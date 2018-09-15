@@ -19,6 +19,8 @@ namespace HH\Asio {
  * The values in the `Vector` of the returned `Awaitable` are not available
  * until you `await` or `join` the returned `Awaitable`.
  *
+ * @deprecated Use `Vec\map_async()` instead.
+ *
  * @param $inputs - The `Traversable` of values to map.
  *
  * @param $callable - The callable containing the `Awaitable` operation to
@@ -85,12 +87,14 @@ async function vmk<Tk, Tv, Tr>(
  * values is done using `Awaitable`s.
  *
  * This function is called `vf` because we are returning a `v`ector, and
- * we are doing a `f`apping operation.
+ * we are doing a `f`iltering operation.
  *
  * `$callable` must return an `Awaitable` of `bool`.
  *
  * The values in the `Vector` of the returned `Awaitable` are not available
  * until you `await` or `join` the returned `Awaitable`.
+ *
+ * @deprecated Use `Vec\filter_async()` instead.
  *
  * @param $inputs - The `KeyedTraversable` of values to map.
  *

@@ -16,6 +16,10 @@ function main(Base $b) {
   $x->say();
 }
 
+
+
+<<__EntryPoint>>
+function main_func_family_001() {
 main(new D1);
 main(new D2);
-
+}

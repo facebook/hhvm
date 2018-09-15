@@ -38,6 +38,7 @@ struct DecInfoOffset {
 struct DecodedInstruction {
   explicit DecodedInstruction(PPC64Instr* ip, uint8_t max_size = 0)
     : m_ip(reinterpret_cast<uint8_t*>(ip))
+    , m_base(reinterpret_cast<uint8_t*>(ip))
     , m_imm(0)
     , m_dinfo(Decoder::GetDecoder().getInvalid())
     , m_size(instr_size_in_bytes)
@@ -48,6 +49,33 @@ struct DecodedInstruction {
   // 0 as @max_size means unlimited size
   explicit DecodedInstruction(uint8_t* ip, uint8_t max_size = 0)
     : m_ip(ip)
+    , m_base(ip)
+    , m_imm(0)
+    , m_dinfo(Decoder::GetDecoder().getInvalid())
+    , m_size(instr_size_in_bytes)
+    , m_max_size(max_size)
+  {
+    decode();
+  }
+
+  explicit DecodedInstruction(PPC64Instr* ip,
+                              PPC64Instr* base,
+                              uint8_t max_size = 0)
+    : m_ip(reinterpret_cast<uint8_t*>(ip))
+    , m_base(reinterpret_cast<uint8_t*>(base))
+    , m_imm(0)
+    , m_dinfo(Decoder::GetDecoder().getInvalid())
+    , m_size(instr_size_in_bytes)
+    , m_max_size(max_size)
+  {
+    decode();
+  }
+
+  explicit DecodedInstruction(uint8_t* ip,
+                             uint8_t* base,
+                             uint8_t max_size = 0)
+    : m_ip(ip)
+    , m_base(base)
     , m_imm(0)
     , m_dinfo(Decoder::GetDecoder().getInvalid())
     , m_size(instr_size_in_bytes)
@@ -114,6 +142,18 @@ struct DecodedInstruction {
   // Retrieve the register used by li32 instruction
   HPHP::jit::Reg64 getLi32Reg() const { return getLi64Reg(); }
 
+  // Check if is loading data from TOC
+  bool isLoadingTOC() const;
+
+  // Return the TOC addres of the immediate
+  uint64_t* decodeTOCAddress() const;
+
+  // Return the TOC offset of the immediate
+  int64_t decodeTOCOffset() const;
+
+  // Check if immediate is smashable (must not have reference).
+  bool isSmashable(uint64_t imm) const;
+
 private:
   // Initialize m_dinfo and m_size up to m_max_size
   void decode();
@@ -129,7 +169,11 @@ private:
   // constraint, only checks a part of it)
   bool isLimmediatePossible() const;
 
+  // Calculate the TOC index
+  int64_t calcIndex (int16_t indexBigTOC, int16_t indexTOC) const;
+
   uint8_t* m_ip;
+  uint8_t* m_base;
   int64_t m_imm;
   DecoderInfo m_dinfo;
   uint8_t m_size;

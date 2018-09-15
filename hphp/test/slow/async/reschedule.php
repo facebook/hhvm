@@ -18,6 +18,9 @@ async function re($e) {
     array($r(-1), $r(0), $r(1)),
   );
 }
+
+<<__EntryPoint>>
+function main_reschedule() {
 \HH\Asio\join(AwaitAllWaitHandle::fromArray(array_map(
   async $e ==> await re($e),
   [ 1, 10, 20 ],
@@ -42,3 +45,4 @@ try {
 }
 
 echo "fin.";
+}

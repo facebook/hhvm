@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // NB: The names need to be all-lowercase to ensure that "someexception" has a
 // lower litstr id than "other" (both original and lowercase versions of the

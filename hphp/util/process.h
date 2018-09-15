@@ -18,11 +18,9 @@
 #define incl_HPHP_PROCESS_H_
 
 #include <string>
-#include <vector>
 
 #include <folly/portability/Unistd.h>
 
-#include <sys/types.h>
 #ifdef _MSC_VER
 # include <windows.h>
 #else
@@ -34,12 +32,50 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * System-wide memory infomation from /proc/meminfo
+ */
 struct MemInfo {
   int64_t freeMb{-1};
   int64_t cachedMb{-1};
   int64_t buffersMb{-1};
+  int64_t availableMb{-1};
   bool valid() const {
-    return freeMb >= 0 && cachedMb >= 0 && buffersMb >= 0;
+    return (freeMb | cachedMb | buffersMb | availableMb) >= 0;
+  }
+};
+
+/*
+ * Infomation from /proc/self/status, along with other HHVM-specific memory
+ * usage data.
+ *
+ * Kernel documentation: http://man7.org/linux/man-pages/man5/proc.5.html
+ */
+struct ProcStatus {
+  int64_t VmSizeKb{-1};                 // virtual memory size
+  int64_t VmRSSKb{-1};                  // RSS, not including hugetlb pages
+  int64_t VmHWMKb{-1};                  // peak RSS
+  int64_t HugetlbPagesKb{0};            // Hugetlb mappings (2M + 1G)
+
+  // 'Real' memory usage that includes VMRSS and HugetlbPages, but excludes
+  // unused space held by jemalloc.  This is mostly used to track regressions.
+  int64_t adjustedRSSKb{-1};
+
+  // Number of threads running in the current process.
+  int Threads{-1};
+
+  // Constructor reads /proc/self/status and fill in the fields.
+  ProcStatus();
+  // Subtrace memory that is mapped in but unused.
+  void registerUnused(int64_t unusedKb) {
+    auto const r = adjustedRSSKb - unusedKb;
+    if (r >= 0) adjustedRSSKb = r;
+  }
+
+  bool valid() const {
+    return VmSizeKb > 0 && VmRSSKb > 0 && VmHWMKb > 0 &&
+      HugetlbPagesKb >= 0 &&
+      Threads > 0;
   }
 };
 
@@ -49,7 +85,12 @@ struct Process {
   // Cached process statics
   static std::string HostName;
   static std::string CurrentWorkingDirectory;
+  static char** Argv;
+
   static void InitProcessStatics();
+  static void RecordArgv(char** argv) { // only call this in main()
+    Argv = argv;
+  }
 
   /**
    * Current executable's name.
@@ -75,7 +116,12 @@ struct Process {
   /**
    * Get memory usage in MB by a process.
    */
-  static int64_t GetProcessRSS(pid_t pid);
+  static int64_t GetMemUsageMb();
+
+  /**
+   * Get the number of threads running in the current process.
+   */
+  static int GetNumThreads();
 
   /**
    * Get system-wide memory usage information.  Returns false upon
@@ -118,8 +164,6 @@ struct Process {
     syscall(SYS_thr_self, &tid);
     return (pid_t) tid;
 # endif
-#elif defined(__CYGWIN__) || defined(__MINGW__)
-    return (long)pthread_self();
 #elif defined(_MSC_VER)
     return GetCurrentThreadId();
 #else
@@ -141,11 +185,6 @@ struct Process {
   static std::string GetCPUModel();
 
   /**
-   * Get binary code footprint in bytes.
-   */
-  static size_t GetCodeFootprint(pid_t pid);
-
-  /**
    * Get current working directory.
    */
   static std::string GetCurrentDirectory();
@@ -159,6 +198,25 @@ struct Process {
    * Get current user's home directory.
    */
   static std::string GetHomeDirectory();
+
+  /**
+   * Set core dump filters to make sure hugetlb pages are included in coredumps.
+   */
+  static void SetCoreDumpHugePages();
+
+  /*
+   * Write to /proc/self/oom_score_adj (for Linux only).  This affects the OOM
+   * killer when it decides which process to kill.  Valid values are between
+   * -1000 and 1000.  Lower values makes it less likely for the process to be
+   * killed.  In particular, -1000 disables the OOM killer completely for the
+   * current process.  Returns whether adjustment was successful.
+   */
+  static bool OOMScoreAdj(int adj = 1000);
+  /*
+   * Sometimes we want to relaunch under modified environment.  It won't return
+   * upon success, and returns -1 when an error occurs (similar to exec()).
+   */
+  static int Relaunch();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

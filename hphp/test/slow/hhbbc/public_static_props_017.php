@@ -11,5 +11,9 @@ class X {
   }
 }
 
+
+<<__EntryPoint>>
+function main_public_static_props_017() {
 X::go();
 var_dump(X::y());
+}

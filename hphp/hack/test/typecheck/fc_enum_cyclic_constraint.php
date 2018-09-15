@@ -1,3 +1,3 @@
 <?hh // strict
 
-enum E : int as E {}
+enum E: int as E {}

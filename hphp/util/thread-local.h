@@ -79,13 +79,15 @@ inline uintptr_t tlsBase() {
 // __thread on cygwin and mingw uses pthreads emulation not native tls so
 // the emulation for thread local must be used as well
 //
-// So we use __thread on gcc, icc and clang, unless we are on OSX. On OSX, we
-// use our own emulation. Use the DECLARE_THREAD_LOCAL() and
-// IMPLEMENT_THREAD_LOCAL() macros to access either __thread or the emulation
-// as appropriate.
+// So we use __thread on gcc, icc and clang, and OSX, falling back to
+// emulation on unsupported platforms. Use the THREAD_LOCAL() macro to
+// hide the decl details.
+//
+// See thread-local-emulate.h for the emulated versions; they're in a
+// separate header to avoid confusion; this is a long header file and it's
+// easy to lose track of which version you're looking at.
 
 #if !defined(NO_TLS) &&                                       \
-    !defined(__CYGWIN__) && !defined(__MINGW__) &&            \
    ((__llvm__ && __clang__) ||                                \
    __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 3) ||   \
    __INTEL_COMPILER || defined(_MSC_VER))
@@ -119,6 +121,8 @@ inline void ThreadLocalSetValue(pthread_key_t key, const void* value) {
 typedef struct __darwin_pthread_handler_rec darwin_pthread_handler;
 #endif
 
+} // namespace HPHP
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -127,11 +131,11 @@ typedef struct __darwin_pthread_handler_rec darwin_pthread_handler;
  * between different threads (hence no locking) but those variables are not
  * on stack in local scope. To use it, just do something like this,
  *
- *   IMPLEMENT_THREAD_LOCAL(MyClass, static_object);
+ *   THREAD_LOCAL(MyClass, static_object);
  *     static_object->data_ = ...;
  *     static_object->doSomething();
  *
- *   IMPLEMENT_THREAD_LOCAL(int, static_number);
+ *   THREAD_LOCAL(int, static_number);
  *     int value = *static_number;
  *
  * So, syntax-wise it's similar to pointers. The type parameter can be a
@@ -141,17 +145,23 @@ typedef struct __darwin_pthread_handler_rec darwin_pthread_handler;
 ///////////////////////////////////////////////////////////////////////////////
 #if defined(USE_GCC_FAST_TLS)
 
+namespace HPHP {
 /**
  * We keep a linked list of destructors in ThreadLocalManager to be called on
  * thread exit. ThreadLocalNode is a node in this list.
  */
 template <typename T>
 struct ThreadLocalNode {
-  T * m_p;
+  T* m_p;
   void (*m_on_thread_exit_fn)(void * p);
-  void * m_next;
+  void (*m_init_tyindex)(void*);
+  void* m_next;
   uint32_t m_size;
   type_scan::Index m_tyindex;
+  static void init_tyindex(void* node_ptr) {
+    auto node = static_cast<ThreadLocalNode<T>*>(node_ptr);
+    node->m_tyindex = type_scan::getIndexForScan<T>();
+  }
 };
 
 struct ThreadLocalManager {
@@ -159,8 +169,10 @@ struct ThreadLocalManager {
   static void PushTop(ThreadLocalNode<T>& node) {
     static_assert(sizeof(T) <= 0xffffffffu, "");
     PushTop(&node, sizeof(T), type_scan::getIndexForScan<T>());
+    node.m_init_tyindex = &node.init_tyindex;
   }
-  void scan(type_scan::Scanner&) const;
+  template<class Fn> void iterate(Fn fn) const;
+  void initTypeIndices();
   static ThreadLocalManager& GetManager();
 
 private:
@@ -201,63 +213,24 @@ void ThreadLocalOnThreadExit(void * p) {
  * The USE_GCC_FAST_TLS implementation of ThreadLocal is just a lazy-initialized
  * pointer wrapper. In this case, we have one ThreadLocal object per thread.
  */
-template<typename T>
-struct ThreadLocal {
-  T *get() const {
-    if (m_node.m_p == nullptr) {
-      const_cast<ThreadLocal<T>*>(this)->create();
-    }
-    return m_node.m_p;
-  }
+template<bool Check, typename T>
+struct ThreadLocalImpl {
 
-  NEVER_INLINE void create();
-
-  bool isNull() const { return m_node.m_p == nullptr; }
-
-  void destroy() {
-    delete m_node.m_p;
-    m_node.m_p = nullptr;
-  }
-
-  void nullOut() {
-    m_node.m_p = nullptr;
-  }
-
-  T *operator->() const {
+  NEVER_INLINE T* getCheck() const {
     return get();
   }
 
-  T &operator*() const {
-    return *get();
-  }
-
-  ThreadLocalNode<T> m_node;
-};
-
-template<typename T>
-void ThreadLocal<T>::create() {
-  if (m_node.m_on_thread_exit_fn == nullptr) {
-    m_node.m_on_thread_exit_fn = ThreadLocalOnThreadExit<T>;
-    ThreadLocalManager::PushTop(m_node);
-  }
-  assert(m_node.m_p == nullptr);
-  m_node.m_p = new T();
-}
-
-/**
- * ThreadLocalNoCheck is a pointer wrapper like ThreadLocal, except that it is
- * explicitly initialized with getCheck(), rather than being initialized when
- * it is first dereferenced.
- */
-template<typename T>
-struct ThreadLocalNoCheck {
-  NEVER_INLINE T *getCheck() const;
   T* getNoCheck() const {
     assert(m_node.m_p);
     return m_node.m_p;
   }
 
-  NEVER_INLINE void create();
+  T* get() const {
+    if (m_node.m_p == nullptr) {
+      const_cast<ThreadLocalImpl<Check,T>*>(this)->create();
+    }
+    return m_node.m_p;
+  }
 
   bool isNull() const { return m_node.m_p == nullptr; }
 
@@ -266,21 +239,30 @@ struct ThreadLocalNoCheck {
     m_node.m_p = nullptr;
   }
 
-  T *operator->() const {
-    return getNoCheck();
+  void nullOut() {
+    m_node.m_p = nullptr;
   }
 
-  T &operator*() const {
-    return *getNoCheck();
+  T* operator->() const {
+    return Check ? get() : getNoCheck();
   }
 
+  T& operator*() const {
+    return Check ? *get() : *getNoCheck();
+  }
+
+  static size_t node_ptr_offset() {
+    using Self = ThreadLocalImpl<Check,T>;
+    return offsetof(Self, m_node) + offsetof(ThreadLocalNode<T>, m_p);
+  }
+
+ private:
+  NEVER_INLINE void create();
   ThreadLocalNode<T> m_node;
-private:
-  void setNull() { m_node.m_p = nullptr; }
 };
 
-template<typename T>
-void ThreadLocalNoCheck<T>::create() {
+template<bool Check, typename T>
+void ThreadLocalImpl<Check,T>::create() {
   if (m_node.m_on_thread_exit_fn == nullptr) {
     m_node.m_on_thread_exit_fn = ThreadLocalOnThreadExit<T>;
     ThreadLocalManager::PushTop(m_node);
@@ -288,133 +270,33 @@ void ThreadLocalNoCheck<T>::create() {
   assert(m_node.m_p == nullptr);
   m_node.m_p = new T();
 }
-template<typename T>
-T *ThreadLocalNoCheck<T>::getCheck() const {
-  if (m_node.m_p == nullptr) {
-    const_cast<ThreadLocalNoCheck<T>*>(this)->create();
-  }
-  return m_node.m_p;
-}
 
-
-///////////////////////////////////////////////////////////////////////////////
-// Singleton thread-local storage for T
-
-/*
- * T must define:
- *
- *   static void Create(void* storage)
- *     which should call new (storage) T, and is called on first getCheck.
- *
- *   static void Delete(T* singleton), and
- *   static void OnThreadExit(T* singleton)
- *     which should both call singleton->~T; Delete is called on manual
- *     destruction, while OnThreadExit is called automatically. The argument
- *     'singleton' is redundant (getters still work), but is for convenience.
- *     These are only called if the singleton was actually created.
- */
-template <typename T>
-struct ThreadLocalSingleton {
-  // Call once per process just to guarantee order of initialization.
-  ThreadLocalSingleton() { s_inited = true; }
-
-  NEVER_INLINE static T *getCheck();
-
-  static T* getNoCheck() {
-    assert(s_inited);
-    assert(singleton() == (T*)&s_storage);
-    return (T*)&s_storage;
-  }
-
-  static bool isNull() { return singleton() == nullptr; }
-
-  static void destroy() {
-    assert(!singleton() || singleton() == (T*)&s_storage);
-    T* p = singleton();
-    if (p) {
-      T::Delete(p);
-      s_node.m_p = nullptr;
-    }
-  }
-
-  T *operator->() const {
-    return getNoCheck();
-  }
-
-  T &operator*() const {
-    return *getNoCheck();
-  }
-
-private:
-  using NodeType = ThreadLocalNode<T>;
-
-  static T* singleton() {
-    return s_node.m_p;
-  }
-
-  static void OnThreadExit(void* p) {
-    NodeType* pNode = (NodeType*)p;
-    assert(pNode == &s_node);
-    if (pNode->m_p) {
-      T::OnThreadExit(pNode->m_p);
-      pNode->m_p = nullptr;
-    }
-  }
-
-  static __thread NodeType s_node;
-  typedef typename std::aligned_storage<sizeof(T), 16>::type
-          StorageType;
-  static __thread StorageType s_storage;
-  static bool s_inited; // no-fast-TLS requires construction so be consistent
-};
-
-template<typename T>
-bool ThreadLocalSingleton<T>::s_inited = false;
-
-template<typename T>
-T *ThreadLocalSingleton<T>::getCheck() {
-  assert(s_inited);
-  if (!singleton()) {
-    T* p = (T*) &s_storage;
-    T::Create(p);
-    s_node.m_p = p;
-    // Register exit hook at most once; doing it twice makes TLM's list cyclic.
-    if (!s_node.m_on_thread_exit_fn) {
-      s_node.m_on_thread_exit_fn = OnThreadExit;
-      ThreadLocalManager::PushTop(s_node);
-    }
-  }
-  return singleton();
-}
-
-template<typename T> __thread typename ThreadLocalSingleton<T>::NodeType
-                              ThreadLocalSingleton<T>::s_node;
-template<typename T> __thread typename ThreadLocalSingleton<T>::StorageType
-                              ThreadLocalSingleton<T>::s_storage;
-
+template<typename T> using ThreadLocal = ThreadLocalImpl<true,T>;
+template<typename T> using ThreadLocalNoCheck = ThreadLocalImpl<false,T>;
 
 ///////////////////////////////////////////////////////////////////////////////
 // some classes don't need new/delete at all
 
-template<typename T, bool throwOnNull = true>
+template<typename T>
 struct ThreadLocalProxy {
   T *get() const {
-    if (m_p == nullptr && throwOnNull) {
-      throw Exception("ThreadLocalProxy::get() called before set()");
-    }
     return m_p;
   }
 
   void set(T* obj) {
+    if (!m_node.m_on_thread_exit_fn) {
+      m_node.m_on_thread_exit_fn = onThreadExit;
+      ThreadLocalManager::PushTop(m_node);
+      assert(!m_node.m_p);
+      m_node.m_p = this;
+    } else {
+      assert(m_node.m_p == this);
+    }
     m_p = obj;
   }
 
   bool isNull() const { return m_p == nullptr; }
 
-  void destroy() {
-    m_p = nullptr;
-  }
-
   T *operator->() const {
     return get();
   }
@@ -423,377 +305,89 @@ struct ThreadLocalProxy {
     return *get();
   }
 
-  T * m_p;
+  static void onThreadExit(void* p) {
+    auto node = (ThreadLocalNode<ThreadLocalProxy<T>>*)p;
+    node->m_p = nullptr;
+  }
+
+  T* m_p;
+  ThreadLocalNode<ThreadLocalProxy<T>> m_node;
+  TYPE_SCAN_IGNORE_FIELD(m_node);
+};
+
+// Wraps a __thread storage instance of T with a similar api to
+// ThreadLocalProxy. Importantly, inlining a method of T via operator-> or
+// operator* allows the C++ compiler to emit direct access to fields of
+// T using the native thread-local segment pointer.
+template<typename T>
+struct ThreadLocalFlat {
+  T* get() const { return (T*)&m_value; }
+  bool isNull() const { return !m_node.m_p; }
+  T* getNoCheck() const { return get(); }
+  T* operator->() const { return get(); }
+  T& operator*() const { return *get(); }
+  explicit operator bool() const { return !isNull(); }
+  static void onThreadExit(void* p) {
+    auto node = (ThreadLocalNode<ThreadLocalFlat<T>>*)p;
+    auto value = (T*)&node->m_p->m_value;
+    value->~T();
+    node->m_p = nullptr;
+  }
+  T* getCheck() {
+    if (!m_node.m_p) {
+      if (!m_node.m_on_thread_exit_fn) {
+        m_node.m_on_thread_exit_fn = onThreadExit;
+        ThreadLocalManager::PushTop(m_node);
+      }
+      new (&m_value) T();
+      m_node.m_p = this;
+    } else {
+      assert(m_node.m_p == this);
+      assert(m_node.m_on_thread_exit_fn);
+    }
+    return get();
+  }
+
+  void destroy() {
+    if (m_node.m_p) {
+      get()->~T();
+      m_node.m_p = nullptr;
+    }
+  }
+
+  // We manage initialization explicitly
+  typename std::aligned_storage<sizeof(T),alignof(T)>::type m_value;
+  ThreadLocalNode<ThreadLocalFlat<T>> m_node;
+  TYPE_SCAN_CUSTOM() {
+    scanner.scan(*get());
+  }
 };
 
 /*
  * How to use the thread-local macros:
  *
- * Use DECLARE_THREAD_LOCAL to declare a *static* class field as thread local:
+ * Use THREAD_LOCAL to declare a *static* class field or global as thread local:
  *   struct SomeClass {
- *     static DECLARE_THREAD_LOCAL(SomeFieldType, f);
- *   }
+ *     static THREAD_LOCAL(SomeFieldType, field);
+ *   };
+ *   extern THREAD_LOCAL(SomeGlobal, tl_myglobal);
  *
- * Use IMPLEMENT_THREAD_LOCAL in the cpp file to implement the field:
- *   IMPLEMENT_THREAD_LOCAL(SomeFieldType, SomeClass::f);
- *
- * Remember: *Never* write IMPLEMENT_THREAD_LOCAL in a header file.
+ * Use THREAD_LOCAL in the cpp file to implement the field:
+ *   THREAD_LOCAL(SomeFieldType, SomeClass::f);
+ *   THREAD_LOCAL(SomeGlobal, tl_myglobal);
  */
 
-#define DECLARE_THREAD_LOCAL(T, f) \
-  __thread HPHP::ThreadLocal<T> f
-#define IMPLEMENT_THREAD_LOCAL(T, f) \
-  __thread HPHP::ThreadLocal<T> f
+#define THREAD_LOCAL(T, f) __thread HPHP::ThreadLocal<T> f
+#define THREAD_LOCAL_NO_CHECK(T, f) __thread HPHP::ThreadLocalNoCheck<T> f
+#define THREAD_LOCAL_PROXY(T, f) __thread HPHP::ThreadLocalProxy<T> f
+#define THREAD_LOCAL_FLAT(T, f) __thread HPHP::ThreadLocalFlat<T> f
 
-#define DECLARE_THREAD_LOCAL_NO_CHECK(T, f) \
-  __thread HPHP::ThreadLocalNoCheck<T> f
-#define IMPLEMENT_THREAD_LOCAL_NO_CHECK(T, f) \
-  __thread HPHP::ThreadLocalNoCheck<T> f
-
-#define DECLARE_THREAD_LOCAL_PROXY(T, N, f) \
-  __thread HPHP::ThreadLocalProxy<T, N> f
-#define IMPLEMENT_THREAD_LOCAL_PROXY(T, N, f) \
-  __thread HPHP::ThreadLocalProxy<T, N> f
+} // namespace HPHP
 
 #else /* USE_GCC_FAST_TLS */
-
-///////////////////////////////////////////////////////////////////////////////
-// ThreadLocal allocates by calling new() without parameters
-
-template<typename T>
-void ThreadLocalOnThreadExit(void *p) {
-  delete (T*)p;
-}
-
-#ifdef __APPLE__
-// The __thread variables in class T will be freed when pthread calls
-// the destructor function on Mac. We can register a handler in
-// pthread_t->__cleanup_stack similar to pthread_cleanup_push(). The handler
-// will be called earlier so the __thread variables will still exist in the
-// handler when the thread exits.
-//
-// See the details at:
-// https://github.com/facebook/hhvm/issues/4444#issuecomment-92497582
-typedef struct __darwin_pthread_handler_rec darwin_pthread_handler;
-
-template<typename T>
-void ThreadLocalOnThreadCleanup(void *key) {
-  void *obj = pthread_getspecific((pthread_key_t)key);
-  if (obj) {
-    ThreadLocalOnThreadExit<T>(obj);
-  }
-}
-
-inline void ThreadLocalSetCleanupHandler(pthread_key_t cleanup_key,
-                                         pthread_key_t key,
-                                         void (*del)(void*)) {
-  // Prevent from adding the handler for multiple times.
-  darwin_pthread_handler *handler =
-      (darwin_pthread_handler*)pthread_getspecific(cleanup_key);
-  if (handler)
-    return;
-
-  pthread_t self = pthread_self();
-
-  handler = new darwin_pthread_handler();
-  handler->__routine = del;
-  handler->__arg = (void*)key;
-  handler->__next = self->__cleanup_stack;
-  self->__cleanup_stack = handler;
-
-  ThreadLocalSetValue(cleanup_key, handler);
-}
-#endif
-
-/**
- * This is the emulation version of ThreadLocal. In this case, the ThreadLocal
- * object is a true global, and the get() method returns a thread-dependent
- * pointer from pthread's thread-specific data management.
- */
-template<typename T>
-struct ThreadLocal {
-  /**
-   * Constructor that has to be called from a thread-neutral place.
-   */
-  ThreadLocal() : m_key(0) {
-#ifdef __APPLE__
-    ThreadLocalCreateKey(&m_key, nullptr);
-    ThreadLocalCreateKey(&m_cleanup_key,
-                         ThreadLocalOnThreadExit<darwin_pthread_handler>);
-#else
-    ThreadLocalCreateKey(&m_key, ThreadLocalOnThreadExit<T>);
-#endif
-  }
-
-  T *get() const {
-    T *obj = (T*)pthread_getspecific(m_key);
-    if (obj == nullptr) {
-      obj = new T();
-      ThreadLocalSetValue(m_key, obj);
-#ifdef __APPLE__
-      ThreadLocalSetCleanupHandler(m_cleanup_key, m_key,
-                                   ThreadLocalOnThreadCleanup<T>);
-#endif
-    }
-    return obj;
-  }
-
-  bool isNull() const { return pthread_getspecific(m_key) == nullptr; }
-
-  void destroy() {
-    delete (T*)pthread_getspecific(m_key);
-    ThreadLocalSetValue(m_key, nullptr);
-  }
-
-  void nullOut() {
-    ThreadLocalSetValue(m_key, nullptr);
-  }
-
-  /**
-   * Access object's member or method through this operator overload.
-   */
-  T *operator->() const {
-    return get();
-  }
-
-  T &operator*() const {
-    return *get();
-  }
-
-private:
-  pthread_key_t m_key;
-
-#ifdef __APPLE__
-  pthread_key_t m_cleanup_key;
-#endif
-};
-
-template<typename T>
-struct ThreadLocalNoCheck {
-  /**
-   * Constructor that has to be called from a thread-neutral place.
-   */
-  ThreadLocalNoCheck() : m_key(0) {
-#ifdef __APPLE__
-    ThreadLocalCreateKey(&m_key, nullptr);
-    ThreadLocalCreateKey(&m_cleanup_key,
-                         ThreadLocalOnThreadExit<darwin_pthread_handler>);
-#else
-    ThreadLocalCreateKey(&m_key, ThreadLocalOnThreadExit<T>);
-#endif
-  }
-
-  NEVER_INLINE T *getCheck() const;
-
-  T* getNoCheck() const {
-    T *obj = (T*)pthread_getspecific(m_key);
-    assert(obj);
-    return obj;
-  }
-
-  bool isNull() const { return pthread_getspecific(m_key) == nullptr; }
-
-  void destroy() {
-    delete (T*)pthread_getspecific(m_key);
-    ThreadLocalSetValue(m_key, nullptr);
-  }
-
-  /**
-   * Access object's member or method through this operator overload.
-   */
-  T *operator->() const {
-    return getNoCheck();
-  }
-
-  T &operator*() const {
-    return *getNoCheck();
-  }
-
-public:
-  void setNull() { ThreadLocalSetValue(m_key, nullptr); }
-  pthread_key_t m_key;
-
-#ifdef __APPLE__
-  pthread_key_t m_cleanup_key;
-#endif
-};
-
-template<typename T>
-T *ThreadLocalNoCheck<T>::getCheck() const {
-  T *obj = (T*)pthread_getspecific(m_key);
-  if (obj == nullptr) {
-    obj = new T();
-    ThreadLocalSetValue(m_key, obj);
-#ifdef __APPLE__
-    ThreadLocalSetCleanupHandler(m_cleanup_key, m_key,
-                                 ThreadLocalOnThreadCleanup<T>);
-#endif
-  }
-  return obj;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Singleton thread-local storage for T
-
-template<typename T>
-void ThreadLocalSingletonOnThreadExit(void *obj) {
-  T::OnThreadExit((T*)obj);
-  free(obj);
-}
-
-#ifdef __APPLE__
-template<typename T>
-void ThreadLocalSingletonOnThreadCleanup(void *key) {
-  void *obj = pthread_getspecific((pthread_key_t)key);
-  if (obj) {
-    ThreadLocalSingletonOnThreadExit<T>(obj);
-  }
-}
-#endif
-
-/*
- * See fast-TlS version of ThreadLocalSingleton above for documentation.
- */
-template<typename T>
-struct ThreadLocalSingleton {
-  ThreadLocalSingleton() { getKey(); }
-
-  NEVER_INLINE static T *getCheck();
-  static T* getNoCheck() {
-    assert(s_inited);
-    T *obj = (T*)pthread_getspecific(s_key);
-    assert(obj);
-    return obj;
-  }
-
-  static bool isNull() {
-    return !s_inited || pthread_getspecific(s_key) == nullptr;
-  }
-
-  static void destroy() {
-    void* p = pthread_getspecific(s_key);
-    T::Delete((T*)p);
-    free(p);
-    ThreadLocalSetValue(s_key, nullptr);
-  }
-
-  T *operator->() const {
-    return getNoCheck();
-  }
-
-  T &operator*() const {
-    return *getNoCheck();
-  }
-
-private:
-  static pthread_key_t s_key;
-  static bool s_inited; // pthread_key_t has no portable valid sentinel
-
-#ifdef __APPLE__
-  static pthread_key_t s_cleanup_key;
-#endif
-
-  static pthread_key_t getKey() {
-    if (!s_inited) {
-      s_inited = true;
-#ifdef __APPLE__
-      ThreadLocalCreateKey(&s_key, nullptr);
-      ThreadLocalCreateKey(&s_cleanup_key,
-                           ThreadLocalOnThreadExit<darwin_pthread_handler>);
-#else
-      ThreadLocalCreateKey(&s_key, ThreadLocalSingletonOnThreadExit<T>);
-#endif
-    }
-    return s_key;
-  }
-};
-
-template<typename T>
-T *ThreadLocalSingleton<T>::getCheck() {
-  assert(s_inited);
-  T *obj = (T*)pthread_getspecific(s_key);
-  if (obj == nullptr) {
-    obj = (T*)malloc(sizeof(T));
-    T::Create(obj);
-    ThreadLocalSetValue(s_key, obj);
-#ifdef __APPLE__
-    ThreadLocalSetCleanupHandler(s_cleanup_key, s_key,
-                                 ThreadLocalSingletonOnThreadCleanup<T>);
-#endif
-  }
-  return obj;
-}
-
-template<typename T>
-pthread_key_t ThreadLocalSingleton<T>::s_key;
-template<typename T>
-bool ThreadLocalSingleton<T>::s_inited = false;
-
-#ifdef __APPLE__
-template<typename T>
-pthread_key_t ThreadLocalSingleton<T>::s_cleanup_key;
-#endif
-
-///////////////////////////////////////////////////////////////////////////////
-// some classes don't need new/delete at all
-
-template<typename T, bool throwOnNull = true>
-struct ThreadLocalProxy {
-  /**
-   * Constructor that has to be called from a thread-neutral place.
-   */
-  ThreadLocalProxy() : m_key(0) {
-    ThreadLocalCreateKey(&m_key, nullptr);
-  }
-
-  T *get() const {
-    T *obj = (T*)pthread_getspecific(m_key);
-    if (obj == nullptr && throwOnNull) {
-      throw Exception("ThreadLocalProxy::get() called before set()");
-    }
-    return obj;
-  }
-
-  void set(T* obj) {
-    ThreadLocalSetValue(m_key, obj);
-  }
-
-  bool isNull() const { return pthread_getspecific(m_key) == nullptr; }
-
-  void destroy() {
-    ThreadLocalSetValue(m_key, nullptr);
-  }
-
-  /**
-   * Access object's member or method through this operator overload.
-   */
-  T *operator->() const {
-    return get();
-  }
-
-  T &operator*() const {
-    return *get();
-  }
-
-public:
-  pthread_key_t m_key;
-};
-
-/**
- * The emulation version of the thread-local macros
- */
-#define DECLARE_THREAD_LOCAL(T, f) HPHP::ThreadLocal<T> f
-#define IMPLEMENT_THREAD_LOCAL(T, f) HPHP::ThreadLocal<T> f
-
-#define DECLARE_THREAD_LOCAL_NO_CHECK(T, f) HPHP::ThreadLocalNoCheck<T> f
-#define IMPLEMENT_THREAD_LOCAL_NO_CHECK(T, f) HPHP::ThreadLocalNoCheck<T> f
-
-#define DECLARE_THREAD_LOCAL_PROXY(T, N, f) HPHP::ThreadLocalProxy<T, N> f
-#define IMPLEMENT_THREAD_LOCAL_PROXY(T, N, f) HPHP::ThreadLocalProxy<T, N> f
-
+#include "hphp/util/thread-local-emulate.h"
 #endif /* USE_GCC_FAST_TLS */
 
 ///////////////////////////////////////////////////////////////////////////////
-}
 
 #endif // incl_HPHP_THREAD_LOCAL_H_

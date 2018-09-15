@@ -2,16 +2,20 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Core
+open Hh_core
 open IdentifySymbolService
 open Option.Monad_infix
 open Typing_defs
+
+module SourceText = Full_fidelity_source_text
+module Syntax = Full_fidelity_positioned_syntax
+module SyntaxKind = Full_fidelity_syntax_kind
+module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(Full_fidelity_positioned_syntax)
 
 (* Element type, class name, element name. Class name refers to "origin" class,
  * we expect to find said element in AST/NAST of this class *)
@@ -58,7 +62,7 @@ let get_member_def opt (x : class_element) =
   | Property
   | Static_property ->
     let props = List.concat_map c.Ast.c_body begin function
-      | Ast.ClassVars (kinds, _, vars) ->
+      | Ast.ClassVars { Ast.cv_kinds = kinds; Ast.cv_names = vars; _ } ->
         List.map vars (fun var -> (kinds, var))
       | Ast.XhpAttr (_, var, _, _) -> [([], var)]
       | _ -> []
@@ -99,6 +103,16 @@ let get_local_var_def ast name p =
   let def = List.hd (ServerFindLocals.go_from_ast ast line char) in
   Option.map def ~f:(FileOutline.summarize_local name)
 
+(* summarize a class or typedef carried with SymbolOccurrence.Class *)
+let summarize_class_typedef opt x =
+  Naming_heap.TypeIdHeap.get x >>= fun (pos, ct) ->
+    let fn = FileInfo.get_pos_filename pos in
+    match ct with
+      | `Class -> (Parser_heap.find_class_in_file opt fn x >>=
+                fun c -> Some (FileOutline.summarize_class c ~no_children:true))
+      | `Typedef -> (Parser_heap.find_typedef_in_file opt fn x >>=
+                fun tdef -> Some (FileOutline.summarize_typedef tdef))
+
 let go tcopt ast result =
   match result.SymbolOccurrence.type_ with
     | SymbolOccurrence.Method (c_name, method_name) ->
@@ -122,12 +136,13 @@ let go tcopt ast result =
       end
     | SymbolOccurrence.Property (c_name, property_name) ->
       Typing_lazy_heap.get_class tcopt c_name >>= fun class_ ->
+      let property_name = clean_member_name property_name in
       begin match SMap.get property_name class_.tc_props with
       | Some m -> get_member_def tcopt (Property, m.ce_origin, property_name)
       | None ->
-        SMap.get property_name class_.tc_sprops >>= fun m ->
+        SMap.get ("$" ^ property_name) class_.tc_sprops >>= fun m ->
         get_member_def tcopt
-          (Static_property, m.ce_origin, clean_member_name property_name)
+          (Static_property, m.ce_origin, property_name)
       end
     | SymbolOccurrence.ClassConst (c_name, const_name) ->
       Typing_lazy_heap.get_class tcopt c_name >>= fun class_ ->
@@ -140,8 +155,7 @@ let go tcopt ast result =
       get_gconst_by_name tcopt result.SymbolOccurrence.name >>= fun cst ->
       Some (FileOutline.summarize_gconst cst)
     | SymbolOccurrence.Class ->
-      get_class_by_name tcopt result.SymbolOccurrence.name >>= fun c ->
-      Some (FileOutline.summarize_class c ~no_children:true)
+      summarize_class_typedef tcopt result.SymbolOccurrence.name
     | SymbolOccurrence.Typeconst (c_name, typeconst_name) ->
       Typing_lazy_heap.get_class tcopt c_name >>= fun class_ ->
       SMap.get typeconst_name class_.tc_typeconsts >>= fun m ->
@@ -150,37 +164,36 @@ let go tcopt ast result =
       get_local_var_def
         ast result.SymbolOccurrence.name result.SymbolOccurrence.pos
 
-let build_symbol_occurence kind name =
-  {
-    SymbolOccurrence.name = "\\" ^ name;
-    type_ = kind;
-    pos = Pos.none;
-  }
+let get_definition_cst_node_from_pos kind source_text pos =
+  let env = Full_fidelity_parser_env.default in
+  let tree = SyntaxTree.make ~env source_text in
+  let (line, start, _) = Pos.info_pos pos in
+  let offset = SourceText.position_to_offset source_text (line, start) in
+  let parents = Syntax.parentage (SyntaxTree.root tree) offset in
+  List.find parents ~f:begin fun syntax ->
+    match kind, Syntax.kind syntax with
+    | SymbolDefinition.Function, SyntaxKind.FunctionDeclaration
+    | SymbolDefinition.Class, SyntaxKind.ClassishDeclaration
+    | SymbolDefinition.Method, SyntaxKind.MethodishDeclaration
+    | SymbolDefinition.Property, SyntaxKind.PropertyDeclaration
+    | SymbolDefinition.Const, SyntaxKind.ConstDeclaration
+    | SymbolDefinition.Enum, SyntaxKind.EnumDeclaration
+    | SymbolDefinition.Interface, SyntaxKind.ClassishDeclaration
+    | SymbolDefinition.Trait, SyntaxKind.ClassishDeclaration
+    | SymbolDefinition.LocalVar, SyntaxKind.VariableExpression
+    | SymbolDefinition.Typeconst, SyntaxKind.TypeConstDeclaration
+    | SymbolDefinition.Param, SyntaxKind.ParameterDeclaration
+    | SymbolDefinition.Typedef, SyntaxKind.SimpleTypeSpecifier -> true
+    | _ -> false
+  end
 
-let from_symbol_id tcopt id =
-  match Str.split (Str.regexp_string "::") id with
-  | [kind; name] when kind = SymbolDefinition.function_kind_name ->
-      go tcopt [] (build_symbol_occurence SymbolOccurrence.Function name)
-  | [kind; name] when kind = SymbolDefinition.type_id_kind_name ->
-      go tcopt [] (build_symbol_occurence SymbolOccurrence.Class name)
-  | [kind; class_name; method_name ]
-        when kind = SymbolDefinition.method_kind_name ->
-      go tcopt [] (build_symbol_occurence
-        (SymbolOccurrence.Method ("\\" ^ class_name, method_name)) "")
-  | [kind; class_name; property_name ]
-        when kind = SymbolDefinition.property_kind_name ->
-      go tcopt [] (build_symbol_occurence
-        (SymbolOccurrence.Property ("\\" ^ class_name, property_name)) "")
-  | [kind; class_name; const_name ]
-        when kind = SymbolDefinition.class_const_kind_name ->
-      let try_const () = go tcopt [] (build_symbol_occurence
-        (SymbolOccurrence.ClassConst ("\\" ^ class_name, const_name)) "")
-      in
-      let try_typeconst () = go tcopt [] (build_symbol_occurence
-        (SymbolOccurrence.Typeconst ("\\" ^ class_name, const_name)) "")
-      in
-      begin match try_const () with
-      | Some result -> Some result
-      | None -> try_typeconst ()
-      end
-  | _ -> None
+let get_definition_cst_node fallback_fn definition =
+  let open SymbolDefinition in
+  let source_text = if Pos.filename definition.pos = ServerIdeUtils.path
+    then
+      (* When the definition is in an IDE buffer with local changes, the filename
+         in the definition will be empty. *)
+      ServerCommandTypesUtils.source_tree_of_file_input fallback_fn
+    else SourceText.from_file (Pos.filename definition.pos)
+  in
+  get_definition_cst_node_from_pos definition.kind source_text definition.pos

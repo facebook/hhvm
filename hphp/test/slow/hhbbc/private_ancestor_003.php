@@ -8,4 +8,8 @@ function main(X $y) {
   var_dump($y->go($asd));
 }
 
+
+<<__EntryPoint>>
+function main_private_ancestor_003() {
 main(new N);
+}

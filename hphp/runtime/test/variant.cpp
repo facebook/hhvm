@@ -89,21 +89,21 @@ TEST(Variant, Casts) {
     EXPECT_EQ(cast<ResourceData>(var), dummy);
     try {
       cast<File>(var);
-      EXPECT_FALSE(true);
+      ADD_FAILURE();
     } catch(...) {
-      EXPECT_TRUE(true);
+      SUCCEED();
     }
     try {
       cast<c_Map>(var);
-      EXPECT_FALSE(true);
+      ADD_FAILURE();
     } catch(...) {
-      EXPECT_TRUE(true);
+      SUCCEED();
     }
     try {
       cast<DummyResource>(empty);
-      EXPECT_FALSE(true);
+      ADD_FAILURE();
     } catch(...) {
-      EXPECT_TRUE(true);
+      SUCCEED();
     }
 
     // cast_or_null tests
@@ -113,15 +113,15 @@ TEST(Variant, Casts) {
 
     try {
       cast_or_null<File>(var);
-      EXPECT_FALSE(true);
+      ADD_FAILURE();
     } catch(...) {
-      EXPECT_TRUE(true);
+      SUCCEED();
     }
     try {
       cast_or_null<c_Map>(var);
-      EXPECT_FALSE(true);
+      ADD_FAILURE();
     } catch(...) {
-      EXPECT_TRUE(true);
+      SUCCEED();
     }
 
     // dyn_cast tests
@@ -132,9 +132,9 @@ TEST(Variant, Casts) {
     EXPECT_EQ(dyn_cast<c_Map>(var), nullptr);
     try {
       dyn_cast<DummyResource>(Variant());
-      EXPECT_FALSE(true);
+      ADD_FAILURE();
     } catch(...) {
-      EXPECT_TRUE(true);
+      SUCCEED();
     }
 
     // dyn_cast_or_null
@@ -166,21 +166,21 @@ TEST(Variant, Casts) {
     EXPECT_EQ(cast<ObjectData>(var), dummy);
     try {
       cast<c_Map>(var);
-      EXPECT_FALSE(true);
+      ADD_FAILURE();
     } catch(...) {
-      EXPECT_TRUE(true);
+      SUCCEED();
     }
     try {
       cast<c_Vector>(empty);
-      EXPECT_FALSE(true);
+      ADD_FAILURE();
     } catch(...) {
-      EXPECT_TRUE(true);
+      SUCCEED();
     }
     try {
       cast<File>(empty);
-      EXPECT_FALSE(true);
+      ADD_FAILURE();
     } catch(...) {
-      EXPECT_TRUE(true);
+      SUCCEED();
     }
 
     // cast_or_null tests
@@ -190,15 +190,15 @@ TEST(Variant, Casts) {
 
     try {
       cast_or_null<File>(var);
-      EXPECT_FALSE(true);
+      ADD_FAILURE();
     } catch(...) {
-      EXPECT_TRUE(true);
+      SUCCEED();
     }
     try {
       cast_or_null<c_Map>(var);
-      EXPECT_FALSE(true);
+      ADD_FAILURE();
     } catch(...) {
-      EXPECT_TRUE(true);
+      SUCCEED();
     }
 
     // dyn_cast tests
@@ -209,9 +209,9 @@ TEST(Variant, Casts) {
     EXPECT_EQ(dyn_cast<File>(var), nullptr);
     try {
       dyn_cast<c_Vector>(empty);
-      EXPECT_FALSE(true);
+      ADD_FAILURE();
     } catch(...) {
-      EXPECT_TRUE(true);
+      SUCCEED();
     }
 
     // dyn_cast_or_null

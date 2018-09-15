@@ -5,5 +5,9 @@ class Test {
     var_dump($args);
   }
 }
+
+<<__EntryPoint>>
+function main_746() {
 $test = new Test();
 $test->test();
+}

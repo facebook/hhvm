@@ -1,0 +1,2 @@
+File "test_case_collision.php", line 8, characters 3-65:
+Redeclared method A::FOO (Parsing[1002])

@@ -12,4 +12,8 @@ function test_builtin() {
   var_dump(sprintf($format, ...$args));
 }
 
+
+<<__EntryPoint>>
+function main_unpack_call_builtin() {
 test_builtin();
+}

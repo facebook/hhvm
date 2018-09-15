@@ -1,0 +1,7 @@
+Notice: Hack Array Compat: Calling array producing function Vector::toArray in %s/to_array_logging.php on line 4
+
+Notice: Hack Array Compat: Calling array producing function Set::toArray in %s/to_array_logging.php on line 4
+
+Notice: Hack Array Compat: Calling array producing function Map::toArray in %s/to_array_logging.php on line 4
+
+Notice: Hack Array Compat: Calling array producing function Pair::toArray in %s/to_array_logging.php on line 4

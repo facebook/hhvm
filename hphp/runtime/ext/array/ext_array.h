@@ -277,7 +277,7 @@ inline int64_t countHelper(TypedValue tv) {
 ///////////////////////////////////////////////////////////////////////////////
 
 #define getCheckedArrayRet(input, fail)                                  \
-  auto const cell_##input = static_cast<const Variant&>(input).asCell(); \
+  auto const cell_##input = static_cast<const Variant&>(input).toCell(); \
   if (UNLIKELY(!isArrayLikeType(cell_##input->m_type))) {                \
     throw_expected_array_exception();                                    \
     return fail;                                                         \
@@ -292,7 +292,7 @@ inline int64_t countHelper(TypedValue tv) {
   }                                                                      \
   Variant var_##input(input);                                            \
   tvCastToArrayInPlace(var_##input.asTypedValue());                      \
-  assert(var_##input.isArray());                                         \
+  assertx(var_##input.isArray());                                         \
   auto arr_##input = var_##input.toArray();
 
 #define getCheckedArray(input)        \

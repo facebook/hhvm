@@ -17,8 +17,12 @@ class C {
   }
 }
 
+
+<<__EntryPoint>>
+function main_bug_5127251() {
 $obj = new C;
 for ($i = 0; $i < 5; $i++) {
   $obj->f(!$i);
   var_dump($obj);
+}
 }

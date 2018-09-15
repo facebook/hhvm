@@ -18,7 +18,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <unordered_map>
 
 #include <folly/Format.h>
 
@@ -105,6 +104,7 @@ bool is_tracked(Location l) {
     case LTag::MBase:
       return true;
     case LTag::Stack:
+    case LTag::CSlot:
       return false;
   }
   not_reached();
@@ -118,6 +118,7 @@ Type& type_of(State& state, Location l) {
       return state.locals[locID];
     }
     case LTag::Stack:
+    case LTag::CSlot:
       always_assert(false);
     case LTag::MBase:
       return state.mbase;
@@ -180,7 +181,7 @@ void region_prune_arcs(RegionDesc& region, std::vector<Type>* input) {
   auto const sortedBlocks = region.blocks();
 
   // Maps region block ids to their RPO ids.
-  auto blockToRPO = std::unordered_map<RegionDesc::BlockId,uint32_t>{};
+  auto blockToRPO = jit::fast_map<RegionDesc::BlockId,uint32_t>{};
 
   auto blockInfos = std::vector<BlockInfo>(sortedBlocks.size());
   auto workQ = dataflow_worklist<uint32_t>(sortedBlocks.size());

@@ -17,7 +17,6 @@
 #include "hphp/compiler/expression/object_method_expression.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/expression_list.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
@@ -25,7 +24,6 @@
 #include "hphp/util/hash.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/expression/simple_variable.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/parser/parser.h"
 
 using namespace HPHP;
@@ -62,30 +60,10 @@ ExpressionPtr ObjectMethodExpression::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void ObjectMethodExpression::analyzeProgram(AnalysisResultPtr ar) {
+void ObjectMethodExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
   FunctionCall::analyzeProgram(ar);
-  m_object->analyzeProgram(ar);
-
-  if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
-    FunctionScopePtr func = m_funcScope;
-    if (!func && m_object->isThis() && !m_origName.empty()) {
-      ClassScopePtr cls = getClassScope();
-      if (cls) {
-        m_classScope = cls;
-        func = cls->findFunction(ar, m_origName, true, true);
-        if (func &&
-            !cls->isInterface() &&
-            !(func->isVirtual() &&
-              (func->isAbstract() ||
-               (func->hasOverride() &&
-                cls->getAttribute(ClassScope::NotFinal))))) {
-          m_funcScope = func;
-          func->addCaller(getScope());
-        }
-      }
-    }
-
-    markRefParams(func, m_origName);
+  if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
+    if (m_params) m_params->markParams();
   }
 }
 
@@ -102,16 +80,15 @@ void ObjectMethodExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr ObjectMethodExpression::preOptimize(AnalysisResultConstPtr ar) {
-  return ExpressionPtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ObjectMethodExpression::outputPHP(CodeGenerator &cg,
                                        AnalysisResultPtr ar) {
   m_object->outputPHP(cg, ar);
+  if (m_nullsafe) {
+    cg_printf("?");
+  }
   cg_printf("->");
   if (m_nameExp->getKindOf() == Expression::KindOfScalarExpression) {
     m_nameExp->outputPHP(cg, ar);

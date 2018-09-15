@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 interface IHerp {
   const FOO = 'bar';

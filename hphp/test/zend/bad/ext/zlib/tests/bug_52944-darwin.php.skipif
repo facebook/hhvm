@@ -1,5 +1,0 @@
-<?php if (!extension_loaded("zlib")) print "skip"; ?>
-<?php
-if (PHP_OS != 'Darwin') {
-	die("skip Darwin only");
-}

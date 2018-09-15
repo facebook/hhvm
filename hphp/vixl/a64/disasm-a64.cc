@@ -36,6 +36,7 @@ Disassembler::Disassembler() {
   buffer_ = reinterpret_cast<char*>(malloc(buffer_size_));
   buffer_pos_ = 0;
   own_buffer_ = true;
+  code_address_offset_ = 0;
 }
 
 
@@ -44,6 +45,7 @@ Disassembler::Disassembler(char* text_buffer, int buffer_size) {
   buffer_ = text_buffer;
   buffer_pos_ = 0;
   own_buffer_ = false;
+  code_address_offset_ = 0;
 }
 
 
@@ -56,6 +58,11 @@ Disassembler::~Disassembler() {
 
 char* Disassembler::GetOutput() {
   return buffer_;
+}
+
+
+void Disassembler::setShouldDereferencePCRelativeLiterals(bool enable) {
+  dereferenceLiterals_ = enable;
 }
 
 
@@ -751,6 +758,23 @@ void Disassembler::VisitMoveWideImmediate(Instruction* instr) {
 }
 
 
+void Disassembler::VisitLseLdOp(Instruction* instr) {
+  const char *mnemonic = "";
+  const char *form = "";
+
+  if (instr->Rt() == 31) {
+    // alias when Rt is wzr/xzr
+    mnemonic = "st'lo'la'ls";
+    form = "'Rs, ['Xns]";
+  } else {
+    mnemonic = "ld'lo'la'ls";
+    form = "'Rs, 'Rt, ['Xns]";
+  }
+
+  Format(instr, mnemonic, form);
+}
+
+
 #define LOAD_STORE_LIST(V)    \
   V(STRB_w, "strb", "'Wt")    \
   V(STRH_w, "strh", "'Wt")    \
@@ -1267,6 +1291,47 @@ void Disassembler::ProcessOutput(Instruction* /*instr*/) {
   // The base disasm does nothing more than disassembling into a buffer.
 }
 
+void Disassembler::MapCodeAddress(int64_t base_address,
+                                  const Instruction *instr_address) {
+  SetCodeAddressOffset(base_address -
+                          reinterpret_cast<intptr_t>(instr_address));
+}
+int64_t Disassembler::CodeRelativeAddress(const void *addr) {
+  return reinterpret_cast<intptr_t>(addr) + CodeAddressOffset();
+}
+
+void Disassembler::AppendCodeRelativeAddressToOutput(const Instruction *instr,
+                                                     const void *addr) {
+  USE(instr);
+  int64_t rel_addr = CodeRelativeAddress(addr);
+  if (rel_addr >= 0) {
+    AppendToOutput("(addr 0x%" PRIx64 ")", rel_addr);
+  } else {
+    AppendToOutput("(addr -0x%" PRIx64 ")", -rel_addr);
+  }
+}
+
+void Disassembler::AppendCodeRelativeLiteralToOutput(uint32_t literal_width,
+                                                     const void *addr) {
+  if (!dereferenceLiterals_) return;
+  intptr_t real_address = CodeRelativeAddress(addr);
+  switch (literal_width) {
+    case LDR_w_lit:
+      AppendToOutput(
+        " [value word 0x%" PRIx32 "]",
+        *reinterpret_cast<uint32_t*>(real_address)
+      );
+      break;
+    case LDR_x_lit:
+      AppendToOutput(
+        " [value dword 0x%" PRIx64 "]",
+        *reinterpret_cast<uint64_t*>(real_address)
+      );
+      break;
+    default:
+      break;
+  }
+}
 
 void Disassembler::Format(Instruction* instr, const char* mnemonic,
                           const char* format) {
@@ -1312,6 +1377,7 @@ int Disassembler::SubstituteField(Instruction* instr, const char* format) {
     case 'A': return SubstitutePCRelAddressField(instr, format);
     case 'B': return SubstituteBranchTargetField(instr, format);
     case 'O': return SubstituteLSRegOffsetField(instr, format);
+    case 'l': return SubstituteInstructionAttributes(instr, format);
     default: {
       not_reached();
       return 1;
@@ -1523,12 +1589,17 @@ int Disassembler::SubstituteLiteralField(Instruction* instr,
                                          const char* format) {
   assert(strncmp(format, "LValue", 6) == 0);
   USE(format);
-
-  switch (instr->Mask(LoadLiteralMask)) {
+  const void* address = instr->LiteralAddress();
+  uint32_t literal_width = instr->Mask(LoadLiteralMask);
+  switch (literal_width) {
     case LDR_w_lit:
     case LDR_x_lit:
     case LDR_s_lit:
-    case LDR_d_lit: AppendToOutput("(addr %p)", instr->LiteralAddress()); break;
+    case LDR_d_lit:
+      AppendCodeRelativeAddressToOutput(instr, address);
+      AppendCodeRelativeLiteralToOutput(literal_width, address);
+      break;
+
     default: not_reached();
   }
 
@@ -1699,6 +1770,32 @@ int Disassembler::SubstitutePrefetchField(Instruction* instr,
   return 6;
 }
 
+
+int Disassembler::SubstituteInstructionAttributes(Instruction* instr,
+                                          const char* format) {
+  assert(format[0] == 'l');
+  const char* lse_op[] = { "add", "clr", "eor", "set", 
+                           "smax", "smin", "umax", "umin" };
+  const char* lse_size[] = { "b", "h", "", "" };
+  const char* lse_semantic[] = { "", "l", "a", "al" };
+
+  int idx;
+  switch (format[1]) {
+    case 'a':
+      idx = instr->Ar();
+      AppendToOutput("%s", lse_semantic[idx]);
+      break;
+    case 'o':
+      idx = instr->Opc();
+      AppendToOutput("%s", lse_op[idx]);
+      break;
+    case 's':
+      idx = instr->SizeLS();
+      AppendToOutput("%s", lse_size[idx]);
+      break;
+  }
+  return 2;
+}
 
 void Disassembler::ResetOutput() {
   buffer_pos_ = 0;

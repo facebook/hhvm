@@ -2,19 +2,16 @@
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
  *
  *)
-
-open Integration_test_base_types
 
 module Test = Integration_test_base
 
 let foo_name = "foo.php"
-let foo_contents = "
-<?hh // strict
+let foo_contents = "<?hh // strict
 
 function foo() : void {}
 "
@@ -58,8 +55,5 @@ let () =
    * so we don't recheck it immediately. *)
   Test.assert_no_diagnostics loop_outputs;
   (* Asking for global error list will trigger recheck of bar.php *)
-  let env, _ = Test.(run_loop_once env { default_loop_input with
-    new_client = Some (RequestResponse (ServerCommandTypes.STATUS))
-  }) in
-  let _, loop_outputs = Test.(run_loop_once env default_loop_input) in
+  let _, loop_outputs = Test.full_check env in
   Test.assert_diagnostics loop_outputs full_diagnostics

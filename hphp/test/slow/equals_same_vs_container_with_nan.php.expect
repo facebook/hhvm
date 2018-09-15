@@ -1,0 +1,30 @@
+--- Packed Array ----
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+--- Mixed Array ----
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+--- Vec ----
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+--- Dict ----
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+--- Vector ----
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+--- Map ----
+bool(true)
+bool(true)
+bool(false)
+bool(false)

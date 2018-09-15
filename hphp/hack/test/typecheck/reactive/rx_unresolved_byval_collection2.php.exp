@@ -1,0 +1,2 @@
+File "rx_unresolved_byval_collection2.php", line 8, characters 12-24:
+Cannot traverse over non-reactive traversable in reactive code. (Typing[4267])

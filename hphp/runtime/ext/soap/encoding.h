@@ -19,9 +19,9 @@
 #define PHP_ENCODING_H
 
 #include "hphp/runtime/ext/soap/xml.h"
-#include <memory>
 #include "hphp/runtime/base/type-variant.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
+#include <memory>
 
 ///////////////////////////////////////////////////////////////////////////////
 // defines
@@ -213,7 +213,7 @@ struct encode {
                        xmlNodePtr parent);
 };
 using encodePtr = std::shared_ptr<encode>;
-using encodeMap = hphp_string_hash_map<encodePtr,encode>;
+using encodeMap = hphp_string_map<encodePtr>;
 using encodeMapPtr = std::shared_ptr<encodeMap>;
 
 struct encodeStatic {
@@ -272,11 +272,14 @@ inline int dataTypeToSoap(DataType dt) {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:   return SOAP_ENC_ARRAY_DT;
     case KindOfObject:  return SOAP_ENC_OBJECT;
     case KindOfResource:
     case KindOfRef:
+    case KindOfFunc:
     case KindOfClass:   return INVALID_TYPE;
   }
   return INVALID_TYPE;

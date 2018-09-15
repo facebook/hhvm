@@ -1,4 +1,0 @@
-<?php
-
-$foo = 0;
-var_dump("hello world");

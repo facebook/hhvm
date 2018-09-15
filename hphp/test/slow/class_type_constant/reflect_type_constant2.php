@@ -11,6 +11,9 @@ abstract class C implements I {
   const TYPE = 0;
 }
 
+
+<<__EntryPoint>>
+function main_reflect_type_constant2() {
 $rc = new ReflectionClass(C::class);
 
 echo "=== ReflectionClass::getTypeConstant('T') ===" . PHP_EOL;
@@ -62,4 +65,5 @@ try {
   new ReflectionTypeConstant(C::class, 'x');
 } catch (ReflectionException $e) {
   var_dump($e->getMessage());
+}
 }

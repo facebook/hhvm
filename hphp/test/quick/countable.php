@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class klass implements Countable {
   public function count() { return 123; }

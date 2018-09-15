@@ -1,6 +1,6 @@
 File "subtype_bug_5.php", line 6, characters 45-46:
 Invalid argument (Typing[4110])
-File "subtype_bug_5.php", line 5, characters 14-17:
+File "subtype_bug_5.php", line 5, characters 14-31:
 This is an object of type Pair
-File "subtype_bug_5.php", line 6, characters 15-20:
+File "subtype_bug_5.php", line 6, characters 15-33:
 It is incompatible with an object of type ImmMap

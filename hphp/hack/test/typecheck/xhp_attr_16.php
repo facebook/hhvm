@@ -4,7 +4,9 @@ class Superclass {}
 class Subclass extends Superclass {}
 
 class :foo {
-  attribute Superclass mysuperclass, Subclass mysubclass;
+  attribute
+    Superclass mysuperclass,
+    Subclass mysubclass;
 }
 
 function main(): void {

@@ -248,7 +248,7 @@ dict(3) {
 }
 ======= base_prop_get ==============================
 
-Notice: Cannot access property on non-object in %s on line %d
+Notice: Cannot access property on non-object in %s/test/quick/dict/member-ops.php on line %d
 NULL
 ======= base_prop_set ==============================
 dict(3) {
@@ -595,7 +595,7 @@ array(2) {
 }
 ======= dim_prop_get ===============================
 
-Notice: Cannot access property on non-object in %s on line %d
+Notice: Cannot access property on non-object in %s/test/quick/dict/member-ops.php on line %d
 NULL
 ======= dim_prop_set ===============================
 array(2) {
@@ -802,6 +802,8 @@ array(2) {
   }
 }
 ======= fini_incdec ================================
+
+Notice: Increment on string 'abc' in %s/test/quick/dict/member-ops.php on line %d
 array(2) {
   [0]=>
   NULL
@@ -829,6 +831,8 @@ array(2) {
     string(3) "def"
   }
 }
+
+Notice: Increment on string 'def' in %s/test/quick/dict/member-ops.php on line %d
 array(2) {
   [0]=>
   NULL
@@ -1098,11 +1102,11 @@ array(2) {
 }
 ======= fini_prop_get ===============================
 
-Notice: Cannot access property on non-object in %s on line %d
+Notice: Cannot access property on non-object in %s/test/quick/dict/member-ops.php on line %d
 NULL
 ======= fini_prop_set ===============================
 
-Warning: Cannot access property on non-object in %s on line %d
+Warning: Cannot access property on non-object in %s/test/quick/dict/member-ops.php on line %d
 array(2) {
   [0]=>
   NULL

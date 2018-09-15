@@ -2,15 +2,15 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Core
+open Hh_core
 open Coverage_level
 open Hh_json
+open Ide_api_types
 
 let result_to_json r = JSON_Object begin
   List.map (SMap.elements r) begin fun (kind, counts) ->
@@ -41,7 +41,7 @@ let print_json r_opt =
  * expressions : total expressions. partial_weight is a number between
  * 0 and 1. *)
 let calc_percentage partial_weight ctr =
-  let total = CLMap.fold (fun k v acc -> v.count + acc) ctr 0 in
+  let total = CLMap.fold (fun _ v acc -> v.count + acc) ctr 0 in
   let mult = function
     | Unchecked -> 0.0
     | Partial -> partial_weight
@@ -83,7 +83,7 @@ let print_reasons reasons_stats =
 
 let print_counts counts =
   CLMap.iter (fun k v ->
-    let level_name = String.capitalize (string_of_level k) in
+    let level_name = String.capitalize_ascii (string_of_level k) in
     Printf.printf "%s: %d\n" level_name v.count;
     print_reasons v.reason_stats) counts;
   Printf.printf "Checked / Total: %f\n" (calc_percentage 0.0 counts);

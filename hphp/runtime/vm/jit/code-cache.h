@@ -27,8 +27,8 @@ namespace HPHP { namespace jit {
 /*
  * CodeCache contains our Translation Cache, which is partitioned into 5
  * sections:
- *   - hot: Hot code from AttrHot Funcs.
- *   - main: Hot code from non-AttrHot Funcs.
+ *   - hot: Hot code from optimized translations.
+ *   - main: Cold code from optimized translations, hot cold from other.
  *   - cold: Cold code from all Funcs.
  *   - frozen: Code that is almost never used, and cold code from profiling
        translations.
@@ -50,17 +50,17 @@ struct CodeCache {
     std::numeric_limits<uint32_t>::max();
 
   /* Code block sizes read from configs. */
-  static uint64_t AHotSize;
-  static uint64_t ASize;
-  static uint64_t AProfSize;
-  static uint64_t AColdSize;
-  static uint64_t AFrozenSize;
+  static uint32_t AHotSize;
+  static uint32_t ASize;
+  static uint32_t AProfSize;
+  static uint32_t AColdSize;
+  static uint32_t AFrozenSize;
 
-  static uint64_t GlobalDataSize;
+  static uint32_t GlobalDataSize;
 
-  static uint64_t AMaxUsage;
-  static uint64_t AColdMaxUsage;
-  static uint64_t AFrozenMaxUsage;
+  static uint32_t AMaxUsage;
+  static uint32_t AColdMaxUsage;
+  static uint32_t AFrozenMaxUsage;
 
   static bool MapTCHuge;
 
@@ -78,6 +78,19 @@ struct CodeCache {
     body("prof", m_prof);
     body("cold", m_cold);
     body("frozen", m_frozen);
+  }
+
+  /*
+   * Note: this includes "data", unlike 'forEachBlock' above.
+   */
+  template<typename M>
+  static void forEachName(M body) {
+    body("hot");
+    body("main");
+    body("prof");
+    body("cold");
+    body("frozen");
+    body("data");
   }
 
   size_t codeSize() const { return m_codeSize; }
@@ -105,6 +118,15 @@ struct CodeCache {
     return addr - m_base;
   }
   bool isValidCodeAddress(ConstCodeAddress addr) const;
+
+  bool inHotOrMain(ConstCodeAddress addr) const {
+    return m_hot.contains(addr) || m_main.contains(addr);
+  }
+
+  bool inHotOrMainOrColdOrFrozen(ConstCodeAddress addr) const {
+    return m_hot.contains(addr)  || m_main.contains(addr) ||
+           m_cold.contains(addr) || m_frozen.contains(addr);
+  }
 
   /*
    * Prevent or allow writing to the code section of this CodeCache.

@@ -2,9 +2,8 @@
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
@@ -34,15 +33,21 @@ let element_to_class_elt ce_type {
   elt_final = ce_final;
   elt_synthesized = ce_synthesized;
   elt_override = ce_override;
+  elt_memoizelsb = ce_memoizelsb;
   elt_abstract = _;
   elt_is_xhp_attr = ce_is_xhp_attr;
+  elt_const = ce_const;
+  elt_lateinit = _;
   elt_origin = ce_origin;
   elt_visibility = ce_visibility;
+  elt_reactivity = _
 } =
   {
     ce_final;
     ce_is_xhp_attr;
+    ce_const;
     ce_override;
+    ce_memoizelsb;
     ce_synthesized;
     ce_visibility;
     ce_origin;
@@ -54,8 +59,12 @@ let to_class_type {
   dc_members_fully_known;
   dc_abstract;
   dc_final;
+  dc_const;
+  dc_ppl = _;
   dc_deferred_init_members;
   dc_kind;
+  dc_is_xhp;
+  dc_is_disposable;
   dc_name;
   dc_pos;
   dc_tparams;
@@ -71,7 +80,12 @@ let to_class_type {
   dc_req_ancestors;
   dc_req_ancestors_extends;
   dc_extends;
+  dc_sealed_whitelist = _;
+  dc_xhp_attr_deps;
   dc_enum_type;
+  dc_decl_errors;
+  dc_condition_types = _;
+  dc_linearization = _;
 } =
   let map_elements find elts = SMap.mapi begin fun name elt ->
     let ty = lazy begin
@@ -102,8 +116,11 @@ let to_class_type {
     tc_members_fully_known = dc_members_fully_known;
     tc_abstract = dc_abstract;
     tc_final = dc_final;
+    tc_const = dc_const;
     tc_deferred_init_members = dc_deferred_init_members;
     tc_kind = dc_kind;
+    tc_is_xhp = dc_is_xhp;
+    tc_is_disposable = dc_is_disposable;
     tc_name = dc_name;
     tc_pos = dc_pos;
     tc_tparams = dc_tparams;
@@ -118,6 +135,7 @@ let to_class_type {
     tc_ancestors = dc_ancestors;
     tc_req_ancestors = dc_req_ancestors;
     tc_req_ancestors_extends = dc_req_ancestors_extends;
-    tc_extends = dc_extends;
+    tc_extends = SSet.union dc_xhp_attr_deps dc_extends;
     tc_enum_type = dc_enum_type;
+    tc_decl_errors = dc_decl_errors;
   }

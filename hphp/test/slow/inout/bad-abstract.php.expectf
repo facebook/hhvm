@@ -1,0 +1,2 @@
+
+Fatal error: Parameter 1 on function foo was not declared inout but is declared inout on abstract function A::foo in %s/bad-abstract.php on line 7

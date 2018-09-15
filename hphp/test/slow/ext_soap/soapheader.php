@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_soapheader() {
 $soapHeader = new SoapHeader("env", "header1", ['foo' => 'bar']);
 var_dump($soapHeader);
 var_dump($soapHeader->namespace);
@@ -17,3 +20,4 @@ var_dump($soapHeader);
 unset($soapHeader->data);
 
 var_dump($soapHeader);
+}

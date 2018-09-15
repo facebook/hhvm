@@ -1,0 +1,7 @@
+<?hh
+
+namespace foo;
+
+use \Things\{AbstractBeanFactoryFactoryController, InternXControllerManager, OtherContrivedNamespace};
+
+use \Things\AbstractBeanFactoryFactoryController, \Things\InternXControllerManager, \Things\OtherContrivedNamespace;

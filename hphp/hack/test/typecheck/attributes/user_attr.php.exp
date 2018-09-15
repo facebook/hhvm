@@ -1,0 +1,4 @@
+File "user_attr.php", line 8, characters 3-7:
+The CAttr attribute cannot be used on a function. (Typing[4231])
+File "user_attr.php", line 4, characters 7-11:
+The attribute's class is defined here. To be available for use on a function, the CAttr class must implement HH\FunctionAttribute.

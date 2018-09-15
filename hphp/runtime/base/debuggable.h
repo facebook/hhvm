@@ -62,8 +62,7 @@ public:
   /**
    * Fill up vector with summary information.
    */
-  virtual void debuggerInfo(InfoVec& info) {
-  }
+  virtual void debuggerInfo(InfoVec& /*info*/) {}
 
   /**
    * Dump detailed information to return string.
@@ -75,8 +74,8 @@ public:
   /**
    * Execute a debugger action.
    */
-  virtual String debuggerVerb(const std::string& verb,
-                              const std::vector<std::string>& args) {
+  virtual String debuggerVerb(const std::string& /*verb*/,
+                              const std::vector<std::string>& /*args*/) {
     return String();
   }
 };

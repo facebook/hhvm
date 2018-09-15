@@ -97,6 +97,9 @@ namespace __SystemLib {
   }
 
   class Bzip2Filter extends \php_user_filter {
+    const DEFAULT_BLOCKS = 4;
+    const DEFAULT_WORK   = 0;
+
     private $filterFunction;
 
     public function onCreate(): bool {
@@ -104,8 +107,31 @@ namespace __SystemLib {
       $filterName = substr($this->filtername, 6);
       switch ($filterName) {
         case 'compress':
+          if (is_int($this->params)) {
+            $blocks = $this->params;
+            $work = self::DEFAULT_WORK;
+          } else if (is_array($this->params)) {
+            $blocks = $this->params['blocks'] ?? self::DEFAULT_BLOCKS;
+            $work = $this->params['work'] ?? self::DEFAULT_WORK;
+          } else {
+            $blocks = self::DEFAULT_BLOCKS;
+            $work = self::DEFAULT_WORK;
+          }
+          $this->filterFunction = function($data) use($blocks, $work) {
+            return bzcompress($data, $blocks, $work);
+          };
+          break;
         case 'decompress':
-          $this->filterFunction = 'bz' . $filterName;
+          if (is_bool($this->params)) {
+            $small = $this->params;
+          } else if (is_array($this->params)) {
+            $small = $this->params['small'] ?? false;
+          } else {
+            $small = false;
+          }
+          $this->filterFunction = function($data) use($small) {
+            return bzdecompress($data, $small);
+          };
           break;
         default:
           return false;

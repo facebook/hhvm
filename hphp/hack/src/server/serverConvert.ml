@@ -2,13 +2,12 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Core
+open Hh_core
 open Sys_utils
 open Utils
 
@@ -31,8 +30,9 @@ let print_patch filename tcopt (line, kind, type_)  =
 (*****************************************************************************)
 
 let add_file env fn =
-  let failed_parsing = Relative_path.Set.add env.ServerEnv.failed_parsing fn in
-  { env with ServerEnv.failed_parsing = failed_parsing }
+  let disk_needs_parsing =
+    Relative_path.Set.add env.ServerEnv.disk_needs_parsing fn in
+  { env with ServerEnv.disk_needs_parsing = disk_needs_parsing }
 
 (* Maps filenames to the contents of those files, split into lines. Each line
  * is numbered with the line number of the *original* line in the file, before
@@ -89,7 +89,7 @@ let apply_patch (genv:ServerEnv.genv) (env:ServerEnv.env) fn f =
   else begin
     write_file fn patched;
     let env = add_file env fn in
-    let env, _, _rechecked = ServerTypeCheck.(type_check genv env Full_check)in
+    let env, _ = ServerTypeCheck.(type_check genv env Full_check) in
     let errors = env.ServerEnv.errorl in
     if not (Errors.is_empty env.ServerEnv.errorl)
     then begin
@@ -97,8 +97,7 @@ let apply_patch (genv:ServerEnv.genv) (env:ServerEnv.env) fn f =
       write_file fn content;
       let env = add_file env fn in
       Printf.printf "Failed\n"; flush stdout;
-      let env, _,  _rechecked =
-        ServerTypeCheck.(type_check genv env Full_check) in
+      let env, _ = ServerTypeCheck.(type_check genv env Full_check) in
       assert (Errors.is_empty env.ServerEnv.errorl);
       errors, env
     end

@@ -8,4 +8,8 @@ function bar() {
   var_dump(is_null($val));
   var_dump(is_array($val));
 }
+
+<<__EntryPoint>>
+function main_array_025() {
 bar();
+}

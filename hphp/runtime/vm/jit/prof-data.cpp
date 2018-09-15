@@ -23,6 +23,8 @@
 
 #include "hphp/util/logger.h"
 
+#include "hphp/runtime/ext/server/ext_server.h"
+
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -47,8 +49,10 @@ ProfTransRec::ProfTransRec(SrcKey sk, int nArgs)
     : m_kind(TransKind::ProfPrologue)
     , m_prologueArgs(nArgs)
     , m_sk(sk)
-    , m_callers()
-{}
+    , m_callers{}
+{
+  m_callers = std::make_unique<CallerRec>();
+}
 
 ProfTransRec::~ProfTransRec() {
   if (m_kind == TransKind::Profile) {
@@ -56,7 +60,7 @@ ProfTransRec::~ProfTransRec() {
     return;
   }
   assertx(m_kind == TransKind::ProfPrologue);
-  m_callers.~CallerRec();
+  m_callers.~CallerRecPtr();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -89,7 +93,7 @@ ProfData::ProfData()
 {}
 
 TransID ProfData::allocTransID() {
-  WriteLock lock{m_transLock};
+  folly::SharedMutex::WriteHolder lock{m_transLock};
   m_transRecs.emplace_back();
   return m_transRecs.size() - 1;
 }
@@ -142,21 +146,38 @@ void ProfData::addTransProfile(TransID transID,
   }
 
   {
-    WriteLock lock{m_transLock};
+    folly::SharedMutex::WriteHolder lock{m_transLock};
     m_transRecs[transID].reset(new ProfTransRec(lastBcOff, startSk, region));
   }
 
   // Putting transID in m_funcProfTrans makes it visible to other threads, so
   // this has to happen after we've already put its metadata in m_transRecs.
-  WriteLock lock{m_funcProfTransLock};
+  folly::SharedMutex::WriteHolder lock{m_funcProfTransLock};
   m_funcProfTrans[funcId].push_back(transID);
 }
 
 void ProfData::addTransProfPrologue(TransID transID, SrcKey sk, int nArgs) {
   m_proflogueDB.emplace(PrologueID{sk.funcID(), nArgs}, transID);
 
-  WriteLock lock{m_transLock};
+  folly::SharedMutex::WriteHolder lock{m_transLock};
   m_transRecs[transID].reset(new ProfTransRec(sk, nArgs));
+}
+
+void ProfData::addProfTrans(TransID transID,
+                            std::unique_ptr<ProfTransRec> ptr) {
+  assertx(transID >= m_transRecs.size());
+  if (transID > m_transRecs.size()) m_transRecs.resize(transID);
+  auto const sk = ptr->srcKey();
+  if (ptr->kind() == TransKind::Profile) {
+    if (sk.func()->isDVEntry(sk.offset())) {
+      m_dvFuncletDB.emplace(sk.toAtomicInt(), transID);
+    }
+    m_funcProfTrans[sk.funcID()].push_back(transID);
+  } else {
+    m_proflogueDB.emplace(PrologueID{sk.funcID(), ptr->prologueArgs()},
+                          transID);
+  }
+  m_transRecs.emplace_back(std::move(ptr));
 }
 
 bool ProfData::anyBlockEndsAt(const Func* func, Offset offset) {
@@ -165,7 +186,7 @@ bool ProfData::anyBlockEndsAt(const Func* func, Offset offset) {
     Arena arena;
     Verifier::GraphBuilder builder{arena, func};
     auto cfg = builder.build();
-    std::unordered_set<Offset> offsets;
+    jit::fast_set<Offset> offsets;
 
     for (auto blocks = linearBlocks(cfg); !blocks.empty(); ) {
       auto last = blocks.popFront()->last - func->unit()->entry();
@@ -246,20 +267,20 @@ void ProfData::maybeResetCounters() {
   if (m_countersReset.load(std::memory_order_acquire)) return;
   if (requestCount() < RuntimeOption::EvalJitResetProfCountersRequest) return;
 
-  WriteLock lock{m_transLock};
+  folly::SharedMutex::WriteHolder lock{m_transLock};
   if (m_countersReset.load(std::memory_order_relaxed)) return;
   m_counters.resetAllCounters(RuntimeOption::EvalJitPGOThreshold);
   m_countersReset.store(true, std::memory_order_release);
 }
 
 void ProfData::addTargetProfile(const ProfData::TargetProfileInfo& info) {
-  WriteLock lock{m_targetProfilesLock};
+  folly::SharedMutex::WriteHolder lock{m_targetProfilesLock};
   m_targetProfiles[info.key.transId].push_back(info);
 }
 
 std::vector<ProfData::TargetProfileInfo> ProfData::getTargetProfiles(
   TransID transID) const {
-  ReadLock lock{m_targetProfilesLock};
+  folly::SharedMutex::ReadHolder lock{m_targetProfilesLock};
   auto it = m_targetProfiles.find(transID);
   if (it != m_targetProfiles.end()) {
     return it->second;
@@ -271,7 +292,8 @@ std::vector<ProfData::TargetProfileInfo> ProfData::getTargetProfiles(
 ////////////////////////////////////////////////////////////////////////////////
 
 bool hasEnoughProfDataToRetranslateAll() {
-  return requestCount() >= RuntimeOption::EvalJitRetranslateAllRequest;
+  return requestCount()    >= RuntimeOption::EvalJitRetranslateAllRequest ||
+         f_server_uptime() >= RuntimeOption::EvalJitRetranslateAllSeconds;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

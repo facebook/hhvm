@@ -27,8 +27,8 @@ inline bool NamedEntityPairTable::contains(Id id) const {
 }
 
 inline StringData* NamedEntityPairTable::lookupLitstr(Id id) const {
-  assert(contains(id));
-  return const_cast<StringData*>((*this)[id].first.get());
+  assertx(contains(id));
+  return const_cast<StringData*>((*this)[id].get());
 }
 
 inline const NamedEntity*
@@ -36,22 +36,15 @@ NamedEntityPairTable::lookupNamedEntity(Id id) const {
   return lookupNamedEntityPair(id).second;
 }
 
-inline const NamedEntityPair&
+inline NamedEntityPair
 NamedEntityPairTable::lookupNamedEntityPair(Id id) const {
-  assert(contains(id));
-  auto const& nep = (*this)[id];
+  assertx(contains(id));
+  auto const name = (*this)[id];
 
-  // Check that the name exists and is normalized.
-  assert(nep.first);
-  assert(nep.first->data()[nep.first->size()] == 0);
-  assert(nep.first->data()[0] != '\\');
+  assertx(name);
+  assertx(name->data()[0] != '\\');
 
-  // Create the NamedEntity if necessary.
-  if (UNLIKELY(!nep.second)) {
-    const_cast<LowPtr<const NamedEntity>&>(nep.second) =
-      NamedEntity::get(nep.first);
-  }
-  return nep;
+  return { name, NamedEntity::get(name) };
 }
 
 ///////////////////////////////////////////////////////////////////////////////

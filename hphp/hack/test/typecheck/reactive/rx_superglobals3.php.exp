@@ -1,0 +1,2 @@
+File "rx_superglobals3.php", line 5, characters 8-12:
+Superglobal $_GET cannot be used in a reactive context. (Typing[4227])

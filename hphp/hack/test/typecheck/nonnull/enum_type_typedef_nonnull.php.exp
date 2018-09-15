@@ -1,0 +1,2 @@
+File "enum_type_typedef_nonnull.php--file2.php", line 5, characters 24-26:
+Can't use typedef that resolves to nonnull in enum (Typing[4219])

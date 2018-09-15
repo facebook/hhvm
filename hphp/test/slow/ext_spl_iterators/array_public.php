@@ -7,6 +7,9 @@ class test {
   protected $prot = 3;
 }
 
+
+<<__EntryPoint>>
+function main_array_public() {
 $ai = new ArrayIterator(new test());
 
 foreach ($ai as $key=>$val) {
@@ -14,3 +17,4 @@ foreach ($ai as $key=>$val) {
 }
 
 echo $ai->count();
+}

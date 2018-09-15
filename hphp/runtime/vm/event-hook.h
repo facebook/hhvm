@@ -82,16 +82,36 @@ struct EventHook {
     ringbufferEnter(ar);
     if (UNLIKELY(checkSurpriseFlags())) { onFunctionResumeYield(ar); }
   }
-  static void FunctionSuspendE(ActRec* suspending, const ActRec* resumableAR) {
+  static void FunctionSuspendAwaitEF(ActRec* suspending,
+                                     const ActRec* resumableAR) {
     ringbufferExit(resumableAR);
     if (UNLIKELY(checkSurpriseFlags())) {
-      onFunctionSuspendE(suspending, resumableAR);
+      onFunctionSuspendAwaitEF(suspending, resumableAR);
     }
   }
-  static void FunctionSuspendR(ActRec* suspending, ObjectData* child) {
+  static void FunctionSuspendAwaitEG(ActRec* suspending) {
     ringbufferExit(suspending);
     if (UNLIKELY(checkSurpriseFlags())) {
-      onFunctionSuspendR(suspending, child);
+      onFunctionSuspendAwaitEG(suspending);
+    }
+  }
+  static void FunctionSuspendAwaitR(ActRec* suspending, ObjectData* child) {
+    ringbufferExit(suspending);
+    if (UNLIKELY(checkSurpriseFlags())) {
+      onFunctionSuspendAwaitR(suspending, child);
+    }
+  }
+  static void FunctionSuspendCreateCont(ActRec* suspending,
+                                        const ActRec* resumableAR) {
+    ringbufferExit(resumableAR);
+    if (UNLIKELY(checkSurpriseFlags())) {
+      onFunctionSuspendCreateCont(suspending, resumableAR);
+    }
+  }
+  static void FunctionSuspendYield(ActRec* suspending) {
+    ringbufferExit(suspending);
+    if (UNLIKELY(checkSurpriseFlags())) {
+      onFunctionSuspendYield(suspending);
     }
   }
   static inline void FunctionReturn(ActRec* ar, TypedValue retval) {
@@ -107,8 +127,11 @@ struct EventHook {
    * Event hooks -- JIT entry points.
    */
   static bool onFunctionCall(const ActRec* ar, int funcType);
-  static void onFunctionSuspendE(ActRec*, const ActRec*);
-  static void onFunctionSuspendR(ActRec*, ObjectData*);
+  static void onFunctionSuspendAwaitEF(ActRec*, const ActRec*);
+  static void onFunctionSuspendAwaitEG(ActRec*);
+  static void onFunctionSuspendAwaitR(ActRec*, ObjectData*);
+  static void onFunctionSuspendCreateCont(ActRec*, const ActRec*);
+  static void onFunctionSuspendYield(ActRec*);
   static void onFunctionReturn(ActRec* ar, TypedValue retval);
 
 private:

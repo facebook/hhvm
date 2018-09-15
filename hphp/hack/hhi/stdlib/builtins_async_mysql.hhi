@@ -3,12 +3,11 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
-
+namespace {
 const int NOT_NULL_FLAG = 0;
 const int PRI_KEY_FLAG = 0;
 const int UNIQUE_KEY_FLAG = 0;
@@ -52,13 +51,21 @@ const int ASYNC_OP_UNSET = 0;
 const int ASYNC_OP_CONNECT = 0;
 const int ASYNC_OP_QUERY = 0;
 
+<<__PHPStdLib>>
 function mysql_async_connect_start($server = null, $username = null, $password = null, $database = null);
+<<__PHPStdLib>>
 function mysql_async_connect_completed($link_identifier);
+<<__PHPStdLib>>
 function mysql_async_query_start($query, $link_identifier);
+<<__PHPStdLib>>
 function mysql_async_query_result($link_identifier);
+<<__PHPStdLib>>
 function mysql_async_query_completed($result);
+<<__PHPStdLib>>
 function mysql_async_fetch_array($result, $result_type = 1);
+<<__PHPStdLib>>
 function mysql_async_wait_actionable($items, $timeout);
+<<__PHPStdLib>>
 function mysql_async_status($link_identifier);
 
 class AsyncMysqlClient {
@@ -72,7 +79,7 @@ class AsyncMysqlClient {
       string $password,
       int $timeout_micros = -1,
       ?MySSLContextProvider $ssl_provider = null): Awaitable<AsyncMysqlConnection> { }
-    
+
     static public function connectWithOpts(
       string $host,
       int $port,
@@ -81,11 +88,22 @@ class AsyncMysqlClient {
       string $password,
       AsyncMysqlConnectionOptions $conn_opts): Awaitable<AsyncMysqlConnection> { }
 
+    static public function connectAndQuery(
+      Traversable<string> $queries,
+      string $host,
+      int $port,
+      string $dbname,
+      string $user,
+      string $password,
+      AsyncMysqlConnectionOptions $conn_opts,
+      dict<string, string> $query_attributes = dict[],
+    ): Awaitable<(AsyncMysqlConnectResult, Vector<AsyncMysqlQueryResult>)> { }
+
    static public function adoptConnection($connection) { }
 }
 
 class AsyncMysqlConnectionPool {
-  public function __construct(array $options) { }
+  public function __construct(darray $options) { }
   public function connect(string $host, int $port, string $dbname, string $user, string $password, int $timeout_micros = -1, string $caller = "") { }
   public function connectWithOpts(
     string $host,
@@ -96,7 +114,7 @@ class AsyncMysqlConnectionPool {
     AsyncMysqlConnectionOptions $conn_opts,
     string $caller = ""): Awaitable<AsyncMysqlConnection> { }
 
-  public function getPoolStats(): array { }
+  public function getPoolStats(): darray { }
 }
 
 class MySSLContextProvider {
@@ -107,9 +125,9 @@ class MySSLContextProvider {
 class AsyncMysqlConnectionOptions {
   public function setConnectTimeout(int $timeout): void { }
   public function setConnectAttempts(int $attempts): void { }
-  public function setTotalTimeout(int $timeout): void { } 
+  public function setTotalTimeout(int $timeout): void { }
   public function setQueryTimeout(int $timeout): void { }
-  public function setConnectionAttributes(array<string, string> $val): void { }
+  public function setConnectionAttributes(darray<string, string> $val): void { }
   public function setSSLOptionsProvider(?MySSLContextProvider $ssl_context): void { }
 }
 
@@ -124,9 +142,17 @@ class AsyncMysqlClientStats {
 
 class AsyncMysqlConnection {
   public function __construct() { }
-  public function query(string $query, int $timeout_micros = -1): Awaitable<AsyncMysqlQueryResult>{ }
+  public function query(
+    string $query,
+    int $timeout_micros = -1,
+    dict<string, string> $query_attributes = dict[],
+  ): Awaitable<AsyncMysqlQueryResult>{ }
   public function queryf(HH\FormatString<HH\SQLFormatter> $query, ...$args): Awaitable<AsyncMysqlQueryResult>{ }
-  public function multiQuery(Traversable<string> $query, int $timeout_micros = -1) { }
+  public function multiQuery(
+    Traversable<string> $query,
+    int $timeout_micros = -1,
+    dict<string, string> $query_attributes = dict[],
+  ) { }
   public function escapeString(string $data): string { }
   public function close(): void{ }
   public function releaseConnection() { }
@@ -182,6 +208,8 @@ class AsyncMysqlQueryResult extends AsyncMysqlResult {
   * implemplement the functions in the interface.
   **/
   public function rowBlocks() { }
+  public function noIndexUsed() : bool { }
+  public function recvGtid(): string { }
 }
 class AsyncMysqlRowBlock implements Countable, KeyedTraversable<int, AsyncMysqlRow> {
   public function __construct() { }
@@ -242,8 +270,9 @@ interface MysqlRow extends Countable, KeyedTraversable<string, mixed>, IteratorA
   public function getIterator(): KeyedIterator<string, mixed>;
 }
 class AsyncMysqlException extends Exception {
-  // Not actually protected, but no good comes of php code constructing these
-  protected function __construct(private AsyncMysqlErrorResult $result) {}
+  // This should not be constructed from Hack source, but since the Exception
+  // has a public constructor, we can not restrict the visibility here.
+  public function __construct(private AsyncMysqlErrorResult $result) {}
   public function mysqlErrorCode(): int;
   public function mysqlErrorString(): string;
   public function timedOut(): bool;
@@ -252,7 +281,7 @@ class AsyncMysqlException extends Exception {
 }
 class AsyncMysqlConnectException extends AsyncMysqlException {}
 class AsyncMysqlQueryException extends AsyncMysqlException {}
-
+}
 namespace HH {
   interface SQLFormatter extends SQLScalarFormatter {
     public function format_0x25(): string; // %%

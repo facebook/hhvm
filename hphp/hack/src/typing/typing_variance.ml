@@ -2,19 +2,19 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Core
+open Core_kernel
 open Typing_defs
 open Utils
 
 module Env = Typing_env
 module SN = Naming_special_names
 module TLazyHeap = Typing_lazy_heap
+module TGen = Typing_generic
 
 (*****************************************************************************)
 (* Module checking the (co/contra)variance annotations (+/-).
@@ -89,8 +89,6 @@ type variance =
    *)
   | Vboth
 
-type env = variance SMap.t
-
 (*****************************************************************************)
 (* Reason pretty-printing *)
 (*****************************************************************************)
@@ -121,7 +119,7 @@ let reason_stack_to_string variance reason_stack =
 
 let reason_to_string ~sign (_, descr, variance) =
   (if sign
-  then variance_to_sign variance^" "
+  then variance_to_sign variance ^ " "
   else ""
   )^
   match descr with
@@ -130,7 +128,7 @@ let reason_to_string ~sign (_, descr, variance) =
   | Rmember ->
       "A non private class member is always invariant"
   | Rtype_parameter ->
-      "The type parameter was declared as "^variance_to_string variance
+      "The type parameter was declared as " ^ variance_to_string variance
   | Rfun_parameter `Instance ->
       "Function parameters are contravariant"
   | Rfun_parameter `Static ->
@@ -160,15 +158,6 @@ let detailed_message variance pos stack =
       (pos, reason_stack_to_string variance stack) ::
       List.map stack (fun (p, _, _ as r) -> p, reason_to_string ~sign:true r)
 
-(*****************************************************************************)
-(* Debug *)
-(*****************************************************************************)
-
-let to_string = function
-  | Vcovariant _     -> "Vcovariant"
-  | Vcontravariant _ -> "Vcontravariant"
-  | Vinvariant _     -> "Vinvariant"
-  | Vboth            -> "Vboth"
 
 (*****************************************************************************)
 (* Converts an annotation (+/-) to a type. *)
@@ -277,7 +266,7 @@ let flip reason = function
 (* Given a type parameter, returns the variance inferred. *)
 (*****************************************************************************)
 
-let get_tparam_variance env (_, (_, tparam_name), _) =
+let get_tparam_variance env (_, (_, tparam_name), _, _) =
   match SMap.get tparam_name env with
   | None -> Vboth
   | Some x -> x
@@ -286,7 +275,7 @@ let get_tparam_variance env (_, (_, tparam_name), _) =
 (* Given a type parameter, returns the variance declared. *)
 (*****************************************************************************)
 
-let make_tparam_variance (variance, (pos, _), _) =
+let make_tparam_variance (variance, (pos, _), _, _) =
   make_variance Rtype_parameter pos variance
 
 (*****************************************************************************)
@@ -320,7 +309,7 @@ let check_variance env tparam =
 let check_final_this_pos_variance env_variance rpos class_ty =
   if class_ty.tc_final then
     List.iter class_ty.tc_tparams
-      begin fun (typar_variance, id, _) ->
+      begin fun (typar_variance, id, _, _) ->
         match env_variance, typar_variance with
         | Vcontravariant(_), (Ast.Covariant | Ast.Contravariant)  ->
            (Errors.contravariant_this
@@ -368,7 +357,8 @@ let rec class_ tcopt class_name class_type impl =
   let tparams = class_type.tc_tparams in
   let env = SMap.empty in
   let env = List.fold_left impl ~f:(type_ tcopt root Vboth) ~init:env in
-  let env = SMap.fold (class_member tcopt root) class_type.tc_props env in
+  let env = SMap.fold (class_member class_type tcopt root `Instance) class_type.tc_props env in
+  let env = SMap.fold (class_member class_type tcopt root `Static) class_type.tc_sprops env in
   let env =
     SMap.fold (class_method tcopt root `Instance) class_type.tc_methods env in
   (* We need to apply the same restrictions to non-final static members because
@@ -385,7 +375,8 @@ let rec class_ tcopt class_name class_type impl =
 
 and typedef tcopt type_name =
   match TLazyHeap.get_typedef tcopt type_name with
-  | Some {td_tparams; td_type; td_pos = _; td_constraint = _; td_vis = _}  ->
+  | Some {td_tparams; td_type; td_pos = _; td_constraint = _; td_vis = _;
+      td_decl_errors = _;}  ->
      let root = (Typing_deps.Dep.Class type_name, None) in
       let env = SMap.empty in
       let pos = Reason.to_pos (fst td_type) in
@@ -394,7 +385,28 @@ and typedef tcopt type_name =
       List.iter td_tparams (check_variance env)
   | None -> ()
 
-and class_member tcopt root _member_name member env =
+and class_member class_type tcopt root static _member_name member env =
+  if static = `Static
+  then begin
+    (* Check whether the type of a static property (class variable) contains
+     * any generic type parameters. Outside of traits, this is illegal as static
+     * properties are shared across all generic instantiations.
+     * Although not strictly speaking a variance check, it fits here because
+     * it concerns the presence of generic type parameters in types.
+     *)
+    if class_type.tc_kind = Ast.Ctrait
+    then env
+    else
+    let lazy (reason, _ as ty) = member.ce_type in
+    let var_type_pos = Reason.to_pos reason in
+    let class_pos = class_type.tc_pos in
+    match TGen.IsGeneric.ty ty with
+    | None -> env
+    | Some (generic_pos, _generic_name) ->
+    Errors.static_property_type_generic_param ~class_pos ~var_type_pos ~generic_pos;
+    env
+  end
+  else
   match member.ce_visibility with
   | Vprivate _ -> env
   | _ ->
@@ -415,7 +427,7 @@ and class_method tcopt root static _method_name method_ env =
       match method_.ce_type with
       | lazy (_, Tfun { ft_tparams; ft_params; ft_ret; _ }) ->
           let env = List.fold_left ft_tparams
-            ~f:begin fun env (_, (_, tparam_name), _) ->
+            ~f:begin fun env (_, (_, tparam_name), _, _) ->
               SMap.remove tparam_name env
             end ~init:env in
           let env = List.fold_left
@@ -426,13 +438,13 @@ and class_method tcopt root static _method_name method_ env =
           env
       | _ -> assert false
 
-and fun_param tcopt root static env (_, (reason, _ as ty)) =
+and fun_param tcopt root static env { fp_type = (reason, _ as ty); _ } =
   let pos = Reason.to_pos reason in
   let reason_contravariant = pos, Rfun_parameter static, Pcontravariant in
   let variance = Vcontravariant [reason_contravariant] in
   type_ tcopt root variance env ty
 
-and fun_tparam tcopt root env (_, _, cstrl) =
+and fun_tparam tcopt root env (_, _, cstrl, _) =
   List.fold_left ~f:(constraint_ tcopt root) ~init:env cstrl
 
 and fun_ret tcopt root static env (reason, _ as ty) =
@@ -450,12 +462,20 @@ and type_list tcopt root variance env tyl =
 
 and type_ tcopt root variance env (reason, ty) =
   match ty with
-  | Tany -> env
-  | Tmixed -> env
+  | Tany | Tmixed | Tnonnull | Terr | Tdynamic -> env
   | Tarray (ty1, ty2) ->
     let env = type_option tcopt root variance env ty1 in
     let env = type_option tcopt root variance env ty2 in
     env
+  | Tdarray (ty1, ty2) ->
+    type_ tcopt root variance env (reason, Tarray (Some ty1, Some ty2))
+  | Tvarray ty ->
+    type_ tcopt root variance env (reason, Tarray (Some ty, None))
+  | Tvarray_or_darray ty ->
+    let tk =
+      Typing_reason.Rvarray_or_darray_key (Reason.to_pos reason),
+      Tprim Nast.Tarraykey in
+    type_ tcopt root variance env (reason, Tarray (Some tk, Some ty))
   | Tthis ->
     (* Check that 'this' isn't being improperly referenced in a contravariant
      * position.
@@ -492,7 +512,7 @@ and type_ tcopt root variance env (reason, ty) =
       type_ tcopt root variance env ty
   | Tprim _ -> env
   | Tfun ft ->
-      let env = List.fold_left ~f:begin fun env (_, (r, _ as ty)) ->
+      let env = List.fold_left ~f:begin fun env { fp_type = (r, _ as ty); _ } ->
         let pos = Reason.to_pos r in
         let reason = pos, Rfun_parameter `Instance, Pcontravariant in
         let variance = flip reason variance in
@@ -523,8 +543,8 @@ and type_ tcopt root variance env (reason, ty) =
   (* when we add type params to type consts might need to change *)
   | Taccess _ -> env
   | Tshape (_, ty_map) ->
-      Nast.ShapeMap.fold begin fun _field_name ty env ->
-        type_ tcopt root variance env ty
+      Nast.ShapeMap.fold begin fun _ { sft_ty; _ } env ->
+        type_ tcopt root variance env sft_ty
       end ty_map env
 
 (* `as` constraints on method type parameters must be contravariant

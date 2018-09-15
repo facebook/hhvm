@@ -12,5 +12,9 @@ class G extends B {
  // __call
   }
 }
+
+<<__EntryPoint>>
+function main_1871() {
 $g = new G(5);
 $g->f4(3);
+}

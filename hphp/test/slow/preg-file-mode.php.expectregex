@@ -1,0 +1,3 @@
+Deprecated\: preg_replace\(\)\: The \/e modifier is deprecated, use preg_replace_callback instead in [^\r\n]+\/preg\-file\-mode\.php on line 7
+
+Fatal error\: (syntax error, unexpected ',', expecting '\]'|A subscript index cannot be a list)

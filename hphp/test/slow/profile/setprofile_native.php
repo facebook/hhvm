@@ -10,6 +10,9 @@ function fb_setprofile_callback1($event) {
   echo "fb_setprofile_callback1 event=", $event, "\n";
 }
 
+
+<<__EntryPoint>>
+function main_setprofile_native() {
 fb_setprofile("fb_setprofile_callback1");
 
 $x = false;
@@ -23,3 +26,4 @@ if (true) {
 echo("hash="); var_dump($hash);
 
 echo("DONE!\n");
+}

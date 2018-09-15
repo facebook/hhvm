@@ -8,6 +8,10 @@ class Foo {
     var_dump($this);
   }
 }
- Foo::Bar();
+
+ <<__EntryPoint>>
+function main_738() {
+Foo::Bar();
  $obj = new Foo();
  $obj->Bar();
+}

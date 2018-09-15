@@ -22,7 +22,6 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-strtod.h"
 
@@ -107,7 +106,11 @@ static const char* s_null = "(null)";
 #define HAVE_LOCALE_H 1
 
 #ifdef HAVE_LOCALE_H
+} // namespace HPHP
+
 #include <locale.h>
+
+namespace HPHP {
 #define LCONV_DECIMAL_POINT (*lconv->decimal_point)
 #else
 #define LCONV_DECIMAL_POINT '.'
@@ -1587,8 +1590,7 @@ skip_output:
 /*
  * This is the general purpose conversion function.
  */
-int vspprintf(char **pbuf, size_t max_len, const char *format, ...)
-{
+int vspprintf(char** pbuf, size_t /*max_len*/, const char* format, ...) {
   int len;
   va_list ap;
   va_start(ap, format);
@@ -1600,8 +1602,8 @@ int vspprintf(char **pbuf, size_t max_len, const char *format, ...)
 /*
  * Same as vspprintf but taking an va_list
  */
-int vspprintf_ap(char **pbuf, size_t max_len, const char *format, va_list ap)
-{
+int vspprintf_ap(char** pbuf, size_t /*max_len*/, const char* format,
+                 va_list ap) {
   int len;
   len = xbuf_format_converter(pbuf, format, ap);
   return len;

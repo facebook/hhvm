@@ -1,2 +1,0 @@
-File "nested_lambda_break.php", line 15, characters 7-11:
-break can only be used inside loops or switch statements (NastCheck[3022])

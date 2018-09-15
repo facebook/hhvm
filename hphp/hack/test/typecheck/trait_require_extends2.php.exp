@@ -1,4 +1,9 @@
+File "trait_require_extends2.php", line 17, characters 7-7:
+Class A does not correctly implement all required methods  (Typing[4070])
+File "trait_require_extends2.php", line 18, characters 7-8:
+Some methods are incompatible with those declared in type T1
+Read the following to see why:
 File "trait_require_extends2.php", line 20, characters 22-24:
-You cannot override this method (Typing[4070])
+You cannot override this method
 File "trait_require_extends2.php", line 6, characters 28-30:
 It was declared as final

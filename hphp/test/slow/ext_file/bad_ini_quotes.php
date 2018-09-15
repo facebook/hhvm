@@ -7,4 +7,8 @@ function main() {
   var_dump($y);
 }
 
+
+<<__EntryPoint>>
+function main_bad_ini_quotes() {
 main();
+}

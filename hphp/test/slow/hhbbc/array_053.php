@@ -14,4 +14,8 @@ function main() {
   var_dump($val);
   $val->yo();
 }
+
+<<__EntryPoint>>
+function main_array_053() {
 main();
+}

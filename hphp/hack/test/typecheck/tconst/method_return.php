@@ -59,10 +59,6 @@ function test(Y $y, X $x): (int, arraykey) {
 }
 
 function test2(Y $y, X $x): (int, arraykey, X::T, int) {
-  return tuple(
-    $y::static_get(),
-    $x::static_get(),
-    X::static_get(),
-    Y::static_get(),
-  );
+  return
+    tuple($y::static_get(), $x::static_get(), X::static_get(), Y::static_get());
 }

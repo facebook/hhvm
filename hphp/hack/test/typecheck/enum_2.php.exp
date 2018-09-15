@@ -1,1 +1,2 @@
-No errors
+File "enum_2.php", line 5, characters 24-28:
+Enums must be int or string, not a mixed value (Typing[4024])

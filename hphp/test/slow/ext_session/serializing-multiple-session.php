@@ -2,7 +2,10 @@
 
 class B {}
 
+
 // Multiple sessions serialized in the same session file.
+<<__EntryPoint>>
+function main_serializing_multiple_session() {
 $data = <<<EOF
 adminhtml|a:2:{
   s:13:"session_hosts";a:1:{
@@ -32,3 +35,4 @@ var_dump(get_class($_SESSION['admin']['U2']['instance']) === 'B');
 var_dump(session_encode() == $serializedSessions);
 
 session_destroy();
+}

@@ -19,7 +19,6 @@
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/statement/exp_statement.h"
 #include "hphp/compiler/statement/method_statement.h"
 #include "hphp/compiler/statement/class_statement.h"
@@ -42,8 +41,7 @@ using namespace HPHP;
 
 StatementList::StatementList
 (STATEMENT_CONSTRUCTOR_PARAMETERS)
-  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(StatementList)),
-    m_included(false) {
+  : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(StatementList)) {
 }
 
 StatementPtr StatementList::clone() {
@@ -98,74 +96,6 @@ StatementPtr StatementList::operator[](int index) {
   return m_stmts[index];
 }
 
-bool StatementList::hasDecl() const {
-  for (unsigned int i = 0; i < m_stmts.size(); i++) {
-    if (m_stmts[i]->hasDecl()) return true;
-  }
-  return false;
-}
-
-bool StatementList::hasImpl() const {
-  for (unsigned int i = 0; i < m_stmts.size(); i++) {
-    if (m_stmts[i]->hasImpl()) return true;
-  }
-  return false;
-}
-
-ExpressionPtr StatementList::getEffectiveImpl(AnalysisResultConstPtr ar) const {
-  ExpressionListPtr rep;
-  for (unsigned int i = 0; i < m_stmts.size(); i++) {
-    StatementPtr s = m_stmts[i];
-    if (s->is(KindOfReturnStatement)) {
-      auto e = static_pointer_cast<ReturnStatement>(s)->getRetExp();
-      if (!e) {
-        e = CONSTANT("null");
-      } else if (!e->isScalar()) {
-        break;
-      }
-      if (!rep) return e;
-
-      rep->addElement(e);
-      return rep;
-    }
-    if (s->hasImpl()) {
-      break;
-    }
-  }
-  return ExpressionPtr();
-}
-
-bool StatementList::hasBody() const {
-  for (unsigned int i = 0; i < m_stmts.size(); i++) {
-    if (m_stmts[i]->hasBody()) return true;
-  }
-  return false;
-}
-
-bool StatementList::hasRetExp() const {
-  for (unsigned int i = 0; i < m_stmts.size(); i++) {
-    if (m_stmts[i]->hasRetExp()) return true;
-  }
-  return false;
-}
-
-void StatementList::analyzeProgram(AnalysisResultPtr ar) {
-  m_included = true;
-  for (unsigned int i = 0; i < m_stmts.size(); i++) {
-    StatementPtr stmt = m_stmts[i];
-
-    // effect testing
-    if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
-      if (!stmt->hasEffect() && !stmt->hasDecl() &&
-          !stmt->is(Statement::KindOfStatementList)) {
-        Compiler::Error(Compiler::StatementHasNoEffect, stmt);
-      }
-    }
-
-    stmt->analyzeProgram(ar);
-  }
-}
-
 ConstructPtr StatementList::getNthKid(int n) const {
   if (n < (int)m_stmts.size()) {
     return m_stmts[n];
@@ -184,46 +114,6 @@ void StatementList::setNthKid(int n, ConstructPtr cp) {
   } else {
     m_stmts[n] = dynamic_pointer_cast<Statement>(cp);
   }
-}
-
-StatementPtr StatementList::preOptimize(AnalysisResultConstPtr ar) {
-  bool changed = false;
-  for (unsigned int i = 0; i < m_stmts.size(); i++) {
-    StatementPtr &s = m_stmts[i];
-
-    if (s) {
-      if (s->is(KindOfStatementList) && !s->hasDecl()) {
-        auto stmts = static_pointer_cast<StatementList>(s);
-        removeElement(i);
-        m_stmts.insert(m_stmts.begin() + i,
-                       stmts->m_stmts.begin(), stmts->m_stmts.end());
-        i--;
-        changed = true;
-        continue;
-      } else if (s->is(KindOfBlockStatement)) {
-        auto bs = static_pointer_cast<BlockStatement>(s);
-        auto stmts = bs->getStmts();
-        if (!stmts) {
-          removeElement(i--);
-          changed = true;
-          continue;
-        } else {
-          FunctionScopePtr fs(getFunctionScope());
-          if (fs && (!fs->inPseudoMain() || !stmts->hasDecl())) {
-            removeElement(i);
-            m_stmts.insert(m_stmts.begin() + i,
-                           stmts->m_stmts.begin(), stmts->m_stmts.end());
-            i--;
-            changed = true;
-            continue;
-          }
-        }
-      }
-    }
-  }
-
-  return changed ? static_pointer_cast<Statement>(shared_from_this())
-                 : StatementPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

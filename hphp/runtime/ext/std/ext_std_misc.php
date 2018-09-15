@@ -3,7 +3,8 @@
 namespace HH {
 
 /**
- * Returns a description of the warmup status of the server.
+ * Returns a (bad) description of the warmup status of the server, based on
+ * request-specific state.
  *
  * @return string - If the server appears to be warmed up, returns the empty
  * string. Otherwise, returns a human-readable description of why the server is
@@ -13,6 +14,34 @@ namespace HH {
  */
 <<__Native>>
 function server_warmup_status(): string;
+
+/**
+ * Returns a good description of the warmup status of the server, based on
+ * process-global state.
+ *
+ * @return string - If the server appears to be warmed up, returns the empty
+ * string. Otherwise, returns a human-readable description of why the server is
+ * not warmed up. Unlike server_warmup_status(), this function is monotonic,
+ * i.e., once it returns empty string, it will keep returning empty string.
+ */
+<<__Native>>
+function server_warmup_status_monotonic(): string;
+
+/**
+ * Returns a description of the context in which the request is executing.
+ *
+ * @return string - If the request was initiated via the proxygen, xbox,
+ * pagelet, fastcgi, or replay servers those values are returned. In client
+ * mode the string cli is returned, when executing in client mode on a server
+ * (via the unix socket interface) clisrv is returned. On the server with an
+ * unknown context the string "worker" is returned indicating the job was run
+ * on an unnamed JobQueue within the server.
+ */
+<<__Native>>
+function execution_context(): string;
+
+<<__Native>>
+function enable_legacy_behavior(vec_or_dict $v): vec_or_dict;
 
 }
 
@@ -124,15 +153,21 @@ function pack(string $format, ...$args): mixed;
  * @return int - Returns zero on success, or FALSE on errors. If the call was
  * interrupted by a signal, sleep() returns the number of seconds left to
  * sleep.
+ *
+ * FCallBuiltin is not used, as it would optimize away event hooks, resulting
+ * in broken request timeout semantics. It's also desirable to make sleep()
+ * frames visible in profiling tools such as Xenon.
  */
-<<__Native>>
+<<__Native("NoFCallBuiltin")>>
 function sleep(int $seconds): int;
 
 /* Delays program execution for the given number of micro seconds.
  * @param int $micro_seconds - Halt time in micro seconds. A micro second is
  * one millionth of a second.
+ *
+ * See sleep() wrt NoFCallBuiltin.
  */
-<<__Native>>
+<<__Native("NoFCallBuiltin")>>
 function usleep(int $micro_seconds): void;
 
 /* Delays program execution for the given number of seconds and nanoseconds.
@@ -142,16 +177,20 @@ function usleep(int $micro_seconds): void;
  * was interrupted by a signal, an associative array will be returned with the
  * components: seconds - number of seconds remaining in the delay nanoseconds
  * - number of nanoseconds remaining in the delay
+ *
+ * See sleep() wrt NoFCallBuiltin.
  */
-<<__Native>>
+<<__Native("NoFCallBuiltin")>>
 function time_nanosleep(int $seconds,
                         int $nanoseconds): mixed;
 
 /* Makes the script sleep until the specified timestamp.
  * @param float $timestamp - The timestamp when the script should wake.
  * @return bool - Returns TRUE on success or FALSE on failure.
+ *
+ * See sleep() wrt NoFCallBuiltin.
  */
-<<__Native>>
+<<__Native("NoFCallBuiltin")>>
 function time_sleep_until(float $timestamp): bool;
 
 /* Gets a prefixed unique identifier based on the current time in
@@ -220,6 +259,12 @@ function token_name(int $token): string;
  */
 <<__Native, __IsFoldable>>
 function hphp_to_string(mixed $v): string;
+
+function __hhas_adata(string $incorrect_hhas_adata) {
+  throw new Exception(
+    "__hhas_adata may only be called with a scalar string argument."
+  );
+}
 
 }
 

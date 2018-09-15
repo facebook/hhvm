@@ -37,6 +37,7 @@
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/boot-stats.h"
+#include "hphp/util/light-process.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/ssl-init.h"
@@ -47,8 +48,13 @@
 #include <folly/Format.h>
 #include <folly/portability/Unistd.h>
 
-#include <sys/types.h>
 #include <signal.h>
+#include <fstream>
+
+#ifdef __linux__
+void DisableFork() __attribute__((__weak__));
+void EnableForkLogging() __attribute__((__weak__));
+#endif
 
 namespace HPHP {
 
@@ -58,6 +64,7 @@ namespace HPHP {
 std::shared_ptr<HttpServer> HttpServer::Server;
 time_t HttpServer::StartTime;
 std::atomic<double> HttpServer::LoadFactor{1.0};
+std::atomic_int HttpServer::QueueDiscount{0};
 std::atomic_int_fast64_t HttpServer::PrepareToStopTime{0};
 time_t HttpServer::OldServerStopTime;
 std::vector<ShutdownStat> HttpServer::ShutdownStats;
@@ -66,33 +73,31 @@ folly::MicroSpinLock HttpServer::StatsLock;
 const int kNumProcessors = sysconf(_SC_NPROCESSORS_ONLN);
 
 static void on_kill(int sig) {
+  signal(sig, SIG_DFL);
   // There is a small race condition here with HttpServer::reset in
   // program-functions.cpp, but it can only happen if we get a signal while
   // shutting down.  The fix is to add a lock to HttpServer::Server but it seems
   // like overkill.
   if (HttpServer::Server) {
     HttpServer::Server->stopOnSignal(sig);
+  } else {
+    raise(sig);
   }
-  signal(sig, SIG_DFL);
-  raise(sig);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 HttpServer::HttpServer()
-  : m_stopped(false), m_killed(false), m_stopReason(nullptr),
-    m_watchDog(this, &HttpServer::watchDog) {
+  : m_stopped(false), m_killed(false), m_stopReason(nullptr) {
   LoadFactor = RuntimeOption::EvalInitialLoadFactor;
 
   // enabling mutex profiling, but it's not turned on
   LockProfiler::s_pfunc_profile = server_stats_log_mutex;
 
   int startingThreadCount = RuntimeOption::ServerThreadCount;
-  uint32_t additionalThreads = 0;
   if (RuntimeOption::ServerWarmupThrottleRequestCount > 0 &&
       RuntimeOption::ServerThreadCount > kNumProcessors) {
     startingThreadCount = kNumProcessors;
-    additionalThreads = RuntimeOption::ServerThreadCount - startingThreadCount;
   }
 
   auto serverFactory = ServerFactoryRegistry::getInstance()->getFactory
@@ -100,18 +105,22 @@ HttpServer::HttpServer()
   const std::string address = RuntimeOption::ServerFileSocket.empty()
     ? RuntimeOption::ServerIP : RuntimeOption::ServerFileSocket;
   ServerOptions options(address, RuntimeOption::ServerPort,
-    RuntimeOption::ServerThreadCount, startingThreadCount);
+    RuntimeOption::ServerThreadCount, startingThreadCount,
+    RuntimeOption::ServerQueueCount);
   options.m_useFileSocket = !RuntimeOption::ServerFileSocket.empty();
   options.m_serverFD = RuntimeOption::ServerPortFd;
   options.m_sslFD = RuntimeOption::SSLPortFd;
   options.m_takeoverFilename = RuntimeOption::TakeoverFilename;
+  options.m_hugeThreads = RuntimeOption::ServerHugeThreadCount;
+  options.m_hugeStackKb = RuntimeOption::ServerHugeStackKb;
+  options.m_loop_sample_rate = RuntimeOption::ServerLoopSampleRate;
   m_pageServer = serverFactory->createServer(options);
   m_pageServer->addTakeoverListener(this);
   m_pageServer->addServerEventListener(this);
 
-  if (additionalThreads) {
+  if (startingThreadCount != RuntimeOption::ServerThreadCount) {
     auto handlerFactory = std::make_shared<WarmupRequestHandlerFactory>(
-      m_pageServer.get(), additionalThreads,
+      m_pageServer.get(),
       RuntimeOption::ServerWarmupThrottleRequestCount,
       RuntimeOption::RequestTimeoutSeconds);
     m_pageServer->setRequestHandlerFactory([handlerFactory] {
@@ -123,15 +132,19 @@ HttpServer::HttpServer()
   }
 
   if (RuntimeOption::EnableSSL) {
-    assert(SSLInit::IsInited());
+    assertx(SSLInit::IsInited());
     m_pageServer->enableSSL(RuntimeOption::SSLPort);
   }
 
-  ServerOptions admin_options
-    (RuntimeOption::ServerIP, RuntimeOption::AdminServerPort,
-     RuntimeOption::AdminThreadCount);
-  admin_options.m_queueToWorkerRatio =
-    RuntimeOption::AdminServerQueueToWorkerRatio;
+  if (RuntimeOption::EnableSSLWithPlainText) {
+    assertx(SSLInit::IsInited());
+    m_pageServer->enableSSLWithPlainText();
+  }
+
+
+  ServerOptions admin_options(RuntimeOption::AdminServerIP,
+                              RuntimeOption::AdminServerPort,
+                              RuntimeOption::AdminThreadCount);
   m_adminServer = serverFactory->createServer(admin_options);
   m_adminServer->setRequestHandlerFactory<AdminRequestHandler>(
     RuntimeOption::RequestTimeoutSeconds);
@@ -154,6 +167,18 @@ HttpServer::HttpServer()
   }
 
   StaticContentCache::TheCache.load();
+
+  m_counterCallback.init(
+    [this](std::map<std::string, int64_t>& counters) {
+      counters["ev_connections"] = m_pageServer->getLibEventConnectionCount();
+      counters["inflight_requests"] = m_pageServer->getActiveWorker();
+      counters["queued_requests"] = m_pageServer->getQueuedJobs();
+
+      auto const sat_requests = getSatelliteRequestCount();
+      counters["satellite_inflight_requests"] = sat_requests.first;
+      counters["satellite_queued_requests"] = sat_requests.second;
+    }
+  );
 
   signal(SIGTERM, on_kill);
   signal(SIGUSR1, on_kill);
@@ -196,7 +221,7 @@ void HttpServer::takeoverShutdown() {
 
 void HttpServer::serverStopped(HPHP::Server* server) {
   Logger::Info("Page server stopped");
-  assert(server == m_pageServer.get());
+  assertx(server == m_pageServer.get());
   removePid();
 
   auto sockFile = RuntimeOption::ServerFileSocket;
@@ -227,10 +252,7 @@ void HttpServer::playShutdownRequest(const std::string& fileName) {
 }
 
 HttpServer::~HttpServer() {
-  // XXX: why should we have to call stop here?  If we haven't already
-  // stopped (and joined all the threads), watchDog could still be
-  // running and leaving this destructor without a wait would be
-  // wrong...
+  m_counterCallback.deinit();
   stop();
 }
 
@@ -253,11 +275,14 @@ void HttpServer::runOrExitProcess() {
             std::vector<std::string> frameStrings;
             std::vector<folly::StringPiece> frames;
             for (int i = 0; i < bt.size(); i++) {
-              auto f = bt.rvalAt(i).toArray();
+              auto f = tvCastToArrayLike(bt.rvalAt(i).tv());
               if (f.exists(s_file)) {
-                std::string s = f.rvalAt(s_file).toString().toCppString();
+                auto s = tvCastToString(f.rvalAt(s_file).tv()).toCppString();
                 if (f.exists(s_line)) {
-                  s += folly::sformat(":{}", f.rvalAt(s_line).toInt64());
+                  s += folly::sformat(
+                    ":{}",
+                    tvCastToInt64(f.rvalAt(s_line).tv())
+                  );
                 }
                 frameStrings.emplace_back(std::move(s));
                 frames.push_back(frameStrings.back());
@@ -290,8 +315,6 @@ void HttpServer::runOrExitProcess() {
     Logger::Info(msg);
   }
 
-  m_watchDog.start();
-
   if (RuntimeOption::ServerPort) {
     if (!startServer(true)) {
       startupFailure("Unable to start page server");
@@ -315,7 +338,7 @@ void HttpServer::runOrExitProcess() {
     try {
       m_satellites[i]->start();
       Logger::Info("satellite server %s started", name.c_str());
-    } catch (Exception &e) {
+    } catch (Exception& e) {
       startupFailure(
         folly::format("Unable to start satellite server {}: {}",
                       name, e.getMessage()).str()
@@ -333,7 +356,7 @@ void HttpServer::runOrExitProcess() {
 
   try {
     InitFiniNode::ServerInit();
-  } catch (std::exception &e) {
+  } catch (std::exception& e) {
     startupFailure(
       folly::sformat("Exception in InitFiniNode::ServerInit(): {}",
                      e.what()));
@@ -342,6 +365,50 @@ void HttpServer::runOrExitProcess() {
   {
     BootStats::mark("servers started");
     Logger::Info("all servers started");
+    if (!RuntimeOption::ServerForkEnabled) {
+#ifdef __linux__
+      if (DisableFork) {
+        // We should not fork from the server process.  Use light process
+        // instead.  This will intercept subsequent fork() calls and make them
+        // fail immediately.
+        DisableFork();
+      } else {
+        // Otherwise, the binary we are building is not HHVM.  It is probably
+        // some tests, don't intercept fork().
+        Logger::Warning("ignored runtime option Server.Forking.Enabled=false");
+      }
+#else
+      Logger::Warning("ignored Server.Forking.Enabled=false "
+                      "as it only works on Linux");
+#endif
+    } else {
+#if FOLLY_HAVE_PTHREAD_ATFORK
+      pthread_atfork(nullptr, nullptr,
+                     [] {
+                       Process::OOMScoreAdj(1000);
+                     });
+#endif
+    }
+    if (RuntimeOption::ServerForkLogging) {
+#ifdef __linux__
+      if (EnableForkLogging) {
+        EnableForkLogging();
+      } else {
+        // the binary we are building is not HHVM.  It is probably
+        // some tests, don't intercept fork().
+        Logger::Warning("ignored runtime option Server.Forking.Log=true");
+      }
+#else
+      Logger::Warning("ignored Server.Forking.Log=true "
+                      "as it only works on Linux");
+#endif
+    }
+    if (RuntimeOption::EvalServerOOMAdj < 0) {
+      // Avoid HHVM getting killed when a forked process uses too much memory.
+      // A positive adjustment makes it more likely for the server to be killed,
+      // and that's not what we want.
+      Process::OOMScoreAdj(RuntimeOption::EvalServerOOMAdj);
+    }
     createPid();
     Lock lock(this);
     BootStats::done();
@@ -351,7 +418,7 @@ void HttpServer::runOrExitProcess() {
       wait();
     }
     if (m_stopReason) {
-      Logger::Warning("Server stopping with reason: %s\n", m_stopReason);
+      Logger::Warning("Server stopping with reason: %s", m_stopReason);
     }
     // if we were killed, bail out immediately
     if (m_killed) {
@@ -369,10 +436,7 @@ void HttpServer::runOrExitProcess() {
   EvictFileCache();
 
   waitForServers();
-  m_watchDog.waitForEnd();
   playShutdownRequest(RuntimeOption::ServerCleanupRequest);
-  hphp_process_exit();
-  Logger::Info("all servers stopped");
 }
 
 void HttpServer::waitForServers() {
@@ -397,27 +461,13 @@ static void exit_on_timeout(int sig) {
   abort();
 }
 
-// Tell OOM killer to kill this process if it has to.  This is used during
-// server shutdown.  If we are dying anyway, let's try to protect others.
-static void oom_sacrifice() {
-#ifdef __linux__
-  // Use open() instead of fopen() here to avoid additional buffering and
-  // allocation, which could go wrong if memory is really limited.
-  int fd = open("/proc/self/oom_score_adj", O_WRONLY, 0);
-  if (fd >= 0) {
-    write(fd, "800", 3);
-    close(fd);
-  }
-#endif
-}
-
 void HttpServer::stop(const char* stopReason) {
-  if (m_stopped) return;
+  if (m_stopping.exchange(true)) return;
   // we're shutting down flush http logs
   Logger::FlushAll();
   HttpRequestHandler::GetAccessLog().flushAllWriters();
+  Process::OOMScoreAdj(1000);
   MarkShutdownStat(ShutdownEvent::SHUTDOWN_INITIATED);
-  oom_sacrifice();
 
   if (RuntimeOption::ServerKillOnTimeout) {
     int totalWait =
@@ -454,21 +504,24 @@ void HttpServer::stop(const char* stopReason) {
 }
 
 void HttpServer::stopOnSignal(int sig) {
-  if (m_stopped) return;
+  if (m_stopping.exchange(true)) return;
   // we're shutting down flush http logs
   Logger::FlushAll();
   HttpRequestHandler::GetAccessLog().flushAllWriters();
+  Process::OOMScoreAdj(1000);
   MarkShutdownStat(ShutdownEvent::SHUTDOWN_INITIATED);
-  oom_sacrifice();
 
   // Signal to the main server thread to exit immediately if
   // we want to die on SIGTERM
   if (RuntimeOption::ServerKillOnSIGTERM && sig == SIGTERM) {
-    Lock lock(this);
-    m_stopped = true;
-    m_killed = true;
-    m_stopReason = "SIGTERM received";
-    notify();
+    {
+      Lock lock(this);
+      m_stopped = true;
+      m_killed = true;
+      m_stopReason = "SIGTERM received";
+      notify();
+    }
+    raise(sig);
     return;
   }
 
@@ -477,15 +530,10 @@ void HttpServer::stopOnSignal(int sig) {
     alarm(RuntimeOption::ServerGracefulShutdownWait);
   }
 
-  // NOTE: Server->stop does a graceful stop by design.
-  if (m_pageServer) {
-    m_pageServer->stop();
-  }
-  if (m_adminServer) {
-    m_adminServer->stop();
-  }
-
-  waitForServers();
+  Lock lock(this);
+  m_stopped = true;
+  m_stopReason = "signal received";
+  notify();
 }
 
 void HttpServer::EvictFileCache() {
@@ -528,50 +576,21 @@ void HttpServer::removePid() {
 
 void HttpServer::killPid() {
   if (!RuntimeOption::PidFile.empty()) {
-    CstrBuffer sb(RuntimeOption::PidFile.c_str());
-    if (sb.size()) {
-      int64_t pid = sb.detach().toInt64();
-      if (pid) {
-        kill((pid_t)pid, SIGKILL);
-        return;
-      }
+    std::ifstream in(RuntimeOption::PidFile);
+    int64_t pid;
+    if ((in >> pid) && pid > 0) {
+      in.close();
+      kill((pid_t)pid, SIGKILL);
+      return;
     }
     Logger::Error("Unable to read pid file %s for any meaningful pid",
                   RuntimeOption::PidFile.c_str());
   }
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// watch dog thread
-
-void HttpServer::watchDog() {
-  int count = 0;
-  bool noneed = false;
-  while (!m_stopped && !noneed) {
-    noneed = true;
-
-    if (RuntimeOption::DropCacheCycle > 0) {
-      noneed = false;
-      if ((count % RuntimeOption::DropCacheCycle) == 0) { // every hour
-        dropCache();
-      }
-    }
-
-    sleep(1);
-    ++count;
-
-    if (RuntimeOption::MaxRSSPollingCycle > 0) {
-      noneed = false;
-      if ((count % RuntimeOption::MaxRSSPollingCycle) == 0) { // every minute
-        checkMemory();
-      }
-    }
-  }
-}
-
 static bool sendAdminCommand(const char* cmd) {
   if (RuntimeOption::AdminServerPort <= 0) return false;
-  std::string host = RuntimeOption::ServerIP;
+  std::string host = RuntimeOption::AdminServerIP;
   if (host.empty()) host = "localhost";
   auto passwords = RuntimeOption::AdminPasswords;
   if (passwords.empty() && !RuntimeOption::AdminPassword.empty()) {
@@ -638,7 +657,7 @@ bool HttpServer::CanContinue(const MemInfo& mem, int64_t rssMb,
   if (mem.freeMb < RuntimeOption::ServerCriticalFreeMb) return false;
   auto const availableMb = availableMemory(mem, rssMb, cacheFreeFactor);
   auto const result = (rssMb + availableMb >= rssNeeded);
-  if (result) assert(CanStep(mem, rssMb, rssNeeded, cacheFreeFactor));
+  if (result) assertx(CanStep(mem, rssMb, rssNeeded, cacheFreeFactor));
   return result;
 }
 
@@ -660,7 +679,6 @@ void HttpServer::CheckMemAndWait(bool final) {
   if (!RuntimeOption::StopOldServer) return;
   if (RuntimeOption::OldServerWait <= 0) return;
 
-  auto const pid = getpid();
   auto const rssNeeded = RuntimeOption::ServerRSSNeededMb;
   auto const factor = RuntimeOption::CacheFreeFactor;
   do {
@@ -670,7 +688,7 @@ void HttpServer::CheckMemAndWait(bool final) {
       return;
     }
 
-    auto const rssMb = Process::GetProcessRSS(pid);
+    auto const rssMb = Process::GetMemUsageMb();
     MemInfo memInfo;
     if (!Process::GetMemoryInfo(memInfo)) {
       Logger::Error("Failed to obtain memory information");
@@ -700,7 +718,7 @@ void HttpServer::MarkShutdownStat(ShutdownEvent event) {
   std::lock_guard<folly::MicroSpinLock> lock(StatsLock);
   MemInfo mem;
   Process::GetMemoryInfo(mem);
-  auto const rss = Process::GetProcessRSS(getpid());
+  auto const rss = Process::GetMemUsageMb();
   auto const requests = requestCount();
   if (event == ShutdownEvent::SHUTDOWN_PREPARE) {
     ShutdownStats.clear();
@@ -708,7 +726,7 @@ void HttpServer::MarkShutdownStat(ShutdownEvent event) {
   }
 #ifndef NDEBUG
   if (!ShutdownStats.empty()) {
-    assert(ShutdownStats.back().event <= event);
+    assertx(ShutdownStats.back().event <= event);
   }
 #endif
   ShutdownStats.push_back({event, time(nullptr), mem, rss, requests});
@@ -743,26 +761,6 @@ void HttpServer::LogShutdownStats() {
   }
   StructuredLog::log("webserver_shutdown_timing", entry);
   ShutdownStats.clear();
-}
-
-void HttpServer::dropCache() {
-  FILE *f = fopen("/proc/sys/vm/drop_caches", "w");
-  if (f) {
-    // http://www.linuxinsight.com/proc_sys_vm_drop_caches.html
-    const char *FREE_ALL_CACHES = "3\n";
-    fwrite(FREE_ALL_CACHES, 2, 1, f);
-    fclose(f);
-  }
-}
-
-void HttpServer::checkMemory() {
-  int64_t used = Process::GetProcessRSS(getpid()) * 1024 * 1024;
-  if (RuntimeOption::MaxRSS > 0 && used > RuntimeOption::MaxRSS) {
-    Logger::Error(
-      "ResourceLimit.MaxRSS %" PRId64 " reached %" PRId64 " used, exiting",
-      RuntimeOption::MaxRSS, used);
-    stop();
-  }
 }
 
 void HttpServer::getSatelliteStats(
@@ -803,18 +801,13 @@ bool HttpServer::startServer(bool pageServer) {
         m_adminServer->start();
       }
       return true;
-    } catch (FailedToListenException &e) {
+    } catch (FailedToListenException& e) {
       if (RuntimeOption::ServerExitOnBindFail) return false;
 
       StopOldServer();
 
       if (errno == EACCES) {
-        if (pageServer && !RuntimeOption::ServerFileSocket.empty()) {
-          Logger::Error("Permission denied opening socket at %s",
-                        RuntimeOption::ServerFileSocket.c_str());
-        } else {
-          Logger::Error("Permission denied listening on port %d", port);
-        }
+        Logger::Error("%s: Permission denied.", e.what());
         return false;
       }
 
@@ -848,7 +841,7 @@ bool HttpServer::startServer(bool pageServer) {
           m_adminServer->start();
         }
         return true;
-      } catch (FailedToListenException &e) {
+      } catch (FailedToListenException& e) {
         if (i == 0) {
           Logger::Info("shutting down old HPHP server by pid file");
         }
@@ -868,7 +861,7 @@ bool HttpServer::startServer(bool pageServer) {
           m_adminServer->start();
         }
         return true;
-      } catch (FailedToListenException &e) {
+      } catch (FailedToListenException& e) {
         if (pageServer && !RuntimeOption::ServerFileSocket.empty()) {
           if (i == 0) {
             Logger::Info("unlinking socket at %s",

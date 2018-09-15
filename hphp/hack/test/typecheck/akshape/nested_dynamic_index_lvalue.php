@@ -6,7 +6,7 @@
  */
 
 function test(string $key): void {
-  $a = Vector {array()};
+  $a = Vector { array() };
   $a[0]['k1'] = 4;
   $a[0]['k2'] = 'aaa';
   $a[0][$key] = 4;

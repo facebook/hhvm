@@ -21,6 +21,7 @@
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/context.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -28,32 +29,128 @@ TRACE_SET_MOD(hhbbc);
 
 //////////////////////////////////////////////////////////////////////
 
+bool poppable(Op op) {
+  switch (op) {
+    case Op::Dup:
+    case Op::Null:
+    case Op::False:
+    case Op::True:
+    case Op::Int:
+    case Op::Double:
+    case Op::String:
+    case Op::Array:
+    case Op::Vec:
+    case Op::Dict:
+    case Op::Keyset:
+    case Op::NewArray:
+    case Op::NewDArray:
+    case Op::NewMixedArray:
+    case Op::NewDictArray:
+    case Op::NewLikeArrayL:
+    case Op::NewCol:
+      return true;
+    default:
+      return false;
+  }
+}
+
 void BasicPeephole::push_back(const Bytecode& next) {
   FTRACE(1, "BasicPeephole::push_back {}\n", show(next));
   if (next.op == Op::Nop) return;
   if (m_next.size()) {
     auto& cur = m_next.back();
+    auto update_cur = [&] (Bytecode bc) {
+      auto srcLoc = cur.srcLoc;
+      cur = std::move(bc);
+      cur.srcLoc = srcLoc;
+    };
 
+    // Kill <side-effect-free-expr>; PopX
     if ((cur.op == Op::RGetCNop && next.op == Op::UnboxRNop) ||
-        (next.op == Op::PopC && (cur.op == Op::Dup ||
-                                 cur.op == Op::Null ||
-                                 cur.op == Op::False ||
-                                 cur.op == Op::True ||
-                                 cur.op == Op::Int ||
-                                 cur.op == Op::Double ||
-                                 cur.op == Op::String))) {
+        (next.op == Op::PopC && poppable(cur.op)) ||
+        (next.op == Op::PopU && cur.op == Op::NullUninit)) {
       m_next.pop_back();
       return;
     }
 
+    // transform <expr> === null or <expr> !== null to IsTypeC Null [Not]
+    if (cur.op == Op::Null &&
+        (next.op == Op::Same || next.op == Op::NSame)) {
+      update_cur(bc::IsTypeC { IsTypeOp::Null });
+      if (next.op == Op::NSame) {
+        m_next.push_back(bc::Not {});
+      }
+      return;
+    }
+
+    // transform $x === null or $x !== null to IsTypeL Null [Not]
+    if (m_next.size() > 1 &&
+        (cur.op == Op::CGetL || cur.op == Op::CGetL2) &&
+        (next.op == Op::Same || next.op == Op::NSame)) {
+      auto& prev = (&cur)[-1];
+      if (prev.op == Op::Null) {
+        prev = bc::IsTypeL {
+          cur.op == Op::CGetL ? cur.CGetL.loc1 : cur.CGetL2.loc1, IsTypeOp::Null
+        };
+        if (next.op == Op::NSame) {
+          update_cur(bc::Not {});
+        } else {
+          m_next.pop_back();
+        }
+        return;
+      }
+    }
+
+    // transform $x = $x . <expr> into $x .= <expr>
+    if (m_next.size() > 1 &&
+        cur.op == Op::Concat &&
+        (next.op == Op::SetL || next.op == Op::PopL)) {
+      auto& prev = (&cur)[-1];
+      auto const setLoc = next.op == Op::SetL ? next.SetL.loc1 : next.PopL.loc1;
+      if (prev.op == Op::CGetL2 && prev.CGetL2.loc1 == setLoc) {
+        prev = bc::SetOpL {
+          setLoc,
+          SetOpOp::ConcatEqual
+        };
+        prev.srcLoc = next.srcLoc;
+        if (next.op == Op::PopL) {
+          update_cur(bc::PopC {});
+        } else {
+          m_next.pop_back();
+        }
+        return;
+      }
+    }
+
+    // transform Not; JmpZ/JmpNZ to JmpNZ/JmpZ
+    if (cur.op == Op::Not &&
+        (next.op == Op::JmpZ || next.op == Op::JmpNZ)) {
+      if (next.op == Op::JmpZ) {
+        update_cur(bc::JmpNZ { next.JmpZ.target });
+      } else {
+        update_cur(bc::JmpZ { next.JmpNZ.target });
+      }
+      return;
+    }
+
+    // transform PopL; PushL to UnsetL
+    if (cur.op == Op::PopL && next.op == Op::PushL &&
+        cur.PopL.loc1 == next.PushL.loc1) {
+      update_cur(bc::UnsetL { cur.PopL.loc1 });
+      return;
+    }
+
+    // transform suitable FCall; UnboxRNop; Await to FCallAwait
     if (!m_ctx.func->isGenerator &&
         m_next.size() > 1 &&
         cur.op == Op::UnboxRNop &&
         next.op == Op::Await) {
       auto& prev = (&cur)[-1];
-      if (prev.op == Op::FCallD) {
-        auto& call = prev.FCallD;
+      if (prev.op == Op::FCall) {
+        auto& call = prev.FCall;
         auto async = [&]() {
+          if (call.fca.hasUnpack || call.fca.numRets != 1) return false;
+          if (call.str3->empty()) return false;
           if (call.str2->empty()) {
             return m_index.is_async_func(
               m_index.resolve_func(m_ctx, call.str3));
@@ -66,15 +163,25 @@ void BasicPeephole::push_back(const Bytecode& next) {
         }();
         if (async) {
           prev = bc::FCallAwait {
-            call.arg1, call.str2, call.str3
+            call.fca.numArgs, call.str2, call.str3
           };
           m_next.pop_back();
           return;
         }
       }
     }
+
+    // transform SetL; PopC to PopL
+    if (cur.op == Op::SetL && next.op == Op::PopC) {
+      cur = bc_with_loc(next.srcLoc, bc::PopL { cur.SetL.loc1 });
+      return;
+    }
   }
   m_next.push_back(next);
+}
+
+std::string BasicPeephole::show(const Bytecode& op) {
+  return php::show(m_ctx.func, op);
 }
 
 void ConcatPeephole::finalize() {
@@ -85,18 +192,16 @@ void ConcatPeephole::finalize() {
 }
 
 void ConcatPeephole::append(const Bytecode& op,
-                            const State& state,
-                            const std::vector<Op>& srcStack) {
-  FTRACE(1, "ConcatPeephole::append {}\n", show(op));
-  assert(state.stack.size() == srcStack.size());
-  int nstack = state.stack.size();
+                            const std::vector<std::pair<Op,bool>>& srcStack) {
+  FTRACE(1, "ConcatPeephole::append {}\n", m_next.show(op));
+  int nstack = srcStack.size();
 
   // Size of the stack at the previous Concat.
   int prevsz = m_working.empty() ? -1 : m_working.back().stacksz;
 
   // Squash the innermost concat stream if we consumed its concat result.
   if (nstack < prevsz - 1 || (nstack == prevsz - 1 &&
-                              srcStack[nstack - 1] != Op::Concat)) {
+                              srcStack[nstack - 1].first != Op::Concat)) {
     squash();
   }
 
@@ -105,17 +210,23 @@ void ConcatPeephole::append(const Bytecode& op,
     auto ind2 = nstack - 2;
 
     // Non-string concat; just append, squashing if this terminates a stream.
-    if (!state.stack[ind1].subtypeOf(TStr) ||
-        !state.stack[ind2].subtypeOf(TStr)) {
+    if (!srcStack[ind1].second || !srcStack[ind2].second) {
       if (nstack == prevsz) {
         squash();
       }
       return push_back(op);
     }
 
-    // If the first concat operand is from the previous concat in the stream,
-    // continue the current stream.
-    if (srcStack[ind2] == Op::Concat && nstack == prevsz) {
+    // If the first concat operand is from the previous concat in the
+    // stream, continue the current stream.
+    if (srcStack[ind2].first == Op::Concat && nstack == prevsz) {
+      return push_back(op, true);
+    }
+
+    // If the second concat operand is from the previous concat in the
+    // stream, continue the current stream.
+    if (srcStack[ind1].first == Op::Concat && nstack == prevsz - 1) {
+      m_working.back().stacksz--;
       return push_back(op, true);
     }
 
@@ -145,7 +256,7 @@ void ConcatPeephole::push_back(const Bytecode& op, bool is_concat) {
     auto& inner = m_working.back();
 
     if (is_concat) ++inner.concats;
-    inner.stream.push_back(std::make_pair(op, is_concat));
+    inner.stream.emplace_back(op, is_concat);
   }
 }
 
@@ -156,11 +267,11 @@ void ConcatPeephole::push_back(const Bytecode& op, bool is_concat) {
 void ConcatPeephole::squash() {
   assert(!m_working.empty());
 
-  auto workstream = m_working.back();
+  auto workstream = std::move(m_working.back());
   m_working.pop_back();
 
   // Concat counters.
-  int naccum = 1;
+  uint32_t naccum = 1;
   int ntotal = 0;
 
   assert(workstream.stream.front().first.op == Op::Concat);
@@ -170,12 +281,7 @@ void ConcatPeephole::squash() {
     auto& is_concat = item.second;
 
     // If we passed the last concat, just append the remaining bytecode.
-    if (ntotal == workstream.concats) {
-      push_back(op);
-      continue;
-    }
-
-    if (is_concat) {
+    if (ntotal < workstream.concats && is_concat) {
       // Bump counters.
       ++naccum;
       ++ntotal;
@@ -183,7 +289,11 @@ void ConcatPeephole::squash() {
       // Emit a ConcatN if we hit the limit, or if we hit the final Concat.
       if (naccum == kMaxConcatN || ntotal == workstream.concats) {
         if (naccum >= 2) {
-          push_back(bc::ConcatN {naccum});
+          if (naccum == 2) {
+            push_back(bc::Concat {});
+          } else {
+            push_back(bc::ConcatN {naccum});
+          }
         }
         naccum = 1;
       }

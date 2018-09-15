@@ -1,0 +1,47 @@
+#if 1 = 1
+#else
+#error "ignored #else (?)"
+#endif
+
+#if true
+  banana
+#elif false
+  apple
+  #error "ignored #elif (?)"
+#endif
+
+#if false
+  earthworm
+  #error ""
+#elif true
+  apricot
+#endif
+
+#if false
+  cuckoo
+  #error ""
+#else
+  #if false
+    egg
+    #error ""
+  #else
+    nest
+  #endif
+#endif
+
+#define X 3
+
+#if false
+  helicopter
+  #error ""
+#elif false
+  ocean
+  #error ""
+#else
+  #if X = 12
+    sand
+    #error ""
+  #elif 4 * X = 12
+    sea urchin
+  #endif
+#endif

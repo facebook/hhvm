@@ -67,4 +67,39 @@ void encode_member_key(MemberKey mk, UnitEmitter& ue) {
   }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+void encodeLocalRange(UnitEmitter& ue, const LocalRange& range) {
+  ue.emitIVA(range.first);
+  ue.emitIVA(range.count);
+}
+
+LocalRange decodeLocalRange(const unsigned char*& pc) {
+  auto const first = decode_iva(pc);
+  auto const restCount = decode_iva(pc);
+  return LocalRange{uint32_t(first), uint32_t(restCount)};
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void encodeFCallArgs(UnitEmitter& ue, const FCallArgs& fca) {
+  bool smallNumArgs = ((fca.numArgs + 1) << 2) <= 0xff;
+  uint8_t flags = smallNumArgs ? (fca.numArgs + 1) << 2 : 0;
+  if (fca.hasUnpack) flags |= 1 << 0;
+  if (fca.numRets != 1) flags |= 1 << 1;
+
+  ue.emitByte(flags);
+  if (!smallNumArgs) ue.emitIVA(fca.numArgs);
+  if (fca.numRets != 1) ue.emitIVA(fca.numRets);
+}
+
+FCallArgs decodeFCallArgs(PC& pc) {
+  auto const flags = decode_byte(pc);
+  auto const numArgs = (flags >> 2) ? (flags >> 2) - 1 : decode_iva(pc);
+  auto const hasUnpack = flags & 1;
+  auto const numRets = (flags & 2) ? decode_iva(pc) : 1;
+  return FCallArgs(numArgs, hasUnpack, numRets);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }

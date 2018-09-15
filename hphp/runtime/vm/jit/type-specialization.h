@@ -27,6 +27,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct Class;
+
 namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -43,6 +45,11 @@ struct ArraySpec {
   explicit ArraySpec(ArrayData::ArrayKind kind);
   explicit ArraySpec(const RepoAuthType::Array* arrTy);
   ArraySpec(ArrayData::ArrayKind kind, const RepoAuthType::Array* arrTy);
+
+  /*
+   * Post-deserialization fixup.
+   */
+  void adjust(const RepoAuthType::Array* adjusted);
 
   /*
    * Accessors.

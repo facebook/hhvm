@@ -2,68 +2,73 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Core
+open Hh_core
 open Reordered_argument_collections
 open Typing_defs
 open Utils
 open String_utils
+include AutocompleteTypes
 
 module Phase = Typing_phase
-
-(* Details about functions to be added in json output *)
-type func_param_result = {
-    param_name     : string;
-    param_ty       : string;
-    param_variadic : bool;
-  }
-
-type func_details_result = {
-    params    : func_param_result list;
-    return_ty : string;
-    min_arity : int;
-  }
-
-(* Results ready to be displayed to the user *)
-type complete_autocomplete_result = {
-    res_pos      : Pos.absolute;
-    res_ty       : string;
-    res_name     : string;
-    expected_ty  : bool;
-    func_details : func_details_result option;
-  }
-
-(* Results that still need a typing environment to convert ty information
-   into strings *)
-type autocomplete_result = {
-    ty   : Typing_defs.phase_ty;
-    name : string;
-    desc : string option
-  }
-
-(* The type returned to the client *)
-type result = complete_autocomplete_result list
+module TUtils = Typing_utils
 
 let ac_env = ref None
-let ac_type = ref None
-let autocomplete_results = ref []
+let autocomplete_results : autocomplete_result list ref = ref []
+let autocomplete_is_complete : bool ref = ref true
+
+(* The position we're autocompleting at. This is used when computing completions
+ * for global identifiers. *)
+let autocomplete_identifier: (Pos.t * string) option ref = ref None
+
+type autocomplete_type =
+  | Acid
+  | Acnew
+  | Actype
+  | Acclass_get
+  | Acprop
+  | Acshape_key
+  | Actrait_only
+
+let (argument_global_type: autocomplete_type option ref) = ref None
+let auto_complete_for_global = ref ""
 
 let auto_complete_suffix = "AUTO332"
 let suffix_len = String.length auto_complete_suffix
 let strip_suffix s = String.sub s 0 (String.length s - suffix_len)
+
+let matches_auto_complete_suffix x =
+  String.length x >= suffix_len &&
+  let suffix = String.sub x (String.length x - suffix_len) suffix_len in
+  suffix = auto_complete_suffix
+
 let is_auto_complete x =
   if !autocomplete_results = []
-  then begin
-    String.length x >= suffix_len &&
-    let suffix = String.sub x (String.length x - suffix_len) suffix_len in
-    suffix = auto_complete_suffix
-  end else
-    false
+  then matches_auto_complete_suffix x
+  else false
+
+let get_replace_pos_exn ~delimit_on_namespaces =
+  match !autocomplete_identifier with
+  | None -> failwith "No autocomplete position was set."
+  | Some (pos, text) ->
+    if Pos.length pos < suffix_len
+    then failwith "Matched position is shorter than autocomplete suffix."
+    else
+    let open Ide_api_types in
+    let range = pos_to_range pos in
+    let st = if delimit_on_namespaces
+      then match String.rindex_opt text '\\' with
+        | Some index ->
+          { range.st with column = range.st.column + index }
+        | None -> range.st
+      else range.st in
+    let ed = { range.ed with column = range.ed.column - suffix_len } in
+    { st; ed }
+
 
 let autocomplete_result_to_json res =
   let func_param_to_json param =
@@ -84,151 +89,120 @@ let autocomplete_result_to_json res =
   let name = res.res_name in
   let pos = res.res_pos in
   let ty = res.res_ty in
-  let expected_ty = res.expected_ty in
   Hh_json.JSON_Object [
       "name", Hh_json.JSON_String name;
       "type", Hh_json.JSON_String ty;
       "pos", Pos.json pos;
       "func_details", func_details_to_json res.func_details;
-      "expected_ty", Hh_json.JSON_Bool expected_ty;
+      "expected_ty", Hh_json.JSON_Bool false; (* legacy field, left here in case clients need it *)
   ]
 
-let autocomplete_result_to_ide_response res =
-  let param_to_ide_response x = {
-    Ide_message.name = x.param_name;
-    type_ = x.param_ty;
-  } in
+let get_partial_result name ty kind class_opt =
+  let base_class = Option.map ~f:(fun class_ -> class_.Typing_defs.tc_name) class_opt in
+  Partial { ty; name; kind_=kind; base_class; }
 
-  let callable_details_to_ide_response res = {
-    Ide_message.return_type = res.return_ty;
-    params = List.map res.params param_to_ide_response;
-  } in
-
-  let callable_details_to_ide_response =
-    Option.map ~f:callable_details_to_ide_response in
-
-  let autocomplete_result_to_ide_response res = {
-    Ide_message.autocomplete_item_text = res.res_name;
-    autocomplete_item_type = res.res_ty;
-    callable_details = callable_details_to_ide_response res.func_details;
-  } in
-  Ide_message.Autocomplete_response
-    (List.map res ~f:autocomplete_result_to_ide_response)
-
-let get_result name ty =
-  {
-    ty   = ty;
-    name = name;
-    desc = None;
-  }
-
-let add_res res =
+let add_res (res: autocomplete_result) : unit =
   autocomplete_results := res :: !autocomplete_results
 
-let add_result name ty =
-  add_res (get_result name ty)
-
-let get_result_with_desc name ty desc =
-  {
-    ty   = ty;
-    name = name;
-    desc = Some desc;
-  }
-
-let add_result_with_desc name ty desc =
-  add_res (get_result_with_desc name ty desc)
+let add_partial_result name ty kind class_opt =
+  add_res (get_partial_result name ty kind class_opt)
 
 let autocomplete_token ac_type env x =
   if is_auto_complete (snd x)
   then begin
     ac_env := env;
-    Autocomplete.auto_complete_pos := Some (fst x);
-    Autocomplete.argument_global_type := Some ac_type;
-    Autocomplete.auto_complete_for_global := snd x
+    autocomplete_identifier := Some x;
+    argument_global_type := Some ac_type;
+    auto_complete_for_global := snd x
   end
 
-let autocomplete_id id env = autocomplete_token Autocomplete.Acid (Some env) id
+let autocomplete_id id env = autocomplete_token Acid (Some env) id
 
-let autocomplete_hint = autocomplete_token Autocomplete.Actype None
+let autocomplete_hint = autocomplete_token Actype None
 
-let autocomplete_new cid env _ =
+let autocomplete_trait_only = autocomplete_token Actrait_only None
+
+let autocomplete_new cid env =
   match cid with
-  | Nast.CI sid -> autocomplete_token Autocomplete.Acnew (Some env) sid
+  | Nast.CI (sid, _) -> autocomplete_token Acnew (Some env) sid
   | _ -> ()
 
 let get_class_elt_types env class_ cid elts =
   let elts = SMap.filter elts begin fun _ x ->
-    Typing_visibility.is_visible env x.ce_visibility cid class_
+    Tast_env.is_visible env x.ce_visibility cid class_
   end in
   SMap.map elts (fun { ce_type = lazy ty; _ } -> ty)
 
-let autocomplete_method is_static class_ id env cid ~is_method:_ ~is_const:_ =
+let autocomplete_shape_key env fields id =
   if is_auto_complete (snd id)
   then begin
     ac_env := Some env;
-    Autocomplete.auto_complete_pos := Some (fst id);
-    Autocomplete.argument_global_type := Some Autocomplete.Acclass_get;
-    let results =
-      if is_static
-      then
-        let elts = SMap.union class_.tc_smethods class_.tc_sprops in
-        let elt_types = get_class_elt_types env class_ cid elts in
-        SMap.fold class_.tc_consts ~f:begin fun x class_const acc ->
-          SMap.add acc x class_const.cc_type
-        end ~init:elt_types
-      else
-        let elts = SMap.union class_.tc_methods class_.tc_props in
-        get_class_elt_types env class_ cid elts
+    autocomplete_identifier := Some id;
+    argument_global_type := Some Acshape_key;
+    (* not the same as `prefix == ""` in namespaces *)
+    let have_prefix = (Pos.length (fst id)) > suffix_len in
+    let prefix = strip_suffix (snd id) in
+    let add (name: Ast.shape_field_name) =
+      let code, kind, ty = match name with
+        | Ast.SFlit_int (pos, str) ->
+          let reason = Typing_reason.Rwitness pos in
+          let ty = Typing_defs.Tprim Aast_defs.Tint in
+          (str, Literal_kind, (reason, ty))
+        | Ast.SFlit_str (pos, str) ->
+          let reason = Typing_reason.Rwitness pos in
+          let ty = Typing_defs.Tprim Aast_defs.Tstring in
+          let quote = if have_prefix then Str.first_chars prefix 1 else "'" in
+          (quote^str^quote, Literal_kind, (reason, ty))
+        | Ast.SFclass_const ((pos, cid), (_, mid)) ->
+          (Printf.sprintf "%s::%s" cid mid, Class_constant_kind, (Reason.Rwitness pos, Typing_defs.Tany))
+      in
+      if (not have_prefix) || string_starts_with code prefix
+      then add_partial_result code (Phase.decl ty) kind None
     in
-    SMap.iter results begin fun x ty ->
-      add_result x (Phase.decl ty)
-    end;
+    List.iter (Ast.ShapeMap.keys fields) ~f:add
   end
 
-let autocomplete_smethod = autocomplete_method true
-
-let autocomplete_cmethod = autocomplete_method false
-
-let autocomplete_lvar_naming _ id locals =
+let autocomplete_member ~is_static env class_ cid id =
+  (* This is used for instance "$x->|" and static "Class1::|" members. *)
+  (* It's also used for "<nt:fb:text |" XHP attributes, in which case  *)
+  (* class_ is ":nt:fb:text" and its attributes are in tc_props.       *)
   if is_auto_complete (snd id)
   then begin
-    Autocomplete.argument_global_type := Some Autocomplete.Acprop;
-    (* Store the position and a map of name to ident so we can add
-     * types at this point later *)
-    Autocomplete.auto_complete_pos := Some (fst id);
-    Autocomplete.auto_complete_vars := SMap.map locals snd
+    ac_env := Some env;
+    autocomplete_identifier := Some id;
+    argument_global_type := Some Acclass_get;
+    let add kind name ty = add_partial_result name (Phase.decl ty) kind (Some class_) in
+    if is_static then begin
+      SMap.iter (get_class_elt_types env class_ cid class_.tc_smethods) ~f:(add Method_kind);
+      SMap.iter (get_class_elt_types env class_ cid class_.tc_sprops) ~f:(add Property_kind);
+      SMap.iter (class_.tc_consts) ~f:(fun name cc -> add Class_constant_kind name cc.cc_type);
+    end else begin
+      SMap.iter (get_class_elt_types env class_ cid class_.tc_methods) ~f:(add Method_kind);
+      SMap.iter (get_class_elt_types env class_ cid class_.tc_props) ~f:(add Property_kind);
+    end
   end
 
-let autocomplete_lvar_typing id env =
-  if Some (fst id)= !(Autocomplete.auto_complete_pos)
+let autocomplete_lvar id env =
+  (* This is used for "$|" and "$x = $|" local variables. *)
+  let text = Local_id.get_name (snd id) in
+  if is_auto_complete text
   then begin
-    (* The typechecker might call this hook more than once (loops) so we
-     * need to clear the list of results first or we could have repeat locals *)
-    autocomplete_results := [];
+    argument_global_type := Some Acprop;
     ac_env := Some env;
-    Autocomplete.auto_complete_pos := Some (fst id);
-    (* Get the types of all the variables in scope at this point *)
-    SMap.iter !Autocomplete.auto_complete_vars begin fun x ident ->
-      let _, ty = Typing_env.get_local env ident in
-      add_result x (Phase.locl ty)
-    end;
-    (* Add $this if we're in a instance method *)
-    let ty = Typing_env.get_self env in
-    if not (Typing_env.is_static env) && (fst ty) <> Reason.Rnone
-    then add_result
-      Naming_special_names.SpecialIdents.this (Phase.locl ty)
+    autocomplete_identifier := Some (fst id, text);
   end
 
 let should_complete_class completion_type class_kind =
   match completion_type, class_kind with
-  | Some Autocomplete.Acid, Ast.Cnormal
-  | Some Autocomplete.Acid, Ast.Cabstract
-  | Some Autocomplete.Acnew, Ast.Cnormal
-  | Some Autocomplete.Actype, _ -> true
+  | Some Acid, Some Ast.Cnormal
+  | Some Acid, Some Ast.Cabstract
+  | Some Acnew, Some Ast.Cnormal
+  | Some Actrait_only, Some Ast.Ctrait
+  | Some Actype, Some _ -> true
   | _ -> false
 
 let should_complete_fun completion_type =
-  completion_type=Some Autocomplete.Acid
+  completion_type=Some Acid
 
 let get_constructor_ty c =
   let pos = c.Typing_defs.tc_pos in
@@ -246,11 +220,13 @@ let get_constructor_ty c =
         end
     | None ->
         (* Nothing defined, so we need to fake the entire constructor *)
-      reason, Typing_defs.Tfun (Typing_env.make_ft pos [] return_ty)
+      reason,
+      Typing_defs.Tfun
+        (Typing_env.make_ft pos Nonreactive (*is_coroutine*)false [] return_ty)
 
 (* Global identifier autocomplete uses search service to find matching names *)
-let search_funs_and_classes input ~on_class ~on_function =
-  HackSearchService.MasterApi.query_autocomplete input ~limit:(Some 100)
+let search_funs_and_classes input ~limit ~on_class ~on_function =
+  HackSearchService.MasterApi.query_autocomplete input ~limit
     ~filter_map:begin fun _ _ res ->
       let name = res.SearchUtils.name in
       match res.SearchUtils.result_type with
@@ -259,251 +235,531 @@ let search_funs_and_classes input ~on_class ~on_function =
       | _ -> None
     end
 
-let compute_complete_global tcopt content_funs content_classes =
-  let completion_type = !Autocomplete.argument_global_type in
-  let gname = Utils.strip_ns !Autocomplete.auto_complete_for_global in
+(* compute_complete_global: given the sets content_funs and content_classes  *)
+(* of function names and classes in the current file, returns a list of all  *)
+(* possible identifier autocompletions at the autocomplete position (which   *)
+(* is stored in a global mutable reference). The results are stored in the   *)
+(* global mutable reference 'autocomplete_results'.                          *)
+(* This function has two modes of dealing with namespaces...                 *)
+(*     delimit_on_namespaces=true   delimit_on_namespaces=false              *)
+(*      St| =>               Str                          Str\compare, ...   *)
+(*  Str\\c| =>               compare                      Str\compare        *)
+(* Essentially, 'delimit_on_namespaces=true' means that autocomplete treats  *)
+(* namespaces as first class entities; 'false' means that it treats them     *)
+(* purely as part of long identifier names where the symbol '\\' is not      *)
+(* really any different from the symbol '_' for example.                     *)
+(*                                                                           *)
+(* XHP note:                                                                 *)
+(* This function is also called for "<foo|", with gname="foo".               *)
+(* This is a Hack shorthand for referring to the global classname ":foo".    *)
+(* Our global dictionary of classnames stores the authoritative name ":foo", *)
+(* and inside autocompleteService we do the job of inserting a leading ":"   *)
+(* from the user's prefix, and stripping the leading ":" when we emit.       *)
+let compute_complete_global
+  ~(tcopt: TypecheckerOptions.t)
+  ~(delimit_on_namespaces: bool)
+  ~(autocomplete_context: AutocompleteTypes.legacy_autocomplete_context)
+  ~(content_funs: Reordered_argument_collections.SSet.t)
+  ~(content_classes: Reordered_argument_collections.SSet.t)
+  : unit =
+  let completion_type = !argument_global_type in
+  let gname = Utils.strip_ns !auto_complete_for_global in
   let gname = strip_suffix gname in
+  let gname = if autocomplete_context.is_xhp_classname then (":" ^ gname) else gname in
+  (* is_after_single_colon : XHP vs switch statements                       *)
+  (* is_after_open_square_bracket : shape field names vs container keys     *)
+  (* is_after_quote: shape field names vs arbitrary strings                 *)
+  (*                                                                        *)
+  (* We can recognize these cases by whether the prefix is empty.           *)
+  (* We do this by checking the identifier length, as the string will       *)
+  (* include the current namespace.                                         *)
+  let have_user_prefix = match !autocomplete_identifier with
+    | None -> failwith "No autocomplete position was set"
+    | Some (pos, _) -> Pos.length pos > suffix_len in
+  let ctx = autocomplete_context in
+  if (not ctx.is_manually_invoked) && (not have_user_prefix) &&
+    (ctx.is_after_single_colon || ctx.is_after_open_square_bracket || ctx.is_after_quote)
+  then ()
+  else if ctx.is_after_double_right_angle_bracket then
+    (* <<__Override>>AUTO332 *)
+    ()
+  else begin
 
-  let gname_gns = if should_complete_fun completion_type then
-    (* Disgusting hack alert!
-     *
-     * In PHP/Hack, namespaced function lookup falls back into the global
-     * namespace if no function in the current namespace exists. The
-     * typechecker knows everything that exists, and resolves all of this
-     * during naming -- meaning that by the time that we get to typing, not
-     * only has "gname" been fully qualified, but we've lost whatever it
-     * might have looked like originally. This makes it tough to do the full
-     * namespace fallback behavior here -- we'd like to know if whatever
-     * "gname" corresponds to in the source code has a '\' to qualify it, but
-     * since it's already fully qualified here, we can't know.
-     *
-     * Except, we can kinda reverse engineer and figure it out. We have the
-     * positional information, which we can use to figure out how long the
-     * original source code token was, and then figure out what portion of
-     * "gname" that corresponds to, and see if it has a '\'. Since fully
-     * qualifying a name will always prepend, this all works.
-     *)
-    match !Autocomplete.auto_complete_pos with
-      | None -> None
-      | Some p ->
-          let len = (Pos.length p) - suffix_len in
-          let start = String.length gname - len in
-          if start < 0 || String.contains_from gname start '\\'
-          then None else Some (strip_all_ns gname)
-    else None in
-
-  let result_count = ref 0 in
-
-  let on_class name ~seen =
-    (* Skip the names that we know we have analyzed before *)
-    if SSet.mem seen name then None else
-    if not (string_starts_with (strip_ns name) gname) then None else
-    match Typing_lazy_heap.get_class tcopt name with
-    | Some c
-      when should_complete_class completion_type c.Typing_defs.tc_kind ->
-        incr result_count;
-        let s = Utils.strip_ns name in
-        (match !ac_env with
-          | Some _env when completion_type = Some Autocomplete.Acnew ->
-              Some (get_result s (Phase.decl (get_constructor_ty c)))
-          | _ ->
-              let desc = match c.Typing_defs.tc_kind with
-                | Ast.Cabstract -> "abstract class"
-                | Ast.Cnormal -> "class"
-                | Ast.Cinterface -> "interface"
-                | Ast.Ctrait -> "trait"
-                | Ast.Cenum -> "enum"
-              in
-              let ty =
-                Typing_reason.Rwitness c.Typing_defs.tc_pos,
-                Typing_defs.Tapply ((c.Typing_defs.tc_pos, name), [])
-              in
-              Some (get_result_with_desc s (Phase.decl ty) desc))
-    | _ -> None
-  in
-
-  let on_function name ~seen =
-    if SSet.mem seen name then None else
-    if should_complete_fun completion_type then begin
+    let does_fully_qualified_name_match_prefix name =
       let stripped_name = strip_ns name in
-      let matches_gname = string_starts_with stripped_name gname in
-      let matches_gname_gns = match gname_gns with
-        | None -> false
-        | Some s -> string_starts_with stripped_name s in
-      if matches_gname || matches_gname_gns
-      then match Typing_lazy_heap.get_fun tcopt name with
-        | Some fun_ ->
-          incr result_count;
-          let ty =
-            Typing_reason.Rwitness fun_.Typing_defs.ft_pos,
-            Typing_defs.Tfun fun_
+      if delimit_on_namespaces then
+        (* name must match gname, and have no additional namespace slashes, e.g. *)
+        (* name="Str\\co" gname="S" -> false *)
+        (* name="Str\\co" gname="Str\\co" -> true *)
+        string_starts_with stripped_name gname &&
+          not (String.contains_from stripped_name (String.length gname) '\\')
+      else
+        string_starts_with stripped_name gname
+    in
+
+    let string_to_replace_prefix name =
+      let stripped_name = strip_ns name in
+      if delimit_on_namespaces then
+        (* returns the part of 'name' after its rightmost slash *)
+        try
+          let len = String.length stripped_name in
+          let i = (String.rindex stripped_name '\\') + 1 in
+          String.sub stripped_name i (len - i)
+        with _ ->
+          stripped_name
+      else
+        stripped_name
+    in
+
+    let result_count = ref 0 in
+
+    let on_class name ~seen =
+      if SSet.mem seen name then None else
+      if not (does_fully_qualified_name_match_prefix name) then None else
+      let target = Typing_lazy_heap.get_class tcopt name in
+      let target_kind = Option.map target ~f:(fun c -> c.Typing_defs.tc_kind) in
+      if not (should_complete_class completion_type target_kind) then None else
+      Option.map target ~f:(fun c ->
+        incr result_count;
+        if completion_type = Some Acnew then
+          get_partial_result
+            (string_to_replace_prefix name)
+            (Phase.decl (get_constructor_ty c))
+            Constructor_kind
+            (* Only do doc block fallback on constructors if they're consistent. *)
+            (if snd c.Typing_defs.tc_construct then Some c else None)
+        else
+          let kind = match c.Typing_defs.tc_kind with
+            | Ast.Cabstract -> Abstract_class_kind
+            | Ast.Cnormal -> Class_kind
+            | Ast.Cinterface -> Interface_kind
+            | Ast.Ctrait -> Trait_kind
+            | Ast.Cenum -> Enum_kind
           in
-          Some (get_result stripped_name (Phase.decl ty))
-        | _ -> None
-      else None
-    end else None
-  in
+          let ty =
+            Typing_reason.Rwitness c.Typing_defs.tc_pos,
+            Typing_defs.Tapply ((c.Typing_defs.tc_pos, name), []) in
+          get_partial_result (string_to_replace_prefix name) (Phase.decl ty) kind None
+      )
+    in
 
-  (* Try using the names in local content buffer first *)
-  List.iter
-    (List.filter_map (SSet.elements content_classes) (on_class ~seen:SSet.empty))
-      add_res;
-  List.iter
-    (List.filter_map (SSet.elements content_funs) (on_function ~seen:SSet.empty))
-      add_res;
+    let on_function name ~seen =
+      if autocomplete_context.is_xhp_classname then None else
+      if SSet.mem seen name then None else
+      if not (should_complete_fun completion_type) then None else
+      if not (does_fully_qualified_name_match_prefix name) then None else
+      Option.map (Typing_lazy_heap.get_fun tcopt name) ~f:(fun fun_ ->
+        incr result_count;
+        let ty = Typing_reason.Rwitness fun_.Typing_defs.ft_pos, Typing_defs.Tfun fun_ in
+        get_partial_result (string_to_replace_prefix name) (Phase.decl ty) Function_kind None
+      )
+    in
 
-  (* Use search results to look for matches, while excluding names we have
-   * already seen in local content buffer *)
-  let gname_results = search_funs_and_classes gname
-    ~on_class:(on_class ~seen:content_classes)
-    ~on_function:(on_function ~seen:content_funs)
-  in
-  List.iter gname_results add_res;
+    let on_namespace name : autocomplete_result option =
+      (* name will have the form "Str" or "HH\\Lib\\Str" *)
+      (* Our autocomplete will show up in the list as "Str". *)
+      if autocomplete_context.is_xhp_classname then None else
+      if not delimit_on_namespaces then None else
+      if not (does_fully_qualified_name_match_prefix name) then None else
+      Some (Complete {
+        res_pos = Pos.none |> Pos.to_absolute;
+        res_replace_pos = get_replace_pos_exn ~delimit_on_namespaces;
+        res_base_class = None;
+        res_ty = "namespace";
+        res_name = string_to_replace_prefix name;
+        res_kind = Namespace_kind;
+        func_details = None;
+      })
+    in
 
-  (* Compute global namespace fallback results for functions, if applicable *)
-  match gname_gns with
-  | Some gname_gns when gname <> gname_gns ->
-    let gname_gns_results = search_funs_and_classes gname_gns
-      ~on_class:(fun _ -> None)
+    (* Try using the names in local content buffer first *)
+    List.iter
+      (List.filter_map (SSet.elements content_classes) (on_class ~seen:SSet.empty))
+        add_res;
+    List.iter
+      (List.filter_map (SSet.elements content_funs) (on_function ~seen:SSet.empty))
+        add_res;
+
+    (* Add namespaces. The hack server doesn't index namespaces themselves; it  *)
+    (* only stores names of functions and classes in fully qualified form, e.g. *)
+    (*   \\HH\\Lib\\Str\\length                                                 *)
+    (* If the project's .hhconfig has auto_namesspace_map "Str": "HH\Lib\\Str"  *)
+    (* then the hack server will index the function just as                     *)
+    (*   \\Str\\length                                                          *)
+    (* The main index, having only a global list if functions/classes, doesn't  *)
+    (* actually offer any way for us to iterate over namespaces. And changing   *)
+    (* its trie-indexer to do so is kind of ugly. So as a temporary workaround, *)
+    (* to give an okay user-experience at least for the Hack standard library,  *)
+    (* we're just going to list all the possible standard namespaces right here *)
+    (* and see if any of them really exist in the current codebase/hhconfig!    *)
+    (* This will give a good experience only for codebases where users rarely   *)
+    (* define their own namespaces...                                           *)
+    let standard_namespaces = [
+      "C";
+      "Vec";
+      "Dict";
+      "Str";
+      "Keyset";
+      "Math";
+      "PseudoRandom";
+      "SecureRandom";
+      "PHP";
+      "JS";
+    ] in
+    let auto_namespace_map = GlobalOptions.po_auto_namespace_map tcopt in
+    let all_standard_namespaces = List.concat_map standard_namespaces ~f:(
+      fun ns -> [
+         Printf.sprintf "%s" ns;
+         Printf.sprintf "%s\\fb" ns;
+         Printf.sprintf "HH\\Lib\\%s" ns;
+         Printf.sprintf "HH\\Lib\\%s\\fb" ns;
+      ]
+    ) in
+    let all_aliased_namespaces = List.concat_map auto_namespace_map ~f:(
+      fun (alias, fully_qualified) -> [alias; fully_qualified]
+    ) in
+    let all_possible_namespaces =
+      (all_standard_namespaces @ all_aliased_namespaces)
+        |> SSet.of_list
+        |> SSet.elements in
+    List.iter all_possible_namespaces ~f:(fun ns ->
+      let ns_results = search_funs_and_classes (ns ^ "\\") ~limit:(Some 1)
+        ~on_class:(fun _className -> on_namespace ns)
+        ~on_function:(fun _functionName -> on_namespace ns)
+      in
+      List.iter ns_results.With_complete_flag.value add_res
+    );
+
+    (* Use search results to look for matches, while excluding names we have
+     * already seen in local content buffer *)
+    let gname_results = search_funs_and_classes gname ~limit:(Some 100)
+      ~on_class:(on_class ~seen:content_classes)
       ~on_function:(on_function ~seen:content_funs)
     in
-    List.iter gname_gns_results add_res;
-  | _ -> ()
+    autocomplete_is_complete :=
+      !autocomplete_is_complete && gname_results.With_complete_flag.is_complete;
+    List.iter gname_results.With_complete_flag.value add_res;
+  end
 
-let process_fun_call fun_args used_args _env =
-  let is_target target_pos p =
-    let line, char_pos, _ = Pos.info_pos target_pos in
-    let start_line, start_col, end_col = Pos.info_pos p in
-    start_line = line && start_col <= char_pos && char_pos - 1 <= end_col
+(* Here we turn partial_autocomplete_results into complete_autocomplete_results *)
+(* by using typing environment to convert ty information into strings. *)
+let resolve_ty
+    (env: Tast_env.t)
+    (autocomplete_context: legacy_autocomplete_context)
+    (x: partial_autocomplete_result)
+    ~(delimit_on_namespaces: bool)
+  : complete_autocomplete_result =
+  let env, ty = match x.ty with
+    | DeclTy ty -> Tast_env.localize_with_self env ty
+    | LoclTy ty -> env, ty
   in
-  match !Autocomplete.auto_complete_pos with
-    | Some pos when !ac_type = None ->
-        (* This function gets called on the 'way up' of the recursion that
-         * processes args. Therefore, inner arguments will hit this function
-         * first, so we only care when we don't have a result yet. This has to
-         * happen on the way up because autocomplete pos needs to get set
-         * before this is called *)
-        let argument_index = ref (-1) in
-        List.iteri used_args begin fun index arg ->
-          if is_target pos arg then argument_index := index;
-        end;
-        begin try
-          let _, arg_ty = List.nth_exn fun_args !argument_index in
-          ac_type := Some arg_ty
-        with
-          | Failure _ ->
-              (* They're specifying too many args, so we'll accept anything *)
-              ac_type := Some (Typing_reason.Rnone, Typing_defs.Tany)
-          | Invalid_argument _ ->
-              (* Never matched at all*)
-              ()
-        end
-    | _ -> ()
-
-let rec result_matches_expected_ty ty =
-  match !ac_type, !ac_env with
-    | Some goal_type, Some env ->
-        (match goal_type, ty with
-          | (_, Tany), _ | _, (_, Tany) ->
-              (* Everything will just be a match so this is pointless *)
-              false
-          | _, (_, Tfun fun_) ->
-              (* if this is a function, we'll check if the return type
-               * is a good result as well TODO: stop after enough levels
-               * and explore methods on the objects as well *)
-              if Typing_subtype.is_sub_type env ty goal_type then true
-              else result_matches_expected_ty fun_.Typing_defs.ft_ret
-          | _ -> Typing_subtype.is_sub_type env ty goal_type)
-    | _ -> false
-
-
-let result_compare a b =
-  if a.expected_ty = b.expected_ty then
-    String.compare a.res_name b.res_name
-  else if a.expected_ty then -1
-  else 1
-
-let get_results tcopt funs classes =
-  Errors.ignore_ begin fun () ->
-    let completion_type = !Autocomplete.argument_global_type in
-    if completion_type = Some Autocomplete.Acid ||
-       completion_type = Some Autocomplete.Acnew ||
-       completion_type = Some Autocomplete.Actype
-    then compute_complete_global tcopt funs classes;
-    let results = !autocomplete_results in
-    let env = match !ac_env with
-      | Some e -> e
-      | None ->
-        Typing_env.empty tcopt Relative_path.default ~droot:None
-    in
-    let results = List.map results begin fun x ->
-      let env, ty = match x.ty with
-        | DeclTy ty -> Phase.localize_with_self env ty
-        | LoclTy ty -> env, ty
+  let desc_string = match x.kind_ with
+    | Method_kind
+    | Function_kind
+    | Variable_kind
+    | Property_kind
+    | Class_constant_kind
+    | Constructor_kind -> Tast_env.print_ty env ty
+    | Abstract_class_kind -> "abstract class"
+    | Class_kind -> "class"
+    | Interface_kind -> "interface"
+    | Trait_kind -> "trait"
+    | Enum_kind -> "enum"
+    | Namespace_kind -> "namespace"
+    | Keyword_kind -> "keyword"
+    | Literal_kind -> "literal"
+  in
+  let func_details = match ty with
+    | (_, Tfun ft) ->
+      let param_to_record ?(is_variadic=false) param =
+        {
+          param_name     = (match param.fp_name with
+                             | Some n -> n
+                             | None -> "");
+          param_ty       = Tast_env.print_ty env param.fp_type;
+          param_variadic = is_variadic;
+        }
       in
-      let desc_string = match x.desc with
-        | Some s -> s
-        | None -> Typing_print.full_strip_ns env ty
-      in
-      let func_details = match ty with
-        | (_, Tfun ft) ->
-          let param_to_record ?(is_variadic=false) (name, pty) =
-            {
-              param_name     = (match name with
-                                 | Some n -> n
-                                 | None -> "");
-              param_ty       = Typing_print.full_strip_ns env pty;
-              param_variadic = is_variadic;
-            }
-          in
-          Some {
-            return_ty = Typing_print.full_strip_ns env ft.ft_ret;
-            min_arity = arity_min ft.ft_arity;
-            params    = List.map ft.ft_params param_to_record @
-              (match ft.ft_arity with
-                 | Fellipsis _ -> let empty = (None, (Reason.none, Tany)) in
-                                  [param_to_record ~is_variadic:true empty]
-                 | Fvariadic (_, p) -> [param_to_record ~is_variadic:true p]
-                 | Fstandard _ -> [])
-          }
-        | _ -> None
-      in
-      let expected_ty = result_matches_expected_ty ty in
-      let pos = Typing_reason.to_pos (fst ty) in
-      {
-        res_pos      = Pos.to_absolute pos;
-        res_ty       = desc_string;
-        res_name     = x.name;
-        expected_ty  = expected_ty;
-        func_details = func_details;
+      Some {
+        return_ty = Tast_env.print_ty env ft.ft_ret;
+        min_arity = arity_min ft.ft_arity;
+        params    = List.map ft.ft_params param_to_record @
+          (match ft.ft_arity with
+             | Fellipsis _ ->
+                 let empty = TUtils.default_fun_param (Reason.none, Tany) in
+                 [param_to_record ~is_variadic:true empty]
+             | Fvariadic (_, p) -> [param_to_record ~is_variadic:true p]
+             | Fstandard _ -> [])
       }
-    end in
-    List.sort result_compare results
+    | _ -> None
+  in
+  (* XHP class+attribute names are stored internally with a leading colon.    *)
+  (* We'll render them without it if and only if we're in an XHP context.     *)
+  (*   $x = new :class1() -- do strip the colon in front of :class1           *)
+  (*   $x = <:class1      -- don't strip it                                   *)
+  (*   $x->:attr1         -- don't strip the colon in front of :attr1         *)
+  (*   <class1 :attr="a"  -- do strip it                                      *)
+  (* The logic is thorny here because we're relying upon regexes to figure    *)
+  (* out the context. Once we switch autocomplete to FFP, it'll be cleaner.   *)
+  let name = match x.kind_, autocomplete_context with
+    | Property_kind, { AutocompleteTypes.is_instance_member = false; _ } -> lstrip x.name ":"
+    | Abstract_class_kind, { AutocompleteTypes.is_xhp_classname = true; _ }
+    | Class_kind, { AutocompleteTypes.is_xhp_classname = true; _ } -> lstrip x.name ":"
+    | _ -> x.name
+  in
+  {
+    res_pos         = (fst ty) |> Typing_reason.to_pos |> Pos.to_absolute;
+    res_replace_pos = get_replace_pos_exn ~delimit_on_namespaces;
+    res_base_class  = x.base_class;
+    res_ty          = desc_string;
+    res_name        = name;
+    res_kind        = x.kind_;
+    func_details    = func_details;
+  }
+
+let tast_cid_to_nast_cid cid =
+  let nmenv = Tast.nast_mapping_env in
+  Tast.NastMapper.map_class_id_ nmenv cid
+
+let autocomplete_typed_member ~is_static env class_ty cid mid =
+  Tast_env.get_class_ids env class_ty
+  |> List.iter ~f:begin fun cname ->
+    Typing_lazy_heap.get_class (Tast_env.get_tcopt env) cname
+    |> Option.iter ~f:begin fun class_ ->
+      let cid = Option.map cid tast_cid_to_nast_cid in
+      autocomplete_member ~is_static env class_ cid mid
+    end
+  end
+
+let autocomplete_static_member env ((_, ty), cid) mid =
+  autocomplete_typed_member ~is_static:true env ty (Some cid) mid
+
+let visitor = object (self)
+  inherit Tast_visitor.iter as super
+
+  method! on_Id env id =
+    autocomplete_id id env;
+    super#on_Id env id
+
+  method! on_Fun_id env id =
+    autocomplete_id id env;
+    super#on_Fun_id env id
+
+  method! on_New env cid el uel =
+    autocomplete_new (tast_cid_to_nast_cid (snd cid)) env;
+    super#on_New env cid el uel
+
+  method! on_Happly env sid hl =
+    autocomplete_hint sid;
+    super#on_Happly env sid hl
+
+  method! on_Lvar env lid =
+    autocomplete_lvar lid env;
+    super#on_Lvar env lid
+
+  method! on_Class_get env cid mid =
+    autocomplete_static_member env cid mid;
+    super#on_Class_get env cid mid
+
+  method! on_Class_const env cid mid =
+    autocomplete_static_member env cid mid;
+    super#on_Class_const env cid mid
+
+  method! on_Obj_get env obj mid ognf =
+    (match mid with
+    | _, Tast.Id mid ->
+      autocomplete_typed_member ~is_static:false env (Tast.get_type obj) None mid
+    | _ -> ()
+    );
+    super#on_Obj_get env obj mid ognf
+
+  method! on_expr env expr =
+    (match expr with
+    | (_, Tast.Array_get (arr, Some ((pos, _), key))) ->
+      let ty = Tast.get_type arr in
+      let _, ty = Tast_env.expand_type env ty in
+      begin match ty with
+      | _, Typing_defs.Tshape (_, fields) ->
+        (match key with
+        | Tast.Id (_, mid) -> autocomplete_shape_key env fields (pos, mid);
+        | Tast.String mid ->
+          (* autocomplete generally assumes that there's a token ending with the suffix; *)
+          (* This isn't the case for `$shape['a`, unless it's at the end of the file *)
+          let offset = String_utils.substring_index auto_complete_suffix mid in
+          if offset = -1
+          then autocomplete_shape_key env fields (pos, mid)
+          else begin
+            let mid = Str.string_before mid (offset + suffix_len) in
+            let (line, bol, cnum) = Pos.line_beg_offset pos in
+            let pos = Pos.make_from_lnum_bol_cnum
+              ~pos_file:(Pos.filename pos)
+              ~pos_start:(line, bol, cnum)
+              ~pos_end:(line, bol, cnum + offset + suffix_len)
+            in
+            autocomplete_shape_key env fields (pos, mid);
+          end
+        | _ -> ()
+        )
+      | _ -> ()
+      end;
+    | _ -> ()
+    );
+    super#on_expr env expr
+
+  method! on_Xml env sid attrs el =
+    (* In the case where we're autocompleting an open XHP bracket but haven't
+       typed anything beyond that yet:
+
+          $x = <
+
+       we'll end up with the following AST:
+
+          (Xml () () (:AUTO332))
+
+       In order to handle this, we strip off the leading `:` if one exists and
+       use that as the search term. *)
+    let trimmed_sid =
+      snd sid
+      |> Utils.strip_ns
+      |> (fun s -> (fst sid, lstrip s ":"))
+    in
+    autocomplete_id trimmed_sid env;
+    let cid = Nast.CI (sid, []) in
+    Typing_lazy_heap.get_class (Tast_env.get_tcopt env) (snd sid)
+    |> Option.iter ~f:begin fun c ->
+      List.iter attrs ~f:begin function
+        | Tast.Xhp_simple (id, _) ->
+          autocomplete_member ~is_static:false env c (Some cid) id
+        | Tast.Xhp_spread _ -> ()
+      end
+    end;
+    super#on_Xml env sid attrs el
+
+  method! on_class_ env cls =
+    List.iter cls.Tast.c_uses ~f:begin fun hint ->
+      match snd hint with
+      | Aast.Happly (sid, params) ->
+        autocomplete_trait_only sid;
+        List.iter params (self#on_hint env)
+      | _ -> ()
+    end;
+    (* If we don't clear out c_uses we'll end up overwriting the trait
+       completion as soon as we get to on_Happly. *)
+    super#on_class_ env {cls with Tast.c_uses = []}
 end
 
+let auto_complete_suffix_finder = object
+  inherit [_] Tast.reduce
+  method zero = false
+  method plus = (||)
+  method! on_Lvar () (_, id) =
+    matches_auto_complete_suffix (Local_id.get_name id)
+end
+
+let method_contains_cursor = auto_complete_suffix_finder#on_method_ ()
+let fun_contains_cursor = auto_complete_suffix_finder#on_fun_ ()
+
+class local_types = object (self)
+  inherit Tast_visitor.iter as super
+
+  val mutable results = Local_id.Map.empty;
+  val mutable after_cursor = false;
+
+  method get_types tast =
+    self#go tast;
+    results
+
+  method add id ty =
+    (* If we already have a type for this identifier, don't overwrite it with
+       results from after the cursor position. *)
+    if not (Local_id.Map.mem id results && after_cursor) then
+      results <- Local_id.Map.add id ty results
+
+  method! on_fun_ env f =
+    if fun_contains_cursor f then
+      super#on_fun_ env f
+
+  method! on_method_ env m =
+    if method_contains_cursor m then begin
+      if not (Tast_env.is_static env) then
+        self#add Typing_defs.this (Tast_env.get_self_exn env);
+      super#on_method_ env m
+    end
+
+  method! on_expr env e =
+    let (_, ty), e_ = e in
+    match e_ with
+    | Tast.Lvar (_, id) ->
+      if matches_auto_complete_suffix (Local_id.get_name id)
+      then after_cursor <- true
+      else self#add id ty
+    | Tast.Binop (Ast.Eq _, e1, e2) ->
+      (* Process the rvalue before the lvalue, since the lvalue is annotated
+         with its type after the assignment. *)
+      self#on_expr env e2;
+      self#on_expr env e1;
+    | _ -> super#on_expr env e
+
+  method! on_fun_param _ fp =
+    let id = Local_id.get fp.Tast.param_name in
+    let _, ty = fp.Tast.param_annotation in
+    self#add id ty
+end
+
+let compute_complete_local tast =
+  new local_types#get_types tast
+  |> Local_id.Map.iter begin fun x ty ->
+    add_partial_result (Local_id.get_name x) (Phase.locl ty) Variable_kind None
+  end
+
 let reset () =
-  Autocomplete.auto_complete_for_global := "";
-  Autocomplete.argument_global_type := None;
-  Autocomplete.auto_complete_pos := None;
-  Autocomplete.auto_complete_vars := SMap.empty;
+  auto_complete_for_global := "";
+  argument_global_type := None;
+  autocomplete_identifier := None;
   ac_env := None;
-  ac_type := None;
-  autocomplete_results := []
+  autocomplete_results := [];
+  autocomplete_is_complete := true
 
-let attach_hooks () =
-  reset();
-  Autocomplete.auto_complete := true;
-  Typing_hooks.attach_id_hook autocomplete_id;
-  Typing_hooks.attach_smethod_hook autocomplete_smethod;
-  Typing_hooks.attach_cmethod_hook autocomplete_cmethod;
-  Typing_hooks.attach_lvar_hook autocomplete_lvar_typing;
-  Typing_hooks.attach_fun_call_hook process_fun_call;
-  Typing_hooks.attach_new_id_hook autocomplete_new;
-  Naming_hooks.attach_hint_hook autocomplete_hint;
-  Naming_hooks.attach_lvar_hook autocomplete_lvar_naming
-
-let detach_hooks () =
-  reset();
-  Autocomplete.auto_complete := false;
-  Typing_hooks.remove_all_hooks();
-  Naming_hooks.remove_all_hooks()
+let go
+    ~tcopt
+    ~delimit_on_namespaces
+    ~content_funs
+    ~content_classes
+    ~autocomplete_context
+    tast
+  =
+  reset ();
+  visitor#go tast;
+  Errors.ignore_ begin fun () ->
+    let completion_type = !argument_global_type in
+    if completion_type = Some Acid ||
+       completion_type = Some Acnew ||
+       completion_type = Some Actype ||
+       completion_type = Some Actrait_only
+    then compute_complete_global
+      ~tcopt ~delimit_on_namespaces ~autocomplete_context ~content_funs ~content_classes;
+    if completion_type = Some Acprop then compute_complete_local tast;
+    let env = match !ac_env with
+      | Some e -> e
+      | None -> Tast_env.empty tcopt
+    in
+    let filter_results (result: autocomplete_result) : bool =
+      let kind = match result with
+        | Partial res -> res.kind_
+        | Complete res -> res.res_kind
+      in
+      match completion_type, kind with
+      | Some Actrait_only, Trait_kind -> true
+      | Some Actrait_only, _ -> false
+      | _ -> true
+    in
+    let resolve (result: autocomplete_result) : complete_autocomplete_result =
+      match result with
+      | Partial res -> resolve_ty env autocomplete_context res ~delimit_on_namespaces
+      | Complete res -> res
+    in
+    {
+      With_complete_flag.is_complete = !autocomplete_is_complete;
+      value = !autocomplete_results |> List.filter ~f:filter_results |> List.map ~f:resolve;
+    }
+  end

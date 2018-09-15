@@ -98,7 +98,7 @@ struct RefineTmpsRec {
         continue;
       }
 
-      if (inst.is(CheckType, AssertType)) {
+      if (inst.is(CheckType, AssertType, CheckVArray, CheckDArray)) {
         if (!saved_state) saved_state = state;
         auto const dst = inst.dst();
         auto const src = inst.src(0);
@@ -133,10 +133,8 @@ struct RefineTmpsRec {
 
 }
 
-void cloneToBlock(const BlockList& rpoBlocks,
-                  IRUnit& unit,
-                  Block::iterator const first,
-                  Block::iterator const last,
+void cloneToBlock(const BlockList& /*rpoBlocks*/, IRUnit& unit,
+                  Block::iterator const first, Block::iterator const last,
                   Block* const target) {
   StateVector<SSATmp,SSATmp*> rewriteMap(unit, nullptr);
 
@@ -206,7 +204,7 @@ void moveToBlock(Block::iterator const first,
   }
 }
 
-bool retypeDests(IRInstruction* inst, const IRUnit* unit) {
+bool retypeDests(IRInstruction* inst, const IRUnit* /*unit*/) {
   auto changed = false;
   for (auto i = uint32_t{0}; i < inst->numDsts(); ++i) {
     DEBUG_ONLY auto const oldType = inst->dst(i)->type();
@@ -292,8 +290,8 @@ void refineTmps(IRUnit& unit,
 }
 
 SSATmp* insertPhi(IRUnit& unit, Block* blk,
-                  const jit::vector<SSATmp*>& inputs) {
-  assert(blk->numPreds() > 1);
+                  const jit::hash_map<Block*, SSATmp*>& inputs) {
+  assertx(blk->numPreds() > 1);
   auto label = &blk->front();
   if (!label->is(DefLabel)) {
     label = unit.defLabel(1, label->bcctx());
@@ -301,11 +299,12 @@ SSATmp* insertPhi(IRUnit& unit, Block* blk,
   } else {
     for (auto d = label->numDsts(); d--; ) {
       auto result = label->dst(d);
-      uint32_t i = 0;
       blk->forEachPred([&](Block* pred) {
           if (result) {
             auto& jmp = pred->back();
-            if (jmp.src(d) != inputs[i++]) {
+            auto it = inputs.find(pred);
+            assertx(it != inputs.end());
+            if (jmp.src(d) != it->second) {
               result = nullptr;
             }
           }
@@ -315,9 +314,10 @@ SSATmp* insertPhi(IRUnit& unit, Block* blk,
     unit.expandLabel(label, 1);
   }
 
-  uint32_t i = 0;
   blk->forEachPred([&](Block* pred) {
-      unit.expandJmp(&pred->back(), inputs[i++]);
+      auto it = inputs.find(pred);
+      assertx(it != inputs.end());
+      unit.expandJmp(&pred->back(), it->second);
     });
   retypeDests(label, &unit);
   return label->dst(label->numDsts() - 1);
@@ -326,9 +326,8 @@ SSATmp* insertPhi(IRUnit& unit, Block* blk,
 SSATmp* deletePhiDest(IRInstruction* label, unsigned i) {
   assertx(label->is(DefLabel));
   auto dest = label->dst(i);
-  label->block()->forEachSrc(i, [&](IRInstruction* jmp, SSATmp* src) {
-    jmp->deleteSrc(i);
-  });
+  label->block()->forEachSrc(
+    i, [&](IRInstruction* jmp, SSATmp* /*src*/) { jmp->deleteSrc(i); });
   label->deleteDst(i);
   return dest;
 }

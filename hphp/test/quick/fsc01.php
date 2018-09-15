@@ -1,4 +1,4 @@
-<?php
+<?hh
 class B {
   public function f1() {
     var_dump(get_called_class());

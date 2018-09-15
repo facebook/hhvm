@@ -8,5 +8,9 @@ function gen() {
     unset($a['b']);
   }
 }
+
+<<__EntryPoint>>
+function main_227() {
 foreach (gen() as $_) {
+}
 }

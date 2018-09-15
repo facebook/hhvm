@@ -113,7 +113,7 @@ struct ArenaImpl {
   std::vector<char*> m_ptrs;
   PointerList<char> m_externalPtrs;
   bool m_bypassSlabAlloc;
-#ifdef DEBUG
+#ifndef NDEBUG
   size_t m_externalAllocSize;
 #endif
 };

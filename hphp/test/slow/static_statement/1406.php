@@ -8,4 +8,8 @@ function test() {
   $commenced = true;
   unset($args);
 }
+
+<<__EntryPoint>>
+function main_1406() {
 echo test();
+}

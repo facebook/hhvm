@@ -15,14 +15,12 @@
 */
 
 #include "hphp/compiler/expression/dynamic_function_call.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/simple_function_call.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/option.h"
-#include "hphp/compiler/analysis/variable_table.h"
 
 using namespace HPHP;
 
@@ -48,7 +46,7 @@ ExpressionPtr DynamicFunctionCall::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void DynamicFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
+void DynamicFunctionCall::analyzeProgram(AnalysisResultConstRawPtr ar) {
   FunctionCall::analyzeProgram(ar);
   if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
     if (hasStaticClass()) {
@@ -58,11 +56,6 @@ void DynamicFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
       m_params->markParams();
     }
   }
-}
-
-ExpressionPtr DynamicFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
-  if (ExpressionPtr rep = FunctionCall::preOptimize(ar)) return rep;
-  return ExpressionPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -37,11 +37,11 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct SocketData : FileData {
-  SocketData() { }
-  SocketData(int port, int type);
+  explicit SocketData(bool nonblocking) : FileData(nonblocking) { }
+  SocketData(int port, int type, bool nonblocking);
 
-  virtual bool closeImpl();
-  ~SocketData();
+  bool closeImpl() override;
+  ~SocketData() override;
 
  private:
   friend struct Socket;
@@ -61,10 +61,7 @@ struct SocketData : FileData {
 struct Socket : File {
   DECLARE_RESOURCE_ALLOCATION(Socket);
 
-  Socket();
-  Socket(int sockfd, int type, const char *address = nullptr, int port = 0,
-         double timeout = 0, const StaticString& streamType = empty_string_ref);
-  virtual ~Socket();
+  ~Socket() override;
 
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
@@ -94,14 +91,18 @@ struct Socket : File {
   std::string getAddress() const { return m_data->m_address; }
   int         getPort() const    { return m_data->m_port; }
 
-  explicit Socket(std::shared_ptr<SocketData> data);
   std::shared_ptr<SocketData> getData() const {
     return std::static_pointer_cast<SocketData>(File::getData());
   }
+
 protected:
   bool waitForData();
   bool timedOut() const { return m_data->m_timedOut; }
 
+  explicit Socket(bool nonblocking = true);
+  Socket(int sockfd, int type, const char *address = nullptr, int port = 0,
+         double timeout = 0, const StaticString& streamType = empty_string_ref,
+         bool nonblocking = true);
   Socket(std::shared_ptr<SocketData> data,
          int sockfd,
          int type,
@@ -109,6 +110,7 @@ protected:
          int port = 0,
          double timeout = 0,
          const StaticString& streamType = empty_string_ref);
+  explicit Socket(std::shared_ptr<SocketData> data);
 
   // make private?
   SocketData* getSocketData() { return m_data; }
@@ -118,6 +120,43 @@ private:
   void inferStreamType();
   SocketData* m_data;
   static __thread int s_lastErrno;
+};
+
+// This class provides exactly the same functionality as Socket but reports as a
+// class/resource of 'Socket' instead of 'stream'.
+struct ConcreteSocket final : Socket {
+  CLASSNAME_IS("Socket");
+  RESOURCENAME_IS("Socket");
+
+  explicit ConcreteSocket(bool nonblocking = true)
+    : Socket(nonblocking)
+  {}
+  ConcreteSocket(int sockfd, int type, const char *address = nullptr,
+                 int port = 0, double timeout = 0,
+                 const StaticString& streamType = empty_string_ref,
+                 bool nonblocking = true)
+    : Socket(sockfd, type, address, port, timeout, streamType, nonblocking)
+  {}
+  explicit ConcreteSocket(std::shared_ptr<SocketData> data) : Socket(data) { }
+
+  // overriding ResourceData
+  const String& o_getClassNameHook() const override { return classnameof(); }
+  const String& o_getResourceName() const override { return resourcenameof(); }
+};
+
+// This class provides exactly the same functionality as ConcreteSocket but
+// reports the default behavior for File.
+struct StreamSocket final : Socket {
+  explicit StreamSocket(bool nonblocking = true)
+    : Socket(nonblocking)
+  {}
+  StreamSocket(int sockfd, int type, const char *address = nullptr,
+                 int port = 0, double timeout = 0,
+                 const StaticString& streamType = empty_string_ref,
+                 bool nonblocking = true)
+    : Socket(sockfd, type, address, port, timeout, streamType, nonblocking)
+  {}
+  explicit StreamSocket(std::shared_ptr<SocketData> data) : Socket(data) { }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

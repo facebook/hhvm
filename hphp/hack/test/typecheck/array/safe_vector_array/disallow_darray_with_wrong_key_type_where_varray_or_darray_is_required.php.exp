@@ -1,0 +1,6 @@
+File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 4, characters 10-26:
+Invalid index type for this darray (Typing[4110])
+File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 4, characters 17-20:
+This is an array key (int/string) because only array keys can be used to index into a Map, dict, darray, Set, or keyset
+File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required.php", line 4, characters 17-20:
+It is incompatible with a bool

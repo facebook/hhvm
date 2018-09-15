@@ -23,6 +23,11 @@ class MySoapClient extends SoapClient {
   }
 }
 
+class BodyType extends stdClass {}
+
+
+<<__EntryPoint>>
+function main_data_type_check() {
 $client = new MySoapClient(
   __DIR__ . '/data-type-check.wdsl',
   array(
@@ -34,9 +39,8 @@ $client = new MySoapClient(
   )
 );
 
-class BodyType extends stdClass {}
-
 $recipientType = new BodyType();
 $recipientType->_ = '1234567890';
 $recipientType->uid = 4119859;
 $client->test($recipientType);
+}

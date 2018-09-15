@@ -29,4 +29,8 @@ function main() {
     var_dump($base > $test);
   }
 }
+
+<<__EntryPoint>>
+function main_compare() {
 main();
+}

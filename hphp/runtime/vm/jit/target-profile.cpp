@@ -28,7 +28,7 @@ namespace detail {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void addTargetProfileInfo(const rds::Profile& key,
+void addTargetProfileInfo(const rds::Profile<void>& key,
                           const std::string& dbgInfo) {
   if (auto profD = profData()) {
     ProfData::TargetProfileInfo info{key, dbgInfo};

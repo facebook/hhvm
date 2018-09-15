@@ -131,8 +131,8 @@ void cgCmpBool(IRLS& env, const IRInstruction* inst) {
   auto const extended0 = v.makeReg();
   auto const extended1 = v.makeReg();
 
-  assert(inst->src(0)->type() <= TBool);
-  assert(inst->src(1)->type() <= TBool);
+  assertx(inst->src(0)->type() <= TBool);
+  assertx(inst->src(1)->type() <= TBool);
 
   v << movzbq{s0, extended0};
   v << movzbq{s1, extended1};
@@ -149,8 +149,8 @@ void cgCmpInt(IRLS& env, const IRInstruction* inst) {
   auto const tmp1 = v.makeReg();
   auto const tmp2 = v.makeReg();
 
-  assert(inst->src(0)->type() <= TInt);
-  assert(inst->src(1)->type() <= TInt);
+  assertx(inst->src(0)->type() <= TInt);
+  assertx(inst->src(1)->type() <= TInt);
 
   v << cmpq{s1, s0, sf};
   v << setcc{CC_G, sf, tmp1};
@@ -159,26 +159,14 @@ void cgCmpInt(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgCheckRange(IRLS& env, const IRInstruction* inst) {
-  auto valTmp = inst->src(0);
   auto dst = dstLoc(env, inst, 0).reg();
   auto val = srcLoc(env, inst, 0).reg();
   auto limit = srcLoc(env, inst, 1).reg();
   auto& v = vmain(env);
 
-  ConditionCode cc;
   auto const sf = v.makeReg();
-
-  if (valTmp->hasConstVal()) {
-    // Try to put the constant in a position that can get imm-folded.  A
-    // suffiently smart imm-folder could handle this for us.  Note that this is
-    // an arch-agnostic API bleed.
-    v << cmpq{val, limit, sf};
-    cc = CC_A;
-  } else {
-    v << cmpq{limit, val, sf};
-    cc = CC_B;
-  }
-  v << setcc{cc, sf, dst};
+  v << cmpq{limit, val, sf};
+  v << setcc{CC_B, sf, dst};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -245,8 +233,8 @@ void cgCmpDbl(IRLS& env, const IRInstruction* inst) {
   auto const tmp1 = v.makeReg();
   auto const tmp2 = v.makeReg();
 
-  assert(inst->src(0)->type() <= TDbl);
-  assert(inst->src(1)->type() <= TDbl);
+  assertx(inst->src(0)->type() <= TDbl);
+  assertx(inst->src(1)->type() <= TDbl);
 
   v << ucomisd{s0, s1, sf};
   v << cmovq{CC_A, sf, v.cns(-1), v.cns(1), tmp1};
@@ -291,6 +279,16 @@ IMPL_OPCODE_CALL(NeqArr);
 IMPL_OPCODE_CALL(SameArr);
 IMPL_OPCODE_CALL(NSameArr);
 IMPL_OPCODE_CALL(CmpArr);
+
+IMPL_OPCODE_CALL(GtShape);
+IMPL_OPCODE_CALL(GteShape);
+IMPL_OPCODE_CALL(LtShape);
+IMPL_OPCODE_CALL(LteShape);
+IMPL_OPCODE_CALL(EqShape);
+IMPL_OPCODE_CALL(NeqShape);
+IMPL_OPCODE_CALL(SameShape);
+IMPL_OPCODE_CALL(NSameShape);
+IMPL_OPCODE_CALL(CmpShape);
 
 IMPL_OPCODE_CALL(GtVec);
 IMPL_OPCODE_CALL(GteVec);
@@ -359,7 +357,16 @@ void cgDbgAssertARFunc(IRLS& env, const IRInstruction* inst) {
   auto const sf = v.makeReg();
   v << cmpqm{func, sp[off + AROFF(m_func)], sf};
 
-  ifThen(v, CC_NE, sf, [&](Vout& v) { v << ud2{}; });
+  ifThen(v, CC_NE, sf, [&](Vout& v) { v << trap{TRAP_REASON}; });
+}
+
+void cgDbgAssertFunc(IRLS& env, const IRInstruction* inst) {
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const func = srcLoc(env, inst, 1).reg(0);
+  auto& v = vmain(env);
+  auto const sf = v.makeReg();
+  v << cmpqm{func, fp[AROFF(m_func)], sf};
+  ifThen(v, CC_NE, sf, [&](Vout& v) { v << trap{TRAP_REASON}; });
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -367,6 +374,12 @@ void cgDbgAssertARFunc(IRLS& env, const IRInstruction* inst) {
 void cgEqStrPtr(IRLS& env, const IRInstruction* inst) {
   assertx(inst->src(0)->type() <= TStr);
   assertx(inst->src(1)->type() <= TStr);
+  implCmp(env, inst, CC_E);
+}
+
+void cgEqArrayDataPtr(IRLS& env, const IRInstruction* inst) {
+  assertx(inst->src(0)->type() <= TArrLike);
+  assertx(inst->src(1)->type() <= TArrLike);
   implCmp(env, inst, CC_E);
 }
 

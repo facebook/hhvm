@@ -5,7 +5,11 @@ function nums() {
  $i < 3;
  $i++) yield $i;
 }
- foreach (nums() as $num) {
+
+
+ <<__EntryPoint>>
+function main_2147() {
+foreach (nums() as $num) {
  var_dump($num);
 }
-
+}

@@ -18,7 +18,11 @@ function f($obj) {
   }
   yield $res;
 }
+
+<<__EntryPoint>>
+function main_2069() {
 $x = new X;
 foreach (f($x) as $i) {
  var_dump($i);
  }
+}

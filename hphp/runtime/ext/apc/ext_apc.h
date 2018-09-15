@@ -48,6 +48,7 @@ struct apcExtension final : Extension {
   static int PurgeRate;
   static bool AllowObj;
   static int TTLLimit;
+  static int64_t TTLMaxFinite;
   static std::vector<std::string> HotPrefix;
   static int HotSize;
   static double HotLoadFactor;
@@ -62,6 +63,7 @@ struct apcExtension final : Extension {
   static bool FileStorageKeepFileLinked;
   static std::vector<std::string> NoTTLPrefix;
   static bool UseUncounted;
+  static bool ShareUncounted;
   static bool Stat;
   static bool EnableCLI;
 
@@ -176,13 +178,19 @@ static_assert(sizeof(int64_t) == sizeof(long long),
 ///////////////////////////////////////////////////////////////////////////////
 // apc serialization
 
-String apc_serialize(const Variant& value);
+String apc_serialize(const_variant_ref value);
+inline String apc_serialize(const Variant& var) {
+  return apc_serialize(const_variant_ref{var});
+}
 Variant apc_unserialize(const char* data, int len);
 String apc_reserialize(const String& str);
 
 ///////////////////////////////////////////////////////////////////////////////
 // debugging support
 bool apc_dump(const char *filename, bool keyOnly, bool metaDump);
+bool apc_dump_prefix(const char *filename,
+                     const std::string &prefix,
+                     uint32_t count);
 size_t get_const_map_size();
 bool apc_get_random_entries(std::ostream &out, uint32_t count);
 

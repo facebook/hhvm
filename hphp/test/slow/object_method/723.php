@@ -13,6 +13,10 @@ class A {
  print 'B';
 }
 }
- $obj = new A();
+
+ <<__EntryPoint>>
+function main_723() {
+$obj = new A();
  $obj = new B();
  $obj->foo();
+}

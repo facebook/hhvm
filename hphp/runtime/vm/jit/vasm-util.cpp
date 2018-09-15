@@ -78,9 +78,8 @@ void forwardJmp(Vunit& unit, jit::flat_set<size_t>& catch_blocks,
     for (unsigned i = 0; i < forwardedRegs.size(); ++i) {
       regs[i] = unit.makeReg();
     }
-    auto newTuple = unit.makeTuple(regs);
-    middle.code.emplace_back(phidef{newTuple}, irctx);
-    middle.code.emplace_back(phijmp{destLabel, newTuple}, irctx);
+    middle.code.emplace_back(phidef{unit.makeTuple(regs)}, irctx);
+    middle.code.emplace_back(phijmp{destLabel, unit.makeTuple(regs)}, irctx);
     return;
   } else if (headInst.op == Vinstr::landingpad) {
     // If the dest started with a landingpad, copy it to middle. The dest's
@@ -116,8 +115,12 @@ bool splitCriticalEdges(Vunit& unit) {
     if (succlist.size() <= 1) continue;
     for (auto& succ : succlist) {
       if (preds[succ] <= 1) continue;
-      // split the critical edge.
-      auto middle = unit.makeBlock(unit.blocks[succ].area_idx);
+      // Split the critical edge. Use the colder of the predecessor and
+      // successor to select the area of the new block.
+      auto middle = unit.makeBlock(
+        std::max(unit.blocks[pred].area_idx, unit.blocks[succ].area_idx),
+        unit.blocks[succ].weight
+      );
       forwardJmp(unit, catch_blocks, middle, succ);
       succ = middle;
       changed = true;
@@ -134,17 +137,26 @@ bool splitCriticalEdges(Vunit& unit) {
   return changed;
 }
 
-Vreg make_const(Vunit& unit, Type type) {
+Vloc make_const(Vunit& unit, Type type) {
   if (type.subtypeOfAny(TUninit, TInitNull)) {
     // Return undefined value.
-    return unit.makeConst(Vconst::Quad);
+    return Vloc{unit.makeConst(Vconst::Quad)};
   }
-  if (type <= TNullptr) return unit.makeConst(0);
+  if (type <= TNullptr) return Vloc{unit.makeConst(0)};
 
   assertx(type.hasConstVal());
-  if (type <= TBool) return unit.makeConst(type.boolVal());
-  if (type <= TDbl) return unit.makeConst(type.dblVal());
-  return unit.makeConst(type.rawVal());
+  if (type <= TBool) return Vloc{unit.makeConst(type.boolVal())};
+  if (type <= TDbl) return Vloc{unit.makeConst(type.dblVal())};
+  if (wide_tv_val && type <= TLvalToGen) {
+    auto const rval = tv_rval{type.ptrVal()};
+    auto const typeReg = unit.makeConst(&rval.type());
+    auto const valReg = unit.makeConst(&rval.val());
+    return Vloc{
+      tv_lval::type_idx == 0 ? typeReg : valReg,
+      tv_lval::val_idx == 1 ? valReg : typeReg,
+    };
+  }
+  return Vloc{unit.makeConst(type.rawVal())};
 }
 
 //////////////////////////////////////////////////////////////////////

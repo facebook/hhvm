@@ -1,11 +1,11 @@
-<?php
+<?hh
 
 function &foo(&$x) {
   return $x;
 }
 
 $x = 34;
-$y =& foo($x);
+$y =& foo(&$x);
 $y++;
 
 var_dump($x);

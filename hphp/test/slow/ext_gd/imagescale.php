@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_imagescale() {
 $im = imagecreate(256, 256);
 $tmpfile = tempnam('/tmp', 'testimagescale.png');
 imagejpeg($im, $tmpfile);
@@ -40,3 +43,4 @@ list($width, $height, $type, $attr) = getimagesize($tmpfile);
 var_dump('width : ' . $width . ' | height : ' . $height);
 
 unlink($tmpfile);
+}

@@ -48,6 +48,7 @@ public:
 
   virtual void start() = 0;
   virtual void stop() = 0;
+  virtual size_t getMaxThreadCount() = 0;
   virtual int getActiveWorker() = 0;
   virtual int getQueuedJobs() = 0;
 
@@ -74,10 +75,11 @@ public:
   SatelliteServerInfo(const IniSetting::Map& ini, const Hdf& hdf,
                       const std::string& ini_key = "");
 
-  const std::string &getName() const { return m_name;}
-  SatelliteServer::Type getType() const { return m_type;}
-  int getPort() const { return m_port;}
-  int getThreadCount() const { return m_threadCount;}
+  const std::string &getName() const { return m_name; }
+  SatelliteServer::Type getType() const { return m_type; }
+  int getPort() const { return m_port; }
+  std::string getServerIP() const { return m_serverIP; }
+  int getThreadCount() const { return m_threadCount; }
 
   // for all libevent servers
   std::chrono::seconds getTimeoutSeconds() const { return m_timeoutSeconds;}
@@ -103,6 +105,7 @@ protected:
   int m_threadCount = 5;
   int m_maxRequest = 500;
   int m_maxDuration = 120;
+  std::string m_serverIP;
   std::chrono::seconds m_timeoutSeconds;
   std::set<std::string> m_urls; // url regex patterns
   std::string m_reqInitFunc;

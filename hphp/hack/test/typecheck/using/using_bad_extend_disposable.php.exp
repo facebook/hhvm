@@ -1,0 +1,4 @@
+File "using_bad_extend_disposable.php", line 15, characters 7-9:
+A disposable type may not extend a class or use a trait that is not disposable (Typing[4194])
+File "using_bad_extend_disposable.php", line 17, characters 25-27:
+A disposable type may not extend a class or use a trait that is not disposable (Typing[4194])

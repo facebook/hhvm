@@ -36,11 +36,11 @@ folly::Optional<Type> usual_arith_conversions(Type t1, Type t2) {
    * value here (rather than bundling everything into the
    * interpreter).
    */
-  if (t1.subtypeOf(TInt) && t2.subtypeOf(TInt)) return TInt;
-  if (t1.subtypeOf(TInt) && t2.subtypeOf(TDbl)) return TDbl;
-  if (t1.subtypeOf(TDbl) && t2.subtypeOf(TInt)) return TDbl;
-  if (t1.subtypeOf(TDbl) && t2.subtypeOf(TDbl)) return TDbl;
-  if (t1.subtypeOf(TNum) && t2.subtypeOf(TNum)) return TNum;
+  if (t1.subtypeOf(BInt) && t2.subtypeOf(BInt)) return TInt;
+  if (t1.subtypeOf(BInt) && t2.subtypeOf(BDbl)) return TDbl;
+  if (t1.subtypeOf(BDbl) && t2.subtypeOf(BInt)) return TDbl;
+  if (t1.subtypeOf(BDbl) && t2.subtypeOf(BDbl)) return TDbl;
+  if (t1.subtypeOf(BNum) && t2.subtypeOf(BNum)) return TNum;
   return folly::none;
 }
 
@@ -52,22 +52,11 @@ folly::Optional<Type> eval_const(Type t1, Type t2, Fun fun) {
   return folly::none;
 }
 
-// As eval_const, but don't divide/mod by zero at compile time.
-template<class Fun>
-folly::Optional<Type> eval_const_divmod(Type t1, Type t2, Fun fun) {
-  auto const v1 = tv(t1);
-  auto const v2 = tv(t2);
-  if (v1 && v2 && cellToInt(*v2) != 0 && cellToDouble(*v2) != 0.0) {
-    return eval_cell([&] { return fun(*v1, *v2); });
-  }
-  return folly::none;
-}
-
 template<class Fun>
 Type bitwise_impl(Type t1, Type t2, Fun op) {
   if (auto t = eval_const(t1, t2, op))          return *t;
-  if (t1.subtypeOf(TStr) && t2.subtypeOf(TStr)) return TStr;
-  if (!t1.couldBe(TStr) || !t2.couldBe(TStr))   return TInt;
+  if (t1.subtypeOf(BStr) && t2.subtypeOf(BStr)) return TStr;
+  if (!t1.couldBe(BStr) || !t2.couldBe(BStr))   return TInt;
   return TInitCell;
 }
 
@@ -85,7 +74,7 @@ Type shift_impl(Type t1, Type t2, Fun op) {
 
 Type typeToInt(Type ty) {
   if (auto const v = tv(ty)) return ival(cellToInt(*v));
-  if (ty.subtypeOf(TNull))   return ival(0);
+  if (ty.subtypeOf(BNull))   return ival(0);
   return TInt;
 }
 
@@ -94,21 +83,21 @@ Type typeToInt(Type ty) {
 Type typeAdd(Type t1, Type t2) {
   if (auto t = eval_const(t1, t2, cellAdd))           return *t;
   if (auto t = usual_arith_conversions(t1, t2))       return *t;
-  if (t1.subtypeOf(TArr) && t2.subtypeOf(TArr))       return TArr;
-  if (t1.subtypeOf(TVec) && t2.subtypeOf(TVec))       return TVec;
-  if (t1.subtypeOf(TDict) && t2.subtypeOf(TDict))     return TDict;
-  if (t1.subtypeOf(TKeyset) && t2.subtypeOf(TKeyset)) return TKeyset;
+  if (t1.subtypeOf(BArr) && t2.subtypeOf(BArr))       return TArr;
+  if (t1.subtypeOf(BVec) && t2.subtypeOf(BVec))       return TVec;
+  if (t1.subtypeOf(BDict) && t2.subtypeOf(BDict))     return TDict;
+  if (t1.subtypeOf(BKeyset) && t2.subtypeOf(BKeyset)) return TKeyset;
   return TInitCell;
 }
 
 Type typeAddO(Type t1, Type t2) {
   if (auto t = eval_const(t1, t2, cellAddO))          return *t;
-  if (t1.subtypeOf(TInt) && t2.subtypeOf(TInt))       return TNum;
+  if (t1.subtypeOf(BInt) && t2.subtypeOf(BInt))       return TNum;
   if (auto t = usual_arith_conversions(t1, t2))       return *t;
-  if (t1.subtypeOf(TArr) && t2.subtypeOf(TArr))       return TArr;
-  if (t1.subtypeOf(TVec) && t2.subtypeOf(TVec))       return TVec;
-  if (t1.subtypeOf(TDict) && t2.subtypeOf(TDict))     return TDict;
-  if (t1.subtypeOf(TKeyset) && t2.subtypeOf(TKeyset)) return TKeyset;
+  if (t1.subtypeOf(BArr) && t2.subtypeOf(BArr))       return TArr;
+  if (t1.subtypeOf(BVec) && t2.subtypeOf(BVec))       return TVec;
+  if (t1.subtypeOf(BDict) && t2.subtypeOf(BDict))     return TDict;
+  if (t1.subtypeOf(BKeyset) && t2.subtypeOf(BKeyset)) return TKeyset;
   return TInitCell;
 }
 
@@ -122,7 +111,7 @@ Type typeSubMulImpl(Type t1, Type t2, CellOp op) {
 template <class CellOp>
 Type typeSubMulImplO(Type t1, Type t2, CellOp op) {
   if (auto t = eval_const(t1, t2, op))          return *t;
-  if (t1.subtypeOf(TInt) && t2.subtypeOf(TInt)) return TNum;
+  if (t1.subtypeOf(BInt) && t2.subtypeOf(BInt)) return TNum;
   if (auto t = usual_arith_conversions(t1, t2)) return *t;
   return TInitPrim;
 }
@@ -134,12 +123,12 @@ Type typeSubO(Type t1, Type t2) { return typeSubMulImplO(t1, t2, cellSubO); }
 Type typeMulO(Type t1, Type t2) { return typeSubMulImplO(t1, t2, cellMulO); }
 
 Type typeDiv(Type t1, Type t2) {
-  if (auto t = eval_const_divmod(t1, t2, cellDiv)) return *t;
+  if (auto t = eval_const(t1, t2, cellDiv)) return *t;
   return TInitPrim;
 }
 
 Type typeMod(Type t1, Type t2) {
-  if (auto t = eval_const_divmod(t1, t2, cellMod)) return *t;
+  if (auto t = eval_const(t1, t2, cellMod)) return *t;
   return TInitPrim;
 }
 
@@ -165,15 +154,15 @@ Type typeIncDec(IncDecOp op, Type t) {
 
   if (!val) {
     // Doubles always stay doubles
-    if (t.subtypeOf(TDbl)) return TDbl;
+    if (t.subtypeOf(BDbl)) return TDbl;
 
     // Ints stay ints unless they can overflow to doubles
-    if (t.subtypeOf(TInt)) {
+    if (t.subtypeOf(BInt)) {
       return overflowToDbl ? TNum : TInt;
     }
 
     // Null goes to 1 on ++, stays null on --. Uninit is folded to init.
-    if (t.subtypeOf(TNull)) {
+    if (t.subtypeOf(BNull)) {
       return isInc(op) ? ival(1) : TInitNull;
     }
 
@@ -192,9 +181,9 @@ Type typeIncDec(IncDecOp op, Type t) {
   auto resultTy = eval_cell([inc,overflowToDbl,val] {
     auto c = *val;
     if (inc) {
-      (overflowToDbl ? cellIncO : cellInc)(c);
+      (overflowToDbl ? cellIncO : cellInc)(&c);
     } else {
-      (overflowToDbl ? cellDecO : cellDec)(c);
+      (overflowToDbl ? cellDecO : cellDec)(&c);
     }
     return c;
   });
@@ -202,7 +191,7 @@ Type typeIncDec(IncDecOp op, Type t) {
 
   // We may have inferred a TSStr or TSArr with a value here, but at
   // runtime it will not be static.
-  resultTy = loosen_statics(*resultTy);
+  resultTy = loosen_staticness(*resultTy);
   return *resultTy;
 }
 
@@ -234,17 +223,17 @@ Type typeSetOp(SetOpOp op, Type lhs, Type rhs) {
 //////////////////////////////////////////////////////////////////////
 
 Type typeSame(const Type& a, const Type& b) {
-  auto const nsa = loosen_statics(a);
-  auto const nsb = loosen_statics(b);
+  auto const nsa = loosen_dvarrayness(a);
+  auto const nsb = loosen_dvarrayness(b);
   if (!nsa.couldBe(nsb)) return TFalse;
   return TBool;
 }
 
 Type typeNSame(const Type& a, const Type& b) {
   auto const ty = typeSame(a, b);
-  assert(ty.subtypeOf(TBool));
-  return ty.subtypeOf(TFalse) ? TTrue :
-         ty.subtypeOf(TTrue) ? TFalse :
+  assert(ty.subtypeOf(BBool));
+  return ty.subtypeOf(BFalse) ? TTrue :
+         ty.subtypeOf(BTrue) ? TFalse :
          TBool;
 }
 

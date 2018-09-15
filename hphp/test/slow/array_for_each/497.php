@@ -2,7 +2,7 @@
 
 function k3() {
   $arr = array(0,1,2,3,4);
-  reset($arr);
+  reset(&$arr);
   $b = true;
   foreach ($arr as $v) {
     if ($b) {
@@ -11,7 +11,11 @@ function k3() {
     }
     echo "val=$v\n";
   }
-  var_dump(current($arr));
-  var_dump(current($arr2));
+  var_dump(current(&$arr));
+  var_dump(current(&$arr2));
 }
+
+<<__EntryPoint>>
+function main_497() {
 k3();
+}

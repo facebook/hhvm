@@ -1,2 +1,8 @@
-File "nullsafe-prop-4.php", line 8, characters 3-8:
-?-> syntax is not supported for lvalues (Parsing[1002])
+File "nullsafe-prop-4.php", line 8, characters 3-7:
+?-> operator is not allowed in write context (Parsing[1002])
+File "nullsafe-prop-4.php", line 8, characters 3-10:
+Typing error (Typing[4110])
+  File "nullsafe-prop-4.php", line 8, characters 3-10:
+  This is a num (int/float) because this is used in an arithmetic operation
+  File "nullsafe-prop-4.php", line 8, characters 3-8:
+  It is incompatible with a nullable type (use of ?-> operator)

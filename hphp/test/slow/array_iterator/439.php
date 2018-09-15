@@ -12,22 +12,22 @@ class MyIterator implements Iterator{
   public function rewind() {
     echo "rewinding
 ";
-    reset($this->var);
+    reset(&$this->var);
   }
   public function current() {
-    $var = current($this->var);
+    $var = current(&$this->var);
     echo "current: $var
 ";
     return $var;
   }
   public function key() {
-    $var = key($this->var);
+    $var = key(&$this->var);
     echo "key: $var
 ";
     return $var;
   }
   public function next() {
-    $var = next($this->var);
+    $var = next(&$this->var);
     echo "next: $var
 ";
     return $var;
@@ -39,6 +39,19 @@ class MyIterator implements Iterator{
     return $var;
   }
 }
+function getIter() {
+  $values = array(1,2,3);
+  $it = new MyIterator($values);
+  return $it;
+}
+class MyIteratorAggregate implements IteratorAggregate {
+  public function getIterator() {
+    return getIter();
+  }
+}
+
+<<__EntryPoint>>
+function main_439() {
 $values = array(1,2,3);
 $it = new MyIterator($values);
 foreach ($it as $a => $b) {
@@ -50,22 +63,13 @@ foreach ($$itp as $a => $b) {
   print "$a: $b
 ";
 }
-function getIter() {
-  $values = array(1,2,3);
-  $it = new MyIterator($values);
-  return $it;
-}
 foreach (getIter() as $a => $b) {
   print "$a: $b
 ";
-}
-class MyIteratorAggregate implements IteratorAggregate {
-  public function getIterator() {
-    return getIter();
-  }
 }
 $obj = new MyIteratorAggregate();
 foreach ($obj as $a => $b) {
   print "$a: $b
 ";
+}
 }

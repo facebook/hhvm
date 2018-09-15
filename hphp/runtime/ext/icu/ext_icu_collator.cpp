@@ -257,13 +257,13 @@ static bool HHVM_METHOD(Collator, sortWithSortKeys, VRefParam arr) {
                         strval.getBuffer(), strval.length(),
                         (uint8_t*)(sortKeys + sortKeysOffset),
                         sortKeysLength - sortKeysOffset);
-      assert(sortkey_len <= (sortKeysLength - sortKeysOffset));
+      assertx(sortkey_len <= (sortKeysLength - sortKeysOffset));
     }
 
     // Check for index buffer overflow
     if ((sortIndexPos + 1) > sortIndexLength) {
       sortIndexLength += DEF_SORT_KEYS_INDX_BUF_INCREMENT;
-      sortIndex = (collator_sort_key_index_t*)req::realloc(
+      sortIndex = (collator_sort_key_index_t*)req::realloc_untyped(
         sortIndex,
         sortIndexLength * sizeof(collator_sort_key_index_t)
       );

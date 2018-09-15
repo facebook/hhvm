@@ -1,0 +1,2 @@
+File "list_non_static.php", line 8, characters 40-55:
+Invalid expression in constant initializer (Parsing[1002])

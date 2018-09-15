@@ -31,6 +31,19 @@ namespace HPHP {
 /**
  * An async generator wait handle represents one step of asynchronous execution
  * between two yield statements of an async generator.
+ *
+ * Unfinished AsyncGeneratorWaitHandles are always referenced by m_waitHandle
+ * property of AsyncGenerators. In addition, semi-implicit references may be
+ * implied based on the current state:
+ *
+ * SUCCEEDED, FAILED: no reference
+ * BLOCKED: referenced by child via its AsioBlockableChain
+ * READY: referenced once per each entry in AsioContext runnable queues
+ * RUNNING: referenced by being executed
+ *
+ * When transitioning between states, incref/decref pairs are simply avoided.
+ * The initial incref happens at the construction time and corresponding decref
+ * at transition to the SUCCEEDED or FAILED state.
  */
 struct AsyncGenerator;
 
@@ -46,12 +59,16 @@ struct c_AsyncGeneratorWaitHandle final : c_ResumableWaitHandle {
     return offsetof(c_AsyncGeneratorWaitHandle, m_blockable);
   }
 
-  static req::ptr<c_AsyncGeneratorWaitHandle>
-  Create(AsyncGenerator* gen, c_WaitableWaitHandle* child);
+  static c_AsyncGeneratorWaitHandle* Create(
+    const ActRec* fp,
+    jit::TCA resumeAddr,
+    Offset resumeOffset,
+    c_WaitableWaitHandle* child
+  ); // nothrow
 
   void resume();
   void onUnblocked();
-  void await(c_WaitableWaitHandle* child);
+  void await(req::ptr<c_WaitableWaitHandle>&& child);
   void ret(Cell& result);
   void fail(ObjectData* exception);
   void failCpp();
@@ -71,10 +88,17 @@ struct c_AsyncGeneratorWaitHandle final : c_ResumableWaitHandle {
   // valid if STATE_READY || STATE_BLOCKED
   c_WaitableWaitHandle* m_child;
   AsioBlockable m_blockable;
+
+  TYPE_SCAN_CUSTOM_FIELD(m_child) {
+    auto state = getState();
+    if (state == STATE_BLOCKED || state == STATE_READY) {
+      scanner.scan(m_child);
+    }
+  }
 };
 
-inline c_AsyncGeneratorWaitHandle* c_WaitHandle::asAsyncGenerator() {
-  assert(getKind() == Kind::AsyncGenerator);
+inline c_AsyncGeneratorWaitHandle* c_Awaitable::asAsyncGenerator() {
+  assertx(getKind() == Kind::AsyncGenerator);
   return static_cast<c_AsyncGeneratorWaitHandle*>(this);
 }
 

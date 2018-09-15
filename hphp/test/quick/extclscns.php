@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   var_dump(Collator::SORT_NUMERIC);

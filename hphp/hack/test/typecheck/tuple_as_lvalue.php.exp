@@ -1,2 +1,2 @@
-File "tuple_as_lvalue.php", line 15, characters 3-15:
-Tuple cannot be used as an lvalue. Maybe you meant List? (Parsing[1002])
+File "tuple_as_lvalue.php", line 15, characters 3-14:
+tuple_expression is not allowed in write context (Parsing[1002])

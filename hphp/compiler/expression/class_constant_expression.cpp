@@ -18,12 +18,9 @@
 #include <set>
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
-#include "hphp/compiler/analysis/constant_table.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/text-util.h"
 #include "hphp/compiler/option.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/constant_expression.h"
 
@@ -38,7 +35,7 @@ ClassConstantExpression::ClassConstantExpression
  ExpressionPtr classExp, const std::string &varName)
   : Expression(
       EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ClassConstantExpression)),
-    StaticClassName(classExp), m_varName(varName), m_depsSet(false),
+    StaticClassName(classExp), m_varName(varName),
     m_originalScopeSet(false) {
 }
 
@@ -46,7 +43,6 @@ ExpressionPtr ClassConstantExpression::clone() {
   auto exp = std::make_shared<ClassConstantExpression>(*this);
   Expression::deepCopy(exp);
   exp->m_class = Clone(m_class);
-  exp->m_depsSet = false;
   exp->m_originalScopeSet = true;
   exp->m_originalScope = m_originalScope ? m_originalScope : getScope();
   return exp;
@@ -60,24 +56,9 @@ ClassScopeRawPtr ClassConstantExpression::getOriginalClassScope() const {
   return scope ? scope->getContainingClass() : ClassScopeRawPtr();
 }
 
-bool ClassConstantExpression::containsDynamicConstant(AnalysisResultPtr ar)
-  const {
-  if (m_class) return true;
-  ClassScopePtr cls = ar->findClass(m_origClassName);
-  return !cls || cls->isVolatile() ||
-    !cls->getConstants()->isRecursivelyDeclared(ar, m_varName);
-}
-
-void ClassConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_class) {
-    m_class->analyzeProgram(ar);
-  } else if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
-    if (ClassScopePtr cls = resolveClass()) {
-      ConstructPtr decl = cls->getConstants()->
-        getValueRecur(ar, m_varName, cls);
-      cls->addUse(getScope(), BlockScope::UseKindConstRef);
-      m_depsSet = true;
-    }
+void ClassConstantExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
+  if (!m_class && ar->getPhase() >= AnalysisResult::AnalyzeAll) {
+    resolveClass();
   }
 }
 
@@ -105,55 +86,6 @@ void ClassConstantExpression::setNthKid(int n, ConstructPtr cp) {
       assert(false);
       break;
   }
-}
-
-ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
-  if (ar->getPhase() < AnalysisResult::FirstPreOptimize) {
-    return ExpressionPtr();
-  }
-  if (m_class) {
-    updateClassName();
-    if (m_class) {
-      return ExpressionPtr();
-    }
-  }
-
-  ClassScopePtr cls = resolveClass();
-  if (!cls || (cls->isVolatile() && !isPresent())) {
-    if (cls && !m_depsSet) {
-      cls->addUse(getScope(), BlockScope::UseKindConstRef);
-      m_depsSet = true;
-    }
-    return ExpressionPtr();
-  }
-
-  ConstantTablePtr constants = cls->getConstants();
-  ClassScopePtr defClass = cls;
-  ConstructPtr decl = constants->getValueRecur(ar, m_varName, defClass);
-  if (decl) {
-    BlockScope::s_constMutex.lock();
-    auto value = dynamic_pointer_cast<Expression>(decl);
-    BlockScope::s_constMutex.unlock();
-
-    if (!value->isScalar() &&
-        (value->is(KindOfClassConstantExpression) ||
-         value->is(KindOfConstantExpression))) {
-      std::set<ExpressionPtr> seen;
-      do {
-        if (!seen.insert(value).second) return ExpressionPtr();
-        value = value->preOptimize(ar);
-        if (!value) return ExpressionPtr();
-      } while (!value->isScalar() &&
-               (value->is(KindOfClassConstantExpression) ||
-                value->is(KindOfConstantExpression)));
-    }
-
-    ExpressionPtr rep = Clone(value, getScope());
-    rep->setComment(getText());
-    copyLocationTo(rep);
-    return replaceValue(rep);
-  }
-  return ExpressionPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -20,6 +20,9 @@ function foo($x, $k) {
   echo "done\n";
 }
 
+
+<<__EntryPoint>>
+function main_invariant_load() {
 foo(array(1,2,3), 123);
 foo(array(1,2,3), 123);
 foo(array(1,2,3), 123);
@@ -27,3 +30,4 @@ foo(array(1,2,3), 123);
 foo(array(1,2,3), 123);
 foo(array(1,2,3), 123);
 foo(array(1,2,3), 'asd');
+}

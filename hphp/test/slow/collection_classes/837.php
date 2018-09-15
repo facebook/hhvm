@@ -1,5 +1,9 @@
 <?hh
 
+
+
+<<__EntryPoint>>
+function main_837() {
 $mapFn = function ($v) {
  return $v+1;
  }
@@ -22,4 +26,4 @@ var_dump($st->map($mapFn)->filter($filtFn));
 foreach ($st->items()->map($mapFn)->filter($filtFn) as $v) {
   var_dump($v);
 }
-
+}

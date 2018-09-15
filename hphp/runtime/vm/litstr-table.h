@@ -17,13 +17,12 @@
 #ifndef incl_HPHP_LITSTR_TABLE_H_
 #define incl_HPHP_LITSTR_TABLE_H_
 
+#include "hphp/runtime/base/string-hash-map.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/named-entity-pair-table.h"
-#include "hphp/util/functional.h"
-#include "hphp/util/hash-map-typedefs.h"
 #include "hphp/util/mutex.h"
 
-#include <vector>
+#include <tbb/concurrent_hash_map.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,6 +58,14 @@ struct LitstrTable {
   static void init();
 
   /*
+   * Destroy the singleton LitstrTable.
+   *
+   * Must not be called in concurrent contexts---the table pointer is not
+   * atomic.
+   */
+  static void fini();
+
+  /*
    * Get the singleton LitstrTable.
    */
   static LitstrTable& get();
@@ -78,7 +85,7 @@ struct LitstrTable {
   bool contains(Id id) const;
   StringData* lookupLitstrId(Id id) const;
   const NamedEntity* lookupNamedEntityId(Id id) const;
-  const NamedEntityPair& lookupNamedEntityPairId(Id id) const;
+  NamedEntityPair lookupNamedEntityPairId(Id id) const;
 
   /*
    * Set up the named info table.  Not thread-safe.
@@ -95,25 +102,17 @@ struct LitstrTable {
   /*
    * Call onItem() for each item in the table.
    */
-  void forEachNamedEntity(
-    std::function<void (int i, const NamedEntityPair& namedEntity)> onItem);
+  void forEachLitstr(
+    std::function<void (int i, const StringData* name)> onItem);
 
 
   /////////////////////////////////////////////////////////////////////////////
   // Concurrency control.
 
   /*
-   * Write lock.
-   *
-   * @requires: !m_safeToRead.
-   */
-  Mutex& mutex();
-
-  /*
    * LitstrTable reader/writer state.
    *
-   * Used for debugging asserts only, but the flags are always set since these
-   * are called rarely.
+   * Setting the reader state will update m_namedInfo from m_litstr2id.
    */
   void setReading();
   void setWriting();
@@ -132,18 +131,17 @@ private:
 private:
   static LitstrTable* s_litstrTable;
 
-  using LitstrMap = hphp_hash_map<
+  using LitstrMap = tbb::concurrent_hash_map<
     const StringData*,
     Id,
-    string_data_hash,
-    string_data_same
+    StringDataHashCompare
   >;
 
   NamedEntityPairTable m_namedInfo;
   LitstrMap m_litstr2id;
 
-  Mutex m_mutex;
-  std::atomic<bool> m_safeToRead;
+  std::atomic<Id> m_nextId{0};
+  std::atomic<bool> m_safeToRead{true};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

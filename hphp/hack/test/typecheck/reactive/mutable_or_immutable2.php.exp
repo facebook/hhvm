@@ -1,0 +1,2 @@
+File "mutable_or_immutable2.php", line 6, characters 19-19:
+Declaration cannot have both <<__Mutable>> and <<__MaybeMutable>> attributtes. (NastCheck[3070])

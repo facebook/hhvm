@@ -19,4 +19,8 @@ class C {
  yield null;
  }
 }
+
+<<__EntryPoint>>
+function main_2197() {
 echo "Done\n";
+}

@@ -22,7 +22,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 struct TestExtCurl : TestCppExt {
-  virtual bool RunTests(const std::string &which);
+  bool RunTests(const std::string& which) override;
 
   bool test_curl_init();
   bool test_curl_copy_handle();

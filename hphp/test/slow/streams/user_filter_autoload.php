@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_user_filter_autoload() {
 spl_autoload_register(function ($class) {
     printf("loading\n");
     class TestFilter extends php_user_filter {
@@ -20,3 +23,4 @@ stream_filter_register('test_filter', '\TestFilter');
 $stream = fopen('php://memory', 'r+');
 stream_filter_append($stream, 'test_filter', STREAM_FILTER_WRITE);
 fwrite($stream, "data");
+}

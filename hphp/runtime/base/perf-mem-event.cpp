@@ -16,17 +16,18 @@
 
 #include "hphp/runtime/base/perf-mem-event.h"
 
+#include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/member-reflection.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/reverse-data-map.h"
 #include "hphp/runtime/vm/unit.h"
@@ -66,7 +67,7 @@ namespace {
  * Bump this whenever the log format changes, so that it's easy to filter out
  * old, incompatible results.
  */
-constexpr auto kVersion = 1;
+constexpr auto kVersion = 2;
 
 /*
  * Update `record' with the data member that `internal' is in, relative to
@@ -149,20 +150,16 @@ void fill_record(const ArrayData* arr, const void* addr,
                  StructuredLogEntry& record) {
   if (try_member(arr, addr, record)) return;
 
-  auto const data = reinterpret_cast<const TypedValue*>(arr + 1);
-  auto const idx = (uintptr_t(addr) - uintptr_t(data)) / sizeof(TypedValue);
+  auto const tv = reinterpret_cast<const TypedValue*>(addr);
+  auto const idx = tv - packedData(arr);
 
-  if (idx < arr->cap()) {
-    record.setInt("ikey", idx);
+  record.setInt("ikey", idx);
 
-    if (idx < arr->size()) {
-      auto const tv = &data[idx];
-
-      if (auto const memb = nameof_member(tv, addr)) {
-        record.setStr("value_memb", memb);
-      }
-      record.setStr("value_type", tname(tv->m_type));
+  if (idx < arr->size()) {
+    if (auto const memb = nameof_member(tv, addr)) {
+      record.setStr("value_memb", memb);
     }
+    record.setStr("value_type", tname(tv->m_type));
   }
 }
 
@@ -277,40 +274,40 @@ bool record_low_mem_event(const void* addr, StructuredLogEntry& record) {
  * Update `record' for an `addr' known to be in the request heap object given
  * by `hdr'.
  */
-bool record_request_heap_mem_event(const void* addr, const Header* hdr,
+bool record_request_heap_mem_event(const void* addr,
+                                   const HeapObject* hdr,
                                    StructuredLogEntry& record) {
   record.setStr("location", "request_heap");
   record.setStr("kind", header_names[uint8_t(hdr->kind())]);
 
   switch (hdr->kind()) {
     case HeaderKind::String:
-      fill_record(&hdr->str_, addr, record);
+      fill_record(static_cast<const StringData*>(hdr), addr, record);
       break;
 
     case HeaderKind::Packed:
     case HeaderKind::VecArray:
-      fill_record(&hdr->arr_, addr, record);
+      fill_record(static_cast<const ArrayData*>(hdr), addr, record);
       break;
 
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
+    case HeaderKind::Shape:
     case HeaderKind::Keyset:
-      fill_record(&hdr->mixed_, addr, record);
+      fill_record(static_cast<const MixedArray*>(hdr), addr, record);
       break;
 
     case HeaderKind::Apc:
-      try_member(&hdr->apc_, addr, record);
+      try_member(static_cast<const APCLocalArray*>(hdr), addr, record);
       break;
     case HeaderKind::Globals:
-      try_member(&hdr->globals_, addr, record);
-      break;
-    case HeaderKind::Proxy:
-      try_member(&hdr->proxy_, addr, record);
+      try_member(static_cast<const GlobalsArray*>(hdr), addr, record);
       break;
     case HeaderKind::Empty:
       break;
 
     case HeaderKind::Object:
+    case HeaderKind::NativeObject:
     case HeaderKind::Closure:
     case HeaderKind::WaitHandle:
     case HeaderKind::AsyncFuncWH:
@@ -329,11 +326,13 @@ bool record_request_heap_mem_event(const void* addr, const Header* hdr,
     case HeaderKind::AsyncFuncFrame:
     case HeaderKind::NativeData:
     case HeaderKind::ClosureHdr:
+    case HeaderKind::MemoData:
       break;
 
+    case HeaderKind::Cpp:
     case HeaderKind::SmallMalloc:
     case HeaderKind::BigMalloc:
-    case HeaderKind::BigObj:
+    case HeaderKind::Slab:
     case HeaderKind::Free:
     case HeaderKind::Hole:
       break;
@@ -347,11 +346,13 @@ bool record_request_heap_mem_event(const void* addr, const Header* hdr,
  *
  * All our stacks are black boxes, so we can't do much categorization.
  */
-bool record_cpp_stack_mem_event(const void* addr, StructuredLogEntry& record) {
+bool record_cpp_stack_mem_event(const void* /*addr*/,
+                                StructuredLogEntry& record) {
   record.setStr("location", "cpp_stack");
   return true;
 }
-bool record_vm_stack_mem_event(const void* addr, StructuredLogEntry& record) {
+bool record_vm_stack_mem_event(const void* /*addr*/,
+                               StructuredLogEntry& record) {
   record.setStr("location", "vm_stack");
   return true;
 }
@@ -377,6 +378,18 @@ void record_perf_mem_event(PerfEvent kind, const perf_event_sample* sample) {
   }());
   record.setInt("addr", uintptr_t(addr));
 
+  auto const data_src = sample->tail()->data_src;
+  auto const info = perf_event_data_src(kind, data_src);
+  record.setInt("data_src", data_src);
+  record.setStr("mem_lvl", info.mem_lvl);
+  record.setStr("tlb", info.tlb);
+  record.setInt("mem_hit", info.mem_hit);
+  record.setInt("snoop", info.snoop);
+  record.setInt("snoop_hit", info.snoop_hit);
+  record.setInt("snoop_hitm", info.snoop_hitm);
+  record.setInt("locked", info.locked);
+  record.setInt("tlb_hit", info.tlb_hit);
+
   auto const should_log = [&] {
     auto const tca = reinterpret_cast<TCA>(const_cast<void*>(addr));
 
@@ -399,14 +412,14 @@ void record_perf_mem_event(PerfEvent kind, const perf_event_sample* sample) {
     /*
      * What we'd like to do here is:
      *
-     * if (auto const hdr = MM().find(addr)) {
+     * if (auto const hdr = tl_heap->find(addr)) {
      *    return record_request_heap_mem_event(addr, hdr, record);
      * }
      *
      * but what appears to be a multithreaded use-after-free bug prevents us
      * from doing so safely.
      */
-    if (MM().contains(const_cast<void*>(addr))) {
+    if (tl_heap->contains(const_cast<void*>(addr))) {
       (void)record_request_heap_mem_event; // shoosh warnings
       record.setStr("location", "request_heap");
       return true;

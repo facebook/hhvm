@@ -19,10 +19,11 @@
 
 #include <vector>
 
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/types.h"
 
 #include "hphp/util/assertions.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-set.h"
 
 namespace HPHP { namespace jit {
 
@@ -102,6 +103,24 @@ inline std::string show(TransKind k) {
   switch (k) { TRANS_KINDS }
 #undef DO
   not_reached();
+}
+
+inline bool isProfiling(TransKind k) {
+  switch (k) {
+    case TransKind::Profile:
+    case TransKind::ProfPrologue:
+      return true;
+
+    case TransKind::Anchor:
+    case TransKind::Interp:
+    case TransKind::Live:
+    case TransKind::LivePrologue:
+    case TransKind::Optimize:
+    case TransKind::OptPrologue:
+    case TransKind::Invalid:
+      return false;
+  }
+  always_assert(false);
 }
 
 inline bool isPrologue(TransKind k) {
@@ -188,6 +207,20 @@ inline std::string areaAsString(AreaIndex area) {
   always_assert(false);
 }
 
+/*
+ * Multiplying factors used to compute the block weights for each code area.
+ * We multiply the corresponding IR block's profile counter by the following
+ * factors, depending on the code area the block is assigned to.
+ */
+inline uint64_t areaWeightFactor(AreaIndex area) {
+  switch (area) {
+    case AreaIndex::Main:   return RuntimeOption::EvalJitLayoutMainFactor;
+    case AreaIndex::Cold:   return RuntimeOption::EvalJitLayoutColdFactor;
+    case AreaIndex::Frozen: return 1;
+  };
+  always_assert(false);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -213,6 +246,18 @@ inline std::string areaAsString(AreaIndex area) {
 using Vflags = uint8_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Information attached to an assertion in emitted code.
+ */
+struct Reason {
+  const char* file;
+  unsigned line;
+};
+
+inline std::string show(const Reason &r) {
+  return folly::sformat("{}:{}", r.file, r.line);
+}
 
 }}
 

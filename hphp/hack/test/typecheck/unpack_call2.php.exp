@@ -1,6 +1,0 @@
-File "unpack_call2.php", line 8, characters 5-12:
-Invalid argument (Typing[4110])
-File "unpack_call2.php", line 3, characters 12-14:
-This is an int
-File "unpack_call2.php", line 8, characters 5-12:
-It is incompatible with a string

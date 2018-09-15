@@ -1,2 +1,2 @@
-File "global_const26.php", line 8, characters 10-19:
-Unbound name: NS1\NS2\Y (a global constant) (Naming[2049])
+File "global_const26.php", line 3, characters 1-39:
+No code may exist outside of namespace {} (Parsing[1002])

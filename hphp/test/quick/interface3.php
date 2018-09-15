@@ -1,4 +1,4 @@
-<?php
+<?hh
 interface I { function foo(); }
 abstract class B implements I {}
 abstract class C extends B {}

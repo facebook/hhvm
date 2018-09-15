@@ -21,7 +21,6 @@
 #include "hphp/compiler/json.h"
 #include <memory>
 #include "hphp/compiler/code_generator.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/block_scope.h"
 
 namespace HPHP {
@@ -50,7 +49,7 @@ struct IParseHandler {
    * onParse is called by the parser when the construct has just been parsed
    * to allow it to do any necessary work
    */
-  virtual void onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
+  virtual void onParse(AnalysisResultConstRawPtr, FileScopePtr /*scope*/) {
     always_assert(0);
   }
   /**
@@ -60,8 +59,8 @@ struct IParseHandler {
    * (eg) a method, the ClassScope doesnt exist. So we wait until onParse
    * is called for the class, and it calls onParseRecur for its children.
    */
-  virtual void onParseRecur(AnalysisResultConstPtr ar, FileScopeRawPtr fs,
-                            ClassScopePtr scope) {
+  virtual void onParseRecur(AnalysisResultConstRawPtr /*ar*/,
+                            FileScopeRawPtr /*fs*/, ClassScopePtr /*scope*/) {
     always_assert(0);
   }
 };
@@ -92,9 +91,9 @@ struct IParseHandler {
   x(UnsetStatement)         \
   x(ExpStatement)           \
   x(ForEachStatement)       \
-  x(FinallyStatement)       \
   x(CatchStatement)         \
   x(TryStatement)           \
+  x(UsingStatement)         \
   x(ThrowStatement)         \
   x(GotoStatement)          \
   x(LabelStatement)         \
@@ -145,7 +144,7 @@ struct IParseHandler {
  */
 struct Construct : std::enable_shared_from_this<Construct>,
                    JSON::CodeError::ISerializable {
-  virtual ~Construct() {}
+  ~Construct() override {}
 
 #define DEC_STATEMENT_ENUM(x) KindOf##x,
 #define DEC_EXPRESSION_ENUM(x,t) KindOf##x,
@@ -218,10 +217,6 @@ public:
   bool isFileLevel() const { return m_flags.fileLevel;}
   bool isTopLevel() const { return m_flags.topLevel;}
 
-  void setNeeded() { m_flags.needed = true; }
-  void clearNeeded() { m_flags.needed = false; }
-  bool isNeeded() const { return m_flags.needed; }
-
   void setIsUnpack() { m_flags.unpack = 1; }
   bool isUnpack() const { return m_flags.unpack; }
   void clearIsUnpack() { m_flags.unpack = 0; }
@@ -238,15 +233,9 @@ public:
     return m_blockScope->getContainingClass();
   }
   void resetScope(BlockScopeRawPtr scope);
-  void parseTimeFatal(FileScopeRawPtr fs, Compiler::ErrorType error,
-    ATTRIBUTE_PRINTF_STRING const char *fmt, ...) ATTRIBUTE_PRINTF(4,5);
-  void analysisTimeFatal(Compiler::ErrorType error,
+  void parseTimeFatal(FileScopeRawPtr fs,
     ATTRIBUTE_PRINTF_STRING const char *fmt, ...) ATTRIBUTE_PRINTF(3,4);
-  virtual int getLocalEffects() const { return UnknownEffect;}
-  int getChildrenEffects() const;
-  int getContainedEffects() const;
-  bool hasEffect() const { return getContainedEffects() != NoEffect;}
-  virtual bool kidUnused(int i) const { return false; }
+  virtual bool kidUnused(int /*i*/) const { return false; }
 
   template<typename T>
   static std::shared_ptr<T> Clone(std::shared_ptr<T> constr) {
@@ -270,17 +259,17 @@ public:
    * Called when we analyze a program, which file it includes, which function
    * and class it uses, etc.
    */
-  virtual void analyzeProgram(AnalysisResultPtr ar) = 0;
+  virtual void analyzeProgram(AnalysisResultConstRawPtr /*ar*/) {}
 
   /**
    * return the nth child construct
    */
-  virtual ConstructPtr getNthKid(int n) const { return ConstructPtr(); }
+  virtual ConstructPtr getNthKid(int /*n*/) const { return ConstructPtr(); }
 
   /**
    * set the nth child construct
    */
-  virtual void setNthKid(int n, ConstructPtr cp)  {}
+  virtual void setNthKid(int /*n*/, ConstructPtr /*cp*/) {}
 
   /**
    * get the kid count
@@ -291,7 +280,7 @@ public:
   void dumpNode(int spc);
   void dumpNode(int spc) const;
 
-  void dump(int spc, AnalysisResultConstPtr ar);
+  void dump(int spc, AnalysisResultConstRawPtr ar);
 
   /**
    * Called when generating code.
@@ -301,7 +290,7 @@ public:
   /**
    * Implements JSON::CodeError::ISerializable.
    */
-  virtual void serialize(JSON::CodeError::OutputStream &out) const;
+  void serialize(JSON::CodeError::OutputStream& out) const override;
 
   /**
    * Get canonicalized PHP source code for this construct.
@@ -311,9 +300,9 @@ public:
 
   void recomputeEffects();
 
-  ExpressionPtr makeConstant(AnalysisResultConstPtr ar,
+  ExpressionPtr makeConstant(AnalysisResultConstRawPtr ar,
                              const std::string &value) const;
-  ExpressionPtr makeScalarExpression(AnalysisResultConstPtr ar,
+  ExpressionPtr makeScalarExpression(AnalysisResultConstRawPtr ar,
                                      const Variant &value) const;
 private:
   BlockScopeRawPtr m_blockScope;
@@ -322,37 +311,13 @@ private:
     struct {
       unsigned fileLevel           : 1; // is it at top level of a file
       unsigned topLevel            : 1; // is it at top level of a scope
-      unsigned needed              : 1;
       unsigned unpack              : 1; // is this an unpack (only on params)
     } m_flags;
   };
   Location::Range m_r;
 protected:
   KindOf m_kindOf;
-  mutable int m_containedEffects;
-  mutable int m_effectsTag;
 };
-
-struct LocalEffectsContainer {
-  int getLocalEffects() const { return m_localEffects; }
-  virtual void effectsCallback() = 0;
-protected:
-  explicit LocalEffectsContainer(Construct::Effect localEffect) :
-    m_localEffects(localEffect) {}
-  LocalEffectsContainer() :
-    m_localEffects(0) {}
-  void setLocalEffect  (Construct::Effect effect);
-  void clearLocalEffect(Construct::Effect effect);
-  bool hasLocalEffect  (Construct::Effect effect) const;
-protected:
-  int m_localEffects;
-};
-
-#define DECL_AND_IMPL_LOCAL_EFFECTS_METHODS \
-  int getLocalEffects() const override { \
-    return LocalEffectsContainer::getLocalEffects(); \
-  } \
-  void effectsCallback() override { recomputeEffects(); }
 
 ///////////////////////////////////////////////////////////////////////////////
 }

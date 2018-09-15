@@ -1,0 +1,14 @@
+array(3) {
+  [123]=>
+  string(5) "value"
+  [456]=>
+  array(1) {
+    [0]=>
+    string(7) "foo bar"
+  }
+  [789]=>
+  array(1) {
+    [0]=>
+    string(3) "baz"
+  }
+}

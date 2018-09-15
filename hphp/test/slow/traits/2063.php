@@ -20,5 +20,9 @@ class Z extends Y {
  return ++$this->x;
  }
  }
+
+<<__EntryPoint>>
+function main_2063() {
 $a = new Z();
 echo join(" ", array($a->x(), $a->x(), $a->y(), $a->y(), $a->z(), $a->z())), "\n";
+}

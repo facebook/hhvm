@@ -5,7 +5,7 @@ function h1(&$arr, $i) {
     echo "i=$i key=$k\n";
     if ($k == 0) {
       if ($i > 0) {
-        h1($arr, $i-1);
+        h1(&$arr, $i-1);
       }
  else if ($i == 0) {
         echo "Unsetting key 1\n";
@@ -13,8 +13,12 @@ function h1(&$arr, $i) {
       }
     }
   }
-  end($arr);
+  end(&$arr);
 }
+
+<<__EntryPoint>>
+function main_489() {
 $arr = array('a','b','c');
-h1($arr, 10);
+h1(&$arr, 10);
 var_dump($arr);
+}

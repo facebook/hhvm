@@ -1,0 +1,92 @@
+array(3) {
+  [1]=>
+  string(3) "ONE"
+  [2]=>
+  string(3) "TWO"
+  [3]=>
+  string(5) "THREE"
+}
+array(3) {
+  ["ONE"]=>
+  string(1) "1"
+  ["TWO"]=>
+  string(1) "2"
+  ["THREE"]=>
+  string(1) "3"
+}
+bool(true)
+bool(true)
+string(1) "1"
+string(1) "1"
+string(1) "1"
+string(1) "1"
+array(1) {
+  [0]=>
+  string(1) "1"
+}
+array(1) {
+  [0]=>
+  string(1) "1"
+}
+==============================================
+array(3) {
+  [1]=>
+  string(3) "ONE"
+  [2]=>
+  string(3) "TWO"
+  [3]=>
+  string(5) "THREE"
+}
+array(3) {
+  ["ONE"]=>
+  int(1)
+  ["TWO"]=>
+  int(2)
+  ["THREE"]=>
+  int(3)
+}
+bool(true)
+bool(true)
+int(1)
+int(1)
+int(1)
+int(1)
+array(1) {
+  [0]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+==============================================
+array(3) {
+  [1]=>
+  string(3) "ONE"
+  [2]=>
+  string(3) "TWO"
+  [3]=>
+  string(5) "THREE"
+}
+array(3) {
+  ["ONE"]=>
+  string(1) "1"
+  ["TWO"]=>
+  string(1) "2"
+  ["THREE"]=>
+  string(1) "3"
+}
+bool(true)
+bool(true)
+string(1) "1"
+int(1)
+string(1) "1"
+int(1)
+array(1) {
+  [0]=>
+  string(1) "1"
+}
+array(1) {
+  [0]=>
+  int(1)
+}

@@ -16,4 +16,8 @@ class A {
   $obj = new B;
  $obj->foo();
 }
- bar();
+
+ <<__EntryPoint>>
+function main_77() {
+bar();
+}

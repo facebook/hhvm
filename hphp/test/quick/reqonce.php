@@ -1,4 +1,4 @@
-<?php
+<?hh
 $c = new TestClass;
 $c->testwithctx();
 testnoctx();

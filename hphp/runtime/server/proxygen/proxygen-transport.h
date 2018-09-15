@@ -84,6 +84,8 @@ struct ResponseMessage {
 
 struct PushTxnHandler;
 
+const StaticString s_proxygen("proxygen");
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -100,7 +102,7 @@ struct ProxygenTransport final
   , Synchronizable
 {
   explicit ProxygenTransport(ProxygenServer *server);
-  virtual ~ProxygenTransport();
+  ~ProxygenTransport() override;
 
   ///////////////////////////////////////////////////////////////////////////
   // Functions sub-classes have to implement.
@@ -154,6 +156,13 @@ struct ProxygenTransport final
    */
   std::string getHeader(const char *name) override;
   void getHeaders(HeaderMap &headers) override;
+
+  /**
+   * Get a description of the type of transport.
+   */
+  String describe() const override {
+    return s_proxygen;
+  }
 
   /**
    * Add/remove a response header.
@@ -239,16 +248,16 @@ struct ProxygenTransport final
 
   void onBody(std::unique_ptr<folly::IOBuf> chain) noexcept override;
 
-  void onChunkHeader(size_t length) noexcept override {};
+  void onChunkHeader(size_t /*length*/) noexcept override{};
 
   void onChunkComplete() noexcept override {};
 
   void onTrailers(
-    std::unique_ptr<proxygen::HTTPHeaders> trailers) noexcept override {
+    std::unique_ptr<proxygen::HTTPHeaders> /*trailers*/) noexcept override {
     Logger::Error("HPHP ate the trailers");
   }
 
-  void onUpgrade(proxygen::UpgradeProtocol protocol) noexcept override {
+  void onUpgrade(proxygen::UpgradeProtocol /*protocol*/) noexcept override {
     Logger::Error("HPHP received upgrade");
   }
 
@@ -269,7 +278,7 @@ struct ProxygenTransport final
 
   void onEgressResumed() noexcept override { }
 
-  void messageAvailable(ResponseMessage&& message);
+  void messageAvailable(ResponseMessage&& message) noexcept;
 
   void beginPartialPostEcho();
   /**
@@ -289,6 +298,10 @@ struct ProxygenTransport final
     m_enqueued = true;
     unlink();
   }
+
+  void setShouldRepost(bool shouldRepost) { m_shouldRepost = shouldRepost; }
+
+  void trySetMaxThreadCount(int max) override;
 
  private:
   bool bufferRequest() const;
@@ -334,7 +347,8 @@ struct ProxygenTransport final
   bool m_enqueued{false};
   // Set to true when sending a partial post back to
   // the slb due to impending server death
-  bool m_repost{false};
+  bool m_reposting{false};
+  bool m_shouldRepost{false};
   std::unique_ptr<folly::IOBuf> m_currentBodyBuf;
   proxygen::HTTPMessage m_response;
   bool m_sendStarted{false};

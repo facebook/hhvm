@@ -1,0 +1,1 @@
+Fatal error: Class SomeInterface2 may not inherit from sealed interface (MyInterface) without being in the whitelist in %s/hphp/test/slow/sealed/sealed_classes13.inc on line 3

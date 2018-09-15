@@ -2,9 +2,8 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
@@ -14,7 +13,7 @@
  * have the proper type, and restricts what types can be used for enums.
  *)
 (*****************************************************************************)
-open Core
+open Core_kernel
 open Nast
 open Typing_defs
 open Utils
@@ -57,8 +56,8 @@ let check_valid_array_key_type f_fail ~allow_any:allow_any env p t =
     | Tprim (Tint | Tstring) -> ()
     (* Enums have to be valid array keys *)
     | Tabstract (AKenum _, _) -> ()
-    | Tany when allow_any -> ()
-    | Tany | Tmixed | Tarraykind _ | Tprim _ | Toption _
+    | Terr | Tany when allow_any -> ()
+    | Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
       | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
       | Tfun _ | Tunresolved _ | Tobject | Tshape _ ->
         f_fail p (Reason.to_pos r) (Typing_print.error t') trail);
@@ -96,30 +95,39 @@ let enum_class_check env tc consts const_types =
           (* We disallow first-class enums from being non-exact types, because
            * a switch on such an enum can lead to very unexpected results,
            * since switch uses == equality. *)
-          | Tmixed | Tprim Tarraykey when tc.tc_enum_type <> None ->
+          | Tmixed | Tnonnull | Tprim Tarraykey when tc.tc_enum_type <> None ->
               Errors.enum_type_bad (Reason.to_pos r)
                 (Typing_print.error ty_exp') trail
           (* We disallow typedefs that point to mixed *)
           | Tmixed when snd ty_exp <> Tmixed ->
               Errors.enum_type_typedef_mixed (Reason.to_pos r)
-          | Tmixed -> ()
+          | Tnonnull when snd ty_exp <> Tnonnull ->
+              Errors.enum_type_typedef_nonnull (Reason.to_pos r)
+          | Tmixed | Tnonnull -> ()
           | Tprim Tint | Tprim Tstring | Tprim Tarraykey -> ()
           (* Allow enums in terms of other enums *)
           | Tabstract (AKenum _, _) -> ()
           (* Don't tell anyone, but we allow type params too, since there are
            * Enum subclasses that need to do that *)
           | Tabstract (AKgeneric _, _) -> ()
-          | Tany | Tarraykind _ | Tprim _ | Toption _ | Tvar _
+          | Terr | Tany | Tarraykind _ | Tprim _ | Toption _ | Tvar _
             | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
-            | Tunresolved _ | Tobject | Tfun _ | Tshape _ ->
+            | Tunresolved _ | Tobject | Tfun _ | Tshape _ | Tdynamic ->
               Errors.enum_type_bad (Reason.to_pos r)
                 (Typing_print.error ty_exp') trail);
 
-        (* Make sure that if a constraint was given that the base type is
-         * actually a subtype of it. *)
+        (* If a constraint was given, make sure that it is a subtype
+           of arraykey, and that the base type is actually a subtype
+           of it. *)
         let env = (match ty_constraint with
           | Some ty ->
              let env, ty = Phase.localize ~ety_env env ty in
+             let ty_arraykey = (
+               Reason.Rimplicit_upper_bound (tc.tc_pos, "arraykey"),
+               Tprim Tarraykey
+             ) in
+             let env = Typing_ops.sub_type tc.tc_pos Reason.URenum_cstr env
+               ty ty_arraykey in
              Typing_ops.sub_type tc.tc_pos Reason.URenum_cstr env ty_exp ty
           | None -> env) in
 
@@ -129,7 +137,7 @@ let enum_class_check env tc consts const_types =
 
 let get_constant tc (seen, has_default) = function
   | Default _ -> (seen, true)
-  | Case ((pos, Class_const (CI (_, cls), (_, const))), _) ->
+  | Case ((pos, Class_const ((_, CI ((_, cls), _)), (_, const))), _) ->
     if cls <> tc.tc_name then
       (Errors.enum_switch_wrong_class pos (strip_ns tc.tc_name) (strip_ns cls);
        (seen, has_default))

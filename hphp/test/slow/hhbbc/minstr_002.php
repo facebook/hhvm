@@ -9,6 +9,10 @@ function bar() {
   var_dump(foo());
 }
 
+
+
+
+<<__EntryPoint>>
+function main_minstr_002() {
 bar();
-
-
+}

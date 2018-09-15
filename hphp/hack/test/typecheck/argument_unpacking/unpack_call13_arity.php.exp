@@ -1,0 +1,32 @@
+File "unpack_call13_arity.php", line 14, characters 3-27:
+Too many arguments (Typing[4105])
+  File "unpack_call13_arity.php", line 36, characters 10-22:
+  Definition is here
+File "unpack_call13_arity.php", line 15, characters 3-30:
+Too many arguments (Typing[4105])
+  File "unpack_call13_arity.php", line 37, characters 10-22:
+  Definition is here
+File "unpack_call13_arity.php", line 16, characters 3-30:
+Too few arguments (Typing[4104])
+  File "unpack_call13_arity.php", line 42, characters 10-25:
+  Definition is here
+File "unpack_call13_arity.php", line 27, characters 3-25:
+Too few arguments (Typing[4104])
+  File "unpack_call13_arity.php", line 36, characters 10-22:
+  Definition is here
+File "unpack_call13_arity.php", line 28, characters 3-28:
+Too many arguments (Typing[4105])
+  File "unpack_call13_arity.php", line 36, characters 10-22:
+  Definition is here
+File "unpack_call13_arity.php", line 29, characters 3-25:
+Too few arguments (Typing[4104])
+  File "unpack_call13_arity.php", line 37, characters 10-22:
+  Definition is here
+File "unpack_call13_arity.php", line 30, characters 3-28:
+Too few arguments (Typing[4104])
+  File "unpack_call13_arity.php", line 37, characters 10-22:
+  Definition is here
+File "unpack_call13_arity.php", line 31, characters 3-31:
+Too many arguments (Typing[4105])
+  File "unpack_call13_arity.php", line 37, characters 10-22:
+  Definition is here

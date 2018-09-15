@@ -15,6 +15,10 @@ function main(): void {
   var_dump($c->foo(Vector { 0, 1, 2, 3, 4, 5, 6 }));
 }
 
+
+<<__EntryPoint>>
+function main_vector_map_private() {
 try {
   main();
 } catch (Exception $e) { echo "nodice\n"; }
+}

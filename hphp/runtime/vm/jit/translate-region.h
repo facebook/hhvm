@@ -23,7 +23,8 @@
 
 namespace HPHP { namespace jit {
 
-struct IRGS;
+namespace irgen { struct IRGS; }
+
 struct IRUnit;
 struct TransContext;
 
@@ -49,7 +50,8 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
  * function call.
  */
 std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
-                                          const RegionDesc& region);
+                                          const RegionDesc& region,
+                                          Annotations& annotations);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -1,0 +1,2 @@
+File "yield_bad2.php", line 5, characters 13-19:
+Yield can only appear as a statement or on the right of an assignment (Parsing[1002])

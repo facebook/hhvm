@@ -1,6 +1,0 @@
-<?php
-
-if (HHVM_FACEBOOK) {
-  // TODO t#6485898 - Remove uses of call time pass by reference
-  echo "skip";
-}

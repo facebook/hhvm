@@ -9,4 +9,8 @@ function main() {
   var_dump(abs("-5"));
 }
 
+
+<<__EntryPoint>>
+function main_abs() {
 main();
+}

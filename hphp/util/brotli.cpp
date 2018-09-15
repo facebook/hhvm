@@ -45,7 +45,7 @@ const char* compressBrotli(BrotliCompressor* compressor,
   // We should also allow 6 extra bytes for an empty meta-block at
   // the end of each chunk to force "flush".
   size_t availableBytes = len + 30;
-  auto available = (char *)malloc(len + availableBytes);
+  auto available = (char *)malloc(availableBytes);
   auto deleter = folly::makeGuard([&] { free(available); });
 
   BrotliMemIn in(data, len);

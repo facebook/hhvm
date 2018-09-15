@@ -1,0 +1,46 @@
+File "arities01.php", line 19, characters 12-45:
+Invalid argument (Typing[4041])
+  File "arities01.php", line 19, characters 12-45:
+  Too many mandatory arguments
+  File "arities01.php", line 10, characters 19-39:
+  Because of this definition
+File "arities01.php", line 22, characters 12-18:
+Invalid argument (Typing[4041])
+  File "arities01.php", line 21, characters 13-46:
+  Too many mandatory arguments
+  File "arities01.php", line 10, characters 19-39:
+  Because of this definition
+File "arities01.php", line 24, characters 13-52:
+Invalid argument (Typing[4041])
+  File "arities01.php", line 24, characters 13-52:
+  Too many mandatory arguments
+  File "arities01.php", line 14, characters 20-37:
+  Because of this definition
+File "arities01.php", line 26, characters 12-19:
+Invalid argument (Typing[4042])
+  File "arities01.php", line 26, characters 12-19:
+  Should have a variadic argument
+  File "arities01.php", line 10, characters 19-39:
+  Because of this definition
+File "arities01.php", line 29, characters 12-18:
+Invalid argument (Typing[4042])
+  File "arities01.php", line 28, characters 13-20:
+  Should have a variadic argument
+  File "arities01.php", line 10, characters 19-39:
+  Because of this definition
+File "arities01.php", line 31, characters 13-20:
+Too few arguments (Typing[4104])
+  File "arities01.php", line 14, characters 20-37:
+  Definition is here
+File "arities01.php", line 31, characters 13-20:
+Invalid argument (Typing[4040])
+  File "arities01.php", line 31, characters 13-20:
+  Too few arguments
+  File "arities01.php", line 14, characters 20-37:
+  Because of this definition
+File "arities01.php", line 34, characters 13-19:
+Invalid argument (Typing[4040])
+  File "arities01.php", line 33, characters 13-20:
+  Too few arguments
+  File "arities01.php", line 14, characters 20-37:
+  Because of this definition

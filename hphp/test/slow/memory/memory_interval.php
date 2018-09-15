@@ -20,6 +20,9 @@ function alloc_lots($x) {
   return $v;
 }
 
+
+<<__EntryPoint>>
+function main_memory_interval() {
 memory_get_usage(); // force stats update
 
 // drive memory up to its highest peak in the script
@@ -49,3 +52,4 @@ var_dump($u1);
 var_dump($u2);
 var_dump($u3);
 var_dump($u4);
+}

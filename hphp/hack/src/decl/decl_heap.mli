@@ -2,9 +2,8 @@
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
@@ -15,47 +14,56 @@ module Class : sig
   type t = decl_class_type
   val prefix : Prefix.t
   val description : string
+  val use_sqlite_fallback : unit -> bool
 end
 module Fun : sig
   type t = decl fun_type
   val prefix : Prefix.t
   val description : string
+  val use_sqlite_fallback : unit -> bool
 end
 module Typedef :
   sig
     type t = typedef_type
     val prefix : Prefix.t
     val description : string
+    val use_sqlite_fallback : unit -> bool
   end
 module GConst : sig
-  type t = decl ty
+  type t = decl ty * Errors.t
   val prefix : Prefix.t
   val description : string
+  val use_sqlite_fallback : unit -> bool
 end
 module Property : sig
   type t = decl ty
   val prefix : Prefix.t
   val description : string
+  val use_sqlite_fallback : unit -> bool
 end
 module StaticProperty : sig
   type t = decl ty
   val prefix : Prefix.t
   val description : string
+  val use_sqlite_fallback : unit -> bool
 end
 module Method : sig
   type t = decl fun_type
   val prefix : Prefix.t
   val description : string
+  val use_sqlite_fallback : unit -> bool
 end
 module StaticMethod : sig
   type t = decl fun_type
   val prefix : Prefix.t
   val description : string
+  val use_sqlite_fallback : unit -> bool
 end
 module Constructor : sig
   type t = decl fun_type
   val prefix : Prefix.t
   val description : string
+  val use_sqlite_fallback : unit -> bool
 end
 
 module ClassEltKey : SharedMem.UserKeyType

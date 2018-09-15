@@ -38,7 +38,7 @@ struct PlainFile : File {
                      bool nonblocking = false,
                      const String& wrapper = null_string,
                      const String& stream_type = null_string);
-  virtual ~PlainFile();
+  ~PlainFile() override;
 
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
@@ -75,9 +75,9 @@ protected:
  * This is wrapper for fds that cannot be closed.
  */
 struct BuiltinFile : PlainFile {
-  explicit BuiltinFile(FILE *stream) : PlainFile(stream, true) {}
-  explicit BuiltinFile(int fd) : PlainFile(fd, true) {}
-  virtual ~BuiltinFile();
+  explicit BuiltinFile(FILE *stream);
+  explicit BuiltinFile(int fd);
+  ~BuiltinFile() override;
   bool close() override;
   void sweep() override;
 };
@@ -101,6 +101,9 @@ private:
   Variant m_stdout;
   Variant m_stderr;
 };
+
+void clearThreadLocalIO();
+void setThreadLocalIO(FILE* in, FILE* out, FILE* err);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

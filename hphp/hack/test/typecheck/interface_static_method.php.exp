@@ -1,0 +1,4 @@
+File "interface_static_method.php", line 17, characters 3-10:
+Cannot call C::foo(); foo is not defined in C (Typing[4185])
+File "interface_static_method.php", line 8, characters 26-28:
+Declaration is here

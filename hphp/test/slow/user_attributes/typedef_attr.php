@@ -1,6 +1,4 @@
 <?hh
-
-error_reporting(-1);
 function handler($errno, $errmsg) {
   if ($errno === E_RECOVERABLE_ERROR) {
     echo "E_RECOVERABLE_ERROR: $errmsg\n";
@@ -8,7 +6,6 @@ function handler($errno, $errmsg) {
     return false;
   }
 }
-set_error_handler('handler');
 
 <<Foo1, Bar1(), Baz1('blah', array(1,2))>>
 type FBID = int;
@@ -29,4 +26,11 @@ function main() {
   echo "Done\n";
 }
 
+
+<<__EntryPoint>>
+function main_typedef_attr() {
+error_reporting(-1);
+set_error_handler('handler');
+
 main();
+}

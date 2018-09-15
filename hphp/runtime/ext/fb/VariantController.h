@@ -17,10 +17,11 @@
 #ifndef VARIANTCONTROLLER_H
 #define VARIANTCONTROLLER_H
 
+#include <algorithm>
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/ext/extension.h"
-#include <algorithm>
+#include "hphp/runtime/ext/fb/FBSerialize/FBSerialize.h"
 
 namespace HPHP {
 
@@ -40,7 +41,7 @@ struct VariantControllerImpl {
   typedef String StringType;
 
   // variant accessors
-  static HPHP::serialize::Type type(const VariantType& obj) {
+  static HPHP::serialize::Type type(const_variant_ref obj) {
     switch (obj.getType()) {
       case KindOfUninit:
       case KindOfNull:       return HPHP::serialize::Type::NULLT;
@@ -50,6 +51,14 @@ struct VariantControllerImpl {
       case KindOfPersistentString:
       case KindOfString:     return HPHP::serialize::Type::STRING;
       case KindOfObject:     return HPHP::serialize::Type::OBJECT;
+      case KindOfPersistentShape:
+      case KindOfShape: { // TODO(T31134050)
+        if (RuntimeOption::EvalHackArrDVArrs &&
+            HackArraysMode != VariantControllerHackArraysMode::ON) {
+          throw HPHP::serialize::HackArraySerializeError{};
+        }
+        return HPHP::serialize::Type::MAP;
+      }
       case KindOfPersistentArray:
       case KindOfArray:      return HPHP::serialize::Type::MAP;
       case KindOfPersistentDict:
@@ -71,21 +80,21 @@ struct VariantControllerImpl {
         throw HPHP::serialize::KeysetSerializeError{};
       case KindOfResource:
       case KindOfRef:
+      case KindOfFunc:
+      case KindOfClass:
         throw HPHP::serialize::SerializeError(
           "don't know how to serialize HPHP Variant");
-      case KindOfClass:
-        break;
     }
     not_reached();
   }
-  static int64_t asInt64(const VariantType& obj) { return obj.toInt64(); }
-  static bool asBool(const VariantType& obj) { return obj.toInt64() != 0; }
-  static double asDouble(const VariantType& obj) { return obj.toDouble(); }
-  static const String& asString(const VariantType& obj) {
+  static int64_t asInt64(const_variant_ref obj) { return obj.toInt64(); }
+  static bool asBool(const_variant_ref obj) { return obj.toInt64() != 0; }
+  static double asDouble(const_variant_ref obj) { return obj.toDouble(); }
+  static const String& asString(const_variant_ref obj) {
     return obj.toCStrRef();
   }
-  static const Array& asMap(const VariantType& obj) { return obj.toCArrRef(); }
-  static const Array& asVector(const VariantType& obj) { return obj.toCArrRef(); }
+  static const Array& asMap(const_variant_ref obj) { return obj.toCArrRef(); }
+  static const Array& asVector(const_variant_ref obj) { return obj.toCArrRef(); }
 
   // variant creators
   static VariantType createNull() { return init_null(); }
@@ -130,12 +139,12 @@ struct VariantControllerImpl {
   static ArrayIter mapIterator(const MapType& map) {
     return ArrayIter(map);
   }
-  static bool mapNotEnd(const MapType& map, ArrayIter& it) {
+  static bool mapNotEnd(const MapType& /*map*/, ArrayIter& it) {
     return !it.end();
   }
   static void mapNext(ArrayIter& it) { ++it; }
   static Variant mapKey(ArrayIter& it) { return it.first(); }
-  static const VariantType& mapValue(ArrayIter& it) { return it.secondRef(); }
+  static const_variant_ref mapValue(ArrayIter& it) { return it.secondRef(); }
 
   // vector methods
   static VectorType createVector() {
@@ -151,11 +160,11 @@ struct VariantControllerImpl {
   static ArrayIter vectorIterator(const VectorType& vec) {
     return ArrayIter(vec);
   }
-  static bool vectorNotEnd(const VectorType& vec, ArrayIter& it) {
+  static bool vectorNotEnd(const VectorType& /*vec*/, ArrayIter& it) {
     return !it.end();
   }
   static void vectorNext(ArrayIter& it) { ++it; }
-  static const VariantType& vectorValue(ArrayIter& it) {
+  static const_variant_ref vectorValue(ArrayIter& it) {
     return it.secondRef();
   }
 

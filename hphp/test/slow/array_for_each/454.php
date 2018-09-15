@@ -20,5 +20,9 @@ function f4() {
   }
   var_dump($foo);
 }
+
+<<__EntryPoint>>
+function main_454() {
 foreach (f4() as $_) {
+}
 }

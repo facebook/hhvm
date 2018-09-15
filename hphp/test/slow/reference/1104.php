@@ -12,6 +12,9 @@ function test($a) {
 function &foo() {
   return $GLOBALS['x'];
 }
+
+<<__EntryPoint>>
+function main_1104() {
 $x = 1;
 test(foo());
 var_dump($x);
@@ -23,3 +26,4 @@ $t = f('test');
 $x = 1;
 $t(foo());
 var_dump($x);
+}

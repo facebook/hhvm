@@ -1,0 +1,2 @@
+File "class_constant_attribute.php", line 3, characters 19-38:
+User-defined constants are not allowed in user attribute expressions (Parsing[1002])

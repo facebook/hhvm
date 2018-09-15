@@ -17,9 +17,13 @@ class MyHandler extends SessionHandler {
   }
 }
 
+
+<<__EntryPoint>>
+function main_handler() {
 ini_set("session.save_handler", "files");
 $handler = new MyHandler;
 session_set_save_handler($handler, false);
 session_start();
 $_SESSION['foo'] = 'bar';
 session_write_close();
+}

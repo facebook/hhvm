@@ -1,2 +1,2 @@
-File "override_final_class2.php", line 12, characters 7-15:
-Expected 'class' (not 'interface') (Parsing[1002])
+File "override_final_class2.php", line 12, characters 17-17:
+Interfaces cannot be final (Typing[4048])

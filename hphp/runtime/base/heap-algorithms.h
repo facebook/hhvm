@@ -34,8 +34,8 @@ struct Scc {
   {}
 
   // find SCCs reachable from roots
-  template<class F> void visitRoots(F f) {
-    g_.eachRoot([&](const HeapGraph::Ptr& ptr) {
+  template<class F> void visitRootPtrs(F f) {
+    g_.eachRootPtr([&](const HeapGraph::Ptr& ptr) {
       auto v = ptr.to;
       if (state[v].index == -1) visit(v, f);
     });
@@ -104,7 +104,7 @@ using NodeRange = detail::Scc::range;
 template<class Live, class Leaked>
 void findHeapCycles(const HeapGraph& g, Live live, Leaked leaked) {
   detail::Scc scc(g);
-  scc.visitRoots(live);
+  scc.visitRootPtrs(live);
   scc.visitAll(leaked);
 }
 

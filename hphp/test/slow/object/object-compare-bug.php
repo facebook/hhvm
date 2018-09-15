@@ -23,4 +23,8 @@ function main() {
     echo "--------\n";
   }
 }
+
+<<__EntryPoint>>
+function main_object_compare_bug() {
 main();
+}

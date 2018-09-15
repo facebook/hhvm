@@ -12,4 +12,8 @@ function main() {
   (new A())->printer();
 }
 
+
+<<__EntryPoint>>
+function main_static_with_destructor() {
 main();
+}

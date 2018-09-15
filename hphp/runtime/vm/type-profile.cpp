@@ -33,10 +33,11 @@
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/jit/write-lease.h"
-#include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/write-lease.h"
+#include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/boot-stats.h"
@@ -70,6 +71,7 @@ std::atomic<int> singleJitConcurrentCount;
 __thread bool acquiredSingleJitConcurrent = false;
 std::atomic<int> singleJitRequests;
 std::atomic<int> relocateRequests;
+__thread bool nonVMThread = false;
 
 /*
  * RFH, or "requests served in first hour" is used as a performance metric that
@@ -86,6 +88,15 @@ const std::vector<int64_t> rfhBuckets = {
 };
 std::atomic<size_t> nextRFH{0};
 
+}
+
+ProfileNonVMThread::ProfileNonVMThread() {
+  always_assert(!nonVMThread);
+  nonVMThread = true;
+}
+
+ProfileNonVMThread::~ProfileNonVMThread() {
+  nonVMThread = false;
 }
 
 void setRelocateRequests(int32_t n) {
@@ -114,11 +125,11 @@ static bool comp(const FuncHotness& a, const FuncHotness& b) {
 }
 
 /*
- * Set AttrHot on hot functions. Sort all functions by their profile count, and
- * set AttrHot to the top Eval.HotFuncCount functions.
+ * Set hot functions. Sort all functions by their profile count, and make the
+ * top Eval.HotFuncCount functions hot.
  */
 static Mutex syncLock;
-void profileSetHotFuncAttr() {
+void profileSetHotFunc() {
   static bool synced = false;
   if (LIKELY(synced)) return;
 
@@ -161,7 +172,7 @@ void profileSetHotFuncAttr() {
     while (queue.size()) {
       auto f = queue.top().first;
       queue.pop();
-      const_cast<Func*>(f)->setAttrs(f->attrs() | AttrHot);
+      const_cast<Func*>(f)->setHot();
     }
   }
 
@@ -191,11 +202,12 @@ int singleJitRequestCount() {
 
 static inline bool doneProfiling() {
   return requestCount() >= RuntimeOption::EvalJitProfileInterpRequests ||
-    (RuntimeOption::ClientExecutionMode() &&
+    (!RuntimeOption::ServerExecutionMode() &&
      !RuntimeOption::EvalJitProfileRecord);
 }
 
 static inline RequestKind getRequestKind() {
+  if (nonVMThread) return RequestKind::NonVM;
   if (warmingUp) return RequestKind::Warmup;
   if (doneProfiling()) return RequestKind::Standard;
   if (RuntimeOption::ServerExecutionMode() ||
@@ -206,13 +218,31 @@ static inline RequestKind getRequestKind() {
 void profileRequestStart() {
   requestKind = getRequestKind();
 
-  bool okToJit = requestKind == RequestKind::Standard;
-  if (okToJit) {
-    jit::setMayAcquireLease(true);
-    jit::setMayAcquireConcurrentLease(true);
-    assertx(!acquiredSingleJit);
-    assertx(!acquiredSingleJitConcurrent);
+  // Force the request to use interpreter (not even running jitted code) when it
+  // is not a standard kind, and during retranslateAll when we need to dump out
+  // precise profile data.
+  auto const retranslateAllScheduled =
+    jit::mcgen::pendingRetranslateAllScheduled();
+  auto const forceInterp =
+    (retranslateAllScheduled && RuntimeOption::DumpPreciseProfileData) ||
+    (requestKind != RequestKind::Standard);
 
+  // When retranslateAll is scheduled to run, we don't want to generate more
+  // profiling or live translations, but the request is allowed to execute
+  // jitted code that is already there.
+  bool okToJit = !forceInterp && !retranslateAllScheduled;
+  if (!ThreadInfo::s_threadInfo.isNull()) {
+    if (RID().isJittingDisabled()) {
+      okToJit = false;
+    } else if (!okToJit) {
+      RID().setJittingDisabled(true);
+    }
+  }
+  jit::setMayAcquireLease(okToJit);
+  jit::setMayAcquireConcurrentLease(okToJit);
+  assertx(!acquiredSingleJit);
+  assertx(!acquiredSingleJitConcurrent);
+  if (okToJit) {
     if (singleJitRequests < RuntimeOption::EvalNumSingleJitRequests) {
       if (!singleJitLock.exchange(true, std::memory_order_relaxed)) {
         acquiredSingleJit = true;
@@ -236,10 +266,12 @@ void profileRequestStart() {
       }
     }
   }
-  if (standardRequest != okToJit) {
-    standardRequest = okToJit;
+
+  // Force interpretation if needed.
+  if (standardRequest == forceInterp) {
+    standardRequest = !forceInterp;
     if (!ThreadInfo::s_threadInfo.isNull()) {
-      ThreadInfo::s_threadInfo->m_reqInjectionData.updateJit();
+      RID().updateJit();
     }
   }
 
@@ -279,8 +311,14 @@ static void checkRFH(int64_t finished) {
 }
 
 void profileRequestEnd() {
-  if (warmingUp) return;
+  if (warmingUp || requestKind == RequestKind::NonVM) return;
   auto const finished = numRequests.fetch_add(1, std::memory_order_relaxed) + 1;
+  static auto const requestSeries = ServiceData::createTimeSeries(
+    "vm.requests",
+    {ServiceData::StatsType::RATE, ServiceData::StatsType::SUM},
+    {std::chrono::seconds(60), std::chrono::seconds(0)}
+  );
+  requestSeries->addValue(1);
   checkRFH(finished);
 
   if (acquiredSingleJit || acquiredSingleJitConcurrent) {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 $GLOBALS['foo'] = 1;

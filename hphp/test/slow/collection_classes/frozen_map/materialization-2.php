@@ -12,4 +12,8 @@ function main() {
   var_dump((Pair {1, 2})->toImmMap() == ImmMap {0 => 1, 1 => 2});
 }
 
+
+<<__EntryPoint>>
+function main_materialization_2() {
 main();
+}

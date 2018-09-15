@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($x) {
   // each of these should "just work" but stresses NewPackedArray logic.

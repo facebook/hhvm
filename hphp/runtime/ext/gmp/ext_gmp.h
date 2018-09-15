@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/vm/native-data.h"
@@ -120,7 +121,7 @@ public:
 
   static Object allocObject(const Variant& arg) {
     Object ret = allocObject();
-    tvRefcountedDecRef(
+    tvDecRefGen(
       g_context->invokeFunc(cls->getCtor(), make_packed_array(arg), ret.get())
     );
     return ret;

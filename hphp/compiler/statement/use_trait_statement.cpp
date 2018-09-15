@@ -45,12 +45,11 @@ StatementPtr UseTraitStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void UseTraitStatement::onParseRecur(AnalysisResultConstPtr ar,
+void UseTraitStatement::onParseRecur(AnalysisResultConstRawPtr ar,
                                      FileScopeRawPtr fs,
                                      ClassScopePtr scope) {
   if (scope->isInterface()) {
     parseTimeFatal(fs,
-                   Compiler::InvalidTraitStatement,
                    "Interfaces cannot use traits");
   }
   std::vector<std::string> usedTraits;
@@ -64,17 +63,6 @@ void UseTraitStatement::onParseRecur(AnalysisResultConstPtr ar,
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-void UseTraitStatement::analyzeProgram(AnalysisResultPtr ar) {
-  // Analyze children
-  for (int i = 0; i < m_exp->getCount(); i++) {
-    (*m_exp)[i]->analyzeProgram(ar);
-  }
-  if (m_stmt) m_stmt->analyzeProgram(ar);
-
-  // At the final pass, collect info & insert trait into target class
-  if (ar->getPhase() != AnalysisResult::AnalyzeAll) return;
-}
 
 ConstructPtr UseTraitStatement::getNthKid(int n) const {
   switch (n) {

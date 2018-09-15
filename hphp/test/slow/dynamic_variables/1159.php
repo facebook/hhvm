@@ -9,4 +9,8 @@ function foo($a) {
     $y = $a * $a;
   }
 }
+
+<<__EntryPoint>>
+function main_1159() {
 foo(4);
+}

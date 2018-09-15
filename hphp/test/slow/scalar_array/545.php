@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_545() {
 $a1 = array();
 $a2 = array(null);
 $a3 = array(true);
@@ -33,3 +36,4 @@ var_dump($a13);
 var_dump($a14);
 var_dump($a15);
 var_dump($a16);
+}

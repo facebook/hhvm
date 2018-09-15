@@ -1,4 +1,4 @@
-<?php
+<?hh
 function bar($a) {}
 function baz() {
   $cipher = 'abcdefghij';

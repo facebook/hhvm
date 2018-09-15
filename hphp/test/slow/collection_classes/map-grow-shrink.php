@@ -19,4 +19,8 @@ function main() {
   for ($i = 10000; $i >= 1; --$i) unset($m[$i]);
   echo "Done\n";
 }
+
+<<__EntryPoint>>
+function main_map_grow_shrink() {
 main();
+}

@@ -1,7 +1,5 @@
 <?php
 
-$tmp_sqlite = tempnam('/tmp', 'vmpdotest');
-
 function VS($x, $y) {
   var_dump($x === $y);
   if ($x !== $y) { echo "Failed: $y\n"; echo "Got: $x\n";
@@ -21,6 +19,11 @@ function cleanupSqliteTestTable($tmp_sqlite) {
   unlink($tmp_sqlite);
 }
 
+
+<<__EntryPoint>>
+function main_pdo_fetch_column() {
+$tmp_sqlite = tempnam('/tmp', 'vmpdotest');
+
 createSqliteTestTable($tmp_sqlite);
 
 $source = "sqlite:$tmp_sqlite";
@@ -33,4 +36,5 @@ try {
   var_dump($result->fetchColumn(3));
 } finally {
   cleanupSqliteTestTable($tmp_sqlite);
+}
 }

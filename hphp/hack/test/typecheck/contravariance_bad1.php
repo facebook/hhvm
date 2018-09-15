@@ -26,8 +26,16 @@ final class Box<T as A> implements ISettable<T> {
   }
 }
 
+function foo():void { }
 function MakeIt(): ISettable<B> {
-  $x = new Box();
+  // If we write new Box() then Hack
+  // incorrectly accepts this: it doesn't check the constraint on T
+  $x = new Box<A>();
+  // So here $x has type Box<v> with v <: A
+  // Now we do Box<v> <: ISettable<B>
+  // So ISettable<v> <: ISettable<B>
+  // So B <: v by contravariance
+  // By transitivity we should therefore check B <: A. Not true!
   return $x;
 }
 

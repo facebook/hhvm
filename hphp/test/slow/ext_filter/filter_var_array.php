@@ -1,11 +1,5 @@
 <?php
 
-$all_filters = array(
-  'No filters' => array(),
-  'Require Scalar' => array('flags' => FILTER_REQUIRE_SCALAR),
-  'Require Array' => array('flags' => FILTER_REQUIRE_ARRAY),
-);
-
 function perform_test($name, $test_filters, $add_empty) {
   $params = array(
     'null' => NULL,
@@ -27,7 +21,17 @@ function perform_test($name, $test_filters, $add_empty) {
   var_dump(filter_var_array($params, $filters, $add_empty));
 }
 
+
+<<__EntryPoint>>
+function main_filter_var_array() {
+$all_filters = array(
+  'No filters' => array(),
+  'Require Scalar' => array('flags' => FILTER_REQUIRE_SCALAR),
+  'Require Array' => array('flags' => FILTER_REQUIRE_ARRAY),
+);
+
 foreach ($all_filters as $test_name => $filter) {
   perform_test($test_name, $filter, true);
   perform_test($test_name, $filter, false);
+}
 }

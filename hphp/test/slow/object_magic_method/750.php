@@ -9,6 +9,10 @@ class A {
  return $this->a[$name];
 }
  }
- $obj = new A();
+
+ <<__EntryPoint>>
+function main_750() {
+$obj = new A();
  $obj->test = 'test';
  var_dump($obj->test);
+}

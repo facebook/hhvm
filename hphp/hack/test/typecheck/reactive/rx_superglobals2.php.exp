@@ -1,0 +1,2 @@
+File "rx_superglobals2.php", line 5, characters 8-15:
+Superglobal $_SERVER cannot be used in a reactive context. (Typing[4227])

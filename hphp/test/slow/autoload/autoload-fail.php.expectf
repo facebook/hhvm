@@ -1,6 +1,6 @@
 string(5) "class"
 string(1) "C"
-string(%d) "syntax error, unexpected '{' in %s/test/slow/autoload/autoload-fail-c.inc on line %d"
+string(%d) "%s in %s/test/slow/autoload/autoload-fail-c.inc on line %d"
 string(5) "class"
 string(1) "D"
 string(9) "Surprise!"

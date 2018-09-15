@@ -61,10 +61,54 @@ function could_include(string $file) : bool;
 function serialize_memoize_param(mixed $param): arraykey;
 
 /**
+ * Clear memoization data
+ *  - if $cls is non-null, clear memoziation cache for $cls::$func,
+ *    or for all static memoized methods if $func is null
+ *  - if $cls is null, clear memoization cache for $func
+ */
+<<__Native, __ParamCoerceModeFalse>>
+function clear_static_memoization(?string $cls, ?string $func = null) : bool;
+
+/**
+ * Clear __MemoizeLSB data
+ *  - if $func is non-null, clear cache for $cls::$func
+ *  - if $func is null, clear all LSB memoization caches for $cls
+ *
+ * Operates on a single class at a time. Clearing the cache for $cls::$func
+ * does not clear the cache for $otherClass::$func, for any other class.
+ */
+<<__Native, __ParamCoerceModeFalse>>
+function clear_lsb_memoization(string $cls, ?string $func = null) : bool;
+
+/**
+ * Clear memoization data on object instance
+ */
+<<__Native, __ParamCoerceModeFalse>>
+function clear_instance_memoization(object $obj) : bool;
+
+/**
  * Attach metadata to the caller's stack frame. The metadata can be retrieved
  * using debug_backtrace(DEBUG_BACKTRACE_PROVIDE_METADATA).
  */
 <<__Native("WritesCallerFrame")>>
 function set_frame_metadata(mixed $metadata): void;
+
+// class-like
+interface ClassLikeAttribute {}
+interface ClassAttribute extends ClassLikeAttribute {}
+interface EnumAttribute extends ClassLikeAttribute {}
+
+interface TypeAliasAttribute {}
+
+// function-like
+interface FunctionAttribute {}
+interface MethodAttribute {}
+
+// properties
+interface PropertyAttribute {}
+interface InstancePropertyAttribute extends PropertyAttribute {}
+interface StaticPropertyAttribute extends PropertyAttribute {}
+
+interface ParameterAttribute {}
 
 }

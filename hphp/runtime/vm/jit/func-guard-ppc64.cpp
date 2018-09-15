@@ -70,7 +70,7 @@ void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
   assertx(funcGuardMatches(guard, func));
 }
 
-TCA funcGuardFromPrologue(TCA prologue, const Func* func) {
+TCA funcGuardFromPrologue(TCA prologue, const Func* /*func*/) {
   if (isPrologueStub(prologue)) return prologue;
   return (prologue - kFuncGuardLen);
 }
@@ -83,7 +83,7 @@ bool funcGuardMatches(TCA guard, const Func* func) {
   return static_cast<uintptr_t>(di.immediate()) == ifunc;
 }
 
-void clobberFuncGuard(TCA guard, const Func* func) {
+void clobberFuncGuard(TCA guard, const Func* /*func*/) {
   smashMovq(guard, 0);
 }
 

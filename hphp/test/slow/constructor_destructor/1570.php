@@ -1,6 +1,4 @@
 <?php
-
-;
 class B1 {
 }
 class C1 {
@@ -68,6 +66,11 @@ function baz($d) {
   $x = n($d.'6');
   $x = n('B1');
 }
+
+
+<<__EntryPoint>>
+function main_1570() {
+;
 foo(false,false);
 foo(false,true);
 foo(true,true);
@@ -77,3 +80,4 @@ bar('D6',false,true);
 bar('D6',true,false);
 bar('D6',true,true);
 baz('D');
+}

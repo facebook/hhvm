@@ -29,6 +29,8 @@ namespace HPHP {
 struct Array;
 struct StringData;
 struct String;
+struct TypedValue;
+using Cell = TypedValue;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -106,7 +108,14 @@ size_t makeStaticStringSize();
  * given request.
  */
 rds::Handle lookupCnsHandle(const StringData* cnsName);
-rds::Handle makeCnsHandle(const StringData* cnsName, bool persistent);
+rds::Handle makeCnsHandle(const StringData* cnsName);
+
+/*
+ * Bind a persistent constant if its not yet been bound.
+ *
+ * Returns true iff the constant has a persistent handle.
+ */
+bool bindPersistentCns(const StringData* cnsName, const Cell& value);
 
 /*
  * Return an array of all the static strings in the current

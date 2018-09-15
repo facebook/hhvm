@@ -1,0 +1,27 @@
+[flake8]
+select = B,C,E,F,P,T4,W,B9
+max-line-length = 80
+# E127, E128 are hard to silence in certain nested formatting situations.
+# E203 doesn't work for slicing
+# E265, E266 talk about comment formatting which is too opinionated.
+# E402 warns on imports coming after statements. There are important use cases
+# like demandimport (https://fburl.com/demandimport) that require statements
+# before imports.
+# E501 is not flexible enough, we're using B950 instead.
+# E722 is a duplicate of B001.
+# P207 is a duplicate of B003.
+# W503 talks about operator formatting which is too opinionated.
+## CUSTOM IGNORES:
+# B001, E241, E251, F401, F403, F405
+ignore = E127, E128, E203, E265, E266, E402, E501, E722, P207, W503, B001, E241, E251, F401, F403, F405
+exclude =
+  .git,
+  .hg,
+  __pycache__,
+  _bin/*,
+  _build/*,
+  _ig_fbcode_wheel/*,
+  buck-out/*,
+  third-party-buck/*,
+  third-party2/*
+max-complexity = 12

@@ -1,4 +1,4 @@
-File "unused_awaitable6.php", line 9, characters 7-9:
+File "unused_awaitable6.php", line 9, characters 8-9:
 This expression is of type Awaitable, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
-File "unused_awaitable6.php", line 3, characters 21-29:
+File "unused_awaitable6.php", line 3, characters 21-34:
 This is why I think it is Awaitable

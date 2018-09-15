@@ -11,5 +11,9 @@ class C extends B {
  echo "$x \n";
 }
 }
+
+<<__EntryPoint>>
+function main_744() {
 $obj = new C;
 $obj->foo(1);
+}

@@ -1,4 +1,4 @@
-<?hh
+<?hh // decl
 
 function regular($a, $b, $c) {
   echo '* ', __FUNCTION__, "\n";
@@ -149,4 +149,8 @@ function main() {
   echo "Done\n";
 }
 
+
+<<__EntryPoint>>
+function main_unpack_call() {
 main();
+}

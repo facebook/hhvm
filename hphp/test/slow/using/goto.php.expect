@@ -1,0 +1,11 @@
+goto within using
+Constructing id 0
+About to goto
+Goto imminent
+At foo:
+Disposing id 0
+goto out of using
+Constructing id 1
+About to goto
+Disposing id 1
+Leaving main

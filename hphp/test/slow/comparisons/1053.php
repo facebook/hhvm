@@ -11,4 +11,8 @@ function foo($p) {
   }
   var_dump($obj == $a);
 }
+
+<<__EntryPoint>>
+function main_1053() {
 foo(false);
+}

@@ -1,0 +1,4 @@
+<?hh
+
+echo "hello\n";
+echo "world\n";

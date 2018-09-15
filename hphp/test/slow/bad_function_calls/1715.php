@@ -8,4 +8,8 @@ function f() {
   array_chunk($a = 1, $b = 2, $c = 3, $d = 4);
   var_dump($a, $b, $c, $d);
 }
+
+<<__EntryPoint>>
+function main_1715() {
 f();
+}

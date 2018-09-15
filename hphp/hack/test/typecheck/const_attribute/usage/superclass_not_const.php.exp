@@ -1,0 +1,2 @@
+File "superclass_not_const.php", line 6, characters 7-7:
+A __Const class may only extend other __Const classes (Typing[4197])

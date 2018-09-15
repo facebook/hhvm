@@ -1,0 +1,4 @@
+File "rx_if_implements26.php", line 13, characters 12-26:
+Shallow reactive functions cannot call non-reactive functions. (Typing[4218])
+File "rx_if_implements26.php", line 6, characters 19-27:
+This function is non-reactive.

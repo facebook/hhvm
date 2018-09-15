@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace A {
   const C = "a";
 }

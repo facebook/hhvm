@@ -37,7 +37,7 @@ void PCFilter::PtrMapNode::clearImpl(unsigned short bits) {
 
   // clear all the sub levels and mark all slots NULL
   if (bits <= PTRMAP_LEVEL_BITS) {
-    assert(bits == PTRMAP_LEVEL_BITS);
+    assertx(bits == PTRMAP_LEVEL_BITS);
     return;
   }
   for (int i = 0; i < PTRMAP_LEVEL_ENTRIES; i++) {
@@ -56,13 +56,13 @@ static void* MakeNode() {
 
 void* PCFilter::PtrMap::getPointerImpl(void* ptr) const {
   auto current = (PtrMapNode*)&m_root;
-  assert(current->m_entries);
+  assertx(current->m_entries);
   unsigned short cursor = PTRMAP_PTR_SIZE;
   do {
     cursor -= PTRMAP_LEVEL_BITS;
     unsigned long index = ((PTRMAP_LEVEL_MASK << cursor) & (unsigned long)ptr)
                           >> cursor;
-    assert(index < PTRMAP_LEVEL_ENTRIES);
+    assertx(index < PTRMAP_LEVEL_ENTRIES);
     current = (PtrMapNode*)&current->m_entries[index];
   } while (current->m_entries && cursor);
   return current->m_entries;
@@ -74,14 +74,14 @@ void PCFilter::PtrMap::setPointer(void* ptr, void* val) {
     if (!val) return;
     m_root = MakeNode();
   }
-  assert(current->m_entries == m_root);
+  assertx(current->m_entries == m_root);
 
   unsigned short cursor = PTRMAP_PTR_SIZE;
   while (true) {
     cursor -= PTRMAP_LEVEL_BITS;
     unsigned long index = ((PTRMAP_LEVEL_MASK << cursor) & (unsigned long)ptr)
                           >> cursor;
-    assert(index < PTRMAP_LEVEL_ENTRIES);
+    assertx(index < PTRMAP_LEVEL_ENTRIES);
     if (!cursor) {
       current->m_entries[index] = val;
       break;

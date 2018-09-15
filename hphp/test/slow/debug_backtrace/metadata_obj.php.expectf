@@ -1,0 +1,90 @@
+array(2) {
+  [0]=>
+  array(7) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(10)
+    ["function"]=>
+    string(3) "bar"
+    ["class"]=>
+    string(3) "Baz"
+    ["object"]=>
+    object(Baz)#1 (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      int(1)
+    }
+  }
+  [1]=>
+  array(7) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(15)
+    ["function"]=>
+    string(3) "foo"
+    ["class"]=>
+    string(3) "Baz"
+    ["object"]=>
+    object(Baz)#1 (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      int(1)
+    }
+  }
+}
+array(2) {
+  [0]=>
+  array(7) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(10)
+    ["function"]=>
+    string(3) "bar"
+    ["class"]=>
+    string(3) "Baz"
+    ["object"]=>
+    object(Baz)#1 (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      int(65537)
+    }
+  }
+  [1]=>
+  array(8) {
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(16)
+    ["function"]=>
+    string(3) "foo"
+    ["class"]=>
+    string(3) "Baz"
+    ["object"]=>
+    object(Baz)#1 (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      int(65537)
+    }
+    ["metadata"]=>
+    string(8) "I am foo"
+  }
+}

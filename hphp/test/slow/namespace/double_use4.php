@@ -10,4 +10,8 @@
 use test\Iterator;
 use test\Traversable;
 
+
+<<__EntryPoint>>
+function main_double_use4() {
 echo 'successful';
+}

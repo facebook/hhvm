@@ -35,8 +35,6 @@ struct SwitchStatement : Statement {
                   ExpressionPtr exp, StatementListPtr cases);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  bool hasDecl() const override;
-  bool hasRetExp() const override;
   int getRecursiveCount() const override;
 
   ExpressionPtr getExp() const { return m_exp; }

@@ -1,0 +1,339 @@
+=============== positive tests =====================
+
+Notice: 'func' called dynamically in %s/forbid-notice.php on line 216
+
+Notice: 'async_func' called dynamically in %s/forbid-notice.php on line 217
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 218
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 219
+
+Notice: 'A::async_func' called dynamically in %s/forbid-notice.php on line 220
+
+Notice: 'A::static_async_func' called dynamically in %s/forbid-notice.php on line 221
+
+Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 222
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 223
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 224
+
+Notice: 'A::async_func' called dynamically in %s/forbid-notice.php on line 225
+
+Notice: 'A::static_async_func' called dynamically in %s/forbid-notice.php on line 226
+
+Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 227
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 228
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 229
+
+Notice: 'A::async_func' called dynamically in %s/forbid-notice.php on line 230
+
+Notice: 'A::static_async_func' called dynamically in %s/forbid-notice.php on line 231
+
+Notice: 'C::__call' called dynamically in %s/forbid-notice.php on line 232
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 233
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 234
+
+Notice: 'A::async_func' called dynamically in %s/forbid-notice.php on line 235
+
+Notice: 'A::static_async_func' called dynamically in %s/forbid-notice.php on line 236
+
+Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 237
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 238
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 239
+
+Notice: 'A::async_func' called dynamically in %s/forbid-notice.php on line 240
+
+Notice: 'A::static_async_func' called dynamically in %s/forbid-notice.php on line 241
+
+Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 242
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 111
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 112
+
+Notice: 'B::func' called dynamically in %s/forbid-notice.php on line 113
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 116
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 117
+
+Notice: 'B::static_func' called dynamically in %s/forbid-notice.php on line 118
+
+Notice: 'A::async_func' called dynamically in %s/forbid-notice.php on line 121
+
+Notice: 'A::async_func' called dynamically in %s/forbid-notice.php on line 122
+
+Notice: 'B::async_func' called dynamically in %s/forbid-notice.php on line 123
+
+Notice: 'A::static_async_func' called dynamically in %s/forbid-notice.php on line 126
+
+Notice: 'A::static_async_func' called dynamically in %s/forbid-notice.php on line 127
+
+Notice: 'B::static_async_func' called dynamically in %s/forbid-notice.php on line 128
+
+Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 24
+
+Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 25
+
+Notice: 'D::__callStatic' called dynamically in %s/forbid-notice.php on line 26
+
+Notice: 'A::__construct' called dynamically in %s/forbid-notice.php on line 247
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 248
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 249
+
+Notice: 'A::async_func' called dynamically in %s/forbid-notice.php on line 250
+
+Notice: 'A::static_async_func' called dynamically in %s/forbid-notice.php on line 251
+
+Notice: 'C::__call' called dynamically in %s/forbid-notice.php on line 252
+
+Notice: 'func' called dynamically in %s/forbid-notice.php on line 254
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 255
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 256
+
+Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 257
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 258
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 259
+
+Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 260
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 261
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 262
+
+Notice: 'C::__call' called dynamically in %s/forbid-notice.php on line 263
+
+Notice: 'func' called dynamically in %s/forbid-notice.php on line 266
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 267
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 268
+
+Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 269
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 270
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 271
+
+Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 272
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 273
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 274
+
+Notice: 'C::__call' called dynamically in %s/forbid-notice.php on line 275
+
+Notice: 'func' called dynamically in %s/forbid-notice.php on line 277
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 278
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 279
+
+Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 280
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 281
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 282
+
+Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 283
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 284
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 285
+
+Notice: 'C::__call' called dynamically in %s/forbid-notice.php on line 286
+
+Notice: 'func' called dynamically in %s/forbid-notice.php on line 288
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 289
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 290
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 291
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 292
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 293
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 294
+
+Notice: 'func' called dynamically in %s/forbid-notice.php on line 132
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 133
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 134
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 135
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 136
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 137
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 138
+
+Notice: 'func' called dynamically in %s/forbid-notice.php on line 140
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 141
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 142
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 143
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 144
+
+Notice: 'A::func' called dynamically in %s/forbid-notice.php on line 145
+
+Notice: 'A::static_func' called dynamically in %s/forbid-notice.php on line 146
+
+Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 30
+
+Notice: 'C::__callStatic' called dynamically in %s/forbid-notice.php on line 31
+
+Notice: 'C::__call' called dynamically in %s/forbid-notice.php on line 32
+
+Notice: 'cmp' called dynamically in %s/forbid-notice.php on line 299
+
+Notice: 'A::cmp' called dynamically in %s/forbid-notice.php on line 300
+
+Notice: 'A::static_cmp' called dynamically in %s/forbid-notice.php on line 301
+
+Notice: 'CCmp::__callStatic' called dynamically in %s/forbid-notice.php on line 302
+
+Notice: 'A::cmp' called dynamically in %s/forbid-notice.php on line 303
+
+Notice: 'A::static_cmp' called dynamically in %s/forbid-notice.php on line 304
+
+Notice: 'CCmp::__callStatic' called dynamically in %s/forbid-notice.php on line 305
+
+Notice: 'A::cmp' called dynamically in %s/forbid-notice.php on line 306
+
+Notice: 'A::static_cmp' called dynamically in %s/forbid-notice.php on line 307
+
+Notice: 'CCmp::__call' called dynamically in %s/forbid-notice.php on line 308
+=============== negative tests =====================
+=============== positive tests (exceptions) ========
+Exception: 'func' called dynamically
+Exception: 'async_func' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::async_func' called dynamically
+Exception: 'A::static_async_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::async_func' called dynamically
+Exception: 'A::static_async_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::async_func' called dynamically
+Exception: 'A::static_async_func' called dynamically
+Exception: 'C::__call' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::async_func' called dynamically
+Exception: 'A::static_async_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::async_func' called dynamically
+Exception: 'A::static_async_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'B::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'B::static_func' called dynamically
+Exception: 'A::async_func' called dynamically
+Exception: 'A::async_func' called dynamically
+Exception: 'B::async_func' called dynamically
+Exception: 'A::static_async_func' called dynamically
+Exception: 'A::static_async_func' called dynamically
+Exception: 'B::static_async_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'D::__callStatic' called dynamically
+Exception: 'A::__construct' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::async_func' called dynamically
+Exception: 'A::static_async_func' called dynamically
+Exception: 'C::__call' called dynamically
+Exception: 'func' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__call' called dynamically
+Exception: 'func' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__call' called dynamically
+Exception: 'func' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__call' called dynamically
+Exception: 'func' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'func' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'func' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'C::__callStatic' called dynamically
+Exception: 'C::__call' called dynamically
+Exception: 'cmp' called dynamically
+Exception: 'A::cmp' called dynamically
+Exception: 'A::static_cmp' called dynamically
+Exception: 'CCmp::__callStatic' called dynamically
+Exception: 'A::cmp' called dynamically
+Exception: 'A::static_cmp' called dynamically
+Exception: 'CCmp::__callStatic' called dynamically
+Exception: 'A::cmp' called dynamically
+Exception: 'A::static_cmp' called dynamically
+Exception: 'CCmp::__call' called dynamically

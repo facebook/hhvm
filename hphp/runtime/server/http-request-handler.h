@@ -63,6 +63,8 @@ private:
   ServiceData::ExportedTimeSeries* m_requestTimedOutOnQueue;
   folly::Optional<SourceRootInfo> m_sourceRootInfo;
 
+  bool handleFileRequest(Transport *transport, const String& translated,
+                         const std::string& path, const char* ext);
   bool handleProxyRequest(Transport *transport, bool force);
   void sendStaticContent(Transport *transport, const char *data, int len,
                          time_t mtime, bool compressed,
@@ -71,7 +73,7 @@ private:
   bool executePHPRequest(Transport *transport, RequestURI &reqURI,
                          SourceRootInfo &sourceRootInfo);
 
-  static DECLARE_THREAD_LOCAL(AccessLog::ThreadData, s_accessLogThreadData);
+  static THREAD_LOCAL(AccessLog::ThreadData, s_accessLogThreadData);
   static AccessLog s_accessLog;
 
   static AccessLog::ThreadData* getAccessLogThreadData() {

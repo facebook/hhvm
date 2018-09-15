@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 var_dump( ini_get('memory_limit'));
 
@@ -8,7 +8,7 @@ var_dump( ini_get('memory_limit'));
 ini_set('memory_limit', '128G');
 var_dump( ini_get('memory_limit'));
 
-ini_set('memory_limit', '128K');
+ini_set('memory_limit', '17000K');
 var_dump( ini_get('memory_limit'));
 
 ini_set('memory_limit', '136314880');

@@ -31,7 +31,6 @@
 #include "hphp/vixl/utils.h"
 #include "hphp/vixl/a64/decoder-a64.h"
 #include "hphp/vixl/a64/constants-a64.h"
-#include "hphp/vixl/a64/instrument-a64.h"
 
 namespace vixl {
 
@@ -76,13 +75,13 @@ class Instrument: public DecoderVisitor {
  public:
   explicit Instrument(const char* datafile = nullptr,
     uint64_t sample_period = kDefaultInstrumentationSamplingPeriod);
-  ~Instrument();
+  ~Instrument() override;
 
   void Enable();
   void Disable();
 
   // Declare all Visitor functions.
-  #define DECLARE(A) void Visit##A(Instruction* instr);
+  #define DECLARE(A) void Visit##A(Instruction* instr) override;
   VISITOR_LIST(DECLARE)
   #undef DECLARE
 

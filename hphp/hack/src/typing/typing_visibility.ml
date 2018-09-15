@@ -2,12 +2,11 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  **)
-
+open Core_kernel
 open Nast
 open Typing_defs
 open Utils
@@ -25,6 +24,7 @@ let is_protected_visible env x self_id =
      * parents can call children's protected methods (like a
      * constructor) *)
     if SSet.mem x my_class.tc_extends
+       || SMap.mem x my_class.tc_ancestors
        || SSet.mem self_id their_class.tc_extends
        || SSet.mem x my_class.tc_req_ancestors_extends
        || not my_class.tc_members_fully_known
@@ -48,7 +48,7 @@ let is_private_visible_for_class env x self_id cid class_ =
   | CIparent ->
     Some "You cannot access a private member with parent::"
   | CIself -> None
-  | CI (_, called_ci) ->
+  | CI ((_, called_ci), _) ->
     (if x = self_id then None else
      match Env.get_class env called_ci with
      | Some {tc_kind = Ast.Ctrait; _} ->

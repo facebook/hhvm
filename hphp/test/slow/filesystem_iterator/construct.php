@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_construct() {
 $sample_dir = __DIR__.'/../../sample_dir';
 $it = new FilesystemIterator($sample_dir);
 $ret = array();
@@ -7,3 +10,4 @@ foreach ($it as $fileinfo) {
 }
 asort($ret);
 var_dump(array_values($ret));
+}

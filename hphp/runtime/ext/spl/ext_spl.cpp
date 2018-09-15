@@ -48,8 +48,9 @@ const StaticString
   s_current("current"),
   s_key("key"),
   s_getIterator("getIterator"),
-  s_directory_iterator("DirectoryIterator");
+  s_DirectoryIterator("DirectoryIterator");
 
+static Class* s_DirectoryIterator_class = nullptr;
 
 void throw_spl_exception(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
   ATTRIBUTE_PRINTF(1,2);
@@ -64,7 +65,7 @@ void throw_spl_exception(const char *fmt, ...) {
 }
 
 static bool s_inited = false;
-static int64_t s_hash_mask_handle = 0;
+static uint64_t s_hash_mask_handle = 0;
 static Mutex s_mutex;
 
 String HHVM_FUNCTION(spl_object_hash, const Object& obj) {
@@ -120,7 +121,8 @@ Variant HHVM_FUNCTION(class_implements, const Variant& obj,
   Array ret(Array::Create());
   const Class::InterfaceMap& ifaces = cls->allInterfaces();
   for (int i = 0, size = ifaces.size(); i < size; i++) {
-    ret.set(ifaces[i]->nameStr(), VarNR(ifaces[i]->name()));
+    ret.set(ifaces[i]->nameStr(),
+            make_tv<KindOfPersistentString>(ifaces[i]->name()));
   }
   return ret;
 }
@@ -146,7 +148,7 @@ Variant HHVM_FUNCTION(class_parents, const Variant& obj,
   }
   Array ret(Array::Create());
   for (cls = cls->parent(); cls; cls = cls->parent()) {
-    ret.set(cls->nameStr(), VarNR(cls->name()));
+    ret.set(cls->nameStr(), make_tv<KindOfPersistentString>(cls->name()));
   }
   return ret;
 }
@@ -173,7 +175,7 @@ Variant HHVM_FUNCTION(class_uses, const Variant& obj,
   auto &usedTraits = cls->preClass()->usedTraits();
   ArrayInit ret(usedTraits.size(), ArrayInit::Map{});
   for (auto const& traitName : usedTraits) {
-    ret.set(StrNR(traitName), VarNR(traitName));
+    ret.set(StrNR(traitName), VarNR(traitName).tv());
   }
   return ret.toArray();
 }
@@ -326,19 +328,30 @@ String HHVM_FUNCTION(spl_autoload_extensions,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+const StaticString
+  s_dir("dir"),
+  s_dirName("dirName");
+
 template <class T>
 static req::ptr<T> getDir(const Object& dir_iter) {
   static_assert(std::is_base_of<Directory, T>::value,
                 "Only cast to directories");
-  return cast<T>(*dir_iter->o_realProp("dir", 0, s_directory_iterator));
+  assertx(s_DirectoryIterator_class);
+  auto const dir = dir_iter->getProp(
+    s_DirectoryIterator_class, s_dir.get()
+  ).unboxed();
+  assertx(dir.is_set());
+  assertx(dir.type() == KindOfResource);
+  return req::ptr<T>(static_cast<T*>(dir.val().pres->data()));
 }
 
 static Variant HHVM_METHOD(DirectoryIterator, hh_readdir) {
   auto dir = getDir<Directory>(ObjNR(this_).asObject());
 
   if (auto array_dir = dyn_cast<ArrayDirectory>(dir)) {
-    auto prop = this_->o_realProp("dirName", 0, s_directory_iterator);
-    *prop = array_dir->path();
+    auto const path = array_dir->path();
+    assertx(s_DirectoryIterator_class);
+    this_->setProp(s_DirectoryIterator_class, s_dirName.get(), path.toCell());
   }
 
   return HHVM_FN(readdir)(Resource(dir));
@@ -352,9 +365,9 @@ static int64_t HHVM_METHOD(GlobIterator, count) {
 
 struct SPLExtension final : Extension {
   SPLExtension() : Extension("spl", "0.2") { }
-  void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
-    HHVM_ME(DirectoryIterator, hh_readdir);
-    HHVM_ME(GlobIterator, count);
+  void moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*config*/) override {
+    HHVM_SYS_ME(DirectoryIterator, hh_readdir);
+    HHVM_SYS_ME(GlobIterator, count);
   }
   void moduleInit() override {
     HHVM_FE(spl_object_hash);
@@ -373,6 +386,9 @@ struct SPLExtension final : Extension {
     HHVM_FE(spl_autoload_unregister);
 
     loadSystemlib();
+
+    s_DirectoryIterator_class = Unit::lookupClass(s_DirectoryIterator.get());
+    assertx(s_DirectoryIterator_class);
   }
 } s_SPL_extension;
 

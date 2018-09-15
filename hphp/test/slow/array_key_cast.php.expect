@@ -1,0 +1,26 @@
+string(0) ""
+int(0)
+int(1)
+int(123)
+int(789)
+string(3) "abc"
+int(456)
+int(1)
+Exception: Arrays cannot be cast to an array-key
+Exception: Vecs cannot be cast to an array-key
+Exception: Dicts cannot be cast to an array-key
+Exception: Keysets cannot be cast to an array-key
+Exception: Objects cannot be cast to an array-key
+string(0) ""
+int(0)
+int(1)
+int(123)
+int(789)
+string(3) "abc"
+int(456)
+int(1)
+Exception: Arrays cannot be cast to an array-key
+Exception: Vecs cannot be cast to an array-key
+Exception: Dicts cannot be cast to an array-key
+Exception: Keysets cannot be cast to an array-key
+Exception: Objects cannot be cast to an array-key

@@ -16,5 +16,9 @@ function bar() {
   var_dump(is_int($z[1]));
   var_dump($z);
 }
-bar();
 
+
+<<__EntryPoint>>
+function main_array_036() {
+bar();
+}

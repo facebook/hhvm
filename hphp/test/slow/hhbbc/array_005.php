@@ -23,4 +23,8 @@ function main() {
   var_dump($name, $cnt);
 }
 
+
+<<__EntryPoint>>
+function main_array_005() {
 main();
+}

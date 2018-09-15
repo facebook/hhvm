@@ -31,4 +31,8 @@ function main() {
   var_dump($y);
 }
 
+
+<<__EntryPoint>>
+function main_fpi_extract() {
 main();
+}

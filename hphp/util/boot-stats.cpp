@@ -36,7 +36,7 @@ ResourceUsage ResourceUsage::sinceEpoch() {
     std::chrono::duration_cast<TimeUnit>(
       std::chrono::microseconds(
         HPHP::Timer::GetRusageMicros(Timer::TotalCPU, Timer::Self))),
-    Process::GetProcessRSS(getpid()));
+    Process::GetMemUsageMb());
 }
 
 std::string ResourceUsage::toString() const {
@@ -129,7 +129,7 @@ std::unique_ptr<BootStats::Impl> BootStats::s_instance;
 void BootStats::start() {
   BootStats::s_started = true;
   BootStats::s_start = ResourceUsage::sinceEpoch();
-  BootStats::s_instance = folly::make_unique<BootStats::Impl>();
+  BootStats::s_instance = std::make_unique<BootStats::Impl>();
 }
 
 void BootStats::done() {
@@ -153,7 +153,7 @@ void BootStats::done() {
     StructuredLog::log("hhvm_boot_timer", cols);
     cols.clear();
     for (auto sample : s_instance->m_marks) {
-      cols.setInt(sample.first, sample.second.rssMb() << 20); // To bytes.
+      cols.setInt(sample.first, sample.second.rssMb() * (1 << 20)); // To bytes.
     }
     StructuredLog::log("hhvm_boot_memory", cols);
   }

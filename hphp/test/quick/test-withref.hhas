@@ -33,8 +33,8 @@
      PopC
   # line 5
     FPushFuncD 1 "var_dump"
-    FPassL 0 $ar
-    FCall 1
+    CGetL $ar
+    FCall 1 0 1 - "" ""
     PopR
   # line 7
     BaseL $ar Define
@@ -47,13 +47,13 @@
     PopC
   # line 9
     FPushFuncD 1 "var_dump"
-    FPassL 0 $x
-    FCall 1
+    CGetL $x
+    FCall 1 0 1 - "" ""
     PopR
   # line 10
     FPushFuncD 1 "var_dump"
-    FPassL 0 $ar
-    FCall 1
+    CGetL $ar
+    FCall 1 0 1 - "" ""
     PopR
   # line 12
     Array @empty
@@ -62,20 +62,16 @@
   # line 13
     FPushFuncD 2 "sprintf"
     String "%d"
-    FPassCE 0
     Int 11
-    FPassCE 1
-    FCall 2
+    FCall 2 0 1 - "" ""
     UnboxR
     SetL $k
     PopC
   # line 14
     FPushFuncD 2 "sprintf"
     String "%d"
-    FPassCE 0
     Int 22
-    FPassCE 1
-    FCall 2
+    FCall 2 0 1 - "" ""
     UnboxR
     SetL $v
     PopC
@@ -99,18 +95,18 @@ loop:
   # line 19
 end_loop:
     FPushFuncD 1 "var_dump"
-    FPassL 0 $ar2
-    FCall 1
+    CGetL $ar2
+    FCall 1 0 1 - "" ""
     PopR
   # line 20
     FPushFuncD 1 "var_dump"
-    FPassL 0 $ar
-    FCall 1
+    CGetL $ar
+    FCall 1 0 1 - "" ""
     PopR
   # line 21
     FPushFuncD 1 "var_dump"
-    FPassL 0 $x
-    FCall 1
+    CGetL $x
+    FCall 1 0 1 - "" ""
     PopR
     Int 1
     RetC

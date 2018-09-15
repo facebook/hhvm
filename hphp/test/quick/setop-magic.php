@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Foo {
   public function __get($x) {

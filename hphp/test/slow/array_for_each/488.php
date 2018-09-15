@@ -16,5 +16,9 @@ function g12($a) {
   }
   var_dump($a);
 }
+
+<<__EntryPoint>>
+function main_488() {
 foreach (g12(array(0, 0, 0, 0)) as $_) {
+}
 }

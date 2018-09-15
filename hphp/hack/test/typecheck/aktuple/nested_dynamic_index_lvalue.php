@@ -6,7 +6,7 @@
  */
 
 function test(int $key): void {
-  $a = Vector {array(4, 'aaa')};
+  $a = Vector { array(4, 'aaa') };
   $a[0][$key] = 4;
   hh_show($a[0]);
   take_string($a[0][1]);

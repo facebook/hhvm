@@ -2,9 +2,8 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
@@ -13,7 +12,7 @@
 (* Checks that a class implements an interface *)
 (*****************************************************************************)
 
-open Core
+open Core_kernel
 open Typing_defs
 open Typing_ops
 
@@ -66,7 +65,7 @@ let check_visibility parent_class_elt class_elt =
 
 (* Check that all the required members are implemented *)
 let check_members_implemented check_private parent_reason reason
-    (parent_members, members, _) =
+    (_, parent_members, members, _) =
   SMap.iter begin fun member_name class_elt ->
     match class_elt.ce_visibility with
       | Vprivate _ when not check_private -> ()
@@ -140,20 +139,63 @@ let should_check_params parent_class class_ =
   let check_params = class_known || check_partially_known_method_params in
   class_known, check_params
 
+let check_final_method member_source parent_class_elt class_elt =
+  (* we only check for final overrides on methods, not properties *)
+  let is_method = match member_source with
+    | `FromMethod | `FromSMethod -> true
+    | _ -> false in
+  let is_override = parent_class_elt.ce_final && parent_class_elt.ce_origin <> class_elt.ce_origin in
+  if is_method && is_override && not class_elt.ce_synthesized then
+    (* we have a final method being overridden by a user-declared method *)
+    let lazy (parent_pos, _) = parent_class_elt.ce_type in
+    let lazy (elt_pos, _) = class_elt.ce_type in
+    let parent_pos = Reason.to_pos parent_pos in
+    let pos = Reason.to_pos elt_pos in
+    Errors.override_final parent_pos pos
+
+let check_memoizelsb_method member_source parent_class_elt class_elt =
+  let is_method = match member_source with
+    | `FromMethod | `FromSMethod -> true
+    | _ -> false in
+  let is_memoizelsb = class_elt.ce_memoizelsb in
+  let is_override = parent_class_elt.ce_origin <> class_elt.ce_origin in
+  if is_method && is_memoizelsb && is_override then
+    (* we have a __MemoizeLSB method which is overriding something else *)
+    let lazy (parent_pos, _) = parent_class_elt.ce_type in
+    let lazy (elt_pos, _) = class_elt.ce_type in
+    let parent_pos = Reason.to_pos parent_pos in
+    let pos = Reason.to_pos elt_pos in
+    Errors.override_memoizelsb parent_pos pos
+
 (* Check that overriding is correct *)
-let check_override env member_name ?(ignore_fun_return = false)
-    parent_class class_ parent_class_elt class_elt =
+let check_override env member_name mem_source ?(ignore_fun_return = false)
+    (parent_class, parent_ty) (class_, class_ty) parent_class_elt class_elt =
+  (* We first verify that we aren't overriding a final method *)
+  check_final_method mem_source parent_class_elt class_elt;
+  check_memoizelsb_method mem_source parent_class_elt class_elt;
   let class_known, check_params = should_check_params parent_class class_ in
   let check_vis = class_known || check_partially_known_method_visibility in
   if check_vis then check_visibility parent_class_elt class_elt else ();
+  let lazy fty_child = class_elt.ce_type in
+  let pos = Reason.to_pos (fst fty_child) in
+  if class_elt.ce_const <> parent_class_elt.ce_const then (
+    let lazy fty_parent = parent_class_elt.ce_type in
+    let parent_pos = Reason.to_pos (fst fty_parent) in
+    Errors.overriding_prop_const_mismatch parent_pos parent_class_elt.ce_const
+      pos class_elt.ce_const);
   if check_params then
-    let lazy fty_child = class_elt.ce_type in
-    let pos = Reason.to_pos (fst fty_child) in
     Errors.try_ (fun () ->
     match parent_class_elt.ce_type, fty_child with
     | lazy (r_parent, Tfun ft_parent), (r_child, Tfun ft_child) ->
+      let is_static = SMap.mem member_name parent_class.tc_smethods in
       (* Add deps here when we override *)
-      let subtype_funs = SubType.subtype_method ~check_return:(
+      let subtype_funs = SubType.subtype_method
+          ~extra_info:SubType.({
+            method_info = Some (member_name, is_static);
+            class_ty = Some (DeclTy class_ty);
+            parent_class_ty = Some (DeclTy parent_ty)
+           })
+          ~check_return:(
           (not ignore_fun_return) &&
           (class_known || check_partially_known_method_returns)
         ) in
@@ -162,6 +204,14 @@ let check_override env member_name ?(ignore_fun_return = false)
       check_ambiguous_inheritance check (r_parent, ft_parent) (r_child, ft_child)
         (Reason.to_pos r_child) class_ class_elt.ce_origin
     | lazy fty_parent, _ ->
+      begin match snd fty_parent, snd fty_child with
+        | Tany, Tany -> ()
+        | Tany, _ ->
+          Errors.decl_override_missing_hint @@ Reason.to_pos (fst fty_parent)
+        | _, Tany ->
+          Errors.decl_override_missing_hint @@ Reason.to_pos (fst fty_child)
+        | _, _ -> ()
+      end;
       unify_decl pos Typing_reason.URnone env fty_parent fty_child
     )
     (fun errorl ->
@@ -184,8 +234,9 @@ let filter_privates members =
     else SMap.add name class_elt acc
   end members SMap.empty
 
-let check_members check_private env (parent_class, psubst) (class_, subst)
-    (parent_members, members, dep) =
+let check_members check_private env (parent_class, psubst, parent_ty)
+  (class_, subst, class_ty)
+    (mem_source, parent_members, members, dep) =
   let parent_members = if check_private then parent_members
     else filter_privates parent_members in
   SMap.iter begin fun member_name parent_class_elt ->
@@ -197,8 +248,9 @@ let check_members check_private env (parent_class, psubst) (class_, subst)
         Typing_deps.add_idep
           (Dep.Class class_.tc_name)
           (dep parent_class_elt.ce_origin member_name);
-      check_override env member_name parent_class class_
-                                     parent_class_elt class_elt
+      check_override env member_name mem_source
+        (parent_class, parent_ty) (class_, class_ty)
+        parent_class_elt class_elt
     | None -> ()
   end parent_members
 
@@ -213,13 +265,13 @@ let instantiate_consts subst consts =
   SMap.map (Inst.instantiate_cc subst) consts
 
 let make_all_members ~child_class ~parent_class = [
-  parent_class.tc_props, child_class.tc_props,
+  `FromProp, parent_class.tc_props, child_class.tc_props,
   (fun x y -> Dep.Prop (x, y));
-  parent_class.tc_sprops, child_class.tc_sprops,
+  `FromSProp, parent_class.tc_sprops, child_class.tc_sprops,
   (fun x y -> Dep.SProp (x, y));
-  parent_class.tc_methods, child_class.tc_methods,
+  `FromMethod, parent_class.tc_methods, child_class.tc_methods,
   (fun x y -> Dep.Method (x, y));
-  parent_class.tc_smethods, child_class.tc_smethods,
+  `FromSMethod, parent_class.tc_smethods, child_class.tc_smethods,
   (fun x y -> Dep.SMethod (x, y));
 ]
 
@@ -234,15 +286,25 @@ let default_constructor_ce class_ =
   let ft = { ft_pos      = pos;
              ft_deprecated = None;
              ft_abstract = false;
+             ft_is_coroutine = false;
              ft_arity    = Fstandard (0, 0);
              ft_tparams  = [];
              ft_where_constraints = [];
              ft_params   = [];
              ft_ret      = r, Tprim Nast.Tvoid;
+             ft_ret_by_ref = false;
+             ft_reactive = Nonreactive;
+             ft_mutability = None;
+             ft_returns_mutable = false;
+             ft_return_disposable = false;
+             ft_decl_errors = None;
+             ft_returns_void_to_rx = false;
            }
   in { ce_final       = false;
        ce_is_xhp_attr = false;
+       ce_const       = false;
        ce_override    = false;
+       ce_memoizelsb  = false;
        ce_synthesized = true;
        ce_visibility  = Vpublic;
        ce_type        = lazy (r, Tfun ft);
@@ -250,7 +312,7 @@ let default_constructor_ce class_ =
      }
 
 (* When an interface defines a constructor, we check that they are compatible *)
-let check_constructors env parent_class class_ psubst subst =
+let check_constructors env (parent_class, parent_ty) (class_, class_ty) psubst subst =
   let explicit_consistency = snd parent_class.tc_construct in
   if parent_class.tc_kind = Ast.Cinterface || explicit_consistency
   then (
@@ -268,8 +330,9 @@ let check_constructors env parent_class class_ psubst subst =
           Typing_deps.add_idep
             (Dep.Class class_.tc_name)
             (Dep.Cstr parent_cstr.ce_origin);
-        check_override env "__construct"
-          ~ignore_fun_return:true parent_class class_ parent_cstr cstr
+        check_override env "__construct" `FromMethod
+          ~ignore_fun_return:true
+          (parent_class, parent_ty) (class_, class_ty) parent_cstr cstr
       | None, Some cstr when explicit_consistency ->
         let parent_cstr = default_constructor_ce parent_class in
         let parent_cstr = Inst.instantiate_ce psubst parent_cstr in
@@ -278,10 +341,16 @@ let check_constructors env parent_class class_ psubst subst =
           Typing_deps.add_idep
             (Dep.Class class_.tc_name)
             (Dep.Cstr parent_cstr.ce_origin);
-        check_override env "__construct"
-          ~ignore_fun_return:true parent_class class_ parent_cstr cstr
+        check_override env "__construct" `FromMethod
+          ~ignore_fun_return:true (parent_class, parent_ty) (class_, class_ty) parent_cstr cstr
       | None, _ -> ()
-  ) else ()
+  ) else (
+    match fst parent_class.tc_construct, fst class_.tc_construct with
+    | Some parent_cstr, _ when parent_cstr.ce_synthesized -> ()
+    | Some parent_cstr, Some child_cstr ->
+      check_visibility parent_cstr child_cstr
+    | _, _ -> ()
+  )
 
 (* Checks if a child is compatible with the type constant of its parent.
  * This requires the child's constraint and assigned type to be a subtype of
@@ -373,7 +442,7 @@ let check_consts env parent_class class_ psubst subst =
   end pconsts;
   ()
 
-let check_class_implements env parent_class class_ =
+let check_class_implements env (parent_class, parent_ty) (class_, class_ty) =
   check_typeconsts env parent_class class_;
   let parent_pos, parent_class, parent_tparaml = parent_class in
   let pos, class_, tparaml = class_ in
@@ -382,13 +451,14 @@ let check_class_implements env parent_class class_ =
   let subst = Inst.make_subst class_.tc_tparams tparaml in
   check_consts env parent_class class_ psubst subst;
   let memberl = make_all_members ~parent_class ~child_class:class_ in
-  check_constructors env parent_class class_ psubst subst;
+  check_constructors env (parent_class, parent_ty) (class_, class_ty) psubst subst;
   let check_privates:bool = (parent_class.tc_kind = Ast.Ctrait) in
   if not fully_known then () else
     List.iter memberl
       (check_members_implemented check_privates parent_pos pos);
   List.iter memberl
-    (check_members check_privates env (parent_class, psubst) (class_, subst));
+    (check_members check_privates env
+      (parent_class, psubst, parent_ty) (class_, subst, class_ty));
   ()
 
 (*****************************************************************************)
@@ -408,7 +478,8 @@ let check_implements env parent_type type_ =
         (Reason.to_pos parent_r), parent_class, parent_tparaml in
       let class_ = (Reason.to_pos r), class_, tparaml in
       Errors.try_
-        (fun () -> check_class_implements env parent_class class_)
+        (fun () ->
+          check_class_implements env (parent_class, parent_type) (class_, type_))
         (fun errorl ->
           let p_name_pos, p_name_str = parent_name in
           let name_pos, name_str = name in

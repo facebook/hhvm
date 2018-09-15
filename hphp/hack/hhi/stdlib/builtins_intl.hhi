@@ -3,15 +3,17 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
 const int INTL_MAX_LOCALE_LEN = 80;
 const string INTL_ICU_VERSION = '52.1';
 const string INTL_ICU_DATA_VERSION = '52.1';
+
+const int INTL_IDNA_VARIANT_2003 = 0;
+const int INTL_IDNA_VARIANT_UTS46 = 1;
 
 const int IDNA_ALLOW_UNASSIGNED = 1;
 const int IDNA_CHECK_BIDI = 4;
@@ -188,177 +190,351 @@ const int U_VARIABLE_RANGE_EXHAUSTED = 65565;
 const int U_VARIABLE_RANGE_OVERLAP = 65566;
 const int U_ZERO_ERROR = 0;
 
+<<__PHPStdLib>>
 function intl_get_error_code() {}
+<<__PHPStdLib>>
 function intl_get_error_message() {}
+<<__PHPStdLib>>
 function intl_error_name($error_code) {}
+<<__PHPStdLib>>
 function intl_is_failure($error_code) {}
+<<__PHPStdLib>>
 function collator_asort($obj, &$arr, $sort_flag = null) {}
+<<__PHPStdLib>>
 function collator_compare($obj, $str1, $str2) {}
+<<__PHPStdLib>>
 function collator_create($locale) {}
+<<__PHPStdLib>>
 function collator_get_attribute($obj, $attr) {}
+<<__PHPStdLib>>
 function collator_get_error_code($obj) {}
+<<__PHPStdLib>>
 function collator_get_error_message($obj) {}
+<<__PHPStdLib>>
 function collator_get_locale($obj, $type = 0) {}
+<<__PHPStdLib>>
+function collator_get_sort_key($obj, $str) {}
+<<__PHPStdLib>>
 function collator_get_strength($obj) {}
+<<__PHPStdLib>>
 function collator_set_attribute($obj, $attr, $val) {}
+<<__PHPStdLib>>
 function collator_set_strength($obj, $strength) {}
+<<__PHPStdLib>>
 function collator_sort_with_sort_keys($obj, &$arr) {}
+<<__PHPStdLib>>
 function collator_sort($obj, &$arr, $sort_flag = null) {}
+<<__PHPStdLib>>
 function idn_to_ascii($domain, $options = 0, $variant = 0, &$idna_info = null) {}
+<<__PHPStdLib>>
 function idn_to_unicode($domain, $options = 0, $variant = 0, &$idna_info = null) {}
+<<__PHPStdLib>>
 function idn_to_utf8($domain, $options = 0, $variant = 0, &$idna_info = null) {}
+<<__PHPStdLib>>
 function datefmt_create($locale, $date_type, $time_type, $timezone_str = null, $calendar = null, $pattern = null) {}
+<<__PHPStdLib>>
 function datefmt_format($args = null, $array = null) {}
+<<__PHPStdLib>>
 function datefmt_format_object($object, $format = null, $locale = null) {}
+<<__PHPStdLib>>
 function datefmt_get_calendar($mf) {}
+<<__PHPStdLib>>
 function datefmt_get_calendar_object($mf) {}
+<<__PHPStdLib>>
 function datefmt_get_datetype($mf) {}
+<<__PHPStdLib>>
 function datefmt_get_error_code($nf) {}
+<<__PHPStdLib>>
 function datefmt_get_error_message($coll) {}
+<<__PHPStdLib>>
 function datefmt_get_locale($mf) {}
+<<__PHPStdLib>>
 function datefmt_get_pattern($mf) {}
+<<__PHPStdLib>>
 function datefmt_get_timetype($mf) {}
+<<__PHPStdLib>>
 function datefmt_get_timezone($mf) {}
+<<__PHPStdLib>>
 function datefmt_get_timezone_id($mf) {}
+<<__PHPStdLib>>
 function datefmt_is_lenient($mf) {}
+<<__PHPStdLib>>
 function datefmt_localtime($formatter, $string, &$position = null) {}
+<<__PHPStdLib>>
 function datefmt_parse($formatter, $string, &$position = null) {}
+<<__PHPStdLib>>
 function datefmt_set_calendar($mf, $calendar) {}
+<<__PHPStdLib>>
 function datefmt_set_lenient($mf) {}
+<<__PHPStdLib>>
 function datefmt_set_pattern($mf, $pattern) {}
+<<__PHPStdLib>>
 function datefmt_set_timezone($mf, $timezone) {}
+<<__PHPStdLib>>
 function datefmt_set_timezone_id($mf, $timezone) {}
+<<__PHPStdLib>>
 function grapheme_extract($arg1, $arg2, $arg3 = null, $arg4 = null, &$arg5 = null) {}
+<<__PHPStdLib>>
 function grapheme_stripos($haystack, $needle, $offset = null) {}
+<<__PHPStdLib>>
 function grapheme_stristr($haystack, $needle, $before_needle = null) {}
+<<__PHPStdLib>>
 function grapheme_strlen($string) {}
+<<__PHPStdLib>>
 function grapheme_strpos($haystack, $needle, $offset = null) {}
+<<__PHPStdLib>>
 function grapheme_strripos($haystack, $needle, $offset = null) {}
+<<__PHPStdLib>>
 function grapheme_strrpos($haystack, $needle, $offset = null) {}
+<<__PHPStdLib>>
 function grapheme_strstr($haystack, $needle, $before_needle = null) {}
+<<__PHPStdLib>>
 function grapheme_substr($string, $start, $length = null) {}
+<<__PHPStdLib>>
 function intlcal_add(IntlCalendar $calendar, $field, $amount) {}
+<<__PHPStdLib>>
 function intlcal_after(IntlCalendar $calendar, IntlCalendar $otherCalendar) {}
+<<__PHPStdLib>>
 function intlcal_before(IntlCalendar $calendar, IntlCalendar $otherCalendar) {}
+<<__PHPStdLib>>
 function intlcal_clear(IntlCalendar $calendar, $field = null) {}
+<<__PHPStdLib>>
 function intlcal_create_instance($timeZone = null, $locale = null) {}
+<<__PHPStdLib>>
 function intlcal_equals(IntlCalendar $calendar, IntlCalendar $otherCalendar) {}
+<<__PHPStdLib>>
 function intlcal_field_difference(IntlCalendar $calendar, $when, $field) {}
+<<__PHPStdLib>>
 function intlcal_from_date_time($dateTime) {}
+<<__PHPStdLib>>
 function intlcal_get(IntlCalendar $calendar, $field) {}
+<<__PHPStdLib>>
 function intlcal_get_actual_maximum(IntlCalendar $calendar, $field) {}
+<<__PHPStdLib>>
 function intlcal_get_actual_minimum(IntlCalendar $calendar, $field) {}
+<<__PHPStdLib>>
 function intlcal_get_available_locales() {}
+<<__PHPStdLib>>
 function intlcal_get_day_of_week_type(IntlCalendar $calendar, $dayOfWeek) {}
+<<__PHPStdLib>>
 function intlcal_get_error_code(IntlCalendar $calendar) {}
+<<__PHPStdLib>>
 function intlcal_get_error_message(IntlCalendar $calendar) {}
+<<__PHPStdLib>>
 function intlcal_get_first_day_of_week(IntlCalendar $calendar) {}
+<<__PHPStdLib>>
 function intlcal_get_greatest_minimum(IntlCalendar $calendar, $field) {}
+<<__PHPStdLib>>
 function intlcal_get_keyword_values_for_locale($key, $locale, $commonlyUsed) {}
+<<__PHPStdLib>>
 function intlcal_get_least_maximum(IntlCalendar $calendar, $field) {}
+<<__PHPStdLib>>
 function intlcal_get_locale(IntlCalendar $calendar, $localeType) {}
+<<__PHPStdLib>>
 function intlcal_get_maximum(IntlCalendar $calendar, $field) {}
+<<__PHPStdLib>>
 function intlcal_get_minimal_days_in_first_week(IntlCalendar $calendar) {}
+<<__PHPStdLib>>
 function intlcal_get_minimum(IntlCalendar $calendar, $field) {}
+<<__PHPStdLib>>
 function intlcal_get_now() {}
+<<__PHPStdLib>>
 function intlcal_get_repeated_wall_time_option(IntlCalendar $calendar) {}
+<<__PHPStdLib>>
 function intlcal_get_skipped_wall_time_option(IntlCalendar $calendar) {}
+<<__PHPStdLib>>
 function intlcal_get_time(IntlCalendar $calendar) {}
+<<__PHPStdLib>>
 function intlcal_get_time_zone(IntlCalendar $calendar) {}
+<<__PHPStdLib>>
 function intlcal_get_type(IntlCalendar $calendar) {}
+<<__PHPStdLib>>
 function intlcal_get_weekend_transition(IntlCalendar $calendar, $dayOfWeek) {}
+<<__PHPStdLib>>
 function intlcal_in_daylight_time(IntlCalendar $calendar) {}
+<<__PHPStdLib>>
 function intlcal_is_equivalent_to(IntlCalendar $calendar, IntlCalendar $otherCalendar) {}
+<<__PHPStdLib>>
 function intlcal_is_lenient(IntlCalendar $calendar) {}
+<<__PHPStdLib>>
 function intlcal_is_set(IntlCalendar $calendar, $field) {}
+<<__PHPStdLib>>
 function intlcal_is_weekend(IntlCalendar $calendar, $date = null) {}
+<<__PHPStdLib>>
 function intlcal_roll(IntlCalendar $calendar, $field, $amountOrUpOrDown = null) {}
+<<__PHPStdLib>>
 function intlcal_set(IntlCalendar $calendar, $fieldOrYear, $valueOrMonth, $dayOfMonth = null, $hour = null, $minute = null, $second = null) {}
+<<__PHPStdLib>>
 function intlcal_set_first_day_of_week(IntlCalendar $calendar, $dayOfWeek) {}
+<<__PHPStdLib>>
 function intlcal_set_lenient(IntlCalendar $calendar, $isLenient) {}
+<<__PHPStdLib>>
 function intlcal_set_minimal_days_in_first_week(IntlCalendar $calendar, $numberOfDays) {}
+<<__PHPStdLib>>
 function intlcal_set_repeated_wall_time_option(IntlCalendar $calendar, $wallTimeOption) {}
+<<__PHPStdLib>>
 function intlcal_set_skipped_wall_time_option(IntlCalendar $calendar, $wallTimeOption) {}
+<<__PHPStdLib>>
 function intlcal_set_time(IntlCalendar $calendar, $date) {}
+<<__PHPStdLib>>
 function intlcal_set_time_zone(IntlCalendar $calendar, $timeZone) {}
+<<__PHPStdLib>>
 function intlcal_to_date_time(IntlCalendar $calendar) {}
+<<__PHPStdLib>>
 function intlgregcal_create_instance($timeZoneOrYear = null, $localeOrMonth = null, $dayOfMonth = null, $hour = null, $minute = null, $second = null) {}
+<<__PHPStdLib>>
 function intlgregcal_get_gregorian_change(IntlGregorianCalendar $calendar) {}
+<<__PHPStdLib>>
 function intlgregcal_is_leap_year(IntlGregorianCalendar $calendar, $year) {}
+<<__PHPStdLib>>
 function intlgregcal_set_gregorian_change(IntlGregorianCalendar $calendar, $date) {}
+<<__PHPStdLib>>
 function intltz_count_equivalent_ids($zoneId) {}
+<<__PHPStdLib>>
 function intltz_create_default() {}
+<<__PHPStdLib>>
 function intltz_create_enumeration($countryOrRawOffset = null) {}
+<<__PHPStdLib>>
 function intltz_create_time_zone($zoneId) {}
+<<__PHPStdLib>>
 function intltz_create_time_zone_id_enumeration($zoneType, $region = null, $rawOffset = null) {}
+<<__PHPStdLib>>
 function intltz_from_date_time_zone(DateTimeZone $dateTimeZone) {}
+<<__PHPStdLib>>
 function intltz_get_canonical_id($zoneId, &$isSystemID = null) {}
+<<__PHPStdLib>>
 function intltz_get_display_name(IntlTimeZone $timeZone, $isDaylight = null, $style = null, $locale = null) {}
+<<__PHPStdLib>>
 function intltz_get_dst_savings(IntlTimeZone $timeZone) {}
+<<__PHPStdLib>>
 function intltz_get_equivalent_id($zoneId, $index) {}
+<<__PHPStdLib>>
 function intltz_get_error_code(IntlTimeZone $timeZone) {}
+<<__PHPStdLib>>
 function intltz_get_error_message(IntlTimeZone $timeZone) {}
+<<__PHPStdLib>>
 function intltz_get_gmt() {}
+<<__PHPStdLib>>
 function intltz_get_id(IntlTimeZone $timeZone) {}
+<<__PHPStdLib>>
 function intltz_get_offset(IntlTimeZone $timeZone, $date, $local, &$rawOffset, &$dstOffset) {}
+<<__PHPStdLib>>
 function intltz_get_raw_offset(IntlTimeZone $timeZone) {}
+<<__PHPStdLib>>
 function intltz_get_region($zoneId) {}
+<<__PHPStdLib>>
 function intltz_get_tz_data_version() {}
+<<__PHPStdLib>>
 function intltz_get_unknown() {}
+<<__PHPStdLib>>
 function intltz_has_same_rules(IntlTimeZone $timeZone, ?IntlTimeZone $otherTimeZone = null) {}
+<<__PHPStdLib>>
 function intltz_to_date_time_zone(IntlTimeZone $timeZone) {}
+<<__PHPStdLib>>
 function intltz_use_daylight_time(IntlTimeZone $timeZone) {}
+<<__PHPStdLib>>
 function locale_accept_from_http($arg1) {}
+<<__PHPStdLib>>
 function locale_canonicalize($arg1) {}
+<<__PHPStdLib>>
 function locale_compose($arg1) {}
+<<__PHPStdLib>>
 function locale_filter_matches($arg1, $arg2, $arg3) {}
+<<__PHPStdLib>>
 function locale_get_all_variants($arg1) {}
+<<__PHPStdLib>>
 function locale_get_default() {}
+<<__PHPStdLib>>
 function locale_get_display_language($arg1, $arg2) {}
+<<__PHPStdLib>>
 function locale_get_display_name($arg1, $arg2) {}
+<<__PHPStdLib>>
 function locale_get_display_region($arg1, $arg2) {}
+<<__PHPStdLib>>
 function locale_get_display_script($arg1, $arg2) {}
+<<__PHPStdLib>>
 function locale_get_display_variant($arg1, $arg2) {}
+<<__PHPStdLib>>
 function locale_get_keywords($arg1) {}
+<<__PHPStdLib>>
 function locale_get_primary_language($arg1) {}
+<<__PHPStdLib>>
 function locale_get_region($arg1) {}
+<<__PHPStdLib>>
 function locale_get_script($arg1) {}
+<<__PHPStdLib>>
 function locale_lookup($arg1, $arg2, $arg3, $arg4) {}
+<<__PHPStdLib>>
 function locale_parse($arg1) {}
+<<__PHPStdLib>>
 function locale_set_default($arg1) {}
+<<__PHPStdLib>>
 function msgfmt_create($locale, $pattern) {}
+<<__PHPStdLib>>
 function msgfmt_format($nf, $args) {}
+<<__PHPStdLib>>
 function msgfmt_format_message($locale, $pattern, $args) {}
+<<__PHPStdLib>>
 function msgfmt_get_error_code($nf) {}
+<<__PHPStdLib>>
 function msgfmt_get_error_message($coll) {}
+<<__PHPStdLib>>
 function msgfmt_get_locale($mf) {}
+<<__PHPStdLib>>
 function msgfmt_get_pattern($mf) {}
+<<__PHPStdLib>>
 function msgfmt_parse($nf, $source) {}
+<<__PHPStdLib>>
 function msgfmt_parse_message($locale, $pattern, $source) {}
+<<__PHPStdLib>>
 function msgfmt_set_pattern($mf, $pattern) {}
+<<__PHPStdLib>>
 function normalizer_is_normalized($input, $form = null) {}
+<<__PHPStdLib>>
 function normalizer_normalize($input, $form = null) {}
+<<__PHPStdLib>>
 function numfmt_create($locale, $style, $pattern = null) {}
+<<__PHPStdLib>>
 function numfmt_format($nf, $num, $type = null) {}
+<<__PHPStdLib>>
 function numfmt_format_currency($nf, $num, $currency) {}
+<<__PHPStdLib>>
 function numfmt_get_attribute($nf, $attr) {}
+<<__PHPStdLib>>
 function numfmt_get_error_code($nf) {}
+<<__PHPStdLib>>
 function numfmt_get_error_message($nf) {}
+<<__PHPStdLib>>
 function numfmt_get_locale($nf, $type = null) {}
+<<__PHPStdLib>>
 function numfmt_get_pattern($nf) {}
+<<__PHPStdLib>>
 function numfmt_get_symbol($nf, $attr) {}
+<<__PHPStdLib>>
 function numfmt_get_text_attribute($nf, $attr) {}
+<<__PHPStdLib>>
 function numfmt_parse($formatter, $string, $type = null, &$position = null) {}
+<<__PHPStdLib>>
 function numfmt_parse_currency($formatter, $string, &$currency, &$position = null) {}
+<<__PHPStdLib>>
 function numfmt_set_attribute($nf, $attr, $value) {}
+<<__PHPStdLib>>
 function numfmt_set_pattern($nf, $pattern) {}
+<<__PHPStdLib>>
 function numfmt_set_symbol($nf, $attr, $symbol) {}
+<<__PHPStdLib>>
 function numfmt_set_text_attribute($nf, $attr, $value) {}
+<<__PHPStdLib>>
 function resourcebundle_count($bundle) {}
+<<__PHPStdLib>>
 function resourcebundle_create($locale, $bundlename, $fallback = null) {}
+<<__PHPStdLib>>
 function resourcebundle_get($bundle, $index, $fallback = null) {}
+<<__PHPStdLib>>
 function resourcebundle_get_error_code($bundle) {}
+<<__PHPStdLib>>
 function resourcebundle_get_error_message($bundle) {}
+<<__PHPStdLib>>
 function resourcebundle_locales($bundlename) {}
 
 class Collator {
@@ -390,14 +566,15 @@ class Collator {
   public function asort(&$arr, $sort_flag = null) {}
   public function compare($str1, $str2) {}
   static public function create($locale) {}
-  public function getattribute($attr) {}
-  public function geterrorcode() {}
-  public function geterrormessage() {}
-  public function getlocale($type = 0) {}
-  public function getstrength() {}
-  public function setattribute($attr, $val) {}
-  public function setstrength($strength) {}
-  public function sortwithsortkeys(&$arr) {}
+  public function getAttribute($attr) {}
+  public function getErrorCode() {}
+  public function getErrorMessage() {}
+  public function getLocale($type = 0) {}
+  public function getSortKey($str) {}
+  public function getStrength() {}
+  public function setAttribute($attr, $val) {}
+  public function setStrength($strength) {}
+  public function sortWithSortKeys(&$arr) {}
   public function sort(&$arr, $sort_flag = null) {}
 }
 

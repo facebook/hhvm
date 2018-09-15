@@ -1,4 +1,4 @@
-<?php
+<?hh
 error_reporting(-1);
 function foo(&$a) { var_dump($a++); }
 function test($cuf, $f) {

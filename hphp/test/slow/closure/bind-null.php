@@ -8,5 +8,9 @@ class X {
   }
 }
 
+
+<<__EntryPoint>>
+function main_bind_null() {
 $f = X::test();
 $f();
+}

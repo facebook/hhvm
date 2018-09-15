@@ -13,6 +13,10 @@ class A {
   }
 }
 
+
+<<__EntryPoint>>
+function main_3329() {
 $a = new A;
 trigger_error("blarg");
 unset($a);
+}

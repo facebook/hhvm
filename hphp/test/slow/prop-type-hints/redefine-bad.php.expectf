@@ -1,0 +1,154 @@
+Warning: Type-hint of 'C::p1' must be int (as in class A), not string in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p2' must be string (as in class A), not int in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p3' must be bool (as in class A), not float in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p4' must be float (as in class A), not num in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p5' must be array (as in class A), not HH\arraylike in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p6' must be resource (as in class A), not Cls1 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p7' must be nonnull (as in class A), not int in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p8' must be num (as in class A), not int in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p9' must be arraykey (as in class A), not string in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p10' must be HH\vec (as in class A), not HH\arraylike in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p11' must be HH\dict (as in class A), not HH\arraylike in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p12' must be HH\keyset (as in class A), not HH\arraylike in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p13' must be HH\vec_or_dict (as in class A), not HH\vec in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p14' must be HH\arraylike (as in class A), not HH\vec in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p15' must be HH\varray (as in class A), not HH\arraylike in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p16' must be HH\darray (as in class A), not HH\arraylike in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p17' must be HH\varray_or_darray (as in class A), not HH\arraylike in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p18' must be this (as in class A), not C in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p19' must be Cls1 (as in class A), not Cls2 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p20' must be Cls2 (as in class A), not Cls1 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p21' must be Enum1 (as in class A), not Enum2 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p22' must be Enum2 (as in class A), not Enum1 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p23' must be Alias1 (as in class A), not Alias2 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p24' must be Alias2 (as in class A), not Alias1 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p25' must be Alias3 (as in class A), not Alias5 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p27' must be Alias5 (as in class A), not Alias3 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p28' must be HH\Traversable (as in class A), not HH\KeyedTraversable in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p29' must be mixed (as in class A), not int in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p30' must be mixed (as in class A), not string in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p31' must be Enum3 (as in class A), not int in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p32' must be Alias6 (as in class A), not string in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p33' must be Alias1 (as in class A), not Alias2 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p34' must be Alias7 (as in class A), not Enum2 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p35' must be Enum4 (as in class A), not int in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p36' must be Alias9 (as in class A), not string in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p37' must be Enum4 (as in class A), not ?Enum4 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p38' must be HH\varray_or_darray (as in class A), not HH\vec in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p39' must be array (as in class A), not HH\arraylike in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p40' must be array (as in class A), not HH\arraylike in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p41' must be mixed (as in class A), not nonnull in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p42' must be mixed (as in class A), not ?nonnull in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p43' must be Alias10 (as in class A), not Alias5 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p44' must be ?Alias10 (as in class A), not ?Alias5 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p45' must be Alias8 (as in class A), not Alias3 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p46' must be ?Alias8 (as in class A), not ?Alias3 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p47' must be Alias11 (as in class A), not ?Alias1 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p48' must be ?Alias11 (as in class A), not Alias1 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p49' must be ?int (as in class A), not int in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p50' must be ?int (as in class A), not ?num in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p51' must be %r.?%rAlias12 (as in class A), not Alias6 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p52' must be ?Alias12 (as in class A), not ?Alias3 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p53' must be ?Alias1 (as in class A), not Alias1 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p54' must be %r.?%rAlias12 (as in class A), not ?Alias2 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p55' must be ?Alias12 (as in class A), not Alias2 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p56' must be ?int (as in class A), not int in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p63' must be ?Enum2 (as in class A), not Enum2 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p64' must be ?Enum2 (as in class A), not Enum2 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p65' must be ?int (as in class A), not ?arraykey in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p66' must be %r.?%rAlias13 (as in class A), not ?Enum3 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p67' must be ?Alias13 (as in class A), not Enum3 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p68' must be ?int (as in class A), not int in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p69' must be ?Cls1 (as in class A), not Cls1 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p70' must be ?Cls1 (as in class A), not ?Cls2 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p71' must be Alias14 (as in class A), not Cls1 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p73' must be ?Alias14 (as in class A), not ?Cls2 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p74' must be Alias14 (as in class A), not bool in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p75' must be ?Alias14 (as in class A), not Alias4 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p76' must be ?Alias4 (as in class A), not ?Alias3 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p77' must be ?Alias4 (as in class A), not Alias3 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p78' must be @int (as in class A), not int in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p79' must be @?int (as in class A), not ?int in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p80' must be int (as in class A), not ?int in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p81' must be CondEnum1 (as in class A), not ?CondEnum1 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p82' must be CondAlias (as in class A), not ?CondAlias in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p83' must be int (as in class A), not @int in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p84' must be CondEnum1 (as in class A), not @?CondEnum1 in %s/redefine-bad.php on line 559
+
+Warning: Type-hint of 'C::p85' must be CondAlias (as in class A), not @?CondAlias in %s/redefine-bad.php on line 559
+DONE

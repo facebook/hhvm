@@ -17,8 +17,6 @@
 #ifndef incl_HPHP_IR_INSTR_TABLE_H_
 #define incl_HPHP_IR_INSTR_TABLE_H_
 
-#include <unordered_map>
-
 #include <folly/Hash.h>
 
 #include "hphp/runtime/vm/jit/ir-instruction.h"
@@ -101,7 +99,7 @@ private:
   };
 
 private:
-  std::unordered_map<IRInstruction*,SSATmp*,HashOp,EqualsOp> m_map;
+  jit::fast_map<IRInstruction*,SSATmp*,HashOp,EqualsOp> m_map;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -69,8 +69,20 @@ function takes_vector_container(Vector $v): Vector {
 function takes_map_container(Map $m): Map {
   return $m;
 }
+function takes_nonnull(nonnull $x): nonnull {
+  return $x;
+}
 function takes_mixed(mixed $m): mixed {
   return $m;
+}
+function takes_vec_or_dict1(vec_or_dict $x): vec_or_dict {
+  return $x;
+}
+function takes_vec_or_dict2(?vec_or_dict $x): ?vec_or_dict {
+  return $x;
+}
+function takes_vec_or_dict3(vec_or_dict<int> $x): vec_or_dict<int> {
+  return $x;
 }
 
 function test_all_hints($x) {
@@ -98,7 +110,11 @@ function test_all_hints($x) {
     |> takes_array_access($$)
     |> takes_vector_container($$)
     |> takes_map_container($$)
+    |> takes_nonnull($$)
     |> takes_mixed($$)
+    |> takes_vec_or_dict1($$)
+    |> takes_vec_or_dict2($$)
+    |> takes_vec_or_dict3($$)
     |> var_dump($$);
 }
 
@@ -110,6 +126,9 @@ function test_dict_hint($x) {
     |> takes_dict3($$)
     |> takes_dict4($$)
     |> takes_dict5($$)
+    |> takes_vec_or_dict1($$)
+    |> takes_vec_or_dict2($$)
+    |> takes_vec_or_dict3($$)
     |> var_dump($$);
 }
 

@@ -13,7 +13,11 @@ function bar() {
   return $y;
 }
 
+
+<<__EntryPoint>>
+function main_movzbool() {
 for ($i = 0; $i < 100; ++$i) {
   bar();
 }
 echo "Done\n";
+}

@@ -4,8 +4,6 @@ function shutdown() {
   var_dump("Script executed with success");
 }
 
-register_shutdown_function('shutdown');
-
 function open($save_path, $session_name) {
   return true;
 }
@@ -31,4 +29,10 @@ function gc($maxlifetime) {
   return true;
 }
 
+
+<<__EntryPoint>>
+function main_register_shutdown_function() {
+register_shutdown_function('shutdown');
+
 session_set_save_handler('open', 'close', 'read', 'write', 'destroy', 'gc');
+}

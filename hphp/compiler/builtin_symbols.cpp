@@ -24,8 +24,6 @@
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/compiler/analysis/file_scope.h"
-#include "hphp/compiler/analysis/variable_table.h"
-#include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/parser/hphp.tab.hpp"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -71,46 +69,11 @@ int BuiltinSymbols::NumGlobalNames() {
     sizeof(BuiltinSymbols::GlobalNames[0]);
 }
 
-void BuiltinSymbols::ImportNativeConstants(AnalysisResultPtr ar,
-                                           ConstantTablePtr dest) {
-  for (auto cnsPair : Native::getConstants()) {
-    ExpressionPtr e(Expression::MakeScalarExpression(
-                      ar, ar, Location::Range(), tvAsVariant(&cnsPair.second)));
-
-    dest->add(cnsPair.first->data(), e, ar, e);
-
-    if ((cnsPair.second.m_type == KindOfUninit) &&
-         cnsPair.second.m_data.pref) {
-      // Callback based constant
-      dest->setDynamic(ar, cnsPair.first->data());
-    }
-  }
-}
-
 bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
   if (Loaded) return true;
   Loaded = true;
 
   if (g_context.isNull()) hphp_thread_init();
-
-  ConstantTablePtr cns = ar->getConstants();
-  // load extension constants, classes and dynamics
-  ImportNativeConstants(ar, cns);
-
-  for (int i = 0, n = NumGlobalNames(); i < n; ++i) {
-    ar->getVariables()->add(GlobalNames[i], false, ar,
-                            ConstructPtr(), ModifierExpressionPtr());
-  }
-
-  cns->setDynamic(ar, "PHP_BINARY");
-  cns->setDynamic(ar, "PHP_BINDIR");
-  cns->setDynamic(ar, "PHP_OS");
-  cns->setDynamic(ar, "PHP_SAPI");
-  cns->setDynamic(ar, "SID");
-
-  for (auto sym : cns->getSymbols()) {
-    sym->setSystem();
-  }
 
   // Systemlib files were all parsed by hphp_process_init
 
@@ -122,27 +85,14 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar) {
     for (const auto& clsVec : classes) {
       assert(clsVec.second.size() == 1);
       auto cls = clsVec.second[0];
-      if (auto nativeConsts = Native::getClassConstants(
-            String(cls->getScopeName()).get())) {
-        for (auto cnsMap : *nativeConsts) {
-          auto tv = cnsMap.second;
-          auto e = Expression::MakeScalarExpression(ar, ar, Location::Range(),
-                                                    tvAsVariant(&tv));
-          cls->getConstants()->add(cnsMap.first->data(), e, ar, e);
-        }
-      }
       cls->setSystem();
       ar->addSystemClass(cls);
-      for (const auto& func : cls->getFunctions()) {
-        FunctionScope::RecordFunctionInfo(func.first, func.second);
-      }
     }
 
     const auto& functions = file.second->getFunctions();
     for (const auto& func : functions) {
       func.second->setSystem();
       ar->addSystemFunction(func.second);
-      FunctionScope::RecordFunctionInfo(func.first, func.second);
     }
   }
 

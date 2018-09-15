@@ -1,0 +1,14 @@
+diff --git a/fibonacci.php b/fibonacci.php
+new file mode 100644
+--- /dev/null
++++ b/fibonacci.php
+@@ -0,0 +1,9 @@
++<?hh // strict
++
++function fibonacci($pos){
++  $arr = array(0, 1);
++  for ($i = 2; $i <= $pos; ++$i)
++    $arr[$i] =
++      $arr[$i-1] + $arr[$i-2];
++  return $arr[$pos];
++}

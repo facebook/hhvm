@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace TestNs;
 
 // Warning: line numbers are sensitive, do not change

@@ -14,9 +14,13 @@ class B extends A {
 }
 class C extends A {
 }
+
+<<__EntryPoint>>
+function main_1410() {
 $a = new A;
 $b = new B;
 $c = new C;
 $a->run();
 $b->run();
 $c->run();
+}

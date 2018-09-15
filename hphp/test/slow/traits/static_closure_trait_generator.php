@@ -1,6 +1,5 @@
 <?php
-class Foo { const Bar = 12; };
-
+class Foo { const Bar = 12; }
 trait Yoyo {
   function cl($k) {
     return function() use ($k) {
@@ -30,4 +29,9 @@ function main() {
   }
 }
 
+<<__EntryPoint>>
+function main_static_closure_trait_generator() {
+;
+
 main();
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * This is a small test case for handling comparisons on null SSATmps

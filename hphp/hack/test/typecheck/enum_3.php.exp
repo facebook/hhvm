@@ -1,6 +1,6 @@
-File "enum_3.php--use.php", line 6, characters 10-17:
+File "enum_3.php--use.php", line 5, characters 10-17:
 Invalid return type (Typing[4110])
-File "enum_3.php--use.php", line 5, characters 15-17:
+File "enum_3.php--use.php", line 4, characters 15-17:
 This is an int
-File "enum_3.php--def.php", line 7, characters 24-26:
-It is incompatible with an object of type lol
+File "enum_3.php--def.php", line 6, characters 24-26:
+It is incompatible with a mixed value arising from an implicit 'as ?nonnull' constraint on this type

@@ -23,6 +23,7 @@
 #include <vector>
 
 #include <folly/String.h>
+#include <folly/portability/Fcntl.h>
 #include <folly/portability/SysMman.h>
 
 #include "hphp/runtime/base/comparisons.h"
@@ -160,7 +161,7 @@ void SnapshotLoader::load(ConcurrentTableSharedStore& s) {
           s.constructPrime(uninit_null(), item);
           break;
         default:
-          assert(false);
+          assertx(false);
           break;
       }
     }
@@ -194,7 +195,10 @@ void SnapshotLoader::load(ConcurrentTableSharedStore& s) {
           break;
         }
         case SnapshotBuilder::kSnapOther: {
-          Variant v = unserialize_from_string(value);
+          Variant v = unserialize_from_string(
+            value,
+            VariableUnserializer::Type::Internal
+          );
           if (same(v, false)) {
             throw Exception("bad apc archive, unserialize_from_string failed");
           }
@@ -202,7 +206,7 @@ void SnapshotLoader::load(ConcurrentTableSharedStore& s) {
           break;
         }
         default:
-          assert(false);
+          assertx(false);
           break;
       }
     }
@@ -218,7 +222,7 @@ void SnapshotLoader::load(ConcurrentTableSharedStore& s) {
       item.sAddr = const_cast<char*>(disk);
       disk += abs(item.sSize) + 1;  // \0
     }
-    assert(disk == m_begin + m_size);
+    assertx(disk == m_begin + m_size);
     all.insert(all.end(), items.begin(), items.end());
   }
   // Sort entries by increasing hotness before priming.
@@ -243,7 +247,7 @@ void SnapshotLoader::load(ConcurrentTableSharedStore& s) {
                      return hotness[a.key] < hotness[b.key];
                    });
   s.prime(std::move(all));
-  assert(m_cur == m_begin + header().diskOffset);
+  assertx(m_cur == m_begin + header().diskOffset);
   // Keys have been copied, so don't need that part any more.
   madvise(const_cast<char*>(m_begin), header().diskOffset, MADV_DONTNEED);
 }
@@ -251,11 +255,11 @@ void SnapshotLoader::load(ConcurrentTableSharedStore& s) {
 void SnapshotLoader::adviseOut() {
   Timer timer(Timer::WallTime, "advising out apc prime snapshot");
   Logger::FInfo("Advising out {} bytes", m_size);
-  assert(m_begin);
+  assertx(m_begin);
   if (madvise(const_cast<char*>(m_begin), m_size, MADV_DONTNEED) < 0) {
     Logger::Error("Failed to madvise");
   }
-  assert(m_fd >= 0);
+  assertx(m_fd >= 0);
   if (fadvise_dontneed(m_fd, m_size) < 0) {
     Logger::Error("Failed to fadvise");
   }

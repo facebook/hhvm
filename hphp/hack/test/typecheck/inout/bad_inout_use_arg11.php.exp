@@ -1,0 +1,2 @@
+File "bad_inout_use_arg11.php", line 7, characters 11-19:
+Cannot use [] for reading (NastCheck[3047])

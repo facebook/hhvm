@@ -20,5 +20,9 @@ function go(IDunno $idunno) {
   var_dump(is_string(Foo::$y));
 }
 
+
+<<__EntryPoint>>
+function main_public_static_props_012() {
 go(new B);
 go(new A);
+}

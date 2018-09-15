@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 
-#include <gtest/gtest.h>
+#include <folly/portability/GTest.h>
 
 namespace HPHP { namespace jit {
 
@@ -67,7 +67,7 @@ std::string stripWhitespace(std::string str) {
 template <typename Ins, typename Arg>
 std::string genTestCode(int argPos, Arg constArg) {
   Vunit unit;
-  unit.entry = unit.makeBlock(AreaIndex::Main);
+  unit.entry = unit.makeBlock(AreaIndex::Main, 1);
   Vout out(unit, unit.entry);
 
   auto v0 = unit.makeReg();

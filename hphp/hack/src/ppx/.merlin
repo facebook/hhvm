@@ -1,0 +1,4 @@
+REC
+
+# This pkg directive conflicts with other packages elsewhere, so we keep it local here
+PKG compiler-libs.common

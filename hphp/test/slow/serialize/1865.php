@@ -16,4 +16,8 @@ function test() {
   $y = unserialize($s);
   var_dump($y);
 }
+
+<<__EntryPoint>>
+function main_1865() {
 test();
+}

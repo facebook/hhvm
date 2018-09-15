@@ -11,7 +11,7 @@ class X {
       return;
     }
 
-    return $x |> array_shift($$);
+    return $x |> array_shift(&$$);
   }
 }
 
@@ -19,4 +19,8 @@ function main($t) {
   return X::foo($t);
 }
 
+
+<<__EntryPoint>>
+function main_lval_pipe() {
 var_dump(main("hello"));
+}

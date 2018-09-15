@@ -1,0 +1,118 @@
+[
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": {
+      "capabilities": {
+        "textDocumentSync": {
+          "openClose": true,
+          "change": 2,
+          "willSave": false,
+          "willSaveWaitUntil": false,
+          "save": {
+            "includeText": false
+          }
+        },
+        "hoverProvider": true,
+        "completionProvider": {
+          "resolveProvider": true,
+          "triggerCharacters": [
+            "$",
+            ">",
+            "\\",
+            ":",
+            "<",
+            "[",
+            "'",
+            "\""
+          ]
+        },
+        "signatureHelpProvider": {
+          "triggerCharacters": [
+            "(",
+            ","
+          ]
+        },
+        "definitionProvider": true,
+        "referencesProvider": true,
+        "documentHighlightProvider": true,
+        "documentSymbolProvider": true,
+        "workspaceSymbolProvider": true,
+        "codeActionProvider": false,
+        "documentFormattingProvider": true,
+        "documentRangeFormattingProvider": true,
+        "documentOnTypeFormattingProvider": {
+          "firstTriggerCharacter": ";",
+          "moreTriggerCharacter": [
+            "}"
+          ]
+        },
+        "renameProvider": true,
+        "typeCoverageProvider": true,
+        "rageProvider": true
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 11,
+    "result": [
+      {
+        "range": {
+          "start": {
+            "line": 5,
+            "character": 17
+          },
+          "end": {
+            "line": 9,
+            "character": 58
+          }
+        },
+        "newText": "{\n  test_otf(\n    '1234567890',\n    '1234567890',\n    '1234567890',\n    '1234567890',\n    '1234567890',\n    '1234567890',\n  );"
+      }
+    ]
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 12,
+    "result": [
+      {
+        "range": {
+          "start": {
+            "line": 13,
+            "character": 0
+          },
+          "end": {
+            "line": 13,
+            "character": 1
+          }
+        },
+        "newText": "{"
+      }
+    ]
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 13,
+    "result": [
+      {
+        "range": {
+          "start": {
+            "line": 15,
+            "character": 0
+          },
+          "end": {
+            "line": 15,
+            "character": 16
+          }
+        },
+        "newText": "function otf() {}"
+      }
+    ]
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 999,
+    "result": null
+  }
+]

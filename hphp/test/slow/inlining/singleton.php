@@ -108,9 +108,13 @@ function run_sprop_get_nsame() {
   var_dump(C::getNSame());
 }
 
+
+<<__EntryPoint>>
+function main_singleton() {
 run_null_same();
 run_null_same_loop();
 run_null_nsame();
 run_null_nsame_loop();
 run_sprop_get_same();
 run_sprop_get_nsame();
+}

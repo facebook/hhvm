@@ -129,10 +129,12 @@ ReflectionMethod(3):array(4) {
   }
 }
 ---- ReflectionClosure ----
-ReflectionFunction(1-closure):array(3) {
+ReflectionFunction(1-closure):array(4) {
   ["a"]=>
   NULL
   ["b"]=>
+  NULL
+  ["c"]=>
   NULL
   ["d"]=>
   NULL
@@ -140,6 +142,7 @@ ReflectionFunction(1-closure):array(3) {
 $foo():
 a = NULL
 b = int(4)
+c = string(1) "x"
 d = array(1) {
   [4]=>
   array(1) {
@@ -147,11 +150,13 @@ d = array(1) {
     int(5)
   }
 }
-ReflectionFunction(2-closure):array(3) {
+ReflectionFunction(2-closure):array(4) {
   ["a"]=>
   NULL
   ["b"]=>
   int(4)
+  ["c"]=>
+  string(1) "x"
   ["d"]=>
   array(1) {
     [4]=>
@@ -164,6 +169,7 @@ ReflectionFunction(2-closure):array(3) {
 $foo():
 a = NULL
 b = int(5)
+c = string(1) "x"
 d = array(1) {
   [4]=>
   array(1) {
@@ -171,11 +177,13 @@ d = array(1) {
     int(5)
   }
 }
-ReflectionFunction(3-closure):array(3) {
+ReflectionFunction(3-closure):array(4) {
   ["a"]=>
   NULL
   ["b"]=>
   int(5)
+  ["c"]=>
+  string(1) "x"
   ["d"]=>
   array(1) {
     [4]=>

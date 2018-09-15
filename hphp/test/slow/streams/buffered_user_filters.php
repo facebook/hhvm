@@ -33,4 +33,8 @@ function main() {
   unlink($fname);
 }
 
+
+<<__EntryPoint>>
+function main_buffered_user_filters() {
 main();
+}

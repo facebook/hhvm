@@ -1,2 +1,2 @@
-File "ternary5.php", line 14, characters 10-21:
-You should add parentheses (Parsing[1002])
+File "ternary5.php", line 14, characters 10-30:
+Nested ternary expressions inside ternary expressions are ambiguous. Please add parentheses (Parsing[1002])

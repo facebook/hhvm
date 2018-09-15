@@ -2,9 +2,8 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
@@ -32,7 +31,8 @@
  *)
 (*****************************************************************************)
 
-open Core
+open Core_kernel
+open Common
 open Nast
 
 module Env = Typing_env
@@ -50,7 +50,7 @@ module Env = Typing_env
 module Dep = struct
 
   let add x1 x2 acc =
-    let prev = try SMap.find_unsafe x1 acc with Not_found -> [] in
+    let prev = try SMap.find_unsafe x1 acc with Caml.Not_found -> [] in
     SMap.add x1 (x2 :: prev) acc
 
   let get key acc =
@@ -60,7 +60,7 @@ module Dep = struct
 
   let visitor local =
     object
-      inherit [string list SMap.t] Nast_visitor.nast_visitor as parent
+      inherit [string list SMap.t] Nast.Visitor_DEPRECATED.visitor as parent
 
       method! on_expr acc (_, e_ as e) =
         match e_ with
@@ -68,7 +68,7 @@ module Dep = struct
             add local (Local_id.to_string x) acc
         | Obj_get ((_, (This | Lvar _) as x), (_, Id (_, y)), _) ->
             add local (Env.FakeMembers.make_id x y) acc
-        | Class_get (x, (_, y)) ->
+        | Class_get ((_, x), (_, y)) ->
             add local (Env.FakeMembers.make_static_id x y) acc
         | _ -> parent#on_expr acc e
     end
@@ -95,13 +95,13 @@ end = struct
         Some (Local_id.to_string x)
     | Obj_get ((_, (This | Lvar _) as x), (_, Id (_, y)), _) ->
         Some (Env.FakeMembers.make_id x y)
-    | Class_get (x, (_, y)) ->
+    | Class_get ((_, x), (_, y)) ->
         Some (Env.FakeMembers.make_static_id x y)
     | _ -> None
 
   let visitor =
     object(this)
-      inherit [string list SMap.t] Nast_visitor.nast_visitor as parent
+      inherit [string list SMap.t] Nast.Visitor_DEPRECATED.visitor as parent
 
       method! on_expr acc (_, e_ as e) =
         match e_ with

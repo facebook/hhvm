@@ -1,0 +1,2 @@
+File "bad_inout_use_lvalue2.php", line 8, characters 5-19:
+You cannot decorate a constant as inout (Parsing[1002])

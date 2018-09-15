@@ -52,17 +52,21 @@ inline bool is_dependent_exception(uint64_t c) {
 }
 
 /*
- * Like __cxxabiv1::__get_object_from_ue(), but with a specific return type.
+ * Like __cxxabiv1::__get_object_from_ue()
  */
-inline std::exception*
+inline void*
 exceptionFromUE(_Unwind_Exception* eo) {
+#ifdef __APPLE__
+  constexpr size_t sizeOfDependentException = 120;
+#else
   constexpr size_t sizeOfDependentException = 112;
+#endif
 
   if (detail::is_dependent_exception(eo->exception_class)) {
     return *reinterpret_cast<std::exception**>(
       reinterpret_cast<char*>(eo + 1) - sizeOfDependentException);
   }
-  return reinterpret_cast<std::exception*>(eo + 1);
+  return eo + 1;
 }
 
 /*
@@ -71,21 +75,11 @@ exceptionFromUE(_Unwind_Exception* eo) {
  */
 inline const std::type_info&
 typeinfoFromUE(_Unwind_Exception* eo) {
-  if (detail::is_dependent_exception(eo->exception_class)) {
-    // like __cxxabiv1::__get_refcounted_exception_header_from_obj()
-    constexpr size_t sizeOfRefcountedException = 128;
-    auto obj = reinterpret_cast<char*>(exceptionFromUE(eo));
-    auto header = obj - sizeOfRefcountedException;
+  auto const obj = exceptionFromUE(eo);
 
-    // Dereference the exc field; the type_info* is the first field inside that.
-    constexpr size_t excOffset = 16;
-    return *reinterpret_cast<std::type_info*>(header + excOffset);
-  }
-
-  // like __cxxabiv1::__get_exception_header_from_ue()
   constexpr size_t sizeOfCxaException = 112;
   return **reinterpret_cast<std::type_info**>(
-    reinterpret_cast<char*>(eo + 1) - sizeOfCxaException);
+    static_cast<char*>(obj) - sizeOfCxaException);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

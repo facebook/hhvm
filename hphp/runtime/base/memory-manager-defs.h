@@ -18,10 +18,11 @@
 #define incl_HPHP_MEMORY_MANAGER_DEFS_H
 
 #include "hphp/runtime/base/apc-local-array.h"
+#include "hphp/runtime/base/apc-local-array-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/packed-array-defs.h"
-#include "hphp/runtime/base/proxy-array.h"
 #include "hphp/runtime/base/set-array.h"
+
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/resumable.h"
@@ -42,6 +43,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/collections/hash-collection.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
+#include "hphp/util/bitset-utils.h"
 
 #include <algorithm>
 
@@ -49,253 +51,391 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// union of all the possible header types, and some utilities
-struct Header {
-  HeaderKind kind() const {
-    assert(unsigned(hdr_.kind) <= NumHeaderKinds);
-    return hdr_.kind;
+using HdrBlock = MemRange<HeapObject*>;
+
+/*
+ * Struct Slab encapsulates the header attached to each large block of memory
+ * used for allocating smaller blocks. The header contains a start-bit map,
+ * used for quickly locating the start of an object, given an interior pointer
+ * (a pointer to somewhere in the body). The start-bit map marks the location
+ * of the start of each object. One bit represents kSmallSizeAlign bytes.
+ */
+struct alignas(kSmallSizeAlign) Slab : HeapObject {
+
+  char* init() {
+    initHeader_32(HeaderKind::Slab, 0);
+    clearStarts();
+    return start();
+    static_assert(sizeof(*this) % kSmallSizeAlign == 0, "");
   }
 
-  size_t size() const;
+  /*
+   * call fn(h) on each object in the slab, without calling allocSize(),
+   * by scanning through the start-bits alone.
+   */
+  template<class Fn> void iter_starts(Fn fn) const;
 
-  size_t allocSize() const {
-    auto const sz = size();
-    switch (hdr_.kind) {
-      case HeaderKind::Hole:
-      case HeaderKind::Free:
-      case HeaderKind::BigObj:
-      case HeaderKind::BigMalloc:
-        // these don't need rounding up to size classes.
-        assertx(sz % 16 == 0);
-        return sz;
-      default:
-        return MemoryManager::smallSizeClass(sz);
-    }
+  void setStart(const void* p) {
+    bitvec_set(starts_, start_index(p));
   }
 
-  const Resumable* resumable() const {
-    assert(kind() == HeaderKind::AsyncFuncFrame);
-    return reinterpret_cast<const Resumable*>(
-      (const char*)this + native_.obj_offset - sizeof(Resumable)
-    );
-  }
-  Resumable* resumable() {
-    assert(kind() == HeaderKind::AsyncFuncFrame);
-    return reinterpret_cast<Resumable*>(
-      (char*)this + native_.obj_offset - sizeof(Resumable)
-    );
-  }
-  const ObjectData* asyncFuncWH() const {
-    assert(resumable()->actRec()->func()->isAsyncFunction());
-    auto obj = reinterpret_cast<const ObjectData*>(
-      (const char*)this + native_.obj_offset
-    );
-    assert(obj->headerKind() == HeaderKind::AsyncFuncWH);
-    return obj;
-  }
-  ObjectData* asyncFuncWH() {
-    assert(resumable()->actRec()->func()->isAsyncFunction());
-    auto obj = reinterpret_cast<ObjectData*>(
-      (char*)this + native_.obj_offset
-    );
-    assert(obj->headerKind() == HeaderKind::AsyncFuncWH);
-    return obj;
-  }
-  const ObjectData* nativeObj() const {
-    assert(kind() == HeaderKind::NativeData);
-    auto obj = Native::obj(&native_);
-    assert(isObjectKind(obj->headerKind()));
-    assert(obj->getAttribute(ObjectData::HasNativeData));
-    return obj;
-  }
-  ObjectData* nativeObj() {
-    assert(kind() == HeaderKind::NativeData);
-    auto obj = Native::obj(&native_);
-    assert(isObjectKind(obj->headerKind()));
-    return obj;
-  }
-  const ObjectData* closureObj() const {
-    assert(kind() == HeaderKind::ClosureHdr);
-    auto obj = reinterpret_cast<const ObjectData*>(&closure_hdr_ + 1);
-    assert(obj->headerKind() == HeaderKind::Closure);
-    return obj;
-  }
-  ObjectData* closureObj() {
-    assert(kind() == HeaderKind::ClosureHdr);
-    auto obj = reinterpret_cast<ObjectData*>(&closure_hdr_ + 1);
-    assert(obj->headerKind() == HeaderKind::Closure);
-    return obj;
+  /*
+   * set start bits for as many objects of size class index, that fit
+   * between [start,end).
+   */
+  void setStarts(const void* start, const void* end, size_t nbytes,
+                 size_t index);
+
+  bool isStart(const void* p) const {
+    return bitvec_test(starts_, start_index(p));
   }
 
-  // if this header is one of the types that contains an ObjectData,
-  // return the (possibly inner ptr) ObjectData*
-  const ObjectData* obj() const {
-    return isObjectKind(kind()) ? &obj_ :
-           kind() == HeaderKind::AsyncFuncFrame ? asyncFuncWH() :
-           kind() == HeaderKind::NativeData ? nativeObj() :
-           kind() == HeaderKind::ClosureHdr ? closureObj() :
-           nullptr;
+  HeapObject* find(const void* ptr) const;
+
+  static Slab* fromHeader(HeapObject* h) {
+    assertx(h->kind() == HeaderKind::Slab);
+    return reinterpret_cast<Slab*>(h);
   }
 
-public:
-  union {
-    struct {
-      HeaderWord<> hdr_;
-      uint64_t q;
-    };
-    StringData str_;
-    ArrayData arr_;
-    MixedArray mixed_;
-    SetArray set_;
-    APCLocalArray apc_;
-    ProxyArray proxy_;
-    GlobalsArray globals_;
-    ObjectData obj_;
-    c_Pair pair_;
-    BaseVector vector_;
-    HashCollection hashcoll_;
-    ResourceHdr res_;
-    RefData ref_;
-    MallocNode malloc_;
-    FreeNode free_;
-    NativeNode native_;
-    c_AwaitAllWaitHandle awaitall_;
-    ClosureHdr closure_hdr_;
-    c_Closure closure_;
-  };
+  size_t size() const {
+    return kSlabSize;
+  }
+
+  static Slab* fromPtr(const void* p) {
+    static_assert(kSlabAlign == kSlabSize, "");
+    auto slab = reinterpret_cast<Slab*>(uintptr_t(p) & ~(kSlabAlign - 1));
+    assertx(slab->kind() == HeaderKind::Slab);
+    return slab;
+  }
+
+  char* start() { return (char*)(this + 1); }
+  char* end() { return (char*)this + size(); }
+  const char* start() const { return (const char*)(this + 1); }
+  const char* end() const { return (const char*)this + size(); }
+
+  struct InitMasks;
+
+  // access whole start-bits word, for testing
+  uint64_t start_bits(const void* p) const {
+    return starts_[start_index(p) / kBitsPerStart];
+  }
+
+private:
+  void clearStarts() {
+    memset(starts_, 0, sizeof(starts_));
+  }
+
+  static size_t start_index(const void* p) {
+    return ((size_t)p & (kSlabSize - 1)) / kSmallSizeAlign;
+  }
+
+private:
+  static constexpr size_t kBitsPerStart = 64; // bits per starts_[] entry
+  static constexpr auto kNumStarts = kSlabSize / kBitsPerStart /
+                                     kSmallSizeAlign;
+
+  // tables for bulk-initializing start bits in setStarts(). kNumMasks
+  // covers the small size classes that span <= 64 start bits (up to 1K).
+  static constexpr size_t kNumMasks = 20;
+  static std::array<uint64_t,kNumMasks> masks_;
+  static std::array<uint8_t,kNumMasks> shifts_;
+
+  // Start-bit state:
+  // 1 = a HeapObject starts at corresponding address
+  // 0 = in the middle of an object or free space
+  uint64_t starts_[kNumStarts];
 };
 
-inline size_t Header::size() const {
+static_assert(kMaxSmallSize < kSlabSize - sizeof(Slab),
+              "kMaxSmallSize must fit in Slab");
+
+inline const Resumable* resumable(const HeapObject* h) {
+  assertx(h->kind() == HeaderKind::AsyncFuncFrame);
+  auto native = static_cast<const NativeNode*>(h);
+  return reinterpret_cast<const Resumable*>(
+    (const char*)native + native->obj_offset - sizeof(Resumable)
+  );
+}
+
+inline Resumable* resumable(HeapObject* h) {
+  assertx(h->kind() == HeaderKind::AsyncFuncFrame);
+  auto native = static_cast<NativeNode*>(h);
+  return reinterpret_cast<Resumable*>(
+    (char*)native + native->obj_offset - sizeof(Resumable)
+  );
+}
+
+inline const c_Awaitable* asyncFuncWH(const HeapObject* h) {
+  assertx(resumable(h)->actRec()->func()->isAsyncFunction());
+  auto native = static_cast<const NativeNode*>(h);
+  auto obj = reinterpret_cast<const c_Awaitable*>(
+    (const char*)native + native->obj_offset
+  );
+  assertx(obj->headerKind() == HeaderKind::AsyncFuncWH);
+  return obj;
+}
+
+inline c_Awaitable* asyncFuncWH(HeapObject* h) {
+  assertx(resumable(h)->actRec()->func()->isAsyncFunction());
+  auto native = static_cast<NativeNode*>(h);
+  auto obj = reinterpret_cast<c_Awaitable*>(
+    (char*)native + native->obj_offset
+  );
+  assertx(obj->headerKind() == HeaderKind::AsyncFuncWH);
+  return obj;
+}
+
+inline const ObjectData* closureObj(const HeapObject* h) {
+  assertx(h->kind() == HeaderKind::ClosureHdr);
+  auto closure_hdr = static_cast<const ClosureHdr*>(h);
+  auto obj = reinterpret_cast<const ObjectData*>(closure_hdr + 1);
+  assertx(obj->headerKind() == HeaderKind::Closure);
+  return obj;
+}
+
+inline ObjectData* closureObj(HeapObject* h) {
+  assertx(h->kind() == HeaderKind::ClosureHdr);
+  auto closure_hdr = static_cast<ClosureHdr*>(h);
+  auto obj = reinterpret_cast<ObjectData*>(closure_hdr + 1);
+  assertx(obj->headerKind() == HeaderKind::Closure);
+  return obj;
+}
+
+inline ObjectData* memoObj(HeapObject* h) {
+  assertx(h->kind() == HeaderKind::MemoData);
+  auto hdr = static_cast<MemoNode*>(h);
+  auto obj = reinterpret_cast<ObjectData*>((char*)hdr + hdr->objOff());
+  assertx(obj->headerKind() == HeaderKind::Object);
+  assertx(obj->getVMClass()->hasMemoSlots());
+  assertx(hdr->objOff() == ObjectData::objOffFromMemoNode(obj->getVMClass()));
+  return obj;
+}
+
+inline const ObjectData* memoObj(const HeapObject* h) {
+  return memoObj(const_cast<HeapObject*>(h));
+}
+
+// if this header is one of the types that contains an ObjectData,
+// return the (possibly inner ptr) ObjectData*
+inline const ObjectData* innerObj(const HeapObject* h) {
+  return isObjectKind(h->kind()) ? static_cast<const ObjectData*>(h) :
+         h->kind() == HeaderKind::AsyncFuncFrame ? asyncFuncWH(h) :
+         h->kind() == HeaderKind::NativeData ?
+           Native::obj(static_cast<const NativeNode*>(h)) :
+         h->kind() == HeaderKind::ClosureHdr ? closureObj(h) :
+         h->kind() == HeaderKind::MemoData ? memoObj(h) :
+         nullptr;
+}
+
+// constexpr version of MemoryManager::sizeClass.
+// requires sizeof(T) <= kMaxSmallSizeLookup
+template<class T> constexpr size_t sizeClass() {
+  return kSizeIndex2Size[
+    kSmallSize2Index[(sizeof(T)-1) >> kLgSmallSizeQuantum]
+  ];
+}
+
+/*
+ * Return the size of h in bytes, rounded up to size class if necessary.
+ */
+inline size_t allocSize(const HeapObject* h) {
   // Ordering depends on ext_wait-handle.h.
-  static const uint32_t waithandle_sizes[] = {
-    sizeof(c_StaticWaitHandle),
+  static const uint16_t waithandle_sizes[] = {
+    sizeClass<c_StaticWaitHandle>(),
     0, /* AsyncFunction */
-    sizeof(c_AsyncGeneratorWaitHandle),
+    sizeClass<c_AsyncGeneratorWaitHandle>(),
     0, /* AwaitAll */
-    sizeof(c_ConditionWaitHandle),
-    sizeof(c_RescheduleWaitHandle),
-    sizeof(c_SleepWaitHandle),
-    sizeof(c_ExternalThreadEventWaitHandle),
+    sizeClass<c_ConditionWaitHandle>(),
+    sizeClass<c_RescheduleWaitHandle>(),
+    sizeClass<c_SleepWaitHandle>(),
+    sizeClass<c_ExternalThreadEventWaitHandle>(),
   };
 
   // Ordering depends on header-kind.h.
-  static constexpr uint32_t kind_sizes[] = {
+  static constexpr uint16_t kind_sizes[] = {
     0, /* Packed */
     0, /* Mixed */
-    sizeof(ArrayData), /* Empty */
-    sizeof(APCLocalArray),
-    sizeof(GlobalsArray),
-    sizeof(ProxyArray),
+    sizeClass<ArrayData>(), /* Empty */
+    0, /* APCLocalArray */
+    sizeClass<GlobalsArray>(),
+    0, /* Shape */
     0, /* Dict */
     0, /* VecArray */
     0, /* KeySet */
     0, /* String */
     0, /* Resource */
-    sizeof(RefData),
+    sizeClass<RefData>(),
     0, /* Object */
+    0, /* NativeObject */
     0, /* WaitHandle */
-    sizeof(c_AsyncFunctionWaitHandle),
+    sizeClass<c_AsyncFunctionWaitHandle>(),
     0, /* AwaitAllWH */
     0, /* Closure */
-    sizeof(c_Vector),
-    sizeof(c_Map),
-    sizeof(c_Set),
-    sizeof(c_Pair),
-    sizeof(c_ImmVector),
-    sizeof(c_ImmMap),
-    sizeof(c_ImmSet),
+    sizeClass<c_Vector>(),
+    sizeClass<c_Map>(),
+    sizeClass<c_Set>(),
+    sizeClass<c_Pair>(),
+    sizeClass<c_ImmVector>(),
+    sizeClass<c_ImmMap>(),
+    sizeClass<c_ImmSet>(),
     0, /* AsyncFuncFrame */
     0, /* NativeData */
     0, /* ClosureHdr */
+    0, /* MemoData */
+    0, /* Cpp */
     0, /* SmallMalloc */
     0, /* BigMalloc */
-    0, /* BigObj */
     0, /* Free */
     0, /* Hole */
+    sizeof(Slab), /* Slab */
   };
-#define CHECKSIZE(knd, size) \
-  static_assert(kind_sizes[(int)HeaderKind::knd] == size, #knd);
-  CHECKSIZE(Empty, sizeof(ArrayData))
-  CHECKSIZE(Apc, sizeof(APCLocalArray))
-  CHECKSIZE(Globals, sizeof(GlobalsArray))
-  CHECKSIZE(AsyncFuncWH, sizeof(c_AsyncFunctionWaitHandle))
-  CHECKSIZE(Vector, sizeof(c_Vector))
-  CHECKSIZE(Map, sizeof(c_Map))
-  CHECKSIZE(Set, sizeof(c_Set))
-  CHECKSIZE(Pair, sizeof(c_Pair))
-  CHECKSIZE(ImmVector, sizeof(c_ImmVector))
-  CHECKSIZE(ImmMap, sizeof(c_ImmMap))
-  CHECKSIZE(ImmSet, sizeof(c_ImmSet))
-  CHECKSIZE(Ref, sizeof(RefData))
-  CHECKSIZE(AsyncFuncFrame, 0)
-  CHECKSIZE(AwaitAllWH, 0)
-  CHECKSIZE(Closure, 0)
-  CHECKSIZE(WaitHandle, 0)
-  CHECKSIZE(Resource, 0)
-  CHECKSIZE(NativeData, 0)
-  CHECKSIZE(ClosureHdr, 0)
-  CHECKSIZE(SmallMalloc, 0)
-  CHECKSIZE(BigMalloc, 0)
-  CHECKSIZE(BigObj, 0)
-  CHECKSIZE(Object, 0)
-  CHECKSIZE(Hole, 0)
-  CHECKSIZE(Free, 0)
+#define CHECKSIZE(knd, type) \
+  static_assert(kind_sizes[(int)HeaderKind::knd] == sizeClass<type>(), #knd);
+  CHECKSIZE(Empty, ArrayData)
+  CHECKSIZE(Globals, GlobalsArray)
+  CHECKSIZE(Ref, RefData)
+  CHECKSIZE(AsyncFuncWH, c_AsyncFunctionWaitHandle)
+  CHECKSIZE(Vector, c_Vector)
+  CHECKSIZE(Map, c_Map)
+  CHECKSIZE(Set, c_Set)
+  CHECKSIZE(Pair, c_Pair)
+  CHECKSIZE(ImmVector, c_ImmVector)
+  CHECKSIZE(ImmMap, c_ImmMap)
+  CHECKSIZE(ImmSet, c_ImmSet)
+  static_assert(kind_sizes[(int)HeaderKind::Slab] == sizeof(Slab), "");
+#undef CHECKSIZE
+#define CHECKSIZE(knd)\
+  static_assert(kind_sizes[(int)HeaderKind::knd] == 0, #knd);
+  CHECKSIZE(Packed)
+  CHECKSIZE(Mixed)
+  CHECKSIZE(Apc)
+  CHECKSIZE(Dict)
+  CHECKSIZE(VecArray)
+  CHECKSIZE(Keyset)
+  CHECKSIZE(String)
+  CHECKSIZE(Resource)
+  CHECKSIZE(Object)
+  CHECKSIZE(NativeObject)
+  CHECKSIZE(WaitHandle)
+  CHECKSIZE(AwaitAllWH)
+  CHECKSIZE(Closure)
+  CHECKSIZE(AsyncFuncFrame)
+  CHECKSIZE(NativeData)
+  CHECKSIZE(ClosureHdr)
+  CHECKSIZE(MemoData)
+  CHECKSIZE(Cpp)
+  CHECKSIZE(SmallMalloc)
+  CHECKSIZE(BigMalloc)
+  CHECKSIZE(Free)
+  CHECKSIZE(Hole)
 #undef CHECKSIZE
 
-  HeaderKind kindVar = kind();
-  if (auto size = kind_sizes[(int)kindVar]) return size;
+  auto kind = h->kind();
+  if (auto size = kind_sizes[(int)kind]) {
+    return size;
+  }
 
-  switch (kindVar) {
+  // In the cases below, kinds that don't need size-class rounding will
+  // return their size immediately; the rest break to the bottom, then
+  // return a rounded-up size.
+  size_t size = 0;
+  switch (kind) {
     case HeaderKind::Packed:
     case HeaderKind::VecArray:
-      return PackedArray::heapSize(&arr_);
+      // size = kSizeIndex2Size[h->aux16]
+      size = PackedArray::heapSize(static_cast<const ArrayData*>(h));
+      break;
+    case HeaderKind::Shape:
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
-      return mixed_.heapSize();
+      // size = fn of h->m_scale
+      size = static_cast<const MixedArray*>(h)->heapSize();
+      break;
     case HeaderKind::Keyset:
-      return set_.heapSize();
+      // size = fn of h->m_scale
+      size = static_cast<const SetArray*>(h)->heapSize();
+      break;
+    case HeaderKind::Apc:
+      // size = h->m_size * 16 + sizeof(APCLocalArray)
+      size = static_cast<const APCLocalArray*>(h)->heapSize();
+      break;
     case HeaderKind::String:
-      return str_.heapSize();
+      // size = isFlat ? isRefCounted ? table[aux16] : m_size+C : proxy_size;
+      size = static_cast<const StringData*>(h)->heapSize();
+      break;
     case HeaderKind::Closure:
     case HeaderKind::Object:
+      // size = h->m_cls->m_declProperties.m_extra * sz(TV) + sz(OD)
       // [ObjectData][props]
-      return obj_.heapSize();
+      size = static_cast<const ObjectData*>(h)->heapSize();
+      break;
     case HeaderKind::ClosureHdr:
+      // size = h->aux32
       // [ClosureHdr][ObjectData][use vars]
-      return closure_hdr_.size();
-    case HeaderKind::WaitHandle:
-    {
+      size = static_cast<const ClosureHdr*>(h)->size();
+      break;
+    case HeaderKind::MemoData:
+      size = static_cast<const MemoNode*>(h)->objOff() + memoObj(h)->heapSize();
+      break;
+    case HeaderKind::WaitHandle: {
+      // size = table[h->whkind & mask]
       // [ObjectData][subclass]
-      auto whKind = wait_handle<c_WaitHandle>(&obj_)->getKind();
-      if (auto whSize = waithandle_sizes[(int)whKind]) return whSize;
-      return asio_object_size(&obj_);
+      auto obj = static_cast<const ObjectData*>(h);
+      auto whKind = wait_handle<c_Awaitable>(obj)->getKind();
+      size = waithandle_sizes[(int)whKind];
+      assertx(size != 0); // AsyncFuncFrame or AwaitAllWH
+      assertx(size == MemoryManager::sizeClass(size));
+      return size;
     }
     case HeaderKind::AwaitAllWH:
+      // size = h->m_cap * sz(Node) + sz(c_AAWH)
       // [ObjectData][children...]
-      return awaitall_.heapSize();
+      size = static_cast<const c_AwaitAllWaitHandle*>(h)->heapSize();
+      break;
     case HeaderKind::Resource:
+      // size = h->aux16
       // [ResourceHdr][ResourceData subclass]
-      return res_.heapSize();
+      size = static_cast<const ResourceHdr*>(h)->heapSize();
+      break;
+    case HeaderKind::Cpp:
     case HeaderKind::SmallMalloc: // [MallocNode][bytes...]
-    case HeaderKind::BigMalloc:   // [MallocNode][bytes...]
-    case HeaderKind::BigObj:      // [MallocNode][Header...]
-      return malloc_.nbytes;
+      // size = h->nbytes // 64-bit
+      size = static_cast<const MallocNode*>(h)->nbytes;
+      break;
     case HeaderKind::AsyncFuncFrame:
+      // size = h->obj_offset + C // 32-bit
       // [NativeNode][locals][Resumable][c_AsyncFunctionWaitHandle]
-      return native_.obj_offset + sizeof(c_AsyncFunctionWaitHandle);
-    case HeaderKind::NativeData:
-      // [NativeNode][NativeData][ObjectData][props] is one allocation.
+      size = static_cast<const NativeNode*>(h)->obj_offset +
+             sizeof(c_AsyncFunctionWaitHandle);
+      break;
+    case HeaderKind::NativeData: {
+      // h->obj_offset + (h+h->obj_offset)->m_cls->m_extra * sz(TV) + sz(OD)
+      // [NativeNode][Memo Slots][NativeData][ObjectData][props] is one alloc.
       // Generators -
       // [NativeNode][NativeData<locals><Resumable><GeneratorData>][ObjectData]
-      return native_.obj_offset + nativeObj()->heapSize();
+      auto native = static_cast<const NativeNode*>(h);
+      size = native->obj_offset + Native::obj(native)->heapSize();
+      break;
+    }
+    // the following sizes are intentionally not rounded up to size class.
+    case HeaderKind::BigMalloc: // [MallocNode][raw bytes...]
+      size = static_cast<const MallocNode*>(h)->nbytes;
+      assertx(size != 0);
+      // not rounded up to size class, because we never need to iterate over
+      // more than one allocated block. avoid calling nallocx().
+      return size;
     case HeaderKind::Free:
     case HeaderKind::Hole:
-      return free_.size();
+      size = static_cast<const FreeNode*>(h)->size();
+      assertx(size != 0);
+      // Free objects are guaranteed to be already size-class aligned.
+      // Holes are not size-class aligned, so neither need to be rounded up.
+      return size;
+    case HeaderKind::Slab:
+    case HeaderKind::NativeObject:
     case HeaderKind::AsyncFuncWH:
     case HeaderKind::Empty:
-    case HeaderKind::Apc:
     case HeaderKind::Globals:
-    case HeaderKind::Proxy:
     case HeaderKind::Vector:
     case HeaderKind::Map:
     case HeaderKind::Set:
@@ -304,111 +444,148 @@ inline size_t Header::size() const {
     case HeaderKind::ImmMap:
     case HeaderKind::ImmSet:
     case HeaderKind::Ref:
-      assertx(false &&
-              "Constant header sizes should be handled by the lookup table.");
+      not_reached();
   }
-  return 0;
+  return MemoryManager::sizeClass(size);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<class Fn> void BigHeap::iterate(Fn fn) {
-  // slabs and bigs are sorted; walk through both in address order
-  const auto SENTINEL = (Header*) ~0LL;
-  auto slab = std::begin(m_slabs);
-  auto big = std::begin(m_bigs);
-  auto slabend = std::end(m_slabs);
-  auto bigend = std::end(m_bigs);
-  while (slab != slabend || big != bigend) {
-    Header* slab_hdr = slab != slabend ? (Header*)slab->ptr : SENTINEL;
-    Header* big_hdr = big != bigend ? (Header*)*big : SENTINEL;
-    assert(slab_hdr < SENTINEL || big_hdr < SENTINEL);
-    Header *h, *end;
-    if (slab_hdr < big_hdr) {
-      h = slab_hdr;
-      end = (Header*)((char*)h + slab->size);
-      ++slab;
-      assert(end <= big_hdr); // otherwise slab overlaps next big
-    } else {
-      h = big_hdr;
-      end = nullptr; // ensure we don't loop below
-      ++big;
-    }
-    do {
-      auto size = h->allocSize();
+// call fn(h) on each object in the slab, without calling allocSize()
+template<class Fn>
+void Slab::iter_starts(Fn fn) const {
+  auto ptr = (char*)this;
+  for (auto it = starts_, end = starts_ + kNumStarts; it < end; ++it) {
+    for (auto bits = *it; bits != 0; bits &= (bits - 1)) {
+      auto k = ffs64(bits);
+      auto h = (HeapObject*)(ptr + k * kSmallSizeAlign);
       fn(h);
-      h = (Header*)((char*)h + size);
-    } while (h < end);
-    assert(!end || h == end); // otherwise, last object was truncated
+    }
+    ptr += kBitsPerStart * kSmallSizeAlign;
   }
 }
 
-template<class Fn> void MemoryManager::iterate(Fn fn) {
-  m_heap.iterate([&](Header* h) {
-    if (h->kind() == HeaderKind::BigObj) {
-      // skip MallocNode
-      h = reinterpret_cast<Header*>((&h->malloc_) + 1);
-    } else if (h->kind() == HeaderKind::Hole) {
-      // no valid pointer can point here.
-      return; // continue iterating
+/*
+ * Search from ptr backwards, for a HeapObject that contains ptr.
+ * Returns the HeapObject* for the containing object, else nullptr.
+ */
+inline HeapObject* Slab::find(const void* ptr) const {
+  auto const i = start_index(ptr);
+  if (bitvec_test(starts_, i)) {
+    return reinterpret_cast<HeapObject*>(
+        uintptr_t(ptr) & ~(kSmallSizeAlign - 1)
+    );
+  }
+  // compute a mask with 0s at i+1 and higher
+  auto const mask = ~0ull >> (kBitsPerStart - 1 - i % kBitsPerStart);
+  auto cursor = starts_ + i / kBitsPerStart;
+  for (auto bits = *cursor & mask;; bits = *cursor) {
+    if (bits) {
+      auto k = fls64(bits);
+      auto h = reinterpret_cast<HeapObject*>(
+        (char*)this + ((cursor - starts_) * kBitsPerStart + k) * kSmallSizeAlign
+      );
+      auto size = allocSize(h);
+      if ((char*)ptr >= (char*)h + size) break;
+      return h;
     }
-    fn(h);
+    if (--cursor < starts_) break;
+  }
+  return nullptr;
+}
+
+/*
+ * Set multiple start bits. See implementation notes near Slab::InitMasks
+ * in memory-manager.cpp
+ */
+inline void Slab::setStarts(const void* start, const void* end,
+                            size_t nbytes, size_t index) {
+  auto const start_bit = start_index(start);
+  auto const end_bit = start_index((char*)end - kSmallSizeAlign) + 1;
+  auto const nbits = nbytes / kSmallSizeAlign;
+  if (nbits <= kBitsPerStart &&
+      start_bit / kBitsPerStart < end_bit / kBitsPerStart) {
+    assertx(index < kNumMasks);
+    auto const mask = masks_[index];
+    size_t const k = shifts_[index];
+    // initially n = how much mask should be shifted to line up with start_bit
+    auto n = start_bit % kBitsPerStart;
+    // first word (containing start_bit) |= left-shifted mask
+    auto s = &starts_[start_bit / kBitsPerStart];
+    *s++ |= mask << n;
+    // subsequently, n accumulates shifts required by the size class
+    n = (n + k) % nbits;
+    // store middle words with shifted mask, update shift amount each time
+    for (auto e = &starts_[end_bit / kBitsPerStart]; s < e;) {
+      *s++ = mask << n;
+      n = n + k >= nbits ? n + k - nbits : n + k; // n = (n+k) % nbits
+    }
+    // last word (containing end_bit) |= mask with end_bit and higher zeroed
+    *s |= (mask << n) & ~(~0ull << end_bit % kBitsPerStart);
+  } else {
+    // Either the size class is too large to fit 1+ bits per 64bit word,
+    // or the ncontig range was too small. Set one bit at a time.
+    for (auto i = start_bit; i < end_bit; i += nbits) {
+      bitvec_set(starts_, i);
+    }
+  }
+}
+
+template<class OnBig, class OnSlab>
+void SparseHeap::iterate(OnBig onBig, OnSlab onSlab) {
+  // slabs and bigs are sorted; walk through both in address order
+  m_bigs.iterate([&](HeapObject* h, size_t size) {
+    if (h->kind() == HeaderKind::Slab) {
+      onSlab(h, size);
+    } else {
+      onBig(h, size);
+    }
   });
 }
 
-template<class Fn> void MemoryManager::forEachHeader(Fn fn) {
+template<class Fn> void SparseHeap::iterate(Fn fn) {
+  // slabs and bigs are sorted; walk through both in address order
+  m_bigs.iterate([&](HeapObject* big, size_t big_size) {
+    HeapObject *h, *end;
+    if (big->kind() == HeaderKind::Slab) {
+      assertx((char*)big + big_size == Slab::fromHeader(big)->end());
+      h = (HeapObject*)Slab::fromHeader(big)->start();
+      end = (HeapObject*)Slab::fromHeader(big)->end();
+    } else {
+      h = big;
+      end = nullptr; // ensure we don't loop below
+    }
+    do {
+      auto size = allocSize(h);
+      fn(h, size);
+      h = (HeapObject*)((char*)h + size);
+    } while (h < end);
+    assertx(!end || h == end); // otherwise, last object was truncated
+  });
+}
+
+template<class Fn> void MemoryManager::iterate(Fn fn) {
+  m_heap.iterate([&](HeapObject* h, size_t allocSize) {
+    if (h->kind() >= HeaderKind::Hole) {
+      assertx(unsigned(h->kind()) < NumHeaderKinds);
+      // no valid pointer can point here.
+      return; // continue iterating
+    }
+    fn(h, allocSize);
+  });
+}
+
+template<class Fn> void MemoryManager::forEachHeapObject(Fn fn) {
   initFree();
   iterate(fn);
 }
 
 template<class Fn> void MemoryManager::forEachObject(Fn fn) {
-  if (debug) checkHeap("MM::forEachObject");
-  std::vector<ObjectData*> ptrs;
-  forEachHeader([&](Header* h) {
-    switch (h->kind()) {
-      case HeaderKind::Object:
-      case HeaderKind::WaitHandle:
-      case HeaderKind::AsyncFuncWH:
-      case HeaderKind::AwaitAllWH:
-      case HeaderKind::Closure:
-      case HeaderKind::Vector:
-      case HeaderKind::Map:
-      case HeaderKind::Set:
-      case HeaderKind::Pair:
-      case HeaderKind::ImmVector:
-      case HeaderKind::ImmMap:
-      case HeaderKind::ImmSet:
-        ptrs.push_back(&h->obj_);
-        break;
-      case HeaderKind::AsyncFuncFrame:
-        ptrs.push_back(h->asyncFuncWH());
-        break;
-      case HeaderKind::NativeData:
-        ptrs.push_back(h->nativeObj());
-        break;
-      case HeaderKind::ClosureHdr:
-        ptrs.push_back(h->closureObj());
-        break;
-      case HeaderKind::Packed:
-      case HeaderKind::Mixed:
-      case HeaderKind::Dict:
-      case HeaderKind::Empty:
-      case HeaderKind::VecArray:
-      case HeaderKind::Keyset:
-      case HeaderKind::Apc:
-      case HeaderKind::Globals:
-      case HeaderKind::Proxy:
-      case HeaderKind::String:
-      case HeaderKind::Resource:
-      case HeaderKind::Ref:
-      case HeaderKind::SmallMalloc:
-      case HeaderKind::BigMalloc:
-      case HeaderKind::Free:
-        break;
-      case HeaderKind::BigObj:
-      case HeaderKind::Hole:
-        assert(false && "forEachHeader skips these kinds");
-        break;
+  if (debug) checkHeap("MemoryManager::forEachObject");
+  std::vector<const ObjectData*> ptrs;
+  forEachHeapObject([&](HeapObject* h, size_t) {
+    if (auto obj = innerObj(h)) {
+      ptrs.push_back(obj);
     }
   });
   for (auto ptr : ptrs) {
@@ -416,90 +593,31 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
   }
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
-// information about heap objects, indexed by valid object starts.
-struct PtrMap {
-  using Region = std::pair<const Header*, std::size_t>;
-  static constexpr auto Mask = 0xffffffffffffULL; // 48 bit address space
-
-  void insert(const Header* h) {
-    sorted_ &= regions_.empty() || h > regions_.back().first;
-    regions_.emplace_back(h, h->size());
-  }
-
-  const Region* region(const void* p) const {
-    assert(sorted_);
-    // Find the first region which begins beyond p.
-    p = reinterpret_cast<void*>(uintptr_t(p) & Mask);
-    auto it = std::upper_bound(regions_.begin(), regions_.end(), p,
-      [](const void* p, const Region& region) {
-        return p < region.first;
-      });
-    // If its the first region, p is before any region, so there's no
-    // header. Otherwise, backup to the previous region.
-    if (it == regions_.begin()) return nullptr;
-    --it;
-    // p can only potentially point within this previous region, so check that.
-    return (uintptr_t(p) < uintptr_t(it->first) + it->second) ? &*it :
-           nullptr;
-  }
-
-  const Header* header(const void* p) const {
-    auto r = region(p);
-    return r ? r->first : nullptr;
-  }
-
-  bool isHeader(const void* p) const {
-    auto h = header(p);
-    return h && h == p;
-  }
-
-  size_t index(const Region* r) const {
-    return r - &regions_[0];
-  }
-
-  // where does this header sit in the regions_ vector?
-  size_t index(const Header* h) const {
-    assert(header(h));
-    return region(h) - &regions_[0];
-  }
-
-  void prepare() {
-    if (!sorted_) {
-      std::sort(regions_.begin(), regions_.end());
-      sorted_ = true;
-    }
-    assert(sanityCheck());
-  }
-
-  size_t size() const {
-    return regions_.size();
-  }
-
-  template<class Fn> void iterate(Fn fn) const {
-    for (auto& r : regions_) {
-      fn(r.first, r.second);
+template<class Fn> void MemoryManager::sweepApcArrays(Fn fn) {
+  for (size_t i = 0; i < m_apc_arrays.size();) {
+    auto a = m_apc_arrays[i];
+    if (fn(a)) {
+      a->sweep();
+      removeApcArray(a);
+    } else {
+      ++i;
     }
   }
-
-private:
-  bool sanityCheck() const {
-    // Verify that all the regions are in increasing and non-overlapping order.
-    DEBUG_ONLY void* last = nullptr;
-    for (const auto& region : regions_) {
-      assert(!last || last <= region.first);
-      last = (void*)(uintptr_t(region.first) + region.second);
-    }
-    return true;
-  }
-
-  std::vector<std::pair<const Header*, std::size_t>> regions_;
-  bool sorted_{true};
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
 }
 
+template<class Fn> void MemoryManager::sweepApcStrings(Fn fn) {
+  auto& head = getStringList();
+  for (StringDataNode *next, *n = head.next; n != &head; n = next) {
+    next = n->next;
+    assertx(next && uintptr_t(next) != kSmallFreeWord);
+    assertx(next && uintptr_t(next) != kMallocFreeWord);
+    auto const s = StringData::node2str(n);
+    if (fn(s)) {
+      s->unProxy();
+    }
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+}
 #endif

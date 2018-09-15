@@ -13,6 +13,13 @@ class C extends B {
 ";
   }
 }
+function test() {
+  $x = new C;
+  $x->meh()->work();
+}
+
+<<__EntryPoint>>
+function main_1482() {
 if (false) {
   class A {
 }
@@ -21,8 +28,5 @@ if (false) {
   class C {
 }
 }
-function test() {
-  $x = new C;
-  $x->meh()->work();
-}
 test();
+}

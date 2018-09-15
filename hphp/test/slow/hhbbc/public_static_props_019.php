@@ -11,4 +11,8 @@ function go() {
 }
 function everything_bad($y, $z) { $y::${$z} = 'heh'; }
 
+
+<<__EntryPoint>>
+function main_public_static_props_019() {
 go();
+}

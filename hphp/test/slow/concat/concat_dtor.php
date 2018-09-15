@@ -18,4 +18,8 @@ function go() {
   foo(new dtor(7), new dtor(8));
 }
 
+
+<<__EntryPoint>>
+function main_concat_dtor() {
 go();
+}

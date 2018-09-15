@@ -16,7 +16,6 @@
 
 #include "hphp/compiler/expression/expression.h"
 #include <vector>
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/parser/hphp.tab.hpp"
 #include "hphp/util/text-util.h"
@@ -32,8 +31,6 @@
 #include "hphp/compiler/expression/object_property_expression.h"
 #include "hphp/compiler/expression/unary_op_expression.h"
 #include "hphp/compiler/expression/binary_op_expression.h"
-#include "hphp/compiler/analysis/constant_table.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/expression/function_call.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/util/hash.h"
@@ -57,12 +54,6 @@ const char* Expression::nameOfKind(Construct::KindOf kind) {
   return Names[idx];
 }
 
-#define DEC_EXPR_CLASSES(x,t) Expression::t,
-Expression::ExprClass Expression::Classes[] = {
-  DECLARE_EXPRESSION_TYPES(DEC_EXPR_CLASSES)
-};
-#undef DEC_EXPR_CLASSES
-
 Expression::Expression(EXPRESSION_CONSTRUCTOR_BASE_PARAMETERS)
     : Construct(scope, r, kindOf), m_context(RValue),
       m_unused(false), m_error(0) {
@@ -79,13 +70,13 @@ ExpressionPtr Expression::replaceValue(ExpressionPtr rep, bool noWarn) {
       getScope(), getRange(), noWarn ?
       ExpressionList::ListKindWrappedNoWarn : ExpressionList::ListKindWrapped);
     el->addElement(rep);
-    rep->clearContext(AssignmentRHS);
     rep = el;
   }
   if (rep->is(KindOfSimpleVariable) && !is(KindOfSimpleVariable)) {
     static_pointer_cast<SimpleVariable>(rep)->setAlwaysStash();
   }
-  rep->copyContext(m_context & ~(DeadStore|AccessContext));
+  if (isUnpack()) rep->setIsUnpack();
+  rep->copyContext(m_context & ~(AccessContext));
 
   if (rep->getScope() != getScope()) {
     rep->resetScope(getScope());
@@ -138,19 +129,6 @@ bool Expression::hasSubExpr(ExpressionPtr sub) const {
   return false;
 }
 
-Expression::ExprClass Expression::getExprClass() const {
-  assert(m_kindOf > Construct::KindOfExpression);
-  auto const idx = static_cast<int32_t>(m_kindOf) -
-    static_cast<int32_t>(Construct::KindOfExpression);
-  assert(idx > 0);
-  ExprClass cls = Classes[idx];
-  if (cls == Update) {
-    ExpressionPtr k = getStoreVariable();
-    if (!k || !(k->hasContext(OprLValue))) cls = Expression::None;
-  }
-  return cls;
-}
-
 bool Expression::getEffectiveScalar(Variant &v) {
   if (is(KindOfExpressionList)) {
     ExpressionRawPtr sub = static_cast<ExpressionList*>(this)->listValue();
@@ -160,60 +138,12 @@ bool Expression::getEffectiveScalar(Variant &v) {
   return getScalarValue(v);
 }
 
-void Expression::addElement(ExpressionPtr exp) {
+void Expression::addElement(ExpressionPtr /*exp*/) {
   assert(false);
 }
 
-void Expression::insertElement(ExpressionPtr exp, int index /* = 0 */) {
+void Expression::insertElement(ExpressionPtr /*exp*/, int /*index*/ /* = 0 */) {
   assert(false);
-}
-
-ExpressionPtr Expression::unneededHelper() {
-  ExpressionListPtr elist = ExpressionListPtr
-    (new ExpressionList(getScope(), getRange(),
-                        ExpressionList::ListKindWrapped));
-
-  bool change = false;
-  for (int i=0, n = getKidCount(); i < n; i++) {
-    ExpressionPtr kid = getNthExpr(i);
-    if (kid && kid->getContainedEffects()) {
-      ExpressionPtr rep = kid->unneeded();
-      if (rep != kid) change = true;
-      if (rep->is(Expression::KindOfExpressionList)) {
-        for (int j=0, m = rep->getKidCount(); j < m; j++) {
-          elist->addElement(rep->getNthExpr(j));
-        }
-      } else {
-        elist->addElement(rep);
-      }
-    }
-  }
-
-  if (change) {
-    getScope()->addUpdates(BlockScope::UseKindCaller);
-  }
-
-  int n = elist->getCount();
-  assert(n);
-  if (n == 1) {
-    return elist->getNthExpr(0);
-  } else {
-    return elist;
-  }
-}
-
-ExpressionPtr Expression::unneeded() {
-  if (getLocalEffects() || is(KindOfScalarExpression)) {
-    return static_pointer_cast<Expression>(shared_from_this());
-  }
-  if (!getContainedEffects()) {
-    getScope()->addUpdates(BlockScope::UseKindCaller);
-    return ScalarExpressionPtr
-      (new ScalarExpression(getScope(), getRange(),
-                            T_LNUMBER, std::string("0")));
-  }
-
-  return unneededHelper();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -228,7 +158,7 @@ bool Expression::IsIdentifier(const std::string &value) {
     return false;
   }
   for (unsigned int i = 1; i < value.size(); i++) {
-    unsigned char ch = value[i];
+    ch = value[i];
     if (((ch < 'a' || ch > 'z') && (ch < 'A' || ch > 'Z') &&
          (ch < '0' || ch > '9') && ch < '\x7f' && ch != '_')) {
       if (ch == '\\' && i < value.size() - 1 && value[i+1] != '\\') {
@@ -240,43 +170,9 @@ bool Expression::IsIdentifier(const std::string &value) {
   return true;
 }
 
-void Expression::analyzeProgram(AnalysisResultPtr ar) {
-}
-
-bool Expression::CheckNeededRHS(ExpressionPtr value) {
-  bool needed = true;
-  always_assert(value);
-  while (value->is(KindOfAssignmentExpression)) {
-    value = dynamic_pointer_cast<AssignmentExpression>(value)->getValue();
-  }
-  if (value->isScalar()) {
-    needed = false;
-  }
-  return needed;
-}
-
-bool Expression::CheckNeeded(ExpressionPtr variable, ExpressionPtr value) {
-  // if the value may involve object, consider the variable as "needed"
-  // so that objects are not destructed prematurely.
-  bool needed = true;
-  if (value) needed = CheckNeededRHS(value);
-  if (variable->is(Expression::KindOfSimpleVariable)) {
-    auto var = dynamic_pointer_cast<SimpleVariable>(variable);
-    const std::string &name = var->getName();
-    VariableTablePtr variables = var->getScope()->getVariables();
-    if (needed) {
-      variables->addNeeded(name);
-    } else {
-      needed = variables->isNeeded(name);
-    }
-  }
-  return needed;
-}
-
-ExpressionPtr Expression::MakeConstant(AnalysisResultConstPtr ar,
-                                       BlockScopePtr scope,
-                                       const Location::Range& r,
-                                       const std::string &value) {
+ExpressionPtr
+Expression::MakeConstant(AnalysisResultConstRawPtr /*ar*/, BlockScopePtr scope,
+                         const Location::Range& r, const std::string& value) {
   auto exp = std::make_shared<ConstantExpression>(scope, r, value, false);
   if (value == "true" || value == "false") {
   } else if (value == "null") {
@@ -301,7 +197,7 @@ bool Expression::isCollection() const {
   return false;
 }
 
-ExpressionPtr Expression::MakeScalarExpression(AnalysisResultConstPtr ar,
+ExpressionPtr Expression::MakeScalarExpression(AnalysisResultConstRawPtr ar,
                                                BlockScopePtr scope,
                                                const Location::Range& r,
                                                const Variant& value) {
@@ -309,15 +205,37 @@ ExpressionPtr Expression::MakeScalarExpression(AnalysisResultConstPtr ar,
     auto el = std::make_shared<ExpressionList>(
       scope, r, ExpressionList::ListKindParam);
 
-    for (ArrayIter iter(value.toArray()); iter; ++iter) {
-      ExpressionPtr k(MakeScalarExpression(ar, scope, r, iter.first()));
-      ExpressionPtr v(MakeScalarExpression(ar, scope, r, iter.second()));
-      if (!k || !v) return ExpressionPtr();
-      auto ap = std::make_shared<ArrayPairExpression>(scope, r, k, v, false);
-      el->addElement(ap);
+    if (value.isVecArray() || value.isKeyset() ||
+        (value.isPHPArray() && value.asCArrRef().isVArray())) {
+      for (ArrayIter iter(value.toArray()); iter; ++iter) {
+        ExpressionPtr v(MakeScalarExpression(ar, scope, r, iter.second()));
+        if (!v) return ExpressionPtr();
+        el->addElement(v);
+      }
+    } else {
+      for (ArrayIter iter(value.toArray()); iter; ++iter) {
+        ExpressionPtr k(MakeScalarExpression(ar, scope, r, iter.first()));
+        ExpressionPtr v(MakeScalarExpression(ar, scope, r, iter.second()));
+        if (!k || !v) return ExpressionPtr();
+        auto ap = std::make_shared<ArrayPairExpression>(scope, r, k, v, false);
+        el->addElement(ap);
+      }
     }
+
     if (!el->getCount()) el.reset();
-    return std::make_shared<UnaryOpExpression>(scope, r, el, T_ARRAY, true);
+
+    auto const token = [&]{
+      if (value.isPHPArray()) {
+        if (value.asCArrRef().isVArray()) return T_VARRAY;
+        if (value.asCArrRef().isDArray()) return T_DARRAY;
+        return T_ARRAY;
+      }
+      if (value.isVecArray()) return T_VEC;
+      if (value.isDict()) return T_DICT;
+      if (value.isKeyset()) return T_KEYSET;
+      always_assert(false);
+    }();
+    return std::make_shared<UnaryOpExpression>(scope, r, el, token, true);
   } else if (value.isNull()) {
     return MakeConstant(ar, scope, r, "null");
   } else if (value.isBoolean()) {

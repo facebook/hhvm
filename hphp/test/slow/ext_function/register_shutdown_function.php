@@ -8,9 +8,6 @@ class Fooz {
   function __destruct() { echo "in Fooz::__destruct()\n"; }
 }
 
-register_shutdown_function('onShutdownRegisterShutdown');
-register_shutdown_function('onShutdownRegisterShutdown_foo');
-
 function onShutdownRegisterShutdown_foo() { echo "in foo\n"; }
 
 function onShutdownRegisterShutdown() {
@@ -26,4 +23,11 @@ function onShutdown() {
 
 function onShutdown2() {
   echo "in shutdown 2\n";
+}
+
+
+<<__EntryPoint>>
+function main_register_shutdown_function() {
+register_shutdown_function('onShutdownRegisterShutdown');
+register_shutdown_function('onShutdownRegisterShutdown_foo');
 }

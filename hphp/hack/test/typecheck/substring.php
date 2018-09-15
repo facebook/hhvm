@@ -11,7 +11,6 @@ function test(): void {
     $arr[$i] = maybe($arr);
   }
   $recurse = maybe($arr);
-  hh_show($recurse);
 
   // Force Typing_subtype.sub_string to run
   $recurse.'';

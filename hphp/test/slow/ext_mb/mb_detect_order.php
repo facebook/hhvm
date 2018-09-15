@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_mb_detect_order() {
 $str = "Pr\xC3\x9C\xC3\x9D"."fung";
 
 /* Set detection order by enumerated list */
@@ -19,3 +22,4 @@ var_dump(implode(", ", mb_detect_order()));
 
 var_dump(!empty(mb_get_info()['detect_order']));
 var_dump(!empty(mb_get_info('all')['detect_order']));
+}

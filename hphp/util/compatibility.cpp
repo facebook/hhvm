@@ -25,7 +25,9 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <unistd.h>
+
+#include <folly/portability/Fcntl.h>
+#include <folly/portability/Unistd.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -101,12 +103,12 @@ int advise_out(const std::string& fileName) {
   return result;
 }
 
-#if defined(__CYGWIN__) || defined(_MSC_VER)
+#ifdef _MSC_VER
 #include <windows.h>
 
 // since we only support win 7+
 // capturestackbacktrace is always available in kernel
-int backtrace (void **buffer, int size) {
+int backtrace(void **buffer, int size) {
   USHORT frames;
 
   if (size <= 0) {
@@ -138,15 +140,6 @@ int dladdr(const void *addr, Dl_info *info) {
 
   return 1;
 }
-
-#ifdef __CYGWIN__
-#include <libintl.h>
-// libbfd on cygwin is broken, stub dgettext to make linker unstupid
-char * libintl_dgettext(const char *domainname, const char *msgid) {
-  return dgettext(domainname, msgid);
-}
-#endif
-
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////

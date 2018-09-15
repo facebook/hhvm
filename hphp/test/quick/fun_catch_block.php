@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class FunCatchBlock {
   public static function setMuteUnmuteState($jumbo_shrimp,

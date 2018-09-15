@@ -21,7 +21,8 @@
 #include <openssl/ssl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
+
+#include <folly/portability/Fcntl.h>
 
 namespace HPHP {
 
@@ -93,7 +94,7 @@ void ServerNameIndication::find_server_names(
 
   // Iterate through all files in the cert directory.
   std::vector<std::string> crt_dir_files;
-  FileUtil::find(crt_dir_files, "/", path.c_str(), /* php */ false);
+  FileUtil::find(crt_dir_files, "/", path, /* php */ false);
   for (auto it = crt_dir_files.begin(); it != crt_dir_files.end(); ++it) {
     // Skip default cert and key; we'll fall back to those anyway.
     size_t filename_len = it->size() - path.size();
@@ -137,7 +138,7 @@ bool ServerNameIndication::ends_with(const std::string &s,
   return false;
 }
 
-int ServerNameIndication::callback(void *s, int *ad, void *arg) {
+int ServerNameIndication::callback(void* s, int* /*ad*/, void* /*arg*/) {
   SSL *ssl = (SSL *)s;
   const char *sn_ptr = SSL_get_servername(ssl, TLSEXT_NAMETYPE_host_name);
   if (!sn_ptr) {

@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_htmlspecialchars_utf8() {
 $inputs = array(
   "Foo\xc0barbaz",
   "\xc2\"",
@@ -11,4 +14,5 @@ $inputs = array(
 foreach ($inputs as $s) {
   $res1 = htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
   echo "'$s' => '$res1'\n";
+}
 }

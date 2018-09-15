@@ -12,7 +12,11 @@ class C1 {
 class C2 {
  use T;
  }
+
+<<__EntryPoint>>
+function main_2066() {
 $o = new C1;
 foreach ($o->fruit() as $fruit) {
   var_dump($fruit);
+}
 }

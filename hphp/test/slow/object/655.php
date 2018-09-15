@@ -19,4 +19,8 @@ function foo() {
 function G() {
   return new g;
 }
+
+<<__EntryPoint>>
+function main_655() {
 foo();
+}

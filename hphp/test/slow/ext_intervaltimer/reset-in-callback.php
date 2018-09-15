@@ -1,6 +1,6 @@
 <?hh
 
-function busy() {}
+function busy() { return __hhvm_intrinsics\launder_value(42); }
 
 $t = null;
 $x = 0;

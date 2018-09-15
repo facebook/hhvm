@@ -12,7 +12,7 @@ function printClass($rc) {
   foreach($rms as $rm) {
     $meths[$rm->getName()] = $rm;
   }
-  ksort($meths);
+  ksort(&$meths);
   foreach($meths as $meth) {
     printFunc($meth);
   }
@@ -21,76 +21,44 @@ function printClass($rc) {
   foreach($rps as $rp) {
     $props[$rp->getName()] = $rp;
   }
-  ksort($props);
+  ksort(&$props);
   foreach($props as $prop) {
     var_dump($prop->getTypeText());
   }
 }
 function f() {
 }
-$rf = new ReflectionFunction('f');
-printFunc($rf);
 function f1(int $t) {
 }
-$rf = new ReflectionFunction('f1');
-printFunc($rf);
 function f2(@string $s) {
 }
-$rf = new ReflectionFunction('f2');
-printFunc($rf);
 function f3(?:xhp:hello $x) {
 }
-$rf = new ReflectionFunction('f3');
-printFunc($rf);
 function f4(): noreturn {
   throw Exception('f4 doesn\'t return');
 }
-$rf = new ReflectionFunction('f4');
-printFunc($rf);
 function f100(): int {
 }
-$rf = new ReflectionFunction('f100');
-printFunc($rf);
 function f101(): string {
 }
-$rf = new ReflectionFunction('f101');
-printFunc($rf);
 function f102(): Vector<:xhp:element> {
 }
-$rf = new ReflectionFunction('f102');
-printFunc($rf);
 function f200((string, Template<A, B, ?C>, ?int, Vector<Map<C, B>>) $tuple): ?int {
 }
-$rf = new ReflectionFunction('f200');
-printFunc($rf);
 function f201((function (@int, Map<string, Map<int, Vector<string>>>):Vector<C>) $i): ClassA {
 }
-$rf = new ReflectionFunction('f201');
-printFunc($rf);
 function f202(:xhp:html-element $html): Map<string, Vector<:xhp:html-element>> {
 }
-$rf = new ReflectionFunction('f202');
-printFunc($rf);
 function f203((int, Vector<string>) $tupple): array<ClassA> {
 }
-$rf = new ReflectionFunction('f203');
-printFunc($rf);
 function f204((function (int): Vector<string>) $f): array<string, ClassA> {
 }
-$rf = new ReflectionFunction('f204');
-printFunc($rf);
 function f300<X, Y>(Y $y, ?double $d): X {
 }
-$rf = new ReflectionFunction('f300');
-printFunc($rf);
 function f301<X, Y>((function (): Vector<Y>) $f): array<string, X> {
 }
-$rf = new ReflectionFunction('f301');
-printFunc($rf);
 function f302<X, Y>((Y, X, double, string) $f): ?Y {
 }
-$rf = new ReflectionFunction('f302');
-printFunc($rf);
 class C {
   public @int $a;
   public ?string $b;
@@ -107,8 +75,6 @@ class C {
   public function m4((function(@int, (string, string)): void) $v) : array<Map<string, :xhp:html>> {
 }
 }
-$rc = new ReflectionClass('C');
-printClass($rc);
 class CT<X, Y> {
   public @int $a;
   public ?string $b;
@@ -125,8 +91,6 @@ class CT<X, Y> {
   public function m4((function(@int, (X, string)): void) $v) : array<Map<Y, :xhp:html>> {
 }
 }
-$rc = new ReflectionClass('CT');
-printClass($rc);
 trait T {
   static public function m1() {
 }
@@ -140,11 +104,50 @@ trait T {
 class TC {
   use T;
 }
-$rc = new ReflectionClass('TC');
-printClass($rc);
 function ff(Vector<int> $i, ?string $s, @C $c,
             array $a, arraykey $k, this $t) {
 }
+
+<<__EntryPoint>>
+function main_1366() {
+$rf = new ReflectionFunction('f');
+printFunc($rf);
+$rf = new ReflectionFunction('f1');
+printFunc($rf);
+$rf = new ReflectionFunction('f2');
+printFunc($rf);
+$rf = new ReflectionFunction('f3');
+printFunc($rf);
+$rf = new ReflectionFunction('f4');
+printFunc($rf);
+$rf = new ReflectionFunction('f100');
+printFunc($rf);
+$rf = new ReflectionFunction('f101');
+printFunc($rf);
+$rf = new ReflectionFunction('f102');
+printFunc($rf);
+$rf = new ReflectionFunction('f200');
+printFunc($rf);
+$rf = new ReflectionFunction('f201');
+printFunc($rf);
+$rf = new ReflectionFunction('f202');
+printFunc($rf);
+$rf = new ReflectionFunction('f203');
+printFunc($rf);
+$rf = new ReflectionFunction('f204');
+printFunc($rf);
+$rf = new ReflectionFunction('f300');
+printFunc($rf);
+$rf = new ReflectionFunction('f301');
+printFunc($rf);
+$rf = new ReflectionFunction('f302');
+printFunc($rf);
+$rc = new ReflectionClass('C');
+printClass($rc);
+$rc = new ReflectionClass('CT');
+printClass($rc);
+$rc = new ReflectionClass('TC');
+printClass($rc);
 $rf = new ReflectionFunction('ff');
 $rps = $rf->getParameters();
 foreach ($rps as $rp) {
@@ -154,4 +157,5 @@ foreach ($rps as $rp) {
   } else {
     var_dump("");
   }
+}
 }

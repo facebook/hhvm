@@ -26,7 +26,7 @@ namespace HPHP { namespace jit {
  * Note: the current name of this module/function is historical.  It
  * use to record cross-tracelet global information ("annotations") to
  * help bind call targets.  Now this information comes from static
- * analysis in FCallD opcodes.
+ * analysis in FCall opcodes.
  */
 void annotate(NormalizedInstruction* instr);
 

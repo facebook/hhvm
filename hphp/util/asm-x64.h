@@ -298,8 +298,12 @@ inline RIPRelativeRef DispRIP::operator[](intptr_t x) const {
 
 inline DispReg operator+(Reg64 r, intptr_t d) { return DispReg(r, d); }
 inline DispReg operator-(Reg64 r, intptr_t d) { return DispReg(r, -d); }
-inline DispRIP operator+(RegRIP r, intptr_t d) { return DispRIP(d); }
-inline DispRIP operator-(RegRIP r, intptr_t d) { return DispRIP(d); }
+inline DispRIP operator+(RegRIP /*r*/, intptr_t d) {
+  return DispRIP(d);
+}
+inline DispRIP operator-(RegRIP /*r*/, intptr_t d) {
+  return DispRIP(d);
+}
 
 inline ScaledIndex operator*(Reg64 r, int scale) {
   return ScaledIndex(r, scale);
@@ -315,7 +319,9 @@ inline IndexedDispReg operator+(Reg64 b, Reg64 i) {
 }
 
 inline MemoryRef operator*(Reg64 r)  { return MemoryRef(DispReg(r)); }
-inline DispRIP   operator*(RegRIP r) { return DispRIP(0); }
+inline DispRIP operator*(RegRIP /*r*/) {
+  return DispRIP(0);
+}
 
 inline MemoryRef Reg64::operator[](intptr_t disp) const {
   return *(*this + disp);
@@ -477,7 +483,7 @@ namespace reg {
     X(xmm14); X(xmm15);
     return nullptr;
   }
-  inline const char* regname(RegSF r) {
+  inline const char* regname(RegSF /*r*/) {
     return "%flags";
   }
 #undef X
@@ -1006,7 +1012,7 @@ public:
   void jmp8(CodeAddress dest)  { emitJ8(instr_jmp, ssize_t(dest)); }
 
   void jmp(CodeAddress dest) {
-    always_assert(dest && jmpDeltaFits(dest));
+    always_assert_flog(dest && jmpDeltaFits(dest), "Bad Jmp: {}", dest);
     emitJ32(instr_jmp, ssize_t(dest));
   }
 
@@ -2265,10 +2271,16 @@ struct DecodedInstruction {
   int64_t immediate() const;
   bool setImmediate(int64_t value);
   bool isNop() const;
-  bool isBranch(bool allowCond = true) const;
+  enum BranchType {
+    Conditional = 1,
+    Unconditional = 1 << 1,
+  };
+  bool isBranch(BranchType branchType = BranchType(Conditional |
+                                                   Unconditional)) const;
   bool isCall() const;
   bool isJmp() const;
   bool isLea() const;
+  bool isFuseable(const DecodedInstruction& next) const;
   ConditionCode jccCondCode() const;
   bool shrinkBranch();
   void widenBranch();
@@ -2335,6 +2347,20 @@ private:
   uint8_t       m_immSz;
   uint8_t       m_offSz;
 };
+
+constexpr DecodedInstruction::BranchType operator|(
+    DecodedInstruction::BranchType a,
+    DecodedInstruction::BranchType b
+  ) {
+  return DecodedInstruction::BranchType((int)a | (int)b);
+}
+
+inline DecodedInstruction::BranchType& operator|=(
+    DecodedInstruction::BranchType& a,
+    const DecodedInstruction::BranchType& b
+  ) {
+  return (a = DecodedInstruction::BranchType((int)a | (int)b));
+}
 
 #undef TRACEMOD
 #undef logical_const

@@ -20,4 +20,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_error_002() {
 main();
+}

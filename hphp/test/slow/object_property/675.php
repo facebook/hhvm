@@ -8,5 +8,9 @@ class A {
  class C extends B {
  static public $foo;
 }
- var_dump(C::$foo);
 
+
+ <<__EntryPoint>>
+function main_675() {
+var_dump(C::$foo);
+}

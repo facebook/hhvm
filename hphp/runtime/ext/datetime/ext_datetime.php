@@ -70,7 +70,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  static function getLastErrors(): array;
+  static function getLastErrors(): darray;
 
   /**
    * Returns the timezone offset.
@@ -228,7 +228,7 @@ class DateTimeZone {
    *
    */
   <<__Native>>
-  function getLocation(): array;
+  function getLocation(): darray;
 
   /**
    * Returns the name of the timezone.
@@ -261,14 +261,14 @@ class DateTimeZone {
    */
   <<__Native>>
   function getTransitions(int $timestamp_begin = PHP_INT_MIN,
-                          int $timestamp_end = PHP_INT_MAX): array;
+                          int $timestamp_end = PHP_INT_MAX): mixed;
 
   /**
    * @return array - Returns array on success or FALSE on failure.
    *
    */
   <<__Native>>
-  static function listAbbreviations(): array;
+  static function listAbbreviations(): darray;
 
   /**
    * @param int $what - One of DateTimeZone class constants.
@@ -281,6 +281,9 @@ class DateTimeZone {
   <<__Native>>
   static function listIdentifiers(int $what = 2047,
                                   string $country = ""): mixed;
+
+  <<__Native>>
+  function __debugInfo(): array;
 }
 
 /**
@@ -828,7 +831,7 @@ function strtotime(string $input, int $timestamp = -1): mixed;
 <<__Native>>
 function time(): int;
 
-function timezone_abbreviations_list(): array {
+function timezone_abbreviations_list(): darray {
   return DateTimeZone::listAbbreviations();
 }
 
@@ -845,7 +848,7 @@ function timezone_identifiers_list(int $what = 2047,
   return DateTimeZone::listIdentifiers($what, $country);
 }
 
-function timezone_location_get(DateTimeZone $timezone): array {
+function timezone_location_get(DateTimeZone $timezone): darray {
   return $timezone->getLocation();
 }
 
@@ -890,7 +893,7 @@ function timezone_open(string $timezone): mixed {
 
 function timezone_transitions_get(DateTimeZone $timezone,
                                   int $timestamp_begin = PHP_INT_MIN,
-                                  int $timestamp_end = PHP_INT_MAX): array {
+                                  int $timestamp_end = PHP_INT_MAX): mixed {
   return $timezone->getTransitions($timestamp_begin, $timestamp_end);
 }
 

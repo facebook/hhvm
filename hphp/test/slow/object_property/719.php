@@ -36,4 +36,8 @@ function test() {
   bar()->bar = 8;
   var_dump(bar()->bar);
 }
+
+<<__EntryPoint>>
+function main_719() {
 test();
+}

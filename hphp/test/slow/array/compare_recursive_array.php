@@ -1,4 +1,4 @@
-<?hh
+<?php /* ref in array */
 
 
 function main() {
@@ -13,4 +13,8 @@ function main() {
   var_dump($recur === $recur);
   var_dump($recur !== $recur);
 }
+
+<<__EntryPoint>>
+function main_compare_recursive_array() {
 main();
+}

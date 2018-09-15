@@ -15,6 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <sstream>
+
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"

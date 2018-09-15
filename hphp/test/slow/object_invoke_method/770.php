@@ -7,7 +7,11 @@ class C9 {
     var_dump(func_get_args());
   }
 }
+
+<<__EntryPoint>>
+function main_770() {
 $c = new C9;
 $c();
 $c(0);
 $c(0, 1);
+}

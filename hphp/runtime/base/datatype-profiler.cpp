@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/datatype-profiler.h"
+#include "hphp/runtime/base/runtime-option.h"
 
 namespace HPHP {
 
@@ -33,11 +34,15 @@ DataTypeProfiler::DataTypeProfiler(std::string name)
   , m_vec(name + "=KindOfVec")
   , m_persistent_dict(name + "=KindOfPersistentDict")
   , m_dict(name + "=KindOfDict")
+  , m_persistent_shape(name + "=KindOfPersistentShape")
+  , m_shape(name + "=KindOfShape")
   , m_persistent_keyset(name + "=KindOfPersistentKeyset")
   , m_keyset(name + "=KindOfKeyset")
   , m_object(name + "=KindOfObject")
   , m_resource(name + "=KindOfResource")
   , m_ref(name + "=KindOfRef")
+  , m_func(name + "=KindOfFunc")
+  , m_class(name + "=KindOfClass")
 {}
 
 DataType DataTypeProfiler::operator()(DataType type) {
@@ -55,12 +60,15 @@ DataType DataTypeProfiler::operator()(DataType type) {
     case KindOfDict:          m_dict.count(); break;
     case KindOfPersistentKeyset: m_persistent_keyset.count(); break;
     case KindOfKeyset:        m_keyset.count(); break;
+    case KindOfPersistentShape: m_persistent_shape.count(); break;
+    case KindOfShape:         m_shape.count(); break;
     case KindOfPersistentArray:  m_persistent_array.count(); break;
     case KindOfArray:         m_array.count(); break;
     case KindOfObject:        m_object.count(); break;
     case KindOfResource:      m_resource.count(); break;
     case KindOfRef:           m_ref.count(); break;
-    case KindOfClass:         not_reached();
+    case KindOfFunc:          m_func.count(); break;
+    case KindOfClass:         m_class.count(); break;
   }
   return type;
 }
@@ -78,13 +86,17 @@ DataTypeProfiler::~DataTypeProfiler() {
                m_vec.hits() +
                m_persistent_dict.hits() +
                m_dict.hits() +
+               m_persistent_shape.hits() +
+               m_shape.hits() +
                m_persistent_keyset.hits() +
                m_keyset.hits() +
                m_persistent_array.hits() +
                m_array.hits() +
                m_object.hits() +
                m_resource.hits() +
-               m_ref.hits();
+               m_ref.hits() +
+               m_func.hits() +
+               m_class.hits();
   if (!total) return;
   fprintf(stderr, "%s: total=%zu KindOfUninit=%.1f%% "
                   "KindOfNull=%.1f%% "
@@ -99,11 +111,15 @@ DataTypeProfiler::~DataTypeProfiler() {
                   "KindOfVec=%.1f%% "
                   "KindOfPersistentDict=%.1f%% "
                   "KindOfDict=%.1f%% "
+                  "KindOfPersistentShape=%.1f%% "
+                  "KindOfShape=%.1f%% "
                   "KindOfPersistentKeyset=%.1f%% "
                   "KindOfKeyset=%.1f%% "
                   "KindOfObject=%.1f%% "
                   "KindOfResource=%.1f%% "
-                  "KindOfRef=%.1f%%\n",
+                  "KindOfRef=%.1f%% "
+                  "KindOfFunc=%.1f%% "
+                  "KindOfClass=%.1f%% ",
           m_name.c_str(), total,
           100.0 * m_uninit.hits() / total,
           100.0 * m_null.hits() / total,
@@ -118,11 +134,15 @@ DataTypeProfiler::~DataTypeProfiler() {
           100.0 * m_vec.hits() / total,
           100.0 * m_persistent_dict.hits() / total,
           100.0 * m_dict.hits() / total,
+          100.0 * m_persistent_shape.hits() / total,
+          100.0 * m_shape.hits() / total,
           100.0 * m_persistent_keyset.hits() / total,
           100.0 * m_keyset.hits() / total,
           100.0 * m_object.hits() / total,
           100.0 * m_resource.hits() / total,
-          100.0 * m_ref.hits() / total);
+          100.0 * m_ref.hits() / total,
+          100.0 * m_func.hits() / total,
+          100.0 * m_class.hits() / total);
 }
 
 }

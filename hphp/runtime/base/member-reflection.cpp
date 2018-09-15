@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/member-reflection.h"
 
+#include "hphp/util/build-info.h"
 #include "hphp/util/embedded-data.h"
 #include "hphp/util/logger.h"
 
@@ -41,20 +42,34 @@ std::unordered_map<std::string, const char*(*)(const void*, const void*)> const*
 HPHP_REFLECTABLES
 #undef X
 
-bool init_member_reflection() {
+
+bool init_member_reflection(const std::string& extractPath,
+                            const std::string& fallbackPath,
+                            bool trust) {
+  g_member_reflection_vtable =
+    reinterpret_cast<decltype(g_member_reflection_vtable)>(
+      dlsym(RTLD_DEFAULT, detail::kMemberReflectionTableName)
+    );
+  if (g_member_reflection_vtable) return true;
+
   embedded_data desc;
   if (!get_embedded_data("member_reflection", &desc)) {
     // We might not be embedding the shared object, depending on platform, so
     // don't cry too loudly if we don't find it.
-    Logger::Verbose("init_member_reflection: Unable to find embedded data\n");
+    Logger::Verbose("init_member_reflection: Unable to find embedded data");
     return false;
   }
 
-  char tmp_filename[] = "/tmp/hhvm_member_reflection_XXXXXX";
-  auto const handle = dlopen_embedded_data(desc, tmp_filename);
+  auto const handle = dlopen_embedded_data(
+    desc,
+    extractPath,
+    fallbackPath,
+    buildId().toString(),
+    trust
+  );
   if (!handle) {
     Logger::Warning("init_member_reflection: "
-                    "Failed to dlopen embedded data\n");
+                    "Failed to dlopen embedded data");
     return false;
   }
 
@@ -63,7 +78,7 @@ bool init_member_reflection() {
       dlsym(handle, detail::kMemberReflectionTableName)
     );
   if (!g_member_reflection_vtable) {
-    Logger::Warning("init_member_reflection: dlsym failed: %s\n", dlerror());
+    Logger::Warning("init_member_reflection: dlsym failed: %s", dlerror());
     return false;
   }
 

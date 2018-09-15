@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -87,7 +88,7 @@ void raise_typehint_error(const std::string& msg) {
     SystemLib::throwTypeErrorObject(msg);
   }
   raise_recoverable_error_without_first_frame(msg);
-  if (RuntimeOption::RepoAuthoritative && Repo::global().HardTypeHints) {
+  if (RuntimeOption::EvalHardTypeHints) {
     raise_error("Error handler tried to recover from typehint violation");
   }
 }
@@ -98,24 +99,211 @@ void raise_return_typehint_error(const std::string& msg) {
     SystemLib::throwTypeErrorObject(msg);
   }
   raise_recoverable_error(msg);
-  if (RuntimeOption::EvalCheckReturnTypeHints >= 3 ||
-      (RuntimeOption::RepoAuthoritative &&
-       Repo::global().HardReturnTypeHints)) {
+  if (RuntimeOption::EvalCheckReturnTypeHints >= 3) {
     raise_error("Error handler tried to recover from a return typehint "
                 "violation");
   }
 }
 
-void raise_disallowed_dynamic_call(const Func* f) {
-  if (RuntimeOption::RepoAuthoritative &&
-      Repo::global().DisallowDynamicVarEnvFuncs) {
-    raise_error(Strings::DISALLOWED_DYNCALL, f->fullName()->data());
+void raise_property_typehint_error(const std::string& msg, bool isSoft) {
+  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+
+  if (RuntimeOption::EvalCheckPropTypeHints == 1 || isSoft) {
+    raise_warning_unsampled(msg);
+    return;
   }
+
+  raise_recoverable_error(msg);
+  if (RuntimeOption::EvalCheckPropTypeHints >= 3) {
+    raise_error("Error handler tried to recover from a property typehint "
+                "violation");
+  }
+}
+
+void raise_property_typehint_binding_error(const Class* declCls,
+                                           const StringData* propName,
+                                           bool isStatic,
+                                           bool isSoft) {
+  raise_property_typehint_error(
+    folly::sformat(
+      "{} '{}::{}' with type annotation binding to ref",
+      isStatic ? "Static property" : "Property",
+      declCls->name(),
+      propName
+    ),
+    isSoft
+  );
+}
+
+void raise_property_typehint_unset_error(const Class* declCls,
+                                         const StringData* propName,
+                                         bool isSoft) {
+  raise_property_typehint_error(
+    folly::sformat(
+      "Unsetting property '{}::{}' with type annotation",
+      declCls->name(),
+      propName
+    ),
+    isSoft
+  );
+}
+
+void raise_disallowed_dynamic_call(const Func* f) {
   raise_hack_strict(
     RuntimeOption::DisallowDynamicVarEnvFuncs,
     "disallow_dynamic_var_env_funcs",
     Strings::DISALLOWED_DYNCALL, f->fullName()->data()
   );
+}
+
+void raise_intish_index_cast() {
+  if (UNLIKELY(RID().getSuppressHackArrayCompatNotices())) return;
+  raise_notice("Hack Array Compat: Intish index cast");
+}
+
+void raise_hackarr_compat_notice(const std::string& msg) {
+  if (UNLIKELY(RID().getSuppressHackArrayCompatNotices())) return;
+  raise_notice("Hack Array Compat: %s", msg.c_str());
+}
+
+
+void raise_hack_arr_compat_serialize_notice(const ArrayData* arr) {
+  if (UNLIKELY(RID().getSuppressHackArrayCompatNotices())) return;
+  auto const type = [&]{
+    if (arr->isVecArray()) return "vec";
+    if (arr->isDict())     return "dict";
+    if (arr->isKeyset())   return "keyset";
+    return "array";
+  }();
+  raise_notice("Hack Array Compat: Serializing %s", type);
+}
+
+void
+raise_hack_arr_compat_array_producing_func_notice(const std::string& name) {
+  if (UNLIKELY(RID().getSuppressHackArrayCompatNotices())) return;
+  raise_notice("Hack Array Compat: Calling array producing function %s",
+               name.c_str());
+}
+
+namespace {
+
+const char* arrayAnnotTypeToName(AnnotType at) {
+  switch (at) {
+    case AnnotType::VArray:     return "varray";
+    case AnnotType::DArray:     return "darray";
+    case AnnotType::VArrOrDArr: return "varray_or_darray";
+    case AnnotType::Array:      return "array";
+    default:                    always_assert(false);
+  }
+}
+
+const char* arrayToName(const ArrayData* ad) {
+  if (ad->isVArray()) return "varray";
+  if (ad->isDArray()) return "darray";
+  return "array";
+}
+
+void raise_hackarr_compat_type_hint_impl(const Func* func,
+                                         const ArrayData* ad,
+                                         AnnotType at,
+                                         folly::Optional<int> param) {
+  if (UNLIKELY(RID().getSuppressHackArrayCompatNotices())) return;
+
+  auto const name = arrayAnnotTypeToName(at);
+  auto const given = arrayToName(ad);
+
+  if (param) {
+    raise_notice(
+      "Hack Array Compat: Argument %d to %s() must be of type %s, %s given",
+      *param + 1, func->fullDisplayName()->data(), name, given
+    );
+  } else {
+    raise_notice(
+      "Hack Array Compat: Value returned from %s() must be of type %s, "
+      "%s given",
+      func->fullDisplayName()->data(), name, given
+    );
+  }
+}
+
+void raise_func_undefined(const char* prefix, const StringData* name,
+                          const Class* cls) {
+  if (LIKELY(!needsStripInOut(name))) {
+    if (cls) {
+      raise_error("%s undefined method %s::%s()", prefix, cls->name()->data(),
+                  name->data());
+    }
+    raise_error("%s undefined function %s()", prefix, name->data());
+  } else {
+    auto stripped = stripInOutSuffix(name);
+    if (cls) {
+      if (cls->lookupMethod(stripped)) {
+        raise_error("%s method %s::%s() with incorrectly annotated inout "
+                    "parameter", prefix, cls->name()->data(), stripped->data());
+      }
+      raise_error("%s undefined method %s::%s()", cls->name()->data(), prefix,
+                  stripped->data());
+    } else if (Unit::lookupFunc(stripped)) {
+      raise_error("%s function %s() with incorrectly annotated inout "
+                  "parameter", prefix, stripped->data());
+    }
+    raise_error("%s undefined function %s()", prefix, stripped->data());
+  }
+}
+
+}
+
+void raise_hackarr_compat_type_hint_param_notice(const Func* func,
+                                                 const ArrayData* ad,
+                                                 AnnotType at,
+                                                 int param) {
+  raise_hackarr_compat_type_hint_impl(func, ad, at, param);
+}
+
+void raise_hackarr_compat_type_hint_ret_notice(const Func* func,
+                                               const ArrayData* ad,
+                                               AnnotType at) {
+  raise_hackarr_compat_type_hint_impl(func, ad, at, folly::none);
+}
+
+void raise_hackarr_compat_type_hint_outparam_notice(const Func* func,
+                                                    const ArrayData* ad,
+                                                    AnnotType at,
+                                                    int param) {
+  if (UNLIKELY(RID().getSuppressHackArrayCompatNotices())) return;
+  auto const name = arrayAnnotTypeToName(at);
+  auto const given = arrayToName(ad);
+  raise_notice(
+    "Hack Array Compat: Argument %d returned from %s() as an inout parameter "
+    "must be of type %s, %s given",
+    param + 1, func->fullDisplayName()->data(), name, given
+  );
+}
+
+void raise_hackarr_compat_type_hint_property_notice(const Class* declCls,
+                                                    const ArrayData* ad,
+                                                    AnnotType at,
+                                                    const StringData* propName,
+                                                    bool isStatic) {
+  if (UNLIKELY(RID().getSuppressHackArrayCompatNotices())) return;
+  auto const name = arrayAnnotTypeToName(at);
+  auto const given = arrayToName(ad);
+  raise_notice(
+    "Hack Array Compat: %s '%s::%s' declared as type %s, %s assigned",
+    isStatic ? "Static property" : "Property",
+    declCls->name()->data(),
+    propName->data(),
+    name,
+    given
+  );
+}
+
+void raise_resolve_undefined(const StringData* name, const Class* cls) {
+  raise_func_undefined("Failure to resolve", name, cls);
+}
+
+void raise_call_to_undefined(const StringData* name, const Class* cls) {
+  raise_func_undefined("Call to", name, cls);
 }
 
 void raise_recoverable_error(const char *fmt, ...) {
@@ -354,7 +542,7 @@ void raise_param_type_warning(
   } else if (strncmp(func_name, "tg1_", 4) == 0) {
     func_name += 4;
   }
-  assert(param_num > 0);
+  assertx(param_num > 0);
   auto msg = folly::sformat(
     "{}() expects parameter {} to be {}, {} given",
     func_name,
@@ -424,4 +612,16 @@ void raise_message(ErrorMode mode,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+SuppressHackArrCompatNotices::SuppressHackArrCompatNotices()
+  : old{RID().getSuppressHackArrayCompatNotices()} {
+  RID().setSuppressHackArrayCompatNotices(true);
+}
+
+SuppressHackArrCompatNotices::~SuppressHackArrCompatNotices() {
+  RID().setSuppressHackArrayCompatNotices(old);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 }

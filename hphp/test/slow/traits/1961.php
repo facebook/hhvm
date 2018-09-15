@@ -15,4 +15,3 @@ class MyHelloWorld {
 $o = new MyHelloWorld();
 $o->sayHelloWorld();
 ?>
-

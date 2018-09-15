@@ -20,6 +20,7 @@
 #include <folly/Conv.h>
 
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 
 namespace HPHP { namespace jit {
@@ -31,7 +32,7 @@ std::string BCMarker::show() const {
   return folly::format(
     "--- bc {}{}{}{}, fp {}, spOff {} ({}){}",
     m_sk.offset(),
-    m_sk.resumed()  ? "r" : "",
+    resumeModeShortName(m_sk.resumeMode()),
     m_sk.hasThis()  ? "t" : "",
     m_sk.prologue() ? "p" : "",
     m_fp ? folly::to<std::string>(m_fp->id()) : "_",
@@ -45,15 +46,12 @@ std::string BCMarker::show() const {
 
 bool BCMarker::valid() const {
   if (isDummy()) return true;
+  // Note, we can't check stack bounds here because of inlining, and
+  // instructions like idx, which can create php-level calls.
   return
     m_sk.valid() &&
     m_sk.offset() >= m_sk.func()->base() &&
-    m_sk.offset() < m_sk.func()->past() &&
-    // When inlining is on, we may modify markers to weird values in
-    // case reentry happens.
-    (RuntimeOption::EvalHHIREnableGenTimeInlining ||
-     m_spOff.offset <= m_sk.func()->numSlotsInFrame() +
-        m_sk.func()->maxStackCells());
+    m_sk.offset() < m_sk.func()->past();
 }
 
 //////////////////////////////////////////////////////////////////////

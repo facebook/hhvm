@@ -13,6 +13,9 @@ class c extends b {
     $this->y();
   }
 }
+
+<<__EntryPoint>>
+function main_1481() {
 if (false) {
   class b{
 }
@@ -21,3 +24,4 @@ if (false) {
 }
 $x = new c();
 $x->z();
+}

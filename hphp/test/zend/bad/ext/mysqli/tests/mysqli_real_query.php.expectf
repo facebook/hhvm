@@ -1,7 +1,0 @@
-array(1) {
-  [%u|b%"valid"]=>
-  %unicode|string%(30) "this is sql but with semicolon"
-}
-
-Warning: %s
-done!

@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_array_keys() {
 var_dump(array_keys(array(0 => 100, "color" => "red")));
 var_dump(array_keys(array("blue", "red", "green", "blue", "blue"),
                     "blue"));
@@ -14,3 +17,4 @@ $array = array(
 );
 var_dump(array_keys($array));
 var_dump(array_keys($array, null));
+}

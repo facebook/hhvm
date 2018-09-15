@@ -49,7 +49,11 @@ class thing {
   }
 }
 
+
+<<__EntryPoint>>
+function main_pgo_loadelim() {
 $t = new thing;
 for ($i = 0; $i < 10; ++$i) {
   var_dump($t->teleport());
+}
 }

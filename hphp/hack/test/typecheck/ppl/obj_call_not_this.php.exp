@@ -1,0 +1,2 @@
+File "obj_call_not_this.php", line 10, characters 5-21:
+Cannot call a method on an object of a <<__PPL>> class inside a <<__PPL>> class unless using $this-> or $this:: syntax (Typing[4264])

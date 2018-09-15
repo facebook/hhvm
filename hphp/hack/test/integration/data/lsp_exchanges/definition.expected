@@ -1,0 +1,229 @@
+[
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": {
+      "capabilities": {
+        "textDocumentSync": {
+          "openClose": true,
+          "change": 2,
+          "willSave": false,
+          "willSaveWaitUntil": false,
+          "save": {
+            "includeText": false
+          }
+        },
+        "hoverProvider": true,
+        "completionProvider": {
+          "resolveProvider": true,
+          "triggerCharacters": [
+            "$",
+            ">",
+            "\\",
+            ":",
+            "<",
+            "[",
+            "'",
+            "\""
+          ]
+        },
+        "signatureHelpProvider": {
+          "triggerCharacters": [
+            "(",
+            ","
+          ]
+        },
+        "definitionProvider": true,
+        "referencesProvider": true,
+        "documentHighlightProvider": true,
+        "documentSymbolProvider": true,
+        "workspaceSymbolProvider": true,
+        "codeActionProvider": false,
+        "documentFormattingProvider": true,
+        "documentRangeFormattingProvider": true,
+        "documentOnTypeFormattingProvider": {
+          "firstTriggerCharacter": ";",
+          "moreTriggerCharacter": [
+            "}"
+          ]
+        },
+        "renameProvider": true,
+        "typeCoverageProvider": true,
+        "rageProvider": true
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 2,
+    "result": [
+      {
+        "uri": "file://${root_path}${path_sep}definition.php",
+        "range": {
+          "start": {
+            "line": 6,
+            "character": 9
+          },
+          "end": {
+            "line": 6,
+            "character": 21
+          }
+        },
+        "title": "b_definition"
+      }
+    ]
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 3,
+    "result": [
+      {
+        "uri": "file://${root_path}${path_sep}definition.php",
+        "range": {
+          "start": {
+            "line": 11,
+            "character": 18
+          },
+          "end": {
+            "line": 11,
+            "character": 29
+          }
+        },
+        "title": "BB::__construct"
+      }
+    ]
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 4,
+    "result": [
+      {
+        "uri": "file://${root_path}${path_sep}definition.php",
+        "range": {
+          "start": {
+            "line": 14,
+            "character": 6
+          },
+          "end": {
+            "line": 14,
+            "character": 8
+          }
+        },
+        "title": "CC"
+      },
+      {
+        "uri": "file://${root_path}${path_sep}definition.php",
+        "range": {
+          "start": {
+            "line": 11,
+            "character": 18
+          },
+          "end": {
+            "line": 11,
+            "character": 29
+          }
+        },
+        "title": "BB::__construct"
+      }
+    ]
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 5,
+    "result": [
+      {
+        "uri": "file://${root_path}${path_sep}definition.php",
+        "range": {
+          "start": {
+            "line": 17,
+            "character": 6
+          },
+          "end": {
+            "line": 17,
+            "character": 8
+          }
+        },
+        "title": "DD"
+      },
+      {
+        "uri": "file://${root_path}${path_sep}definition.php",
+        "range": {
+          "start": {
+            "line": 11,
+            "character": 18
+          },
+          "end": {
+            "line": 11,
+            "character": 29
+          }
+        },
+        "title": "BB::__construct"
+      }
+    ]
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 6,
+    "result": [
+      {
+        "uri": "file://${root_path}${path_sep}definition.php",
+        "range": {
+          "start": {
+            "line": 21,
+            "character": 18
+          },
+          "end": {
+            "line": 21,
+            "character": 29
+          }
+        },
+        "title": "EE::__construct"
+      }
+    ]
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 7,
+    "result": [
+      {
+        "uri": "file://${root_path}${path_sep}definition.php",
+        "range": {
+          "start": {
+            "line": 26,
+            "character": 6
+          },
+          "end": {
+            "line": 26,
+            "character": 8
+          }
+        },
+        "title": "FF"
+      }
+    ]
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 8,
+    "result": [
+      {
+        "uri": "file://${root_path}${path_sep}definition.php",
+        "range": {
+          "start": {
+            "line": 40,
+            "character": 6
+          },
+          "end": {
+            "line": 40,
+            "character": 15
+          }
+        },
+        "title": "HasString"
+      }
+    ]
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 99,
+    "result": null
+  }
+]

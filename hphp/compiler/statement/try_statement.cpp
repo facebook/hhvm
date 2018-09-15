@@ -40,10 +40,8 @@ TryStatement::TryStatement
 StatementPtr TryStatement::clone() {
   TryStatementPtr stmt(new TryStatement(*this));
   stmt->m_tryStmt = Clone(m_tryStmt);
-  if (m_catches)
-    stmt->m_catches = Clone(m_catches);
-  if (m_finallyStmt)
-    stmt->m_finallyStmt = Clone(m_finallyStmt);
+  stmt->m_catches = Clone(m_catches);
+  stmt->m_finallyStmt = Clone(m_finallyStmt);
   return stmt;
 }
 
@@ -58,28 +56,6 @@ int TryStatement::getRecursiveCount() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-void TryStatement::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_tryStmt) m_tryStmt->analyzeProgram(ar);
-  if (m_catches)
-    m_catches->analyzeProgram(ar);
-  if (m_finallyStmt)
-    m_finallyStmt->analyzeProgram(ar);
-}
-
-bool TryStatement::hasDecl() const {
-  if (m_tryStmt && m_tryStmt->hasDecl()) return true;
-  if (m_catches && m_catches->hasDecl()) return true;
-  if (m_finallyStmt && m_finallyStmt->hasDecl()) return true;
-  return false;
-}
-
-bool TryStatement::hasRetExp() const {
-  if (m_tryStmt && m_tryStmt->hasRetExp()) return true;
-  if (m_catches && m_catches->hasRetExp()) return true;
-  if (m_finallyStmt && m_finallyStmt->hasRetExp()) return true;
-  return false;
-}
 
 ConstructPtr TryStatement::getNthKid(int n) const {
   switch (n) {

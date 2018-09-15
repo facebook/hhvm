@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Method call on non-object using FPushObjMethodD
 $foo = 12;
 $foo->bar();

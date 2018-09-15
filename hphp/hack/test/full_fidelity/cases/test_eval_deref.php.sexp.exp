@@ -1,0 +1,21 @@
+((script 23
+  ((list 23
+    ((markup_section 5
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 5 ((() <? 2 ()) (() name 3 ((end_of_line 1)))))
+       (missing 0 ())))
+     (expression_statement 16
+      ((binary_expression 15
+        ((variable 2 ((((end_of_line 1)) variable 2 ((whitespace 1)))))
+         (() = 1 ((whitespace 1)))
+         (prefix_unary_expression 10
+          ((() $ 1 ())
+           (braced_expression 9
+            ((() { 1 ())
+             (binary_expression 7
+              ((literal 3 ((() double_quoted_string_literal 3 ())))
+               (() . 1 ())
+               (literal 3 ((() double_quoted_string_literal 3 ())))))
+             (() } 1 ())))))))
+       (() ";" 1 ((end_of_line 1)))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

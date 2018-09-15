@@ -1,0 +1,2 @@
+File "single_const_attribute_within_class.php", line 12, characters 12-13:
+Cannot assign to a __Const property (Typing[4196])

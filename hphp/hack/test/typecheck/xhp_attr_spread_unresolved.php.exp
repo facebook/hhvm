@@ -1,0 +1,6 @@
+File "xhp_attr_spread_unresolved.php", line 16, characters 23-24:
+An XHP instance was expected (Typing[4191])
+File "xhp_attr_spread_unresolved.php", line 16, characters 23-24:
+The attribute spread operator cannot be called on non-XHP
+File "xhp_attr_spread_unresolved.php", line 11, characters 10-14:
+This is an object of type vec

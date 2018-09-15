@@ -1,0 +1,18 @@
+---- Vector
+int(0)
+---- empty Vector
+---- ImmVector
+int(0)
+---- empty ImmVector
+---- Map
+int(3)
+---- empty Map
+---- ImmMap
+int(5)
+---- empty ImmMap
+---- Set
+int(7)
+---- empty Set
+---- ImmSet
+int(8)
+---- empty ImmSet

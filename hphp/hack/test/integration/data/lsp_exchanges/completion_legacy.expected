@@ -1,0 +1,617 @@
+[
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": {
+      "capabilities": {
+        "textDocumentSync": {
+          "openClose": true,
+          "change": 2,
+          "willSave": false,
+          "willSaveWaitUntil": false,
+          "save": {
+            "includeText": false
+          }
+        },
+        "hoverProvider": true,
+        "completionProvider": {
+          "resolveProvider": true,
+          "triggerCharacters": [
+            "$",
+            ">",
+            "\\",
+            ":",
+            "<",
+            "[",
+            "'",
+            "\""
+          ]
+        },
+        "signatureHelpProvider": {
+          "triggerCharacters": [
+            "(",
+            ","
+          ]
+        },
+        "definitionProvider": true,
+        "referencesProvider": true,
+        "documentHighlightProvider": true,
+        "documentSymbolProvider": true,
+        "workspaceSymbolProvider": true,
+        "codeActionProvider": false,
+        "documentFormattingProvider": true,
+        "documentRangeFormattingProvider": true,
+        "documentOnTypeFormattingProvider": {
+          "firstTriggerCharacter": ";",
+          "moreTriggerCharacter": [
+            "}"
+          ]
+        },
+        "renameProvider": true,
+        "typeCoverageProvider": true,
+        "rageProvider": true
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 20,
+    "result": {
+      "isIncomplete": false,
+      "items": [
+        {
+          "label": "ab:cd:alpha",
+          "kind": 7,
+          "detail": "class",
+          "inlineDetail": "class",
+          "insertText": "ab:cd:alpha",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 9,
+            "char": 13,
+            "base_class": null
+          }
+        },
+        {
+          "label": "ab:cd:text",
+          "kind": 7,
+          "detail": "class",
+          "inlineDetail": "class",
+          "insertText": "ab:cd:text",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 4,
+            "char": 13,
+            "base_class": null
+          }
+        }
+      ]
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 30,
+    "result": {
+      "isIncomplete": false,
+      "items": [
+        {
+          "label": "ab:cd:alpha",
+          "kind": 7,
+          "detail": "class",
+          "inlineDetail": "class",
+          "insertText": "ab:cd:alpha",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 9,
+            "char": 13,
+            "base_class": null
+          }
+        },
+        {
+          "label": "ab:cd:text",
+          "kind": 7,
+          "detail": "class",
+          "inlineDetail": "class",
+          "insertText": "ab:cd:text",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 4,
+            "char": 13,
+            "base_class": null
+          }
+        }
+      ]
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 32,
+    "result": {
+      "isIncomplete": false,
+      "items": [
+        {
+          "label": "ab:cd:alpha",
+          "kind": 7,
+          "detail": "class",
+          "inlineDetail": "class",
+          "insertText": "ab:cd:alpha",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 9,
+            "char": 13,
+            "base_class": null
+          }
+        },
+        {
+          "label": "ab:cd:text",
+          "kind": 7,
+          "detail": "class",
+          "inlineDetail": "class",
+          "insertText": "ab:cd:text",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 4,
+            "char": 13,
+            "base_class": null
+          }
+        }
+      ]
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 40,
+    "result": {
+      "isIncomplete": false,
+      "items": [
+        {
+          "label": "width",
+          "kind": 10,
+          "detail": "?int",
+          "inlineDetail": "?int",
+          "insertText": "width",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 5,
+            "char": 27,
+            "base_class": "\\:ab:cd:text"
+          }
+        },
+        {
+          "label": "color",
+          "kind": 10,
+          "detail": "?string",
+          "inlineDetail": "?string",
+          "insertText": "color",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 5,
+            "char": 13,
+            "base_class": "\\:ab:cd:text"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 50,
+    "result": {
+      "isIncomplete": false,
+      "items": [
+        {
+          "label": "width",
+          "kind": 10,
+          "detail": "?int",
+          "inlineDetail": "?int",
+          "insertText": "width",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 5,
+            "char": 27,
+            "base_class": "\\:ab:cd:text"
+          }
+        },
+        {
+          "label": "color",
+          "kind": 10,
+          "detail": "?string",
+          "inlineDetail": "?string",
+          "insertText": "color",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 5,
+            "char": 13,
+            "base_class": "\\:ab:cd:text"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 60,
+    "result": {
+      "isIncomplete": false,
+      "items": [
+        {
+          "label": ":ab:cd:alpha",
+          "kind": 4,
+          "detail": "function(): :ab:cd:alpha",
+          "inlineDetail": "()",
+          "itemType": ":ab:cd:alpha",
+          "insertText": ":ab:cd:alpha",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 9,
+            "char": 13,
+            "base_class": "\\:ab:cd:alpha"
+          }
+        },
+        {
+          "label": ":ab:cd:text",
+          "kind": 4,
+          "detail": "function(): :ab:cd:text",
+          "inlineDetail": "()",
+          "itemType": ":ab:cd:text",
+          "insertText": ":ab:cd:text",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 4,
+            "char": 13,
+            "base_class": "\\:ab:cd:text"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 70,
+    "result": {
+      "isIncomplete": false,
+      "items": [
+        {
+          "label": ":ab:cd:alpha",
+          "kind": 4,
+          "detail": "function(): :ab:cd:alpha",
+          "inlineDetail": "()",
+          "itemType": ":ab:cd:alpha",
+          "insertText": ":ab:cd:alpha",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 9,
+            "char": 13,
+            "base_class": "\\:ab:cd:alpha"
+          }
+        },
+        {
+          "label": ":ab:cd:text",
+          "kind": 4,
+          "detail": "function(): :ab:cd:text",
+          "inlineDetail": "()",
+          "itemType": ":ab:cd:text",
+          "insertText": ":ab:cd:text",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 4,
+            "char": 13,
+            "base_class": "\\:ab:cd:text"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 80,
+    "result": {
+      "label": ":ab:cd:alpha",
+      "kind": 4,
+      "detail": "function(): :ab:cd:alpha",
+      "inlineDetail": "()",
+      "itemType": ":ab:cd:alpha",
+      "documentation": ":ab:cd:alpha docblock",
+      "insertText": ":ab:cd:alpha",
+      "insertTextFormat": 1,
+      "data": {
+        "filename": "${root_path}${path_sep}completion_extras.php",
+        "line": 9,
+        "char": 13
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 90,
+    "result": {
+      "isIncomplete": false,
+      "items": [
+        {
+          "label": ":width",
+          "kind": 10,
+          "detail": "?int",
+          "inlineDetail": "?int",
+          "insertText": ":width",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 5,
+            "char": 27,
+            "base_class": "\\:ab:cd:text"
+          }
+        },
+        {
+          "label": ":color",
+          "kind": 10,
+          "detail": "?string",
+          "inlineDetail": "?string",
+          "insertText": ":color",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 5,
+            "char": 13,
+            "base_class": "\\:ab:cd:text"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 100,
+    "result": {
+      "isIncomplete": false,
+      "items": [
+        {
+          "label": ":width",
+          "kind": 10,
+          "detail": "?int",
+          "inlineDetail": "?int",
+          "insertText": ":width",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 5,
+            "char": 27,
+            "base_class": "\\:ab:cd:text"
+          }
+        },
+        {
+          "label": ":color",
+          "kind": 10,
+          "detail": "?string",
+          "inlineDetail": "?string",
+          "insertText": ":color",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 5,
+            "char": 13,
+            "base_class": "\\:ab:cd:text"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 110,
+    "result": {
+      "isIncomplete": false,
+      "items": [
+        {
+          "label": "test_function",
+          "kind": 3,
+          "detail": "function(): void",
+          "inlineDetail": "()",
+          "itemType": "void",
+          "insertText": "test_function",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion.php",
+            "line": 8,
+            "char": 10,
+            "base_class": null
+          }
+        }
+      ]
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 120,
+    "result": {
+      "label": "test_function",
+      "kind": 3,
+      "detail": "function(): void",
+      "inlineDetail": "()",
+      "itemType": "void",
+      "documentation": "test_function docblock.",
+      "insertText": "test_function",
+      "insertTextFormat": 1,
+      "data": {
+        "filename": "${root_path}${path_sep}completion.php",
+        "line": 8,
+        "char": 10
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 130,
+    "result": {
+      "isIncomplete": false,
+      "items": []
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 140,
+    "result": {
+      "isIncomplete": false,
+      "items": [
+        {
+          "label": "class",
+          "kind": 12,
+          "detail": "classname<this>",
+          "inlineDetail": "classname<this>",
+          "insertText": "class",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 13,
+            "char": 6,
+            "base_class": "\\Elsa"
+          }
+        },
+        {
+          "label": "Bard",
+          "kind": 12,
+          "detail": "Elsa",
+          "inlineDetail": "Elsa",
+          "insertText": "Bard",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 13,
+            "char": 12,
+            "base_class": "\\Elsa"
+          }
+        },
+        {
+          "label": "Alonso",
+          "kind": 12,
+          "detail": "Elsa",
+          "inlineDetail": "Elsa",
+          "insertText": "Alonso",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${root_path}${path_sep}completion_extras.php",
+            "line": 13,
+            "char": 12,
+            "base_class": "\\Elsa"
+          }
+        },
+        {
+          "label": "isValid",
+          "kind": 2,
+          "detail": "function(mixed $value): bool",
+          "inlineDetail": "(mixed $value)",
+          "itemType": "bool",
+          "insertText": "isValid",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
+            "line": 49,
+            "char": 32,
+            "base_class": "\\Elsa"
+          }
+        },
+        {
+          "label": "getValues",
+          "kind": 2,
+          "detail": "function(): darray<string, Elsa>",
+          "inlineDetail": "()",
+          "itemType": "darray<string, Elsa>",
+          "insertText": "getValues",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
+            "line": 34,
+            "char": 32,
+            "base_class": "\\Elsa"
+          }
+        },
+        {
+          "label": "getNames",
+          "kind": 2,
+          "detail": "function(): darray<Elsa, string>",
+          "inlineDetail": "()",
+          "itemType": "darray<Elsa, string>",
+          "insertText": "getNames",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
+            "line": 43,
+            "char": 32,
+            "base_class": "\\Elsa"
+          }
+        },
+        {
+          "label": "coerce",
+          "kind": 2,
+          "detail": "function(mixed $value): ?Elsa",
+          "inlineDetail": "(mixed $value)",
+          "itemType": "?Elsa",
+          "insertText": "coerce",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
+            "line": 56,
+            "char": 32,
+            "base_class": "\\Elsa"
+          }
+        },
+        {
+          "label": "assertAll",
+          "kind": 2,
+          "detail": "function(Traversable<mixed> $values): Container<Elsa>",
+          "inlineDetail": "(Traversable<mixed> $values)",
+          "itemType": "Container<Elsa>",
+          "insertText": "assertAll",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
+            "line": 70,
+            "char": 32,
+            "base_class": "\\Elsa"
+          }
+        },
+        {
+          "label": "assert",
+          "kind": 2,
+          "detail": "function(mixed $value): Elsa",
+          "inlineDetail": "(mixed $value)",
+          "itemType": "Elsa",
+          "insertText": "assert",
+          "insertTextFormat": 1,
+          "data": {
+            "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
+            "line": 63,
+            "char": 32,
+            "base_class": "\\Elsa"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 150,
+    "result": {
+      "isIncomplete": false,
+      "items": []
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 999,
+    "result": null
+  }
+]

@@ -1,0 +1,26 @@
+{
+  "pattern_type": "descendant_pattern",
+  "pattern": {
+    "pattern_type": "node_pattern",
+    "kind": "classish_declaration",
+    "children": {
+      "classish_name": {
+        "pattern_type": "and_pattern",
+        "patterns": [
+          {
+            "pattern_type": "raw_text_pattern",
+            "raw_text": "Foo"
+          },
+          {
+            "pattern_type": "match_pattern",
+            "match_name": "foo class name token"
+          },
+          {
+            "pattern_type": "match_pattern",
+            "match_name": "foo class name token 2"
+          }
+        ]
+      }
+    }
+  }
+}

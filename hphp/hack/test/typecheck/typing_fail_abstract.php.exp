@@ -1,2 +1,2 @@
-File "typing_fail_abstract.php", line 15, characters 3-11:
-Parse error. You are missing public, private or protected. (Parsing[1002])
+File "typing_fail_abstract.php", line 15, characters 28-28:
+This method is declared as abstract, but has a body (NastCheck[3002])

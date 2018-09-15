@@ -1,0 +1,6 @@
+File "static_rx_if_implements8.php", line 16, characters 5-15:
+Cannot invoke conditionally reactive function in reactive context, because at least one reactivity condition is not met. (Typing[4237])
+File "static_rx_if_implements8.php", line 16, characters 5-13:
+Receiver type must be a subtype of \Rx, now \B.
+File "static_rx_if_implements8.php", line 7, characters 26-26:
+This is the function declaration

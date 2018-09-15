@@ -1,0 +1,6 @@
+(3,10)-(3,15) Encountered unexpected token 'ckass'. Did you mean 'class'?
+(6,7)-(6,16) Encountered unexpected token 'interfsce'. Did you mean 'interface'?
+(9,16)-(9,21) Encountered unexpected token 'ttait'. Did you mean 'trait'?
+(14,7)-(14,7) A semicolon (';') is expected here.
+(14,7)-(15,1) Cannot use collection initialization for non-collection class.
+(15,2)-(16,1) A semicolon (';') is expected here.

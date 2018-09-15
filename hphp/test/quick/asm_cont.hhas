@@ -5,10 +5,10 @@
 .main {
   .numiters 1;
   FPushFuncD 0 "R"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   IterInit 0 L0 $i
-  .try_fault F2 {
+  .try {
   L1:
     String "\n"
     CGetL2 $i
@@ -16,13 +16,14 @@
     Print
     PopC
     IterNext 0 L1 $i
+    Jmp L0
+  } .catch {
+    IterFree 0
+    Throw
   }
 L0:
   Int 1
   RetC
-F2:
-  IterFree 0
-  Unwind
 }
 
 .function R() isGenerator {

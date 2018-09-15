@@ -20,5 +20,9 @@ class Bar {
   }
 }
 
+
+<<__EntryPoint>>
+function main_private_props_007() {
 (new Foo())->closure_private_prop_access();
 (new Bar())->closure_private_prop_access2();
+}

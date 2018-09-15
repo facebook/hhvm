@@ -1,0 +1,15 @@
+diff --git a/Point.php b/Point.php
+--- a/Point.php
++++ b/Point.php
+@@ -23,6 +23,11 @@
+         $this->y += $y;
+     }
+
++    public function magnitude()
++    {
++        return sqrt($this->x ** 2 + $this->y ** 2);
++    }
++
+     public function __toString()
+     {
+         return '(' . $this->x . ',' . $this->y . ')';

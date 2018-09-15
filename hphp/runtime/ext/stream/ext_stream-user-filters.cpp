@@ -43,7 +43,7 @@ const StaticString s_default_filters_register_func(
 
 struct StreamFilterRepository {
   void add(const String& key, const Variant& v) {
-    m_filters.add(key, v);
+    m_filters.set(key, v);
   }
 
   void detach() {
@@ -68,10 +68,10 @@ struct StreamFilterRepository {
     int lastDotPos = needle.rfind('.');
     if (String::npos == lastDotPos ||
         m_filters.exists(m_filters.convertKey(needle))) {
-      return m_filters.rvalAtRef(needle);
+      return m_filters[needle];
     }
     String wildcard = needle.substr(0, lastDotPos) + ".*";
-    return m_filters.rvalAtRef(wildcard);
+    return m_filters[wildcard];
   }
 
   const Array& filtersAsArray() const {

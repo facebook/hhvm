@@ -1,3 +1,15 @@
 *.diff
 *.format_out
 *.out
+*.decl_out
+*.reparse_out
+*.type_check_out
+*.hhvm_out
+*.round_trip.hhas
+*.hhcodegen_messages
+*.hhcodegen_output.hhas
+*.semdiff
+*.semdiff_messages
+*.hhcodegen_config.json
+*.debug_out
+*.type_check_raised_out

@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_2() {
 apc_add("ts", "TestString");
 apc_add("ta", array("a" => 1, "b" => 2));
 apc_add("ts", "NewValue");
@@ -79,3 +82,4 @@ if ($ret !== $map1) echo "no17\n";
 if ($success !== true) echo "no18\n";
 
 echo "ok\n";
+}

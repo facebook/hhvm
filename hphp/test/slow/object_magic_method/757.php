@@ -17,7 +17,11 @@ class c extends b{
     var_dump($this->f2);
   }
 }
+
+<<__EntryPoint>>
+function main_757() {
 $x = new c;
 var_dump($x->f);
 $x->t();
 $x->t2();
+}

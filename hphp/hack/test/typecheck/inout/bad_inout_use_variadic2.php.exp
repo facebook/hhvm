@@ -1,0 +1,4 @@
+File "bad_inout_use_variadic2.php", line 6, characters 17-24:
+Unexpected inout annotation for argument (Typing[4183])
+File "bad_inout_use_variadic2.php", line 4, characters 27-29:
+A variadic parameter can never be inout

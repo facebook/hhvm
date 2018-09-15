@@ -52,14 +52,19 @@ struct SSATmp;
  *     D(type)      single dst has a specific type
  *     DofS(N)      single dst has the type of src N
  *     DRefineS(N)  single dst's type is intersection of src N and paramType
- *     DParam       single dst has type of the instruction's type parameter
- *     DParamMayRelax like DParam, except type may relax
- *     DParamPtr(k) like DParam, but the param must be a PtrTo* of kind k
+ *     DParam(t)    single dst has type of the instruction's type parameter,
+ *                    which must be a subtype of t
+ *     DParamMayRelax(t) like DParam, except type may relax
  *     DUnboxPtr    Unboxed PtrTo*T; adds possibility of pointing into a ref
  *     DBoxPtr      Boxed PtrTo*T
  *     DAllocObj    single dst has a type of a newly allocated object; may be a
  *                    specialized object type if the class is known
  *     DArrPacked   single dst has a packed array type
+ *     DArrMixed    single dst has a mixed array type
+ *     DVArr        single dst is either a packed array type or vec, depending
+                      on configuration
+ *     DDArr        single dst is either a mixed array type or dict, depending
+                      on configuration
  *     DArrElem     single dst has type based on reading an array element,
  *                    intersected with an optional type parameter
  *     DVecElem    single dst has type based on reading a vec element,
@@ -77,11 +82,17 @@ struct SSATmp;
  *                    types such as (TStr | TNull)
  *     DCall        single dst for non-builtin calls. This can return different
  *                     types depending on static analysis.
+ *     DGenIter     single dst for generator iteration. This can return
+ *                     different types based on whether the generator is async.
  *     DSubtract(N,t) single dest has type of src N with t removed
  *     DCns         single dst's type is the union of legal types for PHP
  *                    constants
  *     DUnion(N1,...) single dest has type that is the union of the specified
  *                      N srcs.
+ *     DMemoKey     single dst for memoization key generation. Type depends on
+ *                    source type.
+ *     DLvalOfPtr   single dst with the Ptr type of src 0 converted to an
+ *                    equivalent Lval, preserving all inner type information.
  *
  * srcinfo:
  *
@@ -89,10 +100,14 @@ struct SSATmp;
  *
  *     NA               instruction takes no sources
  *     S(t1,...,tn)     source must be a subtype of {t1|..|tn}
- *     AK(<kind>)       source must be an array with specified kind
+ *     S(AK(<kind>))    source must be an array with specified kind
  *     C(type)          source must be a constant, and subtype of type
  *     CStr             same as C(StaticStr)
  *     SVar(t1,...,tn)  variadic source list, all subtypes of {t1|..|tn}
+ *     SDArr            source must be a mixed array type or dict, depending
+ *                      on configuration
+ *     CDArr            source must be a constant mixed array type or dict,
+ *                      depending on configuration
  *
  * flags:
  *
@@ -106,13 +121,11 @@ struct SSATmp;
  *   The following abbreviations are used in this table:
  *
  *      NF    no flags
- *      Er    mayRaiseError
  *      PRc   producesRC
  *      CRc   consumesRC
  *      T     isTerminal
  *      B     isBranch
  *      P     passthrough
- *      K     killsSource
  *      MProp MInstrProp
  *      MElem MInstrElem
  */
@@ -157,21 +170,21 @@ bool opHasExtraData(Opcode op);
 
 enum OpcodeFlag : uint64_t {
   NoFlags          = 0,
-  HasDest          = 1ULL <<  0,
-  Branch           = 1ULL <<  1,
-  ConsumesRC       = 1ULL <<  2,
-  ProducesRC       = 1ULL <<  3,
-  MInstrProp       = 1ULL <<  4,
-  MInstrElem       = 1ULL <<  5,
-  MayRaiseError    = 1ULL <<  6,
-  Terminal         = 1ULL <<  7, // has no next instruction
-  NaryDest         = 1ULL <<  8, // has 0 or more destinations
-  HasExtra         = 1ULL <<  9,
-  Passthrough      = 1ULL << 10,
+  HasDest          = 1ULL << 0,
+  Branch           = 1ULL << 1,
+  ConsumesRC       = 1ULL << 2,
+  ProducesRC       = 1ULL << 3,
+  MInstrProp       = 1ULL << 4,
+  MInstrElem       = 1ULL << 5,
+  Terminal         = 1ULL << 6, // has no next instruction
+  NaryDest         = 1ULL << 7, // has 0 or more destinations
+  HasExtra         = 1ULL << 8,
+  Passthrough      = 1ULL << 9,
 };
 
 bool hasEdges(Opcode opc);
 bool opcodeHasFlags(Opcode opc, uint64_t flags);
+bool opcodeMayRaise(Opcode opc);
 
 /*
  * Given an SSATmp of type Cls, try to find the name of the class.

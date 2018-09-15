@@ -1,0 +1,2 @@
+File "trait_const_attribute.php", line 14, characters 7-7:
+Cannot assign to a __Const property (Typing[4196])

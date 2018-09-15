@@ -34,29 +34,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-int64_t HHVM_METHOD(WaitableWaitHandle, getContextIdx) {
-  auto obj = wait_handle<c_WaitableWaitHandle>(this_);
-  if (obj->isFinished()) {
-    return 0;
-  }
-
-  return obj->getContextIdx();
-}
-
-Object HHVM_METHOD(WaitableWaitHandle, getCreator) {
-  return Object();
-}
-
-Array HHVM_METHOD(WaitableWaitHandle, getParents) {
-  return wait_handle<c_WaitableWaitHandle>(this_)->getParents();
-}
-
 // throws on context depth level overflows and cross-context cycles
 void c_WaitableWaitHandle::join() {
   EagerVMRegAnchor _;
   auto const savedFP = vmfp();
 
-  assert(!isFinished());
+  assertx(!isFinished());
 
   AsioSession* session = AsioSession::Get();
   if (UNLIKELY(session->hasOnJoin())) {
@@ -73,7 +56,7 @@ void c_WaitableWaitHandle::join() {
 
   // run queues until we are finished
   session->getCurrentContext()->runUntil(this);
-  assert(isFinished());
+  assertx(isFinished());
 }
 
 String c_WaitableWaitHandle::getName() {
@@ -91,7 +74,7 @@ String c_WaitableWaitHandle::getName() {
 }
 
 c_WaitableWaitHandle* c_WaitableWaitHandle::getChild() {
-  assert(!isFinished());
+  assertx(!isFinished());
 
   switch (getKind()) {
     case Kind::Static:              not_reached();
@@ -108,7 +91,7 @@ c_WaitableWaitHandle* c_WaitableWaitHandle::getChild() {
 
 bool
 c_WaitableWaitHandle::isDescendantOf(c_WaitableWaitHandle* wait_handle) const {
-  assert(wait_handle);
+  assertx(wait_handle);
 
   while (wait_handle != this && wait_handle && !wait_handle->isFinished()) {
     wait_handle = wait_handle->getChild();
@@ -119,16 +102,16 @@ c_WaitableWaitHandle::isDescendantOf(c_WaitableWaitHandle* wait_handle) const {
 
 void
 c_WaitableWaitHandle::throwCycleException(c_WaitableWaitHandle* child) const {
-  assert(isDescendantOf(child));
+  assertx(isDescendantOf(child));
 
   req::vector<std::string> exception_msg_items;
   exception_msg_items.push_back("Encountered dependency cycle.\n");
   exception_msg_items.push_back("Existing stack:\n");
 
   exception_msg_items.push_back(folly::stringPrintf(
-    "  %s (%" PRId64 ") (dupe)\n",
+    "  %s (%" PRIxPTR ") (dupe)\n",
     child->getName().data(),
-    child->getId()
+    (uintptr_t)child
   ));
 
   for (auto current = child; current != this;) {
@@ -136,17 +119,17 @@ c_WaitableWaitHandle::throwCycleException(c_WaitableWaitHandle* child) const {
     assertx(current);
 
     exception_msg_items.push_back(folly::stringPrintf(
-      "  %s (%" PRId64 ")\n",
+      "  %s (%" PRIxPTR ")\n",
       current->getName().data(),
-      current->getId()
+      (uintptr_t)current
     ));
   }
 
   exception_msg_items.push_back("Trying to introduce dependency on:\n");
   exception_msg_items.push_back(folly::stringPrintf(
-    "  %s (%" PRId64 ") (dupe)\n",
+    "  %s (%" PRIxPTR ") (dupe)\n",
     child->getName().data(),
-    child->getId()
+    (uintptr_t)child
   ));
 
   SystemLib::throwInvalidOperationExceptionObject(
@@ -157,17 +140,17 @@ c_WaitableWaitHandle::throwCycleException(c_WaitableWaitHandle* child) const {
 Array c_WaitableWaitHandle::getDependencyStack() {
   if (isFinished()) return empty_array();
   Array result = Array::Create();
-  hphp_hash_set<int64_t> visited;
+  hphp_hash_set<c_WaitableWaitHandle*> visited;
   auto current_handle = this;
   auto session = AsioSession::Get();
   while (current_handle != nullptr) {
     result.append(Variant{current_handle});
-    visited.insert(current_handle->getId());
+    visited.insert(current_handle);
     auto context_idx = current_handle->getContextIdx();
 
     // 1. find parent in the same context
     auto p = current_handle->getParentChain().firstInContext(context_idx);
-    if (p && visited.find(p->getId()) == visited.end()) {
+    if (p && visited.find(p) == visited.end()) {
       current_handle = p;
       continue;
     }
@@ -186,22 +169,6 @@ Array c_WaitableWaitHandle::getDependencyStack() {
     }
   }
   return result;
-}
-
-Array HHVM_METHOD(WaitableWaitHandle, getDependencyStack) {
-  return wait_handle<c_WaitableWaitHandle>(this_)->getDependencyStack();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void AsioExtension::initWaitableWaitHandle() {
-#define WWH_ME(meth) \
-  HHVM_MALIAS(HH\\WaitableWaitHandle, meth, WaitableWaitHandle, meth)
-  WWH_ME(getContextIdx);
-  WWH_ME(getCreator);
-  WWH_ME(getParents);
-  WWH_ME(getDependencyStack);
-#undef WWH_ME
 }
 
 ///////////////////////////////////////////////////////////////////////////////

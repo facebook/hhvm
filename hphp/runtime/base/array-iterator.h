@@ -25,8 +25,8 @@
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/set-array.h"
-#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/util/tls-pod-bag.h"
@@ -36,9 +36,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct TypedValue;
-struct BaseVector;
-struct BaseMap;
-struct BaseSet;
 struct Iter;
 struct MixedArray;
 
@@ -46,13 +43,6 @@ enum class IterNextIndex : uint16_t {
   ArrayPacked = 0,
   ArrayMixed,
   Array,
-  Vector,
-  ImmVector,
-  Map,
-  ImmMap,
-  Set,
-  ImmSet,
-  Pair,
   Object,
 };
 
@@ -76,7 +66,7 @@ struct ArrayIter {
   };
 
   enum NoInc { noInc = 0 };
-  enum NoIncNonNull { noIncNonNull = 0 };
+  enum Local { local = 0 };
 
   /*
    * Constructors.  Note that sometimes ArrayIter objects are created
@@ -87,10 +77,12 @@ struct ArrayIter {
   }
   explicit ArrayIter(const ArrayData* data);
   ArrayIter(const ArrayData* data, NoInc) {
-    setArrayData(data);
-    if (data) {
-      m_pos = data->iter_begin();
-    }
+    setArrayData<false>(data);
+    if (data) m_pos = data->iter_begin();
+  }
+  ArrayIter(const ArrayData* data, Local) {
+    setArrayData<true>(data);
+    if (data) m_pos = data->iter_begin();
   }
   explicit ArrayIter(const MixedArray*) = delete;
   explicit ArrayIter(const Array& array);
@@ -107,7 +99,6 @@ struct ArrayIter {
   ArrayIter(ArrayIter&& iter) noexcept {
     m_data = iter.m_data;
     m_pos = iter.m_pos;
-    m_version = iter.m_version;
     m_itype = iter.m_itype;
     m_nextHelperIdx = iter.m_nextHelperIdx;
     iter.m_data = nullptr;
@@ -143,8 +134,8 @@ struct ArrayIter {
   void next() {
     if (LIKELY(hasArrayData())) {
       const ArrayData* ad = getArrayData();
-      assert(ad);
-      assert(m_pos != ad->iter_end());
+      assertx(ad);
+      assertx(m_pos != ad->iter_end());
       m_pos = ad->iter_advance(m_pos);
       return;
     }
@@ -152,20 +143,41 @@ struct ArrayIter {
   }
   void nextHelper();
 
+  bool nextLocal(const ArrayData* ad) {
+    assertx(ad);
+    assertx(!getArrayData());
+    assertx(m_pos != ad->iter_end());
+    m_pos = ad->iter_advance(m_pos);
+    return m_pos == ad->iter_end();
+  }
+
   Variant first() {
     if (LIKELY(hasArrayData())) {
       const ArrayData* ad = getArrayData();
-      assert(ad);
-      assert(m_pos != ad->iter_end());
+      assertx(ad);
+      assertx(m_pos != ad->iter_end());
       return ad->getKey(m_pos);
     }
     return firstHelper();
   }
   Variant firstHelper();
-  void nvFirst(TypedValue* out) {
-    const ArrayData* ad = getArrayData();
-    assert(ad && m_pos != ad->iter_end());
-    cellCopy(ad->nvGetKey(m_pos), *out);
+
+  Variant firstLocal(const ArrayData* ad) const {
+    assertx(!getArrayData());
+    assertx(ad && m_pos != ad->iter_end());
+    return ad->getKey(m_pos);
+  }
+
+  TypedValue nvFirst() const {
+    auto const ad = getArrayData();
+    assertx(ad && m_pos != ad->iter_end());
+    return ad->nvGetKey(m_pos);
+  }
+
+  TypedValue nvFirstLocal(const ArrayData* ad) const {
+    assertx(!getArrayData());
+    assertx(ad && m_pos != ad->iter_end());
+    return ad->nvGetKey(m_pos);
   }
 
   /*
@@ -173,94 +185,49 @@ struct ArrayIter {
    */
   Variant second();
 
+  Variant secondLocal(const ArrayData* ad) const {
+    assertx(!getArrayData());
+    assertx(ad && m_pos != ad->iter_end());
+    return ad->getValue(m_pos);
+  }
+
   /*
-   * Get a reference to the value for the current iterator position.
-   * This function is strictly an optimization to second()---you must
-   * not modify the Variant.
+   * Get a tv_rval for the current iterator position.
    *
-   * note that secondRef() has slightly different behavior than
-   * second() with regard to collection types.  Use secondRefPlus when
-   * you need support for these cases.  And note that unlike second(),
-   * secondRefPlus() will throw for non-collection types.
+   * The difference between secondRval and secondRvalPlus is that, if called
+   * when iterating an Iterable object the former will fatal and the latter
+   * will throw (whereas second will invoke the current() method on the
+   * Iterable object). Why this is has been lost in the mists of time.
    */
-  const Variant& secondRef() const;
-  const Variant& secondRefPlus();
+  tv_rval secondRval() const;
+  tv_rval secondRvalPlus();
+
+  TypedValue secondVal() const { return secondRval().tv(); }
+  TypedValue secondValPlus() { return secondRvalPlus().tv(); }
+
+  const_variant_ref secondRef() const {
+    return const_variant_ref(secondRval());
+  }
 
   // Inline version of secondRef.  Only for use in iterator helpers.
-  const TypedValue* nvSecond() const {
-    const ArrayData* ad = getArrayData();
-    assert(ad && m_pos != ad->iter_end());
-    return ad->getValueRef(m_pos).asTypedValue();
+  tv_rval nvSecond() const {
+    auto const ad = getArrayData();
+    assertx(ad && m_pos != ad->iter_end());
+    return ad->rvalPos(m_pos);
+  }
+
+  tv_rval nvSecondLocal(const ArrayData* ad) const {
+    assertx(!getArrayData());
+    assertx(ad && m_pos != ad->iter_end());
+    return ad->rvalPos(m_pos);
   }
 
   bool hasArrayData() const {
     return !((intptr_t)m_data & 1);
   }
-  bool hasCollection() const {
-    return (!hasArrayData() && getObject()->isCollection());
-  }
-
-  //
-  // Specialized iterator for collections. Used via JIT
-  //
-
-  /**
-   * Fixed is used for collections that are immutable in size.
-   * Templatized Fixed functions expect the collection to implement
-   * size() and get().
-   * The key is the current position of the iterator.
-   */
-  enum class Fixed {};
-  /**
-   * Versionable is used for collections that are mutable and throw if
-   * an insertion or deletion is made to the collection while iterating.
-   * Templatized Versionable functions expect the collection to implement
-   * size(), getVersion() and get().
-   * The key is the current position of the iterator.
-   */
-  enum class Versionable {};
-  /**
-   * VersionableSparse is used for collections that are mutable and throw if
-   * an insertion or deletion is made to the collection while iterating.
-   * Moreover the collection elements are accessed via an iterator.
-   * Templatized VersionableSparse functions expect the collection to implement
-   * getVersion(), iter_begin(), iter_next(), iter_value(), iter_key(), and
-   * iter_valid().
-   */
-  enum class VersionableSparse {};
-
-  // Constructors
-  template<class Tuplish>
-  ArrayIter(Tuplish* coll, Fixed);
-  template<class Vectorish>
-  ArrayIter(Vectorish* coll, Versionable);
-  template<class Mappish>
-  ArrayIter(Mappish* coll, VersionableSparse);
-
-  // iterator "next", "value", "key" functions
-  template<class Tuplish>
-  bool iterNext(Fixed);
-  template<class Vectorish>
-  bool iterNext(Versionable);
-  template<class Mappish>
-  bool iterNext(VersionableSparse);
-
-  template<class Tuplish>
-  Variant iterValue(Fixed);
-  template<class Vectorish>
-  Variant iterValue(Versionable);
-  template<class Mappish>
-  Variant iterValue(VersionableSparse);
-
-  template<class Tuplish>
-  Variant iterKey(Fixed);
-  template<class Vectorish>
-  Variant iterKey(Versionable);
-  template<class Mappish>
-  Variant iterKey(VersionableSparse);
 
   const ArrayData* getArrayData() const {
-    assert(hasArrayData());
+    assertx(hasArrayData());
     return m_data;
   }
   ssize_t getPos() {
@@ -287,13 +254,14 @@ struct ArrayIter {
   }
 
   ObjectData* getObject() const {
-    assert(!hasArrayData());
+    assertx(!hasArrayData());
     return (ObjectData*)((intptr_t)m_obj & ~1);
   }
 
 private:
+  template<bool Local>
   friend int64_t new_iter_array(Iter*, ArrayData*, TypedValue*);
-  template<bool withRef>
+  template<bool withRef, bool Local>
   friend int64_t new_iter_array_key(Iter*, ArrayData*, TypedValue*,
                                     TypedValue*);
 
@@ -304,23 +272,13 @@ private:
 
   void cellInit(Cell);
 
-  static void VectorInit(ArrayIter* iter, ObjectData* obj);
-  static void MapInit(ArrayIter* iter, ObjectData* obj);
-  static void ImmMapInit(ArrayIter* iter, ObjectData* obj);
-  static void SetInit(ArrayIter* iter, ObjectData* obj);
-  static void PairInit(ArrayIter* iter, ObjectData* obj);
-  static void ImmVectorInit(ArrayIter* iter, ObjectData* obj);
-  static void ImmSetInit(ArrayIter* iter, ObjectData* obj);
-  static void IteratorObjInit(ArrayIter* iter, ObjectData* obj);
-
-  typedef void(*InitFuncPtr)(ArrayIter*,ObjectData*);
-  static const InitFuncPtr initFuncTable[];
-
   void destruct();
 
+  template <bool Local = false>
   void setArrayData(const ArrayData* ad) {
-    assert((intptr_t(ad) & 1) == 0);
-    m_data = ad;
+    assertx((intptr_t(ad) & 1) == 0);
+    assertx(!Local || ad);
+    m_data = Local ? nullptr : ad;
     m_nextHelperIdx = IterNextIndex::ArrayMixed;
     if (ad != nullptr) {
       if (ad->hasPackedLayout()) {
@@ -332,11 +290,10 @@ private:
   }
 
   void setObject(ObjectData* obj) {
-    assert((intptr_t(obj) & 1) == 0);
+    assertx((intptr_t(obj) & 1) == 0);
     m_obj = (ObjectData*)((intptr_t)obj | 1);
-    m_nextHelperIdx = getNextHelperIdx(obj);
+    m_nextHelperIdx = IterNextIndex::Object;
   }
-  IterNextIndex getNextHelperIdx(ObjectData* obj);
 
   union {
     const ArrayData* m_data;
@@ -347,7 +304,11 @@ private:
   // in the array. Beware that when m_data is null, m_pos is uninitialized.
   ssize_t m_pos;
  private:
-  int m_version;
+  // we don't use this pointer, but it gives ArrayIter the same layout
+  // as MArrayIter and CufIter, allowing Iter to be scanned without a union
+  // descriminator.
+  MaybeCountable* m_unused;
+  UNUSED int m_alsoUnused;
   // This is unioned so new_iter_array can initialize it more
   // efficiently.
   union {
@@ -381,7 +342,7 @@ private:
  *
  * MArrayIter works by "registering" itself with the array being
  * iterated over, in a way that any array can find out all active
- * MArrayIters associated with it (if any).  See tl_miter_table below.
+ * MArrayIters associated with it (if any).  See MIterTable below.
  *
  * Using this association, when an array mutation occurs, if there are
  * active MArrayIters the array will update them to ensure they behave
@@ -399,18 +360,11 @@ private:
  * be a different array or a non-array value.  When this happens, the
  * MArrayIter unregisters itself with the old array (pointed to by
  * m_container) and registers itself with the new array (pointed to by
- * m_ref->tv().m_data.parr) and resumes iteration at the position
+ * m_ref->cell().m_data.parr) and resumes iteration at the position
  * pointed to by the new array's internal cursor (ArrayData::m_pos).
  * If m_ref points to a non-array value, iteration terminates.
  */
 struct MArrayIter {
-  MArrayIter()
-    : m_data(nullptr)
-    , m_pos(0)
-    , m_container(nullptr)
-    , m_resetFlag(false)
-  {}
-
   explicit MArrayIter(RefData* ref);
   explicit MArrayIter(ArrayData* data);
   ~MArrayIter();
@@ -427,21 +381,22 @@ struct MArrayIter {
    */
   Variant key() {
     ArrayData* data = getArray();
-    assert(data && data == getContainer());
-    assert(!getResetFlag() && data->validMArrayIter(*this));
+    assertx(data && data == getContainer());
+    assertx(!getResetFlag() && data->validMArrayIter(*this));
     return data->getKey(m_pos);
   }
 
-  Variant& val() {
+  variant_ref val() {
     ArrayData* data = getArray();
-    assert(data && data == getContainer());
-    assert(!data->cowCheck() || data->noCopyOnWrite());
-    assert(!getResetFlag());
-    assert(data->validMArrayIter(*this));
-    // Normally it's not ok to modify the return value of getValueRef,
-    // but the whole point of mutable array iteration is that this is
-    // allowed, so this const_cast is not actually evil.
-    return const_cast<Variant&>(data->getValueRef(m_pos));
+    assertx(data && data == getContainer());
+    assertx(!data->cowCheck() || data->noCopyOnWrite());
+    assertx(!getResetFlag());
+    assertx(data->validMArrayIter(*this));
+    // Normally it's not ok to modify the return value of rvalPos, but the
+    // whole point of mutable array iteration is that this is allowed, so this
+    // as_lval() is not actually evil. This may change if we ever decide to
+    // make tv_rval hold the TypedValue by value, rather than a pointer.
+    return variant_ref{data->rvalPos(m_pos).as_lval()};
   }
 
   void release() { delete this; }
@@ -467,11 +422,11 @@ struct MArrayIter {
     return bool(intptr_t(m_data) & 1LL);
   }
   RefData* getRef() const {
-    assert(hasRef());
+    assertx(hasRef());
     return m_ref;
   }
   ArrayData* getAd() const {
-    assert(hasAd());
+    assertx(hasAd());
     return (ArrayData*)(intptr_t(m_data) & ~1LL);
   }
   void setRef(RefData* ref) {
@@ -492,9 +447,9 @@ struct MArrayIter {
 
 private:
   ArrayData* getData() const {
-    assert(hasRef());
-    return isArrayLikeType(m_ref->tv()->m_type)
-      ? m_ref->tv()->m_data.parr
+    assertx(hasRef());
+    return isArrayType(m_ref->cell()->m_type)
+      ? m_ref->cell()->m_data.parr
       : nullptr;
   }
 
@@ -531,6 +486,7 @@ private:
   // "before the first" position in the array.
   UNUSED uint32_t m_unused;
   uint32_t m_resetFlag;
+  friend struct Iter;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -574,56 +530,59 @@ private:
  *     valid ways to check if a slot is empty.
  */
 struct MIterTable {
-  struct Ent { ArrayData* array; MArrayIter* iter; };
+  struct Ent {
+    ArrayData* array;
+    MArrayIter* iter;
+  };
 
-  void clear() {
-    ents.fill({nullptr, nullptr});
-    if (!extras.empty()) {
-      extras.release_if([] (const MIterTable::Ent& e) { return true; });
-    }
-  }
+  static void clear();
 
   static constexpr int ents_size = 7;
   std::array<Ent, ents_size> ents;
   // Slow path: we expect this `extras' list to rarely be allocated.
   TlsPodBag<Ent,req::Allocator<Ent>> extras;
 };
-static_assert(sizeof(MIterTable) == 2*64, "");
-extern __thread MIterTable tl_miter_table;
+static_assert(sizeof(MIterTable) == 2*64, "want multiple of cache line size");
+extern THREAD_LOCAL_FLAT(MIterTable, tl_miter_table);
 
 void free_strong_iterators(ArrayData*);
-ArrayData* move_strong_iterators(ArrayData* dest, ArrayData* src);
+void move_strong_iterators(ArrayData* dest, ArrayData* src);
+bool has_strong_iterator(ArrayData*);
+void reset_strong_iterators(ArrayData* ad);
 
 //////////////////////////////////////////////////////////////////////
 
 struct CufIter {
-  CufIter() : m_func(nullptr), m_ctx(nullptr), m_name(nullptr) {}
+  CufIter() : m_obj_or_cls(nullptr), m_func(nullptr),
+              m_name(nullptr), m_dynamic{false} {}
   ~CufIter();
   const Func* func() const { return m_func; }
-  void* ctx() const { return m_ctx; }
+  void* ctx() const { return m_obj_or_cls; }
   StringData* name() const { return m_name; }
+  bool dynamic() const { return m_dynamic; }
 
   void setFunc(const Func* f) { m_func = f; }
-  void setCtx(ObjectData* obj) { m_ctx = obj; }
+  void setCtx(ObjectData* obj) { m_obj_or_cls = obj; }
   void setCtx(const Class* cls) {
-    m_ctx = cls ? (void*)((char*)cls + 1) : nullptr;
+    m_obj_or_cls = !cls ? nullptr :
+                   reinterpret_cast<ObjectData*>((char*)cls + 1);
   }
   void setName(StringData* name) { m_name = name; }
+  void setDynamic(bool dynamic) { m_dynamic = dynamic; }
 
   static constexpr uint32_t funcOff() { return offsetof(CufIter, m_func); }
-  static constexpr uint32_t ctxOff()  { return offsetof(CufIter, m_ctx); }
+  static constexpr uint32_t ctxOff() { return offsetof(CufIter, m_obj_or_cls); }
   static constexpr uint32_t nameOff() { return offsetof(CufIter, m_name); }
+  static constexpr uint32_t dynamicOff() {
+    return offsetof(CufIter, m_dynamic);
+  }
 
  private:
+  ObjectData* m_obj_or_cls; // maybe a Class* if lsb set.
   const Func* m_func;
-  void* m_ctx;
   StringData* m_name;
-
-  TYPE_SCAN_CUSTOM_FIELD(m_ctx) {
-    if (m_ctx && intptr_t(m_ctx) % 2 == 0) {
-      scanner.enqueue(reinterpret_cast<const ObjectData*>(m_ctx));
-    }
-  }
+  bool m_dynamic;
+  friend struct Iter;
 };
 
 struct alignas(16) Iter {
@@ -634,13 +593,18 @@ struct alignas(16) Iter {
         MArrayIter& marr()       { return m_u.maiter; }
         CufIter&     cuf()       { return m_u.cufiter; }
 
-  bool init(TypedValue* c1);
+  template <bool Local> bool init(TypedValue* c1);
   bool next();
+  bool nextLocal(const ArrayData*);
   void free();
   void mfree();
   void cfree();
 
 private:
+  // ArrayIter, MArrayIter, and CufIter all declare pointers at the
+  // same offsets, allowing gen-type-scanners to generate a scanner
+  // automatically, for the union. If the layouts become incompatible,
+  // gen-type-scanners will report a build-time error.
   union Data {
     Data() {}
     ArrayIter aiter;
@@ -697,12 +661,17 @@ bool IterateV(const ArrayData* adata, ArrFn arrFn) {
     SetArray::Iterate<ArrFn, IncRef>(SetArray::asSet(adata), arrFn);
   } else {
     for (ArrayIter iter(adata); iter; ++iter) {
-      if (ArrayData::call_helper(arrFn, iter.secondRef().asTypedValue())) {
+      if (ArrayData::call_helper(arrFn, iter.secondVal())) {
         break;
       }
     }
   }
   return true;
+}
+
+template <typename ArrFn>
+ALWAYS_INLINE bool IterateVNoInc(const ArrayData* adata, ArrFn arrFn) {
+  return IterateV<ArrFn, false>(adata, std::move(arrFn));
 }
 
 template <typename PreArrFn, typename ArrFn, typename PreCollFn, typename ObjFn>
@@ -711,7 +680,7 @@ bool IterateV(const TypedValue& it,
               ArrFn arrFn,
               PreCollFn preCollFn,
               ObjFn objFn) {
-  assert(it.m_type != KindOfRef);
+  assertx(!isRefType(it.m_type));
   ArrayData* adata;
   if (LIKELY(isArrayLikeType(it.m_type))) {
     adata = it.m_data.parr;
@@ -730,11 +699,11 @@ bool IterateV(const TypedValue& it,
     if (ArrayData::call_helper(preCollFn, odata)) return true;
     adata = collections::asArray(odata);
     if (adata) goto do_array;
-    assert(odata->collectionType() == CollectionType::Pair);
+    assertx(odata->collectionType() == CollectionType::Pair);
     auto tv = make_tv<KindOfInt64>(0);
-    if (!ArrayData::call_helper(arrFn, collections::at(odata, &tv))) {
+    if (!ArrayData::call_helper(arrFn, *collections::at(odata, &tv))) {
       tv.m_data.num = 1;
-      ArrayData::call_helper(arrFn, collections::at(odata, &tv));
+      ArrayData::call_helper(arrFn, *collections::at(odata, &tv));
     }
     return true;
   }
@@ -781,18 +750,21 @@ bool IterateKV(const ArrayData* adata, ArrFn arrFn) {
   } else if (adata->hasPackedLayout()) {
     PackedArray::IterateKV<ArrFn, IncRef>(adata, arrFn);
   } else if (adata->isKeyset()) {
-    auto fun = [&] (const TypedValue* v) { return arrFn(v, v); };
+    auto fun = [&](TypedValue v) { return arrFn(v, v); };
     SetArray::Iterate<decltype(fun), IncRef>(SetArray::asSet(adata), fun);
   } else {
     for (ArrayIter iter(adata); iter; ++iter) {
-      if (ArrayData::call_helper(arrFn,
-                                 iter.first().asTypedValue(),
-                                 iter.secondRef().asTypedValue())) {
+      if (ArrayData::call_helper(arrFn, iter.nvFirst(), iter.secondVal())) {
         break;
       }
     }
   }
   return true;
+}
+
+template <typename ArrFn>
+ALWAYS_INLINE bool IterateKVNoInc(const ArrayData* adata, ArrFn arrFn) {
+  return IterateKV<ArrFn, false>(adata, std::move(arrFn));
 }
 
 template <typename PreArrFn, typename ArrFn, typename PreCollFn, typename ObjFn>
@@ -801,7 +773,7 @@ bool IterateKV(const TypedValue& it,
                ArrFn arrFn,
                PreCollFn preCollFn,
                ObjFn objFn) {
-  assert(it.m_type != KindOfRef);
+  assertx(!isRefType(it.m_type));
   ArrayData* adata;
   if (LIKELY(isArrayLikeType(it.m_type))) {
     adata = it.m_data.parr;
@@ -820,11 +792,11 @@ bool IterateKV(const TypedValue& it,
     if (ArrayData::call_helper(preCollFn, odata)) return true;
     adata = collections::asArray(odata);
     if (adata) goto do_array;
-    assert(odata->collectionType() == CollectionType::Pair);
+    assertx(odata->collectionType() == CollectionType::Pair);
     auto tv = make_tv<KindOfInt64>(0);
-    if (!ArrayData::call_helper(arrFn, &tv, collections::at(odata, &tv))) {
+    if (!ArrayData::call_helper(arrFn, tv, *collections::at(odata, &tv))) {
       tv.m_data.num = 1;
-      ArrayData::call_helper(arrFn, &tv, collections::at(odata, &tv));
+      ArrayData::call_helper(arrFn, tv, *collections::at(odata, &tv));
     }
     return true;
   }
@@ -861,8 +833,9 @@ bool IterateKV(const TypedValue& it,
 
 //////////////////////////////////////////////////////////////////////
 
+template <bool Local>
 int64_t new_iter_array(Iter* dest, ArrayData* arr, TypedValue* val);
-template <bool withRef>
+template <bool withRef, bool Local>
 int64_t new_iter_array_key(Iter* dest, ArrayData* arr, TypedValue* val,
                            TypedValue* key);
 int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
@@ -879,6 +852,9 @@ int64_t miter_next_key(Iter* dest, TypedValue* val, TypedValue* key);
 
 int64_t iter_next_ind(Iter* iter, TypedValue* valOut);
 int64_t iter_next_key_ind(Iter* iter, TypedValue* valOut, TypedValue* keyOut);
+
+int64_t liter_next_ind(Iter*, TypedValue*, ArrayData*);
+int64_t liter_next_key_ind(Iter*, TypedValue*, TypedValue*, ArrayData*);
 
 //////////////////////////////////////////////////////////////////////
 

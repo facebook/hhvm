@@ -34,4 +34,8 @@ function main() {
   $x = new Foo();
 }
 
+
+<<__EntryPoint>>
+function main_private_props_001() {
 main();
+}

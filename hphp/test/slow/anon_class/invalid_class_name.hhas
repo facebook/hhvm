@@ -1,0 +1,7 @@
+.main (1,1) {
+  Int 1
+  RetC
+}
+
+.class [nontop] class@anonymous$foo;2 {
+}

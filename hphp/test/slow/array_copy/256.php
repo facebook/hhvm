@@ -8,4 +8,8 @@ function h7() {
   var_dump(current($arr));
   var_dump(current($arr2));
 }
+
+<<__EntryPoint>>
+function main_256() {
 h7();
+}

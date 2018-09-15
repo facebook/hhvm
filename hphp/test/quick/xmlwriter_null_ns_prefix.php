@@ -1,4 +1,4 @@
-<?php
+<?hh
 $xml = new XMLWriter();
 $xml->openMemory();
 $xml->startDocument('1.0', 'UTF-8');

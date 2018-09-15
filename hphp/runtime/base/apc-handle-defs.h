@@ -18,7 +18,6 @@
 #define incl_HPHP_APC_HANDLE_DEFS_H_
 
 #include "hphp/runtime/base/apc-handle.h"
-#include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/execution-context.h"
 
 namespace HPHP {
@@ -36,7 +35,7 @@ inline void APCHandle::unreferenceNonRoot() const {
 }
 
 inline void APCHandle::unreferenceRoot(size_t size) {
-  assert(isSingletonKind() || m_unref_root_count++ == 0);
+  assertx(isSingletonKind() || m_unref_root_count++ == 0);
   if (!isUncounted()) {
     atomicDecRef();
   } else {
@@ -45,22 +44,22 @@ inline void APCHandle::unreferenceRoot(size_t size) {
 }
 
 inline bool APCHandle::isAtomicCounted() const {
-  return m_kind >= APCKind::SharedString &&
-         m_type == kInvalidDataType;
+  assertx(m_kind < APCKind::SharedString || m_type == kInvalidDataType);
+  return m_kind >= APCKind::SharedString;
 }
 
 inline void APCHandle::atomicIncRef() const {
-  assert(isAtomicCounted());
+  assertx(isAtomicCounted());
   ++m_count;
 }
 
 inline void APCHandle::atomicDecRef() const {
-  assert(m_count.load() > 0);
+  assertx(m_count.load() > 0);
   if (m_count > 1) {
-    assert(isAtomicCounted());
+    assertx(isAtomicCounted());
     if (--m_count) return;
   }
-  assert(isSingletonKind() || m_unref_root_count == 1);
+  assertx(isSingletonKind() || m_unref_root_count == 1);
   const_cast<APCHandle*>(this)->deleteShared();
 }
 

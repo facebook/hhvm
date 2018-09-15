@@ -72,5 +72,9 @@ async function go() {
   await $x->genThings();
   await $x->genThings();
 }
+
+<<__EntryPoint>>
+function main_async_await_002() {
 $y = go();
 HH\Asio\join($y);
+}

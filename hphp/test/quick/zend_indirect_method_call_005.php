@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
    We dont' have ArrayObject so use something from http://php.net/manual/en/class.arrayaccess.php
@@ -32,5 +32,3 @@ class foo implements arrayaccess {
 }
 
 var_dump( (new foo( array(1, array(4, 5), 3) ))[1][0] ); // int(4)
-
-?>

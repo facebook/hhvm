@@ -8,7 +8,7 @@ function show_keyed_iter($iter) {
     $vs[] = Pair {$k, $v};
   }
 
-  usort($vs, function($p1, $p2) {
+  usort(&$vs, function($p1, $p2) {
     if ($p1[0] < $p2[0]) return -1;
     else if ($p1[0] == $p2[0]) return 0;
     else return 1;
@@ -34,4 +34,8 @@ function main() {
   // We can't construct a Map or ImmMap from a Set.
 }
 
+
+<<__EntryPoint>>
+function main_constructors() {
 main();
+}

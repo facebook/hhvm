@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/native-data.h"
 #include <unicode/utypes.h>
 #include <unicode/ucnv.h>
+#include <unicode/unistr.h>
 #include <unicode/ustring.h>
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"

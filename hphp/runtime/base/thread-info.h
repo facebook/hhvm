@@ -42,10 +42,32 @@ struct ThreadInfo {
     UserFunctions,
     NetworkIO,
   };
+  /*
+   * Set to Idle when Treadmill::finishRequest().
+   * Set to OnRequestWithNoPendingExecution when Treadmill::startRequest()
+   * If SetPendingGCForAllOnRequestThread() get called,
+   * set to OnRequestWithPendingExecution for each on-request thread
+   */
+  enum GlobalGCStatus {
+    Idle,
+    OnRequestWithNoPendingExecution,
+    OnRequestWithPendingExecution,
+  };
 
   static void GetExecutionSamples(std::map<Executing, int>& counts);
   static void ExecutePerThread(std::function<void(ThreadInfo*)> f);
-  static DECLARE_THREAD_LOCAL_NO_CHECK(ThreadInfo, s_threadInfo);
+  /*
+   * Only on-request threads should set up PendingGCFlag
+   * Returns number of on-request threads
+   */
+  static int SetPendingGCForAllOnRequestThread();
+  static THREAD_LOCAL_NO_CHECK(ThreadInfo, s_threadInfo);
+
+  /*
+   * Actively kill inflight requests when memory is tight.  Some or all ongoing
+   * request will terminate with fatal error.
+   */
+  static void InvokeOOMKiller();
 
   /*
    * This is the amount of "slack" in stack usage checks - if the stack pointer
@@ -63,6 +85,13 @@ struct ThreadInfo {
 
   void onSessionInit();
   void onSessionExit();
+
+  /*
+   * Change m_globalGCStatus as atomic operation
+   * Returns true if m_globalGCStatus == from when user call this, and atomic
+   * change it
+   */
+  bool changeGlobalGCStatus(GlobalGCStatus from, GlobalGCStatus to);
 
   /*
    * Setting the pending exception.
@@ -90,6 +119,9 @@ struct ThreadInfo {
   Exception* m_pendingException{nullptr};
 
   Executing m_executing{Idling};
+
+private:
+  std::atomic<GlobalGCStatus> m_globalGCStatus{Idle};
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -111,12 +143,11 @@ inline RequestInjectionData& RID() {
 void raise_infinite_recursion_error();
 
 inline void* stack_top_ptr() {
-  char marker;
-
-  // gcc warns about directly returning pointers to local variables.
-  auto to_trick_gcc = static_cast<void*>(&marker);
-  return to_trick_gcc;
+  DECLARE_FRAME_POINTER(fp);
+  return fp;
 }
+
+NEVER_INLINE void* stack_top_ptr_conservative();
 
 inline bool stack_in_bounds() {
   return uintptr_t(stack_top_ptr()) >= s_stackLimit + ThreadInfo::StackSlack;

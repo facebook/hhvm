@@ -22,7 +22,7 @@ Profiling PHP Code
 ## PHP Interface ##
 
 HHVM supports the whole Xhprof interface, as described
-[on php.net](http://php.net/manual/en/book.xhprof.php).
+[on php.net](https://php.net/manual/en/book.xhprof.php).
 
 Note that regardless of whether `XHPROF_FLAGS_NO_BUILTINS` is on, builtins will
 not be profiled if the config option `Eval.JitEnableRenameFunction` is off. That

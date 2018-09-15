@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo($bar, $baz) {
   return 42;
 }

@@ -9,5 +9,9 @@ class X {
   }
 }
 
+
+<<__EntryPoint>>
+function main_extract_005() {
 (new X)->foo();
 X::foo();
+}

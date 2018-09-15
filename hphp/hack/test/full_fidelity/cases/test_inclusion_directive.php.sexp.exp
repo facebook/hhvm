@@ -1,0 +1,65 @@
+((script 168
+  ((list 168
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
+       (missing 0 ())))
+     (namespace_declaration 163
+      ((() namespace 9 ((whitespace 1))) (() name 1 ((whitespace 1)))
+       (namespace_body 151
+        ((() { 1 ((end_of_line 1)))
+         (list 145
+          ((inclusion_directive 12
+            ((inclusion_expression 11
+              ((((whitespace 2)) include 7 ((whitespace 1)))
+               (literal 3 ((() single_quoted_string_literal 3 ())))))
+             (() ";" 1 ((end_of_line 1)))))
+           (inclusion_directive 17
+            ((inclusion_expression 16
+              ((((whitespace 2)) include_once 12 ((whitespace 1)))
+               (literal 3 ((() single_quoted_string_literal 3 ())))))
+             (() ";" 1 ((end_of_line 1)))))
+           (inclusion_directive 12
+            ((inclusion_expression 11
+              ((((whitespace 2)) require 7 ((whitespace 1)))
+               (literal 3 ((() single_quoted_string_literal 3 ())))))
+             (() ";" 1 ((end_of_line 1)))))
+           (inclusion_directive 17
+            ((inclusion_expression 16
+              ((((whitespace 2)) require_once 12 ((whitespace 1)))
+               (literal 3 ((() single_quoted_string_literal 3 ())))))
+             (() ";" 1 ((end_of_line 1)))))
+           (inclusion_directive 14
+            ((inclusion_expression 13
+              ((((whitespace 2)) include 7 ((whitespace 1)))
+               (parenthesized_expression 5
+                ((() "(" 1 ())
+                 (literal 3 ((() single_quoted_string_literal 3 ())))
+                 (() ")" 1 ())))))
+             (() ";" 1 ((end_of_line 1)))))
+           (inclusion_directive 19
+            ((inclusion_expression 18
+              ((((whitespace 2)) include_once 12 ((whitespace 1)))
+               (parenthesized_expression 5
+                ((() "(" 1 ())
+                 (literal 3 ((() single_quoted_string_literal 3 ())))
+                 (() ")" 1 ())))))
+             (() ";" 1 ((end_of_line 1)))))
+           (inclusion_directive 14
+            ((inclusion_expression 13
+              ((((whitespace 2)) require 7 ((whitespace 1)))
+               (parenthesized_expression 5
+                ((() "(" 1 ())
+                 (literal 3 ((() single_quoted_string_literal 3 ())))
+                 (() ")" 1 ())))))
+             (() ";" 1 ((end_of_line 1)))))
+           (inclusion_directive 19
+            ((inclusion_expression 18
+              ((((whitespace 2)) require_once 12 ((whitespace 1)))
+               (parenthesized_expression 5
+                ((() "(" 1 ())
+                 (literal 3 ((() single_quoted_string_literal 3 ())))
+                 (() ")" 1 ())))))
+             (() ";" 1 ((end_of_line 1)))))))
+         (() } 1 ((end_of_line 1)))))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

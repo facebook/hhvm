@@ -43,7 +43,7 @@ ArenaImpl<kChunkBytes>::ArenaImpl() {
   m_current = static_cast<char*>(malloc(kChunkBytes));
   m_ptrs.push_back(m_current);
   m_bypassSlabAlloc = s_bypassSlabAlloc;
-#ifdef DEBUG
+#ifndef NDEBUG
   m_externalAllocSize = 0;
 #endif
 }
@@ -61,7 +61,7 @@ ArenaImpl<kChunkBytes>::~ArenaImpl() {
 template<size_t kChunkBytes>
 size_t ArenaImpl<kChunkBytes>::size() const {
   size_t ret = m_ptrs.size() * kChunkBytes - slackEstimate();
-#ifdef DEBUG
+#ifndef NDEBUG
   ret += m_externalAllocSize;
 #endif
   return ret;
@@ -81,7 +81,7 @@ void* ArenaImpl<kChunkBytes>::allocSlow(size_t nbytes) {
 #endif
 
     char* ptr = static_cast<char*>(malloc(nbytes + extra));
-#ifdef DEBUG
+#ifndef NDEBUG
     m_externalAllocSize += nbytes + extra;
 #endif
     m_externalPtrs.push(ptr); // save ptr before aligning it

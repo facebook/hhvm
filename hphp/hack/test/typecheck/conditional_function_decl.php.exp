@@ -1,0 +1,2 @@
+File "conditional_function_decl.php", line 13, characters 3-19:
+Declarations are not supported outside global scope (Parsing[1002])

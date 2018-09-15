@@ -3,9 +3,8 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
@@ -34,15 +33,24 @@ const int LIBXML_ERR_WARNING = 0;
 const int LIBXML_VERSION = 0;
 const int LIBXML_SCHEMA_CREATE = 0;
 
+<<__PHPStdLib>>
 function libxml_get_errors();
+<<__PHPStdLib>>
 function libxml_get_last_error();
+<<__PHPStdLib>>
 function libxml_clear_errors();
+<<__PHPStdLib>>
 function libxml_use_internal_errors($use_errors = null);
+<<__PHPStdLib>>
 function libxml_suppress_errors($suppress_errors);
+<<__PHPStdLib>>
 function libxml_set_streams_context($streams_context);
+<<__PHPStdLib>>
 function libxml_disable_entity_loader($disable = true);
 
+<<__PHPStdLib>>
 function simplexml_load_string($data, $class_name = "SimpleXMLElement", $options = 0, $ns = "", $is_prefix = false);
+<<__PHPStdLib>>
 function simplexml_load_file($filename, $class_name = "SimpleXMLElement", $options = 0, $ns = "", $is_prefix = false);
 class SimpleXMLElement {
   public function __construct($data, $options = 0, $data_is_url = false, $ns = "", $is_prefix = false);

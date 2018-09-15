@@ -53,7 +53,8 @@ struct FlagVisitor {
   template<class I> void imm(I&) {}
   template<class R> void def(R) {}
   template<class D, class H> void defHint(D, H) {}
-  template<class T> void across(T r) {}
+  template <class T>
+  void across(T /*r*/) {}
   template<class R> void use(R) {}
   template<class S, class H> void useHint(S, H) {}
   void imm(Vflags& fl) {
@@ -77,7 +78,8 @@ struct CCVisitor {
   template<class I> void imm(I&) {}
   template<class R> void def(R) {}
   template<class D, class H> void defHint(D, H) {}
-  template<class T> void across(T r) {}
+  template <class T>
+  void across(T /*r*/) {}
   template<class R> void use(R) {}
   template<class S, class H> void useHint(S, H) {}
   void imm(ConditionCode& cc) {
@@ -102,8 +104,8 @@ struct CCVisitor {
  * This is to be done in the specializations below as general mappings are
  * usually correct.
  */
-template<typename Inst>
-void fixSFUses(const Env& env, Inst& inst) {}
+template <typename Inst>
+void fixSFUses(const Env& /*env*/, Inst& /*inst*/) {}
 
 void fixSFUses(const Env& env, jcc& inst) {
   if (!arch_any(Arch::ARM)) return;

@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1686() {
 $name = tempnam(sys_get_temp_dir(), '1682');
 $input = fopen($name, 'w+');
 fwrite($input, 'hello world');
@@ -22,3 +25,4 @@ fseek($output, 0);
 $bytes = fread($output, 1024);
 print "From file, using Maxlen -1: <".serialize($bytes).">.\n";
 unlink($name);
+}

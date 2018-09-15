@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main($b) {
   $a .= $b;

@@ -186,4 +186,8 @@ function main() {
   triple('LL');
   test('B', 0, 0);
 }
+
+<<__EntryPoint>>
+function main_446() {
 main();
+}

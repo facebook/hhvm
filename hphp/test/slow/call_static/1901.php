@@ -5,4 +5,8 @@ abstract class BaseClass {
     echo "Calling static method '$name' "         . implode(', ', $arguments). "\n";
   }
 }
+
+<<__EntryPoint>>
+function main_1901() {
 BaseClass::foo();
+}

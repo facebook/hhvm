@@ -1,2 +1,2 @@
-File "forbid_await_in_sync_functions1.php", line 13, characters 9-18:
-await can only be used inside async functions (NastCheck[3003])
+File "forbid_await_in_sync_functions1.php", line 13, characters 9-15:
+Await cannot be used as an expression (Parsing[1002])

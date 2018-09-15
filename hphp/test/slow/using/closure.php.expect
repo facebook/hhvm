@@ -1,0 +1,13 @@
+Creating closure
+Entering closure
+Constructing id 0
+In using
+Disposing id 0
+Leaving closure
+Constructing id 1
+Entering closure
+Constructing id 2
+In using
+Disposing id 2
+Disposing id 1
+string(13) "Closure threw"

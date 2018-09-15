@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1584() {
 $a1 = a;
 $a2 = b;
 $a3 = c;
@@ -21,3 +24,4 @@ echo $a1.$a2.$a3.$a4.$a5.$a6.$a7.$a8.$a9.$a10;
 echo $a1.$a2.$a3.$a4.$a5.$a6.$a7.$a8.$a9.$a10.$a11;
 echo $a1.$a2.$a3.$a4.$a5.$a6.$a7.$a8.$a9.$a10.$a11.$a12;
 echo $a1.$a2.$a3.$a4.$a5.$a6.$a7.$a8.$a9.$a10.$a11.$a12.$a13;
+}

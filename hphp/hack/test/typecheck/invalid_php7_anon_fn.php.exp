@@ -1,0 +1,2 @@
+File "invalid_php7_anon_fn.php", line 4, characters 3-44:
+Php7 anonymous functions are not allowed in Hack files, prefer moving the type annotation before the use clause (Parsing[1002])

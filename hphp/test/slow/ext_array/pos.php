@@ -20,6 +20,10 @@ function c() {
   var_dump(pos($arr));
 }
 
+
+<<__EntryPoint>>
+function main_pos() {
 a();
 b();
 c();
+}

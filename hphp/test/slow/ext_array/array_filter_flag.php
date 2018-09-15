@@ -1,9 +1,12 @@
 <?hh
 
+
 // --------------------------------
 // Arrays
 // --------------------------------
 
+<<__EntryPoint>>
+function main_array_filter_flag() {
 $a = array('x' => 10, 'y' => 20);
 
 array_filter($a, ($v, $k) ==> {
@@ -48,3 +51,4 @@ array_filter($m, $v ==> {
 array_filter($m, $v ==> {
   var_dump($v);
 }, 3); // unknown use is defaulted to value
+}

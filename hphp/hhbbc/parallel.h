@@ -29,6 +29,7 @@
 
 #include <folly/ScopeGuard.h>
 
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/base/program-functions.h"
 
 namespace HPHP { namespace HHBBC {
@@ -62,7 +63,7 @@ void for_each(const std::vector<Item>& inputs, Func func) {
     workers.push_back(std::thread([&] {
       try {
         hphp_thread_init();
-        hphp_session_init();
+        hphp_session_init(Treadmill::SessionKind::HHBBC);
         SCOPE_EXIT {
           hphp_context_exit();
           hphp_session_exit();
@@ -100,12 +101,9 @@ void for_each(const std::vector<Item>& inputs, Func func) {
  * If `func' throws an exception, the results of the output vector
  * will contain some default-constructed values.
  */
-template<class Func, class Item>
-std::vector<typename std::result_of<Func (Item)>::type>
-map(const std::vector<Item>& inputs, Func func) {
-  using RetT = typename std::result_of<Func (Item)>::type;
-
-  std::vector<RetT> retVec(inputs.size());
+template<class Func, class Items>
+auto map(Items&& inputs, Func func) -> std::vector<decltype(func(inputs[0]))> {
+  std::vector<decltype(func(inputs[0]))> retVec(inputs.size());
   auto const retMem = &retVec[0];
 
   std::atomic<bool> failed{false};
@@ -116,7 +114,7 @@ map(const std::vector<Item>& inputs, Func func) {
     workers.push_back(std::thread([&] {
       try {
         hphp_thread_init();
-        hphp_session_init();
+        hphp_session_init(Treadmill::SessionKind::HHBBC);
         SCOPE_EXIT {
           hphp_context_exit();
           hphp_session_exit();

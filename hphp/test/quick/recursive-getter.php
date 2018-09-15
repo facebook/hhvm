@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 error_reporting(-1);
 

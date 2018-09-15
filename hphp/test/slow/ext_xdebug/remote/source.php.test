@@ -1,5 +1,0 @@
-<?php
-var_dump("_____");
-var_dump("hello");
-var_dump("world");
-var_dump("^^^^^");

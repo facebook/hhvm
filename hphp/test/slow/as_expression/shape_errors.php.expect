@@ -1,0 +1,14 @@
+string(67) "Expected shape('hi' => int, 'wow' => string), got array of length 1"
+string(35) "Expected string at ["wow"], got int"
+string(67) "Expected shape('hi' => int, 'wow' => string), got array of length 3"
+string(67) "Expected shape('hi' => int, 'wow' => string), got array of length 1"
+
+string(72) "Expected shape('hi' => int, 'wow' => string, ...), got array of length 1"
+string(35) "Expected string at ["wow"], got int"
+string(35) "Expected string at ["wow"], got int"
+string(72) "Expected shape('hi' => int, 'wow' => string, ...), got array of length 1"
+
+string(34) "Expected int at ["hi"], got string"
+string(35) "Expected string at ["wow"], got int"
+string(68) "Expected shape(?'hi' => int, 'wow' => string), got array of length 3"
+OK

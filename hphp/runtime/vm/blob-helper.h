@@ -28,8 +28,10 @@
 #include <folly/Varint.h>
 
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 
@@ -132,7 +134,7 @@ struct BlobEncoder {
 
   void encode(DataType t) {
     // always encode DataType as int8 even if it's a bigger size.
-    assert(DataType(int8_t(t)) == t);
+    assertx(DataType(int8_t(t)) == t);
     encode(int8_t(t));
   }
 
@@ -147,16 +149,21 @@ struct BlobEncoder {
     std::copy(sd->data(), sd->data() + sz, &m_blob[start]);
   }
 
-  void encode(const RepoAuthType::Array* ar) {
-    if (!ar) return encode(std::numeric_limits<uint32_t>::max());
-    encode(ar->id());
+  void encode(const std::string& s) {
+    uint32_t sz = s.size();
+    encode(sz + 1);
+    if (!sz) { return; }
+
+    const size_t start = m_blob.size();
+    m_blob.resize(start + sz);
+    std::copy(s.data(), s.data() + sz, &m_blob[start]);
   }
 
   void encode(const TypedValue& tv) {
     if (tv.m_type == KindOfUninit) {
       return encode(staticEmptyString());
     }
-    String s = f_serialize(tvAsCVarRef(&tv));
+    auto s = internal_serialize(tvAsCVarRef(&tv));
     encode(s.get());
   }
 
@@ -167,6 +174,17 @@ struct BlobEncoder {
     const bool some = opt.hasValue();
     encode(some);
     if (some) encode(*opt);
+  }
+
+  template <size_t I = 0, typename... Ts>
+  typename std::enable_if<I == sizeof...(Ts), void>::type
+  encode(const std::tuple<Ts...>& /*val*/) {}
+
+  template<size_t I = 0, typename ...Ts>
+  typename std::enable_if<I < sizeof...(Ts), void>::type
+  encode(const std::tuple<Ts...>& val) {
+    encode(std::get<I>(val));
+    encode<I + 1, Ts...>(val);
   }
 
   template<class K, class V>
@@ -180,18 +198,22 @@ struct BlobEncoder {
     encodeContainer(vec, "vector");
   }
 
-  template<class K, class V, class H, class C>
-  void encode(const hphp_hash_map<K,V,H,C>& map) {
+  template<class T>
+  typename std::enable_if<
+    std::is_same<typename T::value_type,
+                 std::pair<typename T::key_type const,
+                           typename T::mapped_type>>::value &&
+    !IsNontrivialSerializable<T,BlobEncoder>::value
+  >::type encode(const T& map) {
     encodeContainer(map, "map");
   }
 
-  template<class V, class H, class C>
-  void encode(const hphp_hash_set<V,H,C>& set) {
-    encodeContainer(set, "set");
-  }
-
-  template<class V, class H, class C>
-  void encode(const std::unordered_set<V,H,C>& set) {
+  template<class T>
+  typename std::enable_if<
+    std::is_same<typename T::key_type,
+                 typename T::value_type>::value &&
+    !IsNontrivialSerializable<T,BlobEncoder>::value
+  >::type encode(const T& set) {
     encodeContainer(set, "set");
   }
 
@@ -233,7 +255,7 @@ struct BlobDecoder {
   {}
 
   void assertDone() {
-    assert(m_p >= m_last);
+    assertx(m_p >= m_last);
   }
 
   // See encode() in BlobEncoder for why this only allows integral
@@ -251,7 +273,7 @@ struct BlobDecoder {
 
   template<class T>
   typename std::enable_if<
-    IsNontrivialSerializable<T,BlobEncoder>::value
+    IsNontrivialSerializable<T,BlobDecoder>::value
   >::type decode(T& t) {
     t.serde(*this);
   }
@@ -274,22 +296,20 @@ struct BlobDecoder {
     s = sd;
   }
 
-  void decode(const RepoAuthType::Array*& ar) {
-    uint32_t id;
-    decode(id);
-    ar = id == std::numeric_limits<uint32_t>::max()
-      ? nullptr
-      : Repo::get().global().arrayTypeTable.lookup(id);
+  void decode(std::string& s) {
+    String str(decodeString());
+    s = str.toCppString();
   }
 
   void decode(TypedValue& tv) {
-    tvWriteUninit(&tv);
+    tvWriteUninit(tv);
 
     String s = decodeString();
-    assert(!!s);
+    assertx(!!s);
     if (s.empty()) return;
 
-    tvAsVariant(&tv) = unserialize_from_string(s);
+    tvAsVariant(&tv) =
+      unserialize_from_string(s, VariableUnserializer::Type::Internal);
     tvAsVariant(&tv).setEvalScalar();
   }
 
@@ -309,6 +329,17 @@ struct BlobDecoder {
     }
   }
 
+  template <size_t I = 0, typename... Ts>
+  typename std::enable_if<I == sizeof...(Ts), void>::type
+  decode(std::tuple<Ts...>& /*val*/) {}
+
+  template<size_t I = 0, typename ...Ts>
+  typename std::enable_if<I < sizeof...(Ts), void>::type
+  decode(std::tuple<Ts...>& val) {
+    decode(std::get<I>(val));
+    decode<I + 1, Ts...>(val);
+  }
+
   template<class K, class V>
   void decode(std::pair<K,V>& val) {
     decode(val.first);
@@ -325,34 +356,34 @@ struct BlobDecoder {
     }
   }
 
-  template<class K, class V, class H, class C>
-  void decode(hphp_hash_map<K,V,H,C>& map) {
+  template<class T>
+  typename std::enable_if<
+    std::is_same<typename T::value_type,
+                 std::pair<typename T::key_type const,
+                           typename T::mapped_type>>::value &&
+    !IsNontrivialSerializable<T,BlobDecoder>::value
+  >::type decode(T& map) {
     uint32_t size;
     decode(size);
     for (uint32_t i = 0; i < size; ++i) {
-      std::pair<K,V> val;
+      typename T::key_type key;
+      decode(key);
+      typename T::mapped_type val;
       decode(val);
-      map.insert(val);
+      map.emplace(key, val);
     }
   }
 
-  template<class V, class H, class C>
-  void decode(hphp_hash_set<V,H,C>& set) {
+  template<class T>
+  typename std::enable_if<
+    std::is_same<typename T::key_type,
+                 typename T::value_type>::value &&
+    !IsNontrivialSerializable<T,BlobDecoder>::value
+  >::type decode(T& set) {
     uint32_t size;
     decode(size);
     for (uint32_t i = 0; i < size; ++i) {
-      V val;
-      decode(val);
-      set.insert(val);
-    }
-  }
-
-  template<class V, class H, class C>
-  void decode(std::unordered_set<V,H,C>& set) {
-    uint32_t size;
-    decode(size);
-    for (uint32_t i = 0; i < size; ++i) {
-      V val;
+      typename T::value_type val;
       decode(val);
       set.insert(val);
     }
@@ -374,7 +405,7 @@ private:
 
     String s = String(sz, ReserveString);
     char* pch = s.mutableData();
-    assert(m_last - m_p >= sz);
+    assertx(m_last - m_p >= sz);
     std::copy(m_p, m_p + sz, pch);
     m_p += sz;
     s.setSize(sz);

@@ -14,20 +14,20 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/data-stream-wrapper.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
-#include "hphp/runtime/base/php-stream-wrapper.h"
-#include "hphp/runtime/base/http-stream-wrapper.h"
-#include "hphp/runtime/base/data-stream-wrapper.h"
 #include "hphp/runtime/base/glob-stream-wrapper.h"
+#include "hphp/runtime/base/http-stream-wrapper.h"
+#include "hphp/runtime/base/php-stream-wrapper.h"
+#include "hphp/runtime/base/req-optional.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/string-hash-set.h"
+#include "hphp/runtime/base/string-hash-map.h"
 #include "hphp/runtime/ext/string/ext_string.h"
-#include <set>
-#include <map>
-#include <algorithm>
-#include <memory>
+#include "hphp/util/hash-map.h"
 
 namespace HPHP { namespace Stream {
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,8 +39,8 @@ struct RequestWrappers final : RequestEventHandler {
     m_wrappers.clear();
   }
 
-  using DisabledSet = req::set<String>;
-  using WrapperMap = req::map<String,req::unique_ptr<Wrapper>>;
+  using DisabledSet = req::StringFastSet;
+  using WrapperMap = req::StringFastMap<req::unique_ptr<Wrapper>>;
 
   DisabledSet& disabled() {
     if (!m_disabled) m_disabled.emplace();
@@ -52,18 +52,19 @@ struct RequestWrappers final : RequestEventHandler {
   }
 
 private:
-  folly::Optional<DisabledSet> m_disabled;
-  folly::Optional<WrapperMap> m_wrappers;
+  req::Optional<DisabledSet> m_disabled;
+  req::Optional<WrapperMap> m_wrappers;
 };
 
 // Global registry for wrappers
-static std::map<std::string,Wrapper*> s_wrappers;
+static hphp_string_map<Wrapper*> s_wrappers;
+static __thread Wrapper* tl_fileHandler;
 
 // Request local registry for user defined wrappers and disabled builtins
 IMPLEMENT_STATIC_REQUEST_LOCAL(RequestWrappers, s_request_wrappers);
 
 bool registerWrapper(const std::string &scheme, Wrapper *wrapper) {
-  assert(s_wrappers.find(scheme) == s_wrappers.end());
+  assertx(!s_wrappers.count(scheme));
   s_wrappers[scheme] = wrapper;
   return true;
 }
@@ -75,29 +76,22 @@ const StaticString
 
 bool disableWrapper(const String& scheme) {
   String lscheme = HHVM_FN(strtolower)(scheme);
-  bool ret = false;
 
-  // Unregister request-specific wrappers entirely
-  auto& wrappers = s_request_wrappers->wrappers();
-  if (wrappers.find(lscheme) != wrappers.end()) {
-    wrappers.erase(lscheme);
-    ret = true;
-  }
+  // Unregister request-specific wrappers entirely.
+  // ret = true if request-specific wrapper existed already
+  auto ret = s_request_wrappers->wrappers().erase(lscheme) > 0;
 
   // Disable builtin wrapper if it exists
-  if (s_wrappers.find(lscheme.data()) == s_wrappers.end()) {
+  if (!s_wrappers.count(lscheme.data())) {
     // No builtin to disable
     return ret;
   }
 
-  auto& disabled = s_request_wrappers->disabled();
-  if (disabled.find(lscheme) != disabled.end()) {
+  if (!s_request_wrappers->disabled().insert(lscheme).second) {
     // Already disabled
     return ret;
   }
-
-  // Disable it
-  disabled.insert(lscheme);
+  // newly disabled
   return true;
 }
 
@@ -106,21 +100,16 @@ bool restoreWrapper(const String& scheme) {
   bool ret = false;
 
   // Unregister request-specific wrapper
-  auto& wrappers = s_request_wrappers->wrappers();
-  if (wrappers.find(lscheme) != wrappers.end()) {
-    wrappers.erase(lscheme);
+  if (s_request_wrappers->wrappers().erase(lscheme) > 0) {
     ret = true;
   }
 
   // Un-disable builtin wrapper
-  auto& disabled = s_request_wrappers->disabled();
-  if (disabled.find(lscheme) == disabled.end()) {
-    // Not disabled
+  if (s_request_wrappers->disabled().erase(lscheme) == 0) {
+    // Not previously disabled
     return ret;
   }
-
-  // Perform action un-disable
-  disabled.erase(lscheme);
+  // Performed action un-disable
   return true;
 }
 
@@ -129,20 +118,16 @@ bool registerRequestWrapper(const String& scheme,
   String lscheme = HHVM_FN(strtolower)(scheme);
 
   // Global, non-disabled wrapper
-  auto& disabled = s_request_wrappers->disabled();
-  if ((s_wrappers.find(lscheme.data()) != s_wrappers.end()) &&
-      (disabled.find(lscheme) == disabled.end())) {
+  if (s_wrappers.count(lscheme.data()) &&
+      !s_request_wrappers->disabled().count(lscheme)) {
     return false;
   }
 
-  // A wrapper has already been registered for that scheme
-  auto& wrappers = s_request_wrappers->wrappers();
-  if (wrappers.find(lscheme) != wrappers.end()) {
-    return false;
-  }
-
-  wrappers[lscheme] = std::move(wrapper);
-  return true;
+  // Try to insert, return true if it happend, or false if a wrapper has
+  // already been registered for that scheme
+  return s_request_wrappers->wrappers().insert(
+      std::make_pair(std::move(lscheme), std::move(wrapper))
+  ).second;
 }
 
 Array enumWrappers() {
@@ -151,7 +136,7 @@ Array enumWrappers() {
   // Enum global wrappers which are not disabled
   auto& disabled = s_request_wrappers->disabled();
   for (auto& e : s_wrappers) {
-    if (disabled.find(e.first) == disabled.end()) {
+    if (!disabled.count(e.first)) {
       ret.append(e.first);
     }
   }
@@ -182,6 +167,10 @@ Wrapper* getWrapper(const String& scheme, bool warn /*= false */) {
 
   String lscheme = HHVM_FN(strtolower)(scheme);
 
+  if (tl_fileHandler && lscheme == s_file) {
+    return tl_fileHandler;
+  }
+
   // Request local wrapper?
   if (have_request_wrappers) {
     auto& wrappers = s_request_wrappers->wrappers();
@@ -193,11 +182,10 @@ Wrapper* getWrapper(const String& scheme, bool warn /*= false */) {
 
   // Global, non-disabled wrapper?
   {
-    auto& disabled = s_request_wrappers->disabled();
     auto it = s_wrappers.find(lscheme.data());
     if ((it != s_wrappers.end()) &&
         (!have_request_wrappers ||
-        (disabled.find(lscheme) == disabled.end()))) {
+         !s_request_wrappers->disabled().count(lscheme))) {
       return it->second;
     }
   }
@@ -211,11 +199,13 @@ Wrapper* getWrapper(const String& scheme, bool warn /*= false */) {
 String getWrapperProtocol(const char* uri_string, int* pathIndex) {
   /* Special case for PHP4 Backward Compatibility */
   if (!strncasecmp(uri_string, "zlib:", sizeof("zlib:") - 1)) {
+    if (pathIndex != nullptr) *pathIndex = sizeof("zlib:") - 1;
     return s_compress_zlib;
   }
 
   // data wrapper can come with or without a double forward slash
   if (!strncasecmp(uri_string, "data:", sizeof("data:") - 1)) {
+    if (pathIndex != nullptr) *pathIndex = sizeof("data:") - 1;
     return s_data;
   }
 
@@ -231,6 +221,7 @@ String getWrapperProtocol(const char* uri_string, int* pathIndex) {
   }
 
   if (!colon) {
+    if (pathIndex != nullptr) *pathIndex = 0;
     return s_file;
   }
 
@@ -258,6 +249,10 @@ void RegisterCoreWrappers() {
   s_http_stream_wrapper.registerAs("https");
   s_data_stream_wrapper.registerAs("data");
   s_glob_stream_wrapper.registerAs("glob");
+}
+
+void setThreadLocalFileHandler(Stream::Wrapper* wrapper) {
+  tl_fileHandler = wrapper;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

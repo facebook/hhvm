@@ -1,2 +1,2 @@
 File "variadic_args7.php", line 3, characters 27-27:
-Expected ) (Parsing[1002])
+A variadic parameter ('...') may not be followed by a comma. (Parsing[1002])

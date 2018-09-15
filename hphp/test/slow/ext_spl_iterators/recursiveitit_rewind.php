@@ -15,5 +15,9 @@ class RecItIt extends RecursiveIteratorIterator {
 }
 
 
+
+<<__EntryPoint>>
+function main_recursiveitit_rewind() {
 $rii = new RecItIt(new RecursiveArrayIterator(array(1,2,3,4)));
 $rii->rewind();
+}

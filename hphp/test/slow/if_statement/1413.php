@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1413() {
 if (true) {
   function foo() {
  echo "foo\n";
@@ -9,4 +12,5 @@ if (true) {
   function bar() {
  echo "bar\n";
  }
+}
 }

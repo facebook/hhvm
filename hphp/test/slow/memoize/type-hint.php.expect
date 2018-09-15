@@ -1,0 +1,12 @@
+func1 called
+int(1)
+int(1)
+func1 called
+int(2)
+int(2)
+func2 called
+int(3)
+int(3)
+func2 called
+string(1) "z"
+string(1) "z"

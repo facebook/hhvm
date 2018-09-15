@@ -19,6 +19,7 @@
 
 #include "hphp/tools/tc-print/offline-trans-data.h"
 #include "hphp/tools/tc-print/repo-wrapper.h"
+#include "hphp/tools/tc-print/tc-print-logger.h"
 
 #include <folly/Format.h>
 
@@ -33,5 +34,6 @@ template<typename... Args>
 
 extern HPHP::jit::RepoWrapper* g_repo;
 extern HPHP::jit::OfflineTransData* g_transData;
+extern HPHP::TCPrintLogger* g_logger;
 
 #endif

@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1464() {
 $i = 1;
 if ($i == 1) {
   class foo {
@@ -24,3 +27,4 @@ if ($i == 1) {
 $t = new foo();
 $t->foo();
 $t->bar();
+}

@@ -1,7 +1,5 @@
 <?php
 
-print "Test begin\n";
-
 function obj_dump($o) {
   var_dump($o);
   print "Properties:\n";
@@ -20,8 +18,6 @@ function obj_dump($o) {
     print "\" => ".$v."\n";
   }
 }
-
-print "=== C ===\n";
 class C {
   const C = "C::C";
   private $np = C::C;
@@ -43,16 +39,6 @@ class C {
     $this->s++;
   }
 }
-$o = new C;
-print $o->nr."\n";
-print $o->r."\n";
-print $o->s."\n";
-obj_dump($o);
-$o->fC();
-$o->fC();
-obj_dump($o);
-
-print "=== D ===\n";
 class D extends C {
   const D = "D::D";
   private $np = D::D;
@@ -76,17 +62,6 @@ class D extends C {
     $this->r++;
   }
 }
-$o = new D;
-print $o->nr."\n";
-print $o->r."\n";
-print $o->s."\n";
-$o->fC();
-$o->fD();
-$o->fC();
-$o->fD();
-obj_dump($o);
-
-print "=== E ===\n";
 class E extends C {
   const E = "E::E";
   protected $np = E::E;
@@ -104,17 +79,6 @@ class E extends C {
     $this->r++;
   }
 }
-$o = new E;
-print $o->nr."\n";
-print $o->r."\n";
-print $o->s."\n";
-$o->fC();
-$o->fE();
-$o->fC();
-$o->fE();
-obj_dump($o);
-
-print "=== F ===\n";
 class F extends C {
   const F = "F::F";
   public $np = F::F;
@@ -132,21 +96,6 @@ class F extends C {
     $this->r++;
   }
 }
-$o = new F;
-print $o->np."\n";
-print $o->nq."\n";
-print $o->nr."\n";
-print $o->p."\n";
-print $o->q."\n";
-print $o->r."\n";
-print $o->s."\n";
-$o->fC();
-$o->fF();
-$o->fC();
-$o->fF();
-obj_dump($o);
-
-print "=== G ===\n";
 class G extends D {
   const G = "G::G";
   public $np = G::G;
@@ -164,23 +113,6 @@ class G extends D {
     $this->r++;
   }
 }
-$o = new G;
-print $o->np."\n";
-print $o->nq."\n";
-print $o->nr."\n";
-print $o->p."\n";
-print $o->q."\n";
-print $o->r."\n";
-print $o->s."\n";
-$o->fC();
-$o->fD();
-$o->fG();
-$o->fC();
-$o->fD();
-$o->fG();
-obj_dump($o);
-
-print "=== H ===\n";
 class H {
   const H = "H::H";
   public $np = H::H;
@@ -203,6 +135,107 @@ class H {
     obj_dump($d);
   }
 }
+class I {
+  const I = "I::I";
+  public $p = I::I;
+}
+class J extends I {
+  const J = null;
+  public $p = J::J;
+}
+class ThingerMaker {
+  private $refs;
+  public function __construct(&$refs) {
+    $this->refs =& $refs;
+  }
+  public function doAssignment() {
+    $this->refs = 'it worked';
+  }
+}
+
+class dumper {
+  public function __destruct() {
+    var_dump($this);
+  }
+}
+function foo() {
+  return new dumper;
+}
+function useReturn() {
+  $five = 5;
+  foo()->prop += $five + 5;
+}
+
+
+<<__EntryPoint>>
+function main_properties() {
+print "Test begin\n";
+
+print "=== C ===\n";
+$o = new C;
+print $o->nr."\n";
+print $o->r."\n";
+print $o->s."\n";
+obj_dump($o);
+$o->fC();
+$o->fC();
+obj_dump($o);
+
+print "=== D ===\n";
+$o = new D;
+print $o->nr."\n";
+print $o->r."\n";
+print $o->s."\n";
+$o->fC();
+$o->fD();
+$o->fC();
+$o->fD();
+obj_dump($o);
+
+print "=== E ===\n";
+$o = new E;
+print $o->nr."\n";
+print $o->r."\n";
+print $o->s."\n";
+$o->fC();
+$o->fE();
+$o->fC();
+$o->fE();
+obj_dump($o);
+
+print "=== F ===\n";
+$o = new F;
+print $o->np."\n";
+print $o->nq."\n";
+print $o->nr."\n";
+print $o->p."\n";
+print $o->q."\n";
+print $o->r."\n";
+print $o->s."\n";
+$o->fC();
+$o->fF();
+$o->fC();
+$o->fF();
+obj_dump($o);
+
+print "=== G ===\n";
+$o = new G;
+print $o->np."\n";
+print $o->nq."\n";
+print $o->nr."\n";
+print $o->p."\n";
+print $o->q."\n";
+print $o->r."\n";
+print $o->s."\n";
+$o->fC();
+$o->fD();
+$o->fG();
+$o->fC();
+$o->fD();
+$o->fG();
+obj_dump($o);
+
+print "=== H ===\n";
 $o = new H;
 print $o->np."\n";
 print $o->nq."\n";
@@ -214,27 +247,10 @@ $o->fH();
 obj_dump($o);
 
 print "=== J ===\n";
-class I {
-  const I = "I::I";
-  public $p = I::I;
-}
-class J extends I {
-  const J = null;
-  public $p = J::J;
-}
 $j = new J;
 obj_dump($j);
 
 print "=== Var properties ===\n";
-class ThingerMaker {
-  private $refs;
-  public function __construct(&$refs) {
-    $this->refs =& $refs;
-  }
-  public function doAssignment() {
-    $this->refs = 'it worked';
-  }
-}
 $str = "it didn't work";
 $d = new ThingerMaker($str);
 $d->doAssignment();
@@ -260,19 +276,7 @@ foreach ($o as $k => &$v) {
   }
 }
 obj_dump($o);
-
-class dumper {
-  public function __destruct() {
-    var_dump($this);
-  }
-}
-function foo() {
-  return new dumper;
-}
-function useReturn() {
-  $five = 5;
-  foo()->prop += $five + 5;
-}
 useReturn();
 
 print "Test end\n";
+}

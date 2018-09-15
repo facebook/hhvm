@@ -72,4 +72,8 @@ function main() {
   restarting_things();
 }
 
+
+<<__EntryPoint>>
+function main_strpbrk_short_and_long() {
 main();
+}

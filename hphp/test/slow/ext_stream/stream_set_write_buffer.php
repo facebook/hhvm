@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_stream_set_write_buffer() {
 $descriptorspec = array(
   0 => array("pipe", "r+"),
   1 => array("pipe", "w"),
@@ -15,3 +18,4 @@ var_dump(stream_set_write_buffer($fd, 0));
 var_dump(stream_set_write_buffer($fd, 4096));
 var_dump(trim(fgets($fd)));
 fclose($fd);
+}

@@ -7,4 +7,8 @@ function f() {
   list($e, $f) = yield 4;
 }
 
+
+<<__EntryPoint>>
+function main_yield_parens() {
 echo "OK\n";
+}

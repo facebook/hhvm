@@ -74,7 +74,7 @@ class Runner {
           // and we should be at tests now.
           $tn_matches = array();
           if (preg_match($this->framework->getTestNamePattern(), $line,
-                         $tn_matches) === 1) {
+                         &$tn_matches) === 1) {
             // If analyzeTest returns false, then we have most likely
             // hit a fatal. So we bail the run.
             if(!$this->analyzeTest($tn_matches[0])) {
@@ -250,10 +250,25 @@ class Runner {
     if (!$this->checkReadStream()) {
       return Statuses::TIMEOUT;
     }
-    $line = stream_get_line($this->pipes[1], 4096, PHP_EOL);
-    // No more data
-    if ($line === false || $line === null || strlen($line) === 4096) {
-      return null;
+    $line = "";
+
+    while (true) {
+      $part = stream_get_line($this->pipes[1], 4096, PHP_EOL);
+      if ($part === false || $part === null) {
+        if ($line === "") {
+          // We never read anything, so there is no line here.
+          return null;
+        } else {
+          // We've buffered some output already. Exit the loop and return
+          // that to the caller.
+          break;
+        }
+      } else {
+        $line = $line.$part;
+        if (strlen($part) < 4096) {
+          break;
+        }
+      }
     }
     $line = remove_color_codes($line);
     return $line;
@@ -350,7 +365,7 @@ class Runner {
 
       $this->error_information .= $line.PHP_EOL;
       if (preg_match($this->framework->getTestNamePattern(), $line,
-                     $matches) === 1) {
+                     &$matches) === 1) {
         $print_blanks = true;
         $this->error_information .= PHP_EOL.
                                     $this->getTestRunStr($matches[0],
@@ -424,9 +439,11 @@ class Runner {
     mkdir($temp_dir);
     $this->temp_dir = $temp_dir;
     $env['TMPDIR'] = $temp_dir;
+    $env['HHVM_NO_DEFAULT_CONFIGS'] = true;
+    $env['HHVM_CONFIG_FILE'] = $this->framework->getHHVMConfigFile();
 
     $this->process = proc_open($this->actual_test_command, $descriptorspec,
-                               $this->pipes, $this->framework->getTestPath(),
+                               &$this->pipes, $this->framework->getTestPath(),
                                $env);
     return is_resource($this->process);
   }
@@ -454,7 +471,7 @@ class Runner {
     $r = array($this->pipes[1]);
     $w = null;
     $e = null;
-    $s = stream_select($r, $w, $e, Options::$timeout);
+    $s = stream_select(&$r, &$w, &$e, Options::$timeout);
     // If stream_select returns 0, then there is no more data or we have
     // timed out. If it returns false, then something else bad happened.
     return !($s === 0 || $s === false);

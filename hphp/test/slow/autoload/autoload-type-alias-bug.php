@@ -2,6 +2,9 @@
 function autoload_miss($str1, $str2) {
   echo "Failure handler called: $str1 $str2\n";
 }
+
+<<__EntryPoint>>
+function main_autoload_type_alias_bug() {
 HH\autoload_set_paths(
   array(
     'class' => array(),
@@ -14,3 +17,4 @@ HH\autoload_set_paths(
 );
 include 'autoload-type-alias-bug-1.inc';
 echo "Done\n";
+}

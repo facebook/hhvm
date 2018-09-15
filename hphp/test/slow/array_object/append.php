@@ -7,6 +7,9 @@ class ExtendedArrayObject extends ArrayObject {
   }
 }
 
+
+<<__EntryPoint>>
+function main_append() {
 $arrayobj = new ArrayObject(array('first','second','third'));
 $arrayobj->append('fourth');
 $arrayobj->append(array('five', 'six'));
@@ -19,3 +22,4 @@ var_dump($arrayobj);
 $arrayobj = new ExtendedArrayObject(array('q2' => 'y'));
 $arrayobj->append('z');
 var_dump($arrayobj);
+}

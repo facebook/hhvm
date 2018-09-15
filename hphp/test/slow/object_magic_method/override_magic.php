@@ -16,5 +16,9 @@ class Y1 {
 }
 class X1 extends Y1 {}
 
+
+<<__EntryPoint>>
+function main_override_magic() {
 (new X)->z();
 (new X1)->z();
+}

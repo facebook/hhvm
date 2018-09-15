@@ -12,6 +12,10 @@ class B {
  $obj->test();
 }
 }
+
+<<__EntryPoint>>
+function main_724() {
 $obj = new AA();
  $b = new B();
  $b->foo($obj);
+}

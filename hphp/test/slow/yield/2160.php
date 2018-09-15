@@ -9,6 +9,10 @@ function foo($a) {
     var_dump('i:'.$x);
   }
 }
+
+<<__EntryPoint>>
+function main_2160() {
 foreach (foo(array(1)) as $x) {
   var_dump('o:'.$x);
+}
 }

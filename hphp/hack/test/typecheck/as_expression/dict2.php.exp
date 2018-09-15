@@ -1,0 +1,16 @@
+File "dict2.php", line 12, characters 31-34:
+The type dict expects 2 type parameter(s) (Typing[4101])
+File "dict2.php", line 13, characters 31-34:
+The type dict expects 2 type parameter(s) (Typing[4101])
+File "dict2.php", line 13, characters 16-34:
+Invalid argument (Typing[4110])
+  File "dict2.php", line 23, characters 28-30:
+  This is an int
+  File "hhi_lib__srcs/hackarray.hhi", line 11, characters 34-41:
+  It is incompatible with an array key (int/string)
+File "dict2.php", line 16, characters 16-40:
+Invalid argument (Typing[4110])
+  File "dict2.php", line 23, characters 28-30:
+  This is an int
+  File "hhi_lib__srcs/hackarray.hhi", line 11, characters 34-41:
+  It is incompatible with an array key (int/string)

@@ -52,7 +52,7 @@ struct AssocKeyAccessorImpl {
     if (isInt(elm)) {
       return Self::getInt(elm);
     }
-    assert(isStr(elm));
+    assertx(isStr(elm));
     return Variant{Self::getStr(elm)};
   }
 };
@@ -149,7 +149,7 @@ struct IntElmCompare {
                (string_natural_cmp(sLeft, lenLeft, sRight, lenRight, 1) > 0) :
                (string_natural_cmp(sLeft, lenLeft, sRight, lenRight, 1) < 0);
     }
-    assert(false);
+    assertx(false);
     return true;
   }
 };
@@ -198,7 +198,7 @@ struct StrElmCompare {
                (string_natural_cmp(sLeft, lenLeft, sRight, lenRight, 1) > 0) :
                (string_natural_cmp(sLeft, lenLeft, sRight, lenRight, 1) < 0);
     }
-    assert(false);
+    assertx(false);
     return true;
   }
 };
@@ -313,7 +313,7 @@ struct ElmCompare {
                (string_natural_cmp(sLeft, lenLeft, sRight, lenRight, 1) > 0) :
                (string_natural_cmp(sLeft, lenLeft, sRight, lenRight, 1) < 0);
     }
-    assert(false);
+    assertx(false);
     return true;
   }
 };
@@ -329,8 +329,8 @@ struct ElmUCompare {
 
   bool operator()(ElmT left, ElmT right) const {
     TypedValue args[2] = {
-      *acc.getValue(left).asCell(),
-      *acc.getValue(right).asCell()
+      *acc.getValue(left).toCell(),
+      *acc.getValue(right).toCell()
     };
     auto ret = Variant::attach(
       g_context->invokeFuncFew(*ctx, 2, args)

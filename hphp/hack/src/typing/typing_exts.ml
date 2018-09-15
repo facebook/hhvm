@@ -2,9 +2,8 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 (*
@@ -28,7 +27,7 @@ Ad-hoc rules for typing some common idioms
 
 *)
 
-open Core
+open Core_kernel
 open Typing_defs
 open Utils
 
@@ -43,8 +42,8 @@ let magic_method_name input =
     | Some c ->
         let uc = Char.uppercase c
         and lc = Char.lowercase c in
-          if lc == uc then Printf.sprintf "format_0x%02x" (Char.code lc)
-          else if c == uc then "format_upcase_" ^ String.make 1 lc
+          if phys_equal lc uc then Printf.sprintf "format_0x%02x" (Char.to_int lc)
+          else if phys_equal c uc then "format_upcase_" ^ String.make 1 lc
           else "format_" ^ String.make 1 lc
 
 let lookup_magic_type (env:Env.env) (class_:locl ty) (fname:string) :
@@ -87,9 +86,10 @@ let parse_printf_string env s pos (class_:locl ty) : Env.env * locl fun_params =
   and read_modifier env i class_ i0 : Env.env * locl fun_params =
     let fname = magic_method_name (get_char s i) in
     let snippet = String.sub s i0 ((min (i+1) (String.length s)) - i0) in
-    let add_reason = List.map
-      ~f:(function name, (why, ty) ->
-         name, (Reason.Rformat (pos,snippet,why), ty)) in
+    let add_reason = List.map ~f:begin fun p ->
+      let why, ty = p.fp_type in
+      { p with fp_type = Reason.Rformat (pos, snippet, why), ty }
+    end in
     match lookup_magic_type env class_ fname with
       | env, Some (good_args, None) ->
           let env, xs = read_text env (i+1) in
@@ -125,7 +125,7 @@ let rec const_string_of (env:Env.env) (e:Nast.expr) : Env.env * (Pos.t, string) 
     | Left p, _ -> Left p
     | _, Left p -> Left p in
     match e with
-    | _, Nast.String (_, s) -> env, Right s
+    | _, Nast.String s -> env, Right s
     (* It's an invariant that this is going to fail, but look for the best
      * evidence *)
     | p, Nast.String2 xs ->
@@ -141,19 +141,19 @@ let rec const_string_of (env:Env.env) (e:Nast.expr) : Env.env * (Pos.t, string) 
 let retype_magic_func (env:Env.env) (ft:locl fun_type) (el:Nast.expr list) : Env.env * locl fun_type =
   let rec f env param_types args : Env.env * locl fun_params option =
     (match param_types, args with
-      | [(_,    (_,   Toption (_, Tclass ((_, fs), [_       ]))))], [(_, Nast.Null)]
-        when SN.Classes.is_format_string fs -> env,None
-      | [(name, (why, Toption (_, Tclass ((_, fs), [type_arg]))))], (arg :: _)
-      | [(name, (why,             Tclass ((_, fs), [type_arg] )))], (arg :: _)
+      | [ { fp_type = (_,   Toption (_, Tclass ((_, fs), [_       ]))); _ }       ], [(_, Nast.Null)]
+        when SN.Classes.is_format_string fs -> env, None
+      | [({ fp_type = (why, Toption (_, Tclass ((_, fs), [type_arg]))); _ } as fp)], (arg :: _)
+      | [({ fp_type = (why,             Tclass ((_, fs), [type_arg] )); _ } as fp)], (arg :: _)
         when SN.Classes.is_format_string fs ->
           (match const_string_of env arg with
              |  env, Right str ->
                   let env, argl =
                     parse_printf_string env str (fst arg) type_arg in
-                  env, Some ((name, (why, Tprim Nast.Tstring)) :: argl)
+                  env, Some ({ fp with fp_type = (why, Tprim Nast.Tstring) } :: argl)
              |  env, Left pos ->
                   if Env.is_strict env
-                  then Errors.expected_literal_string pos;
+                  then Errors.expected_literal_format_string pos;
                   env, None)
       | (param::params), (_::args) ->
           (match f env params args with

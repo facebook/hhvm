@@ -2,9 +2,8 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
@@ -12,7 +11,7 @@
 (*****************************************************************************)
 (* Error module                                                              *)
 (*****************************************************************************)
-open Core
+open Hh_core
 open Utils
 
 let get_errorl_json el =
@@ -27,12 +26,6 @@ let get_errorl_json el =
                   "errors", Hh_json.JSON_Array errors_json;
                   "version", Hh_json.JSON_String Build_id.build_id_ohai;
                 ]
-
-let get_errorl_json_array errorl =
-  let el = Errors.get_sorted_error_list errorl in
-  let el = List.map ~f:Errors.to_absolute el in
-  let errors_json = List.map ~f:Errors.to_json el in
-  Hh_json.JSON_Array errors_json
 
 let print_errorl_json oc el =
   let res = get_errorl_json el in

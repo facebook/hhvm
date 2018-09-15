@@ -35,9 +35,10 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/compilation-flags.h"
+#include "hphp/util/functional.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/mutex.h"
-#include "hphp/util/functional.h"
+#include "hphp/util/smalllocks.h"
 
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/autoload-handler.h"
@@ -49,7 +50,9 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-variant.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -61,7 +64,6 @@
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/func-inline.h"
 #include "hphp/runtime/vm/hh-utils.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -98,13 +100,6 @@ const StaticString s_stderr("STDERR");
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Read typed data from an offset relative to a base address
- */
-template<class T>
-T& getDataRef(void* base, unsigned offset) {
-  return *reinterpret_cast<T*>(static_cast<char*>(base) + offset);
-}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -112,7 +107,7 @@ T& getDataRef(void* base, unsigned offset) {
  * We store 'detailed' line number information on a table on the side, because
  * in production modes for HHVM it's generally not useful (which keeps Unit
  * smaller in that case)---this stuff is only used for the debugger, where we
- * can afford the lookup here.  The normal Unit m_lineTable is capable of
+ * can afford the lookup here.  The normal Unit m_lineMap is capable of
  * producing enough line number information for things needed in production
  * modes (backtraces, warnings, etc).
  */
@@ -150,20 +145,15 @@ using LineTableStash = tbb::concurrent_hash_map<
 >;
 LineTableStash s_lineTables;
 
-/*
- * Since line numbers are only used for generating warnings and backtraces, the
- * set of Offset-to-Line# mappings needed is sparse.  To save memory we load
- * these mappings lazily from the repo and cache only the ones we actually use.
-*/
-
-using LineMap = boost::container::flat_map<Offset,int>;
-
-using LineInfoCache = tbb::concurrent_hash_map<
-  const Unit*,
-  LineMap,
-  pointer_hash<Unit>
->;
-LineInfoCache s_lineInfo;
+struct LineCacheEntry {
+  LineCacheEntry(const Unit* unit, LineTable&& table)
+    : unit{unit}
+    , table{std::move(table)}
+  {}
+  const Unit* unit;
+  LineTable table;
+};
+std::array<std::atomic<LineCacheEntry*>, 512> s_lineCache;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -190,19 +180,31 @@ Unit::Unit()
   : m_mergeOnly(false)
   , m_interpretOnly(false)
   , m_isHHFile(false)
+  , m_extended(false)
+  , m_serialized(false)
+  , m_ICE(false)
   , m_mainReturn(make_tv<KindOfUninit>())
 {}
 
 Unit::~Unit() {
   if (RuntimeOption::EvalEnableReverseDataMap &&
-      m_mergeState != MergeState::Unmerged) {
+      m_mergeState.load(std::memory_order_relaxed) != MergeState::Unmerged) {
     // Units are registered to data_map in Unit::initialMerge().
     data_map::deregister(this);
   }
 
   s_extendedLineInfo.erase(this);
   s_lineTables.erase(this);
-  s_lineInfo.erase(this);
+
+  auto const hash = pointer_hash<Unit>{}(this) % s_lineCache.size();
+  auto& entry = s_lineCache[hash];
+  if (auto lce = entry.load(std::memory_order_acquire)) {
+    if (lce->unit == this &&
+        entry.compare_exchange_strong(lce, nullptr,
+                                      std::memory_order_release)) {
+      Treadmill::enqueue([lce] { delete lce; });
+    }
+  }
 
   if (!RuntimeOption::RepoAuthoritative) {
     if (debug) {
@@ -210,10 +212,12 @@ Unit::~Unit() {
       memset(const_cast<unsigned char*>(m_bc), 0xff, m_bclen);
     }
     free(const_cast<unsigned char*>(m_bc));
+    g_hhbc_size->addValue(-int64_t(m_bclen));
   }
 
-  if (m_mergeInfo) {
-    for (auto* func : m_mergeInfo->mutableFuncs()) Func::destroy(func);
+  auto const mi = mergeInfo();
+  if (mi) {
+    for (auto const func : mi->mutableFuncs()) Func::destroy(func);
   }
 
   // ExecutionContext and the TC may retain references to Class'es, so
@@ -229,7 +233,7 @@ Unit::~Unit() {
     }
   }
 
-  free(m_mergeInfo);
+  free(mi);
 
   if (m_pseudoMainCache) {
     for (auto& kv : *m_pseudoMainCache) {
@@ -240,11 +244,11 @@ Unit::~Unit() {
 }
 
 void* Unit::operator new(size_t sz) {
-  return low_malloc_data(sz);
+  return low_malloc(sz);
 }
 
-void Unit::operator delete(void* p, size_t sz) {
-  low_free_data(p);
+void Unit::operator delete(void* p, size_t /*sz*/) {
+  low_free(p);
 }
 
 
@@ -407,70 +411,127 @@ static LineToOffsetRangeVecMap getLineToOffsetRangeVecMap(const Unit* unit) {
   return acc->second.lineToOffsetRange;
 }
 
-static LineTable loadLineTable(const Unit* unit) {
-  auto ret = LineTable{};
+static const LineTable& loadLineTable(const Unit* unit) {
   if (unit->repoID() == RepoIdInvalid) {
     LineTableStash::accessor acc;
     if (s_lineTables.find(acc, unit)) {
       return acc->second;
     }
-    return ret;
+    static LineTable empty;
+    return empty;
   }
 
-  Lock lock(g_classesMutex);
-  auto& urp = Repo::get().urp();
-  urp.getUnitLineTable(unit->repoID(), unit->sn(), ret);
+  auto const hash = pointer_hash<Unit>{}(unit) % s_lineCache.size();
+  auto& entry = s_lineCache[hash];
+  if (auto const p = entry.load(std::memory_order_acquire)) {
+    if (p->unit == unit) return p->table;
+  }
 
-  return ret;
+  // We already hold a lock on the unit in Unit::getLineNumber below,
+  // so nobody else is going to be reading the line table while we are
+  // (this is only an efficiency concern).
+  auto& urp = Repo::get().urp();
+  auto table = LineTable{};
+  urp.getUnitLineTable(unit->repoID(), unit->sn(), table);
+  auto const p = new LineCacheEntry(unit, std::move(table));
+  if (auto const old = entry.exchange(p, std::memory_order_release)) {
+    Treadmill::enqueue([old] { delete old; });
+  }
+  return p->table;
+}
+
+static LineInfo getLineInfo(const LineTable& table, Offset pc) {
+  auto const it =
+    std::upper_bound(begin(table), end(table), LineEntry{ pc, -1 });
+
+  auto const e = end(table);
+  if (it != e) {
+    auto const line = it->val();
+    if (line > 0) {
+      auto const pastOff = it->pastOffset();
+      auto const baseOff = it == begin(table) ?
+        pc : std::prev(it)->pastOffset();
+      assertx(baseOff <= pc && pc < pastOff);
+      return { { baseOff, pastOff }, line };
+    }
+  }
+  return LineInfo{ { pc, pc + 1 }, -1 };
 }
 
 int getLineNumber(const LineTable& table, Offset pc) {
   auto const key = LineEntry(pc, -1);
   auto it = std::upper_bound(begin(table), end(table), key);
   if (it != end(table)) {
-    assert(pc < it->pastOffset());
+    assertx(pc < it->pastOffset());
     return it->val();
   }
   return -1;
 }
 
 int Unit::getLineNumber(Offset pc) const {
-  {
-    LineInfoCache::const_accessor acc;
-    if (s_lineInfo.find(acc, this)) {
-      auto& lineMap = acc->second;
-      auto const it = lineMap.find(pc);
-      if (it != lineMap.end()) {
-        return it->second;
+  if (UNLIKELY(m_repoId == RepoIdInvalid)) {
+    auto const lineTable = [&] () -> const LineTable* {
+      LineTableStash::accessor acc;
+      if (s_lineTables.find(acc, this)) {
+        return &acc->second;
       }
-    }
+      return nullptr;
+    }();
+    if (lineTable) return HPHP::getLineNumber(*lineTable, pc);
   }
 
-  auto line = HPHP::getLineNumber(loadLineTable(this), pc);
+  auto findLine = [&] {
+    // lineMap is an atomically acquired bitwise copy of m_lineMap,
+    // with no destructor
+    auto lineMap(m_lineMap.get());
+    if (lineMap->empty()) return INT_MIN;
+    auto const it = std::upper_bound(
+      lineMap->begin(), lineMap->end(),
+      *lineMap->begin(), // Will be the first (ignored) param to our predicate
+      [&] (const LineInfo&, const LineInfo& elm) {
+        return pc < elm.first.past;
+      }
+    );
+    if (it != lineMap->end() && it->first.base <= pc) return it->second;
+    return INT_MIN;
+  };
 
-  {
-    LineInfoCache::accessor acc;
-    if (s_lineInfo.find(acc, this)) {
-      auto& lineMap = acc->second;
-      lineMap.insert(std::pair<Offset,int>(pc, line));
+  auto line = findLine();
+  if (line != INT_MIN) return line;
+
+  m_lineMap.lock_for_update();
+  try {
+    line = findLine();
+    if (line != INT_MIN) {
+      m_lineMap.unlock();
       return line;
     }
-  }
 
-  LineMap newLineMap{};
-  newLineMap.insert(std::pair<Offset,int>(pc, line));
-  LineInfoCache::accessor acc;
-  if (s_lineInfo.insert(acc, this)) {
-    acc->second = std::move(newLineMap);
+    auto const info = HPHP::getLineInfo(loadLineTable(this), pc);
+    auto copy = m_lineMap.copy();
+    auto const it = std::upper_bound(
+      copy.begin(), copy.end(),
+      info,
+      [&] (const LineInfo& a, const LineInfo& b) {
+        return a.first.base < b.first.past;
+      }
+    );
+    assertx(it == copy.end() || (it->first.past > pc && it->first.base > pc));
+    copy.insert(it, info);
+    auto old = m_lineMap.update_and_unlock(std::move(copy));
+    Treadmill::enqueue([old = std::move(old)] () mutable { old.clear(); });
+    return info.second;
+  } catch (...) {
+    m_lineMap.unlock();
+    throw;
   }
-  return line;
 }
 
 bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc) {
   SourceLocEntry key(pc, sLoc);
   auto it = std::upper_bound(table.begin(), table.end(), key);
   if (it != table.end()) {
-    assert(pc < it->pastOffset());
+    assertx(pc < it->pastOffset());
     sLoc = it->val();
     return true;
   }
@@ -483,21 +544,21 @@ bool Unit::getSourceLoc(Offset pc, SourceLoc& sLoc) const {
 }
 
 bool Unit::getOffsetRange(Offset pc, OffsetRange& range) const {
-  LineEntry key = LineEntry(pc, -1);
-  auto lineTable = loadLineTable(this);
-  auto it = std::upper_bound(lineTable.begin(), lineTable.end(), key);
-  if (it != lineTable.end()) {
-    assert(pc < it->pastOffset());
-    Offset base = it == lineTable.begin() ? 0 : (it-1)->pastOffset();
-    range.base = base;
-    range.past = it->pastOffset();
-    return true;
+  OffsetRangeVec offsets;
+  auto line = getLineNumber(pc);
+  getOffsetRanges(line, offsets);
+
+  for (auto offset: offsets) {
+    if (pc >= offset.base && pc < offset.past) {
+      range = offset;
+      return true;
+    }
   }
   return false;
 }
 
 bool Unit::getOffsetRanges(int line, OffsetRangeVec& offsets) const {
-  assert(offsets.size() == 0);
+  assertx(offsets.size() == 0);
   auto map = getLineToOffsetRangeVecMap(this);
   auto it = map.find(line);
   if (it == map.end()) return false;
@@ -512,11 +573,15 @@ int Unit::getNearestLineWithCode(int line) const {
 }
 
 const Func* Unit::getFunc(Offset pc) const {
-  FuncEntry key = FuncEntry(pc, nullptr);
-  auto it = std::upper_bound(m_funcTable.begin(), m_funcTable.end(), key);
-  if (it != m_funcTable.end()) {
-    assert(pc < it->pastOffset());
-    return it->val();
+  auto& table = getExtended()->m_funcTable;
+  auto it = std::upper_bound(table.begin(), table.end(), nullptr,
+                             [&] (const Func* a, const Func* b) {
+                               assertx(a == nullptr);
+                               return pc < b->past();
+                             });
+  if (it != table.end()) {
+    assertx(pc < (*it)->past());
+    return *it;
   }
   return nullptr;
 }
@@ -528,11 +593,19 @@ void stashLineTable(const Unit* unit, LineTable table) {
   }
 }
 
+void stashExtendedLineTable(const Unit* unit, SourceLocTable table) {
+  ExtendedLineInfoCache::accessor acc;
+  if (s_extendedLineInfo.insert(acc, unit)) {
+    acc->second.sourceLocTable = std::move(table);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Funcs and PreClasses.
 
 Func* Unit::getMain(Class* cls /* = nullptr */) const {
-  if (!cls) return *m_mergeInfo->funcBegin();
+  auto const mi = mergeInfo();
+  if (!cls) return *mi->funcBegin();
   Lock lock(g_classesMutex);
   if (!m_pseudoMainCache) {
     m_pseudoMainCache = new PseudoMainCacheMap;
@@ -541,11 +614,15 @@ Func* Unit::getMain(Class* cls /* = nullptr */) const {
   if (it != m_pseudoMainCache->end()) {
     return it->second;
   }
-  Func* f = (*m_mergeInfo->funcBegin())->clone(cls);
+  Func* f = (*mi->funcBegin())->clone(cls);
   f->setNewFuncId();
   f->setBaseCls(cls);
   (*m_pseudoMainCache)[cls] = f;
   return f;
+}
+
+Func* Unit::getCachedEntryPoint() const {
+  return m_cachedEntryPoint;
 }
 
 void Unit::renameFunc(const StringData* oldName, const StringData* newName) {
@@ -553,12 +630,12 @@ void Unit::renameFunc(const StringData* oldName, const StringData* newName) {
   // func with a given name; in practice this is okay because the units created
   // by create_function() will always have the function being renamed at the
   // beginning
-  assert(oldName && oldName->isStatic());
-  assert(newName && newName->isStatic());
+  assertx(oldName && oldName->isStatic());
+  assertx(newName && newName->isStatic());
 
-  for (auto& func : m_mergeInfo->hoistableFuncs()) {
+  for (auto& func : mergeInfo()->hoistableFuncs()) {
     auto const name = func->name();
-    assert(name);
+    assertx(name);
     if (name->same(oldName)) {
       func->rename(newName);
       break;
@@ -566,9 +643,39 @@ void Unit::renameFunc(const StringData* oldName, const StringData* newName) {
   }
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // Func lookup.
+
+void Unit::defFunc(Func* func, bool debugger) {
+  assertx(!func->isMethod());
+  auto const handle = func->funcHandle();
+
+  if (rds::isPersistentHandle(handle)) {
+    auto& funcAddr = rds::handleToRef<LowPtr<Func>,
+                                      rds::Mode::Persistent>(handle);
+    auto const oldFunc = funcAddr.get();
+    if (oldFunc == func) return;
+    if (UNLIKELY(oldFunc != nullptr)) {
+      assertx(oldFunc->isBuiltin() && !func->isBuiltin());
+      raise_error(Strings::REDECLARE_BUILTIN, func->name()->data());
+    }
+    funcAddr = func;
+  } else {
+    assertx(rds::isNormalHandle(handle));
+    auto& funcAddr = rds::handleToRef<LowPtr<Func>, rds::Mode::Normal>(handle);
+    if (!rds::isHandleInit(handle, rds::NormalTag{})) {
+      rds::initHandle(handle);
+    } else {
+      if (funcAddr.get() == func) return;
+      raise_error(Strings::FUNCTION_ALREADY_DEFINED, func->name()->data());
+    }
+    funcAddr = func;
+  }
+
+  if (func->isUnique()) func->getNamedEntity()->setUniqueFunc(func);
+
+  if (UNLIKELY(debugger)) phpDebuggerDefFuncHook(func);
+}
 
 Func* Unit::lookupFunc(const NamedEntity* ne) {
   return ne->getCachedFunc();
@@ -577,6 +684,16 @@ Func* Unit::lookupFunc(const NamedEntity* ne) {
 Func* Unit::lookupFunc(const StringData* name) {
   const NamedEntity* ne = NamedEntity::get(name);
   return ne->getCachedFunc();
+}
+
+Func* Unit::lookupBuiltin(const StringData* name) {
+  // Builtins are either persistent (the normal case), or defined at the
+  // beginning of every request (if JitEnableRenameFunction or interception is
+  // enabled). In either case, they're unique, so they should be present in the
+  // NamedEntity.
+  auto const ne = NamedEntity::get(name);
+  auto const f = ne->uniqueFunc();
+  return (f && f->isBuiltin()) ? f : nullptr;
 }
 
 Func* Unit::loadFunc(const NamedEntity* ne, const StringData* name) {
@@ -598,54 +715,49 @@ Func* Unit::loadFunc(const StringData* name) {
   return loadFunc(ne, name);
 }
 
-void Unit::loadFunc(const Func *func) {
-  assert(!func->isMethod());
+void Unit::bindFunc(Func *func) {
+  assertx(!func->isMethod());
   auto const ne = func->getNamedEntity();
-  auto const isPersistent =
-    (RuntimeOption::RepoAuthoritative || !SystemLib::s_inited) &&
-    (func->attrs() & AttrPersistent);
   ne->m_cachedFunc.bind(
-    isPersistent ? rds::Mode::Persistent
-                 : rds::Mode::Normal
+    [&] {
+      auto const isPersistent =
+        (RuntimeOption::RepoAuthoritative || !SystemLib::s_inited) &&
+        (func->attrs() & AttrPersistent);
+
+      auto const handle = isPersistent ?
+        rds::alloc<LowPtr<const Func>, rds::Mode::Persistent>().handle() :
+        rds::alloc<LowPtr<const Func>, rds::Mode::Normal>().handle();
+
+      if (func->isUnique()) ne->setUniqueFunc(func);
+      if (RuntimeOption::EvalPerfDataMap) {
+        rds::recordRds(
+          handle,
+          sizeof(LowPtr<const Func>),
+          "Func",
+          func->name()->slice()
+        );
+      }
+      return handle;
+    },
+    func
   );
-  const_cast<Func*>(func)->setFuncHandle(ne->m_cachedFunc);
-  if (RuntimeOption::EvalPerfDataMap) {
-    rds::recordRds(
-      ne->m_cachedFunc.handle(),
-      sizeof(void*),
-      "Func",
-      func->name()->toCppString()
-    );
-  }
-}
-
-Func* Unit::loadDynCallFunc(const StringData* name) {
-  if (auto f = loadFunc(name)) {
-    auto wrapper = f->dynCallWrapper();
-    return LIKELY(!wrapper) ? f : wrapper;
-  }
-  return nullptr;
-}
-
-Func* Unit::lookupDynCallFunc(const StringData* name) {
-  if (auto f = lookupFunc(name)) {
-    auto wrapper = f->dynCallWrapper();
-    return LIKELY(!wrapper) ? f : wrapper;
-  }
-  return nullptr;
+  func->setFuncHandle(ne->m_cachedFunc);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 struct FrameRestore {
-  explicit FrameRestore(const PreClass* preClass) {
+  explicit FrameRestore(const PreClass* preClass) :
+      FrameRestore(preClass->unit(), preClass->getOffset()) {}
+  explicit FrameRestore(const Unit* unit, Op op, Id id) :
+      FrameRestore(unit, (static_cast<size_t>(op) << 32) | id) {}
+  explicit NEVER_INLINE FrameRestore(const Unit* unit, size_t offsetOrOp) {
     ActRec* fp = vmfp();
-    PC pc = vmpc();
 
-    if (vmsp() && (!fp || fp->m_func->unit() != preClass->unit())) {
+    if (vmsp() && (!fp || fp->m_func->unit() != unit)) {
       m_top = vmsp();
       m_fp = fp;
-      m_pc = pc;
+      m_pc = vmpc();
 
       /*
         we can be called from Unit::merge, which hasnt yet setup
@@ -658,16 +770,32 @@ struct FrameRestore {
       ActRec &tmp = *vmStack().allocA();
       tmp.m_sfp = fp;
       tmp.m_savedRip = 0;
-      tmp.m_func = preClass->unit()->getMain(nullptr);
+      tmp.m_func = unit->getMain(nullptr);
       tmp.m_soff = !fp
         ? 0
-        : fp->m_func->unit()->offsetOf(pc) - fp->m_func->base();
+        : fp->m_func->unit()->offsetOf(m_pc) - fp->m_func->base();
       tmp.trashThis();
       tmp.m_varEnv = 0;
       tmp.initNumArgs(0);
       vmfp() = &tmp;
-      vmpc() = preClass->unit()->at(preClass->getOffset());
-      pushLocalsAndIterators(tmp.m_func);
+      auto const offset = [&] {
+        if (offsetOrOp < kInvalidOffset) return static_cast<Offset>(offsetOrOp);
+        auto const op = Op(offsetOrOp >> 32);
+        auto const id = Id(offsetOrOp & 0xffffffff);
+        auto pc = unit->at(tmp.m_func->base());
+        auto const past = unit->at(tmp.m_func->past());
+        while (pc < past) {
+          if (peek_op(pc) == op) {
+            auto tpc = pc;
+            decode_op(tpc);
+            if (decode_iva(tpc) == id) return unit->offsetOf(pc);
+          }
+          pc += instrLen(pc);
+        }
+        return tmp.m_func->base();
+      }();
+      vmpc() = unit->at(offset);
+      pushFrameSlots(tmp.m_func);
     } else {
       m_top = nullptr;
       m_fp = nullptr;
@@ -733,8 +861,8 @@ Class* Unit::defClass(const PreClass* preClass,
     return nullptr;
   }
 
-  // If there was already a class declared with DefClass, check if
-  // it's compatible.
+  // If there was already a class declared with DefClass, check if it's
+  // compatible.
   if (Class* cls = nameList->getCachedClass()) {
     if (cls->preClass() != preClass) {
       if (failIsFatal) {
@@ -769,7 +897,7 @@ Class* Unit::defClass(const PreClass* preClass,
         }
         return nullptr;
       }
-      assert(avail == Class::Avail::False);
+      assertx(avail == Class::Avail::False);
     }
 
     // Create a new class.
@@ -843,20 +971,34 @@ bool isPHP7ReservedType(const StringData* alias) {
 }
 }
 
-bool Unit::aliasClass(Class* original, const StringData* alias) {
+bool Unit::aliasClass(const StringData* original, const StringData* alias,
+                      bool autoload) {
   if (RuntimeOption::PHP7_ScalarTypes && isPHP7ReservedType(alias)) {
     raise_error("Fatal error: Cannot use '%s' as class name as it is reserved",
                 alias->data());
   }
+  auto const origClass =
+    autoload ? Unit::loadClass(original)
+             : Unit::lookupClass(original);
+  if (!origClass) {
+    raise_warning("Class %s not found", original->data());
+    return false;
+  }
+  if (origClass->isBuiltin()) {
+    raise_warning("First argument of class_alias() must be "
+                  "the name of a user defined class");
+    return false;
+  }
+
   auto const aliasNe = NamedEntity::get(alias);
-  aliasNe->m_cachedClass.bind();
+  aliasNe->m_cachedClass.bind(rds::Mode::Normal);
 
   auto const aliasClass = aliasNe->getCachedClass();
   if (aliasClass) {
     raise_warning("Cannot redeclare class %s", alias->data());
     return false;
   }
-  aliasNe->setCachedClass(original);
+  aliasNe->setCachedClass(origClass);
   return true;
 }
 
@@ -898,46 +1040,45 @@ bool Unit::classExists(const StringData* name, bool autoload, ClassKind kind) {
 ///////////////////////////////////////////////////////////////////////////////
 // Constant lookup.
 
-const Cell* Unit::lookupCns(const StringData* cnsName) {
+tv_rval Unit::lookupCns(const StringData* cnsName) {
   auto const handle = lookupCnsHandle(cnsName);
 
-  if (LIKELY(handle != rds::kInvalidHandle &&
+  if (LIKELY(rds::isHandleBound(handle) &&
              rds::isHandleInit(handle))) {
-    auto const& tv = rds::handleToRef<TypedValue>(handle);
+    auto const& tv = rds::handleToRef<TypedValue, rds::Mode::NonLocal>(handle);
 
-    if (LIKELY(rds::isNormalHandle(handle) ||
-               tv.m_type != KindOfUninit)) {
+    if (LIKELY(tv.m_type != KindOfUninit)) {
       assertx(cellIsPlausible(tv));
       return &tv;
     }
-    assertx(rds::isPersistentHandle(handle));
 
-    if (UNLIKELY(tv.m_data.pref != nullptr)) {
-      auto callback = reinterpret_cast<SystemConstantCallback>(tv.m_data.pref);
-      const Cell* tvRet = callback().asTypedValue();
-      assert(cellIsPlausible(*tvRet));
-      if (LIKELY(tvRet->m_type != KindOfUninit)) {
-        return tvRet;
-      }
+    assertx(tv.m_data.pref != nullptr);
+    auto const callback =
+      reinterpret_cast<Native::ConstantCallback>(tv.m_data.pref);
+    const Cell* tvRet = callback().asTypedValue();
+    assertx(cellIsPlausible(*tvRet));
+    if (LIKELY(tvRet->m_type != KindOfUninit)) {
+      return tvRet;
     }
+    return nullptr;
   }
   if (UNLIKELY(rds::s_constants().get() != nullptr)) {
-    return rds::s_constants()->nvGet(cnsName);
+    return rds::s_constants()->rval(cnsName);
   }
   return nullptr;
 }
 
 const Cell* Unit::lookupPersistentCns(const StringData* cnsName) {
   auto const handle = lookupCnsHandle(cnsName);
-  if (handle == rds::kInvalidHandle || !rds::isPersistentHandle(handle)) {
+  if (!rds::isHandleBound(handle) || !rds::isPersistentHandle(handle)) {
     return nullptr;
   }
-  auto const ret = &rds::handleToRef<TypedValue>(handle);
-  assert(cellIsPlausible(*ret));
+  auto const ret = rds::handleToPtr<Cell, rds::Mode::Persistent>(handle);
+  assertx(cellIsPlausible(*ret));
   return ret;
 }
 
-const TypedValue* Unit::loadCns(const StringData* cnsName) {
+tv_rval Unit::loadCns(const StringData* cnsName) {
   auto const tv = lookupCns(cnsName);
   if (LIKELY(tv != nullptr)) return tv;
 
@@ -955,7 +1096,7 @@ const TypedValue* Unit::loadCns(const StringData* cnsName) {
 static bool defCnsHelper(rds::Handle ch,
                          const TypedValue *value,
                          const StringData *cnsName) {
-  TypedValue* cns = &rds::handleToRef<TypedValue>(ch);
+  auto cns = rds::handleToPtr<TypedValue, rds::Mode::NonLocal>(ch);
 
   if (!rds::isHandleInit(ch)) {
     cns->m_type = KindOfUninit;
@@ -965,24 +1106,24 @@ static bool defCnsHelper(rds::Handle ch,
   if (UNLIKELY(cns->m_type != KindOfUninit ||
                cns->m_data.pref != nullptr)) {
     raise_notice(Strings::CONSTANT_ALREADY_DEFINED, cnsName->data());
-  } else if (UNLIKELY(!tvAsCVarRef(value).isAllowedAsConstantValue())) {
-    raise_warning(Strings::CONSTANTS_MUST_BE_SCALAR);
-  } else {
-    Variant v = tvAsCVarRef(value);
-    v.setEvalScalar();
-    cns->m_data = v.asTypedValue()->m_data;
-    cns->m_type = v.asTypedValue()->m_type;
-    if (rds::isNormalHandle(ch)) rds::initHandle(ch);
-    return true;
+    return false;
   }
-  return false;
+
+  if (UNLIKELY(!tvAsCVarRef(value).isAllowedAsConstantValue())) {
+    raise_warning(Strings::CONSTANTS_MUST_BE_SCALAR);
+    return false;
+  }
+
+  assertx(rds::isNormalHandle(ch));
+  cellDup(*value, *cns);
+  rds::initHandle(ch);
+  return true;
 }
 
-bool Unit::defCns(const StringData* cnsName, const TypedValue* value,
-                  bool persistent /* = false */) {
-  auto const handle = makeCnsHandle(cnsName, persistent);
+bool Unit::defCns(const StringData* cnsName, const TypedValue* value) {
+  auto const handle = makeCnsHandle(cnsName);
 
-  if (UNLIKELY(handle == rds::kInvalidHandle)) {
+  if (UNLIKELY(!rds::isHandleBound(handle))) {
     if (UNLIKELY(!rds::s_constants().get())) {
       /*
        * This only happens when we call define on a non
@@ -992,7 +1133,7 @@ bool Unit::defCns(const StringData* cnsName, const TypedValue* value,
       rds::s_constants() =
         Array::attach(PackedArray::MakeReserve(PackedArray::SmallSize));
     }
-    auto const existed = !!rds::s_constants()->nvGet(cnsName);
+    auto const existed = !!rds::s_constants()->rval(cnsName);
     if (!existed) {
       rds::s_constants().set(StrNR(cnsName),
         tvAsCVarRef(value), true /* isKey */);
@@ -1004,8 +1145,8 @@ bool Unit::defCns(const StringData* cnsName, const TypedValue* value,
   return defCnsHelper(handle, value, cnsName);
 }
 
-bool Unit::defSystemConstantCallback(const StringData* cnsName,
-                                     SystemConstantCallback callback) {
+bool Unit::defNativeConstantCallback(const StringData* cnsName,
+                                     Cell value) {
   static const bool kServer = RuntimeOption::ServerExecutionMode();
   // Zend doesn't define the STD* streams in server mode so we don't either
   if (UNLIKELY(kServer &&
@@ -1014,27 +1155,20 @@ bool Unit::defSystemConstantCallback(const StringData* cnsName,
         s_stderr.equal(cnsName)))) {
     return false;
   }
-  auto const handle = makeCnsHandle(cnsName, true);
-  assert(handle != rds::kInvalidHandle);
-  TypedValue* cns = &rds::handleToRef<TypedValue>(handle);
-  if (!rds::isHandleInit(handle)) {
-    cns->m_type = KindOfUninit;
-    cns->m_data.pref = nullptr;
-    rds::initHandle(handle);
-  }
-  assert(cns->m_type == KindOfUninit);
-  cns->m_data.pref = reinterpret_cast<RefData*>(callback);
+  bindPersistentCns(cnsName, value);
   return true;
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Type aliases.
 
 namespace {
 
-TypeAliasReq typeAliasFromClass(const TypeAlias* thisType, Class *klass) {
+TypeAliasReq typeAliasFromClass(Unit* unit, const TypeAlias* thisType,
+                                Class *klass) {
+  assertx(unit);
   TypeAliasReq req;
+  req.unit = unit;
   req.name = thisType->name;
   req.nullable = thisType->nullable;
   if (isEnum(klass)) {
@@ -1042,17 +1176,19 @@ TypeAliasReq typeAliasFromClass(const TypeAlias* thisType, Class *klass) {
     if (auto const enumType = klass->enumBaseTy()) {
       req.type = dataTypeToAnnotType(*enumType);
     } else {
-      req.type = AnnotType::Mixed;
+      req.type = AnnotType::ArrayKey;
     }
   } else {
     req.type = AnnotType::Object;
     req.klass = klass;
   }
-  req.typeStructure = Array(thisType->typeStructure);
+  req.userAttrs = thisType->userAttrs;
+  assertx(thisType->typeStructure.isDictOrDArray());
+  req.typeStructure = thisType->typeStructure;
   return req;
 }
 
-TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
+TypeAliasReq resolveTypeAlias(Unit* unit, const TypeAlias* thisType) {
   /*
    * If this type alias is a KindOfObject and the name on the right
    * hand side was another type alias, we will bind the name to the
@@ -1064,10 +1200,8 @@ TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
    * If the right hand side was a class, we need to autoload and
    * ensure it exists at this point.
    */
-  if (thisType->type != AnnotType::Object &&
-      thisType->type != AnnotType::Self &&
-      thisType->type != AnnotType::Parent) {
-    return TypeAliasReq::From(*thisType);
+  if (thisType->type != AnnotType::Object) {
+    return TypeAliasReq::From(unit, *thisType);
   }
 
   /*
@@ -1088,48 +1222,58 @@ TypeAliasReq resolveTypeAlias(const TypeAlias* thisType) {
   auto targetNE = NamedEntity::get(typeName);
 
   if (auto klass = Unit::lookupClass(targetNE)) {
-    return typeAliasFromClass(thisType, klass);
+    return typeAliasFromClass(unit, thisType, klass);
   }
 
   if (auto targetTd = targetNE->getCachedTypeAlias()) {
-    return TypeAliasReq::From(*targetTd, *thisType);
+    return TypeAliasReq::From(unit, *targetTd, *thisType);
   }
 
   if (AutoloadHandler::s_instance->autoloadClassOrType(
         StrNR(const_cast<StringData*>(typeName))
       )) {
     if (auto klass = Unit::lookupClass(targetNE)) {
-      return typeAliasFromClass(thisType, klass);
+      return typeAliasFromClass(unit, thisType, klass);
     }
     if (auto targetTd = targetNE->getCachedTypeAlias()) {
-      return TypeAliasReq::From(*targetTd, *thisType);
+      return TypeAliasReq::From(unit, *targetTd, *thisType);
     }
   }
 
-  return TypeAliasReq::Invalid();
+  return TypeAliasReq::Invalid(unit);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-const TypeAliasReq* Unit::loadTypeAlias(const StringData* name) {
+const TypeAliasReq* Unit::lookupTypeAlias(const StringData* name,
+                                          bool* persistent) {
   auto ne = NamedEntity::get(name);
-  if (auto target = ne->getCachedTypeAlias()) {
-    return target;
-  }
-  if (AutoloadHandler::s_instance->autoloadClassOrType(
-        StrNR(const_cast<StringData*>(name))
-      )) {
-    if (auto target = ne->getCachedTypeAlias()) {
-      return target;
+  auto target = ne->getCachedTypeAlias();
+  if (persistent) *persistent = ne->isPersistentTypeAlias();
+  return target;
+}
+
+const TypeAliasReq* Unit::loadTypeAlias(const StringData* name,
+                                        bool* persistent) {
+  auto ne = NamedEntity::get(name);
+  auto target = ne->getCachedTypeAlias();
+  if (!target) {
+    if (AutoloadHandler::s_instance->autoloadClassOrType(
+          StrNR(const_cast<StringData*>(name))
+        )) {
+      target = ne->getCachedTypeAlias();
+    } else {
+      return nullptr;
     }
   }
 
-  return nullptr;
+  if (persistent) *persistent = ne->isPersistentTypeAlias();
+  return target;
 }
 
-void Unit::defTypeAlias(Id id) {
-  assert(id < m_typeAliases.size());
+bool Unit::defTypeAlias(Id id) {
+  assertx(id < m_typeAliases.size());
   auto thisType = &m_typeAliases[id];
   auto nameList = NamedEntity::get(thisType->name);
   const StringData* typeName = thisType->value;
@@ -1140,52 +1284,59 @@ void Unit::defTypeAlias(Id id) {
    */
   if (auto current = nameList->getCachedTypeAlias()) {
     auto raiseIncompatible = [&] {
+      FrameRestore _(this, Op::DefTypeAlias, id);
       raise_error("The type %s is already defined to an incompatible type",
                   thisType->name->data());
     };
     if (nameList->isPersistentTypeAlias()) {
       // We may have cached the fully resolved type in a previous request.
-      if (resolveTypeAlias(thisType) != *current) {
+      if (resolveTypeAlias(this, thisType) != *current) {
         raiseIncompatible();
       }
-      return;
+      return true;
     }
     if (!current->compat(*thisType)) {
       raiseIncompatible();
     }
-    return;
+    return false;
   }
 
   // There might also be a class with this name already.
   if (nameList->getCachedClass()) {
+    FrameRestore _(this, Op::DefTypeAlias, id);
     raise_error("The name %s is already defined as a class",
                 thisType->name->data());
-    return;
+    not_reached();
   }
 
-  auto resolved = resolveTypeAlias(thisType);
+  auto resolved = resolveTypeAlias(this, thisType);
   if (resolved.invalid) {
+    FrameRestore _(this, Op::DefTypeAlias, id);
     raise_error("Unknown type or class %s", typeName->data());
-    return;
+    not_reached();
   }
 
-  if (!nameList->m_cachedTypeAlias.bound()) {
-    auto rdsMode = [&] {
-      if (!(thisType->attrs & AttrPersistent)) return rds::Mode::Normal;
-      if (resolved.klass && !classHasPersistentRDS(resolved.klass)) {
-        return rds::Mode::Normal;
-      }
-      return rds::Mode::Persistent;
-    }();
-    nameList->m_cachedTypeAlias.bind(rdsMode);
-    rds::recordRds(nameList->m_cachedTypeAlias.handle(),
-                   sizeof(TypeAliasReq),
-                   "TypeAlias", typeName->data());
-  }
+  nameList->m_cachedTypeAlias.bind(
+    [thisType, &resolved] {
+      auto const persistent = (thisType->attrs & AttrPersistent) &&
+        (!resolved.klass || classHasPersistentRDS(resolved.klass));
+
+      auto const handle = persistent ?
+        rds::alloc<TypeAliasReq, rds::Mode::Persistent>().handle() :
+        rds::alloc<TypeAliasReq, rds::Mode::Normal>().handle();
+
+      rds::recordRds(handle,
+                     sizeof(TypeAliasReq),
+                     "TypeAlias", thisType->value->slice());
+      return handle;
+    },
+    resolved
+  );
+  if (nameList->m_cachedTypeAlias.isPersistent()) return true;
 
   nameList->setCachedTypeAlias(resolved);
+  return false;
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Merge.
@@ -1195,16 +1346,36 @@ namespace {
 
 SimpleMutex unitInitLock(false /* reentrant */, RankUnitInit);
 
-void mergeCns(TypedValue& tv, TypedValue *value, StringData *name) {
-  if (LIKELY(tv.m_type == KindOfUninit)) {
-    tv = *value;
-    return;
-  }
-  raise_notice(Strings::CONSTANT_ALREADY_DEFINED, name->data());
-}
-
 void setGlobal(StringData* name, TypedValue *value) {
   g_context->m_globalVarEnv->set(name, value);
+}
+
+/*
+ * count the number of the EntryPoint in a file, and return a iterator
+ * 1) there is not EntryPoint, return the begin()
+ * 2) there are multiple EntryPoints, return the end()
+ * 3) there is exact one EntryPoint, return that iterator points to the location
+ */
+Func* findEntryPoint(const Unit* unit) {
+  auto it = unit->funcs().begin();
+  auto retIt = it;
+  bool found = false;
+  auto EntryPointTag = makeStaticString("__EntryPoint");
+  for (; it != unit->funcs().end(); it++) {
+    if ((*it)->userAttributes().count(EntryPointTag)) {
+      if (found) {
+        raise_fatal_error(
+          folly::sformat("There are multiple entryPoint in {}",
+                         unit->filepath()->data()).c_str()
+        );
+      }
+      found = true;
+      retIt = it;
+    }
+  }
+  if (found)  return *retIt;
+
+  return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1212,7 +1383,11 @@ void setGlobal(StringData* name, TypedValue *value) {
 
 void Unit::initialMerge() {
   unitInitLock.assertOwnedBySelf();
-  if (m_mergeState != MergeState::Unmerged) return;
+  if (m_mergeState.load(std::memory_order_relaxed) != MergeState::Unmerged) {
+    return;
+  }
+
+  this->m_cachedEntryPoint = findEntryPoint(this);
 
   if (RuntimeOption::EvalEnableReverseDataMap) {
     data_map::register_start(this);
@@ -1220,14 +1395,15 @@ void Unit::initialMerge() {
 
   int state = 0;
   bool needsCompact = false;
-  m_mergeState = MergeState::Merging;
+  m_mergeState.store(MergeState::Merging, std::memory_order_relaxed);
 
+  auto const mi = m_mergeInfo.load(std::memory_order_relaxed);
   bool allFuncsUnique = RuntimeOption::RepoAuthoritative;
-  for (auto& func : m_mergeInfo->nonMainFuncs()) {
+  for (auto& func : mi->nonMainFuncs()) {
     if (allFuncsUnique) {
       allFuncsUnique = (func->attrs() & AttrUnique);
     }
-    loadFunc(func);
+    bindFunc(func);
     if (rds::isPersistentHandle(func->funcHandle())) {
       needsCompact = true;
     }
@@ -1253,20 +1429,20 @@ void Unit::initialMerge() {
      * the pointer will be followed by a TypedValue representing
      * the value being defined/assigned.
      */
-    int ix = m_mergeInfo->m_firstHoistablePreClass;
-    int end = m_mergeInfo->m_firstMergeablePreClass;
+    int ix = mi->m_firstHoistablePreClass;
+    int end = mi->m_firstMergeablePreClass;
     while (ix < end) {
-      PreClass* pre = (PreClass*)m_mergeInfo->mergeableObj(ix++);
+      PreClass* pre = (PreClass*)mi->mergeableObj(ix++);
       if (pre->attrs() & AttrUnique) {
         needsCompact = true;
       }
     }
 
     if (isMergeOnly()) {
-      ix = m_mergeInfo->m_firstMergeablePreClass;
-      end = m_mergeInfo->m_mergeablesSize;
+      ix = mi->m_firstMergeablePreClass;
+      end = mi->m_mergeablesSize;
       while (ix < end) {
-        void *obj = m_mergeInfo->mergeableObj(ix);
+        void *obj = mi->mergeableObj(ix);
         auto k = MergeKind(uintptr_t(obj) & 7);
         switch (k) {
           case MergeKind::UniqueDefinedClass:
@@ -1275,7 +1451,6 @@ void Unit::initialMerge() {
           case MergeKind::TypeAlias: {
             auto const aliasId = static_cast<Id>(intptr_t(obj)) >> 3;
             if (m_typeAliases[aliasId].attrs & AttrPersistent) {
-              defTypeAlias(aliasId);
               needsCompact = true;
             }
             break;
@@ -1290,26 +1465,24 @@ void Unit::initialMerge() {
             auto const unit = lookupUnit(
               SourceRootInfo::RelativeToPhpRoot(StrNR(s)).get(),
               "",
-              nullptr /* initial_opt */
+              nullptr /* initial_opt */,
+              Native::s_noNativeFuncs
             );
             unit->initialMerge();
-            m_mergeInfo->mergeableObj(ix) = (void*)((char*)unit + (int)k);
+            mi->mergeableObj(ix) = (void*)((char*)unit + (int)k);
             break;
           }
           case MergeKind::PersistentDefine:
             needsCompact = true;
           case MergeKind::Define: {
-            StringData* s = (StringData*)((char*)obj - (int)k);
-            auto* v = (TypedValueAux*) m_mergeInfo->mergeableData(ix + 1);
+            auto const s = (StringData*)((char*)obj - (int)k);
+            auto const v = (TypedValueAux*)mi->mergeableData(ix + 1);
+            if (k == MergeKind::PersistentDefine && bindPersistentCns(s, *v)) {
+              Stats::inc(Stats::UnitMerge_mergeable);
+              Stats::inc(Stats::UnitMerge_mergeable_persistent_define);
+            }
             ix += sizeof(*v) / sizeof(void*);
-
-            auto const persistent = (k == MergeKind::PersistentDefine);
-
-            auto const handle = makeCnsHandle(s, persistent);
-            v->rdsHandle() = handle;
-
-            auto& tv = rds::handleToRef<TypedValue>(handle);
-            if (persistent) mergeCns(tv, v, s);
+            v->rdsHandle() = makeCnsHandle(s);
             break;
           }
           case MergeKind::Global:
@@ -1323,34 +1496,36 @@ void Unit::initialMerge() {
     if (needsCompact) state |= MergeState::NeedsCompact;
   }
 
-  m_mergeState = MergeState::Merged | state;
+  m_mergeState.store(MergeState::Merged | state, std::memory_order_relaxed);
 }
 
 void Unit::merge() {
-  if (UNLIKELY(!(m_mergeState & MergeState::Merged))) {
+  if (UNLIKELY(!(m_mergeState.load(std::memory_order_relaxed) &
+                 MergeState::Merged))) {
     SimpleLock lock(unitInitLock);
     initialMerge();
   }
 
   if (UNLIKELY(isDebuggerAttached())) {
-    mergeImpl<true>(rds::tl_base, m_mergeInfo);
+    mergeImpl<true>(mergeInfo());
   } else {
-    mergeImpl<false>(rds::tl_base, m_mergeInfo);
+    mergeImpl<false>(mergeInfo());
   }
 }
 
 void* Unit::replaceUnit() const {
-  if (m_mergeState & MergeState::Empty) return nullptr;
-  if (isMergeOnly() &&
-      m_mergeInfo->m_mergeablesSize == m_mergeInfo->m_firstHoistableFunc + 1) {
+  if (isEmpty()) return nullptr;
+  if (!isMergeOnly()) return const_cast<Unit*>(this);
+  auto const mi = mergeInfo();
+  if (mi->m_mergeablesSize == mi->m_firstHoistableFunc + 1) {
     void* obj =
-      m_mergeInfo->mergeableObj(m_mergeInfo->m_firstHoistableFunc);
-    if (m_mergeInfo->m_firstMergeablePreClass ==
-        m_mergeInfo->m_firstHoistableFunc) {
+      mi->mergeableObj(mi->m_firstHoistableFunc);
+    if (mi->m_firstMergeablePreClass ==
+        mi->m_firstHoistableFunc) {
       auto k = MergeKind(uintptr_t(obj) & 7);
       if (k != MergeKind::Class) return obj;
-    } else if (m_mergeInfo->m_firstHoistablePreClass ==
-               m_mergeInfo->m_firstHoistableFunc) {
+    } else if (mi->m_firstHoistablePreClass ==
+               mi->m_firstHoistableFunc) {
       if (uintptr_t(obj) & 1) {
         return (char*)obj - 1 + (int)MergeKind::UniqueDefinedClass;
       }
@@ -1391,12 +1566,12 @@ static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
   end = in->m_firstMergeablePreClass;
   for (; ix < end; ++ix) {
     void* obj = in->mergeableObj(ix);
-    assert((uintptr_t(obj) & 1) == 0);
+    assertx((uintptr_t(obj) & 1) == 0);
     PreClass* pre = (PreClass*)obj;
     if (pre->attrs() & AttrUnique) {
       Class* cls = pre->namedEntity()->clsList();
-      assert(cls && !cls->m_nextClass);
-      assert(cls->preClass() == pre);
+      assertx(cls && !cls->m_nextClass);
+      assertx(cls->preClass() == pre);
       if (rds::isPersistentHandle(cls->classHandle())) {
         delta++;
       } else if (out) {
@@ -1420,8 +1595,8 @@ static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
         PreClass* pre = (PreClass*)obj;
         if (pre->attrs() & AttrUnique) {
           Class* cls = pre->namedEntity()->clsList();
-          assert(cls && !cls->m_nextClass);
-          assert(cls->preClass() == pre);
+          assertx(cls && !cls->m_nextClass);
+          assertx(cls->preClass() == pre);
           if (rds::isPersistentHandle(cls->classHandle())) {
             delta++;
           } else if (out) {
@@ -1445,11 +1620,17 @@ static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
       case MergeKind::UniqueDefinedClass:
         not_reached();
 
-      case MergeKind::PersistentDefine:
-        delta += 1 + sizeof(TypedValueAux) / sizeof(void*);
-        ix += sizeof(TypedValueAux) / sizeof(void*);
-        break;
-
+      case MergeKind::PersistentDefine: {
+        auto const v = (TypedValueAux*)in->mergeableData(ix);
+        if (rds::isPersistentHandle(v->rdsHandle())) {
+          delta += 1 + sizeof(TypedValueAux) / sizeof(void*);
+          ix += sizeof(TypedValueAux) / sizeof(void*);
+          break;
+        }
+        obj = (char*)obj - (int)MergeKind::PersistentDefine +
+          (int)MergeKind::Define;
+        // fall through
+      }
       case MergeKind::Define:
       case MergeKind::Global:
         if (out) {
@@ -1488,28 +1669,35 @@ static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
 }
 
 template <bool debugger>
-void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
-  assert(m_mergeState & MergeState::Merged);
-
+void Unit::mergeImpl(MergeInfo* mi) {
+  assertx(m_mergeState.load(std::memory_order_relaxed) & MergeState::Merged);
   autoTypecheck(this);
 
   Func** it = mi->funcHoistableBegin();
   Func** fend = mi->funcEnd();
   if (it != fend) {
-    if (LIKELY((m_mergeState & MergeState::UniqueFuncs) != 0)) {
+    if (LIKELY((m_mergeState.load(std::memory_order_relaxed) &
+                MergeState::UniqueFuncs) != 0)) {
       do {
         Func* func = *it;
-        assert(func->top());
+        assertx(func->top());
+        assertx(func->isUnique());
         auto const handle = func->funcHandle();
-        getDataRef<LowPtr<Func>>(tcbase, handle) = func;
-        if (rds::isNormalHandle(handle)) rds::initHandle(handle);
+        if (rds::isNormalHandle(handle)) {
+          rds::handleToRef<LowPtr<Func>, rds::Mode::Normal>(handle) = func;
+          rds::initHandle(handle);
+        } else {
+          assertx(rds::isPersistentHandle(handle));
+          rds::handleToRef<LowPtr<Func>, rds::Mode::Persistent>(handle) = func;
+        }
+        func->getNamedEntity()->setUniqueFunc(func);
         if (debugger) phpDebuggerDefFuncHook(func);
       } while (++it != fend);
     } else {
       do {
         Func* func = *it;
-        assert(func->top());
-        setCachedFunc(func, debugger);
+        assertx(func->top());
+        defFunc(func, debugger);
       } while (++it != fend);
     }
   }
@@ -1528,34 +1716,39 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
       if (LIKELY(uintptr_t(pre) & 1)) {
         Stats::inc(Stats::UnitMerge_hoistable);
         Class* cls = (Class*)(uintptr_t(pre) & ~1);
+        auto const handle = cls->classHandle();
+        auto const handle_persistent = rds::isPersistentHandle(handle);
         if (cls->isPersistent()) {
           Stats::inc(Stats::UnitMerge_hoistable_persistent);
         }
-        if (Stats::enabled() &&
-            rds::isPersistentHandle(cls->classHandle())) {
+        if (Stats::enabled() && handle_persistent) {
           Stats::inc(Stats::UnitMerge_hoistable_persistent_cache);
         }
         if (Class* parent = cls->parent()) {
+          auto const parent_handle = parent->classHandle();
+          auto const parent_handle_persistent =
+            rds::isPersistentHandle(parent_handle);
           if (parent->isPersistent()) {
             Stats::inc(Stats::UnitMerge_hoistable_persistent_parent);
           }
-          if (Stats::enabled() &&
-              rds::isPersistentHandle(parent->classHandle())) {
+          if (Stats::enabled() && parent_handle_persistent) {
             Stats::inc(Stats::UnitMerge_hoistable_persistent_parent_cache);
           }
-
-          auto const parent_handle = parent->classHandle();
           auto const parent_cls_present =
             rds::isHandleInit(parent_handle) &&
-            getDataRef<LowPtr<Class>>(tcbase, parent_handle);
+            rds::handleToRef<LowPtr<Class>, rds::Mode::NonLocal>(parent_handle);
           if (UNLIKELY(!parent_cls_present)) {
             redoHoistable = true;
             continue;
           }
         }
-        auto const handle = cls->classHandle();
-        getDataRef<LowPtr<Class>>(tcbase, handle) = cls;
-        if (rds::isNormalHandle(handle)) rds::initHandle(handle);
+        if (handle_persistent) {
+          rds::handleToRef<LowPtr<Class>, rds::Mode::Persistent>(handle) = cls;
+        } else {
+          assertx(rds::isNormalHandle(handle));
+          rds::handleToRef<LowPtr<Class>, rds::Mode::Normal>(handle) = cls;
+          rds::initHandle(handle);
+        }
         if (debugger) phpDebuggerDefClassHook(cls);
       } else {
         if (UNLIKELY(!defClass(pre, false))) {
@@ -1620,21 +1813,28 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
           Stats::inc(Stats::UnitMerge_mergeable_unique);
           Class* other = nullptr;
           Class* cls = (Class*)((char*)obj - (int)k);
+          auto const handle = cls->classHandle();
+          auto const handle_persistent = rds::isPersistentHandle(handle);
           if (cls->isPersistent()) {
             Stats::inc(Stats::UnitMerge_mergeable_unique_persistent);
           }
-          if (Stats::enabled() &&
-              rds::isPersistentHandle(cls->classHandle())) {
+          if (Stats::enabled() && handle_persistent) {
             Stats::inc(Stats::UnitMerge_mergeable_unique_persistent_cache);
           }
           Class::Avail avail = cls->avail(other, true);
           if (UNLIKELY(avail == Class::Avail::Fail)) {
             raise_error("unknown class %s", other->name()->data());
           }
-          assert(avail == Class::Avail::True);
-          auto const handle = cls->classHandle();
-          getDataRef<LowPtr<Class>>(tcbase, handle) = cls;
-          if (rds::isNormalHandle(handle)) rds::initHandle(handle);
+          assertx(avail == Class::Avail::True);
+          if (handle_persistent) {
+            rds::handleToRef<LowPtr<Class>,
+                             rds::Mode::Persistent>(handle) = cls;
+          } else {
+            assertx(rds::isNormalHandle(handle));
+            rds::handleToRef<LowPtr<Class>,
+                             rds::Mode::Normal>(handle) = cls;
+            rds::initHandle(handle);
+          }
           if (debugger) phpDebuggerDefClassHook(cls);
           obj = mi->mergeableObj(++ix);
           k = MergeKind(uintptr_t(obj) & 7);
@@ -1642,14 +1842,20 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
         continue;
 
       case MergeKind::PersistentDefine:
-        // will be removed by compactMergeInfo
-        // but could be hit by other threads before
-        // that happens
+        // will be removed by compactMergeInfo but will be hit at
+        // least once before that happens.
         do {
+          auto const v = (TypedValueAux*)mi->mergeableData(ix + 1);
+          if (!rds::isPersistentHandle(v->rdsHandle())) {
+            obj = (char*)obj - (int)MergeKind::PersistentDefine +
+              (int)MergeKind::Define;
+            k = MergeKind::Define;
+            break;
+          }
           ix += 1 + sizeof(TypedValueAux) / sizeof(void*);
           obj = mi->mergeableObj(ix);
           k = MergeKind(uintptr_t(obj) & 7);
-        } while (k == MergeKind::Define);
+        } while (k == MergeKind::PersistentDefine);
         continue;
 
       case MergeKind::Define:
@@ -1657,15 +1863,18 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
           Stats::inc(Stats::UnitMerge_mergeable);
           Stats::inc(Stats::UnitMerge_mergeable_define);
 
-          StringData* name = (StringData*)((char*)obj - (int)k);
-          auto* v = (TypedValueAux*)mi->mergeableData(ix + 1);
-          assert(v->m_type != KindOfUninit);
+          auto const name = (StringData*)((char*)obj - (int)k);
+          auto const v = (TypedValueAux*)mi->mergeableData(ix + 1);
+          assertx(v->m_type != KindOfUninit);
 
           auto const handle = v->rdsHandle();
           assertx(rds::isNormalHandle(handle));
-          mergeCns(getDataRef<TypedValue>(tcbase, handle), v, name);
-          rds::initHandle(handle);
-
+          if (UNLIKELY(rds::isHandleInit(handle, rds::NormalTag{}))) {
+            raise_notice(Strings::CONSTANT_ALREADY_DEFINED, name->data());
+          } else {
+            rds::handleToRef<TypedValue, rds::Mode::Normal>(handle) = *v;
+            rds::initHandle(handle);
+          }
           ix += 1 + sizeof(*v) / sizeof(void*);
           obj = mi->mergeableObj(ix);
           k = MergeKind(uintptr_t(obj) & 7);
@@ -1691,7 +1900,7 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
           Stats::inc(Stats::UnitMerge_mergeable_require);
           Unit *unit = (Unit*)((char*)obj - (int)k);
 
-          unit->mergeImpl<debugger>(tcbase, unit->m_mergeInfo);
+          unit->mergeImpl<debugger>(unit->mergeInfo());
           if (UNLIKELY(!unit->isMergeOnly())) {
             Stats::inc(Stats::PseudoMain_Reentered);
             VarEnv* ve = nullptr;
@@ -1707,7 +1916,7 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
                 // local scope.
               }
             }
-            tvRefcountedDecRef(
+            tvDecRefGen(
               g_context->invokeFunc(unit->getMain(nullptr),
                                     init_null_variant,
                                     nullptr, nullptr, ve)
@@ -1725,17 +1934,25 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
           Stats::inc(Stats::UnitMerge_mergeable);
           Stats::inc(Stats::UnitMerge_mergeable_typealias);
           auto const aliasId = static_cast<Id>(intptr_t(obj)) >> 3;
-          defTypeAlias(aliasId);
+          if (!defTypeAlias(aliasId)) {
+            auto& attrs = m_typeAliases[aliasId].attrs;
+            if (attrs & AttrPersistent) {
+              attrs = static_cast<Attr>(attrs & ~AttrPersistent);
+            }
+          }
           obj = mi->mergeableObj(++ix);
           k = MergeKind(uintptr_t(obj) & 7);
         } while (k == MergeKind::TypeAlias);
         continue;
       case MergeKind::Done:
-        Stats::inc(Stats::UnitMerge_mergeable, -1);
-        assert((unsigned)ix == mi->m_mergeablesSize);
-        if (UNLIKELY(m_mergeState & MergeState::NeedsCompact)) {
+        assertx((unsigned)ix == mi->m_mergeablesSize);
+        if (UNLIKELY(m_mergeState.load(std::memory_order_relaxed) &
+                     MergeState::NeedsCompact)) {
           SimpleLock lock(unitInitLock);
-          if (!(m_mergeState & MergeState::NeedsCompact)) return;
+          if (!(m_mergeState.load(std::memory_order_relaxed) &
+                MergeState::NeedsCompact)) {
+            return;
+          }
           if (!redoHoistable) {
             /*
              * All the classes are known to be unique, and we just got
@@ -1761,17 +1978,20 @@ void Unit::mergeImpl(void* tcbase, MergeInfo* mi) {
              */
             compactMergeInfo(mi, newMi, m_typeAliases);
             if (newMi != mi) {
-              this->m_mergeInfo = newMi;
+              this->m_mergeInfo.store(newMi, std::memory_order_release);
               Treadmill::deferredFree(mi);
               if (isMergeOnly() &&
                   newMi->m_firstHoistableFunc == newMi->m_mergeablesSize) {
-                m_mergeState |= MergeState::Empty;
+                m_mergeState.fetch_or(MergeState::Empty,
+                                      std::memory_order_relaxed);
               }
             }
-            assert(newMi->m_firstMergeablePreClass == newMi->m_mergeablesSize ||
+            assertx(newMi->m_firstMergeablePreClass
+                      == newMi->m_mergeablesSize ||
                    isMergeOnly());
           }
-          m_mergeState &= ~MergeState::NeedsCompact;
+          m_mergeState.fetch_and(~MergeState::NeedsCompact,
+                                 std::memory_order_relaxed);
         }
         return;
     }
@@ -1790,9 +2010,9 @@ Array getClassesWithAttrInfo(Attr attrs, bool inverse = false) {
   NamedEntity::foreach_cached_class([&](Class* c) {
     if ((c->attrs() & attrs) ? !inverse : inverse) {
       if (c->isBuiltin()) {
-        a.prepend(VarNR(c->name()));
+        a.prepend(make_tv<KindOfPersistentString>(c->name()));
       } else {
-        a.append(VarNR(c->name()));
+        a.append(make_tv<KindOfPersistentString>(c->name()));
       }
     }
   });
@@ -1806,7 +2026,7 @@ Array getFunctions() {
   Array a = Array::Create();
   NamedEntity::foreach_cached_func([&](Func* func) {
     if ((system ^ func->isBuiltin()) || func->isGenerated()) return; //continue
-    a.append(VarNR(HHVM_FN(strtolower)(func->nameStr())));
+    a.append(HHVM_FN(strtolower)(func->nameStr()));
   });
   return a;
 }
@@ -1864,7 +2084,7 @@ void Unit::prettyPrint(std::ostream& out, PrintOpts opts) const {
   int prevLineNum = -1;
   while (it < &m_bc[stopOffset]) {
     if (opts.showFuncs) {
-      assert(funcIt == funcMap.end() || funcIt->first >= offsetOf(it));
+      assertx(funcIt == funcMap.end() || funcIt->first >= offsetOf(it));
       if (funcIt != funcMap.end() &&
           funcIt->first == offsetOf(it)) {
         out.put('\n');

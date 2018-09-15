@@ -80,21 +80,45 @@ ArgDesc::ArgDesc(SSATmp* tmp, Vloc loc, bool val) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ArgGroup& ArgGroup::typedValue(int i) {
-  // If there's exactly one register argument slot left, the whole TypedValue
-  // goes on the stack instead of being split between a register and the
-  // stack.
-  if (m_gpArgs.size() == num_arg_regs() - 1) {
-    m_override = &m_stkArgs;
+ArgGroup& ArgGroup::ssa(int i, bool allowFP) {
+  auto s = m_inst->src(i);
+  ArgDesc arg(s, m_locs[s]);
+  if (s->isA(TDbl) && allowFP) {
+    push_SIMDarg(arg, s->type());
+    if (arch() == Arch::PPC64) {
+      // PPC64 ABIv2 compliant: reserve the aligned GP if FP is used
+      push_arg(ArgDesc(ArgDesc::Kind::Imm, 0)); // Push a dummy parameter
+    }
+  } else {
+    if (wide_tv_val && (s->isA(TLvalToGen) && !s->isA(TBottom))) {
+      // If there's exactly one register argument slot left, the whole tv_lval
+      // goes on the stack instead of being split between a register and the
+      // stack.
+      if (m_gpArgs.size() == num_arg_regs() - 1) m_override = &m_stkArgs;
+      SCOPE_EXIT { m_override = nullptr; };
+
+      push_arg(arg, s->type());
+      push_arg(ArgDesc{ArgDesc::Kind::Reg, m_locs[s].reg(1), -1});
+    } else {
+      push_arg(arg, s->type());
+    }
   }
-  static_assert(offsetof(TypedValue, m_data) == 0, "");
-  static_assert(offsetof(TypedValue, m_type) == 8, "");
-  ssa(i).type(i);
-  m_override = nullptr;
   return *this;
 }
 
-void ArgGroup::push_arg(const ArgDesc& arg) {
+ArgGroup& ArgGroup::typedValue(int i) {
+  // If there's exactly one register argument slot left, the whole TypedValue
+  // goes on the stack instead of being split between a register and the stack.
+  if (m_gpArgs.size() == num_arg_regs() - 1) m_override = &m_stkArgs;
+  SCOPE_EXIT { m_override = nullptr; };
+
+  static_assert(offsetof(TypedValue, m_data) == 0, "");
+  static_assert(offsetof(TypedValue, m_type) == 8, "");
+  ssa(i, false).type(i);
+  return *this;
+}
+
+void ArgGroup::push_arg(const ArgDesc& arg, Type t) {
   // If m_override is set, use it unconditionally. Otherwise, select
   // m_gpArgs or m_stkArgs depending on how many args we've already pushed.
   ArgVec* args = m_override;
@@ -106,9 +130,10 @@ void ArgGroup::push_arg(const ArgDesc& arg) {
     }
   }
   args->push_back(arg);
+  m_argTypes.emplace_back(t);
 }
 
-void ArgGroup::push_SIMDarg(const ArgDesc& arg) {
+void ArgGroup::push_SIMDarg(const ArgDesc& arg, Type t) {
   // See push_arg above
   ArgVec* args = m_override;
   if (!args) {
@@ -116,6 +141,7 @@ void ArgGroup::push_SIMDarg(const ArgDesc& arg) {
          ? &m_simdArgs : &m_stkArgs;
   }
   args->push_back(arg);
+  m_argTypes.emplace_back(t);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

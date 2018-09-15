@@ -19,7 +19,7 @@
 
 #include "hphp/util/deprecated/declare-boost-types.h"
 #include "hphp/util/functional.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,6 +28,10 @@ struct ClassScope;
 struct FunctionScope;
 
 // ClassScope and FunctionScope are compared case-insensitively.
+
+template<class type, class T> struct hphp_string_hash_map :
+  public hphp_hash_map<std::string,type,string_hash> {
+};
 
 template<class V>
 struct hphp_string_hash_map<V, ClassScope> :

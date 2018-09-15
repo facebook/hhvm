@@ -100,4 +100,8 @@ function main() {
         1.5);
 }
 
+
+<<__EntryPoint>>
+function main_typedef_mixed_case() {
 main();
+}

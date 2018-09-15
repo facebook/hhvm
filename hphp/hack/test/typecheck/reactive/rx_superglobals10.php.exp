@@ -1,0 +1,2 @@
+File "rx_superglobals10.php", line 5, characters 8-15:
+Superglobal $GLOBALS cannot be used in a reactive context. (Typing[4227])

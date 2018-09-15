@@ -6,7 +6,6 @@ function foo($a) {
 }
   }
 }
-foo(true);
 function bar() {
   if (interface_exists('A')) {
     class C implements A {
@@ -18,4 +17,9 @@ function bar() {
     var_dump('no');
   }
 }
+
+<<__EntryPoint>>
+function main_1225() {
+foo(true);
 bar();
+}

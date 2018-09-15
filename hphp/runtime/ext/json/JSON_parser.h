@@ -22,6 +22,20 @@
 
 namespace HPHP {
 
+/**
+ * These are the types of containers that can be returned
+ * depending on the options used for json_decode.
+ *
+ * Objects are not included here.
+ */
+enum class JSONContainerType {
+  PHP_ARRAYS = 1,
+  COLLECTIONS = 2,
+  HACK_ARRAYS = 3,
+  DARRAYS = 4,
+  DARRAYS_AND_VARRAYS = 5,
+};
+
 struct StringBuffer;
 struct Variant;
 

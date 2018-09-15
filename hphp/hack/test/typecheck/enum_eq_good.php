@@ -1,12 +1,12 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-enum E : int as int {
+enum E: int as int {
   A = 1;
   B = 2;
 }
 
-enum F : int as int {
+enum F: int as int {
   C = 2;
   D = 3;
 }

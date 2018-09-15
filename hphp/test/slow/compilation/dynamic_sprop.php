@@ -15,4 +15,8 @@ function heh() {
   var_dump(Base::$x);
 }
 
+
+<<__EntryPoint>>
+function main_dynamic_sprop() {
 heh();
+}

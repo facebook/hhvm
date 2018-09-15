@@ -8,4 +8,8 @@ function test() {
   var_dump('' ?? 3);
 }
 
+
+<<__EntryPoint>>
+function main_coalesce_falsey() {
 test();
+}

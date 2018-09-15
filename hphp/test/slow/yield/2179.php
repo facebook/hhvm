@@ -17,8 +17,12 @@ class C {
  }
 class D extends C {
  }
+
+<<__EntryPoint>>
+function main_2179() {
 $obj = new D;
 foreach($obj->dty('foo') as $var) {
   var_dump($var);
 }
 $obj->edd('foo');
+}

@@ -1,6 +1,6 @@
 
-Warning: SQLSTATE[HY000]: General error: invalid error mode in %s/test/slow/ext_pdo/errmode.php on line 7
+Warning: SQLSTATE[HY000]: General error: invalid error mode in %s/test/slow/ext_pdo/errmode.php on line 10
 
-Warning: SQLSTATE[HY000]: General error in %s/test/slow/ext_pdo/errmode.php on line 7
+Warning: SQLSTATE[HY000]: General error in %s/test/slow/ext_pdo/errmode.php on line 10
 
-Warning: SQLSTATE[HY000]: General error: 1 near "this": syntax error in %s/test/slow/ext_pdo/errmode.php on line 8
+Warning: SQLSTATE[HY000]: General error: 1 near "this": syntax error in %s/test/slow/ext_pdo/errmode.php on line 11

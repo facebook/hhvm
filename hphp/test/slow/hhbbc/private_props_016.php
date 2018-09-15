@@ -19,4 +19,8 @@ function main() {
   var_dump($a);
 }
 
+
+<<__EntryPoint>>
+function main_private_props_016() {
 main();
+}

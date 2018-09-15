@@ -38,7 +38,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_THREAD_LOCAL_PROXY(AsioSession, false, AsioSession::s_current);
+THREAD_LOCAL_PROXY(AsioSession, AsioSession::s_current);
 
 namespace {
   const context_idx_t MAX_CONTEXT_DEPTH =
@@ -58,13 +58,13 @@ namespace {
   }
 
   void runCallback(const Object& function, const Array& params, char* name) {
-    assert(function.get());
+    assertx(function.get());
     try {
       vm_call_user_func(function, params);
-    } catch (const Object& exception) {
+    } catch (const Object&) {
       try {
         raise_warning("[asio] Ignoring exception thrown by %s callback", name);
-      } catch (const Object& exception) {
+      } catch (const Object&) {
         // Swallow the exception. Callers are not designed to deal with
         // PHP exceptions.
       }
@@ -88,12 +88,12 @@ void AsioSession::enterContext(ActRec* savedFP) {
 
   m_contexts.push_back(req::make_raw<AsioContext>(savedFP));
 
-  assert(static_cast<context_idx_t>(m_contexts.size()) == m_contexts.size());
-  assert(isInContext());
+  assertx(static_cast<context_idx_t>(m_contexts.size()) == m_contexts.size());
+  assertx(isInContext());
 }
 
 void AsioSession::exitContext() {
-  assert(isInContext());
+  assertx(isInContext());
 
   m_contexts.back()->exit(m_contexts.size());
   req::destroy_raw(m_contexts.back());
@@ -101,7 +101,7 @@ void AsioSession::exitContext() {
 }
 
 void AsioSession::initAbruptInterruptException() {
-  assert(!hasAbruptInterruptException());
+  assertx(!hasAbruptInterruptException());
   m_abruptInterruptException =
     SystemLib::AllocInvalidOperationExceptionObject(
       "The request was abruptly interrupted."
@@ -109,27 +109,27 @@ void AsioSession::initAbruptInterruptException() {
 }
 
 void AsioSession::setOnIOWaitEnter(const Variant& callback) {
-  m_onIOWaitEnter = checkCallback(callback, "WaitHandle::onIOWaitEnter");
+  m_onIOWaitEnter = checkCallback(callback, "Awaitable::onIOWaitEnter");
 }
 
 void AsioSession::setOnIOWaitExit(const Variant& callback) {
-  m_onIOWaitExit = checkCallback(callback, "WaitHandle::onIOWaitExit");
+  m_onIOWaitExit = checkCallback(callback, "Awaitable::onIOWaitExit");
 }
 
 void AsioSession::setOnJoin(const Variant& callback) {
-  m_onJoin = checkCallback(callback, "WaitHandle::onJoin");
+  m_onJoin = checkCallback(callback, "Awaitable::onJoin");
 }
 
 void AsioSession::onIOWaitEnter() {
-  runCallback(m_onIOWaitEnter, empty_array(), "WaitHandle::onIOWaitEnter");
+  runCallback(m_onIOWaitEnter, empty_array(), "Awaitable::onIOWaitEnter");
 }
 
 void AsioSession::onIOWaitExit() {
-  runCallback(m_onIOWaitExit, empty_array(), "WaitHandle::onIOWaitExit");
+  runCallback(m_onIOWaitExit, empty_array(), "Awaitable::onIOWaitExit");
 }
 
-void AsioSession::onJoin(c_WaitHandle* waitHandle) {
-  runCallback(m_onJoin, make_packed_array(waitHandle), "WaitHandle::onJoin");
+void AsioSession::onJoin(c_Awaitable* waitHandle) {
+  runCallback(m_onJoin, make_packed_array(waitHandle), "Awaitable::onJoin");
 }
 
 void AsioSession::setOnResumableCreate(const Variant& callback) {
@@ -277,22 +277,24 @@ void AsioSession::onExternalThreadEventCreate(
 
 void AsioSession::onExternalThreadEventSuccess(
   c_ExternalThreadEventWaitHandle* waitHandle,
-  const Variant& result
+  const Variant& result,
+  int64_t finish_time
 ) {
   runCallback(
     m_onExtThreadEventSuccess,
-    make_packed_array(waitHandle, result),
+    make_packed_array(waitHandle, result, finish_time),
     "ExternalThreadEventWaitHandle::onSuccess"
   );
 }
 
 void AsioSession::onExternalThreadEventFail(
   c_ExternalThreadEventWaitHandle* waitHandle,
-  const Object& exception
+  const Object& exception,
+  int64_t finish_time
 ) {
   runCallback(
     m_onExtThreadEventFail,
-    make_packed_array(waitHandle, exception),
+    make_packed_array(waitHandle, exception, finish_time),
     "ExternalThreadEventWaitHandle::onFail"
   );
 }
@@ -319,10 +321,13 @@ void AsioSession::onSleepCreate(c_SleepWaitHandle* waitHandle) {
   );
 }
 
-void AsioSession::onSleepSuccess(c_SleepWaitHandle* waitHandle) {
+void AsioSession::onSleepSuccess(
+  c_SleepWaitHandle* waitHandle,
+  int64_t finish_time
+) {
   runCallback(
     m_onSleepSuccess,
-    make_packed_array(waitHandle),
+    make_packed_array(waitHandle, finish_time),
     "SleepWaitHandle::onSuccess"
   );
 }

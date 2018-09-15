@@ -1,0 +1,17 @@
+diff --git a/query.php b/query.php
+--- a/query.php
++++ b/query.php
+@@ -4,7 +4,11 @@
+   await SomeQueriableEntityWithAnExtraordinarilyLongIdentifier::entityQuery(
+     $context_object,
+     $id,
+-  )->before(time())
+-   ->orderedSlice(10, Ordering::newest());
++  )
++    ->queryEdges()
++    ->whereTime(P::lessThanOrEquals((int)time()))
++    ->orderByTimeDesc()
++    ->take(10)
++    |> gen_new_array($$);
+
+ return $matches;

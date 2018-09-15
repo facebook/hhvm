@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_UTIL_EMBEDDED_DATA_H_
 #define incl_HPHP_UTIL_EMBEDDED_DATA_H_
 
+#ifdef __cplusplus
+
 #include <cstdint>
 #include <string>
 
@@ -28,7 +30,7 @@ struct embedded_data {
   std::string m_filename;
   uint64_t m_start;
   uint64_t m_len;
-#if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
+#ifdef _MSC_VER
   void* m_handle;
 #endif
 };
@@ -45,13 +47,23 @@ std::string read_embedded_data(const embedded_data& desc);
  * within another file, or even in memory.  This means we have to copy the
  * section into a temporary file and then dlopen() that.
  *
+ * If trust is true, than any existing file with the same name as the first
+ * extract path will be used without extracting the data. Otherwise if the file
+ * exists, its contents will be verified before using. If the file does not
+ * exist, it will be created and the embedded data copied into it. If this fails
+ * for any reason, the fallback path is used, if provided.
+ *
  * Returns the result of dlopen() on success, else nullptr.  Also logs the
  * failure condition with Logger on failure.
  */
-void* dlopen_embedded_data(const embedded_data& desc, char* tmp_filename);
+void* dlopen_embedded_data(const embedded_data& desc,
+                           std::string extractPath,
+                           std::string fallbackPath,
+                           const std::string& buildId,
+                           bool trust);
 
 /*
- * Clean up any /tmp files that we created at process shutdown time.
+ * Clean up any fallback files that we created at process shutdown time.
  */
 void embedded_data_cleanup();
 
@@ -59,5 +71,16 @@ void embedded_data_cleanup();
 ///////////////////////////////////////////////////////////////////////////////
 
 }
+
+#else //__cplusplus
+
+/*
+ * Read data from the named section and place it into the given buffer (of size
+ * len) Returns the number of bytes (not null-terminated) read or -1 if
+ * unsuccessful
+ */
+ssize_t hphp_read_embedded_data(const char* section, char* buf, size_t len);
+
+#endif //__cplusplus
 
 #endif

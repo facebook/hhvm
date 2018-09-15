@@ -40,9 +40,9 @@ bool is_trivial_nop(const Vinstr&);
 bool splitCriticalEdges(Vunit& unit);
 
 /*
- * Return a Vreg holding the constant value represented by the given Type.
+ * Return a Vloc holding the constant value represented by the given Type.
  */
-Vreg make_const(Vunit&, Type);
+Vloc make_const(Vunit&, Type);
 
 /*
  * Move all the elements of `in' into `out', replacing `count' elements of

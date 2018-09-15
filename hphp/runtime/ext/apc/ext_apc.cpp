@@ -48,6 +48,7 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/apc-file-storage.h"
+#include "hphp/runtime/server/cli-server.h"
 
 using HPHP::ScopedMem;
 
@@ -61,7 +62,35 @@ std::aligned_storage<
   alignof(ConcurrentTableSharedStore)
 >::type s_apc_storage;
 
+using UserAPCCache = folly::AtomicHashMap<uid_t, ConcurrentTableSharedStore*>;
+
+std::aligned_storage<
+  sizeof(UserAPCCache),
+  alignof(UserAPCCache)
+>::type s_user_apc_storage;
+
+UserAPCCache& apc_store_local() {
+  void* vpUserStore = &s_user_apc_storage;
+  return *static_cast<UserAPCCache*>(vpUserStore);
+}
+
+ConcurrentTableSharedStore& apc_store_local(uid_t uid) {
+  auto& cache = apc_store_local();
+  auto iter = cache.find(uid);
+  if (iter != cache.end()) return *(iter->second);
+  auto table = new ConcurrentTableSharedStore;
+  auto res = cache.insert(uid, table);
+  if (!res.second) delete table;
+  return *res.first->second;
+}
+
 ConcurrentTableSharedStore& apc_store() {
+  if (UNLIKELY(!RuntimeOption::RepoAuthoritative &&
+               RuntimeOption::EvalUnixServerQuarantineApc)) {
+    if (auto uc = get_cli_ucred()) {
+      return apc_store_local(uc->uid);
+    }
+  }
   void* vpStore = &s_apc_storage;
   return *static_cast<ConcurrentTableSharedStore*>(vpStore);
 }
@@ -75,6 +104,11 @@ void initialize_apc() {
   // Note: we never destruct APC, currently.
   void* vpStore = &s_apc_storage;
   new (vpStore) ConcurrentTableSharedStore;
+
+  if (UNLIKELY(!RuntimeOption::RepoAuthoritative &&
+               RuntimeOption::EvalUnixServerQuarantineApc)) {
+    new (&s_user_apc_storage) UserAPCCache(10);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -122,6 +156,9 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
 
   Config::Bind(AllowObj, ini, config, "Server.APC.AllowObject");
   Config::Bind(TTLLimit, ini, config, "Server.APC.TTLLimit", -1);
+  // Any TTL > TTLMaxFinite will be made infinite. NB: Applied *after* TTLLimit.
+  Config::Bind(TTLMaxFinite, ini, config, "Server.APC.TTLMaxFinite",
+               std::numeric_limits<int64_t>::max());
   Config::Bind(HotPrefix, ini, config, "Server.APC.HotPrefix");
   Config::Bind(HotSize, ini, config, "Server.APC.HotSize", 30000);
   Config::Bind(HotLoadFactor, ini, config, "Server.APC.HotLoadFactor", 0.5);
@@ -160,6 +197,8 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   Config::Bind(UseUncounted, ini, config, "Server.APC.MemModelTreadmill",
                RuntimeOption::ServerExecutionMode());
 #endif
+  Config::Bind(ShareUncounted, ini, config, "Server.APC.ShareUncounted", true);
+  if (!UseUncounted && ShareUncounted) ShareUncounted = false;
 
   IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.enabled", &Enable);
   IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM, "apc.stat",
@@ -246,6 +285,7 @@ int apcExtension::PurgeFrequency = 4096;
 int apcExtension::PurgeRate = -1;
 bool apcExtension::AllowObj = false;
 int apcExtension::TTLLimit = -1;
+int64_t apcExtension::TTLMaxFinite = std::numeric_limits<int64_t>::max();
 int apcExtension::HotSize = 30000;
 double apcExtension::HotLoadFactor = 0.5;
 std::vector<std::string> apcExtension::HotPrefix;
@@ -264,6 +304,7 @@ bool apcExtension::UseUncounted = true;
 #else
 bool apcExtension::UseUncounted = false;
 #endif
+bool apcExtension::ShareUncounted = true;
 bool apcExtension::Stat = true;
 // Different from zend default but matches what we've been returning for years
 bool apcExtension::EnableCLI = true;
@@ -417,8 +458,7 @@ Variant HHVM_FUNCTION(apc_delete,
   return apc_store().eraseKey(key.toString());
 }
 
-bool HHVM_FUNCTION(apc_clear_cache,
-                   const String& cache_type /* = "" */) {
+bool HHVM_FUNCTION(apc_clear_cache, const String& /*cache_type*/ /* = "" */) {
   if (!apcExtension::Enable) return false;
   return apc_store().clear();
 }
@@ -537,8 +577,7 @@ Variant HHVM_FUNCTION(apc_cache_info,
   return info.toArray();
 }
 
-Array HHVM_FUNCTION(apc_sma_info,
-                    bool limited /* = false */) {
+Array HHVM_FUNCTION(apc_sma_info, bool /*limited*/ /* = false */) {
   return empty_array();
 }
 
@@ -579,7 +618,7 @@ struct ApcLoadWorker {
   }
   void doJob(std::shared_ptr<ApcLoadJob> job) {
     char func_name[128];
-    MemoryManager::SuppressOOM so(MM());
+    MemoryManager::SuppressOOM so(*tl_heap);
     snprintf(func_name, sizeof(func_name), "_apc_load_%d", job->m_index);
     apc_load_func(job->m_handle, func_name)();
   }
@@ -653,14 +692,12 @@ size_t get_const_map_size() {
 // Constant and APC priming (always with compressed data).
 
 EXTERNALLY_VISIBLE
-void const_load_impl_compressed
-    (struct cache_info *info,
-     int *int_lens, const char *int_keys, long long *int_values,
-     int *char_lens, const char *char_keys, char *char_values,
-     int *string_lens, const char *strings,
-     int *object_lens, const char *objects,
-     int *thrift_lens, const char *thrifts,
-     int *other_lens, const char *others) {
+void const_load_impl_compressed(
+  struct cache_info* /*info*/, int* /*int_lens*/, const char* /*int_keys*/,
+  long long* /*int_values*/, int* /*char_lens*/, const char* /*char_keys*/,
+  char* /*char_values*/, int* /*string_lens*/, const char* /*strings*/,
+  int* /*object_lens*/, const char* /*objects*/, int* /*thrift_lens*/,
+  const char* /*thrifts*/, int* /*other_lens*/, const char* /*others*/) {
   // TODO(8117903): Unused; remove after updating www side.
 }
 
@@ -697,7 +734,7 @@ void apc_load_impl_compressed
         k += int_lens[i + 2] + 1; // skip \0
       }
       s.prime(std::move(vars));
-      assert((k - keys) == len);
+      assertx((k - keys) == len);
     }
   }
   {
@@ -733,7 +770,7 @@ void apc_load_impl_compressed
         k += char_lens[i + 2] + 1; // skip \0
       }
       s.prime(std::move(vars));
-      assert((k - keys) == len);
+      assertx((k - keys) == len);
     }
   }
   {
@@ -758,7 +795,7 @@ void apc_load_impl_compressed
         p += string_lens[i + i + 3] + 1; // skip \0
       }
       s.prime(std::move(vars));
-      assert((p - decoded) == len);
+      assertx((p - decoded) == len);
     }
   }
   {
@@ -781,7 +818,7 @@ void apc_load_impl_compressed
         p += object_lens[i + i + 3] + 1; // skip \0
       }
       s.prime(std::move(vars));
-      assert((p - decoded) == len);
+      assertx((p - decoded) == len);
     }
   }
   {
@@ -809,7 +846,7 @@ void apc_load_impl_compressed
         p += thrift_lens[i + i + 3] + 1; // skip \0
       }
       s.prime(std::move(vars));
-      assert((p - decoded) == len);
+      assertx((p - decoded) == len);
     }
   }
   {
@@ -827,7 +864,8 @@ void apc_load_impl_compressed
         item.readOnly = readOnly;
         p += other_lens[i + i + 2] + 1; // skip \0
         String value(p, other_lens[i + i + 3], CopyString);
-        Variant v = unserialize_from_string(value);
+        Variant v =
+          unserialize_from_string(value, VariableUnserializer::Type::Internal);
         if (same(v, false)) {
           // we can't possibly get here if it was a boolean "false" that's
           // supposed to be serialized as a char
@@ -838,7 +876,7 @@ void apc_load_impl_compressed
         p += other_lens[i + i + 3] + 1; // skip \0
       }
       s.prime(std::move(vars));
-      assert((p - decoded) == len);
+      assertx((p - decoded) == len);
     }
   }
 }
@@ -867,9 +905,8 @@ const StaticString
 #define RFC1867_NAME_MAXLEN 63
 #define RFC1867_FILENAME_MAXLEN 127
 
-int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
-                         unsigned int event, void *event_data,
-                         void **extra) {
+int apc_rfc1867_progress(apc_rfc1867_data* rfc1867ApcData, unsigned int event,
+                         void* event_data, void** /*extra*/) {
   switch (event) {
   case MULTIPART_EVENT_START: {
     multipart_event_start *data = (multipart_event_start *) event_data;
@@ -885,7 +922,7 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
     rfc1867ApcData->update_freq = RuntimeOption::Rfc1867Freq;
 
     if (rfc1867ApcData->update_freq < 0) {
-      assert(false); // TODO: support percentage
+      assertx(false); // TODO: support percentage
       // frequency is a percentage, not bytes
       rfc1867ApcData->update_freq =
         rfc1867ApcData->content_length * RuntimeOption::Rfc1867Freq / 100;
@@ -1027,11 +1064,11 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
 ///////////////////////////////////////////////////////////////////////////////
 // apc serialization
 
-String apc_serialize(const Variant& value) {
+String apc_serialize(const_variant_ref value) {
   VariableSerializer::Type sType =
     apcExtension::EnableApcSerialize ?
       VariableSerializer::Type::APCSerialize :
-      VariableSerializer::Type::Serialize;
+      VariableSerializer::Type::Internal;
   VariableSerializer vs(sType);
   return vs.serialize(value, true);
 }
@@ -1040,7 +1077,7 @@ Variant apc_unserialize(const char* data, int len) {
   VariableUnserializer::Type sType =
     apcExtension::EnableApcSerialize ?
       VariableUnserializer::Type::APCSerialize :
-      VariableUnserializer::Type::Serialize;
+      VariableUnserializer::Type::Internal;
   return unserialize_ex(data, len, sType);
 }
 
@@ -1082,6 +1119,19 @@ bool apc_dump(const char *filename, bool keyOnly, bool metaDump) {
 
   apc_store().dump(out, mode);
   out.close();
+  return true;
+}
+
+bool apc_dump_prefix(const char *filename,
+                     const std::string &prefix,
+                     uint32_t count) {
+  std::ofstream out(filename);
+  if (out.fail()) {
+    return false;
+  }
+  SCOPE_EXIT { out.close(); };
+
+  apc_store().dumpPrefix(out, prefix, count);
   return true;
 }
 

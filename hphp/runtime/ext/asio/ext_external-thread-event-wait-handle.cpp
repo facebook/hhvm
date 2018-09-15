@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
 
+#include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event-queue.h"
@@ -48,7 +49,7 @@ void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnFailCallback,
 }
 
 void c_ExternalThreadEventWaitHandle::sweep() {
-  assert(getState() == STATE_WAITING);
+  assertx(getState() == STATE_WAITING);
 
   if (m_event->cancel()) {
     // canceled; the processing thread will take care of cleanup
@@ -109,8 +110,8 @@ void c_ExternalThreadEventWaitHandle::destroyEvent(bool sweeping /*= false */) {
 }
 
 void c_ExternalThreadEventWaitHandle::abandon(bool sweeping) {
-  assert(getState() == STATE_WAITING);
-  assert(hasExactlyOneRef() || sweeping);
+  assertx(getState() == STATE_WAITING);
+  assertx(hasExactlyOneRef() || sweeping);
 
   if (isInContext()) {
     unregisterFromContext();
@@ -151,27 +152,35 @@ bool c_ExternalThreadEventWaitHandle::cancel(const Object& exception) {
 
   auto session = AsioSession::Get();
   if (UNLIKELY(session->hasOnExternalThreadEventFail())) {
-    session->onExternalThreadEventFail(this, exception);
+    session->onExternalThreadEventFail(this, exception, 0);
   }
 
   return true;
 }
 
 void c_ExternalThreadEventWaitHandle::process() {
-  assert(getState() == STATE_WAITING);
+  assertx(getState() == STATE_WAITING);
 
   if (isInContext()) {
     unregisterFromContext();
   }
+
+  // Store the finish time of the underlying IO operation
+  // So we can pass it in the finish callbacks
 
   // clean up once event is processed
   auto exit_guard = folly::makeGuard([&] { destroyEvent(); });
 
   Cell result;
   try {
-    m_event->unserialize(result);
+    try {
+      m_event->unserialize(result);
+    } catch (ExtendedException& exception) {
+      exception.recomputeBacktraceFromWH(this);
+      throw exception;
+    }
   } catch (const Object& exception) {
-    assert(exception->instanceof(SystemLib::s_ThrowableClass));
+    assertx(exception->instanceof(SystemLib::s_ThrowableClass));
     auto parentChain = getParentChain();
     setState(STATE_FAILED);
     tvWriteObject(exception.get(), &m_resultOrException);
@@ -179,7 +188,13 @@ void c_ExternalThreadEventWaitHandle::process() {
 
     auto session = AsioSession::Get();
     if (UNLIKELY(session->hasOnExternalThreadEventFail())) {
-      session->onExternalThreadEventFail(this, exception);
+      session->onExternalThreadEventFail(
+        this,
+        exception,
+        std::chrono::duration_cast<std::chrono::nanoseconds>(
+          m_event->getFinishTime().time_since_epoch()
+        ).count()
+      );
     }
     return;
   } catch (...) {
@@ -191,7 +206,7 @@ void c_ExternalThreadEventWaitHandle::process() {
     throw;
   }
 
-  assert(cellIsPlausible(result));
+  assertx(cellIsPlausible(result));
   auto parentChain = getParentChain();
   setState(STATE_SUCCEEDED);
   cellCopy(result, m_resultOrException);
@@ -199,7 +214,13 @@ void c_ExternalThreadEventWaitHandle::process() {
 
   auto session = AsioSession::Get();
   if (UNLIKELY(session->hasOnExternalThreadEventSuccess())) {
-    session->onExternalThreadEventSuccess(this, tvAsCVarRef(&result));
+    session->onExternalThreadEventSuccess(
+      this,
+      tvAsCVarRef(&result),
+      std::chrono::duration_cast<std::chrono::nanoseconds>(
+        m_event->getFinishTime().time_since_epoch()
+      ).count()
+    );
   }
 }
 
@@ -208,9 +229,9 @@ String c_ExternalThreadEventWaitHandle::getName() {
 }
 
 void c_ExternalThreadEventWaitHandle::exitContext(context_idx_t ctx_idx) {
-  assert(AsioSession::Get()->getContext(ctx_idx));
-  assert(getState() == STATE_WAITING);
-  assert(getContextIdx() == ctx_idx);
+  assertx(AsioSession::Get()->getContext(ctx_idx));
+  assertx(getState() == STATE_WAITING);
+  assertx(getContextIdx() == ctx_idx);
 
   // Move us to the parent context.
   setContextIdx(getContextIdx() - 1);

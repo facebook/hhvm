@@ -1,2 +1,2 @@
-File "php_new_syntax.php", line 13, characters 16-16:
-Expected ( (Parsing[1002])
+File "php_new_syntax.php", line 13, characters 7-14:
+A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new UIPagelet()'? (Parsing[1002])

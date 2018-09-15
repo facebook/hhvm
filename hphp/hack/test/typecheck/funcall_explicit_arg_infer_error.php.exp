@@ -1,0 +1,6 @@
+File "funcall_explicit_arg_infer_error.php", line 7, characters 10-18:
+Invalid return type (Typing[4110])
+File "funcall_explicit_arg_infer_error.php", line 6, characters 35-40:
+This is a string
+File "funcall_explicit_arg_infer_error.php", line 6, characters 26-28:
+It is incompatible with an int

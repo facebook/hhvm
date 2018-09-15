@@ -15,23 +15,22 @@
 */
 
 #include "hphp/compiler/expression/assignment_expression.h"
-#include "hphp/compiler/expression/array_element_expression.h"
-#include "hphp/compiler/expression/object_property_expression.h"
-#include "hphp/compiler/analysis/code_error.h"
-#include "hphp/compiler/expression/constant_expression.h"
-#include "hphp/compiler/expression/simple_variable.h"
+
 #include "hphp/compiler/analysis/block_scope.h"
-#include "hphp/compiler/analysis/variable_table.h"
-#include "hphp/compiler/analysis/constant_table.h"
-#include "hphp/compiler/analysis/file_scope.h"
-#include "hphp/compiler/expression/unary_op_expression.h"
-#include "hphp/parser/hphp.tab.hpp"
-#include "hphp/compiler/option.h"
 #include "hphp/compiler/analysis/class_scope.h"
+#include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/compiler/expression/scalar_expression.h"
+#include "hphp/compiler/expression/array_element_expression.h"
+#include "hphp/compiler/expression/class_constant_expression.h"
+#include "hphp/compiler/expression/constant_expression.h"
 #include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/expression/object_property_expression.h"
+#include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/simple_function_call.h"
+#include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/expression/unary_op_expression.h"
+#include "hphp/compiler/option.h"
+#include "hphp/parser/hphp.tab.hpp"
 
 #include "hphp/runtime/base/execution-context.h"
 
@@ -47,11 +46,8 @@ AssignmentExpression::AssignmentExpression
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(AssignmentExpression)),
     m_variable(variable), m_value(value), m_ref(ref), m_rhsFirst(rhsFirst) {
   assert(!m_ref || !m_rhsFirst);
-  m_variable->setContext(Expression::DeepAssignmentLHS);
   m_variable->setContext(Expression::AssignmentLHS);
   m_variable->setContext(Expression::LValue);
-  m_variable->setContext(Expression::NoLValueWrapper);
-  m_value->setContext(Expression::AssignmentRHS);
   if (ref) {
     m_variable->setContext(Expression::RefAssignmentLHS);
     m_value->setContext(Expression::RefValue);
@@ -67,68 +63,7 @@ ExpressionPtr AssignmentExpression::clone() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// parser functions
-
-void AssignmentExpression::onParseRecur(AnalysisResultConstPtr ar,
-                                        FileScopeRawPtr fs,
-                                        ClassScopePtr scope) {
-  auto isArray = false;
-  if (m_value->is(Expression::KindOfUnaryOpExpression)) {
-    auto uexp = dynamic_pointer_cast<UnaryOpExpression>(m_value);
-    if (uexp->getOp() == T_ARRAY) {
-      isArray = true;
-    }
-  }
-
-  if (m_variable->is(Expression::KindOfConstantExpression)) {
-    // ...as in ClassConstant statement
-    // We are handling this one here, not in ClassConstant, purely because
-    // we need "value" to store in constant table.
-    if (isArray) {
-      parseTimeFatal(fs,
-                     Compiler::NoError,
-                     "Arrays are not allowed in class constants");
-    }
-    auto exp = dynamic_pointer_cast<ConstantExpression>(m_variable);
-    scope->getConstants()->add(exp->getName(), m_value, ar, m_variable);
-  } else if (m_variable->is(Expression::KindOfSimpleVariable)) {
-    auto var = dynamic_pointer_cast<SimpleVariable>(m_variable);
-    scope->getVariables()->add(var->getName(), true, ar,
-                               shared_from_this(), scope->getModifiers());
-    var->clearContext(Declaration); // to avoid wrong CodeError
-  } else {
-    assert(false); // parse phase shouldn't handle anything else
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-int AssignmentExpression::getLocalEffects() const {
-  return AssignEffect;
-}
-
-void AssignmentExpression::analyzeProgram(AnalysisResultPtr ar) {
-  m_variable->analyzeProgram(ar);
-  m_value->analyzeProgram(ar);
-  if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
-    if (m_ref && m_variable->is(Expression::KindOfSimpleVariable)) {
-      auto var = dynamic_pointer_cast<SimpleVariable>(m_variable);
-      const auto& name = var->getName();
-      VariableTablePtr variables = getScope()->getVariables();
-      variables->addUsed(name);
-    }
-  } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    if (m_variable->is(Expression::KindOfConstantExpression)) {
-      auto exp = dynamic_pointer_cast<ConstantExpression>(m_variable);
-      if (!m_value->isScalar()) {
-        getScope()->getConstants()->setDynamic(ar, exp->getName());
-      }
-    } else {
-      CheckNeeded(m_variable, m_value);
-    }
-  }
-}
 
 ConstructPtr AssignmentExpression::getNthKid(int n) const {
   switch (m_rhsFirst ? 1 - n : n) {
@@ -178,50 +113,6 @@ bool AssignmentExpression::isSimpleGlobalAssign(StringData **name,
     *tv = *v.asTypedValue();
   }
   return true;
-}
-
-ExpressionPtr AssignmentExpression::optimize(AnalysisResultConstPtr ar) {
-  if (m_variable->is(Expression::KindOfSimpleVariable)) {
-    auto var = dynamic_pointer_cast<SimpleVariable>(m_variable);
-    if (var->checkUnused() &&
-        !CheckNeeded(var, m_value)) {
-      if (m_value->getContainedEffects() != getContainedEffects()) {
-        recomputeEffects();
-      }
-      return replaceValue(m_value);
-    }
-  }
-  return ExpressionPtr();
-}
-
-ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultConstPtr ar) {
-  if (m_variable->getContainedEffects() & ~(CreateEffect|AccessorEffect)) {
-    return ExpressionPtr();
-  }
-  ExpressionPtr val = m_value;
-  while (val) {
-    if (val->is(KindOfExpressionList)) {
-      val = static_pointer_cast<ExpressionList>(val)->listValue();
-      continue;
-    }
-    if (val->is(KindOfAssignmentExpression)) {
-      val = static_pointer_cast<AssignmentExpression>(val)->m_value;
-      continue;
-    }
-    break;
-  }
-  if (val && val->isScalar()) {
-    if (val != m_value) {
-      ExpressionListPtr rep(new ExpressionList(
-                              getScope(), getRange(),
-                              ExpressionList::ListKindWrapped));
-      rep->addElement(m_value);
-      m_value = val->clone();
-      rep->addElement(static_pointer_cast<Expression>(shared_from_this()));
-      return replaceValue(rep);
-    }
-  }
-  return ExpressionPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

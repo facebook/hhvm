@@ -69,4 +69,8 @@ async function testAsyncGeneratorBacktrace(): Awaitable<void> {
   }
 }
 
+
+<<__EntryPoint>>
+function main_backtrace_async_generators() {
 HH\Asio\join(testAsyncGeneratorBacktrace());
+}

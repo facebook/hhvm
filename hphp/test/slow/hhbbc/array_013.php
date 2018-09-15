@@ -10,4 +10,8 @@ function bar() {
   $l = $y['flag']['flag2'];
   var_dump($z, $l);
 }
+
+<<__EntryPoint>>
+function main_array_013() {
 bar();
+}

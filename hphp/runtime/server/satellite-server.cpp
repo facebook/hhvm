@@ -24,7 +24,7 @@
 #include "hphp/util/text-util.h"
 #include <folly/Memory.h>
 
-using folly::make_unique;
+using std::make_unique;
 using std::set;
 
 namespace HPHP {
@@ -39,6 +39,8 @@ SatelliteServerInfo::SatelliteServerInfo(const IniSetting::Map& ini,
   m_name = hdf.exists() && !hdf.isEmpty() ? hdf.getName() : ini_key;
   m_name = hdf.getName();
   m_port = Config::GetUInt16(ini, hdf, "Port", 0, false);
+  m_serverIP = Config::GetString(ini, hdf, "IP",
+                                 RuntimeOption::ServerIP, false);
   m_threadCount = Config::GetInt32(ini, hdf, "ThreadCount", 5, false);
   m_maxRequest = Config::GetInt32(ini, hdf, "MaxRequest", 500, false);
   m_maxDuration = Config::GetInt32(ini, hdf, "MaxDuration", 120, false);
@@ -65,7 +67,7 @@ SatelliteServerInfo::SatelliteServerInfo(const IniSetting::Map& ini,
   if (type == "InternalPageServer") {
     m_type = SatelliteServer::Type::KindOfInternalPageServer;
     std::vector<std::string> urls;
-    urls = Config::GetVector(ini, hdf, "URLs", urls, false);
+    urls = Config::GetStrVector(ini, hdf, "URLs", urls, false);
     for (unsigned int i = 0; i < urls.size(); i++) {
       m_urls.insert(format_pattern(urls[i], true));
     }
@@ -99,7 +101,7 @@ struct InternalPageServer : SatelliteServer {
   explicit InternalPageServer(std::shared_ptr<SatelliteServerInfo> info)
     : m_allowedURLs(info->getURLs()) {
     m_server = ServerFactoryRegistry::createServer
-      (RuntimeOption::ServerType, RuntimeOption::ServerIP, info->getPort(),
+      (RuntimeOption::ServerType, info->getServerIP(), info->getPort(),
        info->getThreadCount());
     m_server->setRequestHandlerFactory<HttpRequestHandler>(
       info->getTimeoutSeconds().count());
@@ -113,6 +115,9 @@ struct InternalPageServer : SatelliteServer {
   virtual void stop() {
     m_server->stop();
     m_server->waitForEnd();
+  }
+  virtual size_t getMaxThreadCount() {
+    return m_server->getActiveWorker();
   }
   virtual int getActiveWorker() {
     return m_server->getActiveWorker();
@@ -144,7 +149,7 @@ private:
 struct RPCServer : SatelliteServer {
   explicit RPCServer(std::shared_ptr<SatelliteServerInfo> info) {
     m_server = ServerFactoryRegistry::createServer
-      (RuntimeOption::ServerType, RuntimeOption::ServerIP, info->getPort(),
+      (RuntimeOption::ServerType, info->getServerIP(), info->getPort(),
        info->getThreadCount());
     m_server->setRequestHandlerFactory([info] {
         auto handler = make_unique<RPCRequestHandler>(
@@ -160,6 +165,9 @@ struct RPCServer : SatelliteServer {
   virtual void stop() {
     m_server->stop();
     m_server->waitForEnd();
+  }
+  virtual size_t getMaxThreadCount() {
+    return m_server->getActiveWorker();
   }
   virtual int getActiveWorker() {
     return m_server->getActiveWorker();
@@ -189,7 +197,7 @@ SatelliteServer::Create(std::shared_ptr<SatelliteServerInfo> info) {
       satellite.reset(new RPCServer(info));
       break;
     default:
-      assert(false);
+      assertx(false);
     }
     if (satellite) {
       satellite->setName(info->getName());

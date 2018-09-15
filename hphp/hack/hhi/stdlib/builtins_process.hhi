@@ -3,41 +3,66 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
 const int WNOHANG   = 0b001;
 const int WUNTRACED = 0b010;
 
+<<__PHPStdLib>>
 function pcntl_alarm($seconds);
+<<__PHPStdLib>>
 function pcntl_exec($path, $args = null, $envs = null);
+<<__PHPStdLib>>
 function pcntl_fork();
+<<__PHPStdLib>>
 function pcntl_getpriority($pid = 0, $process_identifier = 0);
+<<__PHPStdLib>>
 function pcntl_setpriority($priority, $pid = 0, $process_identifier = 0);
+<<__PHPStdLib>>
 function pcntl_signal($signo, $handler, $restart_syscalls = true);
 
+<<__PHPStdLib>>
 function pcntl_wait(&$status, $options = 0);
+<<__PHPStdLib>>
 function pcntl_waitpid($pid, &$status, $options = 0);
+<<__PHPStdLib>>
 function pcntl_wexitstatus($status);
+<<__PHPStdLib>>
 function pcntl_wifexited($status);
+<<__PHPStdLib>>
 function pcntl_wifsignaled($status);
+<<__PHPStdLib>>
 function pcntl_wifstopped($status);
+<<__PHPStdLib>>
 function pcntl_wstopsig($status);
+<<__PHPStdLib>>
 function pcntl_wtermsig($status);
+<<__PHPStdLib>>
 function pcntl_signal_dispatch();
+<<__PHPStdLib>>
 function shell_exec($cmd);
+<<__PHPStdLib>>
 function exec($command, &$output = null, &$return_var = null);
+<<__PHPStdLib>>
 function passthru($command, &$return_var = null);
+<<__PHPStdLib>>
 function system($command, &$return_var = null);
+<<__PHPStdLib>>
 function proc_open($cmd, $descriptorspec, &$pipes, $cwd = null, $env = null, $other_options = null);
+<<__PHPStdLib>>
 function proc_terminate($process, $signal = 0);
+<<__PHPStdLib>>
 function proc_close($process);
+<<__PHPStdLib>>
 function proc_get_status($process);
+<<__PHPStdLib>>
 function proc_nice($increment);
+<<__PHPStdLib>>
 function escapeshellarg($arg);
+<<__PHPStdLib>>
 function escapeshellcmd($command);
 
 const int SIGABRT = 6;

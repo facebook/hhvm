@@ -21,80 +21,63 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-ArrayInit::ArrayInit(size_t n, Map)
-#ifdef DEBUG
-  : m_addCount(0)
-  , m_expectedCount(n)
-#endif
-{
-  m_data = MixedArray::MakeReserveMixed(n);
-  assert(m_data->hasExactlyOneRef());
-}
-
-ArrayInit::ArrayInit(size_t n, Map, CheckAllocation)
-#ifdef DEBUG
-  : m_addCount(0)
-  , m_expectedCount(n)
-#endif
-{
-  if (n > std::numeric_limits<int>::max()) {
-    MM().forceOOM();
-    check_non_safepoint_surprise();
-  }
-  auto const allocsz = computeAllocBytes(computeScaleFromSize(n));
-  if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
-    check_non_safepoint_surprise();
-  }
-  m_data = MixedArray::MakeReserveMixed(n);
-  assert(m_data->hasExactlyOneRef());
-  check_non_safepoint_surprise();
-}
-
-DictInit::DictInit(size_t n)
-#ifdef DEBUG
-  : m_addCount(0)
-  , m_expectedCount(n)
-#endif
-{
-  m_data = MixedArray::MakeReserveDict(n);
-  assert(m_data->hasExactlyOneRef());
-}
-
 DictInit::DictInit(size_t n, CheckAllocation)
-#ifdef DEBUG
-  : m_addCount(0)
-  , m_expectedCount(n)
-#endif
+  : ArrayInitBase(n, CheckAllocation{})
 {
   if (n > std::numeric_limits<int>::max()) {
-    MM().forceOOM();
+    tl_heap->forceOOM();
     check_non_safepoint_surprise();
   }
-  auto const allocsz = computeAllocBytes(computeScaleFromSize(n));
-  if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
+  auto const allocsz = MixedArray::computeAllocBytes(
+                         MixedArray::computeScaleFromSize(n)
+                       );
+  if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }
-  m_data = MixedArray::MakeReserveDict(n);
-  assert(m_data->hasExactlyOneRef());
+  m_arr = MixedArray::MakeReserveDict(n);
+  assertx(m_arr->hasExactlyOneRef());
   check_non_safepoint_surprise();
 }
 
 KeysetInit::KeysetInit(size_t n, CheckAllocation)
-#ifdef DEBUG
-  : m_addCount(0)
-  , m_expectedCount(n)
+  : ArrayInitBase(n, CheckAllocation{})
+{
+  if (n > std::numeric_limits<int>::max()) {
+    tl_heap->forceOOM();
+    check_non_safepoint_surprise();
+  }
+  auto const allocsz = SetArray::computeAllocBytes(
+                         SetArray::computeScaleFromSize(n)
+                       );
+  if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
+    check_non_safepoint_surprise();
+  }
+  m_arr = SetArray::MakeReserveSet(n);
+  assertx(m_arr->hasExactlyOneRef());
+  check_non_safepoint_surprise();
+}
+
+DArrayInit::DArrayInit(size_t n, CheckAllocation)
+    : m_arr{nullptr}
+#ifndef NDEBUG
+    , m_addCount(0)
+    , m_expectedCount(n)
 #endif
 {
   if (n > std::numeric_limits<int>::max()) {
-    MM().forceOOM();
+    tl_heap->forceOOM();
     check_non_safepoint_surprise();
   }
-  auto const allocsz = computeAllocBytes(computeScaleFromSize(n));
-  if (UNLIKELY(allocsz > kMaxSmallSize && MM().preAllocOOM(allocsz))) {
+  auto const allocsz = MixedArray::computeAllocBytes(
+                         MixedArray::computeScaleFromSize(n)
+                       );
+  if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }
-  m_keyset = SetArray::MakeReserveSet(n);
-  assert(m_keyset->hasExactlyOneRef());
+  m_arr = RuntimeOption::EvalHackArrDVArrs
+    ? MixedArray::MakeReserveDict(n)
+    : MixedArray::MakeReserveDArray(n);
+  assertx(m_arr->hasExactlyOneRef());
   check_non_safepoint_surprise();
 }
 

@@ -35,6 +35,10 @@ function test_all($str) {
   echo "====\n";
 }
 
+
+<<__EntryPoint>>
+function main_strings_with_colons() {
 test_all("stc");
 test_all("dyn");
 X::bar("W::non");
+}

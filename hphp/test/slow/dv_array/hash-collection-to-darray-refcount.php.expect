@@ -1,0 +1,6 @@
+array(2) {
+  [42]=>
+  int(42)
+  ["hello"]=>
+  string(5) "hello"
+}

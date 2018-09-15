@@ -152,30 +152,30 @@ struct StringBuffer {
    * Mutate a character in existing buffer.
    */
   void set(uint32_t offset, char c) {
-    assert(offset < m_len);
-    m_buffer[offset] = c;
+    assertx(offset < m_len);
+    m_str->mutableData()[offset] = c;
   }
 
   /*
    * Append various types of things to this string.
    */
   void append(char c) {
-    if (m_buffer && m_len < m_cap) {
-      m_buffer[m_len++] = c;
+    if (m_str && m_len < m_cap) {
+      m_str->mutableData()[m_len++] = c;
       return;
     }
     appendHelper(c);
   }
   void append(unsigned char c) { append((char)c);}
-  void append(const char* s) { assert(s); append(s, strlen(s)); }
+  void append(const char* s) { assertx(s); append(s, strlen(s)); }
   void append(const String& s) { append(s.data(), s.size()); }
   void append(const std::string& s) { append(s.data(), s.size()); }
   void append(const StringData* s) { append(s->data(), s->size()); }
   void append(folly::StringPiece s) { append(s.data(), s.size()); }
   void append(const char* s, int len) {
-    assert(len >= 0);
-    if (m_buffer && len <= m_cap - m_len) {
-      memcpy(m_buffer + m_len, s, len);
+    assertx(len >= 0);
+    if (m_str && len <= m_cap - m_len) {
+      memcpy(m_str->mutableData() + m_len, s, len);
       m_len += len;
       return;
     }
@@ -210,97 +210,15 @@ private:
   void appendHelper(char c);
   void growBy(int spaceRequired);
   void makeValid(uint32_t minCap);
-  bool valid() const { return m_buffer != nullptr; }
+  bool valid() const { return m_str != nullptr; }
 
 private:
   StringData* m_str;
-  char *m_buffer;
   uint32_t m_initialCap;
   uint32_t m_maxBytes;
   uint32_t m_cap;                    // doesn't include null terminator
   uint32_t m_len;
 };
-
-/*
- * StringBuffer-like wrapper for a malloc'd, null-terminated C-style
- * string.
- */
-struct CstrBuffer {
-  static const unsigned kMaxCap = INT_MAX;
-
-  /*
-   * Create a buffer with enough space for a string of length `len'.
-   * (I.e. an allocation of size len + 1.)
-   *
-   * Pre: len <= kMaxCap
-   */
-  explicit CstrBuffer(int len);
-
-  /*
-   * Take ownership of an existing malloc'd buffer containing a
-   * null-terminated string of length `len'.  It is assumed the
-   * capacity is also len.
-   *
-   * Pre: len < kMaxCap
-   */
-  CstrBuffer(char* data, int len);
-
-  /*
-   * Create a CstrBuffer, attempting to read the contents of a given
-   * file.
-   *
-   * I/O errors are not reported.  size() will just be zero in that
-   * case.
-   *
-   * Post: valid()
-   */
-  explicit CstrBuffer(const char* filename);
-
-  CstrBuffer(const CstrBuffer&) = delete;
-  CstrBuffer& operator=(const CstrBuffer&) = delete;
-  ~CstrBuffer();
-
-  /*
-   * Read-only access to the data this buffer contains.  Guaranteed to
-   * be null-terminated.
-   *
-   * Pre: valid()
-   */
-  const char* data() const;
-  unsigned size() const { return m_len; }
-
-  /*
-   * Returns whether this CstrBuffer contains a buffer.  This can only
-   * return false if detach() has been called.
-   */
-  bool valid() const { return m_buffer != nullptr; }
-
-  /*
-   * Append the supplied data to this string.
-   *
-   * Pre: valid()
-   */
-  void append(folly::StringPiece);
-
-  /*
-   * Create a request-local string from this buffer.
-   *
-   * Pre: valid()
-   * Post: !valid()
-   */
-  String detach();
-
-private:
-  char* m_buffer;
-  unsigned m_len;
-  unsigned m_cap; // doesn't include the space for the \0
-};
-
-inline const char* CstrBuffer::data() const {
-  assert(m_len <= m_cap);
-  m_buffer[m_len] = 0;
-  return m_buffer;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

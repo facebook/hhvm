@@ -1,1 +1,1 @@
-Fatal error: Trying to clone an uncloneable object of class Exception
+Fatal error: Trying to clone an uncloneable object of class Exception in %s/test/quick/exceptions_clone.php on line 3

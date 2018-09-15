@@ -1,1 +1,1 @@
-Fatal error: String length exceeded 2^31-2: %d in %s on line 2
+Fatal error: String length exceeded: %d > %d in %s on line %d

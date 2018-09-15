@@ -7,4 +7,8 @@ function main() {
     var_dump("finally");
   }
 }
+
+<<__EntryPoint>>
+function main_fall_through() {
 main();
+}

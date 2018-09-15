@@ -32,6 +32,7 @@
 
 #include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/unit-util.h"
 
 #include "hphp/util/text-util.h"
 
@@ -59,11 +60,6 @@ inline bool stringMatches(const StringData* rowString, const StringData* sd) {
       rowString->same(sd)));
 }
 
-template<class T = void>
-T* handleToPtr(rds::Handle h) {
-  return (T*)((char*)rds::tl_base + h);
-}
-
 template<class Cache>
 typename Cache::Pair* keyToPair(Cache* cache, const StringData* k) {
   assertx(folly::isPowTwo(Cache::kNumLines));
@@ -78,11 +74,10 @@ typename Cache::Pair* keyToPair(Cache* cache, const StringData* k) {
 // Set of FuncCache handles for dynamic function callsites, used for
 // invalidation when a function is renamed.
 static std::mutex funcCacheMutex;
-static std::vector<rds::Link<FuncCache, true /* normal_only */>>
-  funcCacheEntries;
+static std::vector<rds::Link<FuncCache,rds::Mode::Normal>> funcCacheEntries;
 
 rds::Handle FuncCache::alloc() {
-  auto const link = rds::alloc<FuncCache,sizeof(Pair),true>();
+  auto const link = rds::alloc<FuncCache,rds::Mode::Normal,sizeof(Pair)>();
   std::lock_guard<std::mutex> g(funcCacheMutex);
   funcCacheEntries.push_back(link);
   return link.handle();
@@ -92,7 +87,7 @@ void FuncCache::lookup(rds::Handle handle,
                        StringData* sd,
                        ActRec* ar,
                        ActRec* fp) {
-  auto const thiz = handleToPtr<FuncCache>(handle);
+  auto const thiz = rds::handleToPtr<FuncCache, rds::Mode::Normal>(handle);
   if (!rds::isHandleInit(handle, rds::NormalTag{})) {
     for (std::size_t i = 0; i < FuncCache::kNumLines; ++i) {
       thiz->m_pairs[i].m_key = nullptr;
@@ -104,23 +99,26 @@ void FuncCache::lookup(rds::Handle handle,
   const StringData* pairSd = pair->m_key;
   if (!stringMatches(pairSd, sd)) {
     // Miss. Does it actually exist?
-    auto const* func = Unit::lookupDynCallFunc(sd);
+    auto const* func = Unit::lookupFunc(sd);
     if (UNLIKELY(!func)) {
       ObjectData *this_ = nullptr;
       Class* self_ = nullptr;
       StringData* inv = nullptr;
+      bool dynamic = false;
       try {
         func = vm_decode_function(
-          String(sd),
+          Variant{sd},
           fp,
           false /* forward */,
           this_,
           self_,
           inv,
+          dynamic,
           DecodeFlags::NoWarn);
         if (!func) {
-          raise_error("Call to undefined function %s()", sd->data());
+          raise_call_to_undefined(sd);
         }
+        assertx(dynamic);
       } catch (...) {
         *arPreliveOverwriteCells(ar) = make_tv<KindOfString>(sd);
         throw;
@@ -130,11 +128,13 @@ void FuncCache::lookup(rds::Handle handle,
         ar->m_func = func;
         ar->setThis(this_);
         this_->incRefCount();
+        if (UNLIKELY(inv != nullptr)) ar->setMagicDispatch(inv);
         return;
       }
       if (self_) {
         ar->m_func = func;
         ar->setClass(self_);
+        if (UNLIKELY(inv != nullptr)) ar->setMagicDispatch(inv);
         return;
       }
     }
@@ -162,11 +162,11 @@ void invalidateForRenameFunction(const StringData* name) {
 // ClassCache
 
 rds::Handle ClassCache::alloc() {
-  return rds::alloc<ClassCache,sizeof(Pair)>().handle();
+  return rds::alloc<ClassCache,rds::Mode::Normal,sizeof(Pair)>().handle();
 }
 
 const Class* ClassCache::lookup(rds::Handle handle, StringData* name) {
-  auto const thiz = handleToPtr<ClassCache>(handle);
+  auto const thiz = rds::handleToPtr<ClassCache, rds::Mode::Normal>(handle);
   if (!rds::isHandleInit(handle, rds::NormalTag{})) {
     for (std::size_t i = 0; i < ClassCache::kNumLines; ++i) {
       thiz->m_pairs[i].m_key = nullptr;
@@ -250,7 +250,7 @@ void lookup(Entry* mce, ActRec* ar, StringData* name, Class* cls, Class* ctx) {
       return nullFunc(ar, name);
     }
     ar->setMagicDispatch(name);
-    assert(!(func->attrs() & AttrStatic));
+    assertx(!(func->attrs() & AttrStatic));
     ar->m_func   = func;
     mce->m_key   = reinterpret_cast<uintptr_t>(cls) | 0x1u;
     mce->m_value = func;
@@ -298,16 +298,16 @@ void readMagicOrStatic(Entry* mce,
   decRefObj(obj);
 }
 
-template<bool fatal>
-NEVER_INLINE
-void readPublicStatic(Entry* mce,
-                      ActRec* ar,
-                      Class* cls,
-                      const Func* cand) {
+template <bool fatal>
+NEVER_INLINE void
+readPublicStatic(Entry* mce, ActRec* ar, Class* cls, const Func* /*cand*/) {
   mce->m_key = reinterpret_cast<uintptr_t>(cls) | 0x2u;
   auto const obj = ar->getThis();
   ar->setClass(cls);
   decRefObj(obj);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }
 
 template<bool fatal>
@@ -321,7 +321,7 @@ void handleSlowPath(rds::Handle mce_handle,
   assertx(ar->getThisUnsafe()->getVMClass() == cls);
   assertx(name->isStatic());
 
-  auto const mce = &rds::handleToRef<Entry>(mce_handle);
+  auto const mce = &rds::handleToRef<Entry, rds::Mode::Normal>(mce_handle);
   if (!rds::isHandleInit(mce_handle, rds::NormalTag{})) {
     mce->m_key = 0;
     mce->m_value = nullptr;
@@ -459,9 +459,6 @@ void handleSlowPath(rds::Handle mce_handle,
   return lookup<fatal>(mce, ar, name, cls, ctx);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-}
-
 template<bool fatal>
 void handlePrimeCacheInit(rds::Handle mce_handle,
                           ActRec* ar,
@@ -469,7 +466,7 @@ void handlePrimeCacheInit(rds::Handle mce_handle,
                           Class* cls,
                           Class* ctx,
                           uintptr_t rawTarget) {
-  auto const mce = &rds::handleToRef<Entry>(mce_handle);
+  auto const mce = rds::handleToPtr<Entry, rds::Mode::Normal>(mce_handle);
   if (!rds::isHandleInit(mce_handle, rds::NormalTag{})) {
     mce->m_key = 0;
     mce->m_value = nullptr;
@@ -504,10 +501,6 @@ void handlePrimeCacheInit(rds::Handle mce_handle,
 
   // First fill the request local method cache for this call.
   lookup<fatal>(mce, ar, name, cls, ctx);
-
-  // We are using whether the code is already smashed to determine which thread
-  // should free the SmashLoc.
-  auto codeLock = tc::lockCode();
 
   auto smashMov = [&] (TCA addr, uintptr_t value) -> bool {
     auto const imm = smashableMovqImm(addr);
@@ -560,12 +553,8 @@ void handlePrimeCacheInit(rds::Handle mce_handle,
 
   // Regardless of whether the inline cache was populated, smash the
   // call to start doing real dispatch.
-#ifdef MSVC_REQUIRE_AUTO_TEMPLATED_OVERLOAD
-  auto hsp = handleSlowPath<fatal>;
-  smashCall(callAddr, reinterpret_cast<TCA>(hsp));
-#else
-  smashCall(callAddr, reinterpret_cast<TCA>(handleSlowPath<fatal>));
-#endif
+  smashCall(callAddr, fatal ?
+            tc::ustubs().handleSlowPathFatal : tc::ustubs().handleSlowPath);
 }
 
 template
@@ -575,6 +564,14 @@ void handlePrimeCacheInit<false>(rds::Handle, ActRec*, StringData*,
 template
 void handlePrimeCacheInit<true>(rds::Handle, ActRec*, StringData*,
                                 Class*, Class*, uintptr_t);
+
+template
+void handleSlowPath<false>(rds::Handle, ActRec*, StringData*,
+                           Class*, Class*, uintptr_t);
+
+template
+void handleSlowPath<true>(rds::Handle, ActRec*, StringData*,
+                          Class*, Class*, uintptr_t);
 
 } // namespace MethodCache
 
@@ -599,7 +596,7 @@ static const StringData* mangleSmcName(const StringData* cls,
 rds::Handle StaticMethodCache::alloc(const StringData* clsName,
                                      const StringData* methName,
                                      const char* ctxName) {
-  return rds::bind<StaticMethodCache>(
+  return rds::bind<StaticMethodCache, rds::Mode::Normal>(
     rds::StaticMethod { mangleSmcName(clsName, methName, ctxName) }
   ).handle();
 }
@@ -607,7 +604,7 @@ rds::Handle StaticMethodCache::alloc(const StringData* clsName,
 rds::Handle StaticMethodFCache::alloc(const StringData* clsName,
                                       const StringData* methName,
                                       const char* ctxName) {
-  return rds::bind<StaticMethodFCache>(
+  return rds::bind<StaticMethodFCache, rds::Mode::Normal>(
     rds::StaticMethodF { mangleSmcName(clsName, methName, ctxName) }
   ).handle();
 }
@@ -617,10 +614,8 @@ StaticMethodCache::lookup(rds::Handle handle, const NamedEntity *ne,
                           const StringData* clsName,
                           const StringData* methName, TypedValue* vmfp) {
   assertx(rds::isNormalHandle(handle));
-  StaticMethodCache* thiz = static_cast<StaticMethodCache*>
-    (handleToPtr(handle));
+  auto thiz = rds::handleToPtr<StaticMethodCache, rds::Mode::Normal>(handle);
   Stats::inc(Stats::TgtCache_StaticMethodMiss);
-  Stats::inc(Stats::TgtCache_StaticMethodHit, -1);
   TRACE(1, "miss %s :: %s caller %p\n",
         clsName->data(), methName->data(), __builtin_return_address(0));
 
@@ -634,9 +629,11 @@ StaticMethodCache::lookup(rds::Handle handle, const NamedEntity *ne,
     // After this call, it's a post-condition that the RDS entry for `cls' is
     // initialized, so make sure it has been as a side-effect of
     // Unit::loadClass().
-    DEBUG_ONLY auto const cls_ch = ne->getClassHandle();
+    auto const cls_ch = ne->getClassHandle();
     assertx(rds::isHandleInit(cls_ch));
-    assertx(rds::handleToRef<LowPtr<Class>>(cls_ch).get() == cls);
+    DEBUG_ONLY auto const p =
+      rds::handleToRef<LowPtr<Class>, rds::Mode::NonLocal>(cls_ch);
+    assertx(cls == p.get());
   }
 
   LookupResult res = lookupClsMethod(f, cls, methName,
@@ -668,8 +665,7 @@ StaticMethodFCache::lookup(rds::Handle handle, const Class* cls,
                            const StringData* methName, TypedValue* vmfp) {
   assertx(cls);
   assertx(rds::isNormalHandle(handle));
-  StaticMethodFCache* thiz = static_cast<StaticMethodFCache*>
-    (handleToPtr(handle));
+  auto thiz = rds::handleToPtr<StaticMethodFCache, rds::Mode::Normal>(handle);
   Stats::inc(Stats::TgtCache_StaticMethodFMiss);
   Stats::inc(Stats::TgtCache_StaticMethodFHit, -1);
 

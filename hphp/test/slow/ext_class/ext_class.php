@@ -14,6 +14,9 @@ interface itestable {
   function bar();
 }
 
+
+<<__EntryPoint>>
+function main_ext_class() {
 $classes = get_declared_classes();
 var_dump(in_array("test", $classes, true));
 
@@ -29,3 +32,4 @@ var_dump(get_class_methods("TEst")[0] === "foo");
 var_dump(get_class_vars("TEst") === array("foo" => null));
 
 var_dump(get_class_constants("test") === array("const_foo" => "f"));
+}

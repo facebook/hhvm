@@ -20,9 +20,6 @@
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/compiler/analysis/constant_table.h"
-#include "hphp/compiler/analysis/variable_table.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/text-util.h"
 #include "hphp/compiler/option.h"
@@ -42,18 +39,17 @@ ConstantExpression::ConstantExpression
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ConstantExpression)),
     m_name(name), m_origName(name), m_hadBackslash(hadBackslash),
     m_docComment(docComment), m_valid(false), m_dynamic(false),
-    m_visited(false), m_depsSet(false) {
+    m_visited(false) {
 }
 
-void ConstantExpression::onParse(AnalysisResultConstPtr ar,
-                                 FileScopePtr scope) {
+void ConstantExpression::onParse(AnalysisResultConstRawPtr ar,
+                                 FileScopePtr /*scope*/) {
   ar->parseOnDemandByConstant(m_name);
 }
 
 ExpressionPtr ConstantExpression::clone() {
   ConstantExpressionPtr exp(new ConstantExpression(*this));
   Expression::deepCopy(exp);
-  m_depsSet = false;
   return exp;
 }
 
@@ -102,110 +98,10 @@ bool ConstantExpression::getScalarValue(Variant &value) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// parser functions
-
-///////////////////////////////////////////////////////////////////////////////
-// static analysis functions
-
-Symbol *ConstantExpression::resolveNS(AnalysisResultConstPtr ar) {
-  BlockScopeConstPtr block = ar->findConstantDeclarer(m_name);
-  if (!block) {
-    if (!hadBackslash() && Option::WholeProgram) {
-      int pos = m_name.rfind('\\');
-      m_name = m_name.substr(pos + 1);
-      block = ar->findConstantDeclarer(m_name);
-    }
-    if (!block) return 0;
-  }
-  Symbol *sym = const_cast<Symbol*>(block->getConstants()->getSymbol(m_name));
-  always_assert(sym);
-  return sym;
-}
-
-void ConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
-  if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
-    Symbol *sym = resolveNS(ar);
-    if (!(m_context & LValue) && !m_dynamic) {
-      if (sym && !sym->isSystem()) {
-        if (sym->isDynamic()) {
-          m_dynamic = true;
-        } else {
-          ConstructPtr decl = sym->getDeclaration();
-          if (decl) {
-            decl->getScope()->addUse(
-              getScope(), BlockScope::UseKindConstRef);
-            m_depsSet = true;
-          }
-        }
-      }
-    }
-  }
-}
-
-ExpressionPtr ConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
-  if (ar->getPhase() < AnalysisResult::FirstPreOptimize) {
-    return ExpressionPtr();
-  }
-  ConstructPtr decl;
-  while (!isScalar() && !m_dynamic && !(m_context & LValue)) {
-    const Symbol *sym = resolveNS(ar);
-    if (!sym) {
-      // The constant may be defined in a native extension, so check if its
-      // available and persistent.
-      auto const cns = Unit::lookupPersistentCns(makeStaticString(m_name));
-      if (!cns) break;
-      auto const& value = tvAsCVarRef(cns);
-      if (!value.isAllowedAsConstantValue()) break;
-      auto rep = makeScalarExpression(ar, value);
-      rep->setComment(getText());
-      copyLocationTo(rep);
-      return replaceValue(rep);
-    }
-    if (!const_cast<Symbol*>(sym)->checkDefined() || sym->isDynamic()) {
-      sym = 0;
-      m_dynamic = true;
-    }
-    if (!sym) break;
-    if (!sym->isSystem()) BlockScope::s_constMutex.lock();
-    auto value = dynamic_pointer_cast<Expression>(sym->getValue());
-    if (!sym->isSystem()) BlockScope::s_constMutex.unlock();
-
-    if (!value || !value->isScalar()) {
-      if (!m_depsSet && sym->getDeclaration()) {
-        sym->getDeclaration()->getScope()->addUse(
-          getScope(), BlockScope::UseKindConstRef);
-        m_depsSet = true;
-      }
-      break;
-    }
-
-    Variant scalarValue;
-    if (value->getScalarValue(scalarValue) &&
-        !scalarValue.isAllowedAsConstantValue()) {
-      // block further optimization
-      const_cast<Symbol*>(sym)->setDynamic();
-      m_dynamic = true;
-      break;
-    }
-
-    if (sym->isSystem() && !value->is(KindOfScalarExpression)) {
-      if (ExpressionPtr opt = value->preOptimize(ar)) {
-        value = opt;
-      }
-    }
-    ExpressionPtr rep = Clone(value, getScope());
-    rep->setComment(getText());
-    copyLocationTo(rep);
-    return replaceValue(rep);
-  }
-
-  return ExpressionPtr();
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
-void ConstantExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
+void ConstantExpression::outputPHP(CodeGenerator& cg,
+                                   AnalysisResultPtr /*ar*/) {
   if (hadBackslash()) {
     cg_printf("\\%s", m_name.c_str());
   } else {

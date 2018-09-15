@@ -1,0 +1,6 @@
+File "nullable_mayberx2.php", line 10, characters 3-44:
+Reactive functions can only call other reactive functions. (Typing[4200])
+File "nullable_mayberx2.php", line 4, characters 10-10:
+This function is non-reactive.
+File "nullable_mayberx2.php", line 10, characters 5-43:
+This argument caused function to be non-reactive.

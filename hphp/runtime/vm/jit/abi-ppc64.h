@@ -37,7 +37,7 @@ const Abi& abi(CodeKind kind = CodeKind::Trace);
 
 constexpr PhysReg rvmfp()      { return ppc64_asm::reg::r31; }
 constexpr PhysReg rvmsp()      { return ppc64_asm::reg::r29; }
-constexpr PhysReg rvmtl()      { return ppc64_asm::reg::r30; }
+constexpr PhysReg rvmtl()      { return ppc64_asm::reg::r26; }
 constexpr PhysReg rsp()        { return ppc64_asm::reg::r27; }
 
 // optional in function linkage/used in function prologues
@@ -116,7 +116,9 @@ constexpr RegXMM rFasm = ppc64_asm::reg::f15;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline Vflags required_flags(jit::ConditionCode cc) { return 0xff; }
+inline Vflags required_flags(jit::ConditionCode /*cc*/) {
+  return 0xff;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -23,10 +23,10 @@
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/expression/unary_op_expression.h"
 #include "hphp/compiler/expression/binary_op_expression.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/expression/array_pair_expression.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/compiler/parser/parser.h"
 
 using namespace HPHP;
@@ -60,7 +60,6 @@ void ExpressionList::setContext(Context context) {
       if (m_exps[i]) {
         m_exps[i]->setContext(UnsetContext);
         m_exps[i]->setContext(LValue);
-        m_exps[i]->setContext(NoLValueWrapper);
       }
     }
   }
@@ -109,17 +108,10 @@ bool ExpressionList::isScalar() const {
   if (m_elems_kind != ElemsKind::None) {
     return isScalarArrayPairs();
   }
-  if (m_kind == ListKindParam) {
-    for (unsigned int i = m_exps.size(); i--; ) {
-      if (m_exps[i] && !m_exps[i]->isScalar()) return false;
-    }
-    return true;
+  for (unsigned int i = m_exps.size(); i--; ) {
+    if (m_exps[i] && !m_exps[i]->isScalar()) return false;
   }
-  if (!hasEffect()) {
-    ExpressionPtr v(listValue());
-    return v ? v->isScalar() : false;
-  }
-  return false;
+  return true;
 }
 
 bool ExpressionList::isNoObjectInvolved() const {
@@ -127,13 +119,6 @@ bool ExpressionList::isNoObjectInvolved() const {
     if (!exp->isScalar()) return false;
   }
   return true;
-}
-
-bool ExpressionList::containsDynamicConstant(AnalysisResultPtr ar) const {
-  for (const auto& exp : m_exps) {
-    if (exp->containsDynamicConstant(ar)) return true;
-  }
-  return false;
 }
 
 bool ExpressionList::isScalarArrayPairs() const {
@@ -146,6 +131,20 @@ bool ExpressionList::isScalarArrayPairs() const {
     if (!exp || !exp->isScalarArrayPair()) {
       return false;
     }
+  }
+  return true;
+}
+
+bool ExpressionList::isSetCollectionScalar() const {
+  assertx(getListKind() == ExpressionList::ListKindParam);
+
+  for (const auto& ape : m_exps) {
+    Variant val;
+    auto exp = dynamic_pointer_cast<ArrayPairExpression>(ape);
+    if (!exp || !exp->getValue() || !exp->getValue()->getScalarValue(val)) {
+      return false;
+    }
+    if (!val.isString() && !val.isInteger()) return false;
   }
   return true;
 }
@@ -186,22 +185,27 @@ bool ExpressionList::flattenLiteralStrings(
 
 bool ExpressionList::getScalarValue(Variant &value) {
   if (m_elems_kind != ElemsKind::None) {
-    ArrayInit init(m_exps.size(), ArrayInit::Mixed{});
-    auto const result = getListScalars(
-      [&](const Variant& n, const Variant& v) {
-        if (n.isInitialized()) {
-          init.setUnknownKey(n, v);
-        } else {
-          init.append(v);
+    try {
+      ThrowAllErrorsSetter taes;
+      ArrayInit init(m_exps.size(), ArrayInit::Mixed{});
+      auto const result = getListScalars(
+        [&](const Variant& n, const Variant& v) {
+          if (n.isInitialized()) {
+            init.setUnknownKey(n, v);
+          } else {
+            init.append(v);
+          }
+          return true;
         }
-        return true;
-      }
-    );
-    if (!result) return false;
-    value = init.toVariant();
-    return true;
+      );
+      if (!result) return false;
+      value = init.toVariant();
+      return true;
+    } catch (...) {
+      return false;
+    }
   }
-  if (m_kind != ListKindParam && !hasEffect()) {
+  if (m_kind != ListKindParam && isScalar()) {
     ExpressionPtr v(listValue());
     return v ? v->getScalarValue(value) : false;
   }
@@ -260,12 +264,6 @@ ExpressionPtr &ExpressionList::operator[](int index) {
   return m_exps[index];
 }
 
-void ExpressionList::analyzeProgram(AnalysisResultPtr ar) {
-  for (unsigned int i = 0; i < m_exps.size(); i++) {
-    if (m_exps[i]) m_exps[i]->analyzeProgram(ar);
-  }
-}
-
 bool ExpressionList::kidUnused(int i) const {
   if (m_kind == ListKindParam) {
     return false;
@@ -321,49 +319,6 @@ bool ExpressionList::isLiteralString() const {
 std::string ExpressionList::getLiteralString() const {
   ExpressionPtr v(listValue());
   return v ? v->getLiteralString() : std::string("");
-}
-
-void ExpressionList::optimize(AnalysisResultConstPtr ar) {
-  bool changed = false;
-  size_t i = m_exps.size();
-  if (m_kind != ListKindParam) {
-    size_t skip = m_kind == ListKindLeft ? 0 : i - 1;
-    while (i--) {
-      if (i != skip) {
-        ExpressionPtr &e = m_exps[i];
-        if (!e || (e->getContainedEffects() == NoEffect)) {
-          removeElement(i);
-          changed = true;
-        } else if (e->is(KindOfExpressionList)) {
-          auto el = static_pointer_cast<ExpressionList>(e);
-          removeElement(i);
-          for (size_t j = el->getCount(); j--; ) {
-            insertElement((*el)[j], i);
-          }
-          changed = true;
-        } else if (e->getLocalEffects() == NoEffect) {
-          e = e->unneeded();
-          // changed already handled by unneeded
-        }
-      }
-    }
-    if (m_exps.size() == 1) {
-      if (m_kind != ListKindWrappedNoWarn) m_kind = ListKindWrapped;
-    } else if (m_kind == ListKindLeft && m_exps[0]->isScalar()) {
-      ExpressionPtr e = m_exps[0];
-      removeElement(0);
-      addElement(e);
-      m_kind = ListKindWrapped;
-    }
-  }
-  if (changed) {
-    getScope()->addUpdates(BlockScope::UseKindCaller);
-  }
-}
-
-ExpressionPtr ExpressionList::preOptimize(AnalysisResultConstPtr ar) {
-  optimize(ar);
-  return ExpressionPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

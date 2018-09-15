@@ -9,9 +9,13 @@ function gen(&$x) {
 }
 function test() {
   $x = 0;
-  foreach (gen($x) as $y) {
+  foreach (gen(&$x) as $y) {
     var_dump($y);
   }
   var_dump($x);
 }
+
+<<__EntryPoint>>
+function main_2186() {
 test();
+}

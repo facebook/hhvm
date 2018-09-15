@@ -12,4 +12,8 @@ function foo() {
   var_dump($a());
   var_dump($abc, $var, $ref);
 }
+
+<<__EntryPoint>>
+function main_1921() {
 foo();
+}

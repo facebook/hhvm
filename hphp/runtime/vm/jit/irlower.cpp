@@ -73,7 +73,7 @@ void cgInst(IRLS& env, const IRInstruction* inst){
     if (auto const next = inst->next()) {
       v << jmp{label(env, next)};
     } else {
-      v << ud2{}; // or end?
+      v << trap{TRAP_REASON}; // or end?
     }
   }
 }
@@ -119,7 +119,7 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit, CodeKind kind,
   Timer timer(Timer::hhir_lower, unit.logEntry().get_pointer());
   SCOPE_ASSERT_DETAIL("hhir unit") { return show(unit); };
 
-  auto vunit = folly::make_unique<Vunit>();
+  auto vunit = std::make_unique<Vunit>();
   vunit->context = unit.context();
   vunit->log_entry = unit.logEntry().get_pointer();
   vunit->profiling = true;
@@ -131,8 +131,9 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit, CodeKind kind,
 
   // Create the initial set of vasm blocks, numbered the same as the
   // corresponding HHIR blocks.
+  // We initially create the blocks with 0 weight, and then set them below.
   for (uint32_t i = 0, n = unit.numBlocks(); i < n; ++i) {
-    env.labels[i] = vunit->makeBlock(AreaIndex::Main);
+    env.labels[i] = vunit->makeBlock(AreaIndex::Main, 0);
   }
   vunit->entry = env.labels[unit.entry()];
 
@@ -148,6 +149,7 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit, CodeKind kind,
 
     auto b = env.labels[block];
     vunit->blocks[b].area_idx = v.area();
+    vunit->blocks[b].weight = block->profCount() * areaWeightFactor(v.area());
     v.use(b);
 
     genBlock(env, v, vasm.cold(), *block);
@@ -158,6 +160,7 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit, CodeKind kind,
     assertx(vasm.frozen().empty() || vasm.frozen().closed());
   }
 
+  fixBlockWeights(*vunit);
   printUnit(kInitialVasmLevel, "after initial vasm generation", *vunit);
   assertx(check(*vunit));
   timer.stop();

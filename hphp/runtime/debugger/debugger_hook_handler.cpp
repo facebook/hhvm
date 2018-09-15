@@ -57,15 +57,13 @@ void proxySetBreakPoints(DebuggerProxy* proxy) {
       size_t numFuncs = cls->numMethods();
       if (numFuncs == 0) continue;
       auto methodName = bp->getFunction();
-      for (size_t i = 0; i < numFuncs; ++i) {
-        auto f = cls->getMethod(i);
+      for (size_t i2 = 0; i2 < numFuncs; ++i2) {
+        auto f = cls->getMethod(i2);
         if (!matchFunctionName(methodName, f)) continue;
         bp->m_bindState = BreakPointInfo::KnownToBeValid;
         phpAddBreakPointFuncEntry(f);
         break;
       }
-      // TODO(#2527229): what about superclass methods accessed via the derived
-      // class?
       continue;
     }
     auto funcName = bp->getFuncName();
@@ -98,7 +96,7 @@ void proxySetBreakPoints(DebuggerProxy* proxy) {
       auto expClsName = makeStaticString(exceptionClassName);
       auto cls = Unit::lookupClass(expClsName);
       if (cls != nullptr) {
-        auto baseClsName = makeStaticString("Exception");
+        static auto baseClsName = makeStaticString("Exception");
         auto baseCls = Unit::lookupClass(baseClsName);
         if (baseCls != nullptr) {
           if (cls->classof(baseCls)) {
@@ -163,8 +161,8 @@ void HphpdHook::onDefClass(const Class* cls) {
     // TODO: check name space separately
     if (bp->getClass() != clsName->data()) continue;
     bp->m_bindState = BreakPointInfo::KnownToBeInvalid;
-    for (size_t i = 0; i < numFuncs; ++i) {
-      auto f = cls->getMethod(i);
+    for (size_t i2 = 0; i2 < numFuncs; ++i2) {
+      auto f = cls->getMethod(i2);
       if (!matchFunctionName(bp->getFunction(), f)) continue;
       bp->m_bindState = BreakPointInfo::KnownToBeValid;
       phpAddBreakPointFuncEntry(f);

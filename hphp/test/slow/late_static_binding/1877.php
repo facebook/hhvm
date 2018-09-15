@@ -25,7 +25,11 @@ class B extends A {
  // 'parent' doesn't change 'static'
   }
 }
+ // BA
 
+
+<<__EntryPoint>>
+function main_1877() {
 $a = new A();
 $b = new B();
 
@@ -45,4 +49,4 @@ $a->foo();
   // A
 
 $a->foo2();
- // BA
+}

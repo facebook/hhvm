@@ -25,8 +25,12 @@ function main() {
   foreach ($mp as $k => $v) {
     $new_arr[$k] = $v;
   }
-  ksort($new_arr);
+  ksort(&$new_arr);
   var_dump($new_arr);
   echo "Done\n";
 }
+
+<<__EntryPoint>>
+function main_802() {
 main();
+}

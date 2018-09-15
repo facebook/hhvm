@@ -1,8 +1,5 @@
 <?hh
 
-
-error_reporting(-1);
-
 interface X {
   const X = 'const from X';
   function fromX();
@@ -35,4 +32,11 @@ function reflect() {
   }
 
 }
+
+
+
+<<__EntryPoint>>
+function main_class_ordering() {
+error_reporting(-1);
 reflect();
+}

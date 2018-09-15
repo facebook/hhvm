@@ -2,9 +2,9 @@
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
  *
  *)
 
@@ -56,7 +56,19 @@ let rec create_bars acc = function
   | 0 -> acc
   | i ->  create_bars ((create_bar i) :: acc) (i-1)
 
-let bar_13_diagnostics = ""
+let bar_10_clear_diagnostics = "
+/bar10.php:
+"
+
+let bar_107_diagnostics = {|
+/bar107.php:
+File "/bar107.php", line 4, characters 10-14:
+Invalid return type (Typing[4110])
+File "/bar107.php", line 3, characters 21-23:
+This is an int
+File "/foo.php", line 3, characters 17-22:
+It is incompatible with a string
+|}
 
 let () =
   let env = Test.setup_server () in
@@ -76,40 +88,37 @@ let () =
   let env = Test.open_file env foo_name ~contents:foo_returns_string in
   let env = Test.open_file env baz_name ~contents:baz_contents in
   let env = Test.wait env in
-  let env, _ = Test.status env in
   let env, loop_output = Test.(run_loop_once env default_loop_input) in
 
   (* Make sure that the open file is among the errors *)
   let diagnostics_map = get_diagnostics_map loop_output in
   let files_with_errors = get_files_with_errors diagnostics_map in
+
   let baz_name = Test.prepend_root baz_name in
   if not @@ SSet.mem files_with_errors baz_name then
     Test.fail "Expected diagnostics for baz.php";
 
-  (* Make sure that we only got errors for first 50 files *)
+  (* Trigger global recheck *)
+  let env, loop_output = Test.full_check env in
+
+  let diagnostics_map = get_diagnostics_map loop_output in
+  let files_with_errors = get_files_with_errors diagnostics_map in
+
+  SSet.iter files_with_errors ~f:print_endline;
+  (* Make sure that we only got errors for up to 10 global files *)
   let num_errors = SSet.cardinal files_with_errors in
-  if num_errors <> 50 then Test.fail "Expected to get results for 50 files";
+  if num_errors <> 9 then Test.fail "Expected to get results for 9 files";
 
   (* Fix one of the remaining errors *)
-  let bar_13_name = bar_name 13 in
-  let env, _ = Test.edit_file env bar_13_name "" in
+  let bar_10_name = bar_name 10 in
+  let env, _ = Test.edit_file env bar_10_name "" in
   let env = Test.wait env in
-  let _, loop_output = Test.(run_loop_once env default_loop_input) in
+  let env, loop_output = Test.(run_loop_once env default_loop_input) in
 
-  (* Check that the errors from bar13 are removed, and a new error out of
-   * pending 150 is pushed *)
-  let final_diagnostics_map = get_diagnostics_map loop_output in
-  let bar13_only_diagnostics =
-    SMap.find_unsafe final_diagnostics_map (Test.prepend_root bar_13_name) in
-  Test.assertEqual
-    (Test.errors_to_string bar13_only_diagnostics)
-    bar_13_diagnostics;
+  (* Check that the errors from bar10 are removed *)
+  Test.assert_diagnostics loop_output bar_10_clear_diagnostics;
 
-  (* Select files that didn't have errors before *)
-  let new_errors = SSet.diff
-    (get_files_with_errors final_diagnostics_map)
-    files_with_errors
-    |> SSet.elements
-  in
-  List.iter print_endline new_errors;
-  assert (new_errors = ["/bar143.php"])
+  (* Trigger another global recheck to get more global errors *)
+  let _, loop_output = Test.full_check env in
+
+  Test.assert_diagnostics loop_output bar_107_diagnostics;

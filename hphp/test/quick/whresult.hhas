@@ -1,0 +1,8 @@
+# Tests that WHResult properly fatals when top of stack is not a subclass of
+# WaitHandle
+
+.main {
+  Int 1
+  WHResult
+  RetC
+}

@@ -12,6 +12,6 @@ function test(): void {
   echo "{$a[0]}\n";
   echo "{ { {";
   echo "\n";
-  var_dump("$y");
+
   var_dump("$y$y");
 }

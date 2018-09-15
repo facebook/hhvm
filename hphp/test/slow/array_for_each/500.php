@@ -13,5 +13,9 @@ function test() {
   $a = null;
   var_dump('done');
 }
+
+<<__EntryPoint>>
+function main_500() {
 test();
 var_dump('exit');
+}

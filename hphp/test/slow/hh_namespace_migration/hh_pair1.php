@@ -8,4 +8,8 @@ function main() {
   var_dump($s->isEmpty());
 }
 
+
+<<__EntryPoint>>
+function main_hh_pair1() {
 main();
+}

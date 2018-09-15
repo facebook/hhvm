@@ -25,6 +25,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+const StaticString s_replay("replay");
+
 /**
  * This transport will capture what's in another transport's requests, and
  * record it in a file that later this same class can replay. Written for
@@ -52,6 +54,13 @@ struct ReplayTransport final : Transport {
   void removeHeaderImpl(const char *name) override;
   void sendImpl(const void *data, int size, int code, bool chunked, bool eom)
        override;
+
+  /**
+   * Get a description of the type of transport.
+   */
+  String describe() const override {
+    return s_replay;
+  }
 
   int getResponseCode() const { return m_code;}
   const std::string &getResponse() const { return m_response;}

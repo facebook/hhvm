@@ -17,11 +17,9 @@
 #include "hphp/compiler/expression/object_property_expression.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/expression_list.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/util/hash.h"
@@ -37,10 +35,8 @@ ObjectPropertyExpression::ObjectPropertyExpression
  ExpressionPtr object, ExpressionPtr property, PropAccessType propAccessType)
   : Expression(
       EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ObjectPropertyExpression)),
-    LocalEffectsContainer(AccessorEffect),
-    m_object(object), m_property(property), m_propSym(nullptr) {
+    m_object(object), m_property(property) {
   m_valid = false;
-  m_propSymValid = false;
   m_object->setContext(Expression::ObjectContext);
   m_object->setContext(Expression::AccessContext);
   m_nullsafe = (propAccessType == PropAccessType::NullSafe);
@@ -60,23 +56,6 @@ ExpressionPtr ObjectPropertyExpression::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-bool ObjectPropertyExpression::isNonPrivate(AnalysisResultPtr ar) {
-  // To tell whether a property is declared as private in the context
-  ClassScopePtr cls = getClassScope();
-  if (!cls || !cls->getVariables()->hasNonStaticPrivate()) return true;
-  if (m_property->getKindOf() != Expression::KindOfScalarExpression) {
-    return false;
-  }
-  auto name = dynamic_pointer_cast<ScalarExpression>(m_property);
-  auto const propName = name->getLiteralString();
-  if (propName.empty()) {
-    return false;
-  }
-  Symbol *sym = cls->getVariables()->getSymbol(propName);
-  if (!sym || sym->isStatic() || !sym->isPrivate()) return true;
-  return false;
-}
-
 void ObjectPropertyExpression::setContext(Context context) {
   m_context |= context;
   switch (context) {
@@ -85,8 +64,6 @@ void ObjectPropertyExpression::setContext(Context context) {
         m_object->setContext(Expression::LValue);
       }
       break;
-    case Expression::DeepAssignmentLHS:
-    case Expression::DeepOprLValue:
     case Expression::ExistContext:
     case Expression::UnsetContext:
     case Expression::DeepReference:
@@ -100,21 +77,11 @@ void ObjectPropertyExpression::setContext(Context context) {
     default:
       break;
   }
-  if (!m_valid &&
-      (m_context & (LValue|RefValue)) &&
-      !(m_context & AssignmentLHS)) {
-    setLocalEffect(CreateEffect);
-  }
-  if (context == InvokeArgument) {
-    setContext(NoLValueWrapper);
-  }
 }
 void ObjectPropertyExpression::clearContext(Context context) {
   m_context &= ~context;
   switch (context) {
     case Expression::LValue:
-    case Expression::DeepOprLValue:
-    case Expression::DeepAssignmentLHS:
     case Expression::UnsetContext:
     case Expression::DeepReference:
     case Expression::InvokeArgument:
@@ -126,24 +93,6 @@ void ObjectPropertyExpression::clearContext(Context context) {
       break;
     default:
       break;
-  }
-
-  if (!(m_context & (LValue|RefValue))) {
-    clearLocalEffect(CreateEffect);
-  }
-  if (context == InvokeArgument) {
-    clearContext(NoLValueWrapper);
-  }
-}
-
-void ObjectPropertyExpression::analyzeProgram(AnalysisResultPtr ar) {
-  m_object->analyzeProgram(ar);
-  m_property->analyzeProgram(ar);
-  if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    if (m_valid && !hasLocalEffect(UnknownEffect) &&
-        !m_object->isThis()) {
-      setLocalEffect(DiagnosticEffect);
-    }
   }
 }
 
@@ -184,6 +133,9 @@ void ObjectPropertyExpression::setNthKid(int n, ConstructPtr cp) {
 void ObjectPropertyExpression::outputPHP(CodeGenerator &cg,
                                          AnalysisResultPtr ar) {
   m_object->outputPHP(cg, ar);
+  if (m_nullsafe) {
+    cg_printf("?");
+  }
   cg_printf("->");
   if (m_property->getKindOf() == Expression::KindOfScalarExpression) {
     m_property->outputPHP(cg, ar);

@@ -41,4 +41,8 @@ function main() {
     var_dump($row[0] >= $row[1]);
   }
 }
+
+<<__EntryPoint>>
+function main_matrix() {
 main();
+}

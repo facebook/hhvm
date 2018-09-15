@@ -12,4 +12,8 @@ function main() {
   var_dump($x['something']);
   var_dump(is_object($x['something']));
 }
+
+<<__EntryPoint>>
+function main_array_018() {
 main();
+}

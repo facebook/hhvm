@@ -1,12 +1,12 @@
 keyset(3) {
-  string(1) "q"
-  int(1)
-  string(1) "1"
+  string(1) "r"
+  string(2) "un"
+  string(3) "uno"
 }
 keyset(3) {
-  string(1) "a"
-  string(1) "1"
-  int(1)
+  string(1) "b"
+  string(3) "one"
+  string(3) "ONE"
 }
 keyset(4) {
   int(1)

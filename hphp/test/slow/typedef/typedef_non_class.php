@@ -34,4 +34,8 @@ function main() {
   fooArray(array(1,2,3));
   fooString("asdasd");
 }
+
+<<__EntryPoint>>
+function main_typedef_non_class() {
 main();
+}

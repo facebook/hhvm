@@ -1,0 +1,69 @@
+2018-02-26: release 1.6.4
+  [compat] Tests should now work with older versions of jbuilder.
+
+2018-02-21: release 1.6.3
+  [compat] Fix tests.
+
+2018-01-25: release 1.6.1
+  [compat] Emit line directives always containing the file name,
+           as mandated starting with ocaml 4.07.
+
+2017-08-07: release 1.6.0
+  [pkg] BREAKING: cppo and cppo_ocamlbuild are now two distinct opam
+        packages.
+
+2017-04-24: release 1.5.0
+  [+ui] Added the `CAPITALIZE()` function.
+
+2016-08-19: release 1.4.0
+  [compat] Cppo is now safe-string ready.
+
+2016-04-20: release 1.3.2
+  [pkg] Cppo can now be built on MSVC.
+
+2015-09-20: release 1.3.1
+  [bug] Possible to have #endif between two matching parenthesis.
+
+2015-09-13: release 1.3.0
+  [+ui] Removed the need for escaping commas and parenthesis in macros.
+  [+ui] Blanks is now allowed in argument list in macro definitions.
+  [+ui] #directive with wrong arguments is now giving a proper error.
+  [bug] Fixed expansion of __FILE__ and __LINE__.
+
+2014-11-10: release 1.1.2
+  [+ui] Ocamlbuild_cppo: added the ocamlbuild flag `cppo_V(NAME:VERSION)`,
+        equivalent to `-V NAME:VERSION` (for _tags file).
+
+2014-11-10: release 1.1.1
+  [+ui] Ocamlbuild_cppo: added the ocamlbuild flag `cppo_V_OCAML`,
+        equivalent to `-V OCAML:VERSION` (for _tags file).
+
+2014-11-04: release 1.1.0
+  [+ui] Added the `-V NAME:VERSION` option.
+  [+ui] Support for tuples in comparisons: tuples can be constructed
+        and compared, e.g. `#if (2 + 2, 5) < (4, 5)`.
+
+2014-10-20: release 1.0.1
+  [+ui] `#elif` and `#else` can now be used in the same #if-#else statement.
+  [bug] Fixed the Ocamlbuild flag `cppo_n`.
+
+2014-09-06: release 1.0.0
+  [bug] OCaml comments are now better parsed. For example, (* '"' *) works.
+
+2014-06-10: release 0.9.4
+  [+ui] Added the ocamlbuild_cppo plugin for Ocamlbuild. To use it:
+        `-plugin(cppo_ocamlbuild)`.
+
+2012-02-03: release 0.9.3
+  [pkg] New way of building the tar.gz archive.
+
+2011-08-12: release 0.9.2
+  [+ui] Added two predefined macros STRINGIFY and CONCAT for making
+        string literals and for building identifiers respectively.
+
+2011-07-20: release 0.9.1
+  [+ui] Added support for processing sections of files using external programs
+        (#ext/#endext, -x option)
+  [doc] Moved and extended documentation into the README file.
+
+2009-11-17: initial version 0.9.0

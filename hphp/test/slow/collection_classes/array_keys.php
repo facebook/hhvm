@@ -4,7 +4,7 @@ function f($x) {
   foreach ($x as $k => $_) {
     var_dump($k);
   }
-  usort($x, function($x,$y) {
+  usort(&$x, function($x,$y) {
     if (is_int($x) != is_int($y)) {
       if (is_int($x)) return -1;
       return 1;
@@ -57,5 +57,9 @@ function main() {
   f(array_keys($pair, 22, true));
   f(array_keys($pair, '22', true));
 }
-main();
 
+
+<<__EntryPoint>>
+function main_array_keys() {
+main();
+}

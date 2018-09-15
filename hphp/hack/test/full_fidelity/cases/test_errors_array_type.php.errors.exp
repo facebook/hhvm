@@ -1,0 +1,3 @@
+(4,1)-(4,27) Cannot redeclare f() (previously declared in test_errors_array_type.php:3)
+(5,1)-(5,27) Cannot redeclare f() (previously declared in test_errors_array_type.php:4)
+(6,1)-(6,47) Cannot redeclare f() (previously declared in test_errors_array_type.php:5)

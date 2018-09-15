@@ -38,6 +38,7 @@ namespace __SystemLib {
 
       $pos = 0;
       $next_file_name = null;
+      $mode = null;
       while (!$this->eof()) {
         $header = $this->stream_get_contents(512);
         $pos += 512;
@@ -52,6 +53,7 @@ namespace __SystemLib {
           $next_file_name = null;
         }
 
+        $mode = octdec(substr($header, 100, 7));
         $size = octdec(substr($header, 124, 12));
         $timestamp = octdec(trim(substr($header, 136, 12)));
         $type = $header[156];
@@ -63,36 +65,50 @@ namespace __SystemLib {
           } else if ($filename == '.phar/alias.txt') {
             $this->alias = $this->stream_get_contents($size);
           }
-        } else if (substr($filename, -1) !== '/') {
-          $this->entries[$filename] = new ArchiveEntryStat(
-            /* crc = */ null,
-            $size,
-            /* compressed size = */ $size,
-            $timestamp
-          );
+        } else {
+          $entry_type = null;
 
           switch ($type) {
             case 'L':
+              invariant(
+                $filename === '././@LongLink',
+                "Expected magic filename '././@LongLink' for long file ".
+                "name, got %s instead",
+                $filename,
+              );
               $next_file_name = trim($this->stream_get_contents($size));
               break;
 
             case '0':
             case "\0":
-              $this->fileOffsets[$filename] = [$pos, $size];
+              $this->fileOffsets[$filename] = tuple($pos, $size);
+              $entry_type = ArchiveEntryType::FILE;
               break;
 
             case '2':
               // Assuming this is from GNU Tar
               $target = trim(substr($header, 157, 100), "\0");
               $this->symlinks[$filename] = $target;
+              $entry_type = ArchiveEntryType::SYMLINK;
               break;
 
             case '5':
-              // Directory, ignore
+              $entry_type = ArchiveEntryType::DIRECTORY;
               break;
 
             default:
               throw new Exception("type $type is not implemented yet");
+          }
+
+          if ($entry_type !== null) {
+            $this->entries[$filename] = new ArchiveEntryStat(
+              /* crc = */ null,
+              $size,
+              /* compressed size = */ $size,
+              $timestamp,
+              $mode,
+              $entry_type,
+            );
           }
         }
         $pos += $size;
@@ -115,27 +131,44 @@ namespace __SystemLib {
       $full_path = $root.'/'.$partial_path;
       $dir = dirname($full_path);
       if (!is_dir($dir)) {
-        mkdir($dir, 0777, true);
+        mkdir($dir, 0755, true);
       }
       return $full_path;
     }
 
     public function extractAllTo(string $root) {
-      foreach ($this->fileOffsets as $path => list($offset, $size)) {
-        $fp = fopen($this->createFullPath($root, $path), 'wb');
-        while ($size) {
-          $data = $this->stream_get_contents(min(1024, $size), $offset);
-          fwrite($fp, $data);
-          $size -= strlen($data);
-          $offset += strlen($data);
+      $offsets = $this->fileOffsets;
+      foreach ($this->entries as $path => $stat) {
+        $full_path = $this->createFullPath($root, $path);
+        switch($stat->type) {
+          case ArchiveEntryType::FILE;
+            list($offset, $size) = $offsets[$path];
+            $fp = fopen($full_path, 'wb');
+            while ($size) {
+              $data = $this->stream_get_contents(min(1024, $size), $offset);
+              fwrite($fp, $data);
+              $size -= strlen($data);
+              $offset += strlen($data);
+            }
+            fclose($fp);
+            break;
+          case ArchiveEntryType::SYMLINK:
+            $target = $this->symlinks[$path];
+            symlink($target, $full_path);
+            break;
+          case ArchiveEntryType::DIRECTORY:
+            if (!file_exists($full_path)) {
+              mkdir(
+                $full_path,
+                $stat->mode ?? 0755,
+              );
+            }
+            break;
         }
-        fclose($fp);
-      }
-
-      // Intentional difference to PHP5: PHP5 just creates an empty
-      // file.
-      foreach ($this->symlinks as $path => $target) {
-        symlink($target, $this->createFullPath($root, $path));
+        // Won't exist if it's a dangling symlink
+        if ($stat->mode !== null && file_exists($full_path)) {
+          chmod($full_path, $stat->mode);
+        }
       }
     }
 
@@ -159,8 +192,8 @@ namespace __SystemLib {
         // Checksum calculated as if the checksum field was spaces
         $to_checksum = $header.str_repeat(' ', 8).$header2;
         $sum = 0;
-        foreach (unpack('C*', $to_checksum) as $char) {
-          $sum += ord($char);
+        foreach (unpack('C*', $to_checksum) as $uint8) {
+          $sum += $uint8;
         }
         $checksum = str_pad(decoct($sum), 6, '0', STR_PAD_LEFT)."\0 ";
         fwrite($this->fp, str_pad($header.$checksum.$header2, 512, "\0"));
@@ -186,8 +219,8 @@ namespace __SystemLib {
       // Checksum calculated as if the checksum field was spaces
       $to_checksum = $header.str_repeat(' ', 8).$header2;
       $sum = 0;
-      foreach (unpack('C*', $to_checksum) as $char) {
-        $sum += ord($char);
+      foreach (unpack('C*', $to_checksum) as $uint8) {
+        $sum += $uint8;
       }
       $checksum = str_pad(decoct($sum), 6, '0', STR_PAD_LEFT)."\0 ";
       fwrite($this->fp, str_pad($header.$checksum.$header2, 512, "\0"));

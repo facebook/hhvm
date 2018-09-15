@@ -1,4 +1,4 @@
-<?hh
+<?php
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function pass_by_ref(&$ks) {}
@@ -8,27 +8,27 @@ function &ret_by_ref($ks, $key) { return $ks[$key]; }
 function ref_param($ks) {
   echo "========== ref_param ===============================\n";
   try {
-    pass_by_ref($ks[1]);
+    pass_by_ref(&$ks[1]);
   } catch (Exception $e) {
     echo "ref_param exception: \"", $e->getMessage(), "\"\n";
   }
   try {
-    pass_by_ref($ks[10]);
+    pass_by_ref(&$ks[10]);
   } catch (Exception $e) {
     echo "ref_param exception: \"", $e->getMessage(), "\"\n";
   }
   try {
-    pass_by_ref($ks["key1"]);
+    pass_by_ref(&$ks["key1"]);
   } catch (Exception $e) {
     echo "ref_param exception: \"", $e->getMessage(), "\"\n";
   }
   try {
-    pass_by_ref($ks["key2"]);
+    pass_by_ref(&$ks["key2"]);
   } catch (Exception $e) {
     echo "ref_param exception: \"", $e->getMessage(), "\"\n";
   }
   try {
-    pass_by_ref($ks[false]);
+    pass_by_ref(&$ks[false]);
   } catch (Exception $e) {
     echo "ref_param exception: \"", $e->getMessage(), "\"\n";
   }

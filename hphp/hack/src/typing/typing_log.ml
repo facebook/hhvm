@@ -2,16 +2,15 @@
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
+open Core_kernel
 module Env = Typing_env
 
 open Tty
-open Core
 
 (*****************************************************************************)
 (* Logging type inference environment                                        *)
@@ -41,9 +40,9 @@ let lprintf c =
     then lnewline ()
     else accumulatedLength := !accumulatedLength + len)
 
-let indentEnv message f =
+let indentEnv ?(color=Normal Yellow) message f =
   lnewline ();
-  lprintf (Normal Yellow) "%s" message;
+  lprintf color "%s" message;
   lnewline ();
   indentLevel := !indentLevel + 1;
   f ();
@@ -57,7 +56,11 @@ let iterations: int Pos.Map.t ref = ref Pos.Map.empty
 
 (* Log all changes to subst *)
 let log_subst_diff oldSubst newSubst =
-  indentEnv "subst(changes)" (fun () ->
+  indentEnv (Printf.sprintf
+    "subst(changes; old size = %d; new size = %d; size change = %d)"
+    (IMap.cardinal oldSubst) (IMap.cardinal newSubst)
+    (IMap.cardinal newSubst - IMap.cardinal oldSubst))
+    (fun () ->
   begin
     IMap.iter (fun n n' ->
       match IMap.get n oldSubst with
@@ -82,7 +85,11 @@ let log_subst_diff oldSubst newSubst =
 
 (* Log all changes to tenv *)
 let log_tenv_diff oldEnv newEnv =
-  indentEnv "tenv(changes)" (fun () ->
+  indentEnv (Printf.sprintf
+    "tenv(changes; old size = %d; new size = %d; size change = %d)"
+    (IMap.cardinal oldEnv.Env.tenv) (IMap.cardinal newEnv.Env.tenv)
+    (IMap.cardinal newEnv.Env.tenv - IMap.cardinal oldEnv.Env.tenv))
+    (fun () ->
   begin
     IMap.iter (fun n t ->
       match IMap.get n oldEnv.Env.tenv with
@@ -132,35 +139,46 @@ let log_continuation env name cont =
       lprintf (Normal Green) " [eid: %s]" (Ident.debug expr_id) end
     cont)
 
-let log_history env =
-  indentEnv "history" (fun () ->
-    Local_id.Map.iter begin fun id all_types ->
-      lnewline();
-      lprintf (Bold Green) "%s[#%d]: "
-        (Local_id.get_name id) (Local_id.to_int id);
-      log_type_list env all_types;
-      lprintf (Normal Green) "]" end
-    env.Env.lenv.Env.local_type_history)
-
 let log_local_types env =
   indentEnv "local_types" (fun () ->
     Typing_continuations.Map.iter
       (log_continuation env)
-      env.Env.lenv.Env.local_types;
-    log_history env)
+      env.Env.lenv.Env.local_types)
+
+let log_using_vars env =
+  let using_vars = env.Env.lenv.Env.local_using_vars in
+  if not (Local_id.Set.is_empty using_vars) then
+  indentEnv "using_vars" (fun () ->
+    Local_id.Set.iter (fun lvar ->
+      lprintf (Normal Green) "%s " (Local_id.get_name lvar))
+      using_vars)
+
+let log_return_type env =
+  indentEnv "return_type" (fun () ->
+    let Typing_env_return_info.
+      {return_type; return_disposable; return_mutable; return_explicit; return_by_ref;
+       return_void_to_rx; } = Env.get_return env in
+    lprintf (Normal Green) "%s%s%s%s%s%s"
+      (Typing_print.debug_with_tvars env return_type)
+      (if return_disposable then " (disposable)" else "")
+      (if return_mutable then " (mutable_return)" else "")
+      (if return_explicit then " (explicit)" else "")
+      (if return_by_ref then " (by_ref)" else "")
+      (if return_void_to_rx then " (void_to_rx)" else "")
+  )
 
 let log_tpenv env =
   let tparams = Env.get_generic_parameters env in
-  if tparams != [] then
+  if not (List.is_empty tparams) then
   indentEnv "tpenv" (fun () ->
     List.iter tparams ~f:begin fun tparam ->
-      let lower = Env.get_lower_bounds env tparam in
-      let upper = Env.get_upper_bounds env tparam in
+      let lower = Typing_set.elements (Env.get_lower_bounds env tparam) in
+      let upper = Typing_set.elements (Env.get_upper_bounds env tparam) in
       lnewline ();
-      (if lower != []
+      (if not (List.is_empty lower)
       then (log_type_list env lower; lprintf (Normal Green) " <: "));
       lprintf (Bold Green) "%s" tparam;
-      (if upper != []
+      (if not (List.is_empty upper)
       then (lprintf (Normal Green) " <: "; log_type_list env upper))
         end)
 
@@ -182,44 +200,75 @@ let log_fake_members env =
     SSet.iter (lprintf (Normal Green) " %s") fakes.Env.valid;
     lnewline ())
 
-let log_position p =
+let log_position p f =
   let n =
     match Pos.Map.get p !iterations with
     | None -> iterations := Pos.Map.add p 1 !iterations; 1
     | Some n -> iterations := Pos.Map.add p (n+1) !iterations; n+1 in
-  indentEnv (Pos.string (Pos.to_absolute p)
-    ^ (if n = 1 then "" else "[" ^ string_of_int n ^ "]"))
+  (* If we've hit this many iterations then something must have gone wrong
+   * so let's not bother spewing to the log *)
+  if n > 10000 then ()
+  else
+    indentEnv (Pos.string (Pos.to_absolute p)
+      ^ (if n = 1 then "" else "[" ^ string_of_int n ^ "]")) f
 
 (* Log the environment: local_types, subst, tenv and tpenv *)
 let hh_show_env p env =
   log_position p
     (fun () ->
        log_local_types env;
+       log_using_vars env;
        log_fake_members env;
+       log_return_type env;
        log_env_diff (!lastenv) env;
        log_tpenv env);
   lastenv := env
 
 (* Log the type of an expression *)
 let hh_show p env ty =
-  let s = Typing_print.debug env ty in
+  let s1 = Typing_print.debug env ty in
+  let s2_opt = Typing_print.constraints_for_type env ty in
   log_position p
     (fun () ->
-       lprintf (Normal Green) "%s" s; lnewline ())
+       lprintf (Normal Green) "%s" s1;
+       lnewline ();
+       match s2_opt with
+       | None -> ()
+       | Some s2 -> (lprintf (Normal Green) "%s" s2; lnewline ()))
 
-let log_type p env message ty =
-  let s = Typing_print.debug_with_tvars env ty in
-  log_position p
-    (fun () ->
-       lprintf (Bold Green) "%s: " message;
-       lprintf (Normal Green) "%s" s;
-       lnewline ())
+(* Set the logging level *)
+let log_level = ref 0
 
-let log_types p env pairs =
+let hh_log_level n =
+  log_level := n
+
+let get_log_level () =
+  !log_level
+
+(* Simple type of possible log data *)
+type log_structure =
+| Log_sub of string * log_structure list
+| Log_type of string * Typing_defs.locl Typing_defs.ty
+
+let log_types level p env items =
+  if get_log_level() >= level then
   log_position p
     (fun () ->
-       List.iter pairs ~f:(fun (message, ty) ->
-         let s = Typing_print.debug_with_tvars env ty in
-         lprintf (Bold Green) "%s: " message;
-         lprintf (Normal Green) "%s"  s;
-         lnewline ()))
+      let rec go items =
+        List.iter items (fun item ->
+          match item with
+          | Log_sub (message, items) ->
+            let color =
+              if level < get_log_level() then Bold Yellow else Normal Yellow in
+            indentEnv ~color:color message (fun () -> go items)
+          | Log_type (message, ty) ->
+            let s = Typing_print.debug_with_tvars env ty in
+            lprintf (Bold Green) "%s: " message;
+            lprintf (Normal Green) "%s" s;
+            lnewline ()) in
+      go items)
+  else ()
+
+let increment_feature_count env s =
+  if GlobalOptions.tco_language_feature_logging (Env.get_options env)
+  then Measure.sample s 1.0

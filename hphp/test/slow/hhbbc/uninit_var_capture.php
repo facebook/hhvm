@@ -6,4 +6,8 @@ function test() {
   $foo();
 }
 
+
+<<__EntryPoint>>
+function main_uninit_var_capture() {
 test();
+}

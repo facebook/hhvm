@@ -11,4 +11,8 @@ function main() {
   }
 
 }
+
+<<__EntryPoint>>
+function main_foreach() {
 main();
+}

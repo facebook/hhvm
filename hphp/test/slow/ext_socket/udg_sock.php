@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_udg_sock() {
 $socket = '/tmp/socktest'.rand();
 $data = 'Data to be sent';
 
@@ -22,3 +25,4 @@ var_dump($readed);
 
 socket_close($server);
 unlink($socket);
+}

@@ -30,6 +30,7 @@
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/ext/std/ext_std_network.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process-exec.h"
 #include "hphp/util/process.h"
@@ -123,12 +124,58 @@ static char **debugger_completion(const char *text, int start, int end) {
   return nullptr;
 }
 
+#ifndef USE_EDITLINE
+
+static rl_hook_func_t *old_rl_startup_hook = nullptr;
+
+static int saved_history_line_to_use = -1;
+static int last_saved_history_line = -1;
+
+static bool history_full() {
+  return (history_is_stifled() && history_length >= history_max_entries);
+}
+
+static int set_saved_history() {
+  if (history_full() && saved_history_line_to_use < history_length - 1) {
+    saved_history_line_to_use++;
+  }
+
+  if (saved_history_line_to_use >= 0) {
+   rl_get_previous_history(history_length - saved_history_line_to_use, 0);
+   last_saved_history_line = saved_history_line_to_use;
+  }
+  saved_history_line_to_use = -1;
+  rl_startup_hook = old_rl_startup_hook;
+  return 0;
+}
+
+static int operate_and_get_next(int /*count*/, int c) {
+  /* Accept the current line. */
+  rl_newline (1, c);
+
+  /* Find the current line, and find the next line to use. */
+  int where = where_history();
+
+  if (history_full() || (where >= history_length - 1)) {
+    saved_history_line_to_use = where;
+  } else {
+    saved_history_line_to_use = where + 1;
+  }
+
+  old_rl_startup_hook = rl_startup_hook;
+  rl_startup_hook = set_saved_history;
+
+  return 0;
+}
+
+#endif
+
 static void debugger_signal_handler(int sig) {
   TRACE(2, "DebuggerClient::debugger_signal_handler\n");
   getStaticDebuggerClient().onSignal(sig);
 }
 
-void DebuggerClient::onSignal(int sig) {
+void DebuggerClient::onSignal(int /*sig*/) {
   TRACE(2, "DebuggerClient::onSignal\n");
   if (m_inputState == TakingInterrupt) {
     if (m_sigCount == 0) {
@@ -185,6 +232,7 @@ struct ReadlineApp {
     rl_basic_word_break_characters = PHP_WORD_BREAK_CHARACTERS;
 
 #ifndef USE_EDITLINE
+    rl_bind_keyseq("\\C-o", operate_and_get_next);
     rl_catch_signals = 0;
 #endif
     signal(SIGINT, debugger_signal_handler);
@@ -398,7 +446,7 @@ String DebuggerClient::FormatVariable(
   } catch (const StringBufferLimitException& e) {
     value = "Serialization limit reached";
   } catch (...) {
-    assert(false);
+    assertx(false);
     throw;
   }
   return value;
@@ -409,7 +457,7 @@ String DebuggerClient::FormatVariable(
  * truncated result, and the number of bytes truncated.
  */
 String DebuggerClient::FormatVariableWithLimit(const Variant& v, int maxlen) {
-  assert(maxlen >= 0);
+  assertx(maxlen >= 0);
 
   VariableSerializer vs(VariableSerializer::Type::DebuggerDump, 0, 2);
   auto const value = vs.serializeWithLimit(v, maxlen + 1);
@@ -475,7 +523,7 @@ DebuggerClient::DebuggerClient()
       m_sigNum(CmdSignal::SignalNone), m_sigCount(0),
       m_acLen(0), m_acIndex(0), m_acPos(0), m_acLiveListsDirty(true),
       m_threadId(0), m_listLine(0), m_listLineFocus(0),
-      m_stacktraceAsync(false), m_frame(0),
+      m_frame(0),
       m_unknownCmd(false) {
   TRACE(2, "DebuggerClient::DebuggerClient\n");
   Debugger::InitUsageLogging();
@@ -506,7 +554,7 @@ bool DebuggerClient::isLocal() {
 
 bool DebuggerClient::connect(const std::string &host, int port) {
   TRACE(2, "DebuggerClient::connect\n");
-  assert((!m_machines.empty() && m_machines[0]->m_name == LocalPrompt));
+  assertx((!m_machines.empty() && m_machines[0]->m_name == LocalPrompt));
   // First check for an existing connect, and reuse that.
   for (unsigned int i = 1; i < m_machines.size(); i++) {
     if (HHVM_FN(gethostbyname)(m_machines[i]->m_name) ==
@@ -520,9 +568,9 @@ bool DebuggerClient::connect(const std::string &host, int port) {
 
 bool DebuggerClient::connectRPC(const std::string &host, int port) {
   TRACE(2, "DebuggerClient::connectRPC\n");
-  assert(!m_machines.empty());
+  assertx(!m_machines.empty());
   auto local = m_machines[0];
-  assert(local->m_name == LocalPrompt);
+  assertx(local->m_name == LocalPrompt);
   local->m_rpcHost = host;
   local->m_rpcPort = port;
   switchMachine(local);
@@ -533,9 +581,9 @@ bool DebuggerClient::connectRPC(const std::string &host, int port) {
 
 bool DebuggerClient::disconnect() {
   TRACE(2, "DebuggerClient::disconnect\n");
-  assert(!m_machines.empty());
+  assertx(!m_machines.empty());
   auto local = m_machines[0];
-  assert(local->m_name == LocalPrompt);
+  assertx(local->m_name == LocalPrompt);
   local->m_rpcHost.clear();
   local->m_rpcPort = 0;
   switchMachine(local);
@@ -568,8 +616,8 @@ req::ptr<Socket> DebuggerClient::connectLocal() {
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, fds) != 0) {
     throw Exception("unable to create socket pair for local debugging");
   }
-  auto socket1 = req::make<Socket>(fds[0], AF_UNIX);
-  auto socket2 = req::make<Socket>(fds[1], AF_UNIX);
+  auto socket1 = req::make<StreamSocket>(fds[0], AF_UNIX);
+  auto socket2 = req::make<StreamSocket>(fds[1], AF_UNIX);
 
   socket1->unregister();
   socket2->unregister();
@@ -577,7 +625,7 @@ req::ptr<Socket> DebuggerClient::connectLocal() {
   machine->m_sandboxAttached = true;
   machine->m_name = LocalPrompt;
   machine->m_thrift.create(socket1);
-  assert(m_machines.empty());
+  assertx(m_machines.empty());
   m_machines.push_back(machine);
   switchMachine(machine);
   return socket2;
@@ -599,7 +647,7 @@ bool DebuggerClient::connectRemote(const std::string &host, int port) {
 
 bool DebuggerClient::reconnect() {
   TRACE(2, "DebuggerClient::reconnect\n");
-  assert(m_machine);
+  assertx(m_machine);
   auto& host = m_machine->m_name;
   int port = m_machine->m_port;
   if (port <= 0) {
@@ -639,7 +687,7 @@ bool DebuggerClient::tryConnect(const std::string &host, int port,
   /* try possible families (v4, v6) until we get a connection */
   struct addrinfo *cur;
   for (cur = ai; cur; cur = cur->ai_next) {
-    auto sock = req::make<Socket>(
+    auto sock = req::make<StreamSocket>(
       socket(cur->ai_family, cur->ai_socktype, 0),
       cur->ai_family,
       cur->ai_addr->sa_data,
@@ -753,7 +801,7 @@ void DebuggerClient::run() {
     m_macroPlaying->m_index = 0;
   }
 
-  hphp_session_init();
+  hphp_session_init(Treadmill::SessionKind::DebuggerClient);
   if (m_options.extension.empty()) {
     hphp_invoke_simple("", true); // warm-up only
   } else {
@@ -764,13 +812,13 @@ void DebuggerClient::run() {
     bool reconnect = false;
     try {
       eventLoop(TopLevel, DebuggerCommand::KindOfNone, "Main client loop");
-    } catch (DebuggerClientExitException &e) { /* normal exit */
-    } catch (DebuggerServerLostException &e) {
+    } catch (DebuggerClientExitException& e) { /* normal exit */
+    } catch (DebuggerServerLostException& e) {
       // Loss of connection
       TRACE_RB(1, "DebuggerClient::run: server lost exception\n");
       usageLogEvent("DebuggerServerLostException", m_commandCanonical);
       reconnect = true;
-    } catch (DebuggerProtocolException &e) {
+    } catch (DebuggerProtocolException& e) {
       // Bad or unexpected data. Give reconnect a shot, it could help...
       TRACE_RB(1, "DebuggerClient::run: protocol exception\n");
       usageLogEvent("DebuggerProtocolException", m_commandCanonical);
@@ -844,7 +892,8 @@ void DebuggerClient::promptFunctionPrototype() {
   rl_forced_update_display();
 }
 
-bool DebuggerClient::setCompletion(const char *text, int start, int end) {
+bool DebuggerClient::setCompletion(const char* text, int /*start*/,
+                                   int /*end*/) {
   TRACE(2, "DebuggerClient::setCompletion\n");
   if (m_inputState == TakingCommand) {
     parseCommand(rl_line_buffer);
@@ -996,7 +1045,7 @@ char* DebuggerClient::getCompletion(const char* text, int state) {
         }
       }
     } else {
-      assert(m_inputState == TakingCode);
+      assertx(m_inputState == TakingCode);
       if (!*rl_line_buffer) {
         addCompletion("?>"); // so we tab, we're done
       } else {
@@ -1013,7 +1062,7 @@ char* DebuggerClient::getCompletion(const char* text, int state) {
     } else if ((int64_t)list >= 0 && (int64_t)list < AutoCompleteCount) {
       if (m_acLiveListsDirty) {
         updateLiveLists();
-        assert(!m_acLiveListsDirty);
+        assertx(!m_acLiveListsDirty);
       }
       char *p = getCompletion(m_acLiveLists->get(int64_t(list)), text);
       if (p) return p;
@@ -1225,7 +1274,7 @@ void DebuggerClient::console() {
             error("command \"" + m_command + "\" not found");
             m_command.clear();
           }
-        } catch (DebuggerConsoleExitException &e) {
+        } catch (DebuggerConsoleExitException& e) {
           return;
         }
       }
@@ -1242,7 +1291,7 @@ void DebuggerClient::console() {
             record(line);
             m_command = m_prevCmd;
             process(); // replay the same command
-          } catch (DebuggerConsoleExitException &e) {
+          } catch (DebuggerConsoleExitException& e) {
             return;
           }
           break;
@@ -1636,12 +1685,6 @@ DebuggerCommandPtr DebuggerClient::createCommand() {
     return new_cmd<CmdInternalTesting>("internaltesting");
   }
 
-  // Make 'wa' a quick shortcut for 'where async'
-  if (m_command == "wa") {
-    m_args.insert(m_args.begin(), "async");
-    return new_cmd<CmdWhere>("where");
-  }
-
   switch (tolower(m_command[0])) {
     case 'a': return match_cmd<CmdAbort>("abort");
     case 'b': return match_cmd<CmdBreak>("break");
@@ -1831,7 +1874,7 @@ bool DebuggerClient::parse(const char *line) {
 
 bool DebuggerClient::match(const char *cmd) {
   TRACE(2, "DebuggerClient::match\n");
-  assert(cmd && *cmd);
+  assertx(cmd && *cmd);
   return !strncasecmp(m_command.c_str(), cmd, m_command.size());
 }
 
@@ -1842,8 +1885,8 @@ bool DebuggerClient::Match(const char *input, const char *cmd) {
 
 bool DebuggerClient::arg(int index, const char *s) const {
   TRACE(2, "DebuggerClient::arg\n");
-  assert(s && *s);
-  assert(index > 0);
+  assertx(s && *s);
+  assertx(index > 0);
   --index;
   return (int)m_args.size() > index &&
     !strncasecmp(m_args[index].c_str(), s, m_args[index].size());
@@ -1851,7 +1894,7 @@ bool DebuggerClient::arg(int index, const char *s) const {
 
 std::string DebuggerClient::argValue(int index) {
   TRACE(2, "DebuggerClient::argValue\n");
-  assert(index > 0);
+  assertx(index > 0);
   --index;
   if (index >= 0 && index < (int)m_args.size()) {
     return m_args[index];
@@ -1861,7 +1904,7 @@ std::string DebuggerClient::argValue(int index) {
 
 std::string DebuggerClient::lineRest(int index) {
   TRACE(2, "DebuggerClient::lineRest\n");
-  assert(index > 0);
+  assertx(index > 0);
   return m_line.substr(m_argIdx[index - 1] + 1);
 }
 
@@ -1908,12 +1951,12 @@ const StaticString s_UNDERSCORE("_");
 // and carries out the command.
 void DebuggerClient::processTakeCode() {
   TRACE(2, "DebuggerClient::processTakeCode\n");
-  assert(m_inputState == TakingCommand);
+  assertx(m_inputState == TakingCommand);
 
   char first = m_line[0];
   if (first == '@') {
     usageLogCommand("@", m_line);
-    m_code = std::string("<?php ") + (m_line.c_str() + 1) + ";";
+    m_code = std::string("<?hh ") + (m_line.c_str() + 1) + ";";
     processEval();
     return;
   } else if (first == '=') {
@@ -1922,20 +1965,20 @@ void DebuggerClient::processTakeCode() {
       // strip the trailing ;
       m_line = m_line.substr(0, m_line.size() - 1);
     }
-    m_code = std::string("<?php $_=(") + m_line.substr(1) + "); ";
+    m_code = std::string("<?hh $_=(") + m_line.substr(1) + "); ";
     if (processEval()) CmdVariable::PrintVariable(*this, s_UNDERSCORE);
     return;
   } else if (first != '<') {
     usageLogCommand("eval", m_line);
     // User entered something that did not start with @, =, or <
     // and also was not a debugger command. Interpret it as PHP.
-    m_code = "<?php ";
+    m_code = "<?hh ";
     m_code += m_line + ";";
     processEval();
     return;
   }
   usageLogCommand("<?php", m_line);
-  m_code = "<?php ";
+  m_code = "<?hh ";
   m_code += m_line.substr(m_command.length()) + "\n";
   m_inputState = TakingCode;
 
@@ -1957,7 +2000,7 @@ bool DebuggerClient::processEval() {
 
 void DebuggerClient::swapHelp() {
   TRACE(2, "DebuggerClient::swapHelp\n");
-  assert(m_args.size() > 0);
+  assertx(m_args.size() > 0);
   m_command = m_args[0];
   m_args[0] = "help";
 }
@@ -1982,7 +2025,7 @@ DSandboxInfoPtr DebuggerClient::getSandbox(int index) const {
 // Update the current sandbox in the current machine. This should always be
 // called once we're attached to a machine.
 void DebuggerClient::setSandbox(DSandboxInfoPtr sandbox) {
-  assert(m_machine != nullptr);
+  assertx(m_machine != nullptr);
   m_machine->m_sandbox = sandbox;
 }
 
@@ -2027,7 +2070,7 @@ DThreadInfoPtr DebuggerClient::getThread(int index) const {
 // The current location is initially determined by the
 // breakpoint where the debugger is currently stopped and can
 // thereafter be modified by list commands and by switching the
-// the stack frame. The lineFocus and and charFocus parameters
+// the stack frame. The lineFocus and charFocus parameters
 // are non zero only when the source location comes from a breakpoint.
 // They can be used to highlight the location of the current breakpoint
 // in the edit window of an attached IDE, for example.
@@ -2105,18 +2148,9 @@ void DebuggerClient::addWatch(const char *fmt, const std::string &php) {
   m_watches.push_back(watch);
 }
 
-void DebuggerClient::setStackTrace(const Array& stacktrace, bool isAsync) {
+void DebuggerClient::setStackTrace(const Array& stacktrace) {
   TRACE(2, "DebuggerClient::setStackTrace\n");
   m_stacktrace = stacktrace;
-  //when we set a new stack we need to reset the frame position
-  //if we go from regular to async or vice-versa since the lengths
-  //aren't necessairly the same
-  if (m_stacktraceAsync != isAsync) {
-    m_frame = 0;
-    const char* direction = isAsync ? "sync->async" : "async->sync";
-    info("switching stack contexts (%s) resetting stack state", direction);
-  }
-  m_stacktraceAsync = isAsync;
 }
 
 void DebuggerClient::moveToFrame(int index, bool display /* = true */) {
@@ -2177,35 +2211,10 @@ void DebuggerClient::printFrame(int index, const Array& frame) {
 
   String sindex(index);
 
-  if (m_stacktraceAsync) {
-    if (frame.empty()) {
-      // NB: join boundaries are represented by an empty array.
-      print("#%s  <<join>>", sindex.data());
-    } else {
-      print("#%s  %s [%s]",
-            sindex.data(),
-            func.data() ? func.data() : "",
-            frame[s_id].toString().data());
-      auto ancestors = frame[s_ancestors].toArray();
-      if (ancestors.size() > 1) {
-        StringBuffer ancestorList;
-        for (ArrayIter iter(frame[s_ancestors].toArray()); iter; ++iter) {
-          if (!ancestorList.empty()) ancestorList.append(", ");
-          ancestorList.append(iter.second());
-        }
-        if (!ancestorList.empty()) {
-          print(" %s  ancestors: %s",
-                String("           ").substr(0, sindex.size()).data(),
-                ancestorList.data());
-        }
-      }
-    }
-  } else {
-    print("#%s  %s (%s)",
-          sindex.data(),
-          func.data() ? func.data() : "",
-          args.data() ? args.data() : "");
-  }
+  print("#%s  %s (%s)",
+        sindex.data(),
+        func.data() ? func.data() : "",
+        args.data() ? args.data() : "");
   if (!frame[s_file].isNull()) {
     int line = (int)frame[s_line].toInt32();
     auto fileLineInfo =
@@ -2299,7 +2308,7 @@ bool DebuggerClient::deleteMacro(int index) {
 
 void DebuggerClient::record(const char *line) {
   TRACE(2, "DebuggerClient::record\n");
-  assert(line);
+  assertx(line);
   if (m_macroRecording && line[0] != '&') {
     m_macroRecording->m_cmds.push_back(line);
   }
@@ -2350,7 +2359,7 @@ void DebuggerClient::loadConfig() {
       config.open(Process::GetHomeDirectory() + LegacyConfigFileName);
       needToWriteFile = true;
     }
-  } catch (const HdfException &e) {
+  } catch (const HdfException& e) {
     // Good, they have migrated already
   }
 
@@ -2379,6 +2388,9 @@ void DebuggerClient::loadConfig() {
 
   Config::Bind(m_scriptMode, ini, config, "ScriptMode");
   BIND(script_mode, &m_scriptMode);
+
+  Config::Bind(m_neverSaveConfig, ini, config, "NeverSaveConfig", false);
+  BIND(never_save_config, &m_neverSaveConfig);
 
   setDebuggerClientSmallStep(Config::GetBool(ini, config, "SmallStep"));
   BIND(small_step, IniSetting::SetAndGet<bool>(
@@ -2443,9 +2455,8 @@ void DebuggerClient::loadConfig() {
   Config::Bind(m_tutorialVisited, ini, config, "Tutorial.Visited");
   BIND(tutorial.visited, &m_tutorialVisited);
 
-  auto macros_callback = [&] (const IniSetting::Map &ini_m,
-                              const Hdf &hdf_m,
-                              const std::string &ini_m_key) {
+  auto macros_callback = [&](const IniSetting::Map& ini_m, const Hdf& hdf_m,
+                             const std::string& /*ini_m_key*/) {
     auto macro = std::make_shared<Macro>();
     macro->load(ini_m, hdf_m);
     m_macros.push_back(macro);
@@ -2484,12 +2495,12 @@ void DebuggerClient::loadConfig() {
   Config::Bind(m_sourceRoot, ini, config, "SourceRoot");
   BIND(source_root, &m_sourceRoot);
 
-  Config::Bind(m_neverSaveConfig, ini, config, "NeverSaveConfig", false);
-  BIND(never_save_config, &m_neverSaveConfig);
-
   // We are guaranteed to have an ini file given how m_configFileName is set
   // above
-  Config::ParseIniFile(m_configFileName);
+  {
+    SuppressHackArrCompatNotices suppress;
+    Config::ParseIniFile(m_configFileName);
+  }
 
   // Do this after the ini processing so we don't accidentally save the config
   // when we change one of the options
@@ -2528,7 +2539,7 @@ void DebuggerClient::saveConfig() {
 
   std::vector<std::string> names;
   get_supported_colors(names);
-  for (unsigned int i = 0; i < names.size(); i++) {
+  for (i = 0; i < names.size(); i++) {
     stream << "hhvm.color.supported_names[" << i+1 << "] = " << names[i]
            << std::endl;
   }

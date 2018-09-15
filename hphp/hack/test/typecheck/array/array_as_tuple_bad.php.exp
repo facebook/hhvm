@@ -1,0 +1,6 @@
+File "array_as_tuple_bad.php", line 13, characters 10-11:
+Invalid return type (Typing[4110])
+File "array_as_tuple_bad.php", line 12, characters 38-42:
+This is an untyped array
+File "array_as_tuple_bad.php", line 12, characters 19-31:
+It is incompatible with a tuple of size 2

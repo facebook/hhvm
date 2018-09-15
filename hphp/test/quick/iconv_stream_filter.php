@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 foreach(array('UTF-8', 'UCS-2LE') as $targetCharset) {
   $s = fopen('php://memory', 'rw');

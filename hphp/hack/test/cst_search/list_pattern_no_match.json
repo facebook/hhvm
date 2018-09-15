@@ -1,0 +1,22 @@
+{
+  "pattern_type": "descendant_pattern",
+  "pattern": {
+    "pattern_type": "list_pattern",
+    "children": {
+      "0": {
+        "pattern_type": "descendant_pattern",
+        "pattern": {
+          "pattern_type": "raw_text_pattern",
+          "raw_text": "$foo"
+        }
+      },
+      "1": {
+        "pattern_type": "descendant_pattern",
+        "pattern": {
+          "pattern_type": "raw_text_pattern",
+          "raw_text": "$qux"
+        }
+      }
+    }
+  }
+}

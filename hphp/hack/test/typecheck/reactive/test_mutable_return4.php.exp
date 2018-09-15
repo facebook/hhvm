@@ -1,0 +1,2 @@
+File "test_mutable_return4.php", line 6, characters 10-11:
+The function f1 is annotated with <<__MutableReturn>>,  so it must be marked reactive with <<__Rx>>. (NastCheck[3055])

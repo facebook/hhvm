@@ -1,0 +1,148 @@
+============== 1.0E+100 ==================
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    string(3) "abc"
+  }
+}
+string(3) "abc"
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    string(6) "abcdef"
+  }
+}
+string(6) "abcdef"
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    string(6) "abcdeg"
+  }
+}
+string(6) "abcdeg"
+string(6) "abcdeg"
+array(1) {
+  [0]=>
+  string(6) "abcdeg"
+}
+array(1) {
+  [0]=>
+  array(0) {
+  }
+}
+array(0) {
+}
+============== -1.0E+100 ==================
+array(1) {
+  [-9223372036854775808]=>
+  array(1) {
+    [-9223372036854775808]=>
+    string(3) "abc"
+  }
+}
+string(3) "abc"
+array(1) {
+  [-9223372036854775808]=>
+  array(1) {
+    [-9223372036854775808]=>
+    string(6) "abcdef"
+  }
+}
+string(6) "abcdef"
+array(1) {
+  [-9223372036854775808]=>
+  array(1) {
+    [-9223372036854775808]=>
+    string(6) "abcdeg"
+  }
+}
+string(6) "abcdeg"
+string(6) "abcdeg"
+array(1) {
+  [-9223372036854775808]=>
+  string(6) "abcdeg"
+}
+array(1) {
+  [-9223372036854775808]=>
+  array(0) {
+  }
+}
+array(0) {
+}
+============== INF ==================
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    string(3) "abc"
+  }
+}
+string(3) "abc"
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    string(6) "abcdef"
+  }
+}
+string(6) "abcdef"
+array(1) {
+  [0]=>
+  array(1) {
+    [0]=>
+    string(6) "abcdeg"
+  }
+}
+string(6) "abcdeg"
+string(6) "abcdeg"
+array(1) {
+  [0]=>
+  string(6) "abcdeg"
+}
+array(1) {
+  [0]=>
+  array(0) {
+  }
+}
+array(0) {
+}
+============== -INF ==================
+array(1) {
+  [-9223372036854775808]=>
+  array(1) {
+    [-9223372036854775808]=>
+    string(3) "abc"
+  }
+}
+string(3) "abc"
+array(1) {
+  [-9223372036854775808]=>
+  array(1) {
+    [-9223372036854775808]=>
+    string(6) "abcdef"
+  }
+}
+string(6) "abcdef"
+array(1) {
+  [-9223372036854775808]=>
+  array(1) {
+    [-9223372036854775808]=>
+    string(6) "abcdeg"
+  }
+}
+string(6) "abcdeg"
+string(6) "abcdeg"
+array(1) {
+  [-9223372036854775808]=>
+  string(6) "abcdeg"
+}
+array(1) {
+  [-9223372036854775808]=>
+  array(0) {
+  }
+}
+array(0) {
+}

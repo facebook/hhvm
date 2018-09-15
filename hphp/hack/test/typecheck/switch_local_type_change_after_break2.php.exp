@@ -1,1 +1,6 @@
-No errors
+File "switch_local_type_change_after_break2.php", line 23, characters 10-11:
+Invalid return type (Typing[4110])
+File "switch_local_type_change_after_break2.php", line 12, characters 15-17:
+This is an int
+File "switch_local_type_change_after_break2.php", line 17, characters 14-19:
+It is incompatible with a string

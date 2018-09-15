@@ -31,10 +31,13 @@ namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+struct ProfDataSerializer;
+struct ProfDataDeserializer;
+
 struct MethProfile {
   using RawType = LowPtr<Class>::storage_type;
 
-  enum class Tag {
+  enum class Tag : uint8_t {
     UniqueClass = 0,
     UniqueMeth = 1,
     BaseMeth = 2,
@@ -78,7 +81,7 @@ struct MethProfile {
    */
   void reportMeth(const ActRec* ar, const Class* cls) {
     auto const meth = ar->func();
-    if (!cls && meth->cls()) {
+    if (!cls && meth->isMethod()) {
       cls = ar->hasThis() ? ar->getThis()->getVMClass() : ar->getClass();
     }
     reportMethHelper(cls, meth);
@@ -88,6 +91,9 @@ struct MethProfile {
    * Aggregate two MethProfiles.
    */
   static void reduce(MethProfile& a, const MethProfile& b);
+
+  void serialize(ProfDataSerializer&) const;
+  void deserialize(ProfDataDeserializer&);
 
   /////////////////////////////////////////////////////////////////////////////
 

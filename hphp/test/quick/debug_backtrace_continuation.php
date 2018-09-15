@@ -1,4 +1,4 @@
-<?php
+<?hh
 function my_generator() {
   $value = yield null;
   var_dump(debug_backtrace());

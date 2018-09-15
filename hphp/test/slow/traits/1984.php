@@ -23,5 +23,9 @@ class MyHelloWorld {
     World::say as sayWorld;
   }
 }
+
+<<__EntryPoint>>
+function main_1984() {
 $o = new MyHelloWorld();
 $o->say();
+}

@@ -12,4 +12,3 @@ var_dump(trait_exists('casesensitivitytest'));
 
 echo "Done"
 ?>
-

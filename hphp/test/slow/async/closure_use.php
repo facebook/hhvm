@@ -5,7 +5,10 @@ function block() {
     RescheduleWaitHandle::QUEUE_NO_PENDING_IO,
     1,
   );
-};
+}
+<<__EntryPoint>>
+function main_closure_use() {
+;
 
 // closure in use param
 
@@ -39,3 +42,4 @@ var_dump($env);
 
 var_dump(HH\Asio\join($increfB()));
 var_dump($env);
+}

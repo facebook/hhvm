@@ -27,24 +27,13 @@
 namespace HPHP {
 
 struct MemoryStats {
-  MemoryStats() {}
-
   void ReportMemory(std::string &out, Writer::Format format);
   static MemoryStats* GetInstance();
   void ResetStaticStringSize();
   void LogStaticStringAlloc(size_t bytes);
 
 private:
-  struct StatM {
-    size_t m_vmSize;
-    size_t m_vmRss;
-    size_t m_share;
-    size_t m_text;
-    size_t m_data;
-  };
-
   size_t GetStaticStringSize();
-  bool FillProcessStatM(StatM* pStatM);
   std::atomic<size_t> m_staticStringSize;
 };
 

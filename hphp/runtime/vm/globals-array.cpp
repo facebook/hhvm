@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/runtime-error.h"
 
@@ -24,11 +25,11 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-static __thread GlobalsArray* g_variables;
+static THREAD_LOCAL_PROXY(GlobalsArray, g_variables);
 
 GlobalsArray* get_global_variables() {
-  assertx(g_variables != nullptr);
-  return g_variables;
+  assertx(!g_variables.isNull());
+  return g_variables.get();
 }
 
 GlobalsArray::GlobalsArray(NameValueTable* tab)
@@ -51,18 +52,18 @@ GlobalsArray::GlobalsArray(NameValueTable* tab)
   X(HTTP_RAW_POST_DATA,   init_null_variant);
 #undef X
 
-  g_variables = this;
-  assert(hasExactlyOneRef());
+  g_variables.set(this);
+  assertx(hasExactlyOneRef());
 }
 
 inline GlobalsArray* GlobalsArray::asGlobals(ArrayData* ad) {
-  assert(ad->kind() == kGlobalsKind);
+  assertx(ad->kind() == kGlobalsKind);
   return static_cast<GlobalsArray*>(ad);
 }
 
 inline const GlobalsArray*
 GlobalsArray::asGlobals(const ArrayData* ad) {
-  assert(ad->kind() == kGlobalsKind);
+  assertx(ad->kind() == kGlobalsKind);
   return static_cast<const GlobalsArray*>(ad);
 }
 
@@ -87,7 +88,7 @@ Cell GlobalsArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   if (iter.valid()) {
     auto k = iter.curKey();
     if (k->isRefCounted()) {
-      k->incRefCount();
+      k->rawIncRefCount();
       return make_tv<KindOfString>(const_cast<StringData*>(k));
     }
     return make_tv<KindOfPersistentString>(k);
@@ -95,10 +96,10 @@ Cell GlobalsArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   return make_tv<KindOfUninit>();
 }
 
-const Variant& GlobalsArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
+tv_rval GlobalsArray::GetValueRef(const ArrayData* ad, ssize_t pos) {
   auto a = asGlobals(ad);
   NameValueTable::Iterator iter(a->m_tab, pos);
-  return iter.valid() ? tvAsCVarRef(iter.curVal()) : uninit_variant;
+  return iter.valid() ? iter.curVal() : uninit_variant.asTypedValue();
 }
 
 bool
@@ -111,33 +112,31 @@ GlobalsArray::ExistsStr(const ArrayData* ad, const StringData* k) {
   return asGlobals(ad)->m_tab->lookup(k) != nullptr;
 }
 
-const TypedValue*
-GlobalsArray::NvGetStr(const ArrayData* ad, const StringData* k) {
+tv_rval GlobalsArray::NvGetStr(const ArrayData* ad, const StringData* k) {
   return asGlobals(ad)->m_tab->lookup(k);
 }
 
-const TypedValue*
-GlobalsArray::NvGetInt(const ArrayData* ad, int64_t k) {
+tv_rval GlobalsArray::NvGetInt(const ArrayData* ad, int64_t k) {
   return asGlobals(ad)->m_tab->lookup(String(k).get());
 }
 
-ArrayLval GlobalsArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
+arr_lval GlobalsArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
   return LvalStr(ad, String(k).get(), copy);
 }
 
-ArrayLval GlobalsArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
+arr_lval GlobalsArray::LvalStr(ArrayData* ad, StringData* k, bool /*copy*/) {
   auto a = asGlobals(ad);
   TypedValue* tv = a->m_tab->lookup(k);
   if (!tv) {
     TypedValue nulVal;
-    tvWriteNull(&nulVal);
+    tvWriteNull(nulVal);
     tv = a->m_tab->set(k, &nulVal);
   }
-  return {a, &tvAsVariant(tv)};
+  return arr_lval { ad, tv };
 }
 
-ArrayLval GlobalsArray::LvalNew(ArrayData* ad, bool copy) {
-  return {ad, &lvalBlackHole()};
+arr_lval GlobalsArray::LvalNew(ArrayData* ad, bool /*copy*/) {
+  return arr_lval { ad, lvalBlackHole().asTypedValue() };
 }
 
 ArrayData* GlobalsArray::SetInt(ArrayData* ad,
@@ -147,26 +146,32 @@ ArrayData* GlobalsArray::SetInt(ArrayData* ad,
   return SetStr(ad, String(k).get(), v, copy);
 }
 
-ArrayData* GlobalsArray::SetStr(ArrayData* ad,
-                                         StringData* k,
-                                         Cell v,
-                                         bool copy) {
+ArrayData*
+GlobalsArray::SetStr(ArrayData* ad, StringData* k, Cell v, bool /*copy*/) {
   auto a = asGlobals(ad);
   cellSet(v, *tvToCell(a->m_tab->lookupAdd(k)));
   return a;
 }
 
-ArrayData* GlobalsArray::SetRefInt(ArrayData* ad,
-                                            int64_t k,
-                                            Variant& v,
-                                            bool copy) {
+ArrayData* GlobalsArray::SetWithRefInt(ArrayData* ad, int64_t k,
+                                       TypedValue v, bool copy) {
+  return SetWithRefStr(ad, String(k).get(), v, copy);
+}
+
+ArrayData* GlobalsArray::SetWithRefStr(ArrayData* ad, StringData* k,
+                                       TypedValue v, bool) {
+  auto a = asGlobals(ad);
+  tvSetWithRef(v, *a->m_tab->lookupAdd(k));
+  return a;
+}
+
+ArrayData* GlobalsArray::SetRefInt(ArrayData* ad, int64_t k,
+                                   tv_lval v, bool copy) {
   return asGlobals(ad)->setRef(String(k).get(), v, copy);
 }
 
-ArrayData* GlobalsArray::SetRefStr(ArrayData* ad,
-                                            StringData* k,
-                                            Variant& v,
-                                            bool copy) {
+ArrayData* GlobalsArray::SetRefStr(ArrayData* ad, StringData* k,
+                                   tv_lval v, bool) {
   auto a = asGlobals(ad);
   tvAsVariant(a->m_tab->lookupAdd(k)).assignRef(v);
   return a;
@@ -178,8 +183,7 @@ GlobalsArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
 }
 
 ArrayData*
-GlobalsArray::RemoveStr(ArrayData* ad, const StringData* k,
-                                 bool copy) {
+GlobalsArray::RemoveStr(ArrayData* ad, const StringData* k, bool /*copy*/) {
   auto a = asGlobals(ad);
   a->m_tab->unset(k);
   return a;
@@ -191,15 +195,15 @@ GlobalsArray::RemoveStr(ArrayData* ad, const StringData* k,
  * is currently $GLOBALS.
  */
 
-ArrayData* GlobalsArray::Append(ArrayData*, Cell v, bool copy) {
+ArrayData* GlobalsArray::Append(ArrayData*, Cell /*v*/, bool /*copy*/) {
   throw_not_implemented("append on $GLOBALS");
 }
 
-ArrayData* GlobalsArray::AppendRef(ArrayData*, Variant&, bool) {
+ArrayData* GlobalsArray::AppendRef(ArrayData*, tv_lval, bool) {
   throw_not_implemented("appendRef on $GLOBALS");
 }
 
-ArrayData* GlobalsArray::AppendWithRef(ArrayData*, const Variant&, bool) {
+ArrayData* GlobalsArray::AppendWithRef(ArrayData*, TypedValue, bool) {
   throw_not_implemented("appendWithRef on $GLOBALS");
 }
 
@@ -211,7 +215,7 @@ ArrayData* GlobalsArray::Merge(ArrayData*, const ArrayData*) {
   throw_not_implemented("merge on $GLOBALS");
 }
 
-ArrayData* GlobalsArray::Prepend(ArrayData*, Cell, bool) {
+ArrayData* GlobalsArray::Prepend(ArrayData*, Cell) {
   throw_not_implemented("prepend on $GLOBALS");
 }
 
@@ -248,7 +252,7 @@ ssize_t GlobalsArray::IterRewind(const ArrayData* ad, ssize_t prev) {
 bool
 GlobalsArray::ValidMArrayIter(const ArrayData* ad,
                                        const MArrayIter & fp) {
-  assert(fp.getContainer() == ad);
+  assertx(fp.getContainer() == ad);
   auto a = asGlobals(ad);
   if (fp.getResetFlag()) return false;
   if (fp.m_pos == IterEnd(a)) return false;
@@ -279,31 +283,25 @@ bool GlobalsArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
   return true;
 }
 
-ArrayData* GlobalsArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
+ArrayData* GlobalsArray::EscalateForSort(ArrayData* ad, SortFunction /*sf*/) {
   raise_warning("Sorting the $GLOBALS array is not supported");
   return ad;
 }
-void GlobalsArray::Ksort(ArrayData*, int sort_flags, bool ascending) {}
-void GlobalsArray::Sort(ArrayData*, int sort_flags, bool ascending) {}
-void GlobalsArray::Asort(ArrayData*, int sort_flags, bool ascending) {}
-bool GlobalsArray::Uksort(ArrayData*, const Variant& cmp_function) {
+void GlobalsArray::Ksort(ArrayData*, int /*sort_flags*/, bool /*ascending*/) {}
+void GlobalsArray::Sort(ArrayData*, int /*sort_flags*/, bool /*ascending*/) {}
+void GlobalsArray::Asort(ArrayData*, int /*sort_flags*/, bool /*ascending*/) {}
+bool GlobalsArray::Uksort(ArrayData*, const Variant& /*cmp_function*/) {
   return false;
 }
-bool GlobalsArray::Usort(ArrayData*, const Variant& cmp_function) {
+bool GlobalsArray::Usort(ArrayData*, const Variant& /*cmp_function*/) {
   return false;
 }
-bool GlobalsArray::Uasort(ArrayData*, const Variant& cmp_function) {
+bool GlobalsArray::Uasort(ArrayData*, const Variant& /*cmp_function*/) {
   return false;
 }
 
 bool GlobalsArray::IsVectorData(const ArrayData*) {
   return false;
-}
-
-ArrayData*
-GlobalsArray::CopyWithStrongIterators(const ArrayData* ad) {
-  raise_fatal_error(
-    "Unimplemented ArrayData::copyWithStrongIterators");
 }
 
 ArrayData* GlobalsArray::CopyStatic(const ArrayData*) {

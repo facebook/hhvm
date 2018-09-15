@@ -12,5 +12,9 @@ function getName($part) {
 function scoped($foo, $name) {
   call_user_func(array($foo, getName($name)));
 }
+
+<<__EntryPoint>>
+function main_762() {
 scoped(new Foo, 'a');
 var_dump(Foo::$bar);
+}

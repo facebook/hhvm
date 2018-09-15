@@ -28,11 +28,13 @@ namespace HPHP { namespace jit {
 std::string show(Location loc) {
   switch (loc.tag()) {
     case LTag::Local:
-      return folly::format("Local{{{}}}", loc.localId()).str();
+      return folly::sformat("Local{{{}}}", loc.localId());
     case LTag::Stack:
-      return folly::format("Stack{{{}}}", loc.stackIdx().offset).str();
+      return folly::sformat("Stack{{{}}}", loc.stackIdx().offset);
     case LTag::MBase:
       return "MBase{}";
+    case LTag::CSlot:
+      return folly::sformat("CSlot{{{}}}", loc.clsRefSlot());
   }
   not_reached();
 }

@@ -8,7 +8,7 @@ function test(): void {
   $a[] = true;
   hh_show($a);
 
-  $a = Vector {array(4, 'aaa')};
+  $a = Vector { array(4, 'aaa') };
   $a[0][] = true;
   hh_show($a[0]);
 }

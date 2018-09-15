@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/abi.h"
+#include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/vasm.h"
@@ -25,14 +26,22 @@
 #include "hphp/runtime/vm/jit/vasm-text.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 
-#include <gtest/gtest.h>
+#include <folly/portability/GTest.h>
 
 namespace HPHP { namespace jit {
 using namespace reg;
 
 template<class T> uint64_t test_const(T val) {
   using testfunc = double (*)();
-  static const Abi test_abi = {
+  static const Abi test_abi_arm = {
+    .gpUnreserved = RegSet{},
+    .gpReserved = arm::abi().gp(),
+    .simdUnreserved = RegSet{vixl::d0},
+    .simdReserved = arm::abi().simd() - RegSet{vixl::d0},
+    .calleeSaved = arm::abi().calleeSaved,
+    .sf = arm::abi().sf
+  };
+  static const Abi test_abi_x64 = {
     .gpUnreserved = RegSet{},
     .gpReserved = x64::abi().gp(),
     .simdUnreserved = RegSet{xmm0},
@@ -40,14 +49,22 @@ template<class T> uint64_t test_const(T val) {
     .calleeSaved = x64::abi().calleeSaved,
     .sf = x64::abi().sf
   };
-  static uint8_t code[1000];
-  // None of these tests should use any data.
-  static uint8_t data_buffer[0];
+
+  constexpr auto blockSize = 4096;
+  auto code = static_cast<uint8_t*>(mmap(nullptr, blockSize,
+                                         PROT_READ | PROT_WRITE | PROT_EXEC,
+                                         MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
+  SCOPE_EXIT { munmap(code, blockSize); };
+
+  constexpr auto dataSize = 100;
+  constexpr auto codeSize = blockSize - dataSize;
+  // None of these tests should use much data.
+  auto data_buffer = code + codeSize;
 
   CodeBlock main;
-  main.init(code, sizeof(code), "test");
+  main.init(code, codeSize, "test");
   DataBlock data;
-  data.init(data_buffer, sizeof(data), "data");
+  data.init(data_buffer, dataSize, "data");
 
   Vunit unit;
   Vasm vasm{unit};
@@ -59,13 +76,17 @@ template<class T> uint64_t test_const(T val) {
   v << copy{v.cns(val), Vreg{xmm0}};
   v << ret{RegSet{xmm0}};
 
-  optimizeX64(vasm.unit(), test_abi, true /* regalloc */);
-  CGMeta fixups;
-
-  emitX64(unit, text, fixups, nullptr);
-  // The above code might use fixups.literals but shouldn't use anything else.
-  fixups.literals.clear();
-  EXPECT_TRUE(fixups.empty());
+  CGMeta meta;
+  if (arch() == Arch::ARM) {
+    optimizeARM(vasm.unit(), test_abi_arm, true /* regalloc */);
+    emitARM(unit, text, meta, nullptr);
+  } else if (arch() == Arch::X64) {
+    optimizeX64(vasm.unit(), test_abi_x64, true /* regalloc */);
+    emitX64(unit, text, meta, nullptr);
+  }
+  // The above code might use meta.literalAddrs but shouldn't use anything else.
+  meta.literalAddrs.clear();
+  EXPECT_TRUE(meta.empty());
 
   union { double d; uint64_t c; } u;
   u.d = ((testfunc)code)();
@@ -78,7 +99,7 @@ TEST(Vasm, XlsByteXmm) {
   // DataType is actually mapped to uint64_t constants, for some reason,
   // but if that changes we still want to test them as bytes here.
   EXPECT_EQ(test_const(KindOfUninit), 0);
-  EXPECT_EQ(test_const(KindOfArray), KindOfArray);
+  EXPECT_EQ(static_cast<DataType>(test_const(KindOfArray)), KindOfArray);
 }
 
 TEST(Vasm, XlsIntXmm) {

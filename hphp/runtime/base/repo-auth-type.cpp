@@ -20,10 +20,13 @@
 #include <folly/Hash.h>
 
 #include "hphp/runtime/base/array-data-defs.h"
-#include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/repo-auth-type-array.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/runtime/vm/unit.h"
 
 namespace HPHP {
@@ -37,53 +40,61 @@ static_assert(sizeof(RepoAuthType) == sizeof(CompactTaggedPtr<void>), "");
 namespace {
 
 bool tvMatchesArrayType(TypedValue tv, const RepoAuthType::Array* arrTy) {
-  assert(isArrayType(tv.m_type));
+  assertx(isArrayLikeType(tv.m_type));
   auto const ad = tv.m_data.parr;
   using A = RepoAuthType::Array;
 
-  auto sizeMatches = [&] {
-    switch (arrTy->emptiness()) {
-    case A::Empty::Maybe:
-      return ad->size() == 0 || ad->size() == arrTy->size();
-    case A::Empty::No:
-      return ad->size() == arrTy->size();
-    }
-    not_reached();
-  };
+  if (ad->empty()) return arrTy->emptiness() == A::Empty::Maybe;
+  if (arrTy->tag() == A::Tag::Packed && ad->size() != arrTy->size()) {
+    return false;
+  }
 
   // O(N) checks are available if you want them for debugging, but
   // they are too slow for general use in debug builds.  These type
   // matching functions are currently only used for assertions, so
   // it's ok to leave them out.
-  auto const use_slow_checks = false;
-
-  switch (arrTy->tag()) {
-  case A::Tag::Packed:
-    if (!sizeMatches()) return false;
-    if (use_slow_checks) {
-      for (auto i = uint32_t{0}; i < ad->size(); ++i) {
-        auto const elem = ad->nvGet(i);
-        if (!tvMatchesRepoAuthType(*elem, arrTy->packedElem(i))) {
-          return false;
+  if (false) {
+    switch (arrTy->tag()) {
+      case A::Tag::Packed:
+        if (!ad->isVectorData()) return false;
+        for (auto i = uint32_t{0}; i < ad->size(); ++i) {
+          auto const elem = ad->at(i);
+          if (!tvMatchesRepoAuthType(elem, arrTy->packedElem(i))) {
+            return false;
+          }
         }
-      }
-    }
-    break;
-  case A::Tag::PackedN:
-    if (use_slow_checks) {
-      for (auto i = uint32_t{0}; i < ad->size(); ++i) {
-        auto const elem = ad->nvGet(i);
-        if (!tvMatchesRepoAuthType(*elem, arrTy->elemType())) {
-          return false;
+        break;
+      case A::Tag::PackedN:
+        if (!ad->isVectorData()) return false;
+        for (auto i = uint32_t{0}; i < ad->size(); ++i) {
+          auto const elem = ad->at(i);
+          if (!tvMatchesRepoAuthType(elem, arrTy->elemType())) {
+            return false;
+          }
         }
-      }
+        break;
     }
-    break;
   }
 
   return true;
 }
 
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void RepoAuthType::resolveArray(const UnitEmitter& ue) {
+  auto fn = [&](const uint32_t id) {
+    return ue.lookupArrayType(id);
+  };
+  doResolve(fn);
+}
+
+const uint32_t RepoAuthType::arrayId() const {
+  assertx(mayHaveArrData());
+  if (resolved()) return m_data.ptr() ? array()->id() : kInvalidArrayId;
+
+  return reinterpret_cast<uintptr_t>(m_data.ptr());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -99,11 +110,15 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::OptDbl:
   case T::OptRes:
   case T::OptObj:
+  case T::OptArrKey:
+  case T::OptUncArrKey:
   case T::Null:
   case T::Cell:
   case T::Ref:
   case T::InitUnc:
   case T::Unc:
+  case T::ArrKey:
+  case T::UncArrKey:
   case T::InitCell:
   case T::InitGen:
   case T::Gen:
@@ -130,22 +145,21 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::Keyset:
   case T::OptSKeyset:
   case T::OptKeyset:
-    return true;
-
   case T::OptSArr:
   case T::OptArr:
-    // Can't currently have array() info.
-    return true;
-
+  case T::OptSVArr:
+  case T::OptVArr:
+  case T::OptSDArr:
+  case T::OptDArr:
   case T::SArr:
   case T::Arr:
-    if (array() == nullptr && o.array() == nullptr) {
-      return true;
-    }
-    if ((array() == nullptr) != (o.array() == nullptr)) {
-      return false;
-    }
-    return array()->id() == o.array()->id();
+  case T::SVArr:
+  case T::VArr:
+  case T::SDArr:
+  case T::DArr:
+    // array id equals to either kInvalidArrayId for null array info, or a
+    // regular id. in each case, we just need to compare their id.
+    return arrayId() == o.arrayId();
 
   case T::SubObj:
   case T::ExactObj:
@@ -161,8 +175,8 @@ size_t RepoAuthType::hash() const {
   if (hasClassName()) {
     return folly::hash::hash_128_to_64(iTag, clsName()->hash());
   }
-  if (mayHaveArrData() && array()) {
-    return folly::hash::hash_128_to_64(iTag, array()->id());
+  if (mayHaveArrData() && (arrayId() != kInvalidArrayId)) {
+    return folly::hash::hash_128_to_64(iTag, arrayId());
   }
   return iTag;
 }
@@ -170,7 +184,7 @@ size_t RepoAuthType::hash() const {
 //////////////////////////////////////////////////////////////////////
 
 bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
-  assert(tvIsPlausible(tv));
+  assertx(tvIsPlausible(tv));
 
   bool const initNull = tv.m_type == KindOfNull;
 
@@ -229,41 +243,117 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     }
     return true;
 
+  case T::OptSVArr:
+    if (initNull) return true;
+    // fallthrough
+  case T::SVArr:
+    assertx(!RuntimeOption::EvalHackArrDVArrs);
+    if (!isArrayType(tv.m_type) ||
+        !tv.m_data.parr->isStatic() ||
+        !tv.m_data.parr->isVArray()) {
+      return false;
+    }
+    if (auto const arr = ty.array()) {
+      if (!tvMatchesArrayType(tv, arr)) return false;
+    }
+    return true;
+
+  case T::OptVArr:
+    if (initNull) return true;
+    // fallthrough
+  case T::VArr:
+    assertx(!RuntimeOption::EvalHackArrDVArrs);
+    if (!isArrayType(tv.m_type) || !tv.m_data.parr->isVArray()) return false;
+    if (auto const arr = ty.array()) {
+      if (!tvMatchesArrayType(tv, arr)) return false;
+    }
+    return true;
+
+  case T::OptSDArr:
+    if (initNull) return true;
+    // fallthrough
+  case T::SDArr:
+    assertx(!RuntimeOption::EvalHackArrDVArrs);
+    if (!isArrayType(tv.m_type) ||
+        !tv.m_data.parr->isStatic() ||
+        !tv.m_data.parr->isDArray()) {
+      return false;
+    }
+    if (auto const arr = ty.array()) {
+      if (!tvMatchesArrayType(tv, arr)) return false;
+    }
+    return true;
+
+  case T::OptDArr:
+    if (initNull) return true;
+    // fallthrough
+  case T::DArr:
+    assertx(!RuntimeOption::EvalHackArrDVArrs);
+    if (!isArrayType(tv.m_type) || !tv.m_data.parr->isDArray()) return false;
+    if (auto const arr = ty.array()) {
+      if (!tvMatchesArrayType(tv, arr)) return false;
+    }
+    return true;
+
   case T::OptSVec:
     if (initNull) return true;
     // fallthrough
   case T::SVec:
-    return isVecType(tv.m_type) && tv.m_data.parr->isStatic();
+    if (!isVecType(tv.m_type) || !tv.m_data.parr->isStatic()) return false;
+    if (auto const arr = ty.array()) {
+      if (!tvMatchesArrayType(tv, arr)) return false;
+    }
+    return true;
 
   case T::OptVec:
     if (initNull) return true;
     // fallthrough
   case T::Vec:
-    return isVecType(tv.m_type);
+    if (!isVecType(tv.m_type)) return false;
+    if (auto const arr = ty.array()) {
+      if (!tvMatchesArrayType(tv, arr)) return false;
+    }
+    return true;
 
   case T::OptSDict:
     if (initNull) return true;
     // fallthrough
   case T::SDict:
-    return isDictType(tv.m_type) && tv.m_data.parr->isStatic();
+    if (!isDictType(tv.m_type) || !tv.m_data.parr->isStatic()) return false;
+    if (auto const arr = ty.array()) {
+      if (!tvMatchesArrayType(tv, arr)) return false;
+    }
+    return true;
 
   case T::OptDict:
     if (initNull) return true;
     // fallthrough
   case T::Dict:
-    return isDictType(tv.m_type);
+    if (!isDictType(tv.m_type)) return false;
+    if (auto const arr = ty.array()) {
+      if (!tvMatchesArrayType(tv, arr)) return false;
+    }
+    return true;
 
   case T::OptSKeyset:
     if (initNull) return true;
     // fallthrough
   case T::SKeyset:
-    return isKeysetType(tv.m_type) && tv.m_data.parr->isStatic();
+    if (!isKeysetType(tv.m_type) || !tv.m_data.parr->isStatic()) return false;
+    if (auto const arr = ty.array()) {
+      if (!tvMatchesArrayType(tv, arr)) return false;
+    }
+    return true;
 
   case T::OptKeyset:
     if (initNull) return true;
     // fallthrough
   case T::Keyset:
-    return isKeysetType(tv.m_type);
+    if (!isKeysetType(tv.m_type)) return false;
+    if (auto const arr = ty.array()) {
+      if (!tvMatchesArrayType(tv, arr)) return false;
+    }
+    return true;
 
   case T::Null:
     return initNull || tv.m_type == KindOfUninit;
@@ -295,16 +385,29 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
   case T::Unc:
     return !isRefcountedType(tv.m_type) ||
            (tv.m_type == KindOfString && tv.m_data.pstr->isStatic()) ||
-           (tv.m_type == KindOfArray && tv.m_data.parr->isStatic());
+           (isArrayLikeType(tv.m_type) && tv.m_data.parr->isStatic());
+
+  case T::OptArrKey:
+    if (initNull) return true;
+    // fallthrough
+  case T::ArrKey:
+    return isStringType(tv.m_type) || tv.m_type == KindOfInt64;
+
+  case T::OptUncArrKey:
+    if (initNull) return true;
+    // fallthrough
+  case T::UncArrKey:
+    return (isStringType(tv.m_type) && !tv.m_data.pstr->isRefCounted()) ||
+      tv.m_type == KindOfInt64;
 
   case T::InitCell:
     if (tv.m_type == KindOfUninit) return false;
     // fallthrough
   case T::Cell:
-    return tv.m_type != KindOfRef;
+    return !isRefType(tv.m_type);
 
   case T::Ref:
-    return tv.m_type == KindOfRef;
+    return isRefType(tv.m_type);
 
   case T::InitGen:
     if (tv.m_type == KindOfUninit) return false;
@@ -326,11 +429,15 @@ std::string show(RepoAuthType rat) {
   case T::OptDbl:   return "?Dbl";
   case T::OptRes:   return "?Res";
   case T::OptObj:   return "?Obj";
+  case T::OptUncArrKey: return "?UncArrKey";
+  case T::OptArrKey: return "?ArrKey";
   case T::Null:     return "Null";
   case T::Cell:     return "Cell";
   case T::Ref:      return "Ref";
   case T::InitUnc:  return "InitUnc";
   case T::Unc:      return "Unc";
+  case T::UncArrKey:return "UncArrKey";
+  case T::ArrKey:   return "ArrKey";
   case T::InitCell: return "InitCell";
   case T::InitGen:  return "InitGen";
   case T::Gen:      return "Gen";
@@ -348,36 +455,67 @@ std::string show(RepoAuthType rat) {
   case T::OptArr:
   case T::SArr:
   case T::Arr:
+  case T::OptSVArr:
+  case T::OptVArr:
+  case T::SVArr:
+  case T::VArr:
+  case T::OptSDArr:
+  case T::OptDArr:
+  case T::SDArr:
+  case T::DArr:
+  case T::SVec:
+  case T::Vec:
+  case T::OptSVec:
+  case T::OptVec:
+  case T::SDict:
+  case T::Dict:
+  case T::OptSDict:
+  case T::OptDict:
+  case T::SKeyset:
+  case T::Keyset:
+  case T::OptSKeyset:
+  case T::OptKeyset:
     {
       auto ret = std::string{};
-      if (tag == T::OptArr || tag == T::OptSArr) {
+      if (tag == T::OptArr    || tag == T::OptSArr ||
+          tag == T::OptVArr   || tag == T::OptSVArr ||
+          tag == T::OptDArr   || tag == T::OptSDArr ||
+          tag == T::OptVec    || tag == T::OptSVec ||
+          tag == T::OptDict   || tag == T::OptSDict ||
+          tag == T::OptKeyset || tag == T::OptSKeyset) {
         ret += '?';
       }
-      if (tag == T::SArr || tag == T::OptSArr) {
+      if (tag == T::SArr    || tag == T::OptSArr ||
+          tag == T::SVArr   || tag == T::OptSVArr ||
+          tag == T::SDArr   || tag == T::OptSDArr ||
+          tag == T::SVec    || tag == T::OptSVec ||
+          tag == T::SDict   || tag == T::OptSDict ||
+          tag == T::SKeyset || tag == T::OptSKeyset) {
         ret += 'S';
       }
-      ret += "Arr";
-      if (auto const ar = rat.array()) {
-        folly::format(&ret, "{}", show(*ar));
+      if (tag == T::OptArr  || tag == T::Arr ||
+          tag == T::OptSArr || tag == T::SArr) {
+        ret += "Arr";
+      } else if (tag == T::OptVArr  || tag == T::VArr ||
+                 tag == T::OptSVArr || tag == T::SVArr) {
+        ret += "VArr";
+      } else if (tag == T::OptDArr  || tag == T::DArr ||
+                 tag == T::OptSDArr || tag == T::SDArr) {
+        ret += "DArr";
+      } else if (tag == T::OptVec  || tag == T::Vec ||
+                 tag == T::OptSVec || tag == T::SVec) {
+        ret += "Vec";
+      } else if (tag == T::OptDict  || tag == T::Dict ||
+                 tag == T::OptSDict || tag == T::SDict) {
+        ret += "Dict";
+      } else if (tag == T::OptKeyset  || tag == T::Keyset ||
+                 tag == T::OptSKeyset || tag == T::SKeyset) {
+        ret += "Keyset";
       }
+      if (rat.hasArrData()) folly::format(&ret, "{}", show(*rat.array()));
       return ret;
     }
     break;
-
-  case T::SVec:        return "SVec";
-  case T::Vec:         return "Vec";
-  case T::OptSVec:     return "?SVec";
-  case T::OptVec:      return "?Vec";
-
-  case T::SDict:       return "SDict";
-  case T::Dict:        return "Dict";
-  case T::OptSDict:    return "?SDict";
-  case T::OptDict:     return "?Dict";
-
-  case T::SKeyset:     return "SKeyset";
-  case T::Keyset:      return "Keyset";
-  case T::OptSKeyset:  return "?SKeyset";
-  case T::OptKeyset:   return "?Keyset";
 
   case T::OptSubObj:
   case T::OptExactObj:

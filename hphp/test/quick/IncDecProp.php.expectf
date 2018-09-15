@@ -21,6 +21,8 @@ C Object
 )
 --- D ---
 In D::__get(a)
+
+Notice: Increment on string 'D::a' in %s/test/quick/IncDecProp.php on line %d
 string(4) "D::b"
 In D::__get(b)
 int(43)
@@ -123,7 +125,7 @@ E Object
 )
 --- null ---
 
-Warning: Creating default object from empty value in %s on line 98
+Warning: Creating default object from empty value in %s/test/quick/IncDecProp.php on line %d
 int(1)
 NULL
 NULL
@@ -137,7 +139,7 @@ stdClass Object
 )
 --- 42 ---
 
-Warning: Attempt to increment/decrement property of non-object in %s on line 106
+Warning: Attempt to increment/decrement property of non-object in %s/test/quick/IncDecProp.php on line %d
 NULL
 42
 Test end

@@ -8,6 +8,10 @@ function __autoload($c) {
  use T;
  }
 }
+
+<<__EntryPoint>>
+function main_1532() {
 var_dump(class_uses("A", false));
 var_dump(class_uses("A"));
 var_dump(class_exists("A"));
+}

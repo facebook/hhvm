@@ -1,4 +1,4 @@
-<?
+<?hh
 
 function f() {
   $a = range(-3, 3);

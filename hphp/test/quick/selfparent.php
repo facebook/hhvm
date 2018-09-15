@@ -1,4 +1,4 @@
-<?php
+<?hh
 class B {
   const MYCONST = "B::MYCONST";
   public static function foo() {

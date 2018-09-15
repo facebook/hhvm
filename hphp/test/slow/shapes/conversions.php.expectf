@@ -1,0 +1,54 @@
+array(1) {
+  [0]=>
+  array(2) {
+    ["a"]=>
+    int(2)
+    ["b"]=>
+    int(3)
+  }
+}
+array(2) {
+  ["a"]=>
+  int(2)
+  ["b"]=>
+  int(3)
+}
+array(2) {
+  [0]=>
+  int(2)
+  [1]=>
+  int(3)
+}
+dict(2) {
+  ["a"]=>
+  int(2)
+  ["b"]=>
+  int(3)
+}
+vec(2) {
+  int(2)
+  int(3)
+}
+array(2) {
+  ["a"]=>
+  int(2)
+  ["b"]=>
+  int(3)
+}
+int(1)
+float(1)
+bool(true)
+
+Notice: Array to string conversion in %s on line %d
+string(5) "Array"
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)

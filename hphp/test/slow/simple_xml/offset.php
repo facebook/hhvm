@@ -12,4 +12,8 @@ function main() {
     var_dump((string) $child[0]->c);
   }
 }
+
+<<__EntryPoint>>
+function main_offset() {
 main();
+}

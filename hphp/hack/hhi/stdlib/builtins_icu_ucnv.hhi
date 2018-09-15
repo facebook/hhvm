@@ -3,11 +3,11 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
+
 class UConverter {
   const REASON_UNASSIGNED = 0;
   const REASON_ILLEGAL = 0;
@@ -51,7 +51,6 @@ class UConverter {
   const CESU8 = 0;
   const IMAP_MAILBOX = 0;
   public function __construct($toEncoding = "utf-8", $fromEncoding = "utf-8") { }
-  public function __destruct() { }
   public function getSourceEncoding() { }
   public function setSourceEncoding($encoding) { }
   public function getDestinationEncoding() { }

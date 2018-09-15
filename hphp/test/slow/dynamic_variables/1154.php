@@ -7,4 +7,8 @@ function f() {
  asort($vars);
  var_dump($vars);
 }
+
+<<__EntryPoint>>
+function main_1154() {
 f();
+}

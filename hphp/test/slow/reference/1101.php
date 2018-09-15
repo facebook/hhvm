@@ -14,5 +14,9 @@ function f($x) {
   unset($GLOBALS['a']);
   return 1;
 }
+
+<<__EntryPoint>>
+function main_1101() {
 $a = array(new X);
 test($a[0], f(1));
+}

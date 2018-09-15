@@ -23,6 +23,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/apc-array.h"
+#include "hphp/runtime/base/tv-val.h"
 
 namespace HPHP {
 
@@ -40,41 +41,58 @@ struct MArrayIter;
  * via APC. It has a pointer to the APCArray that it represents and it may
  * cache values locally depending on the type accessed and/or the operation.
  */
-struct APCLocalArray final : private ArrayData,
-                             type_scan::MarkCountable<APCLocalArray> {
-  template<class... Args> static APCLocalArray* Make(Args&&...);
+struct APCLocalArray final : ArrayData,
+                             type_scan::MarkCollectable<APCLocalArray> {
+  static APCLocalArray* Make(const APCArray*);
 
   static size_t Vsize(const ArrayData*);
-  static const Variant& GetValueRef(const ArrayData* ad, ssize_t pos);
+  static tv_rval GetValueRef(const ArrayData* ad, ssize_t pos);
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData* ad, const StringData* k);
-  static ArrayLval LvalInt(ArrayData*, int64_t k, bool copy);
-  static constexpr auto LvalIntRef = &LvalInt;
-  static ArrayLval LvalStr(ArrayData*, StringData* k, bool copy);
-  static constexpr auto LvalStrRef = &LvalStr;
-  static ArrayLval LvalNew(ArrayData*, bool copy);
-  static constexpr auto LvalNewRef = &LvalNew;
+  static arr_lval LvalInt(ArrayData*, int64_t k, bool copy);
+  static arr_lval LvalIntRef(ArrayData*, int64_t k, bool copy);
+  static arr_lval LvalStr(ArrayData*, StringData* k, bool copy);
+  static arr_lval LvalStrRef(ArrayData*, StringData* k, bool copy);
+  static arr_lval LvalNew(ArrayData*, bool copy);
+  static arr_lval LvalNewRef(ArrayData*, bool copy);
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
-  static ArrayData* SetRefInt(ArrayData*, int64_t k, Variant& v, bool copy);
-  static ArrayData* SetRefStr(ArrayData*, StringData* k, Variant& v,
-                              bool copy);
-  static constexpr auto AddInt = &SetInt;
-  static constexpr auto AddStr = &SetStr;
+  static ArrayData* SetWithRefInt(ArrayData*, int64_t k,
+                                  TypedValue v, bool copy);
+  static ArrayData* SetWithRefStr(ArrayData*, StringData* k,
+                                  TypedValue v, bool copy);
+  static ArrayData* SetRefInt(ArrayData*, int64_t k,
+                              tv_lval v, bool copy);
+  static ArrayData* SetRefStr(ArrayData*, StringData* k,
+                              tv_lval v, bool copy);
   static ArrayData *RemoveInt(ArrayData* ad, int64_t k, bool copy);
   static ArrayData *RemoveStr(ArrayData* ad, const StringData* k, bool copy);
   static ArrayData* Copy(const ArrayData*);
-  static ArrayData* CopyWithStrongIterators(const ArrayData*);
   static ArrayData* Append(ArrayData* a, Cell v, bool copy);
-  static ArrayData* AppendRef(ArrayData*, Variant& v, bool copy);
-  static ArrayData* AppendWithRef(ArrayData*, const Variant& v, bool copy);
+  static ArrayData* AppendRef(ArrayData*, tv_lval v, bool copy);
+  static ArrayData* AppendWithRef(ArrayData*, TypedValue v, bool copy);
   static ArrayData* PlusEq(ArrayData*, const ArrayData *elems);
   static ArrayData* Merge(ArrayData*, const ArrayData *elems);
-  static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
-  static const TypedValue* NvGetInt(const ArrayData*, int64_t k);
+  static ArrayData* Prepend(ArrayData*, Cell v);
+  static tv_rval NvGetInt(const ArrayData*, int64_t k);
   static constexpr auto NvTryGetInt = &NvGetInt;
-  static const TypedValue* NvGetStr(const ArrayData*, const StringData* k);
+  static tv_rval NvGetStr(const ArrayData*, const StringData* k);
   static constexpr auto NvTryGetStr = &NvGetStr;
+  static tv_rval RvalInt(const ArrayData* ad, int64_t k) {
+    return NvGetInt(ad, k);
+  }
+  static tv_rval RvalIntStrict(const ArrayData* ad, int64_t k) {
+    return NvTryGetInt(ad, k);
+  }
+  static tv_rval RvalStr(const ArrayData* ad, const StringData* k) {
+    return NvGetStr(ad, k);
+  }
+  static tv_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
+    return NvTryGetStr(ad, k);
+  }
+  static tv_rval RvalAtPos(const ArrayData* ad, ssize_t pos) {
+    return GetValueRef(ad, pos);
+  }
   static Cell NvGetKey(const ArrayData*, ssize_t pos);
   static bool IsVectorData(const ArrayData* ad);
   static ssize_t IterBegin(const ArrayData*);
@@ -104,6 +122,9 @@ struct APCLocalArray final : private ArrayData,
   static constexpr auto ToVec = &ArrayCommon::ToVec;
   static constexpr auto ToDict = &ArrayCommon::ToDict;
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
+  static constexpr auto ToVArray = &ArrayCommon::ToVArray;
+  static constexpr auto ToDArray = &ArrayCommon::ToDArray;
+  static constexpr auto ToShape = &ArrayCommon::ToShape;
 
 public:
   using ArrayData::decRefCount;
@@ -113,7 +134,7 @@ public:
   using ArrayData::incRefCount;
 
   ssize_t iterAdvanceImpl(ssize_t prev) const {
-    assert(prev >= 0 && prev < m_size);
+    assertx(prev >= 0 && prev < m_size);
     ssize_t next = prev + 1;
     return next < m_size ? next : m_size;
   }
@@ -126,9 +147,12 @@ public:
   static APCLocalArray* asApcArray(ArrayData*);
   static const APCLocalArray* asApcArray(const ArrayData*);
 
+  void scan(type_scan::Scanner& scanner) const;
+  size_t heapSize() const;
+
 private:
   explicit APCLocalArray(const APCArray* source);
-  ~APCLocalArray();
+  ~APCLocalArray() = delete;
 
   static bool checkInvariants(const ArrayData*);
   ssize_t getIndex(int64_t k) const;
@@ -136,16 +160,10 @@ private:
   ArrayData* loadElems() const;
   Variant getKey(ssize_t pos) const;
   void sweep();
-
-public:
-  void reap();
-  void scan(type_scan::Scanner& scanner) const {
-    scanner.scan(m_localCache);
-  }
+  TypedValue* localCache() const;
 
 private:
   const APCArray* m_arr;
-  mutable TypedValue* m_localCache;
   unsigned m_sweep_index;
   friend struct MemoryManager; // access to m_sweep_index
 };

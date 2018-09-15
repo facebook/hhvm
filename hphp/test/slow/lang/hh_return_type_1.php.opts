@@ -1,1 +1,2 @@
 -vEval.CheckReturnTypeHints=1
+-vEval.ThisTypeHintLevel=0

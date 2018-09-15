@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_message_queue() {
 $s_msg_qnum = "msg_qnum";
 $filename = tempnam('/tmp', 'vmmsgqueue');
 
@@ -41,3 +44,4 @@ msg_remove_queue($queue);
 pcntl_waitpid($pid, $status);
 
 unlink($filename);
+}

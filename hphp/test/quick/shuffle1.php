@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function get($a, $idx) {
   $max = 10;

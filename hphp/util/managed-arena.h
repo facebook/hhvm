@@ -19,48 +19,82 @@
 
 #include "hphp/util/alloc.h"
 
-#ifdef USE_JEMALLOC_CHUNK_HOOKS
-#include <atomic>
+#if USE_JEMALLOC_EXTENT_HOOKS
 
-namespace HPHP {
-// jemalloc managed arena, backed by an alllocated memory region.
-struct ManagedArena {
-  // s_allocs[arena_idx] is a pointer to the ManagedArena.
-  static ManagedArena** s_allocs;
-  static size_t s_allocs_cap;
+#include "hphp/util/bump-mapper.h"
+#include "hphp/util/extent-hooks.h"
+#include <string>
+
+namespace HPHP { namespace alloc {
+
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * ManagedArena is a wrapper around jemalloc arena with customized extent hooks.
+ * The extent hook is a set of callbacks jemalloc uses to interact with the OS
+ * when managing memory mappings.
+ *
+ * For various purposes, we want to control the properties of the underlying
+ * memory in a particular arena, such as address range, physical placement on
+ * NUMA nodes, or huge pages.  The extent alloc hook comes in handy for the
+ * purpose, and is wrapped in the ExtentAllocator policy class.
+ */
+template <typename ExtentAllocator>
+struct ManagedArena : public ExtentAllocator {
+ private:
+  // Constructor forwards all arguments.  The only correct way to create a
+  // ManagedArena is `CreateAt()` on statically allocated memory.
+  template<typename... Args>
+  explicit ManagedArena(Args&&... args)
+    : ExtentAllocator(std::forward<Args>(args)...) {
+    init();
+  }
+  // Create the arena and set up hooks.
+  void init();
+
+  ManagedArena(const ManagedArena&) = delete;
+  ManagedArena& operator=(const ManagedArena&) = delete;
+  // Don't run the destructor, as we are not good at managing arena lifetime.
+  ~ManagedArena() = delete;
 
  public:
-  // Constructor takes a piece of allocated memory.
-  explicit ManagedArena(void* base, size_t cap);
-
-  inline bool valid() const {
-    return m_base != nullptr;
-  }
-
-  inline void* malloc(size_t size) {
-    if (!valid()) return nullptr;
-    return mallocx(size, MALLOCX_ARENA(m_arenaId));
-  }
-
-  inline void free(void* ptr) {
-    if (ptr) dallocx(ptr, MALLOCX_ARENA(m_arenaId));
-  }
-
-  inline unsigned getArenaId() const {
+  inline unsigned id() const {
     return m_arenaId;
   }
 
- private:
-  static void* chunk_alloc(void* chunk, size_t size, size_t alignment,
-                           bool* zero, bool* commit, unsigned arena_ind);
+  // For stats reporting
+  size_t unusedSize();
+  std::string reportStats();
 
- private:
-  char* const m_base{nullptr};
-  const size_t m_capacity{0};
-  std::atomic_size_t m_size{0};
-  unsigned m_arenaId{static_cast<unsigned>(-1)};
+  template<typename... Args>
+  static ManagedArena* CreateAt(void* addr, Args&&... args) {
+    return new (addr) ManagedArena(std::forward<Args>(args)...);
+  }
+
+ protected:
+  unsigned m_arenaId{0};
 };
 
+using LowArena = alloc::ManagedArena<alloc::BumpExtentAllocator>;
+using HighArena = alloc::ManagedArena<alloc::BumpExtentAllocator>;
+
+// Not using std::aligned_storage<> because zero initialization can be useful.
+extern uint8_t g_lowArena[sizeof(LowArena)];
+extern uint8_t g_highArena[sizeof(HighArena)];
+
+inline LowArena* lowArena() {
+  auto p = reinterpret_cast<LowArena*>(&g_lowArena);
+  if (p->id()) return p;
+  return nullptr;
 }
-#endif // USE_JEMALLOC_CHUNK_HOOKS
+
+inline HighArena* highArena() {
+  auto p = reinterpret_cast<HighArena*>(&g_highArena);
+  if (p->id()) return p;
+  return nullptr;
+}
+
+}}
+
+#endif // USE_JEMALLOC_EXTENT_HOOKS
 #endif

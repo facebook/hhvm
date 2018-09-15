@@ -17,7 +17,6 @@
 #include "hphp/compiler/expression/encaps_list_expression.h"
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/binary_op_expression.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/runtime/base/builtin-functions.h"
 
 using namespace HPHP;
@@ -43,14 +42,6 @@ ExpressionPtr EncapsListExpression::clone() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-void EncapsListExpression::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_exps) {
-    for (int i = 0; i < m_exps->getCount(); i++) {
-      (*m_exps)[i]->analyzeProgram(ar);
-    }
-  }
-}
 
 ConstructPtr EncapsListExpression::getNthKid(int n) const {
   switch (n) {
@@ -80,25 +71,6 @@ void EncapsListExpression::setNthKid(int n, ConstructPtr cp) {
 
 void EncapsListExpression::stripConcat() {
   m_exps->stripConcat();
-}
-
-ExpressionPtr EncapsListExpression::preOptimize(AnalysisResultConstPtr ar) {
-  if (m_type != '`' && m_type != '\'' && m_exps) {
-    int count = m_exps->getCount();
-    // turn into cascaded concat
-    if (count > 1) {
-      auto exp = std::make_shared<BinaryOpExpression>(
-        getScope(), getRange(), (*m_exps)[0], (*m_exps)[1], '.'
-      );
-      for (int i = 2; i < count; i++) {
-        exp = std::make_shared<BinaryOpExpression>(
-          getScope(), getRange(), exp, (*m_exps)[i], '.'
-        );
-      }
-      return exp;
-    }
-  }
-  return ExpressionPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

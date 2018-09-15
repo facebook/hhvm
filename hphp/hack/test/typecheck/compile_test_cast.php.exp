@@ -1,2 +1,2 @@
-File "compile_test_cast.php", line 28, characters 10-10:
-Object casts are unsupported. Try 'if ($var instanceof A)' or 'invariant($var instanceof A, ...)'. (Naming[2055])
+File "compile_test_cast.php", line 28, characters 12-14:
+Encountered unexpected token '$x3'. (Parsing[1002])

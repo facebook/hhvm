@@ -12,6 +12,7 @@ label:
     } finally {
     }
 }
+?>
+
 
 foo();
-?>

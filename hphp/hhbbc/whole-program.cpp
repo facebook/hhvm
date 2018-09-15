@@ -26,18 +26,18 @@
 
 #include "hphp/runtime/vm/unit-emitter.h"
 
-#include "hphp/hhbbc/representation.h"
-#include "hphp/hhbbc/index.h"
-#include "hphp/hhbbc/parse.h"
-#include "hphp/hhbbc/emit.h"
-#include "hphp/hhbbc/parallel.h"
-#include "hphp/hhbbc/debug.h"
 #include "hphp/hhbbc/analyze.h"
-#include "hphp/hhbbc/optimize.h"
-#include "hphp/hhbbc/type-system.h"
-#include "hphp/hhbbc/stats.h"
 #include "hphp/hhbbc/class-util.h"
+#include "hphp/hhbbc/debug.h"
+#include "hphp/hhbbc/emit.h"
 #include "hphp/hhbbc/func-util.h"
+#include "hphp/hhbbc/index.h"
+#include "hphp/hhbbc/optimize.h"
+#include "hphp/hhbbc/parallel.h"
+#include "hphp/hhbbc/parse.h"
+#include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/stats.h"
+#include "hphp/hhbbc/type-system.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -50,9 +50,11 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_invoke("__invoke");
+const StaticString s_86cinit("86cinit");
 
 //////////////////////////////////////////////////////////////////////
 
+enum class AnalyzeMode { NormalPass, ConstPass };
 enum class WorkType { Class, Func };
 
 struct WorkItem {
@@ -81,7 +83,7 @@ struct WorkResult {
     , cls(std::move(cls))
   {}
 
-  explicit WorkResult(FuncAnalysis func)
+  explicit WorkResult(FuncAnalysisResult func)
     : type(WorkType::Func)
     , func(std::move(func))
   {}
@@ -90,8 +92,12 @@ struct WorkResult {
     : type(wr.type)
   {
     switch (type) {
-    case WorkType::Class: new (&cls) ClassAnalysis(std::move(wr.cls));  break;
-    case WorkType::Func:  new (&func) FuncAnalysis(std::move(wr.func)); break;
+    case WorkType::Class:
+      new (&cls) ClassAnalysis(std::move(wr.cls));
+      break;
+    case WorkType::Func:
+      new (&func) FuncAnalysisResult(std::move(wr.func));
+      break;
     }
   }
 
@@ -110,7 +116,7 @@ struct WorkResult {
       cls.~ClassAnalysis();
       break;
     case WorkType::Func:
-      func.~FuncAnalysis();
+      func.~FuncAnalysisResult();
       break;
     }
   }
@@ -118,7 +124,7 @@ struct WorkResult {
   WorkType type;
   union {
     ClassAnalysis cls;
-    FuncAnalysis func;
+    FuncAnalysisResult func;
   };
 };
 
@@ -131,24 +137,46 @@ std::vector<Context> all_function_contexts(const php::Program& program) {
   for (auto& u : program.units) {
     for (auto& c : u->classes) {
       for (auto& m : c->methods) {
-        ret.push_back(Context { borrow(u), borrow(m), borrow(c)});
+        ret.push_back(Context { u.get(), m.get(), c.get()});
       }
     }
     for (auto& f : u->funcs) {
-      ret.push_back(Context { borrow(u), borrow(f) });
+      ret.push_back(Context { u.get(), f.get() });
     }
     if (options.AnalyzePseudomains) {
-      ret.push_back(Context { borrow(u), borrow(u->pseudomain) });
+      ret.push_back(Context { u.get(), u->pseudomain.get() });
     }
   }
   return ret;
 }
 
+std::vector<Context> const_pass_contexts(const php::Program& program,
+                                         php::Program::CInit ci) {
+  std::vector<Context> ret;
+  ret.reserve(program.constInits.size());
+  program.constInits.foreach([&](uintptr_t f) {
+      if (f & ci) {
+        auto const func = static_cast<php::Func*>(
+          reinterpret_cast<void*>(f & ~php::Program::ForAll));
+        ret.push_back(Context { func->unit, func, func->cls });
+      }
+    });
+  return ret;
+}
+
 // Return all the WorkItems we'll need to start analyzing this
 // program.
-std::vector<WorkItem> initial_work(const php::Program& program) {
+std::vector<WorkItem> initial_work(const php::Program& program,
+                                   AnalyzeMode mode) {
   std::vector<WorkItem> ret;
 
+  if (mode == AnalyzeMode::ConstPass) {
+    auto const ctxs = const_pass_contexts(program, php::Program::ForAnalyze);
+    std::transform(begin(ctxs), end(ctxs), std::back_inserter(ret),
+      [&] (Context ctx) { return WorkItem { WorkType::Func, ctx }; }
+    );
+    return ret;
+  }
   /*
    * If we're not doing private property inference, schedule only
    * function-at-a-time work items.
@@ -168,37 +196,62 @@ std::vector<WorkItem> initial_work(const php::Program& program) {
         // with a class context are analyzed as part of that context.
         continue;
       }
-      ret.emplace_back(WorkType::Class,
-                       Context { borrow(u), nullptr, borrow(c) });
+      if (is_used_trait(*c)) {
+        for (auto& f : c->methods) {
+          ret.emplace_back(WorkType::Func,
+                           Context { u.get(), f.get(), f->cls });
+        }
+      } else {
+        ret.emplace_back(WorkType::Class,
+                         Context { u.get(), nullptr, c.get() });
+      }
     }
     for (auto& f : u->funcs) {
-      ret.emplace_back(WorkType::Func, Context { borrow(u), borrow(f) });
+      ret.emplace_back(WorkType::Func, Context { u.get(), f.get() });
     }
     if (options.AnalyzePseudomains) {
       ret.emplace_back(
         WorkType::Func,
-        Context { borrow(u), borrow(u->pseudomain) }
+        Context { u.get(), u->pseudomain.get() }
       );
     }
   }
   return ret;
 }
 
-WorkItem work_item_for(Context ctx) {
-  if (!options.HardPrivatePropInference) {
-    return WorkItem { WorkType::Func, ctx };
+std::vector<Context> opt_prop_type_hints_contexts(const php::Program& program) {
+  std::vector<Context> ret;
+  for (auto& u : program.units) {
+    for (auto& c : u->classes) {
+      ret.emplace_back(Context { u.get(), nullptr, c.get() });
+    }
   }
-
-  return
-    ctx.cls == nullptr ? WorkItem { WorkType::Func, ctx } :
-    ctx.cls->closureContextCls ?
-      WorkItem {
-        WorkType::Class,
-        Context { ctx.unit, nullptr, ctx.cls->closureContextCls }
-      } :
-    WorkItem { WorkType::Class, Context { ctx.unit, nullptr, ctx.cls } };
+  return ret;
 }
 
+WorkItem work_item_for(DependencyContext d, AnalyzeMode mode) {
+  if (auto const cls = d.right()) {
+    assertx(mode != AnalyzeMode::ConstPass &&
+            options.HardPrivatePropInference &&
+            !is_used_trait(*cls));
+    return WorkItem { WorkType::Class, Context { cls->unit, nullptr, cls } };
+  }
+
+  auto const func = d.left();
+  assertx(func);
+  auto const cls = !func->cls ? nullptr :
+    func->cls->closureContextCls ?
+    func->cls->closureContextCls : func->cls;
+  assertx(!cls ||
+          mode == AnalyzeMode::ConstPass ||
+          !options.HardPrivatePropInference ||
+          is_used_trait(*cls));
+
+  return WorkItem {
+    WorkType::Func,
+    Context { func->unit, const_cast<php::Func*>(func), cls }
+  };
+}
 
 /*
  * Algorithm:
@@ -221,16 +274,26 @@ WorkItem work_item_for(Context ctx) {
  * now.)
  *
  * Repeat until the work list is empty.
+ *
  */
-void analyze_iteratively(Index& index, php::Program& program) {
-  trace_time tracer("analyze iteratively");
+void analyze_iteratively(Index& index, php::Program& program,
+                         AnalyzeMode mode) {
+  trace_time tracer(mode == AnalyzeMode::ConstPass ?
+                    "analyze constants" : "analyze iteratively");
 
   // Counters, just for debug printing.
   std::atomic<uint32_t> total_funcs{0};
   std::atomic<uint32_t> total_classes{0};
   auto round = uint32_t{0};
 
-  auto work = initial_work(program);
+  SCOPE_EXIT {
+    if (Trace::moduleEnabledRelease(Trace::hhbbc_time, 1)) {
+      Trace::traceRelease("total class visits %u\n", total_classes.load());
+      Trace::traceRelease("total function visits %u\n", total_funcs.load());
+    }
+  };
+
+  auto work = initial_work(program, mode);
   while (!work.empty()) {
     auto const results = [&] {
       trace_time trace(
@@ -245,7 +308,12 @@ void analyze_iteratively(Index& index, php::Program& program) {
           switch (wi.type) {
           case WorkType::Func:
             ++total_funcs;
-            return WorkResult { analyze_func(index, wi.ctx) };
+            return WorkResult {
+              analyze_func(index, wi.ctx,
+                           mode == AnalyzeMode::ConstPass ?
+                           CollectionOpts{} :
+                           CollectionOpts::TrackConstantArrays)
+            };
           case WorkType::Class:
             ++total_classes;
             return WorkResult { analyze_class(index, wi.ctx) };
@@ -258,12 +326,21 @@ void analyze_iteratively(Index& index, php::Program& program) {
     ++round;
     trace_time update_time("updating");
 
-    std::set<WorkItem> revisit;
+    DependencyContextSet deps;
 
-    auto update_func = [&] (const FuncAnalysis& fa) {
-      auto deps = index.refine_return_type(fa.ctx.func, fa.inferredReturn);
-      for (auto& d : deps) revisit.insert(work_item_for(d));
-
+    auto update_func = [&] (const FuncAnalysisResult& fa) {
+      SCOPE_ASSERT_DETAIL("update_func") {
+        return "Updating Func: " + show(fa.ctx);
+      };
+      index.refine_effect_free(fa.ctx.func, fa.effectFree);
+      index.refine_return_info(fa, deps);
+      index.refine_constants(fa, deps);
+      index.refine_local_static_types(fa.ctx.func, fa.localStaticTypes);
+      if (fa.resolvedConstants.size()) {
+        index.refine_class_constants(fa.ctx,
+                                     fa.resolvedConstants,
+                                     deps);
+      }
       for (auto& kv : fa.closureUseTypes) {
         assert(is_closure(*kv.first));
         if (index.refine_closure_use_vars(kv.first, kv.second)) {
@@ -274,9 +351,26 @@ void analyze_iteratively(Index& index, php::Program& program) {
             kv.first->name->data()
           );
           auto const ctx = Context { func->unit, func, kv.first };
-          revisit.insert(work_item_for(ctx));
+          deps.insert(index.dependency_context(ctx));
         }
       }
+    };
+
+    auto update_class = [&] (const ClassAnalysis& ca) {
+      {
+        SCOPE_ASSERT_DETAIL("update_class") {
+          return "Updating Class: " + show(ca.ctx);
+        };
+        index.refine_private_props(ca.ctx.cls,
+                                   ca.privateProperties);
+        index.refine_private_statics(ca.ctx.cls,
+                                     ca.privateStatics);
+        index.refine_bad_initial_prop_values(ca.ctx.cls,
+                                             ca.badPropInitialValues,
+                                             deps);
+      }
+      for (auto& fa : ca.methods)  update_func(fa);
+      for (auto& fa : ca.closures) update_func(fa);
     };
 
     for (auto& result : results) {
@@ -285,23 +379,37 @@ void analyze_iteratively(Index& index, php::Program& program) {
         update_func(result->func);
         break;
       case WorkType::Class:
-        index.refine_private_props(result->cls.ctx.cls,
-                                   result->cls.privateProperties);
-        index.refine_private_statics(result->cls.ctx.cls,
-                                     result->cls.privateStatics);
-        for (auto& fa : result->cls.methods)  update_func(fa);
-        for (auto& fa : result->cls.closures) update_func(fa);
+        update_class(result->cls);
         break;
       }
     }
 
-    work.assign(begin(revisit), end(revisit));
+    index.update_class_aliases();
+    work.clear();
+    work.reserve(deps.size());
+    for (auto& d : deps) work.push_back(work_item_for(d, mode));
   }
+}
 
-  if (Trace::moduleEnabledRelease(Trace::hhbbc_time, 1)) {
-    Trace::traceRelease("total class visits %u\n", total_classes.load());
-    Trace::traceRelease("total function visits %u\n", total_funcs.load());
-  }
+void constant_pass(Index& index, php::Program& program) {
+  if (!options.HardConstProp) return;
+  index.use_class_dependencies(false);
+  analyze_iteratively(index, program, AnalyzeMode::ConstPass);
+
+  auto save = options.InsertAssertions;
+  options.InsertAssertions = false;
+  index.freeze();
+
+  trace_time optimize_constants("optimize constants");
+  parallel::for_each(
+    const_pass_contexts(program, php::Program::ForAll),
+    [&] (Context ctx) {
+      optimize_func(index, analyze_func(index, ctx, CollectionOpts{}), false);
+    }
+  );
+
+  index.thaw();
+  options.InsertAssertions = save;
 }
 
 void analyze_public_statics(Index& index, php::Program& program) {
@@ -312,7 +420,13 @@ void analyze_public_statics(Index& index, php::Program& program) {
     parallel::for_each(
       all_function_contexts(program),
       [&] (Context ctx) {
-        auto info = CollectedInfo { index, ctx, nullptr, &publicStatics };
+        if (ctx.cls && ctx.cls->closureContextCls) {
+          ctx.cls = ctx.cls->closureContextCls;
+        }
+        auto info = CollectedInfo {
+          index, ctx, nullptr, &publicStatics,
+          CollectionOpts::TrackConstantArrays
+        };
         analyze_func_collect(index, ctx, info);
       }
     );
@@ -328,7 +442,7 @@ void mark_persistent_static_properties(const Index& index,
   for (auto& unit : program.units) {
     for (auto& cls : unit->classes) {
       for (auto& prop : cls->properties) {
-        if (index.lookup_public_static_immutable(borrow(cls), prop.name)) {
+        if (index.lookup_public_static_immutable(cls.get(), prop.name)) {
           prop.attrs |= AttrPersistent;
         }
       }
@@ -336,28 +450,21 @@ void mark_persistent_static_properties(const Index& index,
   }
 }
 
-void update_mayusevv(Index& index, php::Program& program) {
-  trace_time timer("analyze mayusevv");
-  auto const results = parallel::map(
-    all_function_contexts(program),
-    [&] (Context ctx) {
-      if (is_pseudomain(ctx.func)) {
-        return std::make_tuple(true, ctx.func);
-      }
-      auto info = CollectedInfo { index, ctx, nullptr, nullptr };
-      analyze_func_collect(index, ctx, info);
-      return std::make_tuple(info.mayUseVV, ctx.func);
-    }
+void prop_type_hint_pass(Index& index, php::Program& program) {
+  trace_time tracer("optimize prop type-hints");
+
+  auto const contexts = opt_prop_type_hints_contexts(program);
+  parallel::for_each(
+    contexts,
+    [&] (Context ctx) { optimize_class_prop_type_hints(index, ctx); }
   );
 
-  trace_time update("mark mayusevv");
-  for (auto const& pair : results) {
-    auto const mayUseVV = std::get<0>(pair);
-    auto& func = std::get<1>(pair);
-    func->attrs = mayUseVV
-      ? Attr(func->attrs | AttrMayUseVV)
-      : Attr(func->attrs & ~AttrMayUseVV);
-  }
+  parallel::for_each(
+    contexts,
+    [&] (Context ctx) {
+      index.mark_no_bad_redeclare_props(const_cast<php::Class&>(*ctx.cls));
+    }
+  );
 }
 
 /*
@@ -379,32 +486,41 @@ void final_pass(Index& index, php::Program& program) {
   index.freeze();
   parallel::for_each(
     all_function_contexts(program),
-    [&] (Context ctx) { optimize_func(index, analyze_func(index, ctx)); }
+    [&] (Context ctx) {
+      optimize_func(index,
+                    analyze_func(index,
+                                 ctx,
+                                 CollectionOpts::TrackConstantArrays),
+                    true);
+    }
   );
 }
 
 //////////////////////////////////////////////////////////////////////
 
 template<class Container>
-std::unique_ptr<php::Program> parse_program(const Container& units) {
+std::unique_ptr<php::Program> parse_program(Container units) {
   trace_time tracer("parse");
-  auto ret = folly::make_unique<php::Program>();
+  auto ret = std::make_unique<php::Program>(units.size());
   ret->units = parallel::map(
     units,
-    [&] (const std::unique_ptr<UnitEmitter>& ue) {
-      return parse_unit(*ue);
+    [&] (std::unique_ptr<UnitEmitter>& ue) {
+      return parse_unit(*ret, std::move(ue));
     }
   );
   return ret;
 }
 
-std::vector<std::unique_ptr<UnitEmitter>>
-make_unit_emitters(const Index& index, const php::Program& program) {
+template<typename F>
+void make_unit_emitters(
+  const Index& index,
+  const php::Program& program,
+  F outFunc) {
   trace_time trace("make_unit_emitters");
-  return parallel::map(
+  return parallel::for_each(
     program.units,
     [&] (const std::unique_ptr<php::Unit>& unit) {
-      return emit_unit(index, *unit);
+      outFunc(emit_unit(index, *unit));
     }
   );
 }
@@ -415,44 +531,111 @@ make_unit_emitters(const Index& index, const php::Program& program) {
 
 //////////////////////////////////////////////////////////////////////
 
-std::pair<
-  std::vector<std::unique_ptr<UnitEmitter>>,
-  std::unique_ptr<ArrayTypeTable::Builder>
->
-whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues) {
+void UnitEmitterQueue::push(std::unique_ptr<UnitEmitter> ue) {
+  assertx(!m_done.load(std::memory_order_relaxed));
+  Lock lock(this);
+  if (!ue) {
+    m_done.store(true, std::memory_order_relaxed);
+  } else {
+    m_ues.push_back(std::move(ue));
+  }
+  notify();
+}
+
+std::unique_ptr<UnitEmitter> UnitEmitterQueue::pop() {
+  Lock lock(this);
+  while (m_ues.empty()) {
+    if (m_done.load(std::memory_order_relaxed)) return nullptr;
+    wait();
+  }
+  assertx(m_ues.size() > 0);
+  auto ue = std::move(m_ues.front());
+  assertx(ue != nullptr);
+  m_ues.pop_front();
+  return ue;
+}
+
+void UnitEmitterQueue::fetch(std::vector<std::unique_ptr<UnitEmitter>>& ues) {
+  assertx(m_done.load(std::memory_order_relaxed));
+  std::move(m_ues.begin(), m_ues.end(), std::back_inserter(ues));
+  m_ues.clear();
+}
+
+void UnitEmitterQueue::reset() {
+  m_ues.clear();
+  m_done.store(false, std::memory_order_relaxed);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
+                   UnitEmitterQueue& ueq,
+                   std::unique_ptr<ArrayTypeTable::Builder>& arrTable,
+                   int num_threads) {
   trace_time tracer("whole program");
 
-  LitstrTable::get().setReading();
+  RuntimeOption::EvalLowStaticArrays = false;
 
-  auto program = parse_program(ues);
-  ues.clear();
+  if (num_threads > 0) {
+    parallel::num_threads = num_threads;
+  }
+
+  auto program = parse_program(std::move(ues));
 
   state_after("parse", *program);
 
-  Index index{borrow(program)};
+  folly::Optional<Index> index;
+  index.emplace(program.get());
   if (!options.NoOptimizations) {
-    assert(check(*program));
-    analyze_iteratively(index, *program);
-    if (options.AnalyzePublicStatics) {
-      analyze_public_statics(index, *program);
-      analyze_iteratively(index, *program);
+    while (true) {
+      try {
+        assert(check(*program));
+        prop_type_hint_pass(*index, *program);
+        index->rewrite_default_initial_values(*program);
+        index->init_public_static_prop_types();
+        constant_pass(*index, *program);
+        index->use_class_dependencies(options.HardPrivatePropInference);
+        analyze_iteratively(*index, *program, AnalyzeMode::NormalPass);
+        if (options.AnalyzePublicStatics) {
+          analyze_public_statics(*index, *program);
+          analyze_iteratively(*index, *program, AnalyzeMode::NormalPass);
+        }
+        final_pass(*index, *program);
+        index->mark_persistent_classes_and_functions(*program);
+        state_after("optimize", *program);
+        assert(check(*program));
+        break;
+      } catch (Index::rebuild& rebuild) {
+        FTRACE(1, "whole_program: rebuilding index\n");
+        index.emplace(program.get(), &rebuild);
+        continue;
+      }
     }
-    final_pass(index, *program);
-    update_mayusevv(index, *program);
-    state_after("optimize", *program);
   }
 
   if (options.AnalyzePublicStatics) {
-    mark_persistent_static_properties(index, *program);
+    mark_persistent_static_properties(*index, *program);
   }
 
-  debug_dump_program(index, *program);
-  print_stats(index, *program);
+  debug_dump_program(*index, *program);
+  print_stats(*index, *program);
 
+  // running cleanup_for_emit can take a while... do it in parallel
+  // with making the unit emitters.
+  folly::Baton<> done;
+  auto cleanup_thread = std::thread([&] { index->cleanup_for_emit(&done); });
+
+  LitstrTable::fini();
+  LitstrTable::init();
   LitstrTable::get().setWriting();
-  ues = make_unit_emitters(index, *program);
-
-  return { std::move(ues), std::move(index.array_table_builder()) };
+  make_unit_emitters(*index, *program, [&] (std::unique_ptr<UnitEmitter> ue) {
+    ueq.push(std::move(ue));
+  });
+  LitstrTable::get().setReading();
+  arrTable = std::move(index->array_table_builder());
+  done.post();
+  cleanup_thread.join();
+  ueq.push(nullptr);
 }
 
 //////////////////////////////////////////////////////////////////////

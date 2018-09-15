@@ -15,4 +15,8 @@ function main() {
   $m->invoke(new Bar());
 }
 
+
+<<__EntryPoint>>
+function main_invokemethod_static() {
 main();
+}

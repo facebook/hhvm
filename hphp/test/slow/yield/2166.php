@@ -3,6 +3,9 @@
 function get() {
  return true;
  }
+
+<<__EntryPoint>>
+function main_2166() {
 if (get()) {
   function gen($i) {
     yield $i;
@@ -18,3 +21,4 @@ if (get()) {
 foreach (gen(3) as $x) {
  var_dump($x);
  }
+}

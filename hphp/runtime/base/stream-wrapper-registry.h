@@ -22,7 +22,6 @@
 #include <memory>
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/stream-wrapper.h"
-#include "hphp/runtime/base/req-containers.h"
 
 namespace HPHP { namespace Stream {
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,6 +41,8 @@ Wrapper* getWrapperFromURI(const String& uri,
 
 /* Called during process init to register core wrappers */
 void RegisterCoreWrappers();
+
+void setThreadLocalFileHandler(Wrapper* wrapper);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

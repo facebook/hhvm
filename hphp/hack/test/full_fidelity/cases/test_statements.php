@@ -3,7 +3,7 @@ function foo() {
   if ($a)
     if ($b)
       switch ($c) {
-        case 123: break;
+        case 123: fallthrough; // fallthrough parsed but not yet supported
         default: break;
       }
     else

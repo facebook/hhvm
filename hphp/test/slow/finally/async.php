@@ -14,8 +14,7 @@ function block() { // simulates blocking I/O
     RescheduleWaitHandle::QUEUE_NO_PENDING_IO,
     1,
   );
-};
-
+}
 async function genBlocking($a) {
   try {
     echo "before blocking\n";
@@ -36,4 +35,9 @@ function main() {
   $result = HH\Asio\join(genBlocking(42));
   var_dump($result);
 }
+
+<<__EntryPoint>>
+function main_async() {
+;
 main();
+}

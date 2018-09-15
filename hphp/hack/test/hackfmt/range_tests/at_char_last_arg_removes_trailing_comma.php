@@ -1,0 +1,2 @@
+<?hh
+foo($bar, $baz,);

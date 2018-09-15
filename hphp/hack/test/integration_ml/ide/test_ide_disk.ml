@@ -2,9 +2,9 @@
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
  *
  *)
 
@@ -37,7 +37,17 @@ function test() {
 let check_has_no_errors env =
   match Errors.get_error_list env.errorl with
   | [] -> ()
-  | _ -> Test.fail "Expected to have no errors"
+  | es ->
+    let buf = Buffer.create 256 in
+    Buffer.add_string buf "Expected to have no errors, but instead got: ";
+    List.iter
+      (fun e ->
+        Buffer.add_string buf "\n  - ";
+        let str = Errors.to_string (Errors.to_absolute e) in
+        Buffer.add_string buf str
+      ) es;
+    let msg = Buffer.contents buf in
+    Test.fail msg
 
 let check_has_errors env =
   match Errors.get_error_list env.errorl with
@@ -78,8 +88,6 @@ let () =
   let env = Test.wait env in
   (* Next iteration executes the recheck and generates the errors *)
   let env, loop_output = Test.(run_loop_once env default_loop_input) in
-  (* IDE edits only create diagnostics, they don't update global error list *)
-  check_has_no_errors env;
   Test.assert_has_diagnostics loop_output;
 
   (* Edit file back to have no errors *)

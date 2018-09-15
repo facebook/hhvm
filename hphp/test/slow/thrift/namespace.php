@@ -141,4 +141,8 @@ function test() {
   var_dump(md5($p->getTransport()->buff));
   var_dump(thrift_protocol_read_binary($p, '\A\TestStruct', true));
 }
+
+<<__EntryPoint>>
+function main_namespace() {
 test();
+}

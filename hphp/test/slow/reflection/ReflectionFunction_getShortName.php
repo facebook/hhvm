@@ -19,6 +19,10 @@ class Test {
   }
 }
 
+
+
+<<__EntryPoint>>
+function main_reflection_function_get_short_name() {
 $rf = new \ReflectionFunction('\foo\bar\f');
 print "--- getShortName(\"\\foo\\bar\\f\") ---\n";
 var_dump($rf->getShortName());
@@ -42,4 +46,4 @@ print "\n";
 print "--- getNamespaceName(\"strlen\") ---\n";
 var_dump($rf->getNamespaceName());
 print "\n";
-
+}

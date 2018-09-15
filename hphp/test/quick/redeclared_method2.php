@@ -1,4 +1,4 @@
-<?php
+<?hh
 interface I {
   static function foo();
 }

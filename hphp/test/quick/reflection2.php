@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait my_trait {
   function my_trait_method() {}

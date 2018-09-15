@@ -1,8 +1,8 @@
-#Using ini
+# Using ini
 
-ini usage in HHVM is fairly similar to that of php-src, albeit currently with 
-some limitations and enhancements. For example, HHVM currently doesn't support 
-per-dir ini settings (support coming soon), but it does support vector-based 
+ini usage in HHVM is fairly similar to that of php-src, albeit currently with
+some limitations and enhancements. For example, HHVM currently doesn't support
+per-dir ini settings (support coming soon), but it does support vector-based
 settings and wildcards for copying and symlinking values from other settings.
 
 ## Common usage
@@ -25,19 +25,18 @@ hhvm.error_handling.notice_frequency = 1
 hhvm.error_handling.warning_frequency = 1
 hhvm.enable_obj_destruct_call = true
 hhvm.enable_xhp = true
-hhvm.enable_zend_compat = true
 ```
 
 ## Copying and Symlinking Settings
 
-**NOTE**: This feature only currently work with core system settings. They 
+**NOTE**: This feature only currently work with core system settings. They
 don't yet work with extensions, `ini_set()`, etc.
 
-You can also provide wildcards to settings signaling that you want to use the 
+You can also provide wildcards to settings signaling that you want to use the
 value of another setting for its value.
 
 * `@`: Copy the value directly into this setting.
-* `:`: Symlink the value from the other setting to this setting. If the other 
+* `:`: Symlink the value from the other setting to this setting. If the other
 setting changes, then this setting will change with it, and vice-versa.
 
 To use this feature, use the form
@@ -72,9 +71,8 @@ hhvm.error_handling.notice_frequency = 1
 hhvm.error_handling.warning_frequency[:] = "hhvm.error_handling.notice_frequency"
 hhvm.enable_obj_destruct_call = true
 hhvm.enable_xhp[@]= "hhvm.enable_obj_destruct_call"
-hhvm.enable_zend_compat[@] = "hhvm.enable_xhp"
 ```
 
-**NOTE**: If you using this feature with vector or map based settings where you 
-can specify `[]` to indicate an in-order increment of a setting, you must 
+**NOTE**: If you using this feature with vector or map based settings where you
+can specify `[]` to indicate an in-order increment of a setting, you must
 specify explicit indices for them because they will be used to determine which values to be used when copying or symlinking.

@@ -43,4 +43,8 @@ function main() {
   print ":".empty($a[0]).":\n";
   print "\n";
 }
+
+<<__EntryPoint>>
+function main_empty_elem() {
 main();
+}

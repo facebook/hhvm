@@ -46,7 +46,7 @@ using std::string;
 
 static void readString(FILE *f, string &out) {
   size_t nread = 0;
-  const unsigned int BUFFER_SIZE = 1024;
+  constexpr unsigned int BUFFER_SIZE = 1024;
   char buf[BUFFER_SIZE];
   while ((nread = fread(buf, 1, BUFFER_SIZE, f)) != 0) {
     out.append(buf, nread);
@@ -58,6 +58,7 @@ static void readString(FILE *f, string &out) {
 // Cached process statics
 std::string Process::HostName;
 std::string Process::CurrentWorkingDirectory;
+char** Process::Argv;
 
 void Process::InitProcessStatics() {
   HostName = GetHostName();
@@ -97,31 +98,32 @@ bool Process::IsUnderGDB() {
   return binaryPath.filename() == "gdb ";
 }
 
-int64_t Process::GetProcessRSS(pid_t pid) {
-  string name = "/proc/" + folly::to<string>(pid) + "/status";
+int64_t Process::GetMemUsageMb() {
+  ProcStatus status;                    // read /proc/self/status
+  return status.valid() ? status.adjustedRSSKb / 1024 : 0;
+}
 
-  string status;
-  FILE * f = fopen(name.c_str(), "r");
-  if (f) {
-    readString(f, status);
-    fclose(f);
+int Process::GetNumThreads() {
+  ProcStatus status;
+  return status.valid() ? status.Threads : 1;
+}
+
+// Files such as /proc/meminfo and /proc/self/status contain many lines
+// formatted as one of the following:
+//   <fieldName>: <number>
+//   <fieldName>: <number> kB
+// This function parses the line and return the number in it.  -1 is returned
+// when the line isn't formatted as expected (until one day we need to read a
+// line where -1 is a legit value).
+static int64_t readSize(const char* line, bool expectKB = false) {
+  int64_t result = -1;
+  char tail[8];
+  auto n = sscanf(line, "%*s %" SCNd64 " %7s", &result, tail);
+  if (expectKB) {
+    if (n < 2) return -1;
+    if (tail[0] != 'k' || tail[1] != 'B') return -1;
   }
-
-  std::vector<std::string> lines;
-  folly::split('\n', status, lines, true /* ignoreEmpty */);
-  for (unsigned int i = 0; i < lines.size(); i++) {
-    string &line = lines[i];
-    if (line.find("VmRSS:") == 0) {
-      for (unsigned int j = strlen("VmRSS:"); j < line.size(); j++) {
-        if (line[j] != ' ') {
-          long long mem = atoll(line.c_str() + j);
-          return mem/1024;
-        }
-      }
-    }
-  }
-
-  return 0;
+  return result;
 }
 
 bool Process::GetMemoryInfo(MemInfo& info) {
@@ -135,26 +137,26 @@ bool Process::GetMemoryInfo(MemInfo& info) {
   if (f) {
     SCOPE_EXIT{ fclose(f); };
 
-    // Return size in MB
-    auto const parseLine = [] (const char* item, const char* line) -> int64_t {
-      int64_t amount = -1;
-      char mult = 'b';
-      char format[64];
-      snprintf(format, sizeof(format), "%s: %%%s %%c", item, PRId64);
-      sscanf(line, format, &amount, &mult);
-      if (amount <= 0) return -1;
-      if (mult == 'k' || mult == 'K') return amount >> 10;
-      if (mult == 'm' || mult == 'M') return amount;
-      if (mult == 'g' || mult == 'G') return amount << 10;
-      return amount >> 20;
-    };
-
-    char buf[128];
-    while (fgets(buf, sizeof(buf), f)) {
-      info.freeMb = std::max(info.freeMb, parseLine("MemFree", buf));
-      info.buffersMb = std::max(info.buffersMb, parseLine("Buffers", buf));
-      info.cachedMb = std::max(info.cachedMb, parseLine("Cached", buf));
+    char line[128];
+    while (fgets(line, sizeof(line), f)) {
+      auto const kb = readSize(line, true);
+      if (!strncmp(line, "MemFree:", 8)) {
+        if (kb >= 0) info.freeMb = kb / 1024;
+      } else if (!strncmp(line, "Buffers:", 8)) {
+        if (kb >= 0) info.buffersMb = kb / 1024;
+      } else if (!strncmp(line, "Cached:", 7)) {
+        if (kb >= 0) info.cachedMb = kb / 1024;
+      } else if (!strncmp(line, "MemAvailable:", 13)) {
+        if (kb >= 0) info.availableMb = kb / 1024;
+      }
       if (info.valid()) return true;
+    }
+    // If MemAvailable isn't available, which shouldn't be the case for kernel
+    // versions later than 3.14, we get a rough esitmation.
+    if (info.availableMb < 0 && info.freeMb >= 0 &&
+        info.cachedMb >= 0 && info.buffersMb >= 0) {
+      info.availableMb = info.freeMb + info.cachedMb;
+      return true;
     }
   }
   return false;
@@ -163,48 +165,6 @@ bool Process::GetMemoryInfo(MemInfo& info) {
 int Process::GetCPUCount() {
   return sysconf(_SC_NPROCESSORS_ONLN);
 }
-
-size_t Process::GetCodeFootprint(pid_t pid) {
-  // /proc/<pid>/statm reports the following whitespace-separated values (in
-  // terms of page counts):
-  //    size       total program size
-  //    resident   resident set size
-  //    share      shared pages
-  //    text       text (code)
-  //    lib        library (unused in Linux 2.6)
-  //    data       data/stack
-  //    dt         dirty pages (unused in Linux 2.6)
-  //
-  // Return (share + text), under the assumption that share consists only of
-  // shared libraries.
-  string name = "/proc/" + folly::to<string>(pid) + "/statm";
-
-  string statm;
-  FILE * f = fopen(name.c_str(), "r");
-  if (f) {
-    readString(f, statm);
-    fclose(f);
-  }
-
-  size_t pageSize = size_t(sysconf(_SC_PAGESIZE));
-  size_t pos0, pos1 = 0;
-#define STATM_FIELD_NEXT() do {                                               \
-  pos0 = pos1;                                                                \
-  pos1 = statm.find(" ", pos0) + 1;                                           \
-} while (0)
-#define STATM_FIELD_READ(name)                                                \
-  STATM_FIELD_NEXT();                                                         \
-  size_t name = strtoull(statm.substr(pos0, pos1-pos0).c_str(),               \
-                         nullptr, 0) * pageSize;
-  STATM_FIELD_NEXT(); // size.
-  STATM_FIELD_NEXT(); // resident.
-  STATM_FIELD_READ(share);
-  STATM_FIELD_READ(text);
-#undef STATM_FIELD_NEXT
-#undef STATM_FIELD_READ
-  return share + text;
-}
-
 
 #ifdef __x86_64__
 static __inline void do_cpuid(u_int ax, u_int *p) {
@@ -355,6 +315,84 @@ std::string Process::GetHomeDirectory() {
     ret += '/';
   }
   return ret;
+}
+
+void Process::SetCoreDumpHugePages() {
+#if defined(__linux__)
+  /*
+   * From documentation athttp://man7.org/linux/man-pages/man5/core.5.html
+   *
+   * The bits in coredump_filter have the following meanings:
+   *
+   *   bit 0  Dump anonymous private mappings.
+   *   bit 1  Dump anonymous shared mappings.
+   *   bit 2  Dump file-backed private mappings.
+   *   bit 3  Dump file-backed shared mappings.
+   *   bit 4 (since Linux 2.6.24) Dump ELF headers.
+   *   bit 5 (since Linux 2.6.28) Dump private huge pages.
+   *   bit 6 (since Linux 2.6.28) Dump shared huge pages.
+   *   bit 7 (since Linux 4.4) Dump private DAX pages.
+   *   bit 8 (since Linux 4.4) Dump shared DAX pages.
+   */
+  if (FILE* f = fopen("/proc/self/coredump_filter", "r+")) {
+    unsigned mask = 0;
+    if (fscanf(f, "%x", &mask)) {
+      constexpr unsigned hugetlbMask = 0x60;
+      if ((mask & hugetlbMask) != hugetlbMask) {
+        mask |= hugetlbMask;
+        rewind(f);
+        fprintf(f, "0x%x", mask);
+      }
+    }
+    fclose(f);
+  }
+#endif
+}
+
+ProcStatus::ProcStatus() {
+#ifdef __linux__
+  if (FILE* f = fopen("/proc/self/status", "r")) {
+    char line[128];
+    while (fgets(line, sizeof(line), f)) {
+      if (!strncmp(line, "VmSize:", 7)) {
+        VmSizeKb = readSize(line, true);
+      } else if (!strncmp(line, "VmRSS:", 6)) {
+        VmRSSKb = readSize(line, true);
+      } else if (!strncmp(line, "VmHWM:", 6)) {
+        VmHWMKb = readSize(line, true);
+      } else if (!strncmp(line, "HugetlbPages:", 13)) {
+        HugetlbPagesKb = readSize(line, true);
+      } else if (!strncmp(line, "Threads:", 8)) {
+        Threads = readSize(line, false);
+      }
+    }
+    fclose(f);
+    if (!valid()) return;
+    adjustedRSSKb = VmRSSKb + HugetlbPagesKb;
+    VmHWMKb += HugetlbPagesKb;
+  }
+#endif
+}
+
+bool Process::OOMScoreAdj(int adj) {
+#ifdef __linux__
+  if (adj >= -1000 && adj < 1000) {
+    if (auto f = fopen("/proc/self/oom_score_adj", "r+")) {
+      fprintf(f, "%d", adj);
+      fclose(f);
+      return true;
+    }
+  }
+#endif
+  return false;
+}
+
+int Process::Relaunch() {
+  if (!Argv) {
+    errno = EINVAL;
+    return -1;
+  }
+  return execvp(Argv[0], Argv);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

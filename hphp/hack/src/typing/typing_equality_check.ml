@@ -2,12 +2,12 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
+open Core_kernel
 open Typing_defs
 
 module Env = Typing_env
@@ -42,12 +42,19 @@ let eq_incompatible_types p (r1, ty1) (r2, ty2) =
     (Reason.to_string ("This is " ^ tys1) r1)
     (Reason.to_string ("This is " ^ tys2) r2)
 
+let enforce_nullable_or_not_awaitable env p ty1 ty2 =
+  begin
+    Typing_async.enforce_nullable_or_not_awaitable env p ty1;
+    Typing_async.enforce_nullable_or_not_awaitable env p ty2
+  end
+
 let rec assert_nontrivial p bop env ty1 ty2 =
   let ety_env = Phase.env_with_self env in
   let _, ty1 = Env.expand_type env ty1 in
   let _, ety1, trail1 = TDef.force_expand_typedef ~ety_env env ty1 in
   let _, ty2 = Env.expand_type env ty2 in
   let _, ety2, trail2 = TDef.force_expand_typedef ~ety_env env ty2 in
+  enforce_nullable_or_not_awaitable env p ety1 ety2;
   match ty1, ty2 with
   (* Disallow `===` on distinct abstract enum types. *)
   (* Future: consider putting this in typed lint not type checking *)
@@ -65,6 +72,7 @@ let rec assert_nontrivial p bop env ty1 ty2 =
       Errors.noreturn_usage p (Reason.to_string ("This always throws or exits") r)
   | (r, Tprim N.Tvoid), _
   | _, (r, Tprim N.Tvoid) ->
+      if Reason.is_rnull r then () else
       (* Ideally we shouldn't hit this case, but well... *)
       Errors.void_usage p (Reason.to_string ("This is void") r)
   | (_, Tprim a), (_, Tprim b) when a <> b ->
@@ -72,7 +80,7 @@ let rec assert_nontrivial p bop env ty1 ty2 =
   | (_, Toption ty1), (_, Tprim _ as ty2)
   | (_, Tprim _ as ty1), (_, Toption ty2) ->
       assert_nontrivial p bop env ty1 ty2
-  | (_, (Tany | Tmixed | Tarraykind _ | Tprim _ | Toption _
+  | (_, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
     | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
     | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _)
     ), _ -> ()

@@ -63,9 +63,8 @@ const Class* SimpleXMLIterator_classof() {
 
 struct SimpleXMLElement {
   SimpleXMLElement() {
-    auto obj = Native::object<SimpleXMLElement>(this);
-    obj->setAttribute(ObjectData::HasPropEmpty);
-    obj->setAttribute(ObjectData::CallToImpl);
+    assertx(Native::object<SimpleXMLElement>(this)->getVMClass()->
+           rtAttribute(Class::CallToImpl));
   }
   SimpleXMLElement& operator=(const SimpleXMLElement &src) {
     iter.isprefix = src.iter.isprefix;
@@ -119,12 +118,12 @@ struct SimpleXMLElement {
 
 struct SimpleXMLElementIterator {
   SimpleXMLElement* sxe() {
-    assert(m_sxe->instanceof(SimpleXMLElement_classof()));
+    assertx(m_sxe->instanceof(SimpleXMLElement_classof()));
     return Native::data<SimpleXMLElement>(m_sxe.get());
   }
 
   void setSxe(const Object& sxe) {
-    assert(sxe->instanceof(SimpleXMLElement_classof()));
+    assertx(sxe->instanceof(SimpleXMLElement_classof()));
     m_sxe = Object(sxe.get());
   }
 
@@ -213,7 +212,7 @@ static Object _node_as_zval(SimpleXMLElement* sxe, xmlNodePtr node,
   return obj;
 }
 
-static inline bool match_ns(SimpleXMLElement* sxe, xmlNodePtr node,
+static inline bool match_ns(SimpleXMLElement* /*sxe*/, xmlNodePtr node,
                             xmlChar* name, bool prefix) {
   if (name == nullptr && (node->ns == nullptr || node->ns->prefix == nullptr)) {
     return true;
@@ -307,7 +306,7 @@ static void php_sxe_move_forward_iterator(SimpleXMLElement* sxe) {
   xmlNodePtr node = nullptr;
   auto data = sxe->iter.data;
   if (!data.isNull()) {
-    assert(data->instanceof(SimpleXMLElement_classof()));
+    assertx(data->instanceof(SimpleXMLElement_classof()));
     auto intern = Native::data<SimpleXMLElement>(data.get());
     node = intern->nodep();
     sxe->iter.data.reset();
@@ -361,7 +360,7 @@ static xmlNodePtr php_sxe_get_first_node(SimpleXMLElement* sxe,
     php_sxe_reset_iterator(sxe, true);
     xmlNodePtr retnode = nullptr;
     if (!sxe->iter.data.isNull()) {
-      assert(sxe->iter.data->instanceof(SimpleXMLElement_classof()));
+      assertx(sxe->iter.data->instanceof(SimpleXMLElement_classof()));
       retnode = Native::data<SimpleXMLElement>(sxe->iter.data.get())->nodep();
     }
     return retnode;
@@ -777,6 +776,8 @@ static void sxe_properties_add(Array& rv, char* name, const Variant& value) {
   }
 }
 
+const static StaticString s_atAttributes{"@attributes"};
+
 static void sxe_get_prop_hash(SimpleXMLElement* sxe, bool is_debug,
                               Array& rv, bool isBoolCast = false) {
   rv.clear();
@@ -808,7 +809,7 @@ static void sxe_get_prop_hash(SimpleXMLElement* sxe, bool is_debug,
         attr = attr->next;
       }
       if (zattr.size()) {
-        rv.set(String("@attributes"), zattr);
+        rv.set(s_atAttributes, zattr);
       }
     }
   }
@@ -886,8 +887,8 @@ next_iter:
   }
 }
 
-Variant SimpleXMLElement_objectCast(const ObjectData* obj, int8_t type) {
-  assert(obj->instanceof(SimpleXMLElement_classof()));
+Variant SimpleXMLElement_objectCast(const ObjectData* obj, DataType type) {
+  assertx(obj->instanceof(SimpleXMLElement_classof()));
   auto sxe = Native::data<SimpleXMLElement>(const_cast<ObjectData*>(obj));
   if (type == KindOfBoolean) {
     xmlNodePtr node = php_sxe_get_first_node(sxe, nullptr);
@@ -930,8 +931,8 @@ Variant SimpleXMLElement_objectCast(const ObjectData* obj, int8_t type) {
 
   switch (type) {
     case KindOfString: return ret;
-    case KindOfInt64:  return toInt64(ret);
-    case KindOfDouble: return toDouble(ret);
+    case KindOfInt64:  return ret.toInt64();
+    case KindOfDouble: return ret.toDouble();
     default:           return init_null();
   }
 }
@@ -1228,11 +1229,11 @@ static Variant HHVM_FUNCTION(simplexml_load_string,
   return obj;
 }
 
-static Variant HHVM_FUNCTION(simplexml_load_file,
-                              const String& filename,
-                              const String& class_name /* = "SimpleXMLElement" */,
-                              int64_t options /* = 0 */, const String& ns /* = "" */,
-                              bool is_prefix /* = false */) {
+static Variant
+HHVM_FUNCTION(simplexml_load_file, const String& filename,
+              const String& class_name /* = "SimpleXMLElement" */,
+              int64_t /*options*/ /* = 0 */, const String& ns /* = "" */,
+              bool is_prefix /* = false */) {
   SYNC_VM_REGS_SCOPED();
   auto cls = class_from_name(class_name, "simplexml_load_file");
   if (!cls) {
@@ -1433,6 +1434,9 @@ static Variant HHVM_METHOD(SimpleXMLElement, asXML,
       int strval_len;
       xmlDocDumpMemoryEnc(doc, &strval, &strval_len,
                           (const char*)doc->encoding);
+      if (!strval) {
+        return false;
+      }
       String ret = String((char*)strval);
       xmlFree(strval);
       return ret;
@@ -1454,6 +1458,9 @@ static Variant HHVM_METHOD(SimpleXMLElement, asXML,
 #else
       str = (char*)outbuf->buffer->content;
 #endif
+      if (!str) {
+        return false;
+      }
       String ret = String(str);
       xmlOutputBufferClose(outbuf);
       return ret;
@@ -1774,7 +1781,7 @@ static Variant HHVM_METHOD(SimpleXMLIterator, key) {
     return init_null();
   }
 
-  assert(curobj->instanceof(SimpleXMLElement_classof()));
+  assertx(curobj->instanceof(SimpleXMLElement_classof()));
   auto curnode = Native::data<SimpleXMLElement>(curobj.get())->nodep();
   return String((char*)curnode->name);
 }
@@ -1802,7 +1809,7 @@ static Variant HHVM_METHOD(SimpleXMLIterator, getChildren) {
   if (current.isNull()) {
     return init_null();
   }
-  assert(current->instanceof(SimpleXMLElement_classof()));
+  assertx(current->instanceof(SimpleXMLElement_classof()));
   return HHVM_MN(SimpleXMLElement, children)(current.get());
 }
 
@@ -1812,7 +1819,7 @@ static bool HHVM_METHOD(SimpleXMLIterator, hasChildren) {
     return false;
   }
   auto od = children.toObject().get();
-  assert(od->instanceof(SimpleXMLElement_classof()));
+  assertx(od->instanceof(SimpleXMLElement_classof()));
   return HHVM_MN(SimpleXMLElement, count)(od) > 0;
 }
 
@@ -1850,7 +1857,7 @@ static struct SimpleXMLExtension : Extension {
     HHVM_ME(SimpleXMLElement, offsetUnset);
 
     Native::registerNativeDataInfo<SimpleXMLElement>(
-      s_SimpleXMLElement.get()
+      s_SimpleXMLElement.get(), 0, Class::CallToImpl
     );
 
     /* SimpleXMLElementIterator */
@@ -1876,7 +1883,7 @@ static struct SimpleXMLExtension : Extension {
     HHVM_ME(SimpleXMLIterator, hasChildren);
 
     Native::registerNativeDataInfo<SimpleXMLIterator>(
-      s_SimpleXMLIterator.get()
+      s_SimpleXMLIterator.get(), 0, Class::CallToImpl
     );
 
     loadSystemlib();

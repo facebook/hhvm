@@ -43,7 +43,7 @@ void CmdNext::help(DebuggerClient& client) {
 
 void CmdNext::onSetup(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
   TRACE(2, "CmdNext::onSetup\n");
-  assert(!m_complete); // Complete cmds should not be asked to do work.
+  assertx(!m_complete); // Complete cmds should not be asked to do work.
   m_stackDepth = proxy.getStackDepth();
   m_vmDepth = g_context->m_nesting;
   m_loc = interrupt.getFileLine();
@@ -59,7 +59,7 @@ void CmdNext::onSetup(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
 
 void CmdNext::onBeginInterrupt(DebuggerProxy& proxy, CmdInterrupt& interrupt) {
   TRACE(2, "CmdNext::onBeginInterrupt\n");
-  assert(!m_complete); // Complete cmds should not be asked to do work.
+  assertx(!m_complete); // Complete cmds should not be asked to do work.
 
   ActRec *fp = vmfp();
   if (!fp) {
@@ -211,8 +211,8 @@ void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
   // stepping over an await, we land on the next statement.
   auto const op = peek_op(pc);
   if (op == OpAwait) {
-    assert(fp->func()->isAsync());
-    auto wh = c_WaitHandle::fromCell(vmsp());
+    assertx(fp->func()->isAsync());
+    auto wh = c_Awaitable::fromCell(*vmsp());
     if (wh && !wh->isFinished()) {
       TRACE(2, "CmdNext: encountered blocking await\n");
       if (fp->resumed()) {
@@ -223,7 +223,7 @@ void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
         // functions. We need to step over this opcode, then grab the created
         // AsyncFunctionWaitHandle and setup stepping like we do for
         // OpAwait.
-        assert(fp->func()->isAsyncFunction());
+        assertx(fp->func()->isAsyncFunction());
         m_skippingAwait = true;
         m_needsVMInterrupt = true;
         removeLocationFilter();
@@ -231,15 +231,15 @@ void CmdNext::stepCurrentLine(CmdInterrupt& interrupt, ActRec* fp, PC pc) {
       return;
     }
   } else if (op == OpYield || op == OpYieldK) {
-    assert(fp->resumed());
-    assert(fp->func()->isGenerator());
+    assertx(fp->resumed());
+    assertx(fp->func()->isGenerator());
     TRACE(2, "CmdNext: encountered yield from generator\n");
     setupStepOuts();
     setupStepSuspend(fp, pc);
     removeLocationFilter();
     return;
   } else if (op == OpRetC && fp->resumed()) {
-    assert(fp->func()->isResumable());
+    assertx(fp->func()->isResumable());
     TRACE(2, "CmdNext: encountered return from resumed resumable\n");
     setupStepOuts();
     removeLocationFilter();
@@ -264,12 +264,12 @@ bool CmdNext::atStepResumableOffset(Unit* unit, Offset o) {
 void CmdNext::setupStepSuspend(ActRec* fp, PC pc) {
   // Yield is followed by the label where execution will continue.
   auto const op = decode_op(pc);
-  assert(op == OpAwait || op == OpYield || op == OpYieldK);
+  assertx(op == OpAwait || op == OpYield || op == OpYieldK);
   if (op == OpAwait) {
     decode_iva(pc);
   }
   Offset nextInst = fp->func()->unit()->offsetOf(pc);
-  assert(nextInst != InvalidAbsoluteOffset);
+  assertx(nextInst != InvalidAbsoluteOffset);
   m_stepResumableId = fp;
   TRACE(2, "CmdNext: patch for resumable step at '%s' offset %d\n",
         fp->m_func->fullName()->data(), nextInst);
@@ -284,11 +284,11 @@ void CmdNext::setupStepSuspend(ActRec* fp, PC pc) {
 // where execution will resume.
 void CmdNext::stepAfterAwait() {
   auto topObj = vmsp()->m_data.pobj;
-  assert(topObj->instanceof(c_AsyncFunctionWaitHandle::classof()));
+  assertx(topObj->instanceof(c_AsyncFunctionWaitHandle::classof()));
   auto wh = static_cast<c_AsyncFunctionWaitHandle*>(topObj);
   auto func = wh->actRec()->func();
   Offset nextInst = wh->getNextExecutionOffset();
-  assert(nextInst != InvalidAbsoluteOffset);
+  assertx(nextInst != InvalidAbsoluteOffset);
   m_stepResumableId = wh->actRec();
   TRACE(2,
         "CmdNext: patch for cont step after Await at '%s' offset %d\n",
@@ -309,8 +309,8 @@ void CmdNext::cleanupStepResumable() {
 // resumable, or we'll stop when we get back into it, we know the object
 // will remain alive.
 void* CmdNext::getResumableId(ActRec* fp) {
-  assert(fp->resumed());
-  assert(fp->func()->isResumable());
+  assertx(fp->resumed());
+  assertx(fp->func()->isResumable());
   TRACE(2, "CmdNext: resumable tag %p for %s\n", fp,
         fp->func()->name()->data());
   return fp;

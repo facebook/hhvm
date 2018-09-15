@@ -1,0 +1,4 @@
+File "suspend_operator_err1.php", line 5, characters 16-17:
+'suspend' operator expects call to a coroutine as an argument. (Typing[4169])
+File "suspend_operator_err1.php", line 5, characters 16-17:
+This is an int

@@ -8,16 +8,6 @@ class MyClass {
   }
 }
 
-/* Stages in this test
- * Memory reaches 40 -> first callback, registering second callback as a function
- * Memory reaches 50 -> second callback, registering third callback
- * Memory reaches 60 -> changing loop behavior to allocate without function calls
- * Memory reaches 70 -> third callback
- * Memory reaches 80 -> loop over
- * Memory reaches 90 -> OOM Error (never happens)
- */
-ini_set('memory_limit', 90 * 1024 * 1024);
-
 function mem_threshold_callback_as_func2() {
   echo "Threshold crossed again (2), peak: ".memory_get_peak_usage(true)."\n";
 }
@@ -26,6 +16,19 @@ function mem_threshold_callback_as_func() {
   echo "Threshold crossed again, peak: ".memory_get_peak_usage(true)."\n";
   HH\set_mem_threshold_callback(70 * 1024 * 1024, 'mem_threshold_callback_as_func2');
 }
+
+
+/* Stages in this test
+ * Memory reaches 40 -> first callback, registering second callback as a function
+ * Memory reaches 50 -> second callback, registering third callback
+ * Memory reaches 60 -> changing loop behavior to allocate without function calls
+ * Memory reaches 70 -> third callback
+ * Memory reaches 80 -> loop over
+ * Memory reaches 90 -> OOM Error (never happens)
+ */
+<<__EntryPoint>>
+function main_mem_threshold() {
+ini_set('memory_limit', 90 * 1024 * 1024);
 
 HH\set_mem_threshold_callback(40 * 1024 * 1024, ()==> {
   echo "Threshold crossed, current peak: ".memory_get_peak_usage(true)."\n";
@@ -59,4 +62,5 @@ for ($i = 0; $i < 1000000; $i++) {
     // Allocate with function entry/exit
     $myclass->doSomethin($longstr);
   }
+}
 }

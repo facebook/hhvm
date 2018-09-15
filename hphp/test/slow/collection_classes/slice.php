@@ -58,4 +58,8 @@ function main() {
   dump_set($x->slice(4, 10));
   dump_set($x->slice(10, 2));
 }
+
+<<__EntryPoint>>
+function main_slice() {
 main();
+}

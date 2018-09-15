@@ -28,7 +28,7 @@ struct TestServer : TestBase {
   TestServer() = delete;
   explicit TestServer(const std::string serverType);
 
-  virtual bool RunTests(const std::string &which);
+  bool RunTests(const std::string& which) override;
 
   // test test harness
   bool TestSanity();

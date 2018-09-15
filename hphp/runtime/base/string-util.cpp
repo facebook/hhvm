@@ -50,7 +50,7 @@ String StringUtil::StripHTMLTags(const String& input,
 // splits/joins
 
 Variant StringUtil::Explode(const String& input, const String& delimiter,
-                            int limit /* = 0x7FFFFFFF */) {
+                            int64_t limit /* = PHP_INT_MAX */) {
   if (delimiter.empty()) {
     throw_invalid_argument("delimiter: (empty)");
     return false;
@@ -88,7 +88,7 @@ Variant StringUtil::Explode(const String& input, const String& delimiter,
       std::vector<int> positions;
       int len = delimiter.size();
       int pos0 = 0;
-      int found = 0;
+      int64_t found = 0;
       do {
         positions.push_back(pos0);
         positions.push_back(pos - pos0);
@@ -102,8 +102,8 @@ Variant StringUtil::Explode(const String& input, const String& delimiter,
         positions.push_back(input.size() - pos0);
         found++;
       }
-      unsigned nelems = std::max(found + limit, 0);
-      for (unsigned i = 0; i < nelems * 2; i += 2) {
+      uint64_t nelems = std::max(found + limit, (int64_t)0);
+      for (uint64_t i = 0; i < nelems * 2; i += 2) {
         ret.append(input.substr(positions[i], positions[i+1]));
       }
     } // else we have negative limit and delimiter not found
@@ -131,7 +131,7 @@ String StringUtil::Implode(const Variant& items, const String& delim,
     len += sitems.back().size() + lenDelim;
   }
   len -= lenDelim; // always one delimiter less than count of items
-  assert(sitems.size() == size);
+  assertx(sitems.size() == size);
 
   String s = String(len, ReserveString);
   char *buffer = s.mutableData();
@@ -149,7 +149,7 @@ String StringUtil::Implode(const Variant& items, const String& delim,
     memcpy(p, item.data(), lenItem);
     p += lenItem;
   }
-  assert(p - buffer == len);
+  assertx(p - buffer == len);
   s.setSize(len);
   return s;
 }
@@ -206,7 +206,7 @@ String StringUtil::HtmlEncode(const String& input, const int64_t qsBitmask,
                               const char *charset, bool dEncode, bool htmlEnt) {
   if (input.empty()) return input;
 
-  assert(charset);
+  assertx(charset);
   bool utf8 = true;
   if (strcasecmp(charset, "ISO-8859-1") == 0) {
     utf8 = false;
@@ -248,7 +248,7 @@ String StringUtil::HtmlEncodeExtra(const String& input, QuoteStyle quoteStyle,
                                    Array extra) {
   if (input.empty()) return input;
 
-  assert(charset);
+  assertx(charset);
   int flags = STRING_HTML_ENCODE_UTF8;
   if (nbsp) {
     flags |= STRING_HTML_ENCODE_NBSP;
@@ -312,7 +312,7 @@ String StringUtil::HtmlDecode(const String& input, QuoteStyle quoteStyle,
                               const char *charset, bool all) {
   if (input.empty()) return input;
 
-  assert(charset);
+  assertx(charset);
 
   int len = input.size();
   char *ret = string_html_decode(input.data(), len,
@@ -407,7 +407,7 @@ String StringUtil::DecodeFileUrl(const String& input) {
 // formatting
 
 String StringUtil::MoneyFormat(const char *format, double value) {
-  assert(format);
+  assertx(format);
   return string_money_format(format, value);
 }
 
@@ -432,10 +432,6 @@ String StringUtil::ROT13(const String& input) {
   if (input.empty()) return input;
   return String(string_rot13(input.data(), input.size()),
                 input.size(), AttachString);
-}
-
-int64_t StringUtil::CRC32(const String& input) {
-  return string_crc32(input.data(), input.size());
 }
 
 String StringUtil::Crypt(const String& input, const char *salt /* = "" */) {
@@ -475,8 +471,7 @@ size_t safe_address(size_t nmemb, size_t size, size_t offset) {
   uint64_t result =
     (uint64_t) nmemb * (uint64_t) size + (uint64_t) offset;
   if (UNLIKELY(result > StringData::MaxSize)) {
-    throw
-      FatalErrorException(0, "String length exceeded 2^31-2: %" PRIu64, result);
+    raiseStringLengthExceededError(result);
   }
   return result;
 }

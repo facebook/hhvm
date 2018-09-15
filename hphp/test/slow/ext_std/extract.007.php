@@ -7,4 +7,8 @@ class A {
   }
 }
 
+
+<<__EntryPoint>>
+function main_extract_007() {
 new A();
+}

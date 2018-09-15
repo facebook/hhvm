@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 
@@ -85,7 +86,8 @@ inline bool is_ephemeral(ServiceRequest sr) {
  *
  * Declared here for use in the templatized stub emitters defined below.
  */
-void emit_svcreq(CodeBlock& cb, DataBlock& data, TCA start, bool persist,
+void emit_svcreq(CodeBlock& cb, DataBlock& data, CGMeta& meta,
+                 TCA start, bool persist,
                  folly::Optional<FPInvOffset> spOff,
                  ServiceRequest sr, const ArgVec& argv);
 
@@ -98,6 +100,7 @@ void emit_svcreq(CodeBlock& cb, DataBlock& data, TCA start, bool persist,
 template<typename... Args>
 TCA emit_persistent(CodeBlock& cb,
                     DataBlock& data,
+                    CGMeta& meta,
                     folly::Optional<FPInvOffset> spOff,
                     ServiceRequest sr,
                     Args... args) {
@@ -105,13 +108,15 @@ TCA emit_persistent(CodeBlock& cb,
   assertx(!is_ephemeral(sr));
 
   auto const start = cb.frontier();
-  emit_svcreq(cb, data, cb.frontier(), true, spOff, sr, pack_args(args...));
+  emit_svcreq(cb, data, meta, cb.frontier(), true, spOff, sr,
+              pack_args(args...));
   return start;
 }
 
 template<typename... Args>
 TCA emit_ephemeral(CodeBlock& cb,
                    DataBlock& data,
+                   CGMeta& meta,
                    TCA start,
                    folly::Optional<FPInvOffset> spOff,
                    ServiceRequest sr,
@@ -119,8 +124,37 @@ TCA emit_ephemeral(CodeBlock& cb,
   using namespace detail;
   assertx(is_ephemeral(sr) || sr == REQ_RETRANSLATE);
 
-  emit_svcreq(cb, data, start, false, spOff, sr, pack_args(args...));
+  emit_svcreq(cb, data, meta, start, false, spOff, sr,
+              pack_args(args...));
   return start;
+}
+
+template<typename... Args>
+TCA emit_persistent(CodeBlock& cb,
+                    DataBlock& data,
+                    folly::Optional<FPInvOffset> spOff,
+                    ServiceRequest sr,
+                    Args... args) {
+  CGMeta dummy;
+  SCOPE_EXIT {
+    dummy.addressImmediates.clear();
+    assert(dummy.empty());
+  };
+  return emit_persistent(cb, data, dummy, spOff, sr, args...);
+}
+template<typename... Args>
+TCA emit_ephemeral(CodeBlock& cb,
+                   DataBlock& data,
+                   TCA start,
+                   folly::Optional<FPInvOffset> spOff,
+                   ServiceRequest sr,
+                   Args... args) {
+  CGMeta dummy;
+  SCOPE_EXIT {
+    dummy.addressImmediates.clear();
+    assert(dummy.empty());
+  };
+  return emit_ephemeral(cb, data, dummy, start, spOff, sr, args...);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

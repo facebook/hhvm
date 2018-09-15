@@ -28,7 +28,9 @@
 #include <memory>
 
 #include "hphp/runtime/base/config.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/runtime/base/typed-value.h"
+#include "hphp/util/compilation-flags.h"
+#include "hphp/util/hash-map.h"
 #include "hphp/util/functional.h"
 
 namespace HPHP {
@@ -45,6 +47,16 @@ struct IniSettingMap;
 
 constexpr int kDefaultInitialStaticStringTableSize = 500000;
 
+enum class JitSerdesMode {
+  Off,
+  Serialize,
+  SerializeAndExit,
+  Deserialize,
+  DeserializeOrFail,
+  DeserializeOrGenerate,
+  DeserializeAndExit,
+};
+
 /**
  * Configurable options set from command line or configurable file at startup
  * time.
@@ -54,14 +66,11 @@ struct RuntimeOption {
     IniSettingMap &ini, Hdf& config,
     const std::vector<std::string>& iniClis = std::vector<std::string>(),
     const std::vector<std::string>& hdfClis = std::vector<std::string>(),
-    std::vector<std::string>* messages = nullptr);
+    std::vector<std::string>* messages = nullptr,
+    std::string cmd = "");
 
   static bool ServerExecutionMode() {
     return ServerMode;
-  }
-
-  static bool ClientExecutionMode() {
-    return !ServerMode;
   }
 
   static bool GcSamplingEnabled() {
@@ -72,6 +81,12 @@ struct RuntimeOption {
     return EvalJit && EvalJitSampleRate > 0;
   }
 
+  static bool AllowObjectDestructors() {
+    // When one_bit_refcount == true, skip the runtime check since destructors
+    // are never allowed.
+    return !one_bit_refcount && EvalAllowObjectDestructors;
+  }
+
   static void ReadSatelliteInfo(
     const IniSettingMap& ini,
     const Hdf& hdf,
@@ -80,17 +95,14 @@ struct RuntimeOption {
     std::set<std::string>& xboxPasswords
   );
 
+  static std::string getTraceOutputFile();
+
   static bool ServerMode;
   static std::string BuildId;
   static std::string InstanceId;
   static std::string DeploymentId; // ID for set of instances deployed at once
   static std::string PidFile;
 
-#ifdef FACEBOOK
-  static bool UseThriftLogger;
-  static size_t LoggerBatchSize;
-  static size_t LoggerFlushTimeout;
-#endif
   static std::map<std::string, ErrorLogFileData> ErrorLogs;
   static std::string LogFile;
   static std::string LogFileSymLink;
@@ -108,6 +120,7 @@ struct RuntimeOption {
   static int ForceErrorReportingLevel; // Bitmask ORed with the reporting level
 
   static std::string ServerUser; // run server under this user account
+  static bool AllowRunAsRoot; // Allow running hhvm as root.
 
   static int  MaxSerializedStringSize;
   static bool NoInfiniteRecursionDetection;
@@ -138,23 +151,31 @@ struct RuntimeOption {
   static int ServerBacklog;
   static int ServerConnectionLimit;
   static int ServerThreadCount;
-  static int QueuedJobsReleaseRate;
+  static int ServerQueueCount;
+  // Number of worker threads with stack partially on huge pages.
+  static int ServerHugeThreadCount;
+  static int ServerHugeStackKb;
+  static uint32_t ServerLoopSampleRate;
   static int ServerWarmupThrottleRequestCount;
   static int ServerThreadDropCacheTimeoutSeconds;
   static int ServerThreadJobLIFOSwitchThreshold;
   static int ServerThreadJobMaxQueuingMilliSeconds;
+  static bool AlwaysDecodePostDataDefault;
   static bool ServerThreadDropStack;
   static bool ServerHttpSafeMode;
   static bool ServerStatCache;
   static bool ServerFixPathInfo;
   static bool ServerAddVaryEncoding;
   static bool ServerLogSettingsOnStartup;
+  static bool ServerForkEnabled;
+  static bool ServerForkLogging;
   static std::vector<std::string> ServerWarmupRequests;
   static std::string ServerCleanupRequest;
   static int ServerInternalWarmupThreads;
   static boost::container::flat_set<std::string> ServerHighPriorityEndPoints;
   static bool ServerExitOnBindFail;
   static int PageletServerThreadCount;
+  static int PageletServerHugeThreadCount;
   static int PageletServerThreadDropCacheTimeoutSeconds;
   static int PageletServerQueueLimit;
   static bool PageletServerThreadDropStack;
@@ -163,8 +184,12 @@ struct RuntimeOption {
   static int PspTimeoutSeconds;
   static int PspCpuTimeoutSeconds;
   static int64_t MaxRequestAgeFactor;
-  static int64_t ServerMemoryHeadRoom;
   static int64_t RequestMemoryMaxBytes;
+  // Threshold for aborting when host is low on memory.
+  static int64_t RequestMemoryOOMKillBytes;
+  // Approximate upper bound for thread heap that is backed by huge pages.  This
+  // doesn't include the first slab colocated with thread stack, if any.
+  static int64_t RequestHugeMaxBytes;
   static int64_t ImageMemoryMaxBytes;
   static int ServerGracefulShutdownWait;
   static bool ServerHarshShutdown;
@@ -199,6 +224,8 @@ struct RuntimeOption {
   // Base 2 logarithm of the sliding window size. Range is 10-24.
   static int BrotliCompressionLgWindowSize;
   static int BrotliCompressionQuality;
+  static int ZstdCompressionEnabled;
+  static int ZstdCompressionLevel;
   static int GzipCompressionLevel;
   static int GzipMaxCompressionLevel;
   static std::string ForceCompressionURL;
@@ -246,8 +273,10 @@ struct RuntimeOption {
   static std::string SSLCertificateFile;
   static std::string SSLCertificateKeyFile;
   static std::string SSLCertificateDir;
+  static std::string SSLTicketSeedFile;
   static bool TLSDisableTLS1_2;
   static std::string TLSClientCipherSpec;
+  static bool EnableSSLWithPlainText;
 
   static int XboxServerThreadCount;
   static int XboxServerMaxQueueLength;
@@ -267,6 +296,20 @@ struct RuntimeOption {
 
   static std::string SourceRoot;
   static std::vector<std::string> IncludeSearchPaths;
+
+  /**
+   * Legal root directory expressions in an include expression. For example,
+   *
+   *   include_once $PHP_ROOT . '/lib.php';
+   *
+   * Here, "$PHP_ROOT" is a legal include root. Stores what it resolves to.
+   *
+   *   RuntimeOption::IncludeRoots["$PHP_ROOT"] = "";
+   *   RuntimeOption::IncludeRoots["$LIB_ROOT"] = "lib";
+   */
+  static std::map<std::string, std::string> IncludeRoots;
+  static std::map<std::string, std::string> AutoloadRoots;
+
   static std::string FileCache;
   static std::string DefaultDocument;
   static std::string ErrorDocument404;
@@ -303,11 +346,12 @@ struct RuntimeOption {
   static int64_t UnserializationBigMapThreshold;
 
   static std::string TakeoverFilename;
+  static std::string AdminServerIP;
   static int AdminServerPort;
   static int AdminThreadCount;
-  static int AdminServerQueueToWorkerRatio;
   static std::string AdminPassword;
   static std::set<std::string> AdminPasswords;
+  static std::set<std::string> HashedAdminPasswords;
 
   /*
    * Options related to reverse proxying. ProxyOriginRaw and ProxyPercentageRaw
@@ -338,6 +382,8 @@ struct RuntimeOption {
   static std::string StackTraceFilename;
   static int StackTraceTimeout;
   static std::string RemoteTraceOutputDir;
+  static std::set<std::string, stdltistr> TraceFunctions;
+  static uint32_t TraceFuncId;
 
   static bool EnableStats;
   static bool EnableAPCStats;
@@ -356,9 +402,6 @@ struct RuntimeOption {
   static double ProfilerTraceExpansion;
   static int32_t ProfilerMaxTraceBuffer;
 
-  static int64_t MaxRSS;
-  static int64_t MaxRSSPollingCycle;
-  static int64_t DropCacheCycle;
   static int64_t MaxSQLRowCount;
   static int64_t SocketDefaultTimeout;
   static bool LockCodeMemory;
@@ -367,6 +410,9 @@ struct RuntimeOption {
   static bool UseDirectCopy;
 
   static bool DisableSmallAllocator;
+
+  static int PerAllocSampleF;
+  static int TotalAllocSampleF;
 
   static std::map<std::string, std::string> ServerVariables;
 
@@ -383,13 +429,12 @@ struct RuntimeOption {
   static bool EnableShortTags;
   static bool EnableAspTags;
   static bool EnableXHP;
+  static bool CheckParamTypeInvariance;
   static bool EnableObjDestructCall;
-  static bool EnableEmitterStats;
   static bool EnableIntrinsicsExtension;
   static bool CheckSymLink;
   static bool EnableArgsInBacktraces;
   static bool EnableContextInErrorHandler;
-  static bool EnableZendCompat;
   static bool EnableZendSorting;
   static bool EnableZendIniCompat;
   static bool TimeoutsUseWallTime;
@@ -403,6 +448,15 @@ struct RuntimeOption {
   static bool LookForTypechecker;
   static bool AutoTypecheck;
   static bool AutoprimeGenerators;
+  static bool EnableIsExprPrimitiveMigration;
+  static bool EnableReifiedGenerics;
+  static bool EnableCoroutines;
+  static bool Hacksperimental;
+  static uint32_t EvalInitialStaticStringTableSize;
+  static uint32_t EvalInitialNamedEntityTableSize;
+  static JitSerdesMode EvalJitSerdesMode;
+  static std::string EvalJitSerdesFile;
+  static bool DumpPreciseProfileData;
 
   // ENABLED (1) selects PHP7 behavior.
   static bool PHP7_DeprecationWarnings;
@@ -413,7 +467,6 @@ struct RuntimeOption {
   static bool PHP7_ScalarTypes;
   static bool PHP7_EngineExceptions;
   static bool PHP7_Substr;
-  static bool PHP7_InfNanFloatParse;
   static bool PHP7_UVS;
   static bool PHP7_DisallowUnsafeCurlUploads;
 
@@ -423,9 +476,26 @@ struct RuntimeOption {
   static int64_t HeapLowWaterMark;
   static int64_t HeapHighWaterMark;
 
+  // Disables PHP's compact() function. Valid values are 0 => enabled (default),
+  // 1 => warning, 2 => error.
+  static uint64_t DisableCompact;
+  // Disables PHP's extract() function. Valid values are 0 => enabled (default),
+  // 1 => warning, 2 => error.
+  static uint64_t DisableExtract;
+  // Disables PHP's forward_static_call function.
+  // Valid values are 0 => enabled (default),
+  // 1 => warning, 2 => error.
+  static uint64_t DisableForwardStaticCall;
+  // Disables PHP's forward_static_call_array function.
+  // Valid values are 0 => enabled (default),
+  // 1 => warning, 2 => error.
+  static uint64_t DisableForwardStaticCallArray;
+
+
   static int GetScannerType();
 
   static std::set<std::string, stdltistr> DynamicInvokeFunctions;
+  static hphp_string_imap<Cell> ConstantFunctions;
 
   static const uint32_t kPCREInitialTableSize = 96 * 1024;
 
@@ -436,6 +506,8 @@ struct RuntimeOption {
 
   // Namespace aliases for the compiler
   static std::map<std::string, std::string> AliasedNamespaces;
+
+  static std::vector<std::string> TzdataSearchPaths;
 
 #define EVALFLAGS()                                                     \
   /* F(type, name, defaultVal) */                                       \
@@ -453,26 +525,83 @@ struct RuntimeOption {
   F(bool, JitEvaledCode,               true)                            \
   F(bool, JitRequireWriteLease,        false)                           \
   F(uint64_t, JitRelocationSize,       kJitRelocationSizeDefault)       \
-  F(uint64_t, JitMatureSize,           25 << 20)                        \
+  F(uint64_t, JitMatureSize,           125 << 20)                       \
+  F(bool, JitMatureAfterWarmup,        true)                            \
   F(double, JitMaturityExponent,       1.)                              \
   F(bool, JitTimer,                    kJitTimerDefault)                \
   F(int, JitConcurrently,              1)                               \
   F(int, JitThreads,                   4)                               \
-  F(int, JitWorkerThreads,             0)                               \
+  F(int, JitWorkerThreads,             Process::GetCPUCount() / 2)      \
+  F(int, JitWorkerThreadsForSerdes,    0)                               \
+  F(bool, JitDesProfDataAfterRetranslateAll, true)                      \
+  F(int, JitLdimmqSpan,                8)                               \
+  F(int, JitPrintOptimizedIR,          0)                               \
   F(bool, RecordSubprocessTimes,       false)                           \
   F(bool, AllowHhas,                   false)                           \
-  F(string, UseExternalEmitter,        "")                              \
-  /* ExternalEmitterFallback:
-     0 - No fallback; fail when external emitter fails
-     1 - Fallback to builtin emitter if external emitter fails,
-         but log a diagnostic
-     2 - Fallback to builtin emitter if external emitter fails and
-         don't log anything */                                          \
-  F(int, ExternalEmitterFallback,      0)                               \
-  F(bool, ExternalEmitterAllowPartial, false)                           \
+  F(bool, DisassemblerSourceMapping,   true)                            \
+  F(bool, DisableReturnByReference,    false)                           \
+  F(bool, GenerateDocComments,         true)                            \
+  F(bool, DisassemblerDocComments,     true)                            \
+  F(bool, DisassemblerPropDocComments, true)                            \
+  F(bool, LoadFilepathFromUnitCache,   false)                           \
+  F(bool, ThrowOnCallByRefAnnotationMismatch, false)                    \
+  F(bool, WarnOnCallByRefAnnotationMismatch, true)                      \
+  F(bool, WarnOnCoerceBuiltinParams, false)                             \
+  /* Whether to use the embedded hackc binary */                        \
+  F(bool, HackCompilerUseEmbedded,     facebook)                        \
+  /* Whether to trust existing versions of the extracted compiler */    \
+  F(bool, HackCompilerTrustExtract,    true)                            \
+  /* When using an embedded hackc, extract it to the ExtractPath or the
+     ExtractFallback. */                                                \
+  F(string, HackCompilerExtractPath,   "/var/run/hackc_%{schema}")      \
+  F(string, HackCompilerFallbackPath,  "/tmp/hackc_%{schema}_XXXXXX")   \
+  /* Arguments to run embedded hackc binary with */                     \
+  F(string, HackCompilerArgs,          hackCompilerArgsDefault())       \
+  /* The command to invoke to spawn hh_single_compile in server mode. */\
+  F(string, HackCompilerCommand,       hackCompilerCommandDefault())    \
+  /* The number of hh_single_compile daemons to keep alive. */          \
+  F(uint64_t, HackCompilerWorkers,     Process::GetCPUCount())      \
+  /* The number of times to retry after an infra failure communicating
+     with a compiler process. */                                        \
+  F(uint64_t, HackCompilerMaxRetries,  0)                               \
+  /* Whether to log extern compiler performance */                      \
+  F(bool, LogExternCompilerPerf,       false)                           \
+  /* Whether to write verbose log messages to the error log and include
+     the hhas from failing units in the fatal error messages produced by
+     bad hh_single_compile units. */                                    \
+  F(bool, HackCompilerVerboseErrors,   true)                            \
+  /* Whether the HackC compiler should inherit the compiler config of the
+     HHVM process that launches it. */                                  \
+  F(bool, HackCompilerInheritConfig,   true)                            \
+  /* When using embedded data, extract it to the ExtractPath or the
+   * ExtractFallback. */                                                \
+  F(string, EmbeddedDataExtractPath,   "/var/run/hhvm_%{type}_%{buildid}") \
+  F(string, EmbeddedDataFallbackPath,  "/tmp/hhvm_%{type}_%{buildid}_XXXXXX") \
+  /* Whether to trust existing versions of extracted embedded data. */  \
+  F(bool, EmbeddedDataTrustExtract,    true)                            \
   F(bool, EmitSwitch,                  true)                            \
   F(bool, LogThreadCreateBacktraces,   false)                           \
   F(bool, FailJitPrologs,              false)                           \
+  F(bool, UseHHBBC,                    !getenv("HHVM_DISABLE_HHBBC"))   \
+  /* Generate warning of side effect of the pseudomain is called by     \
+     top-level code.*/                                                  \
+  F(bool, WarnOnRealPseudomain, false)                                  \
+  /* Generate warnings of side effect on top-level code that is not     \
+   * called by pseudomain directly (include from other file)            \
+   * 0 - Nothing                                                        \
+   * 1 - Raise Warning                                                  \
+   * 2 - Throw exception                                                \
+   */                                                                   \
+  F(int32_t, WarnOnUncalledPseudomain, 0)                               \
+  /* The following option enables the runtime checks for `this` typehints.
+   * There are 4 possible options:
+   * 0 - No checking of `this` typehints.
+   * 1 - Check `this` as hard `self` typehints.
+   * 2 - Check `this` typehints as soft `this` typehints
+   * 3 - Check `this` typehints as hard `this` typehints (unless explicitly
+   *     soft).  This is the only option which enable optimization in HHBBC.
+   */                                                                   \
+  F(int32_t, ThisTypeHintLevel,        EnableHipHopSyntax ? 3 : 0)      \
   /* CheckReturnTypeHints:
      0 - No checks or enforcement for return type hints.
      1 - Raises E_WARNING if a return type hint fails.
@@ -484,47 +613,88 @@ struct RuntimeOption {
      3 - Same as 2, except if a regular type hint fails the runtime
          will not allow execution to resume normally; if the user
          error handler returns something other than boolean false,
-         the runtime will throw a fatal error (this goes together
-         with Option::HardReturnTypeHints). */                          \
+         the runtime will throw a fatal error. */                       \
   F(int32_t, CheckReturnTypeHints,     2)                               \
-  F(bool, SoftClosureReturnTypeHints,  false)                           \
+  /*
+    CheckPropTypeHints:
+    0 - No checks or enforcement of property type hints.
+    1 - Raises E_WARNING if a property type hint fails.
+    2 - Raises E_RECOVERABLE_ERROR if regular property type hint fails, raises
+        E_WARNING if soft property type hint fails. If a regular property type
+        hint fails, it's possible for execution to resume normally if the user
+        error handler doesn't throw and returns something other than boolean
+        false.
+    3 - Same as 2, except if a regular property type hint fails the runtime will
+        not allow execution to resume normally; if the user error handler
+        returns something other than boolean false, the runtime will throw a
+        fatal error.
+  */                                                                    \
+  F(int32_t, CheckPropTypeHints,       0)                               \
+  /* Whether or not to assume that VerifyParamType instructions must
+     throw if the parameter does not match the associated type
+     constraint. This changes program behavior because parameter type
+     hint validation is normally a recoverable fatal. When this option
+     is on, hhvm will fatal if the error handler tries to recover in
+     this situation.
+     1) In repo-mode, we only set this option to hphpc, and serialize
+        it in Repo::GlobalData::HardTypeHints. Subsequent invocations
+        to hhbbc/hhvm runtime will only load it from the GlobalData.
+     2) In non-repo mode, we set this option to the runtime as usual.
+     3) Both HHBBC and the runtime should query only this option
+        instead of the GlobalData.
+  */                                                                    \
+  F(bool, HardTypeHints,               RepoAuthoritative)               \
   F(bool, PromoteEmptyObject,          !EnableHipHopSyntax)             \
+  F(bool, AllowObjectDestructors,      !one_bit_refcount)               \
+  F(bool, LibXMLUseSafeSubtrees,       true)                            \
+  F(bool, AllDestructorsOptional,      false)                           \
   F(bool, AllowScopeBinding,           true)                            \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
   F(uint32_t, DumpRingBufferOnCrash,   0)                               \
   F(bool, PerfPidMap,                  true)                            \
+  F(bool, PerfPidMapIncludeFilePath,   true)                            \
   F(bool, PerfJitDump,                 false)                           \
   F(string, PerfJitDumpDir,            "/tmp")                          \
   F(bool, PerfDataMap,                 false)                           \
   F(bool, KeepPerfPidMap,              false)                           \
   F(int32_t, PerfRelocate,             0)                               \
-  F(uint32_t, ThreadTCMainBufferSize,  0)                               \
-  F(uint32_t, ThreadTCColdBufferSize,  0)                               \
-  F(uint32_t, ThreadTCFrozenBufferSize,0)                               \
-  F(uint32_t, ThreadTCDataBufferSize,  0)                               \
+  F(uint32_t, ThreadTCMainBufferSize,  6 << 20)                         \
+  F(uint32_t, ThreadTCColdBufferSize,  6 << 20)                         \
+  F(uint32_t, ThreadTCFrozenBufferSize,4 << 20)                         \
+  F(uint32_t, ThreadTCDataBufferSize,  256 << 10)                       \
   F(uint32_t, JitTargetCacheSize,      64 << 20)                        \
   F(uint32_t, HHBCArenaChunkSize,      10 << 20)                        \
   F(bool, ProfileBC,                   false)                           \
   F(bool, ProfileHeapAcrossRequests,   false)                           \
   F(bool, ProfileHWEnable,             true)                            \
   F(string, ProfileHWEvents,           std::string(""))                 \
+  F(bool, ProfileHWExcludeKernel,      false)                           \
+  F(bool, ProfileHWFastReads,          false)                           \
+  F(bool, ProfileHWStructLog,          false)                           \
+  F(int32_t, ProfileHWExportInterval,  30)                              \
   F(bool, JitAlwaysInterpOne,          false)                           \
   F(int32_t, JitNopInterval,           0)                               \
   F(uint32_t, JitMaxTranslations,      10)                              \
   F(uint32_t, JitMaxProfileTranslations, 30)                            \
+  F(uint32_t, JitTraceletGuardsLimit,  5)                               \
   F(uint64_t, JitGlobalTranslationLimit, -1)                            \
+  F(int64_t, JitMaxRequestTranslationTime, -1)                          \
   F(uint32_t, JitMaxRegionInstrs,      1347)                            \
   F(uint32_t, JitProfileInterpRequests, kDefaultProfileInterpRequests)  \
+  F(uint32_t, JitMaxAwaitAllUnroll,    8)                               \
   F(bool, JitProfileWarmupRequests,    false)                           \
   F(uint32_t, NumSingleJitRequests,    nsjrDefault())                   \
   F(uint32_t, JitProfileRequests,      profileRequestsDefault())        \
   F(uint32_t, JitProfileBCSize,        profileBCSizeDefault())          \
   F(uint32_t, JitResetProfCountersRequest, resetProfCountersDefault())  \
-  F(uint32_t, JitRetranslateAllRequest, 0)                              \
+  F(uint32_t, JitRetranslateAllRequest, retranslateAllRequestDefault()) \
+  F(uint32_t, JitRetranslateAllSeconds, retranslateAllSecondsDefault()) \
+  F(bool,     JitLayoutSplitHotCold,   layoutSplitHotColdDefault())     \
   F(double,   JitLayoutHotThreshold,   0.05)                            \
   F(int32_t,  JitLayoutMainFactor,     1000)                            \
   F(int32_t,  JitLayoutColdFactor,     5)                               \
+  F(bool,     JitAHotSizeRoundUp,      true)                            \
   F(bool, JitProfileRecord,            false)                           \
   F(uint32_t, GdbSyncChunks,           128)                             \
   F(bool, JitKeepDbgFiles,             false)                           \
@@ -537,6 +707,8 @@ struct RuntimeOption {
   F(bool, JitDisabledByHphpd,          false)                           \
   F(bool, JitPseudomain,               true)                            \
   F(uint32_t, JitWarmupStatusBytes,    ((25 << 10) + 1))                \
+  F(uint32_t, JitWarmupMaxCodeGenRate, 20000)                           \
+  F(uint32_t, JitWarmupRateSeconds,    64)                              \
   F(uint32_t, JitWriteLeaseExpiration, 1500) /* in microseconds */      \
   F(int, JitRetargetJumps,             1)                               \
   F(bool, HHIRLICM,                    false)                           \
@@ -544,8 +716,14 @@ struct RuntimeOption {
   F(bool, HHIRGenOpts,                 true)                            \
   F(bool, HHIRRefcountOpts,            true)                            \
   F(bool, HHIREnableGenTimeInlining,   true)                            \
-  F(uint32_t, HHIRInliningMaxVasmCost, 370)                             \
+  F(uint32_t, HHIRInliningVasmCostLimit, 175)                           \
+  F(uint32_t, HHIRInliningMinVasmCostLimit, 100)                        \
+  F(uint32_t, HHIRInliningMaxVasmCostLimit, 400)                        \
+  F(double,   HHIRInliningVasmCallerExp, .5)                            \
+  F(double,   HHIRInliningVasmCalleeExp, .5)                            \
   F(uint32_t, HHIRInliningMaxReturnDecRefs, 12)                         \
+  F(uint32_t, HHIRInliningMaxReturnLocals, 20)                          \
+  F(bool,     HHIRInliningIgnoreHints, !debug)                          \
   F(bool, HHIRInlineFrameOpts,         true)                            \
   F(bool, HHIRPartialInlineFrameOpts,  true)                            \
   F(bool, HHIRInlineSingletons,        true)                            \
@@ -553,9 +731,10 @@ struct RuntimeOption {
   F(bool, HHIRGenerateAsserts,         false)                           \
   F(bool, HHIRDeadCodeElim,            true)                            \
   F(bool, HHIRGlobalValueNumbering,    true)                            \
-  F(bool, HHIRTypeCheckHoisting,       false) /* Task: 7568599 */       \
   F(bool, HHIRPredictionOpts,          true)                            \
   F(bool, HHIRMemoryOpts,              true)                            \
+  F(bool, AssemblerFoldDefaultValues,  true)                            \
+  F(uint32_t, HHIRLoadElimMaxIters,    10)                              \
   F(bool, HHIRStorePRE,                true)                            \
   F(bool, HHIROutlineGenericIncDecRef, true)                            \
   F(double, HHIRMixedArrayProfileThreshold, 0.8554)                     \
@@ -569,9 +748,16 @@ struct RuntimeOption {
   F(bool,     JitPGO,                  pgoDefault())                    \
   F(string,   JitPGORegionSelector,    "hotcfg")                        \
   F(uint64_t, JitPGOThreshold,         pgoThresholdDefault())           \
+  F(bool,     JitPGOOnly,              false)                           \
   F(bool,     JitPGOHotOnly,           false)                           \
   F(bool,     JitPGOUsePostConditions, true)                            \
-  F(uint32_t, JitUnlikelyDecRefPercent, 5)                              \
+  F(uint32_t, JitPGOUnlikelyIncRefCountedPercent, 2)                    \
+  F(uint32_t, JitPGOUnlikelyIncRefIncrementPercent, 5)                  \
+  F(uint32_t, JitPGOUnlikelyDecRefReleasePercent, 5)                    \
+  F(uint32_t, JitPGOUnlikelyDecRefCountedPercent, 2)                    \
+  F(uint32_t, JitPGOUnlikelyDecRefPersistPercent, 5)                    \
+  F(uint32_t, JitPGOUnlikelyDecRefSurvivePercent, 5)                    \
+  F(uint32_t, JitPGOUnlikelyDecRefDecrementPercent, 5)                  \
   F(uint32_t, JitPGOReleaseVVMinPercent, 8)                             \
   F(bool,     JitPGOArrayGetStress,    false)                           \
   F(uint32_t, JitPGOMinBlockCountPercent, 0)                            \
@@ -580,58 +766,167 @@ struct RuntimeOption {
   F(uint32_t, JitPGORelaxPercent,      100)                             \
   F(uint32_t, JitPGORelaxUncountedToGenPercent, 20)                     \
   F(uint32_t, JitPGORelaxCountedToGenPercent, 75)                       \
+  F(uint32_t, JitPGOBindCallThreshold, 50)                              \
+  F(double,   JitPGOPushedFuncThreshold, 99.9)                          \
   F(bool,     JitPGODumpCallGraph,     false)                           \
+  F(bool,     JitPGORacyProfiling,     false)                           \
   F(uint64_t, FuncCountHint,           10000)                           \
   F(uint64_t, PGOFuncCountHint,        1000)                            \
   F(uint32_t, HotFuncCount,            4100)                            \
   F(bool, RegionRelaxGuards,           true)                            \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
   F(int32_t, DumpBytecode,             0)                               \
-  F(bool, DumpHhas,                    false)                           \
+  /* DumpHhas =1 dumps user php, =2 dumps systemlib & user php */       \
+  F(int32_t, DumpHhas,                 0)                               \
+  F(string, DumpHhasToFile,            "")                              \
+  F(bool, DisableHphpcOpts,            false)                           \
+  F(bool, DisableErrorHandler,         false)                           \
   F(bool, DumpTC,                      false)                           \
   F(string, DumpTCPath,                "/tmp")                          \
   F(bool, DumpTCAnchors,               false)                           \
   F(uint32_t, DumpIR,                  0)                               \
   F(bool, DumpTCAnnotationsForAllTrans,debug)                           \
+  F(bool, DumpInlRefuse,               false)                           \
   F(uint32_t, DumpRegion,              0)                               \
   F(bool, DumpAst,                     false)                           \
   F(bool, DumpTargetProfiles,          false)                           \
   F(bool, MapTgtCacheHuge,             false)                           \
-  F(uint32_t, MaxHotTextHugePages,     hugePagesSoundNice() ? 1 : 0)    \
+  F(uint32_t, MaxHotTextHugePages,     hotTextHugePagesDefault())       \
   F(int32_t, MaxLowMemHugePages,       hugePagesSoundNice() ? 8 : 0)    \
-  F(bool, RandomHotFuncs,              false)                           \
-  F(bool, EnableGC,                    eagerGcDefault())                \
-  /* Run GC eagerly at each surprise point. */                          \
+  F(uint32_t, Num1GPagesForSlabs,      0)                               \
+  F(uint32_t, Num2MPagesForSlabs,      0)                               \
+  F(bool, LowStaticArrays,             true)                            \
+  F(int64_t, HeapPurgeWindowSize,      5 * 1000000)                     \
+  F(uint64_t, HeapPurgeThreshold,      128 * 1024 * 1024)               \
+  /* GC Options: See heap-collect.cpp for more details */               \
   F(bool, EagerGC,                     eagerGcDefault())                \
-  /* only run eager-gc once at each surprise point (much faster) */     \
   F(bool, FilterGCPoints,              true)                            \
   F(bool, Quarantine,                  eagerGcDefault())                \
+  F(uint32_t, GCSampleRate,            0)                               \
+  F(int64_t, GCMinTrigger,             64L<<20)                         \
+  F(double, GCTriggerPct,              0.5)                             \
+  F(bool, GCForAPC,                    false)                           \
+  F(int64_t, GCForAPCTrigger,          1024*1024*1024)                  \
+  F(bool, TwoPhaseGC,                  false)                           \
+  F(bool, EnableGC,                    enableGcDefault())               \
+  /* End of GC Options */                                               \
   F(bool, RaiseMissingThis,            !EnableHipHopSyntax)             \
   F(bool, QuoteEmptyShellArg,          !EnableHipHopSyntax)             \
-  F(uint32_t, GCSampleRate,            0)                               \
-  F(uint32_t, StaticContentsLogRate,   100)                              \
+  F(bool, Verify,                      (getenv("HHVM_VERIFY") ||        \
+    !EvalHackCompilerCommand.empty()))                                  \
+  F(bool, VerifyOnly,                  false)                           \
+  F(bool, FatalOnVerifyError,          !RepoAuthoritative)              \
+  F(bool, AbortBuildOnVerifyError,     true)                            \
+  F(uint32_t, StaticContentsLogRate,   100)                             \
+  F(uint32_t, LogUnitLoadRate,         0)                               \
+  F(uint32_t, MaxDeferredErrors,       50)                              \
+  F(bool, JitAlignMacroFusionPairs, alignMacroFusionPairs())            \
+  F(bool, JitAlignUniqueStubs,         true)                            \
   F(uint32_t, SerDesSampleRate,            0)                           \
   F(int, SimpleJsonMaxLength,        2 << 20)                           \
   F(uint32_t, JitSampleRate,               0)                           \
-  F(uint32_t, JitFilterLease,              1)                           \
+  /* Log the sizes and metadata for all translations in the TC broken
+   * down by function and inclusive/exclusive size for inlined regions.
+   * When set to "" TC size data will be sampled on a per function basis
+   * as determined by JitSampleRate. When set to a non-empty string all
+   * translations will be logged, and run_key column will be logged with
+   * the value of this option. */                                       \
+  F(string,   JitLogAllInlineRegions,  "")                              \
+  F(bool, JitProfileGuardTypes,        false)                           \
+  F(uint32_t, JitFilterLease,          1)                               \
   F(bool, DisableSomeRepoAuthNotices,  true)                            \
-  F(uint32_t, InitialNamedEntityTableSize,  30000)                      \
-  F(uint32_t, InitialStaticStringTableSize,                             \
-                        kDefaultInitialStaticStringTableSize)           \
   F(uint32_t, PCRETableSize, kPCREInitialTableSize)                     \
   F(uint64_t, PCREExpireInterval, 2 * 60 * 60)                          \
   F(string, PCRECacheType, std::string("static"))                       \
+  F(bool, EnableCompactBacktrace, true)                                 \
   F(bool, EnableNuma, ServerExecutionMode())                            \
   F(bool, EnableNumaLocal, ServerExecutionMode())                       \
+  /* Use 1G pages for jemalloc metadata. */                             \
+  F(bool, EnableArenaMetadata1GPage, false)                             \
+  /* Use 1G pages for jemalloc metadata (NUMA arenas if applicable). */ \
+  F(bool, EnableNumaArenaMetadata1GPage, false)                         \
+  /* Reserved space on 1G pages for jemalloc metadata (arena0). */      \
+  F(uint64_t, ArenaMetadataReservedSize, 216 << 20)                     \
   F(bool, EnableCallBuiltin, true)                                      \
   F(bool, EnableReusableTC,   reuseTCDefault())                         \
   F(bool, LogServerRestartStats, false)                                 \
-  F(bool, EnableOptTCBuffer,  false)                                    \
   F(uint32_t, ReusableTCPadding, 128)                                   \
   F(int64_t,  StressUnitCacheFreq, 0)                                   \
   F(int64_t, PerfWarningSampleRate, 1)                                  \
+  F(int64_t, FunctionCallSampleRate, 0)                                 \
   F(double, InitialLoadFactor, 1.0)                                     \
+  /* Raise notices on various array operations which may present        \
+   * compatibility issues with Hack arrays.                             \
+   *                                                                    \
+   * The various *Notices options independently control separate        \
+   * subsets of notices.  The Check* options are subordinate to the     \
+   * HackArrCompatNotices option, and control whether various runtime
+   * checks are made; they do not affect any optimizations. */          \
+  F(bool, HackArrCompatNotices, false)                                  \
+  F(bool, HackArrCompatCheckIntishCast, false)                          \
+  F(bool, HackArrCompatCheckRefBind, false)                             \
+  F(bool, HackArrCompatCheckFalseyPromote, false)                       \
+  F(bool, HackArrCompatCheckCompare, false)                             \
+  F(bool, HackArrCompatCheckMisc, false)                                \
+  /* Raise notices when is_array is called with any hack array */       \
+  F(bool, HackArrCompatIsArrayNotices, false)                           \
+  /* Raise notices when is_vec or is_dict  is called with a v/darray */ \
+  F(bool, HackArrCompatIsVecDictNotices, false)                         \
+  F(bool, HackArrCompatPromoteNotices, false)                           \
+  F(bool, HackArrCompatTypeHintNotices, false)                          \
+  F(bool, HackArrCompatDVCmpNotices, false)                             \
+  F(bool, HackArrCompatSerializeNotices, false)                         \
+  /* Raise notices when fb_compact_*() would change behavior */         \
+  F(bool, HackArrCompatCompactSerializeNotices, false)                  \
+  /* Raises notice when a function that returns a PHP array, not */     \
+  /* a v/darray, is called */                                           \
+  F(bool, HackArrCompatArrayProducingFuncNotices, false)                \
+  F(bool, HackArrDVArrs, false)                                         \
+  /* Warn if is expression are used with type aliases that cannot be    |
+   * resolved */                                                        \
+  F(bool, IsExprEnableUnresolvedWarning, false)                         \
+  /* Switches on miscellaneous junk. */                                 \
+  F(bool, NoticeOnCreateDynamicProp, false)                             \
+  F(bool, NoticeOnReadDynamicProp, false)                               \
+  F(bool, CreateInOutWrapperFunctions, true)                            \
+  F(bool, ReffinessInvariance, false)                                   \
+  F(bool, NoticeOnBuiltinDynamicCalls, false)                           \
+  F(bool, RxPretendIsEnabled, false)                                    \
+  /* Raise warning when function pointers are used as strings. */       \
+  F(bool, RaiseFuncConversionWarning, false)                            \
+  /* Raise warning when class pointers are used as strings. */          \
+  F(bool, RaiseClassConversionWarning, false)                           \
+  /*                                                                    \
+   * Control dynamic calls to functions which haven't opted into being called \
+   * that way.                                                          \
+   *                                                                    \
+   * 0 - Nothing                                                        \
+   * 1 - Warn                                                           \
+   * 2 - Throw exception                                                \
+   *                                                                    \
+   */                                                                   \
+  F(int32_t, ForbidDynamicCalls, 0)                                     \
+  F(int32_t, ServerOOMAdj, 0)                                           \
+  F(std::string, PreludePath, "")                                       \
+  F(uint32_t, NonSharedInstanceMemoCaches, 10)                          \
   F(std::vector<std::string>, IniGetHide, std::vector<std::string>())   \
+  F(std::string, UseRemoteUnixServer, "no")                             \
+  F(std::string, UnixServerPath, "")                                    \
+  F(uint32_t, UnixServerWorkers, Process::GetCPUCount())                \
+  F(bool, UnixServerQuarantineApc, false)                               \
+  F(bool, UnixServerQuarantineUnits, false)                             \
+  F(bool, UnixServerVerifyExeAccess, false)                             \
+  F(bool, UnixServerFailWhenBusy, false)                                \
+  F(std::vector<std::string>, UnixServerAllowedUsers,                   \
+                                            std::vector<std::string>()) \
+  F(std::vector<std::string>, UnixServerAllowedGroups,                  \
+                                            std::vector<std::string>()) \
+  /* Options for testing */                                             \
+  F(bool, TrashFillOnRequestExit, false)                                \
+  /******************                                                   \
+   | ARM   Options. |                                                   \
+   *****************/                                                   \
+  F(bool, JitArmLse, armLseDefault())                                   \
   /******************                                                   \
    | PPC64 Options. |                                                   \
    *****************/                                                   \
@@ -657,6 +952,8 @@ struct RuntimeOption {
   F(uint32_t, PerfMemEventSampleFreq, 80)                               \
   /* Sampling frequency for TC branch profiling. */                     \
   F(uint32_t, ProfBranchSampleFreq, 0)                                  \
+  /* Sampling frequency for profiling packed array accesses. */         \
+  F(uint32_t, ProfPackedArraySampleFreq, 0)                             \
   /* */
 
 private:
@@ -711,12 +1008,16 @@ public:
   static std::string SandboxLogsRoot;
 
   // Debugger options
-  static bool EnableDebugger;
+  static bool EnableHphpdDebugger;
+  static bool EnableVSDebugger;
+  static int VSDebuggerListenPort;
+  static bool VSDebuggerNoWait;
   static bool EnableDebuggerColor;
   static bool EnableDebuggerPrompt;
   static bool EnableDebuggerServer;
   static bool EnableDebuggerUsageLog;
   static bool DebuggerDisableIPv6;
+  static std::string DebuggerServerIP;
   static int DebuggerServerPort;
   static int DebuggerDefaultRpcPort;
   static std::string DebuggerDefaultRpcAuth;
@@ -725,7 +1026,7 @@ public:
   static std::string DebuggerDefaultSandboxPath;
   static std::string DebuggerStartupDocument;
   static int DebuggerSignalTimeout;
-  static std::string DebuggerAuthTokenScript;
+  static std::string DebuggerAuthTokenScriptBin;
 
   // Mail options
   static std::string SendmailPath;
@@ -753,9 +1054,8 @@ public:
 
   // Xenon options
   static double XenonPeriodSeconds;
+  static uint32_t XenonRequestFreq;
   static bool XenonForceAlwaysOn;
-  static bool XenonTraceUnitLoad;
-  static std::string XenonStructLogDest;
 };
 static_assert(sizeof(RuntimeOption) == 1, "no instance variables");
 

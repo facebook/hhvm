@@ -2,19 +2,16 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Core
+open Core_kernel
 open Typing_defs
 
 module SN     = Naming_special_names
 module Subst = Decl_subst
-
-type subst = decl ty SMap.t
 
 let make_subst tparams tyl = Subst.make tparams tyl
 
@@ -53,10 +50,13 @@ and instantiate_ subst x =
       let ty1 = Option.map ty1 (instantiate subst) in
       let ty2 = Option.map ty2 (instantiate subst) in
       Tarray (ty1, ty2)
-  | Tthis -> Tthis
-  | Tmixed -> Tmixed
-  | Tany
-  | Tprim _ as x -> x
+  | Tdarray (ty1, ty2) ->
+      Tdarray (instantiate subst ty1, instantiate subst ty2)
+  | Tvarray ty ->
+      Tvarray (instantiate subst ty)
+  | Tvarray_or_darray ty ->
+      Tvarray_or_darray (instantiate subst ty)
+  | Tthis | Tmixed | Tdynamic | Tnonnull | Tany | Terr | Tprim _ as x -> x
   | Ttuple tyl ->
       let tyl = List.map tyl (instantiate subst) in
       Ttuple tyl
@@ -68,23 +68,23 @@ and instantiate_ subst x =
       | _ -> Toption ty
       )
   | Tfun ft ->
-      let subst = List.fold_left ~f:begin fun subst (_, (_, x), _) ->
+      let subst = List.fold_left ~f:begin fun subst (_, (_, x), _, _) ->
         SMap.remove x subst
       end ~init:subst ft.ft_tparams in
-      let params = List.map ft.ft_params begin fun (name, param) ->
-        let param = instantiate subst param in
-        (name, param)
+      let params = List.map ft.ft_params begin fun param ->
+        let ty = instantiate subst param.fp_type in
+        { param with fp_type = ty }
       end in
       let arity = match ft.ft_arity with
-        | Fvariadic (min, (name, var_ty)) ->
+        | Fvariadic (min, ({ fp_type = var_ty; _ } as param)) ->
           let var_ty = instantiate subst var_ty in
-          Fvariadic (min, (name, var_ty))
+          Fvariadic (min, { param with fp_type = var_ty })
         | Fellipsis _ | Fstandard _ as x -> x
       in
       let ret = instantiate subst ft.ft_ret in
-      let tparams = List.map ft.ft_tparams begin fun (var, name, cstrl) ->
+      let tparams = List.map ft.ft_tparams begin fun (var, name, cstrl, reified) ->
         (var, name, List.map cstrl
-           (fun (ck, ty) -> (ck, instantiate subst ty))) end in
+           (fun (ck, ty) -> (ck, instantiate subst ty)), reified) end in
       let where_constraints = List.map ft.ft_where_constraints
           begin (fun (ty1, ck, ty2) ->
             (instantiate subst ty1, ck, instantiate subst ty2)) end in
@@ -95,7 +95,7 @@ and instantiate_ subst x =
       let tyl = List.map tyl (instantiate subst) in
       Tapply (x, tyl)
   | Tshape (fields_known, fdm) ->
-      let fdm = Nast.ShapeMap.map (instantiate subst) fdm in
+      let fdm = ShapeFieldMap.map (instantiate subst) fdm in
       Tshape (fields_known, fdm)
 
 let instantiate_ce subst ({ ce_type = x; _ } as ce) =

@@ -1,0 +1,1 @@
+Fatal error: Cannot use type Bar\MyClass as MyClass because the name is already in use in %s/double_use_type.php on line 4

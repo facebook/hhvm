@@ -1,0 +1,2 @@
+File "call_in_static_varray.php", line 7, characters 22-26:
+Invalid expression in constant initializer (Parsing[1002])

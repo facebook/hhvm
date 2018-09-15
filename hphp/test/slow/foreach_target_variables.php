@@ -8,7 +8,10 @@ class Test2 {
     public static $staticKeyProp, $staticValProp;
 }
 
+
 // Target: Integer array keys
+<<__EntryPoint>>
+function main_foreach_target_variables() {
 $array = [1, 2, 3];
 
 $a = [];
@@ -73,3 +76,4 @@ foreach ($array as Test2::$staticKeyProp => Test::$staticValProp) {
     echo Test2::$staticKeyProp, " => ", Test::$staticValProp, ",";
 }
 echo "\n";
+}

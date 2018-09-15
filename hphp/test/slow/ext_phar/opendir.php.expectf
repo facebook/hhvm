@@ -1,5 +1,5 @@
 
-Warning: no Directory resource supplied in %s/test/slow/ext_phar/opendir.php on line 3
+Warning: no Directory resource supplied in %s/test/slow/ext_phar/opendir.php on line 6
 bool(false)
 resource(%d) of type (Directory)
 string(9) "index.php"
@@ -11,7 +11,7 @@ array(1) {
   string(9) "index.php"
 }
 
-Warning: No such file or directory in %s/test/slow/ext_phar/opendir.php on line 15
+Warning: No such file or directory in %s/test/slow/ext_phar/opendir.php on line 18
 bool(false)
 resource(%d) of type (Directory)
 array(5) {

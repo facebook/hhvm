@@ -9,5 +9,9 @@ function f() {
   $arr1 += $arr2;
   var_dump(current($arr1));
 }
-f();
 
+
+<<__EntryPoint>>
+function main_internal_cursor_bug() {
+f();
+}

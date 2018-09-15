@@ -2,13 +2,12 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
 *)
 
-open Core
+open Hh_core
 module SS = HackSearchService
 module SUtils = SearchUtils
 
@@ -57,9 +56,33 @@ let result_to_json res =
       "scope", Hh_json.JSON_String scope_string;
     ]
 
-let go popt workers query type_ =
-  let fuzzy = !Parsing_hooks.fuzzy in
+let re_colon_colon = Str.regexp "::"
+
+let go tcopt workers query type_ =
+  let fuzzy = !HackSearchService.fuzzy in
   let results =
-    HackSearchService.MasterApi.query popt ~fuzzy workers query type_ in
+    (* If query contains "::", search class methods instead of top level definitions *)
+    match Str.split_delim re_colon_colon query with
+    | [class_name_query; method_query] ->
+      (* Get the class with the most similar name to `class_name_query` *)
+      let class_ =
+        HackSearchService.MasterApi.query tcopt ~fuzzy workers class_name_query type_
+        |> List.find ~f:begin fun result ->
+          match result with
+          | SearchUtils.{result_type = HackSearchService.Class _; _} -> true
+          | _ -> false
+        end
+      in
+      begin match class_ with
+      | Some SearchUtils.{name; _} ->
+        HackSearchService.ClassMethods.query tcopt name method_query
+      | None ->
+        (* When we can't find a class with a name similar to the given one,
+           just return no search results. *)
+        []
+      end
+    | _  ->
+      HackSearchService.MasterApi.query tcopt ~fuzzy workers query type_
+  in
 
   List.map results SearchUtils.to_absolute

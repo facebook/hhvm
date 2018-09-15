@@ -15,8 +15,12 @@ class B extends A {
         forward_static_call( 'test', 'other', 'args');
     }
 }
-B::test('foo');
 function test() {
     $args = func_get_args();
     echo "C ".join(',', $args)." \n";
+}
+
+<<__EntryPoint>>
+function main_1875() {
+B::test('foo');
 }

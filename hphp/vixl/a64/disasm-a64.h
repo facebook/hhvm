@@ -38,13 +38,21 @@ class Disassembler: public DecoderVisitor {
  public:
   Disassembler();
   Disassembler(char* text_buffer, int buffer_size);
-  virtual ~Disassembler();
+  ~Disassembler() override;
   char* GetOutput();
 
   // Declare all Visitor functions.
-  #define DECLARE(A)  void Visit##A(Instruction* instr);
+  #define DECLARE(A)  void Visit##A(Instruction* instr) override;
   VISITOR_LIST(DECLARE)
   #undef DECLARE
+
+  void MapCodeAddress(int64_t base_address, const Instruction* instr_address);
+  int64_t CodeRelativeAddress(const void* instr);
+  void AppendCodeRelativeAddressToOutput(const Instruction* instr,
+                                               const void* addr);
+  void AppendCodeRelativeLiteralToOutput(uint32_t width, const void* addr);
+
+  void setShouldDereferencePCRelativeLiterals(bool enable);
 
  protected:
   virtual void ProcessOutput(Instruction* instr);
@@ -64,6 +72,7 @@ class Disassembler: public DecoderVisitor {
   int SubstituteBranchTargetField(Instruction* instr, const char* format);
   int SubstituteLSRegOffsetField(Instruction* instr, const char* format);
   int SubstitutePrefetchField(Instruction* instr, const char* format);
+  int SubstituteInstructionAttributes(Instruction* instr, const char* format);
 
   inline bool RdIsZROrSP(Instruction* instr) const {
     return (instr->Rd() == kZeroRegCode);
@@ -83,6 +92,12 @@ class Disassembler: public DecoderVisitor {
 
   bool IsMovzMovnImm(unsigned reg_size, uint64_t value);
 
+  int64_t CodeAddressOffset() const { return code_address_offset_; }
+
+  void SetCodeAddressOffset(int64_t code_address_offset) {
+    code_address_offset_ = code_address_offset;
+  }
+
   void ResetOutput();
   void AppendToOutput(const char* string, ...);
 
@@ -90,6 +105,10 @@ class Disassembler: public DecoderVisitor {
   uint32_t buffer_pos_;
   uint32_t buffer_size_;
   bool own_buffer_;
+
+  int64_t code_address_offset_;
+
+  bool dereferenceLiterals_{false};
 };
 
 
@@ -104,10 +123,10 @@ class PrintDisassembler: public Disassembler {
       , showEncoding_(showEncoding)
       , color_(color) {
   }
-  ~PrintDisassembler() { }
+  ~PrintDisassembler() override {}
 
  protected:
-  virtual void ProcessOutput(Instruction* instr);
+  void ProcessOutput(Instruction* instr) override;
 
  private:
   std::ostream& stream_;

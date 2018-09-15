@@ -43,12 +43,12 @@ struct NormalizedInstruction {
                      // known Func* that /this/ instruction is pushing)
   const Unit* m_unit;
 
-  ArgUnion imm[4];
+  ArgUnion imm[kMaxHhbcImms];
   ImmVector immVec; // vector immediate; will have !isValid() if the
                     // instruction has no vector immediate
+  IterTable immIters;
 
   bool endsRegion:1;
-  bool preppedByRef:1;
   bool ignoreInnerType:1;
 
   /*
@@ -56,6 +56,9 @@ struct NormalizedInstruction {
    * to translate it has failed.
    */
   bool interp:1;
+  // The inst can be marked so that later on we emit a surprise check
+  // in front of it.
+  bool forceSurpriseCheck:1;
 
   Op op() const;
   PC pc() const;

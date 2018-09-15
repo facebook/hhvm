@@ -3,21 +3,30 @@
 namespace __SystemLib {
   use Phar;
 
+  // Hack enums are fine in extensions, but not systemlib :'(
+  abstract final class ArchiveEntryType {
+    const int FILE = 1;
+    const int DIRECTORY = 2;
+    const int SYMLINK = 3;
+  }
+
   class ArchiveEntryStat {
     public function __construct(
       public ?int $crc,
       public int $size,
       public ?int $compresedSize,
       public int $timestamp,
+      public ?int $mode,
+      public int $type, // ArchiveEntryType
     ) {
     }
   }
 
   abstract class ArchiveHandler {
-    protected Map<string, ArchiveEntryData> $entries = Map { };
+    protected Map<string, ArchiveEntryStat> $entries = Map { };
     protected ?string $alias;
     protected ?string $stub;
-    protected array<string, array<int, int>> $fileOffsets = [];
+    protected array<string, (int, int)> $fileOffsets = [];
     protected string $apiVersion = '1.0.0';
     protected $metadata;
     protected ?string $signature;
@@ -26,7 +35,7 @@ namespace __SystemLib {
 
     // Default implementation, used by Phar- and Tar-based archives
     public function getStream(string $path): resource {
-      if (!isset($this->fileOffsets[$path])) {
+      if (!array_key_exists($path, $this->fileOffsets)) {
         throw new PharException("No $path in phar");
       }
       list($offset, $size) = $this->fileOffsets[$path];

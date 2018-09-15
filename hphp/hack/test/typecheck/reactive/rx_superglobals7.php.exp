@@ -1,0 +1,2 @@
+File "rx_superglobals7.php", line 5, characters 8-16:
+Superglobal $_SESSION cannot be used in a reactive context. (Typing[4227])

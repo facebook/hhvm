@@ -18,10 +18,8 @@
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/expression/modifier_expression.h"
 #include "hphp/compiler/expression/scalar_expression.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/option.h"
 
@@ -65,10 +63,8 @@ StatementPtr CatchStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void CatchStatement::analyzeProgram(AnalysisResultPtr ar) {
-  m_variable->analyzeProgram(ar);
-  (void)resolveClass();
-  if (m_stmt) m_stmt->analyzeProgram(ar);
+void CatchStatement::analyzeProgram(AnalysisResultConstRawPtr /*ar*/) {
+  resolveClass();
   if (m_variable->isThis()) {
     getFunctionScope()->setContainsBareThis(true, true);
   }

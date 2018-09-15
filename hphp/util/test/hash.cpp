@@ -55,7 +55,7 @@ TEST(HashTest, Alignment) {
 
 #ifdef __x86_64__
 TEST(HashTest, SSE42) {
-  if (IsSSEHashSupported()) {
+  if (IsHWHashSupported()) {
     {
       char* stra = "abcdeFGHHHh";
       char* strb = "ABcdEfghhHH";

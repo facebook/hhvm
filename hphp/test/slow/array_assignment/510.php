@@ -12,4 +12,8 @@ function foo() {
   var_dump($a);
   var_dump($b);
 }
+
+<<__EntryPoint>>
+function main_510() {
 foo();
+}

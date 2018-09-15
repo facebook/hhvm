@@ -1,0 +1,2 @@
+File "bad_inout_use_lvalue9.php", line 6, characters 11-22:
+tuple_expression is not allowed in write context (Parsing[1002])

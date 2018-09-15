@@ -1,6 +1,6 @@
 File "fc_enum_6.php", line 4, characters 6-8:
 Invalid constraint on enum (Typing[4110])
-File "fc_enum_6.php", line 4, characters 19-24:
+File "fc_enum_6.php", line 4, characters 18-23:
 This is a string
-File "fc_enum_6.php", line 4, characters 12-14:
+File "fc_enum_6.php", line 4, characters 11-13:
 It is incompatible with an int

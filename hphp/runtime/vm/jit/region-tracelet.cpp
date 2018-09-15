@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/jit/annotation.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
+#include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
@@ -63,21 +64,26 @@ struct Env {
     : ctx(ctx)
     , interp(interp)
     , breakAt(breakAt)
-    , sk{ctx.func, ctx.bcOffset, ctx.resumed, ctx.hasThis}
+    , sk{ctx.func, ctx.bcOffset, ctx.resumeMode, ctx.hasThis}
     , startSk(sk)
     , region(std::make_shared<RegionDesc>())
     , curBlock(region->addBlock(sk, 0, ctx.spOffset))
     , blockFinished(false)
     // TODO(#5703534): this is using a different TransContext than actual
     // translation will use.
-    , unit(TransContext{kInvalidTransID, kind, TransFlags{}, sk, ctx.spOffset})
+    , unit(TransContext{kInvalidTransID, kind, TransFlags{},
+                        sk, ctx.spOffset, 0})
     , irgs(unit, nullptr)
-    , arStates(1)
+    , arState()
     , numJmps(0)
     , numBCInstrs(maxBCInstrs)
     , profiling(kind == TransKind::Profile)
     , inlining(inlining)
-  {}
+  {
+    if (RuntimeOption::EvalRegionRelaxGuards) {
+      irgs.irb->enableConstrainGuards();
+    }
+  }
 
   const RegionContext& ctx;
   InterpSet& interp;
@@ -90,8 +96,7 @@ struct Env {
   bool blockFinished;
   IRUnit unit;
   irgen::IRGS irgs;
-  jit::vector<ActRecState> arStates;
-  RefDeps refDeps;
+  ActRecState arState;
   uint32_t numJmps;
   int32_t numBCInstrs;
   // This map memoizes reachability of IR blocks during tracelet
@@ -142,7 +147,12 @@ bool consumeInput(Env& env, const InputInfo& input) {
   if (input.dontGuard) return true;
   auto const type = irgen::predictedType(env.irgs, input.loc);
 
-  if (env.profiling && type <= TBoxedCell &&
+  if (/* env.profiling &&
+       * FIXME: T21872803:
+       * This check is only intended for profiling translations.  We enabled it
+       * for live translations to avoid a bug tracking type dependences for
+       * boxed values. */
+      type <= TBoxedCell &&
       (env.region->blocks().size() > 1 || !env.region->entry()->empty())) {
     // We don't want side exits when profiling, so only allow instructions that
     // consume refs at the beginning of the region.
@@ -204,10 +214,10 @@ bool prepareInstruction(Env& env) {
   }
   auto const breaksBB =
     (env.profiling && instrBreaksProfileBB(&env.inst)) ||
-    opcodeBreaksBB(env.inst.op());
+    opcodeBreaksBB(env.inst.op(), env.inlining);
   env.inst.endsRegion = breaksBB ||
-    (dontGuardAnyInputs(env.inst.op()) && opcodeChangesPC(env.inst.op()));
-  env.inst.funcd = env.arStates.back().knownFunc();
+    (dontGuardAnyInputs(env.inst) && opcodeChangesPC(env.inst.op()));
+  env.inst.funcd = env.arState.knownFunc();
   irgen::prepareForNextHHBC(env.irgs, &env.inst, env.sk, false);
 
   auto const inputInfos = getInputs(env.inst, env.irgs.irb->fs().bcSPOff());
@@ -225,34 +235,9 @@ bool prepareInstruction(Env& env) {
     }
   }
 
-  if (inputInfos.needsRefCheck) {
-    // Reffiness guards are always at the beginning of the trace for now, so
-    // calculate the delta from the original sp to the ar. The FPI delta from
-    // instrFpToArDelta includes locals and iterators, so when we're in a
-    // resumed context we have to adjust for the fact that they're in a
-    // different place.
-    auto argNum = env.inst.imm[0].u_IVA;
-    auto entryArDelta = env.ctx.spOffset.offset -
-      instrFpToArDelta(curFunc(env), env.inst.pc());
-    if (env.sk.resumed()) entryArDelta += curFunc(env)->numSlotsInFrame();
+  addInstruction(env);
 
-    try {
-      env.inst.preppedByRef =
-        env.arStates.back().checkByRef(argNum, entryArDelta, &env.refDeps,
-                                       env.ctx);
-    } catch (const UnknownInputExc& exn) {
-      // We don't have a guess for the current ActRec.
-      FTRACE(1, "selectTracelet: don't have reffiness guess for {}\n",
-             env.inst.toString());
-      return false;
-    }
-    addInstruction(env);
-    env.curBlock->setParamByRef(env.inst.source, env.inst.preppedByRef);
-  } else {
-    addInstruction(env);
-  }
-
-  if (isFPush(env.inst.op())) env.arStates.back().pushFunc(env.inst);
+  if (isFPush(env.inst.op())) env.arState.pushFunc(env.inst);
 
   return true;
 }
@@ -269,7 +254,7 @@ bool traceThroughJmp(Env& env) {
   // We want to keep profiling translations to basic blocks, inlining shouldn't
   // happen in profiling translations
   if (env.profiling) {
-    assert(!env.inlining);
+    assertx(!env.inlining);
     return false;
   }
 
@@ -386,17 +371,9 @@ void visitGuards(IRUnit& unit, F func) {
 }
 
 /*
- * Records any type/reffiness predictions we depend on in the region.
+ * Records any type predictions we depend on in the region.
  */
 void recordDependencies(Env& env) {
-  // Record the incrementally constructed reffiness predictions.
-  assertx(!env.region->empty());
-  auto& frontBlock = *env.region->blocks().front();
-  for (auto const& dep : env.refDeps.m_arMap) {
-    frontBlock.addReffinessPred({dep.second.m_mask, dep.second.m_vals,
-                                 dep.first});
-  }
-
   // Relax guards and record the ones that survived.
   auto& firstBlock = *env.region->blocks().front();
   auto& unit = env.irgs.unit;
@@ -411,7 +388,7 @@ void recordDependencies(Env& env) {
                          Type type, bool hint) {
     Trace::Indent indent;
     ITRACE(3, "{}: {}\n", show(loc), type);
-    if (type <= TCls) return;
+    assertx(type <= TGen);
     auto& whichMap = hint ? hintMap : guardMap;
     auto inret = whichMap.insert(std::make_pair(loc, type));
     // Unconstrained pseudo-main guards will be relaxed to Gen by the guard
@@ -507,16 +484,15 @@ RegionDescPtr form_region(Env& env) {
                           *env.region, show(env.irgs.irb->unit()));
   };
 
+  env.irgs.irb->setGuardFailBlock(irgen::makeExit(env.irgs));
+
   for (auto const& lt : env.ctx.liveTypes) {
     auto t = lt.type;
-    if (t <= TCls) {
-      irgen::assertTypeLocation(env.irgs, lt.location, t);
-      env.curBlock->addPreCondition({lt.location, t, DataTypeGeneric});
-    } else {
-      irgen::checkType(env.irgs, lt.location, t, env.ctx.bcOffset,
-                       true /* outerOnly */);
-    }
+    assertx(t <= TGen);
+    irgen::checkType(env.irgs, lt.location, t, env.ctx.bcOffset,
+                     true /* outerOnly */);
   }
+  env.irgs.irb->resetGuardFailBlock();
 
   irgen::gen(env.irgs, EndGuards);
 
@@ -531,6 +507,17 @@ RegionDescPtr form_region(Env& env) {
       FTRACE(1, "selectTracelet: breaking region at breakAt: {}\n",
              show(env.sk));
       break;
+    }
+
+    // Break translation if there's already a translation starting at the
+    // current SrcKey.
+    if (!firstInst && env.irgs.context.kind == TransKind::Profile) {
+      auto const sr = tc::findSrcRec(env.sk);
+      if (sr != nullptr && sr->getTopTranslation() != nullptr) {
+        FTRACE(1, "selectTracelet: breaking region at TC entry: {}\n",
+               show(env.sk));
+        break;
+      }
     }
 
     if (!prepareInstruction(env)) break;
@@ -591,7 +578,14 @@ RegionDescPtr form_region(Env& env) {
       break;
     }
 
-    if (isFCallStar(env.inst.op())) env.arStates.back().pop();
+    const auto numGuards = env.irgs.irb->numGuards();
+    if (numGuards >= RuntimeOption::EvalJitTraceletGuardsLimit) {
+      FTRACE(1, "selectTracelet: tracelet broken due to too many guards ({})\n",
+             numGuards);
+      break;
+    }
+
+    if (isFCallStar(env.inst.op())) env.arState.pop();
   }
 
   if (env.region && !env.region->empty()) {
@@ -618,12 +612,12 @@ RegionDescPtr form_region(Env& env) {
       auto const mainExit = findMainExitBlock(env.irgs.irb->unit(), lastSk);
       always_assert_flog(mainExit, "No main exits found!");
       /*
-       * If the last instruction is a Halt, its probably due to
-       * unreachable code. We don't want to truncate the tracelet
-       * in that case, because we could lose the assertion (eg
-       * if the Halt is due to a failed AssertRAT).
+       * If the last instruction is an Unreachable, its probably due to
+       * unreachable code. We don't want to truncate the tracelet in that case,
+       * because we could lose the assertion (eg if the Unreachable is due to a
+       * failed AssertRAT).
        */
-      return !mainExit->back().is(Halt);
+      return !mainExit->back().is(Unreachable);
     }();
 
     if (truncate) {

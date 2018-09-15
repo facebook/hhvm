@@ -38,13 +38,11 @@ struct FunctionStatement : MethodStatement {
                     ExpressionListPtr attrList);
 
   DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS;
-  bool hasDecl() const override { return true; }
-  bool hasImpl() const override;
 
   std::string getName() const override;
 
   // implementing IParseHandler
-  void onParse(AnalysisResultConstPtr ar, FileScopePtr scope) override;
+  void onParse(AnalysisResultConstRawPtr ar, FileScopePtr scope) override;
 
   void outputPHPHeader(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputPHPBody(CodeGenerator &cg, AnalysisResultPtr ar);

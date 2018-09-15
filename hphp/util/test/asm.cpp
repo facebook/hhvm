@@ -13,6 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#if defined(__x86_64__)
+
 #include "hphp/util/asm-x64.h"
 #include <gtest/gtest.h>
 
@@ -96,7 +98,7 @@ void compare(const char* expectedOpName,
     // that affects memory.  We could figure this out and check for
     // it, but it's good enough just to see that the opcode has the
     // prefix we expect.
-    EXPECT_EQ(true, boost::starts_with(opName, expectedOpName))
+    EXPECT_TRUE(boost::starts_with(opName, expectedOpName))
       << "expected " << expectedOpName << ", got " << opName;
 
     if (expectIt == expecteds.end()) {
@@ -974,3 +976,5 @@ TEST(Asm, Psllq) {
 }
 
 }}
+
+#endif

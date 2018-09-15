@@ -2,9 +2,8 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
@@ -12,13 +11,13 @@ open Reordered_argument_collections
 open Typing_deps
 
 val redo_type_decl :
-  Worker.t list option ->
+  MultiWorker.worker list option ->
   bucket_size:int ->
   TypecheckerOptions.t ->
   FileInfo.names ->
   FileInfo.fast ->
   FileInfo.names ->
-  Errors.t * Relative_path.Set.t * DepSet.t * DepSet.t
+  Errors.t * DepSet.t * DepSet.t * DepSet.t
 
 (**
  * Exposed for tests only!
@@ -28,16 +27,23 @@ val redo_type_decl :
  * in a very particular use case of invalidate_type_decl.
  *)
 val get_dependent_classes :
-  Worker.t list option ->
+  MultiWorker.worker list option ->
   bucket_size:int ->
   FileInfo.t Relative_path.Map.t ->
   SSet.t ->
   SSet.t
 
 val oldify_type_decl :
-  Worker.t list option ->
+  ?collect_garbage:bool ->
+  MultiWorker.worker list option ->
   FileInfo.t Relative_path.Map.t ->
   bucket_size:int ->
   FileInfo.names ->
   FileInfo.names ->
+  unit
+
+val remove_defs :
+  FileInfo.names ->
+  Decl_class_elements.t SMap.t ->
+  collect_garbage:bool ->
   unit

@@ -74,4 +74,8 @@ function foo() {
   $obj = apc_fetch('foobar');
   var_dump($obj);
 }
+
+<<__EntryPoint>>
+function main_1821() {
 foo();
+}

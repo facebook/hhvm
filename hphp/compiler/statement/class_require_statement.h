@@ -36,7 +36,7 @@ struct ClassRequireStatement : Statement, IParseHandler {
   std::string getRequiredName() const { return m_required;}
 
   // implementing IParseHandler
-  void onParseRecur(AnalysisResultConstPtr ar, FileScopeRawPtr fs,
+  void onParseRecur(AnalysisResultConstRawPtr ar, FileScopeRawPtr fs,
                     ClassScopePtr scope) override;
 
 private:

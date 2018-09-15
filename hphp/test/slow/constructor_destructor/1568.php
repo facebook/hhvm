@@ -16,5 +16,9 @@ class child_c extends parent_c {
     echo "child__destruct";
   }
 }
+
+<<__EntryPoint>>
+function main_1568() {
 $v = new child_c;
 unset($v);
+}

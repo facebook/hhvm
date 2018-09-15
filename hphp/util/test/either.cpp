@@ -42,8 +42,8 @@ TEST(Either, Simple) {
 
   E enull;
   enull.match(
-    [] (A*) { EXPECT_TRUE(false); },
-    [] (B*) { EXPECT_TRUE(true); }
+    [] (A*) { ADD_FAILURE(); },
+    [] (B*) { SUCCEED(); }
   );
 }
 

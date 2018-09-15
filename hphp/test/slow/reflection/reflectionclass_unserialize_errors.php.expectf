@@ -4,4 +4,4 @@ bool(false)
 
 Fatal error: Uncaught exception 'ReflectionException' with message 'Class A does not exist' in %s:4
 Stack trace:
-#0 {main}
+%A#%d {main}

@@ -20,4 +20,8 @@ function main() {
   var_dump($total_alloc);
 }
 
+
+<<__EntryPoint>>
+function main_memory_basic() {
 main();
+}

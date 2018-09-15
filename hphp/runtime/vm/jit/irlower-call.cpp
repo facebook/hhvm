@@ -21,7 +21,8 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -39,6 +40,7 @@
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/bc-marker.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
+#include "hphp/runtime/vm/jit/call-target-profile.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
@@ -46,6 +48,7 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/type.h"
@@ -59,6 +62,50 @@
 namespace HPHP { namespace jit { namespace irlower {
 
 TRACE_SET_MOD(irlower);
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+const StaticString callTargetProfileKey{"CallTargetProfile"};
+
+TCA getCallTarget(IRLS& env, const IRInstruction* inst, Vreg sp) {
+  auto const extra = inst->extra<Call>();
+  auto const callee = extra->callee;
+  if (callee != nullptr) return tc::ustubs().immutableBindCallStub;
+
+  if (!RuntimeOption::RepoAuthoritative) return tc::ustubs().bindCallStub;
+
+  auto profile = TargetProfile<CallTargetProfile>(env.unit.context(),
+                                                  inst->marker(),
+                                                  callTargetProfileKey.get());
+  if (profile.profiling()) {
+    auto const spOff = cellsToBytes(extra->spOffset.offset + extra->numParams);
+    auto const args = argGroup(env, inst)
+      .addr(rvmtl(), safe_cast<int32_t>(profile.handle()))
+      .addr(sp, spOff);
+    cgCallHelper(vmain(env), env, CallSpec::method(&CallTargetProfile::report),
+                 kVoidDest, SyncOptions::Sync, args);
+    return tc::ustubs().bindCallStub;
+  }
+
+  if (profile.optimizing()) {
+    // Get the result of the profiling data.  If it's strongly biased towards
+    // one function, bind the call.  Otherwise, call funcPrologueRedispatch
+    // directly.
+    auto const data = profile.data();
+    double bias = 0;
+    data.choose(bias);
+    if (bias * 100 >= RuntimeOption::EvalJitPGOBindCallThreshold) {
+      return tc::ustubs().bindCallStub;
+    }
+    return tc::ustubs().funcPrologueRedispatch;
+  }
+
+  return tc::ustubs().bindCallStub;
+}
+
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -76,29 +123,38 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   auto const calleeSP = sp[cellsToBytes(extra->spOffset.offset)];
   auto const calleeAR = calleeSP + cellsToBytes(argc);
 
+  auto const target = getCallTarget(env, inst, sp);
+
   v << store{fp, calleeAR + AROFF(m_sfp)};
   v << storeli{safe_cast<int32_t>(extra->after), calleeAR + AROFF(m_soff)};
 
   if (extra->fcallAwait) {
-    // This clobbers any flags that might have already been set on the callee
-    // AR (e.g., by SpillFrame), but this is okay because there should never be
-    // any conflicts; see the documentation in act-rec.h.
-    auto const imm = static_cast<int32_t>(
-      ActRec::encodeNumArgsAndFlags(argc, ActRec::Flags::IsFCallAwait)
-    );
-    v << storeli{imm, calleeAR + AROFF(m_numArgsAndFlags)};
+    v << orlim{
+      static_cast<int32_t>(ActRec::Flags::IsFCallAwait),
+      calleeAR + AROFF(m_numArgsAndFlags),
+      v.makeReg()
+    };
+  }
+
+  if (extra->numOut) {
+    v << orlim{
+      static_cast<int32_t>(ActRec::Flags::MultiReturn),
+      calleeAR + AROFF(m_numArgsAndFlags),
+      v.makeReg()
+    };
   }
 
   auto const isNativeImplCall = callee &&
-                                callee->builtinFuncPtr() &&
+                                callee->arFuncPtr() &&
                                 !callee->nativeFuncPtr() &&
                                 argc == callee->numParams();
   if (isNativeImplCall) {
     // The assumption here is that for builtins, the generated func contains
     // only a single opcode (NativeImpl), and there are no non-argument locals.
-    if (do_assert) {
+    if (debug) {
       assertx(argc == callee->numLocals());
       assertx(callee->numIterators() == 0);
+      assertx(callee->numClsRefSlots() == 0);
 
       auto addr = callee->getEntry();
       while (peek_op(addr) == Op::AssertRATL) {
@@ -117,9 +173,9 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
 
     emitCheckSurpriseFlagsEnter(v, vc, fp, Fixup(0, argc), catchBlock);
 
-    auto const builtinFuncPtr = callee->builtinFuncPtr();
+    auto const arFuncPtr = callee->arFuncPtr();
     TRACE(2, "Calling builtin preClass %p func %p\n",
-          callee->preClass(), builtinFuncPtr);
+          callee->preClass(), arFuncPtr);
 
     // We sometimes call this while curFunc() isn't really the builtin, so make
     // sure to record the sync point as if we are inside the builtin.
@@ -129,11 +185,12 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
       emitEagerSyncPoint(v, callee->getEntry(), rvmtl(), rvmfp(), syncSP);
     }
 
-    // Call the native implementation.  This will free the locals for us in the
-    // normal case.  In the case where an exception is thrown, the VM unwinder
+    // Call the ArFunction. This will free the locals for us in the
+    // normal case. In the case where an exception is thrown, the VM unwinder
     // will handle it for us.
     auto const done = v.makeBlock();
-    v << vinvoke{CallSpec::direct(builtinFuncPtr), v.makeVcallArgs({{rvmfp()}}),
+    v << vinvoke{CallSpec::direct(arFuncPtr, nullptr),
+                 v.makeVcallArgs({{rvmfp()}}),
                  v.makeTuple({}), {done, catchBlock}, Fixup(0, argc)};
 
     v = done;
@@ -167,18 +224,13 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   // Emit a smashable call that initially calls a recyclable service request
   // stub.  The stub and the eventual targets take rvmfp() as an argument,
   // pointing to the callee ActRec.
-  auto const target = callee
-    ? tc::ustubs().immutableBindCallStub
-    : tc::ustubs().bindCallStub;
-
   auto const done = v.makeBlock();
-  v << callphp{target, php_call_regs(), {{done, catchBlock}}};
+  v << callphp{target, php_call_regs(), {{done, catchBlock}}, callee, argc};
   v = done;
 
   auto const dst = dstLoc(env, inst, 0);
   auto const type = inst->dst()->type();
-  if (!type.hasConstVal() &&
-      !type.subtypeOfAny(TNullptr, TInitNull, TUninit)) {
+  if (!type.admitsSingleVal()) {
     v << defvmretdata{dst.reg(0)};
   }
   if (type.needsReg()) {
@@ -186,8 +238,8 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   }
 }
 
-void cgCallArray(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<CallArray>();
+void cgCallUnpack(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<CallUnpack>();
   auto const sp = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
@@ -195,25 +247,28 @@ void cgCallArray(IRLS& env, const IRInstruction* inst) {
   v << lea{sp[cellsToBytes(extra->spOffset.offset)], syncSP};
   v << syncvmsp{syncSP};
 
-  auto const target = extra->numParams == 0
-    ? tc::ustubs().fcallArrayHelper
-    : tc::ustubs().fcallUnpackHelper;
+  if (extra->numOut) {
+    auto const calleeAR = syncSP + cellsToBytes(extra->numParams);
+    v << orlim{
+      static_cast<int32_t>(ActRec::Flags::MultiReturn),
+      calleeAR + AROFF(m_numArgsAndFlags),
+      v.makeReg()
+    };
+  }
 
+  auto const target = tc::ustubs().fcallUnpackHelper;
   auto const pc = v.cns(extra->pc);
   auto const after = v.cns(extra->after);
-  auto const args = extra->numParams == 0
-    ? v.makeTuple({pc, after})
-    : v.makeTuple({pc, after, v.cns(extra->numParams)});
+  auto const args = v.makeTuple({pc, after, v.cns(extra->numParams)});
 
   auto const done = v.makeBlock();
-  v << vcallarray{target, fcall_array_regs(), args,
-                  {done, label(env, inst->taken())}};
+  v << vcallunpack{target, fcall_unpack_regs(), args,
+                   {done, label(env, inst->taken())}};
   v = done;
 
   auto const dst = dstLoc(env, inst, 0);
   auto const type = inst->dst()->type();
-  if (!type.hasConstVal() &&
-      !type.subtypeOfAny(TNullptr, TInitNull, TUninit)) {
+  if (!type.admitsSingleVal()) {
     v << defvmretdata{dst.reg(0)};
   }
   if (type.needsReg()) {
@@ -294,7 +349,7 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
   }
 
   // Add the func_num_args() value if needed.
-  if (callee->attrs() & AttrNumArgs) {
+  if (callee->takesNumArgs()) {
     // If `numNonDefault' is negative, this is passed as an src.
     if (extra->numNonDefault >= 0) {
       args.imm((int64_t)extra->numNonDefault);
@@ -320,7 +375,7 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
       // This condition indicates a MixedTV (i.e., TypedValue-by-value) arg.
       args.typedValue(srcNum);
     } else {
-      args.ssa(srcNum, pi.builtinType == KindOfDouble);
+      args.ssa(srcNum);
     }
   }
 
@@ -331,12 +386,10 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
         ? callDest(dstData) // String, Array, or Object
         : callDest(dstData, dstType); // Variant
     }
-    return funcReturnType == KindOfDouble
-      ? callDestDbl(env, inst)
-      : callDest(env, inst);
+    return callDest(env, inst);
   }();
 
-  cgCallHelper(v, env, CallSpec::direct(callee->nativeFuncPtr()),
+  cgCallHelper(v, env, CallSpec::direct(callee->nativeFuncPtr(), nullptr),
                dest, SyncOptions::Sync, args);
 
   // For primitive return types (int, bool, double) and returnByValue, the
@@ -366,7 +419,8 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
   if (returnType <= TCell || returnType <= TBoxedCell) {
     // The return type is Variant; fold KindOfUninit to KindOfNull.
     assertx(isBuiltinByRef(funcReturnType) && !isReqPtrRef(funcReturnType));
-    static_assert(KindOfUninit == 0, "KindOfUninit must be 0 for test");
+    static_assert(KindOfUninit == static_cast<DataType>(0),
+                  "KindOfUninit must be 0 for test");
 
     v << load{rvmtl()[returnOffset + TVOFF(m_data)], dstData};
 
@@ -376,6 +430,8 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
 
       auto const sf = v.makeReg();
       auto const nulltype = v.cns(KindOfNull);
+      static_assert(KindOfUninit == static_cast<DataType>(0),
+                    "Codegen assumes KindOfUninit == 0");
       v << testb{rtype, rtype, sf};
       v << cmovb{CC_Z, sf, rtype, nulltype, dstType};
     }
@@ -396,7 +452,7 @@ void cgNativeImpl(IRLS& env, const IRInstruction* inst) {
     emitEagerSyncPoint(v, func->getEntry(), rvmtl(), fp, sp);
   }
   v << vinvoke{
-    CallSpec::direct(func->builtinFuncPtr()),
+    CallSpec::direct(func->arFuncPtr(), nullptr),
     v.makeVcallArgs({{fp}}),
     v.makeTuple({}),
     {label(env, inst->next()), label(env, inst->taken())},
@@ -457,7 +513,9 @@ void cgCheckRefs(IRLS& env, const IRInstruction* inst)  {
       bitsOff = Func::refBitValOff();
       bitsPtr = func;
     } else {
-      v << load{func[Func::sharedOff()], bitsPtr};
+      auto const shared = v.makeReg();
+      v << load{func[Func::sharedOff()], shared};
+      v << load{shared[Func::sharedRefBitPtrOff()], bitsPtr};
       bitsOff -= sizeof(uint64_t);
     }
 
@@ -476,20 +534,18 @@ void cgCheckRefs(IRLS& env, const IRInstruction* inst)  {
       if (vals64) cond = CC_E;
     } else {
       auto const bits = v.makeReg();
-      v << load{bitsPtr[bitsOff], bits};
-
-      auto const truncBits = v.makeReg();
       auto const maskedBits = v.makeReg();
 
       if (mask64 <= 0xff && vals64 <= 0xff) {
-        v << movtqb{bits, truncBits};
-        v << andbi{(int8_t)mask64, truncBits, maskedBits, v.makeReg()};
+        v << loadtqb{bitsPtr[bitsOff], bits};
+        v << andbi{(int8_t)mask64, bits, maskedBits, v.makeReg()};
         v << cmpbi{(int8_t)vals64, maskedBits, sf};
       } else if (mask64 <= 0xffffffff && vals64 <= 0xffffffff) {
-        v << movtql{bits, truncBits};
-        v << andli{(int32_t)mask64, truncBits, maskedBits, v.makeReg()};
+        v << loadtql{bitsPtr[bitsOff], bits};
+        v << andli{(int32_t)mask64, bits, maskedBits, v.makeReg()};
         v << cmpli{(int32_t)vals64, maskedBits, sf};
       } else {
+        v << load{bitsPtr[bitsOff], bits};
         v << andq{v.cns(mask64), bits, maskedBits, v.makeReg()};
         v << cmpq{v.cns(vals64), maskedBits, sf};
       }
@@ -516,7 +572,11 @@ void cgCheckRefs(IRLS& env, const IRInstruction* inst)  {
       ifThenElse(v, CC_NLE, sf, thenBody, [&] (Vout& v) {
         // If not special builtin...
         auto const sf = v.makeReg();
-        v << testlim{AttrVariadicByRef, func[Func::attrsOff()], sf};
+        v << testlim{
+          static_cast<int32_t>(AttrVariadicByRef),
+          func[Func::attrsOff()],
+          sf
+        };
         fwdJcc(v, env, vals64 ? CC_Z : CC_NZ, sf, inst->taken());
       });
     }
@@ -524,5 +584,20 @@ void cgCheckRefs(IRLS& env, const IRInstruction* inst)  {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void cgProfileFunc(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<ProfileCallTargetData>();
+  auto const sp = srcLoc(env, inst, 0).reg();
+
+  auto const args = argGroup(env, inst)
+    .addr(rvmtl(), safe_cast<int32_t>(extra->handle))
+    .addr(sp, cellsToBytes(extra->bcSPOff.offset));
+
+  cgCallHelper(vmain(env), env, CallSpec::method(&CallTargetProfile::report),
+               kVoidDest, SyncOptions::None, args);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 
 }}}

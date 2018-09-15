@@ -1,0 +1,17 @@
+diff --git a/fibonacci.php b/fibonacci.php
+--- a/fibonacci.php
++++ b/fibonacci.php
+@@ -1,9 +1,9 @@
+ <?hh // strict
+
+ function fibonacci($pos){
+-  $a = array(0, 1);
++  $arr = array(0, 1);
+   for ($i = 2; $i <= $pos; ++$i)
+-    $a[$i] =
+-      $a[$i-1] + $a[$i-2];
+-  return $a[$pos];
++    $arr[$i] =
++      $arr[$i-1] + $arr[$i-2];
++  return $arr[$pos];
+ }

@@ -1,0 +1,30 @@
+# starts here
+
+.adata A_0 = """a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}""";
+.adata A_1 = """a:2:{i:1;s:1:\"a\";i:2;s:1:\"b\";}""";
+
+.main {
+  DefCls 0
+  Int 1
+  RetC
+}
+
+.class A {
+  .method [public] <"HH\\void" N  > x() {
+    .declvars $arr $dict;
+    Array @A_0
+    SetL $arr
+    PopC
+    Array @A_1
+    SetL $dict
+    PopC
+    Null
+    RetC
+  }
+  .method [public no_injection] 86ctor() {
+    Null
+    RetC
+  }
+}
+
+# ends here

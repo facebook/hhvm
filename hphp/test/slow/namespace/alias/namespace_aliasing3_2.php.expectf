@@ -1,0 +1,3 @@
+HH\Lib\Dict\foo
+
+Fatal error: Call to undefined function Main\HH\Lib\Dict\foo() in %s on line %d

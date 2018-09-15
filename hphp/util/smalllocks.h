@@ -37,12 +37,12 @@ inline int futex(int* uaddr, int op, int val, const timespec* timeout,
   return syscall(SYS_futex, uaddr, op, val, timeout, uaddr2, val3);
 }
 
-inline void futex_wait(std::atomic<int>* value, int expected) {
+inline void futex_wait(std::atomic<uint32_t>* value, uint32_t expected) {
   futex(reinterpret_cast<int*>(value), FUTEX_WAIT_PRIVATE, expected,
         nullptr, nullptr, 0);
 }
 
-inline void futex_wake(std::atomic<int>* value, int nwake) {
+inline void futex_wake(std::atomic<uint32_t>* value, int nwake) {
   futex(reinterpret_cast<int*>(value), FUTEX_WAKE_PRIVATE, nwake, nullptr,
         nullptr, 0);
 }
@@ -51,10 +51,10 @@ inline void futex_wake(std::atomic<int>* value, int nwake) {
 
 // On non-linux OSs we do nothing for futexes. They essentially turn into spin
 // locks. If this becomes a perf issue, it's <space intentionally left blank>
-inline void futex_wait(std::atomic<int>* value, int expected) {
+inline void futex_wait(std::atomic<uint32_t>* value, int expected) {
 }
 
-inline void futex_wake(std::atomic<int>* value, int nwake) {
+inline void futex_wake(std::atomic<uint32_t>* value, int nwake) {
 }
 
 #endif
@@ -73,7 +73,7 @@ inline void futex_wake(std::atomic<int>* value, int nwake) {
  */
 struct SmallLock {
   void lock() {
-    int c = 0;
+    uint32_t c = 0;
     if (lock_data.compare_exchange_strong(c, 1, std::memory_order_acquire)) {
       return;
     }
@@ -96,7 +96,7 @@ struct SmallLock {
   }
 
 private:
-  std::atomic<int> lock_data;
+  std::atomic<uint32_t> lock_data;
 };
 
 //////////////////////////////////////////////////////////////////////

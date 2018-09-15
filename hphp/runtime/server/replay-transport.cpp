@@ -28,7 +28,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void ReplayTransport::recordInput(Transport* transport, const char *filename) {
-  assert(transport);
+  assertx(transport);
 
   Hdf hdf;
 
@@ -84,8 +84,8 @@ void ReplayTransport::replayInputImpl() {
                                                            "", false));
   m_postData = std::string(postData.data(), postData.size());
   m_requestHeaders.clear();
-  auto headers_callback = [&] (const IniSetting::Map &ini_h,
-                               const Hdf &hdf_h, const std::string &ini_h_key) {
+  auto headers_callback = [&](const IniSetting::Map& ini_h, const Hdf& hdf_h,
+                              const std::string& /*ini_h_key*/) {
     m_requestHeaders[Config::GetString(ini_h, hdf_h, "name",
                                        "", false)].push_back(
       Config::GetString(ini_h, hdf_h, "value", "", false)
@@ -115,9 +115,9 @@ Transport::Method ReplayTransport::getMethod() {
 }
 
 std::string ReplayTransport::getHeader(const char *name) {
-  assert(name);
+  assertx(name);
   if (m_requestHeaders.find(name) != m_requestHeaders.end()) {
-    assert(!m_requestHeaders[name].empty());
+    assertx(!m_requestHeaders[name].empty());
     return m_requestHeaders[name][0];
   }
   return "";
@@ -128,17 +128,17 @@ void ReplayTransport::getHeaders(HeaderMap &headers) {
 }
 
 void ReplayTransport::addHeaderImpl(const char *name, const char *value) {
-  assert(name && value);
+  assertx(name && value);
   m_responseHeaders[name].push_back(value);
 }
 
 void ReplayTransport::removeHeaderImpl(const char *name) {
-  assert(name);
+  assertx(name);
   m_responseHeaders.erase(name);
 }
 
-void ReplayTransport::sendImpl(const void *data, int size, int code,
-                               bool chunked, bool eom) {
+void ReplayTransport::sendImpl(const void* data, int size, int code,
+                               bool /*chunked*/, bool eom) {
   m_code = code;
 
   m_response = "HTTP/1.1 ";

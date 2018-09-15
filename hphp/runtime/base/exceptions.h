@@ -32,10 +32,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-struct String;
-struct IMarker;
-
-//////////////////////////////////////////////////////////////////////
+struct c_WaitableWaitHandle;
 
 /*
  * ExtendedException is the exception type for C++ exceptions that carry PHP
@@ -71,11 +68,10 @@ struct ExtendedException : Exception {
   // a silent exception does not have its exception message logged
   bool isSilent() const { return m_silent; }
   void setSilent(bool s = true) { m_silent = s; }
+  void recomputeBacktraceFromWH(c_WaitableWaitHandle* wh);
 
 protected:
   ExtendedException(const std::string& msg, ArrayData* backTrace);
-
-private:
   void computeBacktrace(bool skipFrame = false);
 
 private:
@@ -136,24 +132,35 @@ struct RequestMemoryExceededException : ResourceExceededException {
   EXCEPTION_COMMON_IMPL(RequestMemoryExceededException);
 };
 
+struct RequestOOMKilledException : ResourceExceededException {
+  RequestOOMKilledException(size_t usedBytes)
+    : ResourceExceededException(
+        folly::sformat("request aborted due to memeory presure, "
+                       "used {} bytes", usedBytes),
+        empty_array())
+  {}
+  EXCEPTION_COMMON_IMPL(RequestOOMKilledException);
+};
+
 //////////////////////////////////////////////////////////////////////
 
-struct ExitException : ExtendedException {
-  static std::atomic<int> ExitCode; // XXX should not be static
+extern __thread int tl_exit_code;
 
+struct ExitException : ExtendedException {
   explicit ExitException(int exitCode) {
-    ExitCode = exitCode;
+    tl_exit_code = exitCode;
   }
   EXCEPTION_COMMON_IMPL(ExitException);
 };
 
 struct PhpFileDoesNotExistException : ExtendedException {
-  explicit PhpFileDoesNotExistException(const char *file)
-    : ExtendedException("File could not be loaded: %s", file) {}
-  explicit PhpFileDoesNotExistException(const char *msg, bool empty_file)
-    : ExtendedException("%s", msg) {
-      assert(empty_file);
-    }
+  explicit PhpFileDoesNotExistException(const char* file)
+      : ExtendedException("File could not be loaded: %s", file) {}
+  explicit PhpFileDoesNotExistException(const char* msg,
+                                        DEBUG_ONLY bool empty_file)
+      : ExtendedException("%s", msg) {
+    assertx(empty_file);
+  }
   EXCEPTION_COMMON_IMPL(PhpFileDoesNotExistException);
 };
 

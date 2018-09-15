@@ -11,5 +11,5 @@ class F {
 }
 
 function f() {
-  return <checked>(new F())</checked><unchecked>->g()</unchecked>;
+  return <unchecked>(</unchecked><checked>new F()</checked><unchecked>)-></unchecked><partial>g</partial><unchecked>()</unchecked>;
 }

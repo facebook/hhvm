@@ -1,5 +1,6 @@
 <?php
 
+
 error_reporting(0);
 
 list($a, $b) = [1, 2];

@@ -1,5 +1,9 @@
 <?hh
 
+
+
+<<__EntryPoint>>
+function main_839() {
 $obj = new stdclass();
 $x0 = Vector {
 1, $obj, "foo", $obj}
@@ -21,4 +25,4 @@ $x0 = Set {
 apc_store('x0', $x0);
 $x1 = apc_fetch('x0');
 var_dump($x1);
-
+}

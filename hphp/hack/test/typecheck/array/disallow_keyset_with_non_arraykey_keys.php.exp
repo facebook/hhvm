@@ -1,0 +1,6 @@
+File "disallow_keyset_with_non_arraykey_keys.php", line 6, characters 8-27:
+Invalid index type for this keyset (Typing[4110])
+File "disallow_keyset_with_non_arraykey_keys.php", line 6, characters 15-17:
+This is an array key (int/string) because only array keys can be used to index into a Map, dict, darray, Set, or keyset
+File "disallow_keyset_with_non_arraykey_keys.php", line 6, characters 15-17:
+It is incompatible with a float

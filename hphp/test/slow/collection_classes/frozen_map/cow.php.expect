@@ -73,9 +73,9 @@ object(HH\ImmMap)#7 (3) {
   int(3)
 }
 ------ clear -------
-object(HH\Map)#7 (0) {
+object(HH\Map)#10 (0) {
 }
-object(HH\ImmMap)#8 (3) {
+object(HH\ImmMap)#11 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -84,7 +84,7 @@ object(HH\ImmMap)#8 (3) {
   int(3)
 }
 ------ set -------
-object(HH\Map)#8 (3) {
+object(HH\Map)#11 (3) {
   [0]=>
   int(42)
   [1]=>
@@ -92,7 +92,7 @@ object(HH\Map)#8 (3) {
   [2]=>
   int(3)
 }
-object(HH\ImmMap)#9 (3) {
+object(HH\ImmMap)#12 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -101,7 +101,7 @@ object(HH\ImmMap)#9 (3) {
   int(3)
 }
 ------ setAll -------
-object(HH\Map)#9 (3) {
+object(HH\Map)#12 (3) {
   [0]=>
   int(42)
   [1]=>
@@ -109,7 +109,7 @@ object(HH\Map)#9 (3) {
   [2]=>
   int(3)
 }
-object(HH\ImmMap)#10 (3) {
+object(HH\ImmMap)#13 (3) {
   [0]=>
   int(1)
   [1]=>
@@ -118,13 +118,13 @@ object(HH\ImmMap)#10 (3) {
   int(3)
 }
 ------ removeKey -------
-object(HH\Map)#10 (2) {
+object(HH\Map)#13 (2) {
   [1]=>
   int(2)
   [2]=>
   int(3)
 }
-object(HH\ImmMap)#11 (3) {
+object(HH\ImmMap)#14 (3) {
   [0]=>
   int(1)
   [1]=>

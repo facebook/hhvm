@@ -1,0 +1,2 @@
+File "async_hint3.php", line 4, characters 16-25:
+Was expecting an Awaitable return type hint (Typing[4174])

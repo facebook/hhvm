@@ -9,4 +9,8 @@ function f($x) {
   var_dump($x[0]);
   var_dump($x[0]);
 }
+
+<<__EntryPoint>>
+function main_542() {
 var_dump('foo');
+}

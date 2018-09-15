@@ -17,7 +17,7 @@ function show($fn, $class=null) {
   foreach ($params as $param) {
     echo "{$param->getName()}:\n";
     $attrs = $param->getAttributes();
-    ksort($attrs);
+    ksort(&$attrs);
     var_dump($attrs);
   }
 }
@@ -33,7 +33,7 @@ function showr($fn, $class=null) {
   foreach ($params as $param) {
     echo "{$param->getName()}:\n";
     $attrs = $param->getAttributesRecursive();
-    ksort($attrs);
+    ksort(&$attrs);
     var_dump($attrs);
   }
 }
@@ -92,8 +92,11 @@ class D extends C {
 }
 }
 
+
 //------------------------
 
+<<__EntryPoint>>
+function main_2201() {
 doboth('no_attrs');
 doboth('simple_attr');
 doboth('two_attrs');
@@ -109,3 +112,4 @@ doboth('o', 'D');
 doboth('p', 'D');
 doboth('q', 'D');
 doboth('wxy', 'D');
+}

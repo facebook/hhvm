@@ -1,0 +1,3 @@
+-vEval.HackArrCompatNotices=1
+-vEval.HackArrCompatCheckCompare=1
+-vEval.JitMaxTranslations=500000

@@ -1,2 +1,2 @@
-File "typing_fail_visibility.php", line 13, characters 20-20:
-This method is not declared as abstract, it must have a body (NastCheck[3014])
+File "typing_fail_visibility.php", line 13, characters 29-29:
+Non-abstract method A::f must contain body (Parsing[1002])

@@ -1,0 +1,35 @@
+vec(9) {
+  string(2) "B5"
+  string(2) "B2"
+  string(2) "B1"
+  string(2) "A4"
+  string(2) "A3"
+  string(2) "A2"
+  string(2) "A1"
+  string(5) "Base2"
+  string(5) "Base1"
+}
+vec(9) {
+  string(2) "B5"
+  string(2) "B2"
+  string(2) "B1"
+  string(2) "A4"
+  string(2) "A3"
+  string(2) "A2"
+  string(2) "A1"
+  string(5) "Base2"
+  string(5) "Base1"
+}
+vec(9) {
+  string(2) "B5"
+  string(2) "B2"
+  string(2) "B1"
+  string(2) "A4"
+  string(2) "A3"
+  string(2) "A2"
+  string(2) "A1"
+  string(5) "Base2"
+  string(5) "Base1"
+}
+vec(0) {
+}

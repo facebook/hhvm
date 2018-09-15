@@ -52,8 +52,7 @@ int pipe2(int pipefd[2], int flags);
 int fadvise_dontneed(int fd, off_t len);
 int advise_out(const std::string& fileName);
 
-#if defined(__CYGWIN__) || defined(_MSC_VER)
-
+#ifdef _MSC_VER
 typedef struct {
   const char *dli_fname;
   void *dli_fbase;
@@ -62,8 +61,7 @@ typedef struct {
 } Dl_info;
 
 int dladdr(const void *addr, Dl_info *info);
-int backtrace (void **buffer, int size);
-
+int backtrace(void **buffer, int size);
 #endif
 
 //////////////////////////////////////////////////////////////////////

@@ -1,0 +1,2 @@
+File "rx_superglobals5.php", line 5, characters 8-14:
+Superglobal $_FILES cannot be used in a reactive context. (Typing[4227])

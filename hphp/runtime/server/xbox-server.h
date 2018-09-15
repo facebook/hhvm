@@ -93,6 +93,8 @@ struct XboxServerInfo : SatelliteServerInfo {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+const StaticString s_xbox("xbox");
+
 struct XboxTransport final : Transport, Synchronizable {
   explicit XboxTransport(
     const folly::StringPiece message,
@@ -124,13 +126,20 @@ struct XboxTransport final : Transport, Synchronizable {
    * Manage headers.
    */
   std::string getHeader(const char *name) override;
-  void getHeaders(HeaderMap &headers) override {}
-  void addHeaderImpl(const char *name, const char *value) override {}
-  void removeHeaderImpl(const char *name) override {}
+  void getHeaders(HeaderMap& /*headers*/) override {}
+  void addHeaderImpl(const char* /*name*/, const char* /*value*/) override {}
+  void removeHeaderImpl(const char* /*name*/) override {}
 
   void sendImpl(const void *data, int size, int code, bool chunked, bool eom)
        override;
   void onSendEndImpl() override;
+
+  /**
+   * Get a description of the type of transport.
+   */
+  String describe() const override {
+    return s_xbox;
+  }
 
   /**
    * Task interface.
@@ -148,7 +157,7 @@ struct XboxTransport final : Transport, Synchronizable {
     ++m_refCount;
   }
   void decRefCount() {
-    assert(m_refCount.load());
+    assertx(m_refCount.load());
     if (--m_refCount == 0) {
       delete this;
     }

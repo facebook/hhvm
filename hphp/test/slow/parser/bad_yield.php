@@ -1,4 +1,4 @@
-<?hh // strict
+<?hh
 
 class C {
   function __construct() {
@@ -7,4 +7,8 @@ class C {
   }
 }
 
+
+<<__EntryPoint>>
+function main_bad_yield() {
 echo "Done\n";
+}

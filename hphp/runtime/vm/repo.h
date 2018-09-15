@@ -41,17 +41,19 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct Repo : RepoProxy {
-private:
-  static SimpleMutex s_lock;
-  static unsigned s_nRepos;
+namespace Native {
+struct FuncTable;
+}
 
-public:
+struct Repo : RepoProxy {
   struct GlobalData;
 
   // Do not directly instantiate this class; a thread-local creates one per
   // thread on demand when Repo::get() is called.
   static Repo& get();
+  // Prefork is called before forking. It attempts to shut down other
+  // threads and returns true if forking should be prevented, false if
+  // it's ok to proceed.
   static bool prefork();
   static void postfork(pid_t pid);
 
@@ -66,7 +68,7 @@ public:
   ~Repo();
 
   const char* dbName(int repoId) const {
-    assert(repoId < RepoIdCount);
+    assertx(repoId < RepoIdCount);
     return kDbs[repoId];
   }
   sqlite3* dbc() const { return m_dbc; }
@@ -77,7 +79,7 @@ public:
     case UnitOrigin::Eval:
       return m_evalRepoId;
     default:
-      assert(false);
+      assertx(false);
       return RepoIdInvalid;
     }
   }
@@ -96,7 +98,8 @@ public:
 
   static void setCliFile(const std::string& cliFile);
 
-  std::unique_ptr<Unit> loadUnit(const std::string& name, const MD5& md5);
+  std::unique_ptr<Unit> loadUnit(const std::string& name, const MD5& md5,
+                                 const Native::FuncTable&);
   RepoStatus findFile(const char* path, const std::string& root, MD5& md5);
   RepoStatus insertMd5(UnitOrigin unitOrigin, UnitEmitter* ue, RepoTxn& txn);
   void commitMd5(UnitOrigin unitOrigin, UnitEmitter* ue);
@@ -118,7 +121,7 @@ public:
    * Load the repo-global metadata table, including the global litstr
    * table.  Normally called during process initialization.
    */
-  void loadGlobalData(bool allowFailure = false);
+  void loadGlobalData(bool allowFailure = false, bool readArrayTable = true);
 
   /*
    * Access to global data.
@@ -127,7 +130,7 @@ public:
    * RuntimeOption::RepoAuthoritative.
    */
   static const GlobalData& global() {
-    assert(RuntimeOption::RepoAuthoritative);
+    assertx(RuntimeOption::RepoAuthoritative);
     return s_globalData;
   }
 
@@ -188,14 +191,11 @@ public:
  private:
   // Magic product constant used to distinguish a .hhbc database.
   static const char* kMagicProduct;
-  static const char* kSchemaPlaceholder;
-
   static const char* kDbs[RepoIdCount];
 
   void connect();
   void disconnect();
   void initCentral();
-  std::string insertSchema(const char* path);
   RepoStatus openCentral(const char* repoPath, std::string& errorMsg);
   void initLocal();
   void attachLocal(const char* repoPath, bool isWritable);
@@ -238,7 +238,7 @@ private:
  * Try to commit a vector of unit emitters to the current repo.  Note that
  * errors are ignored!
  */
-void batchCommit(std::vector<std::unique_ptr<UnitEmitter>>);
+void batchCommit(const std::vector<std::unique_ptr<UnitEmitter>>&);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -1,0 +1,19 @@
+<?hh
+
+if ($x > 3) {
+  // ...
+} else if ($x === null || $x === 'null') {
+  // ...
+} else if (
+  ($my_int_to_be_tested === 1 || $my_int_to_be_tested === 2)
+  && $we_care_about_that_int
+) {
+  // ...
+} else if (multiline_function(
+  $unrealistically_lengthened_argument,
+  $another_unusually_long_winded_argument,
+)) {
+  // ...
+} else {
+  // ...
+}

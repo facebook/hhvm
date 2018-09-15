@@ -17,6 +17,9 @@ class C {
   public function okay() { }
 }
 
+
+<<__EntryPoint>>
+function main_get_doc_comment_builtins() {
 $meths = array(
   array('ArrayAccess', 'offsetExists'),
   array('ReflectionMethod', 'getDocComment'),
@@ -36,4 +39,5 @@ foreach (array('p1', 'p2') as $prop) {
   $refl = new ReflectionProperty('C', $prop);
   $s = $refl->getDocComment();
   var_dump($s);
+}
 }

@@ -1,0 +1,2 @@
+File "await_in_expressions2.php", line 5, characters 14-20:
+Await cannot be used as an expression (Parsing[1002])

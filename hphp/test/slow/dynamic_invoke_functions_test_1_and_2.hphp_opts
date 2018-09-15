@@ -1,1 +1,1 @@
--vDynamicInvokeFunctions.*=test1 -vDynamicInvokeFunctions.*=test2
+-vDynamicInvokeFunctions.*=test1 -vDynamicInvokeFunctions.*=test2 -d hhvm.php7.all=0

@@ -1,1 +1,2 @@
-No errors
+File "namespace_global_const1.php", line 9, characters 12-18:
+Unbound name: N\MYCONST (a global constant) (Naming[2049])

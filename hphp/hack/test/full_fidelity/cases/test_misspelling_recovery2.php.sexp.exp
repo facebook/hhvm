@@ -1,0 +1,48 @@
+((script 204
+  ((list 204
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4
+        ((() <? 2 ())
+         (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))
+       (missing 0 ())))
+     (classish_declaration 33
+      ((missing 0 ())
+       (list 8 ((((end_of_line 1)) abstract 8 ((whitespace 1)))))
+       (missing 0 ()) (() name 1 ((whitespace 1))) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (classish_body 16
+        ((((extra_token_error 5) (whitespace 1)) { 1
+          ((whitespace 1) (single_line_comment 12) (end_of_line 1)))
+         (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (classish_declaration 34
+      ((missing 0 ()) (list 5 ((((end_of_line 1)) final 5 ((whitespace 1)))))
+       (missing 0 ()) (() name 1 ((whitespace 1))) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (classish_body 16
+        ((((extra_token_error 9) (whitespace 1)) { 1
+          ((whitespace 1) (single_line_comment 12) (end_of_line 1)))
+         (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (classish_declaration 39
+      ((missing 0 ())
+       (list 14
+        ((((end_of_line 1)) abstract 8 ((whitespace 1)))
+         (() final 5 ((whitespace 1)))))
+       (missing 0 ()) (() name 1 ((whitespace 1))) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (classish_body 16
+        ((((extra_token_error 5) (whitespace 1)) { 1
+          ((whitespace 1) (single_line_comment 12) (end_of_line 1)))
+         (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (expression_statement 5
+      ((((end_of_line 1) (single_line_comment 63) (end_of_line 1)
+         (end_of_line 1))
+        name 5 ((whitespace 1)))
+       (missing 0 ())))
+     (expression_statement 5
+      ((collection_literal_expression 5
+        ((simple_type_specifier 1 ((() name 1 ((whitespace 1)))))
+         (() { 1 ((end_of_line 1))) (missing 0 ())
+         (() } 1 ((end_of_line 1)))))
+       (missing 0 ())))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

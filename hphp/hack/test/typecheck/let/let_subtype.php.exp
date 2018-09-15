@@ -1,0 +1,6 @@
+File "let_subtype.php", line 15, characters 12-12:
+Invalid argument (Typing[4110])
+File "let_subtype.php", line 6, characters 19-19:
+This is an object of type A
+File "let_subtype.php", line 13, characters 11-11:
+It is incompatible with an object of type I

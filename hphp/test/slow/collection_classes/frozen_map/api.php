@@ -10,7 +10,7 @@ function show_keyed_iter($iter) {
     $vs[] = Pair {$k, $v};
   }
 
-  usort($vs, function($p1, $p2) {
+  usort(&$vs, function($p1, $p2) {
     if ($p1[0] < $p2[0]) return -1;
     else if ($p1[0] == $p2[0]) return 0;
     else return 1;
@@ -23,7 +23,7 @@ function show_keyed_iter($iter) {
 
 function show_iter($iter) {
   $vs = new Vector($iter);
-  sort($vs);
+  sort(&$vs);
 
   echo get_class($iter), " [\n";
   foreach ($vs as $v) var_dump($v);
@@ -115,4 +115,8 @@ function main() {
   show_keyed_iter(ImmMap::fromItems((Vector {Pair {1, 2}, Pair {3, 4}, Pair {5, 6}})));
 }
 
+
+<<__EntryPoint>>
+function main_api() {
 main();
+}

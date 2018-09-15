@@ -1,0 +1,22 @@
+array(0) {
+}
+array(0) {
+}
+array(3) {
+  [0]=>
+  string(3) "bar"
+  [1]=>
+  string(3) "baz"
+  [2]=>
+  string(3) "baz"
+}
+array(1) {
+  [0]=>
+  string(3) "foo"
+}
+array(0) {
+}
+array(1) {
+  [0]=>
+  string(4) "bing"
+}

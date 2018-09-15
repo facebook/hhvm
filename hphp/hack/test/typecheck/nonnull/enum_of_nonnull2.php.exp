@@ -1,0 +1,4 @@
+File "enum_of_nonnull2.php", line 8, characters 9-11:
+Enum constants must be an int or string (Typing[4018])
+File "enum_of_nonnull2.php", line 8, characters 15-18:
+Not a bool

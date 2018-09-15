@@ -35,16 +35,17 @@ public:
                     ExpressionPtr exp, int op);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
+  void analyzeProgram(AnalysisResultConstRawPtr ar) override;
+  ExpressionPtr preOptimize(AnalysisResultConstRawPtr ar) override;
 
   // implementing IParseHandler
-  void onParse(AnalysisResultConstPtr ar, FileScopePtr scope) override;
+  void onParse(AnalysisResultConstRawPtr ar, FileScopePtr scope) override;
 
   bool isReqLit() const;
   void setDocumentRoot() { m_documentRoot = true;}
   bool isDocumentRoot() const { return m_documentRoot;}
   std::string includePath() const;
-  FileScopeRawPtr getIncludedFile(AnalysisResultConstPtr) const;
+  FileScopeRawPtr getIncludedFile(AnalysisResultConstRawPtr) const;
 private:
   /**
    * There are 3 forms of include paths:
@@ -60,7 +61,7 @@ private:
   unsigned m_depsSet : 1;
   std::string m_include;
 
-  bool analyzeInclude(AnalysisResultConstPtr ar, const std::string &include);
+  bool analyzeInclude(AnalysisResultConstRawPtr ar, const std::string &include);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

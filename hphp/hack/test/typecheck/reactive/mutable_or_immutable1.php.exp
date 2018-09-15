@@ -1,0 +1,2 @@
+File "mutable_or_immutable1.php", line 5, characters 10-10:
+<<__MaybeMutable>> only makes sense on methods, or parameters on functions or methods. (NastCheck[3069])

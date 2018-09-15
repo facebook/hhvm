@@ -33,12 +33,28 @@ inline bool RequestInjectionData::getJit() const {
   return m_jit;
 }
 
+inline bool RequestInjectionData::isJittingDisabled() const {
+  return m_jittingDisabled;
+}
+
+inline void RequestInjectionData::setJittingDisabled(bool flag) {
+  m_jittingDisabled = flag;
+}
+
 inline bool RequestInjectionData::getJitFolding() const {
   return m_jitFolding;
 }
 
 inline void RequestInjectionData::setJitFolding(bool flag) {
   m_jitFolding = flag;
+}
+
+inline bool RequestInjectionData::getSuppressHackArrayCompatNotices() const {
+  return m_suppressHackArrayCompatNotices;
+}
+
+inline void RequestInjectionData::setSuppressHackArrayCompatNotices(bool flag) {
+  m_suppressHackArrayCompatNotices = flag;
 }
 
 inline bool RequestInjectionData::getCoverage() const {
@@ -204,6 +220,10 @@ inline void RequestInjectionData::setTimeZone(const std::string& tz) {
   m_timezone = tz;
 }
 
+inline void RequestInjectionData::setSafeFileAccess(bool b) {
+  m_safeFileAccess = b;
+}
+
 inline bool RequestInjectionData::hasSafeFileAccess() const {
   return m_safeFileAccess;
 }
@@ -216,5 +236,8 @@ inline bool RequestInjectionData::hasHtmlErrors() const {
   return m_htmlErrors;
 }
 
+inline bool RequestInjectionData::logFunctionCalls() const {
+  return m_logFunctionCalls;
+}
 ////////////////////////////////////////////////////////////////////////////////
 }

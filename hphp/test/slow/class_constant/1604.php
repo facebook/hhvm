@@ -13,5 +13,9 @@ function foo($a = parent_c::ZERO, $b = child_c::FIFTY, $c = child_c::FORTY) {
   echo $b;
   echo $c;
 }
+
+<<__EntryPoint>>
+function main_1604() {
 foo();
 print parent_c::ZERO;
+}

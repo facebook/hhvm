@@ -8,10 +8,10 @@ type s = shape('x' => int);
 
 type t = shape(
   'x' => int,
-  'z' => ?bool,
+  ?'z' => bool,
 );
 
 function test(s $s): t {
-  Shapes::removeKey($s, 'z');
+  Shapes::removeKey(&$s, 'z');
   return $s;
 }

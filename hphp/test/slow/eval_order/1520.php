@@ -35,4 +35,8 @@ function foo($a) {
   $a['foo']['bar'] = new C;
   $a['foo']['bar']['goo'] = f();
 }
+
+<<__EntryPoint>>
+function main_1520() {
 foo(new C);
+}

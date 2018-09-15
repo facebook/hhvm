@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/srckey.h"
 
 #include "hphp/runtime/vm/jit/location.h"
@@ -31,7 +32,7 @@
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/types.h"
 
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
 #include "hphp/util/mutex.h"
 
 #include <folly/Format.h>
@@ -59,6 +60,8 @@ struct IRTranslator;
 struct NormalizedInstruction;
 struct ProfData;
 namespace irgen { struct IRGS; }
+
+enum class InlineType { Normal, Async, AwaitedAsync };
 
 constexpr uint32_t transCountersPerChunk = 1024 * 1024 / 8;
 
@@ -107,7 +110,8 @@ using BlockIdToIRBlockMap = hphp_hash_map<RegionDesc::BlockId, Block*>;
  */
 struct TransContext {
   TransContext(TransID id, TransKind kind, TransFlags flags,
-               SrcKey sk, FPInvOffset spOff, Op callerFPushOp = Op::LowInvalid);
+               SrcKey sk, FPInvOffset spOff, int optIndex,
+               Op callerFPushOp = Op::Nop);
 
   /*
    * The SrcKey for this translation.
@@ -120,6 +124,7 @@ struct TransContext {
    * The contents of SrcKey are re-laid out to avoid func table lookups.
    */
   TransID transID;  // May be kInvalidTransID if not for a real translation.
+  int optIndex;
   TransKind kind{TransKind::Invalid};
   TransFlags flags;
   FPInvOffset initSpOffset;
@@ -128,7 +133,7 @@ struct TransContext {
   Offset initBcOffset;
   bool hasThis;
   bool prologue;
-  bool resumed;
+  ResumeMode resumeMode;
 };
 
 
@@ -158,7 +163,7 @@ enum class ControlFlowInfo {
 /*
  * Return the ControlFlowInfo for `instr'.
  */
-ControlFlowInfo opcodeControlFlowInfo(const Op op);
+ControlFlowInfo opcodeControlFlowInfo(const Op op, bool inlining);
 
 /*
  * Return true if the instruction can potentially set PC to point to something
@@ -172,7 +177,7 @@ bool opcodeChangesPC(const Op op);
  * Most instructions that change PC will break the tracelet, though some do not
  * (e.g., FCall).
  */
-bool opcodeBreaksBB(const Op op);
+bool opcodeBreaksBB(const Op op, bool inlining);
 
 /*
  * Similar to opcodeBreaksBB but more strict.  We break profiling blocks after
@@ -209,17 +214,10 @@ public:
 };
 
 /*
- * Vector of InputInfo with some flags and a pretty-printer.
+ * Vector of InputInfo with a pretty-printer.
  */
 struct InputInfoVec : public std::vector<InputInfo> {
-  InputInfoVec()
-    : needsRefCheck(false)
-  {}
-
   std::string pretty() const;
-
-public:
-  bool needsRefCheck;
 };
 
 /*
@@ -252,6 +250,8 @@ enum OutTypeConstraints {
   OutInt64,
   OutArray,
   OutArrayImm,
+  OutVArray,
+  OutDArray,
   OutVec,
   OutVecImm,
   OutDict,
@@ -269,26 +269,25 @@ enum OutTypeConstraints {
   OutVUnknown,          // type is V(unknown)
 
   OutSameAsInput1,      // type is the same as the first stack input
-  OutSameAsInput2,      // type is the same as the second stack input
-  OutSameAsInput3,      // type is the same as the third stack input
+  OutModifiedInput2,    // type is the same as the second stack input, but
+                        // counted and unspecialized
+  OutModifiedInput3,    // type is the same as the third stack input, but
+                        // counted and unspecialized
   OutCInput,            // type is C(input)
   OutVInput,            // type is V(input)
   OutCInputL,           // type is C(type) of local input
   OutVInputL,           // type is V(type) of local input
-  OutFInputL,           // type is V(type) of local input if current param is
-                        //   by ref, else type is C(type) of local input
-  OutFInputR,           // Like FInputL, but for R's on the stack.
 
   OutArith,             // For Add, Sub, Mul
   OutArithO,            // For AddO, SubO, MulO
   OutBitOp,             // For BitAnd, BitOr, BitXor
   OutSetOp,             // For SetOpL
   OutIncDec,            // For IncDecL
-  OutClassRef,          // KindOfClass
-  OutFPushCufSafe,      // FPushCufSafe pushes two values of different
-                        // types and an ActRec
 
   OutIsTypeL,           // output for IsTypeL instructions
+
+  OutFunc,              // for function pointers
+  OutClass,             // for class pointers
 
   OutNone,
 };
@@ -307,24 +306,22 @@ enum Operands {
   Stack2          = 1 << 1,
   Stack1          = 1 << 2,
   StackIns1       = 1 << 3,  // Insert an element under top of stack
-  StackIns2       = 1 << 4,  // Insert an element under top 2 of stack
-  FuncdRef        = 1 << 5,  // Input to FPass*
-  FStack          = 1 << 6,  // output of FPushFuncD and friends
-  Local           = 1 << 7,  // Writes to a local
-  Iter            = 1 << 9,  // Iterator in imm[0]
-  AllLocals       = 1 << 10, // All locals (used by RetC)
-  DontGuardStack1 = 1 << 11, // Dont force a guard on behalf of stack1 input
-  IgnoreInnerType = 1 << 12, // Instruction doesnt care about the inner types
-  DontGuardAny    = 1 << 13, // Dont force a guard for any input
-  This            = 1 << 14, // Input to CheckThis
-  StackN          = 1 << 15, // pop N cells from stack; n = imm[0].u_IVA
-  BStackN         = 1 << 16, // consume N cells from stack for builtin call;
+  FStack          = 1 << 5,  // output of FPushFuncD and friends
+  Local           = 1 << 6,  // Writes to a local
+  Iter            = 1 << 7,  // Iterator in imm[0]
+  AllLocals       = 1 << 8, // All locals (used by RetC)
+  DontGuardStack1 = 1 << 9, // Dont force a guard on behalf of stack1 input
+  IgnoreInnerType = 1 << 10, // Instruction doesnt care about the inner types
+  DontGuardAny    = 1 << 11, // Dont force a guard for any input
+  This            = 1 << 12, // Input to CheckThis
+  StackN          = 1 << 13, // pop N cells from stack; n = imm[0].u_IVA
+  BStackN         = 1 << 14, // consume N cells from stack for builtin call;
                              // n = imm[0].u_IVA
-  StackI          = 1 << 17, // consume 1 cell at index imm[0].u_IVA
-  MBase           = 1 << 18, // member operation base
-  IdxA            = 1 << 19, // consume 1 A at idx imm[0].u_IVA, preserving an
-                             // optional C on top of it
-  MKey            = 1 << 20, // member lookup key
+  StackI          = 1 << 15, // consume 1 cell at index imm[0].u_IVA
+  MBase           = 1 << 16, // member operation base
+  MKey            = 1 << 17, // member lookup key
+  LocalRange      = 1 << 18, // read range of locals given in imm[1].u_LAR
+  DontGuardBase   = 1 << 19, // Dont force a guard for the base
   StackTop2 = Stack1 | Stack2,
   StackTop3 = Stack1 | Stack2 | Stack3,
 };
@@ -357,7 +354,7 @@ const InstrInfo& getInstrInfo(Op op);
  *
  * This is used to avoid generating guards for interpreted instructions.
  */
-bool dontGuardAnyInputs(Op op);
+bool dontGuardAnyInputs(const NormalizedInstruction& ni);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Other instruction information.
@@ -366,7 +363,7 @@ bool dontGuardAnyInputs(Op op);
 * Some bytecodes are always no-ops but kept around for various reasons (mostly
 * stack flavor safety).
  */
-bool isAlwaysNop(Op op);
+bool isAlwaysNop(const NormalizedInstruction& ni);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Completely unrelated functionality.
@@ -407,6 +404,25 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
  * ctx, or otherwise guaranteed by guards).
  */
 const Func* lookupImmutableCtor(const Class* cls, const Class* ctx);
+
+/*
+ * Find a function which always uniquely maps to the given name in the context
+ * of the given unit. A function so returned can be used directly in the TC as
+ * it will not change.
+ *
+ * This generally includes persistent functions, but can also include
+ * non-persistent functions in certain situations. Note that even if the
+ * function is immutable, the unit it is defined in may need loading. In that
+ * case, the function is safe to use, but you have to emit code to ensure the
+ * unit is loaded first.
+ */
+struct ImmutableFuncLookup {
+  const Func* func;
+  // Does any use of this function require a check to ensure its unit is loaded?
+  bool needsUnitLoad;
+};
+ImmutableFuncLookup lookupImmutableFunc(const Unit* unit,
+                                        const StringData* name);
 
 /*
  * The offset, in cells, of this location from the frame pointer.

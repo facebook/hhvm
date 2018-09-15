@@ -6,7 +6,7 @@ Read the following to see why:
 File "simplify_error.php", line 13, characters 31-33:
 Member foo has the wrong type
 File "simplify_error.php", line 7, characters 28-34:
-This is the abstract type constant C::T
+This is the expression dependent type \C::T
 File "simplify_error.php", line 4, characters 38-38:
   via this generic T
 File "simplify_error.php", line 8, characters 23-23:

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 function doAThing($followable, $comment_settings) {

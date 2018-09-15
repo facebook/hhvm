@@ -7,5 +7,9 @@ function test() {
    var_dump(compact('a', 'ab', 'b'));
    var_dump(compact('a', array('ab', 'b')));
 }
- test();
 
+
+ <<__EntryPoint>>
+function main_1156() {
+test();
+}

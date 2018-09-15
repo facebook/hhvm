@@ -55,8 +55,9 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static int authorizer(void *autharg, int access_type, const char *arg3,
-                      const char *arg4, const char *arg5, const char *arg6) {
+static int
+authorizer(void* /*autharg*/, int access_type, const char* arg3,
+           const char* arg4, const char* /*arg5*/, const char* /*arg6*/) {
   switch (access_type) {
   case SQLITE_COPY: {
     String filename = File::TranslatePath(arg4);
@@ -199,8 +200,8 @@ int64_t PDOSqliteConnection::doer(const String& sql) {
   return sqlite3_changes(m_db);
 }
 
-bool PDOSqliteConnection::quoter(const String& input, String &quoted,
-                                 PDOParamType paramtype) {
+bool PDOSqliteConnection::quoter(const String& input, String& quoted,
+                                 PDOParamType /*paramtype*/) {
   int len = 2 * input.size() + 3;
   String s(len, ReserveString);
   char *buf = s.mutableData();
@@ -248,11 +249,11 @@ bool PDOSqliteConnection::setAttribute(int64_t attr, const Variant& value) {
   return false;
 }
 
-String PDOSqliteConnection::lastId(const char *name) {
+String PDOSqliteConnection::lastId(const char* /*name*/) {
   return (int64_t)sqlite3_last_insert_rowid(m_db);
 }
 
-bool PDOSqliteConnection::fetchErr(PDOStatement *stmt, Array &info) {
+bool PDOSqliteConnection::fetchErr(PDOStatement* /*stmt*/, Array& info) {
   if (m_einfo.errcode) {
     info.append((int64_t)m_einfo.errcode);
     info.append(String(m_einfo.errmsg, CopyString));
@@ -358,9 +359,9 @@ bool PDOSqliteStatement::support(SupportedMethod method) {
 
 int PDOSqliteStatement::handleError(const char *file, int line) {
   auto rsrc = unsafe_cast<PDOSqliteResource>(dbh);
-  assert(rsrc);
+  assertx(rsrc);
   auto conn = rsrc->conn();
-  assert(conn);
+  assertx(conn);
   return conn->handleError(file, line, this);
 }
 
@@ -393,7 +394,7 @@ bool PDOSqliteStatement::executer() {
   }
 }
 
-bool PDOSqliteStatement::fetcher(PDOFetchOrientation ori, long offset) {
+bool PDOSqliteStatement::fetcher(PDOFetchOrientation /*ori*/, long /*offset*/) {
   SYNC_VM_REGS_SCOPED();
   if (!m_stmt) {
     return false;
@@ -603,8 +604,8 @@ bool PDOSqliteStatement::getColumnMeta(int64_t colno, Array &ret) {
     return false;
   }
 
-  ret = Array::Create();
-  Array flags = Array::Create();
+  ret = Array::CreateDArray();
+  Array flags = Array::CreateVArray();
   switch (sqlite3_column_type(m_stmt, colno)) {
   case SQLITE_NULL:    ret.set(s_native_type, s_null);    break;
   case SQLITE_FLOAT:   ret.set(s_native_type, s_double);  break;

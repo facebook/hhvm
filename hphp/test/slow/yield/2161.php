@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_2161() {
 $env = 3;
 $f = function ($arg0) use (&$env) {
   yield $arg0;
@@ -11,3 +14,4 @@ foreach ($f(32) as $x) {
  var_dump($x);
  }
 var_dump($env);
+}

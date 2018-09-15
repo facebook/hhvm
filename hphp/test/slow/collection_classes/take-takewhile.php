@@ -44,5 +44,9 @@ function main() {
     echo "\n";
   }
 }
-main();
 
+
+<<__EntryPoint>>
+function main_take_takewhile() {
+main();
+}

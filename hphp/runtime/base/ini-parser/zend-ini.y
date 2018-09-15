@@ -31,7 +31,7 @@ using namespace HPHP;
 ///////////////////////////////////////////////////////////////////////////////
 
 %expect 0
-%pure_parser
+%pure-parser
 
 %token TC_SECTION
 %token TC_RAW

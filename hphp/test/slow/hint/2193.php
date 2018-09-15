@@ -38,4 +38,8 @@ public function f(";
 ";
   echo $clsDecl;
 }
+
+<<__EntryPoint>>
+function main_2193() {
 main();
+}

@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/srckey.h"
 
 #include "hphp/runtime/vm/jit/types.h"
@@ -47,8 +48,9 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* sr, CodeBlock& cb, DataBlock& data,
   TCA realCode = sr->getTopTranslation();
   if (!realCode) return;  // No translations, nothing to do.
 
+  TCA dbgBranchGuardSrc = nullptr;
   auto const dbgGuard = vwrap(cb, data, fixups, [&] (Vout& v) {
-    if (!sk.resumed()) {
+    if (sk.resumeMode() == ResumeMode::None) {
       auto const off = sr->nonResumedSPOff();
       v << lea{rvmfp()[-cellsToBytes(off.offset)], rvmsp()};
     }
@@ -72,11 +74,10 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* sr, CodeBlock& cb, DataBlock& data,
     v << jcci{CC_NZ, sf, done, ustubs().interpHelper};
 
     v = done;
-    v << fallthru{};
-  }, CodeKind::Helper);
+    v << debugguardjmp{realCode, &dbgBranchGuardSrc};
+  }, CodeKind::Helper, false);
 
-  // Emit a jump to the actual code.
-  auto const dbgBranchGuardSrc = emitSmashableJmp(cb, fixups, realCode);
+  assertx(dbgBranchGuardSrc);
 
   // Add the guard to the SrcRec.
   sr->addDebuggerGuard(dbgGuard, dbgBranchGuardSrc);
@@ -85,7 +86,7 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* sr, CodeBlock& cb, DataBlock& data,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-bool addDbgGuards(const Unit* unit) {
+bool addDbgGuards(const Func* func) {
   // TODO refactor
   // It grabs the write lease and iterates through whole SrcDB...
   struct timespec tsBegin, tsEnd;
@@ -98,7 +99,7 @@ bool addDbgGuards(const Unit* unit) {
     auto& data = view.data();
 
     HPHP::Timer::GetMonotonicTime(tsBegin);
-    // Doc says even find _could_ invalidate iterator, in pactice it should
+    // Doc says even find _could_ invalidate iterator, in practice it should
     // be very rare, so go with it now.
     CGMeta fixups;
     for (auto& pair : srcDB()) {
@@ -107,7 +108,8 @@ bool addDbgGuards(const Unit* unit) {
       // race with deleting a Func. See task #2826313.
       if (!Func::isFuncIdValid(sk.funcID())) continue;
       SrcRec* sr = pair.second;
-      if (sr->unitMd5() == unit->md5() &&
+      auto srLock = sr->writelock();
+      if (sk.func() == func &&
           !sr->hasDebuggerGuard() &&
           isSrcKeyInDbgBL(sk)) {
         addDbgGuardImpl(sk, sr, main, data, fixups);
@@ -125,8 +127,8 @@ bool addDbgGuards(const Unit* unit) {
 }
 
 bool addDbgGuardHelper(const Func* func, Offset offset,
-                       bool resumed, bool hasThis) {
-  SrcKey sk{func, offset, resumed, hasThis};
+                       ResumeMode resumeMode, bool hasThis) {
+  SrcKey sk{func, offset, resumeMode, hasThis};
   if (auto const sr = srcDB().find(sk)) {
     if (sr->hasDebuggerGuard()) {
       return true;
@@ -154,10 +156,10 @@ bool addDbgGuardHelper(const Func* func, Offset offset,
   return true;
 }
 
-bool addDbgGuard(const Func* func, Offset offset, bool resumed) {
-  auto const ret = addDbgGuardHelper(func, offset, resumed, false);
+bool addDbgGuard(const Func* func, Offset offset, ResumeMode resumeMode) {
+  auto const ret = addDbgGuardHelper(func, offset, resumeMode, false);
   if (!ret || !func->cls() || func->isStatic()) return ret;
-  return addDbgGuardHelper(func, offset, resumed, true);
+  return addDbgGuardHelper(func, offset, resumeMode, true);
 }
 
 }}}

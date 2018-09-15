@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_ext_options() {
 assert_options(1);
 var_dump(dl(""));
 
@@ -51,3 +54,4 @@ define("YOUR_CONSTANT", 2);
 $arr = get_defined_constants(true);
 var_dump(count($arr["user"]) === 2);
 var_dump(in_array('PHP_BINARY', $arr["Core"]));
+}

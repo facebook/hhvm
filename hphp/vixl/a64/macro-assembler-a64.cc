@@ -91,16 +91,22 @@ void MacroAssembler::LogicalMacro(const Register& rd,
   if (operand.IsImmediate()) {
     int64_t immediate = operand.immediate();
     unsigned reg_size = rd.size();
-    assert(rd.Is64Bits() || is_uint32(immediate));
 
     // If the operation is NOT, invert the operation and immediate.
     if ((op & NOT) == NOT) {
       op = static_cast<LogicalOp>(op & ~NOT);
       immediate = ~immediate;
-      if (rd.Is32Bits()) {
-        immediate &= kWRegMask;
-      }
     }
+
+    // Ignore the top 32 bits of an immediate if we're moving to a W register.
+    if (rd.Is32Bits()) {
+      // Check that the top 32 bits are consistent.
+      assert(((immediate >> kWRegSizeInBits) == 0) ||
+             ((immediate >> kWRegSizeInBits) == -1));
+      immediate &= kWRegMask;
+    }
+
+    assert(rd.Is64Bits() || is_uint32(immediate));
 
     // Special cases for all set or all clear immediates.
     if (immediate == 0) {
@@ -220,9 +226,17 @@ void MacroAssembler::Mvn(const Register& rd, const Operand& operand) {
   }
 }
 
-
 void MacroAssembler::Mov(const Register& rd, uint64_t imm) {
   assert(allow_macro_instructions_);
+
+  // Ignore the top 32 bits of an immediate if we're moving to a W register.
+  if (rd.Is32Bits()) {
+    // Check that the top 32 bits are consistent.
+    assert((((int64_t)imm >> kWRegSizeInBits) == 0) ||
+           (((int64_t)imm >> kWRegSizeInBits) == -1));
+    imm &= kWRegMask;
+  }
+
   assert(is_uint32(imm) || is_int32(imm) || rd.Is64Bits());
 
   // Immediates on Aarch64 can be produced using an initial value, and zero to
@@ -237,7 +251,8 @@ void MacroAssembler::Mov(const Register& rd, uint64_t imm) {
   // Move-keep may then be used to modify each of the 16-bit nybbles.
   //
   // The code below supports all five initial value generators, and
-  // applying move-keep operations to move-zero initial values only.
+  // applying move-keep operations to move-zero and move-inverted initial
+  // values.
 
   unsigned reg_size = rd.size();
   unsigned n, imm_s, imm_r;
@@ -263,7 +278,7 @@ void MacroAssembler::Mov(const Register& rd, uint64_t imm) {
 
     assert((reg_size % 16) == 0);
     bool first_mov_done = false;
-    for (unsigned i = 0; i < (temp.size() / 16); i++) {
+    for (unsigned i = 0; i < (reg_size / 16); i++) {
       uint64_t imm16 = (imm >> (16 * i)) & 0xffffL;
       if (imm16 != 0) {
         if (!first_mov_done) {

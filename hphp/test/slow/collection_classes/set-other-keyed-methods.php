@@ -20,4 +20,8 @@ function main() {
   echo "==== ImmSet ====\n";
   test(ImmSet {5, 'a', 0, ''});
 }
+
+<<__EntryPoint>>
+function main_set_other_keyed_methods() {
 main();
+}

@@ -1,0 +1,2 @@
+File "await_in_coroutine2.php", line 5, characters 10-17:
+await is not allowed in coroutines. (NastCheck[3036])

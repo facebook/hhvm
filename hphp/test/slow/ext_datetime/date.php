@@ -1,10 +1,13 @@
 <?php
 
-date_default_timezone_set("America/Los_Angeles");
-
 function format($dt) {
   var_dump(date_format($dt, "Y-m-d H:i:s"));
 }
+
+
+<<__EntryPoint>>
+function main_date() {
+date_default_timezone_set("America/Los_Angeles");
 
 format(date_create("2006-12-12"), "2006-12-12 00:00:00");
 format(date_create("@1170288001"), "2007-02-01 00:00:01");
@@ -95,3 +98,4 @@ $timestamp = strtotime("1st January 2004"); //1072915200
 // however, as this would start with a "0", it
 // only prints "4"
 var_dump(idate("y", $timestamp));
+}

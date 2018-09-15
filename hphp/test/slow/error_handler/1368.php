@@ -10,4 +10,3 @@ function a() {
  set_exception_handler('a');
 restore_exception_handler();
 throw new Exception('bomb');
-

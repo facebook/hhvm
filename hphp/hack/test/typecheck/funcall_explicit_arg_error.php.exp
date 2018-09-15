@@ -1,0 +1,8 @@
+File "funcall_explicit_arg_error.php", line 8, characters 27-30:
+Invalid argument (Typing[4110])
+File "funcall_explicit_arg_error.php", line 8, characters 14-16:
+This is an int
+File "funcall_explicit_arg_error.php", line 3, characters 22-23:
+  via this generic T1
+File "funcall_explicit_arg_error.php", line 8, characters 27-30:
+It is incompatible with a string

@@ -2,32 +2,32 @@
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Core
+open Hh_core
 
 let get_target symbol =
   let open SymbolOccurrence in
+  let module Types = ServerCommandTypes.Find_refs in
   let open FindRefsService in
   match symbol.type_ with
   | SymbolOccurrence.Class -> Some (IClass symbol.name)
   | SymbolOccurrence.Function -> Some (IFunction symbol.name)
   | SymbolOccurrence.Method (class_name, member_name) ->
       Some (IMember (Subclasses_of class_name,
-        FindRefsService.Method member_name))
+        Types.Method member_name))
   | SymbolOccurrence.Property (class_name, member_name) ->
       Some (IMember (Subclasses_of class_name,
-        FindRefsService.Property member_name))
+        Types.Property member_name))
   | SymbolOccurrence.ClassConst (class_name, member_name) ->
       Some (IMember (Subclasses_of class_name,
-        FindRefsService.Class_const member_name))
+        Types.Class_const member_name))
   | SymbolOccurrence.Typeconst  (class_name, member_name) ->
       Some (IMember (Subclasses_of class_name,
-        FindRefsService.Typeconst member_name))
+        Types.Typeconst member_name))
   | SymbolOccurrence.GConst -> Some (IGConst symbol.name)
   | _ -> None
 
@@ -44,7 +44,7 @@ let highlight_symbol tcopt (line, char) path file_info symbol =
       end
     | None -> []
   in
-  List.map res Pos.to_absolute
+  List.map res Ide_api_types.pos_to_range
 
 let filter_result symbols result =
   let result = List.fold symbols ~init:result ~f:(fun result symbol ->
@@ -55,13 +55,13 @@ let filter_result symbols result =
   List.filter symbols ~f:(fun symbol ->
     symbol.SymbolOccurrence.pos = result.SymbolOccurrence.pos)
 
-let compare p1 p2 =
-  let line1, start1, _ = Pos.info_pos p1 in
-  let line2, start2, _ = Pos.info_pos p2 in
-  if line1 < line2 then -1
-  else if line1 > line2 then 1
-  else if start1 < start2 then -1
-  else if start1 > start2 then 1
+let compare r1 r2 =
+  let open Ide_api_types in
+  let s1, s2 = r1.st, r2.st in
+  if s1.line < s2.line then -1
+  else if s1.line > s2.line then 1
+  else if s1.column < s2.column then -1
+  else if s1.column > s2.column then 1
   else 0
 
 let rec combine_result l l1 l2 =

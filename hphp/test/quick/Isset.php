@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f() {
   $n = "x";
@@ -58,6 +58,6 @@ function g($dontTake, &$toFillIn, $id, $key, $value) {
 }
 
 $a = null;
-g(null, $a, "127.0.0.1", null, null );
+g(null, &$a, "127.0.0.1", null, null );
 var_dump($a);
 

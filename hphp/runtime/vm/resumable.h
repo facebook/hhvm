@@ -28,10 +28,46 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 /**
+ * Indicates how a function got resumed.
+ */
+enum class ResumeMode : uint8_t {
+  // The function was regularly called and its frame is located on the stack.
+  // This is the only valid mode for regular (non-async, non-generator)
+  // functions. Async functions are executed in this mode (also called eager
+  // execution) until reaching the first blocking await statement. Generators
+  // and async generators run in this mode only during argument type enforcement
+  // and suspend their execution immediately afterwards using the CreateCont
+  // opcode.
+  None = 0,
+
+  // Execution of the function was resumed by the asio scheduler upon completion
+  // of the awaited WaitHandle. Frame of the function is stored on the heap
+  // colocated with the Resumable structure. Valid only for async functions and
+  // async generators. An AsyncGeneratorWaitHandle is associated with async
+  // generators.
+  Async = 1,
+
+  // Execution of the function was resumed by generator iteration (e.g. by
+  // calling next() or send()). Frame of the function is stored on the heap
+  // colocated with the Resumable structure. Valid only for generators and
+  // async generators. Async generators are considered to be eagerly executed
+  // in this mode and don't have any associated AsyncGeneratorWaitHandle.
+  GenIter = 2,
+};
+
+char* resumeModeShortName(ResumeMode resumeMode);
+
+ResumeMode resumeModeFromActRecImpl(ActRec* ar);
+ALWAYS_INLINE ResumeMode resumeModeFromActRec(ActRec* ar) {
+  if (LIKELY(!ar->resumed())) return ResumeMode::None;
+  return resumeModeFromActRecImpl(ar);
+}
+
+/**
  * Header of the resumable frame used by async functions:
  *
- *     Header*     -> +--------------------------------+ low address
- *                    | NativeNode kind=AsyncFuncFrame |
+ *     NativeNode* -> +--------------------------------+ low address
+ *                    | kind=AsyncFuncFrame            |
  *                    +--------------------------------+
  *                    | Function locals and iterators  |
  *     Resumable*  -> +--------------------------------+
@@ -44,8 +80,8 @@ namespace HPHP {
  *
  * Header of the native frame used by generators:
  *
- *     Header*     -> +--------------------------------+ low address
- *                    | NativeNode NativeData          |
+ *     NativeNode* -> +--------------------------------+ low address
+ *                    | kind=NativeData                |
  *                    +--------------------------------+
  *                    | Function locals and iterators  |
  * BaseGenerator*  -> +--------------------------------+
@@ -86,26 +122,25 @@ struct alignas(16) Resumable {
   static Resumable* Create(size_t frameSize, size_t totalSize) {
     // Allocate memory.
     (void)type_scan::getIndexForMalloc<ActRec>();
-    auto node = reinterpret_cast<NativeNode*>(MM().objMalloc(totalSize));
+    auto node = new (tl_heap->objMalloc(totalSize))
+                NativeNode(HeaderKind::AsyncFuncFrame,
+                           sizeof(NativeNode) + frameSize + sizeof(Resumable));
     auto frame = reinterpret_cast<char*>(node + 1);
-    auto resumable = reinterpret_cast<Resumable*>(frame + frameSize);
-    node->obj_offset = sizeof(NativeNode) + frameSize + sizeof(Resumable);
-    node->hdr.kind = HeaderKind::AsyncFuncFrame;
-    return resumable;
+    return reinterpret_cast<Resumable*>(frame + frameSize);
   }
 
   template<bool clone,
            bool mayUseVV = true>
   void initialize(const ActRec* fp, jit::TCA resumeAddr,
                   Offset resumeOffset, size_t frameSize, size_t totalSize) {
-    assert(fp);
-    assert(fp->resumed() == clone);
+    assertx(fp);
+    assertx(fp->resumed() == clone);
     auto const func = fp->func();
-    assert(func);
-    assert(func->isResumable());
-    assert(func->contains(resumeOffset));
+    assertx(func);
+    assertx(func->isResumable());
+    assertx(func->contains(resumeOffset));
     // Check memory alignment
-    assert((((uintptr_t) actRec()) & (sizeof(Cell) - 1)) == 0);
+    assertx((((uintptr_t) actRec()) & (sizeof(Cell) - 1)) == 0);
 
     if (!clone) {
       // Copy ActRec, locals and iterators
@@ -117,7 +152,7 @@ struct alignas(16) Resumable {
       actRec()->setResumed();
 
       // Suspend VarEnv if needed
-      assert(mayUseVV || !(func->attrs() & AttrMayUseVV));
+      assertx(mayUseVV || !(func->attrs() & AttrMayUseVV));
       if (mayUseVV &&
           UNLIKELY(func->attrs() & AttrMayUseVV) &&
           UNLIKELY(fp->hasVarEnv())) {
@@ -142,20 +177,20 @@ struct alignas(16) Resumable {
   template<class T> static void Destroy(size_t size, T* obj) {
     auto const base = reinterpret_cast<char*>(obj + 1) - size;
     obj->~T();
-    MM().objFree(base, size);
+    tl_heap->objFree(base, size);
   }
 
   ActRec* actRec() { return &m_actRec; }
   const ActRec* actRec() const { return &m_actRec; }
   jit::TCA resumeAddr() const { return m_resumeAddr; }
   Offset resumeOffset() const {
-    assert(m_actRec.func()->contains(m_resumeOffset));
+    assertx(m_actRec.func()->contains(m_resumeOffset));
     return m_resumeOffset;
   }
   size_t size() const { return m_size; }
 
   void setResumeAddr(jit::TCA resumeAddr, Offset resumeOffset) {
-    assert(m_actRec.func()->contains(resumeOffset));
+    assertx(m_actRec.func()->contains(resumeOffset));
     m_resumeAddr = resumeAddr;
     m_resumeOffset = resumeOffset;
   }
@@ -163,7 +198,6 @@ struct alignas(16) Resumable {
 private:
   // ActRec of the resumed frame.
   ActRec m_actRec;
-  TYPE_SCAN_CONSERVATIVE_FIELD(m_actRec);
 
   // Resume address.
   jit::TCA m_resumeAddr;

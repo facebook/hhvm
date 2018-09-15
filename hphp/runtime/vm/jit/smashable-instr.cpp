@@ -45,6 +45,10 @@ size_t smashableJccLen() {
   return ARCH_SWITCH_CALL(smashableJccLen);
 }
 
+size_t smashableAlignTo() {
+  return ARCH_SWITCH_CALL(smashableAlignTo);
+}
+
 TCA emitSmashableMovq(CodeBlock& cb, CGMeta& fixups, uint64_t imm,
                       PhysReg d) {
   return ARCH_SWITCH_CALL(emitSmashableMovq, cb, fixups, imm, d);
@@ -65,24 +69,19 @@ TCA emitSmashableJcc(CodeBlock& cb, CGMeta& fixups, TCA target,
 }
 
 void smashMovq(TCA inst, uint64_t imm) {
-  tc::assertOwnsCodeLock();
   return ARCH_SWITCH_CALL(smashMovq, inst, imm);
 }
 void smashCmpq(TCA inst, uint32_t imm) {
-  tc::assertOwnsCodeLock();
   return ARCH_SWITCH_CALL(smashCmpq, inst, imm);
 }
 void smashCall(TCA inst, TCA target) {
-  tc::assertOwnsCodeLock();
   return ARCH_SWITCH_CALL(smashCall, inst, target);
 }
 void smashJmp(TCA inst, TCA target) {
-  tc::assertOwnsCodeLock();
   return ARCH_SWITCH_CALL(smashJmp, inst, target);
 }
-void smashJcc(TCA inst, TCA target, ConditionCode cc) {
-  tc::assertOwnsCodeLock();
-  return ARCH_SWITCH_CALL(smashJcc, inst, target, cc);
+void smashJcc(TCA inst, TCA target) {
+  return ARCH_SWITCH_CALL(smashJcc, inst, target);
 }
 
 uint64_t smashableMovqImm(TCA inst) {
@@ -111,6 +110,18 @@ ConditionCode smashableJccCond(TCA inst) {
  */
 TCA smashableCallFromRet(TCA ret) {
   return ret - smashableCallLen();
+}
+
+bool optimizeSmashedCall(TCA inst) {
+  return ARCH_SWITCH_CALL(optimizeSmashedCall, inst);
+}
+
+bool optimizeSmashedJmp(TCA inst) {
+  return ARCH_SWITCH_CALL(optimizeSmashedJmp, inst);
+}
+
+bool optimizeSmashedJcc(TCA inst) {
+  return ARCH_SWITCH_CALL(optimizeSmashedJcc, inst);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

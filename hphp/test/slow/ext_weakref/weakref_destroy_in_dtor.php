@@ -9,5 +9,10 @@ class A {
         unset($this->wr);
     }
 }
+
+<<__EntryPoint>>
+function main_weakref_destroy_in_dtor() {
 $a = new A;
 unset($a);
+echo "Done\n";
+}

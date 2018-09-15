@@ -1,6 +1,6 @@
-File "pair-literal-2.php", line 12, characters 10-24:
+File "pair-literal-2.php", line 12, characters 10-26:
 Invalid return type (Typing[4110])
 File "pair-literal-2.php", line 11, characters 20-25:
 This is a string
-File "pair-literal-2.php", line 12, characters 16-16:
+File "pair-literal-2.php", line 12, characters 17-17:
 It is incompatible with an int

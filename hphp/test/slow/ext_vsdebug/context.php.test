@@ -1,0 +1,32 @@
+<?hh
+
+class A {
+  private int $a = 0;
+  protected int $b = 1;
+  static int $S = 100;
+
+  const HELLOA = "hello0";
+  const HELLOB = "hello0";
+}
+
+class B extends A {
+  protected int $b = 2;
+  public int $c = 3;
+  const HELLOB = "hello1";
+}
+
+function innerFunc() {
+  $a = 1;
+  $b = "Hello world";
+  $c = [1, 2, 3];
+  $d = [1, [2, 3]];
+
+  $bObj = new B();
+  $bObj->aObj = new A();
+  $e = [$bObj, $bObj];
+
+  echo "hello world 1\n";
+}
+
+innerFunc();
+echo "hello world 2\n";

@@ -25,4 +25,8 @@ function main() {
   var_dump(is_int($x));
 }
 
+
+<<__EntryPoint>>
+function main_array_006() {
 main();
+}

@@ -23,7 +23,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(ObjectMethodExpression);
-DECLARE_BOOST_TYPES(ClassScope);
 
 struct ObjectMethodExpression : FunctionCall {
   ObjectMethodExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
@@ -32,8 +31,8 @@ struct ObjectMethodExpression : FunctionCall {
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
   ConstructPtr getNthKid(int n) const override;
+  void analyzeProgram(AnalysisResultConstRawPtr ar) override;
   void setNthKid(int n, ConstructPtr cp) override;
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
 
   ExpressionPtr getObject() const { return m_object; }
   bool isNullSafe() const { return m_nullsafe; }
@@ -45,8 +44,6 @@ private:
   bool m_nullsafe;
   bool m_xhpGetAttr;
 
-  // for avoiding code generate toObject(Variant)
-  bool directVariantProxy(AnalysisResultPtr ar);
   bool m_bindClass;
 };
 

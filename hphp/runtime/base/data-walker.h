@@ -16,14 +16,18 @@
 #ifndef incl_HPHP_DATA_WALKER_H_
 #define incl_HPHP_DATA_WALKER_H_
 
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/runtime/base/req-hash-map.h"
+#include "hphp/runtime/base/req-hash-set.h"
+#include "hphp/util/functional.h" // for pointer_hash
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+struct HeapObject;
 struct ArrayData;
 struct ObjectData;
+struct TypedValue;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -41,8 +45,7 @@ struct DataWalker {
   enum class LookupFeature {
     Default                  = 0x0,
     DetectSerializable       = 0x1,
-    RefCountedReference      = 0x2,
-    HasObjectOrResource      = 0x4
+    HasObjectOrResource      = 0x2
   };
 
   /*
@@ -53,7 +56,6 @@ struct DataWalker {
     DataFeature()
       : isCircular(false)
       , hasSerializable(false)
-      , hasRefCountReference(false)
       , hasObjectOrResource(false) {
     }
 
@@ -62,12 +64,15 @@ struct DataWalker {
     unsigned isCircular : 1;
     // whether the data graph contains serializable objects
     unsigned hasSerializable : 1;
-    // whether the data graph contains some ref counted reference
-    // (*not* one of: bool, int, double and static string)
-    unsigned hasRefCountReference : 1;
     // whether the data graph contains any object or resource
     unsigned hasObjectOrResource : 1;
   };
+
+  using PointerSet = req::fast_set<const HeapObject*,
+                                   pointer_hash<const HeapObject>>;
+
+  using PointerMap = req::fast_map<HeapObject*, HeapObject*,
+                                   pointer_hash<HeapObject>>;
 
 public:
   /*
@@ -85,26 +90,32 @@ public:
     return features;
   }
 
-  DataFeature traverseData(ArrayData* data) const {
+  DataFeature traverseData(ArrayData* data,
+                           PointerMap* seenArrs = nullptr) const {
     // keep track of visited nodes in an array or object graph
     PointerSet visited;
     DataFeature features;
-    traverseData(data, features, visited);
+    traverseData(data, features, visited, seenArrs);
     return features;
   }
 
 private:
   void traverseData(ArrayData* data,
                     DataFeature& features,
-                    PointerSet& visited) const;
+                    PointerSet& visited,
+                    PointerMap* seenArrs = nullptr) const;
   void traverseData(ObjectData* data,
                     DataFeature& features,
                     PointerSet& visited) const;
 
-  bool markVisited(void* pvar,
+  bool visitTypedValue(TypedValue rval,
+                       DataFeature& features,
+                       PointerSet& visited,
+                       PointerMap* seenArrs = nullptr) const;
+  bool markVisited(HeapObject* ptr,
                    DataFeature& features,
                    PointerSet& visited) const;
-  void objectFeature(ObjectData* pobj, DataFeature&, PointerSet&) const;
+  void objectFeature(ObjectData* pobj, DataFeature&) const;
 
   bool canStopWalk(DataFeature& features) const;
 

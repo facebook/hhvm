@@ -1,4 +1,4 @@
-<?hh
+<?hh // decl
 
 class E1 extends Exception {
   private static $e;
@@ -46,4 +46,8 @@ function test() {
   \HH\Asio\join(bar());
 }
 
+
+<<__EntryPoint>>
+function main_unwind_gen_array_waithandle() {
 test();
+}

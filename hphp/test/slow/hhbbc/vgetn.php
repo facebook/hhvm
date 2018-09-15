@@ -6,4 +6,8 @@ function &foo() {
   $y =& $$z;
   return $y;
 }
+
+<<__EntryPoint>>
+function main_vgetn() {
 foo();
+}

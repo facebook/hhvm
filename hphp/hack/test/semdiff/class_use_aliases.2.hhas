@@ -1,0 +1,24 @@
+# starts here
+
+.main {
+  DefCls 0
+  DefCls 1
+  Int 1
+  RetC
+}
+
+.class A {
+  .method [public no_injection] 86ctor() {
+    Null
+    RetC
+  }
+}
+
+.class B {
+  .method [public no_injection] 86ctor() {
+    Null
+    RetC
+  }
+}
+
+# ends here

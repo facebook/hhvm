@@ -17,4 +17,8 @@ function foo($p) {
   $a[] = 'b';
   var_dump($a);
 }
+
+<<__EntryPoint>>
+function main_248() {
 foo('c');
+}

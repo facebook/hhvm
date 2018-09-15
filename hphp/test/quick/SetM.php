@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Special handling of a few types.
 function t($val) {

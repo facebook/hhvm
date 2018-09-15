@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function dec($x) {
   return $x + -1;

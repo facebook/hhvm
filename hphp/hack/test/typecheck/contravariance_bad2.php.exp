@@ -4,5 +4,3 @@ File "contravariance_bad2.php", line 12, characters 40-40:
 This is an object of type I
 File "contravariance_bad2.php", line 12, characters 24-25:
 It is incompatible with a nullable type
-File "contravariance_bad2.php", line 9, characters 52-52:
-Considering that this type argument is contravariant with respect to Contra

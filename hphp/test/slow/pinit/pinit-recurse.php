@@ -20,4 +20,8 @@ function test() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_pinit_recurse() {
 test();
+}

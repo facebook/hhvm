@@ -12,5 +12,9 @@ function g($x) {
   block();
   var_dump($x[0]);
 }
+
+<<__EntryPoint>>
+function main_1858() {
 f(array(10));
 g(array(10));
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract class Foo {
   abstract public static function who();

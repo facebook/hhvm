@@ -1505,4 +1505,8 @@ function test($a) {
   );
   var_dump(count($x));
 }
+
+<<__EntryPoint>>
+function main_big_array() {
 test('hi');
+}

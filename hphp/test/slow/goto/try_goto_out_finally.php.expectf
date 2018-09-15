@@ -1,2 +1,0 @@
-
-Fatal error: jump out of a finally block is disallowed in %s/try_goto_out_finally.php on line 7

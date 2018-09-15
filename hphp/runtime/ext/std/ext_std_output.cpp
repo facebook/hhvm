@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/perf-counters.h"
 
 #include "hphp/runtime/ext/json/ext_json.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/server-stats.h"
 
 #include "hphp/util/hardware-counter.h"
@@ -135,8 +136,8 @@ void HHVM_FUNCTION(ob_implicit_flush, bool flag /* = true */) {
 Array HHVM_FUNCTION(ob_list_handlers) {
   return g_context->obGetHandlers();
 }
-bool HHVM_FUNCTION(output_add_rewrite_var, const String& name,
-                                           const String& value) {
+bool HHVM_FUNCTION(output_add_rewrite_var, const String& /*name*/,
+                   const String& /*value*/) {
   throw_not_supported(__func__, "bad coding style");
 }
 bool HHVM_FUNCTION(output_reset_rewrite_vars) {
@@ -265,7 +266,8 @@ void HHVM_FUNCTION(hphp_clear_hardware_events) {
 void HHVM_FUNCTION(SystemLib_print_hashbang, const String& hashbang) {
   auto const ar = GetCallerFrame();
 
-  if (ar->m_func->name()->empty() && RuntimeOption::ClientExecutionMode()) {
+  if (ar->m_func->name()->empty() && (!RuntimeOption::ServerExecutionMode() ||
+      is_cli_mode())) {
     // If run in cli mode, print nothing in the lowest pseudomain
     if (!g_context->getPrevFunc(ar)) return;
   }

@@ -1,0 +1,1 @@
+Fatal error: Values in sealed whitelist must be classname constants. in %s/test/slow/sealed/sealed_classes9.php on line 9

@@ -13,8 +13,12 @@ class Unrelated{
     var_dump(get_object_vars($obj));
   }
 }
+
+<<__EntryPoint>>
+function main_1534() {
 $base_obj = new Base();
 $child_obj = new Child();
 $unrelated_obj = new Unrelated();
 $unrelated_obj->foo($child_obj);
 $unrelated_obj->foo($base_obj);
+}

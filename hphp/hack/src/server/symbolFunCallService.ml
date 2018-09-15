@@ -2,100 +2,123 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-type target_type =
-  | Function
-  | Method
-  | Constructor
+module SN = Naming_special_names
 
-type result = {
-  name:  string;
-  type_: target_type;
-  pos: string Pos.pos;
-  caller: string;
-}
+open Hh_core
+open ServerCommandTypes.Symbol_info_service
+
+module Result_set = Set.Make(struct
+  type t = ServerCommandTypes.Symbol_info_service.symbol_fun_call
+  let compare a b =
+    (* Descending order, since SymbolInfoService.format_result uses rev_append
+       and will reverse our sorted result list. *)
+    let r = Pos.compare b.pos a.pos in if r <> 0 then r else
+    let r = compare b.name a.name   in if r <> 0 then r else
+    let r = compare b.type_ a.type_ in if r <> 0 then r else
+    compare b.caller a.caller
+end)
 
 let combine_name cur_class cur_caller =
-  match (!cur_class, !cur_caller) with
-  | Some c, Some f -> c^"::"^f
+  match cur_class, cur_caller with
+  | _, None -> "" (* Top-level function call *)
   | None, Some f -> f
-  (* Top-level function call; shouldn't happen, but just in case *)
-  | _ -> ""
+  | Some c, Some f -> c ^ "::" ^ f
 
-let process_fun_id result_map cur_class cur_caller id =
-  let caller_str = combine_name cur_class cur_caller in
-  let pos, name = id in
-  result_map := Pos.Map.add pos {
-    name = Utils.strip_ns name;
-    type_ = Function;
-    pos = Pos.to_relative_string pos;
-    caller = caller_str;
-  } !result_map
+let is_pseudofunction name =
+  List.mem SN.PseudoFunctions.[empty; isset; unset;] name
 
-let process_method_id result_map cur_class cur_caller
-    target_type class_def id _ _ ~is_method ~is_const:_ =
-  if is_method then begin
-    let caller_str = combine_name cur_class cur_caller in
-    let class_name = class_def.Typing_defs.tc_name in
-    let pos, method_name = id in
-    let method_fullname = class_name^"::"^method_name in
-      result_map := Pos.Map.add pos {
-        name = Utils.strip_ns method_fullname;
-        type_ = target_type;
-        pos = Pos.to_relative_string pos;
-        caller = caller_str;
-      } !result_map
-  end
+class visitor = object (self)
+  inherit [_] Tast_visitor.reduce as super
 
-let process_constructor result_map cur_class cur_caller class_def _ pos =
-  process_method_id result_map cur_class cur_caller Constructor
-    class_def (pos, "__construct") () () ~is_method:true ~is_const:false
+  method zero = Result_set.empty
+  method plus = Result_set.union
 
-let process_enter_class_def cur_class cls _ =
-  cur_class := Some (Utils.strip_ns (snd cls.Nast.c_name))
+  val mutable cur_caller = None;
 
-let process_exit_class_def cur_class _ _ =
-  cur_class := None
+  method fun_call env target_type name pos =
+    if is_pseudofunction name then self#zero else
+    let name = Utils.strip_ns name in
+    if name = SN.SpecialFunctions.echo then self#zero else
+    let cur_class = Tast_env.get_self_id env |> Option.map ~f:Utils.strip_ns in
+    Result_set.singleton {
+      name;
+      type_ = target_type;
+      pos = Pos.to_relative_string pos;
+      caller = combine_name cur_class cur_caller;
+    }
 
-let process_enter_method_def cur_class cur_caller method_def =
-  ignore(Utils.unsafe_opt_note "cur_class is not set correctly" !cur_class);
-  cur_caller := Some (snd method_def.Nast.m_name)
+  method method_call env target_type class_name method_id =
+    let pos, method_name = method_id in
+    let method_fullname = combine_name (Some class_name) (Some method_name) in
+    self#fun_call env target_type method_fullname pos
 
-let process_exit_method_def cur_caller _ =
-  cur_caller := None
+  method! on_fun_ env f =
+    let name = snd f.Tast.f_name in
+    let is_anon = name = ";anonymous" in
+    if not is_anon then cur_caller <- Some (Utils.strip_ns name);
+    let acc = super#on_fun_ env f in
+    if not is_anon then cur_caller <- None;
+    acc
 
-let process_enter_fun_def cur_class cur_caller fun_def =
-  cur_class := None;
-  cur_caller := Some (Utils.strip_ns (snd fun_def.Nast.f_name))
+  method! on_method_ env m =
+    cur_caller <- Some (snd m.Tast.m_name);
+    let acc = super#on_method_ env m in
+    cur_caller <- None;
+    acc
 
-let process_exit_fun_def cur_caller _ =
-  cur_caller := None
+  method! on_expr env (((pos, ty), expr_) as expr) =
+    let acc =
+      match expr_ with
+      | Tast.New _ ->
+        let mid = (pos, SN.Members.__construct) in
+        Tast_env.get_class_ids env ty
+        |> List.map ~f:(fun cid -> self#method_call env Constructor cid mid)
+        |> List.fold ~init:self#zero ~f:self#plus
+      | Tast.Fun_id (pos, name) ->
+        self#fun_call env Function name pos
+      | Tast.Method_id (((_, ty), _), mid) ->
+        Tast_env.get_class_ids env ty
+        |> List.map ~f:(fun cid -> self#method_call env Method cid mid)
+        |> List.fold ~init:self#zero ~f:self#plus
+      | Tast.Smethod_id ((_, cid), mid)
+      | Tast.Method_caller ((_, cid), mid) ->
+        self#method_call env Method cid mid
+      | _ -> self#zero
+    in
+    let special_fun_acc =
+      let special_fun id = self#fun_call env Function id pos in
+      let module SF = SN.SpecialFunctions in
+      match expr_ with
+      | Tast.Fun_id _        -> special_fun SF.fun_
+      | Tast.Method_id _     -> special_fun SF.inst_meth
+      | Tast.Smethod_id _    -> special_fun SF.class_meth
+      | Tast.Method_caller _ -> special_fun SF.meth_caller
+      | _ -> self#zero
+    in
+    let (+) = self#plus in
+    special_fun_acc + acc + super#on_expr env expr
 
-let attach_hooks result_map =
-  let cur_caller = ref None in
-  let cur_class = ref None in
-  Typing_hooks.attach_fun_id_hook
-    (process_fun_id result_map cur_class cur_caller);
-  Typing_hooks.attach_cmethod_hook
-    (process_method_id result_map cur_class cur_caller Method);
-  Typing_hooks.attach_smethod_hook
-    (process_method_id result_map cur_class cur_caller Method);
-  Typing_hooks.attach_constructor_hook
-    (process_constructor result_map cur_class cur_caller);
-  Typing_hooks.attach_class_def_hook
-    (Some (process_enter_class_def cur_class))
-    (Some (process_exit_class_def cur_class));
-  Typing_hooks.attach_method_def_hook
-    (Some (process_enter_method_def cur_class cur_caller))
-    (Some (process_exit_method_def cur_caller));
-  Typing_hooks.attach_fun_def_hook
-    (Some (process_enter_fun_def cur_class cur_caller))
-    (Some (process_exit_fun_def cur_caller))
+  method! on_Call env ct e hl el uel =
+    let acc =
+      match snd e with
+      | Tast.Id (pos, name) ->
+        self#fun_call env Function name pos
+      | Tast.Class_const (((_, ty), _), mid)
+      | Tast.Obj_get (((_, ty), _), (_, Tast.Id mid), _) ->
+        let target_type =
+          if snd mid = SN.Members.__construct then Constructor else Method in
+        Tast_env.get_class_ids env ty
+        |> List.map ~f:(fun cid -> self#method_call env target_type cid mid)
+        |> List.fold ~init:self#zero ~f:self#plus
+      | _ -> self#zero
+    in
+    self#plus acc (super#on_Call env ct e hl el uel)
+end
 
-let detach_hooks () =
-  Typing_hooks.remove_all_hooks ()
+let find_fun_calls tasts =
+  List.concat_map tasts ~f:(fun x -> new visitor#go x |> Result_set.elements)

@@ -112,7 +112,7 @@ void DummySandbox::run() {
           bool error; std::string errorMsg;
           bool ret = hphp_invoke(g_context.getNoCheck(), doc, false, null_array,
                                  uninit_null(), "", "", error, errorMsg, true,
-                                 false, true);
+                                 false, true, RuntimeOption::EvalPreludePath);
           if (!ret || error) {
             msg += "Unable to pre-load " + doc;
             if (!errorMsg.empty()) {
@@ -125,7 +125,13 @@ void DummySandbox::run() {
         g_context->setSandboxId(m_proxy->getDummyInfo().id());
       }
 
-      DebuggerHook::attach<HphpdHook>(ti);
+      if (!DebuggerHook::attach<HphpdHook>(ti)) {
+        const char* fail = "Could not attach hphpd to request: another debugger"
+                           " is already attached.";
+        Logger::Error("%s", fail);
+        Debugger::InterruptSessionStarted(nullptr, fail);
+        throw DebuggerClientAttachFailureException();
+      }
       {
         DebuggerDummyEnv dde;
         // This is really the entire point of having the dummy sandbox. This
@@ -147,10 +153,10 @@ void DummySandbox::run() {
         }
         m_signum = CmdSignal::SignalNone;
       }
-    } catch (const DebuggerClientExitException &e) {
+    } catch (const DebuggerClientExitException& e) {
       // stopped by the dummy sandbox thread itself
       break;
-    } catch (const DebuggerException &e) {
+    } catch (const DebuggerException& e) {
     }
   }
 }

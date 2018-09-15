@@ -18,6 +18,7 @@
 #define incl_HPHP_NAMED_ENTITY_PAIR_TABLE_H_
 
 #include "hphp/runtime/vm/named-entity.h"
+#include "hphp/util/compact-vector.h"
 
 #include <vector>
 
@@ -31,7 +32,7 @@ struct StringData;
 /*
  * Vector of NamedEntityPairs, used as a map from Id to NEP.
  */
-struct NamedEntityPairTable : std::vector<NamedEntityPair> {
+struct NamedEntityPairTable : CompactVector<LowStringPtr> {
   /*
    * Is `id' valid in this table?
    */
@@ -59,7 +60,7 @@ struct NamedEntityPairTable : std::vector<NamedEntityPair> {
    *
    * @requires: contains(id)
    */
-  const NamedEntityPair& lookupNamedEntityPair(Id id) const;
+  NamedEntityPair lookupNamedEntityPair(Id id) const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

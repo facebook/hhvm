@@ -1,5 +1,4 @@
-<?php ;
-
+<?php
 class X {
   public $foo;
 
@@ -11,5 +10,10 @@ class X {
   }
 }
 
+<<__EntryPoint>>
+function main_add_elem_c_interp() {
+;
+
 $x = new X;
 var_dump($x->test());
+}

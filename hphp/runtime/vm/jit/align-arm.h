@@ -39,7 +39,12 @@ bool is_aligned(TCA frontier, Alignment alignment);
 void align(CodeBlock& cb, CGMeta* meta,
            Alignment alignment, AlignContext context);
 
-constexpr size_t cache_line_size() { return 128; }
+constexpr size_t cache_line_size() { return 64; }
+
+/*
+ * Get the AlignInfo for `alignment'; used by relocation.
+ */
+const AlignInfo& alignment_info(Alignment alignment);
 
 ///////////////////////////////////////////////////////////////////////////////
 

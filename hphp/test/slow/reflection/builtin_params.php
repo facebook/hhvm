@@ -19,4 +19,8 @@ function main() {
     }
   }
 }
+
+<<__EntryPoint>>
+function main_builtin_params() {
 main();
+}

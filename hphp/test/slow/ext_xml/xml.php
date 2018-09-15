@@ -4,6 +4,11 @@ function VS($x, $y) {
   if ($x !== $y) { echo "Failed: $y\n"; }
 }
 
+
+
+
+<<__EntryPoint>>
+function main_xml() {
 VS(utf8_decode("abc \xc3\x80 def"), "abc \xc0 def");
 VS(utf8_encode("abc \xc0 def"), "abc \xc3\x80 def");
 
@@ -19,5 +24,4 @@ var_dump($index["NOTE"]);
 var_dump($vals[0]);
 var_dump($vals[1]);
 var_dump($vals[2]);
-
-
+}

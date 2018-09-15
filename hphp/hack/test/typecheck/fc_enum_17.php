@@ -1,6 +1,6 @@
 <?hh // strict
 
-enum Foo : int {
+enum Foo: int {
   X = 1;
 }
 

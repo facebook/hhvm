@@ -25,6 +25,9 @@ class X {
   }
 }
 
+
+<<__EntryPoint>>
+function main_bindscope() {
 echo "\$d = \$staticNS->bindto(NULL, 'Y');\n";
 $staticNS = static function() {
   echo "self::\$x   = "; var_dump(self::$x);
@@ -82,3 +85,4 @@ if ($res) {
   var_dump($res->getName());
 }
 $R();
+}

@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/opt.h"
 
+#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/vm/jit/check.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
@@ -38,13 +39,14 @@ namespace {
 enum class DCE { None, Minimal, Full };
 
 template<class PassFN>
-void doPass(IRUnit& unit, PassFN fn, DCE dce) {
-  fn(unit);
+bool doPass(IRUnit& unit, PassFN fn, DCE dce) {
+  auto result = ArrayData::call_helper(fn, unit);
   switch (dce) {
   case DCE::Minimal:  mandatoryDCE(unit); break;
   case DCE::Full:     fullDCE(unit); // fallthrough
   case DCE::None:     assertx(checkEverything(unit)); break;
   }
+  return result;
 }
 
 void removeExitPlaceholders(IRUnit& unit) {
@@ -163,10 +165,6 @@ void optimize(IRUnit& unit, TransKind kind) {
   printUnit(6, unit, " after initial DCE ");
   assertx(checkEverything(unit));
 
-  if (RuntimeOption::EvalHHIRTypeCheckHoisting) {
-    doPass(unit, hoistTypeChecks, DCE::Minimal);
-  }
-
   if (RuntimeOption::EvalHHIRPredictionOpts) {
     doPass(unit, optimizePredictions, DCE::None);
   }
@@ -180,27 +178,36 @@ void optimize(IRUnit& unit, TransKind kind) {
     doPass(unit, gvn, DCE::Full);
   }
 
-  if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
-    doPass(unit, optimizeLoads, DCE::Full);
-  }
+  while (true) {
+    if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
+      doPass(unit, optimizeLoads, DCE::Full);
+      printUnit(6, unit, " after optimizeLoads ");
+    }
 
-  if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
-    doPass(unit, optimizeStores, DCE::Full);
-  }
+    if (kind != TransKind::Profile && RuntimeOption::EvalHHIRMemoryOpts) {
+      doPass(unit, optimizeStores, DCE::Full);
+      printUnit(6, unit, " after optimizeStores ");
+    }
 
-  if (RuntimeOption::EvalHHIRPartialInlineFrameOpts) {
-    doPass(unit, optimizeInlineReturns, DCE::Full);
-  }
+    if (RuntimeOption::EvalHHIRPartialInlineFrameOpts) {
+      doPass(unit, optimizeInlineReturns, DCE::Full);
+      printUnit(6, unit, " after optimizeInlineReturns ");
+    }
 
-  doPass(unit, optimizePhis, DCE::Full);
+    if (!doPass(unit, optimizePhis, DCE::Full)) break;
+    doPass(unit, cleanCfg, DCE::None);
+    printUnit(6, unit, " after optimizePhis ");
+  }
 
   if (kind != TransKind::Profile && RuntimeOption::EvalHHIRRefcountOpts) {
     doPass(unit, optimizeRefcounts, DCE::Full);
+    printUnit(6, unit, " after optimizeRefCounts ");
   }
 
   if (RuntimeOption::EvalHHIRLICM && cfgHasLoop(unit) &&
       kind != TransKind::Profile) {
     doPass(unit, optimizeLoopInvariantCode, DCE::Minimal);
+    printUnit(6, unit, " after optimizeLoopInvariantCode ");
   }
 
   doPass(unit, simplifyOrdStrIdx, DCE::Minimal);
@@ -223,8 +230,9 @@ void optimize(IRUnit& unit, TransKind kind) {
   if (kind != TransKind::Profile && RuntimeOption::EvalHHIRSimplification) {
     doPass(unit, simplifyPass, DCE::Full);
   }
-
   doPass(unit, fixBlockHints, DCE::None);
+
+  printUnit(6, unit, " after optimize ");
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -1,0 +1,27 @@
+array(1) {
+  [0]=>
+  string(3) "bcd"
+}
+bool(true)
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    string(3) "bcd"
+    [1]=>
+    string(3) "bzd"
+  }
+}
+bool(true)
+bool(true)
+array(1) {
+  [0]=>
+  array(2) {
+    [0]=>
+    string(3) "def"
+    [1]=>
+    int(3)
+  }
+}
+bool(true)
+bool(true)

@@ -9,4 +9,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_lit_syntax() {
 main();
+}

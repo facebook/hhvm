@@ -1,0 +1,4 @@
+File "trait_static_method.php", line 42, characters 3-16:
+Cannot call R_Trait::bad(); bad is not defined in R_Trait (Typing[4185])
+File "trait_static_method.php", line 4, characters 26-28:
+Declaration is here

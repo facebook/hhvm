@@ -32,7 +32,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 constexpr bool debug =
-#ifdef DEBUG
+#ifndef NDEBUG
   true
 #else
   false
@@ -49,6 +49,30 @@ constexpr bool hhvm_reuse_tc =
 
 constexpr bool use_tsan =
 #ifdef FOLLY_SANITIZE_THREAD
+  true
+#else
+  false
+#endif
+  ;
+
+constexpr bool one_bit_refcount =
+#ifdef ONE_BIT_REFCOUNT
+  true
+#else
+  false
+#endif
+  ;
+
+constexpr bool wide_tv_val =
+#ifdef HHVM_WIDE_TV_VAL
+  true
+#else
+  false
+#endif
+  ;
+
+constexpr bool facebook =
+#ifdef FACEBOOK
   true
 #else
   false

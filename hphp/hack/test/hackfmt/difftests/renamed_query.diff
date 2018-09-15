@@ -1,0 +1,12 @@
+diff --git a/renamed_query.php b/renamed_query.php
+--- a/renamed_query.php
++++ b/renamed_query.php
+@@ -1,7 +1,7 @@
+ <?hh
+
+ $matches = await
+-  SomeQueriableEntityWithAnExtraordinarilyLongIdentifier::entityQuery(
++  SomeQueriableEntityWithALongButNowRenamedIdentifier::entityQuery(
+     $context_object,
+     $id,
+   )

@@ -4,5 +4,9 @@ class C {
     yield 123;
   }
 }
+
+<<__EntryPoint>>
+function main_yield_inside_async_meth() {
 C::foo();
 echo "Done\n";
+}

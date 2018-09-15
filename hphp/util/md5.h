@@ -53,7 +53,7 @@ struct MD5 : private boost::totally_ordered<MD5> {
   }
 
   // Blob is assumed to be in network byte order.
-  explicit MD5(const void* blob, size_t len) {
+  explicit MD5(const void* blob, DEBUG_ONLY size_t len) {
     assertx(len == 16);
     q[0] = ntohq(((const uint64_t*)blob)[0]);
     q[1] = ntohq(((const uint64_t*)blob)[1]);

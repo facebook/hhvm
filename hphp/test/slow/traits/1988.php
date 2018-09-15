@@ -16,5 +16,9 @@ class MyClass {
     echo "meth: MyClass\n";
   }
 }
+
+<<__EntryPoint>>
+function main_1988() {
 $o = new MyClass();
 $o->print_meth();
+}

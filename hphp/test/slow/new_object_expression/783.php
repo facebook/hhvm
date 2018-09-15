@@ -17,4 +17,8 @@ function test($e) {
   }
   return $a;
 }
+
+<<__EntryPoint>>
+function main_783() {
 var_dump(test());
+}

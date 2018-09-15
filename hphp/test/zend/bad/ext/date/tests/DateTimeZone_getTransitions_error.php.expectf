@@ -1,7 +1,0 @@
-*** Testing DateTimeZone::getTransitions() : error conditions ***
-
--- Testing DateTimeZone::getTransitions() function with more than expected no. of arguments --
-
-Warning: %s
-bool(false)
-===DONE===

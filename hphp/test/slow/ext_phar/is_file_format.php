@@ -1,7 +1,10 @@
 <?php
+
 /**
  * Regular Phar
  */
+<<__EntryPoint>>
+function main_is_file_format() {
 echo ".phar:\n";
 $p = new Phar(__DIR__."/basic.phar");
 var_dump('is phar', $p->isFileFormat(Phar::PHAR));
@@ -91,3 +94,4 @@ $p = new Phar(__DIR__."/basic-zip.phar");
 var_dump('is phar', $p->isFileFormat(Phar::PHAR));
 var_dump('is tar', $p->isFileFormat(Phar::TAR));
 var_dump('is zip', $p->isFileFormat(Phar::ZIP));
+}

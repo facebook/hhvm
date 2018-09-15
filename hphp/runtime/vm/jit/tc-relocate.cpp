@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
 #include "hphp/runtime/vm/jit/stub-alloc.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
@@ -93,7 +94,7 @@ struct CodeSmasher {
       cb.init(e.first, e.second - e.first, "relocated");
 
       CGMeta fixups;
-      SCOPE_EXIT { assert(fixups.empty()); };
+      SCOPE_EXIT { assertx(fixups.empty()); };
 
       DataBlock db;
       Vauto vasm { cb, cb, db, fixups };
@@ -238,7 +239,8 @@ void relocateStubs(TransLoc& loc, TCA frozenStart, TCA frozenEnd,
 
     CodeBlock dest;
     dest.init(cache.frozen().frontier(), stubSize, "New Stub");
-    relocate(rel, dest, addr, addr + stubSize, cache.frozen(), fixups, nullptr);
+    relocate(rel, dest, addr, addr + stubSize, cache.frozen(), fixups, nullptr,
+             AreaIndex::Frozen);
     cache.frozen().skip(stubSize);
     if (addr != frozenStart) {
       rel.recordRange(frozenStart, addr, frozenStart, addr);
@@ -280,7 +282,7 @@ void readRelocations(
         }
         continue;
       }
-      assert(pos != std::string::npos && pos > n);
+      assertx(pos != std::string::npos && pos > n);
       auto b64 = line.substr(pos + 1);
       auto decoded = base64_decode(b64.c_str(), b64.size(), true);
 
@@ -298,10 +300,30 @@ void readRelocations(
   }
 }
 
+void adjustProfiledCallers(RelocationInfo& rel) {
+  auto pd = profData();
+  if (!pd) return;
+
+  auto updateCallers = [&] (auto& callers) {
+    for (auto& caller : callers) {
+      if (auto adjusted = rel.adjustedAddressAfter(caller)) {
+        caller = adjusted;
+      }
+    }
+  };
+
+  pd->forEachTransRec([&] (ProfTransRec* rec) {
+    if (rec->kind() != TransKind::ProfPrologue) return;
+    auto lock = rec->lockCallerList();
+    updateCallers(rec->mainCallers());
+    updateCallers(rec->guardCallers());
+  });
+}
+
 void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest,
               CGMeta& fixups) {
   assertOwnsCodeLock();
-  assert(!Func::s_treadmill);
+  assertx(!Func::s_treadmill);
 
   auto newRelocMapName = Debug::DebugInfo::Get()->getRelocMapName() + ".tmp";
   auto newRelocMap = fopen(newRelocMapName.c_str(), "w+");
@@ -327,7 +349,7 @@ void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest,
 
   RelocationInfo rel;
   size_t num = 0;
-  assert(fixups.alignments.empty());
+  assertx(fixups.alignments.empty());
   for (size_t sz = relocs.size(); num < sz; num++) {
     auto& reloc = relocs[num];
     if (ignoreEntry(reloc.sk)) continue;
@@ -335,7 +357,8 @@ void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest,
     try {
       auto& srcBlock = code().blockFor(reloc.start);
       relocate(rel, dest,
-               reloc.start, reloc.end, srcBlock, reloc.fixups, nullptr);
+               reloc.start, reloc.end, srcBlock, reloc.fixups, nullptr,
+               AreaIndex::Main);
     } catch (const DataBlockFull& dbf) {
       break;
     }
@@ -347,7 +370,7 @@ void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest,
     }
   }
   swap_trick(fixups.alignments);
-  assert(fixups.empty());
+  assertx(fixups.empty());
 
   adjustForRelocation(rel);
 
@@ -363,6 +386,8 @@ void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest,
     }
   }
 
+  adjustProfiledCallers(rel);
+
   // At this point, all the relocated code should be correct, and runable.
   // But eg if it has unlikely paths into cold code that has not been relocated,
   // then the cold code will still point back to the original, not the relocated
@@ -374,7 +399,7 @@ void relocate(std::vector<TransRelocInfo>& relocs, CodeBlock& dest,
     it.second->relocate(rel);
   }
 
-  std::unordered_set<Func*> visitedFuncs;
+  jit::fast_set<Func*> visitedFuncs;
   CodeSmasher s;
   for (size_t i = 0; i < num; i++) {
     auto& reloc = relocs[i];
@@ -475,7 +500,7 @@ bool relocateNewTranslation(TransLoc& loc,
 
     dest.init(mainStartRel, mainSize, "New Main");
     asm_count += relocate(rel, dest, mainStart, loc.mainEnd(), cache.main(),
-                          fixups, nullptr);
+                          fixups, nullptr, AreaIndex::Main);
     mainEndRel = dest.frontier();
 
     mainCode.free(loc.mainStart(), mainSize - pad);
@@ -489,7 +514,7 @@ bool relocateNewTranslation(TransLoc& loc,
 
     dest.init(frozenStartRel + sizeof(uint32_t), frozenSize, "New Frozen");
     asm_count += relocate(rel, dest, frozenStart, loc.frozenEnd(),
-                          cache.frozen(), fixups, nullptr);
+                          cache.frozen(), fixups, nullptr, AreaIndex::Frozen);
     frozenEndRel = dest.frontier();
 
     frozenCode.free(loc.frozenStart(), frozenSize - pad);
@@ -504,7 +529,7 @@ bool relocateNewTranslation(TransLoc& loc,
 
       dest.init(coldStartRel + sizeof(uint32_t), coldSize, "New Cold");
       asm_count += relocate(rel, dest, coldStart, loc.coldEnd(),
-                            cache.cold(), fixups, nullptr);
+                            cache.cold(), fixups, nullptr, AreaIndex::Cold);
       coldEndRel = dest.frontier();
 
       coldCode.free(loc.coldStart(), coldSize - pad);
@@ -536,7 +561,7 @@ bool relocateNewTranslation(TransLoc& loc,
       cb.init(start, end - start, "Dead code");
 
       CGMeta fixups;
-      SCOPE_EXIT { assert(fixups.empty()); };
+      SCOPE_EXIT { assertx(fixups.empty()); };
 
       DataBlock db;
       Vauto vasm { cb, cb, db, fixups };
@@ -590,7 +615,8 @@ void liveRelocate(int time) {
   case Arch::PPC64:
     break;
   case Arch::ARM:
-    // Relocation is not supported on arm.
+    // Live (Dynamic) Relocation is not supported on ARM until smashable
+    // locations are tracked and rebuilt using debug info.
     return;
   }
 
@@ -605,7 +631,10 @@ void liveRelocate(int time) {
   fseek(relocMap, 0, SEEK_SET);
 
   std::vector<TransRelocInfo> relocs;
-  if (time == -1) {
+  if (time == -2) {
+    readRelocations(relocMap, nullptr, readRelocsIntoVector, &relocs);
+    if (!relocs.size()) return;
+  } else if (time == -1) {
     readRelocations(relocMap, nullptr, readRelocsIntoVector, &relocs);
     if (!relocs.size()) return;
 
@@ -614,7 +643,7 @@ void liveRelocate(int time) {
 
     unsigned new_size = g() % ((relocs.size() + 1) >> 1);
     new_size += (relocs.size() + 3) >> 2;
-    assert(new_size > 0 && new_size <= relocs.size());
+    assertx(new_size > 0 && new_size <= relocs.size());
 
     relocs.resize(new_size);
   } else {
@@ -647,12 +676,11 @@ void liveRelocate(int time) {
   always_assert(fixups.empty());
 }
 
-std::string perfRelocMapInfo(
-    TCA start, TCA end,
-    TCA coldStart, TCA coldEnd,
-    SrcKey sk, int argNum,
-    const GrowableVector<IncomingBranch>& incomingBranchesIn,
-    CGMeta& fixups) {
+std::string
+perfRelocMapInfo(TCA start, TCA /*end*/, TCA coldStart, TCA coldEnd, SrcKey sk,
+                 int argNum,
+                 const GrowableVector<IncomingBranch>& incomingBranchesIn,
+                 CGMeta& fixups) {
   for (auto& stub : fixups.reusedStubs) {
     Debug::DebugInfo::Get()->recordRelocMap(stub, 0, "NewStub");
   }
@@ -704,7 +732,7 @@ std::string perfRelocMapInfo(
 //////////////////////////////////////////////////////////////////////
 
 void relocateTranslation(
-  const IRUnit& unit,
+  const IRUnit* unit,
   CodeBlock& main, CodeBlock& main_in, CodeAddress main_start,
   CodeBlock& cold, CodeBlock& cold_in, CodeAddress cold_start,
   CodeBlock& frozen, CodeAddress frozen_start,
@@ -722,17 +750,17 @@ void relocateTranslation(
             map.afrozenStart);
     }
   }
-  if (ai) printUnit(kRelocationLevel, unit, " before relocation ", ai);
+  if (ai && unit) printUnit(kRelocationLevel, *unit, " before relocation ", ai);
 
   RelocationInfo rel;
   size_t asm_count{0};
 
   asm_count += relocate(rel, main_in,
                         main.base(), main.frontier(), main,
-                        meta, nullptr);
+                        meta, nullptr, AreaIndex::Main);
   asm_count += relocate(rel, cold_in,
                         cold.base(), cold.frontier(), cold,
-                        meta, nullptr);
+                        meta, nullptr, AreaIndex::Cold);
 
   TRACE(1, "asm %ld\n", asm_count);
 
@@ -773,6 +801,10 @@ void relocateTranslation(
   }
   memset(main.base(), 0xcc, main.frontier() - main.base());
   memset(cold.base(), 0xcc, cold.frontier() - cold.base());
+  if (arch() == Arch::ARM) {
+    main.sync();
+    cold.sync();
+  }
 #endif
 }
 

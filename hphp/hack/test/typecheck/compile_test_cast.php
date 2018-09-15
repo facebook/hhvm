@@ -3,9 +3,9 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
  *
  */
 
@@ -26,6 +26,7 @@ function main(): void {
   $x2 = (string)$z;
   $x3 = new B();
   $x4 = (A)$x3;
+  $x5 = (false && (true)); // (true) is not a cast.
   if($y === 11 && $x2 === 'Afda') {
     echo 'OK';
   }

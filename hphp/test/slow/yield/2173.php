@@ -23,6 +23,9 @@ function t($x) {
  var_dump($v);
  }
  }
+
+<<__EntryPoint>>
+function main_2173() {
 t(B::sgen());
 t(B::sfoo());
 t(A::sgen());
@@ -37,3 +40,4 @@ t($b->foo());
 $a = new A;
 t($a->gen());
 t($a->foo());
+}

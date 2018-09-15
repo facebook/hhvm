@@ -34,6 +34,10 @@ function leak_test($output)
     }
 }
 
+
+<<__EntryPoint>>
+function main_ini_parse_memory_leak() {
 leak_test(false);
 leak_test(false);
 leak_test(true);
+}

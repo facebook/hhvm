@@ -14,22 +14,24 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_STRING_H_
-#define incl_HPHP_STRING_H_
+#ifndef incl_HPHP_TYPE_STRING_H_
+#define incl_HPHP_TYPE_STRING_H_
 
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
+
 #include "hphp/util/assertions.h"
-#include "hphp/util/hash-map-typedefs.h"
-#include "hphp/util/functional.h"
 
 #include <algorithm>
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
+
+// Forward declare to avoid including tv-conversions.h and creating a cycle.
+StringData* tvCastToStringData(TypedValue tv);
 
 struct VarNR;
 struct VariableSerializer;
@@ -52,7 +54,8 @@ constexpr int kMinShrinkThreshold = 1024;
 
 //////////////////////////////////////////////////////////////////////
 
-// Built strings will have their reference counts pre-initialized to 1.
+// Built strings will be uncounted, or will have their reference counts
+// pre-initialized to 1.
 StringData* buildStringData(int     n);
 StringData* buildStringData(int64_t n);
 StringData* buildStringData(double  n);
@@ -89,9 +92,6 @@ public:
   // create a string from a character
   static String FromChar(char ch) {
     return String{makeStaticString(ch)};
-  }
-  static String FromCStr(const char* str) {
-    return String{makeStaticString(str)};
   }
 
   static const StringData *ConvertInteger(int64_t n);
@@ -153,6 +153,9 @@ public:
   /* implicit */ String(const std::string &s)
   : m_str(StringData::Make(s.data(), s.size(), CopyString), NoIncRef{}) { }
 
+  /* implicit */ String(folly::StringPiece s)
+  : m_str(StringData::Make(s), NoIncRef{}) {}
+
   // attach to null terminated malloc'ed string, maybe free it now.
   String(char* s, AttachStringMode mode)
   : m_str(LIKELY((bool)s) ? StringData::Make(s, mode) : nullptr, NoIncRef{}) {}
@@ -177,8 +180,8 @@ public:
                           : nullptr, NoIncRef{}) {}
 
   // make an empty string with cap reserve bytes, plus 1 for '\0'
-  String(size_t cap, ReserveStringMode mode)
-  : m_str(StringData::Make(cap), NoIncRef{}) { }
+  String(size_t cap, ReserveStringMode /*mode*/)
+      : m_str(StringData::Make(cap), NoIncRef{}) {}
 
   static String attach(StringData* sd) {
     return String(sd, NoIncRef{});
@@ -198,16 +201,16 @@ public:
 
 public:
   const String& setSize(int len) {
-    assert(m_str);
+    assertx(m_str);
     m_str->setSize(len);
     return *this;
   }
   const String& shrink(size_t len) {
-    assert(m_str);
+    assertx(m_str && !m_str->isImmutable());
     if (m_str->capacity() - len > kMinShrinkThreshold) {
       m_str = req::ptr<StringData>::attach(m_str->shrinkImpl(len));
     } else {
-      assert(len < StringData::MaxSize);
+      assertx(len < StringData::MaxSize);
       m_str->setSize(len);
     }
     return *this;
@@ -252,14 +255,10 @@ public:
     return m_str ? m_str->isZero() : false;
   }
 
-  /*
-   * Create a sub-string from start with specified length.
-   *
-   * If the start is outside the bounds of the string, or the length is
-   * negative, the empty string is returned.  The range [start, start+length]
-   * gets clamped to [start, size()].
-   */
-  String substr(int start, int length = StringData::MaxSize) const;
+  String substr(int start, int length = StringData::MaxSize) const {
+    return String::attach(
+      m_str ? m_str->substr(start, length) : staticEmptyString());
+  }
 
   /**
    * Find a character or a substring and return its position. "pos" has to be
@@ -346,6 +345,10 @@ public:
   int64_t toInt64 () const { return m_str ? m_str->toInt64  () : 0;}
   double toDouble () const { return m_str ? m_str->toDouble () : 0;}
   std::string toCppString() const { return std::string(c_str(), size()); }
+  Cell toCell() const {
+    assertx(m_str);
+    return make_tv<KindOfString>(m_str.get());
+  }
 
   /**
    * Comparisons
@@ -415,9 +418,6 @@ public:
   void dump() const;
 
  private:
-  static req::ptr<StringData> buildString(int n);
-  static req::ptr<StringData> buildString(int64_t n);
-
   String rvalAtImpl(int key) const {
     if (m_str) {
       return String{m_str->getChar(key)};
@@ -433,92 +433,6 @@ public:
 extern const String null_string;
 
 ///////////////////////////////////////////////////////////////////////////////
-
-struct string_data_lt {
-  bool operator()(const StringData *s1, const StringData *s2) const {
-    int len1 = s1->size();
-    int len2 = s2->size();
-    if (len1 < len2) {
-      return (len1 == 0) || (memcmp(s1->data(), s2->data(), len1) <= 0);
-    } else if (len1 == len2) {
-      return (len1 != 0) && (memcmp(s1->data(), s2->data(), len1) < 0);
-    } else /* len1 > len2 */ {
-      return ((len2 != 0) && (memcmp(s1->data(), s2->data(), len2) < 0));
-    }
-  }
-};
-
-template <class T> using ConstStringDataMap = hphp_hash_map<
-  const StringData*,
-  T,
-  string_data_hash,
-  string_data_same
->;
-
-using ConstStringDataSet = hphp_hash_set<
-  const StringData*,
-  string_data_hash,
-  string_data_same
->;
-
-struct hphp_string_hash {
-  size_t operator()(const String& s) const {
-    return s.get()->hash();
-  }
-};
-
-struct hphp_string_same {
-  bool operator()(const String& s1, const String& s2) const {
-    return s1.get()->same(s2.get());
-  }
-};
-
-struct hphp_string_isame {
-  bool operator()(const String& s1, const String& s2) const {
-    return s1.get()->isame(s2.get());
-  }
-};
-
-struct StringDataHashCompare {
-  bool equal(const StringData *s1, const StringData *s2) const {
-    assert(s1 && s2);
-    return s1->same(s2);
-  }
-  size_t hash(const StringData *s) const {
-    assert(s);
-    return s->hash();
-  }
-};
-
-struct StringDataHashICompare {
-  bool equal(const StringData *s1, const StringData *s2) const {
-    assert(s1 && s2);
-    return s1->isame(s2);
-  }
-  size_t hash(const StringData *s) const {
-    assert(s);
-    return s->hash();
-  }
-};
-
-using StringISet = hphp_hash_set<String,hphp_string_hash,hphp_string_isame>;
-
-template<typename T>
-using StringIMap =
-  hphp_hash_map<String, T, hphp_string_hash, hphp_string_isame>;
-
-using StringSet = hphp_hash_set<String, hphp_string_hash, hphp_string_same>;
-
-template<typename T>
-using StringMap = hphp_hash_map<String, T, hphp_string_hash, hphp_string_same>;
-
-namespace req {
-using StringISet = req::hash_set<String,hphp_string_hash,hphp_string_isame>;
-template<typename T> using StringIMap =
-  req::hash_map<String, T, hphp_string_hash, hphp_string_isame>;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // StrNR
 
 struct StrNR {
@@ -530,6 +444,7 @@ public:
   explicit StrNR(StringData *sd) : m_px(sd) {}
   explicit StrNR(const StringData *sd) : m_px(const_cast<StringData*>(sd)) {}
   explicit StrNR(const String &s) : m_px(s.get()) {} // XXX
+  explicit StrNR(const char*) = delete;
 
   ~StrNR() {
     if (debug) {
@@ -587,7 +502,7 @@ StaticString getDataTypeString(DataType t);
 
 inline String::String(const StaticString& str) :
   m_str(str.m_str.get(), NoIncRef{}) {
-  assert(str.m_str->isStatic());
+  assertx(str.m_str->isStatic());
 }
 
 inline String& String::operator=(const StaticString& v) {
@@ -602,6 +517,28 @@ ALWAYS_INLINE String empty_string() {
 }
 
 //////////////////////////////////////////////////////////////////////
+
+ALWAYS_INLINE String& asStrRef(tv_lval tv) {
+  assertx(cellIsPlausible(*tv));
+  assertx(isStringType(type(tv)));
+  type(tv) = KindOfString;
+  return reinterpret_cast<String&>(val(tv).pstr);
+}
+
+ALWAYS_INLINE const String& asCStrRef(tv_rval tv) {
+  assert(cellIsPlausible(*tv));
+  assertx(isStringType(type(tv)));
+  return reinterpret_cast<const String&>(val(tv).pstr);
+}
+
+ALWAYS_INLINE const String& toCStrRef(tv_rval tv) {
+  return asCStrRef(tvIsRef(tv) ? val(tv).pref->cell() : tv);
+}
+
+ALWAYS_INLINE String toString(tv_rval tv) {
+  if (isStringType(type(tv))) return String{assert_not_null(val(tv).pstr)};
+  return String::attach(tvCastToStringData(*tv));
+}
 
 }
 

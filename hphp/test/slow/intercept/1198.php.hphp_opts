@@ -1,1 +1,1 @@
--vDynamicInvokeFunctions.foo=foo
+-vDynamicInvokeFunctions.foo=foo -d hhvm.php7.all=0

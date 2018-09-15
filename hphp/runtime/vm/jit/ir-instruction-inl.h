@@ -58,7 +58,7 @@ inline bool IRInstruction::consumesReferences() const {
 }
 
 inline bool IRInstruction::mayRaiseError() const {
-  return opcodeHasFlags(op(), MayRaiseError);
+  return opcodeMayRaise(op());
 }
 
 inline bool IRInstruction::isTerminal() const {
@@ -79,10 +79,9 @@ inline bool IRInstruction::producesReference() const {
 
 inline SSATmp* IRInstruction::getPassthroughValue() const {
   assertx(isPassthrough());
-  assertx(is(IncRef,
-             CheckType, AssertType, AssertNonNull,
-             MapAddElemC, ColAddNewElemC,
-             Mov));
+  assertx(is(CheckType, CheckVArray, CheckDArray,
+             AssertType, AssertNonNull, Mov,
+             ConvPtrToLval));
   return src(0);
 }
 

@@ -23,6 +23,9 @@ function noReturnGen() {
   yield 9; yield 10;
 }
 
+
+<<__EntryPoint>>
+function main_generator_return() {
 $a = new A();
 $g = $a->Gen();
 foreach ($g as $num) { var_dump($num); }
@@ -39,3 +42,4 @@ var_dump($g3->getReturn());
 $g4 = noReturnGen();
 foreach ($g4 as $num) { var_dump($num); }
 var_dump($g4->getReturn());
+}

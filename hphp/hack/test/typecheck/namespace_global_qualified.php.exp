@@ -1,1 +1,2 @@
-No errors
+File "namespace_global_qualified.php--N.php", line 13, characters 1-27:
+No code may exist outside of namespace {} (Parsing[1002])

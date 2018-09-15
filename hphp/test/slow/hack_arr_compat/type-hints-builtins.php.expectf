@@ -1,0 +1,44 @@
+Notice: Hack Array Compat: Argument 1 to __hhvm_intrinsics\dummy_varray_builtin() must be of type varray, darray given in %s/type-hints-builtins.php on line 8
+
+Notice: Hack Array Compat: Argument 1 to __hhvm_intrinsics\dummy_varray_builtin() must be of type varray, darray given in %s/type-hints-builtins.php on line 10
+
+Notice: Hack Array Compat: Argument 1 to __hhvm_intrinsics\dummy_varray_builtin() must be of type varray, array given in %s/type-hints-builtins.php on line 11
+
+Notice: Hack Array Compat: Argument 1 to __hhvm_intrinsics\dummy_darray_builtin() must be of type darray, varray given in %s/type-hints-builtins.php on line 13
+
+Notice: Hack Array Compat: Argument 1 to __hhvm_intrinsics\dummy_darray_builtin() must be of type darray, varray given in %s/type-hints-builtins.php on line 15
+
+Notice: Hack Array Compat: Argument 1 to __hhvm_intrinsics\dummy_darray_builtin() must be of type darray, array given in %s/type-hints-builtins.php on line 17
+
+Notice: Hack Array Compat: Argument 1 to __hhvm_intrinsics\dummy_varr_or_darr_builtin() must be of type varray_or_darray, array given in %s/type-hints-builtins.php on line 23
+
+Notice: Hack Array Compat: Argument 1 to __hhvm_intrinsics\dummy_array_builtin() must be of type array, varray given in %s/type-hints-builtins.php on line 25
+
+Notice: Hack Array Compat: Argument 1 to __hhvm_intrinsics\dummy_array_builtin() must be of type array, darray given in %s/type-hints-builtins.php on line 26
+
+Notice: Hack Array Compat: Argument 1 to __hhvm_intrinsics\dummy_array_builtin() must be of type array, varray given in %s/type-hints-builtins.php on line 27
+
+Notice: Hack Array Compat: Argument 1 to __hhvm_intrinsics\dummy_array_builtin() must be of type array, darray given in %s/type-hints-builtins.php on line 28
+
+Notice: Hack Array Compat: Argument 1 to __hhvm_intrinsics\dummy_varray_builtin() must be of type varray, darray given in %s/type-hints-builtins.php on line 40
+
+Notice: Hack Array Compat: Argument 1 to __hhvm_intrinsics\dummy_varray_builtin() must be of type varray, darray given in %s/type-hints-builtins.php on line 42
+
+Notice: Hack Array Compat: Argument 1 to __hhvm_intrinsics\dummy_varray_builtin() must be of type varray, array given in %s/type-hints-builtins.php on line 43
+
+Notice: Hack Array Compat: Argument 1 to __hhvm_intrinsics\dummy_darray_builtin() must be of type darray, varray given in %s/type-hints-builtins.php on line 45
+
+Notice: Hack Array Compat: Argument 1 to __hhvm_intrinsics\dummy_darray_builtin() must be of type darray, varray given in %s/type-hints-builtins.php on line 47
+
+Notice: Hack Array Compat: Argument 1 to __hhvm_intrinsics\dummy_darray_builtin() must be of type darray, array given in %s/type-hints-builtins.php on line 49
+
+Notice: Hack Array Compat: Argument 1 to __hhvm_intrinsics\dummy_varr_or_darr_builtin() must be of type varray_or_darray, array given in %s/type-hints-builtins.php on line 55
+
+Notice: Hack Array Compat: Argument 1 to __hhvm_intrinsics\dummy_array_builtin() must be of type array, varray given in %s/type-hints-builtins.php on line 57
+
+Notice: Hack Array Compat: Argument 1 to __hhvm_intrinsics\dummy_array_builtin() must be of type array, darray given in %s/type-hints-builtins.php on line 58
+
+Notice: Hack Array Compat: Argument 1 to __hhvm_intrinsics\dummy_array_builtin() must be of type array, varray given in %s/type-hints-builtins.php on line 59
+
+Notice: Hack Array Compat: Argument 1 to __hhvm_intrinsics\dummy_array_builtin() must be of type array, darray given in %s/type-hints-builtins.php on line 60
+Exception: Hack Array Compat: Argument 1 to __hhvm_intrinsics\dummy_varray_builtin() must be of type varray, darray given

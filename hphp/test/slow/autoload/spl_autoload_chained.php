@@ -1,7 +1,5 @@
 <?php
 
-spl_autoload_register('my_autoload');
-
 function my_autoload($class) {
   var_dump($class);
   if ($class != 'A')
@@ -25,4 +23,10 @@ function my_autoload($class) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_spl_autoload_chained() {
+spl_autoload_register('my_autoload');
+
 $a = new A();
+}

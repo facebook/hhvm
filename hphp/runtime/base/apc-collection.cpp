@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/apc-object.h"
 #include "hphp/runtime/base/apc-array.h"
+#include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
@@ -34,15 +35,15 @@ namespace {
 
 void fillMap(BaseMap* map, const APCArray* ar) {
   for (auto i = uint32_t{0}; i < ar->size(); ++i) {
-    map->set(ar->getKey(i).asTypedValue(),
-             ar->getValue(i)->toLocal().asTypedValue());
+    map->set(*ar->getKey(i).asTypedValue(),
+             *ar->getValue(i)->toLocal().asTypedValue());
   }
 }
 
 template<class T>
 void fillCollection(T* coll, const APCArray* ar) {
   for (auto i = uint32_t{0}; i < ar->size(); ++i) {
-    coll->add(ar->getValue(i)->toLocal().asTypedValue());
+    coll->add(*ar->getValue(i)->toLocal().asTypedValue());
   }
 }
 
@@ -101,26 +102,36 @@ APCHandle::Pair APCCollection::Make(const ObjectData* obj,
       !array->empty()) {
     DataWalker walker(DataWalker::LookupFeature::HasObjectOrResource);
     auto const features = walker.traverseData(const_cast<ArrayData*>(array));
-    assert(!features.isCircular);
+    assertx(!features.isCircular);
     if (!features.hasObjectOrResource) {
+      auto const makeUncounted = [&] () {
+        if (isVectorCollection(obj->collectionType())) {
+          return APCArray::MakeUncountedVec(const_cast<ArrayData*>(array));
+        }
+        return APCArray::MakeUncountedDict(const_cast<ArrayData*>(array));
+      };
       return WrapArray(
-        { APCArray::MakeUncountedArray(const_cast<ArrayData*>(array)),
-          getMemSize(array) + sizeof(APCTypedValue) },
+        { makeUncounted(), getMemSize(array) + sizeof(APCTypedValue) },
         obj->collectionType()
       );
     }
   }
 
-  return WrapArray(
-    APCArray::MakeSharedArray(const_cast<ArrayData*>(array),
-                              level,
-                              unserializeObj),
-    obj->collectionType()
-  );
+  auto const makeShared = [&] () {
+    if (isVectorCollection(obj->collectionType())) {
+      return APCArray::MakeSharedVec(const_cast<ArrayData*>(array),
+                                     level,
+                                     unserializeObj);
+    }
+    return APCArray::MakeSharedDict(const_cast<ArrayData*>(array),
+                                    level,
+                                    unserializeObj);
+  };
+  return WrapArray(makeShared(), obj->collectionType());
 }
 
 void APCCollection::Delete(APCHandle* h) {
-  assert(offsetof(APCCollection, m_handle) == 0);
+  assertx(offsetof(APCCollection, m_handle) == 0);
   delete reinterpret_cast<APCCollection*>(h);
 }
 
@@ -143,15 +154,16 @@ APCHandle::Pair APCCollection::WrapArray(APCHandle::Pair inner,
 }
 
 Object APCCollection::createObject() const {
-  if (m_arrayHandle->isUncounted()) {
+  if (m_arrayHandle->isTypedValue()) {
     Variant local(m_arrayHandle->toLocal());
-    assert(local.isArray());
+    assertx(local.isArray());
     return Object::attach(
       collections::alloc(m_colType, local.getArrayData())
     );
   }
 
-  if (UNLIKELY(m_arrayHandle->kind() == APCKind::SerializedArray)) {
+  if (UNLIKELY(m_arrayHandle->kind() == APCKind::SerializedVec ||
+               m_arrayHandle->kind() == APCKind::SerializedDict)) {
     return createFromSerialized(m_colType, m_arrayHandle);
   }
 

@@ -1,61 +1,61 @@
 C
   kind: class
   id: type_id::C
-  position: File "", line 3, characters 7-7:
-  span: File "", line 3, character 1 - line 18, character 1:
+  position: line 3, characters 7-7
+  span: line 3, character 1 - line 18, character 1
   modifiers: 
 
   foo
     kind: property
     id: property::C::foo
-    position: File "", line 5, characters 5-8:
-    span: File "", line 5, character 5 - line 5, character 8:
+    position: line 5, characters 5-8
+    span: line 5, character 5 - line 5, character 8
     modifiers: public 
 
   bar
     kind: property
     id: property::C::bar
-    position: File "", line 6, characters 5-8:
-    span: File "", line 6, character 5 - line 6, character 16:
+    position: line 6, characters 5-8
+    span: line 6, character 5 - line 6, character 16
     modifiers: public 
 
   :xhp_property
     kind: property
     id: property::C:::xhp_property
-    position: File "", line 9, characters 12-23:
-    span: File "", line 9, character 12 - line 9, character 23:
+    position: line 9, characters 12-23
+    span: line 9, character 12 - line 9, character 23
     modifiers: 
 
   :xhp_enum_property
     kind: property
     id: property::C:::xhp_enum_property
-    position: File "", line 10, characters 25-41:
-    span: File "", line 10, character 25 - line 10, character 48:
+    position: line 10, characters 25-41
+    span: line 10, character 25 - line 10, character 48
     modifiers: 
 
   __construct
     kind: method
     id: method::C::__construct
-    position: File "", line 12, characters 19-29:
-    span: File "", line 12, character 3 - line 17, character 3:
+    position: line 12, characters 19-29
+    span: line 12, character 3 - line 17, character 3
     modifiers: public 
     params:
       $not_a_property
         kind: param
-        position: File "", line 13, characters 5-19:
-        span: File "", line 13, character 5 - line 13, character 19:
+        position: line 13, characters 5-19
+        span: line 13, character 5 - line 13, character 19
         modifiers: 
 
       $implicit_property
         kind: param
-        position: File "", line 14, characters 19-36:
-        span: File "", line 14, character 12 - line 14, character 36:
+        position: line 14, characters 19-36
+        span: line 14, character 12 - line 14, character 36
         modifiers: public 
 
       $implicit_property_with_init
         kind: param
-        position: File "", line 15, characters 16-43:
-        span: File "", line 15, character 12 - line 15, character 47:
+        position: line 15, characters 16-43
+        span: line 15, character 12 - line 15, character 47
         modifiers: public 
 
 

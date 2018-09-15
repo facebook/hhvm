@@ -9,5 +9,5 @@ Check out this link if you don't understand what this is about:
 http://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science)
 File "covariance_typedef_decl_bad.php", line 5, characters 18-18:
 (-) This type parameter was declared as contravariant (-) (cf 'Foo')
-File "covariance_typedef_decl_bad.php", line 5, characters 14-16:
+File "covariance_typedef_decl_bad.php", line 5, characters 14-19:
 (+) Aliased types are covariant

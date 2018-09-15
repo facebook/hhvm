@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // class with __get and __set
 class A {
@@ -146,9 +146,9 @@ var_dump($a->y);
 // Prop for visible, inaccessible property: use __get
 var_dump($a->x);
 // PropD for visible, accessible property: use __get
-propd($a->y);
+propd(&$a->y);
 // PropD for visible, inaccessible property: use __get
-propd($a->x);
+propd(&$a->x);
 // PropU for visible, accessible property
 unset($a->y);
 /*
@@ -186,7 +186,7 @@ $d->unsetall();
 // Prop for visible, accessible property
 var_dump($d->y);
 // PropD for visible, accessible property
-propd($d->y);
+propd(&$d->y);
 // PropU for visible, accessible property
 unset($d->y);
 // SetProp for visible, accessible properties

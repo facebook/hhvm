@@ -2,5 +2,5 @@ File "invariant_return.php", line 12, characters 30-45:
 Invalid return type (Typing[4110])
 File "invariant_return.php", line 12, characters 17-19:
 This is an int
-File "builtins.hhi", line 60, characters 30-33:
+File "hhi_lib__srcs/func_pointers.hhi", line 51, characters 4-7:
 It is incompatible with void

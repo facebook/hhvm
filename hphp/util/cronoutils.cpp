@@ -72,9 +72,13 @@
 #include "hphp/util/cronoutils.h"
 #include "hphp/util/portability.h"
 
-#ifdef _MSC_VER
-#include <direct.h>
-#endif
+#include <folly/portability/Dirent.h>
+#include <folly/portability/Fcntl.h>
+#include <folly/portability/Stdlib.h>
+#include <folly/portability/String.h>
+#include <folly/portability/SysStat.h>
+#include <folly/portability/Time.h>
+#include <folly/portability/Unistd.h>
 
 extern char *tzname[2];
 

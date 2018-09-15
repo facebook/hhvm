@@ -29,9 +29,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct ArrayData;
 struct Class;
 struct StringData;
-struct ArrayData;
+struct Unit;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -52,7 +53,7 @@ struct TypeAlias {
   AnnotType type;
   bool nullable;  // null is allowed; for ?Foo aliases
   UserAttributeMap userAttrs;
-  Array typeStructure{Array::Create()};
+  Array typeStructure{Array::CreateDArray()};
 
   template<class SerDe>
   typename std::enable_if<!SerDe::deserializing>::type
@@ -64,7 +65,10 @@ struct TypeAlias {
       (userAttrs)
       (attrs)
       ;
-    TypedValue tv = make_tv<KindOfArray>(typeStructure.get());
+    // Can't use make_array_like_tv because of include ordering issues
+    auto tv = RuntimeOption::EvalHackArrDVArrs
+      ? make_tv<KindOfDict>(typeStructure.get())
+      : make_tv<KindOfArray>(typeStructure.get());
     sd(tv);
   }
 
@@ -81,7 +85,12 @@ struct TypeAlias {
 
     TypedValue tv;
     sd(tv);
-    assert(isArrayType(tv.m_type));
+    assertx(tvIsPlausible(tv));
+    assertx(
+      RuntimeOption::EvalHackArrDVArrs
+        ? isDictType(tv.m_type)
+        : isArrayType(tv.m_type)
+    );
     typeStructure = tv.m_data.parr;
   }
 
@@ -100,9 +109,10 @@ struct TypeAliasReq {
   /////////////////////////////////////////////////////////////////////////////
   // Static constructors.
 
-  static TypeAliasReq Invalid();
-  static TypeAliasReq From(const TypeAlias& alias);
-  static TypeAliasReq From(TypeAliasReq req, const TypeAlias& alias);
+  static TypeAliasReq Invalid(Unit* unit);
+  static TypeAliasReq From(Unit* unit, const TypeAlias& alias);
+  static TypeAliasReq From(Unit* unit, TypeAliasReq req,
+                           const TypeAlias& alias);
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -116,7 +126,7 @@ struct TypeAliasReq {
   // Data members.
 
   // The aliased type.
-  AnnotType type{AnnotType::Uninit};
+  AnnotType type{AnnotType::NoReturn};
   // Overrides `type' if the alias is invalid (e.g., for a nonexistent class).
   bool invalid{false};
   // For option types, like ?Foo.
@@ -125,8 +135,9 @@ struct TypeAliasReq {
   LowPtr<Class> klass{nullptr};
   // Needed for error messages; nullptr if not defined.
   LowStringPtr name{nullptr};
-  Array typeStructure{Array::Create()};
+  Array typeStructure{Array::CreateDArray()};
   UserAttributeMap userAttrs;
+  Unit* unit{nullptr};
 };
 
 bool operator==(const TypeAliasReq& l, const TypeAliasReq& r);

@@ -55,21 +55,14 @@ async function foo4(): Awaitable<int> {
 }
 
 function prep<T>(Awaitable<T> $aw): T {
-  /* HH_FIXME[4053]: WaitHandle missing join in hh_single_type_check */
-  return $aw->getWaitHandle()->join();
+  return HH\Asio\join($aw);
 }
 
 async function gena_<Tk, Tv>(
   KeyedTraversable<Tk, Awaitable<Tv>> $awaitables,
 ): Awaitable<array<Tv>> {
-  $wait_handles = array();
-  foreach ($awaitables as $index => $awaitable) {
-    $wait_handles[$index] = $awaitable->getWaitHandle();
-  }
-  /* HH_FIXME[2049] */
-  /* HH_FIXME[4026] */
-  await AwaitAllWaitHandle::fromArray($wait_handles);
-  return array_map($wh ==> \HH\Asio\result($wh), $wait_handles);
+  await AwaitAllWaitHandle::fromArray($awaitables);
+  return array_map($wh ==> \HH\Asio\result($wh), $awaitables);
 }
 
 function wait(): Awaitable<void> {

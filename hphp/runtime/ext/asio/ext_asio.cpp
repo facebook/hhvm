@@ -65,11 +65,11 @@ Object HHVM_FUNCTION(asio_get_running) {
 }
 
 Variant HHVM_FUNCTION(join, const Object& obj) {
-  if (!obj->instanceof(c_WaitHandle::classof())) {
+  if (!obj->instanceof(c_Awaitable::classof())) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Joining unsupported for user-land Awaitable");
   }
-  auto handle = wait_handle<c_WaitHandle>(obj.get());
+  auto handle = wait_handle<c_Awaitable>(obj.get());
   if (!handle->isFinished()) {
     // run the full blown machinery
     assertx(handle->instanceof(c_WaitableWaitHandle::classof()));
@@ -85,21 +85,21 @@ Variant HHVM_FUNCTION(join, const Object& obj) {
 }
 
 bool HHVM_FUNCTION(cancel, const Object& obj, const Object& exception) {
-  if (!obj->instanceof(c_WaitHandle::classof())) {
+  if (!obj->instanceof(c_Awaitable::classof())) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Cancellation unsupported for user-land Awaitable");
   }
-  auto handle = wait_handle<c_WaitHandle>(obj.get());
+  auto handle = wait_handle<c_Awaitable>(obj.get());
 
   switch(handle->getKind()) {
-    case c_WaitHandle::Kind::ExternalThreadEvent:
+    case c_Awaitable::Kind::ExternalThreadEvent:
       return handle->asExternalThreadEvent()->cancel(exception);
-    case c_WaitHandle::Kind::Sleep:
+    case c_Awaitable::Kind::Sleep:
       return handle->asSleep()->cancel(exception);
     default:
       SystemLib::throwInvalidArgumentExceptionObject(
         "Cancellation unsupported for " +
-        HHVM_MN(WaitHandle, getName) (handle)
+        HHVM_MN(Awaitable, getName) (handle)
       );
   }
 }
@@ -112,14 +112,14 @@ Array HHVM_FUNCTION(backtrace,
   bool provide_metadata = options & k_DEBUG_BACKTRACE_PROVIDE_METADATA;
   bool ignore_args = options & k_DEBUG_BACKTRACE_IGNORE_ARGS;
 
-  if (!obj->instanceof(c_WaitHandle::classof())) {
+  if (!obj->instanceof(c_Awaitable::classof())) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Backtrace unsupported for user-land Awaitable");
   }
 
   // it's not possible to backtrace finished wait handle,
   // because it doesn't keep parent chain
-  if (wait_handle<c_WaitHandle>(obj.get())->isFinished()) {
+  if (wait_handle<c_Awaitable>(obj.get())->isFinished()) {
     return Array();
   }
 
@@ -136,6 +136,23 @@ Array HHVM_FUNCTION(backtrace,
 }
 
 static AsioExtension s_asio_extension;
+
+void AsioExtension::moduleInit() {
+  initFunctions();
+
+  initWaitHandle();
+  initResumableWaitHandle();
+  initAsyncGenerator();
+  initAwaitAllWaitHandle();
+  initConditionWaitHandle();
+  initSleepWaitHandle();
+  initRescheduleWaitHandle();
+  initExternalThreadEventWaitHandle();
+
+  loadSystemlib();
+
+  finishClasses();
+}
 
 void AsioExtension::initFunctions() {
   HHVM_FALIAS(

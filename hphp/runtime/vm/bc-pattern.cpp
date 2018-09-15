@@ -105,10 +105,10 @@ void BCPattern::matchAnchored(const Expr& pattern,
     if ((pos->op() == Op::JmpZ || pos->op() == Op::JmpNZ)) {
       // Match the taken block, if there is one.
       auto off = instrJumpOffset(inst);
-      assert(off);
+      assertx(off != kInvalidOffset);
 
       auto res = result;
-      matchAnchored(pos->getTaken(), inst + *off, end, res);
+      matchAnchored(pos->getTaken(), inst + off, end, res);
 
       if (!res.found()) {
         return nomatch();

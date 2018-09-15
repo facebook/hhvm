@@ -31,8 +31,8 @@ namespace HPHP {
  * Example:
  *
  *   struct MyRequestLocalClass final : RequestEventHandler {
- *     virtual void requestInit() override {...}
- *     virtual void requestShutdown() override {...}
+ *     void requestInit() override {...}
+ *     void requestShutdown() override {...}
  *   };
  *   IMPLEMENT_STATIC_REQUEST_LOCAL(MyRequestLocalClass, s_data);
  *
@@ -107,7 +107,7 @@ void RequestLocal<T>::create() {
     m_node.m_on_thread_exit_fn = RequestLocal<T>::OnThreadExit;
     ThreadLocalManager::PushTop(m_node);
   }
-  assert(m_node.m_p == nullptr);
+  assertx(m_node.m_p == nullptr);
   m_node.m_p = new T();
 }
 
@@ -161,19 +161,19 @@ private:
 
 
 #define IMPLEMENT_REQUEST_LOCAL(T,f)     \
-  IMPLEMENT_THREAD_LOCAL(T, f ## __tl);  \
+  THREAD_LOCAL(T, f ## __tl);  \
   HPHP::RequestLocal<T> f(f ## __tl)
 
 #define DECLARE_STATIC_REQUEST_LOCAL(T,f)    \
-  static DECLARE_THREAD_LOCAL(T,f ## __tl);  \
+  static THREAD_LOCAL(T,f ## __tl);  \
   static HPHP::RequestLocal<T> f
 
 #define IMPLEMENT_STATIC_REQUEST_LOCAL(T,f)     \
-  static IMPLEMENT_THREAD_LOCAL(T, f ## __tl);  \
+  static THREAD_LOCAL(T, f ## __tl);  \
   static HPHP::RequestLocal<T> f(f ## __tl)
 
 #define DECLARE_EXTERN_REQUEST_LOCAL(T,f)    \
-  extern DECLARE_THREAD_LOCAL(T,f ## __tl);  \
+  extern THREAD_LOCAL(T,f ## __tl);  \
   extern HPHP::RequestLocal<T> f
 
 #endif // defined(USE_GCC_FAST_TLS)

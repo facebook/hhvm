@@ -2,7 +2,7 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 trait T {
-  abstract private function f(): int;
+  abstract public function f(): int;
 }
 
 class C {

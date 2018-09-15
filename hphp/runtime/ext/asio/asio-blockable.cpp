@@ -41,28 +41,28 @@ inline T* getContainingObject(const AsioBlockable* blockable) {
 inline c_AsyncFunctionWaitHandle::Node* getAsyncFunctionWaitHandleNode(
   const AsioBlockable* blockable
 ) {
-  assert(blockable->getKind() == Kind::AsyncFunctionWaitHandleNode);
+  assertx(blockable->getKind() == Kind::AsyncFunctionWaitHandleNode);
   return getContainingObject<c_AsyncFunctionWaitHandle::Node>(blockable);
 }
 
 inline c_AsyncGeneratorWaitHandle* getAsyncGeneratorWaitHandle(
   const AsioBlockable* blockable
 ) {
-  assert(blockable->getKind() == Kind::AsyncGeneratorWaitHandle);
+  assertx(blockable->getKind() == Kind::AsyncGeneratorWaitHandle);
   return getContainingObject<c_AsyncGeneratorWaitHandle>(blockable);
 }
 
 inline c_AwaitAllWaitHandle::Node* getAwaitAllWaitHandleNode(
   const AsioBlockable* blockable
 ) {
-  assert(blockable->getKind() == Kind::AwaitAllWaitHandleNode);
+  assertx(blockable->getKind() == Kind::AwaitAllWaitHandleNode);
   return getContainingObject<c_AwaitAllWaitHandle::Node>(blockable);
 }
 
 inline c_ConditionWaitHandle* getConditionWaitHandle(
   const AsioBlockable* blockable
 ) {
-  assert(blockable->getKind() == Kind::ConditionWaitHandle);
+  assertx(blockable->getKind() == Kind::ConditionWaitHandle);
   return getContainingObject<c_ConditionWaitHandle>(blockable);
 }
 
@@ -70,9 +70,9 @@ inline void exitContextImpl(
   c_WaitableWaitHandle* waitHandle,
   context_idx_t ctx_idx
 ) {
-  assert(AsioSession::Get()->getContext(ctx_idx));
-  assert(!waitHandle->isFinished());
-  assert(waitHandle->getContextIdx() <= ctx_idx);
+  assertx(AsioSession::Get()->getContext(ctx_idx));
+  assertx(!waitHandle->isFinished());
+  assertx(waitHandle->getContextIdx() <= ctx_idx);
 
   // Not in a context being exited.
   if (waitHandle->getContextIdx() != ctx_idx) {
@@ -133,8 +133,9 @@ c_WaitableWaitHandle* AsioBlockable::getWaitHandle() const {
 }
 
 void AsioBlockableChain::unblock() {
-  for (AsioBlockable* cur = m_firstParent, *next; cur; cur = next) {
-    next = cur->getNextParent();
+  while (auto cur = m_firstParent) {
+    m_firstParent = cur->getNextParent();
+    cur->updateNextParent(nullptr);
     // the onUnblocked handler may free cur
     switch (cur->getKind()) {
       case Kind::AsyncFunctionWaitHandleNode:
@@ -179,18 +180,19 @@ void AsioBlockableChain::removeFromChain(AsioBlockable* ab) {
     next = cur->getNextParent();
     if (ab == cur) {
       // Found the AAWH we need to remove
-      assert(cur->getKind() == Kind::AwaitAllWaitHandleNode);
-      if (prev == nullptr) {
+      assertx(cur->getKind() == Kind::AwaitAllWaitHandleNode);
+      if (!prev) {
         m_firstParent = next;
       } else {
         prev->updateNextParent(next);
       }
+      cur->updateNextParent(nullptr);
       return;
     }
     prev = cur;
   }
   // We should always be able to find the parent.
-  assert(false);
+  assertx(false);
 }
 
 Array AsioBlockableChain::toArray() {
@@ -218,7 +220,7 @@ AsioBlockableChain::firstInContext(context_idx_t ctx_idx) {
 void AsioBlockableChain::UnblockJitHelper(ActRec* ar,
                                           TypedValue* sp,
                                           AsioBlockableChain chain) {
-  assert(tl_regState == VMRegState::DIRTY);
+  assertx(tl_regState == VMRegState::DIRTY);
   tl_regState = VMRegState::CLEAN;
   SCOPE_EXIT { tl_regState = VMRegState::DIRTY; };
 
@@ -226,9 +228,10 @@ void AsioBlockableChain::UnblockJitHelper(ActRec* ar,
   const Func* prevF = prevAr->m_func;
   auto& regs = vmRegs();
   regs.stack.top() = sp;
-  assert(vmStack().isValidAddress((uintptr_t)vmsp()));
+  assertx(vmStack().isValidAddress((uintptr_t)vmsp()));
   regs.pc = prevF->unit()->at(prevF->base() + ar->m_soff);
   regs.fp = prevAr;
+  regs.jitReturnAddr = nullptr;
 
   chain.unblock();
 }

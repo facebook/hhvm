@@ -6,7 +6,6 @@ function foo($a) {
 }
   }
 }
-foo(true);
 function bar() {
   if (class_exists('A')) {
     class C extends A {
@@ -18,4 +17,9 @@ function bar() {
     var_dump('no');
   }
 }
+
+<<__EntryPoint>>
+function main_1224() {
+foo(true);
 bar();
+}

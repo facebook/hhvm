@@ -537,8 +537,7 @@ static int tweenColorTest (void *element, void *key)
  * does the work so that text can be alpha blended across a complex
  * background (TBB; and for real in 2.0.2).
  */
-static void * tweenColorFetch (char **error, void *key)
-{
+static void* tweenColorFetch(char** /*error*/, void* key) {
   tweencolor_t *a;
   tweencolorkey_t *b = (tweencolorkey_t *) key;
   int pixel, npixel, bg, fg;
@@ -657,7 +656,6 @@ static char * gdft_draw_bitmap (gdCache_head_t *tc_cache, gdImage * im, int fg, 
   }
   /* Non-truecolor case, restored to its more or less original form */
   for (row = 0; row < bitmap.rows; row++) {
-    int pcr;
     pc = row * bitmap.pitch;
     pcr = pc;
     if (bitmap.pixel_mode==ft_pixel_mode_mono) {

@@ -2,16 +2,16 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Core
+open Hh_core
 open Utils
 open Reordered_argument_collections
 
+let fuzzy = ref false
 type search_result_type =
   | Class of Ast.class_kind option
   | Method of bool * string
@@ -20,8 +20,8 @@ type search_result_type =
   | Typedef
   | Constant
 
-type result =
-  (Pos.absolute, search_result_type) SearchUtils.term list
+type symbol = (Pos.absolute, search_result_type) SearchUtils.term
+type result = symbol list
 
 module SS = SearchService.Make(struct
   type t = search_result_type
@@ -43,7 +43,7 @@ module WorkerApi = struct
   let clean_key key =
     if (String.length key) > 0
     then
-      let key = String.lowercase (Utils.strip_ns key) in
+      let key = String.lowercase_ascii (Utils.strip_ns key) in
       if (String.length key) > 0 && key.[0] = ':'
       then String.sub key 1 (String.length key - 1)
       else key
@@ -85,7 +85,7 @@ module WorkerApi = struct
     SS.WorkerApi.process_autocomplete_term key name pos type_ acc
 
   let update_defs id type_ fuzzy_defs trie_defs =
-    if !Parsing_hooks.fuzzy then
+    if !fuzzy then
     add_fuzzy_term id type_ fuzzy_defs, trie_defs
     else
     fuzzy_defs, add_trie_term id type_ trie_defs
@@ -126,43 +126,35 @@ module WorkerApi = struct
         end in
     SS.WorkerApi.update fn trie fuzzy auto
 
+  (* Update from the full fileInfo object: get all data except class kind *)
+  let update_from_fileinfo fn (info : FileInfo.t) =
+    let { FileInfo.funs; typedefs; consts; classes; _} = info in
+    let fuzzy, trie, auto = List.fold funs
+        ~init:(SS.Fuzzy.TMap.empty, [], [])
+        ~f:begin fun (f, t, a) id ->
+            let f, t = update_defs id Function f t in
+            f, t, add_autocomplete_term id Function a
+        end in
 
-  (* Called by a worker after the file is parsed *)
-  let update fn ast =
-    let fuzzy_defs, trie_defs =
-      List.fold_left ast ~f:begin fun (fuzzy_defs, trie_defs) def ->
-      match def with
-      | Ast.Fun f ->
-          update_defs
-            (FileInfo.pos_full f.Ast.f_name)
-            Function
-            fuzzy_defs
-            trie_defs
-      | Ast.Class c ->
-          (* Still index methods for trie search *)
-          let trie_defs = update_class c trie_defs in
-          update_defs (FileInfo.pos_full c.Ast.c_name)
-                      (Class (Some c.Ast.c_kind))
-                      fuzzy_defs
-                      trie_defs
-      | Ast.Typedef td ->
-          update_defs (FileInfo.pos_full td.Ast.t_id)
-            Typedef fuzzy_defs trie_defs
-      | Ast.Constant cst ->
-          update_defs (FileInfo.pos_full cst.Ast.cst_name)
-            Constant fuzzy_defs trie_defs
-      | _ -> fuzzy_defs, trie_defs
-    end ~init:(SS.Fuzzy.TMap.empty, []) in
-    let autocomplete_defs = List.fold_left ast ~f:begin fun acc def ->
-      match def with
-      | Ast.Fun f ->
-        add_autocomplete_term (FileInfo.pos_full f.Ast.f_name) Function acc
-      | Ast.Class c -> add_autocomplete_term
-          (FileInfo.pos_full c.Ast.c_name)
-          (Class (Some c.Ast.c_kind)) acc
-      | _ -> acc
-    end ~init:[] in
-    SS.WorkerApi.update fn trie_defs fuzzy_defs autocomplete_defs
+    let fuzzy, trie, auto = List.fold classes
+        ~init:(fuzzy, trie, auto)
+        ~f:begin fun  (f, t, a) id ->
+            let f, t = update_defs id (Class None) f t in
+            f, t, add_autocomplete_term id (Class None) a
+        end in
+    let fuzzy, trie, auto = List.fold typedefs
+        ~init:(fuzzy, trie, auto)
+        ~f:begin fun  (f, t, _a) id  ->
+          let f, t = update_defs id Typedef f t in
+          f, t, _a
+        end in
+    let fuzzy, trie, auto = List.fold consts
+        ~init:(fuzzy, trie, auto)
+        ~f:begin fun (f, t, _a) id ->
+          let f, t = update_defs id Constant f t in
+          f, t, _a
+        end in
+    SS.WorkerApi.update fn trie fuzzy auto
 end
 
 module MasterApi = struct
@@ -257,8 +249,40 @@ module MasterApi = struct
     SS.MasterApi.update_search_index ~fuzzy files
 end
 
-let attach_hooks () =
-  let fuzzy = !Parsing_hooks.fuzzy in
-  Parsing_hooks.attach_file_parsed_hook WorkerApi.update;
-  Parsing_hooks.attach_parse_task_completed_hook
-    (MasterApi.update_search_index ~fuzzy)
+module ClassMethods = struct
+  let get_class_definition_file class_name =
+    let class_def = Naming_heap.TypeIdHeap.get class_name in
+    match class_def with
+    | Some (pos, `Class) ->
+      let file =
+        match pos with
+        | FileInfo.Full pos -> Pos.filename pos
+        | FileInfo.File (_, file) -> file
+      in
+      Some file
+    | _ -> None
+
+  let query tcopt class_name method_query =
+    let open Option.Monad_infix in
+    let method_query = String.lowercase_ascii method_query in
+    let matches_query method_name =
+      let method_name = String.lowercase_ascii method_name in
+        String_utils.is_substring method_query method_name
+    in
+    get_class_definition_file class_name
+    >>= (fun file -> Parser_heap.find_class_in_file tcopt file class_name)
+    >>| (fun class_ -> class_.Ast.c_body)
+    >>| List.filter_map ~f:begin fun class_elt ->
+      match class_elt with
+      | Ast.Method Ast.{m_kind; m_name = (pos, name); _}
+          when matches_query name ->
+        let is_static = List.mem m_kind Ast.Static in
+        Some SearchUtils. {
+          name;
+          pos;
+          result_type = Method (is_static, class_name)
+        }
+      | _ -> None
+    end
+    |> Option.value ~default:[]
+end

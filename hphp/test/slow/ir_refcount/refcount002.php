@@ -9,4 +9,8 @@ function bar() {
   echo $z;
 }
 
+
+<<__EntryPoint>>
+function main_refcount002() {
 bar();
+}

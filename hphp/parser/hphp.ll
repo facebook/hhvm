@@ -98,6 +98,7 @@ static int getNextTokenType(int t) {
     case T_SR:
     case T_BOOLEAN_OR:
     case T_BOOLEAN_AND:
+    case T_COALESCE:
     case T_IS_EQUAL:
     case T_IS_NOT_EQUAL:
     case T_IS_IDENTICAL:
@@ -125,6 +126,7 @@ static int getNextTokenType(int t) {
     case T_YIELD_FROM:
     case T_AWAIT:
     case T_ASYNC:
+    case T_USING:
     case T_NEW:
     case T_INSTANCEOF:
     case T_DOUBLE_ARROW:
@@ -140,6 +142,7 @@ static int getNextTokenType(int t) {
     case T_UNSET_CAST:
     case T_UNRESOLVED_LT:
     case T_AS:
+    case T_INOUT:
       return NextTokenType::XhpTag |
              NextTokenType::XhpClassName |
              NextTokenType::LambdaMaybe;
@@ -154,6 +157,7 @@ static int getNextTokenType(int t) {
              NextTokenType::LambdaMaybe;
     case T_INC:
     case T_DEC:
+    case T_ELLIPSIS:
       return NextTokenType::XhpTagMaybe;
     case T_EXTENDS:
     case T_CLASS:
@@ -170,6 +174,8 @@ static int getNextTokenType(int t) {
     case T_DICT:
     case T_VEC:
     case T_KEYSET:
+    case T_VARRAY:
+    case T_DARRAY:
     case T_WHERE:
       return NextTokenType::TypeListMaybe;
     case T_SUPER:
@@ -261,13 +267,20 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"const"                { RETTOKEN(T_CONST);}
 <ST_IN_SCRIPTING>"return"               { RETTOKEN(T_RETURN); }
 <ST_IN_SCRIPTING>"yield"                { RETTOKEN(T_YIELD);}
-<ST_IN_SCRIPTING>"yield"{WHITESPACE}+"from" { RETTOKEN(T_YIELD_FROM);}
+<ST_IN_SCRIPTING>"yield"{WHITESPACE}+"from"[^a-zA-Z0-9_\x80-\xff] {
+  yyless(--yyleng);
+  RETTOKEN(T_YIELD_FROM);
+}
 <ST_IN_SCRIPTING>"try"                  { RETTOKEN(T_TRY);}
 <ST_IN_SCRIPTING>"catch"                { RETTOKEN(T_CATCH);}
 <ST_IN_SCRIPTING>"finally"              { RETTOKEN(T_FINALLY);}
 <ST_IN_SCRIPTING>"throw"                { RETTOKEN(T_THROW);}
+<ST_IN_SCRIPTING>"using"                { HH_ONLY_KEYWORD(T_USING); }
 <ST_IN_SCRIPTING>"if"                   { RETTOKEN(T_IF);}
-<ST_IN_SCRIPTING>"else"{WHITESPACE}*"if" {RETTOKEN(T_ELSEIF);}
+<ST_IN_SCRIPTING>"else"{WHITESPACE}*"if"[^a-zA-Z0-9_\x80-\xff] {
+  yyless(--yyleng);
+  RETTOKEN(T_ELSEIF);
+}
 <ST_IN_SCRIPTING>"endif"                { RETTOKEN(T_ENDIF);}
 <ST_IN_SCRIPTING>"else"                 { RETTOKEN(T_ELSE);}
 <ST_IN_SCRIPTING>"while"                { RETTOKEN(T_WHILE);}
@@ -489,12 +502,15 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"where"              { HH_ONLY_KEYWORD(T_WHERE); }
 <ST_IN_SCRIPTING>"await"              { HH_ONLY_KEYWORD(T_AWAIT);}
 <ST_IN_SCRIPTING>"vec"                { HH_ONLY_KEYWORD(T_VEC);}
+<ST_IN_SCRIPTING>"varray"             { HH_ONLY_KEYWORD(T_VARRAY);}
+<ST_IN_SCRIPTING>"darray"             { HH_ONLY_KEYWORD(T_DARRAY);}
+<ST_IN_SCRIPTING>"inout"              { HH_ONLY_KEYWORD(T_INOUT);}
 <ST_IN_SCRIPTING>"async"/{WHITESPACE_AND_COMMENTS}[a-zA-Z0-9_\x7f-\xff(${] {
   HH_ONLY_KEYWORD(T_ASYNC);
 }
 
 <ST_IN_SCRIPTING>"tuple"/("("|{WHITESPACE_AND_COMMENTS}"(") {
-  HH_ONLY_KEYWORD(T_ARRAY);
+  HH_ONLY_KEYWORD(T_TUPLE);
 }
 
 <ST_IN_SCRIPTING>"?"/":"[a-zA-Z_\x7f-\xff] {
@@ -565,7 +581,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
   RETSTEP('<');
 }
 
-<ST_LT_CHECK>"<"{XHPLABEL}(">"|"/>"|{WHITESPACE_AND_COMMENTS}(">"|"/>"|[a-zA-Z_\x7f-\xff])) {
+<ST_LT_CHECK>"<"{XHPLABEL}(">"|"/>"|{WHITESPACE_AND_COMMENTS}(">"|"/>"|"{"|[a-zA-Z_\x7f-\xff])) {
   BEGIN(ST_IN_SCRIPTING);
   yyless(1);
   STEPPOS(T_XHP_TAG_LT);
@@ -630,7 +646,6 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         STEPPOS('}');
         // We need to be robust against a '}' in PHP code with
         // no corresponding '{'
-        struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
         if (yyg->yy_start_stack_ptr) {
           yy_pop_state(yyscanner);
           if (YY_START == ST_IN_SCRIPTING) {
@@ -648,7 +663,6 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         STEPPOS('}');
         // We need to be robust against a '}' in PHP code with
         // no corresponding '{'
-        struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
         if (yyg->yy_start_stack_ptr) yy_pop_state(yyscanner);
         return '}';
 }
@@ -766,6 +780,10 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_IN_SCRIPTING>"__FILE__"             { RETTOKEN(T_FILE); }
 <ST_IN_SCRIPTING>"__DIR__"              { RETTOKEN(T_DIR); }
 <ST_IN_SCRIPTING>"__NAMESPACE__"        { RETTOKEN(T_NS_C); }
+<ST_IN_SCRIPTING>"__COMPILER_FRONTEND__" {
+  _scanner->setToken(yytext, yyleng, "hhvm", 4);
+  return T_CONSTANT_ENCAPSED_STRING;
+}
 
 <INITIAL>"#!"[^\n]*"\n" {
         SETTOKEN(T_HASHBANG);
@@ -933,13 +951,13 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 
 <ST_VAR_OFFSET>"]" {
         yy_pop_state(yyscanner);
-        return ']';
+        RETSTEP(']');
 }
 
 <ST_VAR_OFFSET>{TOKENS}|[({}\"`] {
         /* Only '[' can be valid, but returning other tokens will allow
            a more explicit parse error */
-        return yytext[0];
+        RETSTEP(yytext[0]);
 }
 
 <ST_VAR_OFFSET>[ \n\r\t\\\'#] {
@@ -1100,7 +1118,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
         int bprefix = (yytext[0] != '"') ? 1 : 0;
         _scanner->setToken(yytext, yyleng, yytext + bprefix, yyleng - bprefix);
         BEGIN(ST_DOUBLE_QUOTES);
-        return '\"';
+        RETSTEP('\"');
 }
 
 <ST_IN_SCRIPTING>b?"<<<"{TABS_AND_SPACES}({LABEL}|[']{LABEL}[']|["]{LABEL}["]){NEWLINE} {
@@ -1161,7 +1179,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 <ST_XHP_IN_TAG>"/>" {
   BEGIN(ST_XHP_END_SINGLETON_TAG);
   yyless(1);
-  return '/';
+  RETSTEP('/');
 }
 
 <ST_XHP_IN_TAG>{ANY_CHAR} {
@@ -1431,12 +1449,12 @@ doc_scan_done:
 
 <ST_DOUBLE_QUOTES>[\"] {
         BEGIN(ST_IN_SCRIPTING);
-        return '"';
+        RETSTEP('"');
 }
 
 <ST_BACKQUOTE>[\`] {
         BEGIN(ST_IN_SCRIPTING);
-        return '`';
+        RETSTEP('`');
 }
 
 <ST_COMMENT,ST_DOC_COMMENT><<EOF>> {

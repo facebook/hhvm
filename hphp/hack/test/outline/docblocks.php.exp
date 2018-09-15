@@ -1,8 +1,8 @@
 f1
   kind: function
   id: function::f1
-  position: File "", line 7, characters 10-11:
-  span: File "", line 7, character 1 - line 7, character 16:
+  position: line 7, characters 10-11
+  span: line 7, character 1 - line 7, character 16
   modifiers: 
   params:
   docblock:
@@ -14,8 +14,8 @@ f1
 f2
   kind: function
   id: function::f2
-  position: File "", line 11, characters 10-11:
-  span: File "", line 11, character 1 - line 11, character 16:
+  position: line 11, characters 10-11
+  span: line 11, character 1 - line 11, character 16
   modifiers: 
   params:
   docblock:
@@ -24,16 +24,16 @@ f2
 no_docblock1
   kind: function
   id: function::no_docblock1
-  position: File "", line 16, characters 10-21:
-  span: File "", line 16, character 1 - line 16, character 26:
+  position: line 16, characters 10-21
+  span: line 16, character 1 - line 16, character 26
   modifiers: 
   params:
 
 f4
   kind: function
   id: function::f4
-  position: File "", line 18, characters 10-11:
-  span: File "", line 18, character 1 - line 18, character 16:
+  position: line 18, characters 10-11
+  span: line 18, character 1 - line 18, character 16
   modifiers: 
   params:
   docblock:
@@ -42,16 +42,16 @@ f4
 no_docblock2
   kind: function
   id: function::no_docblock2
-  position: File "", line 19, characters 10-21:
-  span: File "", line 19, character 1 - line 19, character 26:
+  position: line 19, characters 10-21
+  span: line 19, character 1 - line 19, character 26
   modifiers: 
   params:
 
 C
   kind: class
   id: type_id::C
-  position: File "", line 22, characters 7-7:
-  span: File "", line 22, character 1 - line 33, character 1:
+  position: line 22, characters 7-7
+  span: line 22, character 1 - line 33, character 1
   modifiers: 
   docblock:
 // line comment
@@ -59,8 +59,8 @@ C
   x
     kind: property
     id: property::C::x
-    position: File "", line 25, characters 17-18:
-    span: File "", line 25, character 17 - line 25, character 18:
+    position: line 25, characters 17-18
+    span: line 25, character 17 - line 25, character 18
     modifiers: public 
     docblock:
 /* Property */
@@ -68,8 +68,8 @@ C
   m1
     kind: method
     id: method::C::m1
-    position: File "", line 30, characters 19-20:
-    span: File "", line 30, character 3 - line 32, character 3:
+    position: line 30, characters 19-20
+    span: line 30, character 3 - line 32, character 3
     modifiers: public 
     params:
     docblock:

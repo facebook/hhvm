@@ -25,6 +25,18 @@ namespace HPHP { namespace jit {
 
 struct Vunit;
 
+/*
+ * Vasm-to-vasm lowering state.
+ */
+struct VLS {
+  Vunit& unit;
+  int vreg_restrict_level;
+
+  bool allow_vreg() const {
+    return vreg_restrict_level >= 0;
+  }
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -32,7 +44,7 @@ struct Vunit;
  *
  * The `lower_impl' callback should have the signature:
  *
- *    void lower_impl(Vinstr& inst, Vlabel b, size_t i);
+ *    void lower_impl(const VLS& env, Vinstr& inst, Vlabel b, size_t i);
  *
  * where `b' and `i' are the block and code index of `inst' in `unit'.  This
  * callback is responsible for any architecture-specific lowering that is
@@ -47,7 +59,7 @@ void vasm_lower(Vunit& unit, Vlower lower_impl);
  * Replaces the instruction at `unit.blocks[b].code[i]` with an appropriate
  * sequence of one or more instructions.
  */
-void vlower(Vunit& unit, Vlabel b, size_t i);
+void vlower(VLS& env, Vlabel b, size_t i);
 
 ///////////////////////////////////////////////////////////////////////////////
 

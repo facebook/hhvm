@@ -1,4 +1,4 @@
-<?php
+<?hh
 $f = tmpfile();
 if ($f === false)
     exit();

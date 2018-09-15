@@ -22,5 +22,9 @@ function extract_empty_ref() {
     var_dump('OK');
 }
 
+
+<<__EntryPoint>>
+function main_extract_refs() {
 heh();
 extract_empty_ref();
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $doc = new DOMDocument();
 $doc->loadXML(
@@ -11,5 +11,3 @@ LIBXML_DTDLOAD | LIBXML_NOENT
 );
 
 var_dump($doc->textContent);
-
-?>

@@ -8,4 +8,8 @@ function main() {
   var_dump(C);
 }
 
+
+<<__EntryPoint>>
+function main_multi_const() {
 main();
+}

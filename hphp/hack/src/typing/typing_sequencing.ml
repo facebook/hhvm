@@ -2,9 +2,8 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
@@ -40,7 +39,7 @@
  *
  *)
 
-open Core
+open Core_kernel
 open Nast
 
 type env = {
@@ -88,7 +87,7 @@ let get_lvar = function
  * when doing our sequencing checks. *)
 let used_variables_visitor =
   object(this)
-  inherit [Local_id.Set.t] Nast_visitor.nast_visitor as parent
+  inherit [Local_id.Set.t] Nast.Visitor_DEPRECATED.visitor as parent
 
   method! on_lvar acc (_, id) = Local_id.Set.add id acc
   (* We have to handle expressions just enough to avoid counting
@@ -169,7 +168,7 @@ let sequence_visitor ~require_used used_vars =
 
   (* And now the actual visitor object *)
   object(this)
-  inherit [env] Nast_visitor.nast_visitor as parent
+  inherit [env] Nast.Visitor_DEPRECATED.visitor as parent
 
   method check_unsequenced_exprs env e1 e2 =
     let env1 = this#on_expr tracking_env e1 in
@@ -223,7 +222,7 @@ let sequence_visitor ~require_used used_vars =
 
     (* leave && and || sequenced before making all
      * the other binops unsequenced *)
-    | Binop ((Ast.AMpamp | Ast.BArbar), _, _) -> parent#on_expr env e
+    | Binop ((Ast.AMpamp | Ast.BArbar | Ast.QuestionQuestion), _, _) -> parent#on_expr env e
 
     (* These operations have unsequenced subexpressions. *)
     | Binop (_, e1, e2)

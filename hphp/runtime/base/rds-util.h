@@ -22,8 +22,10 @@
 
 namespace HPHP {
   struct NamedEntity;
+  struct Class;
   struct Func;
   struct StringData;
+  struct MemoCacheBase;
 }
 
 namespace HPHP { namespace rds {
@@ -41,14 +43,43 @@ namespace HPHP { namespace rds {
  * live in RDS.  Note that we don't put closure locals here because
  * they are per-instance.
  */
-Link<RefData, true /* normal_only */>
+
+struct StaticLocalData {
+  RefData ref;
+  static size_t ref_offset() { return offsetof(StaticLocalData, ref); }
+};
+Link<StaticLocalData, rds::Mode::Normal>
 bindStaticLocal(const Func*, const StringData*);
 
 /*
  * Allocate storage for the value of a class constant in RDS.
  */
-Link<TypedValue, true /* normal_only */>
+Link<TypedValue, rds::Mode::Normal>
 bindClassConstant(const StringData* clsName, const StringData* cnsName);
+
+Link<Cell, rds::Mode::Normal>
+bindStaticMemoValue(const Func*);
+
+Link<MemoCacheBase*, rds::Mode::Normal>
+bindStaticMemoCache(const Func*);
+
+Link<Cell, rds::Mode::Normal>
+attachStaticMemoValue(const Func*);
+
+Link<MemoCacheBase*, rds::Mode::Normal>
+attachStaticMemoCache(const Func*);
+
+Link<Cell, rds::Mode::Normal>
+bindLSBMemoValue(const Class*, const Func*);
+
+Link<MemoCacheBase*, rds::Mode::Normal>
+bindLSBMemoCache(const Class*, const Func*);
+
+Link<Cell, rds::Mode::Normal>
+attachLSBMemoValue(const Class*, const Func*);
+
+Link<MemoCacheBase*, rds::Mode::Normal>
+attachLSBMemoCache(const Class*, const Func*);
 
 //////////////////////////////////////////////////////////////////////
 

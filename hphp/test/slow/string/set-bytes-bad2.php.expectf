@@ -1,0 +1,2 @@
+
+Fatal error: HH\set_bytes_int8 expects at least 3 arguments in %s/test/slow/string/set-bytes-bad2.php on line 4

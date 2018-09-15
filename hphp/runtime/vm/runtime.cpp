@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -30,11 +31,11 @@
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 
+#include <folly/tracing/StaticTracepoint.h>
+
 namespace HPHP {
 
 TRACE_SET_MOD(runtime);
-
-CompileStringFn g_hphp_compiler_parse;
 
 /**
  * print_string will decRef the string
@@ -65,15 +66,20 @@ void print_boolean(bool val) {
  */
 StringData* concat_ss(StringData* v1, StringData* v2) {
   if (v1->cowCheck()) {
+    FOLLY_SDT(hhvm, hhvm_cow_concat, v1->size(), v2->size());
     StringData* ret = StringData::Make(v1, v2);
     // Because v1 was shared, we know this won't release the string.
     v1->decRefCount();
     return ret;
   }
 
-  auto const ret = v1->append(v2->slice());
+  auto const rhs = v2->slice();
+  UNUSED auto const lsize = v1->size();
+  FOLLY_SDT(hhvm, hhvm_mut_concat, lsize, rhs.size());
+  auto const ret = v1->append(rhs);
   if (UNLIKELY(ret != v1)) {
-    assert(v1->hasExactlyOneRef());
+    // had to realloc even though count==1
+    assertx(v1->hasExactlyOneRef());
     v1->release();
   }
   return ret;
@@ -99,15 +105,19 @@ StringData* concat_si(StringData* v1, int64_t v2) {
   auto const s2 = conv_10(v2, intbuf + sizeof(intbuf));
   if (v1->cowCheck()) {
     auto const s1 = v1->slice();
+    FOLLY_SDT(hhvm, hhvm_cow_concat, s1.size(), s2.size());
     auto const ret = StringData::Make(s1, s2);
     // Because v1 was shared, we know this won't release it.
     v1->decRefCount();
     return ret;
   }
 
+  UNUSED auto const lsize = v1->size();
+  FOLLY_SDT(hhvm, hhvm_mut_concat, lsize, s2.size());
   auto const ret = v1->append(s2);
   if (UNLIKELY(ret != v1)) {
-    assert(v1->hasExactlyOneRef());
+    // had to realloc even though count==1
+    assertx(v1->hasExactlyOneRef());
     v1->release();
   }
   return ret;
@@ -115,17 +125,22 @@ StringData* concat_si(StringData* v1, int64_t v2) {
 
 StringData* concat_s3(StringData* v1, StringData* v2, StringData* v3) {
   if (v1->cowCheck()) {
-    StringData* ret = StringData::Make(
-      v1->slice(), v2->slice(), v3->slice());
+    auto s1 = v1->slice();
+    auto s2 = v2->slice();
+    auto s3 = v3->slice();
+    FOLLY_SDT(hhvm, hhvm_cow_concat, s1.size(), s2.size() + s3.size());
+    StringData* ret = StringData::Make(s1, s2, s3);
     // Because v1 was shared, we know this won't release it.
     v1->decRefCount();
     return ret;
   }
 
+  UNUSED auto const lsize = v1->size();
+  FOLLY_SDT(hhvm, hhvm_mut_concat, lsize, v2->size() + v3->size());
   auto const ret = v1->append(v2->slice(), v3->slice());
-
   if (UNLIKELY(ret != v1)) {
-    assert(v1->hasExactlyOneRef());
+    // had to realloc even though count==1
+    assertx(v1->hasExactlyOneRef());
     v1->release();
   }
   return ret;
@@ -134,64 +149,28 @@ StringData* concat_s3(StringData* v1, StringData* v2, StringData* v3) {
 StringData* concat_s4(StringData* v1, StringData* v2,
                       StringData* v3, StringData* v4) {
   if (v1->cowCheck()) {
-    StringData* ret = StringData::Make(
-        v1->slice(), v2->slice(), v3->slice(), v4->slice());
+    auto s1 = v1->slice();
+    auto s2 = v2->slice();
+    auto s3 = v3->slice();
+    auto s4 = v4->slice();
+    FOLLY_SDT(hhvm, hhvm_cow_concat, s1.size(),
+              s2.size() + s3.size() + s4.size());
+    StringData* ret = StringData::Make(s1, s2, s3, s4);
     // Because v1 was shared, we know this won't release it.
     v1->decRefCount();
     return ret;
   }
 
+  UNUSED auto const lsize = v1->size();
+  FOLLY_SDT(hhvm, hhvm_mut_concat, lsize,
+            v2->size() + v3->size() + v4->size());
   auto const ret = v1->append(v2->slice(), v3->slice(), v4->slice());
-
   if (UNLIKELY(ret != v1)) {
-    assert(v1->hasExactlyOneRef());
+    // had to realloc even though count==1
+    assertx(v1->hasExactlyOneRef());
     v1->release();
   }
   return ret;
-}
-
-Unit* compile_file(const char* s, size_t sz, const MD5& md5,
-                   const char* fname, Unit** releaseUnit) {
-  return g_hphp_compiler_parse(s, sz, md5, fname, releaseUnit);
-}
-
-std::string mangleSystemMd5(const std::string& fileMd5) {
-  // This resembles mangleUnitMd5(...), however, only settings that HHBBC is
-  // aware of may be used here or it will be unable to load systemlib!
-  std::string t = fileMd5 + '\0'
-    + (RuntimeOption::PHP7_IntSemantics ? '1' : '0')
-    + (RuntimeOption::AutoprimeGenerators ? '1' : '0')
-    ;
-  return string_md5(t);
-}
-
-Unit* compile_string(const char* s,
-                     size_t sz,
-                     const char* fname,
-                     Unit** releaseUnit) {
-  auto const md5 = MD5{mangleSystemMd5(string_md5(folly::StringPiece{s, sz}))};
-  if (auto u = Repo::get().loadUnit(fname ? fname : "", md5).release()) {
-    return u;
-  }
-  // NB: fname needs to be long-lived if generating a bytecode repo because it
-  // can be cached via a Location ultimately contained by ErrorInfo for printing
-  // code errors.
-  return g_hphp_compiler_parse(s, sz, md5, fname, releaseUnit);
-}
-
-Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname) {
-  if (RuntimeOption::RepoAuthoritative) {
-    String systemName = String("/:") + fname;
-    auto md5 = MD5{mangleSystemMd5(string_md5(folly::StringPiece{s,sz}))};
-    if (Repo::get().findFile(systemName.data(),
-                             SourceRootInfo::GetCurrentSourceRoot(),
-                             md5) == RepoStatus::success) {
-      if (auto u = Repo::get().loadUnit(fname, md5)) {
-        return u.release();
-      }
-    }
-  }
-  return compile_string(s, sz, fname);
 }
 
 int init_closure(ActRec* ar, TypedValue* sp) {
@@ -237,12 +216,46 @@ void raiseNotice(const StringData* sd) {
   raise_notice("%s", sd->data());
 }
 
-void raiseArrayIndexNotice(const int64_t index) {
-  raise_notice("Undefined index: %" PRId64, index);
+void raiseArrayIndexNotice(const int64_t index, bool isInOut) {
+  raise_notice("Undefined index%s: %" PRId64,
+               isInOut ? " on inout parameter" : "", index);
 }
 
-void raiseArrayKeyNotice(const StringData* key) {
-  raise_notice("Undefined index: %s", key->data());
+void raiseArrayKeyNotice(const StringData* key, bool isInOut) {
+  raise_notice("Undefined index%s: %s",
+               isInOut ? " on inout parameter" : "", key->data());
+}
+
+std::string formatParamRefMismatch(const char* fname, uint32_t index,
+                                   bool funcByRef) {
+  if (funcByRef) {
+    return folly::sformat(
+      "{}() expects parameter {} by reference, but the call was "
+      "not annotated with '&'", fname, index + 1
+    );
+  } else {
+    return folly::sformat(
+      "{}() expects parameter {} by value, but the call was "
+      "annotated with '&'", fname, index + 1
+    );
+  }
+}
+
+void raiseParamRefMismatchForFuncName(const StringData* fname, uint32_t index,
+                                      bool funcByRef) {
+  if (RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      formatParamRefMismatch(fname->data(), index, funcByRef));
+  }
+
+  if (RuntimeOption::EvalWarnOnCallByRefAnnotationMismatch) {
+    raise_warning(formatParamRefMismatch(fname->data(), index, funcByRef));
+  }
+}
+
+void raiseParamRefMismatchForFunc(const Func* func, uint32_t index) {
+  raiseParamRefMismatchForFuncName(func->fullDisplayName(), index,
+                                   func->byRef(index));
 }
 
 //////////////////////////////////////////////////////////////////////

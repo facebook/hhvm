@@ -9,5 +9,9 @@ class A {
  $this->$name();
 }
  }
- $obj = new A();
+
+ <<__EntryPoint>>
+function main_1206() {
+$obj = new A();
  $obj->test();
+}

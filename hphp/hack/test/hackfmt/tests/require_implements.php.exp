@@ -1,0 +1,21 @@
+<?hh
+
+trait C {
+  require implements Aaaaaaaaaaaaaaaaaaaaaaaaaaa<
+    Bbbbbbbbbbbbbbb,
+    Cccccccccccccc,
+  >;
+  require implements Aaaaaaaaaaaaaaaaaaaaaaaaaaa<
+    Bbbbbbbbbbbbbbbbbbbbbbb,
+    Ccccccccccccccccccccccc,
+  >;
+  require implements
+    Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa<
+      Bbbbbbbbbbbbbbbbbbbbbbb,
+      Ccccccccccccccccccccccc,
+    >;
+
+  require implements ShortNameWithNoSplits;
+  require implements LongNameWithNoSplits________________________________________;
+  require implements VeryLongNameWithNoSplits_____________________________________________________;
+}

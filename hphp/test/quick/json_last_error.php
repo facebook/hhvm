@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 json_decode("a");
 json_encode("");

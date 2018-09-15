@@ -1,9 +1,5 @@
 <?hh
 
-
-error_reporting(-1);
-require_once __DIR__.'/variadic_funcs.inc';
-
 function reflect_func($name) {
   echo "\n", '* ',__FUNCTION__, ": ", $name, "\n";
   $rf = new ReflectionFunction($name);
@@ -41,4 +37,12 @@ function main() {
   echo "\n", '* reflect meth (direct construction)', "\n";
   reflect_param(new ReflectionParameter('variadic_some', 'v'));
 }
+
+
+
+<<__EntryPoint>>
+function main_reflection() {
+error_reporting(-1);
+require_once __DIR__.'/variadic_funcs.inc';
 main();
+}

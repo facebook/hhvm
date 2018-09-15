@@ -24,23 +24,25 @@ function main() {
     $mrc = curl_multi_exec($mh, $active);
   } while ($mrc == CURLM_CALL_MULTI_PERFORM);
 
+  $ret = "";
   while ($active && $mrc == CURLM_OK) {
     if (curl_multi_select($mh) != -1) {
       do {
-        $mrc = curl_multi_exec($mh, $active);
+        try {
+          $mrc = curl_multi_exec($mh, $active);
+        } catch (Exception $e) {
+          $ret .= ":::Exception: " . $e->getMessage() . "\n";
+        }
       } while ($mrc == CURLM_CALL_MULTI_PERFORM);
     }
   }
 
   curl_multi_close($mh);
+  return $ret;
 }
 
 function except() {
   throw new Exception("oops");
 }
 
-try {
-  main();
-} catch (Exception $e) {
-  echo ":::Exception: ", $e->getMessage(), "\n";
-}
+echo main();

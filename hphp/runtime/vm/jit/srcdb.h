@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <atomic>
 
+#include "hphp/util/alloc.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/growable-vector.h"
 #include "hphp/util/trace.h"
@@ -48,7 +49,7 @@ struct RelocationInfo;
  * intact.
  */
 struct IncomingBranch {
-  enum class Tag {
+  enum class Tag : int16_t {
     JMP,
     JCC,
     ADDR,
@@ -104,7 +105,7 @@ struct TransLoc {
   void setFrozenStart(TCA newFrozen);
 
   void setMainSize(size_t size) {
-    assert(size < std::numeric_limits<uint32_t>::max());
+    assertx(size < std::numeric_limits<uint32_t>::max());
     m_mainLen = (uint32_t)size;
   }
 
@@ -153,12 +154,8 @@ static_assert(sizeof(TransLoc) == 16, "Don't add fields to TransLoc");
 /*
  * SrcRec: record of translator output for a given source location.
  */
-struct SrcRec {
-  SrcRec()
-    : m_topTranslation(nullptr)
-    , m_anchorTranslation(nullptr)
-    , m_dbgBranchGuardSrc(nullptr)
-    , m_guard(0)
+struct SrcRec final {
+  explicit SrcRec(TCA anchor) : m_anchorTranslation(anchor)
   {}
 
   /*
@@ -174,71 +171,69 @@ struct SrcRec {
   }
 
   /*
-   * The following functions are used during creation of new
-   * translations or when inserting debug guards.  May only be called
-   * when holding the translator write lease.
-   */
-  void setFuncInfo(const Func* f);
-  void chainFrom(IncomingBranch br);
-  TCA getFallbackTranslation() const;
-  void newTranslation(TransLoc newStart,
-                      GrowableVector<IncomingBranch>& inProgressTailBranches);
-  void replaceOldTranslations();
-  void addDebuggerGuard(TCA dbgGuard, TCA m_dbgBranchGuardSrc);
-  bool hasDebuggerGuard() const { return m_dbgBranchGuardSrc != nullptr; }
-  const MD5& unitMd5() const { return m_unitMd5; }
-
-  const GrowableVector<TransLoc>& translations() const {
-    return m_translations;
-  }
-
-  const GrowableVector<IncomingBranch>& tailFallbackJumps() {
-    return m_tailFallbackJumps;
-  }
-
-  /*
-   * The anchor translation is a retranslate request for the current
-   * SrcKey that will continue the tracelet chain.
-   */
-  void setAnchorTranslation(TCA anc) {
-    assertx(!m_anchorTranslation);
-    assertx(m_tailFallbackJumps.empty());
-    m_anchorTranslation = anc;
-  }
-
-  /*
    * Returns the VM stack offset the translations in the SrcRec have, in
    * situations where we need to and can know.
    *
    * Pre: this SrcRec is for a non-resumed SrcKey
-   * Pre: setAnchorTranslation has been called
    */
   FPInvOffset nonResumedSPOff() const;
+
+  /*
+   * Get the anchor translation for this SrcRec. If another thread holds the
+   * code lock it may update this address via relocate().
+   */
+  TCA getFallbackTranslation() const;
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  /*
+   * The following functions are used during creation of new
+   * translations or when inserting debug guards.  May only be called
+   * when holding the lock for this SrcRec.
+   */
+  void chainFrom(IncomingBranch br);
+  void addDebuggerGuard(TCA dbgGuard, TCA m_dbgBranchGuardSrc);
+  bool hasDebuggerGuard() const { return m_dbgBranchGuardSrc != nullptr; }
 
   const GrowableVector<IncomingBranch>& incomingBranches() const {
     return m_incomingBranches;
   }
 
-  void relocate(RelocationInfo& rel);
-
-  void removeIncomingBranch(TCA toSmash);
-
-  /*
-   * There is an unlikely race in retranslate, where two threads
-   * could simultaneously generate the same translation for a
-   * tracelet. In practice it's almost impossible to hit this, unless
-   * Eval.JitRequireWriteLease is set. But when it is set, we hit
-   * it a lot.
-   * m_guard doesn't quite solve it, but its as good as things were
-   * before.
-   */
-  bool tryLock() {
-    uint32_t val = 0;
-    return m_guard.compare_exchange_strong(val, 1);
+  const GrowableVector<TransLoc>& translations() const {
+    return m_translations;
   }
 
-  void freeLock() {
-    m_guard = 0;
+  const GrowableVector<IncomingBranch>& tailFallbackJumps() const {
+    return m_tailFallbackJumps;
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  /*
+   * The following functions will implicitly acquire the lock for this SrcRec
+   */
+  void removeIncomingBranch(TCA toSmash);
+  void newTranslation(TransLoc newStart,
+                      GrowableVector<IncomingBranch>& inProgressTailBranches);
+  void replaceOldTranslations();
+  size_t numTrans() const {
+    auto srLock = readlock();
+    return translations().size();
+  }
+
+  /*
+   * Relocate may override the anchor so the code lock must also be acquired
+   */
+  void relocate(RelocationInfo& rel);
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  folly::SharedMutex::WriteHolder writelock() const {
+    return folly::SharedMutex::WriteHolder(m_lock);
+  }
+
+  folly::SharedMutex::ReadHolder readlock() const {
+    return folly::SharedMutex::ReadHolder(m_lock);
   }
 
 private:
@@ -248,11 +243,11 @@ private:
   // This either points to the most recent translation in the
   // translations vector, or if hasDebuggerGuard() it points to the
   // debug guard.
-  AtomicLowTCA m_topTranslation;
+  AtomicLowTCA m_topTranslation{nullptr};
 
   /*
-   * The following members are all protected by the translator write
-   * lease.  They can only be read when the lease is held.
+   * The following members are all protected by the m_lock SharedMutex.
+   * They can only be read or written when the lock is held.
    */
 
   // We chain new translations onto the end of the list, so we need to
@@ -263,10 +258,10 @@ private:
 
   GrowableVector<TransLoc> m_translations;
   GrowableVector<IncomingBranch> m_incomingBranches;
-  MD5 m_unitMd5;
   // The branch src for the debug guard, if this has one.
-  LowTCA m_dbgBranchGuardSrc;
-  std::atomic<uint32_t> m_guard;
+  LowTCA m_dbgBranchGuardSrc{nullptr};
+
+  mutable folly::SharedMutex m_lock;
 };
 
 struct SrcDB {
@@ -276,7 +271,8 @@ struct SrcDB {
    * Maybe could be possible with a better hash function or lower max load
    * factor.  (See D450383.)
    */
-  using THM            = TreadHashMap<SrcKey::AtomicInt, SrcRec*, int64_hash>;
+  using THM            = TreadHashMap<SrcKey::AtomicInt, SrcRec*,
+                                      int64_hash, VMAllocator<char>>;
   using iterator       = THM::iterator;
   using const_iterator = THM::const_iterator;
 
@@ -301,8 +297,10 @@ struct SrcDB {
     return p ? *p : 0;
   }
 
-  SrcRec* insert(SrcKey sk) {
-    return *m_map.insert(sk.toAtomicInt(), new SrcRec);
+  SrcRec* insert(SrcKey sk, TCA anchor) {
+    return *m_map.insert(
+      sk.toAtomicInt(), new SrcRec(anchor)
+    );
   }
 
 private:

@@ -1,0 +1,2 @@
+File "final_class.php", line 4, characters 1-13:
+Classes cannot be both final and sealed. (Parsing[1002])

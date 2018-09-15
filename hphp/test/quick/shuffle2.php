@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function iss($a, $i) {
   $max = 10;

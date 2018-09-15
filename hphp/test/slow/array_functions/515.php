@@ -5,5 +5,9 @@ class A implements Countable {
  return 1;
 }
 }
- $obj = new A();
+
+ <<__EntryPoint>>
+function main_515() {
+$obj = new A();
  var_dump(count($obj));
+}

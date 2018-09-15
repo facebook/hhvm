@@ -18,4 +18,8 @@ class A {
   $obj = new B;
  $obj->foo(123, 456);
 }
- bar();
+
+ <<__EntryPoint>>
+function main_78() {
+bar();
+}

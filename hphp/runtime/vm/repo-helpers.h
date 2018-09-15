@@ -25,6 +25,8 @@
 
 #include <sqlite3.h>
 
+#include <folly/portability/Stdio.h>
+
 namespace HPHP {
 
 // Forward declaration.
@@ -45,7 +47,7 @@ enum RepoId {
 struct RepoExc : std::exception {
   RepoExc(ATTRIBUTE_PRINTF_STRING const char* fmt, ...)
     ATTRIBUTE_PRINTF(2, 3) {
-    va_list(ap);
+    va_list ap;
     va_start(ap, fmt);
     char* msg;
     if (vasprintf(&msg, fmt, ap) == -1) {
@@ -87,7 +89,7 @@ struct RepoStmt {
 struct RepoQuery {
   explicit RepoQuery(RepoStmt& stmt)
     : m_stmt(stmt), m_row(false), m_done(false) {
-    assert(m_stmt.prepared());
+    assertx(m_stmt.prepared());
   }
   ~RepoQuery() { m_stmt.reset(); }
 

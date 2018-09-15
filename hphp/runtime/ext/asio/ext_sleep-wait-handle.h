@@ -33,8 +33,9 @@ struct c_SleepWaitHandle final : c_WaitableWaitHandle {
   WAITHANDLE_CLASSOF(SleepWaitHandle);
   WAITHANDLE_DTOR(SleepWaitHandle);
 
-  explicit c_SleepWaitHandle(Class* cls = c_SleepWaitHandle::classof())
-    : c_WaitableWaitHandle(cls) {}
+  explicit c_SleepWaitHandle()
+    : c_WaitableWaitHandle(classof(), HeaderKind::WaitHandle,
+                           type_scan::getIndexForMalloc<c_SleepWaitHandle>()) {}
   ~c_SleepWaitHandle() {}
 
  public:
@@ -63,8 +64,8 @@ void HHVM_STATIC_METHOD(SleepWaitHandle, setOnSuccessCallback,
                         const Variant& callback);
 Object HHVM_STATIC_METHOD(SleepWaitHandle, create, int64_t usecs);
 
-inline c_SleepWaitHandle* c_WaitHandle::asSleep() {
-  assert(getKind() == Kind::Sleep);
+inline c_SleepWaitHandle* c_Awaitable::asSleep() {
+  assertx(getKind() == Kind::Sleep);
   return static_cast<c_SleepWaitHandle*>(this);
 }
 

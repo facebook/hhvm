@@ -9,6 +9,8 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/sort-helpers.h"
+#include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/zend-math.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -77,29 +79,28 @@ BaseVector::php_map(const Variant& callback) {
       "Parameter must be a valid callback");
   }
 
-  auto nv = req::make<TVector>();
-  uint32_t sz = m_size;
-  nv->reserve(sz);
-  assert(nv->canMutateBuffer());
-  int32_t version = m_version;
+  if (m_size == 0) {
+    return Object{req::make<TVector>()};
+  }
+
+  auto nv = req::make<TVector>(m_size);
   constexpr int64_t argc = useKey ? 2 : 1;
   TypedValue argv[argc];
   if (useKey) {
-    argv[0].m_type = KindOfInt64;
+    argv[0] = make_tv<KindOfInt64>(0);
   }
-  for (uint32_t i = 0; i < sz; ++i) {
-    if (useKey) {
-      argv[0].m_data.num = i;
-    }
-    argv[argc-1] = data()[i];
-    TypedValue* tv = &nv->data()[i];
-    *tv = g_context->invokeFuncFew(ctx, argc, argv);
-    if (UNLIKELY(version != m_version)) {
-      tvRefcountedDecRef(tv);
-      throw_collection_modified();
-    }
+  auto from = data();
+  auto end = from + m_size;
+  auto to = nv->data();
+  do {
+    argv[argc-1] = *from;
+    *to = g_context->invokeFuncFew(ctx, argc, argv);
     nv->incSize();
-  }
+    if (useKey) {
+      argv[0].m_data.num++;
+    }
+    ++to;
+  } while (++from < end);
   return Object{std::move(nv)};
 }
 
@@ -114,28 +115,27 @@ BaseVector::php_filter(const Variant& callback) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter must be a valid callback");
   }
-  auto nv = req::make<TVector>();
-  uint32_t sz = m_size;
-  int32_t version = m_version;
-  assert(nv->canMutateBuffer());
+  if (m_size == 0) {
+    return Object{req::make<TVector>()};
+  }
+  auto nv = req::make<TVector>(0);
   constexpr int64_t argc = useKey ? 2 : 1;
   TypedValue argv[argc];
   if (useKey) {
-    argv[0].m_type = KindOfInt64;
+    argv[0] = make_tv<KindOfInt64>(0);
   }
-  for (uint32_t i = 0; i < sz; ++i) {
-    if (useKey) {
-      argv[0].m_data.num = i;
-    }
-    argv[argc-1] = data()[i];
+  auto elm = data();
+  auto end = elm + m_size;
+  do {
+    argv[argc-1] = *elm;
     bool b = invokeAndCastToBool(ctx, argc, argv);
-    if (UNLIKELY(version != m_version)) {
-      throw_collection_modified();
-    }
     if (b) {
-      nv->addRaw(&data()[i]);
+      nv->addRaw(*elm);
     }
-  }
+    if (useKey) {
+      argv[0].m_data.num++;
+    }
+  } while (++elm < end);
   return Object{std::move(nv)};
 }
 
@@ -147,18 +147,19 @@ BaseVector::php_take(const Variant& n) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter n must be an integer");
   }
-  int64_t len = n.toInt64();
-  auto vec = req::make<TVector>();
-  if (len <= 0) {
-    return Object{std::move(vec)};
+  int64_t len = std::max(n.toInt64(), int64_t{0});
+  uint32_t sz = std::min(len, int64_t(m_size));
+  if (sz == 0) {
+    return Object{req::make<TVector>()};
   }
-  size_t sz = std::min(size_t(len), size_t(m_size));
-  vec->reserve(sz);
-  assert(vec->canMutateBuffer());
+  auto vec = req::make<TVector>(sz);
   vec->setSize(sz);
-  for (size_t i = 0; i < sz; ++i) {
-    cellDup(data()[i], vec->data()[i]);
-  }
+  auto from = data();
+  auto end = from + sz;
+  auto to = vec->data();
+  do {
+    cellDup(*from++, *to++);
+  } while (from < end);
   return Object{std::move(vec)};
 }
 
@@ -172,22 +173,17 @@ BaseVector::php_takeWhile(const Variant& fn) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter must be a valid callback");
   }
-  auto vec = req::make<TVector>();
-  assert(vec->m_size == 0);
-  int32_t version UNUSED;
-  if (std::is_same<c_Vector, TVector>::value) {
-    version = m_version;
+  if (m_size == 0) {
+    return Object{req::make<TVector>()};
   }
-  for (uint32_t i = 0; i < m_size; ++i) {
-    bool b = invokeAndCastToBool(ctx, 1, &data()[i]);
-    if (std::is_same<c_Vector, TVector>::value) {
-      if (UNLIKELY(version != m_version)) {
-        throw_collection_modified();
-      }
-    }
+  auto vec = req::make<TVector>(0);
+  auto elm = data();
+  auto end = elm + m_size;
+  do {
+    bool b = invokeAndCastToBool(ctx, 1, elm);
     if (!b) break;
-    vec->addRaw(&data()[i]);
-  }
+    vec->addRaw(*elm);
+  } while (++elm < end);
   return Object{std::move(vec)};
 }
 
@@ -199,17 +195,20 @@ BaseVector::php_skip(const Variant& n) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter n must be an integer");
   }
-  int64_t len = n.toInt64();
-  auto vec = req::make<TVector>();
-  if (len <= 0) len = 0;
-  size_t skipAmt = std::min<size_t>(len, m_size);
-  size_t sz = size_t(m_size) - skipAmt;
-  vec->reserve(sz);
-  assert(vec->canMutateBuffer());
-  vec->setSize(sz);
-  for (size_t i = 0; i < sz; ++i) {
-    cellDup(data()[i + skipAmt], vec->data()[i]);
+  int64_t len = std::max(n.toInt64(), int64_t{0});
+  uint32_t skipAmt = std::min(len, int64_t(m_size));
+  uint32_t sz = m_size - skipAmt;
+  if (sz == 0) {
+    return Object{req::make<TVector>()};
   }
+  auto vec = req::make<TVector>(sz);
+  vec->setSize(sz);
+  auto from = data() + skipAmt;
+  auto end = data() + m_size;
+  auto to = vec->data();
+  do {
+    cellDup(*from++, *to++);
+  } while (from < end);
   return Object{std::move(vec)};
 }
 
@@ -223,25 +222,25 @@ BaseVector::php_skipWhile(const Variant& fn) {
     SystemLib::throwInvalidArgumentExceptionObject(
                "Parameter must be a valid callback");
   }
-  auto vec = req::make<TVector>();
-  assert(vec->canMutateBuffer());
-  uint32_t i = 0;
-  int32_t version UNUSED;
-  if (std::is_same<c_Vector, TVector>::value) {
-    version = m_version;
+  if (m_size == 0) {
+    return Object{req::make<TVector>()};
   }
-  for (; i < m_size; ++i) {
-    bool b = invokeAndCastToBool(ctx, 1, &data()[i]);
-    if (std::is_same<c_Vector, TVector>::value) {
-      if (UNLIKELY(version != m_version)) {
-        throw_collection_modified();
-      }
-    }
+  auto from = data();
+  auto end = from + m_size;
+  do {
+    bool b = invokeAndCastToBool(ctx, 1, from);
     if (!b) break;
+  } while (++from < end);
+  auto sz = end - from;
+  if (sz == 0) {
+    return Object{req::make<TVector>()};
   }
-  for (; i < m_size; ++i) {
-    vec->addRaw(&data()[i]);
-  }
+  auto vec = req::make<TVector>(sz);
+  vec->setSize(sz);
+  auto to = vec->data();
+  do {
+    cellDup(*from++, *to++);
+  } while (from < end);
   return Object{std::move(vec)};
 }
 
@@ -259,18 +258,19 @@ BaseVector::php_slice(const Variant& start, const Variant& len) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter len must be a non-negative integer");
   }
-  size_t skipAmt = std::min<size_t>(istart, m_size);
-  size_t sz = std::min<size_t>(ilen, size_t(m_size) - skipAmt);
-  auto vec = req::make<TVector>();
-  vec->reserve(sz);
-  assert(vec->canMutateBuffer());
-  vec->setSize(sz);
-  auto* e = data() + skipAmt;
-  auto* eLimit = e + sz;
-  auto* ne = vec->data();
-  for (; e != eLimit; ++e, ++ne) {
-    cellDup(*e, *ne);
+  uint32_t skipAmt = std::min(istart, int64_t(m_size));
+  uint32_t sz = std::min(ilen, int64_t(m_size - skipAmt));
+  if (sz == 0) {
+    return Object{req::make<TVector>()};
   }
+  auto vec = req::make<TVector>(sz);
+  vec->setSize(sz);
+  auto from = data() + skipAmt;
+  auto end = from + sz;
+  auto to = vec->data();
+  do {
+    cellDup(*from++, *to++);
+  } while (from < end);
   return Object{std::move(vec)};
 }
 
@@ -280,13 +280,16 @@ typename std::enable_if<
 BaseVector::php_concat(const Variant& iterable) {
   size_t itSize;
   ArrayIter iter = getArrayIterHelper(iterable, itSize);
-  auto vec = req::make<TVector>();
-  uint32_t sz = m_size;
-  vec->reserve((size_t)sz + itSize);
-  assert(vec->canMutateBuffer());
-  vec->setSize(sz);
-  for (uint32_t i = 0; i < sz; ++i) {
-    cellDup(data()[i], vec->data()[i]);
+  uint32_t sz = m_size + itSize;
+  auto vec = req::make<TVector>(sz);
+  if (m_size > 0) {
+    vec->setSize(m_size);
+    auto from = data();
+    auto end = from + m_size;
+    auto to = vec->data();
+    do {
+      cellDup(*from++, *to++);
+    } while (from < end);
   }
   for (; iter; ++iter) {
     vec->addRaw(iter.second());
@@ -294,24 +297,26 @@ BaseVector::php_concat(const Variant& iterable) {
   return Object{std::move(vec)};
 }
 
-void BaseVector::zip(BaseVector* bvec, const Variant& iterable) {
+template<class TVector>
+typename std::enable_if<
+  std::is_base_of<BaseVector, TVector>::value, Object>::type
+BaseVector::php_zip(const Variant& iterable) {
   size_t itSize;
   ArrayIter iter = getArrayIterHelper(iterable, itSize);
-  uint32_t sz = m_size;
-  bvec->reserve(std::min(itSize, size_t(sz)));
-  assert(bvec->canMutateBuffer());
-  for (uint32_t i = 0; i < sz && iter; ++i, ++iter) {
-    Variant v = iter.second();
-    if (bvec->m_capacity <= bvec->m_size) {
-      bvec->grow();
-    }
-    auto pair = req::make<c_Pair>(c_Pair::NoInit{});
-    pair->initAdd(&data()[i]);
-    pair->initAdd(v);
-    bvec->data()[i].m_data.pobj = pair.detach();
-    bvec->data()[i].m_type = KindOfObject;
-    bvec->incSize();
+  if (m_size == 0 || !iter) {
+    return Object{req::make<TVector>()};
   }
+  uint32_t sz = std::min(itSize, size_t(m_size));
+  auto vec = req::make<TVector>(sz);
+  auto elm = data();
+  auto end = elm + m_size;
+  do {
+    Variant v = iter.second();
+    auto pair = req::make<c_Pair>(*elm, *v.toCell());
+    vec->addRaw(make_tv<KindOfObject>(pair.get()));
+    ++iter;
+  } while (++elm < end && iter);
+  return Object{std::move(vec)};
 }
 
 // Used by __construct for Vector and ImmVector
@@ -319,61 +324,32 @@ void BaseVector::zip(BaseVector* bvec, const Variant& iterable) {
 void BaseVector::addAllImpl(const Variant& t) {
   if (t.isNull()) return;
 
-  bool skip_ref_check = false;
   auto ok = IterateV(
     *t.asTypedValue(),
     [&, this](ArrayData* adata) {
       if (adata->empty()) return true;
-      if (!m_size) {
-
-        // Not isPackedLayout(), we don't want to take ownership of Hack arrays.
-        if (adata->isPacked()) {
-          // Collections can't contains refs, so we need to check for their
-          // presence before taking ownership of this array.
-          bool contains_ref = false;
-          if (!skip_ref_check) {
-            PackedArray::IterateV(
-              adata,
-              [&](const TypedValue* value) {
-                if (value->m_type == KindOfRef) {
-                  contains_ref = true;
-                  return true;
-                }
-                return false;
-              }
-            );
-          }
-
-          if (!contains_ref) {
-            auto* oldAd = arrayData();
-            m_arr = adata;
-            adata->incRefCount();
-            m_capacity = arrayData()->cap();
-            m_size = arrayData()->m_size;
-            decRefArr(oldAd);
-            ++m_version;
-            return true;
-          }
-        }
+      if (!m_size && adata->isVecArray()) {
+        dropImmCopy();
+        auto oldAd = arrayData();
+        m_arr = adata;
+        adata->incRefCount();
+        m_size = arrayData()->m_size;
+        decRefArr(oldAd);
+        return true;
       }
       reserve(m_size + adata->size());
-      mutateAndBump();
       return false;
     },
-    [this](const TypedValue* item) {
-      addRaw(tvAsCVarRef(item));
+    [this](TypedValue v) {
+      addRaw(tvToCell(v));
     },
     [&, this](ObjectData* coll) {
       if (coll->collectionType() == CollectionType::Pair) {
-        mutateAndBump();
-      } else if (coll->collectionType() == CollectionType::Vector) {
-        // If its a vector collection we don't need to worry about refs in the
-        // above fast-path.
-        skip_ref_check = true;
+        reserve(m_size + 2);
       }
     },
     [this](const TypedValue* item) {
-      add(tvToCell(item));
+      add(*tvToCell(item));
     });
 
   if (UNLIKELY(!ok)) {
@@ -382,28 +358,33 @@ void BaseVector::addAllImpl(const Variant& t) {
 }
 
 int64_t BaseVector::linearSearch(const Variant& search_value) {
-  uint32_t sz = m_size;
-  for (uint32_t i = 0; i < sz; ++i) {
-    if (same(search_value, tvAsCVarRef(&data()[i]))) {
-      return i;
+  for (auto elm = data(), end = elm + m_size; elm < end; ++elm) {
+    if (same(search_value, tvAsCVarRef(elm))) {
+      return elm - data();
     }
   }
   return -1;
 }
 
-void BaseVector::keys(BaseVector* bvec) {
-  assert(bvec->m_size == 0);
-  bvec->reserve(m_size);
-  assert(bvec->canMutateBuffer());
-  bvec->setSize(m_size);
-  for (uint32_t i = 0; i < m_size; ++i) {
-    bvec->data()[i].m_data.num = i;
-    bvec->data()[i].m_type = KindOfInt64;
+template<class TVector>
+typename std::enable_if<
+  std::is_base_of<BaseVector, TVector>::value, Object>::type
+BaseVector::php_keys() {
+  if (m_size == 0) {
+    return Object{req::make<TVector>()};
   }
+  auto vec = req::make<TVector>(m_size);
+  vec->setSize(m_size);
+  auto elm = vec->data();
+  int64_t i = 0;
+  do {
+    *elm++ = make_tv<KindOfInt64>(i++);
+  } while (i < m_size);
+  return Object{std::move(vec)};
 }
 
 bool BaseVector::OffsetIsset(ObjectData* obj, const TypedValue* key) {
-  assert(key->m_type != KindOfRef);
+  assertx(!isRefType(key->m_type));
   auto vec = static_cast<BaseVector*>(obj);
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
@@ -416,7 +397,7 @@ bool BaseVector::OffsetIsset(ObjectData* obj, const TypedValue* key) {
 }
 
 bool BaseVector::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
-  assert(key->m_type != KindOfRef);
+  assertx(!isRefType(key->m_type));
   auto vec = static_cast<BaseVector*>(obj);
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
@@ -429,7 +410,7 @@ bool BaseVector::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
 }
 
 bool BaseVector::OffsetContains(ObjectData* obj, const TypedValue* key) {
-  assert(key->m_type != KindOfRef);
+  assertx(!isRefType(key->m_type));
   auto vec = static_cast<BaseVector*>(obj);
   if (key->m_type == KindOfInt64) {
     return vec->contains(key->m_data.num);
@@ -442,51 +423,23 @@ bool BaseVector::OffsetContains(ObjectData* obj, const TypedValue* key) {
 bool BaseVector::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   auto bv1 = static_cast<const BaseVector*>(obj1);
   auto bv2 = static_cast<const BaseVector*>(obj2);
-
-  uint32_t sz = bv1->m_size;
-  if (sz != bv2->m_size) {
-    return false;
-  }
-
-  for (uint32_t i = 0; i < sz; ++i) {
-    if (!HPHP::equal(tvAsCVarRef(&bv1->data()[i]),
-                     tvAsCVarRef(&bv2->data()[i]))) {
-
-      return false;
-    }
-  }
-
-  return true;
+  return PackedArray::VecEqual(bv1->arrayData(), bv2->arrayData());
 }
 
-NEVER_INLINE
-void BaseVector::grow() {
-  if (m_capacity == MaxCapacity()) {
-    return;
-  }
+void BaseVector::addFront(TypedValue tv) {
+  assertx(!isRefType(tv.m_type));
   dropImmCopy();
-  uint32_t newCap =
-    m_capacity ? std::min(uint64_t(m_capacity) * 2, MaxCapacity()) : 8;
-  reserveImpl(newCap);
-}
-
-void BaseVector::addFront(const TypedValue* val) {
-  assert(val->m_type != KindOfRef);
-  if (m_capacity <= m_size) {
-    grow();
-  } else {
-    mutate();
+  auto oldAd = arrayData();
+  m_arr = PackedArray::PrependVec(oldAd, tv);
+  if (m_arr != oldAd) {
+    decRefArr(oldAd);
   }
-  assert(canMutateBuffer());
-  ++m_version;
-  memmove(data()+1, data(), m_size * sizeof(TypedValue));
-  cellDup(*val, data()[0]);
-  incSize();
+  m_size = arrayData()->m_size;
 }
 
 Variant BaseVector::popFront() {
   if (m_size) {
-    mutateAndBump();
+    mutate();
     Variant ret(tvAsCVarRef(&data()[0]), Variant::CellCopy());
     decSize();
     memmove(data(), data()+1, m_size * sizeof(TypedValue));
@@ -498,72 +451,57 @@ Variant BaseVector::popFront() {
 }
 
 void BaseVector::reserveImpl(uint32_t newCap) {
-  auto* oldBuf = data();
-  auto* oldAd = arrayData();
-  m_arr = PackedArray::MakeReserve(newCap);
-  m_capacity = arrayData()->cap();
+  auto oldBuf = data();
+  auto oldAd = arrayData();
+  m_arr = PackedArray::MakeReserveVec(newCap);
   arrayData()->m_size = m_size;
   if (LIKELY(!oldAd->cowCheck())) {
-    std::memcpy(data(), oldBuf, m_size * sizeof(TypedValue));
-    // Mark oldAd as having 0 elements so that the array release logic doesn't
-    // decRef the elements (since we teleported the elements to a new array)
-    assert(oldAd != staticEmptyArray());
-    assert(oldAd->isPacked());
-    oldAd->m_size = 0;
+    assertx(oldAd->isVecArray());
+    if (m_size > 0) {
+      std::memcpy(data(), oldBuf, m_size * sizeof(TypedValue));
+      // Mark oldAd as having 0 elements so that the array release logic doesn't
+      // decRef the elements (since we teleported the elements to a new array)
+      oldAd->m_size = 0;
+    }
     decRefArr(oldAd);
   } else {
-    auto* dst = data();
-    auto* src = oldBuf;
-    auto* stop = src + m_size;
-    for (; src != stop; ++src, ++dst) {
-      cellDup(*src, *dst);
+    if (m_size > 0) {
+      auto from = oldBuf;
+      auto end = oldBuf + m_size;
+      auto to = data();
+      do {
+        cellDup(*from++, *to++);
+      } while (from < end);
     }
+    assertx(!oldAd->decWillRelease());
     oldAd->decRefCount();
   }
 }
 
-void BaseVector::reserve(int64_t sz) {
-  if (sz <= 0) return;
-  if (m_capacity < sz) {
-    dropImmCopy();
-    ++m_version;
+void BaseVector::reserve(uint32_t sz) {
+  dropImmCopy();
+  if (sz > PackedArray::capacity(arrayData())) {
     reserveImpl(sz);
+  } else if (!canMutateBuffer()) {
+    mutateImpl();
   }
+  assertx(canMutateBuffer());
 }
-
-BaseVector::BaseVector(Class* cls, HeaderKind kind, uint32_t cap)
-  : ObjectData(cls, collections::objectFlags, kind)
-  , m_size(0)
-  , m_versionAndCap(cap)
-  , m_arr(cap == 0 ? staticEmptyArray() : PackedArray::MakeReserve(cap))
-{}
 
 /**
  * Delegate the responsibility for freeing the buffer to the immutable copy,
  * if it exists.
  */
 BaseVector::~BaseVector() {
-  // Avoid indirect call, as we know it is a packed array.
-  auto const packed = arrayData();
-  if (packed->decReleaseCheck()) PackedArray::Release(packed);
+  // Avoid indirect call, as we know it is a vec array.
+  auto const vec = arrayData();
+  if (vec->decReleaseCheck()) PackedArray::ReleaseVec(vec);
 }
 
 void BaseVector::mutateImpl() {
-  assert(arrayData()->cowCheck());
-  dropImmCopy();
-  if (canMutateBuffer()) {
-    return;
-  }
-  assert(arrayData()->cowCheck());
-  if (!m_size) {
-    arrayData()->decRefCount();
-    m_arr = staticEmptyArray();
-    m_capacity = 0;
-    return;
-  }
-  auto* oldAd = arrayData();
-  m_arr = PackedArray::Copy(oldAd);
-  assert(oldAd->cowCheck());
+  auto oldAd = arrayData();
+  m_arr = PackedArray::CopyVec(oldAd);
+  assertx(!oldAd->decWillRelease());
   oldAd->decRefCount();
 }
 
@@ -572,44 +510,41 @@ ALWAYS_INLINE typename std::enable_if<
   std::is_base_of<BaseVector, TVector>::value, TVector*>::type
 BaseVector::Clone(ObjectData* obj) {
   auto thiz = static_cast<TVector*>(obj);
-  auto target = static_cast<TVector*>(
-    TVector::instanceCtor(TVector::classof()));
-  if (!thiz->m_size) {
-    return target;
-  }
   thiz->arrayData()->incRefCount();
-  target->m_arr = thiz->m_arr;
-  target->m_size = thiz->m_size;
-  target->m_capacity = thiz->m_capacity;
-  return target;
+  return req::make<TVector>(thiz->arrayData()).detach();
 }
 
 template<class TVector> typename
   std::enable_if<std::is_base_of<BaseVector, TVector>::value, Object>::type
 BaseVector::fromKeysOf(const TypedValue& container) {
+  uint32_t sz = getContainerSize(container);
+  if (sz == 0) {
+    return Object{req::make<TVector>()};
+  }
+  auto vec = req::make<TVector>(sz);
+  vec->setSize(sz);
   ArrayIter iter(container);
-  auto target = req::make<TVector>();
-  target->reserve(getContainerSize(container));
-  assert(target->canMutateBuffer());
-  for (; iter; ++iter) { target->addRaw(iter.first()); }
-  return Object{std::move(target)};
+  assertx(iter);
+  auto elm = vec->data();
+  do {
+    cellDup(*iter.first().toCell(), *elm++);
+    ++iter;
+  } while (iter);
+  return Object{std::move(vec)};
 }
 
 // This function will create a immutable copy of this Vector (if it doesn't
 // already exist) and then return it
 Object BaseVector::getImmutableCopy() {
   if (m_immCopy.isNull()) {
-    auto vec = req::make<c_ImmVector>();
-    vec->m_arr = m_arr;
-    vec->m_size = m_size;
-    vec->m_capacity = m_capacity;
-    vec->m_version = m_version;
-    m_immCopy = std::move(vec);
+    auto vec = req::make<c_ImmVector>(arrayData());
     arrayData()->incRefCount();
+    m_immCopy = std::move(vec);
   }
-  assert(!m_immCopy.isNull());
-  assert(data() == static_cast<c_ImmVector*>(m_immCopy.get())->data());
-  assert(arrayData()->cowCheck());
+  assertx(!m_immCopy.isNull());
+  assertx(arrayData() ==
+         static_cast<c_ImmVector*>(m_immCopy.get())->arrayData());
+  assertx(!canMutateBuffer());
   return m_immCopy;
 }
 
@@ -625,25 +560,22 @@ Object BaseVector::getIterator() {
 Class* c_Vector::s_cls;
 
 void c_Vector::clear() {
-  ++m_version;
   dropImmCopy();
   decRefArr(arrayData());
-  m_arr = staticEmptyArray();
+  m_arr = staticEmptyVecArray();
   m_size = 0;
-  m_capacity = 0;
 }
 
 void c_Vector::removeKey(int64_t k) {
   if (!contains(k)) return;
-  mutateAndBump();
-  uint64_t datum = data()[k].m_data.num;
-  DataType t = data()[k].m_type;
+  mutate();
+  auto const old = data()[k];
   if (k+1 < m_size) {
     memmove(&data()[k], &data()[k+1],
             (m_size-(k+1)) * sizeof(TypedValue));
   }
   decSize();
-  tvRefcountedDecRefHelper(t, datum);
+  tvDecRefGen(old);
 }
 
 void c_Vector::addAllKeysOf(const Variant& container) {
@@ -654,9 +586,6 @@ void c_Vector::addAllKeysOf(const Variant& container) {
   ArrayIter iter(containerCell);
   if (!sz || !iter) return;
   reserve(m_size + sz);
-
-  mutateAndBump();
-  assert(canMutateBuffer());
   do {
     addRaw(iter.first());
     ++iter;
@@ -665,7 +594,7 @@ void c_Vector::addAllKeysOf(const Variant& container) {
 
 Variant c_Vector::pop() {
   if (m_size) {
-    mutateAndBump();
+    mutate();
     decSize();
     return Variant(tvAsCVarRef(&data()[m_size]), Variant::CellCopy());
   } else {
@@ -674,59 +603,75 @@ Variant c_Vector::pop() {
   }
 }
 
-void c_Vector::resize(int64_t sz, const Cell* val) {
-  assert(sz >= 0);
+void c_Vector::resize(uint32_t sz, const Cell* val) {
   if (sz == m_size) {
     return;
   }
-  if (sz > (int64_t)m_capacity) {
-    reserve(sz);
-  } else {
-    mutate();
-  }
-  assert(canMutateBuffer());
-  ++m_version;
-  uint32_t requestedSize = (uint32_t)sz;
-  if (m_size > requestedSize) {
+  if (sz == 0) {
+    dropImmCopy();
+    decRefArr(arrayData());
+    m_arr = staticEmptyVecArray();
+    m_size = 0;
+  } else if (m_size > sz) {
+    // If there were any objects in the part that's being resized away, their
+    // desctuctors may mutate this Vector (and need to see it in the fully
+    // resized state). The easiest way to do this is to copy the part we're
+    // keeping into a new vec, swap them, and decref the old one.
+    dropImmCopy();
+    auto oldAd = arrayData();
+    auto from = data();
+    auto end = from + sz;
+    m_arr = PackedArray::MakeReserveVec(sz);
+    auto to = data();
     do {
-      decSize();
-      tvRefcountedDecRef(&data()[m_size]);
-    } while (m_size > requestedSize);
+      cellDup(*from++, *to++);
+    } while (from < end);
+    arrayData()->m_size = m_size = sz;
+    decRefArr(oldAd);
   } else {
-    for (; m_size < requestedSize; incSize()) {
-      cellDup(*val, data()[m_size]);
-    }
+    reserve(sz);
+    auto elm = data() + m_size;
+    auto end = data() + sz;
+    do {
+      cellDup(*val, *elm);
+    } while (++elm < end);
+    setSize(sz);
   }
 }
 
 void c_Vector::reverse() {
-  if (m_size <= 1) return;
-  mutateAndBump();
-  TypedValue* start = data();
-  TypedValue* end = start + m_size - 1;
-  for (; start < end; ++start, --end) {
+  if (m_size < 2) return;
+  mutate();
+  auto start = data();
+  auto end = start + m_size - 1;
+  do {
     std::swap(start->m_data.num, end->m_data.num);
     std::swap(start->m_type, end->m_type);
-  }
+  } while (++start < --end);
 }
 
 void c_Vector::splice(int64_t startPos, int64_t endPos) {
-  assert(startPos >= 0 && endPos <= m_size);
-  mutateAndBump();
-  // Null out each element before decreffing it. We need to do this in case
-  // a __destruct method reenters and accesses this Vector object.
-  for (int64_t i = startPos; i < endPos; ++i) {
-    uint64_t datum = data()[i].m_data.num;
-    DataType t = data()[i].m_type;
-    tvWriteNull(&data()[i]);
-    tvRefcountedDecRefHelper(t, datum);
+  // If there were any objects in the part that's being spliced away, their
+  // desctuctors may mutate this Vector (and need to see it in the fully
+  // spliced state). The easiest way to do this is to copy the part we're
+  // keeping into a new vec, swap them, and decref the old one.
+  assertx(0 <= startPos && startPos < endPos && endPos <= m_size);
+  uint32_t sz = m_size - (endPos - startPos);
+  dropImmCopy();
+  auto oldBuf = data();
+  auto oldAd = arrayData();
+  m_arr = PackedArray::MakeReserveVec(sz);
+  auto to = data();
+  for (auto from = oldBuf, end = from + startPos; from < end; ++from, ++to) {
+    cellDup(*from, *to);
   }
-  // Move elements that came after the deleted elements (if there are any)
-  if (endPos < m_size) {
-    memmove(&data()[startPos], &data()[endPos],
-            (m_size - endPos) * sizeof(TypedValue));
+  auto from = oldBuf + endPos;
+  auto end = oldBuf + m_size;
+  for (; from < end; ++from, ++to) {
+    cellDup(*from, *to);
   }
-  setSize(m_size - (endPos - startPos));
+  arrayData()->m_size = m_size = sz;
+  decRefArr(oldAd);
 }
 
 void c_Vector::php_splice(const Variant& offset,
@@ -746,7 +691,7 @@ void c_Vector::php_splice(const Variant& offset,
   }
   auto sz = size();
   auto start = offset.toInt64();
-  if (UNLIKELY(start > sz)) return;
+  if (UNLIKELY(start >= sz)) return;
   if (start < 0) {
     start += sz;
     if (start < 0) { start = 0; }
@@ -760,7 +705,7 @@ void c_Vector::php_splice(const Variant& offset,
     } else {
       if (!end) return;
       end += sz;
-      if (end < start) return;
+      if (end <= start) return;
     }
   } else {
     end = sz;
@@ -769,14 +714,15 @@ void c_Vector::php_splice(const Variant& offset,
 }
 
 void c_Vector::shuffle() {
-  if (m_size <= 1) {
+  if (m_size < 2) {
     return;
   }
-  mutateAndBump();
-  for (uint32_t i = 1; i < m_size; ++i) {
+  mutate();
+  uint32_t i = 1;
+  do {
     uint32_t j = math_mt_rand(0, i);
     std::swap(data()[i], data()[j]);
-  }
+  } while (++i < m_size);
 }
 
 c_Vector* c_Vector::Clone(ObjectData* obj) {
@@ -788,18 +734,21 @@ Object c_Vector::fromArray(const Class*, const Variant& arr) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter arr must be an array");
   }
-  auto target = req::make<c_Vector>();
-  auto* ad = arr.getArrayData();
+  auto ad = arr.getArrayData();
   uint32_t sz = ad->size();
-  target->reserve(sz);
-  assert(target->canMutateBuffer());
-  target->setSize(sz);
-  auto* data = target->data();
-  ssize_t pos = ad->iter_begin();
-  for (uint32_t i = 0; i < sz; ++i, pos = ad->iter_advance(pos)) {
-    assert(pos != ad->iter_end());
-    cellDup(*(ad->getValueRef(pos).asCell()), data[i]);
+  if (sz == 0) {
+    return Object{req::make<c_Vector>()};
   }
+  auto target = req::make<c_Vector>(sz);
+  target->setSize(sz);
+  auto elm = target->data();
+  auto end = elm + sz;
+  ssize_t pos = ad->iter_begin();
+  do {
+    assertx(pos != ad->iter_end());
+    cellDup(tvToCell(ad->atPos(pos)), *elm);
+    pos = ad->iter_advance(pos);
+  } while (++elm < end);
   return Object{std::move(target)};
 }
 
@@ -808,7 +757,7 @@ void c_Vector::OffsetSet(ObjectData* obj, const TypedValue* key,
   static_cast<c_Vector*>(obj)->set(key, val);
 }
 
-void c_Vector::OffsetUnset(ObjectData* obj, const TypedValue* key) {
+void c_Vector::OffsetUnset(ObjectData* /*obj*/, const TypedValue* /*key*/) {
   SystemLib::throwRuntimeExceptionObject(
     "Cannot unset an element of a Vector");
 }
@@ -824,14 +773,26 @@ using VectorValAccessor = TVAccessor;
  */
 template <typename AccessorT>
 SortFlavor c_Vector::preSort(const AccessorT& acc) {
-  assert(m_size > 0);
-  uint32_t sz = m_size;
+  assertx(m_size > 0);
   bool allInts = true;
   bool allStrs = true;
-  for (uint32_t i = 0; i < sz; ++i) {
-    allInts = (allInts && acc.isInt(data()[i]));
-    allStrs = (allStrs && acc.isStr(data()[i]));
-  }
+  auto elm = data();
+  auto end = elm + m_size;
+  do {
+    if (acc.isInt(*elm)) {
+      if (!allInts) {
+        return GenericSort;
+      }
+      allStrs = false;
+    } else if (acc.isStr(*elm)) {
+      if (!allStrs) {
+        return GenericSort;
+      }
+      allInts = false;
+    } else {
+      return GenericSort;
+    }
+  } while (++elm < end);
   return allStrs ? StringSort : allInts ? IntegerSort : GenericSort;
 }
 
@@ -869,7 +830,7 @@ void c_Vector::sort(int sort_flags, bool ascending) {
   if (m_size <= 1) {
     return;
   }
-  mutateAndBump();
+  mutate();
   SortFlavor flav = preSort<VectorValAccessor>(VectorValAccessor());
   CALL_SORT(VectorValAccessor);
 }
@@ -882,7 +843,7 @@ bool c_Vector::usort(const Variant& cmp_function) {
   if (m_size <= 1) {
     return true;
   }
-  mutateAndBump();
+  mutate();
   ElmUCompare<VectorValAccessor> comp;
   CallCtx ctx;
   CallerFrame cf;
@@ -924,7 +885,7 @@ ALWAYS_INLINE typename std::enable_if<
 HHVM_STATIC_METHOD(BaseVector, fromKeysOf, const Variant& container) {
   if (container.isNull()) { return Object{req::make<TVector>()}; }
 
-  const auto& cellContainer = *container.asCell();
+  const auto& cellContainer = *container.toCell();
   if (UNLIKELY(!isContainer(cellContainer))) {
     SystemLib::throwInvalidArgumentExceptionObject(
       "Parameter must be a container (array or collection)");
@@ -955,7 +916,9 @@ void CollectionsExtension::initVector() {
   BASE_ME(count,        &BaseVector::size);
   BASE_ME(at,           &BaseVector::php_at);
   BASE_ME(get,          &BaseVector::php_get);
-  BASE_ME(toArray,      &BaseVector::toArray);
+  BASE_ME(toArray,      &BaseVector::toPHPArray);
+  BASE_ME(toVArray,     &BaseVector::toVArray);
+  BASE_ME(toDArray,     &BaseVector::toDArray);
   BASE_ME(getIterator,  &BaseVector::getIterator);
   BASE_ME(firstValue,   &BaseVector::firstValue);
   BASE_ME(lastValue,    &BaseVector::lastValue);

@@ -67,11 +67,10 @@ static void cleanup_xml_node(xmlNodePtr node) {
   }
 }
 
-static void soap_ignorableWhitespace(void *ctx, const xmlChar *ch, int len) {
-}
+static void
+soap_ignorableWhitespace(void* /*ctx*/, const xmlChar* /*ch*/, int /*len*/) {}
 
-static void soap_Comment(void *ctx, const xmlChar *value) {
-}
+static void soap_Comment(void* /*ctx*/, const xmlChar* /*value*/) {}
 
 const StaticString
   s_http("http"),

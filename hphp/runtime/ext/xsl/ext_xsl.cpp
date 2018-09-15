@@ -195,8 +195,8 @@ xmlDocPtr XSLTProcessorData::apply_stylesheet() {
   );
 
   for (ArrayIter iter(m_params); iter; ++iter) {
-    assert(iter.first().isString());
-    assert(iter.second().isString());
+    assertx(iter.first().isString());
+    assertx(iter.second().isString());
 
     xmlChar *value = xslt_string_to_xpathexpr(iter.second().toString().c_str());
     if (value) {
@@ -214,7 +214,7 @@ xmlDocPtr XSLTProcessorData::apply_stylesheet() {
     profile = fopen(m_profile.data(), "w");
   }
 
-  assert(m_usedElements.empty());
+  assertx(m_usedElements.empty());
   xmlDocPtr res = xsltApplyStylesheetUser(m_stylesheet,
                                           doc(),
                                           nullptr,
@@ -422,8 +422,7 @@ static void xslt_ext_function_object_php(xmlXPathParserContextPtr ctxt,
   xslt_ext_function_php(ctxt, nargs, 2);
 }
 
-static void xslt_ext_error_handler(void *ctx,
-                                   const char *fmt, ...) {
+static void xslt_ext_error_handler(void* /*ctx*/, const char* fmt, ...) {
   va_list args;
   va_start(args, fmt);
   try {
@@ -443,14 +442,14 @@ static void xslt_ext_error_handler(void *ctx,
 ///////////////////////////////////////////////////////////////////////////////
 // methods
 
-static Variant HHVM_METHOD(XSLTProcessor, getParameter,
-                        const Variant& namespaceURI,
-                        const String& localName) {
+static Variant
+HHVM_METHOD(XSLTProcessor, getParameter, const Variant& /*namespaceURI*/,
+            const String& localName) {
   auto data = Native::data<XSLTProcessorData>(this_);
 
   // namespaceURI argument is unused in PHP5 XSL extension.
   if (data->m_params.exists(localName)) {
-    assert(data->m_params[localName].isString());
+    assertx(data->m_params[localName].isString());
     return data->m_params[localName].toString();
   }
 
@@ -499,14 +498,14 @@ static void HHVM_METHOD(XSLTProcessor, importStylesheet,
   }
 }
 
-static bool HHVM_METHOD(XSLTProcessor, removeParameter,
-                        const Variant& namespaceURI,
-                        const String& localName) {
+static bool
+HHVM_METHOD(XSLTProcessor, removeParameter, const Variant& /*namespaceURI*/,
+            const String& localName) {
   auto data = Native::data<XSLTProcessorData>(this_);
 
   // namespaceURI argument is unused in PHP5 XSL extension.
   if (data->m_params.exists(localName)) {
-    assert(data->m_params[localName].isString());
+    assertx(data->m_params[localName].isString());
     data->m_params.remove(localName);
 
     return true;
@@ -542,30 +541,21 @@ static void HHVM_METHOD(XSLTProcessor, registerPHPFunctions,
   }
 }
 
-static bool HHVM_METHOD(XSLTProcessor, setParameter,
-                        const Variant& namespaceURI,
-                        const Variant& localName,
-                        const Variant& value /*= uninit_variant*/) {
+static bool
+HHVM_METHOD(XSLTProcessor, setParameter, const Variant& /*namespaceURI*/,
+            const Variant& localName,
+            const Variant& value /*= uninit_variant*/) {
   auto data = Native::data<XSLTProcessorData>(this_);
 
   // namespaceURI argument is unused in PHP5 XSL extension.
   if (localName.isString() && value.isString()) {
-    if (data->m_params.exists(localName)) {
-      data->m_params.set(localName, value);
-    } else {
-      data->m_params.add(localName, value);
-    }
-
+    data->m_params.set(localName, value);
     return true;
   } else if (localName.isArray() && value.isNull()) {
     int ret = true;
     for (ArrayIter iter(localName); iter; ++iter) {
       if (iter.first().isString() && iter.second().isString()) {
-        if (data->m_params.exists(iter.first().toString())) {
-          data->m_params.set(iter.first().toString(), iter.second().toString());
-        } else {
-          data->m_params.add(iter.first().toString(), iter.second().toString());
-        }
+        data->m_params.set(iter.first().toString(), iter.second().toString());
       } else {
         ret = false;
       }

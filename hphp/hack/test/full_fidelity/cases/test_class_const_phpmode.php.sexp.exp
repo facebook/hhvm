@@ -1,0 +1,101 @@
+((script 335
+  ((list 335
+    ((markup_section 5
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 5 ((() <? 2 ()) (() name 3 ((end_of_line 1)))))
+       (missing 0 ())))
+     (classish_declaration 328
+      ((missing 0 ()) (missing 0 ())
+       (((end_of_line 1)) class 5 ((whitespace 1)))
+       (() name 11 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (classish_body 310
+        ((() { 1 ((end_of_line 1)))
+         (list 304
+          ((const_declaration 22
+            ((missing 0 ()) (missing 0 ())
+             (((whitespace 2)) const 5 ((whitespace 1))) (missing 0 ())
+             (list 15
+              ((list_item 15
+                ((constant_declarator 15
+                  ((() name 5 ((whitespace 1)))
+                   (simple_initializer 9
+                    ((() = 1 ((whitespace 1)))
+                     (literal 7 ((() double_quoted_string_literal 7 ())))))))
+                 (missing 0 ())))))
+             (() ";" 1 ((end_of_line 1)))))
+           (const_declaration 27
+            ((missing 0 ()) (missing 0 ())
+             (((whitespace 2)) const 5 ((whitespace 1)))
+             (simple_type_specifier 6 ((() string 6 ((whitespace 1)))))
+             (list 13
+              ((list_item 13
+                ((constant_declarator 13
+                  ((() name 4 ((whitespace 1)))
+                   (simple_initializer 8
+                    ((() = 1 ((whitespace 1)))
+                     (literal 6 ((() double_quoted_string_literal 6 ())))))))
+                 (missing 0 ())))))
+             (() ";" 1 ((end_of_line 1)))))
+           (const_declaration 49
+            ((missing 0 ()) (missing 0 ())
+             (((whitespace 2)) const 5 ((whitespace 1)))
+             (generic_type_specifier 20
+              ((() name 12 ())
+               (type_arguments 8
+                ((() < 1 ())
+                 (list 6
+                  ((list_item 6
+                    ((simple_type_specifier 6 ((() string 6 ())))
+                     (missing 0 ())))))
+                 (() > 1 ((whitespace 1)))))))
+             (list 21
+              ((list_item 21
+                ((constant_declarator 21
+                  ((() name 4 ((whitespace 1)))
+                   (simple_initializer 16
+                    ((() = 1 ((whitespace 1)))
+                     (literal 14 ((() double_quoted_string_literal 14 ())))))))
+                 (missing 0 ())))))
+             (() ";" 1 ((end_of_line 1)))))
+           (const_declaration 61
+            ((((whitespace 2)) public 6 ((whitespace 1))) (missing 0 ())
+             (() const 5 ((whitespace 1)))
+             (simple_type_specifier 6 ((() string 6 ((whitespace 1)))))
+             (list 40
+              ((list_item 40
+                ((constant_declarator 40
+                  ((() name 11 ((whitespace 1)))
+                   (simple_initializer 28
+                    ((() = 1 ((whitespace 1)))
+                     (literal 26 ((() double_quoted_string_literal 26 ())))))))
+                 (missing 0 ())))))
+             (() ";" 1 ((end_of_line 1)))))
+           (const_declaration 67
+            ((((whitespace 2)) protected 9 ((whitespace 1))) (missing 0 ())
+             (() const 5 ((whitespace 1)))
+             (simple_type_specifier 6 ((() string 6 ((whitespace 1)))))
+             (list 43
+              ((list_item 43
+                ((constant_declarator 43
+                  ((() name 14 ((whitespace 1)))
+                   (simple_initializer 28
+                    ((() = 1 ((whitespace 1)))
+                     (literal 26 ((() double_quoted_string_literal 26 ())))))))
+                 (missing 0 ())))))
+             (() ";" 1 ((end_of_line 1)))))
+           (const_declaration 63
+            ((((whitespace 2)) private 7 ((whitespace 1))) (missing 0 ())
+             (() const 5 ((whitespace 1)))
+             (simple_type_specifier 6 ((() string 6 ((whitespace 1)))))
+             (list 41
+              ((list_item 41
+                ((constant_declarator 41
+                  ((() name 12 ((whitespace 1)))
+                   (simple_initializer 28
+                    ((() = 1 ((whitespace 1)))
+                     (literal 26 ((() double_quoted_string_literal 26 ())))))))
+                 (missing 0 ())))))
+             (() ";" 1 ((end_of_line 1)))))))
+         (() } 1 ((end_of_line 1)))))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

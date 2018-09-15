@@ -5,7 +5,7 @@
 .main {
   String "main"
   FPushFunc 0
-  FCall 0 # allow the JIT why not
+  FCall 0 0 1 - "" "" # allow the JIT why not
   PopR
 
   Int 1
@@ -15,23 +15,18 @@
 .adata my_array = """a:2:{s:3:"foo";s:3:"bar";s:3:"baz";s:4:"blah";}""";
 
 .class ClassWithArray {
-  .method [public] 86ctor {
-    Null
-    RetC
-  }
-
   .property [static public] arr =
             """a:4:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;i:4;}""";
 }
 
 .function ArrayMember() {
+  .numclsrefslots 1;
   FPushFuncD 1 "var_dump"
     String "arr"
     String "ClassWithArray"
-    AGetC
-    CGetS
-    FPassC 0
-  FCall 1
+    ClsRefGetC 0
+    CGetS 0
+  FCall 1 0 1 - "" ""
   PopR
 
   String "ClassWithArray"
@@ -41,11 +36,10 @@
   FPushFuncD 1 "var_dump"
     String "arr"
     Int 2
-    AGetL $x
-    BaseSC 2 0
+    ClsRefGetL $x 0
+    BaseSC 1 0 Warn
     QueryM 2 CGet EC:0
-    FPassC 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   True
@@ -54,7 +48,7 @@
 
 .function main() {
   FPushFuncD 0 "ArrayMember"
-  FCall 0
+  FCall 0 0 1 - "" ""
   PopR
 
   Array @my_array
@@ -83,12 +77,12 @@
   String "baz"
   SetL $key
   PopC
-  BaseL $arr None
+  BaseL $arr Unset
   UnsetM 0 EL:$key
 
   # Test that it's unset
   CGetL $arr
-  BaseC 0
+  BaseC 0 Warn
   QueryM 1 Isset EL:$key
   JmpZ unset_label
 
@@ -104,16 +98,15 @@ unset_label:  String "win\n"
               PopC
 
               FPushFuncD 1 "var_dump"
-              FPassL 0 $arr
-              FCall 1
+              CGetL $arr
+              FCall 1 0 1 - "" ""
               PopR
 
               FPushFuncD 1 "var_dump"
               Int 1
               String "b"
               NewPackedArray 2
-              FPassC 0
-              FCall 1
+              FCall 1 0 1 - "" ""
               PopR
 
               Null

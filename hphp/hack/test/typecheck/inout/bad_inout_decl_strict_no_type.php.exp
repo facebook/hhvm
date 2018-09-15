@@ -1,0 +1,2 @@
+File "bad_inout_decl_strict_no_type.php", line 3, characters 21-22:
+Was expecting a type hint (Typing[4032])

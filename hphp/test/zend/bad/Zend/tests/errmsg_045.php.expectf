@@ -1,4 +1,0 @@
-string(50) "Redefining already defined constructor for class A"
-string(%d) "%s(%d) : eval()'d code"
-
-Notice: %s

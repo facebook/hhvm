@@ -1,1 +1,1 @@
--vAutoInline=5
+-vAutoInline=5 -d hhvm.php7.all=0

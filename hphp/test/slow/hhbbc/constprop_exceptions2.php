@@ -34,5 +34,9 @@ heh:
   var_dump($x);
 }
 
+
+<<__EntryPoint>>
+function main_constprop_exceptions2() {
 foo();
 foo();
+}

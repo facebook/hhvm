@@ -415,32 +415,32 @@ Triggered E_WARNING: Value returned from function f17_soft() must be of type @?i
 Triggered E_WARNING: Value returned from function f17_soft() must be of type @?int, array given
 
 calling f18
-Caught exception: Value returned from function f18() must be of type array, null given
-Caught exception: Value returned from function f18() must be of type array, int given
-Caught exception: Value returned from function f18() must be of type array, string given
-Caught exception: Value returned from function f18() must be of type array, bool given
-Caught exception: Value returned from function f18() must be of type array, float given
-Caught exception: Value returned from function f18() must be of type array, gd given
-Caught exception: Value returned from function f18() must be of type array, Closure given
-Caught exception: Value returned from function f18() must be of type array, Figure given
-Caught exception: Value returned from function f18() must be of type array, Square given
-Caught exception: Value returned from function f18() must be of type array, Fractal given
-Caught exception: Value returned from function f18() must be of type array, xhp_div given
-Caught exception: Value returned from function f18() must be of type array, string given
+Caught exception: Value returned from function f18() must be of type HH\varray, null given
+Caught exception: Value returned from function f18() must be of type HH\varray, int given
+Caught exception: Value returned from function f18() must be of type HH\varray, string given
+Caught exception: Value returned from function f18() must be of type HH\varray, bool given
+Caught exception: Value returned from function f18() must be of type HH\varray, float given
+Caught exception: Value returned from function f18() must be of type HH\varray, gd given
+Caught exception: Value returned from function f18() must be of type HH\varray, Closure given
+Caught exception: Value returned from function f18() must be of type HH\varray, Figure given
+Caught exception: Value returned from function f18() must be of type HH\varray, Square given
+Caught exception: Value returned from function f18() must be of type HH\varray, Fractal given
+Caught exception: Value returned from function f18() must be of type HH\varray, xhp_div given
+Caught exception: Value returned from function f18() must be of type HH\varray, string given
 
 calling f18_soft
-Triggered E_WARNING: Value returned from function f18_soft() must be of type @array, null given
-Triggered E_WARNING: Value returned from function f18_soft() must be of type @array, int given
-Triggered E_WARNING: Value returned from function f18_soft() must be of type @array, string given
-Triggered E_WARNING: Value returned from function f18_soft() must be of type @array, bool given
-Triggered E_WARNING: Value returned from function f18_soft() must be of type @array, float given
-Triggered E_WARNING: Value returned from function f18_soft() must be of type @array, gd given
-Triggered E_WARNING: Value returned from function f18_soft() must be of type @array, Closure given
-Triggered E_WARNING: Value returned from function f18_soft() must be of type @array, Figure given
-Triggered E_WARNING: Value returned from function f18_soft() must be of type @array, Square given
-Triggered E_WARNING: Value returned from function f18_soft() must be of type @array, Fractal given
-Triggered E_WARNING: Value returned from function f18_soft() must be of type @array, xhp_div given
-Triggered E_WARNING: Value returned from function f18_soft() must be of type @array, string given
+Triggered E_WARNING: Value returned from function f18_soft() must be of type @HH\varray, null given
+Triggered E_WARNING: Value returned from function f18_soft() must be of type @HH\varray, int given
+Triggered E_WARNING: Value returned from function f18_soft() must be of type @HH\varray, string given
+Triggered E_WARNING: Value returned from function f18_soft() must be of type @HH\varray, bool given
+Triggered E_WARNING: Value returned from function f18_soft() must be of type @HH\varray, float given
+Triggered E_WARNING: Value returned from function f18_soft() must be of type @HH\varray, gd given
+Triggered E_WARNING: Value returned from function f18_soft() must be of type @HH\varray, Closure given
+Triggered E_WARNING: Value returned from function f18_soft() must be of type @HH\varray, Figure given
+Triggered E_WARNING: Value returned from function f18_soft() must be of type @HH\varray, Square given
+Triggered E_WARNING: Value returned from function f18_soft() must be of type @HH\varray, Fractal given
+Triggered E_WARNING: Value returned from function f18_soft() must be of type @HH\varray, xhp_div given
+Triggered E_WARNING: Value returned from function f18_soft() must be of type @HH\varray, string given
 
 calling f19
 

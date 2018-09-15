@@ -157,11 +157,14 @@ static bool variantToGMPData(const char* const fnCaller,
   case KindOfDict:
   case KindOfPersistentKeyset:
   case KindOfKeyset:
+  case KindOfPersistentShape:
+  case KindOfShape:
   case KindOfPersistentArray:
   case KindOfArray:
   case KindOfRef:
-  case KindOfClass:
   case KindOfResource:
+  case KindOfFunc:
+  case KindOfClass:
     raise_warning(cs_GMP_INVALID_TYPE, fnCaller);
     return false;
   }
@@ -999,9 +1002,7 @@ static Variant HHVM_FUNCTION(gmp_prob_prime,
   return probPrime;
 }
 
-
-static void HHVM_FUNCTION(gmp_random,
-                          int64_t limiter) {
+static void HHVM_FUNCTION(gmp_random, int64_t /*limiter*/) {
   throw_not_implemented("gmp_random");
 }
 
@@ -1355,7 +1356,7 @@ static void HHVM_METHOD(GMP, unserialize,
 
   auto gmpObjectData = Native::data<GMPData>(this_);
   gmpObjectData->setGMPMpz(gmpData);
-  this_->o_setArray(props.toArray());
+  this_->setDynProps(props.toArray());
 
   mpz_clear(gmpData);
 }

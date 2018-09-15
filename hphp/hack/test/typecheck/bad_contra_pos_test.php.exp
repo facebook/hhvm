@@ -1,0 +1,6 @@
+File "bad_contra_pos_test.php", line 20, characters 15-21:
+Invalid argument (Typing[4110])
+File "bad_contra_pos_test.php", line 11, characters 25-25:
+This is an object of type I
+File "bad_contra_pos_test.php", line 15, characters 11-12:
+It is incompatible with a nullable type

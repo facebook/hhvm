@@ -31,10 +31,7 @@ struct ClassConstantExpression : Expression, StaticClassName {
                           const std::string &varName);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
-  int getLocalEffects() const override { return NoEffect; }
-
-  bool containsDynamicConstant(AnalysisResultPtr ar) const override;
+  void analyzeProgram(AnalysisResultConstRawPtr ar) override;
 
   const std::string &getConName() const { return m_varName; }
 
@@ -47,7 +44,6 @@ struct ClassConstantExpression : Expression, StaticClassName {
   }
 private:
   std::string m_varName;
-  bool m_depsSet;
   bool m_originalScopeSet;
   BlockScopeRawPtr m_originalScope;
 };

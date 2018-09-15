@@ -21,6 +21,8 @@
 
 namespace HPHP {
 
+const StaticString s_fake("fake");
+
 /**
  * Fake Transport to be passed to the access log when a real transport is not
  * available
@@ -68,28 +70,33 @@ struct FakeTransport final : Transport {
   /**
    * Get request header(s).
    */
-  std::string getHeader(const char *name) override {
-    return "";
-  };
-  void getHeaders(HeaderMap &headers) override {
+  std::string getHeader(const char* /*name*/) override { return ""; };
+  void getHeaders(HeaderMap& /*headers*/) override {
     LOG(FATAL) << "FakeTransport::getHeaders";
   }
   /**
    * Add/remove a response header.
    */
-  void addHeaderImpl(const char *name, const char *value) override {
+  void addHeaderImpl(const char* /*name*/, const char* /*value*/) override {
     LOG(FATAL) << "FakeTransport::addHeaderImpl";
   };
-  void removeHeaderImpl(const char *name) override {
+  void removeHeaderImpl(const char* /*name*/) override {
     LOG(FATAL) << "FakeTransport::removeHeaderImpl";
   }
+  /**
+   * Get a description of the type of transport.
+   */
+  String describe() const override {
+    return s_fake;
+  }
+
 
   /**
    * Send back a response with specified code.
    * Caller deletes data, callee must copy
    */
-  void sendImpl(const void *data, int size, int code, bool chunked, bool eom)
-       override {
+  void sendImpl(const void* /*data*/, int /*size*/, int /*code*/,
+                bool /*chunked*/, bool /*eom*/) override {
     LOG(FATAL) << "FakeTransport::sendImpl";
   };
 

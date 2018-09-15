@@ -18,8 +18,6 @@ class SimpleXMLElementChild extends SimpleXMLElement {
 
 function main() {
   $tests = array(
-    tuple(WaitHandle::class, "getWaitHandle"),
-    tuple(WaitableWaitHandle::class, "getWaitHandle"),
     tuple(Generator::class, "next"),
     tuple(Generator::class, "getOrigFuncName"),
     tuple(SimpleXMLElementChild::class, '__construct'),
@@ -32,5 +30,9 @@ function main() {
   }
 }
 
-main();
 
+
+<<__EntryPoint>>
+function main_reflection_method_get_prototype2() {
+main();
+}

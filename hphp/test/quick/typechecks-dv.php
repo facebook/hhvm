@@ -1,4 +1,4 @@
-<?
+<?hh
 
 function woot(string $val = D00Dz) {
   echo $val;

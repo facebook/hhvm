@@ -20,5 +20,9 @@ class G extends B {
  $b::f4missing();
 }
 }
+
+<<__EntryPoint>>
+function main_1873() {
 $g = new G;
  $g->f4missing();
+}

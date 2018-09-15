@@ -12,7 +12,11 @@ function f3(bool $b = true) {
 function f4(string $s = 'hello') {
  var_dump($s);
  }
+
+<<__EntryPoint>>
+function main_2188() {
 f1();
  f2();
  f3();
  f4();
+}

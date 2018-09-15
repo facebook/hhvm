@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1823() {
 $v = 42;
 $o1 = new stdclass;
 $o2 = new stdclass;
@@ -10,3 +13,4 @@ apc_store('foo', $arr1);
 $arr2 = apc_fetch('foo');
 var_dump($arr1);
 var_dump($arr2);
+}

@@ -26,7 +26,7 @@ namespace HPHP {
 
 TEST(Object, Serialization) {
   String s = "O:1:\"B\":1:{s:3:\"obj\";O:1:\"A\":1:{s:1:\"a\";i:10;}}";
-  Variant v = unserialize_from_string(s);
+  Variant v = unserialize_from_string(s, VariableUnserializer::Type::Serialize);
   EXPECT_TRUE(v.isObject());
   auto o = v.toObject();
   EXPECT_TRUE(
@@ -59,15 +59,15 @@ TEST(Object, Casts) {
     EXPECT_EQ(cast<ObjectData>(res), dummy);
     try {
       cast<c_Map>(res);
-      EXPECT_FALSE(true);
+      ADD_FAILURE();
     } catch(...) {
-      EXPECT_TRUE(true);
+      SUCCEED();
     }
     try {
       cast<c_Vector>(empty);
-      EXPECT_FALSE(true);
+      ADD_FAILURE();
     } catch(...) {
-      EXPECT_TRUE(true);
+      SUCCEED();
     }
 
     // cast_or_null tests
@@ -77,9 +77,9 @@ TEST(Object, Casts) {
 
     try {
       cast_or_null<c_Map>(res);
-      EXPECT_FALSE(true);
+      ADD_FAILURE();
     } catch(...) {
-      EXPECT_TRUE(true);
+      SUCCEED();
     }
 
     // dyn_cast tests
@@ -90,9 +90,9 @@ TEST(Object, Casts) {
 
     try {
       dyn_cast<c_Vector>(empty);
-      EXPECT_FALSE(true);
+      ADD_FAILURE();
     } catch(...) {
-      EXPECT_TRUE(true);
+      SUCCEED();
     }
 
     // dyn_cast_or_null

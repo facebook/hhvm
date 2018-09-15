@@ -25,6 +25,7 @@
 
 #include <folly/Format.h>
 #include <folly/ScopeGuard.h>
+#include <folly/portability/Fcntl.h>
 #include <folly/portability/Unistd.h>
 #include "hphp/util/cache/cache-saver.h"
 #include "hphp/util/cache/magic-numbers.h"
@@ -37,7 +38,6 @@ namespace HPHP {
 
 using folly::format;
 using folly::makeGuard;
-using folly::ScopeGuard;
 using std::string;
 
 static const int kGzipLevel = 9;
@@ -77,7 +77,7 @@ bool CacheData::loadFromFile(const string& name, uint64_t id,
   char* temp_data = static_cast<char*>(malloc(m_file_data_length));
   always_assert(temp_data != nullptr);
 
-  ScopeGuard guard = makeGuard([&] { free(temp_data); });
+  auto guard = makeGuard([&] { free(temp_data); });
 
   m_should_free = true;
 

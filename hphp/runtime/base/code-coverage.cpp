@@ -109,7 +109,8 @@ void CodeCoverage::Record(const char *filename, int line0, int line1) {
   }
 }
 
-Array CodeCoverage::Report(bool sys /* = true */) {
+Array CodeCoverage::Report(bool report_frequency /* = false*/,
+                           bool sys /* = true */) {
   Array ret = Array::Create();
   for (CodeCoverageMap::const_iterator iter = m_hits.begin();
        iter != m_hits.end(); ++iter) {
@@ -117,13 +118,20 @@ Array CodeCoverage::Report(bool sys /* = true */) {
       continue;
     }
     const std::vector<int> &lines = iter->second;
-    Array tmp = Array::Create();
-    for (int i = 1; i < (int)lines.size(); i++) {
-      if (lines[i]) {
-        tmp.set(i, Variant((int64_t)lines[i]));
+
+    if (report_frequency) {
+      auto const count = std::count_if(lines.begin(), lines.end(),
+                                       [&](int i) { return i != 0; });
+      ret.set(String(iter->first), Variant((int64_t)count));
+    } else {
+      Array tmp = Array::Create();
+      for (int i = 1; i < (int)lines.size(); i++) {
+        if (lines[i]) {
+          tmp.set(i, Variant((int64_t)lines[i]));
+        }
       }
+      ret.set(String(iter->first), Variant(tmp));
     }
-    ret.set(String(iter->first), Variant(tmp));
   }
 
   return ret;
@@ -166,4 +174,3 @@ void CodeCoverage::Reset() {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

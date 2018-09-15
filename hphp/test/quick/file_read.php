@@ -1,4 +1,4 @@
-<?php
+<?hh
 $f = tmpfile();
 fwrite($f, "foo.bar.baz");
 fseek($f, 0);

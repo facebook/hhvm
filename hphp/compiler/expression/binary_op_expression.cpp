@@ -15,22 +15,28 @@
 */
 
 #include "hphp/compiler/expression/binary_op_expression.h"
+
+#include "hphp/compiler/analysis/class_scope.h"
+
 #include "hphp/compiler/expression/array_element_expression.h"
-#include "hphp/compiler/expression/object_property_expression.h"
-#include "hphp/compiler/expression/unary_op_expression.h"
-#include "hphp/parser/hphp.tab.hpp"
-#include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/constant_expression.h"
-#include "hphp/runtime/base/type-conversions.h"
-#include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/zend-string.h"
-#include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/encaps_list_expression.h"
+#include "hphp/compiler/expression/expression_list.h"
+#include "hphp/compiler/expression/object_property_expression.h"
+#include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/simple_function_call.h"
 #include "hphp/compiler/expression/simple_variable.h"
+#include "hphp/compiler/expression/unary_op_expression.h"
+
 #include "hphp/compiler/statement/loop_statement.h"
+
+#include "hphp/parser/hphp.tab.hpp"
+
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/tv-arith.h"
+#include "hphp/runtime/base/zend-string.h"
+
 #include "hphp/runtime/vm/runtime.h"
 
 using namespace HPHP;
@@ -58,11 +64,6 @@ BinaryOpExpression::BinaryOpExpression
   case T_SR_EQUAL:
     m_assign = true;
     m_exp1->setContext(Expression::LValue);
-    m_exp1->setContext(Expression::OprLValue);
-    m_exp1->setContext(Expression::DeepOprLValue);
-    if (m_exp1->is(Expression::KindOfObjectPropertyExpression)) {
-      m_exp1->setContext(Expression::NoLValueWrapper);
-    }
     break;
   case T_COLLECTION: {
     std::string s = m_exp1->getLiteralString();
@@ -100,16 +101,6 @@ std::string BinaryOpExpression::getLiteralString() const {
   return "";
 }
 
-bool BinaryOpExpression::containsDynamicConstant(AnalysisResultPtr ar) const {
-  switch (m_op) {
-  case T_COLLECTION:
-    return m_exp2->containsDynamicConstant(ar);
-  default:
-    break;
-  }
-  return false;
-}
-
 bool BinaryOpExpression::isShortCircuitOperator() const {
   switch (m_op) {
   case T_BOOLEAN_OR:
@@ -134,64 +125,8 @@ bool BinaryOpExpression::isLogicalOrOperator() const {
   return false;
 }
 
-ExpressionPtr BinaryOpExpression::unneededHelper() {
-  bool shortCircuit = isShortCircuitOperator();
-  if (!m_exp2->getContainedEffects() ||
-      (!shortCircuit && !m_exp1->getContainedEffects())) {
-    return Expression::unneededHelper();
-  }
-
-  if (shortCircuit) {
-    m_exp2 = m_exp2->unneeded();
-  }
-  return static_pointer_cast<Expression>(shared_from_this());
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-int BinaryOpExpression::getLocalEffects() const {
-  int effect = NoEffect;
-  m_canThrow = false;
-  switch (m_op) {
-  case '/':
-  case '%':
-  case T_DIV_EQUAL:
-  case T_MOD_EQUAL: {
-    Variant v2;
-    if (!m_exp2->getScalarValue(v2) || equal(v2, 0)) {
-      effect = CanThrow;
-      m_canThrow = true;
-    }
-    break;
-  }
-  case '.': {
-    // Conservatively assume that a concat with any non-scalar argument can
-    // invoke arbitrary side-effects. This is because it may involve invoking an
-    // object's __toString() method, which can have side-effects.
-    if (!m_exp1->isScalar() || !m_exp2->isScalar()) {
-      effect = UnknownEffect;
-      m_canThrow = true;
-    }
-    break;
-  }
-  case T_PIPE:
-    if (!m_exp1->isScalar() || !m_exp2->isScalar()) {
-      effect = UnknownEffect;
-      m_canThrow = true;
-    }
-    break;
-  default:
-    break;
-  }
-  if (m_assign) effect |= AssignEffect;
-  return effect;
-}
-
-void BinaryOpExpression::analyzeProgram(AnalysisResultPtr ar) {
-  m_exp1->analyzeProgram(ar);
-  m_exp2->analyzeProgram(ar);
-}
 
 ConstructPtr BinaryOpExpression::getNthKid(int n) const {
   switch (n) {
@@ -224,7 +159,7 @@ void BinaryOpExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr BinaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {
+ExpressionPtr BinaryOpExpression::preOptimize(AnalysisResultConstRawPtr ar) {
   if (!m_exp2->isScalar()) {
     if (!m_exp1->isScalar()) {
       if (m_exp1->is(KindOfBinaryOpExpression)) {
@@ -235,20 +170,18 @@ ExpressionPtr BinaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {
       }
       return ExpressionPtr();
     }
-  } else if (m_canThrow && !(getLocalEffects() & CanThrow)) {
-    recomputeEffects();
   }
   ExpressionPtr optExp;
   try {
     optExp = foldConst(ar);
-  } catch (Exception &e) {
+  } catch (Exception& e) {
     // runtime/base threw an exception, perhaps bad operands
   }
   if (optExp) optExp = replaceValue(optExp);
   return optExp;
 }
 
-static ExpressionPtr makeIsNull(AnalysisResultConstPtr ar,
+static ExpressionPtr makeIsNull(AnalysisResultConstRawPtr ar,
                                 const Location::Range& r, ExpressionPtr exp,
                                 bool invert) {
   /* Replace "$x === null" with an is_null call; this requires slightly
@@ -276,10 +209,12 @@ static ExpressionPtr makeIsNull(AnalysisResultConstPtr ar,
 // the effectivness of this during parse to ensure that we eliminate only
 // very simple scalars that don't require analysis in later phases. For now,
 // that's just simply scalar values.
-ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
+ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstRawPtr ar) {
   ExpressionPtr optExp;
   Variant v1;
   Variant v2;
+
+  if (RuntimeOption::EvalDisableHphpcOpts) return ExpressionPtr();
 
   if (!m_exp2->getScalarValue(v2)) {
     if ((ar->getPhase() != AnalysisResult::ParseAllFiles) &&
@@ -342,6 +277,7 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
   if (m_exp1->isScalar()) {
     if (!m_exp1->getScalarValue(v1)) return ExpressionPtr();
     try {
+      ThrowAllErrorsSetter taes;
       auto scalar1 = dynamic_pointer_cast<ScalarExpression>(m_exp1);
       auto scalar2 = dynamic_pointer_cast<ScalarExpression>(m_exp2);
       // Some data, like the values of __CLASS__ and friends, are not available
@@ -373,13 +309,13 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
           result = static_cast<bool>(v1.toBoolean() ^ v2.toBoolean());
           break;
         case '|':
-          *result.asCell() = cellBitOr(*v1.asCell(), *v2.asCell());
+          *result.toCell() = cellBitOr(*v1.toCell(), *v2.toCell());
           break;
         case '&':
-          *result.asCell() = cellBitAnd(*v1.asCell(), *v2.asCell());
+          *result.toCell() = cellBitAnd(*v1.toCell(), *v2.toCell());
           break;
         case '^':
-          *result.asCell() = cellBitXor(*v1.asCell(), *v2.asCell());
+          *result.toCell() = cellBitXor(*v1.toCell(), *v2.toCell());
           break;
         case '.':
           if (v1.isArray() || v2.isArray()) {
@@ -403,49 +339,51 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
           result = less(v1, v2);
           break;
         case T_IS_SMALLER_OR_EQUAL:
-          result = cellLessOrEqual(*v1.asCell(), *v2.asCell());
+          result = cellLessOrEqual(*v1.toCell(), *v2.toCell());
           break;
         case '>':
           result = more(v1, v2);
           break;
         case T_IS_GREATER_OR_EQUAL:
-          result = cellGreaterOrEqual(*v1.asCell(), *v2.asCell());
+          result = cellGreaterOrEqual(*v1.toCell(), *v2.toCell());
           break;
         case T_SPACESHIP:
-          result = cellCompare(*v1.asCell(), *v2.asCell());
+          result = cellCompare(*v1.toCell(), *v2.toCell());
           break;
         case '+':
-          *result.asCell() = add(*v1.asCell(), *v2.asCell());
+          *result.toCell() = add(*v1.toCell(), *v2.toCell());
           break;
         case '-':
-          *result.asCell() = sub(*v1.asCell(), *v2.asCell());
+          *result.toCell() = sub(*v1.toCell(), *v2.toCell());
           break;
         case '*':
-          *result.asCell() = mul(*v1.asCell(), *v2.asCell());
+          *result.toCell() = mul(*v1.toCell(), *v2.toCell());
           break;
         case '/':
           if ((v2.isIntVal() && v2.toInt64() == 0) || v2.toDouble() == 0.0) {
             return ExpressionPtr();
           }
-          *result.asCell() = cellDiv(*v1.asCell(), *v2.asCell());
+          *result.toCell() = cellDiv(*v1.toCell(), *v2.toCell());
           break;
         case '%':
           if ((v2.isIntVal() && v2.toInt64() == 0) || v2.toDouble() == 0.0) {
             return ExpressionPtr();
           }
-          *result.asCell() = cellMod(*v1.asCell(), *v2.asCell());
+          *result.toCell() = cellMod(*v1.toCell(), *v2.toCell());
           break;
         case T_SL: {
           int64_t shift = v2.toInt64();
           if (!RuntimeOption::PHP7_IntSemantics) {
-            result = v1.toInt64() << (shift & 63);
+            result = static_cast<int64_t>(
+              static_cast<uint64_t>(v1.toInt64()) << (shift & 63));
           } else if (shift >= 64) {
             result = 0;
           } else if (shift < 0) {
             // This raises an error, and so can't be folded.
             return ExpressionPtr();
           } else {
-            result = v1.toInt64() << (shift & 63);
+            result = static_cast<int64_t>(
+              static_cast<uint64_t>(v1.toInt64()) << (shift & 63));
           }
           break;
         }
@@ -567,8 +505,11 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
 }
 
 ExpressionPtr
-BinaryOpExpression::foldRightAssoc(AnalysisResultConstPtr ar) {
+BinaryOpExpression::foldRightAssoc(AnalysisResultConstRawPtr ar) {
   ExpressionPtr optExp1;
+
+  if (RuntimeOption::EvalDisableHphpcOpts) return ExpressionPtr();
+
   switch (m_op) {
   case '.':
   case '+':

@@ -15,6 +15,8 @@
 */
 #include "hphp/runtime/vm/jit/irgen-control.h"
 
+#include "hphp/runtime/vm/resumable.h"
+
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/switch-profile.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
@@ -24,11 +26,15 @@
 
 namespace HPHP { namespace jit { namespace irgen {
 
+void surpriseCheck(IRGS& env) {
+  auto const ptr = resumeMode(env) != ResumeMode::None ? sp(env) : fp(env);
+  auto const exit = makeExitSlow(env);
+  gen(env, CheckSurpriseFlags, exit, ptr);
+}
+
 void surpriseCheck(IRGS& env, Offset relOffset) {
   if (relOffset <= 0) {
-    auto const ptr = resumed(env) ? sp(env) : fp(env);
-    auto const exit = makeExitSlow(env);
-    gen(env, CheckSurpriseFlags, exit, ptr);
+    surpriseCheck(env);
   }
 }
 
@@ -67,7 +73,6 @@ void implCondJmp(IRGS& env, Offset taken, bool negate, SSATmp* src) {
 //////////////////////////////////////////////////////////////////////
 
 void emitJmp(IRGS& env, Offset relOffset) {
-  surpriseCheck(env, relOffset);
   auto const offset = bcOff(env) + relOffset;
   jmpImpl(env, offset);
 }
@@ -77,13 +82,11 @@ void emitJmpNS(IRGS& env, Offset relOffset) {
 }
 
 void emitJmpZ(IRGS& env, Offset relOffset) {
-  surpriseCheck(env, relOffset);
   auto const takenOff = bcOff(env) + relOffset;
   implCondJmp(env, takenOff, true, popC(env));
 }
 
 void emitJmpNZ(IRGS& env, Offset relOffset) {
-  surpriseCheck(env, relOffset);
   auto const takenOff = bcOff(env) + relOffset;
   implCondJmp(env, takenOff, false, popC(env));
 }
@@ -150,7 +153,7 @@ void emitSwitch(IRGS& env, SwitchKind kind, int64_t base,
     PUNT(Switch-UnknownType);
   }
 
-  auto const dataSize = iv.size() * sizeof(SwitchProfile::cases[0]);
+  auto const dataSize = SwitchProfile::extraSize(iv.size());
   TargetProfile<SwitchProfile> profile(
     env.unit.context(), env.irb->curMarker(), s_switchProfile.get(),
     dataSize
@@ -275,6 +278,25 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
     dest,
     sp(env),
     fp(env)
+  );
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void emitSelect(IRGS& env) {
+  auto const condSrc = popC(env);
+  auto const boolSrc = gen(env, ConvCellToBool, condSrc);
+  decRef(env, condSrc);
+
+  ifThenElse(
+    env,
+    [&] (Block* taken) { gen(env, JmpZero, taken, boolSrc); },
+    [&] { // True case
+      auto const val = popC(env, DataTypeCountness);
+      popDecRef(env, DataTypeCountness);
+      push(env, val);
+    },
+    [&] { popDecRef(env, DataTypeCountness); } // False case
   );
 }
 

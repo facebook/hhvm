@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function dumpEach($gen) {
   foreach ($gen as $v) {

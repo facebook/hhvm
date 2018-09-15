@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract class A {
   protected abstract function foo();

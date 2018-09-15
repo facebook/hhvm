@@ -1,1 +1,6 @@
-No errors
+File "list_ok.php", line 9, characters 15-21:
+Invalid argument (Typing[4110])
+File "list_ok.php", line 13, characters 22-27:
+This is a string
+File "list_ok.php", line 6, characters 14-14:
+It is incompatible with an int

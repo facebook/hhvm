@@ -22,4 +22,8 @@ function main() {
   test(new C());
   echo "Done\n";
 }
+
+<<__EntryPoint>>
+function main_nullsafe_call_8() {
 main();
+}

@@ -18,4 +18,8 @@ function f3() {
   }
   var_dump($foo);
 }
+
+<<__EntryPoint>>
+function main_451() {
 f3();
+}

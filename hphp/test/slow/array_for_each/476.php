@@ -8,9 +8,13 @@ function g6() {
     echo "key=$k val=$v\n";
     if ($b && $v == 1) {
       $b = false;
-      array_pop($arr);
+      array_pop(&$arr);
     }
   }
 }
+
+<<__EntryPoint>>
+function main_476() {
 foreach (g6() as $_) {
+}
 }

@@ -22,4 +22,8 @@ function main() {
     2
   );
 }
+
+<<__EntryPoint>>
+function main_array_chunk() {
 main();
+}

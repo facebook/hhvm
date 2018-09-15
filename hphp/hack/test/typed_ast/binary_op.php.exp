@@ -1,8 +1,0 @@
-|binary_op.php:
-(fun
- (name: \foo)
- (body:
-  (stmt
-   ((Tint TPrim) expr binop((Tint TPrim) expr Int)((Tint TPrim) expr Int)))
-  ))
-

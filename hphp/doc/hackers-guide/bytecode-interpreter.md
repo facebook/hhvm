@@ -1,9 +1,10 @@
-# The HHVM interpreter
+# The HHVM Bytecode Interpreter
 
-A typical interpreter consists of a loop that looks something like this:
+A typical interpreter is implemented using a dispatch loop that looks something
+like this:
 
-```
-while (1) {
+```cpp
+while (true) {
   switch(*pc) {
     case ADD:
       /* add implementation */
@@ -22,119 +23,109 @@ while (1) {
 }
 ```
 
-That is, you have a loop which steps through bytecodes, examining each one.
-The switch statement then causes the appropriate thing to happen based on
-the bytecode.
+That is, you have a loop which steps through the bytecode program, examining
+each one. The `switch` statement executes the current bytecode instruction,
+advances the program counter, then repeats, until the program terminates.
 
 If you try to find a code structure like this in HHVM, you won’t find it.
-Instead, HHVM uses a somewhat complicated combination of macros and
-templates. This cuts down on duplicated code (so the same fix doesn’t have
-to be applied in dozens of places). It also makes the code harder for
-newcomers to read and harder to do searches in the code (as some symbols
-don’t directly exist in the source - they’re built by macros).
+Instead, the interpreter is broken up into a number of smaller pieces, some of
+which are defined using a series of nested macros. This is to reduce duplication
+and to keep it more manageable, although it can make the code seem intimidating
+to newcomers.
 
-The interpreter is located in hhvm/hphp/runtime/vm/bytecode.cpp. In that
-file, you’ll find dispatchImpl(). It’s declared as:
+HHVM's interpreter makes repeated use of the [X
+Macro](https://en.wikipedia.org/wiki/X_Macro) pattern to generate code and data
+for each bytecode instruction. The list macro is `OPCODES`, defined in
+[runtime/vm/hhbc.h](https://github.com/facebook/hhvm/blob/f484e7c597763bff68ad9e0e355aff763b71ec1e/hphp/runtime/vm/hhbc.h#L383).
+It contains the name, signature, and attributes for every bytecode instruction.
+The "X" macro is `O()`, which you can see is repeatedly invoked by `OPCODES`.
 
-```
+## Bytecode implementations
+
+HHVM's bytecode interpreter lives in
+[runtime/vm/bytecode.cpp](../../runtime/vm/bytecode.cpp). For every bytecode
+instruction `Foo`, there is a function `iopFoo()`. This function contains the
+interpreter implementation of `Foo`, and takes arguments representing all of the
+immediate arguments to the instruction. For example, since the `Add` instruction
+takes no immediates, `void iopAdd()` takes no arguments. `Int`, on the other
+hand, takes a 64-bit integer immediate, so its signature is `void iopInt(int64_t
+imm)`.
+
+These functions are not called directly by the dispatch loop. Instead, the
+dispatch loop calls `iopWrapFoo()`, giving it a pointer to the appropriate
+`iopFoo()` function. These wrapper functions are automatically generated from
+each bytecode's signature in `hhbc.h`. Each one decodes the appropriate
+immediates, then passes them to the corresponding `iopFoo()` function. You
+should not have to modify the machinery that generates these functions unless
+you add a new bytecode immediate type.
+
+## InterpOne
+
+In addition to the hand-written `iop*()` functions and the macro-generated
+`iopWrap*()` functions, the `OPCODES` macro is used
+[here](https://github.com/facebook/hhvm/blob/f484e7c597763bff68ad9e0e355aff763b71ec1e/hphp/runtime/vm/bytecode.cpp#L7475-L7515)
+to create a set of functions named `interpOne*()`. These functions are used by
+the JIT when a certain instruction would be too complicated to compile to native
+machine code: it syncs all live state to memory, calls the appropriate
+`interpOne*()` function, then resumes running the native code after the
+problematic bytecode.
+
+## Interpreter dispatch loop
+
+The dispatch loop is in `dispatchImpl()`, defined in
+[runtime/vm/bytecode.cpp](../../runtime/vm/bytecode.cpp). It’s declared as:
+
+```cpp
   template <bool breakOnCtlFlow> TCA dispatchImpl()
 ```
 
-This is the function that implements the interpreter. Two different
-versions are instantiated, one with breakOnCtlFlow set to true and one
-with it set to false. Since these are constants, the compiler is smart
-enough to elide the “if” statements that check breakOnCtlFlow. Instead,
-the bodies of the “if”s are either never executed or always executed.
-While at first glance it appears that we're paying the cost of runtime
-checks, that's not actually the case.
+Two different versions are instantiated, one for each possible value of
+`breakOnCtlFlow`. When `breakOnCtlFlow` is `true`, the function will return to
+the caller after a control flow (i.e. branch) instruction is encountered. If
+`breakOnCtlFlow` is `false`, the interpreter will continue executing
+instructions until the current VM entry finishes.
 
-When breakOnCtlFlow is true, the function will return to the caller when
-a control flow (i.e. branch) instruction is encountered. If breakOnCtlFlow
-is false, the interpreter will continue executing instructions until a
-function-exiting instruction is reached. As of this writing, the
-function-exiting instructions are RetC, RetV, NativeImpl, Await, CreateCont,
-Yield, and YieldK. This list could change in the future.
+There are two versions of the interpreter loop. The Windows version (indicated
+with `_MSC_VER`) implements an ordinary switch-based interpreter loop, while the
+Linux version implements a threaded interpreter. In a threaded interpreter, the
+handler for each bytecode jumps directly to the handler for the next bytecode
+rather than going to a single central switch statement. This eliminates a jump
+to a different cache line and improves branch prediction by allowing the
+processor’s branch predictor to find associations between the bytecodes. These
+different mechanisms are hidden by the `DISPATCH_ACTUAL` macro.
 
-There are two versions of the interpreter loop. The Windows version
-(indicated with _MSC_VER) implements an ordinary switch-based
-interpreter loop, while the gcc version implements a threaded interpreter.
-In a threaded interpreter, the handler for each bytecode jumps directly to
-the handler for the next bytecode rather than going to a single central
-switch statement. This eliminates a jump to a different cache line and
-improves branch prediction by allowing the processor’s branch predictor to
-find associations between the bytecodes. These different mechanisms are
-hidden by the DISPATCH_ACTUAL macro.
+There are three separate parts to each bytecode handler. One part for dealing
+with Hack debugging, one part for tracking code coverage, and a third part which
+implements the actual handler. These are defined in the `OPCODE_DEBUG_BODY`,
+`OPCODE_COVER_BODY`, and `OPCODE_MAIN_BODY` macros, respectively. In the Windows
+version, [defined
+here](https://github.com/facebook/hhvm/blob/f484e7c597763bff68ad9e0e355aff763b71ec1e/hphp/runtime/vm/bytecode.cpp#L7621-L7628),
+the three macros are put in a `case` for each opcode, like the example at the
+beginning of this document.
 
-There are three separate parts to each bytecode handler. One part for
-dealing with PHP debugging, one part for doing code coverage, and a third
-part which implements the actual handler. These are contained in the
-OPCODE_DEBUG_BODY, OPCODE_COVER_BODY, and OPCODE_MAIN_BODY macros
-respectively. In the Windows case, these are just called sequentially. For
-gcc code, it’s a little more complicated. Threaded interpreting uses a table
-of labels to dispatch to the next handler. HHVM makes use of three such
-tables. The first is called optabDirect. It contains labels that allow
-jumping directly to OPCODE_MAIN_BODY. The second table is called optabCover. It
-contains labels that cause jumping to OPCODE_COVER_BODY. OPCODE_COVER_BODY
-then falls through to the OPCODE_MAIN_BODY. Lastly there is optabDbg. Its
-labels cause jumping to OPCODE_DEBUG_BODY which falls through to
-OPCODE_COVER_BODY which in turn falls through to OPCODE_MAIN_BODY.
+In the Linux version, [defined
+here](https://github.com/facebook/hhvm/blob/f484e7c597763bff68ad9e0e355aff763b71ec1e/hphp/runtime/vm/bytecode.cpp#L7631-L7636),
+the threaded interpreter uses a dispatch table with [computed
+goto](https://gcc.gnu.org/onlinedocs/gcc/Labels-as-Values.html). Each
+instruction gets three labels: one for each `OPCODE_*_BODY` macro. These labels
+are collected into three different dispatch tables, [defined
+here](https://github.com/facebook/hhvm/blob/f484e7c597763bff68ad9e0e355aff763b71ec1e/hphp/runtime/vm/bytecode.cpp#L7532-L7549).
+`optabDirect` points to `OPCODE_MAIN_BODY`, `optabCover` points to
+`OPCODE_COVER_BODY`, and `optabDbg` points to `OPTAB_DEBUG_BODY`. The correct
+dispatch table is selected at runtime depending on the current code coverage
+configuration, and whether or not a debugger is attached.
 
-Now, where are all these dozens of bytecode handlers? Some more compiler
-magic is employed here. Since these are all going to look very similar,
-their code is generated by macros. In several places a macro named simply
-O() is defined and then there’s a line that just says OPCODES. What’s
-happening here isn’t immediately obvious. The OPCODES macro is defined in
-hphp/runtime/vm/hhbc.h. This is the single, central place which contains
-everything you could ever want to know about each bytecode. The OPCODES
-macro invokes the O macro for each bytecode. So any time you want to
-generate code for every bytecode, you define an O macro and invoke the
-OPCODES macro. Any pieces of information from the table in the OPCODES
-macro that you don’t need can just be ignored by your macro.
+## Performance
 
-```
-//  name             immediates        inputs           outputs     flags
-#define OPCODES \
-  O(LowInvalid,      NA,               NOV,             NOV,        NF) \
-  O(Nop,             NA,               NOV,             NOV,        NF) \
-  ...
-  O(Silence,         TWO(LA,OA(SilenceOp)),                          \
-                                       NOV,             NOV,        NF) \
-  O(HighInvalid,     NA,               NOV,             NOV,        NF)
-```
+In general, we strongly prefer simplicity over performance in the interpreter.
+Any performance-sensitive uses of HHVM rely on the JIT compiler, so we've found
+it beneficial to keep the interpreter as straightforward as possible, kind of
+like a reference implementation to compare the JIT against. This is an
+intentional tradeoff that has resulted in an interpreter that is fairly slow.
 
-
-There are multiple use of the OPCODES macro in bytecodes.cpp. The
-optabDirect, optabDebug, and optableCover are generated using it. The heart
-of the interpreter is constructed by defining an O macro that uses the
-OPCODE_DBG_BODY, OPCODE_COVER_BODY, and OPCODE_MAIN_BODY. The
-OPCODE_MAIN_BODY itself uses a macro called DISPATCH which uses the
-DISPATCH_ACTUAL macro mentioned earlier. So you have about five levels of
-macros involved in creating the interpreter body.
-
-```
-  static const void *optabDirect[] = {
-#define O(name, imm, push, pop, flags) \
-    &&Label##name,
-    OPCODES
-#undef O
-  };
-```
-
-The OPCODES macro is also used to create a set of functions named
-interpOneNop(), interpOnePopA(), interpOnePopC(), etc. These functions can
-be used to invoke each of the individual bytecode handlers, with logging
-and statistics code also included. interpOneEntryPoints[] contains a table
-of these functions, allowing them to be called from JIT code.
-
-The last piece to understanding the interpreter is iopRetWrapper(). These
-are a pair of function which are called by the OPCODE_MAIN_BODY macro.
-These unify the two different kinds of return values from bytecode handlers.
-The handlers either return void or return a TCA. Polymorphism causes the
-appropriate iopRetWrapper to be called. Since both iopRetWrapper functions
-return a TCA, the OPCODE_MAIN_BODY macro doesn’t have to see the difference.
-The iopRetWrapper() functions in turn call the bytecode handlers which are
-named iopXXXX (where XXXX is the name of the bytecode). The iopRetWrapper()
-functions and all the bytecode handlers are declared OPTBLD_INLINE. This is
-a macro that is empty for a debug build or ALWAYS_INLINE for a release
-build. Thus all the code gets inlined in to the interpreter loop for a
-release build.
+One aspect of interpreter performance that we have focused on is inlining
+decisions. We've found that most compilers choose to not inline various parts of
+the interpreter in ways that measurably hurt performance (even when the
+functions are marked `inline`). To counter this, we use the `OPTBLD_INLINE`
+macro, which forces the compiler to inline functions in optimized builds. It does
+nothing in debug builds, so we can still debug the interpreter.

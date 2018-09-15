@@ -18,12 +18,12 @@
 #define HPHP_FILE_STREAM_WRAPPER_H
 
 #include <sys/types.h>
-#include <sys/stat.h>
 
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 #include <folly/String.h>
+#include <folly/portability/SysStat.h>
 #include <folly/portability/Unistd.h>
 
 #define ERROR_RAISE_WARNING(exp)        \
@@ -58,10 +58,11 @@ struct FileStreamWrapper final : Stream::Wrapper {
   int unlink(const String& path) override;
   int rename(const String& oldname, const String& newname) override;
   int mkdir(const String& path, int mode, int options) override;
-  int rmdir(const String& path, int options) override {
+  int rmdir(const String& path, int /*options*/) override {
     ERROR_RAISE_WARNING(::rmdir(File::TranslatePath(path).data()));
     return ret;
   }
+  bool isNormalFileStream() const override { return true; }
 
   req::ptr<Directory> opendir(const String& path) override;
 

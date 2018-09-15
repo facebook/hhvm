@@ -1,0 +1,4 @@
+File "shape_idx_undefined_key_closed_shape.php", line 4, characters 3-22:
+You are calling Shapes::idx() on a field known to not exist (Typing[4251])
+File "shape_idx_undefined_key_closed_shape.php", line 3, characters 15-31:
+The field 'y' is not defined in this shape

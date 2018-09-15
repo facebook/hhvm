@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_json_encode_hh() {
 echo("** array string keys**\n");
 var_dump(json_encode(array()));
 var_dump(json_encode(array('foo')));
@@ -41,3 +44,4 @@ echo("\n");
 var_dump(json_encode(dict[0 => 'fooval', 1 => 'barval']));
 var_dump(json_encode(dict[10 => 'fooval', 11 => 'barval']));
 var_dump(json_encode(dict['0' => 'fooval', '1' => 'barval']));
+}

@@ -6,6 +6,9 @@ class Foo {
   public function __toString() { throw new Exception('No string casts');}
 }
 
+
+<<__EntryPoint>>
+function main_reflection_method_construct() {
 $instance = new Foo();
 
 try {
@@ -40,4 +43,5 @@ try {
   var_dump((new ReflectionMethod('Foo', null))->getName());
 } catch (ReflectionException $ex) {
   echo 'ReflectionException: ', $ex->getMessage(), "\n";
+}
 }

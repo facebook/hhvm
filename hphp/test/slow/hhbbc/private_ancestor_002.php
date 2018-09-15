@@ -10,4 +10,8 @@ function main(X $y) {
   return $y->go($asd);
 }
 
+
+<<__EntryPoint>>
+function main_private_ancestor_002() {
 main(new N);
+}

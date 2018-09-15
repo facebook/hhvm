@@ -15,7 +15,6 @@
 */
 
 #include "hphp/compiler/expression/qop_expression.h"
-#include "hphp/compiler/analysis/code_error.h"
 
 #include "hphp/runtime/base/type-variant.h"
 
@@ -45,14 +44,6 @@ ExpressionPtr QOpExpression::clone() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-void QOpExpression::analyzeProgram(AnalysisResultPtr ar) {
-  m_condition->analyzeProgram(ar);
-  if (m_expYes) {
-    m_expYes->analyzeProgram(ar);
-  }
-  m_expNo->analyzeProgram(ar);
-}
 
 ConstructPtr QOpExpression::getNthKid(int n) const {
   switch (n) {
@@ -88,39 +79,6 @@ void QOpExpression::setNthKid(int n, ConstructPtr cp) {
       assert(false);
       break;
   }
-}
-
-ExpressionPtr QOpExpression::preOptimize(AnalysisResultConstPtr ar) {
-  Variant value;
-  if (m_condition->getScalarValue(value)) {
-    if (value.toBoolean()) {
-      if (m_expYes) {
-        return m_expYes;
-      }
-      return m_condition;
-    }
-    return m_expNo;
-  }
-
-  return ExpressionPtr();
-}
-
-ExpressionPtr QOpExpression::unneededHelper() {
-  bool yesEffect = false;
-  if (m_expYes) {
-    yesEffect = m_expYes->getContainedEffects();
-  }
-  bool noEffect = m_expNo->getContainedEffects();
-
-  if (!yesEffect && !noEffect) {
-    return Expression::unneededHelper();
-  }
-
-  m_expNo = m_expNo->unneeded();
-  if (m_expYes) {
-    m_expYes = m_expYes->unneeded();
-  }
-  return static_pointer_cast<Expression>(shared_from_this());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

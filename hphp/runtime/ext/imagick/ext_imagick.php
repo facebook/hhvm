@@ -416,7 +416,7 @@ class Imagick implements Countable, Iterator {
   <<__Native>>
   function compareImageChannels(Imagick $image,
                                 int $channelType,
-                                int $metricType): array;
+                                int $metricType): varray<mixed>;
 
   /**
    * Returns the maximum bounding region between images
@@ -439,7 +439,7 @@ class Imagick implements Countable, Iterator {
    */
   <<__Native>>
   function compareImages(Imagick $compare,
-                         int $metric): array;
+                         int $metric): varray<mixed>;
 
   /**
    * Composite one image onto another
@@ -512,7 +512,7 @@ class Imagick implements Countable, Iterator {
    * @return bool -
    */
   <<__Native>>
-  function convolveImage(array $kernel,
+  function convolveImage(varray<float> $kernel,
                          int $channel = Imagick::CHANNEL_ALL): bool;
 
   /**
@@ -653,7 +653,7 @@ class Imagick implements Countable, Iterator {
    */
   <<__Native>>
   function distortImage(int $method,
-                        array $arguments,
+                        varray<float> $arguments,
                         bool $bestfit): bool;
 
   /**
@@ -753,7 +753,7 @@ class Imagick implements Countable, Iterator {
                                     int $width,
                                     int $height,
                                     string $map,
-                                    int $storage): array;
+                                    int $storage): varray<int>;
 
   /**
    * Set image size
@@ -852,7 +852,7 @@ class Imagick implements Countable, Iterator {
    */
   <<__Native>>
   public function functionImage(int $function,
-                                array $arguments,
+                                varray<float> $arguments,
                                 int $channel = Imagick::CHANNEL_DEFAULT): bool;
 
   /**
@@ -1033,7 +1033,7 @@ class Imagick implements Countable, Iterator {
    *   point.
    */
   <<__Native>>
-  function getImageBluePrimary(): array;
+  function getImageBluePrimary(): darray<string, mixed>;
 
   /**
    * Returns the image border color
@@ -1098,7 +1098,7 @@ class Imagick implements Countable, Iterator {
    * @return array -
    */
   <<__Native>>
-  function getImageChannelExtrema(int $channel): array;
+  function getImageChannelExtrema(int $channel): darray<string, int>;
 
   /**
    * The getImageChannelKurtosis purpose
@@ -1108,7 +1108,9 @@ class Imagick implements Countable, Iterator {
    * @return array - Returns an array with kurtosis and skewness members.
    */
   <<__Native>>
-  public function getImageChannelKurtosis(int $channel = Imagick::CHANNEL_DEFAULT): array;
+  public function getImageChannelKurtosis(
+    int $channel = Imagick::CHANNEL_DEFAULT,
+  ): darray<string, float>;
 
   /**
    * Gets the mean and standard deviation
@@ -1121,7 +1123,7 @@ class Imagick implements Countable, Iterator {
    * @return array -
    */
   <<__Native>>
-  function getImageChannelMean(int $channel): array;
+  function getImageChannelMean(int $channel): darray<string, float>;
 
   /**
    * Gets channel range
@@ -1132,7 +1134,7 @@ class Imagick implements Countable, Iterator {
    *   of the channel(s).
    */
   <<__Native>>
-  function getImageChannelRange(int $channel): array;
+  function getImageChannelRange(int $channel): darray<string, float>;
 
   /**
    * Returns statistics for each channel in the image
@@ -1140,7 +1142,7 @@ class Imagick implements Countable, Iterator {
    * @return array -
    */
   <<__Native>>
-  function getImageChannelStatistics(): array;
+  function getImageChannelStatistics(): darray<int, darray<string, num>>;
 
   /**
    * Gets image clip mask
@@ -1238,7 +1240,7 @@ class Imagick implements Countable, Iterator {
    *   "max".
    */
   <<__Native>>
-  function getImageExtrema(): array;
+  function getImageExtrema(): darray<string, int>;
 
   /**
    * Returns the filename of a particular image in a sequence
@@ -1271,7 +1273,7 @@ class Imagick implements Countable, Iterator {
    * @return array - Returns an array with the width/height of the image.
    */
   <<__Native>>
-  function getImageGeometry(): array;
+  function getImageGeometry(): darray<string, int>;
 
   /**
    * Gets the image gravity
@@ -1289,7 +1291,7 @@ class Imagick implements Countable, Iterator {
    *   success, throws an ImagickException on failure.
    */
   <<__Native>>
-  function getImageGreenPrimary(): array;
+  function getImageGreenPrimary(): darray<string, float>;
 
   /**
    * Returns the image height
@@ -1306,7 +1308,7 @@ class Imagick implements Countable, Iterator {
    *   ImagickPixel objects.
    */
   <<__Native>>
-  function getImageHistogram(): array;
+  function getImageHistogram(): varray<ImagickPixel>;
 
   /**
    * Gets the index of the current active image
@@ -1383,7 +1385,7 @@ class Imagick implements Countable, Iterator {
    *   in an array with the keys "width", "height", "x", and "y".
    */
   <<__Native>>
-  function getImagePage(): array;
+  function getImagePage(): darray<string, int>;
 
   /**
    * Returns the color of the specified pixel
@@ -1420,7 +1422,7 @@ class Imagick implements Countable, Iterator {
    */
   <<__Native>>
   function getImageProfiles(string $pattern = '*',
-                            bool $with_values = true): array;
+                            bool $with_values = true): varray_or_darray<mixed>;
 
   /**
    * Returns the image properties
@@ -1433,8 +1435,10 @@ class Imagick implements Countable, Iterator {
    *   property names.
    */
   <<__Native>>
-  function getImageProperties(string $pattern = '*',
-                              bool $with_values = true): array;
+  function getImageProperties(
+    string $pattern = '*',
+    bool $with_values = true,
+  ): varray_or_darray<mixed>;
 
   /**
    * Returns the named image property
@@ -1455,7 +1459,7 @@ class Imagick implements Countable, Iterator {
    *   array with the keys "x" and "y".
    */
   <<__Native>>
-  function getImageRedPrimary(): array;
+  function getImageRedPrimary(): darray<string, float>;
 
   /**
    * Extracts a region of the image
@@ -1490,7 +1494,7 @@ class Imagick implements Countable, Iterator {
    * @return array - Returns the resolution as an array.
    */
   <<__Native>>
-  function getImageResolution(): array;
+  function getImageResolution(): darray<string, float>;
 
   /**
    * Returns all image sequences as a blob
@@ -1545,12 +1549,12 @@ class Imagick implements Countable, Iterator {
   /**
    * Gets the potential image type
    *
-   * @return int - Returns the potential image type.  
-   *   Imagick::IMGTYPE_UNDEFINED     Imagick::IMGTYPE_BILEVEL   
-   *   Imagick::IMGTYPE_GRAYSCALE     Imagick::IMGTYPE_GRAYSCALEMATTE   
-   *   Imagick::IMGTYPE_PALETTE     Imagick::IMGTYPE_PALETTEMATTE   
-   *   Imagick::IMGTYPE_TRUECOLOR     Imagick::IMGTYPE_TRUECOLORMATTE   
-   *   Imagick::IMGTYPE_COLORSEPARATION   
+   * @return int - Returns the potential image type.
+   *   Imagick::IMGTYPE_UNDEFINED     Imagick::IMGTYPE_BILEVEL
+   *   Imagick::IMGTYPE_GRAYSCALE     Imagick::IMGTYPE_GRAYSCALEMATTE
+   *   Imagick::IMGTYPE_PALETTE     Imagick::IMGTYPE_PALETTEMATTE
+   *   Imagick::IMGTYPE_TRUECOLOR     Imagick::IMGTYPE_TRUECOLORMATTE
+   *   Imagick::IMGTYPE_COLORSEPARATION
    *   Imagick::IMGTYPE_COLORSEPARATIONMATTE     Imagick::IMGTYPE_OPTIMIZE
    */
   <<__Native>>
@@ -1579,7 +1583,7 @@ class Imagick implements Countable, Iterator {
    *   associative array with the keys "x" and "y".
    */
   <<__Native>>
-  function getImageWhitePoint(): array;
+  function getImageWhitePoint(): darray<string, float>;
 
   /**
    * Returns the image width
@@ -1642,7 +1646,7 @@ class Imagick implements Countable, Iterator {
    *   "height", "x", and "y", throwing ImagickException on error.
    */
   <<__Native>>
-  function getPage(): array;
+  function getPage(): darray<string, int>;
 
   /**
    * Returns a MagickPixelIterator
@@ -1684,7 +1688,7 @@ class Imagick implements Countable, Iterator {
    * @return array - Returns the Imagick quantum depth as a string.
    */
   <<__Native>>
-  static function getQuantumDepth(): array;
+  static function getQuantumDepth(): darray<string, mixed>;
 
   /**
    * Returns the Imagick quantum range
@@ -1692,7 +1696,7 @@ class Imagick implements Countable, Iterator {
    * @return array - Returns the Imagick quantum range as a string.
    */
   <<__Native>>
-  static function getQuantumRange(): array;
+  static function getQuantumRange(): darray<string, mixed>;
 
   /**
    * Returns the ImageMagick release date
@@ -1732,7 +1736,7 @@ class Imagick implements Countable, Iterator {
    *   vertical sampling factors of the image.
    */
   <<__Native>>
-  function getSamplingFactors(): array;
+  function getSamplingFactors(): varray<float>;
 
   /**
    * Returns the size associated with the Imagick object
@@ -1741,7 +1745,7 @@ class Imagick implements Countable, Iterator {
    *   as an array with the keys "columns" and "rows".
    */
   <<__Native>>
-  function getSize(): array;
+  function getSize(): darray<string, int>;
 
   /**
    * Returns the size offset
@@ -1759,7 +1763,7 @@ class Imagick implements Countable, Iterator {
    *   as a number.
    */
   <<__Native>>
-  static function getVersion(): array;
+  static function getVersion(): darray<string, mixed>;
 
   /**
    * Replaces colors in the image
@@ -1803,7 +1807,9 @@ class Imagick implements Countable, Iterator {
    *   Attributes include the image width, height, size, and others.
    */
   <<__Native>>
-  function identifyImage(bool $appendRawOutput = false): array;
+  function identifyImage(
+    bool $appendRawOutput = false,
+  ): darray<arraykey, mixed>;
 
   /**
    * Creates a new image as a copy
@@ -1840,7 +1846,7 @@ class Imagick implements Countable, Iterator {
                                     int $height,
                                     string $map,
                                     int $storage,
-                                    array $pixels): bool;
+                                    varray<float> $pixels): bool;
 
   /**
    * Adds a label to an image
@@ -2383,9 +2389,11 @@ class Imagick implements Countable, Iterator {
    *   font metrics.
    */
   <<__Native>>
-  function queryFontMetrics(ImagickDraw $properties,
-                            string $text,
-                            mixed $multiline = null): array;
+  function queryFontMetrics(
+    ImagickDraw $properties,
+    string $text,
+    mixed $multiline = null,
+  ): darray<arraykey, darray<string, float>>;
 
   /**
    * Returns the configured fonts
@@ -2395,7 +2403,7 @@ class Imagick implements Countable, Iterator {
    * @return array - Returns an array containing the configured fonts.
    */
   <<__Native>>
-  static function queryFonts(string $pattern = '*'): array;
+  static function queryFonts(string $pattern = '*'): varray<mixed>;
 
   /**
    * Returns formats supported by Imagick
@@ -2406,7 +2414,7 @@ class Imagick implements Countable, Iterator {
    *   Imagick.
    */
   <<__Native>>
-  static function queryFormats(string $pattern = '*'): array;
+  static function queryFormats(string $pattern = '*'): varray<mixed>;
 
   /**
    * Radial blurs an image
@@ -2490,7 +2498,7 @@ class Imagick implements Countable, Iterator {
                          string $fileName = ''): bool;
 
   <<__Native>>
-  function readImages(array $files): bool;
+  function readImages(varray<string> $files): bool;
 
   /**
    * Recolors image
@@ -2501,7 +2509,7 @@ class Imagick implements Countable, Iterator {
    * @return bool -
    */
   <<__Native>>
-  function recolorImage(array $matrix): bool;
+  function recolorImage(varray<float> $matrix): bool;
 
   /**
    * Smooths the contours of an image
@@ -3374,7 +3382,7 @@ class Imagick implements Countable, Iterator {
    * @return bool -
    */
   <<__Native>>
-  function setSamplingFactors(array $factors): bool;
+  function setSamplingFactors(varray<float> $factors): bool;
 
   /**
    * Sets the size of the Imagick object
@@ -3542,7 +3550,7 @@ class Imagick implements Countable, Iterator {
    */
   <<__Native>>
   public function sparseColorImage(int $SPARSE_METHOD,
-                                   array $arguments,
+                                   varray<float> $arguments,
                                    int $channel = Imagick::CHANNEL_DEFAULT): bool;
 
   /**
@@ -3856,7 +3864,7 @@ class ImagickDraw {
    * @return bool -
    */
   <<__Native>>
-  function affine(array $affine): bool;
+  function affine(darray<string, float> $affine): bool;
 
   /**
    * Draws text on the image
@@ -3901,7 +3909,7 @@ class ImagickDraw {
    * @return bool -
    */
   <<__Native>>
-  function bezier(array $coordinates): bool;
+  function bezier(varray<darray<string, float>> $coordinates): bool;
 
   /**
    * Draws a circle
@@ -4156,7 +4164,7 @@ class ImagickDraw {
    *   set.
    */
   <<__Native>>
-  function getStrokeDashArray(): array;
+  function getStrokeDashArray(): varray<float>;
 
   /**
    * Returns the offset into the dash pattern to start the dash
@@ -4599,7 +4607,7 @@ class ImagickDraw {
    * @return bool -
    */
   <<__Native>>
-  function polygon(array $coordinates): bool;
+  function polygon(varray<darray<string, float>> $coordinates): bool;
 
   /**
    * Draws a polyline
@@ -4610,7 +4618,7 @@ class ImagickDraw {
    * @return bool -
    */
   <<__Native>>
-  function polyline(array $coordinates): bool;
+  function polyline(varray<darray<string, float>> $coordinates): bool;
 
   /**
    * Destroys the current ImagickDraw in the stack, and returns to the
@@ -4950,7 +4958,7 @@ class ImagickDraw {
    * @return bool -
    */
   <<__Native>>
-  function setStrokeDashArray(array $dashArray): bool;
+  function setStrokeDashArray(varray<float> $dashArray): bool;
 
   /**
    * Specifies the offset into the dash pattern to start the dash
@@ -5174,7 +5182,7 @@ class ImagickPixel {
    *   is given as param. Throws ImagickPixelException on error.
    */
   <<__Native>>
-  function getColor(bool $normalized = false): array;
+  function getColor(bool $normalized = false): darray<string, num>;
 
   /**
    * Returns the color as a string
@@ -5216,7 +5224,7 @@ class ImagickPixel {
    *   on failure.
    */
   <<__Native>>
-  function getHSL(): array;
+  function getHSL(): darray<string, float>;
 
   /**
    * Check the distance between this color and another
@@ -5309,7 +5317,7 @@ class ImagickPixelIterator implements Iterator {
                                          int $rows): ImagickPixelIterator;
 
   <<__Native>>
-  function current(): array;
+  function current(): varray<ImagickPixel>;
 
   <<__Native>>
   function key(): int;
@@ -5356,7 +5364,7 @@ class ImagickPixelIterator implements Iterator {
    *   that can themselves be iterated.
    */
   <<__Native>>
-  function getCurrentIteratorRow(): array;
+  function getCurrentIteratorRow(): varray<ImagickPixel>;
 
   /**
    * Returns the current pixel iterator row
@@ -5374,7 +5382,7 @@ class ImagickPixelIterator implements Iterator {
    *   objects, throwing ImagickPixelIteratorException on error.
    */
   <<__Native>>
-  function getNextIteratorRow(): array;
+  function getNextIteratorRow(): varray<ImagickPixel>;
 
   /**
    * Returns the previous row
@@ -5384,7 +5392,7 @@ class ImagickPixelIterator implements Iterator {
    *   ImagickPixelIteratorException on error.
    */
   <<__Native>>
-  function getPreviousIteratorRow(): array;
+  function getPreviousIteratorRow(): varray<ImagickPixel>;
 
   /**
    * Returns a new pixel iterator
@@ -5458,4 +5466,3 @@ class ImagickPixelIterator implements Iterator {
   function syncIterator(): bool;
 
 }
-

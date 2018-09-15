@@ -167,8 +167,8 @@ bool CmdExtended::invokeClient(DebuggerClient &client, const std::string &cls) {
   return false;
 }
 
-bool CmdExtended::onServer(DebuggerProxy &proxy) {
-  assert(false);
+bool CmdExtended::onServer(DebuggerProxy& /*proxy*/) {
+  assertx(false);
   return false;
 }
 

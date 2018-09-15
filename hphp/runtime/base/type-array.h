@@ -18,7 +18,11 @@
 #define incl_HPHP_ARRAY_H_
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/req-ptr.h"
+#include "hphp/runtime/base/tv-type.h"
+#include "hphp/runtime/base/tv-val.h"
+#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/types.h"
 
 #include <algorithm>
@@ -26,6 +30,9 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+// Forward declare to avoid including tv-conversions.h and creating a cycle.
+ArrayData* tvCastToArrayLikeData(TypedValue tv);
 
 struct ArrayIter;
 struct VariableUnserializer;
@@ -50,13 +57,12 @@ constexpr bool any(AccessFlags a) {
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
- * Array type wrapping around ArrayData to implement reference
- * counting, copy-on-write and ArrayData escalation.
+ * Array type wrapping ArrayData to implement reference counting, copy-on-write
+ * and ArrayData escalation.
  *
  * "Escalation" happens when an underlying ArrayData cannot handle an operation
  * and instead it needs to "upgrade" itself to be a more general (but slower)
- * type of ArrayData to accomplish the task. This "upgrade" is called
- * escalation.
+ * type of ArrayData to accomplish the task.
  */
 struct Array {
 private:
@@ -66,14 +72,12 @@ private:
 
   using Flags = AccessFlags;
 
-  Ptr m_arr;
-
-  Array(ArrayData* ad, NoIncRef) : m_arr(ad, NoIncRef{}) {}
-
 public:
   /*
-   * Create an empty array or an array with one element. Note these are
-   * different than those copying constructors that also take one value.
+   * Create an empty array or an array with one element.
+   *
+   * Note these are different than the copy (or copy-like) constructors that
+   * also take one value.
    */
   static Array Create() {
     return Array(ArrayData::Create(), NoIncRef{});
@@ -87,8 +91,20 @@ public:
     return Array(ArrayData::CreateDict(), NoIncRef{});
   }
 
+  static Array CreateShape() {
+    return Array(ArrayData::CreateShape(), NoIncRef{});
+  }
+
   static Array CreateKeyset() {
     return Array(ArrayData::CreateKeyset(), NoIncRef{});
+  }
+
+  static Array CreateVArray() {
+    return Array(ArrayData::CreateVArray(), NoIncRef{});
+  }
+
+  static Array CreateDArray() {
+    return Array(ArrayData::CreateDArray(), NoIncRef{});
   }
 
   static Array Create(const Variant& value) {
@@ -97,50 +113,41 @@ public:
 
   static Array Create(const Variant& key, const Variant& value);
 
-public:
+  /////////////////////////////////////////////////////////////////////////////
+
   Array() {}
   ~Array();
 
-  // Take ownership of this ArrayData.
+  /*
+   * Take ownership of `ad'.
+   */
   static ALWAYS_INLINE Array attach(ArrayData* ad) {
     return Array(ad, NoIncRef{});
   }
 
-  // Transfer ownership of our reference to this ArrayData.
+  /*
+   * Transfer ownership of our underlying ArrayData.
+   */
   ArrayData* detach() { return m_arr.detach(); }
 
+  /*
+   * Get or null out the underlying ArrayData pointer.
+   */
   ArrayData* get() const { return m_arr.get(); }
   void reset(ArrayData* arr = nullptr) { m_arr.reset(arr); }
 
-  // Deliberately doesn't throw_null_pointer_exception as a perf
-  // optimization.
+  /*
+   * Delegate to the underlying ArrayData.
+   *
+   * Deliberately doesn't throw_null_pointer_exception as a perf optimization.
+   */
   ArrayData* operator->() const { return m_arr.get(); }
 
-  void escalate();
-
-  #define COPY_BODY(meth, def)                                          \
-    if (!m_arr) return def;                                             \
-    auto new_arr = m_arr->meth;                                         \
-    return new_arr != m_arr ? Array{new_arr, NoIncRef{}} : Array{*this};
-
-  // Make a copy of this array. Like the underlying ArrayData::copy operation,
-  // the returned Array may point to the same underlying array as the original,
-  // or a new one.
-  Array copy() const { COPY_BODY(copy(), Array{}) }
-  Array toVec() const { COPY_BODY(toVec(true), CreateVec()) }
-  Array toDict() const { COPY_BODY(toDict(true), CreateDict()) }
-  Array toKeyset() const { COPY_BODY(toKeyset(true), CreateKeyset()) }
-  Array toPHPArray() const { COPY_BODY(toPHPArray(true), Array{}) }
-
-  #undef COPY_BODY
-
   /*
-   * Constructors. Those that take "arr" or "var" are copy constructors, taking
-   * array value from the parameter, and they are NOT constructing an array
-   * with that single value (then one should use Array::Create() functions).
+   * "Copy" constructors.
    */
   explicit Array(ArrayData* data) : m_arr(data) { }
-  /* implicit */ Array(const Array& arr) : m_arr(arr.m_arr) { }
+  Array(const Array& arr) : m_arr(arr.m_arr) { }
 
   /*
    * Special constructor for use from ArrayInit that creates an Array without a
@@ -151,51 +158,13 @@ public:
     : m_arr(ad, NoIncRef{})
   {}
 
-  // Move ctor
+  /*
+   * Move constructor.
+   */
   Array(Array&& src) noexcept : m_arr(std::move(src.m_arr)) { }
 
-  // Move assign
-  Array& operator=(Array&& src) {
-    m_arr = std::move(src.m_arr);
-    return *this;
-  }
-
   /*
-   * Informational
-   */
-  bool empty() const {
-    return !m_arr || m_arr->empty();
-  }
-  ssize_t size() const {
-    return m_arr ? m_arr->size() : 0;
-  }
-  ssize_t length() const {
-    return m_arr ? m_arr->size() : 0;
-  }
-  bool isNull() const {
-    return !m_arr;
-  }
-  Array values() const;
-
-  bool isVecArray() const { return m_arr && m_arr->isVecArray(); }
-  bool isDict() const { return m_arr && m_arr->isDict(); }
-  bool isKeyset() const { return m_arr && m_arr->isKeyset(); }
-  bool isHackArray() const { return m_arr && m_arr->isHackArray(); }
-  bool isPHPArray() const { return !m_arr || m_arr->isPHPArray(); }
-
-  bool useWeakKeys() const {
-    // If array isn't set we may implicitly create a mixed array. We never
-    // implicitly create a dict array or vec.
-    return !m_arr || m_arr->useWeakKeys();
-  }
-
-  /*
-   * Converts k to a valid key for this array type
-   */
-  VarNR convertKey(const Variant& k) const;
-
-  /*
-   * Operators
+   * Assignment.
    */
   Array& operator=(ArrayData* data) {
     m_arr = data;
@@ -206,6 +175,115 @@ public:
     return *this;
   }
   Array& operator=(const Variant& v);
+
+  /*
+   * Move assignment.
+   */
+  Array& operator=(Array&& src) {
+    m_arr = std::move(src.m_arr);
+    return *this;
+  }
+  Array& operator=(Variant&& v);
+
+  /*
+   * Escalate the underlying ArrayData.
+   */
+  void escalate();
+
+  #define COPY_BODY(meth, def)                                          \
+    if (!m_arr) return def;                                             \
+    auto new_arr = m_arr->meth;                                         \
+    return new_arr != m_arr ? Array{new_arr, NoIncRef{}} : Array{*this};
+
+  /*
+   * Make a copy of this array.
+   *
+   * Like the underlying ArrayData::copy operation, the returned Array may
+   * point to the same underlying array as the original, or a new one.
+   */
+  Array copy() const { COPY_BODY(copy(), Array{}) }
+  Array toVec() const { COPY_BODY(toVec(true), CreateVec()) }
+  Array toDict() const { COPY_BODY(toDict(true), CreateDict()) }
+  Array toShape() const { COPY_BODY(toShape(true), CreateShape()) }
+  Array toKeyset() const { COPY_BODY(toKeyset(true), CreateKeyset()) }
+  Array toPHPArray() const { COPY_BODY(toPHPArray(true), Array{}) }
+  Array toVArray() const { COPY_BODY(toVArray(true), CreateVArray()) }
+  Array toDArray() const { COPY_BODY(toDArray(true), CreateDArray()) }
+
+  #undef COPY_BODY
+
+  /////////////////////////////////////////////////////////////////////////////
+
+  /*
+   * Nullability.
+   */
+  bool isNull() const { return !m_arr; }
+
+  /*
+   * Size.
+   */
+  bool empty() const { return !m_arr || m_arr->empty(); }
+  ssize_t size() const { return m_arr ? m_arr->size() : 0; }
+  ssize_t length() const { return m_arr ? m_arr->size() : 0; }
+
+  /*
+   * Array kind.
+   */
+  bool isVecArray() const { return m_arr && m_arr->isVecArray(); }
+  bool isDict() const { return m_arr && m_arr->isDict(); }
+  bool isShape() const { return m_arr && m_arr->isShape(); }
+  bool isKeyset() const { return m_arr && m_arr->isKeyset(); }
+  bool isHackArray() const { return m_arr && m_arr->isHackArray(); }
+  bool isPHPArray() const { return !m_arr || m_arr->isPHPArray(); }
+  bool isVArray() const { return m_arr && m_arr->isVArray(); }
+  bool isDArray() const { return m_arr && m_arr->isDArray(); }
+  bool isVecOrVArray() const { return m_arr && m_arr->isVecOrVArray(); }
+  bool isDictOrDArray() const { return m_arr && m_arr->isDictOrDArray(); }
+  bool isDictOrDArrayOrShape() const {
+    return m_arr && m_arr->isDictOrDArrayOrShape();
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+
+  /*
+   * Start iterator.
+   *
+   * See array-iterator.h for end() and next().
+   */
+  ArrayIter begin(const String& context = null_string) const;
+
+  /*
+   * Converts `k' to a valid key for this array kind.
+   */
+  Cell convertKey(Cell k) const;
+  Cell convertKey(const Variant& k) const;
+
+  /*
+   * Should int-like string keys be implicitly converted to integers before they
+   * are inserted?
+   */
+  bool useWeakKeys() const {
+    // If array isn't set we may implicitly create a mixed array, which uses
+    // weak keys.  We never implicitly create a Hack array.
+    return !m_arr || m_arr->useWeakKeys();
+  }
+
+  /*
+   * Convert the underlying ArrayData to a static copy of itself.
+   */
+  void setEvalScalar() const;
+
+  /////////////////////////////////////////////////////////////////////////////
+  // PHP operations.
+
+  /*
+   * Get a packed array of this Array's values.
+   */
+  Array values() const;
+
+  /*
+   * PHP array union operator.
+   */
   Array  operator+(ArrayData* data) const;
   Array  operator+(const Array& v) const;
   Array  operator+(const Variant& v) const = delete;
@@ -213,56 +291,44 @@ public:
   Array& operator+=(const Array& v);
   Array& operator+=(const Variant& v);
 
-  // Move assignment
-  Array& operator=(Variant&& v);
+  /*
+   * Implementation of array_merge().
+   *
+   * This is different from operator+(), where existing keys' values are NOT
+   * modified.  This function will actually override with new values.
+   *
+   * When merging a packed array with another packed array, new elements are
+   * always appended, and this is also different from operator+() where
+   * existing numeric indices are not modified.
+   */
+  Array& merge(const Array& arr);
 
   /*
-   * Returns the entries that have keys and/or values that are not present in
-   * specified array. Keys and values can be compared by user supplied
-   * functions and key_data or value_data will be passed into PFUNC_CMP as
-   * "data" parameter. Otherwise, equal() will be called for comparisons. If
-   * both by_key and by_value, both keys and values have to match to be
-   * excluded.
+   * Comparison function for array operations.
    */
-  typedef int (*PFUNC_CMP)(const Variant& v1, const Variant& v2, const void* data);
+  using PFUNC_CMP = int (*)(const Variant& v1, const Variant& v2,
+                            const void* data);
+
+  /*
+   * Return the entries that have keys and/or values that are (intersect), or
+   * are not (diff) present in `array'.
+   *
+   * Keys and values can be compared by user supplied functions and `key_data'
+   * or `value_data' will be passed into the corresponding `cmp_function' as
+   * the `data' parameter.  Otherwise, equal() will be called for comparisons.
+   * If both `by_key' and `by_value' are true, both keys and values have to
+   * match to be included (intersect) or excluded (diff).
+   */
   Array diff(const Variant& array, bool by_key, bool by_value,
              PFUNC_CMP key_cmp_function = nullptr,
              const void* key_data = nullptr,
              PFUNC_CMP value_cmp_function = nullptr,
              const void* value_data = nullptr) const;
-
-  /*
-   * Returns the entries that have keys and/or values that are present in
-   * specified array. Keys and values can be compared by user supplied
-   * functions and key_data or value_data will be passed into PFUNC_CMP as
-   * "data" parameter. Otherwise, equal() will be called for comparisons. If
-   * both by_key and by_value, both keys and values have to match to be
-   * included.
-   */
   Array intersect(const Variant& array, bool by_key, bool by_value,
                   PFUNC_CMP key_cmp_function = nullptr,
                   const void* key_data = nullptr,
                   PFUNC_CMP value_cmp_function = nullptr,
                   const void* value_data = nullptr) const;
-
-  /*
-   * Iterator functions. See array-iterator.h for end() and next().
-   */
-  ArrayIter begin(const String& context = null_string) const;
-
-  /*
-   * Manipulations
-   *
-   * Merge: This is different from operator "+", where existing key's values
-   * are NOT modified. This function will actually override with new values.
-   * When merging a vector with a vector, new elements are always appended, and
-   * this is also different from operator "+", where existing numeric indices
-   * are not modified.
-   *
-   * Slice: Taking a slice. When "preserve_keys" is true, a vector will turn
-   * into numerically keyed map.
-   */
-  Array& merge(const Array& arr);
 
   /*
    * Sorting.
@@ -320,142 +386,163 @@ public:
                        bool by_key, const void* data = nullptr);
 
   /*
-   * Type conversions
+   * Type conversions.
    */
-  bool    toBoolean() const { return  m_arr && !m_arr->empty(); }
-  char    toByte   () const { return (m_arr && !m_arr->empty()) ? 1 : 0; }
-  short   toInt16  () const { return (m_arr && !m_arr->empty()) ? 1 : 0; }
-  int     toInt32  () const { return (m_arr && !m_arr->empty()) ? 1 : 0; }
-  int64_t toInt64  () const { return (m_arr && !m_arr->empty()) ? 1 : 0; }
-  double  toDouble () const { return (m_arr && !m_arr->empty()) ? 1.0 : 0.0; }
-  String  toString () const;
+  bool toBoolean() const { return m_arr && !m_arr->empty(); }
+  int8_t  toByte()  const { return toBoolean() ? 1 : 0; }
+  int16_t toInt16() const { return toBoolean() ? 1 : 0; }
+  int32_t toInt32() const { return toBoolean() ? 1 : 0; }
+  int64_t toInt64() const { return toBoolean() ? 1 : 0; }
+  double toDouble() const { return toBoolean() ? 1.0 : 0.0; }
+  String toString() const;
 
   /*
-   * Comparisons
+   * Comparisons.
    */
-  bool same (const Array& v2) const;
-  bool same (const Object& v2) const;
+  bool same(const Array& v2) const;
+  bool same(const Object& v2) const;
   bool equal(const Array& v2) const;
   bool equal(const Object& v2) const;
-  bool less (const Array& v2, bool flip = false) const;
-  bool less (const Object& v2) const;
+  bool less(const Array& v2, bool flip = false) const;
+  bool less(const Object& v2) const;
+  bool less(const Variant& v2) const;
+  bool more(const Array& v2, bool flip = true) const;
+  bool more(const Object& v2) const;
+  bool more(const Variant& v2) const;
+  int compare(const Array& v2, bool flip = false) const;
 
-  bool less (const Variant& v2) const;
-  bool more (const Array& v2, bool flip = true) const;
-  bool more (const Object& v2) const;
-  bool more (const Variant& v2) const;
-  int compare (const Array& v2, bool flip = false) const;
+  /////////////////////////////////////////////////////////////////////////////
+  // Element rval/lval.
 
-  /*
-   * Offset
-   */
-  Variant rvalAt(int     key, Flags = Flags::None) const;
-  Variant rvalAt(int64_t key, Flags = Flags::None) const;
-  Variant rvalAt(double  key, Flags = Flags::None) const = delete;
-  Variant rvalAt(const String& key, Flags = Flags::None) const;
-  Variant rvalAt(const Variant& key, Flags = Flags::None) const;
-
-  /*
-   * To get offset for temporary usage
-   */
-  const Variant& rvalAtRef(int     key, Flags = Flags::None) const;
-  const Variant& rvalAtRef(int64_t key, Flags = Flags::None) const;
-  const Variant& rvalAtRef(double  key, Flags = Flags::None) const = delete;
-  const Variant& rvalAtRef(const Variant& key, Flags = Flags::None) const;
-  const Variant& rvalAtRef(const String& key, Flags = Flags::None) const;
-
-  const Variant operator[](int     key) const;
-  const Variant operator[](int64_t key) const;
-  const Variant operator[](double  key) const = delete;
-  const Variant operator[](const String& key) const;
-  const Variant operator[](const Variant& key) const;
-  const Variant operator[](const char*) const = delete; // use const String&
+#define FOR_EACH_KEY_TYPE(...)    \
+  C(Cell, __VA_ARGS__)            \
+  I(int, __VA_ARGS__)             \
+  I(int64_t, __VA_ARGS__)         \
+  V(const String&, __VA_ARGS__)   \
+  V(const Variant&, __VA_ARGS__)  \
+  D(double, __VA_ARGS__)
 
   /*
-   * Get an lval reference to a newly created element, with the intent
-   * of reading or writing to it as a Cell.
+   * Get a refcounted copy of the element at `key'.
    */
-  Variant& lvalAt();
+  Variant operator[](Cell key) const;
+  Variant operator[](int key) const;
+  Variant operator[](int64_t key) const;
+  Variant operator[](const String& key) const;
+  Variant operator[](const Variant& key) const;
+  Variant operator[](double key) const = delete;
+  Variant operator[](const char*) const = delete;
+
+#define C(key_t, name, ret_t, cns) \
+  ret_t name(key_t, Flags = Flags::None) cns;
+#define V C
+#define I V
+#define D(key_t, name, ret_t, cns) \
+  ret_t name(key_t, Flags = Flags::None) cns = delete;
 
   /*
-   * Get an lval reference to a newly created element, with the intent
-   * of using binding assignment with the newly created element.
+   * Get an rval to the element at `key'.
    */
-  Variant& lvalAtRef();
+  FOR_EACH_KEY_TYPE(rvalAt, tv_rval, const)
 
   /*
-   * Get an lval reference to an element.
+   * Get an lval to the element at `key'.
+   *
+   * These are ArrayData::lval() and ArrayData::lvalRef(), with CoW and
+   * escalation.  As with those functions, the Ref versions should be used if
+   * the lval will be boxed, and the non-Ref versions should be used otherwise.
    */
-  Variant& lvalAt(int key, Flags flags = Flags::None) {
-    return lvalAtImpl(key, flags);
-  }
-  Variant& lvalAt(int64_t key, Flags flags = Flags::None) {
-    return lvalAtImpl(key, flags);
-  }
-  Variant& lvalAt(double key, Flags = Flags::None) = delete;
-  Variant& lvalAt(const String& key, Flags = Flags::None);
-  Variant& lvalAt(const Variant& key, Flags = Flags::None);
+  FOR_EACH_KEY_TYPE(lvalAt, arr_lval, )
+  FOR_EACH_KEY_TYPE(lvalAtRef, arr_lval, )
 
-  Variant& lvalAtRef(int key, Flags flags = Flags::None) {
-    return lvalAtRefImpl(key, flags);
-  }
-  Variant& lvalAtRef(int64_t key, Flags flags = Flags::None) {
-    return lvalAtRefImpl(key, flags);
-  }
-  Variant& lvalAtRef(double key, Flags = Flags::None) = delete;
-  Variant& lvalAtRef(const String& key, Flags = Flags::None);
-  Variant& lvalAtRef(const Variant& key, Flags = Flags::None);
+#undef D
+#undef I
+#undef V
+#undef C
 
   /*
-   * Set an element to a value.
+   * Get an lval to a newly created element.
    */
-  void set(int     key, const Variant& v) { set(int64_t(key), v); }
-  void set(int64_t key, const Variant& v);
-  void set(double  key, const Variant& v) = delete;
-  void set(const String& key, const Variant& v, bool isKey = false);
-  void set(const Variant& key, const Variant& v, bool isKey = false);
+  arr_lval lvalAt();
+  arr_lval lvalAtRef();
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Element access and mutation.
+
+#define C(key_t, ret_t, name, cns)  ret_t name(key_t, bool isKey = false) cns;
+#define V C
+#define I(key_t, ret_t, name, cns)  ret_t name(key_t) cns;
+#define D(key_t, ret_t, name, cns)  ret_t name(key_t) cns = delete;
 
   /*
-   * Set an element to a reference.
+   * Membership.
    */
-  void setRef(int     key, Variant& v) { setRef(int64_t(key), v); }
-  void setRef(int64_t key, Variant& v);
-  void setRef(double  key, Variant& v) = delete;
-  void setRef(const String& key, Variant& v, bool isKey = false);
-  void setRef(const Variant& key, Variant& v, bool isKey = false);
-
-  void setWithRef(const Variant& key, const Variant& v, bool isKey = false);
-
-  /*
-   * Add an element.
-   */
-  void add(int     key, const Variant& v) { add(int64_t(key), v); }
-  void add(int64_t key, const Variant& v);
-  void add(double  key, const Variant& v) = delete;
-  void add(const String& key, const Variant& v, bool isKey = false);
-  void add(const Variant& key, const Variant& v, bool isKey = false);
-
-  /*
-   * Membership functions.
-   */
-  bool exists(char    key) const { return existsImpl((int64_t)key); }
-  bool exists(short   key) const { return existsImpl((int64_t)key); }
-  bool exists(int     key) const { return existsImpl((int64_t)key); }
-  bool exists(int64_t key) const { return existsImpl(key); }
-  bool exists(double  key) const = delete;
-  bool exists(const String& key, bool isKey = false) const;
-  bool exists(const Variant& key, bool isKey = false) const;
+  FOR_EACH_KEY_TYPE(bool, exists, const)
 
   /*
    * Remove an element.
    */
-  void remove(char    key) { removeImpl((int64_t)key); }
-  void remove(short   key) { removeImpl((int64_t)key); }
-  void remove(int     key) { removeImpl((int64_t)key); }
-  void remove(int64_t key) { removeImpl(key); }
-  void remove(double  key) = delete;
-  void remove(const String& key, bool isString = false);
-  void remove(const Variant& key);
+  FOR_EACH_KEY_TYPE(void, remove, )
+
+#undef D
+#undef I
+#undef V
+#undef C
+
+#define C(key_t, name, value_t) \
+  void name(key_t k, value_t v, bool isKey = false);
+#define V C
+#define I(key_t, name, value_t) void name(key_t k, value_t v);
+#define D(key_t, name, value_t) void name(key_t k, value_t v) = delete;
+
+  /*
+   * Set an element to `v', unboxing `v' if it's boxed.
+   */
+  FOR_EACH_KEY_TYPE(set, TypedValue)
+
+  /*
+   * Set an element to `v', preserving refs unless they are singly-referenced.
+   */
+  FOR_EACH_KEY_TYPE(setWithRef, TypedValue)
+
+  /*
+   * Set an element to a reference to `v', boxing it if it's unboxed.
+   */
+  FOR_EACH_KEY_TYPE(setRef, Variant&)
+  FOR_EACH_KEY_TYPE(setRef, tv_lval);
+
+#undef D
+#undef I
+#undef V
+#undef C
+
+#define C(key_t, name, value_t)
+#define V(key_t, name, value_t) \
+  void name(key_t k, value_t v, bool isKey = false);
+#define I(key_t, name, value_t) void name(key_t k, value_t v);
+#define D(key_t, name, value_t) void name(key_t k, value_t v) = delete;
+
+  /*
+   * Variant overloads.
+   */
+  FOR_EACH_KEY_TYPE(set, const Variant&)
+  FOR_EACH_KEY_TYPE(setWithRef, const Variant&)
+
+#undef D
+#undef I
+#undef V
+#undef C
+
+  /*
+   * Append or prepend an element, with semantics like set{,WithRef}().
+   */
+  void append(TypedValue v);
+  void append(const Variant& v);
+  void appendWithRef(TypedValue v);
+  void appendWithRef(const Variant& v);
+  void appendRef(Variant& v);
+  void prepend(TypedValue v);
+  void prepend(const Variant& v);
 
   /*
    * Remove all elements.
@@ -463,78 +550,50 @@ public:
   void clear() { operator=(Create()); }
 
   /*
-   * Append an element.
-   */
-  const Variant& append(const Variant& v);
-  const Variant& appendRef(Variant& v);
-  const Variant& appendWithRef(const Variant& v);
-
-  /*
    * Stack/queue-like functions.
    */
   Variant pop();
   Variant dequeue();
-  void prepend(const Variant& v);
 
-  void setEvalScalar() const;
+#undef FOR_EACH_KEY_TYPE
 
- private:
+  /////////////////////////////////////////////////////////////////////////////
+
+private:
+  Array(ArrayData* ad, NoIncRef) : m_arr(ad, NoIncRef{}) {}
+
   Array& plusImpl(ArrayData* data);
   Array& mergeImpl(ArrayData* data);
   Array diffImpl(const Array& array, bool by_key, bool by_value, bool match,
                  PFUNC_CMP key_cmp_function, const void* key_data,
                  PFUNC_CMP value_cmp_function, const void* value_data) const;
 
-  template<typename T> void setImpl(const T& key, const Variant& v);
+  template<typename T> tv_rval rvalAtImpl(const T& key, Flags) const;
+  template<typename T> arr_lval lvalAtImpl(const T& key, Flags);
+  template<typename T> arr_lval lvalAtRefImpl(const T& key, Flags);
+
+  template<typename T> bool existsImpl(const T& key) const;
+  template<typename T> void removeImpl(const T& key);
+  template<typename T> void setImpl(const T& key, TypedValue v);
+  template<typename T> void setWithRefImpl(const T& key, TypedValue v);
   template<typename T> void setRefImpl(const T& key, Variant& v);
-  template<typename T> void addImpl(const T& key, const Variant& v);
-
-  template<typename T>
-  bool existsImpl(const T& key) const {
-    if (m_arr) return m_arr->exists(key);
-    return false;
-  }
-
-  template<typename T>
-  void removeImpl(const T& key) {
-    if (m_arr) {
-      ArrayData* escalated = m_arr->remove(key, m_arr->cowCheck());
-      if (escalated != m_arr) m_arr = Ptr::attach(escalated);
-    }
-  }
-
-  template<typename T>
-  Variant& lvalAtImpl(const T& key, Flags = Flags::None) {
-    if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
-    auto const r = m_arr->lval(key, m_arr->cowCheck());
-    if (r.array != m_arr) m_arr = Ptr::attach(r.array);
-    assert(r.val);
-    return *r.val;
-  }
-
-  template<typename T>
-  Variant& lvalAtRefImpl(const T& key, Flags = Flags::None) {
-    if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
-    auto const r = m_arr->lvalRef(key, m_arr->cowCheck());
-    if (r.array != m_arr) m_arr = Ptr::attach(r.array);
-    assert(r.val);
-    return *r.val;
-  }
+  template<typename T> void setRefImpl(const T& key, tv_lval v);
 
   static void compileTimeAssertions();
+
+  /////////////////////////////////////////////////////////////////////////////
+
+private:
+  Ptr m_arr;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// ArrNR
 
 struct ArrNR {
-  explicit ArrNR(ArrayData* data = nullptr) {
-    m_px = data;
-  }
+  explicit ArrNR(ArrayData* data = nullptr) { m_px = data; }
+  explicit ArrNR(const ArrayData *ad) : m_px(const_cast<ArrayData*>(ad)) {}
 
-  ArrNR(const ArrNR& a) {
-    m_px = a.m_px;
-  }
+  ArrNR(const ArrNR& a) { m_px = a.m_px; }
 
   ~ArrNR() {
     if (debug) {
@@ -542,23 +601,22 @@ struct ArrNR {
     }
   }
 
+  ArrayData* get() const { return m_px; }
+
   operator const Array&() const { return asArray(); }
 
   Array& asArray() {
     return *reinterpret_cast<Array*>(this); // XXX
   }
-
   const Array& asArray() const {
     return const_cast<ArrNR*>(this)->asArray();
   }
 
-  ArrayData* get() const { return m_px; }
-
-protected:
-  ArrayData* m_px;
-
 private:
   static void compileTimeAssertions();
+
+private:
+  ArrayData* m_px;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -592,6 +650,43 @@ ALWAYS_INLINE Array empty_array() {
 
 ALWAYS_INLINE Array empty_vec_array() {
   return Array::attach(staticEmptyVecArray());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Type-pun a referenced ArrayData* as an Array&.
+ *
+ * This lets us take advantage of Array's CoW and escalation machinery to
+ * possibly mutate `ad', without the overhead or behavioral change of
+ * refcounting.
+ *
+ * asArrRef() unconditionally removes Persistent bits from the referenced type.
+ */
+ALWAYS_INLINE Array& asArrRef(tv_lval tv) {
+  assertx(tvIsArrayLike(tv));
+  tv.type() = tv.val().parr->toDataType();
+  return *reinterpret_cast<Array*>(&val(tv).parr);
+}
+
+ALWAYS_INLINE Array& toArrRef(tv_lval tv) {
+  return asArrRef(isRefType(type(tv)) ? val(tv).pref->cell() : tv);
+}
+
+ALWAYS_INLINE const Array& asCArrRef(tv_rval tv) {
+  assertx(tvIsArrayLike(tv));
+  return *reinterpret_cast<const Array*>(&val(tv).parr);
+}
+
+ALWAYS_INLINE const Array& toCArrRef(tv_rval tv) {
+  return asCArrRef(tvIsRef(tv) ? val(tv).pref->cell() : tv);
+}
+
+ALWAYS_INLINE Array toArray(tv_rval rval) {
+  if (isArrayLikeType(type(rval))) {
+    return Array{assert_not_null(val(rval).parr)};
+  }
+  return Array::attach(tvCastToArrayLikeData(*rval));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

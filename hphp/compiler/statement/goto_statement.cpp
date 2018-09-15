@@ -25,38 +25,17 @@ using namespace HPHP;
 GotoStatement::GotoStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, const std::string &label)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(GotoStatement)),
-    m_label(label), m_error((ParserBase::GotoError)0) {
+    m_label(label) {
 }
 
 StatementPtr GotoStatement::clone() {
   GotoStatementPtr stmt(new GotoStatement(*this));
   stmt->m_label = m_label;
-  stmt->m_error = m_error;
   return stmt;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// parser functions
-void GotoStatement::invalidate(ParserBase::GotoError error) {
-  m_error = error;
-  switch (m_error) {
-  case ParserBase::UndefLabel:
-    Compiler::Error(Compiler::GotoUndefLabel, shared_from_this());
-    break;
-  case ParserBase::InvalidBlock:
-    Compiler::Error(Compiler::GotoInvalidBlock, shared_from_this());
-    break;
-  default:
-    assert(false);
-    break;
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-void GotoStatement::analyzeProgram(AnalysisResultPtr ar) {
-}
 
 ConstructPtr GotoStatement::getNthKid(int n) const {
   switch (n) {
@@ -71,7 +50,7 @@ int GotoStatement::getKidCount() const {
   return 0;
 }
 
-void GotoStatement::setNthKid(int n, ConstructPtr cp) {
+void GotoStatement::setNthKid(int n, ConstructPtr /*cp*/) {
   switch (n) {
     default:
       assert(false);
@@ -82,6 +61,6 @@ void GotoStatement::setNthKid(int n, ConstructPtr cp) {
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
-void GotoStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
+void GotoStatement::outputPHP(CodeGenerator& cg, AnalysisResultPtr /*ar*/) {
   cg_printf("goto %s;\n", m_label.c_str());
 }

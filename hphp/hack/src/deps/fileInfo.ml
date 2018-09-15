@@ -2,9 +2,8 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
@@ -18,7 +17,8 @@
  *)
 (*****************************************************************************)
 
-open Core
+open Hh_core
+open Prim_defs
 
 (*****************************************************************************)
 (* Parsing modes *)
@@ -26,13 +26,42 @@ open Core
 
 type file_type =
   | PhpFile
-  | HhFile
+  | HhFile [@@deriving show]
+
+let string_of_file_type = function
+  | PhpFile -> "php"
+  | HhFile  -> "hh"
 
 type mode =
-  | Mdecl    (* just declare signatures, don't check anything *)
-  | Mstrict  (* check everthing! *)
-  | Mpartial (* Don't fail if you see a function/class you don't know *)
+  | Mphp          (* Do the best you can to support legacy PHP *)
+  | Mdecl         (* just declare signatures, don't check anything *)
+  | Mstrict       (* check everything! *)
+  | Mpartial      (* Don't fail if you see a function/class you don't know *)
+  | Mexperimental (* Strict mode + experimental features *)
+[@@deriving show]
 
+let parse_mode = function
+  | "strict" -> Some Mstrict
+  | "decl" | "only-headers" -> Some Mdecl
+  | "" | "partial" -> Some Mpartial
+  | "experimental" -> Some Mexperimental
+  | _ -> None
+
+let string_of_mode = function
+  | Mphp          -> "php"
+  | Mdecl         -> "decl"
+  | Mstrict       -> "strict"
+  | Mpartial      -> "partial"
+  | Mexperimental -> "experimental"
+
+let pp_mode fmt mode =
+  Format.pp_print_string fmt @@
+    match mode with
+    | Mphp          -> "Mphp"
+    | Mdecl         -> "Mdecl"
+    | Mstrict       -> "Mstrict"
+    | Mpartial      -> "Mpartial"
+    | Mexperimental -> "Mexperimental"
 
 (*****************************************************************************)
 (* We define two types of positions establishing the location of a given name:
@@ -41,31 +70,39 @@ type mode =
  * allowing us to lazily retrieve the name's exact location if necessary.
  *)
 (*****************************************************************************)
-type name_type = Fun | Class | Typedef | Const
-type pos = Full of Pos.t | File of name_type * Relative_path.t
-type id = pos  * string
+type name_type = Fun | Class | Typedef | Const [@@deriving show]
+type pos = Full of Pos.t | File of name_type * Relative_path.t [@@deriving show]
+type id = pos  * string [@@deriving show]
+(* The hash value of a decl AST.
+  We use this to see if two versions of a file are "similar", i.e. their
+  declarations only differ by position information.  *)
 
 (*****************************************************************************)
 (* The record produced by the parsing phase. *)
 (*****************************************************************************)
+
+type hash_type = OpaqueDigest.t option
+let pp_hash_type _ _ _ = "<OpaqueDigest.t option>"
+
 type t = {
+  hash : hash_type;
   file_mode : mode option;
   funs : id list;
   classes : id list;
   typedefs : id list;
   consts : id list;
-  comments : (Pos.t * string) list option; (* None if loaded from saved state *)
-  consider_names_just_for_autoload: bool;
-}
+  comments : (Pos.t * comment) list option;
+    (* None if loaded from saved state *)
+} [@@deriving show]
 
 let empty_t = {
+  hash = None;
   file_mode = None;
   funs = [];
   classes = [];
   typedefs = [];
   consts = [];
   comments = Some [];
-  consider_names_just_for_autoload = false;
 }
 
 let pos_full (p, name) =
@@ -86,11 +123,18 @@ type names = {
   n_consts  : SSet.t;
 }
 
+(* Data structure stored in the saved state *)
+type saved = {
+  s_names : names;
+  s_hash : OpaqueDigest.t option;
+  s_mode: mode option;
+}
+
 
 type fast = names Relative_path.Map.t
 
 (* Object we get from saved state *)
-type fast_with_modes = (names * mode option) Relative_path.Map.t
+type saved_state_info = saved Relative_path.Map.t
 
 let empty_names = {
   n_funs    = SSet.empty;
@@ -106,14 +150,22 @@ let empty_names = {
 let name_set_of_idl idl =
   List.fold_left idl ~f:(fun acc (_, x) -> SSet.add x acc) ~init:SSet.empty
 
-let modes_to_fast fast =
-  Relative_path.Map.map fast fst
+let saved_to_fast fast =
+  Relative_path.Map.map fast
+  begin fun saved -> saved.s_names end
 
-let modes_to_info fast =
+(* Filter out all PHP files from saved fileInfo object. *)
+let saved_to_hack_files fast =
+  saved_to_fast fast
+
+
+let saved_to_info fast =
   Relative_path.Map.fold fast ~init:Relative_path.Map.empty
-  ~f:(fun fn (names, m) acc ->
-    let {n_funs; n_classes; n_types; n_consts} = names in
-    let funs = List.map (SSet.elements n_funs) (fun x -> File (Fun, fn), x) in
+  ~f:(fun fn saved acc ->
+    let {s_names; s_mode; s_hash} = saved in
+    let {n_funs; n_classes; n_types; n_consts;} = s_names in
+    let funs = List.map (SSet.elements n_funs)
+      (fun x -> File (Fun, fn), x) in
     let classes = List.map (SSet.elements n_classes)
       (fun x -> File (Class, fn), x) in
     let typedefs = List.map (SSet.elements n_types)
@@ -121,31 +173,33 @@ let modes_to_info fast =
     let consts = List.map (SSet.elements n_consts)
       (fun x -> File (Const, fn), x) in
     let fileinfo = {
-      file_mode= m;
+      file_mode= s_mode;
+      hash = s_hash;
       funs;
       classes;
       typedefs;
       consts;
       comments = None;
-      consider_names_just_for_autoload = false
     } in
     Relative_path.Map.add acc fn fileinfo
   )
 
-let info_to_modes fileinfo =
+let info_to_saved fileinfo =
   Relative_path.Map.map fileinfo
     (fun info ->
-      let {funs; classes; typedefs; consts; file_mode; comments = _;
-           consider_names_just_for_autoload = _ } = info in
+      let {funs; classes; typedefs; consts; file_mode= s_mode;
+          hash= s_hash; comments = _; } = info in
       let n_funs    = name_set_of_idl funs in
       let n_classes = name_set_of_idl classes in
       let n_types   = name_set_of_idl typedefs in
       let n_consts  = name_set_of_idl consts in
-      {n_funs; n_classes; n_types; n_consts}, file_mode)
+
+      let s_names = { n_funs; n_classes; n_types; n_consts; } in
+      { s_names; s_mode; s_hash; })
 
 let simplify info =
   let {funs; classes; typedefs; consts; file_mode = _; comments = _;
-       consider_names_just_for_autoload = _ } = info in
+      hash = _;} = info in
   let n_funs    = name_set_of_idl funs in
   let n_classes = name_set_of_idl classes in
   let n_types   = name_set_of_idl typedefs in
@@ -176,3 +230,15 @@ let print_names name =
   Printf.printf "\n";
   flush stdout;
   ()
+
+let to_string fast =
+  ["funs",  fast.funs;
+  "classes", fast.classes;
+  "typedefs", fast.typedefs;
+  "consts", fast.consts;] |>
+  List.filter ~f:(fun (_, l) -> not @@ List.is_empty l) |>
+  List.map ~f:begin fun (kind, l) ->
+    Printf.sprintf "%s: %s"
+      kind (List.map l ~f:snd |> String.concat ",")
+  end |>
+  String.concat ";"

@@ -1,0 +1,1 @@
+Fatal error: Class Class2 may not inherit from sealed class (SomeClass) without being in the whitelist in %s/hphp/test/slow/sealed/sealed_classes12.inc on line 3

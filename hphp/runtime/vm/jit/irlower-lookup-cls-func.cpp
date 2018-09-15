@@ -24,7 +24,8 @@
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/strings.h"
-#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
 
@@ -34,6 +35,7 @@
 #include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/system/systemlib.h"
@@ -76,7 +78,7 @@ void implLdMeta(IRLS& env, const IRInstruction* inst) {
 
   auto const ch = TargetCache::alloc();
   rds::recordRds(ch, sizeof(TargetCache), is_func ? "FuncCache" : "ClassCache",
-                 inst->marker().func()->fullName()->data());
+                 inst->marker().func()->fullName()->slice());
 
   auto args = argGroup(env, inst).imm(ch).ssa(0 /* name */);
   if (is_func) {
@@ -93,6 +95,15 @@ void implLdMeta(IRLS& env, const IRInstruction* inst) {
     SyncOptions::Sync,
     args
   );
+}
+
+const Func* loadUnknownFuncHelper(const StringData* name,
+                                  void (*raiser)(const StringData*,
+                                                 const Class*)) {
+  VMRegAnchor _;
+  auto const func = Unit::loadFunc(name);
+  if (UNLIKELY(!func)) raiser(name, nullptr);
+  return func;
 }
 
 }
@@ -137,16 +148,15 @@ const Class* lookupKnownClass(rds::Handle cache_handle,
   if (UNLIKELY(!rds::isHandleInit(cache_handle, rds::NormalTag{}))) {
     raise_error(Strings::UNKNOWN_CLASS, name->data());
   }
-  return rds::handleToRef<LowPtr<Class>>(cache_handle).get();
+  return rds::handleToRef<LowPtr<Class>, rds::Mode::Normal>(cache_handle).get();
+}
+
+const Func* loadUnknownFunc(const StringData* name) {
+  return loadUnknownFuncHelper(name, raise_call_to_undefined);
 }
 
 const Func* lookupUnknownFunc(const StringData* name) {
-  VMRegAnchor _;
-  auto const func = Unit::loadFunc(name);
-  if (UNLIKELY(!func)) {
-    raise_error("Call to undefined function %s()", name->data());
-  }
-  return func;
+  return loadUnknownFuncHelper(name, raise_resolve_undefined);
 }
 
 const Func* lookupFallbackFunc(const StringData* name,
@@ -159,7 +169,8 @@ const Func* lookupFallbackFunc(const StringData* name,
     // Then try to load the fallback function.
     func = Unit::loadFunc(fallback);
     if (UNLIKELY(!func)) {
-      raise_error("Call to undefined function %s()", name->data());
+      raise_error("Call to undefined function %s()",
+                  stripInOutSuffix(name)->data());
     }
   }
   return func;
@@ -199,16 +210,15 @@ void implLdCached(IRLS& env, const IRInstruction* inst,
       }
     );
   } else {
+    auto const pptr = rds::handleToPtr<LowPtr<T>, rds::Mode::Persistent>(ch);
     auto const ptr = v.makeReg();
-    emitLdLowPtr(v, rvmtl()[ch], ptr, sizeof(LowPtr<T>));
+    emitLdLowPtr(v, *v.cns(pptr), ptr, sizeof(LowPtr<T>));
 
     auto const sf = v.makeReg();
     v << testq{ptr, ptr, sf};
-    unlikelyCond(
-      v, vcold(env), CC_Z, sf, dst,
-      [&] (Vout& v) { return fill_cache(v, ch); },
-      [&] (Vout& v) { return ptr; }
-    );
+    unlikelyCond(v, vcold(env), CC_Z, sf, dst,
+                 [&](Vout& v) { return fill_cache(v, ch); },
+                 [&](Vout& /*v*/) { return ptr; });
   }
 }
 
@@ -222,8 +232,25 @@ void implLdCachedSafe(IRLS& env, const IRInstruction* inst,
   if (rds::isNormalHandle(ch)) {
     auto const sf = checkRDSHandleInitialized(v, ch);
     fwdJcc(v, env, CC_NE, sf, inst->taken());
+    emitLdLowPtr(v, rvmtl()[ch], dst, sizeof(LowPtr<T>));
+  } else {
+    assertx(rds::isPersistentHandle(ch));
+    auto const pptr = rds::handleToPtr<LowPtr<T>, rds::Mode::Persistent>(ch);
+    emitLdLowPtr(v, *v.cns(pptr), dst, sizeof(LowPtr<T>));
   }
-  emitLdLowPtr(v, rvmtl()[ch], dst, sizeof(LowPtr<T>));
+}
+
+template<Opcode opc>
+void ldFuncCachedHelper(IRLS& env, const IRInstruction* inst,
+                        const CallSpec& call) {
+  auto const extra = inst->extra<opc>();
+
+  implLdCached<Func>(env, inst, extra->name, [&] (Vout& v, rds::Handle) {
+    auto const ptr = v.makeReg();
+    auto const args = argGroup(env, inst).immPtr(extra->name);
+    cgCallHelper(v, env, call, callDest(ptr), SyncOptions::Sync, args);
+    return ptr;
+  });
 }
 
 }
@@ -243,15 +270,15 @@ void cgLdClsCached(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgLdFuncCached(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<LdFuncCached>();
+  ldFuncCachedHelper<LdFuncCached>(
+    env, inst, CallSpec::direct(loadUnknownFunc)
+  );
+}
 
-  implLdCached<Func>(env, inst, extra->name, [&] (Vout& v, rds::Handle) {
-    auto const ptr = v.makeReg();
-    auto const args = argGroup(env, inst).immPtr(extra->name);
-    cgCallHelper(v, env, CallSpec::direct(lookupUnknownFunc),
-                 callDest(ptr), SyncOptions::Sync, args);
-    return ptr;
-  });
+void cgLookupFuncCached(IRLS& env, const IRInstruction* inst) {
+  ldFuncCachedHelper<LookupFuncCached>(
+    env, inst, CallSpec::direct(lookupUnknownFunc)
+  );
 }
 
 void cgLdFuncCachedU(IRLS& env, const IRInstruction* inst) {
@@ -276,45 +303,29 @@ void cgLdClsCachedSafe(IRLS& env, const IRInstruction* inst) {
   implLdCachedSafe<Class>(env, inst, name);
 }
 
-void cgLdFuncCachedSafe(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<LdFuncCachedSafe>();
-  implLdCachedSafe<Func>(env, inst, extra->name);
-}
-
 IMPL_OPCODE_CALL(LookupClsRDS)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-enum class OnFail { Warn, Fatal };
-
-template<OnFail FailBehavior, class FooNR>
-void loadFuncContextImpl(FooNR callableNR, ActRec* preLiveAR, ActRec* fp) {
-  static_assert(
-    std::is_same<FooNR,ArrNR>::value ||
-    std::is_same<FooNR,StrNR>::value,
-    "check loadFuncContextImpl for a new FooNR"
-  );
-
+void loadFuncContextImpl(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
   ObjectData* inst = nullptr;
   Class* cls = nullptr;
   StringData* invName = nullptr;
+  bool dynamic = false;
 
   auto func = vm_decode_function(
-    VarNR(callableNR),
+    VarNR(arr).operator const Variant&(),
     fp,
     false, // forward
     inst,
     cls,
     invName,
-    FailBehavior == OnFail::Warn ? DecodeFlags::Warn : DecodeFlags::NoWarn
+    dynamic,
+    DecodeFlags::NoWarn
   );
+  assertx(dynamic);
   if (UNLIKELY(func == nullptr)) {
-    if (FailBehavior == OnFail::Fatal) {
-      raise_error("Invalid callable (array)");
-    }
-    func = SystemLib::s_nullFunc;
-    inst = nullptr;
-    cls = nullptr;
+    raise_error("Invalid callable (array)");
   }
 
   preLiveAR->m_func = func;
@@ -333,97 +344,9 @@ void loadFuncContextImpl(FooNR callableNR, ActRec* preLiveAR, ActRec* fp) {
 
 void loadArrayFunctionContext(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
   try {
-    loadFuncContextImpl<OnFail::Fatal>(ArrNR(arr), preLiveAR, fp);
+    loadFuncContextImpl(arr, preLiveAR, fp);
   } catch (...) {
-    *arPreliveOverwriteCells(preLiveAR) = make_tv<KindOfArray>(arr);
-    throw;
-  }
-}
-
-NEVER_INLINE
-static void fpushCufHelperArraySlowPath(ArrayData* arr,
-                                        ActRec* preLiveAR,
-                                        ActRec* fp) {
-  loadFuncContextImpl<OnFail::Warn>(ArrNR(arr), preLiveAR, fp);
-}
-
-ALWAYS_INLINE
-static bool strHasColon(StringData* sd) {
-  auto const sl = sd->slice();
-  auto const e = sl.end();
-  for (auto p = sl.begin(); p != e; ++p) {
-    if (*p == ':') return true;
-  }
-  return false;
-}
-
-void fpushCufHelperArray(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
-  try {
-    if (UNLIKELY(!arr->isPacked() || arr->getSize() != 2)) {
-      return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
-    }
-
-    auto const elem0 = tvToCell(PackedArray::NvGetInt(arr, 0));
-    auto const elem1 = tvToCell(PackedArray::NvGetInt(arr, 1));
-
-    if (UNLIKELY(elem0->m_type != KindOfObject ||
-                 !isStringType(elem1->m_type))) {
-      return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
-    }
-
-    // If the string contains a class name (e.g. Foo::bar), all kinds of weird
-    // junk happens (w.r.t. forwarding class contexts and things).  We just do
-    // a quick loop to try to bail out of this case.
-    if (UNLIKELY(strHasColon(elem1->m_data.pstr))) {
-      return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
-    }
-
-    auto const inst = elem0->m_data.pobj;
-    auto const func = lookupMethodCtx(
-      inst->getVMClass(),
-      elem1->m_data.pstr,
-      fp->func()->cls(),
-      CallType::ObjMethod
-    );
-    if (UNLIKELY(!func || func->isStaticInPrologue())) {
-      return fpushCufHelperArraySlowPath(arr, preLiveAR, fp);
-    }
-
-    preLiveAR->m_func = func;
-    inst->incRefCount();
-    preLiveAR->setThis(inst);
-  } catch (...) {
-    *arPreliveOverwriteCells(preLiveAR) = make_tv<KindOfArray>(arr);
-    throw;
-  }
-}
-
-NEVER_INLINE
-static void fpushCufHelperStringSlowPath(StringData* sd,
-                                         ActRec* preLiveAR,
-                                         ActRec* fp) {
-  loadFuncContextImpl<OnFail::Warn>(StrNR(sd), preLiveAR, fp);
-}
-
-NEVER_INLINE
-static void fpushStringFail(const StringData* sd, ActRec* preLiveAR) {
-  throw_invalid_argument("function: method '%s' not found", sd->data());
-  preLiveAR->m_func = SystemLib::s_nullFunc;
-}
-
-void fpushCufHelperString(StringData* sd, ActRec* preLiveAR, ActRec* fp) {
-  try {
-    if (UNLIKELY(strHasColon(sd))) {
-      return fpushCufHelperStringSlowPath(sd, preLiveAR, fp);
-    }
-
-    auto const func = Unit::loadDynCallFunc(sd);
-    preLiveAR->m_func = func;
-    if (UNLIKELY(!func)) {
-      return fpushStringFail(sd, preLiveAR);
-    }
-  } catch (...) {
-    *arPreliveOverwriteCells(preLiveAR) = make_tv<KindOfString>(sd);
+    *arPreliveOverwriteCells(preLiveAR) = make_array_like_tv(arr);
     throw;
   }
 }
@@ -438,28 +361,6 @@ void cgLdArrFuncCtx(IRLS& env, const IRInstruction* inst) {
     .ssa(2);
 
   cgCallHelper(vmain(env), env, CallSpec::direct(loadArrayFunctionContext),
-               callDest(env, inst), SyncOptions::Sync, args);
-}
-
-void cgLdArrFPushCuf(IRLS& env, const IRInstruction* inst) {
-  auto const args = argGroup(env, inst)
-    .ssa(0)
-    .addr(srcLoc(env, inst, 1).reg(),
-          cellsToBytes(inst->extra<LdArrFPushCuf>()->offset.offset))
-    .ssa(2);
-
-  cgCallHelper(vmain(env), env, CallSpec::direct(fpushCufHelperArray),
-               callDest(env, inst), SyncOptions::Sync, args);
-}
-
-void cgLdStrFPushCuf(IRLS& env, const IRInstruction* inst) {
-  auto const args = argGroup(env, inst)
-    .ssa(0)
-    .addr(srcLoc(env, inst, 1).reg(),
-          cellsToBytes(inst->extra<LdStrFPushCuf>()->offset.offset))
-    .ssa(2);
-
-  cgCallHelper(vmain(env), env, CallSpec::direct(fpushCufHelperString),
                callDest(env, inst), SyncOptions::Sync, args);
 }
 

@@ -151,11 +151,11 @@ inline RegSet php_return_regs() {
 }
 
 /*
- * Registers that are live on entry to fcallArrayHelper.
+ * Registers that are live on entry to fcallUnpackHelper.
  *
  * TODO(#2288359): We don't want this to include rvmsp() eventually.
  */
-inline RegSet fcall_array_regs() { return vm_regs_with_sp(); }
+inline RegSet fcall_unpack_regs() { return vm_regs_with_sp(); }
 
 ///////////////////////////////////////////////////////////////////////////////
 

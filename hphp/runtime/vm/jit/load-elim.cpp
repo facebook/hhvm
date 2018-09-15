@@ -23,16 +23,20 @@
 #include <folly/ScopeGuard.h>
 #include <folly/Hash.h>
 
+#include "hphp/util/bitset-utils.h"
 #include "hphp/util/functional.h"
 #include "hphp/util/either.h"
 #include "hphp/util/dataflow-worklist.h"
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 
+#include "hphp/runtime/base/perf-warning.h"
+
 #include "hphp/runtime/vm/jit/alias-analysis.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/jit/dce.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/memory-effects.h"
@@ -100,6 +104,12 @@ struct State {
    * Currently available indexes in tracked.
    */
   ALocBits avail;
+
+  /*
+   * If we know whether various RDS entries have been initialized at this
+   * position.
+   */
+  jit::flat_set<rds::Handle> initRDS{};
 };
 
 struct BlockInfo {
@@ -166,6 +176,15 @@ struct Global {
    * so if it's needed in more than one place we can reuse it.
    */
   jit::hash_map<PhiKey,SSATmp*,PhiKey::Hash> insertedPhis;
+
+  /*
+   * Stats
+   */
+  size_t instrsReduced = 0;
+  size_t loadsRemoved  = 0;
+  size_t loadsRefined  = 0;
+  size_t jumpsRemoved  = 0;
+  size_t callsResolved = 0;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -201,6 +220,16 @@ DEBUG_ONLY std::string show(const State& state) {
       folly::format(&ret, "  {: >3} = {}\n", idx, show(state.tracked[idx]));
     }
   }
+
+  folly::format(
+    &ret,
+    "  initRDS : {}\n",
+    [&] {
+      using namespace folly::gen;
+      return from(state.initRDS) | unsplit<std::string>(",");
+    }()
+  );
+
   return ret;
 }
 
@@ -230,15 +259,52 @@ struct FRedundant { ValueInfo knownValue; Type knownType; uint32_t aloc; };
 struct FReducible { ValueInfo knownValue; Type knownType; uint32_t aloc; };
 
 /*
+ * The instruction is a load which can be refined to a better type than its
+ * type-parameter currently has.
+ */
+struct FRefinableLoad { Type refinedType; };
+
+/*
+ * The instruction is a call to a callee who's identity has been determined.
+ */
+struct FResolvable { const Func* callee; };
+
+/*
+ * The instruction can be replaced with a nop.
+ */
+struct FRemovable {};
+
+/*
  * The instruction can be legally replaced with a Jmp to either its next or
  * taken edge.
  */
 struct FJmpNext {};
 struct FJmpTaken {};
 
-using Flags = boost::variant<FNone,FRedundant,FReducible,FJmpNext,FJmpTaken>;
+using Flags = boost::variant<FNone,FRedundant,FReducible,FRefinableLoad,
+                             FResolvable,FRemovable,FJmpNext,FJmpTaken>;
 
 //////////////////////////////////////////////////////////////////////
+
+// Conservative list of instructions which have type-parameters safe to refine.
+bool refinable_load_eligible(const IRInstruction& inst) {
+  switch (inst.op()) {
+    case LdLoc:
+    case LdStk:
+    case LdMBase:
+    case LdClsRef:
+    case LdCufIterFunc:
+    case LdCufIterCtx:
+    case LdCufIterInvName:
+    case LdMem:
+    case LdARFuncPtr:
+    case LdARCtx:
+      assertx(inst.hasTypeParam());
+      return true;
+    default:
+      return false;
+  }
+}
 
 void clear_everything(Local& env) {
   FTRACE(3, "      clear_everything\n");
@@ -264,7 +330,7 @@ Flags load(Local& env,
 
   auto const meta = env.global.ainfo.find(acls);
   if (!meta) return FNone{};
-  assert(meta->index < kMaxTrackedALocs);
+  assertx(meta->index < kMaxTrackedALocs);
 
   auto& tracked = env.state.tracked[meta->index];
 
@@ -278,8 +344,7 @@ Flags load(Local& env,
     tracked.knownType &= inst.dst()->type();
   }
 
-  if (tracked.knownType.hasConstVal() ||
-      tracked.knownType.subtypeOfAny(TUninit, TInitNull, TNullptr)) {
+  if (tracked.knownType.admitsSingleVal()) {
     tracked.knownValue = env.global.unit.cns(tracked.knownType);
 
     FTRACE(4, "       {} <- {}\n", show(acls), inst.dst()->toString());
@@ -298,16 +363,27 @@ Flags load(Local& env,
       [] (SSATmp* tmp) { return tmp->inst()->block(); },
       [] (Block* blk)  { return blk; }
     );
-    if (inst.block() != block && inst.block()->hint() == Block::Hint::Unused) {
-      return FNone{};
+    if (inst.block() == block || inst.block()->hint() != Block::Hint::Unused) {
+      return FRedundant { tracked.knownValue, tracked.knownType, meta->index };
     }
-    return FRedundant { tracked.knownValue, tracked.knownType, meta->index };
+  } else {
+    // Only set a new known value if we previously didn't have one. If we had a
+    // known value already, we would have made the load redundant above, unless
+    // we're in an Hint::Unused block. In that case, we want to keep any old
+    // known value to avoid disturbing the main trace in case we merge back.
+    tracked.knownValue = inst.dst();
+    FTRACE(4, "       {} <- {}\n", show(acls), inst.dst()->toString());
+    FTRACE(5, "       av: {}\n", show(env.state.avail));
   }
 
-  tracked.knownValue = inst.dst();
+  // Even if we can't make this load redundant, we might be able to refine its
+  // type parameter.
+  if (refinable_load_eligible(inst)) {
+    if (tracked.knownType < inst.typeParam()) {
+      return FRefinableLoad { tracked.knownType };
+    }
+  }
 
-  FTRACE(4, "       {} <- {}\n", show(acls), inst.dst()->toString());
-  FTRACE(5, "       av: {}\n", show(env.state.avail));
   return FNone{};
 }
 
@@ -380,12 +456,16 @@ Flags handle_general_effects(Local& env,
   case CastStk:
   case CoerceStk:
     {
-      // We only care about the stack component, since we only optimize the case
-      // where we don't need to reenter.
-      assert(m.loads.stack());
-      AliasClass const stk = *m.loads.stack();
+      auto const stkOffset = [&]{
+        if (inst.is(CastStk)) return inst.extra<CastStk>()->offset;
+        if (inst.is(CoerceStk)) return inst.extra<CoerceStk>()->offset;
+        always_assert(false);
+      }();
+      auto const stk =
+        canonicalize(AliasClass { AStack { inst.src(0), stkOffset, 1 } });
+      always_assert(stk <= canonicalize(m.loads));
 
-      auto const meta = env.global.ainfo.find(canonicalize(stk));
+      auto const meta = env.global.ainfo.find(stk);
       auto const tloc = find_tracked(env, meta);
       if (!tloc) break;
       if (inst.op() == CastStk &&
@@ -402,6 +482,33 @@ Flags handle_general_effects(Local& env,
     }
     break;
 
+  case InitSProps: {
+    auto const handle = inst.extra<ClassData>()->cls->sPropInitHandle();
+    if (env.state.initRDS.count(handle) > 0) return FJmpNext{};
+    env.state.initRDS.insert(handle);
+    break;
+  }
+
+  case InitProps: {
+    auto const handle = inst.extra<ClassData>()->cls->propHandle();
+    if (env.state.initRDS.count(handle) > 0) return FJmpNext{};
+    env.state.initRDS.insert(handle);
+    break;
+  }
+
+  case CheckRDSInitialized: {
+    auto const handle = inst.extra<CheckRDSInitialized>()->handle;
+    if (env.state.initRDS.count(handle) > 0) return FJmpNext{};
+    break;
+  }
+
+  case MarkRDSInitialized: {
+    auto const handle = inst.extra<MarkRDSInitialized>()->handle;
+    if (env.state.initRDS.count(handle) > 0) return FRemovable{};
+    env.state.initRDS.insert(handle);
+    break;
+  }
+
   default:
     break;
   }
@@ -411,26 +518,63 @@ Flags handle_general_effects(Local& env,
   return FNone{};
 }
 
-void handle_call_effects(Local& env, CallEffects effects) {
-  if (effects.destroys_locals) {
+Flags handle_call_effects(Local& env,
+                          const IRInstruction& inst,
+                          CallEffects effects) {
+  // If the callee isn't already known, see if we can determine it. We can
+  // determine it if we know the precise type of the Func stored in the spilled
+  // frame.
+  auto const knownCallee = [&]() -> const Func* {
+    if (inst.is(Call)) return inst.extra<Call>()->callee;
+    if (inst.is(CallUnpack)) return inst.extra<CallUnpack>()->callee;
+    return nullptr;
+  }();
+
+  Flags flags = FNone{};
+  auto writesLocals = effects.writes_locals;
+  if (!knownCallee) {
+    if (auto const meta = env.global.ainfo.find(canonicalize(effects.callee))) {
+      assertx(meta->index < kMaxTrackedALocs);
+      if (env.state.avail[meta->index]) {
+        auto const& tracked = env.state.tracked[meta->index];
+        if (tracked.knownType.hasConstVal(TFunc)) {
+          auto const callee = tracked.knownType.funcVal();
+          if (writesLocals) writesLocals = funcWritesLocals(callee);
+          flags = FResolvable { callee };
+        }
+      }
+    }
+  }
+
+  if (writesLocals) {
     clear_everything(env);
-    return;
+    return flags;
   }
 
   /*
-   * Keep types for stack and frame locations, and throw away the values.  We
-   * are just doing this to avoid extending lifetimes across php calls, which
-   * currently always leads to spilling.
+   * Keep types for stack, locals, class-ref slots, and iterators, and throw
+   * away the values.  We are just doing this to avoid extending lifetimes
+   * across php calls, which currently always leads to spilling.
    */
-  auto const stk_and_frame = env.global.ainfo.all_stack |
-                             env.global.ainfo.all_frame;
-  env.state.avail &= stk_and_frame;
+  auto const keep = env.global.ainfo.all_stack       |
+                    env.global.ainfo.all_frame       |
+                    env.global.ainfo.all_clsRefSlot  |
+                    env.global.ainfo.all_cufIterFunc |
+                    env.global.ainfo.all_cufIterCtx  |
+                    env.global.ainfo.all_cufIterInvName |
+                    env.global.ainfo.all_cufIterDynamic;
+  env.state.avail &= keep;
   for (auto aloc = uint32_t{0};
       aloc < env.global.ainfo.locations.size();
       ++aloc) {
     if (!env.state.avail[aloc]) continue;
     env.state.tracked[aloc].knownValue = nullptr;
   }
+
+  // Any stack locations modified by the callee are no longer valid
+  store(env, effects.stack, nullptr);
+
+  return flags;
 }
 
 Flags handle_assert(Local& env, const IRInstruction& inst) {
@@ -452,13 +596,22 @@ Flags handle_assert(Local& env, const IRInstruction& inst) {
 
   auto const meta = env.global.ainfo.find(canonicalize(*acls));
   auto const tloc = find_tracked(env, meta);
-  if (!tloc) return FNone{};
+  if (!tloc) {
+    FTRACE(4, "      untracked assert\n");
+    return FNone{};
+  }
 
   tloc->knownType &= inst.typeParam();
-  if (tloc->knownValue != nullptr) {
+  if (tloc->knownValue != nullptr || tloc->knownType.admitsSingleVal()) {
+    if (tloc->knownValue == nullptr) {
+      tloc->knownValue = env.global.unit.cns(tloc->knownType);
+    }
+
+    FTRACE(4, "      reducible assert: {}\n", show(*tloc));
     return FReducible { tloc->knownValue, tloc->knownType, meta->index };
   }
 
+  FTRACE(4, "      non-reducible assert: {}\n", show(*tloc));
   return FNone{};
 }
 
@@ -493,16 +646,20 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
     [&] (ReturnEffects)     {},
 
     [&] (PureStore m)       { store(env, m.dst, m.value); },
-    [&] (PureSpillFrame m)  { store(env, m.stk, nullptr); },
+    [&] (PureSpillFrame m)  { store(env, m.stk, nullptr);
+                              store(env, m.callee, m.calleeValue); },
 
     [&] (PureLoad m)        { flags = load(env, inst, m.src); },
 
     [&] (GeneralEffects m)  { flags = handle_general_effects(env, inst, m); },
-    [&] (CallEffects x)     { handle_call_effects(env, x); }
+    [&] (CallEffects x)     { flags = handle_call_effects(env, inst, x); }
   );
 
   switch (inst.op()) {
   case CheckType:
+  case CheckNonNull:
+  case CheckVArray:
+  case CheckDArray:
     refine_value(env, inst.dst(), inst.src(0));
     break;
   case AssertLoc:
@@ -702,10 +859,59 @@ void reduce_inst(Global& env, IRInstruction& inst, const FReducible& flags) {
   default: always_assert(false);
   }
 
-  FTRACE(2, "      reducible: {} = {} {}\n",
+  FTRACE(2, "      reduced: {} = {} {}\n",
          opcodeName(oldOp),
          opcodeName(newOp),
          resolved->toString());
+
+  ++env.instrsReduced;
+}
+
+void refine_load(Global& env,
+                 IRInstruction& inst,
+                 const FRefinableLoad& flags) {
+  assertx(refinable_load_eligible(inst));
+  assertx(flags.refinedType < inst.typeParam());
+
+  FTRACE(2, "      refinable: {} :: {} -> {}\n",
+         inst.toString(),
+         inst.typeParam(),
+         flags.refinedType);
+
+  inst.setTypeParam(flags.refinedType);
+  retypeDests(&inst, &env.unit);
+  ++env.loadsRefined;
+}
+
+void resolve_call(Global& env,
+                  IRInstruction& inst,
+                  const FResolvable& flags) {
+  FTRACE(2, "      resolvable: {} -> {}\n",
+         inst.toString(),
+         flags.callee->fullName());
+
+  if (inst.is(Call)) {
+    auto& extra = *inst.extra<Call>();
+    assertx(extra.callee == nullptr);
+    extra.callee = flags.callee;
+    extra.writeLocals = funcWritesLocals(flags.callee);
+    extra.readLocals = funcReadsLocals(flags.callee);
+    extra.needsCallerFrame = funcNeedsCallerFrame(flags.callee);
+    retypeDests(&inst, &env.unit);
+    ++env.callsResolved;
+    return;
+  }
+
+  if (inst.is(CallUnpack)) {
+    auto& extra = *inst.extra<CallUnpack>();
+    assertx(extra.callee == nullptr);
+    extra.callee = flags.callee;
+    extra.writeLocals = funcWritesLocals(flags.callee);
+    extra.readLocals = funcReadsLocals(flags.callee);
+    retypeDests(&inst, &env.unit);
+    ++env.callsResolved;
+    return;
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -715,37 +921,51 @@ void optimize_inst(Global& env, IRInstruction& inst, Flags flags) {
     flags,
     [&] (FNone) {},
 
-    [&] (FRedundant flags) {
-      auto const resolved = resolve_value(env, inst, flags);
+    [&] (FRedundant redundantFlags) {
+      auto const resolved = resolve_value(env, inst, redundantFlags);
       if (!resolved) return;
 
       FTRACE(2, "      redundant: {} :: {} = {}\n",
              inst.dst()->toString(),
-             flags.knownType.toString(),
+             redundantFlags.knownType.toString(),
              resolved->toString());
 
       if (resolved->type().subtypeOfAny(TGen, TCls)) {
-        env.unit.replace(&inst, AssertType, flags.knownType, resolved);
+        env.unit.replace(&inst, AssertType, redundantFlags.knownType, resolved);
       } else {
         env.unit.replace(&inst, Mov, resolved);
       }
+
+      ++env.loadsRemoved;
     },
 
-    [&] (FReducible flags) { reduce_inst(env, inst, flags); },
+    [&] (FReducible reducibleFlags) { reduce_inst(env, inst, reducibleFlags); },
+
+    [&] (FRefinableLoad f) { refine_load(env, inst, f); },
+
+    [&] (FResolvable f) { resolve_call(env, inst, f); },
+
+    [&] (FRemovable) {
+      FTRACE(2, "      removable\n");
+      assertx(!inst.isControlFlow());
+      inst.convertToNop();
+    },
 
     [&] (FJmpNext) {
       FTRACE(2, "      unnecessary\n");
       env.unit.replace(&inst, Jmp, inst.next());
+      ++env.jumpsRemoved;
     },
 
     [&] (FJmpTaken) {
       FTRACE(2, "      unnecessary\n");
       env.unit.replace(&inst, Jmp, inst.taken());
+      ++env.jumpsRemoved;
     }
   );
 
   // Re-simplify AssertType if we produced any.
-  if (inst.is(AssertType)) simplify(env.unit, &inst);
+  if (inst.is(AssertType)) simplifyInPlace(env.unit, &inst);
 }
 
 void optimize_block(Local& env, Global& genv, Block* blk) {
@@ -755,7 +975,7 @@ void optimize_block(Local& env, Global& genv, Block* blk) {
   }
 
   for (auto& inst : *blk) {
-    simplify(genv.unit, &inst);
+    simplifyInPlace(genv.unit, &inst);
     auto const flags = analyze_inst(env, inst);
     optimize_inst(genv, inst, flags);
   }
@@ -814,9 +1034,9 @@ void merge_into(Block* target, TrackedLoc& dst, const TrackedLoc& src) {
   }
 
   dst.knownValue.match(
-    [&] (SSATmp* tdst) {
+    [&](SSATmp* tdst) {
       src.knownValue.match(
-        [&] (SSATmp* tsrc) {
+        [&](SSATmp* tsrc) {
           if (auto const lcm = least_common_ancestor(tdst, tsrc)) {
             dst.knownValue = lcm;
             return;
@@ -825,12 +1045,10 @@ void merge_into(Block* target, TrackedLoc& dst, const TrackedLoc& src) {
           dst.knownValue = target;
         },
 
-        [&] (Block* blk) { dst.knownValue = target; }
-      );
+        [&](Block* /*blk*/) { dst.knownValue = target; });
     },
 
-    [&] (Block* b) { dst.knownValue = target; }
-  );
+    [&](Block* /*b*/) { dst.knownValue = target; });
 }
 
 void merge_into(Global& genv, Block* target, State& dst, const State& src) {
@@ -854,6 +1072,14 @@ void merge_into(Global& genv, Block* target, State& dst, const State& src) {
       }
     }
   );
+
+  for (auto it = dst.initRDS.begin(); it != dst.initRDS.end();) {
+    if (!src.initRDS.count(*it)) {
+      it = dst.initRDS.erase(it);
+    } else {
+      ++it;
+    }
+  }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -910,14 +1136,27 @@ void analyze(Global& genv) {
       auto const oldState = targetInfo.stateIn;
       targetInfo.stateIn.initialized = false; // re-merge of all pred states
       target->forEachPred([&] (Block* pred) {
+        auto const merge = [&](const State& predState) {
+          if (predState.initialized) {
+            FTRACE(7, "pulling state from pred B{}:\n{}\n",
+                   pred->id(), show(predState));
+            merge_into(genv, target, targetInfo.stateIn, predState);
+          }
+        };
+
         auto const& predInfo = genv.blockInfo[pred];
-        auto const& predState = pred->next() == target
-          ? predInfo.stateOutNext
-          : predInfo.stateOutTaken;
-        if (predState.initialized) {
-          FTRACE(7, "pulling state from pred B{}:\n{}\n",
-                 pred->id(), show(predState));
-          merge_into(genv, target, targetInfo.stateIn, predState);
+        if (pred->next() != pred->taken()) {
+          auto const& predState = pred->next() == target
+            ? predInfo.stateOutNext
+            : predInfo.stateOutTaken;
+          merge(predState);
+        } else {
+          // The predecessor jumps to this block along both its next and taken
+          // branches. We can't distinguish the two paths, so just merge both
+          // in.
+          assertx(pred->next() == target);
+          merge(predInfo.stateOutNext);
+          merge(predInfo.stateOutTaken);
         }
       });
       if (oldState != targetInfo.stateIn) {
@@ -1008,29 +1247,89 @@ void optimizeLoads(IRUnit& unit) {
   PassTracer tracer{&unit, Trace::hhir_load, "optimizeLoads"};
   Timer t(Timer::optimize_loads, unit.logEntry().get_pointer());
 
-  auto genv = Global { unit };
-  if (genv.ainfo.locations.size() == 0) {
-    FTRACE(1, "no memory accesses to possibly optimize\n");
-    return;
+  // Unfortunately load-elim may not reach a fixed-point after just one
+  // round. This is because the optimization stage can cause the types of
+  // SSATmps to change, which then can affect what we infer in the analysis
+  // stage. So, loop until we reach a fixed point. Bound the iterations at some
+  // max value for safety.
+  size_t iters = 0;
+  size_t instrsReduced = 0;
+  size_t loadsRemoved = 0;
+  size_t loadsRefined = 0;
+  size_t jumpsRemoved = 0;
+  size_t callsResolved = 0;
+  do {
+    auto genv = Global { unit };
+    if (genv.ainfo.locations.size() == 0) {
+      FTRACE(1, "no memory accesses to possibly optimize\n");
+      break;
+    }
+
+    ++iters;
+    FTRACE(1, "\nIteration #{}\n", iters);
+    FTRACE(1, "Locations:\n{}\n", show(genv.ainfo));
+
+    analyze(genv);
+
+    FTRACE(1, "\n\nFixed point:\n{}\n",
+           [&] () -> std::string {
+             auto ret = std::string{};
+             for (auto& blk : genv.rpoBlocks) {
+               folly::format(&ret, "B{}:\n{}", blk->id(),
+                             show(genv.blockInfo[blk].stateIn));
+             }
+             return ret;
+           }()
+          );
+
+    FTRACE(1, "\nOptimize:\n");
+    optimize(genv);
+
+    if (!genv.instrsReduced &&
+        !genv.loadsRemoved &&
+        !genv.loadsRefined &&
+        !genv.jumpsRemoved &&
+        !genv.callsResolved) {
+      // Nothing changed so we're done
+      break;
+    }
+    instrsReduced += genv.instrsReduced;
+    loadsRemoved += genv.loadsRemoved;
+    loadsRefined += genv.loadsRefined;
+    jumpsRemoved += genv.jumpsRemoved;
+    callsResolved += genv.callsResolved;
+
+    FTRACE(2, "reflowing types\n");
+    reflowTypes(genv.unit);
+
+    // Restore reachability invariants
+    mandatoryDCE(unit);
+
+    if (iters >= RuntimeOption::EvalHHIRLoadElimMaxIters) {
+      // We've iterated way more than usual without reaching a fixed
+      // point. Either there's some bug in load-elim, or this unit is especially
+      // pathological. Emit a perf warning so we're aware and stop iterating.
+      logPerfWarning(
+        "optimize_loads_max_iters", 1,
+        [&](StructuredLogEntry& cols) {
+          auto const func = unit.context().func;
+          cols.setStr("func", func->fullName()->slice());
+          cols.setStr("filename", func->unit()->filepath()->slice());
+          cols.setStr("hhir_unit", show(unit));
+        }
+      );
+      break;
+    }
+  } while (true);
+
+  if (auto& entry = unit.logEntry()) {
+    entry->setInt("optimize_loads_iters", iters);
+    entry->setInt("optimize_loads_instrs_reduced", instrsReduced);
+    entry->setInt("optimize_loads_loads_removed", loadsRemoved);
+    entry->setInt("optimize_loads_loads_refined", loadsRefined);
+    entry->setInt("optimize_loads_jumps_removed", jumpsRemoved);
+    entry->setInt("optimize_loads_calls_resolved", callsResolved);
   }
-  FTRACE(1, "\nLocations:\n{}\n", show(genv.ainfo));
-  analyze(genv);
-
-  FTRACE(1, "\n\nFixed point:\n{}\n",
-    [&] () -> std::string {
-      auto ret = std::string{};
-      for (auto& blk : genv.rpoBlocks) {
-        folly::format(&ret, "B{}:\n{}", blk->id(),
-          show(genv.blockInfo[blk].stateIn));
-      }
-      return ret;
-    }()
-  );
-
-  FTRACE(1, "\nOptimize:\n");
-  optimize(genv);
-  FTRACE(2, "reflowing types\n");
-  reflowTypes(genv.unit);
 }
 
 //////////////////////////////////////////////////////////////////////

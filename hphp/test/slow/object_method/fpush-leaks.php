@@ -22,4 +22,9 @@ function main($o) {
   echo "leaving main\n";
 }
 
+
+
+<<__EntryPoint>>
+function main_fpush_leaks() {
 main(new logger);
+}

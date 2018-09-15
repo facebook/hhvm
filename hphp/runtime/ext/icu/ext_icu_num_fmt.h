@@ -52,7 +52,7 @@ struct NumberFormatter : IntlError {
   static Object newInstance() {
     if (!c_NumberFormatter) {
       c_NumberFormatter = Unit::lookupClass(s_NumberFormatter.get());
-      assert(c_NumberFormatter);
+      assertx(c_NumberFormatter);
     }
     return Object{c_NumberFormatter};
   }

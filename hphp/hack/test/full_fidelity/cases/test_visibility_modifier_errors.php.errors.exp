@@ -1,0 +1,5 @@
+(3,1)-(12,1) Access type for interface method must be omitted
+(8,3)-(8,34) Cannot redeclare i1() (previously declared in test_visibility_modifier_errors.php:4)
+(9,3)-(9,41) Cannot redeclare i2() (previously declared in test_visibility_modifier_errors.php:5)
+(10,3)-(10,42) Cannot redeclare i3() (previously declared in test_visibility_modifier_errors.php:6)
+(11,3)-(11,44) Cannot redeclare i4() (previously declared in test_visibility_modifier_errors.php:7)

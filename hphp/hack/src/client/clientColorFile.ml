@@ -2,14 +2,13 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Core
-open Coverage_level
+open Hh_core
+open Ide_api_types
 
 module C = Tty
 
@@ -38,12 +37,13 @@ let replace_colors input =
 
 let go file_input output_json pos_level_l =
   let str = match file_input with
-    | ServerUtils.FileName filename -> Sys_utils.cat filename
-    | ServerUtils.FileContent content -> content
+    | ServerCommandTypes.FileName filename -> Sys_utils.cat filename
+    | ServerCommandTypes.FileContent content -> content
   in
   let results = ColorFile.go str pos_level_l in
   if output_json then
-    print_endline (Hh_json.json_to_string (ServerColorFile.to_json results))
+    Nuclide_rpc_message_printer.
+      (coverage_levels_response_to_json results |> print_json)
   else if Unix.isatty Unix.stdout
   then C.cprint (replace_colors results)
   else print_endline str

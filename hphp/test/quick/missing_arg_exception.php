@@ -1,4 +1,4 @@
-<?php
+<?hh
 set_error_handler('handler');
 function handler() { throw new Exception; }
 function foo(&$r) {}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class ary implements ArrayAccess {
   private $c;
@@ -32,7 +32,7 @@ function main() {
 
   $idx = array(2, 6, 1, 3);
   foreach (array('gArray', 'gObj', 'gInt', 'gStr') as $dyn) {
-    var_dump($GLOBALS[$dyn][array_shift($idx)]);
+    var_dump($GLOBALS[$dyn][array_shift(&$idx)]);
   }
 }
 init();

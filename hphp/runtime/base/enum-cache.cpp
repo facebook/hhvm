@@ -15,6 +15,8 @@
 */
 
 #include "hphp/runtime/base/enum-cache.h"
+#include "hphp/runtime/base/tv-type.h"
+
 #include <memory>
 
 namespace HPHP {
@@ -26,8 +28,8 @@ static EnumCache s_cache;
 
 const StaticString s_enumName("Enum");
 
-const EnumCache::EnumValues* EnumCache::getValues(const Class* klass,
-                                                  bool recurse) {
+const EnumValues* EnumCache::getValues(const Class* klass,
+                                       bool recurse) {
   if (UNLIKELY(klass->classVecLen() == 1 ||
                !s_enumName.get()->same(klass->classVec()[0]->name()))) {
     std::string msg;
@@ -35,21 +37,29 @@ const EnumCache::EnumValues* EnumCache::getValues(const Class* klass,
     msg += " must derive from Enum";
     EnumCache::failLookup(msg);
   }
+  if (LIKELY(!recurse)) {
+    if (auto values = klass->getEnumValues()) {
+      return values;
+    }
+  }
   return s_cache.getEnumValues(klass, recurse);
 }
 
-const EnumCache::EnumValues* EnumCache::getValuesBuiltin(const Class* klass) {
-  assert(isEnum(klass));
+const EnumValues* EnumCache::getValuesBuiltin(const Class* klass) {
+  assertx(isEnum(klass));
+  if (auto values = klass->getEnumValues()) {
+    return values;
+  }
   return s_cache.getEnumValues(klass, false);
 }
 
 void EnumCache::deleteValues(const Class* klass) {
   // it's unlikely a class is in the cache so check first
   // without write lock
-  if (s_cache.getEnumValuesIfDefined(getKey(klass, false)) != nullptr) {
+  if (s_cache.getEnumValuesIfDefined(getKey(klass, false), false) != nullptr) {
     s_cache.deleteEnumValues(getKey(klass, false));
   }
-  if (s_cache.getEnumValuesIfDefined(getKey(klass, true)) != nullptr) {
+  if (s_cache.getEnumValuesIfDefined(getKey(klass, true), false) != nullptr) {
     s_cache.deleteEnumValues(getKey(klass, true));
   }
 }
@@ -62,15 +72,20 @@ EnumCache::~EnumCache() {
   m_enumValuesMap.clear();
 }
 
-const EnumCache::EnumValues* EnumCache::cachePersistentEnumValues(
+const EnumValues* EnumCache::cachePersistentEnumValues(
   const Class* klass,
   bool recurse,
   Array&& names,
   Array&& values) {
-  std::unique_ptr<EnumCache::EnumValues> enums(new EnumCache::EnumValues());
-  enums->values = ArrayData::GetScalarArray(values.get());
-  enums->names = ArrayData::GetScalarArray(names.get());
+  assertx(names.isDictOrDArray());
+  assertx(values.isDictOrDArray());
 
+  std::unique_ptr<EnumValues> enums(new EnumValues());
+  enums->values = ArrayData::GetScalarArray(std::move(values));
+  enums->names = ArrayData::GetScalarArray(std::move(names));
+  if (!recurse) {
+    return const_cast<Class*>(klass)->setEnumValues(enums.release());
+  }
   intptr_t key = getKey(klass, recurse);
   EnumValuesMap::accessor acc;
   if (!m_enumValuesMap.insert(acc, key)) {
@@ -81,19 +96,22 @@ const EnumCache::EnumValues* EnumCache::cachePersistentEnumValues(
   return acc->second;
 }
 
-const EnumCache::EnumValues* EnumCache::cacheRequestEnumValues(
+const EnumValues* EnumCache::cacheRequestEnumValues(
   const Class* klass,
   bool recurse,
   Array&& names,
   Array&& values) {
 
-  m_nonScalarEnumValuesMap.bind();
+  assertx(names.isDictOrDArray());
+  assertx(values.isDictOrDArray());
+
+  m_nonScalarEnumValuesMap.bind(rds::Mode::Normal);
   if (!m_nonScalarEnumValuesMap.isInit()) {
     m_nonScalarEnumValuesMap.initWith(req::make_raw<ReqEnumValuesMap>());
   }
   auto& enumValuesData = *m_nonScalarEnumValuesMap;
 
-  auto enums = req::make_raw<EnumCache::EnumValues>();
+  auto enums = req::make_raw<EnumValues>();
   enums->values = std::move(values);
   enums->names = std::move(names);
 
@@ -103,11 +121,11 @@ const EnumCache::EnumValues* EnumCache::cacheRequestEnumValues(
   return enums;
 }
 
-const EnumCache::EnumValues* EnumCache::loadEnumValues(const Class* klass,
-                                                       bool recurse) {
+const EnumValues* EnumCache::loadEnumValues(const Class* klass,
+                                            bool recurse) {
   auto const numConstants = klass->numConstants();
-  auto values = Array::Create();
-  auto names = Array::Create();
+  auto values = Array::CreateDArray();
+  auto names = Array::CreateDArray();
   auto const consts = klass->constants();
   bool persist = true;
   for (size_t i = 0; i < numConstants; i++) {
@@ -123,19 +141,28 @@ const EnumCache::EnumValues* EnumCache::loadEnumValues(const Class* klass,
       persist = false;
       value = klass->clsCnsGet(consts[i].name);
     }
-    assert(value.m_type != KindOfUninit);
-    if (UNLIKELY(!(isIntType(value.m_type) ||
-        (tvIsString(&value) && value.m_data.pstr->isStatic())))) {
-      // only int and string values allowed for enums. Moreover the strings
-      // must be static
+    assertx(value.m_type != KindOfUninit);
+    if (UNLIKELY(!(isIntType(value.m_type) || tvIsString(&value)))) {
+      // only int and string values allowed for enums.
       std::string msg;
       msg += klass->name()->data();
-      msg += " enum can only contain static string and int values";
+      msg += " enum can only contain string and int values";
       EnumCache::failLookup(msg);
     }
     values.set(StrNR(consts[i].name), cellAsCVarRef(value));
-    names.set(cellAsCVarRef(value), VarNR(consts[i].name));
+
+    // Manually perform int-like key coercion even if names is a dict for
+    // backwards compatibility.
+    int64_t n;
+    if (tvIsString(&value) && value.m_data.pstr->isStrictlyInteger(n)) {
+      names.set(n, make_tv<KindOfPersistentString>(consts[i].name));
+    } else {
+      names.set(value, make_tv<KindOfPersistentString>(consts[i].name), true);
+    }
   }
+
+  assertx(names.isDictOrDArray());
+  assertx(values.isDictOrDArray());
 
   // If we saw dynamic constants we cannot cache the enum values across requests
   // as they may not be the same in every request.
@@ -152,13 +179,14 @@ const EnumCache::EnumValues* EnumCache::loadEnumValues(const Class* klass,
       std::move(values));
 }
 
-const EnumCache::EnumValues* EnumCache::getEnumValuesIfDefined(
-  intptr_t key) const {
+const EnumValues* EnumCache::getEnumValuesIfDefined(
+  intptr_t key, bool checkLocal) const {
   EnumValuesMap::const_accessor acc;
   if (m_enumValuesMap.find(acc, key)) {
     return acc->second;
   }
-  if (!m_nonScalarEnumValuesMap.bound() ||
+  if (!checkLocal ||
+      !m_nonScalarEnumValuesMap.bound() ||
       !m_nonScalarEnumValuesMap.isInit()) {
     return nullptr;
   }
@@ -170,9 +198,9 @@ const EnumCache::EnumValues* EnumCache::getEnumValuesIfDefined(
   return nullptr;
 }
 
-const EnumCache::EnumValues* EnumCache::getEnumValues(const Class* klass,
-                                                      bool recurse) {
-  const EnumCache::EnumValues* values =
+const EnumValues* EnumCache::getEnumValues(const Class* klass,
+                                           bool recurse) {
+  const EnumValues* values =
       getEnumValuesIfDefined(getKey(klass, recurse));
   if (values == nullptr) {
     values = loadEnumValues(klass, recurse);
@@ -185,13 +213,6 @@ void EnumCache::deleteEnumValues(intptr_t key) {
   if (m_enumValuesMap.find(acc, key)) {
     delete acc->second;
     m_enumValuesMap.erase(acc);
-    return;
-  }
-
-  if (m_nonScalarEnumValuesMap.bound() &&
-      m_nonScalarEnumValuesMap.isInit()) {
-    auto data = *m_nonScalarEnumValuesMap;
-    data->erase(key);
   }
 }
 

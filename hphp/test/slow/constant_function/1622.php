@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1622() {
 var_dump(constant('M_PI'));
 $a = 'M_PI';
 var_dump(constant($a));
@@ -16,3 +19,4 @@ if (false) {
   define('C', 2);
 }
 var_dump(constant('C'));
+}

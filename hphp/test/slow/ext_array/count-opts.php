@@ -28,6 +28,9 @@ function append($arr) {
   var_dump(count($new_arr));
 }
 
+
+<<__EntryPoint>>
+function main_count_opts() {
 append(array(3,2));
 append(HH\Vector{3,2});
 
@@ -43,4 +46,5 @@ try {
   var_dump(bad_counted_obj());
 } catch (Exception $e) {
   var_dump($e->getMessage());
+}
 }

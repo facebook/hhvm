@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Ex1 extends Exception {
   function getString() {

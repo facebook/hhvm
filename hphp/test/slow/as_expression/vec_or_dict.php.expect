@@ -1,0 +1,12 @@
+not vec_or_dict: integer
+not vec_or_dict: boolean
+not vec_or_dict: double
+not vec_or_dict: string
+not vec_or_dict: resource
+not vec_or_dict: object
+vec(0) {
+}
+dict(0) {
+}
+not vec_or_dict: keyset
+not vec_or_dict: NULL

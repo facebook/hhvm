@@ -3,26 +3,42 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
+
+<<__PHPStdLib>>
 function spl_classes();
+<<__PHPStdLib>>
 function spl_object_hash($obj);
+<<__PHPStdLib>>
 function hphp_object_pointer($obj);
+<<__PHPStdLib>>
 function hphp_get_this();
+<<__PHPStdLib>>
 function class_implements($obj, $autoload = true);
+<<__PHPStdLib>>
 function class_parents($obj, $autoload = true);
+<<__PHPStdLib>>
 function class_uses($obj, $autoload = true);
+<<__PHPStdLib>>
 function iterator_apply($obj, $func, $params = null);
+<<__PHPStdLib>>
 function iterator_count($obj);
+<<__PHPStdLib>>
 function iterator_to_array($obj, $use_keys = true);
+<<__PHPStdLib>>
 function spl_autoload_call($class_name);
+<<__PHPStdLib>>
 function spl_autoload_extensions($file_extensions = null);
+<<__PHPStdLib>>
 function spl_autoload_functions();
+<<__PHPStdLib>>
 function spl_autoload_register($autoload_function = null, $throws = true, $prepend = false);
+<<__PHPStdLib>>
 function spl_autoload_unregister($autoload_function);
+<<__PHPStdLib>>
 function spl_autoload($class_name, $file_extensions = null);
 
 class SplDoublyLinkedList<T> implements Iterator<T>, ArrayAccess<int, T>, Countable {
@@ -121,24 +137,28 @@ class SplFileObject extends SplFileInfo
     string $delimiter = ",",
     string $enclosure = "\"",
     string $escape = "\\",
-  ): array;
+    /* HH_IGNORE_ERROR[2071] */
+  ): varray;
   public function fgets();
   public function fgetss(?string $allowable_tags = null): string;
   public function flock(int $operation, mixed &$wouldblock = false): bool;
   public function fpassthru(): int;
   public function fputcsv(
-    array $fields,
+    /* HH_IGNORE_ERROR[2071] */
+    varray $fields,
     string $delimiter = ",",
     string $enclosure = '"',
   ): int;
   public function fread(int $length): string;
   public function fscanf(string $format, ... ): mixed;
   public function fseek(int $offset, int $whence = SEEK_SET): int;
-  public function fstat(): array;
+  /* HH_IGNORE_ERROR[2071] */
+  public function fstat(): darray;
   public function ftell(): int;
   public function ftruncate(int $size): bool;
   public function fwrite(string $str, int $length): int;
-  public function getCsvControl(): array;
+  /* HH_IGNORE_ERROR[2071] */
+  public function getCsvControl(): varray;
   public function getFlags(): int;
   public function getMaxLineLen(): int;
   public function setCsvControl(
@@ -306,11 +326,11 @@ class MultipleIterator<T> implements Iterator<T> {
   const int MIT_KEYS_NUMERIC = 0;
   const int MIT_KEYS_ASSOC = 2;
   public function __construct($flags) {}
-  public function attachIterator(Iterator $iterator, $infos = null) {}
-  public function containsIterator(Iterator $iterator) {}
+  public function attachIterator(Iterator<T> $iterator, $infos = null) {}
+  public function containsIterator(Iterator<T> $iterator) {}
   public function countIterators() {}
   public function current() {}
-  public function detachIterator(Iterator $iterator) {}
+  public function detachIterator(Iterator<T> $iterator) {}
   public function getFlags() {}
   public function key() {}
   public function next() {}

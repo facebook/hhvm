@@ -1,4 +1,0 @@
-<?php 
-require_once(dirname(__FILE__).'/../../dba/tests/skipif.inc');
-require_once('skipif.inc');
-?>

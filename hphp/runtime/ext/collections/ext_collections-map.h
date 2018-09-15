@@ -9,6 +9,8 @@
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
+struct BaseVector;
+
 namespace collections {
 struct MapIterator;
 void deepCopy(TypedValue*);
@@ -20,17 +22,17 @@ void deepCopy(TypedValue*);
  * c_-prefixed child classes.
  */
 struct BaseMap : HashCollection {
- protected:
+protected:
   // BaseMap is an abstract class, with no additional member needing
   // initialization.
   using HashCollection::HashCollection;
   ~BaseMap();
 
- public:
+public:
   // init(), used by Map::__construct()
   // expects an iterable of key=>value
   void init(const Variant& t) {
-    assert(m_size == 0);
+    assertx(m_size == 0);
     addAllImpl(t);
   }
   // addAllPairs(), used by Map::addAll()
@@ -52,40 +54,44 @@ struct BaseMap : HashCollection {
     std::is_base_of<BaseMap, TMap>::value, TMap*>::type
   static Clone(ObjectData* obj);
 
-  void add(const TypedValue* val);
-  void add(const Variant& val) { add(val.asCell()); }
+  /*
+   * Append `v' to the Map and incref it if it's refcounted.
+   */
+  void add(TypedValue v);
+  void add(const Variant& v) { add(*v.toCell()); }
 
-  void set(int64_t k, const TypedValue* data);
-  void set(StringData* key, const TypedValue* data);
-  void set(int64_t k, const Variant& data) {
-    set(k, data.asCell());
-  }
-  void set(StringData* key, const Variant& data) {
-    set(key, data.asCell());
-  }
-  void set(const TypedValue* key, const TypedValue* data) {
-    assert(key->m_type != KindOfRef);
-    if (key->m_type == KindOfInt64) {
-      set(key->m_data.num, data);
-    } else if (isStringType(key->m_type)) {
-      set(key->m_data.pstr, data);
+  /*
+   * Add `k' => `v' to the Map, increffing each if it's refcounted.
+   */
+  void set(int64_t k, TypedValue v);
+  void set(StringData* k, TypedValue v);
+  void set(int64_t k, const Variant& v) { set(k, *v.toCell()); }
+  void set(StringData* k, const Variant& v) { set(k, *v.toCell()); }
+  void set(TypedValue k, TypedValue v) {
+    assertx(!isRefType(k.m_type));
+    if (k.m_type == KindOfInt64) {
+      set(k.m_data.num, v);
+    } else if (isStringType(k.m_type)) {
+      set(k.m_data.pstr, v);
     } else {
       throwBadKeyType();
     }
   }
-  void set(const Variant& key, const Variant& data) {
-    set(key.asCell(), data.asCell());
+  void set(const Variant& k, const Variant& v) {
+    set(*k.toCell(), *v.toCell());
   }
 
   Variant pop();
   Variant popFront();
 
- public:
+  Array toPHPArray();
+
+public:
   static Array ToArray(const ObjectData* obj);
   static bool ToBool(const ObjectData* obj);
   template <bool throwOnMiss>
   static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key) {
-    assertx(key->m_type != KindOfRef);
+    assertx(!isRefType(key->m_type));
     auto map = static_cast<BaseMap*>(obj);
     if (key->m_type == KindOfInt64) {
       return throwOnMiss ? map->at(key->m_data.num)
@@ -105,16 +111,11 @@ struct BaseMap : HashCollection {
   static bool OffsetContains(ObjectData* obj, const TypedValue* key);
   static void OffsetUnset(ObjectData* obj, const TypedValue* key);
 
-  enum EqualityFlavor { OrderMatters, OrderIrrelevant };
-
-  static bool Equals(EqualityFlavor eq,
-                     const ObjectData* obj1, const ObjectData* obj2);
+  static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
 
   [[noreturn]] static void throwBadKeyType();
 
-  static bool instanceof(const ObjectData*);
-
- protected:
+protected:
   Variant php_at(const Variant& key) const {
     if (key.isInteger()) {
       return tvAsCVarRef(atImpl<true>(key.toInt64()));
@@ -180,34 +181,29 @@ struct BaseMap : HashCollection {
   void addAllImpl(const Variant& iterable);
   void setAllImpl(const Variant& iterable);
 
-  template<bool raw>
-  void setImpl(int64_t k, const TypedValue* val);
-  template<bool raw>
-  void setImpl(StringData* key, const TypedValue* data);
+  template<bool raw> void setImpl(int64_t k, TypedValue v);
+  template<bool raw> void setImpl(StringData* k, TypedValue v);
 
   // setRaw() assigns a value to the specified key in this Map, but doesn't
-  // check for an immutable buffer and doesn't increment m_version, so it's
-  // only safe to use in some cases. If you're not sure, use set() instead.
-  void setRaw(int64_t k, const TypedValue* data);
-  void setRaw(StringData* key, const TypedValue* data);
-  void setRaw(int64_t k, const Variant& data) {
-    setRaw(k, data.asCell());
-  }
-  void setRaw(StringData* key, const Variant& data) {
-    setRaw(key, data.asCell());
-  }
-  void setRaw(const TypedValue* key, const TypedValue* data) {
-    assert(key->m_type != KindOfRef);
-    if (key->m_type == KindOfInt64) {
-      setRaw(key->m_data.num, data);
-    } else if (isStringType(key->m_type)) {
-      setRaw(key->m_data.pstr, data);
+  // check for an immutable buffer, so it's only safe to use in some cases.
+  // If you're not sure, use set() instead.
+  void setRaw(int64_t k, TypedValue v);
+  void setRaw(StringData* key, TypedValue v);
+  void setRaw(int64_t k, const Variant& v)     { setRaw(k, *v.toCell()); }
+  void setRaw(StringData* k, const Variant& v) { setRaw(k, *v.toCell()); }
+
+  void setRaw(TypedValue k, TypedValue v) {
+    assertx(!isRefType(k.m_type));
+    if (k.m_type == KindOfInt64) {
+      setRaw(k.m_data.num, v);
+    } else if (isStringType(k.m_type)) {
+      setRaw(k.m_data.pstr, v);
     } else {
       throwBadKeyType();
     }
   }
-  void setRaw(const Variant& key, const Variant& data) {
-    setRaw(key.asCell(), data.asCell());
+  void setRaw(const Variant& k, const Variant& v) {
+    setRaw(*k.toCell(), *v.toCell());
   }
 
   template<class TMap>
@@ -263,7 +259,7 @@ struct BaseMap : HashCollection {
     auto target = req::make<TVector>();
     int64_t sz = m_size;
     target->reserve(sz);
-    assert(target->canMutateBuffer());
+    assertx(target->canMutateBuffer());
     target->setSize(sz);
     auto* out = target->data();
     auto* eLimit = elmLimit();
@@ -277,7 +273,7 @@ struct BaseMap : HashCollection {
   Object php_keys() {
     auto vec = req::make<TVector>();
     vec->reserve(m_size);
-    assert(vec->canMutateBuffer());
+    assertx(vec->canMutateBuffer());
     auto* e = firstElm();
     auto* eLimit = elmLimit();
     ssize_t j = 0;
@@ -286,14 +282,14 @@ struct BaseMap : HashCollection {
         vec->data()[j].m_data.num = e->ikey;
         vec->data()[j].m_type = KindOfInt64;
       } else {
-        assert(e->hasStrKey());
+        assertx(e->hasStrKey());
         cellDup(make_tv<KindOfString>(e->skey), vec->data()[j]);
       }
     }
     return Object{std::move(vec)};
   }
 
- private:
+private:
   friend void collections::deepCopy(TypedValue*);
 
   friend struct collections::CollectionsExtension;
@@ -301,7 +297,6 @@ struct BaseMap : HashCollection {
   friend struct c_Vector;
   friend struct c_Map;
   friend struct c_ImmMap;
-  friend struct ArrayIter;
   friend struct c_AwaitAllWaitHandle;
   friend struct c_GenMapWaitHandle;
 
@@ -319,18 +314,13 @@ struct BaseMap : HashCollection {
 struct c_Map : BaseMap {
   DECLARE_COLLECTIONS_CLASS(Map);
 
-  explicit c_Map(Class* cls = c_Map::classof())
-    : BaseMap(cls, HeaderKind::Map) { }
-  explicit c_Map(Class* cls, ArrayData* arr)
-    : BaseMap(cls, HeaderKind::Map, arr) { }
-  explicit c_Map(Class* cls, uint32_t cap)
-    : BaseMap(cls, HeaderKind::Map, cap) { }
-  explicit c_Map(uint32_t cap, Class* cls = c_Map::classof())
-    : c_Map(cls, cap) { }
+  explicit c_Map()
+    : BaseMap(c_Map::classof(), HeaderKind::Map) { }
+  explicit c_Map(ArrayData* arr)
+    : BaseMap(c_Map::classof(), HeaderKind::Map, arr) { }
+  explicit c_Map(uint32_t cap)
+    : BaseMap(c_Map::classof(), HeaderKind::Map, cap) { }
 
-  void addAll(const Variant& t) {
-    addAllImpl(t);
-  }
   void setAll(const Variant& t) {
     setAllImpl(t);
   }
@@ -387,14 +377,12 @@ struct c_ImmMap : BaseMap {
   DECLARE_COLLECTIONS_CLASS(ImmMap)
 
  public:
-  explicit c_ImmMap(Class* cls = c_ImmMap::classof())
-    : BaseMap(cls, HeaderKind::ImmMap) { }
-  explicit c_ImmMap(Class* cls, ArrayData* arr)
-    : BaseMap(cls, HeaderKind::ImmMap, arr) { }
-  explicit c_ImmMap(Class* cls, uint32_t cap)
-    : BaseMap(cls, HeaderKind::ImmMap, cap) { }
-  explicit c_ImmMap(uint32_t cap, Class* cls = c_ImmMap::classof())
-    : c_ImmMap(cls, cap) { }
+  explicit c_ImmMap()
+    : BaseMap(c_ImmMap::classof(), HeaderKind::ImmMap) { }
+  explicit c_ImmMap(ArrayData* arr)
+    : BaseMap(c_ImmMap::classof(), HeaderKind::ImmMap, arr) { }
+  explicit c_ImmMap(uint32_t cap)
+    : BaseMap(c_ImmMap::classof(), HeaderKind::ImmMap, cap) { }
 
   static c_ImmMap* Clone(ObjectData* obj);
 
@@ -402,11 +390,6 @@ struct c_ImmMap : BaseMap {
   friend struct BaseMap;
   friend struct c_Map;
 };
-
-inline bool BaseMap::instanceof(const ObjectData* obj) {
-  return c_Map::instanceof(obj) ||
-         c_ImmMap::instanceof(obj);
-}
 
 namespace collections {
 /////////////////////////////////////////////////////////////////////////////
@@ -420,7 +403,6 @@ struct MapIterator {
   MapIterator& operator=(const MapIterator& src) {
     m_obj = src.m_obj;
     m_pos = src.m_pos;
-    m_version = src.m_version;
     return *this;
   }
   ~MapIterator() {}
@@ -434,14 +416,10 @@ struct MapIterator {
   void setMap(BaseMap* mp) {
     m_obj = mp;
     m_pos = mp->iter_begin();
-    m_version = mp->getVersion();
   }
 
   Variant current() const {
     auto const mp = m_obj.get();
-    if (UNLIKELY(m_version != mp->getVersion())) {
-      throw_collection_modified();
-    }
     if (!mp->iter_valid(m_pos)) {
       throw_iterator_not_valid();
     }
@@ -450,9 +428,6 @@ struct MapIterator {
 
   Variant key() const {
     auto const mp = m_obj.get();
-    if (UNLIKELY(m_version != mp->getVersion())) {
-      throw_collection_modified();
-    }
     if (!mp->iter_valid(m_pos)) {
       throw_iterator_not_valid();
     }
@@ -463,26 +438,19 @@ struct MapIterator {
     return m_obj->iter_valid(m_pos);
   }
 
-  void next()   {
+  void next() {
     auto const mp = m_obj.get();
-    if (UNLIKELY(m_version != mp->getVersion())) {
-      throw_collection_modified();
-    }
     m_pos = mp->iter_next(m_pos);
   }
 
   void rewind() {
     auto const mp = m_obj.get();
-    if (UNLIKELY(m_version != mp->getVersion())) {
-      throw_collection_modified();
-    }
     m_pos = mp->iter_begin();
   }
 
  private:
   req::ptr<BaseMap> m_obj;
   uint32_t m_pos{0};
-  int32_t  m_version{0};
 };
 
 /////////////////////////////////////////////////////////////////////////////

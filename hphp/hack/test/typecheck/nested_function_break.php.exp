@@ -1,2 +1,2 @@
-File "nested_function_break.php", line 15, characters 7-11:
+File "nested_function_break.php", line 15, characters 7-12:
 break can only be used inside loops or switch statements (NastCheck[3022])

@@ -10,4 +10,8 @@ function bar() {
   var_dump($x[0]);
   var_dump($x[1]);
 }
+
+<<__EntryPoint>>
+function main_array_038() {
 bar();
+}

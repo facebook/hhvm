@@ -30,4 +30,3 @@ namespace Fiz\Biz\Buz {
     var_dump(BOZ);
     var_dump(BAR);
 }
-

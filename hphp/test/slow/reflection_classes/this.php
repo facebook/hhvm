@@ -12,7 +12,7 @@ function printClass($rc) {
   foreach($rms as $rm) {
     $meths[$rm->getName()] = $rm;
   }
-  ksort($meths);
+  ksort(&$meths);
   foreach($meths as $meth) {
     printFunc($meth);
   }
@@ -21,7 +21,7 @@ function printClass($rc) {
   foreach($rps as $rp) {
     $props[$rp->getName()] = $rp;
   }
-  ksort($props);
+  ksort(&$props);
   foreach($props as $prop) {
     var_dump($prop->getTypeText());
   }
@@ -31,5 +31,9 @@ class C {
   public function m() : this { return $this; }
 }
 
+
+<<__EntryPoint>>
+function main_this() {
 $rc = new ReflectionClass('C');
 printClass($rc);
+}

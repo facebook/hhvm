@@ -3,9 +3,8 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
@@ -15,27 +14,80 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
-class Exception {
-  // $code should be untyped, or mixed because some subclasses set it
-  // to a string, the main example being PDOException
-  protected $code;
+<<__Sealed(Error::class, Exception::class)>>
+interface Throwable {
+  public function getMessage(): string;
+  // Documented as 'int' in PHP docs, but not actually guaranteed;
+  // subclasses (e.g. PDO) can do what they want.
+  public function getCode(): mixed;
+  public function getFile(): string;
+  public function getLine(): int;
+  public function getTrace(): Container<mixed>;
+  public function getTraceAsString(): string;
+  public function getPrevious(): ?Throwable;
+  public function __toString(): string;
+}
+
+class Error implements Throwable {
+  protected string $message;
+  protected mixed $code;
   protected string $file;
   protected int $line;
-  protected array $trace;
 
+  /* Methods */
+  <<__Rx>>
+  public function __construct (
+    string $message = "",
+    int $code = 0,
+    ?Throwable $previous = null,
+  );
+  <<__Rx, __MaybeMutable>>
+  final public function getMessage(): string;
+  final public function getPrevious(): ?Throwable;
+  <<__Rx, __MaybeMutable>>
+  final public function getCode(): mixed;
+  <<__Rx, __MaybeMutable>>
+  final public function getFile(): string;
+  <<__Rx, __MaybeMutable>>
+  final public function getLine(): int;
+  final public function getTrace(): varray<mixed>;
+  final public function getTraceAsString(): string;
+  public function __toString(): string;
+  final private function __clone(): void;
+}
+
+class ArithmeticError extends Error {}
+class ArgumentCountError extends Error {}
+class AssertionError extends Error {}
+class DivisionByZeroError extends Error {}
+class ParseError extends Error {}
+class TypeError extends Error {}
+
+class Exception implements Throwable {
+  protected int $code;
+  protected string $file;
+  protected int $line;
+  private varray<mixed> $trace;
+  protected mixed $userMetadata;
+
+  <<__Rx>>
   public function __construct (
     protected string $message = '',
     int $code = 0,
     protected ?Exception $previous = null,
   );
+  <<__Rx, __OnlyRxIfImpl(HH\Rx\Exception::class), __MaybeMutable>>
   public function getMessage(): string;
   final public function getPrevious(): ?Exception;
   public final function setPrevious(Exception $previous): void;
+  <<__Rx, __OnlyRxIfImpl(HH\Rx\Exception::class), __MaybeMutable>>
   public function getCode(): int;
+  <<__Rx, __MaybeMutable>>
   final public function getFile(): string;
+  <<__Rx, __MaybeMutable>>
   final public function getLine(): int;
-  final public function getTrace(): array;
-  final protected function __prependTrace(array $trace): void;
+  final public function getTrace(): varray<mixed>;
+  final protected function __prependTrace(Container<mixed> $trace): void;
   final public function getTraceAsString(): string;
   public function __toString(): string;
   final private function __clone(): void;
@@ -45,6 +97,7 @@ class Exception {
 }
 
 class ErrorException extends Exception {
+  <<__Rx>>
   public function __construct(
     $message = "",
     int $code = 0,
@@ -53,6 +106,7 @@ class ErrorException extends Exception {
     int $lineno = 0 /* __LINE__ */,
     ?Exception $previous = null
   );
+  <<__Rx, __MaybeMutable>>
   public final function getSeverity(): int;
 }
 
@@ -70,3 +124,6 @@ class OverflowException extends RuntimeException {}
 class RangeException extends RuntimeException {}
 class UnderflowException extends RuntimeException {}
 class UnexpectedValueException extends RuntimeException {}
+
+class InvariantException extends Exception {}
+final class TypeAssertionException extends Exception {}

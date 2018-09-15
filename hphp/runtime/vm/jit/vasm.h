@@ -114,6 +114,7 @@ void optimizeJmps(Vunit&);
 void optimizePhis(Vunit&);
 void removeDeadCode(Vunit&);
 void removeTrivialNops(Vunit&);
+void reuseImmq(Vunit&);
 template<typename Folder> void foldImms(Vunit&);
 void simplify(Vunit&);
 
@@ -134,15 +135,18 @@ folly::Range<const Vlabel*> succs(const Vblock& block);
 jit::vector<Vlabel> sortBlocks(const Vunit& unit);
 
 /*
+ * Make block weights more consistent by enforcing that the weight of each block
+ * doesn't exceed the sums of the weights of its predecessors or its successors.
+ */
+void fixBlockWeights(Vunit& unit);
+
+/*
  * Order blocks for lowering to machine code.  May use different layout
  * algorithms depending on the TransKind of `unit'.
  *
- * The output is guaranteed to be partitioned by area relative to `text'.  This
- * is almost the same as partitioning by AreaIndex, except we may interleave,
- * e.g., Main and Cold blocks in the same partition if their actual code areas
- * in `text' are the same.
+ * The output is guaranteed to be partitioned by code area.
  */
-jit::vector<Vlabel> layoutBlocks(Vunit& unit, const Vtext& text);
+jit::vector<Vlabel> layoutBlocks(Vunit& unit);
 
 /*
  * Return a bitset, keyed by Vlabel, indicating which blocks are targets of

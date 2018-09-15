@@ -1,2 +1,2 @@
-File "interface_implement.php", line 8, characters 41-40:
-Expected: extends; Got implements (Parsing[1002])
+File "interface_implement.php", line 8, characters 1-98:
+Interfaces may not implement other interfaces or classes (Parsing[1002])

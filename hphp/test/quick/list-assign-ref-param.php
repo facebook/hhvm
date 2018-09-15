@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 function g(&$x) {
@@ -7,6 +7,6 @@ function g(&$x) {
 
 error_reporting(-1);
 $b = array(20);
-g(list($a) = $GLOBALS['b']);
-g(list($a) = $b);
+g((list($a) = $GLOBALS['b']));
+g((list($a) = $b));
 

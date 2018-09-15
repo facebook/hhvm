@@ -6,4 +6,8 @@ function foo($e='e') {
 function test() {
   echo foo();
 }
+
+<<__EntryPoint>>
+function main_1829() {
 test();
+}

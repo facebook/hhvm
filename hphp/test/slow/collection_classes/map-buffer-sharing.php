@@ -100,4 +100,8 @@ function main() {
   $x->clear();
   unset($x);
 }
+
+<<__EntryPoint>>
+function main_map_buffer_sharing() {
 main();
+}

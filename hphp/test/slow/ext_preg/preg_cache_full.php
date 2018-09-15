@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_preg_cache_full() {
 $matches = 1;
 for ($i=1 ; $i < 100000 ; $i++) {
   $db_name = 'dbs.'.rand();
@@ -15,3 +18,4 @@ for ($i=1 ; $i < 100000 ; $i++) {
   }
 }
 var_dump(sprintf("%d matches", $matches));
+}

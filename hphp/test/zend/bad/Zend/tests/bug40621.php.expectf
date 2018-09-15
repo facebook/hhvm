@@ -1,3 +1,0 @@
-Strict Standards: Non-static method Foo::get() should not be called statically in %s on line %d
-
-Fatal error: %s

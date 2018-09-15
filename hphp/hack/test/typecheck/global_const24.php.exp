@@ -1,2 +1,2 @@
-File "global_const24.php", line 3, characters 13-13:
-Invalid lvalue (Parsing[1002])
+File "global_const24.php", line 3, characters 11-12:
+Invalid expression in constant initializer (Parsing[1002])

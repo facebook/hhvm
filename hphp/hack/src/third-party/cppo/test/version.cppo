@@ -1,0 +1,30 @@
+#if X_VERSION < (123, 0, 0)
+  alligators
+  #error ""
+#else
+  Cape buffalos
+#endif
+
+#define v X_VERSION
+#if v = (X_MAJOR, X_MINOR, X_PATCH)
+  onion rings
+#else
+  gazpacho
+  #error ""
+#endif
+
+major: X_MAJOR
+minor: X_MINOR
+patch: X_PATCH
+
+#ifdef X_PRERELEASE
+  prerelease: X_PRERELEASE
+#else
+  #error ""
+#endif
+
+#ifdef X_BUILD
+  build: X_BUILD
+#else
+  #error ""
+#endif

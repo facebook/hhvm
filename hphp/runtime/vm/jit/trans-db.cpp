@@ -37,6 +37,7 @@ bool enabled() {
   return debug ||
          RuntimeOption::EvalDumpTC ||
          RuntimeOption::EvalDumpIR ||
+         RuntimeOption::EvalDumpInlRefuse ||
          RuntimeOption::EvalDumpRegion;
 }
 
@@ -83,6 +84,7 @@ void addTranslation(const TransRec& transRec) {
   tc::assertOwnsCodeLock();
   TransID id = transRec.id == kInvalidTransID ? s_translations.size()
                                               : transRec.id;
+  assert_flog(transRec.isConsistent(), "{}", transRec.print());
   if (id >= s_translations.size()) {
     s_translations.resize(id + 1);
   }

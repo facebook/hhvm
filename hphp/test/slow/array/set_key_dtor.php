@@ -17,4 +17,8 @@ class A {
 function x($a) {
   $a->z[new dtor(1)][new dtor(2)][new dtor(3)][new dtor(4)] = new dtor(5);
 }
+
+<<__EntryPoint>>
+function main_set_key_dtor() {
 x(new A);
+}

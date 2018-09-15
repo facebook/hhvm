@@ -28,7 +28,6 @@ struct ThrowStatement : Statement {
   ThrowStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  int getLocalEffects() const override { return CanThrow;}
 
 private:
   ExpressionPtr m_exp;

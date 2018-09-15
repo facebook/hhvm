@@ -1,5 +1,6 @@
 Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Unsupported dynamic call of set_frame_metadata()' in %smetadata_call_user_func.php:8
 Stack trace:
-#0 %smetadata_call_user_func.php(8): HH\set_frame_metadata()
-#1 %smetadata_call_user_func.php(12): foo()
-#2 {main}
+#0 (): HH\set_frame_metadata()
+#1 %smetadata_call_user_func.php(8): call_user_func()
+#2 %smetadata_call_user_func.php(12): foo()
+#3 {main}

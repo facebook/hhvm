@@ -18,11 +18,12 @@
 #ifndef incl_HPHP_EXT_HASH_ENGINE_H_
 #define incl_HPHP_EXT_HASH_ENGINE_H_
 
+#include "hphp/util/assertions.h"
+
 #include <map>
 #include <memory>
 #include <cstring>
 #include <string>
-#include <cassert>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -40,9 +41,9 @@ struct HashEngine {
                            unsigned int count) = 0;
   virtual void hash_final(unsigned char *digest, void *context) = 0;
   virtual void hash_copy(void *new_context, void *old_context) {
-    assert(new_context != nullptr);
-    assert(old_context != nullptr);
-    assert(context_size >= 0);
+    assertx(new_context != nullptr);
+    assertx(old_context != nullptr);
+    assertx(context_size >= 0);
     memcpy(new_context, old_context, context_size);
   }
 

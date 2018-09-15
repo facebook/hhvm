@@ -5,4 +5,8 @@ function t() {
  $b = 'a';
  var_dump($$b);
 }
- t();
+
+ <<__EntryPoint>>
+function main_1137() {
+t();
+}

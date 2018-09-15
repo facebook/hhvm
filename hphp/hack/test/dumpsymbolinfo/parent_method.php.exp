@@ -1,0 +1,17 @@
+{
+  "function_calls":[
+    {
+      "name":"C1::foo",
+      "type":"Method",
+      "pos":{"filename":"parent_method.php","line":11,"char_start":20,"char_end":22},
+      "caller":"C2::test"
+    },
+    {
+      "name":"C2::foo",
+      "type":"Method",
+      "pos":{"filename":"parent_method.php","line":17,"char_start":20,"char_end":22},
+      "caller":"C3::test2"
+    }
+  ],
+  "symbol_types":[]
+}

@@ -11,4 +11,8 @@ function d() {
   $y = foo();
   var_dump($y);
 }
+
+<<__EntryPoint>>
+function main_array_048() {
 d();
+}

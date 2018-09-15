@@ -1,0 +1,2 @@
+File "constructor_method_call_complex.php", line 9, characters 9-15:
+Method call following immediate constructor call requires parentheses around constructor call. (Parsing[1002])

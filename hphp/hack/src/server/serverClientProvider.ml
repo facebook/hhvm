@@ -2,22 +2,23 @@
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
+open Hh_core
 open ServerCommandTypes
 
 exception Client_went_away
 
-type t = Unix.file_descr
+(* default pipe, priority pipe *)
+type t = Unix.file_descr * Unix.file_descr
 type client =
   | Non_persistent_client of Timeout.in_channel * out_channel
   | Persistent_client of Unix.file_descr
 
-let provider_from_file_descriptor x = x
+let provider_from_file_descriptors x = x
 let provider_for_test () = failwith "for use in tests only"
 
 (** Retrieve channels to client from monitor process. *)
@@ -35,26 +36,53 @@ let accept_client_opt parent_in_fd =
     None
   end
 
-let sleep_and_check in_fd persistent_client_opt =
-  let l = match persistent_client_opt with
-    | Some (Persistent_client fd) -> [in_fd ; fd]
-    | Some (Non_persistent_client _) ->
+(* sleep_and_check: waits up to 0.1 seconds and then returns either:        *)
+(* - If we should read from persistent_client, then (None, true)            *)
+(* - If we should read from in_fd, then (Some (Non_persist in_fd)), false)  *)
+(* - If there's nothing to read, then (None, false)                         *)
+let sleep_and_check (default_in_fd, priority_in_fd) persistent_client_opt
+    ~ide_idle kind =
+  let in_fds = [default_in_fd; priority_in_fd] in
+  let is_persistent x = match persistent_client_opt with
+    | Some (Persistent_client fd) when fd = x -> true
+    | _ -> false
+  in
+  let l = match kind, persistent_client_opt with
+    | `Priority, _ -> [priority_in_fd]
+    | `Any, Some (Persistent_client fd) ->
+      (* If we are not sure that there are no more IDE commands, do not even
+       * look at non-persistent client to avoid race conditions.*)
+      if not ide_idle then [fd] else fd::in_fds
+    | `Any, Some (Non_persistent_client _) ->
         (* The arguments for "sleep_and_check" are "the source of new clients"
          * and the "client we already store in the env". We only store
          * persistent clients *)
         assert false
-    | None -> [in_fd]
+    | `Any, None -> in_fds
   in
   let ready_fd_l, _, _ = Unix.select l [] [] (0.1) in
-  match ready_fd_l with
-    | [_; _] -> accept_client_opt in_fd, true
-    | [fd] when fd = in_fd -> accept_client_opt in_fd, false
-    | [fd] when fd <> in_fd -> None, true
-    | _ -> None, false
+  (* Prioritize existing persistent client requests over command line ones *)
+  if List.exists ready_fd_l ~f:is_persistent then None, true else
+  match List.hd ready_fd_l with
+  | Some fd -> accept_client_opt fd, false
+  | None -> None, false
+
+let has_persistent_connection_request = function
+  | Persistent_client fd ->
+    let ready, _, _ = Unix.select [fd] [] [] 0.0 in
+    ready <> []
+  | _ -> false
+
+let priority_fd (_, x) = Some x
+
+let get_client_fd = function
+  | Persistent_client fd -> Some fd
+  | Non_persistent_client _ -> failwith "not implemented"
 
 let say_hello oc =
   let fd = Unix.descr_of_out_channel oc in
-  Marshal_tools.to_fd_with_preamble fd "Hello"
+  Marshal_tools.to_fd_with_preamble fd ServerCommandTypes.Hello
+  |> ignore
 
 let read_connection_type ic =
   Timeout.with_timeout
@@ -62,6 +90,7 @@ let read_connection_type ic =
     ~on_timeout: (fun _ -> raise Read_command_timeout)
     ~do_: (fun timeout -> Timeout.input_value ~timeout ic)
 
+[@@@warning "-52"] (* we have no alternative but to depend on Sys_error strings *)
 let read_connection_type = function
   | Non_persistent_client (ic, oc) ->
     begin try
@@ -77,14 +106,15 @@ let read_connection_type = function
      * desired connection type, can be turned into Persistent_client
      * (via make_persistent). *)
     assert false
+[@@@warning "+52"] (* CARE! scope of suppression should be only read_connection_type *)
 
-let send_response_to_client client response =
+let send_response_to_client client response t =
   match client with
   | Non_persistent_client (_, oc) ->
     let fd = Unix.descr_of_out_channel oc in
-    Marshal_tools.to_fd_with_preamble fd response
+    Marshal_tools.to_fd_with_preamble fd response |> ignore
   | Persistent_client fd ->
-    Marshal_tools.to_fd_with_preamble fd (ServerCommandTypes.Response response)
+    Marshal_tools.to_fd_with_preamble fd (ServerCommandTypes.Response (response, t)) |> ignore
 
 let send_push_message_to_client client response =
   match client with
@@ -92,15 +122,23 @@ let send_push_message_to_client client response =
     failwith "non-persistent clients don't expect push messages "
   | Persistent_client fd ->
     try
-      Marshal_tools.to_fd_with_preamble fd (ServerCommandTypes.Push response)
+      Marshal_tools.to_fd_with_preamble fd (ServerCommandTypes.Push response) |> ignore
     with Unix.Unix_error(Unix.EPIPE, "write", "") ->
       raise Client_went_away
 
 let read_client_msg ic =
-  Timeout.with_timeout
+  try
+    Timeout.with_timeout
     ~timeout:1
     ~on_timeout: (fun _ -> raise Read_command_timeout)
     ~do_: (fun timeout -> Timeout.input_value ~timeout ic)
+  with End_of_file -> raise Client_went_away
+
+let client_has_message = function
+  | Non_persistent_client _ -> true
+  | Persistent_client fd ->
+    let ready, _, _ = Unix.select [fd] [] [] 0.0 in
+    ready <> []
 
 let read_client_msg = function
   | Non_persistent_client (ic, _) -> read_client_msg ic
@@ -139,3 +177,12 @@ let shutdown_client client =
         Timeout.in_channel_of_descr fd, Unix.out_channel_of_descr fd
   in
   ServerUtils.shutdown_client (ic, oc)
+
+let ping = function
+  | Non_persistent_client (_, oc) ->
+    let fd = Unix.descr_of_out_channel oc in
+    let _ : int = try
+      Marshal_tools.to_fd_with_preamble fd ServerCommandTypes.Ping
+    with _ -> raise Client_went_away in
+    ()
+  | Persistent_client _ -> ()

@@ -1,0 +1,1 @@
+Fatal error: Callable typehints cannot be used with as-expressions in %s on line %d

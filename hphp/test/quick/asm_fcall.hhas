@@ -4,7 +4,7 @@
 
 .main {
   FPushFuncD 0 "main"
-  FCall 0
+  FCall 0 0 1 - "" ""
   PopR
   Null
   RetC
@@ -13,8 +13,8 @@
 .function caller($who, $arg) {
   CGetL $who
   FPushFunc 1
-  FPassL 0 $arg
-  FCall 1
+  CGetL $arg
+  FCall 1 0 1 - "" ""
   UnboxR
 
   SetL $ret
@@ -22,7 +22,7 @@
 
   CGetL $ret
   FPushFunc 0
-  FCall 0
+  FCall 0 0 1 - "" ""
   PopR
 
   True
@@ -58,18 +58,16 @@
 .function main() {
   FPushFuncD 2 "caller"
   String "a"
-  FPassC 0
   String "b"
-  FPassC 1
-  FCall 2
+  FCall 2 0 1 - "" ""
   PopR
 
   String "strval"
   SetL $funk
   PopC
   FPushFuncD 1 "byref"
-  FPassL 0 $funk
-  FCall 1
+  VGetL $funk
+  FCall 1 0 1 - "" ""
   PopR
   CGetL $funk
   Print

@@ -1,9 +1,6 @@
 """
 Assorted utilities for HHVM GDB bindings.
 """
-# @lint-avoid-python-3-compatibility-imports
-# @lint-avoid-pyflakes3
-# @lint-avoid-pyflakes2
 
 from compatibility import *
 
@@ -75,6 +72,8 @@ def parse_argv(args, limit=None):
 def gdbprint(val, ty=None):
     if ty is None:
         ty = val.type
+    # quote names with :: in case we're in a non-c++ frame
+    ty = re.sub(r'\b(\w*(::\w+(\<.*\>)?)+)\b', r"'\1'", str(ty))
     gdb.execute('print (%s)%s' % (str(ty), str(val)))
 
 
@@ -107,7 +106,7 @@ def crc32q(crc, quad):
     dividend = quad ^ (crc << 32)
     divisor = 0x11edc6f41 << 31
 
-    for i in xrange(64):
+    for _i in xrange(64):
         if dividend & msb:
             dividend ^= divisor
         dividend <<= 1
@@ -160,7 +159,6 @@ def strinfo(s, keep_case=True):
     stringish gdb.Value."""
 
     data = None
-    addr = None
     h = None
 
     t = rawtype(s.type)
@@ -300,3 +298,31 @@ def deref(val):
         return val.cast(rawtype(val.type))
     else:
         return deref(p.referenced_value())
+
+
+#------------------------------------------------------------------------------
+# Architecture.
+
+@memoized
+def arch():
+    try:
+        return gdb.newest_frame().architecture().name()
+    except:
+        return None
+
+@memoized
+def arch_regs():
+    a = arch()
+
+    if a == 'aarch64':
+        return {
+            'fp': 'x29',
+            'sp': 'sp',
+            'ip': 'pc',
+        }
+    else:
+        return {
+            'fp': 'rbp',
+            'sp': 'rsp',
+            'ip': 'rip',
+        }

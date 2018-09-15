@@ -12,4 +12,8 @@ trait Too {
 class Foo {
  use Too;
  }
+
+<<__EntryPoint>>
+function main_2086() {
 Foo::bar();
+}

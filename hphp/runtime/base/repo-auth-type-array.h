@@ -22,6 +22,7 @@
 #include <string>
 
 #include "hphp/runtime/base/repo-auth-type.h"
+#include "hphp/util/compact-vector.h"
 
 namespace HPHP {
 
@@ -39,6 +40,8 @@ namespace HPHP {
  */
 struct ArrayTypeTable {
   struct Builder;
+  using Table = CompactVector<const RepoAuthType::Array*>;
+  using iterator = Table::const_iterator;
 
   /*
    * Re-populate an ArrayTypeTable using a builder object.
@@ -50,11 +53,13 @@ struct ArrayTypeTable {
    */
   void repopulate(const Builder&);
 
+  bool empty() const { return m_arrTypes.empty(); }
+
   /*
    * Find an array type description by id.
    */
   const RepoAuthType::Array* lookup(uint32_t id) const {
-    assert(id < m_arrTypes.size());
+    assertx(id < m_arrTypes.size());
     return m_arrTypes[id];
   }
 
@@ -63,9 +68,27 @@ struct ArrayTypeTable {
   template<class SerDe>
   typename std::enable_if<!SerDe::deserializing>::type serde(SerDe&);
 
+  iterator begin() const { return m_arrTypes.begin(); }
+  iterator end() const { return m_arrTypes.end(); }
+  size_t size() const { return m_arrTypes.size(); }
 private:
-  std::vector<const RepoAuthType::Array*> m_arrTypes;
+  /*
+   * Check that the ArrayTypeTable is fully resolved after deserialization.
+   */
+  bool check(const RepoAuthType::Array*) const;
+
+private:
+  Table m_arrTypes;
 };
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Global singleton instance wrapped around ArrayTypeTable. This should be
+ * only used in repo mode. Non-repo mode array type tables are stored locally in
+ * the units/unit emitters. The logic is very similar to that of LitstrTable.
+ */
+ArrayTypeTable& globalArrayTypeTable();
 
 //////////////////////////////////////////////////////////////////////
 
@@ -97,8 +120,10 @@ struct RepoAuthType::Array {
    * just serializes the ids.  These functions are what the
    * ArrayTypeTable uses to (de)serialize the actual data.
    */
-  template<class SerDe> static Array* deserialize(SerDe&);
-  template<class SerDe> void serialize(SerDe&) const;
+  template <class SerDe>
+  static Array* deserialize(SerDe&, const ArrayTypeTable&);
+  template <class SerDe>
+  void serialize(SerDe&) const;
 
   // These are variable-sized heap allocated objects.  We can't copy
   // them around.
@@ -134,7 +159,7 @@ struct RepoAuthType::Array {
    * Pre: tag() == Tag::Packed
    */
   uint32_t size() const {
-    assert(tag() == Tag::Packed);
+    assertx(tag() == Tag::Packed);
     return m_size;
   }
 
@@ -145,8 +170,8 @@ struct RepoAuthType::Array {
    *      idx < size()
    */
   RepoAuthType packedElem(uint32_t idx) const {
-    assert(tag() == Tag::Packed);
-    assert(idx < size());
+    assertx(tag() == Tag::Packed);
+    assertx(idx < size());
     return types()[idx];
   }
 
@@ -156,7 +181,7 @@ struct RepoAuthType::Array {
    * Pre: tag() == Tag::PackedN
    */
   RepoAuthType elemType() const {
-    assert(tag() == Tag::PackedN);
+    assertx(tag() == Tag::PackedN);
     return types()[0];
   }
 
@@ -177,6 +202,7 @@ private:
   }
 
 private:
+  friend struct ArrayTypeTable;
   friend struct ArrayTypeTable::Builder;
 
 private:

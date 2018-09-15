@@ -2,11 +2,17 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
+module Lowerer = Full_fidelity_ast
+module Syntax = Full_fidelity_positioned_syntax
+module SyntaxKind = Full_fidelity_syntax_kind
+module SourceText = Full_fidelity_source_text
+module SyntaxTree = Full_fidelity_syntax_tree
+  .WithSyntax(Syntax)
 
 let purpose = "Read a single Hack file and produce the resulting S-Expression."
 let extra   = "(Options for development / parser selection and comparisson.)"
@@ -16,7 +22,7 @@ let usage   = Printf.sprintf
   purpose
   extra
 
-type parser_return = Parser_hack.parser_return * float
+type parser_return = Parser_return.t * float
 type result =
   | CmpDifferent
   | Unsupported
@@ -24,14 +30,13 @@ type result =
 
 let exit_code : result -> int = function
   | ParseError   -> 1
-  | Unsupported  -> 2
+  | Unsupported  -> 3
   | CmpDifferent -> 42
 
 type parser_config =
-  | AST
   | FFP
-  | Benchmark
-  | Compare of string
+  | ValidatedFFP
+  | Benchmark_batch of int
 
 let exit_with : result -> 'a = fun r -> exit (exit_code r)
 
@@ -45,135 +50,150 @@ let handle_errors : Errors.t -> unit = fun errorl ->
     exit_with ParseError
   end
 
-let run_ast : Relative_path.t -> Parser_hack.parser_return = fun file ->
-  let parse_call () = Parser_hack.from_file ParserOptions.default file in
-  let errorl, result, _ = Errors.do_ parse_call in
-  handle_errors errorl;
-  result
 
-let run_ffp : Relative_path.t -> Parser_hack.parser_return = fun file ->
-  let module Tree = Full_fidelity_syntax_tree in
-  let module Text = Full_fidelity_source_text in
-
-  let source_text = Text.from_file file in
-  let syntax_tree = Tree.make source_text in
-  let mode = match Tree.mode syntax_tree with
-    | "strict" -> FileInfo.Mstrict
-    | "decl"   -> FileInfo.Mdecl
-    | _        -> FileInfo.Mpartial
+let run_ffp
+  ?(iters = 0)
+  ~codegen
+  ~allow_malformed
+  (file : Relative_path.t)
+: Lowerer.result =
+  let env =
+    Lowerer.make_env
+      ~codegen
+      ~include_line_comments:true
+      ~fail_open:allow_malformed
+      ~keep_errors:(not allow_malformed)
+      file
   in
-  Parser_hack.(
-    { file_mode = Option.some_if (Tree.language syntax_tree = "hh") mode
-    ; comments  = []
-    ; ast       = Namespaces.elaborate_defs ParserOptions.default @@
-                    Classic_ast_mapper.from_tree file syntax_tree
-    ; content   = Text.text source_text
-    })
+  if iters < 1 then () else
+  for i = 1 to iters do
+    ignore(Lowerer.from_file env : Lowerer.result);
+  done;
+  Lowerer.from_file env
+let run_validated_ffp : Relative_path.t -> Lowerer.result = fun file ->
+  let open SyntaxTree in
+  let source_text = SourceText.from_file file in
+  let tree        = make source_text in
+  let script      = root tree in
+  let validated   =
+    try
+      Syntax.Validated.validate_script script
+    with
+    | Syntax.Validated.Validation_failure (k,s) as e -> begin
+      Printf.eprintf "FAILURE: expected: %s  actual: %s\n"
+        (Option.value_map ~f:SyntaxKind.to_string ~default:"Some token" k)
+        (SyntaxKind.to_string (Syntax.kind s));
+      raise e
+    end
+  in
+  let invalidated = Syntax.Validated.invalidate_script validated in
+  let revalidated = Syntax.Validated.validate_script invalidated in
+  assert (validated = revalidated); (* Idempotence *after* validation *)
+  assert (script = invalidated); (* Idempotence *of* validation *)
+  let invalidated =
+    Full_fidelity_editable_positioned_syntax.from_positioned_syntax
+      invalidated in
+  let is_hh_file = is_hack tree in
+  let env = Lowerer.make_env ~is_hh_file file in
+  let comments = Lowerer.scour_comments_and_add_fixmes env source_text script in
+  let module Lowerer = Lowerer.WithPositionedSyntax(Full_fidelity_editable_positioned_syntax) in
+  Lowerer.lower env ~source_text ~script:invalidated comments
 
-let dump_sexpr ast = Debug.dump_ast (Ast.AProgram ast.Parser_hack.ast)
-
-
-let measure : ('a -> 'b) -> 'a -> 'b * float = fun f x ->
+let measure : (unit -> 'a) -> 'a * float = fun f ->
   let start = Unix.gettimeofday () in
-  let res = f x in
+  let res = f () in
   let stop = Unix.gettimeofday () in
   res, stop -. start
 
-let run_parsers (file : Relative_path.t) (conf : parser_config)
-  = match conf with
-  | AST -> Printf.printf "%s" (dump_sexpr @@ run_ast file)
-  | FFP -> Printf.printf "%s" (dump_sexpr @@ run_ffp file)
-  | Compare diff_cmd ->
-    let open Unix in
-    let open Printf in
-    let ast_result = run_ast file in
-    let ffp_result = run_ffp file in
-    let ast_sexpr = dump_sexpr ast_result in
-    let ffp_sexpr = dump_sexpr ffp_result in
-    if ast_sexpr = ffp_sexpr
-    then printf "%s\n" ast_sexpr
-    else begin
-      let unsupported = Str.regexp "Fallthrough\\|Unsafe" in
-      try begin
-        ignore (Str.search_forward unsupported ast_sexpr 0);
-        eprintf "Warning: Unsupported features found: %s\n" "pragma";
-        exit_with Unsupported
-      end with Not_found ->
-        let filename = Relative_path.S.to_string file in
-        let mkTemp (name : string) (content : string) = begin
-          let ic = open_process_in (sprintf "mktemp tmp.%s.XXXXXXXX" name) in
-          let path = input_line ic in
-          ignore (close_process_in ic);
-          let oc = open_out path in
-          fprintf oc "%s\n\n%s\n\n%s\n" filename content filename;
-          close_out oc;
-          path
-        end in
 
-        let pathOld = mkTemp "OLD" ast_sexpr in
-        let pathNew = mkTemp "NEW" ffp_sexpr in
-        eprintf "\n\n****** Different\n";
-        eprintf "  Filename:     %s\n" filename;
-        eprintf "  AST output:   %s\n" pathOld;
-        eprintf "  FFP output:   %s\n" pathNew;
-        eprintf "  Diff command: %s\n" diff_cmd;
-        flush Pervasives.stderr;
-        let command = sprintf "%s %s %s" diff_cmd pathOld pathNew in
-        ignore (system command);
-        ignore (unlink pathOld);
-        ignore (unlink pathNew);
-        exit_with CmpDifferent
-    end
-  | Benchmark ->
-    let filename = Relative_path.S.to_string file in 
-    let (ast_result, ast_duration), (ffp_result, ffp_duration) =
-      try (measure run_ast file, measure run_ffp file)
+let run_parsers
+  dumper
+  (file : Relative_path.t)
+  (conf : parser_config)
+  ~hash
+  ~codegen
+  ~allow_malformed
+=
+  match conf with
+  | FFP ->
+    let ast = (run_ffp ~codegen ~allow_malformed file).Lowerer.ast in
+    let output =
+      if not hash then dumper ast else
+        let decl_hash = Ast_utils.generate_ast_decl_hash ast in
+        OpaqueDigest.to_hex decl_hash
+    in
+    Printf.printf "%s" output
+  | ValidatedFFP ->
+    Printf.printf "%s" (dumper (run_validated_ffp file).Lowerer.ast)
+  | Benchmark_batch iters ->
+    let filename = Relative_path.S.to_string file in
+    let _, duration =
+      try (measure (fun () -> run_ffp ~codegen ~iters file))
       with _ -> begin
         Printf.printf "FAIL, %s\n" filename;
         exit_with ParseError
       end
     in
-    let ast_sexpr = Debug.dump_ast (Ast.AProgram ast_result.Parser_hack.ast) in
-    let ffp_sexpr = Debug.dump_ast (Ast.AProgram ffp_result.Parser_hack.ast) in
-    if ast_sexpr = ffp_sexpr
-    then
-      Printf.printf
-        "PASS, %s, %12.10f, %12.10f\n"
-        filename
-        ast_duration
-        ffp_duration
-    else begin
-      Printf.printf "FAIL, %s\n" filename;
-      exit_with CmpDifferent
-    end
-
-
-
+    let res = Printf.sprintf
+      "PASS, %s, %12.10f\n"
+      filename duration in
+    print_endline res
 
 let () =
-  let use_parser = ref "ast"  in
-  let use_diff   = ref "diff" in
+  Printexc.record_backtrace true;
+  let use_parser = ref "ffp"  in
+  let hash       = ref false in
+  let dumper     = ref Debug.dump_ast in
   let filename   = ref ""     in
+  let num_runs   = ref 100 in
+  let benchmark_files      = ref [] in
+  let no_codegen    = ref false in
+  let allow_malformed = ref false in
   Arg.(parse
-    [ ("--parser", Set_string use_parser,
-        "Which parser to use (ast, ffp, compare) [def: ast]"
+    [ ("--hash", Set hash,
+        "Get the decl level parsing hash of a given file "
       )
-    ; ("--diff", Set_string use_diff,
-        "Which diff tool to compare different S-Expressions with [def: vimdiff]"
+    ; ("--sorted", Unit (fun () -> dumper := Debug.dump_sorted_ast),
+        "When using the `compare` parser, the (lexicographically) sort the " ^
+        "S-Expressions before diffing"
       )
+    ; ("--show-pos", Unit (fun () -> Sof.show_pos := true),
+        "Show positional information on the AST"
+      )
+    ; ("--num-runs", Int (fun x -> num_runs := x),
+        "How many times to benchmark if in benchmark mode [default: 100]"
+      )
+    ; ("--benchmark_batch", Rest (fun fn -> benchmark_files := fn::!benchmark_files),
+        "Run benchmarking on a list of files"
+    )
+    ; ("--no-codegen", Set no_codegen,
+        "Turn off codegen mode when parsing with FFP [default: false]"
+    )
+    ; ("--allow-malformed", Set allow_malformed,
+        "Allow malformed files (such as for testing IDE services) [default: false]"
+    ) ;
     ]) (fun fn -> filename := fn) usage;
   let parse_function = match !use_parser with
-    | "ast"       -> AST
+    | _ when !benchmark_files <> [] -> Benchmark_batch !num_runs
     | "ffp"       -> FFP
-    | "benchmark" -> Benchmark
-    | "compare"   -> Compare !use_diff
+    | "validated" -> ValidatedFFP
     | s -> raise (Failure (Printf.sprintf "Unknown parser '%s'\n" s))
   in
-  if String.length !filename = 0 then raise (Failure "No filename given");
+  if String.length !filename = 0 && !benchmark_files = [] then failwith "No filename given";
   EventLogger.init EventLogger.Event_logger_fake 0.0;
   let _handle = SharedMem.init GlobalConfig.default_sharedmem_config in
-  Unix.handle_unix_error (fun fn ->
+  let dumper ast = !dumper (Ast.AProgram ast) in
+  let parse_file fn =
     let file = Relative_path.create Relative_path.Dummy fn in
-    run_parsers file parse_function
-  ) !filename
-
+    run_parsers
+      dumper
+      file
+      ~hash:!hash
+      parse_function
+      ~codegen:(not !no_codegen)
+      ~allow_malformed:!allow_malformed
+  in
+  if !benchmark_files <> [] then
+    List.iter parse_file !benchmark_files
+  else
+    Unix.handle_unix_error (parse_file) !filename

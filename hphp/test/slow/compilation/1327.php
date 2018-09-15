@@ -20,4 +20,8 @@ function main() {
   $b->foo();
   var_dump($b);
 }
+
+<<__EntryPoint>>
+function main_1327() {
 main();
+}

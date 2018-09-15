@@ -1,0 +1,2 @@
+File "bad_inout_decl_variadic.php", line 3, characters 15-31:
+A variadic parameter ('...') cannot have a modifier that changes the calling convention, like 'inout'. (Parsing[1002])

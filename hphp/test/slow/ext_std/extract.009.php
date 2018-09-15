@@ -14,4 +14,8 @@ function main() {
   var_dump(get_defined_vars());
 }
 
+
+<<__EntryPoint>>
+function main_extract_009() {
 main();
+}

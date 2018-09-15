@@ -65,6 +65,9 @@ class B extends A {
   }
 }
 
+
+<<__EntryPoint>>
+function main_base() {
 (new A())->testA();
 // Test to make sure that a new object isn't reusing the results from the old
 // object,
@@ -91,3 +94,4 @@ echo $b->testMemoizedOverride()."\n";
 // segfault in #5150421.
 echo $a->testPassesThis().' ';
 echo $a->testPassesThis();
+}

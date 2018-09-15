@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_820() {
 $m1 = Map {
 }
 ;
@@ -50,3 +53,4 @@ var_dump($m == false);
 var_dump($m == true);
 var_dump($m == 1);
 var_dump($m == "Map");
+}

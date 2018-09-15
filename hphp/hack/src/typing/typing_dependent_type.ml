@@ -2,13 +2,12 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Core
+open Core_kernel
 open Typing_defs
 
 module ExprDepTy = struct
@@ -41,7 +40,7 @@ module ExprDepTy = struct
               let ereason, dep = new_() in
               pos, ereason, dep
           )
-      | N.CI (p, cls) ->
+      | N.CI ((p, cls), _) ->
           p, Reason.ERclass cls, `cls cls
       | N.CIstatic ->
           pos, Reason.ERstatic, `static
@@ -68,10 +67,51 @@ module ExprDepTy = struct
   (* Takes the given list of dependent types and applies it to the given
    * locl ty to create a new locl ty
    *)
-  let apply dep_tys ty =
-    List.fold_left dep_tys ~f:begin fun ty (r, dep_ty) ->
-      r, Tabstract (AKdependent dep_ty, Some ty)
-    end ~init:ty
+  let apply env dep_tys ty =
+    let apply_single env dep_tys ty =
+      List.fold_left dep_tys ~f:begin fun (env, ty) (r, dep_ty) ->
+        match dep_ty with
+        | (_, []) ->
+         env, (r, Tabstract (AKdependent dep_ty, Some ty))
+        | _ ->
+          begin match ty with
+          (* If the generic in question is exactly equal to something, the
+          expression dependent type collapses to that given type, since
+          all constraints of the expression dependent type will get
+          transferred to the lower type. *)
+          (* For example, if we have the following
+            abstract class Box {
+              abstract const type T;
+            }
+            class IntBox { const type T = int; }
+            function addFiveToValue<T1 as Box>(T1 $x) : int where T1::T = int {
+                return $x->get() + 5;
+            }
+            Here, $x->get() has type expr#1::T as T1::T as Box::T.
+            But T1::T is exactly equal to int, so $x->get() no longer needs
+            to be expression dependent. Thus, $x->get() typechecks.
+          *)
+            | (_, Tabstract (AKgeneric s, _)) when
+            not (Typing_set.is_empty (Env.get_equal_bounds env s)) ->
+            (env, ty)
+            | _ ->
+             let ty_name = to_string dep_ty in
+             let new_ty = (r, Tabstract(AKgeneric ty_name, None)) in
+              let env = Env.add_upper_bound_global env ty_name ty in
+              (env, new_ty)
+          end
+      end ~init:(env, ty) in
+    let env, ety = Env.expand_type env ty in
+    match ety with
+    | _, Tunresolved [x] when dep_tys = [] ->
+       env, x
+    | r, Tunresolved tyl ->
+      let env, tyl = List.fold tyl ~f:(fun (env, acc) ty ->
+        let env, ty = apply_single env dep_tys ty in
+        env, ty::acc) ~init:(env, []) in
+      env, (r, Tunresolved tyl)
+    | _ -> apply_single env dep_tys ety
+
 
   (* We do not want to create a new expression dependent type if the type is
    * already expression dependent. However if the type is Tunresolved that
@@ -93,6 +133,8 @@ module ExprDepTy = struct
   let rec should_apply env ty =
     let env, ty = Env.expand_type env ty in
     match snd ty with
+    | Tabstract(AKgeneric s, _) when AbstractKind.is_generic_dep_ty s ->
+      false
     | Tabstract (AKgeneric _, _) ->
       let env, tyl = Typing_utils.get_concrete_supertypes env ty in
       List.exists tyl (should_apply env)
@@ -117,8 +159,8 @@ module ExprDepTy = struct
           ~default:false
           ~f:(fun class_ty ->
               not (TUtils.class_is_final_and_not_contravariant class_ty))
-    | Tanon _ | Tobject | Tmixed | Tprim _ | Tshape _ | Ttuple _
-    | Tarraykind _ | Tfun _ | Tabstract (_, None) | Tany | Tvar _ ->
+    | Tanon _ | Tobject | Tmixed | Tnonnull | Tprim _ | Tshape _ | Ttuple _ | Tdynamic
+    | Tarraykind _ | Tfun _ | Tabstract (_, None) | Tany | Tvar _ | Terr ->
         false
 
   (****************************************************************************)
@@ -142,7 +184,7 @@ module ExprDepTy = struct
   (****************************************************************************)
   let make env cid cid_ty =
     if should_apply env cid_ty then
-      apply [from_cid env (fst cid_ty) cid] cid_ty
+      apply env [from_cid env (fst cid_ty) cid] cid_ty
     else
-      cid_ty
+      env, cid_ty
 end

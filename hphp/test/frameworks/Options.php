@@ -63,6 +63,9 @@ class Options {
       self::$run_tests = false;
     }
 
+    if ($options->containsKey('testpilot')) {
+      $options['fbmake'] = $options['testpilot'];
+    }
     if ($options->containsKey('list-tests')) {
       if ($options->containsKey('install-only')) {
         error_and_exit('Can not use --list-tests and --install-only together');

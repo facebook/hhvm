@@ -41,14 +41,9 @@ public:
                      ExpressionListPtr attrList);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  StatementPtr preOptimize(AnalysisResultConstPtr ar) override;
-  bool hasDecl() const override { return true; }
-  bool hasImpl() const override;
   int getRecursiveCount() const override;
   // implementing IParseHandler
-  void onParse(AnalysisResultConstPtr ar, FileScopePtr scope) override;
-
-  int getLocalEffects() const override;
+  void onParse(AnalysisResultConstRawPtr ar, FileScopePtr scope) override;
 
   std::string getName() const override;
   const std::string &getOriginalName() const { return m_originalName; }
@@ -67,9 +62,6 @@ protected:
   std::string m_docComment;
   StatementListPtr m_stmt;
   ExpressionListPtr m_attrList;
-  void checkVolatile(AnalysisResultConstPtr ar);
-private:
-  bool checkVolatileBases(AnalysisResultConstPtr ar);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -176,8 +176,12 @@ function test_SpoofChecker_setallowedlocales() {
   VS($checker->issuspicious($snowman), false);
 }
 
+
+<<__EntryPoint>>
+function main_uspoof() {
 test_SpoofChecker_issuspicious();
 test_SpoofChecker_areconfusable();
 test_SpoofChecker_issuesfound();
 test_SpoofChecker_setchecks();
 test_SpoofChecker_setallowedlocales();
+}

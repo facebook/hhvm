@@ -1,0 +1,15 @@
+[
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "textDocument/didOpen",
+  "params": {
+     "textDocument": {
+       "uri":"${php_file_uri}",
+       "languageId": "hack",
+       "version":1,
+       "text":"${php_file}"
+     }
+   }
+}
+]

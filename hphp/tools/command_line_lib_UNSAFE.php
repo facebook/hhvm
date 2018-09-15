@@ -11,5 +11,5 @@ function error_UNSAFE($message) {
 
 function parse_options_UNSAFE($optmap) {
   global $argv;
-  return parse_options_impl($optmap, $argv);
+  return parse_options_impl($optmap, &$argv);
 }

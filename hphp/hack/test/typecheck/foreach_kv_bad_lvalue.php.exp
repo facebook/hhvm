@@ -1,2 +1,2 @@
-File "foreach_kv_bad_lvalue.php", line 13, characters 30-31:
-Invalid lvalue (Parsing[1002])
+File "foreach_kv_bad_lvalue.php", line 13, characters 30-30:
+literal is not allowed in write context (Parsing[1002])

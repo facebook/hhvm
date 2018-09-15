@@ -28,10 +28,9 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 req::ptr<File>
-DataStreamWrapper::open(const String& filename,
-                        const String& mode,
-                        int options,
-                        const req::ptr<StreamContext>& context) {
+DataStreamWrapper::open(const String& filename, const String& /*mode*/,
+                        int /*options*/,
+                        const req::ptr<StreamContext>& /*context*/) {
 
   // @todo: check allow_url_include?
 
@@ -90,7 +89,7 @@ DataStreamWrapper::open(const String& filename,
         }
     }
 
-    assert(data == comma || data == semi);
+    assertx(data == comma || data == semi);
     // eat parameters, and figure out if we have ';base64'
     while (semi && (data == semi)) {
       data++;

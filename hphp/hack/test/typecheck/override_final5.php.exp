@@ -1,0 +1,4 @@
+File "override_final5.php", line 20, characters 7-16:
+Class ChildClass reuses trait T in its hierarchy (Typing[4186])
+File "override_final5.php", line 12, characters 7-7:
+It is already used through T

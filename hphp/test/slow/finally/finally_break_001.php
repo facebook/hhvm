@@ -15,5 +15,9 @@ function blah() {
   }
 }
 
-blah();
 
+
+<<__EntryPoint>>
+function main_finally_break_001() {
+blah();
+}

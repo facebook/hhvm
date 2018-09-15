@@ -2,11 +2,11 @@ Correct usage, two args
 bool(true)
 Invalid $how
 
-Warning: pcntl_sigprocmask(): Invalid argument in %s/test/slow/ext_process/sigprocmask_edge_cases.php on line 9
+Warning: pcntl_sigprocmask(): Invalid argument in %s/test/slow/ext_process/sigprocmask_edge_cases.php on line 12
 bool(false)
 Invalid signal
 
-Warning: pcntl_sigprocmask(): Invalid argument in %s/test/slow/ext_process/sigprocmask_edge_cases.php on line 12
+Warning: pcntl_sigprocmask(): Invalid argument in %s/test/slow/ext_process/sigprocmask_edge_cases.php on line 15
 bool(false)
 Invalid byref arg
 bool(true)

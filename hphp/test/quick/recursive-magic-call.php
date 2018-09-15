@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Blah {
   public function __call($x, $y) {

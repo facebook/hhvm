@@ -38,6 +38,9 @@ namespace HPHP {
 
 struct Array;
 struct Variant;
+struct StructuredLogEntry;
+
+struct ZstdCompressor;
 
 /**
  * For storing headers and cookies.
@@ -96,7 +99,7 @@ struct Transport : IDebuggable {
 
 public:
   Transport();
-  virtual ~Transport();
+  ~Transport() override;
 
   void onRequestStart(const timespec &queueTime);
   const timespec &getQueueTime() const { return m_queueTime; }
@@ -114,6 +117,10 @@ public:
     m_nsleepTimeS += seconds + (m_nsleepTimeN / 1000000000);
     m_nsleepTimeN %= 1000000000;
   }
+
+  StructuredLogEntry* createStructuredLogEntry();
+  StructuredLogEntry* getStructuredLogEntry();
+  void resetStructuredLogEntry();
 
   ///////////////////////////////////////////////////////////////////////////
   // Functions sub-classes have to implement.
@@ -157,7 +164,7 @@ public:
   virtual const void *getPostData(size_t &size) = 0;
   virtual bool hasMorePostData() { return false; }
   virtual const void *getMorePostData(size_t &size) { size = 0;return nullptr; }
-  virtual bool getFiles(std::string &files) { return false; }
+  virtual bool getFiles(std::string& /*files*/) { return false; }
   /**
    * Is this a GET, POST or anything?
    */
@@ -180,8 +187,12 @@ public:
    */
   virtual std::string getHeader(const char *name) = 0;
   virtual void getHeaders(HeaderMap &headers) = 0;
-  virtual void getTransportParams(HeaderMap &serverParams) {};
+  virtual void getTransportParams(HeaderMap& /*serverParams*/){};
 
+  /**
+   * Get a description of the type of transport.
+   */
+  virtual String describe() const = 0;
 
   /**
    * Get/set response headers.
@@ -230,8 +241,9 @@ public:
    * Add/remove a request header. Default is no-op, because not all transports
    * need to support incoming request header manipulations.
    */
-  virtual void addRequestHeaderImpl(const char *name, const char *value) {}
-  virtual void removeRequestHeaderImpl(const char *name) {}
+  virtual void
+  addRequestHeaderImpl(const char* /*name*/, const char* /*value*/) {}
+  virtual void removeRequestHeaderImpl(const char* /*name*/) {}
 
   /**
    * Called when all sending should be done by this time point. Designed for
@@ -271,10 +283,11 @@ public:
    *         is being streamed later.  0 indicates that the push failed
    *         immediately.
    */
-  virtual int64_t pushResource(const char *host, const char *path,
-                               uint8_t priority, const Array& promiseHeaders,
-                               const Array& responseHeaders,
-                               const void *data, int size, bool eom) {
+  virtual int64_t
+  pushResource(const char* /*host*/, const char* /*path*/, uint8_t /*priority*/,
+               const Array& /*promiseHeaders*/,
+               const Array& /*responseHeaders*/, const void* /*data*/,
+               int /*size*/, bool /*eom*/) {
     return 0;
   };
 
@@ -286,8 +299,8 @@ public:
    * @param size length of @p body
    * @param eom true if no more body bytes are expected
    */
-  virtual void pushResourceBody(int64_t id, const void *data, int size,
-                                bool eom) {}
+  virtual void pushResourceBody(int64_t /*id*/, const void* /*data*/,
+                                int /*size*/, bool /*eom*/) {}
 
   /**
    * Need this implementation to break keep-alive connections.
@@ -419,10 +432,15 @@ public:
   const char *getThreadTypeName() const;
 
   // implementing IDebuggable
-  virtual void debuggerInfo(InfoVec &info);
+  void debuggerInfo(InfoVec& info) override;
 
   void setSSL() {m_isSSL = true;}
   bool isSSL() const {return m_isSSL;}
+
+  /*
+   * Request to adjust the maximum number of threads on the server.
+   */
+  virtual void trySetMaxThreadCount(int max) {}
 
 protected:
   /**
@@ -435,7 +453,7 @@ protected:
   using ParamMap = hphp_hash_map<const char*, std::vector<const char*>,
                                  cstr_hash, eqstr>;
 
-  // timers
+  // timers and other perf data
   timespec m_queueTime;
   timespec m_wallTime;
   timespec m_cpuTime;
@@ -446,6 +464,8 @@ protected:
   int64_t m_usleepTime;
   int64_t m_nsleepTimeS;
   int32_t m_nsleepTimeN;
+
+  std::unique_ptr<StructuredLogEntry> m_structLogEntry;
 
   // input
   char *m_url;
@@ -476,6 +496,7 @@ protected:
   enum CompressionType {
     Brotli,
     BrotliChunked,
+    Zstd,
     Gzip,
     Max,
   };
@@ -494,6 +515,7 @@ protected:
   CompressionType m_encodingType;
   std::unique_ptr<StreamCompressor> m_compressor;
   std::unique_ptr<brotli::BrotliCompressor> m_brotliCompressor;
+  std::unique_ptr<ZstdCompressor> m_zstdCompressor;
 
   bool m_isSSL;
 
@@ -521,6 +543,8 @@ protected:
                             bool last);
   StringHolder compressBrotli(const void *data, int size, bool &compressed,
                               bool last);
+  StringHolder compressZstd(const void *data, int size, bool &compressed,
+                            bool last);
 
 private:
   void prepareHeaders(bool compressed, bool chunked,

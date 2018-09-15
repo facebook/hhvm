@@ -1,0 +1,61 @@
+# starts here
+
+.main {
+  DefCls 0
+  Int 1
+  RetC
+}
+
+.class C {
+  .property [public] <"HH\\float" N  > x =
+    """i:3;""";
+  .property [public] <"array<HH\\float>" N  > a =
+    """a:2:{i:0;i:2;i:1;i:3;}""";
+  .property [public deep_init] <"HH\\string" N  > s =
+    uninit;
+  .property [public] <"HH\\string" N  > z =
+    """s:5:\"hello\";""";
+  .property [public static] <"HH\\string" N  > ss =
+    uninit;
+  .property [public deep_init] <"array<HH\\int, HH\\int>" N  > v =
+    uninit;
+  .property [private deep_init] <"(HH\\string, HH\\string)" N  > p =
+    uninit;
+  .method [public no_injection] 86ctor() {
+    Null
+    RetC
+  }
+  .method [private static no_injection] 86pinit() {
+    CheckProp "s"
+    JmpNZ L0
+    ClsCnsD "s" "B"
+    String " there"
+    Concat
+    InitProp "s" NonStatic
+  L0:
+    CheckProp "v"
+    JmpNZ L1
+    NewMixedArray 1
+    ClsCnsD "i" "B"
+    ClsCnsD "s" "B"
+    AddElemC
+    InitProp "v" NonStatic
+  L1:
+    ClsCnsD "i" "B"
+    ClsCnsD "s" "C"
+    NewPackedArray 2
+    InitProp "p" NonStatic
+    Null
+    RetC
+  }
+  .method [private static no_injection] 86sinit() {
+    ClsCnsD "s" "B"
+    String "blah"
+    Concat
+    InitProp "ss" Static
+    Null
+    RetC
+  }
+}
+
+# ends here

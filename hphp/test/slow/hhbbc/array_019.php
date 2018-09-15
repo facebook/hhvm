@@ -9,5 +9,9 @@ function main(bool $x) {
   $k = $ar['x']['y']->x;
   var_dump($k, $ar);
 }
+
+<<__EntryPoint>>
+function main_array_019() {
 main(true);
 main(false);
+}

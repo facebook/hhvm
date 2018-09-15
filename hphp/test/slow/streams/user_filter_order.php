@@ -36,4 +36,8 @@ function main() {
   doTest('stream_filter_prepend');
 }
 
+
+<<__EntryPoint>>
+function main_user_filter_order() {
 main();
+}

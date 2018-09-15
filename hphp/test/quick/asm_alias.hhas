@@ -9,71 +9,63 @@
 
   FPushFuncD 1 "foo"
   Int 0
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "foo"
   String "hi"
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushCtorD 0 "C"
-  FCall 0
+  FCall 0 0 1 - "" ""
   PopR
   SetL $x
   PopC
 
   FPushFuncD 1 "bar"
-  FPassL 0 $x
-  FCall 1
+  CGetL $x
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "bar"
   String "hi"
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "bar"
   Null
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "baz"
-  FPassL 0 $x
-  FCall 1
+  CGetL $x
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "baz"
   String "hi"
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "baz"
   Null
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "quux"
-  FPassL 0 $x
-  FCall 1
+  CGetL $x
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "quux"
   String "hi"
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "quux"
   Null
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   Int 1
@@ -105,10 +97,6 @@
 }
 
 .class C {
-  .method [public] 86ctor() {
-    Null
-    RetC
-  }
 }
 
 .alias Foo = <"HH\\int">;

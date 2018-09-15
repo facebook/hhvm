@@ -16,10 +16,13 @@
 #ifndef incl_HPHP_JIT_IRGEN_SPROP_GLOBAL_H_
 #define incl_HPHP_JIT_IRGEN_SPROP_GLOBAL_H_
 
+#include "hphp/runtime/vm/jit/types.h"
+
 namespace HPHP {
 
 struct Class;
 struct StringData;
+struct TypeConstraint;
 
 namespace jit {
 
@@ -32,8 +35,14 @@ struct IRGS;
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* ldClsPropAddrKnown(IRGS&, const Class*, const StringData*);
-SSATmp* ldClsPropAddr(IRGS&, SSATmp*, SSATmp*, bool);
+struct ClsPropLookup {
+  SSATmp* propPtr;
+  const TypeConstraint* tc;
+  Slot slot;
+};
+
+ClsPropLookup ldClsPropAddrKnown(IRGS&, const Class*, const StringData*, bool);
+ClsPropLookup ldClsPropAddr(IRGS&, SSATmp*, SSATmp*, bool, bool);
 
 //////////////////////////////////////////////////////////////////////
 

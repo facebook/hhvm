@@ -1,0 +1,4 @@
+File "nullable_shape_disallows_indexing.php", line 4, characters 10-43:
+You are trying to access an element of this container but the container could be null.  (Typing[4063])
+File "nullable_shape_disallows_indexing.php", line 4, characters 34-37:
+This is what makes me believe it can be null

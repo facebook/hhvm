@@ -4,7 +4,7 @@
 
 .main {
   FPushFuncD 0 "main"
-  FCall 0
+  FCall 0 0 1 - "" ""
   PopR
   Int 1
   RetC
@@ -36,316 +36,290 @@
 # two registers
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   Add
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   Add
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   Add
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   Add
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   Sub
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   Sub
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   Sub
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   Sub
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   BitOr
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   BitOr
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   BitOr
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   BitOr
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   BitAnd
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   BitAnd
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   BitAnd
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   BitAnd
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   BitXor
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   BitXor
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   BitXor
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   BitXor
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   Mul
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   Mul
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   Mul
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   Mul
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   Div
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
 # exclude divide by zero
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   Div
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
 # exclude divide by zero
@@ -355,61 +329,55 @@
   FPushFuncD 1 "print_bool_result"
   False
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   Add
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   True
   Sub
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   False
   BitOr
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   True
   BitAnd
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_false"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   False
   BitXor
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   FPushFuncD 0 "g_true"
-  FCall 0
+  FCall 0 0 1 - "" ""
   UnboxR
   True
   Mul
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
 # HHIRSimplification == false to test two immediates
@@ -418,48 +386,42 @@
   True
   True
   Add
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   True
   False
   Sub
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   False
   False
   BitOr
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   False
   True
   BitAnd
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   True
   False
   BitXor
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "print_bool_result"
   False
   True
   Mul
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   Null

@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/irlower.h"
+#include "hphp/runtime/vm/jit/guard-type-profile.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/type-specialization.h"
 #include "hphp/runtime/vm/jit/vasm.h"
@@ -38,17 +39,21 @@ namespace HPHP { namespace jit { namespace irlower {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-inline Vout& vmain(IRLS& env) { assert(env.vmain); return *env.vmain; }
-inline Vout& vcold(IRLS& env) { assert(env.vcold); return *env.vcold; }
+inline Vout& vmain(IRLS& env) { assertx(env.vmain); return *env.vmain; }
+inline Vout& vcold(IRLS& env) { assertx(env.vcold); return *env.vcold; }
 
 inline Vlabel label(IRLS& env, Block* b) { return env.labels[b]; }
 
+inline Vloc tmpLoc(IRLS& env, const SSATmp* tmp) {
+  return env.locs[tmp];
+}
+
 inline Vloc srcLoc(IRLS& env, const IRInstruction* inst, unsigned i) {
-  return env.locs[inst->src(i)];
+  return tmpLoc(env, inst->src(i));
 }
 
 inline Vloc dstLoc(IRLS& env, const IRInstruction* inst, unsigned i) {
-  return env.locs[inst->dst(i)];
+  return tmpLoc(env, inst->dst(i));
 }
 
 inline ArgGroup argGroup(IRLS& env, const IRInstruction* inst) {
@@ -64,41 +69,35 @@ inline CallDest callDest(Vreg reg0, Vreg reg1) {
 }
 
 inline CallDest callDest(IRLS& env, const IRInstruction* inst) {
-  if (!inst->numDsts()) return kVoidDest;
+  if (inst->numDsts() == 0) return kVoidDest;
+  assertx(inst->numDsts() == 1);
 
   auto const loc = dstLoc(env, inst, 0);
-  if (loc.numAllocated() == 0) return kVoidDest;
-  assertx(loc.numAllocated() == 1);
+  assertx(loc.numAllocated() == 1 ||
+          (inst->dst()->isA(TLvalToGen) && loc.numAllocated() == 2));
 
-  return {
-    inst->dst(0)->isA(TBool) ? DestType::Byte : DestType::SSA,
-    loc.reg(0)
-  };
+  auto const dst = inst->dst();
+  auto const kind = dst->isA(TBool) ? DestType::Byte :
+                    dst->isA(TDbl) ? DestType::Dbl :
+                    DestType::SSA;
+
+  return { kind, dst->type(), loc.reg(0), loc.reg(1) };
 }
 
 inline CallDest callDestTV(IRLS& env, const IRInstruction* inst) {
-  if (!inst->numDsts()) return kVoidDest;
+  assertx(inst->numDsts() == 1);
 
   auto const loc = dstLoc(env, inst, 0);
-  if (loc.numAllocated() == 0) return kVoidDest;
+  assertx(loc.numAllocated() == 1 || loc.numAllocated() == 2);
 
   if (loc.isFullSIMD()) {
     assertx(loc.numAllocated() == 1);
-    return { DestType::SIMD, loc.reg(0) };
+    return { DestType::SIMD, TGen, loc.reg(0) };
   }
-  if (loc.numAllocated() == 2) {
-    return { DestType::TV, loc.reg(0), loc.reg(1) };
-  }
-  assertx(loc.numAllocated() == 1);
 
-  // Sometimes we statically know the type and only need the value.
-  return { DestType::TV, loc.reg(0), InvalidReg };
-}
-
-inline CallDest callDestDbl(IRLS& env, const IRInstruction* inst) {
-  if (!inst->numDsts()) return kVoidDest;
-  auto const loc = dstLoc(env, inst, 0);
-  return { DestType::Dbl, loc.reg(0) };
+  // loc.reg(1) may be InvalidReg, if the type is statically known. This is
+  // expected and handled by users of CallDest.
+  return { DestType::TV, TGen, loc.reg(0), loc.reg(1) };
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -132,8 +131,8 @@ inline Vreg materialize(Vout&, Vreg data) { return data; }
  *
  * Assumes that the DataType corresponding to `dataSrc' already matches `type'.
  */
-template<class Loc, class JmpFn>
-void emitSpecializedTypeTest(Vout& v, IRLS& env, Type type, Loc dataSrc,
+template <class Loc, class JmpFn>
+void emitSpecializedTypeTest(Vout& v, IRLS& /*env*/, Type type, Loc dataSrc,
                              Vreg sf, JmpFn doJcc) {
   if (type < TRes) {
     // No cls field in Resource.
@@ -180,49 +179,56 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
   // negativeCheckType() to indicate whether it is precise or not.
   always_assert(!type.hasConstVal());
   always_assert_flog(
-    !type.subtypeOfAny(TCls, TCountedStr, TPersistentArrLike),
+    !type.subtypeOfAny(TCountedStr, TPersistentArrLike),
     "Unsupported type in emitTypeTest(): {}", type
   );
 
   // Nothing to check.
   if (type == TGen) return;
 
+  // Profile the type being guarded. We skip TUncounted here because that's
+  // handled in emitIsTVTypeRefCounted, which has a number of other callers.
+  if (RuntimeOption::EvalJitProfileGuardTypes && type != TUncounted) {
+    emitProfileGuardType(v, type);
+  }
+
   auto const cc = [&] {
-
-    auto const mask_cmp = [&] (int mask, int bits, ConditionCode cc) {
-      auto const masked = emitMaskTVType(v, mask, typeSrc);
-      emitCmpTVType(v, sf, bits, masked);
-      return cc;
-    };
-
     auto const cmp = [&] (DataType kind, ConditionCode cc) {
       emitCmpTVType(v, sf, kind, typeSrc);
       return cc;
     };
 
-    auto const test = [&] (int bits, ConditionCode cc) {
-      emitTestTVType(v, sf, bits, typeSrc);
-      return cc;
+    auto const persistent_type = [&](DataType dt) {
+      auto const masked = emitMaskTVType(v, ~kRefCountedBit, typeSrc);
+      emitCmpTVType(v, sf, dt, masked);
+      return CC_E;
     };
 
     if (type <= TPersistentStr) return cmp(KindOfPersistentString, CC_E);
-    if (type <= TStr)           return test(KindOfStringBit, CC_NZ);
-    if (type <= TArr)           return test(KindOfArrayBit, CC_NZ);
-    if (type <= TVec)           return mask_cmp(kDataTypeEquivalentMask,
-                                                KindOfHackArrayVecType,
-                                                CC_E);
-    if (type <= TDict)          return mask_cmp(kDataTypeEquivalentMask,
-                                                KindOfHackArrayDictType,
-                                                CC_E);
-    if (type <= TKeyset)        return mask_cmp(kDataTypeEquivalentMask,
-                                                KindOfHackArrayKeysetType,
-                                                CC_E);
-    if (type <= TArrLike)       return test(KindOfArrayLikeMask, CC_NZ);
+    if (type <= TStr)           return cmp(KindOfPersistentString, CC_AE);
+    if (type <= TArr)           return cmp(KindOfArray, CC_LE);
+    if (type <= TShape)         return persistent_type(KindOfPersistentShape);
+    if (type <= TVec)           return persistent_type(KindOfPersistentVec);
+    if (type <= TDict)          return persistent_type(KindOfPersistentDict);
+    if (type <= TKeyset)        return persistent_type(KindOfPersistentKeyset);
+    if (type <= TArrLike)       return cmp(KindOfVec, CC_LE);
 
     // These are intentionally == and not <=.
-    if (type == TNull)          return cmp(KindOfNull, CC_LE);
-    if (type == TUncountedInit) return test(KindOfUncountedInitBit, CC_NZ);
-    if (type == TUncounted)     return cmp(KindOfRefCountThreshold, CC_LE);
+    if (type == TNull)          return cmp(KindOfNull, CC_BE);
+    if (type == TUncountedInit) {
+      auto const rtype = emitGetTVType(v, typeSrc);
+      auto const sf2 = v.makeReg();
+      emitTestTVType(v, sf2, kRefCountedBit, rtype);
+      doJcc(CC_Z, sf2);
+
+      static_assert(KindOfUninit == static_cast<DataType>(0),
+                    "KindOfUninit == 0 in codegen");
+      v << testb{rtype, rtype, sf};
+      return CC_NZ;
+    }
+    if (type == TUncounted) {
+      return ccNegate(emitIsTVTypeRefCounted(v, sf, typeSrc));
+    }
     if (type == TCell)          return cmp(KindOfRef, CC_NE);
 
     always_assert(type.isKnownDataType());

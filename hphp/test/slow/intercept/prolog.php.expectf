@@ -1,0 +1,70 @@
+intercept1 DONE
+array(3) {
+  [0]=>
+  array(7) {
+    ["file"]=>
+    string(%d) "%s/intercept/prolog.php"
+    ["line"]=>
+    int(5)
+    ["function"]=>
+    string(10) "intercept2"
+    ["class"]=>
+    string(3) "Cls"
+    ["object"]=>
+    object(Cls)#1 (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    array(5) {
+      [0]=>
+      string(9) "Cls::func"
+      [1]=>
+      object(Cls)#1 (0) {
+      }
+      [2]=>
+      array(0) {
+      }
+      [3]=>
+      NULL
+      [4]=>
+      bool(true)
+    }
+  }
+  [1]=>
+  array(7) {
+    ["file"]=>
+    string(%d) "%s/intercept/prolog.php"
+    ["line"]=>
+    int(20)
+    ["function"]=>
+    string(4) "func"
+    ["class"]=>
+    string(3) "Cls"
+    ["object"]=>
+    object(Cls)#1 (0) {
+    }
+    ["type"]=>
+    string(2) "->"
+    ["args"]=>
+    array(0) {
+    }
+  }
+  [2]=>
+  array(4) {
+    ["file"]=>
+    string(%d) "%s/intercept/prolog.php"
+    ["line"]=>
+    int(28)
+    ["function"]=>
+    string(4) "test"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      string(10) "intercept2"
+    }
+  }
+}
+intercept2 DONE
+Caught exception: intercept3
+intercept3 DONE

@@ -75,24 +75,7 @@ struct Option {
    */
   static bool CachePHPFile;
 
-  /**
-   * Legal root directory expressions in an include expression. For example,
-   *
-   *   include_once $PHP_ROOT . '/lib.php';
-   *
-   * Here, "$PHP_ROOT" is a legal include root. Stores what it resolves to.
-   *
-   *   Option::IncludeRoots["$PHP_ROOT"] = "";
-   *   Option::IncludeRoots["$LIB_ROOT"] = "lib";
-   */
-  static std::map<std::string, std::string> IncludeRoots;
-  static std::map<std::string, std::string> AutoloadRoots;
   static std::vector<std::string> IncludeSearchPaths;
-
-  /**
-   * PHP include root expression to use when generating PHP trimmed code.
-   */
-  static std::string DefaultIncludeRoot;
 
   /**
    * PHP functions that can be assumed to always return a certain constant
@@ -100,26 +83,6 @@ struct Option {
    */
   static hphp_string_imap<std::string> ConstantFunctions;
 
-  /**
-   * Optimization flags
-   */
-  static bool PreOptimization;
-
-  /*
-   * Flags that only affect HHBBC right now.  See hhbbc/hhbbc.h for
-   * description.
-   */
-  static bool HardConstProp;
-
-  /**
-   * CodeGenerator options for PHP.
-   */
-  static bool GeneratePickledPHP;
-  static bool GenerateInlinedPHP;
-  static bool GenerateTrimmedPHP;
-  static bool ConvertSuperGlobals;    // $GLOBALS['var'] => global $var
-  static std::string ProgramPrologue;
-  static std::string TrimmedPrologue;
   static std::set<std::string> VolatileClasses;
   static std::map<std::string,std::string, stdltistr> AutoloadClassMap;
   static std::map<std::string,std::string, stdltistr> AutoloadFuncMap;
@@ -130,16 +93,11 @@ struct Option {
    * CodeGenerator options for HHBC.
    */
   static bool GenerateTextHHBC;
+  static bool GenerateHhasHHBC;
   static bool GenerateBinaryHHBC;
   static std::string RepoCentralPath;
-  static bool RepoDebugInfo;
 
   static std::vector<std::string> APCProfile;
-
-  /**
-   * Names of hot and cold functions to be marked in sources.
-   */
-  static std::map<std::string, std::string> FunctionSections;
 
   /**
    * A somewhat unique prefix for system identifiers.
@@ -157,12 +115,6 @@ struct Option {
    * Turn it off for cleaner unit tests.
    */
   static bool KeepStatementsWithNoEffect;
-
-  /**
-   * Whether or not name matches AUTOLOAD files. If not, returns empty. If
-   * yes, returns root directory for the file.
-   */
-  static std::string GetAutoloadRoot(const std::string &name);
 
   /**
    * Turning a file name into an identifier. When id is false, preserve
@@ -188,10 +140,8 @@ struct Option {
   /**
    * Output options
    */
-  static bool GenerateDocComments;
   static bool DumpAst;
   static bool WholeProgram;
-  static bool UseHHBBC;  // see hhbbc/README
   static bool RecordErrors;
 
 private:
@@ -201,17 +151,6 @@ private:
                           const std::string& name,
                           std::map<std::string, std::string> &map);
 };
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * Hook called after Option is set up to propagate various options to
- * HHBBC's option structure.
- *
- * This exists this way because we don't want to have libhhbbc depend
- * on all of libhphp_analysis---the dependency goes the other way.
- */
-void initialize_hhbbc_options();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

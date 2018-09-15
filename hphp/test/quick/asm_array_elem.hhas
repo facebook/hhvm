@@ -1,7 +1,7 @@
 
 .main {
   FPushFuncD 0 "main"
-  FCall 0
+  FCall 0 0 1 - "" ""
   PopR
   Int 1
   RetC
@@ -15,8 +15,8 @@
   PopC
 
   FPushFuncD 1 "var_dump"
-  FPassL 0 $foo
-  FCall 1
+  CGetL $foo
+  FCall 1 0 1 - "" ""
   PopR
 
   Int 1

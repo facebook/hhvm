@@ -408,11 +408,11 @@ static void color_line_no(StringBuffer &sb, int line, int lineFocus0,
   }
 }
 
-static void append_line_no(StringBuffer &sb, const char *text,
-                           int &line, const char *color, const char *end,
-                           int lineFocus0, int charFocus0, int lineFocus1,
-                           int charFocus1, const char **palette =
-                           DebuggerClient::DefaultCodeColors) {
+static void
+append_line_no(StringBuffer& sb, const char* text, int& line, const char* color,
+               const char* end, int lineFocus0, int /*charFocus0*/,
+               int lineFocus1, int /*charFocus1*/,
+               const char** palette = DebuggerClient::DefaultCodeColors) {
   TRACE(7, "debugger_base:append_line_no\n");
   const char *colorLineNo = palette[CodeColorLineNo * 2];
   const char *endLineNo = palette[CodeColorLineNo * 2 + 1];

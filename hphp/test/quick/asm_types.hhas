@@ -5,7 +5,7 @@
 .main {
   DefCls 0
   FPushFuncD 0 "test"
-  FCall 0
+  FCall 0 0 1 - "" ""
   PopR
   Int 1
   RetC
@@ -43,64 +43,54 @@
 .function test() {
   FPushFuncD 1 "use_class"
   FPushCtorD 0 "C"
-  FCall 0
+  FCall 0 0 1 - "" ""
   PopR
-  FPassC 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "use_class"
   Null
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "use_int_soft"
   Int 5
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "use_int_soft"
   Array @A_0
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "use_int_soft"
   Null
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "use_int_nullable"
   Int 6
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "use_int_nullable"
   Null
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "use_int"
   Int 5
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "use_mixed"
   Array @A_0
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   FPushFuncD 1 "use_int"
   Array @A_0
-  FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   Null
@@ -108,12 +98,8 @@
 }
 
 .class C {
-  .method [public] 86ctor() {
-    Null
-    RetC
-  }
   .method [public static] <"HH\\int" "HH\\int" hh_type extended_hint> test() {
-    Null
+    Int 42
     RetC
   }
 }

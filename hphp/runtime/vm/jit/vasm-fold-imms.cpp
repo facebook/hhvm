@@ -33,12 +33,12 @@ namespace HPHP { namespace jit {
 namespace x64 {
 struct ImmFolder {
   Vunit& unit;
-  jit::vector<bool> used;
+  jit::vector<uint8_t> uses;
   jit::vector<uint64_t> vals;
   boost::dynamic_bitset<> valid;
 
-  explicit ImmFolder(Vunit& u, jit::vector<bool>&& used_in)
-      : unit(u), used(std::move(used_in)) { }
+  explicit ImmFolder(Vunit& u, jit::vector<uint8_t>&& uses_in)
+      : unit(u), uses(std::move(uses_in)) { }
 
   template <typename T>
   static uint64_t mask(T r) {
@@ -69,50 +69,54 @@ struct ImmFolder {
   }
 
   // helpers
-  bool match_byte(Vreg r, int& val) {
+  bool match_xbyte(Vreg r, int& val) {
     if (!valid.test(r)) return false;
-    auto imm64 = vals[r];
-    if (!deltaFits(imm64, sz::byte)) return false;
-    val = imm64;
+    auto const imm64 = vals[r];
+    val = static_cast<int8_t>(imm64);
     return true;
   }
-  bool match_word(Vreg r, int& val) {
+  bool match_xword(Vreg r, int& val) {
     if (!valid.test(r)) return false;
-    auto imm64 = vals[r];
-    if (!deltaFits(imm64, sz::word)) return false;
-    val = imm64;
+    auto const imm64 = vals[r];
+    val = static_cast<int16_t>(imm64);
     return true;
   }
   bool match_int(Vreg r, int& val) {
     if (!valid.test(r)) return false;
-    auto imm64 = vals[r];
+    auto const imm64 = vals[r];
     if (!deltaFits(imm64, sz::dword)) return false;
     val = imm64;
     return true;
   }
   bool match_uint(Vreg r, int& val) {
     if (!valid.test(r)) return false;
-    auto imm64 = vals[r];
+    auto const imm64 = vals[r];
     if (!magFits(imm64, sz::dword)) return false;
     val = imm64;
     return true;
   }
+  bool match_xint(Vreg r, int& val) {
+    if (!valid.test(r)) return false;
+    val = vals[r];
+    return true;
+  }
   // folders
-  template<class Inst> void fold(Inst&, Vinstr& out) {}
+  template <class Inst>
+  void fold(Inst&, Vinstr& /*out*/) {}
   void fold(addq& in, Vinstr& out) {
     int val;
     if (match_int(in.s0, val)) {
-      if (val == 0 && !used[in.sf]) { // nop sets no flags.
+      if (val == 0 && !uses[in.sf]) { // nop sets no flags.
         out = copy{in.s1, in.d};
-      } else if (val == 1 && !used[in.sf]) { // CF not set by inc.
+      } else if (val == 1 && !uses[in.sf]) { // CF not set by inc.
         out = incq{in.s1, in.d, in.sf};
       } else {
         out = addqi{val, in.s1, in.d, in.sf};
       }
     } else if (match_int(in.s1, val)) {
-      if (val == 0 && !used[in.sf]) { // nop sets no flags.
+      if (val == 0 && !uses[in.sf]) { // nop sets no flags.
         out = copy{in.s0, in.d};
-      } else if (val == 1 && !used[in.sf]) { // CF not set by inc.
+      } else if (val == 1 && !uses[in.sf]) { // CF not set by inc.
         out = incq{in.s0, in.d, in.sf};
       } else {
         out = addqi{val, in.s0, in.d, in.sf};
@@ -127,7 +131,7 @@ struct ImmFolder {
       out = andqi{val, in.s0, in.d, in.sf};
     } else {
       auto rep = [&](Vreg64 s) {
-        if (val == -1 && !used[in.sf]) {
+        if (val == -1 && !uses[in.sf]) {
           out = movzlq{Reg32(s), in.d};
         } else {
           out = andli{val, Reg32(s), Reg32(in.d), in.sf};
@@ -149,15 +153,19 @@ struct ImmFolder {
   }
   void fold(cmpb& in, Vinstr& out) {
     int val;
-    if (match_byte(in.s0, val)) { out = cmpbi{val, in.s1, in.sf}; }
+    if (match_xbyte(in.s0, val)) { out = cmpbi{val, in.s1, in.sf}; }
   }
   void fold(cmpbm& in, Vinstr& out) {
     int val;
-    if (match_byte(in.s0, val)) { out = cmpbim{val, in.s1, in.sf}; }
+    if (match_xbyte(in.s0, val)) { out = cmpbim{val, in.s1, in.sf}; }
+  }
+  void fold(cmpw& in, Vinstr& out) {
+    int val;
+    if (match_xword(in.s0, val)) { out = cmpwi{val, in.s1, in.sf}; }
   }
   void fold(cmpwm& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = cmpwim{val, in.s1, in.sf}; }
+    if (match_xword(in.s0, val)) { out = cmpwim{val, in.s1, in.sf}; }
   }
   void fold(cmpq& in, Vinstr& out) {
     int val;
@@ -165,7 +173,7 @@ struct ImmFolder {
   }
   void fold(cmpl& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = cmpli{val, in.s1, in.sf}; }
+    if (match_xint(in.s0, val)) { out = cmpli{val, in.s1, in.sf}; }
   }
   void fold(cmpqm& in, Vinstr& out) {
     int val;
@@ -173,7 +181,7 @@ struct ImmFolder {
   }
   void fold(cmplm& in, Vinstr& out) {
     int val;
-    if (match_int(in.s0, val)) { out = cmplim{val, in.s1, in.sf}; }
+    if (match_xint(in.s0, val)) { out = cmplim{val, in.s1, in.sf}; }
   }
   void fold(orq& in, Vinstr& out) {
     int val;
@@ -182,35 +190,37 @@ struct ImmFolder {
   }
   void fold(storeb& in, Vinstr& out) {
     foldVptr(in.m);
-    if (out.origin && out.origin->marker().sk().prologue()) return;
+    if (out.origin && out.origin->marker().sk().prologue() && uses[in.s] > 1) {
+      return;
+    }
     int val;
-    if (match_byte(in.s, val)) { out = storebi{val, in.m}; }
+    if (match_xbyte(in.s, val)) { out = storebi{val, in.m}; }
   }
-  void fold(storebi& in, Vinstr& out) { foldVptr(in.m); }
+  void fold(storebi& in, Vinstr& /*out*/) { foldVptr(in.m); }
   void fold(storew& in, Vinstr& out) {
     foldVptr(in.m);
     int val;
-    if (match_word(in.s, val)) { out = storewi{val, in.m}; }
+    if (match_xword(in.s, val)) { out = storewi{val, in.m}; }
   }
-  void fold(storewi& in, Vinstr& out) { foldVptr(in.m); }
+  void fold(storewi& in, Vinstr& /*out*/) { foldVptr(in.m); }
   void fold(storel& in, Vinstr& out) {
     foldVptr(in.m);
     int val;
-    if (match_int(in.s, val)) { out = storeli{val, in.m}; }
+    if (match_xint(in.s, val)) { out = storeli{val, in.m}; }
   }
-  void fold(storeli& in, Vinstr& out) { foldVptr(in.m); }
+  void fold(storeli& in, Vinstr& /*out*/) { foldVptr(in.m); }
   void fold(store& in, Vinstr& out) {
     foldVptr(in.d);
     int val;
     if (match_int(in.s, val)) { out = storeqi{val, in.d}; }
   }
-  void fold(storeqi& in, Vinstr& out) { foldVptr(in.m); }
+  void fold(storeqi& in, Vinstr& /*out*/) { foldVptr(in.m); }
   void fold(subq& in, Vinstr& out) {
     int val;
     if (match_int(in.s0, val)) {
-      if (val == 0 && !used[in.sf]) { // copy sets no flags.
+      if (val == 0 && !uses[in.sf]) { // copy sets no flags.
         out = copy{in.s1, in.d};
-      } else if (val == 1 && !used[in.sf]) { // CF not set by dec.
+      } else if (val == 1 && !uses[in.sf]) { // CF not set by dec.
         out = decq{in.s1, in.d, in.sf};
       } else {
         out = subqi{val, in.s1, in.d, in.sf};
@@ -220,25 +230,25 @@ struct ImmFolder {
     }
   }
   void fold(subqi& in, Vinstr& out) {
-    if (in.s0.l() == 0 && !used[in.sf]) {  // copy sets no flags.
+    if (in.s0.l() == 0 && !uses[in.sf]) {  // copy sets no flags.
       out = copy{in.s1, in.d};
     }
   }
   // xor clears CF, OF.  ZF, SF, PF set accordingly
   void fold(xorb& in, Vinstr& out) {
     int val;
-    if (match_byte(in.s0, val)) {
-      if (val == 0 && !used[in.sf]) { // copy doesn't set any flags.
+    if (match_xbyte(in.s0, val)) {
+      if (val == 0 && !uses[in.sf]) { // copy doesn't set any flags.
         out = copy{in.s1, in.d};
-      } else if (val == -1 && !used[in.sf]) { // not doesn't set any flags.
+      } else if (val == -1 && !uses[in.sf]) { // not doesn't set any flags.
         out = notb{in.s1, in.d};
       } else {
         out = xorbi{val, in.s1, in.d, in.sf};
       }
-    } else if (match_byte(in.s1, val)) {
-      if (val == 0 && !used[in.sf]) { // copy doesn't set any flags.
+    } else if (match_xbyte(in.s1, val)) {
+      if (val == 0 && !uses[in.sf]) { // copy doesn't set any flags.
         out = copy{in.s0, in.d};
-      } else if (val == -1 && !used[in.sf]) { // not doesn't set any flags.
+      } else if (val == -1 && !uses[in.sf]) { // not doesn't set any flags.
         out = notb{in.s0, in.d};
       } else {
         out = xorbi{val, in.s0, in.d, in.sf};
@@ -248,17 +258,17 @@ struct ImmFolder {
   void fold(xorq& in, Vinstr& out) {
     int val;
     if (match_int(in.s0, val)) {
-      if (val == 0 && !used[in.sf]) { // copy doesn't set any flags
+      if (val == 0 && !uses[in.sf]) { // copy doesn't set any flags
         out = copy{in.s1, in.d};
-      } else if (val == -1 && !used[in.sf]) { // not doesn't set any flags
+      } else if (val == -1 && !uses[in.sf]) { // not doesn't set any flags
         out = not{in.s1, in.d};
       } else {
         out = xorqi{val, in.s1, in.d, in.sf};
       }
     } else if (match_int(in.s1, val)) {
-      if (val == 0 && !used[in.sf]) { // copy doesn't set any flags
+      if (val == 0 && !uses[in.sf]) { // copy doesn't set any flags
         out = copy{in.s0, in.d};
-      } else if (val == -1 && !used[in.sf]) { // not doesn't set any flags
+      } else if (val == -1 && !uses[in.sf]) { // not doesn't set any flags
         out = not{in.s0, in.d};
       } else {
         out = xorqi{val, in.s0, in.d, in.sf};
@@ -286,10 +296,13 @@ struct ImmFolder {
   void fold(movtql& in, Vinstr& out) {
     extend_truncate_impl(in, out);
   }
+  void fold(movtqw& in, Vinstr& out) {
+    extend_truncate_impl(in, out);
+  }
   void fold(movtqb& in, Vinstr& out) {
     extend_truncate_impl(in, out);
   }
-  void fold(copy& in, Vinstr& out) {
+  void fold(copy& in, Vinstr& /*out*/) {
     if (in.d.isVirt() && valid.test(in.s)) {
       valid.set(in.d);
       vals[in.d] = vals[in.s];
@@ -313,26 +326,27 @@ struct ImmFolder {
       }
     }
   }
-  void fold(load& in    , Vinstr& out) { foldVptr(in.s); }
-  void fold(loadb& in   , Vinstr& out) { foldVptr(in.s); }
-  void fold(loadw& in   , Vinstr& out) { foldVptr(in.s); }
-  void fold(loadl& in   , Vinstr& out) { foldVptr(in.s); }
-  void fold(loadups& in , Vinstr& out) { foldVptr(in.s); }
-  void fold(loadsd& in  , Vinstr& out) { foldVptr(in.s); }
-  void fold(loadzbl& in , Vinstr& out) { foldVptr(in.s); }
-  void fold(loadzlq& in , Vinstr& out) { foldVptr(in.s); }
-  void fold(loadtqb& in , Vinstr& out) { foldVptr(in.s); }
+  void fold(load& in, Vinstr& /*out*/) { foldVptr(in.s); }
+  void fold(loadb& in, Vinstr& /*out*/) { foldVptr(in.s); }
+  void fold(loadw& in, Vinstr& /*out*/) { foldVptr(in.s); }
+  void fold(loadl& in, Vinstr& /*out*/) { foldVptr(in.s); }
+  void fold(loadups& in, Vinstr& /*out*/) { foldVptr(in.s); }
+  void fold(loadsd& in, Vinstr& /*out*/) { foldVptr(in.s); }
+  void fold(loadzbl& in, Vinstr& /*out*/) { foldVptr(in.s); }
+  void fold(loadzlq& in, Vinstr& /*out*/) { foldVptr(in.s); }
+  void fold(loadtqb& in, Vinstr& /*out*/) { foldVptr(in.s); }
+  void fold(loadtql& in, Vinstr& /*out*/) { foldVptr(in.s); }
 };
 } // namespace x64
 
 namespace arm {
 struct ImmFolder {
-  jit::vector<bool> used;
+  jit::vector<uint8_t> uses;
   jit::vector<uint64_t> vals;
   boost::dynamic_bitset<> valid;
 
-  explicit ImmFolder(Vunit& unit, jit::vector<bool>&& used_in)
-  : used(std::move(used_in)) { }
+  explicit ImmFolder(Vunit& /*unit*/, jit::vector<uint8_t>&& uses_in)
+      : uses(std::move(uses_in)) {}
 
   bool arith_imm(Vreg r, int32_t& out) {
     if (!valid.test(r)) return false;
@@ -341,6 +355,7 @@ struct ImmFolder {
     out = imm64;
     return true;
   }
+
   bool logical_imm(Vreg r, int32_t& out) {
     if (!valid.test(r)) return false;
     auto imm64 = vals[r];
@@ -349,42 +364,105 @@ struct ImmFolder {
     out = imm64;
     return true;
   }
+
+  bool logical_bmsk(Vreg r, uint64_t& out) {
+    if (!valid.test(r)) return false;
+    auto imm64 = vals[r];
+    if (!vixl::Assembler::IsImmLogical(imm64, vixl::kXRegSize)) return false;
+    out = imm64;
+    return true;
+  }
+
   bool zero_imm(Vreg r) {
     if (!valid.test(r)) return false;
     return vals[r] == 0;
   }
 
-  template<typename Inst>
-  void fold(Inst& i, Vinstr& out) {}
-
-  void fold(addq& in, Vinstr& out) {
+  template<typename arithi, typename arith>
+  void fold_arith(arith& in, Vinstr& out) {
     int val;
-    if (arith_imm(in.s0, val)) { out = addqi{val, in.s1, in.d, in.sf}; }
-    else if (arith_imm(in.s1, val)) { out = addqi{val, in.s0, in.d, in.sf}; }
+    if (arith_imm(in.s0, val)) {
+      if (val == 0 && !uses[in.sf]) {
+        out = copy{in.s1,in.d};
+      } else {
+        out = arithi{val, in.s1, in.d, in.sf};
+      }
+    } else if (arith_imm(in.s1, val)) {
+      if (val == 0 && !uses[in.sf]) {
+        out = copy{in.s0, in.d};
+      } else {
+        out = arithi{val, in.s0, in.d, in.sf};
+      }
+    }
   }
-  void fold(andq& in, Vinstr& out) {
+
+  template<typename logicali, typename logical>
+  void fold_logical(logical& in, Vinstr& out) {
     int val;
+    if (logical_imm(in.s0, val)) { out = logicali{val, in.s1, in.d, in.sf}; }
+    else if (logical_imm(in.s1, val)) { out = logicali{val, in.s0, in.d, in.sf}; }
+  }
+
+  template<typename testi, typename test>
+  void fold_test(test& in, Vinstr& out) {
+    int val;
+    if (logical_imm(in.s0, val)) { out = testi{val, in.s1, in.sf}; }
+    else if (logical_imm(in.s1, val)) { out = testi{val, in.s0, in.sf}; }
+  }
+
+  template<typename cmpi, typename cmp>
+  void fold_cmp(cmp& in, Vinstr& out) {
+    int val;
+    if (arith_imm(in.s0, val)) { out = cmpi{val, in.s1, in.sf}; }
+  }
+
+  template <typename Inst>
+  void fold(Inst& /*i*/, Vinstr& /*out*/) {}
+  void fold(addl& in, Vinstr& out) { return fold_arith<addli>(in, out); }
+  void fold(addq& in, Vinstr& out) { return fold_arith<addqi>(in, out); }
+  void fold(andb& in, Vinstr& out) { return fold_logical<andbi>(in, out); }
+  void fold(andl& in, Vinstr& out) { return fold_logical<andli>(in, out); }
+  void fold(orq& in, Vinstr& out) { return fold_logical<orqi>(in, out); }
+
+  void fold(testb& in, Vinstr& out) { return fold_test<testbi>(in, out); }
+  void fold(testw& in, Vinstr& out) { return fold_test<testwi>(in, out); }
+  void fold(testl& in, Vinstr& out) { return fold_test<testli>(in, out); }
+  void fold(testq& in, Vinstr& out) { return fold_test<testqi>(in, out); }
+  void fold(cmpb& in, Vinstr& out) { return fold_cmp<cmpbi>(in, out); }
+  void fold(cmpw& in, Vinstr& out) { return fold_cmp<cmpwi>(in, out); }
+  void fold(cmpl& in, Vinstr& out) { return fold_cmp<cmpli>(in, out); }
+  void fold(cmpq& in, Vinstr& out) { return fold_cmp<cmpqi>(in, out); }
+
+  void fold(andq& in, Vinstr& out) {
+    if (!uses[in.sf] && valid.test(in.s0) && valid.test(in.s1)) {
+      out = ldimmq{vals[in.s0] & vals[in.s1], in.d};
+      return;
+    }
+    int val;
+    uint64_t bm;
     if (logical_imm(in.s0, val)) { out = andqi{val, in.s1, in.d, in.sf}; }
     else if (logical_imm(in.s1, val)) { out = andqi{val, in.s0, in.d, in.sf}; }
+    else if (logical_bmsk(in.s0, bm)) { out = andqi64{bm, in.s1, in.d, in.sf}; }
+    else if (logical_bmsk(in.s1, bm)) { out = andqi64{bm, in.s0, in.d, in.sf}; }
   }
-  void fold(cmpl& in, Vinstr& out) {
-    int val;
-    if (arith_imm(in.s0, val)) { out = cmpli{val, in.s1, in.sf}; }
+
+  void fold(andqi& in, Vinstr& out) {
+    if (uses[in.sf]) return;
+    if (!valid.test(in.s1)) return;
+    out = ldimmq{vals[in.s1] & in.s0.q(), in.d};
   }
-  void fold(cmpq& in, Vinstr& out) {
-    int val;
-    if (arith_imm(in.s0, val)) { out = cmpqi{val, in.s1, in.sf}; }
+
+  void fold(storeb& in, Vinstr& out) {
+    if (zero_imm(in.s)) out = storeb{PhysReg(vixl::wzr), in.m};
   }
-  void fold(orq& in, Vinstr& out) {
-    int val;
-    if (logical_imm(in.s0, val)) { out = orqi{val, in.s1, in.d, in.sf}; }
-    else if (logical_imm(in.s1, val)) { out = orqi{val, in.s0, in.d, in.sf}; }
+  void fold(storebi& in, Vinstr& out) {
+    if (in.s.l() == 0) out = storeb{PhysReg(vixl::wzr), in.m};
   }
-  void fold(store& in, Vinstr& out) {
-    if (zero_imm(in.s)) out = store{PhysReg(vixl::xzr), in.d};
+  void fold(storew& in, Vinstr& out) {
+    if (zero_imm(in.s)) out = storew{PhysReg(vixl::wzr), in.m};
   }
-  void fold(storeqi& in, Vinstr& out) {
-    if (in.s.q() == 0) out = store{PhysReg(vixl::xzr), in.m};
+  void fold(storewi& in, Vinstr& out) {
+    if (in.s.l() == 0) out = storew{PhysReg(vixl::wzr), in.m};
   }
   void fold(storel& in, Vinstr& out) {
     if (zero_imm(in.s)) out = storel{PhysReg(vixl::wzr), in.m};
@@ -392,14 +470,79 @@ struct ImmFolder {
   void fold(storeli& in, Vinstr& out) {
     if (in.s.l() == 0) out = storel{PhysReg(vixl::wzr), in.m};
   }
+  void fold(store& in, Vinstr& out) {
+    if (zero_imm(in.s)) out = store{PhysReg(vixl::xzr), in.d};
+  }
+  void fold(storeqi& in, Vinstr& out) {
+    if (in.s.q() == 0) out = store{PhysReg(vixl::xzr), in.m};
+  }
+  void fold(subl& in, Vinstr& out) {
+    int val;
+    if (arith_imm(in.s0, val)) {
+      if (val == 0 && !uses[in.sf]) {
+        out = copy{in.s1, in.d};
+      } else {
+        out = subli{val, in.s1, in.d, in.sf};
+      }
+    }
+  }
+  void fold(subli& in, Vinstr& out) {
+    if (in.s0.l() == 0 && !uses[in.sf]) {  // copy sets no flags.
+      out = copy{in.s1, in.d};
+    }
+  }
   void fold(subq& in, Vinstr& out) {
     int val;
-    if (arith_imm(in.s0, val)) { out = subqi{val, in.s1, in.d, in.sf}; }
+    if (arith_imm(in.s0, val)) {
+      if (val == 0 && !uses[in.sf]) {
+        out = copy{in.s1, in.d};
+      } else {
+        out = subqi{val, in.s1, in.d, in.sf};
+      }
+    }
+  }
+  void fold(subqi& in, Vinstr& out) {
+    if (in.s0.l() == 0 && !uses[in.sf]) {  // copy sets no flags.
+      out = copy{in.s1, in.d};
+    }
+  }
+  void fold(xorb& in, Vinstr& out) {
+    int val;
+    if (logical_imm(in.s0, val)) {
+      if (val == 0 && !uses[in.sf]) {
+        out = copy{in.s1, in.d};
+      } else {
+        out = xorbi{val, in.s1, in.d, in.sf};
+      }
+    } else if (logical_imm(in.s1, val)) {
+      if (val == 0 && !uses[in.sf]) {
+        out = copy{in.s0, in.d};
+      } else {
+        out = xorbi{val, in.s0, in.d, in.sf};
+      }
+    }
   }
   void fold(xorq& in, Vinstr& out) {
     int val;
-    if (logical_imm(in.s0, val)) { out = xorqi{val, in.s1, in.d, in.sf}; }
-    else if (logical_imm(in.s1, val)) { out = xorqi{val, in.s0, in.d, in.sf}; }
+    if (logical_imm(in.s0, val)) {
+      if (val == 0 && !uses[in.sf]) {
+        out = copy{in.s1, in.d};
+      } else {
+        out = xorqi{val, in.s1, in.d, in.sf};
+      }
+    } else if (logical_imm(in.s1, val)) {
+      if (val == 0 && !uses[in.sf]) {
+        out = copy{in.s0, in.d};
+      } else {
+        out = xorqi{val, in.s0, in.d, in.sf};
+      }
+    }
+  }
+  void fold(copy& in, Vinstr& /*out*/) {
+    if (in.d.isVirt() && valid.test(in.s)) {
+      valid.set(in.d);
+      vals[in.d] = vals[in.s];
+    }
   }
 };
 }
@@ -413,18 +556,21 @@ void foldImms(Vunit& unit) {
   // block order doesn't matter, but only visit reachable blocks.
   auto blocks = sortBlocks(unit);
 
-  // Use flag for each registers.  If a SR is used then
+  // Use flag for each registers.  If a SR is uses then
   // certain optimizations will not fire since they do not
   // set the condition codes as the original instruction(s)
   // would.
-  jit::vector<bool> used(unit.next_vr);
+  jit::vector<uint8_t> uses(unit.next_vr);
   for (auto b : blocks) {
     for (auto& inst : unit.blocks[b].code) {
-      visitUses(unit, inst, [&](Vreg r) { used[r] = true; });
+      visitUses(unit, inst, [&](Vreg r) {
+          auto& u = uses[r];
+          if (u != 255) ++u;
+        });
     }
   }
 
-  Folder folder(unit, std::move(used));
+  Folder folder(unit, std::move(uses));
   folder.vals.resize(unit.next_vr);
   folder.valid.resize(unit.next_vr);
   // figure out which Vregs are constants and stash their values.

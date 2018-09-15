@@ -18,7 +18,7 @@ function modify($arr) {
   $arr['a'] += 200;
 }
 
-function rvalue_sort($x) { ksort($x); return $x; }
+function rvalue_sort($x) { ksort(&$x); return $x; }
 
 function ref($a) {
   $b =& $a;

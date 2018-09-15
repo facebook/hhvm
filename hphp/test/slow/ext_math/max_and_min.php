@@ -41,5 +41,9 @@ function multi_arg() {
   min_max_multi(1.0, 1);
 }
 
+
+<<__EntryPoint>>
+function main_max_and_min() {
 single_arg();
 multi_arg();
+}

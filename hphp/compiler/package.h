@@ -46,21 +46,19 @@ struct Package {
 
   void addAllFiles(bool force); // add from Option::PackageDirectories/Files
 
-  void addSourceFile(const char *fileName, bool check = false);
-  void addInputList(const char *listFileName);
-  void addStaticFile(const char *fileName);
+  void addSourceFile(const std::string& fileName, bool check = false);
+  void addInputList(const std::string& listFileName);
+  void addStaticFile(const std::string& fileName);
   void addDirectory(const std::string &path, bool force);
-  void addDirectory(const char *path, bool force);
-  void addStaticDirectory(const std::string path);
-  void addPHPDirectory(const char *path, bool force);
+  void addStaticDirectory(const std::string& path);
+  void addPHPDirectory(const std::string& path, bool force);
 
   bool parse(bool check);
-  bool parse(const char *fileName);
-  bool parseImpl(const char *fileName);
+  bool parseImpl(const std::string* fileName);
 
   AnalysisResultPtr getAnalysisResult() { return m_ar;}
   void resetAr() { m_ar.reset(); }
-  int getFileCount() const { return m_files.size();}
+  int getFileCount() const { return m_filesToParse.size();}
   int getLineCount() const { return m_lineCount;}
   int getCharCount() const { return m_charCount;}
 
@@ -72,7 +70,7 @@ struct Package {
 private:
   std::string m_root;
   std::set<std::string> m_filesToParse;
-  StringBag m_files;
+
   void *m_dispatcher;
 
   Mutex m_mutex;
@@ -81,7 +79,7 @@ private:
   int m_charCount;
 
   std::shared_ptr<FileCache> m_fileCache;
-  std::set<std::string> m_directories;
+  std::map<std::string,bool> m_directories;
   std::set<std::string> m_staticDirectories;
   std::set<std::string> m_extraStaticFiles;
   std::map<std::string,std::string> m_discoveredStaticFiles;

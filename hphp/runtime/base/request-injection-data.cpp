@@ -25,12 +25,14 @@
 
 #include <boost/filesystem.hpp>
 #include <folly/Optional.h>
+#include <folly/Random.h>
 #include <folly/portability/SysTime.h>
 
 #include "hphp/util/logger.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/rds-header.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/thread-info.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/vm/debugger-hook.h"
@@ -509,6 +511,15 @@ void RequestInjectionData::threadInit() {
       std::to_string(RuntimeOption::BrotliCompressionLgWindowSize).c_str(),
       &m_brotliLgWindowSize);
 
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
+                   "zstd.compression", &m_zstdEnabled);
+  IniSetting::Bind(
+      IniSetting::CORE,
+      IniSetting::PHP_INI_ALL,
+      "zstd.compression_level",
+      std::to_string(RuntimeOption::ZstdCompressionLevel).c_str(),
+      &m_zstdLevel);
+
   // Assertions
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_ALL,
     "zend.assertions", "1",
@@ -554,6 +565,10 @@ void RequestInjectionData::onSessionInit() {
   if (open_basedir_val) {
     setAllowedDirectories(*open_basedir_val);
   }
+  m_logFunctionCalls = RuntimeOption::EvalFunctionCallSampleRate > 0 &&
+    folly::Random::rand32(
+      RuntimeOption::EvalFunctionCallSampleRate
+    ) == 0;
   reset();
 }
 
@@ -621,12 +636,16 @@ void RequestInjectionData::resetCPUTimer(int seconds /* = 0 */) {
 
 void RequestInjectionData::reset() {
   m_sflagsAndStkPtr->fetch_and(kSurpriseFlagStackMask);
+  m_hostOutOfMemory.store(false, std::memory_order_relaxed);
+  m_OOMAbort = false;
   m_coverage = RuntimeOption::RecordCodeCoverage;
+  m_jittingDisabled = false;
   m_debuggerAttached = false;
   m_debuggerIntr = false;
   m_debuggerStepIn = false;
   m_debuggerStepOut = StepOutState::None;
   m_debuggerNext = false;
+  m_suppressHackArrayCompatNotices = false;
   m_breakPointFilter.clear();
   m_flowFilter.clear();
   m_lineBreakPointFilter.clear();
@@ -648,12 +667,12 @@ void RequestInjectionData::updateJit() {
 }
 
 void RequestInjectionData::clearFlag(SurpriseFlag flag) {
-  assert(flag >= 1ull << 48);
+  assertx(flag >= 1ull << 48);
   m_sflagsAndStkPtr->fetch_and(~flag);
 }
 
 void RequestInjectionData::setFlag(SurpriseFlag flag) {
-  assert(flag >= 1ull << 48);
+  assertx(flag >= 1ull << 48);
   m_sflagsAndStkPtr->fetch_or(flag);
 }
 
@@ -669,7 +688,7 @@ void RequestInjectionData::setMemoryLimit(folly::StringPiece limit) {
       newInt = std::numeric_limits<int64_t>::max();
     }
   }
-  MM().setMemoryLimit(newInt);
+  tl_heap->setMemoryLimit(newInt);
   m_maxMemoryNumeric = newInt;
 }
 

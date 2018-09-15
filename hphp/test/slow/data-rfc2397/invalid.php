@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_invalid() {
 $streams = array(
   "data://invalid,data",
   "data://invalid-data",
@@ -11,4 +14,5 @@ $streams = array(
 
 foreach ($streams as $stream) {
   var_dump(file_get_contents($stream));
+}
 }

@@ -47,6 +47,10 @@ struct APCString {
     return MakeSharedString(APCKind::SerializedDict, str);
   }
 
+  static APCHandle::Pair MakeSerializedShape(StringData* str) {
+    return MakeSharedString(APCKind::SerializedShape, str);
+  }
+
   static APCHandle::Pair MakeSerializedKeyset(StringData* str) {
     return MakeSharedString(APCKind::SerializedKeyset, str);
   }
@@ -56,16 +60,18 @@ struct APCString {
   }
 
   static void Delete(APCString* s) {
+    auto const allocSize = sizeof(APCString) + s->m_str.m_len + 1;
     s->~APCString();
-    std::free(s);
+    uncounted_sized_free(s, allocSize);
   }
 
   static APCString* fromHandle(APCHandle* handle) {
-    assert(handle->checkInvariants());
-    assert(handle->kind() == APCKind::SharedString ||
+    assertx(handle->checkInvariants());
+    assertx(handle->kind() == APCKind::SharedString ||
            handle->kind() == APCKind::SerializedArray ||
            handle->kind() == APCKind::SerializedVec ||
            handle->kind() == APCKind::SerializedDict ||
+           handle->kind() == APCKind::SerializedShape ||
            handle->kind() == APCKind::SerializedKeyset ||
            handle->kind() == APCKind::SerializedObject);
     static_assert(
@@ -76,11 +82,12 @@ struct APCString {
   }
 
   static const APCString* fromHandle(const APCHandle* handle) {
-    assert(handle->checkInvariants());
-    assert(handle->kind() == APCKind::SharedString ||
+    assertx(handle->checkInvariants());
+    assertx(handle->kind() == APCKind::SharedString ||
            handle->kind() == APCKind::SerializedArray ||
            handle->kind() == APCKind::SerializedVec ||
            handle->kind() == APCKind::SerializedDict ||
+           handle->kind() == APCKind::SerializedShape ||
            handle->kind() == APCKind::SerializedKeyset ||
            handle->kind() == APCKind::SerializedObject);
     static_assert(

@@ -3,23 +3,23 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
  *
  */
 
 interface IParent {
   const FOO = 'bar';
 
-  public abstract function whatevs();
+  public function whatevs();
 }
 
-abstract class Parent implements IParent {
+abstract class ParentClass implements IParent {
   protected function bar() {}
 }
 
-abstract class Kid extends Parent {
+abstract class Kid extends ParentClass {
 }
 
 class Grandkid extends Kid {

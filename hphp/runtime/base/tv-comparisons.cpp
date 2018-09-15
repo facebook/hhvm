@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/set-array.h"
@@ -58,13 +57,24 @@ typename Op::RetType cellRelOp(Op op, Cell cell, bool val) {
   } else if (UNLIKELY(isKeysetType(cell.m_type))) {
     return op.keysetVsNonKeyset();
   } else {
+    if (UNLIKELY(op.noticeOnArrNonArr() && isArrayType(cell.m_type))) {
+      raiseHackArrCompatArrMixedCmp();
+    }
     return op(cellToBool(cell), val);
   }
 }
 
+template<class Op, typename Num>
+auto strRelOp(Op op, Cell cell, Num val, const StringData* str) {
+  auto const num = stringToNumeric(str);
+  return num.m_type == KindOfInt64 ? op(num.m_data.num, val) :
+         num.m_type == KindOfDouble ? op(num.m_data.dbl, val) :
+         op(0, val);
+}
+
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell cell, int64_t val) {
-  assert(cellIsPlausible(cell));
+  assertx(cellIsPlausible(cell));
 
   switch (cell.m_type) {
     case KindOfUninit:
@@ -81,12 +91,8 @@ typename Op::RetType cellRelOp(Op op, Cell cell, int64_t val) {
       return op(cell.m_data.dbl, val);
 
     case KindOfPersistentString:
-    case KindOfString: {
-      auto const num = stringToNumeric(cell.m_data.pstr);
-      return num.m_type == KindOfInt64  ? op(num.m_data.num, val) :
-             num.m_type == KindOfDouble ? op(num.m_data.dbl, val) :
-             op(0, val);
-    }
+    case KindOfString:
+      return strRelOp(op, cell, val, cell.m_data.pstr);
 
     case KindOfPersistentVec:
     case KindOfVec:
@@ -100,8 +106,18 @@ typename Op::RetType cellRelOp(Op op, Cell cell, int64_t val) {
     case KindOfKeyset:
       return op.keysetVsNonKeyset();
 
+    case KindOfPersistentShape:
+    case KindOfShape:
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        return op.dictVsNonDict();
+      }
+      // fallthrough
+
     case KindOfPersistentArray:
     case KindOfArray:
+      if (UNLIKELY(op.noticeOnArrNonArr())) {
+        raiseHackArrCompatArrMixedCmp();
+      }
       return op(true, false);
 
     case KindOfObject:
@@ -112,8 +128,13 @@ typename Op::RetType cellRelOp(Op op, Cell cell, int64_t val) {
     case KindOfResource:
       return op(cell.m_data.pres->data()->o_toInt64(), val);
 
-    case KindOfRef:
+    case KindOfFunc:
+      return strRelOp(op, cell, val, funcToStringHelper(cell.m_data.pfunc));
+
     case KindOfClass:
+      return strRelOp(op, cell, val, classToStringHelper(cell.m_data.pclass));
+
+    case KindOfRef:
       break;
   }
   not_reached();
@@ -121,7 +142,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, int64_t val) {
 
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell cell, double val) {
-  assert(cellIsPlausible(cell));
+  assertx(cellIsPlausible(cell));
 
   switch (cell.m_type) {
     case KindOfUninit:
@@ -138,12 +159,8 @@ typename Op::RetType cellRelOp(Op op, Cell cell, double val) {
       return op(cell.m_data.dbl, val);
 
     case KindOfPersistentString:
-    case KindOfString: {
-      auto const num = stringToNumeric(cell.m_data.pstr);
-      return num.m_type == KindOfInt64  ? op(num.m_data.num, val) :
-             num.m_type == KindOfDouble ? op(num.m_data.dbl, val) :
-             op(0, val);
-    }
+    case KindOfString:
+      return strRelOp(op, cell, val, cell.m_data.pstr);
 
     case KindOfPersistentVec:
     case KindOfVec:
@@ -157,8 +174,18 @@ typename Op::RetType cellRelOp(Op op, Cell cell, double val) {
     case KindOfKeyset:
       return op.keysetVsNonKeyset();
 
+    case KindOfPersistentShape:
+    case KindOfShape:
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        return op.dictVsNonDict();
+      }
+      // Fallthrough
+
     case KindOfPersistentArray:
     case KindOfArray:
+      if (UNLIKELY(op.noticeOnArrNonArr())) {
+        raiseHackArrCompatArrMixedCmp();
+      }
       return op(true, false);
 
     case KindOfObject:
@@ -169,8 +196,13 @@ typename Op::RetType cellRelOp(Op op, Cell cell, double val) {
     case KindOfResource:
       return op(cell.m_data.pres->data()->o_toDouble(), val);
 
-    case KindOfRef:
+    case KindOfFunc:
+      return strRelOp(op, cell, val, funcToStringHelper(cell.m_data.pfunc));
+
     case KindOfClass:
+      return strRelOp(op, cell, val, classToStringHelper(cell.m_data.pclass));
+
+    case KindOfRef:
       break;
   }
   not_reached();
@@ -178,7 +210,8 @@ typename Op::RetType cellRelOp(Op op, Cell cell, double val) {
 
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell cell, const StringData* val) {
-  assert(cellIsPlausible(cell));
+  assertx(cellIsPlausible(cell));
+  assertx(val != nullptr);
 
   switch (cell.m_type) {
     case KindOfUninit:
@@ -192,7 +225,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const StringData* val) {
              op(cell.m_data.num, 0);
     }
     case KindOfBoolean:
-      return op(!!cell.m_data.num, toBoolean(val));
+      return op(!!cell.m_data.num, val->toBoolean());
 
     case KindOfDouble: {
       auto const num = stringToNumeric(val);
@@ -217,8 +250,18 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const StringData* val) {
     case KindOfKeyset:
       return op.keysetVsNonKeyset();
 
+    case KindOfPersistentShape:
+    case KindOfShape:
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        return op.dictVsNonDict();
+      }
+      // Fallthrough
+
     case KindOfPersistentArray:
     case KindOfArray:
+      if (UNLIKELY(op.noticeOnArrNonArr())) {
+        raiseHackArrCompatArrMixedCmp();
+      }
       return op(true, false);
 
     case KindOfObject: {
@@ -236,8 +279,13 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const StringData* val) {
       return op(rd->data()->o_toDouble(), val->toDouble());
     }
 
-    case KindOfRef:
+    case KindOfFunc:
+      return op(funcToStringHelper(cell.m_data.pfunc), val);
+
     case KindOfClass:
+      return op(classToStringHelper(cell.m_data.pclass), val);
+
+    case KindOfRef:
       break;
   }
   not_reached();
@@ -245,45 +293,73 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const StringData* val) {
 
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell cell, const ArrayData* ad) {
-  assert(cellIsPlausible(cell));
+  assertx(cellIsPlausible(cell));
 
-  assert(ad->isPHPArray());
+  assertx(ad->isPHPArray());
+
+  auto const nonArr = [&]{
+    if (UNLIKELY(op.noticeOnArrNonArr())) {
+      raiseHackArrCompatArrMixedCmp();
+    }
+  };
+  auto const hackArr = [&]{
+    if (UNLIKELY(op.noticeOnArrHackArr())) {
+      raiseHackArrCompatArrMixedCmp();
+    }
+  };
 
   switch (cell.m_type) {
     case KindOfUninit:
     case KindOfNull:
+      nonArr();
       return op(false, !ad->empty());
 
     case KindOfBoolean:
+      nonArr();
       return op(cell.m_data.num, !ad->empty());
 
     case KindOfInt64:
+      nonArr();
       return op(false, true);
 
     case KindOfDouble:
+      nonArr();
       return op(false, true);
 
     case KindOfPersistentString:
     case KindOfString:
+      nonArr();
       return op(false, true);
 
     case KindOfPersistentVec:
     case KindOfVec:
+      hackArr();
       return op.vecVsNonVec();
 
     case KindOfPersistentDict:
     case KindOfDict:
+      hackArr();
       return op.dictVsNonDict();
 
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+      hackArr();
       return op.keysetVsNonKeyset();
+
+    case KindOfPersistentShape:
+    case KindOfShape:
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        hackArr();
+        return op.dictVsNonDict();
+      }
+      // Fallthrough
 
     case KindOfPersistentArray:
     case KindOfArray:
       return op(cell.m_data.parr, ad);
 
     case KindOfObject: {
+      nonArr();
       auto const od = cell.m_data.pobj;
       return od->isCollection()
         ? op.collectionVsNonObj()
@@ -291,10 +367,12 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ArrayData* ad) {
     }
 
     case KindOfResource:
+    case KindOfFunc:
+    case KindOfClass:
+      nonArr();
       return op(false, true);
 
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -302,7 +380,17 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ArrayData* ad) {
 
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell cell, const ObjectData* od) {
-  assert(cellIsPlausible(cell));
+  assertx(cellIsPlausible(cell));
+
+  auto strRelOp = [&] (const StringData* sd) {
+    auto obj = const_cast<ObjectData*>(od);
+    if (obj->isCollection()) return op.collectionVsNonObj();
+    if (obj->hasToString()) {
+      String str(obj->invokeToString());
+      return op(sd, str.get());
+    }
+    return op(false, true);
+  };
 
   switch (cell.m_type) {
     case KindOfUninit:
@@ -321,15 +409,8 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ObjectData* od) {
                                 : op(cell.m_data.dbl, od->toDouble());
 
     case KindOfPersistentString:
-    case KindOfString: {
-      auto obj = const_cast<ObjectData*>(od);
-      if (obj->isCollection()) return op.collectionVsNonObj();
-      if (obj->hasToString()) {
-        String str(obj->invokeToString());
-        return op(cell.m_data.pstr, str.get());
-      }
-      return op(false, true);
-    }
+    case KindOfString:
+      return strRelOp(cell.m_data.pstr);
 
     case KindOfPersistentVec:
     case KindOfVec:
@@ -343,9 +424,19 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ObjectData* od) {
     case KindOfKeyset:
       return op.keysetVsNonKeyset();
 
+    case KindOfPersistentShape:
+    case KindOfShape:
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        return op.dictVsNonDict();
+      }
+      // Fallthrough
+
     case KindOfPersistentArray:
     case KindOfArray:
-        return od->isCollection() ? op.collectionVsNonObj() : op(false, true);
+      if (UNLIKELY(op.noticeOnArrNonArr())) {
+        raiseHackArrCompatArrMixedCmp();
+      }
+      return od->isCollection() ? op.collectionVsNonObj() : op(false, true);
 
     case KindOfObject:
       return op(cell.m_data.pobj, od);
@@ -353,8 +444,13 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ObjectData* od) {
     case KindOfResource:
       return op(false, true);
 
-    case KindOfRef:
+    case KindOfFunc:
+      return strRelOp(funcToStringHelper(cell.m_data.pfunc));
+
     case KindOfClass:
+      return strRelOp(classToStringHelper(cell.m_data.pclass));
+
+    case KindOfRef:
       break;
   }
   not_reached();
@@ -362,7 +458,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ObjectData* od) {
 
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell cell, const ResourceData* rd) {
-  assert(cellIsPlausible(cell));
+  assertx(cellIsPlausible(cell));
 
   switch (cell.m_type) {
     case KindOfUninit:
@@ -396,8 +492,18 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ResourceData* rd) {
     case KindOfKeyset:
       return op.keysetVsNonKeyset();
 
+    case KindOfPersistentShape:
+    case KindOfShape:
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        return op.dictVsNonDict();
+      }
+      // Fallthrough
+
     case KindOfPersistentArray:
     case KindOfArray:
+      if (UNLIKELY(op.noticeOnArrNonArr())) {
+        raiseHackArrCompatArrMixedCmp();
+      }
       return op(true, false);
 
     case KindOfObject:
@@ -406,8 +512,17 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ResourceData* rd) {
     case KindOfResource:
       return op(cell.m_data.pres->data(), rd);
 
+    case KindOfFunc: {
+      auto const str = funcToStringHelper(cell.m_data.pfunc);
+      return op(str->toDouble(), rd->o_toDouble());
+    }
+
+    case KindOfClass: {
+      auto const str = classToStringHelper(cell.m_data.pclass);
+      return op(str->toDouble(), rd->o_toDouble());
+    }
+
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
@@ -419,25 +534,37 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ResourceHdr* r) {
 
 template<class Op>
 typename Op::RetType cellRelOpVec(Op op, Cell cell, const ArrayData* a) {
-  assert(cellIsPlausible(cell));
-  assert(a->isVecArray());
+  assertx(cellIsPlausible(cell));
+  assertx(a->isVecArray());
 
   if (UNLIKELY(!isVecType(cell.m_type))) {
     if (isDictType(cell.m_type)) return op.dictVsNonDict();
     if (isKeysetType(cell.m_type)) return op.keysetVsNonKeyset();
+    if (UNLIKELY(op.noticeOnArrHackArr() && isArrayType(cell.m_type))) {
+      raiseHackArrCompatArrMixedCmp();
+    }
     return op.vecVsNonVec();
   }
   return op.vec(cell.m_data.parr, a);
 }
 
 template<class Op>
-typename Op::RetType cellRelOpDict(Op op, Cell cell, const ArrayData* a) {
-  assert(cellIsPlausible(cell));
-  assert(a->isDict());
+typename Op::RetType cellRelOpShape(Op op, Cell cell, const ArrayData* a) {
+  return RuntimeOption::EvalHackArrDVArrs ?
+    cellRelOpDict(op, cell, a) : cellRelOp(op, cell, a);
+}
 
-  if (UNLIKELY(!isDictType(cell.m_type))) {
+template<class Op>
+typename Op::RetType cellRelOpDict(Op op, Cell cell, const ArrayData* a) {
+  assertx(cellIsPlausible(cell));
+  assertx(a->isDictOrShape());
+
+  if (UNLIKELY(!isDictOrShapeType(cell.m_type))) {
     if (isVecType(cell.m_type)) return op.vecVsNonVec();
     if (isKeysetType(cell.m_type)) return op.keysetVsNonKeyset();
+    if (UNLIKELY(op.noticeOnArrHackArr() && isArrayType(cell.m_type))) {
+      raiseHackArrCompatArrMixedCmp();
+    }
     return op.dictVsNonDict();
   }
 
@@ -446,12 +573,15 @@ typename Op::RetType cellRelOpDict(Op op, Cell cell, const ArrayData* a) {
 
 template<class Op>
 typename Op::RetType cellRelOpKeyset(Op op, Cell cell, const ArrayData* a) {
-  assert(cellIsPlausible(cell));
-  assert(a->isKeyset());
+  assertx(cellIsPlausible(cell));
+  assertx(a->isKeyset());
 
   if (UNLIKELY(!isKeysetType(cell.m_type))) {
     if (isVecType(cell.m_type)) return op.vecVsNonVec();
     if (isDictType(cell.m_type)) return op.dictVsNonDict();
+    if (UNLIKELY(op.noticeOnArrHackArr() && isArrayType(cell.m_type))) {
+      raiseHackArrCompatArrMixedCmp();
+    }
     return op.keysetVsNonKeyset();
   }
 
@@ -460,8 +590,8 @@ typename Op::RetType cellRelOpKeyset(Op op, Cell cell, const ArrayData* a) {
 
 template<class Op>
 typename Op::RetType cellRelOp(Op op, Cell c1, Cell c2) {
-  assert(cellIsPlausible(c1));
-  assert(cellIsPlausible(c2));
+  assertx(cellIsPlausible(c1));
+  assertx(cellIsPlausible(c2));
 
   switch (c2.m_type) {
   case KindOfUninit:
@@ -481,13 +611,17 @@ typename Op::RetType cellRelOp(Op op, Cell c1, Cell c2) {
   case KindOfDict:         return cellRelOpDict(op, c1, c2.m_data.parr);
   case KindOfPersistentKeyset:
   case KindOfKeyset:       return cellRelOpKeyset(op, c1, c2.m_data.parr);
+  case KindOfPersistentShape:
+  case KindOfShape:        return cellRelOpShape(op, c1, c2.m_data.parr);
   case KindOfPersistentArray:
   case KindOfArray:        return cellRelOp(op, c1, c2.m_data.parr);
   case KindOfObject:       return cellRelOp(op, c1, c2.m_data.pobj);
   case KindOfResource:     return cellRelOp(op, c1, c2.m_data.pres);
-
-  case KindOfRef:
+  case KindOfFunc:
+    return cellRelOp(op, c1, funcToStringHelper(c2.m_data.pfunc));
   case KindOfClass:
+    return cellRelOp(op, c1, classToStringHelper(c2.m_data.pclass));
+  case KindOfRef:
     break;
   }
   not_reached();
@@ -495,8 +629,8 @@ typename Op::RetType cellRelOp(Op op, Cell c1, Cell c2) {
 
 template<class Op>
 typename Op::RetType tvRelOp(Op op, TypedValue tv1, TypedValue tv2) {
-  assert(tvIsPlausible(tv1));
-  assert(tvIsPlausible(tv2));
+  assertx(tvIsPlausible(tv1));
+  assertx(tvIsPlausible(tv2));
   return cellRelOp(op, *tvToCell(&tv1), *tvToCell(&tv2));
 }
 
@@ -529,14 +663,14 @@ struct Eq {
   }
 
   bool operator()(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isPHPArray());
-    assert(ad2->isPHPArray());
+    assertx(ad1->isPHPArray());
+    assertx(ad2->isPHPArray());
     return ArrayData::Equal(ad1, ad2);
   }
 
   bool operator()(const ObjectData* od1, const ObjectData* od2) const {
-    assert(od1);
-    assert(od2);
+    assertx(od1);
+    assertx(od2);
     return od1->equal(*od2);
   }
 
@@ -548,18 +682,18 @@ struct Eq {
   }
 
   bool vec(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isVecArray());
-    assert(ad2->isVecArray());
+    assertx(ad1->isVecArray());
+    assertx(ad2->isVecArray());
     return PackedArray::VecEqual(ad1, ad2);
   }
   bool dict(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isDict());
-    assert(ad2->isDict());
+    assertx(ad1->isDictOrShape());
+    assertx(ad2->isDictOrShape());
     return MixedArray::DictEqual(ad1, ad2);
   }
   bool keyset(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isKeyset());
-    assert(ad2->isKeyset());
+    assertx(ad1->isKeyset());
+    assertx(ad2->isKeyset());
     return SetArray::Equal(ad1, ad2);
   }
 
@@ -567,6 +701,11 @@ struct Eq {
   bool dictVsNonDict() const { return false; }
   bool keysetVsNonKeyset() const { return false; }
   bool collectionVsNonObj() const { return false; }
+
+  bool noticeOnArrNonArr() const { return false; }
+  bool noticeOnArrHackArr() const {
+    return checkHACCompare();
+  }
 };
 
 struct Lt {
@@ -584,14 +723,14 @@ struct Lt {
   }
 
   bool operator()(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isPHPArray());
-    assert(ad2->isPHPArray());
+    assertx(ad1->isPHPArray());
+    assertx(ad2->isPHPArray());
     return ArrayData::Lt(ad1, ad2);
   }
 
   bool operator()(const ObjectData* od1, const ObjectData* od2) const {
-    assert(od1);
-    assert(od2);
+    assertx(od1);
+    assertx(od2);
     return od1->less(*od2);
   }
 
@@ -603,18 +742,18 @@ struct Lt {
   }
 
   bool vec(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isVecArray());
-    assert(ad2->isVecArray());
+    assertx(ad1->isVecArray());
+    assertx(ad2->isVecArray());
     return PackedArray::VecLt(ad1, ad2);
   }
   bool dict(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isDict());
-    assert(ad2->isDict());
+    assertx(ad1->isDictOrShape());
+    assertx(ad2->isDictOrShape());
     throw_dict_compare_exception();
   }
   bool keyset(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isKeyset());
-    assert(ad2->isKeyset());
+    assertx(ad1->isKeyset());
+    assertx(ad2->isKeyset());
     throw_keyset_compare_exception();
   }
 
@@ -629,6 +768,13 @@ struct Lt {
   }
   bool collectionVsNonObj() const {
     throw_collection_compare_exception();
+  }
+
+  bool noticeOnArrNonArr() const {
+    return checkHACCompare();
+  }
+  bool noticeOnArrHackArr() const {
+    return checkHACCompare();
   }
 };
 
@@ -647,14 +793,14 @@ struct Gt {
   }
 
   bool operator()(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isPHPArray());
-    assert(ad2->isPHPArray());
+    assertx(ad1->isPHPArray());
+    assertx(ad2->isPHPArray());
     return ArrayData::Gt(ad1, ad2);
   }
 
   bool operator()(const ObjectData* od1, const ObjectData* od2) const {
-    assert(od1);
-    assert(od2);
+    assertx(od1);
+    assertx(od2);
     return od1->more(*od2);
   }
 
@@ -666,18 +812,18 @@ struct Gt {
   }
 
   bool vec(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isVecArray());
-    assert(ad2->isVecArray());
+    assertx(ad1->isVecArray());
+    assertx(ad2->isVecArray());
     return PackedArray::VecGt(ad1, ad2);
   }
   bool dict(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isDict());
-    assert(ad2->isDict());
+    assertx(ad1->isDictOrShape());
+    assertx(ad2->isDictOrShape());
     throw_dict_compare_exception();
   }
   bool keyset(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isKeyset());
-    assert(ad2->isKeyset());
+    assertx(ad1->isKeyset());
+    assertx(ad2->isKeyset());
     throw_keyset_compare_exception();
   }
 
@@ -692,6 +838,13 @@ struct Gt {
   }
   bool collectionVsNonObj() const {
     throw_collection_compare_exception();
+  }
+
+  bool noticeOnArrNonArr() const {
+    return checkHACCompare();
+  }
+  bool noticeOnArrHackArr() const {
+    return checkHACCompare();
   }
 };
 
@@ -714,8 +867,8 @@ struct Cmp {
   }
 
   int64_t operator()(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isPHPArray());
-    assert(ad2->isPHPArray());
+    assertx(ad1->isPHPArray());
+    assertx(ad2->isPHPArray());
     return ArrayData::Compare(ad1, ad2);
   }
 
@@ -731,18 +884,18 @@ struct Cmp {
   }
 
   int64_t vec(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isVecArray());
-    assert(ad2->isVecArray());
+    assertx(ad1->isVecArray());
+    assertx(ad2->isVecArray());
     return PackedArray::VecCmp(ad1, ad2);
   }
   int64_t dict(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isDict());
-    assert(ad2->isDict());
+    assertx(ad1->isDictOrShape());
+    assertx(ad2->isDictOrShape());
     throw_dict_compare_exception();
   }
   int64_t keyset(const ArrayData* ad1, const ArrayData* ad2) const {
-    assert(ad1->isKeyset());
-    assert(ad2->isKeyset());
+    assertx(ad1->isKeyset());
+    assertx(ad2->isKeyset());
     throw_keyset_compare_exception();
   }
 
@@ -758,6 +911,13 @@ struct Cmp {
   int64_t collectionVsNonObj() const {
     throw_collection_compare_exception();
   }
+
+  bool noticeOnArrNonArr() const {
+    return checkHACCompare();
+  }
+  bool noticeOnArrHackArr() const {
+    return checkHACCompare();
+  }
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -765,13 +925,19 @@ struct Cmp {
 }
 
 bool cellSame(Cell c1, Cell c2) {
-  assert(cellIsPlausible(c1));
-  assert(cellIsPlausible(c2));
+  assertx(cellIsPlausible(c1));
+  assertx(cellIsPlausible(c2));
 
   bool const null1 = isNullType(c1.m_type);
   bool const null2 = isNullType(c2.m_type);
   if (null1 && null2) return true;
   if (null1 || null2) return false;
+
+  auto const phpArrayCheck = [&]{
+    if (UNLIKELY(checkHACCompare() && isArrayType(c2.m_type))) {
+      raiseHackArrCompatArrMixedCmp();
+    }
+  };
 
   switch (c1.m_type) {
     case KindOfBoolean:
@@ -790,22 +956,53 @@ bool cellSame(Cell c1, Cell c2) {
 
     case KindOfPersistentVec:
     case KindOfVec:
-      if (!isVecType(c2.m_type)) return false;
+      if (!isVecType(c2.m_type)) {
+        phpArrayCheck();
+        return false;
+      }
       return PackedArray::VecSame(c1.m_data.parr, c2.m_data.parr);
 
     case KindOfPersistentDict:
     case KindOfDict:
-      if (!isDictType(c2.m_type)) return false;
+      if (!isDictOrShapeType(c2.m_type)) {
+        phpArrayCheck();
+        return false;
+      }
       return MixedArray::DictSame(c1.m_data.parr, c2.m_data.parr);
 
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-      if (!isKeysetType(c2.m_type)) return false;
+      if (!isKeysetType(c2.m_type)) {
+        phpArrayCheck();
+        return false;
+      }
       return SetArray::Same(c1.m_data.parr, c2.m_data.parr);
+
+    case KindOfPersistentShape:
+    case KindOfShape: // TODO(T31025155): Add warning.
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        if (!isDictOrShapeType(c2.m_type)) {
+          phpArrayCheck();
+          return false;
+        }
+      } else {
+        if (!isArrayOrShapeType(c2.m_type)) {
+          if (UNLIKELY(checkHACCompare() && isHackArrayType(c2.m_type))) {
+            raiseHackArrCompatArrMixedCmp();
+          }
+          return false;
+        }
+      }
+      return MixedArray::ShapeSame(c1.m_data.parr, c2.m_data.parr);
 
     case KindOfPersistentArray:
     case KindOfArray:
-      if (!isArrayType(c2.m_type)) return false;
+      if (!isArrayOrShapeType(c2.m_type)) {
+        if (UNLIKELY(checkHACCompare() && isHackArrayType(c2.m_type))) {
+          raiseHackArrCompatArrMixedCmp();
+        }
+        return false;
+      }
       return ArrayData::Same(c1.m_data.parr, c2.m_data.parr);
 
     case KindOfObject:
@@ -816,18 +1013,25 @@ bool cellSame(Cell c1, Cell c2) {
       return c2.m_type == KindOfResource &&
         c1.m_data.pres == c2.m_data.pres;
 
+    case KindOfFunc:
+      if (c2.m_type != KindOfFunc) return false;
+      return c1.m_data.pfunc == c2.m_data.pfunc;
+
+    case KindOfClass:
+      if (c2.m_type != KindOfClass) return false;
+      return c1.m_data.pclass == c2.m_data.pclass;
+
     case KindOfUninit:
     case KindOfNull:
     case KindOfRef:
-    case KindOfClass:
       break;
   }
   not_reached();
 }
 
 bool tvSame(TypedValue tv1, TypedValue tv2) {
-  assert(tvIsPlausible(tv1));
-  assert(tvIsPlausible(tv2));
+  assertx(tvIsPlausible(tv1));
+  assertx(tvIsPlausible(tv2));
   return cellSame(*tvToCell(&tv1), *tvToCell(&tv2));
 }
 
@@ -853,6 +1057,7 @@ bool cellEqual(Cell cell, const ArrayData* val) {
   if (val->isPHPArray()) return cellRelOp(Eq(), cell, val);
   if (val->isVecArray()) return cellRelOpVec(Eq(), cell, val);
   if (val->isDict()) return cellRelOpDict(Eq(), cell, val);
+  if (val->isShape()) return cellRelOpShape(Eq(), cell, val);
   if (val->isKeyset()) return cellRelOpKeyset(Eq(), cell, val);
   not_reached();
 }
@@ -896,6 +1101,7 @@ bool cellLess(Cell cell, const ArrayData* val) {
   if (val->isPHPArray()) return cellRelOp(Lt(), cell, val);
   if (val->isVecArray()) return cellRelOpVec(Lt(), cell, val);
   if (val->isDict()) return cellRelOpDict(Lt(), cell, val);
+  if (val->isShape()) return cellRelOpShape(Lt(), cell, val);
   if (val->isKeyset()) return cellRelOpKeyset(Lt(), cell, val);
   not_reached();
 }
@@ -939,6 +1145,7 @@ bool cellGreater(Cell cell, const ArrayData* val) {
   if (val->isPHPArray()) return cellRelOp(Gt(), cell, val);
   if (val->isVecArray()) return cellRelOpVec(Gt(), cell, val);
   if (val->isDict()) return cellRelOpDict(Gt(), cell, val);
+  if (val->isShape()) return cellRelOpShape(Gt(), cell, val);
   if (val->isKeyset()) return cellRelOpKeyset(Gt(), cell, val);
   not_reached();
 }
@@ -984,6 +1191,7 @@ int64_t cellCompare(Cell cell, const ArrayData* val) {
   if (val->isPHPArray()) return cellRelOp(Cmp(), cell, val);
   if (val->isVecArray()) return cellRelOpVec(Cmp(), cell, val);
   if (val->isDict()) return cellRelOpDict(Cmp(), cell, val);
+  if (val->isShape()) return cellRelOpShape(Cmp(), cell, val);
   if (val->isKeyset()) return cellRelOpKeyset(Cmp(), cell, val);
   not_reached();
 }
@@ -1010,8 +1218,8 @@ int64_t tvCompare(TypedValue tv1, TypedValue tv2) {
 //////////////////////////////////////////////////////////////////////
 
 bool cellLessOrEqual(Cell c1, Cell c2) {
-  assert(cellIsPlausible(c1));
-  assert(cellIsPlausible(c2));
+  assertx(cellIsPlausible(c1));
+  assertx(cellIsPlausible(c2));
 
   if ((isArrayLikeType(c1.m_type) && isArrayLikeType(c2.m_type)) ||
       (c1.m_type == KindOfObject && c2.m_type == KindOfObject) ||
@@ -1029,8 +1237,8 @@ bool cellLessOrEqual(Cell c1, Cell c2) {
 }
 
 bool cellGreaterOrEqual(Cell c1, Cell c2) {
-  assert(cellIsPlausible(c1));
-  assert(cellIsPlausible(c2));
+  assertx(cellIsPlausible(c1));
+  assertx(cellIsPlausible(c2));
 
   if ((isArrayLikeType(c1.m_type) && isArrayLikeType(c2.m_type)) ||
       (c1.m_type == KindOfObject && c2.m_type == KindOfObject) ||

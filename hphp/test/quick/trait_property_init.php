@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Test situations where traits cause duplicate property names when
 // preparing the array for 86pinit setup.

@@ -1,0 +1,52 @@
+vec(6) {
+  string(2) "BX"
+  string(2) "DX"
+  string(2) "CX"
+  string(2) "AX"
+  string(2) "EX"
+  string(5) "BaseX"
+}
+vec(6) {
+  string(2) "BX"
+  string(2) "DX"
+  string(2) "CX"
+  string(2) "AX"
+  string(2) "EX"
+  string(5) "BaseX"
+}
+vec(6) {
+  string(2) "BY"
+  string(2) "DY"
+  string(2) "CY"
+  string(2) "AY"
+  string(2) "EY"
+  string(5) "BaseY"
+}
+vec(6) {
+  string(2) "BY"
+  string(2) "DY"
+  string(2) "CY"
+  string(2) "AY"
+  string(2) "EY"
+  string(5) "BaseY"
+}
+vec(6) {
+  string(2) "BX"
+  string(2) "DX"
+  string(2) "CX"
+  string(2) "AX"
+  string(2) "EX"
+  string(5) "BaseX"
+}
+vec(0) {
+}
+vec(6) {
+  string(2) "BY"
+  string(2) "DY"
+  string(2) "CY"
+  string(2) "AY"
+  string(2) "EY"
+  string(5) "BaseY"
+}
+vec(0) {
+}

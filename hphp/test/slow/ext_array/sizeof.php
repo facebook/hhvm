@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_sizeof() {
 $a = array();
 $a[0] = 1;
 $a[1] = 3;
@@ -21,3 +24,4 @@ $food = array(
 );
 var_dump(sizeof($food, COUNT_RECURSIVE));
 var_dump(sizeof($food));
+}

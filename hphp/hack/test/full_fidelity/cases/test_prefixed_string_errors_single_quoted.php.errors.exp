@@ -1,0 +1,2 @@
+(4,12)-(4,12) Only double-quoted strings may be prefixed.
+(4,12)-(4,23) Encountered unexpected token ''blah blah''.

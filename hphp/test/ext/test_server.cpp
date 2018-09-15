@@ -62,14 +62,13 @@ static char s_logFile[PATH_MAX];
 static char s_filename[PATH_MAX];
 static int k_timeout = 30;
 
-bool TestServer::VerifyServerResponse(const char *input, const char **outputs,
-                                      const char **urls, int nUrls,
-                                      const char *method,
-                                      const char *header, const char *postdata,
+bool TestServer::VerifyServerResponse(const char* input, const char** outputs,
+                                      const char** urls, int nUrls,
+                                      const char* /*method*/,
+                                      const char* header, const char* postdata,
                                       bool responseHeader,
-                                      const char *file /* = "" */,
-                                      int line /* = 0 */,
-                                      int port /* = 0 */) {
+                                      const char* file /* = "" */,
+                                      int line /* = 0 */, int port /* = 0 */) {
   assert(input);
   if (port == 0) port = s_server_port;
 
@@ -255,10 +254,10 @@ void TestServer::KillServer() {
 struct TestServerRequestHandler : RequestHandler {
   explicit TestServerRequestHandler(int timeout) : RequestHandler(timeout) {}
   // implementing RequestHandler
-  virtual void handleRequest(Transport *transport) {
+  void handleRequest(Transport* /*transport*/) override {
     // do nothing
   }
-  virtual void abortRequest(Transport *transport) {
+  void abortRequest(Transport* /*transport*/) override {
     // do nothing
   }
 };
@@ -486,6 +485,8 @@ bool TestServer::TestSetCookie() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+const StaticString s_test("test");
+
 struct TestTransport final : Transport {
   TestTransport() : m_code(0) {}
 
@@ -500,13 +501,20 @@ struct TestTransport final : Transport {
   const void *getPostData(size_t &size) override { size = 0; return nullptr; }
   uint16_t getRemotePort() override { return 0; }
   Method getMethod() override { return Transport::Method::GET; }
-  std::string getHeader(const char *name) override { return ""; }
-  void getHeaders(HeaderMap &headers) override {}
-  void addHeaderImpl(const char *name, const char *value) override {}
-  void removeHeaderImpl(const char *name) override {}
+  std::string getHeader(const char* /*name*/) override { return ""; }
+  void getHeaders(HeaderMap& /*headers*/) override {}
+  void addHeaderImpl(const char* /*name*/, const char* /*value*/) override {}
+  void removeHeaderImpl(const char* /*name*/) override {}
 
-  void sendImpl(const void *data, int size, int code, bool chunked, bool eom)
-       override {
+  /**
+   * Get a description of the type of transport.
+   */
+  String describe() const override {
+    return s_test;
+  }
+
+  void sendImpl(const void* data, int size, int code, bool /*chunked*/,
+                bool /*eom*/) override {
     m_response.clear();
     m_response.append((const char *)data, size);
     m_code = code;
@@ -627,7 +635,7 @@ bool TestServer::TestTakeoverServer() {
   // Wait for the server to actually start
   HttpClient http;
   StringBuffer response;
-  std::vector<String> responseHeaders;
+  req::vector<String> responseHeaders;
   auto url = "http://127.0.0.1:" + folly::to<std::string>(s_server_port) +
     "/status.php";
   HeaderMap headers;
@@ -714,7 +722,7 @@ bool TestServer::TestHttpClient() {
   for (int i = 0; i < 10; i++) {
     HttpClient http;
     StringBuffer response;
-    std::vector<String> responseHeaders;
+    req::vector<String> responseHeaders;
     int code = http.get(url.c_str(), response, &headers, &responseHeaders);
     VS(code, 200);
     VS(response.data(),
@@ -728,8 +736,8 @@ bool TestServer::TestHttpClient() {
         "\n0: 127.0.0.1:" + folly::to<std::string>(s_server_port)).c_str());
 
     bool found = false;
-    for (unsigned int i = 0; i < responseHeaders.size(); i++) {
-      if (responseHeaders[i] == s_Custom_colon_blah) {
+    for (unsigned int i2 = 0; i2 < responseHeaders.size(); i2++) {
+      if (responseHeaders[i2] == s_Custom_colon_blah) {
         found = true;
       }
     }
@@ -738,7 +746,7 @@ bool TestServer::TestHttpClient() {
   for (int i = 0; i < 10; i++) {
     HttpClient http;
     StringBuffer response;
-    std::vector<String> responseHeaders;
+    req::vector<String> responseHeaders;
     int code = http.post(url.c_str(), "postdata", 8, response, &headers,
                          &responseHeaders);
     VS(code, 200);
@@ -758,8 +766,8 @@ bool TestServer::TestHttpClient() {
         "\n0: 127.0.0.1:" + folly::to<std::string>(s_server_port)).c_str());
 
     bool found = false;
-    for (unsigned int i = 0; i < responseHeaders.size(); i++) {
-      if (responseHeaders[i] == s_Custom_colon_blah) {
+    for (unsigned int i2 = 0; i2 < responseHeaders.size(); i2++) {
+      if (responseHeaders[i2] == s_Custom_colon_blah) {
         found = true;
       }
     }

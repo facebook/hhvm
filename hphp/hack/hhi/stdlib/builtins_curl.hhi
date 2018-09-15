@@ -3,11 +3,11 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
+namespace {
 const int CURLAUTH_ANY = 0;
 const int CURLAUTH_ANYSAFE = 0;
 const int CURLAUTH_BASIC = 0;
@@ -41,6 +41,7 @@ const int CURLINFO_HEADER_SIZE = 0;
 const int CURLINFO_HTTPAUTH_AVAIL = 0;
 const int CURLINFO_HTTP_CONNECTCODE = 0;
 const int CURLINFO_HTTP_CODE = 0;
+const int CURLINFO_HTTP_VERSION = 0;
 const int CURLINFO_LASTONE = 0;
 const int CURLINFO_LOCAL_IP = 0;
 const int CURLINFO_LOCAL_PORT = 0;
@@ -51,6 +52,7 @@ const int CURLINFO_PRETRANSFER_TIME = 0;
 const int CURLINFO_PRIMARY_IP = 0;
 const int CURLINFO_PRIMARY_PORT = 0;
 const int CURLINFO_PRIVATE = 0;
+const int CURLINFO_PROTOCOL = 0;
 const int CURLINFO_PROXYAUTH_AVAIL = 0;
 const int CURLINFO_REDIRECT_COUNT = 0;
 const int CURLINFO_REDIRECT_TIME = 0;
@@ -61,6 +63,7 @@ const int CURLINFO_RTSP_CLIENT_CSEQ = 0;
 const int CURLINFO_RTSP_CSEQ_RECV = 0;
 const int CURLINFO_RTSP_SERVER_CSEQ = 0;
 const int CURLINFO_RTSP_SESSION_ID = 0;
+const int CURLINFO_SCHEME = 0;
 const int CURLINFO_SIZE_DOWNLOAD = 0;
 const int CURLINFO_SIZE_UPLOAD = 0;
 const int CURLINFO_SPEED_DOWNLOAD = 0;
@@ -175,6 +178,7 @@ const int CURLOPT_FTPPORT = 0;
 const int CURLOPT_POSTQUOTE = 0;
 const int CURLOPT_RESOLVE = 0;
 const int CURLOPT_QUOTE = 0;
+const int CURLOPT_ABSTRACT_UNIX_SOCKET = 0;
 const int CURLOPT_ACCEPT_ENCODING = 0;
 const int CURLOPT_ACCEPTTIMEOUT_MS = 0;
 const int CURLOPT_ADDRESS_SCOPE = 0;
@@ -207,6 +211,7 @@ const int CURLOPT_HTTP_CONTENT_DECODING = 0;
 const int CURLOPT_HTTP_TRANSFER_DECODING = 0;
 const int CURLOPT_IGNORE_CONTENT_LENGTH = 0;
 const int CURLOPT_ISSUERCERT = 0;
+const int CURLOPT_KEEP_SENDING_ON_ERROR = 0;
 const int CURLOPT_KEYPASSWD = 0;
 const int CURLOPT_KRB4LEVEL = 0;
 const int CURLOPT_KRBLEVEL = 0;
@@ -238,6 +243,7 @@ const int CURLOPT_PROXY_TRANSFER_MODE = 0;
 const int CURLOPT_PROXYUSERNAME = 0;
 const int CURLOPT_READDATA = 0;
 const int CURLOPT_REDIR_PROTOCOLS = 0;
+const int CURLOPT_REQUEST_TARGET = 0;
 const int CURLOPT_RTSP_CLIENT_CSEQ = 0;
 const int CURLOPT_RTSP_REQUEST = 0;
 const int CURLOPT_RTSP_SERVER_CSEQ = 0;
@@ -247,6 +253,7 @@ const int CURLOPT_RTSP_TRANSPORT = 0;
 const int CURLOPT_SASL_IR = 0;
 const int CURLOPT_SERVICE_NAME = 0;
 const int CURLOPT_SHARE = 0;
+const int CURLOPT_SOCKS5_AUTH = 0;
 const int CURLOPT_SOCKS5_GSSAPI_NEC = 0;
 const int CURLOPT_SOCKS5_GSSAPI_SERVICE = 0;
 const int CURLOPT_SSH_AUTH_TYPES = 0;
@@ -260,6 +267,7 @@ const int CURLOPT_SSL_FALSESTART = 0;
 const int CURLOPT_SSL_OPTIONS = 0;
 const int CURLOPT_SSL_SESSIONID_CACHE = 0;
 const int CURLOPT_SSL_VERIFYSTATUS = 0;
+const int CURLOPT_SUPPRESS_CONNECT_HEADERS = 0;
 const int CURLOPT_STREAM_WEIGHT = 0;
 const int CURLOPT_TCP_FASTOPEN = 0;
 const int CURLOPT_TCP_KEEPALIVE = 0;
@@ -467,6 +475,12 @@ const int CURL_SSLVERSION_TLSv1 = 0;
 const int CURL_SSLVERSION_TLSv1_0 = 0;
 const int CURL_SSLVERSION_TLSv1_1 = 0;
 const int CURL_SSLVERSION_TLSv1_2 = 0;
+const int CURL_SSLVERSION_TLSv1_3 = 0;
+const int CURL_SSLVERSION_MAX_DEFAULT = 0;
+const int CURL_SSLVERSION_MAX_TLSv1_0 = 0;
+const int CURL_SSLVERSION_MAX_TLSv1_1 = 0;
+const int CURL_SSLVERSION_MAX_TLSv1_2 = 0;
+const int CURL_SSLVERSION_MAX_TLSv1_3 = 0;
 
 const int CURL_TIMECOND_IFMODSINCE = 0;
 const int CURL_TIMECOND_IFUNMODSINCE = 0;
@@ -480,28 +494,90 @@ const int CURLOPT_PROXYHEADER = 0;
 const int CURLHEADER_UNIFIED = 0;
 const int CURLHEADER_SEPARATE = 0;
 
+const int CURL_LOCK_DATA_COOKIE = 0;
+const int CURL_LOCK_DATA_DNS = 0;
+const int CURL_LOCK_DATA_SSL_SESSION = 0;
+const int CURLSHE_OK = 0;
+const int CURLSHOPT_SHARE = 0;
+const int CURLSHOPT_UNSHARE = 0;
+
+
+<<__PHPStdLib>>
 function curl_init($url = null);
+<<__PHPStdLib>>
 function curl_init_pooled($pool_name, $url = null);
+<<__PHPStdLib>>
 function curl_copy_handle($ch);
+<<__PHPStdLib>>
 function curl_version($uversion = CURLVERSION_NOW);
+<<__PHPStdLib>>
 function curl_setopt($ch, $option, $value);
+<<__PHPStdLib>>
 function curl_setopt_array($ch, $options);
+<<__PHPStdLib>>
 function curl_exec($ch);
+<<__PHPStdLib>>
 function curl_getinfo($ch, $opt = 0);
+<<__PHPStdLib>>
 function curl_errno($ch);
+<<__PHPStdLib>>
 function curl_error($ch);
+<<__PHPStdLib>>
 function curl_strerror($code);
+<<__PHPStdLib>>
 function curl_close($ch);
+<<__PHPStdLib>>
 function curl_multi_init();
+<<__PHPStdLib>>
 function curl_multi_strerror($errornum);
+<<__PHPStdLib>>
 function curl_multi_add_handle($mh, $ch);
+<<__PHPStdLib>>
 function curl_multi_remove_handle($mh, $ch);
+<<__PHPStdLib>>
 function curl_multi_exec($mh, &$still_running);
+<<__PHPStdLib>>
 function curl_multi_select($mh, $timeout = 1.0);
+<<__PHPStdLib>>
 function curl_multi_await($mh, float $timeout = 1.0): Awaitable<int>;
+<<__PHPStdLib>>
 function curl_multi_getcontent($ch);
+<<__PHPStdLib>>
 function curl_multi_info_read($mh, &$msgs_in_queue = null);
+<<__PHPStdLib>>
 function curl_multi_close($mh);
+<<__PHPStdLib>>
+function curl_share_init();
+<<__PHPStdLib>>
+function curl_share_close($sh);
+<<__PHPStdLib>>
+function curl_share_setopt($sh, $option, $value);
+
+class CURLFile {
+  public string $name = '';
+  public string $mime = '';
+  public string $postname = '';
+
+  public function __construct(
+    string $name,
+    string $mime = '',
+    string $postname = '',
+  ): void;
+
+  public function getFilename(): string;
+  public function getMimeType(): string;
+  public function getPostFilename(): string;
+  public function setMimeType(string $mime): void;
+  public function setPostFilename(string $postname): void;
+}
+
+<<__PHPStdLib>>
+function curl_file_create(
+  string $name,
+  string $mime = '',
+  string $postname = '',
+): CURLFile;
+}
 
 namespace HH\Asio {
   function curl_exec(mixed $url_or_handle): Awaitable<string>;

@@ -35,7 +35,7 @@ struct MemFile : File {
   MemFile(const char *data, int64_t len,
           const String& wrapper_type = null_string,
           const String& stream_type = empty_string_ref);
-  virtual ~MemFile();
+  ~MemFile() override;
 
   CLASSNAME_IS("MemFile");
   // overriding ResourceData

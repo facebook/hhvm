@@ -1,4 +1,4 @@
-<?php
+<?hh
 function f() {
   $x = 204; // 11001100 in binary
   $y = 170; // 10101010 in binary

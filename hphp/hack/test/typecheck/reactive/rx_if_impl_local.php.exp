@@ -1,0 +1,6 @@
+File "rx_if_impl_local.php", line 22, characters 10-18:
+Cannot invoke conditionally reactive function in reactive context, because at least one reactivity condition is not met. (Typing[4237])
+File "rx_if_impl_local.php", line 21, characters 14-16:
+Receiver type must be a subtype of \Rx2, now \Cls.
+File "rx_if_impl_local.php", line 13, characters 25-27:
+This is the function declaration

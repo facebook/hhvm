@@ -10,5 +10,9 @@ class thing {
   }
 }
 
+
+<<__EntryPoint>>
+function main_local_type() {
 $t = new thing;
 var_dump($t->go());
+}

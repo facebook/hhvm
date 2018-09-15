@@ -1,4 +1,4 @@
-object(Exception)#%d (7) {
+object(Exception)#%d (8) {
   ["message":protected]=>
   string(3) "foo"
   ["string":"Exception":private]=>
@@ -29,6 +29,8 @@ object(Exception)#%d (7) {
     }
   }
   ["previous":"Exception":private]=>
+  NULL
+  ["userMetadata":protected]=>
   NULL
 }
 'test' => '0'

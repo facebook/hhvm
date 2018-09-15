@@ -1,0 +1,42 @@
+[
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "initialize",
+  "params":
+    {
+      "initializationOptions":{},
+      "processId":null,
+      "rootPath":">>> path_expand('.')",
+      "capabilities":{}
+    }
+},
+{
+  "jsonrpc": "2.0",
+  "method": "textDocument/didOpen",
+  "params": {
+     "textDocument": {
+       "uri":">>> file_uri('sample.php')",
+       "languageId": "hack",
+       "version":1,
+       "text":">>> read_file('sample.php')"
+     }
+   }
+},
+{
+  "jsonrpc": "2.0",
+  "method": "textDocument/didChange",
+  "params": {
+      "textDocument": {
+        "uri":">>> file_uri('sample.php')"
+       },
+       "contentChanges": [{
+         "range": {
+           "start": {"line":2, "character":9},
+           "end": {"line":2, "character":12}
+         },
+         "text":"***"
+       }]
+   }
+}
+]

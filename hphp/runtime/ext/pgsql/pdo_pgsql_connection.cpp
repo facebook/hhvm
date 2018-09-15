@@ -131,14 +131,13 @@ int64_t PDOPgSqlConnection::doer(const String& sql){
   ExecStatusType status = m_lastExec = res.status();
 
   int64_t ret;
-
   if(status == PGRES_COMMAND_OK){
     ret = (int64_t)res.cmdTuples();
   } else if(status == PGRES_TUPLES_OK) {
-    ret = 0L;
+    ret = 0;
   } else {
     HANDLE_ERROR(nullptr, res);
-    return -1L;
+    return -1;
   }
 
   this->pgoid = res.oidValue();
@@ -243,7 +242,7 @@ String PDOPgSqlConnection::lastId(const char *name){
     if(this->pgoid == InvalidOid){
       return empty_string();
     }
-    return String((long)this->pgoid);
+    return String(int64_t(this->pgoid));
   } else {
     const char *values[1];
     values[0] = name;

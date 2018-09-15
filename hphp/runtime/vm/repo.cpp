@@ -15,14 +15,18 @@
 */
 #include "hphp/runtime/vm/repo.h"
 
+#include <sstream>
+
 #include <folly/Format.h>
 #include <folly/Singleton.h>
 
 #include "hphp/hhbbc/options.h"
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/repo-global-data.h"
+#include "hphp/runtime/server/xbox-server.h"
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/async-func.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/hugetlb.h"
 #include "hphp/util/logger.h"
@@ -39,7 +43,6 @@ TRACE_SET_MOD(hhbc);
 
 const char* Repo::kMagicProduct =
   "facebook.com HipHop Virtual Machine bytecode repository";
-const char* Repo::kSchemaPlaceholder = "%{schema}";
 const char* Repo::kDbs[RepoIdCount] = { "main",   // Central.
                                         "local"}; // Local.
 Repo::GlobalData Repo::s_globalData;
@@ -57,7 +60,7 @@ void initialize_repo() {
   }
 }
 
-IMPLEMENT_THREAD_LOCAL(Repo, t_dh);
+THREAD_LOCAL(Repo, t_dh);
 
 Repo& Repo::get() {
   return *t_dh.get();
@@ -67,11 +70,11 @@ void Repo::shutdown() {
   t_dh.destroy();
 }
 
-SimpleMutex Repo::s_lock;
-unsigned Repo::s_nRepos = 0;
+static SimpleMutex s_lock;
+static std::atomic<unsigned> s_nRepos;
 
 bool Repo::prefork() {
-  if (num_huge1g_pages() > 0) {
+  if (num_1g_pages() > 0) {
     // We put data on the 1G huge pages, and we don't want to do COW upon
     // fork().  If you need to fork(), configure HHVM not to use 1G pages.
     return true;
@@ -80,7 +83,9 @@ bool Repo::prefork() {
     t_dh.destroy();
   }
   s_lock.lock();
-  if (s_nRepos > 0) {
+  XboxServer::Stop();
+  if (s_nRepos > 0 || AsyncFuncImpl::count()) {
+    XboxServer::Restart();
     s_lock.unlock();
     return true;
   }
@@ -90,6 +95,7 @@ bool Repo::prefork() {
 
 void Repo::postfork(pid_t pid) {
   folly::SingletonVault::singleton()->reenableInstances();
+  XboxServer::Restart();
   if (pid == 0) {
     Logger::ResetPid();
     new (&s_lock) SimpleMutex();
@@ -107,25 +113,20 @@ Repo::Repo()
     m_evalRepoId(-1), m_txDepth(0), m_rollback(false), m_beginStmt(*this),
     m_rollbackStmt(*this), m_commitStmt(*this), m_urp(*this), m_pcrp(*this),
     m_frp(*this), m_lsrp(*this) {
-  {
-    SimpleLock lock(s_lock);
-    s_nRepos++;
-  }
+
+  ++s_nRepos;
   connect();
 }
 
 Repo::~Repo() {
   disconnect();
-  {
-    SimpleLock lock(s_lock);
-    s_nRepos--;
-  }
+  --s_nRepos;
 }
 
 std::string Repo::s_cliFile;
 void Repo::setCliFile(const std::string& cliFile) {
-  assert(s_cliFile.empty());
-  assert(t_dh.isNull());
+  assertx(s_cliFile.empty());
+  assertx(t_dh.isNull());
   s_cliFile = cliFile;
 }
 
@@ -134,8 +135,9 @@ size_t Repo::stringLengthLimit() const {
   return limit;
 }
 
-void Repo::loadGlobalData(bool allowFailure /* = false */) {
-  m_lsrp.load();
+void Repo::loadGlobalData(bool allowFailure /* = false */,
+                          bool readArrayTable /* = true */) {
+  if (readArrayTable) m_lsrp.load();
 
   if (!RuntimeOption::RepoAuthoritative) return;
 
@@ -173,7 +175,13 @@ void Repo::loadGlobalData(bool allowFailure /* = false */) {
       }
       BlobDecoder decoder = query.getBlob(1);
       decoder(s_globalData);
-
+      if (readArrayTable) {
+        auto& arrayTypeTable = globalArrayTypeTable();
+        decoder(arrayTypeTable);
+        decoder(s_globalData.APCProfile);
+        decoder(s_globalData.ConstantFunctions);
+        decoder.assertDone();
+      }
       txn.commit();
     } catch (RepoExc& e) {
       failures.push_back(repoName(repoId) + ": "  + e.msg());
@@ -184,14 +192,40 @@ void Repo::loadGlobalData(bool allowFailure /* = false */) {
     // which control Option or RuntimeOption values -- the others are read out
     // in an inconsistent and ad-hoc manner. But I don't understand their uses
     // and interactions well enough to feel comfortable fixing now.
-    RuntimeOption::PHP7_IntSemantics = s_globalData.PHP7_IntSemantics;
-    RuntimeOption::PHP7_ScalarTypes  = s_globalData.PHP7_ScalarTypes;
-    RuntimeOption::PHP7_Substr       = s_globalData.PHP7_Substr;
-    RuntimeOption::AutoprimeGenerators = s_globalData.AutoprimeGenerators;
-    HHBBC::options.HardTypeHints = s_globalData.HardTypeHints;
-    HHBBC::options.HardReturnTypeHints = s_globalData.HardReturnTypeHints;
-    HHBBC::options.ElideAutoloadInvokes = s_globalData.ElideAutoloadInvokes;
-    RuntimeOption::EvalPromoteEmptyObject = s_globalData.PromoteEmptyObject;
+    RuntimeOption::EvalPromoteEmptyObject    = s_globalData.PromoteEmptyObject;
+    RuntimeOption::EnableIntrinsicsExtension =
+      s_globalData.EnableIntrinsicsExtension;
+    HHBBC::options.ElideAutoloadInvokes     = s_globalData.ElideAutoloadInvokes;
+    RuntimeOption::AutoprimeGenerators      = s_globalData.AutoprimeGenerators;
+    RuntimeOption::EnableHipHopSyntax       = s_globalData.EnableHipHopSyntax;
+    RuntimeOption::EvalHardTypeHints        = s_globalData.HardTypeHints;
+    RuntimeOption::EvalUseHHBBC             = s_globalData.UsedHHBBC;
+    RuntimeOption::PHP7_Builtins            = s_globalData.PHP7_Builtins;
+    RuntimeOption::PHP7_IntSemantics        = s_globalData.PHP7_IntSemantics;
+    RuntimeOption::PHP7_NoHexNumerics       = s_globalData.PHP7_NoHexNumerics;
+    RuntimeOption::PHP7_ScalarTypes         = s_globalData.PHP7_ScalarTypes;
+    RuntimeOption::PHP7_Substr              = s_globalData.PHP7_Substr;
+    RuntimeOption::EvalReffinessInvariance  = s_globalData.ReffinessInvariance;
+    RuntimeOption::EvalCheckPropTypeHints   = s_globalData.CheckPropTypeHints;
+    RuntimeOption::EvalHackArrDVArrs        = s_globalData.HackArrDVArrs;
+    RuntimeOption::EvalAbortBuildOnVerifyError =
+      s_globalData.AbortBuildOnVerifyError;
+    RuntimeOption::DisallowDynamicVarEnvFuncs =
+      s_globalData.DisallowDynamicVarEnvFuncs;
+    RuntimeOption::EvalAllowObjectDestructors =
+      s_globalData.AllowObjectDestructors;
+    RuntimeOption::EvalDisableReturnByReference =
+      s_globalData.DisableReturnByReference;
+    if (s_globalData.HardReturnTypeHints) {
+      RuntimeOption::EvalCheckReturnTypeHints = 3;
+    }
+    if (s_globalData.ThisTypeHintLevel == 3) {
+      RuntimeOption::EvalThisTypeHintLevel = s_globalData.ThisTypeHintLevel;
+    }
+    RuntimeOption::ConstantFunctions.clear();
+    for (auto const& elm : s_globalData.ConstantFunctions) {
+      RuntimeOption::ConstantFunctions.insert(elm);
+    }
 
     return;
   }
@@ -212,7 +246,7 @@ void Repo::loadGlobalData(bool allowFailure /* = false */) {
     }
   }
 
-  assert(Process::IsInMainThread());
+  assertx(Process::IsInMainThread());
   exit(1);
 }
 
@@ -230,24 +264,28 @@ void Repo::saveGlobalData(GlobalData newData) {
   RepoTxnQuery query(txn, stmt);
   BlobEncoder encoder;
   encoder(s_globalData);
+  encoder(globalArrayTypeTable());
+  encoder(s_globalData.APCProfile);
+  encoder(s_globalData.ConstantFunctions);
   query.bindBlob("@data", encoder, /* static */ true);
   query.exec();
 
   // TODO(#3521039): we could just put the litstr table in the same
   // blob as the above and delete LitstrRepoProxy.
-  LitstrTable::get().forEachNamedEntity(
-    [this, &txn, repoId](int i, const NamedEntityPair& namedEntity) {
-      lsrp().insertLitstr(repoId).insert(txn, i, namedEntity.first);
+  LitstrTable::get().forEachLitstr(
+    [this, &txn, repoId](int i, const StringData* name) {
+      lsrp().insertLitstr(repoId).insert(txn, i, name);
     });
 
   txn.commit();
 }
 
-std::unique_ptr<Unit> Repo::loadUnit(const std::string& name, const MD5& md5) {
+std::unique_ptr<Unit> Repo::loadUnit(const std::string& name, const MD5& md5,
+                                     const Native::FuncTable& nativeFuncs) {
   if (m_dbc == nullptr) {
     return nullptr;
   }
-  return m_urp.load(name, md5);
+  return m_urp.load(name, md5, nativeFuncs);
 }
 
 std::vector<std::pair<std::string,MD5>>
@@ -444,7 +482,7 @@ void Repo::txPop() {
   // rollback an inner transaction we eventually end up rolling back the outer
   // transaction instead (Sqlite doesn't support rolling back partial
   // transactions).
-  assert(m_txDepth > 0);
+  assertx(m_txDepth > 0);
   if (m_txDepth > 1) {
     m_txDepth--;
     return;
@@ -497,7 +535,7 @@ RepoStatus Repo::insertUnit(UnitEmitter* ue, UnitOrigin unitOrigin,
 }
 
 void Repo::commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin) {
-  if (!RuntimeOption::RepoCommit) return;
+  if (!RuntimeOption::RepoCommit || ue->m_ICE) return;
 
   try {
     commitMd5(unitOrigin, ue);
@@ -505,7 +543,7 @@ void Repo::commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin) {
   } catch (const std::exception& e) {
     TRACE(0, "unexpected exception in commitUnit: %s\n",
           e.what());
-    assert(false);
+    assertx(false);
   }
 }
 
@@ -517,7 +555,7 @@ void Repo::connect() {
   } else if (!RuntimeOption::RepoEvalMode.compare("central")) {
     m_evalRepoId = RepoIdCentral;
   } else {
-    assert(!RuntimeOption::RepoEvalMode.compare("readonly"));
+    assertx(!RuntimeOption::RepoEvalMode.compare("readonly"));
     m_evalRepoId = RepoIdInvalid;
   }
   TRACE(1, "Repo.Eval.Mode=%s\n",
@@ -541,7 +579,7 @@ void Repo::disconnect() {
 void Repo::initCentral() {
   std::string error;
 
-  assert(m_dbc == nullptr);
+  assertx(m_dbc == nullptr);
   auto tryPath = [this, &error](const char* path) {
     std::string subErr;
     if (openCentral(path, subErr) == RepoStatus::error) {
@@ -554,7 +592,7 @@ void Repo::initCentral() {
   auto fail_no_repo = [&error] {
     error = "Failed to initialize central HHBC repository:\n" + error;
     // Database initialization failed; this is an unrecoverable state.
-    Logger::Error("%s", error.c_str());
+    Logger::Error(error);
 
     if (Process::IsInMainThread()) {
       exit(1);
@@ -629,20 +667,16 @@ static int busyHandler(void* opaque, int nCalls) {
   Repo* repo UNUSED = static_cast<Repo*>(opaque);
   // yield to allow other threads access to the machine
   // spin-wait can starve other threads.
-  usleep(1000 * nCalls);
-  return 1; // Tell SQLite to retry.
-}
-
-std::string Repo::insertSchema(const char* path) {
-  assert(strstr(repoSchemaId().begin(), kSchemaPlaceholder) == nullptr);
-  std::string result = path;
-  size_t idx;
-  if ((idx = result.find(kSchemaPlaceholder)) != std::string::npos) {
-    result.replace(idx, strlen(kSchemaPlaceholder), repoSchemaId().begin());
+  // We need to give up eventually or we will wait forever in the event of a
+  // deadlock. We've already waited nCalls * (nCalls - 1) / 2 ms; at nCalls
+  // of 300 that's just under 45 seconds.
+  if (nCalls < 300) {
+    usleep(1000 * nCalls);
+    return 1; // Tell SQLite to retry.
+  } else {
+    Logger::Error("Failed to acquire SQLite lock during repository operation");
+    return 0; // Tell SQLite to give up.
   }
-  TRACE(2, "Repo::%s() transformed %s into %s\n",
-        __func__, path, result.c_str());
-  return result;
 }
 
 namespace {
@@ -670,7 +704,7 @@ struct PasswdBuffer {
     : size{sysconf(name)}
   {
     if (size == -1) size = 1024;
-    data = folly::make_unique<char[]>(size);
+    data = std::make_unique<char[]>(size);
   }
 
   long size;
@@ -837,14 +871,14 @@ void Repo::initLocal() {
     if (!RuntimeOption::RepoLocalMode.compare("rw")) {
       isWritable = true;
     } else {
-      assert(!RuntimeOption::RepoLocalMode.compare("r-"));
+      assertx(!RuntimeOption::RepoLocalMode.compare("r-"));
       isWritable = false;
     }
 
     if (!RuntimeOption::RepoLocalPath.empty()) {
       attachLocal(RuntimeOption::RepoLocalPath.c_str(), isWritable);
     } else if (RuntimeOption::RepoAllowFallbackPath) {
-      if (RuntimeOption::ClientExecutionMode()) {
+      if (!RuntimeOption::ServerExecutionMode()) {
         std::string cliRepo = s_cliFile;
         if (!cliRepo.empty()) {
           cliRepo += ".hhbc";
@@ -911,6 +945,11 @@ void Repo::getIntPragma(int repoId, const char* name, int& val) {
 }
 
 void Repo::setIntPragma(int repoId, const char* name, int val) {
+  // Read first to see if a write can be avoided
+  int oldval = -1;
+  getIntPragma(repoId, name, oldval);
+  if (val == oldval) return;
+
   // Pragma writes must be executed outside transactions, since they may change
   // transaction behavior.
   std::stringstream ssPragma;
@@ -940,6 +979,11 @@ void Repo::getTextPragma(int repoId, const char* name, std::string& val) {
 }
 
 void Repo::setTextPragma(int repoId, const char* name, const char* val) {
+  // Read first to see if a write can be avoided
+  std::string oldval = "?";
+  getTextPragma(repoId, name, oldval);
+  if (!strcmp(oldval.c_str(), val)) return;
+
   // Pragma writes must be executed outside transactions, since they may change
   // transaction behavior.
   std::stringstream ssPragma;
@@ -1049,7 +1093,7 @@ bool Repo::writable(int repoId) {
 
 //////////////////////////////////////////////////////////////////////
 
-void batchCommit(std::vector<std::unique_ptr<UnitEmitter>> ues) {
+void batchCommit(const std::vector<std::unique_ptr<UnitEmitter>>& ues) {
   auto& repo = Repo::get();
 
   // Attempt batch commit.  This can legitimately fail due to multiple input

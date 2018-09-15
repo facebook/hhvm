@@ -1,1 +1,1 @@
-../auto_inline_5.hphp_opts
+-vAutoInline=5 -d hhvm.php7.all=0 -d hhvm.php7.all=0

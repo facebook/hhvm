@@ -3,9 +3,8 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
@@ -129,13 +128,17 @@ class DOMNode {
   public function replaceChild<T as DOMNode>(DOMNode $newchildobj, T $oldchildobj): T;
   public function C14N(bool $exclusive = false,
                        bool $with_comments = false,
-                       ?array $xpath = null,
-                       ?array $ns_prefixes = null): string;
+                       /* HH_IGNORE_ERROR[2071] */
+                       ?darray $xpath = null,
+                       /* HH_IGNORE_ERROR[2071] */
+                       ?varray $ns_prefixes = null): string;
   public function C14NFile(string $uri,
                            bool $exclusive = false,
                            bool $with_comments = false,
-                           ?array $xpath = null,
-                           ?array $ns_prefixes = null): int;
+                           /* HH_IGNORE_ERROR[2071] */
+                           ?darray $xpath = null,
+                           /* HH_IGNORE_ERROR[2071] */
+                           ?varray $ns_prefixes = null): int;
   public function getNodePath();
 }
 
@@ -204,7 +207,7 @@ class DOMElement extends DOMNode {
   /* readonly */ public bool $schemaTypeInfo;
 
   /* HH_FIXME[4110]: $attributes is nullable in the parent but not here */
-  /* readonly */ public DOMNamedNodeMap $attributes;
+  /* readonly */ public DOMNamedNodeMap<DOMAttr> $attributes;
 
   // methods
   public function __construct($name, $value = null, $namespaceuri = null);
@@ -277,7 +280,7 @@ class DOMDocumentType extends DOMNode {
   /* readonly */ public string $internalSubset;
 
   // Methods
-  public function __debuginfo(): array;
+  <<__PHPStdLib>> public function __debuginfo(): array;
 
 }
 
@@ -307,7 +310,9 @@ class DOMDocumentFragment extends DOMNode {
 
 }
 
+<<__PHPStdLib>>
 function dom_import_simplexml(SimpleXMLElement $node): ?DOMElement;
+<<__PHPStdLib>>
 function simplexml_import_dom(
   DOMNode $node,
   ?string $class_name = 'SimpleXMLElement',

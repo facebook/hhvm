@@ -5,4 +5,8 @@ class C implements Countable {
  return 0;
  }
  }
+
+<<__EntryPoint>>
+function main_1867() {
 var_dump(class_exists('C'));
+}

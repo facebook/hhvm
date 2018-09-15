@@ -4,6 +4,10 @@ function VC($x, $y) {
   var_dump(abs($x - $y) < 0.00001);
 }
 
+
+
+<<__EntryPoint>>
+function main_math_misc() {
 var_dump(pi());
 var_dump(M_PI);
 
@@ -79,4 +83,4 @@ var_dump(sqrt(9));
 var_dump(getrandmax());
 
 var_dump(mt_getrandmax());
-
+}

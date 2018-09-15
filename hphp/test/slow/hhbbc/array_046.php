@@ -14,4 +14,8 @@ function bar() {
 function main() {
   var_dump(bar());
 }
+
+<<__EntryPoint>>
+function main_array_046() {
 main();
+}

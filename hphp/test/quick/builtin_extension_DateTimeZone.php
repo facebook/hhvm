@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 include __DIR__."/builtin_extensions.inc";
 

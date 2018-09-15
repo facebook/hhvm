@@ -17,20 +17,16 @@
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/parser/hphp.tab.hpp"
 #include "hphp/util/text-util.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/block_scope.h"
-#include "hphp/compiler/analysis/variable_table.h"
-#include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/statement/statement_list.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/parser/parser.h"
 #include "hphp/util/hash.h"
-#include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/zend-strtod.h"
-#include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/compiler/analysis/file_scope.h"
 
 #include <folly/Conv.h>
@@ -52,14 +48,13 @@ ScalarExpression::ScalarExpression
       m_type(type), m_value(value), m_originalValue(value), m_quoted(quoted) {
 }
 
-ScalarExpression::ScalarExpression
-(EXPRESSION_CONSTRUCTOR_PARAMETERS,
- int type, const std::string &value, const std::string &translated,
- bool quoted /* false */)
+ScalarExpression::ScalarExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS, int type,
+                                   const std::string& value,
+                                   const std::string& translated,
+                                   bool /*quoted*/ /* false */)
     : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ScalarExpression)),
       m_type(type), m_value(value), m_originalValue(value),
-      m_translated(translated) {
-}
+      m_translated(translated) {}
 
 ScalarExpression::ScalarExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
@@ -67,8 +62,7 @@ ScalarExpression::ScalarExpression
     : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ScalarExpression)),
       m_quoted(quoted) {
   if (!value.isNull()) {
-    String serialized = HHVM_FN(serialize)(value);
-    m_serializedValue = std::string(serialized.data(), serialized.size());
+    m_serializedValue = internal_serialize(value).toCppString();
     if (value.isDouble()) {
       m_dval = value.toDouble();
     }
@@ -97,11 +91,14 @@ ScalarExpression::ScalarExpression
       case KindOfDict:
       case KindOfPersistentKeyset:
       case KindOfKeyset:
+      case KindOfPersistentShape:
+      case KindOfShape:
       case KindOfPersistentArray:
       case KindOfArray:
       case KindOfObject:
       case KindOfResource:
       case KindOfRef:
+      case KindOfFunc:
       case KindOfClass:
         break;
     }
@@ -147,7 +144,7 @@ bool ScalarExpression::needsTranslation() const {
   }
 }
 
-void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
+void ScalarExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     auto const id = HPHP::toLower(getIdentifier());
 
@@ -303,7 +300,7 @@ std::string ScalarExpression::getIdentifier() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ScalarExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
+void ScalarExpression::outputPHP(CodeGenerator& cg, AnalysisResultPtr /*ar*/) {
   switch (m_type) {
   case T_CONSTANT_ENCAPSED_STRING:
   case T_ENCAPSED_AND_WHITESPACE:
@@ -346,26 +343,14 @@ void ScalarExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 }
 
-int64_t ScalarExpression::getHash() const {
-  int64_t hash = -1;
-  if (isLiteralInteger()) {
-    hash = hash_int64(getLiteralInteger());
-  } else if (isLiteralString()) {
-    auto const scs = getLiteralString();
-    int64_t res;
-    if (is_strictly_integer(scs.c_str(), scs.size(), res)) {
-      hash = hash_int64(res);
-    } else {
-      hash = hash_string_unsafe(scs.c_str(), scs.size());
-    }
-  }
-  return hash;
-}
-
 Variant ScalarExpression::getVariant() const {
   if (!m_serializedValue.empty()) {
     Variant ret = unserialize_from_buffer(
-      m_serializedValue.data(), m_serializedValue.size(), null_array);
+      m_serializedValue.data(),
+      m_serializedValue.size(),
+      VariableUnserializer::Type::Internal,
+      null_array
+    );
     if (ret.isDouble()) {
       return m_dval;
     }

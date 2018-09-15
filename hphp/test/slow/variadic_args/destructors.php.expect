@@ -231,6 +231,15 @@ variadic_only_no_vv_exc: Array
         )
 
 )
+call_user_func: Array
+(
+    [0] => variadic_only_no_vv_exc
+    [1] => HasD Object
+        (
+            [name:HasD:private] => HasD 18
+        )
+
+)
 test_with_exceptions: Array
 (
 )
@@ -267,6 +276,20 @@ variadic_only_no_vv_exc: Array
         )
 
 )
+call_user_func: Array
+(
+    [0] => variadic_only_no_vv_exc
+    [1] => HasD Object
+        (
+            [name:HasD:private] => HasD 19
+        )
+
+    [2] => HasD Object
+        (
+            [name:HasD:private] => HasD 20
+        )
+
+)
 test_with_exceptions: Array
 (
 )
@@ -292,6 +315,19 @@ variadic_only_no_vv_exc: Array
     [0] => HasD Object
         (
             [name:HasD:private] => HasD 21
+        )
+
+)
+call_user_func_array: Array
+(
+    [0] => variadic_only_no_vv_exc
+    [1] => Array
+        (
+            [0] => HasD Object
+                (
+                    [name:HasD:private] => HasD 21
+                )
+
         )
 
 )
@@ -328,6 +364,24 @@ variadic_only_no_vv_exc: Array
     [1] => HasD Object
         (
             [name:HasD:private] => HasD 23
+        )
+
+)
+call_user_func_array: Array
+(
+    [0] => variadic_only_no_vv_exc
+    [1] => Array
+        (
+            [0] => HasD Object
+                (
+                    [name:HasD:private] => HasD 22
+                )
+
+            [1] => HasD Object
+                (
+                    [name:HasD:private] => HasD 23
+                )
+
         )
 
 )

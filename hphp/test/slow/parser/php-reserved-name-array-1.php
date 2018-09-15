@@ -1,4 +1,5 @@
 <?php
+
 if (false) {
   class Array {}
 }

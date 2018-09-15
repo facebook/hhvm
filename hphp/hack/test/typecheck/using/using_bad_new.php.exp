@@ -1,0 +1,6 @@
+File "using_bad_new.php", line 14, characters 12-17:
+Disposable objects may only be created in a 'using' statement or 'return' from function marked <<__ReturnDisposable>> (Typing[4187])
+File "using_bad_new.php", line 19, characters 14-19:
+Disposable objects may only be created in a 'using' statement or 'return' from function marked <<__ReturnDisposable>> (Typing[4187])
+File "using_bad_new.php", line 22, characters 12-22:
+Disposable objects may only be created in a 'using' statement or 'return' from function marked <<__ReturnDisposable>> (Typing[4187])

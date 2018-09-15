@@ -1,4 +1,4 @@
-<?php
+<?hh
 class someClass {
   private function __construct() {
     //do things

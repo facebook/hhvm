@@ -1,1 +1,2 @@
-No errors
+File "namespace_global_function2.php--local.php", line 5, characters 5-5:
+Unbound name: N\f (a global function) (Naming[2049])

@@ -29,36 +29,33 @@ bool invokeAndCastToBool(const CallCtx& ctx, int argc,
 // BaseSet
 
 void BaseSet::addAllKeysOf(const Cell container) {
-  assert(isContainer(container));
+  assertx(isContainer(container));
 
   decltype(cap()) oldCap = 0;
-  bool ok = IterateKV(
-    container,
-    [&](ArrayData* adata) {
-      auto sz = adata->size();
-      if (!sz) return true;
-      if (m_size) {
-        oldCap = cap(); // assume minimal collisions
-      }
-      reserve(m_size + sz);
-      mutateAndBump();
-      return false;
-    },
-    [this](const TypedValue* key, const TypedValue* value) {
-      addRaw(tvAsCVarRef(key));
-    },
-    [this](ObjectData* coll) {
-      if (!m_size && coll->collectionType() == CollectionType::Set) {
-        auto hc = static_cast<HashCollection*>(coll);
-        replaceArray(hc->arrayData());
-        setIntLikeStrKeys(BaseSet::intLikeStrKeys(hc));
-        return true;
-      }
-      if (coll->collectionType() == CollectionType::Pair) {
-        mutateAndBump();
-      }
-      return false;
-    });
+  bool ok =
+    IterateKV(container,
+              [&](ArrayData* adata) {
+                auto sz = adata->size();
+                if (!sz) return true;
+                if (m_size) {
+                  oldCap = cap(); // assume minimal collisions
+                }
+                reserve(m_size + sz);
+                mutate();
+                return false;
+              },
+              [this](Cell k, TypedValue /*v*/) { addRaw(k); },
+              [this](ObjectData* coll) {
+                if (!m_size && coll->collectionType() == CollectionType::Set) {
+                  auto hc = static_cast<HashCollection*>(coll);
+                  replaceArray(hc->arrayData());
+                  return true;
+                }
+                if (coll->collectionType() == CollectionType::Pair) {
+                  mutate();
+                }
+                return false;
+              });
 
   if (UNLIKELY(!ok)) {
     throw_invalid_collection_parameter();
@@ -80,21 +77,20 @@ void BaseSet::addAll(const Variant& t) {
         oldCap = cap(); // assume minimal collisions
       }
       reserve(m_size + sz);
-      mutateAndBump();
+      mutate();
       return false;
     },
-    [this](const TypedValue* value) {
-      addRaw(tvAsCVarRef(value));
+    [this](TypedValue v) {
+      addRaw(tvToCell(v));
     },
     [this](ObjectData* coll) {
       if (!m_size && coll->collectionType() == CollectionType::Set) {
         auto hc = static_cast<HashCollection*>(coll);
         replaceArray(hc->arrayData());
-        setIntLikeStrKeys(BaseSet::intLikeStrKeys(hc));
         return true;
       }
       if (coll->collectionType() == CollectionType::Pair) {
-        mutateAndBump();
+        mutate();
       }
       return false;
     },
@@ -117,8 +113,8 @@ void BaseSet::addImpl(int64_t k) {
   }
   auto h = hash_int64(k);
   auto p = findForInsert(k, h);
-  assert(p);
-  if (validPos(*p)) {
+  assertx(MixedArray::isValidIns(p));
+  if (MixedArray::isValidPos(*p)) {
     // When there is a conflict, the add() API is supposed to replace the
     // existing element with the new element in place. However since Sets
     // currently only support integer and string elements, there is no way
@@ -135,9 +131,6 @@ void BaseSet::addImpl(int64_t k) {
   e.data.m_type = KindOfInt64;
   e.data.m_data.num = k;
   updateNextKI(k);
-  if (!raw) {
-    ++m_version;
-  }
 }
 
 template<bool raw>
@@ -148,8 +141,8 @@ void BaseSet::addImpl(StringData *key) {
   }
   strhash_t h = key->hash();
   auto p = findForInsert(key, h);
-  assert(p);
-  if (validPos(*p)) {
+  assertx(MixedArray::isValidIns(p));
+  if (MixedArray::isValidPos(*p)) {
     return;
   }
   if (UNLIKELY(isFull())) {
@@ -161,10 +154,6 @@ void BaseSet::addImpl(StringData *key) {
   // the key and once for the value
   e.setStrKey(key, h);
   cellDup(make_tv<KindOfString>(key), e.data);
-  updateIntLikeStrKeys(key);
-  if (!raw) {
-    ++m_version;
-  }
 }
 
 void BaseSet::addRaw(int64_t k) {
@@ -187,8 +176,8 @@ void BaseSet::addFront(int64_t k) {
   mutate();
   auto h = hash_int64(k);
   auto p = findForInsert(k, h);
-  assert(p);
-  if (validPos(*p)) {
+  assertx(MixedArray::isValidIns(p));
+  if (MixedArray::isValidPos(*p)) {
     // When there is a conflict, the addFront() API is supposed to replace
     // the existing element with the new element in place. However since
     // Sets currently only support integer and string elements, there is
@@ -205,15 +194,14 @@ void BaseSet::addFront(int64_t k) {
   e.data.m_type = KindOfInt64;
   e.data.m_data.num = k;
   updateNextKI(k);
-  ++m_version;
 }
 
 void BaseSet::addFront(StringData *key) {
   mutate();
   strhash_t h = key->hash();
   auto p = findForInsert(key, h);
-  assert(p);
-  if (validPos(*p)) {
+  assertx(MixedArray::isValidIns(p));
+  if (MixedArray::isValidPos(*p)) {
     return;
   }
   if (UNLIKELY(isFull())) {
@@ -225,18 +213,16 @@ void BaseSet::addFront(StringData *key) {
   // the key and once for the value
   e.setStrKey(key, h);
   cellDup(make_tv<KindOfString>(key), e.data);
-  updateIntLikeStrKeys(key);
-  ++m_version;
 }
 
 Variant BaseSet::pop() {
   if (UNLIKELY(m_size == 0)) {
     SystemLib::throwInvalidOperationExceptionObject("Cannot pop empty Set");
   }
-  mutateAndBump();
+  mutate();
   auto e = elmLimit() - 1;
   for (;; --e) {
-    assert(e >= data());
+    assertx(e >= data());
     if (!isTombstone(e)) break;
   }
   Variant ret = tvAsCVarRef(&e->data);
@@ -251,10 +237,10 @@ Variant BaseSet::popFront() {
   if (UNLIKELY(m_size == 0)) {
     SystemLib::throwInvalidOperationExceptionObject("Cannot pop empty Set");
   }
-  mutateAndBump();
+  mutate();
   auto e = data();
   for (;; ++e) {
-    assert(e != elmLimit());
+    assertx(e != elmLimit());
     if (!isTombstone(e)) break;
   }
   Variant ret = tvAsCVarRef(&e->data);
@@ -265,10 +251,17 @@ Variant BaseSet::popFront() {
   return ret;
 }
 
+Array BaseSet::toPHPArray() {
+  if (RuntimeOption::EvalHackArrCompatArrayProducingFuncNotices) {
+    raise_hack_arr_compat_array_producing_func_notice("Set::toArray");
+  }
+  return toPHPArrayImpl();
+}
+
 Variant BaseSet::firstValue() {
   if (!m_size) return init_null();
   auto e = firstElm();
-  assert(e != elmLimit());
+  assertx(e != elmLimit());
   return tvAsCVarRef(&e->data);
 }
 
@@ -280,7 +273,7 @@ Variant BaseSet::lastValue() {
   // manual while loop.
   uint32_t pos = posLimit() - 1;
   while (isTombstone(pos)) {
-    assert(pos > 0);
+    assertx(pos > 0);
     --pos;
   }
   return tvAsCVarRef(&data()[pos].data);
@@ -295,7 +288,7 @@ Array BaseSet::ToArray(const ObjectData* obj) {
   check_collection_cast_to_array();
   return const_cast<BaseSet*>(
     static_cast<const BaseSet*>(obj)
-  )->toArray();
+  )->toPHPArrayImpl();
 }
 
 bool BaseSet::ToBool(const ObjectData* obj) {
@@ -308,39 +301,26 @@ Object c_Set::getImmutableCopy() {
   if (m_immCopy.isNull()) {
     auto set = req::make<c_ImmSet>();
     set->m_size = m_size;
-    set->m_version = m_version;
     set->m_arr = m_arr;
-    set->setIntLikeStrKeys(intLikeStrKeys());
     m_immCopy = std::move(set);
     arrayData()->incRefCount();
   }
-  assert(!m_immCopy.isNull());
-  assert(data() == static_cast<c_ImmSet*>(m_immCopy.get())->data());
-  assert(arrayData()->hasMultipleRefs());
+  assertx(!m_immCopy.isNull());
+  assertx(data() == static_cast<c_ImmSet*>(m_immCopy.get())->data());
+  assertx(arrayData()->hasMultipleRefs());
   return m_immCopy;
 }
 
 bool BaseSet::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   auto st1 = static_cast<const BaseSet*>(obj1);
   auto st2 = static_cast<const BaseSet*>(obj2);
-  if (st1->m_size != st2->m_size) return false;
-
-  auto eLimit = st1->elmLimit();
-  for (auto e = st1->firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
-    if (e->hasIntKey()) {
-      if (!st2->contains(e->data.m_data.num)) return false;
-    } else {
-      assert(e->hasStrKey());
-      if (!st2->contains(e->data.m_data.pstr)) return false;
-    }
-  }
-  return true;
+  return MixedArray::DictEqual(st1->arrayData(), st2->arrayData());
 }
 
 BaseSet::~BaseSet() {
   auto const mixed = MixedArray::asMixed(arrayData());
   // Avoid indirect call, as we know it is a MixedArray
-  if (mixed->decReleaseCheck()) MixedArray::Release(mixed);
+  if (mixed->decReleaseCheck()) MixedArray::ReleaseDict(mixed);
 }
 
 void BaseSet::throwBadValueType() {
@@ -353,19 +333,18 @@ typename std::enable_if<
   std::is_base_of<BaseSet, TSet>::value, TSet*>::type
 BaseSet::Clone(ObjectData* obj) {
   auto thiz = static_cast<TSet*>(obj);
-  auto target = static_cast<TSet*>(TSet::instanceCtor(TSet::classof()));
+  auto target = req::make<TSet>();
   if (!thiz->m_size) {
-    return target;
+    return target.detach();
   }
   thiz->arrayData()->incRefCount();
   target->m_size = thiz->m_size;
   target->m_arr = thiz->m_arr;
-  target->setIntLikeStrKeys(thiz->intLikeStrKeys());
-  return target;
+  return target.detach();
 }
 
 bool BaseSet::OffsetIsset(ObjectData* obj, const TypedValue* key) {
-  assert(key->m_type != KindOfRef);
+  assertx(!isRefType(key->m_type));
   auto set = static_cast<BaseSet*>(obj);
   if (key->m_type == KindOfInt64) {
     return set->contains(key->m_data.num);
@@ -378,7 +357,7 @@ bool BaseSet::OffsetIsset(ObjectData* obj, const TypedValue* key) {
 }
 
 bool BaseSet::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
-  assert(key->m_type != KindOfRef);
+  assertx(!isRefType(key->m_type));
   auto set = static_cast<BaseSet*>(obj);
   if (key->m_type == KindOfInt64) {
     return set->contains(key->m_data.num) ? !cellToBool(*key) : true;
@@ -391,7 +370,7 @@ bool BaseSet::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
 }
 
 bool BaseSet::OffsetContains(ObjectData* obj, const TypedValue* key) {
-  assert(key->m_type != KindOfRef);
+  assertx(!isRefType(key->m_type));
   auto set = static_cast<BaseSet*>(obj);
   if (key->m_type == KindOfInt64) {
     return set->contains(key->m_data.num);
@@ -404,7 +383,7 @@ bool BaseSet::OffsetContains(ObjectData* obj, const TypedValue* key) {
 }
 
 void BaseSet::OffsetUnset(ObjectData* obj, const TypedValue* key) {
-  assert(key->m_type != KindOfRef);
+  assertx(!isRefType(key->m_type));
   auto set = static_cast<BaseSet*>(obj);
   if (key->m_type == KindOfInt64) {
     set->remove(key->m_data.num);
@@ -430,17 +409,15 @@ BaseSet::php_map(const Variant& callback) {
   }
   auto set = req::make<TSet>();
   if (!m_size) return Object{std::move(set)};
-  assert(posLimit() != 0);
-  assert(hashSize() > 0);
-  assert(set->arrayData() == staticEmptyMixedArray());
+  assertx(posLimit() != 0);
+  assertx(set->arrayData() == staticEmptyDictArrayAsMixed());
   auto oldCap = set->cap();
   set->reserve(posLimit()); // presume minimum collisions ...
-  assert(set->canMutateBuffer());
+  assertx(set->canMutateBuffer());
   constexpr int64_t argc = useKey ? 2 : 1;
   TypedValue argv[argc];
   for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
     auto e = iter_elm(pos);
-    int32_t pVer = m_version;
     if (useKey) {
       argv[0] = e->data;
     }
@@ -448,8 +425,7 @@ BaseSet::php_map(const Variant& callback) {
     auto cbRet = Variant::attach(
       g_context->invokeFuncFew(ctx, argc, argv)
     );
-    if (UNLIKELY(m_version != pVer)) throw_collection_modified();
-    set->addRaw(cbRet.asTypedValue());
+    set->addRaw(*cbRet.asTypedValue());
   }
   // ... and shrink back if that was incorrect
   set->shrinkIfCapacityTooHigh(oldCap);
@@ -471,7 +447,6 @@ BaseSet::php_filter(const Variant& callback) {
   if (!m_size) return Object(std::move(set));
   // we don't reserve(), because we don't know how selective callback will be
   set->mutate();
-  int32_t version = m_version;
   constexpr int64_t argc = useKey ? 2 : 1;
   TypedValue argv[argc];
   for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
@@ -481,15 +456,12 @@ BaseSet::php_filter(const Variant& callback) {
     }
     argv[argc-1] = e->data;
     bool b = invokeAndCastToBool(ctx, argc, argv);
-    if (UNLIKELY(version != m_version)) {
-      throw_collection_modified();
-    }
     if (!b) continue;
     e = iter_elm(pos);
     if (e->hasIntKey()) {
       set->addRaw(e->data.m_data.num);
     } else {
-      assert(e->hasStrKey());
+      assertx(e->hasStrKey());
       set->addRaw(e->data.m_data.pstr);
     }
   }
@@ -524,29 +496,21 @@ Object BaseSet::php_retain(const Variant& callback) {
   constexpr int64_t argc = useKey ? 2 : 1;
   TypedValue argv[argc];
   for (ssize_t pos = iter_begin(); iter_valid(pos); pos = iter_next(pos)) {
-    int32_t version = m_version;
     auto e = iter_elm(pos);
     if (useKey) {
       argv[0] = e->data;
     }
     argv[argc-1] = e->data;
     bool b = invokeAndCastToBool(ctx, argc, argv);
-    if (UNLIKELY(version != m_version)) {
-      throw_collection_modified();
-    }
     if (b) { continue; }
-    mutateAndBump();
-    version = m_version;
+    mutate();
     e = iter_elm(pos);
     auto h = e->hash();
     auto pp = e->hasIntKey() ? findForRemove(e->ikey, h) :
               findForRemove(e->skey, h);
     eraseNoCompact(pp);
-    if (UNLIKELY(version != m_version)) {
-      throw_collection_modified();
-    }
   }
-  assert(m_size <= size);
+  assertx(m_size <= size);
   compactOrShrinkIfDensityTooLow();
   return Object{this};
 }
@@ -585,8 +549,7 @@ BaseSet::php_take(const Variant& n) {
     if (toE.hasIntKey()) {
       set->updateNextKI(toE.ikey);
     } else {
-      assert(toE.hasStrKey());
-      set->updateIntLikeStrKeys(toE.skey);
+      assertx(toE.hasStrKey());
     }
   }
   return Object{std::move(set)};
@@ -605,26 +568,17 @@ BaseSet::php_takeWhile(const Variant& fn) {
   auto set = req::make<TSet>();
   if (!m_size) return Object(std::move(set));
   set->mutate();
-  int32_t version UNUSED;
-  if (std::is_same<c_Set, TSet>::value) {
-    version = m_version;
-  }
   uint32_t used = posLimit();
   for (uint32_t i = 0; i < used; ++i) {
     if (isTombstone(i)) continue;
     Elm* e = &data()[i];
     bool b = invokeAndCastToBool(ctx, 1, &e->data);
-    if (std::is_same<c_Set, TSet>::value) {
-      if (UNLIKELY(version != m_version)) {
-        throw_collection_modified();
-      }
-    }
     if (!b) break;
     e = &data()[i];
     if (e->hasIntKey()) {
       set->addRaw(e->data.m_data.num);
     } else {
-      assert(e->hasStrKey());
+      assertx(e->hasStrKey());
       set->addRaw(e->data.m_data.pstr);
     }
   }
@@ -652,7 +606,7 @@ BaseSet::php_skip(const Variant& n) {
     return Object{std::move(set)};
   }
   size_t sz = size_t(m_size) - size_t(len);
-  assert(sz);
+  assertx(sz);
   set->reserve(sz);
   set->setSize(sz);
   set->setPosLimit(sz);
@@ -661,7 +615,7 @@ BaseSet::php_skip(const Variant& n) {
   auto mask = set->tableMask();
   for (uint32_t toPos = 0; toPos < sz; ++toPos, ++frPos) {
     while (isTombstone(frPos)) {
-      assert(frPos + 1 < posLimit());
+      assertx(frPos + 1 < posLimit());
       ++frPos;
     }
     auto& toE = set->data()[toPos];
@@ -670,8 +624,7 @@ BaseSet::php_skip(const Variant& n) {
     if (toE.hasIntKey()) {
       set->updateNextKI(toE.ikey);
     } else {
-      assert(toE.hasStrKey());
-      set->updateIntLikeStrKeys(toE.skey);
+      assertx(toE.hasStrKey());
     }
   }
   return Object{std::move(set)};
@@ -691,21 +644,12 @@ BaseSet::php_skipWhile(const Variant& fn) {
   if (!m_size) return Object(std::move(set));
   // we don't reserve(), because we don't know how selective fn will be
   set->mutate();
-  int32_t version UNUSED;
-  if (std::is_same<c_Set, TSet>::value) {
-    version = m_version;
-  }
   uint32_t used = posLimit();
   uint32_t i = 0;
   for (; i < used; ++i) {
     if (isTombstone(i)) continue;
     Elm& e = data()[i];
     bool b = invokeAndCastToBool(ctx, 1, &e.data);
-    if (std::is_same<c_Set, TSet>::value) {
-      if (UNLIKELY(version != m_version)) {
-        throw_collection_modified();
-      }
-    }
     if (!b) break;
   }
   for (; i < used; ++i) {
@@ -714,7 +658,7 @@ BaseSet::php_skipWhile(const Variant& fn) {
     if (e.hasIntKey()) {
       set->addRaw(e.data.m_data.num);
     } else {
-      assert(e.hasStrKey());
+      assertx(e.hasStrKey());
       set->addRaw(e.data.m_data.pstr);
     }
   }
@@ -752,8 +696,7 @@ BaseSet::php_slice(const Variant& start, const Variant& len) {
     if (toE.hasIntKey()) {
       set->updateNextKI(toE.ikey);
     } else {
-      assert(toE.hasStrKey());
-      set->updateIntLikeStrKeys(toE.skey);
+      assertx(toE.hasStrKey());
     }
   }
   return Object{std::move(set)};
@@ -768,7 +711,7 @@ BaseSet::php_concat(const Variant& iterable) {
   auto vec = req::make<TVector>();
   uint32_t sz = m_size;
   vec->reserve((size_t)sz + itSize);
-  assert(vec->canMutateBuffer());
+  assertx(vec->canMutateBuffer());
   vec->setSize(sz);
 
   uint32_t used = posLimit();
@@ -795,12 +738,10 @@ Object BaseSet::getIterator() {
 // Set
 
 void c_Set::clear() {
-  ++m_version;
   dropImmCopy();
   decRefArr(arrayData());
-  m_arr = staticEmptyMixedArray();
+  m_arr = staticEmptyDictArrayAsMixed();
   m_size = 0;
-  setIntLikeStrKeys(false);
 }
 
 c_Set* c_Set::Clone(ObjectData* obj) {
@@ -865,7 +806,9 @@ void CollectionsExtension::initSet() {
   BASE_ME(__construct,   &BaseSet::init);
   BASE_ME(count,         &BaseSet::size);
   BASE_ME(contains,      &BaseSet::php_contains);
-  BASE_ME(toArray,       &BaseSet::toArray);
+  BASE_ME(toArray,       &BaseSet::toPHPArray);
+  BASE_ME(toVArray,      &BaseSet::toVArray);
+  BASE_ME(toDArray,      &BaseSet::toDArray);
   BASE_ME(toKeysArray,   &BaseSet::toKeysArray);
   BASE_ME(toValuesArray, &BaseSet::toValuesArray);
   BASE_ME(getIterator,   &BaseSet::getIterator);

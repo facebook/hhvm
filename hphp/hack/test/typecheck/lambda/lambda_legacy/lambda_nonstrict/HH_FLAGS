@@ -1,0 +1,1 @@
+--untyped-nonstrict-lambda-parameters --disallow-ambiguous-lambda --all-errors

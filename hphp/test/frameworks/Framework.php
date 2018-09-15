@@ -26,10 +26,10 @@ class Framework {
   private Set<string> $blacklist;
   private Set<string> $clownylist;
   private Set<string> $flakeylist;
-  private array<array<string, string>> $pull_requests;
   private ?Set $individual_tests = null;
   private ?string $bootstrap_file = null;
   private ?string $config_file = null;
+  private string $hhvm_config_file = __DIR__.'/php.ini';
   private TestFindMode $test_find_mode;
   private bool $parallel;
 
@@ -101,7 +101,6 @@ class Framework {
       $this->setGitBranch(Options::$framework_info[$name]['branch']);
     }
     $this->setTestPath(Options::$framework_info[$name]["test_root"]);
-    $this->setPullRequests(Options::getFrameworkInfo($name, "pull_requests"));
     $this->setBlacklist(Options::getFrameworkInfo($name, "blacklist"));
     $this->setClownylist(Options::getFrameworkInfo($name, 'clowns'));
     $this->setFlakeylist(Options::getFrameworkInfo($name, 'flakey'));
@@ -126,6 +125,9 @@ class Framework {
     // Now that we have an install, we can safely set all possible
     // other framework information
     $this->setConfigFile(Options::getFrameworkInfo($name, "config_file"));
+    $this->setHHVMConfigFile(
+      Options::getFrameworkInfo($name, "hhvm_config_file"),
+    );
     $this->setBootstrapFile(Options::getFrameworkInfo($name, "bootstrap_file"));
     $this->setTestCommand(true);
     $this->findTests();
@@ -214,6 +216,10 @@ class Framework {
     return $command;
   }
 
+  public function getHHVMConfigFile(): string {
+    return $this->hhvm_config_file;
+  }
+
   //********************
   // Protected getters
   //********************
@@ -263,27 +269,6 @@ class Framework {
     if ($flakeylist !== null && !Options::$include_flakey) {
       foreach ($flakeylist as $test) {
         $this->flakeylist[] = Options::$frameworks_root.'/'.$test;
-      }
-    }
-  }
-
-  private function setPullRequests(
-    ?array<int, array<string, string>> $pull_requests
-  ): void {
-    $this->pull_requests = array();
-    if ($pull_requests !== null) {
-      foreach($pull_requests as $pr) {
-        if (array_key_exists("pull_dir", $pr)) {
-          $pr['pull_dir'] = Options::$frameworks_root."/".$pr['pull_dir'];
-        }
-        if (array_key_exists("move_from_dir", $pr)) {
-          $pr['move_from_dir'] = Options::$frameworks_root."/".
-                                 $pr['move_from_dir'];
-        }
-        if (array_key_exists("dir_to_move", $pr)) {
-          $pr['dir_to_move'] = Options::$frameworks_root."/".$pr['dir_to_move'];
-        }
-        $this->pull_requests[] = $pr;
       }
     }
   }
@@ -365,6 +350,17 @@ class Framework {
     }
   }
 
+  private function setHHVMConfigFile(?string $config): void {
+    if ($config === null) {
+      return;
+    }
+    if (substr($config, 0, 1) === '/') {
+      $this->hhvm_config_file = $config;
+    } else {
+      $this->hhvm_config_file = __DIR__.'/'.$config;
+    }
+  }
+
   //********************
   // Private getters
   //********************
@@ -374,14 +370,6 @@ class Framework {
 
   private function getClownylist(): ?Set {
     return $this->clownylist;
-  }
-
-  private function getPullRequests(): ?array<int, array> {
-    return $this->pull_requests;
-  }
-
-  private function getConfigFile(): ?string {
-    return $this->config_file;
   }
 
   private function getTestFilePattern(): string {
@@ -412,13 +400,13 @@ class Framework {
       while (($line = fgets($handle)) !== false) {
         $line = rtrim($line, PHP_EOL);
         if (preg_match(PHPUnitPatterns::TESTS_OK_PATTERN,
-                       $line, $match) === 1) {
+                       $line, &$match) === 1) {
           // We have ths pattern: OK (364 tests, 590 assertions)
           // We want the first match of digits
-          preg_match("/[0-9]+(?= )/", $line, $match);
+          preg_match("/[0-9]+(?= )/", $line, &$match);
           $num_tests += (int) $match[0];
         } else if (preg_match(PHPUnitPatterns::TESTS_FAILURE_PATTERN,
-                       $line, $match) === 1) {
+                       $line, &$match) === 1) {
           // We have this pattern: Tests: 364, Assertions: 585, Errors: 5.
           // Break out each type into an array
           $results_arr = str_getcsv($match[0]);
@@ -501,10 +489,13 @@ class Framework {
 
     while (!feof($file)) {
       $line = fgets($file);
-      if (preg_match($stop_parsing_pattern, $line, $matches) === 1) {
+      if ($line === false) {
         break;
       }
-      if (preg_match($this->test_name_pattern, $line, $matches) === 1) {
+      if (preg_match($stop_parsing_pattern, $line, &$matches) === 1) {
+        break;
+      }
+      if (preg_match($this->test_name_pattern, $line, &$matches) === 1) {
         // Get the next line for the expected status for that test
         $status = rtrim(fgets($file), PHP_EOL);
         $tests[$matches[0]] = $status;
@@ -539,13 +530,13 @@ class Framework {
     if ($handle) {
       while (!feof($handle)) {
         // trim out newline since Map doesn't like them in its keys
-        $test = rtrim(fgets($handle), PHP_EOL);
+        $test = rtrim((string) fgets($handle), PHP_EOL);
         if ($test !== "") {
           $status = rtrim(fgets($handle), PHP_EOL);
           $results[$test] = $status;
         }
       }
-      if (!ksort($results)) { return false; }
+      if (!ksort(&$results)) { return false; }
       fclose($handle);
       $contents = "";
       foreach ($results as $test => $status) {
@@ -612,9 +603,6 @@ class Framework {
       remove_dir_recursive(nullthrows($this->install_root).'-orig');
     }
 
-    if ($this->pull_requests != null) {
-      $this->installPullRequests();
-    }
     $this->extraPreComposer();
     $this->installDependencies();
     $this->extraPostComposer();
@@ -765,7 +753,7 @@ class Framework {
     if (!file_exists($this->tests_file) ||
         !file_exists($this->test_files_file)) {
       $first_time = true;
-      $find_tests_command = get_runtime_build()." TestFinder.php ";
+      $find_tests_command = get_runtime_build()." ".__DIR__."/TestFinder.php ";
       $find_tests_command .= " --framework-name ".$this->name;
       $find_tests_command .= " --tests-file ".$this->tests_file;
       $find_tests_command .= " --test-files-file ".$this->test_files_file;
@@ -785,11 +773,11 @@ class Framework {
       $pipes = array();
       verbose("Command used to find the test files and tests for ".$this->name.
               ": ".$find_tests_command."\n");
-      $proc = proc_open($find_tests_command, $descriptorspec, $pipes, __DIR__);
+      $proc = proc_open($find_tests_command, $descriptorspec, &$pipes);
       if (is_resource($proc)) {
         $pid = proc_get_status($proc)["pid"];
         $child_status = null;
-        pcntl_waitpid($pid, $child_status);
+        pcntl_waitpid($pid, &$child_status);
         fclose($pipes[0]);
         fclose($pipes[1]);
         fclose($pipes[2]);
@@ -933,44 +921,6 @@ class Framework {
     }
   }
 
-  private function installPullRequests(): void {
-    verbose("Merging some upstream pull requests for ".$this->name."\n");
-    foreach ($this->pull_requests as $pr) {
-      $dir = $pr["pull_dir"];
-      $rep = $pr["pull_repo"];
-      $gc = $pr["git_commit"];
-      $type = $pr["type"];
-      $move_from_dir = null;
-      $dir_to_move = null;
-      chdir($dir);
-      $git_command = "";
-      verbose("Pulling code from ".$rep. " and branch/commit ".$gc."\n");
-      if ($type === "pull") {
-        $git_command = "git pull --no-rebase ".$rep." ".$gc;
-      } else if ($type === "submodulemove") {
-        $git_command = "git submodule add -b ".$gc." ".$rep;
-        $move_from_dir = $pr["move_from_dir"];
-        $dir_to_move = $pr["dir_to_move"];
-      }
-      verbose("Pull request command: ".$git_command."\n");
-      $git_ret = run_install($git_command, $dir,
-                             ProxyInformation::$proxies);
-      if ($git_ret !== 0) {
-        remove_dir_recursive(nullthrows($this->install_root));
-        error_and_exit("Could not get pull request code for ".$this->name."!".
-                       " Removing framework!\n");
-      }
-      if ($dir_to_move !== null) {
-        $mv_command = "mv ".$dir_to_move." ".$dir;
-        verbose("Move command: ".$mv_command."\n");
-        exec($mv_command);
-        verbose("After move, removing: ".$move_from_dir."\n");
-        remove_dir_recursive(nullthrows($move_from_dir));
-      }
-      chdir(__DIR__);
-    }
-  }
-
   // Right now this is just an estimate since one test can
   // have a bunch of different data sets sent to it via
   // a data provider, making one test really into n tests.
@@ -981,6 +931,6 @@ class Framework {
     $contents = file_get_contents($testfile);
     $matches = null;
     return preg_match_all(PHPUnitPatterns::TEST_METHOD_NAME_PATTERN,
-                          $contents, $matches);
+                          $contents, &$matches);
   }
 }

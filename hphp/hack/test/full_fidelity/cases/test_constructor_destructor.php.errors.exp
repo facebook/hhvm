@@ -1,0 +1,7 @@
+(5,3)-(5,40) Redeclared method C::__construct
+(6,3)-(6,33) Redeclared method C::__construct
+(7,3)-(7,41) Redeclared method C::__construct
+(8,12)-(8,43) Redeclared method C::__construct
+(9,12)-(9,43) Redeclared method C::__construct
+(10,3)-(10,48) Redeclared method C::__construct
+(12,12)-(12,40) Redeclared method C::__destruct

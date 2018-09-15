@@ -3,9 +3,8 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
@@ -20,9 +19,9 @@
  * for this class. The PHP class definition below is not actually used at run
  * time; it is simply provided for the typechecker and for developer reference.
  *
- * A `ImmVector` cannot be mutated. No elements can be added or removed from it,
- * nor can elements be overwritten using assignment (i.e. `$c[$k] = $v` is not
- * allowed).
+ * An `ImmVector` cannot be mutated. No elements can be added to it or removed
+ * from it, nor can elements be overwritten using assignment (i.e. `$c[$k] = $v`
+ * is not allowed).
  *
  * ```
  * $v = Vector {1, 2, 3};
@@ -51,24 +50,27 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    * Creates an `ImmVector` from the given `Traversable`, or an empty
    * `ImmVector` if `null` is passed.
    *
-   * @param $it - any `Traversable` object from which to create the `ImmVector`
+   * @param $it - Any `Traversable` object from which to create the `ImmVector`
    *              (e.g., `array`). If `null`, then an empty `ImmVector` is
    *              created.
    */
-  public function __construct(?Traversable<Tv> $it);
+  <<__Rx, __OnlyRxIfArgs>>
+  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv> $it);
 
   /**
    * Checks if the current `ImmVector` is empty.
    *
    * @return - `true` if the current `ImmVector` is empty; `false` otherwise.
    */
+  <<__Rx, __MaybeMutable>>
   public function isEmpty(): bool;
 
   /**
-   * Provides the number of elements in the current `ImmVector`.
+   * Returns the number of elements in the current `ImmVector`.
    *
    * @return - The number of elements in the current `ImmVector`.
    */
+  <<__Rx, __MaybeMutable>>
   public function count(): int;
 
   /**
@@ -79,11 +81,12 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    *
    * `$v = $vec->at($k)` is semantically equivalent to `$v = $vec[$k]`.
    *
-   * @param $k - the key from which to retrieve the value.
+   * @param $k - The key for which to retrieve the value.
    *
    * @return - The value at the specified key; or an exception if the key does
    *           not exist.
    */
+  <<__Rx, __MaybeMutable>>
   public function at(int $k): Tv;
 
   /**
@@ -92,11 +95,12 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    * If the key is not present, `null` is returned. If you would rather have an
    * exception thrown when a key is not present, then use `at()`.
    *
-   * @param $k - the key from which to retrieve the value.
+   * @param $k - The key for which to retrieve the value.
    *
    * @return - The value at the specified key; or `null` if the key does not
    *           exist.
    */
+  <<__Rx, __MaybeMutable>>
   public function get(int $k): ?Tv;
 
   /**
@@ -107,6 +111,7 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    *
    * @guide /hack/generics/constraints
    */
+  <<__Rx, __MaybeMutable>>
   public function containsKey<Tu super int>(Tu $k): bool;
 
   /**
@@ -114,8 +119,9 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    *
    * This method is interchangeable with `toValuesArray()`.
    *
-   * @return - an `array` containing the values from the current `ImmVector`.
+   * @return - An `array` containing the values from the current `ImmVector`.
    */
+  <<__Rx, __MaybeMutable, __PHPStdLib>>
   public function toArray(): array<Tv>;
 
   /**
@@ -123,16 +129,18 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    *
    * This method is interchangeable with `toArray()`.
    *
-   * @return - an `array` containing the values from the current `ImmVector`.
+   * @return - An `array` containing the values from the current `ImmVector`.
    */
-  public function toValuesArray(): array<Tv>;
+  <<__Rx, __MaybeMutable>>
+  public function toValuesArray(): varray<Tv>;
 
   /**
    * Returns an `array` whose values are the keys from the current `ImmVector`.
    *
-   * @return - an `array` with the integer keys from the current `ImmVector`.
+   * @return - An `array` with the integer keys from the current `ImmVector`.
    */
-  public function toKeysArray(): array<Tv>;
+  <<__Rx, __MaybeMutable>>
+  public function toKeysArray(): varray<Tv>;
 
   /**
    * Returns an iterator that points to beginning of the current `ImmVector`.
@@ -140,50 +148,53 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    * @return - A `KeyedIterator` that allows you to traverse the current
    *           `ImmVector`.
    */
-  public function getIterator(): KeyedIterator<int, Tv>;
+  <<__Rx, __MutableReturn, __MaybeMutable>>
+  public function getIterator(): HH\Rx\KeyedIterator<int, Tv>;
 
   /**
    * Returns the index of the first element that matches the search value.
    *
    * If no element matches the search value, this function returns -1.
    *
-   * @param $search_value - The value that will be search for in the current
+   * @param $search_value - The value that will be searched for in the current
    *                        `ImmVector`.
    *
    * @return - The key (index) where that value is found; -1 if it is not found.
    *
    * @guide /hack/generics/constraints
    */
+  <<__Rx, __MaybeMutable>>
   public function linearSearch<Tu super Tv>(Tu $search_value): int;
 
   /**
-   * Creates an `ImmVector` from the given `Traversable`, or an empty `ImmVector`
-   * if `null` is passed.
+   * Creates an `ImmVector` from the given `Traversable`, or an empty
+   * `ImmVector` if `null` is passed.
    *
    * This is the static method version of the `ImmVector::__construct()`
    * constructor.
    *
-   * @param $items - any `Traversable` object from which to create an
+   * @param $items - Any `Traversable` object from which to create an
    *                 `ImmVector` (e.g., `array`). If `null`, then an empty
    *                 `ImmVector` is created.
    *
    * @return - An `ImmVector` with the values from the `Traversable`; or an
    *           empty `ImmVector` if the `Traversable` is `null`.
    */
-  public static function fromItems(?Traversable<Tv> $items): ImmVector<Tv>;
+  <<__Rx, __OnlyRxIfArgs, __MaybeMutable>>
+  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv> $items): ImmVector<Tv>;
 
   /**
    * Creates an `ImmVector` from the keys of the specified container.
    *
-   * If a key of the specified container are not integers, then it adds
-   * the next available integer key in the current `ImmVector` and makes that
-   * key the value.
+   * Every key in the provided `KeyedContainer` will appear sequentially in the
+   * returned `ImmVector`, with the next available integer key assigned to each.
    *
    * @param $container - The container with the keys used to create the
    *                     current `ImmVector`.
    *
    * @return - An `ImmVector` built from the keys of the specified container.
    */
+  <<__Rx, __MaybeMutable>>
   public static function fromKeysOf<Tk>(
     ?KeyedContainer<Tk, mixed> $container,
   ): ImmVector<Tk>;
@@ -194,6 +205,7 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    *
    * @return - The `string` `"ImmVector"`.
    */
+  <<__Rx, __MaybeMutable>>
   public function __toString(): string;
 
   /**
@@ -204,39 +216,55 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    *
    * @return - The `Iterable` view of the current `ImmVector`.
    */
-  public function items(): Iterable<Tv>;
+  <<__Rx, __MutableReturn, __MaybeMutable>>
+  public function items(): HH\Rx\Iterable<Tv>;
 
   /**
-   * Returns a copy of the current `ImmVector`.
+   * Returns the current `ImmVector`.
    *
-   * @return - an `ImmVector` that is a copy of the current `ImmVector`.
+   * Unlike `Vector`'s `toVector()` method, this does not actually return a copy
+   * of the current `ImmVector`. Since `ImmVector`s are immutable, there is no
+   * reason to pay the cost of creating a copy of the current `ImmVector`.
+   *
+   * This method is interchangeable with `immutable()`.
+   *
+   * This method is NOT interchangeable with `values()`. `values()` returns a
+   * new `ImmVector` that is a copy of the current `ImmVector`, and thus incurs
+   * both the cost of copying the current `ImmVector`, and the memory space
+   * consumed by the new `ImmVector`.  This may be significant, for large
+   * `ImmVector`s.
+   *
+   * @return - The current `ImmVector`.
    */
+  <<__Rx, __MaybeMutable>>
   public function toImmVector(): ImmVector<Tv>;
 
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
  /**
    * Returns a `Vector` containing the elemnts of the current `ImmVector`.
    *
    * The returned `Vector` will, of course, be mutable.
    *
-   * @return - a `Vector` with the elements of the current `ImmVector`.
+   * @return - A `Vector` with the elements of the current `ImmVector`.
    */
-  public function toVector(): Vector<Tv>;
-
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe
    * See #6853603. */
+  public function toVector(): Vector<Tv>;
+
   /**
    * Returns an integer-keyed `Map` based on the elements of the current
    * `ImmVector`.
    *
    * The keys are `0... count() - 1`.
    *
-   * @return - an integer-keyed `Map` with the values of the current
+   * @return - An integer-keyed `Map` with the values of the current
    *           `ImmVector`.
    */
+  <<__Rx, __MutableReturn, __MaybeMutable>>
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe
+   * See #6853603. */
   public function toMap(): Map<int, Tv>;
 
   /**
@@ -245,140 +273,173 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    *
    * The keys are `0... count() - 1`.
    *
-   * @return - an `ImmMap` with the values of the current `ImmVector`.
+   * @return - An integer-keyed `ImmMap` with the values of the current
+   *           `ImmVector`.
    */
+  <<__Rx, __MaybeMutable>>
   public function toImmMap(): ImmMap<int, Tv>;
 
-  /* HH_FIXME[4120]: While this violates our variance annotations, we are
-   * returning a copy of the underlying collection, so it is actually safe
-   * See #6853603. */
   /**
    * Returns a `Set` with the values of the current `ImmVector`.
    *
-   * @return - a `Set` with the values of the current `ImmVector`.
+   * @return - A `Set` with the values of the current `ImmVector`.
    */
+  <<__Rx, __MutableReturn, __MaybeMutable>>
+  /* HH_FIXME[4120]: While this violates our variance annotations, we are
+   * returning a copy of the underlying collection, so it is actually safe
+   * See #6853603. */
   public function toSet(): Set<Tv>;
 
   /**
    * Returns an immutable Set (`ImmSet`) with the values of the current
    * `ImmVector`.
    *
-   * @return - an `ImmSet` with the current values of the current `ImmVector`.
+   * @return - An `ImmSet` with the current values of the current `ImmVector`.
    */
+  <<__Rx, __MaybeMutable>>
   public function toImmSet(): ImmSet<Tv>;
 
   /**
-   * Returns an immutable copy (`ImmVector`) of the current `ImmVector`.
+   * Returns the current `ImmVector`.
    *
-   * This method is interchangeable with `toImmVector()` and `values()`.
+   * Unlike `Vector`'s `toVector()` method, this does not actually return a copy
+   * of the current `ImmVector`. Since `ImmVector`s are immutable, there is no
+   * reason to pay the cost of creating a copy of the current `ImmVector`.
    *
-   * @return - an `ImmVector` copy of the current `ImmVector`.
+   * This method is interchangeable with `toImmVector()`.
+   *
+   * This method is NOT interchangeable with `values()`. `values()` returns a
+   * new `ImmVector` that is a copy of the current `ImmVector`, and thus incurs
+   * both the cost of copying the current `ImmVector`, and the memory space
+   * consumed by the new `ImmVector`.  This may be significant, for large
+   * `ImmVector`s.
+   *
+   * @return - The current `ImmVector`.
    */
+  <<__Rx, __MaybeMutable>>
   public function immutable(): ImmVector<Tv>;
 
   /**
-   * Returns a lazy, access elements only when needed view of the current
+   * Returns a lazy, access-elements-only-when-needed view of the current
    * `ImmVector`.
    *
    * Normally, memory is allocated for all of the elements of an `ImmVector`.
    * With a lazy view, memory is allocated for an element only when needed or
    * used in a calculation like in `map()` or `filter()`.
    *
-   * @return - an integer-keyed `KeyedIterable` representing the lazy view into
+   * @return - An integer-keyed `KeyedIterable` representing the lazy view into
    *           the current `ImmVector`.
    *
    * @guide /hack/collections/examples
    */
-  public function lazy(): KeyedIterable<int, Tv>;
+  <<__Rx, __MutableReturn, __MaybeMutable>>
+  public function lazy(): HH\Rx\KeyedIterable<int, Tv>;
 
   /**
-   * Returns an `ImmVector` containing the values of the current `ImmVector`.
-   * Essentially a copy of the current `ImmVector`.
+   * Returns a new `ImmVector` containing the values of the current `ImmVector`;
+   * that is, a copy of the current `ImmVector`.
    *
-   * This method is interchangeable with `toImmVector()` and `immutable()`.
+   * This method is NOT interchangeable with `toImmVector()` and `immutable()`.
+   * `toImmVector()` and `immutable()` return the current `ImmVector`, and do
+   * not incur the cost of copying the current `ImmVector`, or the memory space
+   * consumed by the new `ImmVector`.  This may be significant, for large
+   * `ImmVector`s.
    *
-   * @return - an `ImmVector` containing the values of the current `ImmVector`.
+   * @return - A new `ImmVector` containing the values of the current
+   *           `ImmVector`.
    */
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function values(): ImmVector<Tv>;
 
   /**
    * Returns an `ImmVector` containing the keys, as values, of the current
    * `ImmVector`.
    *
-   * @return - an `ImmVector` containing, as values, the integer keys of the
+   * @return - An `ImmVector` containing, as values, the integer keys of the
    *           current `ImmVector`.
    */
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function keys(): ImmVector<int>;
 
   /**
-   * Returns an `ImmVector` containing the values after an operation has been
-   * applied to each value in the current `ImmVector`.
+   * Returns an `ImmVector` containing the results of applying an operation to
+   * each value in the current `ImmVector`.
    *
-   * Every value in the current `ImmVector` is affected by a call to `map()`,
-   * unlike `filter()` where only values that meet a certain criteria are
-   * affected.
+   * `map()`'s result contains a value for every value in the current
+   * `ImmVector`; unlike `filter()`, where only values that meet a certain
+   * criterion are included in the resulting `ImmVector`.
    *
    * @param $callback - The callback containing the operation to apply to the
-   *                    current `ImmVector` values.
+   *                    current `ImmVector`'s values.
    *
-   * @return - a `ImmVector` containing the values after a user-specified
-   *           operation is applied.
+   * @return - An `ImmVector` containing the results of applying a user-specified
+   *           operation to each value of the current `ImmVector` in turn.
    *
    * @guide /hack/collections/examples
    */
-  public function map<Tu>((function(Tv): Tu) $callback): ImmVector<Tu>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function map<Tu>(<<__OnlyRxIfRxFunc>>(function(Tv): Tu) $callback): ImmVector<Tu>;
 
   /**
-   * Returns an `ImmVector` containing the values after an operation has been
-   * applied to each key and value in the current `ImmVector`.
+   * Returns an `ImmVector` containing the results of applying an operation to
+   * each key/value pair in the current `ImmVector`.
    *
-   * Every key and value in the current `ImmVector` is affected by a call to
-   * `mapWithKey()`, unlike `filterWithKey()` where only values that meet a
-   * certain criteria are affected.
+   * `mapWithKey()`'s result contains a value for every key/value pair in the
+   * current `ImmVector`; unlike `filterWithKey()`, where only values whose
+   * key/value pairs meet a certain criterion are included in the resulting
+   * `ImmVector`.
    *
    * @param $callback - The callback containing the operation to apply to the
-   *                    current `ImmVector` keys and values.
+   *                    current `ImmVector`'s key/value pairs.
    *
-   * @return - an `ImmVector` containing the values after a user-specified
-   *           operation on the current `ImmVector`'s keys and values is applied.
+   * @return - An `ImmVector` containing the results of applying a
+   *           user-specified operation to each key/value pair of the current
+   *           `ImmVector` in turn.
    */
-  public function mapWithKey<Tu>((function(int, Tv): Tu) $callback):
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function mapWithKey<Tu>(<<__OnlyRxIfRxFunc>>(function(int, Tv): Tu) $callback):
     ImmVector<Tu>;
 
   /**
    * Returns a `ImmVector` containing the values of the current `ImmVector` that
    * meet a supplied condition.
    *
-   * Only values that meet a certain criteria are affected by a call to
-   * `filter()`, while all values are affected by a call to `map()`.
+   * `filter()`'s result contains only values that meet the provided criterion;
+   * unlike `map()`, where a value is included for each value in the original
+   * `ImmVector`.
    *
    * @param $callback - The callback containing the condition to apply to the
    *                    current `ImmVector` values.
    *
-   * @return - a `ImmVector` containing the values after a user-specified
+   * @return - An `ImmVector` containing the values after a user-specified
    *           condition is applied.
    *
    * @guide /hack/collections/examples
    */
-  public function filter((function(Tv): bool) $callback): ImmVector<Tv>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function filter(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $callback): ImmVector<Tv>;
 
   /**
    * Returns an `ImmVector` containing the values of the current `ImmVector`
    * that meet a supplied condition applied to its keys and values.
    *
-   * Only keys and values that meet a certain criteria are affected by a call to
-   * `filterWithKey()`, while all values are affected by a call to
-   * `mapWithKey()`.
+   * `filterWithKey()`'s result contains only values whose key/value pairs
+   * satisfy the provided criterion; unlike `mapWithKey()`, which contains
+   * results derived from every key/value pair in the original `ImmVector`.
    *
    * @param $callback - The callback containing the condition to apply to the
-   *                    current `ImmVector` keys and values.
+   *                    `ImmVector`'s key/value pairs. For each key/value pair,
+   *                    the key is passed as the first parameter to the
+   *                    callback, and the value is passed as the second
+   *                    parameter.
    *
-   * @return - an `ImmVector` containing the values after a user-specified
-   *           condition is applied to the keys and values of the current
-   *           `ImmVector`.
+   * @return - An `ImmVector` containing the values of the current `ImmVector`
+   *           for which a user-specified test condition returns true when
+   *           applied to the corresponding key/value pairs.
    *
    */
-  public function filterWithKey((function(int, Tv): bool) $callback):
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function filterWithKey(<<__OnlyRxIfRxFunc>>(function(int, Tv): bool) $callback):
     ImmVector<Tv>;
 
   /**
@@ -393,75 +454,90 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    * @param $traversable - The `Traversable` to use to combine with the
    *                       elements of the current `ImmVector`.
    *
-   * @return - The `ImmVector` that combines the values of this `ImmVector`
-   *           with the provided `Traversable`.
+   * @return - An `ImmVector` that combines the values of the current
+   *           `ImmVector` with the provided `Traversable`.
    */
-  public function zip<Tu>(Traversable<Tu> $traversable):
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
     ImmVector<Pair<Tv, Tu>>;
 
   /**
-   * Returns an `ImmVector` containing the first `n` values of the current
+   * Returns an `ImmVector` containing the first `$n` values of the current
    * `ImmVector`.
    *
-   * The returned `ImmVector` will always be a proper subset of this
-   * `ImmVector`.
+   * The returned `ImmVector` will always be a subset (but not necessarily a
+   * proper subset) of the current `ImmVector`. If `$n` is greater than the
+   * length of the current `ImmVector`, the returned `ImmVector` will contain
+   * all elements of the current `ImmVector`.
    *
-   * `n` is 1-based. So the first element is 1, the second 2, etc.
+   * `$n` is 1-based. So the first element is 1, the second 2, etc.
    *
-   * @param $n - The last element that will be included in the `ImmVector`.
+   * @param $n - The last element that will be included in the returned
+   *             `ImmVector`.
    *
-   * @return - An `ImmVector` that is a proper subset of the curretn
-   *           `ImmVector` up to `n` elements.
+   * @return - An `ImmVector` that is a subset of the current `ImmVector` up to
+   *           `$n` elements.
    */
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function take(int $n): ImmVector<Tv>;
 
   /**
    * Returns an `ImmVector` containing the values of the current `ImmVector` up
    * to but not including the first value that produces `false` when passed to
-   * the specified callback.
+   * the specified callback. That is, takes the continuous prefix of values in
+   * the current `ImmVector` for which the specified callback returns `true`.
    *
-   * The returned `ImmVector` will always be a proper subset of the current
-   * `ImmVector`.
+   * The returned `ImmVector` will always be a subset (but not necessarily a
+   * proper subset) of the current `ImmVector`.
    *
    * @param $fn - The callback that is used to determine the stopping condition.
    *
-   * @return - An `ImmVector` that is a proper subset of the current
-   *           `ImmVector` up until when the callback returns `false`.
+   * @return - An `ImmVector` that is a subset of the current `ImmVector` up
+   *           until when the callback returns `false`.
    */
-  public function takeWhile((function(Tv): bool) $fn): ImmVector<Tv>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function takeWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): ImmVector<Tv>;
 
   /**
-   * Returns an `ImmVector` containing the values after the `n`-th element of
+   * Returns an `ImmVector` containing the values after the `$n`-th element of
    * the current `ImmVector`.
    *
-   * The returned `ImmVector` will always be a proper subset of the current
-   * `ImmVector`.
+   * The returned `ImmVector` will always be a subset (but not necessarily a
+   * proper subset) of the current `ImmVector`. If `$n` is greater than or equal
+   * to the length of the current `ImmVector`, the returned `ImmVector` will
+   * contain no elements. If `$n` is negative, the returned `ImmVector` will
+   * contain all elements of the current `ImmVector`.
    *
-   * `n` is 1-based. So the first element is 1, the second 2, etc.
+   * `$n` is 1-based. So the first element is 1, the second 2, etc.
    *
    * @param $n - The last element to be skipped; the `$n+1` element will be the
    *             first one in the returned `ImmVector`.
    *
-   * @return - An `ImmVector` that is a proper subset of the current `ImmVector`
-   *           containing values after the specified `n`-th element.
+   * @return - An `ImmVector` that is a subset of the current `ImmVector`
+   *           containing values after the specified `$n`-th element.
    */
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function skip(int $n): ImmVector<Tv>;
 
   /**
    * Returns an `ImmVector` containing the values of the current `ImmVector`
-   * starting after and including the first value that produces `true` when
-   * passed to the specified callback.
+   * starting after and including the first value that produces `false` when
+   * passed to the specified callback. That is, skips the continuous prefix of
+   * values in the current `ImmVector` for which the specified callback returns
+   * `true`.
    *
-   * The returned `ImmVector` will always be a proper subset of the current
-   * `ImmVector`.
+   * The returned `ImmVector` will always be a subset (but not necessarily a
+   * proper subset) of the current `ImmVector`.
    *
    * @param $fn - The callback used to determine the starting element for the
-   *              `ImmVector`.
+   *              returned `ImmVector`.
    *
-   * @return - An `ImmVector` that is a proper subset of the current
-   *           `ImmVector` starting after the callback returns `true`.
+   * @return - An `ImmVector` that is a subset of the current `ImmVector`
+   *           starting with the value for which the callback first returns
+   *           `false`.
    */
-  public function skipWhile((function(Tv): bool) $fn): ImmVector<Tv>;
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function skipWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): ImmVector<Tv>;
 
   /**
    * Returns a subset of the current `ImmVector` starting from a given key up
@@ -471,35 +547,47 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    * `$start` is 0-based. `$len` is 1-based. So `slice(0, 2)` would return the
    * elements at key 0 and 1.
    *
-   * The returned `ImmVector` will always be a proper subset of the current
-   * `ImmVector`.
+   * The returned `ImmVector` will always be a subset (but not necessarily a
+   * proper subset) of the current `ImmVector`. If `$start` is greater than or
+   * equal to the length of the current `Vector`, the returned `Vector` will
+   * contain no elements.  If `$start` + `$len` is greater than or equal to the
+   * length of the current `Vector`, the returned `Vector` will contain the
+   * elements from `$start` to the end of the current `Vector`.
    *
-   * @param $start - The starting key of the current `ImmVector` to begin the
-   *                 returned `ImmVector`.
+   * If either `$start` or `$len` is negative, an exception is thrown.
+   *
+   * @param $start - The starting key of the current `ImmVector` at which to
+   *                 begin the returned `ImmVector`.
    * @param $len - The length of the returned `ImmVector`.
    *
-   * @return - An `ImmVector` that is a proper subset of the current
-   *           `ImmVector` starting at `$start` up to but not including the
-   *           element `$start + $len`.
+   * @return - An `ImmVector` that is a subset of the current `ImmVector`
+   *           starting at `$start` up to but not including the element
+   *           `$start + $len`.
    */
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function slice(int $start, int $len): ImmVector<Tv>;
 
   /**
    * Returns an `ImmVector` that is the concatenation of the values of the
    * current `ImmVector` and the values of the provided `Traversable`.
    *
-   * The values of the provided `Traversable` is concatenated to the end of the
-   * current `ImmVector` to produce the returned `ImmVector`.
+   * The returned `ImmVector` is created from the values of the current
+   * `ImmVector`, followed by the values of the provided `Traversable`.
+   *
+   * The returned `ImmVector` is a new object; the current `ImmVector` is
+   * unchanged.
    *
    * @param $traversable - The `Traversable` to concatenate to the current
    *                       `ImmVector`.
    *
-   * @return - The concatenated `ImmVector`.
+   * @return - A new `ImmVector` containing the values from `$traversable`
+   *           concatenated to the values from the current `ImmVector`.
    *
    * @guide /hack/generics/constraints
    */
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
   public function concat<Tu super Tv>(
-    Traversable<Tu> $traversable
+    <<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable
   ): ImmVector<Tv>;
 
   /**
@@ -508,6 +596,7 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    * @return - The first value in the current `ImmVector`, or `null` if the
    *           current `ImmVector` is empty.
    */
+  <<__Rx, __MaybeMutable>>
   public function firstValue(): ?Tv;
 
   /**
@@ -516,6 +605,7 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    * @return - The first key (an integer) in the current `ImmVector`, or `null`
    *           if the current `ImmVector` is empty.
    */
+  <<__Rx, __MaybeMutable>>
   public function firstKey(): ?int;
 
   /**
@@ -524,6 +614,7 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    * @return - The last value in the current `ImmVector`, or `null` if the
    *           current `ImmVector` is empty.
    */
+  <<__Rx, __MaybeMutable>>
   public function lastValue(): ?Tv;
 
   /**
@@ -532,5 +623,11 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    * @return - The last key (an integer) in the current `ImmVector`, or `null`
    *           if the current `ImmVector` is empty.
    */
+  <<__Rx, __MaybeMutable>>
   public function lastKey(): ?int;
+
+  <<__Rx, __MaybeMutable>> /* HH_FIXME[0002] */
+  public function toVArray(): varray<Tv>;
+  <<__Rx, __MaybeMutable>> /* HH_FIXME[0001] */
+  public function toDArray(): darray<int, Tv>;
 }

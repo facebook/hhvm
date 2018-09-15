@@ -1,4 +1,2 @@
-File "typedef14.php", line 15, characters 11-15:
-Unexpected typedef (Naming[2052])
-File "typedef14.php", line 12, characters 6-10:
-Definition is here
+File "typedef14.php", line 15, characters 17-17:
+Encountered unexpected token '0'. (Parsing[1002])

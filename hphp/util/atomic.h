@@ -25,11 +25,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-template<class T>
-inline void assert_address_is_atomically_accessible(T* address) {
-  static_assert(
-    sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4 || sizeof(T) == 8,
-    "T must be a 1, 2, 4, or 8 byte object for atomic access");
+template <class T>
+inline void
+assert_address_is_atomically_accessible(ATTRIBUTE_UNUSED T* address) {
+  static_assert(sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4 ||
+                  sizeof(T) == 8,
+                "T must be a 1, 2, 4, or 8 byte object for atomic access");
   static_assert(
     std::is_arithmetic<T>::value || std::is_pointer<T>::value,
     "Atomic operations only supported for built in integer, floating point "

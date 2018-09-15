@@ -9,6 +9,10 @@ function f(&$x, $y) {
     unset($x);
   $x = 0;
 }
+
+<<__EntryPoint>>
+function main_1118() {
 $myvar = 10;
 f($myvar, 30);
 var_dump($myvar);
+}

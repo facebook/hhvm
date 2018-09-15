@@ -8,6 +8,10 @@ function f($code) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_single_line_comment_with_eof() {
 f("<?hh // ?>");
 f("<?php // ?>");
 f("<?php // comment");
+}

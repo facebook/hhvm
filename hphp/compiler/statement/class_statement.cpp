@@ -26,8 +26,6 @@
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/statement/method_statement.h"
 #include "hphp/compiler/statement/class_variable.h"
-#include "hphp/compiler/analysis/variable_table.h"
-#include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/util/text-util.h"
 #include "hphp/compiler/statement/interface_statement.h"
 #include "hphp/compiler/statement/use_trait_statement.h"
@@ -50,7 +48,7 @@ ClassStatement::ClassStatement
  TypeAnnotationPtr enumBaseTy)
   : InterfaceStatement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(ClassStatement),
                        name, base, docComment, stmt, attrList),
-    m_type(type), m_ignored(false), m_enumBaseTy(enumBaseTy) {
+    m_type(type), m_enumBaseTy(enumBaseTy) {
   m_originalParent = parent;
 }
 
@@ -64,7 +62,7 @@ StatementPtr ClassStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
+void ClassStatement::onParse(AnalysisResultConstRawPtr ar, FileScopePtr fs) {
   ClassScope::KindOf kindOf = ClassScope::KindOf::ObjectClass;
   switch (m_type) {
     case T_CLASS:     kindOf = ClassScope::KindOf::ObjectClass;   break;
@@ -104,12 +102,7 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
     stmt, attrs);
 
   setBlockScope(classScope);
-  if (!fs->addClass(ar, classScope)) {
-    m_ignored = true;
-    return;
-  }
-
-  classScope->setPersistent(false);
+  fs->addClass(ar, classScope);
 
   if (m_stmt) {
     MethodStatementPtr constructor = nullptr;
@@ -164,21 +157,18 @@ void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
     }
     if (constructor && constructor->getModifiers()->isStatic()) {
       constructor->parseTimeFatal(fs,
-                                  Compiler::InvalidAttribute,
                                   "Constructor %s::%s() cannot be static",
                                   classScope->getOriginalName().c_str(),
                                   constructor->getOriginalName().c_str());
     }
     if (destructor && destructor->getModifiers()->isStatic()) {
       destructor->parseTimeFatal(fs,
-                                 Compiler::InvalidAttribute,
                                  "Destructor %s::%s() cannot be static",
                                  classScope->getOriginalName().c_str(),
                                  destructor->getOriginalName().c_str());
     }
     if (clone && clone->getModifiers()->isStatic()) {
       clone->parseTimeFatal(fs,
-                            Compiler::InvalidAttribute,
                             "Clone method %s::%s() cannot be static",
                             classScope->getOriginalName().c_str(),
                             clone->getOriginalName().c_str());
@@ -200,37 +190,6 @@ std::string ClassStatement::getName() const {
   return std::string("Class ") + getOriginalName();
 }
 
-void ClassStatement::analyzeProgram(AnalysisResultPtr ar) {
-  std::vector<std::string> bases;
-  auto const hasParent = !m_originalParent.empty();
-  if (hasParent) bases.push_back(m_originalParent);
-  if (m_base) m_base->getStrings(bases);
-
-  checkVolatile(ar);
-
-  if (m_stmt) {
-    m_stmt->analyzeProgram(ar);
-  }
-
-  if (ar->getPhase() != AnalysisResult::AnalyzeAll) return;
-
-  for (unsigned int i = 0; i < bases.size(); i++) {
-    ClassScopePtr cls = ar->findClass(bases[i]);
-    if (cls) {
-      auto const expectClass = hasParent && i == 0;
-      if (expectClass == cls->isInterface() || cls->isTrait()) {
-        Compiler::Error(Compiler::InvalidDerivation,
-                        shared_from_this(),
-                        "You are extending " + cls->getOriginalName() +
-                          " which is an interface or a trait");
-      }
-      if (cls->isUserClass()) {
-        cls->addUse(getScope(), BlockScope::UseKindParentRef);
-      }
-    }
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
@@ -242,9 +201,10 @@ void ClassStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printf("trait %s", m_originalName.c_str());
   } else {
     switch (m_type) {
-      case T_CLASS:                              break;
-      case T_ABSTRACT: cg_printf("abstract ");   break;
-      case T_FINAL:    cg_printf("final ");      break;
+      case T_CLASS:                                  break;
+      case T_ABSTRACT: cg_printf("abstract ");       break;
+      case T_FINAL:    cg_printf("final ");          break;
+      case T_STATIC:   cg_printf("abstract final "); break;
       default:
         assert(false);
     }
@@ -264,8 +224,4 @@ void ClassStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   classScope->outputPHP(cg, ar);
   if (m_stmt) m_stmt->outputPHP(cg, ar);
   cg_indentEnd("}\n");
-}
-
-bool ClassStatement::hasImpl() const {
-  return true;
 }

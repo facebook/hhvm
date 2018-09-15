@@ -10,4 +10,8 @@ function bar() {
   echo " hello " , foo() , "
 ";
 }
+
+<<__EntryPoint>>
+function main_1588() {
 bar();
+}

@@ -1,0 +1,2 @@
+File "suspend_operator_err8.php", line 5, characters 8-11:
+Coroutine calls are only allowed when they are arguments to 'suspend' operator (Typing[4171])

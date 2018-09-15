@@ -28,12 +28,12 @@ namespace HPHP {
  * guarded on checking this first, and placed in an unlikely path.
  */
 inline bool strong_iterators_exist() {
-  return tl_miter_table.ents[0].array != nullptr;
+  return tl_miter_table->ents[0].array != nullptr;
 }
 
 template<class Fn> NEVER_INLINE
-void for_each_strong_iterator_slow(Fn fn) {
-  tl_miter_table.extras.for_each(fn);
+void for_each_strong_iterator_slow(MIterTable& table, Fn fn) {
+  table.extras.for_each(fn);
 }
 
 /*
@@ -46,18 +46,34 @@ void for_each_strong_iterator_slow(Fn fn) {
  */
 template<class Fn>
 void for_each_strong_iterator(Fn fn) {
-  assert(strong_iterators_exist());
-  fn(tl_miter_table.ents[0]);
-  fn(tl_miter_table.ents[1]);
-  fn(tl_miter_table.ents[2]);
-  fn(tl_miter_table.ents[3]);
-  fn(tl_miter_table.ents[4]);
-  fn(tl_miter_table.ents[5]);
-  fn(tl_miter_table.ents[6]);
-  static_assert(tl_miter_table.ents_size == 7, "");
-  if (UNLIKELY(!tl_miter_table.extras.empty())) {
-    for_each_strong_iterator_slow(fn);
+  static_assert(MIterTable::ents_size == 7, "");
+  assertx(strong_iterators_exist());
+  auto& table = *tl_miter_table;
+  fn(table.ents[0]);
+  fn(table.ents[1]);
+  fn(table.ents[2]);
+  fn(table.ents[3]);
+  fn(table.ents[4]);
+  fn(table.ents[5]);
+  fn(table.ents[6]);
+  if (UNLIKELY(!table.extras.empty())) {
+    for_each_strong_iterator_slow(table, fn);
   }
+}
+
+inline void move_strong_iterators(ArrayData* dst, ArrayData* src) {
+  for_each_strong_iterator([&] (MIterTable::Ent& ent) {
+    if (ent.array == src) {
+      ent.array = dst;
+      ent.iter->setContainer(dst);
+    }
+  });
+}
+
+inline void reset_strong_iterators(ArrayData* ad) {
+  for_each_strong_iterator([&] (const MIterTable::Ent& miEnt) {
+    if (miEnt.array == ad) miEnt.iter->setResetFlag(true);
+  });
 }
 
 //////////////////////////////////////////////////////////////////////

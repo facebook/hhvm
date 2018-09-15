@@ -28,8 +28,22 @@ inline bool Class::isZombie() const {
   return !m_cachedClass.bound();
 }
 
+
+inline bool Class::validate() const {
+#ifndef NDEBUG
+  assertx(m_magic == kMagic);
+#endif
+  assertx(name()->checkSane());
+  return true;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Class::PropInitVec.
+
+inline Class::PropInitVec::PropInitVec() : m_data(nullptr),
+                                           m_size(0),
+                                           m_capacity(0) {
+}
 
 inline Class::PropInitVec::iterator Class::PropInitVec::begin() {
   return m_data;
@@ -44,13 +58,17 @@ inline size_t Class::PropInitVec::size() const {
 }
 
 inline TypedValueAux& Class::PropInitVec::operator[](size_t i) {
-  assert(i < m_size);
+  assertx(i < m_size);
   return m_data[i];
 }
 
 inline const TypedValueAux& Class::PropInitVec::operator[](size_t i) const {
-  assert(i < m_size);
+  assertx(i < m_size);
   return m_data[i];
+}
+
+inline bool Class::PropInitVec::reqAllocated() const {
+  return m_capacity < 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -87,7 +105,7 @@ inline Class::veclen_t Class::classVecLen() const {
 // Ancestry.
 
 inline bool Class::classofNonIFace(const Class* cls) const {
-  assert(!(cls->attrs() & AttrInterface));
+  assertx(!(cls->attrs() & AttrInterface));
   if (m_classVecLen >= cls->m_classVecLen) {
     return (m_classVec[cls->m_classVecLen-1] == cls);
   }
@@ -138,12 +156,20 @@ inline StrNR Class::parentStr() const {
 }
 
 inline Attr Class::attrs() const {
-  assert(Attr(m_attrCopy) == m_preClass->attrs());
+  assertx(Attr(m_attrCopy) == m_preClass->attrs());
   return Attr(m_attrCopy);
 }
 
 inline int Class::getODAttrs() const {
   return m_ODAttrs;
+}
+
+inline bool Class::rtAttribute(RuntimeAttribute a) const {
+  return m_RTAttrs & a;
+}
+
+inline void Class::initRTAttributes(uint8_t a) {
+  m_RTAttrs |= a;
 }
 
 inline bool Class::isPersistent() const {
@@ -163,6 +189,18 @@ inline const Func* Class::getDtor() const {
 
 inline const Func* Class::getToString() const {
   return m_toString;
+}
+
+inline const Func* Class::get86pinit() const {
+  return m_pinitVec.back();
+}
+
+inline const Func* Class::get86sinit() const {
+  return m_sinitVec.back();
+}
+
+inline const Func* Class::get86linit() const {
+  return m_linitVec.back();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -242,8 +280,34 @@ inline RepoAuthType Class::staticPropRepoAuthType(Slot index) const {
   return m_staticProperties[index].repoAuthType;
 }
 
+inline const TypeConstraint& Class::declPropTypeConstraint(Slot index) const {
+  return m_declProperties[index].typeConstraint;
+}
+
+inline const TypeConstraint& Class::staticPropTypeConstraint(Slot index) const {
+  return m_staticProperties[index].typeConstraint;
+}
+
 inline bool Class::hasDeepInitProps() const {
   return m_hasDeepInitProps;
+}
+
+inline bool Class::forbidsDynamicProps() const {
+  return attrs() & AttrForbidDynamicProps;
+}
+
+inline bool Class::hasImmutableProps() const {
+  return attrs() & AttrHasImmutable;
+}
+
+inline bool Class::serialize() const {
+  if (m_serialized) return false;
+  m_serialized = true;
+  return true;
+}
+
+inline bool Class::wasSerialized() const {
+  return m_serialized;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -251,6 +315,14 @@ inline bool Class::hasDeepInitProps() const {
 
 inline bool Class::needInitialization() const {
   return m_needInitialization;
+}
+
+inline bool Class::maybeRedefinesPropTypes() const {
+  return m_maybeRedefsPropTy;
+}
+
+inline bool Class::needsPropInitialValueCheck() const {
+  return m_needsPropInitialCheck;
 }
 
 inline const Class::PropInitVec& Class::declPropInit() const {
@@ -261,11 +333,23 @@ inline const FixedVector<const Func*>& Class::pinitVec() const {
   return m_pinitVec;
 }
 
+inline rds::Handle Class::checkedPropTypeRedefinesHandle() const {
+  assertx(m_maybeRedefsPropTy);
+  m_extra->m_checkedPropTypeRedefs.bind(rds::Mode::Normal);
+  return m_extra->m_checkedPropTypeRedefs.handle();
+}
+
+inline rds::Handle Class::checkedPropInitialValuesHandle() const {
+  assertx(m_needsPropInitialCheck);
+  m_extra->m_checkedPropInitialValues.bind(rds::Mode::Normal);
+  return m_extra->m_checkedPropInitialValues.handle();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Property storage.
 
 inline void Class::initPropHandle() const {
-  m_propDataCache.bind();
+  m_propDataCache.bind(rds::Mode::Normal);
 }
 
 inline rds::Handle Class::propHandle() const {
@@ -277,9 +361,18 @@ inline rds::Handle Class::sPropInitHandle() const {
 }
 
 inline rds::Handle Class::sPropHandle(Slot index) const {
-  assert(m_sPropCacheInit.bound());
-  assert(numStaticProperties() > index);
-  return m_sPropCache[index].handle();
+  return sPropLink(index).handle();
+}
+
+inline rds::Link<StaticPropData, rds::Mode::NonNormal>
+Class::sPropLink(Slot index) const {
+  assertx(m_sPropCacheInit.bound());
+  assertx(numStaticProperties() > index);
+  return m_sPropCache[index];
+}
+
+inline rds::Link<bool, rds::Mode::NonLocal> Class::sPropInitLink() const {
+  return m_sPropCacheInit;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -331,12 +424,17 @@ inline Slot Class::traitsEndIdx() const   {
   return m_extra->m_traitsEndIdx;
 }
 
-inline const std::vector<ClassPtr>& Class::usedTraitClasses() const {
+inline const CompactVector<ClassPtr>& Class::usedTraitClasses() const {
   return m_extra->m_usedTraits;
 }
 
 inline const Class::TraitAliasVec& Class::traitAliases() const {
   return m_extra->m_traitAliases;
+}
+
+inline void Class::addTraitAlias(const PreClass::TraitAliasRule& rule) const {
+  allocExtraData();
+  m_extra.raw()->m_traitAliases.push_back(rule.asNamePair());
 }
 
 inline const Class::RequirementMap& Class::allRequirements() const {
@@ -365,8 +463,9 @@ inline rds::Handle Class::classHandle() const {
   return m_cachedClass.handle();
 }
 
-inline void Class::setClassHandle(rds::Link<LowPtr<Class>> link) const {
-  assert(!m_cachedClass.bound());
+inline void Class::setClassHandle(rds::Link<LowPtr<Class>,
+                                            rds::Mode::NonLocal> link) const {
+  assertx(!m_cachedClass.bound());
   m_cachedClass = link;
 }
 
@@ -396,6 +495,28 @@ inline const Class::ScopedClonesMap& Class::scopedClones() const {
   return m_extra->m_scopedClones;
 }
 
+/////////////////////////////////////////////////////////////////////////////
+// Memoization
+
+inline size_t Class::numMemoSlots() const {
+  return m_extra->m_nextMemoSlot;
+}
+
+inline bool Class::hasMemoSlots() const {
+  return numMemoSlots() > 0;
+}
+
+inline std::pair<Slot, bool> Class::memoSlotForFunc(FuncId func) const {
+  assertx(hasMemoSlots());
+  auto const it = m_extra->m_memoMappings.find(func);
+  if (it != m_extra->m_memoMappings.end()) return it->second;
+  // Each mapping is only stored in the class which defines it, so recurse up to
+  // the parent. We should only be calling this with functions which have a memo
+  // slot, so assert if we reach the end without finding a slot.
+  if (m_parent) return m_parent->memoSlotForFunc(func);
+  always_assert(false);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Other methods.
 
@@ -403,114 +524,17 @@ inline MaybeDataType Class::enumBaseTy() const {
   return m_enumBaseTy;
 }
 
+inline EnumValues* Class::getEnumValues() const {
+  return m_extra->m_enumValues.load(std::memory_order_relaxed);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // ExtraData.
 
-inline void Class::allocExtraData() {
+inline void Class::allocExtraData() const {
   if (!m_extra) {
     m_extra = new ExtraData();
   }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Trait method import.
-
-inline bool Class::TMIOps::strEmpty(const StringData* str) {
-  return str->empty();
-}
-
-inline const StringData* Class::TMIOps::clsName(const Class* traitCls) {
-  return traitCls->name();
-}
-
-inline bool Class::TMIOps::isTrait(const Class* traitCls) {
-  return traitCls->attrs() & AttrTrait;
-}
-
-inline bool Class::TMIOps::isAbstract(Attr modifiers) {
-  return modifiers & AttrAbstract;
-}
-
-inline Class::TraitMethod
-Class::TMIOps::traitMethod(const Class* traitCls,
-                           const Func* traitMeth,
-                           Class::TMIOps::alias_type rule) {
-  return TraitMethod { traitCls, traitMeth, rule.modifiers() };
-}
-
-inline const StringData*
-Class::TMIOps::precMethodName(Class::TMIOps::prec_type rule) {
-  return rule.methodName();
-}
-
-inline const StringData*
-Class::TMIOps::precSelectedTraitName(Class::TMIOps::prec_type rule) {
-  return rule.selectedTraitName();
-}
-
-inline TraitNameSet
-Class::TMIOps::precOtherTraitNames(Class::TMIOps::prec_type rule) {
-  return rule.otherTraitNames();
-}
-
-inline const StringData*
-Class::TMIOps::aliasTraitName(Class::TMIOps::alias_type rule) {
-  return rule.traitName();
-}
-
-inline const StringData*
-Class::TMIOps::aliasOrigMethodName(Class::TMIOps::alias_type rule) {
-  return rule.origMethodName();
-}
-
-inline const StringData*
-Class::TMIOps::aliasNewMethodName(Class::TMIOps::alias_type rule) {
-  return rule.newMethodName();
-}
-
-inline Attr
-Class::TMIOps::aliasModifiers(Class::TMIOps::alias_type rule) {
-  return rule.modifiers();
-}
-
-inline const Func*
-Class::TMIOps::findTraitMethod(const Class* cls,
-                               const Class* traitCls,
-                               const StringData* origMethName) {
-  return traitCls->lookupMethod(origMethName);
-}
-
-inline void
-Class::TMIOps::errorUnknownMethod(Class::TMIOps::prec_type rule) {
-  raise_error("unknown method '%s'", rule.methodName()->data());
-}
-
-inline void
-Class::TMIOps::errorUnknownMethod(Class::TMIOps::alias_type rule,
-                                  const StringData* methName) {
-  raise_error(Strings::TRAITS_UNKNOWN_TRAIT_METHOD, methName->data());
-}
-
-template <class Rule>
-inline void
-Class::TMIOps::errorUnknownTrait(const Rule& rule,
-                                 const StringData* traitName) {
-  raise_error(Strings::TRAITS_UNKNOWN_TRAIT, traitName->data());
-}
-
-inline void
-Class::TMIOps::errorDuplicateMethod(const Class* cls,
-                                    const StringData* methName) {
-  // No error if the class will override the method.
-  if (cls->preClass()->hasMethod(methName)) return;
-  raise_error(Strings::METHOD_IN_MULTIPLE_TRAITS, methName->data());
-}
-
-inline void
-Class::TMIOps::errorInconsistentInsteadOf(const Class* cls,
-                                          const StringData* methName) {
-  raise_error(Strings::INCONSISTENT_INSTEADOF, methName->data(),
-              cls->name()->data(), cls->name()->data());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -542,7 +566,6 @@ inline bool isAbstract(const Class* cls) {
 
 inline bool classHasPersistentRDS(const Class* cls) {
   return cls != nullptr &&
-    cls->classHandle() != rds::kInvalidHandle &&
     rds::isPersistentHandle(cls->classHandle());
 }
 
@@ -556,5 +579,11 @@ inline bool classMayHaveMagicPropMethods(const Class* cls) {
   return (cls->attrs() & no_overrides) != no_overrides;
 }
 
+inline const StringData* classToStringHelper(const Class* cls) {
+ if (RuntimeOption::EvalRaiseClassConversionWarning) {
+   raise_warning("Class to string convesion");
+ }
+ return cls->name();
+}
 ///////////////////////////////////////////////////////////////////////////////
 }

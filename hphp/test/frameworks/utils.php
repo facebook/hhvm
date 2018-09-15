@@ -250,7 +250,7 @@ function get_subclasses_of(string $parent): Vector {
       $result[] = strtolower($class);
     }
   }
-  sort($result);
+  sort(&$result);
   return $result;
 }
 
@@ -303,17 +303,21 @@ function get_runtime_build(bool $use_php = false): string {
     if (!$use_php) {
       $repo_loc = tempnam('/tmp', 'framework-test');
       $repo_args = " -v Repo.Local.Mode=-- -v Repo.Central.Path=".$repo_loc;
-      $command .= $repo_args.
-        " --config ".__DIR__."/php.ini";
+      $command .=
+        $repo_args.
+        ' -vEval.HackCompilerExtractPath='.$executable.'_hackc_%{schema}'.
+        ' -vEval.EmbeddedDataExtractPath='.$executable.'_%{type}_%{buildid}';
     }
   }
   invariant(
     file_exists($executable),
-    $executable.' does not exist'
+    '%s does not exist',
+    $executable,
   );
   invariant(
     is_executable($executable),
-    $executable.' is not executable'
+    '%s is not executable',
+    $executable,
   );
   return nullthrows($command);
 }
@@ -405,7 +409,7 @@ function run_install_impl(string $proc, string $path, ?Map $env): ?int
   }
 
   $pipes = null;
-  $process = proc_open($proc, $descriptorspec, $pipes, $path, $env_arr);
+  $process = proc_open($proc, $descriptorspec, &$pipes, $path, $env_arr);
   assert($pipes !== null);
   if (is_resource($process)) {
     fclose($pipes[0]);
@@ -419,7 +423,7 @@ function run_install_impl(string $proc, string $path, ?Map $env): ?int
     while ($done_by > time()) {
       $remaining = $done_by - time();
       $ready = stream_select(
-        $read, $write, $except,
+        &$read, &$write, &$except,
         $remaining > 0 ? $remaining : 1
       );
       if ($ready === 0) {

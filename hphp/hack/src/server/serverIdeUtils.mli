@@ -2,9 +2,8 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
@@ -12,7 +11,7 @@
 * this is the path that will be assigned to it *)
 val path: Relative_path.t
 
-(* Runs the typecheck phase on a single file. *)
+(** Runs the declaration, naming, and typecheck phases on a single file. *)
 val check_file_input :
   TypecheckerOptions.t ->
   (* What are the definitions in each file. Most likely coming from
@@ -22,17 +21,26 @@ val check_file_input :
    * is used to find the declarations and run only the typechecking phase.
    * When given content buffer it will be parsed, named, and declared before
    * that. The declarations will be removed from shared memory afterwards. *)
-  ServerUtils.file_input ->
-  Relative_path.t
+  ServerCommandTypes.file_input ->
+  Relative_path.t * Tast.program
+
+(** Runs the declaration, naming, and typecheck phases on an already-parsed
+    AST. *)
+val check_ast :
+  TypecheckerOptions.t ->
+  Ast.program ->
+  Tast.program
 
 (* Parses, names, declares and typechecks the content buffer, then run f
  * while the declared definitions are still available in shared memory.
  * The declarations will be removed from shared memory afterwards. *)
 val declare_and_check : string ->
-  f:(Relative_path.t -> FileInfo.t -> 'a) -> TypecheckerOptions.t -> 'a
+  f:(Relative_path.t -> FileInfo.t -> Tast.program -> 'a) -> TypecheckerOptions.t -> 'a
 
+val get_errors: Relative_path.t ->  string -> TypecheckerOptions.t -> Errors.t
 
 (* Run the typing phase on a list of files and definitions they contain. *)
 val recheck :
   TypecheckerOptions.t ->
-  (Relative_path.t * FileInfo.t) list -> unit
+  (Relative_path.t * FileInfo.t) list ->
+  (Relative_path.t * Tast.program) list

@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-string.h"
 
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/reverse-data-map.h"
 #include "hphp/runtime/vm/type-alias.h"
@@ -81,7 +82,7 @@ const TypeAliasReq* NamedEntity::getCachedTypeAlias() const {
 }
 
 void NamedEntity::pushClass(Class* cls) {
-  assert(!cls->m_nextClass);
+  assertx(!cls->m_nextClass);
   cls->m_nextClass = m_clsList;
   m_clsList = cls;
 }
@@ -101,10 +102,17 @@ void NamedEntity::removeClass(Class* goner) {
   }
   LowPtr<Class>* cls = &head->m_nextClass;
   while (cls->get() != goner) {
-    assert(*cls);
+    assertx(*cls);
     cls = &(*cls)->m_nextClass;
   }
   *cls = goner->m_nextClass;
+}
+
+void NamedEntity::setUniqueFunc(Func* func) {
+  assertx(func && func->isUnique());
+  auto const DEBUG_ONLY old = m_uniqueFunc;
+  assertx(!old || func == old);
+  m_uniqueFunc = func;
 }
 
 namespace {
@@ -122,6 +130,7 @@ NEVER_INLINE
 void initializeNamedDataMap() {
   NamedEntity::Map::Config config;
   config.growthFactor = 1;
+  config.entryCountThreadCacheSize = 10;
 
   s_namedDataMap = new NamedEntity::Map(
       RuntimeOption::EvalInitialNamedEntityTableSize, config);
@@ -181,6 +190,16 @@ NamedEntity::Map* NamedEntity::table() {
 
 size_t NamedEntity::tableSize() {
   return s_namedDataMap ? s_namedDataMap->size() : 0;
+}
+
+std::vector<std::pair<const char*, int64_t>> NamedEntity::tableStats() {
+  std::vector<std::pair<const char*, int64_t>> stats;
+  if (!s_namedDataMap) return stats;
+
+  stats.emplace_back("submaps", s_namedDataMap->numSubMaps());
+  stats.emplace_back("capacity", s_namedDataMap->capacity());
+
+  return stats;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

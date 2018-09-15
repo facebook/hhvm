@@ -12,4 +12,8 @@ function foo() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_array_060() {
 foo();
+}

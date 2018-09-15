@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Bar {
   private $base;
   public function __construct($base) {

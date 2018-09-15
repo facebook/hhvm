@@ -1,0 +1,96 @@
+==== ints and most strings pass through unchanged ====
+int(0)
+int(123)
+int(-123)
+string(0) ""
+string(11) "hello world"
+string(3) "123"
+string(7) "~abcdef"
+string(7) "a=F0=FF"
+==== strings where the first byte >= 0xf0 ====
+string(12) "=F8=F3=01=F0"
+string(12) "=F8=F3=01=F1"
+string(12) "=F8=F3=01=FF"
+string(18) "=F8=F3=07=F0normal"
+string(17) "=F8=F3=06=F1stuff"
+string(19) "=F8=F3=08=FFfollows"
+==== strings (in an array) ====
+string(21) "=FA=F3=00=F8=F3=00=FB"
+string(32) "=FA=F3=00=F8=F3=0Bhello world=FB"
+string(24) "=FA=F3=00=F8=F3=03123=FB"
+==== 1 byte int (in an array) ====
+string(18) "=FA=F3=00=F3=00=FB"
+string(18) "=FA=F3=00=F3=01=FB"
+string(18) "=FA=F3=00=F3=FF=FB"
+string(18) "=FA=F3=00=F3=7F=FB"
+string(18) "=FA=F3=00=F3=80=FB"
+==== 2 byte int (in an array) ====
+string(21) "=FA=F3=00=F4=80=00=FB"
+string(21) "=FA=F3=00=F4=7F=FF=FB"
+string(21) "=FA=F3=00=F4=FF=7F=FB"
+string(21) "=FA=F3=00=F4=00=80=FB"
+==== 4 byte int (in an array) ====
+string(27) "=FA=F3=00=F5=00=80=00=00=FB"
+string(27) "=FA=F3=00=F5=FF=7F=FF=FF=FB"
+string(27) "=FA=F3=00=F5=FF=FF=FF=7F=FB"
+string(27) "=FA=F3=00=F5=00=00=00=80=FB"
+==== 8 byte int (in an array) ====
+string(39) "=FA=F3=00=F6=00=00=00=80=00=00=00=00=FB"
+string(39) "=FA=F3=00=F6=FF=FF=FF=7F=FF=FF=FF=FF=FB"
+string(39) "=FA=F3=00=F6=FF=FF=FF=FF=FF=FF=FF=7F=FB"
+string(39) "=FA=F3=00=F6=00=00=00=00=00=00=00=80=FB"
+==== other basic types ====
+string(3) "=F0"
+string(3) "=F1"
+string(3) "=F2"
+string(19) "=F7X9=B4=C8v=BE=F3?"
+==== other basic types (in an array) ====
+string(15) "=FA=F3=00=F0=FB"
+string(15) "=FA=F3=00=F1=FB"
+string(15) "=FA=F3=00=F2=FB"
+string(31) "=FA=F3=00=F7X9=B4=C8v=BE=F3?=FB"
+==== empty containers ====
+string(6) "=FA=FB"
+string(6) "=FA=FB"
+string(6) "=FA=FB"
+string(6) "=FA=FB"
+string(6) "=FA=FB"
+string(6) "=FA=FB"
+string(6) "=FA=FB"
+string(6) "=FA=FB"
+string(6) "=FA=FB"
+==== containers with something in them ====
+string(30) "=FA=F3=00=F3=01=F3=01=F3=02=FB"
+string(30) "=FA=F3=01=F3=01=F3=02=F3=02=FB"
+string(30) "=FA=F3=00=F3=01=F3=01=F3=02=FB"
+string(30) "=FA=F3=01=F3=01=F3=02=F3=02=FB"
+string(30) "=FA=F3=01=F3=01=F3=02=F3=02=FB"
+string(30) "=FA=F3=00=F3=01=F3=01=F3=02=FB"
+string(30) "=FA=F3=00=F3=01=F3=01=F3=02=FB"
+string(30) "=FA=F3=01=F3=01=F3=02=F3=02=FB"
+string(30) "=FA=F3=01=F3=01=F3=02=F3=02=FB"
+==== insertion order always matters ====
+string(30) "=FA=F3=00=F3=02=F3=01=F3=01=FB"
+string(30) "=FA=F3=02=F3=02=F3=01=F3=01=FB"
+string(30) "=FA=F3=00=F3=02=F3=01=F3=01=FB"
+string(30) "=FA=F3=02=F3=02=F3=01=F3=01=FB"
+string(30) "=FA=F3=02=F3=02=F3=01=F3=01=FB"
+string(30) "=FA=F3=00=F3=02=F3=01=F3=01=FB"
+string(30) "=FA=F3=00=F3=02=F3=01=F3=01=FB"
+string(30) "=FA=F3=02=F3=02=F3=01=F3=01=FB"
+string(30) "=FA=F3=02=F3=02=F3=01=F3=01=FB"
+==== containers inside containers ====
+string(30) "=FA=F3=00=FA=F3=01=F3=01=FB=FB"
+string(30) "=FA=F3=00=FA=FB=F3=01=F3=01=FB"
+==== instance of class that implements IMemoizeParam ====
+string(22) "=F9=F3=0DCls1 memo key"
+==== instance of class where IMemoizeParam throws ====
+Exception of class 'Exception' with message: string(9) "clowntown"
+==== instance of class that doesn't implement IMemoizeParam ====
+InvalidArgumentException: string(83) "Cannot serialize object of type Cls3 because it does not implement HH\IMemoizeParam"
+==== resource ====
+InvalidArgumentException: string(41) "Cannot Serialize unexpected type Resource"
+==== ref ====
+InvalidArgumentException: string(36) "Cannot Serialize unexpected type Ref"
+==== recursion depth ====
+InvalidArgumentException: string(20) "Array depth exceeded"

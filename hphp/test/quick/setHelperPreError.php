@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 print "Test begin\n";
 
@@ -9,12 +9,11 @@ $w[0] =& $v[0];
 var_dump($v);
 var_dump($w);
 
-# FPassM.
 function f(&$x) {
   var_dump($x);
 }
 $x = 1;
-f($x[0]);
+f(&$x[0]);
 var_dump($x);
 
 # VGetM.

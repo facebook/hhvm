@@ -35,14 +35,17 @@ struct AsmInfo {
   {}
 
   // Asm address info for each instruction and block
-  typedef StateMultiMap<IRInstruction, TcaRange> InstRanges;
+  struct OffsetInstRanges : StateMultiMap<IRInstruction, TcaRange> {
+    // the offset between logical and physical addresses.
+    ptrdiff_t offset{0};
+  };
   typedef StateMultiMap<Block, TcaRange> BlockRanges;
   // Map from IRInstruction to Block id.
   typedef StateVector<IRInstruction, uint32_t> InstBlockMap;
 
-  InstRanges mainInstRanges;
-  InstRanges coldInstRanges;
-  InstRanges frozenInstRanges;
+  OffsetInstRanges mainInstRanges;
+  OffsetInstRanges coldInstRanges;
+  OffsetInstRanges frozenInstRanges;
   BlockRanges mainBlockRanges;
   BlockRanges coldBlockRanges;
   BlockRanges frozenBlockRanges;
@@ -58,13 +61,13 @@ struct AsmInfo {
     return false;
   }
 
-  bool instRangeExists(AreaIndex area, const TcaRange& rng) const {
+  bool instRangeExists(AreaIndex /*area*/, const TcaRange& rng) const {
     return (instRangeExists(instRangesForArea(AreaIndex::Main), rng) ||
             instRangeExists(instRangesForArea(AreaIndex::Cold), rng) ||
             instRangeExists(instRangesForArea(AreaIndex::Frozen), rng));
   }
 
-  InstRanges& instRangesForArea(AreaIndex area) {
+  OffsetInstRanges& instRangesForArea(AreaIndex area) {
     switch (area) {
     case AreaIndex::Main:
       return mainInstRanges;
@@ -76,7 +79,7 @@ struct AsmInfo {
     not_reached();
   }
 
-  const InstRanges& instRangesForArea(AreaIndex area) const {
+  const OffsetInstRanges& instRangesForArea(AreaIndex area) const {
     return const_cast<AsmInfo*>(this)->instRangesForArea(area);
   }
 
@@ -179,12 +182,8 @@ struct AsmInfo {
   }
 
   template <typename MM>
-  TcaRange updateRange(MM& stateMap,
-                       uint32_t id,
-                       AreaIndex area,
-                       TCA start,
-                       TCA end,
-                       bool merge) {
+  TcaRange updateRange(MM& stateMap, uint32_t id, AreaIndex /*area*/, TCA start,
+                       TCA end, bool merge) {
     auto ranges = stateMap[id];
     auto itr = ranges.first;
 
@@ -210,7 +209,9 @@ struct AsmInfo {
     }
 
     auto newRange = TcaRange{start, end};
-    if (itr == ranges.second || itr->second != newRange) {
+    if (itr == ranges.second ||
+        itr->second.start() != start ||
+        itr->second.end() != end) {
       stateMap.insert(id, newRange);
     }
     return newRange;
@@ -286,7 +287,8 @@ struct AsmInfo {
     return !sawBadBlock;
   }
 
-  void dumpInstructionRanges(const char* area, const InstRanges& rngs) const {
+  void dumpInstructionRanges(const char* area,
+                             const OffsetInstRanges& rngs) const {
     std::cout << area << " instructions:\n";
     for (auto& rng : rngs) {
       std::cout << rng.first << " = (" << (void*)rng.second.begin()

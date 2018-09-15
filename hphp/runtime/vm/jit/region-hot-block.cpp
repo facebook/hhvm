@@ -20,9 +20,8 @@
 
 namespace HPHP { namespace jit {
 
-RegionDescPtr selectHotBlock(TransID transId,
-                             const ProfData* profData,
-                             const TransCFG& cfg) {
+RegionDescPtr selectHotBlock(TransID transId, const ProfData* profData,
+                             const TransCFG& /*cfg*/) {
   return profData->transRec(transId)->region();
 }
 

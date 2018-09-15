@@ -10,6 +10,9 @@ keyset(4) {
   int(2)
   string(1) "2"
 }
+keyset(1) {
+  string(3) "bar"
+}
 array(1) {
   ["TestAttr"]=>
   array(1) {

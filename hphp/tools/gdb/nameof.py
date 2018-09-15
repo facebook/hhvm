@@ -1,9 +1,6 @@
 """
 GDB command for printing the names of various objects.
 """
-# @lint-avoid-python-3-compatibility-imports
-# @lint-avoid-pyflakes3
-# @lint-avoid-pyflakes2
 
 from compatibility import *
 
@@ -16,7 +13,10 @@ from gdbutils import *
 
 def nameof(val):
     val = deref(val)
-    t = val.type.name
+    try:
+        t = val.type.name
+    except:
+        return None
 
     sd = None
 

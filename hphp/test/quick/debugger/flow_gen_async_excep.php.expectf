@@ -67,6 +67,17 @@ Break at genFoo() on line 35 of %s/flow_gen_async_excep.php
 
 next
 Caught Thrown from genThrowAndCatch 4 in genFoo()
+Break at genFoo() on line 31 of %s/flow_gen_async_excep.php
+  30   var_dump($a);
+  31*  try {
+  32*    $a = await genThrowNoCatch($a);
+  33*    var_dump($a);
+  34*  } catch (Exception $e) {
+  35*    printf("Caught %s in genFoo()\n", $e->getMessage());
+  36*  }
+  37   printf("Finished in genFoo\n");
+
+next
 Break at genFoo() on line 37 of %s/flow_gen_async_excep.php
   36   }
   37*  printf("Finished in genFoo\n");

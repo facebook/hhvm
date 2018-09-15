@@ -1,4 +1,4 @@
-<?php
+<?hh
 abstract class Base {
   public static function foo() {
     $a = 2;

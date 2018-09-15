@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_array_search() {
 $array = array(
   0 => "blue",
   1 => "red",
@@ -9,3 +12,4 @@ $array = array(
 
 var_dump(array_search("green", $array));
 var_dump(array_search("red", $array));
+}

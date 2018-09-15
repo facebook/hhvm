@@ -1,4 +1,2 @@
-File "trait_abs_const.php", line 4, characters 18-18:
-Cannot declare a constant in a trait (Typing[4130])
-File "trait_abs_const.php", line 3, characters 7-7:
-T was defined as a trait here
+File "trait_abs_const.php", line 4, characters 3-18:
+Traits cannot have constants (Parsing[1002])

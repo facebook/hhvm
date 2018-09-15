@@ -1,0 +1,31 @@
+((script 40
+  ((list 40
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
+       (missing 0 ())))
+     (expression_statement 11
+      ((binary_expression 9
+        ((variable 2 ((((end_of_line 1)) variable 2 ((whitespace 1)))))
+         (() = 1 ((whitespace 1)))
+         (binary_expression 4
+          ((variable 2 ((() variable 2 ((whitespace 1)))))
+           (() + 1 ((whitespace 1))) (missing 0 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (expression_statement 11
+      ((binary_expression 9
+        ((variable 2 ((() variable 2 ((whitespace 1)))))
+         (() = 1 ((whitespace 1)))
+         (binary_expression 4
+          ((variable 2 ((() variable 2 ((whitespace 1)))))
+           (() < 1 ((whitespace 1))) (missing 0 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (expression_statement 10
+      ((binary_expression 8
+        ((variable 2 ((() variable 2 ((whitespace 1)))))
+         (() = 1 ((whitespace 1)))
+         (binary_expression 3
+          ((literal 1 ((() decimal_literal 1 ((whitespace 1)))))
+           (() - 1 ((whitespace 1))) (missing 0 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

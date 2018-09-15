@@ -14,5 +14,9 @@ class D extends C {
   const X = 'D::C';
 }
 
+
+<<__EntryPoint>>
+function main_abstract_const4() {
 var_dump(D::X);
 var_dump(C::X);
+}

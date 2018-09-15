@@ -1,0 +1,10 @@
+name: \SomeTypeAlias, kind: type_id, span: line 8, characters 3-15, is_declaration: false
+definition:
+ SomeTypeAlias
+   kind: typedef
+   id: type_id::SomeTypeAlias
+   position: line 4, characters 6-18
+   span: line 4, character 6 - line 4, character 30
+   modifiers: 
+
+

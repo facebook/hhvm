@@ -8,5 +8,9 @@ class Base {
 }
 class Derived extends Base {
 }
+
+<<__EntryPoint>>
+function main_1905() {
 Base::foo();
 Derived::foo();
+}

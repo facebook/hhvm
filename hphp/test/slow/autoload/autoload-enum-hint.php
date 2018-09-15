@@ -2,6 +2,9 @@
 function autoload_miss($str1, $str2) {
   echo "Failure handler called: $str1 $str2\n";
 }
+
+<<__EntryPoint>>
+function main_autoload_enum_hint() {
 HH\autoload_set_paths(
   array(
     'class' => array('foo' => 'autoload-enum-hint-2.inc',
@@ -15,3 +18,4 @@ HH\autoload_set_paths(
   __DIR__.'/'
 );
 include 'autoload-enum-hint-1.inc';
+}

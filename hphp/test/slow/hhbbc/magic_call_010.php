@@ -20,4 +20,8 @@ function main() {
   (new Foo)->go();
 }
 
+
+<<__EntryPoint>>
+function main_magic_call_010() {
 main();
+}

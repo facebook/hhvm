@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_unset_error() {
 $ar = array('a'=>0, 1, 2, 3);
 $ar = new ArrayObject($ar);
 
@@ -18,3 +21,4 @@ unset($ar['one']);
 unset($ar[12]);
 unset($ar['c']);
 $ar->offsetUnset('c');
+}

@@ -1,4 +1,5 @@
 <?hh
+
 /* Tests the 20 function matrix of:
  *   v(),  vf(),  vm(),  vfk(),  vmk(),
  *   m(),  mf(),  mm(),  mfk(),  mmk(),
@@ -8,6 +9,8 @@
  * Using static wait handles which yield results in various types
  */
 
+<<__EntryPoint>>
+function main_hh_async_matrix() {
 $vals = array(
   NULL,
   true,
@@ -53,4 +56,5 @@ foreach ($typeMap as $type => $inputs) {
       var_dump($wgen(\HH\Asio\join($wh)));
     }
   }
+}
 }

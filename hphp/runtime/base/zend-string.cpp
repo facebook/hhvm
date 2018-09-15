@@ -31,7 +31,6 @@
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/builtin-functions.h"
 
@@ -235,8 +234,8 @@ int string_natural_cmp(char const *a, size_t a_len,
 ///////////////////////////////////////////////////////////////////////////////
 
 void string_to_case(String& s, int (*tocase)(int)) {
-  assert(!s.isNull());
-  assert(tocase);
+  assertx(!s.isNull());
+  assertx(tocase);
   auto data = s.mutableData();
   auto len = s.size();
   for (int i = 0; i < len; i++) {
@@ -253,7 +252,7 @@ void string_to_case(String& s, int (*tocase)(int)) {
 String string_pad(const char *input, int len, int pad_length,
                   const char *pad_string, int pad_str_len,
                   int pad_type) {
-  assert(input);
+  assertx(input);
   int num_pad_chars = pad_length - len;
 
   /* If resulting string turns out to be shorter than input string,
@@ -313,7 +312,7 @@ String string_pad(const char *input, int len, int pad_length,
 
 int string_find(const char *input, int len, char ch, int pos,
                 bool case_sensitive) {
-  assert(input);
+  assertx(input);
   if (pos < 0 || pos > len) {
     return -1;
   }
@@ -331,7 +330,7 @@ int string_find(const char *input, int len, char ch, int pos,
 
 int string_rfind(const char *input, int len, char ch, int pos,
                  bool case_sensitive) {
-  assert(input);
+  assertx(input);
   if (pos < -len || pos > len) {
     return -1;
   }
@@ -357,8 +356,8 @@ int string_rfind(const char *input, int len, char ch, int pos,
 
 int string_find(const char *input, int len, const char *s, int s_len,
                 int pos, bool case_sensitive) {
-  assert(input);
-  assert(s);
+  assertx(input);
+  assertx(s);
   if (!s_len || pos < 0 || pos > len) {
     return -1;
   }
@@ -376,8 +375,8 @@ int string_find(const char *input, int len, const char *s, int s_len,
 
 int string_rfind(const char *input, int len, const char *s, int s_len,
                  int pos, bool case_sensitive) {
-  assert(input);
-  assert(s);
+  assertx(input);
+  assertx(s);
   if (!s_len || pos < -len || pos > len) {
     return -1;
   }
@@ -423,9 +422,9 @@ const char *string_memnstr(const char *haystack, const char *needle,
 
 String string_replace(const char *s, int len, int start, int length,
                       const char *replacement, int len_repl) {
-  assert(s);
-  assert(replacement);
-  assert(len >= 0);
+  assertx(s);
+  assertx(replacement);
+  assertx(len >= 0);
 
   // if "start" position is negative, count start position from the end
   // of the string
@@ -481,11 +480,11 @@ String string_replace(const char *input, int len,
                       const char *search, int len_search,
                       const char *replacement, int len_replace,
                       int &count, bool case_sensitive) {
-  assert(input);
-  assert(search && len_search);
-  assert(len >= 0);
-  assert(len_search >= 0);
-  assert(len_replace >= 0);
+  assertx(input);
+  assertx(search && len_search);
+  assertx(len >= 0);
+  assertx(len_search >= 0);
+  assertx(len_replace >= 0);
 
   if (len == 0) {
     return String();
@@ -697,8 +696,8 @@ String string_strip_tags(const char *s, const int len,
   int br, i=0, depth=0, in_q = 0;
   int state = 0, pos;
 
-  assert(s);
-  assert(allow);
+  assertx(s);
+  assertx(allow);
 
   String retString(s, len, CopyString);
   rbuf = retString.mutableData();
@@ -710,7 +709,7 @@ String string_strip_tags(const char *s, const int len,
   rp = rbuf;
   br = 0;
   if (allow_len) {
-    assert(allow);
+    assertx(allow);
 
     allowString = String(allow_len, ReserveString);
     char *atmp = allowString.mutableData();
@@ -1015,7 +1014,7 @@ String string_quoted_printable_encode(const char *input, int len) {
 }
 
 String string_quoted_printable_decode(const char *input, int len, bool is_q) {
-  assert(input);
+  assertx(input);
   if (len == 0) {
     return String();
   }
@@ -1080,7 +1079,7 @@ Variant string_base_to_numeric(const char *s, int len, int base) {
   int64_t cutoff;
   int cutlim;
 
-  assert(string_validate_base(base));
+  assertx(string_validate_base(base));
 
   cutoff = LONG_MAX / base;
   cutlim = LONG_MAX % base;
@@ -1127,7 +1126,7 @@ String string_long_to_base(unsigned long value, int base) {
   char buf[(sizeof(unsigned long) << 3) + 1];
   char *ptr, *end;
 
-  assert(string_validate_base(base));
+  assertx(string_validate_base(base));
 
   end = ptr = buf + sizeof(buf) - 1;
 
@@ -1142,7 +1141,7 @@ String string_long_to_base(unsigned long value, int base) {
 String string_numeric_to_base(const Variant& value, int base) {
   static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-  assert(string_validate_base(base));
+  assertx(string_validate_base(base));
   if ((!value.isInteger() && !value.isDouble())) {
     return empty_string();
   }
@@ -1177,15 +1176,15 @@ String string_numeric_to_base(const Variant& value, int base) {
 #define PHP_UU_ENC(c) \
   ((c) ? ((c) & 077) + ' ' : '`')
 #define PHP_UU_ENC_C2(c) \
-  PHP_UU_ENC(((*(c) << 4) & 060) | ((*((c) + 1) >> 4) & 017))
+  PHP_UU_ENC(((*(c) * 16) & 060) | ((*((c) + 1) >> 4) & 017))
 #define PHP_UU_ENC_C3(c) \
-  PHP_UU_ENC(((*(c + 1) << 2) & 074) | ((*((c) + 2) >> 6) & 03))
+  PHP_UU_ENC(((*(c + 1) * 4) & 074) | ((*((c) + 2) >> 6) & 03))
 #define PHP_UU_DEC(c) \
   (((c) - ' ') & 077)
 
 String string_uuencode(const char *src, int src_len) {
-  assert(src);
-  assert(src_len);
+  assertx(src);
+  assertx(src_len);
 
   int len = 45;
   char *p;
@@ -1801,6 +1800,11 @@ String string_number_format(double d, int dec,
 
   /* allow for thousand separators */
   if (!thousand_sep.empty()) {
+    if (integral + thousand_sep.size() * ((integral-1) / 3) < integral) {
+      /* overflow */
+      raise_error("String overflow");
+    }
+
     integral += ((integral-1) / 3) * thousand_sep.size();
   }
 
@@ -1810,6 +1814,10 @@ String string_number_format(double d, int dec,
     reslen += dec;
 
     if (!dec_point.empty()) {
+      if (reslen + dec_point.size() < dec_point.size()) {
+        /* overflow */
+        raise_error("String overflow");
+      }
       reslen += dec_point.size();
     }
   }
@@ -1877,7 +1885,7 @@ String string_number_format(double d, int dec,
 
 /* Simple soundex algorithm as described by Knuth in TAOCP, vol 3 */
 String string_soundex(const String& str) {
-  assert(!str.empty());
+  assertx(!str.empty());
   int _small, code, last;
   String retString(4, ReserveString);
   char* soundex = retString.mutableData();
@@ -2567,10 +2575,10 @@ String string_convert_cyrillic_string(const String& input, char from, char to) {
  * Converts Logical Hebrew text (Hebrew Windows style) to Visual text
  * Cheers/complaints/flames - Zeev Suraski <zeev@php.net>
  */
-String string_convert_hebrew_string(const String& inStr,
-                                    int max_chars_per_line,
-                                    int convert_newlines) {
-  assert(!inStr.empty());
+String
+string_convert_hebrew_string(const String& inStr, int /*max_chars_per_line*/,
+                             int convert_newlines) {
+  assertx(!inStr.empty());
   auto str = inStr.data();
   auto str_len = inStr.size();
   const char *tmp;

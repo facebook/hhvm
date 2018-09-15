@@ -1,4 +1,4 @@
-<?php
+<?hh
 interface I {
   public function foo($x);
 }

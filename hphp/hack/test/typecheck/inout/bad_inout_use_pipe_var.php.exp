@@ -1,0 +1,2 @@
+File "bad_inout_use_pipe_var.php", line 9, characters 17-18:
+Arguments for inout parameters must be local variables or simple subscript expressions on vecs, dicts, keysets, or arrays (NastCheck[3050])

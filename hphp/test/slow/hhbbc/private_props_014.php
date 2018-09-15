@@ -18,4 +18,8 @@ function main() {
   var_dump($a->getY());
   var_dump($a->getX());
 }
+
+<<__EntryPoint>>
+function main_private_props_014() {
 main();
+}

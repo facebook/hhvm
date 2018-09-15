@@ -65,7 +65,6 @@ function ut_coll_set_default( $coll )
 {
     return $GLOBALS['oo-mode'] ? Collator::setDefault( $coll ) : collator_set_default( $coll );
 }
-$test_num = 1;
 function sort_arrays( $locale, $arrays, $sort_flag = Collator::SORT_REGULAR )
 {
     $res_str = '';
@@ -130,7 +129,6 @@ function ut_main1()
     $res_str .= sort_arrays( 'lt_LT', $test_params );
     return $res_str;
 }
-ut_run('ut_main1');
 function ut_main2() {
   $obj = ut_coll_create('en_US');
   $arr0 = array( 100, 25, 36, '30.2', '30.12' );
@@ -170,7 +168,6 @@ function ut_main2() {
   ut_coll_sort($obj, $arrC, Collator::SORT_NUMERIC);
   var_dump($arrA, $arrB, $arrC);
 }
-ut_run('ut_main2');
 function ut_main3()
 {
     $res_str = '';
@@ -199,7 +196,6 @@ function ut_main3()
     }
     return $res_str;
 }
-ut_run('ut_main3');
 function test_COW( $locale, $test_array )
 {
     $res_str = '';
@@ -226,7 +222,6 @@ function ut_main4()
     $res_str .= test_COW( 'ru_RU', $a2 );
     return $res_str;
 }
-ut_run('ut_main4');
 function cmp_array( &$coll, $a )
 {
     $res = '';
@@ -265,7 +260,6 @@ function ut_main5()
     return
         check_alternate_handling( $coll );
 }
-ut_run('ut_main5');
 function sort_arrays_with_sort_keys( $locale, $arrays )
 {
     $res_str = '';
@@ -322,4 +316,14 @@ function ut_main6()
     $res_str .= sort_arrays_with_sort_keys( 'lt_LT', $test_params );
     return $res_str . "\n";
 }
+
+<<__EntryPoint>>
+function main_1810() {
+$test_num = 1;
+ut_run('ut_main1');
+ut_run('ut_main2');
+ut_run('ut_main3');
+ut_run('ut_main4');
+ut_run('ut_main5');
 ut_run('ut_main6');
+}

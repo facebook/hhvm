@@ -1,0 +1,2 @@
+File "rx_superglobals4.php", line 5, characters 8-13:
+Superglobal $_POST cannot be used in a reactive context. (Typing[4227])

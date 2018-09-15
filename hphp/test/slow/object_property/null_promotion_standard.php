@@ -12,4 +12,8 @@ function main() {
   var_dump($foo);
 }
 
+
+<<__EntryPoint>>
+function main_null_promotion_standard() {
 main();
+}

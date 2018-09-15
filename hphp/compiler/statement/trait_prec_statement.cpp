@@ -64,15 +64,6 @@ void TraitPrecStatement::getOtherTraitNames(
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void TraitPrecStatement::analyzeProgram(AnalysisResultPtr ar) {
-  // Analyze children
-  m_traitName->analyzeProgram(ar);
-  m_methodName->analyzeProgram(ar);
-  for (int i = 0; i < m_otherTraitNames->getCount(); i++) {
-    (*m_otherTraitNames)[i]->analyzeProgram(ar);
-  }
-}
-
 ConstructPtr TraitPrecStatement::getNthKid(int n) const {
   switch (n) {
     case 0:

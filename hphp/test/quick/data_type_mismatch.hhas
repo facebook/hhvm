@@ -1,0 +1,47 @@
+# Checks that data type opcodes refer to the correct data type
+
+.adata A_0 = """a:1:{i:1;i:1;}""";
+.adata A_1 = """D:1:{i:1;i:1;}""";
+.adata A_2 = """v:1:{i:1;}""";
+.adata A_3 = """k:1:{i:1;}""";
+
+.main {
+  Array @A_0
+  PopC
+  Dict @A_1
+  PopC
+  Vec @A_2
+  PopC
+  Keyset @A_3
+  PopC
+
+  Keyset @A_0
+  PopC
+  Array @A_1
+  PopC
+  Dict @A_2
+  PopC
+  Vec @A_3
+  PopC
+
+  Vec @A_0
+  PopC
+  Keyset @A_1
+  PopC
+  Array @A_2
+  PopC
+  Dict @A_3
+  PopC
+
+  Dict @A_0
+  PopC
+  Vec @A_1
+  PopC
+  Keyset @A_2
+  PopC
+  Array @A_3
+  PopC
+
+  Int 1
+  RetC
+}

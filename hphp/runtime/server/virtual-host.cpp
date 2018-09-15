@@ -32,7 +32,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool VirtualHost::IsDefault(const IniSetting::Map &ini, const Hdf &vh,
+bool VirtualHost::IsDefault(const IniSetting::Map& /*ini*/, const Hdf& vh,
                             const std::string& ini_key /* = "" */) {
   if (vh.exists() && !vh.isEmpty()) {
     return (vh.getName() == "default");
@@ -89,13 +89,13 @@ int64_t VirtualHost::GetLowestMaxPostSize() {
 
 int64_t VirtualHost::GetMaxPostSize() {
   const VirtualHost *vh = GetCurrent();
-  assert(vh);
+  assertx(vh);
   return vh->getMaxPostSize();
 }
 
 int64_t VirtualHost::GetUploadMaxFileSize() {
   const VirtualHost *vh = GetCurrent();
-  assert(vh);
+  assertx(vh);
   if (vh->m_runtimeOption.uploadMaxFileSize != -1) {
     return vh->m_runtimeOption.uploadMaxFileSize;
   }
@@ -104,7 +104,7 @@ int64_t VirtualHost::GetUploadMaxFileSize() {
 
 void VirtualHost::UpdateSerializationSizeLimit() {
   const VirtualHost *vh = GetCurrent();
-  assert(vh);
+  assertx(vh);
   if (vh->m_runtimeOption.serializationSizeLimit != StringData::MaxSize) {
     VariableSerializer::serializationSizeLimit =
       vh->m_runtimeOption.serializationSizeLimit;
@@ -119,7 +119,7 @@ bool VirtualHost::alwaysDecodePostData(const String& origPath) const {
 
 const std::vector<std::string> &VirtualHost::GetAllowedDirectories() {
   const VirtualHost *vh = GetCurrent();
-  assert(vh);
+  assertx(vh);
   if (!vh->m_runtimeOption.allowedDirectories.empty()) {
     return vh->m_runtimeOption.allowedDirectories;
   }
@@ -176,7 +176,7 @@ void VirtualHost::initRuntimeOption(const IniSetting::Map& ini, const Hdf& vh) {
       ini,
       vh, "overwrite.ResourceLimit.SerializationSizeLimit",
       StringData::MaxSize, false);
-  m_runtimeOption.allowedDirectories = Config::GetVector(
+  m_runtimeOption.allowedDirectories = Config::GetStrVector(
     ini,
     vh, "overwrite.Server.AllowedDirectories",
     m_runtimeOption.allowedDirectories, false);
@@ -191,7 +191,7 @@ void VirtualHost::initRuntimeOption(const IniSetting::Map& ini, const Hdf& vh) {
     m_documentRoot.pop_back();
     // Make sure we've not converted "/" to "" (which is why we're checking
     // length() > 1 instead of !empty() above)
-    assert(!m_documentRoot.empty());
+    assertx(!m_documentRoot.empty());
   }
 }
 
@@ -249,15 +249,18 @@ void VirtualHost::init(const IniSetting::Map& ini, const Hdf& vh,
   m_checkExistenceBeforeRewrite =
     Config::GetBool(ini, vh, "CheckExistenceBeforeRewrite", true, false);
 
-  m_alwaysDecodePostData =
-    Config::GetBool(ini, vh, "AlwaysDecodePostData", true, false);
+  m_alwaysDecodePostData = Config::GetBool(
+    ini,
+    vh,
+    "AlwaysDecodePostData",
+    RuntimeOption::AlwaysDecodePostDataDefault,
+    false);
 
   m_decodePostDataBlackList =
     Config::GetSetC(ini, vh, "DecodePostDataBlackList");
 
-  auto rr_callback = [&] (const IniSetting::Map &ini_rr,
-                          const Hdf &hdf_rr,
-                          const std::string &ini_rr_key) {
+  auto rr_callback = [&](const IniSetting::Map& ini_rr, const Hdf& hdf_rr,
+                         const std::string& /*ini_rr_key*/) {
     RewriteRule dummy;
     m_rewriteRules.push_back(dummy);
     RewriteRule &rule = m_rewriteRules.back();
@@ -274,9 +277,8 @@ void VirtualHost::init(const IniSetting::Map& ini, const Hdf& vh,
       throw std::runtime_error("Invalid rewrite rule: (empty pattern or to)");
     }
 
-    auto rc_callback = [&] (const IniSetting::Map &ini_rc,
-                            const Hdf &hdf_rc,
-                            const std::string &ini_rc_key) {
+    auto rc_callback = [&](const IniSetting::Map& ini_rc, const Hdf& hdf_rc,
+                           const std::string& /*ini_rc_key*/) {
       RewriteCond dummy;
       rule.rewriteConds.push_back(dummy);
       RewriteCond &cond = rule.rewriteConds.back();
@@ -306,9 +308,8 @@ void VirtualHost::init(const IniSetting::Map& ini, const Hdf& vh,
 
   m_ipBlocks = std::make_shared<IpBlockMap>(ini, vh);
 
-  auto lf_callback = [&] (const IniSetting::Map &ini_lf,
-                          const Hdf &hdf_lf,
-                          const std::string &ini_lf_key) {
+  auto lf_callback = [&](const IniSetting::Map& ini_lf, const Hdf& hdf_lf,
+                         const std::string& /*ini_lf_key*/) {
     QueryStringFilter filter;
     filter.urlPattern = format_pattern(Config::GetString(ini_lf, hdf_lf, "url",
                                                          "", false),
@@ -316,30 +317,30 @@ void VirtualHost::init(const IniSetting::Map& ini, const Hdf& vh,
     filter.replaceWith = Config::GetString(ini_lf, hdf_lf, "value", "", false);
     filter.replaceWith = "\\1=" + filter.replaceWith;
 
-    std::string pattern = Config::GetString(ini_lf, hdf_lf, "pattern", "",
+    std::string namePattern = Config::GetString(ini_lf, hdf_lf, "pattern", "",
                                             false);
     std::vector<std::string> names;
-    names = Config::GetVector(ini_lf, hdf_lf, "params", names, false);
+    names = Config::GetStrVector(ini_lf, hdf_lf, "params", names, false);
 
-    if (pattern.empty()) {
+    if (namePattern.empty()) {
       for (unsigned int i = 0; i < names.size(); i++) {
-        if (pattern.empty()) {
-          pattern = "(?<=[&\?])(";
+        if (namePattern.empty()) {
+          namePattern = "(?<=[&\?])(";
         } else {
-          pattern += "|";
+          namePattern += "|";
         }
-        pattern += names[i];
+        namePattern += names[i];
       }
-      if (!pattern.empty()) {
-        pattern += ")=.*?(?=(&|$))";
-        pattern = format_pattern(pattern, false);
+      if (!namePattern.empty()) {
+        namePattern += ")=.*?(?=(&|$))";
+        namePattern = format_pattern(namePattern, false);
       }
     } else if (!names.empty()) {
       throw std::runtime_error("Invalid log filter: (cannot specify "
         "both params and pattern)");
     }
 
-    filter.namePattern = pattern;
+    filter.namePattern = namePattern;
     m_queryStringFilters.push_back(filter);
   };
   Config::Iterate(lf_callback, ini, vh, "LogFilters", false);
@@ -365,7 +366,7 @@ bool VirtualHost::match(const String &host) const {
 }
 
 static int get_backref(const char **s) {
-  assert('0' <= **s && **s <= '9');
+  assertx('0' <= **s && **s <= '9');
   int val = **s - '0';
   *s += 1;
   if ('0' <= **s && **s <= '9') {
@@ -503,7 +504,7 @@ std::string VirtualHost::serverName(const std::string &host) const {
 // query string filter
 
 std::string VirtualHost::filterUrl(const std::string &url) const {
-  assert(!m_queryStringFilters.empty());
+  assertx(!m_queryStringFilters.empty());
 
   for (unsigned int i = 0; i < m_queryStringFilters.size(); i++) {
     const QueryStringFilter &filter = m_queryStringFilters[i];

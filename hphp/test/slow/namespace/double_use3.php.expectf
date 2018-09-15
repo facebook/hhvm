@@ -1,2 +1,2 @@
 
-Fatal error: Cannot use %s as %s because the name is already in use: %s in %s
+Fatal error: Cannot use A\C\B as B because the name is already in use%sin %s

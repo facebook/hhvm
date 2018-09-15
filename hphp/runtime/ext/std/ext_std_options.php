@@ -189,6 +189,12 @@ function clock_gettime(int $clk_id,
                        mixed &$sec,
                        mixed &$nsec): bool;
 
+/* Same as clock_gettime(), but returns a single integer in nanoseconds.
+ * Returns -1 if invalid or non-supported clock is specified.
+ */
+<<__Native>>
+function clock_gettime_ns(int $clk_id): int;
+
 /* Gets number of processors.
  */
 <<__Native>>
@@ -247,6 +253,20 @@ function memory_get_usage(bool $real_usage = false): int;
  */
 <<__Native, __HipHopSpecific>>
 function memory_get_allocation(): int;
+
+/* Returns the request-heap memory currently in use by the script.
+ * Does not trigger OOM.
+ */
+<<__Native, __HipHopSpecific>>
+function hphp_memory_heap_usage(): int;
+
+/* Returns the current total capacity of the request-heap, including
+ * blocks freed by the script but not returned to the process heap,
+ * external fragmentation, and heap management overhead.
+ * Does not trigger OOM.
+ */
+<<__Native, __HipHopSpecific>>
+function hphp_memory_heap_capacity(): int;
 
 /* Returns the peak of memory, in bytes, that's been allocated to your PHP
  * script since calling memory_start_usage_interval.

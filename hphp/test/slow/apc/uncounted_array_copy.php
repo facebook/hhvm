@@ -8,7 +8,10 @@ function makeNonStatic($n) {
   return $s;
 }
 
+
 // Runs twice with Treadmill in between (see .opts)
+<<__EntryPoint>>
+function main_uncounted_array_copy() {
 if (apc_exists('minefield')) {
   // Second run: verify array was correctly copied.
   var_dump(apc_fetch('minefield'));
@@ -26,4 +29,5 @@ if (apc_exists('minefield')) {
   apc_store('minefield', $v, 100);
   // ...since its values can easily go away (after Treadmill runs):
   apc_delete('mine');
+}
 }

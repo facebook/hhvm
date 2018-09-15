@@ -1,2 +1,2 @@
-File "iface_require_extends3.php", line 6, characters 22-27:
-Only traits may use 'require implements' (Naming[2030])
+File "iface_require_extends3.php", line 6, characters 3-27:
+Only traits may use 'require implements'. (Parsing[1002])

@@ -1,2 +1,2 @@
-File "no_unset_in_strict_mode.php", line 5, characters 3-11:
+File "no_unset_in_strict_mode.php", line 5, characters 3-12:
 In strict mode, unset is banned except on array, keyset, or dict indexing (Typing[4135])

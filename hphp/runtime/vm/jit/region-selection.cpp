@@ -19,6 +19,7 @@
 #include <fstream>
 #include <functional>
 #include <exception>
+#include <sstream>
 #include <utility>
 #include <iostream>
 
@@ -29,13 +30,14 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/map-walker.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/vm/resumable.h"
+#include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/type-constraint.h"
 
 namespace HPHP { namespace jit {
 
@@ -80,7 +82,7 @@ void truncateMap(Container& c, SrcKey final) {
 
 //////////////////////////////////////////////////////////////////////
 
-PGORegionMode pgoRegionMode(const Func& func) {
+PGORegionMode pgoRegionMode(const Func& /*func*/) {
   auto& s = RuntimeOption::EvalJitPGORegionSelector;
   if (s == "hottrace") return PGORegionMode::Hottrace;
   if (s == "hotblock") return PGORegionMode::Hotblock;
@@ -89,28 +91,6 @@ PGORegionMode pgoRegionMode(const Func& func) {
   FTRACE(1, "unknown pgo region mode {}: using hottrace\n", s);
   assertx(false);
   return PGORegionMode::Hottrace;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * Checks whether two RefPredVecs contain the same elements, which may
- * appear in different orders.
- */
-bool operator==(const RegionDesc::Block::RefPredVec& reffys1,
-                const RegionDesc::Block::RefPredVec& reffys2) {
-  if (reffys1.size() != reffys2.size()) return false;
-
-  for (size_t r1 = 0; r1 < reffys1.size(); r1++) {
-    size_t r2 = 0;
-    for (; r2 < reffys2.size(); r2++) {
-      if (reffys1[r1].arSpOffset == reffys2[r2].arSpOffset) break;
-    }
-    if (r2 == reffys2.size()) return false;
-    if (reffys1[r1] != reffys2[r2]) return false;
-  }
-
-  return true;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -158,11 +138,16 @@ RegionDesc::Block* RegionDesc::addBlock(SrcKey      sk,
                                         int         length,
                                         FPInvOffset spOffset) {
   m_blocks.push_back(
-    std::make_shared<Block>(sk.func(), sk.resumed(), sk.hasThis(), sk.offset(),
-                            length, spOffset));
+    std::make_shared<Block>(kInvalidTransID, sk.func(), sk.resumeMode(),
+                            sk.hasThis(), sk.offset(), length, spOffset));
   BlockPtr block = m_blocks.back();
   m_data[block->id()] = BlockData(block);
   return block.get();
+}
+
+void RegionDesc::addBlock(BlockPtr newBlock) {
+  m_blocks.push_back(newBlock);
+  m_data[newBlock->id()] = BlockData{newBlock};
 }
 
 void RegionDesc::replaceBlock(BlockId bid, BlockPtr newBlock) {
@@ -218,42 +203,65 @@ bool RegionDesc::hasBlock(BlockId id) const {
 }
 
 RegionDesc::BlockPtr RegionDesc::block(BlockId id) const {
-  return const_cast<RegionDesc*>(this)->data(id).block;
+  return data(id).block;
 }
 
 const RegionDesc::BlockIdSet& RegionDesc::succs(BlockId id) const {
-  return const_cast<RegionDesc*>(this)->data(id).succs;
+  return data(id).succs;
 }
 
 const RegionDesc::BlockIdSet& RegionDesc::preds(BlockId id) const {
-  return const_cast<RegionDesc*>(this)->data(id).preds;
+  auto const& data = this->data(id);
+  if (data.hasIncoming) {
+    assertx(data.succs.empty());
+    return data.succs;
+  }
+  return data.preds;
+}
+
+const RegionDesc::BlockIdSet* RegionDesc::incoming() const {
+  auto const& data = this->data(entry()->id());
+  return data.hasIncoming ? &data.preds : nullptr;
+}
+
+void RegionDesc::incoming(RegionDesc::BlockIdSet&& ids) {
+  auto& data = this->data(entry()->id());
+  assertx(data.succs.empty());
+  assertx(data.preds.empty());
+  assertx(!data.hasIncoming);
+  data.hasIncoming = true;
+  data.preds = std::move(ids);
 }
 
 const RegionDesc::BlockIdSet& RegionDesc::merged(BlockId id) const {
-  return const_cast<RegionDesc*>(this)->data(id).merged;
+  return data(id).merged;
 }
 
 folly::Optional<RegionDesc::BlockId> RegionDesc::prevRetrans(BlockId id) const {
-  return const_cast<RegionDesc*>(this)->data(id).prevRetrans;
+  auto const prev = data(id).prevRetransId;
+  if (prev == kInvalidTransID) return folly::none;
+  return prev;
 }
 
 folly::Optional<RegionDesc::BlockId> RegionDesc::nextRetrans(BlockId id) const {
-  return const_cast<RegionDesc*>(this)->data(id).nextRetrans;
+  auto const next = data(id).nextRetransId;
+  if (next == kInvalidTransID) return folly::none;
+  return next;
 }
 
 void RegionDesc::setNextRetrans(BlockId id, BlockId next) {
-  assertx(!data(id).nextRetrans);
-  assertx(!data(next).prevRetrans);
-  data(id).nextRetrans = next;
-  data(next).prevRetrans = id;
+  assertx(data(id).nextRetransId == kInvalidTransID);
+  assertx(data(next).prevRetransId == kInvalidTransID);
+  data(id).nextRetransId = next;
+  data(next).prevRetransId = id;
 }
 
 void RegionDesc::clearNextRetrans(BlockId id) {
-  data(id).nextRetrans = folly::none;
+  data(id).nextRetransId = kInvalidTransID;
 }
 
 void RegionDesc::clearPrevRetrans(BlockId id) {
-  data(id).prevRetrans = folly::none;
+  data(id).prevRetransId = kInvalidTransID;
 }
 
 void RegionDesc::addArc(BlockId srcId, BlockId dstId) {
@@ -411,6 +419,30 @@ RegionDesc::BlockId findFirstInSet(const Chain& c, RegionDesc::BlockIdSet s) {
   always_assert(0);
 }
 
+/**
+ * Returns true iff all the block ids in `chains' are in the `validBlockIds'
+ * set.
+ */
+bool chainsAreValid(const jit::vector<Chain>& chains,
+                    const jit::hash_set<RegionDesc::BlockId>& validBlockIds) {
+  for (auto& chain : chains) {
+    for (auto bid : chain.blocks) {
+      if (validBlockIds.find(bid) == validBlockIds.end()) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+std::string show(const jit::vector<Chain>& chains) {
+  std::string ret;
+  for (auto& chain : chains) {
+    folly::format(&ret, "[{}]: {}\n", chain.id, folly::join(",", chain.blocks));
+  }
+  return ret;
+}
+
 }
 
 /**
@@ -421,6 +453,10 @@ void RegionDesc::chainRetransBlocks() {
   jit::vector<Chain> chains;
   BlockToChainMap block2chain;
   SCOPE_ASSERT_DETAIL("RegionDesc::chainRetransBlocks") { return show(*this); };
+  jit::hash_set<RegionDesc::BlockId> blockIds;
+  jit::hash_map<RegionDesc::BlockId, int64_t> blockWgt;
+
+  auto profData = jit::profData();
 
   // 1. Initially assign each region block to its own chain.
   for (auto b : blocks()) {
@@ -428,7 +464,11 @@ void RegionDesc::chainRetransBlocks() {
     auto cid = chains.size();
     chains.push_back({cid, {bid}});
     block2chain[bid] = cid;
+    blockIds.insert(bid);
+    always_assert(hasTransID(bid));
+    blockWgt[bid] = profData->transCounter(bid);
   }
+  always_assert_flog(chainsAreValid(chains, blockIds), show(chains));
 
   // 2. For each block, if it has 2 successors with the same SrcKey,
   //    then merge the successors' chains into one.
@@ -447,6 +487,7 @@ void RegionDesc::chainRetransBlocks() {
       }
     }
   }
+  always_assert_flog(chainsAreValid(chains, blockIds), show(chains));
 
   // 3. Sort each chain.  In general, we want to sort each chain in
   //    decreasing order of profile weights.  However, note that this
@@ -470,14 +511,8 @@ void RegionDesc::chainRetransBlocks() {
   //          B3  ->   B2"
   //        Note the cycle: B2" -R-> B2' -> B3 -> B2".
   //
-  auto profData = jit::profData();
-
-  auto weight = [&](RegionDesc::BlockId bid) {
-    return hasTransID(bid) ? profData->transCounter(getTransID(bid)) : 0;
-  };
-
   auto cmpBlocks = [&](RegionDesc::BlockId bid1, RegionDesc::BlockId bid2) {
-    return weight(bid1) > weight(bid2);
+    return blockWgt[bid1] > blockWgt[bid2];
   };
 
   TRACE(1, "chainRetransBlocks: computed chains:\n");
@@ -485,13 +520,14 @@ void RegionDesc::chainRetransBlocks() {
     std::sort(c.blocks.begin(), c.blocks.end(), cmpBlocks);
 
     if (Trace::moduleEnabled(Trace::region, 1) && c.blocks.size() > 0) {
-      FTRACE(1, "  -> {} (w={})", c.blocks[0], weight(c.blocks[0]));
+      FTRACE(1, "  -> {} (w={})", c.blocks[0], blockWgt[c.blocks[0]]);
       for (size_t i = 1; i < c.blocks.size(); i++) {
-        FTRACE(1, ", {} (w={})", c.blocks[i], weight(c.blocks[i]));
+        FTRACE(1, ", {} (w={})", c.blocks[i], blockWgt[c.blocks[i]]);
       }
       FTRACE(1, "\n");
     }
   }
+  always_assert_flog(chainsAreValid(chains, blockIds), show(chains));
 
   // 4. Set the nextRetrans blocks according to the computed chains.
   for (auto& c : chains) {
@@ -503,17 +539,24 @@ void RegionDesc::chainRetransBlocks() {
 
   // 5. For each block with multiple successors in the same chain,
   //    only keep the successor that first appears in the chain.
+  BlockIdSet erased_ids;
   for (auto b : blocks()) {
     auto& succSet = data(b->id()).succs;
     for (auto s : succSet) {
+      if (erased_ids.count(s)) continue;
       auto& c = chains[block2chain[s]];
       auto selectedSucc = findFirstInSet(c, succSet);
       for (auto other : c.blocks) {
         if (other == selectedSucc) continue;
-        succSet.erase(other);
-        data(other).preds.erase(b->id());
+        // You can't erase from a flat_set while iterating it, so track
+        // the ids we erased here.
+        if (erased_ids.insert(other).second) {
+          data(other).preds.erase(b->id());
+        }
       }
     }
+    for (auto id : erased_ids) succSet.erase(id);
+    erased_ids.clear();
   }
 
   // 6. Reorder the blocks in the region in topological order (if
@@ -548,15 +591,15 @@ bool hasTransID(RegionDesc::BlockId blockId) {
   return blockId >= 0;
 }
 
-RegionDesc::Block::Block(const Func* func,
-                         bool        resumed,
+RegionDesc::Block::Block(BlockId     id,
+                         const Func* func,
+                         ResumeMode  resumeMode,
                          bool        hasThis,
                          Offset      start,
                          int         length,
                          FPInvOffset initSpOff)
-  : m_id(s_nextId.fetch_sub(1, std::memory_order_relaxed))
-  , m_func(func)
-  , m_resumed(resumed)
+  : m_func(func)
+  , m_resumeMode(resumeMode)
   , m_hasThis(hasThis)
   , m_start(start)
   , m_last(kInvalidOffset)
@@ -564,9 +607,23 @@ RegionDesc::Block::Block(const Func* func,
   , m_initialSpOffset(initSpOff)
   , m_profTransID(kInvalidTransID)
 {
+  if (id == kInvalidTransID) {
+    m_id = s_nextId.fetch_sub(1, std::memory_order_relaxed);
+  } else {
+    m_id = id;
+    while (true) {
+      auto expected = s_nextId.load(std::memory_order_relaxed);
+      if (id > expected) break;
+      if (s_nextId.compare_exchange_weak(expected, id - 1,
+                                         std::memory_order_relaxed)) {
+        break;
+      }
+    }
+  }
+
   assertx(length >= 0);
   if (length > 0) {
-    SrcKey sk(func, start, resumed, hasThis);
+    SrcKey sk(func, start, resumeMode, hasThis);
     for (unsigned i = 1; i < length; ++i) sk.advance();
     m_last = sk.offset();
   }
@@ -603,7 +660,6 @@ void RegionDesc::Block::truncateAfter(SrcKey final) {
   m_length = newLen;
   m_last = final.offset();
 
-  truncateMap(m_byRefs, final);
   truncateMap(m_knownFuncs, final);
 
   checkInstructions();
@@ -613,7 +669,7 @@ void RegionDesc::Block::truncateAfter(SrcKey final) {
 void RegionDesc::Block::addPredicted(TypedLocation locType) {
   FTRACE(2, "Block::addPredicted({})\n", show(locType));
   assertx(locType.type != TBottom);
-  assertx(locType.type <= TStkElem);
+  assertx(locType.type <= TGen);
   // type predictions should be added in order of location
   assertx(m_typePredictions.size() == 0 ||
           (m_typePredictions.back().location < locType.location));
@@ -623,23 +679,10 @@ void RegionDesc::Block::addPredicted(TypedLocation locType) {
 void RegionDesc::Block::addPreCondition(const GuardedLocation& locGuard) {
   FTRACE(2, "Block::addPreCondition({})\n", show(locGuard));
   assertx(locGuard.type != TBottom);
-  assertx(locGuard.type <= TStkElem);
+  assertx(locGuard.type <= TGen);
   assertx(locGuard.type.isSpecialized() ||
           typeFitsConstraint(locGuard.type, locGuard.category));
   m_typePreConditions.push_back(locGuard);
-}
-
-void RegionDesc::Block::setParamByRef(SrcKey sk, bool byRef) {
-  FTRACE(2, "Block::setParamByRef({}, {})\n", showShort(sk),
-         byRef ? "by ref" : "by val");
-  assertx(m_byRefs.find(sk) == m_byRefs.end());
-  assertx(contains(sk));
-  m_byRefs.insert(std::make_pair(sk, byRef));
-}
-
-void RegionDesc::Block::addReffinessPred(const ReffinessPred& pred) {
-  FTRACE(2, "Block::addReffinessPred({})\n", show(pred));
-  m_refPreds.push_back(pred);
 }
 
 void RegionDesc::Block::setKnownFunc(SrcKey sk, const Func* func) {
@@ -695,8 +738,8 @@ void RegionDesc::Block::checkInstruction(Op op) const {
 /*
  * Check invariants about the metadata for this Block.
  *
- * 1. Each SrcKey in m_typePredictions, m_preConditions, m_byRefs, m_refPreds,
- *    and m_knownFuncs is within the bounds of the block.
+ * 1. Each SrcKey in m_typePredictions, m_preConditions, and m_knownFuncs is
+ *    within the bounds of the block.
  *
  * 2. Each local id referred to in the type prediction list is valid.
  *
@@ -711,7 +754,7 @@ void RegionDesc::Block::checkMetadata() const {
     }
   };
 
-  auto checkTypedLocations = [&](const char* msg, const TypedLocVec& vec) {
+  auto checkTypedLocations = [&](const char* /*msg*/, const TypedLocVec& vec) {
     for (auto& typedLoc : vec) {
       auto& loc = typedLoc.location;
       switch (loc.tag()) {
@@ -721,11 +764,15 @@ void RegionDesc::Block::checkMetadata() const {
         case LTag::Stack:
         case LTag::MBase:
           break;
+        case LTag::CSlot:
+          assertx("Class-ref slot type-prediction" && false);
+          break;
       }
     }
   };
 
-  auto checkGuardedLocations = [&](const char* msg, const GuardedLocVec& vec) {
+  auto checkGuardedLocations = [&](const char* /*msg*/,
+                                   const GuardedLocVec& vec) {
     for (auto& guardedLoc : vec) {
       assertx(guardedLoc.type.isSpecialized() ||
               typeFitsConstraint(guardedLoc.type, guardedLoc.category));
@@ -737,6 +784,9 @@ void RegionDesc::Block::checkMetadata() const {
         case LTag::Stack:
         case LTag::MBase:
           break;
+        case LTag::CSlot:
+          assertx("Class-ref slot type-precondition" && false);
+          break;
       }
     }
   };
@@ -744,9 +794,6 @@ void RegionDesc::Block::checkMetadata() const {
   checkTypedLocations("type prediction", m_typePredictions);
   checkGuardedLocations("type precondition", m_typePreConditions);
 
-  for (auto& byRef : m_byRefs) {
-    rangeCheck("parameter reference flag", byRef.first.offset());
-  }
   for (auto& func : m_knownFuncs) {
     rangeCheck("known Func*", func.first.offset());
   }
@@ -872,6 +919,7 @@ bool breaksRegion(SrcKey sk) {
     case Op::YieldFromDelegate:
     case Op::RetC:
     case Op::RetV:
+    case Op::RetM:
     case Op::Exit:
     case Op::Fatal:
     case Op::Throw:
@@ -881,11 +929,12 @@ bool breaksRegion(SrcKey sk) {
       return true;
 
     case Op::Await:
+    case Op::AwaitAll:
     case Op::FCallAwait:
       // We break regions at resumed Await/FCallAwait instructions, to avoid
       // duplicating the translation of the resumed SrcKey after the
       // Await.
-      return sk.resumed();
+      return sk.resumeMode() == ResumeMode::Async;
 
     default:
       return false;
@@ -1133,15 +1182,6 @@ std::string show(const PostConditions& pconds) {
   return ret;
 }
 
-std::string show(const RegionDesc::ReffinessPred& pred) {
-  std::ostringstream out;
-  out << "offset: " << pred.arSpOffset << " mask: ";
-  for (auto const bit : pred.mask) out << (bit ? '1' : '0');
-  out << " vals: ";
-  for (auto const bit : pred.vals) out << (bit ? '1' : '0');
-  return out.str();
-}
-
 std::string show(RegionContext::LiveType ta) {
   return folly::format(
     "{} :: {}",
@@ -1150,21 +1190,11 @@ std::string show(RegionContext::LiveType ta) {
   ).str();
 }
 
-std::string show(RegionContext::PreLiveAR ar) {
-  return folly::format(
-    "AR@{}: {} ({})",
-    ar.stackOff,
-    ar.func->fullName(),
-    ar.objOrCls.toString()
-  ).str();
-}
-
 std::string show(const RegionContext& ctx) {
   std::string ret;
   folly::toAppend(ctx.func->fullName()->data(), "@", ctx.bcOffset,
-                  ctx.resumed ? "r" : "", "\n", &ret);
+                  resumeModeShortName(ctx.resumeMode), "\n", &ret);
   for (auto& t : ctx.liveTypes) folly::toAppend(" ", show(t), "\n", &ret);
-  for (auto& ar : ctx.preLiveARs) folly::toAppend(" ", show(ar), "\n", &ret);
 
   return ret;
 }
@@ -1173,7 +1203,7 @@ std::string show(const RegionDesc::Block& b) {
   std::string ret{"Block "};
   folly::toAppend(b.id(), ' ',
                   b.func()->fullName()->data(), '@', b.start().offset(),
-                  b.start().resumed() ? "r" : "",
+                  resumeModeShortName(b.start().resumeMode()),
                   " length ", b.length(),
                   " initSpOff ", b.initialSpOffset().offset,
                   " profTransID ", b.profTransID(),
@@ -1183,8 +1213,6 @@ std::string show(const RegionDesc::Block& b) {
 
   auto& predictions   = b.typePredictions();
   auto& preconditions = b.typePreConditions();
-  auto  byRefs        = makeMapWalker(b.paramByRefs());
-  auto& refPreds      = b.reffinessPreds();
   auto  knownFuncs    = makeMapWalker(b.knownFuncs());
   auto  skIter        = b.start();
 
@@ -1195,9 +1223,6 @@ std::string show(const RegionDesc::Block& b) {
   }
   for (auto const& p : preconditions) {
     folly::toAppend("  precondition: ", show(p), "\n", &ret);
-  }
-  for (auto const& rp : refPreds) {
-    folly::toAppend("  predict reffiness: ", show(rp), "\n", &ret);
   }
 
   for (int i = 0; i < b.length(); ++i) {
@@ -1211,15 +1236,8 @@ std::string show(const RegionDesc::Block& b) {
                                 topFunc->fullName(), inlined).str();
     }
 
-    std::string byRef;
-    if (byRefs.hasNext(skIter)) {
-      byRef = folly::format(" (passed by {})", byRefs.next() ? "reference"
-                                                             : "value").str();
-    }
-
     std::string instrString;
     folly::toAppend(instrToString(b.unit()->at(skIter.offset()), b.unit()),
-                    byRef,
                     &instrString);
 
     folly::toAppend(

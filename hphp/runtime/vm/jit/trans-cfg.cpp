@@ -26,13 +26,20 @@ namespace HPHP { namespace jit {
 
 TRACE_SET_MOD(pgo);
 
-static TransIDSet findPredTrans(TransID dstID, const ProfData* profData) {
-  auto const dstRec = profData->transRec(dstID);
-  auto const dstSK = dstRec->srcKey();
+TransIDSet findPredTrans(const RegionDesc& rd, const ProfData* profData) {
+  auto const incoming = rd.incoming();
+  TransIDSet predSet;
+  if (incoming) {
+    for (auto id : *incoming) {
+      predSet.insert(id);
+    }
+    return predSet;
+  }
+  auto const dstSK = rd.start();
   const SrcRec* dstSR = tc::findSrcRec(dstSK);
   assertx(dstSR);
-  TransIDSet predSet;
 
+  auto srLock = dstSR->readlock();
   for (auto& inBr : dstSR->incomingBranches()) {
     auto const srcID = profData->jmpTransID(inBr.toSmash());
     if (srcID == kInvalidTransID) continue;
@@ -48,7 +55,7 @@ static TransIDSet findPredTrans(TransID dstID, const ProfData* profData) {
     } else {
       FTRACE(5, "findPredTrans: WARNING: incoming branch with impossible "
              "control flow between translations: {} -> {}"
-             "(probably due to side exit)\n", srcID, dstID);
+             "(probably due to side exit)\n", srcID, rd.entry()->id());
     }
   }
 
@@ -109,7 +116,7 @@ TransCFG::TransCFG(FuncId funcId,
     auto const dstSK = rec->srcKey();
     auto const dstBlock = rec->region()->entry();
     FTRACE(5, "TransCFG: adding incoming arcs in dstId = {}\n", dstId);
-    TransIDSet predIDs = findPredTrans(dstId, profData);
+    TransIDSet predIDs = findPredTrans(*rec->region(), profData);
     for (auto predId : predIDs) {
       if (hasNode(predId)) {
         auto const predRec = profData->transRec(predId);
@@ -120,7 +127,7 @@ TransCFG::TransCFG(FuncId funcId,
                              postConds.refined.end());
         auto const predSK = predRec->srcKey();
         if (preCondsAreSatisfied(dstBlock, predPostConds) &&
-            predSK.resumed() == dstSK.resumed()) {
+            predSK.resumeMode() == dstSK.resumeMode()) {
           FTRACE(5, "TransCFG: adding arc {} -> {} ({} -> {})\n",
                  predId, dstId, showShort(predSK), showShort(dstSK));
           addArc(predId, dstId, TransCFG::Arc::kUnknownWeight);

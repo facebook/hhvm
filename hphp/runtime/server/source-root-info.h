@@ -83,8 +83,8 @@ private:
     Off
   } m_sandboxCond;
   Array m_serverVars;
-  static DECLARE_THREAD_LOCAL_NO_CHECK(std::string, s_path);
-  static DECLARE_THREAD_LOCAL_NO_CHECK(std::string, s_phproot);
+  static THREAD_LOCAL_NO_CHECK(std::string, s_path);
+  static THREAD_LOCAL_NO_CHECK(std::string, s_phproot);
 
   static std::string& initPhpRoot();
   std::string parseSandboxServerVariable(const std::string &format) const;

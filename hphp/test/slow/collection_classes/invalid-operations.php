@@ -181,4 +181,8 @@ function main() {
   var_dump($x);
 }
 
+
+<<__EntryPoint>>
+function main_invalid_operations() {
 main();
+}

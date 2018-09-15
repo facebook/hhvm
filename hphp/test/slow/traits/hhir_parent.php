@@ -28,4 +28,8 @@ function foo() {
   $k->foo();
 }
 
+
+<<__EntryPoint>>
+function main_hhir_parent() {
 foo();
+}

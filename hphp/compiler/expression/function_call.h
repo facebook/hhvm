@@ -33,15 +33,13 @@ protected:
                const std::string &name, bool hadBackslash,
                ExpressionListPtr params, ExpressionPtr classExp);
 public:
-  void analyzeProgram(AnalysisResultPtr ar) override;
-
-  bool isRefable(bool checkError = false) const override { return true;}
+  bool isRefable(bool /*checkError*/ = false) const override { return true; }
 
   ConstructPtr getNthKid(int n) const override;
   void setNthKid(int n, ConstructPtr cp) override;
   int getKidCount() const override;
 
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
+  void analyzeProgram(AnalysisResultConstRawPtr ar) override;
 
   const std::string& getName() const = delete;//{ return m_name; }
   const std::string& getOriginalName() const { return m_origName; }
@@ -56,12 +54,11 @@ public:
   const ExpressionListPtr& getParams() const { return m_params; }
   void deepCopy(FunctionCallPtr exp);
 
-  FunctionScopeRawPtr getFuncScope() const { return m_funcScope; }
   void setArrayParams() { m_arrayParams = true; }
   bool isValid() const { return m_valid; }
   bool hadBackslash() const { return m_hadBackslash; }
   bool hasUnpack() const;
-  void onParse(AnalysisResultConstPtr ar, FileScopePtr fileScope) override;
+  void onParse(AnalysisResultConstRawPtr ar, FileScopePtr fileScope) override;
   bool checkUnpackParams();
   bool isNamed(folly::StringPiece name) const;
 private:
@@ -72,19 +69,11 @@ protected:
   std::string m_origName;
   ExpressionListPtr m_params;
 
-  // Pointers to the corresponding function scope and class scope for this
-  // function call, set during the AnalyzeAll phase. These pointers may be
-  // null if the function scope or class scope could not be resolved.
-  FunctionScopeRawPtr m_funcScope;
-  ClassScopeRawPtr m_classScope;
-
   bool m_valid;
   unsigned m_variableArgument : 1;
   unsigned m_redeclared : 1;
   unsigned m_arrayParams : 1;
   bool m_hadBackslash;
-
-  void markRefParams(FunctionScopePtr func, const std::string &name);
 
   /**
    * Each program needs to reset this object's members to revalidate

@@ -18,4 +18,3 @@ trait TestTrait {
 	echo B::test();
 
 ?>
-

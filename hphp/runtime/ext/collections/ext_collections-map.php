@@ -13,37 +13,38 @@ namespace {
 /* An iterator implementation for iterating over a Map.
  */
 <<__NativeData("MapIterator")>>
-final class MapIterator implements HH\KeyedIterator {
+final class MapIterator implements HH\Rx\KeyedIterator {
 
+  <<__Rx>>
   public function __construct(): void {}
 
   /* Returns the current value that the iterator points to.
    * @return mixed
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function current(): mixed;
 
   /* Returns the current key that the iterator points to.
    * @return mixed
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function key(): mixed;
 
   /* Returns true if the iterator points to a valid value, returns false
    * otherwise.
    * @return bool
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function valid(): bool;
 
   /* Advance this iterator forward one position.
    */
-  <<__Native>>
+  <<__Native, __Rx, __Mutable>>
   public function next(): void;
 
   /* Move this iterator back to the first position.
    */
-  <<__Native>>
+  <<__Native, __Rx, __Mutable>>
   public function rewind(): void;
 }
 
@@ -58,12 +59,13 @@ final class Map implements \MutableMap {
    * KeyedIterable.
    * @param mixed $iterable
    */
-  <<__Native>>
-  public function __construct(mixed $iterable = null): void;
+  <<__Native, __Rx, __OnlyRxIfArgs>>
+  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> mixed $iterable = null): void;
 
   /* Returns true if the Map is empty, false otherwise.
    * @return bool
    */
+  <<__Rx, __MaybeMutable>>
   public function isEmpty(): bool {
     return !$this->count();
   }
@@ -71,12 +73,13 @@ final class Map implements \MutableMap {
   /* Returns the number of key/value pairs in the Map.
    * @return int
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function count(): int;
 
   /* Returns an Iterable that produces the key/value Pairs from this Map.
    * @return object
    */
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function items(): \LazyKVZipIterable {
     return new \LazyKVZipIterable($this);
   }
@@ -84,12 +87,13 @@ final class Map implements \MutableMap {
   /* Returns a Vector built from the keys of this Map.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function keys(): object;
 
   /* Returns a lazy iterable view of this Map.
    * @return object
    */
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function lazy(): \LazyKeyedIterableView {
     return new \LazyKeyedIterableView($this);
   }
@@ -99,7 +103,7 @@ final class Map implements \MutableMap {
    * @param mixed $key
    * @return mixed
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function at(mixed $key): mixed;
 
   /* Returns the value at the specified key. If the key is not present, null is
@@ -107,7 +111,7 @@ final class Map implements \MutableMap {
    * @param mixed $key
    * @return mixed
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function get(mixed $key): mixed;
 
   /* Stores a value into the Map with the specified key, overwriting any
@@ -116,7 +120,7 @@ final class Map implements \MutableMap {
    * @param mixed $value
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __Mutable, __ReturnsVoidToRx>>
   public function set(mixed $key,
                       mixed $value): object;
 
@@ -126,33 +130,34 @@ final class Map implements \MutableMap {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native>>
-  public function setAll(mixed $iterable): object;
+  <<__Native, __Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
+  public function setAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> mixed $iterable): object;
 
   /* Removes all key/value pairs from the Map.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __Mutable, __ReturnsVoidToRx>>
   public function clear(): object;
 
   /* Returns true if the specified key is present in the Map, false otherwise.
    * @param mixed $key
    * @return bool
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function contains(mixed $key): bool;
 
   /* Returns true if the specified key is present in the Map, false otherwise.
    * @param mixed $key
    * @return bool
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function containsKey(mixed $key): bool;
 
   /* Removes the specified key from this Map.
    * @param mixed $key
    * @return object
    */
+  <<__Rx, __Mutable, __ReturnsVoidToRx>>
   public function remove(mixed $key) {
     return $this->removeKey($key);
   }
@@ -161,7 +166,7 @@ final class Map implements \MutableMap {
    * @param mixed $key
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __Mutable, __ReturnsVoidToRx>>
   public function removeKey(mixed $key): object;
 
   /* Adds the specified key/value Pair to this Map. If an element with the same
@@ -169,45 +174,52 @@ final class Map implements \MutableMap {
    * @param mixed $val
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __Mutable, __ReturnsVoidToRx>>
   public function add(mixed $val): object;
 
   /* Adds the key/value Pairs produced by the specified Iterable to this Map.
    * @param mixed $iterable
    * @return object
    */
-  <<__Native>>
-  public function addAll(mixed $iterable): object;
+  <<__Native, __Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
+  public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Instructs this Map to grow its capacity to accommodate the given number of
    * elements. The caller is expected to make the appropriate
    * add/set/addAll/setAll calls to fill this reserved capacity.
    * @param mixed $sz
    */
-  <<__Native>>
+  <<__Native, __Rx, __Mutable>>
   public function reserve(int $sz): void;
 
   /* Returns an array built from the keys and values from this Map.
    * @return array
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function toArray(): array;
+
+  <<__Native, __Rx, __MaybeMutable>>
+  public function toVArray(): varray;
+
+  <<__Native, __Rx, __MaybeMutable>>
+  public function toDArray(): darray;
 
   /* Returns a Vector built from the values of this Map.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function toVector(): object;
 
   /* Returns a ImmVector built from the values of this Map.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function toImmVector(): object;
 
   /* Returns a copy of this Map.
    * @return object
    */
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function toMap(): this {
     return clone $this;
   }
@@ -215,24 +227,25 @@ final class Map implements \MutableMap {
   /* Returns a ImmMap built from the keys and values of this Map.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function toImmMap(): object;
 
   /* Returns a Set built from the values of this Map.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function toSet(): object;
 
   /* Returns a ImmSet built from the values of this Map.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function toImmSet(): object;
 
   /* Returns an immutable version of this collection.
    * @return object
    */
+  <<__Rx, __MaybeMutable>>
   public function immutable(): \HH\ImmMap {
     return $this->toImmMap();
   }
@@ -240,31 +253,31 @@ final class Map implements \MutableMap {
   /* Returns a Vector built from the values of this Map.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function values(): object;
 
   /* Returns an array built from the keys from this Map.
    * @return array
    */
-  <<__Native>>
-  public function toKeysArray(): array;
+  <<__Native, __Rx, __MaybeMutable>>
+  public function toKeysArray(): varray;
 
   /* Returns an array built from the values from this Map.
    * @return array
    */
-  <<__Native>>
-  public function toValuesArray(): array;
+  <<__Native, __Rx, __MaybeMutable>>
+  public function toValuesArray(): varray;
 
   /* @param mixed $it
    * @return object
    */
-  <<__Native>>
-  public function differenceByKey(mixed $it): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function differenceByKey(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> mixed $it): object;
 
   /* Returns an iterator that points to beginning of this Map.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function getIterator(): object;
 
   /* Returns a Map of the keys/values produced by applying the specified
@@ -272,13 +285,14 @@ final class Map implements \MutableMap {
    * @param mixed $callback
    * @return object
    */
-  public function map(mixed $callback): object {
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function map(<<__OnlyRxIfRxFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
 
           CGetL $callback
           DecodeCufIter 0 bad_func
-.try_fault kill_iter_0 {
+.try {
            This
            Clone
            SetL $res
@@ -286,18 +300,30 @@ final class Map implements \MutableMap {
 
            This
            IterInitK 1 endloop $v $k
-  .try_fault kill_iter_1 1 {
+  .try 1 {
     loop:   FPushCufIter 1 0
-            FPassL 0 $v
-            FCall 1
+            FIsParamByRefCufIter 0 Any 0
+            JmpNZ by_ref
+            CGetL $v
+            Jmp call
+    by_ref: VGetL $v
+    call:   FCall 1 0 1 - "" ""
             UnboxR
             AssertRATL $res Obj=HH\Map
             BaseL $res Define
             SetM 0 EL:$k
             PopC
     next:   IterNextK 1 loop $v $k
+            Jmp endloop
+  } .catch {
+            IterFree 1
+            Throw
   }
+} .catch {
+           CIterFree 0
+           Throw
 }
+
     endloop:
            CIterFree 0
            AssertRATL $res Obj=HH\Map
@@ -306,17 +332,9 @@ final class Map implements \MutableMap {
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassC 0
-          FCall 1
+          FCall 1 0 1 - "" ""
           PopR
           Throw
-
-kill_iter_0:
-           CIterFree 0
-           Unwind
-kill_iter_1:
-           IterFree 1
-           Unwind
 
 EOT
         );
@@ -327,13 +345,14 @@ EOT
    * @param mixed $callback
    * @return object
    */
-  public function mapWithKey(mixed $callback): object {
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function mapWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
 
           CGetL $callback
           DecodeCufIter 0 bad_func
-.try_fault kill_iter_0 {
+.try {
            This
            Clone
            SetL $res
@@ -341,19 +360,37 @@ EOT
 
            This
            IterInitK 1 endloop $v $k
-  .try_fault kill_iter_1 1 {
+  .try 1 {
     loop:   FPushCufIter 2 0
-            FPassL 0 $k
-            FPassL 1 $v
-            FCall 2
+            FIsParamByRefCufIter 0 Any 0
+            JmpNZ by_ref_k
+            CGetL $k
+            Jmp pass_v
+    by_ref_k:
+            VGetL $k
+    pass_v: FIsParamByRefCufIter 1 Any 0
+            JmpNZ by_ref_v
+            CGetL $v
+            Jmp call
+    by_ref_v:
+            VGetL $v
+    call:   FCall 2 0 1 - "" ""
             UnboxR
             AssertRATL $res Obj=HH\Map
             BaseL $res Define
             SetM 0 EL:$k
             PopC
     next:   IterNextK 1 loop $v $k
+            Jmp endloop
+  } .catch {
+            IterFree 1
+            Throw
   }
+} .catch {
+           CIterFree 0
+           Throw
 }
+
     endloop:
            CIterFree 0
            AssertRATL $res Obj=HH\Map
@@ -362,17 +399,9 @@ EOT
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassC 0
-          FCall 1
+          FCall 1 0 1 - "" ""
           PopR
           Throw
-
-kill_iter_0:
-           CIterFree 0
-           Unwind
-kill_iter_1:
-           IterFree 1
-           Unwind
 
 EOT
         );
@@ -383,25 +412,30 @@ EOT
    * @param mixed $callback
    * @return object
    */
-  public function filter(mixed $callback): object {
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function filter(<<__OnlyRxIfRxFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
 
           CGetL $callback
           DecodeCufIter 0 bad_func
-.try_fault kill_iter_0 {
+.try {
            FPushCtorD 0 "HH\\Map"
-           FCall 0
+           FCall 0 0 1 - "" ""
            PopR
            SetL $res
            PopC
 
            This
            IterInitK 1 endloop $v $k
-  .try_fault kill_iter_1 1 {
+  .try 1 {
     loop:   FPushCufIter 1 0
-            FPassL 0 $v
-            FCall 1
+            FIsParamByRefCufIter 0 Any 0
+            JmpNZ by_ref
+            CGetL $v
+            Jmp call
+    by_ref: VGetL $v
+    call:   FCall 1 0 1 - "" ""
             UnboxR
             JmpZ next
             CGetL $v
@@ -410,8 +444,16 @@ EOT
             SetM 0 EL:$k
             PopC
     next:   IterNextK 1 loop $v $k
+            Jmp endloop
+  } .catch {
+            IterFree 1
+            Throw
   }
+} .catch {
+           CIterFree 0
+           Throw
 }
+
     endloop:
            CIterFree 0
            AssertRATL $res Obj=HH\Map
@@ -420,17 +462,9 @@ EOT
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassC 0
-          FCall 1
+          FCall 1 0 1 - "" ""
           PopR
           Throw
-
-kill_iter_0:
-           CIterFree 0
-           Unwind
-kill_iter_1:
-           IterFree 1
-           Unwind
 
 EOT
         );
@@ -441,26 +475,37 @@ EOT
    * @param mixed $callback
    * @return object
    */
-  public function filterWithKey(mixed $callback): object {
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function filterWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
 
           CGetL $callback
           DecodeCufIter 0 bad_func
-.try_fault kill_iter_0 {
+.try {
            FPushCtorD 0 "HH\\Map"
-           FCall 0
+           FCall 0 0 1 - "" ""
            PopR
            SetL $res
            PopC
 
            This
            IterInitK 1 endloop $v $k
-  .try_fault kill_iter_1 1 {
+  .try 1 {
     loop:   FPushCufIter 2 0
-            FPassL 0 $k
-            FPassL 1 $v
-            FCall 2
+            FIsParamByRefCufIter 0 Any 0
+            JmpNZ by_ref_k
+            CGetL $k
+            Jmp pass_v
+    by_ref_k:
+            VGetL $k
+    pass_v: FIsParamByRefCufIter 1 Any 0
+            JmpNZ by_ref_v
+            CGetL $v
+            Jmp call
+    by_ref_v:
+            VGetL $v
+    call:   FCall 2 0 1 - "" ""
             UnboxR
             JmpZ next
             CGetL $v
@@ -469,8 +514,16 @@ EOT
             SetM 0 EL:$k
             PopC
     next:   IterNextK 1 loop $v $k
+            Jmp endloop
+  } .catch {
+            IterFree 1
+            Throw
   }
+} .catch {
+           CIterFree 0
+           Throw
 }
+
     endloop:
            CIterFree 0
            AssertRATL $res Obj=HH\Map
@@ -479,17 +532,9 @@ EOT
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassC 0
-          FCall 1
+          FCall 1 0 1 - "" ""
           PopR
           Throw
-
-kill_iter_0:
-           CIterFree 0
-           Unwind
-kill_iter_1:
-           IterFree 1
-           Unwind
 
 EOT
         );
@@ -516,14 +561,14 @@ EOT
    * @param mixed $iterable
    * @return object
    */
-  <<__Native>>
-  public function zip(mixed $iterable): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function zip(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a Map containing the first n key/value pairs of this Map.
    * @param mixed $n
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function take(mixed $n): object;
 
   /* Returns a Map containing the key/value pairs of this Map up to but not
@@ -532,25 +577,30 @@ EOT
    * @param mixed $callback
    * @return object
    */
-  public function takeWhile(mixed $callback): object {
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function takeWhile(<<__OnlyRxIfRxFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
 
           CGetL $callback
           DecodeCufIter 0 bad_func
-.try_fault kill_iter_0 {
+.try {
            FPushCtorD 0 "HH\\Map"
-           FCall 0
+           FCall 0 0 1 - "" ""
            PopR
            SetL $res
            PopC
 
            This
            IterInitK 1 endloop $v $k
-  .try_fault kill_iter_1 1 {
+  .try 1 {
     loop:   FPushCufIter 1 0
-            FPassL 0 $v
-            FCall 1
+            FIsParamByRefCufIter 0 Any 0
+            JmpNZ by_ref
+            CGetL $v
+            Jmp call
+    by_ref: VGetL $v
+    call:   FCall 1 0 1 - "" ""
             UnboxR
             JmpNZ skip
             IterBreak endloop <(Iter)1>
@@ -561,8 +611,16 @@ EOT
             SetM 0 EL:$k
             PopC
     next:   IterNextK 1 loop $v $k
+            Jmp endloop
+  } .catch {
+            IterFree 1
+            Throw
   }
+} .catch {
+           CIterFree 0
+           Throw
 }
+
     endloop:
            CIterFree 0
            AssertRATL $res Obj=HH\Map
@@ -571,17 +629,9 @@ EOT
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassC 0
-          FCall 1
+          FCall 1 0 1 - "" ""
           PopR
           Throw
-
-kill_iter_0:
-           CIterFree 0
-           Unwind
-kill_iter_1:
-           IterFree 1
-           Unwind
 
 EOT
         );
@@ -592,7 +642,7 @@ EOT
    * @param mixed $n
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function skip(mixed $n): object;
 
   /* Returns a Map containing the key/value pairs of this Map excluding the
@@ -600,8 +650,8 @@ EOT
    * @param mixed $fn
    * @return object
    */
-  <<__Native>>
-  public function skipWhile(mixed $fn): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function skipWhile(<<__OnlyRxIfRxFunc>> mixed $fn): object;
 
   /* Returns a Map containing the specified range of key/value pairs from this
    * Map. The range is specified by two non-negative integers: a starting
@@ -610,7 +660,7 @@ EOT
    * @param mixed $len
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function slice(mixed $start,
                         mixed $len): object;
 
@@ -620,35 +670,36 @@ EOT
    * @param mixed $iterable
    * @return object
    */
-  <<__Native>>
-  public function concat(mixed $iterable): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function concat(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns the first value from this Map, or null if this Map is empty.
    * @return mixed
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function firstValue(): mixed;
 
   /* Returns the first key from this Map, or null if this Map is empty.
    * @return mixed
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function firstKey(): mixed;
 
   /* Returns the last value from this Map, or null if this Map is empty.
    * @return mixed
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function lastValue(): mixed;
 
   /* Returns the last key from this Map, or null if this Map is empty.
    * @return mixed
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function lastKey(): mixed;
 
   /* @return string
    */
+  <<__Rx, __MaybeMutable>>
   public function __toString(): string { return "Map"; }
 
   /* @param mixed $name
@@ -690,8 +741,8 @@ EOT
    * @param mixed $iterable
    * @return object
    */
-  <<__Native>>
-  public static function fromItems(mixed $iterable): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a Map built from the keys and values from the specified array.
    * @param mixed $mp
@@ -709,12 +760,13 @@ final class ImmMap implements \ConstMap {
    * KeyedIterable.
    * @param mixed $iterable
    */
-  <<__Native>>
-  public function __construct(mixed $iterable = null): void;
+  <<__Native, __Rx, __OnlyRxIfArgs>>
+  public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> mixed $iterable = null): void;
 
   /* Returns true if the ImmMap is empty, false otherwise.
    * @return bool
    */
+  <<__Rx, __MaybeMutable>>
   public function isEmpty(): bool {
     return !$this->count();
   }
@@ -722,12 +774,13 @@ final class ImmMap implements \ConstMap {
   /* Returns the number of key/value pairs in the ImmMap.
    * @return int
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function count(): int;
 
   /* Returns an Iterable that produces the key/value Pairs from this ImmMap.
    * @return object
    */
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function items(): \LazyKVZipIterable {
     return new \LazyKVZipIterable($this);
   }
@@ -735,12 +788,13 @@ final class ImmMap implements \ConstMap {
   /* Returns a ImmVector built from the keys of this ImmMap.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function keys(): object;
 
   /* Returns a lazy iterable view of this ImmMap.
    * @return object
    */
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public function lazy(): \LazyKeyedIterableView {
     return new \LazyKeyedIterableView($this);
   }
@@ -750,7 +804,7 @@ final class ImmMap implements \ConstMap {
    * @param mixed $key
    * @return mixed
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function at(mixed $key): mixed;
 
   /* Returns the value at the specified key. If the key is not present, null is
@@ -758,7 +812,7 @@ final class ImmMap implements \ConstMap {
    * @param mixed $key
    * @return mixed
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function get(mixed $key): mixed;
 
   /* Returns true if the specified key is present in the ImmMap, false
@@ -766,7 +820,7 @@ final class ImmMap implements \ConstMap {
    * @param mixed $key
    * @return bool
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function contains(mixed $key): bool;
 
   /* Returns true if the specified key is present in the ImmMap, false
@@ -774,36 +828,43 @@ final class ImmMap implements \ConstMap {
    * @param mixed $key
    * @return bool
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function containsKey(mixed $key): bool;
 
   /* Returns an array built from the keys and values from this ImmMap.
    * @return array
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function toArray(): array;
+
+  <<__Native, __Rx, __MaybeMutable>>
+  public function toVArray(): varray;
+
+  <<__Native, __Rx, __MaybeMutable>>
+  public function toDArray(): darray;
 
   /* Returns a Vector built from the values of this ImmMap.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function toVector(): object;
 
   /* Returns a ImmVector built from the values of this ImmMap.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function toImmVector(): object;
 
   /* Returns a Map built from the keys and values of this ImmMap.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function toMap(): object;
 
   /* Returns an immutable version of this collection.
    * @return object
    */
+  <<__Rx, __MaybeMutable>>
   public function toImmMap(): this {
     return $this;
   }
@@ -811,18 +872,19 @@ final class ImmMap implements \ConstMap {
   /* Returns a Set built from the values of this ImmMap.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function toSet(): object;
 
   /* Returns a ImmSet built from the values of this ImmMap.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function toImmSet(): object;
 
   /* Returns an immutable version of this collection.
    * @return object
    */
+  <<__Rx, __MaybeMutable>>
   public function immutable(): this {
     return $this;
   }
@@ -830,31 +892,32 @@ final class ImmMap implements \ConstMap {
   /* Returns a ImmVector built from the values of this ImmMap.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function values(): object;
 
   /* Returns an array built from the keys from this ImmMap.
    * @return array
    */
-  <<__Native>>
-  public function toKeysArray(): array;
+
+  <<__Native, __Rx, __MaybeMutable>>
+  public function toKeysArray(): varray;
 
   /* Returns an array built from the values from this ImmMap.
    * @return array
    */
-  <<__Native>>
-  public function toValuesArray(): array;
+  <<__Native, __Rx, __MaybeMutable>>
+  public function toValuesArray(): varray;
 
   /* @param mixed $it
    * @return object
    */
-  <<__Native>>
-  public function differenceByKey(mixed $it): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MaybeMutable>>
+  public function differenceByKey(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> mixed $it): object;
 
   /* Returns an iterator that points to beginning of this ImmMap.
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function getIterator(): object;
 
   /* Returns a ImmMap of the keys/values produced by applying the specified
@@ -862,56 +925,61 @@ final class ImmMap implements \ConstMap {
    * @param mixed $callback
    * @return object
    */
-  public function map(mixed $callback): object {
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function map(<<__OnlyRxIfRxFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
 
           CGetL $callback
           DecodeCufIter 0 bad_func
-.try_fault kill_iter_0 {
+.try {
            This
            FPushObjMethodD 0 "toMap" NullThrows
-           FCall 0
+           FCall 0 0 1 - "" ""
            UnboxRNop
            SetL $res
            PopC
 
            This
            IterInitK 1 endloop $v $k
-  .try_fault kill_iter_1 1 {
+  .try 1 {
     loop:   FPushCufIter 1 0
-            FPassL 0 $v
-            FCall 1
+            FIsParamByRefCufIter 0 Any 0
+            JmpNZ by_ref
+            CGetL $v
+            Jmp call
+    by_ref: VGetL $v
+    call:   FCall 1 0 1 - "" ""
             UnboxR
             AssertRATL $res Obj=HH\Map
             BaseL $res Define
             SetM 0 EL:$k
             PopC
     next:   IterNextK 1 loop $v $k
+            Jmp endloop
+  } .catch {
+            IterFree 1
+            Throw
   }
+} .catch {
+           CIterFree 0
+           Throw
 }
+
     endloop:
            CIterFree 0
            AssertRATL $res Obj=HH\Map
            CGetL $res
            FPushObjMethodD 0 "toImmMap" NullThrows
-           FCall 0
+           FCall 0 0 1 - "" ""
            UnboxRNop
            RetC
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassC 0
-          FCall 1
+          FCall 1 0 1 - "" ""
           PopR
           Throw
-
-kill_iter_0:
-           CIterFree 0
-           Unwind
-kill_iter_1:
-           IterFree 1
-           Unwind
 
 EOT
         );
@@ -922,57 +990,68 @@ EOT
    * @param mixed $callback
    * @return object
    */
-  public function mapWithKey(mixed $callback): object {
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function mapWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
 
           CGetL $callback
           DecodeCufIter 0 bad_func
-.try_fault kill_iter_0 {
+.try {
            This
            FPushObjMethodD 0 "toMap" NullThrows
-           FCall 0
+           FCall 0 0 1 - "" ""
            UnboxRNop
            SetL $res
            PopC
 
            This
            IterInitK 1 endloop $v $k
-  .try_fault kill_iter_1 1 {
+  .try 1 {
     loop:   FPushCufIter 2 0
-            FPassL 0 $k
-            FPassL 1 $v
-            FCall 2
+            FIsParamByRefCufIter 0 Any 0
+            JmpNZ by_ref_k
+            CGetL $k
+            Jmp pass_v
+    by_ref_k:
+            VGetL $k
+    pass_v: FIsParamByRefCufIter 1 Any 0
+            JmpNZ by_ref_v
+            CGetL $v
+            Jmp call
+    by_ref_v:
+            VGetL $v
+    call:   FCall 2 0 1 - "" ""
             UnboxR
             AssertRATL $res Obj=HH\Map
             BaseL $res Define
             SetM 0 EL:$k
             PopC
     next:   IterNextK 1 loop $v $k
+            Jmp endloop
+  } .catch {
+            IterFree 1
+            Throw
   }
+} .catch {
+           CIterFree 0
+           Throw
 }
+
     endloop:
            CIterFree 0
            AssertRATL $res Obj=HH\Map
            CGetL $res
            FPushObjMethodD 0 "toImmMap" NullThrows
-           FCall 0
+           FCall 0 0 1 - "" ""
            UnboxRNop
            RetC
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassC 0
-          FCall 1
+          FCall 1 0 1 - "" ""
           PopR
           Throw
-
-kill_iter_0:
-           CIterFree 0
-           Unwind
-kill_iter_1:
-           IterFree 1
-           Unwind
 
 EOT
         );
@@ -983,25 +1062,30 @@ EOT
    * @param mixed $callback
    * @return object
    */
-  public function filter(mixed $callback): object {
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function filter(<<__OnlyRxIfRxFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
 
           CGetL $callback
           DecodeCufIter 0 bad_func
-.try_fault kill_iter_0 {
+.try {
            FPushCtorD 0 "HH\\Map"
-           FCall 0
+           FCall 0 0 1 - "" ""
            PopR
            SetL $res
            PopC
 
            This
            IterInitK 1 endloop $v $k
-  .try_fault kill_iter_1 1 {
+  .try 1 {
     loop:   FPushCufIter 1 0
-            FPassL 0 $v
-            FCall 1
+            FIsParamByRefCufIter 0 Any 0
+            JmpNZ by_ref
+            CGetL $v
+            Jmp call
+    by_ref: VGetL $v
+    call:   FCall 1 0 1 - "" ""
             UnboxR
             JmpZ next
             CGetL $v
@@ -1010,30 +1094,30 @@ EOT
             SetM 0 EL:$k
             PopC
     next:   IterNextK 1 loop $v $k
+            Jmp endloop
+  } .catch {
+            IterFree 1
+            Throw
   }
+} .catch {
+           CIterFree 0
+           Throw
 }
+
     endloop:
            CIterFree 0
            AssertRATL $res Obj=HH\Map
            CGetL $res
            FPushObjMethodD 0 "toImmMap" NullThrows
-           FCall 0
+           FCall 0 0 1 - "" ""
            UnboxRNop
            RetC
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassC 0
-          FCall 1
+          FCall 1 0 1 - "" ""
           PopR
           Throw
-
-kill_iter_0:
-           CIterFree 0
-           Unwind
-kill_iter_1:
-           IterFree 1
-           Unwind
 
 EOT
         );
@@ -1044,26 +1128,37 @@ EOT
    * @param mixed $callback
    * @return object
    */
-  public function filterWithKey(mixed $callback): object {
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function filterWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
 
           CGetL $callback
           DecodeCufIter 0 bad_func
-.try_fault kill_iter_0 {
+.try {
            FPushCtorD 0 "HH\\Map"
-           FCall 0
+           FCall 0 0 1 - "" ""
            PopR
            SetL $res
            PopC
 
            This
            IterInitK 1 endloop $v $k
-  .try_fault kill_iter_1 1 {
+  .try 1 {
     loop:   FPushCufIter 2 0
-            FPassL 0 $k
-            FPassL 1 $v
-            FCall 2
+            FIsParamByRefCufIter 0 Any 0
+            JmpNZ by_ref_k
+            CGetL $k
+            Jmp pass_v
+    by_ref_k:
+            VGetL $k
+    pass_v: FIsParamByRefCufIter 1 Any 0
+            JmpNZ by_ref_v
+            CGetL $v
+            Jmp call
+    by_ref_v:
+            VGetL $v
+    call:   FCall 2 0 1 - "" ""
             UnboxR
             JmpZ next
             CGetL $v
@@ -1072,30 +1167,30 @@ EOT
             SetM 0 EL:$k
             PopC
     next:   IterNextK 1 loop $v $k
+            Jmp endloop
+  } .catch {
+            IterFree 1
+            Throw
   }
+} .catch {
+           CIterFree 0
+           Throw
 }
+
     endloop:
            CIterFree 0
            AssertRATL $res Obj=HH\Map
            CGetL $res
            FPushObjMethodD 0 "toImmMap" NullThrows
-           FCall 0
+           FCall 0 0 1 - "" ""
            UnboxRNop
            RetC
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassC 0
-          FCall 1
+          FCall 1 0 1 - "" ""
           PopR
           Throw
-
-kill_iter_0:
-           CIterFree 0
-           Unwind
-kill_iter_1:
-           IterFree 1
-           Unwind
 
 EOT
         );
@@ -1106,14 +1201,14 @@ EOT
    * @param mixed $iterable
    * @return object
    */
-  <<__Native>>
-  public function zip(mixed $iterable): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function zip(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a ImmMap containing the first n key/value pairs of this ImmMap.
    * @param mixed $n
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function take(mixed $n): object;
 
   /* Returns a ImmMap containing the key/value pairs of this ImmMap up to but
@@ -1122,25 +1217,30 @@ EOT
    * @param mixed $callback
    * @return object
    */
-  public function takeWhile(mixed $callback): object {
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function takeWhile(<<__OnlyRxIfRxFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
 
           CGetL $callback
           DecodeCufIter 0 bad_func
-.try_fault kill_iter_0 {
+.try {
            FPushCtorD 0 "HH\\Map"
-           FCall 0
+           FCall 0 0 1 - "" ""
            PopR
            SetL $res
            PopC
 
            This
            IterInitK 1 endloop $v $k
-  .try_fault kill_iter_1 1 {
+  .try 1 {
     loop:   FPushCufIter 1 0
-            FPassL 0 $v
-            FCall 1
+            FIsParamByRefCufIter 0 Any 0
+            JmpNZ by_ref
+            CGetL $v
+            Jmp call
+    by_ref: VGetL $v
+    call:   FCall 1 0 1 - "" ""
             UnboxR
             JmpNZ skip
             IterBreak endloop <(Iter)1>
@@ -1151,30 +1251,30 @@ EOT
             SetM 0 EL:$k
             PopC
     next:   IterNextK 1 loop $v $k
+            Jmp endloop
+  } .catch {
+            IterFree 1
+            Throw
   }
+} .catch {
+           CIterFree 0
+           Throw
 }
+
     endloop:
            CIterFree 0
            AssertRATL $res Obj=HH\Map
            CGetL $res
            FPushObjMethodD 0 "toImmMap" NullThrows
-           FCall 0
+           FCall 0 0 1 - "" ""
            UnboxRNop
            RetC
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FPassC 0
-          FCall 1
+          FCall 1 0 1 - "" ""
           PopR
           Throw
-
-kill_iter_0:
-           CIterFree 0
-           Unwind
-kill_iter_1:
-           IterFree 1
-           Unwind
 
 EOT
         );
@@ -1185,7 +1285,7 @@ EOT
    * @param mixed $n
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function skip(mixed $n): object;
 
   /* Returns a ImmMap containing the key/value pairs of this ImmMap excluding
@@ -1193,8 +1293,8 @@ EOT
    * @param mixed $fn
    * @return object
    */
-  <<__Native>>
-  public function skipWhile(mixed $fn): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function skipWhile(<<__OnlyRxIfRxFunc>> mixed $fn): object;
 
   /* Returns a ImmMap containing the specified range of key/value pairs from
    * this ImmMap. The range is specified by two non-negative integers: a
@@ -1203,7 +1303,7 @@ EOT
    * @param mixed $len
    * @return object
    */
-  <<__Native>>
+  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function slice(mixed $start,
                         mixed $len): object;
 
@@ -1213,35 +1313,36 @@ EOT
    * @param mixed $iterable
    * @return object
    */
-  <<__Native>>
-  public function concat(mixed $iterable): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  public function concat(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns the first value from this ImmMap, or null if this ImmMap is empty.
    * @return mixed
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function firstValue(): mixed;
 
   /* Returns the first key from this ImmMap, or null if this ImmMap is empty.
    * @return mixed
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function firstKey(): mixed;
 
   /* Returns the last value from this ImmMap, or null if this ImmMap is empty.
    * @return mixed
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function lastValue(): mixed;
 
   /* Returns the last key from this ImmMap, or null if this ImmMap is empty.
    * @return mixed
    */
-  <<__Native>>
+  <<__Native, __Rx, __MaybeMutable>>
   public function lastKey(): mixed;
 
   /* @return string
    */
+  <<__Rx, __MaybeMutable>>
   public function __toString(): string { return "ImmMap"; }
 
   /* @param mixed $name
@@ -1283,8 +1384,8 @@ EOT
    * @param mixed $iterable
    * @return object
    */
-  <<__Native>>
-  public static function fromItems(mixed $iterable): object;
+  <<__Native, __Rx, __OnlyRxIfArgs, __MaybeMutable>>
+  public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 }
 
 } // namespace HH

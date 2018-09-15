@@ -5,8 +5,7 @@ function block() {
     RescheduleWaitHandle::QUEUE_NO_PENDING_IO,
     1,
   );
-};
-
+}
 async function ret1() {
   await block();
   return 1;
@@ -20,5 +19,10 @@ async function await1() {
 function retWh() { return await1(); }
 function retValue() { return HH\Asio\join(retWh()); }
 
-var_dump(retValue());
 
+<<__EntryPoint>>
+function main_pass_wh() {
+;
+
+var_dump(retValue());
+}

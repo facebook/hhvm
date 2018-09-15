@@ -10,8 +10,7 @@ function show_elems($fs) {
     var_dump($e);
   }
   echo "----\n";
-};
-
+}
 function api() {
   $fs = new ImmSet(Vector {1, 2, 3});
   $e = new ImmSet();
@@ -139,4 +138,9 @@ function main() {
   constructors();
 }
 
+<<__EntryPoint>>
+function main_api() {
+;
+
 main();
+}

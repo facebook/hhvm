@@ -53,9 +53,18 @@ function loop_tests($cmd, $line_func) {
     $line = fgets($ftest);
     $line_func($line);
   }
+  if (!fclose($ftest)) {
+    global $current;
+    if ($current !== '') {
+      finish('failed');
+    }
+    start('test-binary');
+    finish('failed');
+    return;
+  }
+
   say(array('op'      => 'all_done',
             'results' => $results));
-  fclose($ftest);
 }
 
 

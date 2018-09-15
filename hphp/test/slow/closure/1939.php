@@ -3,6 +3,9 @@
 function get() {
  return true;
  }
+
+<<__EntryPoint>>
+function main_1939() {
 if (get()) {
   function f($x) {
     return function () use ($x) {
@@ -21,3 +24,4 @@ if (get()) {
 }
 $f = f(32);
 var_dump($f());
+}

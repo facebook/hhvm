@@ -44,4 +44,8 @@ function main() {
   foo(new ImmVector($v));
 }
 
+
+<<__EntryPoint>>
+function main_keyed_iterable() {
 main();
+}

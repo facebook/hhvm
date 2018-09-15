@@ -26,27 +26,41 @@ LitstrTable* LitstrTable::s_litstrTable = nullptr;
 ///////////////////////////////////////////////////////////////////////////////
 
 Id LitstrTable::mergeLitstr(const StringData* litstr) {
-  std::lock_guard<Mutex> g(mutex());
-  assert(!m_safeToRead);
-  auto it = m_litstr2id.find(litstr);
-
-  if (it == m_litstr2id.end()) {
-    const StringData* sd = makeStaticString(litstr);
-    Id id = numLitstrs();
-
-    m_litstr2id[sd] = id;
-    m_namedInfo.emplace_back(sd, nullptr);
-
-    return id;
-  } else {
-    return it->second;
+  {
+    LitstrMap::const_accessor acc;
+    if (m_litstr2id.find(acc, litstr)) {
+      return acc->second;
+    }
   }
+
+  auto const sd = makeStaticString(litstr);
+  LitstrMap::accessor acc;
+  if (m_litstr2id.insert(acc, sd)) {
+    acc->second = m_nextId.fetch_add(1, std::memory_order_relaxed);
+  }
+
+  return acc->second;
 }
 
-void LitstrTable::forEachNamedEntity(
-  std::function<void (int i, const NamedEntityPair& namedEntity)> onItem) {
-  for (int i = 0; i < m_namedInfo.size(); ++i) {
-    onItem(i, m_namedInfo[i]);
+void LitstrTable::setReading() {
+  always_assert(!m_safeToRead);
+  always_assert(!m_namedInfo.size());
+  if (m_litstr2id.size()) {
+    m_namedInfo.resize(m_litstr2id.size());
+    m_namedInfo.shrink_to_fit();
+    for (auto const& strId : m_litstr2id) {
+      m_namedInfo[strId.second] = strId.first;
+    }
+  }
+  m_safeToRead = true;
+}
+
+void LitstrTable::forEachLitstr(
+  std::function<void (int, const StringData*)> onItem) {
+  assertx(m_safeToRead);
+  auto i = 0;
+  for (auto s : m_namedInfo) {
+    onItem(i++, s);
   }
 }
 

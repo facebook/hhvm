@@ -57,6 +57,13 @@ void initDebugInfo() {
   s_info = new DebugInfo();
 }
 
+void destroyDebugInfo() {
+  if (s_info) {
+    delete s_info;
+    s_info = nullptr;
+  }
+}
+
 DebugInfo* DebugInfo::Get() {
   return s_info;
 }
@@ -226,12 +233,13 @@ void DebugInfo::recordStub(TCRange range, const std::string& name) {
   }
 }
 
-void DebugInfo::recordPerfMap(TCRange range, SrcKey sk, const Func* func,
+void DebugInfo::recordPerfMap(TCRange range, SrcKey /*sk*/, const Func* func,
                               bool exit, bool inPrologue, std::string name) {
   if (!m_perfMap) return;
   if (RuntimeOption::EvalProfileBC) return;
   if (name.empty()) {
-    name = lookupFunction(func, exit, inPrologue, true);
+    name = lookupFunction(func, exit, inPrologue,
+                          RuntimeOption::EvalPerfPidMapIncludeFilePath);
   }
   fprintf(m_perfMap, "%lx %x %s\n",
     reinterpret_cast<uintptr_t>(range.begin()),
@@ -253,14 +261,6 @@ void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {
 #undef O
   };
 
-  static const char* acoldOpcodeName[] = {
-    "OpAcoldStart",
-#define O(name, imm, push, pop, flags) \
-#name "-Acold",
-    OPCODES
-#undef O
-  };
-
   static const char* highOpcodeName[] = {
     "OpHighStart",
 #define O(name) \
@@ -275,8 +275,6 @@ void DebugInfo::recordBCInstr(TCRange range, uint32_t op) {
     const char* name;
     if (op < Op_count) {
       name = opcodeName[op];
-    } else if (op < OpAcoldCount) {
-      name = acoldOpcodeName[op - OpAcoldStart];
     } else {
       name = highOpcodeName[op - OpHighStart];
     }
@@ -343,9 +341,16 @@ std::string lookupFunction(const Func* f,
     }
     return fname;
   }
-  fname += f->fullName()->data();
-  if (inPrologue)
+  if (f->isClosureBody()) {
+    fname += f->baseCls()->name()->toCppString();
+    fname = fname.substr(0, fname.find(';'));
+    fname += "::__invoke";
+  } else {
+    fname += f->fullName()->data();
+  }
+  if (inPrologue) {
     fname += "$prologue";
+  }
   return fname;
 }
 

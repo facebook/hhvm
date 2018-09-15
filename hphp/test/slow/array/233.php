@@ -5,12 +5,12 @@ function push_stack(){
   global $stack;
   static $index = 0;
   $val = $index++;
-  array_push($stack, $val);
+  array_push(&$stack, $val);
 }
 function pop_stack(){
   global $stack;
   if ($stack) {
-    array_pop($stack);
+    array_pop(&$stack);
   }
 }
 push_stack();

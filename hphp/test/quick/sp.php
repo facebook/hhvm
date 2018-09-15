@@ -1,4 +1,4 @@
-<?
+<?hh
 class A {
   public static $goo = 'foo';
 }
@@ -66,4 +66,3 @@ p();
 A::$goo = 'foo';
 d();
 p();
-?>

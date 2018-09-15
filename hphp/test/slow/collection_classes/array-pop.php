@@ -18,8 +18,12 @@ function main() {
     ImmSet {},
   };
   foreach ($containers as $x) {
-    var_dump(array_pop($x));
+    var_dump(array_pop(&$x));
     var_dump($x);
   }
 }
+
+<<__EntryPoint>>
+function main_array_pop() {
 main();
+}

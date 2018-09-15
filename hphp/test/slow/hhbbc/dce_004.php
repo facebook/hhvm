@@ -17,6 +17,10 @@ function bar(str $k) {
   var_dump($tmp);
 }
 
+
+
+<<__EntryPoint>>
+function main_dce_004() {
 bar(new str1);
 bar(new str2);
-
+}

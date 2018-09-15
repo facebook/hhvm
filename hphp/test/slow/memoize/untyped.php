@@ -34,6 +34,9 @@ class O implements HH\IMemoizeParam {
   public function getInstanceKey(): string { return $this->a; }
 }
 
+
+<<__EntryPoint>>
+function main_untyped() {
 echo "Test each kind of function call with one and many args\n";
 $a = new A();
 echo $a->oneArgMeth(1).' ';
@@ -148,3 +151,4 @@ echo oneArgTopLevel(new O('test1')).' ';
 echo oneArgTopLevel('test1').' ';
 echo oneArgTopLevel(new O('test2')).' ';
 echo oneArgTopLevel('test2')."\n";
+}

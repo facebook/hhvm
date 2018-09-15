@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_g5() {
 $a1 = 1;
 $a2 = -999999999;
 $foo = function () use ($a1, &$a2) {
@@ -42,3 +45,4 @@ foreach ($x as $v) {
 }
 echo "--------\n";
 var_dump($a1, $a2);
+}

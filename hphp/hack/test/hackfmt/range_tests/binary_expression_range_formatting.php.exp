@@ -1,0 +1,14 @@
+        $$,
+        $index ==> self::isPotentialBar($index, $someOtherLongArgument),
+      )
+      |> Vec\map(
+        $$,
+        (Baz::TSomeTypeWithALongIdentifier $index): ?SomePotentialBarType ==>
+          self::getPotentialBar(
+            $index,
+            $argumentTwo,
+            $argumentThree,
+            $argumentFour,
+          ),
+      )
+      |>

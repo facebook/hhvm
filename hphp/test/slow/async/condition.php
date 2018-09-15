@@ -52,14 +52,14 @@ async function condition_block_ugly_fail() {
 
 async function condition_block_nice_succeed() {
   $condition = null;
-  $condition = ConditionWaitHandle::create(block_then_succeed($condition));
+  $condition = ConditionWaitHandle::create(block_then_succeed(&$condition));
   echo "constructed ConditionWaitHandle\n";
   return await $condition;
 }
 
 async function condition_block_nice_fail() {
   $condition = null;
-  $condition = ConditionWaitHandle::create(block_then_fail($condition));
+  $condition = ConditionWaitHandle::create(block_then_fail(&$condition));
   echo "constructed ConditionWaitHandle\n";
   return await $condition;
 }
@@ -85,4 +85,8 @@ async function run() {
   await run_one('condition_block_nice_fail');
 }
 
+
+<<__EntryPoint>>
+function main_condition() {
 HH\Asio\join(run());
+}

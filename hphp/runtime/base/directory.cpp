@@ -59,6 +59,10 @@ Array Directory::getMetaData() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+PlainDirectory::PlainDirectory(int fd) {
+  m_dir = ::fdopendir(fd);
+}
+
 PlainDirectory::PlainDirectory(const String& path) {
   m_dir = ::opendir(path.data());
 }
@@ -98,7 +102,7 @@ Variant ArrayDirectory::read() {
   }
 
   auto ret = m_it.second();
-  assert(ret.isString());
+  assertx(ret.isString());
   ++m_it;
   return Variant(HHVM_FN(basename)(ret.toString()));
 }
@@ -117,12 +121,12 @@ String ArrayDirectory::path() {
   }
 
   auto entry = m_it.second();
-  assert(entry.isString());
+  assertx(entry.isString());
   return HHVM_FN(dirname)(entry.toString());
 }
 
 CachedDirectory::CachedDirectory(const String& path) {
-  assert(File::IsVirtualDirectory(path));
+  assertx(File::IsVirtualDirectory(path));
   m_files = StaticContentCache::TheFileCache->readDirectory(path.c_str());
 }
 

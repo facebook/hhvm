@@ -17,7 +17,7 @@
 #include "hphp/runtime/base/zend-collator.h"
 #include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/runtime/base/intl-convert.h"
-#include "hphp/runtime/base/type-conversions.h"
+#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -341,7 +341,7 @@ static Variant collator_convert_object_to_string(const Variant& obj) {
   String str;
   try {
     str = obj.toString();
-  } catch (Exception &e) {
+  } catch (Exception& e) {
     return obj;
   }
   UErrorCode status;
@@ -357,10 +357,13 @@ static Variant collator_convert_object_to_string(const Variant& obj) {
 static void collator_convert_array_from_utf16_to_utf8(Array &array,
                                                       UErrorCode * status) {
   for (ArrayIter iter(array); iter; ++iter) {
-    const Variant& value = iter.secondRef();
+    auto const rval = iter.secondRval().unboxed();
     /* Process string values only. */
-    if (!value.isString()) continue;
-    String str = intl_convert_str_utf16_to_utf8(value.toString(), status);
+    if (!isStringType(rval.type())) continue;
+    String str = intl_convert_str_utf16_to_utf8(
+      StrNR(rval.val().pstr),
+      status
+    );
     if (U_FAILURE(*status)) {
       return;
     }
@@ -373,10 +376,13 @@ static void collator_convert_array_from_utf16_to_utf8(Array &array,
 static void collator_convert_array_from_utf8_to_utf16(Array &array,
                                                       UErrorCode * status) {
   for (ArrayIter iter(array); iter; ++iter) {
-    const Variant& value = iter.secondRef();
+    auto const rval = iter.secondRval().unboxed();
     /* Process string values only. */
-    if (!value.isString()) continue;
-    String str = intl_convert_str_utf8_to_utf16(value.toString(), status);
+    if (!isStringType(rval.type())) continue;
+    String str = intl_convert_str_utf8_to_utf16(
+      StrNR(rval.val().pstr),
+      status
+    );
     if (U_FAILURE(*status)) {
       return;
     }
@@ -420,7 +426,7 @@ static int collator_regular_compare_function(const Variant& v1, const Variant& v
       num2 = collator_convert_string_to_number_if_possible(str2);
     }
     if (same(num1, false) || same(num2, false)) {
-      assert(data);
+      assertx(data);
       int ret = ucol_strcoll((const UCollator *)data,
                              (UChar*)(str1.toString().data()),
                              UCHARS(str1.toString().length()),
@@ -472,9 +478,9 @@ static int collator_regular_compare_descending(const Variant& v1, const Variant&
   return collator_regular_compare_function(v1, v2, data, false);
 }
 
-static int collator_numeric_compare_function(const Variant& v1, const Variant& v2,
-                                             const void *data,
-                                             bool ascending) {
+static int
+collator_numeric_compare_function(const Variant& v1, const Variant& v2,
+                                  const void* /*data*/, bool ascending) {
   Variant num1;
   Variant num2;
 
@@ -511,7 +517,7 @@ static int collator_numeric_compare_descending(const Variant& v1, const Variant&
 static int collator_string_compare_function(const Variant& v1, const Variant& v2,
                                             const void *data,
                                             bool ascending) {
-  assert(data);
+  assertx(data);
   String str1;
   if (v1.isString()) {
     str1 = v1.toString();
@@ -556,7 +562,7 @@ static int collator_string_compare_descending(const Variant& v1, const Variant& 
 static bool collator_sort_internal(bool renumber, Variant &array,
                                    int sort_flags, bool ascending, bool byKey,
                                    UCollator *coll, Intl::IntlError *errcode) {
-  assert(coll);
+  assertx(coll);
   errcode->clearError();
   Array temp = array.toArray();
   Array::PFUNC_CMP cmp_func;
@@ -602,7 +608,7 @@ static bool collator_sort_internal(bool renumber, Variant &array,
 
 bool collator_sort(Variant &array, int sort_flags, bool ascending,
                    UCollator *coll, Intl::IntlError *errcode) {
-  assert(coll);
+  assertx(coll);
   bool byKey = false;
   bool ret = collator_sort_internal(true, array, sort_flags, ascending, byKey,
                                     coll, errcode);
@@ -611,7 +617,7 @@ bool collator_sort(Variant &array, int sort_flags, bool ascending,
 
 bool collator_asort(Variant &array, int sort_flags, bool ascending,
                     UCollator *coll, Intl::IntlError *errcode) {
-  assert(coll);
+  assertx(coll);
   bool byKey = false;
   bool ret = collator_sort_internal(false, array, sort_flags, ascending, byKey,
                                     coll, errcode);

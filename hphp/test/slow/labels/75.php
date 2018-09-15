@@ -5,4 +5,7 @@ class modalité {
  var_dump(123);
 }
  }
- modalité::odalité();
+ <<__EntryPoint>>
+function main_75() {
+modalité::odalité();
+}

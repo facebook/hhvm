@@ -10,4 +10,8 @@ function foo(bool $x, int $n, string $y) {
   }
   return $y[0];
 }
+
+<<__EntryPoint>>
+function main_tuple_types() {
 var_dump(foo(false, 4, 'hi'));
+}

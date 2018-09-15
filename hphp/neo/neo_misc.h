@@ -81,7 +81,7 @@ typedef unsigned short int UINT16;
 typedef short int INT16;
 typedef unsigned char UINT8;
 /* This was conflicting with a cygwin header definition */
-#if defined(__CYGWIN__) || defined(_MSC_VER)
+#ifdef _MSC_VER
 typedef signed char INT8;
 #else
 typedef char INT8;

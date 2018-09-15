@@ -1,4 +1,4 @@
-<?php
+<?hh
 function doThrow() { throw new Exception("blah!"); }
 function foo() {
   foreach (array(1, 2, 3) as $_) {

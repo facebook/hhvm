@@ -14,4 +14,8 @@ class A {
  $obj = new A();
  $obj->a();
  }
- test();
+
+ <<__EntryPoint>>
+function main_1720() {
+test();
+}

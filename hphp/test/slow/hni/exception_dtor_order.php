@@ -1,4 +1,4 @@
-<?hh
+<?hh // decl
 
 class dtor {
   public function __construct(private int $i) {}
@@ -17,5 +17,9 @@ function foo() {
     echo "ok\n";
   }
 }
+
+<<__EntryPoint>>
+function main_exception_dtor_order() {
 foo();
 echo "done\n";
+}

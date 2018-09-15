@@ -5,7 +5,6 @@ class a extends Exception {
     var_dump('__destruct');
   }
 }
-;
 function foo() {
   $ex = null;
   try {
@@ -16,4 +15,9 @@ function foo() {
   }
   var_dump(2);
 }
+
+<<__EntryPoint>>
+function main_58() {
+;
 foo();
+}

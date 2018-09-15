@@ -19,7 +19,9 @@
 #define incl_HPHP_EXT_STRING_H_
 
 #include "hphp/zend/zend-html.h"
+#include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/base/req-vector.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/util/bstring.h"
@@ -108,7 +110,7 @@ String HHVM_FUNCTION(chop,
 Variant HHVM_FUNCTION(explode,
                       const String& delimiter,
                       const String& str,
-                      int limit = 0x7FFFFFFF);
+                      int64_t limit = k_PHP_INT_MAX);
 String HHVM_FUNCTION(implode,
                      const Variant& arg1,
                      const Variant& arg2 = uninit_variant);
@@ -184,8 +186,6 @@ Variant HHVM_FUNCTION(convert_uuencode,
                       const String& data);
 String HHVM_FUNCTION(str_rot13,
                      const String& str);
-int64_t HHVM_FUNCTION(crc32,
-                      const String& str);
 String HHVM_FUNCTION(crypt,
                      const String& str,
                      const String& salt = "");
@@ -218,8 +218,7 @@ Variant HHVM_FUNCTION(setlocale,
                       const Variant& locale,
                       const Array& _argv = null_array);
 Array HHVM_FUNCTION(localeconv);
-String HHVM_FUNCTION(nl_langinfo,
-                     int item);
+Variant HHVM_FUNCTION(nl_langinfo, int item);
 
 ///////////////////////////////////////////////////////////////////////////////
 // input/output
@@ -334,8 +333,6 @@ TypedValue HHVM_FUNCTION(strcspn,
                          const String& str2,
                          int start = 0,
                          int length = 0x7FFFFFFF);
-TypedValue HHVM_FUNCTION(strlen,
-                         const Variant& vstr);
 Array HHVM_FUNCTION(str_getcsv,
                     const String& str,
                     const String& delimiter = ",",

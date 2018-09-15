@@ -1,0 +1,4 @@
+-vEval.HackArrCompatNotices=1
+-vEval.HackArrCompatCheckIntishCast=1
+-vEval.HackArrCompatCheckCompare=1
+-vEval.HackArrCompatCheckMisc=1

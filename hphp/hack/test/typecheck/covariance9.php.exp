@@ -9,7 +9,7 @@ Check out this link if you don't understand what this is about:
 http://en.wikipedia.org/wiki/Covariance_and_contravariance_(computer_science)
 File "covariance9.php", line 6, characters 41-41:
 (-) This type parameter was declared as contravariant (-) (cf 'Y')
-File "covariance9.php", line 6, characters 34-34:
+File "covariance9.php", line 6, characters 34-42:
 (-) Function parameters are contravariant
 File "covariance9.php", line 6, characters 24-50:
 (-) Function parameters are contravariant

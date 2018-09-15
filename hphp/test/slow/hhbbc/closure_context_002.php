@@ -28,4 +28,8 @@ function main() {
   var_dump($my->getter());
 }
 
+
+<<__EntryPoint>>
+function main_closure_context_002() {
 main();
+}

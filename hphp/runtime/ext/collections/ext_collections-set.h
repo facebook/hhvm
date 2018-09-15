@@ -12,6 +12,8 @@ namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 // BaseSet
 
+struct BaseVector;
+
 namespace collections {
 struct SetIterator;
 }
@@ -25,56 +27,56 @@ struct BaseSet : HashCollection {
   void addAll(const Variant& t);
 
   void init(const Variant& t) {
-    assert(m_size == 0);
+    assertx(m_size == 0);
     addAll(t);
   }
 
- protected:
-  template <bool raw>
-  void addImpl(int64_t k);
-  template <bool raw>
-  void addImpl(StringData* key);
+protected:
+  template<bool raw> void addImpl(int64_t k);
+  template<bool raw> void addImpl(StringData* k);
 
   void addRaw(int64_t k);
-  void addRaw(StringData* key);
-  void addRaw(const TypedValue* val) {
-    assert(val->m_type != KindOfRef);
-    if (val->m_type == KindOfInt64) {
-      addRaw(val->m_data.num);
-    } else if (isStringType(val->m_type)) {
-      addRaw(val->m_data.pstr);
+  void addRaw(StringData* k);
+  void addRaw(Cell tv) {
+    assertx(!isRefType(tv.m_type));
+    if (tv.m_type == KindOfInt64) {
+      addRaw(tv.m_data.num);
+    } else if (isStringType(tv.m_type)) {
+      addRaw(tv.m_data.pstr);
     } else {
       throwBadValueType();
     }
   }
-  void addRaw(const Variant& val) {
-    addRaw(val.asCell());
-  }
+  void addRaw(const Variant& v) { addRaw(*v.toCell()); }
 
- public:
+public:
+  /*
+   * Append an element to the Set, increffing it if it's refcounted.
+   */
   void add(int64_t k);
-  void add(StringData* key);
-  void add(const TypedValue* val) {
-    assert(val->m_type != KindOfRef);
-    if (val->m_type == KindOfInt64) {
-      add(val->m_data.num);
-    } else if (isStringType(val->m_type)) {
-      add(val->m_data.pstr);
+  void add(StringData* k);
+  void add(Cell tv) {
+    assertx(!isRefType(tv.m_type));
+    if (tv.m_type == KindOfInt64) {
+      add(tv.m_data.num);
+    } else if (isStringType(tv.m_type)) {
+      add(tv.m_data.pstr);
     } else {
       throwBadValueType();
     }
   }
-  void add(const Variant& val) {
-    add(val.asCell());
-  }
+  void add(const Variant& v) { add(*v.toCell()); }
 
+  /*
+   * Prepend an element to the Set, increffing it if it's refcounted.
+   */
   void addFront(int64_t k);
-  void addFront(StringData* key);
-  void addFront(const TypedValue* val) {
-    if (val->m_type == KindOfInt64) {
-      addFront(val->m_data.num);
-    } else if (isStringType(val->m_type)) {
-      addFront(val->m_data.pstr);
+  void addFront(StringData* k);
+  void addFront(TypedValue tv) {
+    if (tv.m_type == KindOfInt64) {
+      addFront(tv.m_data.num);
+    } else if (isStringType(tv.m_type)) {
+      addFront(tv.m_data.pstr);
     } else {
       throwBadValueType();
     }
@@ -84,6 +86,8 @@ struct BaseSet : HashCollection {
   Variant lastValue();
   Variant pop();
   Variant popFront();
+
+  Array toPHPArray();
 
   template<class TSet>
   typename std::enable_if<
@@ -95,7 +99,7 @@ struct BaseSet : HashCollection {
 
   template <bool throwOnMiss>
   static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key) {
-    assertx(key->m_type != KindOfRef);
+    assertx(!isRefType(key->m_type));
     auto set = static_cast<BaseSet*>(obj);
     ssize_t p;
     if (key->m_type == KindOfInt64) {
@@ -114,7 +118,7 @@ struct BaseSet : HashCollection {
     if (key->m_type == KindOfInt64) {
       collections::throwUndef(key->m_data.num);
     } else {
-      assert(isStringType(key->m_type));
+      assertx(isStringType(key->m_type));
       collections::throwUndef(key->m_data.pstr);
     }
   }
@@ -125,7 +129,7 @@ struct BaseSet : HashCollection {
 
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
 
- protected:
+protected:
   template<class TVector>
   Object php_values() {
     auto vec = req::make<TVector>();
@@ -218,7 +222,7 @@ struct BaseSet : HashCollection {
     ssize_t pos_limit = ad->iter_end();
     for (ssize_t pos = ad->iter_begin(); pos != pos_limit;
          pos = ad->iter_advance(pos)) {
-      set->addRaw(ad->getValueRef(pos));
+      set->addRaw(tvToCell(ad->atPos(pos)));
     }
     set->shrinkIfCapacityTooHigh(oldCap); // ... and shrink if we were wrong
     return Object(std::move(set));
@@ -236,27 +240,24 @@ struct BaseSet : HashCollection {
     throwBadValueType();
   }
 
- public:
+public:
   [[noreturn]] static void throwNoMutableIndexAccess();
   [[noreturn]] static void throwBadValueType();
 
-  static bool instanceof(const ObjectData*);
-
- protected:
+protected:
   // BaseSet is an abstract class with no additional member needing
   // initialization.
   using HashCollection::HashCollection;
 
   ~BaseSet();
 
- private:
+private:
 
   friend struct collections::CollectionsExtension;
   friend struct collections::SetIterator;
   friend struct c_Vector;
   friend struct c_Set;
   friend struct c_Map;
-  friend struct ArrayIter;
 
   static void compileTimeAssertions() {
     // For performance, all native collection classes have their m_size field
@@ -274,14 +275,12 @@ struct c_Set : BaseSet {
 
  public:
   // PHP-land methods.
-  explicit c_Set(Class* cls = c_Set::classof())
-    : BaseSet(cls, HeaderKind::Set) { }
-  explicit c_Set(Class* cls, ArrayData* arr)
-    : BaseSet(cls, HeaderKind::Set, arr) { }
-  explicit c_Set(Class* cls, uint32_t cap)
-    : BaseSet(cls, HeaderKind::Set, cap) { }
-  explicit c_Set(uint32_t cap, Class* cls = c_Set::classof())
-    : c_Set(cls, cap) { }
+  explicit c_Set()
+    : BaseSet(c_Set::classof(), HeaderKind::Set) { }
+  explicit c_Set(ArrayData* arr)
+    : BaseSet(c_Set::classof(), HeaderKind::Set, arr) { }
+  explicit c_Set(uint32_t cap)
+    : BaseSet(c_Set::classof(), HeaderKind::Set, cap) { }
 
   void clear();
   static c_Set* Clone(ObjectData* obj);
@@ -351,22 +350,15 @@ struct c_Set : BaseSet {
 struct c_ImmSet : BaseSet {
   DECLARE_COLLECTIONS_CLASS(ImmSet)
 
-  explicit c_ImmSet(Class* cls = c_ImmSet::classof())
-    : BaseSet(cls, HeaderKind::ImmSet) { }
-  explicit c_ImmSet(Class* cls, ArrayData* arr)
-    : BaseSet(cls, HeaderKind::ImmSet, arr) { }
-  explicit c_ImmSet(Class* cls, uint32_t cap)
-    : BaseSet(cls, HeaderKind::ImmSet, cap) { }
-  explicit c_ImmSet(uint32_t cap, Class* cls = c_ImmSet::classof())
-    : c_ImmSet(cls, cap) { }
+  explicit c_ImmSet()
+    : BaseSet(c_ImmSet::classof(), HeaderKind::ImmSet) { }
+  explicit c_ImmSet(ArrayData* arr)
+    : BaseSet(c_ImmSet::classof(), HeaderKind::ImmSet, arr) { }
+  explicit c_ImmSet(uint32_t cap)
+    : BaseSet(c_ImmSet::classof(), HeaderKind::ImmSet, cap) { }
 
   static c_ImmSet* Clone(ObjectData* obj);
 };
-
-inline bool BaseSet::instanceof(const ObjectData* obj) {
-  return c_Set::instanceof(obj) ||
-         c_ImmSet::instanceof(obj);
-}
 
 namespace collections {
 /////////////////////////////////////////////////////////////////////////////
@@ -380,7 +372,6 @@ struct SetIterator {
   SetIterator& operator=(const SetIterator& src) {
     m_obj = src.m_obj;
     m_pos = src.m_pos;
-    m_version = src.m_version;
     return *this;
   }
   ~SetIterator() {}
@@ -394,14 +385,10 @@ struct SetIterator {
   void setSet(BaseSet* mp) {
     m_obj = mp;
     m_pos = mp->iter_begin();
-    m_version = mp->getVersion();
   }
 
   Variant current() const {
     auto st = m_obj.get();
-    if (UNLIKELY(m_version != st->getVersion())) {
-      throw_collection_modified();
-    }
     if (!st->iter_valid(m_pos)) {
       throw_iterator_not_valid();
     }
@@ -416,24 +403,17 @@ struct SetIterator {
 
   void next() {
     auto st = m_obj.get();
-    if (UNLIKELY(m_version != st->getVersion())) {
-      throw_collection_modified();
-    }
     m_pos = st->iter_next(m_pos);
   }
 
   void rewind() {
     auto st = m_obj.get();
-    if (UNLIKELY(m_version != st->getVersion())) {
-      throw_collection_modified();
-    }
     m_pos = st->iter_begin();
   }
 
  private:
   req::ptr<BaseSet> m_obj;
   uint32_t m_pos{0};
-  int32_t  m_version{0};
 };
 
 /////////////////////////////////////////////////////////////////////////////

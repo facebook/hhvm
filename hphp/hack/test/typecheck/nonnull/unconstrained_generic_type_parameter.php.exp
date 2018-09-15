@@ -1,0 +1,6 @@
+File "unconstrained_generic_type_parameter.php", line 4, characters 10-11:
+Invalid return type (Typing[4110])
+File "unconstrained_generic_type_parameter.php", line 3, characters 25-31:
+This is a nonnull value
+File "unconstrained_generic_type_parameter.php", line 3, characters 18-18:
+It is incompatible with a value of generic type T

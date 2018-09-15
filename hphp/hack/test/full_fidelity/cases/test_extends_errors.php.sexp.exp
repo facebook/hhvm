@@ -1,0 +1,135 @@
+((script 342
+  ((list 342
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4
+        ((() <? 2 ())
+         (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))
+       (missing 0 ())))
+     (classish_declaration 28
+      ((missing 0 ()) (missing 0 ())
+       (((end_of_line 1) (single_line_comment 8) (end_of_line 1)) interface 9
+        ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ())
+       (() extends 7 ((whitespace 1)))
+       (list 4
+        ((list_item 2
+          ((simple_type_specifier 1 ((() name 1 ())))
+           (() , 1 ((whitespace 1)))))
+         (list_item 1
+          ((simple_type_specifier 1 ((() name 1 ((whitespace 1)))))
+           (missing 0 ())))))
+       (missing 0 ()) (missing 0 ())
+       (classish_body 3
+        ((() { 1 ((end_of_line 1))) (missing 0 ())
+         (() } 1 ((end_of_line 1)))))))
+     (classish_declaration 24
+      ((missing 0 ()) (missing 0 ())
+       (((end_of_line 1) (single_line_comment 8) (end_of_line 1)) class 5
+        ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ())
+       (() extends 7 ((whitespace 1)))
+       (list 4
+        ((list_item 2
+          ((simple_type_specifier 1 ((() name 1 ())))
+           (() , 1 ((whitespace 1)))))
+         (list_item 1
+          ((simple_type_specifier 1 ((() name 1 ((whitespace 1)))))
+           (missing 0 ())))))
+       (missing 0 ()) (missing 0 ())
+       (classish_body 3
+        ((() { 1 ((end_of_line 1))) (missing 0 ())
+         (() } 1 ((end_of_line 1)))))))
+     (classish_declaration 24
+      ((missing 0 ()) (missing 0 ())
+       (((end_of_line 1) (single_line_comment 8) (end_of_line 1)) trait 5
+        ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ())
+       (() extends 7 ((whitespace 1)))
+       (list 4
+        ((list_item 2
+          ((simple_type_specifier 1 ((() name 1 ())))
+           (() , 1 ((whitespace 1)))))
+         (list_item 1
+          ((simple_type_specifier 1 ((() name 1 ((whitespace 1)))))
+           (missing 0 ())))))
+       (missing 0 ()) (missing 0 ())
+       (classish_body 3
+        ((() { 1 ((end_of_line 1))) (missing 0 ())
+         (() } 1 ((end_of_line 1)))))))
+     (classish_declaration 25
+      ((missing 0 ()) (missing 0 ())
+       (((end_of_line 1) (single_line_comment 8) (end_of_line 1)) interface 9
+        ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ())
+       (() extends 7 ((whitespace 1)))
+       (list 1
+        ((list_item 1
+          ((simple_type_specifier 1 ((() name 1 ((whitespace 1)))))
+           (missing 0 ())))))
+       (missing 0 ()) (missing 0 ())
+       (classish_body 3
+        ((() { 1 ((end_of_line 1))) (missing 0 ())
+         (() } 1 ((end_of_line 1)))))))
+     (classish_declaration 21
+      ((missing 0 ()) (missing 0 ())
+       (((end_of_line 1) (single_line_comment 8) (end_of_line 1)) class 5
+        ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ())
+       (() extends 7 ((whitespace 1)))
+       (list 1
+        ((list_item 1
+          ((simple_type_specifier 1 ((() name 1 ((whitespace 1)))))
+           (missing 0 ())))))
+       (missing 0 ()) (missing 0 ())
+       (classish_body 3
+        ((() { 1 ((end_of_line 1))) (missing 0 ())
+         (() } 1 ((end_of_line 1)))))))
+     (classish_declaration 21
+      ((missing 0 ()) (missing 0 ())
+       (((end_of_line 1) (single_line_comment 8) (end_of_line 1)) trait 5
+        ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ())
+       (() extends 7 ((whitespace 1)))
+       (list 1
+        ((list_item 1
+          ((simple_type_specifier 1 ((() name 1 ((whitespace 1)))))
+           (missing 0 ())))))
+       (missing 0 ()) (missing 0 ())
+       (classish_body 3
+        ((() { 1 ((end_of_line 1))) (missing 0 ())
+         (() } 1 ((end_of_line 1)))))))
+     (classish_declaration 23
+      ((missing 0 ()) (missing 0 ())
+       (((end_of_line 1) (single_line_comment 13) (end_of_line 1)) interface
+        9 ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ())
+       (() extends 7 ((whitespace 1)))
+       (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
+       (missing 0 ()) (missing 0 ())
+       (classish_body 3
+        ((() { 1 ((end_of_line 1))) (missing 0 ())
+         (() } 1 ((end_of_line 1)))))))
+     (classish_declaration 19
+      ((missing 0 ()) (missing 0 ())
+       (((end_of_line 1) (single_line_comment 13) (end_of_line 1)) class 5
+        ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ())
+       (() extends 7 ((whitespace 1)))
+       (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
+       (missing 0 ()) (missing 0 ())
+       (classish_body 3
+        ((() { 1 ((end_of_line 1))) (missing 0 ())
+         (() } 1 ((end_of_line 1)))))))
+     (classish_declaration 19
+      ((missing 0 ()) (missing 0 ())
+       (((end_of_line 1) (single_line_comment 23) (end_of_line 1)) trait 5
+        ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ())
+       (() extends 7 ((whitespace 1)))
+       (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
+       (missing 0 ()) (missing 0 ())
+       (classish_body 3
+        ((() { 1 ((end_of_line 1))) (missing 0 ())
+         (() } 1 ((end_of_line 1)))))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

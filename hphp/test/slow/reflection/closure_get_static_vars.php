@@ -1,13 +1,6 @@
 <?php
 
-$a = 4;
-$b = 'i am a string';
-
 function fn($c) { return $c + 5; }
-
-$lam = function ($c) use ($a, $b) {
-  return $a + $c;
-};
 
 class C {
   public static $i;
@@ -15,6 +8,16 @@ class C {
 
   public function meth($c) { return $c + 3; }
 }
+
+
+<<__EntryPoint>>
+function main_closure_get_static_vars() {
+$a = 4;
+$b = 'i am a string';
+
+$lam = function ($c) use ($a, $b) {
+  return $a + $c;
+};
 
 $refl = new ReflectionFunction('fn');
 var_dump($refl->getStaticVariables());
@@ -24,3 +27,4 @@ var_dump($refl->getStaticVariables());
 
 $refl = new ReflectionMethod('C', 'meth');
 var_dump($refl->getStaticVariables());
+}

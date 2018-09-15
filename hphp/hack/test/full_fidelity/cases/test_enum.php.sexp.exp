@@ -1,0 +1,30 @@
+((script 54
+  ((list 54
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
+       (missing 0 ())))
+     (enum_declaration 49
+      ((attribute_specification 7
+        ((() << 2 ())
+         (list 3
+          ((list_item 3
+            ((constructor_call 3
+              ((() name 3 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())))
+             (missing 0 ())))))
+         (() >> 2 ((whitespace 1)))))
+       (() enum 4 ((whitespace 1))) (() name 5 ((whitespace 1)))
+       (() : 1 ((whitespace 1)))
+       (simple_type_specifier 3 ((() int 3 ((whitespace 1))))) (missing 0 ())
+       (() { 1 ((whitespace 1)))
+       (list 20
+        ((enumerator 10
+          ((() name 5 ((whitespace 1))) (() = 1 ((whitespace 1)))
+           (literal 1 ((() decimal_literal 1 ())))
+           (() ";" 1 ((whitespace 1)))))
+         (enumerator 9
+          ((() name 4 ((whitespace 1))) (() = 1 ((whitespace 1)))
+           (literal 1 ((() decimal_literal 1 ())))
+           (() ";" 1 ((whitespace 1)))))))
+       (() } 1 ((end_of_line 1)))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

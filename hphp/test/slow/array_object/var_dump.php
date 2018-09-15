@@ -8,6 +8,10 @@ function test($flag = 0) {
   var_dump($ao);
 }
 
+
+<<__EntryPoint>>
+function main_var_dump() {
 test();
 test(ArrayObject::STD_PROP_LIST);
 test(ArrayObject::ARRAY_AS_PROPS);
+}

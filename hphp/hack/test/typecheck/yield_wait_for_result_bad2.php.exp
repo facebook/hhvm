@@ -1,6 +1,6 @@
-File "yield_wait_for_result_bad2.php", line 13, characters 3-7:
+File "yield_wait_for_result_bad2.php", line 13, characters 3-11:
 Invalid yield (Typing[4110])
-File "yield_wait_for_result_bad2.php", line 12, characters 17-25:
+File "yield_wait_for_result_bad2.php", line 12, characters 17-30:
 This is an object of type Awaitable
-File "yield_wait_for_result_bad2.php", line 13, characters 3-7:
+File "yield_wait_for_result_bad2.php", line 13, characters 3-11:
 It is incompatible with an object of type Generator (result of function with 'yield' in the body)

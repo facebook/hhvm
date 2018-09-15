@@ -16,6 +16,10 @@ class Y extends X {
  X::bar();
  }
 }
+
+<<__EntryPoint>>
+function main_1879() {
 $y = new Y;
 $y->baz();
 Y::baz();
+}

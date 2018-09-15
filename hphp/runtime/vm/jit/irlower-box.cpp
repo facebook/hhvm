@@ -17,9 +17,9 @@
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
 #include "hphp/runtime/base/ref-data.h"
-#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-variant.h"
 
-#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
@@ -41,45 +42,79 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
+TypedValue* tvBoxHelper(TypedValue* tv) { tvBox(tv); return tv; }
+tv_lval tvBoxHelper(tv_lval tv) { tvBox(tv); return tv; }
+
 void cgBoxPtr(IRLS& env, const IRInstruction* inst) {
-  auto const base = srcLoc(env, inst, 0).reg();
+  auto const src = inst->src(0);
+  auto const srcLoc = irlower::srcLoc(env, inst, 0);
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
-  irlower::emitTypeTest(
-    v, env, TBoxedCell, base[TVOFF(m_type)], base[TVOFF(m_data)], v.makeReg(),
-    [&] (ConditionCode cc, Vreg sf) {
-      cond(v, cc, sf, dst,
-        [&] (Vout& v) { return base; },
-        [&] (Vout& v) {
-          auto const args = argGroup(env, inst).ssa(0 /* addr */);
-          auto const ret = v.makeReg();
-          cgCallHelper(v, env, CallSpec::direct(tvBox),
-                       callDest(ret), SyncOptions::None, args);
-          return ret;
-        }
-      );
+  emitTypeTest(
+    v, env, TBoxedCell,
+    memTVTypePtr(src, srcLoc), memTVValPtr(src, srcLoc), v.makeReg(),
+    [&](ConditionCode cc, Vreg sf) {
+      cond(v, cc, sf, dst, [&](Vout& /*v*/) { return srcLoc.reg(); },
+           [&](Vout& v) {
+             auto const args = argGroup(env, inst).ssa(0 /* addr */);
+             auto const ret = v.makeReg();
+             auto const target = [&] {
+               if (src->isA(TPtrToGen)) {
+                 TypedValue* (*f)(TypedValue*) = tvBoxHelper;
+                 return CallSpec::direct(f);
+               }
+               tv_lval (*f)(tv_lval) = tvBoxHelper;
+               return CallSpec::direct(f);
+             }();
+             cgCallHelper(v, env, target,
+                          callDest(ret), SyncOptions::None, args);
+             return ret;
+           });
     });
 }
 
 void cgUnboxPtr(IRLS& env, const IRInstruction* inst) {
-  auto const src = srcLoc(env, inst, 0).reg();
-  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const src = inst->src(0);
+  auto const dst = inst->dst();
+  auto const wide = wide_tv_val && dst->isA(TLvalToGen);
+  assertx((src->isA(TPtrToGen) && dst->isA(TPtrToGen)) ||
+          (src->isA(TLvalToGen) && dst->isA(TLvalToGen)));
+
+  auto const srcLoc = irlower::srcLoc(env, inst, 0);
+  auto const dstLoc = irlower::dstLoc(env, inst, 0);
+  auto const valIdx = wide ? tv_lval::val_idx : 0;
   auto& v = vmain(env);
 
   auto const sf = v.makeReg();
-  emitCmpTVType(v, sf, KindOfRef, src[TVOFF(m_type)]);
+  auto const type_ptr = memTVTypePtr(src, srcLoc);
+  emitCmpTVType(v, sf, KindOfRef, type_ptr);
 
-  if (RefData::tvOffset() == 0) {
-    v << cloadq{CC_E, sf, src, src[TVOFF(m_data)], dst};
+  auto const val_ptr = memTVValPtr(src, srcLoc);
+  if (RefData::cellOffset() == 0) {
+    v << cloadq{CC_E, sf, srcLoc.reg(valIdx), val_ptr, dstLoc.reg(valIdx)};
+    if (wide) {
+      static_assert(TVOFF(m_data) == 0, "");
+      auto const ref_type = v.makeReg();
+      v << lea{dstLoc.reg(valIdx)[TVOFF(m_type)], ref_type};
+      v << cmovq{CC_E, sf, srcLoc.reg(tv_lval::type_idx),
+                 ref_type, dstLoc.reg(tv_lval::type_idx)};
+    }
     return;
   }
 
   auto const ref_ptr = v.makeReg();
   auto const cell_ptr = v.makeReg();
-  v << load{src[TVOFF(m_data)], ref_ptr};
-  v << lea{ref_ptr[RefData::tvOffset()], cell_ptr};
-  v << cmovq{CC_E, sf, src, cell_ptr, dst};
+  v << load{val_ptr, ref_ptr};
+  v << lea{ref_ptr[RefData::cellOffset()], cell_ptr};
+  v << cmovq{CC_E, sf, srcLoc.reg(valIdx), cell_ptr, dstLoc.reg(valIdx)};
+  if (wide) {
+    static_assert(TVOFF(m_data) == 0, "");
+    auto const ref_type = v.makeReg();
+    v << lea{cell_ptr[TVOFF(m_type)], ref_type};
+    v << cmovq{CC_E, sf, srcLoc.reg(tv_lval::type_idx),
+               ref_type, dstLoc.reg(tv_lval::type_idx)};
+  }
 }
 
 IMPL_OPCODE_CALL(Box)

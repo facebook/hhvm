@@ -19,6 +19,8 @@ namespace HH\Asio {
  * The keys and values in the `Map` of the returned `Awaitable` are not
  * available until you `await` or `join` the returned `Awaitable`.
  *
+ * @deprecated Use `Dict\map_async()` instead.
+ *
  * @param $inputs - The `KeyedTraversable` of values to map.
  *
  * @param $callable - The callable containing the `Awaitable` operation to
@@ -85,12 +87,14 @@ async function mmk<Tk, Tv, Tr>(
  * values is done using `Awaitable`s.
  *
  * This function is called `mf` because we are returning a `m`ap, and we are
- * doing a `f`apping operation.
+ * doing a `f`iltering operation.
  *
  * `$callable` must return an `Awaitable` of `bool`.
  *
  * The keys and values in the `Map` of the returned `Awaitable` are not
  * available until you `await` or `join` the returned `Awaitable`.
+ *
+ * @deprecated Use `Dict\filter_async()` instead.
  *
  * @param $inputs - The `KeyedTraversable` of values to map.
  *

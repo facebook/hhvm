@@ -1,0 +1,15 @@
+OK
+string(29) "Expected bool at [1], got int"
+string(31) "Expected string at [2], got int"
+string(51) "Expected (int, bool, string), got array of length 2"
+string(51) "Expected (int, bool, string), got array of length 2"
+string(51) "Expected (int, bool, string), got array of length 2"
+string(51) "Expected (int, bool, string), got array of length 4"
+
+string(57) "Expected (int, (int, (int, bool))), got array of length 3"
+string(57) "Expected (int, (int, (int, bool))), got array of length 3"
+string(57) "Expected (int, (int, (int, bool))), got array of length 3"
+OK
+string(35) "Expected int at [1][1][0], got bool"
+string(34) "Expected int at [1][0], got string"
+string(57) "Expected (int, (int, (int, bool))), got array of length 4"

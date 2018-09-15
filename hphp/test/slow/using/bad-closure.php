@@ -1,0 +1,3 @@
+<?hh
+
+using (function() {}) {}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class aa {
   protected function blah() {

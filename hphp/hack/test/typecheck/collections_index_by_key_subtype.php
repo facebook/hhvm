@@ -1,10 +1,10 @@
 <?hh // strict
 
-enum IntSubtype : int as int {
+enum IntSubtype: int as int {
   ZERO = 0;
 }
 
-enum StringSubtype : string as string {
+enum StringSubtype: string as string {
   FOO = 'foo';
 }
 

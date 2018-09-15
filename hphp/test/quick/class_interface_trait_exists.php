@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function __autoload($n) {
   var_dump($n);

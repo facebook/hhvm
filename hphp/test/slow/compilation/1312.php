@@ -7,4 +7,8 @@ function setAttribute() {
   $v_att_list = &func_get_args();
   return true;
 }
+
+<<__EntryPoint>>
+function main_1312() {
 setAttribute('a');
+}

@@ -281,7 +281,7 @@ static bool set_sockaddr(sockaddr_storage &sa_storage, req::ptr<Socket> sock,
 
 static void sock_array_to_fd_set(const Array& sockets, pollfd *fds, int &nfds,
                                  short flag) {
-  assert(fds);
+  assertx(fds);
   for (ArrayIter iter(sockets); iter; ++iter) {
     auto sock = cast<File>(iter.second());
     int intfd = sock->fd();
@@ -300,12 +300,12 @@ static void sock_array_to_fd_set(const Array& sockets, pollfd *fds, int &nfds,
 
 static void sock_array_from_fd_set(Variant &sockets, pollfd *fds, int &nfds,
                                    int &count, short flag) {
-  assert(sockets.isArray());
+  assertx(sockets.isArray());
   Array sock_array = sockets.toArray();
   Array ret = Array::Create();
   for (ArrayIter iter(sock_array); iter; ++iter) {
     const pollfd &fd = fds[nfds++];
-    assert(fd.fd == cast<File>(iter.second())->fd());
+    assertx(fd.fd == cast<File>(iter.second())->fd());
     if (fd.revents & flag) {
       ret.set(iter.first(), iter.second());
       count++;
@@ -398,8 +398,8 @@ static req::ptr<Socket> create_new_socket(
   if (sslsock) {
     sock = sslsock;
   } else {
-    sock = req::make<Socket>(fd, domain, hosturl.getHost().c_str(),
-                             hosturl.getPort());
+    sock = req::make<StreamSocket>(fd, domain, hosturl.getHost().c_str(),
+                                   hosturl.getPort());
   }
 
   if (!sock->valid()) {
@@ -489,8 +489,9 @@ static Variant new_socket_connect(const HostURL &hosturl, double timeout,
     size_t sa_size;
 
     fd = socket(domain, type, 0);
-    sock = req::make<Socket>(
-      fd, domain, hosturl.getHost().c_str(), hosturl.getPort());
+    sock = req::make<StreamSocket>(
+      fd, domain, hosturl.getHost().c_str(), hosturl.getPort(),
+      0, empty_string_ref, false);
 
     if (!set_sockaddr(sa_storage, sock, hosturl.getHost().c_str(),
                       hosturl.getPort(), sa_ptr, sa_size)) {
@@ -536,14 +537,17 @@ static Variant new_socket_connect(const HostURL &hosturl, double timeout,
       fd = -1;
     }
 
-    sslsock = SSLSocket::Create(fd, domain, hosturl, timeout, streamctx);
+    sslsock = SSLSocket::Create(fd, domain, hosturl, timeout, streamctx, false);
     if (sslsock) {
       sock = sslsock;
     } else {
-      sock = req::make<Socket>(fd,
-                                  domain,
-                                  hosturl.getHost().c_str(),
-                                  hosturl.getPort());
+      sock = req::make<StreamSocket>(fd,
+                                     domain,
+                                     hosturl.getHost().c_str(),
+                                     hosturl.getPort(),
+                                     0,
+                                     empty_string_ref,
+                                     false);
     }
   }
 
@@ -572,12 +576,12 @@ Variant HHVM_FUNCTION(socket_create,
   check_socket_parameters(domain, type);
   int socketId = socket(domain, type, protocol);
   if (socketId == -1) {
-    SOCKET_ERROR(req::make<Socket>(),
+    SOCKET_ERROR(req::make<ConcreteSocket>(),
                  "Unable to create socket",
                  errno);
     return false;
   }
-  return Variant(req::make<Socket>(socketId, domain));
+  return Variant(req::make<ConcreteSocket>(socketId, domain));
 }
 
 Variant HHVM_FUNCTION(socket_create_listen,
@@ -594,7 +598,7 @@ Variant HHVM_FUNCTION(socket_create_listen,
   la.sin_family = result.hostbuf.h_addrtype;
   la.sin_port = htons((unsigned short)port);
 
-  auto sock = req::make<Socket>(
+  auto sock = req::make<ConcreteSocket>(
     socket(PF_INET, SOCK_STREAM, 0), PF_INET, "0.0.0.0", port);
 
   if (!sock->valid()) {
@@ -618,28 +622,42 @@ Variant HHVM_FUNCTION(socket_create_listen,
 const StaticString
   s_socktype_generic("generic_socket");
 
-bool HHVM_FUNCTION(socket_create_pair,
-                   int domain,
-                   int type,
-                   int protocol,
-                   VRefParam fd) {
+bool socket_create_pair_impl(int domain, int type, int protocol, VRefParam fd,
+                             bool asStream) {
   check_socket_parameters(domain, type);
 
   int fds_array[2];
   if (socketpair(domain, type, protocol, fds_array) != 0) {
-    SOCKET_ERROR(req::make<Socket>(),
+    SOCKET_ERROR(req::make<StreamSocket>(),
                  "unable to create socket pair",
                  errno);
     return false;
   }
 
-  fd.assignIfRef(make_packed_array(
-    Variant(req::make<Socket>(fds_array[0], domain, nullptr, 0, 0.0,
-                              s_socktype_generic)),
-    Variant(req::make<Socket>(fds_array[1], domain, nullptr, 0, 0.0,
-                              s_socktype_generic))
-  ));
+  if (asStream) {
+    fd.assignIfRef(make_packed_array(
+      Variant(req::make<StreamSocket>(fds_array[0], domain, nullptr, 0, 0.0,
+                                      s_socktype_generic)),
+      Variant(req::make<StreamSocket>(fds_array[1], domain, nullptr, 0, 0.0,
+                                      s_socktype_generic))
+    ));
+  } else {
+    fd.assignIfRef(make_packed_array(
+      Variant(req::make<ConcreteSocket>(fds_array[0], domain, nullptr, 0, 0.0,
+                                        s_socktype_generic)),
+      Variant(req::make<ConcreteSocket>(fds_array[1], domain, nullptr, 0, 0.0,
+                                        s_socktype_generic))
+    ));
+  }
   return true;
+}
+
+bool HHVM_FUNCTION(socket_create_pair,
+                   int domain,
+                   int type,
+                   int protocol,
+                   VRefParam fd) {
+  return socket_create_pair_impl(domain, type, protocol, fd, false);
 }
 
 const StaticString
@@ -1068,7 +1086,7 @@ Variant HHVM_FUNCTION(socket_accept,
   auto sock = cast<Socket>(socket);
   struct sockaddr sa;
   socklen_t salen = sizeof(sa);
-  auto new_sock = req::make<Socket>(
+  auto new_sock = req::make<ConcreteSocket>(
     accept(sock->fd(), &sa, &salen), sock->getType());
   if (!new_sock->valid()) {
     SOCKET_ERROR(new_sock, "unable to accept incoming connection", errno);
@@ -1377,7 +1395,7 @@ bool HHVM_FUNCTION(socket_shutdown,
    * a memfile. As the fact that it's not really a socket is an implementation
    * detail, user code needs to be able to call shutdown on it.
    */
-  if (socket.is<MemFile>()) {
+  if (socket->instanceof<MemFile>()) {
     return true;
   }
   auto sock = cast<Socket>(socket);
@@ -1456,7 +1474,7 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
           std::dynamic_pointer_cast<SSLSocketData>(sockItr->second)) {
         sock = req::make<SSLSocket>(sslSocketData);
       } else {
-        sock = req::make<Socket>(sockItr->second);
+        sock = req::make<StreamSocket>(sockItr->second);
       }
 
       if (sock->getError() == 0 && sock->checkLiveness()) {
@@ -1486,9 +1504,9 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
   }
 
   if (persistent) {
-    assert(!key.empty());
+    assertx(!key.empty());
     s_sockets[key] = cast<Socket>(socket)->getData();
-    assert(s_sockets[key]);
+    assertx(s_sockets[key]);
   }
 
   return socket;

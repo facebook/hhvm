@@ -41,6 +41,7 @@
 #include <zlib.h>
 #include <set>
 
+#include <folly/portability/Stdlib.h>
 #include <folly/portability/Unistd.h>
 
 /* Section Filters Declarations */
@@ -122,7 +123,7 @@ struct ImageMemoryAlloc final : RequestEventHandler {
     int n = 1000;
     if (m_mallocSize) imDump(ptrs, n);
 #endif
-    assert(m_mallocSize == 0);
+    assertx(m_mallocSize == 0);
     m_mallocSize = 0;
   }
   void requestShutdown() override {
@@ -130,7 +131,7 @@ struct ImageMemoryAlloc final : RequestEventHandler {
     void *ptrs[1000];
     int n = 1000;
     if (m_mallocSize) imDump(ptrs, n);
-    assert(m_mallocSize == 0);
+    assertx(m_mallocSize == 0);
 #endif
     m_mallocSize = 0;
   }
@@ -139,7 +140,7 @@ struct ImageMemoryAlloc final : RequestEventHandler {
 , int ln
 #endif
   ) {
-    assert(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assertx(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
     if (m_mallocSize + size < (size_t)RuntimeOption::ImageMemoryMaxBytes) {
 #ifdef IM_MEMORY_CHECK
       void *ptr = malloc(sizeof(ln) + sizeof(size) + size);
@@ -164,7 +165,7 @@ struct ImageMemoryAlloc final : RequestEventHandler {
 , int ln
 #endif
   ) {
-    assert(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assertx(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
     size_t bytes = nmemb * size;
     if (m_mallocSize + bytes < (size_t)RuntimeOption::ImageMemoryMaxBytes) {
 #ifdef IM_MEMORY_CHECK
@@ -199,11 +200,11 @@ struct ImageMemoryAlloc final : RequestEventHandler {
 #ifdef IM_MEMORY_CHECK
     void *lnPtr = (char *)sizePtr - sizeof(ln);
     int count = m_alloced.erase((char*)sizePtr - sizeof(ln));
-    assert(count == 1); // double free on failure
-    assert(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assertx(count == 1); // double free on failure
+    assertx(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
     free(lnPtr);
 #else
-    assert(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assertx(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
     free(sizePtr);
 #endif
   }
@@ -214,7 +215,7 @@ struct ImageMemoryAlloc final : RequestEventHandler {
 , int ln
 #endif
   ) {
-    assert(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
+    assertx(m_mallocSize < (size_t)RuntimeOption::ImageMemoryMaxBytes);
 
 #ifdef IM_MEMORY_CHECK
     if (!ptr) return imMalloc(size, ln);
@@ -240,7 +241,7 @@ struct ImageMemoryAlloc final : RequestEventHandler {
     if (m_mallocSize + diff > (size_t)RuntimeOption::ImageMemoryMaxBytes ||
         !(tmp = realloc(lnPtr, sizeof(ln) + sizeof(size) + size))) {
       int count = m_alloced.erase(ptr);
-      assert(count == 1); // double free on failure
+      assertx(count == 1); // double free on failure
       free(lnPtr);
       return nullptr;
     }
@@ -249,7 +250,7 @@ struct ImageMemoryAlloc final : RequestEventHandler {
     m_mallocSize += diff;
     if (tmp != lnPtr) {
       int count = m_alloced.erase(lnPtr);
-      assert(count == 1);
+      assertx(count == 1);
       m_alloced.insert(tmp);
     }
     return ((char *)tmp + sizeof(ln) + sizeof(size));
@@ -271,7 +272,7 @@ struct ImageMemoryAlloc final : RequestEventHandler {
     for (std::set<void*>::iterator iter = m_alloced.begin();
          iter != m_alloced.end(); ++i, ++iter) {
       void *p = *iter;
-      assert(p);
+      assertx(p);
       if (i < n) ptrs[i] = p;
       int ln;
       size_t size;
@@ -723,9 +724,8 @@ static unsigned short php_read2(const req::ptr<File>& stream) {
   return (((unsigned short)a[0]) << 8) + ((unsigned short)a[1]);
 }
 
-static unsigned int php_next_marker(const req::ptr<File>& file,
-                                    int last_marker,
-                                    int ff_read) {
+static unsigned int
+php_next_marker(const req::ptr<File>& file, int /*last_marker*/, int ff_read) {
   int a=0, marker;
 
   // get marker byte, swallowing possible padding
@@ -1139,12 +1139,12 @@ static signed short php_ifd_get16s(void *Short, int motorola_intel) {
 /* Convert a 32 bit signed value from file's native byte order */
 static int php_ifd_get32s(void *Long, int motorola_intel) {
   if (motorola_intel) {
-    return ((( char *)Long)[0] << 24) |
+    return (((unsigned char *)Long)[0] << 24) |
            (((unsigned char *)Long)[1] << 16) |
            (((unsigned char *)Long)[2] << 8) |
            (((unsigned char *)Long)[3] << 0);
   } else {
-    return ((( char *)Long)[3] << 24) |
+    return (((unsigned char *)Long)[3] << 24) |
            (((unsigned char *)Long)[2] << 16) |
            (((unsigned char *)Long)[1] << 8) |
            (((unsigned char *)Long)[0] << 0);
@@ -1815,7 +1815,7 @@ static int php_write(void *buf, uint32_t size) {
   return size;
 }
 
-static void _php_image_output_putc(struct gdIOCtx *ctx, int c) {
+static void _php_image_output_putc(struct gdIOCtx* /*ctx*/, int c) {
   /* without the following downcast, the write will fail
    * (i.e., will write a zero byte) for all
    * big endian architectures:
@@ -1824,8 +1824,8 @@ static void _php_image_output_putc(struct gdIOCtx *ctx, int c) {
   php_write(&ch, 1);
 }
 
-static int _php_image_output_putbuf(struct gdIOCtx *ctx, const void* buf,
-                                    int len) {
+static int
+_php_image_output_putbuf(struct gdIOCtx* /*ctx*/, const void* buf, int len) {
   return php_write((void *)buf, len);
 }
 
@@ -1834,11 +1834,9 @@ static void _php_image_output_ctxfree(struct gdIOCtx *ctx) {
     IM_FREE(ctx);
   }
 }
-static bool _php_image_output_ctx(const Resource& image,
-                                  const String& filename,
-                                  int quality, int basefilter,
-                                  int image_type, char *tn,
-                                  void (*func_p)()) {
+static bool _php_image_output_ctx(const Resource& image, const String& filename,
+                                  int quality, int basefilter, int image_type,
+                                  char* /*tn*/, void (*func_p)()) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   req::ptr<File> file;
@@ -2141,9 +2139,9 @@ static bool _php_image_convert(const String& f_org, const String& f_dest,
 }
 
 // For quality and type, -1 means that the argument does not exist
-static bool _php_image_output(const Resource& image, const String& filename,
-                              int quality, int type, int image_type, char *tn,
-                              void (*func_p)()) {
+static bool
+_php_image_output(const Resource& image, const String& filename, int quality,
+                  int type, int image_type, char* /*tn*/, void (*func_p)()) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   req::ptr<File> file;
@@ -2338,7 +2336,7 @@ static gdImagePtr _php_image_create_from(const String& filename,
   }
   else {
     /* TODO: try and force the stream to be FILE* */
-    assert(false);
+    assertx(false);
   }
 
   if (!im && fp) {
@@ -2616,45 +2614,39 @@ static bool php_imagepolygon(const Resource& image,
   return true;
 }
 
-static bool php_image_filter_negate(gdImagePtr im,
-                                    int arg1 /* = 0 */,
-                                    int arg2 /* = 0 */,
-                                    int arg3 /* = 0 */,
-                                    int arg4 /* = 0 */) {
+static bool
+php_image_filter_negate(gdImagePtr im, int /*arg1*/ /* = 0 */,
+                        int /*arg2*/ /* = 0 */, int /*arg3*/ /* = 0 */,
+                        int /*arg4*/ /* = 0 */) {
   return gdImageNegate(im) == 1;
 }
 
-static bool php_image_filter_grayscale(gdImagePtr im,
-                                       int arg1 /* = 0 */,
-                                       int arg2 /* = 0 */,
-                                       int arg3 /* = 0 */,
-                                       int arg4 /* = 0 */) {
+static bool
+php_image_filter_grayscale(gdImagePtr im, int /*arg1*/ /* = 0 */,
+                           int /*arg2*/ /* = 0 */, int /*arg3*/ /* = 0 */,
+                           int /*arg4*/ /* = 0 */) {
   return gdImageGrayScale(im) == 1;
 }
 
-static bool php_image_filter_brightness(gdImagePtr im,
-                                        int arg1 /* = 0 */,
-                                        int arg2 /* = 0 */,
-                                        int arg3 /* = 0 */,
-                                        int arg4 /* = 0 */) {
+static bool
+php_image_filter_brightness(gdImagePtr im, int arg1 /* = 0 */,
+                            int /*arg2*/ /* = 0 */, int /*arg3*/ /* = 0 */,
+                            int /*arg4*/ /* = 0 */) {
   int brightness = arg1;
   return gdImageBrightness(im, brightness) == 1;
 }
 
-static bool php_image_filter_contrast(gdImagePtr im,
-                                      int arg1 /* = 0 */,
-                                      int arg2 /* = 0 */,
-                                      int arg3 /* = 0 */,
-                                      int arg4 /* = 0 */) {
+static bool
+php_image_filter_contrast(gdImagePtr im, int arg1 /* = 0 */,
+                          int /*arg2*/ /* = 0 */, int /*arg3*/ /* = 0 */,
+                          int /*arg4*/ /* = 0 */) {
   int contrast = arg1;
   return gdImageContrast(im, contrast) == 1;
 }
 
-static bool php_image_filter_colorize(gdImagePtr im,
-                                      int arg1 /* = 0 */,
-                                      int arg2 /* = 0 */,
-                                      int arg3 /* = 0 */,
-                                      int arg4 /* = 0 */) {
+static bool
+php_image_filter_colorize(gdImagePtr im, int arg1 /* = 0 */, int arg2 /* = 0 */,
+                          int arg3 /* = 0 */, int /*arg4*/ /* = 0 */) {
   int r = arg1;
   int g = arg2;
   int b = arg3;
@@ -2662,60 +2654,52 @@ static bool php_image_filter_colorize(gdImagePtr im,
   return gdImageColor(im, r, g, b, a) == 1;
 }
 
-static bool php_image_filter_edgedetect(gdImagePtr im,
-                                        int arg1 /* = 0 */,
-                                        int arg2 /* = 0 */,
-                                        int arg3 /* = 0 */,
-                                        int arg4 /* = 0 */) {
+static bool
+php_image_filter_edgedetect(gdImagePtr im, int /*arg1*/ /* = 0 */,
+                            int /*arg2*/ /* = 0 */, int /*arg3*/ /* = 0 */,
+                            int /*arg4*/ /* = 0 */) {
   return gdImageEdgeDetectQuick(im) == 1;
 }
 
-static bool php_image_filter_emboss(gdImagePtr im,
-                                    int arg1 /* = 0 */,
-                                    int arg2 /* = 0 */,
-                                    int arg3 /* = 0 */,
-                                    int arg4 /* = 0 */) {
+static bool
+php_image_filter_emboss(gdImagePtr im, int /*arg1*/ /* = 0 */,
+                        int /*arg2*/ /* = 0 */, int /*arg3*/ /* = 0 */,
+                        int /*arg4*/ /* = 0 */) {
   return gdImageEmboss(im) == 1;
 }
 
-static bool php_image_filter_gaussian_blur(gdImagePtr im,
-                                           int arg1 /* = 0 */,
-                                           int arg2 /* = 0 */,
-                                           int arg3 /* = 0 */,
-                                           int arg4 /* = 0 */) {
+static bool
+php_image_filter_gaussian_blur(gdImagePtr im, int /*arg1*/ /* = 0 */,
+                               int /*arg2*/ /* = 0 */, int /*arg3*/ /* = 0 */,
+                               int /*arg4*/ /* = 0 */) {
   return gdImageGaussianBlur(im) == 1;
 }
 
-static bool php_image_filter_selective_blur(gdImagePtr im,
-                                            int arg1 /* = 0 */,
-                                            int arg2 /* = 0 */,
-                                            int arg3 /* = 0 */,
-                                            int arg4 /* = 0 */) {
+static bool
+php_image_filter_selective_blur(gdImagePtr im, int /*arg1*/ /* = 0 */,
+                                int /*arg2*/ /* = 0 */, int /*arg3*/ /* = 0 */,
+                                int /*arg4*/ /* = 0 */) {
   return gdImageSelectiveBlur(im) == 1;
 }
 
-static bool php_image_filter_mean_removal(gdImagePtr im,
-                                          int arg1 /* = 0 */,
-                                          int arg2 /* = 0 */,
-                                          int arg3 /* = 0 */,
-                                          int arg4 /* = 0 */) {
+static bool
+php_image_filter_mean_removal(gdImagePtr im, int /*arg1*/ /* = 0 */,
+                              int /*arg2*/ /* = 0 */, int /*arg3*/ /* = 0 */,
+                              int /*arg4*/ /* = 0 */) {
   return gdImageMeanRemoval(im) == 1;
 }
 
-static bool php_image_filter_smooth(gdImagePtr im,
-                                    int arg1 /* = 0 */,
-                                    int arg2 /* = 0 */,
-                                    int arg3 /* = 0 */,
-                                    int arg4 /* = 0 */) {
+static bool
+php_image_filter_smooth(gdImagePtr im, int arg1 /* = 0 */,
+                        int /*arg2*/ /* = 0 */, int /*arg3*/ /* = 0 */,
+                        int /*arg4*/ /* = 0 */) {
   int weight = arg1;
   return gdImageSmooth(im, weight) == 1;
 }
 
-static bool php_image_filter_pixelate(gdImagePtr im,
-                                      int arg1 /* = 0 */,
-                                      int arg2 /* = 0 */,
-                                      int arg3 /* = 0 */,
-                                      int arg4 /* = 0 */) {
+static bool
+php_image_filter_pixelate(gdImagePtr im, int arg1 /* = 0 */, int arg2 /* = 0 */,
+                          int /*arg3*/ /* = 0 */, int /*arg4*/ /* = 0 */) {
   int blocksize = arg1;
   unsigned mode = arg2;
   return gdImagePixelate(im, blocksize, mode) == 1;
@@ -2767,9 +2751,9 @@ static Variant php_imagettftext_common(int mode, int extended,
     Resource image = arg1.toResource();
     ptsize = arg2.toDouble();
     angle = arg3.toDouble();
-    x = toInt64(arg4);
-    y = toInt64(arg5);
-    col = toInt64(arg6);
+    x = arg4.toInt64();
+    y = arg5.toInt64();
+    col = arg6.toInt64();
     fontname = arg7.toString();
     str = arg8.toString();
     extrainfo = arg9;
@@ -2789,7 +2773,7 @@ static Variant php_imagettftext_common(int mode, int extended,
       Variant item = iter.second();
       if (equal(key, s_linespacing)) {
         strex.flags |= gdFTEX_LINESPACE;
-        strex.linespacing = toDouble(item);
+        strex.linespacing = item.toDouble();
       }
     }
   }
@@ -2907,7 +2891,7 @@ Array HHVM_FUNCTION(gd_info) {
                      ((a & 0x0000ff00) << 8) | \
                      ((a & 0x000000ff) << 24))
 
-Variant HHVM_FUNCTION(imageloadfont, const String& file) {
+Variant HHVM_FUNCTION(imageloadfont, const String& /*file*/) {
   // TODO: ind = 5 + zend_list_insert(font, le_gd_font);
   throw_not_supported(__func__, "NYI");
 #ifdef NEVER
@@ -2952,9 +2936,9 @@ Variant HHVM_FUNCTION(imageloadfont, const String& file) {
     return false;
   }
   memcpy((void*)font, hdr.c_str(), hdr.length());
-  i = toInt64(f_tell(stream));
+  i = int64_t(f_tell(stream));
   stream->seek(0, SEEK_END);
-  body_size_check = toInt64(f_tell(stream)) - hdr_size;
+  body_size_check = int64_t(f_tell(stream)) - hdr_size;
   stream->seek(i, SEEK_SET);
 
   body_size = font->w * font->h * font->nchars;
@@ -3026,7 +3010,7 @@ bool HHVM_FUNCTION(imagesetstyle, const Resource& image, const Array& style) {
   CHECK_ALLOC_R(stylearr, malloc_size, false);
   index = 0;
   for (ArrayIter iter(style); iter; ++iter) {
-    stylearr[index++] = iter.secondRef().toInt32();
+    stylearr[index++] = cellToInt(tvToCell(iter.secondVal()));
   }
   gdImageSetStyle(im, stylearr, index);
   IM_FREE(stylearr);
@@ -3380,7 +3364,7 @@ Variant HHVM_FUNCTION(imageaffinematrixget,
 
     default:
       raise_warning("imageaffinematrixget():Invalid type for "
-                    "element %li", type);
+                    "element %" PRId64, type);
       return false;
   }
 
@@ -3463,13 +3447,12 @@ bool HHVM_FUNCTION(imagecopyresampled,
   return true;
 }
 
-Variant HHVM_FUNCTION(imagerotate, const Resource& source_image,
-    double angle, int64_t bgd_color,
-    int64_t ignore_transparent /* = 0 */) {
+Variant
+HHVM_FUNCTION(imagerotate, const Resource& source_image, double angle,
+              int64_t bgd_color, int64_t /*ignore_transparent*/ /* = 0 */) {
   gdImagePtr im_src = get_valid_image_resource(source_image);
   if (!im_src) return false;
-  gdImagePtr im_dst = gdImageRotate(im_src, angle, bgd_color,
-                                    ignore_transparent);
+  gdImagePtr im_dst = gdImageRotateInterpolated(im_src, angle, bgd_color);
   if (!im_dst) return false;
   return Variant(req::make<Image>(im_dst));
 }
@@ -4379,14 +4362,14 @@ bool HHVM_FUNCTION(imageconvolution, const Resource& image,
   }
   for (i=0; i<3; i++) {
     if (matrix.exists(i) && (v = matrix[i]).isArray()) {
-      if ((row = toArray(v)).size() != 3) {
+      if ((row = v.toArray()).size() != 3) {
         raise_warning("You must have 3x3 array");
         return false;
       }
 
       for (j=0; j<3; j++) {
         if (row.exists(j)) {
-          mtx[i][j] = toDouble(row[j]);
+          mtx[i][j] = row[j].toDouble();
         } else {
           raise_warning("You must have a 3x3 matrix");
           return false;
@@ -4413,6 +4396,7 @@ Variant HHVM_FUNCTION(imagescale, const Resource& image, int64_t newwidth,
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
   gdImagePtr imscaled = nullptr;
+  gdInterpolationMethod old_method;
   if (method == -1) method = GD_BILINEAR_FIXED;
 
   if (newheight < 0) {
@@ -4424,12 +4408,16 @@ Variant HHVM_FUNCTION(imagescale, const Resource& image, int64_t newwidth,
       newheight = newwidth * src_y / src_x;
     }
   }
-  if (newheight <= 0 || newwidth <= 0) {
+  if (newheight <= 0 || newheight > INT_MAX || newwidth <= 0 || newwidth > INT_MAX) {
     return false;
   }
+
+  old_method = im->interpolation_id;
   if (gdImageSetInterpolationMethod(im, (gdInterpolationMethod) method)) {
     imscaled = gdImageScale(im, newwidth, newheight);
   }
+  gdImageSetInterpolationMethod(im, old_method);
+
   if (imscaled == nullptr) {
     return false;
   }
@@ -4440,10 +4428,8 @@ Variant HHVM_FUNCTION(imagescale, const Resource& image, int64_t newwidth,
 namespace {
 
 // PHP extension STANDARD: iptc.c
-inline int php_iptc_put1(req::ptr<File> file,
-                         int spool,
-                         unsigned char c,
-                         unsigned char **spoolbuf) {
+inline int php_iptc_put1(req::ptr<File> /*file*/, int spool, unsigned char c,
+                         unsigned char** spoolbuf) {
   if (spool > 0) {
     g_context->write((const char *)&c, 1);
   }
@@ -4712,7 +4698,10 @@ Variant HHVM_FUNCTION(iptcparse, const String& iptcblock) {
     }
 
     String skey((const char *)key, CopyString);
-    auto& lval = ret.lvalAt(skey);
+    if (!ret.exists(skey)) {
+      ret.set(skey, Array::CreateVArray());
+    }
+    auto const lval = ret.lvalAt(skey);
     forceToArray(lval).append(
       String((const char *)(buffer+inx), len, CopyString));
     inx += len;
@@ -5383,7 +5372,7 @@ typedef struct {
 
 static const maker_note_type maker_note_array[] = {
   { tag_table_VND_CANON, "Canon", nullptr, nullptr,
-    0, 0, MN_ORDER_INTEL, MN_OFFSET_GUESS},
+    0, 0, MN_ORDER_INTEL, MN_OFFSET_NORMAL},
 /*  { tag_table_VND_CANON, "Canon", nullptr, nullptr,
       0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},*/
   { tag_table_VND_CASIO, "CASIO", nullptr, nullptr,
@@ -5955,7 +5944,7 @@ static size_t exif_convert_any_to_int(void *value, int format,
       if (s_den == 0) {
         return 0;
       } else {
-        return php_ifd_get32s(value, motorola_intel) / s_den;
+        return (size_t)((double)php_ifd_get32s(value, motorola_intel) / s_den);
       }
 
     case TAG_FMT_SSHORT:
@@ -6264,9 +6253,9 @@ static int exif_process_string(char **result, char *value,
 }
 
 /* Process UserComment in IFD. */
-static int exif_process_user_comment(image_info_type *ImageInfo,
-                                     char **pszInfoPtr, char **pszEncoding,
-                                     char *szValuePtr, int ByteCount) {
+static int
+exif_process_user_comment(image_info_type* /*ImageInfo*/, char** pszInfoPtr,
+                          char** pszEncoding, char* szValuePtr, int ByteCount) {
   int   a;
 
 #if EXIF_USE_MBSTRING
@@ -6352,9 +6341,9 @@ static int exif_process_user_comment(image_info_type *ImageInfo,
 }
 
 /* Process unicode field in IFD. */
-static int exif_process_unicode(image_info_type *ImageInfo,
-                                xp_field_type *xp_field, int tag,
-                                char *szValuePtr, int ByteCount) {
+static int
+exif_process_unicode(image_info_type* /*ImageInfo*/, xp_field_type* xp_field,
+                     int tag, char* szValuePtr, int ByteCount) {
   xp_field->tag = tag;
   xp_field->value = nullptr;
 
@@ -6983,8 +6972,8 @@ static void exif_process_APP12(image_info_type *ImageInfo,
 }
 
 /* Process a SOFn marker.  This is useful for the image dimensions */
-static void exif_process_SOFn (unsigned char *Data, int marker,
-                               jpeg_sof_info *result) {
+static void
+exif_process_SOFn(unsigned char* Data, int /*marker*/, jpeg_sof_info* result) {
   result->bits_per_sample = Data[2];
   result->height          = php_jpg_get16(Data+3);
   result->width           = php_jpg_get16(Data+5);

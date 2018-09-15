@@ -18,6 +18,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/actrec-args.h"
+#include "hphp/runtime/base/tv-type.h"
 
 namespace HPHP {
 
@@ -80,7 +81,7 @@ bool WddxPacket::recursiveAddVarImpl(const String& varName,
   if (isArray || isObject) {
     Array varAsArray;
     Object varAsObject;
-    ArrayOrObject ptr;
+    const HeapObject* ptr = nullptr;
     if (isArray) {
       varAsArray = varVariant.toArray();
       ptr = varAsArray.get();
@@ -90,7 +91,7 @@ bool WddxPacket::recursiveAddVarImpl(const String& varName,
       varAsArray = varAsObject.toArray();
       ptr = varAsObject.get();
     }
-    assert(!ptr.isNull());
+    assertx(ptr);
     if (!seen.emplace(ptr).second) {
       raise_warning("recursion detected");
       return false;
@@ -119,10 +120,10 @@ bool WddxPacket::recursiveAddVarImpl(const String& varName,
         m_packetString.append(std::to_string(length));
         m_packetString.append("'>");
       }
-      for (ArrayIter it(varAsArray); it; ++it) {
+      for (; it; ++it) {
         auto key = it.first();
-        auto const& value = it.secondRef();
-        recursiveAddVarImpl(key.toString(), value, isObject, seen);
+        recursiveAddVarImpl(key.toString(), VarNR(it.secondVal()),
+                            isObject, seen);
       }
       if (isObject) {
         m_packetString.append("</struct>");
@@ -213,15 +214,15 @@ String WddxPacket::wrapValue(const String& start,
 //////////////////////////////////////////////////////////////////////////////
 // helpers
 
-void find_var_recursive(const TypedValue* tv,
-                        const req::ptr<WddxPacket>& wddxPacket) {
+static void find_var_recursive(tv_rval tv,
+                               const req::ptr<WddxPacket>& wddxPacket) {
   if (tvIsString(tv)) {
-    String var_name{tvCastToString(tv)};
+    auto var_name = tvCastToString(*tv);
     wddxPacket->add_var(var_name, true);
   }
-  if (isArrayLikeType(tv->m_type)) {
-    for (ArrayIter iter(tv->m_data.parr); iter; ++iter) {
-      find_var_recursive(iter.secondRef().asTypedValue(), wddxPacket);
+  if (tvIsArrayLike(tv)) {
+    for (ArrayIter iter(val(tv).parr); iter; ++iter) {
+      find_var_recursive(iter.secondRval(), wddxPacket);
     }
   }
 }

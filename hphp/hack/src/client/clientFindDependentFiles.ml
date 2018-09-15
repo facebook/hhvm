@@ -2,13 +2,12 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Core
+open Hh_core
 
 let to_json result =
   Hh_json.JSON_Object ["dependent_files",
@@ -28,6 +27,6 @@ let go conn (files : string) expand_path =
     end in
   let command =
     ServerCommandTypes.FIND_DEPENDENT_FILES (expand_path_list file_list) in
-  let result = ServerCommand.rpc conn command in
+  let result = ClientConnect.rpc conn command in
   let result_json = to_json result in
   print_endline (Hh_json.json_to_string result_json)

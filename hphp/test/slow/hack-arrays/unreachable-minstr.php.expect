@@ -1,0 +1,9 @@
+1
+Catch: Out of bounds vec access: invalid index 2
+Catch: Out of bounds vec access: invalid index 2
+1
+Catch: Out of bounds dict access: invalid index "b"
+Catch: Out of bounds dict access: invalid index "b"
+b
+Catch: Out of bounds keyset access: invalid index "c"
+Catch: Out of bounds keyset access: invalid index "c"

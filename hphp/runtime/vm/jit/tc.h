@@ -17,6 +17,8 @@
 #ifndef incl_HPHP_JIT_TC_H_
 #define incl_HPHP_JIT_TC_H_
 
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -32,11 +34,7 @@
 #include <string>
 #include <vector>
 
-namespace HPHP {
-
-struct Func;
-
-namespace jit {
+namespace HPHP { namespace jit {
 
 struct AsmInfo;
 struct FPInvOffset;
@@ -62,32 +60,51 @@ struct TransRange {
   TransLoc loc() const;
 };
 
+using CodeViewPtr = std::unique_ptr<CodeCache::View>;
+
 struct TransMetaInfo {
   SrcKey sk;
   CodeCache::View emitView; // View code was emitted into (may be thread local)
-  TransKind viewKind; // TransKind used to select code view
-  TransKind transKind; // TransKind used for translation
-  TransRange range;
-  CGMeta meta;
-  TransRec transRec;
+  TransKind   viewKind; // TransKind used to select code view
+  TransKind   transKind; // TransKind used for translation
+  TransRange  range;
+  CodeViewPtr finalView; // View where code finally ended up (after relocation)
+  TransLoc    loc; // final location of translation (after relocation)
+  CGMeta      meta;
+  TransRec    transRec;
+  GrowableVector<IncomingBranch> tailBranches;
 };
 
-struct ThreadTCBuffer {
-  ThreadTCBuffer() = default;
-  explicit ThreadTCBuffer(TCA start);
-  ThreadTCBuffer(ThreadTCBuffer&&) = default;
-  ThreadTCBuffer& operator=(ThreadTCBuffer&&) = default;
+struct PrologueMetaInfo {
+  PrologueMetaInfo(ProfTransRec* rec)
+    : transRec(rec)
+  { }
+  ProfTransRec* transRec{nullptr};
+  TransID       transID{kInvalidTransID};
+  TCA           start{0};
+  TransLoc      loc;
+  CGMeta        meta;
+  CodeViewPtr   finalView;
+};
 
-#ifndef NDEBUG
-  ~ThreadTCBuffer();
-#endif
+struct BodyDispatchMetaInfo {
+  BodyDispatchMetaInfo(TCA start, TCA end)
+    : start(start), end(end)
+  { }
+  TCA             start;
+  TCA             end;
+};
+
+struct LocalTCBuffer {
+  LocalTCBuffer() = default;
+  explicit LocalTCBuffer(Address start, size_t initialSize);
+  LocalTCBuffer(LocalTCBuffer&&) = default;
+  LocalTCBuffer& operator=(LocalTCBuffer&&) = default;
 
   OptView view();
-  TCA start() const { return m_start; }
-  bool valid() const { return m_start; }
+  bool valid() const { return m_main.base() != nullptr; }
 
 private:
-  TCA m_start{nullptr};
   CodeBlock m_main;
   CodeBlock m_cold;
   CodeBlock m_frozen;
@@ -95,19 +112,44 @@ private:
 };
 
 struct FuncMetaInfo {
+  enum class Kind : uint8_t {
+    Prologue,
+    Translation,
+  };
+
   FuncMetaInfo() = default;
-  FuncMetaInfo(Func* f, ThreadTCBuffer&& buf)
-    : func(f)
+  FuncMetaInfo(Func* f, LocalTCBuffer&& buf)
+    : fid(f->getFuncId())
+    , func(f)
     , tcBuf(std::move(buf))
   {}
 
   FuncMetaInfo(FuncMetaInfo&&) = default;
   FuncMetaInfo& operator=(FuncMetaInfo&&) = default;
 
+  FuncId fid;
   Func* func;
-  ThreadTCBuffer tcBuf;
-  std::vector<ProfTransRec*> prologues;
-  std::vector<TransMetaInfo> translations;
+  LocalTCBuffer tcBuf;
+
+  void add(ProfTransRec* p) {
+    prologues.emplace_back(p);
+    order.emplace_back(Kind::Prologue);
+  }
+
+  void add(TransMetaInfo&& t) {
+    translations.emplace_back(std::move(t));
+    order.emplace_back(Kind::Translation);
+  }
+
+  // We rebuild a variant type here because using boosts fails on opensource
+  // builds because it at some point requires a copy construction.
+  // This vector has one entry per prologue/translation stored in the two
+  // vectors above, and it encodes the order in which they should be published.
+  std::vector<Kind> order;
+
+  std::unique_ptr<BodyDispatchMetaInfo> bodyDispatch;
+  std::vector<PrologueMetaInfo>         prologues;
+  std::vector<TransMetaInfo>            translations;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -117,17 +159,6 @@ struct FuncMetaInfo {
  * recorded in srcRec.
  */
 bool reachedTranslationLimit(TransKind kind, SrcKey sk, const SrcRec& srcRec);
-
-/*
- * Invalidate the SrcDB entries for func's SrcKeys that have any
- * Profile translation.
- */
-void invalidateFuncProfSrcKeys(const Func* func);
-
-/*
- * Invalidate the SrcDB entries for sk.
- */
-void invalidateSrcKey(SrcKey sk);
 
 /*
  * Emit machine code for env. Returns folly::none if the global translation
@@ -157,7 +188,17 @@ folly::Optional<TransLoc> publishTranslation(
  * function. It is assumed that these translations have been emitted into per-
  * thread buffers and will need to be relocated.
  */
-void publishOptFunction(FuncMetaInfo info);
+void publishOptFunc(FuncMetaInfo info);
+
+/*
+ * Acquires the code and metadata locks once, and then processes all the
+ * functions in `infos' by:
+ *  1) relocating their translations into the TC in the order given by `infos';
+ *  2) smashing all the calls and jumps between these translations;
+ *  3) optimizing the calls and jumps smashed in step 2);
+ *  4) publishing these translations.
+ */
+void relocatePublishSortedOptFuncs(std::vector<FuncMetaInfo> infos);
 
 /*
  * Emit a new prologue for func-- returns nullptr if the global translation
@@ -171,13 +212,14 @@ TCA emitFuncPrologue(Func* func, int argc, TransKind kind);
  * Smashes the callers of the prologue for rec and updates the cached func
  * prologue.
  */
-TCA emitFuncPrologueOpt(ProfTransRec* rec);
+void emitFuncPrologueOpt(ProfTransRec* rec);
 
 /*
  * Emit the prologue dispatch for func which contains dvs DV initializers, and
- * return its start address.
+ * return its start address.  The `kind' of translation argument is used to
+ * decide what area of the code cache will be used (hot, main, or prof).
  */
-TCA emitFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs);
+TCA emitFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs, TransKind kind);
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -190,12 +232,17 @@ bool canTranslate();
  * Whether we should emit a translation of kind for func, ignoring the cap on
  * overall TC size.
  */
-bool shouldTranslateNoSizeLimit(const Func* func);
+bool shouldTranslateNoSizeLimit(const Func* func, TransKind kind);
 
 /*
  * Whether we should emit a translation of kind for func.
  */
 bool shouldTranslate(const Func* func, TransKind kind);
+
+/*
+ * Whether we are still profiling new functions.
+ */
+bool shouldProfileNewFuncs();
 
 /*
  * Whether we should try profile-guided optimization when translating `func'.
@@ -252,6 +299,12 @@ ALWAYS_INLINE const UniqueStubs& ustubs() {
  * this module.
  */
 void processInit();
+
+/*
+ * Perform process shutdown functions for the TC including joining any
+ * outstanding background threads.
+ */
+void processExit();
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -320,8 +373,8 @@ void freeTCStub(TCA stub);
  * Emit checks for (and hooks into) an attached debugger in front of each
  * translation in `unit' or for `SrcKey{func, offset, resumed}'.
  */
-bool addDbgGuards(const Unit* unit);
-bool addDbgGuard(const Func* func, Offset offset, bool resumed);
+bool addDbgGuards(const Func* func);
+bool addDbgGuard(const Func* func, Offset offset, ResumeMode resumeMode);
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -419,7 +472,7 @@ inline void liveRelocate(bool random) {
  * TODO(t10543562): This can probably be merged with relocateNewTranslation.
  */
 void relocateTranslation(
-  const IRUnit& unit,
+  const IRUnit* unit,
   CodeBlock& main, CodeBlock& main_in, CodeAddress main_start,
   CodeBlock& cold, CodeBlock& cold_in, CodeAddress cold_start,
   CodeBlock& frozen, CodeAddress frozen_start,
@@ -450,7 +503,7 @@ int recordedFuncs();
  * Record a jmp at address toSmash to SrcRec sr.
  *
  * When a translation is reclaimed we remove all annotations from all SrcRecs
- * containing IBs from the translation so that they cannot be inadvertantly
+ * containing IBs from the translation so that they cannot be inadvertently
  * smashed in the process of replaceOldTranslations()
  */
 void recordJump(TCA toSmash, SrcRec* sr);

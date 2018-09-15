@@ -51,6 +51,8 @@ struct Vunit;
  *    I(f)      immediate
  *    Inone     no immediates
  *    U(s)      use s
+ *    UM(s)     s is a Vptr used to read-modify-write memory
+ *    UW(s)     s is a Vptr used to write memory
  *    UA(s)     use s, but s lifetime extends across the instruction
  *    UH(s,h)   use s, try assigning same register as h
  *    D(d)      define d
@@ -76,13 +78,19 @@ struct Vunit;
   O(ldimml, I(s), Un, D(d))\
   O(ldimmq, I(s), Un, D(d))\
   O(load, Inone, U(s), D(d))\
-  O(store, Inone, U(s) U(d), Dn)\
+  O(store, Inone, U(s) UW(d), Dn)\
   O(mcprep, Inone, Un, D(d))\
   O(phidef, Inone, Un, D(defs))\
-  O(phijcc, I(cc), U(uses) U(sf), Dn)\
   O(phijmp, Inone, U(uses), Dn)\
   O(conjure, Inone, Un, D(c))\
   O(conjureuse, Inone, U(c), Dn)\
+  O(funcguard, Inone, Un, Dn)\
+  O(debugguardjmp, Inone, Un, Dn)\
+  O(inlinestart, Inone, Un, Dn)\
+  O(inlineend, Inone, Un, Dn)\
+  O(pushframe, Inone, Un, Dn)\
+  O(popframe, Inone, Un, Dn)\
+  O(recordstack, Inone, Un, Dn)\
   /* native function abi */\
   O(vcall, I(call) I(destType) I(fixup), U(args), D(d))\
   O(vinvoke, I(call) I(destType) I(fixup), U(args), D(d))\
@@ -106,12 +114,13 @@ struct Vunit;
   O(defvmretdata, Inone, Un, D(data))\
   O(defvmrettype, Inone, Un, D(type))\
   O(syncvmret, Inone, U(data) U(type), Dn)\
+  O(syncvmrettype, Inone, U(type), Dn)\
   O(phplogue, Inone, U(fp), Dn)\
   O(phpret, Inone, U(fp) U(args), D(d))\
   O(callphp, I(stub), U(args), Dn)\
   O(tailcallphp, Inone, U(target) U(fp) U(args), Dn)\
-  O(callarray, I(target), U(args), Dn)\
-  O(vcallarray, I(target), U(args) U(extraArgs), Dn)\
+  O(callunpack, I(target), U(args), Dn)\
+  O(vcallunpack, I(target), U(args) U(extraArgs), Dn)\
   O(contenter, Inone, U(fp) U(target) U(args), Dn)\
   /* vm entry intrinsics */\
   O(calltc, Inone, U(target) U(fp) U(args), Dn)\
@@ -125,45 +134,53 @@ struct Vunit;
   O(unwind, Inone, Un, Dn)\
   /* nop and trap */\
   O(nop, Inone, Un, Dn)\
-  O(ud2, Inone, Un, Dn)\
+  O(trap, I(reason), Un, Dn)\
+  /* restrict/unrestrict new virtuals */\
+  O(vregrestrict, Inone, Un, Dn)\
+  O(vregunrestrict, Inone, Un, Dn)\
   /* arithmetic instructions */\
+  O(addwm, I(fl), U(s0) UM(m), D(sf)) \
   O(addl, I(fl), U(s0) U(s1), D(d) D(sf)) \
   O(addli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
-  O(addlm, I(fl), U(s0) U(m), D(sf)) \
-  O(addlim, I(s0) I(fl), U(m), D(sf)) \
+  O(addlm, I(fl), U(s0) UM(m), D(sf)) \
+  O(addlim, I(s0) I(fl), UM(m), D(sf)) \
   O(addq, I(fl), U(s0) U(s1), D(d) D(sf)) \
+  O(addqmr, I(fl), UA(m) UH(s1,d), DH(d,s1) D(sf))  \
+  O(addqrm, I(fl), U(s1) UM(m), D(sf)) \
   O(addqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
-  O(addqim, I(s0) I(fl), U(m), D(sf)) \
+  O(addqim, I(s0) I(fl), UM(m), D(sf)) \
   O(addsd, Inone, U(s0) U(s1), D(d))\
   O(andb, I(fl), U(s0) U(s1), D(d) D(sf)) \
   O(andbi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
-  O(andbim, I(s) I(fl), U(m), D(sf)) \
+  O(andbim, I(s) I(fl), UM(m), D(sf)) \
   O(andl, I(fl), U(s0) U(s1), D(d) D(sf)) \
   O(andli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(andq, I(fl), U(s0) U(s1), D(d) D(sf)) \
   O(andqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
+  O(andqi64, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(decl, I(fl), UH(s,d), DH(d,s) D(sf))\
-  O(declm, I(fl), U(m), D(sf))\
+  O(declm, I(fl), UM(m), D(sf))\
   O(decq, I(fl), UH(s,d), DH(d,s) D(sf))\
-  O(decqm, I(fl), U(m), D(sf))\
-  O(decqmlock, I(fl), U(m), D(sf))\
+  O(decqm, I(fl), UM(m), D(sf))\
+  O(decqmlock, I(fl), UM(m), D(sf))\
   O(incw, I(fl), UH(s,d), DH(d,s) D(sf))\
-  O(incwm, I(fl), U(m), D(sf))\
+  O(incwm, I(fl), UM(m), D(sf))\
   O(incl, I(fl), UH(s,d), DH(d,s) D(sf))\
-  O(inclm, I(fl), U(m), D(sf))\
+  O(inclm, I(fl), UM(m), D(sf))\
   O(incq, I(fl), UH(s,d), DH(d,s) D(sf))\
-  O(incqm, I(fl), U(m), D(sf))\
+  O(incqm, I(fl), UM(m), D(sf))\
   O(imul, I(fl), U(s0) U(s1), D(d) D(sf))\
   O(divint, Inone, U(s0) U(s1), D(d))\
   O(srem, Inone, U(s0) U(s1), D(d))\
   O(neg, I(fl), UH(s,d), DH(d,s) D(sf))\
   O(notb, Inone, UH(s,d), DH(d,s))\
   O(not, Inone, UH(s,d), DH(d,s))\
-  O(orbim, I(s0) I(fl), U(m), D(sf))\
-  O(orwim, I(s0) I(fl), U(m), D(sf))\
+  O(orbim, I(s0) I(fl), UM(m), D(sf))\
+  O(orwim, I(s0) I(fl), UM(m), D(sf))\
+  O(orlim, I(s0) I(fl), UM(m), D(sf))\
   O(orq, I(fl), U(s0) U(s1), D(d) D(sf))\
   O(orqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
-  O(orqim, I(s0) I(fl), U(m), D(sf))\
+  O(orqim, I(s0) I(fl), UM(m), D(sf))\
   O(sar, I(fl), U(s0) U(s1), D(d) D(sf))\
   O(shl, I(fl), U(s0) U(s1), D(d) D(sf))\
   O(sarqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
@@ -171,8 +188,6 @@ struct Vunit;
   O(shlqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
   O(shrli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
   O(shrqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
-  O(subb, I(fl), UA(s0) U(s1), D(d) D(sf))\
-  O(subbi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
   O(subl, I(fl), UA(s0) U(s1), D(d) D(sf))\
   O(subli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
   O(subq, I(fl), UA(s0) U(s1), D(d) D(sf))\
@@ -188,6 +203,8 @@ struct Vunit;
   O(cmpbi, I(s0) I(fl), U(s1), D(sf))\
   O(cmpbim, I(s0) I(fl), U(s1), D(sf))\
   O(cmpbm, I(fl), U(s0) U(s1), D(sf))\
+  O(cmpw, I(fl), U(s0) U(s1), D(sf))\
+  O(cmpwi, I(s0) I(fl), U(s1), D(sf))\
   O(cmpwim, I(s0) I(fl), U(s1), D(sf))\
   O(cmpwm, I(fl), U(s0) U(s1), D(sf))\
   O(cmpl, I(fl), U(s0) U(s1), D(sf))\
@@ -203,6 +220,8 @@ struct Vunit;
   O(testb, I(fl), U(s0) U(s1), D(sf))\
   O(testbi, I(s0) I(fl), U(s1), D(sf))\
   O(testbim, I(s0) I(fl), U(s1), D(sf))\
+  O(testw, I(fl), U(s0) U(s1), D(sf))\
+  O(testwi, I(s0) I(fl), U(s1), D(sf))\
   O(testwim, I(s0) I(fl), U(s1), D(sf))\
   O(testl, I(fl), U(s0) U(s1), D(sf))\
   O(testli, I(s0) I(fl), U(s1), D(sf))\
@@ -235,7 +254,13 @@ struct Vunit;
   O(movtdb, Inone, UH(s,d), DH(d,s))\
   O(movtdq, Inone, UH(s,d), DH(d,s))\
   O(movtqb, Inone, UH(s,d), DH(d,s))\
+  O(movtqw, Inone, UH(s,d), DH(d,s))\
   O(movtql, Inone, UH(s,d), DH(d,s))\
+  O(movsbl, Inone, UH(s,d), DH(d,s))\
+  O(movswl, Inone, UH(s,d), DH(d,s))\
+  O(movsbq, Inone, UH(s,d), DH(d,s))\
+  O(movswq, Inone, UH(s,d), DH(d,s))\
+  O(movslq, Inone, UH(s,d), DH(d,s))\
   /* loads/stores */\
   O(loadb, Inone, U(s), D(d))\
   O(loadw, Inone, U(s), D(d))\
@@ -246,17 +271,19 @@ struct Vunit;
   O(loadsd, Inone, U(s), D(d))\
   O(loadzbl, Inone, U(s), D(d))\
   O(loadzbq, Inone, U(s), D(d))\
+  O(loadsbq, Inone, U(s), D(d))\
   O(loadzlq, Inone, U(s), D(d))\
   O(loadtqb, Inone, U(s), D(d))\
-  O(storeb, Inone, U(s) U(m), Dn)\
-  O(storebi, I(s), U(m), Dn)\
-  O(storew, Inone, U(s) U(m), Dn)\
-  O(storewi, I(s), U(m), Dn)\
-  O(storel, Inone, U(s) U(m), Dn)\
-  O(storeli, I(s), U(m), Dn)\
-  O(storeqi, I(s), U(m), Dn)\
-  O(storeups, Inone, U(s) U(m), Dn)\
-  O(storesd, Inone, U(s) U(m), Dn)\
+  O(loadtql, Inone, U(s), D(d))\
+  O(storeb, Inone, U(s) UW(m), Dn)\
+  O(storebi, I(s), UW(m), Dn)\
+  O(storew, Inone, U(s) UW(m), Dn)\
+  O(storewi, I(s), UW(m), Dn)\
+  O(storel, Inone, U(s) UW(m), Dn)\
+  O(storeli, I(s), UW(m), Dn)\
+  O(storeqi, I(s), UW(m), Dn)\
+  O(storeups, Inone, U(s) UW(m), Dn)\
+  O(storesd, Inone, U(s) UW(m), Dn)\
   /* branches */\
   O(jcc, I(cc), U(sf), Dn)\
   O(jcci, I(cc), U(sf), Dn)\
@@ -267,9 +294,9 @@ struct Vunit;
   /* push/pop */\
   O(pop, Inone, Un, D(d))\
   O(popf, Inone, Un, D(d))\
-  O(popm, Inone, U(d), Dn)\
+  O(popm, Inone, UW(d), Dn)\
   O(popp, Inone, Un, D(d0) D(d1))\
-  O(poppm, Inone, U(d0) U(d1), Dn)\
+  O(poppm, Inone, UW(d0) UW(d1), Dn)\
   O(push, Inone, U(s), Dn)\
   O(pushf, Inone, U(s), Dn)\
   O(pushm, Inone, U(s), Dn)\
@@ -292,13 +319,15 @@ struct Vunit;
   O(sarq, I(fl), UH(s,d), DH(d,s) D(sf))\
   O(shlq, I(fl), UH(s,d), DH(d,s) D(sf))\
   /* arm instructions */\
-  O(cmplims, I(s0) I(fl), U(s1), D(sf))\
+  O(csincb, I(cc), U(sf) U(f) U(t), D(d))\
+  O(csincw, I(cc), U(sf) U(f) U(t), D(d))\
+  O(csincl, I(cc), U(sf) U(f) U(t), D(d))\
+  O(csincq, I(cc), U(sf) U(f) U(t), D(d))\
   O(fcvtzs, Inone, U(s), D(d))\
   O(mrs, I(s), Un, D(r))\
   O(msr, I(s), U(r), Dn)\
+  O(ubfmli, I(mr) I(ms), U(s), D(d))\
   /* ppc64 instructions */\
-  O(extsb, Inone, UH(s,d), DH(d,s))\
-  O(extsl, Inone, UH(s,d), DH(d,s))\
   O(fcmpo, Inone, U(s0) U(s1), D(sf))\
   O(fcmpu, Inone, U(s0) U(s1), D(sf))\
   O(fctidz, Inone, U(s), D(d) D(sf))\
@@ -322,6 +351,7 @@ struct Vunit;
  *    sd  double
  *    i   immediate
  *    m   Vptr
+ *    mr  m is src, r is dest
  *    p   RIPRelativeRef
  *    d   VdataPtr
  *    s   smashable
@@ -478,8 +508,8 @@ struct ldimmq { Immed64 s; Vreg d; };
 /*
  * Memory operand load and store.
  */
-struct load { Vptr s; Vreg d; };
-struct store { Vreg s; Vptr d; };
+struct load { Vptr64 s; Vreg d; };
+struct store { Vreg s; Vptr64 d; };
 
 /*
  * Method cache smashable prime data.
@@ -495,7 +525,6 @@ struct mcprep { Vreg64 d; };
  */
 struct phidef { Vtuple defs; };
 struct phijmp { Vlabel target; Vtuple uses; };
-struct phijcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; Vtuple uses; };
 
 /*
  * These marker instructions are used to model dataflow in pseudo-translations.
@@ -503,6 +532,43 @@ struct phijcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; Vtuple uses; };
  */
 struct conjure { Vreg c; };
 struct conjureuse { Vreg c; };
+
+/*
+ * Emit a function prologue guard.
+ * *watch will be set to the address following the guard.
+ */
+struct funcguard { const Func* func; TCA* watch; };
+
+/*
+ * Emit a smashable jmp to realCode.
+ * *watch will be set to the address of the smashable.
+ */
+struct debugguardjmp { TCA realCode; TCA* watch; };
+
+/*
+ * Marks the entry block of an inlined function, func, in the current unit,
+ * whose Vcost was computed to be cost. Id is a post computed index into a table
+ * of frames stored on Vunit.
+ */
+struct inlinestart { const Func* func; int cost; int id; };
+
+/*
+ * Marks a return target or exit from the current inlined frame.
+ */
+struct inlineend {};
+
+/*
+ * Indicate that an inline frame has been added or removed to/from the rbp
+ * chain for record keeping.
+ */
+struct pushframe {};
+struct popframe {};
+
+/*
+ * Record the current inline stack as though it were materialized for a call at
+ * fakeAddress.
+ */
+struct recordstack { TCA fakeAddress; };
 
 ///////////////////////////////////////////////////////////////////////////////
 // Native function ABI.
@@ -621,11 +687,11 @@ struct stubunwind {};
  * Convert from a stublogue{} context to a phplogue{} context.  `fp' is the
  * target PHP context's frame.
  *
- * This is only used by fcallArrayHelper, which needs to begin with a
+ * This is only used by fcallUnpackHelper, which needs to begin with a
  * stublogue{} (see unique-stubs.cpp) and later perform the work of phplogue{}.
  *
  * This instruction should, in theory, teleport the stub frame's saved %rip
- * onto the PHP callee's frame.  However, since fcallArrayHelper is the only
+ * onto the PHP callee's frame.  However, since fcallUnpackHelper is the only
  * user, and since the PHP frame's m_savedRip always gets updated by a native
  * helper before stubtophp{} is hit, for now, implementations of stubtophp{}
  * needn't touch the callee frame at all.
@@ -669,11 +735,18 @@ struct defvmretdata { Vreg data; };
 struct defvmrettype { Vreg type; };
 
 /*
- * Copy a PHP return value into the return registers (rreg(0) and rreg(1)).
+ * Copy a PHP return value into the rret_data() and rret_type() registers.
  *
  * This should be used right before we execute a phpret{}.
  */
 struct syncvmret { Vreg data; Vreg type; };
+
+/*
+ * Copy a PHP return type into the rret_type() register.
+ *
+ * This should be used right before we execute a phpret{}.
+ */
+struct syncvmrettype { Vreg type; };
 
 /*
  * PHP function prologue.
@@ -718,9 +791,13 @@ struct phpret { Vreg fp; Vreg d; RegSet args; bool noframe; };
 struct callphp {
   explicit callphp(TCA stub,
                    RegSet args,
-                   std::array<Vlabel,2> targets)
+                   std::array<Vlabel,2> targets,
+                   const Func* func,
+                   uint32_t nargs)
     : stub{stub}
     , args{args}
+    , func{func}
+    , nargs{nargs}
   {
     this->targets[0] = targets[0];
     this->targets[1] = targets[1];
@@ -729,6 +806,8 @@ struct callphp {
   TCA stub;
   RegSet args;
   Vlabel targets[2];
+  const Func* func;
+  uint32_t nargs;
 };
 
 /*
@@ -742,18 +821,18 @@ struct tailcallphp { Vreg target; Vreg fp; RegSet args; };
 /*
  * Non-smashable PHP function call with (almost) the same ABI as callphp{}.
  *
- * NB: The only difference is that callarray preserves vmfp.  Currently only
- * used by the CallArray instruction.
+ * NB: The only difference is that callunpack preserves vmfp.  Currently only
+ * used by the CallUnpack instruction.
  */
-struct callarray { TCA target; RegSet args; };
+struct callunpack { TCA target; RegSet args; };
 
 /*
- * High-level version of callarray.
+ * High-level version of callunpack.
  *
  * Has exception edges and additional integer args (used by the `target' stub).
  */
-struct vcallarray { TCA target; RegSet args; Vtuple extraArgs;
-                    Vlabel targets[2]; };
+struct vcallunpack { TCA target; RegSet args; Vtuple extraArgs;
+                     Vlabel targets[2]; };
 
 /*
  * Enter a continuation (with exception edges).
@@ -857,41 +936,51 @@ struct unwind { Vlabel targets[2]; };
  * Nop and trap.
  */
 struct nop {};
-struct ud2 {};
+struct trap { Reason reason; };
+#define TRAP_REASON Reason{__FILE__, __LINE__}
+
+/*
+ * Restrict/unrestrict new virtuals.
+ */
+struct vregrestrict {};
+struct vregunrestrict {};
 
 /*
  * Arithmetic instructions.
  */
 // add: s0 + {s1|m} => {d|m}, sf
+struct addwm  { Vreg16 s0; Vptr16 m; VregSF sf; Vflags fl; };
 struct addl   { Vreg32 s0, s1, d; VregSF sf; Vflags fl; };
 struct addli  { Immed s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
-struct addlm  { Vreg32 s0; Vptr m; VregSF sf; Vflags fl; };
-struct addlim { Immed s0; Vptr m; VregSF sf; Vflags fl; };
+struct addlm  { Vreg32 s0; Vptr32 m; VregSF sf; Vflags fl; };
+struct addlim { Immed s0; Vptr32 m; VregSF sf; Vflags fl; };
 struct addq  { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
 struct addqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
-struct addqim { Immed s0; Vptr m; VregSF sf; Vflags fl; };
+struct addqmr { Vptr64 m; Vreg64 s1; Vreg64 d; VregSF sf; Vflags fl; };
+struct addqrm { Vreg64 s1; Vptr64 m; VregSF sf; Vflags fl; };
+struct addqim { Immed s0; Vptr64 m; VregSF sf; Vflags fl; };
 struct addsd  { VregDbl s0, s1, d; };
 // and: s0 & {s1|m} => {d|m}, sf
 struct andb  { Vreg8 s0, s1, d; VregSF sf; Vflags fl; };
 struct andbi { Immed s0; Vreg8 s1, d; VregSF sf; Vflags fl; };
-struct andbim { Immed s; Vptr m; VregSF sf; Vflags fl; };
+struct andbim { Immed s; Vptr8 m; VregSF sf; Vflags fl; };
 struct andl  { Vreg32 s0, s1, d; VregSF sf; Vflags fl; };
 struct andli { Immed s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
 struct andq  { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
 struct andqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 // dec: {s|m} - 1 => {d|m}, sf
 struct decl { Vreg32 s, d; VregSF sf; Vflags fl; };
-struct declm { Vptr m; VregSF sf; Vflags fl; };
+struct declm { Vptr32 m; VregSF sf; Vflags fl; };
 struct decq { Vreg64 s, d; VregSF sf; Vflags fl; };
-struct decqm { Vptr m; VregSF sf; Vflags fl; };
+struct decqm { Vptr64 m; VregSF sf; Vflags fl; };
 struct decqmlock { Vptr m; VregSF sf; Vflags fl; };
 // inc: {s|m} + 1 => {d|m}, sf
 struct incw { Vreg16 s, d; VregSF sf; Vflags fl; };
-struct incwm { Vptr m; VregSF sf; Vflags fl; };
+struct incwm { Vptr16 m; VregSF sf; Vflags fl; };
 struct incl { Vreg32 s, d; VregSF sf; Vflags fl; };
-struct inclm { Vptr m; VregSF sf;  Vflags fl;};
+struct inclm { Vptr32 m; VregSF sf;  Vflags fl;};
 struct incq { Vreg64 s, d; VregSF sf; Vflags fl; };
-struct incqm { Vptr m; VregSF sf; Vflags fl; };
+struct incqm { Vptr64 m; VregSF sf; Vflags fl; };
 // mul: s0 * s1 => d, sf
 struct imul { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
 // div/mod: s0 / s1 => d
@@ -903,11 +992,12 @@ struct neg { Vreg64 s, d; VregSF sf; Vflags fl; };
 struct notb { Vreg8 s, d; };
 struct not { Vreg64 s, d; };
 // or: s0 | {s1|m} => {d|m}, sf
-struct orbim { Immed s0; Vptr m; VregSF sf; Vflags fl; };
-struct orwim { Immed s0; Vptr m; VregSF sf; Vflags fl; };
+struct orbim { Immed s0; Vptr8 m; VregSF sf; Vflags fl; };
+struct orwim { Immed s0; Vptr16 m; VregSF sf; Vflags fl; };
+struct orlim { Immed s0; Vptr32 m; VregSF sf; Vflags fl; };
 struct orq { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
 struct orqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
-struct orqim { Immed s0; Vptr m; VregSF sf; Vflags fl; };
+struct orqim { Immed s0; Vptr64 m; VregSF sf; Vflags fl; };
 // shift: s1 << s0 => d, sf
 struct sar { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
 struct shl { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
@@ -917,8 +1007,6 @@ struct shlqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 struct shrli { Immed s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
 struct shrqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 // sub: s1 - s0 => d, sf
-struct subb { Vreg8 s0; Vreg8 s1, d; VregSF sf; Vflags fl; };
-struct subbi { Immed s0; Vreg8 s1, d; VregSF sf; Vflags fl; };
 struct subl { Vreg32 s0, s1, d; VregSF sf; Vflags fl; };
 struct subli { Immed s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
 struct subq { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };
@@ -937,38 +1025,42 @@ struct xorqi { Immed s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
 // s1 - s0 => sf
 struct cmpb { Vreg8 s0; Vreg8 s1; VregSF sf; Vflags fl; };
 struct cmpbi { Immed s0; Vreg8 s1; VregSF sf; Vflags fl; };
-struct cmpbim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
-struct cmpbm { Vreg8 s0; Vptr s1; VregSF sf; Vflags fl; };
-struct cmpwim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
-struct cmpwm { Vreg16 s0; Vptr s1; VregSF sf; Vflags fl; };
+struct cmpbim { Immed s0; Vptr8 s1; VregSF sf; Vflags fl; };
+struct cmpbm { Vreg8 s0; Vptr8 s1; VregSF sf; Vflags fl; };
+struct cmpw { Vreg16 s0; Vreg16 s1; VregSF sf; Vflags fl; };
+struct cmpwi { Immed s0; Vreg16 s1; VregSF sf; Vflags fl; };
+struct cmpwim { Immed s0; Vptr16 s1; VregSF sf; Vflags fl; };
+struct cmpwm { Vreg16 s0; Vptr16 s1; VregSF sf; Vflags fl; };
 struct cmpl { Vreg32 s0; Vreg32 s1; VregSF sf; Vflags fl; };
 struct cmpli { Immed s0; Vreg32 s1; VregSF sf; Vflags fl; };
-struct cmplm { Vreg32 s0; Vptr s1; VregSF sf; Vflags fl; };
-struct cmplim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
+struct cmplm { Vreg32 s0; Vptr32 s1; VregSF sf; Vflags fl; };
+struct cmplim { Immed s0; Vptr32 s1; VregSF sf; Vflags fl; };
 struct cmpq { Vreg64 s0; Vreg64 s1; VregSF sf; Vflags fl; };
 struct cmpqi { Immed s0; Vreg64 s1; VregSF sf; Vflags fl; };
-struct cmpqm { Vreg64 s0; Vptr s1; VregSF sf; Vflags fl; };
-struct cmpqim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
+struct cmpqm { Vreg64 s0; Vptr64 s1; VregSF sf; Vflags fl; };
+struct cmpqim { Immed s0; Vptr64 s1; VregSF sf; Vflags fl; };
 struct cmpsd { ComparisonPred pred; VregDbl s0, s1, d; };
 struct ucomisd { VregDbl s0, s1; VregSF sf; Vflags fl; };
 // s1 & s0 => sf
 struct testb { Vreg8 s0, s1; VregSF sf; Vflags fl; };
 struct testbi { Immed s0; Vreg8 s1; VregSF sf; Vflags fl; };
-struct testbim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
-struct testwim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
+struct testbim { Immed s0; Vptr8 s1; VregSF sf; Vflags fl; };
+struct testw { Vreg16 s0, s1; VregSF sf; Vflags fl; };
+struct testwi { Immed s0; Vreg16 s1; VregSF sf; Vflags fl; };
+struct testwim { Immed s0; Vptr16 s1; VregSF sf; Vflags fl; };
 struct testl { Vreg32 s0, s1; VregSF sf; Vflags fl; };
 struct testli { Immed s0; Vreg32 s1; VregSF sf; Vflags fl; };
-struct testlim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
+struct testlim { Immed s0; Vptr32 s1; VregSF sf; Vflags fl; };
 struct testq { Vreg64 s0, s1; VregSF sf; Vflags fl; };
 struct testqi { Immed s0; Vreg64 s1; VregSF sf; Vflags fl; };
-struct testqm { Vreg64 s0; Vptr s1; VregSF sf; Vflags fl; };
-struct testqim { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
+struct testqm { Vreg64 s0; Vptr64 s1; VregSF sf; Vflags fl; };
+struct testqim { Immed s0; Vptr64 s1; VregSF sf; Vflags fl; };
 
 /*
  * Conditional operations.
  */
 // t1 = load t; d = condition ? t1 : f
-struct cloadq { ConditionCode cc; VregSF sf; Vreg64 f; Vptr t; Vreg64 d; };
+struct cloadq { ConditionCode cc; VregSF sf; Vreg64 f; Vptr64 t; Vreg64 d; };
 // d = condition ? t : f
 struct cmovb { ConditionCode cc; VregSF sf; Vreg8 f, t, d; };
 struct cmovw { ConditionCode cc; VregSF sf; Vreg16 f, t, d; };
@@ -1002,36 +1094,45 @@ struct movzlq { Vreg32 s; Vreg64 d; };
 struct movtdb { VregDbl s; Vreg8 d; };
 struct movtdq { VregDbl s; Vreg64 d; };
 struct movtqb { Vreg64 s; Vreg8 d; };
+struct movtqw { Vreg64 s; Vreg16 d; };
 struct movtql { Vreg64 s; Vreg32 d; };
-
+// sign-extended s to d
+struct movsbl { Vreg8 s; Vreg32 d; };
+struct movswl { Vreg16 s; Vreg32 d; };
+struct movsbq { Vreg8 s; Vreg64 d; };
+struct movswq { Vreg16 s; Vreg64 d; };
+struct movslq { Vreg32 s; Vreg64 d; };
 
 /*
  * Loads and stores.
  */
 // loads
-struct loadb { Vptr s; Vreg8 d; };
-struct loadw { Vptr s; Vreg16 d; };
-struct loadl { Vptr s; Vreg32 d; };
+struct loadb { Vptr8 s; Vreg8 d; };
+struct loadw { Vptr16 s; Vreg16 d; };
+struct loadl { Vptr32 s; Vreg32 d; };
 struct loadqp { RIPRelativeRef s; Vreg64 d; };
 struct loadqd { VdataPtr<uint64_t> s; Vreg64 d; };
-struct loadups { Vptr s; Vreg128 d; };
-struct loadsd { Vptr s; VregDbl d; };
+struct loadups { Vptr128 s; Vreg128 d; };
+struct loadsd { Vptr64 s; VregDbl d; };
 // zero-extended s to d
-struct loadzbl { Vptr s; Vreg32 d; };
-struct loadzbq { Vptr s; Vreg64 d; };
-struct loadzlq { Vptr s; Vreg64 d; };
+struct loadzbl { Vptr8 s; Vreg32 d; };
+struct loadzbq { Vptr8 s; Vreg64 d; };
+struct loadzlq { Vptr32 s; Vreg64 d; };
+// sign-extended s to d
+struct loadsbq { Vptr8 s; Vreg64 d; };
 // truncated s to d
-struct loadtqb { Vptr s; Vreg8 d; };
+struct loadtqb { Vptr64 s; Vreg8 d; };
+struct loadtql { Vptr64 s; Vreg32 d; };
 // stores
-struct storeb { Vreg8 s; Vptr m; };
-struct storebi { Immed s; Vptr m; };
-struct storew { Vreg16 s; Vptr m; };
-struct storewi { Immed s; Vptr m; };
-struct storel { Vreg32 s; Vptr m; };
-struct storeli { Immed s; Vptr m; };
-struct storeqi { Immed s; Vptr m; };
-struct storeups { Vreg128 s; Vptr m; };
-struct storesd { VregDbl s; Vptr m; };
+struct storeb { Vreg8 s; Vptr8 m; };
+struct storebi { Immed s; Vptr8 m; };
+struct storew { Vreg16 s; Vptr16 m; };
+struct storewi { Immed s; Vptr16 m; };
+struct storel { Vreg32 s; Vptr32 m; };
+struct storeli { Immed s; Vptr32 m; };
+struct storeqi { Immed s; Vptr64 m; };
+struct storeups { Vreg128 s; Vptr128 m; };
+struct storesd { VregDbl s; Vptr64 m; };
 
 /*
  * Branch instructions.
@@ -1091,16 +1192,19 @@ struct shlq { Vreg64 s, d; VregSF sf; Vflags fl; }; // uses rcx
 /*
  * arm intrinsics.
  */
-struct cmplims { Immed s0; Vptr s1; VregSF sf; Vflags fl; };
+struct andqi64 { Immed64 s0; Vreg64 s1, d; VregSF sf; Vflags fl; };
+struct csincb { ConditionCode cc; VregSF sf; Vreg8 f, t, d; };
+struct csincw { ConditionCode cc; VregSF sf; Vreg16 f, t, d; };
+struct csincl { ConditionCode cc; VregSF sf; Vreg32 f, t, d; };
+struct csincq { ConditionCode cc; VregSF sf; Vreg64 f, t, d; };
 struct fcvtzs { VregDbl s; Vreg64 d;};
 struct mrs { Immed s; Vreg64 r; };
 struct msr { Vreg64 r; Immed s; };
+struct ubfmli { Immed mr, ms; Vreg32 s, d; };
 
 /*
  * ppc64 intrinsics.
  */
-struct extsb { Vreg8 s; Vreg64 d; };  // Extend byte sign
-struct extsl { Vreg32 s; Vreg64 d; }; // Extend word sign
 struct fcmpo { VregDbl s0; VregDbl s1; VregSF sf; };
 struct fcmpu { VregDbl s0; VregDbl s1; VregSF sf; };
 struct fctidz { VregDbl s; VregDbl d; VregSF sf; };
@@ -1127,7 +1231,7 @@ struct Vinstr {
 
   /////////////////////////////////////////////////////////////////////////////
 
-  Vinstr() : op(ud2) {}
+  Vinstr() : op(trap) {}
 
 #define O(name, imms, uses, defs) \
   /* implicit */ Vinstr(jit::name i, ir_context ctx = ir_context{}) \
@@ -1252,6 +1356,12 @@ VASM_OPCODES
  * Whether `inst' is a block-terminating instruction.
  */
 bool isBlockEnd(const Vinstr& inst);
+
+/*
+ * Whether `op' or `inst' is a call instruction.
+ */
+bool isCall(Vinstr::Opcode op);
+inline bool isCall(const Vinstr& inst) { return isCall(inst.op); }
 
 /*
  * The register width specification of `op'.

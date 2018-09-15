@@ -112,6 +112,24 @@ struct APCTypedValue {
     assertx(checkInvariants());
   }
 
+  enum class StaticShape {};
+  APCTypedValue(StaticShape, ArrayData* data)
+    : m_handle(APCKind::StaticShape, KindOfPersistentShape) {
+    assertx(data->isShape());
+    assertx(data->isStatic());
+    m_data.shape = data;
+    assertx(checkInvariants());
+  }
+
+  enum class UncountedShape {};
+  APCTypedValue(UncountedShape, ArrayData* data)
+    : m_handle(APCKind::UncountedShape, KindOfPersistentShape) {
+    assertx(data->isShape());
+    assertx(data->isUncounted());
+    m_data.shape = data;
+    assertx(checkInvariants());
+  }
+
   enum class StaticKeyset {};
   APCTypedValue(StaticKeyset, ArrayData* data)
     : m_handle(APCKind::StaticKeyset, KindOfPersistentKeyset) {
@@ -195,11 +213,26 @@ struct APCTypedValue {
     return m_data.dict;
   }
 
+  ArrayData* getShapeData() const {
+    assertx(checkInvariants());
+    assertx(m_handle.kind() == APCKind::StaticShape ||
+            m_handle.kind() == APCKind::UncountedShape);
+    return m_data.shape;
+  }
+
   ArrayData* getKeysetData() const {
     assertx(checkInvariants());
     assertx(m_handle.kind() == APCKind::StaticKeyset ||
            m_handle.kind() == APCKind::UncountedKeyset);
     return m_data.keyset;
+  }
+
+  TypedValue toTypedValue() const {
+    assertx(m_handle.isTypedValue());
+    TypedValue tv;
+    tv.m_data.num = m_data.num;
+    tv.m_type = m_handle.type();
+    return tv;
   }
 
   static APCTypedValue* tvUninit();
@@ -208,6 +241,25 @@ struct APCTypedValue {
   static APCTypedValue* tvFalse();
 
   void deleteUncounted();
+  // Recursively register all {allocation, root} with APCGCManager
+  void registerUncountedAllocations();
+
+  template <class StaticKey, class UncountedKey, class XData>
+  static APCHandle::Pair HandlePersistent(StaticKey skey,
+                                          UncountedKey ukey,
+                                          XData *data) {
+    if (!data->isRefCounted()) {
+      if (data->isStatic()) {
+        auto const value = new APCTypedValue(skey, data);
+        return {value->getHandle(), sizeof(APCTypedValue)};
+      }
+      if (data->uncountedIncRef()) {
+        auto const value = new APCTypedValue(ukey, data);
+        return {value->getHandle(), sizeof(APCTypedValue)};
+      }
+    }
+    return {nullptr, 0};
+  }
 
 private:
   APCTypedValue(const APCTypedValue&) = delete;
@@ -222,10 +274,23 @@ private:
     ArrayData* arr;
     ArrayData* vec;
     ArrayData* dict;
+    ArrayData* shape;
     ArrayData* keyset;
   } m_data;
   APCHandle m_handle;
 };
+
+//////////////////////////////////////////////////////////////////////
+// Here because of circular dependencies
+
+inline Variant APCHandle::toLocal() const {
+  if (isTypedValue()) {
+    Variant ret;
+    *ret.asTypedValue() = APCTypedValue::fromHandle(this)->toTypedValue();
+    return ret;
+  }
+  return toLocalHelper();
+}
 
 //////////////////////////////////////////////////////////////////////
 

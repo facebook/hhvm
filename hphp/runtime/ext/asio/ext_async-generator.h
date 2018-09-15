@@ -30,7 +30,7 @@ namespace HPHP {
 struct c_AsyncGeneratorWaitHandle;
 struct c_StaticWaitHandle;
 struct c_WaitableWaitHandle;
-struct c_WaitHandle;
+struct c_Awaitable;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncGenerator
@@ -42,7 +42,7 @@ struct AsyncGenerator final : BaseGenerator {
   static ObjectData* Create(const ActRec* fp, size_t numSlots,
                             jit::TCA resumeAddr, Offset resumeOffset);
   static Class* getClass() {
-    assert(s_class);
+    assertx(s_class);
     return s_class;
   }
   static constexpr ptrdiff_t objectOff() {
@@ -52,8 +52,6 @@ struct AsyncGenerator final : BaseGenerator {
     return Native::data<AsyncGenerator>(obj);
   }
 
-  c_AsyncGeneratorWaitHandle* await(Offset resumeOffset,
-                                    c_WaitableWaitHandle* child);
   c_StaticWaitHandle* yield(Offset resumeOffset,
                             const Cell* key, Cell value);
   c_StaticWaitHandle* ret();
@@ -65,13 +63,22 @@ struct AsyncGenerator final : BaseGenerator {
   }
 
   bool isEagerlyExecuted() const {
-    assert(isRunning());
+    assertx(isRunning());
     return !m_waitHandle;
   }
 
   c_AsyncGeneratorWaitHandle* getWaitHandle() const {
-    assert(isRunning());
+    assertx(!isEagerlyExecuted());
     return m_waitHandle.get();
+  }
+
+  req::ptr<c_AsyncGeneratorWaitHandle> detachWaitHandle() {
+    return std::move(m_waitHandle);
+  }
+
+  void attachWaitHandle(req::ptr<c_AsyncGeneratorWaitHandle>&& waitHandle) {
+    assertx(isEagerlyExecuted());
+    m_waitHandle = std::move(waitHandle);
   }
 
 private:

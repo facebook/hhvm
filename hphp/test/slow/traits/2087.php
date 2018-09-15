@@ -19,6 +19,10 @@ trait T {
 class A {
  use T;
 }
+
+<<__EntryPoint>>
+function main_2087() {
 $obj = new A;
 var_dump($obj->bar());
 $obj->foo();
+}

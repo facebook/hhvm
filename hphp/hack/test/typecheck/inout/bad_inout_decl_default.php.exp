@@ -1,0 +1,2 @@
+File "bad_inout_decl_default.php", line 3, characters 28-30:
+An 'inout' parameter must not have a default value. (Parsing[1002])

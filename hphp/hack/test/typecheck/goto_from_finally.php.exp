@@ -1,0 +1,2 @@
+File "goto_from_finally.php", line 6, characters 10-11:
+It is illegal to invoke goto within a finally block. (Naming[2075])

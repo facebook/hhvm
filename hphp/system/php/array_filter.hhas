@@ -1,4 +1,4 @@
-.function array_filter($arr = no_args, $func = start("""null"""), $flag = start("""null"""), $res = start) {
+.function [skip_frame dyn_callable] array_filter($arr = no_args, $func = start("""null"""), $flag = start("""null"""), $res = start) {
           .numiters 2;
 
 # if we get here, a value was supplied for $res
@@ -20,7 +20,7 @@ warning:  Cns "E_WARNING"
           Null
           RetC
 
-start:          IsTypeL $arr Arr
+start:          IsTypeL $arr ArrLike
                 JmpZ not_array
 
                 IssetL $func
@@ -28,14 +28,14 @@ start:          IsTypeL $arr Arr
 
                 CGetL $func
                 DecodeCufIter 0 bad_param2
-.try_fault kill_iter_0 {
+.try {
                 NewLikeArrayL $arr 0
                 SetL $res
                 PopC
 
                 CGetL $arr
                 WIterInitK 1 endloop_a $v $k
-  .try_fault kill_iter_1 1 {
+  .try 1 {
                 IssetL $flag
                 JmpZ loop_val
                 Int 1           # ARRAY_FILTER_USE_BOTH
@@ -48,8 +48,12 @@ start:          IsTypeL $arr Arr
                 JmpNZ loop_key
 
     loop_val:   FPushCufIter 1 0
-                FPassL 0 $v
-                FCall 1
+                FIsParamByRefCufIter 0 Any 0
+                JmpNZ by_ref_val
+                CGetL $v
+                Jmp call_val
+    by_ref_val: VGetL $v
+    call_val:   FCall 1 0 1 - "" ""
                 UnboxR
                 JmpZ next_val
                 BaseL $res Define
@@ -58,9 +62,19 @@ start:          IsTypeL $arr Arr
                 Jmp endloop_a
 
     loop_both:  FPushCufIter 2 0
-                FPassL 0 $v
-                FPassL 1 $k
-                FCall 2
+                FIsParamByRefCufIter 0 Any 0
+                JmpNZ by_ref_v_both
+                CGetL $v
+                Jmp pass_k_both
+    by_ref_v_both:
+                VGetL $v
+    pass_k_both:FIsParamByRefCufIter 1 Any 0
+                JmpNZ by_ref_k_both
+                CGetL $k
+                Jmp call_both
+    by_ref_k_both:
+                VGetL $k
+    call_both:  FCall 2 0 1 - "" ""
                 UnboxR
                 JmpZ next_both
                 BaseL $res Define
@@ -69,15 +83,27 @@ start:          IsTypeL $arr Arr
                 Jmp endloop_a
 
     loop_key:   FPushCufIter 1 0
-                FPassL 0 $k
-                FCall 1
+                FIsParamByRefCufIter 0 Any 0
+                JmpNZ by_ref_key
+                CGetL $k
+                Jmp call_key
+    by_ref_key: VGetL $k
+    call_key:   FCall 1 0 1 - "" ""
                 UnboxR
                 JmpZ next_key
                 BaseL $res Define
                 SetWithRefLML $k $v
     next_key:   WIterNextK 1 loop_key $v $k
+                Jmp endloop_a
+  } .catch {
+                IterFree 1
+                Throw
   }
+} .catch {
+            CIterFree 0
+            Throw
 }
+
 endloop_a:CIterFree 0
 endloop_n:CGetL $res
           RetC
@@ -87,28 +113,32 @@ no_func:  NewLikeArrayL $arr 0
           PopC
           CGetL $arr
           WIterInitK 1 endloop_n $v $k
-.try_fault kill_iter_1_only 1 {
+.try 1 {
 loop_n:   CGetL $v
           JmpZ skip_n
           BaseL $res Define
           SetWithRefLML $k $v
 skip_n:   WIterNextK 1 loop_n $v $k
-}
           Jmp endloop_n
+} .catch {
+          IterFree 1
+          Throw
+}
+
 
 start_kt:         IssetL $func
                   JmpZ no_func_kt
 
                   CGetL $func
                   DecodeCufIter 0 bad_param2
-.try_fault kill_iter_0_kt {
+.try {
                   NewLikeArrayL $arr 0
                   SetL $res
                   PopC
 
                   CGetL $arr
                   IterInitK 1 endloop_a_kt $v $k
-  .try_fault kill_iter_1_kt 1 {
+  .try 1 {
                   IssetL $flag
                   JmpZ loop_val_kt
                   Int 1           # ARRAY_FILTER_USE_BOTH
@@ -121,8 +151,12 @@ start_kt:         IssetL $func
                   JmpNZ loop_key_kt
 
     loop_val_kt:  FPushCufIter 1 0
-                  FPassL 0 $v
-                  FCall 1
+                  FIsParamByRefCufIter 0 Any 0
+                  JmpNZ by_ref_val_kt
+                  CGetL $v
+                  Jmp call_val_kt
+    by_ref_val_kt:VGetL $v
+    call_val_kt:  FCall 1 0 1 - "" ""
                   UnboxR
                   JmpZ next_val_kt
                   CGetL $v
@@ -133,9 +167,20 @@ start_kt:         IssetL $func
                   Jmp endloop_a_kt
 
     loop_both_kt: FPushCufIter 2 0
-                  FPassL 0 $v
-                  FPassL 1 $k
-                  FCall 2
+                  FIsParamByRefCufIter 0 Any 0
+                  JmpNZ by_ref_v_both_kt
+                  CGetL $v
+                  Jmp pass_k_both_kt
+    by_ref_v_both_kt:
+                  VGetL $v
+    pass_k_both_kt:
+                  FIsParamByRefCufIter 1 Any 0
+                  JmpNZ by_ref_k_both_kt
+                  CGetL $k
+                  Jmp call_both_kt
+    by_ref_k_both_kt:
+                  VGetL $k
+    call_both_kt: FCall 2 0 1 - "" ""
                   UnboxR
                   JmpZ next_both_kt
                   CGetL $v
@@ -146,8 +191,12 @@ start_kt:         IssetL $func
                   Jmp endloop_a_kt
 
     loop_key_kt:  FPushCufIter 1 0
-                  FPassL 0 $k
-                  FCall 1
+                  FIsParamByRefCufIter 0 Any 0
+                  JmpNZ by_ref_key_kt
+                  CGetL $k
+                  Jmp call_key_kt
+    by_ref_key_kt:VGetL $k
+    call_key_kt:  FCall 1 0 1 - "" ""
                   UnboxR
                   JmpZ next_key_kt
                   CGetL $v
@@ -155,8 +204,16 @@ start_kt:         IssetL $func
                   SetM 0 EL:$k
                   PopC
     next_key_kt:  IterNextK 1 loop_key_kt $v $k
+                  Jmp endloop_a_kt
+  } .catch {
+                  IterFree 1
+                  Throw
   }
+} .catch {
+               CIterFree 0
+               Throw
 }
+
 endloop_a_kt:CIterFree 0
 endloop_n_kt:CGetL $res
              RetC
@@ -166,7 +223,7 @@ no_func_kt:  NewLikeArrayL $arr 0
              PopC
              CGetL $arr
              IterInitK 1 endloop_n_kt $v $k
-.try_fault kill_iter_1_only_kt 1 {
+.try 1 {
 loop_n_kt:   CGetL $v
              JmpZ skip_n_kt
              CGetL $v
@@ -174,30 +231,9 @@ loop_n_kt:   CGetL $v
              SetM 0 EL:$k
              PopC
 skip_n_kt:   IterNextK 1 loop_n_kt $v $k
+             Jmp endloop_n_kt
+} .catch {
+             IterFree 1
+             Throw
 }
-          Jmp endloop_n_kt
-
-kill_iter_0:
-          CIterFree 0
-          Unwind
-kill_iter_1:
-          IterFree 1
-          Unwind
-# Needed for the verifier. Otherwise it complains
-# because from in one fault region iter 0 is live
-# and in the other its not.
-kill_iter_1_only:
-          IterFree 1
-          Unwind
-
-kill_iter_0_kt:
-          CIterFree 0
-          Unwind
-kill_iter_1_kt:
-          IterFree 1
-          Unwind
-kill_iter_1_only_kt:
-          IterFree 1
-          Unwind
-
 }

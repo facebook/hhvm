@@ -22,4 +22,8 @@ function main() {
 
 }
 
+
+<<__EntryPoint>>
+function main_array_flip() {
 main();
+}

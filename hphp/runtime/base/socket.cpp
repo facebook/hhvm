@@ -15,7 +15,7 @@
 */
 #include "hphp/runtime/base/socket.h"
 
-#include <fcntl.h>
+#include <folly/portability/Fcntl.h>
 #include <folly/portability/Sockets.h>
 
 #include "hphp/runtime/base/request-event-handler.h"
@@ -34,11 +34,11 @@ __thread int Socket::s_lastErrno;
 ///////////////////////////////////////////////////////////////////////////////
 // constructors and destructor
 
-SocketData::SocketData(
-  int port,
-  int type
-) : FileData(true), m_port(port), m_type(type) {
-}
+SocketData::SocketData(int port, int type, bool nonblocking)
+  : FileData(nonblocking)
+  , m_port(port)
+  , m_type(type)
+{}
 
 bool SocketData::closeImpl() {
   s_pcloseRet = 0;
@@ -54,8 +54,8 @@ SocketData::~SocketData() {
   SocketData::closeImpl();
 }
 
-Socket::Socket()
-: File(std::make_shared<SocketData>(0, -1)),
+Socket::Socket(bool nonblocking /* = true*/)
+: File(std::make_shared<SocketData>(0, -1, nonblocking)),
   m_data(static_cast<SocketData*>(getFileData()))
 {
 }
@@ -64,20 +64,15 @@ Socket::Socket(std::shared_ptr<SocketData> data)
 : File(data),
   m_data(static_cast<SocketData*>(getFileData()))
 {
-  assert(data);
+  assertx(data);
   inferStreamType();
 }
 
-Socket::Socket(std::shared_ptr<SocketData> data,
-               int sockfd,
-               int type,
-               const char *address /* = NULL */,
-               int port /* = 0 */,
+Socket::Socket(std::shared_ptr<SocketData> data, int sockfd, int type,
+               const char* address /* = NULL */, int /*port*/ /* = 0 */,
                double timeout /* = 0 */,
                const StaticString& streamType /* = empty_string_ref */)
-: File(data, null_string, streamType),
-  m_data(data.get())
-{
+    : File(data, null_string, streamType), m_data(data.get()) {
   if (address) m_data->m_address = address;
   setFd(sockfd);
 
@@ -103,9 +98,10 @@ Socket::Socket(std::shared_ptr<SocketData> data,
 
 Socket::Socket(int sockfd, int type, const char *address /* = NULL */,
                int port /* = 0 */, double timeout /* = 0 */,
-               const StaticString& streamType /* = empty_string_ref */)
+               const StaticString& streamType /* = empty_string_ref */,
+               bool nonblocking /* = true */)
 : Socket(
-    std::make_shared<SocketData>(port, type),
+    std::make_shared<SocketData>(port, type, nonblocking),
     sockfd, type, address, port, timeout, streamType)
 { }
 
@@ -123,7 +119,7 @@ void Socket::setError(int err) {
   s_lastErrno = m_data->m_error = err;
 }
 
-bool Socket::open(const String& filename, const String& mode) {
+bool Socket::open(const String& /*filename*/, const String& /*mode*/) {
   throw_not_supported(__func__, "cannot open socket this way");
 }
 
@@ -181,8 +177,8 @@ bool Socket::waitForData() {
 }
 
 int64_t Socket::readImpl(char *buffer, int64_t length) {
-  assert(getFd());
-  assert(length > 0);
+  assertx(getFd());
+  assertx(length > 0);
 
   IOStatusHelper io("socket::recv", m_data->m_address.c_str(), m_data->m_port);
 
@@ -206,8 +202,8 @@ int64_t Socket::readImpl(char *buffer, int64_t length) {
 }
 
 int64_t Socket::writeImpl(const char *buffer, int64_t length) {
-  assert(getFd());
-  assert(length > 0);
+  assertx(getFd());
+  assertx(length > 0);
   setEof(false);
   IOStatusHelper io("socket::send", m_data->m_address.c_str(), m_data->m_port);
   int64_t ret = send(getFd(), buffer, length, 0);

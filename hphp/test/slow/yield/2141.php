@@ -4,7 +4,11 @@ function fruit() {
  yield 'apple';
  yield 'banana';
 }
- foreach (fruit() as $fruit) {
+
+
+ <<__EntryPoint>>
+function main_2141() {
+foreach (fruit() as $fruit) {
  var_dump($fruit);
 }
-
+}

@@ -6,7 +6,7 @@
  */
 
 function test(): ConstVector<ConstVector<array<string, string>>> {
-  $v1 = Vector {Vector {array()}};
+  $v1 = Vector { Vector { array() } };
   $v2 = $v1[0];
   $v3 = $v2[0];
   $v3['aaa'] = 4;

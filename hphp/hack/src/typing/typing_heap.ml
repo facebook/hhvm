@@ -2,11 +2,12 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
+open Core_kernel
 
 module type ReadOnly = sig
   type key
@@ -26,6 +27,7 @@ module Classes = struct
     type t = Typing_defs.class_type
     let prefix = Prefix.make()
     let description = "ClassType"
+    let use_sqlite_fallback () = false
   end
 
   module Cache = SharedMem.LocalCache (StringKey) (Class)
@@ -47,7 +49,7 @@ module Classes = struct
 
   let find_unsafe key =
     match get key with
-    | None -> raise Not_found
+    | None -> raise Caml.Not_found
     | Some x -> x
 
   let mem key =

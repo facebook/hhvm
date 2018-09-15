@@ -7,8 +7,11 @@ function VS($x, $y) {
 }
 function VERIFY($x) { VS($x != false, true); }
 
+
 //////////////////////////////////////////////////////////////////////
 
+<<__EntryPoint>>
+function main_ext_mcrypt() {
 $td = mcrypt_module_open("rijndael-256", "", "ofb", "");
 $iv = mcrypt_create_iv(mcrypt_enc_get_iv_size($td),
                                 MCRYPT_DEV_RANDOM);
@@ -142,3 +145,4 @@ VS(mcrypt_enc_is_block_mode($td), true);
 
 $td = mcrypt_module_open("tripledes", "", "ecb", "");
 VS(mcrypt_enc_self_test($td), 0);
+}

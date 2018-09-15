@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Callbacks {
   public $count = 0;

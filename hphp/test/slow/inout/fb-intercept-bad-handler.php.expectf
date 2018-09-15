@@ -1,0 +1,2 @@
+
+Fatal error: fb_intercept used with an inout handler with a bad signature (expected parameters three and five to be inout) in %s/fb-intercept-bad-handler.php on line 8

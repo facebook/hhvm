@@ -7,7 +7,6 @@ function err($code, $msg) {
   echo "Handled ${code}: $msg", "\n";
   return true;
 }
-set_error_handler('err');
 
 class CExplicit implements Stringish {
   public function __toString() {
@@ -131,5 +130,10 @@ function test_reflection() {
 
 }
 
+<<__EntryPoint>>
+function main_stringish() {
+set_error_handler('err');
+
 test_functionality();
 test_reflection();
+}

@@ -1,0 +1,2 @@
+File "function_abstract_bad.php", line 4, characters 7-14:
+Top-level function cannot have modifier 'abstract' (Parsing[1002])

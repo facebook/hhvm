@@ -128,14 +128,14 @@ private:
   Array m_SERVER;
   Array m_ENV;
 };
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(FilterRequestData, s_filter_request_data);
+THREAD_LOCAL_NO_CHECK(FilterRequestData, s_filter_request_data);
 
 static struct FilterExtension final : Extension {
   FilterExtension() : Extension("filter", "0.11.0") {}
 
-  void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
-    HHVM_FE(__SystemLib_filter_input_get_var);
-    HHVM_FE(_filter_snapshot_globals);
+  void moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*config*/) override {
+    HHVM_SYS_FE(__SystemLib_filter_input_get_var);
+    HHVM_SYS_FE(_filter_snapshot_globals);
   }
 
   void moduleInit() override {
@@ -370,8 +370,8 @@ static bool filter_var(Variant& ret, const Variant& variable, int64_t filter,
   return true;
 }
 
-static bool filter_recursive(Variant& ret, const Variant& variable, int64_t filter,
-                             const Variant& options) {
+static bool filter_recursive(Variant& ret, const Variant& variable,
+                             int64_t filter, const Variant& options) {
   Array arr = Array::Create();
   for (ArrayIter iter(variable.toArray()); iter; ++iter) {
     Variant v;
@@ -380,7 +380,7 @@ static bool filter_recursive(Variant& ret, const Variant& variable, int64_t filt
     } else {
       FAIL_IF(!filter_var(v, iter.second(), filter, options));
     }
-    arr.add(iter.first(), v);
+    arr.set(iter.first(), v);
   }
   ret = arr;
   return true;

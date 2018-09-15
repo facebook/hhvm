@@ -1,0 +1,5 @@
+
+Fatal error: Uncaught exception 'DOMException' with message 'Wrong Document Error' in %s/append_invalid.php:12
+Stack trace:
+#0 %s/append_invalid.php(12): DOMNode->appendChild()
+#1 {main}

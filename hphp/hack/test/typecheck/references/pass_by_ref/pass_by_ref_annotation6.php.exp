@@ -1,0 +1,8 @@
+File "pass_by_ref_annotation6.php", line 7, characters 9-11:
+This argument should not be annotated with & (Typing[4181])
+  File "pass_by_ref_annotation6.php", line 3, characters 20-22:
+  Because variadic parameters are passed by value
+File "pass_by_ref_annotation6.php", line 7, characters 18-20:
+This argument should not be annotated with & (Typing[4181])
+  File "pass_by_ref_annotation6.php", line 3, characters 20-22:
+  Because variadic parameters are passed by value

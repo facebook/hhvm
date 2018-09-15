@@ -1,0 +1,10 @@
+diff --git a/chaining.php b/chaining.php
+--- a/chaining.php
++++ b/chaining.php
+@@ -19,7 +19,7 @@
+   $my_object
+     ?->getASubObjectFromMyObject()
+     ->getSomeOtherObject()
++->addedUnindented
+     ?->field
+     ->subField;

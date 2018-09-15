@@ -1,0 +1,6 @@
+File "let_type_hint_error.php", line 6, characters 11-13:
+Wrong type hint (Typing[4110])
+File "let_type_hint_error.php", line 6, characters 11-13:
+This is an int
+File "let_type_hint_error.php", line 6, characters 17-27:
+It is incompatible with a string

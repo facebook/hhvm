@@ -1,12 +1,12 @@
 
-Warning: lchown(): Unable to find uid for ihopenomachinehasthisuserthatwouldbebad in %s/lchown_wronguser.php on line 8
+Warning: lchown(): Unable to find uid for ihopenomachinehasthisuserthatwouldbebad in %s/lchown_wronguser.php on line 11
 bool(false)
 
-Warning: chown(): Unable to find uid for ihopenomachinehasthisuserthatwouldbebad in %s/lchown_wronguser.php on line 9
+Warning: chown(): Unable to find uid for ihopenomachinehasthisuserthatwouldbebad in %s/lchown_wronguser.php on line 12
 bool(false)
 
-Warning: lchgrp(): Unable to find gid for ihopenomachinehasthisgroupthatwouldbebad in %s/lchown_wronguser.php on line 10
+Warning: lchgrp(): Unable to find gid for ihopenomachinehasthisgroupthatwouldbebad in %s/lchown_wronguser.php on line 13
 bool(false)
 
-Warning: chgrp(): Unable to find gid for ihopenomachinehasthisgroupthatwouldbebad in %s/lchown_wronguser.php on line 11
+Warning: chgrp(): Unable to find gid for ihopenomachinehasthisgroupthatwouldbebad in %s/lchown_wronguser.php on line 14
 bool(false)

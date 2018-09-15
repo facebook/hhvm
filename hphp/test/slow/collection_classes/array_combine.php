@@ -64,5 +64,9 @@ function main() {
   dump(array_combine($pair, $pair));
   dump(array_combine($pair, $pair));
 }
-main();
 
+
+<<__EntryPoint>>
+function main_array_combine() {
+main();
+}

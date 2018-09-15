@@ -8,4 +8,8 @@ function test() {
   define('Y', 4);
   var_dump(Y);
 }
+
+<<__EntryPoint>>
+function main_1199() {
 test();
+}

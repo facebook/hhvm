@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_session_ini_set_get_test() {
 var_dump(ini_get('session.serialize_handler'));
 var_dump(ini_set('session.serialize_handler','php_binary'));
 var_dump(ini_get('session.serialize_handler'));
@@ -10,3 +13,4 @@ var_dump(ini_get('session.serialize_handler'));
 var_dump(ini_get('session.gc_maxlifetime'));
 var_dump(ini_set('session.gc_maxlifetime', 123));
 var_dump(ini_get('session.gc_maxlifetime'));
+}

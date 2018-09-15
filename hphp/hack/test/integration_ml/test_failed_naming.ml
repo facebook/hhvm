@@ -24,9 +24,6 @@ let d_contents = contents "D"
 let errors = "
 File \"/test.php\", line 3, characters 15-15:
 Unbound name: C (an object type) (Naming[2049])
-
-File \"/test.php\", line 3, characters 15-15:
-Unbound name: C (an object type) (Naming[2049])
 "
 
 let () =
@@ -50,4 +47,4 @@ let () =
       f1, "";
     ]
   }) in
-  Test.assert_errors env errors
+  Test.assert_env_errors env errors

@@ -1,0 +1,6 @@
+File "rx_if_arg_impl2.php", line 19, characters 3-7:
+Cannot invoke conditionally reactive function in reactive context, because at least one reactivity condition is not met. (Typing[4237])
+File "rx_if_arg_impl2.php", line 17, characters 12-12:
+Argument type must be a subtype of \RxA, now \C.
+File "rx_if_arg_impl2.php", line 10, characters 10-10:
+This is the function declaration

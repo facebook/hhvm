@@ -19,6 +19,9 @@ class C {
   function f8() { async (): Awaitable<void> ==> {}; }
   function f9() { async (): AsyncIterator<int> ==> { yield 1; }; }
 }
+
+<<__EntryPoint>>
+function main_return_annotation_1() {
 if (false) {
   async function g1() {}
   async function g2(): Awaitable<void> {}
@@ -42,3 +45,4 @@ if (false) {
   }
 }
 echo "Done\n";
+}

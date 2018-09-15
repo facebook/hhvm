@@ -111,6 +111,9 @@ function emptyProp() {
   echo "\n";
 }
 
+
+<<__EntryPoint>>
+function main_nullsafe_prop_1() {
 basic();
 nested();
 notNull();
@@ -119,3 +122,4 @@ varNameBase();
 xhpAttr();
 issetProp();
 emptyProp();
+}

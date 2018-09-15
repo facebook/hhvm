@@ -1,4 +1,4 @@
-<?php
+<?hh
 function f() { echo '1 '; }
 function g() { echo '3 '; }
 function __autoload($cls) {

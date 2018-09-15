@@ -83,25 +83,56 @@ Resource CurlMultiResource::find(CURL *cp) {
   return Resource();
 }
 
+void CurlMultiResource::setInExec(bool b) {
+  for (ArrayIter iter(m_easyh); iter; ++iter) {
+    auto const curl = cast<CurlResource>(iter.second());
+    curl->m_in_exec = b;
+  }
+}
+
+bool CurlMultiResource::anyInExec() const {
+  for (ArrayIter iter(m_easyh); iter; ++iter) {
+    auto const curl = cast<CurlResource>(iter.second());
+    if (curl->m_in_exec) return true;
+  }
+  return false;
+}
+
 void CurlMultiResource::check_exceptions() {
   Exception* cppException = nullptr;
   Object phpException;
   for (ArrayIter iter(m_easyh); iter; ++iter) {
-    auto curl = cast<CurlResource>(iter.second());
-    CurlResource::ExceptionType nextException(curl->getAndClearException());
+    auto const curl = cast<CurlResource>(iter.second());
+    auto const nextException = curl->getAndClearException();
     if (!nextException) continue;
     if (CurlResource::isPhpException(nextException)) {
       Object e(CurlResource::getPhpException(nextException));
       e->o_set(s_previous, phpException, s_exception);
       phpException = std::move(e);
     } else {
-      auto e = CurlResource::getCppException(nextException);
-      if (auto f = dynamic_cast<FatalErrorException*>(e)) {
-        if (!f->isRecoverable()) f->throwException();
+      auto const e = CurlResource::getCppException(nextException);
+      if (auto const f = dynamic_cast<FatalErrorException*>(e)) {
+        if (!f->isRecoverable()) {
+          // clean up cppException and remainder of m_easyh before throwing
+          delete cppException;
+          for (++iter; iter; ++iter) {
+            auto const ignore_curl = cast<CurlResource>(iter.second());
+            if (auto const ignore_exn = curl->getAndClearException()) {
+              if (!CurlResource::isPhpException(ignore_exn)) {
+                delete CurlResource::getCppException(ignore_exn);
+              }
+            }
+          }
+          f->throwException();
+        }
       }
       delete cppException;
       cppException = e;
     }
+  }
+  for (ArrayIter iter(m_easyh); iter; ++iter) {
+    auto const curl = cast<CurlResource>(iter.second());
+    assertx(!curl->m_exception);
   }
   if (cppException) cppException->throwException();
   if (!phpException.isNull()) throw_object(phpException);

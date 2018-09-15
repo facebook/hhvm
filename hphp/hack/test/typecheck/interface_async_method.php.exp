@@ -1,0 +1,2 @@
+File "interface_async_method.php", line 4, characters 10-13:
+The 'async' annotation cannot be used on 'abstract' methods or methods inside of interfaces. (Parsing[1002])

@@ -13,6 +13,9 @@ class books extends domDocument {
   }
 }
 
+
+<<__EntryPoint>>
+function main_1675() {
 $dom = new books;
 
 $xml = <<<EOM
@@ -29,3 +32,4 @@ EOM;
 $dom->loadXML($xml);
 $dom->addBook('PHP de Luxe', 'Richard Samar, Christian Stocker');
 print $dom->saveXML();
+}

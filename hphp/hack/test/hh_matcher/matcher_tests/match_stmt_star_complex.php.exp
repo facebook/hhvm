@@ -1,4 +1,0 @@
-4: class Foo {
-5:   public function bar(): void {
-10:     throw new Exception ("Anexception");
-13:     return;

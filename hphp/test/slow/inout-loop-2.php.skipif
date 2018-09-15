@@ -1,0 +1,4 @@
+<?php
+if (ini_get('hhvm.allow_object_destructors') !== '1') {
+  die("cannot run test with destructors disabled");
+}

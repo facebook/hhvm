@@ -5,5 +5,9 @@ class MyException extends Exception
   protected $line = 'abc';
 }
 
+
+<<__EntryPoint>>
+function main_shadow_prop() {
 $exception = new MyException('Error', 1234);
 echo "DONE\n";
+}

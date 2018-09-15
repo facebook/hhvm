@@ -24,6 +24,7 @@
 
 #include "hphp/util/trace.h"
 #include "hphp/util/match.h"
+#include "hphp/util/low-ptr.h"
 
 namespace HPHP {
 struct StringData;
@@ -35,35 +36,37 @@ namespace HPHP { namespace HHBBC {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Self-documenting type alias for pointers that aren't owned.
- *
- * This type is intended to imply that someone else has an owning
- * pointer on this value which is guaranteed to live longer than this
- * pointer.
- */
-template<class T> using borrowed_ptr = T*;
-
-template<class T>
-borrowed_ptr<T> borrow(const std::unique_ptr<T>& p) {
-  return p.get();
-}
-
-/*
- * String that must be a static string, and and Array that must be a
+ * String that must be a static string, and Array that must be a
  * static array.
  */
-using SString = const StringData*;
-using SArray  = const ArrayData*;
+using SString  = const StringData*;
+using LSString = LowPtr<const StringData>;
+using SArray   = const ArrayData*;
 
 /*
  * HHBC evaluation stack flavors.
  */
-enum class Flavor { C, V, A, R, F, U, CR, CVU };
+enum class Flavor { C, V, R, U, CR, CU, CV, CVU };
 
 /*
  * Types of parameter preparation (or unknown).
  */
 enum class PrepKind { Ref, Val, Unknown };
+
+using LocalId = uint32_t;
+constexpr const LocalId NoLocalId = -1;
+/*
+ * Special value used by StackElem::equivLoc to indicate that
+ * this element is a dup of the one below.
+ */
+constexpr const LocalId StackDupId = -2;
+constexpr const LocalId MaxLocalId = StackDupId - 1;
+
+using IterId = uint32_t;
+using ClsRefSlotId = uint32_t;
+constexpr const ClsRefSlotId NoClsRefSlotId = -1;
+using BlockId = uint32_t;
+constexpr const BlockId NoBlockId = -1;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -78,7 +81,7 @@ constexpr int kSystemLibBump = 10;
  * Functions listed in the --trace functions list get trace level bumped by
  * this amount.
  */
-constexpr int kTraceFuncBump = -2;
+constexpr int kTraceFuncBump = -10;
 
 /*
  * We may run the interpreter collecting stats and when trace is on

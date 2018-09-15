@@ -22,7 +22,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct Symbol;
 DECLARE_BOOST_TYPES(SimpleVariable);
 
 struct SimpleVariable : Expression {
@@ -31,7 +30,7 @@ struct SimpleVariable : Expression {
                  const std::string &docComment = "");
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  int getLocalEffects() const override;
+  void analyzeProgram(AnalysisResultConstRawPtr ar) override;
   bool isThis() const override { return m_this;}
   bool isSuperGlobal() const { return m_superGlobal || m_globals; }
   bool isRefable(bool checkError = false) const override {
@@ -44,19 +43,12 @@ struct SimpleVariable : Expression {
   const std::string &getDocComment() const {
     return m_docComment;
   }
-  Symbol *getSymbol() const { return m_sym; }
 
-  bool isHidden() const;
-  bool checkUnused() const;
   bool getAlwaysStash() const { return m_alwaysStash; }
   void setAlwaysStash() { m_alwaysStash = true; }
-  void updateSymbol(SimpleVariablePtr src);
 private:
   std::string m_name;
   std::string m_docComment;
-
-  Symbol *m_sym;
-  Symbol *m_originalSym;
 
   unsigned m_this : 1; // whether this is a legitimate $this
   unsigned m_globals : 1; // whether is is $GLOBAL

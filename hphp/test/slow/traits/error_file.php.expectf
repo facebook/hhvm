@@ -1,3 +1,14 @@
-Notice: Undefined variable: x in%stest/slow/traits/error_file.inc2 on line 4
 
-Notice: Undefined variable: x in%stest/slow/traits/error_file.inc on line 7
+Notice: Undefined variable: x in %s/test/slow/traits/error_file.inc2 on line 4
+
+Notice: Undefined variable: x in %s/test/slow/traits/error_file.inc on line 7
+array(4) {
+  ["class"]=>
+  string(1) "X"
+  ["file"]=>
+  string(%d) "%s/test/slow/traits/error_file.inc2"
+  ["function"]=>
+  string(1) "h"
+  ["line"]=>
+  int(5)
+}

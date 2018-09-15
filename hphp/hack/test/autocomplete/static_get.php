@@ -6,6 +6,6 @@ class Foo {
   static int $x = 2;
 
   public static function f() {
-    Foo::AUTO332
+    Foo::AUTO332  // autocomplete output has no defined order
   }
 }

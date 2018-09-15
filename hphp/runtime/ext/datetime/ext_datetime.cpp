@@ -64,13 +64,13 @@ struct DateGlobals {
   double sunset_zenith;
   double sunrise_zenith;
 };
-IMPLEMENT_THREAD_LOCAL(DateGlobals, s_date_globals);
+THREAD_LOCAL(DateGlobals, s_date_globals);
 
 #define IMPLEMENT_GET_CLASS(cls)                                               \
   Class* cls::getClass() {                                                     \
     if (s_class == nullptr) {                                                  \
       s_class = Unit::lookupClass(s_className.get());                          \
-      assert(s_class);                                                         \
+      assertx(s_class);                                                        \
     }                                                                          \
     return s_class;                                                            \
   }                                                                            \
@@ -175,14 +175,14 @@ static const StaticString s_errors("errors");
 Array HHVM_STATIC_METHOD(DateTime, getLastErrors) {
   Array errors = DateTime::getLastErrors();
   Array warnings = DateTime::getLastWarnings();
-  Array ret = Array::Create();
+  DArrayInit ret(4);
 
   ret.add(s_warning_count, warnings.size());
   ret.add(s_warnings, warnings);
   ret.add(s_error_count, errors.size());
   ret.add(s_errors, errors);
 
-  return ret;
+  return ret.toArray();
 }
 
 int64_t HHVM_METHOD(DateTime, getOffset) {
@@ -291,11 +291,14 @@ const StaticString
 
 Array HHVM_METHOD(DateTime, __sleep) {
   DateTimeData* data = Native::data<DateTimeData>(this_);
-  int zoneType = data->m_dt->zoneType();
 
-  this_->o_set(s_date, data->format(s_ISOformat));
-  this_->o_set(s_timezone_type, zoneType);
-  this_->o_set(s_timezone, zone_type_to_string(zoneType, data->m_dt));
+  auto const formatted = data->format(s_ISOformat);
+  this_->setProp(nullptr, s_date.get(), formatted.toCell());
+  int zoneType = data->m_dt->zoneType();
+  this_->setProp(nullptr, s_timezone_type.get(),
+                 make_tv<KindOfInt64>(zoneType));
+  auto const timezone = zone_type_to_string(zoneType, data->m_dt);
+  this_->setProp(nullptr, s_timezone.get(), timezone.toCell());
   return make_packed_array(s_date, s_timezone_type, s_timezone);
 }
 
@@ -333,7 +336,7 @@ int64_t DateTimeData::getTimestamp(const Object& obj) {
   if (LIKELY(obj.instanceof(getClass()))) {
     return Native::data<DateTimeData>(obj)->getTimestamp();
   }
-  assert(obj->instanceof(SystemLib::s_DateTimeInterfaceClass));
+  assertx(obj->instanceof(SystemLib::s_DateTimeInterfaceClass));
   Variant result = obj->o_invoke(s_getTimestamp, Array::Create());
   return result.toInt64();
 }
@@ -378,13 +381,12 @@ req::ptr<DateTime> DateTimeData::unwrap(const Object& datetime) {
     return data->m_dt;
   }
   if (datetime->instanceof(SystemLib::s_DateTimeImmutableClass)) {
-    auto lookup = datetime->getProp(
+    auto rval = datetime->getProp(
       SystemLib::s_DateTimeImmutableClass,
       s_data.get()
     );
-    auto tv = lookup.prop;
-    assert(tv->m_type == KindOfObject);
-    Object impl(tv->m_data.pobj);
+    assertx(rval.is_set() && type(rval) == KindOfObject);
+    Object impl(rval.val().pobj);
     return unwrap(impl);
   }
   return req::ptr<DateTime>();
@@ -433,11 +435,15 @@ Variant HHVM_METHOD(DateTimeZone, getOffset,
   return data->m_tz->offset(ts);
 }
 
-Array HHVM_METHOD(DateTimeZone, getTransitions,
+TypedValue HHVM_METHOD(DateTimeZone, getTransitions,
                   int64_t timestamp_begin, /*=k_PHP_INT_MIN*/
                   int64_t timestamp_end /*=k_PHP_INT_MAX*/) {
   DateTimeZoneData* data = Native::data<DateTimeZoneData>(this_);
-  return data->m_tz->transitions(timestamp_begin, timestamp_end);
+  auto result = data->m_tz->transitions(timestamp_begin, timestamp_end);
+  if (result.isNull()) {
+    return make_tv<KindOfBoolean>(false);
+  }
+  return tvReturn(std::move(result));
 }
 
 Array HHVM_STATIC_METHOD(DateTimeZone, listAbbreviations) {
@@ -454,7 +460,7 @@ Variant HHVM_STATIC_METHOD(DateTimeZone, listIdentifiers,
     return false;
   }
 
-  const timelib_tzdb *tzdb = timezone_get_builtin_tzdb();
+  const timelib_tzdb *tzdb = timezone_get_tzdb();
   int item_count = tzdb->index_size;
   const timelib_tzdb_index_entry *table = tzdb->index;
 
@@ -496,6 +502,18 @@ req::ptr<TimeZone> DateTimeZoneData::unwrap(const Object& timezone) {
 }
 
 IMPLEMENT_GET_CLASS(DateTimeZoneData)
+
+Array HHVM_METHOD(DateTimeZone, __debuginfo) {
+  DateTimeZoneData* data = Native::data<DateTimeZoneData>(this_);
+  return data->getDebugInfo();
+}
+
+Array DateTimeZoneData::getDebugInfo() const {
+  return make_map_array(
+    s_timezone_type, m_tz->type(),
+    s_timezone, m_tz->name()
+  );
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // DateInterval
@@ -990,6 +1008,7 @@ static struct DateTimeExtension final : Extension {
     HHVM_RCC_INT(DateTimeZone, PER_COUNTRY, DateTimeZoneData::PER_COUNTRY);
 
     HHVM_ME(DateTimeZone, __construct);
+    HHVM_ME(DateTimeZone, __debuginfo);
     HHVM_ME(DateTimeZone, getLocation);
     HHVM_ME(DateTimeZone, getName);
     HHVM_ME(DateTimeZone, getOffset);

@@ -219,9 +219,9 @@ static String HHVM_METHOD(IntlDateFormatter, format, const Variant& value) {
   return out;
 }
 
-static String HHVM_STATIC_METHOD(IntlDateFormatter, formatObject,
-                                 const Object& object, const Variant& format,
-                                 const Variant& locale) {
+static String
+HHVM_STATIC_METHOD(IntlDateFormatter, formatObject, const Object& /*object*/,
+                   const Variant& /*format*/, const Variant& /*locale*/) {
   // TODO: Need IntlCalendar implemented first
   throw_not_implemented("IntlDateFormatter::formatObject");
 }
@@ -247,12 +247,13 @@ static String HHVM_METHOD(IntlDateFormatter, getErrorMessage) {
 }
 
 static String HHVM_METHOD(IntlDateFormatter, getLocale, const Variant& which) {
-  ULocDataLocaleType whichloc = ULOC_ACTUAL_LOCALE;
-  if (!which.isNull()) whichloc = (ULocDataLocaleType)which.toInt64();
+  std::underlying_type<ULocDataLocaleType>::type whichloc = ULOC_ACTUAL_LOCALE;
+  if (!which.isNull()) whichloc = which.toInt64();
 
   DATFMT_GET(data, this_, String());
   UErrorCode error = U_ZERO_ERROR;
-  const char *loc = udat_getLocaleByType(data->datefmt(), whichloc, &error);
+  const char *loc = udat_getLocaleByType(data->datefmt(),
+                                         (ULocDataLocaleType)whichloc, &error);
   if (U_FAILURE(error)) {
     data->setError(error);
     return String();
@@ -288,7 +289,7 @@ static int64_t HHVM_METHOD(IntlDateFormatter, getTimeType) {
 
 static String HHVM_METHOD(IntlDateFormatter, getTimeZoneId) {
   DATFMT_GET(data, this_, 0);
-  UnicodeString id;
+  icu::UnicodeString id;
   data->datefmtObject()->getTimeZone().getID(id);
   UErrorCode error = U_ZERO_ERROR;
   String ret(u8(id, error));
@@ -418,7 +419,8 @@ static Variant HHVM_METHOD(IntlDateFormatter, parse,
   }
 }
 
-static bool HHVM_METHOD(IntlDateFormatter, setCalendar, const Variant& which) {
+static bool
+HHVM_METHOD(IntlDateFormatter, setCalendar, const Variant& /*which*/) {
   // TODO: Need IntlCalendar implemented first
   throw_not_implemented("IntlDateFormatter::setCalendar");
 }

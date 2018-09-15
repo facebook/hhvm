@@ -6,9 +6,9 @@ function dump($x) {
 function dump_unordered($x) {
   var_dump(get_class($x));
   $arr = (array)$x;
-  ksort($arr, SORT_STRING);
+  ksort(&$arr, SORT_STRING);
   var_dump($arr);
-  sort($arr, SORT_STRING);
+  sort(&$arr, SORT_STRING);
   var_dump($arr);
 }
 function main() {
@@ -34,4 +34,8 @@ function main() {
     dump_unordered($v->toSet());
   }
 }
+
+<<__EntryPoint>>
+function main_materialize_methods_1() {
 main();
+}

@@ -1,0 +1,16 @@
+slow/collection_classes/pair-clone.php
+slow/dict/ref-fail-leak.php
+slow/dv_array/ext_xenon/xenon_crash.php
+slow/dv_array_hack_arr/ext_xenon/xenon_crash.php
+slow/hack_arr_compat/parse-str.php
+slow/inline-nested-vm-stack.php
+slow/inline-trim-extra-args.php
+slow/inout-refs.php
+slow/inout/complex-expr.php
+slow/inout/invalid-index.php
+slow/objprof/objprof-props.php
+slow/objprof/objprof-user-types.php
+slow/objprof/objprof.php
+slow/objprof/strings.php
+slow/unserialize-reference-overwritten.php
+slow/vec/ref-fail-leak.php

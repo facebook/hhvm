@@ -39,6 +39,7 @@ Type arithOpResult(Type t1, Type t2) {
   auto both = t1 | t2;
   if (both.maybe(TDbl)) return TDbl;
   if (both.maybe(TArr)) return TArr;
+  if (both.maybe(TShape)) return TShape;
   if (both.maybe(TVec)) return TVec;
   if (both.maybe(TDict)) return TDict;
   if (both.maybe(TKeyset)) return TKeyset;
@@ -107,14 +108,7 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     return TBoxedInitCell;
   };
 
-  auto outFlag = getInstrInfo(inst.op()).type;
-  if (outFlag == OutFInputL) {
-    outFlag = inst.preppedByRef ? OutVInputL : OutCInputL;
-  } else if (outFlag == OutFInputR) {
-    outFlag = inst.preppedByRef ? OutVInput : OutCInput;
-  }
-
-  switch (outFlag) {
+  switch (getInstrInfo(inst.op()).type) {
     case OutNull:        return TInitNull;
     case OutNullUninit:  return TUninit;
     case OutString:      return TStr;
@@ -127,6 +121,8 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     case OutInt64:       return TInt;
     case OutArray:       return TArr;
     case OutArrayImm:    return TArr; // Should be StaticArr/Vec/Dict: t2124292
+    case OutVArray:      return RuntimeOption::EvalHackArrDVArrs ? TVec : TArr;
+    case OutDArray:      return RuntimeOption::EvalHackArrDVArrs ? TDict : TArr;
     case OutVec:         return TVec;
     case OutVecImm:      return TVec;
     case OutDict:        return TDict;
@@ -142,12 +138,10 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     case OutVUnknown:    return TBoxedInitCell;
 
     case OutSameAsInput1: return topType(env, BCSPRelOffset{0});
-    case OutSameAsInput2: return topType(env, BCSPRelOffset{1});
-    case OutSameAsInput3: return topType(env, BCSPRelOffset{2});
+    case OutModifiedInput2: return topType(env, BCSPRelOffset{1}).modified();
+    case OutModifiedInput3: return topType(env, BCSPRelOffset{2}).modified();
     case OutVInput:      return boxed(topType(env, BCSPRelOffset{0}));
     case OutVInputL:     return boxed(localType());
-    case OutFInputL:
-    case OutFInputR:     not_reached();
 
     case OutArith:
       return arithOpResult(topType(env, BCSPRelOffset{0}),
@@ -155,12 +149,8 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     case OutArithO:
       return arithOpOverResult(topType(env, BCSPRelOffset{0}),
                                topType(env, BCSPRelOffset{1}));
-    case OutUnknown: {
-      if (isFPassStar(inst.op())) {
-        return inst.preppedByRef ? TBoxedInitCell : TCell;
-      }
-      return TGen;
-    }
+    case OutUnknown:     return TGen;
+
     case OutBitOp:
       return bitOpResult(topType(env, BCSPRelOffset{0}),
                          inst.op() == HPHP::OpBitNot ?
@@ -172,9 +162,6 @@ folly::Optional<Type> interpOutputType(IRGS& env,
       auto ty = localType().unbox();
       return ty <= TDbl ? ty : TCell;
     }
-    case OutClassRef:   return TCls;
-    case OutFPushCufSafe: return folly::none;
-
     case OutNone:       return folly::none;
 
     case OutCInput: {
@@ -196,6 +183,8 @@ folly::Optional<Type> interpOutputType(IRGS& env,
       }
       return TCell;
     }
+    case OutFunc: return TFunc;
+    case OutClass: return TCls;
   }
   not_reached();
 }
@@ -219,6 +208,7 @@ interpOutputLocals(IRGS& env,
     locals.emplace_back(id, relaxToGuardable(t));
   };
   auto setImmLocType = [&](uint32_t id, Type t) {
+    assertx(id < kMaxHhbcImms);
     setLocType(inst.imm[id].u_LA, t);
   };
   auto handleBoxiness = [&] (Type testTy, Type useTy) {
@@ -251,17 +241,23 @@ interpOutputLocals(IRGS& env,
     }
 
     case OpStaticLocInit:
+    case OpStaticLocDef:
       setImmLocType(0, TBoxedInitCell);
+      break;
+
+    case OpStaticLocCheck:
+      setImmLocType(0, TGen);
       break;
 
     case OpInitThisLoc:
       setImmLocType(0, TCell);
       break;
 
-    case OpSetL: {
+    case OpSetL:
+    case OpPopL: {
       auto locType = env.irb->local(localInputId(inst), DataTypeSpecific).type;
       auto stackType = topType(env, BCSPRelOffset{0});
-      // SetL preserves reffiness of a local.
+      // [Set,Pop]L preserves reffiness of a local.
       setImmLocType(0, handleBoxiness(locType, stackType));
       break;
     }
@@ -280,12 +276,12 @@ interpOutputLocals(IRGS& env,
 
     // New minstrs are handled extremely conservatively.
     case OpQueryM:
+    case OpMemoGet:
+    case OpMemoSet:
       break;
     case OpDim:
       if (inst.imm[0].u_OA & mDefine) smashesAllLocals = true;
       break;
-    case OpFPassDim:
-    case OpFPassM:
     case OpVGetM:
     case OpSetM:
     case OpIncDecM:
@@ -319,6 +315,15 @@ interpOutputLocals(IRGS& env,
       setImmLocType(2, TGen);
       break;
 
+    case OpLIterInitK:
+    case OpLIterNextK:
+      setImmLocType(4, TCell);
+      /* fallthrough */
+    case OpLIterInit:
+    case OpLIterNext:
+      setImmLocType(3, TGen);
+      break;
+
     case OpVerifyParamType: {
       auto locType = env.irb->local(localInputId(inst), DataTypeSpecific).type;
       setImmLocType(0, handleBoxiness(locType, TCell));
@@ -326,8 +331,8 @@ interpOutputLocals(IRGS& env,
     }
 
     case OpSilence:
-      if (static_cast<SilenceOp>(inst.imm[0].u_OA) == SilenceOp::Start) {
-        setImmLocType(inst.imm[0].u_LA, TInt);
+      if (static_cast<SilenceOp>(inst.imm[1].u_OA) == SilenceOp::Start) {
+        setImmLocType(0, TInt);
       }
       break;
 
@@ -338,6 +343,24 @@ interpOutputLocals(IRGS& env,
   }
 
   return locals;
+}
+
+jit::vector<InterpOneData::ClsRefSlot>
+interpClsRefSlots(IRGS& /*env*/, const NormalizedInstruction& inst) {
+  jit::vector<InterpOneData::ClsRefSlot> slots;
+
+  auto const op = inst.op();
+  auto const numImmeds = numImmediates(op);
+  for (auto i = uint32_t{0}; i < numImmeds; ++i) {
+    auto const type = immType(op, i);
+    if (type == ArgType::CAR) {
+      slots.emplace_back(inst.imm[i].u_CAR, false);
+    } else if (type == ArgType::CAW) {
+      slots.emplace_back(inst.imm[i].u_CAW, true);
+    }
+  }
+
+  return slots;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -360,11 +383,14 @@ void interpOne(IRGS& env, const NormalizedInstruction& inst) {
   idata.nChangedLocals = locals.size();
   idata.changedLocals = locals.data();
 
+  auto slots = interpClsRefSlots(env, inst);
+  idata.nChangedClsRefSlots = slots.size();
+  idata.changedClsRefSlots = slots.data();
+
   interpOne(env, stackType, popped, pushed, idata);
   if (checkTypeType) {
     auto const out = getInstrInfo(inst.op()).out;
     auto const checkIdx = BCSPRelOffset{
-      (out & InstrFlags::StackIns2) ? 2 :
       (out & InstrFlags::StackIns1) ? 1 : 0
     }.to<FPInvOffset>(env.irb->fs().bcSPOff());
 
@@ -415,10 +441,10 @@ void interpOne(IRGS& env,
 
 #define INTERP interpOne(env, *env.currentNormalizedInstruction);
 
-void emitFPushObjMethod(IRGS& env, int32_t, ObjMethodOp) { INTERP }
+void emitFPushObjMethod(IRGS& env, uint32_t, ObjMethodOp, const ImmVector&) {
+  INTERP
+}
 
-void emitLowInvalid(IRGS& env)                { std::abort(); }
-void emitCGetL3(IRGS& env, int32_t)           { INTERP }
 void emitAddElemV(IRGS& env)                  { INTERP }
 void emitAddNewElemV(IRGS& env)               { INTERP }
 void emitExit(IRGS& env)                      { INTERP }
@@ -433,35 +459,39 @@ void emitEmptyN(IRGS& env)                    { INTERP }
 void emitSetN(IRGS& env)                      { INTERP }
 void emitSetOpN(IRGS& env, SetOpOp)           { INTERP }
 void emitSetOpG(IRGS& env, SetOpOp)           { INTERP }
-void emitSetOpS(IRGS& env, SetOpOp)           { INTERP }
+void emitSetOpS(IRGS& env, SetOpOp, uint32_t) { INTERP }
 void emitIncDecN(IRGS& env, IncDecOp)         { INTERP }
 void emitIncDecG(IRGS& env, IncDecOp)         { INTERP }
 void emitBindN(IRGS& env)                     { INTERP }
+void emitBindS(IRGS& env, uint32_t)           { INTERP }
 void emitUnsetN(IRGS& env)                    { INTERP }
 void emitUnsetG(IRGS& env)                    { INTERP }
-void emitFPassN(IRGS& env, int32_t)           { INTERP }
-void emitCufSafeArray(IRGS& env)              { INTERP }
-void emitCufSafeReturn(IRGS& env)             { INTERP }
+void emitVGetS(IRGS& env, uint32_t)           { INTERP }
 void emitIncl(IRGS& env)                      { INTERP }
 void emitInclOnce(IRGS& env)                  { INTERP }
 void emitReq(IRGS& env)                       { INTERP }
 void emitReqDoc(IRGS& env)                    { INTERP }
 void emitReqOnce(IRGS& env)                   { INTERP }
 void emitEval(IRGS& env)                      { INTERP }
-void emitDefTypeAlias(IRGS& env, int32_t)     { INTERP }
+void emitDefTypeAlias(IRGS& env, uint32_t)    { INTERP }
 void emitDefCns(IRGS& env, const StringData*) { INTERP }
-void emitDefCls(IRGS& env, int32_t)           { INTERP }
-void emitDefFunc(IRGS& env, int32_t)          { INTERP }
+void emitDefCls(IRGS& env, uint32_t)          { INTERP }
+void emitAliasCls(IRGS& env,
+                  const StringData*,
+                  const StringData*)          { INTERP }
+void emitDefFunc(IRGS& env, uint32_t)         { INTERP }
 void emitCatch(IRGS& env)                     { INTERP }
+void emitChainFaults(IRGS& env)               { INTERP }
 void emitContGetReturn(IRGS& env)             { INTERP }
 void emitContAssignDelegate(IRGS& env, int32_t)
                                               { INTERP }
 void emitContEnterDelegate(IRGS& env)         { INTERP }
 void emitYieldFromDelegate(IRGS& env, int32_t, int32_t)
                                               { INTERP }
-void emitContUnsetDelegate(IRGS& env, int32_t, int32_t)
+void emitContUnsetDelegate(IRGS& env, CudOp, int32_t)
                                               { INTERP }
-void emitHighInvalid(IRGS& env)               { std::abort(); }
+void emitCombineAndResolveTypeStruct(IRGS& env, uint32_t)
+                                              { INTERP }
 
 //////////////////////////////////////////////////////////////////////
 

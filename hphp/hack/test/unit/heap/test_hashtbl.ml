@@ -2,20 +2,22 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
  *
 *)
 
-type key = Digest.t
+type key = OpaqueDigest.t
 
 external hh_add    : key -> string -> unit = "hh_add"
 external hh_mem    : key -> bool           = "hh_mem"
+external hh_mem_status : key -> int        = "hh_mem_status"
 external hh_remove : key -> unit           = "hh_remove"
 external hh_move   : key -> key -> unit    = "hh_move"
 external hh_get    : key -> string         = "hh_get_and_deserialize"
 external hh_collect    : bool -> unit         = "hh_collect"
+external hh_should_collect : bool -> bool = "hh_should_collect"
 external heap_size: unit -> int = "hh_heap_size"
 
 let expect ~msg bool =
@@ -24,13 +26,17 @@ let expect ~msg bool =
     exit 1
   end
 
-let to_key = Digest.string
+let to_key = OpaqueDigest.string
 
 let add key value = hh_add (to_key key) value
 let mem key = hh_mem (to_key key)
+let get_status key = hh_mem_status (to_key key)
 let remove key = hh_remove (to_key key)
 let move k1 k2 = hh_move (to_key k1) (to_key k2)
 let get key = hh_get (to_key key)
+
+let should_gentle_collect () = hh_should_collect false
+let should_aggresive_collect () = hh_should_collect true
 let gentle_collect () = hh_collect false
 let aggressive_collect () = hh_collect true
 
@@ -71,6 +77,14 @@ let expect_not_mem key =
   expect ~msg:(Printf.sprintf "Expected key '%s' to not be in hashtable" key)
   @@ not (mem key)
 
+let expect_absent key =
+  expect ~msg:(Printf.sprintf "Expected key '%s' to be absent from hashtable" key)
+  @@ (get_status key = -1)
+
+let expect_removed key =
+  expect ~msg:(Printf.sprintf "Expected key '%s' to be removed from hashtable" key)
+  @@ (get_status key = -2)
+
 let expect_get key expected =
   let value = get key in
   expect ~msg:(
@@ -78,9 +92,24 @@ let expect_get key expected =
       key expected value
   ) (value = expected)
 
+let expect_gentle_collect expected =
+  expect ~msg:(
+    Printf.sprintf "Expected gentle collection to be %sneeded"
+      (if expected then "" else "not ")
+    )
+    (should_gentle_collect () = expected)
+
+let expect_aggressive_collect expected =
+  expect ~msg:(
+    Printf.sprintf "Expected aggressive collection to be %sneeded"
+      (if expected then "" else "not ")
+    )
+    (should_aggresive_collect () = expected)
+
 let test_ops () =
   expect_stats ~nonempty:0 ~used:0;
   expect_not_mem "0";
+  expect_absent "0";
 
   add "0" "";
   expect_stats ~nonempty:1 ~used:1;
@@ -89,11 +118,13 @@ let test_ops () =
   move "0" "1";
   expect_stats ~nonempty:2 ~used:1;
   expect_not_mem "0";
+  expect_removed "0";
   expect_mem "1";
 
   remove "1";
   expect_stats ~nonempty:2 ~used:0;
-  expect_not_mem "1"
+  expect_not_mem "1";
+  expect_removed "1"
 
 let test_hashtbl_full_hh_add () =
   expect_stats ~nonempty:0 ~used:0;
@@ -144,6 +175,7 @@ let test_no_overwrite () =
   remove "0";
   expect_stats ~nonempty:1 ~used:0;
   expect_not_mem "0";
+  expect_removed "0";
 
   add "0" "Bar";
   expect_stats ~nonempty:1 ~used:1;
@@ -164,6 +196,7 @@ let test_reuse_slots () =
    *)
   remove "1";
   expect_not_mem "1";
+  expect_removed "1";
   expect_stats ~nonempty:2 ~used:1;
   add "1" "Foo";
   expect_mem "1";
@@ -173,9 +206,11 @@ let test_reuse_slots () =
   (* If we move to a previously used slot, nonempty slots stays the same *)
   remove "1";
   expect_not_mem "1";
+  expect_removed "1";
   expect_stats ~nonempty:2 ~used:1;
   move "0" "1";
   expect_not_mem "0";
+  expect_removed "0";
   expect_mem "1";
   expect_get "1" "0";
   expect_stats ~nonempty:2 ~used:1;
@@ -183,6 +218,7 @@ let test_reuse_slots () =
   (* Moving to a brand new key will increase number of nonempty slots *)
   move "1" "2";
   expect_not_mem "1";
+  expect_removed "1";
   expect_mem "2";
   expect_get "2" "0";
   expect_stats ~nonempty:3 ~used:1
@@ -193,6 +229,9 @@ let test_gc_collect () =
   expect_heap_size 0;
   add "0" "0";
   add "1" "1";
+  (* no memory is wasted *)
+  expect_gentle_collect false;
+  expect_aggressive_collect false;
   expect_heap_size 2;
   expect_mem "0";
   expect_mem "1";
@@ -212,15 +251,18 @@ let test_gc_aggressive () =
    (* Since latest heap size is zero,
       now it should gc, but theres nothing to gc,
       so the heap will stay the same *)
+  expect_gentle_collect false;
   gentle_collect ();
   expect_heap_size 2;
   remove "1";
   add "2" "2";
   expect_heap_size 3;
   (* Gentle garbage collection shouldn't catch this *)
+  expect_gentle_collect false;
   gentle_collect ();
   expect_heap_size 3;
   (* Aggressive garbage collection should run *)
+  expect_aggressive_collect true;
   aggressive_collect ();
   expect_heap_size 2
 
@@ -230,23 +272,24 @@ let test_heapsize_decrease () =
   add "1" "1";
   add "2" "2";
   add "3" "3";
+  expect_heap_size 4;
+  remove "2";
+  remove "1";
+  remove "0";
   add "4" "4";
   add "5" "5";
   expect_heap_size 6;
-  remove "1";
-  remove "0";
-  add "6" "6";
-  add "7" "7";
-  expect_heap_size 8;
-  gentle_collect (); (* This runs *)
-  expect_heap_size 6;
+  gentle_collect (); (* This runs because 6 >= 2*3 *)
+  expect_heap_size 3;
   add "0" "0";
   add "1" "1";
-  remove "6";
-  remove "7";
-  expect_heap_size 8; (* Latest heap size should be set to 6, not 8 *)
-  aggressive_collect (); (* Aggressive collection should kick in *)
-  expect_heap_size 6
+  remove "4";
+  remove "5";
+  expect_heap_size 5;
+  aggressive_collect (); (* Aggressive collection should kick in,
+                          * because 5 >= 1.2*3 *)
+  expect_heap_size 3;
+  ()
 
 
 let tests handle =

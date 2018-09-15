@@ -1,4 +1,0 @@
-4:   class Foo {
-5:     public function bar(): void {
-6:       "a stmt";
-8:       "a stmt";

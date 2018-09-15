@@ -17,16 +17,20 @@
 #ifndef incl_HPHP_UTIL_ALLOC_H_
 #define incl_HPHP_UTIL_ALLOC_H_
 
-#include <stdint.h>
-#include <cassert>
+#include <array>
 #include <atomic>
 
+#include <stdint.h>
+
+#include <folly/CPortability.h>
 #include <folly/Portability.h>
+#include <folly/portability/PThread.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/exception.h"
+#include "hphp/util/low-ptr-def.h"
 
-#if defined(FOLLY_SANITIZE_ADDRESS) || defined(FOLLY_SANITIZE_THREAD)
+#if FOLLY_SANITIZE
 // ASan is less precise than valgrind so we'll need a superset of those tweaks
 # define VALGRIND
 // TODO: (t2869817) ASan doesn't play well with jemalloc
@@ -47,33 +51,25 @@
 #  include "malloc.h"
 # endif
 #else
-# undef MALLOCX_LG_ALIGN
-# undef MALLOCX_ZERO
 # include <jemalloc/jemalloc.h>
-# if JEMALLOC_VERSION_MAJOR == 4
-#  define USE_JEMALLOC_CHUNK_HOOKS 1
+# if (JEMALLOC_VERSION_MAJOR >= 5) && defined(USE_LOWPTR) && \
+     defined(__linux__) && !defined(USE_JEMALLOC_EXTENT_HOOKS)
+#  define USE_JEMALLOC_EXTENT_HOOKS 1
+#  if (JEMALLOC_VERSION_MAJOR > 5) || (JEMALLOC_VERSION_MINOR >= 1)
+#   define JEMALLOC_METADATA_1G_PAGES 1
+#  endif
+# endif
+# if (JEMALLOC_VERSION_MAJOR > 4)
+#  define JEMALLOC_NEW_ARENA_CMD "arenas.create"
+# else
+#  define JEMALLOC_NEW_ARENA_CMD "arenas.extend"
 # endif
 #endif
-
-#include "hphp/util/maphuge.h"
 
 extern "C" {
 #ifdef USE_TCMALLOC
 #define MallocExtensionInstance _ZN15MallocExtension8instanceEv
   MallocExtension* MallocExtensionInstance() __attribute__((__weak__));
-#endif
-
-#ifdef USE_JEMALLOC
-
-  int mallctl(const char *name, void *oldp, size_t *oldlenp, void *newp,
-              size_t newlen) __attribute__((__weak__));
-  int mallctlnametomib(const char *name, size_t* mibp, size_t*miblenp)
-              __attribute__((__weak__));
-  int mallctlbymib(const size_t* mibp, size_t miblen, void *oldp,
-              size_t *oldlenp, void *newp, size_t newlen) __attribute__((__weak__));
-  void malloc_stats_print(void (*write_cb)(void *, const char *),
-                          void *cbopaque, const char *opts)
-    __attribute__((__weak__));
 #endif
 }
 
@@ -101,10 +97,20 @@ constexpr bool use_jemalloc =
 #endif
   ;
 
+// When this is true, all static/uncounted strings/arrays have addresses lower
+// than kUncountedMaxAddr, and all counted HeapObjects have higher addresses.
+constexpr bool use_addr_to_check_counted =
+#if USE_JEMALLOC_EXTENT_HOOKS && defined(USE_ADDR_CHECK_COUNTED)
+  true
+#else
+  false
+#endif
+  ;
+
 // ASAN modifies the generated code in ways that cause abnormally high C++
 // stack usage.
 constexpr size_t kStackSizeMinimum =
-#ifdef FOLLY_SANITIZE_ADDRESS
+#if FOLLY_SANITIZE
   16 << 20;
 #else
   8 << 20;
@@ -118,114 +124,103 @@ struct OutOfMemoryException : Exception {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+// Address ranges for the managed arenas.  Low arena is in [1G, 4G), and high
+// arena in [4G, kUncountedMaxAddr) at most.  LOW_PTR builds won't work if low
+// arena overflows.  High arena overflow would result in a crash, so we size it
+// large enough to make sure we run out of memory before it overflows.  These
+// constants are only meaningful when use_addr_to_check_counted is true (which
+// currently depends on USE_JEMALLOC_EXTENT_HOOKS).  We make them available for
+// all modes to avoid having ifdefs everywhere.
+constexpr unsigned kUncountedMaxShift = 38;
+constexpr uintptr_t kLowArenaMinAddr = 1ull << 30;
+constexpr uintptr_t kLowArenaMaxAddr = 1ull << 32;
+constexpr uintptr_t kUncountedMaxAddr = 1ull << kUncountedMaxShift;
+constexpr uintptr_t kHighArenaMaxAddr = kUncountedMaxAddr;
+constexpr size_t kLowArenaMaxCap = 3ull << 30;
+constexpr size_t kHighArenaMaxCap = kHighArenaMaxAddr - kLowArenaMaxAddr;
+
 #ifdef USE_JEMALLOC
+
+// Low arena uses ManagedArena if extent hooks are used, otherwise it is using
+// DSS.  It should always be available for supported versions of jemalloc.  High
+// arena is 0 if extent hook API isn't used, but mallocx/dallocx could use 0 as
+// flags and behave similarly to malloc/free.  Low arena doesn't use tcache, but
+// we need tcache for the high arena, so the flags are thread-local.
 extern unsigned low_arena;
+extern unsigned high_arena;
+extern int low_arena_flags;
+extern __thread int high_arena_flags;
+
+#if !USE_JEMALLOC_EXTENT_HOOKS
+
 extern std::atomic<int> low_huge_pages;
 
-inline int low_mallocx_flags() {
-  // Allocate from low_arena, and bypass the implicit tcache to assure that the
-  // result actually comes from low_arena.
-#ifdef MALLOCX_TCACHE_NONE
-  return MALLOCX_ARENA(low_arena) | MALLOCX_TCACHE_NONE;
-#else
-  return MALLOCX_ARENA(low_arena);
+#else // USE_JEMALLOC_EXTENT_HOOKS
+
+#ifndef MAX_MANAGED_ARENA_COUNT
+#define MAX_MANAGED_ARENA_COUNT 4
 #endif
+static_assert(MAX_MANAGED_ARENA_COUNT >= 1, "");
+// All ManagedArena's represented as an array of pair<id, pointer>.  Each
+// pointer can be casted to the underlying ExtentAllocator/Arena. We use this
+// to access the state of ExtentAllocators in extent hooks.  An id of zero
+// indicates an empty entry.
+using ArenaArray = std::array<std::pair<unsigned, void*>,
+                              MAX_MANAGED_ARENA_COUNT>;
+extern ArenaArray g_arenas;
+template<typename T> inline T* GetByArenaId(unsigned id) {
+  for (auto i : g_arenas) {
+    if (i.first == id) {
+      return static_cast<T*>(i.second);
+    }
+  }
+  return nullptr;
 }
 
-inline int low_dallocx_flags() {
-#ifdef MALLOCX_TCACHE_NONE
-  // Bypass the implicit tcache for this deallocation.
-  return MALLOCX_TCACHE_NONE;
-#else
-  // Prior to the introduction of MALLOCX_TCACHE_NONE, explicitly specifying
-  // MALLOCX_ARENA(a) caused jemalloc to bypass tcache.
-  return MALLOCX_ARENA(low_arena);
-#endif
-}
+// Explicit per-thread tcache for the huge arenas.
+extern __thread int high_arena_tcache;
 
-#ifdef USE_JEMALLOC_CHUNK_HOOKS
-extern unsigned low_huge1g_arena;
-extern unsigned high_huge1g_arena;
+/* Set up extent hooks to use 1g pages for jemalloc metadata. */
+void setup_jemalloc_metadata_extent_hook(bool enable, bool enable_numa_arena,
+                                         size_t reserved);
 
-inline int low_mallocx_huge1g_flags() {
-  // MALLOCX_TCACHE_NONE is introduced earlier than the chunk hook API
-  return MALLOCX_ARENA(low_huge1g_arena) | MALLOCX_TCACHE_NONE;
-}
+// Functions to manipulate tcaches for the high arena
+void high_arena_tcache_create();        // tcache.create
+void high_arena_tcache_flush();         // tcache.flush
+void high_arena_tcache_destroy();       // tcache.destroy
 
-inline int low_dallocx_huge1g_flags() {
-  return MALLOCX_TCACHE_NONE;
-}
+#endif // USE_JEMALLOC_EXTENT_HOOKS
 
-inline int mallocx_huge1g_flags() {
-  return MALLOCX_ARENA(high_huge1g_arena) | MALLOCX_TCACHE_NONE;
-}
+#endif // USE_JEMALLOC
 
-inline int dallocx_huge1g_flags() {
-  return MALLOCX_TCACHE_NONE;
-}
+void low_malloc_huge_pages(int pages);
 
-#endif
-
-#endif
-
-inline void* low_malloc(size_t size) {
-#ifndef USE_JEMALLOC
+inline void* malloc_huge_internal(size_t size) {
+#if !USE_JEMALLOC_EXTENT_HOOKS
   return malloc(size);
 #else
-  extern void* low_malloc_impl(size_t size);
-  return low_malloc_impl(size);
+  assert(size);
+  return mallocx(size, high_arena_flags);
 #endif
 }
 
-inline void low_free(void* ptr) {
-#ifndef USE_JEMALLOC
+inline void free_huge_internal(void* ptr) {
+#if !USE_JEMALLOC_EXTENT_HOOKS
   free(ptr);
 #else
-  if (ptr) dallocx(ptr, low_dallocx_flags());
+  assert(ptr);
+  dallocx(ptr, high_arena_flags);
 #endif
 }
 
-inline void low_malloc_huge_pages(int pages) {
-#ifdef USE_JEMALLOC
-  low_huge_pages = pages;
-#endif
-}
-
-void low_malloc_skip_huge(void* start, void* end);
-
-inline void* low_malloc_data(size_t size) {
-#ifndef USE_JEMALLOC_CHUNK_HOOKS
-  return low_malloc(size);
-#else
-  extern void* low_malloc_huge1g_impl(size_t);
-  return low_malloc_huge1g_impl(size);
-#endif
-}
-
-inline void low_free_data(void* ptr) {
-#ifndef USE_JEMALLOC_CHUNK_HOOKS
-  low_free(ptr);
-#else
-  if (ptr) dallocx(ptr, low_dallocx_huge1g_flags());
-#endif
-}
-
-inline void* malloc_huge(size_t size) {
-#ifndef USE_JEMALLOC_CHUNK_HOOKS
-  return malloc(size);
-#else
-  extern void* malloc_huge1g_impl(size_t);
-  return malloc_huge1g_impl(size);
-#endif
-}
-
-inline void free_huge(void* ptr) {
-#ifndef USE_JEMALLOC_CHUNK_HOOKS
+inline void sized_free_huge_internal(void* ptr, size_t size) {
+#if !USE_JEMALLOC_EXTENT_HOOKS
   free(ptr);
 #else
-  if (ptr) dallocx(ptr, dallocx_huge1g_flags());
+  assert(ptr);
+  assert(sallocx(ptr, high_arena_flags) == nallocx(size, high_arena_flags));
+  sdallocx(ptr, size, high_arena_flags);
 #endif
-
 }
 
 /**
@@ -251,6 +246,12 @@ inline void* safe_realloc(void* ptr, size_t size) {
 
 inline void safe_free(void* ptr) {
   return free(ptr);
+}
+
+inline void* safe_aligned_alloc(size_t align, size_t size) {
+  auto p = aligned_alloc(align, size);
+  if (!p) throw OutOfMemoryException(size);
+  return p;
 }
 
 /**
@@ -292,6 +293,14 @@ struct ScopedMem {
   void* m_ptr;
 };
 
+// POD type for tracking arbitrary memory ranges
+template<class T> struct MemRange {
+  T ptr;
+  size_t size; // bytes
+};
+
+using MemBlock = MemRange<void*>;
+
 extern __thread uintptr_t s_stackLimit;
 extern __thread size_t s_stackSize;
 void init_stack_limits(pthread_attr_t* attr);
@@ -303,15 +312,21 @@ extern const size_t s_pageSize;
  */
 extern __thread int32_t s_numaNode;
 /*
+ * The optional preallocated space collocated with thread stack.
+ */
+extern __thread MemBlock s_tlSpace;
+/*
+ * The part of thread stack and s_tlSpace that lives on huge pages.  It could be
+ * empty if huge page isn't used for this thread.
+ */
+extern __thread MemBlock s_hugeRange;
+
+/*
  * enable the numa support in hhvm,
  * and determine whether threads should default to using
  * local memory.
  */
 void enable_numa(bool local);
-/*
- * Determine the node that the next thread should run on.
- */
-int next_numa_node();
 /*
  * Set the thread affinity, and the jemalloc arena for the current
  * thread.
@@ -319,21 +334,9 @@ int next_numa_node();
  */
 void set_numa_binding(int node);
 /*
- * The number of numa nodes in the system
+ * Allocate on a specific NUMA node, with alignment requirement.
  */
-int num_numa_nodes();
-/*
- * Enable numa interleaving for the specified address range
- */
-void numa_interleave(void* start, size_t size);
-/*
- * Allocate the specified address range on the local node
- */
-void numa_local(void* start, size_t size);
-/*
- * Allocate the specified address range on the given node
- */
-void numa_bind_to(void* start, size_t size, int node);
+void* mallocx_on_node(size_t size, int node, size_t align);
 
 /*
  * mallctl wrappers.
@@ -343,10 +346,9 @@ void numa_bind_to(void* start, size_t size, int node);
  * Call mallctl, reading/writing values of type <T> if out/in are non-null,
  * respectively.  Assert/log on error, depending on errOk.
  */
-template <typename T>
-int mallctlHelper(const char *cmd, T* out, T* in, bool errOk) {
+template <typename T, bool ErrOK>
+int mallctlHelper(const char *cmd, T* out, T* in) {
 #ifdef USE_JEMALLOC
-  assert(mallctl != nullptr);
   size_t outLen = sizeof(T);
   int err = mallctl(cmd,
                     out, out ? &outLen : nullptr,
@@ -355,36 +357,33 @@ int mallctlHelper(const char *cmd, T* out, T* in, bool errOk) {
 #else
   int err = ENOENT;
 #endif
-  if (err != 0) {
-    if (!errOk) {
-      std::string errStr =
-        folly::format("mallctl {}: {} ({})", cmd, strerror(err), err).str();
-      // Do not use Logger here because JEMallocInitializer() calls this
-      // function and JEMallocInitializer has the highest constructor priority.
-      // The static variables in Logger are not initialized yet.
-      fprintf(stderr, "%s\n", errStr.c_str());
-    }
-    always_assert(errOk || err == 0);
+  if (!ErrOK && err != 0) {
+    char msg[128];
+    snprintf(msg, sizeof(msg), "mallctl %s failed with error %d", cmd, err);
+    throw std::runtime_error{msg};
   }
   return err;
 }
 
-template <typename T>
-int mallctlReadWrite(const char *cmd, T* out, T in, bool errOk=false) {
-  return mallctlHelper(cmd, out, &in, errOk);
+template <typename T, bool ErrOK = false>
+int mallctlReadWrite(const char *cmd, T* out, T in) {
+  return mallctlHelper<T, ErrOK>(cmd, out, &in);
 }
 
-template <typename T>
-int mallctlRead(const char* cmd, T* out, bool errOk=false) {
-  return mallctlHelper(cmd, out, static_cast<T*>(nullptr), errOk);
+template <typename T, bool ErrOK = false>
+int mallctlRead(const char* cmd, T* out) {
+  return mallctlHelper<T, ErrOK>(cmd, out, static_cast<T*>(nullptr));
 }
 
-template <typename T>
-int mallctlWrite(const char* cmd, T in, bool errOk=false) {
-  return mallctlHelper(cmd, static_cast<T*>(nullptr), &in, errOk);
+template <typename T, bool ErrOK = false>
+int mallctlWrite(const char* cmd, T in) {
+  return mallctlHelper<T, ErrOK>(cmd, static_cast<T*>(nullptr), &in);
 }
 
-int mallctlCall(const char* cmd, bool errOk=false);
+template <bool ErrOK = false> int mallctlCall(const char* cmd) {
+  // Use <unsigned> rather than <void> to avoid sizeof(void).
+  return mallctlHelper<unsigned, ErrOK>(cmd, nullptr, nullptr);
+}
 
 /*
  * jemalloc pprof utility functions.
@@ -393,112 +392,183 @@ int jemalloc_pprof_enable();
 int jemalloc_pprof_disable();
 int jemalloc_pprof_dump(const std::string& prefix, bool force);
 
+
+// For allocation of VM data.
+inline void* vm_malloc(size_t size) {
+  return malloc_huge_internal(size);
+}
+
+inline void vm_free(void* ptr) {
+  return free_huge_internal(ptr);
+}
+
+inline void vm_sized_free(void* ptr, size_t size) {
+  return sized_free_huge_internal(ptr, size);
+}
+
+// Allocations that are guaranteed to live below kUncountedMaxAddr when
+// USE_JEMALLOC_EXTENT_HOOKS.  This provides a new way to check for countedness
+// for arrays and strings.
+inline void* uncounted_malloc(size_t size) {
+  return malloc_huge_internal(size);
+}
+
+inline void uncounted_free(void* ptr) {
+  return free_huge_internal(ptr);
+}
+
+inline void uncounted_sized_free(void* ptr, size_t size) {
+  return sized_free_huge_internal(ptr, size);
+}
+
+// Allocations for the APC but do not necessarily live below kUncountedMaxAddr,
+// e.g., APCObject, or the hash table.  Currently they live below
+// kUncountedMaxAddr anyway, but this may change later.
+inline void* apc_malloc(size_t size) {
+  return malloc_huge_internal(size);
+}
+
+inline void apc_free(void* ptr) {
+  return free_huge_internal(ptr);
+}
+
+inline void apc_sized_free(void* ptr, size_t size) {
+  return sized_free_huge_internal(ptr, size);
+}
+
+inline void* low_malloc(size_t size) {
+#ifndef USE_JEMALLOC
+  return malloc(size);
+#else
+  if (!size) return nullptr;
+  auto ptr = mallocx(size, low_arena_flags);
+#ifndef USE_LOWPTR
+  // low_malloc isn't required to return 32-bit addresses, but we still want to
+  // make sure it is below kUncountedMaxAddr, when ManagedArena is used.
+  if (!ptr) {
+    return uncounted_malloc(size);
+  }
+#endif
+  return ptr;
+#endif
+}
+
+inline void low_free(void* ptr) {
+#ifndef USE_JEMALLOC
+  free(ptr);
+#else
+  if (ptr) dallocx(ptr, low_arena_flags);
+#endif
+}
+
 template <class T>
 struct LowAllocator {
-  typedef T              value_type;
-  typedef T*             pointer;
-  typedef const T*       const_pointer;
-  typedef T&             reference;
-  typedef const T&       const_reference;
-  typedef std::size_t    size_type;
-  typedef std::ptrdiff_t difference_type;
+  using value_type = T;
+  using pointer = T*;
+  using const_pointer = const T*;
 
   template <class U>
   struct rebind { using other = LowAllocator<U>; };
-
-  pointer address(reference value) {
-    return &value;
-  }
-  const_pointer address(const_reference value) const {
-    return &value;
-  }
 
   LowAllocator() noexcept {}
   template<class U> LowAllocator(const LowAllocator<U>&) noexcept {}
   ~LowAllocator() noexcept {}
 
-  size_type max_size() const {
-    return std::numeric_limits<std::size_t>::max() / sizeof(T);
+  pointer allocate(size_t num) {
+    return (pointer)low_malloc(num * sizeof(T));
   }
-
-  pointer allocate(size_type num, const void* = nullptr) {
-    pointer ret = (pointer)low_malloc_data(num * sizeof(T));
-    return ret;
+  void deallocate(pointer p, size_t /*num*/) {
+    low_free((void*)p);
   }
 
   template<class U, class... Args>
   void construct(U* p, Args&&... args) {
     ::new ((void*)p) U(std::forward<Args>(args)...);
   }
-
   void destroy(pointer p) {
     p->~T();
-  }
-
-  void deallocate(pointer p, size_type num) {
-    low_free_data((void*)p);
   }
 
   template<class U> bool operator==(const LowAllocator<U>&) const {
     return true;
   }
-
   template<class U> bool operator!=(const LowAllocator<U>&) const {
     return false;
   }
 };
 
 template <class T>
-struct HugeAllocator {
+struct VMAllocator {
   using value_type = T;
-  using pointer = T *;
-  using const_pointer = const T *;
-  using reference = T &;
-  using const_reference = const T &;
-  using size_type = std::size_t;
-  using difference_type = std::ptrdiff_t;
+  using pointer = T*;
+  using const_pointer = const T*;
 
   template <class U>
-  struct rebind { using other = HugeAllocator<U>; };
+  struct rebind { using other = VMAllocator<U>; };
 
-  pointer address(reference value) {
-    return &value;
+  VMAllocator() noexcept {}
+  template<class U> explicit VMAllocator(const VMAllocator<U>&) noexcept {}
+  ~VMAllocator() noexcept {}
+
+  pointer allocate(size_t num) {
+    if (!num) return nullptr;
+    return (pointer)vm_malloc(num * sizeof(T));
   }
-  const_pointer address(const_reference value) const {
-    return &value;
-  }
-
-  HugeAllocator() noexcept {}
-  template<class U> explicit HugeAllocator(const HugeAllocator<U>&) noexcept {}
-  ~HugeAllocator() noexcept {}
-
-  size_type max_size() const {
-    return std::numeric_limits<std::size_t>::max() / sizeof(T);
-  }
-
-  pointer allocate(size_type num, const void* = nullptr) {
-    pointer ret = (pointer)malloc_huge(num * sizeof(T));
-    return ret;
+  void deallocate(pointer p, size_t num) {
+    if (!p) return;
+    vm_sized_free((void*)p, num * sizeof(T));
   }
 
   template<class U, class... Args>
   void construct(U* p, Args&&... args) {
     ::new ((void*)p) U(std::forward<Args>(args)...);
   }
-
   void destroy(pointer p) {
     p->~T();
   }
 
-  void deallocate(pointer p, size_type num) {
-    free_huge((void*)p);
-  }
-
-  template<class U> bool operator==(const LowAllocator<U>&) const {
+  template<class U> bool operator==(const VMAllocator<U>&) const {
     return true;
   }
+  template<class U> bool operator!=(const VMAllocator<U>&) const {
+    return false;
+  }
+};
 
-  template<class U> bool operator!=(const LowAllocator<U>&) const {
+template <class T>
+struct APCAllocator {
+  using value_type = T;
+  using pointer = T*;
+  using const_pointer = const T*;
+
+  template <class U>
+  struct rebind { using other = APCAllocator<U>; };
+
+  APCAllocator() noexcept {}
+  template<class U> explicit APCAllocator(const APCAllocator<U>&) noexcept {}
+  ~APCAllocator() noexcept {}
+
+  pointer allocate(size_t num, const void* = nullptr) {
+    if (!num) return nullptr;
+    return (pointer)apc_malloc(num * sizeof(T));
+  }
+  void deallocate(pointer p, size_t num) {
+    if (!p) return;
+    apc_sized_free((void*)p, num * sizeof(T));
+  }
+
+  template<class U, class... Args>
+  void construct(U* p, Args&&... args) {
+    ::new ((void*)p) U(std::forward<Args>(args)...);
+  }
+  void destroy(pointer p) {
+    p->~T();
+  }
+
+  template<class U> bool operator==(const APCAllocator<U>&) const {
+    return true;
+  }
+  template<class U> bool operator!=(const APCAllocator<U>&) const {
     return false;
   }
 };

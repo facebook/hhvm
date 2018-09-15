@@ -1,0 +1,8 @@
+dict(3) {
+  [0]=>
+  string(3) "abc"
+  [1]=>
+  string(3) "abc"
+  [2]=>
+  string(3) "abc"
+}

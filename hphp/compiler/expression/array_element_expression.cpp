@@ -17,8 +17,6 @@
 #include "hphp/compiler/expression/array_element_expression.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/expression/scalar_expression.h"
-#include "hphp/compiler/analysis/variable_table.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/expression/static_member_expression.h"
 #include "hphp/compiler/analysis/function_scope.h"
@@ -35,7 +33,6 @@ ArrayElementExpression::ArrayElementExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr variable, ExpressionPtr offset)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ArrayElementExpression)),
-    LocalEffectsContainer(AccessorEffect),
     m_variable(variable), m_offset(offset), m_global(false),
     m_dynamicGlobal(false) {
   m_variable->setContext(Expression::AccessContext);
@@ -74,19 +71,7 @@ void ArrayElementExpression::setContext(Context context) {
       if (!hasContext(Expression::UnsetContext)) {
         m_variable->setContext(Expression::LValue);
       }
-      if (m_variable->is(Expression::KindOfObjectPropertyExpression)) {
-        m_variable->clearContext(Expression::NoLValueWrapper);
-      }
-      // special case for $GLOBALS[], we do not need lvalue wrapper
-      if (m_variable->is(Expression::KindOfSimpleVariable)) {
-        auto var = dynamic_pointer_cast<SimpleVariable>(m_variable);
-        if (var->getName() == "GLOBALS") {
-          m_context |= Expression::NoLValueWrapper;
-        }
-      }
       break;
-    case Expression::DeepAssignmentLHS:
-    case Expression::DeepOprLValue:
     case Expression::ExistContext:
     case Expression::UnsetContext:
     case Expression::DeepReference:
@@ -98,7 +83,6 @@ void ArrayElementExpression::setContext(Context context) {
       break;
     case Expression::InvokeArgument:
       m_variable->setContext(context);
-      setContext(NoLValueWrapper);
     default:
       break;
   }
@@ -108,15 +92,12 @@ void ArrayElementExpression::clearContext(Context context) {
   m_context &= ~context;
   switch (context) {
     case Expression::LValue:
-    case Expression::DeepOprLValue:
-    case Expression::DeepAssignmentLHS:
     case Expression::UnsetContext:
     case Expression::DeepReference:
       m_variable->clearContext(context);
       break;
     case Expression::InvokeArgument:
       m_variable->clearContext(context);
-      clearContext(NoLValueWrapper);
       break;
     case Expression::RefValue:
     case Expression::RefParameter:
@@ -131,7 +112,7 @@ void ArrayElementExpression::clearContext(Context context) {
 // parser functions
 
 bool ArrayElementExpression::appendClass(ExpressionPtr cls,
-                                         AnalysisResultConstPtr ar,
+                                         AnalysisResultConstRawPtr ar,
                                          FileScopePtr file) {
   if (m_variable->is(Expression::KindOfArrayElementExpression)) {
     return dynamic_pointer_cast<ArrayElementExpression>(m_variable)
@@ -154,28 +135,6 @@ bool ArrayElementExpression::appendClass(ExpressionPtr cls,
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-void ArrayElementExpression::analyzeProgram(AnalysisResultPtr ar) {
-  m_variable->analyzeProgram(ar);
-  if (m_offset) m_offset->analyzeProgram(ar);
-  if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    if (m_global) {
-      if (getContext() & (LValue|RefValue|DeepReference)) {
-        setContext(NoLValueWrapper);
-      } else if (!m_dynamicGlobal &&
-          !(getContext() &
-            (LValue|RefValue|RefParameter|DeepReference|
-             UnsetContext|ExistContext))) {
-        VariableTablePtr vars = ar->getVariables();
-        Symbol *sym = vars->getSymbol(m_globalName);
-        if (!sym || sym->getDeclaration().get() == this) {
-          Compiler::Error(Compiler::UseUndeclaredGlobalVariable,
-                          shared_from_this());
-        }
-      }
-    }
-  }
-}
 
 ConstructPtr ArrayElementExpression::getNthKid(int n) const {
   switch (n) {
@@ -208,36 +167,6 @@ void ArrayElementExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr ArrayElementExpression::preOptimize(AnalysisResultConstPtr ar) {
-  if (!(m_context & (RefValue|LValue|UnsetContext|OprLValue|
-                     InvokeArgument|DeepReference|DeepOprLValue))) {
-    if (m_offset && m_variable->isScalar()) {
-      Variant v, o;
-      if (m_variable->getScalarValue(v)) {
-        if (m_context & ExistContext &&
-            !v.isArray() &&
-            !v.isString() &&
-            !m_offset->hasEffect()) {
-          return replaceValue(makeConstant(ar, "null"));
-        }
-        if (m_offset->isScalar() && m_offset->getScalarValue(o)) {
-          if (v.isArray()) {
-            try {
-              ThrowAllErrorsSetter taes;
-              Variant res = v.toArrRef().rvalAt(
-                o, hasContext(ExistContext) ?
-                AccessFlags::None : AccessFlags::Error);
-              return replaceValue(makeScalarExpression(ar, res));
-            } catch (...) {
-            }
-          }
-        }
-      }
-    }
-  }
-  return ExpressionPtr();
-}
-
 /**
  * ArrayElementExpression comes from:
  *
@@ -247,27 +176,13 @@ ExpressionPtr ArrayElementExpression::preOptimize(AnalysisResultConstPtr ar) {
  * encaps ${T_STRING[expr]}
  */
 
-ExpressionPtr ArrayElementExpression::unneeded() {
-  if (m_global) {
-    if (m_offset) return m_offset->unneeded();
-  }
-  return Expression::unneeded();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ArrayElementExpression::outputPHP(CodeGenerator &cg,
                                        AnalysisResultPtr ar) {
-  if (Option::ConvertSuperGlobals && m_global && !m_dynamicGlobal &&
-      getScope() && (getScope()->is(BlockScope::ProgramScope) ||
-                     getScope()-> getVariables()->
-                     isConvertibleSuperGlobal(m_globalName))) {
-    cg_printf("$%s", m_globalName.c_str());
-  } else {
-    m_variable->outputPHP(cg, ar);
-    cg_printf("[");
-    if (m_offset) m_offset->outputPHP(cg, ar);
-    cg_printf("]");
-  }
+  m_variable->outputPHP(cg, ar);
+  cg_printf("[");
+  if (m_offset) m_offset->outputPHP(cg, ar);
+  cg_printf("]");
 }

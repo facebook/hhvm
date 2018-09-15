@@ -1,0 +1,2 @@
+File "coroutine_constructor.php", line 4, characters 29-39:
+A class constructor may not be a coroutine (NastCheck[3065])

@@ -58,7 +58,7 @@ class Node {
       return;
     }
 
-    usort($items, ($a, $b) ==> $b[1]->count - $a[1]->count);
+    usort(&$items, ($a, $b) ==> $b[1]->count - $a[1]->count);
     foreach ($items as $pair) {
       $pair[1]->show($total_count, $indent);
     }
@@ -67,21 +67,34 @@ class Node {
 
 # Build and print a perf-annotated call graph of each stack trace in $samples,
 # truncated at the highest frame containing $top.
-function treeify($samples, $top) {
+function treeify(Vector $samples, bool $reverse, ?string $top) {
   $root = new Node('', $samples->count());
+  $inc = $reverse ? 1 : -1;
 
   foreach ($samples as $stack) {
-    for ($i = $stack->count() - 1; $i >= 0; --$i) {
-      if (strpos($stack[$i], $top) !== false) break;
+    $begin = $reverse ? 0 : $stack->count() - 1;
+    $end = $reverse ? $stack->count() : -1;
+
+    $i = $begin;
+    if ($top !== null) {
+      for (; $i !== $end; $i += $inc) {
+        if (strpos($stack[$i], $top) !== false) break;
+      }
     }
 
     $node = $root;
-    for (; $i >= 0; --$i) {
-      $node = $node->followEdge($stack[$i]);
+    for (; $i !== $end; $i += $inc) {
+      $func = $stack[$i];
+      if ($func === 'HHVM::retInlHelper') continue;
+      $func = preg_replace('/^PHP::.+\.php::/', 'PHP::', $func);
+
+      $node = $node->followEdge($func);
     }
-    # Add a final entry for exclusive time spent in the body of the bottom
-    # function.
-    $node->followEdge('<body>');
+    if (!$reverse) {
+      # Add a final entry for exclusive time spent in the body of the bottom
+      # function.
+      $node->followEdge('<body>');
+    }
   }
 
   $root->show();
@@ -91,17 +104,24 @@ function usage($script_name) {
   echo <<<EOT
 Usage:
 
-$script_name [symbol]
+$script_name [--reverse] [symbol]...
 
-This script expects the output of "perf script -f comm,ip,sym" on stdin. If the
-optional symbol argument is present, a call graph of all frames containing that
-symbol will be output, with the root of the frame truncated at the highest
-frame containing the symbol. Note that the symbol may appear anywhere in the
-function name, so using 'Foo::translate' will match both 'Foo::translate' and
-'Foo::translateFrob'. If you just want Foo::translate, use 'Foo::translate('.
-If symbol is not present, the total number of samples present will be printed
-along with the number of samples that contain a few hardcoded functions.
+This script expects the output of "perf script --fields comm,ip,sym" on stdin.
+If no symbols are given, all samples will be combined into a single tree showing
+the call graph, annotated with the inclusive cost of each node.
 
+If one symbol is given, the call graph will instead be built from samples with
+at least one frame containing the symbol. Samples will be truncated at the
+highest frame containing the symbol. Note that the symbol may appear
+anywhere in the function name, so using 'Foo::translate' will match both
+'Foo::translate' and 'Foo::translateFrob'. If you just want Foo::translate, use
+'Foo::translate('.
+
+Finally, if multiple symbols are given, a summary will be printed showing the
+total number of samples, and how many samples contain each symbol.
+
+If the first argument is --reverse, the call graph will be inverted, showing
+callers of any given symbols, rather than callees.
 
 EOT;
 }
@@ -112,44 +132,35 @@ function main($argv) {
     usage($argv[0]);
     return 1;
   }
+  array_shift(&$argv);
 
-  $samples = read_perf_samples(STDIN);
-
-  if (count($argv) == 2) {
-    $functions = Set { $argv[1] };
-  } else {
-    $functions = Set {
-      'MCGenerator::translate',
-      'jit::selectTracelet(',
-      'Translator::translateRegion(',
-      'jit::optimizeRefcounts(',
-      'jit::optimize(',
-      'jit::allocateRegs(',
-      'jit::genCode(',
-      'getStackValue(',
-      'IRBuilder::constrain',
-      'relaxGuards(',
-      'MCGenerator::retranslateOpt(',
-      'IRTranslator::translateInstr(',
-      'Type::subtypeOf(',
-      'jit::regionizeFunc',
-    };
+  $reverse = false;
+  if (($argv[0] ?? null) === '--reverse') {
+    $reverse = true;
+    array_shift(&$argv);
   }
+  $functions = new Set($argv);
 
+  $samples = read_perf_samples(STDIN, 'hhvm');
   $subsamples = Map {'all' => $samples};
   foreach ($functions as $f) {
     $subsamples[$f] = $samples->filter($s ==> contains_frame($s, $f));
   }
 
-  if (count($argv) == 2) {
-    $sub = $subsamples[$argv[1]];
+  if ($functions->isEmpty()) {
+    treeify($subsamples['all'], $reverse, null);
+  } else if ($functions->count() === 1) {
+    $func = $functions->firstValue();
+    $sub = $subsamples[$func];
     printf("Looking for pattern *%s*. %d of %d total samples (%.2f%%)\n\n",
-           $argv[1], $sub->count(), $samples->count(),
+           $func, $sub->count(), $samples->count(),
            $sub->count() / $samples->count() * 100);
-    treeify($subsamples[$argv[1]], $argv[1]);
+    treeify($sub, $reverse, $func);
   } else {
     foreach ($subsamples as $k => $v) {
-      printf("%5d %s\n", $v->count(), $k);
+      printf(
+        "%8d %5.1f %s\n", $v->count(), $v->count() / $samples->count() * 100, $k
+      );
     }
   }
 

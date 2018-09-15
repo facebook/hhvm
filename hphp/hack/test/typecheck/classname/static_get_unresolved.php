@@ -17,7 +17,7 @@ class Baz extends Foo {
 }
 
 function f(mixed $x): arraykey {
-  $classes = Vector {Bar::class, Baz::class};
+  $classes = Vector { Bar::class, Baz::class };
   if ($x instanceof $classes[0]) {
     $ret = $x::f();
     hh_show($ret);

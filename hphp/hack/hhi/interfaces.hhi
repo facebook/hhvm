@@ -3,9 +3,8 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
@@ -31,6 +30,18 @@
  * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
+<<__Sealed(
+  ArrayObject::class,
+  DOMNodeList::class,
+  Imagick::class,
+  Iterator::class,
+  IteratorAggregate::class,
+  KeyedTraversable::class,
+  ResourceBundle::class,
+  SplHeap::class,
+  SplObjectStorage::class,
+  \HH\Rx\Traversable::class
+)>>
 interface Traversable<+Tv> {}
 
 /**
@@ -51,6 +62,17 @@ interface Traversable<+Tv> {}
  * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
+<<__Sealed(
+  ArrayIterator::class,
+  AsyncMysqlRowBlock::class,
+  DOMNamedNodeMap::class,
+  ImagickPixelIterator::class,
+  IntlBreakIterator::class,
+  KeyedIterable::class,
+  KeyedIterator::class,
+  MysqlRow::class,
+  \HH\Rx\KeyedTraversable::class
+)>>
 interface KeyedTraversable<+Tk, +Tv> extends Traversable<Tv> {}
 
 /**
@@ -65,7 +87,8 @@ interface KeyedTraversable<+Tk, +Tv> extends Traversable<Tv> {}
  * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
-interface Container<+Tv> extends Traversable<Tv> {}
+<<__Sealed(KeyedContainer::class, ConstSet::class)>>
+interface Container<+Tv> extends \HH\Rx\Traversable<Tv> {}
 
 /**
  * Represents an entity that can be iterated over using `foreach`, allowing
@@ -80,7 +103,8 @@ interface Container<+Tv> extends Traversable<Tv> {}
  * @guide /hack/collections/introduction
  * @guide /hack/collections/interfaces
  */
-interface KeyedContainer<+Tk, +Tv> extends Container<Tv>, KeyedTraversable<Tk, Tv> {}
+<<__Sealed(Indexish::class)>>
+interface KeyedContainer<+Tk, +Tv> extends \HH\Rx\KeyedTraversable<Tk, Tv>, Container<Tv> {}
 
 /**
  * Represents an entity that can be indexed using square-bracket syntax.
@@ -99,6 +123,7 @@ interface KeyedContainer<+Tk, +Tv> extends Container<Tv>, KeyedTraversable<Tk, T
  * @guide /hack/collections/interfaces
  * @guide /hack/collections/read-write
  */
+<<__Sealed(ConstVector::class, ConstMap::class, ImmMap::class, dict::class, keyset::class, vec::class)>>
 interface Indexish<+Tk, +Tv> extends KeyedContainer<Tk, Tv> {}
 
 /**
@@ -153,7 +178,7 @@ interface Iterator<+Tv> extends Traversable<Tv> {
  *
  * async function use_countdown(): Awaitable<void> {
  *   $async_iter = countdown(100);
- *   foreach ($async_gen await as $value) { ... }
+ *   foreach ($async_iter await as $value) { ... }
  * }
  * ```
  *
@@ -271,6 +296,7 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    *
    * @return - an array converted from the current `Iterable`.
    */
+  <<__PHPStdLib>>
   public function toArray(): array;
   /**
    * Returns an `array` with the values from the current `Iterable`.
@@ -280,7 +306,7 @@ interface Iterable<+Tv> extends IteratorAggregate<Tv> {
    *
    * @return - an `array` containing the values from the current `Iterable`.
    */
-  public function toValuesArray(): array;
+  public function toValuesArray(): varray;
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe
    * See #6853603. */
@@ -532,7 +558,7 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    * @return - an `array` containing the values from the current
    *           `KeyedIterable`.
    */
-  public function toKeysArray(): array;
+  public function toKeysArray(): varray;
   /* HH_FIXME[4120]: While this violates our variance annotations, we are
    * returning a copy of the underlying collection, so it is actually safe
    * See #6853603. */
@@ -807,16 +833,16 @@ interface Countable {
   public function count(): int;
 }
 
-interface RecursiveIterator<Tv> extends Iterator<Tv> {
+interface RecursiveIterator<+Tv> extends Iterator<Tv> {
   public function getChildren(): this;
   public function hasChildren(): bool;
 }
 
-interface SeekableIterator<Tv> extends Iterator<Tv> {
+interface SeekableIterator<+Tv> extends Iterator<Tv> {
   public function seek(int $position): void;
 }
 
-interface OuterIterator<Tv> extends Iterator<Tv> {
+interface OuterIterator<+Tv> extends Iterator<Tv> {
   public function getInnerIterator(): Iterator<Tv>;
 }
 
@@ -825,10 +851,6 @@ interface ArrayAccess<Tk, Tv> {
   public function offsetGet(Tk $key): Tv;
   public function offsetSet(Tk $key, Tv $val): void;
   public function offsetUnset(Tk $key): void;
-}
-
-interface Awaitable<+T> {
-  public function getWaitHandle(): WaitHandle<T>;
 }
 
 /**
@@ -854,7 +876,8 @@ interface XHPChild {}
  * Stringish is a type that matches strings as well as string-convertible
  * objects: that is, objects that provide the __toString method
  */
-interface Stringish {
+<<__HipHopSpecific>>
+interface Stringish extends XHPChild {
   <<__Deprecated('Use string coercion syntax `(string) <expression>` instead.')>>
   public function __toString(): string;
 }
@@ -866,10 +889,35 @@ interface Stringish {
  * @guide /hack/attributes/introduction
  * @guide /hack/attributes/special
   */
+<<__HipHopSpecific>>
 interface IMemoizeParam {
    /**
    * Serialize this object to a string that can be used as a
    * dictionary key to differentiate instances of this class.
    */
   public function getInstanceKey(): string;
+}
+
+/**
+  * Objects that implement IDisposable may be used in using statements
+  */
+<<__HipHopSpecific>>
+interface IDisposable {
+  /**
+   * This method is invoked exactly once at the end of the scope of the
+   * using statement, unless the program terminates with a fatal error.
+   */
+  public function __dispose(): void;
+}
+
+/**
+  * Objects that implement IAsyncDisposable may be used in await using statements
+  */
+<<__HipHopSpecific>>
+interface IAsyncDisposable {
+  /**
+   * This method is invoked exactly once at the end of the scope of the
+   * await using statement, unless the program terminates with a fatal error.
+   */
+  public function __disposeAsync(): Awaitable<void>;
 }

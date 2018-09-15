@@ -3,9 +3,8 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
@@ -36,13 +35,24 @@ const int JSON_PRESERVE_ZERO_FRACTION  = 1<<10;
 const int JSON_OBJECT_AS_ARRAY = 1<<0;
 const int JSON_BIGINT_AS_STRING = 1<<1;
 
+const int JSON_FB_DARRAYS = 0;
 const int JSON_FB_LOOSE = 0;
 const int JSON_FB_UNLIMITED = 0;
 const int JSON_FB_EXTRA_ESCAPES = 0;
 const int JSON_FB_COLLECTIONS = 0;
 const int JSON_FB_HACK_ARRAYS = 0;
+const int JSON_FB_FORCE_PHP_ARRAYS = 0;
+const int JSON_FB_WARN_DICTS = 0;
+const int JSON_FB_WARN_PHP_ARRAYS = 0;
+const int JSON_FB_WARN_EMPTY_DARRAYS = 0;
+const int JSON_FB_WARN_VEC_LIKE_DARRAYS = 0;
+const int JSON_FB_WARN_DICT_LIKE_DARRAYS = 0;
 
+<<__PHPStdLib>>
 function json_encode($value, $options = 0, $depth = 512);
+<<__PHPStdLib>>
 function json_decode($json, $assoc = false, $depth = 512, $options = 0);
+<<__PHPStdLib>>
 function json_last_error();
+<<__PHPStdLib>>
 function json_last_error_msg();

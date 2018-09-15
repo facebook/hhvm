@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_2127() {
 if (true) {
   trait T {
  public static function foo() {
@@ -11,3 +14,4 @@ if (true) {
  }
 }
 C::foo();
+}

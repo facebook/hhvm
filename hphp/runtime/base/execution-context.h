@@ -17,16 +17,9 @@
 #ifndef incl_HPHP_EXECUTION_CONTEXT_H_
 #define incl_HPHP_EXECUTION_CONTEXT_H_
 
-#include <list>
-#include <set>
-#include <string>
-#include <unordered_map>
-#include <utility>
-#include <vector>
-
-#include "hphp/util/lock.h"
-#include "hphp/util/thread-local.h"
-#include "hphp/util/tiny-vector.h"
+#include "hphp/runtime/base/req-list.h"
+#include "hphp/runtime/base/req-tiny-vector.h"
+#include "hphp/runtime/base/req-vector.h"
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -38,6 +31,17 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/minstr-state.h"
 #include "hphp/runtime/vm/pc-filter.h"
+
+#include "hphp/util/lock.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/thread-local.h"
+
+#include <list>
+#include <set>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 namespace HPHP {
 struct RequestEventHandler;
@@ -56,6 +60,7 @@ struct VMState {
   TypedValue* sp;
   MInstrState mInstrState;
   ActRec* jitCalledFrame;
+  jit::TCA jitReturnAddr;
 };
 
 enum class InclOpFlags {
@@ -192,8 +197,12 @@ public:
    */
   void writeTransport(const char* s, int len);
 
-  using PFUNC_STDOUT = void (*)(const char* s, int len, void* data);
-  void setStdout(PFUNC_STDOUT func, void* data);
+  struct StdoutHook {
+    virtual void operator()(const char* s, int len) = 0;
+    virtual ~StdoutHook() {};
+  };
+  void addStdoutHook(StdoutHook*);
+  bool removeStdoutHook(StdoutHook*);
 
   /**
    * Output buffering.
@@ -223,6 +232,7 @@ public:
   /**
    * Request sequences and program execution hooks.
    */
+  void acceptRequestEventHandlers(bool enable);
   std::size_t registerRequestEventHandler(RequestEventHandler* handler);
   void unregisterRequestEventHandler(RequestEventHandler* handler,
                                      std::size_t index);
@@ -241,6 +251,7 @@ public:
   Variant pushUserExceptionHandler(const Variant& function);
   void popUserErrorHandler();
   void popUserExceptionHandler();
+  void clearUserErrorHandlers();
   bool errorNeedsHandling(int errnum,
                           bool callUserHandler,
                           ErrorThrowMode mode);
@@ -249,13 +260,13 @@ public:
                    int errnum,
                    bool callUserHandler,
                    ErrorThrowMode mode,
-                   const std::string &prefix,
+                   const std::string& prefix,
                    bool skipFrame = false);
-  bool callUserErrorHandler(const Exception &e, int errnum,
+  bool callUserErrorHandler(const Exception& e, int errnum,
                             bool swallowExceptions);
-  void recordLastError(const Exception &e, int errnum = 0);
+  void recordLastError(const Exception& e, int errnum = 0);
   void clearLastError();
-  bool onFatalError(const Exception &e); // returns handled
+  bool onFatalError(const Exception& e); // returns handled
   bool onUnhandledException(Object e);
   ErrorState getErrorState() const;
   void setErrorState(ErrorState);
@@ -265,6 +276,9 @@ public:
   void setErrorPage(const String&);
   String getLastErrorPath() const;
   int getLastErrorLine() const;
+
+  // Obtain the current queued errors, resetting the queue in the process.
+  Array releaseDeferredErrors();
 
   /**
    * Misc. settings
@@ -360,18 +374,21 @@ public:
   int getLine();
   Array getCallerInfo();
   bool evalUnit(Unit* unit, PC& pc, int funcType);
-  TypedValue invokeUnit(const Unit* unit);
+  TypedValue invokeUnit(const Unit* unit, bool callByHPHPInvoke = false);
   Unit* compileEvalString(StringData* code,
                                 const char* evalFilename = nullptr);
   StrNR createFunction(const String& args, const String& code);
 
-  // Compiles the passed string and evaluates it in the given frame.
-  // Returns true on failure.
-  std::pair<bool,Variant> evalPHPDebugger(StringData* code, int frame);
+  struct EvaluationResult {
+    bool failed;
+    Variant result;
+    std::string error;
+  };
 
-  // Evaluates the a unit compiled via compile_string in the given frame.
-  // Returns true on failure.
-  std::pair<bool,Variant> evalPHPDebugger(Unit* unit, int frame);
+  // Evaluates the given unit in the Nth frame from the current frame (ignoring
+  // skip-frames).
+  EvaluationResult evalPHPDebugger(StringData* code, int frame);
+  EvaluationResult evalPHPDebugger(Unit* unit, int frame);
 
   void enterDebuggerDummyEnv();
   void exitDebuggerDummyEnv();
@@ -396,8 +413,12 @@ public:
   ActRec* getPrevVMState(const ActRec* fp,
                          Offset* prevPc = nullptr,
                          TypedValue** prevSp = nullptr,
-                         bool* fromVMEntry = nullptr);
-
+                         bool* fromVMEntry = nullptr,
+                         uint64_t* jitReturnAddr = nullptr);
+  ActRec* getPrevVMStateSkipFrame(const ActRec* fp,
+                                  Offset* prevPc = nullptr,
+                                  TypedValue** prevSp = nullptr,
+                                  bool* fromVMEntry = nullptr);
   /*
    * Returns the caller of the given frame.
    */
@@ -406,11 +427,12 @@ public:
   ActRec* getFrameAtDepth(int frame = 0);
   VarEnv* getOrCreateVarEnv(int frame = 0);
   VarEnv* hasVarEnv(int frame = 0);
-  void setVar(StringData* name, const TypedValue* v);
-  void bindVar(StringData* name, TypedValue* v);
+  void setVar(StringData* name, tv_rval v);
+  void bindVar(StringData* name, tv_lval v);
   Array getLocalDefinedVariables(int frame);
-  const Variant& getEvaledArg(const StringData* val,
-                              const String& namespacedName);
+  Variant getEvaledArg(const StringData* val,
+                       const String& namespacedName,
+                       const Unit* funcUnit);
 
 private:
   template <bool forwarding>
@@ -421,7 +443,6 @@ public:
 
   enum InvokeFlags {
     InvokeNormal,
-    InvokeCuf,
     InvokePseudoMain
   };
 
@@ -432,7 +453,8 @@ public:
                         VarEnv* varEnv = nullptr,
                         StringData* invName = nullptr,
                         InvokeFlags flags = InvokeNormal,
-                        bool useWeakTypes = false);
+                        bool dynamic = true,
+                        bool checkRefAnnot = false);
 
   TypedValue invokeFunc(const CallCtx& ctx,
                         const Variant& args_,
@@ -443,7 +465,7 @@ public:
                            StringData* invName,
                            int argc,
                            const TypedValue* argv,
-                           bool useWeakTypes = false);
+                           bool dynamic = true);
 
   TypedValue invokeFuncFew(const Func* f,
                            void* thisOrCls,
@@ -456,13 +478,15 @@ public:
   TypedValue invokeMethod(
     ObjectData* obj,
     const Func* meth,
-    InvokeArgs args = InvokeArgs()
+    InvokeArgs args = InvokeArgs(),
+    bool dynamic = true
   );
 
   Variant invokeMethodV(
     ObjectData* obj,
     const Func* meth,
-    InvokeArgs args = InvokeArgs()
+    InvokeArgs args = InvokeArgs(),
+    bool dynamic = true
   );
 
   void resumeAsyncFunc(Resumable* resumable, ObjectData* freeObj,
@@ -472,14 +496,24 @@ public:
 
   bool setHeaderCallback(const Variant& callback);
 
+  template<class Fn> void sweepDynPropTable(Fn);
+
 private:
   template<class FStackCheck, class FInitArgs, class FEnterVM>
   TypedValue invokeFuncImpl(const Func* f,
                             ObjectData* thiz, Class* cls, uint32_t argc,
-                            StringData* invName, bool useWeakTypes,
+                            StringData* invName,
+                            bool dynamic,
                             FStackCheck doStackCheck,
                             FInitArgs doInitArgs,
                             FEnterVM doEnterVM);
+
+  struct ExcLoggerHook final : LoggerHook {
+    explicit ExcLoggerHook(ExecutionContext& ec) : ec(ec) {}
+    void operator()(const char* header, const char* msg, const char* ending)
+         override;
+    ExecutionContext& ec;
+  };
 
 ///////////////////////////////////////////////////////////////////////////////
 // only fields past here, please.
@@ -496,14 +530,15 @@ private:
   bool m_insideOBHandler{false};
   bool m_implicitFlush;
   int m_protectedLevel;
-  PFUNC_STDOUT m_stdout;
-  void* m_stdoutData;
+
+  std::unordered_set<StdoutHook*> m_stdoutHooks;
   size_t m_stdoutBytesWritten;
   String m_rawPostData;
 
   // request handlers
   req::vector<RequestEventHandler*> m_requestEventHandlers;
   Array m_shutdowns;
+  bool m_acceptRequestEventHandlers;
 
   // error handling
   req::vector<std::pair<Variant,int>> m_userErrorHandlers;
@@ -512,6 +547,7 @@ private:
   String m_lastError;
   int m_lastErrorNum;
   String m_errorPage;
+  Array m_deferredErrors;
 
   // misc settings
   Array m_envs;
@@ -529,7 +565,7 @@ private:
   const VirtualHost* m_vhost;
 public:
   DebuggerSettings debuggerSettings;
-  req::set<ObjectData*> m_liveBCObjs; // objects with destructors
+  req::vector_set<ObjectData*> m_liveBCObjs; // objects with destructors
 private:
   size_t m_apcMemSize{0};
   std::vector<APCHandle*> m_apcHandles; // gets moved to treadmill
@@ -537,20 +573,23 @@ public:
   // Although the error handlers may want to access dynamic properties,
   // we cannot *call* the error handlers (or their destructors) while
   // destroying the context, so C++ order of destruction is not an issue.
-  req::hash_map<const ObjectData*,ArrayNoDtor> dynPropTable;
+  req::fast_map<const ObjectData*,ArrayNoDtor> dynPropTable;
+  TYPE_SCAN_IGNORE_FIELD(dynPropTable);
   VarEnv* m_globalVarEnv;
   struct FileInfo {
     Unit* unit;
     time_t ts_sec; // timestamp seconds
     unsigned long ts_nsec; // timestamp nanoseconds (or 0 if ns not supported)
   };
-  req::hash_map<const StringData*, FileInfo, string_data_hash, string_data_same>
+  req::fast_map<const StringData*, FileInfo, string_data_hash, string_data_same>
     m_evaledFiles;
   req::vector<const StringData*> m_evaledFilesOrder;
   req::vector<Unit*> m_createdFuncs;
   req::vector<Fault> m_faults;
   int m_lambdaCounter;
-  req::TinyVector<VMState, 32> m_nestedVMs;
+  using VMStateVec = req::TinyVector<VMState, 32>;
+  VMStateVec m_nestedVMs;
+  TYPE_SCAN_IGNORE_FIELD(m_nestedVMs); // handled explicitly in heap-scan.h
   int m_nesting;
   bool m_dbgNoBreak;
   bool m_unwindingCppException;
@@ -566,9 +605,8 @@ public:
 public:
   Cell m_headerCallback;
   bool m_headerCallbackDone{false}; // used to prevent infinite loops
-
-  TYPE_SCAN_CONSERVATIVE_FIELD(m_stdoutData);
-  TYPE_SCAN_IGNORE_FIELD(dynPropTable);
+private:
+  ExcLoggerHook m_logger_hook;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -580,7 +618,7 @@ template<>
 #endif
 void ThreadLocalNoCheck<ExecutionContext>::destroy();
 
-extern DECLARE_THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);
+extern THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

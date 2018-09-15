@@ -13,6 +13,6 @@ include_once 'MyRangeException.inc';
 $re = new MyRangeException("xxx", 5, 20, 30);
 var_dump($re);
 
-echo "=======\n";
+echo "======\n";
 
 echo "\$re = >$re<\n";

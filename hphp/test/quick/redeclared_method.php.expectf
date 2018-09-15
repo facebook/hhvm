@@ -1,2 +1,2 @@
 
-Fatal error: Redeclared method C::f in %s on line 6
+Fatal error: Redeclared method C::f in %s on line %s

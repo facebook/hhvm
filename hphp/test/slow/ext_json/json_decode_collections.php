@@ -40,8 +40,8 @@ function is_equal($obj1, $obj2) {
     $keys1 = $obj1->toKeysArray();
     $keys2 = $obj2->toKeysArray();
     if ($type1 === "HH\Map") {
-      sort($keys1);
-      sort($keys2);
+      sort(&$keys1);
+      sort(&$keys2);
     }
     if ($keys1 !== $keys2) {
       report("Incorrect keys", $keys1, $keys2);
@@ -208,5 +208,9 @@ function main() {
   echo "Done\n";
 }
 
-main();
 
+
+<<__EntryPoint>>
+function main_json_decode_collections() {
+main();
+}

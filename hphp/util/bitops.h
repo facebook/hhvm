@@ -17,8 +17,6 @@
 #ifndef incl_HPHP_BITOPS_H_
 #define incl_HPHP_BITOPS_H_
 
-#include <bitset>
-
 #if !defined(__x86_64__) && !defined(__aarch64__)
 #include <folly/Bits.h>
 #endif
@@ -47,7 +45,7 @@ inline bool ffs64(I64 input, J64 &out) {
     "rbit  %2, %2\n\t"  // reverse bits
     "clz   %1, %2\n\t"  // count leading zeros
     "cmp   %1, #64\n\t"
-    "cset  %0, NE":     // return (result != 64)
+    "cset  %w0, NE":    // return (result != 64)
     "=r"(retval), "=r"(out), "+r"(input):
     :
     "cc"
@@ -91,7 +89,7 @@ inline bool fls64(I64 input, J64 &out) {
     "neg   %1, %1\n\t"
     "adds  %1, %1, #63\n\t" // result = 63 - (# of leading zeros)
                             // "s" suffix sets condition flags
-    "cset  %0, PL":         // return (result >= 0)
+    "cset  %w0, PL":        // return (result >= 0)
                             //   because result < 0 iff input == 0
     "=r"(retval), "=r"(out):
     "r"(input):
@@ -117,48 +115,82 @@ inline bool fls64(I64 input, J64 &out) {
   return retval;
 }
 
-// Return the index of the first set bit in a bitset, or bitset.size() if none.
-template <size_t N>
-inline size_t bitset_find_first(const std::bitset<N>& bitset) {
-#if defined(__GNUC__) && !defined(__APPLE__)
-  // GNU provides non-standard (its a hold over from the original SGI
-  // implementation) _Find_first(), which efficiently returns the index of the
-  // first set bit.
-  return bitset._Find_first();
+/*
+ * Return the index (0..63) of the most significant bit in x.
+ * x must be nonzero.
+ */
+inline size_t fls64(size_t x) {
+  assertx(x);
+#if defined(__x86_64__)
+  size_t ret;
+  __asm__ ("bsrq %1, %0"
+           : "=r"(ret) // Outputs.
+           : "r"(x)    // Inputs.
+           );
+  return ret;
+#elif defined(__powerpc64__)
+  size_t ret;
+  __asm__ ("cntlzd %0, %1"
+           : "=r"(ret) // Outputs.
+           : "r"(x)    // Inputs.
+           );
+  return 63 - ret;
+#elif defined(__aarch64__)
+  size_t ret;
+  __asm__ ("clz %x0, %x1"
+           : "=r"(ret) // Outputs.
+           : "r"(x)    // Inputs.
+           );
+  return 63 - ret;
 #else
-  for (size_t i = 0; i < bitset.size(); ++i) {
-    if (bitset[i]) return i;
-  }
-  return bitset.size();
+  // Equivalent (but incompletely strength-reduced by gcc):
+  return 63 - __builtin_clzl(x);
 #endif
 }
 
-// Return the index of the first set bit in a bitset after the given index, or
-// bitset.size() if none.
-template <size_t N>
-inline size_t bitset_find_next(const std::bitset<N>& bitset, size_t prev) {
-  assertx(prev < bitset.size());
-#if defined(__GNUC__) && !defined(__APPLE__)
-  // GNU provides non-standard (its a hold over from the original SGI
-  // implementation) _Find_next(), which given an index, efficiently returns
-  // the index of the first set bit after the index.
-  return bitset._Find_next(prev);
+/*
+ * Return the index (0..63) of the least significant bit in x.
+ * x must be nonzero.
+ */
+inline size_t ffs64(size_t x) {
+  assertx(x);
+#if defined(__x86_64__)
+  size_t ret;
+  __asm__ ("bsfq %1, %0"
+           : "=r"(ret) // Outputs.
+           : "r"(x)    // Inputs.
+           );
+  return ret;
+#elif defined(__aarch64__)
+  size_t ret;
+  __asm__ ("rbit %0, %1\n\t"
+           "clz %0, %0"
+           : "=r"(ret) // Outputs.
+           : "r"(x)    // Inputs.
+           );
+  return ret;
 #else
-  for (size_t i = prev+1; i < bitset.size(); ++i) {
-    if (bitset[i]) return i;
-  }
-  return bitset.size();
+  return __builtin_ffsll(x) - 1;
 #endif
 }
 
-// Invoke the given callable on the indices of all the set bits in a bitset.
-template <typename F, size_t N>
-inline void bitset_for_each_set(const std::bitset<N>& bitset, F f) {
-  for (auto i = bitset_find_first(bitset);
-       i < bitset.size();
-       i = bitset_find_next(bitset, i)) {
-    f(i);
-  }
+inline void bitvec_set(uint64_t* bits, size_t index) {
+#if defined(__x86_64__)
+  asm ("bts %1,%0" : "+m"(*bits) : "r"(index));
+#else
+  bits[index / 64] |= 1ull << (index % 64);
+#endif
+}
+
+inline bool bitvec_test(const uint64_t* bits, size_t index) {
+#if defined(__x86_64__)
+  bool b;
+  asm ("bt %2,%1\n"
+       "setc %0\n" : "=r"(b) : "m"(*bits), "r"(index));
+  return b;
+#else
+  return (bits[index / 64] & (1ull << (index % 64))) != 0;
+#endif
 }
 
 } // HPHP

@@ -26,4 +26,8 @@ function main() {
   var_dump($foo->getter());
 }
 
+
+<<__EntryPoint>>
+function main_closure_context_004() {
 main();
+}

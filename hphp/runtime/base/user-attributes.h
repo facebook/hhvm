@@ -22,7 +22,6 @@
 
 #include "hphp/util/copy-ptr.h"
 #include "hphp/util/functional.h"
-#include "hphp/util/hash-map-typedefs.h"
 
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
@@ -38,18 +37,17 @@ namespace HPHP {
  */
 struct UserAttributeMap {
 private:
-  using Map = hphp_hash_map<
+  using Map = std::map<
     LowStringPtr,
     TypedValue,
-    string_data_hash,
-    string_data_isame
+    string_data_lti
   >;
 
 public:
-  using mapped_type    = TypedValue;
-  using key_type       = LowStringPtr;
-  using value_type     = std::pair<key_type,mapped_type>;
-  using size_type      = std::size_t;
+  using mapped_type    = Map::mapped_type;
+  using key_type       = Map::key_type;
+  using value_type     = Map::value_type;
+  using size_type      = Map::size_type;
   using iterator       = Map::iterator;
   using const_iterator = Map::const_iterator;
 
@@ -60,6 +58,11 @@ public:
   template<class... Args>
   std::pair<iterator,bool> insert(Args&&... args) {
     return map().insert(std::forward<Args>(args)...);
+  }
+
+  template<class... Args>
+  std::pair<iterator,bool> emplace(Args&&... args) {
+    return map().emplace(std::forward<Args>(args)...);
   }
 
   const_iterator find(const key_type& k) const {
@@ -82,26 +85,25 @@ public:
   }
 
   template<class SerDe>
-  void serde(SerDe& sd) {
-    if (SerDe::deserializing) {
-      bool empty;
-      sd(empty);
-      if (empty) return;
-      m_map.reset(new Map);
-      sd(*m_map);
-      return;
-    }
+  typename std::enable_if<SerDe::deserializing>::type
+  serde(SerDe& sd) {
+    Map m;
+    sd(m);
+    lookup(std::move(m));
+  }
 
-    bool empty = !m_map.get();
-    sd(empty);
-    if (empty) return;
-    sd(*m_map);
+  template<class SerDe>
+  typename std::enable_if<!SerDe::deserializing>::type
+  serde(SerDe& sd) const {
+    sd(map());
   }
 
 private:
+  struct MapCompare;
+  void lookup(Map&& map);
   Map& map() {
-    if (!m_map) m_map.reset(new Map);
-    return *m_map;
+    if (!m_map) m_map.emplace();
+    return *m_map.mutate();
   }
   const Map& map() const {
     return !m_map ? s_empty_map : *m_map;
@@ -110,6 +112,7 @@ private:
 private:
   static Map s_empty_map; // so our iterators can be normal Map iterators
   copy_ptr<Map> m_map;
+  TYPE_SCAN_IGNORE_FIELD(m_map); // TypedValue in Map are never heap ptrs
 };
 
 //////////////////////////////////////////////////////////////////////

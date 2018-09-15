@@ -4,6 +4,15 @@ class Base {
   function concrete_override() { return false; }
 }
 
+function main(Base $b) {
+  $x = $b->concrete_override();
+  var_dump(is_object($x));
+}
+
+
+
+<<__EntryPoint>>
+function main_func_family_009() {
 if (mt_rand() > 100) {
   abstract class Middle extends Base {
     abstract function abs();
@@ -22,11 +31,6 @@ if (mt_rand() > 100) {
   }
 }
 
-function main(Base $b) {
-  $x = $b->concrete_override();
-  var_dump(is_object($x));
-}
-
 main(new Base);
 main(new Derived);
-
+}

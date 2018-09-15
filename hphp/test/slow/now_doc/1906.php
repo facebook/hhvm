@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1906() {
 $b = 'bad';
 $a = <<<'NOWDOC'
 $b
@@ -13,3 +16,4 @@ $a = <<<NOWDOC
 $b
 NOWDOC;
 var_dump($a);
+}

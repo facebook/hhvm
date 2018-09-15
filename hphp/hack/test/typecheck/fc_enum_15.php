@@ -1,3 +1,3 @@
 <?hh
 
-enum Foo : mixed {}
+enum Foo: mixed {}

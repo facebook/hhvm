@@ -1,2 +1,2 @@
-File "abstract_final.php", line 13, characters 3-34:
-Parse error. Cannot mix final and abstract (Parsing[1002])
+File "abstract_final.php", line 12, characters 1-68:
+Class Foo contains an abstract method and must therefore be declared abstract (Parsing[1002])

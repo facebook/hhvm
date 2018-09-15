@@ -8,5 +8,9 @@ function f($code) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_single_line_comment_with_mac_newline() {
 f("<?php // \r");
 f("<?php // \r\r");
+}

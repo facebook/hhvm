@@ -1,0 +1,1 @@
+include WatchmanEventWatcherClient_sig.S

@@ -22,6 +22,8 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/externals.h"
+#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/root-map.h"
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -169,19 +171,25 @@ const String& XmlParser::o_getClassNameHook() const {
   return classnameof();
 }
 
+struct XmlParserData final : RequestEventHandler {
+  void requestInit() override { parsers.reset(); }
+  void requestShutdown() override { parsers.reset(); }
+  RootMap<XmlParser> parsers;
+};
+IMPLEMENT_STATIC_REQUEST_LOCAL(XmlParserData, s_xml_data);
+
 namespace {
 
 inline req::ptr<XmlParser> getParserFromToken(void* userData) {
-  auto token = reinterpret_cast<MemoryManager::RootId>(userData);
-  return MM().lookupRoot<XmlParser>(token);
+  return s_xml_data->parsers.lookupRoot(userData);
 }
 
 inline void* getParserToken(const req::ptr<XmlParser>& parser) {
-  return reinterpret_cast<void*>(MM().addRoot(parser));
+  return reinterpret_cast<void*>(s_xml_data->parsers.addRoot(parser));
 }
 
 inline void clearParser(const req::ptr<XmlParser>& p) {
-  MM().removeRoot(p);
+  s_xml_data->parsers.removeRoot(p);
 }
 
 }
@@ -222,11 +230,11 @@ xml_encoding xml_encodings[] = {
 };
 
 static void *php_xml_malloc_wrapper(size_t sz) {
-  return req::malloc(sz);
+  return req::malloc_untyped(sz);
 }
 
 static void *php_xml_realloc_wrapper(void *ptr, size_t sz) {
-  return req::realloc(ptr, sz);
+  return req::realloc_untyped(ptr, sz);
 }
 
 static void php_xml_free_wrapper(void *ptr) {
@@ -289,7 +297,7 @@ String xml_utf8_decode(const XML_Char *s, int len,
     ++newlen;
   }
 
-  assert(newlen <= len);
+  assertx(newlen <= len);
   str.shrink(newlen);
   return str;
 }
@@ -405,7 +413,7 @@ static void _xml_add_to_info(const req::ptr<XmlParser>& parser,
   if (!parser->info.toCArrRef().exists(nameStr)) {
     parser->info.toArrRef().set(nameStr, Array::Create());
   }
-  auto& inner = parser->info.toArrRef().lvalAt(nameStr);
+  auto const inner = parser->info.toArrRef().lvalAt(nameStr);
   forceToArray(inner).append(parser->curtag);
   parser->curtag++;
 }
@@ -499,7 +507,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
           String myval;
           // check if value exists, if yes append to that
           if (parser->ctag.toArrRef().exists(s_value)) {
-            myval = parser->ctag.toArray().rvalAt(s_value).toString();
+            myval = tvCastToString(parser->ctag.toArray().rvalAt(s_value).tv());
             myval += decoded_value;
             parser->ctag.toArrRef().set(s_value, myval);
           } else {
@@ -521,10 +529,10 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
           };
 
           if (curtag.toArrRef().exists(s_type)) {
-            mytype = curtag.toArrRef().rvalAt(s_type).toString();
+            mytype = tvCastToString(curtag.toArrRef().rvalAt(s_type).tv());
             if (!strcmp(mytype.data(), "cdata") &&
                 curtag.toArrRef().exists(s_value)) {
-              myval = curtag.toArrRef().rvalAt(s_value).toString();
+              myval = tvCastToString(curtag.toArrRef().rvalAt(s_value).tv());
               myval += decoded_value;
               curtag.toArrRef().set(s_value, myval);
               return;
@@ -582,7 +590,8 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
         String val = xml_utf8_decode(attributes[1],
                                     strlen((const char*)attributes[1]),
                                     parser->target_encoding);
-        args.lvalAt(2).toArrRef().set(att, val);
+        auto const arr = args.lvalAt(2);
+        asArrRef(arr).set(att, val);
         attributes += 2;
       }
 
@@ -620,8 +629,9 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
         if (atcnt) {
           tag.set(s_attributes,atr);
         }
-        auto& lval = parser->data.toArrRef().lvalAt();
-        lval.assign(tag);
+        auto lval = parser->data.toArrRef().lvalAt();
+        type(lval) = KindOfArray;
+        val(lval).parr = tag.detach();
         parser->ctag.assignRef(lval);
       } else if (parser->level == (XML_MAXLEVEL + 1)) {
         raise_warning("Maximum depth exceeded - Results truncated");
@@ -1018,7 +1028,7 @@ String HHVM_FUNCTION(utf8_encode,
     }
   }
 
-  assert(newlen <= maxSize);
+  assertx(newlen <= maxSize);
   str.shrink(newlen);
   return str;
 }

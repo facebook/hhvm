@@ -50,6 +50,33 @@ size_t encodedRATSize(const unsigned char* pc) {
   case T::OptSStr:
   case T::Str:
   case T::OptStr:
+  case T::Obj:
+  case T::OptObj:
+  case T::UncArrKey:
+  case T::ArrKey:
+  case T::OptUncArrKey:
+  case T::OptArrKey:
+  case T::InitUnc:
+  case T::Unc:
+  case T::InitCell:
+  case T::Cell:
+  case T::Ref:
+  case T::InitGen:
+  case T::Gen:
+    assertx(!highBitSet);
+    return 1;
+  case T::SArr:
+  case T::OptSArr:
+  case T::Arr:
+  case T::OptArr:
+  case T::SVArr:
+  case T::OptSVArr:
+  case T::VArr:
+  case T::OptVArr:
+  case T::SDArr:
+  case T::OptSDArr:
+  case T::DArr:
+  case T::OptDArr:
   case T::SVec:
   case T::OptSVec:
   case T::Vec:
@@ -62,27 +89,12 @@ size_t encodedRATSize(const unsigned char* pc) {
   case T::OptSKeyset:
   case T::Keyset:
   case T::OptKeyset:
-  case T::Obj:
-  case T::OptObj:
-  case T::InitUnc:
-  case T::Unc:
-  case T::InitCell:
-  case T::Cell:
-  case T::Ref:
-  case T::InitGen:
-  case T::Gen:
-    assert(!highBitSet);
-    return 1;
-  case T::SArr:
-  case T::OptSArr:
-  case T::Arr:
-  case T::OptArr:
     return highBitSet ? 5 : 1;
   case T::ExactObj:
   case T::SubObj:
   case T::OptExactObj:
   case T::OptSubObj:
-    assert(!highBitSet);
+    assertx(!highBitSet);
     return 5;
   }
   not_reached();

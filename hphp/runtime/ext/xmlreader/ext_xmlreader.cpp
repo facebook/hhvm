@@ -20,7 +20,7 @@
 #include "hphp/runtime/ext/libxml/ext_libxml.h"
 
 #include "hphp/util/functional.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/vm/native-data.h"
@@ -553,7 +553,7 @@ struct XMLPropertyAccessor {
   const char *name;
   int (*getter_int)(xmlTextReaderPtr);
   const xmlChar* (*getter_char)(xmlTextReaderPtr);
-  int return_type;
+  DataType return_type;
 };
 
 struct XMLPropertyAccessorMap
@@ -635,7 +635,7 @@ Variant HHVM_METHOD(XMLReader, __get,
     }
   }
 
-  switch (DataType(propertyMap->return_type)) {
+  switch (propertyMap->return_type) {
     case KindOfBoolean:
       return retint ? true : false;
     case KindOfInt64:
@@ -650,6 +650,8 @@ Variant HHVM_METHOD(XMLReader, __get,
     case KindOfNull:
     case KindOfDouble:
     case KindOfPersistentString:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfArray:
     case KindOfPersistentArray:
     case KindOfVec:
@@ -661,10 +663,9 @@ Variant HHVM_METHOD(XMLReader, __get,
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
-      return init_null();
-
+    case KindOfFunc:
     case KindOfClass:
-      break;
+      return init_null();
   }
   not_reached();
 }

@@ -14,6 +14,9 @@ interface I {
 class GrandChild extends Child implements I {
 }
 
+
+<<__EntryPoint>>
+function main_reflect_type_constant3() {
 $rtc = new ReflectionTypeConstant(GrandChild::class, 'T');
 var_dump($rtc->getDeclaringClass()->getName());
 var_dump($rtc->getClass()->getName());
@@ -21,3 +24,4 @@ var_dump($rtc->getClass()->getName());
 $rtc = new ReflectionTypeConstant(GrandChild::class, 'U');
 var_dump($rtc->getDeclaringClass()->getName());
 var_dump($rtc->getClass()->getName());
+}

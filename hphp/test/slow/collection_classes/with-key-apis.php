@@ -129,4 +129,8 @@ function main() {
   echo "========\n";
   print_keyed_iterable($y);
 }
+
+<<__EntryPoint>>
+function main_with_key_apis() {
 main();
+}

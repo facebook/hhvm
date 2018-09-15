@@ -164,6 +164,9 @@ private:
   // m_signum, m_okayToPoll.
   Mutex m_signalMutex;
   int m_signum;
+
+  // Last output hook for nested PHP evaluations.
+  ExecutionContext::StdoutHook* m_evalOutputHook{};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

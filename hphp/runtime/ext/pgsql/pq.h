@@ -39,8 +39,11 @@ struct Result {
   }
 
   Result& operator=(Result&& other) {
-    m_res = other.m_res;
-    other.m_res = nullptr;
+    if (this != &other) {
+      clear();
+      m_res = other.m_res;
+      other.m_res = nullptr;
+    }
     return *this;
   }
 

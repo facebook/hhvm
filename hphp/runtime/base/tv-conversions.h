@@ -13,30 +13,130 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_RUNTIME_BASE_TV_CONVERSIONS_H_
-#define incl_HPHP_RUNTIME_BASE_TV_CONVERSIONS_H_
 
+#ifndef incl_HPHP_TV_CONVERSIONS_H_
+#define incl_HPHP_TV_CONVERSIONS_H_
+
+#include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/req-root.h"
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-object.h"
+#include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
 
-//////////////////////////////////////////////////////////////////////
+struct StringData;
+
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * TypedValue conversions that update `tv' in place (decrefing the old value,
+ * if necessary).
+ *
+ * We have two kinds of type conversions, both of which unbox their argument
+ * before doing anything:
+ *
+ * - Cast forcibly changes the value to the new type and will not fail (though
+ *   the result may be silly).
+ * - Coerce attempts to convert the type and returns false on failure.
+ */
+
+#define X(kind) \
+void tvCastTo##kind##InPlace(TypedValue* tv); \
+bool tvCoerceParamTo##kind##InPlace(TypedValue* tv, \
+                                    bool builtin);
+X(Boolean)
+X(Int64)
+X(Double)
+X(String)
+X(Vec)
+X(Dict)
+X(Keyset)
+X(Shape)
+X(Array)
+X(Object)
+X(NullableObject)
+X(Resource)
+#undef X
+
+void tvCastToVArrayInPlace(TypedValue* tv);
+void tvCastToDArrayInPlace(TypedValue* tv);
+void cellCastToStringInPlace(tv_lval tv);
+
+ALWAYS_INLINE void tvCastInPlace(TypedValue* tv, DataType DType) {
+#define X(kind) \
+  if (DType == KindOf##kind) { tvCastTo##kind##InPlace(tv); return; }
+  X(Boolean)
+  X(Int64)
+  X(Double)
+  X(String)
+  X(Vec)
+  X(Dict)
+  X(Keyset)
+  X(Array)
+  X(Object)
+  X(Resource)
+#undef X
+  not_reached();
+}
+
+ALWAYS_INLINE bool tvCoerceParamInPlace(TypedValue* tv, DataType DType,
+                                        bool builtin) {
+#define X(kind) \
+  if (DType == KindOf##kind) \
+    return tvCoerceParamTo##kind##InPlace(tv, \
+                                          builtin);
+  X(Boolean)
+  X(Int64)
+  X(Double)
+  X(String)
+  X(Vec)
+  X(Dict)
+  X(Keyset)
+  X(Shape)
+  X(Array)
+  X(Object)
+  X(Resource)
+#undef X
+  not_reached();
+}
 
 /*
- * Convert a cell to various types, without changing the Cell.
+ * Non-in-place casts.
+ */
+bool tvCastToBoolean(TypedValue tv);
+int64_t tvCastToInt64(TypedValue tv);
+double tvCastToDouble(TypedValue tv);
+String tvCastToString(TypedValue tv);
+Array tvCastToArrayLike(TypedValue tv);
+Object tvCastToObject(TypedValue tv);
+
+StringData* tvCastToStringData(TypedValue tv);
+StringData* cellCastToStringData(Cell c);
+ArrayData* tvCastToArrayLikeData(TypedValue tv);
+ObjectData* tvCastToObjectData(TypedValue tv);
+
+/*
+ * Convert a cell to various raw data types, without changing the Cell.
  */
 bool cellToBool(Cell);
 int64_t cellToInt(Cell);
-double cellToDouble(double);
+double cellToDouble(Cell);
 
 /*
- * Convert a string to a TypedNum following php semantics, allowing
- * strings that have only a partial number in them.  (I.e. the string
- * may have junk after the number.)
+ * Convert `tv' or `cell' to a valid array key for `ad', or throw an exception.
+ */
+Cell cellToKey(Cell cell, const ArrayData* ad);
+Cell tvToKey(TypedValue tv, const ArrayData* ad);
+
+/*
+ * Convert a string to a TypedNum following PHP semantics, allowing strings
+ * that have only a partial number in them (i.e. the string may have junk after
+ * the number).
  */
 TypedNum stringToNumeric(const StringData*);
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 }
 

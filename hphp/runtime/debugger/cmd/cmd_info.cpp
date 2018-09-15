@@ -127,7 +127,7 @@ void CmdInfo::help(DebuggerClient &client) {
 }
 
 bool CmdInfo::parseZeroArg(DebuggerClient &client) {
-  assert(client.argCount() == 0);
+  assertx(client.argCount() == 0);
   BreakPointInfoPtr bpi = client.getCurrentLocation();
   if (bpi) {
     m_symbol = bpi->getClass();
@@ -141,7 +141,7 @@ bool CmdInfo::parseZeroArg(DebuggerClient &client) {
 }
 
 void CmdInfo::parseOneArg(DebuggerClient &client, std::string &subsymbol) {
-  assert(client.argCount() == 1);
+  assertx(client.argCount() == 1);
   string symbol = client.argValue(1);
   size_t pos = symbol.find("::");
   if (pos != string::npos) {
@@ -186,7 +186,7 @@ void CmdInfo::onClient(DebuggerClient &client) {
   } else {
     for (ArrayIter iter(info); iter; ++iter) {
       StringBuffer sb;
-      PrintInfo(client, sb, iter.second().toArray(), subsymbol);
+      PrintInfo(&client, sb, iter.second().toArray(), subsymbol);
       client.code(sb.detach());
     }
   }
@@ -378,7 +378,7 @@ void CmdInfo::PrintDocComments(StringBuffer &sb, const Array& info) {
   }
 }
 
-void CmdInfo::PrintHeader(DebuggerClient &client, StringBuffer &sb,
+void CmdInfo::PrintHeader(DebuggerClient* client, StringBuffer &sb,
                           const Array& info) {
   if (!info[s_internal].toBoolean()) {
     String file = info[s_file].toString();
@@ -391,11 +391,15 @@ void CmdInfo::PrintHeader(DebuggerClient &client, StringBuffer &sb,
     } else if (line1 && line2 && line1 != line2) {
       sb.printf("// defined on line %d to %d of %s\n", line1, line2,
                 file.data());
-      client.setListLocation(file.data(), line1 - 1, false);
+      if (client != nullptr) {
+        client->setListLocation(file.data(), line1 - 1, false);
+      }
     } else {
       int line = line1 ? line1 : line2;
       sb.printf("// defined on line %d of %s\n", line, file.data());
-      client.setListLocation(file.data(), line - 1, false);
+      if (client != nullptr) {
+        client->setListLocation(file.data(), line - 1, false);
+      }
     }
   }
 
@@ -429,7 +433,7 @@ String CmdInfo::GetParams(const Array& params, bool varg,
         // ClassInfo was not able to serialize the value, so ext_reflection
         // prepared a stdClass error object. We should fall back to display
         // the original PHP text, if there.
-        Object obj{defValue.asCell()->m_data.pobj};
+        Object obj{defValue.toCell()->m_data.pobj};
         args.append(obj->o_get(s_msg).toString());
       } else if (detailed) {
         args.append(DebuggerClient::FormatVariable(arg[s_default]));
@@ -506,8 +510,8 @@ bool CmdInfo::TryProperty(StringBuffer &sb, const Array& info,
   return false;
 }
 
-bool CmdInfo::TryMethod(DebuggerClient &client, StringBuffer &sb, const Array& info,
-                        std::string subsymbol) {
+bool CmdInfo::TryMethod(DebuggerClient* client, StringBuffer &sb,
+                         const Array& info, std::string subsymbol) {
   if (subsymbol.size() > 2 && subsymbol.substr(subsymbol.size() - 2) == "()") {
     subsymbol = subsymbol.substr(0, subsymbol.size() - 2);
   }
@@ -578,8 +582,8 @@ String CmdInfo::GetTypeProfilingInfo(const Array& profilingArray, const Array& p
   return profile.detach();
 }
 
-void CmdInfo::PrintInfo(DebuggerClient &client, StringBuffer &sb, const Array& info,
-                        const std::string &subsymbol) {
+void CmdInfo::PrintInfo(DebuggerClient* client, StringBuffer &sb,
+                        const Array& info, const std::string &subsymbol) {
   if (info.exists(s_params)) {
     PrintHeader(client, sb, info);
     sb.printf("function %s%s(%s);\n",
@@ -601,7 +605,9 @@ void CmdInfo::PrintInfo(DebuggerClient &client, StringBuffer &sb, const Array& i
     if (TryProperty(sb, info, subsymbol)) found = true;
     if (TryMethod(client, sb, info, subsymbol)) found = true;
     if (found) return;
-    client.info("Specified symbol cannot be found. Here the whole class:\n");
+    if (client != nullptr) {
+      client->info("Specified symbol cannot be found. Here the whole class:\n");
+    }
   }
 
   PrintHeader(client, sb, info);

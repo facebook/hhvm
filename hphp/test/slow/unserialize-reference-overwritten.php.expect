@@ -1,0 +1,9 @@
+object(stdClass)#1 (2) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  object(stdClass)#2 (1) {
+    ["a"]=>
+    string(1) "a"
+  }
+}

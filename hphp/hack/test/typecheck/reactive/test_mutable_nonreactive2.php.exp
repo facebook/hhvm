@@ -1,0 +1,2 @@
+File "test_mutable_nonreactive2.php", line 8, characters 19-36:
+The method mutableNonReactive has a mutable parameter (or mutable this), so it must be marked reactive with <<__Rx>>. (NastCheck[3053])

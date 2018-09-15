@@ -35,9 +35,9 @@ struct c_RescheduleWaitHandle final : c_WaitableWaitHandle {
   WAITHANDLE_CLASSOF(RescheduleWaitHandle);
   WAITHANDLE_DTOR(RescheduleWaitHandle);
 
-  explicit c_RescheduleWaitHandle(Class* cls =
-      c_RescheduleWaitHandle::classof())
-    : c_WaitableWaitHandle(cls) {}
+  explicit c_RescheduleWaitHandle()
+    : c_WaitableWaitHandle(classof(), HeaderKind::WaitHandle,
+                     type_scan::getIndexForMalloc<c_RescheduleWaitHandle>()) {}
   ~c_RescheduleWaitHandle() {}
 
  public:
@@ -63,8 +63,8 @@ struct c_RescheduleWaitHandle final : c_WaitableWaitHandle {
 Object HHVM_STATIC_METHOD(RescheduleWaitHandle, create,
                           int64_t queue, int64_t priority);
 
-inline c_RescheduleWaitHandle* c_WaitHandle::asReschedule() {
-  assert(getKind() == Kind::Reschedule);
+inline c_RescheduleWaitHandle* c_Awaitable::asReschedule() {
+  assertx(getKind() == Kind::Reschedule);
   return static_cast<c_RescheduleWaitHandle*>(this);
 }
 

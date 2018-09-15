@@ -12,4 +12,8 @@ function main() {
   $x = foo();
   $x[0]->heh();
 }
+
+<<__EntryPoint>>
+function main_array_056() {
 main();
+}

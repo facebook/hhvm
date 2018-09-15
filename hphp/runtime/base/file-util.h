@@ -98,9 +98,18 @@ String dirname(const String& path);
  * Search for PHP or non-PHP files under a directory.
  */
 void find(std::vector<std::string> &out,
-          const std::string &root, const char *path, bool php,
+          const std::string &root, const std::string& path, bool php,
           const std::set<std::string> *excludeDirs = nullptr,
           const std::set<std::string> *excludeFiles = nullptr);
+
+/**
+ * Search for PHP or non-PHP files under a directory, calling callback for
+ * each one found.
+ */
+template <typename F>
+void find(std::vector<std::string> &out,
+          const std::string &root, const std::string& path, bool php,
+          const F& callback);
 
 /**
  * Determines if a given string is a valid path or not
@@ -117,6 +126,16 @@ bool checkPathAndWarn(const String& path,
 void checkPathAndError(const String& path,
                        const char* func_name,
                        int param_pos);
+
+/**
+ * If any parent of the directory the script cmd was run from includes the
+ * relative path suffix, and the file at that path is readable, then perform
+ * action() on that file. Continues processing up the directory tree until
+ * action() returns true.
+ */
+template <class Action>
+bool runRelative(std::string suffix, String cmd,
+                 const char* currentDir, Action action);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

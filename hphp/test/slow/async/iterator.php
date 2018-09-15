@@ -5,8 +5,7 @@ function block() {
     RescheduleWaitHandle::QUEUE_NO_PENDING_IO,
     1,
   );
-};
-
+}
 async function test() {
   $arr3 = array(1,2,3);
   $arr5 = array(1,2,3,4,5);
@@ -31,6 +30,10 @@ async function test2() {
   }
 }
 
+<<__EntryPoint>>
+function main_iterator() {
+;
+
 $t = test();
 echo "\n";
 HH\Asio\join($t);
@@ -39,3 +42,4 @@ $t2 = test2();
 echo "\n";
 HH\Asio\join($t2);
 echo "\n";
+}

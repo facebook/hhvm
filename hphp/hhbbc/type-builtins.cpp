@@ -38,8 +38,8 @@ const StaticString s_setall("setall");
 
 //////////////////////////////////////////////////////////////////////
 
-bool is_collection_method_returning_this(borrowed_ptr<php::Class> cls,
-                                         borrowed_ptr<php::Func> func) {
+bool is_collection_method_returning_this(const php::Class* cls,
+                                         const php::Func* func) {
   if (!cls) return false;
 
   if (cls->name->isame(s_Vector.get())) {
@@ -75,7 +75,7 @@ bool is_collection_method_returning_this(borrowed_ptr<php::Class> cls,
   return false;
 }
 
-Type native_function_return_type(borrowed_ptr<const php::Func> f,
+Type native_function_return_type(const php::Func* f,
                                  bool include_coercion_failures) {
   assert(f->nativeInfo);
 
@@ -86,13 +86,27 @@ Type native_function_return_type(borrowed_ptr<const php::Func> f,
   }
 
   // Infer the type from the HNI declaration
-  auto const hni = f->nativeInfo->returnType;
-  auto t = hni ? from_DataType(*hni) : TInitCell;
+  auto t = [&]{
+    auto const hni = f->nativeInfo->returnType;
+    return hni ? from_DataType(*hni) : TInitCell;
+  }();
+  if (t.subtypeOf(BArr)) {
+    if (f->retTypeConstraint.isVArray()) {
+      assertx(!RuntimeOption::EvalHackArrDVArrs);
+      t = TVArr;
+    } else if (f->retTypeConstraint.isDArray()) {
+      assertx(!RuntimeOption::EvalHackArrDVArrs);
+      t = TDArr;
+    } else if (f->retTypeConstraint.isArray()) {
+      t = TPArr;
+    }
+  }
+
   // Non-simple types (ones that are represented by pointers) can always
   // possibly be null.
   if (t.subtypeOfAny(TStr, TArr, TVec, TDict,
                      TKeyset, TObj, TRes)) {
-    t = union_of(t, TInitNull);
+    t |= TInitNull;
   } else {
     // Otherwise it should be a simple type or possibly everything.
     assert(t == TInitCell || t.subtypeOfAny(TBool, TInt, TDbl, TNull));
@@ -102,10 +116,10 @@ Type native_function_return_type(borrowed_ptr<const php::Func> f,
     // If parameter coercion fails, we can also get null or false depending on
     // the function.
     if (f->attrs & AttrParamCoerceModeNull) {
-      t = union_of(t, TInitNull);
+      t |= TInitNull;
     }
     if (f->attrs & AttrParamCoerceModeFalse) {
-      t = union_of(t, TFalse);
+      t |= TFalse;
     }
   }
 

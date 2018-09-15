@@ -22,13 +22,14 @@
 #include <boost/filesystem.hpp>
 
 #include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 
 #include <folly/String.h>
 #include <folly/portability/Dirent.h>
+#include <folly/portability/Fcntl.h>
 #include <folly/portability/Libgen.h>
+#include <folly/portability/SysStat.h>
 
+#include "hphp/runtime/base/file-util-defs.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/logger.h"
@@ -203,6 +204,18 @@ void FileUtil::syncdir(const std::string &dest_, const std::string &src_,
 int FileUtil::copy(const char *srcfile, const char *dstfile) {
   int srcFd = open(srcfile, O_RDONLY);
   if (srcFd == -1) return -1;
+
+  struct stat st;
+  int ret = fstat(srcFd, &st);
+  if (ret == -1) {
+    Logger::Error("fstat failed: %s", folly::errnoStr(errno).c_str());
+    return -1;
+  }
+  if (!S_ISREG(st.st_mode)) {
+    Logger::Error("copy failed: the first argument must be a regular file");
+    return -1;
+  }
+
   int dstFd = open(dstfile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
   if (dstFd == -1) return -1;
 
@@ -242,6 +255,18 @@ static int force_sync(int fd) {
 int FileUtil::directCopy(const char *srcfile, const char *dstfile) {
   int srcFd = open(srcfile, O_RDONLY);
   if (srcFd == -1) return -1;
+
+  struct stat st;
+  int ret = fstat(srcFd, &st);
+  if (ret == -1) {
+    Logger::Error("fstat failed: %s", folly::errnoStr(errno).c_str());
+    return -1;
+  }
+  if (!S_ISREG(st.st_mode)) {
+    Logger::Error("copy failed: the first argument must be a regular file");
+    return -1;
+  }
+
   int dstFd = open(dstfile, O_WRONLY | O_CREAT | O_TRUNC, 0666);
   if (dstFd == -1) return -1;
 
@@ -297,7 +322,10 @@ int FileUtil::rename(const char *oldname, const char *newname) {
   if (ret == 0) return 0;
   if (errno != EXDEV) return -1;
 
-  copy(oldname, newname);
+  ret = copy(oldname, newname);
+  if (ret != 0) {
+    return -1;
+  }
   unlink(oldname);
   return 0;
 }
@@ -307,7 +335,10 @@ int FileUtil::directRename(const char *oldname, const char *newname) {
   if (ret == 0) return 0;
   if (errno != EXDEV) return -1;
 
-  directCopy(oldname, newname);
+  ret = directCopy(oldname, newname);
+  if (ret != 0) {
+    return -1;
+  }
   unlink(oldname);
   return 0;
 }
@@ -440,8 +471,8 @@ String FileUtil::relativePath(const std::string& fromDir,
   }
 
   // Ensure the result is null-terminated after the strcpy
-  assert(to_start - to_file <= toFile.size());
-  assert(path_end - path + strlen(to_start) <= ret.capacity());
+  assertx(to_start - to_file <= toFile.size());
+  assertx(path_end - path + strlen(to_start) <= ret.capacity());
 
   strcpy(path_end, to_start);
   return ret.setSize(strlen(path));
@@ -473,7 +504,7 @@ String FileUtil::canonicalize(const std::string &path) {
 
 String FileUtil::canonicalize(const char *addpath, size_t addlen,
                               bool collapse_slashes /* = true */) {
-  assert(strlen(addpath) <= addlen);
+  assertx(strlen(addpath) <= addlen);
   // 4 for slashes at start, after root, and at end, plus trailing
   // null
   size_t maxlen = addlen + 4;
@@ -602,7 +633,7 @@ std::string FileUtil::normalizeDir(const std::string &dirname) {
    * in Runtime option parsing, when MemoryManager may not have been
    * initialized
    */
-  MemoryManager::TlsWrapper::getCheck();
+  tl_heap.getCheck();
   string ret = FileUtil::canonicalize(dirname).toCppString();
   if (!ret.empty() && !isDirSeparator(ret[ret.length() - 1])) {
     ret += getDirSeparator();
@@ -611,93 +642,20 @@ std::string FileUtil::normalizeDir(const std::string &dirname) {
 }
 
 void FileUtil::find(std::vector<std::string> &out,
-                    const std::string &root, const char *path, bool php,
+                    const std::string &root, const std::string& path, bool php,
                     const std::set<std::string> *excludeDirs /* = NULL */,
                     const std::set<std::string> *excludeFiles /* = NULL */) {
-  if (!path) path = "";
-  if (isDirSeparator(*path)) path++;
 
-  string spath = path;
-  if (spath.length() && !isDirSeparator(spath[spath.length() - 1])) {
-    spath += getDirSeparator();
-  }
-  if (excludeDirs && excludeDirs->find(spath) != excludeDirs->end()) {
-    return;
-  }
-
-  string fullPath = root + path;
-  if (fullPath.empty()) {
-    return;
-  }
-  DIR *dir = opendir(fullPath.c_str());
-  if (dir == nullptr) {
-    Logger::Error("FileUtil::find(): unable to open directory %s",
-                  fullPath.c_str());
-    return;
-  }
-  if (!isDirSeparator(fullPath[fullPath.length() - 1])) {
-    fullPath += getDirSeparator();
-  }
-
-  dirent *e;
-  while ((e = readdir(dir))) {
-    char *ename = e->d_name;
-
-    // skipping .  .. hidden files
-    if (ename[0] == '.' || !*ename) {
-      continue;
-    }
-    string fe = fullPath + ename;
-    struct stat se;
-    if (stat(fe.c_str(), &se)) {
-      Logger::Error("FileUtil::find(): unable to stat %s", fe.c_str());
-      continue;
-    }
-
-    if ((se.st_mode & S_IFMT) == S_IFDIR) {
-      string subdir = spath + ename;
-      find(out, root, subdir.c_str(), php, excludeDirs, excludeFiles);
-      continue;
-    }
-
-    // skipping "tags" files
-    if (strcmp(ename, "tags") == 0) {
-      continue;
-    }
-
-    // skipping emacs leftovers
-    char last = ename[strlen(ename) - 1];
-    if (last == '~' || last == '#') {
-      continue;
-    }
-
-    bool isPHP = false;
-    const char *p = strrchr(ename, '.');
-    if (p) {
-      isPHP = (strncmp(p + 1, "php", 3) == 0);
-    } else {
-      try {
-        string line;
-        std::ifstream fin(fe.c_str());
-        if (std::getline(fin, line)) {
-          if (line[0] == '#' && line[1] == '!' &&
-              line.find("php") != string::npos) {
-            isPHP = true;
-          }
-        }
-      } catch (...) {
-        Logger::Error("FileUtil::find(): unable to read %s", fe.c_str());
-      }
-    }
-
-    if (isPHP == php &&
-        (!excludeFiles ||
-         excludeFiles->find(spath + ename) == excludeFiles->end())) {
-      out.push_back(fe);
-    }
-  }
-
-  closedir(dir);
+  find(root, path, php,
+       [&] (const std::string& rpath, bool isDir) {
+         if (isDir) {
+           return !excludeDirs || !excludeDirs->count(rpath);
+         }
+         if (!excludeFiles || !excludeFiles->count(rpath)) {
+           out.push_back(root + rpath);
+         }
+         return false;
+       });
 }
 
 bool FileUtil::isValidPath(const String& path) {

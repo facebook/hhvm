@@ -29,11 +29,9 @@ struct BinaryOpExpression : Expression {
                      ExpressionPtr exp1, ExpressionPtr exp2, int op);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
-  int getLocalEffects() const override;
+  ExpressionPtr preOptimize(AnalysisResultConstRawPtr ar) override;
   bool isLiteralString() const override;
   std::string getLiteralString() const override;
-  bool containsDynamicConstant(AnalysisResultPtr ar) const override;
 
   bool isRefable(bool checkError = false) const override;
   bool isShortCircuitOperator() const;
@@ -43,10 +41,8 @@ struct BinaryOpExpression : Expression {
   ExpressionPtr getExp2() { return m_exp2;}
   int getOp() const { return m_op;}
 
-  ExpressionPtr foldConst(AnalysisResultConstPtr ar);
-  ExpressionPtr foldRightAssoc(AnalysisResultConstPtr ar);
-
-  ExpressionPtr unneededHelper() override;
+  ExpressionPtr foldConst(AnalysisResultConstRawPtr ar);
+  ExpressionPtr foldRightAssoc(AnalysisResultConstRawPtr ar);
 
   static int getConcatList(std::vector<ExpressionPtr>& ev, ExpressionPtr exp,
                            bool &hasVoid);

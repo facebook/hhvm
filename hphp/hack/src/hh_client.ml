@@ -2,9 +2,8 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
@@ -38,7 +37,11 @@
  *  Use --help or see clientArgs.ml for more options
  *)
 
+let exit_on_parent_exit () = Parent.exit_on_parent_exit 10 60
+
 let () =
+  (* no-op, needed at entry-point for Daemon hookup *)
+  Daemon.check_entry_point ();
   (* Ignore SIGPIPE since we might get a server hangup and don't care (can
    * detect and handle better than a signal). Ignore SIGUSR1 since we sometimes
    * use that for the server to tell us when it's done initializing, but if we
@@ -48,7 +51,16 @@ let () =
     raise Exit_status.(Exit_with Interrupted)));
   let command = ClientArgs.parse_args () in
   let root = ClientArgs.root command in
-  HackEventLogger.client_init root;
+  HackEventLogger.client_init ~exit_on_parent_exit root;
+  let command_name = function
+    | ClientCommand.CCheck _ -> "Check"
+    | ClientCommand.CStart _ -> "Start"
+    | ClientCommand.CStop _ -> "Stop"
+    | ClientCommand.CRestart _ -> "Restart"
+    | ClientCommand.CBuild _ -> "Build"
+    | ClientCommand.CLsp _ -> "Lsp"
+    | ClientCommand.CDebug _ -> "Debug"
+  in
   let exit_status =
     try
       match command with
@@ -57,10 +69,10 @@ let () =
         | ClientCommand.CStop env -> ClientStop.main env
         | ClientCommand.CRestart env -> ClientRestart.main env
         | ClientCommand.CBuild env -> ClientBuild.main env
-        | ClientCommand.CIde env -> ClientIde.main env
+        | ClientCommand.CLsp env -> ClientLsp.main env (* never terminates *)
         | ClientCommand.CDebug env -> ClientDebug.main env
     with Exit_status.Exit_with es ->
-      HackEventLogger.client_bad_exit es;
+      HackEventLogger.client_bad_exit ~command:(command_name command) es;
       es
   in
   Exit_status.exit exit_status

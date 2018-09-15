@@ -75,4 +75,8 @@ function main() {
   has_ref(...$args);
 }
 
+
+<<__EntryPoint>>
+function main_unpack_call_ref() {
 main();
+}

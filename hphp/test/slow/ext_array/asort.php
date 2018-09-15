@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_asort() {
 $fruits = array(
   "d" => "lemon",
   "a" => "orange",
@@ -28,3 +31,4 @@ foreach($arr as &$val) {
 }
 unset($val);
 var_dump($arr);
+}

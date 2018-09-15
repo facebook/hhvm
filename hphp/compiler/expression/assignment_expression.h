@@ -25,17 +25,12 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(AssignmentExpression);
 struct TypedValue;
 
-struct AssignmentExpression : Expression, IParseHandler {
+struct AssignmentExpression : Expression {
   AssignmentExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                        ExpressionPtr variable, ExpressionPtr value,
                        bool ref, bool rhsFirst = false);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
-
-  // implementing IParseHandler
-  void onParseRecur(AnalysisResultConstPtr ar, FileScopeRawPtr fs,
-                    ClassScopePtr scope) override;
 
   bool isRefable(bool checkError = false) const override {
     if (checkError) return true;
@@ -49,13 +44,10 @@ struct AssignmentExpression : Expression, IParseHandler {
   void setVariable(ExpressionPtr v) { m_variable = v; }
   void setValue(ExpressionPtr v) { m_value = v; }
   bool isRhsFirst() { return m_rhsFirst; }
-  int getLocalEffects() const override;
 
   // $GLOBALS[<literal-string>] = <scalar>;
   bool isSimpleGlobalAssign(StringData **name, TypedValue *tv) const;
 private:
-  ExpressionPtr optimize(AnalysisResultConstPtr ar);
-
   ExpressionPtr m_variable;
   ExpressionPtr m_value;
   bool m_ref;

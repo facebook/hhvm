@@ -5,6 +5,9 @@ function err_handler($errno, $errstr, $errfile, $errline) {
   throw new Exception;
 }
 
+
+<<__EntryPoint>>
+function main_is_valid_phar_filename() {
 set_error_handler('err_handler', E_RECOVERABLE_ERROR);
 
 chdir(__DIR__);
@@ -76,3 +79,4 @@ var_dump(Phar::isValidPharFilename('dir.phar.php', true));
 var_dump(Phar::isValidPharFilename('dir.phar.php', false));
 
 rmdir(__DIR__.'/.phar');
+}

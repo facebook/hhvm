@@ -23,5 +23,9 @@ function f6() {
       break;
   }
 }
+
+<<__EntryPoint>>
+function main_458() {
 foreach (f6() as $_) {
+}
 }

@@ -30,4 +30,8 @@ function main() {
   $a = new A();
   return $a->getter();
 }
+
+<<__EntryPoint>>
+function main_private_props_017() {
 main();
+}

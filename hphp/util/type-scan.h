@@ -20,7 +20,6 @@
 #include <cstdint>
 #include <stdexcept>
 #include <type_traits>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -135,18 +134,18 @@ template <typename T> struct WithSuffix {};
 
 }
 
-// The type scanners need to know which types are "countable". A countable type
-// is one with a reference count that is explicitly managed. The ultimate goal
-// for the type scanners is to find all the pointers to countable types. To mark
-// a type as being countable, instantiate MarkCountable<> on the type. Its
-// usually easiest to have the type T derive from MarkCountable<T>.
-template <typename T> struct MarkCountable {};
+// The type scanners need to know which types are "collectable". A collectable
+// type is one with a reference count that is explicitly managed. The ultimate
+// goal for the type scanners is to find all the pointers to collectable types.
+// To mark a type as being collectable, instantiate MarkCollectable<> on the
+// type.  Its usually easiest to have the type T derive from MarkCollectable<T>.
+template <typename T> struct MarkCollectable {};
 
 // Normally countable types are never scanned, even if explicitly
 // requested. However, you may want to scan a countable type in certain contexts
 // (for example, a countable type which can be both allocated in memory and the
 // stack). In that case, use this marker instead.
-template <typename T> struct MarkScannableCountable {};
+template <typename T> struct MarkScannableCollectable {};
 
 // Obtain a type index for the given type T and an optional action. Asserts that
 // this index will be used to scan T, and that T is being allocated here.
@@ -181,11 +180,30 @@ inline bool hasNonConservative() {
   return detail::g_metadata_table_size > 2;
 }
 
+// Return true if index is a valid type or if everything is conservative
+inline bool isKnownType(Index index) {
+  return !hasNonConservative() || index != kIndexUnknown;
+}
+
+inline bool hasScanner(Index index) {
+  assert(index < detail::g_metadata_table_size);
+  return detail::g_metadata_table[index].m_scan !=
+         detail::g_metadata_table[kIndexUnknownNoPtrs].m_scan;
+}
+
+inline bool hasConservativeScanner(Index index) {
+  assert(index < detail::g_metadata_table_size);
+  return detail::g_metadata_table[index].m_scan ==
+         detail::g_metadata_table[kIndexUnknown].m_scan;
+}
+
 // Initialize the type scanner infrastructure. Before this is done,
 // getIndexForMalloc() will always return kIndexUnknown and any attempts to scan
 // will use conservative scanning. For this reason, its important to call init()
 // as early as possible.
-void init();
+void init(const std::string& extractPath,
+          const std::string& fallbackPath,
+          bool trust);
 
 // Thrown by init() if initialization fails.
 struct InitException: std::runtime_error {
@@ -200,20 +218,6 @@ struct InitException: std::runtime_error {
  * re-used this way multiple times.
  */
 struct Scanner {
-  // Enqueue a pointer into this scanner to be reported later. This is meant to
-  // be called from type custom scanner functions to report interesting
-  // pointers.
-  template <typename T> void enqueue(const T* ptr) {
-    // Don't allow void*
-    static_assert(!detail::IsVoid<T>::value,
-                  "Trying to enqueue void pointer(s). "
-                  "Please provide a more specific type.");
-    // Certain types are statically uninteresting, so don't enqueue pointers to
-    // those.
-    if (detail::Uninteresting<T*>::value) return;
-    m_ptrs.emplace_back(ptr);
-  }
-
   /*
    * scan() overloads:
    *
@@ -225,43 +229,23 @@ struct Scanner {
    * on the type.
    */
 
-  // Overload for types where we statically know the type isn't interesting, so
-  // do nothing.
-  template <typename T> typename std::enable_if<
-    detail::Uninteresting<T>::value
-  >::type
-  scan(const T&, std::size_t size = sizeof(T)) {
-    // Even though this function is a nop, still try to catch errors like trying
-    // to scan an unbounded array.
-    static_assert(!detail::UnboundedArray<T>::value,
-                  "Trying to scan unbounded array");
-    assert(size % sizeof(T) == 0);
-  }
-
   // Overload for interesting pointer types. "Scanning" a pointer is just
   // enqueuing it, so do that.
-  template <typename T> typename std::enable_if<
-    std::is_pointer<T>::value && !detail::Uninteresting<T>::value
-  >::type
+  template <typename T>
+  typename std::enable_if<std::is_pointer<T>::value>::type
   scan(const T& ptr, std::size_t size = sizeof(T)) {
-    // No pointers to void or unbounded arrays.
-    static_assert(!detail::IsVoid<T>::value,
-                  "Trying to scan void pointer(s). "
-                  "Please provide a more specific type.");
     static_assert(!detail::UnboundedArray<T>::value,
                   "Trying to scan unbounded array");
-
+    // scan contiguous array of pointers: insert addr of each pointer
     assert(size % sizeof(T) == 0);
-    const auto raw = reinterpret_cast<std::uintptr_t>(ptr);
-    for (std::size_t i = 0; i < size; i += sizeof(T)) {
-      enqueue(reinterpret_cast<const T>(raw + i));
+    for (auto p = &ptr, e = p + size / sizeof(T); p < e; ++p) {
+      m_addrs.emplace_back((const void**)p);
     }
   }
 
   // Overload for interesting non-pointer types.
-  template <typename T> typename std::enable_if<
-    !std::is_pointer<T>::value && !detail::Uninteresting<T>::value
-  >::type
+  template <typename T>
+  typename std::enable_if<!std::is_pointer<T>::value>::type
   scan(const T& val, std::size_t size = sizeof(T)) {
     static_assert(!detail::IsVoid<T>::value,
                   "Trying to scan void pointer(s). "
@@ -281,48 +265,41 @@ struct Scanner {
   // Scan a region of memory using the given type-index.
   void scanByIndex(Index index, const void* ptr, std::size_t size) {
     assert(index < detail::g_metadata_table_size);
-    if (auto scan = detail::g_metadata_table[index].m_scan) {
-      scan(*this, ptr, size);
-    }
+    detail::g_metadata_table[index].m_scan(*this, ptr, size);
   }
 
-  struct WhereIndex { uint32_t ptr, cons; const char* description; };
+  // Add a weak pointer.
+  void weak(const void* ptr) {
+    m_weak.emplace_back(ptr);
+  }
 
-  // Called once all the scanning is done. Reports enqueued pointers via the
-  // first passed callback, and conservative ranges via the second passed
-  // callback. Afterwards, all the state is cleared. The Scanner can be re-used
-  // after this.
-  template <typename F1, typename F2> void finish(F1&& f1, F2&& f2) {
-    where(""); // sentinel
-    auto description = "";
-    size_t i = 0, j = 0;
-    for (auto& w : m_where) {
-      for (; i < w.ptr; ++i) {
-        if (auto p = m_ptrs[i]) f1(p, description);
-      }
-      for (; j < w.cons; ++j) {
-        auto& r = m_conservative[j];
-        f2(r.first, r.second, description);
-      }
-      description = w.description;
+  // Called once all the scanning is done. Callbacks report different
+  // pointer types:
+  //   F1 - called to report conservative ranges
+  //   F2 - called to report addresses of pointers
+  //   F3 - called to report weak pointers
+  // Afterwards, all the state is cleared, and the scanner can be re-used.
+  template <typename F1, typename F2, typename F3>
+  void finish(F1&& f1, F2&& f2, F3&& f3) {
+    for (auto r : m_conservative) {
+      f1(r.first, r.second);
     }
-    m_ptrs.clear();
+    for (auto addr : m_addrs) {
+      f2(addr);
+    }
+    for (auto weak : m_weak) {
+      f3(weak);
+    }
+    m_addrs.clear();
     m_conservative.clear();
-    m_where.clear();
-  }
-
-  // record where we are in root scanning now.
-  void where(const char* description) {
-    m_where.push_back(
-      {uint32_t(m_ptrs.size()), uint32_t(m_conservative.size()), description}
-    );
+    m_weak.clear();
   }
 
   // These are logically private, but they're public so that the generated
   // functions can manipulate them directly.
-  std::vector<const void*> m_ptrs;
+  std::vector<const void**> m_addrs; // pointer locations
   std::vector<std::pair<const void*, std::size_t>> m_conservative;
-  std::vector<WhereIndex> m_where;
+  std::vector<const void*> m_weak;
 };
 
 /*

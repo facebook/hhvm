@@ -1,4 +1,4 @@
-<?hh
+<?hh // decl
 
 class DestructLogger {
   private $where;
@@ -53,4 +53,8 @@ async function baz($from, $to) {
   echo "end baz\n";
 }
 
+
+<<__EntryPoint>>
+function main_foreach_await_as() {
 HH\Asio\join(baz(42, 100));
+}

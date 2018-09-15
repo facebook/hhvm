@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function breaker(&$x) {
   $x = (string)mt_rand();
@@ -6,7 +6,7 @@ function breaker(&$x) {
 
 function foo() {
   $x = "";
-  breaker($x);
+  breaker(&$x);
   // Bug #2240782: HHIR needs to think of $x as a BoxedStr, not a
   // BoxedStaticStr here.
   echo "Num: ";

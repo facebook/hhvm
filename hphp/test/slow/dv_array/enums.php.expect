@@ -1,0 +1,132 @@
+array(7) {
+  [1]=>
+  string(6) "SUNDAY"
+  [2]=>
+  string(6) "MONDAY"
+  [3]=>
+  string(7) "TUESDAY"
+  [4]=>
+  string(9) "WEDNESDAY"
+  [5]=>
+  string(8) "THURSDAY"
+  [6]=>
+  string(6) "FRIDAY"
+  [7]=>
+  string(8) "SATURDAY"
+}
+bool(true)
+bool(false)
+bool(true)
+============================================
+array(7) {
+  ["SUNDAY"]=>
+  int(1)
+  ["MONDAY"]=>
+  int(2)
+  ["TUESDAY"]=>
+  int(3)
+  ["WEDNESDAY"]=>
+  int(4)
+  ["THURSDAY"]=>
+  int(5)
+  ["FRIDAY"]=>
+  int(6)
+  ["SATURDAY"]=>
+  int(7)
+}
+bool(true)
+bool(false)
+bool(true)
+============================================
+array(3) {
+  [1]=>
+  string(3) "ONE"
+  [2]=>
+  string(3) "TWO"
+  [3]=>
+  string(5) "THREE"
+}
+array(3) {
+  ["ONE"]=>
+  string(1) "1"
+  ["TWO"]=>
+  string(1) "2"
+  ["THREE"]=>
+  string(1) "3"
+}
+bool(true)
+bool(true)
+string(1) "1"
+string(1) "1"
+string(1) "1"
+string(1) "1"
+array(1) {
+  [0]=>
+  string(1) "1"
+}
+array(1) {
+  [0]=>
+  string(1) "1"
+}
+==============================================
+array(3) {
+  [1]=>
+  string(3) "ONE"
+  [2]=>
+  string(3) "TWO"
+  [3]=>
+  string(5) "THREE"
+}
+array(3) {
+  ["ONE"]=>
+  int(1)
+  ["TWO"]=>
+  int(2)
+  ["THREE"]=>
+  int(3)
+}
+bool(true)
+bool(true)
+int(1)
+int(1)
+int(1)
+int(1)
+array(1) {
+  [0]=>
+  int(1)
+}
+array(1) {
+  [0]=>
+  int(1)
+}
+==============================================
+array(3) {
+  [1]=>
+  string(3) "ONE"
+  [2]=>
+  string(3) "TWO"
+  [3]=>
+  string(5) "THREE"
+}
+array(3) {
+  ["ONE"]=>
+  string(1) "1"
+  ["TWO"]=>
+  string(1) "2"
+  ["THREE"]=>
+  string(1) "3"
+}
+bool(true)
+bool(true)
+string(1) "1"
+int(1)
+string(1) "1"
+int(1)
+array(1) {
+  [0]=>
+  string(1) "1"
+}
+array(1) {
+  [0]=>
+  int(1)
+}

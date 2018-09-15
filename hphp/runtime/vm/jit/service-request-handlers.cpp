@@ -29,8 +29,10 @@
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/workload-stats.h"
 
 #include "hphp/ppc64-asm/decoded-instr-ppc64.h"
 #include "hphp/vixl/a64/decoder-a64.h"
@@ -50,7 +52,7 @@ namespace {
 RegionContext getContext(SrcKey sk) {
   RegionContext ctx {
     sk.func(), sk.offset(), liveSpOff(),
-    sk.resumed(), sk.hasThis()
+    sk.resumeMode(), sk.hasThis()
   };
 
   auto const fp = vmfp();
@@ -67,19 +69,11 @@ RegionContext getContext(SrcKey sk) {
     FTRACE(2, "added live type {}\n", show(ctx.liveTypes.back()));
   }
 
-  // Track stack types and pre-live ActRecs.
+  // Track stack types.
   int32_t stackOff = 0;
   visitStackElems(
     fp, sp, ctx.bcOffset,
     [&] (const ActRec* ar, Offset) {
-      auto const objOrCls =
-        !ar->func()->cls() ? TNullptr :
-        (ar->hasThis()  ?
-         Type::SubObj(ar->getThis()->getVMClass()) :
-         Type::SubCls(ar->getClass()));
-
-      ctx.preLiveARs.push_back({ stackOff, ar->func(), objOrCls });
-      FTRACE(2, "added prelive ActRec {}\n", show(ctx.preLiveARs.back()));
       stackOff += kNumActRecCells;
     },
     [&] (const TypedValue* tv) {
@@ -137,7 +131,7 @@ TCA getTranslation(TransArgs args) {
   }
 
   if (!RID().getJit()) {
-    SKTRACE(2, sk, "punting because jitting was disabled\n");
+    SKTRACE(2, sk, "punting because jit was disabled\n");
     return nullptr;
   }
 
@@ -146,6 +140,11 @@ TCA getTranslation(TransArgs args) {
       SKTRACE(2, sk, "getTranslation: found %p\n", tca);
       return tca;
     }
+  }
+
+  if (UNLIKELY(RID().isJittingDisabled())) {
+    SKTRACE(2, sk, "punting because jitting code was disabled\n");
+    return nullptr;
   }
 
   args.kind = tc::profileFunc(args.sk.func()) ?
@@ -162,10 +161,7 @@ TCA getTranslation(TransArgs args) {
 
   tc::createSrcRec(sk, liveSpOff());
 
-  auto sr = tc::findSrcRec(sk);
-  always_assert(sr);
-
-  if (auto const tca = sr->getTopTranslation()) {
+  if (auto const tca = tc::findSrcRec(sk)->getTopTranslation()) {
     // Handle extremely unlikely race; someone may have just added the first
     // translation for this SrcRec while we did a non-blocking wait on the
     // write lease in createSrcRec().
@@ -187,9 +183,15 @@ TCA getFuncBody(Func* func) {
 
   auto const dvs = func->getDVFunclets();
   if (dvs.size() || func->hasThisVaries()) {
-    tca = tc::emitFuncBodyDispatch(func, dvs);
+    if (UNLIKELY(RID().isJittingDisabled())) {
+      TRACE(2, "punting because jitting code was disabled\n");
+      return nullptr;
+    }
+    auto const kind = tc::profileFunc(func) ? TransKind::Profile
+                                            : TransKind::Live;
+    tca = tc::emitFuncBodyDispatch(func, dvs, kind);
   } else {
-    SrcKey sk(func, func->base(), false, func->mayHaveThis());
+    SrcKey sk(func, func->base(), ResumeMode::None, func->mayHaveThis());
     tca = getTranslation(TransArgs{sk});
     if (tca) func->setFuncBody(tca);
   }
@@ -208,9 +210,6 @@ TCA bindJmp(TCA toSmash, SrcKey destSk, ServiceRequest req, TransFlags trflags,
   auto tDest = getTranslation(args);
   if (!tDest) return nullptr;
 
-  LeaseHolder writer(destSk.func(), TransKind::Profile);
-  if (!writer) return tDest;
-
   if (req == REQ_BIND_ADDR) {
     return tc::bindAddr(toSmash, destSk, trflags, smashed);
   }
@@ -222,6 +221,7 @@ void syncFuncBodyVMRegs(ActRec* fp, void* sp) {
   auto& regs = vmRegsUnsafe();
   regs.fp = fp;
   regs.stack.top() = (Cell*)sp;
+  regs.jitReturnAddr = nullptr;
 
   auto const nargs = fp->numArgs();
   auto const nparams = fp->func()->numNonVariadicParams();
@@ -292,7 +292,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
     case REQ_RETRANSLATE: {
       INC_TPC(retranslate);
       sk = SrcKey{
-        liveFunc(), info.args[0].offset, liveResumed(), liveHasThis()
+        liveFunc(), info.args[0].offset, liveResumeMode(), liveHasThis()
       };
       auto trflags = info.args[1].trflags;
       auto args = TransArgs{sk};
@@ -336,7 +336,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
           auto delegate = gen->m_delegate.m_data.pobj;
           // We only checked that our delegate is an object, but we can't get
           // into this situation if the object itself isn't a Generator
-          assert(delegate->getVMClass() == Generator::getClass());
+          assertx(delegate->getVMClass() == Generator::getClass());
           // Ok so we're in a `yield from` situation, we know our ar is garbage.
           // The ar that we're looking for is the ar of the delegate generator,
           // so grab that here.
@@ -349,7 +349,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
       if (ar->isFCallAwait()) {
         // If there was an interped FCallAwait, and we return via the
         // jit, we need to deal with the suspend case here.
-        assert(ar->retSlot()->m_aux.u_fcallAwaitFlag < 2);
+        assertx(ar->retSlot()->m_aux.u_fcallAwaitFlag < 2);
         if (ar->retSlot()->m_aux.u_fcallAwaitFlag) {
           start = tc::ustubs().fcallAwaitSuspendHelper;
           break;
@@ -367,7 +367,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
     case REQ_POST_DEBUGGER_RET: {
       auto fp = vmfp();
       auto caller = fp->func();
-      assert(g_unwind_rds.isInit());
+      assertx(g_unwind_rds.isInit());
       vmpc() = caller->unit()->at(caller->base() +
                                   g_unwind_rds->debuggerReturnOff);
       FTRACE(3, "REQ_DEBUGGER_RET: pc {} in {}\n",
@@ -413,14 +413,8 @@ TCA handleBindCall(TCA toSmash, ActRec* calleeFrame, bool isImmutable) {
   }
 
   if (start && !RuntimeOption::EvalFailJitPrologs) {
-    LeaseHolder writer(func, TransKind::Profile);
-    if (!writer) return start;
-
-    // Someone else may have changed the func prologue while we waited for
-    // the write lease, so read it again.
-    start = mcgen::getFuncPrologue(func, nArgs);
-    if (start && !isImmutable) start = funcGuardFromPrologue(start, func);
-
+    // Using start is racy but bindCall will recheck the start address after
+    // acquiring a lock on the ProfTransRec
     tc::bindCall(toSmash, start, func, nArgs, isImmutable);
   } else {
     // We couldn't get a prologue address. Return a stub that will finish
@@ -463,22 +457,27 @@ TCA handleResume(bool interpFirst) {
     start = getTranslation(TransArgs(sk));
   }
 
+  vmJitReturnAddr() = nullptr;
   vmJitCalledFrame() = vmfp();
   SCOPE_EXIT { vmJitCalledFrame() = nullptr; };
 
   // If we can't get a translation at the current SrcKey, interpret basic
   // blocks until we end up somewhere with a translation (which we may have
   // created, if the lease holder dropped it).
-  while (!start) {
-    INC_TPC(interp_bb);
-    if (auto retAddr = HPHP::dispatchBB()) {
-      start = retAddr;
-      break;
-    }
+  if (!start) {
+    WorkloadStats guard(WorkloadStats::InInterp);
 
-    assertx(vmpc());
-    sk = liveSK();
-    start = getTranslation(TransArgs{sk});
+    while (!start) {
+      INC_TPC(interp_bb);
+      if (auto retAddr = HPHP::dispatchBB()) {
+        start = retAddr;
+        break;
+      }
+
+      assertx(vmpc());
+      sk = liveSK();
+      start = getTranslation(TransArgs{sk});
+    }
   }
 
   if (Trace::moduleEnabled(Trace::ringbuffer, 1)) {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 error_reporting(-1);
 function doThrow() {
   throw new Exception("f you!");

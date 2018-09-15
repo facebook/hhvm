@@ -14,8 +14,12 @@ class A {
     $f($this, $var++);
   }
 }
+
+<<__EntryPoint>>
+function main_1099() {
 $a = new A;
 $a->f('f', 'this');
 $a->f('g', 'this');
 $a->g('f', 30);
 $a->g('g', 30);
+}

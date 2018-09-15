@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // generate a string from bits in i where 0=>a, 1=>A. This causes
 // hash collisions if the string hash is case-insensitive.
@@ -15,4 +15,4 @@ function test(&$a, $b) {
 }
 
 $y = null;
-test($y, 5);
+test(&$y, 5);

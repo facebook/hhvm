@@ -1,4 +1,4 @@
-<?php
+<?hh
 class C {
   public function className() {
     return 'C';

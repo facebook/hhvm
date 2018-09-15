@@ -1,0 +1,8 @@
+.main {
+  Int 0
+  Double 1.6
+  Sub
+  PopC
+  Int 1
+  RetC
+}

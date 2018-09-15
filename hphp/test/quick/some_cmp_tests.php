@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function eq($x, $y) {
   var_dump($x == $y);

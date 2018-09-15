@@ -16,4 +16,8 @@ trait Foo {
   }
 }
 
+
+<<__EntryPoint>>
+function main_anon_1() {
 Foo::f();
+}

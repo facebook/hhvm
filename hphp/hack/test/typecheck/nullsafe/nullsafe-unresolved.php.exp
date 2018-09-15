@@ -1,0 +1,12 @@
+File "nullsafe-unresolved.php", line 6, characters 18-19:
+Invalid argument (Typing[4110])
+  File "nullsafe-unresolved.php", line 15, characters 25-40:
+  This is an object of type Container
+  File "nullsafe-unresolved.php", line 5, characters 8-15:
+  It is incompatible with a nullable type (use of ?-> operator)
+File "nullsafe-unresolved.php", line 8, characters 18-19:
+Invalid argument (Typing[4110])
+  File "nullsafe-unresolved.php", line 15, characters 25-40:
+  This is an object of type Container
+  File "nullsafe-unresolved.php", line 7, characters 8-13:
+  It is incompatible with a nullable type (use of ?-> operator)

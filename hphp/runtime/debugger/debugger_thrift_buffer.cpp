@@ -24,7 +24,7 @@ TRACE_SET_MOD(debugger);
 
 String DebuggerThriftBuffer::readImpl() {
   TRACE(7, "DebuggerThriftBuffer::readImpl\n");
-  assert(m_size <= BUFFER_SIZE);
+  assertx(m_size <= BUFFER_SIZE);
   int nread = getSocket()->readImpl(m_buffer, m_size);
   m_buffer[nread] = '\0';
   return String(m_buffer, nread, CopyString);
@@ -53,8 +53,8 @@ static inline int serializeImpl(T data, String& sdata) {
   TRACE(7, "DebuggerWireHelpers::serializeImpl\n");
   VariableSerializer vs(VariableSerializer::Type::DebuggerSerialize);
   try {
-    sdata = vs.serialize(data, true);
-  } catch (StringBufferLimitException &e) {
+    sdata = vs.serialize(VarNR{data}, true);
+  } catch (StringBufferLimitException& e) {
     sdata = s_hit_limit;
     return DebuggerWireHelpers::HitLimit;
   } catch (...) {
@@ -82,15 +82,15 @@ static inline int unserializeImpl(const String& sdata, Variant& data) {
   } catch (const Object& o) {
     // Get the message property from the Exception if we can. Otherwise, use
     // the class name.
-    assert(o->instanceof(SystemLib::s_ExceptionClass));
+    assertx(o->instanceof(SystemLib::s_ExceptionClass));
 
     auto const info = o->getProp(SystemLib::s_ExceptionClass, s_message.get());
-    if (info.accessible && info.prop) {
-      auto& val = tvAsCVarRef(info.prop);
-      if (val.isString()) {
+    if (info) {
+      auto const inner = info.unboxed();
+      if (isStringType(inner.type())) {
         data = folly::sformat(
           "unserialize() threw '{}' with message '{}'",
-          o->getVMClass()->name(), val.toCStrRef()
+          o->getVMClass()->name(), inner.val().pstr
         );
         return DebuggerWireHelpers::ErrorMsg;
       }

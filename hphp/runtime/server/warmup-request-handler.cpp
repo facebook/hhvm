@@ -21,7 +21,7 @@
 
 #include <folly/Memory.h>
 
-using folly::make_unique;
+using std::make_unique;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -52,7 +52,7 @@ void WarmupRequestHandler::logToAccessLog(Transport *transport) {
 
 std::unique_ptr<RequestHandler> WarmupRequestHandlerFactory::createHandler() {
   return
-    folly::make_unique<WarmupRequestHandler>(m_timeout, shared_from_this());
+    std::make_unique<WarmupRequestHandler>(m_timeout, shared_from_this());
 }
 
 void WarmupRequestHandlerFactory::bumpReqCount() {
@@ -63,16 +63,8 @@ void WarmupRequestHandlerFactory::bumpReqCount() {
     return;
   }
 
-  auto const num = m_additionalThreads.load();
-  if (!num) {
-    return;
-  }
-
-  Logger::Info("Finished warmup; adding %d new worker threads", num);
-  m_server->addWorkers(num);
-
-  // Set to zero so we can't do it if the req counter wraps.
-  m_additionalThreads.store(0);
+  Logger::Info("Finished warmup; saturating worker threads");
+  m_server->saturateWorkers();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

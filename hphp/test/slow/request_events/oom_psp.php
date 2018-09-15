@@ -1,6 +1,4 @@
 <?php
-
-ini_set('memory_limit', '1M');
 function foo() {
   $x = array();
   while (true) {
@@ -13,6 +11,12 @@ function go() {
   foo();
 }
 
+
+<<__EntryPoint>>
+function main_oom_psp() {
+ini_set('memory_limit', '18M');
+
 register_postsend_function('go');
 
 foo();
+}

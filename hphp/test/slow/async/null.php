@@ -5,8 +5,7 @@ function block() {
     RescheduleWaitHandle::QUEUE_NO_PENDING_IO,
     1,
   );
-};
-
+}
 async function foo() {
   return await null;
 }
@@ -27,5 +26,10 @@ async function test() {
   var_dump($a);
 }
 
-HH\Asio\join(test());
 
+<<__EntryPoint>>
+function main_null() {
+;
+
+HH\Asio\join(test());
+}

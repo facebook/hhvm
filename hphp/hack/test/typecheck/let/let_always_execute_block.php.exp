@@ -1,0 +1,2 @@
+File "let_always_execute_block.php", line 11, characters 8-8:
+Unbound name: y (a global constant) (Naming[2049])

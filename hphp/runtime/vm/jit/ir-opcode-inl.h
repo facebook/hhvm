@@ -32,7 +32,7 @@ inline bool opcodeHasFlags(Opcode opcode, uint64_t flags) {
 }
 
 inline bool hasEdges(Opcode opcode) {
-  return opcodeHasFlags(opcode, Branch | MayRaiseError);
+  return opcodeHasFlags(opcode, Branch) || opcodeMayRaise(opcode);
 }
 
 inline bool opHasExtraData(Opcode op) {

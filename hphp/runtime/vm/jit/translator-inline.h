@@ -18,6 +18,8 @@
 #define incl_HPHP_TRANSLATOR_INLINE_H_
 
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -34,10 +36,10 @@ inline ActRec* liveFrame() { return vmfp(); }
 inline const Func* liveFunc() { return liveFrame()->m_func; }
 inline const Unit* liveUnit() { return liveFunc()->unit(); }
 inline Class* liveClass() { return liveFunc()->cls(); }
-inline bool liveResumed() { return liveFrame()->resumed(); }
+inline ResumeMode liveResumeMode() { return resumeModeFromActRec(liveFrame()); }
 inline bool liveHasThis() { return liveClass() && liveFrame()->hasThis(); }
 inline SrcKey liveSK() {
-  return { liveFunc(), vmpc(), liveResumed(), liveHasThis() };
+  return { liveFunc(), vmpc(), liveResumeMode(), liveHasThis() };
 }
 inline jit::FPInvOffset liveSpOff() {
   Cell* fp = reinterpret_cast<Cell*>(vmfp());

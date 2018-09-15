@@ -31,11 +31,7 @@ struct EncapsListExpression : Expression {
                        int type, ExpressionListPtr expList);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
 
-  int getLocalEffects() const override {
-    return m_type == '`' ? UnknownEffect : NoEffect;
-  }
    int getType() { return m_type;}
   ExpressionListPtr getExpressions() { return m_exps; }
   void stripConcat();

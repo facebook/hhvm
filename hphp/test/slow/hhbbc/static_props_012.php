@@ -14,4 +14,8 @@ function main() {
   var_dump(c::go());
 }
 
+
+<<__EntryPoint>>
+function main_static_props_012() {
 main();
+}

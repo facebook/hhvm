@@ -9,8 +9,7 @@ class Foo {
     $this->name = $name;
   }
   public function get() { return $this->name; }
-};
-
+}
 function test_map($array, $key) {
   $map = new Map($array);
   echo "  map: ";
@@ -56,5 +55,10 @@ function packed() {
   test_set($set_array, "value1");
 }
 
+<<__EntryPoint>>
+function main_array_with_ref() {
+;
+
 mixed();
 packed();
+}

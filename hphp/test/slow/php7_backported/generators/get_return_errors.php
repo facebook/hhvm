@@ -6,18 +6,32 @@ function gen1() {
     return 3;
 }
 
+function gen2() {
+    throw new Exception("gen2() throw");
+    yield 1;
+    return 2;
+}
+
+function gen3() {
+    throw new Exception("gen3() throw");
+    return 1;
+    yield 2;
+}
+
+function gen4() {
+    yield;
+    return 1;
+}
+
+
+<<__EntryPoint>>
+function main_get_return_errors() {
 $gen = gen1();
 try {
     // Generator hasn't reached the "return" yet
     $gen->getReturn();
 } catch (Exception $e) {
     echo $e->getMessage(), "\n";
-}
-
-function gen2() {
-    throw new Exception("gen2() throw");
-    yield 1;
-    return 2;
 }
 
 $gen = gen2();
@@ -33,23 +47,12 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-function gen3() {
-    throw new Exception("gen3() throw");
-    return 1;
-    yield 2;
-}
-
 $gen = gen3();
 try {
     // Generator throws during auto-priming of getReturn() call
     $gen->getReturn();
 } catch (Exception $e) {
     echo $e->getMessage(), "\n";
-}
-
-function gen4() {
-    yield;
-    return 1;
 }
 
 $gen = gen4();
@@ -64,4 +67,5 @@ try {
     $gen->getReturn();
 } catch (Exception $e) {
     echo $e->getMessage(), "\n";
+}
 }

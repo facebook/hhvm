@@ -1,2 +1,0 @@
-File "collection_non_static.php", line 8, characters 37-41:
-Initialization of class property must be a static literal expression. (Typing[4152])

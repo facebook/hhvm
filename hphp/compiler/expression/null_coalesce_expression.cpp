@@ -15,7 +15,6 @@
 */
 
 #include "hphp/compiler/expression/null_coalesce_expression.h"
-#include "hphp/compiler/analysis/code_error.h"
 
 #include "hphp/runtime/base/type-variant.h"
 
@@ -44,11 +43,6 @@ ExpressionPtr NullCoalesceExpression::clone() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-void NullCoalesceExpression::analyzeProgram(AnalysisResultPtr ar) {
-  m_expFirst->analyzeProgram(ar);
-  m_expSecond->analyzeProgram(ar);
-}
 
 ConstructPtr NullCoalesceExpression::getNthKid(int n) const {
   switch (n) {
@@ -79,24 +73,6 @@ void NullCoalesceExpression::setNthKid(int n, ConstructPtr cp) {
       assert(false);
       break;
   }
-}
-
-ExpressionPtr NullCoalesceExpression::preOptimize(AnalysisResultConstPtr ar) {
-  Variant value;
-  if (m_expFirst->getScalarValue(value)) {
-    return value.isNull() ? m_expSecond : m_expFirst;
-  }
-  return ExpressionPtr();
-}
-
-ExpressionPtr NullCoalesceExpression::unneededHelper() {
-  if (!m_expFirst->getContainedEffects() &&
-      !m_expSecond->getContainedEffects()) {
-    return Expression::unneededHelper();
-  }
-  m_expFirst = m_expFirst->unneeded();
-  m_expSecond = m_expSecond->unneeded();
-  return static_pointer_cast<Expression>(shared_from_this());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,4 @@
+File "fallthrough_not_last_line.php", line 4, characters 11-12:
+This switch has a case that implicitly falls through and is not annotated with // FALLTHROUGH (NastCheck[3005])
+File "fallthrough_not_last_line.php", line 5, characters 10-10:
+This case implicitly falls through

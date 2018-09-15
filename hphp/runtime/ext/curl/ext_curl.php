@@ -61,8 +61,12 @@ function curl_strerror(int $errno): string;
  *
  * @return mixed - However, if the CURLOPT_RETURNTRANSFER option is set,
  *   it will return the result on success, FALSE on failure.
+ *
+ * FCallBuiltin is not used, as it would optimize away event hooks, resulting
+ * in broken request timeout semantics. It's also desirable to make curl_exec()
+ * frames visible in profiling tools such as Xenon.
  */
-<<__Native>>
+<<__Native("NoFCallBuiltin")>>
 function curl_exec(resource $ch): mixed;
 
 /**
@@ -183,8 +187,10 @@ function curl_multi_close(resource $mh): mixed;
  *   This only returns errors regarding the whole multi stack. There might
  *   still have occurred problems on individual transfers even when this
  *   function returns CURLM_OK.
+ *
+ * See curl_exec() wrt NoFCallBuiltin.
  */
-<<__Native>>
+<<__Native("NoFCallBuiltin")>>
 function curl_multi_exec(resource $mh,
                          mixed &$still_running): ?int;
 
@@ -257,8 +263,10 @@ function curl_multi_remove_handle(resource $mh,
  * @return int - On success, returns the number of descriptors contained
  *   in the descriptor sets. On failure, this function will return -1 on a
  *   select failure or timeout (from the underlying select system call).
+ *
+ * See curl_exec() wrt NoFCallBuiltin.
  */
-<<__Native>>
+<<__Native("NoFCallBuiltin")>>
 function curl_multi_select(resource $mh,
                            float $timeout = 1.0): ?int;
 
@@ -283,8 +291,10 @@ function curl_multi_select(resource $mh,
  *
  * @guide /hack/async/introduction
  * @guide /hack/async/extensions
+ *
+ * See curl_exec() wrt NoFCallBuiltin.
  */
-<<__Native>>
+<<__Native("NoFCallBuiltin")>>
 function curl_multi_await(resource $mh,
                           float $timeout = 1.0): Awaitable<int>;
 
@@ -379,6 +389,37 @@ function fb_curl_getopt(resource $ch, int $opt = 0): mixed;
 function fb_curl_multi_fdset(resource $mh, mixed &$read_fd_set,
                              mixed &$write_fd_set, mixed &$exc_fd_set,
                              ?int &$max_fd = null): mixed;
+
+/**
+* Returns a new cURL share handle
+*
+* @return resource - Returns a cURL share handle resource on success,
+*/
+<<__Native>>
+function curl_share_init(): resource;
+
+/**
+* Set an option for a cURL share handle.
+*
+* @param resource $sh -
+* @param int $option - One of the CURLSHOPT_* constants.
+* @param mixed $value - One of the [CURL_LOCK_DATA_DNS,
+*                      CURL_LOCK_DATA_COOKIE, CURL_LOCK_DATA_SSL_SESSION]
+*
+* @return Returns TRUE on success or FALSE on failure.
+*/
+<<__Native>>
+function curl_share_setopt(resource $sh, int $option, mixed $value) : bool;
+
+/**
+ * Close a set of cURL share handles
+ *
+ * @param resource $sh -
+ *
+ * @return void -
+ */
+<<__Native>>
+function curl_share_close(resource $sh): void;
 
 } // root namespace
 

@@ -1,2 +1,2 @@
-File "encapsed4.php", line 7, characters 15-15:
-Expected } (Parsing[1002])
+File "encapsed4.php", line 7, characters 10-17:
+Variable variables are not legal; all variable identifiers must be static strings. (Naming[2081])

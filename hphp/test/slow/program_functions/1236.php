@@ -3,4 +3,8 @@
 function p($a) {
  print $a;
 }
- register_shutdown_function('p', 'shutdown');
+
+ <<__EntryPoint>>
+function main_1236() {
+register_shutdown_function('p', 'shutdown');
+}

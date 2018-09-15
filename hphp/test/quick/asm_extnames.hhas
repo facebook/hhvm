@@ -2,17 +2,17 @@
 
 .main {
   FPushCtorI 0 0
-  FCall 0
+  FCall 0 0 1 - "" ""
   PopR
   FPushObjMethodD 0 "print$foo" NullThrows
-  FCall 0
+  FCall 0 0 1 - "" ""
   PopR
   Int 1
   RetC
 }
 
 
-.class Uh$Foo::Bar;42 {
+.class Uh$Foo::Bar {
   .default_ctor;
   .method [public static] print$foo() {
     String "hi\n"

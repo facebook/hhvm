@@ -1,0 +1,43 @@
+<?hh
+
+// Single arguments with surrounding whitespace, which end up with line breaks
+// in the formatted output, are formatted with line breaks between the argument
+// and the function call parentheses:
+foo(
+  vec['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut']
+);
+
+// This is true even when the argument is not surrounded by line breaks in the
+// original source:
+foo( vec['Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana']);
+
+// However, single arguments with no surrounding whitespace will stay joined
+// with the function call parens, when possible, even when they are formatted
+// with internal line breaks:
+foo(vec['Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts']);
+
+// Here, that isn't possible, since it would result in overflow:
+veryLongFunctionNameWhichCannotFitOnTheSameLineAs(thisOtherFunctionWithAVeryLongName('Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada'));
+
+// Lambda expressions can be formatted this way too:
+forAllStates($state ==> { visitState($state); });
+
+// But only when the body is a CompoundStatement:
+forAllStates($long_name_state_variable ==> visitFunctionWithLongName($long_name_state_variable));
+
+// We always break around some constructs:
+
+foo($predicate_with_a_very_long_identifier && $other_predicate_with_a_long_identifier);
+foo($nullable_value_with_a_long_identifier ?? $some_result_with_a_very_long_name);
+foo($nullable_value_with_a_long_identifier ?? $some_result_with_a_very_long_identifier);
+foo($predicate_with_a_very_long_identifier ? $some_result_with_long_name : $other_result);
+
+dict['dictKeyWithAnExtraordinarilyLongLength' => 'dictValueWhichIsAlsoQuiteLong'];
+shape('shapeKeyWithAnExtraordinarilyLongLength' => 'shapeValueWhichIsAlsoQuiteLengthy');
+type MyShape = shape('shapeTypeSpecifierKeyWithAnExtraordinarilyLongLength' => TypeWhichIsAlsoQuiteLengthy);
+
+$my_query = GitHubRepositoryEntity::queryAll($this->context->obtainContextObject())
+  ->orderBy(
+    GitHubRepositoryEntitySpec::isDeleted(),
+    Ordering::desc(GitHubRepositoryEntitySpec::isManaged()),
+  );

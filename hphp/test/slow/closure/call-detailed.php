@@ -7,6 +7,13 @@ class Foo {
     };
   }
 }
+// Ensure ->call calls with scope of passed object
+class FooBar {
+  private $x = 3;
+}
+
+<<__EntryPoint>>
+function main_call_detailed() {
 $foo = new Foo;
 $qux = $foo->bar();
 $foobar = new Foo;
@@ -31,11 +38,8 @@ $beta = function ($z) {
 };
 // Ensure argument passing works
 var_dump($beta->call($elePHPant, 3));
-// Ensure ->call calls with scope of passed object
-class FooBar {
-  private $x = 3;
-}
 $foo = function () {
   var_dump($this->x);
 };
 $foo->call(new FooBar);
+}

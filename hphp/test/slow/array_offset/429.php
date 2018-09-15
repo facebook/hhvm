@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_429() {
 $a = array();
 $a[0] = 1;
 $a[01] = 2;
@@ -15,3 +18,4 @@ var_dump("$a[01]");
 var_dump("$a[007]");
 var_dump("$a[08]");
 var_dump("$a[0xa]");
+}

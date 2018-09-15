@@ -19,7 +19,11 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-common.h"
+#include "hphp/runtime/base/data-walker.h"
+#include "hphp/runtime/base/hash-table.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/typed-value.h"
 
 #include <folly/portability/Constexpr.h>
@@ -32,76 +36,125 @@ namespace jit {
 struct ArrayOffsetProfile;
 }
 struct APCArray;
+struct APCHandle;
+
+struct SetArrayElm {
+  using hash_t = strhash_t;
+  /*
+   * We store elements of the set here, but also some information
+   * local to this array: tv.m_aux.u_hash contains either a negative
+   * number (for an int key) or a string hashcode (31-bit and thus
+   * non-negative).  The field tv.m_type == kInvalidDataType is used
+   * to mark a deleted element (tombstone); tv.m_type == KindOfUninit
+   * is used for debugging to mark empty elements.
+   */
+  TypedValueAux tv;
+
+  static auto constexpr kTombstone = kInvalidDataType;
+  static auto constexpr kEmpty = KindOfUninit;
+
+  void setStrKey(StringData* k, strhash_t h) {
+    assertx(isEmpty());
+    k->incRefCount();
+    tv.m_type = KindOfString;
+    tv.m_data.pstr = k;
+    tv.hash() = h;
+    assertx(!isInvalid());
+  }
+
+  void setIntKey(int64_t k, inthash_t h) {
+    assertx(isEmpty());
+    tv.m_type = KindOfInt64;
+    tv.m_data.num = k;
+    tv.hash() = h | STRHASH_MSB;
+    assertx(!isInvalid());
+    assertx(hasIntKey());
+  }
+
+  void setTombstone() {
+    tv.m_type = kTombstone;
+    static_assert(!isRefcountedType(kTombstone), "");
+  }
+
+  bool isEmpty() const {
+    return tv.m_type == kEmpty;
+  }
+
+  // Members below here are required for HashTable implemenation.
+  ALWAYS_INLINE const TypedValue* datatv() const {
+    return &tv;
+  }
+
+  ALWAYS_INLINE bool hasStrKey() const {
+    /*
+     * Currently string hash is 31-bit, thus it saves us some
+     * instructions to encode int keys as a negative hash, so
+     * that we don't have to care about the MSB when working
+     * with strhash_t.
+     */
+    assertx(!isInvalid());
+    return tv.hash() >= 0;
+  }
+
+  ALWAYS_INLINE StringData* strKey() const {
+    assertx(hasStrKey());
+    return tv.m_data.pstr;
+  }
+
+  ALWAYS_INLINE bool hasIntKey() const {
+    assertx(!isInvalid());
+    return tv.hash() < 0;
+  }
+
+  ALWAYS_INLINE int64_t intKey() const {
+    return tv.m_data.num;
+  }
+
+  ALWAYS_INLINE
+  Cell getKey() const {
+    assertx(!isInvalid());
+    Cell out;
+    cellDup(tv, out);
+    return out;
+  }
+
+
+  ALWAYS_INLINE hash_t hash() const {
+    return tv.hash();
+  }
+
+  ALWAYS_INLINE bool isTombstone() const {
+    return tv.m_type == kTombstone;
+  }
+
+  ALWAYS_INLINE bool isInvalid() const {
+    return tv.m_type == kEmpty || isTombstone();
+  }
+
+  static constexpr ptrdiff_t keyOff() {
+    return offsetof(SetArrayElm, tv) + offsetof(TypedValue, m_data.pstr);
+  }
+  static constexpr ptrdiff_t dataOff() {
+    return offsetof(SetArrayElm, tv) + offsetof(TypedValue, m_data);
+  }
+  static constexpr ptrdiff_t typeOff() {
+    return offsetof(SetArrayElm, tv) + offsetof(TypedValue, m_type);
+  }
+  static constexpr ptrdiff_t hashOff() {
+    return offsetof(SetArrayElm, tv) + offsetof(TypedValue, m_aux);
+  }
+};
 
 //////////////////////////////////////////////////////////////////////
 
-struct SetArray final
-  : private ArrayData, type_scan::MarkCountable<SetArray> {
+struct SetArray final : ArrayData,
+                        array::HashTable<SetArray, SetArrayElm>,
+                        type_scan::MarkCollectable<SetArray> {
 
 //////////////////////////////////////////////////////////////////////
 // Set Layout
 
 public:
-  struct Elm;
-
-  /*
-   * Load factor scaler. If S is the # of elements, C is the
-   * power-of-2 capacity, and L=LoadScale, we grow when S > C-C/L.
-   * So 2 gives 0.5 load factor, 4 gives 0.75 load factor, 8 gives
-   * 0.875 load factor. Use powers of 2 to enable shift-divide.
-   *
-   * The LoadScale also is the minimum size of the hash table.
-   */
-  static constexpr uint32_t LoadScale = 4;
-
-  constexpr static uint32_t HashSize(uint32_t scale) { return 4 * scale; }
-  constexpr static uint32_t Mask(uint32_t scale) { return HashSize(scale) - 1; }
-  constexpr static uint32_t Capacity(uint32_t scale) { return 3 * scale; }
-  static_assert(LoadScale == 4, "Change Capacity()");
-
-  /*
-   * The minimum hash size for a set is 4.
-   */
-  constexpr static uint32_t SmallScale = 1;
-
-  uint32_t capacity() const { return Capacity(m_scale); }
-  uint32_t mask() const     { return Mask(m_scale); }
-  uint32_t scale() const    { return m_scale; }
-
-  /*
-   * A set array has a header of type SetArray followed by an array
-   * of Capacity(m_scale) Elms, and then a hash table of
-   * HashSize(m_scale) uint32_t indices.
-   */
-  ALWAYS_INLINE static Elm* SetData(const SetArray* a) {
-    return const_cast<Elm*>(
-      reinterpret_cast<Elm const*>(a + 1)
-    );
-  }
-  Elm* data() const { return SetData(this); }
-
-  ALWAYS_INLINE static uint32_t* SetHashTab(const SetArray* a, uint32_t scale) {
-    return const_cast<uint32_t*>(
-      reinterpret_cast<uint32_t const*>(SetData(a) + Capacity(scale))
-    );
-  }
-  uint32_t* hashTab() const { return SetHashTab(this, m_scale); }
-
-  constexpr static size_t ComputeAllocBytes(uint32_t scale) {
-    return sizeof(SetArray) +
-      sizeof(Elm) * Capacity(scale) +
-      sizeof(uint32_t) * HashSize(scale);
-  }
-  size_t heapSize() const { return ComputeAllocBytes(m_scale); }
-
-  /*
-   * These two indices are used in hash tables.  It is safe
-   * to choose small "negative" integers since the maximum
-   * capacity is 3 * 2^30.
-   */
-  constexpr static uint32_t Empty     = -uint32_t{1};
-  constexpr static uint32_t Tombstone = -uint32_t{2};
-
   void scan(type_scan::Scanner& scanner) const {
     auto const elms = data();
     scanner.scan(*elms, m_used * sizeof(*elms));
@@ -118,6 +171,7 @@ public:
    * The returned array is already incref'd.
    */
   static ArrayData* MakeReserveSet(uint32_t size);
+  static constexpr auto MakeReserve = &MakeReserveSet;
 
   static ArrayData* MakeSet(uint32_t size, const TypedValue* values);
 
@@ -125,14 +179,22 @@ public:
    * Allocate an uncounted SetArray and copy the values from the
    * input 'array' into the uncounted one.
    *
-   * 'extra' bytes may be allocated in front of the returned pointer,
-   * must be a multiple of 16, and later be passed to ReleaseUncounted.
-   * (This is used to co-allocate a TypedValue with its array data.)
+   * If withApcTypedValue is true, space for an APCTypedValue will be
+   * allocated in front of the returned pointer.
    */
-  static ArrayData* MakeUncounted(ArrayData* array, size_t extra = 0);
+  static ArrayData* MakeUncounted(ArrayData* array,
+                                  bool withApcTypedValue = false,
+                                  DataWalker::PointerMap* m = nullptr);
+  static ArrayData* MakeUncounted(ArrayData* array, int) = delete;
+  static ArrayData* MakeUncounted(ArrayData* array, size_t) = delete;
 
   static void Release(ArrayData*);
-  static void ReleaseUncounted(ArrayData*, size_t);
+  static void ReleaseUncounted(ArrayData*);
+  /*
+   * Recursively register {allocation, rootAPCHandle} with APCGCManager
+   */
+  static void RegisterUncountedAllocations(ArrayData* ad,
+                                           APCHandle* rootAPCHandle);
 
   /*
    * Safe downcast helpers.
@@ -149,8 +211,6 @@ public:
   static ArrayData* AddToSet(ArrayData*, StringData*, bool);
 
 private:
-  static void InitHash(uint32_t* table, uint32_t scale);
-  static void CopyHash(uint32_t* dest, uint32_t* src, uint32_t scale);
   static bool ClearElms(Elm* elms, uint32_t count);
 
   enum class AllocMode : bool { Request, Static };
@@ -158,7 +218,8 @@ private:
   static SetArray* CopySet(const SetArray& other, AllocMode);
   static SetArray* CopyReserve(const SetArray* src, size_t expectedSize);
   SetArray* copySet() const { return CopySet(*this, AllocMode::Request); }
-  SetArray* copyAndResizeIfNeeded() const;
+
+  template <typename Init> static ArrayData* ToArrayImpl(ArrayData*, bool);
 
 private:
   SetArray() = delete;
@@ -170,14 +231,7 @@ private:
 // Iteration
 
 private:
-  ssize_t getIterBegin() const;
-  ssize_t getIterLast() const;
-  ssize_t getIterEnd() const { return m_used; }
   Cell getElm(ssize_t ei) const;
-
-  ssize_t nextElm(Elm* elms, ssize_t ei) const;
-  ssize_t prevElm(Elm* elms, ssize_t ei) const;
-  ssize_t nextElm(ssize_t ei) const { return nextElm(data(), ei); }
 
 public:
   const TypedValue* tvOfPos(uint32_t) const;
@@ -189,7 +243,7 @@ public:
     auto const* elm = a->data();
     for (auto i = a->m_used; i--; elm++) {
       if (LIKELY(!elm->isTombstone())) {
-        if (ArrayData::call_helper(fn, &elm->tv)) break;
+        if (ArrayData::call_helper(fn, elm->tv)) break;
       }
     }
   }
@@ -218,9 +272,6 @@ private:
 
 private:
   bool checkInvariants() const;
-  bool isFull() const;
-
-  using hash_t = strhash_t;
 
   /*
    * These functions require !isFull().  The index of the position
@@ -231,25 +282,9 @@ private:
   void insert(StringData* k, strhash_t h);
   void insert(StringData* k);
 
-  Elm* allocElm(uint32_t*);
-
-  enum FindType { Lookup, Insert, Remove };
-
-  template <FindType type, class Hit>
-  typename std::conditional<
-    type == FindType::Lookup,
-    ssize_t,
-    uint32_t*
-  >::type findImpl(hash_t h0, Hit) const;
-
-  ssize_t find(int64_t ki, inthash_t h) const;
-  ssize_t find(const StringData* s, strhash_t h) const;
   ssize_t findElm(const Elm& e) const;
-  template<FindType t> uint32_t* findHash(int64_t, inthash_t) const;
-  template<FindType t> uint32_t* findHash(const StringData*, strhash_t) const;
-  uint32_t* findForNewInsert(hash_t h) const;
 
-  void erase(uint32_t*);
+  void erase(int32_t);
 
   /*
    * Append idx at the end of the linked list containing the set
@@ -268,34 +303,23 @@ private:
 
 
   /*
-   * Returns a new set containing all the elements of the current set
-   * with the new specified scale.  The original set must not be used
-   * afterwards.  If the passed scale is smaller than the original
-   * one, grow() can shrink too!
+   * Returns a copy of the set with twice the scale of the original. It
+   * rebuilds the hash table, but it does not compact the elements. If copy is
+   * true, it will copy elements instead of taking ownership of them.
    */
-  SetArray* grow(uint32_t newScale);
+  SetArray* grow(bool copy);
+
+  /*
+   * prepareForInsert ensures that the set has room to insert an element and
+   * has a refcount of 1, copying if requested and growing if needed.
+   */
+  SetArray* prepareForInsert(bool copy);
 
   /*
    * compact() removes all tombstones from the hash table by going
    * through the inner linked list.
    */
   void compact();
-
-  /*
-   * resize() and resizeIfNeeded() will grow the array as necessary to
-   * ensure that there is room for a new element and a new hash entry.
-   *
-   * resize() assumes isFull().  resizeIfNeeded() will first check if
-   * there is room for a new element and hash entry before growing the
-   * array.
-   *
-   * Both functions return the new SetArray* to use (or the old one
-   * if they didn't need to grow).  The old SetArray is left in a
-   * zombie state where the only legal action is to decref and then
-   * throw it away.
-   */
-  SetArray* resize();
-  SetArray* resizeIfNeeded();
 
   /*
    * Zombie arrays!
@@ -312,108 +336,9 @@ private:
 // Elements
 
 public:
-  struct Elm {
-    /*
-     * We store elements of the set here, but also some information
-     * local to this array: tv.m_aux.u_hash contains either a negative
-     * number (for an int key) or a string hashcode (31-bit and thus
-     * non-negative).  The field tv.m_type == kInvalidDataType is used
-     * to mark a deleted element (tombstone); tv.m_type == KindOfUninit
-     * is used for debugging to mark empty elements.
-     */
-    TypedValueAux tv;
-
-    static auto constexpr kTombstone = kInvalidDataType;
-    static auto constexpr kEmpty = KindOfUninit;
-
-    bool hasStrKey() const {
-      /*
-       * Currently string hash is 31-bit, thus it saves us some
-       * instructions to encode int keys as a negative hash, so
-       * that we don't have to care about the MSB when working
-       * with strhash_t.
-       */
-      assert(!isInvalid());
-      return tv.hash() >= 0;
-    }
-
-    bool hasIntKey() const {
-      assert(!isInvalid());
-      return tv.hash() < 0;
-    }
-
-    void setStrKey(StringData* k, strhash_t h) {
-      assert(isEmpty());
-      k->incRefCount();
-      tv.m_type = KindOfString;
-      tv.m_data.pstr = k;
-      tv.hash() = h;
-      assert(!isInvalid());
-    }
-
-    StringData* strKey() const {
-      assert(hasStrKey());
-      return tv.m_data.pstr;
-    }
-
-    int64_t intKey() const {
-      assert(hasIntKey());
-      return tv.m_data.num;
-    }
-
-    void setIntKey(int64_t k, inthash_t h) {
-      assert(isEmpty());
-      tv.m_type = KindOfInt64;
-      tv.m_data.num = k;
-      tv.hash() = h | STRHASH_MSB;
-      assert(!isInvalid());
-      assert(hasIntKey());
-    }
-
-    void setTombstone() {
-      tv.m_type = kTombstone;
-    }
-
-    bool isTombstone() const {
-      static_assert(
-        kEmpty == 0 && kTombstone < 0 &&
-        KindOfString > kEmpty && KindOfInt64 > kEmpty,
-        "Fix the check below."
-      );
-      return tv.m_type < kEmpty;
-    }
-
-    bool isEmpty() const {
-      return tv.m_type == kEmpty;
-    }
-
-    bool isInvalid() const {
-      // An element is invalid if it is a tombstone or empty.
-      static_assert(
-        kTombstone < kEmpty &&
-        kEmpty < KindOfInt64 &&
-        kEmpty < KindOfString &&
-        kEmpty < KindOfPersistentString,
-        "Revise m_type choices."
-      );
-      return tv.m_type <= kEmpty;
-    }
-
-    hash_t hash() const {
-      return tv.hash();
-    }
-  };
 
 //////////////////////////////////////////////////////////////////////
 // JIT Supporting Routines
-
-  static constexpr ptrdiff_t usedOff() {
-    return offsetof(SetArray, m_used);
-  }
-
-  static constexpr ptrdiff_t dataOff() {
-    return sizeof(SetArray);
-  }
 
   static constexpr ptrdiff_t tvOff(uint32_t pos) {
     return dataOff() + pos * sizeof(Elm) + offsetof(Elm, tv);
@@ -439,20 +364,20 @@ public:
    */
 private:
   using ArrayData::exists;
+  using ArrayData::at;
+  using ArrayData::rval;
   using ArrayData::lval;
   using ArrayData::lvalNew;
   using ArrayData::set;
   using ArrayData::setRef;
-  using ArrayData::add;
   using ArrayData::remove;
-  using ArrayData::nvGet;
   using ArrayData::release;
 
 //////////////////////////////////////////////////////////////////////
 // Friends
 
 private:
-  friend struct ArrayInit;
+  friend struct array::HashTable<SetArray, SetArrayElm>;
   friend struct MemoryProfile;
   friend struct jit::ArrayOffsetProfile;
   friend struct EmptyArray;
@@ -468,7 +393,7 @@ private:
   friend struct c_ImmSet;
   friend struct c_AwaitAllWaitHandle;
 
-  friend size_t getMemSize(const ArrayData*);
+  friend size_t getMemSize(const ArrayData*, bool);
   template <typename AccessorT, class ArrayT>
   friend SortFlavor genericPreSort(ArrayT&, const AccessorT&, bool);
 
@@ -476,46 +401,48 @@ private:
 // ArrayData API
 
 public:
-  static const TypedValue* NvGetInt(const ArrayData*, int64_t);
-  static const TypedValue* NvGetStr(const ArrayData*, const StringData*);
-  static const TypedValue* NvTryGetInt(const ArrayData*, int64_t);
-  static const TypedValue* NvTryGetStr(const ArrayData*, const StringData*);
-  static Cell NvGetKey(const ArrayData*, ssize_t);
+  static tv_rval NvTryGetInt(const ArrayData*, int64_t);
+  static tv_rval NvTryGetStr(const ArrayData*, const StringData*);
+  static tv_rval RvalIntStrict(const ArrayData* ad, int64_t k) {
+    return NvTryGetInt(ad, k);
+  }
+  static tv_rval RvalStrStrict(const ArrayData* ad, const StringData* k) {
+    return NvTryGetStr(ad, k);
+  }
+  static tv_rval RvalAtPos(const ArrayData* ad, ssize_t pos) {
+    return GetValueRef(ad, pos);
+  }
   static size_t Vsize(const ArrayData*);
-  static const Variant& GetValueRef(const ArrayData*, ssize_t);
+  static tv_rval GetValueRef(const ArrayData*, ssize_t);
   static bool IsVectorData(const ArrayData*);
   static bool ExistsInt(const ArrayData*, int64_t);
   static bool ExistsStr(const ArrayData*, const StringData*);
-  static ArrayLval LvalInt(ArrayData*, int64_t, bool);
-  static ArrayLval LvalIntRef(ArrayData*, int64_t, bool);
-  static ArrayLval LvalStr(ArrayData*, StringData*, bool);
-  static ArrayLval LvalStrRef(ArrayData*, StringData*, bool);
-  static ArrayLval LvalNew(ArrayData*, bool);
-  static ArrayLval LvalNewRef(ArrayData*, bool);
-  static ArrayData* SetRefInt(ArrayData*, int64_t, Variant&, bool);
-  static ArrayData* SetRefStr(ArrayData*, StringData*, Variant&, bool);
+  static arr_lval LvalInt(ArrayData*, int64_t, bool);
+  static arr_lval LvalIntRef(ArrayData*, int64_t, bool);
+  static arr_lval LvalStr(ArrayData*, StringData*, bool);
+  static arr_lval LvalStrRef(ArrayData*, StringData*, bool);
+  static arr_lval LvalNew(ArrayData*, bool);
+  static arr_lval LvalNewRef(ArrayData*, bool);
   static ArrayData* SetInt(ArrayData*, int64_t, Cell, bool);
   static ArrayData* SetStr(ArrayData*, StringData*, Cell, bool);
+  static ArrayData* SetWithRefInt(ArrayData*, int64_t, TypedValue, bool);
+  static ArrayData* SetWithRefStr(ArrayData*, StringData*, TypedValue, bool);
+  static ArrayData* SetRefInt(ArrayData*, int64_t, tv_lval, bool);
+  static ArrayData* SetRefStr(ArrayData*, StringData*, tv_lval, bool);
   static ArrayData* RemoveInt(ArrayData*, int64_t, bool);
   static ArrayData* RemoveStr(ArrayData*, const StringData*, bool);
-  static ssize_t IterBegin(const ArrayData*);
-  static ssize_t IterLast(const ArrayData*);
-  static ssize_t IterEnd(const ArrayData*);
-  static ssize_t IterAdvance(const ArrayData*, ssize_t);
-  static ssize_t IterRewind(const ArrayData*, ssize_t);
   static constexpr auto ValidMArrayIter = &ArrayCommon::ValidMArrayIter;
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter&);
   static ArrayData* Copy(const ArrayData*);
-  static ArrayData* CopyWithStrongIterators(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, Cell, bool);
-  static ArrayData* AppendRef(ArrayData*, Variant&, bool);
-  static ArrayData* AppendWithRef(ArrayData*, const Variant&, bool);
+  static ArrayData* AppendRef(ArrayData*, tv_lval, bool);
+  static ArrayData* AppendWithRef(ArrayData*, TypedValue, bool);
   static ArrayData* PlusEq(ArrayData*, const ArrayData*);
   static ArrayData* Merge(ArrayData*, const ArrayData*);
   static ArrayData* Pop(ArrayData*, Variant&);
   static ArrayData* Dequeue(ArrayData*, Variant&);
-  static ArrayData* Prepend(ArrayData*, Cell, bool);
+  static ArrayData* Prepend(ArrayData*, Cell);
   static void Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static ArrayData* Escalate(const ArrayData*);
@@ -523,6 +450,9 @@ public:
   static constexpr auto ToVec = &ArrayCommon::ToVec;
   static ArrayData* ToPHPArray(ArrayData*, bool);
   static ArrayData* ToKeyset(ArrayData*, bool);
+  static constexpr auto ToVArray = &ArrayCommon::ToVArray;
+  static ArrayData* ToDArray(ArrayData*, bool);
+  static ArrayData* ToShape(ArrayData*, bool);
   static bool Equal(const ArrayData*, const ArrayData*);
   static bool NotEqual(const ArrayData*, const ArrayData*);
   static bool Same(const ArrayData*, const ArrayData*);
@@ -534,22 +464,10 @@ private:
   struct Initializer;
   static Initializer s_initializer;
 
-  /*
-   * Some of these are packed into qword-sized unions so we can
-   * combine stores during initialization. (gcc won't do it on its own.)
-   */
-
-  union {
-    struct {
-      uint32_t m_scale; // Size-class equal to 1/4 table size.
-      uint32_t m_used;  // Number of used entries in the hash.
-                        // (includes tombstones)
-    };
-    uint64_t m_scale_used;
-  };
   uint64_t m_padding;
 };
 
+HASH_TABLE_CHECK_OFFSETS(SetArray, SetArrayElm)
 //////////////////////////////////////////////////////////////////////
 
 }

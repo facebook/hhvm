@@ -1,29 +1,29 @@
 
-Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 28
+Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 26
 Instance += destroyed!
 
-Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 29
+Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 27
 Instance -= destroyed!
 
-Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 30
+Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 28
 Instance *= destroyed!
 
-Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 31
+Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 29
 Instance /= destroyed!
 
-Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 32
+Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 30
 Instance %= destroyed!
 
-Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 33
+Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 31
 Instance **= destroyed!
 
-Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 34
+Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 32
 Instance &= destroyed!
 
-Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 35
+Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 33
 Instance |= destroyed!
 
-Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 36
+Notice: Object of class D could not be converted to int in %s/arithmetic/power-assign-decref.php on line 34
 Instance ^= destroyed!
 int(2)
 int(0)

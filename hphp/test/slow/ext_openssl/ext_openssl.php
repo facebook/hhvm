@@ -356,8 +356,11 @@ function test_openssl_decrypt_long() {
   var_dump($pt1 === $pt);
 }
 
+
 //////////////////////////////////////////////////////////////////////
 
+<<__EntryPoint>>
+function main_ext_openssl() {
 test_openssl_csr_export_to_file();
 test_openssl_csr_get_public_key();
 test_openssl_csr_get_subject();
@@ -386,3 +389,4 @@ test_openssl_encrypt();
 test_openssl_digest();
 test_openssl_encrypt_long();
 test_openssl_decrypt_long();
+}

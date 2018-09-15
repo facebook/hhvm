@@ -10,6 +10,9 @@ function test(SplDoublyLinkedList $l) {
   echo PHP_EOL;
 }
 
+
+<<__EntryPoint>>
+function main_unset_non_array() {
 echo "FIFO:", PHP_EOL;
 test(new SplDoublyLinkedList());
 
@@ -19,3 +22,4 @@ $list->setIteratorMode(SplDoublyLinkedList::IT_MODE_LIFO);
 echo "-------------------------", PHP_EOL;
 echo "LIFO:", PHP_EOL;
 test($list);
+}

@@ -1,0 +1,2 @@
+
+Fatal error\: (syntax error, unexpected '\='|Array-like class consts are not valid lvalues) in [^\r\n]+test\/slow\/const_array_assign.php on line 7

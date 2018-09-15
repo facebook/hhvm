@@ -1,0 +1,6 @@
+File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required_in_non_strict_mode.php", line 9, characters 38-74:
+Invalid argument (Typing[4110])
+File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required_in_non_strict_mode.php", line 6, characters 54-69:
+This is varray_or_darray, which requires arraykey-typed keys when used with an array (used like a hashtable)
+File "disallow_darray_with_wrong_key_type_where_varray_or_darray_is_required_in_non_strict_mode.php", line 5, characters 67-70:
+It is incompatible with a bool

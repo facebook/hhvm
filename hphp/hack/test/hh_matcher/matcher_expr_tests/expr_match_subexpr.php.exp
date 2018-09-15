@@ -1,3 +1,0 @@
-6:     $a = true;
-8:     echo true;
-9:     return $b && true;

@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/vasm-print.h"
 
+#include <sstream>
 #include <type_traits>
 
 #include "hphp/runtime/base/stats.h"
@@ -143,7 +144,11 @@ struct FormatVisitor {
   void imm(RoundDirection rd) {
     str << sep() << show(rd);
   }
-  void imm(Vflags fl) {}
+  void imm(Vflags /*fl*/) {}
+
+  void imm(Reason r) {
+    str << sep() << show(r);
+  }
 
   void imm(RegSet x) { print(x); }
   void imm(ComparisonPred x) {

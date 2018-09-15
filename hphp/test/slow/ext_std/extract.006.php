@@ -7,4 +7,8 @@ function foo() {
     var_dump($this);
 }
 
+
+<<__EntryPoint>>
+function main_extract_006() {
 foo();
+}

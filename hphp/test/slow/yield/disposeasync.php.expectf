@@ -1,0 +1,2 @@
+
+Fatal error: 'yield' is not allowed in constructor, destructor, or magic methods in %s/disposeasync.php on line 5

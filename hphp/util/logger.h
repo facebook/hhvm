@@ -42,9 +42,15 @@ struct ErrorLogFileData {
   {}
   std::string logFile;
   std::string symLink;
-  int periodMultiplier;
+  int periodMultiplier{};
   bool isPipeOutput() const { return !logFile.empty() && logFile[0] == '|'; }
   bool hasTemplate() const { return logFile.find('%') != std::string::npos; }
+};
+
+struct LoggerHook {
+  virtual ~LoggerHook() {}
+  virtual void operator()(const char* header, const char* msg,
+                          const char* ending) = 0;
 };
 
 struct Logger {
@@ -93,8 +99,8 @@ struct Logger {
   template<typename... Args> static void FInfo(Args&&... args);
   template<typename... Args> static void FVerbose(Args&&... args);
 
-  static void Log(LogLevelType level, const char *type, const Exception &e,
-                  const char *file = nullptr, int line = 0);
+  static void Log(LogLevelType level, const char* type, const Exception& e,
+                  const char* file = nullptr, int line = 0);
   static void OnNewRequest();
   static void ResetRequestCount();
 
@@ -102,12 +108,11 @@ struct Logger {
   static void ClearThreadLog();
   static void UnlimitThreadMessages();
 
-  typedef void (*PFUNC_LOG)(const char *header, const char *msg,
-                            const char *ending, void *data);
-  static void SetThreadHook(PFUNC_LOG func, void *data);
+  static void SetThreadHook(LoggerHook*);
 
   static constexpr const char *DEFAULT = "Default";
   static void SetTheLogger(const std::string &name, Logger* newLogger);
+  static bool IsDefaultLogger(const std::string& name);
 
   static char *EscapeString(const std::string &msg);
 
@@ -132,11 +137,9 @@ protected:
     LogFileFlusher flusher;
     FILE *log{nullptr};
     bool threadLogOnly{false};
-    PFUNC_LOG hook{nullptr};
-    void *hookData;
-    TYPE_SCAN_CONSERVATIVE_FIELD(hookData);
+    LoggerHook* hook{nullptr};
   };
-  static DECLARE_THREAD_LOCAL(ThreadData, s_threadData);
+  static THREAD_LOCAL(ThreadData, s_threadData);
 
   static void LogImpl(LogLevelType level, const std::string &msg,
                       const StackTrace *stackTrace,
@@ -159,12 +162,12 @@ protected:
   // Returns (lines, bytes) it's going to output. Used for monitoring growth.
   virtual std::pair<int, int> flush() { return std::make_pair(0, 0); }
 
-  virtual void setBatchSize(size_t bsize) {}
+  virtual void setBatchSize(size_t /*bsize*/) {}
 
   // flush the log after this timeout (in milliseconds) has been exceeded.
   // 0 will disable the timeout and flush only when the batch size has been
   // met.
-  virtual void setFlushTimeout(std::chrono::milliseconds timeoutMs) {}
+  virtual void setFlushTimeout(std::chrono::milliseconds /*timeoutMs*/) {}
 
   // deduce where to write log
   virtual FILE* output();

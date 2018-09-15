@@ -32,10 +32,6 @@ w
     at %s/async_stack.php:%d
 #2  main (42)
     at %s/async_stack.php:%d
-wa
-Fetching async stacktrace...
-switching stack contexts (sync->async) resetting stack state
-(no async stacktrace to display)
 c
 In genBar
 int(43)
@@ -48,7 +44,6 @@ Breakpoint 4 reached at genBar() on line %d of %s/async_stack.php
   %d   return $a + 2;
 
 w
-switching stack contexts (async->sync) resetting stack state
 #0   ()
     at %s/async_stack.php:%d
 #1  genBar (43)
@@ -60,16 +55,6 @@ switching stack contexts (async->sync) resetting stack state
     at %s/async_stack.php:%d
 #5  main (42)
     at %s/async_stack.php:%d
-wa
-Fetching async stacktrace...
-switching stack contexts (sync->async) resetting stack state
-#0  genBar [%d]
-#1  <await-all> [%d]
-#2  genList [%d]
-    at %s/async_stack.php:%d
-#3  genFoo [%d]
-    at %s/async_stack.php:%d
-#4  <<join>>
 c
 Finished in genBar
 Breakpoint 4 reached at genBar() on line 29 of %s/async_stack.php
@@ -78,7 +63,6 @@ Breakpoint 4 reached at genBar() on line 29 of %s/async_stack.php
   %d   return $a + 2;
 
 w
-switching stack contexts (async->sync) resetting stack state
 #0   ()
     at %s/async_stack.php:%d
 #1  genBar (44)
@@ -90,16 +74,6 @@ switching stack contexts (async->sync) resetting stack state
     at %s/async_stack.php:%d
 #5  main (42)
     at %s/async_stack.php:%d
-wa
-Fetching async stacktrace...
-switching stack contexts (sync->async) resetting stack state
-#0  genBar [%d]
-#1  <await-all> [%d]
-#2  genList [%d]
-    at %s/async_stack.php:%d
-#3  genFoo [%d]
-    at %s/async_stack.php:%d
-#4  <<join>>
 c
 Finished in genBar
 Breakpoint 3 reached at gen2() on line 20 of %s/async_stack.php
@@ -108,7 +82,6 @@ Breakpoint 3 reached at gen2() on line 20 of %s/async_stack.php
   %d   error_log('Finished in gen2');
 
 w
-switching stack contexts (async->sync) resetting stack state
 #0   ()
     at %s/async_stack.php:%d
 #1  gen2 (45)
@@ -120,16 +93,6 @@ switching stack contexts (async->sync) resetting stack state
     at %s/async_stack.php:%d
 #5  main (42)
     at %s/async_stack.php:%d
-wa
-Fetching async stacktrace...
-switching stack contexts (sync->async) resetting stack state
-#0  gen2 [%d]
-#1  <await-all> [%d]
-#2  genList [%d]
-    at %s/async_stack.php:%d
-#3  genFoo [%d]
-    at %s/async_stack.php:%d
-#4  <<join>>
 c
 In gen1
 Finished in gen1
@@ -139,7 +102,6 @@ Breakpoint 1 reached at gen1() on line 13 of %s/async_stack.php
   %d   return $a + 1;
 
 w
-switching stack contexts (async->sync) resetting stack state
 #0   ()
     at %s/async_stack.php:%d
 #1  gen1 (45)
@@ -153,16 +115,6 @@ switching stack contexts (async->sync) resetting stack state
     at %s/async_stack.php:%d
 #6  main (42)
     at %s/async_stack.php:%d
-w a
-Fetching async stacktrace...
-switching stack contexts (sync->async) resetting stack state
-#0  gen2 [%d]
-#1  <await-all> [%d]
-#2  genList [%d]
-    at %s/async_stack.php:%d
-#3  genFoo [%d]
-    at %s/async_stack.php:%d
-#4  <<join>>
 c
 Breakpoint 2 reached at gen1() on line 14 of %s/async_stack.php
   %d   await RescheduleWaitHandle::Create(0, 0); // simulate blocking I/O
@@ -170,7 +122,6 @@ Breakpoint 2 reached at gen1() on line 14 of %s/async_stack.php
   %d }
 
 w
-switching stack contexts (async->sync) resetting stack state
 #0   ()
     at %s/async_stack.php:%d
 #1  gen1 (45)
@@ -185,18 +136,6 @@ switching stack contexts (async->sync) resetting stack state
     at %s/async_stack.php:%d
 #7  main (42)
     at %s/async_stack.php:%d
-wa
-Fetching async stacktrace...
-switching stack contexts (sync->async) resetting stack state
-#0  gen1 [%d]
-#1  <<join>>
-#2  gen2 [%d]
-#3  <await-all> [%d]
-#4  genList [%d]
-    at %s/async_stack.php:%d
-#5  genFoo [%d]
-    at %s/async_stack.php:%d
-#6  <<join>>
 c
 Finished in gen2
 Breakpoint 6 reached at genFoo() on line 42 of %s/async_stack.php

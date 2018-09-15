@@ -1,4 +1,4 @@
-<?
+<?hh
 
 class MyClass {
   public static $x;

@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/parser/parser.h"
 #include "hphp/compiler/construct.h"
 #include "hphp/compiler/option.h"
@@ -42,6 +43,10 @@
 
 #ifdef HPHP_PARSER_ERROR
 #undef HPHP_PARSER_ERROR
+#endif
+
+#ifdef HPHP_PARSER_ERROR_AT
+#undef HPHP_PARSER_ERROR_AT
 #endif
 
 namespace HPHP {
@@ -123,16 +128,16 @@ public:
          AnalysisResultPtr ar, int fileSize = 0);
 
   // implementing ParserBase
-  virtual bool parseImpl();
+  bool parseImpl() override;
   virtual bool parseImpl5();
   virtual bool parseImpl7();
   bool parse();
-  virtual void error(ATTRIBUTE_PRINTF_STRING const char* fmt, ...)
-    ATTRIBUTE_PRINTF(2,3);
+  void error(ATTRIBUTE_PRINTF_STRING const char* fmt, ...) override
+      ATTRIBUTE_PRINTF(2, 3);
   IMPLEMENT_XHP_ATTRIBUTES;
 
-  virtual void fatal(const Location* loc, const char* msg);
-  virtual void parseFatal(const Location* loc, const char* msg);
+  void fatal(const Location* loc, const char* msg) override;
+  void parseFatal(const Location* loc, const char* msg) override;
   std::string errString();
 
   // result
@@ -147,10 +152,9 @@ public:
                   bool constant = false,
                   const std::string &docComment = "");
   void onStaticVariable(Token &out, Token *exprs, Token &var, Token *value);
-  void onClassVariableModifer(Token &mod) {}
   void onClassVariableStart(Token &out, Token *modifiers, Token &decl,
-                            Token *type, bool abstract = false,
-                            bool typeconst = false,
+                            Token *type, Token *attr,
+                            bool abstract = false, bool typeconst = false,
                             const TypeAnnotationPtr& typeAnnot = nullptr);
   void onClassVariable(Token &out, Token *exprs, Token &var, Token *value);
   void onClassConstant(Token &out, Token *exprs, Token &var, Token &value);
@@ -166,7 +170,7 @@ public:
   void onStaticMember(Token &out, Token &cls, Token &name);
   void onRefDim(Token &out, Token &var, Token &offset);
   void onCallParam(Token &out, Token *params, Token &expr,
-                   bool ref, bool unpack);
+                   ParamMode mode, bool unpack);
   void onCall(Token &out, bool dynamic, Token &name, Token &params, Token *cls);
   void onEncapsList(Token &out, int type, Token &list);
   void addEncap(Token &out, Token *list, Token &expr, int type);
@@ -178,6 +182,7 @@ public:
   void onConstantValue(Token &out, Token &constant);
   void onScalar(Token &out, int type, Token &scalar);
   void onExprListElem(Token &out, Token *exprs, Token &expr);
+  void onOptExprListElem(Token &out, Token *exprs, Token &expr);
 
   void onObjectProperty(Token &out, Token &base,
                         PropAccessType propAccessType, Token &prop);
@@ -189,8 +194,6 @@ public:
 
   void onListAssignment(Token &out, Token &vars, Token *expr,
                         bool rhsFirst = false);
-  void onAListVar(Token &out, Token *list, Token *var);
-  void onAListSub(Token &out, Token *list, Token &sublist);
   void onAssign(Token &out, Token &var, Token &expr, bool ref,
                 bool rhsFirst = false);
   void onAssignNew(Token &out, Token &var, Token &name, Token &args);
@@ -200,13 +203,14 @@ public:
   void onQOp(Token &out, Token &exprCond, Token *expYes, Token &expNo);
   void onNullCoalesce(Token &out, Token &expFirst, Token &expSecond);
   void onArray(Token &out, Token &pairs, int op = T_ARRAY);
-  void onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
+  void onArrayPair(Token &out, Token *pairs, Token *name, Token *value,
                    bool ref);
   void onDict(Token &out, Token &pairs);
   void onVec(Token& out, Token& exprs);
   void onKeyset(Token& out, Token& exprs);
+  void onVArray(Token& out, Token& exprs);
+  void onDArray(Token& out, Token& exprs);
   void onEmptyCollection(Token &out);
-  void onCollectionPair(Token &out, Token *pairs, Token *name, Token &value);
   void onUserAttribute(Token &out, Token *attrList, Token &name, Token &value);
   void onClassConst(Token &out, Token &cls, Token &name, bool text);
   void onClassClass(Token &out, Token &cls, Token &name, bool text);
@@ -218,7 +222,7 @@ public:
                        Token &type, Token &var,
                        bool ref, Token *attr, Token *modifier);
   void onParam(Token &out, Token *params, Token &type, Token &var,
-               bool ref, Token *defValue, Token *attr, Token *modifier);
+               ParamMode mode, Token *defValue, Token *attr, Token *modifier);
   void onClassStart(int type, Token &name);
   void onClass(Token &out, int type, Token &name, Token &base,
                Token &baseInterface, Token &stmt, Token *attr,
@@ -247,6 +251,7 @@ public:
   void onMemberModifier(Token &out, Token *modifiers, Token &modifier);
   void onStatementListStart(Token &out);
   void addStatement(Token &out, Token &stmts, Token &new_stmt);
+  void makeStatementList(Token &out, Token &stmt);
   void addTopStatement(Token &new_stmt);
   void onClassStatement(Token &out, Token &stmts, Token &new_stmt) {
     addStatement(out, stmts, new_stmt);
@@ -282,6 +287,8 @@ public:
   void onTry(Token &out, Token &tryStmt, Token &className, Token &var,
              Token &catchStmt, Token &catches, Token &finallyStmt);
   void onTry(Token &out, Token &tryStmt, Token &finallyStmt);
+  void onUsing(Token &out, Token &async, bool wholeFunc, Token &usingExpr,
+               Token *usingStmt);
   void onCatch(Token &out, Token &catches, Token &className, Token &var,
                Token &stmt);
   void onFinally(Token &out, Token &stmt);
@@ -302,15 +309,21 @@ public:
   void onLabel(Token &out, Token &label);
   void onGoto(Token &out, Token &label, bool limited);
   void setTypeVars(Token &out, const Token &name);
-  void onTypedef(Token& out, const Token& name, const Token& type,
+  void onTypedef(Token& out, Token& name, const Token& type,
                  const Token* attr = nullptr);
 
   void onTypeAnnotation(Token& out, const Token& name, const Token& typeArgs);
   void onTypeList(Token& type1, const Token& type2);
   void onTypeSpecialization(Token& type, char specialization);
+  void onShapeFieldSpecialization(Token& shapeField, char specialization);
   void onClsCnsShapeField(Token& out, const Token& cls, const Token& cns,
     const Token& value);
-  void onShape(Token& out, const Token& shapeMemberList);
+  void onShape(
+    Token& out, const Token& shapeMemberList, bool terminatedWithEllipsis);
+  // for correctly tracking XHP spread operator names
+  void onXhpAttributesStart();
+  void onXhpAttributeSpread(Token& out, Token* pairs, Token& expr);
+  void onXhpAttributesEnd();
 
   // for namespace support
   void onNamespaceStart(const std::string &ns, bool file_scope = false);
@@ -353,7 +366,9 @@ public:
   void onGroupUse(const std::string &prefix, const Token &tok,
                   UseDeclarationConsumer f);
 
+  void useClassAndNamespace(const std::string &fn, const std::string &as);
   void useClass(const std::string &fn, const std::string &as);
+  void useNamespace(const std::string &fn, const std::string &as);
   void useFunction(const std::string &fn, const std::string &as);
   void useConst(const std::string &cnst, const std::string &as);
 
@@ -385,15 +400,25 @@ public:
   void onScopeLabel(const Token& stmt, const Token& label);
 
   /*
+   * Called at the end of a function to close any whole-function using
+   * statements.
+   */
+  void closeActiveUsings();
+
+  /*
    * Called whenever a label scope ends. The fresh parameter has the
    * same meaning as for onNewLabelScope.
    */
   void onCompleteLabelScope(bool fresh);
 
-  virtual void invalidateGoto(TStatementPtr stmt, GotoError error);
-  virtual void invalidateLabel(TStatementPtr stmt);
+  /*
+   * Called once for each whole-function using
+   * statement. onCompleteLabelScope(true) will clean up any active using
+   * statements at the end of the function.
+   */
+  void pushActiveUsing();
 
-  virtual TStatementPtr extractStatement(ScannerToken *stmt);
+  TStatementPtr extractStatement(ScannerToken* stmt) override;
 
   FileScopePtr getFileScope() { return m_file; }
 
@@ -441,6 +466,7 @@ private:
   std::vector<std::string> m_comments; // for docComment stack
   std::vector<std::vector<BlockScopePtr>> m_scopes;
   std::vector<std::vector<LabelScopePtr>> m_labelScopes;
+  std::vector<int> m_activeUsings;
   std::vector<FunctionContext> m_funcContexts;
   std::vector<ScalarExpressionPtr> m_compilerHaltOffsetVec;
   std::stack<ClassContext> m_clsContexts;
@@ -475,14 +501,14 @@ private:
 
   void setHasNonEmptyReturn(ConstructPtr blame);
 
-  void invalidYield();
   void setIsGenerator();
 
-  void invalidAwait();
   void setIsAsync();
 
-  static bool canBeAsyncOrGenerator(const std::string& funcName,
-                                    const std::string& clsName);
+  static bool canBeAsync(const std::string& funcName,
+                         const std::string& clsName);
+  static bool canBeGenerator(const std::string& funcName,
+                             const std::string& clsName);
   void checkFunctionContext(const std::string& funcName,
                             FunctionContext& funcContext,
                             ModifierExpressionPtr modifiers,
@@ -503,7 +529,8 @@ private:
   ExpressionPtr getDynamicVariable(ExpressionPtr exp, bool encap);
   ExpressionPtr createDynamicVariable(ExpressionPtr exp);
 
-  void checkThisContext(const std::string& var, ThisContextError error);
+  void checkThisContext(ExpressionPtr e,
+    const std::string& var, ThisContextError error);
   void checkThisContext(Token &var, ThisContextError error);
   void checkThisContext(ExpressionPtr e, ThisContextError error);
   void checkThisContext(ExpressionListPtr params, ThisContextError error);
@@ -526,10 +553,10 @@ public:
    */
   struct AliasTable {
     enum class AliasFlags {
-      None = 0,
+      None = 0x0,
       HH = 0x1,
       PHP7_ScalarTypes = 0x2,
-      PHP7_EngineExceptions = 0x4,
+      RuntimeOption = 0x4,
     };
 
     struct AutoAlias {
@@ -553,11 +580,11 @@ public:
     AliasTable(const AutoAliasMap& aliases,
                std::function<AliasFlags ()> autoOracle);
 
-    std::string getName(const std::string& alias, int line_no, bool forNs);
+    std::string getName(const std::string& alias, int line_no);
     std::string getNameRaw(const std::string& alias);
     AliasType getType(const std::string& alias);
     int getLine(const std::string& alias);
-    bool isAliased(const std::string& alias, bool forNs);
+    bool isAliased(const std::string& alias);
     void set(const std::string& alias,
              const std::string& name,
              AliasType type,
@@ -588,20 +615,40 @@ private:
   NamespaceState m_nsState;
   bool m_nsFileScope;
   std::string m_namespace; // current namespace
-  AliasTable m_nsAliasTable;
   std::vector<uint32_t> m_nsStack;
+  int m_xhpSpreadCount; // how many xhp spread operators have we labeled
+  std::vector<uint32_t> m_xhpSpreadStack;
 
-  // Function aliases
+  /* Namespace aliases:
+   *  - RuntimeOption::AliasedNamespace
+   *  - `use Foo\bar`
+   *  - Potential future: `use namespace Foo\bar`
+   */
+  AliasTable m_nsAliasTable;
+
+  /* Class aliases:
+   * - auto-aliased classes, e.g. `Vector`, `vec`)
+   * - `use Foo\bar`
+   * - Potential future: `use type Foo\bar`
+   */
+  AliasTable m_classAliasTable;
+
+  /* Function aliases:
+   *  - `use function Foo\bar`
+   */
   hphp_string_iset m_fnTable;
   hphp_string_imap<std::string> m_fnAliasTable;
 
-  // Constant aliases
+  /* Constant aliases:
+   *  - `use const Foo\bar`
+   */
   hphp_string_set m_cnstTable;
   hphp_string_map<std::string> m_cnstAliasTable;
 
-  void registerAlias(std::string name);
+  void registerClassAlias(std::string name);
   AliasFlags getAliasFlags();
   const AutoAliasMap& getAutoAliasedClasses();
+  const AutoAliasMap& getAutoAliasedNamespaces();
 };
 
 inline Parser::AliasFlags operator|(const Parser::AliasFlags& lhs,
@@ -623,6 +670,19 @@ inline void HPHP_PARSER_ERROR(const char* fmt,
 
 inline void HPHP_PARSER_ERROR(const char* msg, Parser* p) {
   throw ParseTimeFatalException(p->file(), p->line1(), "%s", msg);
+}
+
+template<typename... Args>
+inline void HPHP_PARSER_ERROR_AT(const char* fmt,
+                       Parser* p,
+                       int line,
+                       Args&&... args) {
+  throw ParseTimeFatalException(p->file(), line, fmt, args...);
+}
+
+inline void HPHP_PARSER_ERROR_AT(const char* msg, Parser* p,
+  int line) {
+  throw ParseTimeFatalException(p->file(), line, "%s", msg);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

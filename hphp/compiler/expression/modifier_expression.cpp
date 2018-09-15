@@ -41,12 +41,6 @@ void ModifierExpression::add(int modifier) {
   m_modifiers.push_back(modifier);
 }
 
-void ModifierExpression::remove(int modifier) {
-  m_modifiers.erase(
-    std::remove(m_modifiers.begin(), m_modifiers.end(), modifier),
-    m_modifiers.end());
-}
-
 int ModifierExpression::operator[](int index) {
   assert(index >= 0 && index < getCount());
   return m_modifiers[index];
@@ -152,16 +146,10 @@ bool ModifierExpression::validForTraitAliasRule() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// static analysis functions
-
-void ModifierExpression::analyzeProgram(AnalysisResultPtr ar) {
-  // do nothing
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
-void ModifierExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
+void ModifierExpression::outputPHP(CodeGenerator& cg,
+                                   AnalysisResultPtr /*ar*/) {
   if (m_hasPrivacy) {
     if (m_modifiers.empty()) {
       cg_printf("public ");
@@ -181,6 +169,7 @@ void ModifierExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
   }
 
+  bool saw_async = false;
   for (unsigned int i = 0; i < m_modifiers.size(); i++) {
     switch (m_modifiers[i]) {
     case T_PUBLIC:    break;
@@ -189,9 +178,10 @@ void ModifierExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     case T_STATIC:    cg_printf("static ");    break;
     case T_ABSTRACT:  cg_printf("abstract ");  break;
     case T_FINAL:     cg_printf("final ");     break;
-    case T_ASYNC:     cg_printf("async ");     break;
+    case T_ASYNC:     saw_async = true;        break;
     default:
       assert(false);
     }
   }
+  if (saw_async) cg_printf("async ");
 }

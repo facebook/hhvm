@@ -1,0 +1,441 @@
+==========================================
+Testing free functions....
+
+freeFunc1()
+int(123)
+int(123)
+int(123)
+int(123)
+freeFunc2()
+string(3) "abc"
+freeFunc2()
+int(456)
+string(3) "abc"
+int(456)
+freeFunc2()
+NULL
+NULL
+int(456)
+string(3) "abc"
+freeFunc3()
+string(9) "789 def 1"
+freeFunc3()
+string(9) " 100 1.23"
+freeFunc3()
+string(8) "789 def "
+string(9) "789 def 1"
+string(9) " 100 1.23"
+string(8) "789 def "
+freeFunc3()
+string(8) "123 abc "
+string(8) "123 abc "
+freeFunc3()
+string(11) "456 123 ghi"
+string(11) "456 123 ghi"
+freeFunc4()
+NULL
+NULL
+NULL
+NULL
+freeFunc5()
+NULL
+freeFunc5()
+NULL
+NULL
+NULL
+freeFunc5()
+NULL
+NULL
+NULL
+NULL
+==========================================
+Testing static functions....
+
+Cls1::staticFunc1()
+int(123)
+int(123)
+int(123)
+int(123)
+Cls1::staticFunc2()
+string(3) "abc"
+Cls1::staticFunc2()
+int(456)
+string(3) "abc"
+int(456)
+Cls1::staticFunc2()
+NULL
+NULL
+int(456)
+string(3) "abc"
+Cls1::staticFunc3()
+string(9) "789 def 1"
+Cls1::staticFunc3()
+string(9) " 100 1.23"
+Cls1::staticFunc3()
+string(8) "789 def "
+string(9) "789 def 1"
+string(9) " 100 1.23"
+string(8) "789 def "
+Cls1::staticFunc3()
+string(8) "123 abc "
+string(8) "123 abc "
+Cls1::staticFunc3()
+string(11) "456 123 ghi"
+string(11) "456 123 ghi"
+Cls1::staticFunc4()
+NULL
+NULL
+NULL
+NULL
+Cls1::staticFunc5()
+NULL
+Cls1::staticFunc5()
+NULL
+NULL
+NULL
+Cls1::staticFunc5()
+NULL
+NULL
+NULL
+NULL
+==========================================
+Testing methods....
+
+Cls1::func1()
+int(123)
+int(123)
+int(123)
+int(123)
+Cls1::func2()
+string(3) "abc"
+Cls1::func2()
+int(456)
+string(3) "abc"
+int(456)
+Cls1::func2()
+NULL
+NULL
+int(456)
+string(3) "abc"
+Cls1::func3()
+string(9) "789 def 1"
+Cls1::func3()
+string(9) " 100 1.23"
+Cls1::func3()
+string(8) "789 def "
+string(9) "789 def 1"
+string(9) " 100 1.23"
+string(8) "789 def "
+Cls1::func3()
+string(8) "123 abc "
+string(8) "123 abc "
+Cls1::func3()
+string(11) "456 123 ghi"
+string(11) "456 123 ghi"
+Cls1::func4()
+NULL
+NULL
+NULL
+NULL
+Cls1::func5()
+NULL
+Cls1::func5()
+NULL
+NULL
+NULL
+Cls1::func5()
+NULL
+NULL
+NULL
+NULL
+Cls1::func1()
+int(123)
+int(123)
+int(123)
+int(123)
+Cls1::func2()
+string(3) "abc"
+Cls1::func2()
+int(456)
+string(3) "abc"
+int(456)
+Cls1::func2()
+NULL
+NULL
+int(456)
+string(3) "abc"
+Cls1::func3()
+string(9) "789 def 1"
+Cls1::func3()
+string(9) " 100 1.23"
+Cls1::func3()
+string(8) "789 def "
+string(9) "789 def 1"
+string(9) " 100 1.23"
+string(8) "789 def "
+Cls1::func3()
+string(8) "123 abc "
+string(8) "123 abc "
+Cls1::func3()
+string(11) "456 123 ghi"
+string(11) "456 123 ghi"
+Cls1::func4()
+NULL
+NULL
+NULL
+NULL
+Cls1::func5()
+NULL
+Cls1::func5()
+NULL
+NULL
+NULL
+Cls1::func5()
+NULL
+NULL
+NULL
+NULL
+==========================================
+Testing single methods....
+
+Cls2::func()
+int(123)
+int(123)
+int(123)
+int(123)
+Cls3::func()
+string(3) "abc"
+Cls3::func()
+int(456)
+string(3) "abc"
+int(456)
+Cls3::func()
+NULL
+NULL
+int(456)
+string(3) "abc"
+Cls4::func()
+string(9) "789 def 1"
+Cls4::func()
+string(9) " 100 1.23"
+Cls4::func()
+string(8) "789 def "
+string(9) "789 def 1"
+string(9) " 100 1.23"
+string(8) "789 def "
+Cls4::func()
+string(8) "123 abc "
+string(8) "123 abc "
+Cls4::func()
+string(11) "456 123 ghi"
+string(11) "456 123 ghi"
+Cls5::func()
+NULL
+NULL
+NULL
+NULL
+Cls6::func()
+NULL
+Cls6::func()
+NULL
+NULL
+NULL
+Cls6::func()
+NULL
+NULL
+NULL
+NULL
+==========================================
+Testing trait statics....
+
+Trait1::staticFunc1()
+int(123)
+int(123)
+int(123)
+int(123)
+Trait2::staticFunc2()
+string(3) "abc"
+Trait2::staticFunc2()
+int(456)
+string(3) "abc"
+int(456)
+Trait2::staticFunc2()
+NULL
+NULL
+int(456)
+string(3) "abc"
+Trait3::staticFunc3()
+string(9) "789 def 1"
+Trait3::staticFunc3()
+string(9) " 100 1.23"
+Trait3::staticFunc3()
+string(8) "789 def "
+string(9) "789 def 1"
+string(9) " 100 1.23"
+string(8) "789 def "
+Trait3::staticFunc3()
+string(8) "123 abc "
+string(8) "123 abc "
+Trait3::staticFunc3()
+string(11) "456 123 ghi"
+string(11) "456 123 ghi"
+Trait4::staticFunc4()
+NULL
+NULL
+NULL
+NULL
+Trait5::staticFunc5()
+NULL
+Trait5::staticFunc5()
+NULL
+NULL
+NULL
+Trait5::staticFunc5()
+NULL
+NULL
+NULL
+NULL
+Trait1::staticFunc1()
+int(123)
+int(123)
+int(123)
+int(123)
+Trait2::staticFunc2()
+string(3) "abc"
+Trait2::staticFunc2()
+int(456)
+string(3) "abc"
+int(456)
+Trait2::staticFunc2()
+NULL
+NULL
+int(456)
+string(3) "abc"
+Trait3::staticFunc3()
+string(9) "789 def 1"
+Trait3::staticFunc3()
+string(9) " 100 1.23"
+Trait3::staticFunc3()
+string(8) "789 def "
+string(9) "789 def 1"
+string(9) " 100 1.23"
+string(8) "789 def "
+Trait3::staticFunc3()
+string(8) "123 abc "
+string(8) "123 abc "
+Trait3::staticFunc3()
+string(11) "456 123 ghi"
+string(11) "456 123 ghi"
+Trait4::staticFunc4()
+NULL
+NULL
+NULL
+NULL
+Trait5::staticFunc5()
+NULL
+Trait5::staticFunc5()
+NULL
+NULL
+NULL
+Trait5::staticFunc5()
+NULL
+NULL
+NULL
+NULL
+==========================================
+Testing trait methods....
+
+Trait1::func1()
+int(123)
+int(123)
+int(123)
+int(123)
+Trait2::func2()
+string(3) "abc"
+Trait2::func2()
+int(456)
+string(3) "abc"
+int(456)
+Trait2::func2()
+NULL
+NULL
+int(456)
+string(3) "abc"
+Trait3::func3()
+string(9) "789 def 1"
+Trait3::func3()
+string(9) " 100 1.23"
+Trait3::func3()
+string(8) "789 def "
+string(9) "789 def 1"
+string(9) " 100 1.23"
+string(8) "789 def "
+Trait3::func3()
+string(8) "123 abc "
+string(8) "123 abc "
+Trait3::func3()
+string(11) "456 123 ghi"
+string(11) "456 123 ghi"
+Trait4::func4()
+NULL
+NULL
+NULL
+NULL
+Trait5::func5()
+NULL
+Trait5::func5()
+NULL
+NULL
+NULL
+Trait5::func5()
+NULL
+NULL
+NULL
+NULL
+Trait1::func1()
+int(123)
+int(123)
+int(123)
+int(123)
+Trait2::func2()
+string(3) "abc"
+Trait2::func2()
+int(456)
+string(3) "abc"
+int(456)
+Trait2::func2()
+NULL
+NULL
+int(456)
+string(3) "abc"
+Trait3::func3()
+string(9) "789 def 1"
+Trait3::func3()
+string(9) " 100 1.23"
+Trait3::func3()
+string(8) "789 def "
+string(9) "789 def 1"
+string(9) " 100 1.23"
+string(8) "789 def "
+Trait3::func3()
+string(8) "123 abc "
+string(8) "123 abc "
+Trait3::func3()
+string(11) "456 123 ghi"
+string(11) "456 123 ghi"
+Trait4::func4()
+NULL
+NULL
+NULL
+NULL
+Trait5::func5()
+NULL
+Trait5::func5()
+NULL
+NULL
+NULL
+Trait5::func5()
+NULL
+NULL
+NULL
+NULL

@@ -1,0 +1,12 @@
+        <x:div padding="large">
+          <!--
+            Here is a multiline comment that is very unhelpful. In fact, it is
+            strange that it exists at all, let alone takes up multiple lines
+          -->
+          <x:form id="form" method="post">
+            <x:text-input name="input" placeholder="Type a message." />
+            <x:button use="primary">Submit Form</x:button>
+            <x:button
+              use="other">This is a decoy button meant to confuse you</x:button>
+          </x:form>
+        </x:div>

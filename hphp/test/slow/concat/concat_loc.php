@@ -20,4 +20,8 @@ function x() {
   $z = "asd".(new dtor(0));
   go($z);
 }
+
+<<__EntryPoint>>
+function main_concat_loc() {
 x();
+}

@@ -2,9 +2,8 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
@@ -12,6 +11,16 @@
   Exception representing not finding a class during decl
 *)
 exception Decl_not_found of string
+
+val fun_reactivity :
+  Decl_env.env ->
+  Nast.user_attribute list ->
+  Typing_defs.reactivity
+
+val condition_type_from_attributes:
+  Decl_env.env ->
+  Nast.user_attribute list ->
+  Typing_defs.decl Typing_defs.ty option
 
 (*
  * This function works by side effects. It is adding in the
@@ -27,15 +36,6 @@ val name_and_declare_types_program:
   TypecheckerOptions.t -> Ast.program -> unit
 
 val make_env: TypecheckerOptions.t -> Relative_path.t -> unit
-
-val class_decl:
-  TypecheckerOptions.t -> Nast.class_ -> unit
-
-val fun_decl : Nast.fun_ -> unit
-
-val typedef_decl : Nast.typedef -> unit
-
-val const_decl : Nast.gconst -> unit
 
 val fun_decl_in_env:
   Decl_env.env -> Nast.fun_ -> Typing_defs.decl Typing_defs.fun_type

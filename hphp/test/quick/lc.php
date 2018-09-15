@@ -1,4 +1,4 @@
-<?php
+<?hh
 $arr = array('foo','bar','baz');
 $foo = 'foo';
 $bar = 'bar';

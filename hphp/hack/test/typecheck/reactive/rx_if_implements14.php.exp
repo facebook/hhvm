@@ -1,0 +1,4 @@
+File "rx_if_implements14.php", line 19, characters 3-15:
+Reactive functions can only call other reactive functions. (Typing[4200])
+File "rx_if_implements14.php", line 8, characters 19-25:
+This function is local reactive.

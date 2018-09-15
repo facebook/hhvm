@@ -25,7 +25,6 @@ Tr::__call
 E_USER_DEPRECATED: fMem: message for %s/lang/deprecated.php:49
 fMem
 E_USER_DEPRECATED: fMem: message for %s/lang/deprecated.php:49
-fMem
 
 = builtin =
 E_DEPRECATED: ereg: As of PHP 5.3.0, preg_match is suggested instead for %s/lang/deprecated.php:72

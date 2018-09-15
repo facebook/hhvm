@@ -3,6 +3,9 @@
 class A {
  public $a;
  }
+
+<<__EntryPoint>>
+function main_174() {
 $a = new A;
  $a->a = 'a';
  $b = new A;
@@ -11,3 +14,4 @@ $a = new A;
 print $arr[0]->a;
 sort($arr, SORT_REGULAR);
  print $arr[0]->a;
+}

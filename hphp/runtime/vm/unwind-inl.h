@@ -57,7 +57,7 @@ inline void exception_handler(Action action) {
       return;
     }
 
-    assert(!vmpc());
+    assertx(!vmpc());
     // o will be destroyed at the end of the catch block
     // so we have to make sure the vm state is valid in
     // case a __destruct method needs to run.
@@ -103,10 +103,10 @@ inline void exception_handler(Action action) {
       auto const outer = fp->m_sfp;
       auto const off = outer->func()->base() + fp->m_soff;
       auto const fe = outer->func()->findPrecedingFPI(off);
-      vmpc() = outer->func()->unit()->at(fe->m_fcallOff);
+      vmpc() = outer->func()->unit()->at(fe->m_fpiEndOff);
       assertx(isFCallStar(peek_op(vmpc())));
       vmfp() = outer;
-      assert(vmsp() == reinterpret_cast<Cell*>(fp) - fp->numArgs());
+      assertx(vmsp() == reinterpret_cast<Cell*>(fp) - fp->numArgs());
     } else {
       vmsp() = reinterpret_cast<Cell*>(fp + 1);
     }

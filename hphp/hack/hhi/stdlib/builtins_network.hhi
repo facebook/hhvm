@@ -3,9 +3,8 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
@@ -58,38 +57,73 @@ const int LOG_USER = 8;
 const int LOG_UUCP = 64;
 const int LOG_WARNING = 4;
 
+<<__PHPStdLib>>
 function gethostname();
+<<__PHPStdLib>>
 function gethostbyaddr($ip_address);
+<<__PHPStdLib>>
 function gethostbyname($hostname);
+<<__PHPStdLib>>
 function gethostbynamel($hostname);
+<<__PHPStdLib>>
 function getprotobyname($name);
+<<__PHPStdLib>>
 function getprotobynumber($number);
+<<__PHPStdLib>>
 function getservbyname($service, $protocol);
+<<__PHPStdLib>>
 function getservbyport($port, $protocol);
+<<__PHPStdLib, __Rx>>
 function inet_ntop($in_addr);
+<<__PHPStdLib, __Rx>>
 function inet_pton($address);
+<<__PHPStdLib, __Rx>>
 function ip2long($ip_address);
+<<__PHPStdLib, __Rx>>
 function long2ip($proper_address);
+<<__PHPStdLib>>
 function dns_check_record($host, $type = null);
+<<__PHPStdLib>>
 function checkdnsrr($host, $type = null);
+<<__PHPStdLib>>
 function dns_get_record($hostname, $type = -1, &$authns = null, &$addtl = null);
+<<__PHPStdLib>>
 function dns_get_mx($hostname, &$mxhosts, &$weights = null);
+<<__PHPStdLib>>
 function getmxrr($hostname, &$mxhosts, &$weight = null);
+<<__PHPStdLib>>
 function fsockopen($hostname, $port = -1, &$errnum = null, &$errstr = null, $timeout = 0.0);
+<<__PHPStdLib>>
 function pfsockopen($hostname, $port = -1, &$errnum = null, &$errstr = null, $timeout = 0.0);
+<<__PHPStdLib>>
 function socket_get_status($stream);
+<<__PHPStdLib>>
 function socket_set_blocking($stream, $mode);
+<<__PHPStdLib>>
 function socket_set_timeout($stream, $seconds, $microseconds = 0);
+<<__PHPStdLib>>
 function header($str, $replace = true, $http_response_code = 0);
+<<__PHPStdLib>>
 function http_response_code($response_code = 0);
+<<__PHPStdLib>>
 function headers_list();
+<<__PHPStdLib>>
 function get_http_request_size();
+<<__PHPStdLib>>
 function headers_sent(&$file = null, &$line = null);
+<<__PHPStdLib>>
 function header_register_callback($callback);
+<<__PHPStdLib>>
 function header_remove($name = null);
+<<__PHPStdLib>>
 function setcookie($name, $value = null, $expire = 0, $path = null, $domain = null, $secure = false, $httponly = false);
+<<__PHPStdLib>>
 function setrawcookie($name, $value = null, $expire = 0, $path = null, $domain = null, $secure = false, $httponly = false);
+<<__PHPStdLib>>
 function define_syslog_variables();
+<<__PHPStdLib>>
 function openlog($ident, $option, $facility);
+<<__PHPStdLib>>
 function closelog();
+<<__PHPStdLib>>
 function syslog(int $priority, string $message): bool;

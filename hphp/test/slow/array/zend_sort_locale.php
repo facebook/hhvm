@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_zend_sort_locale() {
 setlocale(LC_ALL, 'fr_FR.ISO8859-1', 'fr_FR');
 $table = array("AB" => "Alberta",
 "BC" => "Colombie-Britannique",
@@ -21,3 +24,4 @@ foreach($table as &$val) {
 }
 unset($val);
 var_dump($table);
+}

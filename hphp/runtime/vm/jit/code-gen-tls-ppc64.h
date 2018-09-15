@@ -34,8 +34,8 @@ namespace HPHP { namespace jit { namespace ppc64 { namespace detail {
  * No segmented memory exists, just need to use relative addressing to r13,
  * therefore no FS segment was specified.
  */
-template<typename T>
-Vptr emitTLSAddr(Vout& v, TLSDatum<T> datum) {
+template <typename T>
+Vptr emitTLSAddr(Vout& /*v*/, TLSDatum<T> datum) {
   uintptr_t vaddr = uintptr_t(datum.tls) - tlsBase();
   return rthreadptr()[vaddr];
 }

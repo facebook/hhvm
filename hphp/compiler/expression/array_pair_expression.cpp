@@ -26,10 +26,9 @@ using namespace HPHP;
 
 ArrayPairExpression::ArrayPairExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
- ExpressionPtr name, ExpressionPtr value, bool ref,
- bool collection /* = false */)
+ ExpressionPtr name, ExpressionPtr value, bool ref)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(ArrayPairExpression)),
-    m_name(name), m_value(value), m_ref(ref), m_collection(collection) {
+    m_name(name), m_value(value), m_ref(ref) {
   if (m_ref) {
     m_value->setContext(Expression::RefValue);
   }
@@ -51,11 +50,14 @@ bool ArrayPairExpression::isScalar() const {
 // parser functions
 
 bool ArrayPairExpression::isScalarArrayPair() const {
+  if (!m_value) return true;
   if (!m_value->isScalar()) return false;
   if (!m_name) return true;
   if (!m_name->isScalar()) return false;
   if (m_name->is(KindOfUnaryOpExpression) &&
       (static_pointer_cast<UnaryOpExpression>(m_name)->getOp() == T_ARRAY ||
+       static_pointer_cast<UnaryOpExpression>(m_name)->getOp() == T_VARRAY ||
+       static_pointer_cast<UnaryOpExpression>(m_name)->getOp() == T_DARRAY ||
        static_pointer_cast<UnaryOpExpression>(m_name)->getOp() == T_VEC ||
        static_pointer_cast<UnaryOpExpression>(m_name)->getOp() == T_DICT ||
        static_pointer_cast<UnaryOpExpression>(m_name)->getOp() == T_KEYSET)) {
@@ -66,16 +68,6 @@ bool ArrayPairExpression::isScalarArrayPair() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-bool ArrayPairExpression::containsDynamicConstant(AnalysisResultPtr ar) const {
-  return (m_name && m_name->containsDynamicConstant(ar)) ||
-    m_value->containsDynamicConstant(ar);
-}
-
-void ArrayPairExpression::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_name) m_name->analyzeProgram(ar);
-  m_value->analyzeProgram(ar);
-}
 
 ConstructPtr ArrayPairExpression::getNthKid(int n) const {
   switch (n) {
@@ -117,5 +109,7 @@ void ArrayPairExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printf(" => ");
   }
   if (m_ref) cg_printf("&");
-  m_value->outputPHP(cg, ar);
+  if (m_value) {
+    m_value->outputPHP(cg, ar);
+  }
 }

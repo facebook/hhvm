@@ -6,4 +6,8 @@ class MyReflectionFunction extends ReflectionFunctionAbstract {
   }
 }
 
+
+<<__EntryPoint>>
+function main_extend_reflection_function_abstract() {
 echo new MyReflectionFunction;
+}

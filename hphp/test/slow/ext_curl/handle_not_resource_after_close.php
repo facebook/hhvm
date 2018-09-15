@@ -12,4 +12,8 @@ function main() {
   var_dump(is_resource($ch));
 }
 
+
+<<__EntryPoint>>
+function main_handle_not_resource_after_close() {
 main();
+}

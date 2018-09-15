@@ -1,6 +1,0 @@
-*** Testing stat() on dir after subdir and file is created in it ***
-bool(true)
-bool(true)
-bool(true)
-
---- Done ---

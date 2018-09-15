@@ -56,7 +56,7 @@ int SSLSocket::GetSSLExDataIndex() {
   if (s_ex_data_index < 0) {
     s_ex_data_index = SSL_get_ex_new_index(0, (void*)"PHP stream index",
                                            nullptr, nullptr, nullptr);
-    assert(s_ex_data_index >= 0);
+    assertx(s_ex_data_index >= 0);
   }
   return s_ex_data_index;
 }
@@ -97,7 +97,7 @@ int SSLSocket::verifyCallback(int preverify_ok, X509_STORE_CTX *ctx) {
 
 const StaticString s_passphrase("passphrase");
 
-int SSLSocket::passwdCallback(char *buf, int num, int verify, void *data) {
+int SSLSocket::passwdCallback(char* buf, int num, int /*verify*/, void* data) {
   /* TODO: could expand this to make a callback into PHP user-space */
   SSLSocket *stream = (SSLSocket *)data;
   String passphrase = stream->m_context[s_passphrase].toString();
@@ -215,8 +215,8 @@ SSL *SSLSocket::createSSL(SSL_CTX *ctx) {
 ///////////////////////////////////////////////////////////////////////////////
 // constructors and destructor
 
-SSLSocket::SSLSocket()
-: Socket(std::make_shared<SSLSocketData>()),
+SSLSocket::SSLSocket(bool nonblocking /* = true*/)
+: Socket(std::make_shared<SSLSocketData>(nonblocking)),
   m_data(static_cast<SSLSocketData*>(getSocketData()))
 {}
 
@@ -228,8 +228,10 @@ SSLSocket::SSLSocket(std::shared_ptr<SSLSocketData> data)
 StaticString s_ssl("ssl");
 
 SSLSocket::SSLSocket(int sockfd, int type, const req::ptr<StreamContext>& ctx,
-                     const char *address /* = NULL */, int port /* = 0 */)
-: Socket(std::make_shared<SSLSocketData>(port, type), sockfd, type, address, port),
+                     const char *address /* = NULL */, int port /* = 0 */,
+                     bool nonblocking /* = true*/)
+: Socket(std::make_shared<SSLSocketData>(port, type, nonblocking),
+        sockfd, type, address, port),
   m_data(static_cast<SSLSocketData*>(getSocketData()))
 {
   if (!ctx) {
@@ -292,7 +294,7 @@ bool SSLSocket::onAccept() {
       m_data->m_method = CryptoMethod::ServerTLS;
       break;
     default:
-      assert(false);
+      assertx(false);
     }
 
     if (setupCrypto() && enableCrypto()) {
@@ -381,7 +383,8 @@ bool SSLSocket::handleError(int64_t nr_bytes, bool is_init) {
 
 req::ptr<SSLSocket> SSLSocket::Create(
   int fd, int domain, const HostURL &hosturl, double timeout,
-  const req::ptr<StreamContext>& ctx
+  const req::ptr<StreamContext>& ctx,
+  bool nonblocking
 ) {
   CryptoMethod method;
   const std::string scheme = hosturl.getScheme();
@@ -404,15 +407,16 @@ req::ptr<SSLSocket> SSLSocket::Create(
   }
 
   return Create(fd, domain, method, hosturl.getHost(), hosturl.getPort(),
-                timeout, ctx);
+                timeout, ctx, nonblocking);
 }
 
 req::ptr<SSLSocket> SSLSocket::Create(
   int fd, int domain, CryptoMethod method, std::string address, int port,
-  double timeout, const req::ptr<StreamContext>& ctx
+  double timeout, const req::ptr<StreamContext>& ctx,
+  bool nonblocking
 ) {
   auto sock = req::make<SSLSocket>(
-    fd, domain, ctx, address.c_str(), port);
+    fd, domain, ctx, address.c_str(), port, nonblocking);
 
   sock->m_data->m_method = method;
   sock->m_data->m_connect_timeout = timeout;
@@ -478,7 +482,7 @@ bool SSLSocket::setupCrypto(SSLSocket *session /* = NULL */) {
   }
 
   if (!m_context.exists(s_verify_peer)) {
-    m_context.add(s_verify_peer, true);
+    m_context.set(s_verify_peer, true);
   }
 
   /* need to do slightly different things, based on client/server method,

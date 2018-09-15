@@ -1,0 +1,2 @@
+File "disallow_destruct_noattr.php", line 5, characters 19-28:
+Destructors are not supported in Hack; use other patterns like IDisposable/using or try/catch instead. (NastCheck[3056])

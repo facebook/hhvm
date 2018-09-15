@@ -1,0 +1,2 @@
+File "namespaces_error.php", line 9, characters 34-35:
+Cannot use function foo as foo because the name is already in use (Parsing[1002])

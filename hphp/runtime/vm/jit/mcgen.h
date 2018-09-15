@@ -33,7 +33,7 @@ namespace jit {
 struct IRUnit;
 struct Vunit;
 
-namespace tc { struct ThreadTCBuffer; }
+namespace tc { struct LocalTCBuffer; }
 
 /*
  * Arguments for the translate() entry points in Translator.
@@ -47,6 +47,10 @@ struct TransArgs {
   Annotations annotations;
   TransFlags flags{0};
   TransID transId{kInvalidTransID};
+  // A sequential per function index to identify optimized
+  // translations in TRACE and StructuredLog output (in particular to
+  // make it possible to cross reference between the two).
+  int optIndex{0};
   TransKind kind{TransKind::Invalid};
   RegionDescPtr region{nullptr};
 };
@@ -89,36 +93,6 @@ struct TransEnv {
 
 namespace mcgen {
 
-struct UseThreadLocalTC {
-  UseThreadLocalTC(UseThreadLocalTC&&) = delete;
-  UseThreadLocalTC& operator=(UseThreadLocalTC&&) = delete;
-
-#ifdef NDEBUG
-  explicit UseThreadLocalTC(tc::ThreadTCBuffer&) {}
-#else
-  explicit UseThreadLocalTC(tc::ThreadTCBuffer& buf);
-  ~UseThreadLocalTC();
-
-private:
-  tc::ThreadTCBuffer& m_buf;
-#endif
-};
-
-struct ReadThreadLocalTC {
-  ReadThreadLocalTC(ReadThreadLocalTC&&) = delete;
-  ReadThreadLocalTC& operator=(ReadThreadLocalTC&&) = delete;
-
-#ifdef NDEBUG
-  explicit ReadThreadLocalTC(const tc::ThreadTCBuffer&) {}
-#else
-  explicit ReadThreadLocalTC(const tc::ThreadTCBuffer& m_buf);
-  ~ReadThreadLocalTC();
-
-private:
-  const tc::ThreadTCBuffer& m_buf;
-#endif
-};
-
 /*
  * Look up or translate a func prologue or func body.
  */
@@ -140,10 +114,13 @@ TCA retranslate(TransArgs args, const RegionContext& ctx);
 bool retranslateOpt(FuncId funcId);
 
 /*
- * In JitPGO mode, check whether enough profile data has been collected and,
- * if we haven't retranslated
+ * In JitPGO mode, run retranslateAll if its enabled, we haven't already run it,
+ * and either force is true, or we've collected "enough" profile data.
+ *
+ * In CLI mode, or when force is true, wait for retranslateAll to
+ * finish; otherwise let it run in parallel.
  */
-void checkRetranslateAll();
+void checkRetranslateAll(bool force = false);
 
 /*
  * Called once when the JIT is activated to initialize internal mcgen structures
@@ -154,7 +131,7 @@ void processInit();
  * Called once before process shutdown. May block to wait for any pending JIT
  * worker threads.
  */
-void processExit();
+void joinWorkerThreads();
 
 /*
  * True iff mcgen::processInit() has been called
@@ -173,19 +150,24 @@ int64_t jitInitTime();
 bool dumpTCAnnotation(const Func& func, TransKind transKind);
 
 /*
- * Is the thread local TC in use
+ * Is still a pending call to retranslateAll()
  */
-bool isLocalTCEnabled();
+bool retranslateAllPending();
 
 /*
- * Expected size of all thread local TC buffers
+ * Whether retranslateAll has been scheduled but has not complete.
  */
-size_t localTCSize();
+bool pendingRetranslateAllScheduled();
 
 /*
- * Per-thread cached TC buffer
+ * Is retranslateAll() finished.
  */
-TCA cachedLocalTCBuffer();
+bool retranslateAllComplete();
+
+/*
+ * How many JIT worker threads are active.
+ */
+int getActiveWorker();
 
 }}}
 

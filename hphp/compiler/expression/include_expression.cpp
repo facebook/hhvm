@@ -17,7 +17,6 @@
 #include "hphp/compiler/expression/include_expression.h"
 #include <map>
 #include "hphp/parser/hphp.tab.hpp"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/statement/statement_list.h"
@@ -26,9 +25,9 @@
 #include "hphp/compiler/expression/binary_op_expression.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/parser/parser.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/runtime-option.h"
 
 using namespace HPHP;
 
@@ -85,9 +84,8 @@ static std::string get_include_file_path(const std::string &source,
     }
 
     // if file cannot be found, resolve it using search paths
-    for (unsigned int i = 0; i < Option::IncludeSearchPaths.size(); i++) {
+    for (std::size_t i = 0; i < Option::IncludeSearchPaths.size(); i++) {
       auto const filename = Option::IncludeSearchPaths[i] + "/" + lit;
-      struct stat sb;
       if (stat(filename.c_str(), &sb) == 0) {
         return filename;
       }
@@ -102,9 +100,9 @@ static std::string get_include_file_path(const std::string &source,
   }
 
   // [IncludeRoot] . 'string'
-  auto const iter = Option::IncludeRoots.find(var);
+  auto const iter = RuntimeOption::IncludeRoots.find(var);
 
-  if (iter != Option::IncludeRoots.end()) {
+  if (iter != RuntimeOption::IncludeRoots.end()) {
     auto includeRoot = iter->second;
     if (!includeRoot.empty()) {
       if (includeRoot[0] == '/') includeRoot = includeRoot.substr(1);
@@ -155,10 +153,9 @@ static void parse_string_arg(ExpressionPtr exp,
   return;
 }
 
-std::string IncludeExpression::CheckInclude(ConstructPtr includeExp,
-                                            FileScopePtr scope,
-                                            ExpressionPtr fileExp,
-                                            bool &documentRoot) {
+std::string
+IncludeExpression::CheckInclude(ConstructPtr /*includeExp*/, FileScopePtr scope,
+                                ExpressionPtr fileExp, bool& documentRoot) {
   auto const& container = scope->getName();
   std::string var, lit;
   parse_string_arg(fileExp, var, lit);
@@ -175,16 +172,14 @@ std::string IncludeExpression::CheckInclude(ConstructPtr includeExp,
 
   auto included = get_include_file_path(container, var, lit, documentRoot);
   if (!included.empty()) {
-    if (included == container) {
-      Compiler::Error(Compiler::BadPHPIncludeFile, includeExp);
-    }
     included = FileUtil::canonicalize(included).toCppString();
     if (!var.empty()) documentRoot = true;
   }
   return included;
 }
 
-void IncludeExpression::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
+void IncludeExpression::onParse(AnalysisResultConstRawPtr ar,
+                                FileScopePtr scope) {
   /* m_documentRoot is a bitfield */
   bool dr = m_documentRoot;
   m_include = CheckInclude(shared_from_this(), scope, m_exp, dr);
@@ -196,7 +191,7 @@ void IncludeExpression::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
 // static analysis functions
 
 FileScopeRawPtr IncludeExpression::getIncludedFile(
-  AnalysisResultConstPtr ar) const {
+  AnalysisResultConstRawPtr ar) const {
   if (m_include.empty()) return FileScopeRawPtr();
   return ar->findFileScope(m_include);
 }
@@ -210,23 +205,18 @@ bool IncludeExpression::isReqLit() const {
     m_op == T_REQUIRE_ONCE && isDocumentRoot();
 }
 
-bool IncludeExpression::analyzeInclude(AnalysisResultConstPtr ar,
+bool IncludeExpression::analyzeInclude(AnalysisResultConstRawPtr ar,
                                        const std::string &include) {
   ConstructPtr self = shared_from_this();
   FileScopePtr file = ar->findFileScope(include);
   if (!file) {
-    Compiler::Error(Compiler::PHPIncludeFileNotFound, self);
     return false;
   }
 
-  FunctionScopePtr func = getFunctionScope();
-  if (func && file->getPseudoMain()) {
-    file->getPseudoMain()->addUse(func, BlockScope::UseKindInclude);
-  }
   return true;
 }
 
-void IncludeExpression::analyzeProgram(AnalysisResultPtr ar) {
+void IncludeExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
   if (!m_include.empty()) {
     if (ar->getPhase() == AnalysisResult::AnalyzeAll ||
         ar->getPhase() == AnalysisResult::AnalyzeFinal) {
@@ -234,13 +224,11 @@ void IncludeExpression::analyzeProgram(AnalysisResultPtr ar) {
     }
   }
 
-  VariableTablePtr var = getScope()->getVariables();
-  var->setAttribute(VariableTable::ContainsLDynamicVariable);
-
-  UnaryOpExpression::analyzeProgram(ar);
+  auto const func = getScope()->getContainingFunction();
+  func->setContainsDynamicVar();
 }
 
-ExpressionPtr IncludeExpression::preOptimize(AnalysisResultConstPtr ar) {
+ExpressionPtr IncludeExpression::preOptimize(AnalysisResultConstRawPtr ar) {
   if (ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
     if (m_include.empty()) {
       bool dr = m_documentRoot;

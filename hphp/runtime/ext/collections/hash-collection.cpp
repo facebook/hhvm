@@ -11,42 +11,16 @@ namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 // HashCollection
 
-/**
- * The HashCollection implementation makes use of s_theEmptyMixedArray, a
- * special static empty array that has all of MixedArray's fields initialized
- * to convenient values.  This "static empty mixed array" is only used
- * internally within the HashCollection implementation and it's never exposed
- * outside of the HashCollection implementation.  hashTab()[0] is set to Empty
- * so that the find() method won't find anything, and m_cap is set to 0 so that
- * any attempt to add an element will trigger a grow operation.
- *
- * Using this static empty mixed array allows us to always assume data() is
- * non-null, and it is better than calling MakeReserveMixed because it avoids
- * doing any allocation.
- */
-
-EmptyMixedArrayStorage s_theEmptyMixedArray;
-
-struct HashCollection::EmptyMixedInitializer {
-  EmptyMixedInitializer() {
-    auto a = reinterpret_cast<MixedArray*>(&s_theEmptyMixedArray);
-    MixedArray::InitSmall(a, StaticValue, 0/*used*/, 0/*nextIntKey*/);
-  }
-};
-
-HashCollection::EmptyMixedInitializer
-HashCollection::s_empty_mixed_initializer;
-
 HashCollection::HashCollection(Class* cls, HeaderKind kind, uint32_t cap)
-  : ObjectData(cls, collections::objectFlags, kind)
-  , m_versionAndSize(0)
-  , m_arr(cap == 0 ? staticEmptyMixedArray() :
-          MixedArray::asMixed(MixedArray::MakeReserveMixed(cap)))
+  : ObjectData(cls, NoInit{}, collections::objectFlags, kind)
+  , m_unusedAndSize(0)
+  , m_arr(cap == 0 ? staticEmptyDictArrayAsMixed() :
+          MixedArray::asMixed(MixedArray::MakeReserveDict(cap)))
 {}
 
 NEVER_INLINE
 void HashCollection::throwTooLarge() {
-  assert(getClassName().size() == 6);
+  assertx(getClassName().size() == 6);
   auto clsName = getClassName().get()->slice();
   String msg(130, ReserveString);
   auto buf = msg.bufferSlice();
@@ -62,7 +36,7 @@ void HashCollection::throwTooLarge() {
 
 NEVER_INLINE
 void HashCollection::throwReserveTooLarge() {
-  assert(getClassName().size() == 6);
+  assertx(getClassName().size() == 6);
   auto clsName = getClassName().get()->slice();
   String msg(80, ReserveString);
   auto buf = msg.bufferSlice();
@@ -87,7 +61,7 @@ int32_t* HashCollection::warnUnbalanced(size_t n, int32_t* ei) const {
 
 NEVER_INLINE
 void HashCollection::warnOnStrIntDup() const {
-  req::hash_set<int64_t> seenVals;
+  req::fast_set<int64_t> seenVals;
 
   auto* eLimit = elmLimit();
   for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
@@ -96,12 +70,12 @@ void HashCollection::warnOnStrIntDup() const {
     if (e->hasIntKey()) {
       newVal = e->ikey;
     } else {
-      assert(e->hasStrKey());
+      assertx(e->hasStrKey());
       // isStriclyInteger() puts the int value in newVal as a side effect.
       if (!e->skey->isStrictlyInteger(newVal)) continue;
     }
 
-    if (seenVals.find(newVal) != seenVals.end()) {
+    if (!seenVals.insert(newVal).second) {
       auto cls = getVMClass()->name()->toCppString();
       auto pos = cls.rfind('\\');
       if (pos != std::string::npos) {
@@ -115,74 +89,58 @@ void HashCollection::warnOnStrIntDup() const {
         newVal,
         newVal
       );
-
       return;
     }
-
-    seenVals.insert(newVal);
   }
   // Do nothing if no 'duplicates' were found.
 }
 
-Array HashCollection::toArray() {
+Array HashCollection::toPHPArrayImpl() {
   if (!m_size) {
     return empty_array();
   }
-  if (UNLIKELY(intLikeStrKeys())) {
-    // In the rare case where this collection contains integer-like string
-    // keys, instead of exposing this collection's buffer we return a copy
-    // of the buffer with the int-like string keys converted to integers.
-    // This is important because int-like string keys cannot be accessed by
-    // user code via the brackets operator (i.e. "$c[$k]").
-    ArrayInit ai(m_size, ArrayInit::Mixed{});
-    auto* eLimit = elmLimit();
-    for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
-      if (e->hasIntKey()) {
-        ai.set((int64_t)e->ikey, tvAsCVarRef(&e->data));
-      } else {
-        assert(e->hasStrKey());
-        ai.set(VarNR::MakeKey(String(StrNR(e->skey))), tvAsCVarRef(&e->data));
-      }
-    }
-    Array arr = ai.toArray();
-    // If both a given integer x and its equivalent string presentation
-    // were both keys in the collection, we better warn the user.
-    if (UNLIKELY(arr.length() < m_size)) warnOnStrIntDup();
-    return arr;
-  }
-  auto ad = const_cast<ArrayData*>(
-    reinterpret_cast<const ArrayData*>(arrayData())
-  );
-  assert(m_size);
-  assert(ad->m_pos == nthElmPos(0));
-  return Array(ad);
+  auto ad = arrayData()->toPHPArray(true);
+  if (UNLIKELY(ad->size() < m_size)) warnOnStrIntDup();
+  assertx(m_size);
+  assertx(ad->m_pos == 0);
+  return Array::attach(ad);
+}
+
+Array HashCollection::toVArray() {
+  if (!m_size) return Array::attach(staticEmptyVArray());
+  auto arr = Array{arrayData()}.toVArray();
+  assertx(arr->m_pos == 0);
+  return arr;
+}
+
+Array HashCollection::toDArray() {
+  if (!m_size) return Array::attach(staticEmptyDArray());
+  auto arr = Array{arrayData()}.toDArray();
+  if (UNLIKELY(arr->size() < m_size)) warnOnStrIntDup();
+  assertx(arr->m_pos == 0);
+  return arr;
 }
 
 Array HashCollection::toKeysArray() {
-  PackedArrayInit ai(m_size);
+  VArrayInit ai(m_size);
   auto* eLimit = elmLimit();
   for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
     if (e->hasIntKey()) {
       ai.append(int64_t{e->ikey});
     } else {
-      assert(e->hasStrKey());
-      ai.append(VarNR(e->skey));
+      assertx(e->hasStrKey());
+      ai.append(VarNR(e->skey).tv());
     }
   }
   return ai.toArray();
 }
 
 Array HashCollection::toValuesArray() {
-  PackedArrayInit ai(m_size);
-  auto* eLimit = elmLimit();
-  for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit)) {
-    ai.append(tvAsCVarRef(&e->data));
-  }
-  return ai.toArray();
+  return toVArray();
 }
 
 void HashCollection::remove(int64_t key) {
-  mutateAndBump();
+  mutate();
   auto p = findForRemove(key, hash_int64(key));
   if (validPos(p)) {
     erase(p);
@@ -190,7 +148,7 @@ void HashCollection::remove(int64_t key) {
 }
 
 void HashCollection::remove(StringData* key) {
-  mutateAndBump();
+  mutate();
   auto p = findForRemove(key, key->hash());
   if (validPos(p)) {
     erase(p);
@@ -198,17 +156,17 @@ void HashCollection::remove(StringData* key) {
 }
 
 void HashCollection::eraseNoCompact(ssize_t pos) {
-  assert(canMutateBuffer());
-  assert(validPos(pos) && !isTombstone(pos));
-  assert(m_size > 0);
+  assertx(canMutateBuffer());
+  assertx(validPos(pos) && !isTombstone(pos));
+  assertx(m_size > 0);
   arrayData()->eraseNoCompact(pos);
   --m_size;
 }
 
 NEVER_INLINE
 void HashCollection::makeRoom() {
-  assert(isFull());
-  assert(posLimit() == cap());
+  assertx(isFull());
+  assertx(posLimit() == cap());
   if (LIKELY(!isDensityTooLow())) {
     if (UNLIKELY(cap() == MaxSize)) {
       throwTooLarge();
@@ -218,14 +176,14 @@ void HashCollection::makeRoom() {
   } else {
     compact();
   }
-  assert(canMutateBuffer());
-  assert(m_immCopy.isNull());
-  assert(!isFull());
+  assertx(canMutateBuffer());
+  assertx(m_immCopy.isNull());
+  assertx(!isFull());
 }
 
 NEVER_INLINE
 void HashCollection::reserve(int64_t sz) {
-  assert(m_size <= posLimit() && posLimit() <= cap());
+  assertx(m_size <= posLimit() && posLimit() <= cap());
   auto cap = static_cast<int64_t>(this->cap());
   if (LIKELY(sz > cap)) {
     if (UNLIKELY(sz > int64_t(MaxReserveSize))) {
@@ -233,8 +191,8 @@ void HashCollection::reserve(int64_t sz) {
     }
     // Fast path: The requested capacity is greater than the current capacity.
     // Grow to the smallest allowed capacity that is sufficient.
-    grow(computeScaleFromSize(sz));
-    assert(canMutateBuffer());
+    grow(MixedArray::computeScaleFromSize(sz));
+    assertx(canMutateBuffer());
     return;
   }
   if (LIKELY(!hasTombstones())) {
@@ -250,7 +208,7 @@ void HashCollection::reserve(int64_t sz) {
     // sz < m_size or there's enough room to add sz-m_size elements, in
     // which case we do nothing and return.
     compactOrShrinkIfDensityTooLow();
-    assert(sz + int64_t(posLimit() - m_size) <= cap);
+    assertx(sz + int64_t(posLimit() - m_size) <= cap);
     mutate();
     return;
   }
@@ -258,52 +216,50 @@ void HashCollection::reserve(int64_t sz) {
   // there is not enough room to add sz-m_size elements. While would could
   // compact to make room, it's better for Hysteresis if we grow capacity
   // by 2x instead.
-  assert(!isDensityTooLow());
-  assert(sz + int64_t(posLimit() - m_size) > cap);
-  assert(cap < MaxSize && tableMask() != 0);
+  assertx(!isDensityTooLow());
+  assertx(sz + int64_t(posLimit() - m_size) > cap);
+  assertx(cap < MaxSize && tableMask() != 0);
   auto newScale = scale() * 2;
-  assert(sz > 0 && MixedArray::Capacity(newScale) >= sz);
+  assertx(sz > 0 && MixedArray::Capacity(newScale) >= sz);
   grow(newScale);
-  assert(canMutateBuffer());
+  assertx(canMutateBuffer());
 }
 
 ALWAYS_INLINE
 void HashCollection::resizeHelper(uint32_t newCap) {
-  assert(newCap >= m_size);
-  assert(m_immCopy.isNull());
+  assertx(newCap >= m_size);
+  assertx(m_immCopy.isNull());
   // Allocate a new ArrayData with the specified capacity and dup
   // all the elements (without copying over tombstones).
-  auto ad = arrayData() == staticEmptyMixedArray() ?
-    MixedArray::asMixed(MixedArray::MakeReserveMixed(newCap)) :
+  auto ad = arrayData() == staticEmptyDictArrayAsMixed() ?
+    MixedArray::asMixed(MixedArray::MakeReserveDict(newCap)) :
     MixedArray::CopyReserve(m_arr, newCap);
   decRefArr(m_arr);
   m_arr = ad;
-  assert(canMutateBuffer());
+  assertx(canMutateBuffer());
 }
 
 void HashCollection::grow(uint32_t newScale) {
   auto newCap = MixedArray::Capacity(newScale);
-  assert(m_size <= posLimit() && posLimit() <= cap() && cap() <= newCap);
-  assert(SmallSize <= newCap && newCap <= MaxSize);
-  assert(m_size <= newCap);
+  assertx(m_size <= posLimit() && posLimit() <= cap() && cap() <= newCap);
+  assertx(SmallSize <= newCap && newCap <= MaxSize);
+  assertx(m_size <= newCap);
   auto oldAd = arrayData();
   dropImmCopy();
   if (m_size > 0 && !oldAd->cowCheck()) {
-    // MixedArray::Grow can only handle non-empty cases where the
-    // buffer's refcount is 1.
-    m_arr = MixedArray::Grow(oldAd, newScale);
+    m_arr = MixedArray::Grow(oldAd, newScale, false);
     decRefArr(oldAd);
   } else {
     // For cases where m_size is zero or the buffer's refcount is
     // greater than 1, call resizeHelper().
     resizeHelper(newCap);
   }
-  assert(canMutateBuffer());
-  assert(m_immCopy.isNull());
+  assertx(canMutateBuffer());
+  assertx(m_immCopy.isNull());
 }
 
 void HashCollection::compact() {
-  assert(isDensityTooLow());
+  assertx(isDensityTooLow());
   dropImmCopy();
   if (!arrayData()->cowCheck()) {
     // MixedArray::compact can only handle cases where the buffer's
@@ -314,14 +270,14 @@ void HashCollection::compact() {
     // resizeHelper().
     resizeHelper(cap());
   }
-  assert(canMutateBuffer());
-  assert(m_immCopy.isNull());
-  assert(!isDensityTooLow());
+  assertx(canMutateBuffer());
+  assertx(m_immCopy.isNull());
+  assertx(!isDensityTooLow());
 }
 
 void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
-  assert(isCapacityTooHigh() && (oldCap == 0 || oldCap < cap()));
-  assert(m_size <= posLimit() && posLimit() <= cap());
+  assertx(isCapacityTooHigh() && (oldCap == 0 || oldCap < cap()));
+  assertx(m_size <= posLimit() && posLimit() <= cap());
   dropImmCopy();
   uint32_t newCap;
   if (oldCap != 0) {
@@ -331,11 +287,11 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
     // smallest capacity that is large enough to hold the current number
     // of elements.
     for (; newCap < m_size; newCap <<= 1) {}
-    assert(newCap == computeMaxElms(folly::nextPowTwo<uint64_t>(newCap) - 1));
+    assertx(newCap == computeMaxElms(folly::nextPowTwo<uint64_t>(newCap) - 1));
   } else {
     if (m_size == 0 && nextKI() == 0) {
       decRefArr(m_arr);
-      m_arr = staticEmptyMixedArray();
+      m_arr = staticEmptyDictArrayAsMixed();
       return;
     }
     // If no old capacity was provided, we compute the largest capacity
@@ -344,8 +300,8 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
     uint32_t capThreshold = (doubleSz < size_t(MaxSize)) ? doubleSz : MaxSize;
     for (newCap = SmallSize * 2; newCap < capThreshold; newCap <<= 1) {}
   }
-  assert(SmallSize <= newCap && newCap <= MaxSize);
-  assert(m_size <= newCap);
+  assertx(SmallSize <= newCap && newCap <= MaxSize);
+  assertx(m_size <= newCap);
   auto* oldAd = arrayData();
   if (!oldAd->cowCheck()) {
     // If the buffer's refcount is 1, we can teleport the elements
@@ -353,17 +309,17 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
     auto oldBuf = data();
     auto oldUsed = posLimit();
     auto oldNextKI = nextKI();
-    auto arr = MixedArray::asMixed(MixedArray::MakeReserveMixed(newCap));
-    auto data = mixedData(arr);
-    m_arr = arr;
-    auto table = (int32_t*)(data + size_t(newCap));
+    m_arr = MixedArray::asMixed(MixedArray::MakeReserveDict(newCap));
     m_arr->m_size = m_size;
+    auto data = this->data();
+    auto table = hashTab();
+    auto table_mask = tableMask();
     setPosLimit(m_size);
     setNextKI(oldNextKI);
     for (uint32_t frPos = 0, toPos = 0; toPos < m_size; ++toPos, ++frPos) {
       frPos = skipTombstonesNoBoundsCheck(frPos, oldUsed, oldBuf);
       copyElm(oldBuf[frPos], data[toPos]);
-      *findForNewInsert(table, tableMask(), data[toPos].probe()) = toPos;
+      *findForNewInsert(table, table_mask, data[toPos].probe()) = toPos;
     }
     oldAd->setZombie();
     decRefArr(oldAd);
@@ -372,20 +328,21 @@ void HashCollection::shrink(uint32_t oldCap /* = 0 */) {
     // resizeHelper()
     resizeHelper(newCap);
   }
-  assert(canMutateBuffer());
-  assert(m_immCopy.isNull());
-  assert(!isCapacityTooHigh() || newCap == oldCap);
+  assertx(canMutateBuffer());
+  assertx(m_immCopy.isNull());
+  assertx(!isCapacityTooHigh() || newCap == oldCap);
 }
 
-HashCollection::Elm& HashCollection::allocElmFront(int32_t* ei) {
-  assert(ei && !validPos(*ei) && m_size <= posLimit() && posLimit() < cap());
+HashCollection::Elm& HashCollection::allocElmFront(MixedArray::Inserter ei) {
+  assertx(MixedArray::isValidIns(ei) && !MixedArray::isValidPos(*ei));
+  assertx(m_size <= posLimit() && posLimit() < cap());
   // Move the existing elements to make element slot 0 available.
   memmove(data() + 1, data(), posLimit() * sizeof(Elm));
   incPosLimit();
   // Update the hashtable to reflect the fact that everything was
   // moved over one position
   auto* hash = hashTab();
-  auto* hashEnd = hash + hashSize();
+  auto* hashEnd = hash + arrayData()->hashSize();
   for (; hash != hashEnd; ++hash) {
     if (validPos(*hash)) {
       ++(*hash);
@@ -401,47 +358,6 @@ HashCollection::Elm& HashCollection::allocElmFront(int32_t* ei) {
   return data()[0];
 }
 
-// Quadratic probe is:
-//
-//   h(k, i) = (k + c1*i + c2*(i^2)) % tableSize
-//
-// Use 1/2 for c1 and c2. In combination with a table size that is a power of
-// 2, this guarantees a probe sequence of length tableSize that probes all
-// table elements exactly once.
-
-template <class Hit>
-ALWAYS_INLINE
-ssize_t HashCollection::findImpl(hash_t h0, Hit hit) const {
-  uint32_t mask = tableMask();
-  auto elms = data();
-  auto hashtable = hashTab();
-  for (uint32_t probeIndex = h0, i = 1;; ++i) {
-    auto pos = hashtable[probeIndex & mask];
-    if (validPos(pos)) {
-      if (hit(elms[pos])) return pos;
-    } else if (pos & 1) {
-      assert(pos == Empty);
-      return pos;
-    }
-    probeIndex += i;
-    assertx(i <= mask);
-    assertx(probeIndex == static_cast<uint32_t>(h0) + (i + i * i) / 2);
-  }
-}
-
-ssize_t HashCollection::find(int64_t ki, inthash_t h) const {
-  return findImpl(h, [ki] (const Elm& e) {
-    return hitIntKey(e, ki);
-  });
-}
-
-ssize_t
-HashCollection::find(const StringData* s, strhash_t h) const {
-  return findImpl(h, [s, h] (const Elm& e) {
-    return hitStringKey(e, s, h);
-  });
-}
-
 /**
  * preSort() does an initial pass to do some preparatory work before the
  * sort algorithm runs. For sorts that use builtin comparators, the types
@@ -451,7 +367,7 @@ HashCollection::find(const StringData* s, strhash_t h) const {
  */
 template <typename AccessorT>
 SortFlavor HashCollection::preSort(const AccessorT& acc, bool checkTypes) {
-  assert(m_size > 0);
+  assertx(m_size > 0);
   if (!checkTypes && !hasTombstones()) {
     // No need to loop over the elements, we're done
     return GenericSort;
@@ -497,7 +413,7 @@ SortFlavor HashCollection::preSort(const AccessorT& acc, bool checkTypes) {
   // garbage by resetting it. The logic above ensures that the first
   // slot is not a tombstone, so it's safe to set m_pos to 0.
   arrayData()->m_pos = 0;
-  assert(!hasTombstones());
+  assertx(!hasTombstones());
   if (checkTypes) {
     return allStrs ? StringSort : allInts ? IntegerSort : GenericSort;
   } else {
@@ -557,13 +473,13 @@ void HashCollection::postSort() {  // Must provide the nothrow guarantee
 
 void HashCollection::asort(int sort_flags, bool ascending) {
   if (m_size <= 1) return;
-  mutateAndBump();
+  mutate();
   SORT_BODY(AssocValAccessor<HashCollection::Elm>);
 }
 
 void HashCollection::ksort(int sort_flags, bool ascending) {
   if (m_size <= 1) return;
-  mutateAndBump();
+  mutate();
   SORT_BODY(AssocKeyAccessor<HashCollection::Elm>);
 }
 
@@ -593,36 +509,28 @@ void HashCollection::ksort(int sort_flags, bool ascending) {
 
 bool HashCollection::uasort(const Variant& cmp_function) {
   if (m_size <= 1) return true;
-  mutateAndBump();
+  mutate();
   USER_SORT_BODY(AssocValAccessor<HashCollection::Elm>);
 }
 
 bool HashCollection::uksort(const Variant& cmp_function) {
   if (m_size <= 1) return true;
-  mutateAndBump();
+  mutate();
   USER_SORT_BODY(AssocKeyAccessor<HashCollection::Elm>);
 }
 
 #undef USER_SORT_BODY
 
 void HashCollection::mutateImpl() {
-  assert(arrayData()->hasMultipleRefs());
+  assertx(arrayData()->hasMultipleRefs());
   dropImmCopy();
   if (canMutateBuffer()) {
     return;
   }
-  if (!m_size) {
-    setIntLikeStrKeys(false);
-  }
   auto* oldAd = arrayData();
   m_arr = MixedArray::asMixed(MixedArray::Copy(oldAd));
-  assert(oldAd->hasMultipleRefs());
+  assertx(oldAd->hasMultipleRefs());
   oldAd->decRefCount();
-}
-
-bool HashCollection::instanceof(const ObjectData* obj) {
-  return BaseMap::instanceof(obj) ||
-         BaseSet::instanceof(obj);
 }
 
 /////////////////////////////////////////////////////////////////////////////

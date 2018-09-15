@@ -23,4 +23,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_traits_and_interfaces8() {
 main();
+}

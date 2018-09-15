@@ -12,4 +12,8 @@ function main() {
   var_dump($fs2 == $s);
 }
 
+
+<<__EntryPoint>>
+function main_eq() {
 main();
+}

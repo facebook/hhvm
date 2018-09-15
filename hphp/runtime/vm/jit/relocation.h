@@ -25,8 +25,37 @@
 
 namespace HPHP { namespace jit {
 
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Support for relocation involves implementing the following:
+ *
+ *   adjustForRelocation - Adjusts a range of instructions which may
+ *                         contain addresses which have been moved.
+ *   adjustCodeForRelocation - Similar to adjustForRelocation, but is
+ *                             reserved for ranges which may still
+ *                             hold live instructions.
+ *   adjustMetaDataForRelocation - Adjusts the affected metadata
+ *                                 following a relocation.
+ *   findFixups - Finds the affected fixups following a relocation.
+ *   relocate - Relocates a range of instructions to a new
+ *              destination. Critically, relocation is a chance
+ *              to grow/shrink the region which is advantageous
+ *              when moving a far branch to simple near relative
+ *              branch for instance.
+ *
+ * adjustForRelocation and adjustCodeForRelocation both search for
+ * addresses in instruction ranges that need to be updated following
+ * a relocation. This involves finding instructions which might
+ * be loading an address and then determining if that target is
+ * actually an address for an instruction which has been moved.
+ */
+
+//////////////////////////////////////////////////////////////////////
+
 struct AsmInfo;
 struct CGMeta;
+using TcaRange = folly::Range<TCA>;
 
 struct RelocationInfo {
   RelocationInfo() {}
@@ -34,6 +63,8 @@ struct RelocationInfo {
   void recordRange(TCA start, TCA end,
                    TCA destStart, TCA destEnd);
   void recordAddress(TCA src, TCA dest, int range);
+  TcaRange fixupRange(const TcaRange& rng);
+  void fixupRanges(AsmInfo* asmInfo, AreaIndex area);
   TCA adjustedAddressAfter(TCA addr) const;
   TCA adjustedAddressBefore(TCA addr) const;
   CTCA adjustedAddressAfter(CTCA addr) const {
@@ -45,6 +76,21 @@ struct RelocationInfo {
   void rewind(TCA start, TCA end);
   void markAddressImmediates(const std::set<TCA>& ai) {
     addressImmediates.insert(ai.begin(), ai.end());
+    // We should add the relocated address immediates as well.  During
+    // adjustForRelocation, relocated ranges may need to have their address
+    // immediates updated to point to other relocated ranges.  This requires
+    // adjustForRelocation to know which immediates are address immediates in
+    // the newly relocated range.
+    decltype(addressImmediates) updatedAI;
+    for (auto addrImm : ai) {
+      if (TCA adjusted = adjustedAddressAfter(addrImm)) {
+        updatedAI.insert(adjusted);
+      } else if (TCA odd = adjustedAddressAfter((TCA)~uintptr_t(addrImm))) {
+        // just for cgLdObjMethod
+        updatedAI.insert((TCA)~uintptr_t(odd));
+      }
+    }
+    addressImmediates.insert(updatedAI.begin(), updatedAI.end());
   }
   bool isAddressImmediate(TCA ip) {
     return addressImmediates.count(ip);
@@ -75,17 +121,18 @@ struct RelocationInfo {
 
 void adjustForRelocation(RelocationInfo&);
 void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd);
-void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& fixups);
+void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& meta);
 void adjustMetaDataForRelocation(RelocationInfo& rel,
                                  AsmInfo* asmInfo,
-                                 CGMeta& fixups);
-void findFixups(TCA start, TCA end, CGMeta& fixups);
+                                 CGMeta& meta);
+void findFixups(TCA start, TCA end, CGMeta& meta);
 size_t relocate(RelocationInfo& rel,
                 CodeBlock& destBlock,
                 TCA start, TCA end,
                 DataBlock& srcBlock,
-                CGMeta& fixups,
-                TCA* exitAddr);
+                CGMeta& meta,
+                TCA* exitAddr,
+                AreaIndex codeArea);
 
 }}
 

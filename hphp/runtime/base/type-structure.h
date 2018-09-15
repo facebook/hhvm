@@ -18,6 +18,7 @@
 #define incl_HPHP_TYPE_STRUCTURE_H
 
 #include <cstdint>
+#include "hphp/runtime/base/req-vector.h"
 #include "hphp/runtime/vm/class.h"
 
 namespace HPHP {
@@ -57,17 +58,30 @@ enum class Kind : uint8_t {
   T_dict = 19,
   T_vec = 20,
   T_keyset = 21,
+  T_vec_or_dict = 22,
+
+  T_nonnull = 23,
+
+  T_darray = 24,
+  T_varray = 25,
+  T_varray_or_darray = 26,
+  T_arraylike = 27,
 
   /* The following kinds needs class/alias resolution, and
    * are not exposed to the users. */
   T_unresolved = 101,
   T_typeaccess = 102,
   T_xhp = 103,
+  T_reifiedtype = 104,
 };
 
-bool KindOfClass(Kind kind);
-
 String toString(const Array& arr);
+String toStringForDisplay(const Array& arr);
+
+/*
+ * All resolve functions ignore the initial value present in the
+ * persistent flag
+ */
 
 Array resolve(const Class::Const& typeCns,
               const Class* typeCnsCls,
@@ -77,6 +91,28 @@ Array resolve(const String& aliasName,
               const Array& arr,
               bool& persistent,
               const Array& generics = Array());
+
+Array resolve(const Array& ts,
+              const Class* typeCnsCls,
+              const Class* declCls,
+              const req::vector<Array>& tsList,
+              bool& persistent);
+
+/*
+ * Allows partially resolving a type structure.
+ * Does not call the autoloader.
+ * If the resulting type structure is persistent, persistent will be set.
+ * If the resulting type structure is only partially resolved,
+ * partial will be set, otherwise it will be unset.
+ * If the type structure contains an invalid type for is/as expressions,
+ * invalidType will be set.
+ */
+Array resolvePartial(const Array& ts,
+                     const Class* typeCnsCls,
+                     const Class* declCls,
+                     bool& persistent,
+                     bool& partial,
+                     bool& invalidType);
 
 }
 

@@ -1,0 +1,2 @@
+File "rx_if_implements9.php", line 8, characters 28-35:
+Method is marked with <<__OnlyRxIfImpl>> attribute that have invalid arguments. This attribute must have one argument and it should be '::class' class constant. (NastCheck[3059])

@@ -34,7 +34,7 @@ struct ReadlineVars {
   Array array;
 };
 
-IMPLEMENT_THREAD_LOCAL(ReadlineVars, s_readline);
+THREAD_LOCAL(ReadlineVars, s_readline);
 
 static Variant HHVM_FUNCTION(readline, const Variant& prompt /* = null */) {
   auto result = readline(
@@ -43,7 +43,7 @@ static Variant HHVM_FUNCTION(readline, const Variant& prompt /* = null */) {
   if (result == nullptr) {
     return false;
   } else {
-    auto str = String::FromCStr(result);
+    auto str = Variant{result};
     free(result);
     return str;
   }
@@ -73,7 +73,7 @@ static char* _readline_command_generator(const char* text, int state) {
   }
   auto text_str = String(text);
   while (iter) {
-    auto value = iter.secondRef().toString();
+    auto value = tvCastToString(iter.secondVal());
     ++iter;
     if (text_str == value.substr(0, text_str.length())) {
       // readline frees this using free(), so we must use malloc() and not new

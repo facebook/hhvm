@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $test_run_id = posix_getpid();
 $error_log_file = fopen("${LOG_ROOT}_test$test_run_id.log", 'w');
@@ -8,6 +8,7 @@ function tlog($str) {
 
   fwrite($error_log_file, $str);
   fwrite($error_log_file, "\n");
+  fflush($error_log_file);
   // error_log($str);
 }
 
@@ -73,7 +74,7 @@ function get_random_port($exclude1, $exclude2) {
 
 # Return the command line to start the server with the specified options
 function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
-                      $customArgs = '', $serverId = null) {
+                      $customArgs = '', $serverId = null, $repoArgs = '') {
   global $test_run_id, $LOG_ROOT;
   $portConfig = ' -vServer.Port='.$serverPort;
   $serverConfig = ' --config='.$home.'/config/server.ini';
@@ -97,7 +98,7 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
 
   if (ini_get('hhvm.repo.authoritative')) {
     $cmd = "$hhvm --hphp -k1 -l2 -t hhbc -o ${LOG_ROOT}_bytecode$test_run_id ".
-      "--input-dir $root";
+      "--input-dir $root $repoArgs";
     tlog('Building repo with command: '.$cmd);
     tlog(exec($cmd));
     $repoConfig .=
@@ -121,13 +122,14 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
 }
 
 function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
-                     $customArgs = '', $serverId = null) {
+                     $customArgs = '', $serverId = null, $repoArgs = '') {
   global $test_run_id, $LOG_ROOT;
 
   $chooseServer = $serverPort === null;
   $chooseAdmin = $adminPort === null;
   $chooseDebug = $debugPort === null;
   $pid = posix_getpid();
+  $safe_children = array_flip(explode(',', exec("pgrep -f -d , -P $pid")));
 
   for ($i = 0; $i < 5; $i++) {
     if ($chooseServer) $serverPort = get_random_port($adminPort, $debugPort);
@@ -135,16 +137,16 @@ function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
     if ($chooseDebug) $debugPort = get_random_port($serverPort, $adminPort);
 
     $cmd = getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
-                        $customArgs, $serverId);
+                        $customArgs, $serverId, $repoArgs);
     tlog('Starting server with command: '.$cmd);
     $pipes = array();
-    $serverProc = proc_open($cmd, array(), $pipes);
+    $serverProc = proc_open($cmd, array(), &$pipes);
     if (!is_resource($serverProc)) {
       tlog('Failed to start a shell process for the server');
     } else if (waitForServerToGetGoing($serverPort, $serverProc, $serverId)) {
       return $serverProc;
     }
-    killChildren($pid);
+    killChildren($pid, $safe_children);
     if ($serverProc) proc_close($serverProc);
   }
   dumpLogFilesToStdoutAndDie();
@@ -154,7 +156,7 @@ function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
 function checkServerId($serverPort, $expectedIds) {
   $host = php_uname('n');
   $r = request($host, $serverPort, "hello.php");
-  if (preg_match('/Hello, World!(.*+)/', $r, $matches)) {
+  if (preg_match('/Hello, World!(.*+)/', $r, &$matches)) {
     foreach ((array)$expectedIds as $id) {
       if ($matches[1] == $id) return true;
     }
@@ -225,7 +227,7 @@ function takeoverOldServer($serverPort, $adminPort, $home, $root,
   $cmd = getServerCmd($serverPort, $adminPort, false, $home, $root,
                       $customArgs, $serverId);
   $pipes = array();
-  $serverProc = proc_open($cmd, array(), $pipes);
+  $serverProc = proc_open($cmd, array(), &$pipes);
   if (!is_resource($serverProc)) {
     tlog('Failed to start a shell process for the server');
     return;
@@ -233,7 +235,7 @@ function takeoverOldServer($serverPort, $adminPort, $home, $root,
   return $serverProc;
 }
 
-function http_request($host, $port, $path, $timeout = 1200) {
+function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '') {
   global $test_run_id, $LOG_ROOT;
 
   @list($path, $post, $headers) = (array)$path;
@@ -250,14 +252,14 @@ function http_request($host, $port, $path, $timeout = 1200) {
   $url = "http://$host:$port/$path";
   $host_name = "hphpd.debugger.".php_uname('n');
   $cmd = "curl $post --trace-ascii ${LOG_ROOT}_curl$test_run_id.log ".
-    "--silent --connect-timeout $timeout ".
+    "--silent $curl_opts --connect-timeout $timeout ".
     "-H 'Host: $host_name' $headers --url \"$url\"";
   tlog("Requesting page with command: $cmd");
-  if (exec($cmd, $result) === null) return null;
+  if (exec($cmd, &$result) === null) return null;
   return implode("\n", $result);
 }
 
-function requestAll(array $requests, $customArgs = '') {
+function requestAll(array $requests, $customArgs = '', $repoArgs = '') {
   runTest(
     function($serverPort) use ($requests) {
       foreach ($requests as $request) {
@@ -266,7 +268,8 @@ function requestAll(array $requests, $customArgs = '') {
         var_dump(request(php_uname('n'), $serverPort, $request));
       }
     },
-    $customArgs
+    $customArgs,
+    $repoArgs,
   );
 }
 
@@ -276,12 +279,13 @@ if (!function_exists("request")) {
   }
 }
 
-function killChildren($pid) {
+function killChildren($pid, $safe_children) {
   $childIds = exec("pgrep -f -d , -P $pid");
   foreach (explode(",", $childIds) as $cid) {
     if (!$cid) continue;
+    if (isset($safe_children[$cid])) continue;
     tlog("killing ".exec("ps -f -p ".$cid));
-    killChildren($cid);
+    killChildren($cid, $safe_children);
     posix_kill($cid, SIGKILL);
   }
 }

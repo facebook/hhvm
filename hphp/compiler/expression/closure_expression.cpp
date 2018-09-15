@@ -23,7 +23,6 @@
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/statement/function_statement.h"
 #include "hphp/compiler/statement/static_statement.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
 
@@ -139,69 +138,113 @@ void ClosureExpression::setNthKid(int n, ConstructPtr cp) {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void ClosureExpression::analyzeProgram(AnalysisResultPtr ar) {
-  m_func->analyzeProgram(ar);
+void ClosureExpression::processLambdas(
+  AnalysisResultConstRawPtr ar,
+  CompactVector<ClosureExpressionRawPtr>&& lambdas) {
+  for (auto const ce : lambdas) {
+    ce->processLambda(ar);
+  }
+  lambdas.clear();
+}
 
-  if (m_vars) analyzeVars(ar);
+void ClosureExpression::processLambda(AnalysisResultConstRawPtr ar) {
+  if (m_captureState == CaptureState::Unknown) {
+    assert(m_type == ClosureType::Short);
+    auto const closureFuncScope = m_func->getFunctionScope();
 
-  FunctionScopeRawPtr container =
-    getFunctionScope()->getContainingNonClosureFunction();
-  if (container && container->isStatic()) {
-    m_func->getModifiers()->add(T_STATIC);
+    auto const paramNames = collectParamNames();
+    auto const& mentioned = closureFuncScope->getLocals();
+
+    std::set<std::string> toCapture;
+
+    for (auto& m : mentioned) {
+      if (paramNames.count(m)) continue;
+      if (m == "this") {
+        toCapture.insert("this");
+        continue;
+      }
+      auto scope = closureFuncScope;
+      do {
+        auto const prev = scope;
+        scope = prev->getOuterScope()->getContainingFunction();
+        always_assert(scope);
+        always_assert(!FileScope::getCurrent() ||
+                      scope->getContainingFile() == FileScope::getCurrent());
+        if (scope->hasLocal(m)) {
+          toCapture.insert(m);
+          break;
+        }
+      } while (scope->isLambdaClosure());
+    }
+
+    if (closureFuncScope->containsThis()) {
+      toCapture.insert("this");
+    }
+
+    setCaptureList(ar, toCapture);
   }
 }
 
-void ClosureExpression::analyzeVars(AnalysisResultPtr ar) {
-  m_values->analyzeProgram(ar);
+void ClosureExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
+  always_assert(getFileScope() == FileScope::getCurrent());
 
-  if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
-    getFunctionScope()->addUse(m_func->getFunctionScope(),
-                               BlockScope::UseKindClosure);
-    m_func->getFunctionScope()->setClosureVars(m_vars);
+  auto const sameScope = m_func->getFileScope() == FileScope::getCurrent();
+  if (sameScope) {
+    // Closures in flattened traits could come from another file.
+    // Only let the owner analyze them
+    ar->analyzeProgram(m_func);
 
-    // closure function's variable table (not containing function's)
-    VariableTablePtr variables = m_func->getFunctionScope()->getVariables();
-    VariableTablePtr containing = getFunctionScope()->getVariables();
-    for (int i = 0; i < m_vars->getCount(); i++) {
-      auto param = dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
-      auto const& name = param->getName();
-      {
-        Symbol *containingSym = containing->addDeclaredSymbol(name, param);
-        containingSym->setPassClosureVar();
-
-        Symbol *sym = variables->addDeclaredSymbol(name, param);
-        sym->setClosureVar();
-        sym->setDeclaration(ConstructPtr());
-        if (param->isRef()) {
-          sym->setRefClosureVar();
-          sym->setUsed();
-        } else {
-          sym->clearRefClosureVar();
-          sym->clearUsed();
-        }
-      }
+    if (m_captureState == CaptureState::Unknown) {
+      assert(m_type == ClosureType::Short);
+      FileScope::getCurrent()->addLambda(ClosureExpressionRawPtr{this});
     }
-    return;
+  } else {
+    if (m_captureState == CaptureState::Unknown) {
+      assert(m_type == ClosureType::Short);
+      ar->lock()->addClonedLambda(ClosureExpressionRawPtr{this});
+    }
   }
 
-  if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    // closure function's variable table (not containing function's)
-    VariableTablePtr variables = m_func->getFunctionScope()->getVariables();
-    for (int i = 0; i < m_vars->getCount(); i++) {
-      auto param = dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
-      auto const& name = param->getName();
+  if (m_vars && ar->getPhase() == AnalysisResult::AnalyzeAll) {
+    if (sameScope) analyzeVarsForClosure(ar);
+    analyzeVarsForClosureExpression(ar);
+  }
 
-      // so we can assign values to them, instead of seeing CVarRef
-      Symbol *sym = variables->getSymbol(name);
-      if (sym && sym->isParameter()) {
-        sym->setLvalParam();
-      }
+  if (!sameScope || m_func->getModifiers()->isStatic()) return;
+  auto const funcScope = getFunctionScope();
+  auto const container = funcScope->getContainingNonClosureFunction();
+  if (container && container->isStatic()) {
+    m_func->getModifiers()->add(T_STATIC);
+  } else {
+    auto const closureFuncScope = m_func->getFunctionScope();
+    if (m_type != ClosureType::Short ||
+        closureFuncScope->containsThis()) {
+      funcScope->setContainsThis();
     }
+  }
+}
+
+void ClosureExpression::analyzeVarsForClosure(
+  AnalysisResultConstRawPtr /*ar*/) {
+  // closure function (not containing function)
+  auto const func = m_func->getFunctionScope();
+  for (auto const& var : *m_vars) {
+    auto const param = dynamic_pointer_cast<ParameterExpression>(var);
+    func->addLocal(param->getName());
+  }
+}
+
+void ClosureExpression::analyzeVarsForClosureExpression(
+  AnalysisResultConstRawPtr /*ar*/) {
+  auto const containing = getFunctionScope();
+  for (auto const& var : *m_vars) {
+    auto const param = dynamic_pointer_cast<ParameterExpression>(var);
+    containing->addLocal(param->getName());
   }
 }
 
 void ClosureExpression::setCaptureList(
-    AnalysisResultPtr ar,
+    AnalysisResultConstRawPtr ar,
     const std::set<std::string>& captureNames) {
   assert(m_captureState == CaptureState::Unknown);
   m_captureState = CaptureState::Known;
@@ -220,7 +263,9 @@ void ClosureExpression::setCaptureList(
      * with this flag to avoid checks on closures in member functions
      * when they use neither $this nor static::)
      */
-    if (!usedThis) m_func->getModifiers()->add(T_STATIC);
+    if (!usedThis && !m_func->getModifiers()->isStatic()) {
+      m_func->getModifiers()->add(T_STATIC);
+    }
   };
 
   if (captureNames.empty()) return;
@@ -240,7 +285,7 @@ void ClosureExpression::setCaptureList(
       TypeAnnotationPtr(),
       true /* hhType */,
       name,
-      false /* ref */,
+      ParamMode::In,
       0 /* token modifier thing */,
       ExpressionPtr(),
       ExpressionPtr()
@@ -249,7 +294,8 @@ void ClosureExpression::setCaptureList(
   }
 
   initializeValuesFromVars();
-  analyzeVars(ar);
+  analyzeVarsForClosure(ar);
+  analyzeVarsForClosureExpression(ar);
 }
 
 std::set<std::string> ClosureExpression::collectParamNames() const {

@@ -14,32 +14,35 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/unit-util.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-template <class TraitMethod,
-          class Ops,
-          class String,
-          class StringHash,
-          class StringEq>
+template <class TraitMethod, class Ops>
 inline void
-TraitMethodImportData<TraitMethod, Ops, String, StringHash, StringEq>
+TraitMethodImportData<TraitMethod, Ops>
 ::add(const TraitMethod& tm, const String& name) {
   if (Ops::exclude(name)) return;
 
-  bool found = m_dataForName.count(name);
+  if (tm.modifiers & AttrTakesInOutParams) {
+    assertx(name == Ops::methName(tm.method));
+    auto const wrapper = Ops::findTraitMethod(tm.trait,
+                                              stripInOutSuffix(name));
+    assertx(wrapper);
+    m_inoutMethods.emplace(wrapper, tm);
+    return;
+  }
+
+  auto const found = m_dataForName.count(name);
 
   m_dataForName[name].methods.push_back(tm);
   if (!found) m_orderedNames.push_back(name);
 }
 
-template <class TraitMethod,
-          class Ops,
-          class String,
-          class StringHash,
-          class StringEq>
+template <class TraitMethod, class Ops>
 inline void
-TraitMethodImportData<TraitMethod, Ops, String, StringHash, StringEq>
+TraitMethodImportData<TraitMethod, Ops>
 ::add(const TraitMethod& tm,
       const String& aliasedName,
       const String& origName) {
@@ -47,33 +50,25 @@ TraitMethodImportData<TraitMethod, Ops, String, StringHash, StringEq>
 
   add(tm, aliasedName);
 
-  assert(m_dataForName.count(origName));
+  assertx(m_dataForName.count(origName));
   m_dataForName[origName].aliases.push_back(aliasedName);
 }
 
-template <class TraitMethod,
-          class Ops,
-          class String,
-          class StringHash,
-          class StringEq>
+template <class TraitMethod, class Ops>
 inline void
-TraitMethodImportData<TraitMethod, Ops, String, StringHash, StringEq>
+TraitMethodImportData<TraitMethod, Ops>
 ::erase(const String& name) {
   // We don't bother erasing `name' from any name lists---since it will not
   // correspond to any NameData, it will be skipped during finalization anyway.
   m_dataForName.erase(name);
 }
 
-template <class TraitMethod,
-          class Ops,
-          class String,
-          class StringHash,
-          class StringEq>
+template <class TraitMethod, class Ops>
 inline void
-TraitMethodImportData<TraitMethod, Ops, String, StringHash, StringEq>
+TraitMethodImportData<TraitMethod, Ops>
 ::setModifiers(const String& name,
                typename TraitMethod::class_type trait,
-               typename TraitMethod::modifiers_type mods) {
+               Attr mods) {
   auto& methods = m_dataForName[name].methods;
 
   for (auto& tm : methods) {
@@ -86,22 +81,18 @@ TraitMethodImportData<TraitMethod, Ops, String, StringHash, StringEq>
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template <class TraitMethod,
-          class Ops,
-          class String,
-          class StringHash,
-          class StringEq>
-template <typename Context>
+template <class TraitMethod, class Ops>
 inline void
-TraitMethodImportData<TraitMethod, Ops, String, StringHash, StringEq>
-::applyPrecRule(typename Ops::prec_type rule, Context ctx) {
-  auto methName          = Ops::precMethodName(rule);
-  auto selectedTraitName = Ops::precSelectedTraitName(rule);
-  auto otherTraitNames   = Ops::precOtherTraitNames(rule);
+TraitMethodImportData<TraitMethod, Ops>
+::applyPrecRule(const PreClass::TraitPrecRule& rule,
+                typename TraitMethod::class_type ctx) {
+  auto methName          = rule.methodName();
+  auto selectedTraitName = rule.selectedTraitName();
+  auto otherTraitNames   = rule.otherTraitNames();
 
   auto it = m_dataForName.find(methName);
   if (it == m_dataForName.end()) {
-    Ops::errorUnknownMethod(rule);
+    Ops::errorUnknownMethod(methName);
     return;
   }
 
@@ -126,46 +117,47 @@ TraitMethodImportData<TraitMethod, Ops, String, StringHash, StringEq>
   }
 
   if (!foundSelectedTrait) {
-    Ops::errorUnknownTrait(rule, selectedTraitName);
+    Ops::errorUnknownTrait(selectedTraitName);
   }
   for (auto const& traitName : otherTraitNames) {
-    auto trait = Ops::findTraitClass(ctx, traitName);
-    if (Ops::findTraitMethod(ctx, trait, methName)) {
-      Ops::errorUnknownTrait(rule, traitName);
+    if (auto trait = Ops::findTraitClass(ctx, traitName)) {
+      if (Ops::findTraitMethod(trait, methName)) {
+        // The trait exists, and defines the method, but it wasn't in methods,
+        // so it must have been removed by a previous prec rule.
+        Ops::errorMultiplyExcluded(traitName, methName);
+      }
+    } else {
+      Ops::errorUnknownTrait(traitName);
     }
   }
 }
 
-template <class TraitMethod,
-          class Ops,
-          class String,
-          class StringHash,
-          class StringEq>
-template <class Context>
+template <class TraitMethod, class Ops>
 inline void
-TraitMethodImportData<TraitMethod, Ops, String, StringHash, StringEq>
-::applyAliasRule(typename Ops::alias_type rule, Context ctx) {
-  auto traitName    = Ops::aliasTraitName(rule);
-  auto origMethName = Ops::aliasOrigMethodName(rule);
-  auto newMethName  = Ops::aliasNewMethodName(rule);
-  auto modifiers    = Ops::aliasModifiers(rule);
+TraitMethodImportData<TraitMethod, Ops>
+::applyAliasRule(const PreClass::TraitAliasRule& rule,
+                 typename TraitMethod::class_type ctx) {
+  auto traitName    = rule.traitName();
+  auto origMethName = rule.origMethodName();
+  auto newMethName  = rule.newMethodName();
+  auto modifiers    = rule.modifiers();
 
   typename TraitMethod::class_type traitCls;
-  if (Ops::strEmpty(traitName)) {
+  if (traitName->empty()) {
     traitCls = Ops::findSingleTraitWithMethod(ctx, origMethName);
   } else {
     traitCls = Ops::findTraitClass(ctx, traitName);
   }
 
   if (!traitCls || !Ops::isTrait(traitCls)) {
-    Ops::errorUnknownTrait(rule, traitName);
+    Ops::errorUnknownTrait(traitName);
   }
 
   Ops::addTraitAlias(ctx, rule, traitCls);
 
-  auto traitMeth = Ops::findTraitMethod(ctx, traitCls, origMethName);
+  auto traitMeth = Ops::findTraitMethod(traitCls, origMethName);
   if (!traitMeth) {
-    Ops::errorUnknownMethod(rule, origMethName);
+    Ops::errorUnknownMethod(origMethName);
   }
 
   if (origMethName == newMethName) {
@@ -180,13 +172,9 @@ TraitMethodImportData<TraitMethod, Ops, String, StringHash, StringEq>
  * Remove trait abstract methods that are either (a) implemented by other
  * traits, or (b) duplicated.
  */
-template <class TraitMethod,
-          class Ops,
-          class String,
-          class StringHash,
-          class StringEq>
+template <class TraitMethod, class Ops>
 inline void
-TraitMethodImportData<TraitMethod, Ops, String, StringHash, StringEq>
+TraitMethodImportData<TraitMethod, Ops>
 ::removeSpareTraitAbstractMethods() {
   for (auto& nameData : m_dataForName) {
     auto& methods = nameData.second.methods;
@@ -220,19 +208,10 @@ TraitMethodImportData<TraitMethod, Ops, String, StringHash, StringEq>
   }
 }
 
-template <class TraitMethod,
-          class Ops,
-          class String,
-          class StringHash,
-          class StringEq>
-template <class Context>
-inline std::vector<typename TraitMethodImportData<TraitMethod,
-                                                  Ops,
-                                                  String,
-                                                  StringHash,
-                                                  StringEq>::MethodData>
-TraitMethodImportData<TraitMethod, Ops, String, StringHash, StringEq>
-::finish(Context ctx) {
+template <class TraitMethod, class Ops>
+inline auto
+TraitMethodImportData<TraitMethod, Ops>
+::finish(typename TraitMethod::class_type ctx) {
   removeSpareTraitAbstractMethods();
 
   std::unordered_set<String> seenNames;
@@ -255,7 +234,24 @@ TraitMethodImportData<TraitMethod, Ops, String, StringHash, StringEq>
     }
 
     seenNames.insert(name);
-    output.push_back(MethodData { name, *methods.begin() });
+    auto const &front = *methods.begin();
+    output.push_back({name, front});
+    auto it = m_inoutMethods.find(front.method);
+    if (it != m_inoutMethods.end()) {
+      auto tm = front;
+      tm.method = it->second.method;
+      auto userName = Ops::methName(front.method);
+      auto internalName = Ops::methName(tm.method);
+      auto sfx = folly::StringPiece(
+          internalName->data() + userName->size(),
+          internalName->data() + internalName->size()
+      );
+      output.push_back(
+          {
+            makeStaticString(folly::to<std::string>(name->slice(), sfx)), tm
+          }
+      );
+    }
   };
 
   for (auto const& name : m_orderedNames) {

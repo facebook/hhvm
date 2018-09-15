@@ -17,4 +17,8 @@ function foo() {
   (new X)->x();
 }
 
+
+<<__EntryPoint>>
+function main_array_access_004() {
 foo();
+}

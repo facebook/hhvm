@@ -20,9 +20,11 @@
 #include "hphp/runtime/base/execution-context.h"
 
 #include "hphp/hhbbc/eval-cell.h"
+#include "hphp/hhbbc/interp-internal.h"
+#include "hphp/hhbbc/optimize.h"
 #include "hphp/hhbbc/type-builtins.h"
 #include "hphp/hhbbc/type-system.h"
-#include "hphp/hhbbc/interp-internal.h"
+#include "hphp/hhbbc/unit-util.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -30,70 +32,26 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-folly::Optional<Type> const_fold(ISS& env,
-                                 const bc::FCallBuiltin& op,
-                                 const res::Func& rfunc) {
-  assert(rfunc.isFoldable());
-
-  // Don't pop the args yet---if the builtin throws at compile time (because
-  // it would raise a warning or something at runtime) we're going to leave
-  // the call alone.
-  std::vector<Cell> args(op.arg1);
-  for (auto i = uint32_t{0}; i < op.arg1; ++i) {
-    auto const val = tv(topT(env, i));
-    if (!val || val->m_type == KindOfUninit) return folly::none;
-    args[op.arg1 - i - 1] = *val;
-  }
-
-  auto const func = Unit::lookupFunc(rfunc.name());
-  always_assert_flog(
-    func,
-    "func not found for builtin {}\n",
-    rfunc.name()->data()
-  );
-
-  // If the function is variadic, all the variadic parameters are already packed
-  // into an array as the last parameter. invokeFuncFew, however, expects them
-  // to be unpacked, so do so here.
-  if (func->hasVariadicCaptureParam()) {
-    if (args.empty()) return folly::none;
-    if (!isArrayType(args.back().m_type)) return folly::none;
-    auto const variadic = args.back();
-    args.pop_back();
-    IterateV(
-      variadic.m_data.parr,
-      [&](const TypedValue* v) { args.emplace_back(*v); }
-    );
-  }
-
-  FTRACE(1, "invoking: {}\n", func->fullName()->data());
-
-  assert(!RuntimeOption::EvalJit);
-  return eval_cell(
-    [&] {
-      auto retVal = g_context->invokeFuncFew(
-        func, nullptr, nullptr,
-        args.size(), args.data(), !env.ctx.unit->useStrictTypes
-      );
-
-      // If we got here, we didn't throw, so we can pop the inputs.
-      for (auto i = uint32_t{0}; i < op.arg1; ++i) popT(env);
-
-      assert(cellIsPlausible(retVal));
-      return retVal;
-    }
-  );
-}
-
 //////////////////////////////////////////////////////////////////////
-
-const StaticString s_get_class("get_class");
 
 bool builtin_get_class(ISS& env, const bc::FCallBuiltin& op) {
   if (op.arg1 != 1) return false;
   auto const ty = topT(env);
+  if (op.arg2 == 0) {
+    // AttrNoOverride naturally handles classes - but it also handles
+    // traits, because we only set it if there are no uses of the
+    // trait in the program (this is after any trait flattening has
+    // taken place).
+    if (!env.ctx.cls || !(env.ctx.cls->attrs & AttrNoOverride)) return false;
+    assertx(ty.subtypeOf(BUninit));
+    reduce(env,
+           bc::PopU {},
+           bc::String { env.ctx.cls->name },
+           bc::RGetCNop {});
+    return true;
+  }
 
-  if (!ty.subtypeOf(TObj)) return false;
+  if (!ty.subtypeOf(BObj)) return false;
 
   auto unknown_class = [&] {
     popT(env);
@@ -117,8 +75,8 @@ bool builtin_get_class(ISS& env, const bc::FCallBuiltin& op) {
 bool builtin_abs(ISS& env, const bc::FCallBuiltin& op) {
   if (op.arg1 != 1) return false;
   auto const ty = popC(env);
-  push(env, ty.subtypeOf(TInt) ? TInt :
-            ty.subtypeOf(TDbl) ? TDbl :
+  push(env, ty.subtypeOf(BInt) ? TInt :
+            ty.subtypeOf(BDbl) ? TDbl :
             TInitUnc);
   return true;
 }
@@ -131,7 +89,7 @@ bool builtin_abs(ISS& env, const bc::FCallBuiltin& op) {
 bool floatIfNumeric(ISS& env, const bc::FCallBuiltin& op) {
   if (op.arg1 != 1) return false;
   auto const ty = popC(env);
-  push(env, ty.subtypeOf(TNum) ? TDbl : TInitUnc);
+  push(env, ty.subtypeOf(BNum) ? TDbl : TInitUnc);
   return true;
 }
 bool builtin_ceil(ISS& env, const bc::FCallBuiltin& op) {
@@ -156,10 +114,10 @@ bool builtin_mt_rand(ISS& env, const bc::FCallBuiltin& op) {
   case 0:
     return success();
   case 1:
-    return topT(env, 0).subtypeOf(TNum) ? success() : false;
+    return topT(env, 0).subtypeOf(BNum) ? success() : false;
   case 2:
-    if (topT(env, 0).subtypeOf(TNum) &&
-        topT(env, 1).subtypeOf(TNum)) {
+    if (topT(env, 0).subtypeOf(BNum) &&
+        topT(env, 1).subtypeOf(BNum)) {
       return success();
     }
     break;
@@ -180,7 +138,7 @@ bool minmax2(ISS& env, const bc::FCallBuiltin& op) {
 
   auto const t0 = topT(env, 0);
   auto const t1 = topT(env, 1);
-  if (!t0.subtypeOf(TNum) || !t1.subtypeOf(TNum)) return false;
+  if (!t0.subtypeOf(BNum) || !t1.subtypeOf(BNum)) return false;
   popC(env);
   popC(env);
   push(env, t0 == t1 ? t0 : TNum);
@@ -203,27 +161,192 @@ bool builtin_strlen(ISS& env, const bc::FCallBuiltin& op) {
   return true;
 }
 
-const StaticString
-  s_abs("abs"),
-  s_ceil("ceil"),
-  s_floor("floor"),
-  s_max2("__SystemLib\\max2"),
-  s_min2("__SystemLib\\min2"),
-  s_mt_rand("mt_rand"),
-  s_strlen("mt_strlen");
+bool builtin_defined(ISS& env, const bc::FCallBuiltin& op) {
+  if (!options.HardConstProp || op.arg1 != 2) return false;
+  if (auto const v = tv(topT(env, 1))) {
+    if (isStringType(v->m_type) &&
+        !env.index.lookup_constant(env.ctx, v->m_data.pstr)) {
+      env.collect.cnsMap[v->m_data.pstr].m_type = kDynamicConstant;
+    }
+  }
+  return false;
+}
+
+bool builtin_function_exists(ISS& env, const bc::FCallBuiltin& op) {
+  return handle_function_exists(env, op.arg1, true);
+}
+
+bool handle_oodecl_exists(ISS& env,
+                          const bc::FCallBuiltin& op,
+                          OODeclExistsOp subop) {
+  if (op.arg1 != 2) return false;
+  auto const& name = topT(env, 1);
+  if (name.subtypeOf(BStr)) {
+    if (!topT(env).subtypeOf(BBool)) {
+      reduce(env,
+             bc::CastBool {},
+             bc::OODeclExists { subop },
+             bc::RGetCNop {});
+      return true;
+    }
+    reduce(env, bc::OODeclExists { subop }, bc::RGetCNop {});
+    return true;
+  }
+  if (!topT(env).strictSubtypeOf(TBool)) return false;
+  auto const v = tv(topT(env));
+  assertx(v);
+  reduce(env,
+         bc::PopC {},
+         bc::CastString {},
+         gen_constant(*v),
+         bc::OODeclExists { subop },
+         bc::RGetCNop {});
+  return true;
+}
+
+bool builtin_class_exists(ISS& env, const bc::FCallBuiltin& op) {
+  return handle_oodecl_exists(env, op, OODeclExistsOp::Class);
+}
+
+bool builtin_interface_exists(ISS& env, const bc::FCallBuiltin& op) {
+  return handle_oodecl_exists(env, op, OODeclExistsOp::Interface);
+}
+
+bool builtin_trait_exists(ISS& env, const bc::FCallBuiltin& op) {
+  return handle_oodecl_exists(env, op, OODeclExistsOp::Trait);
+}
+
+bool builtin_class_alias(ISS& env, const bc::FCallBuiltin& op) {
+  if (op.arg1 != 3) return false;
+  auto const& alias = topT(env, 1);
+  auto const& orig  = topT(env, 2);
+  auto const alias_tv = tv(alias);
+  auto const orig_tv = tv(orig);
+  if (!alias_tv || !orig_tv ||
+      !isStringType(alias_tv->m_type) ||
+      !isStringType(orig_tv->m_type) ||
+      !env.index.register_class_alias(orig_tv->m_data.pstr,
+                                      alias_tv->m_data.pstr)) {
+    return false;
+  }
+
+  auto const aload = topT(env);
+  if (aload != TTrue && aload != TFalse) return false;
+
+  reduce(env, bc::PopC {}, bc::PopC {}, bc::PopC {},
+         gen_constant(make_tv<KindOfBoolean>(aload == TTrue)),
+         bc::AliasCls { orig_tv->m_data.pstr, alias_tv->m_data.pstr },
+         bc::RGetCNop {});
+  return true;
+}
+
+bool builtin_array_key_cast(ISS& env, const bc::FCallBuiltin& op) {
+  if (op.arg1 != 1) return false;
+  auto const ty = topC(env);
+
+  if (ty.subtypeOf(BNum) || ty.subtypeOf(BBool) || ty.subtypeOf(BRes)) {
+    reduce(env, bc::CastInt {}, bc::RGetCNop {});
+    return true;
+  }
+
+  auto retTy = TBottom;
+  if (ty.couldBe(BNull)) {
+    retTy |= sval(staticEmptyString());
+  }
+  if (ty.couldBe(BNum | BBool | BRes)) {
+    retTy |= TInt;
+  }
+  if (ty.couldBe(BStr)) {
+    retTy |= [&] {
+      if (ty.subtypeOf(BSStr)) {
+        auto const v = tv(ty);
+        if (v) {
+          int64_t i;
+          if (v->m_data.pstr->isStrictlyInteger(i)) {
+            return ival(i);
+          }
+          return ty;
+        }
+        return TUncArrKey;
+      }
+      return TArrKey;
+    }();
+  }
+
+  if (!ty.couldBe(BObj | BArr | BVec | BDict | BKeyset)) {
+    constprop(env);
+    nothrow(env);
+  }
+
+  popC(env);
+  push(env, retTy);
+
+  if (retTy == TBottom) unreachable(env);
+
+  return true;
+}
+
+bool builtin_is_list_like(ISS& env, const bc::FCallBuiltin& op) {
+  if (op.arg1 != 1) return false;
+  auto const ty = topC(env);
+
+  constprop(env);
+  nothrow(env);
+
+  if (!ty.couldBeAny(TArr, TVec, TDict, TKeyset)) {
+    popC(env);
+    push(env, TFalse);
+    return true;
+  }
+
+  if (ty.subtypeOfAny(TVec, TVArr)) {
+    popC(env);
+    push(env, TTrue);
+    return true;
+  }
+
+  switch (categorize_array(ty).cat) {
+    case Type::ArrayCat::Empty:
+    case Type::ArrayCat::Packed:
+      popC(env);
+      push(env, TTrue);
+      return true;
+    case Type::ArrayCat::Mixed:
+    case Type::ArrayCat::Struct:
+      popC(env);
+      push(env, TFalse);
+      return true;
+    case Type::ArrayCat::None:
+      return false;
+  }
+  always_assert(false);
+}
+
+#define SPECIAL_BUILTINS                                                \
+  X(abs, abs)                                                           \
+  X(ceil, ceil)                                                         \
+  X(floor, floor)                                                       \
+  X(get_class, get_class)                                               \
+  X(max2, max2)                                                         \
+  X(min2, min2)                                                         \
+  X(mt_rand, mt_rand)                                                   \
+  X(strlen, strlen)                                                     \
+  X(defined, defined)                                                   \
+  X(function_exists, function_exists)                                   \
+  X(class_exists, class_exists)                                         \
+  X(interface_exists, interface_exists)                                 \
+  X(trait_exists, trait_exists)                                         \
+  X(class_alias, class_alias)                                           \
+  X(array_key_cast, HH\\array_key_cast)                                 \
+  X(is_list_like, HH\\is_list_like)                                     \
+
+#define X(x, y)    const StaticString s_##x(#y);
+  SPECIAL_BUILTINS
+#undef X
 
 bool handle_builtin(ISS& env, const bc::FCallBuiltin& op) {
-#define X(x) if (op.str3->isame(s_##x.get())) return builtin_##x(env, op);
-
-  X(abs)
-  X(ceil)
-  X(floor)
-  X(get_class)
-  X(max2)
-  X(min2)
-  X(mt_rand)
-  X(strlen)
-
+#define X(x, y) if (op.str3->isame(s_##x.get())) return builtin_##x(env, op);
+  SPECIAL_BUILTINS
 #undef X
 
   return false;
@@ -240,9 +363,10 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
   auto const func = env.index.resolve_func(env.ctx, name);
 
   if (options.ConstantFoldBuiltins && func.isFoldable()) {
-    if (auto const val = const_fold(env, op, func)) {
+    if (auto val = const_fold(env, op.arg1, func)) {
       constprop(env);
-      return push(env, *val);
+      discard(env, op.arg1);
+      return push(env, std::move(*val));
     }
   }
 
@@ -285,6 +409,207 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
   push(env, rt);
 }
 
+}
+
+bool can_emit_builtin(const php::Func* func,
+                      int numArgs, bool hasUnpack) {
+  if (func->attrs & (AttrInterceptable | AttrNoFCallBuiltin |
+                     AttrTakesInOutParams) ||
+      func->cls ||
+      !func->nativeInfo ||
+      func->params.size() >= Native::maxFCallBuiltinArgs() ||
+      !RuntimeOption::EvalEnableCallBuiltin) {
+    return false;
+  }
+
+  // We rely on strength reduction to convert builtins, but if we do
+  // the analysis on the assumption that builtins will be created, but
+  // don't actually create them, all sorts of things can go wrong.
+  if (!options.StrengthReduce) {
+    return false;
+  }
+
+  auto variadic = func->params.size() && func->params.back().isVariadic;
+
+  // Only allowed to overrun the signature if we have somewhere to put it
+  if (numArgs > func->params.size() && !variadic) return false;
+
+  // Don't convert an FCall with unpack unless we're calling a variadic function
+  // with the unpack in the right place to pass it directly.
+  if (hasUnpack &&
+      (!variadic || numArgs != func->params.size())) {
+    return false;
+  }
+
+  // Don't convert to FCallBuiltin if there are too many variadic args.
+  if (variadic && !hasUnpack &&
+      numArgs - func->params.size() + 1 > ArrayData::MaxElemsOnStack) {
+    return false;
+  }
+
+  auto const allowDoubleArgs = Native::allowFCallBuiltinDoubles();
+
+  if (!allowDoubleArgs && func->nativeInfo->returnType == KindOfDouble) {
+    return false;
+  }
+
+  auto const concrete_params = func->params.size() - (variadic ? 1 : 0);
+
+  for (int i = 0; i < concrete_params; i++) {
+    auto const& pi = func->params[i];
+    if (!allowDoubleArgs && pi.builtinType == KindOfDouble) {
+      return false;
+    }
+    if (i >= numArgs) {
+      if (pi.isVariadic) continue;
+      if (pi.defaultValue.m_type == KindOfUninit) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+void finish_builtin(ISS& env,
+                    const php::Func* func,
+                    uint32_t numArgs,
+                    bool unpack) {
+  std::vector<Bytecode> repl;
+  assert(!unpack ||
+         (numArgs + 1 == func->params.size() &&
+          func->params.back().isVariadic));
+
+  if (unpack) {
+    ++numArgs;
+  } else {
+    for (auto i = numArgs; i < func->params.size(); i++) {
+      auto const& pi = func->params[i];
+      if (pi.isVariadic) {
+        if (RuntimeOption::EvalHackArrDVArrs) {
+          repl.emplace_back(bc::Vec { staticEmptyVecArray() });
+        } else {
+          repl.emplace_back(bc::Array { staticEmptyVArray() });
+        }
+        continue;
+      }
+      auto cell = pi.defaultValue.m_type == KindOfNull && !pi.builtinType ?
+        make_tv<KindOfUninit>() : pi.defaultValue;
+      repl.emplace_back(gen_constant(cell));
+    }
+
+    if (func->params.size() &&
+        func->params.back().isVariadic &&
+        numArgs >= func->params.size()) {
+
+      const uint32_t numToPack = numArgs - func->params.size() + 1;
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        repl.emplace_back(bc::NewVecArray { numToPack });
+      } else {
+        repl.emplace_back(bc::NewVArray { numToPack });
+      }
+      numArgs = func->params.size();
+    }
+  }
+
+  assert(numArgs <= func->params.size());
+
+  repl.emplace_back(
+    bc::FCallBuiltin {
+      static_cast<uint32_t>(func->params.size()), numArgs, func->name }
+  );
+
+  reduce(env, std::move(repl));
+  fpiPop(env);
+}
+
+bool handle_function_exists(ISS& env, int numArgs, bool allowConstProp) {
+  if (numArgs < 1 || numArgs > 2) return false;
+  auto const& name = topT(env, numArgs - 1);
+  if (!name.strictSubtypeOf(TStr)) return false;
+  auto const v = tv(name);
+  if (!v) return false;
+  auto const rfunc = env.index.resolve_func(env.ctx, v->m_data.pstr);
+  if (auto const func = rfunc.exactFunc()) {
+    if (is_systemlib_part(*func->unit)) {
+      if (!allowConstProp) return false;
+      constprop(env);
+      for (int i = 0; i < numArgs; i++) popC(env);
+      push(env, TTrue);
+      return true;
+    }
+    if (!any(env.collect.opts & CollectionOpts::Inlining)) {
+      func->unit->persistent.store(false, std::memory_order_relaxed);
+    }
+  }
+  return false;
+}
+
+folly::Optional<Type> const_fold(ISS& env,
+                                 uint32_t nArgs,
+                                 const res::Func& rfunc) {
+  assert(rfunc.isFoldable());
+
+  std::vector<Cell> args(nArgs);
+  for (auto i = uint32_t{0}; i < nArgs; ++i) {
+    auto const val = tv(topT(env, i));
+    if (!val || val->m_type == KindOfUninit) return folly::none;
+    args[nArgs - i - 1] = *val;
+  }
+
+  auto phpFunc = rfunc.exactFunc();
+  assertx(phpFunc);
+
+  Class* cls = nullptr;
+  auto const func = [&] () -> HPHP::Func* {
+    if (phpFunc->cls) {
+      cls = Unit::lookupClass(phpFunc->cls->name);
+      if (!cls || !(cls->attrs() & AttrBuiltin)) return nullptr;
+      auto const f = cls->lookupMethod(phpFunc->name);
+      if (!f->isStatic()) return nullptr;
+      return f;
+    }
+    return Unit::lookupBuiltin(phpFunc->name);
+  }();
+
+  if (!func) return folly::none;
+
+  // If the function is variadic, all the variadic parameters are already packed
+  // into an array as the last parameter. invokeFuncFew, however, expects them
+  // to be unpacked, so do so here.
+  if (func->hasVariadicCaptureParam()) {
+    if (args.empty()) return folly::none;
+    if (!isArrayType(args.back().m_type) && !isVecType(args.back().m_type)) {
+      return folly::none;
+    }
+    auto const variadic = args.back();
+    args.pop_back();
+    IterateV(
+      variadic.m_data.parr,
+      [&](TypedValue v) { args.emplace_back(v); }
+    );
+  }
+
+  FTRACE(1, "invoking: {}\n", func->fullName()->data());
+
+  auto const warn = RuntimeOption::EvalWarnOnCoerceBuiltinParams;
+
+  RuntimeOption::EvalWarnOnCoerceBuiltinParams = true;
+  SCOPE_EXIT { RuntimeOption::EvalWarnOnCoerceBuiltinParams = warn; };
+
+  assert(!RuntimeOption::EvalJit);
+  return eval_cell(
+    [&] {
+      auto retVal = g_context->invokeFuncFew(
+        func, HPHP::ActRec::encodeClass(cls), nullptr,
+        args.size(), args.data(),
+        false
+      );
+
+      assert(cellIsPlausible(retVal));
+      return retVal;
+    }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////

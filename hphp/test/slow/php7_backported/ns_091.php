@@ -11,4 +11,3 @@ namespace Fiz\Biz\Buz {
     new A;
     new B;
 }
-

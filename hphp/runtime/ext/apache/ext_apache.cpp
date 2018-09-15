@@ -50,31 +50,12 @@ Variant HHVM_FUNCTION(apache_note, const String& note_name,
   return false;
 }
 
-static Array get_headers(const HeaderMap& headers, bool allHeaders = false) {
-  ArrayInit ret(headers.size(), ArrayInit::Mixed{});
-  for (auto& iter : headers) {
-    const auto& values = iter.second;
-    if (auto size = values.size()) {
-      if (!allHeaders) {
-        ret.set(String(iter.first), String(values.back()));
-      } else {
-        PackedArrayInit dups(size);
-        for (auto& dup : values) {
-          dups.append(String(dup));
-        }
-        ret.set(String(toLower(iter.first)), dups.toArray());
-      }
-    }
-  }
-  return ret.toArray();
-}
-
 Array HHVM_FUNCTION(apache_request_headers) {
   Transport *transport = g_context->getTransport();
   if (transport) {
     HeaderMap headers;
     transport->getHeaders(headers);
-    return get_headers(headers);
+    return get_headers<PackedArrayInit, MixedArrayInit>(headers);
   }
   return empty_array();
 }
@@ -84,13 +65,14 @@ Array HHVM_FUNCTION(apache_response_headers) {
   if (transport) {
     HeaderMap headers;
     transport->getResponseHeaders(headers);
-    return get_headers(headers);
+    return get_headers<PackedArrayInit, MixedArrayInit>(headers);
   }
   return empty_array();
 }
 
-bool HHVM_FUNCTION(apache_setenv, const String& variable, const String& value,
-                     bool walk_to_top /* = false */) {
+bool HHVM_FUNCTION(apache_setenv, const String& /*variable*/,
+                   const String& /*value*/,
+                   bool /*walk_to_top*/ /* = false */) {
   return false;
 }
 
@@ -109,6 +91,9 @@ Array HHVM_FUNCTION(apache_get_config) {
   if (HttpServer::Server) {
     workers = HttpServer::Server->getPageServer()->getActiveWorker();
     queued = HttpServer::Server->getPageServer()->getQueuedJobs();
+    queued -= HttpServer::QueueDiscount.load(std::memory_order_relaxed);
+    if (queued < 0)
+      queued = 0;
     health_level = (int)(ApacheExtension::GetHealthLevel());
   }
 
@@ -126,9 +111,9 @@ Array HHVM_FUNCTION(get_headers_secure) {
   if (transport) {
     HeaderMap headers;
     transport->getHeaders(headers);
-    return get_headers(headers, true);
+    return get_headers<VArrayInit, DArrayInit>(headers, true);
   }
-  return empty_array();
+  return Array::CreateVArray();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

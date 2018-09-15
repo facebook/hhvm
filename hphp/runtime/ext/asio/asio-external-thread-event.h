@@ -21,6 +21,7 @@
 #include <atomic>
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/asio/ext_external-thread-event-wait-handle.h"
+#include "hphp/runtime/ext/asio/asio-session.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -100,7 +101,7 @@ struct c_ExternalThreadEventWaitHandle;
  *     event->setException(exception);
  *   } catch (...) {
  *     // unknown exception; should be never reached
- *     assert(false);
+ *     assertx(false);
  *     event->abandon();
  *     SystemLib::throwInvalidOperationExceptionObject(
  *       "Encountered unexpected exception"
@@ -193,6 +194,12 @@ struct AsioExternalThreadEvent {
      */
     virtual void unserialize(Cell& result) = 0;
 
+    /**
+     * Get the time markAsFinished was called to retroactively reference
+     * when the underlying IO operation was over
+     */
+    AsioSession::TimePoint getFinishTime() const { return m_finishTime; };
+
   protected:
     /**
      * Construct AsioExternalThreadEvent
@@ -212,7 +219,7 @@ struct AsioExternalThreadEvent {
      * is eventually called.
      */
     virtual ~AsioExternalThreadEvent() {
-      assert(
+      assertx(
         m_state.load() == Finished ||
         m_state.load() == Canceled ||
         m_state.load() == Abandoned
@@ -240,7 +247,7 @@ struct AsioExternalThreadEvent {
      * called only from the unserialize() implementation.
      */
     ObjectData* getPrivData() const {
-      assert(m_state.load() == Finished);
+      assertx(m_state.load() == Finished);
       return m_waitHandle->getPrivData();
     }
 
@@ -282,6 +289,7 @@ struct AsioExternalThreadEvent {
     AsioExternalThreadEventQueue* m_queue;
     c_ExternalThreadEventWaitHandle* m_waitHandle;
     std::atomic<uint32_t/*state_t*/> m_state;
+    AsioSession::TimePoint m_finishTime;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

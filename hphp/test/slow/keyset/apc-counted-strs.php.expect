@@ -1,0 +1,16 @@
+array(3) {
+  [0]=>
+  string(11) "val1---val1"
+  [1]=>
+  string(11) "val2---val2"
+  [2]=>
+  string(11) "val3---val3"
+}
+array(3) {
+  [0]=>
+  string(11) "val1---val1"
+  [1]=>
+  string(11) "val2---val2"
+  [2]=>
+  string(11) "val3---val3"
+}

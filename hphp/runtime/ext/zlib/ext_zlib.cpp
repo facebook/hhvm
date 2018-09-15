@@ -42,8 +42,9 @@ namespace HPHP {
 // compress.zlib:// stream wrapper
 
 static struct ZlibStreamWrapper final : Stream::Wrapper {
-  req::ptr<File> open(const String& filename, const String& mode, int options,
-                      const req::ptr<StreamContext>& context) override {
+  req::ptr<File>
+  open(const String& filename, const String& mode, int /*options*/,
+       const req::ptr<StreamContext>& /*context*/) override {
     String fname;
     static const char cz[] = "compress.zlib://";
 
@@ -69,7 +70,6 @@ static struct ZlibStreamWrapper final : Stream::Wrapper {
     auto file = req::make<ZipFile>();
     bool ret = file->open(translated, mode);
     if (!ret) {
-      raise_warning("%s", file->getLastError().c_str());
       return nullptr;
     }
     return file;
@@ -126,11 +126,11 @@ inline size_t hhvm_zlib_buffer_size_guess(size_t inlen) {
   return ((double) inlen * (double) 1.015) + 23;
 }
 
-static voidpf hhvm_zlib_alloc(voidpf opaque, uInt items, uInt size) {
-  return (voidpf)req::malloc(items * size);
+static voidpf hhvm_zlib_alloc(voidpf /*opaque*/, uInt items, uInt size) {
+  return (voidpf)req::malloc_noptrs(items * size);
 }
 
-static void hhvm_zlib_free(voidpf opaque, voidpf address) {
+static void hhvm_zlib_free(voidpf /*opaque*/, voidpf address) {
   req::free((void*)address);
 }
 
@@ -212,16 +212,17 @@ Variant HHVM_FUNCTION(gzencode, const String& data, int level,
  */
 static String hhvm_zlib_inflate_rounds(z_stream *Z, int64_t maxlen,
                                        int &status) {
-  assert(maxlen >= 0);
+  assertx(maxlen >= 0);
   size_t retsize = (maxlen && maxlen < Z->avail_in) ? maxlen : Z->avail_in;
   String ret;
   size_t retused = 0;
   int round = 0;
 
   do {
-    if (UNLIKELY(retsize >= kMaxSmallSize && MM().preAllocOOM(retsize + 1))) {
+    if (UNLIKELY(retsize >= kMaxSmallSize) &&
+        UNLIKELY(tl_heap->preAllocOOM(retsize + 1))) {
       VMRegAnchor _;
-      assert(checkSurpriseFlags());
+      assertx(checkSurpriseFlags());
       handle_request_surprise();
     }
 
@@ -320,7 +321,7 @@ String HHVM_FUNCTION(zlib_get_coding_type) {
 // stream functions
 
 Variant HHVM_FUNCTION(gzopen, const String& filename, const String& mode,
-                              int64_t use_include_path /* = 0 */) {
+                      int64_t /*use_include_path*/ /* = 0 */) {
   if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
     return init_null();
   }
@@ -503,7 +504,7 @@ struct ChunkedInflator {
 
 bool HHVM_METHOD(ChunkedInflator, eof) {
   FETCH_CHUNKED_INFLATOR(data, this_);
-  assert(data);
+  assertx(data);
   return data->eof();
 }
 
@@ -511,7 +512,7 @@ String HHVM_METHOD(ChunkedInflator,
                    inflateChunk,
                    const String& chunk) {
   FETCH_CHUNKED_INFLATOR(data, this_);
-  assert(data);
+  assertx(data);
   return data->inflateChunk(chunk);
 }
 
@@ -519,7 +520,7 @@ String HHVM_METHOD(ChunkedInflator,
 
 struct ZlibExtension final : Extension {
   ZlibExtension() : Extension("zlib", "2.0") {}
-  void moduleLoad(const IniSetting::Map& ini, Hdf hdf) override {
+  void moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*hdf*/) override {
     s_zlib_stream_wrapper.registerAs("compress.zlib");
   }
   void moduleInit() override {

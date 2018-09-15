@@ -16,5 +16,9 @@ class Foo {
 public function bar() {
 }
 }
+
+<<__EntryPoint>>
+function main_1882() {
 $obj = new Foo();
 TestA::nativeTest($obj);
+}

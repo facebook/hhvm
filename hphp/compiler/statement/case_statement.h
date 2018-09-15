@@ -29,8 +29,6 @@ struct CaseStatement : Statement {
                 ExpressionPtr condition, StatementPtr stmt);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  bool hasDecl() const override { return m_stmt && m_stmt->hasDecl(); }
-  bool hasRetExp() const override { return m_stmt && m_stmt->hasRetExp(); }
   int getRecursiveCount() const override {
     return m_stmt ? m_stmt->getRecursiveCount() : 0;
   }

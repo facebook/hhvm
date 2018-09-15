@@ -45,6 +45,10 @@ function bar() {
   echo "Leave bar()\n";
 }
 
+
+<<__EntryPoint>>
+function main_dom_node_destruction_v1() {
 echo "Enter main()\n";
 bar();
 echo "Leave main()\n";
+}

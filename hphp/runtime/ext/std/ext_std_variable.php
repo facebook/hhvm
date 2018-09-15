@@ -214,16 +214,54 @@ namespace HH {
 
   /* Finds whether the given variable is a vec.
    */
-  <<__Native, __ParamCoerceModeFalse>>
-  function is_vec(mixed $var): bool;
+  <<__Native, __ParamCoerceModeFalse, __IsFoldable, __Rx>>
+  function is_vec(<<__MaybeMutable>> mixed $var): bool;
 
   /* Finds whether the given variable is a dict.
    */
-  <<__Native, __ParamCoerceModeFalse>>
-  function is_dict(mixed $var): bool;
+  <<__Native, __ParamCoerceModeFalse, __IsFoldable, __Rx>>
+  function is_dict(<<__MaybeMutable>> mixed $var): bool;
 
   /* Finds whether the given variable is a keyset.
    */
-  <<__Native, __ParamCoerceModeFalse>>
-  function is_keyset(mixed $var): bool;
+  <<__Native, __ParamCoerceModeFalse, __IsFoldable, __Rx>>
+  function is_keyset(<<__MaybeMutable>> mixed $var): bool;
+
+  <<__Native, __ParamCoerceModeFalse, __IsFoldable, __Rx>>
+  function is_varray(<<__MaybeMutable>> mixed $var): bool;
+
+  <<__Native, __ParamCoerceModeFalse, __IsFoldable, __Rx>>
+  function is_darray(<<__MaybeMutable>> mixed $var): bool;
+
+  <<__Native, __ParamCoerceModeFalse, __IsFoldable, __Rx>>
+  function is_any_array(<<__MaybeMutable>> mixed $var): bool;
+
+  /*
+   * Check if the input is an array-like containing only integer keys running
+   * from 0 to N-1, in that order.
+   */
+  <<__Native, __ParamCoerceModeFalse, __IsFoldable, __Rx>>
+  function is_list_like(<<__MaybeMutable>> arraylike $var): bool;
+
+ /*
+  * Behaves like serialize() but takes an optional set of options.
+  *
+  * Options:
+  *
+  * warnOnHackArrays - If true, emit a Hack array compat notice if serializing a
+  *                    Hack array
+  * warnOnPHPArrays  - If true, emit a Hack array compat notice if serializing a
+  *                    PHP array
+  * forcePHPArrays   - If true, serialize all Hack arrays as PHP arrays
+  */
+  <<__Native, __IsFoldable>>
+  function serialize_with_options(mixed $value, dict $options = dict[]): string;
+
+  /*
+   * This function returns an array of an object's properties in the same manner
+   * as casting the object to an array.
+   */
+  <<__Native>>
+  function object_prop_array(object $obj): array;
+
 }

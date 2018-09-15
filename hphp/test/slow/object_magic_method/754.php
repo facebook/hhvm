@@ -22,8 +22,12 @@ class MemberTest {
     return 1;
   }
 }
+
+<<__EntryPoint>>
+function main_754() {
 $obj = new MemberTest;
 $obj->a = 1;
 var_dump($obj->a);
 var_dump(isset($obj->a));
 unset($obj->a);
+}

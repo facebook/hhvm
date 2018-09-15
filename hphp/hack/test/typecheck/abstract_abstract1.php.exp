@@ -1,2 +1,2 @@
-File "abstract_abstract1.php", line 12, characters 10-17:
-Cannot specify attribute 'abstract' multiple times. (Parsing[1002])
+File "abstract_abstract1.php", line 12, characters 1-16:
+A class, interface, or trait declaration cannot have duplicate modifiers. (Parsing[1002])

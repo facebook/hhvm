@@ -1,0 +1,2 @@
+File "wrong_fixme_format.php", line 10, characters 1-1:
+HH_FIXME wrong format, expected '/* HH_FIXME[ERROR_NUMBER] */' (Parsing[1001])

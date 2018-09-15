@@ -50,18 +50,6 @@ int IfStatement::getRecursiveCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void IfStatement::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_stmts) m_stmts->analyzeProgram(ar);
-}
-
-bool IfStatement::hasDecl() const {
-  return m_stmts && m_stmts->hasDecl();
-}
-
-bool IfStatement::hasRetExp() const {
-  return m_stmts && m_stmts->hasRetExp();
-}
-
 ConstructPtr IfStatement::getNthKid(int n) const {
   switch (n) {
     case 0:
@@ -85,82 +73,6 @@ void IfStatement::setNthKid(int n, ConstructPtr cp) {
     default:
       assert(false);
       break;
-  }
-}
-
-StatementPtr IfStatement::preOptimize(AnalysisResultConstPtr ar) {
-  if (ar->getPhase() < AnalysisResult::FirstPreOptimize) {
-    return StatementPtr();
-  }
-
-  // we cannot optimize away the code inside if statement, because
-  // there may be a goto that goes into if statement.
-  if (hasReachableLabel()) {
-    return StatementPtr();
-  }
-
-  bool changed = false;
-  int i;
-  int j;
-  Variant value;
-  bool hoist = false;
-  for (i = 0; i < m_stmts->getCount(); i++) {
-    auto branch = dynamic_pointer_cast<IfBranchStatement>((*m_stmts)[i]);
-    ExpressionPtr condition = branch->getCondition();
-    if (!condition) {
-      StatementPtr stmt = branch->getStmt();
-      if (stmt) {
-        if (!i &&
-            ((getFunctionScope() && !getFunctionScope()->inPseudoMain()) ||
-             !stmt->hasDecl())) {
-          hoist = true;
-          break;
-        }
-        if (stmt->is(KindOfIfStatement)) {
-          auto sub_stmts = dynamic_pointer_cast<IfStatement>(stmt)->m_stmts;
-          m_stmts->removeElement(i);
-          changed = true;
-          for (j = 0; j < sub_stmts->getCount(); j++) {
-            m_stmts->insertElement((*sub_stmts)[j], i++);
-          }
-        }
-      }
-      break;
-    } else if (condition->getEffectiveScalar(value)) {
-      if (value.toBoolean()) {
-        hoist = !i &&
-          ((getFunctionScope() && !getFunctionScope()->inPseudoMain()) ||
-           !branch->hasDecl());
-        break;
-      } else if (!condition->hasEffect()) {
-        m_stmts->removeElement(i--);
-        changed = true;
-      } else if (branch->getStmt()) {
-        branch->clearStmt();
-        changed = true;
-      }
-    }
-  }
-
-  if (!changed && i && i == m_stmts->getCount()) return StatementPtr();
-
-  // either else branch or if (true) branch without further declarations
-
-  i++;
-  while (i < m_stmts->getCount()) {
-    m_stmts->removeElement(i);
-    changed = true;
-  }
-
-  // if there is only one branch left, return stmt.
-  if (hoist) {
-    auto branch = dynamic_pointer_cast<IfBranchStatement>((*m_stmts)[0]);
-    return branch->getStmt() ? branch->getStmt() : NULL_STATEMENT();
-  } else if (m_stmts->getCount() == 0) {
-    return NULL_STATEMENT();
-  } else {
-    return changed ? static_pointer_cast<Statement>(shared_from_this())
-                   : StatementPtr();
   }
 }
 

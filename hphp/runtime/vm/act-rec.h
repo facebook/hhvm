@@ -85,17 +85,27 @@ struct ActRec {
     StringData* m_invName;  // Invoked name, used for __call(), when pre-live
   };
 
-  TYPE_SCAN_CONSERVATIVE_FIELD(m_thisUnsafe);
-  TYPE_SCAN_CONSERVATIVE_FIELD(m_varEnv);
+  TYPE_SCAN_CUSTOM_FIELD(m_thisUnsafe) {
+    // skip if "this" is a class
+    if (checkThisOrNull(m_thisUnsafe)) scanner.scan(m_thisUnsafe);
+  }
+  TYPE_SCAN_CUSTOM_FIELD(m_varEnv) {
+    // All three union members could be heap pointers, but we don't care
+    // which kind; PtrMap will resolve things.
+    scanner.scan(m_varEnv);
+  }
 
   /////////////////////////////////////////////////////////////////////////////
 
   enum Flags : uint32_t {
     None          = 0,
 
-    // In non-HH files the caller can specify whether param type-checking
-    // should be strict or weak.
-    UseWeakTypes = (1u << 28),
+    // Set if the function was called using FCall instruction with more
+    // than one return values and must return a value via RetM.
+    MultiReturn = (1u << 26),
+
+    // Set if this corresponds to a dynamic call
+    DynamicCall = (1u << 27),
 
     // This bit can be independently set on ActRecs with any other flag state.
     // It's used by the unwinder to know that an ActRec has been partially torn
@@ -109,10 +119,11 @@ struct ActRec {
     // MayNeedStaticWaitHandle, if neither bit is set.
   };
 
-  static constexpr int kNumArgsBits = 28;
+  static constexpr int kNumArgsBits = 26;
   static constexpr int kNumArgsMask = (1 << kNumArgsBits) - 1;
   static constexpr int kFlagsMask = ~kNumArgsMask;
-  static constexpr int kExecutionModeMask = ~(LocalsDecRefd | UseWeakTypes);
+  static constexpr int kExecutionModeMask =
+    ~(LocalsDecRefd | DynamicCall | MultiReturn);
 
   /*
    * To conserve space, we use unions for pairs of mutually exclusive fields
@@ -127,6 +138,7 @@ struct ActRec {
 
   static constexpr uintptr_t kTrashedVarEnvSlot = 0xfeeefeee000f000f;
   static constexpr uintptr_t kTrashedThisSlot = 0xfeeefeeef00fe00e;
+  static constexpr uintptr_t kTrashedFuncSlot = 0xfeeefeeef00fe00d;
 
   /////////////////////////////////////////////////////////////////////////////
 
@@ -172,12 +184,13 @@ struct ActRec {
    * Raw flags accessors.
    */
   Flags flags() const;
-  bool useWeakTypes() const;
   bool localsDecRefd() const;
   bool resumed() const;
   bool isFCallAwait() const;
   bool mayNeedStaticWaitHandle() const;
   bool magicDispatch() const;
+  bool isDynamicCall() const;
+  bool isFCallM() const;
 
   /*
    * Pack `numArgs' and `flags' into the format expected by m_numArgsAndFlags.
@@ -196,10 +209,11 @@ struct ActRec {
   /*
    * Flags setters.
    */
-  void setUseWeakTypes();
   void setLocalsDecRefd();
   void setResumed();
   void setFCallAwait();
+  void setDynamicCall();
+  void setFCallM();
 
   /*
    * Set or clear both m_invName and the MagicDispatch flag.
@@ -341,6 +355,7 @@ struct ActRec {
    */
   void setVarEnv(VarEnv* val);
   void setExtraArgs(ExtraArgs* val);
+  void resetExtraArgs();
 
   /*
    * Get the extra argument with index `ind', from either the VarEnv or the
@@ -378,6 +393,16 @@ static_assert(kArRetOff % sizeof(TypedValue) == 0, "");
  */
 bool isReturnHelper(void* address);
 bool isDebuggerReturnHelper(void* address);
+
+/* Offset of the m_func and m_thisUnsafe fields in cells */
+
+static_assert(offsetof(ActRec, m_func) % sizeof(Cell) == 0, "");
+static_assert(offsetof(ActRec, m_thisUnsafe) % sizeof(Cell) == 0, "");
+
+constexpr auto kActRecFuncCellOff = offsetof(ActRec, m_func) /
+                                    sizeof(Cell);
+constexpr auto kActRecCtxCellOff  = offsetof(ActRec, m_thisUnsafe) /
+                                    sizeof(Cell);
 
 ///////////////////////////////////////////////////////////////////////////////
 

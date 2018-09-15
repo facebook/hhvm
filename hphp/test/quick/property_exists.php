@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Club {
   protected $app_id = 0;

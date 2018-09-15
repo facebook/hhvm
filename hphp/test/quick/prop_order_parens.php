@@ -1,4 +1,4 @@
-<?php
+<?hh
 class D {
 public $prop = 300;
 public function prop() { return 350; }

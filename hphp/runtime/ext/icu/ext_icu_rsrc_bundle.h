@@ -33,7 +33,7 @@ struct ResourceBundle : IntlError {
   static Object newInstance(icu::ResourceBundle* bundle) {
     if (!c_ResourceBundle) {
       c_ResourceBundle = Unit::lookupClass(s_ResourceBundle.get());
-      assert(c_ResourceBundle);
+      assertx(c_ResourceBundle);
     }
     Object obj{c_ResourceBundle};
     auto data = Native::data<ResourceBundle>(obj);
@@ -61,7 +61,7 @@ struct ResourceBundle : IntlError {
     return true;
   }
   icu::ResourceBundle iterCurrent(UErrorCode& error) {
-    assert(iterValid());
+    assertx(iterValid());
     return m_rsrc->get(m_iterIndex, error);
   }
   Variant iterKey() {

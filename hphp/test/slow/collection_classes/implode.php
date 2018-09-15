@@ -15,14 +15,18 @@ function main() {
 
   var_dump(implode(', ', $m));
   var_dump(implode($m, ', '));
-  var_dump(implode(', ', $v) === $arr_implode);
+  var_dump(implode(', ', $m) === $arr_implode);
 
   var_dump(join(', ', $v));
   var_dump(join($v, ', '));
-  var_dump(implode(', ', $v) === $arr_implode);
+  var_dump(join(', ', $v) === $arr_implode);
 
   $set_implode = implode(', ', $s);
   var_dump(strlen($set_implode) === strlen($arr_implode));
   var_dump(new Set(explode(', ', $set_implode)) == $s);
 }
+
+<<__EntryPoint>>
+function main_implode() {
 main();
+}

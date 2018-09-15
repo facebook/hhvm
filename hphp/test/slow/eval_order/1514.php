@@ -1,10 +1,4 @@
 <?php
-
-$GLOBALS['t'] = 0;
-$GLOBALS['f'] = 0;
-$GLOBALS['i'] = 0;
-$GLOBALS['d'] = 0;
-$GLOBALS['v'] = 'a';
 function t() {
   global $t;
   $t++;
@@ -110,4 +104,14 @@ function foo() {
   var_dump(v() * v());
   var_dump($GLOBALS['t'], $GLOBALS['f'],           $GLOBALS['i'], $GLOBALS['d'],           $GLOBALS['v']);
 }
+
+
+<<__EntryPoint>>
+function main_1514() {
+$GLOBALS['t'] = 0;
+$GLOBALS['f'] = 0;
+$GLOBALS['i'] = 0;
+$GLOBALS['d'] = 0;
+$GLOBALS['v'] = 'a';
 foo();
+}

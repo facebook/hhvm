@@ -1,4 +1,4 @@
-<?
+<?hh
 
 function nop($unused) { /* value sink */ }
 

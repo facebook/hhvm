@@ -6,4 +6,8 @@ class :script {
   }
 }
 
+
+<<__EntryPoint>>
+function main_closing_tag_xhp() {
 echo <script></script>;
+}

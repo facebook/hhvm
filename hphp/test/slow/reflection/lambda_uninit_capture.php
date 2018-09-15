@@ -10,4 +10,8 @@ function test() {
   $foo(); // x is not defined
 }
 
+
+<<__EntryPoint>>
+function main_lambda_uninit_capture() {
 test();
+}

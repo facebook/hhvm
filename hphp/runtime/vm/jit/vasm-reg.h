@@ -27,9 +27,11 @@
 namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
+enum class Width : uint8_t;
 struct Vptr;
 struct Vscaled;
 struct VscaledDisp;
+template <Width w> struct Vp;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -173,9 +175,7 @@ struct Vr {
   Vptr operator[](ScaledIndexDisp) const;
   Vptr operator[](Vptr) const;
   Vptr operator[](DispReg) const;
-
   Vptr operator*() const;
-
   Vptr operator+(size_t) const;
   Vptr operator+(intptr_t) const;
 
@@ -220,16 +220,14 @@ enum class Width : uint8_t {
   Long  = 1 << 2,
   Quad  = 1 << 3,
   Octa  = 1 << 4,
-  Dbl   = 1 << 5,
-  Flags = 1 << 6,
-  Wide  = Octa | Dbl,
+  Flags = 1 << 5,
   // X-or-narrower widths.
   WordN = Byte | Word,
   LongN = Byte | Word | Long,
   QuadN = Byte | Word | Long | Quad,
   // Any non-flags register.
-  AnyNF = Byte | Word | Long | Quad | Octa | Dbl,
-  Any   = Byte | Word | Long | Quad | Octa | Dbl | Flags,
+  AnyNF = Byte | Word | Long | Quad | Octa,
+  Any   = Byte | Word | Long | Quad | Octa | Flags,
 };
 
 inline Width operator&(Width w1, Width w2) {
@@ -247,7 +245,7 @@ inline Width width(Vreg16)  { return Width::Word; }
 inline Width width(Vreg32)  { return Width::Long; }
 inline Width width(Vreg64)  { return Width::Quad; }
 inline Width width(Vreg128) { return Width::Octa; }
-inline Width width(VregDbl) { return Width::Dbl; }
+inline Width width(VregDbl) { return Width::Quad; }
 inline Width width(VregSF)  { return Width::Flags; }
 
 std::string show(Width w);
@@ -257,6 +255,7 @@ std::string show(Width w);
 struct Vscaled {
   Vreg64 index;
   int scale;
+  Width width;
 };
 
 struct VscaledDisp {
@@ -274,26 +273,27 @@ VscaledDisp operator+(Vscaled, int32_t);
 struct Vptr {
   enum Segment : uint8_t { DS, FS, GS };
 
-  Vptr()
+  Vptr(Width w = Width::None)
     : base(Vreg{})
     , index(Vreg{})
     , disp(0)
+    , width(w)
   {}
 
-  template<class Base>
-  Vptr(Base b, int d)
+  Vptr(Vreg b, uint32_t d, Width w = Width::None)
     : base(b)
     , index(Vreg{})
-    , scale(1)
     , disp(d)
+    , scale(1)
+    , width(w)
   {}
 
-  template<class Base, class Index>
-  Vptr(Base b, Index i, int s, int d)
+  Vptr(Vreg b, Vreg i, uint8_t s, uint32_t d, Width w = Width::None)
     : base(b)
     , index(i)
-    , scale(s)
     , disp(d)
+    , scale(s)
+    , width(w)
   {
     validate();
   }
@@ -301,9 +301,20 @@ struct Vptr {
   /* implicit */ Vptr(MemoryRef m, Segment s = DS)
     : base(m.r.base)
     , index(m.r.index)
+    , disp(m.r.disp)
     , scale(m.r.scale)
     , seg(s)
+  {
+    validate();
+  }
+
+  Vptr(MemoryRef m, Width w, Segment s = DS)
+    : base(m.r.base)
+    , index(m.r.index)
     , disp(m.r.disp)
+    , scale(m.r.scale)
+    , seg(s)
+    , width(w)
   {
     validate();
   }
@@ -318,21 +329,44 @@ struct Vptr {
   bool operator!=(const Vptr&) const;
 
   void validate() {
-    assert((scale == 0x1 || scale == 0x2 || scale == 0x4 || scale == 0x8) &&
+    assertx((scale == 0x1 || scale == 0x2 || scale == 0x4 || scale == 0x8) &&
            "Invalid index register scaling (must be 1,2,4 or 8).");
   }
 
   Vreg64 base;      // optional, for baseless mode
   Vreg64 index;     // optional
+  int32_t disp;
   uint8_t scale;    // 1,2,4,8
   Segment seg{DS};  // DS, FS or GS
-  int32_t disp;
+  Width width{Width::None};
 };
+
+template <Width w>
+struct Vp : Vptr {
+  Vp(Vreg b, uint32_t d) : Vptr(b, d, w) {}
+  /* implicit */ Vp(MemoryRef m, Segment s = DS) : Vptr(m, w, s) {}
+  Vp(Vreg b, Vreg i, uint8_t s, int32_t d) : Vptr(b, i, d, s, w) {}
+  /* implicit */ Vp(const Vptr& m) : Vptr(m) { width = w; }
+};
+
+using Vptr8 = Vp<Width::Byte>;
+using Vptr16 = Vp<Width::Word>;
+using Vptr32 = Vp<Width::Long>;
+using Vptr64 = Vp<Width::Quad>;
+using Vptr128 = Vp<Width::Octa>;
 
 Vptr operator+(Vptr lhs, int32_t d);
 Vptr operator+(Vptr lhs, intptr_t d);
+Vptr operator+(Vptr lhr, size_t d);
 
 Vptr baseless(VscaledDisp);
+
+inline Width width(Vptr8)   { return Width::Byte; }
+inline Width width(Vptr16)  { return Width::Word; }
+inline Width width(Vptr32)  { return Width::Long; }
+inline Width width(Vptr64)  { return Width::Quad; }
+inline Width width(Vptr128) { return Width::Octa; }
+inline Width width(Vptr m)  { return m.width; }
 
 ///////////////////////////////////////////////////////////////////////////////
 

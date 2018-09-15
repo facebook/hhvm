@@ -1,0 +1,4 @@
+File "tparam_rebind.php", line 4, characters 31-31:
+You cannot re-bind the type parameter T (Naming[2041])
+File "tparam_rebind.php", line 3, characters 9-9:
+T is already bound here

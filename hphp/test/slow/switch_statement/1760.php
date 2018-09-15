@@ -10,4 +10,8 @@ function test($x) {
  break;
   }
 }
+
+<<__EntryPoint>>
+function main_1760() {
 test(new X);
+}

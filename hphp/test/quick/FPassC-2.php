@@ -47,7 +47,7 @@ var_dump($x);
 echo "==============================\n";
 
 // For list assignment expressions, if the RHS is a simple variable
-// then it will be passed by reference via FPassH
+// then it will be passed by reference
 
 $x = null;
 $innerArr = array(1);
@@ -63,7 +63,7 @@ unset($innerArr);
 echo "==============================\n";
 
 // For binding assignment expressions, the RHS will be passed
-// by reference via FPassV
+// by reference
 
 $x = null;
 g($y =& $x);

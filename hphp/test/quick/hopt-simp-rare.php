@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f1($x) {
   return true < $x;

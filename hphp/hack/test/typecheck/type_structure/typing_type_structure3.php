@@ -1,6 +1,6 @@
 <?hh // strict
 
-enum E : int {}
+enum E: int {}
 
 type MyAlias2 = E;
 type MyAlias = MyAlias2;

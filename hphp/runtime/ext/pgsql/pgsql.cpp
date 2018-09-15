@@ -31,13 +31,22 @@
 #define PGSQL_STATUS_STRING 2
 
 #define FAIL_RETURN return false
-#define MAKE_STR_VECTOR(name, params) \
-  std::vector<const char *> name; \
-  name.reserve(params.size()); \
-  for (ArrayIter iter(params); iter; ++iter) { \
-    const Variant &param = iter.secondRef(); \
-    name.push_back(param.isNull() ? \
-      nullptr : param.toString().detach()->data()); \
+#define MAKE_STR_VECTOR(name, params)                 \
+  std::vector<const char *> name;                     \
+  std::vector<String> name##_decrefs;                 \
+  name.reserve(params.size());                        \
+  name##_decrefs.reserve(params.size());              \
+                                                      \
+  for (ArrayIter iter(params); iter; ++iter) {        \
+    auto const param = iter.secondRval().unboxed();   \
+    if (isNullType(param.type())) {                   \
+      name.push_back(nullptr);                        \
+    } else {                                          \
+      name##_decrefs.push_back(                       \
+        tvCastToString(param.tv())                    \
+      );                                              \
+      name.push_back(name##_decrefs.back().c_str());  \
+    }                                                 \
   }
 
 namespace HPHP {
@@ -354,7 +363,7 @@ bool PGSQLResult::convertFieldRow(const Variant& row, const Variant& field,
   Variant actual_field;
   int actual_row;
 
-  assert(out_row && out_field && "Output parameters cannot be null");
+  assertx(out_row && out_field && "Output parameters cannot be null");
 
   if (!fn_name) {
     fn_name = "__internal_pgsql_func";

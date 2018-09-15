@@ -42,25 +42,26 @@ struct AlignImpl {
 
   static void pad(CodeBlock& cb, AlignContext context, size_t bytes) {
     vixl::MacroAssembler a { cb };
-    auto const start = reinterpret_cast<char*>(cb.frontier());
+    auto const begin = cb.frontier();
 
     switch (context) {
-      case AlignContext::Live:
-        assert(((bytes & 3) == 0) && "alignment must be multiple of 4");
+      case AlignContext::Live: {
+        assertx(((bytes & 3) == 0) && "alignment must be multiple of 4");
         for (; bytes > 0; bytes -= 4) {
           a.Nop();
         }
-        __builtin___clear_cache(start, reinterpret_cast<char*>(cb.frontier()));
+        cb.sync(begin);
         return;
-
-      case AlignContext::Dead:
+      }
+      case AlignContext::Dead: {
         if (bytes > 4) {
           a.Brk();
           bytes -= 4;
         }
-        __builtin___clear_cache(start, reinterpret_cast<char*>(cb.frontier()));
+        cb.sync(begin);
         if (bytes > 0) pad(cb, AlignContext::Live, bytes);
         return;
+      }
     }
     not_reached();
   }
@@ -79,6 +80,12 @@ bool is_aligned(TCA frontier, Alignment alignment) {
 void align(CodeBlock& cb, CGMeta* meta,
            Alignment alignment, AlignContext context) {
   return jit::align<AlignImpl>(cb, meta, alignment, context);
+}
+
+const AlignInfo& alignment_info(Alignment alignment) {
+  auto const idx = static_cast<uint32_t>(alignment);
+
+  return AlignImpl::s_table[idx];
 }
 
 ///////////////////////////////////////////////////////////////////////////////

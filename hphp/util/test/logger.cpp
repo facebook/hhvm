@@ -24,9 +24,7 @@ struct MockLogFileFlusher : LogFileFlusher {
   off_t last_flush;
 
 private:
-  void dropCache(int fd, off_t off) override {
-    last_flush = off;
-  }
+void dropCache(int /*fd*/, off_t off) override { last_flush = off; }
 };
 
 static void doWrite(LogFileFlusher* flusher, int fd, int bytes) {

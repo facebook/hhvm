@@ -24,6 +24,7 @@ namespace HPHP {
 
 struct SrcKey;
 struct ActRec;
+struct Func;
 
 namespace jit {
 
@@ -40,11 +41,11 @@ namespace jit {
 void clearDbgBL();
 
 /*
- * Add `pc' to the debug blacklist.
+ * Add `func' to the debug blacklist.
  *
  * Return whether we actually performed an insertion.
  */
-bool addDbgBLPC(PC pc);
+bool addDbgBLFunc(const Func* func);
 
 /*
  * Check if `sk' is in the debug blacklist.

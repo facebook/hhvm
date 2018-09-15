@@ -1,4 +1,4 @@
-<?php
+<?hh
 class C {
   private static $cls = 'C';
   public function __construct() {

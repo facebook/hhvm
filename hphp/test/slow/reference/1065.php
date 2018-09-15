@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1065() {
 $a = 1;
  $b = &$a;
  $c = 2;
@@ -8,3 +11,4 @@ $a = 1;
  var_dump($a);
  var_dump($b);
  var_dump($c);
+}

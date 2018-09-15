@@ -37,15 +37,15 @@ struct RPCRequestHandler : RequestHandler {
   };
 
   RPCRequestHandler(int timeout, bool info);
-  virtual ~RPCRequestHandler();
+  ~RPCRequestHandler() override;
 
   void setServerInfo(std::shared_ptr<SatelliteServerInfo> info) {
     m_serverInfo = info;
   }
 
   // implementing RequestHandler
-  virtual void handleRequest(Transport *transport);
-  virtual void abortRequest(Transport *transport);
+  void handleRequest(Transport* transport) override;
+  void abortRequest(Transport* transport) override;
 
   static void cleanupState();
 
@@ -76,7 +76,7 @@ private:
   std::string getSourceFilename(const std::string &path,
                                 SourceRootInfo &sourceRootInfo);
 
-  static DECLARE_THREAD_LOCAL(AccessLog::ThreadData, s_accessLogThreadData);
+  static THREAD_LOCAL(AccessLog::ThreadData, s_accessLogThreadData);
   static AccessLog s_accessLog;
 
   static AccessLog::ThreadData* getAccessLogThreadData() {

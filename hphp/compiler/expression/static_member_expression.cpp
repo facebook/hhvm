@@ -19,8 +19,6 @@
 #include "hphp/compiler/expression/dynamic_variable.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/analysis/class_scope.h"
-#include "hphp/compiler/analysis/variable_table.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/hash.h"
@@ -36,8 +34,7 @@ StaticMemberExpression::StaticMemberExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr classExp, ExpressionPtr exp)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES(StaticMemberExpression)),
-    StaticClassName(classExp), m_exp(exp), m_valid(false),
-    m_dynamicClass(false) {
+    StaticClassName(classExp), m_exp(exp) {
   if (exp->is(KindOfSimpleVariable)) {
     auto s = dynamic_pointer_cast<SimpleVariable>(exp);
     m_exp = ExpressionPtr
@@ -63,57 +60,8 @@ ExpressionPtr StaticMemberExpression::clone() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-bool StaticMemberExpression::findMember(AnalysisResultPtr ar, std::string &name,
-                                        Symbol *&sym) {
-  if (m_exp->is(Expression::KindOfScalarExpression)) {
-    auto var = dynamic_pointer_cast<ScalarExpression>(m_exp);
-    name = var->getString();
-  }
-
-  if (m_class) return false;
-
-  sym = nullptr;
-  m_resolvedClass = resolveClass();
-  if (!m_resolvedClass) return isRedeclared();
-
-  if (m_resolvedClass->derivesFromRedeclaring() == Derivation::Redeclaring) {
-    m_dynamicClass = true;
-  }
-
-  if (m_dynamicClass) return true;
-
-  if (!name.empty()) {
-    ClassScopePtr parent = m_resolvedClass;
-    sym = m_resolvedClass->findProperty(parent, name, ar);
-    if (sym && sym->isStatic()) {
-      m_resolvedClass = parent;
-    } else {
-      sym = nullptr;
-    }
-  }
-
-  return true;
-}
-
-void StaticMemberExpression::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_class) {
-    m_class->analyzeProgram(ar);
-  } else if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
-    Symbol *sym;
-    std::string name;
-    if (findMember(ar, name, sym)) {
-      if (m_resolvedClass) {
-        m_resolvedClass->addUse(getScope(), BlockScope::UseKindStaticRef);
-        if (!sym && !m_dynamicClass && !name.empty() &&
-            ar->getPhase() == AnalysisResult::AnalyzeFinal &&
-            !m_resolvedClass->isTrait()) {
-          Compiler::Error(Compiler::UseUndeclaredVariable, shared_from_this());
-        }
-      }
-    }
-  }
-  m_exp->analyzeProgram(ar);
+void StaticMemberExpression::analyzeProgram(AnalysisResultConstRawPtr /*ar*/) {
+  resolveClass();
 }
 
 ConstructPtr StaticMemberExpression::getNthKid(int n) const {
@@ -145,11 +93,6 @@ void StaticMemberExpression::setNthKid(int n, ConstructPtr cp) {
       assert(false);
       break;
   }
-}
-
-ExpressionPtr StaticMemberExpression::preOptimize(AnalysisResultConstPtr ar) {
-  if (m_class) updateClassName();
-  return ExpressionPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

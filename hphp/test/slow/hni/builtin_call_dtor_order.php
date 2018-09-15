@@ -1,4 +1,4 @@
-<?hh
+<?hh // decl
 
 class dtor {
   public function __construct(private int $i) {}
@@ -13,4 +13,8 @@ class invoker {
 function foo() {
   array_map(new invoker, array(new dtor(1), new dtor(2)));
 }
+
+<<__EntryPoint>>
+function main_builtin_call_dtor_order() {
 foo();
+}

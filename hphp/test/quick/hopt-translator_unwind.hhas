@@ -4,8 +4,7 @@
 .main {
   FPushFuncD 1 "set_error_handler"
     String "thrower"
-    FPassC 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
   # If get_undefined_var is inlined then the context passed to handler will
@@ -15,37 +14,36 @@
   # alive past the end of test_unwind_dirty_stack_regs.
   FPushClsMethodD 1 "setTraceOptions" "Exception"
     Cns "DEBUG_BACKTRACE_IGNORE_ARGS"
-    FPassCE 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
 
-  .try_catch (Exception handler) {
+  .try {
     FPushFuncD 0 "test_unwind_dirty_stack_regs"
-    FCall 0
+    FCall 0 0 1 - "" ""
     UnboxR
     RetC
+  } .catch {
+    SetL _1
+    PopC
+    String "Received exception:  "
+    PushL _1
+    FPushObjMethodD 0 "getMessage" NullThrows
+    FCall 0 0 1 - "" ""
+    UnboxR
+    Concat
+    String "\n"
+    Concat
+    Print
+    PopC
+    Int 1
+    RetC
   }
-
-handler:
-  String "Received exception:  "
-  Catch
-  FPushObjMethodD 0 "getMessage" NullThrows
-  FCall 0
-  UnboxR
-  Concat
-  String "\n"
-  Concat
-  Print
-  PopC
-  Int 1
-  RetC
 }
 
 .function thrower() {
   FPushCtorD 1 "Exception"
     String "hi"
-    FPassC 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   PopR
   Throw
 }
@@ -62,7 +60,7 @@ handler:
 
     This
     CGetL $id
-    BaseC 1
+    BaseC 1 Define
     SetM 1 PT:"x"
     PopC
     Int 1
@@ -72,7 +70,7 @@ handler:
   .method [public] __destruct() {
     String "dtor: "
     This
-    BaseC 0
+    BaseC 0 Warn
     QueryM 1 CGet PT:"x"
     Concat
     String "\n"
@@ -86,8 +84,8 @@ handler:
 
 .function make_obj($id) {
   FPushCtorD 1 "DtorPrinter"
-    FPassL 0 $id
-  FCall 1
+    CGetL $id
+  FCall 1 0 1 - "" ""
   PopR
   RetC
 }
@@ -110,22 +108,19 @@ handler:
 .function test_unwind_dirty_stack_regs() {
   FPushFuncD 1 "make_obj"
     Int 0
-    FPassC 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   UnboxR
   SetL $k_0
   PopC
   FPushFuncD 1 "make_obj"
     Int 1
-    FPassC 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   UnboxR
   SetL $k_1
   PopC
   FPushFuncD 1 "make_obj"
     Int 2
-    FPassC 0
-  FCall 1
+  FCall 1 0 1 - "" ""
   UnboxR
   SetL $k_2
   PopC
@@ -135,7 +130,7 @@ handler:
   CGetL $k_2
 
   FPushFuncD 0 "get_undefined_var"
-  FCall 0
+  FCall 0 0 1 - "" ""
   PopR
 
   # This code isn't reached---but let's Pop this junk just so

@@ -209,14 +209,16 @@ Vreg cond(Vout& vmain, Vout& vcold, ConditionCode cc, Vreg sf,
  * appropriately for the loop.
  *
  * `loopBlock' is the lambda responsible for generating the code.  It takes
- * both the input phidef and output phijcc loop registers as arguments, and
+ * both the input phidef and output phijmp loop registers as arguments, and
  * should return a single SF Vreg to be tested against `cc'.
  */
 template <class Loop>
-void doWhile(Vout& v, ConditionCode cc,
-             const VregList& regs, Loop loopBlock) {
-  auto loop = v.makeBlock();
-  auto done = v.makeBlock();
+VregList doWhile(Vout& v, ConditionCode cc,
+                 const VregList& regs, Loop loopBlock) {
+  auto const loop = v.makeBlock();
+  auto const done = v.makeBlock();
+  auto const loopSplit = v.makeBlock();
+  auto const doneSplit = v.makeBlock();
 
   auto const freshRegs = [&] {
     auto copy = regs;
@@ -230,10 +232,19 @@ void doWhile(Vout& v, ConditionCode cc,
   v = loop;
   v << phidef{v.makeTuple(in)};
   auto const sf = loopBlock(in, out);
-  v << phijcc{cc, sf, {done, loop}, v.makeTuple(out)};
+  v << jcc{cc, sf, {doneSplit, loopSplit}};
+
+  v = loopSplit;
+  v << phijmp{loop, v.makeTuple(out)};
+
+  v = doneSplit;
+  v << phijmp{done, v.makeTuple(out)};
 
   v = done;
-  v << phidef{v.makeTuple(freshRegs())};
+  auto fout = freshRegs();
+  v << phidef{v.makeTuple(fout)};
+
+  return fout;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

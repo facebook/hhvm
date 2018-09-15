@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1479() {
 if (!isset($g2)) {
   class test {
 }
@@ -14,3 +17,4 @@ $x = new test();
 $x->bar = 1;
 $x->foo = 2;
 var_dump($x);
+}

@@ -1,0 +1,10 @@
+(3,1)-(3,13) No code may exist outside of namespace {}
+(3,61)-(4,1) A semicolon (';') or a namespace body is expected here.
+(8,14)-(8,14) Cannot mix bracketed namespace declarations with unbracketed namespace declarations
+  (4,1)-(4,1) First unbracketed namespace occurrence here
+(13,1)-(17,1) No code may exist outside of namespace {}
+(27,1)-(27,13) No code may exist outside of namespace {}
+(27,61)-(28,1) A semicolon (';') or a namespace body is expected here.
+(31,35)-(32,1) An expression is expected here.
+(33,1)-(36,14) No code may exist outside of namespace {}
+(36,50)-(37,1) A right brace ('}') is expected here.

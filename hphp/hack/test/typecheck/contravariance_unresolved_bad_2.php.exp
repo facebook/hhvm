@@ -1,0 +1,6 @@
+File "contravariance_unresolved_bad_2.php", line 28, characters 18-20:
+Invalid argument (Typing[4110])
+File "contravariance_unresolved_bad_2.php", line 8, characters 30-35:
+This is a string
+File "contravariance_unresolved_bad_2.php", line 38, characters 12-13:
+It is incompatible with an int

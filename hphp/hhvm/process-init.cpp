@@ -16,14 +16,9 @@
 
 #include "hphp/compiler/option.h"
 
-#include "hphp/runtime/vm/jit/fixup.h"
-#include "hphp/runtime/vm/jit/mcgen.h"
-#include "hphp/runtime/vm/jit/prof-data.h"
-#include "hphp/runtime/vm/jit/translator.h"
-
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/unit.h"
 
 #include "hphp/runtime/base/execution-context.h"
@@ -58,21 +53,19 @@ SYSTEMLIB_CLASSES(SYSTEM_CLASS_STRING)
 #undef STRINGIZE_CLASS_NAME
 
 namespace {
-const StaticString s_Throwable("\\__SystemLib\\Throwable");
+const StaticString s_Throwable("Throwable");
 const StaticString s_BaseException("\\__SystemLib\\BaseException");
-const StaticString s_Error("\\__SystemLib\\Error");
-const StaticString s_ArithmeticError("\\__SystemLib\\ArithmeticError");
-const StaticString s_AssertionError("\\__SystemLib\\AssertionError");
-const StaticString s_DivisionByZeroError("\\__SystemLib\\DivisionByZeroError");
-const StaticString s_ParseError("\\__SystemLib\\ParseError");
-const StaticString s_TypeError("\\__SystemLib\\TypeError");
+const StaticString s_Error("Error");
+const StaticString s_ArithmeticError("ArithmeticError");
+const StaticString s_ArgumentCountError("ArgumentCountError");
+const StaticString s_AssertionError("AssertionError");
+const StaticString s_DivisionByZeroError("DivisionByZeroError");
+const StaticString s_ParseError("ParseError");
+const StaticString s_TypeError("TypeError");
 }
 
 void tweak_variant_dtors();
 void ProcessInit() {
-  jit::mcgen::processInit();
-  jit::processInitProfData();
-
   // Save the current options, and set things up so that
   // systemlib.php can be read from and stored in the
   // normal repo.
@@ -87,6 +80,11 @@ void ProcessInit() {
   RuntimeOption::EvalAllowHhas = true;
   Option::WholeProgram = false;
 
+  if (RuntimeOption::RepoAuthoritative) {
+    LitstrTable::init();
+    Repo::get().loadGlobalData();
+  }
+
   rds::requestInit();
   std::string hhas;
   auto const slib = get_systemlib(&hhas);
@@ -98,16 +96,13 @@ void ProcessInit() {
     _exit(1);
   }
 
-  LitstrTable::init();
-  if (!RuntimeOption::RepoAuthoritative) LitstrTable::get().setWriting();
-  Repo::get().loadGlobalData();
-
   // Save this in case the debugger needs it. Once we know if this
   // process does not have debugger support, we'll clear it.
   SystemLib::s_source = slib;
 
   SystemLib::s_unit = compile_systemlib_string(slib.c_str(), slib.size(),
-                                               "systemlib.php");
+                                               "/:systemlib.php",
+                                               Native::s_systemNativeFuncs);
 
   const StringData* msg;
   int line;
@@ -115,13 +110,14 @@ void ProcessInit() {
     Logger::Error("An error has been introduced into the systemlib, "
                   "but we cannot give you a file and line number right now.");
     Logger::Error("Check all of your changes to hphp/system/php");
-    Logger::Error("HipHop Parse Error: %s", msg->data());
+    Logger::Error("HipHop Parse Error: %s %d", msg->data(), line);
     _exit(1);
   }
 
   if (!hhas.empty()) {
     SystemLib::s_hhas_unit = compile_systemlib_string(
-      hhas.c_str(), hhas.size(), "systemlib.hhas");
+      hhas.c_str(), hhas.size(), "/:systemlib.hhas",
+      Native::s_systemNativeFuncs);
     if (SystemLib::s_hhas_unit->compileTimeFatal(msg, line)) {
       Logger::Error("An error has been introduced in the hhas portion of "
                     "systemlib.");
@@ -141,8 +137,6 @@ void ProcessInit() {
   SystemLib::s_nullFunc =
     Unit::lookupFunc(makeStaticString("__SystemLib\\__86null"));
 
-  LitstrTable::get().setReading();
-
 #define INIT_SYSTEMLIB_CLASS_FIELD(cls)                                 \
   {                                                                     \
     Class *cls = NamedEntity::get(s_##cls.get())->clsList();            \
@@ -154,6 +148,7 @@ void ProcessInit() {
   INIT_SYSTEMLIB_CLASS_FIELD(BaseException)
   INIT_SYSTEMLIB_CLASS_FIELD(Error)
   INIT_SYSTEMLIB_CLASS_FIELD(ArithmeticError)
+  INIT_SYSTEMLIB_CLASS_FIELD(ArgumentCountError)
   INIT_SYSTEMLIB_CLASS_FIELD(AssertionError)
   INIT_SYSTEMLIB_CLASS_FIELD(DivisionByZeroError)
   INIT_SYSTEMLIB_CLASS_FIELD(ParseError)

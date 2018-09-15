@@ -1,7 +1,5 @@
 <?hh
 
-$s = strtolower('heLLo');
-
 class C {
   public $x = 3;
   public $f = 'hi';
@@ -20,6 +18,11 @@ function apcOps($key, $val) {
   var_dump(apc_fetch($key));
   var_dump(apc_fetch($key));
 }
+
+
+<<__EntryPoint>>
+function main_apc_objects() {
+$s = strtolower('heLLo');
 
 echo "**** Object instance with simple properties\n";
 $o = new C;
@@ -161,3 +164,4 @@ apcOps('key', $s);
 
 echo "**** Make sure delete is ok\n";
 apc_delete('key');
+}

@@ -1,0 +1,22 @@
+File "ellipsis_strict_mode_2.php", line 12, characters 10-29:
+Cannot use ... without a type hint in strict mode. Please add a type hint. (Typing[4223])
+File "ellipsis_strict_mode_2.php", line 10, characters 12-31:
+Cannot use ... without a type hint in strict mode. Please add a type hint. (Typing[4223])
+File "ellipsis_strict_mode_2.php", line 16, characters 25-44:
+Cannot use ... without a type hint in strict mode. Please add a type hint. (Typing[4223])
+File "ellipsis_strict_mode_2.php", line 20, characters 27-46:
+Cannot use ... without a type hint in strict mode. Please add a type hint. (Typing[4223])
+File "ellipsis_strict_mode_2.php", line 24, characters 29-48:
+Cannot use ... without a type hint in strict mode. Please add a type hint. (Typing[4223])
+File "ellipsis_strict_mode_2.php", line 28, characters 30-49:
+Cannot use ... without a type hint in strict mode. Please add a type hint. (Typing[4223])
+File "ellipsis_strict_mode_2.php", line 32, characters 26-45:
+Cannot use ... without a type hint in strict mode. Please add a type hint. (Typing[4223])
+File "ellipsis_strict_mode_2.php", line 36, characters 29-48:
+Cannot use ... without a type hint in strict mode. Please add a type hint. (Typing[4223])
+File "ellipsis_strict_mode_2.php", line 3, characters 13-30:
+Cannot use ... without a type hint in strict mode. Please add a type hint. (Typing[4223])
+File "ellipsis_strict_mode_2.php", line 5, characters 14-31:
+Cannot use ... without a type hint in strict mode. Please add a type hint. (Typing[4223])
+File "ellipsis_strict_mode_2.php", line 7, characters 23-43:
+Cannot use ... without a type hint in strict mode. Please add a type hint. (Typing[4223])

@@ -22,8 +22,8 @@ void FileEventHandler::handlerReady(uint16_t events) noexcept {
 /////////////////////////////////////////////////////////////////////////////
 
 FileAwait::FileAwait(int fd, uint16_t events, double timeout) {
-  assert(fd >= 0);
-  assert(events & FileEventHandler::READ_WRITE);
+  assertx(fd >= 0);
+  assertx(events & FileEventHandler::READ_WRITE);
 
   auto asio_event_base = getSingleton<AsioEventBase>();
   m_file = std::make_shared<FileEventHandler>(asio_event_base.get(), fd, this);
@@ -99,7 +99,7 @@ Object File::await(uint16_t events, double timeout) {
   try {
     return Object{ev->getWaitHandle()};
   } catch (...) {
-    assert(false);
+    assertx(false);
     ev->abandon();
     throw;
   }

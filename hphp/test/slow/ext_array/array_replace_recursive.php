@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_array_replace_recursive() {
 $ar1 = array(
   "color" => array("favoritte" => "red"),
   5
@@ -10,3 +13,4 @@ $ar2 = array(
 );
 $r = array_replace_recursive($ar1, array($ar2));
 var_dump($r);
+}

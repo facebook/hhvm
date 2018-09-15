@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function val() { return 0; }
 function foo($k) {

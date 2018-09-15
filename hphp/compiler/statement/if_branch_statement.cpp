@@ -42,11 +42,6 @@ StatementPtr IfBranchStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void IfBranchStatement::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_condition) m_condition->analyzeProgram(ar);
-  if (m_stmt) m_stmt->analyzeProgram(ar);
-}
-
 ConstructPtr IfBranchStatement::getNthKid(int n) const {
   switch (n) {
     case 0:

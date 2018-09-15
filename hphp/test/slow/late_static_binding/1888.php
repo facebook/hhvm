@@ -13,5 +13,9 @@ class X {
     var_dump(get_called_class());
   }
 }
+
+<<__EntryPoint>>
+function main_1888() {
 $x = new X;
 $x->foo();
+}

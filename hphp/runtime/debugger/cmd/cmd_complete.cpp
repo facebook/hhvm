@@ -31,8 +31,7 @@ void CmdComplete::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
 }
 
-void CmdComplete::list(DebuggerClient &client) {
-}
+void CmdComplete::list(DebuggerClient& /*client*/) {}
 
 void CmdComplete::help(DebuggerClient &client) {
   client.helpTitle("Complete");
@@ -54,8 +53,8 @@ void CmdComplete::onClient(DebuggerClient &client) {
   }
 }
 
-bool CmdComplete::onServer(DebuggerProxy &proxy) {
-  assert(false); // this command is processed entirely locally
+bool CmdComplete::onServer(DebuggerProxy& /*proxy*/) {
+  assertx(false); // this command is processed entirely locally
   return false;
 }
 

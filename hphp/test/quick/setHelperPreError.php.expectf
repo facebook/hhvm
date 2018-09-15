@@ -7,10 +7,10 @@ array(1) {
 }
 int(1)
 
-Warning: Cannot use a scalar value as an array in %s on line 17
+Warning: Cannot use a scalar value as an array in %s on line 16
 NULL
 int(1)
 
-Warning: Cannot use a scalar value as an array in %s on line 22
+Warning: Cannot use a scalar value as an array in %s on line 21
 NULL
 Test end

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function func_num_args_simple() {
   return func_num_args();

@@ -1,0 +1,134 @@
+((script 743
+  ((list 743
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
+       (missing 0 ())))
+     (expression_statement 7
+      ((binary_expression 6
+        ((variable 2 ((((end_of_line 1)) variable 2 ((whitespace 1)))))
+         (() = 1 ((whitespace 1))) (literal 1 ((() decimal_literal 1 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (do_statement 91
+      ((() do 2 ((whitespace 1)))
+       (compound_statement 70
+        ((() { 1 ((end_of_line 1)))
+         (list 64
+          ((echo_statement 27
+            ((((whitespace 2)) echo 4 ((whitespace 1)))
+             (list 21
+              ((list_item 21
+                ((binary_expression 21
+                  ((binary_expression 16
+                    ((literal 6
+                      ((list 6
+                        ((() double_quoted_string_literal_head 1 ())
+                         (variable 2 ((() variable 2 ())))
+                         (() double_quoted_string_literal_tail 3 ())))))
+                     (() . 1 ())
+                     (parenthesized_expression 9
+                      ((() "(" 1 ())
+                       (binary_expression 7
+                        ((variable 2 ((() variable 2 ((whitespace 1)))))
+                         (() * 1 ((whitespace 1)))
+                         (variable 2 ((() variable 2 ())))))
+                       (() ")" 1 ())))))
+                   (() . 1 ())
+                   (literal 4 ((() double_quoted_string_literal 4 ())))))
+                 (missing 0 ())))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 28) (end_of_line 1)))))
+           (expression_statement 5
+            ((prefix_unary_expression 4
+              ((((whitespace 2)) ++ 2 ()) (variable 2 ((() variable 2 ())))))
+             (() ";" 1 ((end_of_line 1)))))))
+         (() } 1 ((whitespace 1)))))
+       (missing 0 ()) (((extra_token_error 5) (whitespace 1)) "(" 1 ())
+       (binary_expression 8
+        ((variable 2 ((() variable 2 ((whitespace 1)))))
+         (() <= 2 ((whitespace 1))) (literal 2 ((() decimal_literal 2 ())))))
+       (() ")" 1 ())
+       (() ";" 1 ((whitespace 1) (single_line_comment 31) (end_of_line 1)))))
+     (expression_statement 7
+      ((binary_expression 6
+        ((variable 2
+          ((((end_of_line 1) (single_line_comment 75) (end_of_line 1)
+             (single_line_comment 74) (end_of_line 1)
+             (single_line_comment 62) (end_of_line 1) (end_of_line 1))
+            variable 2 ((whitespace 1)))))
+         (() = 1 ((whitespace 1))) (literal 1 ((() decimal_literal 1 ())))))
+       (() ";" 1 ((end_of_line 1)))))
+     (do_statement 91
+      ((() do 2 ((whitespace 1)))
+       (compound_statement 70
+        ((() { 1 ((end_of_line 1)))
+         (list 64
+          ((echo_statement 27
+            ((((whitespace 2)) echo 4 ((whitespace 1)))
+             (list 21
+              ((list_item 21
+                ((binary_expression 21
+                  ((binary_expression 16
+                    ((literal 6
+                      ((list 6
+                        ((() double_quoted_string_literal_head 1 ())
+                         (variable 2 ((() variable 2 ())))
+                         (() double_quoted_string_literal_tail 3 ())))))
+                     (() . 1 ())
+                     (parenthesized_expression 9
+                      ((() "(" 1 ())
+                       (binary_expression 7
+                        ((variable 2 ((() variable 2 ((whitespace 1)))))
+                         (() * 1 ((whitespace 1)))
+                         (variable 2 ((() variable 2 ())))))
+                       (() ")" 1 ())))))
+                   (() . 1 ())
+                   (literal 4 ((() double_quoted_string_literal 4 ())))))
+                 (missing 0 ())))))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 28) (end_of_line 1)))))
+           (expression_statement 5
+            ((prefix_unary_expression 4
+              ((((whitespace 2)) ++ 2 ()) (variable 2 ((() variable 2 ())))))
+             (() ";" 1 ((end_of_line 1)))))))
+         (() } 1 ((end_of_line 1)))))
+       (missing 0 ()) (((extra_token_error 5) (whitespace 1)) "(" 1 ())
+       (binary_expression 8
+        ((variable 2 ((() variable 2 ((whitespace 1)))))
+         (() <= 2 ((whitespace 1))) (literal 2 ((() decimal_literal 2 ())))))
+       (() ")" 1 ()) (() ";" 1 ((end_of_line 1)))))
+     (expression_statement 16
+      ((binary_expression 16
+        ((variable 9
+          ((((end_of_line 1) (single_line_comment 69) (end_of_line 1)
+             (single_line_comment 69) (end_of_line 1)
+             (single_line_comment 45) (end_of_line 1) (end_of_line 1))
+            variable 9 ((whitespace 1)))))
+         (() = 1 ((whitespace 1)))
+         (parenthesized_expression 4
+          ((() "(" 1 ()) (variable 2 ((() variable 2 ())))
+           (() ")" 1 ((whitespace 1)))))))
+       (missing 0 ())))
+     (expression_statement 11
+      ((binary_expression 10
+        ((() => 2 ()) (() > 1 ((whitespace 1)))
+         (binary_expression 6
+          ((variable 2 ((() variable 2 ((whitespace 1)))))
+           (() * 1 ((whitespace 1))) (literal 1 ((() decimal_literal 1 ())))))))
+       (() ";" 1 ((whitespace 1) (single_line_comment 43) (end_of_line 1)))))
+     (expression_statement 20
+      ((binary_expression 20
+        ((variable 9 ((() variable 9 ((whitespace 1)))))
+         (() = 1 ((whitespace 1)))
+         (binary_expression 8
+          ((parenthesized_expression 4
+            ((() "(" 1 ()) (variable 2 ((() variable 2 ())))
+             (() ")" 1 ((whitespace 1)))))
+           (() == 2 ()) (() name 1 ((whitespace 1)))))))
+       (missing 0 ())))
+     (expression_statement 7
+      ((binary_expression 6
+        ((variable 2 ((() variable 2 ((whitespace 1)))))
+         (() * 1 ((whitespace 1))) (literal 1 ((() decimal_literal 1 ())))))
+       (() ";" 1 ((whitespace 1) (single_line_comment 43) (end_of_line 1)))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

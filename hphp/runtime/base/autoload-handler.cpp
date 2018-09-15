@@ -19,9 +19,9 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/vm/unit.h"
@@ -44,7 +44,7 @@ const StaticString
   s_failure("failure"),
   s_autoload("__autoload"),
   s_exception("exception"),
-  s_error("SystemLib\\Error"),
+  s_error("Error"),
   s_previous("previous");
 
 using CufIterPtr = req::unique_ptr<CufIter>;
@@ -77,13 +77,14 @@ Variant vm_call_user_func_cufiter(const CufIter& cufIter,
       obj = (ObjectData*)cufIter.ctx();
     }
   }
-  assert(!obj || !cls);
+  assertx(!obj || !cls);
   if (invName) {
     invName->incRefCount();
   }
   return Variant::attach(
     g_context->invokeFunc(f, params, obj, cls, nullptr, invName,
-                          ExecutionContext::InvokeCuf)
+                          ExecutionContext::InvokeNormal, false,
+                          cufIter.dynamic())
   );
 }
 
@@ -95,9 +96,10 @@ bool vm_decode_function_cufiter(const Variant& function,
   ObjectData* obj = nullptr;
   Class* cls = nullptr;
   StringData* invName = nullptr;
+  bool dynamic;
   // Don't warn here, let the caller decide what to do if the func is nullptr.
   const HPHP::Func* func = vm_decode_function(function, GetCallerFrame(), false,
-                                              obj, cls, invName,
+                                              obj, cls, invName, dynamic,
                                               DecodeFlags::NoWarn);
   if (func == nullptr) {
     return false;
@@ -112,7 +114,7 @@ bool vm_decode_function_cufiter(const Variant& function,
   } else {
     cufIter->setCtx(cls);
   }
-
+  cufIter->setDynamic(dynamic);
   return true;
 }
 
@@ -125,9 +127,9 @@ bool vm_decode_function_cufiter(const Variant& function,
 IMPLEMENT_REQUEST_LOCAL(AutoloadHandler, AutoloadHandler::s_instance);
 
 void AutoloadHandler::requestInit() {
-  assert(m_map.get() == nullptr);
-  assert(m_map_root.get() == nullptr);
-  assert(m_loading.get() == nullptr);
+  assertx(m_map.get() == nullptr);
+  assertx(m_map_root.get() == nullptr);
+  assertx(m_loading.get() == nullptr);
   m_spl_stack_inited = false;
   new (&m_handlers) req::deque<HandlerBundle>();
   m_handlers_valid = true;
@@ -163,7 +165,7 @@ struct FuncExistsChecker {
     }
     auto f = m_ne->getCachedFunc();
     return (f != nullptr) &&
-           (f->builtinFuncPtr() != Native::unimplementedWrapper);
+           (f->arFuncPtr() != Native::unimplementedWrapper);
   }
 };
 struct ClassExistsChecker {
@@ -233,17 +235,16 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
                                  bool toLower,
                                  const T &checkExists,
                                  Variant& err) {
-  assert(!m_map.isNull());
+  assertx(!m_map.isNull());
   // Always normalize name before autoloading
   const String& name = normalizeNS(clsName);
-  const Variant& type_map = m_map.get()->get(kind);
-  auto const typeMapCell = type_map.asCell();
-  if (!isArrayType(typeMapCell->m_type)) return Failure;
+  auto const type_map = m_map.get()->get(kind).unboxed();
+  if (!isArrayType(type_map.type())) return Failure;
   String canonicalName = toLower ? HHVM_FN(strtolower)(name) : name;
-  const Variant& file = typeMapCell->m_data.parr->get(canonicalName);
+  auto const file = type_map.val().parr->get(canonicalName).unboxed();
   bool ok = false;
-  if (file.isString()) {
-    String fName{file.toCStrRef().get()};
+  if (isStringType(file.type())) {
+    String fName{file.val().pstr};
     if (fName.get()->data()[0] != '/') {
       if (!m_map_root.empty()) {
         fName = m_map_root + fName;
@@ -253,10 +254,11 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
       VMRegAnchor _;
       bool initial;
       auto const ec = g_context.getNoCheck();
-      auto const unit = lookupUnit(fName.get(), "", &initial);
+      auto const unit = lookupUnit(fName.get(), "", &initial,
+                                   Native::s_noNativeFuncs);
       if (unit) {
         if (initial) {
-          tvRefcountedDecRef(
+          tvDecRefGen(
             ec->invokeFunc(unit->getMain(nullptr), init_null_variant,
                            nullptr, nullptr, nullptr, nullptr,
                            ExecutionContext::InvokePseudoMain)
@@ -299,9 +301,9 @@ AutoloadHandler::loadFromMap(const String& clsName,
     Variant err{Variant::NullInit()};
     Result res = loadFromMapImpl(clsName, kind, toLower, checkExists, err);
     if (res == Success) return Success;
-    const Variant& func = m_map.get()->get(s_failure);
-    if (func.isNull()) return Failure;
-    res = invokeFailureCallback(func, kind, clsName, err);
+    auto const func = m_map.get()->get(s_failure);
+    if (isNullType(func.unboxed().type())) return Failure;
+    res = invokeFailureCallback(const_variant_ref{func}, kind, clsName, err);
     if (checkExists()) return Success;
     if (res == RetryAutoloading) {
       continue;
@@ -311,15 +313,17 @@ AutoloadHandler::loadFromMap(const String& clsName,
 }
 
 AutoloadHandler::Result
-AutoloadHandler::invokeFailureCallback(const Variant& func, const String& kind,
-                                       const String& name, const Variant& err) {
+AutoloadHandler::invokeFailureCallback(
+    const_variant_ref func, const String& kind,
+    const String& name, const Variant& err
+) {
   // can throw, otherwise
   //  - true means the map was updated. try again
   //  - false means we should stop applying autoloaders (only affects classes)
   //  - anything else means keep going
   Variant action = vm_call_user_func(func,
                                      make_packed_array(kind, name, err));
-  auto const actionCell = action.asCell();
+  auto const actionCell = action.toCell();
   if (actionCell->m_type == KindOfBoolean) {
     return actionCell->m_data.num ? RetryAutoloading : StopAutoloading;
   }
@@ -328,7 +332,7 @@ AutoloadHandler::invokeFailureCallback(const Variant& func, const String& kind,
 
 bool AutoloadHandler::autoloadFunc(StringData* name) {
   return !m_map.isNull() &&
-    loadFromMap(String{name},
+    loadFromMap(String{stripInOutSuffix(name)},
                 s_function,
                 true,
                 FuncExistsChecker(name)) != Failure;
@@ -391,7 +395,7 @@ bool AutoloadHandler::autoloadClassPHP5Impl(const String& className,
   // in which case autoload is allowed to be reentrant.
   if (!forceSplStack) {
     if (m_loading.exists(className)) { return false; }
-    m_loading.add(className, className);
+    m_loading.set(className, className);
   } else {
     // We can still overflow the stack if there is a loop when using
     // spl_autoload_call directly, but this behavior matches PHP5.
@@ -402,7 +406,7 @@ bool AutoloadHandler::autoloadClassPHP5Impl(const String& className,
   // code below can throw
   SCOPE_EXIT {
     DEBUG_ONLY auto const l_className = m_loading.pop().toString();
-    assert(l_className == className);
+    assertx(l_className == className);
   };
 
   Array params = PackedArrayInit(1).append(className).toArray();
@@ -421,7 +425,7 @@ bool AutoloadHandler::autoloadClassPHP5Impl(const String& className,
     try {
       vm_call_user_func_cufiter(*hb.m_cufIter, params);
     } catch (Object& ex) {
-      assert(ex.instanceof(SystemLib::s_ThrowableClass));
+      assertx(ex.instanceof(SystemLib::s_ThrowableClass));
       if (autoloadException.isNull()) {
         autoloadException = ex;
       } else {
@@ -459,12 +463,14 @@ AutoloadHandler::loadFromMapPartial(const String& className,
   if (res == Success) {
     return Success;
   }
-  assert(res == Failure);
+  assertx(res == Failure);
   if (!err.isNull()) {
-    const Variant& func = m_map.get()->get(s_failure);
-    if (!func.isNull()) {
-      res = invokeFailureCallback(func, kind, className, err);
-      assert(res != Failure);
+    auto const func = m_map.get()->get(s_failure);
+    if (!isNullType(func.unboxed().type())) {
+      res = invokeFailureCallback(
+        const_variant_ref{func}, kind, className, err
+      );
+      assertx(res != Failure);
       if (checkExists()) {
         return Success;
       }
@@ -496,7 +502,7 @@ bool AutoloadHandler::autoloadClassOrType(const String& clsName) {
         typeRes = loadFromMapPartial(className, s_type, true, cte, typeErr);
         if (typeRes == Success) return true;
       }
-      const Variant func = m_map.get()->get(s_failure);
+      auto const func = Variant::wrap(m_map.get()->get(s_failure).tv());
       // If we reach this point, then for each map either nothing was found
       // or the file we included didn't define a class or type alias with the
       // specified name, and the failure callback (if one exists) did not throw
@@ -505,7 +511,7 @@ bool AutoloadHandler::autoloadClassOrType(const String& clsName) {
         // First, call the failure callback for 'class' if we didn't do so
         // above
         if (classRes == Failure) {
-          assert(tryClass);
+          assertx(tryClass);
           classRes = invokeFailureCallback(func, s_class, className, classErr);
           // The failure callback may have defined a class or type alias for
           // us, in which case we're done.
@@ -513,13 +519,13 @@ bool AutoloadHandler::autoloadClassOrType(const String& clsName) {
         }
         // Next, call the failure callback for 'type' if we didn't do so above
         if (typeRes == Failure) {
-          assert(tryType);
+          assertx(tryType);
           typeRes = invokeFailureCallback(func, s_type, className, typeErr);
           // The failure callback may have defined a class or type alias for
           // us, in which case we're done.
           if (cte()) return true;
         }
-        assert(classRes != Failure && typeRes != Failure);
+        assertx(classRes != Failure && typeRes != Failure);
         tryClass = (classRes == RetryAutoloading);
         tryType = (typeRes == RetryAutoloading);
         // If the failure callback requested a retry for 'class' or 'type'

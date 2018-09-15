@@ -40,7 +40,7 @@ struct IntlTimeZone : IntlError {
   static Object newInstance(icu::TimeZone *tz = nullptr, bool owned = true) {
     if (!c_IntlTimeZone) {
       c_IntlTimeZone = Unit::lookupClass(s_IntlTimeZone.get());
-      assert(c_IntlTimeZone);
+      assertx(c_IntlTimeZone);
     }
     Object obj{c_IntlTimeZone};
     if (tz) {

@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_exchange_array_returnval() {
 $arr = array(1, 2, 'a'=>'b');
 $obj = new ArrayObject($arr, 0);
 
@@ -12,4 +15,5 @@ if(is_array($old)) {
   echo "is_object\n";
 } else {
   echo "is neither";
+}
 }

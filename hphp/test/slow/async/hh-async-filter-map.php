@@ -1,4 +1,5 @@
 <?hh
+
 /* Tests the 8 function matrix of:
  *   vf(), vfk(), vm(), vmk(),
  *   mf(), mfk(), mm(), mmk(),
@@ -6,6 +7,8 @@
  * Using static wait handles which yield results in various types
  */
 
+<<__EntryPoint>>
+function main_hh_async_filter_map() {
 $vals = array(
   NULL,
   true,
@@ -48,4 +51,5 @@ foreach ($typeMap as $type => $gen) {
     var_dump(\HH\Asio\join($wh));
   }
 
+}
 }

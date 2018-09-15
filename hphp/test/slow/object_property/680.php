@@ -11,5 +11,9 @@ class B extends A {
  class C extends B {
  public $a = 'test';
 }
- $obj = new C();
+
+ <<__EntryPoint>>
+function main_680() {
+$obj = new C();
  $obj->foo();
+}

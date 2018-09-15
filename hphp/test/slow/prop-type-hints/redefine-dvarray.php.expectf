@@ -1,0 +1,64 @@
+Notice: Hack Array Compat: Type-hint of 'C::v1' must be HH\varray (as in class A), not HH\darray in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::v2' must be HH\varray (as in class A), not HH\varray_or_darray in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::v3' must be HH\varray (as in class A), not array in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::v4' must be ?HH\varray (as in class A), not ?HH\darray in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::v5' must be ?HH\varray (as in class A), not ?HH\varray_or_darray in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::v6' must be ?HH\varray (as in class A), not ?array in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::d1' must be HH\darray (as in class A), not HH\varray in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::d2' must be HH\darray (as in class A), not HH\varray_or_darray in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::d3' must be HH\darray (as in class A), not array in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::d4' must be ?HH\darray (as in class A), not ?HH\varray in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::d5' must be ?HH\darray (as in class A), not ?HH\varray_or_darray in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::d6' must be ?HH\darray (as in class A), not ?array in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::dv1' must be HH\varray_or_darray (as in class A), not HH\varray in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::dv2' must be HH\varray_or_darray (as in class A), not HH\darray in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::dv3' must be HH\varray_or_darray (as in class A), not array in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::dv4' must be ?HH\varray_or_darray (as in class A), not ?HH\varray in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::dv5' must be ?HH\varray_or_darray (as in class A), not ?HH\darray in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::dv6' must be ?HH\varray_or_darray (as in class A), not ?array in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::a1' must be array (as in class A), not HH\varray in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::a2' must be array (as in class A), not HH\darray in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::a3' must be array (as in class A), not HH\varray_or_darray in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::a4' must be ?array (as in class A), not ?HH\varray in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::a5' must be ?array (as in class A), not ?HH\darray in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::a6' must be ?array (as in class A), not ?HH\varray_or_darray in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::v1a' must be VAlias (as in class A), not HH\darray in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::d1a' must be DAlias (as in class A), not HH\varray in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::dv1a' must be DVAlias (as in class A), not array in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::a1a' must be AAlias (as in class A), not HH\varray_or_darray in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::v2a' must be VAlias (as in class A), not DAlias in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::d2a' must be DAlias (as in class A), not VAlias in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::dv2a' must be DVAlias (as in class A), not AAlias in %s/redefine-dvarray.php on line 94
+
+Notice: Hack Array Compat: Type-hint of 'C::a2a' must be AAlias (as in class A), not DVAlias in %s/redefine-dvarray.php on line 94
+DONE

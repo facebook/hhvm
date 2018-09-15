@@ -32,6 +32,7 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP { namespace jit { namespace irlower {
@@ -40,14 +41,14 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgBeginCatch(IRLS& env, const IRInstruction* inst) {
+void cgBeginCatch(IRLS& env, const IRInstruction* /*inst*/) {
   auto& v = vmain(env);
 
   v << landingpad{};
   emitIncStat(v, Stats::TC_CatchTrace);
 }
 
-void cgEndCatch(IRLS& env, const IRInstruction* inst) {
+void cgEndCatch(IRLS& env, const IRInstruction* /*inst*/) {
   // endCatchHelper only expects rvmtl() and rvmfp() to be live.
   vmain(env) << jmpi{tc::ustubs().endCatchHelper, rvmtl() | rvmfp()};
 }
@@ -69,19 +70,58 @@ void cgLdUnwinderValue(IRLS& env, const IRInstruction* inst) {
 }
 
 IMPL_OPCODE_CALL(DebugBacktrace)
+IMPL_OPCODE_CALL(DebugBacktraceFast)
 
 ///////////////////////////////////////////////////////////////////////////////
 
 static void raiseVarEnvDynCall(const Func* func) {
   assertx(func->accessesCallerFrame());
-  assertx(func->dynCallWrapper());
-  assertx(!func->dynCallTarget());
   raise_disallowed_dynamic_call(func);
 }
 
 void cgRaiseVarEnvDynCall(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(vmain(env), env, CallSpec::direct(raiseVarEnvDynCall),
                kVoidDest, SyncOptions::Sync, argGroup(env, inst).ssa(0));
+}
+
+static void raiseHackArrCompatNotice(const StringData* msg) {
+  raise_hackarr_compat_notice(msg->toCppString());
+}
+
+void cgRaiseHackArrCompatNotice(IRLS& env, const IRInstruction* inst) {
+  cgCallHelper(vmain(env), env, CallSpec::direct(raiseHackArrCompatNotice),
+               kVoidDest, SyncOptions::Sync, argGroup(env, inst).ssa(0));
+}
+
+static void raiseForbiddenDynCall(const Func* func) {
+  assertx(RuntimeOption::EvalForbidDynamicCalls > 0);
+  assertx(!func->isDynamicallyCallable());
+
+  if (RuntimeOption::EvalForbidDynamicCalls >= 2) {
+    std::string msg;
+    string_printf(
+      msg,
+      Strings::FUNCTION_CALLED_DYNAMICALLY,
+      func->fullDisplayName()->data()
+    );
+    throw_invalid_operation_exception(makeStaticString(msg));
+  } else {
+    raise_notice(
+      Strings::FUNCTION_CALLED_DYNAMICALLY,
+      func->fullDisplayName()->data()
+    );
+  }
+}
+
+void cgRaiseForbiddenDynCall(IRLS& env, const IRInstruction* inst) {
+  cgCallHelper(vmain(env), env, CallSpec::direct(raiseForbiddenDynCall),
+               kVoidDest, SyncOptions::Sync, argGroup(env, inst).ssa(0));
+}
+
+void cgThrowLateInitPropError(IRLS& env, const IRInstruction* inst) {
+  cgCallHelper(vmain(env), env, CallSpec::direct(throw_late_init_prop),
+               kVoidDest, SyncOptions::Sync,
+               argGroup(env, inst).ssa(0).ssa(1).ssa(2));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -100,6 +140,8 @@ IMPL_OPCODE_CALL(RaiseNotice)
 IMPL_OPCODE_CALL(RaiseUndefProp)
 IMPL_OPCODE_CALL(RaiseUninitLoc)
 IMPL_OPCODE_CALL(RaiseWarning)
+IMPL_OPCODE_CALL(RaiseParamRefMismatchForFunc)
+IMPL_OPCODE_CALL(RaiseParamRefMismatchForFuncName)
 IMPL_OPCODE_CALL(RaiseMissingThis)
 IMPL_OPCODE_CALL(FatalMissingThis)
 IMPL_OPCODE_CALL(ThrowArithmeticError)

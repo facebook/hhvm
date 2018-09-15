@@ -12,4 +12,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_set_map_uniqueness() {
 main();
+}

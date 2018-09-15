@@ -53,11 +53,9 @@ struct WarmupRequestHandlerFactory
   : std::enable_shared_from_this<WarmupRequestHandlerFactory>
 {
   WarmupRequestHandlerFactory(Server *server,
-                              uint32_t additionalThreads,
                               uint32_t reqCount,
                               int timeout)
-    : m_additionalThreads(additionalThreads),
-      m_reqNumber(0),
+    : m_reqNumber(0),
       m_warmupReqThreshold(reqCount),
       m_timeout(timeout),
       m_server(server) {}
@@ -67,7 +65,6 @@ struct WarmupRequestHandlerFactory
   void bumpReqCount();
 
 private:
-  std::atomic<uint32_t> m_additionalThreads;
   std::atomic<uint32_t> m_reqNumber;
   uint32_t const m_warmupReqThreshold;
   int m_timeout;

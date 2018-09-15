@@ -22,6 +22,7 @@
 
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/trace.h"
+#include "hphp/runtime/base/runtime-option.h"
 
 namespace HPHP {
 
@@ -91,6 +92,40 @@ struct repo_auth_array_eq {
 
 //////////////////////////////////////////////////////////////////////
 
+static ArrayTypeTable s_instance;
+
+ArrayTypeTable& globalArrayTypeTable() {
+  assertx(RuntimeOption::RepoAuthoritative);
+  return s_instance;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+bool ArrayTypeTable::check(const RepoAuthType::Array* arr) const {
+  if (!arr) return true;
+
+  switch (arr->tag()) {
+    case RepoAuthType::Array::Tag::Packed: {
+      for (uint32_t idx = 0; idx < arr->size(); ++idx) {
+        auto rat = arr->packedElem(idx);
+        assertx(rat.resolved());
+        if (rat.mayHaveArrData()) check(rat.array());
+      }
+      break;
+    }
+    case RepoAuthType::Array::Tag::PackedN: {
+      auto rat = arr->elemType();
+      assertx(rat.resolved());
+      if (rat.mayHaveArrData()) check(rat.array());
+      break;
+    }
+  }
+
+  return true;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 /*
  * Note about nested array types in the builder:
  *
@@ -121,7 +156,7 @@ Builder::~Builder() {}
 const RepoAuthType::Array*
 Builder::packed(RepoAuthType::Array::Empty emptiness,
                 const std::vector<RepoAuthType>& types) {
-  assert(!types.empty());
+  assertx(!types.empty());
 
   auto const size = types.size() * sizeof(RepoAuthType) +
     sizeof(RepoAuthType::Array);
@@ -170,13 +205,13 @@ Builder::packedn(RepoAuthType::Array::Empty emptiness, RepoAuthType elemTy) {
 // Returns the `cand' if it was successfully inserted; otherwise it's
 // the callers responsibility to free it.
 const RepoAuthType::Array* Builder::insert(RepoAuthType::Array* cand) {
-  assert(cand->id() == -1u);
+  assertx(cand->id() == -1u);
   std::lock_guard<std::mutex> g(m_impl->mutex);
   auto ins = m_impl->types.insert(cand);
   if (ins.second) {
     cand->m_id = m_impl->nextId++;
-    assert(*ins.first == cand);
-    assert((*ins.first)->id() == cand->id());
+    assertx(*ins.first == cand);
+    assertx((*ins.first)->id() == cand->id());
     return cand;
   }
   return *ins.first;
@@ -187,7 +222,7 @@ void ArrayTypeTable::repopulate(const Builder& builder) {
 
   m_arrTypes.resize(builder.m_impl->nextId);
   for (auto& ty : builder.m_impl->types) {
-    assert(m_arrTypes[ty->id()] == nullptr);
+    assertx(m_arrTypes[ty->id()] == nullptr);
     m_arrTypes[ty->id()] = ty;
   }
   if (debug) {

@@ -1,0 +1,4 @@
+File "bad_inout_decl_retbyref1.php", line 3, characters 11-13:
+Functions with inout parameters cannot return by reference (&) (NastCheck[3046])
+File "bad_inout_decl_retbyref1.php", line 3, characters 21-22:
+This is an inout parameter

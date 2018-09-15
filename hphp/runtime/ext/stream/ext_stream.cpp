@@ -410,15 +410,16 @@ Array HHVM_FUNCTION(stream_get_transports) {
   return make_packed_array("tcp", "udp", "unix", "udg", "ssl", "tls");
 }
 
-Variant HHVM_FUNCTION(stream_resolve_include_path,
-                      const String& filename,
-                      const Variant& context /* = uninit_variant */) {
+Variant HHVM_FUNCTION(stream_resolve_include_path, const String& filename,
+                      const Variant& /*context*/ /* = uninit_variant */) {
   if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
     return init_null();
   }
 
   struct stat s;
-  String ret = resolveVmInclude(filename.get(), "", &s, true);
+  String ret = resolveVmInclude(filename.get(), "", &s,
+                                Native::s_noNativeFuncs,
+                                /*allow_dir*/true);
   if (ret.isNull()) {
     return false;
   }
@@ -490,7 +491,9 @@ Variant HHVM_FUNCTION(stream_set_chunk_size,
 
 const StaticString
   s_sec("sec"),
-  s_usec("usec");
+  s_usec("usec"),
+  s_options("options"),
+  s_notification("notification");
 
 bool HHVM_FUNCTION(stream_set_timeout,
                    const Resource& stream,
@@ -620,7 +623,7 @@ static Variant socket_accept_impl(
   } else {
     auto sock = cast<Socket>(socket);
     auto new_fd = accept(sock->fd(), addr, addrlen);
-    new_sock = req::make<Socket>(new_fd, sock->getType());
+    new_sock = req::make<StreamSocket>(new_fd, sock->getType());
   }
 
   if (!new_sock->valid()) {
@@ -823,8 +826,10 @@ Variant HHVM_FUNCTION(stream_socket_get_name,
   } else {
     ret = HHVM_FN(socket_getsockname)(handle, ref(address), ref(port));
   }
-  if (ret) {
+  if (ret && port.isInteger()) {
     return address.toString() + ":" + port.toString();
+  } else if (ret) {
+    return address.toString();
   }
   return false;
 }
@@ -834,7 +839,7 @@ Variant HHVM_FUNCTION(stream_socket_pair,
                       int type,
                       int protocol) {
   Variant fd;
-  if (!HHVM_FN(socket_create_pair)(domain, type, protocol, ref(fd))) {
+  if (!socket_create_pair_impl(domain, type, protocol, ref(fd), true)) {
     return false;
   }
   return fd;
@@ -939,8 +944,8 @@ void StreamContext::mergeOptions(const Array& options) {
     if (!m_options.exists(wrapper)) {
       m_options.set(wrapper, Array::Create());
     }
-    assert(m_options[wrapper].isArray());
-    Array& opts = m_options.lvalAt(wrapper).toArrRef();
+    assertx(m_options[wrapper].isArray());
+    Array& opts = asArrRef(m_options.lvalAt(wrapper));
     Array new_opts = it.second().toArray();
     for (ArrayIter it2(new_opts); it2; ++it2) {
       opts.set(it2.first(), it2.second());
@@ -957,8 +962,8 @@ void StreamContext::setOption(const String& wrapper,
   if (!m_options.exists(wrapper)) {
     m_options.set(wrapper, Array::Create());
   }
-  assert(m_options[wrapper].isArray());
-  Array& opts = m_options.lvalAt(wrapper).toArrRef();
+  assertx(m_options[wrapper].isArray());
+  Array& opts = asArrRef(m_options.lvalAt(wrapper));
   opts.set(option, value);
 }
 
@@ -974,12 +979,11 @@ bool StreamContext::validateParams(const Variant& params) {
     return false;
   }
   const Array& arr = params.toArray();
-  const String& options_key = String::FromCStr("options");
   for (ArrayIter it(arr); it; ++it) {
     if (!it.first().isString()) {
       return false;
     }
-    if (it.first().toString() == options_key) {
+    if (it.first().toString() == s_options) {
       if (!StreamContext::validateOptions(it.second())) {
         return false;
       }
@@ -992,14 +996,12 @@ void StreamContext::mergeParams(const Array& params) {
   if (m_params.isNull()) {
     m_params = Array::Create();
   }
-  const String& notification_key = String::FromCStr("notification");
-  if (params.exists(notification_key)) {
-    m_params.set(notification_key, params[notification_key]);
+  if (params.exists(s_notification)) {
+    m_params.set(s_notification, params[s_notification]);
   }
-  const String& options_key = String::FromCStr("options");
-  if (params.exists(options_key)) {
-    assert(params[options_key].isArray());
-    mergeOptions(params[options_key].toArray());
+  if (params.exists(s_options)) {
+    assertx(params[s_options].isArray());
+    mergeOptions(params[s_options].toArray());
   }
 }
 
@@ -1008,8 +1010,7 @@ Array StreamContext::getParams() const {
   if (params.isNull()) {
     params = Array::Create();
   }
-  const String& options_key = String::FromCStr("options");
-  params.set(options_key, getOptions());
+  params.set(s_options, getOptions());
   return params;
 }
 

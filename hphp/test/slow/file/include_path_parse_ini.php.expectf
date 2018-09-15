@@ -1,25 +1,57 @@
-Warning: Invalid argument: Filename cannot be empty! in %s/test/slow/file/include_path_parse_ini.php on line 13
+Warning: Invalid argument: Filename cannot be empty! in %s/test/slow/file/include_path_parse_ini.php on line 16
 bool(false)
+array(2) {
+  ["include_path_parse_direct_dir"]=>
+  string(1) "1"
+  ["hhvm.php7.all"]=>
+  string(0) ""
+}
+
+Warning: No such file or directory in %s/test/slow/file/include_path_parse_ini.php on line 22
+bool(false)
+array(2) {
+  ["include_path_parse_direct_dir"]=>
+  string(1) "1"
+  ["hhvm.php7.all"]=>
+  string(0) ""
+}
+array(2) {
+  ["include_path_parse_direct_dir"]=>
+  string(1) "1"
+  ["hhvm.php7.all"]=>
+  string(0) ""
+}
+array(2) {
+  ["include_path_parse_nested_dir"]=>
+  string(1) "1"
+  ["hhvm.php7.all"]=>
+  string(0) ""
+}
+array(2) {
+  ["include_path_parse_nested_dir"]=>
+  string(1) "1"
+  ["hhvm.php7.all"]=>
+  string(0) ""
+}
+array(1) {
+  ["include_path_parse_direct_dir"]=>
+  string(1) "1"
+}
+array(1) {
+  ["include_path_parse_direct_dir"]=>
+  string(1) "1"
+}
+array(1) {
+  ["include_path_parse_nested_dir"]=>
+  string(1) "1"
+}
 array(1) {
   ["include_path_parse_direct_dir"]=>
   string(1) "1"
 }
 
-Warning: No such file or directory in %s/test/slow/file/include_path_parse_ini.php on line 19
+Warning: No such file or directory in %s/test/slow/file/include_path_parse_ini.php on line 63
 bool(false)
-array(1) {
-  ["include_path_parse_direct_dir"]=>
-  string(1) "1"
-}
-array(1) {
-  ["include_path_parse_direct_dir"]=>
-  string(1) "1"
-}
-array(1) {
-  ["include_path_parse_nested_dir"]=>
-  string(1) "1"
-}
-array(1) {
-  ["include_path_parse_nested_dir"]=>
-  string(1) "1"
-}
+
+Warning: remote access to ini files is not allowed in %s/test/slow/file/include_path_parse_ini.php on line 68
+bool(false)

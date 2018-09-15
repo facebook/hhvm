@@ -1,0 +1,9 @@
+autoloading function: hit1
+string(4) "hit1"
+autoloading function: hit2
+string(4) "hit2"
+autoloading function: hit3
+string(4) "hit3"
+autoloading function: partial
+
+Fatal error: Call to function partial() with incorrectly annotated inout parameter in %s/autoloader.php on line 35

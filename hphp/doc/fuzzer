@@ -1,0 +1,98 @@
+The fuzzer is an automating testing tool for exposing holes in the HHVM verifier
+by generating random .hhas files from existing well-formed inputs. Specifics of
+how the fuzzer works can be found at https://fburl.com/gc516ctu.
+
+Currently the fuzzer supports eight kinds of mutations to HHAS programs:
+* Changing instruction immediates
+* Duplicating instructions
+* Deleting instructions
+* Reordering sequences of instructions
+* Replacing instructions with other random instructions
+* Inserting new instructions
+* Generating random metadata
+* Adding random exception regions
+
+The Fuzzer is a dependency of hh_single_compile, but can also be compiled
+standalone by pointing buck to the TARGETS file in the fuzzer directory.
+
+The OCaml base of the tool can be run by itself with
+
+ buck-out/bin/hphp/vm/runtime/verifier/fuzzer/fuzzer/fuzzer.opt
+
+and can be built with
+
+ buck build @mode/<MODE> //hphp/runtime/vm/verifier/fuzzer:fuzzer
+
+but this is unlikely to be useful to a user. The Python script is much more
+useful for testing purposes.
+
+In either case, both the OCaml base and the Python script are highly
+configurable with command-line arguments.
+
+The OCaml base tool requires only an input file, which is passed without an
+argument flag. The rest of the options are:
+* -out (string): the output directory for the generated mutations. By default
+    the mutations are printed to stdout, but this is almost never what you want.
+    If a directory is specified, the mutations are saved as
+    <dirname>/mutations<N>.hhas, where <N> denotes the number of the mutations.
+* -o (string): alias for the above.
+* -prob (float, <=1): The probability of a mutation occurring at each phase,
+    with a default value of 0.1 (10%). The higher this is, the more likely a
+    mutation is to occur at each step.
+* -magnitude (int): The maximum change to an integer value that can occur as
+    part of a single mutation, with a default value of 1.
+* -immediate (int): The number of immediate mutations to be performed, with a
+    default value of 1.
+* -duplicate (int): The number of duplication mutations to be performed, with a
+    default value of 1.
+* -remove (int): The number of removal mutations to be performed, with a default
+    value of 1.
+* -insert (int): The number of insertion mutations to be performed, with a
+    default value of 1.
+* -reorder (int): The number of reorder mutations to be performed, with a
+    default value of 1.
+* -exception (int): The number of exception region mutations to be performed,
+    with a default value of 1.
+* -metadata (int): The number of metadata mutations to be performed, with a
+    default value of 1.
+* -complete (int): A shorthand way of setting all the mutation numbers to a
+    single value. This defaults to 0, but when it is N, each mutation will be
+    performed N times.
+----
+The Python script can be run with
+
+ python3 hphp/runtime/vm/verifier/fuzzer/fuzz.py
+
+The script requires an initial input file (passed with -i) . The rest of the
+options are:
+* -g (int): The number of generations to run the Fuzzer for, with a default
+    value of 1. The runtime of the tool increases exponentially with this value.
+* -f (int): The failure threshold for generational pruning, with a default
+    value of 1. All files with more verification errors than this threshold will
+    be eliminated at the end of each generation. Higher failure thresholds allow
+    more files to continue to the next generation, increasing the possibility of
+    discovering a bug but exponentially increasing the runtime of the tool.
+* -p (float, <=1): The probability of a mutation occurring at each step, passed
+    directly to the OCaml code. This defaults to 0.05. Increasing this will
+    cause the Fuzzer to generate more trivially broken files, decreasing the
+    probability of finding a bug but also decreasing the runtime of the tool.
+* -v: The flag for verbose mode, default off
+* -l (string): The path to the logfile. If verbose mode is active, the tool
+    will log to this file. If verbose mode is on but no logfile is provided,
+    the information is printed to stdout.
+* -t (int): The number of threads to use when running the Fuzzer. The default
+    is to run with one thread
+* -h: Help flag. Prints the usage text for the script.
+* -c: The flag for coverage mode. When turned on, the tool will use coverage
+    data from HHVM to decide which files to prune after each generation. Turning
+    this on will drastically increase the amount of time each generation will
+    take, since collecting coverage data requires actually running HHVM rather
+    than simply running the verifier. However, over a large number of
+    generations this will actually decrease the runtime of the tool since
+    an increasing number of files will be pruned each generation.
+* --args (string): Used to pass arguments directly to the OCaml Fuzzer.
+
+The output of the Python tool is stored in the mutations directory, which is
+created as a subdirectory of the directory where you ran the script. A summary
+of the results of the run, including a list of generated files that successfully
+verified but crashed HHVM, is found in mutations/results.txt.

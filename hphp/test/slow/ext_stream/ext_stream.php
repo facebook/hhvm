@@ -219,6 +219,11 @@ function test_stream_socket_sendto_issue324() {
   VS($buffer, $text);
 }
 
+function test_stream_socket_kind() {
+  list($port, $address, $server) = retry_bind_server();
+  var_dump($server);
+}
+
 function test_stream_socket_shutdown() {
   list($port, $address, $server) = retry_bind_server();
   VERIFY(stream_socket_shutdown($server, 0));
@@ -233,6 +238,9 @@ function test_stream_constants() {
   VS(STREAM_SOCK_SEQPACKET, 5);
 }
 
+
+<<__EntryPoint>>
+function main_ext_stream() {
 test_stream_copy_to_stream();
 test_stream_get_contents();
 test_stream_get_line();
@@ -247,4 +255,6 @@ test_stream_socket_recvfrom_udp6();
 test_stream_socket_recvfrom_unix();
 test_stream_socket_sendto_issue324();
 test_stream_socket_shutdown();
+test_stream_socket_kind();
 test_stream_constants();
+}

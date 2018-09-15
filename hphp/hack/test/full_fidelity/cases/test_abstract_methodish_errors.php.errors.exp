@@ -1,0 +1,2 @@
+(5,3)-(5,17) No method inside an interface may be declared 'abstract'.
+(8,1)-(11,1) Class C1 contains an abstract method and must therefore be declared abstract

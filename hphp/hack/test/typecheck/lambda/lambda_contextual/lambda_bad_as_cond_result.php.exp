@@ -1,0 +1,16 @@
+File "lambda_bad_as_cond_result.php", line 30, characters 17-30:
+Could not find method missing_method in an object of type MyClass (Typing[4053])
+  File "lambda_bad_as_cond_result.php", line 26, characters 46-52:
+  This is why I think it is an object of type MyClass
+  File "lambda_bad_as_cond_result.php", line 26, characters 46-52:
+  Considering that this type argument is contravariant with respect to MyClosureRunner
+  File "lambda_bad_as_cond_result.php", line 4, characters 7-13:
+  Declaration of MyClass is here
+File "lambda_bad_as_cond_result.php", line 36, characters 17-39:
+Could not find method another_missing_methodO in an object of type MyClass (Typing[4053])
+  File "lambda_bad_as_cond_result.php", line 26, characters 46-52:
+  This is why I think it is an object of type MyClass
+  File "lambda_bad_as_cond_result.php", line 26, characters 46-52:
+  Considering that this type argument is contravariant with respect to MyClosureRunner
+  File "lambda_bad_as_cond_result.php", line 4, characters 7-13:
+  Declaration of MyClass is here

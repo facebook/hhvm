@@ -3,12 +3,13 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
  *
  */
 
+/* HH_FIXME[4101] */
 function foo1(KeyedContainer $p) {
   foreach ($p as $v) {
     f2($v);
@@ -17,6 +18,7 @@ function foo1(KeyedContainer $p) {
 //  $p[10] = 'meh';
 }
 
+/* HH_FIXME[4101] */
 function foo2(KeyedContainer $p) {
   foreach ($p as $k => $v) {
     f1($k);
@@ -51,6 +53,7 @@ function arr3(array<int, string> $arr) {
 //  foo1($arr);
   foo3($arr);
 }
+/* HH_FIXME[4101] */
 function map1(Map $map) {
   foo1($map);
   foo3($map);
@@ -59,6 +62,7 @@ function map2(Map<int, string> $map) {
   foo1($map);
   foo3($map);
 }
+/* HH_FIXME[4101] */
 function vec1(Vector $v) {
   foo1($v);
   foo3($v);

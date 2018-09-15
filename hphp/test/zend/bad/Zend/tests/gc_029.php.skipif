@@ -1,1 +1,0 @@
-<?php if (PHP_ZTS) { print "skip only for no-zts build"; }

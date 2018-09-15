@@ -33,10 +33,8 @@ inline StringData* StringData::Make(const char* data, CopyStringMode) {
 // AttachString
 
 inline StringData* StringData::Make(char* data, AttachStringMode) {
-  auto const sd = Make(data, CopyString);
-  free(data);
-  assert(sd->checkSane());
-  return sd;
+  SCOPE_EXIT { free(data); };
+  return Make(data, CopyString);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -58,33 +56,33 @@ inline folly::StringPiece StringData::slice() const {
 }
 
 inline folly::MutableStringPiece StringData::bufferSlice() {
-  assert(!isImmutable());
+  assertx(!isImmutable());
   return folly::MutableStringPiece{mutableData(), capacity()};
 }
 
 inline void StringData::invalidateHash() {
-  assert(!isImmutable());
-  assert(!hasMultipleRefs());
+  assertx(!isImmutable());
+  assertx(!hasMultipleRefs());
   m_hash = 0;
-  assert(checkSane());
+  assertx(checkSane());
 }
 
 inline void StringData::setSize(int len) {
-  assert(len >= 0 && len <= capacity() && !isImmutable());
-  assert(!hasMultipleRefs());
+  assertx(!isImmutable() && !hasMultipleRefs());
+  assertx(len >= 0 && len <= capacity());
   mutableData()[len] = 0;
   m_lenAndHash = len;
-  assert(m_hash == 0);
-  assert(checkSane());
+  assertx(m_hash == 0);
+  assertx(checkSane());
 }
 
 inline void StringData::checkStack() const {
-  assert(uintptr_t(this) - s_stackLimit >= s_stackSize);
+  assertx(uintptr_t(this) - s_stackLimit >= s_stackSize);
 }
 
 inline const char* StringData::data() const {
   // TODO: t1800106: re-enable this assert
-  // assert(data()[size()] == 0); // all strings must be null-terminated
+  // assertx(data()[size()] == 0); // all strings must be null-terminated
 #ifdef NO_M_DATA
   return reinterpret_cast<const char*>(this + 1);
 #else
@@ -93,19 +91,27 @@ inline const char* StringData::data() const {
 }
 
 inline char* StringData::mutableData() const {
-  assert(!isImmutable());
+  assertx(!isImmutable());
   return const_cast<char*>(data());
 }
 
 inline int StringData::size() const { return m_len; }
 inline bool StringData::empty() const { return size() == 0; }
 inline uint32_t StringData::capacity() const {
-  return m_hdr.aux.decode();
+  return kSizeIndex2StringCapacity[m_aux16];
 }
 
 inline size_t StringData::heapSize() const {
-  return isFlat() ? sizeof(StringData) + 1 + capacity() :
-         sizeof(StringData) + sizeof(Proxy);
+  return isFlat()
+    ? isRefCounted()
+      ? MemoryManager::sizeIndex2Size(m_aux16)
+      : size() + kStringOverhead
+    : sizeof(StringData) + sizeof(Proxy);
+}
+
+inline size_t StringData::estimateCap(size_t size) {
+  assertx(size <= MaxSize);
+  return MemoryManager::sizeClass(size + kStringOverhead);
 }
 
 inline bool StringData::isStrictlyInteger(int64_t& res) const {
@@ -117,7 +123,7 @@ inline bool StringData::isStrictlyInteger(int64_t& res) const {
   if ((unsigned char)(data()[0] - '-') > ('9' - '-')) {
     return false;
   }
-  if (isStatic() && m_hash < 0) return false;
+  if (m_hash < 0) return false;
   auto const s = slice();
   return is_strictly_integer(s.data(), s.size(), res);
 }
@@ -127,13 +133,21 @@ inline bool StringData::isZero() const  {
 }
 
 inline StringData* StringData::modifyChar(int offset, char c) {
-  assert(offset >= 0 && offset < size());
-  assert(!hasMultipleRefs());
+  assertx(offset >= 0 && offset < size());
+  assertx(!hasMultipleRefs());
 
   auto const sd = isProxy() ? escalate(size()) : this;
   sd->mutableData()[offset] = c;
   sd->m_hash = 0;
   return sd;
+}
+
+inline strhash_t StringData::hash_unsafe(const char* s, size_t len) {
+  return hash_string_i_unsafe(s, len);
+}
+
+inline strhash_t StringData::hash(const char* s, size_t len) {
+  return hash_string_i(s, len);
 }
 
 inline strhash_t StringData::hash() const {
@@ -142,17 +156,17 @@ inline strhash_t StringData::hash() const {
 }
 
 inline bool StringData::same(const StringData* s) const {
-  assert(s);
+  assertx(s);
   if (m_len != s->m_len) return false;
   // The underlying buffer and its length are 8-byte aligned, ensured by
   // StringData layout, req::malloc, or malloc. So compare words.
-  assert(uintptr_t(data()) % 8 == 0);
-  assert(uintptr_t(s->data()) % 8 == 0);
+  assertx(uintptr_t(data()) % 8 == 0);
+  assertx(uintptr_t(s->data()) % 8 == 0);
   return wordsame(data(), s->data(), m_len);
 }
 
 inline bool StringData::isame(const StringData* s) const {
-  assert(s);
+  assertx(s);
   if (m_len != s->m_len) return false;
   return bstrcaseeq(data(), s->data(), m_len);
 }
@@ -192,7 +206,7 @@ struct string_data_hash {
 
 struct string_data_same {
   bool operator()(const StringData *s1, const StringData *s2) const {
-    assert(s1 && s2);
+    assertx(s1 && s2);
     return s1->same(s2);
   }
 };
@@ -205,8 +219,28 @@ struct string_data_eq_same {
 
 struct string_data_isame {
   bool operator()(const StringData *s1, const StringData *s2) const {
-    assert(s1 && s2);
+    assertx(s1 && s2);
     return s1->isame(s2);
+  }
+};
+
+struct string_data_lt {
+  bool operator()(const StringData *s1, const StringData *s2) const {
+    int len1 = s1->size();
+    int len2 = s2->size();
+    if (len1 < len2) {
+      return (len1 == 0) || (memcmp(s1->data(), s2->data(), len1) <= 0);
+    } else if (len1 == len2) {
+      return (len1 != 0) && (memcmp(s1->data(), s2->data(), len1) < 0);
+    } else /* len1 > len2 */ {
+      return ((len2 != 0) && (memcmp(s1->data(), s2->data(), len2) < 0));
+    }
+  }
+};
+
+struct string_data_lti {
+  bool operator()(const StringData *s1, const StringData *s2) const {
+    return bstrcasecmp(s1->data(), s1->size(), s2->data(), s2->size()) < 0;
   }
 };
 

@@ -1,7 +1,7 @@
-<?hh
+<?hh // decl
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-class Cls {
+class Cls implements Iterator {
   public $idx;
   function __construct($idx) {
     $this->idx = $idx;
@@ -9,6 +9,12 @@ class Cls {
   function __destruct() {
     echo "Cls::__destruct " . $this->idx . "\n";
   }
+
+  public function rewind() {}
+  public function current() {}
+  public function key() {}
+  public function next() {}
+  public function valid() { return false; }
 }
 
 function from_obj($obj) {
@@ -23,5 +29,9 @@ function test() {
   }
 }
 
-error_reporting(0);
+
+<<__EntryPoint>>
+function main_from_obj_dtor() {
+error_reporting(E_ERROR);
 test();
+}

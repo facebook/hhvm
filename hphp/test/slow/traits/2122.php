@@ -11,5 +11,9 @@ trait T {
 class C {
  use T;
  }
+
+<<__EntryPoint>>
+function main_2122() {
 $o = new C;
 $o->foo();
+}

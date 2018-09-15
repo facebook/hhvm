@@ -1,4 +1,0 @@
-<?php
-if (!function_exists('gzdeflate'))
-    die("skip zlib extension required");
-?>

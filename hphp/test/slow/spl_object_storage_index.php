@@ -13,4 +13,8 @@ class Test extends \SplObjectStorage {
     }
   }
 }
+
+<<__EntryPoint>>
+function main_spl_object_storage_index() {
 new Test();
+}

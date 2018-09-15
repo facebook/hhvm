@@ -15,64 +15,59 @@
 */
 #include "hphp/util/thread-local.h"
 
+#include <folly/portability/GTest.h>
 #include <thread>
-#include <gtest/gtest.h>
+#include <atomic>
 
 namespace HPHP {
 
-static bool s_exited = false;
+static std::atomic<int> s_destructs;
 
 struct Foo {
-  explicit Foo(int bar) : m_bar(bar) {}
-  ~Foo() { EXPECT_EQ(m_bar, 87); }
-  static void Create(void* storage) { new (storage) Foo(42); }
-  static void Delete(Foo* foo) { foo->~Foo(); }
-  static void OnThreadExit(Foo* foo) {
-    foo->~Foo();
-    s_exited = true;
+  explicit Foo() : m_bar(42) {}
+  ~Foo() {
+    EXPECT_EQ(m_bar, 87);
+    ++s_destructs;
   }
   int m_bar;
 };
 
-using TLSFoo = ThreadLocalSingleton<Foo>;
-static TLSFoo s_fooInitDummy;
+static THREAD_LOCAL_FLAT(Foo, s_foo);
 
-TEST(ThreadLocalSingleton, OnThreadExit) {
-  s_exited = false;
+TEST(ThreadLocalFlat, OnThreadExit) {
+  s_destructs = 0;
   std::thread thread([&]() {
-      EXPECT_TRUE(TLSFoo::isNull());
-      Foo* foo = TLSFoo::getCheck();
+      EXPECT_TRUE(s_foo.isNull());
+      Foo* foo = s_foo.getCheck();
       EXPECT_EQ(foo->m_bar, 42);
-      EXPECT_FALSE(TLSFoo::isNull());
-      EXPECT_EQ(foo, TLSFoo::getCheck());
-      EXPECT_EQ(foo, TLSFoo::getNoCheck());
-      EXPECT_FALSE(s_exited);
+      EXPECT_FALSE(s_foo.isNull());
+      EXPECT_EQ(foo, s_foo.getCheck());
+      EXPECT_EQ(foo, s_foo.getNoCheck());
+      EXPECT_EQ(s_destructs, 0);
       foo->m_bar = 87;
     });
-  EXPECT_FALSE(s_exited);
   thread.join();
-  EXPECT_TRUE(s_exited);
+  EXPECT_EQ(s_destructs, 1);
 }
 
 // Manual re-construction of the instance.
-TEST(ThreadLocalSingleton, Recreate) {
-  s_exited = false;
+TEST(ThreadLocalFlat, Recreate) {
+  s_destructs = 0;
   std::thread thread([&]() {
-      EXPECT_TRUE(TLSFoo::isNull());
-      Foo* foo = TLSFoo::getCheck();
-      EXPECT_FALSE(TLSFoo::isNull());
+      EXPECT_TRUE(s_foo.isNull());
+      Foo* foo = s_foo.getCheck();
+      EXPECT_FALSE(s_foo.isNull());
       foo->m_bar = 87;
-      TLSFoo::destroy();
-      EXPECT_TRUE(TLSFoo::isNull());
-      foo = TLSFoo::getCheck();
-      EXPECT_FALSE(TLSFoo::isNull());
+      s_foo.destroy();
+      EXPECT_TRUE(s_foo.isNull());
+      foo = s_foo.getCheck();
+      EXPECT_FALSE(s_foo.isNull());
       EXPECT_EQ(foo->m_bar, 42);
-      EXPECT_FALSE(s_exited);
+      EXPECT_EQ(s_destructs, 1);
       foo->m_bar = 87;
     });
-  EXPECT_FALSE(s_exited);
   thread.join();
-  EXPECT_TRUE(s_exited);
+  EXPECT_EQ(s_destructs, 2);
 }
 
 }

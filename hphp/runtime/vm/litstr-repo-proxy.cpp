@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <sstream>
+
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/repo.h"
 
@@ -81,7 +83,7 @@ RepoStatus LitstrRepoProxy::GetLitstrsStmt::get() {
       query.step();
       if (query.row()) {
         StringData* litstr; /**/ query.getStaticString(1, litstr);
-        namedInfo.emplace_back(litstr, nullptr);
+        namedInfo.emplace_back(litstr);
       }
     } while (!query.done());
     namedInfo.shrink_to_fit();

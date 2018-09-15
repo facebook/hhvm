@@ -11,4 +11,8 @@ class X {
 function test($a, $b) {
   return $a ? $b : id(new X)->f();
 }
+
+<<__EntryPoint>>
+function main_1828() {
 var_dump(test());
+}

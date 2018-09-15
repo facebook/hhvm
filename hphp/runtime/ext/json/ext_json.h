@@ -41,6 +41,7 @@ extern const int64_t k_JSON_PRETTY_PRINT;
 extern const int64_t k_JSON_UNESCAPED_UNICODE;
 extern const int64_t k_JSON_PARTIAL_OUTPUT_ON_ERROR;
 extern const int64_t k_JSON_PRESERVE_ZERO_FRACTION;
+extern const int64_t k_JSON_FB_DARRAYS;
 extern const int64_t k_JSON_FB_LOOSE;
 extern const int64_t k_JSON_FB_EXTRA_ESCAPES;
 extern const int64_t k_JSON_FB_UNLIMITED;
@@ -48,6 +49,7 @@ extern const int64_t k_JSON_FB_COLLECTIONS;
 extern const int64_t k_JSON_FB_HACK_ARRAYS;
 extern const int64_t k_JSON_FB_STABLE_MAPS;
 extern const int64_t k_JSON_BIGINT_AS_STRING;
+extern const int64_t k_JSON_FB_DARRAYS_AND_VARRAYS;
 
 extern const int64_t k_JSON_ERROR_NONE;
 extern const int64_t k_JSON_ERROR_DEPTH;

@@ -1,2 +1,0 @@
-5: class Foo {
-6:   public function bar(): void { }

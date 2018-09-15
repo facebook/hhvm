@@ -1,0 +1,4 @@
+Before error
+
+Fatal error: (syntax error, unexpected \$end, expecting ',' or ';'|A semicolon \(';'\) is expected here\.) in [^\r\n]+\(\d+\)\([^\r\n]+\) : eval\(\)'d code on line \d+
+eval returns false

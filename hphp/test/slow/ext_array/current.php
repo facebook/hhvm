@@ -21,6 +21,10 @@ function c() {
   var_dump(current($arr));
 }
 
+
+<<__EntryPoint>>
+function main_current() {
 a();
 b();
 c();
+}

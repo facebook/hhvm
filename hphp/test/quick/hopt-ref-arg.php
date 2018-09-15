@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function run(&$a) {
   $b =& $a;
@@ -8,5 +8,5 @@ function run(&$a) {
 }
 
 $a = 5;
-run($a);
+run(&$a);
 var_dump($a);

@@ -23,7 +23,7 @@
 
 namespace HPHP {
 
-CURLcode curl_tls_workarounds_cb(CURL *curl, void *sslctx, void *parm) {
+CURLcode curl_tls_workarounds_cb(CURL* /*curl*/, void* sslctx, void* /*parm*/) {
   // Check to see if workarounds are enabled.
   SSL_CTX* ctx = (SSL_CTX*)sslctx;
   if (RuntimeOption::TLSDisableTLS1_2) {

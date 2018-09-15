@@ -12,6 +12,9 @@ function f($a) {
  var_dump($v->getName());
  }
  }
+
+<<__EntryPoint>>
+function main_1362() {
 $r = new ReflectionClass('A');
 $a = $r->getProperties();
  f($a);
@@ -23,3 +26,4 @@ $a = $r->getProperties(ReflectionProperty::IS_PROTECTED);
  f($a);
 $a = $r->getProperties(ReflectionProperty::IS_STATIC);
  f($a);
+}

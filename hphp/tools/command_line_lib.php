@@ -74,14 +74,14 @@ function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): Option
 
   foreach ($optmap as $k => $v) {
     $m = null;
-    if (preg_match('/^([^:]*)(\[\])/', $k, $m)) {
+    if (preg_match('/^([^:]*)(\[\])/', $k, &$m)) {
       invariant($m !== null, "Regex must return match!");
       $k = $m[1];
       $all_longs[$k] = true;
       $long_supports_arg[$k] = true;
       $long_requires_arg[$k] = true;
       $long_set_arg[$k] = true;
-    } else if (preg_match('/^([^:]*)(:(:(.*))?)?/', $k, $m)) {
+    } else if (preg_match('/^([^:]*)(:(:(.*))?)?/', $k, &$m)) {
       invariant($m !== null, "Regex must return match!");
       $k = $m[1];
       $all_longs[$k] = true;
@@ -104,13 +104,13 @@ function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): Option
 
   $ret = Map {};
 
-  array_shift($argv);
+  array_shift(&$argv);
   $pos_args_count = 0;
   while (count($argv) - $pos_args_count > 0) {
     $arg = $argv[$pos_args_count];
 
     if ($arg == "--") {
-      remove_argument($argv, $pos_args_count);
+      remove_argument(&$argv, $pos_args_count);
       break;
     }
 
@@ -123,7 +123,7 @@ function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): Option
                                            $long_set_arg) {
       if (!$long_supports_arg[$long]) error("precondition");
       if ($long_requires_arg[$long] || $long_set_arg[$long]) {
-        remove_argument($argv, $pos_args_count);
+        remove_argument(&$argv, $pos_args_count);
         if (count($argv) - $pos_args_count == 0) {
           error("option --$long requires an argument");
         }
@@ -132,7 +132,7 @@ function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): Option
             $argv[$pos_args_count + 1][0] == '-') {
           return $long_to_default[$long];
         }
-        remove_argument($argv, $pos_args_count);
+        remove_argument(&$argv, $pos_args_count);
       }
 
       return $argv[$pos_args_count];
@@ -145,7 +145,7 @@ function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): Option
 
     // Long-style arguments.
     $m = null;
-    if (preg_match('/^--([^=]*)(=(.*))?/', $arg, $m)) {
+    if (preg_match('/^--([^=]*)(=(.*))?/', $arg, &$m)) {
       assert($m);
       $long = $m[1];
       $has_val = !empty($m[3]);
@@ -172,13 +172,13 @@ function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): Option
       } else {
         $ret[$long] = $val;
       }
-      remove_argument($argv, $pos_args_count);
+      remove_argument(&$argv, $pos_args_count);
       continue;
     }
 
     // Short-style arguments
     $m = null;
-    if (preg_match('/^-([^-=]*)(=(.*))?/', $arg, $m)) {
+    if (preg_match('/^-([^-=]*)(=(.*))?/', $arg, &$m)) {
       assert($m);
       $shorts = $m[1];
       $has_val = !empty($m[3]);
@@ -201,7 +201,7 @@ function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): Option
           }
           $ret[$short_to_long[$s]] = $long_to_default[$long];
         }
-        remove_argument($argv, $pos_args_count);
+        remove_argument(&$argv, $pos_args_count);
         continue;
       }
 
@@ -218,7 +218,7 @@ function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): Option
       }
 
       $ret[$long] = $val;
-      remove_argument($argv, $pos_args_count);
+      remove_argument(&$argv, $pos_args_count);
       continue;
     }
 

@@ -5,4 +5,8 @@ function a() {
   var_dump($x);
   foreach ($x as $k => $v) { var_dump(is_int($k), is_int($v)); }
 }
+
+<<__EntryPoint>>
+function main_array_054() {
 a();
+}

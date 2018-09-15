@@ -124,8 +124,7 @@ static bool isServerReachable(const String& host, int port /*= 0*/) {
 // methods
 
 static bool HHVM_METHOD(Memcache, connect, const String& host, int port /*= 0*/,
-                                           int timeout /*= 0*/,
-                                           int timeoutms /*= 0*/) {
+                        int /*timeout*/ /*= 0*/, int /*timeoutms*/ /*= 0*/) {
   auto data = Native::data<MemcacheData>(this_);
   memcached_return_t ret;
 
@@ -162,15 +161,16 @@ static uint32_t memcache_get_flag_for_type(const Variant& var) {
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
-      return MMC_TYPE_STRING;
-
+    case KindOfFunc:
     case KindOfClass:
-      break;
+      return MMC_TYPE_STRING;
   }
   not_reached();
 }
@@ -249,10 +249,14 @@ static Variant unserialize_if_serialized(const char *payload,
                                          uint32_t flags) {
   Variant ret = uninit_null();
   if (flags & MMC_SERIALIZED) {
-    ret = unserialize_from_buffer(payload, payload_len);
+    ret = unserialize_from_buffer(
+      payload,
+      payload_len,
+      VariableUnserializer::Type::Serialize
+    );
   } else {
     if (payload_len == 0) {
-      ret = String("");
+      ret = empty_string();
     } else {
       ret = String(payload, payload_len, CopyString);
     }
@@ -376,8 +380,8 @@ static bool HHVM_METHOD(Memcache, replace, const String& key,
   return (ret == MEMCACHED_SUCCESS);
 }
 
-static Variant HHVM_METHOD(Memcache, get, const Variant& key,
-                                          VRefParam flags /*= null*/) {
+static Variant
+HHVM_METHOD(Memcache, get, const Variant& key, VRefParam /*flags*/ /*= null*/) {
   auto data = Native::data<MemcacheData>(this_);
 
   if (!hasAvailableServers(data)) {
@@ -396,7 +400,7 @@ static Variant HHVM_METHOD(Memcache, get, const Variant& key,
       auto key = iter.second().toString();
       String serializedKey = memcache_prepare_key(key);
       char *k = new char[serializedKey.length()+1];
-      std::strcpy(k, serializedKey.c_str());
+      memcpy(k, serializedKey.c_str(), serializedKey.length() + 1);
       real_keys.push_back(k);
       key_len.push_back(serializedKey.length());
     }
@@ -678,8 +682,8 @@ static Array HHVM_METHOD(Memcache, getstats,
 }
 
 static Array HHVM_METHOD(Memcache, getextendedstats,
-                         const String& type /* = null_string */,
-                         int slabid /* = 0 */, int limit /* = 100 */) {
+                         const String& /*type*/ /* = null_string */,
+                         int /*slabid*/ /* = 0 */, int /*limit*/ /* = 100 */) {
   auto data = Native::data<MemcacheData>(this_);
   memcached_return_t ret;
   memcached_stat_st *stats;
@@ -719,13 +723,13 @@ static Array HHVM_METHOD(Memcache, getextendedstats,
   return return_val;
 }
 
-static bool HHVM_METHOD(Memcache, addserver, const String& host,
-                        int port /* = 11211 */,
-                        bool persistent /* = false */,
-                        int weight /* = 0 */, int timeout /* = 0 */,
-                        int retry_interval /* = 0 */, bool status /* = true */,
-                        const Variant& failure_callback /* = uninit_variant */,
-                        int timeoutms /* = 0 */) {
+static bool
+HHVM_METHOD(Memcache, addserver, const String& host, int port /* = 11211 */,
+            bool /*persistent*/ /* = false */, int weight /* = 0 */,
+            int /*timeout*/ /* = 0 */, int /*retry_interval*/ /* = 0 */,
+            bool /*status*/ /* = true */,
+            const Variant& /*failure_callback*/ /* = uninit_variant */,
+            int /*timeoutms*/ /* = 0 */) {
   auto data = Native::data<MemcacheData>(this_);
   memcached_return_t ret;
 
@@ -751,9 +755,7 @@ static bool HHVM_METHOD(Memcache, addserver, const String& host,
 struct MemcacheExtension final : Extension {
     MemcacheExtension() : Extension("memcache", "3.0.8") {};
     void threadInit() override {
-      // TODO: t5226715 We shouldn't need to check s_defaultLocale here,
-      // but right now this is called for every request.
-      if (s_memcache_globals) return;
+      assertx(!s_memcache_globals);
       s_memcache_globals = new MEMCACHEGlobals;
       IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                        "memcache.hash_strategy", "standard",

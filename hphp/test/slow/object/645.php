@@ -19,6 +19,9 @@ class C extends A {
     parent::__construct($a);
   }
 }
+
+<<__EntryPoint>>
+function main_645() {
 $obj = new A(1);
  var_dump($obj->a);
 $obj = new B(1);
@@ -26,3 +29,4 @@ $obj = new B(1);
 $obj = new C(1);
  var_dump($obj->a);
 unset($obj);
+}

@@ -3,11 +3,11 @@
 * Copyright (c) 2014, Facebook, Inc.
 * All rights reserved.
 *
-* This source code is licensed under the BSD-style license found in the
-* LICENSE file in the 'hack' directory of this source tree. An additional grant
-* of patent rights can be found in the PATENTS file in the same directory.
+* This source code is licensed under the MIT license found in the
+* LICENSE file in the 'hack' directory of this source tree.
 *
 */
+
 const int INPUT_POST = 0;
 const int INPUT_GET = 0;
 const int INPUT_COOKIE = 0;
@@ -63,11 +63,17 @@ const int FILTER_FLAG_IPV6 = 0;
 const int FILTER_FLAG_NO_RES_RANGE = 0;
 const int FILTER_FLAG_NO_PRIV_RANGE = 0;
 
+<<__PHPStdLib>>
 function filter_has_var(int $type, string $variable_name): bool {}
+<<__PHPStdLib>>
 function filter_id(string $name) {}
+<<__PHPStdLib>>
 function filter_input_array(int $type, mixed $definition = null, bool $add_empty = true) {}
+<<__PHPStdLib>>
 function filter_input(int $type, string $variable_name, int $filter = FILTER_DEFAULT, mixed $options = null) {}
+<<__PHPStdLib>>
 function filter_list(): array<string> {}
+<<__PHPStdLib>>
 function filter_var_array(array $data, mixed $definition = null, bool $add_empty = true) {}
+<<__PHPStdLib>>
 function filter_var(mixed $value, int $filter = FILTER_DEFAULT, mixed $options = null) {}
-

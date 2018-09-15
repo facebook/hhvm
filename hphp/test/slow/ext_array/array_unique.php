@@ -50,7 +50,11 @@ function d() {
   var_dump(array_unique($input, SORT_REGULAR));
 }
 
+
+<<__EntryPoint>>
+function main_array_unique() {
 a();
 b();
 c();
 d();
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $nonstaticUnscoped = function () {
   var_dump(A::$priv);

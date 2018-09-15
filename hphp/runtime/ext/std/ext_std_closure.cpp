@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/ext/std/ext_std.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/vm/preclass-emitter.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP {
@@ -33,7 +33,24 @@ const StaticString
   s_varprefix("$"),
   s_parameter("parameter"),
   s_required("<required>"),
-  s_optional("<optional>");
+  s_optional("<optional>"),
+  s_staticPrefix("86static_");
+
+Slot lookupStaticSlotFromClosure(const Class* cls, const StringData* name) {
+  auto str = String::attach(
+    StringData::Make(s_staticPrefix.slice(), name->slice())
+  );
+  auto const slot = cls->lookupDeclProp(str.get());
+  assertx(slot != kInvalidSlot);
+  return slot;
+}
+
+TypedValue* lookupStaticTvFromClosure(ObjectData* closure,
+                                      const StringData* name) {
+  assertx(closure->instanceof(c_Closure::classof()));
+  auto const slot = lookupStaticSlotFromClosure(closure->getVMClass(), name);
+  return c_Closure::fromObject(closure)->getStaticVar(slot);
+}
 
 static Array HHVM_METHOD(Closure, __debugInfo) {
   auto closure = c_Closure::fromObject(this_);
@@ -111,6 +128,15 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
    */
   auto const numDeclProperties = cls->numDeclProperties();
   assertx(numDeclProperties - numArgs == getInvokeFunc()->numStaticLocals());
+
+  if (debug) {
+    // Closure properties shouldn't have type-hints nor should they be LateInit.
+    for (auto const& prop : cls->declProperties()) {
+      always_assert(!prop.typeConstraint.isCheckable());
+      always_assert(!(prop.attrs & AttrLateInit));
+    }
+  }
+
   auto beforeCurUseVar = sp + numArgs;
   auto curProperty = getUseVars();
   int i = 0;
@@ -120,7 +146,7 @@ void c_Closure::init(int numArgs, ActRec* ar, TypedValue* sp) {
     tvCopy(*--beforeCurUseVar, *curProperty++);
   }
   for (; i < numDeclProperties; ++i) {
-    tvWriteUninit(curProperty++);
+    tvWriteUninit(*curProperty++);
   }
 }
 
@@ -194,8 +220,14 @@ static Variant HHVM_METHOD(Closure, bindto,
   auto cloneObj = this_->clone();
   auto clone = c_Closure::fromObject(cloneObj);
 
-  Attr curattrs = invoke->attrs();
-  Attr newattrs = static_cast<Attr>(curattrs & ~AttrHasForeignThis);
+  auto curattrs = Class::CloneAttr::DynamicBind;
+  if (invoke->attrs() & AttrStatic) {
+    curattrs |= Class::CloneAttr::Static;
+  }
+  auto newattrs = curattrs;
+  if (invoke->hasForeignThis()) {
+    curattrs |= Class::CloneAttr::HasForeignThis;
+  }
 
   if (od) {
     od->incRefCount();
@@ -204,12 +236,12 @@ static Variant HHVM_METHOD(Closure, bindto,
     if (thisNotOfCtx) {
       // If the bound $this is not a subclass of the context class, then we
       // have to pessimize translation.
-      newattrs |= AttrHasForeignThis;
+      newattrs |= Class::CloneAttr::HasForeignThis;
     }
   } else if (newscope) {
     // If we attach a scope to a function with no bound $this we need to make
     // the function static.
-    newattrs |= AttrStatic;
+    newattrs |= Class::CloneAttr::Static;
     clone->setClass(newscope);
   } else {
     clone->setThis(nullptr);
@@ -218,7 +250,7 @@ static Variant HHVM_METHOD(Closure, bindto,
   // If we are changing either the scope or the attributes of the closure, we
   // need to re-scope its Closure subclass.
   if (newscope != curscope || newattrs != curattrs) {
-    assert(newattrs != AttrNone);
+    assertx(newattrs != Class::CloneAttr::None);
 
     auto newcls = cls->rescope(newscope, newattrs);
     cloneObj->setVMClass(newcls);
@@ -264,7 +296,8 @@ static Variant HHVM_METHOD(Closure, call,
     g_context->invokeFunc(c_Closure::fromObject(this_)->getInvokeFunc(),
                           params, bound.toObject().get(),
                           nullptr, nullptr, nullptr,
-                          ExecutionContext::InvokeCuf)
+                          ExecutionContext::InvokeNormal,
+                          false, false)
   );
 }
 
@@ -275,14 +308,13 @@ static Variant HHVM_METHOD(Closure, call,
 static ObjectData* closureInstanceCtorRepoAuth(Class* cls) {
   assertx(!(cls->attrs() & (AttrAbstract|AttrInterface|AttrTrait|AttrEnum)));
   assertx(!cls->needInitialization());
-  assertx(cls->parent() == c_Closure::classof());
+  assertx(cls->parent() == c_Closure::classof() || cls == c_Closure::classof());
   // ensure c_Closure and ClosureHdr ptrs are scanned inside other types
   (void)type_scan::getIndexForMalloc<c_Closure>();
   (void)type_scan::getIndexForMalloc<ClosureHdr>();
   auto const nProps = cls->numDeclProperties();
   auto const size = sizeof(ClosureHdr) + ObjectData::sizeForNProps(nProps);
-  auto hdr = static_cast<ClosureHdr*>(MM().objMalloc(size));
-  hdr->hdr.init(HeaderKind::ClosureHdr, size);
+  auto hdr = new (tl_heap->objMalloc(size)) ClosureHdr(size);
   auto obj = new (hdr + 1) c_Closure(cls);
   assertx(obj->hasExactlyOneRef());
   return obj;
@@ -321,6 +353,9 @@ ObjectData* c_Closure::clone() {
 }
 
 static void closureInstanceDtor(ObjectData* obj, const Class* cls) {
+  if (UNLIKELY(obj->getAttribute(ObjectData::IsWeakRefed))) {
+    WeakRefData::invalidateWeakRef((uintptr_t)obj);
+  }
   auto const nProps = size_t{cls->numDeclProperties()};
   auto prop = c_Closure::fromObject(obj)->getUseVars();
   auto const stop = prop + nProps;
@@ -329,27 +364,27 @@ static void closureInstanceDtor(ObjectData* obj, const Class* cls) {
     decRefObj(t);
   }
   for (; prop != stop; ++prop) {
-    tvRefcountedDecRef(prop);
+    tvDecRefGen(prop);
   }
   auto hdr = closure->hdr();
-  MM().objFree(hdr, hdr->size());
-}
-
-void PreClassEmitter::setClosurePreClass() {
-  m_instanceCtor = RuntimeOption::RepoAuthoritative ?
-    closureInstanceCtorRepoAuth : closureInstanceCtor;
-  m_instanceDtor = closureInstanceDtor;
+  tl_heap->objFree(hdr, hdr->size());
 }
 
 void StandardExtension::loadClosure() {
-  HHVM_ME(Closure, __debugInfo);
-  HHVM_ME(Closure, bindto);
-  HHVM_ME(Closure, call);
+  HHVM_SYS_ME(Closure, __debugInfo);
+  HHVM_SYS_ME(Closure, bindto);
+  HHVM_SYS_ME(Closure, call);
 }
 
 void StandardExtension::initClosure() {
   c_Closure::cls_Closure = Unit::lookupClass(s_Closure.get());
   assertx(c_Closure::cls_Closure);
+  assertx(!c_Closure::cls_Closure->hasMemoSlots());
+  c_Closure::cls_Closure->allocExtraData();
+  c_Closure::cls_Closure->m_extra.raw()->m_instanceCtor =
+    RuntimeOption::RepoAuthoritative
+      ? closureInstanceCtorRepoAuth : closureInstanceCtor;
+  c_Closure::cls_Closure->m_extra.raw()->m_instanceDtor = closureInstanceDtor;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

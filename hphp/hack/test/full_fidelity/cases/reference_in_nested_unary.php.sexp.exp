@@ -1,0 +1,67 @@
+((script 47
+  ((list 47
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
+       (missing 0 ())))
+     (expression_statement 41
+      ((function_call_expression 40
+        ((((end_of_line 1)) name 8 ()) (() "(" 1 ())
+         (list 30
+          ((list_item 30
+            ((binary_expression 30
+              ((prefix_unary_expression 26
+                ((() @ 1 ())
+                 (prefix_unary_expression 25
+                  ((() @ 1 ())
+                   (prefix_unary_expression 24
+                    ((() @ 1 ())
+                     (prefix_unary_expression 23
+                      ((() @ 1 ())
+                       (prefix_unary_expression 22
+                        ((() ! 1 ())
+                         (prefix_unary_expression 21
+                          ((() ! 1 ())
+                           (prefix_unary_expression 20
+                            ((() @ 1 ((whitespace 1)))
+                             (prefix_unary_expression 18
+                              ((() & 1 ((whitespace 1)))
+                               (prefix_unary_expression 16
+                                ((() @ 1 ())
+                                 (prefix_unary_expression 15
+                                  ((() & 1 ())
+                                   (prefix_unary_expression 14
+                                    ((() - 1 ())
+                                     (prefix_unary_expression 13
+                                      ((() + 1 ())
+                                       (prefix_unary_expression 12
+                                        ((() @ 1 ())
+                                         (prefix_unary_expression 11
+                                          ((() ! 1 ())
+                                           (prefix_unary_expression 10
+                                            ((() @ 1 ())
+                                             (prefix_unary_expression 9
+                                              ((() @ 1 ())
+                                               (prefix_unary_expression 8
+                                                ((() @ 1 ())
+                                                 (prefix_unary_expression 7
+                                                  ((() ~ 1 ())
+                                                   (prefix_unary_expression 6
+                                                    ((() ~ 1 ())
+                                                     (prefix_unary_expression
+                                                      5
+                                                      ((() @ 1 ())
+                                                       (prefix_unary_expression
+                                                        4
+                                                        ((() @ 1
+                                                          ((whitespace 1)))
+                                                         (literal 2
+                                                          ((()
+                                                            decimal_literal 2
+                                                            ((whitespace 1)))))))))))))))))))))))))))))))))))))))))))))))
+               (() + 1 ((whitespace 1)))
+               (literal 1 ((() decimal_literal 1 ())))))
+             (missing 0 ())))))
+         (() ")" 1 ())))
+       (() ";" 1 ((end_of_line 1)))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo($x, $y) {
   if ($x + $y) { return $x; }

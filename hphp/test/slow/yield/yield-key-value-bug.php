@@ -13,5 +13,9 @@ function main() {
     echo "$k $v\n";
   }
 }
-main();
 
+
+<<__EntryPoint>>
+function main_yield_key_value_bug() {
+main();
+}

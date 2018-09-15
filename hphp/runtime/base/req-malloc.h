@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_RUNTIME_BASE_REQ_MALLOC_H_
 #define incl_HPHP_RUNTIME_BASE_REQ_MALLOC_H_
 
+#include "hphp/util/alloc.h"
 #include "hphp/util/type-scan.h"
 
 /*
@@ -24,7 +25,7 @@
  *
  * This is the most generic entry point to the request local
  * allocator.  If you easily know the size of the allocation at free
- * time, it might be more efficient to use MM() apis directly.
+ * time, it might be more efficient to use MemoryManager apis directly.
  *
  * These functions behave like C's malloc/free, but get memory from
  * the current thread's MemoryManager instance.  At request-end, any
@@ -41,31 +42,55 @@ namespace HPHP { namespace req {
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
+ * Plain malloc-style allocation in the request heap is not available;
+ * please choose one of the variants below. Memory obtained through any
+ * of these will be freed at end-of-request, unless passed back to req::free().
+ *
+ * 1. malloc_noptrs, if you know the memory will not contain heap pointers,
+ * e.g. c-strings, pixels, compressed or encrypted data, etc.
+ *
+ * 2. make_raw<T>(...) or make_raw_array<T>(count), if you know the type,
+ * whether or not it contains pointers. These are analogs of C++ new.
+ *
+ * 3. malloc(type_scan::Index) like make_raw<T>, but you provide the type id,
+ * which must not be type_scan::kIndexUnknown; intended for implementing
+ * templated apis.
+ *
+ * 4. malloc_unk() memory will be treated as root and conservative scanned,
+ * because we don't know whether or not it will have pointers.
+ */
+void* malloc(size_t nbytes) = delete;
+void* calloc(size_t count, size_t bytes) = delete;
+void* realloc(void* ptr, size_t nbytes) = delete;
+
+/*
  * Interfaces to receive raw memory. Whenever possible, prefer the typed
  * interfaces below, such as make_raw<T>.
  */
+void* malloc(size_t nbytes, type_scan::Index);
+void* calloc(size_t count, size_t bytes, type_scan::Index);
+void* realloc(void* ptr, size_t nbytes, type_scan::Index);
 
-void* malloc(size_t nbytes,
-             type_scan::Index tyindex = type_scan::kIndexUnknown);
+// Unknown type-index, conservative scan contents and treat as root.
+void* malloc_untyped(size_t nbytes);
+void* calloc_untyped(size_t count, size_t bytes);
+void* realloc_untyped(void* ptr, size_t nbytes);
 
 // Unknown type-index, but assert there's no pointers within.
 inline void* malloc_noptrs(size_t nbytes) {
   return malloc(nbytes, type_scan::kIndexUnknownNoPtrs);
 }
-
-void* calloc(size_t count, size_t bytes,
-             type_scan::Index tyindex = type_scan::kIndexUnknown);
-
-void* realloc(void* ptr,
-              size_t nbytes,
-              type_scan::Index tyindex = type_scan::kIndexUnknown);
-
-// Unknown type-index, but assert there's no pointers within.
+inline void* calloc_noptrs(size_t count, size_t bytes) {
+  return calloc(count, bytes, type_scan::kIndexUnknownNoPtrs);
+}
 inline void* realloc_noptrs(void* ptr, size_t nbytes) {
   return realloc(ptr, nbytes, type_scan::kIndexUnknownNoPtrs);
 }
 
 char* strndup(const char* str, size_t len);
+inline char* strdup(const char* str) {
+  return strndup(str, strlen(str));
+}
 
 void free(void* ptr);
 
@@ -117,9 +142,43 @@ struct Allocator {
   typedef std::size_t    size_type;
   typedef std::ptrdiff_t difference_type;
 
+  typedef std::true_type folly_has_default_object_construct;
+  typedef std::true_type folly_has_default_object_destroy;
+
+  template<typename U, typename A> struct action_helper {
+    using type = A;
+  };
+
+  /*
+   * When rebinding, we want to downgrade to conservative scan if the
+   * rebound type is char, unsigned char, void, or a pointer to one of
+   * those, unless Action is Ignore.
+   */
+  template<typename A> struct action_helper<char, A> {
+    using type = typename std::conditional<
+      std::is_same<type_scan::Action::Ignore, A>::value,
+      A, type_scan::Action::Conservative<T>
+    >::type;
+  };
+
+  template<typename A> struct action_helper<unsigned char, A> {
+    using type = typename action_helper<char, A>::type;
+  };
+
+  template<typename A> struct action_helper<void, A> {
+    using type = typename action_helper<char, A>::type;
+  };
+
   template <class U>
   struct rebind {
-    typedef Allocator<U, Action> other;
+    using other = Allocator<
+      U,
+      typename action_helper<
+        typename std::remove_const<
+          typename std::remove_pointer<U>::type
+        >::type, Action
+      >::type
+    >;
   };
 
   pointer address(reference value) {
@@ -150,16 +209,14 @@ struct Allocator {
 
   template<class U, class... Args>
   void construct(U* p, Args&&... args) {
-    ::new ((void*)p) U(std::forward<Args>(args)...);
+    ::new (NotNull{}, p) U(std::forward<Args>(args)...);
   }
 
   void destroy(pointer p) {
     p->~T();
   }
 
-  void deallocate(pointer p, size_type num) {
-    req::free((void*)p);
-  }
+  void deallocate(pointer p, size_type /*num*/) { req::free((void*)p); }
 
   template<class U, typename A> bool operator==(const Allocator<U,A>&) const {
     return true;
@@ -182,34 +239,18 @@ using ConservativeAllocator = Allocator<T, type_scan::Action::Conservative<T>>;
 
 /////////////////////////////////////////////////////////////////////
 
-template<class T, class... Args> T* make_raw(Args&&... args) {
-  auto const mem = req::malloc(sizeof(T), type_scan::getIndexForMalloc<T>());
-  try {
-    return new (mem) T(std::forward<Args>(args)...);
-  } catch (...) {
-    req::free(mem);
-    throw;
-  }
-}
-
-template<class T> void destroy_raw(T* t) {
-  t->~T();
-  req::free(t);
-}
-
 template<class T> T* make_raw_array(size_t count) {
   T* ret = static_cast<T*>(
     req::malloc(count * sizeof(T), type_scan::getIndexForMalloc<T>())
   );
-  size_t i = 0;
+  auto p = ret;
   try {
-    for (; i < count; ++i) {
-      new (&ret[i]) T();
+    for (auto e = ret + count; p < e; ++p) {
+      ::new (NotNull{}, p) T();
     }
   } catch (...) {
-    size_t j = i;
-    while (j-- > 0) {
-      ret[j].~T();
+    while (p-- > ret) {
+      p->~T();
     }
     req::free(ret);
     throw;

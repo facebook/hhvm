@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_htmlentities_substitute() {
 $foo = array(
   array('41efbfbd2667743b42', "\x41\xC2\x3E\x42", null),
   array('41efbfbd2667743b42', "\x41\xC2\x3E\x42", ENT_NOQUOTES),
@@ -24,3 +27,4 @@ foreach ($foo as $arr) {
 }
 
 echo "Done.\n";
+}

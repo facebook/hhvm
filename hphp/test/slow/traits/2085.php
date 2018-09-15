@@ -20,5 +20,9 @@ trait Too {
 class Foo {
  use Too;
  }
+
+<<__EntryPoint>>
+function main_2085() {
 $a = Foo::bar();
 Foo::baz($a);
+}

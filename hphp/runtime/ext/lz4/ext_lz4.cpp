@@ -69,7 +69,6 @@ Variant HHVM_FUNCTION(lz4_compress, const String& uncompressed,
   VarintEncode(uncompressed.size(), &compressed);  // write the header
 
   int size;
-#if LZ4_VERSION_NUMBER >= 10700
   if (high) {
     size = LZ4_compress_HC(
         uncompressed.data(), compressed, uncompressed.size(), bufsize, 0);
@@ -77,13 +76,6 @@ Variant HHVM_FUNCTION(lz4_compress, const String& uncompressed,
     size = LZ4_compress_default(
         uncompressed.data(), compressed, uncompressed.size(), bufsize);
   }
-#else
-  if (high) {
-    size = LZ4_compressHC(uncompressed.data(), compressed, uncompressed.size());
-  } else {
-    size = LZ4_compress(uncompressed.data(), compressed, uncompressed.size());
-  }
-#endif
   if (size < 0) {
     return false;
   }

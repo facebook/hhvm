@@ -1,0 +1,2 @@
+File "class_top_var.php", line 7, characters 3-5:
+Properties cannot be declared as var; a type is required (Parsing[1002])

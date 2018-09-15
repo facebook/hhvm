@@ -24,6 +24,7 @@
 
 namespace HPHP {
 struct ArrayData;
+struct Class;
 struct c_Pair;
 struct c_Vector;
 struct c_ImmVector;
@@ -78,13 +79,10 @@ inline ObjectData* alloc(CollectionType ctype, ArrayData* arr) {
   return allocFromArrayFunc(ctype)(arr);
 }
 
-/* Preallocate room for {sz} elements in the Collection */
-void reserve(ObjectData* obj, int64_t sz);
-
-/* Used by Collections Literals syntax for Maps */
-void initMapElem(ObjectData* obj, TypedValue* key, TypedValue* val);
-/* Used by Collections Literals syntax for non-Maps */
-void initElem(ObjectData* obj, TypedValue* val);
+/*
+ * Creates a Pair. Takes ownership of the TypedValues passed in.
+ */
+ObjectData* allocPair(TypedValue c1, TypedValue c2);
 
 /////////////////////////////////////////////////////////////////////////////
 // Casting and Cloing

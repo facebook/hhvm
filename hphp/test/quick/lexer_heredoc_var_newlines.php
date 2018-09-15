@@ -1,7 +1,7 @@
-<?php
+<?hh
   $info = "hello";
 echo <<<SCRIPT
-<?php
+<?hh
 $info
 throw new Exception(<<<TXT
 $info

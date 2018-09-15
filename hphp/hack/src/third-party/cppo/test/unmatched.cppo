@@ -1,0 +1,14 @@
+#ifdef whatever
+  (
+#else
+  let a = 1 in
+  let b = 2 in
+  (a ||
+#endif
+
+  b)
+
+#define F(x, y) (x + y)
+F(1,(2+3))
+)
+(

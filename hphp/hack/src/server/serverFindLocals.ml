@@ -2,14 +2,13 @@
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
 open Ast
-open Core
+open Hh_core
 
 type result = Pos.absolute list
 
@@ -168,9 +167,6 @@ module LocalMap = struct
   let previous_scopechain localmap =
     ScopeChains.previous localmap.scopechains
 
-  let previous_scopechains localmap =
-    ScopeChains.pop localmap.scopechains
-
   let replace_head scopechain localmap =
     let scopechains =
       ScopeChains.replace_head scopechain localmap.scopechains in
@@ -305,15 +301,10 @@ end (* End of module LocalMap *)
   *)
 
 class local_finding_visitor = object(this)
-  inherit [LocalMap.t] Ast_visitor.ast_visitor as super
+  inherit [LocalMap.t] Ast_visitor.ast_visitor as _super
 
   method! on_lvar localmap (pos, name) =
     LocalMap.add name pos localmap
-
-  method! on_expr localmap (pos, e) =
-    match e with
-    | Dollardollar -> LocalMap.add "$$" pos localmap
-    | _ -> super#on_expr localmap (pos, e)
 
   method! on_pipe localmap left right =
     (**
@@ -519,12 +510,10 @@ end
 
 let parse tcopt content =
   Errors.ignore_ begin fun () ->
-    let {Parser_hack.ast; comments = _; file_mode = _; content = _;} =
-      Parser_hack.program
-        tcopt
-        Relative_path.default
-        content
-    in ast
+    let open Full_fidelity_ast in
+    let env = make_env ~parser_options:tcopt Relative_path.default in
+    let {Parser_return.ast; _} = from_text_with_legacy env content in
+    ast
   end
 
 let go_from_ast ast line char =
@@ -534,15 +523,15 @@ let go_from_ast ast line char =
   LocalMap.results localmap
 
  (**
-  * This is the entrypoint to this module. The contents of a file, and a
-  * position within it, identifying a local, are given. The result is a
-  * list of the positions of other uses of that local in the file.
+  * This is the entrypoint to this module. The relative path of a file,
+  * the contents of a file, and a position within it, identifying a local, are given.
+  * The result is a list of the positions of other uses of that local in the file.
   *)
-let go tcopt content line char =
+let go tcopt path content line char =
   try
     let ast = parse tcopt content in
     let results_list = go_from_ast ast line char in
-    List.map results_list Pos.to_absolute
+    List.map results_list (fun pos -> Pos.set_file path pos)
   with Failure error ->
     failwith (
       (Printf.sprintf "Find locals service failed with error %s:\n" error) ^

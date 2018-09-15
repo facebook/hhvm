@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_fstat() {
 $tempfile = tempnam('/tmp', 'vmextfiletest');
 
 $f = fopen($tempfile, 'w');
@@ -10,3 +13,4 @@ $f = fopen($tempfile, "r");
 var_dump(fstat($f)['size']);
 
 unlink($tempfile);
+}

@@ -2,9 +2,8 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
@@ -15,6 +14,7 @@ type build_opts = {
                          None means 'all except kill-switched' *)
   ignore_killswitch: bool; (* when true, also build kill-switched steps *)
   no_steps: string list option; (* ...but don't run these steps *)
+  use_factsdb_static: bool; (* use FactsDB generators for certain steps *)
   run_scripts: bool; (* when true, run remaining arc build steps
                      that we haven't figured out how to port yet*)
   serial: bool; (* when true, don't use parallel workers *)

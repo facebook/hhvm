@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_var_export_arrays() {
 echo("** array **\n");
 var_export(array());
 echo("\n\n");
@@ -39,3 +42,4 @@ var_export(keyset['foo']);
 echo("\n\n");
 var_export(keyset['foo', 'bar']);
 echo("\n\n");
+}

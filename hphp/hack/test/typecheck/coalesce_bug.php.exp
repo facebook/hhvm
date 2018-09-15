@@ -1,0 +1,6 @@
+File "coalesce_bug.php", line 19, characters 10-11:
+Invalid return type (Typing[4110])
+File "coalesce_bug.php", line 17, characters 47-47:
+This is an object of type C
+File "coalesce_bug.php", line 14, characters 19-19:
+It is incompatible with an object of type I

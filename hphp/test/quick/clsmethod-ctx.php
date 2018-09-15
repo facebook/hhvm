@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class a {
   private static function priv() {

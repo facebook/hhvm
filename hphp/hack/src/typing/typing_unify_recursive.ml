@@ -2,13 +2,12 @@
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Core
+open Core_kernel
 open Typing_defs
 
 module Env = Typing_env
@@ -40,17 +39,18 @@ let rec occurs env n rty =
   | Tvar n' ->
     let _, n'' = Env.get_var env n' in
     begin
-      n == n'' || (match IMap.get n'' env.Env.tenv with
+      phys_equal n n'' || (match IMap.get n'' env.Env.tenv with
       | Some ty -> occurs env n ty
       | None -> false)
     end
-  | Tany | Tmixed | Tanon _ | Tprim _ | Tobject -> false
+  | Terr | Tany | Tmixed | Tnonnull | Tanon _ | Tprim _ | Tobject | Tdynamic -> false
   | Toption t -> occurs env n t
   | Ttuple ts | Tunresolved ts | Tclass(_,ts) -> occurs_list env n ts
   | Tabstract(ak,topt) -> occurs_ak env n ak || occurs_opt  env n topt
   | Tarraykind ak -> occurs_array env n ak
   | Tfun ft -> occurs_ft env n ft
-  | Tshape(_,sm) -> Nast.ShapeMap.exists (fun _ t -> occurs env n t) sm
+  | Tshape(_,sm) ->
+      Nast.ShapeMap.exists (fun _ { sft_ty; _ } -> occurs env n sft_ty) sm
 and occurs_opt env n topt =
   match topt with
   | None -> false
@@ -68,7 +68,10 @@ and occurs_ak env n ak =
 and occurs_array env n ak =
   match ak with
   | AKany -> false
+  | AKvarray_or_darray t
+  | AKvarray t
   | AKvec t -> occurs env n t
+  | AKdarray (t1, t2)
   | AKmap(t1,t2) -> occurs env n t1 || occurs env n t2
   | AKempty -> false
   | AKshape sm -> Nast.ShapeMap.exists
@@ -77,7 +80,7 @@ and occurs_array env n ak =
 and occurs_ft env n ft =
     occurs_params env n ft.ft_params || occurs env n ft.ft_ret
 and occurs_params env n p =
-  List.exists p (fun (_,t) -> occurs env n t)
+  List.exists p (fun { fp_type = t; _ } -> occurs env n t)
 
 (* Does variable [n] occur at top-level in [ty] or under any number
  * of Toption wrappers, eliding singleton Tunresolved?
@@ -89,7 +92,7 @@ let rec occursUnderOptions level env n ty =
   | Tvar n' ->
     let _, n'' = Env.get_var env n' in
     begin
-      if n == n''
+      if phys_equal n n''
       then Some level
       else
       begin match IMap.get n'' env.Env.tenv with
@@ -98,7 +101,7 @@ let rec occursUnderOptions level env n ty =
       end
     end
   | Toption t -> occursUnderOptions (level+1) env n t
-  | Tunresolved [t] -> occursUnderOptions level env n t
+  | Tunresolved [t] when level > 0 -> occursUnderOptions level env n t
   | _ -> None
 
 (* Given a list of types [tyl], locate the first type that is
@@ -106,23 +109,21 @@ let rec occursUnderOptions level env n ty =
  * Toption wrappers. Return Some(k, tys) where tys is the
  * other types in tyl (in arbitrary order). Otherwise return None.
 *)
-let rec findFirstVarOrOptionVar env n tyl =
-  match tyl with
-  | [] ->
-    None
-
-  | ty::tyl ->
-    match occursUnderOptions 0 env n ty with
-    | Some count ->
-      begin match findFirstVarOrOptionVar env n tyl with
-      | None -> Some(count,tyl)
-      | Some _ -> None
-      end
-    | None ->
-      begin match findFirstVarOrOptionVar env n tyl with
-      | None -> None
-      | Some (count,tys) -> Some (count,ty::tys)
-      end
+let findFirstVarOrOptionVar env n tyl =
+  let rec aux tyl maxcount tys_wo_n found =
+    match tyl with
+    | [] ->
+      if found
+        then Some (maxcount, tys_wo_n)
+        else None
+    | ty::tyl ->
+      match occursUnderOptions 0 env n ty with
+      | Some count ->
+        let maxcount = if count > maxcount then count else maxcount in
+        aux tyl maxcount tys_wo_n true
+      | None ->
+        aux tyl maxcount (ty::tys_wo_n) found in
+  aux tyl 0 [] false
 
 (* Does variable n (which must be normalized with respect to env.subst)
  * occur inside type rty? See comment above occursResult for meaning
@@ -161,6 +162,12 @@ let occursTop env n rty =
  * variables in functions that recurse over type structure.
  *)
 let add env x ty =
+  let extend_unresolved env ty tyl =
+    let env, ty' = TUtils.unresolved env ty in
+    match tyl with
+    | [] -> env, snd ty'
+    | _ -> env, Tunresolved (ty'::tyl)
+  in
   let env, x' = Env.get_var env x in
   match occursTop env x' ty with
   | DoesOccurAtTop ->
@@ -173,14 +180,15 @@ let add env x ty =
     begin
       Errors.unification_cycle
         (Reason.to_pos (fst ty)) (Typing_print.full_rec env x' ty);
-      Env.add env x (fst ty, Tany)
+      Env.add env x (fst ty, Terr)
     end
 
     (* We solve the unification problem [n] against ?+ [n] by
      * the substitution n := ?m for fresh variable m
      *)
   | DoesOccurUnderOptions ->
-    let env, ty' = Env.fresh_unresolved_type env in
+    let env, ty' = Env.get_type_unsafe env x' in
+    let env, ty' = TUtils.unresolved env ty' in
     Env.add env x (fst ty, Toption ty')
 
     (* We solve the unification problem [n]
@@ -188,13 +196,15 @@ let add env x ty =
      * substitution n := ?(m | t1 | ... | tk) for fresh variable m
      *)
   | DoesOccurUnderUnresolvedOptions ts ->
-    let env, ty' = Env.fresh_unresolved_type env in
-    Env.add env x (fst ty, Toption (fst ty, Tunresolved (ty'::ts)))
+    let env, ty' = Env.get_type_unsafe env x' in
+    let env, ty' = extend_unresolved env ty' ts in
+    Env.add env x (fst ty, Toption (fst ty, ty'))
 
     (* We solve the unification problem [n]
      * against ([n] | t1 | ... |k) by the
      * substitution n := (m | t1 | ... | tk) for fresh variable m
      *)
   | DoesOccurUnderUnresolved ts ->
-    let env, ty' = Env.fresh_unresolved_type env in
-    Env.add env x (fst ty, Tunresolved (ty'::ts))
+    let env, ty' = Env.get_type_unsafe env x' in
+    let env, ty' = extend_unresolved env ty' ts in
+    Env.add env x (fst ty, ty')

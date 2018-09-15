@@ -1,2 +1,2 @@
-<?php
+<?hh
 define('FOO', null);

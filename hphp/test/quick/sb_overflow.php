@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 var_dump(iconv_mime_decode(
            '=?utf-8?Q?...=20.....=3A=20...=20.....=20....=20'.

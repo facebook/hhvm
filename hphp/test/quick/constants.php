@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f() {
   print "Enter f()\n";

@@ -1,8 +1,5 @@
 <?hh
 
-// disable array -> "Array" conversion notice
-error_reporting(error_reporting() & ~E_NOTICE);
-
 interface IFoo {
 }
 function trav(Traversable $x) {
@@ -44,4 +41,11 @@ function main() {
   ind($arr);
   ifoo($arr);
 }
+
+
+// disable array -> "Array" conversion notice
+<<__EntryPoint>>
+function main_array_traversable() {
+error_reporting(error_reporting() & ~E_NOTICE);
 main();
+}

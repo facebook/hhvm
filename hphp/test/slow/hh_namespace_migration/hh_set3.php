@@ -7,4 +7,8 @@ function main() {
   $s = new Set();
 }
 
+
+<<__EntryPoint>>
+function main_hh_set3() {
 main();
+}

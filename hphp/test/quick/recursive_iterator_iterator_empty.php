@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $array = array('k1' => array());
 

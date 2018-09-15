@@ -37,6 +37,9 @@ namespace x64 {
  * Mirrors the API of func-guard.h.
  */
 
+// No instructions are enforced to be continuous on x86.
+constexpr size_t funcGuardLen() { return 0; }
+
 void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups);
 TCA funcGuardFromPrologue(TCA prologue, const Func* func);
 bool funcGuardMatches(TCA guard, const Func* func);

@@ -58,6 +58,11 @@ void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref);
 void emitLdLowPtr(Vout& v, Vptr mem, Vreg reg, size_t size);
 
 /*
+ * Store the LowPtr<T> in `reg' into `mem', with storage size `size'.
+ */
+void emitStLowPtr(Vout& v, Vreg reg, Vptr mem, size_t size);
+
+/*
  * Copy two 64-bit values, `s0' and `s1', into one 128-bit register, `d0'.
  */
 void pack2(Vout& v, Vreg s0, Vreg s1, Vreg d0);
@@ -71,20 +76,25 @@ Vreg zeroExtendIfBool(Vout& v, Type type, Vreg reg);
 // TypedValue manipulations.
 
 /*
+ * Return a pointer to the type or value field of the pointee of `ptr', whether
+ * it is a TPtrToGen or a TLvalToGen.
+ */
+Vptr memTVTypePtr(SSATmp* ptr, Vloc loc);
+Vptr memTVValPtr(SSATmp* ptr, Vloc loc);
+
+/*
  * Test or compare `s0' against the live type `s1', setting the result in `sf'.
  */
 void emitTestTVType(Vout& v, Vreg sf, Immed s0, Vreg s1);
 void emitTestTVType(Vout& v, Vreg sf, Immed s0, Vptr s1);
-void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vptr s1);
-void emitCmpTVType(Vout& v, Vreg sf, Immed s0, Vreg s1);
-
-Vreg emitMaskTVType(Vout& v, Immed s0, Vreg s1);
-Vreg emitMaskTVType(Vout& v, Immed s0, Vptr s1);
+void emitCmpTVType(Vout& v, Vreg sf, DataType s0, Vptr s1);
+void emitCmpTVType(Vout& v, Vreg sf, DataType s0, Vreg s1);
 
 /*
  * Store `loc', the registers representing `src', to `dst'.
  */
 void storeTV(Vout& v, Vptr dst, Vloc srcLoc, const SSATmp* src);
+void storeTV(Vout& v, Type type, Vloc srcLoc, Vptr typePtr, Vptr dataPtr);
 
 /*
  * Load `src' into `loc', the registers representing `dst'.
@@ -93,6 +103,8 @@ void storeTV(Vout& v, Vptr dst, Vloc srcLoc, const SSATmp* src);
  * into the type reg.  This should only happen when loading a return value.
  */
 void loadTV(Vout& v, const SSATmp* dst, Vloc dstLoc, Vptr src,
+            bool aux = false);
+void loadTV(Vout& v, Type type, Vloc dstLoc, Vptr typePtr, Vptr valPtr,
             bool aux = false);
 
 /*
@@ -106,7 +118,30 @@ void copyTV(Vout& v, Vloc src, Vloc dst, Type dstType);
  *
  * Note that this will also clobber the Aux area of a TypedValueAux.
  */
-void trashTV(Vout& v, Vreg ptr, int32_t offset, char byte);
+void trashFullTV(Vout& v, Vptr ptr, char byte);
+
+/*
+ * Fill the type and value of a TypedValue with trash.
+ */
+void trashTV(Vout& v, Vptr typePtr, Vptr valPtr, char byte);
+
+/*
+ * Compare an object's reference count with an immediate value, return the
+ * status flags used for the comparison.
+ */
+Vreg emitCmpRefCount(Vout& v, Immed s0, Vreg s1);
+
+/*
+ * Store `s0' to the reference count of the given object.
+ */
+void emitStoreRefCount(Vout& v, Immed s0, Vreg s1);
+void emitStoreRefCount(Vout& v, Immed s0, Vptr m);
+
+/*
+ * Decrement the reference count of the given object, returning the status
+ * flags from the decrement instruction.
+ */
+Vreg emitDecRefCount(Vout& v, Vreg s0);
 
 /*
  * Incref or decref `data', and perform some asserts.
@@ -118,13 +153,14 @@ void trashTV(Vout& v, Vreg ptr, int32_t offset, char byte);
  * decrement, since callers may want to check the result and invoke data
  * destructors.
  */
-void emitIncRef(Vout& v, Vreg data);
-Vreg emitDecRef(Vout& v, Vreg data);
+void emitIncRef(Vout& v, Vreg data, Reason reason);
+Vreg emitDecRef(Vout& v, Vreg data, Reason reason);
 
 /*
  * emitIncRefWork performs type check and calls incRef if appropriate.
  */
-void emitIncRefWork(Vout& v, Vreg data, Vreg type);
+void emitIncRefWork(Vout& v, Vreg data, Vreg type, Reason reason);
+void emitIncRefWork(Vout& v, Vloc loc, Type type, Reason reason);
 
 /*
  * Check the refcount of `data'.  If it's negative (and hence, a sentinel
@@ -135,18 +171,19 @@ void emitIncRefWork(Vout& v, Vreg data, Vreg type);
  */
 template<class Destroy>
 void emitDecRefWork(Vout& v, Vout& vcold, Vreg data,
-                    Destroy destroy, bool unlikelyDestroy);
+                    Destroy destroy, bool unlikelyDestroy,
+                    Reason reason);
 
 /*
  * Like emitDecRefWork(), but for a known-KindOfObject value.
  */
-void emitDecRefWorkObj(Vout& v, Vreg obj);
+void emitDecRefWorkObj(Vout& v, Vreg obj, Reason reason);
 
 /*
  * Trap or otherwise fail if `data' does not have a realistic refcount (either
  * a positive value or the sentinel static/uncounted values).
  */
-void emitAssertRefCount(Vout& v, Vreg data);
+void emitAssertRefCount(Vout& v, Vreg data, Reason reason);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Calls.
@@ -161,7 +198,7 @@ void emitCall(Vout& v, CallSpec call, RegSet args);
 /*
  * Return a Vptr to the native destructor function for values of type `type'.
  */
-Vptr lookupDestructor(Vout& v, Vreg type);
+Vptr lookupDestructor(Vout& v, Vreg type, bool typeIsQuad = false);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Class metadata.
@@ -209,6 +246,12 @@ void emitCmpLowPtr(Vout& v, Vreg sf, Vreg reg1, Vreg reg2) {
  */
 void emitCmpVecLen(Vout& v, Vreg sf, Immed val, Vptr mem);
 
+/*
+ * emit an isCollection(obj) range check. The returned status
+ * flags can be tested; CC_BE means true
+ */
+Vreg emitIsCollection(Vout& v, Vreg obj);
+
 ///////////////////////////////////////////////////////////////////////////////
 // VM intrinsics.
 
@@ -223,12 +266,9 @@ void emitEagerSyncPoint(Vout& v, PC pc, Vreg rds, Vreg vmfp, Vreg vmsp);
 void emitRB(Vout& v, Trace::RingBufferType t, const char* msg);
 
 /*
- * Increment the counter for `stat' by `n'.
- *
- * If `force' is set, do so even if stats aren't enabled.
+ * Increment the counter for `stat'.
  */
-void emitIncStat(Vout& v, Stats::StatCounter stat, int n = 1,
-                 bool force = false);
+void emitIncStat(Vout& v, Stats::StatCounter stat);
 
 ///////////////////////////////////////////////////////////////////////////////
 // RDS manipulation.
@@ -240,6 +280,7 @@ void emitIncStat(Vout& v, Stats::StatCounter stat, int n = 1,
  * @requires: rds::isNormalHandle(ch)
  */
 Vreg checkRDSHandleInitialized(Vout& v, rds::Handle ch);
+Vreg checkRDSHandleInitialized(Vout& v, Vreg ch);
 
 /*
  * Update the generation number for `ch' to the current generation.
@@ -247,6 +288,7 @@ Vreg checkRDSHandleInitialized(Vout& v, rds::Handle ch);
  * @requires: rds::isNormalHandle(ch)
  */
 void markRDSHandleInitialized(Vout& v, rds::Handle ch);
+void markRDSHandleInitialized(Vout& v, Vreg ch);
 
 }}
 

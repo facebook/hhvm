@@ -42,7 +42,11 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgBeginInlining(IRLS& env, const IRInstruction* inst) { }
+void cgBeginInlining(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const extra = inst->extra<BeginInlining>();
+  v << inlinestart{extra->func, extra->cost};
+}
 
 void cgDefInlineFP(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<DefInlineFP>();
@@ -60,7 +64,15 @@ void cgDefInlineFP(IRLS& env, const IRInstruction* inst) {
   if (extra->target->attrs() & AttrMayUseVV) {
     v << storeqi{0, ar + AROFF(m_invName)};
   }
+  if (extra->isFCallAwait) {
+    v << orlim{
+      static_cast<int32_t>(ActRec::Flags::IsFCallAwait),
+      ar + AROFF(m_numArgsAndFlags),
+      v.makeReg()
+    };
+  }
 
+  v << pushframe{};
   v << lea{ar, dstLoc(env, inst, 0).reg()};
 }
 
@@ -69,16 +81,31 @@ void cgInlineReturn(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const callerFPOff = inst->extra<InlineReturn>()->offset;
   v << lea{fp[cellsToBytes(callerFPOff.offset)], rvmfp()};
+  v << popframe{};
+  v << inlineend{};
+}
+
+void cgInlineSuspend(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const callerFPOff = inst->extra<InlineSuspend>()->offset;
+  v << lea{fp[cellsToBytes(callerFPOff.offset)], rvmfp()};
+  v << popframe{};
+  v << inlineend{};
 }
 
 void cgInlineReturnNoFrame(IRLS& env, const IRInstruction* inst) {
-  if (!RuntimeOption::EvalHHIRGenerateAsserts) return;
+  auto& v = vmain(env);
 
-  auto const extra = inst->extra<InlineReturnNoFrame>();
-  auto const offset = cellsToBytes(extra->offset.offset);
-  for (auto i = 0; i < kNumActRecCells; ++i) {
-    trashTV(vmain(env), rvmfp(), offset - cellsToBytes(i), kTVTrashJITFrame);
+  if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    auto const extra = inst->extra<InlineReturnNoFrame>();
+    auto const offset = cellsToBytes(extra->offset.offset);
+    for (auto i = 0; i < kNumActRecCells; ++i) {
+      trashFullTV(v, rvmfp()[offset - cellsToBytes(i)], kTVTrashJITFrame);
+    }
   }
+
+  v << inlineend{};
 }
 
 void cgSyncReturnBC(IRLS& env, const IRInstruction* inst) {

@@ -1,1 +1,0 @@
-<?php extension_loaded('dom') or die('skip - dom extension not loaded'); ?>

@@ -1,0 +1,2 @@
+File "variadic_args12.php", line 3, characters 16-20:
+Variadic parameters should not be taken by reference (NastCheck[3068])

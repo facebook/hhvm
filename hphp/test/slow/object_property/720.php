@@ -23,4 +23,8 @@ function main() {
   $c->get();
   echo "Error\n";
 }
+
+<<__EntryPoint>>
+function main_720() {
 main();
+}

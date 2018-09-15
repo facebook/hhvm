@@ -35,7 +35,7 @@ namespace ppc64_asm {
 
 bool DecodedInstruction::couldBeNearBranch() {
   assert(isFarBranch());
-  ptrdiff_t diff = farBranchTarget() - m_ip;
+  ptrdiff_t diff = farBranchTarget() - m_base;
 
   // assert already stated it's a Far branch, but depending if it's conditional
   // or not, an additional range can be used.
@@ -44,13 +44,13 @@ bool DecodedInstruction::couldBeNearBranch() {
 
 uint8_t* DecodedInstruction::nearBranchTarget() const {
   assert(isNearBranch());
-  auto address = reinterpret_cast<uint64_t>(m_ip) + m_dinfo.branchOffset();
+  auto address = reinterpret_cast<uint64_t>(m_base) + m_dinfo.branchOffset();
   return reinterpret_cast<uint8_t*>(address);
 }
 
 bool DecodedInstruction::setNearBranchTarget(uint8_t* target) {
   if (!isNearBranch()) return false;
-  ptrdiff_t diff = target - m_ip;
+  ptrdiff_t diff = target - m_base;
   bool uncond = m_dinfo.isOffsetBranch(AllowCond::OnlyUncond);
   if (fitsOnNearBranch(diff, uncond)) {
     auto pinstr = reinterpret_cast<PPC64Instr*>(m_ip);
@@ -75,13 +75,7 @@ bool DecodedInstruction::setImmediate(int64_t value) {
   HPHP::CodeCursor cursor { cb, m_ip };
   Assembler a{ cb };
 
-  a.limmediate(getLimmediateReg(), ssize_t(value),
-#ifdef USE_TOC_ON_BRANCH
-      ImmType::TocOnly
-#else
-      ImmType::AnyFixed
-#endif
-      );
+  a.limmediate(getLimmediateReg(), ssize_t(value), ImmType::TocOnly);
 
   // refresh m_imm and other parameters
   decode();
@@ -135,13 +129,7 @@ void DecodedInstruction::widenBranch(uint8_t* target) {
     cb.init(m_ip, block_size, "widenBranch relocation");
     HPHP::CodeCursor cursor { cb, m_ip };
     Assembler a { cb };
-    a.branchFar(target, bp,
-#ifdef USE_TOC_ON_BRANCH
-      ImmType::TocOnly
-#else
-      ImmType::AnyFixed
-#endif
-      );
+    a.branchFar(target, bp, ImmType::TocOnly, true);
 
     // refresh m_size and other parameters
     decode();
@@ -194,11 +182,14 @@ DecInfoOffset DecodedInstruction::getFarBranchLength(AllowCond ac) const {
     auto far_branch_instr = m_ip + ret.m_offset;
     ret.m_di = Decoder::GetDecoder().decode(far_branch_instr);
     if (ret.m_di.isRegisterBranch(ac)) return ret;
+    // If branch instruction found, stop searching.
+    if (ret.m_di.isRegisterBranch(AllowCond::Any)) break;
   }
   return DecInfoOffset();
 }
 
-bool DecodedInstruction::setFarBranchTarget(uint8_t* target, bool smashable) {
+bool DecodedInstruction::setFarBranchTarget(uint8_t* target,
+                                            bool smashable) {
   DecoderInfo di = getFarBranch();
   if (di.isInvalid()) return false;
 
@@ -209,16 +200,10 @@ bool DecodedInstruction::setFarBranchTarget(uint8_t* target, bool smashable) {
   HPHP::CodeBlock cb;
   cb.init(m_ip, block_size, "setFarBranchTarget");
   Assembler a{ cb };
-  a.branchFar(target, bp,
-#ifdef USE_TOC_ON_BRANCH
-      ImmType::TocOnly
-#else
-      ImmType::AnyFixed
-#endif
-      );
+  a.branchFar(target, bp, ImmType::TocOnly, smashable);
 
   // Check if something was overwritten
-  if ((a.frontier() - m_ip) > m_size) {
+  if ((a.frontier() - m_base) > m_size) {
     return false;
   }
 
@@ -296,6 +281,12 @@ void DecodedInstruction::decode() {
   }
 }
 
+int64_t DecodedInstruction::calcIndex (int16_t indexBigTOC, 
+                                       int16_t indexTOC) const {
+  return static_cast<int64_t>(static_cast<int64_t>(indexTOC) +
+static_cast<int64_t>(indexBigTOC << 16));
+}
+
 /*
  * Reads back the immediate when emmited with (without nops) and return the
  * number of bytes read for this immediate decoding.
@@ -304,11 +295,6 @@ uint8_t DecodedInstruction::decodeImm() {
   // Functions that detect if @dinfo is exactly the instructions flavor that
   // our limmediate uses. Also the target register to be modified has to be
   // the same.
-
-  auto calcIndex = [&](int16_t indexBigTOC, int16_t indexTOC) {
-    return static_cast<int64_t>(static_cast<int64_t>(indexTOC) +
-              static_cast<int64_t>(indexBigTOC << 16));
-  };
 
   if (m_dinfo.isLd(true)) {
     m_imm = VMTOC::getInstance().getValue(calcIndex(0, m_dinfo.offsetDS()),
@@ -424,6 +410,51 @@ uint8_t DecodedInstruction::decodeImm() {
   return bytes_read;
 }
 
+uint64_t* DecodedInstruction::decodeTOCAddress() const{
+ if (m_dinfo.isLd(true)) {
+    return VMTOC::getInstance().getAddr(calcIndex(0, m_dinfo.offsetDS()));
+  } else if (m_dinfo.isLwz(true)) {
+    return VMTOC::getInstance().getAddr(calcIndex(0, m_dinfo.offsetD()));
+  } else if (m_dinfo.isAddis(true)) {
+    auto bigIndexTOC = m_dinfo.offsetD();
+    // Get next instruction
+    auto di = Decoder::GetDecoder().decode(m_ip+4);
+    if (di.isLd()) {
+      return VMTOC::getInstance().getAddr(calcIndex(bigIndexTOC,
+          di.offsetDS()));
+    } else if (di.isLwz()) {
+      return VMTOC::getInstance().getAddr(calcIndex(bigIndexTOC,
+          di.offsetD()));
+    }
+  }
+  return 0;
+}
+
+int64_t DecodedInstruction::decodeTOCOffset() const {
+ if (m_dinfo.isLd(true)) {
+    return calcIndex(0, m_dinfo.offsetDS());
+  } else if (m_dinfo.isLwz(true)) {
+    return calcIndex(0, m_dinfo.offsetD());
+  } else if (m_dinfo.isAddis(true)) {
+    auto bigIndexTOC = m_dinfo.offsetD();
+    // Get next instruction
+    auto di = Decoder::GetDecoder().decode(m_ip+4);
+    if (di.isLd()) {
+      return calcIndex(bigIndexTOC, di.offsetDS());
+    } else if (di.isLwz()) {
+      return calcIndex(bigIndexTOC, di.offsetD());
+    }
+  }
+  return 0;
+
+}
+
+bool DecodedInstruction::isSmashable(uint64_t elem) const {
+  auto elemOffset = decodeTOCOffset();
+  auto offset = VMTOC::getInstance().getIndex(elem);
+  return offset != elemOffset;
+}
+
 bool DecodedInstruction::fitsOnNearBranch(ptrdiff_t diff, bool uncond) const {
   // is it b or bc? b can use offsets up to 26bits and bc only 16bits
   auto bitsize = uncond ? 26 : 16;
@@ -435,6 +466,10 @@ bool DecodedInstruction::isLimmediatePossible() const {
     return true;
   }
   return isLi64Possible();
+}
+
+bool DecodedInstruction::isLoadingTOC() const {
+  return m_dinfo.isLd(true) || m_dinfo.isLwz(true) || m_dinfo.isAddis(true);
 }
 
 bool DecodedInstruction::isLi64Possible() const {

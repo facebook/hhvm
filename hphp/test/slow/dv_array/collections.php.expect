@@ -1,0 +1,189 @@
+====================================================
+array(0) {
+}
+array(0) {
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+array(0) {
+}
+array(0) {
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+array(0) {
+}
+array(0) {
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+array(0) {
+}
+array(0) {
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+array(0) {
+}
+array(0) {
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+array(0) {
+}
+array(0) {
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+array(3) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(200)
+  [2]=>
+  int(300)
+}
+array(3) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(200)
+  [2]=>
+  int(300)
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+array(2) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(200)
+}
+array(2) {
+  ["a"]=>
+  int(100)
+  ["b"]=>
+  int(200)
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+array(3) {
+  ["a"]=>
+  string(1) "a"
+  ["b"]=>
+  string(1) "b"
+  ["c"]=>
+  string(1) "c"
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+array(2) {
+  [0]=>
+  string(3) "abc"
+  [1]=>
+  string(3) "def"
+}
+array(2) {
+  [0]=>
+  string(3) "abc"
+  [1]=>
+  string(3) "def"
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+array(3) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(200)
+  [2]=>
+  int(300)
+}
+array(3) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(200)
+  [2]=>
+  int(300)
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+array(2) {
+  [0]=>
+  int(100)
+  [1]=>
+  int(200)
+}
+array(2) {
+  ["a"]=>
+  int(100)
+  ["b"]=>
+  int(200)
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+====================================================
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+array(3) {
+  ["a"]=>
+  string(1) "a"
+  ["b"]=>
+  string(1) "b"
+  ["c"]=>
+  string(1) "c"
+}
+bool(true)
+bool(false)
+bool(false)
+bool(true)

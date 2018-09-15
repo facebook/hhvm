@@ -1,1 +1,1 @@
-Exception: WaitHandles may not be directly instantiated
+Exception: Awaitables may not be directly instantiated

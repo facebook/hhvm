@@ -1,6 +1,6 @@
 File "pending_if5.php", line 21, characters 10-11:
 Invalid return type (Typing[4110])
-File "pending_if5.php", line 12, characters 15-17:
+File "pending_if5.php", line 12, characters 31-33:
 This is an int
 File "pending_if5.php", line 18, characters 10-14:
 It is incompatible with a bool

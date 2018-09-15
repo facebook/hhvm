@@ -114,6 +114,9 @@ function test_urlencode() {
   VS(urlencode("foo bar@baz"), "foo+bar%40baz");
 }
 
+
+<<__EntryPoint>>
+function main_ext_url() {
 test_base64_decode();
 test_base64_encode();
 test_get_meta_tags();
@@ -123,3 +126,4 @@ test_rawurldecode();
 test_rawurlencode();
 test_urldecode();
 test_urlencode();
+}

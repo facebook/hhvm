@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo20($x) {
   return $x == 0;

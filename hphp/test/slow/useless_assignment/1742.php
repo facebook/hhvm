@@ -16,4 +16,8 @@ function bar() {
   $a = foo();
   var_dump('doing');
 }
+
+<<__EntryPoint>>
+function main_1742() {
 bar();
+}

@@ -1,6 +1,9 @@
 <?hh
 
+
 // ensure legacy token name is returned
+<<__EntryPoint>>
+function main_token_consistency() {
 var_dump(token_name(T_DOUBLE_COLON));
 
 // see also hphp/hack/hhi/stdlib/builtins_tokens.php
@@ -65,3 +68,4 @@ echo 'Undefined but name unexpectedly returned by token_name:', "\n";
 var_dump($undefined_tokens);
 echo 'token_name result disagrees with constant value:', "\n";
 var_dump($mismatches);
+}

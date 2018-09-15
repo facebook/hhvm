@@ -19,7 +19,6 @@
 
 #include "hphp/compiler/expression/function_call.h"
 #include <map>
-#include "hphp/compiler/analysis/variable_table.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -34,10 +33,9 @@ public:
                      ExpressionListPtr params, ExpressionPtr cls);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
+  void analyzeProgram(AnalysisResultConstRawPtr ar) override;
   void deepCopy(SimpleFunctionCallPtr exp);
 
-  bool isDefineWithoutImpl(AnalysisResultConstPtr ar);
   void setValid() { m_valid = true; }
   void setThrowFatal() { m_type = FunType::ThrowFatal; }
   void setThrowParseFatal() { m_type = FunType::ThrowParseFatal; }
@@ -51,34 +49,23 @@ public:
   // define(<literal-string>, <scalar>);
   bool isSimpleDefine(StringData **name, TypedValue *value) const;
 
-  int getLocalEffects() const override;
+  bool isScalar() const override;
+  bool getScalarValue(Variant &value) override;
 
   // implementing IParseHandler
-  void onParse(AnalysisResultConstPtr ar, FileScopePtr fs) override;
+  void onParse(AnalysisResultConstRawPtr ar, FileScopePtr fs) override;
 
-  void addLateDependencies(AnalysisResultConstPtr ar);
   void setSafeCall(int flag) { m_safe = flag; }
   void setSafeDefault(ExpressionPtr def) { m_safeDef = def; }
   ConstructPtr getNthKid(int n) const override;
   void setNthKid(int n, ConstructPtr cp) override;
-  static SimpleFunctionCallPtr GetFunctionCallForCallUserFunc(
-    AnalysisResultConstPtr ar, SimpleFunctionCallPtr call, int testOnly,
-    int firstParam, bool &error);
-  void setupScopes(AnalysisResultConstPtr ar);
+  void setupScopes(AnalysisResultConstRawPtr ar);
   bool readsLocals() const;
   bool writesLocals() const;
   void updateVtFlags();
   void setLocalThis(const std::string& name) { m_localThis = name; }
   bool isCallToFunction(folly::StringPiece name) const;
   std::string getFullName() const;
-  void resolveNSFallbackFunc(AnalysisResultConstPtr ar, FileScopePtr fs);
-
-  void changeToBytecode() {
-    m_changedToBytecode = true;
-  }
-  bool hasBeenChangedToBytecode() {
-    return m_changedToBytecode;
-  }
 
 protected:
   enum class FunType {
@@ -97,7 +84,6 @@ protected:
     InterfaceExists,
     Unserialize,
     GetDefinedVars,
-    FBCallUserFuncSafe,
     ThrowFatal,
     ThrowParseFatal,
     ClassAlias,
@@ -109,23 +95,15 @@ protected:
   unsigned m_builtinFunction : 1;
   unsigned m_dynamicInvoke : 1;
   unsigned m_transformed : 1;
-  unsigned m_changedToBytecode : 1; // true if it morphed into a bytecode
   unsigned m_optimizable : 1; // true if it can be morphed into a bytecode
 
   int m_safe;
   ExpressionPtr m_safeDef;
   std::string m_lambda;
 
-  ExpressionPtr optimize(AnalysisResultConstPtr ar);
 private:
-  FunctionScopePtr
-  getFuncScopeFromParams(AnalysisResultPtr ar,
-                         BlockScopeRawPtr scope,
-                         ExpressionPtr clsName,
-                         ExpressionPtr funcName,
-                         ClassScopePtr &clsScope);
   std::string getThisString(bool withArrow);
-  void mungeIfSpecialFunction(AnalysisResultConstPtr ar, FileScopePtr fs);
+  void mungeIfSpecialFunction(AnalysisResultConstRawPtr ar, FileScopePtr fs);
 
   std::string m_localThis;
 };
@@ -134,21 +112,6 @@ SimpleFunctionCallPtr NewSimpleFunctionCall(
   EXPRESSION_CONSTRUCTOR_PARAMETERS,
   const std::string &name, bool hadBackslash, ExpressionListPtr params,
   ExpressionPtr cls);
-
-///////////////////////////////////////////////////////////////////////////////
-// hphp_opt functions
-
-ExpressionPtr hphp_opt_fb_call_user_func(CodeGenerator *cg,
-                                         AnalysisResultConstPtr ar,
-                                         SimpleFunctionCallPtr call, int mode);
-
-ExpressionPtr hphp_opt_is_callable(CodeGenerator *cg,
-                                   AnalysisResultConstPtr ar,
-                                   SimpleFunctionCallPtr call, int mode);
-
-ExpressionPtr hphp_opt_call_user_func(CodeGenerator *cg,
-                                      AnalysisResultConstPtr ar,
-                                      SimpleFunctionCallPtr call, int mode);
 
 ///////////////////////////////////////////////////////////////////////////////
 } // HPHP

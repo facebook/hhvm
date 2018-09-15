@@ -44,4 +44,3 @@ namespace Fiz\Biz\Buz {
     boz();
     A();
 }
-

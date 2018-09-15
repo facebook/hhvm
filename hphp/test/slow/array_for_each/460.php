@@ -17,5 +17,9 @@ function f7() {
       break;
   }
 }
+
+<<__EntryPoint>>
+function main_460() {
 foreach (f7() as $_) {
+}
 }

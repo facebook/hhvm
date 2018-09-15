@@ -24,11 +24,11 @@
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/type.h"
-#include "hphp/runtime/vm/jit/type-constraint.h"
 
 namespace HPHP { namespace jit {
 
@@ -125,7 +125,7 @@ LocationTypeWeights findLocationTypes(const BlockDataVec& blockData) {
 bool relaxIsProfitable(const jit::hash_map<Type,int64_t>& typeWeights,
                        Type                               guardType,
                        DataTypeCategory&                  guardCategory) {
-  if (guardType <= TCls) return false;
+  assertx(guardType <= TGen);
   auto relaxedType = relaxType(guardType, guardCategory);
 
   int64_t totalWgt   = 0; // sum of all the block weights
@@ -134,7 +134,7 @@ bool relaxIsProfitable(const jit::hash_map<Type,int64_t>& typeWeights,
   for (auto& typeWgt : typeWeights) {
     auto type = typeWgt.first;
     auto weight = typeWgt.second;
-    if (type <= TCls) continue;
+    assertx(type <= TGen);
     const bool fitsConstraint = guardCategory == DataTypeSpecialized
       ? type.isSpecialized()
       : typeFitsConstraint(type, guardCategory);
@@ -220,8 +220,7 @@ void relaxGuards(BlockDataVec& blockData) {
  *
  *  1) Their type guards are identical after relaxation;
  *  2) Their type predictions are identical;
- *  3) Their reffiness guards are identical;
- *  4) Their sets of successor region blocks are identical.
+ *  3) Their sets of successor region blocks are identical.
  */
 bool equivalent(const BlockData&  bd1,
                 const BlockData&  bd2,
@@ -240,12 +239,7 @@ bool equivalent(const BlockData&  bd1,
   const auto& predictedTypes2 = block2->typePredictions();
   if (predictedTypes1 != predictedTypes2) return false;
 
-  // 3) Compare the reffiness guards
-  const auto& reffys1 = block1->reffinessPreds();
-  const auto& reffys2 = block2->reffinessPreds();
-  if (reffys1 != reffys2) return false;
-
-  // 4) Compare the sets of successor blocks
+  // 3) Compare the sets of successor blocks
   if (region.succs(bd1.blockId) != region.succs(bd2.blockId)) return false;
 
   return true;
@@ -306,15 +300,15 @@ void unrelaxGuards(BlockDataVec& blockData) {
 }
 
 /*
- * Returns whether all the type and reffiness guards for `block' are
- * satisfied by 'bd' and its corresponding block.
+ * Returns whether all the type guards for `block' are satisfied by 'bd' and
+ * its corresponding block.
  */
 bool passesGuards(const RegionDesc& region, const RegionDesc::Block& block,
                   const BlockData& bd) {
   if (bd.blockId == block.id()) return true;
 
-  // 1) Check the type guards.  For simplicity, for now we return
-  //    `false' if the sets of guarded locations are different.
+  // Check the type guards.  For simplicity, for now we return `false'
+  // if the sets of guarded locations are different.
   const auto& preConds  = block.typePreConditions();
   const auto& newGuards = bd.guards;
   FTRACE(5, "passesGuards():\n   preConds = {}\n   newGuards = {}\n",
@@ -339,12 +333,6 @@ bool passesGuards(const RegionDesc& region, const RegionDesc::Block& block,
              preConds[p].type, newGuards[g].type);
       return false;
     }
-  }
-
-  // 2) Check the reffiness guards.
-  if (block.reffinessPreds() != region.block(bd.blockId)->reffinessPreds()) {
-    FTRACE(5, "passesGuards(): No, reffinessPreds mismatch\n");
-    return false;
   }
 
   FTRACE(5, "passesGuards(): OK\n");
@@ -578,12 +566,12 @@ void optimizeGuards(RegionDesc& region, bool simple) {
     auto& oldPreConds = block->typePreConditions();
 
     for (auto& preCond : oldPreConds) {
+      assertx(preCond.type <= TGen);
       auto category = preCond.category;
       if (simple && category > DataTypeGeneric && category < DataTypeSpecific) {
         category = DataTypeSpecific;
       }
-      auto newType = preCond.type == TCls ? TCls :
-                     relaxType(preCond.type, category);
+      auto newType = relaxType(preCond.type, category);
 
       if (newType != TGen) {
         newPreConds.push_back({preCond.location, newType, preCond.category});

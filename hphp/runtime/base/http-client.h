@@ -17,11 +17,10 @@
 #ifndef incl_HPHP_HTTP_CLIENT_H_
 #define incl_HPHP_HTTP_CLIENT_H_
 
-#include <vector>
-
+#include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/type-array.h"
-#include "hphp/runtime/server/transport.h"
+#include "hphp/runtime/base/req-vector.h"
 #include <curl/curl.h>
 
 namespace HPHP {
@@ -73,7 +72,7 @@ struct HttpClient {
    */
   int get(const char *url, StringBuffer &response,
           const HeaderMap *requestHeaders = nullptr,
-          std::vector<String> *responseHeaders = nullptr);
+          req::vector<String> *responseHeaders = nullptr);
 
   /**
    * POST data to an URL and returns its response code.
@@ -81,12 +80,12 @@ struct HttpClient {
   int post(const char *url, const char *data, size_t size,
            StringBuffer &response,
            const HeaderMap *requestHeaders = nullptr,
-           std::vector<String> *responseHeaders = nullptr);
+           req::vector<String> *responseHeaders = nullptr);
 
   int request(const char* method,
               const char *url, const char *data, size_t size,
               StringBuffer &response, const HeaderMap *requestHeaders,
-              std::vector<String> *responseHeaders);
+              req::vector<String> *responseHeaders);
 
   const std::string& getLastError() const {
     return m_error;
@@ -101,7 +100,7 @@ private:
   bool m_decompress;
 
   StringBuffer *m_response;
-  std::vector<String> *m_responseHeaders;
+  req::vector<String> *m_responseHeaders;
   std::string m_error;
 
   bool m_basic;

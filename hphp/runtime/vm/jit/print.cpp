@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/print.h"
 
 #include <iostream>
+#include <sstream>
 #include <vector>
 #include <algorithm>
 
@@ -167,8 +168,7 @@ void printOpcode(std::ostream& os, const IRInstruction* inst,
 void printSrcs(std::ostream& os, const IRInstruction* inst) {
   bool first = true;
   if (inst->op() == IncStat) {
-    os << " " << Stats::g_counterNames[inst->src(0)->intVal()]
-       << ", " << inst->src(1)->intVal();
+    os << " " << Stats::g_counterNames[inst->src(0)->intVal()];
     return;
   }
   for (uint32_t i = 0, n = inst->numSrcs(); i < n; i++) {
@@ -248,12 +248,12 @@ static constexpr auto kIndent = 4;
 
 void disasmRange(std::ostream& os, TCA begin, TCA end) {
   assertx(begin <= end);
-  bool const dumpIR = dumpIREnabled(kExtraLevel);
+  bool const printEncoding = dumpIREnabled(kAsmEncodingLevel);
 
   switch (arch()) {
     case Arch::X64: {
       Disasm disasm(Disasm::Options().indent(kIndent + 4)
-                    .printEncoding(dumpIR)
+                    .printEncoding(printEncoding)
                     .color(color(ANSI_COLOR_BROWN)));
       disasm.disasm(os, begin, end);
       return;
@@ -261,8 +261,9 @@ void disasmRange(std::ostream& os, TCA begin, TCA end) {
 
     case Arch::ARM: {
       vixl::Decoder dec;
-      vixl::PrintDisassembler disasm(os, kIndent + 4, dumpIR,
+      vixl::PrintDisassembler disasm(os, kIndent + 4, printEncoding,
                                      color(ANSI_COLOR_BROWN));
+      disasm.setShouldDereferencePCRelativeLiterals(true);
       dec.AppendVisitor(&disasm);
       for (; begin < end; begin += vixl::kInstructionSize) {
         dec.Decode(vixl::Instruction::Cast(begin));
@@ -271,8 +272,8 @@ void disasmRange(std::ostream& os, TCA begin, TCA end) {
     }
 
     case Arch::PPC64: {
-      ppc64_asm::Disassembler disasm(dumpIR, true, kIndent + 4,
-                                      color(ANSI_COLOR_BROWN));
+      ppc64_asm::Disassembler disasm(printEncoding, true, kIndent + 4,
+                                     color(ANSI_COLOR_BROWN));
       for (; begin < end; begin += ppc64_asm::instr_size_in_bytes) {
         disasm.disassembly(os, begin);
       }
@@ -366,7 +367,7 @@ void printIRInstruction(std::ostream& os,
   os << '\n';
 }
 
-void print(std::ostream& os, const Block* block, AreaIndex area,
+void print(std::ostream& os, const Block* block, AreaIndex /*area*/,
            const AsmInfo* asmInfo, const GuardConstraints* guards,
            BCMarker* markerPtr) {
   BCMarker dummy;
@@ -419,12 +420,13 @@ void print(std::ostream& os, const Block* block, AreaIndex area,
 
       for (auto i = 0; i < kNumAreas; ++i) {
         const auto instArea = static_cast<AreaIndex>(i);
-        auto rngs = asmInfo->instRangesForArea(instArea)[inst];
+        auto const& areaRanges = asmInfo->instRangesForArea(instArea);
+        auto const& rngs = areaRanges[inst];
         for (auto itr = rngs.first; itr != rngs.second; ++itr) {
-          instRanges.push_back(InstAreaRange(instIdx,
-                                             instArea,
-                                             itr->second));
-          lastRange[(int)instArea] = itr->second;
+          auto range = TcaRange { itr->second.start() + areaRanges.offset,
+                                  itr->second.end() + areaRanges.offset };
+          instRanges.push_back(InstAreaRange(instIdx, instArea, range));
+          lastRange[(int)instArea] = range;
         }
       }
 
@@ -540,6 +542,10 @@ void print(std::ostream& os, const IRUnit& unit, const AsmInfo* asmInfo,
   BCMarker curMarker;
   static bool dotBodies = getenv("HHIR_DOT_BODIES");
 
+  os << "TransKind: " << show(unit.context().kind) << "\n";
+  if (unit.context().kind == TransKind::Optimize) {
+    os << "OptIndex : " << unit.context().optIndex << "\n";
+  }
   auto blocks = rpoSortCfg(unit);
   // Partition into main, cold and frozen, without changing relative order.
   auto cold = std::stable_partition(blocks.begin(), blocks.end(),

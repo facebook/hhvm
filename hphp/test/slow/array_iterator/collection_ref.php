@@ -7,4 +7,8 @@ function test(Vector $vec) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_collection_ref() {
 test(Vector { 1,2,3 });
+}

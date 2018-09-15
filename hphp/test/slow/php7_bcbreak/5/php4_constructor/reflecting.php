@@ -11,6 +11,7 @@ class Filter {
   }
 }
 
+
 $f = new Filter(); // calls the PHP 4 style constructor
 $f->filter(); // calls the method filter, which is also the PHP4 style ctor
 

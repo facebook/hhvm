@@ -22,4 +22,8 @@ function main() {
   var_dump(d() === 42);
   var_dump(e() === null);
 }
+
+<<__EntryPoint>>
+function main_array_008() {
 main();
+}

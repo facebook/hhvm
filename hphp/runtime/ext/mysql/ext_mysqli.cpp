@@ -58,6 +58,11 @@ const StaticString
   s_def("def"),
   s_free("free");
 
+static Class* s_mysqli_class = nullptr;
+static Class* s_mysqli_stmt_class = nullptr;
+static Class* s_mysqli_result_class = nullptr;
+static Class* s_mysqli_driver_class = nullptr;
+
 // ini settings settable anywhere -- PHP_INI_ALL
 struct MysqliIniSetting {
   int m_default_port;
@@ -67,7 +72,7 @@ struct MysqliIniSetting {
   std::string m_default_pw;
 };
 
-IMPLEMENT_THREAD_LOCAL(MysqliIniSetting, s_ini_setting);
+THREAD_LOCAL(MysqliIniSetting, s_ini_setting);
 
 // System-wide ini settings -- PHP_INI_SYSTEM
 static bool allow_local_infile = true;
@@ -80,16 +85,10 @@ static bool reconnect = false;
 // helper
 
 static Resource get_connection_resource(const Object& obj) {
-  auto res = obj->o_realProp(
-    s_connection,
-    ObjectData::RealPropUnchecked,
-    s_mysqli
-  );
-  if (!res || !res->isResource()) {
-    return Resource();
-  }
-
-  return res->toResource();
+  assertx(s_mysqli_class);
+  auto const rval = obj->getProp(s_mysqli_class, s_connection.get()).unboxed();
+  if (rval.type() != KindOfResource) return Resource();
+  return Resource{rval.val().pres};
 }
 
 static std::shared_ptr<MySQL> get_connection(const Object& obj) {
@@ -99,26 +98,22 @@ static std::shared_ptr<MySQL> get_connection(const Object& obj) {
 }
 
 static req::ptr<MySQLStmt> getStmt(const Object& obj) {
-  auto res = obj->o_realProp(
-    s_stmt,
-    ObjectData::RealPropUnchecked,
-    s_mysqli_stmt
-  );
-  assert(res->isResource());
-  return cast<MySQLStmt>(*res);
+  assertx(s_mysqli_stmt_class);
+  auto const rval = obj->getProp(s_mysqli_stmt_class, s_stmt.get()).unboxed();
+  assertx(rval.type() == KindOfResource);
+  return req::ptr<MySQLStmt>(static_cast<MySQLStmt*>(rval.val().pres->data()));
 }
 
 static req::ptr<MySQLResult> getResult(const Object& obj) {
-  auto res = obj->o_realProp(
-    s_result,
-    ObjectData::RealPropUnchecked,
-    s_mysqli_result
+  assertx(s_mysqli_result_class);
+  auto const rval = obj->getProp(
+    s_mysqli_result_class,
+    s_result.get()
+  ).unboxed();
+  if (rval.type() != KindOfResource) return nullptr;
+  return req::ptr<MySQLResult>(
+    static_cast<MySQLResult*>(rval.val().pres->data())
   );
-  if (!res || !res->isResource()) {
-    return nullptr;
-  }
-
-  return cast_or_null<MySQLResult>(*res);
 }
 
 Variant mysqli_stmt_param_count_get(const Object& this_);
@@ -242,16 +237,16 @@ static Variant HHVM_METHOD(mysqli, get_charset) {
   VALIDATE_CONN_CONNECTED(conn);
   mysql_get_character_set_info(conn->get(), &cs);
 
-  auto ret = SystemLib::AllocStdClassObject();
-  ret.o_set(s_charset, String(cs.csname, CopyString));
-  ret.o_set(s_collation, String(cs.name, CopyString));
-  ret.o_set(s_dir, String(cs.dir, CopyString));
-  ret.o_set(s_min_length, (int64_t)cs.mbminlen);
-  ret.o_set(s_max_length, (int64_t)cs.mbmaxlen);
-  ret.o_set(s_number, (int64_t)cs.number);
-  ret.o_set(s_state, (int64_t)cs.state);
-  ret.o_set(s_comment, String(cs.comment, CopyString));
-  return ret;
+  ArrayInit props(8, ArrayInit::Map{});
+  props.set(s_charset, String(cs.csname, CopyString));
+  props.set(s_collation, String(cs.name, CopyString));
+  props.set(s_dir, String(cs.dir, CopyString));
+  props.set(s_min_length, (int64_t)cs.mbminlen);
+  props.set(s_max_length, (int64_t)cs.mbmaxlen);
+  props.set(s_number, (int64_t)cs.number);
+  props.set(s_state, (int64_t)cs.state);
+  props.set(s_comment, String(cs.comment, CopyString));
+  return ObjectData::FromArray(props.create());
 }
 
 //static Variant HHVM_METHOD(mysqli, get_connection_stats) {
@@ -286,7 +281,7 @@ static bool HHVM_METHOD(mysqli, hh_real_connect, const Variant& server,
     s = s.substr(2);
   }
   auto conn = get_connection(Object{this_});
-  assert(conn);
+  assertx(conn);
   Variant ret = php_mysql_do_connect_on_link(
                   conn, s, username.toString(), password.toString(),
                   dbname.toString(), client_flags.toInt64(), persistent, false,
@@ -308,10 +303,10 @@ static Variant HHVM_METHOD(mysqli, hh_real_query, const String& query) {
 
 static void HHVM_METHOD(mysqli, hh_update_last_error, const Object& stmt_obj) {
   auto conn = get_connection(Object{this_});
-  assert(conn);
+  assertx(conn);
 
   auto stmt = getStmt(stmt_obj);
-  assert(stmt);
+  assertx(stmt);
 
   auto s = stmt->get();
   auto mysql = conn->get();
@@ -350,7 +345,7 @@ static MaybeDataType get_option_value_type(int64_t option) {
 #if MYSQL_VERSION_ID >= 50606
     case MYSQL_SERVER_PUBLIC_KEY:
 #endif
-#if MYSQL_VERSION_ID >= 40101
+#if MYSQL_VERSION_ID >= 40101 && MYSQL_VERSION_ID < 80004
     case MYSQL_SET_CLIENT_IP:
 #endif
 #if MYSQL_VERSION_ID >= 40100
@@ -370,7 +365,7 @@ static MaybeDataType get_option_value_type(int64_t option) {
 #if MYSQL_VERSION_ID >= 50610
     case MYSQL_OPT_CAN_HANDLE_EXPIRED_PASSWORDS:
 #endif
-#if MYSQL_VERSION_ID >= 50023
+#if MYSQL_VERSION_ID >= 50023 && MYSQL_VERSION_ID < 80004
     case MYSQL_OPT_SSL_VERIFY_SERVER_CERT:
 #endif
 #if MYSQL_VERSION_ID >= 50013
@@ -379,13 +374,13 @@ static MaybeDataType get_option_value_type(int64_t option) {
 #if MYSQL_VERSION_ID >= 50003
     case MYSQL_REPORT_DATA_TRUNCATION:
 #endif
-#if MYSQL_VERSION_ID >= 40101
+#if MYSQL_VERSION_ID >= 40101 && MYSQL_VERSION_ID < 80004
     case MYSQL_SECURE_AUTH:
 #endif
       return KindOfBoolean;
     case MYSQL_OPT_COMPRESS:
     case MYSQL_OPT_NAMED_PIPE:
-#if MYSQL_VERSION_ID >= 40101
+#if MYSQL_VERSION_ID >= 40101 && MYSQL_VERSION_ID < 80004
     case MYSQL_OPT_GUESS_CONNECTION:
     case MYSQL_OPT_USE_EMBEDDED_CONNECTION:
     case MYSQL_OPT_USE_REMOTE_CONNECTION:
@@ -437,11 +432,14 @@ static Variant HHVM_METHOD(mysqli, options, int64_t option,
         case KindOfDict:
         case KindOfPersistentKeyset:
         case KindOfKeyset:
+        case KindOfPersistentShape:
+        case KindOfShape:
         case KindOfPersistentArray:
         case KindOfArray:
         case KindOfObject:
         case KindOfResource:
         case KindOfRef:
+        case KindOfFunc:
         case KindOfClass:
           // Impossible.
           break;
@@ -496,16 +494,6 @@ static Variant HHVM_METHOD(mysqli, ssl_set, const Variant& key,
   return true;
 }
 
-static Variant* getRawProp(const Object& obj,
-                          const String& propName,
-                          const String& className) {
-  return obj->o_realProp(
-    propName,
-    ObjectData::RealPropUnchecked,
-    className
-  );
-}
-
 static Variant getStaticProp(const Object& obj, const StaticString& prop) {
   auto cls = obj->getVMClass();
   return tvAsVariant(cls->getSPropData(cls->lookupSProp(prop.get())));
@@ -521,11 +509,11 @@ static int64_t HHVM_FUNCTION(mysqli_get_client_version) {
 
 // Native accessor properties of mysqli.
 
-static Variant mysqli_client_info_get(const Object& this_) {
+static Variant mysqli_client_info_get(const Object& /*this_*/) {
   return HHVM_FN(mysqli_get_client_info)();
 }
 
-static Variant mysqli_client_version_get(const Object& this_) {
+static Variant mysqli_client_version_get(const Object& /*this_*/) {
   return HHVM_FN(mysqli_get_client_version)();
 }
 
@@ -692,26 +680,28 @@ struct mysqli_PropHandler : Native::MapPropHandler<mysqli_PropHandler> {
 //  throw NotImplementedException(__FUNCTION__);
 //}
 
-static Variant mysqli_driver_client_info_get(const Object& this_) {
+static Variant mysqli_driver_client_info_get(const Object& /*this_*/) {
   return HHVM_FN(mysqli_get_client_info)();
 }
 
-static Variant mysqli_driver_client_version_get(const Object& this_) {
+static Variant mysqli_driver_client_version_get(const Object& /*this_*/) {
   return HHVM_FN(mysqli_get_client_version)();
 }
 
-static Variant mysqli_driver_driver_version_get(const Object& this_) {
+static Variant mysqli_driver_driver_version_get(const Object& /*this_*/) {
   // Lets pretend we are the same version as PHP. Taken from here
   // http://git.io/wY2WPw
   return 101009;
 }
 
-static Variant mysqli_driver_embedded_get(const Object& this_) {
+static Variant mysqli_driver_embedded_get(const Object& /*this_*/) {
   return false;
 }
 
 static Variant mysqli_driver_reconnect_get(const Object& this_) {
-  return *getRawProp(this_, s_reconnect, s_mysqli_driver);
+  assertx(s_mysqli_driver_class);
+  auto const rval = this_->getProp(s_mysqli_driver_class, s_reconnect.get());
+  return Variant::wrap(rval.tv());
 }
 
 void mysqli_driver_reconnect_set(const Object& this_, const Variant& value) {
@@ -719,7 +709,9 @@ void mysqli_driver_reconnect_set(const Object& this_, const Variant& value) {
 }
 
 static Variant mysqli_driver_report_mode_get(const Object& this_) {
-  return *getRawProp(this_, s_report_mode, s_mysqli_driver);
+  assertx(s_mysqli_driver_class);
+  auto const rval = this_->getProp(s_mysqli_driver_class, s_report_mode.get());
+  return Variant::wrap(rval.tv());
 }
 
 void mysqli_driver_report_mode_set(const Object& this_, const Variant& value) {
@@ -789,22 +781,21 @@ static Variant HHVM_METHOD(mysqli_result, fetch_field) {
     return false;
   }
 
-  auto obj = SystemLib::AllocStdClassObject();
-  obj->o_set("name",       info->name);
-  obj->o_set("orgname",    info->org_name);
-  obj->o_set("table",      info->table);
-  obj->o_set("orgtable",   info->org_table);
-  obj->o_set("def",        info->def);
-  obj->o_set("db",         info->db);
-  obj->o_set("catalog",    s_def);
-  obj->o_set("max_length", info->max_length);
-  obj->o_set("length",     info->length);
-  obj->o_set("charsetnr",  (int64_t)info->charsetnr);
-  obj->o_set("flags",      (int64_t)info->flags);
-  obj->o_set("type",       info->type);
-  obj->o_set("decimals",   (int64_t)info->decimals);
-
-  return obj;
+  ArrayInit props(13, ArrayInit::Map{});
+  props.set("name",       info->name);
+  props.set("orgname",    info->org_name);
+  props.set("table",      info->table);
+  props.set("orgtable",   info->org_table);
+  props.set("def",        info->def);
+  props.set("db",         info->db);
+  props.set("catalog",    s_def);
+  props.set("max_length", info->max_length);
+  props.set("length",     info->length);
+  props.set("charsetnr",  (int64_t)info->charsetnr);
+  props.set("flags",      (int64_t)info->flags);
+  props.set("type",       info->type);
+  props.set("decimals",   (int64_t)info->decimals);
+  return ObjectData::FromArray(props.create());
 }
 
 // Consts to be used on PHP and C++ side.
@@ -836,17 +827,24 @@ Variant mysqli_result_lengths_get(const Object& this_) {
 }
 
 Variant mysqli_result_type_get(const Object& this_) {
-  return *getRawProp(this_, s_resulttype, s_mysqli_result);
+  assertx(s_mysqli_result_class);
+  auto const rval = this_->getProp(s_mysqli_result_class, s_resulttype.get());
+  return Variant::wrap(rval.tv());
 }
 
 Variant mysqli_result_num_rows_get(const Object& this_) {
   auto res = getResult(this_);
   VALIDATE_RESULT(res)
 
-  auto resultType = getRawProp(this_, s_resulttype, s_mysqli_result);
-  auto done = getRawProp(this_, s_done, s_mysqli_result)->toBoolean();
+  assertx(s_mysqli_result_class);
+  auto resultType = tvCastToInt64(
+    this_->getProp(s_mysqli_result_class, s_resulttype.get()).tv()
+  );
+  auto done = tvCastToBoolean(
+    this_->getProp(s_mysqli_result_class, s_done.get()).tv()
+  );
 
-  if (resultType->toInt64() == _MYSQLI_USE_RESULT && !done) {
+  if (resultType == _MYSQLI_USE_RESULT && !done) {
     raise_warning("Function can not be used with MYSQL_USE_RESULT");
     return VarNR(0);
   }
@@ -1103,16 +1101,14 @@ struct mysqliExtension final : Extension {
   mysqliExtension() : Extension("mysqli") {}
   // Use moduleLoad() for settings that are system-wide and cannot
   // change per request (e.g. PHP_INI_SYSTEM)
-  void moduleLoad(const IniSetting::Map& ini, Hdf config) override {
+  void moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*config*/) override {
     // Not supporting local_infile yet. But this is the skeleton for
     // when we do.
-    IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM,
-                     "mysqli.allow_local_infile",
-                     IniSetting::SetAndGet<bool>(
-                       [](const bool value) { return false; },
-                       []() { return false; }
-                     ),
-                     &allow_local_infile);
+    IniSetting::Bind(
+      this, IniSetting::PHP_INI_SYSTEM, "mysqli.allow_local_infile",
+      IniSetting::SetAndGet<bool>([](const bool /*value*/) { return false; },
+                                  []() { return false; }),
+      &allow_local_infile);
     IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM,
                      "mysqli.allow_persistent", "true",
                      &allow_persistent);
@@ -1128,12 +1124,10 @@ struct mysqliExtension final : Extension {
     // Requires mysqlnd. This setting is actually an int, but setting
     // to a bool that returns false for now. If and when we support
     // this, we set to an int and define and bind to &cache_size
-    IniSetting::Bind(this, IniSetting::PHP_INI_SYSTEM,
-                     "mysqli.cache_size",
-                     IniSetting::SetAndGet<bool>(
-                       [](const bool value) { return false; },
-                       []() { return false; }
-                     ));
+    IniSetting::Bind(
+      this, IniSetting::PHP_INI_SYSTEM, "mysqli.cache_size",
+      IniSetting::SetAndGet<bool>([](const bool /*value*/) { return false; },
+                                  []() { return false; }));
 
     MySQL::SetAllowReconnect(reconnect);
     MySQL::SetAllowPersistent(allow_persistent);
@@ -1363,7 +1357,7 @@ struct mysqliExtension final : Extension {
 #if MYSQL_VERSION_ID >= 50606
     HHVM_RC_INT(MYSQLI_SERVER_PUBLIC_KEY, MYSQL_SERVER_PUBLIC_KEY);
 #endif
-#if MYSQL_VERSION_ID >= 50023
+#if MYSQL_VERSION_ID >= 50023 && MYSQL_VERSION_ID < 80004
     HHVM_RC_INT(MYSQLI_OPT_SSL_VERIFY_SERVER_CERT,
                 MYSQL_OPT_SSL_VERIFY_SERVER_CERT);
 #endif
@@ -1374,15 +1368,17 @@ struct mysqliExtension final : Extension {
     HHVM_RC_INT(MYSQLI_REPORT_DATA_TRUNCATION, MYSQL_REPORT_DATA_TRUNCATION);
 #endif
 #if MYSQL_VERSION_ID >= 40101
-    HHVM_RC_INT(MYSQLI_OPT_GUESS_CONNECTION, MYSQL_OPT_GUESS_CONNECTION);
     HHVM_RC_INT(MYSQLI_OPT_READ_TIMEOUT, MYSQL_OPT_READ_TIMEOUT);
+    HHVM_RC_INT(MYSQLI_OPT_WRITE_TIMEOUT, MYSQL_OPT_WRITE_TIMEOUT);
+#if MYSQL_VERSION_ID < 80004
+    HHVM_RC_INT(MYSQLI_OPT_GUESS_CONNECTION, MYSQL_OPT_GUESS_CONNECTION);
     HHVM_RC_INT(MYSQLI_OPT_USE_EMBEDDED_CONNECTION,
                 MYSQL_OPT_USE_EMBEDDED_CONNECTION);
     HHVM_RC_INT(MYSQLI_OPT_USE_REMOTE_CONNECTION,
                 MYSQL_OPT_USE_REMOTE_CONNECTION);
-    HHVM_RC_INT(MYSQLI_OPT_WRITE_TIMEOUT, MYSQL_OPT_WRITE_TIMEOUT);
     HHVM_RC_INT(MYSQLI_SECURE_AUTH, MYSQL_SECURE_AUTH);
     HHVM_RC_INT(MYSQLI_SET_CLIENT_IP, MYSQL_SET_CLIENT_IP);
+#endif
 #endif
 #if MYSQL_VERSION_ID >= 40100
     HHVM_RC_INT(MYSQLI_OPT_PROTOCOL, MYSQL_OPT_PROTOCOL);
@@ -1396,6 +1392,17 @@ struct mysqliExtension final : Extension {
     HHVM_RC_INT(MYSQLI_SERVER_QUERY_WAS_SLOW, 2048);
 
     loadSystemlib();
+
+#define GET_CLASS(x) \
+    s_##x##_class = Unit::lookupClass(s_##x.get()); \
+    assertx(s_##x##_class)
+
+    GET_CLASS(mysqli);
+    GET_CLASS(mysqli_stmt);
+    GET_CLASS(mysqli_result);
+    GET_CLASS(mysqli_driver);
+
+#undef GET_CLASS
   }
 } s_mysqli_extension;
 

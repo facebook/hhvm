@@ -22,4 +22,8 @@ function main() {
   var_dump($rc->newInstance());
   var_dump($rc->newInstanceWithoutConstructor());
 }
+
+<<__EntryPoint>>
+function main_constructor_reflection1() {
 main();
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function zero() { return 0; }
 function foo() { return "0x10"; }

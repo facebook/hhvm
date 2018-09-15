@@ -2,39 +2,26 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Core
+open Hh_core
 
-type t = {
-  time : float;
-  content : string;
+type position = {
+  line : int; (* 1-based *)
+  column : int; (* 1-based *)
 }
 
-type content_pos = {
-  line : int;
-  column : int;
+type range = {
+  st : position;
+  ed : position;
 }
 
-type content_range = {
-  st : content_pos;
-  ed : content_pos;
-}
-
-type code_edit = {
-  range : content_range option;
+type text_edit = {
+  range : range option;
   text : string;
 }
-
-let of_content ~content = {
-  time = Unix.gettimeofday ();
-  content;
-}
-
-let get_content t = t.content
 
 (* UTF-8 encoding character lengths.
  *
@@ -81,21 +68,55 @@ let invalid_position p =
   raise (Failure (Printf.sprintf
     "Invalid position: {line: %d; column: %d}" p.line p.column))
 
-let get_offsets content queries =
+(* this returns 0-based offsets *)
+let get_offsets
+  (content : string)
+  (queries : position * position)
+  : (int * int) =
   match get_offsets content queries 1 1 0 (None, None) with
   | Some r1, Some r2 -> r1, r2
   | None, _ -> invalid_position (fst queries)
   | _, None -> invalid_position (snd queries)
 
-let apply_edit = fun fc {range; text} ->
+(* This returns a 0-based offset. If you need to get two offsets, use
+   `get_offsets` instead. *)
+let get_offset (content : string) (position : position) : int =
+  fst (get_offsets content (position, position))
+
+
+(* This takes 0-based offsets and returns 1-based positions.                  *)
+(* It gives the position of the character *immediately after* this offset,    *)
+(* e.g. "offset_to_position s 0" gives the 1-based position {line=1,col=1}.   *)
+(* It sounds confusing but is natural when you work with half-open ranges!    *)
+(* It is okay to ask for the position of the offset of the end of the file.   *)
+(* In case of multi-byte characters, if you give an offset inside a character,*)
+(* it still gives the position immediately after.                             *)
+let offset_to_position (content: string) (offset: int) : position =
+  let rec helper ~(line: int) ~(column: int) ~(index: int) =
+    if index >= offset then
+      {line; column;}
+    else
+      let c = get_char content index in
+      let clen = get_char_length c in
+      if c = '\n' then
+        helper (line + 1) 1 (index + clen)
+      else
+        helper line (column + 1) (index + clen)
+  in
+  if offset > String.length content then
+    raise (Failure (Printf.sprintf "Invalid offset: %d" offset))
+  else
+    helper ~line:1 ~column:1 ~index:0
+
+
+let apply_edit = fun content {range; text} ->
   match range with
-  | None -> of_content text
+  | None -> text
   | Some {st; ed} ->
-    let content = get_content fc in
     let start_offset, end_offset = get_offsets content (st, ed) in
     let prefix = Str.string_before content start_offset in
     let suffix = Str.string_after content end_offset in
-    of_content ~content:(prefix ^ text ^ suffix)
+    prefix ^ text ^ suffix
 
 let print_edit b edit =
   let range = match edit.range with
@@ -105,20 +126,21 @@ let print_edit b edit =
   in
   Printf.bprintf b "range = %s\n text = \n%s\n" range edit.text
 
-let edit_file fc (edits: code_edit list) =
+let edit_file content (edits: text_edit list) : (string, string * Utils.callstack) result =
   try
-    Result.Ok (List.fold ~init:fc ~f:apply_edit edits)
+    Ok (List.fold ~init:content ~f:apply_edit edits)
   with e ->
+    let stack = Printexc.get_backtrace () in
     let b = Buffer.create 1024 in
     Printf.bprintf b "Invalid edit: %s\n" (Printexc.to_string e);
-    Printf.bprintf b "Original content:\n%s\n" fc.content;
+    Printf.bprintf b "Original content:\n%s\n" content;
     Printf.bprintf b "Edits:\n";
     List.iter edits ~f:(print_edit b);
-    Result.Error (Buffer.contents b)
+    Error (Buffer.contents b, Utils.Callstack stack)
 
 let edit_file_unsafe fc edits =
   match edit_file fc edits with
-  | Result.Ok r -> r
-  | Result.Error e ->
+  | Ok r -> r
+  | Error (e, _stack) ->
       Printf.eprintf "%s" e;
-      assert false
+      failwith e

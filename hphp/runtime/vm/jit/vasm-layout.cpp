@@ -30,6 +30,7 @@
 #include <folly/MapUtil.h>
 
 #include <algorithm>
+#include <sstream>
 
 /*
  * This module implements two code layout strategies for sorting a Vunit's
@@ -61,7 +62,7 @@ TRACE_SET_MOD(layout);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-jit::vector<Vlabel> rpoLayout(const Vunit& unit, const Vtext& text) {
+jit::vector<Vlabel> rpoLayout(const Vunit& unit) {
   auto labels = sortBlocks(unit);
 
   auto const blk = [&] (Vlabel b) -> const Vblock& { return unit.blocks[b]; };
@@ -86,8 +87,7 @@ jit::vector<Vlabel> rpoLayout(const Vunit& unit, const Vtext& text) {
   assertx(n < 2 ||
     IMPLIES(
       blk(labels.back()).code.back().op == Vinstr::fallthru,
-      text.area(blk(labels.back()).area_idx) ==
-        text.area(blk(labels[n - 2]).area_idx)
+      blk(labels.back()).area_idx == blk(labels[n - 2]).area_idx
     )
   );
 
@@ -104,7 +104,7 @@ struct Scale {
       : m_unit(unit)
       , m_blocks(sortBlocks(unit))
       , m_preds(computePreds(unit)) {
-    computeWeights();
+    computeArcWeights();
   }
   int64_t weight(Vlabel blk) const;
   int64_t weight(Vlabel src, Vlabel dst) const;
@@ -112,8 +112,8 @@ struct Scale {
   std::string toString() const;
 
  private:
-  void    computeWeights();
-  void    computeBlockWeights();
+  static const int64_t kUnknownWeight = std::numeric_limits<int64_t>::max();
+
   void    computeArcWeights();
   TransID findProfTransID(Vlabel blk) const;
   int64_t findProfCount(Vlabel blk)   const;
@@ -123,12 +123,11 @@ struct Scale {
   const Vunit&                     m_unit;
   const jit::vector<Vlabel>        m_blocks;
   const PredVector                 m_preds;
-  jit::vector<int64_t>             m_blkWgts;
   jit::hash_map<uint64_t, int64_t> m_arcWgts; // keyed using arcId()
 };
 
 int64_t Scale::weight(Vlabel blk) const {
-  return m_blkWgts[blk];
+  return m_unit.blocks[blk].weight;
 }
 
 int64_t Scale::weight(Vlabel src, Vlabel dst) const {
@@ -154,53 +153,96 @@ int64_t Scale::findProfCount(Vlabel blk) const {
   return 1;
 }
 
-void Scale::computeBlockWeights() {
-  m_blkWgts.resize(m_unit.blocks.size(), 0);
-
-  // We multiply the corresponding region block's profile counter by the
-  // following factors, depending on the code area the block is assigned to.
-  static int areaWeightFactors[] = {
-    RuntimeOption::EvalJitLayoutMainFactor, // main
-    RuntimeOption::EvalJitLayoutColdFactor, // cold
-    1                                       // frozen
-  };
-
-  static_assert(
-    sizeof(areaWeightFactors) / sizeof(areaWeightFactors[0]) == kNumAreas,
-    "need to update areaWeightFactors");
-
-  for (auto b : m_blocks) {
-    auto a = unsigned(m_unit.blocks[b].area_idx);
-    assertx(a < 3);
-    m_blkWgts[b] = findProfCount(b) * areaWeightFactors[a];
-    if (m_blkWgts[b] < 0) m_blkWgts[b] = 0;
-  }
-}
-
 void Scale::computeArcWeights() {
+  FTRACE(3, "[vasm-layout] computeArcWeights:\n");
+
+  // First, we can easily compute the weight of the non-crititical arcs by
+  // looking at its incident blocks.
   for (auto b : m_blocks) {
     auto succSet = succs(m_unit.blocks[b]);
     for (auto s : succSet) {
-      // If the arc is non-critical, we can figure out its weight by
-      // looking at its incident blocks.  For critical arcs, we
-      // currently just approximate it as half of the smallest weight
-      // of its incident blocks.
       auto arcid = arcId(b, s);
       m_arcWgts[arcid] = succSet.size()    == 1 ? weight(b)
                        : m_preds[s].size() == 1 ? weight(s)
-                       : std::min(weight(b), weight(s)) / 2;
-      if (m_arcWgts[arcid] < 0) m_arcWgts[arcid] = 0;
-      FTRACE(3, "arc({} -> {}) => weight = {}  "
-             "[|succs(b)| = {} ; |preds(s)| = {}] "
-             "[weight(b) = {} ; weight(s) = {}]\n", b, s, m_arcWgts[arcid],
-             succSet.size(), m_preds[s].size(), weight(b), weight(s));
+                       : kUnknownWeight;
+      assertx(m_arcWgts[arcid] >= 0);
+      if (m_arcWgts[arcid] != kUnknownWeight) {
+        FTRACE(3, "  - arc({} -> {}) [non-critical] => weight = {}  "
+               "[|succs(b)| = {} ; |preds(s)| = {}] "
+               "[weight(b) = {} ; weight(s) = {}]\n", b, s, m_arcWgts[arcid],
+               succSet.size(), m_preds[s].size(), weight(b), weight(s));
+      }
     }
   }
-}
 
-void Scale::computeWeights() {
-  computeBlockWeights();
-  computeArcWeights();
+  // Next, do an iterative pass trying to infer the remaining arcs using the
+  // fact that some arc weights are already known and the invariant that arc
+  // weights incoming / outgoing a specific block should add up to that block's
+  // weight.
+  bool inferred = true;
+  do {
+    inferred = false;
+
+    for (auto b : m_blocks) {
+      const auto total = weight(b);
+
+      // If b has a single successor with unknown weight, infer its weight.
+      auto succSet = succs(m_unit.blocks[b]);
+      unsigned numUnknown = 0;
+      uint64_t unknownArcId = 0;
+      uint64_t knownTotal = 0;
+      for (auto s : succSet) {
+        auto arcid = arcId(b, s);
+        if (m_arcWgts[arcid] == kUnknownWeight) {
+          numUnknown++;
+          unknownArcId = arcid;
+        } else {
+          knownTotal += m_arcWgts[arcid];
+        }
+      }
+      if (numUnknown == 1) {
+        m_arcWgts[unknownArcId] = total > knownTotal ? total - knownTotal : 0;
+        inferred = true;
+        FTRACE(3, "  - arc({} -> {}) [inferred-succs] => weight = {}\n",
+               b, unknownArcId & 0xffffffff, m_arcWgts[unknownArcId]);
+      }
+
+      // If b has a single predecessor with unknown weight, infer its weight.
+      numUnknown = 0;
+      unknownArcId = 0;
+      knownTotal = 0;
+      for (auto p : m_preds[b]) {
+        auto arcid = arcId(p, b);
+        if (m_arcWgts[arcid] == kUnknownWeight) {
+          numUnknown++;
+          unknownArcId = arcid;
+        } else {
+          knownTotal += m_arcWgts[arcid];
+        }
+      }
+      if (numUnknown == 1) {
+        m_arcWgts[unknownArcId] = total > knownTotal ? total - knownTotal : 0;
+        inferred = true;
+        FTRACE(3, "  - arc({} -> {}) [inferred-preds] => weight = {}\n",
+               unknownArcId >> 32, b, m_arcWgts[unknownArcId]);
+      }
+    }
+  } while (inferred);
+
+  // Finally, for each arc whose weight is still unknown at this point, we
+  // currently just approximate it as half of the smallest weight of its
+  // incident blocks.
+  for (auto b : m_blocks) {
+    auto succSet = succs(m_unit.blocks[b]);
+    for (auto s : succSet) {
+      auto arcid = arcId(b, s);
+      if (m_arcWgts[arcid] == kUnknownWeight) {
+        m_arcWgts[arcid] = std::min(weight(b), weight(s)) / 2;
+        FTRACE(3, "  - arc({} -> {}) [guessed] => weight = {}\n",
+               b, s, m_arcWgts[arcid]);
+      }
+    }
+  }
 }
 
 std::string Scale::toString() const {
@@ -235,7 +277,9 @@ struct Clusterizer {
     initClusters();
     clusterize();
     sortClusters();
-    splitHotColdClusters();
+    if (RuntimeOption::EvalJitLayoutSplitHotCold) {
+      splitHotColdClusters();
+    }
     FTRACE(1, "{}", toString());
   }
 
@@ -456,8 +500,11 @@ void Clusterizer::splitHotColdClusters() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-jit::vector<Vlabel> pgoLayout(Vunit& unit, const Vtext& text) {
-  // Compute block & arc weights.
+jit::vector<Vlabel> pgoLayout(Vunit& unit) {
+  // Make sure block weights are consistent.
+  fixBlockWeights(unit);
+
+  // Compute arc weights.
   Scale scale(unit);
   FTRACE(1, "profileGuidedLayout: Weighted CFG:\n{}\n", scale.toString());
 
@@ -468,13 +515,21 @@ jit::vector<Vlabel> pgoLayout(Vunit& unit, const Vtext& text) {
   // Partition by actual code area without changing relative order.
   auto cold_iter = std::stable_partition(labels.begin(), labels.end(),
     [&] (Vlabel b) {
-      return text.area(unit.blocks[b].area_idx) == text.area(AreaIndex::Main);
+      return unit.blocks[b].area_idx == AreaIndex::Main;
     });
   if (cold_iter != labels.end()) {
     std::stable_partition(cold_iter, labels.end(),
       [&] (Vlabel b) {
-        return text.area(unit.blocks[b].area_idx) == text.area(AreaIndex::Cold);
+        return unit.blocks[b].area_idx == AreaIndex::Cold;
       });
+  }
+
+  if (!RuntimeOption::EvalJitLayoutSplitHotCold) {
+    for (auto b : labels) {
+      if (unit.blocks[b].area_idx == AreaIndex::Cold) {
+        unit.blocks[b].area_idx = AreaIndex::Main;
+      }
+    }
   }
 
   if (Trace::moduleEnabled(Trace::layout, 1)) {
@@ -492,12 +547,51 @@ jit::vector<Vlabel> pgoLayout(Vunit& unit, const Vtext& text) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-jit::vector<Vlabel> layoutBlocks(Vunit& unit, const Vtext& text) {
+jit::vector<Vlabel> layoutBlocks(Vunit& unit) {
   Timer timer(Timer::vasm_layout);
 
   return unit.context && unit.context->kind == TransKind::Optimize
-    ? pgoLayout(unit, text)
-    : rpoLayout(unit, text);
+    ? pgoLayout(unit)
+    : rpoLayout(unit);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void fixBlockWeights(Vunit& unit) {
+  const auto preds(computePreds(unit));
+  bool changed = false;
+  do {
+    changed = false;
+    for (size_t b = 0; b < unit.blocks.size(); b++) {
+      auto& block = unit.blocks[b];
+
+      // Rule 1: a block's weight can't exceed the sum of its predecessors,
+      // except for the entry block.
+      if (b != unit.entry) {
+        uint64_t predsTotal = 0;
+        for (auto p : preds[b]) {
+          predsTotal += unit.blocks[p].weight;
+        }
+        if (block.weight > predsTotal) {
+          block.weight = predsTotal;
+          changed = true;
+        }
+      }
+
+      // Rule 2: a block's weight can't exceed the sum of its successors, except
+      // for exit blocks.
+      if (succs(block).size() > 0) {
+        uint64_t succsTotal = 0;
+        for (auto s : succs(block)) {
+          succsTotal += unit.blocks[s].weight;
+        }
+        if (block.weight > succsTotal) {
+          block.weight = succsTotal;
+          changed = true;
+        }
+      }
+    }
+  } while (changed);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

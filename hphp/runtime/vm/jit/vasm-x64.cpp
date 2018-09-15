@@ -21,7 +21,6 @@
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
-#include "hphp/runtime/vm/jit/func-guard-x64.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/service-requests.h"
@@ -54,6 +53,9 @@ namespace x64 { struct ImmFolder; }
 namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
+static_assert(folly::kIsLittleEndian,
+  "Code contains little-endian specific optimizations.");
+
 struct Vgen {
   explicit Vgen(Venv& env)
     : env(env)
@@ -65,6 +67,8 @@ struct Vgen {
     , catches(env.catches)
   {}
 
+  static void emitVeneers(Venv& env) {}
+  static void handleLiterals(Venv& env) {}
   static void patch(Venv& env);
   static void pad(CodeBlock& cb);
 
@@ -78,8 +82,8 @@ struct Vgen {
   // intrinsics
   void emit(const copy& i);
   void emit(const copy2& i);
-  void emit(const debugtrap& i) { a.int3(); }
-  void emit(const fallthru& i) {}
+  void emit(const debugtrap& /*i*/) { a.int3(); }
+  void emit(const fallthru& /*i*/) {}
   void emit(const ldimmb& i);
   void emit(const ldimml& i);
   void emit(const ldimmq& i);
@@ -92,7 +96,7 @@ struct Vgen {
   void emit(const callm& i) { a.call(i.target); }
   void emit(const callr& i) { a.call(i.target); }
   void emit(const calls& i);
-  void emit(const ret& i) { a.ret(); }
+  void emit(const ret& /*i*/) { a.ret(); }
 
   // stub function abi
   void emit(const stubret& i);
@@ -103,16 +107,16 @@ struct Vgen {
   // php function abi
   void emit(const phpret& i);
   void emit(const tailcallphp& i);
-  void emit(const callarray& i);
+  void emit(const callunpack& i);
   void emit(const contenter& i);
 
   // vm entry abi
-  void emit(const inittc& i) {}
+  void emit(const inittc& /*i*/) {}
   void emit(const calltc&);
   void emit(const leavetc&) { a.ret(); }
 
   // exceptions
-  void emit(const landingpad& i) {}
+  void emit(const landingpad& /*i*/) {}
   void emit(const nothrow& i);
   void emit(const syncpoint& i);
   void emit(const unwind& i);
@@ -126,11 +130,14 @@ struct Vgen {
   void emit(andli i) { binary(i); a.andl(i.s0, i.d); }
   void emit(andq i) { commuteSF(i); a.andq(i.s0, i.d); }
   void emit(andqi i);
+  void emit(const addwm& i) { a.addw(i.s0, i.m); }
   void emit(addli i) { binary(i); a.addl(i.s0, i.d); }
   void emit(const addlm& i) { a.addl(i.s0, i.m); }
   void emit(const addlim& i);
   void emit(addq i) { commuteSF(i); a.addq(i.s0, i.d); }
   void emit(addqi i) { binary(i); a.addq(i.s0, i.d); }
+  void emit(const addqmr& i) { binary(i); a.addq(i.m, i.d); }
+  void emit(const addqrm& i) { a.addq(i.s1, i.m); }
   void emit(const addqim& i);
   void emit(addsd i) { commute(i); a.addsd(i.s0, i.d); }
   void emit(const cloadq& i);
@@ -143,6 +150,8 @@ struct Vgen {
   void emit(const cmpbi& i) { a.cmpb(i.s0, i.s1); }
   void emit(const cmpbim& i) { a.cmpb(i.s0, i.s1); }
   void emit(const cmpbm& i) { a.cmpb(i.s0, i.s1); }
+  void emit(const cmpw& i) { a.cmpw(i.s0, i.s1); }
+  void emit(const cmpwi& i) { a.cmpw(i.s0, i.s1); }
   void emit(const cmpwim& i) { a.cmpw(i.s0, i.s1); }
   void emit(const cmpwm& i) { a.cmpw(i.s0, i.s1); }
   void emit(const cmpl& i) { a.cmpl(i.s0, i.s1); }
@@ -154,7 +163,7 @@ struct Vgen {
   void emit(const cmpqim& i) { a.cmpq(i.s0, i.s1); }
   void emit(const cmpqm& i) { a.cmpq(i.s0, i.s1); }
   void emit(cmpsd i) { noncommute(i); a.cmpsd(i.s0, i.d, i.pred); }
-  void emit(const cqo& i) { a.cqo(); }
+  void emit(const cqo& /*i*/) { a.cqo(); }
   void emit(const cvttsd2siq& i) { a.cvttsd2siq(i.s, i.d); }
   void emit(const cvtsi2sd& i);
   void emit(const cvtsi2sdm& i);
@@ -184,12 +193,14 @@ struct Vgen {
   void emit(const loadtqb& i) { a.loadb(i.s, i.d); }
   void emit(const loadb& i) { a.loadb(i.s, i.d); }
   void emit(const loadw& i) { a.loadw(i.s, i.d); }
+  void emit(const loadtql& i) { a.loadl(i.s, i.d); }
   void emit(const loadl& i) { a.loadl(i.s, i.d); }
   void emit(const loadqp& i) { a.loadq(i.s, i.d); }
   void emit(const loadqd& i) { a.loadq(rip[(intptr_t)i.s.get()], i.d); }
   void emit(const loadsd& i) { a.movsd(i.s, i.d); }
   void emit(const loadzbl& i) { a.loadzbl(i.s, i.d); }
   void emit(const loadzbq& i) { a.loadzbl(i.s, Reg32(i.d)); }
+  void emit(const loadsbq& i) { a.loadsbq(i.s, i.d); }
   void emit(const loadzlq& i) { a.loadl(i.s, Reg32(i.d)); }
   void emit(const movb& i) { a.movb(i.s, i.d); }
   void emit(const movl& i) { a.movl(i.s, i.d); }
@@ -199,13 +210,15 @@ struct Vgen {
   void emit(const movzwl& i) { a.movzwl(i.s, i.d); }
   void emit(const movzwq& i) { a.movzwl(i.s, Reg32(i.d)); }
   void emit(const movzlq& i) { a.movl(i.s, Reg32(i.d)); }
+  void emit(const movsbq& i) { a.movsbq(i.s, i.d); }
   void emit(mulsd i) { commute(i); a.mulsd(i.s0, i.d); }
   void emit(neg i) { unary(i); a.neg(i.d); }
-  void emit(const nop& i) { a.nop(); }
+  void emit(const nop& /*i*/) { a.nop(); }
   void emit(not i) { unary(i); a.not(i.d); }
   void emit(notb i) { unary(i); a.notb(i.d); }
   void emit(const orbim& i) { a.orb(i.s0, i.m); }
   void emit(const orwim& i) { a.orw(i.s0, i.m); }
+  void emit(const orlim& i) { a.orl(i.s0, i.m); }
   void emit(orq i) { commuteSF(i); a.orq(i.s0, i.d); }
   void emit(orqi i) { binary(i); a.orq(i.s0, i.d); }
   void emit(const orqim& i) { a.orq(i.s0, i.m); }
@@ -234,7 +247,6 @@ struct Vgen {
   void emit(const storesd& i) { a.movsd(i.s, i.m); }
   void emit(const storew& i) { a.storew(i.s, i.m); }
   void emit(const storewi& i) { a.storew(i.s, i.m); }
-  void emit(subbi i) { binary(i); a.subb(i.s0, i.d); }
   void emit(subl i) { noncommute(i); a.subl(i.s0, i.d); }
   void emit(subli i) { binary(i); a.subl(i.s0, i.d); }
   void emit(subq i) { noncommute(i); a.subq(i.s0, i.d); }
@@ -243,6 +255,8 @@ struct Vgen {
   void emit(const testb& i) { a.testb(i.s0, i.s1); }
   void emit(const testbi& i) { a.testb(i.s0, i.s1); }
   void emit(const testbim& i) { a.testb(i.s0, i.s1); }
+  void emit(const testw& i) { a.testw(i.s0, i.s1); }
+  void emit(const testwi& i);
   void emit(const testwim& i);
   void emit(const testl& i) { a.testl(i.s0, i.s1); }
   void emit(const testli& i);
@@ -251,16 +265,16 @@ struct Vgen {
   void emit(const testqi& i);
   void emit(const testqm& i) { a.testq(i.s0, i.s1); }
   void emit(const testqim& i);
+  void emit(const trap& i);
   void emit(const ucomisd& i) { a.ucomisd(i.s0, i.s1); }
-  void emit(const ud2& i) { a.ud2(); }
   void emit(unpcklpd i) { noncommute(i); a.unpcklpd(i.s0, i.d); }
   void emit(xorb i) { commuteSF(i); a.xorb(i.s0, i.d); }
   void emit(xorbi i) { binary(i); a.xorb(i.s0, i.d); }
   void emit(xorl i) { commuteSF(i); a.xorl(i.s0, i.d); }
   void emit(xorq i);
   void emit(xorqi i) { binary(i); a.xorq(i.s0, i.d); }
-  void emit(const conjure& i) { always_assert(false); }
-  void emit(const conjureuse& i) { always_assert(false); }
+  void emit(const conjure& /*i*/) { always_assert(false); }
+  void emit(const conjureuse& /*i*/) { always_assert(false); }
 
   void emit_nop() {
     emit(lea{rax[8], rax});
@@ -440,6 +454,13 @@ void retargetJumps(Venv& env,
       }
     }
     env.meta.inProgressTailJumps.swap(newTailJumps);
+  }
+  // If the retarged jumps were smashable, now they aren't anymore, so remove
+  // them from smashableJumpData.
+  for (auto jmp : retargeted) {
+    if (env.meta.smashableJumpData.erase(jmp) > 0) {
+      FTRACE(3, "retargetJumps: removed {} from smashableJumpData\n", jmp);
+    }
   }
 }
 
@@ -661,7 +682,7 @@ void Vgen::emit(const tailcallphp& i) {
   emit(jmpr{i.target, i.args});
 }
 
-void Vgen::emit(const callarray& i) {
+void Vgen::emit(const callunpack& i) {
   emit(call{i.target, i.args});
 }
 
@@ -697,18 +718,21 @@ void Vgen::emit(const calltc& i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vgen::emit(const nothrow& i) {
+void Vgen::emit(const nothrow& /*i*/) {
   env.meta.catches.emplace_back(a.frontier(), nullptr);
+  env.record_inline_stack(a.frontier());
 }
 
 void Vgen::emit(const syncpoint& i) {
   FTRACE(5, "IR recordSyncPoint: {} {} {}\n", a.frontier(),
          i.fix.pcOffset, i.fix.spOffset);
   env.meta.fixups.emplace_back(a.frontier(), i.fix);
+  env.record_inline_stack(a.frontier());
 }
 
 void Vgen::emit(const unwind& i) {
   catches.push_back({a.frontier(), i.targets[1]});
+  env.record_inline_stack(a.frontier());
   emit(jmp{i.targets[0]});
 }
 
@@ -838,6 +862,13 @@ bool testimHelper(Vgen& env, const Inst& i, uint64_t mask) {
   return true;
 }
 
+void Vgen::emit(const testwi& i) {
+  if (i.s0.w() == -1) {
+    return emit(testw{i.s1, i.s1, i.sf});
+  }
+  a.testw(i.s0, i.s1);
+}
+
 void Vgen::emit(const testwim& i) {
   if (testimHelper(*this, i, i.s0.w())) return;
   a.testw(i.s0, i.s1);
@@ -879,6 +910,11 @@ void Vgen::emit(const testqim& i) {
   }
 }
 
+void Vgen::emit(const trap& i) {
+  env.meta.trapReasons.emplace_back(a.frontier(), i.reason);
+  a.ud2();
+}
+
 void Vgen::emit(xorq i) {
   if (i.s0 == i.s1) {
     // 32-bit xor{s, s, d} zeroes the upper bits of `d'.
@@ -895,8 +931,8 @@ void lower_impl(Vunit& unit, Vlabel b, size_t i, Lower lower) {
   vmodify(unit, b, i, [&] (Vout& v) { lower(v); return 1; });
 }
 
-template<typename Inst>
-void lower(Vunit& unit, Inst& inst, Vlabel b, size_t i) {}
+template <typename Inst>
+void lower(Vunit& /*unit*/, Inst& /*inst*/, Vlabel /*b*/, size_t /*i*/) {}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -938,11 +974,11 @@ void lower(Vunit& unit, stublogue& inst, Vlabel b, size_t i) {
   }
 }
 
-void lower(Vunit& unit, stubunwind& inst, Vlabel b, size_t i) {
+void lower(Vunit& unit, stubunwind& /*inst*/, Vlabel b, size_t i) {
   unit.blocks[b].code[i] = lea{reg::rsp[16], reg::rsp};
 }
 
-void lower(Vunit& unit, stubtophp& inst, Vlabel b, size_t i) {
+void lower(Vunit& unit, stubtophp& /*inst*/, Vlabel b, size_t i) {
   unit.blocks[b].code[i] = lea{reg::rsp[16], reg::rsp};
 }
 
@@ -1006,6 +1042,9 @@ void lower(Vunit& unit, movtdb& inst, Vlabel b, size_t i) {
 void lower(Vunit& unit, movtdq& inst, Vlabel b, size_t i) {
   unit.blocks[b].code[i] = copy{inst.s, inst.d};
 }
+void lower(Vunit& unit, movtqw& inst, Vlabel b, size_t i) {
+  unit.blocks[b].code[i] = copy{inst.s, inst.d};
+}
 void lower(Vunit& unit, movtql& inst, Vlabel b, size_t i) {
   unit.blocks[b].code[i] = copy{inst.s, inst.d};
 }
@@ -1016,7 +1055,7 @@ void lower(Vunit& unit, movtql& inst, Vlabel b, size_t i) {
  * Lower a few abstractions to facilitate straightforward x64 codegen.
  */
 void lowerForX64(Vunit& unit) {
-  vasm_lower(unit, [&] (Vinstr& inst, Vlabel b, size_t i) {
+  vasm_lower(unit, [&](const VLS& /*env*/, Vinstr& inst, Vlabel b, size_t i) {
     switch (inst.op) {
 #define O(name, ...)                      \
       case Vinstr::name:                  \
@@ -1043,11 +1082,12 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
 
   assertx(checkWidths(unit));
 
-  if (abi.canSpill && RuntimeOption::EvalProfBranchSampleFreq > 0) {
-    // Only profile branches if we're allowed to spill (and if branch profiling
-    // is on, of course).  This is not only for the freedom to generate
-    // arbitrary code, but also because we don't want to profile unique stubs
-    // and such.
+  if (unit.context && !isProfiling(unit.context->kind) && abi.canSpill &&
+      RuntimeOption::EvalProfBranchSampleFreq > 0) {
+    // Even when branch profiling is on, we still only want to profile
+    // non-profiling translations of PHP functions.  We also require that we
+    // can spill, so that we can generate arbitrary profiling code, and also to
+    // ensure we don't profile unique stubs and such.
     profile_branches(unit);
   }
 

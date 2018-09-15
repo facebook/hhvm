@@ -175,32 +175,93 @@ void cgMod(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+auto setOpOpToHelper(SetOpOp op) {
+  switch (op) {
+    case SetOpOp::PlusEqual:   return cellAddEq;
+    case SetOpOp::MinusEqual:  return cellSubEq;
+    case SetOpOp::MulEqual:    return cellMulEq;
+    case SetOpOp::ConcatEqual: return cellConcatEq;
+    case SetOpOp::DivEqual:    return cellDivEq;
+    case SetOpOp::PowEqual:    return cellPowEq;
+    case SetOpOp::ModEqual:    return cellModEq;
+    case SetOpOp::AndEqual:    return cellBitAndEq;
+    case SetOpOp::OrEqual:     return cellBitOrEq;
+    case SetOpOp::XorEqual:    return cellBitXorEq;
+    case SetOpOp::SlEqual:     return cellShlEq;
+    case SetOpOp::SrEqual:     return cellShrEq;
+    case SetOpOp::PlusEqualO:  return cellAddEqO;
+    case SetOpOp::MinusEqualO: return cellSubEqO;
+    case SetOpOp::MulEqualO:   return cellMulEqO;
+  }
+  not_reached();
+}
+
+}
+
 void cgSetOpCell(IRLS& env, const IRInstruction* inst) {
   auto const op = inst->extra<SetOpData>()->op;
-  auto const helper = [&] {
+  auto const helper = setOpOpToHelper(op);
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(helper), kVoidDest, SyncOptions::Sync,
+               argGroup(env, inst).ssa(0).typedValue(1));
+}
+
+template <SetOpOp Op>
+static void setOpCellVerifyImpl(tv_lval lhs, Cell rhs,
+                                const Class* cls, Slot slot) {
+  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(slot < cls->numDeclProperties());
+  auto const& prop = cls->declProperties()[slot];
+  assertx(prop.typeConstraint.isCheckable());
+
+  Cell temp;
+  cellDup(*lhs, temp);
+  SCOPE_FAIL { tvDecRefGen(&temp); };
+  setOpOpToHelper(Op)(&temp, rhs);
+  prop.typeConstraint.verifyProperty(&temp, cls, prop.cls, prop.name);
+  cellMove(temp, lhs);
+}
+
+void cgSetOpCellVerify(IRLS& env, const IRInstruction* inst) {
+  auto const op = inst->extra<SetOpData>()->op;
+  auto& v = vmain(env);
+
+  using S = SetOpOp;
+  auto const helper = [&]{
     switch (op) {
-      case SetOpOp::PlusEqual:   return cellAddEq;
-      case SetOpOp::MinusEqual:  return cellSubEq;
-      case SetOpOp::MulEqual:    return cellMulEq;
-      case SetOpOp::ConcatEqual: return cellConcatEq;
-      case SetOpOp::DivEqual:    return cellDivEq;
-      case SetOpOp::PowEqual:    return cellPowEq;
-      case SetOpOp::ModEqual:    return cellModEq;
-      case SetOpOp::AndEqual:    return cellBitAndEq;
-      case SetOpOp::OrEqual:     return cellBitOrEq;
-      case SetOpOp::XorEqual:    return cellBitXorEq;
-      case SetOpOp::SlEqual:     return cellShlEq;
-      case SetOpOp::SrEqual:     return cellShrEq;
-      case SetOpOp::PlusEqualO:  return cellAddEqO;
-      case SetOpOp::MinusEqualO: return cellSubEqO;
-      case SetOpOp::MulEqualO:   return cellMulEqO;
+      case S::PlusEqual:   return setOpCellVerifyImpl<S::PlusEqual>;
+      case S::MinusEqual:  return setOpCellVerifyImpl<S::MinusEqual>;
+      case S::MulEqual:    return setOpCellVerifyImpl<S::MulEqual>;
+      case S::ConcatEqual: return setOpCellVerifyImpl<S::ConcatEqual>;
+      case S::DivEqual:    return setOpCellVerifyImpl<S::DivEqual>;
+      case S::PowEqual:    return setOpCellVerifyImpl<S::PowEqual>;
+      case S::ModEqual:    return setOpCellVerifyImpl<S::ModEqual>;
+      case S::AndEqual:    return setOpCellVerifyImpl<S::AndEqual>;
+      case S::OrEqual:     return setOpCellVerifyImpl<S::OrEqual>;
+      case S::XorEqual:    return setOpCellVerifyImpl<S::XorEqual>;
+      case S::SlEqual:     return setOpCellVerifyImpl<S::SlEqual>;
+      case S::SrEqual:     return setOpCellVerifyImpl<S::SrEqual>;
+      case S::PlusEqualO:  return setOpCellVerifyImpl<S::PlusEqualO>;
+      case S::MinusEqualO: return setOpCellVerifyImpl<S::MinusEqualO>;
+      case S::MulEqualO:   return setOpCellVerifyImpl<S::MulEqualO>;
     }
     not_reached();
   }();
 
-  auto& v = vmain(env);
-  cgCallHelper(v, env, CallSpec::direct(helper), kVoidDest, SyncOptions::Sync,
-               argGroup(env, inst).ssa(0).typedValue(1));
+  cgCallHelper(
+    v,
+    env,
+    CallSpec::direct(helper),
+    kVoidDest,
+    SyncOptions::Sync,
+    argGroup(env, inst)
+      .ssa(0)
+      .typedValue(1)
+      .ssa(2)
+      .ssa(3)
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

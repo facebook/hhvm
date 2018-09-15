@@ -13,4 +13,8 @@ function d() {
   var_dump($y);
   var_dump($y[0]);
 }
+
+<<__EntryPoint>>
+function main_array_051() {
 d();
+}

@@ -25,4 +25,8 @@ function main() {
   var_dump($f->getX());
 }
 
+
+<<__EntryPoint>>
+function main_private_props_021() {
 main();
+}

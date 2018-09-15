@@ -28,47 +28,34 @@ inline void ObjectData::resetMaxId() {
   os_max_id = 0;
 }
 
-inline ObjectData::ObjectData(Class* cls, uint16_t flags, HeaderKind kind)
+inline ObjectData::ObjectData(Class* cls, uint8_t flags, HeaderKind kind)
   : m_cls(cls)
 {
-  m_hdr.init(flags, kind, 1);
-  assert(m_hdr.aux == flags && hasExactlyOneRef());
-  assert(isObjectKind(kind));
-  assert(!cls->needInitialization() || cls->initialized());
+  initHeader_16(kind, OneReference, flags | cls->getODAttrs());
+  assertx(isObjectKind(m_kind));
+  assertx(!cls->needInitialization() || cls->initialized());
+  assertx(!isCollection()); // collections use NoInit{}
   o_id = ++os_max_id;
-
-  if (flags & Attribute::IsCollection) {
-    // Whatever attribute we need to set, do it via flags and void runtime
-    // loading.  These assertions guarantee that `instanceInit(cls)' is not
-    // needed for collections.
-    assertx(cls->numDeclProperties() == 0);
-    return;
-  }
   instanceInit(cls);
 }
 
-inline ObjectData::ObjectData(Class* cls, NoInit) noexcept
+inline ObjectData::ObjectData(Class* cls, InitRaw, uint8_t flags,
+                              HeaderKind kind) noexcept
   : m_cls(cls)
 {
-  m_hdr.init(0, HeaderKind::Object, 1);
-  assert(m_hdr.aux == 0 && hasExactlyOneRef());
-  assert(!cls->needInitialization() || cls->initialized());
+  initHeader_16(kind, OneReference, flags);
+  assertx(isObjectKind(m_kind));
+  assertx(!cls->needInitialization() || cls->initialized());
+  assertx(!(cls->getODAttrs() & ~static_cast<uint8_t>(flags)));
   o_id = ++os_max_id;
 }
 
-inline ObjectData::ObjectData(Class* cls,
-                              uint16_t flags,
-                              HeaderKind kind,
-                              NoInit) noexcept
-  : m_cls(cls)
+inline ObjectData::ObjectData(Class* cls, NoInit, uint8_t flags,
+                              HeaderKind kind) noexcept
+  : ObjectData(cls, InitRaw{}, flags, kind)
 {
-  m_hdr.init(flags, kind, 1);
-  assert(m_hdr.aux == flags && hasExactlyOneRef());
-  assert(isObjectKind(kind));
-  assert(!cls->needInitialization() || cls->initialized());
-  assert(!(cls->getODAttrs() & ~static_cast<uint16_t>(flags)));
-  assert(cls->numDeclProperties() == 0);
-  o_id = ++os_max_id;
+  assertx(cls->numDeclProperties() == 0);
+  assertx(!cls->hasMemoSlots());
 }
 
 inline size_t ObjectData::heapSize() const {
@@ -88,19 +75,34 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
   ObjectData* obj;
   if (auto const ctor = cls->instanceCtor()) {
     obj = ctor(cls);
-    assert(obj->checkCount());
+    assertx(obj->checkCount());
+    assertx(obj->hasInstanceDtor());
+  } else if (cls->hasMemoSlots()) {
+    auto const size = sizeForNProps(cls->numDeclProperties());
+    auto const objOff = objOffFromMemoNode(cls);
+    auto mem = tl_heap->objMalloc(size + objOff);
+    new (NotNull{}, mem) MemoNode(objOff);
+    std::memset(
+      reinterpret_cast<char*>(mem) + sizeof(MemoNode),
+      0,
+      objOff - sizeof(MemoNode)
+    );
+    obj = new (NotNull{}, reinterpret_cast<char*>(mem) + objOff)
+      ObjectData(cls);
+    assertx(obj->hasExactlyOneRef());
+    assertx(!obj->hasInstanceDtor());
   } else {
-    size_t nProps = cls->numDeclProperties();
-    size_t size = sizeForNProps(nProps);
-    auto& mm = MM();
-    obj = new (mm.objMalloc(size)) ObjectData(cls);
-    assert(obj->hasExactlyOneRef());
+    auto const size = sizeForNProps(cls->numDeclProperties());
+    auto& mm = *tl_heap;
+    obj = new (NotNull{}, mm.objMalloc(size)) ObjectData(cls);
+    assertx(obj->hasExactlyOneRef());
+    assertx(!obj->hasInstanceDtor());
   }
 
   if (UNLIKELY(cls->needsInitThrowable())) {
     // may incref obj
     throwable_init(obj);
-    assert(obj->checkCount());
+    assertx(obj->checkCount());
   }
 
   return obj;
@@ -109,44 +111,101 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
 inline ObjectData* ObjectData::newInstanceNoPropInit(Class* cls) {
   if (cls->needInitialization()) cls->initialize();
 
-  assert(!cls->instanceCtor() &&
+  assertx(!cls->instanceCtor() &&
          !(cls->attrs() &
            (AttrAbstract | AttrInterface | AttrTrait | AttrEnum)));
 
-  size_t nProps = cls->numDeclProperties();
-  size_t size = sizeForNProps(nProps);
-  auto& mm = MM();
-  auto const obj = new (mm.objMalloc(size)) ObjectData(cls, NoInit{});
-  obj->m_hdr.aux |= cls->getODAttrs();
-  assert(obj->hasExactlyOneRef());
+  ObjectData* obj;
+  auto const size = sizeForNProps(cls->numDeclProperties());
+  if (cls->hasMemoSlots()) {
+    auto const objOff = objOffFromMemoNode(cls);
+    auto mem = tl_heap->objMalloc(size + objOff);
+    new (NotNull{}, mem) MemoNode(objOff);
+    std::memset(
+      reinterpret_cast<char*>(mem) + sizeof(MemoNode),
+      0,
+      objOff - sizeof(MemoNode)
+    );
+    obj = new (NotNull{}, reinterpret_cast<char*>(mem) + objOff)
+      ObjectData(cls, InitRaw{}, cls->getODAttrs());
+  } else {
+    obj = new (NotNull{}, tl_heap->objMalloc(size))
+      ObjectData(cls, InitRaw{}, cls->getODAttrs());
+  }
+  assertx(obj->hasExactlyOneRef());
   return obj;
 }
 
 inline void ObjectData::instanceInit(Class* cls) {
-  m_hdr.aux |= cls->getODAttrs();
-
   size_t nProps = cls->numDeclProperties();
   if (nProps > 0) {
     if (cls->pinitVec().size() > 0) {
       const Class::PropInitVec* propInitVec = m_cls->getPropData();
-      assert(propInitVec != nullptr);
-      assert(nProps == propInitVec->size());
+      assertx(propInitVec != nullptr);
+      assertx(nProps == propInitVec->size());
       if (!cls->hasDeepInitProps()) {
-        memcpy16_inline(propVec(),
+        memcpy16_inline(propVecForConstruct(),
                         &(*propInitVec)[0], nProps * sizeof(TypedValue));
       } else {
-        deepInitHelper(propVec(), &(*propInitVec)[0], nProps);
+        deepInitHelper(propVecForConstruct(), &(*propInitVec)[0], nProps);
       }
     } else {
-      assert(nProps == cls->declPropInit().size());
-      memcpy16_inline(propVec(),
+      assertx(nProps == cls->declPropInit().size());
+      memcpy16_inline(propVecForConstruct(),
                       &cls->declPropInit()[0], nProps * sizeof(TypedValue));
     }
   }
 }
 
+inline void ObjectData::verifyPropTypeHints(size_t end) const {
+  assertx(end <= m_cls->declProperties().size());
+
+  if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
+
+  auto const declProps = m_cls->declProperties();
+  auto const props = propVec();
+  for (size_t idx = 0; idx < end; ++idx) {
+    auto const val = props[idx];
+    assertx(tvIsPlausible(val));
+    auto const& prop = declProps[idx];
+    auto const& tc = prop.typeConstraint;
+    if (tc.isCheckable()) {
+      if (UNLIKELY(val.m_type == KindOfRef)) {
+        raise_property_typehint_binding_error(
+          prop.cls,
+          prop.name,
+          false,
+          tc.isSoft()
+        );
+      } else if (UNLIKELY(val.m_type == KindOfUninit)) {
+        if (!(prop.attrs & AttrLateInit)) {
+          raise_property_typehint_unset_error(
+            prop.cls,
+            prop.name,
+            tc.isSoft()
+          );
+        }
+      } else {
+        tc.verifyProperty(&val, m_cls, prop.cls, prop.name);
+      }
+    }
+
+    if (debug && RuntimeOption::RepoAuthoritative) {
+      // The fact that uninitialized LateInit props are uninint isn't
+      // reflected in the repo-auth-type.
+      if (val.m_type != KindOfUninit || !(prop.attrs & AttrLateInit)) {
+        always_assert(tvMatchesRepoAuthType(val, prop.repoAuthType));
+      }
+    }
+  }
+}
+
+inline void ObjectData::verifyPropTypeHints() const {
+  verifyPropTypeHints(m_cls->declProperties().size());
+}
+
 inline Class* ObjectData::getVMClass() const {
-  assert(kindIsValid());
+  assertx(kindIsValid());
   return m_cls;
 }
 
@@ -158,8 +217,20 @@ inline bool ObjectData::instanceof(const Class* c) const {
   return m_cls->classof(c);
 }
 
+inline bool ObjectData::isBeingConstructed() const {
+  return getAttribute(Attribute::IsBeingConstructed);
+}
+
 inline bool ObjectData::isCollection() const {
-  return getAttribute(Attribute::IsCollection);
+  return m_kind >= HeaderKind::Vector && m_kind <= HeaderKind::ImmSet;
+}
+
+inline bool ObjectData::isCppBuiltin() const {
+  return HPHP::isCppBuiltin(m_kind);
+}
+
+inline bool ObjectData::isWaitHandle() const {
+  return isWaithandleKind(m_kind);
 }
 
 inline bool ObjectData::isMutableCollection() const {
@@ -171,12 +242,12 @@ inline bool ObjectData::isImmutableCollection() const {
 }
 
 inline CollectionType ObjectData::collectionType() const {
-  assert(isValidCollection(static_cast<CollectionType>(m_hdr.kind)));
-  return static_cast<CollectionType>(m_hdr.kind);
+  assertx(isValidCollection(static_cast<CollectionType>(m_kind)));
+  return static_cast<CollectionType>(m_kind);
 }
 
 inline HeaderKind ObjectData::headerKind() const {
-  return m_hdr.kind;
+  return m_kind;
 }
 
 inline bool ObjectData::isIterator() const {
@@ -184,11 +255,11 @@ inline bool ObjectData::isIterator() const {
 }
 
 inline bool ObjectData::getAttribute(Attribute attr) const {
-  return m_hdr.aux & attr;
+  return m_aux16 & attr;
 }
 
 inline void ObjectData::setAttribute(Attribute attr) {
-  m_hdr.aux |= attr;
+  m_aux16 |= attr;
 }
 
 inline bool ObjectData::noDestruct() const {
@@ -200,11 +271,15 @@ inline void ObjectData::setNoDestruct() {
 }
 
 inline void ObjectData::clearNoDestruct() {
-  m_hdr.aux &= ~NoDestructor;
+  m_aux16 &= ~NoDestructor;
 }
 
 inline bool ObjectData::hasInstanceDtor() const {
-  return m_hdr.aux & (IsCppBuiltin | HasNativeData);
+  return HPHP::hasInstanceDtor(m_kind);
+}
+
+inline bool ObjectData::hasNativeData() const {
+  return m_kind == HeaderKind::NativeObject;
 }
 
 inline uint32_t ObjectData::getId() const {
@@ -212,14 +287,14 @@ inline uint32_t ObjectData::getId() const {
 }
 
 inline bool ObjectData::toBoolean() const {
-  if (UNLIKELY(getAttribute(CallToImpl))) {
+  if (UNLIKELY(m_cls->rtAttribute(Class::CallToImpl))) {
     return toBooleanImpl();
   }
   return true;
 }
 
 inline int64_t ObjectData::toInt64() const {
-  if (UNLIKELY(getAttribute(CallToImpl) && !isCollection())) {
+  if (!isCollection() && UNLIKELY(m_cls->rtAttribute(Class::CallToImpl))) {
     return toInt64Impl();
   }
   raiseObjToIntNotice(classname_cstr());
@@ -227,7 +302,7 @@ inline int64_t ObjectData::toInt64() const {
 }
 
 inline double ObjectData::toDouble() const {
-  if (UNLIKELY(getAttribute(CallToImpl) && !isCollection())) {
+  if (!isCollection() && UNLIKELY(m_cls->rtAttribute(Class::CallToImpl))) {
     return toDoubleImpl();
   }
   raiseObjToDoubleNotice(classname_cstr());
@@ -238,20 +313,75 @@ inline const Func* ObjectData::methodNamed(const StringData* sd) const {
   return getVMClass()->lookupMethod(sd);
 }
 
-inline TypedValue* ObjectData::propVec() {
-  return reinterpret_cast<TypedValue*>(uintptr_t(this + 1));
+[[noreturn]] void throw_cannot_modify_immutable_object(const char* className);
+
+inline TypedValue* ObjectData::propVecForWrite() {
+  if (UNLIKELY(m_cls->hasImmutableProps()) && !isBeingConstructed()) {
+    throw_cannot_modify_immutable_object(getClassName().data());
+  }
+  return const_cast<TypedValue*>(propVec());
+}
+
+inline TypedValue* ObjectData::propVecForConstruct() {
+  return const_cast<TypedValue*>(propVec());
 }
 
 inline const TypedValue* ObjectData::propVec() const {
-  return const_cast<ObjectData*>(this)->propVec();
+  return reinterpret_cast<const TypedValue*>(uintptr_t(this + 1));
+}
+
+inline tv_lval ObjectData::propLvalAtOffset(Slot idx) {
+  assertx(idx < m_cls->numDeclProperties());
+  assertx(!(m_cls->declProperties()[idx].attrs & AttrIsImmutable));
+  return tv_lval { const_cast<TypedValue*>(&propVec()[idx]) };
+}
+
+inline tv_rval ObjectData::propRvalAtOffset(Slot idx) const {
+  assertx(idx < m_cls->numDeclProperties());
+  return tv_rval { &propVec()[idx] };
 }
 
 inline bool ObjectData::hasDynProps() const {
-  return getAttribute(HasDynPropArr) && dynPropArray().size() != 0;
+  return getAttribute(HasDynPropArr) && !dynPropArray().empty();
+}
+
+inline MemoSlot* ObjectData::memoSlot(Slot slot) {
+  assertx(!hasNativeData());
+  assertx(slot < m_cls->numMemoSlots());
+  return reinterpret_cast<MemoSlot*>(this) - slot - 1;
+}
+
+inline const MemoSlot* ObjectData::memoSlot(Slot slot) const {
+  assertx(!hasNativeData());
+  assertx(slot < m_cls->numMemoSlots());
+  return reinterpret_cast<const MemoSlot*>(this) - slot - 1;
+}
+
+inline MemoSlot* ObjectData::memoSlotNativeData(Slot slot,
+                                                size_t ndiSize) {
+  assertx(slot < m_cls->numMemoSlots());
+  return reinterpret_cast<MemoSlot*>(
+    reinterpret_cast<char*>(this) - alignTypedValue(ndiSize)
+  ) - slot - 1;
+}
+
+inline const MemoSlot* ObjectData::memoSlotNativeData(
+  Slot slot, size_t ndiSize
+) const {
+  assertx(slot < m_cls->numMemoSlots());
+  return reinterpret_cast<const MemoSlot*>(
+    reinterpret_cast<const char*>(this) - alignTypedValue(ndiSize)
+  ) - slot - 1;
 }
 
 inline size_t ObjectData::sizeForNProps(Slot nProps) {
   return sizeof(ObjectData) + sizeof(TypedValue) * nProps;
+}
+
+inline size_t ObjectData::objOffFromMemoNode(const Class* cls) {
+  assertx(cls->hasMemoSlots());
+  assertx(!cls->getNativeDataInfo());
+  return cls->numMemoSlots() * sizeof(MemoSlot) + sizeof(MemoNode);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

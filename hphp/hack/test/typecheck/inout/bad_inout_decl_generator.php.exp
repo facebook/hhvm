@@ -1,0 +1,2 @@
+File "bad_inout_decl_generator.php", line 4, characters 3-9:
+Parameters may not be marked inout on generators (Parsing[1002])

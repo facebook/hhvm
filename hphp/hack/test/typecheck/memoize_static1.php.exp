@@ -1,0 +1,2 @@
+File "memoize_static1.php", line 4, characters 26-28:
+memoize is not allowed on static methods in classes that aren't final  (NastCheck[3041])

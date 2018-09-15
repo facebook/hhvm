@@ -1,0 +1,12 @@
+# tests that OODeclExists with bad argument types properly punts to the interpreter
+
+.main {
+  FPushFuncD 1 "var_dump"
+  String "abc"
+  String "asdfasdf"
+  OODeclExists Interface
+  FCall 1 0 1 - "" ""
+  PopR
+  Int 1
+  RetC
+}

@@ -1,0 +1,5 @@
+Warning: gd2: EOF while reading
+ in %s on line %d
+
+Warning: '%s' is not a valid GD2 file in %s on line %d
+bool(false)

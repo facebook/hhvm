@@ -30,6 +30,9 @@ struct SrcKey;
 namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct ProfDataSerializer;
+struct ProfDataDeserializer;
+
 struct RegionDesc;
 namespace irgen { struct IRGS; }
 
@@ -98,7 +101,7 @@ struct InliningDecider {
   /*
    * Can we perform inlining of `callee' at `callSK' from within `region'?
    *
-   * This is a shallow check---it asks whether `callSK' is an FCall{,D} with an
+   * This is a shallow check---it asks whether `callSK' is an FCall with an
    * appropriate FPush* in the same region, and verifies that the call does not
    * block inlining (e.g., due to missing arguments, recursion, resumable
    * callee, etc.).  It does not peek into the callee's bytecode or regions,
@@ -111,7 +114,8 @@ struct InliningDecider {
    * NOTE: Inlining will fail during translation if the FPush was interpreted.
    * It is up to the client to ensure that this is not the case.
    */
-  bool canInlineAt(SrcKey callSK, const Func* callee) const;
+  bool canInlineAt(SrcKey callSK, const Func* callee,
+                  Annotations& annotations) const;
 
   /*
    * Check that `region' of `callee' can be inlined (possibly via other inlined
@@ -126,15 +130,17 @@ struct InliningDecider {
    * must be called immediately to correctly reset the internal inlining costs.
    */
   bool shouldInline(SrcKey callerSk, Op callerFPushOp, const Func* callee,
-                    const RegionDesc& region, uint32_t maxTotalCost);
+    const RegionDesc& region, uint32_t maxTotalCost, Annotations& annotations);
 
   /*
    * Update our context to account for the beginning of an inlined call.
    */
-  void accountForInlining(SrcKey callerSk,
-                          Op callerFPushOp,
-                          const Func* callee,
-                          const RegionDesc& region);
+  int accountForInlining(SrcKey callerSk,
+                         Op callerFPushOp,
+                         const Func* callee,
+                         const RegionDesc& region,
+                         const irgen::IRGS& irgs,
+                         Annotations& annotations);
 
   /*
    * Update context to begin inlining of callee with cost zero.
@@ -149,12 +155,6 @@ struct InliningDecider {
    * function (even if it's nested in another inlined function).
    */
   void registerEndInlining(const Func* callee);
-
-  /*
-   * Prevents any Func with the same fullName() as the specified callee from
-   * being inlined in the future.
-   */
-  static void forbidInliningOf(const Func* callee);
 
 private:
   // The function being inlined into.
@@ -179,7 +179,10 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
                                  const Func* callee,
                                  const irgen::IRGS& irgs,
                                  InliningDecider& inl,
-                                 int32_t maxBCInstrs);
+                                 int32_t maxBCInstrs,
+                                 Annotations& annotations);
+
+void setBaseInliningProfCount(uint64_t value);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

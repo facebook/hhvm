@@ -1,6 +1,9 @@
 <?php
 
+
 // Array of available fruits
+<<__EntryPoint>>
+function main_get_flags() {
 $fruits = array("lemons" => 1, "oranges" => 4, "bananas" => 5, "apples" => 10);
 
 $fruitsArrayObject = new ArrayObject($fruits);
@@ -15,3 +18,4 @@ $fruitsArrayObject->setFlags(ArrayObject::ARRAY_AS_PROPS);
 // Get the new flags
 $flags = $fruitsArrayObject->getFlags();
 var_dump($flags);
+}

@@ -2,7 +2,6 @@
 
 class a extends Exception {
 }
-;
 class b extends a {
   function dump() {
     echo 'c:', $this->code, '
@@ -13,6 +12,10 @@ y:', $this->y, '
 ';
   }
 }
+
+<<__EntryPoint>>
+function main_60() {
+;
 if (0) {
  class a extends Exception {
 }
@@ -22,4 +25,5 @@ try {
 }
  catch (b $e) {
   $e->dump();
+}
 }

@@ -23,15 +23,15 @@ function is_callable(mixed $callback, bool $syntax_only = false,
  * Call a callback with an array of parameters
  *
  * @param callable $callback - The callable to be called.
- * @param array $param_arr - The parameters to be passed to the callback,
- *   as an indexed array.
+ * @param mixed $param_arr - The parameters to be passed to the callback,
+ *   as an indexed array or collection.
  *
  * @return mixed - Returns the return value of the callback, or FALSE on
  *   error.
  */
 <<__Native>>
 function call_user_func_array(mixed $callback,
-                              array $params): mixed;
+                              mixed $params): mixed;
 
 /**
  * Call the callback given by the first parameter

@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_splfixedarray_set_size_errors() {
 $fixedarr = new SplFixedArray();
 
 echo "Errors:", PHP_EOL;
@@ -16,3 +19,4 @@ $fixedarr->setSize(true);
 var_dump($fixedarr->getSize() == 1); // because php...
 $fixedarr->setSize(false);
 var_dump($fixedarr->getSize() == 0); // because php...
+}

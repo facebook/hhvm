@@ -18,6 +18,7 @@
 #define incl_HPHP_UNIT_CACHE_H_
 
 #include <string>
+#include <vector>
 
 struct stat;
 
@@ -26,6 +27,10 @@ namespace HPHP {
 struct Unit;
 struct String;
 struct StringData;
+
+namespace Native {
+struct FuncTable;
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -54,7 +59,13 @@ struct StringData;
  * May return nullptr if the Unit can't be loaded, and may throw exceptions or
  * fatal errors.
  */
-Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt);
+Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
+                 const Native::FuncTable&);
+
+/*
+ * As above, but for system units.
+ */
+Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable&);
 
 /*
  * Mangle a file's md5sum with runtime options that affect the Unit output.
@@ -67,6 +78,14 @@ std::string mangleUnitMd5(const std::string& fileMd5);
  * Exported for the admin request handler.
  */
 size_t numLoadedUnits();
+
+/*
+ * Return a std::vector of all the units currently loaded. Must be
+ * called from a single threaded context (wrt other unit-cache functions).
+ *
+ * Precondition: RepoAuthoritative
+ */
+std::vector<Unit*> loadedUnitsRepoAuth();
 
 /*
  * Resolve an include path, for the supplied path and directory, using the same
@@ -82,6 +101,7 @@ size_t numLoadedUnits();
 String resolveVmInclude(StringData* path,
                         const char* currentDir,
                         struct stat* s,  // out
+                        const Native::FuncTable&,
                         bool allow_dir = false);
 
 void preloadRepo();

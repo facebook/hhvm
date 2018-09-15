@@ -1,0 +1,1 @@
+-vDynamicInvokeFunctions.0=frap -vDynamicInvokeFunctions.1=BLARK::sfrap -vDynamicInvokeFunctions.2=BlaRk::frap -vDynamicInvokeFunctions.3=handler -vDynamicInvokeFunctions.4=magiccall::__call -d hhvm.php7.all=0

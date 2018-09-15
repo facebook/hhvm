@@ -1,0 +1,17 @@
+{
+  "function_calls":[
+    {
+      "name":"X::__construct",
+      "type":"Constructor",
+      "pos":{"filename":"static_in_trait.php","line":8,"char_start":12,"char_end":23},
+      "caller":"X::foo"
+    },
+    {
+      "name":"Y::foo",
+      "type":"Method",
+      "pos":{"filename":"static_in_trait.php","line":16,"char_start":19,"char_end":21},
+      "caller":"Y::buildAnObjectAFromTrait"
+    }
+  ],
+  "symbol_types":[]
+}

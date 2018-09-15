@@ -15,36 +15,43 @@
 */
 #include "hphp/runtime/base/unit-cache.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <memory>
-#include <string>
-#include <cstdlib>
-#include <thread>
-
-#include <folly/ScopeGuard.h>
-
-#include "hphp/util/assertions.h"
-#include "hphp/util/rank.h"
-#include "hphp/util/mutex.h"
-#include "hphp/util/process.h"
-#include "hphp/runtime/base/system-profiler.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/plain-file.h"
-#include "hphp/runtime/base/stat-cache.h"
-#include "hphp/runtime/base/stream-wrapper-registry.h"
-#include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/stat-cache.h"
+#include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/base/system-profiler.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/vm/debugger-hook.h"
+#include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/type-profile.h"
+
+#include "hphp/util/assertions.h"
+#include "hphp/util/mutex.h"
+#include "hphp/util/process.h"
+#include "hphp/util/rank.h"
+#include "hphp/util/struct-log.h"
+#include "hphp/util/timer.h"
+
+#include <cstdlib>
+#include <memory>
+#include <string>
+#include <thread>
+
+#include <folly/AtomicHashMap.h>
+#include <folly/Optional.h>
+#include <folly/portability/Fcntl.h>
+#include <folly/portability/SysStat.h>
 
 #ifdef __APPLE__
 #define st_mtim st_mtimespec
@@ -58,6 +65,30 @@ namespace HPHP {
 namespace {
 
 //////////////////////////////////////////////////////////////////////
+
+using OptLog = folly::Optional<StructuredLogEntry>;
+
+struct LogTimer {
+  LogTimer(const char* name, OptLog& ent)
+    : m_name(name)
+    , m_ent(ent)
+    , m_start(m_ent ? Timer::GetThreadCPUTimeNanos() : -1)
+  {}
+  ~LogTimer() { stop(); }
+
+  void stop() {
+    if (m_start == -1) return;
+
+    auto const elapsed = Timer::GetThreadCPUTimeNanos() - m_start;
+    m_ent->setInt(m_name, elapsed / 1000);
+    m_start = -1;
+  }
+
+private:
+  const char* m_name;
+  OptLog& m_ent;
+  int64_t m_start;
+};
 
 struct CachedUnit {
   CachedUnit() = default;
@@ -89,7 +120,8 @@ using RepoUnitCache = RankedCHM<
 >;
 RepoUnitCache s_repoUnitCache;
 
-CachedUnit lookupUnitRepoAuth(const StringData* path) {
+CachedUnit lookupUnitRepoAuth(const StringData* path,
+                              const Native::FuncTable& nativeFuncs) {
   path = makeStaticString(path);
 
   RepoUnitCache::accessor acc;
@@ -113,7 +145,11 @@ CachedUnit lookupUnitRepoAuth(const StringData* path) {
       return acc->second;
     }
 
-    acc->second.unit = Repo::get().loadUnit(path->data(), md5).release();
+    acc->second.unit = Repo::get().loadUnit(
+        path->data(),
+        md5,
+        nativeFuncs)
+      .release();
     if (acc->second.unit) {
       acc->second.rdsBitId = rds::allocBit();
     }
@@ -161,6 +197,14 @@ using NonRepoUnitCache = RankedCHM<
 >;
 NonRepoUnitCache s_nonRepoUnitCache;
 
+// When running in remote unix server mode with UnixServerQuarantineUnits set,
+// we need to cache any unit generated from a file descriptor passed via the
+// client process in a special quarantined cached. Units in this cache may only
+// be loaded in unix server requests from the same user and are never used when
+// handling web requests.
+using PerUserCache = folly::AtomicHashMap<uid_t, NonRepoUnitCache*>;
+PerUserCache s_perUserUnitCaches(10);
+
 #ifndef _MSC_VER
 int64_t timespecCompare(const struct timespec& l,
                         const struct timespec& r) {
@@ -177,25 +221,33 @@ bool stressUnitCache() {
   return ++g_units_seen_count % RuntimeOption::EvalStressUnitCacheFreq == 0;
 }
 
-bool isChanged(const CachedUnitNonRepo& cu, const struct stat& s) {
+bool isChanged(const CachedUnitNonRepo& cu, const struct stat* s) {
   // If the cached unit is null, we always need to consider it out of date (in
   // case someone created the file).  This case should only happen if something
   // successfully stat'd the file, but then it was gone by the time we tried to
   // open() it.
+  if (!s) return false;
   return !cu.cachedUnit ||
          cu.cachedUnit->cu.unit == nullptr ||
 #ifdef _MSC_VER
-         cu.mtime - s.st_mtime < 0 ||
+         cu.mtime - s->st_mtime < 0 ||
 #else
-         timespecCompare(cu.mtime, s.st_mtim) < 0 ||
-         timespecCompare(cu.ctime, s.st_ctim) < 0 ||
+         timespecCompare(cu.mtime, s->st_mtim) < 0 ||
+         timespecCompare(cu.ctime, s->st_ctim) < 0 ||
 #endif
-         cu.ino != s.st_ino ||
-         cu.devId != s.st_dev ||
+         cu.ino != s->st_ino ||
+         cu.devId != s->st_dev ||
          stressUnitCache();
 }
 
-folly::Optional<String> readFileAsString(const StringData* path) {
+folly::Optional<String> readFileAsString(Stream::Wrapper* w,
+                                         const StringData* path) {
+  if (w) {
+    if (const auto f = w->open(StrNR(path), "r", 0, nullptr)) {
+      return f->read();
+    }
+    return folly::none;
+  }
   auto const fd = open(path->data(), O_RDONLY);
   if (fd < 0) return folly::none;
   auto file = req::make<PlainFile>(fd);
@@ -204,40 +256,108 @@ folly::Optional<String> readFileAsString(const StringData* path) {
 
 CachedUnit createUnitFromString(const char* path,
                                 const String& contents,
-                                Unit** releaseUnit) {
+                                Unit** releaseUnit,
+                                OptLog& ent,
+                                const Native::FuncTable& nativeFuncs) {
   auto const md5 = MD5{mangleUnitMd5(string_md5(contents.slice()))};
   // Try the repo; if it's not already there, invoke the compiler.
-  if (auto unit = Repo::get().loadUnit(path, md5)) {
+  if (auto unit = Repo::get().loadUnit(path, md5, nativeFuncs)) {
     return CachedUnit { unit.release(), rds::allocBit() };
   }
+  LogTimer compileTimer("compile_ms", ent);
   auto const unit = compile_file(contents.data(), contents.size(), md5, path,
-                                 releaseUnit);
+                                 nativeFuncs, releaseUnit);
   return CachedUnit { unit, rds::allocBit() };
 }
 
-CachedUnit createUnitFromUrl(const StringData* const requestedPath) {
+CachedUnit createUnitFromUrl(const StringData* const requestedPath,
+                             const Native::FuncTable& nativeFuncs) {
   auto const w = Stream::getWrapperFromURI(StrNR(requestedPath));
   if (!w) return CachedUnit{};
   auto const f = w->open(StrNR(requestedPath), "r", 0, nullptr);
   if (!f) return CachedUnit{};
   StringBuffer sb;
   sb.read(f.get());
-  return createUnitFromString(requestedPath->data(), sb.detach(), nullptr);
+  OptLog ent;
+  return createUnitFromString(requestedPath->data(), sb.detach(), nullptr, ent,
+                              nativeFuncs);
 }
 
 CachedUnit createUnitFromFile(const StringData* const path,
-                              Unit** releaseUnit) {
-  auto const contents = readFileAsString(path);
-  return contents ? createUnitFromString(path->data(), *contents, releaseUnit)
-                  : CachedUnit{};
+                              Unit** releaseUnit, Stream::Wrapper* w,
+                              OptLog& ent,
+                              const Native::FuncTable& nativeFuncs) {
+  auto const contents = readFileAsString(w, path);
+  return contents
+    ? createUnitFromString(path->data(), *contents, releaseUnit, ent,
+                           nativeFuncs)
+    : CachedUnit{};
+}
+
+// When running via the CLI server special access checks may need to be
+// performed, and in the event that the server is unable to load the file an
+// alternative per client cache may be used.
+NonRepoUnitCache& getNonRepoCache(const StringData* rpath,
+                                  Stream::Wrapper*& w) {
+  if (auto uc = get_cli_ucred()) {
+    if (!(w = Stream::getWrapperFromURI(StrNR(rpath)))) {
+      return s_nonRepoUnitCache;
+    }
+
+    auto unit_check_quarantine = [&] () -> NonRepoUnitCache& {
+      if (!RuntimeOption::EvalUnixServerQuarantineUnits) {
+        return s_nonRepoUnitCache;
+      }
+      auto iter = s_perUserUnitCaches.find(uc->uid);
+      if (iter != s_perUserUnitCaches.end()) return *iter->second;
+      auto cache = new NonRepoUnitCache;
+      auto res = s_perUserUnitCaches.insert(uc->uid, cache);
+      if (!res.second) delete cache;
+      return *res.first->second;
+    };
+
+    // If the server cannot access rpath attempt to open the unit on the
+    // client. When UnixServerQuarantineUnits is set store units opened by
+    // clients in per UID caches which are never accessible by server web
+    // requests.
+    if (access(rpath->data(), R_OK) == -1) {
+      return unit_check_quarantine();
+    }
+
+    // When UnixServerVerifyExeAccess is set clients may not execute units if
+    // they cannot read them, even when the server has access. To verify that
+    // clients have access they are asked to open the file for read access,
+    // and using fstat the server verifies that the file it sees is identical
+    // to the unit opened by the client.
+    if (RuntimeOption::EvalUnixServerVerifyExeAccess) {
+      struct stat local, remote;
+      auto remoteFile = w->open(StrNR(rpath), "r", 0, nullptr);
+      if (!remoteFile ||
+          fcntl(remoteFile->fd(), F_GETFL) != O_RDONLY ||
+          fstat(remoteFile->fd(), &remote) != 0 ||
+          stat(rpath->data(), &local) != 0 ||
+          remote.st_dev != local.st_dev ||
+          remote.st_ino != local.st_ino) {
+        return unit_check_quarantine();
+      }
+    }
+
+    // When the server is able to read the file prefer to access it that way,
+    // in all modes units loaded by the server are cached for all clients.
+    w = nullptr;
+  }
+  return s_nonRepoUnitCache;
 }
 
 CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
-                               const struct stat& statInfo) {
+                               const struct stat* statInfo,
+                               OptLog& ent,
+                               const Native::FuncTable& nativeFuncs) {
+  LogTimer loadTime("load_ms", ent);
   if (strstr(requestedPath->data(), "://") != nullptr) {
     // URL-based units are not currently cached in memory, but the Repo still
     // caches them on disk.
-    return createUnitFromUrl(requestedPath);
+    return createUnitFromUrl(requestedPath, nativeFuncs);
   }
 
   // The string we're using as a key must be static, because we're using it as
@@ -265,19 +385,44 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
     return path;
   }();
 
+  Stream::Wrapper* w = nullptr;
+  auto& cache = getNonRepoCache(rpath, w);
+
+  assertx(
+    !w || &cache != &s_nonRepoUnitCache ||
+    !RuntimeOption::EvalUnixServerQuarantineUnits
+  );
+
   // Freeing a unit while holding the tbb lock would cause a rank violation when
   // recycle-tc is enabled as reclaiming dead functions requires that the code
   // and metadata locks be acquired.
   Unit* releaseUnit = nullptr;
   SCOPE_EXIT { if (releaseUnit) delete releaseUnit; };
 
-  auto const cuptr = [&] () -> std::shared_ptr<CachedUnitWithFree> {
+  auto const updateStatInfo = [&] (NonRepoUnitCache::accessor& acc) {
+    if (statInfo) {
+#ifdef _MSC_VER
+      acc->second.mtime      = statInfo->st_mtime;
+#else
+      acc->second.mtime      = statInfo->st_mtim;
+      acc->second.ctime      = statInfo->st_ctim;
+#endif
+      acc->second.ino        = statInfo->st_ino;
+      acc->second.devId      = statInfo->st_dev;
+    }
+  };
+
+  auto const cu = [&] () -> CachedUnit {
     NonRepoUnitCache::accessor rpathAcc;
 
-    if (!s_nonRepoUnitCache.insert(rpathAcc, rpath)) {
+    if (!cache.insert(rpathAcc, rpath)) {
       if (!isChanged(rpathAcc->second, statInfo)) {
-        return rpathAcc->second.cachedUnit;
+        if (ent) ent->setStr("type", "cache_hit_writelock");
+        return rpathAcc->second.cachedUnit->cu;
       }
+      if (ent) ent->setStr("type", "cache_stale");
+    } else {
+      if (ent) ent->setStr("type", "cache_miss");
     }
 
     /*
@@ -290,86 +435,93 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
      * expected to be low contention).
      */
 
-    auto const cu = createUnitFromFile(rpath, &releaseUnit);
-    rpathAcc->second.cachedUnit = std::make_shared<CachedUnitWithFree>(cu);
-#ifdef _MSC_VER
-    rpathAcc->second.mtime      = statInfo.st_mtime;
-#else
-    rpathAcc->second.mtime      = statInfo.st_mtim;
-    rpathAcc->second.ctime      = statInfo.st_ctim;
-#endif
-    rpathAcc->second.ino        = statInfo.st_ino;
-    rpathAcc->second.devId      = statInfo.st_dev;
+    auto const cu = createUnitFromFile(rpath, &releaseUnit, w, ent,
+                                       nativeFuncs);
 
-    return rpathAcc->second.cachedUnit;
+    // Don't cache the unit if it was created in response to an internal error
+    // in ExternCompiler. Such units represent transient events.
+    if (UNLIKELY(cu.unit && cu.unit->isICE())) {
+      auto const unit = cu.unit;
+      Treadmill::enqueue([unit] { delete unit; });
+      return cu;
+    }
+
+    rpathAcc->second.cachedUnit = std::make_shared<CachedUnitWithFree>(cu);
+    updateStatInfo(rpathAcc);
+    return rpathAcc->second.cachedUnit->cu;
   }();
 
-  if (path != rpath) {
-    NonRepoUnitCache::accessor pathAcc;
-    s_nonRepoUnitCache.insert(pathAcc, path);
-    pathAcc->second.cachedUnit = cuptr;
-#ifdef _MSC_VER
-    pathAcc->second.mtime      = statInfo.st_mtime;
-#else
-    pathAcc->second.mtime      = statInfo.st_mtim;
-    pathAcc->second.ctime      = statInfo.st_ctim;
-#endif
-    pathAcc->second.ino        = statInfo.st_ino;
-    pathAcc->second.devId      = statInfo.st_dev;
+  if (!cu.unit || !cu.unit->isICE()) {
+    if (path != rpath) {
+      NonRepoUnitCache::accessor pathAcc;
+      cache.insert(pathAcc, path);
+      updateStatInfo(pathAcc);
+    }
   }
 
-  return cuptr->cu;
+  return cu;
 }
 
 CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
-                                 const struct stat& statInfo) {
+                                 const struct stat* statInfo,
+                                 OptLog& ent,
+                                 const Native::FuncTable& nativeFuncs) {
   // Steady state, its probably already in the cache. Try that first
   {
     NonRepoUnitCache::const_accessor acc;
-    if (s_nonRepoUnitCache.find(acc, requestedPath)) {
-      if (!isChanged(acc->second, statInfo)) {
-        return acc->second.cachedUnit->cu;
+    if (s_nonRepoUnitCache.find(acc, requestedPath) &&
+        !isChanged(acc->second, statInfo)) {
+      auto const cu = acc->second.cachedUnit->cu;
+      if (!cu.unit || !RuntimeOption::CheckSymLink ||
+          !strcmp(StatCache::realpath(requestedPath->data()).c_str(),
+                  cu.unit->filepath()->data())) {
+        if (ent) ent->setStr("type", "cache_hit_readlock");
+        return cu;
       }
     }
   }
-  return loadUnitNonRepoAuth(requestedPath, statInfo);
+  return loadUnitNonRepoAuth(requestedPath, statInfo, ent, nativeFuncs);
 }
 
 //////////////////////////////////////////////////////////////////////
 // resolveVmInclude callbacks
 
 struct ResolveIncludeContext {
-  String path;    // translated path of the file
   struct stat* s; // stat for the file
   bool allow_dir; // return true for dirs?
+  const Native::FuncTable& nativeFuncs;
+  String path;    // translated path of the file
 };
 
-bool findFile(const StringData* path, struct stat* s, bool allow_dir) {
+bool findFile(const StringData* path, struct stat* s, bool allow_dir,
+              Stream::Wrapper* w, const Native::FuncTable& nativeFuncs) {
   // We rely on this side-effect in RepoAuthoritative mode right now, since the
   // stat information is an output-param of resolveVmInclude, but we aren't
   // really going to call stat.
   s->st_mode = 0;
 
   if (RuntimeOption::RepoAuthoritative) {
-    return lookupUnitRepoAuth(path).unit != nullptr;
+    return lookupUnitRepoAuth(path, nativeFuncs).unit != nullptr;
   }
 
-  auto const ret = StatCache::stat(path->data(), s) == 0 &&
-    !S_ISDIR(s->st_mode);
-  if (S_ISDIR(s->st_mode) && allow_dir) {
+  if (StatCache::stat(path->data(), s) == 0) {
     // The call explicitly populates the struct for dirs, but returns false for
     // them because it is geared toward file includes.
-    return true;
+    return allow_dir || !S_ISDIR(s->st_mode);
   }
-  return ret;
+
+  if (w && w->stat(StrNR(path), s) == 0) {
+    return allow_dir || !S_ISDIR(s->st_mode);
+  }
+  return false;
 }
 
 bool findFileWrapper(const String& file, void* ctx) {
   auto const context = static_cast<ResolveIncludeContext*>(ctx);
-  assert(context->path.isNull());
+  assertx(context->path.isNull());
 
   Stream::Wrapper* w = Stream::getWrapperFromURI(file);
-  if (w && !dynamic_cast<FileStreamWrapper*>(w)) {
+  if (w && !w->isNormalFileStream()) {
     if (w->stat(file, context->s) == 0) {
       context->path = file;
       return true;
@@ -383,18 +535,27 @@ bool findFileWrapper(const String& file, void* ctx) {
 
   if (!w) return false;
 
+  auto passW =
+    RuntimeOption::RepoAuthoritative ||
+    dynamic_cast<FileStreamWrapper*>(w) ||
+    !w->isNormalFileStream()
+      ? nullptr
+      : w;
+
   // TranslatePath() will canonicalize the path and also check
   // whether the file is in an allowed directory.
   String translatedPath = File::TranslatePathKeepRelative(file);
   if (!FileUtil::isAbsolutePath(file.toCppString())) {
-    if (findFile(translatedPath.get(), context->s, context->allow_dir)) {
+    if (findFile(translatedPath.get(), context->s, context->allow_dir,
+                 passW, context->nativeFuncs)) {
       context->path = translatedPath;
       return true;
     }
     return false;
   }
   if (RuntimeOption::SandboxMode || !RuntimeOption::AlwaysUseRelativePath) {
-    if (findFile(translatedPath.get(), context->s, context->allow_dir)) {
+    if (findFile(translatedPath.get(), context->s, context->allow_dir, passW,
+                 context->nativeFuncs)) {
       context->path = translatedPath;
       return true;
     }
@@ -408,26 +569,73 @@ bool findFileWrapper(const String& file, void* ctx) {
     }
   }
   String rel_path(FileUtil::relativePath(server_root, translatedPath.data()));
-  if (findFile(rel_path.get(), context->s, context->allow_dir)) {
+  if (findFile(rel_path.get(), context->s, context->allow_dir, passW,
+               context->nativeFuncs)) {
     context->path = rel_path;
     return true;
   }
   return false;
 }
 
-//////////////////////////////////////////////////////////////////////
+void logLoad(
+  StructuredLogEntry& ent,
+  StringData* path,
+  const char* cwd,
+  String rpath,
+  const CachedUnit& cu
+) {
+  ent.setStr("include_path", path->data());
+  ent.setStr("current_dir", cwd);
+  ent.setStr("resolved_path", rpath.data());
+  if (auto const u = cu.unit) {
+    const StringData* err;
+    int line;
+    if (u->compileTimeFatal(err, line)) {
+      ent.setStr("result", "compile_fatal");
+      ent.setStr("error", err->data());
+    } else if (u->parseFatal(err, line)) {
+      ent.setStr("result", "parse_fatal");
+      ent.setStr("error", err->data());
+    } else {
+      ent.setStr("result", "success");
+    }
 
-CachedUnit checkoutFile(StringData* path, const struct stat& statInfo) {
-  return RuntimeOption::RepoAuthoritative
-    ? lookupUnitRepoAuth(path)
-    : lookupUnitNonRepoAuth(path, statInfo);
+    ent.setStr("md5", u->md5().toString());
+    ent.setStr("repo_sn", folly::to<std::string>(u->sn()));
+    ent.setStr("repo_id", folly::to<std::string>(u->repoID()));
+
+    ent.setInt("bc_len", u->bclen());
+    ent.setInt("num_litstrs", u->numLitstrs());
+    ent.setInt("num_funcs", u->funcs().size());
+    ent.setInt("num_classes", u->preclasses().size());
+    ent.setInt("num_type_aliases", u->typeAliases().size());
+  } else {
+    ent.setStr("result", "file_not_found");
+  }
+
+  switch (requestKind) {
+  case RequestKind::Warmup: ent.setStr("request_kind", "warmup"); break;
+  case RequestKind::Profile: ent.setStr("request_kind", "profile"); break;
+  case RequestKind::Standard: ent.setStr("request_kind", "standard"); break;
+  case RequestKind::NonVM: ent.setStr("request_kind", "nonVM"); break;
+  }
+  ent.setInt("request_count", requestCount());
+
+  StructuredLog::log("hhvm_unit_cache", ent);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-} // end empty namespace
-
-//////////////////////////////////////////////////////////////////////
+CachedUnit checkoutFile(
+  StringData* path,
+  const struct stat& statInfo,
+  OptLog& ent,
+  const Native::FuncTable& nativeFuncs
+) {
+  return RuntimeOption::RepoAuthoritative
+    ? lookupUnitRepoAuth(path, nativeFuncs)
+    : lookupUnitNonRepoAuth(path, &statInfo, ent, nativeFuncs);
+}
 
 const std::string mangleUnitPHP7Options() {
   // As the list of options increases, we may want to do something smarter here?
@@ -452,23 +660,54 @@ const std::string mangleAliasedNamespaces() {
   return s;
 }
 
+//////////////////////////////////////////////////////////////////////
+
+} // end empty namespace
+
+//////////////////////////////////////////////////////////////////////
+
 std::string mangleUnitMd5(const std::string& fileMd5) {
   std::string t = fileMd5 + '\0'
-    + (RuntimeOption::EvalEmitSwitch ? '1' : '0')
+    + (RuntimeOption::AssertEmitted ? '1' : '0')
+    + (RuntimeOption::AutoprimeGenerators ? '1' : '0')
+    + (RuntimeOption::EnableCoroutines ? '1' : '0')
+    + (RuntimeOption::EnableIsExprPrimitiveMigration ? '1' : '0')
     + (RuntimeOption::EnableHipHopExperimentalSyntax ? '1' : '0')
     + (RuntimeOption::EnableHipHopSyntax ? '1' : '0')
+    + (RuntimeOption::EnableReifiedGenerics ? '1' : '0')
+    + (RuntimeOption::EvalGenerateDocComments ? '1' : '0')
     + (RuntimeOption::EnableXHP ? '1' : '0')
     + (RuntimeOption::EvalAllowHhas ? '1' : '0')
-    + (RuntimeOption::EvalJitEnableRenameFunction ? '1' : '0')
-    + (RuntimeOption::IntsOverflowToInts ? '1' : '0')
+    + (RuntimeOption::EvalEmitSwitch ? '1' : '0')
     + (RuntimeOption::EvalEnableCallBuiltin ? '1' : '0')
-    + (RuntimeOption::AssertEmitted ? '1' : '0')
-    + RuntimeOption::EvalUseExternalEmitter + '\0'
-    + (RuntimeOption::EvalExternalEmitterFallback ? '1' : '0')
-    + (RuntimeOption::EvalExternalEmitterAllowPartial ? '1' : '0')
-    + (RuntimeOption::AutoprimeGenerators ? '1' : '0')
+    + (RuntimeOption::EvalHackArrCompatNotices ? '1' : '0')
+    + (RuntimeOption::EvalHackArrCompatIsArrayNotices ? '1' : '0')
+    + (RuntimeOption::EvalHackArrCompatPromoteNotices ? '1' : '0')
+    + (RuntimeOption::EvalHackArrCompatTypeHintNotices ? '1' : '0')
+    + (RuntimeOption::EvalHackArrCompatDVCmpNotices ? '1' : '0')
+    + (RuntimeOption::EvalHackArrCompatSerializeNotices ? '1' : '0')
+    + (RuntimeOption::EvalHackCompilerUseEmbedded ? '1' : '0')
+    + (RuntimeOption::EvalHackCompilerVerboseErrors ? '1' : '0')
+    + (RuntimeOption::EvalJitEnableRenameFunction ? '1' : '0')
+    + (RuntimeOption::EvalLoadFilepathFromUnitCache ? '1' : '0')
+    + (RuntimeOption::EvalThrowOnCallByRefAnnotationMismatch  ? '1' : '0')
+    + (RuntimeOption::IntsOverflowToInts ? '1' : '0')
+    + (RuntimeOption::EvalReffinessInvariance ? '1' : '0')
+    + (RuntimeOption::EvalCreateInOutWrapperFunctions ? '1' : '0')
+    + std::to_string(RuntimeOption::EvalForbidDynamicCalls)
+    + (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls ? '1' : '0')
+    + (RuntimeOption::EvalHackArrDVArrs ? '1' : '0')
+    + (RuntimeOption::EvalDisableHphpcOpts ? '1' : '0')
+    + (RuntimeOption::EvalAllowObjectDestructors ? '1' : '0')
+    + (RuntimeOption::EvalAssemblerFoldDefaultValues ? '1' : '0')
+    + RuntimeOption::EvalHackCompilerCommand + '\0'
+    + RuntimeOption::EvalHackCompilerArgs + '\0'
+    + (RuntimeOption::Hacksperimental ? '1' : '0')
+    + (RuntimeOption::RepoDebugInfo ? '1' : '0')
+    + (RuntimeOption::EvalDisableReturnByReference ? '1' : '0')
     + mangleUnitPHP7Options()
-    + mangleAliasedNamespaces();
+    + mangleAliasedNamespaces()
+    + hackc_version();
   return string_md5(t);
 }
 
@@ -479,23 +718,42 @@ size_t numLoadedUnits() {
   return s_nonRepoUnitCache.size();
 }
 
+std::vector<Unit*> loadedUnitsRepoAuth() {
+  always_assert(RuntimeOption::RepoAuthoritative);
+  std::vector<Unit*> units;
+  units.reserve(s_repoUnitCache.size());
+  for (auto const& elm : s_repoUnitCache) {
+    if (elm.second.unit) {
+      units.push_back(elm.second.unit);
+    }
+  }
+  return units;
+}
+
 String resolveVmInclude(StringData* path,
                         const char* currentDir,
                         struct stat* s,
+                        const Native::FuncTable& nativeFuncs,
                         bool allow_dir /* = false */) {
-  ResolveIncludeContext ctx;
-  ctx.s = s;
-  ctx.allow_dir = allow_dir;
-  void* vpCtx = &ctx;
-  resolve_include(String{path}, currentDir, findFileWrapper, vpCtx);
+  ResolveIncludeContext ctx{s, allow_dir, nativeFuncs};
+  resolve_include(String{path}, currentDir, findFileWrapper, &ctx);
   // If resolve_include() could not find the file, return NULL
   return ctx.path;
 }
 
-Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
+Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
+                 const Native::FuncTable& nativeFuncs) {
   bool init;
   bool& initial = initial_opt ? *initial_opt : init;
   initial = true;
+
+  OptLog ent;
+  if (!RuntimeOption::RepoAuthoritative &&
+      StructuredLog::coinflip(RuntimeOption::EvalLogUnitLoadRate)) {
+    ent.emplace();
+  }
+
+  LogTimer lookupTimer("lookup_ms", ent);
 
   /*
    * NB: the m_evaledFiles map is only for the debugger, and could be omitted
@@ -503,26 +761,26 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
    */
 
   struct stat s;
-  auto const spath = resolveVmInclude(path, currentDir, &s);
+  auto const spath = resolveVmInclude(path, currentDir, &s, nativeFuncs);
   if (spath.isNull()) return nullptr;
 
   auto const eContext = g_context.getNoCheck();
 
   // Check if this file has already been included.
   auto it = eContext->m_evaledFiles.find(spath.get());
-  if (it != end(eContext->m_evaledFiles)) {
+  if (it != eContext->m_evaledFiles.end()) {
     // In RepoAuthoritative mode we assume that the files are unchanged.
+    initial = false;
     if (RuntimeOption::RepoAuthoritative ||
         (it->second.ts_sec > s.st_mtime) ||
         ((it->second.ts_sec == s.st_mtime) &&
          (it->second.ts_nsec >= s.st_mtim.tv_nsec))) {
-      initial = false;
       return it->second.unit;
     }
   }
 
   // This file hasn't been included yet, so we need to parse the file
-  auto const cunit = checkoutFile(spath.get(), s);
+  auto const cunit = checkoutFile(spath.get(), s, ent, nativeFuncs);
   if (cunit.unit && initial_opt) {
     // if initial_opt is not set, this shouldn't be recorded as a
     // per request fetch of the file.
@@ -545,7 +803,17 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt) {
     DEBUGGER_ATTACHED_ONLY(phpDebuggerFileLoadHook(cunit.unit));
   }
 
+  lookupTimer.stop();
+  if (ent) logLoad(*ent, path, currentDir, spath, cunit);
   return cunit.unit;
+}
+
+Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable& nativeFuncs) {
+  if (RuntimeOption::RepoAuthoritative) {
+    return lookupUnitRepoAuth(path, nativeFuncs).unit;
+  }
+  OptLog ent;
+  return lookupUnitNonRepoAuth(path, nullptr, ent, nativeFuncs).unit;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -568,8 +836,9 @@ void preloadRepo() {
   std::atomic<size_t> index{0};
   for (auto worker = 0; worker < numWorkers; ++worker) {
     workers.push_back(std::thread([&] {
+      ProfileNonVMThread nonVM;
       hphp_thread_init();
-      hphp_session_init();
+      hphp_session_init(Treadmill::SessionKind::PreloadRepo);
 
       while (true) {
         auto begin = index.fetch_add(batchSize);
@@ -580,7 +849,7 @@ void preloadRepo() {
           auto& kv = units[begin + i];
           try {
             lookupUnit(String(RuntimeOption::SourceRoot + kv.first).get(),
-                       "", nullptr);
+                       "", nullptr, Native::s_noNativeFuncs);
           } catch (...) {
             // swallow errors silently
           }

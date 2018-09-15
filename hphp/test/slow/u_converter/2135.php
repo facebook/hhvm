@@ -24,4 +24,8 @@ function main() {
   unset($c);
 }
 
+
+<<__EntryPoint>>
+function main_2135() {
 main();
+}

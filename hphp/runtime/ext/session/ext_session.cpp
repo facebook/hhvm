@@ -42,6 +42,7 @@
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/zend-math.h"
@@ -147,7 +148,7 @@ public:
   String id;
 };
 
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(SessionRequestData, s_session);
+THREAD_LOCAL_NO_CHECK(SessionRequestData, s_session);
 
 void SessionRequestData::requestShutdownImpl() {
   if (mod_is_open()) {
@@ -362,7 +363,7 @@ const Object& SystemlibSessionModule::getObject() {
   }
   s_obj->setObject(Object{m_cls});
   const auto& obj = s_obj->getObject();
-  tvRefcountedDecRef(
+  tvDecRefGen(
     g_context->invokeFuncFew(m_ctor, obj.get())
   );
   return obj;
@@ -374,7 +375,7 @@ bool SystemlibSessionModule::open(const char *save_path,
 
   Variant savePath = String(save_path, CopyString);
   Variant sessionName = String(session_name, CopyString);
-  TypedValue args[2] = { *savePath.asCell(), *sessionName.asCell() };
+  TypedValue args[2] = { *savePath.toCell(), *sessionName.toCell() };
   auto ret = Variant::attach(
       g_context->invokeFuncFew(m_open, obj.get(), nullptr, 2, args)
   );
@@ -415,7 +416,7 @@ bool SystemlibSessionModule::read(const char *key, String &value) {
   Variant sessionKey = String(key, CopyString);
   auto ret = Variant::attach(
     g_context->invokeFuncFew(m_read, obj.get(),
-                             nullptr, 1, sessionKey.asCell())
+                             nullptr, 1, sessionKey.toCell())
   );
 
   if (ret.isString()) {
@@ -432,7 +433,7 @@ bool SystemlibSessionModule::write(const char *key, const String& value) {
 
   Variant sessionKey = String(key, CopyString);
   Variant sessionVal = value;
-  TypedValue args[2] = { *sessionKey.asCell(), *sessionVal.asCell() };
+  TypedValue args[2] = { *sessionKey.toCell(), *sessionVal.toCell() };
   auto ret = Variant::attach(
     g_context->invokeFuncFew(m_write, obj.get(), nullptr, 2, args)
   );
@@ -451,7 +452,7 @@ bool SystemlibSessionModule::destroy(const char *key) {
   Variant sessionKey = String(key, CopyString);
   auto ret = Variant::attach(
     g_context->invokeFuncFew(m_destroy, obj.get(),
-                             nullptr, 1, sessionKey.asCell())
+                             nullptr, 1, sessionKey.toCell())
   );
 
   if (ret.isBoolean() && ret.toBoolean()) {
@@ -468,7 +469,7 @@ bool SystemlibSessionModule::gc(int maxlifetime, int *nrdels) {
   Variant maxLifeTime = maxlifetime;
   auto ret = Variant::attach(
     g_context->invokeFuncFew(m_gc, obj.get(),
-                             nullptr, 1, maxLifeTime.asCell())
+                             nullptr, 1, maxLifeTime.toCell())
   );
 
   if (ret.isInteger()) {
@@ -507,7 +508,7 @@ struct FileSessionData {
   FileSessionData() : m_fd(-1), m_dirdepth(0), m_st_size(0), m_filemode(0600) {
   }
 
-  bool open(const char *save_path, const char *session_name) {
+  bool open(const char* save_path, const char* /*session_name*/) {
     String tmpdir;
     if (*save_path == '\0') {
       tmpdir = HHVM_FN(sys_get_temp_dir)();
@@ -836,7 +837,7 @@ private:
     return nrdels;
   }
 };
-IMPLEMENT_THREAD_LOCAL(FileSessionData, s_file_session_data);
+THREAD_LOCAL(FileSessionData, s_file_session_data);
 
 struct FileSessionModule : SessionModule {
   FileSessionModule() : SessionModule("files") {
@@ -912,7 +913,7 @@ struct UserSessionModule : SessionModule {
     ));
   }
 
-  bool gc(int maxlifetime, int *nrdels) override {
+  bool gc(int maxlifetime, int* /*nrdels*/) override {
     return handleReturnValue(vm_call_user_func(
        make_packed_array(s_session->ps_session_handler, s_gc),
        make_packed_array((int64_t)maxlifetime)
@@ -1090,12 +1091,12 @@ static PhpSessionSerializer s_php_session_serializer;
 struct PhpSerializeSessionSerializer : SessionSerializer {
   PhpSerializeSessionSerializer() : SessionSerializer("php_serialize") {}
 
-  virtual String encode() {
+  String encode() override {
     VariableSerializer vs(VariableSerializer::Type::Serialize);
-    return vs.serialize(php_global(s__SESSION).toArray(), true, true);
+    return vs.serialize(VarNR{php_global(s__SESSION).toArray()}, true, true);
   }
 
-  virtual bool decode(const String& value) {
+  bool decode(const String& value) override {
     VariableUnserializer vu(value.data(), value.size(),
                             VariableUnserializer::Type::Serialize);
 
@@ -1198,7 +1199,7 @@ static std::string ini_get_serializer() {
   return serializer->getName();
 }
 
-static bool ini_on_update_trans_sid(const bool& value) {
+static bool ini_on_update_trans_sid(const bool& /*value*/) {
   return session_check_active_state();
 }
 
@@ -1207,7 +1208,7 @@ static bool ini_on_update_save_dir(const std::string& value) {
     return false;
   }
   if (g_context.isNull()) return false;
-  const char *path = value.data() + value.rfind(';') + 1;
+  const char *path = value.data() + (value.rfind(';') + 1);
   if (File::TranslatePath(path).empty()) {
     return false;
   }
@@ -1381,7 +1382,7 @@ static void php_session_reset_id() {
     if (!handle) {
       f_define(String{s_SID}, v);
     } else {
-      TypedValue* cns = &rds::handleToRef<TypedValue>(handle);
+      auto cns = rds::handleToPtr<TypedValue, rds::Mode::NonLocal>(handle);
       v.setEvalScalar();
       cns->m_data = v.asTypedValue()->m_data;
       cns->m_type = v.asTypedValue()->m_type;
@@ -1687,7 +1688,7 @@ static bool HHVM_FUNCTION(session_start) {
       /* fallthrough */
     }
   default:
-    assert(s_session->session_status == Session::None);
+    assertx(s_session->session_status == Session::None);
     s_session->define_sid = true;
     s_session->send_cookie = true;
   }
@@ -1814,7 +1815,8 @@ static bool HHVM_METHOD(SessionHandler, hhclose) {
   return s_session->default_mod && s_session->default_mod->close();
 }
 
-static Variant HHVM_METHOD(SessionHandler, hhread, const String& session_id) {
+static Variant
+HHVM_METHOD(SessionHandler, hhread, const String& /*session_id*/) {
   String value;
   if (s_session->default_mod &&
       s_session->default_mod->read(s_session->id.data(), value)) {
@@ -1880,12 +1882,10 @@ static struct SessionExtension final : Extension {
   }
 
   void threadInit() override {
-    // TODO: t5226715 We shouldn't need to check s_session here, but right now
-    // this is called for every request.
-    if (!s_session.isNull()) return;
+    assertx(s_session.isNull());
     s_session.getCheck();
     Extension* ext = ExtensionRegistry::get(s_session_ext_name);
-    assert(ext);
+    assertx(ext);
     IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                      "session.save_path",               "",
                      IniSetting::SetAndGet<std::string>(

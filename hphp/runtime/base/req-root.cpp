@@ -21,20 +21,21 @@
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/util/safe-cast.h"
 
 namespace HPHP {
 namespace req {
 
-size_t req::root_handle::addRootHandle() {
-  auto& handles = MM().m_root_handles;
-  auto id = handles.size();
+uint32_t req::root_handle::addRootHandle() {
+  auto& handles = tl_heap->m_root_handles;
+  auto id = safe_cast<uint32_t>(handles.size());
   handles.push_back(this);
   return id;
 }
 
-size_t req::root_handle::stealRootHandle(root_handle* s) {
-  assert(s->m_id != INVALID);
-  auto& handles = MM().m_root_handles;
+uint32_t req::root_handle::stealRootHandle(root_handle* s) {
+  assertx(s->m_id != INVALID);
+  auto& handles = tl_heap->m_root_handles;
   auto id = s->m_id;
   handles[id] = this;
   s->m_id = INVALID;
@@ -42,7 +43,7 @@ size_t req::root_handle::stealRootHandle(root_handle* s) {
 }
 
 void req::root_handle::delRootHandle() {
-  auto& handles = MM().m_root_handles;
+  auto& handles = tl_heap->m_root_handles;
   auto last = handles.back();
   handles[last->m_id = m_id] = last;
   m_id = INVALID;

@@ -303,4 +303,8 @@ function oh_come_on() {
   $local299 = 299; var_dump($local299);
 }
 
+
+<<__EntryPoint>>
+function main_lotsa_locals() {
 oh_come_on();
+}

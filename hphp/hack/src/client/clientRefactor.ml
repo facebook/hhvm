@@ -2,13 +2,12 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Core
+open Hh_core
 open ClientEnv
 
 let compare_pos pos1 pos2 =
@@ -47,6 +46,7 @@ let write_patches_to_buffer buf original_content patch_list =
   let add_original_content j =
     if j <= !i then () else
     let size = (j - !i + 1) in
+    let size = min (-(!i) + String.length original_content) size in
     let str_to_write = String.sub original_content !i size in
     Buffer.add_string buf str_to_write;
     i := !i + size
@@ -74,12 +74,13 @@ let apply_patches_to_file fn patch_list =
   let new_file_contents = Buffer.contents buf in
   write_string_to_file fn new_file_contents
 
-let input_prompt str =
-  print_string str;
-  flush stdout;
-  input_line stdin
+let list_to_file_map =
+  List.fold_left
+    ~f:map_patches_to_filename
+    ~init:SMap.empty
 
-let apply_patches file_map =
+let apply_patches patches =
+  let file_map = list_to_file_map patches in
   SMap.iter apply_patches_to_file file_map;
   print_endline
       ("Rewrote "^(string_of_int (SMap.cardinal file_map))^" files.")
@@ -106,19 +107,52 @@ let patch_to_json res =
       "replacement", Hh_json.JSON_String replacement;
   ]
 
-let print_patches_json file_map =
+let patches_to_json_string patches =
+  let file_map = list_to_file_map patches in
   let entries = SMap.fold begin fun fn patch_list acc ->
     Hh_json.JSON_Object [
         "filename", Hh_json.JSON_String fn;
         "patches",  Hh_json.JSON_Array (List.map patch_list patch_to_json);
     ] :: acc
   end file_map [] in
-  print_endline (Hh_json.json_to_string (Hh_json.JSON_Array entries))
+  Hh_json.json_to_string (Hh_json.JSON_Array entries)
+
+let print_patches_json patches =
+  print_endline (patches_to_json_string patches)
+
+let go_ide conn args filename line char new_name =
+  let patches = ClientConnect.rpc_with_retry conn @@
+    ServerCommandTypes.IDE_REFACTOR {
+      ServerCommandTypes.Ide_refactor_type.
+      filename;
+      line;
+      char;
+      new_name;
+    } in
+  let patches = match patches with
+  | Ok patches -> patches
+  | Error message -> failwith message
+  in
+  if args.output_json
+  then print_patches_json patches
+  else apply_patches patches
 
 let go conn args mode before after =
     let command = match mode with
     | "Class" -> ServerRefactorTypes.ClassRename (before, after)
-    | "Function" -> ServerRefactorTypes.FunctionRename (before, after)
+    | "Function" ->
+      (*
+        We set these to `None` here because we don't want to add a deprecated
+          wrapper after the rename. Likewise for `MethodRename`
+      *)
+      let filename = None in
+      let definition = None in
+      ServerRefactorTypes.FunctionRename {
+        filename;
+        definition;
+        old_name = before;
+        new_name = after;
+      }
     | "Method" ->
       let befores = Str.split (Str.regexp "::") before in
       if (List.length befores) <> 2
@@ -138,15 +172,20 @@ let go conn args mode before after =
         failwith "Before and After classname must match"
       end
       else
-        ServerRefactorTypes.MethodRename
-          (before_class, before_method, after_method)
+        let filename = None in
+        let definition = None in
+        ServerRefactorTypes.MethodRename {
+          filename;
+          definition;
+          class_name = before_class;
+          old_name = before_method;
+          new_name = after_method;
+        }
     | _ ->
         failwith "Unexpected Mode" in
 
     let patches =
-      ServerCommand.rpc conn @@ ServerCommandTypes.REFACTOR command in
-    let file_map = List.fold_left patches
-      ~f:map_patches_to_filename ~init:SMap.empty in
+      ClientConnect.rpc_with_retry conn @@ ServerCommandTypes.REFACTOR command in
     if args.output_json
-    then print_patches_json file_map
-    else apply_patches file_map
+    then print_patches_json patches
+    else apply_patches patches

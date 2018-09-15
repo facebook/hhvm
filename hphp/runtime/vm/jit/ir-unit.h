@@ -249,6 +249,12 @@ struct IRUnit {
 
   /////////////////////////////////////////////////////////////////////////////
 
+  /*
+   * For prologue contexts, the address of the start of the prologue
+   * (ie the address after the prologue guard) gets written here.
+   */
+  TCA prologueStart{nullptr};
+
 private:
   template<class... Args> SSATmp* newSSATmp(Args&&...);
 
@@ -275,9 +281,6 @@ private:
   // Default hint value for new blocks in this unit.
   Block::Hint m_defHint{Block::Hint::Neither};
 
-  // "Cursor" for IRInstructions in the current bytecode.  Managed externally.
-  uint16_t m_iroff{0};
-
   int64_t m_startNanos; // Timestamp at construction time.
   mutable folly::Optional<StructuredLogEntry> m_logEntry;
 };
@@ -291,6 +294,13 @@ std::string show(const IRUnit&);
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Find and return a unique block that ends the unit at lastSk.
+ *
+ * If one cannot be found, abort, unless the unit has 0 main exits and 1 or
+ * more blocks that end with Unreachable, in which case return nullptr. This
+ * indicates regions that ended early due to type contradictions.
+ */
 Block* findMainExitBlock(const IRUnit& unit, SrcKey lastSk);
 
 //////////////////////////////////////////////////////////////////////

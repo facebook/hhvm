@@ -67,7 +67,7 @@ function fun(string $s) /* interpreted by the type checker as
 }
 
 /**
- * Like [`fun`](/hack/reference/function/HH.fun/), but with the purpose of
+ * Like `fun`, but with the purpose of
  * calling an instance method on any object of a certain class.
  *
  * With `fun` you'd pass in something like `'count'` and it'd call `count($x)`
@@ -105,7 +105,7 @@ function meth_caller(string $class, string $method) {
 }
 
 /**
- * Like [`fun`](/hack/reference/function/HH.fun/), but with the purpose of
+ * Like `fun`, but with the purpose of
  * calling static methods.
  *
  * Example:
@@ -135,19 +135,22 @@ function meth_caller(string $class, string $method) {
 <<__IsFoldable>>
 function class_meth(string $class, string $method)
   /* : (function(<hack figures this>): <and this>) */ {
-  return array($class, $method);
+  return varray[$class, $method];
 }
 
 /**
- * Like [`fun`](/hack/reference/function/HH.fun/), but with the purpose of
- * calling an instance method on a specific object.
+ * Like `fun`, but with the purpose of calling an instance method on a specific
+ * object.
+ *
+ * This function can only be used on public methods; for private or protected
+ * methods, use a lambda instead.
  *
  * Example:
  *
  * ```
  * <?hh
  *  class C {
- *   private function isOdd(int $i): bool { return $i % 2 == 1; }
+ *   public function isOdd(int $i): bool { return $i % 2 == 1; }
  *   private function filter(Vector<int> $data): Vector<int> {
  *     $callback = inst_meth($this, 'isOdd');
  *     return $data->filter($callback);
@@ -169,7 +172,7 @@ function class_meth(string $class, string $method)
 function inst_meth($instance, string $method)
   /* : (function(<hack figures this>): <and this>) */ {
   invariant(\is_object($instance), 'expecting an object');
-  return array($instance, $method);
+  return varray[$instance, $method];
 }
 
 }

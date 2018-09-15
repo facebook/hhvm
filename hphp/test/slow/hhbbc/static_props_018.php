@@ -1,11 +1,5 @@
 <?php
 
-if (mt_rand()) {
-  class L { const A = 2; }
-} else {
-  class L { const A = 3; }
-}
-
 class Asd {
   private static $foo = array(1,false,3, L::A);
 
@@ -18,4 +12,14 @@ class Asd {
   }
 }
 
+
+<<__EntryPoint>>
+function main_static_props_018() {
+if (mt_rand()) {
+  class L { const A = 2; }
+} else {
+  class L { const A = 3; }
+}
+
 Asd::go();
+}

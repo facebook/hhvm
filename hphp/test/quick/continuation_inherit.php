@@ -1,4 +1,4 @@
-<?
+<?hh
 
 function derp() {
   class HerpDerp extends Generator {}

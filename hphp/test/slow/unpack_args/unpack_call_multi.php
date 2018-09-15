@@ -10,4 +10,8 @@ function main() {
   f(...$args, ...$args);
 }
 
+
+<<__EntryPoint>>
+function main_unpack_call_multi() {
 main();
+}

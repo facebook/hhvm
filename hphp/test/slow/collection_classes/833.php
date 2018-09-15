@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_833() {
 $mapFn = function ($v) {
  return $v+1;
  }
@@ -37,4 +40,5 @@ foreach ($iterable as $v1) {
   foreach ($iterable as $v2) {
     echo "$v1 $v2\n";
   }
+}
 }

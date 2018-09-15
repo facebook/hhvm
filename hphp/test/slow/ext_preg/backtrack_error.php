@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_backtrack_error() {
 $re = '{^(\s*\{\s*(?:"(?:\\\\["bfnrt/\\\\]|\\\\u[a-fA-F0-9]{4}|[^\0-\x09\x0a-\x1f\\\\"])*"\s*:\s*(?:[0-9.]+|null|true|false|"(?:\\\\["bfnrt/\\\\]|\\\\u[a-fA-F0-9]{4}|[^\0-\x09\x0a-\x1f\\\\"])*"|\[[^\]]*\]|\{(?:[^{}]*|\{(?:[^{}]*|\{(?:[^{}]*|\{(?:[^{}]*|\{[^{}]*\})*\})*\})*\})*\})\s*,\s*)*?)("require-dev"\s*:\s*(?:[0-9.]+|null|true|false|"(?:\\\\["bfnrt/\\\\]|\\\\u[a-fA-F0-9]{4}|[^\0-\x09\x0a-\x1f\\\\"])*"|\[[^\]]*\]|\{(?:[^{}]*|\{(?:[^{}]*|\{(?:[^{}]*|\{(?:[^{}]*|\{[^{}]*\})*\})*\})*\})*\}))(.*)}s';
 
 $pass = '{
@@ -34,3 +37,4 @@ var_dump($count, preg_last_error() === PREG_BACKTRACK_LIMIT_ERROR);
 
 $count = preg_split($re, $pass);
 var_dump($count, preg_last_error() === PREG_BACKTRACK_LIMIT_ERROR);
+}

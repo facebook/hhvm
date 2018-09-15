@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // XXXjit doesn't do "missing argument" warnings
 error_reporting(0);

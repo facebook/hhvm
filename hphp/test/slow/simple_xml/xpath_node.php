@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_xpath_node() {
 $xml = simplexml_load_string(<<<EOF
 <root>
   <block name="test" />
@@ -15,3 +18,4 @@ $block[0]->addAttribute('attr', true);
 
 var_dump((bool)$block[0]->attributes()->attr);
 var_dump((bool)$xml->children()->block->attributes()->attr);
+}

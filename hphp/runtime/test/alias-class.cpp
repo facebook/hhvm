@@ -193,8 +193,8 @@ TEST(AliasClass, Basic) {
   // == implies <=, and <= implies maybe
   for (auto c1 : joined) {
     for (auto c2 : joined) {
-      if (c1 == c2) EXPECT_TRUE(c1 <= c2);
-      if (c1 <= c2) EXPECT_TRUE(c1.maybe(c2));
+      EXPECT_TRUE(!(c1 == c2) || c1 <= c2);
+      EXPECT_TRUE(!(c1 <= c2) || c1.maybe(c2));
     }
   }
 
@@ -463,9 +463,9 @@ TEST(AliasClass, IterUnion) {
 TEST(AliasClass, Pointees) {
   IRUnit unit{test_context};
   auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
-  auto ptr = unit.gen(LdMBase, bcctx, TPtrToGen)->dst();
+  auto ptr = unit.gen(LdMBase, bcctx, TLvalToGen)->dst();
   auto const acls = pointee(ptr);
-  EXPECT_EQ(AHeapAny | AFrameAny | AStackAny | AMIStateTV, acls);
+  EXPECT_EQ(AHeapAny | AFrameAny | AStackAny | AMIStateTV | ARdsAny, acls);
 }
 
 //////////////////////////////////////////////////////////////////////

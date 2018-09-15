@@ -2,13 +2,12 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Core
+open Core_kernel
 open Decl_defs
 open Nast
 open Typing_defs
@@ -74,6 +73,7 @@ let declared_class_req env (requirements, req_extends) hint =
     requirements, req_extends
   | Some parent_type -> (* The parent class lives in Hack *)
     let req_extends = SSet.union parent_type.dc_extends req_extends in
+    let req_extends = SSet.union parent_type.dc_xhp_attr_deps req_extends in
     (* the req may be of an interface that has reqs of its own; the
      * flattened ancestry required by *those* reqs need to be added
      * in to, e.g., interpret accesses to protected functions inside
@@ -95,21 +95,21 @@ let declared_class_req env (requirements, req_extends) hint =
  * than I'm willing to do now. *)
 let naive_dedup req_extends =
   (* maps class names to type params *)
-  let h = Hashtbl.create 0 in
+  let h = Caml.Hashtbl.create 0 in
   List.rev_filter_map req_extends begin fun (parent_pos, ty) ->
     match ty with
     | _r, Tapply (name, hl) ->
       let hl = List.map hl Decl_pos_utils.NormalizeSig.ty in
       begin try
-        let hl' = Hashtbl.find h name in
-        if List.compare ~cmp:Pervasives.compare hl hl' <> 0 then
+        let hl' = Caml.Hashtbl.find h name in
+        if List.compare Pervasives.compare hl hl' <> 0 then
           raise Exit
         else
           None
       with
       | Exit
-      | Not_found ->
-        Hashtbl.add h name hl;
+      | Caml.Not_found ->
+        Caml.Hashtbl.add h name hl;
         Some (parent_pos, ty)
       end
     | _ -> Some (parent_pos, ty)

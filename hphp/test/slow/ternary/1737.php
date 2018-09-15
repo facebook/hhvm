@@ -19,5 +19,9 @@ function f($a0,
     $r0, $r1, $r2,
     $r3, $r4, $r5);
 }
+
+<<__EntryPoint>>
+function main_1737() {
 var_dump(f(0, 0.0, false, null, null, null));
 var_dump(f(1, 1.0, true, 'hello', array(0, 1), new X));
+}

@@ -42,4 +42,8 @@ function main() {
   foreach (foo() as $k) {
 }
 }
+
+<<__EntryPoint>>
+function main_generator_nested_fcalls() {
 main();
+}

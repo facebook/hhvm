@@ -1,0 +1,19 @@
+[
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "initialize",
+  "params": {
+    "initializationOptions":{},
+    "processId":null,
+    "rootPath":">>> path_expand('.')",
+    "capabilities":{}
+  }
+},
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "shutdown",
+  "params": {}
+}
+]

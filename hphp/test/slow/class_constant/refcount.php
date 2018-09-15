@@ -12,5 +12,9 @@ function t() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_refcount() {
 t();
 var_dump(Foo::VALUE);
+}

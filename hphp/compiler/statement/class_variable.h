@@ -18,6 +18,7 @@
 #define incl_HPHP_CLASS_VARIABLE_H_
 
 #include "hphp/compiler/statement/statement.h"
+#include "hphp/compiler/type_annotation.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,26 +32,27 @@ struct ClassVariable : Statement, IParseHandler {
   ClassVariable(STATEMENT_CONSTRUCTOR_PARAMETERS,
                 ModifierExpressionPtr modifiers,
                 std::string typeConstraint,
-                ExpressionListPtr declaration);
+                ExpressionListPtr declaration,
+                TypeAnnotationPtr typeAnnot,
+                ExpressionListPtr attrList);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  StatementPtr preOptimize(AnalysisResultConstPtr ar) override;
 
   // implementing IParseHandler
-  void onParseRecur(AnalysisResultConstPtr ar, FileScopeRawPtr fs,
+  void onParseRecur(AnalysisResultConstRawPtr ar, FileScopeRawPtr fs,
                     ClassScopePtr scope) override;
 
   std::string getTypeConstraint() const { return m_typeConstraint; }
   ExpressionListPtr getVarList() const { return m_declaration; }
   ModifierExpressionPtr getModifiers() const { return m_modifiers; }
-
-  void addTraitPropsToScope(AnalysisResultPtr ar, ClassScopePtr scope);
-
+  ExpressionListPtr userAttributeList() { return m_attributeList; }
+  TypeAnnotationPtr getTypeAnnotation() const { return m_typeAnnotation; }
 private:
-
   ModifierExpressionPtr m_modifiers;
   std::string m_typeConstraint;
   ExpressionListPtr m_declaration;
+  TypeAnnotationPtr m_typeAnnotation;
+  ExpressionListPtr m_attributeList;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

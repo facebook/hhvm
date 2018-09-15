@@ -19,9 +19,7 @@
 #include "hphp/compiler/statement/block_statement.h"
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/analysis/block_scope.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/analysis_result.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/expression/dynamic_variable.h"
 #include "hphp/compiler/analysis/function_scope.h"
@@ -39,7 +37,6 @@ GlobalStatement::GlobalStatement
   std::set<std::string> seen;
   for (int i = 0; i < m_exp->getCount(); i++) {
     ExpressionPtr exp = (*m_exp)[i];
-    exp->setContext(Expression::Declaration);
     if (exp->is(Expression::KindOfSimpleVariable)) {
       auto const& name = static_pointer_cast<SimpleVariable>(exp)->getName();
       if (!seen.insert(name).second) {
@@ -60,10 +57,6 @@ StatementPtr GlobalStatement::clone() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-void GlobalStatement::analyzeProgram(AnalysisResultPtr ar) {
-  m_exp->analyzeProgram(ar);
-}
 
 ConstructPtr GlobalStatement::getNthKid(int n) const {
   switch (n) {
@@ -89,13 +82,6 @@ void GlobalStatement::setNthKid(int n, ConstructPtr cp) {
       assert(false);
       break;
   }
-}
-
-StatementPtr GlobalStatement::preOptimize(AnalysisResultConstPtr ar) {
-  if (!m_exp->getCount()) {
-    return NULL_STATEMENT();
-  }
-  return StatementPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -25,37 +25,28 @@ namespace HPHP {
 struct StaticClassName : IParseHandler {
   explicit StaticClassName(ExpressionPtr classExp);
 
-  void onParse(AnalysisResultConstPtr ar, FileScopePtr scope);
+  void onParse(AnalysisResultConstRawPtr ar, FileScopePtr scope) override;
 
   bool isSelf() const { return m_self; }
   bool isParent() const { return m_parent; }
   bool isStatic() const { return m_static; }
-  bool isRedeclared() const { return m_redeclared; }
-  bool isPresent() const { return m_present; }
-  bool isUnknown() const { return m_unknown; }
-
-  void setRedeclared() { m_redeclared = true; }
 
   const std::string &getOriginalClassName() const { return m_origClassName; }
 
   ExpressionPtr getClass() const { return m_class; }
 
-  ClassScopePtr resolveClass();
+  void resolveClass();
   bool isNamed(folly::StringPiece clsName) const;
   bool hasStaticClass() const { return !m_origClassName.empty(); }
 protected:
   ExpressionPtr m_class;
   std::string m_origClassName;
 
-  void updateClassName();
   void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
 private:
   unsigned m_self : 1;
   unsigned m_parent : 1;
   unsigned m_static : 1;
-  unsigned m_redeclared : 1;
-  unsigned m_present : 1;
-  unsigned m_unknown : 1;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

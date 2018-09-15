@@ -1,4 +1,4 @@
-<?php
+<?hh
 hello
 throw new Exception(<<<TXT
 hello

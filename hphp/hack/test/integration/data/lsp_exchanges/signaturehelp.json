@@ -1,0 +1,166 @@
+[
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "initialize",
+    "params": {
+      "initializationOptions": {},
+      "processId": null,
+      "rootPath": "${root_path}",
+      "capabilities": {}
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "textDocument/didOpen",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}",
+        "languageId": "hack",
+        "version": 1,
+        "text": "${php_file}"
+      }
+    }
+  },
+  {
+    "comment": "signature help for 0-argument method invocation (left of opening paren)",
+    "jsonrpc": "2.0",
+    "method": "textDocument/signatureHelp",
+    "id": 10,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 4,
+        "character": 23
+      }
+    }
+  },
+  {
+    "comment": "signature help for 0-argument method invocation",
+    "jsonrpc": "2.0",
+    "method": "textDocument/signatureHelp",
+    "id": 20,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 4,
+        "character": 24
+      }
+    }
+  },
+  {
+    "comment": "signature help for 0-argument method invocation (right of closing paren)",
+    "jsonrpc": "2.0",
+    "method": "textDocument/signatureHelp",
+    "id": 30,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 4,
+        "character": 25
+      }
+    }
+  },
+  {
+    "comment": "signature help for non-0-argument function invocation (left of opening paren)",
+    "jsonrpc": "2.0",
+    "method": "textDocument/signatureHelp",
+    "id": 40,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 5,
+        "character": 15
+      }
+    }
+  },
+  {
+    "comment": "signature help for non-0-argument function invocation (right of opening paren)",
+    "jsonrpc": "2.0",
+    "method": "textDocument/signatureHelp",
+    "id": 50,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 5,
+        "character": 16
+      }
+    }
+  },
+  {
+    "comment": "signature help for non-0-argument function invocation (left of first comma)",
+    "jsonrpc": "2.0",
+    "method": "textDocument/signatureHelp",
+    "id": 60,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 5,
+        "character": 26
+      }
+    }
+  },
+  {
+    "comment": "signature help for non-0-argument function invocation (right of first comma)",
+    "jsonrpc": "2.0",
+    "method": "textDocument/signatureHelp",
+    "id": 70,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 5,
+        "character": 27
+      }
+    }
+  },
+  {
+    "comment": "signature help for non-0-argument function invocation (left of closing paren)",
+    "jsonrpc": "2.0",
+    "method": "textDocument/signatureHelp",
+    "id": 80,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 5,
+        "character": 30
+      }
+    }
+  },
+  {
+    "comment": "signature help for non-0-argument function invocation (right of closing paren)",
+    "jsonrpc": "2.0",
+    "method": "textDocument/signatureHelp",
+    "id": 90,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 5,
+        "character": 31
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 999,
+    "method": "shutdown",
+    "params": {}
+  }
+]

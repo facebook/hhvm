@@ -10,5 +10,6 @@ class testClass
   }
 }
 
+
 $test = new testClass();
 $test->testInclude();

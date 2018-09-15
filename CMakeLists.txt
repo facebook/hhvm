@@ -8,17 +8,46 @@ INCLUDE("${CMAKE_CURRENT_SOURCE_DIR}/CMake/VisualStudioToolset.cmake")
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-# package information
-SET(PACKAGE_NAME      "hhvm")
-SET(PACKAGE_VERSION   "3.18.0-dev")
-SET(PACKAGE_STRING    "${PACKAGE_NAME} ${PACKAGE_VERSION}")
-SET(PACKAGE_TARNAME   "${PACKAGE_NAME}-${PACKAGE_VERSION}")
-SET(PACKAGE_BUGREPORT "https://github.com/facebook/hhvm/issues")
+PROJECT(hhvm C CXX ASM)
 
-PROJECT(${PACKAGE_NAME} C CXX ASM)
+include(HHVMProject)
+
 if (MSVC)
   enable_language(ASM_MASM)
 endif()
+
+# Look for and apply patches to the third-party (and sub) repo.
+file(GLOB PATCHES "${CMAKE_SOURCE_DIR}/patches/*.patch")
+if (PATCHES)
+  message(STATUS "Patches: ${PATCHES}")
+  foreach(PATCH ${PATCHES})
+    message(STATUS "Applying ${PATCH}")
+    execute_process(
+      COMMAND patch -p1 --forward --ignore-whitespace
+      WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+      INPUT_FILE "${PATCH}"
+      OUTPUT_VARIABLE OUTPUT
+      RESULT_VARIABLE RESULT)
+    if (RESULT EQUAL 0)
+      message(STATUS "Patch applied: ${PATCH}")
+    else()
+      # Unfortunately although patch will recognise that a patch is already
+      # applied it will still return an error.
+      execute_process(
+        COMMAND patch -p1 -R --dry-run
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+        INPUT_FILE "${PATCH}"
+        OUTPUT_VARIABLE OUTPUT
+        RESULT_VARIABLE RESULT2)
+      if (RESULT2 EQUAL 0)
+        message(STATUS "Patch was already applied: ${PATCH}")
+      else()
+        message(FATAL_ERROR "Error applying patch ${PATCH}")
+      endif()
+    endif()
+  endforeach(PATCH)
+endif()
+
 
 MARK_AS_ADVANCED(CLEAR CMAKE_INSTALL_PREFIX)
 IF(APPLE)
@@ -64,7 +93,7 @@ git submodule update --init --recursive
 ")
 ENDIF()
 
-INCLUDE("${CMAKE_CURRENT_SOURCE_DIR}/CMake/HPHPFunctions.cmake")
+INCLUDE(HPHPFunctions)
 INCLUDE(CheckFunctionExists)
 
 SET(HPHP_HOME ${CMAKE_CURRENT_SOURCE_DIR})
@@ -72,8 +101,11 @@ SET(TP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third-party")
 SET(TP_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/third-party")
 
 include(MSVCDefaults)
+include(Options)
+include(HPHPCompiler)
+include(HPHPFindLibs)
 
-ADD_SUBDIRECTORY(third-party)
+ADD_SUBDIRECTORY(third-party EXCLUDE_FROM_ALL)
 ADD_SUBDIRECTORY(hphp)
 
 # use GNU install dirs (e.g. lib64 instead of lib)

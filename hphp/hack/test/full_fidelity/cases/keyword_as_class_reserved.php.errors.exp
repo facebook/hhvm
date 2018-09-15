@@ -1,0 +1,12 @@
+(7,7)-(7,15) Cannot use 'classname' as class name as it is reserved
+(8,7)-(8,12) Cannot use 'darray' as class name as it is reserved
+(11,7)-(11,11) Cannot use 'false' as class name as it is reserved
+(18,7)-(18,10) Cannot use 'null' as class name as it is reserved
+(20,7)-(20,12) Cannot use 'parent' as class name as it is reserved
+(23,7)-(23,10) Cannot use 'self' as class name as it is reserved
+(25,7)-(25,10) Cannot use 'this' as class name as it is reserved
+(26,7)-(26,10) Cannot use 'true' as class name as it is reserved
+(27,7)-(27,12) Cannot use 'varray' as class name as it is reserved
+(38,5)-(38,9) Unexpected node on right hand side of new or instanceof: literal
+(45,5)-(45,8) Unexpected node on right hand side of new or instanceof: literal
+(53,5)-(53,8) Unexpected node on right hand side of new or instanceof: literal

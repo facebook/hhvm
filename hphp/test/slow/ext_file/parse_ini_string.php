@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_parse_ini_string() {
 $inis = array(
   'general_ini_with_sections' =>
     ';;; Created on Tuesday, October 27, 2009 at 12:01 PM GMT'."\n".
@@ -53,4 +56,5 @@ foreach ($inis as $key => $ini) {
   echo "===\n";
   var_dump(parse_ini_string($ini, true));
   echo "===\n";
+}
 }

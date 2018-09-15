@@ -14,4 +14,8 @@ function main() {
   while (true) continue;
 }
 
+
+<<__EntryPoint>>
+function main_1563() {
 main();
+}

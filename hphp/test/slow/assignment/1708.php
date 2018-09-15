@@ -54,6 +54,9 @@ class node_arr {
   }
 }
 
+
+<<__EntryPoint>>
+function main_1708() {
 echo "
 Property, SetM
 ";
@@ -81,3 +84,4 @@ Array, UnsetM
 $node = new node_arr(new dom);
 $node->clear_unset();
 unset($node);
+}

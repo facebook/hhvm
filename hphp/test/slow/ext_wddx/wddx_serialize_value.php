@@ -29,4 +29,8 @@ function test(){
   echo wddx_serialize_value($v);
   print "\n";
 }
+
+<<__EntryPoint>>
+function main_wddx_serialize_value() {
 test();
+}

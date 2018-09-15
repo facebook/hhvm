@@ -21,11 +21,14 @@ extern "C" {
 #include <timelib.h>
 }
 
+#include <chrono>
+
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/util/timer.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,9 +39,11 @@ int64_t TimeStamp::Current() {
 }
 
 double TimeStamp::CurrentSecond() {
-  struct timeval tp;
-  gettimeofday(&tp, nullptr);
-  return (double)tp.tv_sec + (double)tp.tv_usec / 1000000;
+  auto now_ns = gettime_ns(CLOCK_REALTIME);
+  using DoubleSeconds =
+    std::chrono::duration<double, std::chrono::seconds::period>;
+  auto now_double_secs = DoubleSeconds(std::chrono::nanoseconds(now_ns));
+  return now_double_secs.count();
 }
 
 const StaticString
@@ -52,7 +57,7 @@ Array TimeStamp::CurrentTime() {
   gettimeofday(&tp, nullptr);
 
   timelib_time_offset *offset =
-    timelib_get_time_zone_info(tp.tv_sec, TimeZone::Current()->get());
+    timelib_get_time_zone_info(tp.tv_sec, TimeZone::Current()->getTZInfo());
 
   auto const ret = make_map_array(
     s_sec, (int)tp.tv_sec,

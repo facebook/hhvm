@@ -1,5 +1,5 @@
+<?hh
 
-        <?hh
         function h(): string {
             return "a";
         }

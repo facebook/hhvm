@@ -10,5 +10,9 @@ function f($code) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_single_line_comment_hack_closer() {
 f("<?hh // ?>\n");
 f("<?hh // ?>");
+}

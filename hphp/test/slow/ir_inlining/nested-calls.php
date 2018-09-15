@@ -22,5 +22,9 @@ class c {
   }
 }
 
+
+<<__EntryPoint>>
+function main_nested_calls() {
 new c;
 echo "done\n";
+}

@@ -1,0 +1,32 @@
+(3,1)-(25,1) Class E contains an abstract method and must therefore be declared abstract
+(4,3)-(4,16) A method declaration cannot have multiple visibility modifiers.
+(5,3)-(5,13) A method declaration cannot have duplicate modifiers.
+(5,3)-(5,34) Redeclared method E::f
+(6,3)-(6,23) Cannot declare abstract method E::f final
+(6,3)-(6,44) Redeclared method E::f
+(7,3)-(7,18) Cannot declare abstract method E::f private
+(7,3)-(7,39) Redeclared method E::f
+(8,3)-(8,45) Redeclared method E::f
+(9,3)-(9,45) Redeclared method E::f
+(10,3)-(10,29) Redeclared method E::f
+(10,31)-(10,31) Non-abstract method E::f must contain body
+(11,3)-(11,15) Constructor E::__construct() cannot be static
+(12,3)-(12,45) Redeclared method E::__construct
+(13,3)-(13,41) Redeclared method E::__construct
+(14,3)-(14,41) Redeclared method E::__construct
+(15,3)-(15,42) Redeclared method E::f
+(15,22)-(15,34) Parameters cannot have visibility modifiers (except in parameter lists of constructors).
+(16,3)-(16,8) Method E::__destruct cannot accept any arguments
+(17,3)-(17,8) Destructor E::__destruct() cannot be static
+(17,3)-(17,31) Redeclared method E::__destruct
+(18,3)-(18,38) Redeclared method E::__construct
+(18,36)-(18,38) A constructor or destructor cannot have a non-void type annotation.
+(19,3)-(19,35) Redeclared method E::__destruct
+(19,35)-(19,35) A constructor or destructor cannot have a non-void type annotation.
+(20,3)-(20,39) Redeclared method E::__construct
+(21,3)-(21,38) Redeclared method E::__destruct
+(22,3)-(22,32) Redeclared method E::f
+(23,3)-(23,33) Redeclared method E::f
+(23,25)-(23,25) A variadic parameter ('...') may not be followed by a comma.
+(24,3)-(24,40) Redeclared method E::f
+(24,22)-(24,24) A variadic parameter ('...') may only appear at the end of a parameter list.

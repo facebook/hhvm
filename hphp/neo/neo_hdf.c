@@ -967,6 +967,7 @@ static NEOERR* hdf_dump_cb(HDF *hdf, const char *prefix, int dtype, int lvl,
 	if (err) return nerr_pass(err);
 	while (attr != NULL)
 	{
+    //#undef strcmp
 	  if (attr->value == NULL || !strcmp(attr->value, "1"))
 	    err = dump_cbf(rock, "%s", attr->key);
 	  else

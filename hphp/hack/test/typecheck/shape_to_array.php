@@ -1,6 +1,9 @@
 <?hh //strict
 
-type my_shape = shape('x' => int);
+type my_shape = shape(
+  'x' => int,
+  ...
+);
 
 class C {
   const int KEY1 = 1;

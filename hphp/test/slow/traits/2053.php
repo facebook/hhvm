@@ -17,4 +17,8 @@ class MyDerivedClass extends MyBaseClass {
     echo __class__ . ": " . $arg . "\n";
   }
 }
+
+<<__EntryPoint>>
+function main_2053() {
 $o= MyDerivedClass::callNew();
+}

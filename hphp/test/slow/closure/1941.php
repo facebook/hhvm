@@ -16,6 +16,10 @@ class A {
  return $p;
  }
 }
+
+<<__EntryPoint>>
+function main_1941() {
 $obj = new A;
 var_dump($obj->bar());
 $obj->foo();
+}

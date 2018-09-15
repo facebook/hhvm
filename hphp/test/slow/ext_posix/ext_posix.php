@@ -7,9 +7,12 @@ function VS($x, $y) {
 }
 function VERIFY($x) { VS($x != false, true); }
 
+
 //////////////////////////////////////////////////////////////////////
 
 
+<<__EntryPoint>>
+function main_ext_posix() {
 VERIFY(posix_access(__DIR__."/ext_posix.php"));
 
 VERIFY(strlen(posix_ctermid()));
@@ -53,7 +56,7 @@ $ret = posix_getrlimit();
 VERIFY($ret != false);
 VERIFY(count((array)$ret) != 0);
 
-VERIFY(posix_getsid(posix_getpid()));
+VERIFY(posix_getsid(posix_getpid()) !== false);
 
 $tmpfifo = tempnam('/tmp', 'vmmkfifotest');
 unlink($tmpfifo);
@@ -71,3 +74,4 @@ VERIFY(count((array)$ret) != 0);
 $ret = posix_uname();
 VERIFY($ret != false);
 VERIFY(count((array)$ret) != 0);
+}

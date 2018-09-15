@@ -28,12 +28,11 @@
 #include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_misc.h"
-#include "hphp/runtime/ext/xdebug/xdebug_profiler.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/cycles.h"
-#include "hphp/util/vdso.h"
+#include "hphp/util/timer.h"
 
 #include <iostream>
 #include <fstream>
@@ -232,39 +231,21 @@ tv_to_cycles(const struct timeval& tv, int64_t MHz)
 static inline uint64_t
 to_usec(int64_t cycles, int64_t MHz, bool cpu_time = false)
 {
-  static bool vdso_usable =
-#ifdef CLOCK_THREAD_CPUTIME_ID
-    vdso::clock_gettime_ns(CLOCK_THREAD_CPUTIME_ID) >= 0
-#else
-    false
-#endif
-    ;
-
-  if (cpu_time && vdso_usable) {
+  if (cpu_time) {
     return cycles / 1000;
   }
   return (cycles + MHz/2) / MHz;
 }
 
-static inline uint64_t cpuTime(int64_t MHz) {
-#ifdef CLOCK_THREAD_CPUTIME_ID
-  auto const rval = vdso::clock_gettime_ns(CLOCK_THREAD_CPUTIME_ID);
-  if (rval >= 0) {
-    return rval;
-  }
-#endif
-  struct rusage usage;
-  getrusage(RUSAGE_SELF, &usage);
-  return
-    tv_to_cycles(usage.ru_utime, MHz) + tv_to_cycles(usage.ru_stime, MHz);
+static inline uint64_t cpuTime(int64_t /*MHz*/) {
+  return gettime_ns(CLOCK_THREAD_CPUTIME_ID);
 }
 
 uint64_t
 get_allocs()
 {
 #ifdef USE_JEMALLOC
-  auto& mm = MM();
-  return mm.getAllocated();
+  return tl_heap->getAllocated();
 #endif
 #ifdef USE_TCMALLOC
   if (MallocExtensionInstance) {
@@ -281,8 +262,7 @@ uint64_t
 get_frees()
 {
 #ifdef USE_JEMALLOC
-  auto& mm = MM();
-  return mm.getDeallocated();
+  return tl_heap->getDeallocated();
 #endif
 #ifdef USE_TCMALLOC
   if (MallocExtensionInstance) {
@@ -392,18 +372,15 @@ Profiler::~Profiler() {
 /*
  * Called right before a function call.
  */
-void Profiler::beginFrameEx(const char *symbol) {
-}
+void Profiler::beginFrameEx(const char* /*symbol*/) {}
 
 /*
  * Called right after a function is finished.
  */
-void Profiler::endFrameEx(const TypedValue *retval,
-                          const char *_symbol) {
-}
+void Profiler::endFrameEx(const TypedValue* /*retval*/,
+                          const char* /*_symbol*/) {}
 
-void Profiler::writeStats(Array &ret) {
-}
+void Profiler::writeStats(Array& /*ret*/) {}
 
 void Profiler::endAllFrames() {
     while (m_stack) {
@@ -506,7 +483,7 @@ private:
     int64_t         m_vtsc_start;  // user/sys time start
   };
 
-  typedef hphp_hash_map<std::string, CountMap, string_hash> StatsMap;
+  using StatsMap = hphp_hash_map<std::string, CountMap, string_hash>;
   StatsMap m_stats; // outcome
 
 public:
@@ -517,7 +494,7 @@ public:
     return new HierarchicalProfilerFrame();
   }
 
-  void beginFrameEx(const char *symbol) override {
+  void beginFrameEx(const char* /*symbol*/) override {
     HierarchicalProfilerFrame *frame =
       dynamic_cast<HierarchicalProfilerFrame *>(m_stack);
     frame->m_tsc_start = cpuCycles();
@@ -527,7 +504,7 @@ public:
     }
 
     if (m_flags & TrackMemory) {
-      auto const stats = MM().getStats();
+      auto const stats = tl_heap->getStats();
       frame->m_mu_start  = stats.usage();
       frame->m_pmu_start = stats.peakUsage;
     } else if (m_flags & TrackMalloc) {
@@ -536,7 +513,8 @@ public:
     }
   }
 
-  void endFrameEx(const TypedValue *retval, const char *given_symbol) override {
+  void endFrameEx(const TypedValue* /*retval*/,
+                  const char* /*given_symbol*/) override {
     char symbol[512];
     HierarchicalProfilerFrame *frame =
       dynamic_cast<HierarchicalProfilerFrame *>(m_stack);
@@ -550,7 +528,7 @@ public:
     }
 
     if (m_flags & TrackMemory) {
-      auto const stats = MM().getStats();
+      auto const stats = tl_heap->getStats();
       int64_t mu_end = stats.usage();
       int64_t pmu_end = stats.peakUsage;
       counts.memory += mu_end - frame->m_mu_start;
@@ -639,7 +617,7 @@ struct TraceWalker {
     // off. This ensures main() represents the entire run, even if we
     // run out of log space.
     if (!m_stack.empty()) {
-      assert(strcmp(m_stack.back().trace->symbol, "main()") == 0);
+      assertx(strcmp(m_stack.back().trace->symbol, "main()") == 0);
       incStats(m_stack.back().trace->symbol, final, m_stack.back(), stats);
     }
     if (m_badArcCount > 0) {
@@ -770,7 +748,7 @@ struct TraceProfiler final : Profiler {
     } else {
       m_maxTraceBuffer = RuntimeOption::ProfilerMaxTraceBuffer;
       Extension* ext = ExtensionRegistry::get(s_hotprofiler);
-      assert(ext);
+      assertx(ext);
       IniSetting::Bind(ext, IniSetting::PHP_INI_ALL,
                        "profiler.max_trace_buffer",
                        &m_maxTraceBuffer);
@@ -851,7 +829,7 @@ struct TraceProfiler final : Profiler {
                    m_traceBuffer[m_nextTraceEntry++]);
     }
     {
-      MemoryManager::MaskAlloc masker(MM());
+      MemoryManager::MaskAlloc masker(*tl_heap);
       auto r = (TraceEntry*)realloc((void*)m_traceBuffer,
                                     new_array_size * sizeof(TraceEntry));
 
@@ -877,8 +855,8 @@ struct TraceProfiler final : Profiler {
     doTrace(symbol, false);
   }
 
-  void endFrame(const TypedValue *retval, const char *symbol,
-                bool endMain = false) override {
+  void endFrame(const TypedValue* /*retval*/, const char* symbol,
+                bool /*endMain*/ = false) override {
     doTrace(symbol, true);
   }
 
@@ -902,7 +880,7 @@ struct TraceProfiler final : Profiler {
       te.cpu = cpuTime(m_MHz);
     }
     if (m_flags & TrackMemory) {
-      auto const stats = MM().getStats();
+      auto const stats = tl_heap->getStats();
       te.memory = stats.usage();
       te.peak_memory = stats.peakUsage;
     } else if (m_flags & TrackMalloc) {
@@ -980,7 +958,7 @@ struct TraceProfiler final : Profiler {
     int64_t count;
     CountedTraceData() : count(0)  { clear(); }
   };
-  typedef hphp_hash_map<std::string, CountedTraceData, string_hash> StatsMap;
+  using StatsMap = hphp_hash_map<std::string, CountedTraceData, string_hash>;
   StatsMap m_stats; // outcome
 
   static pthread_mutex_t s_inUse;
@@ -1026,11 +1004,10 @@ public:
     m_sampling_interval_tsc = SAMPLING_INTERVAL * m_MHz;
   }
 
-  void beginFrameEx(const char *symbol) override {
-    sample_check();
-  }
+  void beginFrameEx(const char* /*symbol*/) override { sample_check(); }
 
-  void endFrameEx(const TypedValue *retvalue, const char *symbol) override {
+  void
+  endFrameEx(const TypedValue* /*retvalue*/, const char* /*symbol*/) override {
     sample_check();
   }
 
@@ -1122,7 +1099,7 @@ private:
 // value from writeStats, not print to stderr :) Task 3396401 tracks this.
 
 struct MemoProfiler final : Profiler {
-  explicit MemoProfiler(int flags) : Profiler(true) {}
+  explicit MemoProfiler(int /*flags*/) : Profiler(true) {}
 
   ~MemoProfiler() {
   }
@@ -1140,7 +1117,7 @@ struct MemoProfiler final : Profiler {
         VariableSerializer vs(VariableSerializer::Type::DebuggerSerialize);
         String sdata;
         try {
-          sdata = vs.serialize(args, true);
+          sdata = vs.serialize(VarNR{args}, true);
           f.m_args = sdata;
         } catch (...) {
           fprintf(stderr, "Args Serialization failure: %s\n", symbol);
@@ -1150,8 +1127,8 @@ struct MemoProfiler final : Profiler {
     m_stack.push_back(f);
   }
 
-  void endFrame(const TypedValue *retval, const char *symbol,
-                bool endMain = false) override {
+  void endFrame(const TypedValue* retval, const char* symbol,
+                bool /*endMain*/ = false) override {
     if (m_stack.empty()) {
       fprintf(stderr, "STACK IMBALANCE empty %s\n", symbol);
       return;
@@ -1224,7 +1201,7 @@ struct MemoProfiler final : Profiler {
     // Nothing to do for this profiler since all work is done as we go.
   }
 
-  void writeStats(Array &ret) override {
+  void writeStats(Array& /*ret*/) override {
     fprintf(stderr, "writeStats start\n");
     // RetSame: the return value is the same instance every time
     // HasThis: call has a this argument
@@ -1321,9 +1298,6 @@ bool ProfilerFactory::start(ProfilerKind kind,
     break;
   case ProfilerKind::Memo:
     m_profiler = req::make_raw<MemoProfiler>(flags);
-    break;
-  case ProfilerKind::XDebug:
-    m_profiler = req::make_raw<XDebugProfiler>();
     break;
   case ProfilerKind::External:
     if (g_system_profiler) {

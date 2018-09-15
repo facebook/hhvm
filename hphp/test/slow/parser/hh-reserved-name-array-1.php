@@ -1,4 +1,5 @@
 <?hh
+
 if (false) {
   class Array {}
 }

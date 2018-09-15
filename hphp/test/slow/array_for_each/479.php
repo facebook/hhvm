@@ -9,8 +9,12 @@ function g8() {
       $b = false;
       unset($arr[1]);
 
-      array_pop($arr);
+      array_pop(&$arr);
     }
   }
 }
+
+<<__EntryPoint>>
+function main_479() {
 g8();
+}

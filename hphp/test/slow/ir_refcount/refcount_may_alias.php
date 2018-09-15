@@ -26,6 +26,10 @@ function go(X $x) {
   var_dump($x->myfunc());
 }
 
+
+<<__EntryPoint>>
+function main_refcount_may_alias() {
 for ($i = 0; $i < 30; ++$i) {
   go(new X(array(1,2,new stdclass)));
+}
 }

@@ -38,7 +38,7 @@ class MyInt implements GIComparable<MyInt> {
     return $this->item - $mi->item;
   }
   public function __toString(): string {
-    return (string) $this->item;
+    return (string)$this->item;
   }
 }
 
@@ -53,7 +53,7 @@ class MyPair<Tx as GIComparable<Tx>, Ty as GIComparable<Ty>>
     return $this->snd->Compare($that->snd);
   }
   public function __toString(): string {
-    return (string) $this->fst.",".(string) $this->snd;
+    return (string)$this->fst.",".(string)$this->snd;
   }
 }
 

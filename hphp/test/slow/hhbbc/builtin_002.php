@@ -17,4 +17,8 @@ function foo() {
   var_dump($y);
 }
 
+
+<<__EntryPoint>>
+function main_builtin_002() {
 foo();
+}

@@ -3,11 +3,6 @@
 class A extends Exception {
  public $a = 1;
  }
-if (0) {
-  class A {
- public $a = 2;
- }
-}
 function test() {
 try {
   throw new A;
@@ -17,4 +12,13 @@ try {
 ';
 }
 }
+
+<<__EntryPoint>>
+function main_1473() {
+if (0) {
+  class A {
+ public $a = 2;
+ }
+}
  test();
+}

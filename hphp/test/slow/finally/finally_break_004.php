@@ -47,5 +47,9 @@ function blah() {
   }
 }
 
-blah();
 
+
+<<__EntryPoint>>
+function main_finally_break_004() {
+blah();
+}

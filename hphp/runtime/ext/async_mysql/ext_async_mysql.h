@@ -32,7 +32,6 @@
 
 #include <folly/Format.h>
 
-using folly::StringPiece;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,6 +46,8 @@ namespace db = facebook::db;
 
 struct AsyncMysqlConnectionPool {
   AsyncMysqlConnectionPool() = default;
+  void sweep();
+
   std::shared_ptr<am::AsyncConnectionPool> m_async_pool;
   static const StaticString s_className;
 
@@ -72,7 +73,12 @@ struct AsyncMysqlConnection {
       std::unique_ptr<am::Connection> conn,
       std::shared_ptr<am::ConnectOperation> conn_op = nullptr,
       db::ClientPerfStats clientStats = db::ClientPerfStats());
-  Object query(ObjectData* this_, am::Query query, int64_t timeout_micros = -1);
+  using AttributeMap = std::unordered_map<std::string, std::string>;
+  Object query(
+      ObjectData* this_,
+      am::Query query,
+      int64_t timeout_micros = -1,
+      const AttributeMap& queryAttributes = AttributeMap());
 
   std::unique_ptr<am::Connection> m_conn;
   String m_host;
@@ -121,6 +127,7 @@ struct AsyncMysqlConnectionOptions {
   static const StaticString s_className;
 
   am::ConnectionOptions m_conn_opts;
+  TYPE_SCAN_IGNORE_FIELD(m_conn_opts);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -152,7 +159,7 @@ struct AsyncMysqlResult {
 
 struct AsyncMysqlConnectResult : AsyncMysqlResult {
   AsyncMysqlConnectResult() = default;
-  virtual ~AsyncMysqlConnectResult() {}
+  ~AsyncMysqlConnectResult() override {}
   static Class* getClass();
   static Object newInstance(std::shared_ptr<am::Operation> op,
                             db::ClientPerfStats clientStats);
@@ -170,7 +177,7 @@ struct AsyncMysqlConnectResult : AsyncMysqlResult {
 
 struct AsyncMysqlErrorResult : AsyncMysqlResult {
   AsyncMysqlErrorResult() = default;
-  virtual ~AsyncMysqlErrorResult() {}
+  ~AsyncMysqlErrorResult() override {}
 
   static Class* getClass();
   static Object newInstance(std::shared_ptr<am::Operation> op,
@@ -227,12 +234,12 @@ struct FieldIndex {
   String getFieldString(size_t field_index) const;
 
  private:
+  // NB: It's possible to just use a req::vector_map<String> for names,
+  // and rely on insertion order to compute indexes, but sometimes this
+  // FieldIndex has duplicate names. last-name-wins, requiring the map.
   req::vector<String> field_names_;
-  req::hash_map<
-    String,
-    size_t,
-    hphp_string_hash,
-    hphp_string_same> field_name_map_;
+  req::fast_map<String, size_t, hphp_string_hash, hphp_string_same>
+    field_name_map_;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -240,18 +247,19 @@ struct FieldIndex {
 
 struct AsyncMysqlQueryResult : AsyncMysqlResult {
   AsyncMysqlQueryResult() = default;
-  virtual ~AsyncMysqlQueryResult() {}
+  ~AsyncMysqlQueryResult() override {}
   void sweep();
-  void create(std::shared_ptr<am::Operation> op,
-              db::ClientPerfStats values,
-              am::QueryResult query_result);
+  void
+  create(std::shared_ptr<am::Operation> op, db::ClientPerfStats values,
+         am::QueryResult query_result, bool noIndexUsed);
   Object buildRows(bool as_maps, bool typed_values);
   static Class* getClass();
-  static Object newInstance(std::shared_ptr<am::Operation> op,
-                            db::ClientPerfStats values,
-                            am::QueryResult query_result);
+  static Object
+  newInstance(std::shared_ptr<am::Operation> op, db::ClientPerfStats values,
+              am::QueryResult query_result, bool noIndexUsed);
 
   std::unique_ptr<am::QueryResult> m_query_result;
+  bool m_no_index_used;
 
   // Created here for buildRows and passed to RowBlocks
   req::shared_ptr<FieldIndex> m_field_index;
@@ -277,7 +285,7 @@ struct AsyncMysqlConnectEvent final : AsioExternalThreadEvent {
   }
 
  protected:
-  void unserialize(Cell& result) override final;
+  void unserialize(Cell& result) final;
 
  private:
   std::shared_ptr<am::ConnectOperation> m_op;
@@ -298,7 +306,7 @@ struct AsyncMysqlQueryEvent final : AsioExternalThreadEvent {
   }
 
  protected:
-  void unserialize(Cell& result) override final;
+  void unserialize(Cell& result) final;
 
  private:
   std::shared_ptr<am::QueryOperation> m_query_op;
@@ -319,10 +327,35 @@ struct AsyncMysqlMultiQueryEvent final : AsioExternalThreadEvent {
   }
 
  protected:
-  void unserialize(Cell& result) override final;
+  void unserialize(Cell& result) final;
 
  private:
   std::shared_ptr<am::MultiQueryOperation> m_multi_op;
+  db::ClientPerfStats m_clientStats;
+};
+
+struct AsyncMysqlConnectAndMultiQueryEvent final : AsioExternalThreadEvent {
+  explicit AsyncMysqlConnectAndMultiQueryEvent(
+      std::shared_ptr<am::ConnectOperation> op) {
+    m_connect_op = op;
+  }
+
+  void setQueryOp(std::shared_ptr<am::MultiQueryOperation> op) {
+    m_multi_query_op = std::move(op);
+  }
+
+  void opFinished() { markAsFinished(); }
+
+  void setClientStats(db::ClientPerfStats stats) {
+    m_clientStats = std::move(stats);
+  }
+
+ protected:
+  void unserialize(Cell& result) final;
+
+ private:
+  std::shared_ptr<am::ConnectOperation> m_connect_op;
+  std::shared_ptr<am::MultiQueryOperation> m_multi_query_op;
   db::ClientPerfStats m_clientStats;
 };
 

@@ -75,7 +75,7 @@ std::string get_thread_mem_usage() {
            "\t\tBytes allocated\t\tThread Name\n";
   for (auto it : threadMap) {
     if (!it.second->mm) continue;
-    auto usage = it.second->mm->getStats().usage();
+    auto usage = it.second->mm->getStatsCopy().usage();
     result += folly::sformat("\t{:10}\t{:9}\t{:13}\t\t{}\n", it.second->pid,
                              it.second->tid, usage,
                              *it.second->start_name_ptr);
@@ -92,9 +92,8 @@ void* start_routine_wrapper(void *arg) {
   pthread_t self = pthread_self();
   auto& info = *reinterpret_cast<PthreadInfo*>(arg);
 
-  MemoryManager::TlsWrapper::getCheck();
-  info.mm = &MM();
-  assert(info.mm);
+  info.mm = tl_heap.getCheck();
+  assertx(info.mm);
   info.mm->resetExternalStats();
 #ifdef __linux__
   info.tid = syscall(SYS_gettid);

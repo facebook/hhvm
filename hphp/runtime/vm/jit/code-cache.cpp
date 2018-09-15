@@ -25,6 +25,8 @@
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/maphuge.h"
+#include "hphp/util/numa.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP { namespace jit {
@@ -34,30 +36,31 @@ TRACE_SET_MOD(mcg);
 // This value should be enough bytes to emit a REQ_RETRANSLATE: lea (4 or 7
 // bytes), movq (10 bytes), and jmp (5 bytes). We then add some extra slack for
 // safety.
-static const int kMinTranslationBytes = 32;
+static constexpr int kMinTranslationBytes = 32;
+static constexpr size_t kRoundUp = 2ull << 20;
 
 /* Initialized by RuntimeOption. */
-uint64_t CodeCache::AHotSize = 0;
-uint64_t CodeCache::ASize = 0;
-uint64_t CodeCache::AProfSize = 0;
-uint64_t CodeCache::AColdSize = 0;
-uint64_t CodeCache::AFrozenSize = 0;
-uint64_t CodeCache::GlobalDataSize = 0;
-uint64_t CodeCache::AMaxUsage = 0;
-uint64_t CodeCache::AColdMaxUsage = 0;
-uint64_t CodeCache::AFrozenMaxUsage = 0;
+uint32_t CodeCache::AHotSize = 0;
+uint32_t CodeCache::ASize = 0;
+uint32_t CodeCache::AProfSize = 0;
+uint32_t CodeCache::AColdSize = 0;
+uint32_t CodeCache::AFrozenSize = 0;
+uint32_t CodeCache::GlobalDataSize = 0;
+uint32_t CodeCache::AMaxUsage = 0;
+uint32_t CodeCache::AColdMaxUsage = 0;
+uint32_t CodeCache::AFrozenMaxUsage = 0;
 bool CodeCache::MapTCHuge = false;
 uint32_t CodeCache::AutoTCShift = 0;
 uint32_t CodeCache::TCNumHugeHotMB = 0;
 uint32_t CodeCache::TCNumHugeColdMB = 0;
 
+static size_t ru(size_t sz) { return sz + (-sz & (kRoundUp - 1)); }
+
+static size_t rd(size_t sz) { return sz & ~(kRoundUp - 1); }
+
 CodeCache::CodeCache()
   : m_useHot{RuntimeOption::RepoAuthoritative && CodeCache::AHotSize > 0}
 {
-  static const size_t kRoundUp = 2 << 20;
-
-  auto ru = [=] (size_t sz) { return sz + (-sz & (kRoundUp - 1)); };
-  auto rd = [=] (size_t sz) { return sz & ~(kRoundUp - 1); };
 
   // We want to ensure that all code blocks are close to each other so that we
   // can short jump/point between them. Thus we allocate one slab and divide it
@@ -69,15 +72,16 @@ CodeCache::CodeCache()
     RuntimeOption::EvalThreadTCDataBufferSize
   );
 
-  auto const kAHotSize    = ru(CodeCache::AHotSize);
+  auto const kAHotSize = RuntimeOption::EvalJitAHotSizeRoundUp ?
+    ru(CodeCache::AHotSize) : CodeCache::AHotSize;
   auto const kASize       = ru(CodeCache::ASize);
   auto const kAProfSize   = ru(CodeCache::AProfSize);
   auto const kAColdSize   = ru(CodeCache::AColdSize);
   auto const kAFrozenSize = ru(CodeCache::AFrozenSize);
 
   auto kGDataSize = ru(CodeCache::GlobalDataSize);
-  m_totalSize = kAHotSize + kASize + kAColdSize + kAProfSize +
-                kAFrozenSize + kGDataSize + thread_local_size;
+  m_totalSize = ru(kAHotSize + kASize + kAColdSize + kAProfSize +
+                   kAFrozenSize + kGDataSize + thread_local_size);
   m_codeSize = m_totalSize - kGDataSize;
 
   if ((kASize < (10 << 20)) ||
@@ -89,17 +93,73 @@ CodeCache::CodeCache()
     exit(1);
   }
 
+  auto const cutTCSizeTo = [] (size_t targetSize) {
+    assertx(targetSize < (2ull << 30));
+    // Make sure the result if size_t to avoid 32-bit overflow
+    auto const total = static_cast<size_t>(AHotSize) + ASize + AProfSize +
+                       AColdSize + AFrozenSize + GlobalDataSize;
+    if (total <= targetSize) return;
+
+    AHotSize = rd(AHotSize * targetSize / total);
+    ASize = rd(ASize * targetSize / total);
+    AProfSize = rd(AProfSize * targetSize / total);
+    AColdSize = rd(AColdSize * targetSize / total);
+    AFrozenSize = rd(AFrozenSize * targetSize / total);
+    GlobalDataSize = rd(GlobalDataSize * targetSize / total);
+
+    AMaxUsage = ASize - ASize / 128;
+    AColdMaxUsage = AColdSize - AColdSize / 128;
+    AFrozenMaxUsage = AFrozenSize - AFrozenSize / 128;
+
+    assertx(static_cast<size_t>(AHotSize) + ASize + AProfSize + AColdSize +
+            AFrozenSize + GlobalDataSize <= targetSize);
+
+    if (RuntimeOption::ServerExecutionMode()) {
+      Logger::FWarning("Adjusted TC sizes to fit in {} bytes: AHotSize = {}, "
+                       "ASize = {}, AProfSize = {}, AColdSize = {}, "
+                       "AFrozenSize = {}, GlobalDataSize = {}",
+                       targetSize, AHotSize, ASize, AProfSize, AColdSize,
+                       AFrozenSize, GlobalDataSize);
+    }
+  };
+
+  auto const currBase = ru(reinterpret_cast<uintptr_t>(sbrk(0)));
   if (m_totalSize > (2ul << 30)) {
-    fprintf(stderr,"Combined size of ASize, AColdSize, AFrozenSize and "
+    fprintf(stderr, "Combined size of ASize, AColdSize, AFrozenSize and "
                     "GlobalDataSize must be < 2GiB to support 32-bit relative "
-                    "addresses\n");
-    exit(1);
+                    "addresses.\n  The sizes will be automatically reduced.\n");
+    cutTCSizeTo((2ul << 30) - kRoundUp - currBase - thread_local_size);
+    new (this) CodeCache;
+    return;
   }
 
-  auto enhugen = [&](void* base, int numMB) {
+#if USE_JEMALLOC_EXTENT_HOOKS
+  if (use_lowptr) {
+    // in LOWPTR builds, TC must fit in lower 1G address.  If it doesn't, we
+    // shrink things to make it so.
+    if (currBase + (32u << 20) > kLowArenaMinAddr) {
+      fprintf(stderr, "brk is too big for LOWPTR build\n");
+      exit(1);
+    }
+    auto const endAddr = currBase + m_totalSize;
+    if (endAddr > kLowArenaMinAddr) {
+      cutTCSizeTo(kLowArenaMinAddr - kRoundUp - currBase - thread_local_size);
+      new (this) CodeCache;
+      return;
+    }
+  }
+#endif
+
+  auto enhugen = [&](void* base, unsigned numMB) {
     if (CodeCache::MapTCHuge) {
-      assert((uintptr_t(base) & (kRoundUp - 1)) == 0);
-      hintHuge(base, numMB << 20);
+      assertx((uintptr_t(base) & (kRoundUp - 1)) == 0);
+      assertx(numMB < (1 << 12));
+      hintHugeDeleteData((char*)base, numMB << 20,
+                         PROT_READ | PROT_WRITE | PROT_EXEC,
+                         false /* MAP_SHARED */);
+#ifdef __linux__
+      madvise(base, numMB << 20, MADV_DONTFORK);
+#endif
     }
   };
 
@@ -128,7 +188,7 @@ CodeCache::CodeCache()
   };
 
   if (base != (uint8_t*)-1) {
-    assert(!(allocationSize & (kRoundUp - 1)));
+    assertx(!(allocationSize & (kRoundUp - 1)));
     // Make sure that we have space to round up to the start of a huge page
     allocationSize += -(uint64_t)base & (kRoundUp - 1);
     allocationSize += shiftTC();
@@ -142,19 +202,14 @@ CodeCache::CodeCache()
     }
     base = (uint8_t*)low_malloc(allocationSize);
     if (!base) {
-      base = (uint8_t*)malloc(allocationSize);
-    }
-    if (!base) {
       fprintf(stderr, "could not allocate %zd bytes for translation cache\n",
               allocationSize);
       exit(1);
     }
     baseAdjustment = -(uint64_t)base & (kRoundUp - 1);
     baseAdjustment += shiftTC();
-  } else {
-    low_malloc_skip_huge(base, base + allocationSize - 1);
   }
-  assert(base);
+  assertx(base);
   base += baseAdjustment;
 
   m_base = base;
@@ -162,7 +217,7 @@ CodeCache::CodeCache()
   numa_interleave(base, m_totalSize);
 
   if (kAHotSize) {
-    TRACE(1, "init ahot @%p\n", base);
+    FTRACE(1, "init ahot @{}, size = {}\n", base, kAHotSize);
     m_hot.init(base, kAHotSize, "hot");
     enhugen(base, kAHotSize >> 20);
     base += kAHotSize;
@@ -207,9 +262,9 @@ CodeCache::CodeCache()
   }
   m_threadLocalSize = thread_local_size;
 
-  assert(base - m_base <= allocationSize);
-  assert(base - m_base + 2 * kRoundUp > allocationSize);
-  assert(base - m_base <= (2ul << 30));
+  assertx(base - m_base <= allocationSize);
+  assertx(base - m_base + 2 * kRoundUp > allocationSize);
+  assertx(base - m_base <= (2ul << 30));
 }
 
 CodeBlock& CodeCache::blockFor(CodeAddress addr) {
@@ -246,10 +301,8 @@ void CodeCache::unprotect() {
 }
 
 CodeCache::View CodeCache::view(TransKind kind) {
-  assertx(!mcgen::isLocalTCEnabled());
-
   auto view = [&] {
-    if (kind == TransKind::Profile || kind == TransKind::ProfPrologue) {
+    if (isProfiling(kind)) {
       return View{m_prof, m_frozen, m_frozen, m_data, false};
     }
 

@@ -89,19 +89,20 @@ enum PDOFetchType {
   PDO_FETCH_NAMED,  /* like PDO_FETCH_ASSOC, but can handle duplicate names */
   PDO_FETCH_KEY_PAIR,  /* fetch into an array where the 1st column is a key
                           and all subsequent columns are values */
-  PDO_FETCH__MAX    /* must be last */
+  PDO_FETCH__MAX,    /* must be after all modes, and before flags */
+
+  PDO_FETCH_FLAGS      = 0xFFFF0000, /* fetchAll() modes or'd to
+                                            PDO_FETCH_XYZ */
+  PDO_FETCH_GROUP      = 0x00010000, /* fetch into groups */
+  PDO_FETCH_UNIQUE     = 0x00030000, /* fetch into groups assuming
+                                            first col is unique */
+  PDO_FETCH_CLASSTYPE  = 0x00040000, /* fetch class gets its class
+                                            name from 1st column */
+  PDO_FETCH_SERIALIZE  = 0x00080000, /* fetch class instances by
+                                            calling serialize */
+  PDO_FETCH_PROPS_LATE = 0x00100000, /* fetch props after calling ctor */
 };
 
-#define PDO_FETCH_FLAGS      0xFFFF0000  /* fetchAll() modes or'd to
-                                            PDO_FETCH_XYZ */
-#define PDO_FETCH_GROUP      0x00010000  /* fetch into groups */
-#define PDO_FETCH_UNIQUE     0x00030000  /* fetch into groups assuming
-                                            first col is unique */
-#define PDO_FETCH_CLASSTYPE  0x00040000  /* fetch class gets its class
-                                            name from 1st column */
-#define PDO_FETCH_SERIALIZE  0x00080000  /* fetch class instances by
-                                            calling serialize */
-#define PDO_FETCH_PROPS_LATE 0x00100000  /* fetch props after calling ctor */
 
 /* fetch orientation for scrollable cursors */
 enum PDOFetchOrientation {
@@ -444,7 +445,7 @@ protected:
  */
 struct PDOResource : SweepableResourceData {
   explicit PDOResource(sp_PDOConnection conn) : m_conn(conn) {
-    assert(m_conn);
+    assertx(m_conn);
   }
   virtual ~PDOResource() {}
 
@@ -520,8 +521,8 @@ public:
   PDOStatement *stmt;      /* for convenience in dtor */
   bool is_param;           /* parameter or column ? */
 
-  void *driver_data;
-  TYPE_SCAN_CONSERVATIVE_FIELD(driver_data);
+  void *driver_ext_data;   /* must not be request-heap ptr */
+  TYPE_SCAN_IGNORE_FIELD(driver_ext_data);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

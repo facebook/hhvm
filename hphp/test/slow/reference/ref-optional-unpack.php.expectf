@@ -1,0 +1,7 @@
+int(42)
+array(0) {
+}
+
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'foo() expects parameter 2 by reference, but the call was not annotated with '&'' in %sref-optional-unpack.php:16
+Stack trace:
+#0 {main}

@@ -1,0 +1,8 @@
+(26,5)-(26,15) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new coroutine()()'?
+(26,5)-(26,15) Unexpected node on right hand side of new or instanceof: lambda_expression
+(26,16)-(26,16) A lambda arrow ('==>') is expected here.
+(27,5)-(27,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new define()()'?
+(27,5)-(27,12) Unexpected node on right hand side of new or instanceof: define_expression
+(37,5)-(37,13) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new suspend()()'?
+(37,5)-(37,13) Unexpected node on right hand side of new or instanceof: prefix_unary_expression
+(37,14)-(37,14) An expression is expected here.

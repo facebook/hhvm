@@ -8,4 +8,8 @@ function test($a, $f) {
   return $a;
 }
 
+
+<<__EntryPoint>>
+function main_promote_string() {
 var_dump(test("", "f".isset($g)?"x":""));
+}

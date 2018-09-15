@@ -13,5 +13,9 @@ class MyStream {
   public function stream_eof() {  return true; }
 }
 
+
+<<__EntryPoint>>
+function main_user_registered_context() {
 stream_wrapper_register('my', 'MyStream');
 $fp = fopen('my://stream', 'r', false, stream_context_create(['my' => ['foo' => 'bar']]));
+}

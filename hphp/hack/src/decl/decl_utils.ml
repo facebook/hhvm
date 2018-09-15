@@ -2,9 +2,8 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
@@ -25,11 +24,27 @@ let unwrap_class_hint = function
 
 let unwrap_class_type = function
   | r, Tapply (name, tparaml) -> r, name, tparaml
-  | _, (Tany | Tmixed | Tarray (_, _) | Tgeneric _ | Toption _ | Tprim _
-  | Tfun _ | Ttuple _ | Tshape _ | Taccess (_, _) | Tthis) ->
+  | _,
+    (
+      Terr
+      | Tany
+      | Tmixed
+      | Tnonnull
+      | Tarray (_, _)
+      | Tdarray (_, _)
+      | Tvarray _
+      | Tvarray_or_darray _
+      | Tgeneric _
+      | Toption _
+      | Tprim _
+      | Tfun _
+      | Ttuple _
+      | Tshape _
+      | Taccess (_, _)
+      | Tdynamic
+      | Tthis
+    ) ->
     raise @@ Invalid_argument "unwrap_class_type got non-class"
-
-let try_unwrap_class_type x = Option.try_with (fun () -> unwrap_class_type x)
 
 (* Given sets A and B return a tuple (AnB, A\B), i.e split A into the part
  * that is common with B, and which is unique to A *)

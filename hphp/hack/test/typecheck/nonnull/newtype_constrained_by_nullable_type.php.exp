@@ -1,0 +1,6 @@
+File "newtype_constrained_by_nullable_type.php--file2.php", line 4, characters 10-11:
+Invalid return type (Typing[4110])
+File "newtype_constrained_by_nullable_type.php--file2.php", line 3, characters 19-25:
+This is a nonnull value
+File "newtype_constrained_by_nullable_type.php--file1.php", line 3, characters 14-20:
+It is incompatible with a nullable type

@@ -16,11 +16,13 @@
 
 #include "hphp/runtime/base/config.h"
 
+#include <fstream>
+#include <sstream>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem.hpp>
-#include <fstream>
 
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -29,8 +31,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-std::string Config::IniName(const Hdf& config,
-                            bool prepend_hhvm /* = true */) {
+std::string
+Config::IniName(const Hdf& config, bool /*prepend_hhvm*/ /* = true */) {
   return Config::IniName(config.getFullPath());
 }
 
@@ -85,14 +87,12 @@ std::string Config::IniName(const std::string& config,
   boost::replace_first(out, ".my_sql.", ".mysql.");
   boost::replace_first(out, ".enable_hip_hop_syntax", ".force_hh");
 
-  // Fix "XDebug" turning into "x_debug".
-  boost::replace_first(out, "hhvm.debugger.x_debug_", "xdebug.");
-
   return out;
 }
 
-void Config::ParseIniString(const std::string &iniStr, IniSettingMap &ini) {
-  Config::SetParsedIni(ini, iniStr, "", false, true);
+void Config::ParseIniString(const std::string &iniStr, IniSettingMap &ini,
+                            const bool constants_only /* = false */ ) {
+  Config::SetParsedIni(ini, iniStr, "", constants_only, true);
 }
 
 void Config::ParseHdfString(const std::string &hdfStr, Hdf &hdf) {
@@ -185,13 +185,13 @@ void Config::SetParsedIni(IniSettingMap &ini, const std::string confStr,
                           bool is_system) {
   // if we are setting constants, we must be setting system settings
   if (constants_only) {
-    assert(is_system);
+    assertx(is_system);
   }
   auto parsed_ini = IniSetting::FromStringAsMap(confStr, filename);
   for (ArrayIter iter(parsed_ini.toArray()); iter; ++iter) {
     // most likely a string, but just make sure that we are dealing
     // with something that can be converted to a string
-    assert(iter.first().isScalar());
+    assertx(iter.first().isScalar());
     ini.set(iter.first().toString(), iter.second());
     if (constants_only) {
       IniSetting::FillInConstant(iter.first().toString().toCppString(),
@@ -323,7 +323,10 @@ void Config::Bind(T& loc, const IniSetting::Map& ini, const Hdf& config, \
                    IniName(name, prepend_hhvm), &loc); \
 }
 
-CONTAINER_CONFIG_BODY(ConfigVector, Vector)
+CONTAINER_CONFIG_BODY(std::vector<uint32_t>, UInt32Vector)
+CONTAINER_CONFIG_BODY(std::vector<std::string>, StrVector)
+namespace { using simap = std::unordered_map<std::string, int>; }
+CONTAINER_CONFIG_BODY(simap, IntMap)
 CONTAINER_CONFIG_BODY(ConfigMap, Map)
 CONTAINER_CONFIG_BODY(ConfigMapC, MapC)
 CONTAINER_CONFIG_BODY(ConfigSet, Set)

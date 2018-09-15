@@ -43,13 +43,15 @@ struct Venv {
   struct LabelPatch { CodeAddress instr; Vlabel target; };
   struct SvcReqPatch { CodeAddress jmp, jcc; Vinstr svcreq; };
 
-  Venv(const Vunit& unit, Vtext& text, CGMeta& meta)
+  Venv(Vunit& unit, Vtext& text, CGMeta& meta)
     : unit(unit)
     , text(text)
     , meta(meta)
   {}
 
-  const Vunit& unit;
+  void record_inline_stack(TCA);
+
+  Vunit& unit;
   Vtext& text;
   CGMeta& meta;
 
@@ -58,9 +60,15 @@ struct Venv {
   Vlabel current{0};
   Vlabel next{0};
 
+  uint32_t pending_frames{0}; // unpushed inlined frames
+  int frame{-1};
+  CodeAddress framestart;
+  const IRInstruction* origin;
+
   jit::vector<CodeAddress> addrs;
   jit::vector<LabelPatch> jmps, jccs;
   jit::vector<LabelPatch> catches;
+  jit::vector<std::pair<TCA,IStack>> stacks;
 
   /*
    * Stubs that need to be emitted and patched into service request callsites.

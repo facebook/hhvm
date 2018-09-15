@@ -30,10 +30,10 @@
 
 #include <folly/portability/SysSyscall.h>
 #include <folly/portability/Time.h>
+#include <folly/portability/Unistd.h>
 #include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 #include <errno.h>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -45,7 +45,7 @@ const char padding_bytes[7] = {'\0', '\0', '\0', '\0', '\0', '\0', '\0'};
 namespace HPHP {
 namespace Debug {
 
-static int getEMachine(JitHeader *hdr)  {
+static int getEMachine(JitHeader* /*hdr*/) {
   char id[16];
   int fd;
   struct {
@@ -64,9 +64,6 @@ static int getEMachine(JitHeader *hdr)  {
   }
 
   read(fd, &info, sizeof(info));
-  if (info.e_machine < 0)  {
-    hdr->elf_mach = 0; /* ELF EM_NONE */
-  }
   close(fd);
   return 0;
 }

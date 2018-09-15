@@ -1,0 +1,737 @@
+[
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "initialize",
+    "params": {
+      "initializationOptions": {
+        "useTextEditAutocomplete": true
+      },
+      "processId": null,
+      "rootPath": "${root_path}",
+      "capabilities": {}
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "textDocument/didOpen",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}",
+        "languageId": "hack",
+        "version": 1,
+        "text": "${php_file}"
+      }
+    }
+  },
+  {
+    "comment": "Add '$x = <'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/didChange",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "contentChanges": [
+        {
+          "range": {
+            "start": {
+              "line": 3,
+              "character": 0
+            },
+            "end": {
+              "line": 3,
+              "character": 0
+            }
+          },
+          "text": "$x = <"
+        }
+      ]
+    }
+  },
+  {
+    "comment": "autocomplete after '$x = <'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/completion",
+    "id": 20,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 3,
+        "character": 6
+      }
+    }
+  },
+  {
+    "comment": "Add '$x = <a'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/didChange",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "contentChanges": [
+        {
+          "range": {
+            "start": {
+              "line": 3,
+              "character": 0
+            },
+            "end": {
+              "line": 3,
+              "character": 6
+            }
+          },
+          "text": "$x = <a"
+        }
+      ]
+    }
+  },
+  {
+    "comment": "autocomplete after '$x = <a'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/completion",
+    "id": 30,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 3,
+        "character": 7
+      }
+    }
+  },
+  {
+    "comment": "Add '$x = <ab:'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/didChange",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "contentChanges": [
+        {
+          "range": {
+            "start": {
+              "line": 3,
+              "character": 0
+            },
+            "end": {
+              "line": 3,
+              "character": 7
+            }
+          },
+          "text": "$x = <ab:"
+        }
+      ]
+    }
+  },
+  {
+    "comment": "autocomplete after '$x = <ab:'.",
+    "jsonrpc": "2.0",
+    "method": "textDocument/completion",
+    "id": 32,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 3,
+        "character": 9
+      }
+    }
+  },
+  {
+    "comment": "Add '$x = <ab:cd:text '",
+    "jsonrpc": "2.0",
+    "method": "textDocument/didChange",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "contentChanges": [
+        {
+          "range": {
+            "start": {
+              "line": 3,
+              "character": 0
+            },
+            "end": {
+              "line": 3,
+              "character": 9
+            }
+          },
+          "text": "$x = <ab:cd:text "
+        }
+      ]
+    }
+  },
+  {
+    "comment": "autocomplete after '$x = <ab:cd:text '",
+    "jsonrpc": "2.0",
+    "method": "textDocument/completion",
+    "id": 40,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 3,
+        "character": 17
+      }
+    }
+  },
+  {
+    "comment": "Add '$x = <ab:cd:text w'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/didChange",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "contentChanges": [
+        {
+          "range": {
+            "start": {
+              "line": 3,
+              "character": 0
+            },
+            "end": {
+              "line": 3,
+              "character": 17
+            }
+          },
+          "text": "$x = <ab:cd:text w"
+        }
+      ]
+    }
+  },
+  {
+    "comment": "autocomplete after '$x = <ab:cd:text w'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/completion",
+    "id": 50,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 3,
+        "character": 18
+      }
+    }
+  },
+  {
+    "comment": "Add '$x = new :'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/didChange",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "contentChanges": [
+        {
+          "range": {
+            "start": {
+              "line": 3,
+              "character": 0
+            },
+            "end": {
+              "line": 3,
+              "character": 18
+            }
+          },
+          "text": "$x = new :"
+        }
+      ]
+    }
+  },
+  {
+    "comment": "autocomplete after '$x = new :'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/completion",
+    "id": 60,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 3,
+        "character": 10
+      }
+    }
+  },
+  {
+    "comment": "Add '$x = new :a'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/didChange",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "contentChanges": [
+        {
+          "range": {
+            "start": {
+              "line": 3,
+              "character": 0
+            },
+            "end": {
+              "line": 3,
+              "character": 10
+            }
+          },
+          "text": "$x = new :a"
+        }
+      ]
+    }
+  },
+  {
+    "comment": "autocomplete after '$x = new :a'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/completion",
+    "id": 70,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 3,
+        "character": 11
+      }
+    }
+  },
+  {
+    "comment": "autocomplete resolving after '$x = new :a'",
+    "jsonrpc": "2.0",
+    "method": "completionItem/resolve",
+    "id": 80,
+    "params": {
+      "label": ":ab:cd:alpha",
+      "kind": 4,
+      "detail": "function(): :ab:cd:alpha",
+      "inlineDetail": "()",
+      "itemType": ":ab:cd:alpha",
+      "insertText": ":ab:cd:alpha",
+      "insertTextFormat": 1,
+      "data": {
+        "filename": "${root_path}${path_sep}completion_extras.php",
+        "line": 9,
+        "char": 13
+      }
+    }
+  },
+  {
+    "comment": "Add '$x = <ab:cd:text/>; $y = $x->'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/didChange",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "contentChanges": [
+        {
+          "range": {
+            "start": {
+              "line": 3,
+              "character": 0
+            },
+            "end": {
+              "line": 3,
+              "character": 11
+            }
+          },
+          "text": "$x = <ab:cd:text/>; $y = $x->"
+        }
+      ]
+    }
+  },
+  {
+    "comment": "autocomplete after '$x = <ab:cd:text/>; $y = $x->'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/completion",
+    "id": 90,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 3,
+        "character": 29
+      }
+    }
+  },
+  {
+    "comment": "Add '$x = <ab:cd:text/>; $y = $x->:'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/didChange",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "contentChanges": [
+        {
+          "range": {
+            "start": {
+              "line": 3,
+              "character": 0
+            },
+            "end": {
+              "line": 3,
+              "character": 29
+            }
+          },
+          "text": "$x = <ab:cd:text/>; $y = $x->:"
+        }
+      ]
+    }
+  },
+  {
+    "comment": "autocomplete after '$x = <ab:cd:text/>; $y = $x->:'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/completion",
+    "id": 100,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 3,
+        "character": 30
+      }
+    }
+  },
+  {
+    "comment": "Add 'test_fun'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/didChange",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "contentChanges": [
+        {
+          "range": {
+            "start": {
+              "line": 3,
+              "character": 0
+            },
+            "end": {
+              "line": 3,
+              "character": 30
+            }
+          },
+          "text": "test_fun"
+        }
+      ]
+    }
+  },
+  {
+    "comment": "autocomplete after 'test_fun'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/completion",
+    "id": 110,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 3,
+        "character": 8
+      }
+    }
+  },
+  {
+    "comment": "autocomplete resolving after 'test_fun'",
+    "jsonrpc": "2.0",
+    "method": "completionItem/resolve",
+    "id": 120,
+    "params": {
+      "label": "test_function",
+      "kind": 3,
+      "detail": "function(): void",
+      "inlineDetail": "()",
+      "itemType": "void",
+      "insertText": "test_function",
+      "insertTextFormat": 1,
+      "data": {
+        "filename": "${root_path}${path_sep}completion.php",
+        "line": 8,
+        "char": 10
+      }
+    }
+  },
+  {
+    "comment": "Add 'switch (Elsa::Alonso) { case Elsa:'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/didChange",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "contentChanges": [
+        {
+          "range": {
+            "start": {
+              "line": 3,
+              "character": 0
+            },
+            "end": {
+              "line": 3,
+              "character": 8
+            }
+          },
+          "text": "switch (Elsa::Alonso) { case Elsa:"
+        }
+      ]
+    }
+  },
+  {
+    "comment": "autocomplete after 'switch (Elsa::Alonso) { case Elsa:'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/completion",
+    "id": 130,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 3,
+        "character": 34
+      }
+    }
+  },
+  {
+    "comment": "Add 'switch (Elsa::Alonso) { case Elsa::'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/didChange",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "contentChanges": [
+        {
+          "range": {
+            "start": {
+              "line": 3,
+              "character": 0
+            },
+            "end": {
+              "line": 3,
+              "character": 34
+            }
+          },
+          "text": "switch (Elsa::Alonso) { case Elsa::"
+        }
+      ]
+    }
+  },
+  {
+    "comment": "autocomplete after 'switch (Elsa::Alonso) { case Elsa::'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/completion",
+    "id": 140,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 3,
+        "character": 35
+      }
+    }
+  },
+  {
+    "comment": "Add 'switch (Elsa::Alonso) { case Elsa::Alonso:'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/didChange",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "contentChanges": [
+        {
+          "range": {
+            "start": {
+              "line": 3,
+              "character": 0
+            },
+            "end": {
+              "line": 3,
+              "character": 35
+            }
+          },
+          "text": "switch (Elsa::Alonso) { case Elsa::Alonso:"
+        }
+      ]
+    }
+  },
+  {
+    "comment": "autocomplete resolving after 'switch (Elsa::Alonso) { case Elsa::'",
+    "jsonrpc": "2.0",
+    "method": "completionItem/resolve",
+    "id": 145,
+    "params": {
+      "label": "isValid",
+      "kind": 2,
+      "detail": "function(mixed $value): bool",
+      "inlineDetail": "(mixed $value)",
+      "itemType": "bool",
+      "insertTextFormat": 1,
+      "textEdit": {
+        "range": {
+          "start": {
+            "line": 3,
+            "character": 35
+          },
+          "end": {
+            "line": 3,
+            "character": 35
+          }
+        },
+        "newText": "isValid"
+      },
+      "data": {
+        "filename": "${hhi_path}${path_sep}BuiltinEnum.hhi",
+        "line": 49,
+        "char": 32
+      }
+    }
+  },
+  {
+    "comment": "autocomplete after 'switch (Elsa::Alonso) { case Elsa::Alonso:'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/completion",
+    "id": 150,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 3,
+        "character": 42
+      }
+    }
+  },
+  {
+    "comment": "Add 'TestNS\\'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/didChange",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "contentChanges": [
+        {
+          "range": {
+            "start": {
+              "line": 3,
+              "character": 0
+            },
+            "end": {
+              "line": 3,
+              "character": 42
+            }
+          },
+          "text": "TestNS\\"
+        }
+      ]
+    }
+  },
+  {
+    "comment": "autocomplete after 'TestNS\\'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/completion",
+    "id": 160,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 3,
+        "character": 7
+      }
+    }
+  },
+  {
+    "comment": "Add '$cc = new CompletionClass(); $cc->interfa'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/didChange",
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "contentChanges": [
+        {
+          "range": {
+            "start": {
+              "line": 3,
+              "character": 0
+            },
+            "end": {
+              "line": 3,
+              "character": 7
+            }
+          },
+          "text": "$cc = new CompletionClass(); $cc->interfa"
+        }
+      ]
+    }
+  },
+  {
+    "comment": "autocomplete after '$cc = new CompletionClass(); $cc->interfa'",
+    "jsonrpc": "2.0",
+    "method": "textDocument/completion",
+    "id": 170,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 3,
+        "character": 41
+      }
+    }
+  },
+  {
+    "comment": "autocomplete resolving after '$cc = new CompletionClass(); $cc->interfa'",
+    "jsonrpc": "2.0",
+    "method": "completionItem/resolve",
+    "id": 180,
+    "params": {
+      "label": "interfaceDocBlockMethod",
+      "kind": 2,
+      "detail": "function(): void",
+      "inlineDetail": "()",
+      "itemType": "void",
+      "insertTextFormat": 1,
+      "textEdit": {
+        "range": {
+          "start": {
+            "line": 3,
+            "character": 34
+          },
+          "end": {
+            "line": 3,
+            "character": 41
+          }
+        },
+        "newText": "interfaceDocBlockMethod"
+      },
+      "data": {
+        "filename": "${root_path}${path_sep}completion.php",
+        "line": 18,
+        "char": 19
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 999,
+    "method": "shutdown",
+    "params": {}
+  }
+]

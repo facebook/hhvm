@@ -48,7 +48,7 @@ Variant HHVM_FUNCTION(min,
                       const Variant& value,
                       const Array& args /* = null_array */) {
   if (args.empty()) {
-    const auto& cell_value = *value.asCell();
+    const auto& cell_value = *value.toCell();
     if (UNLIKELY(!isContainer(cell_value))) {
       if (RuntimeOption::MinMaxAllowDegenerate == HackStrictOption::WARN) {
         raise_warning("min(): This will return the value instead of null, "
@@ -72,32 +72,32 @@ Variant HHVM_FUNCTION(min,
       raise_warning("min(): Array must contain at least one element");
       return false;
     }
-    Variant ret = iter.secondRefPlus();
+    auto ret = iter.secondValPlus();
     ++iter;
     for (; iter; ++iter) {
-      Variant currVal = iter.secondRefPlus();
-      if (less(currVal, ret)) {
-        ret = currVal;
+      auto const cur = iter.secondValPlus();
+      if (tvLess(cur, ret)) {
+        ret = cur;
       }
     }
-    return ret;
+    return Variant(VarNR(ret));
   }
 
-  Variant ret = value;
+  auto ret = *value.asTypedValue();
   for (ArrayIter iter(args); iter; ++iter) {
-    Variant currVal = iter.secondRef();
-    if (less(currVal, ret)) {
-      ret = currVal;
+    auto const cur = iter.secondVal();
+    if (tvLess(cur, ret)) {
+      ret = cur;
     }
   }
-  return ret;
+  return Variant(VarNR(ret));
 }
 
 Variant HHVM_FUNCTION(max,
                       const Variant& value,
                       const Array& args /* = null_array */) {
   if (args.empty()) {
-    const auto& cell_value = *value.asCell();
+    const auto& cell_value = *value.toCell();
     if (UNLIKELY(!isContainer(cell_value))) {
       if (RuntimeOption::MinMaxAllowDegenerate == HackStrictOption::WARN) {
         raise_warning("max(): This will return the value instead of null, "
@@ -121,25 +121,25 @@ Variant HHVM_FUNCTION(max,
       raise_warning("max(): Array must contain at least one element");
       return false;
     }
-    Variant ret = iter.secondRefPlus();
+    auto ret = iter.secondValPlus();
     ++iter;
     for (; iter; ++iter) {
-      Variant currVal = iter.secondRefPlus();
-      if (more(currVal, ret)) {
-        ret = currVal;
+      auto const cur = iter.secondValPlus();
+      if (tvGreater(cur, ret)) {
+        ret = cur;
       }
     }
-    return ret;
+    return Variant(VarNR(ret));
   }
 
-  Variant ret = value;
+  auto ret = *value.asTypedValue();
   for (ArrayIter iter(args); iter; ++iter) {
-    Variant currVal = iter.secondRef();
-    if (more(currVal, ret)) {
-      ret = currVal;
+    auto const cur = iter.secondVal();
+    if (tvGreater(cur, ret)) {
+      ret = cur;
     }
   }
-  return ret;
+  return Variant(VarNR(ret));
 }
 
 /*
@@ -303,10 +303,13 @@ static MaybeDataType convert_for_pow(const Variant& val,
     case KindOfDict:
     case KindOfPersistentKeyset:
     case KindOfKeyset:
+    case KindOfPersistentShape:
+    case KindOfShape:
     case KindOfPersistentArray:
     case KindOfArray:
       // Not reachable since HHVM_FN(pow) deals with these base cases first.
     case KindOfRef:
+    case KindOfFunc:
     case KindOfClass:
       break;
   }
@@ -348,7 +351,8 @@ Variant HHVM_FUNCTION(pow, const Variant& base, const Variant& exp) {
   }
 
   auto const castableToNumber = [] (const ObjectData* obj) {
-    return obj->getAttribute(ObjectData::CallToImpl) && !obj->isCollection();
+    return !obj->isCollection() &&
+           obj->getVMClass()->rtAttribute(Class::CallToImpl);
   };
 
   // We'll have already raised a notice in convert_for_pow

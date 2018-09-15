@@ -1,0 +1,3 @@
+<?hh
+
+type ShapeWithUnknownFields = shape(...);

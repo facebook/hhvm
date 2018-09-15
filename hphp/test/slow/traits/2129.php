@@ -73,8 +73,12 @@ class D extends C {
 
 }
 
+
+<<__EntryPoint>>
+function main_2129() {
 $r = new ReflectionClass('C');
 do_wonderful_things_with($r);
 
 $r = new ReflectionClass('D');
 do_wonderful_things_with($r);
+}

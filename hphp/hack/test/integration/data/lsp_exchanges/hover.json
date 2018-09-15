@@ -1,0 +1,104 @@
+[
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "initialize",
+  "params":
+    {
+      "initializationOptions":{},
+      "processId":null,
+      "rootPath":"${root_path}",
+      "capabilities":{}
+    }
+},
+{
+  "jsonrpc": "2.0",
+  "method": "textDocument/didOpen",
+  "params": {
+     "textDocument": {
+       "uri":"${php_file_uri}",
+       "languageId": "hack",
+       "version":1,
+       "text":"${php_file}"
+     }
+   }
+},
+{
+  "comment": "hover over function invocation",
+  "jsonrpc": "2.0",
+  "method": "textDocument/hover",
+  "id": 2,
+  "params": {
+      "textDocument": {
+        "uri":"${php_file_uri}"
+      },
+      "position": {"line": 3, "character": 16}
+   }
+},
+{
+  "comment": "hover over whitespace",
+  "jsonrpc": "2.0",
+  "method": "textDocument/hover",
+  "id": 3,
+  "params": {
+      "textDocument": {
+        "uri":"${php_file_uri}"
+      },
+      "position": {"line": 3, "character": 1}
+   }
+},
+{
+  "comment": "hover over a keyword",
+  "jsonrpc": "2.0",
+  "method": "textDocument/hover",
+  "id": 4,
+  "params": {
+      "textDocument": {
+        "uri":"${php_file_uri}"
+      },
+      "position": {"line": 2, "character": 1}
+   }
+},
+{
+  "comment": "hover over a comment",
+  "jsonrpc": "2.0",
+  "method": "textDocument/hover",
+  "id": 5,
+  "params": {
+      "textDocument": {
+        "uri":"${php_file_uri}"
+      },
+      "position": {"line": 1, "character": 4}
+   }
+},
+{
+  "comment": "hover past the end of a line",
+  "jsonrpc": "2.0",
+  "method": "textDocument/hover",
+  "id": 6,
+  "params": {
+      "textDocument": {
+        "uri":"${php_file_uri}"
+      },
+      "position": {"line": 3, "character": 100}
+   }
+},
+{
+  "comment": "hover past the end of a file",
+  "jsonrpc": "2.0",
+  "method": "textDocument/hover",
+  "id": 7,
+  "params": {
+      "textDocument": {
+        "uri":"${php_file_uri}"
+      },
+      "position": {"line": 300, "character": 0}
+   }
+},
+{
+  "jsonrpc": "2.0",
+  "id": 8,
+  "method": "shutdown",
+  "params": {}
+}
+]

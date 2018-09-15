@@ -111,9 +111,10 @@ struct DebugInfo {
 };
 
 /*
- * Initialize the global DebugInfo
+ * Initialize/destroy the global DebugInfo
  */
 void initDebugInfo();
+void destroyDebugInfo();
 
 /*
  * Gets the fake symbol name we want to use for a php function.

@@ -22,4 +22,8 @@ function go() {
   return $z->x();
 }
 
+
+<<__EntryPoint>>
+function main_singleton_fail() {
 go();
+}

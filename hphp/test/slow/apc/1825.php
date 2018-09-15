@@ -1,5 +1,9 @@
 <?php
 
+
+
+<<__EntryPoint>>
+function main_1825() {
 $f = function($a) {
  return $a;
  }
@@ -8,4 +12,4 @@ $f = function($a) {
  apc_store('key', $f);
  $g = apc_fetch('key');
  var_dump($g);
-
+}

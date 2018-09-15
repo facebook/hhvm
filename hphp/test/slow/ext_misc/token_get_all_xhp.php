@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_token_get_all_xhp() {
 $src = token_get_all('<?hh class :test{category %test}');
 $expected = array(
   array(
@@ -42,3 +45,4 @@ $expected = array(
 );
 
 var_dump($src == $expected);
+}

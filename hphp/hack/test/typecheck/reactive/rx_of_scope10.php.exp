@@ -1,0 +1,6 @@
+File "rx_of_scope10.php", line 9, characters 14-15:
+Invalid argument (Typing[4203])
+File "rx_of_scope10.php", line 13, characters 21-41:
+This function is reactive.
+File "rx_of_scope10.php", line 7, characters 10-33:
+This function is local reactive.

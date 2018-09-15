@@ -1,9 +1,6 @@
 """
 Helpers for accessing C++ STL containers in GDB.
 """
-# @lint-avoid-python-3-compatibility-imports
-# @lint-avoid-pyflakes3
-# @lint-avoid-pyflakes2
 
 from compatibility import *
 
@@ -215,6 +212,20 @@ def tread_hash_map_at(thm, key, hasher=None):
             idx = 0
 
 
+def compact_vector_at(vec, idx, hasher=None):
+    if vec['m_data'] == nullptr():
+        return None
+
+    sz = vec['m_data']['m_len']
+    if idx >= sz:
+        return None
+
+    inner = vec.type.template_argument(0)
+    elems = (vec['m_data'].cast(T('char').pointer()) +
+             vec['elems_offset']).cast(inner.pointer())
+    return elems[idx]
+
+
 #------------------------------------------------------------------------------
 # PHP value accessors.
 
@@ -255,6 +266,7 @@ def idx_accessors():
         'HPHP::IndexedStringMap':   indexed_string_map_at,
         'HPHP::TreadHashMap':       tread_hash_map_at,
         'HPHP::ObjectData':         object_data_at,
+        'HPHP::CompactVector':      compact_vector_at,
     }
 
 

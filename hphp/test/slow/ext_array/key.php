@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_key() {
 $array = array(
   "fruit1" => "apple",
   "fruit2" => "orange",
@@ -21,3 +24,4 @@ while (true) {
 }
 var_dump($output);
 var_dump(key(array()));
+}

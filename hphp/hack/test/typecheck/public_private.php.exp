@@ -1,2 +1,2 @@
-File "public_private.php", line 13, characters 3-30:
-Parse error. Cannot mix different visibilities. (Parsing[1002])
+File "public_private.php", line 13, characters 3-28:
+A method declaration cannot have multiple visibility modifiers. (Parsing[1002])

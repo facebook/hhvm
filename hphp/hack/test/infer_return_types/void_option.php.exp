@@ -1,0 +1,3 @@
+\f : void, void try void
+\g : \Awaitable<void>, \Awaitable<void> try \Awaitable<void>
+No errors

@@ -1,7 +1,0 @@
-*** Testing mail() : basic functionality ***
-bool(true)
-%w1%wTo: user@example.com
-%w2%wSubject: Test Subject
-%w3%w
-%w4%wA Message
-===DONE===

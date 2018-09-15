@@ -1,5 +1,8 @@
 <?php
+
 // gmp_abs
+<<__EntryPoint>>
+function main_most_in_one() {
 $abs1 = gmp_abs("274982683358");
 $abs2 = gmp_abs("-274982683358");
 echo gmp_strval($abs1) . "\n";
@@ -274,3 +277,4 @@ $b = gmp_init(0xFFFFFF, 16);
 var_dump(gmp_strval($b));
 $c = gmp_init($b);
 var_dump(gmp_strval($c, 16));
+}

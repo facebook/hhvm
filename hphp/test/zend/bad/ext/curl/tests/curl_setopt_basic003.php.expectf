@@ -1,5 +1,0 @@
-*** curl_setopt() call with CURLOPT_HTTPHEADER
-
-Warning: %s
-bool(false)
-bool(true)

@@ -110,13 +110,13 @@ struct SoapVar {
     if (!enc_type.isInitialized()) {
       raise_error("Encoding: SoapVar has no 'enc_type' property");
       not_reached();
-      assert(false);
+      assertx(false);
     }
     return enc_type.toInt64();
   }
 
   static void setEncType(ObjectData* obj, int64_t t) {
-    obj->o_set(s_enc_type, t);
+    obj->setProp(nullptr, s_enc_type.get(), make_tv<KindOfInt64>(t));
   }
 
   static Variant getEncValue(ObjectData* obj) {
@@ -124,12 +124,16 @@ struct SoapVar {
   }
 
   static void setEncValue(ObjectData* obj, const Variant& val) {
-    obj->o_set(s_enc_value, val);
+    obj->setProp(nullptr, s_enc_value.get(), *val.toCell());
   }
 
 #define X(Name, str_name) \
   static void setEnc##Name(ObjectData* obj, const String& str) { \
-    obj->o_set(s_enc_##str_name, str); \
+    if (str.isNull()) { \
+      obj->setProp(nullptr, s_enc_##str_name.get(), make_tv<KindOfNull>()); \
+    } else { \
+      obj->setProp(nullptr, s_enc_##str_name.get(), str.toCell()); \
+    } \
   } \
   static String getEnc##Name(ObjectData* obj) { \
     return getStrValue(obj, s_enc_##str_name); \

@@ -1,0 +1,6 @@
+bar's pseudo-main called...
+bar called...
+
+Fatal error: Call to undefined function bar() in %s/unique-non-persistent.php on line 3
+
+Fatal error: Call to undefined function bar() in %s/unique-non-persistent.php on line 3

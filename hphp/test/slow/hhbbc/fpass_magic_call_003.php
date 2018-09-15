@@ -24,4 +24,8 @@ class E extends A {
 }
 class F extends A {}
 
+
+<<__EntryPoint>>
+function main_fpass_magic_call_003() {
 E::go();
+}

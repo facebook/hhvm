@@ -1,4 +1,4 @@
-<?php
+<?hh
 function main() {
   function f($x = Vector {}) {
     return $x;

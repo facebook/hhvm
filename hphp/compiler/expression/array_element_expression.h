@@ -24,16 +24,13 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(ArrayElementExpression);
 
-struct ArrayElementExpression : Expression, LocalEffectsContainer {
+struct ArrayElementExpression : Expression {
   ArrayElementExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                          ExpressionPtr variable, ExpressionPtr offset);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  DECL_AND_IMPL_LOCAL_EFFECTS_METHODS;
 
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
-
-  bool isRefable(bool checkError = false) const override { return true;}
+  bool isRefable(bool /*checkError*/ = false) const override { return true; }
 
   ExpressionPtr getVariable() const { return m_variable;}
   ExpressionPtr getOffset() const { return m_offset;}
@@ -43,14 +40,13 @@ struct ArrayElementExpression : Expression, LocalEffectsContainer {
   bool isSuperGlobal() const { return m_global;}
   bool isDynamicGlobal() const { return m_dynamicGlobal;}
   const std::string &getGlobalName() const { return m_globalName;}
-  ExpressionPtr unneeded() override;
 
   /**
    * This is purely for resolving a nasty case of interpreting
    * self::$a[1][2] correctly.
    */
   bool appendClass(ExpressionPtr cls,
-                   AnalysisResultConstPtr ar, FileScopePtr file);
+                   AnalysisResultConstRawPtr ar, FileScopePtr file);
 
 private:
   ExpressionPtr m_variable;

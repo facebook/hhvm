@@ -16,7 +16,8 @@
 #ifndef incl_HPHP_RUNTIME_BASE_TV_ARITH_H_
 #define incl_HPHP_RUNTIME_BASE_TV_ARITH_H_
 
-#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/typed-value.h"
 
@@ -97,10 +98,10 @@ Cell cellShr(Cell, Cell);
  * Mutates the first argument in place, by adding the second argument
  * to it in the sense of php's operator +=.
  *
- * Post: isTypedNum(c1), unless both arguments are KindOfArray, in
- * which case it will contain a Cell of KindOfArray.
+ * Post: c1 is a KindOfInt or KindOfDouble, unless both arguments are
+ * KindOfArray, in which case it will contain a Cell of KindOfArray.
  */
-void cellAddEq(Cell& c1, Cell);
+void cellAddEq(tv_lval c1, Cell);
 
 /*
  * PHP operators -= and *=.
@@ -108,18 +109,18 @@ void cellAddEq(Cell& c1, Cell);
  * Mutates the first argument in place, by combining the second
  * argument with it in the sense of either php operator -= or *=.
  *
- * Post: isTypedNum(c1)
+ * Post: c1 is a KindOfInt or KindOfDouble
  */
-void cellSubEq(Cell& c1, Cell);
-void cellMulEq(Cell& c1, Cell);
+void cellSubEq(tv_lval c1, Cell);
+void cellMulEq(tv_lval c1, Cell);
 
 /*
  * Same as their corresponding non-O functions, but will cast their sources to
  * doubles instead of doing integer overflow.
  */
-void cellAddEqO(Cell& c1, Cell c2);
-void cellSubEqO(Cell& c1, Cell c2);
-void cellMulEqO(Cell& c1, Cell c2);
+void cellAddEqO(tv_lval c1, Cell c2);
+void cellSubEqO(tv_lval c1, Cell c2);
+void cellMulEqO(tv_lval c1, Cell c2);
 
 /*
  * PHP operators /= and %=.
@@ -127,11 +128,11 @@ void cellMulEqO(Cell& c1, Cell c2);
  * Mutates the first argument in place, by combining the second
  * argument with it in the sense of either php operator /= or %=.
  *
- * Post: isTypedNum(c1), unless the second argument converts to zero,
- * in which case c1 will contain boolean false.
+ * Post: c1 is a KindOfInt or KindOfDouble, unless the second argument converts
+ * to zero, in which case c1 will contain boolean false.
  */
-void cellDivEq(Cell& c1, Cell);
-void cellModEq(Cell& c1, Cell);
+void cellDivEq(tv_lval c1, Cell);
+void cellModEq(tv_lval c1, Cell);
 
 /*
  * PHP operator **=.
@@ -139,7 +140,7 @@ void cellModEq(Cell& c1, Cell);
  * Mutates the first argument in place, by combining the second
  * argument with it in the of php operator **=.
  */
-void cellPowEq(Cell& c1, Cell);
+void cellPowEq(tv_lval c1, Cell);
 
 /*
  * PHP operators &=, |=, and ^=.
@@ -149,9 +150,9 @@ void cellPowEq(Cell& c1, Cell);
  *
  * Post: c1.m_type == KindOfString || c1.m_type == KindOfInt64
  */
-void cellBitAndEq(Cell& c1, Cell);
-void cellBitOrEq(Cell& c1, Cell);
-void cellBitXorEq(Cell& c1, Cell);
+void cellBitAndEq(tv_lval c1, Cell);
+void cellBitOrEq(tv_lval c1, Cell);
+void cellBitXorEq(tv_lval c1, Cell);
 
 /*
  * PHP operators <<= and >>=.
@@ -161,8 +162,8 @@ void cellBitXorEq(Cell& c1, Cell);
  *
  * Post: c1.m_type == KindOfInt64
  */
-void cellShlEq(Cell& c1, Cell);
-void cellShrEq(Cell& c1, Cell);
+void cellShlEq(tv_lval c1, Cell);
+void cellShrEq(tv_lval c1, Cell);
 
 /*
  * PHP operator .=.
@@ -172,8 +173,8 @@ void cellShrEq(Cell& c1, Cell);
  *
  * Post: lhs.m_type == KindOfString
  */
-inline void cellConcatEq(Cell& lhs, Cell rhs) {
-  concat_assign(tvAsVariant(&lhs), cellAsCVarRef(rhs).toString());
+inline void cellConcatEq(tv_lval lhs, Cell rhs) {
+  concat_assign(lhs, cellAsCVarRef(rhs).toString());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -184,11 +185,11 @@ inline void cellConcatEq(Cell& lhs, Cell rhs) {
  * Mutates the argument in place, with the effects of php's
  * pre-increment or pre-decrement operators.
  */
-void cellInc(Cell&);
-void cellDec(Cell&);
+void cellInc(tv_lval);
+void cellDec(tv_lval);
 
-void cellIncO(Cell&);
-void cellDecO(Cell&);
+void cellIncO(tv_lval);
+void cellDecO(tv_lval);
 
 /*
  * PHP unary operator ~.

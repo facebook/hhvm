@@ -15,14 +15,16 @@
 */
 
 #include "hphp/runtime/base/http-stream-wrapper.h"
+
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/string-util.h"
-#include "hphp/runtime/base/url-file.h"
+#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/url-file.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/url/ext_url.h"
-#include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/server/cli-server.h"
 #include <memory>
 
 namespace HPHP {
@@ -41,12 +43,10 @@ const StaticString
   s_user_agent("user_agent"),
   s_User_Agent("User-Agent");
 
-req::ptr<File>
-HttpStreamWrapper::open(const String& filename,
-                        const String& mode,
-                        int options,
-                        const req::ptr<StreamContext>& context) {
-  if (RuntimeOption::ServerHttpSafeMode) {
+req::ptr<File> HttpStreamWrapper::open(const String& filename,
+                                       const String& mode, int /*options*/,
+                                       const req::ptr<StreamContext>& context) {
+  if (RuntimeOption::ServerHttpSafeMode && !is_cli_mode()) {
     return nullptr;
   }
 
@@ -84,7 +84,7 @@ HttpStreamWrapper::open(const String& filename,
       for (ArrayIter it(lines); it; ++it) {
         Array parts = StringUtil::Explode(
           it.second().toString(), ":", 2).toArray();
-        headers.set(parts.rvalAt(0), parts.rvalAt(1));
+        headers.set(parts.rvalAt(0).unboxed().tv(), parts.rvalAt(1).tv());
       }
     }
     if (opts.exists(s_user_agent) && !headers.exists(s_User_Agent)) {

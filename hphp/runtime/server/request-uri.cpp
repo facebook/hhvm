@@ -318,8 +318,10 @@ bool RequestURI::virtualFileExists(const VirtualHost *vhost,
     struct stat st;
     return RuntimeOption::AllowedFiles.find(fullname.c_str()) !=
       RuntimeOption::AllowedFiles.end() ||
-      (stat(m_absolutePath.c_str(), &st) == 0 &&
-       (st.st_mode & S_IFMT) == S_IFREG);
+      ((!RuntimeOption::RepoAuthoritative ||
+        RuntimeOption::EnableStaticContentFromDisk) &&
+         (stat(m_absolutePath.c_str(), &st) == 0 &&
+          (st.st_mode & S_IFMT) == S_IFREG));
   }
   m_path = canon;
   m_absolutePath = String(sourceRoot) + canon;

@@ -1,7 +1,0 @@
-*** Checking lstat() and stat() on hard link ***
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-
---- Done ---

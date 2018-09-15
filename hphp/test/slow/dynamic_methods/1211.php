@@ -13,4 +13,8 @@ class foo {
     print($this->functions['test']());
   }
 }
+
+<<__EntryPoint>>
+function main_1211() {
 $a = new foo ();
+}

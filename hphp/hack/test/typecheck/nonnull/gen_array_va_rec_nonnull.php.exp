@@ -1,0 +1,6 @@
+File "gen_array_va_rec_nonnull.php", line 4, characters 9-36:
+await can only operate on an Awaitable (Typing[4110])
+File "gen_array_va_rec_nonnull.php", line 4, characters 9-36:
+This is an object of type Awaitable
+File "gen_array_va_rec_nonnull.php", line 3, characters 18-24:
+It is incompatible with a nonnull value

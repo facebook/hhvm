@@ -19,8 +19,8 @@
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/constant_expression.h"
 #include "hphp/compiler/analysis/class_scope.h"
-#include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/expression/assignment_expression.h"
+#include "hphp/compiler/expression/class_constant_expression.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/type_annotation.h"
@@ -40,6 +40,7 @@ ClassConstant::ClassConstant
   // for now only store TypeAnnotation info for type constants
   if (typeconst && typeAnnot) {
     m_typeStructure = Array(typeAnnot->getScalarArrayRep());
+    assertx(m_typeStructure.isDictOrDArray());
   }
 }
 
@@ -52,71 +53,16 @@ StatementPtr ClassConstant::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void ClassConstant::onParseRecur(AnalysisResultConstPtr ar,
-                                 FileScopeRawPtr fs,
-                                 ClassScopePtr scope) {
-  ConstantTablePtr constants = scope->getConstants();
-
+void ClassConstant::onParseRecur(AnalysisResultConstRawPtr /*ar*/,
+                                 FileScopeRawPtr fs, ClassScopePtr scope) {
   if (scope->isTrait()) {
     parseTimeFatal(fs,
-                   Compiler::InvalidTraitStatement,
                    "Traits cannot have constants");
-  }
-
-  if (isAbstract()) {
-    for (int i = 0; i < m_exp->getCount(); i++) {
-      auto exp = dynamic_pointer_cast<ConstantExpression>((*m_exp)[i]);
-      const std::string &name = exp->getName();
-      if (constants->isPresent(name)) {
-        exp->parseTimeFatal(fs,
-                            Compiler::DeclaredConstantTwice,
-                            "Cannot redeclare %s::%s",
-                            scope->getOriginalName().c_str(),
-                            name.c_str());
-      }
-
-      // HACK: break attempts to write global constants here;
-      // see ConstantExpression::preOptimize
-      exp->setContext(Expression::LValue);
-
-      // Unlike with assignment expression below, nothing needs to be added
-      // to the scope's constant table
-    }
-  } else {
-    for (int i = 0; i < m_exp->getCount(); i++) {
-      auto assignment =
-        dynamic_pointer_cast<AssignmentExpression>((*m_exp)[i]);
-      auto var = assignment->getVariable();
-      const auto& name =
-        dynamic_pointer_cast<ConstantExpression>(var)->getName();
-      if (constants->isPresent(name)) {
-        assignment->parseTimeFatal(fs,
-                                   Compiler::DeclaredConstantTwice,
-                                   "Cannot redeclare %s::%s",
-                                   scope->getOriginalName().c_str(),
-                                   name.c_str());
-      } else {
-        if (isTypeconst()) {
-          // We do not want type constants to be available at run time.
-          // To ensure this we do not want them to be added to the constants
-          // table. The constants table is used to inline values for expressions
-          // See ClassConstantExpression::preOptimize.
-          // AssignmentExpression::onParseRecur essentially adds constants to
-          // the constant table so we skip it.
-          continue;
-        }
-        assignment->onParseRecur(ar, fs, scope);
-      }
-    }
   }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-void ClassConstant::analyzeProgram(AnalysisResultPtr ar) {
-  m_exp->analyzeProgram(ar);
-}
 
 ConstructPtr ClassConstant::getNthKid(int n) const {
   switch (n) {
@@ -142,32 +88,6 @@ void ClassConstant::setNthKid(int n, ConstructPtr cp) {
       assert(false);
       break;
   }
-}
-
-StatementPtr ClassConstant::preOptimize(AnalysisResultConstPtr ar) {
-  if (!isAbstract() && !isTypeconst()) {
-    for (int i = 0; i < m_exp->getCount(); i++) {
-      auto assignment =
-        dynamic_pointer_cast<AssignmentExpression>((*m_exp)[i]);
-
-      auto var = assignment->getVariable();
-      auto val = assignment->getValue();
-
-      const auto& name =
-        dynamic_pointer_cast<ConstantExpression>(var)->getName();
-
-      Symbol *sym = getScope()->getConstants()->getSymbol(name);
-      Lock lock(BlockScope::s_constMutex);
-      if (sym->getValue() != val) {
-        getScope()->addUpdates(BlockScope::UseKindConstRef);
-        sym->setValue(val);
-      }
-    }
-  }
-
-  // abstract constants are not added to the constant table and don't have
-  // any values to propagate.
-  return StatementPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

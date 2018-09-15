@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_835() {
 $c1 = Map {
 'a' => 0, 'b' => 3, 'c' => 6, 'd' => 9}
 ;
@@ -28,4 +31,5 @@ $c2 = Map {
 ;
 foreach ($c1->zip($c2) as $k => $v) {
   var_dump($k, $v);
+}
 }

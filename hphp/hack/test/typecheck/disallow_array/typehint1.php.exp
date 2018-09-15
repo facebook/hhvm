@@ -1,0 +1,2 @@
+File "typehint1.php", line 4, characters 12-16:
+Array typehints are no longer legal; use varray or darray instead (Naming[2082])

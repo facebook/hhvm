@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract class A {
   abstract function f();

@@ -14,6 +14,6 @@
 # needs to be set before the languages are enabled in order to have any effect, so we set it
 # based directly off of the name of the generator, which is set before configuration even begins.
 
-if ("${CMAKE_GENERATOR}" STREQUAL "Visual Studio 14 2015 Win64")
-    set(CMAKE_GENERATOR_TOOLSET "v140</PlatformToolset><PreferredToolArchitecture>x64</PreferredToolArchitecture><PlatformToolset>v140")
+if ("${CMAKE_GENERATOR}" STREQUAL "Visual Studio 15( 2017)? Win64")
+    set(CMAKE_GENERATOR_TOOLSET "v141</PlatformToolset><PreferredToolArchitecture>x64</PreferredToolArchitecture><PlatformToolset>v141")
 endif()

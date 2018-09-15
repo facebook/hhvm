@@ -13,4 +13,8 @@ function test() {
   var_dump($foo->bar[$k?->key]->baz); // 200
 }
 
+
+<<__EntryPoint>>
+function main_nullsafe_prop_12() {
 test();
+}

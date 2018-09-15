@@ -2,9 +2,9 @@
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
  *
  *)
 
@@ -26,7 +26,8 @@ function test() {
 }"
 
 let identify_foo_request =
-  ServerCommandTypes.IDENTIFY_FUNCTION (bar_contents, 4, 4)
+  ServerCommandTypes.IDENTIFY_FUNCTION
+    (ServerCommandTypes.FileContent bar_contents, 4, 4)
 
 let check_identify_foo_response = function
   | Some [_, Some def] ->
@@ -50,7 +51,7 @@ let () =
   let env = Test.connect_persistent_client env in
 
   let _, loop_output = Test.(run_loop_once env { default_loop_input with
-    persistent_client_request = Some identify_foo_request
+    persistent_client_request = Some (Request identify_foo_request)
   }) in
 
   check_identify_foo_response loop_output.persistent_client_response

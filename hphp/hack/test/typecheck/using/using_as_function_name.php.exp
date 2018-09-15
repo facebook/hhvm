@@ -1,0 +1,4 @@
+File "using_as_function_name.php", line 4, characters 15-15:
+A name, __construct, or __destruct keyword is expected here. (Parsing[1002])
+File "using_as_function_name.php", line 4, characters 10-14:
+Illegal function name: using (NastCheck[3025])

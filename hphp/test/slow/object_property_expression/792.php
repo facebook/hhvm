@@ -13,6 +13,9 @@ class C1 {
   }
   private $_p = array();
 }
+
+<<__EntryPoint>>
+function main_792() {
 $c = new C1();
 $c->a += 1;
 print $c->a;
@@ -36,3 +39,4 @@ $c->a &= 333;
 print $c->a;
 $c->a |= 7;
 print $c->a;
+}

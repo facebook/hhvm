@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function VS($a, $b) {
   if ($a === $b) var_dump("ok");

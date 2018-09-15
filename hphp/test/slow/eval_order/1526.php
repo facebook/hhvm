@@ -14,4 +14,8 @@ function test($x, $y) {
   $x->foo($x = null);
   $y($y = null);
 }
+
+<<__EntryPoint>>
+function main_1526() {
 test(new X, 'y');
+}

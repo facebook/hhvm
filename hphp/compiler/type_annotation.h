@@ -116,7 +116,9 @@ struct TypeAnnotation {
   void setTypeVar() { m_typevar = true; }
   void setTypeAccess() { m_typeaccess = true; }
   void setShape() { m_shape = true; }
+  void setAllowsUnknownFields() { m_allowsUnknownFields = true; }
   void setClsCnsShapeField() { m_clsCnsShapeField = true; }
+  void setOptionalShapeField() { m_optionalShapeField = true; }
   void setGenerics(const std::string& generics) { m_generics = generics; }
 
   const std::string& getGenerics() const { return m_generics; }
@@ -129,7 +131,9 @@ struct TypeAnnotation {
   bool isTypeVar() const { return m_typevar; }
   bool isTypeAccess() const { return m_typeaccess; }
   bool isShape() const { return m_shape; }
+  bool allowsUnknownFields() const { return m_allowsUnknownFields; }
   bool isClsCnsShapeField() const { return m_clsCnsShapeField; }
+  bool isOptionalShapeField() const { return m_optionalShapeField; }
 
   /*
    * Return a shallow copy of this TypeAnnotation, except with
@@ -153,17 +157,14 @@ struct TypeAnnotation {
 
   bool isMixed() const { return !strcasecmp(m_name.c_str(), "HH\\mixed"); }
 
+  bool isNonnull() const { return !strcasecmp(m_name.c_str(), "HH\\nonnull"); }
+
   bool isVoid() const { return !strcasecmp(m_name.c_str(), "HH\\void"); }
 
   bool isThis() const { return !strcasecmp(m_name.c_str(), "HH\\this"); }
 
   bool isAwaitable() const {
     return !strcasecmp(m_name.c_str(), "HH\\Awaitable");
-  }
-
-  bool isWaitHandle() const {
-    return !strcasecmp(m_name.c_str(), "WaitHandle") ||
-           !strcasecmp(m_name.c_str(), "HH\\WaitHandle");
   }
 
   /*
@@ -244,7 +245,10 @@ private:
   unsigned m_typevar : 1;
   unsigned m_typeaccess : 1;
   unsigned m_shape : 1;
+  unsigned m_allowsUnknownFields : 1;
   unsigned m_clsCnsShapeField : 1;
+  unsigned m_optionalShapeField : 1;
+  unsigned m_reifiedtype : 1;
 };
 
 }

@@ -17,4 +17,8 @@ function bar() {
   $a = foo(2);
   var_dump($GLOBALS['b']);
 }
+
+<<__EntryPoint>>
+function main_1743() {
 bar();
+}

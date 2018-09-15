@@ -8,7 +8,7 @@ Member foo has the wrong type
 File "gen4a.php", line 13, characters 31-31:
 Some type constraint(s) here are violated
 File "gen4a.php", line 20, characters 23-23:
-'T' is a constrained type
+'T' is a constrained type parameter
 File "gen4a.php", line 20, characters 28-28:
 This is an object of type B
 File "gen4a.php", line 13, characters 28-28:

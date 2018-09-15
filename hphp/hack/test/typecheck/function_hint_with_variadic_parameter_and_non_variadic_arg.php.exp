@@ -1,0 +1,6 @@
+File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 8, characters 17-35:
+Invalid argument (Typing[4041])
+File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 3, characters 10-21:
+Too many mandatory arguments
+File "function_hint_with_variadic_parameter_and_non_variadic_arg.php", line 5, characters 24-49:
+Because of this definition

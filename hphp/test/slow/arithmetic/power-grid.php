@@ -1,4 +1,15 @@
 <?php
+
+function inline_dump($val) {
+  ob_start();
+  var_dump($val);
+  $contents = ob_get_contents();
+  ob_end_clean();
+  return trim(preg_replace('/[\r\n\s]+/', ' ', $contents));
+}
+
+<<__EntryPoint>>
+function main_power_grid() {
 error_reporting(E_ALL | E_NOTICE | E_STRICT);
 // PHP's resource numbers start one ahead of us
 if (defined('HHVM_VERSION')) $dummy = fopen('php://memory', 'w+');
@@ -21,18 +32,11 @@ $args = [
 ];
 fclose($closeme);
 
-function inline_dump($val) {
-  ob_start();
-  var_dump($val);
-  $contents = ob_get_contents();
-  ob_end_clean();
-  return trim(preg_replace('/[\r\n\s]+/', ' ', $contents));
-}
-
 foreach($args as $x) {
   foreach($args as $y) {
     echo inline_dump($x), ' ** ',
          inline_dump($y), ' => ',
          inline_dump($x ** $y), "\n";
   }
+}
 }

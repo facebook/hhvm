@@ -38,27 +38,42 @@ namespace {
 
 c_AsyncGeneratorWaitHandle::~c_AsyncGeneratorWaitHandle() {
   if (LIKELY(isFinished())) return;
-  assert(!isRunning());
+  assertx(!isRunning());
   decRefObj(m_child);
 }
 
-req::ptr<c_AsyncGeneratorWaitHandle>
-c_AsyncGeneratorWaitHandle::Create(AsyncGenerator* gen,
+c_AsyncGeneratorWaitHandle*
+c_AsyncGeneratorWaitHandle::Create(const ActRec* fp,
+                                   jit::TCA resumeAddr,
+                                   Offset resumeOffset,
                                    c_WaitableWaitHandle* child) {
-  assert(child->instanceof(c_WaitableWaitHandle::classof()));
-  assert(!child->isFinished());
+  assertx(fp);
+  assertx(fp->resumed());
+  assertx(fp->func()->isAsyncGenerator());
+  assertx(child);
+  assertx(child->instanceof(c_WaitableWaitHandle::classof()));
+  assertx(!child->isFinished());
+
+  auto const gen = frame_async_generator(fp);
   auto wh = req::make<c_AsyncGeneratorWaitHandle>(gen, child);
   child->getParentChain().addParent(
       wh->m_blockable,
       AsioBlockable::Kind::AsyncGeneratorWaitHandle
   );
-  wh->incRefCount(); // on behalf of child->parent ptr in AsioBlockableChain
-  return wh;
+  // Implied reference from child via its AsioBlockableChain.
+  wh->incRefCount();
+
+  // Set resume address and link the AGWH to the async generator.
+  gen->resumable()->setResumeAddr(resumeAddr, resumeOffset);
+  gen->attachWaitHandle(req::ptr<c_AsyncGeneratorWaitHandle>(wh));
+
+  return wh.detach();
 }
 
 c_AsyncGeneratorWaitHandle::c_AsyncGeneratorWaitHandle(AsyncGenerator* gen,
                                             c_WaitableWaitHandle* child)
-  : c_ResumableWaitHandle(classof())
+  : c_ResumableWaitHandle(classof(), HeaderKind::WaitHandle,
+                type_scan::getIndexForMalloc<c_AsyncGeneratorWaitHandle>())
   , m_generator(gen->toObject())
 {
   setState(STATE_BLOCKED);
@@ -67,8 +82,9 @@ c_AsyncGeneratorWaitHandle::c_AsyncGeneratorWaitHandle(AsyncGenerator* gen,
 }
 
 void c_AsyncGeneratorWaitHandle::resume() {
-  assert(getState() == STATE_READY);
-  assert(m_child->isFinished());
+  // No refcnt: incref by being executed, decref by no longer in runnable queue.
+  assertx(getState() == STATE_READY);
+  assertx(m_child->isFinished());
   setState(STATE_RUNNING);
 
   auto generator = Native::data<AsyncGenerator>(m_generator);
@@ -86,7 +102,7 @@ void c_AsyncGeneratorWaitHandle::resume() {
 }
 
 void c_AsyncGeneratorWaitHandle::prepareChild(c_WaitableWaitHandle* child) {
-  assert(!child->isFinished());
+  assertx(!child->isFinished());
 
   // import child into the current context, throw on cross-context cycles
   asio::enter_context(child, getContextIdx());
@@ -98,19 +114,22 @@ void c_AsyncGeneratorWaitHandle::prepareChild(c_WaitableWaitHandle* child) {
 void c_AsyncGeneratorWaitHandle::onUnblocked() {
   setState(STATE_READY);
   if (isInContext()) {
+    // No refcnt: incref by runnable queue, decref by no longer refd by child.
     getContext()->schedule(this);
   } else {
+    // Drop implied reference from child.
     decRefObj(this);
   }
 }
 
-void c_AsyncGeneratorWaitHandle::await(c_WaitableWaitHandle* child) {
+void c_AsyncGeneratorWaitHandle::await(req::ptr<c_WaitableWaitHandle>&& child) {
   // Prepare child for establishing dependency. May throw.
-  prepareChild(child);
+  prepareChild(child.get());
 
   // Set up the dependency.
+  // No refcnt: incref by ref from child, decref by no longer being executed.
   setState(STATE_BLOCKED);
-  m_child = child;
+  m_child = child.detach();
   m_child->getParentChain()
     .addParent(m_blockable, AsioBlockable::Kind::AsyncGeneratorWaitHandle);
 }
@@ -121,6 +140,9 @@ void c_AsyncGeneratorWaitHandle::ret(Cell& result) {
   cellCopy(result, m_resultOrException);
   parentChain.unblock();
   m_generator.reset();
+
+  // Drop implied reference by being executed.
+  decRefObj(this);
 }
 
 void c_AsyncGeneratorWaitHandle::fail(ObjectData* exception) {
@@ -134,6 +156,9 @@ void c_AsyncGeneratorWaitHandle::fail(ObjectData* exception) {
   cellCopy(make_tv<KindOfObject>(exception), m_resultOrException);
   parentChain.unblock();
   m_generator.reset();
+
+  // Drop implied reference by being executed.
+  decRefObj(this);
 }
 
 void c_AsyncGeneratorWaitHandle::failCpp() {
@@ -143,6 +168,9 @@ void c_AsyncGeneratorWaitHandle::failCpp() {
   tvWriteObject(exception, &m_resultOrException);
   parentChain.unblock();
   m_generator.reset();
+
+  // Drop implied reference by being executed.
+  decRefObj(this);
 }
 
 String c_AsyncGeneratorWaitHandle::getName() {
@@ -151,10 +179,10 @@ String c_AsyncGeneratorWaitHandle::getName() {
 
 c_WaitableWaitHandle* c_AsyncGeneratorWaitHandle::getChild() {
   if (getState() == STATE_BLOCKED) {
-    assert(m_child);
+    assertx(m_child);
     return m_child;
   } else {
-    assert(getState() == STATE_READY || getState() == STATE_RUNNING);
+    assertx(getState() == STATE_READY || getState() == STATE_RUNNING);
     return nullptr;
   }
 }
@@ -165,7 +193,7 @@ Resumable* c_AsyncGeneratorWaitHandle::resumable() const {
 }
 
 void c_AsyncGeneratorWaitHandle::exitContext(context_idx_t ctx_idx) {
-  assert(AsioSession::Get()->getContext(ctx_idx));
+  assertx(AsioSession::Get()->getContext(ctx_idx));
 
   // stop before corrupting unioned data
   if (isFinished()) {
@@ -174,7 +202,7 @@ void c_AsyncGeneratorWaitHandle::exitContext(context_idx_t ctx_idx) {
   }
 
   // not in a context being exited
-  assert(getContextIdx() <= ctx_idx);
+  assertx(getContextIdx() <= ctx_idx);
   if (getContextIdx() != ctx_idx) {
     decRefObj(this);
     return;
@@ -205,7 +233,7 @@ void c_AsyncGeneratorWaitHandle::exitContext(context_idx_t ctx_idx) {
       break;
 
     default:
-      assert(false);
+      assertx(false);
   }
 }
 

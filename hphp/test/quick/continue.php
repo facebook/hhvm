@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function bare_break_continue() {
   // This should emit properly; it's not an include-time fatal
@@ -31,7 +31,7 @@ function test() {
   foreach ($three as $x) {
     foreach ($four as $y) {
       if ($y == 3) {
-        continue (100 - 98);
+        continue 2;
       }
       echo $y;
     }

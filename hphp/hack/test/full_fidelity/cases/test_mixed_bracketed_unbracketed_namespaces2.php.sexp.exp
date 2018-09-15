@@ -1,0 +1,33 @@
+((script 121
+  ((list 121
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4
+        ((() <? 2 ())
+         (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))
+       (missing 0 ())))
+     (namespace_declaration 16
+      ((() namespace 9 ((whitespace 1))) (() name 3 ((whitespace 1)))
+       (namespace_body 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (namespace_declaration 14
+      ((() namespace 9 ((whitespace 1))) (() name 3 ())
+       (namespace_empty_body 1 ((() ";" 1 ((end_of_line 1)))))))
+     (namespace_declaration 17
+      ((() namespace 9 ((whitespace 1))) (() name 4 ((whitespace 1)))
+       (namespace_body 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (namespace_declaration 16
+      ((() namespace 9 ((whitespace 1))) (() name 5 ())
+       (namespace_empty_body 1 ((() ";" 1 ((end_of_line 1)))))))
+     (namespace_declaration 38
+      ((((end_of_line 1)) namespace 9 ((whitespace 1)))
+       (() name 5 ((whitespace 1)))
+       (namespace_body 22
+        ((() { 1 ((end_of_line 1)))
+         (list 16
+          ((namespace_declaration 16
+            ((((whitespace 2)) namespace 9 ((whitespace 1))) (() name 5 ())
+             (namespace_empty_body 1 ((() ";" 1 ((end_of_line 1)))))))))
+         (() } 1 ((end_of_line 1)))))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

@@ -4,7 +4,10 @@ class A {
   public static function bar($baz) {}
 }
 
+
 // Bad function.
+<<__EntryPoint>>
+function main_reflection_param_exception() {
 try {
   new ReflectionParameter(1, 'baz');
 } catch (ReflectionException $e) {
@@ -36,4 +39,5 @@ try {
   new ReflectionParameter(['A', 'bar'], []);
 } catch (ReflectionException $e) {
   echo $e->getMessage() . "\n";
+}
 }

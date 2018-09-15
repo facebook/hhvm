@@ -32,13 +32,13 @@ Array get_tspec(const Class* cls) {
     passing in nullptr would do the correct checks. Not sure it matters
   */
   auto lookup = cls->getSProp(cls, s_TSPEC.get());
-  if (!lookup.prop) {
+  if (!lookup.val) {
     thrift_error(
       folly::sformat("Class {} does not have a property named {}",
                      cls->name(), s_TSPEC),
       ERR_INVALID_DATA);
   }
-  Variant structSpec = tvAsVariant(lookup.prop);
+  Variant structSpec = tvAsVariant(lookup.val);
   if (!structSpec.isArray()) {
     thrift_error("invalid type of spec", ERR_INVALID_DATA);
   }

@@ -53,7 +53,12 @@ namespace HPHP { namespace jit {
  *     and an offset from the start of the func for pc.  In the case of
  *     resumable frames the sp offset is relative to Stack::resumableStackBase.
  *
- *   - IndirectFixup: this is used for some shared stubs in the TC.
+ *   - IndirectFixup:
+ *
+ *     This can be used for some shared stubs in the TC, to avoid
+ *     setting up a full frame, on architectures where the calee's
+ *     frame is stored immediately under the caller's sp (currently
+ *     true of x64 but not arm or ppc).
  *
  *     In this case, some JIT'd code associated with the ActRec* we found made
  *     a call to a shared stub, and then that stub called C++.  The
@@ -62,9 +67,10 @@ namespace HPHP { namespace jit {
  *     shared stub can be found.  I.e., we're trying to chase back two return
  *     ips into the TC.
  *
- *     Note that this means IndirectFixups will not work for C++ code paths
- *     that need to do a fixup without making at least one other C++ call, but
- *     for the current use case this is fine.
+ *     Note that this means IndirectFixups will not work for C++ code
+ *     paths that need to do a fixup without making at least one other
+ *     C++ call (because of -momit-leaf-frame-pointers), but for the
+ *     current use case this is fine.
  *
  *     Here's a picture of the native stack in the indirect fixup situation:
  *

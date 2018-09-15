@@ -4,7 +4,7 @@
 
 function show_iter($iter) {
   $vs = new Vector($iter);
-  sort($vs);
+  sort(&$vs);
   echo "...\n";
   foreach ($vs as $v) var_dump($v);
   echo "...\n";
@@ -66,4 +66,8 @@ function main() {
   // TODO: add toImmMap() once it exists.
 }
 
+
+<<__EntryPoint>>
+function main_materialization() {
 main();
+}

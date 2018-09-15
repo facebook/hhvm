@@ -34,4 +34,8 @@ function blah() {
   echo "after if\n";
 }
 
+
+<<__EntryPoint>>
+function main_finally_goto_001() {
 blah();
+}

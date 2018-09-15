@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class a {
   public $pub = 'public in a';

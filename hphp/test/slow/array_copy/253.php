@@ -9,4 +9,8 @@ function h4() {
   var_dump(current($x));
   var_dump(current($y));
 }
+
+<<__EntryPoint>>
+function main_253() {
 h4();
+}

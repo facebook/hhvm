@@ -1,4 +1,4 @@
-<?
+<?hh
 
 include_once "crossUnitRefsInc.php";
 

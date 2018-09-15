@@ -23,4 +23,8 @@ function main() {
   $x->foo($y);
 }
 
+
+<<__EntryPoint>>
+function main_func_family_013() {
 main();
+}

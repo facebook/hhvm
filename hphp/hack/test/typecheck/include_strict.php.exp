@@ -1,2 +1,2 @@
-File "include_strict.php", line 2, characters 6-12:
-Parse error: include is supported only as a toplevel declaration (Parsing[1002])
+File "include_strict.php", line 2, characters 1-25:
+Toplevel statements besides requires are not allowed in strict files (Parsing[1002])

@@ -27,6 +27,10 @@ function c() {
   var_dump($output);
 }
 
+
+<<__EntryPoint>>
+function main_each() {
 a();
 b();
 c();
+}

@@ -63,8 +63,7 @@ static inline long in6addrWord(struct in6_addr addr, char wordNo) {
 static void arrayRefHelper(Variant& arr) {
   String sms("hhvm.stats.max_slot");
   String hfc("hhvm.hot_func_count");
-  Variant r(Variant::StrongBind{}, arr.toArrRef().lvalAt(sms));
-  arr.toArrRef().setRef(hfc, r);
+  arr.toArrRef().setRef(hfc, arr.toArrRef().lvalAt(sms));
 }
 
 bool TestCppBase::TestVariantArrayRef() {
@@ -81,26 +80,29 @@ bool TestCppBase::TestVariantArrayRef() {
 
   Variant ml_arr(Array::Create());
   ml_arr.toArrRef().set(k1, Array::Create());
-  ml_arr.toArrRef().lvalAt(k1).toArrRef().set(k2, Array::Create());
-  ml_arr.toArrRef().lvalAt(k1).toArrRef().lvalAt(k2).toArrRef().set(k3, v4);
+  asArrRef(ml_arr.toArrRef().lvalAt(k1)).set(k2, Array::Create());
+  asArrRef(asArrRef(ml_arr.toArrRef().lvalAt(k1)).lvalAt(k2)).set(k3, v4);
 
   Variant arr(Array::Create());
   arr.toArrRef().set(sms, v1);
   arrayRefHelper(arr);
   arr.toArrRef().set(sms, v2);
 
-  VERIFY(arr.toArray().rvalAt(hfc).toInt64() == 77);
+  VERIFY(tvCastToInt64(arr.toArray().rvalAt(hfc).tv()) == 77);
 
   // bidirectional references
   arr.toArrRef().set(hfc, v3);
-  VERIFY(arr.toArray().rvalAt(sms).toInt64() == 99);
+  VERIFY(tvCastToInt64(arr.toArray().rvalAt(sms).tv()) == 99);
 
   VERIFY(ml_arr.toArray().size() == 1);
-  VERIFY(ml_arr.toArray().rvalAt(k1).isArray() == true);
-  VERIFY(ml_arr.toArray().
-         rvalAt(k1).toArray().
-         rvalAt(k2).toArray().
-         rvalAt(k3).toBoolean() == true);
+  VERIFY(isArrayLikeType(ml_arr.toArray().rvalAt(k1).unboxed().type()));
+  VERIFY(tvCastToBoolean(
+    tvCastToArrayLike(
+      tvCastToArrayLike(
+        ml_arr.toArray().rvalAt(k1).tv()
+      ).rvalAt(k2).tv()
+    ).rvalAt(k3).tv()
+  ));
   return Count(true);
 }
 
@@ -473,7 +475,7 @@ bool TestCppBase::TestVirtualHost() {
   RuntimeOption::AllowedDirectories.clear();
   std::vector<VirtualHost> hosts;
   RuntimeOption::AllowedDirectories =
-    Config::GetVector(ini, hdf, "Server.AllowedDirectories");
+    Config::GetStrVector(ini, hdf, "Server.AllowedDirectories");
   auto cb = [&] (const IniSetting::Map &ini_cb, const Hdf &hdf_cb,
                  const std::string &host) {
     if (VirtualHost::IsDefault(ini_cb, hdf_cb, host)) {
@@ -585,7 +587,7 @@ bool TestCppBase::TestVirtualHostIni() {
 
   Config::ParseIniString(inistr, ini);
   RuntimeOption::AllowedDirectories =
-    Config::GetVector(ini, empty, "Server.AllowedDirectories");
+    Config::GetStrVector(ini, empty, "Server.AllowedDirectories");
   auto cb = [&] (const IniSetting::Map &ini_cb,
                  const Hdf &hdf_cb,
                  const std::string &host){
@@ -669,7 +671,7 @@ bool TestCppBase::TestCollectionHdf() {
                hdf, "Server.AllowedDirectories");
   VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
   std::vector<std::string> ad =
-    Config::GetVector(ini, hdf, "Server.AllowedDirectories",
+    Config::GetStrVector(ini, hdf, "Server.AllowedDirectories",
                       RuntimeOption::AllowedDirectories);
   VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
   VERIFY(ad.size() == 2);
@@ -700,7 +702,7 @@ bool TestCppBase::TestCollectionIni() {
                "Server.AllowedDirectories"); // Test converting name
   VERIFY(RuntimeOption::AllowedDirectories.size() == 2);
   std::vector<std::string> ad =
-    Config::GetVector(ini, empty, "Server.AllowedDirectories",
+    Config::GetStrVector(ini, empty, "Server.AllowedDirectories",
                       RuntimeOption::AllowedDirectories, false);
   // This should still be 2. In other words, Get shouldn't append
   // values.

@@ -22,8 +22,12 @@ async function d() {
   await a();
 }
 
+
+<<__EntryPoint>>
+function main_fcallawait_interp() {
 try {
   \HH\Asio\join(a());
 } catch (Exception $e) {
   echo "Caught!\n";
+}
 }

@@ -3,15 +3,15 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
-   | Copyright (c) 1998-2010 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE.PHP, and is    |
    | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
+   | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
 
@@ -45,21 +45,32 @@ static void replace_controlchars(String& output, const char *str, int len) {
 
 bool url_parse(Url &output, const char *str, size_t length) {
   char port_buf[6];
+  // s: full string
+  // ue: end of full string
+  // p: start of string slice we're looking at
+  // e: index of something we searched for, e.g. ':'. usually end of string
+  //    slice, but not always
+  // pp: start of string sub-slice
   const char *s, *e, *p, *pp, *ue;
 
   s = str;
   ue = s + length;
 
   /* parse scheme */
-  if ((e = (const char *)memchr((const void *)s, ':', length)) && (e - s)) {
+  if ((e = (const char *)memchr((const void *)s, ':', length)) && e != s) {
     /* validate scheme */
     p = s;
     while (p < e) {
       /* scheme = 1*[ lowalpha | digit | "+" | "-" | "." ] */
       if (!isalpha(*p) && !isdigit(*p) &&
           *p != '+' && *p != '.' && *p != '-') {
-        if (e + 1 < ue) {
+        if (e + 1 < ue && e < s + strcspn(s, "?#")) {
           goto parse_port;
+        } else if (s + 1 < ue && *s == '/' && *(s + 1) == '/') {
+          /* relative-scheme URL */
+          s += 2;
+          e = nullptr;
+          goto parse_host;
         } else {
           goto just_path;
         }
@@ -67,9 +78,9 @@ bool url_parse(Url &output, const char *str, size_t length) {
       p++;
     }
 
-    if (*(e + 1) == '\0') { /* only scheme is available */
+    if ((e + 1) == ue) { /* only scheme is available */
       replace_controlchars(output.scheme, s, (e - s));
-      goto end;
+      return true;
     }
 
     /*
@@ -81,110 +92,96 @@ bool url_parse(Url &output, const char *str, size_t length) {
        * correctly parse things like a.com:80
        */
       p = e + 1;
-      while (isdigit(*p)) {
+      while (p < ue && isdigit(*p)) {
         p++;
       }
 
-      if ((*p == '\0' || *p == '/') && (p - e) < 7) {
+      if ((p == ue || *p == '/') && (p - e) < 7) {
         goto parse_port;
       }
 
       replace_controlchars(output.scheme, s, (e - s));
 
-      length -= ++e - s;
-      s = e;
+      s = e + 1;
       goto just_path;
     } else {
       replace_controlchars(output.scheme, s, (e - s));
 
-      if (*(e+2) == '/') {
+      if (e + 2 < ue && *(e+2) == '/') {
         s = e + 3;
         if (output.scheme.get()->isame(s_file.get())) {
-          if (*(e + 3) == '/') {
+          if (e + 3 < ue && *(e + 3) == '/') {
             /* support windows drive letters as in:
                file:///c:/somedir/file.txt
             */
-            if (e[4] != '\0' && e[5] == ':') {
+            if (e + 5 < ue && e[4] != '\0' && e[5] == ':') {
               s = e + 4;
             }
-            goto nohost;
+            goto just_path;
           }
         }
       } else {
-        if (output.scheme.get()->isame(s_file.get())) {
-          s = e + 1;
-          goto nohost;
-        } else {
-          length -= ++e - s;
-          s = e;
-          goto just_path;
-        }
+        s = e + 1;
+        goto just_path;
       }
     }
-  } else if (e) { /* no scheme, look for port */
+  } else if (e) { /* no scheme; starts with colon: look for port */
     parse_port:
     p = e + 1;
     pp = p;
 
-    while (pp-p < 6 && isdigit(*pp)) {
+    while (pp < ue && pp - p < 6 && isdigit(*pp)) {
       pp++;
     }
 
-    if (pp - p > 0 && pp-p < 6 && (*pp == '/' || *pp == '\0')) {
+    if (pp - p > 0 && pp - p < 6 && (pp == ue || *pp == '/')) {
       memcpy(port_buf, p, (pp-p));
       port_buf[pp-p] = '\0';
       auto port = atoi(port_buf);
       if (port > 0 && port <= 65535) {
         output.port = port;
-        if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
+        if (s + 1 < ue && *s == '/' && *(s+1) == '/') {
+          /* relative-scheme URL */
           s += 2;
         }
       } else {
         return false;
       }
-    } else if (p == pp && *pp == '\0') {
+    } else if (p == pp && pp == ue) {
       return false;
-    } else if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
+    } else if (s + 1 < ue && *s == '/' && *(s+1) == '/') {
+      /* relative-scheme URL */
       s += 2;
     } else {
       goto just_path;
     }
-  } else if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
+  } else if (s + 1 < ue && *s == '/' && *(s +1 ) == '/') {
+    /* relative-scheme URL */
     s += 2;
   } else {
-    just_path:
-    ue = s + length;
-    goto nohost;
+    goto just_path;
   }
 
+  parse_host:
+  /* Binary-safe strcspn(s, "/?#") */
   e = ue;
-
-  if (!(p = (const char *)memchr(s, '/', (ue - s)))) {
-    const char *query = (const char *)memchr(s, '?', (ue - s));
-    const char *fragment = (const char *)memchr(s, '#', (ue - s));
-
-    if (query && fragment) {
-      e = (query > fragment) ? fragment : query;
-    } else if (query) {
-      e = query;
-    } else if (fragment) {
-      e = fragment;
-    }
-  } else {
+  if ((p = (const char*)memchr(s, '/', e - s))) {
+    e = p;
+  }
+  if ((p = (const char*)memchr(s, '?', e - s))) {
+    e = p;
+  }
+  if ((p = (const char*)memchr(s, '#', e - s))) {
     e = p;
   }
 
   /* check for login and password */
-  if ((p = (const char *)memrchr(s, '@', (e-s)))) {
-    if ((pp = (const char *)memchr(s, ':', (p-s)))) {
-      if ((pp-s) > 0) {
-        replace_controlchars(output.user, s, (pp - s));
-      }
+  if ((p = (const char*)memrchr(s, '@', (e-s)))) {
+    if ((pp = (const char*)memchr(s, ':', (p-s)))) {
+      replace_controlchars(output.user, s, (pp - s));
 
       pp++;
-      if (p-pp > 0) {
-        replace_controlchars(output.pass, pp, (p-pp));
-      }
+      replace_controlchars(output.pass, pp, (p-pp));
     } else {
       replace_controlchars(output.user, s, (p-s));
     }
@@ -193,18 +190,16 @@ bool url_parse(Url &output, const char *str, size_t length) {
   }
 
   /* check for port */
-  if (*s == '[' && *(e-1) == ']') {
+  if (s < ue && *s == '[' && *(e-1) == ']') {
     /* Short circuit portscan,
        we're dealing with an
        IPv6 embedded address */
-    p = s;
+    p = nullptr;
   } else {
-    /* memrchr is a GNU specific extension
-       Emulate for wide compatibility */
-    for(p = e; *p != ':' && p >= s; p--);
+    p = (const char*)memrchr(s, ':', e - s);
   }
 
-  if (p >= s && *p == ':') {
+  if (p) {
     if (!output.port) {
       p++;
       if (e-p > 5) { /* port cannot be longer then 5 characters */
@@ -238,47 +233,32 @@ bool url_parse(Url &output, const char *str, size_t length) {
 
   s = e;
 
-  nohost:
+  just_path:
 
-  if ((p = (const char *)memchr(s, '?', (ue - s)))) {
-    pp = strchr(s, '#');
+  e = ue;
+  p = (const char*)memchr(s, '#', (e - s));
 
-    if (pp && pp < p) {
-      if (pp - s) {
-        replace_controlchars(output.path, s, (pp - s));
-        p = pp;
-      }
-      goto label_parse;
-    }
-
-    if (p - s) {
-      replace_controlchars(output.path, s, (p - s));
-    }
-
-    if (pp) {
-      if (pp - ++p) {
-        replace_controlchars(output.query, p, (pp - p));
-      }
-      p = pp;
-      goto label_parse;
-    } else if (++p - ue) {
-      replace_controlchars(output.query, p, (ue - p));
-    }
-  } else if ((p = (const char *)memchr(s, '#', (ue - s)))) {
-    if (p - s) {
-      replace_controlchars(output.path, s, (p - s));
-    }
-
-    label_parse:
+  if (p) {
     p++;
-
-    if (ue - p) {
-      replace_controlchars(output.fragment, p, (ue - p));
+    if (p < e) {
+      replace_controlchars(output.fragment, p, e - p);
     }
-  } else {
-    replace_controlchars(output.path, s, (ue - s));
+    e = p - 1;
   }
-end:
+
+  p = (const char*)memchr(s, '?', (e - s));
+  if (p) {
+    p++;
+    if (p < e) {
+      replace_controlchars(output.query, p, e - p);
+    }
+    e = p - 1;
+  }
+
+  if (s < e || s == ue) {
+    replace_controlchars(output.path, s, e - s);
+  }
+
   return true;
 }
 
@@ -373,7 +353,7 @@ String url_decode(const char *s, size_t len) {
 }
 
 size_t url_decode_ex(char *value, size_t len) {
-  assert(value && *value); // check before calling this function
+  assertx(value && *value); // check before calling this function
   if (len == 0) return 0;
 
   size_t i = 0, o = 0;

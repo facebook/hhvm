@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/jit/vasm-print.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 
-#include <gtest/gtest.h>
+#include <folly/portability/GTest.h>
 
 namespace HPHP { namespace jit {
 
@@ -53,7 +53,7 @@ std::string stripWhitespace(std::string str) {
 void testSetccXor() {
   {
     Vunit unit;
-    unit.entry = unit.makeBlock(AreaIndex::Main);
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
     Vout v(unit, unit.entry);
 
     auto sf = v.makeReg();
@@ -76,7 +76,7 @@ void testSetccXor() {
 
   {
     Vunit unit;
-    unit.entry = unit.makeBlock(AreaIndex::Main);
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
     Vout v(unit, unit.entry);
 
     auto sf = v.makeReg();
@@ -103,7 +103,7 @@ void testSetccXor() {
 
   {
     Vunit unit;
-    unit.entry = unit.makeBlock(AreaIndex::Main);
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
     Vout v(unit, unit.entry);
 
     auto sf = v.makeReg();
@@ -126,7 +126,7 @@ void testSetccXor() {
 
   {
     Vunit unit;
-    unit.entry = unit.makeBlock(AreaIndex::Main);
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
     Vout v(unit, unit.entry);
 
     auto sf = v.makeReg();
@@ -147,7 +147,7 @@ void testSetccXor() {
 
   {
     Vunit unit;
-    unit.entry = unit.makeBlock(AreaIndex::Main);
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
     Vout v(unit, unit.entry);
 
     auto sf = v.makeReg();
@@ -171,7 +171,7 @@ void testSetccXor() {
 
   {
     Vunit unit;
-    unit.entry = unit.makeBlock(AreaIndex::Main);
+    unit.entry = unit.makeBlock(AreaIndex::Main, 1);
     Vout v(unit, unit.entry);
 
     auto sf = v.makeReg();

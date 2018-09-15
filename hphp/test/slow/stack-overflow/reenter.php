@@ -11,4 +11,8 @@ function foo($x) {
   bar($x);
 }
 
+
+<<__EntryPoint>>
+function main_reenter() {
 foo(1);
+}

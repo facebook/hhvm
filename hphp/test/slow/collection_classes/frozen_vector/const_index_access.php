@@ -26,4 +26,8 @@ function main() {
   foo($fv);
 }
 
+
+<<__EntryPoint>>
+function main_const_index_access() {
 main();
+}

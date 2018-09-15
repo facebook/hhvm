@@ -1,0 +1,2 @@
+File "parse_int_with_underscore_bad1.php", line 5, characters 19-20:
+Unbound name: _0 (a global constant) (Naming[2049])

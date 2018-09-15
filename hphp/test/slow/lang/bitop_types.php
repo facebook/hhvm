@@ -1,5 +1,25 @@
 <?php
 
+class c {
+  public function __toString() {
+    return 'c';
+  }
+}
+
+function test_uninit() {
+  if (false) {}
+  $a = 'string';
+  $x = $a & $b;
+  var_dump($x);
+
+  $a = 'string';
+  $x = $a ^ $b;
+  var_dump($x);
+}
+
+
+<<__EntryPoint>>
+function main_bitop_types() {
 $format = '
   function %s($a, $b) {
     if (false) {} // force translation
@@ -8,12 +28,6 @@ $format = '
            gettype($a), gettype($b), gettype($x));
   }
   %s(%s, %s);';
-
-class c {
-  public function __toString() {
-    return 'c';
-  }
-}
 
 $ops = array(
   '&',
@@ -41,15 +55,5 @@ for ($o = 0; $o < count($ops); ++$o) {
   }
 }
 
-function test_uninit() {
-  if (false) {}
-  $a = 'string';
-  $x = $a & $b;
-  var_dump($x);
-
-  $a = 'string';
-  $x = $a ^ $b;
-  var_dump($x);
-}
-
 @test_uninit();
+}

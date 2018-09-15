@@ -35,4 +35,8 @@ function main() {
   reflect('C');
   reflect('P');
 }
+
+<<__EntryPoint>>
+function main_defaultconstructor_exceptions() {
 main();
+}

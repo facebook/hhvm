@@ -45,15 +45,11 @@ StatementPtr ExpStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void ExpStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
-}
+void ExpStatement::onParse(AnalysisResultConstRawPtr /*ar*/,
+                           FileScopePtr /*scope*/) {}
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-void ExpStatement::analyzeProgram(AnalysisResultPtr ar) {
-  m_exp->analyzeProgram(ar);
-}
 
 ConstructPtr ExpStatement::getNthKid(int n) const {
   switch (n) {
@@ -81,20 +77,10 @@ void ExpStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr ExpStatement::preOptimize(AnalysisResultConstPtr ar) {
-  assert (ar->getPhase() > AnalysisResult::AnalyzeAll);
-  m_exp = m_exp->unneeded();
-  return StatementPtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
 void ExpStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_exp->outputPHP(cg, ar);
   cg_printf(";\n");
-}
-
-bool ExpStatement::shouldEmitStatement() const {
-  return hasEffect() || Option::KeepStatementsWithNoEffect;
 }

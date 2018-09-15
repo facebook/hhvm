@@ -69,6 +69,11 @@ Variant HHVM_FUNCTION(curl_multi_close, const Resource& mh);
 bool HHVM_FUNCTION(curl_multi_setopt, const Resource& mh,
                               int option,
                               const Variant& value);
+Resource HHVM_FUNCTION(curl_share_init);
+void HHVM_FUNCTION(curl_share_close, const Resource& sh);
+bool HHVM_FUNCTION(curl_share_setopt, const Resource& sh,
+                    int option,
+                    const Variant& value);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

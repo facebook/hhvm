@@ -1,8 +1,11 @@
 <?php
 
+
 // Various functions that accept resource arguments have different coerce modes
 
 // False
+<<__EntryPoint>>
+function main_param_coerce_mode() {
 var_dump('fclose', @fclose(false));
 var_dump('pclose', @pclose(false));
 var_dump('fseek', @fseek(false, 0));
@@ -30,3 +33,4 @@ var_dump('flock', @flock(false, 0));
 var_dump('readdir', @readdir(false));
 var_dump('rewinddir', @rewinddir(false));
 var_dump('closedir', @closedir(false));
+}

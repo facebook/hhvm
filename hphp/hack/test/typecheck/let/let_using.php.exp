@@ -1,0 +1,2 @@
+File "let_using.php", line 9, characters 18-19:
+Variable from 'using' clause may only be used as receiver in method invocation or passed to function with <<__AcceptDisposable>> parameter attribute (Typing[4180])

@@ -31,10 +31,13 @@
 
 #include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/ext/std/ext_std_options.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/server-stats.h"
 
+#include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -44,18 +47,14 @@
 #include "hphp/util/current-executable.h"
 #include "hphp/util/logger.h"
 
-#ifndef _MSC_VER
-#include <sys/param.h> // MAXPATHLEN is here
-#endif
-
 namespace HPHP {
 
-IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_string);
-IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_comment);
-IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_keyword);
-IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_default);
-IMPLEMENT_THREAD_LOCAL(std::string, s_misc_highlight_default_html);
-IMPLEMENT_THREAD_LOCAL(std::string, s_misc_display_errors);
+THREAD_LOCAL(std::string, s_misc_highlight_default_string);
+THREAD_LOCAL(std::string, s_misc_highlight_default_comment);
+THREAD_LOCAL(std::string, s_misc_highlight_default_keyword);
+THREAD_LOCAL(std::string, s_misc_highlight_default_default);
+THREAD_LOCAL(std::string, s_misc_highlight_default_html);
+THREAD_LOCAL(std::string, s_misc_display_errors);
 
 const std::string s_1("1"), s_2("2"), s_stdout("stdout"), s_stderr("stderr");
 const double k_INF = std::numeric_limits<double>::infinity();
@@ -65,7 +64,9 @@ const int64_t k_CONNECTION_NORMAL = 0;
 const int64_t k_CONNECTION_ABORTED = 1;
 const int64_t k_CONNECTION_TIMEOUT = 2;
 
-static String HHVM_FUNCTION(server_warmup_status) {
+namespace {
+
+String HHVM_FUNCTION(server_warmup_status) {
   // Fail if we jitted at least Eval.JitWarmupStatusBytes of code.
   size_t begin, end;
   jit::tc::codeEmittedThisRequest(begin, end);
@@ -87,8 +88,12 @@ static String HHVM_FUNCTION(server_warmup_status) {
     return "Warmup is still in progress.";
   }
 
-  if (requestCount() <= RuntimeOption::EvalJitProfileRequests) {
+  if (jit::tc::shouldProfileNewFuncs()) {
     return "PGO profiling translations are still enabled.";
+  }
+
+  if (jit::mcgen::retranslateAllPending()) {
+    return "Waiting on retranslateAll()";
   }
 
   auto tpc_diff = jit::tl_perf_counters[jit::tpc_interp_bb] -
@@ -100,6 +105,26 @@ static String HHVM_FUNCTION(server_warmup_status) {
   return empty_string();
 }
 
+String HHVM_FUNCTION(server_warmup_status_monotonic) {
+  return String(jit::tc::warmupStatusString());
+}
+
+const StaticString
+  s_clisrv("clisrv"),
+  s_cli("cli"),
+  s_worker("worker");
+
+String HHVM_FUNCTION(execution_context) {
+  if (is_cli_mode()) return s_clisrv;
+
+  if (auto t = g_context->getTransport()) {
+    return t->describe();
+  }
+
+  return RuntimeOption::ServerExecutionMode() ? s_worker : s_cli;
+}
+
+}
 
 void StandardExtension::threadInitMisc() {
     IniSetting::Bind(
@@ -159,9 +184,9 @@ static int get_user_token_id(int internal_id);
 #define PHP_VERSION_ID_5 50699
 
 #define PHP_MAJOR_VERSION_7 7
-#define PHP_MINOR_VERSION_7 0
-#define PHP_VERSION_7 "7.0.99-hhvm"
-#define PHP_VERSION_ID_7 70099
+#define PHP_MINOR_VERSION_7 1
+#define PHP_VERSION_7 "7.1.99-hhvm"
+#define PHP_VERSION_ID_7 70199
 
 #define PHP_RELEASE_VERSION 99
 #define PHP_EXTRA_VERSION "hhvm"
@@ -174,6 +199,9 @@ StaticString get_PHP_VERSION() {
 
 void StandardExtension::initMisc() {
     HHVM_FALIAS(HH\\server_warmup_status, server_warmup_status);
+    HHVM_FALIAS(HH\\server_warmup_status_monotonic,
+                server_warmup_status_monotonic);
+    HHVM_FALIAS(HH\\execution_context, execution_context);
     HHVM_FE(connection_aborted);
     HHVM_FE(connection_status);
     HHVM_FE(connection_timeout);
@@ -192,6 +220,7 @@ void StandardExtension::initMisc() {
     HHVM_FE(token_get_all);
     HHVM_FE(token_name);
     HHVM_FE(hphp_to_string);
+    HHVM_FALIAS(HH\\enable_legacy_behavior, enable_legacy_behavior);
     HHVM_FALIAS(__SystemLib\\max2, SystemLib_max2);
     HHVM_FALIAS(__SystemLib\\min2, SystemLib_min2);
 
@@ -207,7 +236,7 @@ void StandardExtension::initMisc() {
     HHVM_RC_DBL(INF, k_INF);
     HHVM_RC_DBL(NAN, k_NAN);
     HHVM_RC_INT(PHP_MAXPATHLEN, PATH_MAX);
-#if DEBUG
+#ifndef NDEBUG
     HHVM_RC_BOOL(PHP_DEBUG, true);
 #else
     HHVM_RC_BOOL(PHP_DEBUG, false);
@@ -240,10 +269,16 @@ void StandardExtension::initMisc() {
                             IniSetting::PHP_INI_PERDIR |
                             IniSetting::PHP_INI_USER);
 
-    HHVM_RC_STR(PHP_BINARY, current_executable_path());
-    HHVM_RC_STR(PHP_BINDIR, current_executable_directory());
+    HHVM_RC_DYNAMIC(PHP_BINARY,
+                    make_tv<KindOfPersistentString>(
+                      makeStaticString(current_executable_path())));
+    HHVM_RC_DYNAMIC(PHP_BINDIR,
+                    make_tv<KindOfPersistentString>(
+                      makeStaticString(current_executable_directory())));
     HHVM_RC_STR(PHP_OS, HHVM_FN(php_uname)("s").toString());
-    HHVM_RC_STR(PHP_SAPI, HHVM_FN(php_sapi_name()));
+    HHVM_RC_DYNAMIC(PHP_SAPI,
+                    make_tv<KindOfPersistentString>(
+                      makeStaticString(HHVM_FN(php_sapi_name()))));
 
     HHVM_RC_INT(PHP_INT_SIZE, sizeof(int64_t));
     HHVM_RC_INT(PHP_INT_MIN, k_PHP_INT_MIN);
@@ -377,7 +412,7 @@ Variant HHVM_FUNCTION(constant, const String& name) {
     }
   } else {
     auto const cns = Unit::loadCns(name.get());
-    if (cns) return tvAsCVarRef(cns);
+    if (cns) return Variant::wrap(*cns);
   }
 
   raise_warning("constant(): Couldn't find constant %s", data);
@@ -389,7 +424,7 @@ bool HHVM_FUNCTION(define, const String& name, const Variant& value,
   if (case_insensitive) {
     raise_warning(Strings::CONSTANTS_CASE_SENSITIVE);
   }
-  return Unit::defCns(name.get(), value.asCell());
+  return Unit::defCns(name.get(), value.toCell());
 }
 
 bool HHVM_FUNCTION(defined, const String& name, bool autoload /* = true */) {
@@ -410,11 +445,11 @@ bool HHVM_FUNCTION(defined, const String& name, bool autoload /* = true */) {
     return false;
   } else {
     auto* cb = autoload ? Unit::loadCns : Unit::lookupCns;
-    return cb(name.get());
+    return cb(name.get()).is_set();
   }
 }
 
-int64_t HHVM_FUNCTION(ignore_user_abort, bool setting /* = false */) {
+int64_t HHVM_FUNCTION(ignore_user_abort, bool /*setting*/ /* = false */) {
   return 0;
 }
 
@@ -564,17 +599,14 @@ String HHVM_FUNCTION(uniqid, const String& prefix /* = null_string */,
 }
 
 Variant HHVM_FUNCTION(unpack, const String& format, const String& data) {
+  SuppressHackArrCompatNotices suppress;
   return ZendPack().unpack(format, data);
 }
 
 Array HHVM_FUNCTION(sys_getloadavg) {
-#if (defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER))
-  return make_packed_array(0, 0, 0);
-#else
   double load[3];
   getloadavg(load, 3);
   return make_packed_array(load[0], load[1], load[2]);
-#endif
 }
 
 // We want token IDs to remain stable regardless of how we change the
@@ -755,7 +787,12 @@ const int UserTokenId_T_DICT = 442;
 const int UserTokenId_T_VEC = 443;
 const int UserTokenId_T_KEYSET = 444;
 const int UserTokenId_T_WHERE = 445;
-const int MaxUserTokenId = 446; // Marker, not a real user token ID
+const int UserTokenId_T_VARRAY = 446;
+const int UserTokenId_T_DARRAY = 447;
+const int UserTokenId_T_USING = 448;
+const int UserTokenId_T_INOUT = 449;
+const int UserTokenId_T_TUPLE = 450;
+const int MaxUserTokenId = 451; // Marker, not a real user token ID
 
 #undef YYTOKENTYPE
 #undef YYTOKEN_MAP
@@ -768,7 +805,7 @@ const int MaxUserTokenId = 446; // Marker, not a real user token ID
 
 // Converts an internal token ID to a user token ID
 static int get_user_token_id(int internal_id) {
-  assert(internal_id >= 0);
+  assertx(internal_id >= 0);
   if (internal_id < 256) {
     return internal_id;
   }
@@ -804,10 +841,10 @@ static String token_get_all_fix_elseif(Array& res,
     return true;
   };
 
-  assert(tokText.size() > strlen("elseif"));
-  assert(!strncasecmp(tokCStr, "else", strlen("else")));
-  assert(checkWhitespace(tokCStr + strlen("else"), tokCEnd - strlen("if")));
-  assert(!strcasecmp(tokCEnd - strlen("if"), "if"));
+  assertx(tokText.size() > strlen("elseif"));
+  assertx(!strncasecmp(tokCStr, "else", strlen("else")));
+  assertx(checkWhitespace(tokCStr + strlen("else"), tokCEnd - strlen("if")));
+  assertx(!strcasecmp(tokCEnd - strlen("if"), "if"));
 
   // Shove in the T_ELSE and T_WHITESPACE, then return the remaining T_IF
   res.append(make_packed_array(
@@ -841,7 +878,7 @@ Array HHVM_FUNCTION(token_get_all, const String& source) {
   while ((tokid = scanner.getNextToken(tok, loc))) {
 loop_start: // For after seeing a T_INLINE_HTML, see below
     if (tokid < 256) {
-      res.append(String::FromChar((char)tokid));
+      res.append(String(tok.text()));
     } else {
       String value;
       int tokVal = get_user_token_id(tokid);
@@ -929,6 +966,17 @@ String HHVM_FUNCTION(token_name, int64_t token) {
     return table[token];
   }
   return "UNKNOWN";
+}
+
+Variant HHVM_FUNCTION(enable_legacy_behavior, const Variant& v) {
+  if (v.isVecArray() || v.isDict()) {
+    auto arr = v.toCArrRef().copy();
+    arr->setLegacyArray(true);
+    return arr;
+  } else {
+    raise_warning("enable_legacy_behavior expects a dict or vec");
+    return v;
+  }
 }
 
 String HHVM_FUNCTION(hphp_to_string, const Variant& v) {

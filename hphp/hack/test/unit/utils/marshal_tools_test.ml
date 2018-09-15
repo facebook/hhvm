@@ -2,9 +2,9 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
  *
  *)
 
@@ -74,8 +74,8 @@ let child_1_process socket_fd =
 
 (** Tail call; exits *)
 let child_2_process socket_fd =
-  Marshal_tools.to_fd_with_preamble socket_fd payload_message_1;
-  Marshal_tools.to_fd_with_preamble socket_fd payload_message_2;
+  Marshal_tools.to_fd_with_preamble socket_fd payload_message_1 |> ignore;
+  Marshal_tools.to_fd_with_preamble socket_fd payload_message_2 |> ignore;
   exit 0
 
 (** After forking once, continue as the parent to fork the second child.

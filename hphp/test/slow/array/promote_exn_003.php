@@ -16,6 +16,10 @@ function foo() {
   var_dump($x);
 }
 
+
+<<__EntryPoint>>
+function main_promote_exn_003() {
 foo();
 set_error_handler('err');
 foo();
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($a, $b, $c, $d, $e) {
   $k = array();

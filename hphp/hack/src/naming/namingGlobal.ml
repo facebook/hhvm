@@ -2,9 +2,8 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
@@ -14,7 +13,7 @@
  * 1- get all the global names
  * 2- transform all the local names into a unique identifier
  *)
-open Core
+open Core_kernel
 open Utils
 open Naming_heap
 module SN = Naming_special_names
@@ -139,27 +138,12 @@ end
 module Env = struct
   let check_not_typehint popt (p, name) =
     let x = canon_key (Utils.strip_all_ns name) in
-    match x with
-    | x when (
-        x = SN.Typehints.void ||
-        x = SN.Typehints.noreturn ||
-        x = SN.Typehints.int ||
-        x = SN.Typehints.bool ||
-        x = SN.Typehints.float ||
-        x = SN.Typehints.num ||
-        x = SN.Typehints.string ||
-        x = SN.Typehints.resource ||
-        x = SN.Typehints.mixed ||
-        x = SN.Typehints.array ||
-        x = SN.Typehints.arraykey ||
-        x = SN.Typehints.integer ||
-        x = SN.Typehints.boolean ||
-        x = SN.Typehints.double ||
-        x = SN.Typehints.real
-      ) ->
-        let p, name = GEnv.get_full_pos popt (p, name) in
-        Errors.name_is_reserved name p; false
-    | _ -> true
+    if SN.Typehints.is_reserved_hh_name x ||
+       SN.Typehints.is_reserved_global_name x
+    then
+      let p, name = GEnv.get_full_pos popt (p, name) in
+      Errors.name_is_reserved name p; false
+    else true
 
   (* Dont check for errors, just add to canonical heap *)
   let new_fun_fast fn name =
@@ -204,21 +188,42 @@ module Env = struct
       FunCanonHeap.add name_key name;
       ()
 
+  let attr_prefix, attr_prefix_len =
+    let a = "\\__attribute__" in (* lowercase because canon_key call *)
+    a, String.length a
+
   let new_cid popt cid_kind (p, name) =
-    if not (check_not_typehint popt (p, name)) then () else
-    let name_key = canon_key name in
-    match TypeCanonHeap.get name_key with
-    | Some canonical ->
+    let validate canonical error =
       let (p', _) = unsafe_opt @@ TypeIdHeap.get canonical in
       if not @@ GEnv.compare_pos p' p
       then
       let p, name = GEnv.get_full_pos popt (p, name) in
       let p', canonical = GEnv.get_full_pos popt (p', canonical) in
-      Errors.error_name_already_bound name canonical p p'
+      error name canonical p p'
+    in
+    if not (check_not_typehint popt (p, name)) then () else
+    let name_key = canon_key name in
+    match TypeCanonHeap.get name_key with
+    | Some canonical ->
+      validate canonical Errors.error_name_already_bound
     | None ->
+      (* Check to prevent collision with attribute classes
+       * If we are checking \A, check \__Attribute__A and vice versa *)
+      let name_len = String.length name_key in
+      let alt_name_key =
+        if name_len > attr_prefix_len &&
+          String.equal attr_prefix (String.sub name_key 0 attr_prefix_len)
+        then
+          "\\" ^ String.sub name_key attr_prefix_len (name_len - attr_prefix_len)
+        else
+          attr_prefix ^ String.sub name_key 1 (name_len - 1) in
+      begin match TypeCanonHeap.get alt_name_key with
+      | Some alt_canonical ->
+        validate alt_canonical Errors.error_class_attribute_already_bound
+      | None ->
+        () end;
       TypeIdHeap.write_through name (p, cid_kind);
-      TypeCanonHeap.add name_key name;
-      ()
+      TypeCanonHeap.add name_key name
 
   let new_class popt = new_cid popt `Class
 
@@ -288,11 +293,10 @@ let ndecl_file_fast fn ~funs ~classes ~typedefs ~consts =
 
 let ndecl_file popt fn
               { FileInfo.file_mode = _; funs; classes; typedefs; consts;
-                    consider_names_just_for_autoload; comments = _} =
-  let errors, _, _ = Errors.do_ begin fun () ->
+                comments = _; hash = _} =
+  let errors, _ = Errors.do_with_context fn Errors.Naming begin fun () ->
     dn ("Naming decl: "^Relative_path.to_absolute fn);
-    if not consider_names_just_for_autoload then
-      make_env popt ~funs ~classes ~typedefs ~consts
+    make_env popt ~funs ~classes ~typedefs ~consts
   end in
   if Errors.is_empty errors
   then errors, Relative_path.Set.empty

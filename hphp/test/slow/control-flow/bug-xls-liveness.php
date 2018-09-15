@@ -82,4 +82,8 @@ function main() {
   var_dump(strip_hh_prefix("HH\\arraykey", true));
 }
 
+
+<<__EntryPoint>>
+function main_bug_xls_liveness() {
 main();
+}

@@ -33,7 +33,7 @@ DECLARE_BOOST_TYPES(FunctionContainer);
  * Base class of both FileScope and ClassScope that can contain functions.
  */
 struct FunctionContainer {
-  FunctionContainer();
+  FunctionContainer() {}
 
   /**
    * Functions this container has.
@@ -43,9 +43,6 @@ struct FunctionContainer {
   const StringToFunctionScopePtrMap& getFunctions() const {
     return m_functions;
   }
-  void getFunctionsFlattened(const StringToFunctionScopePtrVecMap* redec,
-                             std::vector<FunctionScopePtr>& funcs,
-                             bool excludePseudoMains = false) const;
 
 protected:
   // name => functions. Order of declaration

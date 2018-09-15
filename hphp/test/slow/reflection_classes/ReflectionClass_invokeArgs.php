@@ -18,6 +18,9 @@ function test_invoke($ref, $instance) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_reflection_class_invoke_args() {
 $class = new ReflectionClass('Foo');
 $static_method = $class->getMethod('bar');
 $instance_method = $class->getMethod('baz');
@@ -27,3 +30,4 @@ test_invoke($static_method, $class);
 
 test_invoke($instance_method, null);
 test_invoke($instance_method, $class);
+}

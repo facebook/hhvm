@@ -25,14 +25,14 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct IMarker;
+struct BaseException : std::exception {};
 
-struct Exception : std::exception {
+struct Exception : BaseException {
   explicit Exception() = default;
   explicit Exception(ATTRIBUTE_PRINTF_STRING const char *fmt, ...)
     ATTRIBUTE_PRINTF(2,3);
   explicit Exception(const std::string& msg);
-  Exception(const Exception &e);
+  Exception(const Exception& e);
 
   // Try not to use this function (or the other varargs-based things) in new
   // code.  (You probably shouldn't be using Exception directly either.)
@@ -62,7 +62,7 @@ struct Exception : std::exception {
   /**
    * Error message without stacktrace.
    */
-  const std::string &getMessage() const { return m_msg;}
+  const std::string& getMessage() const { return m_msg; }
 
 protected:
   mutable std::string m_msg;
@@ -89,6 +89,7 @@ struct FileOpenException : Exception {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+
 }
 
 #endif // incl_HPHP_EXCEPTION_H_

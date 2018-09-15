@@ -34,8 +34,12 @@ __CLaSS__}
     foreach ($obj as $k => $v) {
       $arr[$k] = $v;
     }
-    ksort($arr);
+    ksort(&$arr);
     var_dump($arr);
   }
 }
+
+<<__EntryPoint>>
+function main_672() {
 tEst::eXclaiM();
+}

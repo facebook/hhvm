@@ -1,1 +1,1 @@
---ffile=hphp/test/slow/traits/require_constraint_repo_ifaces1.inc --ffile=hphp/test/slow/traits/require_constraint_repo_ifaces2.inc --ffile=hphp/test/slow/traits/require_constraint_repo_ifaces3.inc
+--ffile=hphp/test/slow/traits/require_constraint_repo_ifaces1.inc --ffile=hphp/test/slow/traits/require_constraint_repo_ifaces2.inc --ffile=hphp/test/slow/traits/require_constraint_repo_ifaces3.inc -d hhvm.php7.all=0

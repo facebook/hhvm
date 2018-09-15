@@ -4,10 +4,10 @@
 int(657930)
 
 --float -10.5--
-bool(false)
+int(16124426)
 
 --float 10.1234567e10--
-bool(false)
+int(5769738)
 
 --float 10.7654321E-10--
 int(2570)

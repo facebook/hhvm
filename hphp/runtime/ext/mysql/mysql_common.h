@@ -18,17 +18,17 @@
 #ifndef incl_HPHP_MYSQL_COMMON_H_
 #define incl_HPHP_MYSQL_COMMON_H_
 
-#include <folly/Optional.h>
-
-#include <memory>
-#include <vector>
+#include "hphp/runtime/base/req-list.h"
+#include "hphp/runtime/base/req-optional.h"
+#include "hphp/runtime/base/req-vector.h"
+#include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/ext/extension.h"
 
 #include "mysql.h"
 
-#include "hphp/runtime/base/req-containers.h"
-#include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/runtime/ext/extension.h"
+#ifdef ENABLE_ASYNC_MYSQL
 #include "squangle/mysql_client/SSLOptionsProviderBase.h"
+#endif
 
 #ifdef PHP_MYSQL_UNIX_SOCK_ADDR
 #ifdef MYSQL_UNIX_ADDR
@@ -39,6 +39,10 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+#if MYSQL_VERSION_ID >= 80004
+using my_bool = bool;
+#endif
 
 struct MySQLUtil {
   enum TimeoutType { ConnectTimeout, ReadTimeout, WriteTimeout };
@@ -229,7 +233,7 @@ public:
 
 struct MySQLResource : SweepableResourceData {
   explicit MySQLResource(std::shared_ptr<MySQL> mysql) : m_mysql(mysql) {
-    assert(mysql);
+    assertx(mysql);
   }
 
   CLASSNAME_IS("mysql link")
@@ -284,7 +288,7 @@ struct MySQLResult : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(MySQLResult);
 
   explicit MySQLResult(MYSQL_RES *res, bool localized = false);
-  virtual ~MySQLResult();
+  ~MySQLResult() override;
 
   CLASSNAME_IS("mysql result")
   // overriding ResourceData
@@ -351,7 +355,7 @@ protected:
   MYSQL_ROW m_current_async_row;
   bool m_localized; // whether all the rows have been localized
   req::vector<MySQLFieldInfo> m_fields;
-  folly::Optional<req::list<req::vector<Variant>>> m_rows;
+  req::Optional<req::list<req::vector<Variant>>> m_rows;
   req::list<req::vector<Variant>>::const_iterator m_current_row;
   int64_t m_current_field;
   bool m_row_ready; // set to false after seekRow, true after fetchRow
@@ -385,7 +389,7 @@ struct MySQLStmt : public SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(MySQLStmt);
 
   explicit MySQLStmt(MYSQL *mysql);
-  virtual ~MySQLStmt();
+  ~MySQLStmt() override;
 
   CLASSNAME_IS("mysql stmt")
 
@@ -451,8 +455,12 @@ Variant php_mysql_do_connect_on_link(
     bool async,
     int connect_timeout_ms,
     int query_timeout_ms,
-    std::shared_ptr<facebook::common::mysql_client::SSLOptionsProviderBase>
-        ssl_opts = nullptr);
+    const Array* conn_attrs = nullptr
+#ifdef ENABLE_ASYNC_MYSQL
+    , std::shared_ptr<facebook::common::mysql_client::SSLOptionsProviderBase>
+        ssl_opts = nullptr
+#endif
+);
 
 Variant php_mysql_do_connect(
     const String& server,
@@ -463,7 +471,8 @@ Variant php_mysql_do_connect(
     bool persistent,
     bool async,
     int connect_timeout_ms,
-    int query_timeout_ms);
+    int query_timeout_ms,
+    const Array* conn_attrs = nullptr);
 
 Variant php_mysql_do_connect_with_ssl(
     const String& server,
@@ -473,6 +482,7 @@ Variant php_mysql_do_connect_with_ssl(
     int client_flags,
     int connect_timeout_ms,
     int query_timeout_ms,
+    const Array* conn_attrs,
     const Variant& sslContextProvider /* = null */);
 
 enum MySQLQueryReturn { FAIL = 0, OK = 1, OK_FETCH_RESULT = 2 };

@@ -60,7 +60,7 @@ function foo(): void {
 }
 
 function list_children_of_I(): ConstVector<classname<I>> {
-  $v = Vector {C1::class};
+  $v = Vector { C1::class };
   $v[] = C2::class;
   return $v;
 }

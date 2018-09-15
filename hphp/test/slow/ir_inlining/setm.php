@@ -17,4 +17,8 @@ function main() {
   $x->clearX();
 }
 
+
+<<__EntryPoint>>
+function main_setm() {
 main();
+}

@@ -13,7 +13,11 @@ final class class2 extends class1 {
   const SOME_CONST = 2;
 }
 
+
+<<__EntryPoint>>
+function main_1628() {
 $class2 = new class2;
 
 var_dump($class2->getConstViaThis());
 var_dump($class2->getConstViaFrame());
+}

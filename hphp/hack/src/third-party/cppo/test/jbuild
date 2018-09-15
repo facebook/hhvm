@@ -1,0 +1,95 @@
+(jbuild_version 1)
+
+(rule
+ ((targets (ext.out))
+  (deps (ext.cppo source.sh))
+  (action
+   (with-stdout-to ${@} (run ${bin:cppo} -x "rot13:tr '[a-z]' '[n-za-m]'" -x "source:sh source.sh '%F' %B %E" ${<})))))
+
+(rule
+ ((targets (comments.out))
+  (deps (comments.cppo))
+  (action
+   (with-stdout-to ${@} (run ${bin:cppo} ${<})))))
+
+(rule
+ ((targets (cond.out))
+  (deps (cond.cppo))
+  (action
+   (with-stdout-to ${@} (run ${bin:cppo} ${<})))))
+
+(rule
+ ((targets (tuple.out))
+  (deps (tuple.cppo))
+  (action
+   (with-stdout-to ${@} (run ${bin:cppo} ${<})))))
+
+(rule
+ ((targets (loc.out))
+  (deps (loc.cppo))
+  (action
+   (with-stdout-to ${@} (run ${bin:cppo} ${<})))))
+
+(rule
+ ((targets (paren_arg.out))
+  (deps (paren_arg.cppo))
+  (action
+   (with-stdout-to ${@} (run ${bin:cppo} ${<})))))
+
+(rule
+ ((targets (unmatched.out))
+  (deps (unmatched.cppo))
+  (action
+   (with-stdout-to ${@} (run ${bin:cppo} ${<})))))
+
+(rule
+ ((targets (version.out))
+  (deps (version.cppo))
+  (action
+   (with-stdout-to ${@} (run ${bin:cppo} -V X:123.05.2-alpha.1+foo-2.1 ${<})))))
+
+(alias
+ ((name runtest)
+  (package cppo)
+  (action (diff ext.ref ext.out))))
+
+(alias
+ ((name runtest)
+  (package cppo)
+  (action (diff comments.ref comments.out))))
+
+(alias
+ ((name runtest)
+  (package cppo)
+  (action (diff cond.ref cond.out))))
+
+(alias
+ ((name runtest)
+  (package cppo)
+  (action (diff tuple.ref tuple.out))))
+
+(alias
+ ((name runtest)
+  (package cppo)
+  (action (diff loc.ref loc.out))))
+
+(alias
+ ((name runtest)
+  (package cppo)
+  (action (diff paren_arg.ref paren_arg.out))))
+
+(alias
+ ((name runtest)
+  (package cppo)
+  (deps (version.out))))
+
+(alias
+ ((name runtest)
+  (package cppo)
+  (action (diff unmatched.ref unmatched.out))))
+
+(alias
+ ((name runtest)
+  (package cppo)
+  (deps (test.cppo incl.cppo incl2.cppo))
+  (action (ignore-stdout (run ${bin:cppo} ${<})))))

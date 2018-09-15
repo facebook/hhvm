@@ -2,16 +2,15 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
 
 (** Module used to suggest type annotations when they are missing
 *)
-open Core
+open Core_kernel
 open Typing_defs
 open Utils
 
@@ -35,9 +34,15 @@ module Env = Typing_env
 module TUtils = Typing_utils
 
 (*****************************************************************************)
+(* List of functions or methods without return types  *)
+(*****************************************************************************)
+let (funs_and_methods : (Ast.id list ref)) =  ref []
+
+let save_fun_or_method name =
+  if !is_suggest_mode then funs_and_methods := name :: !funs_and_methods
+(*****************************************************************************)
 (* List of types found in a file. *)
 (*****************************************************************************)
-
 let (types: (Env.env * Pos.t * hint_kind * locl ty) list ref) = ref []
 let (initialized_members: (SSet.t SMap.t) ref) = ref SMap.empty
 
@@ -74,7 +79,7 @@ let save_type hint_kind env x arg =
             let x_pos = Reason.to_pos (fst x) in
             add_type env x_pos hint_kind arg;
         )
-    | _, (Tmixed | Tarraykind _ | Tprim _ | Toption _
+    | _, (Terr | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
       | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
       | Tfun _ | Tunresolved _ | Tobject | Tshape _) -> ()
   end
@@ -125,10 +130,28 @@ let get_implements tcopt (_, x) =
       SMap.fold begin fun _ ty set ->
         match ty with
         | _, Tapply ((_, x), []) -> SSet.add x set
-        | _, (Tany | Tmixed | Tarray (_, _) | Tprim _ | Tgeneric _ | Tfun _
-          | Toption _ | Tapply (_, _) | Ttuple _ | Tshape _ | Taccess (_, _)
-          | Tthis) ->
-          raise Exit
+        | _,
+          (
+            Tany
+            | Tdynamic
+            | Terr
+            | Tmixed
+            | Tnonnull
+            | Tarray (_, _)
+            | Tdarray (_, _)
+            | Tvarray _
+            | Tvarray_or_darray _
+            | Tprim _
+            | Tgeneric _
+            | Tfun _
+            | Toption _
+            | Tapply (_, _)
+            | Ttuple _
+            | Tshape _
+            | Taccess (_, _)
+            | Tthis
+          ) ->
+            raise Exit
       end tyl SSet.empty
 
 (** normalizes a "guessed" type. We basically want to bailout whenever
@@ -146,9 +169,10 @@ and normalize_ tcopt = function
     (function _, (Tany | Tunresolved []) -> true | _ -> false) ->
       let tyl = List.filter tyl begin function
         |  _, (Tany |  Tunresolved []) -> false
-        | _, (Tmixed | Tarraykind _ | Tprim _ | Toption _
+        | _, (Terr | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Toption _
           | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
           | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject | Tshape _
+          | Tdynamic
              ) -> true
       end in
       normalize_ tcopt (Tunresolved tyl)
@@ -158,7 +182,7 @@ and normalize_ tcopt = function
        *)
       let rl = List.map rl begin function
         | _, Tclass (x, []) -> x
-        | _, (Tany | Tmixed | Tarraykind _ | Tprim _
+        | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Tdynamic
           | Toption _ | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
           | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
           | Tshape _) -> raise Exit
@@ -175,13 +199,18 @@ and normalize_ tcopt = function
       normalize_ tcopt (Tunresolved rl)
   | Tunresolved _ | Tany -> raise Exit
   | Tmixed -> Tmixed                       (* ' with Nothing (mixed type) *)
+  | Tnonnull -> Tnonnull
+  | Terr -> Terr
   | Tarraykind akind -> begin
     try
       Tarraykind (match akind with
         | AKany -> AKany
         | AKempty -> AKempty
+        | AKvarray tk -> AKvarray (normalize tcopt tk)
         | AKvec tk -> AKvec (normalize tcopt tk)
+        | AKdarray (tk, tv) -> AKdarray (normalize tcopt tk, normalize tcopt tv)
         | AKmap (tk, tv) -> AKmap (normalize tcopt tk, normalize tcopt tv)
+        | AKvarray_or_darray tv -> AKvarray_or_darray (normalize tcopt tv)
         (* fully_expand_tvars_downcast_aktypes should have removed those *)
         | AKshape _ | AKtuple _ -> raise Exit
       )
@@ -195,7 +224,7 @@ and normalize_ tcopt = function
   | Tprim _ as ty -> ty
   | Tvar _ -> raise Exit
   | Tfun _ -> raise Exit
-  | Tclass ((pos, name), tyl) when name.[0] = '\\' && String.rindex name '\\' = 0 ->
+  | Tclass ((pos, name), tyl) when name.[0] = '\\' && String.rindex_exn name '\\' = 0 ->
       (* TODO this transform isn't completely legit; can cause a reference into
        * the global namespace to suddenly refer to a different class in the
        * local one. Figure something else out that doesn't involve spamming '\'
@@ -215,6 +244,7 @@ and normalize_ tcopt = function
       in
       Tclass ((pos, name), List.map tyl (normalize tcopt))
   | Ttuple tyl -> Ttuple (List.map tyl (normalize tcopt))
+  | Tdynamic -> Tdynamic
   | Tanon _ -> raise Exit
   | Tobject -> raise Exit
   | Tabstract _ -> raise Exit

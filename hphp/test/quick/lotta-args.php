@@ -1,4 +1,4 @@
-<?
+<?hh
 
 function f($a0,
            $a1,

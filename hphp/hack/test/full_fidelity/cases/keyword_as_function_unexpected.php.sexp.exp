@@ -1,0 +1,820 @@
+((script 2033
+  ((list 2033
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
+       (missing 0 ())))
+     (function_declaration 22
+      ((missing 0 ())
+       (function_declaration_header 19
+        ((missing 0 ())
+         (((end_of_line 1) (single_line_comment 27) (end_of_line 1)) function
+          8 ((whitespace 1)))
+         (missing 0 ()) (error 8 ((() abstract 8 ()))) (missing 0 ())
+         (() "(" 1 ()) (missing 0 ()) (() ")" 1 ((whitespace 1)))
+         (missing 0 ()) (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 17
+      ((missing 0 ())
+       (function_declaration_header 14
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 3 ((() and 3 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 19
+      ((missing 0 ())
+       (function_declaration_header 16
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 5 ((() array 5 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 16
+      ((missing 0 ())
+       (function_declaration_header 13
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 2 ((() as 2 ()))) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+         (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+         (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 19
+      ((missing 0 ())
+       (function_declaration_header 16
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 5 ((() async 5 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 19
+      ((missing 0 ())
+       (function_declaration_header 16
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 5 ((() await 5 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 19
+      ((missing 0 ())
+       (function_declaration_header 16
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 5 ((() break 5 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 18
+      ((missing 0 ())
+       (function_declaration_header 15
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 4 ((() case 4 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 19
+      ((missing 0 ())
+       (function_declaration_header 16
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 5 ((() catch 5 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 19
+      ((missing 0 ())
+       (function_declaration_header 16
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 5 ((() class 5 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 19
+      ((missing 0 ())
+       (function_declaration_header 16
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 5 ((() clone 5 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 19
+      ((missing 0 ())
+       (function_declaration_header 16
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 5 ((() const 5 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 22
+      ((missing 0 ())
+       (function_declaration_header 19
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 8 ((() continue 8 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 21
+      ((missing 0 ())
+       (function_declaration_header 18
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 7 ((() declare 7 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 21
+      ((missing 0 ())
+       (function_declaration_header 18
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 7 ((() default 7 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 16
+      ((missing 0 ())
+       (function_declaration_header 13
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 2 ((() do 2 ()))) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+         (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+         (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 18
+      ((missing 0 ())
+       (function_declaration_header 15
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 4 ((() echo 4 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 18
+      ((missing 0 ())
+       (function_declaration_header 15
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 4 ((() else 4 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 20
+      ((missing 0 ())
+       (function_declaration_header 17
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 6 ((() elseif 6 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 20
+      ((missing 0 ())
+       (function_declaration_header 17
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 6 ((() endfor 6 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 24
+      ((missing 0 ())
+       (function_declaration_header 21
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 10 ((() endforeach 10 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 24
+      ((missing 0 ())
+       (function_declaration_header 21
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 10 ((() enddeclare 10 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 19
+      ((missing 0 ())
+       (function_declaration_header 16
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 5 ((() endif 5 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 23
+      ((missing 0 ())
+       (function_declaration_header 20
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 9 ((() endswitch 9 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 22
+      ((missing 0 ())
+       (function_declaration_header 19
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 8 ((() endwhile 8 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 18
+      ((missing 0 ())
+       (function_declaration_header 15
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 4 ((() eval 4 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 21
+      ((missing 0 ())
+       (function_declaration_header 18
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 7 ((() extends 7 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 19
+      ((missing 0 ())
+       (function_declaration_header 16
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 5 ((() final 5 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 21
+      ((missing 0 ())
+       (function_declaration_header 18
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 7 ((() finally 7 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 17
+      ((missing 0 ())
+       (function_declaration_header 14
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 3 ((() for 3 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 21
+      ((missing 0 ())
+       (function_declaration_header 18
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 7 ((() foreach 7 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 22
+      ((missing 0 ())
+       (function_declaration_header 19
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 8 ((() function 8 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 20
+      ((missing 0 ())
+       (function_declaration_header 17
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 6 ((() global 6 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 18
+      ((missing 0 ())
+       (function_declaration_header 15
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 4 ((() goto 4 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 16
+      ((missing 0 ())
+       (function_declaration_header 13
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 2 ((() if 2 ()))) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+         (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+         (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 24
+      ((missing 0 ())
+       (function_declaration_header 21
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 10 ((() implements 10 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 21
+      ((missing 0 ())
+       (function_declaration_header 18
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 7 ((() include 7 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 26
+      ((missing 0 ())
+       (function_declaration_header 23
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 12 ((() include_once 12 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 19
+      ((missing 0 ())
+       (function_declaration_header 16
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 5 ((() inout 5 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 24
+      ((missing 0 ())
+       (function_declaration_header 21
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 10 ((() instanceof 10 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 23
+      ((missing 0 ())
+       (function_declaration_header 20
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 9 ((() insteadof 9 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 23
+      ((missing 0 ())
+       (function_declaration_header 20
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 9 ((() interface 9 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 18
+      ((missing 0 ())
+       (function_declaration_header 15
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 4 ((() list 4 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 23
+      ((missing 0 ())
+       (function_declaration_header 20
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (() name 9 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+         (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+         (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 17
+      ((missing 0 ())
+       (function_declaration_header 14
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 3 ((() new 3 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 16
+      ((missing 0 ())
+       (function_declaration_header 13
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 2 ((() or 2 ()))) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+         (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+         (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 19
+      ((missing 0 ())
+       (function_declaration_header 16
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 5 ((() print 5 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 21
+      ((missing 0 ())
+       (function_declaration_header 18
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 7 ((() private 7 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 23
+      ((missing 0 ())
+       (function_declaration_header 20
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 9 ((() protected 9 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 20
+      ((missing 0 ())
+       (function_declaration_header 17
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 6 ((() public 6 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 21
+      ((missing 0 ())
+       (function_declaration_header 18
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 7 ((() require 7 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 26
+      ((missing 0 ())
+       (function_declaration_header 23
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 12 ((() require_once 12 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 20
+      ((missing 0 ())
+       (function_declaration_header 17
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 6 ((() return 6 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 19
+      ((missing 0 ())
+       (function_declaration_header 16
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 5 ((() shape 5 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 20
+      ((missing 0 ())
+       (function_declaration_header 17
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 6 ((() static 6 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 20
+      ((missing 0 ())
+       (function_declaration_header 17
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 6 ((() switch 6 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 19
+      ((missing 0 ())
+       (function_declaration_header 16
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 5 ((() throw 5 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 19
+      ((missing 0 ())
+       (function_declaration_header 16
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 5 ((() trait 5 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 17
+      ((missing 0 ())
+       (function_declaration_header 14
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 3 ((() try 3 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 17
+      ((missing 0 ())
+       (function_declaration_header 14
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 3 ((() use 3 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 19
+      ((missing 0 ())
+       (function_declaration_header 16
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 5 ((() using 5 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 17
+      ((missing 0 ())
+       (function_declaration_header 14
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 3 ((() var 3 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 19
+      ((missing 0 ())
+       (function_declaration_header 16
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 5 ((() while 5 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 17
+      ((missing 0 ())
+       (function_declaration_header 14
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 3 ((() xor 3 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (function_declaration 19
+      ((missing 0 ())
+       (function_declaration_header 16
+        ((missing 0 ()) (() function 8 ((whitespace 1))) (missing 0 ())
+         (error 5 ((() yield 5 ()))) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
+         (missing 0 ()) (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (classish_declaration 77
+      ((missing 0 ()) (list 8 ((((end_of_line 1)) abstract 8 ())))
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (classish_body 69
+        ((missing 0 ())
+         (list 69
+          ((error 1 ((() "(" 1 ()))) (error 1 ((() ")" 1 ())))
+           (error 1 ((() ";" 1 ((end_of_line 1))))) (error 3 ((() and 3 ())))
+           (error 1 ((() "(" 1 ()))) (error 1 ((() ")" 1 ())))
+           (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 5 ((() array 5 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 2 ((() as 2 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (property_declaration 8
+            ((missing 0 ()) (list 5 ((() async 5 ())))
+             (tuple_type_specifier 2
+              ((() "(" 1 ())
+               (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
+               (() ")" 1 ())))
+             (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
+             (() ";" 1 ((end_of_line 1)))))
+           (error 5 ((() await 5 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 5 ((() break 5 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 4 ((() case 4 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 5 ((() catch 5 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (missing 0 ())))
+         (missing 0 ())))))
+     (classish_declaration 334
+      ((missing 0 ()) (missing 0 ()) (() class 5 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ())
+       (classish_body 329
+        ((missing 0 ())
+         (list 329
+          ((error 1 ((() "(" 1 ()))) (error 1 ((() ")" 1 ())))
+           (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 5 ((() clone 5 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (const_declaration 5
+            ((missing 0 ()) (missing 0 ()) (() const 5 ()) (missing 0 ())
+             (list 0
+              ((list_item 0
+                ((constant_declarator 0 ((missing 0 ()) (missing 0 ())))
+                 (missing 0 ())))))
+             (missing 0 ())))
+           (error 1 ((() "(" 1 ()))) (error 1 ((() ")" 1 ())))
+           (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 8 ((() continue 8 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 7 ((() declare 7 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 7 ((() default 7 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 2 ((() do 2 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 4 ((() echo 4 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 4 ((() else 4 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 6 ((() elseif 6 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 6 ((() endfor 6 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 10 ((() endforeach 10 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 10 ((() enddeclare 10 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 5 ((() endif 5 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 9 ((() endswitch 9 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 8 ((() endwhile 8 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 4 ((() eval 4 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 7 ((() extends 7 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (property_declaration 8
+            ((missing 0 ()) (list 5 ((() final 5 ())))
+             (tuple_type_specifier 2
+              ((() "(" 1 ())
+               (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
+               (() ")" 1 ())))
+             (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
+             (() ";" 1 ((end_of_line 1)))))
+           (error 7 ((() finally 7 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 3 ((() for 3 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 7 ((() foreach 7 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (methodish_declaration 11
+            ((missing 0 ())
+             (function_declaration_header 10
+              ((missing 0 ()) (() function 8 ()) (missing 0 ())
+               (missing 0 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+               (() ")" 1 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())))
+             (missing 0 ()) (() ";" 1 ((end_of_line 1)))))
+           (error 6 ((() global 6 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 4 ((() goto 4 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 2 ((() if 2 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 10 ((() implements 10 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 7 ((() include 7 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 12 ((() include_once 12 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 5 ((() inout 5 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 10 ((() instanceof 10 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 9 ((() insteadof 9 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (missing 0 ())))
+         (missing 0 ())))))
+     (classish_declaration 164
+      ((missing 0 ()) (missing 0 ()) (() interface 9 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ())
+       (classish_body 155
+        ((missing 0 ())
+         (list 155
+          ((error 1 ((() "(" 1 ()))) (error 1 ((() ")" 1 ())))
+           (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 4 ((() list 4 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 9 ((() namespace 9 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 3 ((() new 3 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 2 ((() or 2 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 5 ((() print 5 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (property_declaration 10
+            ((missing 0 ()) (list 7 ((() private 7 ())))
+             (tuple_type_specifier 2
+              ((() "(" 1 ())
+               (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
+               (() ")" 1 ())))
+             (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
+             (() ";" 1 ((end_of_line 1)))))
+           (property_declaration 12
+            ((missing 0 ()) (list 9 ((() protected 9 ())))
+             (tuple_type_specifier 2
+              ((() "(" 1 ())
+               (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
+               (() ")" 1 ())))
+             (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
+             (() ";" 1 ((end_of_line 1)))))
+           (property_declaration 9
+            ((missing 0 ()) (list 6 ((() public 6 ())))
+             (tuple_type_specifier 2
+              ((() "(" 1 ())
+               (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
+               (() ")" 1 ())))
+             (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
+             (() ";" 1 ((end_of_line 1)))))
+           (require_clause 7
+            ((() require 7 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())))
+           (error 1 ((() "(" 1 ()))) (error 1 ((() ")" 1 ())))
+           (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 12 ((() require_once 12 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 6 ((() return 6 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 5 ((() shape 5 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (property_declaration 9
+            ((missing 0 ()) (list 6 ((() static 6 ())))
+             (tuple_type_specifier 2
+              ((() "(" 1 ())
+               (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
+               (() ")" 1 ())))
+             (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
+             (() ";" 1 ((end_of_line 1)))))
+           (error 6 ((() switch 6 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 5 ((() throw 5 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (missing 0 ())))
+         (missing 0 ())))))
+     (classish_declaration 63
+      ((missing 0 ()) (missing 0 ()) (() trait 5 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (missing 0 ())
+       (classish_body 58
+        ((missing 0 ())
+         (list 58
+          ((error 1 ((() "(" 1 ()))) (error 1 ((() ")" 1 ())))
+           (error 1 ((() ";" 1 ((end_of_line 1))))) (error 3 ((() try 3 ())))
+           (error 1 ((() "(" 1 ()))) (error 1 ((() ")" 1 ())))
+           (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (trait_use 3
+            ((() use 3 ())
+             (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
+             (missing 0 ())))
+           (error 1 ((() "(" 1 ()))) (error 1 ((() ")" 1 ())))
+           (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 5 ((() using 5 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (property_declaration 6
+            ((missing 0 ()) (() var 3 ())
+             (tuple_type_specifier 2
+              ((() "(" 1 ())
+               (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
+               (() ")" 1 ())))
+             (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
+             (() ";" 1 ((end_of_line 1)))))
+           (error 5 ((() while 5 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 3 ((() xor 3 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
+           (error 5 ((() yield 5 ()))) (error 1 ((() "(" 1 ())))
+           (error 1 ((() ")" 1 ())))
+           (error 1 ((() ";" 1 ((end_of_line 1)))))))
+         (missing 0 ())))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

@@ -53,5 +53,9 @@ function test() {
   }
   dump_set($m);
 }
+
+<<__EntryPoint>>
+function main_cow_during_iteration() {
 test();
 echo "Done\n";
+}

@@ -14,32 +14,32 @@ bool(true)
 bool(true)
 bool(true)
 
-Deprecated: Function mcrypt_cbc() is deprecated in %s/test/slow/ext_mcrypt/ext_mcrypt.php on line 60
-
 Deprecated: Function mcrypt_cbc() is deprecated in %s/test/slow/ext_mcrypt/ext_mcrypt.php on line 63
-bool(true)
-bool(true)
 
-Deprecated: Function mcrypt_cfb() is deprecated in %s/test/slow/ext_mcrypt/ext_mcrypt.php on line 73
+Deprecated: Function mcrypt_cbc() is deprecated in %s/test/slow/ext_mcrypt/ext_mcrypt.php on line 66
+bool(true)
+bool(true)
 
 Deprecated: Function mcrypt_cfb() is deprecated in %s/test/slow/ext_mcrypt/ext_mcrypt.php on line 76
-bool(true)
-bool(true)
 
-Deprecated: Function mcrypt_ecb() is deprecated in %s/test/slow/ext_mcrypt/ext_mcrypt.php on line 86
+Deprecated: Function mcrypt_cfb() is deprecated in %s/test/slow/ext_mcrypt/ext_mcrypt.php on line 79
+bool(true)
+bool(true)
 
 Deprecated: Function mcrypt_ecb() is deprecated in %s/test/slow/ext_mcrypt/ext_mcrypt.php on line 89
-bool(true)
-bool(true)
 
-Deprecated: Function mcrypt_ofb() is deprecated in %s/test/slow/ext_mcrypt/ext_mcrypt.php on line 99
+Deprecated: Function mcrypt_ecb() is deprecated in %s/test/slow/ext_mcrypt/ext_mcrypt.php on line 92
+bool(true)
+bool(true)
 
 Deprecated: Function mcrypt_ofb() is deprecated in %s/test/slow/ext_mcrypt/ext_mcrypt.php on line 102
+
+Deprecated: Function mcrypt_ofb() is deprecated in %s/test/slow/ext_mcrypt/ext_mcrypt.php on line 105
 bool(true)
 bool(true)
 bool(true)
 
-Warning: mcrypt_get_block_size() expects exactly 2 parameters, 1 given in %s/test/slow/ext_mcrypt/ext_mcrypt.php on line 109
+Warning: mcrypt_get_block_size() expects exactly 2 parameters, 1 given in %s/test/slow/ext_mcrypt/ext_mcrypt.php on line 112
 bool(true)
 bool(true)
 bool(true)

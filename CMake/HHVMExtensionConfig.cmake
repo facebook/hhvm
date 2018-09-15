@@ -140,8 +140,7 @@ include(Options)
 # Dependencies prefixed with "os" represent the OS required to
 # build the extension. The only valid value for this currently
 # is osPosix, which represents everything with a valid posix
-# API, which is most everything except for Windows. Cygwin and
-# MinGW are both included in osPosix.
+# API, which is most everything except for Windows.
 #
 # Dependencies prefixed with "var" represent a CMake variable
 # which must evaluate to a trueish value for the extension to
@@ -907,19 +906,19 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBMEMCACHED")
     endif()
   elseif (${libraryName} STREQUAL "mysql")
-    # mysql checks - if we're using async mysql, we use webscalesqlclient from
+    # mysql checks - if we're using async mysql, we use fbmysqlclient from
     # third-party/ instead
     if (ENABLE_ASYNC_MYSQL)
-      set(MYSQL_CLIENT_LIB_DIR ${TP_DIR}/webscalesqlclient/src/)
+      set(MYSQL_CLIENT_LIB_DIR ${TP_DIR}/fb-mysql/src/)
       set(MYSQL_CLIENT_LIBS
-        ${MYSQL_CLIENT_LIB_DIR}/libmysql/libwebscalesqlclient_r.a
+        ${MYSQL_CLIENT_LIB_DIR}/libmysql/libfbmysqlclient_r.a
       )
 
       if (${addPaths})
         HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(
-          ${TP_DIR}/re2/src/
+          ${RE2_INCLUDE_DIR}
           ${TP_DIR}/squangle/src/
-          ${TP_DIR}/webscalesqlclient/src/include/
+          ${TP_DIR}/fb-mysql/src/include/
         )
         HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DENABLE_ASYNC_MYSQL=1")
       endif()
@@ -971,7 +970,7 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
       return()
     endif()
-    
+
     if(${addPaths})
       HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${PGSQL_INCLUDE_DIR})
       HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${PGSQL_LIBRARY})
@@ -1000,6 +999,17 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     if (${addPaths})
       HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${SNAPPY_INCLUDE_DIRS})
       HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${SNAPPY_LIBRARIES})
+    endif()
+  elseif (${libraryName} STREQUAL "sodium")
+    find_package(LibSodium ${requiredVersion})
+    if (NOT LIBSODIUM_INCLUDE_DIRS OR NOT LIBSODIUM_LIBRARIES)
+      HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
+      return()
+    endif()
+
+    if (${addPaths})
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${LIBSODIUM_INCLUDE_DIRS})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${LIBSODIUM_LIBRARIES})
     endif()
   elseif (${libraryName} STREQUAL "vpx")
     find_package(LibVpx ${requiredVersion})
@@ -1043,17 +1053,16 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
         HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DLIBEXSLT_STATIC=1")
       endif()
     endif()
-  elseif (${libraryName} STREQUAL "uodbc")
-    find_package(LibUODBC ${requiredVersion})
-    if (NOT LIBUODBC_INCLUDE_DIRS OR NOT LIBUODBC_LIBRARIES)
+  elseif (${libraryName} STREQUAL "watchmanclient")
+    find_package(libWatchmanClient ${requiredVersion})
+    if (NOT WATCHMANCLIENT_INCLUDE_DIRS OR NOT WATCHMANCLIENT_LIBRARIES)
       HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
       return()
     endif()
 
     if (${addPaths})
-      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${LIBUODBC_INCLUDE_DIRS})
-      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${LIBUODBC_LIBRARIES})
-      HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBUODBC")
+      HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${WATCHMANCLIENT_INCLUDE_DIRS})
+      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${WATCHMANCLIENT_LIBRARIES})
     endif()
   else()
     message(FATAL_ERROR "Unknown library '${originalLibraryName}' as a dependency of the '${HHVM_EXTENSION_${extensionID}_PRETTY_NAME}' extension!")

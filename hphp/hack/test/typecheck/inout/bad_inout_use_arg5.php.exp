@@ -1,0 +1,2 @@
+File "bad_inout_use_arg5.php", line 11, characters 5-17:
+You cannot decorate this argument as inout (Parsing[1002])

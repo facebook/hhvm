@@ -112,7 +112,7 @@ static Variant php_mcrypt_do_crypt(const String& cipher, const String& key,
     memset(key_s, 0, key_length_sizes[0]);
     memcpy(key_s, key.data(), MIN(key.size(), key_length_sizes[0]));
     use_key_length = key_length_sizes[0];
-  } else { /* dertermine smallest supported key > length of requested key */
+  } else { /* determine smallest supported key > length of requested key */
     use_key_length = max_key_length; /* start with max key length */
     for (int i = 0; i < count; i++) {
       if (key_length_sizes[i] >= key.size() &&

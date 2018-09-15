@@ -1,0 +1,4 @@
+File "at_most_rx_as_func4.php", line 6, characters 10-18:
+Reactive functions can only call other reactive functions. (Typing[4200])
+File "at_most_rx_as_func4.php", line 10, characters 10-16:
+This function is local reactive.

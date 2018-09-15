@@ -18,6 +18,10 @@ function h($x) {
  while (is_array($x) && isset($x[0]));
   var_dump($x);
 }
+
+<<__EntryPoint>>
+function main_1857() {
 f(array(array(array(array('hello')))));
 g(array(array(array(array('hello')))));
 h(array(array(array(array('hello')))));
+}

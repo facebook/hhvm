@@ -1,7 +1,5 @@
 <?php
 
-ob_start();
-
 function s_open($path, $name) { return true; }
 function s_close() { return true; }
 function s_read($id) { return ''; }
@@ -13,6 +11,11 @@ function s_write($id, $data) {
 }
 function s_destroy($id) { return true; }
 function s_gc($t) { return true; }
+
+
+<<__EntryPoint>>
+function main_keep_save_handler() {
+ob_start();
 
 session_set_save_handler(
   's_open',
@@ -35,3 +38,4 @@ session_start();
 session_destroy();
 
 session_start();
+}

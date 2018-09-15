@@ -1,0 +1,2 @@
+File "rx_superglobals8.php", line 5, characters 8-16:
+Superglobal $_REQUEST cannot be used in a reactive context. (Typing[4227])

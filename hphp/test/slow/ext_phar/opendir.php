@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_opendir() {
 var_dump(readdir());
 
 $dir = opendir('phar://'.__DIR__."/basic.phar");
@@ -21,3 +24,4 @@ var_dump(array_values($files));
 
 $files = scandir('phar://'.__DIR__."/phpunit.phar/File_Iterator-1.3.3");
 var_dump($files);
+}

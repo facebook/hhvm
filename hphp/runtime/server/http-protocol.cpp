@@ -36,6 +36,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/replay-transport.h"
 #include "hphp/runtime/server/request-uri.h"
 #include "hphp/runtime/server/source-root-info.h"
@@ -185,7 +186,8 @@ static void PrepareEnv(Array& env, Transport *transport) {
     break;
   }
 
-  bool isServer = RuntimeOption::ServerExecutionMode();
+  bool isServer =
+    RuntimeOption::ServerExecutionMode() && !is_cli_mode();
   if (isServer) {
     env.set(s_HPHP_SERVER, 1);
     env.set(s_HPHP_HOTPROFILER, 1);
@@ -226,6 +228,7 @@ static void StartRequest(Array& server) {
 void HttpProtocol::PrepareSystemVariables(Transport *transport,
                                           const RequestURI &r,
                                           const SourceRootInfo &sri) {
+  SuppressHackArrCompatNotices suppress;
 
   auto const vhost = VirtualHost::GetCurrent();
   auto const g = get_global_variables()->asArrayData();
@@ -425,7 +428,7 @@ void HttpProtocol::PreparePostVariables(Array& post,
           size = 0;
         }
       }
-      assert(!transport->getFiles(files_str));
+      assertx(!transport->getFiles(files_str));
     } else {
       needDelete = read_all_post_data(transport, data, size);
 
@@ -446,7 +449,10 @@ void HttpProtocol::PreparePostVariables(Array& post,
 
       bool ret = transport->getFiles(files_str);
       if (ret) {
-        files = unserialize_from_string(files_str);
+        files = unserialize_from_string(
+          files_str,
+          VariableUnserializer::Type::Serialize
+        );
       }
     }
 
@@ -635,7 +641,7 @@ static void CopyPathInfo(Array& server,
   String prefix(transport->isSSL() ? "https://" : "http://");
 
   // Need to append port
-  assert(server.exists(s_SERVER_PORT));
+  assertx(server.exists(s_SERVER_PORT));
   std::string serverPort = "80";
   if (server.exists(s_SERVER_PORT)) {
     Variant port = server[s_SERVER_PORT];
@@ -658,7 +664,7 @@ static void CopyPathInfo(Array& server,
   }
   String hostName;
   if (server.exists(s_SERVER_NAME)) {
-    assert(server[s_SERVER_NAME].isString());
+    assertx(server[s_SERVER_NAME].isString());
     hostName = server[s_SERVER_NAME].toCStrRef();
   }
   server.set(s_SCRIPT_URI,
@@ -707,8 +713,8 @@ static void CopyPathInfo(Array& server,
   if (r.pathInfo().empty()) {
     server.set(s_PATH_TRANSLATED, r.absolutePath());
   } else {
-    assert(server.exists(s_DOCUMENT_ROOT));
-    assert(server[s_DOCUMENT_ROOT].isString());
+    assertx(server.exists(s_DOCUMENT_ROOT));
+    assertx(server[s_DOCUMENT_ROOT].isString());
     // reset path_translated back to the transport if it has it.
     auto const& pathTranslated = transport->getPathTranslated();
     if (!pathTranslated.empty()) {
@@ -851,7 +857,7 @@ void HttpProtocol::DecodeParameters(Array& variables, const char *data,
 }
 
 void HttpProtocol::DecodeCookies(Array& variables, char *data) {
-  assert(data && *data);
+  assertx(data && *data);
 
   char *strtok_buf = nullptr;
   char *var = strtok_r(data, ";", &strtok_buf);
@@ -987,7 +993,7 @@ bool HttpProtocol::ProxyRequest(Transport *transport, bool force,
                                 int &code, std::string &error,
                                 StringBuffer &response,
                                 HeaderMap *extraHeaders /* = NULL */) {
-  assert(transport);
+  assertx(transport);
   if (transport->headersSent()) {
     raise_warning("Cannot proxy request - headers already sent");
     return false;
@@ -1009,7 +1015,7 @@ bool HttpProtocol::ProxyRequest(Transport *transport, bool force,
     data = (const char *)transport->getPostData(size);
   }
 
-  std::vector<String> responseHeaders;
+  req::vector<String> responseHeaders;
   HttpClient http;
   code = http.request(transport->getMethodName(),
                       url.c_str(), data, size, response, &requestHeaders,

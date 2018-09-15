@@ -1,0 +1,2 @@
+File "bad_inout_decl_async_generator.php", line 5, characters 25-38:
+Parameters may not be marked inout on async functions (Parsing[1002])

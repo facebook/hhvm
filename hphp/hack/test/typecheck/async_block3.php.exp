@@ -1,2 +1,2 @@
-File "async_block3.php", line 4, characters 15-19:
+File "async_block3.php", line 4, characters 15-42:
 Unexpected use of async {...} as lambda expression (Parsing[1002])

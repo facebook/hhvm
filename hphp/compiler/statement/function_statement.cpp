@@ -23,7 +23,6 @@
 #include "hphp/compiler/expression/parameter_expression.h"
 #include "hphp/compiler/expression/modifier_expression.h"
 #include "hphp/compiler/option.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include <sstream>
 
@@ -54,7 +53,8 @@ StatementPtr FunctionStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
+void FunctionStatement::onParse(AnalysisResultConstRawPtr ar,
+                                FileScopePtr scope) {
   checkParameters(scope);
   // Correctness checks are normally done before adding function to scope.
   if (m_params) {
@@ -70,15 +70,12 @@ void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
   // as a function may be declared inside a class's method, yet this function
   // is a global function, not a class method.
   FunctionScopePtr fs = onInitialParse(ar, scope);
-  FunctionScope::RecordFunctionInfo(m_originalName, fs);
+  fs->recordParams();
   scope->addFunction(ar, fs);
-
-  fs->setPersistent(false);
 
   if (isNamed("__autoload")) {
     if (m_params && m_params->getCount() != 1) {
       parseTimeFatal(scope,
-                     Compiler::InvalidMagicMethod,
                      "__autoload() must take exactly 1 argument");
     }
   }
@@ -86,7 +83,6 @@ void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
   if (fs->isNative()) {
     if (getStmts()) {
       parseTimeFatal(scope,
-                     Compiler::InvalidAttribute,
                      "Native functions must not have an implementation body");
     }
     if (m_params) {
@@ -97,7 +93,6 @@ void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
         auto param = dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
         if (!param->hasUserType() && !param->isVariadic()) {
           parseTimeFatal(scope,
-                         Compiler::InvalidAttribute,
                          "Native function calls must have type hints "
                          "on all args");
         }
@@ -105,13 +100,11 @@ void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
     }
     if (getReturnTypeConstraint().empty()) {
       parseTimeFatal(scope,
-                     Compiler::InvalidAttribute,
                      "Native function %s() must have a return type hint",
                      getOriginalName().c_str());
     }
   } else if (!getStmts()) {
     parseTimeFatal(scope,
-                   Compiler::InvalidAttribute,
                    "Global function %s() must contain a body",
                     getOriginalName().c_str());
   }
@@ -122,10 +115,6 @@ void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
 
 std::string FunctionStatement::getName() const {
   return std::string("Function ") + getOriginalName();
-}
-
-void FunctionStatement::analyzeProgram(AnalysisResultPtr ar) {
-  MethodStatement::analyzeProgram(ar);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -159,8 +148,4 @@ void FunctionStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     outputPHPHeader(cg, ar);
     outputPHPBody(cg, ar);
   }
-}
-
-bool FunctionStatement::hasImpl() const {
-  return true;
 }

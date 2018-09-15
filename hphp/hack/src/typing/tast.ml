@@ -1,152 +1,129 @@
 (**
- * Copyright (c) 2015, Facebook, Inc.
+ * Copyright (c) 2017, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-type sid = Nast.sid
-type pstring = Nast.pstring
+open Core_kernel
+(* This is the current notion of type in the typed AST.
+ * In future we might want to reconsider this and define a new representation
+ * that omits type inference artefacts such as type variables and lambda
+ * identifiers.
+ *)
 type ty = Typing_defs.locl Typing_defs.ty
-type shape_field_name = Nast.shape_field_name
 
-(* Typed statement.
- * For now, this is a straight copy of Nast.stmt but it will evolve
- * to a point where there is sufficient type information in the
- * AST to reconstruct types (of locals, for example) without solving
- * constraints.
+type saved_env = {
+  tcopt : TypecheckerOptions.t;
+  tenv : ty IMap.t;
+  subst : int IMap.t;
+  tpenv : Type_parameter_env.t;
+}
+
+let empty_saved_env tcopt : saved_env = {
+  tcopt;
+  tenv = IMap.empty;
+  subst = IMap.empty;
+  tpenv = SMap.empty;
+}
+
+let pp_saved_env fmt env =
+  Format.fprintf fmt "@[<hv 2>{ ";
+
+  Format.fprintf fmt "@[%s =@ " "tcopt";
+  Format.fprintf fmt "<opaque>";
+  Format.fprintf fmt "@]";
+  Format.fprintf fmt ";@ ";
+
+  Format.fprintf fmt "@[%s =@ " "tenv";
+  IMap.pp Pp_type.pp_ty fmt env.tenv;
+  Format.fprintf fmt "@]";
+  Format.fprintf fmt ";@ ";
+
+  Format.fprintf fmt "@[%s =@ " "subst";
+  IMap.pp Format.pp_print_int fmt env.subst;
+  Format.fprintf fmt "@]";
+  Format.fprintf fmt ";@ ";
+
+  Format.fprintf fmt "@[%s =@ " "tpenv";
+  Type_parameter_env.pp fmt env.tpenv;
+  Format.fprintf fmt "@]";
+
+  Format.fprintf fmt " }@]"
+
+(* Typed AST.
  *
- * Also, we need to determine where position information is retained.
+ * We re-use the NAST, but annotate expressions with position *and* type, not
+ * just position.
+ *
+ * Going forward, we will need further annotations
+ * such as type arguments to generic methods and `new`, annotations on locals
+ * at merge points to make flow typing explicit, bound type parameters for
+ * `instanceof` refinements, and possibly other features.
+ *
+ * Ideally we should record anything that is computed by the type inference
+ * algorithm that can't be deduced again cheaply from the embedded type.
+ *
  *)
-type stmt =
-  | Expr of expr
-  | Break
-  | Continue
-  | Throw of Nast.is_terminal * expr
-  | Return of expr option
-  | Static_var of expr list
-  | If of expr * block * block
-  | Do of block * expr
-  | While of expr * block
-  | For of expr * expr * expr * block
-  | Switch of expr * case list
-  | Foreach of expr * as_expr * block
-  | Try of block * catch list * block
-  | Noop
-  | Fallthrough
+module Annotations = struct
+  module ExprAnnotation = struct
+    type t = Pos.t * ty
+    let pp fmt (pos, ty) =
+      Format.fprintf fmt "(@[";
+      Pos.pp fmt pos;
+      Format.fprintf fmt ",@ ";
+      Pp_type.pp_ty fmt ty;
+      Format.fprintf fmt "@])"
+  end
 
-and as_expr =
-  | As_v of expr
-  | As_kv of expr * expr
-  | Await_as_v of Pos.t * expr
-  | Await_as_kv of Pos.t * expr * expr
+  module EnvAnnotation = struct
+    type t = saved_env
+    let pp = pp_saved_env
+  end
+end
 
-and block = stmt list
+module TypeAndPosAnnotatedAST = Aast.AnnotatedAST(Annotations)
 
-and class_id =
-  | CIparent
-  | CIself
-  | CIstatic
-  | CIexpr of expr
-  | CI of sid
+include TypeAndPosAnnotatedAST
 
-(* Typed expression.
- * For now, this is pretty much a straight copy of Nast.expr but it will
- * evolve to a point where there is sufficient type information in the
- * expression to reconstruct its type without solving constraints.
- * Also, we need to determine where position information is retained.
+(* Helper function to create an annotation for a typed and positioned expression.
+ * Do not construct this tuple directly - at some point we will build
+ * some abstraction in so that we can change the representation (e.g. put
+ * further annotations on the expression) as we see fit.
  *)
-and expr =
-  | Any
-  | Shape of expr Nast.ShapeMap.t
-  | ValCollection of Nast.vc_kind * expr list
-  | KeyValCollection of Nast.kvc_kind * field list
-  | This
-  | Id of sid
-  | Lvar of Local_id.t
-  | Lplaceholder of Pos.t
-  | Fun_id of sid
-  | Method_id of expr * pstring
-  (* meth_caller('Class name', 'method name') *)
-  | Method_caller of sid * pstring
-  | Smethod_id of sid * pstring
-  (* Dynamic instance property access e.g. $x->$f; not legal in strict files *)
-  | Obj_dynamic_get of expr * expr * Nast.og_null_flavor
-  (* Statically-known instance property access e.g. $x->f *)
-  | Obj_get of ty * expr * sid * Nast.og_null_flavor
-  | Array_get of expr * expr option
-  | Class_get of class_id * pstring
-  | Class_const of class_id * pstring
-  | Call of Nast.call_type
-    * expr (* function *)
-    * expr list (* positional args *)
-    * expr list (* unpacked args *)
-  | Bool_literal of bool
-  | Int_literal of pstring
-  | Float_literal of pstring
-  (* This has type ?ty *)
-  | Null_literal of ty
-  | String_literal of pstring
-  | String2 of expr list
-  | Special_func of special_func
-  | Yield_break
-  | Yield of afield
-  | Await of ty * expr
-  (* TODO TAST: we should be able to consolidate these *)
-  (* e1, ..., en : tn
-   *   ==> New_tuple [e1; ...; en] : (t1, ..., tn)
-   *)
-  | New_tuple of expr list
-  (* e1 : t1, ..., en : tn
-   *   ==> New_tuple_array [e1; ...; en] : tuple_array<t1, ..., tn>
-   *)
-  | New_tuple_array of expr list
-  (* e1 : t, ..., en : t
-   *   ==> New_vec_array(t, [e1; ...; en]): array<t> *)
-  | New_vec_array of ty * expr list
-  (* e1 : t1, ..., en : tn ==>
-   *   New_shape_array [(f1,t1); ...; (fn,tn)] : shape_array<f1=>t1,...,fn=>tn>
-   *)
-  | New_shape_array of (shape_field_name * expr) list
-  (* k1 : tk, ..., kn : tk and
-   * e1 : tv, ..., en : tv
-   *   New_map_array(tk, tv, [(k1,e1);...;(kn,en)]) : array<tk,tv>
-   *)
-  | New_map_array of ty * ty * (expr * expr) list
-  | Pair of expr * expr
-  | Cast of ty * expr
-  (* TODO TAST: use an "instrinsic" to precisely describe the
-   * overloaded operation that we have resolved for unop and binop
-   *)
-  | Unop of Ast.uop * expr * ty
-  | Binop of Ast.bop * expr * expr * ty
-  (** The ID of the $$ that is implicitly declared by this pipe. *)
-  | Pipe of Local_id.t * expr * expr
-  (* Explicit type must be a supertype of the types of the branches. *)
-  | Eif of expr * expr * expr * ty
-  | InstanceOf of expr * class_id
-  | New of class_id * expr list * expr list
-  (*  | Efun of fun_ * id list*)
-  | Xml of sid * (pstring * expr) list * expr list
-  (*  | Assert of assert_expr*)
-  | Clone of expr
-  | Typename of sid
+let make_expr_annotation p ty : Annotations.ExprAnnotation.t = (p, ty)
 
-and case =
-  | Default of block
-  | Case of expr * block
+(* Helper function to create a typed and positioned expression.
+ * Do not construct this triple directly - at some point we will build
+ * some abstraction in so that we can change the representation (e.g. put
+ * further annotations on the expression) as we see fit.
+ *)
+let make_typed_expr p ty te : expr = (make_expr_annotation p ty, te)
 
-and catch = sid * Local_id.t * block
+(* Get the position of an expression *)
+let get_position (((p, _), _) : expr) = p
 
-and field = expr * expr
-and afield =
-  | AFvalue of expr
-  | AFkvalue of expr * expr
+(* Get the type of an expression *)
+let get_type (((_, ty), _) : expr) = ty
 
-and special_func =
-  | Gena of expr
-  | Genva of expr list
-  | Gen_array_rec of expr
+module NastMapper = Aast_mapper.MapAnnotatedAST(Annotations)(Nast.Annotations)
+
+let nast_mapping_env =
+  NastMapper.{
+    map_env_annotation = (fun _ -> ());
+    map_expr_annotation = fst;
+  }
+
+let to_nast program =
+  NastMapper.map_program
+    ~map_env_annotation:(fun _ -> ())
+    ~map_expr_annotation:fst
+    program
+
+let to_nast_expr =
+  NastMapper.map_expr nast_mapping_env
+
+let to_nast_class_id_ =
+  NastMapper.map_class_id_ nast_mapping_env

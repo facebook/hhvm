@@ -1,4 +1,4 @@
-<?php
+<?hh
 function test($t) {
   unset($GLOBALS['foo']['bar']);
 }

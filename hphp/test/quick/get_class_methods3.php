@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract class B {
   private function priv() { }

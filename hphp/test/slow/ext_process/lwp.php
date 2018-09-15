@@ -7,8 +7,11 @@ function VS($x, $y) {
 }
 function VERIFY($x) { VS($x != false, true); }
 
+
 //////////////////////////////////////////////////////////////////////
 
+<<__EntryPoint>>
+function main_lwp() {
 $output = shell_exec("echo hello");
 VS($output, "hello\n");
 
@@ -114,3 +117,4 @@ VS($nullbyteout, null);
 VS(shell_exec($nullbyte), null);
 $process = proc_open($nullbyte, array(), $pipes);
 VS($process, false);
+}

@@ -15,7 +15,7 @@
 */
 
 #include "hphp/util/bitops.h"
-#include <gtest/gtest.h>
+#include <folly/portability/GTest.h>
 
 namespace HPHP {
 
@@ -51,64 +51,6 @@ TEST(BitopsTest, FlsZero) {
   int64_t zero = 0;
   int64_t out;
   EXPECT_FALSE(fls64(zero, out));
-}
-
-TEST(BitopsTest, BitsetForEach1) {
-  std::vector<size_t> indices = {0, 63, 70, 71, 112, 128, 255};
-  std::bitset<256> bitset;
-  for (auto const& i : indices) {
-    bitset.set(i);
-  }
-
-  size_t iter = 0;
-  bitset_for_each_set(
-    bitset,
-    [&](size_t i) {
-      EXPECT_TRUE(iter < indices.size() &&
-                  i == indices[iter]);
-      ++iter;
-    }
-  );
-}
-
-TEST(BitopsTest, BitsetForEach2) {
-  std::vector<size_t> indices = {90, 107, 115};
-  std::bitset<256> bitset;
-  for (auto const& i : indices) {
-    bitset.set(i);
-  }
-
-  size_t iter = 0;
-  bitset_for_each_set(
-    bitset,
-    [&](size_t i) {
-      EXPECT_TRUE(iter < indices.size() &&
-                  i == indices[iter]);
-      ++iter;
-    }
-  );
-}
-
-TEST(BitopsTest, BitsetForEachEmpty) {
-  std::bitset<256> bitset;
-  bitset_for_each_set(
-    bitset,
-    [&](size_t) { EXPECT_TRUE(false); }
-  );
-}
-
-TEST(BitopsTest, BitsetForEachFull) {
-  std::bitset<256> bitset;
-  bitset.set();
-
-  size_t iter = 0;
-  bitset_for_each_set(
-    bitset,
-    [&](size_t i) {
-      EXPECT_TRUE(i < bitset.size() && i == iter);
-      ++iter;
-    }
-  );
 }
 
 }

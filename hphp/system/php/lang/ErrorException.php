@@ -23,8 +23,9 @@ class ErrorException extends Exception {
    * @previous   mixed   The previous exception used for the exception
    *                     chaining.
    */
+  <<__Rx>>
   public function __construct($message = "", $code = 0, $severity = 0,
-                              $filename = null, $lineno = null, Exception $previous = null) {
+                              $filename = null, $lineno = null, <<__MaybeMutable>> Exception $previous = null) {
     parent::__construct($message, $code, $previous);
     $this->severity = $severity;
     if ($filename !== null) {
@@ -43,6 +44,6 @@ class ErrorException extends Exception {
    *
    * @return     mixed   Returns the severity level of the exception.
    */
+  <<__Rx, __MaybeMutable>>
   final public function getSeverity() { return $this->severity; }
 }
-

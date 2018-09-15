@@ -66,4 +66,8 @@ function main() {
   try { var_dump([dict[0 => 123], vec['123']] >= [vec['123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
   try { var_dump([dict[0 => 123], vec['123']] <=> [vec['123'], dict[0 => 123]]); } catch (Exception $e) { echo $e->getMessage() . "\n"; }
 }
+
+<<__EntryPoint>>
+function main_hphpc_literal() {
 main();
+}

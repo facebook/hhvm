@@ -10,4 +10,8 @@ function f() {
     echo $k . ' ' . $v . "\n";
   }
 }
+
+<<__EntryPoint>>
+function main_818() {
 f();
+}

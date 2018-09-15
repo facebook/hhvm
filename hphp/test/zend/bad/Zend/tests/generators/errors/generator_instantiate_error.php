@@ -1,5 +1,0 @@
-<?php
-
-new Generator;
-
-?>

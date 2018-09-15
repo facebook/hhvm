@@ -117,17 +117,17 @@ static Array HHVM_FUNCTION(
 ) {
   Array result;
 
-  result.add(
+  result.set(
     String("name"),
     String((char *)fribidi_char_set_name((FriBidiCharSet)charset))
   );
-  result.add(
+  result.set(
     String("title"),
     String((char *)fribidi_char_set_title((FriBidiCharSet)charset))
   );
 
   if (fribidi_char_set_desc((FriBidiCharSet)charset)) {
-    result.add(
+    result.set(
       String("desc"),
       String((char *)fribidi_char_set_desc((FriBidiCharSet)charset))
     );
@@ -141,14 +141,14 @@ static Array HHVM_FUNCTION(
 ) {
   Array result;
 
-  result.add(FRIBIDI_CHAR_SET_UTF8, Variant{s_FRIBIDI_CHARSET_UTF8.get()});
-  result.add(FRIBIDI_CHAR_SET_ISO8859_6,
+  result.set(FRIBIDI_CHAR_SET_UTF8, Variant{s_FRIBIDI_CHARSET_UTF8.get()});
+  result.set(FRIBIDI_CHAR_SET_ISO8859_6,
              Variant{s_FRIBIDI_CHARSET_8859_6.get()});
-  result.add(FRIBIDI_CHAR_SET_ISO8859_8,
+  result.set(FRIBIDI_CHAR_SET_ISO8859_8,
              Variant{s_FRIBIDI_CHARSET_8859_8.get()});
-  result.add(FRIBIDI_CHAR_SET_CP1255, Variant{s_FRIBIDI_CHARSET_CP1255.get()});
-  result.add(FRIBIDI_CHAR_SET_CP1256, Variant{s_FRIBIDI_CHARSET_CP1256.get()});
-  result.add(FRIBIDI_CHAR_SET_CAP_RTL,
+  result.set(FRIBIDI_CHAR_SET_CP1255, Variant{s_FRIBIDI_CHARSET_CP1255.get()});
+  result.set(FRIBIDI_CHAR_SET_CP1256, Variant{s_FRIBIDI_CHARSET_CP1256.get()});
+  result.set(FRIBIDI_CHAR_SET_CAP_RTL,
              Variant{s_FRIBIDI_CHARSET_CAP_RTL.get()});
 
   return result;

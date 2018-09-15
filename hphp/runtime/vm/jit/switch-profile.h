@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_TYPE_PROFILE_H_
-#define incl_HPHP_JIT_TYPE_PROFILE_H_
+#ifndef incl_HPHP_JIT_SWITCH_PROFILE_H_
+#define incl_HPHP_JIT_SWITCH_PROFILE_H_
 
 #include "hphp/runtime/vm/jit/target-profile.h"
 
@@ -32,19 +32,35 @@ struct SwitchProfile {
   SwitchProfile(const SwitchProfile&) = delete;
   SwitchProfile& operator=(const SwitchProfile&) = delete;
 
-  std::string toString(int nCases) const {
-    std::ostringstream out;
-    for (int i = 0; i < nCases; ++i) out << folly::format("{},", cases[i]);
-    return out.str();
+  std::string toString(uint32_t size) const {
+    auto const nCases = size / sizeof(uint32_t);
+    std::string out;
+    for (int i = 0; i < nCases; ++i) folly::format(&out, "{},", cases()[i]);
+    return out;
   }
 
-  static void reduce(SwitchProfile& a, const SwitchProfile& b, int nCases) {
+  static void reduce(SwitchProfile& a, const SwitchProfile& b, uint32_t size) {
+    auto const nCases = size / sizeof(uint32_t);
     for (uint32_t i = 0; i < nCases; ++i) {
-      a.cases[i] += b.cases[i];
+      a.cases()[i] += b.cases()[i];
     }
   }
 
-  uint32_t cases[0]; // dynamically sized
+  static size_t extraSize(int n) {
+    return n * sizeof(uint32_t) - sizeof(SwitchProfile);
+  }
+
+  uint32_t* cases() {
+    auto ptr = static_cast<void*>(this);
+    ptr = static_cast<char*>(ptr) + offsetof(SwitchProfile, first_case);
+    return static_cast<uint32_t*>(ptr);
+  }
+
+  const uint32_t* cases() const {
+    return const_cast<SwitchProfile*>(this)->cases();
+  }
+
+  uint32_t first_case;
 
   // In RDS but can't contain pointers to request-allocated data
   TYPE_SCAN_IGNORE_ALL;

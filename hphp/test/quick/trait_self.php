@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T {
   static function foo() { self::bar(); }

@@ -8,5 +8,9 @@ function test($x) {
 ;
   var_dump($filter(0));
 }
+
+<<__EntryPoint>>
+function main_1936() {
 test('hello');
 test(array(1,2,'foo'=>'bar'));
+}

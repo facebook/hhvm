@@ -1,0 +1,26 @@
+vec(6) {
+  string(2) "A1"
+  string(1) "B"
+  string(1) "C"
+  string(1) "A"
+  string(2) "A2"
+  string(4) "Base"
+}
+vec(6) {
+  string(2) "A1"
+  string(1) "B"
+  string(1) "C"
+  string(1) "A"
+  string(2) "A2"
+  string(4) "Base"
+}
+vec(6) {
+  string(2) "A1"
+  string(1) "B"
+  string(1) "C"
+  string(1) "A"
+  string(2) "A2"
+  string(4) "Base"
+}
+vec(0) {
+}

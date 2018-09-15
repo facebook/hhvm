@@ -21,6 +21,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <unordered_map>
 
 #include <boost/container/flat_set.hpp>
 
@@ -28,7 +29,7 @@
 
 #include "hphp/util/exception.h"
 #include "hphp/util/functional.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -140,10 +141,12 @@ struct Hdf {
   uint64_t configGetUInt64(uint64_t defValue = 0) const;
   double configGetDouble(double defValue = 0) const;
 
+  void configGet(std::vector<uint32_t> &values) const;
   void configGet(std::vector<std::string> &values) const;
   void configGet(std::set<std::string> &values) const;
   void configGet(std::set<std::string, stdltistr> &values) const;
   void configGet(boost::container::flat_set<std::string> &values) const;
+  void configGet(std::unordered_map<std::string, int> &values) const;
   void configGet(std::map<std::string, std::string> &values) const;
   void configGet(std::map<std::string, std::string, stdltistr> &values) const;
   void configGet(hphp_string_imap<std::string> &values) const;

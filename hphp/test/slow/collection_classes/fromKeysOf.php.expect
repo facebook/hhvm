@@ -1,50 +1,106 @@
-
 Set::fromKeysOf...
----- HH\Set ----
+---- empty array
+HH\Set
+---- packed array
+HH\Set
 int(0)
 int(1)
 int(2)
-----
----- HH\Set ----
+---- mixed array
+HH\Set
+string(1) "a"
+string(1) "b"
+---- empty Vector
+HH\Set
+---- empty ImmVector
+HH\Set
+---- empty Map
+HH\Set
+---- empty ImmMap
+HH\Set
+---- empty Set
+HH\Set
+---- empty ImmSet
+HH\Set
+---- Vector
+HH\Set
 int(0)
 int(1)
 int(2)
-----
----- HH\Set ----
+---- ImmVector
+HH\Set
+int(0)
+int(1)
+int(2)
+---- Map
+HH\Set
 string(1) "a"
 string(1) "b"
-----
----- HH\Set ----
+---- ImmMap
+HH\Set
 string(1) "a"
 string(1) "b"
-----
----- HH\Set ----
+---- Set
+HH\Set
 int(4)
 int(5)
 int(6)
-----
+---- ImmSet
+HH\Set
+int(4)
+int(5)
+int(6)
 
 Vector::fromKeysOf...
----- HH\Vector ----
+---- empty array
+HH\Vector
+---- packed array
+HH\Vector
 int(0)
 int(1)
 int(2)
-----
----- HH\Vector ----
+---- mixed array
+HH\Vector
+string(1) "a"
+string(1) "b"
+---- empty Vector
+HH\Vector
+---- empty ImmVector
+HH\Vector
+---- empty Map
+HH\Vector
+---- empty ImmMap
+HH\Vector
+---- empty Set
+HH\Vector
+---- empty ImmSet
+HH\Vector
+---- Vector
+HH\Vector
 int(0)
 int(1)
 int(2)
-----
----- HH\Vector ----
+---- ImmVector
+HH\Vector
+int(0)
+int(1)
+int(2)
+---- Map
+HH\Vector
 string(1) "a"
 string(1) "b"
-----
----- HH\Vector ----
+---- ImmMap
+HH\Vector
 string(1) "a"
 string(1) "b"
-----
----- HH\Vector ----
+---- Set
+HH\Vector
 int(4)
 int(5)
 int(6)
-----
+---- ImmSet
+HH\Vector
+int(4)
+int(5)
+int(6)
+

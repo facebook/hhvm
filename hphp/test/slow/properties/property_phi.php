@@ -42,4 +42,8 @@ function main() {
     $t->done(false);
   }
 }
+
+<<__EntryPoint>>
+function main_property_phi() {
 main();
+}

@@ -1,0 +1,122 @@
+[(Fun
+    { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+      f_ret =
+      (Some ([3:38-55],
+             (Happly (([3:38-47], "\\Awaitable"),
+                [([3:48-54], (Hprim Tstring))]))));
+      f_name = ([3:16-25], "\\genString"); f_tparams = [];
+      f_where_constraints = []; f_variadic = FVnonVariadic;
+      f_params =
+      [{ Aast.AnnotatedAST.param_annotation = ([3:33-35], string);
+         param_hint = (Some ([3:26-32], (Hprim Tstring)));
+         param_is_reference = false; param_is_variadic = false;
+         param_pos = [3:33-35]; param_name = "$s"; param_expr = None;
+         param_callconv = None; param_user_attributes = [] }
+        ];
+      f_body =
+      (NamedBody
+         { Aast.AnnotatedAST.fnb_nast =
+           [(Return ([3:58-68],
+               (Some (([3:65-67], string), (Lvar ([3:65-67], $s))))))
+             ];
+           fnb_unsafe = false });
+      f_fun_kind = FAsync; f_user_attributes = []; f_ret_by_ref = false;
+      f_external = false });
+  (Fun
+     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+       f_ret = (Some ([5:18-22], (Hprim Tvoid)));
+       f_name = ([5:10-14], "\\test"); f_tparams = [];
+       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+       f_body =
+       (NamedBody
+          { Aast.AnnotatedAST.fnb_nast =
+            [(Expr
+                (([6:3-8:4], (function(): Awaitable<void>)),
+                 (Binop ((Eq None),
+                    (([6:3-6], (function(): Awaitable<void>)),
+                     (Lvar ([6:3-6], $f0))),
+                    (([6:9-8:4], (function(): Awaitable<_>)),
+                     (Efun (
+                        { Aast.AnnotatedAST.f_annotation = ();
+                          f_mode = <opaque>; f_ret = None;
+                          f_name = ([6:9-8:4], ";anonymous"); f_tparams = [];
+                          f_where_constraints = [];
+                          f_variadic = FVnonVariadic; f_params = [];
+                          f_body =
+                          (NamedBody
+                             { Aast.AnnotatedAST.fnb_nast =
+                               [(Expr
+                                   (([7:5-34], string),
+                                    (Binop ((Eq None),
+                                       (([7:5-9], string),
+                                        (Lvar ([7:5-9], $str))),
+                                       (([7:12-34], string),
+                                        (Await
+                                           (([7:18-34], Awaitable<string>),
+                                            (Call (Cnormal,
+                                               (([7:18-27], (function(string $s): Awaitable<string>)),
+                                                (Id
+                                                   ([7:18-27], "\\genString"))),
+                                               [],
+                                               [(([7:28-33], string),
+                                                 (String "foo"))],
+                                               [])))))
+                                       ))))
+                                 ];
+                               fnb_unsafe = false });
+                          f_fun_kind = FAsync; f_user_attributes = [];
+                          f_ret_by_ref = false; f_external = false },
+                        [])))
+                    ))));
+              (Expr
+                 (([9:3-11:4], [fun]),
+                  (Binop ((Eq None),
+                     (([9:3-6], [fun]), (Lvar ([9:3-6], $f1))),
+                     (([9:9-11:4], [fun]),
+                      (Efun (
+                         { Aast.AnnotatedAST.f_annotation = ();
+                           f_mode = <opaque>; f_ret = None;
+                           f_name = ([9:9-11:4], ";anonymous");
+                           f_tparams = []; f_where_constraints = [];
+                           f_variadic = FVnonVariadic;
+                           f_params =
+                           [{ Aast.AnnotatedAST.param_annotation =
+                              ([9:15-17], _); param_hint = None;
+                              param_is_reference = false;
+                              param_is_variadic = false;
+                              param_pos = [9:15-17]; param_name = "$x";
+                              param_expr = None; param_callconv = None;
+                              param_user_attributes = [] }
+                             ];
+                           f_body =
+                           (NamedBody
+                              { Aast.AnnotatedAST.fnb_nast =
+                                [(Expr
+                                    (([10:5-31], string),
+                                     (Binop ((Eq None),
+                                        (([10:5-9], string),
+                                         (Lvar ([10:5-9], $str))),
+                                        (([10:12-31], string),
+                                         (Await
+                                            (([10:18-31], Awaitable<string>),
+                                             (Call (Cnormal,
+                                                (([10:18-27], (function(string $s): Awaitable<string>)),
+                                                 (Id
+                                                    ([10:18-27],
+                                                     "\\genString"))),
+                                                [],
+                                                [(([10:28-30], _),
+                                                  (Lvar ([10:28-30], $x)))],
+                                                [])))))
+                                        ))))
+                                  ];
+                                fnb_unsafe = false });
+                           f_fun_kind = FAsync; f_user_attributes = [];
+                           f_ret_by_ref = false; f_external = false },
+                         [])))
+                     ))))
+              ];
+            fnb_unsafe = false });
+       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
+       f_external = false })
+  ]

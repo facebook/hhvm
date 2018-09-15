@@ -74,7 +74,7 @@ function array_combine(mixed $keys, mixed $values): mixed;
  *
  */
 <<__Native, __IsFoldable>>
-function array_count_values(array $input): mixed;
+function array_count_values(arraylike $input): mixed;
 
 /**
  * Fills an array with the value of the value parameter, using the values of
@@ -593,7 +593,7 @@ function array_walk(mixed &$input,
  *
  */
 <<__Native("ReadsCallerFrame")>>
-function compact(mixed $varname, ...$argv): array;
+function compact(mixed $varname, ...$argv): darray;
 
 /**
  * This function shuffles (randomizes the order of the elements in) an array.
@@ -1282,7 +1282,7 @@ function uksort(mixed &$array, mixed $cmp_function): bool;
  *
  * @param mixed $array - The input array.
  *
- * @return mixed - Returns TRUE on success or FALSE on failure.
+ * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
 <<__Native>>
@@ -1296,7 +1296,7 @@ function natsort(mixed &$array): bool;
  *
  * @param mixed $array - The input array.
  *
- * @return mixed - Returns TRUE on success or FALSE on failure.
+ * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
 <<__Native>>
@@ -1367,15 +1367,45 @@ namespace __SystemLib {
   function array_map(mixed $callback,
                      mixed $arr1,
                      ...$argv): mixed;
+
+  <<__Native, __IsFoldable>>
+  function merge_xhp_attr_declarations(darray $arr1,
+                                       darray $arr2,
+                                       ...$rest): darray;
 }
 
 namespace HH {
-  <<__Native>>
-  function dict(mixed $arr): dict;
+  <<__Native, __IsFoldable, __Rx, __OnlyRxIfArgs>>
+  function dict(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>> mixed $arr): dict;
 
-  <<__Native>>
-  function vec(mixed $arr): vec;
+  <<__Native, __IsFoldable, __Rx, __OnlyRxIfArgs>>
+  function vec(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>> mixed $arr): vec;
 
-  <<__Native>>
-  function keyset(mixed $arr): keyset;
+  <<__Native, __IsFoldable, __Rx, __OnlyRxIfArgs>>
+  function keyset(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>> mixed $arr): keyset;
+
+  <<__Native, __IsFoldable, __Rx, __OnlyRxIfArgs>>
+  function varray(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>> mixed $arr): varray;
+
+  <<__Native, __IsFoldable, __Rx, __OnlyRxIfArgs>>
+  function darray(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>> mixed $arr): darray;
+
+  /**
+   * array_key_cast() can be used to convert a given value to the equivalent
+   * that would be used if that value was used as a key in an array.
+   *
+   * An integer is returned unchanged. A boolean, float, or resource is cast to
+   * an integer (using standard semantics). A null is converted to an empty
+   * string. A string is converted to an integer if it represents an integer
+   * value, returned unchanged otherwise.
+   *
+   * For object, array, vec, dict, or keyset values, an InvalidArgumentException
+   * is thrown (as these cannot be used as array keys).
+   *
+   * @param mixed $key - The value to be converted.
+   *
+   * @return arraykey - Returns the converted value.
+   */
+  <<__Native, __IsFoldable>>
+  function array_key_cast(mixed $key): arraykey;
 }

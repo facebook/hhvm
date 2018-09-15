@@ -11,7 +11,11 @@ function g(string $x) {
   var_dump($x[1]);
   var_dump($x[0]);
 }
+
+<<__EntryPoint>>
+function main_535() {
 f(array(), 0);
 g('bar');
 g('');
 g('b');
+}

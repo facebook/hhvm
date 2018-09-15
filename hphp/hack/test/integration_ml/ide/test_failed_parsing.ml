@@ -2,9 +2,9 @@
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
  *
  *)
 
@@ -32,14 +32,14 @@ function bar() : void {
 }"
 
 let parse_error =
-"<?hh // strict
+"<?hh
 
 {"
 
 let bar_parse_error_diagnostics = "
 /bar.php:
-File \"/bar.php\", line 4, characters 1-0:
-Expected } (Parsing[1002])
+File \"/bar.php\", line 3, characters 2-2:
+A right brace ('}') is expected here. (Parsing[1002])
 "
 
 let () =
@@ -66,5 +66,5 @@ let () =
   let env = Test.wait env in
   let _, loop_output = Test.(run_loop_once env default_loop_input) in
   (* Bar depends on foo, so change of foo will trigger recheck of bar.
-   * Verify that doing this doesn't forget about parsing stage errors *)
-  Test.assert_diagnostics loop_output bar_parse_error_diagnostics
+   * Verify that doing this doesn't change previous parsing stage errors *)
+  Test.assert_no_diagnostics loop_output

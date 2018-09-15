@@ -18,4 +18,8 @@ function main() {
   $items[1] = $time;
   return $items;
 }
+
+<<__EntryPoint>>
+function main_array_possibly_empty_002() {
 main();
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 function main() {
   $y = 20;
   var_dump($y += 10);

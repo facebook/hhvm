@@ -1205,6 +1205,9 @@ class Phar extends RecursiveDirectoryIterator
     }
     $info = [];
     foreach ($this->archiveHandler->getEntriesMap() as $filename => $entry) {
+      if ($entry->type === \__SystemLib\ArchiveEntryType::DIRECTORY) {
+        continue;
+      }
       $info[$filename] = new PharFileInfo(
         $this->iteratorRoot.$filename,
         $entry

@@ -1,0 +1,107 @@
+[
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": {
+      "capabilities": {
+        "textDocumentSync": {
+          "openClose": true,
+          "change": 2,
+          "willSave": false,
+          "willSaveWaitUntil": false,
+          "save": {
+            "includeText": false
+          }
+        },
+        "hoverProvider": true,
+        "completionProvider": {
+          "resolveProvider": true,
+          "triggerCharacters": [
+            "$",
+            ">",
+            "\\",
+            ":",
+            "<",
+            "[",
+            "'",
+            "\""
+          ]
+        },
+        "signatureHelpProvider": {
+          "triggerCharacters": [
+            "(",
+            ","
+          ]
+        },
+        "definitionProvider": true,
+        "referencesProvider": true,
+        "documentHighlightProvider": true,
+        "documentSymbolProvider": true,
+        "workspaceSymbolProvider": true,
+        "codeActionProvider": false,
+        "documentFormattingProvider": true,
+        "documentRangeFormattingProvider": true,
+        "documentOnTypeFormattingProvider": {
+          "firstTriggerCharacter": ";",
+          "moreTriggerCharacter": [
+            "}"
+          ]
+        },
+        "renameProvider": true,
+        "typeCoverageProvider": true,
+        "rageProvider": true
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 2,
+    "result": {
+      "coveredPercent": 0,
+      "uncoveredRanges": [
+        {
+          "range": {
+            "start": {
+              "line": 3,
+              "character": 12
+            },
+            "end": {
+              "line": 3,
+              "character": 17
+            }
+          }
+        },
+        {
+          "range": {
+            "start": {
+              "line": 3,
+              "character": 8
+            },
+            "end": {
+              "line": 3,
+              "character": 10
+            }
+          }
+        },
+        {
+          "range": {
+            "start": {
+              "line": 3,
+              "character": 2
+            },
+            "end": {
+              "line": 3,
+              "character": 5
+            }
+          }
+        }
+      ],
+      "defaultMessage": "Un-type checked code. Consider adding type annotations."
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 99,
+    "result": null
+  }
+]

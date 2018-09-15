@@ -54,8 +54,6 @@ enum Rank {
   RankStatCacheNode = RankUnitCache,
 
   RankInstanceBitsInit,
-  RankInstanceCounts,
-  RankInstanceBitsClsInit = RankInstanceCounts,
 
   RankTreadmill,
 
@@ -67,7 +65,7 @@ enum Rank {
   RankLeaf
 };
 
-#ifdef DEBUG
+#ifndef NDEBUG
 extern Rank currentRank();
 extern void checkRank(Rank r);
 extern void pushRank(Rank r);

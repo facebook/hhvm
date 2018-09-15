@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // disable array -> "Array" conversion notice
 error_reporting(error_reporting() & ~E_NOTICE);

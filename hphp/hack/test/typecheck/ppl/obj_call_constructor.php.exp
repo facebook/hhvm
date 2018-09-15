@@ -1,0 +1,2 @@
+File "obj_call_constructor.php", line 6, characters 5-9:
+Cannot call a method on an object of a <<__PPL>> class from inside a <<__PPL>> class constructor (Typing[4264])

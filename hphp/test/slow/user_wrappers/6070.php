@@ -12,6 +12,9 @@ class TestStream {
   function stream_seek($offset, $whence) { return true; }
 }
 
+
+<<__EntryPoint>>
+function main_6070() {
 stream_wrapper_register('test', 'TestStream');
 
 $f = fopen('test://nonempty2nd', 'r');
@@ -31,3 +34,4 @@ var_dump(ftell($f));
 
 $f = fopen('test://nonempty2nd', 'a+');
 var_dump(ftell($f));
+}

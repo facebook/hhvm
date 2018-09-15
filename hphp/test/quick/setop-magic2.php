@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $bar = new Bar;
 $foo = new Foo;

@@ -26,6 +26,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+// Forward declare to avoid including tv-conversions.h and creating a cycle.
+ObjectData* tvCastToObjectData(TypedValue tv);
+
 /**
  * Object type wrapping around ObjectData to implement reference count.
  */
@@ -51,59 +54,59 @@ public:
   explicit Object(ObjectData *data) : m_obj(data) {
     // The object must have at least two refs here. One pre-existing ref, and
     // one caused by placing it under m_obj's control.
-    assert(!data || data->hasMultipleRefs());
+    assertx(!data || data->hasMultipleRefs());
   }
   /* implicit */ Object(const Object& src) : m_obj(src.m_obj) {
-    assert(!m_obj || m_obj->hasMultipleRefs());
+    assertx(!m_obj || m_obj->hasMultipleRefs());
   }
 
   template <typename T>
   explicit Object(const req::ptr<T> &ptr) : m_obj(ptr) {
-    assert(!m_obj || m_obj->hasMultipleRefs());
+    assertx(!m_obj || m_obj->hasMultipleRefs());
   }
 
   template <typename T>
   explicit Object(req::ptr<T>&& ptr) : m_obj(std::move(ptr)) {
-    assert(!m_obj || m_obj->checkCount());
+    assertx(!m_obj || m_obj->checkCount());
   }
 
   explicit Object(Class* cls)
     : m_obj(ObjectData::newInstance(cls), NoIncRef{}) {
     // References to the object can escape inside newInstance, so we only know
     // that the ref-count is at least 1 here.
-    assert(!m_obj || m_obj->checkCount());
+    assertx(!m_obj || m_obj->checkCount());
   }
 
   // Move ctor
   Object(Object&& src) noexcept : m_obj(std::move(src.m_obj)) {
-    assert(!m_obj || m_obj->checkCount());
+    assertx(!m_obj || m_obj->checkCount());
   }
 
   // Regular assign
   Object& operator=(const Object& src) {
     m_obj = src.m_obj;
-    assert(!m_obj || m_obj->hasMultipleRefs());
+    assertx(!m_obj || m_obj->hasMultipleRefs());
     return *this;
   }
 
   template <typename T>
   Object& operator=(const req::ptr<T>& src) {
     m_obj = src;
-    assert(!m_obj || m_obj->hasMultipleRefs());
+    assertx(!m_obj || m_obj->hasMultipleRefs());
     return *this;
   }
 
   // Move assign
   Object& operator=(Object&& src) {
     m_obj = std::move(src.m_obj);
-    assert(!m_obj || m_obj->checkCount());
+    assertx(!m_obj || m_obj->checkCount());
     return *this;
   }
 
   template <typename T>
   Object& operator=(req::ptr<T>&& src) {
     m_obj = std::move(src);
-    assert(!m_obj || m_obj->checkCount());
+    assertx(!m_obj || m_obj->checkCount());
     return *this;
   }
 
@@ -118,43 +121,6 @@ public:
   }
   bool instanceof(const Class* cls) const {
     return m_obj && m_obj->instanceof(cls);
-  }
-
-  /**
-   * getTyped() and is() are intended for use with C++ classes that derive
-   * from ObjectData.
-   *
-   * Prefer using the following functions instead of getTyped:
-   * o.getTyped<T>(false, false) -> cast<T>(o)
-   * o.getTyped<T>(true,  false) -> cast_or_null<T>(o)
-   * o.getTyped<T>(false, true) -> dyn_cast<T>(o)
-   * o.getTyped<T>(true,  true) -> dyn_cast_or_null<T>(o)
-   */
-  template<typename T>
-  [[deprecated("Please use one of the cast family of functions instead.")]]
-  req::ptr<T> getTyped(bool nullOkay = false, bool badTypeOkay = false) const {
-    static_assert(std::is_base_of<ObjectData, T>::value, "");
-
-    ObjectData *cur = get();
-    if (!cur) {
-      if (!nullOkay) {
-        throw_null_pointer_exception();
-      }
-      return nullptr;
-    }
-    if (!cur->instanceof(T::classof())) {
-      if (!badTypeOkay) {
-        throw_invalid_object_type(classname_cstr());
-      }
-      return nullptr;
-    }
-
-    return req::ptr<T>(static_cast<T*>(cur));
-  }
-
-  template<typename T>
-  bool is() const {
-    return m_obj && m_obj->instanceof(T::classof());
   }
 
   /**
@@ -192,19 +158,12 @@ public:
   }
   bool moreEqual(const Object& v2) const { return more(v2) || equal(v2); }
 
-  Variant o_get(const String& propName, bool error = true,
-                const String& context = null_string) const;
-  Variant o_set(
-    const String& s, const Variant& v, const String& context = null_string);
-
-  void setToDefaultObject();
-
   // Transfer ownership of our reference to this object.
   ObjectData *detach() { return m_obj.detach(); }
 
   // Take ownership of a reference without touching the ref count
   static Object attach(ObjectData *object) {
-    assert(!object || object->checkCount());
+    assertx(!object || object->checkCount());
     return Object{req::ptr<ObjectData>::attach(object)};
   }
 
@@ -251,6 +210,21 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+
+ALWAYS_INLINE const Object& asCObjRef(tv_rval tv) {
+  assertx(tvIsObject(tv));
+  return reinterpret_cast<const Object&>(val(tv).pobj);
+}
+
+ALWAYS_INLINE const Object& toCObjRef(tv_rval tv) {
+  return asCObjRef(tvIsRef(tv) ? val(tv).pref->cell() : tv);
+}
+
+ALWAYS_INLINE Object toObject(tv_rval tv) {
+  if (tvIsObject(tv)) return Object{assert_not_null(val(tv).pobj)};
+  return Object::attach(tvCastToObjectData(*tv));
+}
+
 }
 
 #endif // incl_HPHP_OBJECT_H_

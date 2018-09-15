@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1459() {
 if (true) {
   function test() {
     echo('a');
@@ -11,3 +14,4 @@ if (true) {
   }
 }
 test();
+}

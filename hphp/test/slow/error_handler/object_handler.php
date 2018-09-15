@@ -24,4 +24,8 @@ function main() {
   $x->fail();
 }
 
+
+<<__EntryPoint>>
+function main_object_handler() {
 main();
+}

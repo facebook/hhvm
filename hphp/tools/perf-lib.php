@@ -1,13 +1,17 @@
 <?php
 // Copyright 2004-present Facebook. All Rights Reserved.
 
+function starts_with($str, $prefix) {
+  return strncmp($str, $prefix, strlen($prefix)) === 0;
+}
+
 # If $func looks like a mangled C++ symbol, attempt to demangle it, stripping
 # off any trailing junk first.
 function filter_func(string $func): string {
   static $cache = Map {};
 
   if (strncmp($func, '_Z', 2) === 0) {
-    if (preg_match('/^(.+)\.isra\.\d+$/', $func, $matches) === 1) {
+    if (preg_match('/^(.+)\.isra\.\d+$/', $func, &$matches) === 1) {
       $func = $matches[1];
     }
     if (!isset($cache[$func])) {
@@ -21,7 +25,7 @@ function filter_func(string $func): string {
 
 # Read perf samples from the given file stream into a Vector of stack traces.
 # The stream should contain the output of "perf script -f comm,ip,sym".
-function read_perf_samples($file, $desired_binary = 'hhvm') {
+function read_perf_samples($file, $desired_binary_prefix = 'hhvmworker') {
   $samples = Vector {};
   $skip_sample = false;
   $stack = null;
@@ -42,13 +46,13 @@ function read_perf_samples($file, $desired_binary = 'hhvm') {
       continue;
     }
 
-    if (preg_match('/^[a-f0-9]+ (.+)$/', $line, $matches) === 1) {
+    if (preg_match('/^[a-f0-9]+ (.+)$/', $line, &$matches) === 1) {
       if (!$stack) $stack = Vector {};
       $stack[] = filter_func($matches[1]);
     } else {
       if ($stack !== null) throw new Exception("Unexpected line $line");
       $binary = $line;
-      $skip_sample = $binary !== $desired_binary;
+      $skip_sample = !starts_with($binary, $desired_binary_prefix);
     }
   }
 

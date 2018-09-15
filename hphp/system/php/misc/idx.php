@@ -63,7 +63,7 @@ namespace HH {
  * @return mixed Value at array index if it exists, or the default value if not.
  */
 function idx($arr, $idx, $default=null) {
-  if (\is_array($arr) || \is_vec($arr) || \is_dict($arr) || \is_keyset($arr)) {
+  if (\HH\is_any_array($arr)) {
     return \hphp_array_idx($arr, $idx, $default);
   }
 

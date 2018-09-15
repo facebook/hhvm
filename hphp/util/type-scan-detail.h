@@ -24,7 +24,7 @@
  * Here's how all the type scanner machinery works at a high level:
  *
  * - All "countable" types (basically ones with explicitly managed ref-counts)
- *   have MarkCountable<> instantiations.
+ *   have MarkCollectable<> instantiations.
  *
  * - Any call to getIndexForMalloc<T> or getIndexForScan<T> present in the
  *   source results in an Indexer<> instantiation, which provides a static
@@ -38,7 +38,7 @@
  *
  * - The scanner generator is run during the build, after the final link where
  *   the executable is produced. It parses the debug information inside the
- *   final executable, and sees all the MarkCountable<T> and Indexer<T>
+ *   final executable, and sees all the MarkCollectable<T> and Indexer<T>
  *   instantiations. Using these instantiations, as well as the presence of the
  *   specially named fields and member functions, the scanner generator
  *   generates scanning functions. Every Indexer<T> instantiation is assigned a
@@ -330,7 +330,7 @@ constexpr const char* const kIgnoreFieldName =
 constexpr const char* const kIgnoreBaseName =
   TYPE_SCAN_STRINGIFY(TYPE_SCAN_IGNORE_BASE_NAME);
 constexpr const char* const kConservativeName =
-  TYPE_SCAN_STRINGIFY(TYPE_SCAN_IGNORE_CONSERVATIVE_NAME);
+  TYPE_SCAN_STRINGIFY(TYPE_SCAN_CONSERVATIVE_NAME);
 constexpr const char* const kConservativeFieldName =
   TYPE_SCAN_STRINGIFY(TYPE_SCAN_CONSERVATIVE_FIELD_NAME);
 constexpr const char* const kFlexibleArrayFieldName =

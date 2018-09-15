@@ -9,4 +9,8 @@ function foo() {
   echo "\n";
 }
 
+
+<<__EntryPoint>>
+function main_dce_002() {
 foo();
+}

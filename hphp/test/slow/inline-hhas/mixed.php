@@ -15,4 +15,8 @@ function f($x) {
 }
 
 
+
+<<__EntryPoint>>
+function main_mixed() {
 var_dump(f(4));
+}

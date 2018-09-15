@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_source_root_empty() {
 $expected = getcwd();
 if ($expected[strlen($expected)-1] !== '/') {
   $expected .= '/';
@@ -10,3 +13,4 @@ var_dump(
   ? "matches"
   : [$expected, $actual]
 );
+}

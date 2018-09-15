@@ -1,0 +1,6 @@
+File "function_hint_with_variadic_parameter_wrong_types.php", line 8, characters 14-32:
+Invalid argument (Typing[4110])
+File "function_hint_with_variadic_parameter_wrong_types.php", line 3, characters 30-31:
+This is an int (variadic argument)
+File "function_hint_with_variadic_parameter_wrong_types.php", line 5, characters 41-44:
+It is incompatible with a bool

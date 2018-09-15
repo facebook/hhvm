@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $a = array(3 => 5);
 foreach ($a as &$b => &$c) {

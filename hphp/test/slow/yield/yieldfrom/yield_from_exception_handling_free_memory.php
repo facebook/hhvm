@@ -45,4 +45,8 @@ function bar() {
     echo "Finishing bar()\n";
 }
 
+
+<<__EntryPoint>>
+function main_yield_from_exception_handling_free_memory() {
 bar();
+}

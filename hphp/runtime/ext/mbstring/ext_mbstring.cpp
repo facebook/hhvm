@@ -28,12 +28,13 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/request-event-handler.h"
 
+#include <map>
+
 extern "C" {
 #include <mbfl/mbfl_convert.h>
 #include <mbfl/mbfilter.h>
 #include <mbfl/mbfilter_pass.h>
 #include <oniguruma.h>
-#include <map>
 }
 
 #define php_mb_re_pattern_buffer   re_pattern_buffer
@@ -218,8 +219,8 @@ struct MBGlobals final : RequestEventHandler {
     strict_detection(0),
     illegalchars(0),
     outconv(nullptr),
-    default_mbctype(ONIG_ENCODING_EUC_JP),
-    current_mbctype(ONIG_ENCODING_EUC_JP),
+    default_mbctype(ONIG_ENCODING_UTF8),
+    current_mbctype(ONIG_ENCODING_UTF8),
     search_pos(0),
     search_re((php_mb_regex_t*)nullptr),
     search_regs((OnigRegion*)nullptr),
@@ -475,8 +476,8 @@ static unsigned long php_unicode_tolower(unsigned long code,
   return case_lookup(code, l, r, field);
 }
 
-static unsigned long php_unicode_totitle(unsigned long code,
-                                         enum mbfl_no_encoding enc) {
+static unsigned long
+php_unicode_totitle(unsigned long code, enum mbfl_no_encoding /*enc*/) {
   int field;
   long l, r;
 
@@ -524,9 +525,9 @@ static unsigned long php_unicode_totitle(unsigned long code,
  *  Even if any illegal encoding is detected the result may contain a list
  *  of parsed encodings.
  */
-static int php_mb_parse_encoding_list(const char *value, int value_length,
-                                      mbfl_encoding ***return_list,
-                                      int *return_size, int persistent) {
+static int php_mb_parse_encoding_list(const char* value, int value_length,
+                                      mbfl_encoding*** return_list,
+                                      int* return_size, int /*persistent*/) {
   int n, l, size, bauto, ret = 1;
   char *p, *p1, *p2, *endp, *tmpstr;
   mbfl_encoding *encoding;
@@ -821,9 +822,9 @@ static char *php_unicode_convert_case(int case_mode, const char *srcstr,
  *  Even if any illegal encoding is detected the result may contain a list
  *  of parsed encodings.
  */
-static int php_mb_parse_encoding_array(const Array& array,
-                                       mbfl_encoding ***return_list,
-                                       int *return_size, int persistent) {
+static int
+php_mb_parse_encoding_array(const Array& array, mbfl_encoding*** return_list,
+                            int* return_size, int /*persistent*/) {
   int n, l, size, bauto,ret = 1;
   mbfl_encoding *encoding;
   mbfl_no_encoding *src;
@@ -1084,12 +1085,12 @@ Variant HHVM_FUNCTION(mb_list_encodings_alias_names,
       return false;
     }
 
-    char *name = (char *)mbfl_no_encoding2name(no_encoding);
-    if (name != nullptr) {
+    char *encodingName = (char *)mbfl_no_encoding2name(no_encoding);
+    if (encodingName != nullptr) {
       i = 0;
       encodings = mbfl_get_supported_encodings();
       while ((encoding = encodings[i++]) != nullptr) {
-        if (strcmp(encoding->name, name) != 0) continue;
+        if (strcmp(encoding->name, encodingName) != 0) continue;
 
         if (encoding->aliases != nullptr) {
           j = 0;
@@ -1136,12 +1137,12 @@ Variant HHVM_FUNCTION(mb_list_mime_names,
       return false;
     }
 
-    char *name = (char *)mbfl_no_encoding2name(no_encoding);
-    if (name != nullptr) {
+    char *encodingName = (char *)mbfl_no_encoding2name(no_encoding);
+    if (encodingName != nullptr) {
       i = 0;
       encodings = mbfl_get_supported_encodings();
       while ((encoding = encodings[i++]) != nullptr) {
-        if (strcmp(encoding->name, name) != 0) continue;
+        if (strcmp(encoding->name, encodingName) != 0) continue;
         if (encoding->mime_name != nullptr) {
           return String(encoding->mime_name, CopyString);
         }
@@ -1321,6 +1322,10 @@ Variant HHVM_FUNCTION(mb_convert_kana,
 
   ret = mbfl_ja_jp_hantozen(&string, &result, opt);
   if (ret != nullptr) {
+    if (ret->len > StringData::MaxSize) {
+      raise_warning("String too long, max is %d", StringData::MaxSize);
+      return false;
+    }
     return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
@@ -1547,6 +1552,10 @@ static Variant php_mb_numericentity_exec(const String& str,
   ret = mbfl_html_numeric_entity(&string, &result, iconvmap, mapsize, type);
   free(iconvmap);
   if (ret != nullptr) {
+    if (ret->len > StringData::MaxSize) {
+      raise_warning("String too long, max is %d", StringData::MaxSize);
+      return false;
+    }
     return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
@@ -1685,6 +1694,10 @@ Variant HHVM_FUNCTION(mb_encode_mimeheader,
   ret = mbfl_mime_header_encode(&string, &result, charsetenc, transenc,
                                 linefeed.data(), indent);
   if (ret != nullptr) {
+    if (ret->len > StringData::MaxSize) {
+      raise_warning("String too long, max is %d", StringData::MaxSize);
+      return false;
+    }
     return String(reinterpret_cast<char*>(ret->val), ret->len, AttachString);
   }
   return false;
@@ -2251,7 +2264,7 @@ bool HHVM_FUNCTION(mb_parse_str,
                    VRefParam result /* = null */) {
   php_mb_encoding_handler_info_t info;
   info.data_type              = PARSE_STRING;
-  info.separator              = ";&";
+  info.separator              = "&";
   info.force_register_globals = false;
   info.report_errors          = 1;
   info.to_encoding            = MBSTRG(current_internal_encoding);
@@ -3318,8 +3331,8 @@ static php_mb_regex_t *php_mbregex_compile_pattern(const String& pattern,
     rc = it->second;
   }
 
-  if (!rc || rc->options != options || rc->enc != enc ||
-      rc->syntax != syntax) {
+  if (!rc || onig_get_options(rc) != options || onig_get_encoding(rc) != enc ||
+      onig_get_syntax(rc) != syntax) {
     if (rc) {
       onig_free(rc);
       rc = nullptr;
@@ -4373,7 +4386,7 @@ bool HHVM_FUNCTION(mb_send_mail,
       }
       to_r[to_len - 1] = '\0';
     }
-    for (int i = 0; to_r[i]; i++) {
+    for (size_t i = 0; to_r[i]; i++) {
       if (iscntrl((unsigned char)to_r[i])) {
         /**
          * According to RFC 822, section 3.1.1 long headers may be

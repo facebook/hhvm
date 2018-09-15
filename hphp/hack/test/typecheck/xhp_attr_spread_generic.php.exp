@@ -1,0 +1,6 @@
+File "xhp_attr_spread_generic.php", line 18, characters 15-17:
+Invalid xhp value for attribute :my-vec in :my-bar (Typing[4110])
+File "xhp_attr_spread_generic.php", line 8, characters 17-19:
+This is an int
+File "xhp_attr_spread_generic.php", line 17, characters 29-33:
+It is incompatible with a string

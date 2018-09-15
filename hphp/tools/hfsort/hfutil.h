@@ -20,6 +20,7 @@
 #include <limits>
 #include <map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "hphp/util/hfsort.h"
@@ -53,11 +54,13 @@ struct Func {
 struct CallGraph : TargetGraph {
   bool addFunc(std::string name, uint64_t addr, uint32_t size, uint32_t group);
   TargetId addrToTargetId(uint64_t addr) const;
+  TargetId funcToTargetId(const std::string& func) const;
 
   std::string toString(TargetId id) const;
 
   std::vector<Func> funcs;
-  std::map<uint64_t,TargetId> addr2TargetId;
+  std::map<uint64_t, TargetId> addr2TargetId;
+  std::unordered_map<std::string, TargetId> func2TargetId;
 };
 
 }}

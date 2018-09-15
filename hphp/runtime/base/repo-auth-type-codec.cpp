@@ -25,8 +25,9 @@ namespace HPHP {
 
 namespace {
 
-template<class LookupStr>
-RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr) {
+template <class LookupStr, class LookupArrayType>
+RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr,
+                           LookupArrayType lookupArrayType) {
   using T = RepoAuthType::Tag;
   auto const rawTag = *pc++;
   bool const highBitSet = rawTag & kRATArrayDataBit;
@@ -47,6 +48,34 @@ RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr) {
   case T::OptSStr:
   case T::Str:
   case T::OptStr:
+  case T::Obj:
+  case T::OptObj:
+  case T::UncArrKey:
+  case T::ArrKey:
+  case T::OptUncArrKey:
+  case T::OptArrKey:
+  case T::InitUnc:
+  case T::Unc:
+  case T::InitCell:
+  case T::Cell:
+  case T::Ref:
+  case T::InitGen:
+  case T::Gen:
+    assertx(!highBitSet);
+    return RepoAuthType{tag};
+
+  case T::SArr:
+  case T::OptSArr:
+  case T::Arr:
+  case T::OptArr:
+  case T::SVArr:
+  case T::OptSVArr:
+  case T::VArr:
+  case T::OptVArr:
+  case T::SDArr:
+  case T::OptSDArr:
+  case T::DArr:
+  case T::OptDArr:
   case T::SVec:
   case T::OptSVec:
   case T::Vec:
@@ -59,27 +88,11 @@ RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr) {
   case T::OptSKeyset:
   case T::Keyset:
   case T::OptKeyset:
-  case T::Obj:
-  case T::OptObj:
-  case T::InitUnc:
-  case T::Unc:
-  case T::InitCell:
-  case T::Cell:
-  case T::Ref:
-  case T::InitGen:
-  case T::Gen:
-    assert(!highBitSet);
-    return RepoAuthType{tag};
-
-  case T::SArr:
-  case T::OptSArr:
-  case T::Arr:
-  case T::OptArr:
     if (highBitSet) {
       uint32_t id;
       std::memcpy(&id, pc, sizeof id);
       pc += sizeof id;
-      auto const arr = Repo::get().global().arrayTypeTable.lookup(id);
+      auto const arr = lookupArrayType(id);
       return RepoAuthType{tag, arr};
     }
     return RepoAuthType{tag};
@@ -88,7 +101,7 @@ RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr) {
   case T::SubObj:
   case T::OptExactObj:
   case T::OptSubObj:
-    assert(!highBitSet);
+    assertx(!highBitSet);
     {
       uint32_t id;
       std::memcpy(&id, pc, sizeof id);
@@ -103,15 +116,19 @@ RepoAuthType decodeRATImpl(const unsigned char*& pc, LookupStr lookupStr) {
 }
 
 RepoAuthType decodeRAT(const Unit* unit, const unsigned char*& pc) {
-  return decodeRATImpl(pc, [&] (uint32_t id) {
-    return unit->lookupLitstrId(id);
-  });
+  return decodeRATImpl(
+    pc,
+    [&](uint32_t id) { return unit->lookupLitstrId(id); },
+    [&](uint32_t id) { return unit->lookupArrayTypeId(id); }
+  );
 }
 
 RepoAuthType decodeRAT(const UnitEmitter& ue, const unsigned char*& pc) {
-  return decodeRATImpl(pc, [&] (uint32_t id) {
-    return ue.lookupLitstr(id);
-  });
+  return decodeRATImpl(
+    pc,
+    [&](uint32_t id) { return ue.lookupLitstr(id); },
+    [&](uint32_t id) { return ue.lookupArrayType(id); }
+  );
 }
 
 void encodeRAT(UnitEmitter& ue, RepoAuthType rat) {
@@ -132,20 +149,12 @@ void encodeRAT(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptSStr:
   case T::Str:
   case T::OptStr:
-  case T::SVec:
-  case T::OptSVec:
-  case T::Vec:
-  case T::OptVec:
-  case T::SDict:
-  case T::OptSDict:
-  case T::Dict:
-  case T::OptDict:
-  case T::SKeyset:
-  case T::OptSKeyset:
-  case T::Keyset:
-  case T::OptKeyset:
   case T::Obj:
   case T::OptObj:
+  case T::UncArrKey:
+  case T::ArrKey:
+  case T::OptUncArrKey:
+  case T::OptArrKey:
   case T::InitUnc:
   case T::Unc:
   case T::InitCell:
@@ -160,13 +169,32 @@ void encodeRAT(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptSArr:
   case T::Arr:
   case T::OptArr:
+  case T::SVArr:
+  case T::OptSVArr:
+  case T::VArr:
+  case T::OptVArr:
+  case T::SDArr:
+  case T::OptSDArr:
+  case T::DArr:
+  case T::OptDArr:
+  case T::SVec:
+  case T::OptSVec:
+  case T::Vec:
+  case T::OptVec:
+  case T::SDict:
+  case T::OptSDict:
+  case T::Dict:
+  case T::OptDict:
+  case T::SKeyset:
+  case T::OptSKeyset:
+  case T::Keyset:
+  case T::OptKeyset:
     {
       auto tagByte = static_cast<uint8_t>(rat.tag());
-      auto const arr = rat.array();
-      if (arr) tagByte |= kRATArrayDataBit;
+      if (rat.hasArrData()) tagByte |= kRATArrayDataBit;
       ue.emitByte(tagByte);
-      if (arr) {
-        ue.emitInt32(arr->id());
+      if (rat.hasArrData()) {
+        ue.emitInt32(rat.arrayId());
       }
       break;
     }

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function mult1($x) {
   return $x * 1;

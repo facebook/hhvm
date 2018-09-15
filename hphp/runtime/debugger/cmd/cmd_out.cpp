@@ -38,9 +38,9 @@ void CmdOut::help(DebuggerClient &client) {
   );
 }
 
-void CmdOut::onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
+void CmdOut::onSetup(DebuggerProxy& proxy, CmdInterrupt& /*interrupt*/) {
   TRACE(2, "CmdOut::onSetup\n");
-  assert(!m_complete); // Complete cmds should not be asked to do work.
+  assertx(!m_complete); // Complete cmds should not be asked to do work.
   m_stackDepth = proxy.getStackDepth();
   m_vmDepth = g_context->m_nesting;
 
@@ -50,7 +50,7 @@ void CmdOut::onSetup(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
 
 void CmdOut::onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
   TRACE(2, "CmdOut::onBeginInterrupt\n");
-  assert(!m_complete); // Complete cmds should not be asked to do work.
+  assertx(!m_complete); // Complete cmds should not be asked to do work.
 
   m_needsVMInterrupt = false;
 

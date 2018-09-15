@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_number_format_multibyte() {
 $separators = [
   'multichar' => ['herp', 'derp'],
   'multibyte' => ['¡', '×']
@@ -14,3 +17,4 @@ var_dump(
     $separators
   )
 );
+}

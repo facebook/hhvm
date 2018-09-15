@@ -13,4 +13,8 @@ function main() {
   foo(Set {4, 5, 6});
 }
 
+
+<<__EntryPoint>>
+function main_const_set() {
 main();
+}

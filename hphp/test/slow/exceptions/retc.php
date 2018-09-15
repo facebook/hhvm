@@ -20,7 +20,12 @@ function foo() {
   // locals), then further out the next enter hook will throw the
   // fatal.
 }
+ // enter hook throws the fatal
 
+
+
+<<__EntryPoint>>
+function main_retc() {
 try {
   foo();
 }
@@ -28,5 +33,4 @@ try {
  echo "notreached\n";
  }
 foo();
- // enter hook throws the fatal
-
+}

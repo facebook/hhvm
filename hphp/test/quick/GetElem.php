@@ -1,4 +1,4 @@
-<?php
+<?hh
 error_reporting(0);
 
 $a = array(0, "b", "c");

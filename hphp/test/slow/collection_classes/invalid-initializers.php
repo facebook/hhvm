@@ -35,4 +35,8 @@ function test() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_invalid_initializers() {
 test();
+}

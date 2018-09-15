@@ -342,51 +342,58 @@ keyset(2) {
 ====================================================
 bool(false)
 ----------------------------------------------------
-
-Warning: Bool to keyset conversion in %s on line %d
-keyset(0) {
-}
+Exception: "Bool to keyset conversion"
 ====================================================
 ====================================================
 NULL
 ----------------------------------------------------
-
-Warning: Null to keyset conversion in %s on line %d
-keyset(0) {
-}
+Exception: "Null to keyset conversion"
 ====================================================
 ====================================================
 int(123)
 ----------------------------------------------------
-
-Warning: Int to keyset conversion in %s on line %d
-keyset(0) {
-}
+Exception: "Int to keyset conversion"
 ====================================================
 ====================================================
 float(1.23)
 ----------------------------------------------------
-
-Warning: Double to keyset conversion in %s on line %d
-keyset(0) {
-}
+Exception: "Double to keyset conversion"
 ====================================================
 ====================================================
 string(4) "abcd"
 ----------------------------------------------------
-
-Warning: String to keyset conversion in %s on line %d
-keyset(0) {
+Exception: "String to keyset conversion"
+====================================================
+====================================================
+object(IterableObj)#1 (1) {
+  ["position":"IterableObj":private]=>
+  int(0)
 }
+----------------------------------------------------
+keyset(3) {
+  string(3) "abc"
+  string(3) "def"
+  string(3) "ghi"
+}
+====================================================
+====================================================
+object(ThrowIterableObj)#1 (1) {
+  ["position":"ThrowIterableObj":private]=>
+  int(0)
+}
+----------------------------------------------------
+Exception: "ThrowIterableObj"
 ====================================================
 ====================================================
 object(stdClass)#%d (0) {
 }
 ----------------------------------------------------
-
-Warning: Non-iterable object conversion to keyset in %s on line %d
-keyset(0) {
-}
+Exception: "Non-iterable object to keyset conversion"
+====================================================
+====================================================
+resource(1) of type (stream)
+----------------------------------------------------
+Exception: "Resource to keyset conversion"
 ====================================================
 ====================================================
 object(HH\Vector)#%d (3) {
@@ -477,6 +484,16 @@ keyset(5) {
   int(3)
   int(2)
   int(1)
+}
+====================================================
+====================================================
+object(AggregateObj)#%d (0) {
+}
+----------------------------------------------------
+keyset(3) {
+  string(3) "abc"
+  string(3) "def"
+  string(3) "ghi"
 }
 ====================================================
 ====================================================
@@ -653,15 +670,11 @@ keyset(4) {
   string(1) "2"
 }
 ----------------------------------------------------
-array(4) {
+array(2) {
   [1]=>
   int(1)
-  ["1"]=>
-  string(1) "1"
   [2]=>
   int(2)
-  ["2"]=>
-  string(1) "2"
 }
 vec(4) {
   int(1)
@@ -685,15 +698,11 @@ float(1)
 
 Notice: Keyset to string conversion in %s on line %d
 string(6) "Keyset"
-object(stdClass)#%d (4) {
+object(stdClass)#%d (2) {
   [1]=>
   int(1)
-  ["1"]=>
-  string(1) "1"
   [2]=>
   int(2)
-  ["2"]=>
-  string(1) "2"
 }
 object(HH\Vector)#%d (4) {
   [0]=>

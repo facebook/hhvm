@@ -1,0 +1,2 @@
+File "await_in_rx5.php", line 11, characters 14-16:
+This value has Awaitable type. Awaitable typed values in reactive code must be either immediately await'ed or passed as arguments to 'genva' function. (Typing[4248])

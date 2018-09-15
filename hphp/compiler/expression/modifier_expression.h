@@ -31,7 +31,6 @@ struct ModifierExpression : Expression {
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
   void add(int modifier);
-  void remove(int modifier);
   int getCount() const { return m_modifiers.size();}
   int operator[](int index);
 
@@ -54,8 +53,6 @@ struct ModifierExpression : Expression {
   bool isAbstract() const;
   bool isFinal() const;
   bool isAsync() const;
-
-  int getLocalEffects() const override { return NoEffect; }
 
   bool validForFunction() const;
   bool validForClosure() const;

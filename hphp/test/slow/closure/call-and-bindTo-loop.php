@@ -1,11 +1,14 @@
 <?php
-$a = function ($add) {
-  return $this->x + $add;
-};
 
 class FooBar {
   private $x = 3;
 }
+
+<<__EntryPoint>>
+function main_call_and_bind_to_loop() {
+$a = function ($add) {
+  return $this->x + $add;
+};
 
 $fb = new FooBar();
 
@@ -27,3 +30,4 @@ for ($i = 0; $i < 1000; $i++) {
 $end = microtime(true);
 var_dump($r2);
 var_dump($end - $st);
+}

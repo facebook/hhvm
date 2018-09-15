@@ -12,5 +12,5 @@ function test2(bool $b): void {
   } else {
     $st = $t;
   }
-  Shapes::keyExists($s, 'z');
+  Shapes::keyExists($st, 'z');
 }

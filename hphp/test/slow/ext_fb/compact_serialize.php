@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function fb_cs_test($v) {
   echo "====\n";
@@ -11,10 +11,10 @@ function fb_cs_test($v) {
   var_dump(!empty($ss_));
   /* check high bit of first character always set */
   var_dump(preg_match("/^[\x80-\xff]/", $ss_));
-  var_dump(fb_compact_unserialize($s_, $ret) === $v_);
+  var_dump(fb_compact_unserialize($s_, &$ret) === $v_);
   var_dump($ret === true);
   $ret = null;
-  var_dump(fb_unserialize($s_, $ret) === $v_);
+  var_dump(fb_unserialize($s_, &$ret) === $v_);
   var_dump($ret === true);
 }
 
@@ -52,6 +52,7 @@ function main() {
   fb_cs_test(array(1 => "a", 2 => "b", 3 => "c"));
   fb_cs_test(array(0 => "a", 2 => "b", 3 => "c"));
   fb_cs_test(array(3 => "a"));
+  fb_cs_test(array(2 => 2, 1 => 1, 3 => 3));
   // Test for overflow (1ull << 63) - 1
   fb_cs_test(array(9223372036854775807, 'a'));
 
@@ -73,7 +74,18 @@ function main() {
   // C++ code in serialized strings)
   $s = "\xfe\x01\x02\x03\xfc";  // VECTOR, 1, 2, 3, STOP
   $ret = null;
-  var_dump(fb_compact_unserialize($s, $ret));
+  var_dump(fb_compact_unserialize($s, &$ret));
+
+  // Demonstrate vector deserialize issue.
+  // This should be illegal and result in an error.
+  $s = "\xfe\x01\xfd\xfd\x03\xfc";  // VECTOR, 1, SKIP, SKIP, 2, STOP
+  $ret = null;
+  var_dump(fb_compact_unserialize($s, &$ret));
+  var_dump($ret);
 }
 
+
+<<__EntryPoint>>
+function main_compact_serialize() {
 main();
+}

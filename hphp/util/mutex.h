@@ -19,17 +19,7 @@
 
 #include <pthread.h>
 #include <time.h>
-
-// This fixes a bug in tbb headers
-// make sure these aren't defined on cygwin
-#ifdef __CYGWIN__
-# ifdef _WIN32
-#  undef _WIN32
-# endif
-# ifdef _WIN64
-#  undef _WIN64
-# endif
-#endif
+#include <thread>
 
 #include <tbb/concurrent_hash_map.h>
 
@@ -43,33 +33,31 @@ namespace HPHP {
 template <bool enableAssertions>
 struct BaseMutex {
 private:
-#ifdef DEBUG
+#ifndef NDEBUG
   static const int kMagic = 0xba5eba11;
   int          m_magic;
   Rank         m_rank;
   // m_owner/m_hasOwner for keeping track of lock ownership, useful for debugging
-  pthread_t    m_owner;
+  std::thread::id m_owner;
   unsigned int m_acquires;
   bool         m_recursive;
   bool         m_hasOwner;
 #endif
   inline void recordAcquisition() {
-#ifdef DEBUG
+#ifndef NDEBUG
     if (enableAssertions) {
-      assert(!m_hasOwner ||
-             pthread_equal(m_owner, pthread_self()));
-      assert(m_acquires == 0 ||
-             pthread_equal(m_owner, pthread_self()));
+      assert(!m_hasOwner || m_owner == std::this_thread::get_id());
+      assert(m_acquires == 0 || m_owner == std::this_thread::get_id());
       pushRank(m_rank);
       m_hasOwner = true;
-      m_owner    = pthread_self();
+      m_owner = std::this_thread::get_id();
       m_acquires++;
       assert(m_recursive || m_acquires == 1);
     }
 #endif
   }
   inline void invalidateOwner() {
-#ifdef DEBUG
+#ifndef NDEBUG
     if (enableAssertions) {
       m_hasOwner = false;
       m_acquires = 0;
@@ -77,7 +65,7 @@ private:
 #endif
   }
   inline void recordRelease() {
-#ifdef DEBUG
+#ifndef NDEBUG
     if (enableAssertions) {
       popRank(m_rank);
       assertOwnedBySelf();
@@ -90,7 +78,7 @@ private:
   }
 public:
   inline void assertNotOwned() const {
-#ifdef DEBUG
+#ifndef NDEBUG
     if (enableAssertions) {
       assert(!m_hasOwner);
       assert(m_acquires == 0);
@@ -98,49 +86,51 @@ public:
 #endif
   }
   inline void assertOwnedBySelf() const {
-#ifdef DEBUG
+#ifndef NDEBUG
     if (enableAssertions) {
       assert(m_hasOwner);
-      assert(pthread_equal(m_owner, pthread_self()));
+      assert(m_owner == std::this_thread::get_id());
       assert(m_acquires > 0);
     }
 #endif
   }
-public:
-  explicit BaseMutex(bool recursive = true, Rank r = RankUnranked) {
+
+  public:
+  explicit BaseMutex(bool recursive = true, DEBUG_ONLY Rank r = RankUnranked) {
     pthread_mutexattr_init(&m_mutexattr);
     if (recursive) {
       pthread_mutexattr_settype(&m_mutexattr, PTHREAD_MUTEX_RECURSIVE);
     } else {
-#if (defined(__APPLE__) || defined(__CYGWIN__) || defined(__MINGW__) || \
-    defined(_MSC_VER))
+#if defined(__APPLE__) || defined(_MSC_VER)
       pthread_mutexattr_settype(&m_mutexattr, PTHREAD_MUTEX_DEFAULT);
 #else
       pthread_mutexattr_settype(&m_mutexattr, PTHREAD_MUTEX_ADAPTIVE_NP);
 #endif
     }
     pthread_mutex_init(&m_mutex, &m_mutexattr);
-#ifdef DEBUG
+#ifndef NDEBUG
     m_rank = r;
     m_magic = kMagic;
     invalidateOwner();
     m_recursive = recursive;
 #endif
   }
+  BaseMutex(const BaseMutex&) = delete;
+  BaseMutex& operator=(const BaseMutex&) = delete;
   ~BaseMutex() {
-#ifdef DEBUG
+#ifndef NDEBUG
     assert(m_magic == kMagic);
 #endif
     assertNotOwned();
     pthread_mutex_destroy(&m_mutex);
     pthread_mutexattr_destroy(&m_mutexattr);
-#ifdef DEBUG
+#ifndef NDEBUG
     m_magic = ~m_magic;
 #endif
   }
 
   bool tryLock() {
-#ifdef DEBUG
+#ifndef NDEBUG
     assert(m_magic == kMagic);
 #endif
     bool success = !pthread_mutex_trylock(&m_mutex);
@@ -152,7 +142,7 @@ public:
   }
 
   void lock() {
-#ifdef DEBUG
+#ifndef NDEBUG
     assert(m_magic == kMagic);
     checkRank(m_rank);
 #endif
@@ -164,17 +154,13 @@ public:
   }
 
   void unlock() {
-#ifdef DEBUG
+#ifndef NDEBUG
     assert(m_magic == kMagic);
 #endif
     recordRelease();
     UNUSED int ret = pthread_mutex_unlock(&m_mutex);
     assert(ret == 0);
   }
-
-private:
-  BaseMutex(const BaseMutex &); // suppress
-  BaseMutex &operator=(const BaseMutex &); // suppress
 
 protected:
   pthread_mutexattr_t m_mutexattr;
@@ -209,51 +195,53 @@ struct SimpleMutex : BaseMutex<true> {
  */
 struct ReadWriteMutex {
 private:
-#ifdef DEBUG
+#ifndef NDEBUG
 /*
  * We have a track record of self-deadlocking on these, and our pthread
  * implementation tends to do crazy things when a rwlock is double-wlocked,
  * so check and assert early in debug builds.
  */
-  static constexpr pthread_t InvalidThread = (pthread_t)0;
-  pthread_t m_writeOwner;
+  std::thread::id m_writeOwner;
   Rank m_rank;
 #endif
 
   void invalidateWriteOwner() {
-#ifdef DEBUG
-    m_writeOwner = InvalidThread;
+#ifndef NDEBUG
+    m_writeOwner = std::thread::id();
 #endif
   }
 
   void recordWriteAcquire() {
-#ifdef DEBUG
-    assert(m_writeOwner == InvalidThread);
-    m_writeOwner = pthread_self();
+#ifndef NDEBUG
+    assert(m_writeOwner == std::thread::id());
+    m_writeOwner = std::this_thread::get_id();
 #endif
   }
 
   void assertNotWriteOwner() {
-#ifdef DEBUG
-    assert(m_writeOwner != pthread_self());
+#ifndef NDEBUG
+    assert(m_writeOwner != std::this_thread::get_id());
 #endif
   }
 
   void assertNotWriteOwned() {
-#ifdef DEBUG
-    assert(m_writeOwner == InvalidThread);
+#ifndef NDEBUG
+    assert(m_writeOwner == std::thread::id());
 #endif
   }
 
-public:
-  explicit ReadWriteMutex(Rank rank = RankUnranked)
-#ifdef DEBUG
-    : m_rank(rank)
+  public:
+  explicit ReadWriteMutex(DEBUG_ONLY Rank rank = RankUnranked)
+#ifndef NDEBUG
+      : m_rank(rank)
 #endif
   {
     invalidateWriteOwner();
     pthread_rwlock_init(&m_rwlock, nullptr);
   }
+
+  ReadWriteMutex(const ReadWriteMutex&) = delete;
+  ReadWriteMutex& operator=(const ReadWriteMutex&) = delete;
 
   ~ReadWriteMutex() {
     assertNotWriteOwned();
@@ -285,9 +273,9 @@ public:
   bool attemptRead() { return !pthread_rwlock_tryrdlock(&m_rwlock); }
   bool attemptWrite() { return !pthread_rwlock_trywrlock(&m_rwlock); }
   void release() {
-#ifdef DEBUG
+#ifndef NDEBUG
     popRank(m_rank);
-    if (m_writeOwner == pthread_self()) {
+    if (m_writeOwner == std::this_thread::get_id()) {
       invalidateWriteOwner();
     }
 #endif
@@ -295,9 +283,6 @@ public:
   }
 
 private:
-  ReadWriteMutex(const ReadWriteMutex &); // suppress
-  ReadWriteMutex &operator=(const ReadWriteMutex &); // suppress
-
   pthread_rwlock_t m_rwlock;
 };
 

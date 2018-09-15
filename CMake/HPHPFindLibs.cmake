@@ -27,19 +27,6 @@ if (LIBDL_INCLUDE_DIRS)
   endif()
 endif()
 
-# boost checks
-find_package(Boost 1.51.0 COMPONENTS system program_options filesystem context REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
-link_directories(${Boost_LIBRARY_DIRS})
-add_definitions("-DHAVE_BOOST1_49")
-
-
-# features.h
-FIND_PATH(FEATURES_HEADER features.h)
-if (FEATURES_HEADER)
-  add_definitions("-DHAVE_FEATURES_H=1")
-endif()
-
 # google-glog
 find_package(Glog REQUIRED)
 if (LIBGLOG_STATIC)
@@ -53,17 +40,17 @@ if (LIBINOTIFY_INCLUDE_DIR)
   include_directories(${LIBINOTIFY_INCLUDE_DIR})
 endif()
 
-# mysql checks - if we're using async mysql, we use webscalesqlclient from
+# mysql checks - if we're using async mysql, we use fbmysqlclient from
 # third-party/ instead
 if (ENABLE_ASYNC_MYSQL)
   include_directories(
-    ${TP_DIR}/re2/src/
+    ${RE2_INCLUDE_DIR}
     ${TP_DIR}/squangle/src/
-    ${TP_DIR}/webscalesqlclient/src/include/
+    ${TP_DIR}/fb-mysql/src/include/
   )
-  set(MYSQL_CLIENT_LIB_DIR ${TP_DIR}/webscalesqlclient/src/)
+  set(MYSQL_CLIENT_LIB_DIR ${TP_DIR}/fb-mysql/src/)
   set(MYSQL_CLIENT_LIBS
-    ${MYSQL_CLIENT_LIB_DIR}/libmysql/libwebscalesqlclient_r.a
+    ${MYSQL_CLIENT_LIB_DIR}/libmysql/libfbmysqlclient_r.a
   )
 else()
   find_package(MySQL REQUIRED)
@@ -137,7 +124,7 @@ endif ()
 
 # liblz4
 find_package(LZ4)
-if (LZ4_INCLUDE_DIR)
+if (LZ4_FOUND)
   include_directories(${LZ4_INCLUDE_DIR})
 endif()
 
@@ -178,6 +165,10 @@ if (ICU_FOUND)
     add_definitions("-DU_EXPORT=")
     add_definitions("-DU_IMPORT=")
   endif()
+  # Everything is either in the `icu61` namespace or `icu` namespace, depending
+  # on another definition. There's an implicit `using namespace WHATEVER;` in
+  # ICU4c < 61.1, but now that's opt-in rather than opt-out.
+  add_definitions("-DU_USING_ICU_NAMESPACE=1")
 endif (ICU_FOUND)
 
 # jemalloc/tmalloc and profiler
@@ -440,7 +431,7 @@ macro(hphp_link target)
     target_link_libraries(${target} ${GOOGLE_TCMALLOC_MIN_LIB})
   endif()
 
-  target_link_libraries(${target} ${Boost_LIBRARIES})
+  target_link_libraries(${target} boost)
   target_link_libraries(${target} ${MYSQL_CLIENT_LIBS})
   if (ENABLE_ASYNC_MYSQL)
     target_link_libraries(${target} squangle)
@@ -510,17 +501,19 @@ macro(hphp_link target)
     target_link_libraries(${target} sqlite3)
   endif()
 
-  if (DOUBLE_CONVERSION_LIBRARY)
+  if (DOUBLE_CONVERSION_FOUND)
     target_link_libraries(${target} ${DOUBLE_CONVERSION_LIBRARY})
   else()
     target_link_libraries(${target} double-conversion)
   endif()
 
-  if (LZ4_LIBRARY)
+  if (LZ4_FOUND)
     target_link_libraries(${target} ${LZ4_LIBRARY})
   else()
     target_link_libraries(${target} lz4)
   endif()
+  # The syntax used for these warnings is unparsable by Apple's Clang
+  add_definitions("-DLZ4_DISABLE_DEPRECATE_WARNINGS=1")
 
   if (LIBZIP_LIBRARY)
     target_link_libraries(${target} ${LIBZIP_LIBRARY})
@@ -573,4 +566,32 @@ macro(hphp_link target)
   if (MSVC)
     target_link_libraries(${target} dbghelp.lib dnsapi.lib)
   endif()
+
+# Check whether atomic operations require -latomic or not
+# See https://github.com/facebook/hhvm/issues/5217
+  include(CheckCXXSourceCompiles)
+  set(OLD_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
+  set(CMAKE_REQUIRED_FLAGS "-std=c++1y")
+  CHECK_CXX_SOURCE_COMPILES("
+#include <atomic>
+#include <iostream>
+#include <stdint.h>
+int main() {
+    struct Test { int64_t val1; int64_t val2; };
+    std::atomic<Test> s;
+    // Do this to stop modern compilers from optimizing away the libatomic
+    // calls in release builds, making this test always pass in release builds,
+    // and incorrectly think that HHVM doesn't need linking against libatomic.
+    bool (std::atomic<Test>::* volatile x)(void) const =
+      &std::atomic<Test>::is_lock_free;
+    std::cout << (s.*x)() << std::endl;
+}
+  " NOT_REQUIRE_ATOMIC_LINKER_FLAG)
+
+  if(NOT "${NOT_REQUIRE_ATOMIC_LINKER_FLAG}")
+      message(STATUS "-latomic is required to link hhvm")
+      find_library(ATOMIC_LIBRARY NAMES atomic libatomic.so.1)
+      target_link_libraries(${target} ${ATOMIC_LIBRARY})
+  endif()
+  set(CMAKE_REQUIRED_FLAGS ${OLD_CMAKE_REQUIRED_FLAGS})
 endmacro()

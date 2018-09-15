@@ -1,0 +1,4 @@
+# 2 "paren_arg.cppo"
+ <(1, (2))> < 34> 
+# 3 "paren_arg.cppo"
+ <(1 , (2 ))> < 34> 

@@ -11,4 +11,8 @@ function foo() {
   $x = null;
   var_dump('after');
 }
+
+<<__EntryPoint>>
+function main_1705() {
 foo();
+}

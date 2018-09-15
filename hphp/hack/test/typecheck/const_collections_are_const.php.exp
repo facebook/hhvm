@@ -1,0 +1,2 @@
+File "const_collections_are_const.php", line 8, characters 5-16:
+Array-like class consts are not valid lvalues (Parsing[1002])

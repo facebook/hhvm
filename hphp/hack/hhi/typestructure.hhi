@@ -3,9 +3,8 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
@@ -36,36 +35,73 @@ enum TypeStructureKind : int {
   OF_DICT = 0;
   OF_VEC = 0;
   OF_KEYSET = 0;
+  OF_VEC_OR_DICT = 0;
+  OF_NONNULL = 0;
+  OF_DARRAY = 0;
+  OF_VARRAY = 0;
+  OF_VARRAY_OR_DARRAY = 0;
   OF_UNRESOLVED = 0;
 }
 
+// Note: Nullable fields in shapes of this type may not be present, and so
+// should be considered optional. Additionally, shapes of this type may contain
+// additional fields other than those specified here.
 newtype TypeStructure<T> as shape(
-  'kind' => TypeStructureKind,
   'nullable' => ?bool,
-  'classname' => ?classname<T>,
-  'elem_types' => ?array,
-  'param_types' => ?array,
-  'return_type' => ?array,
-  'generic_types' => ?array,
-  'fields' => ?array,
+  'kind' => TypeStructureKind,
   'name' => ?string,
+  'classname' => ?classname<T>,
+  /* HH_IGNORE_ERROR[2071] */
+  'elem_types' => ?varray,
+  /* HH_IGNORE_ERROR[2071] */
+  'return_type' => ?darray,
+  /* HH_IGNORE_ERROR[2071] */
+  'param_types' => ?varray,
+  /* HH_IGNORE_ERROR[2071] */
+  'generic_types' => ?varray,
+  'root_name' => ?string,
+  /* HH_IGNORE_ERROR[2071] */
+  'access_list' => ?varray,
+  /* HH_IGNORE_ERROR[2071] */
+  'fields' => ?darray,
+  'allows_unknown_fields' => ?bool,
+  'is_cls_cns' => ?bool,
+  'optional_shape_field' => ?bool,
+  /* HH_IGNORE_ERROR[2071] */
+  'value' => ?darray,
+  'typevars' => ?string,
   'alias' => ?string,
 ) = shape(
-  'kind' => TypeStructureKind,
   'nullable' => ?bool,
+  'kind' => TypeStructureKind,
+  // name for generics (type variables)
+  'name' => ?string,
   // classname for classes, interfaces, enums, or traits
   'classname' => ?classname<T>,
   // for tuples
-  'elem_types' => ?array,
+  /* HH_IGNORE_ERROR[2071] */
+  'elem_types' => ?varray,
+  /* HH_IGNORE_ERROR[2071] */
+  'return_type' => ?darray,
   // for functions
-  'param_types' => ?array,
-  'return_type' => ?array,
+  /* HH_IGNORE_ERROR[2071] */
+  'param_types' => ?varray,
   // for arrays, classes
-  'generic_types' => ?array,
+  /* HH_IGNORE_ERROR[2071] */
+  'generic_types' => ?varray,
+  'root_name' => ?string,
+  /* HH_IGNORE_ERROR[2071] */
+  'access_list' => ?varray,
   // for shapes
-  'fields' => ?array,
-  // name for generics (type variables)
-  'name' => ?string,
+  /* HH_IGNORE_ERROR[2071] */
+  'fields' => ?darray,
+  'allows_unknown_fields' => ?bool,
+  'is_cls_cns' => ?bool,
+  'optional_shape_field' => ?bool,
+  /* HH_IGNORE_ERROR[2071] */
+  'value' => ?darray,
+  // Comma-separated string
+  'typevars' => ?string,
   // for type aliases
   'alias' => ?string,
 );
@@ -73,6 +109,7 @@ newtype TypeStructure<T> as shape(
 /*
  * returns the shape associated with the type constant.
  */
+<<__Rx>>
 function type_structure(mixed $cls_or_obj, string $cns_name);
 // becomes:
 // type_structure(C::class or new C, 'type_const_name')

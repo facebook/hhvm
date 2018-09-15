@@ -39,6 +39,10 @@ void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID);
 
 void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs);
 
+void emitCalleeDynamicCallCheck(IRGS& env);
+
+void emitCallMCheck(IRGS& env);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

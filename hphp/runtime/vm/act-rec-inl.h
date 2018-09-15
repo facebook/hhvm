@@ -48,10 +48,6 @@ inline ActRec::Flags ActRec::flags() const {
   return static_cast<Flags>(m_numArgsAndFlags & kFlagsMask);
 }
 
-inline bool ActRec::useWeakTypes() const {
-  return flags() & UseWeakTypes;
-}
-
 inline bool ActRec::localsDecRefd() const {
   return flags() & LocalsDecRefd;
 }
@@ -72,9 +68,17 @@ inline bool ActRec::magicDispatch() const {
   return (flags() & kExecutionModeMask) == MagicDispatch;
 }
 
+inline bool ActRec::isDynamicCall() const {
+  return flags() & DynamicCall;
+}
+
+inline bool ActRec::isFCallM() const {
+  return flags() & MultiReturn;
+}
+
 inline uint32_t ActRec::encodeNumArgsAndFlags(uint32_t numArgs, Flags flags) {
-  assert((numArgs & kFlagsMask) == 0);
-  assert((uint32_t{flags} & kNumArgsMask) == 0);
+  assertx((numArgs & kFlagsMask) == 0);
+  assertx((uint32_t{flags} & kNumArgsMask) == 0);
   return numArgs | flags;
 }
 
@@ -86,22 +90,33 @@ inline void ActRec::setNumArgs(uint32_t numArgs) {
   m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs, flags());
 }
 
-inline void ActRec::setUseWeakTypes() {
-  m_numArgsAndFlags |= UseWeakTypes;
-}
-
 inline void ActRec::setLocalsDecRefd() {
   m_numArgsAndFlags |= LocalsDecRefd;
 }
 
+inline void ActRec::setDynamicCall() {
+  m_numArgsAndFlags |= DynamicCall;
+}
+
+inline void ActRec::setFCallM() {
+  m_numArgsAndFlags |= MultiReturn;
+}
+
 inline void ActRec::setResumed() {
-  assert((flags() & ~IsFCallAwait) == Flags::None);
-  m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), InResumed);
+  assertx((flags() & ~(IsFCallAwait | DynamicCall))
+         == Flags::None);
+  m_numArgsAndFlags = encodeNumArgsAndFlags(
+    numArgs(),
+    static_cast<Flags>(InResumed | (flags() & DynamicCall))
+  );
 }
 
 inline void ActRec::setFCallAwait() {
-  assert(flags() == Flags::None);
-  m_numArgsAndFlags = encodeNumArgsAndFlags(numArgs(), IsFCallAwait);
+  assertx((flags() & ~DynamicCall) == Flags::None);
+  m_numArgsAndFlags = encodeNumArgsAndFlags(
+    numArgs(),
+    static_cast<Flags>(IsFCallAwait | (flags() & DynamicCall))
+  );
 }
 
 inline void ActRec::setMagicDispatch(StringData* invName) {
@@ -111,7 +126,7 @@ inline void ActRec::setMagicDispatch(StringData* invName) {
 }
 
 inline StringData* ActRec::clearMagicDispatch() {
-  assert(magicDispatch());
+  assertx(magicDispatch());
   auto const invName = getInvName();
   m_numArgsAndFlags = encodeNumArgsAndFlags(
     numArgs(),
@@ -181,12 +196,12 @@ inline ObjectData* ActRec::getThisUnsafe() const {
 }
 
 inline ObjectData* ActRec::getThis() const {
-  assert(hasThis());
+  assertx(hasThis());
   return m_thisUnsafe;
 }
 
 inline Class* ActRec::getClass() const {
-  assert(hasClass());
+  assertx(hasClass());
   return reinterpret_cast<Class*>(
     reinterpret_cast<uintptr_t>(m_clsUnsafe) - kHasClassBit);
 }
@@ -213,23 +228,23 @@ inline void ActRec::trashVarEnv() {
 }
 
 inline bool ActRec::checkVarEnv() const {
-  assert(m_varEnv != reinterpret_cast<VarEnv*>(kTrashedVarEnvSlot));
+  assertx(m_varEnv != reinterpret_cast<VarEnv*>(kTrashedVarEnvSlot));
   return true;
 }
 
 inline bool ActRec::hasVarEnv() const {
-  assert(checkVarEnv());
-  assert(!magicDispatch());
+  assertx(checkVarEnv());
+  assertx(!magicDispatch());
   return m_varEnv && !(reinterpret_cast<uintptr_t>(m_varEnv) & kExtraArgsBit);
 }
 
 inline bool ActRec::hasExtraArgs() const {
-  assert(checkVarEnv());
+  assertx(checkVarEnv());
   return reinterpret_cast<uintptr_t>(m_extraArgs) & kExtraArgsBit;
 }
 
 inline VarEnv* ActRec::getVarEnv() const {
-  assert(hasVarEnv());
+  assertx(hasVarEnv());
   return m_varEnv;
 }
 
@@ -240,8 +255,8 @@ inline ExtraArgs* ActRec::getExtraArgs() const {
 }
 
 inline StringData* ActRec::getInvName() const {
-  assert(magicDispatch());
-  assert(checkVarEnv());
+  assertx(magicDispatch());
+  assertx(checkVarEnv());
   return m_invName;
 }
 
@@ -252,6 +267,10 @@ inline void ActRec::setVarEnv(VarEnv* val) {
 inline void ActRec::setExtraArgs(ExtraArgs* val) {
   m_extraArgs = reinterpret_cast<ExtraArgs*>(
     reinterpret_cast<uintptr_t>(val) | kExtraArgsBit);
+}
+
+inline void ActRec::resetExtraArgs() {
+  m_extraArgs = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

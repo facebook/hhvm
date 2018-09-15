@@ -16,5 +16,9 @@ function foo(Foo $x) {
   var_dump($y instanceof $z);
 }
 
+
+<<__EntryPoint>>
+function main_instanceof_obj() {
 foo(new Foo);
 foo(new Bar);
+}

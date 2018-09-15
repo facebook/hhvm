@@ -38,7 +38,7 @@ struct ScalarExpression : Expression {
   void toLower(bool funcCall = false);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  int getLocalEffects() const override { return NoEffect; }
+  void analyzeProgram(AnalysisResultConstRawPtr ar) override;
   bool isScalar() const override { return true;}
   bool isLiteralString() const override;
   std::string getLiteralString() const override;
@@ -59,7 +59,6 @@ struct ScalarExpression : Expression {
   int64_t getLiteralInteger() const;
   std::string getIdentifier() const;
   Variant getVariant() const;
-  int64_t getHash() const;
 
   void setComment(const std::string &comment) override { m_comment = comment;}
   std::string getComment() override { return m_comment;}

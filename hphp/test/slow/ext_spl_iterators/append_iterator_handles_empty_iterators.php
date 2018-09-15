@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_append_iterator_handles_empty_iterators() {
 $ai = new AppendIterator();
 $i1 = new ArrayIterator([]);
 $i2 = new ArrayIterator([]);
@@ -12,4 +15,5 @@ $ai->append($i4);
 $ai->append($i5);
 foreach($ai as $val) {
   echo $val."\n";
+}
 }

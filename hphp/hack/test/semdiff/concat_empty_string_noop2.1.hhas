@@ -1,0 +1,10 @@
+.main {
+  String "4"
+  String "2"
+  Concat
+  String ""
+  Concat
+  PopC
+  Int 1
+  RetC
+}

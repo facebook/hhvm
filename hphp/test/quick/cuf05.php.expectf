@@ -4,30 +4,13 @@ array(1) {
   [0]=>
   &int(1)
 }
-array(2) {
-  [0]=>
-  bool(true)
-  [1]=>
-  int(1)
-}
-int(1)
-array(2) {
-  [0]=>
-  bool(true)
-  [1]=>
-  int(1)
-}
-array(1) {
-  [0]=>
-  &int(1)
-}
 int(1)
 array(1) {
   [0]=>
   &int(1)
 }
 
-Warning: Parameter 1 to bar() expected to be a reference, value given in %s on line 13
+Warning: bar() expects parameter 1 by reference, but the call was not annotated with '&' in %s on line 11
 int(1)
 array(1) {
   [0]=>
@@ -38,21 +21,8 @@ array(1) {
   int(1)
 }
 
-Warning: Invalid argument: function: method 'baz' not found in %s on line 18
+Warning: Invalid argument: function: method 'baz' not found in %s on line 16
 NULL
 
-Warning: Invalid argument: function: method 'baz' not found in %s on line 19
+Warning: Invalid argument: function: method 'baz' not found in %s on line 17
 NULL
-array(2) {
-  [0]=>
-  bool(false)
-  [1]=>
-  NULL
-}
-array(2) {
-  [0]=>
-  bool(false)
-  [1]=>
-  NULL
-}
-string(6) "foobar"

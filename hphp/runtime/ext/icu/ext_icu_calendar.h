@@ -48,7 +48,7 @@ struct IntlCalendar : IntlError {
   static Object newInstance(icu::Calendar *cal) {
     if (!c_IntlCalendar) {
       c_IntlCalendar = Unit::lookupClass(s_IntlCalendar.get());
-      assert(c_IntlCalendar);
+      assertx(c_IntlCalendar);
     }
     Object ret{c_IntlCalendar};
     if (cal) {

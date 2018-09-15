@@ -30,7 +30,7 @@ of a catch trace, where the unwinder will have to walk the callee frame and
 inspect its live ActRec.
 
 In particular notice that any instructions which may raise, as well as Call,
-CallArray, and CallBuiltin all require catch traces. Many of these instructions
+CallUnpack, and CallBuiltin all require catch traces. Many of these instructions
 can be found within very simple callees and without such a pass would require
 that the callee's frame be stored to the stack and the frame pointer be updated
 to reference it.
@@ -125,19 +125,20 @@ After determining the callee main blocks the optimize pass will process every
 use of the callee frame pointer to determine if the use is compatible with
 sinking the DefInlineFP into exit-heads. Any use occuring within an exit-block
 is accepted as these uses will have access to the sunk frame pointer. Uses on
-the main block that can either be transformed to stack relative uses or
-adjusted to use the parent frame pointer (generally with some additional fixup
-                                          in any associated catch traces) are
-also accepted.
+the main block that can either be transformed to stack relative uses or adjusted
+to use the parent frame pointer (generally with some additional fixup in any
+associated catch traces) are also accepted.
 
 All pure memory access and pointer logic can be transformed, in particular:
-LdLoc, StLoc, LdLocAddr, CheckLoc, HintLocInner, and AssertLoc.
+LdLoc, StLoc, LdLocAddr, CheckLoc, HintLocInner, AssertLoc, LdClsRef, StClsRef,
+and KillClsRef.
 
-Currently only EagerSyncVMRegs, CallBuiltin, and Call can be adjusted to use
-the parent frame. For calls only those calls which are known to not access the
-caller frame can be modified in this manner. All C++ builtins can do this but
-many hot functions do not. A whitelist exists for builtin functions which are
-safe to call without a valid caller frame.
+Currently only EagerSyncVMRegs, CallBuiltin, Call, LdClsRef, StClsRef, and
+KillClsRef can be adjusted to use the parent frame. For calls only those calls
+which are known to not access the caller frame can be modified in this
+manner. All C++ builtins can do this but many hot functions do not. A whitelist
+exists for builtin functions which are safe to call without a valid caller
+frame.
 
 A special list of instructions known to access the current frame without
 explicitly depending on it are also blacklisted.
@@ -166,10 +167,7 @@ An additional EagerSyncVMRegs is inserted following EndCatch in catch traces to
 ensure that the callee frame is visited by the unwinder.
 */
 
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
-
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/dce.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -184,10 +182,10 @@ namespace {
 
 TRACE_SET_MOD(pdce_inline);
 
-using InstructionList = std::vector<IRInstruction*>;
-using InstructionSet = std::unordered_set<IRInstruction*>;
-using FPUseMap = std::unordered_map<SSATmp*, InstructionSet>;
-using FPMap = std::unordered_map<Block*, SSATmp*>;
+using InstructionList = jit::vector<IRInstruction*>;
+using InstructionSet = jit::fast_set<IRInstruction*>;
+using FPUseMap = jit::fast_map<SSATmp*, InstructionSet>;
+using FPMap = jit::fast_map<Block*, SSATmp*>;
 
 struct InlineAnalysis {
   IRUnit* unit;
@@ -206,7 +204,7 @@ struct InlineAnalysis {
    * Map fp -> set, where all blocks in set exit the unit while still within the
    * the inlined region for fp.
    */
-  std::unordered_map<SSATmp*, BlockSet> exitBlocks;
+  jit::fast_map<SSATmp*, BlockSet> exitBlocks;
 };
 
 struct OptimizeContext {
@@ -285,7 +283,7 @@ InlineAnalysis analyze(IRUnit& unit) {
 
   // Exit blocks are all associated with FPs that are defined on the main trace
   // as part of a DefInlineFP/InlineReturn pair (mainFPs)
-  std::unordered_set<SSATmp*> mainFPs;
+  jit::fast_set<SSATmp*> mainFPs;
 
   auto addFPUse = [&] (IRInstruction& inst, SSATmp* use) {
     auto it = ia.fpUses.find(use);
@@ -402,6 +400,10 @@ bool canConvertToStack(IRInstruction& inst) {
   return inst.is(LdLoc, StLoc, CheckLoc, AssertLoc, HintLocInner, LdLocAddr);
 }
 
+bool canRewriteToParent(const IRInstruction& inst) {
+  return inst.is(LdClsRef, StClsRef, KillClsRef);
+}
+
 /*
  * Instructions which require a FramePtr for chaining but will accept a parent
  * FramePtr. (NB: these instructions will likely require a DefInlineFP in their
@@ -415,15 +417,15 @@ bool canAdjustFrame(IRInstruction& inst) {
    * caller frame (e.g. for the value of m_thisOrClass). If these functions
    * are called we cannot elide the inlined frame.
    *
-   * TODO(#9876778): we should be able to support CallArray here as well.
+   * TODO(#9876778): we should be able to support CallUnpack here as well.
    */
   case CallBuiltin: {
     auto data = inst.extra<CallBuiltin>();
-    return !data->destroyLocals && !data->needsCallerFrame;
+    return !data->writeLocals && !data->needsCallerFrame;
   }
   case Call: {
     auto data = inst.extra<Call>();
-    return !data->destroyLocals && !data->needsCallerFrame;
+    return !data->writeLocals && !data->needsCallerFrame;
   }
   default: break;
   }
@@ -518,7 +520,7 @@ bool isCallCatch(Block* block) {
     }
   }
   for (auto& pred : block->preds()) {
-    if (pred.inst()->is(Call, CallArray)) {
+    if (pred.inst()->is(Call, CallUnpack)) {
       return true;
     }
   }
@@ -684,7 +686,7 @@ bool process(OptimizeContext& ctx, Block* pred, Block* succ,
 
   ITRACE(3, "Updating pred jmps\n");
   {
-    Trace::Indent _i;
+    Trace::Indent _i2;
     succ->forEachPred([&] (Block* p) {
       auto& jmp = p->back();
       auto updateFp = ctx.fpMap.count(p) ? ctx.fpMap[p] : ctx.deadFp;
@@ -735,6 +737,11 @@ void transformUses(OptimizeContext& ctx, InstructionSet& uses) {
       assertx(ctx.mainBlocks.count(block) != 0);
       ITRACE(3, "Converting to stack relative instruction: {}\n", *inst);
       convertToStackInst(*ctx.unit, *inst);
+    } else if (canRewriteToParent(*inst)) {
+      assertx(ctx.mainBlocks.count(block) != 0);
+      ITRACE(3, "Converting to use parent frame for instruction: {}\n", *inst);
+      rewriteToParentFrame(*ctx.unit, *inst);
+      recordNewUse(ctx, inst, parentFp);
     } else if (canAdjustFrame(*inst)) {
       assertx(ctx.mainBlocks.count(block) != 0);
       ITRACE(3, "Using parent frame for instruction: {}\n", *inst);
@@ -825,7 +832,7 @@ void syncCatchTraces(OptimizeContext& ctx, BlockSet& exitBlocks) {
      * fixup the call frame to contain the inlined frame.
      *
      * Note: when unwinding from an exception the callee may not be the first
-     * AR on the stack, however, with the exception of Call, and CallArray, the
+     * AR on the stack, however, with the exception of Call, and CallUnpack, the
      * next frame will always be native. This means that the callee will always
      * be the first frame in its nested VM. The unwinder will unwind through
      * VMs nested under this one first, making it safe to assume that we can
@@ -869,6 +876,7 @@ bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn) {
     uses.end(),
     [&] (IRInstruction* inst) { return ctx.mainBlocks.count(inst->block()) &&
                                        !canConvertToStack(*inst) &&
+                                       !canRewriteToParent(*inst) &&
                                        !canAdjustFrame(*inst); }
   );
   if (hasMainUse) {

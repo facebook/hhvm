@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class stringer {
   public function __toString() { throw new Exception("nope\n"); }
@@ -13,6 +13,7 @@ function foo() {
 try {
   foo();
 } catch (Exception $e) {
+  echo "Caught!\n";
 }
 
 print "all ok\n";

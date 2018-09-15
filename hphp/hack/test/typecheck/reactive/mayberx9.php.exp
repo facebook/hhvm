@@ -1,0 +1,4 @@
+File "mayberx9.php", line 11, characters 10-44:
+Reactive functions can only call other reactive functions. (Typing[4200])
+File "mayberx9.php", line 4, characters 10-16:
+This function is local reactive.

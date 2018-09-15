@@ -21,7 +21,7 @@
 namespace HPHP {
 
 // NoHandleSurpriseScope is only implemented in DEBUG mode.
-#ifdef DEBUG
+#ifndef NDEBUG
 namespace {
 
 __thread int64_t tl_noSurpriseDepth[sizeof(SurpriseFlag)] = {0,};

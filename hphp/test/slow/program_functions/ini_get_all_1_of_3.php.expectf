@@ -1,4 +1,4 @@
-array(177) {
+array(176) {
   ["allow_url_fopen"]=>
   array(3) {
     ["global_value"]=>
@@ -644,15 +644,6 @@ array(177) {
     string(0) ""
     ["local_value"]=>
     string(0) ""
-    ["access"]=>
-    int(4)
-  }
-  ["hhvm.enable_zend_compat"]=>
-  array(3) {
-    ["global_value"]=>
-    string(1) "1"
-    ["local_value"]=>
-    string(1) "1"
     ["access"]=>
     int(4)
   }

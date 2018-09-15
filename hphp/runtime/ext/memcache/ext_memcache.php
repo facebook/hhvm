@@ -391,8 +391,8 @@ class Memcache {
                      mixed $failure_callback = null,
                      int $timeoutms = 0): bool;
 
+  <<__OptionalDestruct>>
   function __destruct(): void {
-    $this->close();
   }
 }
 

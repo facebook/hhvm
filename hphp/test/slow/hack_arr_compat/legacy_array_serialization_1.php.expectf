@@ -1,0 +1,149 @@
+
+before legacy bit set:
+D:0:{}
+dict(0) {
+}
+
+after legacy bit set:
+a:0:{}
+dict(0) {
+}
+
+
+before legacy bit set:
+D:3:{s:3:"foo";s:4:"quux";s:3:"bar";v:3:{i:1;i:2;i:3;}s:3:"baz";D:0:{}}
+dict(3) {
+  ["foo"]=>
+  string(4) "quux"
+  ["bar"]=>
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  ["baz"]=>
+  dict(0) {
+  }
+}
+
+after legacy bit set:
+a:3:{s:3:"foo";s:4:"quux";s:3:"bar";v:3:{i:1;i:2;i:3;}s:3:"baz";D:0:{}}
+dict(3) {
+  ["foo"]=>
+  string(4) "quux"
+  ["bar"]=>
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+  ["baz"]=>
+  dict(0) {
+  }
+}
+
+
+before legacy bit set:
+v:0:{}
+vec(0) {
+}
+
+after legacy bit set:
+a:0:{}
+vec(0) {
+}
+
+
+before legacy bit set:
+v:4:{i:1;i:2;i:3;v:3:{i:1;i:2;i:3;}}
+vec(4) {
+  int(1)
+  int(2)
+  int(3)
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+}
+
+after legacy bit set:
+a:4:{i:0;i:1;i:1;i:2;i:2;i:3;i:3;v:3:{i:1;i:2;i:3;}}
+vec(4) {
+  int(1)
+  int(2)
+  int(3)
+  vec(3) {
+    int(1)
+    int(2)
+    int(3)
+  }
+}
+
+
+before legacy bit set:
+a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+
+Warning: enable_legacy_behavior expects a dict or vec in %s on line %d
+
+after legacy bit set:
+a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+
+
+before legacy bit set:
+a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+
+Warning: enable_legacy_behavior expects a dict or vec in %s on line %d
+
+after legacy bit set:
+a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+
+
+before legacy bit set:
+a:1:{s:3:"foo";s:3:"bar";}
+array(1) {
+  ["foo"]=>
+  string(3) "bar"
+}
+
+Warning: enable_legacy_behavior expects a dict or vec in %s on line %d
+
+after legacy bit set:
+a:1:{s:3:"foo";s:3:"bar";}
+array(1) {
+  ["foo"]=>
+  string(3) "bar"
+}
+

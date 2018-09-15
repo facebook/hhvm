@@ -1,4 +1,4 @@
-<?hh
+<?hh // decl
 
 class ExitOnDestruct {
   private function __destruct() {
@@ -22,16 +22,20 @@ function foo() {
   return $wh = $wh ?: block();
 }
 
-register_postsend_function(function() {
-  echo "postsend start\n";
-  HH\Asio\join(foo());
-  echo "postsend end\n";
-});
-
 async function evil($local) {
   $dep = foo();
   new ExitOnDestruct();
   await $dep;
 }
 
+
+<<__EntryPoint>>
+function main_await_cpp_exception2() {
+register_postsend_function(function() {
+  echo "postsend start\n";
+  HH\Asio\join(foo());
+  echo "postsend end\n";
+});
+
 HH\Asio\join(evil(new DoubleDecRef()));
+}

@@ -1,16 +1,31 @@
---Parameter--
+--Function nfoo - Parameter--
+
+bool(true)
+bool(true)
+string(3) "int"
+bool(true)
+
+--Function nfoo - Return--
+
+bool(true)
+bool(true)
+string(4) "bool"
+bool(true)
+
+--Function foo - Parameter--
 
 bool(true)
 bool(true)
 string(3) "int"
 bool(false)
 
---Return--
+--Function foo - Return--
 
 bool(true)
 bool(true)
 string(4) "bool"
 bool(false)
+
 
 --Call Constructor Directly--
 

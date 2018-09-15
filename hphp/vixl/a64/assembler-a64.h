@@ -120,8 +120,9 @@ class CPURegister {
 
   bool IsValidFPRegister() const {
     return IsFPRegister() &&
-           ((size_ == kSRegSize) || (size_ == kDRegSize)) &&
-           (code_ < kNumberOfFPRegisters);
+           (code_ < kNumberOfFPRegisters) &&
+           ((size_ == kSRegSize) || (size_ == kDRegSize) ||
+            (size_ == kVRegSize));
   }
 
   bool Is(const CPURegister& other) const {
@@ -242,7 +243,8 @@ const Register sp(kSPRegInternalCode, kXRegSize);
 
 #define DEFINE_FPREGISTERS(N)  \
 const FPRegister s##N(N, kSRegSize);  \
-const FPRegister d##N(N, kDRegSize);
+const FPRegister d##N(N, kDRegSize);  \
+const FPRegister v##N(N, kVRegSize);
 REGISTER_CODE_LIST(DEFINE_FPREGISTERS)
 #undef DEFINE_FPREGISTERS
 
@@ -556,10 +558,23 @@ class Label {
  private:
   // Indicates if the label has been bound, ie its location is fixed.
   bool is_bound_;
+
   // Branches instructions branching to this label form a chained list, with
   // their offset indicating where the next instruction is located.
   // link_ points to the latest branch instruction generated branching to this
   // branch.
+
+  // link_ and target_ will hold virtual addresses if the CodeBlock is
+  // configured as such. When binding a Label, the physical instructions will
+  // be updated with targets computed with the virtual address of the linked
+  // instructions and the virtual target_. This will cause calls to
+  // Instruction::ImmPCOffsetTarget() for the physical instruction to return
+  // target in the weeds, and so the code in relocation-arm.cpp takes this
+  // into account. Why the madness? Because translations in high memory of
+  // thread local caches will have branches distances as if they were in
+  // low memory. Ideally, this means we're very likely to have an identically-
+  // sized translation once we relocate into the code cache.
+
   // If link_ is not nullptr, the label has been linked to.
   HPHP::CodeAddress link_;
   // The label location.
@@ -1106,6 +1121,9 @@ class Assembler {
   void stnp(const CPURegister& rt, const CPURegister& rt2,
             const MemOperand& dst);
 
+  // Load Add - Large System Extension
+  void ldaddal(const Register& rs, const Register& rt, const MemOperand& src);
+
   // Load literal to register.
   void ldr(const Register& rt, uint64_t imm);
 
@@ -1123,6 +1141,9 @@ class Assembler {
 
   // One-element structure store from one register.
   void st1(const VRegister& vt, const MemOperand& src);
+
+  // Vector move from Vreg to Vreg.
+  void mov(const VRegister& vd, const VRegister& vs);
 
   // Move instructions. The default shift of -1 indicates that the move
   // instruction will calculate an appropriate 16-bit immediate and left shift
@@ -1599,7 +1620,7 @@ class Assembler {
   }
 
   // Instruction bits for vector format in load and store operations.
-  static Instr LSVFormat(VRegister vd) {
+  static Instr LSVFormat(VRegister /*vd*/) {
     // Note: vasm opcodes need only 2 lanes (64b each)
     return LS_NEON_2D;
   }
@@ -1786,11 +1807,10 @@ class Assembler {
 
   // Emit the instruction at pc_.
   void Emit(Instr instruction) {
-    assert(cb_.canEmit(sizeof(instruction)));
     assert(sizeof(instruction) == sizeof(uint32_t));
     CheckBufferSpace();
 
-#ifdef DEBUG
+#ifndef NDEBUG
     finalized_ = false;
 #endif
 
@@ -1799,10 +1819,9 @@ class Assembler {
 
   // Emit data inline in the instruction stream.
   void EmitData(void const * data, unsigned size) {
-    assert(cb_.canEmit(size));
     CheckBufferSpace();
 
-#ifdef DEBUG
+#ifndef NDEBUG
     finalized_ = false;
 #endif
 
@@ -1812,7 +1831,6 @@ class Assembler {
   }
 
   inline void CheckBufferSpace() {
-    assert(cb_.available() > 0);
     if (cb_.frontier() > next_literal_pool_check_) {
       CheckLiteralPool();
     }
@@ -1827,7 +1845,7 @@ class Assembler {
 
   friend class BlockLiteralPoolScope;
 
-#ifdef DEBUG
+#ifndef NDEBUG
   bool finalized_;
 #endif
 };

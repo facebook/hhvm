@@ -1,0 +1,8 @@
+File "lambda_bad_as_result.php", line 29, characters 13-26:
+Could not find method missing_method in an object of type MyClass (Typing[4053])
+  File "lambda_bad_as_result.php", line 26, characters 39-45:
+  This is why I think it is an object of type MyClass
+  File "lambda_bad_as_result.php", line 26, characters 39-45:
+  Considering that this type argument is contravariant with respect to MyClosureRunner
+  File "lambda_bad_as_result.php", line 4, characters 7-13:
+  Declaration of MyClass is here

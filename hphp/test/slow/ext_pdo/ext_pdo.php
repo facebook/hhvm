@@ -7,10 +7,6 @@ function VS($x, $y) {
 }
 function VERIFY($x) { VS($x != false, true); }
 
-//////////////////////////////////////////////////////////////////////
-
-$tmp_sqllite = tempnam('/tmp', 'vmpdotest');
-
 function createSqliteTestTable($tmp_sqllite) {
   unlink($tmp_sqllite);
   $db = new SQLite3($tmp_sqllite);
@@ -28,6 +24,13 @@ function cleanupSqliteTestTable($tmp_sqllite) {
 
 class MyStatement extends PDOStatement {
 }
+
+
+//////////////////////////////////////////////////////////////////////
+
+<<__EntryPoint>>
+function main_ext_pdo() {
+$tmp_sqllite = tempnam('/tmp', 'vmpdotest');
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -126,3 +129,4 @@ try {
 }
 
 cleanupSqliteTestTable($tmp_sqllite);
+}

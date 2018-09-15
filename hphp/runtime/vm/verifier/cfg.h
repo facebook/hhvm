@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/verifier/util.h"
 #include "hphp/util/arena.h"
+#include <boost/dynamic_bitset.hpp>
 
 namespace HPHP {
 namespace Verifier {
@@ -38,12 +39,15 @@ namespace Verifier {
 struct Block {
   explicit Block(PC start) :
       start(start), last(0), end(0) , id(-1), rpo_id(-1), next_linear(0),
-      next_rpo(0), succs(0), exns(0) {
+      next_rpo(0), succs(0), exn(0) {
   }
 
   // Never copy Blocks.
   explicit Block(const Block&) = delete;
   Block& operator=(const Block&) = delete;
+
+  static bool reachable(Block* from, Block* to,
+                        boost::dynamic_bitset<>& visited);
 
   PC start;           // first instruction
   PC last;            // last instruction (inclusive)
@@ -53,7 +57,7 @@ struct Block {
   Block* next_linear; // next block in linear order
   Block* next_rpo;    // next block in reverse postorder
   Block** succs;      // array of succesors (can have nulls)
-  Block** exns;       // array of exception edges (can have nulls)
+  Block* exn;         // exception edge (can be null)
 };
 
 /**
@@ -65,8 +69,7 @@ struct Block {
  * you can, use a predefined Range, like LinearBlocks or RpoBlocks.
  */
 struct Graph {
-  Graph() : first_linear(0), first_rpo(0), entries(0), block_count(0),
-      exn_cap(0) {
+  Graph() : first_linear(0), first_rpo(0), entries(0), block_count(0) {
   }
 
   explicit Graph(const Graph&) = delete;
@@ -77,7 +80,6 @@ struct Graph {
   Block** entries; // entry points indexed by arg count [0:param_count]
   int param_count;
   int block_count;
-  int exn_cap; // capacity of exns array in each Block
 };
 
 inline bool isTF(PC pc) {
@@ -94,34 +96,40 @@ inline bool isFF(PC pc) {
 
 inline bool isRet(PC pc) {
   auto const op = peek_op(pc);
-  return op == Op::RetC || op == Op::RetV;
+  return op == Op::RetC || op == Op::RetV || op == Op::RetM;
 }
 
+// Return true if pc points to an Iter instruction whose first immedate
+// argument is an iterator id.
 inline bool isIter(PC pc) {
+  // IterBreak is not included, because it has a variable-length list of
+  // iterartor ids, rather than a single iterator id.
   switch (peek_op(pc)) {
   case Op::IterInit:
   case Op::MIterInit:
   case Op::WIterInit:
+  case Op::LIterInit:
   case Op::IterInitK:
   case Op::MIterInitK:
   case Op::WIterInitK:
+  case Op::LIterInitK:
   case Op::IterNext:
   case Op::MIterNext:
   case Op::WIterNext:
+  case Op::LIterNext:
   case Op::IterNextK:
   case Op::MIterNextK:
   case Op::WIterNextK:
+  case Op::LIterNextK:
   case Op::DecodeCufIter:
   case Op::IterFree:
   case Op::MIterFree:
   case Op::CIterFree:
+  case Op::LIterFree:
     return true;
   default:
     break;
   }
-  // TODO(#3882518): this function omits IterBreak, and it's unclear
-  // whether it is supposed to.  (It used to be implemented using
-  // ordered comparisons on the opcode enum, so it might be a mistake.
   return false;
 }
 
@@ -130,8 +138,72 @@ inline int getImmIva(PC pc) {
 }
 
 inline int numSuccBlocks(const Block* b) {
-  return numSuccs(b->last);
+  // Fault handlers are a special case with 1 edge (to the parent)
+  return peek_op(b->last) == Op::Unwind ? 1 : numSuccs(b->last);
 }
+
+#define APPLY(d, l, r)                         \
+  if (auto left = d.left()) return left->l;    \
+  if (auto right = d.right()) return right->r; \
+  not_reached()
+
+struct SomeUnit {
+  /* implicit */ SomeUnit(const Unit* u) : m_unit(u) {}
+  /* implicit */ SomeUnit(const UnitEmitter* u) : m_unit(u) {}
+
+  SomeUnit& operator=(const Unit* u) { m_unit = u; return *this; }
+  SomeUnit& operator=(const UnitEmitter* u) { m_unit = u; return *this; }
+
+  PC entry() const               { APPLY(m_unit, entry(), bc()); }
+  PC at(Offset o) const          { return entry() + o; }
+  Offset offsetOf(PC addr) const { return static_cast<Offset>(addr - entry()); }
+
+private:
+  Either<const Unit*, const UnitEmitter*> m_unit;
+};
+
+struct SomeFunc {
+  /* implicit */ SomeFunc(const Func* f) : m_func(f) {}
+  /* implicit */ SomeFunc(const FuncEmitter* f) : m_func(f) {}
+
+  SomeFunc& operator=(const Func* f) { m_func = f; return *this; }
+  SomeFunc& operator=(const FuncEmitter* f) { m_func = f; return *this; }
+
+  SomeUnit unit() const {
+    return m_func.match(
+      [&] (const Func* f)        -> SomeUnit { return f->unit(); },
+      [&] (const FuncEmitter* f) -> SomeUnit { return &f->ue(); }
+    );
+  }
+  Offset base() const   { APPLY(m_func, base(), base); }
+  Offset past() const   { APPLY(m_func, past(), past); }
+
+  size_t numParams() const { APPLY(m_func, params().size(), params.size()); }
+  const Func::ParamInfo& param(size_t idx) const {
+    APPLY(m_func, params()[idx], params[idx]);
+  }
+
+  size_t numEHEnts() const { APPLY(m_func, ehtab().size(), ehtab.size()); }
+  const EHEnt& ehent(size_t i) const { APPLY(m_func, ehtab()[i], ehtab[i]); }
+
+  const EHEnt* findEH(Offset off) const {
+    return m_func.match(
+      [&] (const Func* f) { return Func::findEH(f->ehtab(), off); },
+      [&] (const FuncEmitter* f) { return Func::findEH(f->ehtab, off); }
+    );
+  }
+  const EHEnt* findEHbyHandler(Offset off) const {
+    return m_func.match(
+      [&] (const Func* f) { return Func::findEHbyHandler(f->ehtab(), off); },
+      [&] (const FuncEmitter* f) { return Func::findEHbyHandler(f->ehtab, off);}
+    );
+  }
+
+private:
+  Either<const Func*, const FuncEmitter*> m_func;
+};
+
+#undef APPLY
 
 /**
  * A GraphBuilder holds the temporary state required for building
@@ -142,30 +214,30 @@ private:
   typedef hphp_hash_map<PC, Block*> BlockMap;
   enum EdgeKind { FallThrough, Taken };
  public:
-  GraphBuilder(Arena& arena, const Func* func)
+  template<class F>
+  GraphBuilder(Arena& arena, const F* func)
     : m_arena(arena), m_func(func),
-      m_unit(func->unit()), m_graph(0) {
+      m_unit(m_func.unit()), m_graph(0) {
   }
   Graph* build();
-  Block* at(Offset off) { return at(m_unit->at(off)); }
+  Block* at(Offset off) const { return at(m_unit.at(off)); }
  private:
   void createBlocks();
   void createExBlocks();
   void linkBlocks();
   void linkExBlocks();
   Block* createBlock(PC pc);
-  Block* createBlock(Offset off) { return createBlock(m_unit->at(off)); }
-  Block* at(PC addr);
+  Block* createBlock(Offset off) { return createBlock(m_unit.at(off)); }
+  Block* at(PC addr) const;
   Offset offset(PC addr) const {
-    return m_unit->offsetOf(addr);
+    return m_unit.offsetOf(addr);
   }
   Block** succs(Block* b);
-  Block** exns(Block* b);
  private:
   BlockMap m_blocks;
   Arena& m_arena;
-  const Func* const m_func;
-  const Unit* const m_unit;
+  const SomeFunc m_func;
+  const SomeUnit m_unit;
   Graph* m_graph;
 };
 
@@ -176,7 +248,7 @@ struct LinearBlocks {
   LinearBlocks(Block* first, Block* end) : b(first), end(end) {
   }
   bool empty() const { return b == end; }
-  Block* front() const { assert(!empty()); return b; }
+  Block* front() const { assertx(!empty()); return b; }
   Block* popFront() { Block* f = front(); b = b->next_linear; return f; }
  private:
   Block *b;   // The current block.
@@ -192,8 +264,8 @@ struct BlockPtrRange {
     trimBack();
   }
   bool empty() const { return i >= end; }
-  Block* front() const { assert(!empty()); return i[0]; }
-  Block* back()  const { assert(!empty()); return end[-1]; }
+  Block* front() const { assertx(!empty()); return i[0]; }
+  Block* back()  const { assertx(!empty()); return end[-1]; }
   Block* popFront() {
     Block* b = front();
     ++i; trimFront();
@@ -222,7 +294,7 @@ struct InstrRange {
     return pc >= end;
   }
   PC front() const {
-    assert(!empty());
+    assertx(!empty());
     return pc;
   }
   PC popFront() {
@@ -240,9 +312,9 @@ struct InstrRange {
  */
 void sortRpo(Graph* g);
 
-inline InstrRange funcInstrs(const Func* func) {
-  return InstrRange(func->unit()->at(func->base()),
-                    func->unit()->at(func->past()));
+inline InstrRange funcInstrs(SomeFunc func) {
+  return InstrRange(func.unit().at(func.base()),
+                    func.unit().at(func.past()));
 }
 
 inline InstrRange blockInstrs(const Block* b) {
@@ -253,11 +325,6 @@ inline BlockPtrRange succBlocks(const Block* b) {
   return BlockPtrRange(b->succs, numSuccBlocks(b));
 }
 
-inline BlockPtrRange exnBlocks(const Graph* g, const Block* b) {
-  return b->exns ? BlockPtrRange(b->exns, g->exn_cap) :
-         BlockPtrRange(0, 0);
-}
-
 inline BlockPtrRange entryBlocks(const Graph* g) {
   return BlockPtrRange(g->entries, g->param_count + 1);
 }
@@ -266,12 +333,12 @@ inline LinearBlocks linearBlocks(const Graph* g) {
   return LinearBlocks(g->first_linear, 0);
 }
 
-typedef std::pair<Id, Offset> CatchEnt;
-
-// A callsite starts with FPush*, has 0 or more FPass*, and ends with FCall*.
-// The FPI Region protects the range of instructions that execute with the
-// partial activation on the stack, which is the instruction after FPush*
-// up to and including FCall*.  FPush* is not in the protected region.
+// A callsite starts with FPush*, pushes 0 or more values, and usually
+// ends with FCall* (If there is a terminal making the FCall*
+// unreachable, the fpi region will end there). The FPI Region
+// protects the range of instructions that execute with the partial
+// activation on the stack, which is the instruction after FPush* up
+// to and including FCall*.  FPush* is not in the protected region.
 
 inline Offset fpiBase(const FPIEnt& fpi, PC bc) {
   PC fpush = bc + fpi.m_fpushOff;
@@ -279,8 +346,8 @@ inline Offset fpiBase(const FPIEnt& fpi, PC bc) {
 }
 
 inline Offset fpiPast(const FPIEnt& fpi, PC bc) {
-  PC fcall = bc + fpi.m_fcallOff;
-  return fcall + instrLen(fcall) - bc;
+  PC endFpiOp = bc + fpi.m_fpiEndOff;
+  return endFpiOp + instrLen(endFpiOp) - bc;
 }
 
 }} // HPHP::Verifier

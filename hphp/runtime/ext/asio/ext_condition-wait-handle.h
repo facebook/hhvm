@@ -34,8 +34,9 @@ struct c_ConditionWaitHandle final : c_WaitableWaitHandle {
   WAITHANDLE_CLASSOF(ConditionWaitHandle);
   WAITHANDLE_DTOR(ConditionWaitHandle);
 
-  explicit c_ConditionWaitHandle(Class* cls = c_ConditionWaitHandle::classof())
-    : c_WaitableWaitHandle(cls) {}
+  explicit c_ConditionWaitHandle()
+    : c_WaitableWaitHandle(classof(), HeaderKind::WaitHandle,
+                       type_scan::getIndexForMalloc<c_ConditionWaitHandle>()) {}
   ~c_ConditionWaitHandle() {}
 
  public:
@@ -62,6 +63,10 @@ struct c_ConditionWaitHandle final : c_WaitableWaitHandle {
  private:
   c_WaitableWaitHandle* m_child;
   AsioBlockable m_blockable;
+
+  TYPE_SCAN_CUSTOM_FIELD(m_child) {
+    if (!isFinished()) scanner.scan(m_child);
+  }
 };
 
 void HHVM_STATIC_METHOD(ConditionWaitHandle, setOnCreateCallback,
@@ -71,8 +76,8 @@ Object HHVM_STATIC_METHOD(ConditionWaitHandle, create,
 void HHVM_METHOD(ConditionWaitHandle, succeed, const Variant& result);
 void HHVM_METHOD(ConditionWaitHandle, fail, const Object& exception);
 
-inline c_ConditionWaitHandle* c_WaitHandle::asCondition() {
-  assert(getKind() == Kind::Condition);
+inline c_ConditionWaitHandle* c_Awaitable::asCondition() {
+  assertx(getKind() == Kind::Condition);
   return static_cast<c_ConditionWaitHandle*>(this);
 }
 

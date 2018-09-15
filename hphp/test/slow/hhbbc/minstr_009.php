@@ -10,4 +10,8 @@ function foo() {
   echo "\n";
   var_dump($x);
 }
+
+<<__EntryPoint>>
+function main_minstr_009() {
 foo();
+}

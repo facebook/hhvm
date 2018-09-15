@@ -1,0 +1,9 @@
+File "override_final4.php", line 20, characters 7-16:
+Class ChildClass does not correctly implement all required methods  (Typing[4070])
+File "override_final4.php", line 20, characters 26-36:
+Some methods are incompatible with those declared in type ParentClass
+Read the following to see why:
+File "override_final4.php", line 17, characters 25-25:
+You cannot override this method
+File "override_final4.php", line 13, characters 25-25:
+It was declared as final

@@ -1,5 +1,0 @@
-<?php
-if (!function_exists('crypt') || !defined("CRYPT_SHA512")) {
-	die("SKIP crypt()-sha512 is not available");
-}
-?> 

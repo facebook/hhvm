@@ -16,4 +16,8 @@ function main() {
   echo "Result: ";
   var_dump($str);
 }
+
+<<__EntryPoint>>
+function main_to_string_recoverable_error_2() {
 main();
+}

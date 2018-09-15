@@ -1,0 +1,1 @@
+Unknown child type 'foo'; valid child types for a node of kind 'methodish_declaration' are: methodish_attribute, methodish_function_decl_header, methodish_function_body, methodish_semicolon (at field `children.0`)

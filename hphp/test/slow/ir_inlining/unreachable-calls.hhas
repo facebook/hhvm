@@ -1,6 +1,6 @@
 .main {
   FPushFuncD 0 "main"
-  FCall 0
+  FCall 0 0 1 - "" ""
   PopR
 
   String "DONE\n"
@@ -31,12 +31,12 @@
   CGetL $obj
   AssertRATStk 0 Obj=Cls1
   FPushObjMethodD 5 "foobaz" NullThrows
-  FPassL 0 $x
-  FPassL 1 $x
-  FPassL 2 $x
-  FPassL 3 $x
-  FPassL 4 $x
-  FCallD 5 "Cls1" "foobaz"
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  FCall 5 0 1 - "Cls1" "foobaz"
   UnboxRNop
   Jmp end
 
@@ -44,12 +44,12 @@ cls2:
   CGetL $obj
   AssertRATStk 0 Obj=Cls2
   FPushObjMethodD 5 "foobaz" NullThrows
-  FPassL 0 $x
-  FPassL 1 $x
-  FPassL 2 $x
-  FPassL 3 $x
-  FPassL 4 $x
-  FCallD 5 "Cls2" "foobaz"
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  CGetL $x
+  FCall 5 0 1 - "Cls2" "foobaz"
   UnboxRNop
   Jmp end
 
@@ -62,29 +62,29 @@ end:
   JmpZ cls2
 
   FPushCtorD 0 "Cls1"
-  FCall 0
+  FCall 0 0 1 - "" ""
   PopR
   SetL $obj
   PopC
   FPushFuncD 3 "test"
-  FPassL 0 $obj
-  FPassL 1 $type
-  FPassL 2 $x
-  FCall 3
+  CGetL $obj
+  CGetL $type
+  CGetL $x
+  FCall 3 0 1 - "" ""
   UnboxRNop
   RetC
 
 cls2:
   FPushCtorD 0 "Cls2"
-  FCall 0
+  FCall 0 0 1 - "" ""
   PopR
   SetL $obj
   PopC
   FPushFuncD 3 "test"
-  FPassL 0 $obj
-  FPassL 1 $type
-  FPassL 2 $x
-  FCall 3
+  CGetL $obj
+  CGetL $type
+  CGetL $x
+  FCall 3 0 1 - "" ""
   UnboxRNop
   RetC
 }
@@ -101,10 +101,9 @@ header:
   JmpZ end
 
   FPushFuncD 2 "test_outer"
-  FPassL 0 $type
+  CGetL $type
   Int 1
-  FPassC 1
-  FCall 2
+  FCall 2 0 1 - "" ""
   PopR
 
   IncDecL $count PreInc
@@ -119,18 +118,14 @@ end:
 .function main() {
   FPushFuncD 2 "loop"
   False
-  FPassC 0
   Int 40
-  FPassC 1
-  FCall 2
+  FCall 2 0 1 - "" ""
   PopR
 
   FPushFuncD 2 "loop"
   True
-  FPassC 0
   Int 100
-  FPassC 1
-  FCall 2
+  FCall 2 0 1 - "" ""
   UnboxRNop
   RetC
 }

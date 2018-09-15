@@ -26,7 +26,7 @@ DECLARE_BOOST_TYPES(UnaryOpExpression);
 
 struct Variant;
 
-struct UnaryOpExpression : Expression, LocalEffectsContainer {
+struct UnaryOpExpression : Expression {
 private:
   void ctorInit();
 protected:
@@ -37,14 +37,12 @@ public:
                     ExpressionPtr exp, int op, bool front);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  DECL_AND_IMPL_LOCAL_EFFECTS_METHODS;
 
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
-  void onParse(AnalysisResultConstPtr ar, FileScopePtr scope);
+  ExpressionPtr preOptimize(AnalysisResultConstRawPtr ar) override;
+  void onParse(AnalysisResultConstRawPtr ar, FileScopePtr scope);
   bool isRefable(bool checkError = false) const override;
   bool isScalar() const override;
   bool isThis() const override;
-  bool containsDynamicConstant(AnalysisResultPtr ar) const override;
   bool getScalarValue(Variant &value) override;
 
   ExpressionPtr getExpression() { return m_exp;}
@@ -54,7 +52,6 @@ public:
   bool isCast() const;
   bool getFront() const { return m_front; }
 
-  ExpressionPtr unneededHelper() override;
   void setDefinedScope(BlockScopeRawPtr scope);
 protected:
   ExpressionPtr m_exp;
@@ -82,6 +79,15 @@ bool isDictScalar(ExpressionPtr exp);
  * statically initialize a keyset.
  */
 bool isKeysetScalar(ExpressionPtr exp);
+
+/*
+ * Check if the ExpressionList exp is a valid scalar initializer for an array.
+ *
+ * If the list contains keys or values, it cannot statically initialize an
+ * array. In addition, if EvalHackArrCompatNotices is set, the keys must either
+ * be strings or integers.
+ */
+bool isArrayScalar(ExpressionPtr exp);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

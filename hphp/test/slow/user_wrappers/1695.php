@@ -10,5 +10,9 @@ class MyWrapper {
     return true;
   }
 }
+
+<<__EntryPoint>>
+function main_1695() {
 stream_wrapper_register('wrap', 'MyWrapper');
 fclose(fopen('wrap://test', 'r'));
+}

@@ -138,13 +138,7 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer& thrift,
     case KindOfThread   : cmd = std::make_shared<CmdThread>(); break;
     case KindOfUp       : cmd = std::make_shared<CmdUp>(); break;
     case KindOfVariable : cmd = std::make_shared<CmdVariable>(); break;
-    case KindOfVariableAsync :
-      cmd = std::make_shared<CmdVariable>(KindOfVariableAsync);
-      break;
     case KindOfWhere    : cmd = std::make_shared<CmdWhere>(); break;
-    case KindOfWhereAsync:
-      cmd = std::make_shared<CmdWhere>(KindOfWhereAsync);
-      break;
     case KindOfEval     : cmd = std::make_shared<CmdEval>(); break;
     case KindOfInterrupt: cmd = std::make_shared<CmdInterrupt>(); break;
     case KindOfSignal   : cmd = std::make_shared<CmdSignal>(); break;
@@ -155,9 +149,9 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer& thrift,
       break;
 
     case KindOfExtended: {
-      assert(!clsname.empty());
+      assertx(!clsname.empty());
       cmd = CmdExtended::CreateExtendedCommand(clsname);
-      assert(cmd);
+      assertx(cmd);
       break;
     }
 
@@ -182,13 +176,13 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer& thrift,
 // Informs the client of all argument strings that may follow this command
 // name. Used for auto completion. The client uses the prefix of the argument
 // following the command name to narrow down the list displayed to the user.
-void DebuggerCommand::list(DebuggerClient& client) {
+void DebuggerCommand::list(DebuggerClient& /*client*/) {
   TRACE(2, "DebuggerCommand::list\n");
 }
 
 // The text to display when the debugger client
 // processes "help <this command name>".
-void DebuggerCommand::help(DebuggerClient& client) {
+void DebuggerCommand::help(DebuggerClient& /*client*/) {
   TRACE(2, "DebuggerCommand::help\n");
   not_reached();
 }
@@ -207,9 +201,9 @@ bool DebuggerCommand::displayedHelp(DebuggerClient& client) {
 
 // Server-side work for a command. Returning false indicates a failure to
 // communicate with the client (for commands that do so).
-bool DebuggerCommand::onServer(DebuggerProxy& proxy) {
+bool DebuggerCommand::onServer(DebuggerProxy& /*proxy*/) {
   TRACE(2, "DebuggerCommand::onServer\n");
-  assert(false);
+  assertx(false);
   Logger::Error("DebuggerCommand::onServer(): bad cmd type: %d", m_type);
   return false;
 }

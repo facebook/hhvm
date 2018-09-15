@@ -3,6 +3,9 @@
 // Php doesn't support \u escapes.
 function u($x) { return json_decode("\"" . $x . "\""); }
 
+
+<<__EntryPoint>>
+function main_idn_uts46_errors() {
 echo "bad variant:", "\n";
 var_dump(idn_to_ascii("foo.com", 0, INTL_IDNA_VARIANT_UTS46 + 10));
 
@@ -68,3 +71,4 @@ $result = idn_to_utf8(
 var_dump($result);
 var_dump($info);
 var_dump(intl_get_error_code() == U_IDNA_DOMAIN_NAME_TOO_LONG_ERROR);
+}

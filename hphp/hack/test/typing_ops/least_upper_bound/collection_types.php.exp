@@ -1,0 +1,13 @@
+Least upper bound of (int, string), (float, string) is (num, string) 
+Least upper bound of (int, string), (num, string) is (num, string) 
+Least upper bound of (int, string, int), (num, int) is mixed 
+Least upper bound of array<(int, int)>, array<(num, int)> is array<(num, int)> 
+Least upper bound of array<(int, int, int)>, array<(num, int)> is array<mixed> 
+Least upper bound of \classid<(int, int)>, \classid<(num, int)> is \classid<(num, int)> 
+Least upper bound of \classid1<(int, int)>, \classid2<(num, int)> is mixed 
+Least upper bound of \classid<int>, \classid<(num, int)> is \classid<mixed> 
+Least upper bound of \classid1<int>, \classid2<(num, int)> is mixed 
+Least upper bound of (int, ?string), (?num, string) is (?num, ?string) 
+Least upper bound of ?int, ?(string, float) is ?mixed 
+Least upper bound of int, ?float is ?num 
+Least upper bound of ?int, ?float, num is ?num 

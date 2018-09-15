@@ -19,7 +19,11 @@ class Y {
     call_user_func_array($x, array(0, 1));
   }
 }
+
+<<__EntryPoint>>
+function main_771() {
 $x = new X;
 $x->test();
 $y = new Y;
 $y->test($x);
+}

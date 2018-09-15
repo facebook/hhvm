@@ -1,0 +1,2 @@
+File "declare_statement.php", line 4, characters 12-20:
+Declare statements are disallowed in Hack code. (Naming[2089])

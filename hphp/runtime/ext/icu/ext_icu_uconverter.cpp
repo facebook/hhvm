@@ -37,7 +37,7 @@ static Class* UConverterClass = nullptr;
 static Class* getClass() {
   if (!UConverterClass) {
     UConverterClass = Unit::lookupClass(s_UConverter.get());
-    assert(UConverterClass);
+    assertx(UConverterClass);
   }
   return UConverterClass;
 }

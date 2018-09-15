@@ -1,0 +1,42 @@
+File "lambda.php", line 23, characters 5-15:
+  A as A
+File "lambda.php", line 24, characters 5-15:
+  A as A
+File "lambda.php", line 51, characters 11-21:
+  _
+File "lambda.php", line 71, characters 9-19:
+  (D as D | G as G | J as J)
+File "lambda.php", line 51, characters 11-21:[2]
+  A as A
+File "lambda.php", line 71, characters 9-19:[2]
+  (D as D | G as G | A as A | J as J)
+File "lambda.php", line 23, characters 5-15:[2]
+  (B as B | A as A | C as C)
+File "lambda.php", line 24, characters 5-15:[2]
+  (B as B | A as A | C as C)
+File "lambda.php", line 51, characters 11-21:[3]
+  _
+File "lambda.php", line 71, characters 9-19:[3]
+  (D as D | G as G | J as J)
+File "lambda.php", line 51, characters 11-21:[4]
+  A as A
+File "lambda.php", line 71, characters 9-19:[4]
+  (D as D | G as G | A as A | J as J)
+File "lambda.php", line 23, characters 5-15:[3]
+  (B as B | A as A | C as C)
+File "lambda.php", line 24, characters 5-15:[3]
+  (B as B | A as A | C as C)
+File "lambda.php", line 51, characters 11-21:[5]
+  _
+File "lambda.php", line 71, characters 9-19:[5]
+  (D as D | G as G | J as J)
+File "lambda.php", line 51, characters 11-21:[6]
+  A as A
+File "lambda.php", line 71, characters 9-19:[6]
+  (D as D | G as G | A as A | J as J)
+File "lambda.php", line 86, characters 3-13:
+  (E as E | C as C | A as A | B as B)
+File "lambda.php", line 87, characters 3-13:
+  (E as E | C as C | A as A | B as B)
+File "lambda.php", line 48, characters 11-19:
+continue can only be used inside loops (NastCheck[3023])

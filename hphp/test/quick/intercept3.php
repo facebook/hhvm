@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function bar() { return count(func_get_args()); }
 function baz() {}

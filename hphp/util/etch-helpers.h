@@ -1,7 +1,7 @@
 #ifndef incl_ETCH_HELPERS_H
 #define incl_ETCH_HELPERS_H
 
-#if defined(__CYGWIN__) || defined(__MINGW__) || defined(_MSC_VER)
+#ifdef _MSC_VER
 #define CFI(x)            .cfi_##x
 #define CFI2(x, y)        .cfi_##x y
 #define CFI3C(x, y, z)    .cfi_##x y##, z
@@ -36,7 +36,7 @@
 #define ETCH_SECTION(x)   .text
 #define ETCH_SIZE(x)      /* not used on OSX */
 #define ETCH_NAME(x)      _##x
-#define ETCH_LABEL(x)     .L##_##x
+#define ETCH_LABEL(x)     L##_##x /* not .L */
 #define ETCH_TYPE(x, y)   /* not used on OSX */
 #define ETCH_NAME_REL(x)  _##x@GOTPCREL(%rip)
 #define ETCH_ARG1         %rdi

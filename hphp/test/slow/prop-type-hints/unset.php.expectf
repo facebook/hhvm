@@ -1,0 +1,1 @@
+Catchable fatal error: Unsetting property 'A::x' with type annotation in %s/unset.php on line 17

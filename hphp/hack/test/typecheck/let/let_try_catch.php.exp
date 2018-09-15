@@ -1,0 +1,2 @@
+File "let_try_catch.php", line 7, characters 10-17:
+Unbound name: catch_me (a global constant) (Naming[2049])

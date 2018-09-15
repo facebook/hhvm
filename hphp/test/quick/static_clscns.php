@@ -1,4 +1,4 @@
-<?php
+<?hh
 class C {
   const CLASSNAME = 'C';
   public function __construct() {

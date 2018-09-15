@@ -10,13 +10,17 @@ string(10) "string_val"
 string(10) "string_val"
 
 -- Iteration 4 --
-string(10) "string_val"
+
+Warning: %s
+bool(false)
 
 -- Iteration 5 --
 string(10) "string_val"
 
 -- Iteration 6 --
-string(10) "string_val"
+
+Warning: %s
+bool(false)
 
 -- Iteration 7 --
 string(10) "string_val"

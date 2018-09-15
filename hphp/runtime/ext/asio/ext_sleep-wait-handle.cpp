@@ -90,7 +90,12 @@ bool c_SleepWaitHandle::cancel(const Object& exception) {
   // this is technically a lie, since sleep failed
   auto session = AsioSession::Get();
   if (UNLIKELY(session->hasOnSleepSuccess())) {
-    session->onSleepSuccess(this);
+    session->onSleepSuccess(
+      this,
+      std::chrono::duration_cast<std::chrono::nanoseconds>(
+        m_waketime.time_since_epoch()
+      ).count()
+    );
   }
 
   return true;
@@ -102,7 +107,7 @@ bool c_SleepWaitHandle::process() {
     return false;
   }
 
-  assert(getState() == STATE_WAITING);
+  assertx(getState() == STATE_WAITING);
 
   if (isInContext()) {
     unregisterFromContext();
@@ -110,12 +115,17 @@ bool c_SleepWaitHandle::process() {
 
   auto parentChain = getParentChain();
   setState(STATE_SUCCEEDED);
-  tvWriteNull(&m_resultOrException);
+  tvWriteNull(m_resultOrException);
   parentChain.unblock();
 
   auto session = AsioSession::Get();
   if (UNLIKELY(session->hasOnSleepSuccess())) {
-    session->onSleepSuccess(this);
+    session->onSleepSuccess(
+      this,
+      std::chrono::duration_cast<std::chrono::nanoseconds>(
+        m_waketime.time_since_epoch()
+      ).count()
+    );
   }
 
   return true;
@@ -126,9 +136,9 @@ String c_SleepWaitHandle::getName() {
 }
 
 void c_SleepWaitHandle::exitContext(context_idx_t ctx_idx) {
-  assert(AsioSession::Get()->getContext(ctx_idx));
-  assert(getState() == STATE_WAITING);
-  assert(getContextIdx() == ctx_idx);
+  assertx(AsioSession::Get()->getContext(ctx_idx));
+  assertx(getState() == STATE_WAITING);
+  assertx(getContextIdx() == ctx_idx);
 
   // Move us to the parent context.
   setContextIdx(getContextIdx() - 1);

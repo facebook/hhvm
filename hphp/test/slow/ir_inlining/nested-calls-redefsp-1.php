@@ -39,4 +39,8 @@ class MyThing {
   }
 }
 
+
+<<__EntryPoint>>
+function main_nested_calls_redefsp_1() {
 (new MyThing)->c();
+}

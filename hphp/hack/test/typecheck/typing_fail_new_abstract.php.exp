@@ -1,4 +1,4 @@
-File "typing_fail_new_abstract.php", line 20, characters 8-16:
+File "typing_fail_new_abstract.php", line 20, characters 12-14:
 Meh is uninstantiable (Typing[4002])
 File "typing_fail_new_abstract.php", line 12, characters 16-18:
 Declaration is here

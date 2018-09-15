@@ -12,5 +12,9 @@ class B extends A {
   protected $bar = array();
 }
 
+
+<<__EntryPoint>>
+function main_child_parent_property_ordering() {
 $class = new ReflectionClass("B");
 var_dump($class->getProperties());
+}

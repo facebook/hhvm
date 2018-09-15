@@ -1,9 +1,8 @@
 # Copyright (c) 2014, Facebook, Inc.
 # All rights reserved.
 #
-# This source code is licensed under the BSD-style license found in the
-# LICENSE file in the "hack" directory of this source tree. An additional grant
-# of patent rights can be found in the PATENTS file in the same directory.
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the "hack" directory of this source tree.
 
 # fixme.py -- Adds HH_FIXME annotations in your code to clean up after a new
 #             check in the typechecker or after an upgrade. Takes two arguments:
@@ -26,6 +25,7 @@ from collections import defaultdict
 import json
 import re
 import sys
+import textwrap
 
 class ParseException(Exception):
     pass
@@ -61,10 +61,25 @@ def patch(path, patches, explanation):
         for code in codes:
             if is_parse_error(code):
                 raise ParseException()
-            fixme_line = \
-                    "%s/* HH_FIXME[%d]: %s */\n" % \
-                    (whitespace, code, explanation)
-            file_lines.insert(line, fixme_line)
+            fixme_message = "HH_FIXME[%d]: %s" % (code, explanation)
+            # Wrap before 80 characters
+            # Don't forget comment delimiters and whitespace
+            # TODO: account for tab size?
+            fixme_lines = textwrap.wrap(fixme_message, 74 - len(whitespace))
+            num_lines = len(fixme_lines)
+            if num_lines == 1:
+                full_line = "%s/* %s */\n" % (whitespace, fixme_lines[0])
+                file_lines.insert(line, full_line)
+            else:
+                for i in reversed(range(num_lines)):
+                    fixme_line = fixme_lines[i]
+                    if i == 0:
+                        full_line = "%s/* %s\n" % (whitespace, fixme_line)
+                    elif i + 1 == num_lines:
+                        full_line = "%s   %s */\n" % (whitespace, fixme_line)
+                    else:
+                        full_line = "%s   %s\n" % (whitespace, fixme_line)
+                    file_lines.insert(line, full_line)
 
     with open(path, 'w') as f:
         f.writelines(file_lines)

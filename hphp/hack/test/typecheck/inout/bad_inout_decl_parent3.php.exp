@@ -1,0 +1,11 @@
+File "bad_inout_decl_parent3.php", line 7, characters 7-8:
+Class C2 does not correctly implement all required methods  (Typing[4175])
+File "bad_inout_decl_parent3.php", line 7, characters 18-19:
+Some methods are incompatible with those declared in type C1
+Read the following to see why:
+File "bad_inout_decl_parent3.php", line 8, characters 19-21:
+Member foo has the wrong type
+File "bad_inout_decl_parent3.php", line 8, characters 28-29:
+This parameter is passed by reference
+File "bad_inout_decl_parent3.php", line 4, characters 33-34:
+It is incompatible with an inout parameter

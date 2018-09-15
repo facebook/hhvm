@@ -1,4 +1,5 @@
 <?php
+
 // This is testing our enhanced ini functionality, where we return things like
 // arrays
 
@@ -7,6 +8,8 @@
 
 // First make sure we are working on normal primitive based bindings, where
 // something easily convertible to string is returned
+<<__EntryPoint>>
+function main_enhanced_get_ini() {
 var_dump(ini_get("hhvm.hot_func_count"));
 var_dump(ini_get("hhvm.stats.slot_duration"));
 
@@ -14,3 +17,4 @@ var_dump(ini_get("hhvm.stats.slot_duration"));
 var_dump(ini_get("hhvm.server.allowed_exec_cmds"));
 var_dump(ini_get("hhvm.env_variables"));
 var_dump(ini_get("hhvm.server_variables"));
+}

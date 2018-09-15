@@ -1,0 +1,3 @@
+begin sleep
+
+Fatal error: Maximum execution time of 1 seconds exceeded in %s on line %d

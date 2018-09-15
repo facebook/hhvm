@@ -17,4 +17,8 @@ function g3() {
     }
   }
 }
+
+<<__EntryPoint>>
+function main_469() {
 g3();
+}

@@ -18,15 +18,15 @@
 #define incl_HPHP_PROGRAM_FUNCTIONS_H_
 
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/treadmill.h"
 #include <boost/program_options/parsers.hpp>
-
-// Needed for compatibility with oniguruma-5.9.4+
-#define ONIG_ESCAPE_UCHAR_COLLISION
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-#if defined(__APPLE__) || defined(__CYGWIN__) || defined(_MSC_VER)
+struct Transport;
+
+#if defined(__APPLE__) || defined(_MSC_VER)
 extern const void* __hot_start;
 extern const void* __hot_end;
 #else
@@ -43,6 +43,12 @@ int execute_program(int argc, char **argv);
 void execute_command_line_begin(int argc, char **argv, int xhprof);
 void execute_command_line_end(int xhprof, bool coverage, const char *program);
 
+void init_command_line_session(int arc, char** argv);
+void
+init_command_line_globals(int argc, char** argv, char** envp,
+                          int xhprof,
+                          std::map<std::string, std::string>& serverVariables,
+                          std::map<std::string, std::string>& envVariables);
 /**
  * Setting up environment variables.
  */
@@ -90,7 +96,8 @@ std::string get_right_option_name(
 struct ExecutionContext;
 
 void hphp_process_init();
-void hphp_session_init();
+void hphp_session_init(Treadmill::SessionKind session_kind,
+                       Transport* transport = nullptr);
 
 bool hphp_invoke_simple(const std::string& filename, bool warmupOnly);
 bool hphp_invoke(ExecutionContext *context,
@@ -104,7 +111,8 @@ bool hphp_invoke(ExecutionContext *context,
                  std::string &errorMsg,
                  bool once,
                  bool warmupOnly,
-                 bool richErrorMsg);
+                 bool richErrorMsg,
+                 const std::string& prelude);
 void hphp_context_shutdown();
 void hphp_context_exit(bool shutdown = true);
 
@@ -112,8 +120,13 @@ void hphp_thread_init();
 void hphp_thread_exit();
 
 void hphp_memory_cleanup();
-void hphp_session_exit();
-void hphp_process_exit();
+/*
+ * Tear down various internal state at the very end of a session. If transport
+ * is provided, various statistics about resources consumed by the request will
+ * be logged to ServiceData.
+ */
+void hphp_session_exit(Transport* transport = nullptr);
+void hphp_process_exit() noexcept;
 bool is_hphp_session_initialized();
 std::string get_systemlib(std::string* hhas = nullptr,
                           const std::string &section = "systemlib",

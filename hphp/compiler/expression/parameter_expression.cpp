@@ -17,9 +17,7 @@
 #include "hphp/compiler/type_annotation.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/file_scope.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/class_scope.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/util/text-util.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/expression/constant_expression.h"
@@ -36,7 +34,7 @@ ParameterExpression::ParameterExpression(
      TypeAnnotationPtr type,
      bool hhType,
      const std::string &name,
-     bool ref,
+     ParamMode mode,
      TokenID modifier,
      ExpressionPtr defaultValue,
      ExpressionPtr attributeList,
@@ -45,7 +43,7 @@ ParameterExpression::ParameterExpression(
   , m_originalType(type)
   , m_name(name)
   , m_hhType(hhType)
-  , m_ref(ref)
+  , m_mode(mode)
   , m_modifier(modifier)
   , m_defaultValue(defaultValue)
   , m_attributeList(attributeList)
@@ -132,10 +130,6 @@ void ParameterExpression::fixupSelfAndParentTypehints(ClassScopePtr cls) {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void ParameterExpression::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_defaultValue) m_defaultValue->analyzeProgram(ar);
-}
-
 ConstructPtr ParameterExpression::getNthKid(int n) const {
   switch (n) {
     case 0:
@@ -195,10 +189,30 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
     }
   }
 
+  const char* hint = getTypeHint().c_str();
+  // type declarations mean that we must accept arbitrary types for
+  // arbitrary strings in HipHopSyntax mode. But we can still enforce
+  // the known types.
+  auto const acceptAny = m_hhType && (strcasecmp(hint, "HH\\bool") &&
+                                      strcasecmp(hint, "HH\\int") &&
+                                      strcasecmp(hint, "HH\\num") &&
+                                      strcasecmp(hint, "HH\\arraykey") &&
+                                      strcasecmp(hint, "HH\\float") &&
+                                      strcasecmp(hint, "HH\\num") &&
+                                      strcasecmp(hint, "HH\\string") &&
+                                      strcasecmp(hint, "HH\\vec") &&
+                                      strcasecmp(hint, "HH\\dict") &&
+                                      strcasecmp(hint, "HH\\keyset") &&
+                                      strcasecmp(hint, "HH\\varray") &&
+                                      strcasecmp(hint, "HH\\darray") &&
+                                      strcasecmp(hint, "HH\\varray_or_darray") &&
+                                      strcasecmp(hint, "HH\\vec_or_dict") &&
+                                      strcasecmp(hint, "HH\\arraylike") &&
+                                      strcasecmp(hint, "array"));
+
   // Normally a named type like 'int' is compatible with Int but not integer
   // Since the default value's type is inferred from the value itself it is
   // ok to compare against the lower case version of the type hint in hint
-  const char* hint = getTypeHint().c_str();
   [&] {
     switch (defaultType) {
       case KindOfUninit:
@@ -210,65 +224,88 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
         return;
 
       case KindOfBoolean:
-        compat = !strcasecmp(hint, "HH\\bool");
+        compat = acceptAny || !strcasecmp(hint, "HH\\bool");
         return;
 
       case KindOfInt64:
-        compat = (!strcasecmp(hint, "HH\\int") ||
+        compat = (acceptAny ||
+                  !strcasecmp(hint, "HH\\int") ||
                   !strcasecmp(hint, "HH\\num") ||
                   !strcasecmp(hint, "HH\\arraykey") ||
                   // PHP 7 allows widening conversions
                   (RuntimeOption::PHP7_ScalarTypes &&
-                   !strcasecmp(hint, "HH\\float")) ||
-                  (m_hhType && interface_supports_int(hint)));
+                   !strcasecmp(hint, "HH\\float")));
         return;
 
       case KindOfDouble:
-        compat = (!strcasecmp(hint, "HH\\float") ||
-                  !strcasecmp(hint, "HH\\num") ||
-                  (m_hhType && interface_supports_double(hint)));
+        compat = (acceptAny ||
+                  !strcasecmp(hint, "HH\\float") ||
+                  !strcasecmp(hint, "HH\\num"));
         return;
 
       case KindOfPersistentString:
       case KindOfString:
-        compat = (!strcasecmp(hint, "HH\\string") ||
-                  !strcasecmp(hint, "HH\\arraykey") ||
-                  (m_hhType && interface_supports_string(hint)));
+        compat = (acceptAny ||
+                  !strcasecmp(hint, "HH\\string") ||
+                  !strcasecmp(hint, "HH\\arraykey"));
         return;
 
       case KindOfPersistentVec:
       case KindOfVec:
-        compat = (!strcasecmp(hint, "HH\\vec") ||
-                  (m_hhType && interface_supports_vec(hint)));
+        compat = (acceptAny ||
+                  !strcasecmp(hint, "HH\\vec") ||
+                  !strcasecmp(hint, "HH\\vec_or_dict") ||
+                  !strcasecmp(hint, "HH\\arraylike") ||
+                  (RuntimeOption::EvalHackArrDVArrs &&
+                   (!strcasecmp(hint, "HH\\varray") ||
+                    !strcasecmp(hint, "HH\\varray_or_darray")))
+                 );
         return;
 
       case KindOfPersistentDict:
       case KindOfDict:
-        compat = (!strcasecmp(hint, "HH\\dict") ||
-                  (m_hhType && interface_supports_dict(hint)));
+        compat = (acceptAny ||
+                  !strcasecmp(hint, "HH\\dict") ||
+                  !strcasecmp(hint, "HH\\vec_or_dict") ||
+                  !strcasecmp(hint, "HH\\arraylike") ||
+                  (RuntimeOption::EvalHackArrDVArrs &&
+                   (!strcasecmp(hint, "HH\\darray") ||
+                    !strcasecmp(hint, "HH\\varray_or_darray")))
+                 );
         return;
 
       case KindOfPersistentKeyset:
       case KindOfKeyset:
-        compat = (!strcasecmp(hint, "HH\\keyset")  ||
-                  (m_hhType && interface_supports_keyset(hint)));
+        compat = (acceptAny ||
+                  !strcasecmp(hint, "HH\\keyset") ||
+                  !strcasecmp(hint, "HH\\arraylike"));
         return;
+
+      case KindOfPersistentShape:
+      case KindOfShape:
+        always_assert(false);
 
       case KindOfPersistentArray:
       case KindOfArray:
-        compat = (!strcasecmp(hint, "array") ||
-                  (m_hhType && interface_supports_array(hint)));
+        compat = (acceptAny ||
+                  !strcasecmp(hint, "array") ||
+                  !strcasecmp(hint, "HH\\arraylike") ||
+                  (!RuntimeOption::EvalHackArrDVArrs &&
+                   (!strcasecmp(hint, "HH\\varray") ||
+                    !strcasecmp(hint, "HH\\darray") ||
+                    !strcasecmp(hint, "HH\\varray_or_darray"))
+                  ));
         return;
 
       case KindOfObject:
       case KindOfResource:
       case KindOfRef:
+      case KindOfFunc:
+      case KindOfClass:
         if (!m_hhType) {
           compat = false;
           return;
         }
-      /* fall through */
-      case KindOfClass:
         break;
     }
     always_assert(false /* likely parser bug */);
@@ -289,8 +326,7 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
 
     auto const& name = getName();
     auto const tdefault = HPHP::tname(defaultType);
-    parseTimeFatal(file,
-                   Compiler::BadDefaultValueType, msg,
+    parseTimeFatal(file, msg,
                    name.c_str(), tdefault.c_str(),
                    getTypeHintDisplayName().c_str());
   }
@@ -300,8 +336,9 @@ void ParameterExpression::compatibleDefault(FileScopeRawPtr file) {
 // code generation functions
 
 void ParameterExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
+  if (m_mode == ParamMode::InOut) cg_printf("inout ");
   if (!m_type.empty()) cg_printf("%s ", m_originalType->vanillaName().c_str());
-  if (m_ref) cg_printf("&");
+  if (m_mode == ParamMode::Ref) cg_printf("&");
   cg_printf("$%s", m_name.c_str());
   if (m_defaultValue) {
     cg_printf(" = ");

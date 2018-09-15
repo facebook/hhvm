@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_stream_select_not_full_read() {
 $descriptorspec = array(
   array("pipe", "r"),
   array("pipe", "w"),
@@ -23,4 +26,5 @@ while (!feof($io[1])) {
   } else {
     break;
   }
+}
 }

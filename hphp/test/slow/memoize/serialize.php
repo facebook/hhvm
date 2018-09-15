@@ -101,4 +101,8 @@ function main() {
   test_unserialize(C6::class, $s);
 }
 
+
+<<__EntryPoint>>
+function main_serialize() {
 main();
+}

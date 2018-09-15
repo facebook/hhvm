@@ -4,7 +4,8 @@ namespace HH {
 
 /* A wait handle representing asynchronous operation
  */
-abstract class WaitHandle implements Awaitable {
+<<__Sealed(StaticWaitHandle::class, WaitableWaitHandle::class)>>
+abstract class Awaitable {
 
   final private function __construct() {
     throw new \InvalidOperationException(
@@ -30,55 +31,34 @@ abstract class WaitHandle implements Awaitable {
   <<__HipHopSpecific, __Native>>
   final public static function setOnJoinCallback(mixed $callback): void;
 
-  /* Return this wait handle (for Awaitable interface)
-   * @return object
-   */
-  final public function getWaitHandle(): this {
-    return $this;
-  }
-
-  /* Import this wait handle to the current scheduler context
-   */
-  <<__Native>>
-  final public function import(): void;
-
-  /* Return the wait handle's result if it is already finished (and valid),
-   * throw an exception otherwise
-   * @return mixed - A result of the operation represented by given wait handle
-   */
-  final public function result(): mixed {
-    return \hh\asm('
-      This
-      WHResult
-    ');
-  }
-
   /* Check if this wait handle finished (succeeded or failed)
    * @return bool - A boolean indicating whether this wait handle finished
+   *
+   * DEPRECATED: use HH\Asio\has_finished()
    */
   <<__Native>>
   final public function isFinished(): bool;
 
   /* Check if this wait handle succeeded
    * @return bool - A boolean indicating whether this wait handle succeeded
+   *
+   * DEPRECATED: use HH\Asio\has_succeeded()
    */
   <<__Native>>
   final public function isSucceeded(): bool;
 
   /* Check if this wait handle failed
    * @return bool - A boolean indicating whether this wait handle failed
+   *
+   * DEPRECATED: use HH\Asio\has_failed()
    */
   <<__Native>>
   final public function isFailed(): bool;
 
-  /* Get unique ID of this wait handle (amongst existing ones)
-   * @return int - An integer representing unique ID of this wait handle
-   */
-  <<__Native>>
-  final public function getID(): int;
-
   /* Get name of the operation behind this wait handle
    * @return string - A name of the operation behind this wait handle
+   *
+   * TODO: replace this with a HH\Asio equivalent
    */
   <<__Native>>
   final public function getName(): string;
@@ -86,42 +66,24 @@ abstract class WaitHandle implements Awaitable {
 
 /* A wait handle that is always finished
  */
-final class StaticWaitHandle extends WaitHandle {}
+final class StaticWaitHandle extends Awaitable {}
 
 /* A wait handle that can be waited upon
  */
-abstract class WaitableWaitHandle extends WaitHandle {
-
-  /* Get index of the scheduler context this wait handle operates in
-   * @return int - An index of scheduler context this wait handle operates in
-   */
-  <<__Native>>
-  final public function getContextIdx(): int;
-
-  /* Get wait handle that created this wait handle
-   * @return object - An AsyncFunctionWaitHandle that was being executed when
-   * this wait handle was constructed
-   */
-  <<__Native>>
-  final public function getCreator(): WaitHandle;
-
-  /* Get wait handles blocked on this wait handle
-   * @return array - An array of WaitableWaitHandles blocked on this wait handle
-   */
-  <<__Native>>
-  final public function getParents(): array;
-
-  /* Get the dependency stack for this wait handle
-   * @return array - A representation of the call stack of wait handles,
-   * starting with this wait handle. Each element in the array is a wait handle,
-   * or null which represents crossing a context boundary.
-   */
-  <<__Native>>
-  final public function getDependencyStack(): array;
+<<__Sealed(
+  AwaitAllWaitHandle::class,
+  ConditionWaitHandle::class,
+  ExternalThreadEventWaitHandle::class,
+  RescheduleWaitHandle::class,
+  ResumableWaitHandle::class,
+  SleepWaitHandle::class
+)>>
+abstract class WaitableWaitHandle extends Awaitable {
 }
 
 /* A wait handle that can resume execution of PHP code
  */
+<<__Sealed(AsyncFunctionWaitHandle::class, AsyncGeneratorWaitHandle::class)>>
 abstract class ResumableWaitHandle extends WaitableWaitHandle {
 
   /* Set callback to be called when a ResumableWaitHandle is created
@@ -171,7 +133,23 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
    * dependencies
    */
   <<__Native>>
-  public static function fromArray(array $dependencies): WaitHandle;
+  public static function fromArray(array $dependencies): Awaitable;
+
+  /* Create a wait handle that waits for a given array of dependencies
+   * @param array $dependencies - A DArray of dependencies to wait for
+   * @return object - A WaitHandle that will wait for a given array of
+   * dependencies
+   */
+  <<__Native>>
+  public static function fromDArray(darray $dependencies): Awaitable;
+
+  /* Create a wait handle that waits for a given array of dependencies
+   * @param array $dependencies - A VArray of dependencies to wait for
+   * @return object - A WaitHandle that will wait for a given array of
+   * dependencies
+   */
+  <<__Native>>
+  public static function fromVArray(varray $dependencies): Awaitable;
 
   /* Create a wait handle that waits for a given vec of dependencies
    * @param array $dependencies - A vec of dependencies to wait for
@@ -179,7 +157,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
    * dependencies
    */
   <<__Native>>
-  public static function fromVec(vec $dependencies): WaitHandle;
+  public static function fromVec(vec $dependencies): Awaitable;
 
   /* Create a wait handle that waits for a given dict of dependencies
    * @param array $dependencies - A dict of dependencies to wait for
@@ -187,7 +165,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
    * dependencies
    */
   <<__Native>>
-  public static function fromDict(dict $dependencies): WaitHandle;
+  public static function fromDict(dict $dependencies): Awaitable;
 
   /* Create a wait handle that waits for a given Map of dependencies
    * @param mixed $dependencies - A Map of dependencies to wait for
@@ -195,7 +173,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
    * dependencies
    */
   <<__Native>>
-  public static function fromMap(mixed $dependencies): WaitHandle;
+  public static function fromMap(mixed $dependencies): Awaitable;
 
   /* Create a wait handle that waits for a given Vector of dependencies
    * @param mixed $dependencies - A Vector of dependencies to wait for
@@ -203,7 +181,7 @@ final class AwaitAllWaitHandle extends WaitableWaitHandle {
    * dependencies
    */
   <<__Native>>
-  public static function fromVector(mixed $dependencies): WaitHandle;
+  public static function fromVector(mixed $dependencies): Awaitable;
 
   /* Set callback for when a AwaitAllWaitHandle is created
    * @param mixed $callback - A Closure to be called on creation
@@ -358,22 +336,24 @@ function join<T>(Awaitable<T> $awaitable): mixed;
  * Throws an InvalidOperationException if the Awaitable is not finished.
  */
 function result<T>(Awaitable<T> $awaitable): T {
-  invariant(
-    $awaitable instanceof WaitHandle,
-    'unsupported user-land Awaitable',
-  );
-  return $awaitable->result();
+  return \hh\asm('
+    CGetL $awaitable
+    WHResult
+  ');
 }
 
 /**
  * Check whether the given Awaitable has finished.
  */
 function has_finished<T>(Awaitable<T> $awaitable): bool {
-  invariant(
-    $awaitable instanceof WaitHandle,
-    'unsupported user-land Awaitable',
-  );
   return $awaitable->isFinished();
+}
+
+/**
+ * Get the name of the Awaitable
+ */
+function name<T>(Awaitable<T> $awaitable): string {
+  return $awaitable->getName();
 }
 
 /**
@@ -410,7 +390,7 @@ function cancel<T>(Awaitable<T> $awaitable, \Exception $exception): bool;
 <<__Native>>
 function backtrace<T>(Awaitable<T> $awaitable,
                       int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT,
-                      int $limit = 0): array<array>;
+                      int $limit = 0): varray<darray>;
 
 
 } // namespace

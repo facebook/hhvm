@@ -8,4 +8,8 @@ function foo() {
     var_dump($v);
   }
 }
+
+<<__EntryPoint>>
+function main_iter_003() {
 foo();
+}

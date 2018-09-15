@@ -75,7 +75,7 @@ void CmdRun::onClient(DebuggerClient &client) {
   throw DebuggerConsoleExitException();
 }
 
-bool CmdRun::onServer(DebuggerProxy &proxy) {
+bool CmdRun::onServer(DebuggerProxy& /*proxy*/) {
   throw DebuggerRestartException(m_args);
 }
 

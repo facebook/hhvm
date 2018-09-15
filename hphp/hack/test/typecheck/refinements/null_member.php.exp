@@ -1,0 +1,12 @@
+File "null_member.php", line 10, characters 27-34:
+Invalid argument (Typing[4110])
+  File "null_member.php", line 29, characters 31-33:
+  This is an int
+  File "null_member.php", line 6, characters 11-11:
+  It is incompatible with an object of type A
+File "null_member.php", line 22, characters 27-34:
+Invalid argument (Typing[4110])
+  File "null_member.php", line 29, characters 31-33:
+  This is an int
+  File "null_member.php", line 6, characters 11-11:
+  It is incompatible with an object of type A

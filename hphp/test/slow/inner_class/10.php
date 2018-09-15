@@ -7,6 +7,10 @@ function test() {
 }
  }
 }
- test();
+
+ <<__EntryPoint>>
+function main_10() {
+test();
  $obj = new Test();
  $obj->p();
+}

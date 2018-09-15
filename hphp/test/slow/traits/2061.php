@@ -27,6 +27,9 @@ class D extends C {
  $this->x = 'set from D';
  }
 }
+
+<<__EntryPoint>>
+function main_2061() {
 $x = new D();
  echo serialize($x), "\n";
 $x = new D();
@@ -44,3 +47,4 @@ $x = new D();
 $x = new D();
  $x->useD();
  echo serialize($x), "\n";
+}

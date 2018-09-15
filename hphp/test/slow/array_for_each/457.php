@@ -22,4 +22,8 @@ function f6() {
       break;
   }
 }
+
+<<__EntryPoint>>
+function main_457() {
 f6();
+}

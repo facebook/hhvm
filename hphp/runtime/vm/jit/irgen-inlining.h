@@ -16,7 +16,11 @@
 #ifndef incl_HPHP_JIT_IRGEN_INLINING_H_
 #define incl_HPHP_JIT_IRGEN_INLINING_H_
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP { namespace jit {
+
+struct SSATmp;
+
+namespace irgen {
 
 struct IRGS;
 
@@ -33,6 +37,12 @@ void implInlineReturn(IRGS& env);
  * Emit a return from an inlined function.
  */
 void retFromInlined(IRGS&);
+
+/*
+ * Exit the (now suspended) inline frame. The frame must no longer be live, and
+ * its contents must now reside in waithandle.
+ */
+void suspendFromInlined(IRGS&, SSATmp* waithandle);
 
 ///////////////////////////////////////////////////////////////////////////////
 

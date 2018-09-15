@@ -1,0 +1,16 @@
+{
+  "matched_nodes":[
+    {
+      "match_name":"foo class name token",
+      "kind":"token",
+      "start_offset":22,
+      "end_offset":24
+    },
+    {
+      "match_name":"foo class name token 2",
+      "kind":"token",
+      "start_offset":22,
+      "end_offset":24
+    }
+  ]
+}

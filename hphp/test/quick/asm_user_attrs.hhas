@@ -16,10 +16,6 @@
     Null
     RetC
   }
-  .method [public] 86ctor() {
-    Null
-    RetC
-  }
 }
 
 # /home/msullivan/tmp/saved-tests/user-attrs.php ends here

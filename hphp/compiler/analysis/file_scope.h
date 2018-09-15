@@ -23,13 +23,12 @@
 #include <vector>
 
 #include "hphp/compiler/analysis/block_scope.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/function_container.h"
 #include "hphp/compiler/hphp.h"
-#include "hphp/compiler/json.h"
 
 #include "hphp/compiler/statement/class_statement.h"
 
+#include "hphp/util/compact-vector.h"
 #include "hphp/util/deprecated/declare-boost-types.h"
 #include "hphp/util/md5.h"
 #include "hphp/util/text-util.h"
@@ -42,14 +41,14 @@ DECLARE_BOOST_TYPES(Expression)
 DECLARE_BOOST_TYPES(FileScope);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(StatementList);
+DECLARE_BOOST_TYPES(ClosureExpression);
 
 /**
  * A FileScope stores what's parsed from one single source file. It's up to
  * AnalysisResult objects to grab statements, functions and classes from
  * FileScope objects to form execution paths.
  */
-struct FileScope : BlockScope, FunctionContainer,
-                   JSON::DocTarget::ISerializable {
+struct FileScope : BlockScope, FunctionContainer {
   enum Attribute {
     ContainsDynamicVariable  = 0x0001,
     ContainsLDynamicVariable = 0x0002,
@@ -67,7 +66,9 @@ struct FileScope : BlockScope, FunctionContainer,
 
 public:
   FileScope(const std::string &fileName, int fileSize, const MD5 &md5);
-  ~FileScope() { delete m_redeclaredFunctions; }
+  ~FileScope() override {
+    delete m_redeclaredFunctions;
+  }
   int getSize() const { return m_size;}
 
   const std::string &getName() const { return m_fileName;}
@@ -77,8 +78,6 @@ public:
   const StringToClassScopePtrVecMap &getClasses() const {
     return m_classes;
   }
-  void getClassesFlattened(std::vector<ClassScopePtr>& classes) const;
-  void getScopesSet(BlockScopeRawPtrQueue &v);
 
   int getFunctionCount() const;
   int getClassCount() const { return m_classes.size();}
@@ -87,56 +86,24 @@ public:
   void setAttribute(Attribute attr);
   int popAttribute();
 
-  void serialize(JSON::DocTarget::OutputStream &out) const;
-
-  /**
-   * Whether this file has top level non-declaration statements that
-   * have CPP implementation.
-   */
-  ExpressionPtr getEffectiveImpl(AnalysisResultConstPtr ar) const;
-
   /**
    * Parser functions. Parser only deals with a FileScope object, and these
    * are the only functions a parser calls upon analysis results.
    */
-  FunctionScopePtr setTree(AnalysisResultConstPtr ar, StatementListPtr tree);
-  void cleanupForError(AnalysisResultConstPtr ar);
-  void makeFatal(AnalysisResultConstPtr ar,
+  FunctionScopePtr setTree(AnalysisResultConstRawPtr ar, StatementListPtr tree);
+  void cleanupForError(AnalysisResultConstRawPtr ar);
+  void makeFatal(AnalysisResultConstRawPtr ar,
                  const std::string& msg, int line);
-  void makeParseFatal(AnalysisResultConstPtr ar,
+  void makeParseFatal(AnalysisResultConstRawPtr ar,
                       const std::string& msg, int line);
 
-  bool addFunction(AnalysisResultConstPtr ar, FunctionScopePtr funcScope);
-  bool addClass(AnalysisResultConstPtr ar, ClassScopePtr classScope);
+  void addFunction(AnalysisResultConstRawPtr ar, FunctionScopePtr funcScope);
+  void addClass(AnalysisResultConstRawPtr ar, ClassScopePtr classScope);
   const StringToFunctionScopePtrVecMap *getRedecFunctions() {
     return m_redeclaredFunctions;
   }
   void addAnonClass(ClassStatementPtr stmt);
   const std::vector<ClassStatementPtr>& getAnonClasses() const;
-
-  /**
-   * For separate compilation
-   * These add edges between filescopes in the other dep graph and
-   * save the symbols for our iface.
-   * This stuff only happens in the filechanged state.
-   */
-  void declareConstant(AnalysisResultPtr ar, const std::string &name);
-
-  void addClassAlias(const std::string& target, const std::string& alias) {
-    m_classAliasMap.emplace(toLower(target), toLower(alias));
-  }
-
-  std::multimap<std::string,std::string> const& getClassAliases() const {
-    return m_classAliasMap;
-  }
-
-  void addTypeAliasName(const std::string& name) {
-    m_typeAliasNames.emplace(toLower(name));
-  }
-
-  std::set<std::string> const& getTypeAliasNames() const {
-    return m_typeAliasNames;
-  }
 
   void setSystem();
   bool isSystem() const { return m_system; }
@@ -146,11 +113,13 @@ public:
 
   void setUseStrictTypes();
   bool useStrictTypes() const { return m_useStrictTypes; }
+  void setUseStrictTypesForBuiltins();
+  bool useStrictTypesForBuiltins() const { return m_useStrictTypesForBuiltins; }
 
   void setPreloadPriority(int p) { m_preloadPriority = p; }
   int preloadPriority() const { return m_preloadPriority; }
 
-  void analyzeProgram(AnalysisResultPtr ar);
+  void analyzeProgram(AnalysisResultConstRawPtr ar);
 
   void visit(AnalysisResultPtr ar,
              void (*cb)(AnalysisResultPtr, StatementPtr, void*),
@@ -167,12 +136,18 @@ public:
       (BlockScope::shared_from_this());
   }
 
+  static FileScopeRawPtr getCurrent() {
+    return FileScopeRawPtr { s_current };
+  }
+
+  void addLambda(ClosureExpressionRawPtr c) { m_lambdas.push_back(c); }
 private:
   int m_size;
   MD5 m_md5;
   unsigned m_system : 1;
   unsigned m_isHHFile : 1;
   unsigned m_useStrictTypes : 1;
+  unsigned m_useStrictTypesForBuiltins : 1;
   int m_preloadPriority;
 
   std::vector<int> m_attributes;
@@ -186,17 +161,15 @@ private:
   std::string m_pseudoMainName;
   std::set<std::string> m_redecBases;
 
-  // Map from class alias names to the class they are aliased to.
-  // This is only needed in WholeProgram mode.
-  std::multimap<std::string,std::string> m_classAliasMap;
+  // Temporary vector of lambda expressions; populated
+  // during analyzeProgram, and then processed at the end
+  // of FileScope::analyzeProgram.
+  CompactVector<ClosureExpressionRawPtr> m_lambdas;
 
-  // Set of names that are on the left hand side of type alias
-  // declarations.  We need this to make sure we don't mark classes
-  // with the same name Unique.
-  std::set<std::string> m_typeAliasNames;
-
-  FunctionScopePtr createPseudoMain(AnalysisResultConstPtr ar);
+  FunctionScopePtr createPseudoMain(AnalysisResultConstRawPtr ar);
   void setFileLevel(StatementListPtr stmt);
+
+  static __thread FileScope* s_current;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

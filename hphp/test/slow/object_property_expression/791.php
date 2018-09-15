@@ -39,9 +39,13 @@ class C3 {
   }
   private $_p = array();
 }
+
+<<__EntryPoint>>
+function main_791() {
 $c3 = new C3();
 $c3->p3 = new C2();
 $c3->p3->p2 = new C1();
 $c3->p3->p2->a = 1;
 $c3->p3->p2->a .= 1;
 print $c3->p3->p2->a;
+}

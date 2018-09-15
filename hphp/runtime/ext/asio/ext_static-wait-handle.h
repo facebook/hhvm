@@ -18,6 +18,8 @@
 #ifndef incl_HPHP_EXT_ASIO_STATIC_WAIT_HANDLE_H_
 #define incl_HPHP_EXT_ASIO_STATIC_WAIT_HANDLE_H_
 
+#include "hphp/runtime/base/tv-refcount.h"
+
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
 
@@ -30,15 +32,18 @@ namespace HPHP {
  * of the operation is always available and waiting for the wait handle finishes
  * immediately.
  */
-struct c_StaticWaitHandle final : c_WaitHandle {
+struct c_StaticWaitHandle final : c_Awaitable {
   WAITHANDLE_CLASSOF(StaticWaitHandle);
   WAITHANDLE_DTOR(StaticWaitHandle);
 
-  explicit c_StaticWaitHandle(Class* cls = c_StaticWaitHandle::classof())
-    : c_WaitHandle(cls) {}
+  explicit c_StaticWaitHandle()
+    : c_Awaitable(c_StaticWaitHandle::classof(),
+                  HeaderKind::WaitHandle,
+                  type_scan::getIndexForMalloc<c_StaticWaitHandle>())
+  {}
   ~c_StaticWaitHandle() {
-    assert(isFinished());
-    tvRefcountedDecRef(&m_resultOrException);
+    assertx(isFinished());
+    tvDecRefGen(&m_resultOrException);
   }
 
  public:

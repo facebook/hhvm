@@ -1,4 +1,4 @@
-<?
+<?hh
 
 function main($x, $y, $z, $t) {
   $a = (int)$x;

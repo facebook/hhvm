@@ -30,6 +30,14 @@ if (NOT MSVC)
   )
 endif()
 
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/low-ptr-def.h
+  COMMAND INSTALL_DIR=${CMAKE_CURRENT_BINARY_DIR} bash ${CMAKE_CURRENT_SOURCE_DIR}/../tools/generate-low-ptr.sh ignored
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../tools/generate-low-ptr.sh
+)
+
+list(APPEND HEADER_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/low-ptr-def.h)
+
 HHVM_PUBLIC_HEADERS(util ${HEADER_SOURCES})
 
 find_package(LibNuma)
@@ -56,5 +64,5 @@ if (LIBNUMA_LIBRARIES)
   target_link_libraries(hphp_util ${LIBNUMA_LIBRARIES})
 endif()
 if (ENABLE_ASYNC_MYSQL)
-  add_dependencies(hphp_util webscalesqlclient)
+  add_dependencies(hphp_util fbmysqlclient)
 endif ()

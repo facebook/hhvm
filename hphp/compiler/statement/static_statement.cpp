@@ -19,7 +19,6 @@
 #include "hphp/compiler/expression/expression.h"
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/analysis/block_scope.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/expression/assignment_expression.h"
@@ -49,8 +48,7 @@ StatementPtr StaticStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void StaticStatement::analyzeProgram(AnalysisResultPtr ar) {
-  m_exp->analyzeProgram(ar);
+void StaticStatement::analyzeProgram(AnalysisResultConstRawPtr ar) {
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     BlockScopePtr scope = getScope();
     for (int i = 0; i < m_exp->getCount(); i++) {
@@ -67,16 +65,6 @@ void StaticStatement::analyzeProgram(AnalysisResultPtr ar) {
                                     false));
         (*m_exp)[i] = exp;
       }
-      always_assert(exp->is(Expression::KindOfAssignmentExpression));
-      auto assignment_exp = dynamic_pointer_cast<AssignmentExpression>(exp);
-      variable = assignment_exp->getVariable();
-      value = assignment_exp->getValue();
-      auto var = dynamic_pointer_cast<SimpleVariable>(variable);
-      // set the Declaration context here instead of all over this file - this phase
-      // is the first to run
-      var->setContext(Expression::Declaration);
-      Symbol *sym = var->getSymbol();
-      sym->setStaticInitVal(value);
     }
   }
 }
@@ -105,19 +93,6 @@ void StaticStatement::setNthKid(int n, ConstructPtr cp) {
       assert(false);
       break;
   }
-}
-
-StatementPtr StaticStatement::preOptimize(AnalysisResultConstPtr ar) {
-  for (int i = 0; i < m_exp->getCount(); i++) {
-    auto exp = (*m_exp)[i];
-    auto assignment_exp =
-      dynamic_pointer_cast<AssignmentExpression>(exp);
-    auto var =
-      dynamic_pointer_cast<SimpleVariable>(assignment_exp->getVariable());
-    Symbol *sym = var->getSymbol();
-    sym->setStaticInitVal(assignment_exp->getValue());
-  }
-  return StatementPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

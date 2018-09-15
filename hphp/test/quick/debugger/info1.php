@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function myfunc($a, $b) {
   error_log($a.$b);

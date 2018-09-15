@@ -22,4 +22,8 @@ function main() {
   var_dump($x);
 }
 
+
+<<__EntryPoint>>
+function main_empty_array_010() {
 main();
+}

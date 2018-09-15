@@ -15,4 +15,8 @@ function main() {
   $custom_set = new Set();
 }
 
+
+<<__EntryPoint>>
+function main_hh_set4() {
 main();
+}

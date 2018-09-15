@@ -1,4 +1,4 @@
-.function array_map($func = no_args, $arr = one_arg, $res = one_array, ...$extra) {
+.function [skip_frame dyn_callable] array_map($func = no_args, $arr = one_arg, $res = one_array, ...$extra) {
           .numiters 2;
 
 # If we get here, a value was supplied for $res (or we did not get an
@@ -6,19 +6,19 @@
 
 call_cpp_impl_with_extra:
           FPushFuncD   4   "__SystemLib\\array_map"
-          FPassL 0 $func
-          FPassL 1 $arr
-          FPassL 2 $res
-          FPassL 3 $extra
-          FCallUnpack 4
+          CGetL $func
+          CGetL $arr
+          CGetL $res
+          CGetL $extra
+          FCall 3 1 1 - "" ""
           UnboxR
           RetC
 
 call_cpp_impl:
           FPushFuncD   2   "__SystemLib\\array_map"
-          FPassL 0 $func
-          FPassL 1 $arr
-          FCall 2
+          CGetL $func
+          CGetL $arr
+          FCall 2 0 1 - "" ""
           UnboxR
           RetC
 
@@ -40,7 +40,7 @@ convert_to_array:
 # with a null func, we have to convert the input to an array
           CGetL $arr
           FPushObjMethodD 0 "toArray" NullThrows
-          FCall 0
+          FCall 0 0 1 - "" ""
           UnboxR
           RetC
 
@@ -57,22 +57,34 @@ not_array:
 
           CGetL $func
           DecodeCufIter 0 bad_func
-.try_fault kill_iter_0_kt {
+.try {
             NewLikeArrayL $arr 0
             SetL $res
             PopC
 
             CGetL $arr
             WIterInitK 1 endloop_kt $v $k
-  .try_fault kill_iter_1_kt 1 {
+  .try 1 {
     loop_x_kt:FPushCufIter 1 0
-              FPassL 0 $v
-              FCall 1
+              FIsParamByRefCufIter 0 Any 0
+              JmpNZ by_ref_kt
+              CGetL $v
+              Jmp call_kt
+    by_ref_kt:VGetL $v
+    call_kt:  FCall 1 0 1 - "" ""
               BaseL $res Define
               SetWithRefRML $k
               WIterNextK 1 loop_x_kt $v $k
-   }
+              Jmp endloop_kt
+  } .catch {
+              IterFree 1
+              Throw
+  }
+} .catch {
+            CIterFree 0
+            Throw
 }
+
 endloop_kt:
           CIterFree 0
           CGetL $res
@@ -81,13 +93,13 @@ endloop_kt:
 # if we get here, there was only one array,
 # so we use the fast, php version
 one_array:
-          IsTypeL $arr Arr
+          IsTypeL $arr ArrLike
           JmpZ not_array
           IssetL $func
           JmpZ ident
           CGetL $func
           DecodeCufIter 0 bad_func
-.try_fault kill_iter_0 {
+.try {
             NewLikeArrayL $arr 0
             SetL $res
             PopC
@@ -95,32 +107,31 @@ one_array:
             CGetL $arr
             WIterInitK 1 endloop $v $k
 
-  .try_fault kill_iter_1 1 {
+  .try 1 {
     loop_x:   FPushCufIter 1 0
-              FPassL 0 $v
-              FCall 1
+              FIsParamByRefCufIter 0 Any 0
+              JmpNZ by_ref
+              CGetL $v
+              Jmp call
+    by_ref:   VGetL $v
+    call:     FCall 1 0 1 - "" ""
               BaseL $res Define
               SetWithRefRML $k
               WIterNextK 1 loop_x $v $k
+              Jmp endloop
+  } .catch {
+              IterFree 1
+              Throw
   }
+} .catch {
+            CIterFree 0
+            Throw
 }
+
 endloop:  CIterFree 0
           CGetL $res
           RetC
 
 ident:    CGetL $arr
           RetC
-
-kill_iter_0:
-          CIterFree 0
-          Unwind
-kill_iter_1:
-          IterFree 1
-          Unwind
-kill_iter_0_kt:
-           CIterFree 0
-           Unwind
-kill_iter_1_kt:
-           IterFree 1
-           Unwind
 }

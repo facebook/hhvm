@@ -29,12 +29,6 @@ struct StatementList : Statement {
   StatementListPtr shallowClone();
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  StatementPtr preOptimize(AnalysisResultConstPtr ar) override;
-  bool hasDecl() const override;
-  bool hasImpl() const override;
-  ExpressionPtr getEffectiveImpl(AnalysisResultConstPtr ar) const;
-  bool hasBody() const override;
-  bool hasRetExp() const override;
 
   void addElement(StatementPtr stmt) override;
   void insertElement(StatementPtr stmt, int index = 0) override;
@@ -57,7 +51,6 @@ struct StatementList : Statement {
 
 private:
   std::vector<StatementPtr> m_stmts;
-  bool m_included; // whether includes have been inlined
 };
 
 ///////////////////////////////////////////////////////////////////////////////

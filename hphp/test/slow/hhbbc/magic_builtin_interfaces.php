@@ -32,6 +32,7 @@ function type_hint_traversable(\HH\KeyedTraversable $x) {
 function type_hint_stringish(Stringish $x) {
   echo '==================== ', __FUNCTION__,' ====================', "\n";
   var_dump($x instanceof Stringish);
+  var_dump($x instanceof XHPChild);
   var_dump(is_string($x));
 }
 
@@ -49,4 +50,8 @@ function main() {
   $c = new C();
   type_hint_stringish($c);
 }
+
+<<__EntryPoint>>
+function main_magic_builtin_interfaces() {
 main();
+}

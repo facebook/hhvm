@@ -18,7 +18,6 @@
 #include "hphp/runtime/base/dateinterval.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/array-init.h"
 
@@ -299,8 +298,29 @@ void DateTime::fromTimeStamp(int64_t timestamp, bool utc /* = false */) {
     if (!m_tz.get()) {
       m_tz = TimeZone::Current();
     }
-    t->tz_info = m_tz->get();
-    t->zone_type = TIMELIB_ZONETYPE_ID;
+
+    if (!m_tz->isValid()) {
+      raise_error("No tz info found for timezone check for tzdata package.");
+    }
+
+    // We could get a correct result for this time stamp by just using
+    // ZONETYPE_OFFSET and m_tz->offset(timestamp); the problem is that
+    // potentially breaks if we do another timezone-sensitive operation
+    // on the result.
+    t->zone_type = m_tz->type();
+    switch (t->zone_type) {
+      case TIMELIB_ZONETYPE_OFFSET:
+        t->z = m_tz->offset(timestamp);
+        break;
+      case TIMELIB_ZONETYPE_ABBR:
+        t->z = m_tz->offset(timestamp);
+        t->dst = m_tz->dst(timestamp);
+        t->tz_abbr = strdup(m_tz->abbr().data());
+        break;
+      case TIMELIB_ZONETYPE_ID:
+        t->tz_info = m_tz->getTZInfo();
+        break;
+    }
     timelib_unixtime2local(t, (timelib_sll)m_timestamp);
   }
   m_time = TimePtr(t, time_deleter());
@@ -314,13 +334,13 @@ void DateTime::sweep() {
 // informational
 
 int DateTime::beat() const {
-  int retval = (((((long)m_time->sse)-(((long)m_time->sse) -
+  int retval = ((((long)m_time->sse)-(((long)m_time->sse) -
                                        ((((long)m_time->sse) % 86400) +
-                                        3600))) * 10) / 864);
+                                        3600))) * 10);
   while (retval < 0) {
-    retval += 1000;
+    retval += 864000;
   }
-  retval = retval % 1000;
+  retval = (retval / 864) % 1000;
   return retval;
 }
 
@@ -358,7 +378,7 @@ int DateTime::offset() const {
       {
         bool error;
         timelib_time_offset *offset =
-          timelib_get_time_zone_info(toTimeStamp(error), m_tz->get());
+          timelib_get_time_zone_info(toTimeStamp(error), m_tz->getTZInfo());
         int ret = offset->offset;
         timelib_time_offset_dtor(offset);
         return ret;
@@ -391,7 +411,7 @@ void DateTime::update() {
   if (utc()) {
     timelib_update_ts(m_time.get(), nullptr);
   } else {
-    timelib_update_ts(m_time.get(), m_tz->get());
+    timelib_update_ts(m_time.get(), m_tz->getTZInfo());
   }
   m_timestamp = 0;
   m_timestampSet = false;
@@ -439,13 +459,35 @@ void DateTime::setTime(int hour, int minute, int second) {
 }
 
 void DateTime::setTimezone(req::ptr<TimeZone> timezone) {
-  if (timezone) {
-    m_tz = timezone->cloneTimeZone();
-    if (m_tz.get()) {
-      timelib_set_timezone(m_time.get(), m_tz->get());
-      timelib_unixtime2local(m_time.get(), m_time->sse);
+  if (!timezone) {
+    return;
+  }
+
+  m_tz = timezone->cloneTimeZone();
+
+  if (!m_tz.get()) {
+    return;
+  }
+
+  assert(m_tz->isValid());
+
+  switch (m_tz->type()) {
+    case TIMELIB_ZONETYPE_ID:
+      timelib_set_timezone(m_time.get(), m_tz->getTZInfo());
+      break;
+    case TIMELIB_ZONETYPE_OFFSET:
+      timelib_set_timezone_from_offset(m_time.get(), m_tz->offset(0));
+      break;
+    case TIMELIB_ZONETYPE_ABBR: {
+      timelib_abbr_info abbr;
+      abbr.utc_offset = m_tz->offset(0);
+      abbr.abbr = strdup(m_tz->abbr().data());
+      abbr.dst = m_tz->dst(0);
+      timelib_set_timezone_from_abbr(m_time.get(), abbr);
+      break;
     }
   }
+  timelib_unixtime2local(m_time.get(), m_time->sse);
 }
 
 bool DateTime::modify(const String& diff) {
@@ -617,7 +659,7 @@ String DateTime::toString(DateFormat format) const {
   case DateFormat::Cookie:     return rfcFormat(DateFormatCookie);
   case DateFormat::HttpHeader: return rfcFormat(DateFormatHttpHeader);
   default:
-    assert(false);
+    assertx(false);
   }
   throw_invalid_argument("format: %d", static_cast<int>(format));
   return String();
@@ -658,6 +700,7 @@ String DateTime::rfcFormat(const String& format) const {
     case 'i': s.printf("%02d", (int)minute()); break;
     case 's': s.printf("%02d", (int)second()); break;
     case 'u': s.printf("%06d", (int)floor(fraction() * 1000000)); break;
+    case 'v': s.printf("%03d", (int)floor(fraction() * 1000)); break;
     case 'I': s.append(!utc() && m_tz->dst(toTimeStamp(error)) ? 1 : 0);
       break;
     case 'P': rfc_colon = true; /* break intentionally missing */
@@ -892,7 +935,7 @@ bool DateTime::fromString(const String& input, req::ptr<TimeZone> tz,
   if (m_timestamp == -1) {
     fromTimeStamp(0);
   }
-  if (tz.get() && (input.size() <= 0 || input[0] != '@')) {
+  if (tz.get() && tz->isValid() && (input.size() <= 0 || input[0] != '@')) {
     setTimezone(tz);
   } else {
     setTimezone(TimeZone::Current());
@@ -900,7 +943,7 @@ bool DateTime::fromString(const String& input, req::ptr<TimeZone> tz,
 
   // needed if any date part is missing
   timelib_fill_holes(t, m_time.get(), TIMELIB_NO_CLONE);
-  timelib_update_ts(t, m_tz->get());
+  timelib_update_ts(t, m_tz->getTZInfo());
   timelib_update_from_sse(t);
 
   int error2;
@@ -912,7 +955,7 @@ bool DateTime::fromString(const String& input, req::ptr<TimeZone> tz,
   }
 
   m_time = TimePtr(t, time_deleter());
-  if (t->tz_info != m_tz->get()) {
+  if (t->tz_info != m_tz->getTZInfo()) {
     m_tz = req::make<TimeZone>(t->tz_info);
   }
   return true;
@@ -1074,7 +1117,7 @@ Variant DateTime::getSunInfo(SunInfoFormat retformat,
     return String(retstr, CopyString);
   }
 
-  assert(retformat == SunInfoFormat::ReturnDouble);
+  assertx(retformat == SunInfoFormat::ReturnDouble);
   return N;
 }
 

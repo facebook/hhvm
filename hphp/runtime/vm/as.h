@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_HHVM_AS_H_
 #define incl_HPHP_HHVM_AS_H_
 
+#include <memory>
 #include <string>
 
 namespace HPHP {
@@ -25,20 +26,58 @@ struct UnitEmitter;
 struct FuncEmitter;
 struct MD5;
 
+namespace Native {
+struct FuncTable;
+}
+
 //////////////////////////////////////////////////////////////////////
+
+/*
+ * We allow callers of assemble_string to pass in a struct of callbacks which
+ * can be triggered on certain events that occur during assembly. We use
+ * callbacks for instance to process metadata sections like .include,
+ * .constant_refs, etc. which hold information about which symbols this
+ * compilation unit makes reference to but doesn't necessarily define itself.
+ */
+struct AsmCallbacks {
+  virtual ~AsmCallbacks() {}
+
+  virtual void onInclude(const std::string&) {}
+  virtual void onConstantRef(const std::string&) {}
+  virtual void onFunctionRef(const std::string&) {}
+  virtual void onClassRef(const std::string&) {}
+};
 
 /*
  * Assemble the contents of `filename' and return a UnitEmitter.
  *
+ * If swallowErrors is true then emit a fataling unit for any assembler errors.
+ *
  * Minimal documentation is available in as.cpp.
  */
-UnitEmitter* assemble_string(const char* code, int codeLen,
-                             const char* filename, const MD5&);
+std::unique_ptr<UnitEmitter> assemble_string(
+  const char* code,
+  int codeLen,
+  const char* filename,
+  const MD5&,
+  const Native::FuncTable&,
+  bool swallowErrors = true,
+  AsmCallbacks* callbacks = nullptr
+);
 
 enum class AsmResult {
   NoResult,
   ValuePushed,
   Unreachable
+};
+
+struct AssemblerError : std::runtime_error {
+  explicit AssemblerError(const std::string& msg) : std::runtime_error(msg) {}
+  AssemblerError(int where, const std::string& what);
+};
+
+struct AssemblerUnserializationError : AssemblerError {
+  using AssemblerError::AssemblerError;
 };
 
 AsmResult assemble_expression(UnitEmitter&, FuncEmitter*, int,

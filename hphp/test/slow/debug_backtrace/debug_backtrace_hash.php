@@ -14,6 +14,9 @@ class SomeClass {
   }
 }
 
+
+<<__EntryPoint>>
+function main_debug_backtrace_hash() {
 $hash_a = SomeClass::pathA();
 $hash_a2 = SomeClass::pathA();
 if ($hash_a === $hash_a2) {
@@ -25,4 +28,5 @@ if ($hash_a !== $hash_b) {
   echo "different hash for different paths\n";
 } else {
   echo "BAD: same hash for different paths ($hash_a)\n";
+}
 }

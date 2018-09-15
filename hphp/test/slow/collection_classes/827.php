@@ -13,4 +13,8 @@ function f() {
   }
   var_dump($mp3);
 }
+
+<<__EntryPoint>>
+function main_827() {
 f();
+}

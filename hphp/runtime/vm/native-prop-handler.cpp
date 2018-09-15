@@ -29,7 +29,7 @@ void registerNativePropHandler(const String& className,
                                NativePropHandler::IssetFunc isset,
                                NativePropHandler::UnsetFunc unset) {
 
-  assert(s_nativePropHandlerMap.find(className.get()) ==
+  assertx(s_nativePropHandlerMap.find(className.get()) ==
     s_nativePropHandlerMap.end());
 
   NativePropHandler propHandler;
@@ -96,29 +96,29 @@ PropAccessorMap::const_iterator PropAccessorMap::lookupProp(
 
 Variant getProp(const Object& obj, const String& name) {
   auto nph = obj->getVMClass()->getNativePropHandler();
-  assert(nph);
-  assert(nph->get);
+  assertx(nph);
+  assertx(nph->get);
   return nph->get(obj, name);
 }
 
 Variant setProp(const Object& obj, const String& name, const Variant& value) {
   auto nph = obj->getVMClass()->getNativePropHandler();
-  assert(nph);
-  assert(nph->set);
+  assertx(nph);
+  assertx(nph->set);
   return nph->set(obj, name, value);
 }
 
 Variant issetProp(const Object& obj, const String& name) {
   auto nph = obj->getVMClass()->getNativePropHandler();
-  assert(nph);
-  assert(nph->isset);
+  assertx(nph);
+  assertx(nph->isset);
   return nph->isset(obj, name);
 }
 
 Variant unsetProp(const Object& obj, const String& name) {
   auto nph = obj->getVMClass()->getNativePropHandler();
-  assert(nph);
-  assert(nph->unset);
+  assertx(nph);
+  assertx(nph->unset);
   return nph->unset(obj, name);
 }
 

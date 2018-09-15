@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_g10() {
 $foo = function() {
   static $x = 1;
   $x += 10;
@@ -22,4 +25,5 @@ for ($y1->next(); $y1->valid(); $y1->next()) {
 echo "========\n";
 for ($y2->next(); $y2->valid(); $y2->next()) {
   echo $y2->current() . "\n";
+}
 }

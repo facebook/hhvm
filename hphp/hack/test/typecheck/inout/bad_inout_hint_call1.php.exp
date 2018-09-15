@@ -1,0 +1,6 @@
+File "bad_inout_hint_call1.php", line 7, characters 5-18:
+Invalid argument (Typing[4184])
+File "bad_inout_hint_call1.php", line 3, characters 30-32:
+This is an inout parameter
+File "bad_inout_hint_call1.php", line 7, characters 5-6:
+It is incompatible with a normal parameter

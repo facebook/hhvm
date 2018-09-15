@@ -88,7 +88,7 @@ namespace {
 }
 
 void AsioContext::exit(context_idx_t ctx_idx) {
-  assert(AsioSession::Get()->getContext(ctx_idx) == this);
+  assertx(AsioSession::Get()->getContext(ctx_idx) == this);
 
   exitContextVector(ctx_idx, m_runnableQueue);
   exitContextVector(ctx_idx, m_fastRunnableQueue);
@@ -106,8 +106,8 @@ void AsioContext::exit(context_idx_t ctx_idx) {
 
 void AsioContext::schedule(c_RescheduleWaitHandle* wait_handle, uint32_t queue,
                            int64_t priority) {
-  assert(queue == QUEUE_DEFAULT || queue == QUEUE_NO_PENDING_IO);
-  assert(!(priority < 0));
+  assertx(queue == QUEUE_DEFAULT || queue == QUEUE_NO_PENDING_IO);
+  assertx(!(priority < 0));
 
   auto& dst_queue = queue == QUEUE_DEFAULT ? m_priorityQueueDefault :
                     m_priorityQueueNoPendingIO;
@@ -144,8 +144,8 @@ c_AsyncFunctionWaitHandle* AsioContext::maybePopFast() {
 }
 
 void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
-  assert(wait_handle);
-  assert(wait_handle->getContext() == this);
+  assertx(wait_handle);
+  assertx(wait_handle->getContext() == this);
 
   auto session = AsioSession::Get();
   auto ete_queue = session->getExternalThreadEventQueue();
@@ -256,7 +256,7 @@ void AsioContext::runUntil(c_WaitableWaitHandle* wait_handle) {
     // What could it possibly mean? I think we are in a deep sh^H^Hcycle.
     // But we can't, the cycles are detected and avoided at blockOn() time.
     // So, looks like it's not cycle, but the word I started typing first.
-    assert(false);
+    assertx(false);
     raise_fatal_error(
       "Invariant violation: queues are empty, but wait handle did not finish");
   }

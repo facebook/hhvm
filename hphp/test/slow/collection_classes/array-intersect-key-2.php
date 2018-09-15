@@ -1,7 +1,7 @@
 <?hh
 function f($x) {
   $arr = (array)$x;
-  uasort($arr, function($a,$b) {
+  uasort(&$arr, function($a,$b) {
     if (is_int($a) != is_int($b)) {
       if (is_int($a)) return -1;
       return 1;
@@ -62,5 +62,9 @@ function main() {
   f(array_intersect_key($m1, $s2, $s3));
   f(array_intersect_key($s1, $s2, $s3));
 }
-main();
 
+
+<<__EntryPoint>>
+function main_array_intersect_key_2() {
+main();
+}

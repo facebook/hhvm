@@ -1,7 +1,7 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-trait Trait {
+trait Traitt {
   require extends AbstractClass;
 }
 
@@ -14,5 +14,5 @@ class ActualClass extends AbstractClass {
 }
 
 final class FinalActualClass extends ActualClass {
-  use Trait;
+  use Traitt;
 }

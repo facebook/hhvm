@@ -19,6 +19,7 @@
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/asm-info.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
+#include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/relocation.h"
@@ -130,16 +131,17 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
   CodeBlock& main_in = code.main();
   CodeBlock& cold_in = code.cold();
 
-  CodeBlock main;
-  CodeBlock cold;
+  CodeBlock mainLocal;
+  CodeBlock coldLocal;
+
+  CodeBlock& main = code.isLocal() ? code.main() : mainLocal;
+  CodeBlock& cold = code.isLocal() ? code.cold() : coldLocal;
   CodeBlock* frozen = &code.frozen();
 
-  auto const do_relocate = arch_any(Arch::X64, Arch::PPC64) &&
-    !RuntimeOption::EvalEnableReusableTC &&
+  auto const do_relocate = !RuntimeOption::EvalEnableReusableTC &&
     RuntimeOption::EvalJitRelocationSize &&
     cold_in.canEmit(RuntimeOption::EvalJitRelocationSize * 3) &&
-    (!RuntimeOption::EvalEnableOptTCBuffer ||
-     unit.context().kind != TransKind::Optimize);
+    !code.isLocal();
 
   // If code relocation is supported and enabled, set up temporary code blocks.
   if (do_relocate) {
@@ -164,7 +166,7 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
     main.init(cold.frontier() +
               RuntimeOption::EvalJitRelocationSize + off,
               RuntimeOption::EvalJitRelocationSize - off, "cgRelocMain");
-  } else {
+  } else if (!code.isLocal()) {
     // Use separate code blocks, so that attempts to use code's blocks
     // directly will fail (e.g., by overwriting the same memory being written
     // through these locals).
@@ -190,22 +192,36 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
   bindDataPtrs(vunit, vtext.data());
   emit(vunit, vtext, meta, ai);
 
-  assertx(cold_in.frontier() == cold_start);
-  assertx(main_in.frontier() == main_start);
+  assertx(code.isLocal() || cold_in.frontier() == cold_start);
+  assertx(code.isLocal() || main_in.frontier() == main_start);
+
+  assertx(!isPrologue(unit.context().kind) ||
+          funcGuardMatches(
+            funcGuardFromPrologue(unit.prologueStart, unit.context().func),
+            unit.context().func
+          ));
 
   if (do_relocate) {
-    tc::relocateTranslation(unit,
+    tc::relocateTranslation(&unit,
                             main, main_in, main_start,
                             cold, cold_in, cold_start,
                             *frozen, frozen_start, ai, meta);
-  } else {
+  } else if (!code.isLocal()) {
     cold_in.skip(cold.frontier() - cold_in.frontier());
     main_in.skip(main.frontier() - main_in.frontier());
   }
 
   if (ai) {
+    if (code.isLocal()) {
+      ai->mainInstRanges.offset =
+        main.toDestAddress(main.frontier()) - main.frontier();
+      ai->coldInstRanges.offset =
+        cold.toDestAddress(cold.frontier()) - cold.frontier();
+      ai->frozenInstRanges.offset =
+        frozen->toDestAddress(frozen->frontier()) - frozen->frontier();
+    }
     printUnit(kCodeGenLevel, unit, " after code gen ",
-              ai, nullptr, annotations);
+             ai, nullptr, annotations);
   }
 }
 

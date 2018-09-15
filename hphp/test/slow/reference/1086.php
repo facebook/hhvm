@@ -4,6 +4,10 @@ function &f() {
  $a = array();
  return $a['b'];
 }
- $b = &f();
+
+ <<__EntryPoint>>
+function main_1086() {
+$b = &f();
  $b = 20;
  var_dump($b);
+}

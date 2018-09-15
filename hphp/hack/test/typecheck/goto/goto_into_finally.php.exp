@@ -1,0 +1,2 @@
+File "goto_into_finally.php", line 8, characters 5-6:
+It is illegal to define a goto label within a finally block. (Naming[2074])

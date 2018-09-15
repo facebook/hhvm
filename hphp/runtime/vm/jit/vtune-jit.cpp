@@ -26,7 +26,7 @@ namespace HPHP { namespace jit {
 // the comment in iJIT_Method_Load structure definition.) We use 1000 for
 // trampolines and larger values for normal functions.
 static const int MIN_HELPER_ID = 1000;
-static const int MIN_METHOD_ID = 1100;
+static const int MIN_METHOD_ID = 2000;
 
 void reportTraceletToVtune(const Unit* unit,
                            const Func* func,
@@ -137,7 +137,7 @@ void reportHelperToVtune(const char *name,
   iJIT_Method_Load methodInfo;
   memset(&methodInfo, 0, sizeof(methodInfo));
 
-  assert(helperNumber < MIN_METHOD_ID);
+  assertx(helperNumber < MIN_METHOD_ID);
   methodInfo.method_id = helperNumber++;
 
   methodInfo.method_name = const_cast<char *>(name);

@@ -1,0 +1,4 @@
+File "gen_array_rec_nonnull.php", line 4, characters 9-25:
+gena expects an array (Typing[4044])
+File "gen_array_rec_nonnull.php", line 3, characters 18-24:
+It is incompatible with a nonnull value

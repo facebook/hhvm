@@ -1,0 +1,24 @@
+.main {
+  Int 1
+  RetC
+}
+
+.function <"" N  > foo() {
+  Null
+  RetC
+}
+
+.function [nontop] <"" N  > bar() {
+  Null
+  RetC
+}
+
+.function <"" N  > foo2() {
+  Null
+  RetC
+}
+
+.function [nontop] <"" N  > bar2() {
+  Null
+  RetC
+}

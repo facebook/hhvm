@@ -122,7 +122,7 @@ class SimSystemRegister {
 class Simulator : public DecoderVisitor {
  public:
   explicit Simulator(Decoder* decoder, std::ostream& stream);
-  ~Simulator();
+  ~Simulator() override;
 
   void ResetState();
 
@@ -180,7 +180,7 @@ class Simulator : public DecoderVisitor {
   }
 
   // Declare all Visitor functions.
-  #define DECLARE(A)  void Visit##A(Instruction* instr);
+  #define DECLARE(A)  void Visit##A(Instruction* instr) override;
   VISITOR_LIST(DECLARE)
   #undef DECLARE
 

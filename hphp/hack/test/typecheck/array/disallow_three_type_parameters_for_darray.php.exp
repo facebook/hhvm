@@ -1,0 +1,2 @@
+File "disallow_three_type_parameters_for_darray.php", line 3, characters 35-37:
+Encountered unexpected token 'int'. (Parsing[1002])

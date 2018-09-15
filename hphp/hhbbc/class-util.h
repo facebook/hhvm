@@ -38,16 +38,14 @@ bool is_collection(res::Class);
 bool is_closure(const php::Class&);
 
 /*
- * Returns whether a Type could hold an object that has a custom
- * boolean conversion function.
+ * Returns whether a clsName is a class with a magic toBoolean method.
  */
-bool could_have_magic_bool_conversion(Type);
+bool has_magic_bool_conversion(SString clsName);
 
 /*
  * Returns method named "name" if it exists.
  */
-borrowed_ptr<php::Func> find_method(borrowed_ptr<const php::Class>,
-                                    SString name);
+php::Func* find_method(const php::Class*, SString name);
 
 /*
  * Returns true if `name' is the name of an internal VM special class
@@ -59,7 +57,26 @@ bool is_special_method_name(SString name);
  * Returns true if a class has the __MockClass user attribute.  This
  * attribute allows final methods and final classes to be overridden.
  */
-bool is_mock_class(borrowed_ptr<const php::Class>);
+bool is_mock_class(const php::Class*);
+
+/*
+ * Returns true if cls is a trait which will not be imported into any
+ * classes at runtime (probably because it was flattened into them).
+ */
+bool is_unused_trait(const php::Class& cls);
+
+/*
+ * Returns true if cls is a trait which could be imported into a class
+ * at runtime.
+ */
+bool is_used_trait(const php::Class& cls);
+
+/*
+ * Normalizes a class' name to remove any non-deterministic elements. For
+ * closures and anonymous classes, it removes the unique integer identifier from
+ * it. Otherwise, it returns the unmodified class name.
+ */
+std::string normalized_class_name(const php::Class& cls);
 
 //////////////////////////////////////////////////////////////////////
 

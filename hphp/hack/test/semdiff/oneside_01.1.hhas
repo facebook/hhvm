@@ -1,0 +1,8 @@
+.main {
+  .try_fault F1 {
+    Int 1
+  }
+  RetC
+F1:
+  Unwind
+}

@@ -1,9 +1,6 @@
 """
 GDB commands related to the HHVM stack.
 """
-# @lint-avoid-python-3-compatibility-imports
-# @lint-avoid-pyflakes3
-# @lint-avoid-pyflakes2
 
 from compatibility import *
 
@@ -29,12 +26,13 @@ falls back to the default GDB unwinder(s) otherwise.
 """
 
     def __init__(self):
+        self.regs = arch_regs()
         super(HHVMUnwinder, self).__init__('hhvm_unwinder')
 
     def __call__(self, pending_frame):
-        fp = pending_frame.read_register('rbp')
-        sp = pending_frame.read_register('rsp')
-        ip = pending_frame.read_register('rip')
+        fp = pending_frame.read_register(self.regs['fp'])
+        sp = pending_frame.read_register(self.regs['sp'])
+        ip = pending_frame.read_register(self.regs['ip'])
 
         if not frame.is_jitted(fp, ip):
             return None
@@ -53,18 +51,18 @@ falls back to the default GDB unwinder(s) otherwise.
 
         # Restore the saved frame pointer and instruction pointer.
         fp = fp.cast(T('uintptr_t').pointer())
-        unwind_info.add_saved_register('rbp', fp[0])
-        unwind_info.add_saved_register('rip', fp[1])
+        unwind_info.add_saved_register(self.regs['fp'], fp[0])
+        unwind_info.add_saved_register(self.regs['ip'], fp[1])
 
         if frame.is_jitted(fp[0], fp[1]):
             # Our parent frame is jitted.  Again, we are unable to track %rsp
             # properly in the TC, so just preserve its value (just as we do in
             # the TC's custom .eh_frame section).
-            unwind_info.add_saved_register('rsp', sp)
+            unwind_info.add_saved_register(self.regs['sp'], sp)
         else:
             # Our parent frame is not jitted, so we're in enterTCHelper, and we
             # can restore our parent's %rsp as usual.
-            unwind_info.add_saved_register('rsp', fp + 16)
+            unwind_info.add_saved_register(self.regs['sp'], fp + 16)
 
         return unwind_info
 

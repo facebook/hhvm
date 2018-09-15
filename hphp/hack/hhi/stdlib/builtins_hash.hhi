@@ -3,21 +3,34 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
+
+<<__PHPStdLib, __Rx>>
 function hash($algo, $data, $raw_output = false) { }
+<<__PHPStdLib, __Rx>>
 function hash_algos() { }
+<<__PHPStdLib>>
 function hash_init($algo, $options = 0, $key = null) { }
+<<__PHPStdLib>>
 function hash_file($algo, $filename, $raw_output = false) { }
+<<__PHPStdLib>>
 function hash_final($context, $raw_output = false) { }
+<<__PHPStdLib>>
 function hash_hmac_file($algo, $filename, $key, $raw_output = false) { }
+<<__PHPStdLib, __Rx>>
 function hash_hmac($algo, $data, $key, $raw_output = false) { }
+<<__PHPStdLib>>
 function hash_update_file($init_context, $filename, $stream_context = null) { }
+<<__PHPStdLib>>
 function hash_update_stream($context, $handle, $length = -1) { }
+<<__PHPStdLib>>
 function hash_update($context, $data) { }
+<<__PHPStdLib, __Rx>>
 function furchash_hphp_ext($key, $len, $nPart) { }
+<<__PHPStdLib, __Rx>>
 function furchash_hphp_ext_supported() { }
+<<__PHPStdLib, __Rx>>
 function hphp_murmurhash($key, $len, $seed) { }

@@ -17,4 +17,8 @@ function test() {
   $a = apc_fetch('foo');
   var_dump($a);
 }
+
+<<__EntryPoint>>
+function main_1827() {
 test();
+}

@@ -1,0 +1,10 @@
+name: \C::foo, kind: property, span: line 4, characters 22-25, is_declaration: true
+definition:
+ foo
+   kind: property
+   id: property::C::foo
+   position: line 4, characters 22-25
+   span: line 4, character 22 - line 4, character 25
+   modifiers: public static 
+
+

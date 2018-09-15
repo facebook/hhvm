@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_805() {
 $collections = array(
   'Vector' => new Vector(),
   'Map' => new Map(),
@@ -34,3 +37,4 @@ try {
   echo "Fail!\n";
 }
 echo "Done\n";
+}

@@ -16,4 +16,8 @@ function main() {
   var_dump($c->loadAllWithIDs($testA));
 }
 
+
+<<__EntryPoint>>
+function main_1326() {
 main();
+}

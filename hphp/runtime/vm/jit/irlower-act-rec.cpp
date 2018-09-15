@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/countable.h"
@@ -24,7 +25,9 @@
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-variant.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/act-rec.h"
@@ -58,20 +61,13 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace {
-
-int iterOffset(const BCMarker& marker, uint32_t id) {
-  auto const func = marker.func();
-  return -cellsToBytes(((id + 1) * kNumIterCells + func->numLocals()));
-}
-
-}
-
 void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<SpillFrame>();
   auto const funcTmp = inst->src(1);
   auto const ctxTmp = inst->src(2);
+  auto const invNameTmp = inst->src(3);
+  auto const isDynamic = inst->src(4);
   auto& v = vmain(env);
 
   auto const ar = sp[cellsToBytes(extra->spOffset.offset)];
@@ -89,121 +85,188 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
       v << orqi{ActRec::kHasClassBit, cls, cctx, v.makeReg()};
       v << store{cctx, ar + AROFF(m_thisUnsafe)};
     }
-  } else if (ctxTmp->isA(TCtx)) {
-    // We don't have to incref here;
-    auto const ctx = srcLoc(env, inst, 2).reg();
-    v << store{ctx, ar + AROFF(m_thisUnsafe)};
-  } else {
-    always_assert(ctxTmp->isA(TNullptr));
+  } else if (ctxTmp->isA(TNullptr)) {
     // No $this or class; this happens in FPushFunc.
     if (RuntimeOption::EvalHHIRGenerateAsserts) {
       emitImmStoreq(v, ActRec::kTrashedThisSlot, ar + AROFF(m_thisUnsafe));
     }
+  } else {
+    // It could be TCls | TCtx | TNullptr, but we can't distinguish TCls and
+    // TCtx so assert it doesn't happen. We don't generate SpillFrames with such
+    // input types.
+    assertx(ctxTmp->isA(TCtx | TNullptr));
+
+    // We don't have to incref here
+    auto const ctx = srcLoc(env, inst, 2).reg();
+    v << store{ctx, ar + AROFF(m_thisUnsafe)};
+    if (RuntimeOption::EvalHHIRGenerateAsserts &&
+        ctxTmp->type().maybe(TNullptr)) {
+      auto const sf = v.makeReg();
+      v << testq{ctx, ctx, sf};
+      ifThen(
+        v,
+        CC_Z,
+        sf,
+        [&] (Vout& v) {
+          emitImmStoreq(v, ActRec::kTrashedThisSlot, ar + AROFF(m_thisUnsafe));
+        }
+      );
+    }
   }
 
   // Set m_invName.
-  if (extra->invName) {
-    auto const invName = reinterpret_cast<uintptr_t>(extra->invName);
-    emitImmStoreq(v, invName, ar + AROFF(m_invName));
-  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, ar + AROFF(m_invName));
+  if (invNameTmp->isA(TNullptr)) {
+    if (RuntimeOption::EvalHHIRGenerateAsserts) {
+      emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, ar + AROFF(m_invName));
+    }
+  } else {
+    assertx(invNameTmp->isA(TStr | TNullptr));
+
+    // We don't have to incref here
+    auto const invName = srcLoc(env, inst, 3).reg();
+    v << store{invName, ar + AROFF(m_invName)};
+    if (invNameTmp->type().maybe(TNullptr)) {
+      if (RuntimeOption::EvalHHIRGenerateAsserts) {
+        auto const sf = v.makeReg();
+        v << testq{invName, invName, sf};
+        ifThen(
+          v,
+          CC_Z,
+          sf,
+          [&] (Vout& v) {
+            emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, ar + AROFF(m_invName));
+          }
+        );
+      }
+    }
   }
 
   // Set m_func.
-  if (!funcTmp->isA(TNullptr)) {
-    auto const func = srcLoc(env, inst, 1).reg(0);
-    v << store{func, ar + AROFF(m_func)};
-  }
-
-  auto const caller = inst->marker().func();
-  auto flags = !caller->isBuiltin() && !caller->unit()->useStrictTypes()
-    ? ActRec::Flags::UseWeakTypes
-    : ActRec::Flags::None;
-  if (extra->invName) {
-    flags = static_cast<ActRec::Flags>(flags | ActRec::Flags::MagicDispatch);
-  }
-  auto const naaf = static_cast<int32_t>(
-    ActRec::encodeNumArgsAndFlags(extra->numArgs, flags)
-  );
-  v << storeli{naaf, ar + AROFF(m_numArgsAndFlags)};
-}
-
-void cgCufIterSpillFrame(IRLS& env, const IRInstruction* inst) {
-  auto const sp = srcLoc(env, inst, 0).reg();
-  auto const fp = srcLoc(env, inst, 1).reg();
-  auto const extra = inst->extra<CufIterSpillFrame>();
-  auto const iterOff = iterOffset(inst->marker(), extra->iterId);
-
-  auto& v = vmain(env);
-
-  auto const ar = sp[cellsToBytes(extra->spOffset.offset)];
-
-  auto const func = v.makeReg();
-  v << load{fp[iterOff + CufIter::funcOff()], func};
-  v << store{func, ar + AROFF(m_func)};
-
-  auto const ctx = v.makeReg();
-  v << load{fp[iterOff + CufIter::ctxOff()], ctx};
-  v << store{ctx, ar + AROFF(m_thisUnsafe)};
-
-  { // Incref m_this, if it's indeed a $this (rather than a class context).
-    auto const sf = v.makeReg();
-    auto const shifted = v.makeReg();
-    v << shrqi{1, ctx, shifted, sf};
-    ifThen(v, CC_NBE, sf, [&](Vout& v) {
-      auto const rthis = v.makeReg();
-      v << shlqi{1, shifted, rthis, v.makeReg()};
-      emitIncRef(v, rthis);
-    });
-  }
-
-  auto const caller = inst->marker().func();
-  auto const flags = !caller->isBuiltin() && !caller->unit()->useStrictTypes()
-    ? ActRec::Flags::UseWeakTypes
-    : ActRec::Flags::None;
-
-  auto const name = v.makeReg();
-  auto const sf = v.makeReg();
-  v << load{fp[iterOff + CufIter::nameOff()], name};
-  v << store{name, ar + AROFF(m_invName)};
-  v << testq{name, name, sf};
-
-  ifThenElse(v, CC_NZ, sf,
-    [&] (Vout& v) {
-      static_assert(UncountedValue < 0 && StaticValue < 0, "");
-
-      // Incref m_invName if it's non-persistent.
-      auto const sf = v.makeReg();
-      v << cmplim{0, name[FAST_REFCOUNT_OFFSET], sf};
-      ifThen(v, CC_GE, sf, [&] (Vout& v) { emitIncRef(v, name); });
-
-      auto const naaf = static_cast<int32_t>(
-        ActRec::encodeNumArgsAndFlags(
-          safe_cast<int32_t>(extra->args),
-          static_cast<ActRec::Flags>(ActRec::Flags::MagicDispatch | flags)
-        )
-      );
-      v << storeli{naaf, ar + AROFF(m_numArgsAndFlags)};
-    },
-    [&] (Vout& v) {
-      auto const naaf = static_cast<int32_t>(
-        ActRec::encodeNumArgsAndFlags(
-          safe_cast<int32_t>(extra->args),
-          flags
-        )
-      );
-      v << storeli{naaf, ar + AROFF(m_numArgsAndFlags)};
+  if (funcTmp->isA(TNullptr)) {
+    if (RuntimeOption::EvalHHIRGenerateAsserts) {
+      emitImmStoreq(v, ActRec::kTrashedFuncSlot, ar + AROFF(m_func));
     }
+  } else {
+    assertx(funcTmp->isA(TFunc | TNullptr));
+    auto const func = srcLoc(env, inst, 1).reg();
+    v << store{func, ar + AROFF(m_func)};
+    if (RuntimeOption::EvalHHIRGenerateAsserts &&
+        funcTmp->type().maybe(TNullptr)) {
+      auto const sf = v.makeReg();
+      v << testq{func, func, sf};
+      ifThen(
+        v,
+        CC_Z,
+        sf,
+        [&] (Vout& v) {
+          emitImmStoreq(v, ActRec::kTrashedFuncSlot, ar + AROFF(m_func));
+        }
+      );
+    }
+  }
+
+  // Set flags
+  auto flags = ActRec::Flags::None;
+
+  bool dynamicCheck = false;
+  bool magicCheck = false;
+  if (!isDynamic->hasConstVal()) {
+    dynamicCheck = true;
+  } else if (isDynamic->hasConstVal(true)) {
+    flags = static_cast<ActRec::Flags>(flags | ActRec::Flags::DynamicCall);
+  }
+
+  if (!invNameTmp->type().maybe(TNullptr)) {
+    flags = static_cast<ActRec::Flags>(flags | ActRec::Flags::MagicDispatch);
+  } else if (!invNameTmp->isA(TNullptr)) {
+    magicCheck = true;
+  }
+
+  auto naaf = v.cns(
+    static_cast<int32_t>(ActRec::encodeNumArgsAndFlags(extra->numArgs, flags))
   );
+
+  if (magicCheck) {
+    auto const invName = srcLoc(env, inst, 3).reg();
+    auto const sf = v.makeReg();
+    v << testq{invName, invName, sf};
+    naaf = unlikelyCond(
+      v,
+      vcold(env),
+      CC_NZ,
+      sf,
+      v.makeReg(),
+      [&] (Vout& v) {
+        auto const dst = v.makeReg();
+        v << orqi{
+          static_cast<int32_t>(ActRec::Flags::MagicDispatch),
+          naaf,
+          dst,
+          v.makeReg()
+        };
+        return dst;
+      },
+      [&] (Vout& v) { return naaf; }
+    );
+  }
+
+  if (dynamicCheck) {
+    auto const dynamicReg = srcLoc(env, inst, 4).reg();
+    auto const sf = v.makeReg();
+    v << testb{dynamicReg, dynamicReg, sf};
+    naaf = unlikelyCond(
+      v,
+      vcold(env),
+      CC_NZ,
+      sf,
+      v.makeReg(),
+      [&] (Vout& v) {
+        auto const dst = v.makeReg();
+        v << orqi{
+          static_cast<int32_t>(ActRec::Flags::DynamicCall),
+          naaf,
+          dst,
+          v.makeReg()
+        };
+        return dst;
+      },
+      [&] (Vout& v) { return naaf; }
+    );
+  }
+
+  v << storel{naaf, ar + AROFF(m_numArgsAndFlags)};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void cgAssertARFunc(IRLS&, const IRInstruction*) {}
 
 void cgLdARFuncPtr(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const off = cellsToBytes(inst->extra<LdARFuncPtr>()->offset.offset);
   vmain(env) << load{sp[off + AROFF(m_func)], dst};
+}
+
+void cgLdARIsDynamic(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const sp = srcLoc(env, inst, 0).reg();
+  auto const off = cellsToBytes(inst->extra<LdARIsDynamic>()->offset.offset);
+
+  auto& v = vmain(env);
+  auto const sf = v.makeReg();
+  v << testlim{
+    static_cast<int32_t>(ActRec::Flags::DynamicCall),
+    sp[off + AROFF(m_numArgsAndFlags)], sf
+  };
+  v << setcc{CC_NZ, sf, dst};
+}
+
+void cgLdARCtx(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const sp = srcLoc(env, inst, 0).reg();
+  auto const off = cellsToBytes(inst->extra<LdARCtx>()->offset.offset);
+  vmain(env) << load{sp[off + AROFF(m_thisUnsafe)], dst};
 }
 
 void cgLdARNumArgsAndFlags(IRLS& env, const IRInstruction* inst) {
@@ -317,23 +380,38 @@ static void sync_regstate_to_caller(ActRec* preLive) {
     : preLive->m_sfp;
   regs.fp = fp;
   regs.pc = fp->func()->unit()->at(fp->func()->base() + preLive->m_soff);
+  regs.jitReturnAddr = (TCA)preLive->m_savedRip;
 
   tl_regState = VMRegState::CLEAN;
 }
 
+/*
+ * Perform the action specified by 'action1' on the range of TypedValues
+ * represented by 'tv' and 'limit'. If 'pred' ever returns true, sync the
+ * register register state and then start calling 'action2' instead.
+ */
+template <typename Iter, typename Pred, typename Action1, typename Action2>
 NEVER_INLINE
-static void trimExtraArgsMayReenter(ActRec* ar,
-                                    TypedValue* tvArgs,
-                                    TypedValue* limit) {
-  sync_regstate_to_caller(ar);
+static void actionMayReenter(ActRec* ar,
+                             Iter tv,
+                             Iter limit,
+                             Pred pred,
+                             Action1 action1,
+                             Action2 action2) {
   do {
-    tvRefcountedDecRef(tvArgs); // may reenter for __destruct
-    ++tvArgs;
-  } while (tvArgs != limit);
-  ar->setNumArgs(ar->m_func->numParams());
-
-  // Go back to dirty (see the comments of sync_regstate_to_caller()).
-  tl_regState = VMRegState::DIRTY;
+    if (pred(*tv)) {
+      sync_regstate_to_caller(ar);
+      // Go back to dirty (see the comments of sync_regstate_to_caller()).
+      SCOPE_EXIT { tl_regState = VMRegState::DIRTY; };
+      do {
+        action2(*tv);
+        ++tv;
+      } while (tv != limit);
+      break;
+    }
+    action1(*tv);
+    ++tv;
+  } while (tv != limit);
 }
 
 }
@@ -354,15 +432,14 @@ void trimExtraArgs(ActRec* ar) {
   assertx(!f->hasVariadicCaptureParam());
   assertx(!(f->attrs() & AttrMayUseVV));
 
-  auto limit = tvArgs + numExtra;
-  do {
-    if (UNLIKELY(tvDecRefWillCallHelper(tvArgs))) {
-      trimExtraArgsMayReenter(ar, tvArgs, limit);
-      return;
-    }
-    tvDecRefOnly(tvArgs);
-    ++tvArgs;
-  } while (tvArgs != limit);
+  actionMayReenter(
+    ar,
+    tvArgs,
+    tvArgs + numExtra,
+    [](TypedValue v){ return tvDecRefWillCallHelper(v); },
+    [](TypedValue v){ tvDecRefGenNZ(v); },
+    [](TypedValue v){ tvDecRefGen(v); }
+  );
 
   assertx(f->numParams() == (numArgs - numExtra));
   assertx(f->numParams() == numParams);
@@ -382,11 +459,29 @@ void shuffleExtraArgsVariadic(ActRec* ar) {
   assertx(f->hasVariadicCaptureParam());
   assertx(!(f->attrs() & AttrMayUseVV));
 
-  auto varArgsArray = Array::attach(PackedArray::MakePacked(numExtra, tvArgs));
+  VArrayInit ai{numExtra};
+  actionMayReenter(
+    ar,
+    std::reverse_iterator<TypedValue*>(tvArgs + numExtra),
+    std::reverse_iterator<TypedValue*>(tvArgs),
+    [](TypedValue v)  { return isRefType(v.m_type); },
+    [&](TypedValue v) { ai.appendWithRef(v); },
+    [&](TypedValue v) { ai.appendWithRef(v); }
+  );
+  actionMayReenter(
+    ar,
+    tvArgs,
+    tvArgs + numExtra,
+    /* If the value wasn't a ref, we'll have definitely inc-reffed it, so we
+     * won't re-enter. */
+    [](TypedValue v){ return isRefType(v.m_type); },
+    [](TypedValue v){ tvDecRefGenNZ(v); },
+    [](TypedValue v){ tvDecRefGen(v); }
+  );
+
   // Write into the last (variadic) param.
   auto tv = reinterpret_cast<TypedValue*>(ar) - numParams - 1;
-  tv->m_type = KindOfArray;
-  tv->m_data.parr = varArgsArray.detach();
+  *tv = make_array_like_tv(ai.create());
   assertx(tv->m_data.parr->hasExactlyOneRef());
 
   // No incref is needed, since extra values are being transferred from the
@@ -402,20 +497,27 @@ void shuffleExtraArgsVariadicAndVV(ActRec* ar) {
   assertx(f->attrs() & AttrMayUseVV);
 
   ar->setExtraArgs(ExtraArgs::allocateCopy(tvArgs, numExtra));
-
-  auto varArgsArray = Array::attach(PackedArray::MakePacked(numExtra, tvArgs));
-  auto tvIncr = tvArgs;
-  // An incref is needed to compensate for discarding from the stack.
-  for (uint32_t i = 0; i < numExtra; ++i, ++tvIncr) {
-    tvRefcountedIncRef(tvIncr);
+  try {
+    VArrayInit ai{numExtra};
+    actionMayReenter(
+      ar,
+      std::reverse_iterator<TypedValue*>(tvArgs + numExtra),
+      std::reverse_iterator<TypedValue*>(tvArgs),
+      [](TypedValue v)  { return isRefType(v.m_type); },
+      [&](TypedValue v) { ai.appendWithRef(v); },
+      [&](TypedValue v) { ai.appendWithRef(v); }
+    );
+    // Write into the last (variadic) param.
+    auto tv = reinterpret_cast<TypedValue*>(ar) - numParams - 1;
+    *tv = make_array_like_tv(ai.create());
+    assertx(tv->m_data.parr->hasExactlyOneRef());
+    // Before, for each arg: refcount = n + 1 (stack).
+    // After, for each arg: refcount = n + 2 (ExtraArgs, varArgsArray).
+  } catch (...) {
+    ExtraArgs::deallocateRaw(ar->getExtraArgs());
+    ar->resetExtraArgs();
+    throw;
   }
-  // Write into the last (variadic) param.
-  auto tv = reinterpret_cast<TypedValue*>(ar) - numParams - 1;
-  tv->m_type = KindOfArray;
-  tv->m_data.parr = varArgsArray.detach();
-  assertx(tv->m_data.parr->hasExactlyOneRef());
-  // Before, for each arg: refcount = n + 1 (stack).
-  // After, for each arg: refcount = n + 2 (ExtraArgs, varArgsArray).
 }
 
 #undef SHUFFLE_EXTRA_ARGS_PRELUDE
@@ -454,11 +556,14 @@ void cgInitExtraArgs(IRLS& env, const IRInstruction* inst) {
       break;
   }
 
-  v << vcall{
+  cgCallHelper(
+    v,
+    env,
     CallSpec::direct(handler),
-    v.makeVcallArgs({{fp}}),
-    v.makeTuple({})
-  };
+    callDest(env, inst),
+    SyncOptions::Sync,
+    argGroup(env, inst).reg(fp)
+  );
 }
 
 void cgPackMagicArgs(IRLS& env, const IRInstruction* inst) {
@@ -484,8 +589,16 @@ void cgPackMagicArgs(IRLS& env, const IRInstruction* inst) {
     .reg(num_args)
     .reg(values);
 
-  cgCallHelper(v, env, CallSpec::direct(PackedArray::MakePacked),
-               callDest(env, inst), SyncOptions::Sync, args);
+  cgCallHelper(
+    v,
+    env,
+    RuntimeOption::EvalHackArrDVArrs
+      ? CallSpec::direct(PackedArray::MakeVec)
+      : CallSpec::direct(PackedArray::MakeVArray),
+    callDest(env, inst),
+    SyncOptions::Sync,
+    args
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

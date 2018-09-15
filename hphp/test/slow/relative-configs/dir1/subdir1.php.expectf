@@ -1,0 +1,15 @@
+string(1) "2"
+array(3) {
+  ["names"]=>
+  string(5) "root2"
+  ["values1"]=>
+  string(1) "2"
+  ["values2"]=>
+  string(1) "5"
+}
+array(2) {
+  [0]=>
+  string(%d) "%s/relative-configs/root1.ini"
+  [1]=>
+  string(%d) "%s/relative-configs/root2.ini"
+}

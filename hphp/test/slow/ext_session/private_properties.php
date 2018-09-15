@@ -10,6 +10,9 @@ class MyClass {
     }
 }
 
+
+<<__EntryPoint>>
+function main_private_properties() {
 $handler = new SessionHandler();
 session_set_save_handler($handler);
 session_start();
@@ -20,3 +23,4 @@ unset($_SESSION);
 
 session_start();
 var_dump($_SESSION['a']);
+}

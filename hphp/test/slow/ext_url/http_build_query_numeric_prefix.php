@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_http_build_query_numeric_prefix() {
 $query = array(
     0                    => "4.6.1",
     'php'                => "7.0.99-hhvm",
@@ -12,3 +15,4 @@ $query = array(
 );
 var_dump(http_build_query($query, null, "&"));
 var_dump(http_build_query($query, 52, "&"));
+}

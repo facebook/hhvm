@@ -28,7 +28,7 @@ namespace HPHP {
 
 struct HHProf {
   struct Request {
-    static DECLARE_THREAD_LOCAL(Request, s_request);
+    static THREAD_LOCAL(Request, s_request);
 
     static inline void Setup(Transport* transport) {
       if (!RuntimeOption::HHProfEnabled) return;

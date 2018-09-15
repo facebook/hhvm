@@ -16,4 +16,8 @@ trait T2 {
 class C {
  use T2;
  }
+
+<<__EntryPoint>>
+function main_2081() {
 foreach (C::bar() as $x) var_dump($x);
+}

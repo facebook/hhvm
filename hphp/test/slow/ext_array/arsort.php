@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_arsort() {
 $fruits = array(
   "d" => "lemon",
   "a" => "orange",
@@ -28,3 +31,4 @@ $fruits = array(
 );
 krsort($fruits);
 var_dump($fruits);
+}

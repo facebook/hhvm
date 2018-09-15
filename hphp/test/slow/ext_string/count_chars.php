@@ -17,6 +17,9 @@ class CountCharsTest {
   }
 }
 
+
+<<__EntryPoint>>
+function main_count_chars() {
 echo "mode 0\n";
 var_dump(array_filter(count_chars('', 0)));
 var_dump(array_filter(count_chars('hhvm', 0)));
@@ -41,3 +44,4 @@ echo "\nmode 4\n";
 var_dump(charsAsHexSeq(count_chars('', 4)));
 var_dump(charsAsHexSeq(count_chars('hhvm', 4)));
 var_dump(charsAsHexSeq(count_chars(new CountCharsTest, 4)));
+}

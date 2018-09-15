@@ -28,6 +28,7 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/ext/imagick/constants.h"
 #include "hphp/util/string-vsnprintf.h"
 
@@ -38,18 +39,24 @@ namespace HPHP {
 struct ImagickExtension final : Extension {
   ImagickExtension();
   void moduleInit() override;
+  void moduleShutdown() override;
   void threadInit() override;
 
   static bool hasLocaleFix();
   static bool hasProgressMonitor();
 
  private:
+  void loadImagickClass();
+  void loadImagickDrawClass();
+  void loadImagickPixelClass();
+  void loadImagickPixelIteratorClass();
+
   struct ImagickIniSetting {
     bool m_locale_fix;
     bool m_progress_monitor;
   };
 
-  static DECLARE_THREAD_LOCAL(ImagickIniSetting, s_ini_setting);
+  static THREAD_LOCAL(ImagickIniSetting, s_ini_setting);
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -66,7 +73,7 @@ struct ImagickExtension final : Extension {
     \
     static Object allocObject(const Variant& arg) { \
       Object ret = allocObject(); \
-      tvRefcountedDecRef(\
+      tvDecRefGen(\
         g_context->invokeFunc(cls->getCtor(), make_packed_array(arg), \
                               ret.get()) \
       );\
@@ -117,6 +124,7 @@ void imagickThrow(const char* fmt, ...) {
 // WandResource
 template<typename Wand>
 struct WandResource : SweepableResourceData {
+
 private:
   DECLARE_RESOURCE_ALLOCATION(WandResource<Wand>);
 
@@ -127,6 +135,11 @@ public:
 
   ~WandResource() {
     clear();
+  }
+
+  CLASSNAME_IS("WandResource");
+  const String& o_getClassNameHook() const override {
+    return classnameof();
   }
 
   void clear() {
@@ -235,7 +248,7 @@ req::ptr<WandResource<DrawingWand>> getDrawingWandResource(const Object& obj) {
 ALWAYS_INLINE
 req::ptr<WandResource<PixelWand>> getPixelWandResource(const Object& obj) {
   auto ret = getWandResource<PixelWand>(s_ImagickPixel, obj);
-  assert(ret != nullptr && ret->getWand() != nullptr);
+  assertx(ret != nullptr && ret->getWand() != nullptr);
   return ret;
 }
 
@@ -298,7 +311,7 @@ String convertMagickData(size_t size, unsigned char* &data);
 template<typename T>
 ALWAYS_INLINE
 Array convertArray(size_t num, const T* arr) {
-  PackedArrayInit ret(num);
+  VArrayInit ret(num);
   for (size_t i = 0; i < num; ++i) {
     ret.appendWithRef(arr[i]);
   }

@@ -67,9 +67,10 @@ static void reportDbCorruption(Repo& repo, int repoId,
 
   // Use raw SQLite here because we just want to hit the raw DB itself.
   sqlite3_exec(repo.dbc(),
-               folly::sformat(
-                 "PRAGMA {}.integrity_check(4);", repo.dbName(repoId)).c_str(),
-               [](void* _report, int columns, char** text, char** names) {
+               folly::sformat("PRAGMA {}.integrity_check(4);",
+                              repo.dbName(repoId))
+                 .c_str(),
+               [](void* _report, int columns, char** text, char** /*names*/) {
                  std::string& report = *reinterpret_cast<std::string*>(_report);
                  for (int column = 0; column < columns; ++column) {
                    report += folly::sformat("Integrity Check ({}): {}\n",
@@ -77,8 +78,7 @@ static void reportDbCorruption(Repo& repo, int repoId,
                  }
                  return 0;
                },
-               &report,
-               nullptr);
+               &report, nullptr);
 
   Logger::Error(report);
 }
@@ -191,8 +191,8 @@ void RepoTxn::exec(RepoQuery& query) {
 }
 
 void RepoTxn::rollback() {
-  assert(!m_error);
-  assert(m_pending);
+  assertx(!m_error);
+  assertx(m_pending);
   m_error = true;
   m_pending = false;
   m_repo.rollback();
@@ -211,7 +211,7 @@ void RepoQuery::bindBlob(const char* paramName, const void* blob,
                       sqlite3_bind_parameter_index(stmt, paramName),
                       blob, int(size),
                       isStatic ? SQLITE_STATIC : SQLITE_TRANSIENT);
-  assert(rc == SQLITE_OK);
+  assertx(rc == SQLITE_OK);
 }
 
 void RepoQuery::bindBlob(const char* paramName, const BlobEncoder& blob,
@@ -229,7 +229,7 @@ void RepoQuery::bindTypedValue(const char* paramName, const TypedValue& tv) {
   if (tv.m_type == KindOfUninit) {
     bindBlob(paramName, "", 0, true);
   } else {
-    String blob = f_serialize(tvAsCVarRef(&tv));
+    String blob = internal_serialize(tvAsCVarRef(&tv));
     bindBlob(paramName, blob.data(), blob.size());
   }
 }
@@ -242,7 +242,7 @@ void RepoQuery::bindText(const char* paramName, const char* text,
                       sqlite3_bind_parameter_index(stmt, paramName),
                       text, int(size),
                       isStatic ? SQLITE_STATIC : SQLITE_TRANSIENT);
-  assert(rc == SQLITE_OK);
+  assertx(rc == SQLITE_OK);
 }
 
 void RepoQuery::bindStaticString(const char* paramName, const StringData* sd) {
@@ -267,7 +267,7 @@ void RepoQuery::bindDouble(const char* paramName, double val) {
     sqlite3_bind_double(stmt,
                         sqlite3_bind_parameter_index(stmt, paramName),
                         val);
-  assert(rc == SQLITE_OK);
+  assertx(rc == SQLITE_OK);
 }
 
 void RepoQuery::bindInt(const char* paramName, int val) {
@@ -276,7 +276,7 @@ void RepoQuery::bindInt(const char* paramName, int val) {
     sqlite3_bind_int(stmt,
                      sqlite3_bind_parameter_index(stmt, paramName),
                      val);
-  assert(rc == SQLITE_OK);
+  assertx(rc == SQLITE_OK);
 }
 
 void RepoQuery::bindId(const char* paramName, Id id) {
@@ -301,7 +301,7 @@ void RepoQuery::bindInt64(const char* paramName, int64_t val) {
     sqlite3_bind_int64(stmt,
                        sqlite3_bind_parameter_index(stmt, paramName),
                        val);
-  assert(rc == SQLITE_OK);
+  assertx(rc == SQLITE_OK);
 }
 
 void RepoQuery::bindNull(const char* paramName) {
@@ -309,7 +309,7 @@ void RepoQuery::bindNull(const char* paramName) {
   int rc UNUSED =
     sqlite3_bind_null(stmt,
                       sqlite3_bind_parameter_index(stmt, paramName));
-  assert(rc == SQLITE_OK);
+  assertx(rc == SQLITE_OK);
 }
 
 void RepoQuery::step() {
@@ -415,17 +415,18 @@ void RepoQuery::getTypedValue(int iCol, TypedValue& tv) {
   const void* blob;
   size_t size;
   getBlob(iCol, blob, size);
-  tvWriteUninit(&tv);
+  tvWriteUninit(tv);
   if (size > 0) {
     String s = String((const char*)blob, size, CopyString);
-    Variant v = unserialize_from_string(s);
+    Variant v =
+      unserialize_from_string(s, VariableUnserializer::Type::Internal);
     if (v.isString()) {
       v = String(makeStaticString(v.asCStrRef().get()));
     } else if (v.isArray()) {
-      v = Array(ArrayData::GetScalarArray(v.asCArrRef().get()));
+      v = Array(ArrayData::GetScalarArray(std::move(v)));
     } else {
       // Serialized variants and objects shouldn't ever make it into the repo.
-      assert(!isRefcountedType(v.getType()));
+      assertx(!isRefcountedType(v.getType()));
     }
     tvAsVariant(&tv) = v;
   }
@@ -518,12 +519,12 @@ void RepoQuery::getInt64(int iCol, int64_t& val) {
 // RepoTxnQuery.
 
 void RepoTxnQuery::step() {
-  assert(!m_txn.error());
+  assertx(!m_txn.error());
   m_txn.step(*this);
 }
 
 void RepoTxnQuery::exec() {
-  assert(!m_txn.error());
+  assertx(!m_txn.error());
   m_txn.exec(*this);
 }
 

@@ -38,16 +38,13 @@ struct ClassStatement : InterfaceStatement {
                  TypeAnnotationPtr enumBaseTy);
 
   DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS;
-  bool hasDecl() const override { return true; }
-  bool hasImpl() const override;
 
   void setPromotedParameterCount(int count) {
     m_promotedParameterCount = count;
   }
 
   // implementing IParseHandler
-  void onParse(AnalysisResultConstPtr ar, FileScopePtr scope) override;
-  bool ignored() const { return m_ignored;}
+  void onParse(AnalysisResultConstRawPtr ar, FileScopePtr scope) override;
 
   std::string getName() const override;
   StatementPtr addClone(StatementPtr origStmt);
@@ -58,7 +55,6 @@ private:
   int m_type;
   int m_promotedParameterCount;
   std::string m_originalParent;
-  bool m_ignored;
   TypeAnnotationPtr m_enumBaseTy;
 };
 

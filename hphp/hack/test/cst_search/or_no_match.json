@@ -1,0 +1,22 @@
+{
+  "pattern_type": "descendant_pattern",
+  "pattern": {
+    "pattern_type": "node_pattern",
+    "kind": "classish_declaration",
+    "children": {
+      "classish_name": {
+        "pattern_type": "or_pattern",
+        "patterns": [
+          {
+            "pattern_type": "raw_text_pattern",
+            "raw_text": "Bar"
+          },
+          {
+            "pattern_type": "raw_text_pattern",
+            "raw_text": "Baz"
+          }
+        ]
+      }
+    }
+  }
+}

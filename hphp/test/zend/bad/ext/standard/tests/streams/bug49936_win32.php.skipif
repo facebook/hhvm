@@ -1,4 +1,0 @@
-<?php
-if( substr(PHP_OS, 0, 3) != "WIN" )
-  die("skip. Do run on Windows only");
-?>

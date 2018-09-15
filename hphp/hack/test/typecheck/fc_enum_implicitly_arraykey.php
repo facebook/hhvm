@@ -1,22 +1,22 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-enum FooInt : int {
+enum FooInt: int {
   FOO_VALUE_ONE = 1;
   FOO_VALUE_TWO = 2;
 }
 
-enum FooStr : string {
+enum FooStr: string {
   FOO_VALUE_BAR = 'foobar';
   FOO_VALUE_BAZ = 'foobaz';
 }
 
-enum BarInt : int as int {
+enum BarInt: int as int {
   BAR_VALUE_ONE = 1;
   BAR_VALUE_TWO = 2;
 }
 
-enum BarStr : string as string {
+enum BarStr: string as string {
   BAR_VALUE_BAR = 'barbar';
   BAR_VALUE_BAZ = 'barbaz';
 }

@@ -115,7 +115,8 @@ void refineTmps(IRUnit&, const BlockList&, const IdomVector&);
  * inputs.size() must be greater than 1.
  * If there's already a suitable phi, it will be returned.
  */
-SSATmp* insertPhi(IRUnit&, Block* blk, const jit::vector<SSATmp*>& inputs);
+SSATmp* insertPhi(IRUnit&, Block* blk,
+                  const jit::hash_map<Block*, SSATmp*>& inputs);
 
 /*
  * Remove the i'th dest from `label' and all incoming Jmps, returning its

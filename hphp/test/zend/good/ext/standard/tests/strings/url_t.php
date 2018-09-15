@@ -72,6 +72,7 @@ $sample_urls = array (
 );
 
     foreach ($sample_urls as $url) {
+        echo "\n--> $url: ";
         var_dump(@parse_url($url));
     }
 

@@ -1,0 +1,2 @@
+File "static_call_by_classname.php", line 12, characters 5-23:
+Cannot call a static method on a <<__PPL>> class by classname. Use self::, static::, or parent:: (Typing[4265])

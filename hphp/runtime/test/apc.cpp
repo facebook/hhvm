@@ -71,8 +71,8 @@ std::vector<PrimePair> primable_ints(Store& store) {
  * Sets obj_n -> a stdClass
  */
 std::vector<PrimePair> primable_objs(Store& store) {
-  return primable_n(store, "obj", [&] (int64_t n) {
-      return Variant::attach(SystemLib::AllocStdClassObject().detach());
+  return primable_n(store, "obj", [&](int64_t /*n*/) {
+    return Variant::attach(SystemLib::AllocStdClassObject().detach());
   });
 }
 
@@ -80,7 +80,7 @@ std::vector<PrimePair> primable_objs(Store& store) {
  * Just an empty table.
  */
 std::unique_ptr<Store> new_store() {
-  return folly::make_unique<Store>();
+  return std::make_unique<Store>();
 }
 
 /*
@@ -89,7 +89,7 @@ std::unique_ptr<Store> new_store() {
 std::unique_ptr<Store> new_primed_store() {
   s_apc_file_storage.enable("/tmp/apc_unit_test", 1ul << 20);
 
-  auto ret = folly::make_unique<Store>();
+  auto ret = std::make_unique<Store>();
   ret->prime(primable_ints(*ret));
   ret->prime(primable_objs(*ret));
   ret->primeDone();
@@ -113,7 +113,7 @@ TEST(APC, Basic) {
   EXPECT_EQ(store->exists(s_key), true);
   Variant got;
   EXPECT_EQ(store->get(s_key, got), true);
-  EXPECT_TRUE(cellSame(*got.asCell(),
+  EXPECT_TRUE(cellSame(*got.toCell(),
     make_tv<KindOfPersistentString>(s_value1.get())));
   EXPECT_EQ(store->eraseKey(s_key), true);
   EXPECT_EQ(store->get(s_key, got), false);
@@ -125,11 +125,11 @@ TEST(APC, SetOverwrite) {
   store->set(s_key, Variant(s_value1), 1500);
   Variant got;
   EXPECT_EQ(store->get(s_key, got), true);
-  EXPECT_TRUE(cellSame(*got.asCell(),
+  EXPECT_TRUE(cellSame(*got.toCell(),
               make_tv<KindOfPersistentString>(s_value1.get())));
   store->set(s_key, Variant(s_value2), 1500);
   EXPECT_EQ(store->get(s_key, got), true);
-  EXPECT_TRUE(cellSame(*got.asCell(),
+  EXPECT_TRUE(cellSame(*got.toCell(),
               make_tv<KindOfPersistentString>(s_value2.get())));
 }
 
@@ -200,7 +200,7 @@ TEST(APC, BasicPrimeStuff) {
   Variant val;
 
   EXPECT_TRUE(store->get("int_2", val));
-  EXPECT_TRUE(cellSame(*val.asCell(), make_tv<KindOfInt64>(2)));
+  EXPECT_TRUE(cellSame(*val.toCell(), make_tv<KindOfInt64>(2)));
 
   bool found = false;
   EXPECT_EQ(store->inc("int_3", 1, found), 4);

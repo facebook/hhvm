@@ -1,4 +1,4 @@
-<?php
+<?hh
 class C {
   public function foo($x, $y) {
     var_dump(isset($this));

@@ -10,3 +10,6 @@ class Foo {
   <<__Memoize>>
   public function someMethod((int, Bar, string) $tup): void {}
 }
+
+<<__Memoize>>
+function some_function((int, Bar, string) $tup): void {}

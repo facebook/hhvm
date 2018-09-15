@@ -6,5 +6,9 @@ class test {
   function stream_flush() { echo "flush\n"; return true; }
   function stream_close() { echo "close\n"; }
 }
+
+<<__EntryPoint>>
+function main_user_stream_leak() {
 stream_register_wrapper("test", "test", STREAM_IS_URL);
 var_dump(file_put_contents("test://hello", "w"));
+}

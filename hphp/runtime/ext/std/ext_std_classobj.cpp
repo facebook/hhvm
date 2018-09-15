@@ -63,20 +63,12 @@ Array HHVM_FUNCTION(get_declared_traits) {
 
 bool HHVM_FUNCTION(class_alias, const String& original, const String& alias,
                                 bool autoload /* = true */) {
-  auto const origClass =
-    autoload ? Unit::loadClass(original.get())
-             : Unit::lookupClass(original.get());
-  if (!origClass) {
-    raise_warning("Class %s not found", original.data());
+  if (RuntimeOption::EvalAuthoritativeMode) {
+    raise_warning("Cannot call class_alias dynamically "
+                  "in repo-authoritative mode");
     return false;
   }
-  if (origClass->isBuiltin()) {
-    raise_warning(
-      "First argument of class_alias() must be a name of user defined class");
-    return false;
-  }
-
-  return Unit::aliasClass(origClass, alias.get());
+  return Unit::aliasClass(original.get(), alias.get(), autoload);
 }
 
 bool HHVM_FUNCTION(class_exists, const String& class_name,
@@ -136,7 +128,7 @@ Array HHVM_FUNCTION(get_class_constants, const String& className) {
       if (value.m_type == KindOfUninit) {
         value = cls->clsCnsGet(consts[i].name);
       }
-      assert(value.m_type != KindOfUninit);
+      assertx(value.m_type != KindOfUninit);
       arrayInit.set(name, cellAsCVarRef(value));
     }
   }
@@ -165,8 +157,8 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
     ? cls->getPropData()
     : &declPropInitVec;
 
-  assert(propVals != nullptr);
-  assert(propVals->size() == numDeclProps);
+  assertx(propVals != nullptr);
+  assertx(propVals->size() == numDeclProps);
 
   // For visibility checks
   auto ctx = arGetContextClass(GetCallerFrame());
@@ -176,7 +168,7 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
   for (size_t i = 0; i < numDeclProps; ++i) {
     auto const name = const_cast<StringData*>(propInfo[i].name.get());
     // Empty names are used for invisible/private parent properties; skip them.
-    assert(name->size() != 0);
+    assertx(name->size() != 0);
     if (Class::IsPropAccessible(propInfo[i], ctx)) {
       auto const value = &((*propVals)[i]);
       arr.set(name, tvAsCVarRef(value));
@@ -188,7 +180,7 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
     if (lookup.accessible) {
       arr.set(
         const_cast<StringData*>(sprop.name.get()),
-        tvAsCVarRef(lookup.prop)
+        tvAsCVarRef(lookup.val)
       );
     }
   }
@@ -302,7 +294,7 @@ Variant HHVM_FUNCTION(property_exists, const Variant& class_or_object,
   if (class_or_object.isObject()) {
     obj = class_or_object.getObjectData();
     cls = obj->getVMClass();
-    assert(cls);
+    assertx(cls);
   } else if (class_or_object.isString()) {
     cls = Unit::loadClass(class_or_object.toString().get());
     if (!cls) return false;
@@ -315,11 +307,14 @@ Variant HHVM_FUNCTION(property_exists, const Variant& class_or_object,
   }
 
   auto const lookup = cls->getDeclPropIndex(cls, property.get());
-  if (lookup.prop != kInvalidSlot) return true;
+  if (lookup.slot != kInvalidSlot) return true;
 
   if (obj &&
       UNLIKELY(obj->getAttribute(ObjectData::HasDynPropArr)) &&
-      obj->dynPropArray()->nvGet(property.get())) {
+      obj->dynPropArray()->rval(property.get())) {
+    if (RuntimeOption::EvalNoticeOnReadDynamicProp) {
+      obj->raiseReadDynamicProp(property.get());
+    }
     return true;
   }
   auto const propInd = cls->lookupSProp(property.get());
@@ -327,7 +322,9 @@ Variant HHVM_FUNCTION(property_exists, const Variant& class_or_object,
 }
 
 Array HHVM_FUNCTION(get_object_vars, const Object& object) {
-  return object->o_toIterArray(ctxClassName(), ObjectData::PreserveRefs);
+  return object
+    ->o_toIterArray(ctxClassName(), ObjectData::PreserveRefs)
+    .toDArray();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

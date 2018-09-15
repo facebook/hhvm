@@ -1,0 +1,4 @@
+File "newtype9.php--useit.php", line 6, characters 24-49:
+This is a string (Typing[4110])
+File "newtype9.php--newtype.php", line 6, characters 10-18:
+It is incompatible with a nonnull value arising from an implicit 'as ?nonnull' constraint on this type

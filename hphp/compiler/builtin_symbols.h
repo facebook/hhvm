@@ -17,10 +17,11 @@
 #ifndef incl_HPHP_BUILTIN_SYMBOLS_H_
 #define incl_HPHP_BUILTIN_SYMBOLS_H_
 
-#include <set>
-#include <string>
 
 #include "hphp/compiler/hphp.h"
+#include "hphp/util/hash-set.h"
+#include <set>
+#include <string>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,8 +30,6 @@ DECLARE_EXTENDED_BOOST_TYPES(Type);
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_EXTENDED_BOOST_TYPES(FunctionScope);
 DECLARE_EXTENDED_BOOST_TYPES(ClassScope);
-DECLARE_BOOST_TYPES(VariableTable);
-DECLARE_BOOST_TYPES(ConstantTable);
 
 struct BuiltinSymbols {
   static bool Loaded;
@@ -51,9 +50,6 @@ private:
   static hphp_string_set s_superGlobals;
 
   static std::set<std::string> s_declaredDynamic;
-
-  static void ImportNativeConstants(AnalysisResultPtr ar,
-                                    ConstantTablePtr dest);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

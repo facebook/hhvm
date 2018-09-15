@@ -3,52 +3,94 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
+
+<<__PHPStdLib>>
 function xmlwriter_open_memory() { }
+<<__PHPStdLib>>
 function xmlwriter_open_uri($uri) { }
+<<__PHPStdLib>>
 function xmlwriter_set_indent_string($xmlwriter, $indentstring) { }
+<<__PHPStdLib>>
 function xmlwriter_set_indent($xmlwriter, $indent) { }
+<<__PHPStdLib>>
 function xmlwriter_start_document($xmlwriter, $version = "1.0", $encoding = null, $standalone = null) { }
+<<__PHPStdLib>>
 function xmlwriter_start_element($xmlwriter, $name) { }
+<<__PHPStdLib>>
 function xmlwriter_start_element_ns($xmlwriter, $prefix, $name, $uri) { }
+<<__PHPStdLib>>
 function xmlwriter_write_element_ns($xmlwriter, $prefix, $name, $uri, $content = null) { }
+<<__PHPStdLib>>
 function xmlwriter_write_element($xmlwriter, $name, $content = null) { }
+<<__PHPStdLib>>
 function xmlwriter_end_element($xmlwriter) { }
+<<__PHPStdLib>>
 function xmlwriter_full_end_element($xmlwriter) { }
+<<__PHPStdLib>>
 function xmlwriter_start_attribute_ns($xmlwriter, $prefix, $name, $uri) { }
+<<__PHPStdLib>>
 function xmlwriter_start_attribute($xmlwriter, $name) { }
+<<__PHPStdLib>>
 function xmlwriter_write_attribute_ns($xmlwriter, $prefix, $name, $uri, $content) { }
+<<__PHPStdLib>>
 function xmlwriter_write_attribute($xmlwriter, $name, $value) { }
+<<__PHPStdLib>>
 function xmlwriter_end_attribute($xmlwriter) { }
+<<__PHPStdLib>>
 function xmlwriter_start_cdata($xmlwriter) { }
+<<__PHPStdLib>>
 function xmlwriter_write_cdata($xmlwriter, $content) { }
+<<__PHPStdLib>>
 function xmlwriter_end_cdata($xmlwriter) { }
+<<__PHPStdLib>>
 function xmlwriter_start_comment($xmlwriter) { }
+<<__PHPStdLib>>
 function xmlwriter_write_comment($xmlwriter, $content) { }
+<<__PHPStdLib>>
 function xmlwriter_end_comment($xmlwriter) { }
+<<__PHPStdLib>>
 function xmlwriter_end_document($xmlwriter) { }
+<<__PHPStdLib>>
 function xmlwriter_start_pi($xmlwriter, $target) { }
+<<__PHPStdLib>>
 function xmlwriter_write_pi($xmlwriter, $target, $content) { }
+<<__PHPStdLib>>
 function xmlwriter_end_pi($xmlwriter) { }
+<<__PHPStdLib>>
 function xmlwriter_text($xmlwriter, $content) { }
+<<__PHPStdLib>>
 function xmlwriter_write_raw($xmlwriter, $content) { }
+<<__PHPStdLib>>
 function xmlwriter_start_dtd($xmlwriter, $qualifiedname, $publicid = null, $systemid = null) { }
+<<__PHPStdLib>>
 function xmlwriter_write_dtd($xmlwriter, $name, $publicid = null, $systemid = null, $subset = null) { }
+<<__PHPStdLib>>
 function xmlwriter_start_dtd_element($xmlwriter, $qualifiedname) { }
+<<__PHPStdLib>>
 function xmlwriter_write_dtd_element($xmlwriter, $name, $content) { }
+<<__PHPStdLib>>
 function xmlwriter_end_dtd_element($xmlwriter) { }
+<<__PHPStdLib>>
 function xmlwriter_start_dtd_attlist($xmlwriter, $name) { }
+<<__PHPStdLib>>
 function xmlwriter_write_dtd_attlist($xmlwriter, $name, $content) { }
+<<__PHPStdLib>>
 function xmlwriter_end_dtd_attlist($xmlwriter) { }
+<<__PHPStdLib>>
 function xmlwriter_start_dtd_entity($xmlwriter, $name, $isparam) { }
+<<__PHPStdLib>>
 function xmlwriter_write_dtd_entity($xmlwriter, $name, $content, $pe = false, $publicid = null, $systemid = null, $ndataid = null) { }
+<<__PHPStdLib>>
 function xmlwriter_end_dtd_entity($xmlwriter) { }
+<<__PHPStdLib>>
 function xmlwriter_end_dtd($xmlwriter) { }
+<<__PHPStdLib>>
 function xmlwriter_flush($xmlwriter, $empty = true) { }
+<<__PHPStdLib>>
 function xmlwriter_output_memory($xmlwriter, $flush = true) { }
 class XMLWriter {
   public function __construct() { }

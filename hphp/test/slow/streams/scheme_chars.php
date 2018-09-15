@@ -9,4 +9,8 @@ function main() {
   $e_acute = chr(130);
   var_dump(file_exists($e_acute.'this.is_not.a.valid.scheme://example.com'));
 }
+
+<<__EntryPoint>>
+function main_scheme_chars() {
 main();
+}

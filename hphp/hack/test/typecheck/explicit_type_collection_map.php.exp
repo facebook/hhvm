@@ -1,0 +1,2 @@
+File "explicit_type_collection_map.php", line 3, characters 8-26:
+Cannot initialize collection builtins with type parameters (Parsing[1002])

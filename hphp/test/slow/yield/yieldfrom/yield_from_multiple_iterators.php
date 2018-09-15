@@ -7,6 +7,10 @@ function gen() {
   yield from [31, 32, 33, 34, 35];
 }
 
+
+<<__EntryPoint>>
+function main_yield_from_multiple_iterators() {
 foreach(gen() as $val) {
   var_dump($val);
+}
 }

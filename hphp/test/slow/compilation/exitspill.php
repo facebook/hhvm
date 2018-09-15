@@ -1,7 +1,5 @@
 <?php
 
-define('FIZ', 32);
-
 class X {
   const FOO = 1;
   const BAR = FIZ;
@@ -23,6 +21,12 @@ function test() {
                  X::BOO, X::BIZ));
 }
 
+
+
+
+<<__EntryPoint>>
+function main_exitspill() {
+define('FIZ', 32);
+
 test();
-
-
+}

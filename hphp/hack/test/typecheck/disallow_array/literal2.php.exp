@@ -1,0 +1,2 @@
+File "literal2.php", line 4, characters 15-35:
+Array literals are no longer legal; use varray or darray instead (Naming[2083])

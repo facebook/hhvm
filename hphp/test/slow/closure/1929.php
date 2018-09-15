@@ -7,5 +7,9 @@ function h() {
  }
 );
 }
+
+<<__EntryPoint>>
+function main_1929() {
 h();
 var_dump(h());
+}

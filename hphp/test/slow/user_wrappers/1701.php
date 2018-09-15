@@ -28,6 +28,9 @@ class MemoryStream {
  return $this->ofs;
  }
 }
+
+<<__EntryPoint>>
+function main_1701() {
 stream_wrapper_register('mem', 'MemoryStream');
 $fp = fopen('mem://abcdefghijklmnopqrstuvwxyz', 'r');
 var_dump(fgetc($fp), fgetc($fp));
@@ -35,3 +38,4 @@ fseek($fp, 11, SEEK_CUR);
 var_dump(fgetc($fp), fgetc($fp));
 fseek($fp, 0, SEEK_END);
 var_dump(ftell($fp));
+}

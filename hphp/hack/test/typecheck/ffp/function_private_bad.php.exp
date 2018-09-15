@@ -1,0 +1,2 @@
+File "function_private_bad.php", line 4, characters 7-13:
+Top-level function cannot have modifier 'private' (Parsing[1002])

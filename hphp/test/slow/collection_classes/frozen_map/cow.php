@@ -26,4 +26,8 @@ function main() {
   $test("removeKey", function ($m) { $m->removeKey(0); });
 }
 
+
+<<__EntryPoint>>
+function main_cow() {
 main();
+}

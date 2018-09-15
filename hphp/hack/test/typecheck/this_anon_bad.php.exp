@@ -4,5 +4,5 @@ File "this_anon_bad.php", line 14, characters 41-44:
 This is the expression dependent type <static>
 File "this_anon_bad.php", line 21, characters 13-17:
   where '<static>' refers to the late bound type of the enclosing class
-File "this_anon_bad.php", line 34, characters 11-19:
+File "this_anon_bad.php", line 34, characters 15-17:
 It is incompatible with an object of type Foo

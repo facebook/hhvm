@@ -1,0 +1,12 @@
+<?hh
+// Copyright 2004-present Facebook. All Rights Reserved.
+
+$a = $x ==> $x + 1;
+var_dump($a);
+
+$o = new stdclass;
+var_dump($o);
+unset($o);
+
+$b = $x ==> $x + 3;
+var_dump($b);

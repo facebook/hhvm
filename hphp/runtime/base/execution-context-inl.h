@@ -30,7 +30,7 @@ inline void* ExecutionContext::operator new(size_t s) {
   return req::malloc(s, type_scan::getIndexForMalloc<ExecutionContext>());
 }
 
-inline void* ExecutionContext::operator new(size_t s, void* p) {
+inline void* ExecutionContext::operator new(size_t /*s*/, void* p) {
   return p;
 }
 
@@ -116,6 +116,12 @@ inline int ExecutionContext::getLastErrorLine() const {
   return m_lastErrorLine;
 }
 
+inline Array ExecutionContext::releaseDeferredErrors() {
+  auto ret = std::move(m_deferredErrors);
+  m_deferredErrors = Array::CreateVec();
+  return ret;
+}
+
 inline Array ExecutionContext::getEnvs() const {
   return m_envs;
 }
@@ -191,7 +197,8 @@ inline TypedValue ExecutionContext::invokeFunc(
   const Variant& args_,
   VarEnv* varEnv
 ) {
-  return invokeFunc(ctx.func, args_, ctx.this_, ctx.cls, varEnv, ctx.invName);
+  return invokeFunc(ctx.func, args_, ctx.this_, ctx.cls, varEnv,
+                    ctx.invName, InvokeNormal, ctx.dynamic);
 }
 
 inline TypedValue ExecutionContext::invokeFuncFew(
@@ -218,31 +225,35 @@ inline TypedValue ExecutionContext::invokeFuncFew(
     thisOrCls,
     ctx.invName,
     argc,
-    argv
+    argv,
+    ctx.dynamic
   );
 }
 
 inline TypedValue ExecutionContext::invokeMethod(
   ObjectData* obj,
   const Func* meth,
-  InvokeArgs args
+  InvokeArgs args,
+  bool dynamic
 ) {
   return invokeFuncFew(
     meth,
     ActRec::encodeThis(obj),
     nullptr /* invName */,
     args.size(),
-    args.start()
+    args.start(),
+    dynamic
   );
 }
 
 inline Variant ExecutionContext::invokeMethodV(
   ObjectData* obj,
   const Func* meth,
-  InvokeArgs args
+  InvokeArgs args,
+  bool dynamic
 ) {
   // Construct variant without triggering incref.
-  return Variant::attach(invokeMethod(obj, meth, args));
+  return Variant::attach(invokeMethod(obj, meth, args, dynamic));
 }
 
 inline ActRec* ExecutionContext::getOuterVMFrame(const ActRec* ar) {
@@ -262,6 +273,29 @@ inline VarEnv* ExecutionContext::hasVarEnv(int frame) {
     if (fp->hasVarEnv()) return fp->getVarEnv();
   }
   return nullptr;
+}
+
+inline ActRec*
+ExecutionContext::getPrevVMStateSkipFrame(const ActRec* fp,
+                                          Offset* prevPc /* = NULL */,
+                                          TypedValue** prevSp /* = NULL */,
+                                          bool* fromVMEntry /* = NULL */) {
+  auto prev = getPrevVMState(fp, prevPc, prevSp, fromVMEntry);
+  if (LIKELY(!prev || !prev->skipFrame())) return prev;
+  do {
+    prev = getPrevVMState(prev, prevPc, prevSp, fromVMEntry);
+  } while (prev && prev->skipFrame());
+  return prev;
+}
+
+template<class Fn> void ExecutionContext::sweepDynPropTable(Fn fn) {
+  for (auto i = dynPropTable.begin(); i != dynPropTable.end();) {
+    if (fn(i->first)) {
+      i = dynPropTable.erase(i);
+    } else {
+      ++i;
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

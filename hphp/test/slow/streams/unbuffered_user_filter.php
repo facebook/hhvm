@@ -18,8 +18,6 @@ class TestFilter extends php_user_filter {
   }
 }
 
-var_dump(stream_filter_register('testfilter', 'TestFilter'));
-
 function testWrite() {
   printf("---%s---\n", __FUNCTION__);
   $f = fopen('php://memory', 'r+');
@@ -54,4 +52,10 @@ function main() {
   testStagedRead();
 }
 
+
+<<__EntryPoint>>
+function main_unbuffered_user_filter() {
+var_dump(stream_filter_register('testfilter', 'TestFilter'));
+
 main();
+}

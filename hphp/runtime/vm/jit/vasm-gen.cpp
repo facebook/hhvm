@@ -60,7 +60,12 @@ bool Vout::closed() const {
 }
 
 Vout Vout::makeBlock() {
-  return {m_unit, m_unit.makeBlock(area()), m_irctx};
+  uint64_t weight = 0;
+  if (m_irctx.origin != nullptr) {
+    weight = m_irctx.origin->block()->profCount();
+  }
+  weight = weight * areaWeightFactor(area());
+  return {m_unit, m_unit.makeBlock(area(), weight), m_irctx};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -71,7 +76,7 @@ Vout& Vasm::out(AreaIndex area) {
 
   // Initialize all streams up through `area'.
   for (auto i = m_outs.size(); i <= a; ++i) {
-    auto b = m_unit.makeBlock(static_cast<AreaIndex>(i));
+    auto b = m_unit.makeBlock(static_cast<AreaIndex>(i), 0);
     m_outs.emplace_back(m_unit, b);
   }
   return m_outs[a];
@@ -90,20 +95,49 @@ Vauto::~Vauto() {
       // Prevent spurious printir traces.
       Trace::Bump bumper{Trace::printir, 10};
 
+      CodeBlock mainTmp, coldTmp;
+      auto text = [&] {
+        if (m_relocate) {
+          auto& cold = m_text.cold().code;
+          if (cold.canEmit(0x10000)) {
+            mainTmp.init(cold.frontier() + 0x8000,
+                         cold.toDestAddress(cold.frontier() + 0x8000),
+                         0x4000,
+                         "vauto main tmp");
+            coldTmp.init(cold.frontier() + 0xc000,
+                         cold.toDestAddress(cold.frontier() + 0xc000),
+                         0x4000,
+                         "vauto cold tmp");
+            return Vtext(mainTmp, coldTmp, m_text.data());
+          }
+          m_relocate = false;
+        }
+        return std::move(m_text);
+      }();
+
       auto const abi = jit::abi(m_kind);
       switch (arch()) {
         case Arch::X64:
           optimizeX64(unit(), abi, true /* regalloc */);
-          emitX64(unit(), m_text, m_fixups, nullptr);
+          emitX64(unit(), text, m_fixups, nullptr);
           break;
         case Arch::ARM:
           optimizeARM(unit(), abi, true /* regalloc */);
-          emitARM(unit(), m_text, m_fixups, nullptr);
+          emitARM(unit(), text, m_fixups, nullptr);
           break;
         case Arch::PPC64:
           optimizePPC64(unit(), abi, true /* regalloc */);
-          emitPPC64(unit(), m_text, m_fixups, nullptr);
+          emitPPC64(unit(), text, m_fixups, nullptr);
           break;
+      }
+
+      if (m_relocate) {
+        tc::relocateTranslation(
+          nullptr,
+          mainTmp, m_text.main().code, m_text.main().code.frontier(),
+          coldTmp, m_text.cold().code, m_text.cold().code.frontier(),
+          coldTmp, coldTmp.frontier(),
+          nullptr, m_fixups);
       }
       return;
     }

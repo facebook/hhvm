@@ -16,14 +16,13 @@
 
 #include <unordered_set>
 
-#include <gtest/gtest.h>
-
+#include <folly/portability/GTest.h>
 #include <folly/ScopeGuard.h>
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
-#include "hphp/runtime/vm/jit/type-constraint.h"
+#include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/type.h"
 
@@ -36,11 +35,17 @@ namespace {
 
 std::unordered_set<Type> allTypes() {
   std::unordered_set<Type> r;
-# define IRT(name, ...) r.insert(T##name);
-# define IRTP(name, ...) IRT(name)
+#define IRT(name, ...) r.insert(T##name);
+#define IRTP(name, ...) IRT(name)
+#define IRTL(name, ...) IRT(name)
+#define IRTM(name, ...) IRT(name)
+#define IRTX(name, ...) IRT(name)
   IR_TYPES
-# undef IRT
-# undef IRTP
+#undef IRT
+#undef IRTP
+#undef IRTL
+#undef IRTM
+#undef IRTX
   return r;
 }
 
@@ -48,6 +53,8 @@ std::unordered_set<Type> allTypes() {
 
 TEST(Type, Equality) {
   EXPECT_NE(TCls, TPtrToBoxedObj);
+  EXPECT_NE(TCls, TLvalToBoxedObj);
+  EXPECT_NE(TCls, TMemToBoxedObj);
 }
 
 TEST(Type, Null) {
@@ -84,6 +91,9 @@ TEST(Type, KnownDataType) {
     TPersistentDict,
     TStaticDict,
     TCountedDict,
+    TShape,
+    TPersistentShape,
+    TCountedShape,
     TKeyset,
     TPersistentKeyset,
     TStaticKeyset,
@@ -115,7 +125,7 @@ TEST(Type, ToString) {
   EXPECT_EQ("Int", TInt.toString());
   EXPECT_EQ("Cell", TCell.toString());
   EXPECT_EQ("BoxedDbl", TBoxedDbl.toString());
-  EXPECT_EQ("Boxed{Int|Dbl}", (TBoxedInt | TBoxedDbl).toString());
+  EXPECT_EQ("Boxed{Dbl|Int}", (TBoxedInt | TBoxedDbl).toString());
 
   EXPECT_EQ("Vec", TVec.toString());
   EXPECT_EQ("Dict", TDict.toString());
@@ -127,17 +137,30 @@ TEST(Type, ToString) {
   EXPECT_EQ("Obj<=Iterator", sub.toString());
   EXPECT_EQ("Obj=Iterator", exact.toString());
   EXPECT_EQ("PtrToStr", TPtrToStr.toString());
+  EXPECT_EQ("LvalToStr", TLvalToStr.toString());
 
   EXPECT_EQ("PtrTo{Prop|MIS|MMisc|Other}Gen",
             (TPtrToMembGen - TPtrToElemGen).toString());
+  EXPECT_EQ("LvalTo{Prop|MIS|MMisc|Other}Gen",
+            (TLvalToMembGen - TLvalToElemGen).toString());
   EXPECT_EQ("PtrToMembGen", TPtrToMembGen.toString());
+  EXPECT_EQ("LvalToMembGen", TLvalToMembGen.toString());
   EXPECT_EQ(
     "PtrTo{ClsInit|ClsCns|Frame|Stk|Gbl|Prop|Elem|SProp|MIS|MMisc|Other}Gen",
     (TPtrToGen - TPtrToRefGen).toString()
   );
+  EXPECT_EQ(
+    "LvalTo{ClsInit|ClsCns|Frame|Stk|Gbl|Prop|Elem|SProp|MIS|MMisc|Other}Gen",
+    (TLvalToGen - TLvalToRefGen).toString()
+  );
+  EXPECT_EQ("MemToInt", TMemToInt.toString());
+  EXPECT_EQ("PtrTo{Str|Int}|LvalTo{Str|Int}",
+            (TMemToInt | TMemToStr).toString());
 
   EXPECT_EQ("PtrTo{Int|StaticStr}|{Int|StaticStr}",
             (TInt | TPtrToStaticStr).toString());
+  EXPECT_EQ("LvalTo{Int|StaticStr}|{Int|StaticStr}",
+            (TInt | TLvalToStaticStr).toString());
   EXPECT_EQ("{Obj<=Iterator|Int}", (TInt | sub).toString());
 
   EXPECT_EQ("Cls<=Iterator",
@@ -145,13 +168,14 @@ TEST(Type, ToString) {
   EXPECT_EQ("Cls=Iterator",
             Type::ExactCls(SystemLib::s_IteratorClass).toString());
 
-  EXPECT_EQ("{Func|ABC}", (TABC | TFunc).toString());
+  EXPECT_EQ("{ABC|Func}", (TABC | TFunc).toString());
 
   EXPECT_EQ("InitNull", TInitNull.constValString());
 
   EXPECT_EQ("InitGen", TInitGen.toString());
   EXPECT_EQ("PtrToInitGen", TInitGen.ptr(Ptr::Ptr).toString());
   EXPECT_EQ("PtrToFrameInitGen", TPtrToFrameInitGen.toString());
+  EXPECT_EQ("LvalToFrameInitGen", TLvalToFrameInitGen.toString());
 
   auto const ptrCns = Type::cns((TypedValue*)0xba5eba11, TPtrToMembInitNull);
   EXPECT_EQ("PtrToMembInitNull<TV: 0xba5eba11>", ptrCns.toString());
@@ -172,8 +196,46 @@ TEST(Type, Boxes) {
             (TCell - TUninit).box());
 
   EXPECT_EQ(TBottom, TBoxedCell & TPtrToGen);
+  EXPECT_EQ(TBottom, TBoxedCell & TLvalToGen);
+  EXPECT_EQ(TBottom, TBoxedCell & TMemToGen);
 
   EXPECT_EQ(TInt | TDbl, (TInt | TBoxedDbl).unbox());
+
+  auto const packedSpec = ArraySpec(ArrayData::kPackedKind);
+  auto const arrData = ArrayData::GetScalarArray(make_packed_array(1, 2, 3, 4));
+  auto boxedConstPackedArray = Type::cns(arrData).box();
+  EXPECT_FALSE(boxedConstPackedArray.hasConstVal());
+  EXPECT_TRUE(boxedConstPackedArray.isSpecialized());
+  EXPECT_EQ(TBoxedStaticArr, boxedConstPackedArray.unspecialize());
+  EXPECT_EQ(packedSpec, boxedConstPackedArray.arrSpec());
+
+  auto boxedStaticPackedArray = Type::StaticArray(ArrayData::kPackedKind).box();
+  EXPECT_FALSE(boxedStaticPackedArray.hasConstVal());
+  EXPECT_TRUE(boxedStaticPackedArray.isSpecialized());
+  EXPECT_EQ(TBoxedStaticArr, boxedStaticPackedArray.unspecialize());
+  EXPECT_EQ(packedSpec, boxedStaticPackedArray.arrSpec());
+
+  auto boxedPackedArray = Type::Array(ArrayData::kPackedKind).box();
+  EXPECT_FALSE(boxedPackedArray.hasConstVal());
+  EXPECT_TRUE(boxedPackedArray.isSpecialized());
+  EXPECT_EQ(TBoxedArr, boxedPackedArray.unspecialize());
+  EXPECT_EQ(packedSpec, boxedPackedArray.arrSpec());
+
+  auto boxedExactObj = Type::ExactObj(SystemLib::s_IteratorClass).box();
+  auto exactClassSpec =
+    ClassSpec(SystemLib::s_IteratorClass, ClassSpec::ExactTag{});
+  EXPECT_FALSE(boxedExactObj.hasConstVal());
+  EXPECT_TRUE(boxedExactObj.isSpecialized());
+  EXPECT_EQ(TBoxedObj, boxedExactObj.unspecialize());
+  EXPECT_EQ(exactClassSpec, boxedExactObj.clsSpec());
+
+  auto boxedSubObj = Type::SubObj(SystemLib::s_IteratorClass).box();
+  auto subClassSpec =
+    ClassSpec(SystemLib::s_IteratorClass, ClassSpec::SubTag{});
+  EXPECT_FALSE(boxedSubObj.hasConstVal());
+  EXPECT_TRUE(boxedSubObj.isSpecialized());
+  EXPECT_EQ(TBoxedObj, boxedSubObj.unspecialize());
+  EXPECT_EQ(subClassSpec, boxedSubObj.clsSpec());
 }
 
 TEST(Type, Ptr) {
@@ -203,19 +265,135 @@ TEST(Type, Ptr) {
   auto const a2 = Type::Array(ArrayData::kMixedKind).ptr(Ptr::Frame);
   EXPECT_EQ(TBottom, a1 & a2);
   EXPECT_EQ(a1, a1 - a2);
-  EXPECT_EQ(TFunc, (TFunc | a1) - a1);
+  EXPECT_EQ(TVarEnv, (TVarEnv | a1) - a1);
 
   EXPECT_EQ(TBottom, TBottom.deref());
+
+  auto const packedSpec = ArraySpec(ArrayData::kPackedKind);
+  auto const arrData = ArrayData::GetScalarArray(make_packed_array(1, 2, 3, 4));
+  auto ptrToConstPackedArray = Type::cns(arrData).ptr(Ptr::Ptr);
+  EXPECT_FALSE(ptrToConstPackedArray.hasConstVal());
+  EXPECT_TRUE(ptrToConstPackedArray.isSpecialized());
+  EXPECT_EQ(TPtrToStaticArr, ptrToConstPackedArray.unspecialize());
+  EXPECT_EQ(packedSpec, ptrToConstPackedArray.arrSpec());
+
+  auto ptrToStaticPackedArray =
+    Type::StaticArray(ArrayData::kPackedKind).ptr(Ptr::Ptr);
+  EXPECT_FALSE(ptrToStaticPackedArray.hasConstVal());
+  EXPECT_TRUE(ptrToStaticPackedArray.isSpecialized());
+  EXPECT_EQ(TPtrToStaticArr, ptrToStaticPackedArray.unspecialize());
+  EXPECT_EQ(packedSpec, ptrToStaticPackedArray.arrSpec());
+
+  auto ptrToPackedArray = Type::Array(ArrayData::kPackedKind).ptr(Ptr::Ptr);
+  EXPECT_FALSE(ptrToPackedArray.hasConstVal());
+  EXPECT_TRUE(ptrToPackedArray.isSpecialized());
+  EXPECT_EQ(TPtrToArr, ptrToPackedArray.unspecialize());
+  EXPECT_EQ(packedSpec, ptrToPackedArray.arrSpec());
+
+  auto ptrToExactObj = Type::ExactObj(SystemLib::s_IteratorClass).ptr(Ptr::Ptr);
+  auto exactClassSpec =
+    ClassSpec(SystemLib::s_IteratorClass, ClassSpec::ExactTag{});
+  EXPECT_FALSE(ptrToExactObj.hasConstVal());
+  EXPECT_TRUE(ptrToExactObj.isSpecialized());
+  EXPECT_EQ(TPtrToObj, ptrToExactObj.unspecialize());
+  EXPECT_EQ(exactClassSpec, ptrToExactObj.clsSpec());
+
+  auto ptrToSubObj = Type::SubObj(SystemLib::s_IteratorClass).ptr(Ptr::Ptr);
+  auto subClassSpec =
+    ClassSpec(SystemLib::s_IteratorClass, ClassSpec::SubTag{});
+  EXPECT_FALSE(ptrToSubObj.hasConstVal());
+  EXPECT_TRUE(ptrToSubObj.isSpecialized());
+  EXPECT_EQ(TPtrToObj, ptrToSubObj.unspecialize());
+  EXPECT_EQ(subClassSpec, ptrToSubObj.clsSpec());
+}
+
+TEST(Type, Lval) {
+  EXPECT_TRUE(TLvalToInt <= TLvalToGen);
+  EXPECT_TRUE(TLvalToBoxedInt <= TLvalToGen);
+  EXPECT_TRUE(TLvalToBoxedCell <= TLvalToGen);
+  EXPECT_TRUE(TLvalToInt <= TLvalToCell);
+
+  EXPECT_EQ(TInt, TLvalToInt.deref());
+  EXPECT_EQ(TBoxedCell, TLvalToBoxedCell.deref());
+
+  EXPECT_EQ(TLvalToInt, TLvalToInt - TInt);
+  EXPECT_EQ(TInt, (TLvalToInt | TInt) - TLvalToInt);
+  EXPECT_EQ(TLvalToUncountedInit, TLvalToUncounted - TLvalToUninit);
+
+  auto const t = TLvalToInt | TLvalToStr | TInt | TStr;
+  EXPECT_EQ(t, t - TLvalToInt);
+  EXPECT_EQ(t, t - TInt);
+  EXPECT_EQ(TLvalToInt | TLvalToStr, t - (TInt | TStr));
+  EXPECT_EQ(TInt | TStr, t - (TLvalToInt | TLvalToStr));
+  EXPECT_EQ(TLvalToFrameGen, TLvalToRFrameGen - TLvalToRefGen);
+
+  EXPECT_EQ(TBottom, TLvalToInt & TInt);
+}
+
+TEST(Type, Mem) {
+  EXPECT_TRUE(TMemToInt <= TMemToGen);
+  EXPECT_TRUE(TMemToBoxedInt <= TMemToGen);
+  EXPECT_TRUE(TMemToBoxedCell <= TMemToGen);
+  EXPECT_TRUE(TMemToInt <= TMemToCell);
+
+  EXPECT_EQ(TInt, TMemToInt.deref());
+  EXPECT_EQ(TBoxedCell, TMemToBoxedCell.deref());
+
+  EXPECT_EQ(TMemToInt, TMemToInt - TInt);
+  EXPECT_EQ(TInt, (TMemToInt | TInt) - TMemToInt);
+  EXPECT_EQ(TMemToUncountedInit, TMemToUncounted - TMemToUninit);
+
+  auto const t = TMemToInt | TMemToStr | TInt | TStr;
+  EXPECT_EQ(t, t - TMemToInt);
+  EXPECT_EQ(t, t - TInt);
+  EXPECT_EQ(TMemToInt | TMemToStr, t - (TInt | TStr));
+  EXPECT_EQ(TInt | TStr, t - (TMemToInt | TMemToStr));
+  EXPECT_EQ(TMemToFrameGen, TMemToRFrameGen - TMemToRefGen);
+
+  EXPECT_EQ(TBottom, TMemToInt & TInt);
+}
+
+TEST(Type, MemPtrLval) {
+  EXPECT_TRUE(TPtrToInt <= TMemToGen);
+  EXPECT_TRUE(TLvalToInt <= TMemToGen);
+  EXPECT_FALSE(TInt <= TMemToGen);
+
+  EXPECT_TRUE(TPtrToBoxedInt <= TMemToGen);
+  EXPECT_TRUE(TLvalToBoxedInt <= TMemToGen);
+  EXPECT_TRUE(TPtrToBoxedCell <= TMemToGen);
+  EXPECT_TRUE(TLvalToBoxedCell <= TMemToGen);
+  EXPECT_TRUE(TPtrToInt <= TMemToCell);
+  EXPECT_TRUE(TLvalToInt <= TMemToCell);
+
+  EXPECT_EQ(TBottom, TPtrToInt & TLvalToInt);
+  EXPECT_EQ(TBottom, TPtrToGen & TLvalToGen);
+  EXPECT_EQ(TPtrToInt, TPtrToInt & TMemToGen);
+
+  EXPECT_EQ(TPtrToInt, TMemToInt - TLvalToInt);
+  EXPECT_EQ(TLvalToInt, TMemToInt - TPtrToInt);
+
+  auto const t = TInt | TPtrToInt | TLvalToInt;
+  EXPECT_EQ(TInt, t - (TPtrToInt | TLvalToInt));
+  EXPECT_EQ(TPtrToInt, t - (TInt | TLvalToInt));
+  EXPECT_EQ(TLvalToInt, t - (TInt | TPtrToInt));
+  EXPECT_EQ(TPtrToInt | TLvalToInt, t - TInt);
+  EXPECT_EQ(TInt | TLvalToInt, t - TPtrToInt);
+  EXPECT_EQ(TInt | TPtrToInt, t - TLvalToInt);
+
+  EXPECT_EQ(t | TStr | TMemToStr, t | TStr);
+  EXPECT_EQ(t | TStr | TMemToStr, (t | TStr) - TLvalToInt);
+
+  EXPECT_EQ(TLvalToUncounted, TLvalToUncounted - TPtrToUninit);
 }
 
 TEST(Type, Subtypes) {
   Type numbers = TDbl | TInt;
-  EXPECT_EQ("{Int|Dbl}", numbers.toString());
+  EXPECT_EQ("{Dbl|Int}", numbers.toString());
   EXPECT_TRUE(TDbl <= numbers);
   EXPECT_TRUE(TInt <= numbers);
   EXPECT_FALSE(TBool <= numbers);
 
-  EXPECT_FALSE(TFunc <= TCell);
+  EXPECT_TRUE(TFunc <= TCell);
   EXPECT_FALSE(TTCA <= TGen);
 
   EXPECT_TRUE(TPtrToCell < TPtrToGen);
@@ -237,18 +415,18 @@ TEST(Type, Top) {
 }
 
 namespace {
-inline bool fits(Type t, TypeConstraint tc) {
-  return typeFitsConstraint(t, tc);
+inline bool fits(Type t, GuardConstraint gc) {
+  return typeFitsConstraint(t, gc);
 }
 }
 
-TEST(Type, TypeConstraints) {
+TEST(Type, GuardConstraints) {
   EXPECT_TRUE(fits(TGen, DataTypeGeneric));
   EXPECT_FALSE(fits(TGen, DataTypeBoxAndCountness));
   EXPECT_FALSE(fits(TGen, DataTypeBoxAndCountnessInit));
   EXPECT_FALSE(fits(TGen, DataTypeSpecific));
   EXPECT_FALSE(fits(TGen,
-                    TypeConstraint(DataTypeSpecialized).setWantArrayKind()));
+                    GuardConstraint(DataTypeSpecialized).setWantArrayKind()));
 
   EXPECT_TRUE(fits(TCell,
                    {DataTypeGeneric}));
@@ -256,9 +434,9 @@ TEST(Type, TypeConstraints) {
                     {DataTypeGeneric}));
 
   EXPECT_FALSE(fits(TArr,
-                    TypeConstraint(DataTypeSpecialized).setWantArrayKind()));
+                    GuardConstraint(DataTypeSpecialized).setWantArrayKind()));
   EXPECT_TRUE(fits(Type::Array(ArrayData::kPackedKind),
-                   TypeConstraint(DataTypeSpecialized).setWantArrayKind()));
+                   GuardConstraint(DataTypeSpecialized).setWantArrayKind()));
 }
 
 TEST(Type, RelaxType) {
@@ -268,12 +446,12 @@ TEST(Type, RelaxType) {
                       DataTypeBoxAndCountness));
 
 
-  auto tc = TypeConstraint{DataTypeSpecialized};
-  tc.setDesiredClass(SystemLib::s_IteratorClass);
-  tc.category = DataTypeSpecialized;
+  auto gc = GuardConstraint{DataTypeSpecialized};
+  gc.setDesiredClass(SystemLib::s_IteratorClass);
+  gc.category = DataTypeSpecialized;
   auto subIter = Type::SubObj(SystemLib::s_IteratorClass);
   EXPECT_EQ("Obj<=Iterator", subIter.toString());
-  EXPECT_EQ(subIter, relaxType(subIter, tc.category));
+  EXPECT_EQ(subIter, relaxType(subIter, gc.category));
 
   EXPECT_EQ(TBoxedInitCell,
             relaxType(TBoxedInitCell, DataTypeBoxAndCountnessInit));
@@ -282,13 +460,13 @@ TEST(Type, RelaxType) {
 }
 
 TEST(Type, RelaxConstraint) {
-  EXPECT_EQ(TypeConstraint(DataTypeBoxAndCountness),
-            relaxConstraint(TypeConstraint{DataTypeSpecific},
+  EXPECT_EQ(GuardConstraint(DataTypeBoxAndCountness),
+            relaxConstraint(GuardConstraint{DataTypeSpecific},
                             TCell,
                             TArr));
 
-  EXPECT_EQ(TypeConstraint(DataTypeGeneric),
-            relaxConstraint(TypeConstraint{DataTypeBoxAndCountness},
+  EXPECT_EQ(GuardConstraint(DataTypeGeneric),
+            relaxConstraint(GuardConstraint{DataTypeBoxAndCountness},
                             TArr,
                             TCell));
 }
@@ -310,10 +488,11 @@ TEST(Type, Specialized) {
 
   EXPECT_EQ(TPtrToSPropCell, TPtrToSPropGen - TPtrToBoxedCell);
 
-  auto const array = make_packed_array(1, 2, 3, 4);
-  auto const mixed = make_map_array(1, 1, 2, 2);
-  auto const arrData = ArrayData::GetScalarArray(array.get());
-  auto const arrDataMixed = ArrayData::GetScalarArray(mixed.get());
+
+
+  auto const arrData = ArrayData::GetScalarArray(make_packed_array(1, 2, 3, 4));
+  auto const arrDataMixed = ArrayData::GetScalarArray(make_map_array(1, 1,
+                                                                     2, 2));
   auto constArray = Type::cns(arrData);
   auto constArrayMixed = Type::cns(arrDataMixed);
   auto const spacked = Type::StaticArray(ArrayData::kPackedKind);
@@ -344,8 +523,6 @@ TEST(Type, Specialized) {
 
   auto const subCls = Type::SubCls(SystemLib::s_IteratorClass);
   EXPECT_EQ(TCls, TCls - subCls);
-  EXPECT_EQ(subCls, (subCls | TPtrToInt) - TPtrToInt);
-  EXPECT_EQ(TPtrToInt, (subCls | TPtrToInt) - subCls);
 }
 
 TEST(Type, SpecializedObjects) {
@@ -471,7 +648,7 @@ TEST(Type, Const) {
   EXPECT_LT(True, TBool);
   EXPECT_NE(True, TBool);
   EXPECT_TRUE(True.hasConstVal());
-  EXPECT_EQ(true, True.boolVal());
+  EXPECT_TRUE(True.boolVal());
   EXPECT_TRUE(TUncounted.maybe(True));
   EXPECT_FALSE(five <= True);
   EXPECT_FALSE(five > True);
@@ -481,8 +658,7 @@ TEST(Type, Const) {
   EXPECT_EQ(TBottom, five & True);
   EXPECT_EQ(Type::cns(false), TBool - True);
 
-  auto array = make_packed_array(1, 2, 3, 4);
-  auto arrData = ArrayData::GetScalarArray(array.get());
+  auto arrData = ArrayData::GetScalarArray(make_packed_array(1, 2, 3, 4));
   auto constArray = Type::cns(arrData);
   auto packedArray = Type::Array(ArrayData::kPackedKind);
   auto mixedArray = Type::Array(ArrayData::kMixedKind);
@@ -520,17 +696,17 @@ TEST(Type, Const) {
   EXPECT_EQ(packedRat, packedRat & ratArray1);
 
   auto vec = make_vec_array(1, 2, 3, 4);
-  auto vecData = ArrayData::GetScalarArray(vec.get());
+  auto vecData = ArrayData::GetScalarArray(std::move(vec));
   auto constVec = Type::cns(vecData);
   EXPECT_TRUE(constVec < TVec);
 
   auto dict = make_dict_array(1, 1, 2, 2, 3, 3, 4, 4);
-  auto dictData = ArrayData::GetScalarArray(dict.get());
+  auto dictData = ArrayData::GetScalarArray(std::move(dict));
   auto constDict = Type::cns(dictData);
   EXPECT_TRUE(constDict < TDict);
 
   auto keyset = make_keyset_array(1, 2, 3, 4);
-  auto keysetData = ArrayData::GetScalarArray(keyset.get());
+  auto keysetData = ArrayData::GetScalarArray(std::move(keyset));
   auto constKeyset = Type::cns(keysetData);
   EXPECT_TRUE(constKeyset < TKeyset);
 }

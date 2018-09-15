@@ -1,0 +1,6 @@
+File "subtype_shape_may_not_omit_nullable_fields_in_supertype_shape.php", line 4, characters 10-21:
+Invalid return type (Typing[4110])
+File "subtype_shape_may_not_omit_nullable_fields_in_supertype_shape.php", line 3, characters 52-57:
+This is a string
+File "subtype_shape_may_not_omit_nullable_fields_in_supertype_shape.php", line 3, characters 15-21:
+It is incompatible with a nonnull value because the field 'a' may be set to any type in this shape

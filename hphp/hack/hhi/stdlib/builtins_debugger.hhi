@@ -3,17 +3,26 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
+
+<<__PHPStdLib>>
 function hphpd_install_user_command($cmd, $clsname);
+<<__PHPStdLib>>
 function hphpd_auth_token(): string;
+<<__PHPStdLib>>
 function hphpd_get_user_commands();
+<<__PHPStdLib>>
 function hphpd_break(bool $condition = true): void;
+<<__PHPStdLib>>
+function hphp_debug_break(bool $condition = true): bool;
+<<__PHPStdLib>>
 function hphp_debugger_attached(): bool;
+<<__PHPStdLib>>
 function hphpd_get_client($name = null);
+<<__PHPStdLib>>
 function hphpd_client_ctrl($name, $op);
 class DebuggerProxyCmdUser {
   public function __construct();

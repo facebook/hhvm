@@ -7,4 +7,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_1501() {
 main();
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function b($s) {
   if ($s === 'floo') {
@@ -44,7 +44,7 @@ function main() {
   echo "Done enabling\n";
   f();
   $r = fb_disable_code_coverage();
-  unset($r['systemlib.phpfb']);
+  unset($r['/:systemlib.phpfb']);
   var_dump($r);
 }
 main();

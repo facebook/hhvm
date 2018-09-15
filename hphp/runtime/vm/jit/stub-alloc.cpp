@@ -48,16 +48,17 @@ void FreeStubList::push(TCA stub) {
   always_assert(tc::isValidCodeAddress(stub));
   std::unique_lock<std::mutex> l(s_stubLock);
 
-  /*
-   * A freed stub may be released by Treadmill more than once if multiple
-   * threads execute the service request before it is freed. We detect
-   * duplicates by marking freed stubs
-   */
   StubNode* n = reinterpret_cast<StubNode*>(stub);
-  if (n->m_freed == kStubFree) {
-    TRACE(1, "already freed stub %p\n", stub);
-    return;
-  }
+  /*
+   * We should never try to free a stub twice, but if the code to do
+   * so is not careful, two threads running through the stub at the
+   * same time could both think they need to smash it, and treadmill
+   * the stub. We use the m_freed field to opportunistically catch
+   * that kind of error (its still possible that its pushed, then
+   * popped, scribbled over and then pushed again).
+   */
+  always_assert(n->m_freed != kStubFree &&
+                n->m_freed != ~kStubFree);
   n->m_freed = kStubFree;
   n->m_next = m_list;
   TRACE(1, "free stub %p (-> %p)\n", stub, m_list);
@@ -70,6 +71,8 @@ TCA FreeStubList::maybePop() {
   StubNode* ret = m_list;
   if (ret) {
     TRACE(1, "alloc stub %p\n", ret);
+    always_assert(ret->m_next == nullptr ||
+                  tc::isValidCodeAddress((TCA)ret->m_next));
     m_list = ret->m_next;
     ret->m_freed = ~kStubFree;
   }
@@ -97,8 +100,6 @@ TCA allocTCStub(CodeBlock& frozen, CGMeta* fixups, bool* isReused) {
 
   if (ret) {
     Stats::inc(Stats::Astub_Reused);
-    always_assert(s_freeStubs.peek() == nullptr ||
-                  tc::isValidCodeAddress(s_freeStubs.peek()));
     TRACE(1, "recycle stub %p\n", ret);
   } else {
     ret = frozen.frontier();
@@ -113,6 +114,7 @@ TCA allocTCStub(CodeBlock& frozen, CGMeta* fixups, bool* isReused) {
 }
 
 void markStubFreed(TCA stub) {
+  Debug::DebugInfo::Get()->recordRelocMap(stub, 0, "FreeStub");
   s_freeStubs.push(stub);
 }
 

@@ -1,0 +1,8 @@
+File "tconst7.php", line 15, characters 14-30:
+Invalid argument (Typing[4110])
+  File "tconst7.php", line 6, characters 21-30:
+  This is a num (int/float)
+  File "tconst7.php", line 4, characters 31-33:
+    resulting from expanding the type constant C::TFoo
+  File "tconst7.php", line 15, characters 14-30:
+  It is incompatible with a nullable type

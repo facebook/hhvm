@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $arr = array();
 $arr[] = 0x1234;

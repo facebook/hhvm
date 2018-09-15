@@ -42,8 +42,6 @@ Construct::Construct(BlockScopePtr scope,
   , m_flagsVal(0)
   , m_r(r)
   , m_kindOf(kindOf)
-  , m_containedEffects(0)
-  , m_effectsTag(0)
 {
 }
 
@@ -75,60 +73,12 @@ void Construct::resetScope(BlockScopeRawPtr scope) {
   }
 }
 
-void Construct::recomputeEffects() {
-  BlockScopeRawPtr scope = getScope();
-  if (scope) scope->incEffectsTag();
-}
-
-int Construct::getChildrenEffects() const {
-  int childrenEffects = NoEffect;
-  for (int i = getKidCount(); i--; ) {
-    ConstructPtr child = getNthKid(i);
-    if (child) {
-      if (child->skipRecurse()) continue;
-      childrenEffects |= child->getContainedEffects();
-      if ((childrenEffects & UnknownEffect) == UnknownEffect) {
-        break;
-      }
-    }
-  }
-  return childrenEffects;
-}
-
-int Construct::getContainedEffects() const {
-  BlockScopeRawPtr scope = getScope();
-  int curTag = scope ? scope->getEffectsTag() : m_effectsTag + 1;
-  if (m_effectsTag != curTag) {
-    m_effectsTag = curTag;
-    m_containedEffects = getLocalEffects() | getChildrenEffects();
-  }
-  return m_containedEffects;
-}
-
-void LocalEffectsContainer::setLocalEffect(Construct::Effect effect) {
-  if ((m_localEffects & effect) != effect) {
-    effectsCallback();
-    m_localEffects |= effect;
-  }
-}
-
-void LocalEffectsContainer::clearLocalEffect(Construct::Effect effect) {
-  if (m_localEffects & effect) {
-    effectsCallback();
-    m_localEffects &= ~effect;
-  }
-}
-
-bool LocalEffectsContainer::hasLocalEffect(Construct::Effect effect) const {
-  return m_localEffects & effect;
-}
-
-ExpressionPtr Construct::makeConstant(AnalysisResultConstPtr ar,
+ExpressionPtr Construct::makeConstant(AnalysisResultConstRawPtr ar,
                                       const std::string &value) const {
   return Expression::MakeConstant(ar, getScope(), getRange(), value);
 }
 
-ExpressionPtr Construct::makeScalarExpression(AnalysisResultConstPtr ar,
+ExpressionPtr Construct::makeScalarExpression(AnalysisResultConstRawPtr ar,
                                                const Variant &value) const {
   return Expression::MakeScalarExpression(ar, getScope(),
                                           getRange(), value);
@@ -169,7 +119,6 @@ void Construct::dumpNode(int spc) {
   std::string scontext;
   std::string value;
   std::string type_info;
-  int ef = 0;
 
   if (isStatement()) {
     Statement *s = static_cast<Statement*>(this);
@@ -180,8 +129,6 @@ void Construct::dumpNode(int spc) {
   } else {
     assert(isExpression());
     Expression *e = static_cast<Expression*>(this);
-
-    ef = e->getLocalEffects();
 
     Expression::KindOf etype = e->getKindOf();
     name = Expression::nameOfKind(etype);
@@ -202,13 +149,8 @@ void Construct::dumpNode(int spc) {
     }
 
     int c = e->getContext();
-    if ((c & Expression::Declaration) == Expression::Declaration) {
-      scontext += "|Declaration";
-    } else if (c & Expression::LValue) {
+    if (c & Expression::LValue) {
       scontext += "|LValue";
-    }
-    if (c & Expression::NoLValueWrapper) {
-      scontext += "|NoLValueWrapper";
     }
     if (c & Expression::RefValue) {
       scontext += "|RefValue";
@@ -237,26 +179,11 @@ void Construct::dumpNode(int spc) {
     if (c & Expression::RefAssignmentLHS) {
       scontext += "|RefAssignmentLHS";
     }
-    if (c & Expression::DeepAssignmentLHS) {
-      scontext += "|DeepAssignmentLHS";
-    }
-    if (c & Expression::AssignmentRHS) {
-      scontext += "|AssignmentRHS";
-    }
     if (c & Expression::InvokeArgument) {
       scontext += "|InvokeArgument";
     }
-    if (c & Expression::OprLValue) {
-      scontext += "|OprLValue";
-    }
-    if (c & Expression::DeepOprLValue) {
-      scontext += "|DeepOprLValue";
-    }
     if (c & Expression::AccessContext) {
       scontext += "|AccessContext";
-    }
-    if (c & Expression::ReturnContext) {
-      scontext += "|ReturnContext";
     }
 
     if (scontext != "") {
@@ -282,33 +209,12 @@ void Construct::dumpNode(int spc) {
     std::cout << "[" << value << "] ";
   }
 
-  std::string sef;
-  if ((ef & UnknownEffect) == UnknownEffect) {
-    sef = "|UnknownEffect";
-  } else {
-    if (ef & IOEffect) sef += "|IOEffect";
-    if (ef & AssignEffect) sef += "|AssignEffect";
-    if (ef & GlobalEffect) sef += "|GlobalEffect";
-    if (ef & LocalEffect) sef += "|LocalEffect";
-    if (ef & ParamEffect) sef += "|ParamEffect";
-    if (ef & DeepParamEffect) sef += "|DeepParamEffect";
-    if (ef & DynamicParamEffect) sef += "|DynamicParamEffect";
-    if (ef & CanThrow) sef += "|CanThrow";
-    if (ef & AccessorEffect) sef += "|AccessorEffect";
-    if (ef & CreateEffect) sef += "|CreateEffect";
-    if (ef & DiagnosticEffect) sef += "|DiagnosticEffect";
-    if (ef & OtherEffect) sef += "|OtherEffect";
-  }
-  if (sef != "") {
-    sef = " (" + sef.substr(1) + ")";
-  }
-
   std::string objstr;
   if (dynamic_cast<SimpleVariable*>(this) != nullptr) {
     objstr = " (NoObjInfo)";
   }
 
-  std::cout << nkid << scontext << sef << objstr;
+  std::cout << nkid << scontext << objstr;
   if (auto scope = getFileScope()) {
     std::cout << " " << scope->getName() << ":"
       << "[" << m_r.line0 << "@" << m_r.char0 << ", "
@@ -317,7 +223,7 @@ void Construct::dumpNode(int spc) {
   std::cout << "\n";
 }
 
-void Construct::dump(int spc, AnalysisResultConstPtr ar) {
+void Construct::dump(int spc, AnalysisResultConstRawPtr ar) {
   dumpNode(spc);
   for (int i = 0, n = getKidCount(); i < n; i++) {
     if (auto kid = getNthKid(i)) {
@@ -330,29 +236,13 @@ void Construct::dump(int spc, AnalysisResultConstPtr ar) {
   }
 }
 
-void Construct::parseTimeFatal(FileScopeRawPtr fs,
-                               Compiler::ErrorType err, const char *fmt, ...) {
+void Construct::parseTimeFatal(FileScopeRawPtr fs, const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   std::string msg;
   string_vsnprintf(msg, fmt, ap);
   va_end(ap);
 
-  if (err != Compiler::NoError) Compiler::Error(err, shared_from_this());
   throw ParseTimeFatalException(fs->getName(), m_r.line0,
                                 "%s", msg.c_str());
-}
-
-void Construct::analysisTimeFatal(Compiler::ErrorType err,
-                                  const char *fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-  std::string msg;
-  string_vsnprintf(msg, fmt, ap);
-  va_end(ap);
-
-  assert(err != Compiler::NoError);
-  Compiler::Error(err, shared_from_this());
-  throw AnalysisTimeFatalException(getFileScope()->getName(), m_r.line0,
-                                   "%s [analysis]", msg.c_str());
 }

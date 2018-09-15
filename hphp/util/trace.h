@@ -1,4 +1,5 @@
 /*
+
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
@@ -22,6 +23,7 @@
 #include <stdarg.h>
 
 #include <folly/Format.h>
+#include <folly/portability/Unistd.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/portability.h"
@@ -103,6 +105,7 @@ namespace Trace {
       TM(dispatchBB)    \
       TM(ehframe)       \
       TM(emitter)       \
+      TM(extern_compiler) \
       TM(fixup)         \
       TM(fr)            \
       TM(gc)            \
@@ -111,11 +114,14 @@ namespace Trace {
       TM(hfsort)        \
       TM(hhas)          \
       TM(hhbbc)         \
+      TM(hhbbc_cfg)     \
       TM(hhbbc_dce)     \
       TM(hhbbc_dump)    \
+      TM(hhbbc_parse)   \
       TM(hhbbc_emit)    \
       TM(hhbbc_iface)   \
       TM(hhbbc_index)   \
+      TM(hhbbc_stats)   \
       TM(hhbbc_time)    \
       TM(hhbc)          \
       TM(hhir)          \
@@ -134,6 +140,7 @@ namespace Trace {
       TM(hhir_refcount) \
       TM(hhir_refineTmps) \
       TM(hhir_store)    \
+      TM(hhir_unreachable) \
       TM(hhprof)        \
       TM(inlining)      \
       TM(instancebits)  \
@@ -152,6 +159,7 @@ namespace Trace {
       TM(pgo)           \
       TM(printir)       \
       TM(prof_branch)   \
+      TM(prof_array)    \
       TM(rat)           \
       TM(refcount)      \
       TM(regalloc)      \
@@ -180,6 +188,8 @@ namespace Trace {
       TM(xls)           \
       TM(xls_stats)     \
       TM(pdce_inline)   \
+      TM(clisrv)        \
+      TM(factparse)     \
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)  \
       TM(stress_txInterpSeed) \
@@ -303,7 +313,7 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-#if (defined(DEBUG) || defined(USE_TRACE)) /* { */
+#if (!defined(NDEBUG) || defined(USE_TRACE)) /* { */
 #  ifndef USE_TRACE
 #    define USE_TRACE 1
 #  endif
@@ -389,7 +399,7 @@ void setTraceThread(const std::string& traceSpec);
 
 //////////////////////////////////////////////////////////////////////
 
-#else /* } (defined(DEBUG) || defined(USE_TRACE)) { */
+#else /* } (!defined(NDEBUG) || defined(USE_TRACE)) { */
 
 //////////////////////////////////////////////////////////////////////
 /*
@@ -410,31 +420,37 @@ void setTraceThread(const std::string& traceSpec);
 struct Indent {
   Indent() {
     always_assert(true && "If this struct is completely empty we get unused "
-                  "variable warnings in code that uses it.");
+                          "variable warnings in code that uses it.");
   }
 };
-inline std::string indent() { return std::string(); }
+inline std::string indent() {
+  return std::string();
+}
 
 struct Bump {
-  Bump(Module mod, int adjust, bool condition = true) {
+  Bump(Module /*mod*/, int /*adjust*/, bool /*condition*/ = true) {
     always_assert(true && "If this struct is completely empty we get unused "
-                  "variable warnings in code that uses it.");
+                          "variable warnings in code that uses it.");
   }
 };
 
 const bool enabled = false;
 
-inline void trace(const char*, ...)      { }
-inline void trace(const std::string&)    { }
-inline void vtrace(const char*, va_list) { }
-inline bool moduleEnabled(Module t, int level = 1) { return false; }
-inline int moduleLevel(Module tm) { return 0; }
-inline void ensureInit(std::string outFile) { }
-inline void setTraceThread(const std::string& traceSpec) { }
+inline void trace(const char*, ...) {}
+inline void trace(const std::string&) {}
+inline void vtrace(const char*, va_list) {}
+inline bool moduleEnabled(Module /*t*/, int /*level*/ = 1) {
+  return false;
+}
+inline int moduleLevel(Module /*tm*/) {
+  return 0;
+}
+inline void ensureInit(std::string /*outFile*/) {}
+inline void setTraceThread(const std::string& /*traceSpec*/) {}
 
 //////////////////////////////////////////////////////////////////////
 
-#endif /* } (defined(DEBUG) || defined(USE_TRACE)) */
+#endif /* } (!defined(NDEBUG) || defined(USE_TRACE)) */
 
 } // Trace
 

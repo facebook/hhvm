@@ -1,11 +1,4 @@
 <?php
-var_dump(extract(
-  array(
-      'GLOBALS' => 'test',
-    ),
-  EXTR_OVERWRITE
-));
-var_dump($GLOBALS);
 
 class Test {
   public function testOverwrite() {
@@ -14,5 +7,16 @@ class Test {
     }
 }
 
+<<__EntryPoint>>
+function main_extract_002() {
+var_dump(extract(
+  array(
+      'GLOBALS' => 'test',
+    ),
+  EXTR_OVERWRITE
+));
+var_dump($GLOBALS);
+
 $t = new Test();
 $t->testOverwrite();
+}

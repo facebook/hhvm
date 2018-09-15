@@ -1088,7 +1088,7 @@ function localeconv(): array;
  *
  */
 <<__Native>>
-function nl_langinfo(int $item): string;
+function nl_langinfo(int $item): mixed;
 
 /**
  * The function sscanf() is the input analog of printf(). sscanf() reads from
@@ -1561,7 +1561,7 @@ function strcspn(string $str1,
  *
  */
 <<__IsFoldable, __Native>>
-function strlen(mixed $vstr): mixed;
+function strlen(string $vstr): int;
 
 /**
  * Parses a string input for fields in CSV format and returns an array

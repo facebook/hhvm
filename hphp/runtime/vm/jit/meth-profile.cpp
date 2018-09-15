@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/jit/prof-data-serialize.h"
 
 #include "hphp/util/assertions.h"
 
@@ -130,6 +131,19 @@ std::string MethProfile::toString() const {
     return folly::sformat("interfaceMeth {}", meth->fullName()->data());
   }
   return std::string("none");
+}
+
+void MethProfile::serialize(ProfDataSerializer& ser) const {
+  write_raw(ser, curTag());
+  write_func(ser, rawMeth());
+  write_class(ser, rawClass());
+}
+
+void MethProfile::deserialize(ProfDataDeserializer& ser) {
+  auto const tag = read_raw<Tag>(ser);
+  auto const func = read_func(ser);
+  setMeth(func, tag);
+  m_curClass = read_class(ser);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

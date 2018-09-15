@@ -1,8 +1,0 @@
-%unicode|string%(9) "it worked"
-%unicode|string%(%d) "phar://%sphar_bz2.phar/tar_004.php"
-bool(true)
-bool(true)
-
-Warning: %s
-Unknown file format specified
-===DONE===

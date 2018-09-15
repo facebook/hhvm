@@ -19,19 +19,22 @@
 #error "This should only be included by ext_waitable-wait-handle.h"
 #endif
 
+#include "hphp/runtime/base/tv-refcount.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline
-c_WaitableWaitHandle::c_WaitableWaitHandle(Class* cb, HeaderKind kind) noexcept
-    : c_WaitHandle(cb, kind) {
+c_WaitableWaitHandle::c_WaitableWaitHandle(Class* cb, HeaderKind kind,
+                                           type_scan::Index tyindex) noexcept
+    : c_Awaitable(cb, kind, tyindex) {
   m_parentChain.init();
 }
 
 inline c_WaitableWaitHandle::~c_WaitableWaitHandle() {
   switch (getState()) {
     case STATE_SUCCEEDED:
-      tvRefcountedDecRef(&m_resultOrException);
+      tvDecRefGen(&m_resultOrException);
       break;
 
     case STATE_FAILED:
@@ -41,12 +44,12 @@ inline c_WaitableWaitHandle::~c_WaitableWaitHandle() {
 }
 
 inline context_idx_t c_WaitableWaitHandle::getContextIdx() const {
-  assert(!isFinished());
+  assertx(!isFinished());
   return m_contextIdx;
 }
 
 inline void c_WaitableWaitHandle::setContextIdx(context_idx_t ctx_idx) {
-  assert(!isFinished());
+  assertx(!isFinished());
   m_contextIdx = ctx_idx;
 }
 
@@ -55,12 +58,12 @@ inline bool c_WaitableWaitHandle::isInContext() const {
 }
 
 inline AsioContext* c_WaitableWaitHandle::getContext() const {
-  assert(isInContext());
+  assertx(isInContext());
   return AsioSession::Get()->getContext(getContextIdx());
 }
 
 inline AsioBlockableChain& c_WaitableWaitHandle::getParentChain() {
-  assert(!isFinished());
+  assertx(!isFinished());
   return m_parentChain;
 }
 

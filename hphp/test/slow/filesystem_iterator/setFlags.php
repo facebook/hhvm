@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_set_flags() {
 $sample_dir = __DIR__.'/../../sample_dir';
 $iterator = new FilesystemIterator(
   $sample_dir,
@@ -20,3 +23,4 @@ foreach ($iterator as $key => $fileinfo) {
 }
 asort($ret);
 var_dump(array_values($ret));
+}

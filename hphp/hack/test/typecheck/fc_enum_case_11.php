@@ -1,6 +1,6 @@
 <?hh // strict
 
-enum MyEnum : string {
+enum MyEnum: string {
   A = 'a';
   B = 'b';
 }

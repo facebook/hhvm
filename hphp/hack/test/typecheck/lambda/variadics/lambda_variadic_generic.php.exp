@@ -1,0 +1,14 @@
+File "lambda_variadic_generic.php", line 38, characters 18-46:
+Invalid argument (Typing[4101])
+  File "lambda_variadic_generic.php", line 38, characters 19-19:
+  This type has 0 arguments
+  File "lambda_variadic_generic.php", line 16, characters 35-35:
+  This one has 1
+File "lambda_variadic_generic.php", line 40, characters 47-49:
+Could not find method bar in an object of type C (Typing[4053])
+  File "lambda_variadic_generic.php", line 16, characters 37-37:
+  This is why I think it is an object of type C
+  File "lambda_variadic_generic.php", line 11, characters 29-29:
+    via this generic T
+  File "lambda_variadic_generic.php", line 3, characters 7-7:
+  Declaration of C is here

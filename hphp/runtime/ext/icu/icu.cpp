@@ -74,9 +74,7 @@ void IntlError::throwException(const char *format, ...) {
 static __thread std::string* s_defaultLocale;
 
 void IntlExtension::bindIniSettings() {
-  // TODO: t5226715 We shouldn't need to check s_defaultLocale here,
-  // but right now this is called for every request.
-  if (s_defaultLocale) return;
+  assertx(!s_defaultLocale);
   s_defaultLocale = new std::string;
   IniSetting::Bind(this, IniSetting::PHP_INI_ALL,
                    "intl.default_locale", "",
@@ -89,7 +87,7 @@ void IntlExtension::threadShutdown() {
 }
 
 const String GetDefaultLocale() {
-  assert(s_defaultLocale);
+  assertx(s_defaultLocale);
   if (s_defaultLocale->empty()) {
     return String(uloc_getDefault(), CopyString);
   }
@@ -97,7 +95,7 @@ const String GetDefaultLocale() {
 }
 
 bool SetDefaultLocale(const String& locale) {
-  assert(s_defaultLocale);
+  assertx(s_defaultLocale);
   *s_defaultLocale = locale.toCppString();
   return true;
 }

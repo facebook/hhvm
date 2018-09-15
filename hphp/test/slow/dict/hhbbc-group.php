@@ -25,4 +25,8 @@ function main() {
     var_dump($d);
   }
 }
+
+<<__EntryPoint>>
+function main_hhbbc_group() {
 main();
+}

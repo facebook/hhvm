@@ -1,5 +1,8 @@
 #include "hphp/runtime/ext/icu/ext_icu_break_iterator.h"
 
+using icu::BreakIterator;
+using icu::RuleBasedBreakIterator;
+
 namespace HPHP { namespace Intl {
 
 const StaticString
@@ -23,7 +26,7 @@ inline Object ibi_create(const char *funcname,
                                                      UErrorCode&),
                          const String& locale) {
   UErrorCode error = U_ZERO_ERROR;
-  auto bi = func(Locale::createFromName(locale.c_str()), error);
+  auto bi = func(icu::Locale::createFromName(locale.c_str()), error);
   if (U_FAILURE(error)) {
     s_intl_error->setError(error, "%s: error creating BreakIterator", funcname);
     return Object();
@@ -131,8 +134,8 @@ static Variant HHVM_METHOD(IntlBreakIterator, getLocale, int64_t locale_type) {
   return String(locale.getName(), CopyString);
 }
 
-static Object HHVM_METHOD(IntlBreakIterator, getPartsIterator,
-                          const String& key_type) {
+static Object
+HHVM_METHOD(IntlBreakIterator, getPartsIterator, const String& /*key_type*/) {
   throw_not_implemented("IntlBreakIterator::getPartsIterator");
 }
 

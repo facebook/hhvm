@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Fat {
   public $prop0 = 0;

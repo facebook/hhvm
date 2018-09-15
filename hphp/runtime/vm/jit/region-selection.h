@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/jit/types.h"
 
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP { namespace jit {
@@ -69,7 +70,6 @@ struct RegionDesc {
   struct Arc;
   struct TypedLocation;
   struct GuardedLocation;
-  struct ReffinessPred;
   using BlockPtr = std::shared_ptr<Block>;
   using BlockId = TransID;
   // BlockId Encoding:
@@ -98,6 +98,9 @@ struct RegionDesc {
    */
   const BlockIdSet& merged(BlockId id) const;
 
+  const BlockIdSet* incoming() const;
+  void incoming(BlockIdSet&& ids);
+
   /*
    * Modify this RegionDesc so that its list of blocks is sorted in a reverse
    * post order.
@@ -125,6 +128,7 @@ struct RegionDesc {
   int64_t           blockProfCount(BlockId bid) const;
 
   Block*            addBlock(SrcKey sk, int length, FPInvOffset spOffset);
+  void              addBlock(BlockPtr newBlock);
   void              replaceBlock(BlockId bid, BlockPtr newBlock);
   void              deleteBlock(BlockId bid);
   BlockVec::iterator deleteBlock(RegionDesc::BlockVec::iterator it);
@@ -162,13 +166,17 @@ private:
     BlockIdSet               preds;
     BlockIdSet               succs;
     BlockIdSet               merged; // other blocks that got merged into this
-    folly::Optional<BlockId> prevRetrans;
-    folly::Optional<BlockId> nextRetrans;
+    BlockId                  prevRetransId{kInvalidTransID};
+    BlockId                  nextRetransId{kInvalidTransID};
+    bool                     hasIncoming{false};
     explicit BlockData(BlockPtr b = nullptr) : block(b) {}
   };
 
   bool       hasBlock(BlockId id) const;
   BlockData& data(BlockId id);
+  const BlockData& data(BlockId id) const {
+    return const_cast<RegionDesc*>(this)->data(id);
+  }
   void       copyBlocksFrom(const RegionDesc& other,
                             BlockVec::iterator where);
   void       copyArcsFrom(const RegionDesc& other);
@@ -257,45 +265,16 @@ struct PostConditions {
 };
 
 /*
- * A prediction for the argument reffiness of the Func for a pre-live ActRec.
- *
- * mask is a bitmask of all 1's, with one bit for each parameter being passed.
- *
- * vals is a bitmask of the same length as mask, with a 1 representing a
- * parameter that will be passed by reference and a 0 for for value.
- *
- * arSpOffset is the offset from the initialSpOffset to the ActRec.
- */
-struct RegionDesc::ReffinessPred {
-  std::vector<bool> mask;
-  std::vector<bool> vals;
-  int64_t arSpOffset;
-};
-
-inline bool operator==(const RegionDesc::ReffinessPred& a,
-                       const RegionDesc::ReffinessPred& b) {
-  return a.mask == b.mask && a.vals == b.vals && a.arSpOffset == b.arSpOffset;
-}
-
-
-inline bool operator!=(const RegionDesc::ReffinessPred& a,
-                       const RegionDesc::ReffinessPred& b) {
-  return !(a == b);
-}
-
-/*
  * A basic block in the region, with type predictions for conditions
  * at various execution points, including at entry to the block.
  */
 struct RegionDesc::Block {
   using TypedLocVec   = jit::vector<TypedLocation>;
   using GuardedLocVec = jit::vector<GuardedLocation>;
-  using RefPredVec    = jit::vector<ReffinessPred>;
-  using ParamByRefMap = boost::container::flat_map<SrcKey,bool>;
   using KnownFuncMap  = boost::container::flat_map<SrcKey,const Func*>;
 
-  explicit Block(const Func* func, bool resumed, bool hasThis,
-                 Offset start, int length, FPInvOffset initSpOff);
+  Block(BlockId id, const Func* func, ResumeMode resumeMode, bool hasThis,
+        Offset start, int length, FPInvOffset initSpOff);
 
   Block& operator=(const Block&) = delete;
 
@@ -307,10 +286,10 @@ struct RegionDesc::Block {
   const Unit* unit()              const { return m_func->unit(); }
   const Func* func()              const { return m_func; }
   SrcKey      start()             const {
-    return SrcKey { m_func, m_start, m_resumed, m_hasThis };
+    return SrcKey { m_func, m_start, m_resumeMode, m_hasThis };
   }
   SrcKey      last()              const {
-    return SrcKey { m_func, m_last, m_resumed, m_hasThis };
+    return SrcKey { m_func, m_last, m_resumeMode, m_hasThis };
   }
   int         length()            const { return m_length; }
   bool        empty()             const { return length() == 0; }
@@ -347,16 +326,6 @@ struct RegionDesc::Block {
   void addPreCondition(const GuardedLocation&);
 
   /*
-   * Add information about parameter reffiness to this block.
-   */
-  void setParamByRef(SrcKey sk, bool);
-
-  /*
-   * Add a reffiness prediction about a pre-live ActRec.
-   */
-  void addReffinessPred(const ReffinessPred&);
-
-  /*
    * Update the statically known Func*. It remains active until another is
    * specified, so pass nullptr to indicate that there is no longer a known
    * Func*.
@@ -381,8 +350,6 @@ struct RegionDesc::Block {
    */
   const TypedLocVec&    typePredictions()   const { return m_typePredictions;  }
   const GuardedLocVec&  typePreConditions() const { return m_typePreConditions;}
-  const ParamByRefMap&  paramByRefs()       const { return m_byRefs;           }
-  const RefPredVec&     reffinessPreds()    const { return m_refPreds;         }
   const KnownFuncMap&   knownFuncs()        const { return m_knownFuncs;       }
   const PostConditions& postConds()         const { return m_postConds;        }
 
@@ -392,27 +359,20 @@ private:
   void checkMetadata() const;
 
 private:
-  BlockId         m_id;
-  const Func*     m_func;
-  const bool      m_resumed;
-  const bool      m_hasThis;
-  const Offset    m_start;
-  Offset          m_last;
-  int             m_length;
-  FPInvOffset     m_initialSpOffset;
-  TransID         m_profTransID;
-  TypedLocVec     m_typePredictions;
-  GuardedLocVec   m_typePreConditions;
-  ParamByRefMap   m_byRefs;
-  RefPredVec      m_refPreds;
-  KnownFuncMap    m_knownFuncs;
-  PostConditions  m_postConds;
+  BlockId          m_id;
+  const Func*      m_func;
+  const ResumeMode m_resumeMode;
+  const bool       m_hasThis;
+  const Offset     m_start;
+  Offset           m_last;
+  int              m_length;
+  FPInvOffset      m_initialSpOffset;
+  TransID          m_profTransID;
+  TypedLocVec      m_typePredictions;
+  GuardedLocVec    m_typePreConditions;
+  KnownFuncMap     m_knownFuncs;
+  PostConditions   m_postConds;
 };
-
-//////////////////////////////////////////////////////////////////////
-
-bool operator==(const RegionDesc::Block::RefPredVec& reffys1,
-                const RegionDesc::Block::RefPredVec& reffys2);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -426,19 +386,17 @@ bool operator==(const RegionDesc::Block::RefPredVec& reffys1,
  */
 struct RegionContext {
   struct LiveType;
-  struct PreLiveAR;
 
   RegionContext(const Func* f, Offset bcOff, FPInvOffset spOff,
-                bool r, bool ht) :
-      func(f), bcOffset(bcOff), spOffset(spOff), resumed(r), hasThis(ht) {}
+                ResumeMode rm, bool ht) :
+      func(f), bcOffset(bcOff), spOffset(spOff), resumeMode(rm), hasThis(ht) {}
 
   const Func* func;
   Offset bcOffset;
   FPInvOffset spOffset;
-  bool resumed;
+  ResumeMode resumeMode;
   bool hasThis;
   jit::vector<LiveType> liveTypes;
-  jit::vector<PreLiveAR> preLiveARs;
 };
 
 /*
@@ -447,18 +405,6 @@ struct RegionContext {
 struct RegionContext::LiveType {
   Location location;
   Type type;
-};
-
-/*
- * Pre-live ActRec information for a RegionContext.  The ActRec is
- * located stackOff slots above the stack at the start of the context,
- * contains the supplied func, and the m_this/m_class field is of type
- * objOrClass.
- */
-struct RegionContext::PreLiveAR {
-  int32_t stackOff;
-  const Func* func;
-  Type        objOrCls;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -589,9 +535,7 @@ std::string show(RegionDesc::TypedLocation);
 std::string show(const RegionDesc::GuardedLocation&);
 std::string show(const RegionDesc::Block::GuardedLocVec&);
 std::string show(const PostConditions&);
-std::string show(const RegionDesc::ReffinessPred&);
 std::string show(RegionContext::LiveType);
-std::string show(RegionContext::PreLiveAR);
 std::string show(const RegionContext&);
 std::string show(const RegionDesc::Block&);
 std::string show(const RegionDesc&);

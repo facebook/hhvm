@@ -12,9 +12,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef _MSC_VER
-#include <Windows.h>
-#endif
+
+#include <folly/portability/Malloc.h>
+#include <folly/portability/Windows.h>
 
 namespace HPHP {
 

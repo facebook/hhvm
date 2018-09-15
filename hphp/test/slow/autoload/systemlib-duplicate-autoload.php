@@ -44,4 +44,8 @@ function main() {
   var_dump(HERP_DERP);
 }
 
+
+<<__EntryPoint>>
+function main_systemlib_duplicate_autoload() {
 main();
+}

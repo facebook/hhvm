@@ -38,5 +38,9 @@ function main() {
   var_dump(array_filter(
     Pair {$v0, $v1}));
 }
-main();
 
+
+<<__EntryPoint>>
+function main_array_filter() {
+main();
+}

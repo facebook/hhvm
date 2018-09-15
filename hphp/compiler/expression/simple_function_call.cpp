@@ -20,7 +20,6 @@
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/constant_expression.h"
@@ -30,8 +29,6 @@
 #include "hphp/compiler/expression/unary_op_expression.h"
 #include "hphp/compiler/expression/parameter_expression.h"
 #include "hphp/compiler/statement/method_statement.h"
-#include "hphp/compiler/analysis/constant_table.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/util/text-util.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/expression/simple_variable.h"
@@ -82,12 +79,6 @@ void SimpleFunctionCall::InitFunctionTypeMap() {
     FunctionTypeMap["apc_fetch"]            = FunType::Unserialize;
 
     FunctionTypeMap["get_defined_vars"]     = FunType::GetDefinedVars;
-
-    FunctionTypeMap["fb_call_user_func_safe"] = FunType::FBCallUserFuncSafe;
-    FunctionTypeMap["fb_call_user_func_array_safe"] =
-      FunType::FBCallUserFuncSafe;
-    FunctionTypeMap["fb_call_user_func_safe_return"] =
-      FunType::FBCallUserFuncSafe;
   }
 }
 
@@ -111,7 +102,6 @@ SimpleFunctionCall::SimpleFunctionCall
   , m_builtinFunction(false)
   , m_dynamicInvoke(false)
   , m_transformed(false)
-  , m_changedToBytecode(false)
   , m_optimizable(false)
   , m_safe(0)
 {
@@ -139,7 +129,8 @@ void SimpleFunctionCall::deepCopy(SimpleFunctionCallPtr exp) {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void SimpleFunctionCall::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
+void SimpleFunctionCall::onParse(AnalysisResultConstRawPtr ar,
+                                 FileScopePtr fs) {
   FunctionCall::onParse(ar, fs);
   mungeIfSpecialFunction(ar, fs);
 
@@ -154,7 +145,7 @@ void SimpleFunctionCall::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
   }
 }
 
-void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
+void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstRawPtr ar,
                                                 FileScopePtr fs) {
   ConstructPtr self = shared_from_this();
   switch (m_type) {
@@ -174,20 +165,6 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
           m_params->removeElement(0);
           m_params->insertElement(ename);
         }
-        auto name = dynamic_pointer_cast<ScalarExpression>(ename);
-        if (name) {
-          auto const varName = name->getIdentifier();
-          if (varName.empty()) break;
-          AnalysisResult::Locker lock(ar);
-          fs->declareConstant(lock.get(), varName);
-          // handling define("CONSTANT", ...);
-          ExpressionPtr value = (*m_params)[1];
-          BlockScopePtr block = lock->findConstantDeclarer(varName);
-          ConstantTablePtr constants = block->getConstants();
-          if (constants != ar->getConstants()) {
-            constants->add(varName, value, ar, self);
-          }
-        }
       }
       break;
 
@@ -203,27 +180,6 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
           "{" + body + "}";
         m_lambda = "1_" + m_lambda;
         ar->appendExtraCode(fs->getName(), code);
-      }
-      break;
-
-    // The class_alias builtin can create new names for other classes;
-    // we need to mark some of these classes redeclaring to avoid
-    // making incorrect assumptions during WholeProgram mode.  See
-    // AnalysisResult::collectFunctionsAndClasses.
-    case FunType::ClassAlias:
-      if (m_params &&
-          (m_params->getCount() == 2 || m_params->getCount() == 3) &&
-          Option::WholeProgram) {
-        if (!(*m_params)[0]->isLiteralString() ||
-            !(*m_params)[1]->isLiteralString()) {
-          parseTimeFatal(
-            fs,
-            Compiler::NoError,
-            "class_alias with non-literal parameters is not allowed when "
-            "WholeProgram optimizations are turned on");
-        }
-        fs->addClassAlias((*m_params)[0]->getLiteralString(),
-                          (*m_params)[1]->getLiteralString());
       }
       break;
 
@@ -264,62 +220,13 @@ void SimpleFunctionCall::mungeIfSpecialFunction(AnalysisResultConstPtr ar,
   }
 }
 
-void SimpleFunctionCall::resolveNSFallbackFunc(
-    AnalysisResultConstPtr ar, FileScopePtr fs) {
-  if (ar->findFunction(m_origName)) {
-    // the fully qualified name for this function exists, nothing to do
-    return;
-  }
-
-  int pos = m_origName.rfind('\\');
-  m_origName = m_origName.substr(pos + 1);
-  auto iter = FunctionTypeMap.find(m_origName);
-  assert(iter != FunctionTypeMap.end());
-  m_type = iter->second;
-  mungeIfSpecialFunction(ar, fs);
-  updateVtFlags();
-}
-
-
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void SimpleFunctionCall::setupScopes(AnalysisResultConstPtr ar) {
-  FunctionScopePtr func;
-  if (!m_class && !hasStaticClass()) {
-    if (!m_dynamicInvoke) {
-      func = ar->findFunction(m_origName);
-      if (!func && !hadBackslash() && Option::WholeProgram) {
-        int pos = m_origName.rfind('\\');
-        auto short_name = m_origName.substr(pos + 1);
-        func = ar->findFunction(m_origName);
-        if (func) m_origName = short_name;
-      }
-    }
-  } else {
-    ClassScopePtr cls = resolveClass();
-    if (cls) {
-      m_classScope = cls;
-      if (isNamed("__construct")) {
-        func = cls->findConstructor(ar, true);
-      } else {
-        func = cls->findFunction(ar, m_origName, true, true);
-      }
-    }
+void SimpleFunctionCall::setupScopes(AnalysisResultConstRawPtr /*ar*/) {
+  if (m_class || hasStaticClass()) {
+    resolveClass();
   }
-  if (func && !func->isRedeclaring()) {
-    if (m_funcScope != func) {
-      m_funcScope = func;
-      Construct::recomputeEffects();
-      m_funcScope->addCaller(getScope());
-    }
-  }
-}
-
-void SimpleFunctionCall::addLateDependencies(AnalysisResultConstPtr ar) {
-  m_funcScope.reset();
-  m_classScope.reset();
-  setupScopes(ar);
 }
 
 ConstructPtr SimpleFunctionCall::getNthKid(int n) const {
@@ -335,137 +242,14 @@ void SimpleFunctionCall::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
+void SimpleFunctionCall::analyzeProgram(AnalysisResultConstRawPtr ar) {
   FunctionCall::analyzeProgram(ar);
-
-  if (m_safeDef) m_safeDef->analyzeProgram(ar);
-
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     ConstructPtr self = shared_from_this();
     // Look up the corresponding FunctionScope and ClassScope
     // for this function call
-    m_funcScope.reset();
-    m_classScope.reset();
     setupScopes(ar);
-    if (m_funcScope && m_funcScope->getOptFunction()) {
-      auto self = static_pointer_cast<SimpleFunctionCall>(shared_from_this());
-      (m_funcScope->getOptFunction())(0, ar, self, 1);
-    }
-
-    // check for dynamic constant and volatile function/class
-    if (!m_class && !hasStaticClass() &&
-        (m_type == FunType::Define ||
-         m_type == FunType::Defined ||
-         m_type == FunType::FunctionExists ||
-         m_type == FunType::ClassExists ||
-         m_type == FunType::InterfaceExists) &&
-        m_params && m_params->getCount() >= 1) {
-      ExpressionPtr value = (*m_params)[0];
-      if (value->isScalar()) {
-        auto name = dynamic_pointer_cast<ScalarExpression>(value);
-        if (name && name->isLiteralString()) {
-          auto const symbol = name->getLiteralString();
-          switch (m_type) {
-            case FunType::Define: {
-              ConstantTableConstPtr constants = ar->getConstants();
-              // system constant
-              if (constants->isPresent(symbol)) {
-                break;
-              }
-              // user constant
-              BlockScopeConstPtr block = ar->findConstantDeclarer(symbol);
-              // not found (i.e., undefined)
-              if (!block) break;
-              constants = block->getConstants();
-              const Symbol *sym = constants->getSymbol(symbol);
-              always_assert(sym);
-              if (!sym->isDynamic()) {
-                if (FunctionScopeRawPtr fsc = getFunctionScope()) {
-                  if (!fsc->inPseudoMain()) {
-                    const_cast<Symbol*>(sym)->setDynamic();
-                  }
-                }
-              }
-              break;
-            }
-            case FunType::Defined: {
-              ConstantTablePtr constants = ar->getConstants();
-              if (!constants->isPresent(symbol)) {
-                // user constant
-                BlockScopePtr block = ar->findConstantDeclarer(symbol);
-                if (block) { // found the constant
-                  constants = block->getConstants();
-                  // set to be dynamic
-                  if (m_type == FunType::Defined) {
-                    constants->setDynamic(ar, symbol);
-                  }
-                }
-              }
-              break;
-            }
-            case FunType::FunctionExists:
-              {
-                FunctionScopePtr func = ar->findFunction(toLower(symbol));
-                if (func && func->isUserFunction()) {
-                  func->setVolatile();
-                }
-                break;
-              }
-            case FunType::InterfaceExists:
-            case FunType::ClassExists:
-              {
-                ClassScopePtr cls = ar->findClass(toLower(symbol));
-                if (cls && cls->isUserClass()) {
-                  cls->setVolatile();
-                }
-                break;
-              }
-            default:
-              assert(false);
-          }
-        }
-      } else if ((m_type == FunType::InterfaceExists ||
-                  m_type == FunType::ClassExists) &&
-                 value->is(KindOfSimpleVariable)) {
-        auto name = dynamic_pointer_cast<SimpleVariable>(value);
-        if (name && name->getSymbol()) {
-          // name is checked as class name
-          name->getSymbol()->setClassName();
-        }
-      }
-    }
-
-    if (m_params) {
-      markRefParams(m_funcScope, m_origName);
-    }
-  } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    if (m_type == FunType::Unknown &&
-        !m_class && !m_redeclared && !m_dynamicInvoke && !m_funcScope &&
-        (!hasStaticClass() ||
-         (m_classScope &&
-          !m_classScope->isTrait() &&
-          m_classScope->derivesFromRedeclaring() == Derivation::Normal &&
-          !m_classScope->getAttribute(
-            ClassScope::HasUnknownStaticMethodHandler) &&
-          !m_classScope->getAttribute(
-            ClassScope::InheritsUnknownStaticMethodHandler)))) {
-      bool ok = false;
-      if (m_classScope && getClassScope()) {
-        FunctionScopeRawPtr fs = getFunctionScope();
-        if (fs && !fs->isStatic() &&
-            (m_classScope->getAttribute(
-              ClassScope::HasUnknownMethodHandler) ||
-             m_classScope->getAttribute(
-               ClassScope::InheritsUnknownMethodHandler))) {
-          ok = true;
-        }
-      }
-      if (!ok) {
-        if (m_classScope || !Unit::lookupFunc(String(m_origName).get())) {
-          Compiler::Error(Compiler::UnknownFunction, shared_from_this());
-        }
-      }
-    }
+    if (m_params) m_params->markParams();
   }
 }
 
@@ -479,35 +263,15 @@ bool SimpleFunctionCall::writesLocals() const {
 }
 
 void SimpleFunctionCall::updateVtFlags() {
-  FunctionScopeRawPtr f = getFunctionScope();
-  if (f) {
-    if (m_funcScope) {
-      if ((m_classScope && (isSelf() || isParent()) &&
-           m_funcScope->usesLSB()) ||
-          isStatic() ||
-          m_type == FunType::FBCallUserFuncSafe ||
-          isNamed("call_user_func") ||
-          isNamed("call_user_func_array") ||
-          isNamed("forward_static_call") ||
-          isNamed("forward_static_call_array") ||
-          isNamed("get_called_class")) {
-        f->setNextLSB(true);
-      }
-    }
-  }
   if (m_type != FunType::Unknown) {
-    VariableTablePtr vt = getScope()->getVariables();
+    auto const func = getScope()->getContainingFunction();
+    if (!func) return;
     switch (m_type) {
       case FunType::Extract:
-        vt->setAttribute(VariableTable::ContainsLDynamicVariable);
-        break;
       case FunType::Assert:
-        vt->setAttribute(VariableTable::ContainsLDynamicVariable);
       case FunType::Compact:
-        vt->setAttribute(VariableTable::ContainsDynamicVariable);
-        break;
       case FunType::GetDefinedVars:
-        vt->setAttribute(VariableTable::ContainsDynamicVariable);
+        func->setContainsDynamicVar();
         break;
       default:
         break;
@@ -540,415 +304,38 @@ bool SimpleFunctionCall::isSimpleDefine(StringData **outName,
   if (outName) {
     *outName = makeStaticString(v.toCStrRef().get());
   }
-  if (!(*m_params)[1]->getScalarValue(v) || v.isArray()) return false;
+  if (!(*m_params)[1]->getScalarValue(v)) return false;
   if (outValue) {
-    if (v.isString()) {
-      v = makeStaticString(v.toCStrRef().get());
-    }
+    v.setEvalScalar();
     *outValue = *v.asTypedValue();
   }
   return true;
-}
-
-bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultConstPtr ar) {
-  if (m_class || hasStaticClass()) return false;
-  if (m_type == FunType::Define && m_params &&
-      unsigned(m_params->getCount() - 2) <= 1u) {
-    if (m_dynamicConstant) return false;
-    auto name = dynamic_pointer_cast<ScalarExpression>((*m_params)[0]);
-    if (!name) return false;
-    auto const varName = name->getIdentifier();
-    if (varName.empty()) return false;
-    if (!SystemLib::s_inited || ar->isSystemConstant(varName)) {
-      return true;
-    }
-    ExpressionPtr value = (*m_params)[1];
-    if (ar->isConstantRedeclared(varName)) {
-      return false;
-    }
-    Variant scalarValue;
-    return (value->isScalar() &&
-            value->getScalarValue(scalarValue) &&
-            scalarValue.isAllowedAsConstantValue());
-  } else {
-    return false;
-  }
 }
 
 const StaticString
   s_GLOBALS("GLOBALS"),
   s_this("this");
 
-ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
-  if (m_class || !m_funcScope ||
-      (hasStaticClass() && (!m_classScope || !isPresent()))) {
-    return ExpressionPtr();
-  }
-
-  if (!m_funcScope->isUserFunction()) {
-    if (m_type == FunType::Extract && m_params && m_params->getCount() >= 1) {
-      ExpressionPtr vars = (*m_params)[0];
-      while (vars) {
-        if (vars->is(KindOfUnaryOpExpression) &&
-            static_pointer_cast<UnaryOpExpression>(vars)->getOp() == T_ARRAY) {
-          break;
-        }
-        if (vars->is(KindOfExpressionList)) {
-          vars = static_pointer_cast<ExpressionList>(vars)->listValue();
-        } else {
-          vars.reset();
-        }
-      }
-      if (vars) {
-        bool svar = vars->isScalar();
-        if (!svar && getScope()->getUpdated()) {
-          /*
-           * kind of a hack. If the extract param is non-scalar,
-           * and we've made changes already, dont try to optimize yet.
-           * this gives us a better chance of getting a scalar result.
-           * Later, we should add more array optimizations, which would
-           * allow us to optimize the generated code once the scalar
-           * expressions are resolved
-           */
-          return ExpressionPtr();
-        }
-        int n = m_params->getCount();
-        String prefix;
-        int mode = EXTR_OVERWRITE;
-        if (n >= 2) {
-          Variant v;
-          ExpressionPtr m = (*m_params)[1];
-          if (m->isScalar() && m->getScalarValue(v)) {
-            mode = v.toInt64();
-          } else {
-            mode = -1;
-          }
-          if (n >= 3) {
-            ExpressionPtr p = (*m_params)[2];
-            if (p->isScalar() && p->getScalarValue(v)) {
-              prefix = v.toString();
-            } else {
-              mode = -1;
-            }
-          }
-        }
-        bool ref = mode & EXTR_REFS;
-        mode &= ~EXTR_REFS;
-        switch (mode) {
-          case EXTR_PREFIX_ALL:
-          case EXTR_PREFIX_INVALID:
-          case EXTR_OVERWRITE: {
-            auto arr = static_pointer_cast<ExpressionList>(
-              static_pointer_cast<UnaryOpExpression>(vars)->getExpression());
-            auto rep = std::make_shared<ExpressionList>(
-              getScope(), getRange(), ExpressionList::ListKindWrappedNoWarn);
-            std::string root_name;
-            int n = arr ? arr->getCount() : 0;
-            int i, j, k;
-            for (i = j = k = 0; i < n; i++) {
-              auto ap = dynamic_pointer_cast<ArrayPairExpression>((*arr)[i]);
-              always_assert(ap);
-              String name;
-              Variant voff;
-              if (!ap->getName()) {
-                voff = j++;
-              } else {
-                if (!ap->getName()->isScalar() ||
-                    !ap->getName()->getScalarValue(voff)) {
-                  return ExpressionPtr();
-                }
-              }
-              name = voff.toString();
-              if (mode == EXTR_PREFIX_ALL ||
-                  (mode == EXTR_PREFIX_INVALID &&
-                   !is_valid_var_name(name.c_str(), name.size()))) {
-                name = prefix + "_" + name;
-              }
-              if (!is_valid_var_name(name.c_str(), name.size())) continue;
-              if (mode == EXTR_OVERWRITE ||
-                  mode == EXTR_PREFIX_SAME ||
-                  mode == EXTR_PREFIX_INVALID ||
-                  mode == EXTR_IF_EXISTS) {
-                if (name == s_this) {
-                  // this needs extra checks, so skip the optimisation
-                  return ExpressionPtr();
-                }
-                if (name == s_GLOBALS) {
-                  continue;
-                }
-              }
-              SimpleVariablePtr var(
-                new SimpleVariable(getScope(), getRange(), name.data()));
-              var->updateSymbol(SimpleVariablePtr());
-              ExpressionPtr val(ap->getValue());
-              if (!val->isScalar()) {
-                if (root_name.empty()) {
-                  root_name = "t" + folly::to<std::string>(
-                    getFunctionScope()->nextInlineIndex());
-                  SimpleVariablePtr rv(
-                    new SimpleVariable(getScope(), getRange(), root_name));
-                  rv->updateSymbol(SimpleVariablePtr());
-                  rv->getSymbol()->setHidden();
-                  ExpressionPtr root(
-                    new AssignmentExpression(getScope(), getRange(),
-                                             rv, (*m_params)[0], false));
-                  rep->insertElement(root);
-                }
-
-                SimpleVariablePtr rv(
-                  new SimpleVariable(getScope(), getRange(), root_name));
-                rv->updateSymbol(SimpleVariablePtr());
-                rv->getSymbol()->setHidden();
-                ExpressionPtr offset(makeScalarExpression(ar, voff));
-                val = ExpressionPtr(
-                  new ArrayElementExpression(getScope(), getRange(),
-                                             rv, offset));
-              }
-              ExpressionPtr a(
-                new AssignmentExpression(getScope(), getRange(),
-                                         var, val, ref));
-              rep->addElement(a);
-              k++;
-            }
-            if (root_name.empty()) {
-              if ((*m_params)[0]->hasEffect()) {
-                rep->insertElement((*m_params)[0]);
-              }
-            } else {
-              ExpressionListPtr unset_list
-                (new ExpressionList(getScope(), getRange()));
-
-              SimpleVariablePtr rv(
-                new SimpleVariable(getScope(), getRange(), root_name));
-              rv->updateSymbol(SimpleVariablePtr());
-              unset_list->addElement(rv);
-
-              ExpressionPtr unset(
-                new UnaryOpExpression(getScope(), getRange(),
-                                      unset_list, T_UNSET, true));
-              rep->addElement(unset);
-            }
-            rep->addElement(makeScalarExpression(ar, k));
-            return replaceValue(rep);
-          }
-          default: break;
-        }
-      }
-    }
-  }
-
-  if (!m_classScope) {
-    if (m_type == FunType::Unknown && m_funcScope->isFoldable()) {
-      try {
-        ThrowAllErrorsSetter taes;
-        Array arr;
-        if (m_params) {
-          if (!m_params->isScalar()) return ExpressionPtr();
-          for (int i = 0, n = m_params->getCount(); i < n; ++i) {
-            Variant v;
-            if (!(*m_params)[i]->getScalarValue(v)) return ExpressionPtr();
-            arr.set(i, v);
-          }
-          if (m_arrayParams) {
-            arr = arr[0];
-          }
-        }
-        auto const v = invoke(m_funcScope->getScopeName().c_str(),
-                              arr, -1, true, true,
-                              !getFileScope()->useStrictTypes());
-        return replaceValue(makeScalarExpression(ar, v), true);
-      } catch (...) {
-      }
-      return ExpressionPtr();
-    }
-    if (m_funcScope->getOptFunction()) {
-      auto const self =
-        static_pointer_cast<SimpleFunctionCall>(shared_from_this());
-      auto const e = (m_funcScope->getOptFunction())(0, ar, self, 0);
-      if (e) return replaceValue(e, true);
-    }
-  }
-
-  return ExpressionPtr();
+// Certain simple function calls, like get_class(), can sometimes be evaluated
+// statically. Implementing the virtual isScalar() and getScalarValue() here
+// allows the statically knowable return values of those sorts of calls to be
+// "maximally" inlined early on if desired.
+bool SimpleFunctionCall::isScalar() const {
+  return
+    getScope() &&
+    isCallToFunction("get_class") &&
+    !getParams() &&
+    getClassScope() &&
+    !getClassScope()->isTrait();
 }
 
-ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
-  if (!Option::ParseTimeOpts) return ExpressionPtr();
-
-  if (m_class) updateClassName();
-
-  if (ar->getPhase() < AnalysisResult::FirstPreOptimize) {
-    return ExpressionPtr();
+bool SimpleFunctionCall::getScalarValue(Variant &value) {
+  if (isScalar()) {
+    value = getClassScope()->getScopeName();
+    return true;
   }
 
-  if (ExpressionPtr rep = optimize(ar)) {
-    return rep;
-  }
-
-  if (!m_class && !hasStaticClass() &&
-      (m_type == FunType::Define ||
-       m_type == FunType::Defined ||
-       m_type == FunType::FunctionExists ||
-       m_type == FunType::ClassExists ||
-       m_type == FunType::InterfaceExists) &&
-      m_params &&
-      (m_type == FunType::Define ?
-       unsigned(m_params->getCount() - 2) <= 1u :
-       m_params->getCount() == 1)) {
-    ExpressionPtr value = (*m_params)[0];
-    if (value->isScalar()) {
-      auto name = dynamic_pointer_cast<ScalarExpression>(value);
-      if (name && name->isLiteralString()) {
-        auto symbol = name->getLiteralString();
-        switch (m_type) {
-          case FunType::Define: {
-            ConstantTableConstPtr constants = ar->getConstants();
-            // system constant
-            if (constants->isPresent(symbol)) {
-              break;
-            }
-            // user constant
-            BlockScopeConstPtr block = ar->findConstantDeclarer(symbol);
-            // not found (i.e., undefined)
-            if (!block) break;
-            constants = block->getConstants();
-            const Symbol *sym = constants->getSymbol(symbol);
-            always_assert(sym);
-            Lock lock(BlockScope::s_constMutex);
-            if (!sym->isDynamic()) {
-              if (sym->getValue() != (*m_params)[1]) {
-                if (sym->getDeclaration() != shared_from_this()) {
-                  // redeclared
-                  const_cast<Symbol*>(sym)->setDynamic();
-                }
-                const_cast<Symbol*>(sym)->setValue((*m_params)[1]);
-                getScope()->addUpdates(BlockScope::UseKindConstRef);
-              }
-              Variant v;
-              auto value = static_pointer_cast<Expression>(sym->getValue());
-              if (value->getScalarValue(v)) {
-                if (!v.isAllowedAsConstantValue()) {
-                  const_cast<Symbol*>(sym)->setDynamic();
-                }
-              }
-            }
-            break;
-          }
-          case FunType::Defined: {
-            if (symbol == "false" ||
-                symbol == "true" ||
-                symbol == "null") {
-              return CONSTANT("true");
-            }
-            ConstantTableConstPtr constants = ar->getConstants();
-            if (symbol[0] == '\\') symbol = symbol.substr(1);
-            // system constant
-            if (constants->isPresent(symbol) && !constants->isDynamic(symbol)) {
-              return CONSTANT("true");
-            }
-            // user constant
-            BlockScopeConstPtr block = ar->findConstantDeclarer(symbol);
-            // not found (i.e., undefined)
-            if (!block) {
-              if (symbol.find("::") == std::string::npos &&
-                  Option::WholeProgram) {
-                return CONSTANT("false");
-              } else {
-                // e.g., defined("self::ZERO")
-                break;
-              }
-            }
-            constants = block->getConstants();
-            // already set to be dynamic
-            if (constants->isDynamic(symbol)) return ExpressionPtr();
-            Lock lock(BlockScope::s_constMutex);
-            ConstructPtr decl = constants->getValue(symbol);
-            auto constValue = dynamic_pointer_cast<Expression>(decl);
-            if (constValue->isScalar()) {
-              return CONSTANT("true");
-            }
-            break;
-          }
-          case FunType::FunctionExists: {
-            const std::string &lname = toLower(symbol);
-            if (!RuntimeOption::DynamicInvokeFunctions.count(lname)) {
-              FunctionScopePtr func = ar->findFunction(lname);
-              if (!func) {
-                if (Option::WholeProgram) {
-                  return CONSTANT("false");
-                }
-                break;
-              }
-              if (func->isUserFunction()) {
-                func->setVolatile();
-              }
-              if (!func->isVolatile()) {
-                return CONSTANT("true");
-              }
-            }
-            break;
-          }
-          case FunType::InterfaceExists: {
-            auto classes = ar->findClasses(toLower(symbol));
-            bool interfaceFound = false;
-            for (const auto cls : classes) {
-              if (cls->isUserClass()) {
-                cls->setVolatile();
-              }
-              if (cls->isInterface()) {
-                interfaceFound = true;
-              }
-            }
-            if (!interfaceFound) {
-              if (Option::WholeProgram) {
-                return CONSTANT("false");
-              }
-              break;
-            }
-            if (classes.size() == 1 && !classes.back()->isVolatile()) {
-              return CONSTANT("true");
-            }
-            break;
-          }
-          case FunType::ClassExists: {
-            auto classes = ar->findClasses(toLower(symbol));
-            bool classFound = false;
-            for (const auto cls : classes) {
-              if (cls->isUserClass()) {
-                cls->setVolatile();
-              }
-              if (!cls->isInterface() && !cls->isTrait()) {
-                classFound = true;
-              }
-            }
-            if (!classFound) {
-              if (Option::WholeProgram) {
-                return CONSTANT("false");
-              }
-              break;
-            }
-            if (classes.size() == 1 && !classes.back()->isVolatile()) {
-              return CONSTANT("true");
-            }
-            break;
-          }
-          default:
-            assert(false);
-        }
-      }
-    }
-  }
-  return ExpressionPtr();
-}
-
-int SimpleFunctionCall::getLocalEffects() const {
-  if (m_class) return UnknownEffect;
-
-  if (m_funcScope && !m_funcScope->hasEffect()) {
-    return 0;
-  }
-
-  return UnknownEffect;
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -964,258 +351,4 @@ void SimpleFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   if (m_params) m_params->outputPHP(cg, ar);
   cg_printf(")");
-}
-
-FunctionScopePtr
-SimpleFunctionCall::getFuncScopeFromParams(AnalysisResultPtr ar,
-                                           BlockScopeRawPtr scope,
-                                           ExpressionPtr clsName,
-                                           ExpressionPtr funcName,
-                                           ClassScopePtr &clsScope) {
-  clsScope.reset();
-  auto clsName0 = dynamic_pointer_cast<ScalarExpression>(clsName);
-  auto funcName0 = dynamic_pointer_cast<ScalarExpression>(funcName);
-  if (clsName0 && funcName0) {
-    auto const cname = clsName0->getLiteralString();
-    auto const fname = funcName0->getLiteralString();
-    if (!fname.empty()) {
-      if (!cname.empty()) {
-        ClassScopePtr cscope(ar->findClass(cname));
-        if (cscope && cscope->isRedeclaring()) {
-          cscope = scope->findExactClass(cscope);
-        }
-        if (cscope) {
-          FunctionScopePtr fscope(cscope->findFunction(ar, fname, true));
-          if (fscope) {
-            clsScope = cscope;
-          }
-          return fscope;
-        }
-      } else {
-        FunctionScopePtr fscope(ar->findFunction(fname));
-        return fscope;
-      }
-    }
-  }
-  return FunctionScopePtr();
-}
-
-SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
-  AnalysisResultConstPtr ar, SimpleFunctionCallPtr call, int testOnly,
-  int firstParam, bool &error) {
-  error = false;
-  ExpressionListPtr params = call->getParams();
-  if (params && params->getCount() >= firstParam) {
-    ExpressionPtr p0 = (*params)[0];
-    Variant v;
-    if (p0->isScalar() && p0->getScalarValue(v)) {
-      if (v.isString()) {
-        Variant t = StringUtil::Explode(v.toString(), "::", 3);
-        if (!t.isArray() || t.toArray().size() != 2) {
-          auto name = toLower(v.toString().slice());
-          FunctionScopePtr func = ar->findFunction(name);
-          if (!func || func->isDynamicInvoke()) {
-            error = !func;
-            return SimpleFunctionCallPtr();
-          }
-          if (testOnly < 0) return SimpleFunctionCallPtr();
-          ExpressionListPtr p2;
-          if (testOnly) {
-            p2 = ExpressionListPtr(
-              new ExpressionList(call->getScope(), call->getRange()));
-            p2->addElement(call->makeScalarExpression(ar, v));
-            name = "function_exists";
-          } else {
-            p2 = static_pointer_cast<ExpressionList>(params->clone());
-            while (firstParam--) {
-              p2->removeElement(0);
-            }
-          }
-          SimpleFunctionCallPtr rep(
-            NewSimpleFunctionCall(call->getScope(), call->getRange(),
-                                  name, false, p2, ExpressionPtr()));
-          return rep;
-        }
-        v = t;
-      }
-      if (v.isArray()) {
-        Array arr = v.toArray();
-        if (arr.size() != 2 || !arr.exists(0) || !arr.exists(1)) {
-          error = true;
-          return SimpleFunctionCallPtr();
-        }
-        Variant classname = arr.rvalAt(int64_t(0));
-        Variant methodname = arr.rvalAt(int64_t(1));
-        if (!methodname.isString()) {
-          error = true;
-          return SimpleFunctionCallPtr();
-        }
-        if (!classname.isString()) {
-          return SimpleFunctionCallPtr();
-        }
-        std::string sclass = classname.toString().data();
-        auto smethod = toLower(methodname.toString().slice());
-
-        ClassScopePtr cls;
-        if (sclass == "self") {
-          cls = call->getClassScope();
-        }
-        if (!cls) {
-          if (sclass == "parent") {
-            cls = call->getClassScope();
-            if (cls && !cls->getOriginalParent().empty()) {
-              sclass = cls->getOriginalParent();
-            }
-          }
-          cls = ar->findClass(sclass);
-          if (!cls) {
-            error = true;
-            return SimpleFunctionCallPtr();
-          }
-          if (cls->isRedeclaring()) {
-            cls = call->getScope()->findExactClass(cls);
-          }
-          if (!cls) {
-            return SimpleFunctionCallPtr();
-          }
-        }
-
-        if (testOnly < 0) return SimpleFunctionCallPtr();
-
-        size_t c = smethod.find("::");
-        if (c != 0 && c != std::string::npos && c+2 < smethod.size()) {
-          auto const name = smethod.substr(0, c);
-          if (!cls->isNamed(name)) {
-            if (!cls->derivesFrom(ar, name, true, false)) {
-              error = cls->derivesFromRedeclaring() == Derivation::Normal;
-              return SimpleFunctionCallPtr();
-            }
-          }
-          smethod = smethod.substr(c+2);
-        }
-
-        FunctionScopePtr func = cls->findFunction(ar, smethod, true);
-        if (!func) {
-          error = true;
-          return SimpleFunctionCallPtr();
-        }
-        if (func->isPrivate() ?
-            (cls != call->getClassScope() ||
-             !cls->findFunction(ar, smethod, false)) :
-            (func->isProtected() &&
-             (!call->getClassScope() ||
-              !call->getClassScope()->derivesFrom(ar, sclass,
-                                                     true, false)))) {
-          error = true;
-          return SimpleFunctionCallPtr();
-        }
-        ExpressionPtr cl(call->makeScalarExpression(ar, classname));
-        ExpressionListPtr p2;
-        if (testOnly) {
-          p2 = ExpressionListPtr(
-            new ExpressionList(call->getScope(), call->getRange()));
-          p2->addElement(cl);
-          cl.reset();
-          smethod = "class_exists";
-        } else {
-          p2 = static_pointer_cast<ExpressionList>(params->clone());
-          while (firstParam--) {
-            p2->removeElement(0);
-          }
-        }
-        SimpleFunctionCallPtr rep(
-          NewSimpleFunctionCall(call->getScope(), call->getRange(),
-                                smethod, false, p2, cl));
-        return rep;
-      }
-    }
-  }
-  return SimpleFunctionCallPtr();
-}
-
-namespace HPHP {
-
-ExpressionPtr hphp_opt_call_user_func(CodeGenerator *cg,
-                                      AnalysisResultConstPtr ar,
-                                      SimpleFunctionCallPtr call, int mode) {
-  bool error = false;
-  if (!cg && mode <= 1 && Option::WholeProgram) {
-    bool isArray = call->isNamed("call_user_func_array");
-    if (call->isNamed("call_user_func") || isArray) {
-      SimpleFunctionCallPtr rep(
-        SimpleFunctionCall::GetFunctionCallForCallUserFunc(ar, call,
-                                                           mode ? -1 : 0,
-                                                           1, error));
-      if (!mode) {
-        if (error) {
-          rep.reset();
-        } else if (rep) {
-          if (!isArray) {
-            rep->setSafeCall(-1);
-            rep->addLateDependencies(ar);
-            if (isArray) rep->setArrayParams();
-          } else {
-            rep.reset();
-          }
-        }
-        return rep;
-      }
-    }
-  }
-  return ExpressionPtr();
-}
-
-ExpressionPtr hphp_opt_fb_call_user_func(CodeGenerator *cg,
-                                         AnalysisResultConstPtr ar,
-                                         SimpleFunctionCallPtr call, int mode) {
-  bool error = false;
-  if (!cg && mode <= 1 && Option::WholeProgram) {
-    bool isArray = call->isNamed("fb_call_user_func_array_safe");
-    bool safe_ret = call->isNamed("fb_call_user_func_safe_return");
-    if (isArray || safe_ret || call->isNamed("fb_call_user_func_safe")) {
-      SimpleFunctionCallPtr rep(
-        SimpleFunctionCall::GetFunctionCallForCallUserFunc(
-          ar, call, mode ? -1 : 0, safe_ret ? 2 : 1, error));
-      if (!mode) {
-        if (error) {
-          if (!Option::WholeProgram) {
-            rep.reset();
-          } else if (safe_ret) {
-            return (*call->getParams())[1];
-          } else {
-            Array ret(Array::Create(0, false));
-            ret.set(1, init_null());
-            return call->makeScalarExpression(ar, ret);
-          }
-        }
-      }
-    }
-  }
-  return ExpressionPtr();
-}
-
-ExpressionPtr hphp_opt_is_callable(CodeGenerator *cg,
-                                   AnalysisResultConstPtr ar,
-                                   SimpleFunctionCallPtr call, int mode) {
-  if (!cg && mode <= 1 && Option::WholeProgram) {
-    ExpressionListPtr params = call->getParams();
-    if (params && params->getCount() == 1) {
-      bool error = false;
-      SimpleFunctionCallPtr rep(
-        SimpleFunctionCall::GetFunctionCallForCallUserFunc(
-          ar, call, mode ? 1 : -1, 1, error));
-      if (error && !mode) {
-        if (!Option::WholeProgram) {
-          rep.reset();
-        } else {
-          return call->makeConstant(ar, "false");
-        }
-      }
-      return rep;
-    }
-  }
-
-  return ExpressionPtr();
-}
-
 }

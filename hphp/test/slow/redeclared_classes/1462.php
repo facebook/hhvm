@@ -4,6 +4,9 @@ class base1 {
 }
 class base2 {
 }
+
+<<__EntryPoint>>
+function main_1462() {
 if (true) {
   class a extends base1 {
     const aconst = "firstA";
@@ -52,3 +55,4 @@ var_dump(get_parent_class($y));
 var_dump(is_subclass_of("a", "base1"));
 var_dump(is_subclass_of("a", "base2"));
 var_dump(get_object_vars($y));
+}

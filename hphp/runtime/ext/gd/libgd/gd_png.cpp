@@ -91,9 +91,7 @@ static void gdPngWriteData (png_structp png_ptr, png_bytep data, png_size_t leng
   gdPutBuf (data, length, (gdIOCtx *) png_get_io_ptr(png_ptr));
 }
 
-static void gdPngFlushData (png_structp png_ptr)
-{
-}
+static void gdPngFlushData(png_structp /*png_ptr*/) {}
 
 gdImagePtr gdImageCreateFromPng (FILE * inFile)
 {
@@ -400,7 +398,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
         }
       }
   }
-#ifdef DEBUG
+#ifndef NDEBUG
   if (!im->trueColor) {
     for (i = num_palette; i < gdMaxColors; ++i) {
       if (!open[i]) {
@@ -599,8 +597,6 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level, int basefilte
      */
 
     int tc = 0;
-    int i;
-    int j;
     int k;
 
     for (i = 0; (i < im->colorsTotal); i++) {

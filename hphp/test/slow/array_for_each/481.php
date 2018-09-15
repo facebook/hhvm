@@ -7,8 +7,12 @@ function g9() {
     echo "val=$v\n";
     if ($b && $v == 1) {
       $b = false;
-      array_shift($arr);
+      array_shift(&$arr);
     }
   }
 }
+
+<<__EntryPoint>>
+function main_481() {
 g9();
+}

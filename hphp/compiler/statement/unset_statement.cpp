@@ -16,9 +16,7 @@
 
 #include "hphp/compiler/statement/unset_statement.h"
 #include "hphp/compiler/expression/expression_list.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/analysis_result.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/statement/statement.h"
 #include "hphp/compiler/statement/block_statement.h"
@@ -50,10 +48,6 @@ StatementPtr UnsetStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void UnsetStatement::analyzeProgram(AnalysisResultPtr ar) {
-  m_exp->analyzeProgram(ar);
-}
-
 ConstructPtr UnsetStatement::getNthKid(int n) const {
   switch (n) {
     case 0:
@@ -78,11 +72,6 @@ void UnsetStatement::setNthKid(int n, ConstructPtr cp) {
       assert(false);
       break;
   }
-}
-
-StatementPtr UnsetStatement::preOptimize(AnalysisResultConstPtr ar) {
-  if (m_exp->getCount() == 0) return NULL_STATEMENT();
-  return StatementPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

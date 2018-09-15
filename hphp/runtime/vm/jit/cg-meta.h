@@ -18,6 +18,7 @@
 #define incl_HPHP_JIT_CODE_GEN_FIXUPS_H_
 
 #include "hphp/runtime/vm/jit/alignment.h"
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
@@ -30,6 +31,20 @@
 
 namespace HPHP { namespace jit {
 
+using IFrameID = int32_t;
+
+struct IFrame {
+  const Func* func; // callee (m_func)
+  int32_t soff;     // caller offset (m_soff)
+  IFrameID parent;  // parent frame (m_sfp)
+};
+
+struct IStack {
+  IFrameID frame; // leaf frame in this stack
+  uint32_t nframes;
+  uint32_t soff;
+};
+
 /*
  * CGMeta contains a variety of different metadata information that is
  * collected during code generation.
@@ -41,6 +56,8 @@ namespace HPHP { namespace jit {
 struct CGMeta {
   void process(GrowableVector<IncomingBranch>* inProgressTailBranches);
   void process_only(GrowableVector<IncomingBranch>* inProgressTailBranches);
+  void process_literals();
+
   bool empty() const;
   void clear();
 
@@ -60,9 +77,41 @@ struct CGMeta {
    * Pending MCGenerator table entries.
    */
   std::vector<std::pair<TCA,Fixup>> fixups;
-  std::vector<std::pair<CTCA,TCA>> catches;
+  std::vector<std::pair<TCA,TCA>> catches;
   std::vector<std::pair<TCA,TransID>> jmpTransIDs;
-  std::unordered_map<uint64_t, const uint64_t*> literals;
+  std::vector<std::pair<TCA,Reason>> trapReasons;
+  std::vector<IFrame> inlineFrames;
+  std::vector<std::pair<TCA,IStack>> inlineStacks;
+
+  /*
+   * On some architectures (like ARM) we want to pool up literals and emit them
+   * at once.  This allows us to accumulate literals until the end of a
+   * Vunit, where we can emit them together.
+   */
+  struct PoolLiteralMeta {
+    uint64_t value;
+    CodeAddress patchAddress;
+    bool smashable;
+    uint8_t width;
+  };
+  std::vector<PoolLiteralMeta> literalsToPool;
+
+  /*
+   * We want to collapse emitting literals multiple times.  This map allows us
+   * to find the addresses of already emitted literals.
+   */
+  jit::fast_map<uint64_t, const uint64_t*> literalAddrs;
+
+  struct VeneerData {
+    TCA source; // address of instruction that jumps/calls the veneer
+    TCA target; // address that the veneer jumps to
+  };
+  std::vector<VeneerData> veneers;
+
+  /*
+   * Addresses of veneers.
+   */
+  std::set<TCA> veneerAddrs;
 
   /*
    * All the alignment constraints on each code address.
@@ -81,6 +130,14 @@ struct CGMeta {
    * that were emitted.
    */
   std::set<TCA> addressImmediates;
+
+  /*
+   * Certain addresses are fallthrough to the next vunit.
+   * We tag such an address so we can patch a jump over any inserted literal
+   * pools/veneers.  This metadata is kept around so the relocator can properly
+   * adjust or remove the jump to keep it pointing directly after the Vunit.
+   */
+  folly::Optional<TCA> fallthru;
 
   /*
    * Code addresses of interest to other code.
@@ -104,9 +161,26 @@ struct CGMeta {
 
   /*
    * Smashable locations. Used on relocation to be sure a smashable instruction
-   * is not optimized in size.
+   * is not optimized.
    */
   std::set<TCA> smashableLocations;
+
+  /*
+   * Extra data kept for smashable calls.  Used to pre-smash calls before the
+   * code is published.
+   */
+  jit::fast_map<TCA,PrologueID> smashableCallData;
+
+  /*
+   * Extra data kept for smashable jumps/jccs.  Used to pre-smash jumps/jccs
+   * before code is published.
+   */
+  enum class JumpKind { Bindjmp, Bindjcc, Fallback, Fallbackcc };
+  struct JumpData {
+    SrcKey   sk;
+    JumpKind kind;
+  };
+  jit::fast_map<TCA,JumpData> smashableJumpData;
 
   /*
    * Debug-only map from bytecode to machine code address.
@@ -136,6 +210,45 @@ size_t numCatchTraces();
  */
 void eraseCatchTrace(CTCA addr);
 
+/*
+ * Get the reason for the jit::trap instruction (UD2 on x64) at given address.
+ * The returned pointer refers to memory subject to the treadmill, so should
+ * only be used in the current request.
+ */
+Reason* getTrapReason(CTCA addr);
+
+/*
+ * Pool up literal to be emitted at patch time.
+ */
+void poolLiteral(CodeBlock& cb, CGMeta& meta, uint64_t val, uint8_t width,
+                 bool smashable);
+
+void addVeneer(CGMeta& meta, TCA source, TCA target);
+
+folly::Optional<IStack> inlineStackAt(CTCA addr);
+IFrame getInlineFrame(IFrameID id);
+
 }}
+
+namespace folly {
+template<> class FormatValue<HPHP::jit::IFrame> {
+public:
+  explicit FormatValue(HPHP::jit::IFrame ifr) : m_ifr(ifr) {}
+
+  template<typename Callback>
+  void format(FormatArg& arg, Callback& cb) const {
+    auto str = folly::sformat(
+      "IFrame{{func = {}, soff = {}, parent = {}}}",
+      m_ifr.func->fullName()->data(),
+      m_ifr.soff,
+      m_ifr.parent
+    );
+    format_value::formatString(str, arg, cb);
+  }
+
+private:
+  HPHP::jit::IFrame m_ifr;
+};
+}
 
 #endif

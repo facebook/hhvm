@@ -16,5 +16,9 @@ function test($fn, $arg) {
   $fn($arg, $arg, $arg);
   var_dump($arg);
 }
+
+<<__EntryPoint>>
+function main_1100() {
 test('foo', 1);
 test('bar', 1);
+}

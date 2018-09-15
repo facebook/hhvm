@@ -1,0 +1,60 @@
+array(2) {
+  ["kind"]=>
+  int(10)
+  ["elem_types"]=>
+  array(2) {
+    [0]=>
+    array(1) {
+      ["kind"]=>
+      int(1)
+    }
+    [1]=>
+    array(2) {
+      ["kind"]=>
+      int(10)
+      ["elem_types"]=>
+      array(2) {
+        [0]=>
+        array(2) {
+          ["kind"]=>
+          int(10)
+          ["elem_types"]=>
+          array(2) {
+            [0]=>
+            array(1) {
+              ["kind"]=>
+              int(1)
+            }
+            [1]=>
+            array(1) {
+              ["kind"]=>
+              int(1)
+            }
+          }
+        }
+        [1]=>
+        array(1) {
+          ["kind"]=>
+          int(1)
+        }
+      }
+    }
+  }
+}
+array(2) {
+  ["kind"]=>
+  int(10)
+  ["elem_types"]=>
+  array(2) {
+    [0]=>
+    array(1) {
+      ["kind"]=>
+      int(1)
+    }
+    [1]=>
+    array(1) {
+      ["kind"]=>
+      int(1)
+    }
+  }
+}

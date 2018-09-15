@@ -17,10 +17,11 @@
 #ifndef incl_HPHP_LOW_PTR_H_
 #define incl_HPHP_LOW_PTR_H_
 
+#include "hphp/util/low-ptr-def.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/portability.h"
 
-#include <folly/CPortability.h> // FOLLY_SANITIZE_ADDRESS
+#include <folly/Format.h>
 
 #include <algorithm>
 #include <atomic>
@@ -50,7 +51,7 @@ struct LowPtrImpl {
 
   /* implicit */ LowPtrImpl(T* px) : m_s{to_low(px)} {}
 
-  /* implicit */ LowPtrImpl(std::nullptr_t px) : m_s{0} {}
+  /* implicit */ LowPtrImpl(std::nullptr_t /*px*/) : m_s{ 0 } {}
 
   LowPtrImpl(const LowPtrImpl<T, S>& r) : m_s{S::get(r.m_s)} {}
 
@@ -66,7 +67,7 @@ struct LowPtrImpl {
     return *this;
   }
 
-  LowPtrImpl& operator=(std::nullptr_t px) {
+  LowPtrImpl& operator=(std::nullptr_t /*px*/) {
     S::set(m_s, 0);
     return *this;
   }
@@ -196,10 +197,6 @@ struct AtomicStorage {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifdef FOLLY_SANITIZE_ADDRESS
-#undef USE_LOWPTR
-#endif
-
 #ifdef USE_LOWPTR
 constexpr bool use_lowptr = true;
 
@@ -227,6 +224,21 @@ using AtomicLowPtr =
                                               write_order>>;
 
 ///////////////////////////////////////////////////////////////////////////////
+}
+
+namespace folly {
+template<class T> class FormatValue<HPHP::LowPtr<T>> {
+ public:
+  explicit FormatValue(HPHP::LowPtr<T> v) : m_val(v) {}
+
+  template<typename Callback>
+  void format(FormatArg& arg, Callback& cb) const {
+    FormatValue<T*>(m_val.get()).format(arg, cb);
+  }
+
+ private:
+  const HPHP::LowPtr<T> m_val;
+};
 }
 
 #endif // incl_HPHP_LOW_PTR_H_

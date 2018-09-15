@@ -25,4 +25,8 @@ abstract class Foo {
   abstract function j5(Foo<(function(int,...):void)> $x): void;
   abstract function j6(Foo<(function(int,string,...):void)> $x): void;
 }
+
+<<__EntryPoint>>
+function main_2215() {
 echo "Done\n";
+}

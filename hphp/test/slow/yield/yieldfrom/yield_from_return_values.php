@@ -13,7 +13,11 @@ function yf() {
     return yield from gen(42);
 }
 
+
+<<__EntryPoint>>
+function main_yield_from_return_values() {
 $g = yf();
 foreach($g as $val) { var_dump($val); }
 echo "====================\n";
 var_dump($g->getReturn());
+}

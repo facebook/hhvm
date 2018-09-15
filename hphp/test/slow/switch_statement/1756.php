@@ -25,6 +25,9 @@ function g($x) {
  break;
   }
 }
+
+<<__EntryPoint>>
+function main_1756() {
 f("foo");
 f("3");
 f("bar");
@@ -39,3 +42,4 @@ f(array());
 f(new stdClass());
 g(0);
 g(0.0);
+}

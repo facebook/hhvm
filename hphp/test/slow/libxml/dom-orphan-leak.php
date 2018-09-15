@@ -10,8 +10,18 @@ function foo() {
   }
 }
 
-foo(); foo(); foo();
-$start = memory_get_peak_usage(true);
-foo();
-$end = memory_get_peak_usage(true);
-echo $end - $start, "\n";
+function test() {
+  foo(); foo(); foo();
+  $start = memory_get_peak_usage(true);
+  foo();
+  $end = memory_get_peak_usage(true);
+  return $end - $start;
+}
+
+
+<<__EntryPoint>>
+function main_dom_orphan_leak() {
+$x = test();
+$x = test();
+echo $x, "\n";
+}

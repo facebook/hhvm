@@ -1,1 +1,4 @@
-No errors
+File "typing_ok_xhp.php", line 18, characters 29-30:
+XHP children must be compatible with XHPChild (Typing[4193])
+File "typing_ok_xhp.php", line 16, characters 14-18:
+This is a mixed value

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Test intercepts where callsites have already been bound to the

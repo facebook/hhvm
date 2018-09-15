@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function check($f) {
   var_dump($f);

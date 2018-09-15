@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function not_a_closure() {
   return 1;

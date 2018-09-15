@@ -5,15 +5,6 @@ class A {
     $a = 'ok';
   }
 }
-$a = 'failed';
-A::bar($a);
-var_dump($a);
-if (false) {
-  class A{
-}
-  class A2{
-}
-}
 class C {
   static function bar() {
   }
@@ -23,6 +14,19 @@ class A2 extends C {
     $a = 'ok';
   }
 }
+
+<<__EntryPoint>>
+function main_1478() {
+$a = 'failed';
+A::bar($a);
+var_dump($a);
+if (false) {
+  class A{
+}
+  class A2{
+}
+}
 $a = 'failed';
 A2::bar($a);
 var_dump($a);
+}

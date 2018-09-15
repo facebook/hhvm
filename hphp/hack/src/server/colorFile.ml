@@ -2,13 +2,13 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Core
+open Hh_core
+open Ide_api_types
 
 (*****************************************************************************)
 (* Module comparing positions (to sort them later)
@@ -99,8 +99,12 @@ let walk content pos_level_list =
 (* The entry point. *)
 (*****************************************************************************)
 
-let go str pos_level_l =
+let go
+    (str : string)
+    (pos_level_l, _ : Coverage_level.result) :
+    (coverage_level option * string) list =
+  let get_pos_info_raw (pos, level) = (Pos.info_raw pos, level) in
+  let pos_level_l = List.map pos_level_l ~f:get_pos_info_raw in
   let cmp x y = Compare.pos (fst x) (fst y) in
-  let pos_level_l = List.sort cmp pos_level_l in
-  let pos_level_l = flatten pos_level_l in
+  let pos_level_l = List.sort cmp pos_level_l |> flatten in
   walk str pos_level_l

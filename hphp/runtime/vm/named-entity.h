@@ -40,11 +40,12 @@ struct String;
 
 /*
  * StringData* comparison for AtomicHashMap entries, where -1, -2, and -3 are
- * used as magic values.
+ * used as magic values. Optimized for comparisons between static strings.
  */
 struct ahm_string_data_isame {
   bool operator()(const StringData *s1, const StringData *s2) const {
-    return int64_t(s1) > 0 && s1->isame(s2);
+    assertx(int64_t(s2) > 0);  // RHS is never a magic value.
+    return s1 == s2 || (int64_t(s1) > 0 && s1->isame(s2));
   }
 };
 
@@ -84,11 +85,7 @@ struct NamedEntity {
   /////////////////////////////////////////////////////////////////////////////
   // Constructors.
 
-  explicit NamedEntity()
-    : m_cachedClass(rds::kInvalidHandle)
-    , m_cachedFunc(rds::kInvalidHandle)
-    , m_cachedTypeAlias(rds::kInvalidHandle)
-  {}
+  explicit NamedEntity() {}
 
   NamedEntity(NamedEntity&& ne) noexcept;
 
@@ -158,6 +155,21 @@ struct NamedEntity {
   void pushClass(Class* cls);
   void removeClass(Class* goner);
 
+  /////////////////////////////////////////////////////////////////////////////
+  // Unique func.
+
+  /*
+   * Return the unique func corresponding to this name, or nullptr if there is
+   * none registered.
+   */
+  Func* uniqueFunc() const;
+
+  /*
+   * Register the unique func corresponding to this name.
+   *
+   * Precondition: func->isUnique()
+   */
+  void setUniqueFunc(Func* func);
 
   /////////////////////////////////////////////////////////////////////////////
   // Global table.                                                     [static]
@@ -179,27 +191,34 @@ struct NamedEntity {
   template<class Fn> static void foreach_class(Fn fn);
   template<class Fn> static void foreach_cached_class(Fn fn);
   template<class Fn> static void foreach_cached_func(Fn fn);
+  template<class Fn> static void foreach_name(Fn);
 
   /*
    * Size of the global NamedEntity table.
    */
   static size_t tableSize();
 
+  /*
+   * Various stats about the global NamedEntity table, excluding its size.
+   */
+  static std::vector<std::pair<const char*, int64_t>> tableStats();
+
 private:
-  template<class Fn> static void foreach_name(Fn);
   static Map* table();
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
 
 public:
-  mutable rds::Link<LowPtr<Class>> m_cachedClass;
-  mutable rds::Link<LowPtr<Func>> m_cachedFunc;
-  mutable rds::Link<TypeAliasReq> m_cachedTypeAlias;
+  mutable rds::Link<LowPtr<Class>, rds::Mode::NonLocal> m_cachedClass;
+  mutable rds::Link<LowPtr<Func>, rds::Mode::NonLocal> m_cachedFunc;
+  mutable rds::Link<TypeAliasReq, rds::Mode::NonLocal> m_cachedTypeAlias;
 
 private:
   AtomicLowPtr<Class, std::memory_order_acquire,
                std::memory_order_release> m_clsList{nullptr};
+  AtomicLowPtr<Func, std::memory_order_acquire,
+               std::memory_order_release> m_uniqueFunc{nullptr};
 };
 
 /*

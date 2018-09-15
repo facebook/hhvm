@@ -1,0 +1,70 @@
+bool(false)
+bool(true)
+bool(false)
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+====================================================
+bool(false)
+bool(false)
+bool(true)
+dict(3) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  int(3)
+}
+====================================================
+bool(false)
+bool(true)
+bool(false)
+vec(3) {
+  int(1)
+  int(2)
+  int(3)
+}
+====================================================
+bool(false)
+bool(false)
+bool(true)
+dict(3) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  int(2)
+  ["c"]=>
+  int(3)
+}
+====================================================
+bool(true)
+bool(false)
+bool(false)
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+}
+====================================================
+
+Warning: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be vec, dict given in %s/builtin-annotations.php on line 44
+
+Warning: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be vec, array given in %s/builtin-annotations.php on line 45
+====================================================
+
+Warning: __hhvm_intrinsics\dummy_darray_builtin() expects parameter 1 to be dict, vec given in %s/builtin-annotations.php on line 48
+
+Warning: __hhvm_intrinsics\dummy_darray_builtin() expects parameter 1 to be dict, array given in %s/builtin-annotations.php on line 50
+====================================================
+====================================================
+
+Warning: __hhvm_intrinsics\dummy_array_builtin() expects parameter 1 to be array, vec given in %s/builtin-annotations.php on line 58
+
+Warning: __hhvm_intrinsics\dummy_array_builtin() expects parameter 1 to be array, dict given in %s/builtin-annotations.php on line 59
+====================================================

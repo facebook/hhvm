@@ -1,7 +1,5 @@
 <?php
 
-set_error_handler('handler');
-
 function main($a, $x) {
   $s = $x;
   array_chunk($a, 0);
@@ -13,4 +11,10 @@ function handler() {
   exit(0);
 }
 
+
+<<__EntryPoint>>
+function main_store_elim() {
+set_error_handler('handler');
+
 main(0, 42);
+}

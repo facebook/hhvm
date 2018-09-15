@@ -43,4 +43,8 @@ function main() {
   var_dump(fread($f, 1024));
 }
 
+
+<<__EntryPoint>>
+function main_filter_pass_on_feed_me() {
 main();
+}

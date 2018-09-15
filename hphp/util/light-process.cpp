@@ -16,9 +16,9 @@
 #include "hphp/util/light-process.h"
 
 #include <string>
+#include <memory>
 #include <vector>
 
-#include <boost/scoped_array.hpp>
 #include <boost/thread/barrier.hpp>
 
 #include <folly/portability/SysMman.h>
@@ -53,6 +53,7 @@ namespace HPHP {
 
 namespace {
 
+__thread LightProcess* tl_proc;
 bool s_trackProcessTimes = false;
 Mutex s_mutex;
 
@@ -115,7 +116,9 @@ int popen_impl(const char* cmd, const char* mode, pid_t* out_pid) {
   int child_pipe = read ? 1 : 0;
   if (pid == 0) {
     // child
-    mprotect_huge1g_pages(PROT_READ);
+    mprotect_1g_pages(PROT_READ);
+    // If anything goes wrong, let the OOM killer kill this child process.
+    Process::OOMScoreAdj(1000);
     // replace stdin or stdout with the appropriate end
     // of the pipe
     if (p[child_pipe] == child_pipe) {
@@ -215,7 +218,7 @@ void hardwareCounterWrapperHelper(pid_t (*func)(int), int afdt_fd) {
     return;
   }
 
-  auto arg = folly::make_unique<HardwareCounterWrapperArg>();
+  auto arg = std::make_unique<HardwareCounterWrapperArg>();
   arg->afdt_fd = afdt_fd;
   arg->func = func;
   if (pthread_create(&arg->thr, nullptr, hardwareCounterWrapper, arg.get())) {
@@ -309,7 +312,8 @@ pid_t do_proc_open_helper(int afdt_fd) {
   // now ready to start the child process
   pid_t child = fork();
   if (child == 0) {
-    mprotect_huge1g_pages(PROT_READ);
+    mprotect_1g_pages(PROT_READ);
+    Process::OOMScoreAdj(1000);
     for (int i = 0; i < pvals.size(); i++) {
       dup2(pkeys[i], pvals[i]);
     }
@@ -365,12 +369,13 @@ void do_waitpid(int afdt_fd) {
   }
 
   rusage ru;
+  int64_t time_us = 0;
   const auto ret = ::wait4(pid, &stat, options, &ru);
   alarm(0); // cancel the previous alarm if not triggered yet
   waited = 0;
-  const auto time_us = ru2microseconds(ru);
   int64_t events[] = { 0, 0, 0 };
   if (ret > 0 && s_trackProcessTimes) {
+    time_us = ru2microseconds(ru);
     auto it = s_pidToHCWMap.find(ret);
     if (it == s_pidToHCWMap.end()) {
       throw Exception("pid not in map: %s",
@@ -408,7 +413,7 @@ void do_change_user(int afdt_fd) {
 ///////////////////////////////////////////////////////////////////////////////
 // light-weight process
 
-boost::scoped_array<LightProcess> g_procs;
+std::unique_ptr<LightProcess[]> g_procs;
 int g_procsCount = 0;
 bool s_handlerInited = false;
 LightProcess::LostChildHandler s_lostChildHandler;
@@ -421,7 +426,7 @@ LightProcess::LightProcess() : m_shadowProcess(0), m_afdt_fd(-1) { }
 LightProcess::~LightProcess() {
 }
 
-void LightProcess::SigChldHandler(int sig, siginfo_t* info, void* ctx) {
+void LightProcess::SigChldHandler(int /*sig*/, siginfo_t* info, void* /*ctx*/) {
   if (info->si_code != CLD_EXITED &&
       info->si_code != CLD_KILLED &&
       info->si_code != CLD_DUMPED) {
@@ -464,10 +469,10 @@ void LightProcess::Initialize(const std::string &prefix, int count,
   afdt_error_t err = AFDT_ERROR_T_INIT;
   auto afdt_lid = afdt_listen(afdt_filename.c_str(), &err);
   if (afdt_lid < 0) {
-    Logger::Warning("Unable to afdt_listen to %s: %d %s",
-                    afdt_filename.c_str(),
-                    errno, folly::errnoStr(errno).c_str());
-    return;
+    Logger::Error("Unable to afdt_listen to %s: %d %s",
+                  afdt_filename.c_str(),
+                  errno, folly::errnoStr(errno).c_str());
+    abort();
   }
 
   SCOPE_EXIT {
@@ -506,7 +511,7 @@ bool LightProcess::initShadow(int afdt_lid,
   pid_t child = fork();
   if (child == 0) {
     // child
-    mprotect_huge1g_pages(PROT_READ);
+    mprotect_1g_pages(PROT_READ);
     if (s_trackProcessTimes) {
       HardwareCounter::RecordSubprocessTimes();
     }
@@ -533,7 +538,9 @@ bool LightProcess::initShadow(int afdt_lid,
     g_procsCount = 0;
     close_fds(inherited_fds);
     ::close(afdt_lid);
-
+    // Tell the OOM killer never to kill a light process.  Killing it will cause
+    // the entire server to exit, and won't free much memory anyway.
+    Process::OOMScoreAdj(-1000);
     runShadow(afdt_fd);
   } else if (child < 0) {
     // failed
@@ -624,7 +631,7 @@ void handleException(const char* call) {
 template <class R, class F1>
 R runLight(const char* call, F1 body, R failureResult) {
   try {
-    auto proc = &g_procs[GetId()];
+    auto proc = tl_proc ? tl_proc : &g_procs[GetId()];
     Lock lock(proc->mutex());
 
     return body(proc);
@@ -637,7 +644,7 @@ R runLight(const char* call, F1 body, R failureResult) {
 }
 
 void LightProcess::Close() {
-  boost::scoped_array<LightProcess> procs;
+  std::unique_ptr<LightProcess[]> procs;
   procs.swap(g_procs);
   int count = g_procsCount;
   g_procs.reset();
@@ -657,7 +664,14 @@ void LightProcess::closeShadow() {
       handleException("closeShadow");
     }
     // removes the "zombie" process, so not to interfere with later waits
-    ::waitpid(m_shadowProcess, nullptr, 0);
+    while (true) {
+      auto r = ::waitpid(m_shadowProcess, nullptr, 0);
+      // retry on EINTR
+      if (r != -1 || errno != EINTR) {
+        break;
+      }
+    }
+
     m_shadowProcess = 0;
   }
   closeFiles();
@@ -671,6 +685,7 @@ void LightProcess::closeFiles() {
 }
 
 bool LightProcess::Available() {
+  if (tl_proc) return true;
   return g_procsCount > 0;
 }
 
@@ -684,6 +699,10 @@ FILE *LightProcess::popen(const char *cmd, const char *type,
     FILE *f = LightPopenImpl(cmd, type, cwd);
     if (f) {
       return f;
+    }
+    if (tl_proc) {
+      Logger::Verbose("Light-weight fork failed in remote CLI mode.");
+      return nullptr;
     }
     Logger::Verbose("Light-weight fork failed; use the heavy one instead.");
   }
@@ -756,13 +775,16 @@ int LightProcess::pclose(FILE *f) {
     pid = it->second;
     s_popenMap.erase(it);
   } else {
-    int id = GetId();
-    Lock lock(g_procs[id].m_procMutex);
+    auto proc = [] {
+      if (tl_proc) return tl_proc;
+      return &g_procs[GetId()];
+    }();
+    Lock lock(proc->m_procMutex);
 
-    auto it = g_procs[id].m_popenMap.find(f);
-    if (it == g_procs[id].m_popenMap.end()) return -1;
+    auto it = proc->m_popenMap.find(f);
+    if (it == proc->m_popenMap.end()) return -1;
     pid = it->second;
-    g_procs[id].m_popenMap.erase(it);
+    proc->m_popenMap.erase(it);
   }
 
   fclose(f);
@@ -820,8 +842,8 @@ pid_t LightProcess::waitpid(pid_t pid, int *stat_loc, int options,
     // light process is not really there
     rusage ru;
     const auto ret = wait4(pid, stat_loc, options, &ru);
-    if (s_trackProcessTimes) {
-      s_extra_request_microseconds += ru2microseconds(ru);
+    if (ret > 0 && s_trackProcessTimes) {
+      s_extra_request_nanoseconds += ru2microseconds(ru) * 1000;
     }
     return ret;
   }
@@ -840,7 +862,7 @@ pid_t LightProcess::waitpid(pid_t pid, int *stat_loc, int options,
       if (ret < 0) {
         errno = err;
       } else if (s_trackProcessTimes) {
-        s_extra_request_microseconds += time_us;
+        s_extra_request_nanoseconds += time_us * 1000;
         HardwareCounter::IncInstructionCount(events[0]);
         HardwareCounter::IncLoadCount(events[1]);
         HardwareCounter::IncStoreCount(events[2]);
@@ -853,13 +875,17 @@ pid_t LightProcess::waitpid(pid_t pid, int *stat_loc, int options,
 pid_t LightProcess::pcntl_waitpid(pid_t pid, int *stat_loc, int options) {
   rusage ru;
   const auto ret = wait4(pid, stat_loc, options, &ru);
-  if (s_trackProcessTimes) {
-    s_extra_request_microseconds += ru2microseconds(ru);
+  if (ret > 0 && s_trackProcessTimes) {
+    s_extra_request_nanoseconds += ru2microseconds(ru) * 1000;
   }
   return ret;
 }
 
-void LightProcess::ChangeUser(const std::string &username) {
+void LightProcess::ChangeUser(int afdt, const std::string& username) {
+  if (!username.empty()) lwp_write(afdt, "change_user", username);
+}
+
+void LightProcess::ChangeUser(const std::string& username) {
   if (username.empty()) return;
   for (int i = 0; i < g_procsCount; i++) {
     Lock lock(g_procs[i].m_procMutex);
@@ -869,6 +895,73 @@ void LightProcess::ChangeUser(const std::string &username) {
 
 void LightProcess::SetLostChildHandler(const LostChildHandler& handler) {
   s_lostChildHandler = handler;
+}
+
+std::unique_ptr<LightProcess> LightProcess::setThreadLocalAfdtOverride(
+  std::unique_ptr<LightProcess> p
+) {
+  auto ret = std::unique_ptr<LightProcess>(tl_proc);
+  tl_proc = p.release();
+  return ret;
+}
+
+std::unique_ptr<LightProcess> LightProcess::setThreadLocalAfdtOverride(int fd) {
+  auto ret = std::unique_ptr<LightProcess>(tl_proc);
+  tl_proc = new LightProcess;
+  tl_proc->m_afdt_fd = fd;
+  return ret;
+}
+
+int LightProcess::createDelegate() {
+  int pair[2];
+  if (socketpair(AF_UNIX, SOCK_STREAM, 0, pair)) {
+    Logger::Warning("Unable to create a unix socket pair: %s",
+                    folly::errnoStr(errno).c_str());
+    return -1;
+  }
+
+  pid_t child = fork();
+
+  if (child < 0) {
+    Logger::Warning("Unable to fork delegate process: %s",
+                    folly::errnoStr(errno).c_str());
+    close(pair[0]);
+    close(pair[1]);
+    return -1;
+  }
+
+  if (child == 0) {
+    // child
+    fclose(stdin);
+    fclose(stdout);
+    fclose(stderr);
+
+    mprotect_1g_pages(PROT_READ);
+    if (s_trackProcessTimes) {
+      HardwareCounter::RecordSubprocessTimes();
+    }
+    Logger::ResetPid();
+    pid_t sid = setsid();
+    if (sid < 0) {
+      Logger::Warning("Unable to setsid");
+      _Exit(HPHP_EXIT_FAILURE);
+    }
+
+    close(pair[0]);
+#ifdef __APPLE__
+    {
+      int newfd = dup2(pair[1], 0);
+      always_assert(newfd == 0);
+    }
+    close(pair[1]);
+    pair[1] = 0;
+#endif
+    runShadow(pair[1]);
+  }
+
+  always_assert(child > 0);
+  close(pair[1]);
+  return pair[0];
 }
 
 ///////////////////////////////////////////////////////////////////////////////

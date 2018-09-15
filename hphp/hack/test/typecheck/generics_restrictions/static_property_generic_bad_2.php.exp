@@ -1,0 +1,12 @@
+File "static_property_generic_bad_2.php", line 20, characters 12-12:
+A generic parameter cannot be used in the type of a static property (Typing[4279])
+  File "static_property_generic_bad_2.php", line 6, characters 17-18:
+  This is where the type of the static property was declared
+  File "static_property_generic_bad_2.php", line 19, characters 7-13:
+  This is the class containing the static property
+File "static_property_generic_bad_2.php", line 20, characters 12-12:
+A generic parameter cannot be used in the type of a static property (Typing[4279])
+  File "static_property_generic_bad_2.php", line 7, characters 17-22:
+  This is where the type of the static property was declared
+  File "static_property_generic_bad_2.php", line 19, characters 7-13:
+  This is the class containing the static property

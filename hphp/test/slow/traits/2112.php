@@ -24,5 +24,9 @@ class D extends C {
     parent::doTest();
   }
 }
+
+<<__EntryPoint>>
+function main_2112() {
 D::doTest();
 echo "Done\n";
+}

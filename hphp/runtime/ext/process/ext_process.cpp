@@ -37,17 +37,19 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/plain-file.h"
+#include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/server/cli-server.h"
+#include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/base/request-event-handler.h"
 
 #if !defined(_NSIG) && defined(NSIG)
 # define _NSIG NSIG
@@ -60,24 +62,21 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // build environment pair list
-static char **build_envp(const Array& envs, std::vector<String> &senvs) {
-  char **envp = NULL;
-  int size = envs.size();
-  if (size) {
-    envp = (char **)malloc((size + 1) * sizeof(char *));
-    int i = 0;
-    for (ArrayIter iter(envs); iter; ++iter, ++i) {
-      StringBuffer nvpair;
-      nvpair.append(iter.first().toString());
-      nvpair.append('=');
-      nvpair.append(iter.second().toString());
-
-      String env = nvpair.detach();
-      senvs.push_back(env);
-      *(envp + i) = (char *)env.data();
-    }
-    *(envp + i) = NULL;
+static char** build_envp(const Array& envs, req::vector<String> &senvs) {
+  auto const size = envs.size();
+  if (!size) return nullptr;
+  auto envp = req::make_raw_array<char*>(size + 1);
+  size_t i = 0;
+  for (ArrayIter iter(envs); iter; ++iter, ++i) {
+    StringBuffer nvpair;
+    nvpair.append(iter.first().toString());
+    nvpair.append('=');
+    nvpair.append(iter.second().toString());
+    String env = nvpair.detach();
+    senvs.push_back(env);
+    envp[i] = (char*)env.data();
   }
+  envp[i] = nullptr;
   return envp;
 }
 
@@ -88,7 +87,7 @@ static bool check_cmd(const char *cmd) {
     bool allow = false;
     while (isblank(*cmd_tmp)) cmd_tmp++;
     const char *space = strchr(cmd_tmp, ' ');
-    unsigned int cmd_len = strlen(cmd_tmp);
+    auto cmd_len = strlen(cmd_tmp);
     if (space) {
       cmd_len = space - cmd_tmp;
     }
@@ -212,25 +211,25 @@ void HHVM_FUNCTION(pcntl_exec,
     return;
   }
 
-  // build argumnent list
-  std::vector<String> sargs; // holding those char *
-  int size = args.size();
-  char **argv = (char **)malloc((size + 2) * sizeof(char *));
-  *argv = (char *)path.data();
+  // build argument list
+  req::vector<String> sargs; // holding those char *
+  auto const size = args.size();
+  auto argv = req::make_raw_array<char*>(size + 2);
+  argv[0] = (char*)path.data();
   int i = 1;
   if (size) {
     sargs.reserve(size);
     for (ArrayIter iter(args); iter; ++iter, ++i) {
       String arg = iter.second().toString();
       sargs.push_back(arg);
-      *(argv + i) = (char *)arg.data();
+      argv[i] = (char*)arg.data();
     }
   }
-  *(argv + i) = NULL;
+  argv[i] = nullptr;
 
   // build environment pair list
-  std::vector<String> senvs; // holding those char *
-  char **envp = build_envp(envs, senvs);
+  req::vector<String> senvs; // holding those char *
+  auto envp = build_envp(envs, senvs);
   if (execve(path.c_str(), argv, envp) == -1) {
     raise_warning("Error has occurred: (errno %d) %s",
                     errno, folly::errnoStr(errno).c_str());
@@ -241,6 +240,10 @@ void HHVM_FUNCTION(pcntl_exec,
 }
 
 int64_t HHVM_FUNCTION(pcntl_fork) {
+  if (is_cli_mode()) {
+    raise_error("forking not available via server CLI execution");
+    return -1;
+  }
   if (RuntimeOption::ServerExecutionMode()) {
     raise_error("forking is disallowed in server mode");
     return -1;
@@ -254,6 +257,9 @@ int64_t HHVM_FUNCTION(pcntl_fork) {
   std::cerr.flush();
   pid_t pid = fork();
   Repo::postfork(pid);
+  if (pid == 0) {
+    compilers_detach_after_fork();
+  }
   return pid;
 }
 
@@ -377,7 +383,7 @@ struct SignalHandlers final : RequestEventHandler {
   Array handlers;
   int signaled[_NSIG];
   sigset_t oldSet;
-  std::atomic<bool> inited;
+  std::atomic<bool> inited{};
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(SignalHandlers, s_signal_handlers);
 

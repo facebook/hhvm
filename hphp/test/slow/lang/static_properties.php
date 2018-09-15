@@ -1,10 +1,5 @@
 <?php
 
-// disable array -> "Array" conversion notice
-error_reporting(error_reporting() & ~E_NOTICE);
-
-print "Test begin\n";
-
 class A {
   const CD = "A::CD";
   const CE = B::CE;
@@ -220,5 +215,14 @@ class D {
   }
 }
 
+
+// disable array -> "Array" conversion notice
+<<__EntryPoint>>
+function main_static_properties() {
+error_reporting(error_reporting() & ~E_NOTICE);
+
+print "Test begin\n";
+
 main();
 D::main();
+}

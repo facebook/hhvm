@@ -31,18 +31,29 @@ extern const StaticString s_Closure;
 
 // native data for closures. Memory layout looks like this:
 // [ClosureHdr][ObjectData, kind=Closure][captured vars]
-struct ClosureHdr {
-  HeaderWord<> hdr;
-  void* ctx;
-  uint32_t& size() { return hdr.lo32; }
-  uint32_t size() const { return hdr.lo32; }
+struct ClosureHdr : HeapObject {
+  explicit ClosureHdr(uint32_t size) {
+    initHeader_32(HeaderKind::ClosureHdr, size);
+    // we need to set this here, because the next thing 'new Closure'
+    // will do is call the constructor, which will throw, and the
+    // destructor will examine this field.
+    ctx_bits = 0;
+  }
+  uint32_t& size() { return m_aux32; }
+  uint32_t size() const { return m_aux32; }
   static constexpr uintptr_t kClassBit = 0x1;
   bool ctxIsClass() const {
-    return reinterpret_cast<uintptr_t>(ctx) & kClassBit;
+    return ctx_bits & kClassBit;
   }
   TYPE_SCAN_CUSTOM_FIELD(ctx) {
-    if (!ctxIsClass()) scanner.scan(static_cast<ObjectData*>(ctx));
+    if (!ctxIsClass()) scanner.scan(ctx_this);
   }
+ public:
+  union {
+    void* ctx;
+    uintptr_t ctx_bits;
+    ObjectData* ctx_this;
+  };
 };
 
 struct c_Closure final : ObjectData {
@@ -57,7 +68,7 @@ struct c_Closure final : ObjectData {
    * Update that method if this assumption changes.
    */
   explicit c_Closure(Class* cls)
-    : ObjectData(cls, IsCppBuiltin | HasClone, HeaderKind::Closure) {
+    : ObjectData(cls, 0, HeaderKind::Closure) {
     // hdr()->ctx must be initialized by init() or the TC.
     if (debug) setThis(reinterpret_cast<ObjectData*>(-uintptr_t(1)));
   }
@@ -92,10 +103,13 @@ struct c_Closure final : ObjectData {
   /*
    * Use and static local variables.
    *
-   * Returns obj->propVec()
+   * Returns obj->propVecForWrite()
    * but with runtime generalized checks replaced with assertions
+   *
+   * NB: Closure properties can't have type-hints, so no checking is necessary
+   * for writes.
    */
-  TypedValue* getUseVars() { return propVec(); }
+  TypedValue* getUseVars() { return propVecForWrite(); }
 
   TypedValue* getStaticVar(Slot s) {
     assertx(getVMClass()->numDeclProperties() > s);
@@ -115,28 +129,22 @@ struct c_Closure final : ObjectData {
   void setThisOrClass(void* p) { hdr()->ctx = p; }
   ObjectData* getThisUnchecked() const {
     assertx(!hdr()->ctxIsClass());
-    return reinterpret_cast<ObjectData*>(hdr()->ctx);
+    return hdr()->ctx_this;
   }
   ObjectData* getThis() const {
     return UNLIKELY(hdr()->ctxIsClass()) ? nullptr : getThisUnchecked();
   }
-  void setThis(ObjectData* od) { hdr()->ctx = od; }
+  void setThis(ObjectData* od) { hdr()->ctx_this = od; }
   bool hasThis() const { return hdr()->ctx && !hdr()->ctxIsClass(); }
 
   Class* getClass() const {
-    if (LIKELY(hdr()->ctxIsClass())) {
-      return reinterpret_cast<Class*>(
-        reinterpret_cast<uintptr_t>(hdr()->ctx) & ~ClosureHdr::kClassBit
-      );
-    } else {
-      return nullptr;
-    }
+    return LIKELY(hdr()->ctxIsClass()) ?
+      reinterpret_cast<Class*>(hdr()->ctx_bits & ~ClosureHdr::kClassBit) :
+      nullptr;
   }
   void setClass(Class* cls) {
     assertx(cls);
-    hdr()->ctx = reinterpret_cast<void*>(
-      reinterpret_cast<uintptr_t>(cls) | ClosureHdr::kClassBit
-    );
+    hdr()->ctx_bits = reinterpret_cast<uintptr_t>(cls) | ClosureHdr::kClassBit;
   }
   bool hasClass() const { return hdr()->ctxIsClass(); }
 
@@ -158,6 +166,10 @@ private:
   static Class* cls_Closure;
   static void setAllocators(Class* cls);
 };
+
+TypedValue* lookupStaticTvFromClosure(ObjectData* closure,
+                                      const StringData* name);
+Slot lookupStaticSlotFromClosure(const Class* cls, const StringData* name);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

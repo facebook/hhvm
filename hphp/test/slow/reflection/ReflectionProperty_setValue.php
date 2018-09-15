@@ -29,4 +29,3 @@ var_dump($barRef->getValue($obj));
 var_dump($barRef->getValue()); //fail
 var_dump($barRef->getValue("foo")); //fail
 var_dump($barRef->getValue(1, 2)); //fail
-

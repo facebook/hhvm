@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function blah(&$val) {
   global $x;
@@ -26,7 +26,7 @@ function foo() {
   foreach ($x6 as &$v6)
   foreach ($x7 as &$v7)
   foreach ($x8 as &$v8)
-  foreach ($x9 as &$v9)   blah($v9);
+  foreach ($x9 as &$v9)   blah(&$v9);
 }
 
 foo();

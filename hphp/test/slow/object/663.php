@@ -12,7 +12,6 @@ class A {
     $this->d = 4;
   }
 }
-;
 function f() {
   $obj = new A();
   foreach ($obj as $key => &$val) {
@@ -20,4 +19,9 @@ function f() {
   }
   var_dump($obj);
 }
+
+<<__EntryPoint>>
+function main_663() {
+;
 f();
+}

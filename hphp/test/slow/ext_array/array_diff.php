@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_array_diff() {
 $array1 = array(
   "a" => "green",
   "red",
@@ -18,3 +21,4 @@ var_dump($result);
 $a = array("b");
 $b = array("b", "c");
 var_dump(array_diff($b, $a));
+}

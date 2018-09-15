@@ -1,0 +1,2 @@
+File "only_rx_if_args1.php", line 4, characters 3-16:
+Function or method annotated with <<__AtMostRxAsArgs>> attribute should have at least one parameter with <<__AtMostRxAsFunc>> or <<__OnlyRxIfImpl>> annotations. (NastCheck[3064])

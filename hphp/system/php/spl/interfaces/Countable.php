@@ -21,3 +21,12 @@ interface Countable {
    */
   public function count();
 }
+
+namespace HH\Rx {
+
+interface Countable extends \Countable {
+  <<__Rx, __MaybeMutable>>
+  public function count(): int;
+}
+
+}

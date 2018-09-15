@@ -12,6 +12,9 @@ class A {
 class B extends A {
  }
 
+
+<<__EntryPoint>>
+function main_1201() {
 fb_intercept('A::foo', function($_, $called_on) {
   var_dump($called_on);
 }
@@ -25,3 +28,4 @@ $class = 'B';
 $c = 'call_user_fun';
 $c .= 'c';
 $c(array($class, 'foo'));
+}

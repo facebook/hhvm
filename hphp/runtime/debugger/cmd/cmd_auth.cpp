@@ -29,18 +29,20 @@ TRACE_SET_MOD(debugger);
 void CmdAuth::sendImpl(DebuggerThriftBuffer& thrift) {
   DebuggerCommand::sendImpl(thrift);
   thrift.write(m_token);
+  thrift.write(m_sandboxPath);
 }
 
 void CmdAuth::recvImpl(DebuggerThriftBuffer& thrift) {
   DebuggerCommand::recvImpl(thrift);
   thrift.read(m_token);
+  thrift.read(m_sandboxPath);
 }
 
 void CmdAuth::onClient(DebuggerClient& client) {
-  auto path = FileUtil::expandUser(RuntimeOption::DebuggerAuthTokenScript);
-  const char *argv[] = { "", path.data(), nullptr };
-  // We *should* be invoking the file in the same process.
-  if (path.empty() || !proc::exec("php", argv, nullptr, m_token, nullptr)) {
+  auto const path = RuntimeOption::DebuggerAuthTokenScriptBin;
+  const char *argv[] = { nullptr };
+  if (path.empty() || !proc::exec(path.data(), argv, nullptr, m_token,
+      nullptr)) {
     m_token.clear();
   }
 

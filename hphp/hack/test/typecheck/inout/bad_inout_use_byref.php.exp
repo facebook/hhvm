@@ -1,0 +1,2 @@
+File "bad_inout_use_byref.php", line 7, characters 5-12:
+Cannot use both 'inout' and '&' on the same argument. (Parsing[1002])

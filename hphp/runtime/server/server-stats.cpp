@@ -126,7 +126,7 @@ void ServerStats::Filter(list<TimeSlot*>& slots, const std::string& keys,
     std::map<std::string, int> rules;
     for (unsigned int i = 0; i < rules0.size(); i++) {
       auto const& rule = rules0[i];
-      assert(!rule.empty());
+      assertx(!rule.empty());
       int len = rule.length();
       std::string suffix;
       if (len > 4) {
@@ -199,10 +199,11 @@ void ServerStats::Aggregate(list<TimeSlot*>& slots,
   }
 
   // Hack: These two are not really page specific.
-  int load = HttpServer::Server->getPageServer()->getActiveWorker();
-  int idle = RuntimeOption::ServerThreadCount - load;
-  int queued = HttpServer::Server->getPageServer()->getQueuedJobs();
-  int health_level = (int)ServerStats::m_ServerHealthLevel;
+  auto const server = HttpServer::Server->getPageServer();
+  auto const load = server->getActiveWorker();
+  auto const idle = server->getMaxThreadCount() - load;
+  auto const queued = server->getQueuedJobs();
+  auto const health_level = (int)ServerStats::m_ServerHealthLevel;
 
   for (auto const& s : slots) {
     int sec = (s->m_time == 0 ? slotCount : 1) *
@@ -260,7 +261,7 @@ Mutex ServerStats::s_lock;
 std::vector<ServerStats*> ServerStats::s_loggers;
 bool ServerStats::s_profile_network = false;
 HealthLevel ServerStats::m_ServerHealthLevel = HealthLevel::Bold;
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(ServerStats, ServerStats::s_logger);
+THREAD_LOCAL_NO_CHECK(ServerStats, ServerStats::s_logger);
 
 void ServerStats::LogPage(const string& url, int code) {
   if (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats) {
@@ -293,6 +294,25 @@ void ServerStats::SetServerHealthLevel(HealthLevel new_health_level) {
 
 void ServerStats::SetThreadMode(ThreadMode mode) {
   ServerStats::s_logger->setThreadMode(mode);
+}
+
+ServerStats::ThreadMode ServerStats::GetThreadMode() {
+  return ServerStats::s_logger->m_threadStatus.m_mode;
+}
+
+const char* ServerStats::ThreadModeString(ThreadMode mode) {
+  switch (mode) {
+    case ThreadMode::Idling:
+      return "Idling";
+    case ThreadMode::Processing:
+      return "Processing";
+    case ThreadMode::Writing:
+      return "Writing";
+    case ThreadMode::PostProcessing:
+      return "PostProcessing";
+    default:
+      return "Unknown";
+  }
 }
 
 void ServerStats::SetThreadIOStatusAddress(const char *name) {
@@ -420,7 +440,7 @@ void ServerStats::ReportStatus(std::string& output, Writer::Format format) {
   } else if (format == Writer::Format::HTML) {
     w = new HTMLWriter(out);
   } else {
-    assert(format == Writer::Format::JSON);
+    assertx(format == Writer::Format::JSON);
     w = new JSONWriter(out);
   }
 
@@ -435,7 +455,7 @@ void ServerStats::ReportStatus(std::string& output, Writer::Format format) {
 
   w->writeEntry("compiler", compilerId().begin());
 
-#ifdef DEBUG
+#ifndef NDEBUG
   w->writeEntry("debug", "yes");
 #else
   w->writeEntry("debug", "no");
@@ -475,7 +495,7 @@ void ServerStats::ReportStatus(std::string& output, Writer::Format format) {
     case ThreadMode::Processing:     mode = "process"; break;
     case ThreadMode::Writing:        mode = "writing"; break;
     case ThreadMode::PostProcessing: mode = "psp";     break;
-    default: assert(false);
+    default: assertx(false);
     }
 
     w->beginObject("thread");
@@ -490,9 +510,11 @@ void ServerStats::ReportStatus(std::string& output, Writer::Format format) {
       auto const stats = ts.m_mm->getStatsCopy();
       w->beginObject("memory");
       w->writeEntry("current usage", stats.usage());
-      w->writeEntry("current alloc", stats.capacity);
+      w->writeEntry("current alloc", stats.capacity());
       w->writeEntry("peak usage", stats.peakUsage);
       w->writeEntry("peak alloc", stats.peakCap);
+      w->writeEntry("limit", ts.m_mm->getMemoryLimit());
+      w->writeEntry("current mm usage", stats.mmUsage());
       w->endObject("memory");
     }
     w->writeEntry("io", ts.m_ioInProcess);
@@ -527,7 +549,7 @@ void ServerStats::StartNetworkProfile() {
   Lock lock(s_lock, false);
   for (unsigned int i = 0; i < s_loggers.size(); i++) {
     ServerStats *ss = s_loggers[i];
-    Lock lock(ss->m_lock, false);
+    Lock loggerLock(ss->m_lock, false);
     ss->m_ioProfiles.clear();
   }
 }
@@ -543,7 +565,7 @@ Array ServerStats::EndNetworkProfile() {
   Array ret;
   for (unsigned int i = 0; i < s_loggers.size(); i++) {
     ServerStats *ss = s_loggers[i];
-    Lock lock(ss->m_lock, false);
+    Lock loggerLock(ss->m_lock, false);
 
     IOStatusMap& status = ss->m_ioProfiles;
     for (auto const& iter : status) {
@@ -614,7 +636,7 @@ int64_t ServerStats::get(const std::string& name) {
   return 0;
 }
 
-void ServerStats::logPage(const string& url, int code) {
+void ServerStats::logPage(const string& /*url*/, int /*code*/) {
   int64_t now = time(nullptr) / RuntimeOption::StatsSlotDuration;
   int slot = now % RuntimeOption::StatsMaxSlot;
 
@@ -689,7 +711,7 @@ void ServerStats::startRequest(const char *url, const char *clientIP,
                                const char *vhost) {
   ++m_threadStatus.m_requestCount;
 
-  m_threadStatus.m_mm = &MM();
+  m_threadStatus.m_mm = tl_heap.get();
   gettimeofday(&m_threadStatus.m_start, 0);
   memset(&m_threadStatus.m_done, 0, sizeof(m_threadStatus.m_done));
   m_threadStatus.m_mode = ThreadMode::Processing;
@@ -746,14 +768,14 @@ void ServerStats::setThreadIOStatus(const char *name, const char *addr,
         wt = gettime_diff_us(m_threadStatus.m_ioStart, now);
       }
 
-      const char *name = m_threadStatus.m_ioName;
-      const char *addr = m_threadStatus.m_ioLogicalName;
-      if (!*addr) addr = m_threadStatus.m_ioAddr;
+      const char *ioName = m_threadStatus.m_ioName;
+      const char *ioAddr = m_threadStatus.m_ioLogicalName;
+      if (!*ioAddr) ioAddr = m_threadStatus.m_ioAddr;
 
       if (RuntimeOption::EnableNetworkIOStatus) {
-        string key = name;
-        if (*addr) {
-          key += ' '; key += addr;
+        string key = ioName;
+        if (*ioAddr) {
+          key += ' '; key += ioAddr;
         }
         IOStatus& io = m_threadStatus.m_ioStatuses[key];
         ++io.count;
@@ -763,11 +785,11 @@ void ServerStats::setThreadIOStatus(const char *name, const char *addr,
       if (s_profile_network) {
         const char *key0 = "main()";
         const char *key1 = m_threadStatus.m_url;
-        string key2 = m_threadStatus.m_url; key2 += "==>"; key2 += name;
-        const char *key3 = name;
-        string key4 = name;
-        if (*addr) {
-          key4 += "==>"; key4 += addr;
+        string key2 = m_threadStatus.m_url; key2 += "==>"; key2 += ioName;
+        const char *key3 = ioName;
+        string key4 = ioName;
+        if (*ioAddr) {
+          key4 += "==>"; key4 += ioAddr;
         }
 
         Lock lock(m_lock, false);
@@ -775,7 +797,7 @@ void ServerStats::setThreadIOStatus(const char *name, const char *addr,
         { IOStatus& io = m_ioProfiles[key1]; ++io.count; io.wall_time += wt;}
         { IOStatus& io = m_ioProfiles[key2]; ++io.count; io.wall_time += wt;}
         { IOStatus& io = m_ioProfiles[key3]; ++io.count; io.wall_time += wt;}
-        if (*addr) {
+        if (*ioAddr) {
           IOStatus& io = m_ioProfiles[key4]; ++io.count; io.wall_time += wt;
         }
       }
@@ -828,7 +850,7 @@ ServerStatsHelper::~ServerStatsHelper() {
 #endif
 
     if (m_track & TRACK_MEMORY) {
-      auto const stats = MM().getStats();
+      auto const stats = tl_heap->getStatsCopy();
       ServerStats::Log(string("mem.") + m_section, stats.peakUsage);
       ServerStats::Log(string("mem.allocated.") + m_section,
                        stats.peakCap);
@@ -859,7 +881,7 @@ IOStatusHelper::IOStatusHelper(const char *name,
                                const char *address /* = NULL */,
                                int port /* = 0 */)
     : m_exeProfiler(ThreadInfo::NetworkIO) {
-  assert(name && *name);
+  assertx(name && *name);
 
   if (ServerStats::s_profile_network ||
       (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats)) {

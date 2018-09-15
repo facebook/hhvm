@@ -1,0 +1,2 @@
+File "interface_use_trait.php", line 4, characters 7-11:
+Interfaces cannot use traits (NastCheck[3073])

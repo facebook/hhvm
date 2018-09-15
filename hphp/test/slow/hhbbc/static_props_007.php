@@ -19,6 +19,9 @@ function heh() {
   return Foob::ok();
 }
 
+
+<<__EntryPoint>>
+function main_static_props_007() {
 var_dump(Foob::asd('asd'));
 var_dump(Foob::asd('asd'));
 var_dump(Foob::asd('asd'));
@@ -27,3 +30,4 @@ var_dump(Foob::ok());
 var_dump(Foob::breaker('ok'));
 var_dump(Foob::ok());
 var_dump(heh());
+}

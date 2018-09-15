@@ -1,0 +1,6 @@
+File "instanceof_generic_good_2.php", line 14, characters 31-44:
+Invalid return type (Typing[4110])
+File "instanceof_generic_good_2.php", line 14, characters 31-44:
+This is void because this async function implicitly returns Awaitable<void>
+File "instanceof_generic_good_2.php", line 16, characters 16-25:
+It is incompatible with a value of generic type TvInternal

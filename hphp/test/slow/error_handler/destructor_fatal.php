@@ -20,14 +20,18 @@ class Y {
   }
 }
 
-set_error_handler(function() {
-    var_dump('Handler', func_get_args());
-  }, -1);
-
 function test() {
   $x = new X;
   $y = new Y;
   set_time_limit(1);
 }
 
+
+<<__EntryPoint>>
+function main_destructor_fatal() {
+set_error_handler(function() {
+    var_dump('Handler', func_get_args());
+  }, -1);
+
 test();
+}

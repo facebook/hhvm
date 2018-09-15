@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Hey { public static $x = "yup\n"; }
 

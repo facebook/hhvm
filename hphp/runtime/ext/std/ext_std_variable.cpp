@@ -24,9 +24,6 @@
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/zend-functions.h"
-#ifdef ENABLE_EXTENSION_XDEBUG
-#include "hphp/runtime/ext/xdebug/ext_xdebug.h"
-#endif
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/server/http-protocol.h"
 
@@ -98,19 +95,19 @@ bool HHVM_FUNCTION(settype, VRefParam var, const String& type) {
 }
 
 bool HHVM_FUNCTION(is_null, const Variant& v) {
-  return is_null(v);
+  return is_null(v.asTypedValue());
 }
 
 bool HHVM_FUNCTION(is_bool, const Variant& v) {
-  return is_bool(v);
+  return is_bool(v.asTypedValue());
 }
 
 bool HHVM_FUNCTION(is_int, const Variant& v) {
-  return is_int(v);
+  return is_int(v.asTypedValue());
 }
 
 bool HHVM_FUNCTION(is_float, const Variant& v) {
-  return is_double(v);
+  return is_double(v.asTypedValue());
 }
 
 bool HHVM_FUNCTION(is_numeric, const Variant& v) {
@@ -118,7 +115,7 @@ bool HHVM_FUNCTION(is_numeric, const Variant& v) {
 }
 
 bool HHVM_FUNCTION(is_string, const Variant& v) {
-  return is_string(v);
+  return is_string(v.asTypedValue());
 }
 
 bool HHVM_FUNCTION(is_scalar, const Variant& v) {
@@ -126,27 +123,97 @@ bool HHVM_FUNCTION(is_scalar, const Variant& v) {
 }
 
 bool HHVM_FUNCTION(is_array, const Variant& v) {
-  return is_array(v);
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
+    if (v.isPHPArrayOrShape()) {
+      return true;
+    } else if (v.isVecArray()) {
+      raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VEC_IS_ARR);
+    } else if (v.isDictOrShape()) {
+      raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DICT_IS_ARR);
+    } else if (v.isKeyset()) {
+      raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_KEYSET_IS_ARR);
+    }
+    return false;
+  }
+  return is_array(v.asTypedValue());
 }
 
 bool HHVM_FUNCTION(HH_is_vec, const Variant& v) {
-  return is_vec(v);
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
+    if (v.isPHPArray()) {
+      auto const& arr = v.toCArrRef();
+      if (arr.isVArray()) {
+        raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VARR_IS_VEC);
+      }
+      return false;
+    }
+  }
+  return is_vec(v.asTypedValue());
 }
 
 bool HHVM_FUNCTION(HH_is_dict, const Variant& v) {
-  return is_dict(v);
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
+    if (v.isPHPArrayOrShape()) {
+      auto const& arr = v.toCArrRef();
+      if (arr.isDArray()) {
+        raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DARR_IS_DICT);
+      }
+      return false;
+    }
+  }
+  return is_dict(v.asTypedValue());
 }
 
 bool HHVM_FUNCTION(HH_is_keyset, const Variant& v) {
-  return is_keyset(v);
+  return is_keyset(v.asTypedValue());
+}
+
+bool HHVM_FUNCTION(HH_is_varray, const Variant& val) {
+  auto const cell = val.asTypedValue();
+  if (RuntimeOption::EvalHackArrDVArrs) return is_vec(cell);
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
+    if (val.isVecArray()) {
+      raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VEC_IS_VARR);
+      return false;
+    }
+  }
+  return tvIsArray(cell) && cell->m_data.parr->isVArray();
+}
+
+bool HHVM_FUNCTION(HH_is_darray, const Variant& val) {
+  auto const cell = val.asTypedValue();
+  if (RuntimeOption::EvalHackArrDVArrs) return is_dict(cell);
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsVecDictNotices)) {
+    if (val.isDictOrShape()) {
+      raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DICT_IS_DARR);
+      return false;
+    }
+  }
+  return tvIsArrayOrShape(cell) && cell->m_data.parr->isDArray();
+}
+
+bool HHVM_FUNCTION(HH_is_any_array, const Variant& val) {
+  return tvIsArrayLike(val.asTypedValue());
+}
+
+bool HHVM_FUNCTION(HH_is_list_like, const Variant& val) {
+  if (!val.isArray()) return false;
+  auto const& arr = val.toCArrRef();
+  return arr->isVectorData();
 }
 
 bool HHVM_FUNCTION(is_object, const Variant& v) {
-  return is_object(v);
+  return is_object(v.asTypedValue());
 }
 
 bool HHVM_FUNCTION(is_resource, const Variant& v) {
   return (v.getType() == KindOfResource && !v.toCResRef().isInvalid());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+Array HHVM_FUNCTION(HH_object_prop_array, const Object& obj) {
+  return obj.toArray();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -163,7 +230,7 @@ Variant HHVM_FUNCTION(print_r, const Variant& expression,
       vs.serialize(expression, ret);
       res = true;
     }
-  } catch (StringBufferLimitException &e) {
+  } catch (StringBufferLimitException& e) {
     raise_notice("print_r() exceeded max bytes limit");
     res = e.m_result;
   }
@@ -181,7 +248,7 @@ Variant HHVM_FUNCTION(var_export, const Variant& expression,
       vs.serialize(expression, ret);
       res = true;
     }
-  } catch (StringBufferLimitException &e) {
+  } catch (StringBufferLimitException& e) {
     raise_notice("var_export() exceeded max bytes limit");
   }
   return res;
@@ -198,13 +265,6 @@ static ALWAYS_INLINE void do_var_dump(VariableSerializer& vs,
 
 void HHVM_FUNCTION(var_dump, const Variant& expression,
                              const Array& _argv /*=null_array */) {
-#ifdef ENABLE_EXTENSION_XDEBUG
-  if (UNLIKELY(XDEBUG_GLOBAL(OverloadVarDump) &&
-               XDEBUG_GLOBAL(DefaultEnable))) {
-    HHVM_FN(xdebug_var_dump)(expression, _argv);
-    return;
-  }
-#endif
 
   VariableSerializer vs(VariableSerializer::Type::VarDump, 0, 2);
   do_var_dump(vs, expression);
@@ -220,17 +280,33 @@ void HHVM_FUNCTION(debug_zval_dump, const Variant& variable) {
   vs.serialize(variable, false);
 }
 
+namespace {
+
 const StaticString
   s_Null("N;"),
   s_True("b:1;"),
   s_False("b:0;"),
   s_Res("i:0;"),
   s_EmptyArray("a:0:{}"),
+  s_EmptyVArray("y:0:{}"),
+  s_EmptyDArray("Y:0:{}"),
   s_EmptyVecArray("v:0:{}"),
   s_EmptyDictArray("D:0:{}"),
   s_EmptyKeysetArray("k:0:{}");
 
-String HHVM_FUNCTION(serialize, const Variant& value) {
+ALWAYS_INLINE String serialize_impl(const Variant& value,
+                                    bool keepDVArrays,
+                                    bool forcePHPArrays,
+                                    bool hackWarn,
+                                    bool phpWarn) {
+  auto const empty_hack = [&](const ArrayData* arr, const StaticString& empty) {
+    if (UNLIKELY(RuntimeOption::EvalHackArrCompatSerializeNotices &&
+                 hackWarn)) {
+      raise_hack_arr_compat_serialize_notice(arr);
+    }
+    return forcePHPArrays ? s_EmptyArray : empty;
+  };
+
   switch (value.getType()) {
     case KindOfUninit:
     case KindOfNull:
@@ -265,51 +341,136 @@ String HHVM_FUNCTION(serialize, const Variant& value) {
     case KindOfPersistentVec:
     case KindOfVec: {
       ArrayData* arr = value.getArrayData();
-      assert(arr->isVecArray());
-      if (arr->empty()) return s_EmptyVecArray;
+      assertx(arr->isVecArray());
+      if (arr->empty()) {
+        return UNLIKELY(arr->isLegacyArray())
+          ? s_EmptyArray
+          : empty_hack(arr, s_EmptyVecArray);
+      }
       break;
     }
 
     case KindOfPersistentDict:
     case KindOfDict: {
       ArrayData* arr = value.getArrayData();
-      assert(arr->isDict());
-      if (arr->empty()) return s_EmptyDictArray;
+      assertx(arr->isDict());
+      if (arr->empty()) {
+        return UNLIKELY(arr->isLegacyArray())
+          ? s_EmptyArray
+          : empty_hack(arr, s_EmptyDictArray);
+      }
       break;
     }
 
     case KindOfPersistentKeyset:
     case KindOfKeyset: {
       ArrayData* arr = value.getArrayData();
-      assert(arr->isKeyset());
-      if (arr->empty()) return s_EmptyKeysetArray;
+      assertx(arr->isKeyset());
+      if (arr->empty()) return empty_hack(arr, s_EmptyKeysetArray);
       break;
+    }
+
+    case KindOfPersistentShape:
+    case KindOfShape: { // TODO(T31134050)
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        ArrayData* arr = value.getArrayData();
+        assertx(arr->isShape());
+        if (arr->empty()) {
+          return UNLIKELY(arr->isLegacyArray())
+            ? s_EmptyArray
+            : empty_hack(arr, s_EmptyDictArray);
+        }
+        break;
+      }
+      // Fallthrough
     }
 
     case KindOfPersistentArray:
     case KindOfArray: {
       ArrayData *arr = value.getArrayData();
-      assert(arr->isPHPArray());
-      if (arr->empty()) return s_EmptyArray;
+      assertx(arr->isPHPArray());
+      assertx(!RuntimeOption::EvalHackArrDVArrs || arr->isNotDVArray());
+      if (arr->empty()) {
+        if (UNLIKELY(RuntimeOption::EvalHackArrCompatSerializeNotices &&
+                     phpWarn)) {
+          raise_hack_arr_compat_serialize_notice(arr);
+        }
+        if (keepDVArrays && !forcePHPArrays) {
+          if (arr->isVArray()) return s_EmptyVArray;
+          if (arr->isDArray()) return s_EmptyDArray;
+        }
+        return s_EmptyArray;
+      }
       break;
     }
     case KindOfDouble:
     case KindOfObject:
+    // TODO (T29639296)
+    case KindOfFunc:
+    case KindOfClass:
       break;
 
     case KindOfRef:
-    case KindOfClass:
       not_reached();
   }
 
   VariableSerializer vs(VariableSerializer::Type::Serialize);
+  if (keepDVArrays)   vs.keepDVArrays();
+  if (forcePHPArrays) vs.setForcePHPArrays();
+  if (hackWarn)       vs.setHackWarn();
+  if (phpWarn)        vs.setPHPWarn();
   // Keep the count so recursive calls to serialize() embed references properly.
   return vs.serialize(value, true, true);
 }
 
+}
+
+String HHVM_FUNCTION(serialize, const Variant& value) {
+  return serialize_impl(value, false, false, false, false);
+}
+
+const StaticString
+  s_forcePHPArrays("forcePHPArrays"),
+  s_warnOnHackArrays("warnOnHackArrays"),
+  s_warnOnPHPArrays("warnOnPHPArrays");
+
+String HHVM_FUNCTION(HH_serialize_with_options,
+                     const Variant& value, const Array& options) {
+  return serialize_impl(
+    value,
+    false,
+    options.exists(s_forcePHPArrays) &&
+      options[s_forcePHPArrays].toBoolean(),
+    options.exists(s_warnOnHackArrays) &&
+      options[s_warnOnHackArrays].toBoolean(),
+    options.exists(s_warnOnPHPArrays) &&
+      options[s_warnOnPHPArrays].toBoolean()
+  );
+}
+
+String HHVM_FUNCTION(hhvm_intrinsics_serialize_keep_dvarrays,
+                     const Variant& value) {
+  return serialize_impl(value, true, false, false, false);
+}
+
 Variant HHVM_FUNCTION(unserialize, const String& str,
                                    const Array& options /* =[] */) {
-  return unserialize_from_string(str, options);
+  return unserialize_from_string(
+    str,
+    VariableUnserializer::Type::Serialize,
+    options
+  );
+}
+
+Variant HHVM_FUNCTION(hhvm_intrinsics_unserialize_keep_dvarrays,
+                      const String& str) {
+  return unserialize_from_string(
+    str,
+    // This is fine because the only difference between Serialize and Internal
+    // right now is d/varray serialization.
+    VariableUnserializer::Type::Internal,
+    null_array
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -409,10 +570,17 @@ int64_t HHVM_FUNCTION(extract,
                       VRefParam vref_array,
                       int64_t extract_type = EXTR_OVERWRITE,
                       const String& prefix = "") {
+  auto const warning =
+    "extract() is deprecated and subject to removal from the Hack language";
+  switch (RuntimeOption::DisableExtract) {
+    case 0:  break;
+    case 1:  raise_warning(warning); break;
+    default: raise_error(warning);
+  }
   auto arrByRef = false;
   auto arr_tv = vref_array.wrapped().asTypedValue();
-  if (arr_tv->m_type == KindOfRef) {
-    arr_tv = arr_tv->m_data.pref->tv();
+  if (isRefType(arr_tv->m_type)) {
+    arr_tv = arr_tv->m_data.pref->cell();
     arrByRef = true;
   }
   if (!isArrayLikeType(arr_tv->m_type)) {
@@ -441,18 +609,18 @@ int64_t HHVM_FUNCTION(extract,
       for (ArrayIter iter(arr); iter; ++iter) {
         auto name = iter.first().toString();
         if (!modify_extract_name(varEnv, name, extract_type, prefix)) continue;
-        // The const_cast is safe because we escalated the array.  We can't use
+        // The as_lval() is safe because we escalated the array.  We can't use
         // arr.lvalAt(name), because arr may have been modified as a side
         // effect of an earlier iteration.
-        auto& ref = const_cast<Variant&>(iter.secondRef());
-        g_context->bindVar(name.get(), ref.asTypedValue());
+        auto const rval = iter.secondRval();
+        g_context->bindVar(name.get(), rval.as_lval());
         ++count;
       }
       return count;
     };
 
     if (arrByRef) {
-      return extr_refs(tvAsVariant(vref_array.getRefData()->tv()).asArrRef());
+      return extr_refs(tvAsVariant(vref_array.getRefData()->cell()).asArrRef());
     }
     Array tmp = carr;
     return extr_refs(tmp);
@@ -462,7 +630,7 @@ int64_t HHVM_FUNCTION(extract,
   for (ArrayIter iter(carr); iter; ++iter) {
     auto name = iter.first().toString();
     if (!modify_extract_name(varEnv, name, extract_type, prefix)) continue;
-    g_context->setVar(name.get(), iter.secondRef().asTypedValue());
+    g_context->setVar(name.get(), iter.secondRval());
     ++count;
   }
   return count;
@@ -471,6 +639,7 @@ int64_t HHVM_FUNCTION(extract,
 void HHVM_FUNCTION(parse_str,
                    const String& str,
                    VRefParam arr /* = null */) {
+  SuppressHackArrCompatNotices suppress;
   Array result = Array::Create();
   HttpProtocol::DecodeParameters(result, str.data(), str.size());
   if (!arr.isReferenced()) {
@@ -507,6 +676,10 @@ void StandardExtension::initVariable() {
   HHVM_FALIAS(HH\\is_vec, HH_is_vec);
   HHVM_FALIAS(HH\\is_dict, HH_is_dict);
   HHVM_FALIAS(HH\\is_keyset, HH_is_keyset);
+  HHVM_FALIAS(HH\\is_varray, HH_is_varray);
+  HHVM_FALIAS(HH\\is_darray, HH_is_darray);
+  HHVM_FALIAS(HH\\is_any_array, HH_is_any_array);
+  HHVM_FALIAS(HH\\is_list_like, HH_is_list_like);
   HHVM_FE(is_object);
   HHVM_FE(is_resource);
   HHVM_FE(boolval);
@@ -526,6 +699,15 @@ void StandardExtension::initVariable() {
   HHVM_FE(get_defined_vars);
   HHVM_FE(extract);
   HHVM_FE(parse_str);
+  HHVM_FALIAS(HH\\object_prop_array, HH_object_prop_array);
+  HHVM_FALIAS(HH\\serialize_with_options, HH_serialize_with_options);
+
+  if (RuntimeOption::EnableIntrinsicsExtension) {
+    HHVM_FALIAS(__hhvm_intrinsics\\serialize_keep_dvarrays,
+                hhvm_intrinsics_serialize_keep_dvarrays);
+    HHVM_FALIAS(__hhvm_intrinsics\\deserialize_keep_dvarrays,
+                hhvm_intrinsics_unserialize_keep_dvarrays);
+  }
 
   loadSystemlib("std_variable");
 }

@@ -2,20 +2,19 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Core
+open Core_kernel
 open Utils
 
 (* The reason why something is expected to have a certain type *)
 type t =
   | Rnone
   | Rwitness         of Pos.t
-  | Ridx             of Pos.t * t (* Used as an index into into a vector-like
+  | Ridx             of Pos.t * t (* Used as an index into a vector-like
                                      array or string. Position of indexing,
                                      reason for the indexed type *)
   | Ridx_vector      of Pos.t (* Used as an index, in the Vector case *)
@@ -25,8 +24,14 @@ type t =
   | Rasyncforeach    of Pos.t (* Because it is iterated "await as" in foreach *)
   | Raccess          of Pos.t
   | Rarith           of Pos.t
+  | Rarith_int       of Pos.t
   | Rarith_ret       of Pos.t
-  | Rarray_plus_ret  of Pos.t
+  | Rarith_ret_float of Pos.t * t * arg_position (* pos, arg float typing reason, arg position *)
+  | Rarith_ret_num   of Pos.t * t * arg_position (* pos, arg num typing reason, arg position *)
+  | Rarith_ret_int   of Pos.t
+  | Rsum_dynamic     of Pos.t
+  | Rbitwise_dynamic of Pos.t
+  | Rincdec_dynamic  of Pos.t
   | Rstring2         of Pos.t
   | Rcomp            of Pos.t
   | Rconcat          of Pos.t
@@ -60,6 +65,7 @@ type t =
   | Rmap_append      of Pos.t
   | Rvar_param       of Pos.t
   | Runpack_param    of Pos.t
+  | Rinout_param     of Pos.t
   | Rinstantiate     of t * string * t
   | Rarray_filter    of Pos.t * t
   | Rtype_access     of t * string list * t
@@ -70,6 +76,26 @@ type t =
   | Rused_as_shape   of Pos.t
   | Rpredicated      of Pos.t * string
   | Rinstanceof      of Pos.t * string
+  | Ris              of Pos.t
+  | Ras              of Pos.t
+  | Rfinal_property  of Pos.t
+  | Rvarray_or_darray_key of Pos.t
+  | Rusing           of Pos.t
+  | Rdynamic_prop    of Pos.t
+  | Rdynamic_call    of Pos.t
+  | Ridx_dict        of Pos.t
+  | Rmissing_optional_field of Pos.t * string
+  | Rcontravariant_generic of t * string
+  | Rinvariant_generic of t * string
+  | Rregex           of Pos.t
+  | Rlambda_use      of Pos.t
+  | Rimplicit_upper_bound of Pos.t * string
+  | Rnull            of Pos.t
+
+and arg_position =
+  | Aonly
+  | Afirst
+  | Asecond
 
 and expr_dep_type_reason =
   | ERexpr of int
@@ -77,6 +103,12 @@ and expr_dep_type_reason =
   | ERclass of string
   | ERparent of string
   | ERself of string
+
+let arg_pos_str ap =
+  match ap with
+  | Aonly -> "only"
+  | Afirst -> "first"
+  | Asecond -> "second"
 
 (* Translate a reason to a (pos, string) list, suitable for error_l. This
  * previously returned a string, however the need to return multiple lines with
@@ -95,11 +127,37 @@ let rec to_string prefix r =
   | Rappend          _ -> [(p, prefix ^ " because a value is appended to it")]
   | Rfield           _ -> [(p, prefix ^ " because one of its field is accessed")]
   | Rforeach         _ -> [(p, prefix ^ " because this is used in a foreach statement")]
-  | Rasyncforeach    _ -> [(p, prefix ^ " because this is used in a foreach statement with \"await as\"")]
+  | Rasyncforeach    _ -> [(p, prefix ^ " because this is used in a foreach statement \
+    with \"await as\"")]
   | Raccess          _ -> [(p, prefix ^ " because one of its elements is accessed")]
   | Rarith           _ -> [(p, prefix ^ " because this is used in an arithmetic operation")]
+  | Rarith_int       _ -> [(p, prefix ^ " because this is used in integer arithmetic operation")]
   | Rarith_ret       _ -> [(p, prefix ^ " because this is the result of an arithmetic operation")]
-  | Rarray_plus_ret  _ -> [(p, prefix ^ " because this is the result of adding arrays")]
+  | Rarith_ret_float (_, r, s) ->
+      let rec find_last reason =
+        match reason with
+        | Rarith_ret_float (_, r, _) -> find_last r
+        | r -> r in
+      let r_last = find_last r in
+      [(p, prefix ^ " because this is the result of an arithmetic operation with a float as the "
+        ^ arg_pos_str s ^ " argument.")]
+        @ (to_string "Here is why I think the argument is a float: this is a float" r_last)
+  | Rarith_ret_num   (_, r, s) ->
+      let rec find_last reason =
+        match reason with
+        | Rarith_ret_num (_, r, _) -> find_last r
+        | r -> r in
+      let r_last = find_last r in
+      [(p, prefix ^ " because this is the result of an arithmetic operation with a num as the "
+        ^ arg_pos_str s ^ " argument, and no floats.")]
+        @ (to_string "Here is why I think the argument is a num: this is a num" r_last)
+  | Rarith_ret_int   _ -> [(p, prefix ^ " because this is the result of an integer arithmetic \
+    operation")]
+  | Rsum_dynamic     _ -> [(p, prefix ^ " because this is the sum of two arguments typed dynamic")]
+  | Rbitwise_dynamic _ -> [(p, prefix ^ " because this is the result of a bitwise operation with \
+    all arguments typed dynamic")]
+  | Rincdec_dynamic  _ -> [(p, prefix ^ " because this is the result of an increment/decrement of \
+    an argument typed dynamic")]
   | Rstring2         _ -> [(p, prefix ^ " because this is used in a string")]
   | Rcomp            _ -> [(p, prefix ^ " because this is the result of a comparison")]
   | Rconcat          _ -> [(p, prefix ^ " because this is used in a string concatenation")]
@@ -110,13 +168,14 @@ let rec to_string prefix r =
   | Rbitwise_ret     _ -> [(p, prefix ^ " because this is the result of a bitwise operation")]
   | Rstmt            _ -> [(p, prefix ^ " because this is a statement")]
   | Rno_return       _ -> [(p, prefix ^ " because this function implicitly returns void")]
-  | Rno_return_async _ -> [(p, prefix ^ " because this async function implicitly returns Awaitable<void>")]
+  | Rno_return_async _ -> [(p, prefix ^ " because this async function implicitly returns \
+    Awaitable<void>")]
   | Rret_fun_kind    (_, kind) ->
-    [(p, match kind with
-      | Ast.FAsyncGenerator -> prefix ^ " (result of 'async function' containing a 'yield')"
-      | Ast.FGenerator -> prefix ^ " (result of function containing a 'yield')"
-      | Ast.FAsync -> prefix ^ " (result of 'async function')"
-      | Ast.FSync -> prefix)]
+      [(p, match kind with
+        | Ast.FAsyncGenerator -> prefix ^ " (result of 'async function' containing a 'yield')"
+        | Ast.FGenerator -> prefix ^ " (result of function containing a 'yield')"
+        | Ast.FAsync -> prefix ^ " (result of 'async function')"
+        | Ast.FCoroutine | Ast.FSync -> prefix)]
   | Rhint            _ -> [(p, prefix)]
   | Rnull_check      _ -> [(p, prefix ^ " because this was checked to see if the value was null")]
   | Rnot_in_cstr     _ -> [(p, prefix ^ " because it is not always defined in __construct")]
@@ -127,10 +186,13 @@ let rec to_string prefix r =
   | Rret_div         _ -> [(p, prefix ^ " because it is the result of a division (/)")]
   | Ryield_gen       _ -> [(p, prefix ^ " (result of function with 'yield' in the body)")]
   | Ryield_asyncgen  _ -> [(p, prefix ^ " (result of 'async function' with 'yield' in the body)")]
-  | Ryield_asyncnull _ -> [(p, prefix ^ " because \"yield x\" is equivalent to \"yield null => x\" in an async function")]
-  | Ryield_send      _ -> [(p, prefix ^ " ($generator->send() can always send a null back to a \"yield\")")]
+  | Ryield_asyncnull _ -> [(p, prefix ^ " because \"yield x\" is equivalent to \"yield null => x\" \
+    in an async function")]
+  | Ryield_send      _ -> [(p, prefix ^ " ($generator->send() can always send a null back to a \
+    \"yield\")")]
   | Rvar_param       _ -> [(p, prefix ^ " (variadic argument)")]
   | Runpack_param    _ -> [(p, prefix ^ " (it is unpacked with '...')")]
+  | Rinout_param     _ -> [(p, prefix ^ " (inout parameter)")]
   | Rnullsafe_op     _ -> [(p, prefix ^ " (use of ?-> operator)")]
   | Rcoerced     (_, p2, s)  ->
       [
@@ -178,7 +240,7 @@ let rec to_string prefix r =
         else
           "  resulting from expanding a type constant as follows:\n    " in
       (to_string prefix r_orig) @
-      (to_string (expand_prefix^String.concat " -> " expansions) r_expanded)
+      (to_string (expand_prefix^String.concat ~sep:" -> " expansions) r_expanded)
   | Rexpr_dep_type (r, p, e) ->
       (to_string prefix r) @ [p, "  "^expr_dep_type_reason_string e]
   | Rtconst_no_cstr (_, n) ->
@@ -187,9 +249,45 @@ let rec to_string prefix r =
   | Rused_as_shape _ ->
       [(p, prefix ^ " because it is used as shape-like array here")]
   | Rpredicated (p, f) ->
-      [(p, prefix ^ " from the condition on the predicate " ^ f)]
+      [(p, prefix ^ " from the argument to this "^ f ^" test")]
   | Rinstanceof (p,s) ->
       [(p, prefix ^ " from this instanceof test matching " ^ s)]
+  | Ris p ->
+    [(p, prefix ^ " from this is expression test")]
+  | Ras p ->
+    [(p, prefix ^ " from this \"as\" assertion")]
+  | Rfinal_property _ ->
+      [(p, prefix ^ " because properties cannot be declared final")]
+  | Rvarray_or_darray_key _ ->
+      [(
+        p,
+        "This is varray_or_darray, which requires arraykey-typed keys when \
+        used with an array (used like a hashtable)"
+      )]
+  | Rusing p ->
+    [(p, prefix ^ " because it was assigned in a 'using' clause")]
+  | Rdynamic_prop p ->
+    [(p, prefix ^ ", the result of accessing a property of a dynamic type")]
+  | Rdynamic_call p ->
+    [(p, prefix ^ ", the result of calling a dynamic type as a function")]
+  | Ridx_dict _ -> [(p, prefix ^
+    " because only array keys can be used to index into a Map, dict, darray, Set, or keyset")]
+  | Rmissing_optional_field (p, name) ->
+    [(p, prefix ^ " because the field '" ^ name ^ "' may be set to any type in this shape")]
+  | Rcontravariant_generic (r_orig, class_name) ->
+    (to_string prefix r_orig) @
+    [(p, "Considering that this type argument is contravariant with respect to " ^ class_name)]
+  | Rinvariant_generic (r_orig, class_name) ->
+    (to_string prefix r_orig) @
+    [(p, "Considering that this type argument is invariant with respect to " ^ class_name)]
+  | Rregex _ ->
+    [(p, prefix ^ " resulting from this regex pattern")]
+  | Rlambda_use p ->
+    [(p, prefix ^ " because the lambda function was used here")]
+  | Rimplicit_upper_bound (_, cstr) ->
+    [(p, prefix ^ " arising from an implicit 'as " ^ cstr ^ "' constraint on this type")]
+  | Rnull p ->
+    [(p, Printf.sprintf "%s (null has type void)" prefix)]
 
 and to_pos = function
   | Rnone     -> Pos.none
@@ -202,8 +300,8 @@ and to_pos = function
   | Rasyncforeach p -> p
   | Raccess   p -> p
   | Rarith       p -> p
-  | Rarith_ret   p -> p
-  | Rarray_plus_ret p -> p
+  | Rarith_ret p -> p
+  | Rsum_dynamic p -> p
   | Rstring2     p -> p
   | Rcomp        p -> p
   | Rconcat      p -> p
@@ -237,6 +335,7 @@ and to_pos = function
   | Rmap_append p -> p
   | Rvar_param p -> p
   | Runpack_param p -> p
+  | Rinout_param p -> p
   | Rinstantiate (_, _, r) -> to_pos r
   | Rarray_filter (p, _) -> p
   | Rtype_access (r, _, _) -> to_pos r
@@ -247,6 +346,27 @@ and to_pos = function
   | Rused_as_shape p -> p
   | Rpredicated (p, _) -> p
   | Rinstanceof (p, _) -> p
+  | Ris p -> p
+  | Ras p -> p
+  | Rvarray_or_darray_key p
+  | Rfinal_property p -> p
+  | Rusing p -> p
+  | Rdynamic_prop p -> p
+  | Rdynamic_call p -> p
+  | Ridx_dict p -> p
+  | Rmissing_optional_field (p, _) -> p
+  | Rcontravariant_generic (r, _) -> to_pos r
+  | Rinvariant_generic (r, _) -> to_pos r
+  | Rregex p -> p
+  | Rlambda_use p -> p
+  | Rimplicit_upper_bound (p, _) -> p
+  | Rarith_int p -> p
+  | Rarith_ret_float (p, _, _) -> p
+  | Rarith_ret_num (p, _, _) -> p
+  | Rarith_ret_int p -> p
+  | Rbitwise_dynamic p -> p
+  | Rincdec_dynamic p -> p
+  | Rnull p -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -276,10 +396,98 @@ and expr_dep_type_reason_string = function
       "where the class '"^(strip_ns c)^"' was referenced here via the keyword \
        'self'"
 
+let to_constructor_string r =
+match r with
+  | Rnone -> "Rnone"
+  | Rwitness _ -> "Rwitness"
+  | Ridx _ -> "Ridx"
+  | Ridx_vector _ -> "Ridx_vector"
+  | Rappend _ -> "Rappend"
+  | Rfield _ -> "Rfield"
+  | Rforeach _ -> "Rforeach"
+  | Rasyncforeach _ -> "Rasyncforeach"
+  | Raccess _ -> "Raccess"
+  | Rarith _ -> "Rarith"
+  | Rarith_ret _ -> "Rarith_ret"
+  | Rstring2 _ -> "Rstring2"
+  | Rcomp _ -> "Rcomp"
+  | Rconcat _ -> "Rconcat"
+  | Rconcat_ret _ -> "Rconcat_ret"
+  | Rlogic _ -> "Rlogic"
+  | Rlogic_ret _ -> "Rlogic_ret"
+  | Rbitwise _ -> "Rbitwise"
+  | Rbitwise_ret _ -> "Rbitwise_ret"
+  | Rstmt _ -> "Rstmt"
+  | Rno_return _ -> "Rno_return"
+  | Rno_return_async _ -> "Rno_return_async"
+  | Rret_fun_kind _ -> "Rret_fun_kind"
+  | Rhint _ -> "Rhint"
+  | Rnull_check _ -> "Rnull_check"
+  | Rnot_in_cstr _ -> "Rnot_in_cstr"
+  | Rthrow _ -> "Rthrow"
+  | Rplaceholder _ -> "Rplaceholder"
+  | Rattr _ -> "Rattr"
+  | Rxhp _ -> "Rxhp"
+  | Rret_div _ -> "Rret_div"
+  | Ryield_gen _ -> "Ryield_gen"
+  | Ryield_asyncgen _ -> "Ryield_asyncgen"
+  | Ryield_asyncnull _ -> "Ryield_asyncnull"
+  | Ryield_send _ -> "Ryield_send"
+  | Rlost_info _ -> "Rlost_info"
+  | Rcoerced _ -> "Rcoerced"
+  | Rformat _ -> "Rformat"
+  | Rclass_class _ -> "Rclass_class"
+  | Runknown_class _ -> "Runknown_class"
+  | Rdynamic_yield _ -> "Rdynamic_yield"
+  | Rmap_append _ -> "Rmap_append"
+  | Rvar_param _ -> "Rvar_param"
+  | Runpack_param _ -> "Runpack_param"
+  | Rinout_param _ -> "Rinout_param"
+  | Rinstantiate _ -> "Rinstantiate"
+  | Rarray_filter _ -> "Rarray_filter"
+  | Rtype_access _ -> "Rtype_access"
+  | Rexpr_dep_type _ -> "Rexpr_dep_type"
+  | Rnullsafe_op _ -> "Rnullsafe_op"
+  | Rtconst_no_cstr _ -> "Rtconst_no_cstr"
+  | Rused_as_map _ -> "Rused_as_map"
+  | Rused_as_shape _ -> "Rused_as_shape"
+  | Rpredicated _ -> "Rpredicated"
+  | Rinstanceof _ -> "Rinstanceof"
+  | Ris _ -> "Ris"
+  | Ras _ -> "Ras"
+  | Rfinal_property _ -> "Rfinal_property"
+  | Rvarray_or_darray_key _ -> "Rvarray_or_darray_key"
+  | Rusing _ -> "Rusing"
+  | Rdynamic_prop _ -> "Rdynamic_prop"
+  | Rdynamic_call _ -> "Rdynamic_call"
+  | Ridx_dict _ -> "Ridx_dict"
+  | Rmissing_optional_field _ -> "Rmissing_optional_field"
+  | Rcontravariant_generic _ -> "Rcontravariant_generic"
+  | Rinvariant_generic _ -> "Rinvariant_generic"
+  | Rregex _ -> "Rregex"
+  | Rlambda_use _ -> "Rlambda_use"
+  | Rimplicit_upper_bound _ -> "Rimplicit_upper_bound"
+  | Rarith_int _ -> "Rarith_int"
+  | Rarith_ret_num _ -> "Rarith_ret_num"
+  | Rarith_ret_float _ -> "Rarith_ret_float"
+  | Rarith_ret_int _ -> "Rarith_ret_int"
+  | Rsum_dynamic _ -> "Rsum_dynamic"
+  | Rbitwise_dynamic _ -> "Rbitwise_dynamic"
+  | Rincdec_dynamic _ -> "Rincdec_dynamic"
+  | Rnull _ -> "Rnull"
+
+let is_rnull = function
+  | Rnull _ -> true
+  | _ -> false
+
+let pp fmt r =
+  Format.pp_print_string fmt @@ to_constructor_string r
+
 type ureason =
   | URnone
   | URassign
   | URassign_branch
+  | URassign_inout
   | URhint
   | URreturn
   | URforeach
@@ -290,10 +498,13 @@ type ureason =
   | URif
   | URawait
   | URyield
+  | URyield_from
   (* Name of XHP class, Name of XHP attribute *)
   | URxhp of string * string
+  | URxhp_spread
   | URindex of string
   | URparam
+  | URparam_inout
   | URarray_value
   | URarray_key
   | URtuple_access
@@ -306,6 +517,9 @@ type ureason =
   | URtypeconst_cstr
   | URsubsume_tconst_cstr
   | URsubsume_tconst_assign
+  | URfinal_property
+  | URclone
+  | URusing
 
 let index_array = URindex "array"
 let index_tuple = URindex "tuple"
@@ -317,6 +531,7 @@ let string_of_ureason = function
   | URhint -> "Wrong type hint"
   | URassign -> "Invalid assignment"
   | URassign_branch -> "Invalid assignment in this branch"
+  | URassign_inout -> "Invalid assignment to an inout parameter"
   | URforeach -> "Invalid foreach"
   | URthrow -> "Invalid exception"
   | URvector -> "Some elements in this Vector are incompatible"
@@ -325,10 +540,13 @@ let string_of_ureason = function
   | URif -> "The two branches of ? must have the same type"
   | URawait -> "await can only operate on an Awaitable"
   | URyield -> "Invalid yield"
+  | URyield_from -> "Invalid yield from"
   | URxhp (cls, attr) ->
       "Invalid xhp value for attribute " ^ attr ^ " in " ^ (strip_ns cls)
+  | URxhp_spread -> "The attribute spread operator cannot be called on non-XHP"
   | URindex s -> "Invalid index type for this " ^ s
   | URparam -> "Invalid argument"
+  | URparam_inout -> "Invalid argument to an inout parameter"
   | URarray_value -> "Incompatible field values"
   | URarray_key -> "Incompatible array keys"
   | URtuple_access ->
@@ -350,6 +568,10 @@ let string_of_ureason = function
      "The constraint on this type constant is inconsistent with its parent"
   | URsubsume_tconst_assign ->
      "The assigned type of this type constant is inconsistent with its parent"
+  | URfinal_property ->
+      "Property cannot be declared final"
+  | URclone -> "Clone cannot be called on non-object"
+  | URusing -> "Using cannot be used on non-disposable expression"
 
 let compare r1 r2 =
   let get_pri = function
@@ -369,4 +591,4 @@ let none = Rnone
 
 let explain_generic_constraint p_inst reason name error =
   let pos = to_pos reason in
-  Errors.explain_constraint p_inst pos name error
+  Errors.explain_constraint ~use_pos:p_inst ~definition_pos:pos ~param_name:name error

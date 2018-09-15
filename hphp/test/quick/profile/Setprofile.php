@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function pure_function($a) {
   return 7;

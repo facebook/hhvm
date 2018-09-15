@@ -19,10 +19,6 @@
 
 #include <set>
 
-#if defined(__CYGWIN__) && defined(WIN32)
-#undef WIN32
-#endif
-
 #include <curl/curl.h>
 #include <time.h>
 
@@ -60,6 +56,8 @@ public:
   static void StartRequest(const char *url, const char *clientIP,
                            const char *vhost);
   static void SetThreadMode(ThreadMode mode);
+  static ThreadMode GetThreadMode();
+  static const char* ThreadModeString(ThreadMode mode);
   static void ReportStatus(std::string& out, Writer::Format format);
 
   static void SetServerHealthLevel(HealthLevel new_health_level);
@@ -90,7 +88,7 @@ private:
 
   static Mutex s_lock;
   static std::vector<ServerStats*> s_loggers;
-  static DECLARE_THREAD_LOCAL_NO_CHECK(ServerStats, s_logger);
+  static THREAD_LOCAL_NO_CHECK(ServerStats, s_logger);
 
   using CounterMap = std::unordered_map<std::string, int64_t>;
 

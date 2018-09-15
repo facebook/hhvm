@@ -15,5 +15,9 @@ class d2 extends c2 {
     c2::foo();
   }
 }
+
+<<__EntryPoint>>
+function main_1889() {
 $obj = new d2;
 $obj->test1a();
+}

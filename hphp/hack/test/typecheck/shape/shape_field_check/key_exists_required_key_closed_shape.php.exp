@@ -1,0 +1,4 @@
+File "key_exists_required_key_closed_shape.php", line 5, characters 10-35:
+This Shapes::keyExists() check is always true (Typing[4249])
+File "key_exists_required_key_closed_shape.php", line 4, characters 21-22:
+The field 'x' exists because of this definition

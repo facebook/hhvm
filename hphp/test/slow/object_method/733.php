@@ -20,4 +20,8 @@ function foo() {
   $obj->privateData = 2;
   $obj = new Base();
 }
+
+<<__EntryPoint>>
+function main_733() {
 foo();
+}

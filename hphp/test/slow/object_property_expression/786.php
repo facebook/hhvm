@@ -13,7 +13,11 @@ class C1 {
   }
   private $_p = array();
 }
+
+<<__EntryPoint>>
+function main_786() {
 $c = new C1();
 $c->a = 1;
 $c->a .= 1;
 print $c->a;
+}

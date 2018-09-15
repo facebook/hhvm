@@ -9,6 +9,10 @@ class A {
  class B extends A {
  static public $foo;
 }
- var_dump(B::$foo);
+
+ <<__EntryPoint>>
+function main_673() {
+var_dump(B::$foo);
  B::$foo = 123;
  A::foo();
+}

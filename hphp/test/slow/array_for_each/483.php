@@ -7,8 +7,12 @@ function g10() {
     echo "val=$v\n";
     if ($b && $v == 1) {
       $b = false;
-      array_unshift($arr, 4);
+      array_unshift(&$arr, 4);
     }
   }
 }
+
+<<__EntryPoint>>
+function main_483() {
 g10();
+}

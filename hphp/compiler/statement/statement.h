@@ -31,7 +31,6 @@
 #define STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(kindOf)                  \
   scope, labelScope, r, Statement::KindOf##kindOf
 #define DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS                        \
-  void analyzeProgram(AnalysisResultPtr ar) override;                   \
   StatementPtr clone() override;                                        \
   void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) override;
 #define DECLARE_STATEMENT_VIRTUAL_FUNCTIONS                             \
@@ -59,7 +58,7 @@ public:
   static const char* nameOfKind(Construct::KindOf);
 
 protected:
-  Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS);
+  explicit Statement(STATEMENT_CONSTRUCTOR_BASE_PARAMETERS);
 
 public:
   /**
@@ -80,16 +79,11 @@ public:
  /**
    * Called before type inference.
    */
-  virtual StatementPtr preOptimize(AnalysisResultConstPtr ar) {
+  virtual StatementPtr preOptimize(AnalysisResultConstRawPtr /*ar*/) {
     return StatementPtr();
   }
 
   bool hasReachableLabel() const;
-
-  virtual bool hasDecl() const { return false; }
-  virtual bool hasImpl() const { return hasEffect(); }
-  virtual bool hasBody() const { return true;}
-  virtual bool hasRetExp() const { return false; }
 
   virtual StatementPtr clone() {
     assert(false);
@@ -98,7 +92,8 @@ public:
 
   virtual int getRecursiveCount() const { return 1; }
 
-  LabelScopePtr getLabelScope() { return m_labelScope; }
+  LabelScopePtr      getLabelScope()       { return m_labelScope; }
+  LabelScopeConstPtr getLabelScope() const { return m_labelScope; }
   void setLabelScope(LabelScopePtr labelScope) { m_labelScope = labelScope; }
 
 protected:

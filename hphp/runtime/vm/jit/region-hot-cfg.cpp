@@ -93,12 +93,12 @@ private:
     Trace::Indent indent;
 
     auto sk = profRegion.blocks().back()->last();
-    assert(sk.op() == OpSwitch);
+    assertx(sk.op() == OpSwitch);
     TargetProfile<SwitchProfile> profile(tid,
                                          TransKind::Optimize,
                                          sk.offset(),
                                          s_switchProfile.get());
-    assert(!profile.profiling());
+    assertx(!profile.profiling());
     if (!profile.optimizing()) {
       // We don't have profile data for this Switch, most likely because it saw
       // some weird input type during profiling.
@@ -122,7 +122,7 @@ private:
     // kMinSwitchPercent % of total profiling hits.
     uint32_t includedCases = 0;
     uint32_t includedHits = 0;
-    std::unordered_set<SrcKey, SrcKey::Hasher> allowedSks;
+    jit::fast_set<SrcKey, SrcKey::Hasher> allowedSks;
     for (auto const& item : data) {
       // We always have bounds checks for the default, so it doesn't count
       // against the case limit.

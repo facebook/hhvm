@@ -1,0 +1,2 @@
+
+Fatal error: Parameters marked inout must be contained in locals, vecs, dicts, keysets, and arrays in %s/bad-call-13.php on line 4

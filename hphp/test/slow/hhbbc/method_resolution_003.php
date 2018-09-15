@@ -26,4 +26,8 @@ function main() {
   var_dump($y->heh($y));
 }
 
+
+<<__EntryPoint>>
+function main_method_resolution_003() {
 main();
+}

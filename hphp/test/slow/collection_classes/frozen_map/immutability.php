@@ -40,5 +40,9 @@ function nomutatorfuncs() {
   var_dump(method_exists($fm, 'remove'));
 }
 
+
+<<__EntryPoint>>
+function main_immutability() {
 main();
 nomutatorfuncs();
+}

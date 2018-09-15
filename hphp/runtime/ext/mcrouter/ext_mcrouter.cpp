@@ -2,6 +2,7 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 
@@ -10,9 +11,9 @@
 #include <folly/Memory.h>
 #include <folly/Range.h>
 
+#include "mcrouter/config.h" // @nolint
 #include "mcrouter/McrouterClient.h" // @nolint
 #include "mcrouter/McrouterInstance.h" // @nolint
-#include "mcrouter/config.h" // @nolint
 #include "mcrouter/lib/McOperation.h" // @nolint
 #include "mcrouter/lib/McResUtil.h" // @nolint
 #include "mcrouter/lib/network/CarbonMessageList.h" // @nolint
@@ -46,11 +47,11 @@ static void mcr_throwException(const std::string& message,
                                const std::string& key = "") {
   if (!c_MCRouterException) {
     c_MCRouterException = Unit::lookupClass(s_MCRouterException.get());
-    assert(c_MCRouterException);
+    assertx(c_MCRouterException);
   }
 
   Object obj{c_MCRouterException};
-  tvRefcountedDecRef(
+  tvDecRefGen(
     g_context->invokeFunc(c_MCRouterException->getCtor(),
       make_packed_array(message, (int64_t)op, (int64_t)result, key),
       obj.get())
@@ -66,7 +67,7 @@ static void mcr_throwOptionException(
   if (!c_MCRouterOptionException) {
     c_MCRouterOptionException =
       Unit::lookupClass(s_MCRouterOptionException.get());
-    assert(c_MCRouterOptionException);
+    assertx(c_MCRouterOptionException);
   }
 
   Array errorArray = Array::Create();
@@ -79,7 +80,7 @@ static void mcr_throwOptionException(
   }
 
   Object obj{c_MCRouterOptionException};
-  tvRefcountedDecRef(
+  tvDecRefGen(
     g_context->invokeFunc(
       c_MCRouterOptionException->getCtor(),
       make_packed_array(errorArray),
@@ -93,7 +94,7 @@ namespace {
 
 // Helpers for retrieving 'delta' field
 template <class Reply>
-uint64_t getDelta(const Reply& reply) {
+uint64_t getDelta(const Reply& /*reply*/) {
   mcr_throwException(
       "getDelta expected arithmetic reply type",
       mc::McOperation<mc::OpFromType<Reply, mc::ReplyOpMapping>::value>::mc_op);
@@ -107,7 +108,7 @@ uint64_t getDelta(const mc::McDecrReply& reply) {
 
 // Helpers for retrieving 'casToken' field
 template <class Reply>
-uint64_t getCasToken(const Reply& reply) {
+uint64_t getCasToken(const Reply& /*reply*/) {
   mcr_throwException(
       "getCasToken expected reply type McGetsReply",
       mc::McOperation<mc::OpFromType<Reply, mc::ReplyOpMapping>::value>::mc_op);
@@ -353,7 +354,7 @@ Object MCRouter::issue(std::unique_ptr<const Request> request) {
   try {
     return Object{ev->getWaitHandle()};
   } catch (...) {
-    assert(false);
+    assertx(false);
     ev->abandon();
     throw;
   }
@@ -369,7 +370,7 @@ static void HHVM_METHOD(MCRouter, __construct,
 template <class M>
 static Object mcr_str(ObjectData* this_, const String& key) {
   return Native::data<MCRouter>(this_)->issue(
-      folly::make_unique<const M>(folly::StringPiece(key.c_str(), key.size())));
+      std::make_unique<const M>(folly::StringPiece(key.c_str(), key.size())));
 }
 
 template <class Request>
@@ -377,7 +378,7 @@ static Object mcr_set(ObjectData* this_,
                       const String& key, const String& val,
                       int64_t flags, int64_t expiration) {
   auto request =
-      folly::make_unique<Request>(folly::StringPiece(key.c_str(), key.size()));
+      std::make_unique<Request>(folly::StringPiece(key.c_str(), key.size()));
   request->value() = folly::IOBuf(
       folly::IOBuf::COPY_BUFFER, folly::StringPiece(val.c_str(), val.size()));
   request->flags() = flags;
@@ -390,7 +391,7 @@ template <class Request>
 static Object mcr_aprepend(ObjectData* this_,
                            const String& key, const String& val) {
   auto request =
-      folly::make_unique<Request>(folly::StringPiece(key.c_str(), key.size()));
+      std::make_unique<Request>(folly::StringPiece(key.c_str(), key.size()));
   request->value() = folly::IOBuf(
       folly::IOBuf::COPY_BUFFER, folly::StringPiece(val.c_str(), val.size()));
 
@@ -401,7 +402,7 @@ template <class Request>
 static Object mcr_str_delta(ObjectData* this_,
                             const String& key, int64_t val) {
   auto request =
-      folly::make_unique<Request>(folly::StringPiece(key.c_str(), key.size()));
+      std::make_unique<Request>(folly::StringPiece(key.c_str(), key.size()));
   request->delta() = val;
 
   return Native::data<MCRouter>(this_)->issue<Request>(std::move(request));
@@ -410,7 +411,7 @@ static Object mcr_str_delta(ObjectData* this_,
 static Object mcr_flushall(ObjectData* this_, int64_t val) {
   using Request = mc::McFlushAllRequest;
 
-  auto request = folly::make_unique<Request>("unused");
+  auto request = std::make_unique<Request>("unused");
   request->delay() = val;
 
   return Native::data<MCRouter>(this_)->issue<Request>(std::move(request));
@@ -418,7 +419,7 @@ static Object mcr_flushall(ObjectData* this_, int64_t val) {
 
 static Object mcr_version(ObjectData* this_) {
   return Native::data<MCRouter>(this_)->issue(
-      folly::make_unique<const mc::McVersionRequest>("unused"));
+      std::make_unique<const mc::McVersionRequest>("unused"));
 }
 
 static Object HHVM_METHOD(MCRouter, cas,
@@ -428,7 +429,7 @@ static Object HHVM_METHOD(MCRouter, cas,
                           int64_t expiration /*=0*/) {
   using Request = mc::McCasRequest;
 
-  auto request = folly::make_unique<Request>(
+  auto request = std::make_unique<Request>(
       folly::StringPiece(key.c_str(), key.size()));
   request->value() = folly::IOBuf(
       folly::IOBuf::COPY_BUFFER, folly::StringPiece(val.c_str(), val.size()));

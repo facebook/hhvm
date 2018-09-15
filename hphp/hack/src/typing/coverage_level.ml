@@ -2,13 +2,13 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Core
+open Core_kernel
+open Ide_api_types
 open Typing_defs
 open Utils
 
@@ -20,23 +20,35 @@ let sample_rate = 0
 let display_limit = 10
 let samples_limit = 5
 
-type level =
-  | Unchecked (* Completely unchecked code, i.e. Tanys *)
-  | Partial   (* Partially checked code, e.g. array, Awaitable<_> with no
-                 concrete type parameters *)
-  | Checked   (* Completely checked code *)
-
-type result = ((int * int) * level) list
-
 let string_of_level = function
   | Checked   -> "checked"
   | Partial   -> "partial"
   | Unchecked -> "unchecked"
 
 module CLMap = MyMap.Make (struct
-  type t = level
+  type t = coverage_level
   let compare x y = Pervasives.compare x y
 end)
+
+type checked_stats = {
+  unchecked : int;
+  partial : int;
+  checked : int;
+  }
+
+(* result is an association list from absolute position in the code file to the
+ * coverage level of the expression at that position, paired with a count of
+ * the total instances of each coverage level.
+ * Note in usage that the list does not contain every
+ * instance, only those which do not themselves contain worse type-level
+ * expressions as subexpressions.
+ * This way when it is used to show typing information,
+ * large chunks of code that are poorly typed do not obscure
+ * the root cause of their poor typing, which would be some poorly
+ * typed subexpression.
+ *)
+type result =
+  (Pos.absolute * coverage_level) list * checked_stats
 
 type pos_stats_entry = {
   (* How many times this reason position has occured. *)
@@ -64,16 +76,16 @@ let empty_level_stats_entry = {
 }
 
 let empty_counter =
-  let m = CLMap.empty in
-  let m = CLMap.add Checked empty_level_stats_entry m in
-  let m = CLMap.add Partial empty_level_stats_entry m in
-  CLMap.add Unchecked empty_level_stats_entry m
+  CLMap.empty
+  |> CLMap.add Checked empty_level_stats_entry
+  |> CLMap.add Partial empty_level_stats_entry
+  |> CLMap.add Unchecked empty_level_stats_entry
 
 (* This is highly unscientific and not really uniform sampling, but for
  * debugging purposes should be enough. *)
 let merge_pos_stats_samples l1 l2 =
   let rec pick_n acc n m l =
-    if n == 0 then acc
+    if n = 0 then acc
     else if m <= n then l @ acc else match l with
       | [] -> acc
       | h::tl ->
@@ -87,63 +99,7 @@ let add_sample_pos p samples =
 let incr_reason_stats r p reason_stats =
   if sample_rate = 0 || Random.int sample_rate <> 0 then reason_stats else
   let reason_pos = Reason.to_pos r in
-  let string_key =
-    let open Reason in match r with
-    | Rnone -> "Rnone"
-    | Rwitness _ -> "Rwitness"
-    | Ridx _ -> "Ridx"
-    | Ridx_vector _ -> "Ridx_vector"
-    | Rappend _ -> "Rappend"
-    | Rfield _ -> "Rfield"
-    | Rforeach _ -> "Rforeach"
-    | Rasyncforeach _ -> "Rasyncforeach"
-    | Raccess _ -> "Raccess"
-    | Rarith _ -> "Rarith"
-    | Rarith_ret _ -> "Rarith_ret"
-    | Rarray_plus_ret _ -> "Rarray_plus_ret"
-    | Rstring2 _ -> "Rstring2"
-    | Rcomp _ -> "Rcomp"
-    | Rconcat _ -> "Rconcat"
-    | Rconcat_ret _ -> "Rconcat_ret"
-    | Rlogic _ -> "Rlogic"
-    | Rlogic_ret _ -> "Rlogic_ret"
-    | Rbitwise _ -> "Rbitwise"
-    | Rbitwise_ret _ -> "Rbitwise_ret"
-    | Rstmt _ -> "Rstmt"
-    | Rno_return _ -> "Rno_return"
-    | Rno_return_async _ -> "Rno_return_async"
-    | Rret_fun_kind _ -> "Rret_fun_kind"
-    | Rhint _ -> "Rhint"
-    | Rnull_check _ -> "Rnull_check"
-    | Rnot_in_cstr _ -> "Rnot_in_cstr"
-    | Rthrow _ -> "Rthrow"
-    | Rplaceholder _ -> "Rplaceholder"
-    | Rattr _ -> "Rattr"
-    | Rxhp _ -> "Rxhp"
-    | Rret_div _ -> "Rret_div"
-    | Ryield_gen _ -> "Ryield_gen"
-    | Ryield_asyncgen _ -> "Ryield_asyncgen"
-    | Ryield_asyncnull _ -> "Ryield_asyncnull"
-    | Ryield_send _ -> "Ryield_send"
-    | Rlost_info _ -> "Rlost_info"
-    | Rcoerced _ -> "Rcoerced"
-    | Rformat _ -> "Rformat"
-    | Rclass_class _ -> "Rclass_class"
-    | Runknown_class _ -> "Runknown_class"
-    | Rdynamic_yield _ -> "Rdynamic_yield"
-    | Rmap_append _ -> "Rmap_append"
-    | Rvar_param _ -> "Rvar_param"
-    | Runpack_param _ -> "Runpack_param"
-    | Rinstantiate _ -> "Rinstantiate"
-    | Rarray_filter _ -> "Rarray_filter"
-    | Rtype_access _ -> "Rtype_access"
-    | Rexpr_dep_type _ -> "Rexpr_dep_type"
-    | Rnullsafe_op _ -> "Rnullsafe_op"
-    | Rtconst_no_cstr _ -> "Rtconst_no_cstr"
-    | Rused_as_map _ -> "Rused_as_map"
-    | Rused_as_shape _ -> "Rused_as_shape"
-    | Rpredicated _ -> "Rpredicated"
-    | Rinstanceof _ -> "Rinstanceof" in
+  let string_key = Reason.to_constructor_string r in
   let pos_stats_map = match SMap.get string_key reason_stats with
     | Some x -> x
     | None -> Pos.Map.empty in
@@ -201,7 +157,7 @@ type 'a trie =
   | Node of 'a * 'a trie SMap.t
 
 let rec is_tany ty = match ty with
-  | r, Tany -> Some r
+  | r, (Tany | Terr) -> Some r
   | _, Tunresolved [] -> None
   | _, Tunresolved (h::tl) -> begin match is_tany h with
     | Some r when
@@ -210,21 +166,93 @@ let rec is_tany ty = match ty with
     end
   | _ -> None
 
-let level_of_type fixme_map (p, ty) =
-  let r, lvl = match ty with
-    | r, Tobject -> r, Partial
-    | r, _ -> match is_tany ty with
-      | Some r -> r, Unchecked
-      | None -> match TUtils.HasTany.check_why ty with
-        | Some r -> r, Partial
-        | _ -> r, Checked in
-  let line = Pos.line p in
-  (* If the line has a HH_FIXME, then mark it as (at most) partially checked *)
-  match lvl with
-  | Checked when IMap.mem line fixme_map ->
-      r, Partial
-  | Unchecked | Partial | Checked -> r, lvl
+let level_of_type fixme_map (pos, ty) =
+  match ty with
+  | _, Tobject -> Partial
+  | _, _ -> match is_tany ty with
+    | Some _ -> Unchecked
+    | None -> match TUtils.HasTany.check_why ty with
+      | Some _ -> Partial
+      | _ ->
+      (* If the line has a HH_FIXME, then mark it as (at most) partially checked *)
+        begin
+          if IMap.mem (Pos.line pos) fixme_map
+          then Partial
+          else Checked
+        end
 
-let level_of_type_mapper fn =
-  let fixme_map = Fixmes.HH_FIXMES.find_unsafe fn in
-  level_of_type fixme_map
+class level_getter fixme_map =
+  object
+    inherit [(coverage_level Pos.Map.t) * checked_stats]
+      Tast_visitor.reduce as super
+    method zero =
+      Pos.Map.empty,
+      {
+        checked = 0;
+        partial = 0;
+        unchecked = 0;
+      }
+    method plus (pmap1, cmap1) (pmap2, cmap2) =
+      Pos.Map.union pmap1 pmap2,
+      {
+        checked = cmap1.checked + cmap2.checked;
+        partial = cmap1.partial + cmap2.partial;
+        unchecked = cmap1.unchecked + cmap2.unchecked;
+      }
+    method! on_expr env expr =
+      (* This method performs the typical reduce operations on subsexpressions
+       * yielding a map from positions to coverage levels of the expressions
+       * at those positions, paired with a count of coverage level instances.
+       * The map contains those positions we wish to track to show typing info.
+       * Then it looks at the expression it is at and determines if it
+       * something that should be tracked or not. Because
+       * we want typing information to be informative, it only tracks
+       * expressions that do not themselves contain worse-typed subexpressions.
+       * This way large chunks of code that are poorly typed do not obscure
+       * the root cause of their poor typing, which would be some poorly
+       * typed subexpression. The count is then always incremented.
+       *)
+       let pmap, cmap = super#on_expr env expr in
+      let (pos, ty), _ = expr in
+      let lvl = level_of_type fixme_map (pos, ty) in
+      let should_update_pmap =
+        match lvl with
+        | Checked ->
+            cmap.checked +
+            cmap.partial +
+            cmap.unchecked = 0
+        | Partial ->
+            cmap.partial +
+            cmap.unchecked = 0
+        | Unchecked ->
+            cmap.unchecked = 0
+      in
+      let new_pmap =
+        if should_update_pmap
+        then Pos.Map.add pos lvl pmap
+        else pmap
+      in
+      let new_cmap =
+        match lvl with
+        | Checked -> {cmap with checked = cmap.checked + 1}
+        | Partial -> {cmap with partial = cmap.partial + 1}
+        | Unchecked -> {cmap with unchecked = cmap.unchecked + 1}
+      in
+      new_pmap, new_cmap
+  end
+
+let get_levels tast check =
+  let lg = new level_getter (Fixmes.HH_FIXMES.find_unsafe check) in
+  let pmap, cmap = lg#go tast in
+  Pos.Map.fold (fun p ty xs ->
+    ((Pos.to_absolute p, ty)) :: xs) pmap []
+    , cmap
+
+let get_percent counts =
+  let nchecked = counts.checked in
+  let nunchecked = counts.unchecked in
+  let npartial = counts.partial in
+  let ntotal = nchecked + nunchecked + npartial in
+  if ntotal = 0
+  then 100
+  else ((nchecked * 100) + (npartial * 100)) / ntotal

@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/unit-emitter.h"
 
+#include "hphp/compiler/analysis/analysis_result.h"
+#include "hphp/compiler/builtin_symbols.h"
 #include "hphp/compiler/option.h"
 #include "hphp/parser/location.h"
 #include "hphp/system/systemlib.h"
@@ -26,10 +28,10 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/ext/std/ext_std_variable.h"
-#include "hphp/runtime/ext/xenon/ext_xenon.h"
 
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/disas.h"
@@ -45,6 +47,7 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/verifier/check.h"
 
+#include "hphp/util/logger.h"
 #include "hphp/util/md5.h"
 #include "hphp/util/read-only-arena.h"
 #include "hphp/util/trace.h"
@@ -52,6 +55,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <folly/Memory.h>
+#include <folly/FileUtil.h>
 
 #include <algorithm>
 #include <cstdio>
@@ -85,8 +89,9 @@ size_t hhbc_arena_capacity() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-UnitEmitter::UnitEmitter(const MD5& md5)
+UnitEmitter::UnitEmitter(const MD5& md5, const Native::FuncTable& nativeFuncs)
   : m_mainReturn(make_tv<KindOfUninit>())
+  , m_nativeFuncs(nativeFuncs)
   , m_md5(md5)
   , m_bc((unsigned char*)malloc(BCMaxInit))
   , m_bclen(0)
@@ -124,13 +129,24 @@ const StringData* UnitEmitter::lookupLitstr(Id id) const {
   if (isGlobalLitstrId(id)) {
     return LitstrTable::get().lookupLitstrId(decodeGlobalLitstrId(id));
   }
-  assert(id < m_litstrs.size());
+  assertx(id < m_litstrs.size());
   return m_litstrs[id];
 }
 
 const ArrayData* UnitEmitter::lookupArray(Id id) const {
-  assert(id < m_arrays.size());
+  assertx(id < m_arrays.size());
   return m_arrays[id];
+}
+
+const RepoAuthType::Array* UnitEmitter::lookupArrayType(Id id) const {
+  return RuntimeOption::RepoAuthoritative
+           ? globalArrayTypeTable().lookup(id)
+           : m_arrayTypeTable.lookup(id);
+}
+
+void UnitEmitter::repopulateArrayTypeTable(
+  const ArrayTypeTable::Builder& builder) {
+  m_arrayTypeTable.repopulate(builder);
 }
 
 Id UnitEmitter::mergeLitstr(const StringData* litstr) {
@@ -154,21 +170,12 @@ Id UnitEmitter::mergeUnitLitstr(const StringData* litstr) {
 }
 
 Id UnitEmitter::mergeArray(const ArrayData* a) {
-  auto key = ArrayData::GetScalarArrayKey(const_cast<ArrayData*>(a));
-  return mergeArray(a, key);
-}
-
-Id UnitEmitter::mergeArray(const ArrayData* a,
-                           const ArrayData::ScalarArrayKey& key) {
-  auto const it = m_array2id.find(key);
-  if (it != m_array2id.end()) {
-    return it->second;
+  assertx(a->isStatic());
+  auto const emplaced = m_array2id.emplace(a, static_cast<Id>(m_arrays.size()));
+  if (emplaced.second) {
+    m_arrays.push_back(a);
   }
-  auto sa = ArrayData::GetScalarArray(const_cast<ArrayData*>(a), key);
-  Id id = m_arrays.size();
-  m_arrays.push_back(sa);
-  m_array2id[key] = id;
-  return id;
+  return emplaced.first->second;
 }
 
 
@@ -176,8 +183,8 @@ Id UnitEmitter::mergeArray(const ArrayData* a,
 // FuncEmitters.
 
 void UnitEmitter::initMain(int line1, int line2) {
-  assert(m_fes.size() == 0);
-  StringData* name = makeStaticString("");
+  assertx(m_fes.size() == 0);
+  StringData* name = staticEmptyString();
   FuncEmitter* pseudomain = newFuncEmitter(name);
   Attr attrs = AttrMayUseVV;
   pseudomain->init(line1, line2, 0, attrs, false, name);
@@ -191,7 +198,6 @@ void UnitEmitter::addTrivialPseudoMain() {
   emitOp(OpRetC);
   mfe->maxStackCells = 1;
   mfe->finish(bcPos(), false);
-  recordFunction(mfe);
 
   TypedValue mainReturn;
   mainReturn.m_data.num = 1;
@@ -202,7 +208,7 @@ void UnitEmitter::addTrivialPseudoMain() {
 
 FuncEmitter* UnitEmitter::newFuncEmitter(const StringData* name) {
   // The pseudomain comes first.
-  assert(m_fes.size() > 0 || !strcmp(name->data(), ""));
+  assertx(m_fes.size() > 0 || !strcmp(name->data(), ""));
 
   FuncEmitter* fe = new FuncEmitter(*this, m_nextFuncSn++, m_fes.size(), name);
   m_fes.push_back(fe);
@@ -219,16 +225,12 @@ void UnitEmitter::appendTopEmitter(FuncEmitter* fe) {
   m_fes.push_back(fe);
 }
 
-void UnitEmitter::recordFunction(FuncEmitter* fe) {
-  m_feTab.push_back(std::make_pair(fe->past, fe));
-}
-
 Func* UnitEmitter::newFunc(const FuncEmitter* fe, Unit& unit,
                            const StringData* name, Attr attrs,
                            int numParams) {
-  auto f = new (Func::allocFuncMem(numParams)) Func(unit, name, attrs);
-  m_fMap[fe] = f;
-  return f;
+  auto const func = new (Func::allocFuncMem(numParams)) Func(unit, name, attrs);
+  if (unit.m_extended) unit.getExtended()->m_funcTable.push_back(func);
+  return func;
 }
 
 
@@ -298,6 +300,7 @@ Id UnitEmitter::addTypeAlias(const TypeAlias& td) {
 // Source locations.
 
 SourceLocTable UnitEmitter::createSourceLocTable() const {
+  assertx(m_sourceLocTab.size() != 0);
   SourceLocTable locations;
   for (size_t i = 0; i < m_sourceLocTab.size(); ++i) {
     Offset endOff = i < m_sourceLocTab.size() - 1
@@ -315,12 +318,21 @@ using SrcLoc = std::vector<std::pair<Offset, SourceLoc>>;
 /*
  * Create a LineTable from `srcLoc'.
  */
-LineTable createLineTable(SrcLoc& srcLoc, Offset bclen) {
+LineTable createLineTable(const SrcLoc& srcLoc, Offset bclen) {
   LineTable lines;
-  for (size_t i = 0; i < srcLoc.size(); ++i) {
-    Offset endOff = i < srcLoc.size() - 1 ? srcLoc[i + 1].first : bclen;
-    lines.push_back(LineEntry(endOff, srcLoc[i].second.line1));
+  if (srcLoc.empty()) {
+    return lines;
   }
+
+  auto prev = srcLoc.begin();
+  for (auto it = prev + 1; it != srcLoc.end(); ++it) {
+    if (prev->second.line1 != it->second.line1) {
+      lines.push_back(LineEntry(it->first, prev->second.line1));
+      prev = it;
+    }
+  }
+
+  lines.push_back(LineEntry(bclen, prev->second.line1));
   return lines;
 }
 
@@ -336,16 +348,16 @@ void UnitEmitter::recordSourceLocation(const Location::Range& sLoc,
   if (!m_sourceLocTab.empty()) {
     if (m_sourceLocTab.back().second == newLoc) {
       // Combine into the interval already at the back of the vector.
-      assert(start >= m_sourceLocTab.back().first);
+      assertx(start >= m_sourceLocTab.back().first);
       return;
     }
-    assert(m_sourceLocTab.back().first < start &&
+    assertx(m_sourceLocTab.back().first < start &&
            "source location offsets must be added to UnitEmitter in "
            "increasing order");
   } else {
     // First record added should be for bytecode offset zero or very rarely one
     // when the source starts with a label and a Nop is inserted.
-    assert(start == 0 || start == 1);
+    assertx(start == 0 || start == 1);
   }
   m_sourceLocTab.push_back(std::make_pair(start, newLoc));
 }
@@ -366,7 +378,7 @@ void UnitEmitter::pushMergeableInclude(Unit::MergeKind kind,
 }
 
 void UnitEmitter::insertMergeableInclude(int ix, Unit::MergeKind kind, Id id) {
-  assert(size_t(ix) <= m_mergeableStmts.size());
+  assertx(size_t(ix) <= m_mergeableStmts.size());
   m_mergeableStmts.insert(m_mergeableStmts.begin() + ix,
                           std::make_pair(kind, id));
   m_allClassesHoistable = false;
@@ -382,7 +394,7 @@ void UnitEmitter::pushMergeableDef(Unit::MergeKind kind,
 
 void UnitEmitter::insertMergeableDef(int ix, Unit::MergeKind kind,
                                      Id id, const TypedValue& tv) {
-  assert(size_t(ix) <= m_mergeableStmts.size());
+  assertx(size_t(ix) <= m_mergeableStmts.size());
   m_mergeableStmts.insert(m_mergeableStmts.begin() + ix,
                           std::make_pair(kind, m_mergeableValues.size()));
   m_mergeableValues.push_back(std::make_pair(id, tv));
@@ -396,7 +408,7 @@ void UnitEmitter::pushMergeableTypeAlias(Unit::MergeKind kind, const Id id) {
 
 void UnitEmitter::insertMergeableTypeAlias(int ix, Unit::MergeKind kind,
                                            const Id id) {
-  assert(size_t(ix) <= m_mergeableStmts.size());
+  assertx(size_t(ix) <= m_mergeableStmts.size());
   m_mergeableStmts.insert(m_mergeableStmts.begin() + ix,
                           std::make_pair(kind, id));
   m_allClassesHoistable = false;
@@ -444,12 +456,14 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
       urp.insertUnitLitstr[repoId].insert(txn, usn, i, m_litstrs[i]);
     }
     for (unsigned i = 0; i < m_arrays.size(); ++i) {
-      VariableSerializer vs(VariableSerializer::Type::Serialize);
       urp.insertUnitArray[repoId].insert(
         txn, usn, i,
-        vs.serializeValue(VarNR(m_arrays[i]), false /* limit */).toCppString()
+        internal_serialize(
+          VarNR(const_cast<ArrayData*>(m_arrays[i]))
+        ).toCppString()
       );
     }
+    urp.insertUnitArrayTypeTable[repoId].insert(txn, usn, m_arrayTypeTable);
     for (auto& fe : m_fes) {
       fe->commit(txn);
     }
@@ -502,8 +516,16 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
   }
 }
 
+ServiceData::ExportedTimeSeries* g_hhbc_size = ServiceData::createTimeSeries(
+  "vm.hhbc-size",
+  {ServiceData::StatsType::AVG,
+   ServiceData::StatsType::SUM,
+   ServiceData::StatsType::COUNT}
+);
+
 static const unsigned char*
 allocateBCRegion(const unsigned char* bc, size_t bclen) {
+  g_hhbc_size->addValue(bclen);
   if (RuntimeOption::RepoAuthoritative) {
     // In RepoAuthoritative, we assume we won't ever deallocate units
     // and that this is read-only, mostly cold data.  So we throw it
@@ -517,10 +539,60 @@ allocateBCRegion(const unsigned char* bc, size_t bclen) {
   return mem;
 }
 
-std::unique_ptr<Unit> UnitEmitter::create() {
+bool UnitEmitter::check(bool verbose) const {
+  return Verifier::checkUnit(
+    this,
+    verbose ? Verifier::kVerbose : Verifier::kStderr
+  );
+}
+
+std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   INC_TPC(unit_load);
-  auto u = folly::make_unique<Unit>();
-  u->m_repoId = m_repoId;
+
+  static const bool kVerify = debug || RuntimeOption::EvalVerify ||
+    RuntimeOption::EvalVerifyOnly || RuntimeOption::EvalFatalOnVerifyError;
+  static const bool kVerifyVerboseSystem =
+    getenv("HHVM_VERIFY_VERBOSE_SYSTEM");
+  static const bool kVerifyVerbose =
+    kVerifyVerboseSystem || getenv("HHVM_VERIFY_VERBOSE");
+
+  const bool isSystemLib =
+    boost::starts_with(m_filepath->data(), "/:systemlib");
+  const bool doVerify =
+    kVerify || boost::ends_with(m_filepath->data(), ".hhas");
+  if (doVerify) {
+    auto const verbose = isSystemLib ? kVerifyVerboseSystem : kVerifyVerbose;
+    if (!check(verbose)) {
+      if (!verbose) {
+        std::cerr << folly::format(
+          "Verification failed for unit {}. Re-run with "
+          "HHVM_VERIFY_VERBOSE{}=1 to see more details.\n",
+          m_filepath->data(), isSystemLib ? "_SYSTEM" : ""
+        );
+      }
+      if (!RuntimeOption::EvalVerifyOnly &&
+          RuntimeOption::EvalFatalOnVerifyError) {
+        return createFatalUnit(
+          const_cast<StringData*>(m_filepath),
+          m_md5,
+          FatalOp::Parse,
+          makeStaticString("A bytecode verification error was detected")
+        )->create(saveLineTable);
+      }
+    }
+    if (!isSystemLib && RuntimeOption::EvalVerifyOnly) {
+      std::fflush(stdout);
+      _Exit(0);
+    }
+  }
+
+  std::unique_ptr<Unit> u {
+    RuntimeOption::RepoAuthoritative && !RuntimeOption::SandboxMode &&
+      m_litstrs.empty() && m_arrayTypeTable.empty() ?
+    new Unit : new UnitExtended
+  };
+
+  u->m_repoId = saveLineTable ? RepoIdInvalid : m_repoId;
   u->m_sn = m_sn;
   u->m_bc = allocateBCRegion(m_bc, m_bclen);
   u->m_bclen = m_bclen;
@@ -529,25 +601,16 @@ std::unique_ptr<Unit> UnitEmitter::create() {
   u->m_mergeOnly = m_mergeOnly;
   u->m_isHHFile = m_isHHFile;
   u->m_useStrictTypes = m_useStrictTypes;
+  u->m_useStrictTypesForBuiltins = m_useStrictTypesForBuiltins;
   u->m_dirpath = makeStaticString(FileUtil::dirname(StrNR{m_filepath}));
   u->m_md5 = m_md5;
-  for (unsigned i = 0; i < m_litstrs.size(); ++i) {
-    NamedEntityPair np;
-    np.first = m_litstrs[i];
-    np.second = nullptr;
-    u->m_namedInfo.push_back(np);
-  }
-  u->m_arrays = [&]() -> std::vector<const ArrayData*> {
-    auto ret = std::vector<const ArrayData*>{};
-    for (unsigned i = 0; i < m_arrays.size(); ++i) {
-      ret.push_back(m_arrays[i]);
-    }
-    return ret;
-  }();
+  u->m_arrays = m_arrays;
   for (auto const& pce : m_pceVec) {
     u->m_preClasses.push_back(PreClassPtr(pce->create(*u)));
   }
   u->m_typeAliases = m_typeAliases;
+  u->m_metaData = m_metaData;
+  u->m_ICE = m_ICE;
 
   size_t ix = m_fes.size() + m_hoistablePceIdList.size();
   if (m_mergeOnly && !m_allClassesHoistable) {
@@ -575,26 +638,26 @@ std::unique_ptr<Unit> UnitEmitter::create() {
     ix += extra;
   }
   Unit::MergeInfo *mi = Unit::MergeInfo::alloc(ix);
-  u->m_mergeInfo = mi;
+  u->m_mergeInfo.store(mi, std::memory_order_relaxed);
   ix = 0;
   for (auto& fe : m_fes) {
-    Func* func = fe->create(*u);
+    auto const func = fe->create(*u);
     if (func->top()) {
       if (!mi->m_firstHoistableFunc) {
         mi->m_firstHoistableFunc = ix;
       }
     } else {
-      assert(!mi->m_firstHoistableFunc);
+      assertx(!mi->m_firstHoistableFunc);
     }
-    assert(ix == fe->id());
+    assertx(ix == fe->id());
     mi->mergeableObj(ix++) = func;
   }
-  assert(u->getMain(nullptr)->isPseudoMain());
+  assertx(u->getMain(nullptr)->isPseudoMain());
   if (!mi->m_firstHoistableFunc) {
     mi->m_firstHoistableFunc =  ix;
   }
   mi->m_firstHoistablePreClass = ix;
-  assert(m_fes.size());
+  assertx(m_fes.size());
   for (auto& id : m_hoistablePceIdList) {
     mi->mergeableObj(ix++) = u->m_preClasses[id].get();
   }
@@ -610,14 +673,14 @@ std::unique_ptr<Unit> UnitEmitter::create() {
             (void*)((intptr_t(mergeable.second) << 3) + (int)mergeable.first);
           break;
         case MergeKind::ReqDoc: {
-          assert(RuntimeOption::RepoAuthoritative);
+          assertx(RuntimeOption::RepoAuthoritative);
           void* name = u->lookupLitstrId(mergeable.second);
           mi->mergeableObj(ix++) = (char*)name + (int)mergeable.first;
           break;
         }
         case MergeKind::Define:
         case MergeKind::Global:
-          assert(RuntimeOption::RepoAuthoritative);
+          assertx(RuntimeOption::RepoAuthoritative);
         case MergeKind::PersistentDefine: {
           void* name = u->lookupLitstrId
             (m_mergeableValues[mergeable.second].first);
@@ -628,7 +691,7 @@ std::unique_ptr<Unit> UnitEmitter::create() {
           tva->m_type = tv.m_type;
           // leave tva->m_aux uninitialized
           ix += sizeof(*tva) / sizeof(void*);
-          assert(sizeof(*tva) % sizeof(void*) == 0);
+          assertx(sizeof(*tva) % sizeof(void*) == 0);
           break;
         }
         case MergeKind::Done:
@@ -637,7 +700,7 @@ std::unique_ptr<Unit> UnitEmitter::create() {
       }
     }
   }
-  assert(ix == mi->m_mergeablesSize);
+  assertx(ix == mi->m_mergeablesSize);
   mi->mergeableObj(ix) = (void*)MergeKind::Done;
 
   /*
@@ -653,61 +716,59 @@ std::unique_ptr<Unit> UnitEmitter::create() {
    */
   if (m_sourceLocTab.size() != 0) {
     stashLineTable(u.get(), createLineTable(m_sourceLocTab, m_bclen));
+    // If we plan to dump hhas we will need the extended line table information
+    // in the output, and if we're not writing the repo, stashing it here is
+    // necessary for it to make it through.
+    if (RuntimeOption::RepoDebugInfo &&
+        RuntimeOption::EvalDumpHhas &&
+        SystemLib::s_inited) {
+      stashExtendedLineTable(u.get(), createSourceLocTable());
+    }
+  } else if (saveLineTable) {
+    stashLineTable(u.get(), m_lineTable);
   }
 
-  for (size_t i = 0; i < m_feTab.size(); ++i) {
-    auto const past = m_feTab[i].first;
-    auto const fe = m_feTab[i].second;
-    assert(fe->past == past);
-    assert(m_fMap.find(fe) != m_fMap.end());
-    auto func = m_fMap.find(fe)->second;
-    u->m_funcTable.push_back(FuncEntry(past, func));
-    // If this function has a dynamic call wrapper, hookup the Func* pointers so
-    // they point to each other.
-    if (fe->dynCallWrapperId != kInvalidId) {
-      auto wrapper = u->lookupFuncId(fe->dynCallWrapperId);
-      func->setDynCallWrapper(wrapper);
-      wrapper->setDynCallTarget(func);
+  if (u->m_extended) {
+    auto ux = u->getExtended();
+    for (auto s : m_litstrs) {
+      ux->m_namedInfo.push_back(s);
+    }
+    ux->m_arrayTypeTable = m_arrayTypeTable;
+
+    // Funcs can be recorded out of order when loading them from the
+    // repo currently.  So sort 'em here.
+    std::sort(ux->m_funcTable.begin(), ux->m_funcTable.end(),
+              [] (const Func* a, const Func* b) {
+                return a->past() < b->past();
+              });
+  } else {
+    assertx(!m_litstrs.size());
+    assertx(m_arrayTypeTable.empty());
+  }
+
+  if (RuntimeOption::EvalDumpHhas > 1 ||
+    (SystemLib::s_inited && RuntimeOption::EvalDumpHhas == 1)) {
+    auto const& hhaspath = RuntimeOption::EvalDumpHhasToFile;
+    if (!hhaspath.empty()) {
+      static std::atomic<bool> first_unit{true};
+      auto const flags = O_WRONLY | O_CREAT | (first_unit ? O_TRUNC : O_APPEND);
+      if (!folly::writeFile(disassemble(u.get()), hhaspath.c_str(), flags)) {
+        Logger::Error("Failed to write hhas to %s", hhaspath.c_str());
+        _Exit(1);
+      }
+      first_unit = false;
+    } else {
+      std::printf("%s", disassemble(u.get()).c_str());
+      std::fflush(stdout);
+    }
+    if (SystemLib::s_inited) {
+      _Exit(0);
     }
   }
-
-  // Funcs can be recorded out of order when loading them from the
-  // repo currently.  So sort 'em here.
-  std::sort(u->m_funcTable.begin(), u->m_funcTable.end());
-
-  m_fMap.clear();
 
   if (RuntimeOption::EvalDumpBytecode) {
     // Dump human-readable bytecode.
     Trace::traceRelease("%s", u->toString().c_str());
-  }
-  if (RuntimeOption::EvalDumpHhas && SystemLib::s_inited) {
-    std::printf("%s", disassemble(u.get()).c_str());
-    std::fflush(stdout);
-    _Exit(0);
-  }
-
-  static const bool kVerify = debug || getenv("HHVM_VERIFY");
-  static const bool kVerifyVerboseSystem =
-    getenv("HHVM_VERIFY_VERBOSE_SYSTEM");
-  static const bool kVerifyVerbose =
-    kVerifyVerboseSystem || getenv("HHVM_VERIFY_VERBOSE");
-
-  const bool isSystemLib = u->filepath()->empty() ||
-    boost::contains(u->filepath()->data(), "systemlib");
-  const bool doVerify =
-    kVerify || boost::ends_with(u->filepath()->data(), "hhas");
-  if (doVerify) {
-    auto const verbose = isSystemLib ? kVerifyVerboseSystem : kVerifyVerbose;
-    auto const ok = Verifier::checkUnit(u.get(), verbose);
-
-    if (!ok && !verbose) {
-      std::cerr << folly::format(
-        "Verification failed for unit {}. Re-run with HHVM_VERIFY_VERBOSE{}=1 "
-        "to see more details.\n",
-        u->filepath()->data(), isSystemLib ? "_SYSTEM" : ""
-      );
-    }
   }
 
   return u;
@@ -720,7 +781,14 @@ void UnitEmitter::serdeMetaData(SerDe& sd) {
     (m_isHHFile)
     (m_typeAliases)
     (m_useStrictTypes)
+    (m_useStrictTypesForBuiltins)
+    (m_metaData)
     ;
+
+  if (RuntimeOption::EvalLoadFilepathFromUnitCache) {
+    /* May be different than the unit origin: e.g. for hhas files. */
+    sd(m_filepath);
+  }
 }
 
 
@@ -762,6 +830,13 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   }
   {
     std::stringstream ssCreate;
+    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "UnitArrayTypeTable")
+             << "(unitSn INTEGER, arrayTypeTable BLOB,"
+                " PRIMARY KEY (unitSn));";
+    txn.exec(ssCreate.str());
+  }
+  {
+    std::stringstream ssCreate;
     ssCreate << "CREATE TABLE " << m_repo.table(repoId, "UnitMergeables")
              << "(unitSn INTEGER, mergeableIx INTEGER,"
                 " mergeableKind INTEGER, mergeableId INTEGER,"
@@ -788,7 +863,9 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
 RepoStatus UnitRepoProxy::loadHelper(UnitEmitter& ue,
                                      const std::string& name,
                                      const MD5& md5) {
-  ue.m_filepath = makeStaticString(name);
+  if (!RuntimeOption::EvalLoadFilepathFromUnitCache) {
+    ue.m_filepath = makeStaticString(name);
+  }
   // Look for a repo that contains a unit with matching MD5.
   int repoId;
   for (repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
@@ -804,6 +881,7 @@ RepoStatus UnitRepoProxy::loadHelper(UnitEmitter& ue,
   try {
     getUnitLitstrs[repoId].get(ue);
     getUnitArrays[repoId].get(ue);
+    getUnitArrayTypeTable[repoId].get(ue);
     m_repo.pcrp().getPreClasses[repoId].get(ue);
     getUnitMergeables[repoId].get(ue);
     getUnitLineTable(repoId, ue.m_sn, ue.m_lineTable);
@@ -822,20 +900,18 @@ RepoStatus UnitRepoProxy::loadHelper(UnitEmitter& ue,
 }
 
 std::unique_ptr<UnitEmitter>
-UnitRepoProxy::loadEmitter(const std::string& name, const MD5& md5) {
-  auto ue = folly::make_unique<UnitEmitter>(md5);
+UnitRepoProxy::loadEmitter(const std::string& name, const MD5& md5,
+                           const Native::FuncTable& nativeFuncs) {
+  auto ue = std::make_unique<UnitEmitter>(md5, nativeFuncs);
   if (loadHelper(*ue, name, md5) == RepoStatus::error) ue.reset();
   return ue;
 }
 
 std::unique_ptr<Unit>
-UnitRepoProxy::load(const std::string& name, const MD5& md5) {
-  UnitEmitter ue(md5);
-  if (loadHelper(ue, name, md5) == RepoStatus::error) return nullptr;
-
-  if (RuntimeOption::XenonTraceUnitLoad) {
-    Xenon::getInstance().logNoSurprise(Xenon::UnitLoadEvent, name.c_str());
-  }
+UnitRepoProxy::load(const std::string& name, const MD5& md5,
+                    const Native::FuncTable& nativeFuncs) {
+  auto ue = std::make_unique<UnitEmitter>(md5, nativeFuncs);
+  if (loadHelper(*ue, name, md5) == RepoStatus::error) return nullptr;
 
 #ifdef USE_JEMALLOC
   if (RuntimeOption::TrackPerUnitMemory) {
@@ -846,7 +922,7 @@ UnitRepoProxy::load(const std::string& name, const MD5& md5) {
     mallctl("thread.deallocatedp", static_cast<void*>(&del), &len, nullptr, 0);
     auto before = *alloc;
     auto debefore = *del;
-    std::unique_ptr<Unit> result = ue.create();
+    std::unique_ptr<Unit> result = ue->create();
     auto after = *alloc;
     auto deafter = *del;
 
@@ -863,7 +939,14 @@ UnitRepoProxy::load(const std::string& name, const MD5& md5) {
   }
 #endif
 
-  return ue.create();
+  auto unit = ue->create();
+  if (BuiltinSymbols::s_systemAr) {
+    assertx(ue->m_filepath->data()[0] == '/' &&
+            ue->m_filepath->data()[1] == ':');
+    BuiltinSymbols::s_systemAr->addHhasFile(std::move(ue));
+  }
+  FTRACE(1, "Creating unit {} for `{}`\n", unit.get(), name);
+  return unit;
 }
 
 void UnitRepoProxy::InsertUnitStmt
@@ -960,9 +1043,51 @@ void UnitRepoProxy::GetUnitLitstrsStmt
       Id litstrId;        /**/ query.getId(0, litstrId);
       StringData* litstr; /**/ query.getStaticString(1, litstr);
       Id id UNUSED = ue.mergeUnitLitstr(litstr);
-      assert(id == litstrId);
+      assertx(id == litstrId);
     }
   } while (!query.done());
+  txn.commit();
+}
+
+void UnitRepoProxy::InsertUnitArrayTypeTableStmt::insert(
+  RepoTxn& txn, int64_t unitSn, const ArrayTypeTable& att) {
+
+  if (!prepared()) {
+    std::stringstream ssInsert;
+    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "UnitArrayTypeTable")
+             << " VALUES(@unitSn, @arrayTypeTable);";
+    txn.prepare(*this, ssInsert.str());
+  }
+  RepoTxnQuery query(txn, *this);
+  query.bindInt64("@unitSn", unitSn);
+  BlobEncoder dataBlob;
+  dataBlob(att);
+  query.bindBlob("@arrayTypeTable", dataBlob, /* static */ true);
+  query.exec();
+}
+
+void UnitRepoProxy::GetUnitArrayTypeTableStmt
+                  ::get(UnitEmitter& ue) {
+  RepoTxn txn(m_repo);
+  if (!prepared()) {
+    std::stringstream ssSelect;
+    ssSelect << "SELECT unitSn, arrayTypeTable FROM "
+             << m_repo.table(m_repoId, "UnitArrayTypeTable")
+             << " WHERE unitSn == @unitSn;";
+    txn.prepare(*this, ssSelect.str());
+  }
+
+  RepoTxnQuery query(txn, *this);
+  query.bindInt64("@unitSn", ue.m_sn);
+
+  query.step();
+  assertx(query.row());
+  BlobDecoder dataBlob = query.getBlob(1);
+  dataBlob(ue.m_arrayTypeTable);
+  dataBlob.assertDone();
+  query.step();
+  assertx(query.done());
+
   txn.commit();
 }
 
@@ -999,11 +1124,13 @@ void UnitRepoProxy::GetUnitArraysStmt
     if (query.row()) {
       Id arrayId;        /**/ query.getId(0, arrayId);
       std::string key;   /**/ query.getStdString(1, key);
-      Variant v = unserialize_from_buffer(key.data(), key.size());
-      Id id UNUSED = ue.mergeArray(
-        v.asArrRef().get(),
-        ArrayData::GetScalarArrayKey(key.c_str(), key.size()));
-      assert(id == arrayId);
+      Variant v = unserialize_from_buffer(
+        key.data(),
+        key.size(),
+        VariableUnserializer::Type::Internal
+      );
+      Id id DEBUG_ONLY = ue.mergeArray(ArrayData::GetScalarArray(std::move(v)));
+      assertx(id == arrayId);
     }
   } while (!query.done());
   txn.commit();
@@ -1027,12 +1154,12 @@ void UnitRepoProxy::InsertUnitMergeableStmt
   query.bindInt("@mergeableKind", (int)kind);
   query.bindId("@mergeableId", id);
   if (value) {
-    assert(kind == MergeKind::Define ||
+    assertx(kind == MergeKind::Define ||
            kind == MergeKind::PersistentDefine ||
            kind == MergeKind::Global);
     query.bindTypedValue("@mergeableValue", *value);
   } else {
-    assert(kind == MergeKind::ReqDoc || kind == MergeKind::TypeAlias);
+    assertx(kind == MergeKind::ReqDoc || kind == MergeKind::TypeAlias);
     query.bindNull("@mergeableValue");
   }
   query.exec();
@@ -1192,6 +1319,23 @@ UnitRepoProxy::GetSourceLocTabStmt::get(int64_t unitSn,
     return RepoStatus::error;
   }
   return RepoStatus::success;
+}
+
+std::unique_ptr<UnitEmitter>
+createFatalUnit(StringData* filename, const MD5& md5, FatalOp /*op*/,
+                StringData* err) {
+  auto ue = std::make_unique<UnitEmitter>(md5, Native::s_noNativeFuncs);
+  ue->m_filepath = filename;
+  ue->initMain(1, 1);
+  ue->emitOp(OpString);
+  ue->emitInt32(ue->mergeLitstr(err));
+  ue->emitOp(OpFatal);
+  ue->emitByte(static_cast<uint8_t>(FatalOp::Runtime));
+  FuncEmitter* fe = ue->getMain();
+  fe->maxStackCells = 1;
+  // XXX line numbers are bogus
+  fe->finish(ue->bcPos(), false);
+  return ue;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

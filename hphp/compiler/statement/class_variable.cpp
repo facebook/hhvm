@@ -20,7 +20,6 @@
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/analysis/block_scope.h"
 #include "hphp/compiler/analysis/class_scope.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/expression/simple_variable.h"
 #include "hphp/compiler/expression/assignment_expression.h"
 #include "hphp/compiler/option.h"
@@ -35,69 +34,43 @@ using namespace HPHP;
 ClassVariable::ClassVariable
 (STATEMENT_CONSTRUCTOR_PARAMETERS,
  ModifierExpressionPtr modifiers, std::string typeConstraint,
- ExpressionListPtr declaration)
+ ExpressionListPtr declaration, TypeAnnotationPtr typeAnnot,
+ ExpressionListPtr attrList)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(ClassVariable)),
     m_modifiers(modifiers), m_typeConstraint(typeConstraint),
-    m_declaration(declaration) {
+    m_declaration(declaration), m_typeAnnotation(typeAnnot),
+    m_attributeList(attrList) {
 }
 
 StatementPtr ClassVariable::clone() {
   ClassVariablePtr stmt(new ClassVariable(*this));
   stmt->m_modifiers = Clone(m_modifiers);
   stmt->m_declaration = Clone(m_declaration);
+  stmt->m_attributeList = Clone(m_attributeList);
   return stmt;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-static bool isEquivRedecl(const std::string &name,
-                          ExpressionPtr exp,
-                          ModifierExpressionPtr modif,
-                          Symbol * symbol) {
-  assert(exp);
-  assert(modif);
-  assert(symbol);
-  if (symbol->getName()     != name                 ||
-      symbol->isProtected() != modif->isProtected() ||
-      symbol->isPrivate()   != modif->isPrivate()   ||
-      symbol->isPublic()    != modif->isPublic()    ||
-      symbol->isStatic()    != modif->isStatic())
-    return false;
-
-  auto symDeclExp =
-    dynamic_pointer_cast<Expression>(symbol->getDeclaration());
-  if (!exp) return !symDeclExp;
-  Variant v1, v2;
-  auto s1 = exp->getScalarValue(v1);
-  auto s2 = symDeclExp->getScalarValue(v2);
-  if (s1 != s2) return false;
-  if (s1) return same(v1, v2);
-  return exp->getText() == symDeclExp->getText();
-}
-
-void ClassVariable::onParseRecur(AnalysisResultConstPtr ar,
-                                 FileScopeRawPtr fs,
-                                 ClassScopePtr scope) {
+void ClassVariable::onParseRecur(AnalysisResultConstRawPtr /*ar*/,
+                                 FileScopeRawPtr fs, ClassScopePtr scope) {
   ModifierExpressionPtr modifiers =
     scope->setModifiers(m_modifiers);
 
   if (m_modifiers->isAbstract()) {
     m_modifiers->parseTimeFatal(fs,
-                                Compiler::InvalidAttribute,
                                 "Properties cannot be declared abstract");
   }
 
   if (m_modifiers->isFinal()) {
     m_modifiers->parseTimeFatal(fs,
-                                Compiler::InvalidAttribute,
                                 "Properties cannot be declared final");
   }
 
   if (!m_modifiers->isStatic() && scope->isStaticUtil()) {
     m_modifiers->parseTimeFatal(
       fs,
-      Compiler::InvalidAttribute,
       "Class %s contains non-static property declaration and "
       "therefore cannot be declared 'abstract final'",
       scope->getOriginalName().c_str()
@@ -109,41 +82,10 @@ void ClassVariable::onParseRecur(AnalysisResultConstPtr ar,
        m_modifiers->isPrivate()) > 1) {
     m_modifiers->parseTimeFatal(
       fs,
-      Compiler::InvalidAttribute,
       "%s: properties of %s",
       Strings::PICK_ACCESS_MODIFIER,
       scope->getOriginalName().c_str()
     );
-  }
-
-  for (int i = 0; i < m_declaration->getCount(); i++) {
-    VariableTablePtr variables = scope->getVariables();
-    ExpressionPtr exp = (*m_declaration)[i];
-    if (exp->is(Expression::KindOfAssignmentExpression)) {
-      auto assignment = dynamic_pointer_cast<AssignmentExpression>(exp);
-      ExpressionPtr var = assignment->getVariable();
-      const auto& name =
-        dynamic_pointer_cast<SimpleVariable>(var)->getName();
-      if (variables->isPresent(name)) {
-        exp->parseTimeFatal(fs,
-                            Compiler::DeclaredVariableTwice,
-                            "Cannot redeclare %s::$%s",
-                            scope->getOriginalName().c_str(), name.c_str());
-      } else {
-        assignment->onParseRecur(ar, fs, scope);
-      }
-    } else {
-      const std::string &name =
-        dynamic_pointer_cast<SimpleVariable>(exp)->getName();
-      if (variables->isPresent(name)) {
-        exp->parseTimeFatal(fs,
-                            Compiler::DeclaredVariableTwice,
-                            "Cannot redeclare %s::$%s",
-                            scope->getOriginalName().c_str(), name.c_str());
-      } else {
-        variables->add(name, false, ar, exp, m_modifiers);
-      }
-    }
   }
 
   scope->setModifiers(modifiers);
@@ -151,79 +93,6 @@ void ClassVariable::onParseRecur(AnalysisResultConstPtr ar,
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-void ClassVariable::analyzeProgram(AnalysisResultPtr ar) {
-  m_declaration->analyzeProgram(ar);
-  auto phase = ar->getPhase();
-  if (phase != AnalysisResult::AnalyzeAll) {
-    return;
-  }
-  auto scope = getClassScope();
-  for (int i = 0; i < m_declaration->getCount(); i++) {
-    auto exp = (*m_declaration)[i];
-    bool error;
-    if (exp->is(Expression::KindOfAssignmentExpression)) {
-      auto assignment =
-        dynamic_pointer_cast<AssignmentExpression>(exp);
-      auto var =
-        dynamic_pointer_cast<SimpleVariable>(assignment->getVariable());
-      auto value = assignment->getValue();
-      scope->getVariables()->setClassInitVal(var->getName(), value);
-      error = scope->getVariables()->markOverride(ar, var->getName());
-    } else {
-      auto var = dynamic_pointer_cast<SimpleVariable>(exp);
-      error = scope->getVariables()->markOverride(ar, var->getName());
-      scope->getVariables()->setClassInitVal(var->getName(),
-                                             makeConstant(ar, "null"));
-    }
-    if (error) {
-      Compiler::Error(Compiler::InvalidOverride, exp);
-    }
-  }
-}
-
-void ClassVariable::addTraitPropsToScope(AnalysisResultPtr ar,
-                                         ClassScopePtr scope) {
-  ModifierExpressionPtr modifiers = scope->setModifiers(m_modifiers);
-  VariableTablePtr variables = scope->getVariables();
-
-  for (int i = 0; i < m_declaration->getCount(); i++) {
-    ExpressionPtr exp = (*m_declaration)[i];
-
-    SimpleVariablePtr var;
-    ExpressionPtr value;
-    if (exp->is(Expression::KindOfAssignmentExpression)) {
-      auto assignment = dynamic_pointer_cast<AssignmentExpression>(exp);
-      var = dynamic_pointer_cast<SimpleVariable>(assignment->getVariable());
-      value = assignment->getValue();
-    } else {
-      var = dynamic_pointer_cast<SimpleVariable>(exp);
-      value = makeConstant(ar, "null");
-    }
-
-    auto const& name = var->getName();
-    Symbol *sym;
-    ClassScopePtr prevScope = variables->isPresent(name) ? scope :
-      scope->getVariables()->findParent(ar, name, sym);
-
-    if (prevScope &&
-        !isEquivRedecl(name, exp, m_modifiers,
-                       prevScope->getVariables()->getSymbol(name))) {
-      Compiler::Error(Compiler::DeclaredVariableTwice, exp);
-      m_declaration->removeElement(i--);
-    } else {
-      if (prevScope != scope) { // Property is new or override, so add it
-        variables->add(name, false, ar, exp, m_modifiers);
-        variables->getSymbol(name)->setValue(exp);
-        variables->setClassInitVal(name, value);
-        variables->markOverride(ar, name);
-      } else {
-        m_declaration->removeElement(i--);
-      }
-    }
-  }
-  scope->setModifiers(modifiers);
-}
 
 ConstructPtr ClassVariable::getNthKid(int n) const {
   switch (n) {
@@ -254,21 +123,6 @@ void ClassVariable::setNthKid(int n, ConstructPtr cp) {
       assert(false);
       break;
   }
-}
-
-StatementPtr ClassVariable::preOptimize(AnalysisResultConstPtr ar) {
-  auto scope = getClassScope();
-  for (int i = 0; i < m_declaration->getCount(); i++) {
-    auto exp = (*m_declaration)[i];
-    if (exp->is(Expression::KindOfAssignmentExpression)) {
-      auto assignment = dynamic_pointer_cast<AssignmentExpression>(exp);
-      auto var =
-        dynamic_pointer_cast<SimpleVariable>(assignment->getVariable());
-      auto value = assignment->getValue();
-      scope->getVariables()->setClassInitVal(var->getName(), value);
-    }
-  }
-  return StatementPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

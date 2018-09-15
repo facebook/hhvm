@@ -59,7 +59,7 @@ bool IpBlockMap::BinaryPrefixTrie::isAllowedImpl(
     return m_allow;
   }
 
-  assert(bit_offset < num_bits);
+  assertx(bit_offset < num_bits);
 
   child = m_children[(*search_bytes >> (7 - bit_offset)) & 1];
   if (child) {
@@ -173,9 +173,8 @@ void IpBlockMap::LoadIpList(std::shared_ptr<Acl> acl,
 }
 
 IpBlockMap::IpBlockMap(const IniSetting::Map& ini, const Hdf& config) {
-  auto ipm_callback = [&] (const IniSetting::Map &ini_ipm,
-                           const Hdf &hdf_ipm,
-                           const std::string& ini_name) {
+  auto ipm_callback = [&](const IniSetting::Map& ini_ipm, const Hdf& hdf_ipm,
+                          const std::string& /*ini_name*/) {
     auto acl = std::make_shared<Acl>();
     // sgrimm note: not sure AllowFirst is relevant with my implementation
     // since we always search for the narrowest matching rule -- it really
@@ -214,7 +213,7 @@ bool IpBlockMap::isBlocking(const std::string &command,
 
       if (!translated) {
         ReadIPv6Address(ip.c_str(), &address, bits);
-        assert(bits == 128);
+        assertx(bits == 128);
         translated = true;
       }
 

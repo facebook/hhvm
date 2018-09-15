@@ -1,0 +1,11 @@
+File "suspend_operator_err12.php", line 9, characters 7-7:
+Class B does not correctly implement all required methods  (Typing[4173])
+File "suspend_operator_err12.php", line 9, characters 17-17:
+Some methods are incompatible with those declared in type A
+Read the following to see why:
+File "suspend_operator_err12.php", line 11, characters 19-24:
+Member number has the wrong type
+File "suspend_operator_err12.php", line 4, characters 29-34:
+This is a coroutine.
+File "suspend_operator_err12.php", line 11, characters 19-24:
+This is not a coroutine.

@@ -36,11 +36,12 @@ struct ExpressionList : Expression {
     ListKindLeft
   };
 
+  using iterator = std::vector<ExpressionPtr>::iterator;
+
   explicit ExpressionList(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                           ListKind kind = ListKindParam);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultConstPtr ar) override;
 
   void setContext(Context context) override;
   void setListKind(ListKind kind) { m_kind = kind; }
@@ -48,9 +49,7 @@ struct ExpressionList : Expression {
   void addElement(ExpressionPtr exp) override;
   void insertElement(ExpressionPtr exp, int index = 0) override;
   bool isScalar() const override;
-  int getLocalEffects() const override { return NoEffect; }
   bool isNoObjectInvolved() const;
-  bool containsDynamicConstant(AnalysisResultPtr ar) const override;
   void removeElement(int index);
   void clearElements();
   bool getScalarValue(Variant &value) override;
@@ -61,9 +60,13 @@ struct ExpressionList : Expression {
   std::string getLiteralString() const override;
 
   bool isScalarArrayPairs() const;
+  bool isSetCollectionScalar() const;
 
   int getCount() const { return m_exps.size();}
+
   ExpressionPtr &operator[](int index);
+  iterator begin() { return m_exps.begin(); }
+  iterator end() { return m_exps.end(); }
 
   void getStrings(std::vector<std::string> &strings);
   void stripConcat();
@@ -84,7 +87,6 @@ struct ExpressionList : Expression {
 
   template <typename F> bool getListScalars(F) const;
 private:
-  void optimize(AnalysisResultConstPtr ar);
   unsigned int checkLitstrKeys() const;
   enum class ElemsKind: uint8_t { None, ArrayPairs, Collection };
 
@@ -106,15 +108,20 @@ inline bool ExpressionList::getListScalars(F f) const {
     return true;
   }
   if (!isScalarArrayPairs()) return false;
-  for (const auto ape : m_exps) {
+  const auto count = m_exps.size();
+  for (size_t i = 0; i < count; ++i) {
+    const auto ape = m_exps[i];
     auto exp = dynamic_pointer_cast<ArrayPairExpression>(ape);
     if (!exp) return false;
     auto name = exp->getName();
     auto val = exp->getValue();
+    if (!val) {
+      return i == count - 1;
+    }
     if (!name) {
       Variant v;
-      bool ret = val->getScalarValue(v);
-      if (!ret) assert(false);
+      auto const ret = val->getScalarValue(v);
+      always_assert(ret);
       if (!f(Variant{}, v)) return false;
     } else {
       Variant n;

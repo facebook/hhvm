@@ -43,7 +43,13 @@ enum class AttrContext {
   Prop          = 0x4,
   TraitImport   = 0x8,
   Alias         = 0x10,
+  Parameter     = 0x20,
 };
+
+/*
+ * Convert an attr to a vector of attribute names, for a given context.
+ */
+std::vector<std::string> attrs_to_vec(AttrContext, Attr);
 
 /*
  * Convert an attr to a string of space-separated attribute names, for
@@ -73,7 +79,11 @@ std::string type_flags_to_string(TypeConstraint::Flags flags);
 folly::Optional<TypeConstraint::Flags> string_to_type_flag(
     const std::string& name);
 //////////////////////////////////////////////////////////////////////
-
+struct is_bareword {
+  bool operator()(int i) const {
+    return isalnum(i) || i == '_' || i == '.' || i == '$' || i == '\\';
+  }
+};
 }
 
 #endif

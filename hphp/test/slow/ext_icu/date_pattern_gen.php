@@ -299,6 +299,9 @@ function test_get_error() {
   });
 }
 
+
+<<__EntryPoint>>
+function main_date_pattern_gen() {
 $tests = array(
   'test_create_instance_with_no_locale_fails',
   'test_create_instance_with_null_locale_fails',
@@ -322,4 +325,5 @@ $tests = array(
 foreach ($tests as $test) {
   echo "Running $test\n";
   $test();
+}
 }

@@ -16,9 +16,13 @@ function genOuter() {
   echo "Finished genOuter()\n";
 }
 
+
+<<__EntryPoint>>
+function main_yield_from_unwind_generator() {
 $o = genOuter();
 try {
   $o->current();
 } catch (Exception $ex) {
   echo "Caught Exception (main)\n";
+}
 }

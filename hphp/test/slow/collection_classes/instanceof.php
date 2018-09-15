@@ -4,6 +4,9 @@ function test($v, $m, $s) {
   if ($m instanceof MutableMap) var_dump($m == 1);
   if ($s instanceof MutableSet) var_dump($s == 1);
 }
+
+<<__EntryPoint>>
+function main_instanceof() {
 $vector = Vector {};
 $map = Map {};
 $set = Set {};
@@ -58,3 +61,4 @@ var_dump($pair instanceof ConstMap);
 var_dump($pair instanceof ConstSet);
 echo "==== Jit tests ====\n";
 test($vector, $map, $set);
+}

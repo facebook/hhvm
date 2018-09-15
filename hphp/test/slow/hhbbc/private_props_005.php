@@ -20,4 +20,8 @@ function main() {
   $x->printer();
 }
 
+
+<<__EntryPoint>>
+function main_private_props_005() {
 main();
+}

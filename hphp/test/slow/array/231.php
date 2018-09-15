@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_231() {
 $a = array('a' => 'apple', 'b' => 'banana', 'c' => 'citrus');
 foreach ($a as $k1 => &$v1) {
   foreach ($a as $k2 => &$v2) {
@@ -8,4 +11,5 @@ foreach ($a as $k1 => &$v1) {
     }
     var_dump($v1, $v2);
   }
+}
 }

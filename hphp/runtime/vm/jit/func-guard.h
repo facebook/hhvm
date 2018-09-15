@@ -17,6 +17,10 @@
 #ifndef incl_HPHP_JIT_FUNC_GUARD_H
 #define incl_HPHP_JIT_FUNC_GUARD_H
 
+#include "hphp/runtime/vm/jit/func-guard-arm.h"
+#include "hphp/runtime/vm/jit/func-guard-ppc64.h"
+#include "hphp/runtime/vm/jit/func-guard-x64.h"
+
 #include "hphp/runtime/vm/jit/types.h"
 
 #include "hphp/util/data-block.h"
@@ -32,6 +36,11 @@ struct CGMeta;
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
+ * Size of func guard sequence that should be kept continuous.
+ */
+size_t funcGuardLen();
+
+/*
  * Emit a func guard for `func' into `cb'.
  *
  * A func guard is a small stub of code immediately preceding a func prologue.
@@ -42,7 +51,7 @@ struct CGMeta;
  * When we don't, rather than calling straight into the func prologue, we call
  * the func guard instead.
  */
-void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups);
+void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups, TCA* watch);
 
 /*
  * Get the address of the guard preceding a `prologue' for `func'.

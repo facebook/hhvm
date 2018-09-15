@@ -2,9 +2,8 @@
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 open Typing_defs
@@ -42,13 +41,19 @@ type subst_context = {
   sc_from_req_extends : bool;
 }
 
+type linearization = string list
+
 type decl_class_type = {
   dc_need_init           : bool;
   dc_members_fully_known : bool;
   dc_abstract            : bool;
   dc_final               : bool;
+  dc_is_disposable       : bool;
+  dc_const               : bool;
+  dc_ppl                 : bool;
   dc_deferred_init_members : SSet.t;
   dc_kind                : Ast.class_kind;
+  dc_is_xhp              : bool;
   dc_name                : string ;
   dc_pos                 : Pos.t ;
   dc_tparams             : decl tparam list ;
@@ -65,8 +70,24 @@ type decl_class_type = {
   dc_req_ancestors       : requirement list;
   dc_req_ancestors_extends : SSet.t;
   dc_extends             : SSet.t;
+  dc_sealed_whitelist    : SSet.t option;
+  dc_xhp_attr_deps       : SSet.t;
   dc_enum_type           : enum_type option;
+  dc_decl_errors         : Errors.t option;
+  (* this field is used to prevent condition types being filtered
+       in Decl_redecl_service.is_dependent_class_of_any *)
+  dc_condition_types     : SSet.t;
+  dc_linearization       : linearization;
 }
+
+(* name of condition type for conditional reactivity of methods.
+   If None - method is unconditionally reactive *)
+and condition_type_name = string option
+
+and method_reactivity =
+| Method_reactive of condition_type_name
+| Method_shallow of condition_type_name
+| Method_local of condition_type_name
 
 and element = {
   elt_final : bool;
@@ -74,10 +95,14 @@ and element = {
 
   (* Only relevant for methods *)
   elt_override : bool;
+  elt_memoizelsb : bool;
   elt_abstract : bool;
+  elt_reactivity : method_reactivity option;
 
   (* Only relevant for properties *)
   elt_is_xhp_attr : bool;
+  elt_const: bool;
+  elt_lateinit: bool;
 
   elt_origin : string;
   elt_visibility : visibility;

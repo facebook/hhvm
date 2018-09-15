@@ -6,4 +6,8 @@ function foo($p) {
   }
   var_dump((string)$a);
 }
+
+<<__EntryPoint>>
+function main_1748() {
 foo(false);
+}

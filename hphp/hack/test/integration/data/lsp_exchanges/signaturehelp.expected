@@ -1,0 +1,184 @@
+[
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": {
+      "capabilities": {
+        "textDocumentSync": {
+          "openClose": true,
+          "change": 2,
+          "willSave": false,
+          "willSaveWaitUntil": false,
+          "save": {
+            "includeText": false
+          }
+        },
+        "hoverProvider": true,
+        "completionProvider": {
+          "resolveProvider": true,
+          "triggerCharacters": [
+            "$",
+            ">",
+            "\\",
+            ":",
+            "<",
+            "[",
+            "'",
+            "\""
+          ]
+        },
+        "signatureHelpProvider": {
+          "triggerCharacters": [
+            "(",
+            ","
+          ]
+        },
+        "definitionProvider": true,
+        "referencesProvider": true,
+        "documentHighlightProvider": true,
+        "documentSymbolProvider": true,
+        "workspaceSymbolProvider": true,
+        "codeActionProvider": false,
+        "documentFormattingProvider": true,
+        "documentRangeFormattingProvider": true,
+        "documentOnTypeFormattingProvider": {
+          "firstTriggerCharacter": ";",
+          "moreTriggerCharacter": [
+            "}"
+          ]
+        },
+        "renameProvider": true,
+        "typeCoverageProvider": true,
+        "rageProvider": true
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 10,
+    "result": null
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 20,
+    "result": {
+      "signatures": [
+        {
+          "label": "public function methodCall(): void",
+          "documentation": "Method doc block",
+          "parameters": []
+        }
+      ],
+      "activeSignature": 0,
+      "activeParameter": 0
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 30,
+    "result": null
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 40,
+    "result": null
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 50,
+    "result": {
+      "signatures": [
+        {
+          "label": "function function_call(MyClass $myObject, int $x): void",
+          "documentation": "Function doc block",
+          "parameters": [
+            {
+              "label": "$myObject"
+            },
+            {
+              "label": "$x"
+            }
+          ]
+        }
+      ],
+      "activeSignature": 0,
+      "activeParameter": 0
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 60,
+    "result": {
+      "signatures": [
+        {
+          "label": "function function_call(MyClass $myObject, int $x): void",
+          "documentation": "Function doc block",
+          "parameters": [
+            {
+              "label": "$myObject"
+            },
+            {
+              "label": "$x"
+            }
+          ]
+        }
+      ],
+      "activeSignature": 0,
+      "activeParameter": 0
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 70,
+    "result": {
+      "signatures": [
+        {
+          "label": "function function_call(MyClass $myObject, int $x): void",
+          "documentation": "Function doc block",
+          "parameters": [
+            {
+              "label": "$myObject"
+            },
+            {
+              "label": "$x"
+            }
+          ]
+        }
+      ],
+      "activeSignature": 0,
+      "activeParameter": 1
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 80,
+    "result": {
+      "signatures": [
+        {
+          "label": "function function_call(MyClass $myObject, int $x): void",
+          "documentation": "Function doc block",
+          "parameters": [
+            {
+              "label": "$myObject"
+            },
+            {
+              "label": "$x"
+            }
+          ]
+        }
+      ],
+      "activeSignature": 0,
+      "activeParameter": 1
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 90,
+    "result": null
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 999,
+    "result": null
+  }
+]

@@ -13,4 +13,8 @@ function heh() {
   var_dump(foo());
 }
 
+
+<<__EntryPoint>>
+function main_constprop_staticness() {
 heh();
+}

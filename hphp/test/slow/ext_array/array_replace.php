@@ -61,9 +61,13 @@ function g() {
   var_dump(array_replace($a, array($b)));
 }
 
+
+<<__EntryPoint>>
+function main_array_replace() {
 a();
 b();
 c();
 d();
 e();
 f();
+}

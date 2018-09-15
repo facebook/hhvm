@@ -20,6 +20,9 @@ class Foo {
   }
 }
 
+
+<<__EntryPoint>>
+function main_param_tostring_zendcompat() {
 $method = (new ReflectionClass('Foo'))->getMethod('bar');
 
 var_dump(
@@ -30,3 +33,4 @@ var_dump(
     $method->getParameters()
   )
 );
+}

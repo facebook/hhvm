@@ -14,8 +14,6 @@ class B extends A {
     var_dump($this);
   }
 }
-$b = new B();
-$b->f();
 function f() {
   $o = new B();
   foreach ($o as $k => &$v) {
@@ -24,4 +22,10 @@ function f() {
  }
   var_dump($o);
 }
+
+<<__EntryPoint>>
+function main_692() {
+$b = new B();
+$b->f();
 f();
+}

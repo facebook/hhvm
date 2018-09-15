@@ -1,8 +1,2 @@
-File "suggest_method_name3.php", line 18, characters 7-14:
-Could not find method mymethod in an object of type X (Typing[4053])
-File "suggest_method_name3.php", line 13, characters 26-33:
-The closest thing is myMethod but it's a static method
-File "suggest_method_name3.php", line 17, characters 8-14:
-This is why I think it is an object of type X
-File "suggest_method_name3.php", line 12, characters 7-7:
-Declaration of X is here
+File "suggest_method_name3.php", line 13, characters 36-36:
+Non-abstract method X::myMethod must contain body (Parsing[1002])

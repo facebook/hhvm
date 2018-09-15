@@ -1,6 +1,6 @@
 File "subtype_bug_1.php", line 6, characters 40-41:
 Invalid argument (Typing[4110])
-File "subtype_bug_1.php", line 5, characters 14-22:
+File "subtype_bug_1.php", line 5, characters 14-25:
 This is an object of type ImmVector
-File "subtype_bug_1.php", line 6, characters 15-25:
+File "subtype_bug_1.php", line 6, characters 15-28:
 It is incompatible with an object of type ConstVector

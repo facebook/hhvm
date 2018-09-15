@@ -9,7 +9,7 @@ function main() {
   $v = Vector {0, 0, 0};
   foreach ($v as $e) {
     $v[0] = 42; // the "current" element as seen by the iterator is unmodified
-    $v[2] = 42; // but "future" changes are seen
+    $v[2] = 42; // "future" changes are not seen either
     var_dump($e);
   }
   var_dump($v);
@@ -22,4 +22,8 @@ function main() {
   var_dump($sm);
 }
 
+
+<<__EntryPoint>>
+function main_iter_collections() {
 main();
+}

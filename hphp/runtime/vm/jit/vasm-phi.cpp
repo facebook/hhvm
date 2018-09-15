@@ -136,22 +136,9 @@ void optimizePhis(Vunit& unit) {
             if (pred == label) continue;
             auto i2 = unit.blocks[pred].code.end();
             --i2;
-            if (i2->op == Vinstr::phijmp) {
-              assert(i2->phijmp_.target == label);
-              i2->phijmp_.target = phijmp.target;
-            } else {
-              assert(i2->op == Vinstr::phijcc);
-              int changes = 0;
-              if (i2->phijcc_.targets[0] == label) {
-                i2->phijcc_.targets[0] = phijmp.target;
-                changes++;
-              }
-              if (i2->phijcc_.targets[1] == label) {
-                i2->phijcc_.targets[1] = phijmp.target;
-                changes++;
-              }
-              assertx(changes > 0);
-            }
+            assertx(i2->op == Vinstr::phijmp);
+            assertx(i2->phijmp_.target == label);
+            i2->phijmp_.target = phijmp.target;
             preds[phijmp.target].push_back(pred);
           }
           preds[label].clear();
@@ -190,14 +177,14 @@ void optimizePhis(Vunit& unit) {
         auto const is_jcc = it->op == Vinstr::jcc;
 
         using Iter = decltype(it);
-        auto predNeedsFixing = [&](Iter it, Iter begin) -> bool {
-          if (it->op != Vinstr::phijmp) return false;
-          auto const use = unit.tuples[it->phijmp_.uses][0];
+        auto predNeedsFixing = [&](Iter it2, Iter begin) -> bool {
+          if (it2->op != Vinstr::phijmp) return false;
+          auto const use = unit.tuples[it2->phijmp_.uses][0];
           if (!unit.regToConst.count(use)) {
             if (useCounts[use] > 1) return false;
-            if (it == begin) return false;
-            --it;
-            if (it->op != Vinstr::setcc || use != it->setcc_.d) return false;
+            if (it2 == begin) return false;
+            --it2;
+            if (it2->op != Vinstr::setcc || use != it2->setcc_.d) return false;
           }
           return true;
         };

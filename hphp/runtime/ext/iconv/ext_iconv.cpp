@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/request-event-handler.h"
 
-#include <folly/Assume.h>
+#include <folly/lang/Assume.h>
 #include <boost/algorithm/string/predicate.hpp>
 
 #define ICONV_SUPPORTS_ERRNO 1
@@ -671,9 +671,9 @@ static php_iconv_err_t _php_iconv_strpos(unsigned int *pretval,
 
 #define _php_iconv_memequal(a, b, c)            \
   ((c) == sizeof(uint64_t)                      \
-   ? (x).buf_64 == *((uint64_t *)(b))           \
+   ? (a).buf_64 == *((uint64_t *)(b))           \
    : ((c) == sizeof(uint32_t)                   \
-      ? (x).buf_32 == *((uint32_t *)(b))        \
+      ? (a).buf_32 == *((uint32_t *)(b))        \
       : memcmp((a).buf, b, c) == 0))
 
   union gsnb_t {
@@ -1948,8 +1948,8 @@ static Variant HHVM_FUNCTION(iconv_substr,
   return false;
 }
 
-static String HHVM_FUNCTION(ob_iconv_handler,
-    const String& contents, int64_t status) {
+static String
+HHVM_FUNCTION(ob_iconv_handler, const String& contents, int64_t /*status*/) {
   String mimetype = g_context->getMimeType();
   if (!mimetype.empty()) {
     char *out_buffer;

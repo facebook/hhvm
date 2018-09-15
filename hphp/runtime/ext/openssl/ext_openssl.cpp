@@ -16,6 +16,8 @@
 */
 
 #include "hphp/runtime/ext/openssl/ext_openssl.h"
+
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/ssl-socket.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/zend-string.h"
@@ -23,16 +25,9 @@
 
 #include <folly/ScopeGuard.h>
 #include <openssl/conf.h>
-#include <openssl/crypto.h>
-#include <openssl/err.h>
-#include <openssl/evp.h>
-#include <openssl/opensslv.h>
 #include <openssl/pem.h>
 #include <openssl/pkcs12.h>
 #include <openssl/rand.h>
-#include <openssl/ssl.h>
-#include <openssl/x509.h>
-#include <openssl/x509v3.h>
 #include <vector>
 
 namespace HPHP {
@@ -72,12 +67,12 @@ struct OpenSSLInitializer {
 
     /* Determine default SSL configuration file */
     char *config_filename = getenv("OPENSSL_CONF");
-    if (config_filename == NULL) {
+    if (config_filename == nullptr) {
       config_filename = getenv("SSLEAY_CONF");
     }
 
     /* default to 'openssl.cnf' if no environment variable is set */
-    if (config_filename == NULL) {
+    if (config_filename == nullptr) {
       snprintf(default_ssl_conf_filename, sizeof(default_ssl_conf_filename),
                "%s/%s", X509_get_default_cert_area(), "openssl.cnf");
     } else {
@@ -98,7 +93,7 @@ static OpenSSLInitializer s_openssl_initializer;
 
 struct Key : SweepableResourceData {
   EVP_PKEY *m_key;
-  explicit Key(EVP_PKEY *key) : m_key(key) { assert(m_key);}
+  explicit Key(EVP_PKEY *key) : m_key(key) { assertx(m_key);}
   ~Key() {
     if (m_key) EVP_PKEY_free(m_key);
   }
@@ -110,16 +105,21 @@ struct Key : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(Key)
 
   bool isPrivate() {
-    assert(m_key);
-    switch (m_key->type) {
+    assertx(m_key);
+    switch (EVP_PKEY_id(m_key)) {
 #ifndef NO_RSA
     case EVP_PKEY_RSA:
     case EVP_PKEY_RSA2:
-      assert(m_key->pkey.rsa);
-      if (!m_key->pkey.rsa->p || !m_key->pkey.rsa->q) {
-        return false;
+      {
+        const auto rsa = EVP_PKEY_get0_RSA(m_key);
+        assertx(rsa);
+        const BIGNUM *p, *q;
+        RSA_get0_factors(rsa, &p, &q);
+        if (!p || !q) {
+          return false;
+        }
+        break;
       }
-      break;
 #endif
 #ifndef NO_DSA
     case EVP_PKEY_DSA:
@@ -127,20 +127,48 @@ struct Key : SweepableResourceData {
     case EVP_PKEY_DSA2:
     case EVP_PKEY_DSA3:
     case EVP_PKEY_DSA4:
-      assert(m_key->pkey.dsa);
-      if (!m_key->pkey.dsa->p || !m_key->pkey.dsa->q ||
-          !m_key->pkey.dsa->priv_key) {
-        return false;
+      {
+        const auto dsa = EVP_PKEY_get0_DSA(m_key);
+        assertx(dsa);
+        const BIGNUM *p, *q, *g, *pub_key, *priv_key;
+        DSA_get0_pqg(dsa, &p, &q, &g);
+        if (!p || !q || !g) {
+          return false;
+        }
+        DSA_get0_key(dsa, &pub_key, &priv_key);
+        if (!priv_key) {
+          return false;
+        }
+        break;
       }
-      break;
 #endif
 #ifndef NO_DH
     case EVP_PKEY_DH:
-      assert(m_key->pkey.dh);
-      if (!m_key->pkey.dh->p || !m_key->pkey.dh->priv_key) {
-        return false;
+      {
+        const auto dh = EVP_PKEY_get0_DH(m_key);
+        assertx(dh);
+        const BIGNUM *p, *q, *g, *pub_key, *priv_key;
+        DH_get0_pqg(dh, &p, &q, &g);
+        if (!p) {
+          return false;
+        }
+        DH_get0_key(dh, &pub_key, &priv_key);
+        if (!priv_key) {
+          return false;
+        }
+        break;
+       }
+#endif
+#ifdef HAVE_EVP_PKEY_EC
+    case EVP_PKEY_EC:
+      {
+        const auto ec_key = EVP_PKEY_get0_EC_KEY(m_key);
+        assertx(ec_key);
+        if (EC_KEY_get0_private_key(ec_key) == nullptr) {
+          return false;
+        }
+        break;
       }
-      break;
 #endif
     default:
       raise_warning("key type not supported in this PHP build!");
@@ -162,8 +190,8 @@ struct Key : SweepableResourceData {
    *      an X509 certificate, then interpret as public key
    *
    * NOTE: If you are requesting a private key but have not specified a
-   *   passphrase, you should use an empty string rather than NULL for the
-   *   passphrase - NULL causes a passphrase prompt to be emitted in
+   *   passphrase, you should use an empty string rather than nullptr for the
+   *   passphrase - nullptr causes a passphrase prompt to be emitted in
    *   the Apache error log!
    */
   static req::ptr<Key> Get(const Variant& var, bool public_key,
@@ -185,7 +213,7 @@ struct Key : SweepableResourceData {
   static req::ptr<Key> GetHelper(const Variant& var, bool public_key,
                                  const char *passphrase) {
     req::ptr<Certificate> ocert;
-    EVP_PKEY *key = NULL;
+    EVP_PKEY *key = nullptr;
 
     if (var.isResource()) {
       auto cert = dyn_cast_or_null<Certificate>(var);
@@ -214,14 +242,14 @@ struct Key : SweepableResourceData {
           /* not a X509 certificate, try to retrieve public key */
           BIO *in = Certificate::ReadData(var);
           if (in == nullptr) return nullptr;
-          key = PEM_read_bio_PUBKEY(in, NULL,NULL, NULL);
+          key = PEM_read_bio_PUBKEY(in, nullptr,nullptr, nullptr);
           BIO_free(in);
         }
       } else {
         /* we want the private key */
         BIO *in = Certificate::ReadData(var);
         if (in == nullptr) return nullptr;
-        key = PEM_read_bio_PrivateKey(in, NULL,NULL, (void*)passphrase);
+        key = PEM_read_bio_PrivateKey(in, nullptr,nullptr, (void*)passphrase);
         BIO_free(in);
       }
     }
@@ -250,7 +278,7 @@ private:
 
 public:
   explicit CSRequest(X509_REQ *csr) : m_csr(csr) {
-    assert(m_csr);
+    assertx(m_csr);
   }
 
   X509_REQ *csr() { return m_csr; }
@@ -270,7 +298,7 @@ public:
     auto csr = cast_or_null<CSRequest>(GetRequest(var));
     if (!csr || !csr->m_csr) {
       raise_warning("cannot get CSR");
-      return NULL;
+      return nullptr;
     }
     return csr;
   }
@@ -284,7 +312,7 @@ private:
       BIO *in = Certificate::ReadData(var);
       if (in == nullptr) return nullptr;
 
-      X509_REQ *csr = PEM_read_bio_X509_REQ(in, NULL,NULL,NULL);
+      X509_REQ *csr = PEM_read_bio_X509_REQ(in, nullptr,nullptr,nullptr);
       BIO_free(in);
       if (csr) {
         return req::make<CSRequest>(csr);
@@ -314,6 +342,9 @@ struct php_x509_request {
   int priv_key_bits;
   int priv_key_type;
   int priv_key_encrypt;
+#ifdef HAVE_EVP_PKEY_EC
+  int curve_name;
+#endif
   EVP_PKEY *priv_key;
 
   static bool load_rand_file(const char *file, int *egdsocket, int *seeded) {
@@ -321,9 +352,9 @@ struct php_x509_request {
 
     *egdsocket = 0;
     *seeded = 0;
-    if (file == NULL) {
+    if (file == nullptr) {
       file = RAND_file_name(buffer, sizeof(buffer));
-#ifndef OPENSSL_NO_RAND_EGD
+#if !defined(OPENSSL_NO_RAND_EGD) && !defined(OPENSSL_NO_EGD)
     } else if (RAND_egd(file) > 0) {
       /* if the given filename is an EGD socket, don't
        * write anything back to it */
@@ -332,7 +363,7 @@ struct php_x509_request {
 #endif
     }
 
-    if (file == NULL || !RAND_load_file(file, -1)) {
+    if (file == nullptr || !RAND_load_file(file, -1)) {
       if (RAND_status() == 0) {
         raise_warning("unable to load random state; not enough data!");
         return false;
@@ -351,10 +382,10 @@ struct php_x509_request {
        * a low-entropy seed file back */
       return false;
     }
-    if (file == NULL) {
+    if (file == nullptr) {
       file = RAND_file_name(buffer, sizeof(buffer));
     }
-    if (file == NULL || !RAND_write_file(file)) {
+    if (file == nullptr || !RAND_write_file(file)) {
       raise_warning("unable to write random state");
       return false;
     }
@@ -362,7 +393,7 @@ struct php_x509_request {
   }
 
   bool generatePrivateKey() {
-    assert(priv_key == NULL);
+    assertx(priv_key == nullptr);
 
     if (priv_key_bits < MIN_KEY_LENGTH) {
       raise_warning("private key length is too short; it needs to be "
@@ -376,19 +407,19 @@ struct php_x509_request {
     load_rand_file(randfile, &egdsocket, &seeded);
 
     bool ret = false;
-    if ((priv_key = EVP_PKEY_new()) != NULL) {
+    if ((priv_key = EVP_PKEY_new()) != nullptr) {
       switch (priv_key_type) {
       case OPENSSL_KEYTYPE_RSA:
         if (EVP_PKEY_assign_RSA
-            (priv_key, RSA_generate_key(priv_key_bits, 0x10001, NULL, NULL))) {
+            (priv_key, RSA_generate_key(priv_key_bits, 0x10001, nullptr, nullptr))) {
           ret = true;
         }
         break;
 #if !defined(NO_DSA) && defined(HAVE_DSA_DEFAULT_METHOD)
       case OPENSSL_KEYTYPE_DSA:
         {
-          DSA *dsapar = DSA_generate_parameters(priv_key_bits, NULL, 0, NULL,
-                                                NULL, NULL, NULL);
+          DSA *dsapar = DSA_generate_parameters(priv_key_bits, nullptr, 0, nullptr,
+                                                nullptr, nullptr, nullptr);
           if (dsapar) {
             DSA_set_method(dsapar, DSA_get_default_method());
             if (DSA_generate_key(dsapar)) {
@@ -397,6 +428,25 @@ struct php_x509_request {
               }
             } else {
               DSA_free(dsapar);
+            }
+          }
+        }
+        break;
+#endif
+#ifdef HAVE_EVP_PKEY_EC
+      case OPENSSL_KEYTYPE_EC:
+        {
+          if (curve_name == NID_undef) {
+            raise_warning("Missing configuration value: 'curve_name' not set");
+            return false;
+          }
+          if (auto const eckey = EC_KEY_new_by_curve_name(curve_name)) {
+            EC_KEY_set_asn1_flag(eckey, OPENSSL_EC_NAMED_CURVE);
+            if (EC_KEY_generate_key(eckey) &&
+                EVP_PKEY_assign_EC_KEY(priv_key, eckey)) {
+              ret = true;
+            } else {
+              EC_KEY_free(eckey);
             }
           }
         }
@@ -436,8 +486,8 @@ static void add_assoc_name_entry(Array &ret, const char *key,
     Array subentries;
     int last = -1;
     int j;
-    ASN1_STRING *str = NULL;
-    unsigned char *to_add = NULL;
+    ASN1_STRING *str = nullptr;
+    unsigned char *to_add = nullptr;
     int to_add_len = 0;
     for (;;) {
       j = X509_NAME_get_index_by_OBJ(name, obj, last);
@@ -493,20 +543,22 @@ static int64_t read_integer(const Array& args, const String& key, int64_t def) {
 }
 
 static bool add_oid_section(struct php_x509_request *req) {
-  char *str = CONF_get_string(req->req_config, NULL, "oid_section");
-  if (str == NULL) {
+  char *str = CONF_get_string(req->req_config, nullptr, "oid_section");
+  if (str == nullptr) {
     return true;
   }
 
   STACK_OF(CONF_VALUE) *sktmp = CONF_get_section(req->req_config, str);
-  if (sktmp == NULL) {
+  if (sktmp == nullptr) {
     raise_warning("problem loading oid section %s", str);
     return false;
   }
 
   for (int i = 0; i < sk_CONF_VALUE_num(sktmp); i++) {
     CONF_VALUE *cnf = sk_CONF_VALUE_value(sktmp, i);
-    if (OBJ_create(cnf->value, cnf->name, cnf->name) == NID_undef) {
+    if (OBJ_sn2nid(cnf->name) == NID_undef &&
+      OBJ_ln2nid(cnf->name) == NID_undef &&
+      OBJ_create(cnf->value, cnf->name, cnf->name) == NID_undef) {
       raise_warning("problem creating object %s=%s", cnf->name, cnf->value);
       return false;
     }
@@ -527,7 +579,7 @@ static inline bool php_openssl_config_check_syntax
   X509V3_CTX ctx;
   X509V3_set_ctx_test(&ctx);
   X509V3_set_conf_lhash(&ctx, config);
-  if (!X509V3_EXT_add_conf(config, &ctx, (char*)section, NULL)) {
+  if (!X509V3_EXT_add_conf(config, &ctx, (char*)section, nullptr)) {
     raise_warning("Error loading %s section %s of %s",
                     section_label, section, config_filename);
     return false;
@@ -543,7 +595,8 @@ const StaticString
   s_req_extensions("req_extensions"),
   s_private_key_bits("private_key_bits"),
   s_private_key_type("private_key_type"),
-  s_encrypt_key("encrypt_key");
+  s_encrypt_key("encrypt_key"),
+  s_curve_name("curve_name");
 
 static bool php_openssl_parse_config(struct php_x509_request *req,
                                      const Array& args,
@@ -552,14 +605,14 @@ static bool php_openssl_parse_config(struct php_x509_request *req,
     read_string(args, s_config, default_ssl_conf_filename, strings);
   req->section_name =
     read_string(args, s_config_section_name, "req", strings);
-  req->global_config = CONF_load(NULL, default_ssl_conf_filename, NULL);
-  req->req_config = CONF_load(NULL, req->config_filename, NULL);
-  if (req->req_config == NULL) {
+  req->global_config = CONF_load(nullptr, default_ssl_conf_filename, nullptr);
+  req->req_config = CONF_load(nullptr, req->config_filename, nullptr);
+  if (req->req_config == nullptr) {
     return false;
   }
 
   /* read in the oids */
-  char *str = CONF_get_string(req->req_config, NULL, "oid_file");
+  char *str = CONF_get_string(req->req_config, nullptr, "oid_file");
   if (str) {
     BIO *oid_bio = BIO_new_file(str, "r");
     if (oid_bio) {
@@ -603,7 +656,7 @@ static bool php_openssl_parse_config(struct php_x509_request *req,
   } else {
     str = CONF_get_string(req->req_config, req->section_name,
                           "encrypt_rsa_key");
-    if (str == NULL) {
+    if (str == nullptr) {
       str = CONF_get_string(req->req_config, req->section_name, "encrypt_key");
     }
     if (str && strcmp(str, "no") == 0) {
@@ -614,16 +667,32 @@ static bool php_openssl_parse_config(struct php_x509_request *req,
   }
 
   /* digest alg */
-  if (req->digest_name == NULL) {
+  if (req->digest_name == nullptr) {
     req->digest_name = CONF_get_string(req->req_config, req->section_name,
                                        "default_md");
   }
   if (req->digest_name) {
     req->digest = req->md_alg = EVP_get_digestbyname(req->digest_name);
   }
-  if (req->md_alg == NULL) {
-    req->md_alg = req->digest = EVP_md5();
+  if (req->md_alg == nullptr) {
+    req->md_alg = req->digest = EVP_sha256();
   }
+
+#ifdef HAVE_EVP_PKEY_EC
+  /* set the ec group curve name */
+  req->curve_name = NID_undef;
+  if (args.exists(s_curve_name)) {
+    auto const curve_name = args[s_curve_name].toString();
+    req->curve_name = OBJ_sn2nid(curve_name.data());
+    if (req->curve_name == NID_undef) {
+      raise_warning(
+        "Unknown elliptic curve (short) name %s",
+        curve_name.data()
+      );
+      return false;
+    }
+  }
+#endif
 
   if (req->extensions_section &&
       !php_openssl_config_check_syntax
@@ -652,18 +721,18 @@ static bool php_openssl_parse_config(struct php_x509_request *req,
 static void php_openssl_dispose_config(struct php_x509_request *req) {
   if (req->global_config) {
     CONF_free(req->global_config);
-    req->global_config = NULL;
+    req->global_config = nullptr;
   }
   if (req->req_config) {
     CONF_free(req->req_config);
-    req->req_config = NULL;
+    req->req_config = nullptr;
   }
 }
 
 static STACK_OF(X509) *load_all_certs_from_file(const char *certfile) {
-  STACK_OF(X509_INFO) *sk = NULL;
-  STACK_OF(X509) *stack = NULL, *ret = NULL;
-  BIO *in = NULL;
+  STACK_OF(X509_INFO) *sk = nullptr;
+  STACK_OF(X509) *stack = nullptr, *ret = nullptr;
+  BIO *in = nullptr;
   X509_INFO *xi;
 
   if (!(stack = sk_X509_new_null())) {
@@ -678,7 +747,7 @@ static STACK_OF(X509) *load_all_certs_from_file(const char *certfile) {
   }
 
   /* This loads from a file, a stack of x509/crl/pkey sets */
-  if (!(sk = PEM_X509_INFO_read_bio(in, NULL, NULL, NULL))) {
+  if (!(sk = PEM_X509_INFO_read_bio(in, nullptr, nullptr, nullptr))) {
     raise_warning("error reading the file, %s", certfile);
     sk_X509_free(stack);
     goto end;
@@ -687,9 +756,9 @@ static STACK_OF(X509) *load_all_certs_from_file(const char *certfile) {
   /* scan over it and pull out the certs */
   while (sk_X509_INFO_num(sk)) {
     xi = sk_X509_INFO_shift(sk);
-    if (xi->x509 != NULL) {
+    if (xi->x509 != nullptr) {
       sk_X509_push(stack, xi->x509);
-      xi->x509 = NULL;
+      xi->x509 = nullptr;
     }
     X509_INFO_free(xi);
   }
@@ -713,8 +782,8 @@ end:
  */
 static X509_STORE *setup_verify(const Array& calist) {
   X509_STORE *store = X509_STORE_new();
-  if (store == NULL) {
-    return NULL;
+  if (store == nullptr) {
+    return nullptr;
   }
 
   X509_LOOKUP *dir_lookup, *file_lookup;
@@ -730,35 +799,35 @@ static X509_STORE *setup_verify(const Array& calist) {
 
     if ((sb.st_mode & S_IFREG) == S_IFREG) {
       file_lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file());
-      if (file_lookup == NULL ||
+      if (file_lookup == nullptr ||
           !X509_LOOKUP_load_file(file_lookup, item.data(),
                                  X509_FILETYPE_PEM)) {
         raise_warning("error loading file %s", item.data());
       } else {
         nfiles++;
       }
-      file_lookup = NULL;
+      file_lookup = nullptr;
     } else {
       dir_lookup = X509_STORE_add_lookup(store, X509_LOOKUP_hash_dir());
-      if (dir_lookup == NULL ||
+      if (dir_lookup == nullptr ||
           !X509_LOOKUP_add_dir(dir_lookup, item.data(), X509_FILETYPE_PEM)) {
         raise_warning("error loading directory %s", item.data());
       } else {
         ndirs++;
       }
-      dir_lookup = NULL;
+      dir_lookup = nullptr;
     }
   }
   if (nfiles == 0) {
     file_lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file());
     if (file_lookup) {
-      X509_LOOKUP_load_file(file_lookup, NULL, X509_FILETYPE_DEFAULT);
+      X509_LOOKUP_load_file(file_lookup, nullptr, X509_FILETYPE_DEFAULT);
     }
   }
   if (ndirs == 0) {
     dir_lookup = X509_STORE_add_lookup(store, X509_LOOKUP_hash_dir());
     if (dir_lookup) {
-      X509_LOOKUP_add_dir(dir_lookup, NULL, X509_FILETYPE_DEFAULT);
+      X509_LOOKUP_add_dir(dir_lookup, nullptr, X509_FILETYPE_DEFAULT);
     }
   }
   return store;
@@ -790,17 +859,17 @@ static bool php_openssl_make_REQ(struct php_x509_request *req, X509_REQ *csr,
                                  const Array& dn, const Array& attribs) {
   char *dn_sect = CONF_get_string(req->req_config, req->section_name,
                                   "distinguished_name");
-  if (dn_sect == NULL) return false;
+  if (dn_sect == nullptr) return false;
 
   STACK_OF(CONF_VALUE) *dn_sk = CONF_get_section(req->req_config, dn_sect);
-  if (dn_sk == NULL) return false;
+  if (dn_sk == nullptr) return false;
 
   char *attr_sect = CONF_get_string(req->req_config, req->section_name,
                                     "attributes");
-  STACK_OF(CONF_VALUE) *attr_sk = NULL;
+  STACK_OF(CONF_VALUE) *attr_sk = nullptr;
   if (attr_sect) {
     attr_sk = CONF_get_section(req->req_config, attr_sect);
-    if (attr_sk == NULL) {
+    if (attr_sk == nullptr) {
       return false;
     }
   }
@@ -893,7 +962,7 @@ bool HHVM_FUNCTION(openssl_csr_export_to_file, const Variant& csr,
   if (!pcsr) return false;
 
   BIO *bio_out = BIO_new_file((char*)outfilename.data(), "w");
-  if (bio_out == NULL) {
+  if (bio_out == nullptr) {
     raise_warning("error opening file %s", outfilename.data());
     return false;
   }
@@ -942,7 +1011,7 @@ Variant HHVM_FUNCTION(openssl_csr_get_subject, const Variant& csr,
 
   X509_NAME *subject = X509_REQ_get_subject_name(pcsr->csr());
   Array ret = Array::Create();
-  add_assoc_name_entry(ret, NULL, subject, use_shortnames);
+  add_assoc_name_entry(ret, nullptr, subject, use_shortnames);
   return ret;
 }
 
@@ -955,7 +1024,7 @@ Variant HHVM_FUNCTION(openssl_csr_new,
   memset(&req, 0, sizeof(req));
 
   req::ptr<Key> okey;
-  X509_REQ *csr = NULL;
+  X509_REQ *csr = nullptr;
   std::vector<String> strings;
   if (php_openssl_parse_config(&req, configargs.toArray(), strings)) {
     /* Generate or use a private key */
@@ -965,20 +1034,20 @@ Variant HHVM_FUNCTION(openssl_csr_new,
         req.priv_key = okey->m_key;
       }
     }
-    if (req.priv_key == NULL) {
+    if (req.priv_key == nullptr) {
       req.generatePrivateKey();
       if (req.priv_key) {
         okey = req::make<Key>(req.priv_key);
       }
     }
-    if (req.priv_key == NULL) {
+    if (req.priv_key == nullptr) {
       raise_warning("Unable to generate a private key");
     } else {
       csr = X509_REQ_new();
       if (csr && php_openssl_make_REQ(&req, csr, dn.toArray(),
                                       extraattribs.toArray())) {
         X509V3_CTX ext_ctx;
-        X509V3_set_ctx(&ext_ctx, NULL, NULL, csr, NULL, 0);
+        X509V3_set_ctx(&ext_ctx, nullptr, nullptr, csr, nullptr, 0);
         X509V3_set_conf_lhash(&ext_ctx, req.req_config);
 
         /* Add extensions */
@@ -992,7 +1061,7 @@ Variant HHVM_FUNCTION(openssl_csr_new,
           ret = true;
           if (X509_REQ_sign(csr, req.priv_key, req.digest)) {
             ret = req::make<CSRequest>(csr);
-            csr = NULL;
+            csr = nullptr;
           } else {
             raise_warning("Error signing request");
           }
@@ -1030,7 +1099,7 @@ Variant HHVM_FUNCTION(openssl_csr_sign, const Variant& csr,
     raise_warning("cannot get private key from parameter 3");
     return false;
   }
-  X509 *cert = NULL;
+  X509 *cert = nullptr;
   if (ocert) {
     cert = ocert->m_cert;
   }
@@ -1052,7 +1121,7 @@ Variant HHVM_FUNCTION(openssl_csr_sign, const Variant& csr,
   /* Check that the request matches the signature */
   EVP_PKEY *key;
   key = X509_REQ_get_pubkey(pcsr->csr());
-  if (key == NULL) {
+  if (key == nullptr) {
     raise_warning("error unpacking public key");
     goto cleanup;
   }
@@ -1070,7 +1139,7 @@ Variant HHVM_FUNCTION(openssl_csr_sign, const Variant& csr,
   /* Now we can get on with it */
   X509 *new_cert;
   new_cert = X509_new();
-  if (new_cert == NULL) {
+  if (new_cert == nullptr) {
     raise_warning("No memory");
     goto cleanup;
   }
@@ -1082,7 +1151,7 @@ Variant HHVM_FUNCTION(openssl_csr_sign, const Variant& csr,
   ASN1_INTEGER_set(X509_get_serialNumber(new_cert), serial);
   X509_set_subject_name(new_cert, X509_REQ_get_subject_name(pcsr->csr()));
 
-  if (cert == NULL) {
+  if (cert == nullptr) {
     cert = new_cert;
   }
   if (!X509_set_issuer_name(new_cert, X509_get_subject_name(cert))) {
@@ -1248,17 +1317,17 @@ openssl_pkcs12_export_impl(const Variant& x509, BIO *bio_out,
     friendly_name = arrArgs[s_friendly_name].toString();
   }
 
-  STACK_OF(X509) *ca = NULL;
+  STACK_OF(X509) *ca = nullptr;
   if (arrArgs.exists(s_extracerts)) {
     ca = php_array_to_X509_sk(arrArgs[s_extracerts]);
   }
 
   PKCS12 *p12 = PKCS12_create
     ((char*)pass.data(),
-     (char*)(friendly_name.empty() ? NULL : friendly_name.data()),
+     (char*)(friendly_name.empty() ? nullptr : friendly_name.data()),
      key, cert, ca, 0, 0, 0, 0, 0);
 
-  assert(bio_out);
+  assertx(bio_out);
   bool ret = i2d_PKCS12_bio(bio_out, p12);
   PKCS12_free(p12);
   sk_X509_free(ca);
@@ -1271,7 +1340,7 @@ bool HHVM_FUNCTION(openssl_pkcs12_export_to_file, const Variant& x509,
                                                   const String& pass,
                                   const Variant& args /* = uninit_variant */) {
   BIO *bio_out = BIO_new_file(filename.data(), "w");
-  if (bio_out == NULL) {
+  if (bio_out == nullptr) {
     raise_warning("error opening file %s", filename.data());
     return false;
   }
@@ -1302,7 +1371,7 @@ const StaticString
 bool HHVM_FUNCTION(openssl_pkcs12_read, const String& pkcs12, VRefParam certs,
                                         const String& pass) {
   bool ret = false;
-  PKCS12 *p12 = NULL;
+  PKCS12 *p12 = nullptr;
 
   BIO *bio_in = BIO_new(BIO_s_mem());
   if (!BIO_write(bio_in, pkcs12.data(), pkcs12.size())) {
@@ -1310,45 +1379,50 @@ bool HHVM_FUNCTION(openssl_pkcs12_read, const String& pkcs12, VRefParam certs,
   }
 
   if (d2i_PKCS12_bio(bio_in, &p12)) {
-    EVP_PKEY *pkey = NULL;
-    X509 *cert = NULL;
-    STACK_OF(X509) *ca = NULL;
+    EVP_PKEY *pkey = nullptr;
+    X509 *cert = nullptr;
+    STACK_OF(X509) *ca = nullptr;
     if (PKCS12_parse(p12, pass.data(), &pkey, &cert, &ca)) {
       Variant vcerts = Array::Create();
       SCOPE_EXIT {
         certs.assignIfRef(vcerts);
       };
-      BIO *bio_out = BIO_new(BIO_s_mem());
-      if (PEM_write_bio_X509(bio_out, cert)) {
-        BUF_MEM *bio_buf;
-        BIO_get_mem_ptr(bio_out, &bio_buf);
-        vcerts.toArrRef().set(s_cert,
-          String((char*)bio_buf->data, bio_buf->length, CopyString));
-      }
-      BIO_free(bio_out);
-
-      bio_out = BIO_new(BIO_s_mem());
-      if (PEM_write_bio_PrivateKey(bio_out, pkey, NULL, NULL, 0, 0, NULL)) {
-        BUF_MEM *bio_buf;
-        BIO_get_mem_ptr(bio_out, &bio_buf);
-        vcerts.toArrRef().set(s_pkey,
-          String((char*)bio_buf->data, bio_buf->length, CopyString));
-      }
-      BIO_free(bio_out);
-
-      Array extracerts;
-      for (X509 *aCA = sk_X509_pop(ca); aCA; aCA = sk_X509_pop(ca)) {
+      BIO *bio_out = nullptr;
+      if (cert) {
         bio_out = BIO_new(BIO_s_mem());
-        if (PEM_write_bio_X509(bio_out, aCA)) {
+        if (PEM_write_bio_X509(bio_out, cert)) {
           BUF_MEM *bio_buf;
           BIO_get_mem_ptr(bio_out, &bio_buf);
-          extracerts.append(String((char*)bio_buf->data, bio_buf->length,
-                                   CopyString));
+          vcerts.toArrRef().set(s_cert,
+            String((char*)bio_buf->data, bio_buf->length, CopyString));
         }
         BIO_free(bio_out);
-        X509_free(aCA);
       }
+
+      if (pkey) {
+        bio_out = BIO_new(BIO_s_mem());
+        if (PEM_write_bio_PrivateKey(bio_out, pkey, nullptr, nullptr, 0, 0, nullptr)) {
+          BUF_MEM *bio_buf;
+          BIO_get_mem_ptr(bio_out, &bio_buf);
+          vcerts.toArrRef().set(s_pkey,
+            String((char*)bio_buf->data, bio_buf->length, CopyString));
+        }
+        BIO_free(bio_out);
+      }
+
       if (ca) {
+        Array extracerts;
+        for (X509 *aCA = sk_X509_pop(ca); aCA; aCA = sk_X509_pop(ca)) {
+          bio_out = BIO_new(BIO_s_mem());
+          if (PEM_write_bio_X509(bio_out, aCA)) {
+            BUF_MEM *bio_buf;
+            BIO_get_mem_ptr(bio_out, &bio_buf);
+            extracerts.append(String((char*)bio_buf->data, bio_buf->length,
+                                     CopyString));
+          }
+          BIO_free(bio_out);
+          X509_free(aCA);
+        }
         sk_X509_free(ca);
         vcerts.toArrRef().set(s_extracerts, extracerts);
       }
@@ -1370,8 +1444,8 @@ bool HHVM_FUNCTION(openssl_pkcs7_decrypt, const String& infilename,
                                           const Variant& recipcert,
                               const Variant& recipkey /* = uninit_variant */) {
   bool ret = false;
-  BIO *in = NULL, *out = NULL, *datain = NULL;
-  PKCS7 *p7 = NULL;
+  BIO *in = nullptr, *out = nullptr, *datain = nullptr;
+  PKCS7 *p7 = nullptr;
   req::ptr<Key> okey;
 
   auto ocert = Certificate::Get(recipcert);
@@ -1387,22 +1461,22 @@ bool HHVM_FUNCTION(openssl_pkcs7_decrypt, const String& infilename,
   }
 
   in = BIO_new_file(infilename.data(), "r");
-  if (in == NULL) {
+  if (in == nullptr) {
     raise_warning("error opening the file, %s", infilename.data());
     goto clean_exit;
   }
   out = BIO_new_file(outfilename.data(), "w");
-  if (out == NULL) {
+  if (out == nullptr) {
     raise_warning("error opening the file, %s", outfilename.data());
     goto clean_exit;
   }
 
   p7 = SMIME_read_PKCS7(in, &datain);
-  if (p7 == NULL) {
+  if (p7 == nullptr) {
     goto clean_exit;
   }
-  assert(okey->m_key);
-  assert(ocert->m_cert);
+  assertx(okey->m_key);
+  assertx(ocert->m_cert);
   if (PKCS7_decrypt(p7, okey->m_key, ocert->m_cert, out, PKCS7_DETACHED)) {
     ret = true;
   }
@@ -1438,18 +1512,18 @@ bool HHVM_FUNCTION(openssl_pkcs7_encrypt, const String& infilename,
                                           int flags /* = 0 */,
                                 int cipherid /* = k_OPENSSL_CIPHER_RC2_40 */) {
   bool ret = false;
-  BIO *infile = NULL, *outfile = NULL;
-  STACK_OF(X509) *precipcerts = NULL;
-  PKCS7 *p7 = NULL;
-  const EVP_CIPHER *cipher = NULL;
+  BIO *infile = nullptr, *outfile = nullptr;
+  STACK_OF(X509) *precipcerts = nullptr;
+  PKCS7 *p7 = nullptr;
+  const EVP_CIPHER *cipher = nullptr;
 
-  infile = BIO_new_file(infilename.data(), "r");
-  if (infile == NULL) {
+  infile = BIO_new_file(infilename.data(), (flags & PKCS7_BINARY) ? "rb" : "r");
+  if (infile == nullptr) {
     raise_warning("error opening the file, %s", infilename.data());
     goto clean_exit;
   }
   outfile = BIO_new_file(outfilename.data(), "w");
-  if (outfile == NULL) {
+  if (outfile == nullptr) {
     raise_warning("error opening the file, %s", outfilename.data());
     goto clean_exit;
   }
@@ -1471,13 +1545,13 @@ bool HHVM_FUNCTION(openssl_pkcs7_encrypt, const String& infilename,
     raise_warning("Invalid cipher type `%d'", cipherid);
     goto clean_exit;
   }
-  if (cipher == NULL) {
+  if (cipher == nullptr) {
     raise_warning("Failed to get cipher");
     goto clean_exit;
   }
 
   p7 = PKCS7_encrypt(precipcerts, infile, (EVP_CIPHER*)cipher, flags);
-  if (p7 == NULL) goto clean_exit;
+  if (p7 == nullptr) goto clean_exit;
 
   print_headers(outfile, headers);
   (void)BIO_reset(infile);
@@ -1500,15 +1574,15 @@ bool HHVM_FUNCTION(openssl_pkcs7_sign, const String& infilename,
                                        int flags /* = k_PKCS7_DETACHED */,
                                 const String& extracerts /* = null_string */) {
   bool ret = false;
-  STACK_OF(X509) *others = NULL;
-  BIO *infile = NULL, *outfile = NULL;
-  PKCS7 *p7 = NULL;
+  STACK_OF(X509) *others = nullptr;
+  BIO *infile = nullptr, *outfile = nullptr;
+  PKCS7 *p7 = nullptr;
   req::ptr<Key> okey;
   req::ptr<Certificate> ocert;
 
   if (!extracerts.empty()) {
     others = load_all_certs_from_file(extracerts.data());
-    if (others == NULL) {
+    if (others == nullptr) {
       goto clean_exit;
     }
   }
@@ -1529,20 +1603,20 @@ bool HHVM_FUNCTION(openssl_pkcs7_sign, const String& infilename,
   X509 *cert;
   cert = ocert->m_cert;
 
-  infile = BIO_new_file(infilename.data(), "r");
-  if (infile == NULL) {
+  infile = BIO_new_file(infilename.data(), (flags & PKCS7_BINARY) ? "rb" : "r");
+  if (infile == nullptr) {
     raise_warning("error opening input file %s!", infilename.data());
     goto clean_exit;
   }
 
   outfile = BIO_new_file(outfilename.data(), "w");
-  if (outfile == NULL) {
+  if (outfile == nullptr) {
     raise_warning("error opening output file %s!", outfilename.data());
     goto clean_exit;
   }
 
   p7 = PKCS7_sign(cert, key, others, infile, flags);
-  if (p7 == NULL) {
+  if (p7 == nullptr) {
     raise_warning("error creating PKCS7 structure!");
     goto clean_exit;
   }
@@ -1591,20 +1665,20 @@ Variant openssl_pkcs7_verify_core(
   bool ignore_cert_expiration
 ) {
   Variant ret = -1;
-  X509_STORE *store = NULL;
-  BIO *in = NULL;
-  PKCS7 *p7 = NULL;
-  BIO *datain = NULL;
-  BIO *dataout = NULL;
+  X509_STORE *store = nullptr;
+  BIO *in = nullptr;
+  PKCS7 *p7 = nullptr;
+  BIO *datain = nullptr;
+  BIO *dataout = nullptr;
 
   auto cainfo = vcainfo.toArray();
   auto extracerts = vextracerts.toString();
   auto content = vcontent.toString();
 
-  STACK_OF(X509) *others = NULL;
+  STACK_OF(X509) *others = nullptr;
   if (!extracerts.empty()) {
     others = load_all_certs_from_file(extracerts.data());
-    if (others == NULL) {
+    if (others == nullptr) {
       goto clean_exit;
     }
   }
@@ -1618,7 +1692,11 @@ Variant openssl_pkcs7_verify_core(
   if (ignore_cert_expiration) {
 #if (OPENSSL_VERSION_NUMBER >= 0x10000000)
     // make sure no other callback is specified
-    assert(!store->verify_cb);
+  #if OPENSSL_VERSION_NUMBER >= 0x10100000L
+    assertx(!X509_STORE_get_verify_cb(store));
+  #else
+    assertx(!store->verify_cb);
+  #endif
     // ignore expired certs
     X509_STORE_set_verify_cb(store, pkcs7_ignore_expiration);
 #else
@@ -1626,19 +1704,19 @@ Variant openssl_pkcs7_verify_core(
 #endif
   }
   in = BIO_new_file(filename.data(), (flags & PKCS7_BINARY) ? "rb" : "r");
-  if (in == NULL) {
+  if (in == nullptr) {
     raise_warning("error opening the file, %s", filename.data());
     goto clean_exit;
   }
 
   p7 = SMIME_read_PKCS7(in, &datain);
-  if (p7 == NULL) {
+  if (p7 == nullptr) {
     goto clean_exit;
   }
 
   if (!content.empty()) {
     dataout = BIO_new_file(content.data(), "w");
-    if (dataout == NULL) {
+    if (dataout == nullptr) {
       raise_warning("error opening the file, %s", content.data());
       goto clean_exit;
     }
@@ -1650,7 +1728,7 @@ Variant openssl_pkcs7_verify_core(
     if (!outfilename.empty()) {
       BIO *certout = BIO_new_file(outfilename.data(), "w");
       if (certout) {
-        STACK_OF(X509) *signers = PKCS7_get0_signers(p7, NULL, flags);
+        STACK_OF(X509) *signers = PKCS7_get0_signers(p7, nullptr, flags);
         for (int i = 0; i < sk_X509_num(signers); i++) {
           PEM_write_bio_X509(certout, sk_X509_value(signers, i));
         }
@@ -1707,12 +1785,27 @@ openssl_pkey_export_impl(const Variant& key, BIO *bio_out,
     if (!passphrase.empty() && req.priv_key_encrypt) {
       cipher = (EVP_CIPHER *)EVP_des_ede3_cbc();
     } else {
-      cipher = NULL;
+      cipher = nullptr;
     }
-    assert(bio_out);
-    ret = PEM_write_bio_PrivateKey(bio_out, pkey, cipher,
-                                   (unsigned char *)passphrase.data(),
-                                   passphrase.size(), NULL, NULL);
+    assertx(bio_out);
+
+    switch (EVP_PKEY_id(pkey)) {
+#ifdef HAVE_EVP_PKEY_EC
+      case EVP_PKEY_EC:
+        ret = PEM_write_bio_ECPrivateKey(bio_out, EVP_PKEY_get0_EC_KEY(pkey),
+                                         cipher,
+                                         (unsigned char *)passphrase.data(),
+                                         passphrase.size(),
+                                         nullptr,
+                                         nullptr);
+        break;
+#endif
+      default:
+        ret = PEM_write_bio_PrivateKey(bio_out, pkey, cipher,
+                                       (unsigned char *)passphrase.data(),
+                                       passphrase.size(), nullptr, nullptr);
+        break;
+    }
   }
   php_openssl_dispose_config(&req);
   return ret;
@@ -1723,7 +1816,7 @@ bool HHVM_FUNCTION(openssl_pkey_export_to_file, const Variant& key,
                                    const String& passphrase /* = null_string */,
                              const Variant& configargs /* = uninit_variant */) {
   BIO *bio_out = BIO_new_file(outfilename.data(), "w");
-  if (bio_out == NULL) {
+  if (bio_out == nullptr) {
     raise_warning("error opening the file, %s", outfilename.data());
     return false;
   }
@@ -1754,6 +1847,7 @@ const StaticString
   s_hash("hash"),
   s_version("version"),
   s_serialNumber("serialNumber"),
+  s_signatureAlgorithm("signatureAlgorithm"),
   s_validFrom("validFrom"),
   s_validTo("validTo"),
   s_validFrom_time_t("validFrom_time_t"),
@@ -1764,21 +1858,25 @@ const StaticString
   s_rsa("rsa"),
   s_dsa("dsa"),
   s_dh("dh"),
+  s_ec("ec"),
   s_n("n"),
   s_e("e"),
   s_d("d"),
   s_p("p"),
   s_q("q"),
   s_g("g"),
+  s_x("x"),
+  s_y("y"),
   s_dmp1("dmp1"),
   s_dmq1("dmq1"),
   s_iqmp("iqmp"),
   s_priv_key("priv_key"),
-  s_pub_key("pub_key");
+  s_pub_key("pub_key"),
+  s_curve_oid("curve_oid");
 
 static void add_bignum_as_string(Array &arr,
                                  StaticString key,
-                                 BIGNUM *bn) {
+                                 const BIGNUM *bn) {
   if (!bn) {
     return;
   }
@@ -1802,48 +1900,113 @@ Array HHVM_FUNCTION(openssl_pkey_get_details, const Resource& key) {
   long ktype = -1;
 
   Array details;
-  RSA *rsa = pkey->pkey.rsa;
-  DSA *dsa = pkey->pkey.dsa;
-  DH *dh = pkey->pkey.dh;
-  switch (EVP_PKEY_type(pkey->type)) {
+  switch (EVP_PKEY_id(pkey)) {
   case EVP_PKEY_RSA:
   case EVP_PKEY_RSA2:
-    ktype = OPENSSL_KEYTYPE_RSA;
-    assert(rsa);
-    add_bignum_as_string(details, s_n, rsa->n);
-    add_bignum_as_string(details, s_e, rsa->e);
-    add_bignum_as_string(details, s_d, rsa->d);
-    add_bignum_as_string(details, s_p, rsa->p);
-    add_bignum_as_string(details, s_q, rsa->q);
-    add_bignum_as_string(details, s_dmp1, rsa->dmp1);
-    add_bignum_as_string(details, s_dmq1, rsa->dmq1);
-    add_bignum_as_string(details, s_iqmp, rsa->iqmp);
-    ret.set(s_rsa, details);
-    break;
+    {
+      ktype = OPENSSL_KEYTYPE_RSA;
+      RSA *rsa = EVP_PKEY_get0_RSA(pkey);
+      assertx(rsa);
+      const BIGNUM *n, *e, *d, *p, *q, *dmp1, *dmq1, *iqmp;
+      RSA_get0_key(rsa, &n, &e, &d);
+      RSA_get0_factors(rsa, &p, &q);
+      RSA_get0_crt_params(rsa, &dmp1, &dmq1, &iqmp);
+      add_bignum_as_string(details, s_n, n);
+      add_bignum_as_string(details, s_e, e);
+      add_bignum_as_string(details, s_d, d);
+      add_bignum_as_string(details, s_p, p);
+      add_bignum_as_string(details, s_q, q);
+      add_bignum_as_string(details, s_dmp1, dmp1);
+      add_bignum_as_string(details, s_dmq1, dmq1);
+      add_bignum_as_string(details, s_iqmp, iqmp);
+      ret.set(s_rsa, details);
+      break;
+  }
   case EVP_PKEY_DSA:
   case EVP_PKEY_DSA2:
   case EVP_PKEY_DSA3:
   case EVP_PKEY_DSA4:
-    ktype = OPENSSL_KEYTYPE_DSA;
-    assert(dsa);
-    add_bignum_as_string(details, s_p, dsa->p);
-    add_bignum_as_string(details, s_q, dsa->q);
-    add_bignum_as_string(details, s_g, dsa->g);
-    add_bignum_as_string(details, s_priv_key, dsa->priv_key);
-    add_bignum_as_string(details, s_pub_key, dsa->pub_key);
-    ret.set(s_dsa, details);
-    break;
+    {
+      ktype = OPENSSL_KEYTYPE_DSA;
+      DSA *dsa = EVP_PKEY_get0_DSA(pkey);
+      assertx(dsa);
+      const BIGNUM *p, *q, *g, *pub_key, *priv_key;
+      DSA_get0_pqg(dsa, &p, &q, &g);
+      DSA_get0_key(dsa, &pub_key, &priv_key);
+      add_bignum_as_string(details, s_p, p);
+      add_bignum_as_string(details, s_q, q);
+      add_bignum_as_string(details, s_g, g);
+      add_bignum_as_string(details, s_priv_key, priv_key);
+      add_bignum_as_string(details, s_pub_key, pub_key);
+      ret.set(s_dsa, details);
+      break;
+    }
   case EVP_PKEY_DH:
-    ktype = OPENSSL_KEYTYPE_DH;
-    assert(dh);
-    add_bignum_as_string(details, s_p, dh->p);
-    add_bignum_as_string(details, s_g, dh->g);
-    add_bignum_as_string(details, s_priv_key, dh->priv_key);
-    add_bignum_as_string(details, s_pub_key, dh->pub_key);
-    ret.set(s_dh, details);
+    {
+      ktype = OPENSSL_KEYTYPE_DH;
+      DH *dh = EVP_PKEY_get0_DH(pkey);
+      assertx(dh);
+      const BIGNUM *p, *q, *g, *pub_key, *priv_key;
+      DH_get0_pqg(dh, &p, &q, &g);
+      DH_get0_key(dh, &pub_key, &priv_key);
+      add_bignum_as_string(details, s_p, p);
+      add_bignum_as_string(details, s_g, g);
+      add_bignum_as_string(details, s_priv_key, priv_key);
+      add_bignum_as_string(details, s_pub_key, pub_key);
+      ret.set(s_dh, details);
+      break;
+    }
+#ifdef HAVE_EVP_PKEY_EC
+  case EVP_PKEY_EC:
+    {
+      ktype = OPENSSL_KEYTYPE_EC;
+      auto const ec = EVP_PKEY_get0_EC_KEY(pkey);
+      assertx(ec);
+
+      auto const ec_group = EC_KEY_get0_group(ec);
+      auto const nid = EC_GROUP_get_curve_name(ec_group);
+      if (nid == NID_undef) {
+        break;
+      }
+
+      auto const crv_sn = OBJ_nid2sn(nid);
+      if (crv_sn != nullptr) {
+        details.set(s_curve_name, String(crv_sn, CopyString));
+      }
+
+      auto const obj = OBJ_nid2obj(nid);
+      if (obj != nullptr) {
+        SCOPE_EXIT {
+          ASN1_OBJECT_free(obj);
+        };
+        char oir_buf[256];
+        OBJ_obj2txt(oir_buf, sizeof(oir_buf) - 1, obj, 1);
+        details.set(s_curve_oid, String(oir_buf, CopyString));
+      }
+
+      auto x = BN_new();
+      auto y = BN_new();
+      SCOPE_EXIT {
+        BN_free(x);
+        BN_free(y);
+      };
+      auto const pub = EC_KEY_get0_public_key(ec);
+      if (EC_POINT_get_affine_coordinates_GFp(ec_group, pub, x, y, nullptr)) {
+        add_bignum_as_string(details, s_x, x);
+        add_bignum_as_string(details, s_y, y);
+      }
+
+      auto d = BN_dup(EC_KEY_get0_private_key(ec));
+      SCOPE_EXIT {
+        BN_free(d);
+      };
+      if (d != nullptr) {
+        add_bignum_as_string(details, s_d, d);
+      }
+
+      ret.set(s_ec, details);
+    }
     break;
-#ifdef EVP_PKEY_EC
-  case EVP_PKEY_EC:      ktype = OPENSSL_KEYTYPE_EC;    break;
 #endif
   }
   ret.set(s_type, ktype);
@@ -1860,20 +2023,21 @@ Variant HHVM_FUNCTION(openssl_pkey_get_public, const Variant& certificate) {
   return toVariant(Key::Get(certificate, true));
 }
 
-Resource HHVM_FUNCTION(openssl_pkey_new,
+Variant HHVM_FUNCTION(openssl_pkey_new,
                        const Variant& configargs /* = uninit_variant */) {
   struct php_x509_request req;
   memset(&req, 0, sizeof(req));
+  SCOPE_EXIT {
+    php_openssl_dispose_config(&req);
+  };
 
-  Resource ret;
   std::vector<String> strings;
   if (php_openssl_parse_config(&req, configargs.toArray(), strings) &&
       req.generatePrivateKey()) {
-    ret = Resource(req::make<Key>(req.priv_key));
+    return Resource(req::make<Key>(req.priv_key));
+  } else {
+    return false;
   }
-
-  php_openssl_dispose_config(&req);
-  return ret;
 }
 
 bool HHVM_FUNCTION(openssl_private_decrypt, const String& data,
@@ -1891,13 +2055,13 @@ bool HHVM_FUNCTION(openssl_private_decrypt, const String& data,
   unsigned char *cryptedbuf = (unsigned char *)s.mutableData();
 
   int successful = 0;
-  switch (pkey->type) {
+  switch (EVP_PKEY_id(pkey)) {
   case EVP_PKEY_RSA:
   case EVP_PKEY_RSA2:
     cryptedlen = RSA_private_decrypt(data.size(),
                                      (unsigned char *)data.data(),
                                      cryptedbuf,
-                                     pkey->pkey.rsa,
+                                     EVP_PKEY_get0_RSA(pkey),
                                      padding);
     if (cryptedlen != -1) {
       successful = 1;
@@ -1931,13 +2095,13 @@ bool HHVM_FUNCTION(openssl_private_encrypt, const String& data,
   unsigned char *cryptedbuf = (unsigned char *)s.mutableData();
 
   int successful = 0;
-  switch (pkey->type) {
+  switch (EVP_PKEY_id(pkey)) {
   case EVP_PKEY_RSA:
   case EVP_PKEY_RSA2:
     successful = (RSA_private_encrypt(data.size(),
                                       (unsigned char *)data.data(),
                                       cryptedbuf,
-                                      pkey->pkey.rsa,
+                                      EVP_PKEY_get0_RSA(pkey),
                                       padding) == cryptedlen);
     break;
   default:
@@ -1967,13 +2131,13 @@ bool HHVM_FUNCTION(openssl_public_decrypt, const String& data,
   unsigned char *cryptedbuf = (unsigned char *)s.mutableData();
 
   int successful = 0;
-  switch (pkey->type) {
+  switch (EVP_PKEY_id(pkey)) {
   case EVP_PKEY_RSA:
   case EVP_PKEY_RSA2:
     cryptedlen = RSA_public_decrypt(data.size(),
                                     (unsigned char *)data.data(),
                                     cryptedbuf,
-                                    pkey->pkey.rsa,
+                                    EVP_PKEY_get0_RSA(pkey),
                                     padding);
     if (cryptedlen != -1) {
       successful = 1;
@@ -2007,13 +2171,13 @@ bool HHVM_FUNCTION(openssl_public_encrypt, const String& data,
   unsigned char *cryptedbuf = (unsigned char *)s.mutableData();
 
   int successful = 0;
-  switch (pkey->type) {
+  switch (EVP_PKEY_id(pkey)) {
   case EVP_PKEY_RSA:
   case EVP_PKEY_RSA2:
     successful = (RSA_public_encrypt(data.size(),
                                      (unsigned char *)data.data(),
                                      cryptedbuf,
-                                     pkey->pkey.rsa,
+                                     EVP_PKEY_get0_RSA(pkey),
                                      padding) == cryptedlen);
     break;
   default:
@@ -2112,19 +2276,18 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
 
   s = String(data.size() + EVP_CIPHER_CTX_block_size(ctx), ReserveString);
   buf = (unsigned char *)s.mutableData();
-  if (!EVP_SealInit(ctx, cipher_type, eks, eksl, iv_buf, pkeys, nkeys) ||
-      !EVP_SealUpdate(
-          ctx, buf, &len1, (unsigned char*)data.data(), data.size())) {
+  if (EVP_SealInit(ctx, cipher_type, eks, eksl, iv_buf, pkeys, nkeys) <= 0 ||
+      !EVP_SealUpdate(ctx, buf, &len1, (unsigned char*)data.data(), data.size()) ||
+      !EVP_SealFinal(ctx, buf + len1, &len2)) {
     ret = false;
     goto clean_exit;
   }
 
-  EVP_SealFinal(ctx, buf + len1, &len2);
   if (len1 + len2 > 0) {
     sealed_data.assignIfRef(s.setSize(len1 + len2));
 
     Array ekeys;
-    for (int i = 0; i < nkeys; i++) {
+    for (i = 0; i < nkeys; i++) {
       eks[i][eksl[i]] = '\0';
       ekeys.append(String((char*)eks[i], eksl[i], AttachString));
       eks[i] = nullptr;
@@ -2133,7 +2296,7 @@ Variant HHVM_FUNCTION(openssl_seal, const String& data, VRefParam sealed_data,
   }
 
  clean_exit:
-  for (int i = 0; i < nkeys; i++) {
+  for (i = 0; i < nkeys; i++) {
     if (eks[i]) free(eks[i]);
   }
   free(eks);
@@ -2161,7 +2324,9 @@ static const EVP_MD *php_openssl_get_evp_md_from_algo(long algo) {
 #ifdef HAVE_OPENSSL_MD2_H
   case OPENSSL_ALGO_MD2:  return EVP_md2();
 #endif
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
   case OPENSSL_ALGO_DSS1: return EVP_dss1();
+#endif
 #if OPENSSL_VERSION_NUMBER >= 0x0090708fL
   case OPENSSL_ALGO_SHA224: return EVP_sha224();
   case OPENSSL_ALGO_SHA256: return EVP_sha256();
@@ -2170,7 +2335,7 @@ static const EVP_MD *php_openssl_get_evp_md_from_algo(long algo) {
   case OPENSSL_ALGO_RMD160: return EVP_ripemd160();
 #endif
   }
-  return NULL;
+  return nullptr;
 }
 
 bool HHVM_FUNCTION(openssl_sign, const String& data, VRefParam signature,
@@ -2199,19 +2364,16 @@ bool HHVM_FUNCTION(openssl_sign, const String& data, VRefParam signature,
   String s = String(siglen, ReserveString);
   unsigned char *sigbuf = (unsigned char *)s.mutableData();
 
-  EVP_MD_CTX md_ctx;
-  EVP_SignInit(&md_ctx, mdtype);
-  EVP_SignUpdate(&md_ctx, (unsigned char *)data.data(), data.size());
-  if (EVP_SignFinal(&md_ctx, sigbuf, (unsigned int *)&siglen, pkey)) {
+  EVP_MD_CTX *md_ctx = EVP_MD_CTX_new();
+  SCOPE_EXIT {
+    EVP_MD_CTX_free(md_ctx);
+  };
+  EVP_SignInit(md_ctx, mdtype);
+  EVP_SignUpdate(md_ctx, (unsigned char *)data.data(), data.size());
+  if (EVP_SignFinal(md_ctx, sigbuf, (unsigned int *)&siglen, pkey)) {
     signature.assignIfRef(s.setSize(siglen));
-#if OPENSSL_VERSION_NUMBER >= 0x0090700fL
-    EVP_MD_CTX_cleanup(&md_ctx);
-#endif
     return true;
   }
-#if OPENSSL_VERSION_NUMBER >= 0x0090700fL
-  EVP_MD_CTX_cleanup(&md_ctx);
-#endif
   return false;
 }
 
@@ -2239,14 +2401,14 @@ Variant HHVM_FUNCTION(openssl_verify, const String& data,
     return false;
   }
 
-  EVP_MD_CTX md_ctx;
-  EVP_VerifyInit(&md_ctx, mdtype);
-  EVP_VerifyUpdate(&md_ctx, (unsigned char*)data.data(), data.size());
-  err = EVP_VerifyFinal(&md_ctx, (unsigned char *)signature.data(),
+  EVP_MD_CTX *md_ctx = EVP_MD_CTX_new();
+  SCOPE_EXIT {
+    EVP_MD_CTX_free(md_ctx);
+  };
+  EVP_VerifyInit(md_ctx, mdtype);
+  EVP_VerifyUpdate(md_ctx, (unsigned char*)data.data(), data.size());
+  err = EVP_VerifyFinal(md_ctx, (unsigned char *)signature.data(),
                          signature.size(), okey->m_key);
-#if OPENSSL_VERSION_NUMBER >= 0x0090700fL
-  EVP_MD_CTX_cleanup(&md_ctx);
-#endif
   return err;
 }
 
@@ -2266,7 +2428,7 @@ bool HHVM_FUNCTION(openssl_x509_check_private_key, const Variant& cert,
 static int check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedchain,
                       int purpose) {
   X509_STORE_CTX *csc = X509_STORE_CTX_new();
-  if (csc == NULL) {
+  if (csc == nullptr) {
     raise_warning("memory allocation failure");
     return 0;
   }
@@ -2286,19 +2448,19 @@ Variant HHVM_FUNCTION(openssl_x509_checkpurpose, const Variant& x509cert,
                       const Array& cainfo /* = null_array */,
                       const String& untrustedfile /* = null_string */) {
   int ret = -1;
-  STACK_OF(X509) *untrustedchain = NULL;
-  X509_STORE *pcainfo = NULL;
+  STACK_OF(X509) *untrustedchain = nullptr;
+  X509_STORE *pcainfo = nullptr;
   req::ptr<Certificate> ocert;
 
   if (!untrustedfile.empty()) {
     untrustedchain = load_all_certs_from_file(untrustedfile.data());
-    if (untrustedchain == NULL) {
+    if (untrustedchain == nullptr) {
       goto clean_exit;
     }
   }
 
   pcainfo = setup_verify(cainfo);
-  if (pcainfo == NULL) {
+  if (pcainfo == nullptr) {
     goto clean_exit;
   }
 
@@ -2309,7 +2471,7 @@ Variant HHVM_FUNCTION(openssl_x509_checkpurpose, const Variant& x509cert,
   }
   X509 *cert;
   cert = ocert->m_cert;
-  assert(cert);
+  assertx(cert);
 
   ret = check_cert(pcainfo, cert, untrustedchain, purpose);
 
@@ -2331,9 +2493,9 @@ static bool openssl_x509_export_impl(const Variant& x509, BIO *bio_out,
     return false;
   }
   X509 *cert = ocert->m_cert;
-  assert(cert);
+  assertx(cert);
 
-  assert(bio_out);
+  assertx(bio_out);
   if (!notext) {
     X509_print(bio_out, cert);
   }
@@ -2344,7 +2506,7 @@ bool HHVM_FUNCTION(openssl_x509_export_to_file, const Variant& x509,
                                                 const String& outfilename,
                                                 bool notext /* = true */) {
   BIO *bio_out = BIO_new_file((char*)outfilename.data(), "w");
-  if (bio_out == NULL) {
+  if (bio_out == nullptr) {
     raise_warning("error opening file %s", outfilename.data());
     return false;
   }
@@ -2374,20 +2536,29 @@ bool HHVM_FUNCTION(openssl_x509_export, const Variant& x509, VRefParam output,
  */
 static time_t asn1_time_to_time_t(ASN1_UTCTIME *timestr) {
 
-  if (ASN1_STRING_type(timestr) != V_ASN1_UTCTIME) {
+  auto const timestr_type = ASN1_STRING_type(timestr);
+
+  if (timestr_type != V_ASN1_UTCTIME && timestr_type != V_ASN1_GENERALIZEDTIME) {
     raise_warning("illegal ASN1 data type for timestamp");
     return (time_t)-1;
   }
 
+  auto const timestr_len = (size_t)ASN1_STRING_length(timestr);
+
   // Binary safety
-  if (ASN1_STRING_length(timestr) != strlen((char*)ASN1_STRING_data(timestr))) {
+  if (timestr_len != strlen((char*)ASN1_STRING_data(timestr))) {
     raise_warning("illegal length in timestamp");
     return (time_t)-1;
   }
 
-  if (ASN1_STRING_length(timestr) < 13) {
+  if (timestr_len < 13 && timestr_len != 11) {
     raise_warning("unable to parse time string %s correctly",
                     timestr->data);
+    return (time_t)-1;
+  }
+
+  if (timestr_type == V_ASN1_GENERALIZEDTIME && timestr_len < 15) {
+    raise_warning("unable to parse time string %s correctly", timestr->data);
     return (time_t)-1;
   }
 
@@ -2398,14 +2569,25 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME *timestr) {
 
   /* we work backwards so that we can use atoi more easily */
   char *thestr = strbuf + ASN1_STRING_length(timestr) - 3;
-  thetime.tm_sec  = atoi(thestr);   *thestr = '\0';  thestr -= 2;
+  if (ASN1_STRING_length(timestr) == 11) {
+    thetime.tm_sec = 0;
+  } else {
+    thetime.tm_sec  = atoi(thestr);   *thestr = '\0';  thestr -= 2;
+  }
   thetime.tm_min  = atoi(thestr);   *thestr = '\0';  thestr -= 2;
   thetime.tm_hour = atoi(thestr);   *thestr = '\0';  thestr -= 2;
   thetime.tm_mday = atoi(thestr);   *thestr = '\0';  thestr -= 2;
-  thetime.tm_mon  = atoi(thestr)-1; *thestr = '\0';  thestr -= 2;
-  thetime.tm_year = atoi(thestr);
-  if (thetime.tm_year < 68) {
-    thetime.tm_year += 100;
+  thetime.tm_mon  = atoi(thestr)-1; *thestr = '\0';
+
+  if (ASN1_STRING_type(timestr) == V_ASN1_UTCTIME) {
+    thestr -= 2;
+    thetime.tm_year = atoi(thestr);
+    if (thetime.tm_year < 68) {
+      thetime.tm_year += 100;
+    }
+  } else if (ASN1_STRING_type(timestr) == V_ASN1_GENERALIZEDTIME) {
+    thestr -= 4;
+    thetime.tm_year = atoi(thestr) - 1900;
   }
 
   thetime.tm_isdst = -1;
@@ -2425,9 +2607,10 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME *timestr) {
    * and set the adjustment to the main timezone + 3600 seconds.
    */
   gmadjust = -(thetime.tm_isdst ?
-               (long)timezone - 3600 : (long)timezone + 3600);
+               (long)timezone - 3600 : (long)timezone);
 #endif
-  ret += gmadjust;
+  /* no adjustment for UTC */
+  if (timezone) ret += gmadjust;
   free(strbuf);
   return ret;
 }
@@ -2448,8 +2631,9 @@ static int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension)
     return -1;
   }
 
-  p = extension->value->data;
-  length = extension->value->length;
+  const auto data = X509_EXTENSION_get_data(extension);
+  p = data->data;
+  length = data->length;
   if (method->it) {
     names = (GENERAL_NAMES*)(ASN1_item_d2i(nullptr, &p, length,
                                           ASN1_ITEM_ptr(method->it)));
@@ -2506,14 +2690,14 @@ Variant HHVM_FUNCTION(openssl_x509_parse, const Variant& x509cert,
     return false;
   }
   X509 *cert = ocert->m_cert;
-  assert(cert);
+  assertx(cert);
 
   Array ret;
-  if (cert->name) {
-    ret.set(s_name, String(cert->name, CopyString));
+  const auto sn = X509_get_subject_name(cert);
+  if (sn) {
+    ret.set(s_name, String(X509_NAME_oneline(sn, nullptr, 0), CopyString));
   }
-  add_assoc_name_entry(ret, "subject", X509_get_subject_name(cert),
-                       shortnames);
+  add_assoc_name_entry(ret, "subject", sn, shortnames);
   /* hash as used in CA directories to lookup cert by subject name */
   {
     char buf[32];
@@ -2525,7 +2709,16 @@ Variant HHVM_FUNCTION(openssl_x509_parse, const Variant& x509cert,
   ret.set(s_version, X509_get_version(cert));
 
   ret.set(s_serialNumber, String
-          (i2s_ASN1_INTEGER(NULL, X509_get_serialNumber(cert)), AttachString));
+          (i2s_ASN1_INTEGER(nullptr, X509_get_serialNumber(cert)), AttachString));
+  // Adding Signature Algorithm
+  BIO *bio_out = BIO_new(BIO_s_mem());
+  SCOPE_EXIT { BIO_free(bio_out); };
+  if (i2a_ASN1_OBJECT(bio_out, X509_get0_tbs_sigalg(cert)->algorithm) > 0) {
+    BUF_MEM *bio_buf;
+    BIO_get_mem_ptr(bio_out, &bio_buf);
+    ret.set(s_signatureAlgorithm,
+            String((char*)bio_buf->data, bio_buf->length, CopyString));
+  }
 
   ASN1_STRING *str = X509_get_notBefore(cert);
   ret.set(s_validFrom, String((char*)str->data, str->length, CopyString));
@@ -2534,7 +2727,7 @@ Variant HHVM_FUNCTION(openssl_x509_parse, const Variant& x509cert,
   ret.set(s_validFrom_time_t, asn1_time_to_time_t(X509_get_notBefore(cert)));
   ret.set(s_validTo_time_t, asn1_time_to_time_t(X509_get_notAfter(cert)));
 
-  char *tmpstr = (char *)X509_alias_get0(cert, NULL);
+  char *tmpstr = (char *)X509_alias_get0(cert, nullptr);
   if (tmpstr) {
     ret.set(s_alias, String(tmpstr, CopyString));
   }
@@ -2594,7 +2787,7 @@ Variant HHVM_FUNCTION(openssl_x509_parse, const Variant& x509cert,
         subitem.set(String(extname, CopyString),
                     String((char*)bio_buf->data, bio_buf->length, CopyString));
       } else {
-        ASN1_STRING *str = X509_EXTENSION_get_data(extension);
+        str = X509_EXTENSION_get_data(extension);
         subitem.set(String(extname, CopyString),
                     String((char*)str->data, str->length, CopyString));
       }
@@ -2622,7 +2815,7 @@ Variant HHVM_FUNCTION(openssl_random_pseudo_bytes, int length,
     return false;
   }
 
-  unsigned char *buffer = NULL;
+  unsigned char *buffer = nullptr;
 
   String s = String(length, ReserveString);
   buffer = (unsigned char *)s.mutableData();
@@ -2865,7 +3058,7 @@ Variant HHVM_FUNCTION(openssl_encrypt, const String& data, const String& method,
   }
 
   // OpenSSL before 0.9.8i asserts with size < 0
-  if (data.size() > 0) {
+  if (data.size() >= 0) {
     EVP_EncryptUpdate(cipher_ctx, outbuf, &result_len,
                       (unsigned char *)data.data(), data.size());
   }
@@ -3062,11 +3255,15 @@ Variant HHVM_FUNCTION(openssl_digest, const String& data, const String& method,
   int siglen = EVP_MD_size(mdtype);
   String rv = String(siglen, ReserveString);
   unsigned char *sigbuf = (unsigned char *)rv.mutableData();
-  EVP_MD_CTX md_ctx;
+  EVP_MD_CTX *md_ctx = EVP_MD_CTX_new();
+  SCOPE_EXIT {
+    EVP_MD_CTX_free(md_ctx);
+  };
 
-  EVP_DigestInit(&md_ctx, mdtype);
-  EVP_DigestUpdate(&md_ctx, (unsigned char *)data.data(), data.size());
-  if (EVP_DigestFinal(&md_ctx, (unsigned char *)sigbuf, (unsigned int *)&siglen)) {
+  EVP_DigestInit(md_ctx, mdtype);
+
+  EVP_DigestUpdate(md_ctx, (unsigned char *)data.data(), data.size());
+  if (EVP_DigestFinal(md_ctx, (unsigned char *)sigbuf, (unsigned int *)&siglen)) {
     if (raw_output) {
       rv.setSize(siglen);
       return rv;
@@ -3099,6 +3296,28 @@ Array HHVM_FUNCTION(openssl_get_cipher_methods, bool aliases /* = false */) {
     aliases ? openssl_add_method_or_alias: openssl_add_method,
     &ret);
   return ret;
+}
+
+Variant HHVM_FUNCTION(openssl_get_curve_names) {
+#ifdef HAVE_EVP_PKEY_EC
+  const size_t len = EC_get_builtin_curves(nullptr, 0);
+  std::unique_ptr<EC_builtin_curve[]> curves(new EC_builtin_curve[len]);
+  if (!EC_get_builtin_curves(curves.get(), len)) {
+    return false;
+  }
+
+  PackedArrayInit ret(len);
+  for (size_t i = 0; i < len; ++i) {
+    auto const sname = OBJ_nid2sn(curves[i].nid);
+    if (sname != nullptr) {
+      ret.append(String(sname, CopyString));
+    }
+  }
+
+  return ret.toArray();
+#else
+  return false;
+#endif
 }
 
 Array HHVM_FUNCTION(openssl_get_md_methods, bool aliases /* = false */) {
@@ -3145,7 +3364,9 @@ struct opensslExtension final : Extension {
     HHVM_RC_INT_SAME(OPENSSL_KEYTYPE_RSA);
     HHVM_RC_INT_SAME(OPENSSL_KEYTYPE_DSA);
     HHVM_RC_INT_SAME(OPENSSL_KEYTYPE_DH);
+#ifdef HAVE_EVP_PKEY_EC
     HHVM_RC_INT_SAME(OPENSSL_KEYTYPE_EC);
+#endif
 
     HHVM_RC_INT_SAME(OPENSSL_VERSION_NUMBER);
 
@@ -3211,6 +3432,7 @@ struct opensslExtension final : Extension {
     HHVM_FE(openssl_decrypt);
     HHVM_FE(openssl_digest);
     HHVM_FE(openssl_get_cipher_methods);
+    HHVM_FE(openssl_get_curve_names);
     HHVM_FE(openssl_get_md_methods);
 
     loadSystemlib();

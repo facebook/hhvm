@@ -64,6 +64,11 @@ size_t smashableJmpLen();
 size_t smashableJccLen();
 
 /*
+ * Boundry to align the smashables to (normally cache line size).
+ */
+size_t smashableAlignTo();
+
+/*
  * Emit a smashable instruction and return the instruction's address.
  *
  * For jcc_and_jmp, return a pair of (jcc_addr, jmp_addr).
@@ -90,7 +95,7 @@ void smashMovq(TCA inst, uint64_t imm);
 void smashCmpq(TCA inst, uint32_t imm);
 void smashCall(TCA inst, TCA target);
 void smashJmp(TCA inst, TCA target);
-void smashJcc(TCA inst, TCA target, ConditionCode cc = CC_None);
+void smashJcc(TCA inst, TCA target);
 
 /*
  * Extract instruction operands from assembly.
@@ -110,6 +115,14 @@ ConditionCode smashableJccCond(TCA inst);
  * Obtain the address of a smashable call from its return IP.
  */
 TCA smashableCallFromRet(TCA ret);
+
+/*
+ * Optimize a smashable instruction in place after it has been smashed.  Returns
+ * whether or not the instruction was optimized.
+ */
+bool optimizeSmashedCall(TCA inst);
+bool optimizeSmashedJmp(TCA inst);
+bool optimizeSmashedJcc(TCA inst);
 
 ///////////////////////////////////////////////////////////////////////////////
 

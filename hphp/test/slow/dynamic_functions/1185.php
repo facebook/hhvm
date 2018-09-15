@@ -3,6 +3,10 @@
 function test($a, $b) {
  print $a.$b;
 }
- $a = 'Test';
+
+ <<__EntryPoint>>
+function main_1185() {
+$a = 'Test';
  $y = 'kqq';
  $a('o',$y[0]);
+}

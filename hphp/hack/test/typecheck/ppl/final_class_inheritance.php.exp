@@ -1,0 +1,4 @@
+File "final_class_inheritance.php", line 10, characters 7-16:
+You cannot extend final class BaseClass (Typing[4035])
+File "final_class_inheritance.php", line 6, characters 13-21:
+Declaration is here

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function cmpCTrue($x) {
   print "----------\n";

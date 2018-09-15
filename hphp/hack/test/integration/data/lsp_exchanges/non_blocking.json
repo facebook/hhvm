@@ -1,0 +1,46 @@
+[
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "initialize",
+    "params": {
+      "initializeOptions": {},
+      "processId": null,
+      "rootPath": "${root_path}",
+      "capabilities": {}
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "textDocument/definition",
+    "id": 2,
+    "params": {
+      "textDocument": {
+        "uri": "${php_file_uri}"
+      },
+      "position": {
+        "line": 7,
+        "character": 11
+      }
+    }
+  },
+  {
+    "comment": "remove hh_loop_forever() invocation to break the infinite loop",
+    "jsonrpc": "2.0",
+    "method": "textDocument/didOpen",
+    "params": {
+      "textDocument": {
+        "uri": "${root_path}/__hh_loop_forever_foo.php",
+        "languageId": "hack",
+        "version": 1,
+        "text": "<?hh //strict\n\nfunction __hh_loop_forever_foo(): int { return 4; }"
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "id": 999,
+    "method": "shutdown",
+    "params": {}
+  }
+]

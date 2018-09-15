@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_BUILTIN_FUNCTIONS_H_
 #define incl_HPHP_BUILTIN_FUNCTIONS_H_
 
-#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/vm/bytecode.h"
@@ -61,28 +60,77 @@ void throw_exception(const Object& e);
 ///////////////////////////////////////////////////////////////////////////////
 // type testing
 
-inline bool is_null(const Variant& v)   { return v.isNull();}
-inline bool is_not_null(const Variant& v) { return !v.isNull();}
-inline bool is_bool(const Variant& v)   { return v.is(KindOfBoolean);}
-inline bool is_int(const Variant& v)    { return v.isInteger();}
-inline bool is_double(const Variant& v) { return v.is(KindOfDouble);}
-inline bool is_string(const Variant& v) { return v.isString();}
-inline bool is_array(const Variant& v)  { return v.isPHPArray();}
-inline bool is_vec(const Variant& v)    { return v.isVecArray();}
-inline bool is_dict(const Variant& v)   { return v.isDict();}
-inline bool is_keyset(const Variant& v) { return v.isKeyset();}
-
-inline bool is_object(const Variant& var) {
-  if (!var.is(KindOfObject)) {
-    return false;
-  }
-  auto cls = var.toObject().get()->getVMClass();
-  auto incompleteClass = SystemLib::s___PHP_Incomplete_ClassClass;
-  return cls != incompleteClass;
+inline bool is_null(const Cell* c) {
+  assertx(cellIsPlausible(*c));
+  return tvIsNull(c);
 }
 
-inline bool is_empty_string(const Variant& v) {
-  return v.isString() && v.getStringData()->empty();
+inline bool is_bool(const Cell* c) {
+  assertx(cellIsPlausible(*c));
+  return tvIsBool(c);
+}
+
+inline bool is_int(const Cell* c) {
+  assertx(cellIsPlausible(*c));
+  return tvIsInt(c);
+}
+
+inline bool is_double(const Cell* c) {
+  assertx(cellIsPlausible(*c));
+  return tvIsDouble(c);
+}
+
+inline bool is_string(const Cell* c) {
+  if (tvIsString(c)) return true;
+  if (tvIsFunc(c)) {
+    if (RuntimeOption::EvalRaiseFuncConversionWarning) {
+      raise_warning("Func to string conversion");
+    }
+    return true;
+  }
+  return false;
+}
+
+inline bool is_array(const Cell* c) {
+  assertx(cellIsPlausible(*c));
+  return tvIsArrayOrShape(c);
+}
+
+inline bool is_vec(const Cell* c) {
+  assertx(cellIsPlausible(*c));
+  return tvIsVec(c);
+}
+
+inline bool is_dict(const Cell* c) {
+  assertx(cellIsPlausible(*c));
+  return tvIsDictOrShape(c);
+}
+
+inline bool is_keyset(const Cell* c) {
+  assertx(cellIsPlausible(*c));
+  return tvIsKeyset(c);
+}
+
+inline bool is_varray(const Cell* c) {
+  return RuntimeOption::EvalHackArrDVArrs
+    ? tvIsVec(c)
+    : (tvIsArray(c) && c->m_data.parr->isVArray());
+}
+
+inline bool is_darray(const Cell* c) {
+  return RuntimeOption::EvalHackArrDVArrs
+    ? tvIsDictOrShape(c)
+    : (tvIsArray(c) && c->m_data.parr->isDArray());
+}
+
+inline bool is_object(const Cell* c) {
+  assertx(cellIsPlausible(*c));
+  return tvIsObject(c) &&
+    c->m_data.pobj->getVMClass() != SystemLib::s___PHP_Incomplete_ClassClass;
+}
+
+inline bool is_empty_string(const Cell* c) {
+  return tvIsString(c) && c->m_data.pstr->empty();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -101,26 +149,35 @@ bool array_is_valid_callback(const Array& arr);
 
 enum class DecodeFlags { Warn, NoWarn, LookupOnly };
 const HPHP::Func*
-vm_decode_function(const Variant& function,
+vm_decode_function(const_variant_ref function,
                    ActRec* ar,
                    bool forwarding,
                    ObjectData*& this_,
                    HPHP::Class*& cls,
                    StringData*& invName,
+                   bool& dynamic,
                    DecodeFlags flags = DecodeFlags::Warn);
 
 inline void
-vm_decode_function(const Variant& function,
+vm_decode_function(const_variant_ref function,
                    ActRec* ar,
                    bool forwarding,
                    CallCtx& ctx,
                    DecodeFlags flags = DecodeFlags::Warn) {
   ctx.func = vm_decode_function(function, ar, forwarding, ctx.this_, ctx.cls,
-                                ctx.invName, flags);
+                                ctx.invName, ctx.dynamic, flags);
 }
 
-Variant vm_call_user_func(const Variant& function, const Variant& params,
-                          bool forwarding = false);
+Variant vm_call_user_func(const_variant_ref function, const Variant& params,
+                          bool forwarding = false, bool checkRef = false);
+template<typename T>
+Variant vm_call_user_func(T&& t, const Variant& params,
+                          bool forwarding = false, bool checkRef = false) {
+  const Variant function{std::forward<T>(t)};
+  return vm_call_user_func(
+    const_variant_ref{function}, params, forwarding, checkRef
+  );
+}
 
 Variant invoke_static_method(const String& s, const String& method,
                              const Variant& params, bool fatal = true);
@@ -136,15 +193,23 @@ void throw_instance_method_fatal(const char *name);
 [[noreturn]] void throw_arithmetic_error(StringData*);
 [[noreturn]] void throw_division_by_zero_error(StringData*);
 [[noreturn]] void throw_iterator_not_valid();
-[[noreturn]] void throw_collection_modified();
 [[noreturn]] void throw_collection_property_exception();
 [[noreturn]] void throw_collection_compare_exception();
 [[noreturn]] void throw_vec_compare_exception();
 [[noreturn]] void throw_dict_compare_exception();
 [[noreturn]] void throw_keyset_compare_exception();
 [[noreturn]] void throw_param_is_not_container();
-[[noreturn]]
-void throw_cannot_modify_immutable_object(const char* className);
+[[noreturn]] void throw_invalid_inout_base();
+[[noreturn]] void throw_cannot_modify_immutable_object(const char* className);
+[[noreturn]] void throw_object_forbids_dynamic_props(const char* className);
+[[noreturn]] void throw_cannot_modify_immutable_prop(const char* className,
+                                                     const char* propName);
+[[noreturn]] void throw_cannot_bind_immutable_prop(const char* className,
+                                                   const char* propName);
+[[noreturn]] void throw_late_init_prop(const Class* cls,
+                                       const StringData* propName,
+                                       bool isSProp);
+
 void check_collection_compare(const ObjectData* obj);
 void check_collection_compare(const ObjectData* obj1, const ObjectData* obj2);
 void check_collection_cast_to_array();
@@ -228,22 +293,23 @@ Variant unserialize_ex(const char* str, int len,
                        const Array& options = null_array);
 
 inline Variant unserialize_from_buffer(const char* str, int len,
+                                       VariableUnserializer::Type type,
                                        const Array& options = null_array) {
-  return unserialize_ex(str, len,
-                        VariableUnserializer::Type::Serialize,
-                        options);
+  return unserialize_ex(str, len, type, options);
 }
 
 inline Variant unserialize_from_string(const String& str,
+                                       VariableUnserializer::Type type,
                                        const Array& options = null_array) {
-  return unserialize_from_buffer(str.data(), str.size(), options);
+  return unserialize_from_buffer(str.data(), str.size(), type, options);
 }
 
 String resolve_include(const String& file, const char* currentDir,
                        bool (*tryFile)(const String& file, void* ctx),
                        void* ctx);
 Variant include_impl_invoke(const String& file, bool once = false,
-                            const char *currentDir = "");
+                            const char *currentDir = "",
+                            bool callByHPHPInvoke = false);
 Variant require(const String& file, bool once, const char* currentDir,
                 bool raiseNotice);
 

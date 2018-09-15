@@ -21,8 +21,10 @@
 #include <memory>
 #include <vector>
 
+#include <folly/container/F14Set.h>
 #include <folly/Format.h>
 
+#include "hphp/util/build-info.h"
 #include "hphp/util/embedded-data.h"
 
 namespace {
@@ -31,7 +33,7 @@ namespace {
 
 // List of types which should be ignored (including any bases) by the generated
 // scanners. Add as needed.
-const std::unordered_set<std::string> ignored = {
+const folly::F14FastSet<std::string> ignored = {
   "pthread_cond_t",
   "std::condition_variable",
   "st_mysql_bind",
@@ -39,7 +41,7 @@ const std::unordered_set<std::string> ignored = {
 
 // List of templates which should not be used to store request heap allocated
 // values (because scanner aware variants exist).
-const std::unordered_set<std::string> forbidden_template = {
+const folly::F14FastSet<std::string> forbidden_template = {
   "boost::container::flat_map",
   "boost::container::flat_multimap",
   "boost::container::flat_multiset",
@@ -55,6 +57,7 @@ const std::unordered_set<std::string> forbidden_template = {
   "std::priority_queue",
   "std::queue",
   "std::set",
+  "std::shared_ptr",
   "std::stack",
   "std::unique_ptr",
   "std::unordered_map",
@@ -64,11 +67,11 @@ const std::unordered_set<std::string> forbidden_template = {
   "std::vector"
 };
 
-const std::unordered_set<std::string> forced_conservative = {
+const folly::F14FastSet<std::string> forced_conservative = {
   "boost::variant",
   "folly::Optional",
   "std::optional",
-  "std::shared_ptr",
+  "std::function"
 };
 
 std::string stripTemplateArgs(std::string name) {
@@ -107,12 +110,15 @@ void conservative_stub(type_scan::Scanner& scanner,
   scanner.conservative(ptr, size);
 }
 
+void noptrs_stub(type_scan::Scanner& /*scanner*/, const void* /*ptr*/,
+                 std::size_t /*size*/) {}
+
 // Initialize metadata table, used before init() is called. Since before this,
 // the only type-indices that can be present are "kIndexUnknown" and
 // "kIndexUnknownNoPtrs".
 const Metadata stub_metadata_table[] = {
   {"(UNKNOWN)", conservative_stub},
-  {"(UNKNOWN NO-PTRS)", nullptr}
+  {"(UNKNOWN NO-PTRS)", noptrs_stub}
 };
 const Metadata* g_metadata_table = stub_metadata_table;
 std::size_t g_metadata_table_size = 2;
@@ -135,7 +141,9 @@ bool isForcedConservativeTemplate(const std::string& name) {
 
 using namespace detail;
 
-void init() {
+void init(const std::string& extractPath,
+          const std::string& fallbackPath,
+          bool trust) {
 #if defined(__clang__)
   // Clang is currently broken... It doesn't emit uncalled member functions in a
   // template class, even when using ATTRIBUTE_USED. This prevents the custom
@@ -145,33 +153,44 @@ void init() {
   return;
 #elif defined(__linux__) || defined(__FreeBSD__)
 
-  // Find the shared object embedded within a custom section.
-  embedded_data data;
-  if (!get_embedded_data("type_scanners", &data)) {
-    // no embedded data was built; fall back to conservative scan.
-    return;
-  }
+  using init_func_t = const Metadata*(*)(std::size_t&);
 
-  // Link in the embedded object.
-  char tmp_filename[] = "/tmp/hhvm_type_scanner_XXXXXX";
-  auto const handle = dlopen_embedded_data(data, tmp_filename);
-  if (!handle) {
-    throw InitException{"Failed to dlopen embedded data"};
-  }
+  auto const scanner_init = [&] () -> init_func_t {
+    auto const result = dlsym(RTLD_DEFAULT, kInitFuncName);
+    if (result != nullptr) return reinterpret_cast<init_func_t>(result);
 
-  // Find the initialization function.
-  auto scanner_init = reinterpret_cast<const Metadata*(*)(std::size_t&)>(
-    dlsym(handle, kInitFuncName)
-  );
-  if (!scanner_init) {
-    throw InitException{
-      folly::sformat("dlsym() fails: {}", dlerror())
-    };
-  }
+    // Find the shared object embedded within a custom section.
+    embedded_data data;
+    if (!get_embedded_data("type_scanners", &data)) {
+      // no embedded data was built; fall back to conservative scan.
+      return nullptr;
+    }
+
+    // Link in the embedded object.
+    auto const handle = dlopen_embedded_data(
+      data,
+      extractPath,
+      fallbackPath,
+      buildId().toString(),
+      trust
+    );
+    if (!handle) {
+      throw InitException{"Failed to dlopen embedded data"};
+    }
+
+    // Find the initialization function.
+    auto const init = dlsym(handle, kInitFuncName);
+    if (!init) {
+      throw InitException { folly::sformat("dlsym() fails: {}", dlerror()) };
+    }
+    return reinterpret_cast<init_func_t>(init);
+  }();
+
+  if (!scanner_init) return;
 
   // And call it. The return value is a pointer to the new metadata table, and
   // the size of the table will be updated by passing by ref.
-  if (auto table = scanner_init(g_metadata_table_size)) {
+  if (auto const table = scanner_init(g_metadata_table_size)) {
     g_metadata_table = table;
   } else {
     throw InitException{"Failed to load scanner table"};

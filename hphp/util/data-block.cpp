@@ -115,11 +115,18 @@ void DataBlock::free(void* vaddr, size_t len) {
 void DataBlock::reportFull(size_t nBytes) const {
   throw DataBlockFull(m_name, folly::sformat(
     "Attempted to emit {} byte(s) into a {} byte DataBlock with {} bytes "
-    "available. This almost certainly means the TC is full. If this is "
-    "the case, increasing Eval.JitASize, Eval.JitAColdSize, "
+    "available ({} max bytes). This almost certainly means the TC is full. If "
+    "this is the case, increasing Eval.JitASize, Eval.JitAColdSize, "
     "Eval.JitAFrozenSize and Eval.JitGlobalDataSize in the configuration "
     "file when running this script or application should fix this problem.",
-    nBytes, m_size, m_size - (m_frontier - m_base)));
+    nBytes, m_size, m_size - (m_frontier - m_base), m_maxGrow));
+}
+
+void DataBlock::reportMallocError(size_t nBytes) const {
+  throw DataBlockFull(m_name, folly::sformat(
+    "Encountered a malloc/realloc error while attempting to grow a {} byte "
+    "DataBlock to {} bytes. The maximum size for this DataBlock is {} byte(s).",
+    m_size, nBytes, m_maxGrow));
 }
 
 }

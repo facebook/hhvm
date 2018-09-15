@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_809() {
 var_dump(unserialize(
   "K:8:\"stdClass\":2:{
 i:0;
@@ -14,3 +17,4 @@ s:3:\"foo\";
 i:7;
 }
 "));
+}

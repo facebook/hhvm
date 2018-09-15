@@ -25,27 +25,28 @@
 namespace HPHP { namespace Trace {
 
 void dumpEntry(const RingBufferEntry* e) {
-  if (e->m_type == RBTypeUninit) return;
+  if (e->type == RBTypeUninit) return;
 
   std::cerr <<
     folly::format("{:#x} {:10} {:20}",
-                  e->m_threadId, e->m_seq, ringbufferName(e->m_type));
+                  e->threadId, e->seq, ringbufferName(e->type));
   auto const msgFormat = "{:50} {:#16x}\n";
 
-  switch (e->m_type) {
+  switch (e->type) {
     case RBTypeUninit: return;
     case RBTypeMsg:
     case RBTypeFuncPrologue: {
+      auto& info = e->msg;
       // The strings in thread-private ring buffers are not null-terminated;
       // we also can't trust their length, since they might wrap around.
-      auto len = std::min(size_t(e->m_len), strlen(e->m_msg));
+      auto len = std::min(size_t(info.len), strlen(info.msg));
 
       // We append our own newline so ignore any newlines in the msg.
-      while (len > 0 && e->m_msg[len - 1] == '\n') --len;
+      while (len > 0 && info.msg[len - 1] == '\n') --len;
       std::cerr <<
         folly::format(msgFormat,
-                      folly::StringPiece(e->m_msg, e->m_msg + len),
-                      e->m_truncatedRip);
+                      folly::StringPiece(info.msg, info.msg + len),
+                      info.truncatedRip);
       break;
     }
     case RBTypeFuncEntry:
@@ -62,26 +63,34 @@ void dumpEntry(const RingBufferEntry* e) {
       // Take this indentation with a grain of salt; it's only reliable
       // within a single thread, and since we still miss some function
       // entries and exits can get confused.
-      indentDepth -= e->m_type == RBTypeFuncExit;
+      auto& info = e->msg;
+      indentDepth -= e->type == RBTypeFuncExit;
       if (indentDepth < 0) indentDepth = 0;
       auto const indentedName =
-        folly::sformat("{}{}", std::string(indentDepth * 4, ' '), e->m_msg);
+        folly::sformat("{}{}", std::string(indentDepth * 4, ' '), info.msg);
       std::cerr << folly::format(msgFormat,
-                                 indentedName, e->m_truncatedRip);
-      indentDepth += e->m_type == RBTypeFuncEntry;
+                                 indentedName, info.truncatedRip);
+      indentDepth += e->type == RBTypeFuncEntry;
       break;
     }
     case RBTypeServiceReq: {
-      auto req = static_cast<jit::ServiceRequest>(e->m_sk);
+      auto& info = e->vmPoint;
+      auto req = static_cast<jit::ServiceRequest>(info.sk);
       std::cerr << folly::format(msgFormat,
-                                 jit::svcreq::to_name(req), e->m_data);
+                                 jit::svcreq::to_name(req), info.data);
+      break;
+    }
+    case RBTypeGeneric: {
+      auto& info = e->generic;
+      std::cerr << folly::format(msgFormat, info.name, info.data);
       break;
     }
     default: {
+      auto& info = e->vmPoint;
       std::cerr <<
         folly::format(msgFormat,
-                      showShort(SrcKey::fromAtomicInt(e->m_sk)),
-                      e->m_data);
+                      showShort(SrcKey::fromAtomicInt(info.sk)),
+                      info.data);
       break;
     }
   }
@@ -101,12 +110,12 @@ void dumpRingBufferMasked(int numEntries, uint32_t types, uint32_t threadId) {
   while (startIdx < 0) {
     startIdx += kMaxRBEntries;
   }
-  assert(startIdx >= 0 && startIdx < kMaxRBEntries);
+  assertx(startIdx >= 0 && startIdx < kMaxRBEntries);
   int numDumped = 0;
   for (int i = 0; i < kMaxRBEntries && numDumped < numEntries; i++) {
     RingBufferEntry* rb = &g_ring_ptr[(startIdx + i) % kMaxRBEntries];
-    if ((1 << rb->m_type) & types &&
-        (!threadId || threadId == rb->m_threadId)) {
+    if ((1 << rb->type) & types &&
+        (!threadId || threadId == rb->threadId)) {
       numDumped++;
       dumpEntry(rb);
     }

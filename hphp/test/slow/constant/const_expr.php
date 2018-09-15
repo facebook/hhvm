@@ -44,4 +44,8 @@ function main() {
   var_dump(D::PROTECT);
 }
 
+
+<<__EntryPoint>>
+function main_const_expr() {
 main();
+}

@@ -17,16 +17,16 @@ function exn($e) {
 }
 
 function run_tests() {
-  try { 1 % 0; } catch (\__SystemLib\Throwable $e) { exn($e); }
-  try { 1 % 0.0; } catch (\__SystemLib\Throwable $e) { exn($e); }
-  try { 1 % noinline(0); } catch (\__SystemLib\Throwable $e) { exn($e); }
-  try { 1 % noinline(0.0); } catch (\__SystemLib\Throwable $e) { exn($e); }
-  try { noinline(1) % 0; } catch (\__SystemLib\Throwable $e) { exn($e); }
-  try { noinline(1) % 0.0; } catch (\__SystemLib\Throwable $e) { exn($e); }
+  try { 1 % 0; } catch (\Throwable $e) { exn($e); }
+  try { 1 % 0.0; } catch (\Throwable $e) { exn($e); }
+  try { 1 % noinline(0); } catch (\Throwable $e) { exn($e); }
+  try { 1 % noinline(0.0); } catch (\Throwable $e) { exn($e); }
+  try { noinline(1) % 0; } catch (\Throwable $e) { exn($e); }
+  try { noinline(1) % 0.0; } catch (\Throwable $e) { exn($e); }
   try { noinline(1) % noinline(0); }
-    catch (\__SystemLib\Throwable $e) { exn($e); }
+    catch (\Throwable $e) { exn($e); }
   try { noinline(1) % noinline(0.0); }
-    catch (\__SystemLib\Throwable $e) { exn($e); }
+    catch (\Throwable $e) { exn($e); }
 }
 
 run_tests();

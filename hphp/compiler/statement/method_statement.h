@@ -50,11 +50,9 @@ public:
                       attr, docComment, attrList, method) {}
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  bool hasDecl() const override { return true; }
-  bool hasImpl() const override { return false; }
   int getRecursiveCount() const override;
   // implementing IParseHandler
-  void onParseRecur(AnalysisResultConstPtr ar, FileScopeRawPtr fs,
+  void onParseRecur(AnalysisResultConstRawPtr ar, FileScopeRawPtr fs,
                     ClassScopePtr scope) override;
 
   void fixupSelfAndParentTypehints(ClassScopePtr scope);
@@ -75,9 +73,8 @@ public:
   }
   StatementListPtr getStmts() { return m_stmt;}
   bool isRef(int index = -1) const;
+  bool isInOut(int index) const;
   bool isSystem() const;
-
-  int getLocalEffects() const override;
 
   ModifierExpressionPtr getModifiers() {
     return m_modifiers;
@@ -89,7 +86,8 @@ public:
 
   bool hasRefParam();
   void outputParamArrayCreate(CodeGenerator &cg, bool checkRef);
-  FunctionScopePtr onInitialParse(AnalysisResultConstPtr ar, FileScopePtr fs);
+  FunctionScopePtr onInitialParse(AnalysisResultConstRawPtr ar,
+                                  FileScopePtr fs);
 
   FunctionScopeRawPtr getFunctionScope() const {
     BlockScopeRawPtr b = getScope();
@@ -115,7 +113,7 @@ public:
     m_originalFilename = name;
   }
 
-  void addTraitMethodToScope(AnalysisResultConstPtr ar,
+  void addTraitMethodToScope(AnalysisResultConstRawPtr ar,
                              ClassScopePtr classScope);
 
   void setMayCallSetFrameMetadata(bool f) { m_mayCallSetFrameMetadata = f; }

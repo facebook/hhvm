@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function gen_func_num_args_simple() {
   yield func_num_args();

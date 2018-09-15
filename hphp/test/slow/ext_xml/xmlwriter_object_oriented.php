@@ -9,6 +9,9 @@ function VERIFY($x) {
   VS($x, true);
 }
 
+
+<<__EntryPoint>>
+function main_xmlwriter_object_oriented() {
 $xml = new XMLWriter();
 $xml->openMemory();
 var_dump($xml);
@@ -79,3 +82,4 @@ VERIFY($xml->endDocument());
 
 var_dump($xml->flush());
 var_dump($xml->outputMemory());
+}

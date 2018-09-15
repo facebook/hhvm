@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 print "\"Hello\" . \" world!\" --> "; print "Hello" . " world!"; print "\n";
 print "\n";

@@ -34,7 +34,6 @@ namespace HPHP {
   X(EmptyArray)\
   X(APCLocalArray)\
   X(GlobalsArray)\
-  X(ProxyArray)\
   /* other php types */\
   X(StringData)\
   X(ObjectData)\
@@ -62,7 +61,10 @@ namespace HPHP {
  *
  * Returns true on success, else false.
  */
-bool init_member_reflection();
+
+bool init_member_reflection(const std::string& extractPath,
+                            const std::string& fallbackPath,
+                            bool trust);
 
 /*
  * Given an object pointer `base' and an internal pointer `internal' for
@@ -76,9 +78,9 @@ bool init_member_reflection();
   HPHP_REFLECTABLES
 #undef X
 
-template<typename T>
-const char* nameof_member(const T* base, const void* internal) {
-  return nullptr;
+  template <typename T>
+  const char* nameof_member(const T* /*base*/, const void* /*internal*/) {
+    return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

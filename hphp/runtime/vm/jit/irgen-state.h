@@ -39,10 +39,20 @@ namespace irgen {
 
 struct ReturnTarget {
   /*
-   * Block that will contain the InlineReturn and serve as a branch target for
-   * returning to the caller.
+   * Block that will serve as a branch target for returning to the caller.
    */
-  Block* target;
+  Block* callerTarget;
+
+  /*
+   * Block that will suspend the inlined frame and optionally contain the
+   * InlineSuspend instruction.
+   */
+  Block* suspendTarget;
+
+  /*
+   * Type of return to create for this inline region.
+   */
+  InlineType returnType;
 };
 
 /*

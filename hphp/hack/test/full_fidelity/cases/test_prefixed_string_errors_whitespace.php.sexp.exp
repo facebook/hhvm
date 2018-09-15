@@ -1,0 +1,27 @@
+((script 54
+  ((list 54
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
+       (missing 0 ())))
+     (function_declaration 48
+      ((missing 0 ())
+       (function_declaration_header 19
+        ((missing 0 ()) (((end_of_line 1)) function 8 ((whitespace 1)))
+         (missing 0 ()) (() name 1 ()) (missing 0 ()) (() "(" 1 ())
+         (missing 0 ()) (() ")" 1 ((whitespace 1))) (() : 1 ((whitespace 1)))
+         (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
+         (missing 0 ())))
+       (compound_statement 28
+        ((() { 1 ((end_of_line 1)))
+         (list 22
+          ((expression_statement 22
+            ((binary_expression 21
+              ((variable 4 ((((whitespace 2)) variable 4 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (prefixed_string 14
+                ((() name 2 ((whitespace 1)))
+                 (literal 11 ((() double_quoted_string_literal 11 ())))))))
+             (() ";" 1 ((end_of_line 1)))))))
+         (() } 1 ((end_of_line 1)))))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

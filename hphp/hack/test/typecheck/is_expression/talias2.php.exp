@@ -1,0 +1,4 @@
+File "talias2.php", line 7, characters 13-15:
+Invalid "is" expression hint (Typing[4195])
+  File "talias2.php", line 4, characters 12-22:
+  The "is" operator cannot be used with a type with generics, because generics are erased at runtime

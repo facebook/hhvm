@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_conditional_fatal() {
 $execute_fatal = false;
 if ($execute_fatal) {
   class C1 {
@@ -17,3 +20,4 @@ if ($execute_fatal) {
 }
 
 echo 'Bad', "\n";
+}

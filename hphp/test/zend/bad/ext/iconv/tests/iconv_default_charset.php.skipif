@@ -1,4 +1,0 @@
-<?php
-extension_loaded('iconv') or die('skip');
-function_exists('iconv_get_encoding') or die("skip iconv_get_encoding() is not available in this build");
-?>

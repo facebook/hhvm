@@ -54,4 +54,8 @@ function f() {
   echo "------------------------\n";
   var_dump(clone $t, clone $u);
 }
+
+<<__EntryPoint>>
+function main_823() {
 f();
+}

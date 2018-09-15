@@ -1,4 +1,4 @@
-<?hh
+<?hh // decl
 
 class Foo {
   public function __destruct() {
@@ -28,4 +28,8 @@ async function main() {
   echo "survived\n";
 }
 
+
+<<__EntryPoint>>
+function main_async_gen_0ref_on_retc() {
 \HH\Asio\join(main());
+}

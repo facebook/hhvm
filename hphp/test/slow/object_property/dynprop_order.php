@@ -16,4 +16,8 @@ function go() {
   $x->dyn = new dtor(1);
 }
 
+
+<<__EntryPoint>>
+function main_dynprop_order() {
 go();
+}

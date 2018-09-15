@@ -32,11 +32,11 @@ class C extends Base {
 class CMagic {
   public function __call($name, $args) {
     echo $name, ' called on instance', "\n";
-    return intval(reset($args));
+    return intval(reset(&$args));
   }
   public static function __callStatic($name, $args) {
     echo $name, ' called statically', "\n";
-    return intval(reset($args));
+    return intval(reset(&$args));
   }
 }
 

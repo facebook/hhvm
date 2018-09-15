@@ -14,13 +14,25 @@ hphp/system/php/lang/Iterator.ns.php
 hphp/system/php/lang/IteratorAggregate.ns.php
 hphp/system/php/lang/KeyedIterator.ns.php
 hphp/system/php/lang/KeyedIterable.ns.php
-hphp/system/php/lang/Throwable.ns.php
+hphp/system/php/lang/Throwable.php
 hphp/system/php/lang/BaseException.ns.php
-hphp/system/php/lang/Error.ns.php
+hphp/system/php/lang/Error.php
 hphp/system/php/lang/Exception.php
 hphp/system/php/spl/exceptions/exceptions.php
 hphp/system/php/spl/interfaces/Countable.php
 hphp/system/php/spl/interfaces/RecursiveIterator.php
+
+hphp/system/php/lang/rx/Traversable.ns.php
+
+hphp/system/php/lang/Container.ns.php
+
+hphp/system/php/lang/rx/IteratorAggregate.ns.php
+hphp/system/php/lang/rx/Iterator.ns.php
+hphp/system/php/lang/rx/KeyedIterator.ns.php
+hphp/system/php/lang/rx/KeyedIterable.ns.php
+hphp/system/php/lang/rx/AsyncIterator.ns.php
+hphp/system/php/lang/rx/AsyncKeyedIterator.ns.php
+hphp/system/php/lang/rx/Exception.php
 
 hphp/system/php/spl/datastructures/SplHeap.php
 
@@ -94,18 +106,18 @@ hphp/system/php/async/maps.ns.php
 hphp/system/php/async/vectors.ns.php
 
 # If you have no inheritance relationship, go here in alphabetical order
-hphp/system/php/XhprofFrame.php
 hphp/system/php/array_filter.hhas
 hphp/system/php/array_map.hhas
 hphp/system/php/array_reduce.hhas
 hphp/system/php/apc/APCIterator.php
-hphp/system/php/asio/Awaitable.php
 hphp/system/php/asio/InvalidOperationException.php
+hphp/system/php/async/EntryPoint.ns.php
 hphp/system/php/curl/CURLFile.php
 hphp/system/php/date/dateperiod.php
 hphp/system/php/date/datetime_funcs.php
 hphp/system/php/dom/DOMException.php
 hphp/system/php/file_system/Directory.php
+hphp/system/php/lang/Disposable.php
 hphp/system/php/lang/ErrorException.php
 hphp/system/php/lang/fun.ns.php
 hphp/system/php/lang/invariant.ns.php
@@ -117,6 +129,7 @@ hphp/system/php/misc/php_strip_whitespace.php
 hphp/system/php/pdo/PDOException.php
 hphp/system/php/redis/Redis.php
 hphp/system/php/redis/RedisSessionModule.php
+hphp/system/php/rx/mutable.php
 hphp/system/php/shapes/Shapes.php
 hphp/system/php/soap/SoapFault.php
 hphp/system/php/spl/datastructures/SplFixedArray.php
@@ -132,6 +145,7 @@ hphp/system/php/spl/iterators/RecursiveIteratorIterator.php
 hphp/system/php/spl/iterators/RecursiveTreeIterator.php
 hphp/system/php/spl/miscellaneous/ArrayObject.php
 hphp/system/php/spl/miscellaneous/autoload.php
+hphp/system/php/XhprofFrame.php
 
 # This provides a temporary workaround for renamed lz4 methods
 hphp/system/php/zlib/ext_zlib.php

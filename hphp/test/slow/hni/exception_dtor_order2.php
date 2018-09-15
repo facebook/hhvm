@@ -1,6 +1,6 @@
-<?hh
+<?hh // decl
 
-function err() {} set_error_handler('err');
+function err() { throw new Exception; }
 
 class dtor {
   public function __construct(private int $i) {}
@@ -14,5 +14,10 @@ function foo() {
     echo "ok\n";
   }
 }
+
+<<__EntryPoint>>
+function main_exception_dtor_order2() {
+set_error_handler('err');
 foo();
 echo "done\n";
+}

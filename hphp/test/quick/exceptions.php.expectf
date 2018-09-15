@@ -28,10 +28,11 @@ caught 3
 
 Fatal error: Uncaught exception 'Ex3' with message '' in %s/test/quick/exceptions.php:21
 Stack trace:
-#0 %s/test/quick/exceptions.php(28): bar()
-#1 %s/test/quick/exceptions.php(35): foo2()
-#2 %s/test/quick/exceptions.php(39): foo1()
-#3 (): foo()
-#4 %s/test/quick/exceptions.php(105): array_map()
-#5 %s/test/quick/exceptions.php(111): main3()
-#6 {main}
+#0 (): bar()
+#1 %s/test/quick/exceptions.php(28): call_user_func()
+#2 %s/test/quick/exceptions.php(35): foo2()
+#3 %s/test/quick/exceptions.php(39): foo1()
+#4 (): foo()
+#5 %s/test/quick/exceptions.php(105): array_map()
+#6 %s/test/quick/exceptions.php(111): main3()
+#7 {main}

@@ -11,4 +11,8 @@ function main() {
   $y = bar()[0];
   $y->heh();
 }
+
+<<__EntryPoint>>
+function main_array_040() {
 main();
+}

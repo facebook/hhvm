@@ -12,6 +12,9 @@ class X implements ArrayAccess {
   function offsetunset($n) {
 }
 }
+
+<<__EntryPoint>>
+function main_49() {
 list($a,$b) = new X;
 var_dump($a, $b);
 $x = 'foo';
@@ -21,3 +24,4 @@ var_dump($a,$b);
 $z = $x.$y;
 list($a, $b) = $z;
 var_dump($a, $b);
+}

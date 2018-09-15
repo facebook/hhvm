@@ -1,0 +1,4 @@
+File "cond_reactive_ret_type3.php", line 26, characters 10-20:
+Reactive functions can only call other reactive functions. (Typing[4200])
+File "cond_reactive_ret_type3.php", line 5, characters 19-21:
+This function is non-reactive.

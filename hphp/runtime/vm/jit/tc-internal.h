@@ -194,7 +194,7 @@ bool newTranslation();
  */
 ALWAYS_INLINE CodeCache& code() {
   extern CodeCache* g_code;
-  assert(g_code);
+  assertx(g_code);
   return *g_code;
 }
 
@@ -206,6 +206,18 @@ ALWAYS_INLINE SrcDB& srcDB() {
   extern SrcDB g_srcDB;
   return g_srcDB;
 }
+
+/*
+ * Initialize the TC recycling mechanism. Does nothing if EvalEnableReusableTC
+ * is false.
+ */
+void recycleInit();
+
+/*
+ * Teardown TC recycling mechanism. Does nothing if EvalEnableReusableTC is
+ * false.
+ */
+void recycleStop();
 
 }}}
 

@@ -29,4 +29,8 @@ function main() {
     echo "Caught exception\n";
   }
 }
+
+<<__EntryPoint>>
+function main_finally_foreach_2() {
 main();
+}

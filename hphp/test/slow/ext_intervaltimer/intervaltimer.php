@@ -1,7 +1,10 @@
 <?hh
 
-function busy() {}
+function busy() { return __hhvm_intrinsics\launder_value(42); }
 
+
+<<__EntryPoint>>
+function main_intervaltimer() {
 $x1 = null;
 $t1 = new IntervalTimer(
   0.1, 0.1,
@@ -29,3 +32,4 @@ $t1->stop();
 var_dump($x1);
 var_dump($x2);
 var_dump($x1 > $x2);
+}

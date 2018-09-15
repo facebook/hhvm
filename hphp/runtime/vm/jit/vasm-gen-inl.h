@@ -75,14 +75,20 @@ namespace detail {
 
 template<class GenFunc>
 TCA vwrap_impl(CodeBlock& main, CodeBlock& cold, DataBlock& data,
-               CGMeta* meta, GenFunc gen, CodeKind kind) {
+               CGMeta* meta, GenFunc gen, CodeKind kind, bool relocate) {
   CGMeta dummy_meta;
 
   auto const start = main.frontier();
 
   { // Finish emitting in this scope so that we can assert about `dummy_meta'.
-    Vauto vauto { main, cold, data, meta ? *meta : dummy_meta, kind };
+    Vauto vauto { main, cold, data, meta ? *meta : dummy_meta, kind, relocate };
     gen(vauto.main(), vauto.cold());
+  }
+
+  dummy_meta.process_literals();
+  if (!meta) {
+    dummy_meta.addressImmediates.clear();
+    dummy_meta.fallthru.clear();
   }
   assertx(dummy_meta.empty());
 

@@ -3,9 +3,6 @@
 async function f() { return 42; }
 async function g() { throw new Exception(__FUNCTION__); }
 async function h() { return 37; }
-final class MyAwaitable implements Awaitable<int> {
-  public function getWaitHandle() { return f(); }
-}
 async function test0(): Awaitable<void> {
   await genva(f());
 }
@@ -18,10 +15,7 @@ async function test2(): Awaitable<(int, int)> {
 async function test3(): Awaitable<void> {
   await genva(f(), g());
 }
-async function test4(): Awaitable<void> {
-  await genva(new MyAwaitable);
-}
-async function test5() {
+async function test4() {
   return await genva(f(), h(), f());
 }
 
@@ -35,6 +29,9 @@ function main() {
     var_dump(\HH\Asio\join(test3()));
   } catch (Exception $e) { print $e->getMessage()."\n"; }
   var_dump(\HH\Asio\join(test4()));
-  var_dump(\HH\Asio\join(test5()));
 }
+
+<<__EntryPoint>>
+function main_genva() {
 main();
+}

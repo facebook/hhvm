@@ -1,0 +1,1 @@
+((Fatal error\: syntax error, unexpected ',', expecting '\]' in [^\r\n]+ on line \d+)|(Fatal error\: A subscript index cannot be a list in [^\r\n]+\/keyset\/hh\-only1\.php on line 5))

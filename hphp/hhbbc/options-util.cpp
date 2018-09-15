@@ -16,29 +16,33 @@
 #include "hphp/hhbbc/options-util.h"
 
 #include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/unit-util.h"
 
 namespace HPHP { namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
 bool method_map_contains(const MethodMap& mmap,
-                         borrowed_ptr<const php::Class> cls,
-                         borrowed_ptr<const php::Func> func) {
+                         const php::Class* cls,
+                         const php::Func* func) {
   std::string const clsname = cls ? cls->name->data() : "";
   auto it = mmap.find(clsname);
   if (it == end(mmap)) return false;
-  return it->second.count(func->name->data());
+  return it->second.count(func == nullptr ? "" :
+                          (func->name->empty() ?
+                           func->unit->filename : func->name)->data());
 }
 
-bool is_trace_function(borrowed_ptr<const php::Class> cls,
-                       borrowed_ptr<const php::Func> func) {
+bool is_trace_function(const php::Class* cls,
+                       const php::Func* func) {
   return method_map_contains(options.TraceFunctions, cls, func);
 }
 
-bool is_interceptable_function(borrowed_ptr<const php::Class> cls,
-                               borrowed_ptr<const php::Func> func) {
-  if (options.AllFuncsInterceptable) return true;
-  return method_map_contains(options.InterceptableFunctions, cls, func);
+int trace_bump_for(const php::Class* cls,
+                   const php::Func* func) {
+  auto const unit = func ? func->unit : cls->unit;
+  return is_trace_function(cls, func) ? kTraceFuncBump :
+    (is_systemlib_part(*unit) ? kSystemLibBump : 0);
 }
 
 //////////////////////////////////////////////////////////////////////

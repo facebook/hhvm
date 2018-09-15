@@ -20,6 +20,7 @@
 #include <string>
 
 #include "hphp/runtime/vm/jit/stack-offsets.h"
+#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP { namespace jit {
@@ -42,7 +43,7 @@ struct BCMarker {
    */
   static BCMarker Dummy() {
     return BCMarker {
-      SrcKey(DummyFuncId, 0, false, false),
+      SrcKey(DummyFuncId, 0, ResumeMode::None, false),
       FPInvOffset{0},
       kInvalidTransID,
       nullptr
@@ -75,16 +76,16 @@ struct BCMarker {
                                 m_sk.funcID() == DummyFuncId; }
   bool hasFunc() const { return valid() && !isDummy(); }
 
-  SrcKey      sk()          const { assertx(valid());   return m_sk;           }
+  SrcKey      sk()          const { assertx(valid()); return m_sk;             }
   const Func* func()        const { assertx(hasFunc()); return m_sk.func();    }
-  Offset      bcOff()       const { assertx(valid());   return m_sk.offset();  }
-  bool        resumed()     const { assertx(valid());   return m_sk.resumed(); }
-  bool        hasThis()     const { assertx(valid());   return m_sk.hasThis(); }
-  bool        prologue()    const { assertx(valid());   return m_sk.prologue();}
-  FPInvOffset spOff()       const { assertx(valid());   return m_spOff;        }
-  TransID     profTransID() const { assertx(valid());   return m_profTransID;  }
-  SSATmp*     fp()          const { assertx(valid());   return m_fp;           }
-  SrcKey      fixupSk()     const { assertx(valid());   return m_fixupSk;      }
+  Offset      bcOff()       const { assertx(valid()); return m_sk.offset();    }
+  ResumeMode  resumeMode()  const { assertx(valid()); return m_sk.resumeMode();}
+  bool        hasThis()     const { assertx(valid()); return m_sk.hasThis();   }
+  bool        prologue()    const { assertx(valid()); return m_sk.prologue();  }
+  FPInvOffset spOff()       const { assertx(valid()); return m_spOff;          }
+  TransID     profTransID() const { assertx(valid()); return m_profTransID;    }
+  SSATmp*     fp()          const { assertx(valid()); return m_fp;             }
+  SrcKey      fixupSk()     const { assertx(valid()); return m_fixupSk;        }
 
   const Func* fixupFunc() const {
     assertx(valid());

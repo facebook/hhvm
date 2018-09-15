@@ -42,42 +42,10 @@ TRACE_SET_MOD(hhir);
 using JmpSet = hphp_hash_set<void*>;
 struct JmpOutOfRange : std::exception {};
 
-TcaRange fixupRange(const RelocationInfo& rel, const TcaRange& rng) {
-  /*
-   * We have to be careful with before/after here.
-   * If we relocate two consecutive regions of memory,
-   * but relocate them to two different destinations, then
-   * the end address of the first region is also the start
-   * address of the second region; so adjustedAddressBefore(end)
-   * gives us the relocated address of the end of the first
-   * region, while adjustedAddressAfter(end) gives us the
-   * relocated address of the start of the second region.
-   */
-  auto s = rel.adjustedAddressAfter(rng.begin());
-  auto e = rel.adjustedAddressBefore(rng.end());
-  if (s && e) {
-    return TcaRange(s, e);
-  }
-  if (s && !e) {
-    return TcaRange(s, s + rng.size());
-  }
-  if (!s && e) {
-    return TcaRange(e - rng.size(), e);
-  }
-  return rng;
-}
-
-void fixupRanges(AsmInfo* asmInfo, AreaIndex area, RelocationInfo& rel) {
-  asmInfo->clearBlockRangesForArea(area);
-  for (auto& ii : asmInfo->instRangesForArea(area)) {
-    ii.second = fixupRange(rel, ii.second);
-    asmInfo->updateForBlock(area, ii.first, ii.second);
-  }
-}
-
 size_t relocateImpl(RelocationInfo& rel,
                     CodeBlock& dest_block,
                     TCA start, TCA end,
+                    CodeBlock& src_block,
                     CGMeta& fixups,
                     TCA* exit_addr,
                     JmpSet& far_jmps,
@@ -91,12 +59,12 @@ size_t relocateImpl(RelocationInfo& rel,
   try {
     while (src != end) {
       assertx(src < end);
-      DecodedInstruction di(src);
+      DecodedInstruction di(src_block.toDestAddress(src), src);
       asm_count++;
 
       TCA dest = dest_block.frontier();
-      dest_block.bytes(di.size(), src);
-      DecodedInstruction d2(dest, di.size());
+      dest_block.bytes(di.size(), src_block.toDestAddress(src));
+      DecodedInstruction d2(dest_block.toDestAddress(dest), dest, di.size());
       if (di.isNearBranch()) {
         if (di.isBranch(ppc64_asm::AllowCond::OnlyUncond)) {
           jmp_dest = di.nearBranchTarget();
@@ -111,7 +79,7 @@ size_t relocateImpl(RelocationInfo& rel,
 
           // Near branch will be widen to Far branch. Update d2 in order to be
           // able to read more bytes than only the Near branch
-          d2 = DecodedInstruction(dest);
+          d2 = DecodedInstruction(dest_block.toDestAddress(dest), dest);
           d2.widenBranch(new_target);
 
           // widening a branch makes the dest instruction bigger
@@ -221,10 +189,10 @@ size_t relocateImpl(RelocationInfo& rel,
       src = start;
       bool ok = true;
       while (src != end) {
-        DecodedInstruction di(src);
+        DecodedInstruction di(src_block.toDestAddress(src), src);
         TCA dest = rel.adjustedAddressAfter(src);
         // Avoid set max_size as it would fail when a branch is widen.
-        DecodedInstruction d2(dest);
+        DecodedInstruction d2(dest_block.toDestAddress(dest), dest);
         if (di.isNearBranch()) {
           TCA old_target = di.nearBranchTarget();
           TCA adjusted_target = rel.adjustedAddressAfter(old_target);
@@ -277,7 +245,7 @@ size_t relocateImpl(RelocationInfo& rel,
               keep_nops = rel.isSmashableRelocation(dest);
             }
             if (!d2.setFarBranchTarget(new_far_target, keep_nops)) {
-              assert(false && "Far branch target setting failed");
+              assertx(false && "Far branch target setting failed");
             }
             if (d2.couldBeNearBranch()) {
               // target is close enough, convert it to Near branch
@@ -387,124 +355,6 @@ void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd) {
 }
 
 /*
- * Adjusts the addresses in asmInfo and fixups to match the new
- * location of the code.
- * This will not "hook up" the relocated code in any way, so is safe
- * to call before the relocated code is ready to run.
- */
-void adjustMetaDataForRelocation(RelocationInfo& rel,
-                                 AsmInfo* asmInfo,
-                                 CGMeta& meta) {
-  auto& ip = meta.inProgressTailJumps;
-  for (size_t i = 0; i < ip.size(); ++i) {
-    IncomingBranch& ib = const_cast<IncomingBranch&>(ip[i]);
-    if (TCA adjusted = rel.adjustedAddressAfter(ib.toSmash())) {
-      ib.adjust(adjusted);
-    }
-  }
-
-  for (auto watch : meta.watchpoints) {
-    if (auto const adjusted = rel.adjustedAddressBefore(*watch)) {
-      *watch = adjusted;
-    }
-  }
-
-  for (auto& fixup : meta.fixups) {
-    /*
-     * Pending fixups always point after the call instruction,
-     * so use the "before" address, since there may be nops
-     * before the next actual instruction.
-     */
-    if (TCA adjusted = rel.adjustedAddressBefore(fixup.first)) {
-      fixup.first = adjusted;
-    }
-  }
-
-  for (auto& ct : meta.catches) {
-    /*
-     * Similar to fixups - this is a return address so get
-     * the address returned to.
-     */
-    if (auto const adjusted = rel.adjustedAddressBefore(ct.first)) {
-      ct.first = adjusted;
-    }
-    /*
-     * But the target is an instruction, so skip over any nops
-     * that might have been inserted (eg for alignment).
-     */
-    if (auto const adjusted = rel.adjustedAddressAfter(ct.second)) {
-      ct.second = adjusted;
-    }
-  }
-
-  for (auto& jt : meta.jmpTransIDs) {
-    if (auto const adjusted = rel.adjustedAddressAfter(jt.first)) {
-      jt.first = adjusted;
-    }
-  }
-
-  if (!meta.bcMap.empty()) {
-    /*
-     * Most of the time we want to adjust to a corresponding "before" address
-     * with the exception of the start of the range where "before" can point to
-     * the end of a previous range.
-     */
-    auto const aStart = meta.bcMap[0].aStart;
-    auto const acoldStart = meta.bcMap[0].acoldStart;
-    auto const afrozenStart = meta.bcMap[0].afrozenStart;
-    auto adjustAddress = [&](TCA& address, TCA blockStart) {
-      if (TCA adjusted = (address == blockStart
-                            ? rel.adjustedAddressAfter(blockStart)
-                            : rel.adjustedAddressBefore(address))) {
-        address = adjusted;
-      }
-    };
-    for (auto& tbc : meta.bcMap) {
-      adjustAddress(tbc.aStart, aStart);
-      adjustAddress(tbc.acoldStart, acoldStart);
-      adjustAddress(tbc.afrozenStart, afrozenStart);
-    }
-  }
-
-  decltype(meta.addressImmediates) updatedAI;
-  for (auto addrImm : meta.addressImmediates) {
-    if (TCA adjusted = rel.adjustedAddressAfter(addrImm)) {
-      updatedAI.insert(adjusted);
-    } else if (TCA odd = rel.adjustedAddressAfter((TCA)~uintptr_t(addrImm))) {
-      // just for cgLdObjMethod
-      updatedAI.insert((TCA)~uintptr_t(odd));
-    } else {
-      updatedAI.insert(addrImm);
-    }
-  }
-  updatedAI.swap(meta.addressImmediates);
-
-  decltype(meta.alignments) updatedAF;
-  for (auto af : meta.alignments) {
-    if (TCA adjusted = rel.adjustedAddressAfter(af.first)) {
-      updatedAF.emplace(adjusted, af.second);
-    } else {
-      updatedAF.emplace(af);
-    }
-  }
-  updatedAF.swap(meta.alignments);
-
-  for (auto& af : meta.reusedStubs) {
-    if (TCA adjusted = rel.adjustedAddressAfter(af)) {
-      af = adjusted;
-    }
-  }
-
-  if (asmInfo) {
-    assert(asmInfo->validate());
-    fixupRanges(asmInfo, AreaIndex::Main, rel);
-    fixupRanges(asmInfo, AreaIndex::Cold, rel);
-    fixupRanges(asmInfo, AreaIndex::Frozen, rel);
-    assert(asmInfo->validate());
-  }
-}
-
-/*
  * Adjust potentially live references that point into the relocated
  * area.
  * Must not be called until its safe to run the relocated code.
@@ -531,7 +381,7 @@ void adjustCodeForRelocation(RelocationInfo& rel, CGMeta& fixups) {
 
 void findFixups(TCA start, TCA end, CGMeta& meta) {
   while (start != end) {
-    assert(start < end);
+    assertx(start < end);
     DecodedInstruction di(start);
     start += di.size();
 
@@ -558,13 +408,14 @@ void findFixups(TCA start, TCA end, CGMeta& meta) {
 size_t relocate(RelocationInfo& rel,
                 CodeBlock& dest_block,
                 TCA start, TCA end,
-                CodeBlock&,
+                DataBlock& src_block,
                 CGMeta& fixups,
-                TCA* exit_addr) {
+                TCA* exit_addr,
+                AreaIndex) {
   JmpSet far_jmps, near_jmps;
   while (true) {
     try {
-      return relocateImpl(rel, dest_block, start, end,
+      return relocateImpl(rel, dest_block, start, end, src_block,
                           fixups, exit_addr, far_jmps, near_jmps);
     } catch (JmpOutOfRange& j) {
     }

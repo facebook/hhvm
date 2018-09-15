@@ -2,9 +2,8 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
@@ -14,7 +13,7 @@
  *)
 
 module GEnv: sig
-  val get_full_pos : ParserOptions.t -> FileInfo.pos * string -> Pos.t * string
+  val get_full_pos: ParserOptions.t -> FileInfo.pos * string -> Pos.t * string
   val type_pos: ParserOptions.t -> string -> Pos.t option
   val type_canon_name: string -> string option
   val type_info:
@@ -27,9 +26,6 @@ module GEnv: sig
 
   val gconst_pos: ParserOptions.t -> string -> Pos.t option
 end
-
-(* Canonicalizes a key *)
-val canon_key: String.t -> String.t
 
 (* Function building the original naming environment.
  * This pass "declares" all the global names. The only checks done

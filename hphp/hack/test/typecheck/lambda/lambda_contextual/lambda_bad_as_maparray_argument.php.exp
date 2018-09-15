@@ -1,0 +1,8 @@
+File "lambda_bad_as_maparray_argument.php", line 32, characters 17-30:
+Could not find method missing_method in an object of type MyClass (Typing[4053])
+  File "lambda_bad_as_maparray_argument.php", line 22, characters 33-39:
+  This is why I think it is an object of type MyClass
+  File "lambda_bad_as_maparray_argument.php", line 22, characters 33-39:
+  Considering that this type argument is contravariant with respect to MyClosureRunner
+  File "lambda_bad_as_maparray_argument.php", line 4, characters 7-13:
+  Declaration of MyClass is here

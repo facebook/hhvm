@@ -16,12 +16,15 @@
 #ifndef incl_HPHP_OPTIMIZE_H_
 #define incl_HPHP_OPTIMIZE_H_
 
+#include "hphp/hhbbc/context.h"
+
 namespace HPHP { namespace HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
 struct Index;
 struct FuncAnalysis;
+struct Bytecode;
 
 /*
  * Use information from an analyze call to perform various
@@ -34,7 +37,17 @@ struct FuncAnalysis;
  * php::Func, but it won't modify the top-level meta-data in the
  * php::Func itself.
  */
-void optimize_func(const Index&, FuncAnalysis);
+void optimize_func(const Index&, FuncAnalysis&&, bool isFinal);
+
+/*
+ * Optimize property type hints for a particular class.
+ */
+void optimize_class_prop_type_hints(const Index& index, Context ctx);
+
+/*
+ * Return a bytecode to generate the value in cell
+ */
+Bytecode gen_constant(const Cell& cell);
 
 //////////////////////////////////////////////////////////////////////
 

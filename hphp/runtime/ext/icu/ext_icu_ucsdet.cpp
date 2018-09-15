@@ -12,40 +12,81 @@ const StaticString s_EncodingDetector("EncodingDetector");
     s_intl_error->throwException("Call to invalid EncodingDetector Object"); \
   }
 
+struct EncodingDetectorDeleter {
+  void operator()(UCharsetDetector* ed) { ucsdet_close(ed); }
+};
+
+std::shared_ptr<UCharsetDetector> EncodingDetector::detector() {
+  UErrorCode error;
+
+  error = U_ZERO_ERROR;
+
+  auto const encdet = ucsdet_open(&error);
+  if (U_FAILURE(error)) {
+    throwException("Could not open spoof checker, error %d (%s)",
+                   error, u_errorName(error));
+  }
+
+  auto encodingDetector =
+    std::shared_ptr<UCharsetDetector>{encdet, EncodingDetectorDeleter{}};
+
+  error = U_ZERO_ERROR;
+  ucsdet_setText(encodingDetector.get(), m_text.data(), m_text.size(), &error);
+  if (U_FAILURE(error)) {
+    throwException("Could not set encoding detector text to "
+                   "[%s], error %d (%s)",
+                   m_text.data(), error, u_errorName(error));
+  }
+
+  error = U_ZERO_ERROR;
+  ucsdet_setDeclaredEncoding(encodingDetector.get(),
+                             m_declaredEncoding.data(),
+                             m_declaredEncoding.size(), &error);
+  if (U_FAILURE(error)) {
+    throwException("Could not set encoding detector declaredEncoding to "
+                   "[%s], error %d (%s)",
+                   m_text.data(), error, u_errorName(error));
+  }
+
+  return encodingDetector;
+}
+
 static void HHVM_METHOD(EncodingDetector, setText, const String& text) {
   FETCH_DET(data, this_);
-  data->setText(text.toCppString());
+  data->setText(text);
 }
 
 static void HHVM_METHOD(EncodingDetector, setDeclaredEncoding,
                         const String& declaredEncoding) {
   FETCH_DET(data, this_);
-  data->setDeclaredEncoding(declaredEncoding.toCppString());
+  data->setDeclaredEncoding(declaredEncoding);
 }
 
 static Object HHVM_METHOD(EncodingDetector, detect) {
   FETCH_DET(data, this_);
   UErrorCode error = U_ZERO_ERROR;
-  auto match = ucsdet_detect(data->detector(), &error);
+  auto detector = data->detector();
+  auto match = ucsdet_detect(detector.get(), &error);
   if (U_FAILURE(error)) {
     data->throwException("Could not detect encoding, error %d (%s)",
                          error, u_errorName(error));
   }
-  return EncodingMatch::newInstance(match);
+  return EncodingMatch::newInstance(match, detector);
 }
 
 static Array HHVM_METHOD(EncodingDetector, detectAll) {
   FETCH_DET(data, this_);
   UErrorCode error = U_ZERO_ERROR;
   int32_t count = 0;
-  auto matches = ucsdet_detectAll(data->detector(), &count, &error);
+  auto detector = data->detector();
+  auto matches = ucsdet_detectAll(detector.get(), &count, &error);
   if (U_FAILURE(error)) {
     data->throwException("Could not detect all encodings, error %d (%s)",
                          error, u_errorName(error));
   }
   Array ret = Array::Create();
   for (int i = 0; i < count; ++i) {
-    ret.append(EncodingMatch::newInstance(matches[i]));
+    ret.append(EncodingMatch::newInstance(matches[i], detector));
   }
   return ret;
 }
@@ -148,7 +189,10 @@ void IntlExtension::initUcsDet() {
   HHVM_ME(EncodingMatch, getLanguage);
   HHVM_ME(EncodingMatch, getUTF8);
 
-  Native::registerNativeDataInfo<EncodingDetector>(s_EncodingDetector.get());
+  Native::registerNativeDataInfo<EncodingDetector>(
+      s_EncodingDetector.get(),
+      Native::NDIFlags::NO_SWEEP
+  );
   Native::registerNativeDataInfo<EncodingMatch>(s_EncodingMatch.get());
 
   loadSystemlib("icu_ucsdet");

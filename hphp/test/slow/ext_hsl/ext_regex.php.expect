@@ -1,0 +1,125 @@
+hello
+---
+RE: /foo(bar)?/
+In: foo
+PHP:
+array(1) {
+  [0]=>
+  string(3) "foo"
+}
+HSL:
+array(2) {
+  [0]=>
+  string(3) "foo"
+  [1]=>
+  string(0) ""
+}
+---
+RE: /foo(?<bar>bar)?/
+In: foo
+PHP:
+array(1) {
+  [0]=>
+  string(3) "foo"
+}
+HSL:
+array(3) {
+  [0]=>
+  string(3) "foo"
+  ["bar"]=>
+  string(0) ""
+  [1]=>
+  string(0) ""
+}
+---
+RE: /foo(?<bar>bar)?(baz)?/
+In: foo
+PHP:
+array(1) {
+  [0]=>
+  string(3) "foo"
+}
+HSL:
+array(4) {
+  [0]=>
+  string(3) "foo"
+  ["bar"]=>
+  string(0) ""
+  [1]=>
+  string(0) ""
+  [2]=>
+  string(0) ""
+}
+---
+RE: /foo(?<bar>bar)?(baz)?/
+In: foobar
+PHP:
+array(3) {
+  [0]=>
+  string(6) "foobar"
+  ["bar"]=>
+  string(3) "bar"
+  [1]=>
+  string(3) "bar"
+}
+HSL:
+array(4) {
+  [0]=>
+  string(6) "foobar"
+  ["bar"]=>
+  string(3) "bar"
+  [1]=>
+  string(3) "bar"
+  [2]=>
+  string(0) ""
+}
+---
+RE: /foo(?<bar>bar)?(baz)?/
+In: foobaz
+PHP:
+array(4) {
+  [0]=>
+  string(6) "foobaz"
+  ["bar"]=>
+  string(0) ""
+  [1]=>
+  string(0) ""
+  [2]=>
+  string(3) "baz"
+}
+HSL:
+array(4) {
+  [0]=>
+  string(6) "foobaz"
+  ["bar"]=>
+  string(0) ""
+  [1]=>
+  string(0) ""
+  [2]=>
+  string(3) "baz"
+}
+---
+RE: /foo(?<bar>bar)?(baz)?/
+In: foobarbaz
+PHP:
+array(4) {
+  [0]=>
+  string(9) "foobarbaz"
+  ["bar"]=>
+  string(3) "bar"
+  [1]=>
+  string(3) "bar"
+  [2]=>
+  string(3) "baz"
+}
+HSL:
+array(4) {
+  [0]=>
+  string(9) "foobarbaz"
+  ["bar"]=>
+  string(3) "bar"
+  [1]=>
+  string(3) "bar"
+  [2]=>
+  string(3) "baz"
+}

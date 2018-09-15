@@ -62,7 +62,7 @@ namespace {
 /*
  * Thread-local RDS branch-sampling counter.
  */
-rds::Link<uint32_t> s_counter{rds::kInvalidHandle};
+rds::Link<uint32_t, rds::Mode::Local> s_counter;
 
 /*
  * Reset `s_counter'.
@@ -168,6 +168,7 @@ constexpr auto kVersion = 1;
  */
 void record_branch_hit(const BranchID* branch,
                        const Func* func, const ActRec* fp) {
+  assertx(fp);
   reset_counter();
 
   auto const& b = *branch;
@@ -203,9 +204,8 @@ void record_branch_hit(const BranchID* branch,
   if (auto const cls = func->cls()) {
     record.setStr("cls", cls->name()->data());
 
-    if (fp == nullptr || fp->func() != func || instrCanHalt(b.from.bc_op)) {
+    if (fp->func() != func || instrCanHalt(b.from.bc_op)) {
       // We can't access the late-bound class if:
-      //  - rvmfp() was invalidated, e.g., by FreeActRec;
       //  - we're in an inlined function but are not pointing at the callee
       //    frame; or
       //  - we're in a Ret-like instruction which might have decref'd the
@@ -249,7 +249,7 @@ Vout vheader(Vunit& unit, Vlabel s, AreaIndex area_cap = AreaIndex::Main) {
       return static_cast<unsigned>(l) < static_cast<unsigned>(r);
     }
   );
-  auto const header = unit.makeBlock(aidx);
+  auto const header = unit.makeBlock(aidx, unit.blocks[s].weight);
 
   auto const& code = unit.blocks[s].code;
   assertx(!code.empty());
@@ -292,11 +292,7 @@ struct Env {
    * we def'd a VregSF, branched, re-joined, and then used the VregSF after the
    * phi), so instead we just rename everything to RegSF{0}.
    */
-  std::unordered_set<unsigned> sf_renames;
-  /*
-   * Set of Vlabels for which rvmfp() is not valid.
-   */
-  boost::dynamic_bitset<> fp_invalid;
+  jit::fast_set<unsigned> sf_renames;
 };
 
 /*
@@ -363,9 +359,9 @@ BranchID branch_id_for(Env& env, const jcci& from, Vlabel b) {
  *
  * `b' should be either the from-block or the to-block for `branch'.
  */
-void sample_branch(Vout& v, Env& env, const BranchID& branch,
-                   const Func* func, Vlabel b) {
-  auto const push_val = [&] (uint64_t val) {
+void sample_branch(Vout& v, Env& /*env*/, const BranchID& branch,
+                   const Func* func, Vlabel /*b*/) {
+  auto const push_val = [&] (Vout& v, uint64_t val) {
     // This wacky nonsense is to try to force XLS to use the same register for
     // each immediate we want to push.
     v << copy{v.cns(val), rret()};
@@ -373,16 +369,16 @@ void sample_branch(Vout& v, Env& env, const BranchID& branch,
   };
 
   auto const rbranch = v.makeReg();
-  push_val(branch.taken.vasm_id.hi);
-  push_val(branch.taken.vasm_id.lo);
-  push_val(branch.next.hi);
-  push_val(branch.next.lo);
-  push_val(branch.from.hi);
-  push_val(branch.from.lo);
+  push_val(v, branch.taken.vasm_id.hi);
+  push_val(v, branch.taken.vasm_id.lo);
+  push_val(v, branch.next.hi);
+  push_val(v, branch.next.lo);
+  push_val(v, branch.from.hi);
+  push_val(v, branch.from.lo);
   v << copy{rsp(), rbranch};
 
   auto const rfunc = v.cns(func);
-  auto const rfp = env.fp_invalid[b] ? v.cns(0) : Vreg(rvmfp());
+  auto const rfp = Vreg(rvmfp());
 
   v << vcall{
     CallSpec::direct(record_branch_hit),
@@ -458,8 +454,8 @@ void insert_profiling_header(Env& env, BranchID branch, Vlabel& to) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<typename Inst>
-void profile(Env& env, Inst& inst, Vlabel b) {}
+template <typename Inst>
+void profile(Env& /*env*/, Inst& /*inst*/, Vlabel /*b*/) {}
 
 void profile(Env& env, jcc& inst, Vlabel b) {
   auto branch = branch_id_for(env, inst, b);
@@ -493,39 +489,6 @@ void profile(Env& env, jcci& inst, Vlabel b) {
   // ...then replace the jcci{} with a jcc{}.
   auto& from = unit.blocks[b].code.back();
   from = jcc{inst.cc, inst.sf, {inst.target, header}};
-}
-
-void profile(Env& env, phijcc& inst, Vlabel b) {
-  auto& unit = env.unit;
-
-  auto const fresh_tuple = [&] {
-    auto copy = unit.tuples[inst.uses];
-    for (auto& r : copy) r = unit.makeReg();
-    return unit.makeTuple(copy);
-  };
-
-  auto branch = branch_id_for(env, inst, b);
-  auto const taken = inst.targets[1];
-
-  for (auto& s : inst.targets) {
-    DEBUG_ONLY auto const& to = unit.blocks[s].code.front();
-    assertx(to.op == Vinstr::phidef);
-    assertx(unit.tuples[inst.uses].size() ==
-            unit.tuples[to.phidef_.defs].size());
-
-    auto const middlemen = fresh_tuple();
-
-    create_profiling_header(
-      env, branch.take(s == taken), s,
-      [&] (Vout& v, Vlabel) {
-        v << phidef{middlemen};
-      },
-      [&] (Vout& v, Vlabel header) {
-        v << phijmp{s, middlemen};
-        s = header;
-      }
-    );
-  };
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -583,7 +546,7 @@ std::vector<Vreg> compute_sf_livein(const Vunit& unit,
       RegSet implicit_uses, implicit_across, implicit_defs;
       if (inst.op == Vinstr::vcall ||
           inst.op == Vinstr::vinvoke ||
-          inst.op == Vinstr::vcallarray) {
+          inst.op == Vinstr::vcallunpack) {
         // getEffects() would assert since these haven't been lowered yet.
         implicit_defs |= RegSF{0};
       } else {
@@ -617,64 +580,6 @@ std::vector<Vreg> compute_sf_livein(const Vunit& unit,
   }
 
   return livein;
-}
-
-/*
- * Determine which blocks include, or are dominated by, an operation which
- * logically invalidates rvmfp().
- *
- * For the most part, we only change rvmfp() via calls and returns, which we
- * consider "safe" for our purposes here, since they are "atomic" sequences.
- * The one exception is in the async return path, when we emit a FreeActRec
- * instruction before doing some more work and eventually returning to the
- * scheduler.
- *
- * This analysis just searches for all blocks that contain or are dominated by
- * a FreeActRec instruction.
- */
-boost::dynamic_bitset<> analyze_fp_validity(const Vunit& unit,
-                                            const jit::vector<Vlabel>& rpo,
-                                            const PredVector& preds) {
-  auto fp_invalid = boost::dynamic_bitset<>(unit.blocks.size());
-
-  auto workQ = dataflow_worklist<uint32_t>(unit.blocks.size());
-
-  auto const block_to_rpo = [&] {
-    auto order = std::vector<uint32_t>(unit.blocks.size());
-
-    for (size_t i = 0; i < rpo.size(); ++i) {
-      workQ.push(i);
-      order[rpo[i]] = i;
-    }
-    return order;
-  }();
-
-  while (!workQ.empty()) {
-    auto const b = rpo[workQ.pop()];
-    auto const& block = unit.blocks[b];
-
-    auto const invalid = !!fp_invalid[b];
-
-    // `b' is fp-invalidated if any of its predecessors are...
-    for (auto p : preds[b]) {
-      fp_invalid[b] |= fp_invalid[p];
-    }
-    // ...or if it contains Vinstrs belonging to a FreeActRec.
-    if (!fp_invalid[b]) {
-      for (auto const& inst : block.code) {
-        if (inst.origin && inst.origin->is(FreeActRec)) {
-          fp_invalid[b] = true;
-          break;
-        }
-      }
-    }
-
-    if (invalid != fp_invalid[b]) {
-      for (auto const s : succs(block)) workQ.push(block_to_rpo[s]);
-    }
-  }
-
-  return fp_invalid;
 }
 
 /*
@@ -717,7 +622,6 @@ void profile_branches(Vunit& unit) {
     unit,
     compute_sf_livein(unit, rpo, preds),
     decltype(Env::sf_renames){},
-    analyze_fp_validity(unit, rpo, preds)
   };
 
   PostorderWalker{unit}.dfs([&] (Vlabel b) {

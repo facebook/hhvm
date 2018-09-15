@@ -1,6 +1,6 @@
 File "constructor_error.php", line 14, characters 26-27:
 Invalid argument (Typing[4110])
-File "constructor_error.php", line 8, characters 39-45:
+File "constructor_error.php", line 12, characters 31-37:
 This is an array key (int/string)
 File "constructor_error.php", line 4, characters 19-26:
   resulting from expanding the type constant X::T

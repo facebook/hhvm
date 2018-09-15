@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_isset_elem() {
 $a = array(0, 1, 2);
 print ":".isset($a[-1]).":\n";
 print ":".isset($a[0]).":\n";
@@ -48,3 +51,4 @@ print "\n";
 $a = 2.0;
 print ":".isset($a[0]).":\n";
 print "\n";
+}

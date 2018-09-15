@@ -24,13 +24,12 @@ using namespace HPHP;
 LabelStatement::LabelStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, const std::string &label)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES(LabelStatement)),
-    m_label(label), m_isValid(true) {
+    m_label(label) {
 }
 
 StatementPtr LabelStatement::clone() {
   LabelStatementPtr stmt(new LabelStatement(*this));
   stmt->m_label   = m_label;
-  stmt->m_isValid = m_isValid;
   return stmt;
 }
 
@@ -39,9 +38,6 @@ StatementPtr LabelStatement::clone() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-void LabelStatement::analyzeProgram(AnalysisResultPtr ar) {
-}
 
 ConstructPtr LabelStatement::getNthKid(int n) const {
   switch (n) {
@@ -56,7 +52,7 @@ int LabelStatement::getKidCount() const {
   return 0;
 }
 
-void LabelStatement::setNthKid(int n, ConstructPtr cp) {
+void LabelStatement::setNthKid(int n, ConstructPtr /*cp*/) {
   switch (n) {
     default:
       assert(false);
@@ -67,6 +63,6 @@ void LabelStatement::setNthKid(int n, ConstructPtr cp) {
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
-void LabelStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
+void LabelStatement::outputPHP(CodeGenerator& cg, AnalysisResultPtr /*ar*/) {
   cg_printf("%s:\n", m_label.c_str());
 }

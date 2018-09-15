@@ -1,0 +1,6 @@
+File "method_shadow.php", line 6, characters 16-18:
+This object access to get is ambiguous (Typing[4256])
+File "method_shadow.php", line 8, characters 20-22:
+You will access the private instance declared in A
+File "method_shadow.php", line 17, characters 19-21:
+Instead of the public instance declared in B

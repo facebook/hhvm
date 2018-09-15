@@ -1,0 +1,13 @@
+File "match_param.php", line 13, characters 7-9:
+Class Bad does not correctly implement all required methods  (Typing[4110])
+File "match_param.php", line 13, characters 22-31:
+Some methods are incompatible with those declared in type FunAsClass
+Read the following to see why:
+File "match_param.php", line 14, characters 19-20:
+Member do has the wrong type
+File "match_param.php", line 14, characters 22-28:
+This is a dynamic value
+File "match_param.php", line 13, characters 33-37:
+It is incompatible with a mixed value
+File "match_param.php", line 4, characters 22-24:
+  via this generic Tin

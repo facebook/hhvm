@@ -96,12 +96,12 @@ struct InitFiniNode {
 
   static InitFiniNode*& node(When when) {
     auto idx = static_cast<unsigned>(when);
-    assert(idx < NumNodes);
+    assertx(idx < NumNodes);
     return s_nodes[idx];
   }
   static IFDispatcher*& dispatcher(When when) {
     auto idx = static_cast<unsigned>(when);
-    assert(idx < NumNodes);
+    assertx(idx < NumNodes);
     return s_dispatcher[idx];
   }
   void (*func)();

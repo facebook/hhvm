@@ -1,0 +1,2 @@
+File "bad_inout_use_this.php", line 9, characters 13-17:
+Arguments for inout parameters must be local variables or simple subscript expressions on vecs, dicts, keysets, or arrays (NastCheck[3050])

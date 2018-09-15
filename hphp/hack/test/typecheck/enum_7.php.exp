@@ -1,4 +1,2 @@
-File "enum_7.php", line 14, characters 9-11:
-Enum constants must be an int or string (Typing[4018])
-File "enum_7.php", line 7, characters 9-12:
-Not a bool
+File "enum_7.php", line 11, characters 24-28:
+Enums must be int or string, not a mixed value (Typing[4024])

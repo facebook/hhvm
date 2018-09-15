@@ -2,17 +2,15 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Core
+open Hh_core
 open Reordered_argument_collections
 open SymbolDefinition
-
-type outline = string SymbolDefinition.t list
+module Parser = Full_fidelity_ast
 
 let modifiers_of_ast_kinds l =
   List.map l begin function
@@ -24,14 +22,21 @@ let modifiers_of_ast_kinds l =
     | Ast.Protected -> Protected
   end
 
+let get_full_name class_name name =
+  match class_name with
+  | None -> name
+  | Some class_name -> class_name ^ "::" ^ name
+
 let summarize_property class_name kinds var =
   let modifiers = modifiers_of_ast_kinds kinds in
   let span, (pos, name), _expr_opt = var in
   let kind = Property in
   let id = get_symbol_id kind (Some class_name) name in
+  let full_name = get_full_name (Some class_name) name in
   {
     kind;
     name;
+    full_name;
     id;
     pos;
     span;
@@ -49,9 +54,11 @@ let summarize_const class_name ((pos, name), (expr_pos, _)) =
   let span = (Pos.btw pos expr_pos) in
   let kind = Const in
   let id = get_symbol_id kind (Some class_name) name in
+  let full_name = get_full_name (Some class_name) name in
   {
     kind;
     name;
+    full_name;
     id;
     pos;
     span;
@@ -64,9 +71,11 @@ let summarize_const class_name ((pos, name), (expr_pos, _)) =
 let summarize_abs_const class_name (pos, name) =
   let kind = Const in
   let id = get_symbol_id kind (Some class_name) name in
+  let full_name = get_full_name (Some class_name) name in
   {
     kind;
     name;
+    full_name;
     id;
     pos = pos;
     span = pos;
@@ -80,13 +89,19 @@ let modifier_of_fun_kind acc = function
   | Ast.FAsync | Ast.FAsyncGenerator -> Async :: acc
   | _ -> acc
 
+let modifier_of_param_kind acc = function
+  | Some Ast.Pinout -> Inout :: acc
+  | _ -> acc
+
 let summarize_typeconst class_name t =
   let pos, name = t.Ast.tconst_name in
   let kind = Typeconst in
   let id = get_symbol_id kind (Some class_name) name in
+  let full_name = get_full_name (Some class_name) name in
   {
     kind;
     name;
+    full_name;
     id;
     pos;
     span = t.Ast.tconst_span;
@@ -100,13 +115,16 @@ let summarize_param param =
   let pos, name = param.Ast.param_id in
   let param_start = Option.value_map param.Ast.param_hint ~f:fst ~default:pos in
   let param_end = Option.value_map param.Ast.param_expr ~f:fst ~default:pos in
-  let modifiers =
-    modifiers_of_ast_kinds (Option.to_list param.Ast.param_modifier) in
+  let modifiers = modifier_of_param_kind [] param.Ast.param_callconv in
+  let param_vis = Option.to_list param.Ast.param_modifier in
+  let modifiers = (modifiers_of_ast_kinds param_vis) @ modifiers in
   let kind = Param in
   let id = get_symbol_id kind None name in
+  let full_name = get_full_name None name in
   {
     kind;
     name;
+    full_name;
     id;
     pos;
     span = Pos.btw param_start param_end;
@@ -123,9 +141,11 @@ let summarize_method class_name m =
   let name = snd m.Ast.m_name in
   let kind = Method in
   let id = get_symbol_id kind (Some class_name) name in
+  let full_name = get_full_name (Some class_name) name in
   {
     kind;
     name;
+    full_name;
     id;
     pos = (fst m.Ast.m_name);
     span = m.Ast.m_span;
@@ -168,7 +188,7 @@ let summarize_class class_ ~no_children =
     in
     Some (List.concat_map class_.Ast.c_body ~f:begin function
       | Ast.Method m -> [summarize_method class_name m]
-      | Ast.ClassVars (kinds, _, vars) ->
+      | Ast.ClassVars { Ast.cv_kinds = kinds; Ast.cv_names = vars; _ } ->
           List.concat_map vars
             ~f:(maybe_summarize_property class_name ~skip:implicit_props kinds)
       | Ast.XhpAttr (_, var, _, _) ->
@@ -187,14 +207,43 @@ let summarize_class class_ ~no_children =
   in
   let name = class_name in
   let id = get_symbol_id kind None name in
+  let full_name = get_full_name None name in
   {
     kind;
     name;
+    full_name;
     id;
     pos = class_name_pos;
     span = c_span;
     modifiers;
     children;
+    params = None;
+    docblock = None;
+  }
+
+let typedef_kind_pos tk =
+  begin match tk with
+  | Ast.Alias (pos,_) -> pos
+  | Ast.NewType (pos,_) -> pos
+  end
+
+let summarize_typedef tdef =
+  let kind = Typedef in
+  let name = Utils.strip_ns (snd tdef.Ast.t_id) in
+  let id = get_symbol_id kind None name in
+  let full_name = get_full_name None name in
+  let pos = fst tdef.Ast.t_id in
+  let kind_pos = typedef_kind_pos tdef.Ast.t_kind in
+  let span = (Pos.btw pos kind_pos) in
+  {
+    kind;
+    name;
+    full_name;
+    id;
+    pos;
+    span;
+    modifiers = [];
+    children = None;
     params = None;
     docblock = None;
   }
@@ -205,9 +254,11 @@ let summarize_fun f =
   let kind = Function in
   let name = Utils.strip_ns (snd f.Ast.f_name) in
   let id = get_symbol_id kind None name in
+  let full_name = get_full_name None name in
   {
     kind;
     name;
+    full_name;
     id;
     pos = fst f.Ast.f_name;
     span = f.Ast.f_span;
@@ -224,9 +275,11 @@ let summarize_gconst cst =
   let kind = Const in
   let name = Utils.strip_ns (snd cst.Ast.cst_name) in
   let id = get_symbol_id kind None name in
+  let full_name = get_full_name None name in
   {
     kind;
     name;
+    full_name;
     id;
     pos;
     span = Pos.btw gconst_start gconst_end;
@@ -239,9 +292,11 @@ let summarize_gconst cst =
 let summarize_local name span =
   let kind = LocalVar in
   let id = get_symbol_id kind None name in
+  let full_name = get_full_name None name in
   {
     kind;
     name;
+    full_name;
     id;
     pos = span;
     span;
@@ -261,7 +316,7 @@ let outline_ast ast =
 
 let should_add_docblock = function
   | Function| Class | Method | Property | Const | Enum
-  | Interface | Trait | Typeconst -> true
+  | Interface | Trait | Typeconst | Typedef -> true
   | LocalVar | Param -> false
 
 let add_def_docblock finder previous_def_line def =
@@ -275,7 +330,7 @@ let add_def_docblock finder previous_def_line def =
 let add_docblocks defs comments =
   let finder = Docblock_finder.make_docblock_finder comments in
 
-  let rec map_def f acc def =
+  let rec map_def f (acc : int) (def : string SymbolDefinition.t) =
     let acc, def = f acc def in
     let acc, children = Option.value_map def.children
       ~f:(fun defs ->
@@ -285,7 +340,7 @@ let add_docblocks defs comments =
     in
     acc, { def with children }
 
-  and map_def_list f acc defs =
+  and map_def_list f (acc : int) (defs : string SymbolDefinition.t list) =
     let acc, defs = List.fold_left defs
       ~f:(fun (acc, defs) def ->
         let acc, def = map_def f acc def in
@@ -297,59 +352,37 @@ let add_docblocks defs comments =
   snd (map_def_list (add_def_docblock finder) 0 defs)
 
 let outline popt content =
-  let {Parser_hack.ast; comments; _} =
-    Parser_hack.program
-      popt
-      Relative_path.default
-      content
-      ~include_line_comments:true
-      ~keep_errors:false
+  let env = Parser.make_env
+    ~parser_options:popt
+    ~include_line_comments:true
+    ~keep_errors:false
+    Relative_path.default
   in
+  let {Parser_return.ast; comments; _} = Parser.from_text_with_legacy env content in
   let result = outline_ast ast in
   add_docblocks result comments
 
-let rec definition_to_json def =
-  Hh_json.JSON_Object ([
-    "kind", Hh_json.JSON_String (string_of_kind def.kind);
-    "name", Hh_json.JSON_String def.name;
-    "id", Option.value_map def.id
-      ~f:(fun x -> Hh_json.JSON_String x) ~default:Hh_json.JSON_Null;
-    "position", Pos.json def.pos;
-    "span", Pos.multiline_json def.span;
-    "modifiers", Hh_json.JSON_Array
-      (List.map def.modifiers
-      (fun x -> Hh_json.JSON_String (string_of_modifier x)));
-  ] @
-  (Option.value_map def.children
-    ~f:(fun x -> [("children", to_json x)]) ~default:[])
-    @
-  (Option.value_map def.params
-    ~f:(fun x -> [("params", to_json x)]) ~default:[])
-    @
-  (Option.value_map def.docblock
-    ~f:(fun x -> [("docblock", Hh_json.JSON_String x)]) ~default:[]))
-
-and to_json outline =
-  Hh_json.JSON_Array begin
-    List.map outline ~f:definition_to_json
-  end
-
-let rec print_def indent def =
+let rec print_def ~short_pos indent def =
   let
-    {name; kind; id; pos; span; modifiers; children; params; docblock} = def
+    {name; kind; id; pos; span; modifiers; children; params; docblock;
+      full_name=_} = def
+  in
+  let print_pos, print_span = if short_pos
+    then Pos.string_no_file, Pos.multiline_string_no_file
+    else Pos.string, Pos.multiline_string
   in
   Printf.printf "%s%s\n" indent name;
   Printf.printf "%s  kind: %s\n" indent (string_of_kind kind);
   Option.iter id (fun id -> Printf.printf "%s  id: %s\n" indent id);
-  Printf.printf "%s  position: %s\n" indent (Pos.string pos);
-  Printf.printf "%s  span: %s\n" indent (Pos.multiline_string span);
+  Printf.printf "%s  position: %s\n" indent (print_pos pos);
+  Printf.printf "%s  span: %s\n" indent (print_span span);
   Printf.printf "%s  modifiers: " indent;
   List.iter modifiers
     (fun x -> Printf.printf "%s " (string_of_modifier x));
     Printf.printf "\n";
   Option.iter params (fun x ->
     Printf.printf "%s  params:\n" indent;
-    print (indent ^ "    ") x;
+    print ~short_pos (indent ^ "    ") x;
   );
   Option.iter docblock (fun x ->
     Printf.printf "%s  docblock:\n" indent;
@@ -357,10 +390,11 @@ let rec print_def indent def =
   );
   Printf.printf "\n";
   Option.iter children (fun x ->
-    print (indent ^ "  ") x
+    print ~short_pos (indent ^ "  ") x
   );
 
-and print indent defs  =
-  List.iter defs ~f:(print_def indent)
+and print ~short_pos indent defs =
+  List.iter defs ~f:(print_def ~short_pos indent)
 
-let print  = print ""
+let print_def ?short_pos:(short_pos = false) = print_def ~short_pos
+let print ?short_pos:(short_pos = false) = print ~short_pos ""

@@ -29,10 +29,6 @@ namespace HPHP {
 
 #ifndef NO_HARDWARE_COUNTERS
 
-struct InstructionCounter;
-struct LoadCounter;
-struct StoreCounter;
-
 struct PerfTable {
   const char* name;
   uint32_t type;
@@ -40,7 +36,9 @@ struct PerfTable {
 };
 
 struct HardwareCounterImpl;
+struct StructuredLogEntry;
 
+/* If you change the public interface, remember to update the stubs below. */
 struct HardwareCounter {
   HardwareCounter();
   ~HardwareCounter();
@@ -57,9 +55,19 @@ struct HardwareCounter {
   typedef void (*PerfEventCallback)(const std::string&, int64_t, void*);
   static void GetPerfEvents(PerfEventCallback f, void* data);
   static void ClearPerfEvents();
-  static void Init(bool enable, const std::string& events, bool subProc);
+  static void UpdateServiceData(const timespec& cpu_begin,
+                                const timespec& wall_begin,
+                                StructuredLogEntry* entry,
+                                bool includingPsp);
+  static void Init(bool enable,
+                   const std::string& events,
+                   bool subProc,
+                   bool excludeKernel,
+                   bool fastReads,
+                   int exportInterval);
   static void RecordSubprocessTimes();
-  static DECLARE_THREAD_LOCAL_NO_CHECK(HardwareCounter, s_counter);
+  static void ExcludeKernel();
+  static THREAD_LOCAL_NO_CHECK(HardwareCounter, s_counter);
   bool m_countersSet{false};
 private:
   void reset();
@@ -70,15 +78,20 @@ private:
   bool addPerfEvent(const char* event);
   bool setPerfEvents(folly::StringPiece events);
   void getPerfEvents(PerfEventCallback f, void* data);
+  template<typename F>
+  void forEachCounter(F func);
   void clearPerfEvents();
+  void updateServiceData(StructuredLogEntry* entry, bool includingPsp);
 
-  std::unique_ptr<InstructionCounter> m_instructionCounter;
-  std::unique_ptr<LoadCounter> m_loadCounter;
-  std::unique_ptr<StoreCounter> m_storeCounter;
+  std::unique_ptr<HardwareCounterImpl> m_instructionCounter;
+  std::unique_ptr<HardwareCounterImpl> m_loadCounter;
+  std::unique_ptr<HardwareCounterImpl> m_storeCounter;
   std::vector<std::unique_ptr<HardwareCounterImpl>> m_counters;
 };
 
 #else // NO_HARDWARE_COUNTERS
+
+struct StructuredLogEntry;
 
 /* Stub implementation for platforms without hardware counters (non-linux)
  * This mock class pretends to track performance events, but just returns
@@ -100,10 +113,20 @@ struct HardwareCounter {
   typedef void (*PerfEventCallback)(const std::string&, int64_t, void*);
   static void GetPerfEvents(PerfEventCallback f, void* data) { }
   static void ClearPerfEvents() { }
-  static void Init(bool enable, const std::string& events, bool subProc) {}
+  static void UpdateServiceData(const timespec& cpu_begin,
+                                const timespec& wall_begin,
+                                StructuredLogEntry* entry,
+                                bool includingPsp) { }
+  static void Init(bool enable,
+                   const std::string& events,
+                   bool subProc,
+                   bool excludeKernel,
+                   bool fastReads,
+                   int exportInterval) {}
   static void RecordSubprocessTimes() {}
+  static void ExcludeKernel() {}
 
-  // Normally exposed by DECLARE_THREAD_LOCAL_NO_CHECK
+  // Normally exposed by THREAD_LOCAL_NO_CHECK
   void getCheck() { }
   void destroy() { }
   static HardwareCounter s_counter;

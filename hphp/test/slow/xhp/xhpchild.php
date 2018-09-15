@@ -45,4 +45,8 @@ function main() {
   f1(null);
   f2(null);
 }
+
+<<__EntryPoint>>
+function main_xhpchild() {
 main();
+}

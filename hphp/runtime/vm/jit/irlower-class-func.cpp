@@ -109,7 +109,16 @@ void cgLdFuncVecLen(IRLS& env, const IRInstruction* inst) {
   // handle that case.
   auto const off = Class::funcVecLenOff() -
     (inst->src(0)->isA(TCctx) ? ActRec::kHasClassBit : 0);
-  v << loadzlq{cls[off], dst};
+
+  static_assert(sizeof(Class::veclen_t) == 2 || sizeof(Class::veclen_t) == 4,
+                "Class::veclen_t must be 2 or 4 bytes wide");
+  if (sizeof(Class::veclen_t) == 2) {
+    auto const tmp = v.makeReg();
+    v << loadw{cls[off], tmp};
+    v << movzwq{tmp, dst};
+  } else {
+    v << loadzlq{cls[off], dst};
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -118,7 +127,7 @@ void cgLdClsInitData(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const cls = srcLoc(env, inst, 0).reg();
   auto const offset = Class::propDataCacheOff() +
-                      rds::Link<Class::PropInitVec*>::handleOff();
+    rds::Link<Class::PropInitVec*, rds::Mode::Normal>::handleOff();
   auto& v = vmain(env);
 
   auto const handle = v.makeReg();
@@ -128,31 +137,38 @@ void cgLdClsInitData(IRLS& env, const IRInstruction* inst) {
   v << load{vec[Class::PropInitVec::dataOff()], dst};
 }
 
-void cgCheckInitProps(IRLS& env, const IRInstruction* inst) {
-  auto const cls = inst->extra<CheckInitProps>()->cls;
-  auto& v = vmain(env);
-
-  auto const sf = checkRDSHandleInitialized(v, cls->propHandle());
-  v << jcc{CC_NE, sf, {label(env, inst->next()), label(env, inst->taken())}};
-}
-
-void cgCheckInitSProps(IRLS& env, const IRInstruction* inst) {
-  auto const cls = inst->extra<CheckInitSProps>()->cls;
-  auto& v = vmain(env);
-
-  auto const handle = cls->sPropInitHandle();
-  if (rds::isNormalHandle(handle)) {
-    auto const sf = checkRDSHandleInitialized(v, handle);
-    v << jcc{CC_NE, sf, {label(env, inst->next()), label(env, inst->taken())}};
-  } else {
-    // Always initialized; just fall through to inst->next().
-    assert(rds::isPersistentHandle(handle));
-    assert(rds::handleToRef<bool>(handle));
-  }
+void cgPropTypeRedefineCheck(IRLS& env, const IRInstruction* inst) {
+  auto const cls = inst->src(0)->clsVal();
+  auto const slot = inst->src(1)->intVal();
+  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
+  assertx(cls->maybeRedefinesPropTypes());
+  assertx(slot != kInvalidSlot);
+  assertx(slot < cls->numDeclProperties());
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::method(&Class::checkPropTypeRedefinition),
+    kVoidDest,
+    SyncOptions::Sync,
+    argGroup(env, inst).immPtr(cls).imm(slot)
+  );
 }
 
 IMPL_OPCODE_CALL(InitProps)
 IMPL_OPCODE_CALL(InitSProps)
+
+///////////////////////////////////////////////////////////////////////////////
+
+void cgLookupSPropSlot(IRLS& env, const IRInstruction* inst) {
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::method(&Class::lookupSProp),
+    callDest(env, inst),
+    SyncOptions::None,
+    argGroup(env, inst).ssa(0).ssa(1)
+  );
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -165,6 +181,20 @@ void cgLdFuncNumParams(IRLS& env, const IRInstruction* inst) {
   // See Func::finishedEmittingParams and Func::numParams.
   v << loadzlq{func[Func::paramCountsOff()], tmp};
   v << shrqi{1, tmp, dst, v.makeReg()};
+}
+
+void cgIsFuncDynCallable(IRLS& env, const IRInstruction* inst) {
+  auto const func = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  auto const sf = v.makeReg();
+  v << testlim{
+    static_cast<int32_t>(AttrDynamicallyCallable),
+    func[Func::attrsOff()],
+    sf
+  };
+  v << setcc{CC_NZ, sf, dst};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

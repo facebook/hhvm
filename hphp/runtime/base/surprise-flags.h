@@ -64,6 +64,9 @@ enum SurpriseFlag : size_t {
    */
   PendingPerfEventFlag = 1ull << 62,
 
+  /* Set when executing a CLI-server request and the client has vanished. */
+  CLIClientTerminated = 1ull << 63,
+
   /*
    * Flags that shouldn't be cleared by fetchAndClearSurpriseFlags, because
    * fetchAndClearSurpriseFlags is only supposed to touch flags related to
@@ -84,6 +87,7 @@ enum SurpriseFlag : size_t {
     XenonSignalFlag |
     IntervalTimerFlag |
     MemThresholdFlag |
+    CLIClientTerminated |
     ResourceFlags,
 
   /*
@@ -104,16 +108,17 @@ enum SurpriseFlag : size_t {
  * regardess of whether they actually are set.
  */
 struct NoHandleSurpriseScope {
-#ifdef DEBUG
+#ifndef NDEBUG
   static void AssertNone(SurpriseFlag flags);
   explicit NoHandleSurpriseScope(SurpriseFlag flags);
   ~NoHandleSurpriseScope();
- private:
+
+  private:
   SurpriseFlag m_flags;
 #else
   // Compiles to nothing in release mode.
-  static void AssertNone(SurpriseFlag flags) {}
-  explicit NoHandleSurpriseScope(SurpriseFlag flags) {}
+  static void AssertNone(SurpriseFlag) {}
+  explicit NoHandleSurpriseScope(SurpriseFlag) {}
   ~NoHandleSurpriseScope() {}
 #endif
 };

@@ -17,8 +17,8 @@
 #ifndef incl_HPHP_VARIABLE_UNSERIALIZER_H_
 #define incl_HPHP_VARIABLE_UNSERIALIZER_H_
 
-#include "hphp/runtime/base/req-containers.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/util/compact-tagged-ptrs.h"
 
 namespace HPHP {
@@ -33,6 +33,7 @@ enum class UnserializeMode {
   ColKey = 3,
   VecValue = 4,
   DictValue = 5,
+  ShapeValue = 6,
 };
 
 struct InvalidAllowedClassesException : Exception {
@@ -45,6 +46,7 @@ struct VariableUnserializer {
    */
   enum class Type {
     Serialize,
+    Internal,
     APCSerialize,
     DebuggerSerialize
   };
@@ -80,6 +82,10 @@ struct VariableUnserializer {
    * Set the beginning and end of internal buffer.
    */
   void set(const char* buf, const char* end);
+
+  void setDVOverrides(VariableSerializer::DVOverrides* overrides) {
+    m_dvOverrides = overrides;
+  }
 
  private:
   bool readOnly() const { return m_readOnly; }
@@ -124,7 +130,7 @@ struct VariableUnserializer {
   /*
    * Push v onto the vector of refs for future reference.
    */
-  void add(Variant* v, UnserializeMode mode);
+  void add(tv_lval v, UnserializeMode mode);
 
   /*
    * Preallocate memory for an expected number of values to be added
@@ -135,18 +141,18 @@ struct VariableUnserializer {
   /*
    * Used by the 'r' encoding to get a reference.
    */
-  Variant* getByVal(int id);
+  tv_lval getByVal(int id);
 
   /*
    * Used by the 'R' encoding to get a reference.
    */
-  Variant* getByRef(int id);
+  tv_lval getByRef(int id);
 
   /*
    * Store properties/array elements that get overwritten incase they are
    * referenced later during unserialization
    */
-  void putInOverwrittenList(const Variant& v);
+  void putInOverwrittenList(tv_rval v);
 
   /*
    * Register an object that needs its __wakeup() method called after
@@ -160,26 +166,29 @@ private:
    * whether it is legal to reference them later.
    */
   struct RefInfo {
-    explicit RefInfo(Variant* v);
-    static RefInfo makeColValue(Variant* v);
-    static RefInfo makeVecValue(Variant* v);
-    static RefInfo makeDictValue(Variant* v);
+    explicit RefInfo(tv_lval v);
+    static RefInfo makeColValue(tv_lval v);
+    static RefInfo makeVecValue(tv_lval v);
+    static RefInfo makeDictValue(tv_lval v);
+    static RefInfo makeShapeValue(tv_lval v);
 
-    Variant* var() const;
+    tv_lval var() const;
 
     bool canBeReferenced() const;
     bool isColValue() const;
     bool isVecValue() const;
     bool isDictValue() const;
   private:
-    enum class Type {
+    enum class Type : int16_t {
       Value,
       ColValue,
       VecValue,
-      DictValue
+      DictValue,
+      ShapeValue
     };
-    RefInfo(Variant*, Type);
-    CompactTaggedPtr<Variant, Type> m_data;
+    RefInfo(tv_lval, Type);
+    // tv_lval with a Type tag.
+    tv_val<false, Type> m_data;
   };
 
   Array m_overwrittenList;
@@ -195,13 +204,18 @@ private:
   const Array& m_options; // e.g. classes allowed to be unserialized
   req::vector<Object> m_sleepingObjects;
   const char* const m_begin;
+  bool m_forceDArrays;
+  VariableSerializer::DVOverrides* m_dvOverrides = nullptr;
 
-  void unserializeVariant(Variant& self,
+  void unserializeVariant(tv_lval self,
                           UnserializeMode mode = UnserializeMode::Value);
   Array unserializeArray();
   Array unserializeDict();
   Array unserializeVec();
   Array unserializeKeyset();
+  Array unserializeVArray();
+  Array unserializeDArray();
+  Array unserializeShape();
   folly::StringPiece unserializeStringPiece(char delimiter0 = '"',
                                             char delimiter1 = '"');
   String unserializeString(char delimiter0 = '"', char delimiter1 = '"');
@@ -211,7 +225,7 @@ private:
   void unserializeMap(ObjectData*, int64_t sz, char type);
   void unserializeSet(ObjectData*, int64_t sz, char type);
   void unserializePair(ObjectData*, int64_t sz, char type);
-  void unserializePropertyValue(Variant& v, int remainingProps);
+  void unserializePropertyValue(tv_lval v, int remainingProps);
   bool tryUnserializeStrIntMap(struct BaseMap* map, int64_t sz);
   void unserializeProp(ObjectData* obj, const String& key, Class* ctx,
                        const String& realKey, int nProp);

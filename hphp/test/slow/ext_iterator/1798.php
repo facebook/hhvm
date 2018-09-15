@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1798() {
 $sample_dir = __DIR__.'/../../sample_dir';
 
 $files = array();
@@ -79,4 +82,5 @@ foreach ($files as $name => $fileinfo) {
    $fileinfo->isLink() . "\n";
    $fileinfo->isReadable() . "\n";
    $fileinfo->isWritable() . "\n";
+}
 }

@@ -4,6 +4,10 @@ class A {
  function test() {
 }
 }
- $obj = new A();
+
+ <<__EntryPoint>>
+function main_721() {
+$obj = new A();
  $obj->test();
  $obj = 1;
+}

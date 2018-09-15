@@ -1,0 +1,2 @@
+File "ternary_within_lambda_within_ternary.php", line 10, characters 8-72:
+Nested ternary expressions inside ternary expressions are ambiguous. Please add parentheses (Parsing[1002])

@@ -289,7 +289,7 @@ abstract class SplHeap implements \HH\Iterator, Countable {
   }
 
   private static function parentIndex($childIndex) {
-    return floor(($childIndex - 1) / 2);
+    return (int)floor(($childIndex - 1) / 2);
   }
 }
 

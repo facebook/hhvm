@@ -98,6 +98,11 @@ static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
       case T_EVAL:
       case T_ARRAY:
       case T_ARRAY_CAST:
+      case T_VARRAY:
+      case T_DARRAY:
+      case T_VEC:
+      case T_DICT:
+      case T_KEYSET:
         return ListAssignment::Regular;
       default:
         return ListAssignment::Null;
@@ -180,10 +185,8 @@ void ListAssignment::setLValue() {
           sublist->setLValue();
         } else {
           // Magic contexts I took from assignment expression
-          exp->setContext(Expression::DeepAssignmentLHS);
           exp->setContext(Expression::AssignmentLHS);
           exp->setContext(Expression::LValue);
-          exp->setContext(Expression::NoLValueWrapper);
         }
       }
     }
@@ -195,24 +198,6 @@ void ListAssignment::setLValue() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-void ListAssignment::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_variables) m_variables->analyzeProgram(ar);
-  if (m_array) m_array->analyzeProgram(ar);
-  FunctionScopePtr func = getFunctionScope();
-  if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    if (m_variables) {
-      for (int i = 0; i < m_variables->getCount(); i++) {
-        ExpressionPtr exp = (*m_variables)[i];
-        if (exp) {
-          if (!exp->is(Construct::KindOfListAssignment)) {
-            CheckNeeded(exp, ExpressionPtr());
-          }
-        }
-      }
-    }
-  }
-}
 
 ConstructPtr ListAssignment::getNthKid(int n) const {
   switch (m_rhsFirst ? 1 - n : n) {

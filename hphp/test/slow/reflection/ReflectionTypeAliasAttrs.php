@@ -8,6 +8,9 @@ type MyType = int;
 <<Attr2, Attr3>>
 newtype MyNewType = int;
 
+
+<<__EntryPoint>>
+function main_reflection_type_alias_attrs() {
 $x = new ReflectionTypeAlias('MyTypeNoAttrs');
 echo $x->__toString();
 var_dump($x->getAttributes());
@@ -21,5 +24,6 @@ var_dump($x->getAttribute('Attr1'));
 $x = new ReflectionTypeAlias('MyNewType');
 echo $x->__toString();
 $attrs = $x->getAttributes();
-ksort($attrs);
+ksort(&$attrs);
 var_dump($attrs);
+}

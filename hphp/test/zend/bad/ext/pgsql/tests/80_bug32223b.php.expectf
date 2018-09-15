@@ -1,7 +1,0 @@
-resource(%d) of type (pgsql result)
-array(1) {
-  [0]=>
-  string(1) "f"
-}
-string(14) "NOTICE:  11111"
-===DONE===

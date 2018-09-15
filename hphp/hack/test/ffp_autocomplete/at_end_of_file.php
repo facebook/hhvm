@@ -1,0 +1,2 @@
+<?hh
+// AUTOCOMPLETE 3 1

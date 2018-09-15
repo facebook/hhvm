@@ -1,0 +1,28 @@
+Notice: Undefined variable: z in %s/hphp/test/slow/null_coalesce_assignment/bad_intermediate.php on line 16
+
+Notice: Undefined index:  in %s/hphp/test/slow/null_coalesce_assignment/bad_intermediate.php on line 16
+bool(true)
+
+Notice: Undefined variable: z in %s/hphp/test/slow/null_coalesce_assignment/bad_intermediate.php on line 17
+bool(true)
+
+Notice: Undefined variable: z in %s/hphp/test/slow/null_coalesce_assignment/bad_intermediate.php on line 18
+
+Notice: Undefined variable: z in %s/hphp/test/slow/null_coalesce_assignment/bad_intermediate.php on line 19
+bool(true)
+bool(true)
+
+Notice: Undefined property: Foo::$foo in %s/hphp/test/slow/null_coalesce_assignment/bad_intermediate.php on line 23
+
+Warning: Creating default object from empty value in %s/hphp/test/slow/null_coalesce_assignment/bad_intermediate.php on line 23
+bool(true)
+object(Foo)#1 (1) {
+  ["foo"]=>
+  object(stdClass)#2 (1) {
+    ["bar"]=>
+    int(42)
+  }
+}
+
+Warning: Creating default object from empty value in %s/hphp/test/slow/null_coalesce_assignment/bad_intermediate.php on line 26
+bool(true)

@@ -199,7 +199,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    * @return     array<string, mixed>   An array of static variables.
    */
   <<__Native>>
-  public function getStaticVariables(): array;
+  public function getStaticVariables(): darray<string, mixed>;
 
   /**
    * ( excerpt from
@@ -254,11 +254,11 @@ abstract class ReflectionFunctionAbstract implements Reflector {
       $retTypeInfo = $this->getRetTypeInfo();
       return new ReflectionType(
         $this,
-        array(
+        darray[
           'name' => $retTypeInfo['type_hint'],
           'nullable' => $retTypeInfo['type_hint_nullable'],
           'builtin' => $retTypeInfo['type_hint_builtin'],
-        )
+        ]
       );
     }
     return null;
@@ -273,7 +273,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    * @return  array<arraykey, array<int, mixed>>
    */
   <<__Native>>
-  final public function getAttributes(): array;
+  final public function getAttributes(): darray<arraykey, array<mixed>>;
 
   /**
    * ( excerpt from
@@ -295,7 +295,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * @return  array<arraykey, array<int, mixed>>
    */
-  public function getAttributesRecursive(): array {
+  public function getAttributesRecursive(
+  ): darray<arraykey, array<int, mixed>> {
     return $this->getAttributes();
   }
 
@@ -316,7 +317,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function getNumberOfParameters(): int;
 
   <<__Native>>
-  private function getParamInfo(): array;
+  private function getParamInfo(): varray<darray<string, mixed>>;
 
   private $params = null;
 
@@ -330,16 +331,16 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * @return     array  The parameters, as a ReflectionParameter object.
    */
-  public function getParameters(): array<ReflectionParameter> {
+  public function getParameters(): varray<ReflectionParameter> {
     // FIXME: ReflectionParameter sh/could have native data pointing to the
     // relevant Func::ParamInfo data structure
     if (null === $this->params) {
-      $ret = array();
-      foreach ($this->getParamInfo() as $name => $info) {
+      $ret = varray[];
+      foreach ($this->getParamInfo() as $idx => $info) {
         $param = new ReflectionParameter(null, null);
         $param->info = $info;
         $param->name = $info['name'];
-        $param->paramTypeInfo = array();
+        $param->paramTypeInfo = darray[];
         $param->paramTypeInfo['name'] = $info['type_hint'];
         $param->paramTypeInfo['nullable'] = $info['type_hint_nullable'];
         $param->paramTypeInfo['builtin'] = $info['type_hint_builtin'];
@@ -678,6 +679,8 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
     }
     return null;
   }
+
+  use ReflectionTypedAttribute;
 }
 
 /**
@@ -1099,17 +1102,24 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
     return $rm->getAttributeRecursive($name);
   }
 
-  public function getAttributesRecursive(): array {
+  public function getAttributesRecursive(
+  ): darray<arraykey, array<int, mixed>> {
     $attrs = $this->getAttributes();
     $p = get_parent_class($this->getDeclaringClassname());
     if ($p !== false) {
       $rm = new ReflectionMethod($p, $this->getName());
       if (!$rm->isPrivate()) {
-        $attrs += $rm->getAttributesRecursive();
+        foreach ($rm->getAttributesRecursive() as $name => $value) {
+          if (!array_key_exists($name, $attrs)) {
+            $attrs[$name] = $value;
+          }
+        }
       }
     }
     return $attrs;
   }
+
+  use ReflectionTypedAttribute;
 }
 
 /**
@@ -1142,11 +1152,11 @@ class ReflectionClass implements Reflector {
     } else {
       $classname = $name_or_obj;
     }
-    if (!$this->__init($classname)) {
+    $name = $this->__init($classname);
+    if (!$name) {
       throw new ReflectionException("Class $classname does not exist");
     }
-
-    $this->name = $this->getName();
+    $this->name = $name;
   }
 
   <<__Native>>
@@ -1479,8 +1489,8 @@ class ReflectionClass implements Reflector {
    * @return     mixed   An array of ReflectionMethod objects reflecting each
    *                     method.
    */
-  public function getMethods(?int $filter = null): array<ReflectionMethod> {
-    $ret = array();
+  public function getMethods(?int $filter = null): varray<ReflectionMethod> {
+    $ret = varray[];
     $clsname = $this->getName();
     foreach ($this->getMethodOrderWithCaching($filter) as $name) {
       $ret[] = new ReflectionMethod($clsname, $name);
@@ -1527,7 +1537,7 @@ class ReflectionClass implements Reflector {
    * @return     array   An array of constants. Constant name in key,
    *                     constant value in value.
    */
-  public function getConstants(): array<string, mixed> {
+  public function getConstants(): darray<string, mixed> {
     $clsname = $this->getName();
     $cached = hphp_array_idx(self::$constCache, $clsname, null);
     if (null !== $cached) {
@@ -1548,7 +1558,7 @@ class ReflectionClass implements Reflector {
    *
    * @return  array<string, string>
    */
-  public function getAbstractConstantNames(): array<string, string> {
+  public function getAbstractConstantNames(): darray<string, string> {
     $clsname = $this->getName();
     $cached = hphp_array_idx(self::$absConstCache, $clsname, null);
     if (null !== $cached) {
@@ -1576,8 +1586,8 @@ class ReflectionClass implements Reflector {
     return array_key_exists($name, $this->getTypeConstantNamesWithCaching());
   }
 
-  public function getTypeConstants(): array<ReflectionTypeConstant> {
-    $ret = array();
+  public function getTypeConstants(): varray<ReflectionTypeConstant> {
+    $ret = varray[];
     $class = $this->getName();
     foreach ($this->getTypeConstantNamesWithCaching() as $name) {
       $ret[] = new ReflectionTypeConstant($class, $name);
@@ -1586,10 +1596,10 @@ class ReflectionClass implements Reflector {
   }
 
   <<__Native>>
-  private function getOrderedConstants(): array<string, mixed>;
+  private function getOrderedConstants(): darray<string, mixed>;
 
   <<__Native>>
-  private function getOrderedAbstractConstants(): array<string, string>;
+  private function getOrderedAbstractConstants(): darray<string, string>;
 
   <<__Native>>
   public function getOrderedTypeConstants(): array<string, string>;
@@ -1604,7 +1614,7 @@ class ReflectionClass implements Reflector {
    *                     values.
    */
   <<__Native>>
-  public function getInterfaceNames(): array<string>;
+  public function getInterfaceNames(): varray<string>;
 
   /**
    * ( excerpt from
@@ -1616,7 +1626,7 @@ class ReflectionClass implements Reflector {
    *                     interface names and the array values as
    *                     ReflectionClass objects.
    */
-  public function getInterfaces(): array<string, ReflectionClass> {
+  public function getInterfaces(): darray<string, ReflectionClass> {
     return $this->getReflectionClassesFromNames($this->getInterfaceNames());
   }
 
@@ -1626,7 +1636,7 @@ class ReflectionClass implements Reflector {
    * concrete classes.
    */
   <<__Native>>
-  public function getRequirementNames(): array<string>;
+  public function getRequirementNames(): varray<string>;
 
   /**
    * Gets ReflectionClass-es for the requirements of this class
@@ -1634,7 +1644,7 @@ class ReflectionClass implements Reflector {
    * @return  An associative array of requirements, with keys as
    *          requirement names and the array values as ReflectionClass objects.
    */
-  public function getRequirements(): array<string, ReflectionClass> {
+  public function getRequirements(): darray<string, ReflectionClass> {
     return $this->getReflectionClassesFromNames($this->getRequirementNames());
   }
 
@@ -1649,7 +1659,7 @@ class ReflectionClass implements Reflector {
    *                     NULL in case of an error.
    */
   <<__Native>>
-  public function getTraitNames(): array<string>;
+  public function getTraitNames(): varray<string>;
 
   /**
    * ( excerpt from
@@ -1663,7 +1673,7 @@ class ReflectionClass implements Reflector {
    *                     in values. Returns NULL in case of an error.
    */
   <<__Native>>
-  public function getTraitAliases(): array<string, string>;
+  public function getTraitAliases(): darray<string, string>;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.gettraits.php )
@@ -1675,15 +1685,15 @@ class ReflectionClass implements Reflector {
    *                     instances of trait's ReflectionClass in values.
    *                     Returns NULL in case of an error.
    */
-  public function getTraits(): array<string, ReflectionClass> {
+  public function getTraits(): darray<string, ReflectionClass> {
     return $this->getReflectionClassesFromNames($this->getTraitNames());
   }
 
   /**
    * Helper for the get{Traits,Interfaces,Requirements} methods
    */
-  private function getReflectionClassesFromNames(array<string> $names) {
-    $ret = array();
+  private function getReflectionClassesFromNames(varray<string> $names) {
+    $ret = darray[];
     foreach ($names as $name) {
       $ret[$name] = new ReflectionClass($name);
     }
@@ -1811,7 +1821,7 @@ class ReflectionClass implements Reflector {
    *
    * @return     mixed   Returns a new instance of the class.
    */
-  public function newInstanceArgs($args = array()) {
+  public function newInstanceArgs($args = varray[]) {
     if ($args && !$this->getConstructorName()) {
       // consistent with reference, but perhaps not particularly useful
       throw new ReflectionException(
@@ -1820,7 +1830,7 @@ class ReflectionClass implements Reflector {
       );
     }
     // XXX: is this array_values necessary?
-    return hphp_create_object($this->getName(), array_values($args));
+    return hphp_create_object($this->getName(), array_values((array)$args));
   }
 
   /**
@@ -1853,9 +1863,18 @@ class ReflectionClass implements Reflector {
     $props_map = hphp_array_idx(self::$propInfoCache, $this->getName(), null);
     if (null === $props_map) {
       $prop_info = $this->getClassPropertyInfo();
-      $properties = $prop_info['properties'] + $prop_info['private_properties'];
-      $props_index =
-        $prop_info['properties_index'] + $prop_info['private_properties_index'];
+      $properties = $prop_info['properties'];
+      foreach ($prop_info['private_properties'] as $k => $v) {
+        if (!array_key_exists($k, $properties)) {
+          $properties[$k] = $v;
+        }
+      }
+      $props_index = $prop_info['properties_index'];
+      foreach ($prop_info['private_properties_index'] as $k => $v) {
+        if (!array_key_exists($k, $props_index)) {
+          $props_index[$k] = $v;
+        }
+      }
       $ordering = array_values($props_index);
       array_multisort($ordering, $properties);
       self::$propInfoCache[$this->getName()]
@@ -1923,8 +1942,8 @@ class ReflectionClass implements Reflector {
    *
    * @return     mixed   An array of ReflectionProperty objects.
    */
-  public function getProperties($filter = 0xFFFF): array<ReflectionProperty> {
-    $ret = array();
+  public function getProperties($filter = 0xFFFF): varray<ReflectionProperty> {
+    $ret = varray[];
     foreach ($this->getOrderedPropertyInfos() as $name => $prop_info) {
       if ($this->obj) {
         $p = new ReflectionProperty($this->obj, $name);
@@ -1950,8 +1969,8 @@ class ReflectionClass implements Reflector {
    *
    * @return     mixed   The static properties, as an array.
    */
-  public function getStaticProperties(): array<string, mixed> {
-    $ret = array();
+  public function getStaticProperties(): darray<string, mixed> {
+    $ret = darray[];
     foreach ($this->getProperties(ReflectionProperty::IS_STATIC) as $prop) {
       $val = hphp_get_static_property($this->getName(), $prop->name, true);
       $ret[$prop->name] = $val;
@@ -2010,9 +2029,10 @@ class ReflectionClass implements Reflector {
    *
    * Gets default properties from a class (including inherited properties).
    *
-   * This method only works for static properties when used on internal
-   * classes. The default value of a static class property can not be tracked
-   * when using this method on user defined classes.
+   * This method only works for static properties when the default value is
+   * known statically. If it is not known statically you will get null instead
+   * of the correct value. Do not rely on this API for default values of
+   * static properties.
    *
    * @return     mixed   An array of default properties, with the key being
    *                     the name of the property and the value being the
@@ -2022,11 +2042,11 @@ class ReflectionClass implements Reflector {
    *                     properties and does not take visibility modifiers
    *                     into account.
    */
-  public function getDefaultProperties(): array<string, mixed> {
-    $ret = array();
+  public function getDefaultProperties(): darray<string, mixed> {
+    $ret = darray[];
     foreach ($this->getProperties() as $prop) {
       if ($prop->isDefault()) {
-        $ret[$prop->name] = $prop->info['defaultValue'];
+        $ret[$prop->name] = $prop->getDefaultValue();
       }
     }
     return $ret;
@@ -2190,8 +2210,10 @@ class ReflectionClass implements Reflector {
     return hphp_array_idx($this->getAttributes(), $name, null);
   }
 
+  use ReflectionTypedAttribute;
+
   <<__Native>>
-  public function getAttributes(): array;
+  public function getAttributes(): darray<string, array<mixed>>;
 
   public function getAttributeRecursive($name) {
     // Note: not particularly optimal ... could be a fast-terminating
@@ -2200,7 +2222,7 @@ class ReflectionClass implements Reflector {
   }
 
   <<__Native>>
-  public function getAttributesRecursive(): array;
+  public function getAttributesRecursive(): darray<string, array<mixed>>;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2391,16 +2413,17 @@ class ReflectionTypeAlias implements Reflector {
    * @name      string  Name of the type alias.
    */
   final public function __construct(string $name) {
-    if (!$this->__init($name)) {
+    $n = $this->__init($name);
+    if (!$n) {
       throw new ReflectionException(
         "type alias {$name} does not exist");
     }
-    $this->name = $name;
+    $this->name = $n;
   }
 
   // helper for ctor
   <<__Native>>
-  private function __init(string $name): bool;
+  private function __init(string $name): string;
 
   /**
    * Get the TypeStructure that contains the full type information of
@@ -2409,7 +2432,7 @@ class ReflectionTypeAlias implements Reflector {
    * @return    array  The type structure of the type alias.
    */
   <<__Native>>
-  public function getTypeStructure(): array;
+  public function getTypeStructure(): darray;
 
   /**
    * Gets all attributes
@@ -2417,7 +2440,7 @@ class ReflectionTypeAlias implements Reflector {
    * @return  array<arraykey, array<int, mixed>>
    */
   <<__Native>>
-  final public function getAttributes(): array;
+  final public function getAttributes(): darray<arraykey, array<int, mixed>>;
 
   /**
    * Returns all attributes with given key.
@@ -2427,6 +2450,8 @@ class ReflectionTypeAlias implements Reflector {
   final public function getAttribute(string $name) {
     return hphp_array_idx($this->getAttributes(), $name, null);
   }
+
+  use ReflectionTypedAttribute;
 
   /**
    * Get the TypeStructure with type information resolved. Call at
@@ -2452,8 +2477,14 @@ class ReflectionTypeAlias implements Reflector {
    * @return    string  The name of the type alias
    */
   public function getName() {
-    return $name;
+    return $this->name;
   }
+
+  /**
+   * Get the name of the file in which the type alias was defined.
+   */
+  <<__Native>>
+  public function getFileName(): string;
 
   // Prevent cloning
   final public function __clone() {

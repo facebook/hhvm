@@ -329,8 +329,8 @@ PhysExpr expr_for(const Env& env, RegState& state, Vreg s) {
  *
  * Returns true if no further analysis is needed for the def to `d'.
  */
-bool analyze_phys_callseq(const Env& env, Vreg d,
-                          const Vinstr& inst, const Vinstr* next) {
+bool analyze_phys_callseq(const Env& /*env*/, Vreg d, const Vinstr& inst,
+                          const Vinstr* next) {
   if (d != rvmfp()) return false;
 
   /*
@@ -459,7 +459,6 @@ void analyze_virt_disp(Env& env, RegState& state,
       V(addli)    \
       V(addqi)
 #define VASM_SUBS \
-      V(subbi)    \
       V(subli)    \
       V(subqi)
 
@@ -632,8 +631,8 @@ template<class F>
 void if_rewritable(const Env& env, const RegState& state, Vreg r, F f) {
   if (!r.isVirt()) return;
 
-  auto const& def = env.defs[r];
-  if (!def.base.isValid()) return;
+  auto const& definition = env.defs[r];
+  if (!definition.base.isValid()) return;
 
   auto const try_phys_rewrite = [&] (DefInfo def) {
     // We can't fold defs relative to unreserved physical registers.
@@ -688,26 +687,26 @@ void if_rewritable(const Env& env, const RegState& state, Vreg r, F f) {
            try_rewrite(def.expr.base);
   };
 
-  if (def.base.isPhys()) {
-    try_phys_rewrite(def);
+  if (definition.base.isPhys()) {
+    try_phys_rewrite(definition);
     return;
   }
-  assertx(def.base.isVirt());
+  assertx(definition.base.isVirt());
 
-  auto const& src = env.defs[def.base];
+  auto const& src = env.defs[definition.base];
   // The flatten_def_infos() pass should have folded chains of virtual defs.
   assertx(!src.base.isVirt());
 
   if (src.base.isPhys()) {
     auto folded = src;
-    folded.disp += def.disp;
+    folded.disp += definition.disp;
 
-    // Try rewriting to the physical `src'; but even if we can't, we can still
-    // just rewrite to `def'.
+    // Try rewriting to the physical `src`; but even if we can't, we can still
+    // just rewrite to `definition`.
     if (try_phys_rewrite(folded)) return;
   }
 
-  f(def);
+  f(definition);
 }
 
 /*
@@ -739,7 +738,7 @@ struct OptVisit {
       if (arch() == Arch::ARM) {
         // After lowering, only [base, index lsl #scale] and [base, #imm]
         // are allowed where the range of #imm is [-256 .. 255]
-        assert(ptr.base.isValid());
+        assertx(ptr.base.isValid());
         auto disp = ptr.disp + def.disp;
         if (ptr.index.isValid()) {
           if (disp != 0) return;

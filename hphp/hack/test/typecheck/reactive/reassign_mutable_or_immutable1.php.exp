@@ -1,0 +1,2 @@
+File "reassign_mutable_or_immutable1.php", line 7, characters 8-9:
+This variable is maybe mutable. You cannot create a new reference to it. (Typing[4258])

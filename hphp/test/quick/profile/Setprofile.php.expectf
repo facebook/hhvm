@@ -156,7 +156,7 @@ array(3) {
   [2]=>
   array(1) {
     ["exception"]=>
-    object(Exception)#1 (7) {
+    object(Exception)#1 (8) {
       ["message":protected]=>
       string(4) "test"
       ["string":"Exception":private]=>
@@ -195,6 +195,8 @@ array(3) {
         }
       }
       ["previous":"Exception":private]=>
+      NULL
+      ["userMetadata":protected]=>
       NULL
     }
   }

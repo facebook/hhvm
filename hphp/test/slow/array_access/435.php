@@ -17,6 +17,9 @@ class A implements ArrayAccess {
     $this->$offset = 'unset';
   }
 }
+
+<<__EntryPoint>>
+function main_435() {
 $obj = new A();
 if (!isset($obj['a'])) {
   $obj['a'] = 'test';
@@ -27,3 +30,4 @@ if (!empty($obj['a'])) {
 var_dump($obj['a']);
 unset($obj['a']);
 var_dump($obj['a']);
+}

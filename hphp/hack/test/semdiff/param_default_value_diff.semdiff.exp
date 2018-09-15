@@ -1,0 +1,9 @@
+comparing .main
+Semdiff succeeded
+comparing key f
+Semdiff succeeded
+Edits = 
+
+for f:
+- 1
++ 2

@@ -2,12 +2,12 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
+open Core_kernel
 open Decl_defs
 
 module Dep = Typing_deps.Dep
@@ -15,6 +15,7 @@ module Dep = Typing_deps.Dep
 type env = {
   mode : FileInfo.mode;
   droot : Typing_deps.Dep.variant option;
+  decl_tcopt : TypecheckerOptions.t;
 }
 
 let mode env = env.mode

@@ -19,7 +19,6 @@
 
 #include "hphp/compiler/expression/expression.h"
 #include "hphp/compiler/expression/simple_variable.h"
-#include "hphp/compiler/analysis/variable_table.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

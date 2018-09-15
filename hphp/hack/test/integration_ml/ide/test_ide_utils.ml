@@ -66,7 +66,7 @@ let test_early_revive () =
 
   expect_mem();
   SharedMem.invalidate_caches();
-  ServerIdeUtils.declare_and_check content ~f:(fun _ _ -> expect_mem()) tcopt;
+  ServerIdeUtils.declare_and_check content ~f:(fun _ _ _ -> expect_mem()) tcopt;
   SharedMem.invalidate_caches();
   expect_mem();
 
@@ -127,7 +127,7 @@ let test_cleanup () =
           used after
       )
   in
-  let f _ _ = () in
+  let f _ _ _ = () in
   let env = Test.setup_server () in
   let tcopt = env.tcopt in
 

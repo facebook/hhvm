@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A extends RecursiveDirectoryIterator {
   public function current() {

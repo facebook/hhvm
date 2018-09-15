@@ -54,6 +54,9 @@ class X implements arrayaccess {
       $this->container[$offset] : null;
   }
 }
+
+<<__EntryPoint>>
+function main_1859() {
 $x = new X(array(0, 1, 2));
 f($x);
 f(array(0, 1, 2));
@@ -64,3 +67,4 @@ h('foobar');
 h(new stdClass());
 var_dump(i($x));
 var_dump(i(array(0, 1, 2)));
+}

@@ -2,13 +2,13 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Core
+open Core_kernel
+open Common
 open Typing_defs
 open Type_mapper
 
@@ -24,10 +24,10 @@ type static_array_access_type =
   | AKother
 
 let static_array_access env = function
-  | Some (_, x) -> begin match x with
-    | Nast.Int (_, x) ->
+  | Some (p, x) -> begin match x with
+    | Nast.Int x ->
       (try AKtuple_index (int_of_string x) with Failure _ -> AKother)
-    | _ -> begin match TUtils.maybe_shape_field_name env x with
+    | _ -> begin match TUtils.maybe_shape_field_name env (p, x) with
       | Some x -> AKshape_key x
       | None -> AKother
       end
@@ -48,35 +48,53 @@ end
  * to just an array.*)
 class virtual downcast_tabstract_to_array_type_mapper = object(this)
   method on_tabstract env r ak cstr =
-    match TUtils.get_as_constraints env ak cstr with
-    | None -> env, (r, Tabstract (ak, cstr))
-    | Some ty -> this#on_type env ty
+    let ty = (r, Tabstract(ak, cstr)) in
+    match TUtils.get_all_supertypes env ty with
+    | _, [] -> env, ty
+    | env, tyl ->
+      let is_array = function
+      | _, Tarraykind _ -> true
+      | _ -> false in
+      match List.filter tyl is_array with
+      | [] ->
+        env, ty
+      | x::_ ->
+        (* If the abstract type has multiple concrete supertypes
+        which are arrays, just take the first one.
+        TODO(jjwu): Try all of them and find one that works
+        *)
+        this#on_type env x
+
 
   method virtual on_type : env -> locl ty -> result
 end
 
-let array_type_list_to_single_type env values =
+let union env tyl =
+  let env, union_ty = Env.fresh_unresolved_type env in
+  let env = List.fold_left tyl ~init:env ~f:begin fun env ty ->
+    let env, ty = Typing_env.unbind env ty in
+    TUtils.sub_type env ty union_ty
+  end in
+  env, union_ty
+
+let union_keys = union
+
+let union_values env values =
   let unknown = List.find values (fun ty ->
-    snd (snd (TUtils.fold_unresolved env ty)) = Tany)
-  in match unknown with
-    | Some (r, _) -> env, (r, Tany)
-    | None ->
-      let env, value = Env.fresh_unresolved_type env in
-      List.fold_left_env env values ~init:value ~f:TUtils.unify
+    snd (snd (TUtils.fold_unresolved env ty)) = Tany) in
+  match unknown with
+  | Some (r, _) -> env, (r, TUtils.tany env)
+  | None -> union env values
 
 let downcast_akshape_to_akmap_ env r fdm =
   let keys, values = List.unzip (ShapeMap.values fdm) in
-  let env, values = List.map_env env values Typing_env.unbind in
-  let env, value = array_type_list_to_single_type env values in
-  let env, keys = List.map_env env keys Typing_env.unbind in
-  let env, key = Env.fresh_unresolved_type env in
-  let env, key = List.fold_left_env env keys ~init:key ~f:TUtils.unify in
+  let env, value = union_values env values in
+  let env, key = union_keys env keys in
   env, (r, Tarraykind (AKmap (key, value)))
 
 let downcast_aktuple_to_akvec_ env r fields =
   let tyl = List.rev (IMap.values fields) in
-  let env, tyl = List.map_env env tyl Typing_env.unbind in
-  let env, value = array_type_list_to_single_type env tyl in
+  let env, value = union_values env tyl in
   env, (r, Tarraykind (AKvec (value)))
 
 class virtual downcast_aktypes_mapper = object(this)
@@ -133,9 +151,10 @@ let fold_aktuple_as_akvec f env r fields =
  * Shape field names must all be constant strings or constants from
  * same class. *)
 let akshape_keys_consistent field_name_x field_name_y =
-  let open Nast in
+  let open Ast in
     match field_name_x, field_name_y with
-      | (SFlit _, SFlit _) -> true
+      | (SFlit_int _, SFlit_int _) | (SFlit_str _, SFlit_str _)
+      | (SFlit_int _, SFlit_str _) | (SFlit_str _, SFlit_int _) -> true
       | (SFclass_const ((_, cls1), _)), (SFclass_const ((_, cls2), _))
           -> cls1 = cls2
       | _ -> false
@@ -143,13 +162,13 @@ let akshape_keys_consistent field_name_x field_name_y =
 let akshape_key_consistent_with_map field_name fdm =
   try
     akshape_keys_consistent field_name (fst (ShapeMap.min_binding fdm))
-  with Not_found -> true
+  with Caml.Not_found -> true
 
 let is_shape_like_array env = function
   | [] -> false
   | x::rl ->
     let field_name = function
-      | Nast.AFkvalue (ex, _) -> TUtils.maybe_shape_field_name env (snd ex)
+      | Nast.AFkvalue (ex, _) -> TUtils.maybe_shape_field_name env ex
       | _ -> None in
     let x_field_name = field_name x in
     Option.is_some x_field_name && List.for_all rl begin fun y ->
@@ -203,7 +222,13 @@ let update_array_type p access_type ~lvar_assignment env ty =
     method! on_tshape env r fields_known fdm =
       match access_type with
         | AKshape_key field_name when lvar_assignment ->
-          let env, tv = Env.fresh_unresolved_type env in
+          let env, sft_ty = Env.fresh_unresolved_type env in
+          (* When we assign to a shape, like:
+           *
+           *   $shape['field'] = // some type
+           *
+           * We want to infer the shape field as non-optional. *)
+          let tv = { sft_optional = false; sft_ty } in
           let fdm = ShapeMap.add field_name tv fdm in
           env, (Reason.Rwitness p, Tshape (fields_known, fdm))
         | _ ->

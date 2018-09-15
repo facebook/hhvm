@@ -7,4 +7,8 @@ class SubClass extends BaseClass {
     echo "Calling static method '$name' "         . implode(', ', $arguments). "\n";
   }
 }
+
+<<__EntryPoint>>
+function main_1902() {
 SubClass::foo();
+}

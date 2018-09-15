@@ -1,0 +1,4 @@
+File "suspend_operator_err3.php", line 5, characters 16-17:
+Only coroutine functions are allowed to be called in 'suspend' operator. (Typing[4170])
+File "suspend_operator_err3.php", line 3, characters 22-38:
+This is a function

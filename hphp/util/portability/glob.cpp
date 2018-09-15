@@ -33,8 +33,10 @@
 #include <stddef.h>
 
 #include <folly/CPortability.h>
-#include <folly/FilePortability.h>
 #include <folly/ScopeGuard.h>
+#include <folly/portability/Dirent.h>
+#include <folly/portability/Stdlib.h>
+#include <folly/portability/Unistd.h>
 
 #include "hphp/util/portability/fnmatch.h"
 #include "hphp/util/portability.h"

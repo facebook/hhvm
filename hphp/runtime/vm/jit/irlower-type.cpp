@@ -25,9 +25,9 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/type-profile.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/types.h"
-#include "hphp/runtime/vm/jit/type-profile.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
@@ -68,7 +68,7 @@ void cgCheckType(IRLS& env, const IRInstruction* inst) {
     if (srcType != InvalidReg) {
       v << copy{srcType, dstType};
     } else {
-      v << ldimmq{src->type().toDataType(), dstType};
+      v << ldimmb{static_cast<data_type_t>(src->type().toDataType()), dstType};
     }
   };
 
@@ -133,8 +133,7 @@ void cgCheckType(IRLS& env, const IRInstruction* inst) {
       src->type().maybe(typeParam)) {
     assertx(src->type().maybe(TPersistent));
 
-    auto const sf = v.makeReg();
-    v << cmplim{0, srcData[FAST_REFCOUNT_OFFSET], sf};
+    auto const sf = emitCmpRefCount(v, 0, srcData);
     doJcc(CC_L, sf);
     doMov();
     return;
@@ -148,9 +147,11 @@ void cgCheckType(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgCheckTypeMem(IRLS& env, const IRInstruction* inst) {
-  auto const src = srcLoc(env, inst, 0).reg();
+  auto const src = inst->src(0);
+  auto const srcLoc = tmpLoc(env, src);
   emitTypeCheck(vmain(env), env, inst->typeParam(),
-                src[TVOFF(m_type)], src[TVOFF(m_data)], inst->taken());
+                memTVTypePtr(src, srcLoc), memTVValPtr(src, srcLoc),
+                inst->taken());
 }
 
 void cgCheckLoc(IRLS& env, const IRInstruction* inst) {
@@ -171,7 +172,7 @@ void cgCheckStk(IRLS& env, const IRInstruction* inst) {
 
 void cgCheckRefInner(IRLS& env, const IRInstruction* inst) {
   if (inst->typeParam() >= TInitCell) return;
-  auto const base = srcLoc(env, inst, 0).reg()[RefData::tvOffset()];
+  auto const base = srcLoc(env, inst, 0).reg()[RefData::cellOffset()];
 
   emitTypeCheck(vmain(env), env, inst->typeParam(),
                 base + TVOFF(m_type), base + TVOFF(m_data), inst->taken());
@@ -228,70 +229,35 @@ void cgIsNTypeMem(IRLS& env, const IRInstruction* inst) {
   implIsType(env, inst, true);
 }
 
-void cgIsScalarType(IRLS& env, const IRInstruction* inst) {
-  auto rtype = srcLoc(env, inst, 0).reg(1);
-  auto dst = dstLoc(env, inst, 0).reg(0);
+///////////////////////////////////////////////////////////////////////////////
 
-  static_assert(KindOfInt64 < KindOfPersistentString,
-                "fix checks for IsScalar");
-  static_assert(KindOfBoolean < KindOfPersistentString,
-                "fix checks for IsScalar");
-
-  static_assert(KindOfDouble > KindOfPersistentString,
-                "fix checks for IsScalar");
-  static_assert(KindOfString > KindOfPersistentString,
-                "fix checks for IsScalar");
-
-  static_assert(sizeof(DataType) == 1, "");
-
+void cgCheckVArray(IRLS& env, const IRInstruction* inst) {
+  auto const src = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
-
-  if (rtype == InvalidReg) {
-    auto const type = inst->src(0)->type();
-    auto const imm = type <= (TBool | TInt | TDbl | TStr);
-    v << copy{v.cns(imm), dst};
-    return;
-  }
-
   auto const sf = v.makeReg();
-  v << cmpbi{KindOfPersistentString, rtype, sf};
-  cond(
-    v, CC_L, sf, dst,
-    [&](Vout& v) {
-      auto const sf = v.makeReg();
-      auto const dst = v.makeReg();
-      v << cmpbi{KindOfInt64, rtype, sf};
-      cond(
-        v, CC_E, sf, dst,
-        [&](Vout& v) { return v.cns(true); },
-        [&](Vout& v) {
-          auto const sf = v.makeReg();
-          auto const dst = v.makeReg();
-          v << cmpbi{KindOfBoolean, rtype, sf};
-          v << setcc{CC_E, sf, dst};
-          return dst;
-        }
-      );
-      return dst;
-    },
-    [&](Vout& v) {
-      auto const sf = v.makeReg();
-      auto const dst = v.makeReg();
-      emitTestTVType(v, sf, KindOfStringBit, rtype);
-      cond(
-        v, CC_NZ, sf, dst,
-        [&](Vout& v) { return v.cns(true); },
-        [&](Vout& v) {
-          auto const sf = v.makeReg();
-          auto const dst = v.makeReg();
-          v << cmpbi{KindOfDouble, rtype, sf};
-          v << setcc{CC_E, sf, dst};
-          return dst;
-        }
-      );
-      return dst;
-    }
-  );
+  v << testbim{ArrayData::kVArray, src + ArrayData::offsetofDVArray(), sf};
+  fwdJcc(v, env, CC_Z, sf, inst->taken());
+  v << copy{src, dst};
+}
+
+void cgCheckDArray(IRLS& env, const IRInstruction* inst) {
+  auto const src = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  auto const sf = v.makeReg();
+  v << testbim{ArrayData::kDArray, src + ArrayData::offsetofDVArray(), sf};
+  fwdJcc(v, env, CC_Z, sf, inst->taken());
+  v << copy{src, dst};
+}
+
+void cgIsDVArray(IRLS& env, const IRInstruction* inst) {
+  auto const src = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  auto const sf = v.makeReg();
+  v << testbim{ArrayData::kDVArrayMask, src + ArrayData::offsetofDVArray(), sf};
+  v << setcc{CC_NZ, sf, dst};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -300,7 +266,7 @@ void cgAssertType(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const& dtype = inst->dst()->type();
   if (dtype == TBottom) {
-    v << ud2();
+    v << trap{TRAP_REASON};
     v = v.makeBlock();
     return;
   }

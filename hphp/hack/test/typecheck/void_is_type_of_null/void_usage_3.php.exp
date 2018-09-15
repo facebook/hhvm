@@ -1,0 +1,4 @@
+File "void_usage_3.php", line 6, characters 7-9:
+You are using the return value of a void function (Typing[4119])
+File "void_usage_3.php", line 3, characters 15-18:
+A void function doesn't return a value

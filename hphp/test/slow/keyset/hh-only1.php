@@ -6,4 +6,8 @@ function main() {
   return $v;
 }
 
+
+<<__EntryPoint>>
+function main_hh_only1() {
 main();
+}

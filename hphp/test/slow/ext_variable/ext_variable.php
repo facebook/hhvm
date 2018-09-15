@@ -7,8 +7,11 @@ function VS($x, $y) {
 }
 function VERIFY($x) { VS($x != false, true); }
 
+
 //////////////////////////////////////////////////////////////////////
 
+<<__EntryPoint>>
+function main_ext_variable() {
 $valid_res = imagecreate(10, 10);
 $invalid_res = imagecreate(10, 10);
 imagedestroy($invalid_res);
@@ -158,4 +161,5 @@ foreach ($typesTest as $testedType => $values) {
         settype($value, $testedType);
         var_dump(gettype($value));
     }
+}
 }

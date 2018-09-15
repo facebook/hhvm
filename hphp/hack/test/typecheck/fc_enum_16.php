@@ -1,3 +1,3 @@
 <?hh
 
-enum Foo : arraykey {}
+enum Foo: arraykey {}

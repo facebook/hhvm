@@ -6,6 +6,8 @@
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/tv-type.h"
 
 namespace HPHP { namespace collections {
 /////////////////////////////////////////////////////////////////////////////
@@ -44,18 +46,11 @@ static void HHVM_METHOD(PairIterator, rewind) {
 Class* c_Pair::s_cls;
 
 c_Pair::~c_Pair() {
-  if (LIKELY(m_size == 2)) {
-    tvRefcountedDecRef(&elm0);
-    tvRefcountedDecRef(&elm1);
-    return;
-  }
-  if (m_size == 1) {
-    tvRefcountedDecRef(&elm0);
-  }
+  tvDecRefGen(&elm0);
+  tvDecRefGen(&elm1);
 }
 
 int64_t c_Pair::linearSearch(const Variant& value) const {
-  assertx(isFullyConstructed());
   for (uint64_t i = 0; i < 2; ++i) {
     if (same(value, tvAsCVarRef(&getElms()[i]))) {
       return i;
@@ -64,21 +59,29 @@ int64_t c_Pair::linearSearch(const Variant& value) const {
   return -1;
 }
 
-Array c_Pair::toArrayImpl() const {
-  // Parsing/scanning the heap (e.g., objprof) can cause us to get here before
-  // we've initialized the elms.
-  if (!isFullyConstructed()) return empty_array();
+Array c_Pair::toPHPArrayImpl() const {
   return make_packed_array(tvAsCVarRef(&elm0), tvAsCVarRef(&elm1));
+}
+
+Array c_Pair::toPHPArray() const {
+  if (RuntimeOption::EvalHackArrCompatArrayProducingFuncNotices) {
+    raise_hack_arr_compat_array_producing_func_notice("Pair::toArray");
+  }
+  return toPHPArrayImpl();
+}
+
+Array c_Pair::toVArrayImpl() const {
+  return make_varray(tvAsCVarRef(&elm0), tvAsCVarRef(&elm1));
+}
+
+Array c_Pair::toDArrayImpl() const {
+  return make_darray(0, tvAsCVarRef(&elm0), 1, tvAsCVarRef(&elm1));
 }
 
 c_Pair* c_Pair::Clone(ObjectData* obj) {
   auto thiz = static_cast<c_Pair*>(obj);
-  auto pair = static_cast<c_Pair*>(c_Pair::instanceCtor(c_Pair::classof()));
-  assertx(thiz->isFullyConstructed());
-  pair->m_size = 2;
-  cellDup(thiz->elm0, pair->elm0);
-  cellDup(thiz->elm1, pair->elm1);
-  return pair;
+  auto pair = req::make<c_Pair>(thiz->elm0, thiz->elm1);
+  return pair.detach();
 }
 
 void c_Pair::throwBadKeyType() {
@@ -89,13 +92,12 @@ void c_Pair::throwBadKeyType() {
 Array c_Pair::ToArray(const ObjectData* obj) {
   auto pair = static_cast<const c_Pair*>(obj);
   check_collection_cast_to_array();
-  return pair->toArrayImpl();
+  return pair->toPHPArrayImpl();
 }
 
 bool c_Pair::OffsetIsset(ObjectData* obj, const TypedValue* key) {
-  assertx(key->m_type != KindOfRef);
+  assertx(!isRefType(key->m_type));
   auto pair = static_cast<c_Pair*>(obj);
-  assertx(pair->isFullyConstructed());
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
     result = pair->get(key->m_data.num);
@@ -107,9 +109,8 @@ bool c_Pair::OffsetIsset(ObjectData* obj, const TypedValue* key) {
 }
 
 bool c_Pair::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
-  assertx(key->m_type != KindOfRef);
+  assertx(!isRefType(key->m_type));
   auto pair = static_cast<c_Pair*>(obj);
-  assertx(pair->isFullyConstructed());
   TypedValue* result;
   if (key->m_type == KindOfInt64) {
     result = pair->get(key->m_data.num);
@@ -121,9 +122,8 @@ bool c_Pair::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
 }
 
 bool c_Pair::OffsetContains(ObjectData* obj, const TypedValue* key) {
-  assertx(key->m_type != KindOfRef);
+  assertx(!isRefType(key->m_type));
   auto pair = static_cast<c_Pair*>(obj);
-  assertx(pair->isFullyConstructed());
   if (key->m_type == KindOfInt64) {
     return pair->contains(key->m_data.num);
   } else {
@@ -135,14 +135,11 @@ bool c_Pair::OffsetContains(ObjectData* obj, const TypedValue* key) {
 bool c_Pair::Equals(const ObjectData* obj1, const ObjectData* obj2) {
   auto pair1 = static_cast<const c_Pair*>(obj1);
   auto pair2 = static_cast<const c_Pair*>(obj2);
-  assertx(pair1->isFullyConstructed());
-  assertx(pair2->isFullyConstructed());
   return HPHP::equal(tvAsCVarRef(&pair1->elm0), tvAsCVarRef(&pair2->elm0)) &&
          HPHP::equal(tvAsCVarRef(&pair1->elm1), tvAsCVarRef(&pair2->elm1));
 }
 
 Object c_Pair::getIterator() {
-  assertx(isFullyConstructed());
   auto iter = collections::PairIterator::newInstance();
   Native::data<collections::PairIterator>(iter)->setPair(this);
   return iter;
@@ -167,8 +164,10 @@ void CollectionsExtension::initPair() {
   HHVM_NAMED_ME(HH\\Pair, at,             &c_Pair::php_at);
   HHVM_NAMED_ME(HH\\Pair, get,            &c_Pair::php_get);
   HHVM_NAMED_ME(HH\\Pair, linearSearch,   &c_Pair::linearSearch);
-  HHVM_NAMED_ME(HH\\Pair, toArray,        &c_Pair::toArrayImpl);
-  HHVM_NAMED_ME(HH\\Pair, toValuesArray,  &c_Pair::toArrayImpl);
+  HHVM_NAMED_ME(HH\\Pair, toArray,        &c_Pair::toPHPArray);
+  HHVM_NAMED_ME(HH\\Pair, toVArray,       &c_Pair::toVArrayImpl);
+  HHVM_NAMED_ME(HH\\Pair, toDArray,       &c_Pair::toDArrayImpl);
+  HHVM_NAMED_ME(HH\\Pair, toValuesArray,  &c_Pair::toVArrayImpl);
   HHVM_NAMED_ME(HH\\Pair, getIterator,    &c_Pair::getIterator);
 
   HHVM_NAMED_ME(HH\\Pair, toVector,       materialize<c_Vector>);

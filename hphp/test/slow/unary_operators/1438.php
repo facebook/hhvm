@@ -12,4 +12,8 @@ function foo($x) {
 var_dump((object)$s);
 var_dump((object)$o);
 }
+
+<<__EntryPoint>>
+function main_1438() {
 foo(false);
+}

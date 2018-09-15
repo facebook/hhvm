@@ -1,4 +1,13 @@
 <?php
+
+
+class TestingFilterIterator extends RecursiveFilterIterator {
+    public function accept()
+    {
+        return !($this->current() instanceof StdClass);
+    }
+}
+
 // Issue #2693
 
 /*
@@ -11,6 +20,8 @@
                c1
 */
 
+<<__EntryPoint>>
+function main_level_recursive_filter_iterator() {
 $arrayForTest = [
     'a1' => [
         'b1' => new StdClass(),
@@ -25,14 +36,6 @@ $arrayForTest = [
 ];
 
 
-class TestingFilterIterator extends RecursiveFilterIterator {
-    public function accept()
-    {
-        return !($this->current() instanceof StdClass);
-    }
-}
-
-
 $iterator = new RecursiveArrayIterator($arrayForTest);
 $filter   = new TestingFilterIterator($iterator);
 $final    = new RecursiveIteratorIterator($filter,
@@ -45,3 +48,4 @@ foreach($final as $key => $value)
 }
 
 var_dump($keys);
+}

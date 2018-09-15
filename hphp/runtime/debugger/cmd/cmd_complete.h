@@ -25,17 +25,17 @@ namespace HPHP { namespace Eval {
 struct CmdComplete : DebuggerCommand {
   CmdComplete() : DebuggerCommand(KindOfComplete) {}
 
-  virtual void list(DebuggerClient &client);
-  virtual void help(DebuggerClient &client);
+  void list(DebuggerClient& client) override;
+  void help(DebuggerClient& client) override;
 
-  virtual bool onServer(DebuggerProxy &proxy);
-  virtual void onClient(DebuggerClient &client);
+  bool onServer(DebuggerProxy& proxy) override;
+  void onClient(DebuggerClient& client) override;
 
-protected:
-  virtual void sendImpl(DebuggerThriftBuffer &thrift);
-  virtual void recvImpl(DebuggerThriftBuffer &thrift);
+ protected:
+  void sendImpl(DebuggerThriftBuffer& thrift) override;
+  void recvImpl(DebuggerThriftBuffer& thrift) override;
 
-private:
+ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////

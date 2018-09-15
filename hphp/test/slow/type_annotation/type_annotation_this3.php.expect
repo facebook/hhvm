@@ -1,24 +1,32 @@
-array(2) {
+array(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(10) "GrandChild"
+  ["exact"]=>
+  bool(true)
 }
-array(2) {
+array(3) {
   ["kind"]=>
   int(16)
   ["classname"]=>
   string(6) "IChild"
+  ["exact"]=>
+  bool(true)
 }
-array(2) {
+array(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(10) "GrandChild"
+  ["exact"]=>
+  bool(true)
 }
-array(2) {
+array(3) {
   ["kind"]=>
   int(15)
   ["classname"]=>
   string(10) "GrandChild"
+  ["exact"]=>
+  bool(true)
 }

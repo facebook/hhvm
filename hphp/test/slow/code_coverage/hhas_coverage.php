@@ -6,4 +6,8 @@ function test($a) {
   fb_disable_code_coverage();
 }
 
+
+<<__EntryPoint>>
+function main_hhas_coverage() {
 test(array(1,2,3));
+}

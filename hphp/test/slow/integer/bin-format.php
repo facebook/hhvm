@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_bin_format() {
 echo "simple\n";
 var_dump(0b0);
 var_dump(0b1);
@@ -66,3 +69,4 @@ $f = (float)  "0b100";
 var_dump($i);                        // int(0)
 var_dump($f);                        // float(0)
 var_dump(is_numeric("0b100"));       // false
+}

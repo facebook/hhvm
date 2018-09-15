@@ -6,4 +6,8 @@ function f($b) {
  $a[] = $a2;
  var_dump($a);
 }
+
+<<__EntryPoint>>
+function main_261() {
 f(false);
+}

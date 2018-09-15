@@ -1,9 +1,0 @@
-<?hh
-
-$foo = array(1 => 2);
-
-array(1 => 2);
-
-tuple(1, 5, 65);
-
-$tup = tuple(1, 5, 65);

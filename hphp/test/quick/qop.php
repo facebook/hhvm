@@ -1,4 +1,4 @@
-<?php
+<?hh
 $arr = array(null, true, false, 0, 1, 0.0, 1.0, "", "foo", array(), array(1));
 
 function id($x) {

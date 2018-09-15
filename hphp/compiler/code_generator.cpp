@@ -21,14 +21,14 @@
 #include "hphp/compiler/analysis/file_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/analysis/analysis_result.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/hash.h"
 #include <folly/Conv.h>
 #include <boost/format.hpp>
-#include <boost/scoped_array.hpp>
+
 #include <algorithm>
+#include <memory>
 #include <vector>
 
 using namespace HPHP;
@@ -130,7 +130,7 @@ void CodeGenerator::namespaceEnd() {
 
 void CodeGenerator::print(const char *fmt, va_list ap) {
   if (!m_out) return;
-  boost::scoped_array<char> buf;
+  std::unique_ptr<char[]> buf;
   bool done = false;
   for (int len = 1024; !done; len <<= 1) {
     va_list v;

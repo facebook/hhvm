@@ -14,17 +14,20 @@
    +----------------------------------------------------------------------+
 */
 
-#include <iterator>
-
-#include <folly/Lazy.h>
-#include <folly/Optional.h>
+#include "hphp/runtime/vm/jit/opt.h"
 
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/mutation.h"
+#include "hphp/runtime/vm/jit/simple-propagation.h"
 #include "hphp/runtime/vm/jit/timer.h"
+
+#include <folly/Lazy.h>
+#include <folly/Optional.h>
+
+#include <iterator>
 
 namespace HPHP { namespace jit {
 

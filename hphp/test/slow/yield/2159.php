@@ -12,9 +12,13 @@ function f($x) {
     yield 4;
   }
 }
+
+<<__EntryPoint>>
+function main_2159() {
 foreach (f(0) as $x) {
  var_dump($x);
  }
 foreach (f(1) as $x) {
  var_dump($x);
  }
+}

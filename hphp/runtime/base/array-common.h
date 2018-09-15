@@ -23,6 +23,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 struct ArrayData;
+struct ObjectData;
 struct MArrayIter;
 struct Variant;
 
@@ -43,14 +44,13 @@ struct ArrayCommon {
   static ssize_t ReturnInvalidIndex(const ArrayData*);
 
   /*
-   * The normal case for ValidMArrayIter is shared between packed and
-   * mixed arrays.
+   * The normal case for ValidMArrayIter is shared between packed and mixed
+   * arrays.
    */
   static bool ValidMArrayIter(const ArrayData*, const MArrayIter&);
 
   /*
-   * Generic Pop and Dequeue implementations in terms of other
-   * functions.
+   * Generic Pop and Dequeue implementations in terms of other functions.
    */
   static ArrayData* Pop(ArrayData*, Variant&);
   static ArrayData* Dequeue(ArrayData*, Variant&);
@@ -59,6 +59,11 @@ struct ArrayCommon {
   static ArrayData* ToDict(ArrayData*, bool);
   static ArrayData* ToKeyset(ArrayData*, bool);
 
+  static ArrayData* ToVArray(ArrayData*, bool);
+  static ArrayData* ToDArray(ArrayData*, bool);
+
+  static ArrayData* ToShape(ArrayData*, bool);
+
   enum class RefCheckResult {
     Pass, // No refs
     Fail, // Referenced ref
@@ -66,6 +71,14 @@ struct ArrayCommon {
   };
   static RefCheckResult CheckForRefs(const ArrayData*);
 };
+
+//////////////////////////////////////////////////////////////////////
+
+ArrayData* castObjToVec(ObjectData*);
+ArrayData* castObjToDict(ObjectData*);
+ArrayData* castObjToKeyset(ObjectData*);
+ArrayData* castObjToVArray(ObjectData*);
+ArrayData* castObjToDArray(ObjectData*);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -1,0 +1,20 @@
+array(0) {
+}
+array(0) {
+}
+array(2) {
+  ["bar"]=>
+  int(1)
+  ["baz"]=>
+  int(3)
+}
+array(1) {
+  ["foo"]=>
+  int(0)
+}
+array(0) {
+}
+array(1) {
+  ["bing"]=>
+  int(42)
+}

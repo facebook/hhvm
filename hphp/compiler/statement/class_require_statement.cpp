@@ -41,18 +41,16 @@ StatementPtr ClassRequireStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void ClassRequireStatement::onParseRecur(AnalysisResultConstPtr ar,
+void ClassRequireStatement::onParseRecur(AnalysisResultConstRawPtr ar,
                                          FileScopeRawPtr fs,
                                          ClassScopePtr scope) {
   if (!scope->isTrait() && !scope->isInterface()) {
     parseTimeFatal(fs,
-                   Compiler::InvalidTraitStatement,
                    "Only traits and interfaces may use 'require' in class scope");
   }
   if (scope->isInterface() && !m_extends) {
     parseTimeFatal(
       fs,
-      Compiler::InvalidTraitStatement,
       "'require implements' may not be used in interface scope"
       "; instead, use interface inheritance");
   }
@@ -61,7 +59,6 @@ void ClassRequireStatement::onParseRecur(AnalysisResultConstPtr ar,
   if (!scope->addClassRequirement(m_required, m_extends)) {
     parseTimeFatal(
       fs,
-      Compiler::InvalidTraitStatement,
       "Conflicting requirements for '%s'",
       m_required.c_str()
     );
@@ -72,9 +69,7 @@ void ClassRequireStatement::onParseRecur(AnalysisResultConstPtr ar,
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void ClassRequireStatement::analyzeProgram(AnalysisResultPtr ar) {}
-
-ConstructPtr ClassRequireStatement::getNthKid(int n) const {
+ConstructPtr ClassRequireStatement::getNthKid(int /*n*/) const {
   always_assert(false);
   return ConstructPtr();
 }
@@ -83,14 +78,15 @@ int ClassRequireStatement::getKidCount() const {
   return 0;
 }
 
-void ClassRequireStatement::setNthKid(int n, ConstructPtr cp) {
+void ClassRequireStatement::setNthKid(int /*n*/, ConstructPtr /*cp*/) {
   always_assert(false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
-void ClassRequireStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
+void ClassRequireStatement::outputPHP(CodeGenerator& cg,
+                                      AnalysisResultPtr /*ar*/) {
   cg_printf("require %s %s;\n",
             m_extends ? "extends " : "implements ",
             m_required.c_str());

@@ -2,13 +2,12 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Core
+open Core_kernel
 
 (** Module consisting of the special names known to the typechecker *)
 
@@ -20,21 +19,18 @@ module Classes = struct
   let cUnknown = "\\*Unknown*" (* Used for dynamic classnames, e.g. new $foo(); *)
 
   let cAwaitable = "\\Awaitable"
-  let cWaitHandle = "\\WaitHandle"
-  let cWaitableWaitHandle = "\\WaitableWaitHandle"
   let cGenerator = "\\Generator"
   let cAsyncGenerator = "\\AsyncGenerator"
-  let cFormatString = "\\FormatString" (* deprecated - defined in user code *)
-  let cHackFormatString = "\\HH\\FormatString" (* Same thing, but in core HHI *)
   let is_format_string x = match x with
     "\\FormatString" | "\\HH\\FormatString" -> true
     | _ -> false
 
   let cHH_BuiltinEnum = "\\HH\\BuiltinEnum"
 
-  let cException = "\\Exception"
+  let cThrowable= "\\Throwable"
   let cStdClass = "\\stdClass"
   let cDateTime = "\\DateTime"
+  let cDateTimeImmutable = "\\DateTimeImmutable"
 
   let cAsyncIterator = "\\AsyncIterator"
   let cAsyncKeyedIterator = "\\AsyncKeyedIterator"
@@ -44,6 +40,9 @@ module Classes = struct
   let cIMemoizeParam = "\\IMemoizeParam"
   let cClassname = "\\classname"
   let cTypename = "\\typename"
+
+  let cIDisposable = "\\IDisposable"
+  let cIAsyncDisposable = "\\IAsyncDisposable"
 end
 
 module Collections = struct
@@ -59,17 +58,12 @@ module Collections = struct
   let cPair      = "\\Pair"
 
   (* interfaces *)
-  let cIterator         = "\\Iterator"
-  let cKeyedIterator    = "\\KeyedIterator"
   let cContainer        = "\\Container"
   let cKeyedContainer   = "\\KeyedContainer"
   let cTraversable      = "\\Traversable"
   let cKeyedTraversable = "\\KeyedTraversable"
-  let cIterable         = "\\Iterable"
-  let cKeyedIterable    = "\\KeyedIterable"
   let cIndexish         = "\\Indexish"
 
-  let cCollection       = "\\Collection"
   let cConstVector      = "\\ConstVector"
   let cConstMap         = "\\ConstMap"
   let cDict             = "\\dict"
@@ -86,12 +80,28 @@ module Members = struct
   let __destruct   = "__destruct"
   let __call       = "__call"
   let __callStatic = "__callStatic"
-  let __toString   = "__toString"
-  let __set        = "__set"
-  let __isset      = "__isset"
+  let __clone      = "__clone"
+  let __debugInfo  = "__debugInfo"
+  let __dispose    = "__dispose"
+  let __disposeAsync = "__disposeAsync"
   let __get        = "__get"
+  let __invoke     = "__invoke"
+  let __isset      = "__isset"
+  let __set        = "__set"
+  let __set_state  = "__set_state"
+  let __sleep      = "__sleep"
+  let __toString   = "__toString"
   let __unset      = "__unset"
+  let __wakeup     = "__wakeup"
 
+  let as_set = List.fold_right ~f:SSet.add ~init:SSet.empty
+    [
+      __construct; __destruct; __call; __callStatic; __clone; __debugInfo;
+      __dispose; __disposeAsync;
+      __get; __invoke; __isset; __set; __set_state; __sleep; __toString;
+      __unset; __wakeup;
+    ]
+  let as_lowercase_set = SSet.map String.lowercase as_set
 
   (* Any data- or aria- attribute is always valid, even if it is not declared
    * for a given XHP element *)
@@ -104,19 +114,95 @@ module UserAttributes = struct
 
   let uaOverride            = "__Override"
   let uaConsistentConstruct = "__ConsistentConstruct"
+  let uaConst               = "__Const"
   let uaUnsafeConstruct     = "__UNSAFE_Construct"
   let uaDeprecated          = "__Deprecated"
+  let uaEntrypoint          = "__Entrypoint"
   let uaMemoize             = "__Memoize"
+  let uaMemoizeLSB          = "__MemoizeLSB"
+  let uaPHPStdLib           = "__PHPStdLib"
+  let uaHipHopSpecific      = "__HipHopSpecific"
+  let uaAcceptDisposable    = "__AcceptDisposable"
+  let uaReturnDisposable    = "__ReturnDisposable"
+  let uaReactive            = "__Rx"
+  let uaLocalReactive       = "__RxLocal"
+  let uaShallowReactive     = "__RxShallow"
+  let uaMutable             = "__Mutable"
+  let uaMutableReturn       = "__MutableReturn"
+  let uaOptionalDestruct    = "__OptionalDestruct"
+  let uaOnlyRxIfImpl        = "__OnlyRxIfImpl"
+  let uaProbabilisticModel  = "__PPL"
+  (* DEPRECATED: remove after codemodding www *)
+  let uaOnlyRxIfRxFunc_do_not_use = "__OnlyRxIfRxFunc"
+  let uaAtMostRxAsFunc      = "__AtMostRxAsFunc"
+  (* DEPRECATED: remove after codemodding www *)
+  let uaOnlyRxIfArgs_do_not_use = "__OnlyRxIfArgs"
+  let uaAtMostRxAsArgs      = "__AtMostRxAsArgs"
+  let uaSealed              = "__Sealed"
+  let uaReturnsVoidToRx     = "__ReturnsVoidToRx"
+  let uaMaybeMutable        = "__MaybeMutable"
+  let uaRxOfScope           = "__RxOfScope"
+  let uaLateInit            = "__LateInit"
 
-  let as_set : SSet.t =
-    let s = SSet.empty in
-    let s = SSet.add uaOverride s in
-    let s = SSet.add uaConsistentConstruct s in
-    let s = SSet.add uaUnsafeConstruct s in
-    let s = SSet.add uaDeprecated s in
-    let s = SSet.add uaMemoize s in
-    s
+  let as_set = List.fold_right ~f:SSet.add ~init:SSet.empty
+    [
+      uaOverride;
+      uaConsistentConstruct;
+      uaConst;
+      uaUnsafeConstruct;
+      uaDeprecated;
+      uaEntrypoint;
+      uaMemoize;
+      uaMemoizeLSB;
+      uaPHPStdLib;
+      uaHipHopSpecific;
+      uaAcceptDisposable;
+      uaReturnDisposable;
+      uaReactive;
+      uaLocalReactive;
+      uaMutable;
+      uaMutableReturn;
+      uaShallowReactive;
+      uaOptionalDestruct;
+      uaOnlyRxIfImpl;
+      uaProbabilisticModel;
+      uaOnlyRxIfRxFunc_do_not_use;
+      uaOnlyRxIfArgs_do_not_use;
+      uaSealed;
+      uaReturnsVoidToRx;
+      uaMaybeMutable;
+      uaRxOfScope;
+      uaLateInit;
+      uaAtMostRxAsFunc;
+      uaAtMostRxAsArgs;
+    ]
+end
 
+module AttributeKinds = struct
+  let cls = "\\HH\\ClassAttribute"
+  let enum = "\\HH\\EnumAttribute"
+
+  let typealias = "\\HH\\TypeAliasAttribute"
+
+  let fn = "\\HH\\FunctionAttribute"
+  let mthd = "\\HH\\MethodAttribute"
+
+  let instProperty = "\\HH\\InstancePropertyAttribute"
+  let staticProperty = "\\HH\\StaticPropertyAttribute"
+
+  let parameter = "\\HH\\ParameterAttribute"
+
+  let plain_english_map =
+    List.fold_left ~init:SMap.empty ~f:(fun acc (k, v) -> SMap.add k v acc)
+      [ (cls, "a class")
+      ; (enum, "an enum")
+      ; (typealias, "a typealias")
+      ; (fn, "a function")
+      ; (mthd, "a method")
+      ; (instProperty, "an instance property")
+      ; (staticProperty, "a static property")
+      ; (parameter, "a parameter")
+      ]
 end
 
 (* Tested before \\-prepending name-canonicalization *)
@@ -135,6 +221,8 @@ module SpecialFunctions = struct
   let meth_caller    = "meth_caller"
 
   let call_user_func = "call_user_func"
+  let autoload       = "__autoload"
+  let clone          = "__clone"
 end
 
 module SpecialIdents = struct
@@ -150,10 +238,10 @@ module PseudoFunctions = struct
   let empty = "\\empty"
   let isset = "\\isset"
   let unset = "\\unset"
-  let exit_ = "\\exit"
-  let die = "\\die"
   let hh_show = "\\hh_show"
   let hh_show_env = "\\hh_show_env"
+  let hh_log_level = "\\hh_log_level"
+  let hh_loop_forever = "\\hh_loop_forever"
 
 end
 
@@ -187,20 +275,55 @@ module Typehints = struct
   let arraykey = "arraykey"
   let noreturn = "noreturn"
   let mixed    = "mixed"
+  let nonnull  = "nonnull"
   let this     = "this"
+  let dynamic  = "dynamic"
 
   let int     = "int"
   let bool    = "bool"
   let float   = "float"
   let string  = "string"
   let array   = "array"
+  let darray  = "darray"
+  let varray  = "varray"
+  let varray_or_darray = "varray_or_darray"
   let integer = "integer"
   let boolean = "boolean"
   let double  = "double"
   let real    = "real"
+  let callable = "callable"
 
   let object_cast = "object"
   let unset_cast = "unset"
+
+  let wildcard = "_"
+
+  let is_reserved_global_name x =
+    let x = String.lowercase x in
+    x = array    || x = callable || x = Classes.cSelf || x = Classes.cParent
+
+  let is_reserved_hh_name x =
+    let x = String.lowercase x in
+    x = void     || x = noreturn || x = int      || x = bool     || x = float ||
+    x = num      || x = string   || x = resource || x = mixed    || x = array ||
+    x = arraykey || x = integer  || x = boolean  || x = double   || x = real  ||
+    x = dynamic  || x = wildcard
+
+  let is_namespace_with_reserved_hh_name x =
+    let unqualify qualified_name =
+      let as_list = Str.split (Str.regexp "\\") qualified_name in
+      let as_list = List.filter as_list ~f:(fun s -> not (phys_equal s "")) in
+      match List.rev as_list with
+      | name :: qualifiers -> List.rev qualifiers, name
+      | [] -> [], qualified_name in
+    let is_HH qualifier =
+      match qualifier with
+      | [qual] -> qual = "HH"
+      | _ -> false in
+    let qualifier, name = unqualify x in
+    name |> is_reserved_hh_name
+    && not (List.is_empty qualifier)
+    && not (qualifier |> is_HH)
 
 end
 
@@ -214,10 +337,11 @@ module PseudoConsts = struct
   let g__FUNCTION__  = "\\__FUNCTION__"
   let g__METHOD__    = "\\__METHOD__"
   let g__NAMESPACE__ = "\\__NAMESPACE__"
+  let g__COMPILER_FRONTEND__ = "\\__COMPILER_FRONTEND__"
 
   let all_pseudo_consts = [
     g__LINE__; g__CLASS__; g__TRAIT__; g__FILE__; g__DIR__;
-    g__FUNCTION__; g__METHOD__; g__NAMESPACE__
+    g__FUNCTION__; g__METHOD__; g__NAMESPACE__; g__COMPILER_FRONTEND__
   ]
   let is_pseudo_const =
     let h = HashSet.create 23 in
@@ -230,9 +354,6 @@ module FB = struct
 
   let cEnum                  = "\\Enum"
   let cUncheckedEnum         = "\\UncheckedEnum"
-
-  let cDynamicYield          = "\\DynamicYield"
-  let cIUseDynamicYield      = "\\IUseDynamicYield"
 
   let fgena                  = "\\gena"
   let fgenva                 = "\\genva"
@@ -247,7 +368,17 @@ end
 module HH = struct
 
   let asio_va                = "\\HH\\Asio\\va"
+  let lib_tuple_from_async   = "\\HH\\Lib\\Tuple\\from_async"
+  let lib_tuple_gen          = "\\HH\\Lib\\Tuple\\gen"
 
+end
+
+module Rx = struct
+  let freeze = "\\HH\\Rx\\freeze"
+  let mutable_ = "\\HH\\Rx\\mutable"
+  let cTraversable = "\\HH\\Rx\\Traversable"
+  let is_enabled = "\\HH\\Rx\\IS_ENABLED"
+  let cKeyedTraversable = "\\HH\\Rx\\KeyedTraversable"
 end
 
 module Shapes = struct
@@ -270,4 +401,21 @@ module Superglobals = struct
     let h = HashSet.create 23 in
     List.iter all_superglobals (HashSet.add h);
     fun x -> HashSet.mem h x
+end
+
+module PPLFunctions = struct
+  let all_reserved =
+    [ "sample"; "\\sample"; "factor"; "\\factor";
+      "observe"; "\\observe"; "condition"; "\\condition";
+      "sample_model"; "\\sample_model";
+    ]
+
+  let is_reserved =
+    let h = HashSet.create 23 in
+    List.iter all_reserved (HashSet.add h);
+    fun name -> HashSet.mem h name
+end
+
+module Regex = struct
+  let tPattern = "\\HH\\Lib\\Regex\\Pattern"
 end

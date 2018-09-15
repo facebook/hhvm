@@ -14,4 +14,8 @@ function main() {
       var_dump($elapsed);
     }
 }
+
+<<__EntryPoint>>
+function main_67() {
 main();
+}

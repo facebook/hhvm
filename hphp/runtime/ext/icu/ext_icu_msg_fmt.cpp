@@ -35,6 +35,8 @@ public:
 };
 U_NAMESPACE_END
 
+using icu::MessageFormatAdapter;
+
 namespace HPHP { namespace Intl {
 //////////////////////////////////////////////////////////////////////////////
 // Internal resource data
@@ -353,7 +355,7 @@ static Variant HHVM_METHOD(MessageFormatter, format, const Array& args) {
       !data->mapArgs(arg_types, arg_names, args)) {
     return false;
   }
-  assert(arg_types.size() == arg_names.size());
+  assertx(arg_types.size() == arg_names.size());
 
   icu::UnicodeString result;
   UErrorCode error = U_ZERO_ERROR;

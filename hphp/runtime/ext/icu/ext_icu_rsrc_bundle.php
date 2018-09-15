@@ -53,12 +53,12 @@ class ResourceBundle implements \Iterator, \ArrayAccess, \Countable {
    * @param bool $fallback - Whether locale should match exactly or
    *   fallback to parent locale is allowed.
    *
-   * @return ResourceBundle - Returns ResourceBundle object or FALSE on
+   * @return ResourceBundle - Returns ResourceBundle object or NULL on
    *   error.
    */
   public static function create(mixed $locale,
                                 mixed $bundlename,
-                                bool $fallback = false): ResourceBundle {
+                                bool $fallback = false): ?ResourceBundle {
     try {
       return new ResourceBundle($locale, $bundlename, $fallback);
     } catch (Exception $e) {

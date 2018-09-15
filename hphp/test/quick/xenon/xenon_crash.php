@@ -35,7 +35,7 @@ class A {
     return $a + 2;
   }
 
-  async static function genFoo($a) {
+  static async function genFoo($a) {
     $a++;
     list($x, $y) = await genList(
       (new A)->genBar($a),

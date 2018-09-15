@@ -17,7 +17,9 @@
 #ifndef incl_HPHP_TRANSLATOR_RUNTIME_H_
 #define incl_HPHP_TRANSLATOR_RUNTIME_H_
 
+#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/bytecode.h"
 
@@ -31,6 +33,7 @@ namespace HPHP {
 struct Func;
 struct Iter;
 struct MInstrState;
+struct TypeConstraint;
 struct c_Pair;
 struct c_Vector;
 
@@ -38,7 +41,6 @@ namespace jit {
 //////////////////////////////////////////////////////////////////////
 
 struct ArrayKindProfile;
-struct TypeConstraint;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -75,36 +77,38 @@ struct TypeConstraint;
 inline TypedValue* arPreliveOverwriteCells(ActRec *preLiveAR) {
   auto actRecCell = reinterpret_cast<TypedValue*>(preLiveAR);
   for (size_t ar_cell = 0; ar_cell < HPHP::kNumActRecCells; ++ar_cell) {
-    tvWriteNull(actRecCell + ar_cell);
+    tvWriteNull(*(actRecCell + ar_cell));
   }
   return actRecCell + HPHP::kNumActRecCells - 1;
 }
 
 ArrayData* addNewElemHelper(ArrayData* a, TypedValue value);
 ArrayData* addElemIntKeyHelper(ArrayData* ad, int64_t key, TypedValue val);
+template <bool intishWarn>
 ArrayData* addElemStringKeyHelper(ArrayData* ad, StringData* key,
                                   TypedValue val);
 ArrayData* dictAddElemIntKeyHelper(ArrayData* ad, int64_t key, TypedValue val);
 ArrayData* dictAddElemStringKeyHelper(ArrayData* ad, StringData* key,
                                       TypedValue val);
-void setNewElem(TypedValue* base, Cell val);
-void setNewElemArray(TypedValue* base, Cell val);
-void setNewElemVec(TypedValue* base, Cell val);
 RefData* boxValue(TypedValue tv);
 ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2);
 /* Helper functions for conversion instructions that are too
  * complicated to inline
  */
 ArrayData* convCellToArrHelper(TypedValue tv);
+ArrayData* convArrToNonDVArrHelper(ArrayData* a);
 ArrayData* convVecToArrHelper(ArrayData* a);
 ArrayData* convDictToArrHelper(ArrayData* a);
+ArrayData* convShapeToArrHelper(ArrayData* a);
 ArrayData* convKeysetToArrHelper(ArrayData* a);
 ArrayData* convArrToVecHelper(ArrayData* a);
 ArrayData* convDictToVecHelper(ArrayData* a);
+ArrayData* convShapeToVecHelper(ArrayData* a);
 ArrayData* convKeysetToVecHelper(ArrayData* a);
 ArrayData* convObjToVecHelper(ObjectData* o);
 ArrayData* convCellToVecHelper(TypedValue tv);
 ArrayData* convArrToDictHelper(ArrayData* a);
+ArrayData* convShapeToDictHelper(ArrayData* a);
 ArrayData* convVecToDictHelper(ArrayData* a);
 ArrayData* convKeysetToDictHelper(ArrayData* a);
 ArrayData* convObjToDictHelper(ObjectData* o);
@@ -112,49 +116,50 @@ ArrayData* convCellToDictHelper(TypedValue tv);
 ArrayData* convArrToKeysetHelper(ArrayData* a);
 ArrayData* convVecToKeysetHelper(ArrayData* a);
 ArrayData* convDictToKeysetHelper(ArrayData* a);
+ArrayData* convShapeToKeysetHelper(ArrayData* a);
 ArrayData* convObjToKeysetHelper(ObjectData* o);
 ArrayData* convCellToKeysetHelper(TypedValue tv);
-int64_t convObjToDblHelper(const ObjectData* o);
-int64_t convArrToDblHelper(ArrayData* a);
-int64_t convStrToDblHelper(const StringData* s);
-int64_t convResToDblHelper(const ResourceHdr* r);
-int64_t convCellToDblHelper(TypedValue tv);
+double convObjToDblHelper(const ObjectData* o);
+double convArrToDblHelper(ArrayData* a);
+double convStrToDblHelper(const StringData* s);
+double convResToDblHelper(const ResourceHdr* r);
+double convCellToDblHelper(TypedValue tv);
 ObjectData* convCellToObjHelper(TypedValue tv);
-StringData* convDblToStrHelper(int64_t i);
+StringData* convDblToStrHelper(double i);
 StringData* convIntToStrHelper(int64_t i);
 StringData* convObjToStrHelper(ObjectData* o);
 StringData* convResToStrHelper(ResourceHdr* o);
-StringData* convCellToStrHelper(TypedValue tv);
 
 
 bool coerceCellToBoolHelper(TypedValue tv, int64_t argNum, const Func* func);
-int64_t coerceStrToDblHelper(StringData* sd, int64_t argNum, const Func* func);
-int64_t coerceCellToDblHelper(TypedValue tv, int64_t argNum, const Func* func);
+double coerceStrToDblHelper(StringData* sd, int64_t argNum, const Func* func);
+double coerceCellToDblHelper(TypedValue tv, int64_t argNum, const Func* func);
 int64_t coerceStrToIntHelper(StringData* sd, int64_t argNum, const Func* func);
 int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func);
+
 
 void raiseUndefProp(ObjectData* base, const StringData* name);
 void raiseUndefVariable(StringData* nm);
 void VerifyParamTypeSlow(const Class* cls,
                          const Class* constraint,
-                         const HPHP::TypeConstraint* expected,
+                         const TypeConstraint* expected,
                          int param);
 void VerifyParamTypeCallable(TypedValue value, int param);
 void VerifyParamTypeFail(int param);
-void VerifyRetTypeSlow(const Class* cls,
+void VerifyRetTypeSlow(int32_t id,
+                       const Class* cls,
                        const Class* constraint,
-                       const HPHP::TypeConstraint* expected,
+                       const TypeConstraint* expected,
                        const TypedValue value);
-void VerifyRetTypeCallable(TypedValue value);
-void VerifyRetTypeFail(TypedValue* value);
+void VerifyRetTypeCallable(int32_t id, TypedValue value);
+void VerifyRetTypeFail(int32_t id, TypedValue* value);
 
 void raise_error_sd(const StringData* sd);
 
-RefData* ldClosureStaticLoc(StringData* name, ActRec* fp);
-
 TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);
-TypedValue arrayIdxIc(ArrayData*, int64_t, TypedValue);
 TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
+
+template <bool intishWarn>
 TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
 
 TypedValue dictIdxI(ArrayData*, int64_t, TypedValue);
@@ -163,32 +168,26 @@ TypedValue dictIdxS(ArrayData*, StringData*, TypedValue);
 TypedValue keysetIdxI(ArrayData*, int64_t, TypedValue);
 TypedValue keysetIdxS(ArrayData*, StringData*, TypedValue);
 
-TypedValue mapIdx(ObjectData*, StringData*, TypedValue);
-
-int32_t arrayVsize(ArrayData*);
-
 TypedValue* ldGblAddrDefHelper(StringData* name);
 
 TypedValue* getSPropOrNull(const Class* cls,
-    const StringData* name, Class* ctx);
+                           const StringData* name,
+                           Class* ctx,
+                           bool ignoreLateInit);
 TypedValue* getSPropOrRaise(const Class* cls,
-    const StringData* name, Class* ctx);
+                            const StringData* name,
+                            Class* ctx,
+                            bool ignoreLateInit);
 
-int64_t switchDoubleHelper(int64_t val, int64_t base, int64_t nTargets);
+int64_t switchDoubleHelper(double val, int64_t base, int64_t nTargets);
 int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets);
 int64_t switchObjHelper(ObjectData* o, int64_t base, int64_t nTargets);
 
 void checkFrame(ActRec* fp, Cell* sp, bool fullCheck, Offset bcOff);
 
 void loadArrayFunctionContext(ArrayData*, ActRec* preLiveAR, ActRec* fp);
-void fpushCufHelperArray(ArrayData*, ActRec* preLiveAR, ActRec* fp);
-void fpushCufHelperString(StringData*, ActRec* preLiveAR, ActRec* fp);
 
 const Func* loadClassCtor(Class* cls, ActRec* fp);
-
-ObjectData* colAddNewElemCHelper(ObjectData* coll, TypedValue value);
-ObjectData* colAddElemCHelper(ObjectData* coll, TypedValue key,
-                              TypedValue value);
 
 // These shuffle* functions are the JIT's version of bytecode.cpp's
 // shuffleExtraStackArgs
@@ -210,6 +209,16 @@ void registerLiveObj(ObjectData* obj);
 /* Check if a method of the given name exists on the class. */
 bool methodExistsHelper(Class*, StringData*);
 
+/* Is/As Helpers */
+ArrayData* resolveTypeStructHelper(
+  const ArrayData*,
+  const Class* declaringCls,
+  const Class* calledCls,
+  bool suppress
+);
+bool isTypeStructHelper(ArrayData*, Cell);
+void asTypeStructHelper(ArrayData*, Cell);
+
 /*
  * Throw a VMSwitchMode exception.
  */
@@ -219,22 +228,56 @@ bool methodExistsHelper(Class*, StringData*);
 [[noreturn]] void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key);
 
 namespace MInstrHelpers {
-TypedValue setOpElem(TypedValue* base, TypedValue key, Cell val, SetOpOp op);
+void setNewElem(tv_lval base, Cell val, const MInstrPropState*);
+void setNewElemArray(tv_lval base, Cell val);
+void setNewElemVec(tv_lval base, Cell val);
+template<bool intishWarn>
+TypedValue setOpElem(tv_lval base, TypedValue key, Cell val, SetOpOp op,
+                     const MInstrPropState*);
 StringData* stringGetI(StringData*, uint64_t);
 uint64_t pairIsset(c_Pair*, int64_t);
 uint64_t vectorIsset(c_Vector*, int64_t);
-void bindElemC(TypedValue*, TypedValue, RefData*);
-void setWithRefElem(TypedValue*, TypedValue, TypedValue);
-TypedValue incDecElem(TypedValue* base, TypedValue key, IncDecOp op);
-void bindNewElem(TypedValue* base, RefData* val);
-TypedValue* elemVecID(TypedValue* base, int64_t key);
-TypedValue* elemVecIU(TypedValue* base, int64_t key);
+template <bool intishWarn>
+void bindElemC(tv_lval, TypedValue, RefData*, const MInstrPropState*);
+template <bool intishWarn>
+void setWithRefElem(tv_lval, TypedValue, TypedValue,
+                    const MInstrPropState*);
+template<bool intishWarn>
+TypedValue incDecElem(tv_lval base, TypedValue key, IncDecOp op,
+                      const MInstrPropState*);
+void bindNewElem(tv_lval base, RefData* val, const MInstrPropState*);
+tv_lval elemVecID(tv_lval base, int64_t key);
+tv_lval elemVecIU(tv_lval base, int64_t key);
 }
 
 /*
  * Just calls tlsBase, but not inlined, so it can be called from the TC.
  */
 uintptr_t tlsBaseNoInline();
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * If the current builtin function `func' was called in a strict context,
+ * verify that `tv' is the correct type for `argNum' or attempt to convert it
+ * to the correct type, fataling on failure.
+ *
+ * If PHP7_ScalarType is false or EnableHipHopSyntax is true, this call does
+ * nothing.
+ */
+void tvCoerceIfStrict(TypedValue& tv, int64_t argNum, const Func* func);
+
+/*
+ * Exception thrown to indicate that a parameter could not be coerced when
+ * calling an HNI builtin function.
+ */
+struct TVCoercionException : std::runtime_error {
+  TVCoercionException(const Func* func, int arg_num,
+                      DataType actual, DataType expected);
+  TypedValue tv() const { return m_tv; }
+private:
+  req::root<TypedValue> m_tv;
+};
 
 //////////////////////////////////////////////////////////////////////
 

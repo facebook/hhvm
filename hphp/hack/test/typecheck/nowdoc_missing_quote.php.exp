@@ -1,2 +1,2 @@
-File "nowdoc_missing_quote.php", line 12, characters 9-9:
-string not closed (Parsing[1002])
+File "nowdoc_missing_quote.php", line 12, characters 6-12:
+A single quote is expected here. (Parsing[1002])

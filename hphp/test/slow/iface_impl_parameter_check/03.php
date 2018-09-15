@@ -13,4 +13,8 @@ class UserClass {
 class C extends UserClass implements I {
 }
 
+
+<<__EntryPoint>>
+function main_03() {
 print("Success\n");
+}

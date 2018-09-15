@@ -5,6 +5,10 @@ function main($n) {
   while (--$n > 0) $p2 = clone $p;
 }
 
-ini_set('memory_limit', '100K');
+
+<<__EntryPoint>>
+function main_pair_clone() {
+ini_set('memory_limit', '17M');
 main(100000);
-echo 'pass\n';
+echo "pass\n";
+}

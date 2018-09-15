@@ -29,6 +29,7 @@ struct State;
 struct Context;
 struct Bytecode;
 struct FuncAnalysis;
+struct CollectedInfo;
 namespace php { struct Block; }
 
 //////////////////////////////////////////////////////////////////////
@@ -36,30 +37,14 @@ namespace php { struct Block; }
 /*
  * Perform DCE on a single basic block.
  */
-void local_dce(const Index&, const FuncAnalysis&, borrowed_ptr<php::Block>,
-  const State&);
+void local_dce(const Index&, const FuncAnalysis&, CollectedInfo& collect,
+               php::Block*, const State&);
 
 /*
  * Eliminate dead code in a function, across basic blocks, based on
  * results from a previous analyze_func call.
  */
 void global_dce(const Index&, const FuncAnalysis&);
-
-/*
- * Assist in removing blocks that aren't reachable by removing
- * conditional jumps that are never taken.  Conditional jumps that are
- * always taken are turned into unconditional jumps in first_pass.
- *
- * If options.RemoveDeadBlocks is off, this function just replaces
- * blocks we believe are unreachable with fatal opcodes.
- */
-void remove_unreachable_blocks(const Index&, const FuncAnalysis&);
-
-/*
- * Merge single-succ block goes to single pred block into one
- * where possible.
- */
-bool merge_blocks(const FuncAnalysis&);
 
 //////////////////////////////////////////////////////////////////////
 

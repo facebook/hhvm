@@ -11,5 +11,9 @@ class A {
  return array('foo');
 }
  }
- $a = new A();
+
+ <<__EntryPoint>>
+function main_747() {
+$a = new A();
  var_dump(serialize($a));
+}

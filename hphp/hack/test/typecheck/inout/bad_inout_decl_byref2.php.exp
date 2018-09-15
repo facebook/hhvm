@@ -1,0 +1,2 @@
+File "bad_inout_decl_byref2.php", line 3, characters 15-46:
+Functions may not use both reference and inout parameters (Parsing[1002])

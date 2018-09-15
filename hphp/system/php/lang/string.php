@@ -2,6 +2,6 @@
 
 interface XHPChild {}
 
-interface Stringish {
+interface Stringish extends XHPChild {
   public function __toString();
 }

@@ -21,5 +21,9 @@ class d3 extends c3 {
   }
 }
 
+
+<<__EntryPoint>>
+function main_1892() {
 c3::test1b();
 d3::test1b();
+}

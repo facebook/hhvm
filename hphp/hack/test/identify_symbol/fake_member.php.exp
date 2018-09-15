@@ -1,1 +1,10 @@
-None
+name: \C::foo, kind: property, span: line 8, characters 14-16, is_declaration: false
+definition:
+ foo
+   kind: property
+   id: property::C::foo
+   position: line 4, characters 16-19
+   span: line 4, character 16 - line 4, character 26
+   modifiers: private 
+
+

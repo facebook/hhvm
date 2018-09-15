@@ -1,1 +1,0 @@
-<?php extension_loaded('reflection') or die('skip'); ?>

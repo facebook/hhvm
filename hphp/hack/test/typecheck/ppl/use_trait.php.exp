@@ -1,0 +1,4 @@
+File "use_trait.php", line 9, characters 7-13:
+a class annotated with <<__PPL>> cannot use non <<__PPL>> trait: MyTrait (Typing[4257])
+File "use_trait.php", line 5, characters 7-13:
+Declaration is here

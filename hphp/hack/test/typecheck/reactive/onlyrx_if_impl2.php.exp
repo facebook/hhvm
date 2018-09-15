@@ -1,0 +1,4 @@
+File "onlyrx_if_impl2.php", line 20, characters 24-30:
+Reactivity mismatch: reactive function cannot call maybe (reactive) function. (Typing[4254])
+File "onlyrx_if_impl2.php", line 4, characters 19-19:
+This is declaration of the function being called.

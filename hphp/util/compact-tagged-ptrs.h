@@ -16,89 +16,73 @@
 #ifndef incl_HPHP_UTIL_COMPACT_TAGGED_PTRS_H_
 #define incl_HPHP_UTIL_COMPACT_TAGGED_PTRS_H_
 
+#include "hphp/util/assertions.h"
+
 #include <cstdint>
 
 /*
- * A combined pointer + tag intended to save space on x64.  The tag must fit in
- * a 16 bit integer anywhere you use this class (although the non-x64
- * implementation uses larger space for the tag).
+ * A combined pointer + tag intended to save space.  The tag must fit in
+ * a 16 bit integer anywhere you use this class.
  *
- * For the x64 version, this class relies on the x64 property that a
- * "canonical form" address must have all the upper bits set to the same
- * value as bit 47.  Further, it relies on the OS using only "lower
- * half" canonical form addresses for userland pointers.  For more,
- * see:
+ * For all supported architectures, this class relies on the property that a
+ * "canonical form" address must have all the upper bits set to the same value
+ * as bit 47.  Further, it relies on the OS using only "lower half" canonical
+ * form addresses for userland pointers.  For more, see:
  *
  *     http://en.wikipedia.org/wiki/X86-64#Canonical_form_addresses
- *
- * The portable version just uses a pointer plus an actual TagType for the tag.
  */
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-#if defined(__x86_64__) || defined(_M_X64) || defined(__powerpc64__) || \
-    defined(__aarch64__)
+#if !(defined(__x86_64__) || defined(_M_X64) || defined(__powerpc64__) || \
+      defined(__aarch64__))
+#error CompactTaggedPtr is not supported on your architecture.
+#endif
 
-template<class T, class TagType = uint32_t>
+template<class T, class TagType = uint16_t>
 struct CompactTaggedPtr {
   using Opaque = uintptr_t;
-  CompactTaggedPtr() { set(TagType{}, 0); }
+  static_assert(sizeof(TagType) <= sizeof(int16_t),
+                "TagType must fit in 16 bits");
+
+  CompactTaggedPtr() : m_data{makeOpaque(TagType{}, nullptr)} {}
+  CompactTaggedPtr(TagType tag, T* ptr) : m_data{makeOpaque(tag, ptr)} {}
 
   // for save and restore
   explicit CompactTaggedPtr(Opaque v) : m_data(v) {}
   Opaque getOpaque() const { return m_data; }
 
-  void set(TagType ttag, T* ptr) {
-    auto const tag = static_cast<uint64_t>(ttag);
-    assert(tag <= 0xffffu);
-    assert(!(uintptr_t(ptr) >> 48));
-    m_data = uintptr_t(ptr) | (size_t(tag) << 48);
+  void set(TagType tag, T* ptr) {
+    m_data = makeOpaque(tag, ptr);
   }
 
   TagType tag() const { return static_cast<TagType>(m_data >> 48); }
 
-  const T* ptr() const {
-    return const_cast<CompactTaggedPtr*>(this)->ptr();
-  }
-  T* ptr() {
+  T* ptr() const {
     return reinterpret_cast<T*>(m_data & (-1ull >> 16));
+  }
+
+  T* operator->() const {
+    return ptr();
+  }
+
+  explicit operator bool() const {
+    return ptr();
   }
 
 private:
   uintptr_t m_data;
-};
 
-#else
-
-template<class T, class TagType = uint32_t>
-struct CompactTaggedPtr {
-  using Opaque = std::pair<T*,TagType>;
-
-  CompactTaggedPtr() { set(TagType{}, 0); }
-
-  // for save and restore
-  explicit CompactTaggedPtr(Opaque v) : m_ptr(v.first), m_tag(v.second) {}
-  Opaque getOpaque() const { return std::make_pair(m_ptr, m_tag); }
-
-  void set(TagType ttag, T* ptr) {
-    auto const tag = static_cast<uint32_t>(ttag);
-    assert(tag <= 0xffffu);
-    m_tag = ttag;
-    m_ptr = ptr;
+  static uintptr_t makeOpaque(TagType ttag, T* ptr) {
+    auto const tag = static_cast<uint64_t>(ttag);
+    auto const ptr_int = reinterpret_cast<uintptr_t>(ptr);
+    assertx(tag <= 0xffffu);
+    assertx((ptr_int >> 48) == 0);
+    return ptr_int | (tag << 48);
   }
-
-  TagType  tag() const { return m_tag; }
-  const T* ptr() const { return m_ptr; }
-        T* ptr()       { return m_ptr; }
-
-private:
-  T* m_ptr;
-  TagType m_tag;
 };
-
-#endif
 
 //////////////////////////////////////////////////////////////////////
 

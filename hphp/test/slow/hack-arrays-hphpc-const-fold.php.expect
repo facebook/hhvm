@@ -1,0 +1,49 @@
+array(4) {
+  [0]=>
+  vec(1) {
+    int(4)
+  }
+  [1]=>
+  vec(1) {
+    int(3)
+  }
+  [2]=>
+  vec(1) {
+    int(2)
+  }
+  [3]=>
+  vec(1) {
+    int(1)
+  }
+}
+array(3) {
+  [0]=>
+  dict(1) {
+    [3]=>
+    string(1) "c"
+  }
+  [1]=>
+  dict(1) {
+    [2]=>
+    string(1) "b"
+  }
+  [2]=>
+  dict(1) {
+    [1]=>
+    string(1) "a"
+  }
+}
+array(3) {
+  [0]=>
+  keyset(1) {
+    string(1) "c"
+  }
+  [1]=>
+  keyset(1) {
+    string(1) "b"
+  }
+  [2]=>
+  keyset(1) {
+    string(1) "a"
+  }
+}

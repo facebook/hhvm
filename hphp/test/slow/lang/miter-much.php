@@ -8,7 +8,7 @@ function miter_foo(&$ar) {
     return;
   }
   foreach ($ar as &$v) {
-    miter_bar($v);
+    miter_bar(&$v);
   }
 }
 
@@ -20,7 +20,7 @@ function miter_bar(&$ar) {
     return;
   }
   foreach ($ar as &$v) {
-    miter_foo($ar);
+    miter_foo(&$ar);
   }
 }
 
@@ -41,7 +41,7 @@ function repeat($fn, $accum, $k) {
 
 function main() {
   $x = repeat($x ==> array_blowup($x), array(1,2,3,4), 3);
-  miter_foo($x);
+  miter_foo(&$x);
 }
 
 main();

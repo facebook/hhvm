@@ -1,6 +1,6 @@
-File "async_function_explicit_null_return_wrong_type.php", line 13, characters 3-8:
+File "async_function_explicit_null_return_wrong_type.php", line 13, characters 3-9:
 Invalid return type (Typing[4110])
+File "async_function_explicit_null_return_wrong_type.php", line 13, characters 3-9:
+This is an object of type Awaitable
 File "async_function_explicit_null_return_wrong_type.php", line 12, characters 23-26:
-This is void
-File "async_function_explicit_null_return_wrong_type.php", line 13, characters 3-8:
-It is incompatible with an object of type Awaitable
+It is incompatible with void

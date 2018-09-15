@@ -1,0 +1,2 @@
+Notice: Unable to unserialize: [%s]. Mangled private object property. in %s/hphp/test/slow/unserialize-invalid-dynamic-prop-name/slow-malformed.php on line 6
+bool(false)

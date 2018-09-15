@@ -29,16 +29,27 @@ struct Func;
 enum class RequestKind {
   Warmup,
   Profile,
-  Standard
+  NonVM,
+  Standard,
 };
 
 //////////////////////////////////////////////////////////////////////
+
+/*
+ * Used to indicate that the current thread should be ignored for profiling
+ * purposes, usually because it is a JIT worker thread and not processing real
+ * requests.
+ */
+struct ProfileNonVMThread {
+  ProfileNonVMThread();
+  ~ProfileNonVMThread();
+};
 
 void profileWarmupStart();
 void profileWarmupEnd();
 void profileRequestStart();
 void profileRequestEnd();
-void profileSetHotFuncAttr();
+void profileSetHotFunc();
 
 int64_t requestCount();
 int singleJitRequestCount();

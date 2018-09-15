@@ -28,5 +28,9 @@ function blah() {
   return 9;
 }
 
-var_dump(blah());
 
+
+<<__EntryPoint>>
+function main_new_try_catch_001() {
+var_dump(blah());
+}

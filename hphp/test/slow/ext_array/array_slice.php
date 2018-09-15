@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_array_slice() {
 $input = array("a", "b", "c", "d", "e");
 
 var_dump(array_slice($input, 2));
@@ -30,3 +33,4 @@ var_dump(array_slice(array(123, "b", "c"), 1, 2, false));
 
 var_dump(array_slice(array(12 => 1, 6 => 2), 0, 2, true));
 var_dump(array_slice(array(12 => 1, 6 => 2), 0, 2, false));
+}

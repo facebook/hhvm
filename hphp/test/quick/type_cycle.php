@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // A fun test for type inference.
 function foo() {

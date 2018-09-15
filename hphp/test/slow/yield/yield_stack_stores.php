@@ -21,6 +21,10 @@ function funny($thing) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_yield_stack_stores() {
 for ($i = 0; $i < 10; ++$i) {
   funny(Set { 'asd', 'bsd', 'foo', 'asd' });
+}
 }

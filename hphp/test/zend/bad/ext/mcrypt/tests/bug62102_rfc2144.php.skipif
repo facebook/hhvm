@@ -1,1 +1,0 @@
-<?php extension_loaded('mcrypt') OR print 'skip'; ?>

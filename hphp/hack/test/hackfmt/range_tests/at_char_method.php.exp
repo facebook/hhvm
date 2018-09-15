@@ -1,0 +1,5 @@
+16 92
+{
+  public function foo(int $bar): int {
+    return $bar;
+  }

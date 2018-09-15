@@ -50,5 +50,9 @@ function intFunc() {
   return $groups;
 }
 
+
+<<__EntryPoint>>
+function main_not_dead_stores() {
 var_dump(stringFunc());
 var_dump(intFunc());
+}

@@ -47,30 +47,30 @@ object(HH\ImmMap)#2 (1) {
 }
 object(HH\ImmMap)#3 (1) {
   [0]=>
-  object(HH\Map)#2 (1) {
+  object(HH\Map)#1 (1) {
     [0]=>
     int(2)
   }
 }
-object(HH\ImmMap)#3 (1) {
+object(HH\ImmMap)#4 (1) {
   [0]=>
   object(HH\Map)#2 (1) {
     [0]=>
     int(3)
   }
 }
-object(HH\ImmMap)#3 (1) {
+object(HH\ImmMap)#5 (1) {
   [0]=>
-  object(HH\Map)#2 (2) {
+  object(HH\Map)#3 (2) {
     [0]=>
     int(1)
     [1]=>
     int(2)
   }
 }
-object(HH\ImmMap)#3 (1) {
+object(HH\ImmMap)#6 (1) {
   [0]=>
-  object(HH\Map)#2 (1) {
+  object(HH\Map)#4 (1) {
     [0]=>
     int(2)
   }

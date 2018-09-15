@@ -16,13 +16,25 @@ File "test.php", line 12, characters 19-30: Foo::implement_me
 
 Ancestors of \Bar and their overridden methods:
 File "test.php", line 16, characters 7-9: Bar
+    inherited from File "test.php", line 9, characters 11-14: IQux
+File "test.php", line 16, characters 7-9: Bar
     inherited from File "test.php", line 3, characters 11-14: IFoo
 File "test.php", line 16, characters 7-9: Bar
+    inherited from File "test.php", line 7, characters 11-14: IBar
+File "test.php", line 16, characters 7-9: Bar
     inherited from File "test.php", line 11, characters 7-9: Foo
+File "test.php", line 16, characters 7-9: Bar
+    inherited from File "test.php", line 16, characters 7-9: Bar
+File "test.php", line 17, characters 19-32: Bar::not_overridden
+    inherited from File "test.php", line 17, characters 19-32: Bar::not_overridden
 
 Ancestors of \Baz and their overridden methods:
 File "test.php", line 20, characters 7-9: Baz
+    inherited from File "test.php", line 9, characters 11-14: IQux
+File "test.php", line 20, characters 7-9: Baz
     inherited from File "test.php", line 3, characters 11-14: IFoo
+File "test.php", line 20, characters 7-9: Baz
+    inherited from File "test.php", line 7, characters 11-14: IBar
 File "test.php", line 20, characters 7-9: Baz
     inherited from File "test.php", line 11, characters 7-9: Foo
 File "test.php", line 21, characters 19-29: Baz::override_me
@@ -45,9 +57,17 @@ File "test.php", line 3, characters 11-14: IFoo
 
 Children of \IBar and the methods they override:
 File "test.php", line 7, characters 11-14: IBar
+    inherited by File "test.php", line 20, characters 7-9: Baz
+File "test.php", line 7, characters 11-14: IBar
+    inherited by File "test.php", line 16, characters 7-9: Bar
+File "test.php", line 7, characters 11-14: IBar
     inherited by File "test.php", line 9, characters 11-14: IQux
 
 Children of \IQux and the methods they override:
+File "test.php", line 9, characters 11-14: IQux
+    inherited by File "test.php", line 20, characters 7-9: Baz
+File "test.php", line 9, characters 11-14: IQux
+    inherited by File "test.php", line 16, characters 7-9: Bar
 
 Children of \Foo and the methods they override:
 File "test.php", line 11, characters 7-9: Foo
@@ -60,6 +80,10 @@ File "test.php", line 11, characters 7-9: Foo
 Children of \Bar and the methods they override:
 File "test.php", line 16, characters 7-9: Bar
     inherited by File "test.php", line 20, characters 7-9: Baz
+File "test.php", line 16, characters 7-9: Bar
+    inherited by File "test.php", line 16, characters 7-9: Bar
+File "test.php", line 17, characters 19-32: Bar::not_overridden
+    inherited by File "test.php", line 17, characters 19-32: Bar::not_overridden
 
 Children of \Baz and the methods they override:
 

@@ -1,0 +1,8 @@
+(3,14)-(3,22) A type specifier is expected here.
+(3,22)-(3,22) A variable name is expected here.
+(3,26)-(3,26) An expression is expected here.
+(3,27)-(3,27) A semicolon (';') is expected here.
+(3,28)-(3,28) An expression is expected here.
+(3,30)-(3,30) An expression is expected here.
+(3,30)-(3,36) Cannot use collection initialization for non-collection class.
+(3,37)-(4,1) A semicolon (';') is expected here.

@@ -1,6 +1,6 @@
 File "subtype_bug_4.php", line 6, characters 42-43:
 Invalid argument (Typing[4110])
-File "subtype_bug_4.php", line 5, characters 14-24:
+File "subtype_bug_4.php", line 5, characters 14-31:
 This is an object of type ConstVector
-File "subtype_bug_4.php", line 6, characters 15-22:
+File "subtype_bug_4.php", line 6, characters 15-30:
 It is incompatible with an object of type ConstSet

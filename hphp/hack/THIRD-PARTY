@@ -14,3 +14,6 @@ under the following licenses:
 
 - src/third-party/libancillary: Files from Nicolas George's libancillary, under
   its license. See license in src/third-party/libancillary/COPYING
+
+- src/third-party/ppx_deriving: Files from whitequark's ppx_deriving library,
+  under the MIT License. See license in src/third-party/ppx_deriving/LICENSE.

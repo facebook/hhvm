@@ -16,4 +16,4 @@ array(3) {
 }
 oops
 
-Fatal error: Call to undefined function gena() in %s/async/await_gena.php on line %d
+Fatal error: Call to undefined function gena() in %s on line %d

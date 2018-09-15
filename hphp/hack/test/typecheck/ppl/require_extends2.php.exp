@@ -1,0 +1,4 @@
+File "require_extends2.php", line 8, characters 11-23:
+an interface annotated with <<__PPL>> cannot require non <<__PPL>> class: RequireMe (Typing[4257])
+File "require_extends2.php", line 4, characters 16-24:
+Declaration is here

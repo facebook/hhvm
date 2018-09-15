@@ -1,0 +1,7 @@
+array(1) {
+  [0]=>
+  int(42)
+}
+
+Notice: Undefined variable: x in %s/test/slow/silence_operator/fatal_and_no_op.php on line 4
+NULL

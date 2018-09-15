@@ -53,4 +53,8 @@ function run() {
   $a->run();
 }
 
+
+<<__EntryPoint>>
+function main_interleaved_global_deregistration() {
 run();
+}

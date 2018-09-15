@@ -4,7 +4,6 @@ class A {
   var $a;
   var $b;
 }
-;
 function gen() {
   $obj = new A();
   var_dump($obj);
@@ -21,5 +20,10 @@ function gen() {
   }
   var_dump($obj);
 }
+
+<<__EntryPoint>>
+function main_658() {
+;
 foreach (gen() as $_) {
+}
 }

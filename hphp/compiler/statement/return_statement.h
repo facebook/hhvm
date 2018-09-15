@@ -28,7 +28,7 @@ struct ReturnStatement : Statement {
   ReturnStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  bool hasRetExp() const override { return m_exp != nullptr; }
+  void analyzeProgram(AnalysisResultConstRawPtr ar) override;
   ExpressionPtr getRetExp() const { return m_exp; }
 
 private:

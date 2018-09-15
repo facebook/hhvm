@@ -15,5 +15,9 @@ class child2 extends dad {
 ";
   }
 }
+
+<<__EntryPoint>>
+function main_1457() {
 $foo = new child();
 $bar = new child2();
+}

@@ -4,20 +4,20 @@ class Foo implements Iterator {
   private $data = array(1, 2, 3);
 
   public function current() {
-    return current($this->data);
+    return current(&$this->data);
   }
   public function key() {
-    return key($this->data);
+    return key(&$this->data);
   }
   public function next() {
-    next($this->data);
+    next(&$this->data);
   }
   public function rewind() {
     echo "hagfish\n";
-    reset($this->data);
+    reset(&$this->data);
   }
   public function valid() {
-    return current($this->data);
+    return current(&$this->data);
   }
 }
 
@@ -35,5 +35,9 @@ function run_test() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_2184() {
 foreach (run_test() as $_) {
+}
 }

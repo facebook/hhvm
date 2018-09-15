@@ -8,8 +8,12 @@ function g5() {
     echo "val=$v\n";
     if ($b && $v == 1) {
       $b = false;
-      array_push($arr, 4);
+      array_push(&$arr, 4);
     }
   }
 }
+
+<<__EntryPoint>>
+function main_473() {
 g5();
+}

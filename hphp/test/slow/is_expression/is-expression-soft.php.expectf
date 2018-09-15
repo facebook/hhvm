@@ -1,0 +1,1 @@
+Fatal error: Soft typehints cannot be used with is-expressions in %s on line %d

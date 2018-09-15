@@ -31,4 +31,8 @@ class C {
   public $C = 'C';
 }
 
+
+<<__EntryPoint>>
+function main_nested_traits() {
 var_dump(serialize(new C()));
+}

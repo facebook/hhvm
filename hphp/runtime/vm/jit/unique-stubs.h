@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/vm/hhbc.h"
 
+#include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
@@ -39,7 +40,7 @@ struct CodeCache;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-constexpr int kNumFreeLocalsHelpers = 8;
+constexpr int kNumFreeLocalsHelpers = 7;
 
 /*
  * Addresses of various unique, long-lived JIT helper routines.
@@ -93,7 +94,7 @@ struct UniqueStubs {
    *  +---------+---------------------+---------+-----------+
    *  | native  | call{,r,m,s}        | ret     | N/A       |
    *  +---------+---------------------+---------+-----------+
-   *  | PHP     | phpcall, callarray  | phpret  | phplogue  |
+   *  | PHP     | phpcall, callunpack | phpret  | phplogue  |
    *  +---------+---------------------+---------+----------+
    *  | stub    | callstub            | stubret | stublogue |
    *  +---------+---------------------+---------+-----------+
@@ -149,7 +150,7 @@ struct UniqueStubs {
    * translation.
    *
    * @reached:  call from enterTCHelper$callTC
-   *            jmp from fcallArrayHelper
+   *            jmp from fcallUnpackHelper
    * @context:  func body
    */
   TCA funcBodyHelperThunk;
@@ -221,19 +222,24 @@ struct UniqueStubs {
   TCA debuggerAsyncGenRetHelper;
 
   /*
-   * Async function return stub.
+   * Return from a resumed async function.
    *
-   * Check whether the parent of the returning WaitHandle can be resumed
-   * directly (namely, if it is the solitary parent and is in the same
-   * AsioContext), and do so if possible.  Otherwise, unblock all parents and
-   * jump to asyncSwitchCtrl.
+   * Store result into the AsyncFunctionWaitHandle, mark it as finished and
+   * unblock its parents. Check whether the first parent is eligible to be
+   * resumed directly (it is an AsyncFunctionWaitHandle in the same context
+   * with a non-null resume address), and do so if possible. Otherwise, jump
+   * to asyncSwitchCtrl. Slow version doesn't try to resume and just returns
+   * to the asio scheduler.
    *
-   * rvmfp() should point to the ActRec of the WaitHandle that is returning.
+   * rvmfp() should point to the ActRec of the AsyncFunctionWaitHandle that
+   * is returning, rvmsp() should point to an uninitialized cell on the
+   * stack containing garbage.
    *
    * @reached:  jmp from TC
    * @context:  func body
    */
-  TCA asyncRetCtrl;
+  TCA asyncFuncRet;
+  TCA asyncFuncRetSlow;
 
   /*
    * Async function finish-suspend-and-resume stub.
@@ -264,19 +270,11 @@ struct UniqueStubs {
 
   /*
    * Use interpreter functions to enter the pre-live ActRec that we place on
-   * the stack (along with the Array of parameters) in a CallArray instruction.
+   * the stack (along with the Array of parameters) in a CallUnpack instruction.
+   * The last arg specifies the total number of args, including the array
+   * parameter (which must be the last one).
    *
-   * @reached:  callarray from TC
-   * @context:  func prologue
-   */
-  TCA fcallArrayHelper;
-
-  /*
-   * Similar to fcallArrayHelper, but takes an additional arg specifying the
-   * total number of args, including the array parameter (which must be the
-   * last one).
-   *
-   * @reached:  callarray from TC
+   * @reached:  callunpack from TC
    * @context:  func prologue
    */
   TCA fcallUnpackHelper;
@@ -341,7 +339,7 @@ struct UniqueStubs {
    * @reached:  jmp from TC
    * @context:  func body
    */
-  std::unordered_map<Op, TCA> interpOneCFHelpers;
+  jit::fast_map<Op, TCA> interpOneCFHelpers;
 
 
   /////////////////////////////////////////////////////////////////////////////
@@ -414,6 +412,12 @@ struct UniqueStubs {
   TCA endCatchHelperPast;
 
   /*
+   * Handle unknown exceptions that are thrown across php code
+   */
+  TCA unknownExceptionHandler;
+  TCA unknownExceptionHandlerPast;
+
+  /*
    * Service request helper.
    *
    * Packs service request arguments into a struct on the stack before calling
@@ -428,6 +432,16 @@ struct UniqueStubs {
    * Throw a VMSwitchMode exception.  Used in switchModeForDebugger().
    */
   TCA throwSwitchMode;
+
+  /*
+   * Method lookup helpers. Normally point to the corresponding c++
+   * functions, but may be generated stubs if the c++ code is too far
+   * from the translation cache.
+   */
+  TCA handlePrimeCacheInit;
+  TCA handlePrimeCacheInitFatal;
+  TCA handleSlowPath;
+  TCA handleSlowPathFatal;
 
   /////////////////////////////////////////////////////////////////////////////
 
@@ -452,6 +466,11 @@ struct UniqueStubs {
   std::string describe(TCA addr) const;
 
 private:
+  /*
+   * Emit all Resumable-related unique stubs to `code'.
+   */
+  void emitAllResumable(CodeCache& code, Debug::DebugInfo& dbg);
+
   struct StubRange {
     std::string name;
     TCA start, end;

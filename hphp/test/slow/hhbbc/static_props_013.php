@@ -17,4 +17,8 @@ function main() {
   var_dump($a->getY());
   var_dump($a->getX());
 }
+
+<<__EntryPoint>>
+function main_static_props_013() {
 main();
+}

@@ -59,9 +59,10 @@ struct c_AsyncFunctionWaitHandle final : c_ResumableWaitHandle {
     AsioBlockable m_blockable;
   };
 
-  explicit c_AsyncFunctionWaitHandle(Class* cls =
-      c_AsyncFunctionWaitHandle::classof()) noexcept
-    : c_ResumableWaitHandle(cls, HeaderKind::AsyncFuncWH) {}
+  explicit c_AsyncFunctionWaitHandle() noexcept
+    : c_ResumableWaitHandle(classof(), HeaderKind::AsyncFuncWH,
+                    type_scan::getIndexForMalloc<c_AsyncFunctionWaitHandle>())
+  {}
   ~c_AsyncFunctionWaitHandle();
 
  public:
@@ -89,7 +90,7 @@ struct c_AsyncFunctionWaitHandle final : c_ResumableWaitHandle {
   static void PrepareChild(const ActRec* fp, c_WaitableWaitHandle* child);
   void onUnblocked();
   void resume();
-  void await(Offset resumeOffset, c_WaitableWaitHandle* child);
+  void await(Offset resumeOffset, req::ptr<c_WaitableWaitHandle>&& child);
   void ret(Cell& result);
   void fail(ObjectData* exception);
   void failCpp();
@@ -111,7 +112,7 @@ struct c_AsyncFunctionWaitHandle final : c_ResumableWaitHandle {
   }
 
   bool isFastResumable() const {
-    assert(getState() == STATE_READY);
+    assertx(getState() == STATE_READY);
     return (resumable()->resumeAddr() &&
             m_children[0].getChild()->isSucceeded());
   }
@@ -121,12 +122,20 @@ struct c_AsyncFunctionWaitHandle final : c_ResumableWaitHandle {
   void initialize(c_WaitableWaitHandle* child);
   void prepareChild(c_WaitableWaitHandle* child);
 
-  // valid if STATE_READY || STATE_BLOCKED
+  // valid if STATE_BLOCKED || STATE_READY. For now, always 1 element.
+  // May become a flexible array later.
   Node m_children[1];
+
+  TYPE_SCAN_CUSTOM_FIELD(m_children) {
+    auto state = getState();
+    if (state == STATE_BLOCKED || state == STATE_READY) {
+      scanner.scan(m_children[0]);
+    }
+  }
 };
 
-inline c_AsyncFunctionWaitHandle* c_WaitHandle::asAsyncFunction() {
-  assert(getKind() == Kind::AsyncFunction);
+inline c_AsyncFunctionWaitHandle* c_Awaitable::asAsyncFunction() {
+  assertx(getKind() == Kind::AsyncFunction);
   return static_cast<c_AsyncFunctionWaitHandle*>(this);
 }
 

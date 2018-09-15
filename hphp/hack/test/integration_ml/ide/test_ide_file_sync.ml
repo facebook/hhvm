@@ -2,9 +2,9 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
  *
  *)
 
@@ -35,7 +35,7 @@ function test() {
 "
 
 let build_code_edit st_line st_column ed_line ed_column text =
-  File_content.{
+  Ide_api_types.{
     range = Some {
       st = {
         line = st_line;
@@ -63,15 +63,15 @@ let () =
   let env, _ = Test.edit_file env bar_name bar_contents in
   (* Request completions *)
   let env, loop_output = Test.ide_autocomplete env (bar_name, 3, 5) in
-  Test.assert_autocomplete loop_output ["foo"];
+  Test.assert_ide_autocomplete loop_output ["foo"];
 
   (* Add a new definition to the file *)
   let env, _ = Test.(run_loop_once env { default_loop_input with
-    persistent_client_request = Some (EDIT_FILE
+    persistent_client_request = Some (Request (EDIT_FILE
       (Test.prepend_root bar_name, [build_code_edit 2 1 2 1 foo2_definition])
-    )
+    ))
   }) in
 
   (* Check that new definition is among the completions *)
   let _, loop_output = Test.ide_autocomplete env (bar_name, 4, 5) in
-  Test.assert_autocomplete loop_output ["foo"; "foo2"]
+  Test.assert_ide_autocomplete loop_output ["foo"; "foo2"]

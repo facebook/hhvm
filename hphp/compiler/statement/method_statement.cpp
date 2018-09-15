@@ -37,9 +37,7 @@
 #include "hphp/compiler/expression/closure_expression.h"
 
 #include "hphp/compiler/analysis/analysis_result.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/file_scope.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 
@@ -103,6 +101,13 @@ bool MethodStatement::isRef(int index /* = -1 */) const {
   return param->isRef();
 }
 
+bool MethodStatement::isInOut(int index) const {
+  assert(index >= 0 && index < m_params->getCount());
+  auto param =
+    dynamic_pointer_cast<ParameterExpression>((*m_params)[index]);
+  return param->mode() == ParamMode::InOut;
+}
+
 bool MethodStatement::isSystem() const {
   return getFunctionScope()->isSystem();
 }
@@ -114,7 +119,7 @@ int MethodStatement::getRecursiveCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
+FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstRawPtr ar,
                                                  FileScopePtr fs) {
   ConstructPtr self = shared_from_this();
   int minParam = 0, numDeclParam = 0;
@@ -145,8 +150,6 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
       if (param->isRef()) { hasRef = true; }
       if (!param->isOptional()) {
         if (!minParam) minParam = i + 1;
-      } else if (minParam && !param->hasTypeHint()) {
-        Compiler::Error(Compiler::RequiredAfterOptionalParam, param);
       }
       allDeclNames.insert(param->getName());
     }
@@ -156,7 +159,6 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
     for (i = (numDeclParam - 1); i >= 0; --i) {
       auto param = dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
       if (names.find(param->getName()) != names.end()) {
-        Compiler::Error(Compiler::RedundantParameter, param);
         for (int j = 0; j < 1000; j++) {
           auto name = param->getName() + folly::to<std::string>(j);
           if (names.find(name) == names.end() &&
@@ -194,9 +196,6 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
                                     stmt, m_ref, minParam, numDeclParam,
                                     m_modifiers, m_attribute, m_docComment,
                                     fs, attrs);
-  if (!m_stmt) {
-    funcScope->setVirtual();
-  }
   setBlockScope(funcScope);
 
   funcScope->setParamCounts(ar, -1, -1);
@@ -204,7 +203,7 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
   return funcScope;
 }
 
-void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
+void MethodStatement::onParseRecur(AnalysisResultConstRawPtr ar,
                                    FileScopeRawPtr fileScope,
                                    ClassScopePtr classScope) {
   checkParameters(fileScope);
@@ -218,7 +217,6 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
          m_modifiers->isPrivate()) > 1) {
       m_modifiers->parseTimeFatal(
         fileScope,
-        Compiler::InvalidAttribute,
         Strings::PICK_ACCESS_MODIFIER
       );
     }
@@ -226,24 +224,22 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
     if (m_modifiers->hasDuplicates()) {
       m_modifiers->parseTimeFatal(
         fileScope,
-        Compiler::InvalidAttribute,
         Strings::PICK_ACCESS_MODIFIER);
     }
 
     if (classScope->isInterface()) {
-      if (m_modifiers->isProtected() || m_modifiers->isPrivate() ||
+      if (m_modifiers->isPrivate() ||
           m_modifiers->isAbstract()  || m_modifiers->isFinal() ||
           isNative) {
         m_modifiers->parseTimeFatal(
           fileScope,
-          Compiler::InvalidAttribute,
-          "Access type for interface method %s::%s() must be omitted",
+          "Private, abstract, final modifiers and <<__Native>> attribute on "
+          "interface method %s::%s() must be omitted",
           classScope->getOriginalName().c_str(), getOriginalName().c_str());
       }
       if (m_modifiers->isAsync()) {
         m_modifiers->parseTimeFatal(
           fileScope,
-          Compiler::InvalidAttribute,
           Strings::ASYNC_WITHOUT_BODY,
           "interface", classScope->getOriginalName().c_str(),
           getOriginalName().c_str()
@@ -252,7 +248,6 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
       if (getStmts()) {
         getStmts()->parseTimeFatal(
           fileScope,
-          Compiler::InvalidMethodDefinition,
           "Interface method %s::%s() cannot contain body",
           classScope->getOriginalName().c_str(),
           getOriginalName().c_str());
@@ -260,10 +255,9 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
     }
     if (m_modifiers->isAbstract()) {
       if (!Option::WholeProgram &&
-          funcScope->userAttributes().count("__Memoize")) {
+          funcScope->hasMemoize()) {
         m_modifiers->parseTimeFatal(
           fileScope,
-          Compiler::InvalidAttribute,
           "Abstract method %s::%s cannot be memoized",
           classScope->getOriginalName().c_str(),
           getOriginalName().c_str());
@@ -271,7 +265,6 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
       if (m_modifiers->isPrivate() || m_modifiers->isFinal() || isNative) {
         m_modifiers->parseTimeFatal(
           fileScope,
-          Compiler::InvalidAttribute,
           "Cannot declare abstract method %s::%s() %s",
           classScope->getOriginalName().c_str(),
           getOriginalName().c_str(),
@@ -281,7 +274,6 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
       if (!classScope->isInterface() && !classScope->isAbstract()) {
         /* note that classScope->isAbstract() returns true for traits */
         m_modifiers->parseTimeFatal(fileScope,
-                                    Compiler::InvalidAttribute,
                                     "Class %s contains abstract method %s and "
                                     "must therefore be declared abstract",
                                     classScope->getOriginalName().c_str(),
@@ -289,7 +281,6 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
       }
       if (getStmts()) {
         parseTimeFatal(fileScope,
-                       Compiler::InvalidAttribute,
                        "Abstract method %s::%s() cannot contain body",
                        classScope->getOriginalName().c_str(),
                        getOriginalName().c_str());
@@ -297,7 +288,6 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
       if (m_modifiers->isAsync()) {
         m_modifiers->parseTimeFatal(
           fileScope,
-          Compiler::InvalidAttribute,
           Strings::ASYNC_WITHOUT_BODY,
           "abstract", classScope->getOriginalName().c_str(),
           getOriginalName().c_str()
@@ -307,7 +297,6 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
     if (!m_modifiers->isStatic() && classScope->isStaticUtil()) {
       m_modifiers->parseTimeFatal(
         fileScope,
-        Compiler::InvalidAttribute,
         "Class %s contains non-static method %s and "
         "therefore cannot be declared 'abstract final'",
         classScope->getOriginalName().c_str(),
@@ -318,7 +307,6 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
     if (isNative) {
       if (getStmts()) {
         parseTimeFatal(fileScope,
-                       Compiler::InvalidAttribute,
                        "Native method %s::%s() cannot contain body",
                        classScope->getOriginalName().c_str(),
                        getOriginalName().c_str());
@@ -326,7 +314,6 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
       auto is_ctordtor = isNamed("__construct") || isNamed("__destruct");
       if (!m_retTypeAnnotation && !is_ctordtor) {
         parseTimeFatal(fileScope,
-                       Compiler::InvalidAttribute,
                        "Native method %s::%s() must have a return type hint",
                        classScope->getOriginalName().c_str(),
                        getOriginalName().c_str());
@@ -334,7 +321,6 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
                  is_ctordtor &&
                 (m_retTypeAnnotation->dataType() != KindOfNull)) {
         parseTimeFatal(fileScope,
-                       Compiler::InvalidAttribute,
                        "Native method %s::%s() must return void",
                        classScope->getOriginalName().c_str(),
                        getOriginalName().c_str());
@@ -344,7 +330,6 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
   if ((!m_modifiers || !m_modifiers->isAbstract()) &&
       !getStmts() && !classScope->isInterface() && !isNative) {
     parseTimeFatal(fileScope,
-                   Compiler::InvalidAttribute,
                    "Non-abstract method %s::%s() must contain body",
                    classScope->getOriginalName().c_str(),
                    getOriginalName().c_str());
@@ -366,12 +351,11 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
       // be treated as Arrays as far as HNI is concerned.
       if (isNative && !param->hasUserType() && !param->isVariadic()) {
         parseTimeFatal(fileScope,
-                       Compiler::InvalidAttribute,
                        "Native method calls must have type hints on all args");
       }
     }
   }
-  FunctionScope::RecordFunctionInfo(m_originalName, funcScope);
+  funcScope->recordParams();
 }
 
 void MethodStatement::fixupSelfAndParentTypehints(ClassScopePtr scope) {
@@ -397,8 +381,7 @@ void MethodStatement::setSpecialMethod(FileScopeRawPtr fileScope,
     classScope->setAttribute(ClassScope::HasDestructor);
     if (m_params && m_params->getCount()) {
       parseTimeFatal(fileScope,
-                     Compiler::InvalidMagicMethod,
-                     "Method %s cannot take any arguments",
+                     "Method %s cannot accept any arguments",
                      getOriginalFullName().c_str());
     }
   } else if (name == "__get") {
@@ -427,7 +410,6 @@ void MethodStatement::setSpecialMethod(FileScopeRawPtr fileScope,
   } else if (name == "__clone") {
     if (m_params && m_params->getCount()) {
       parseTimeFatal(fileScope,
-                     Compiler::InvalidMagicMethod,
                      "Method %s cannot accept any arguments",
                      getOriginalFullName().c_str());
     }
@@ -437,7 +419,6 @@ void MethodStatement::setSpecialMethod(FileScopeRawPtr fileScope,
     int n = m_params ? m_params->getCount() : 0;
     if (numArgs != n) {
       parseTimeFatal(fileScope,
-                     Compiler::InvalidMagicMethod,
                      "Method %s() must take exactly %d argument%s",
                      getOriginalFullName().c_str(),
                      numArgs, (numArgs == 1) ? "" : "s");
@@ -445,14 +426,12 @@ void MethodStatement::setSpecialMethod(FileScopeRawPtr fileScope,
     // Fatal if any arguments are pass by reference
     if (m_params && hasRefParam()) {
       parseTimeFatal(fileScope,
-                     Compiler::InvalidMagicMethod,
                      "Method %s() cannot take arguments by reference",
                      getOriginalFullName().c_str());
     }
     // Fatal if any arguments are variadic
     if (m_params && getFunctionScope()->hasVariadicParam()) {
       parseTimeFatal(fileScope,
-                     Compiler::InvalidMagicMethod,
                      "Method %s() cannot take a variadic argument",
                      getOriginalFullName().c_str());
     }
@@ -461,7 +440,6 @@ void MethodStatement::setSpecialMethod(FileScopeRawPtr fileScope,
         m_modifiers->isStatic() != isStatic) {
       parseTimeFatal(
         fileScope,
-        Compiler::InvalidMagicMethod,
         "Method %s() must have public visibility and %sbe static",
         getOriginalFullName().c_str(),
         isStatic ? "" : "cannot ");
@@ -469,31 +447,17 @@ void MethodStatement::setSpecialMethod(FileScopeRawPtr fileScope,
   }
 }
 
-void MethodStatement::addTraitMethodToScope(AnalysisResultConstPtr ar,
+void MethodStatement::addTraitMethodToScope(AnalysisResultConstRawPtr ar,
                                             ClassScopePtr classScope) {
   FunctionScopeRawPtr funcScope = getFunctionScope();
   FileScopeRawPtr fileScope = getFileScope();
   classScope->addFunction(ar, fileScope, funcScope);
   setSpecialMethod(fileScope, classScope);
-  FunctionScope::RecordFunctionInfo(m_originalName, funcScope);
+  funcScope->recordParams();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-int MethodStatement::getLocalEffects() const {
-  if (m_method) return NoEffect;
-  FunctionScopeRawPtr scope = getFunctionScope();
-  return scope->isVolatile() ? OtherEffect | CanThrow : NoEffect;
-}
-
-void MethodStatement::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_params) {
-    m_params->analyzeProgram(ar);
-  }
-
-  if (m_stmt) m_stmt->analyzeProgram(ar);
-}
 
 ConstructPtr MethodStatement::getNthKid(int n) const {
   switch (n) {
@@ -586,12 +550,10 @@ void MethodStatement::checkParameters(FileScopeRawPtr scope) {
     default:
       if (isCtor) {
         param->parseTimeFatal(scope,
-                              Compiler::InvalidAttribute,
                               "Invalid modifier on __construct, only public, "
                               "private or protected allowed");
       } else {
         param->parseTimeFatal(scope,
-                              Compiler::InvalidAttribute,
                               "Parameters modifiers not allowed on methods");
       }
     }

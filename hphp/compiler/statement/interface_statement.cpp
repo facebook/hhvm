@@ -24,7 +24,6 @@
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/statement/statement_list.h"
-#include "hphp/compiler/analysis/variable_table.h"
 #include "hphp/util/text-util.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/parser/parser.h"
@@ -64,17 +63,13 @@ StatementPtr InterfaceStatement::clone() {
   return stmt;
 }
 
-bool InterfaceStatement::hasImpl() const {
-  return true;
-}
-
 int InterfaceStatement::getRecursiveCount() const {
   return m_stmt ? m_stmt->getRecursiveCount() : 0;
 }
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void InterfaceStatement::onParse(AnalysisResultConstPtr ar,
+void InterfaceStatement::onParse(AnalysisResultConstRawPtr ar,
                                  FileScopePtr scope) {
   std::vector<std::string> bases;
   if (m_base) m_base->getStrings(bases);
@@ -101,8 +96,6 @@ void InterfaceStatement::onParse(AnalysisResultConstPtr ar,
   setBlockScope(classScope);
   scope->addClass(ar, classScope);
 
-  classScope->setPersistent(false);
-
   if (m_stmt) {
     for (int i = 0; i < m_stmt->getCount(); i++) {
       auto ph = dynamic_pointer_cast<IParseHandler>((*m_stmt)[i]);
@@ -122,12 +115,11 @@ void InterfaceStatement::checkArgumentsToPromote(
     if (meth && meth->isNamed("__construct")) {
       ExpressionListPtr params = meth->getParams();
       if (params) {
-        for (int i = 0; i < params->getCount(); i++) {
-          auto param = dynamic_pointer_cast<ParameterExpression>((*params)[i]);
+        for (int i2 = 0; i2 < params->getCount(); i2++) {
+          auto param = dynamic_pointer_cast<ParameterExpression>((*params)[i2]);
           if (param->getModifier() != 0) {
             if (type == T_TRAIT || type == T_INTERFACE) {
               param->parseTimeFatal(scope,
-                                    Compiler::InvalidAttribute,
                                     "Constructor parameter promotion "
                                     "not allowed on traits or interfaces");
             }
@@ -145,62 +137,8 @@ void InterfaceStatement::checkArgumentsToPromote(
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-int InterfaceStatement::getLocalEffects() const {
-  ClassScopeRawPtr classScope = getClassScope();
-  return classScope->isVolatile() ? OtherEffect | CanThrow : NoEffect;
-}
-
 std::string InterfaceStatement::getName() const {
   return std::string("Interface ") + m_originalName;
-}
-
-bool InterfaceStatement::checkVolatileBases(AnalysisResultConstPtr ar) {
-  ClassScopeRawPtr classScope = getClassScope();
-  assert(!classScope->isVolatile());
-  auto const& bases = classScope->getBases();
-  for (auto it = bases.begin(); it != bases.end(); ++it) {
-    ClassScopePtr base = ar->findClass(*it);
-    if (base && base->isVolatile()) return true;
-  }
-  return false;
-}
-
-void InterfaceStatement::checkVolatile(AnalysisResultConstPtr ar) {
-  ClassScopeRawPtr classScope = getClassScope();
-  // redeclared classes/interfaces are automatically volatile
-  if (!classScope->isVolatile()) {
-     if (checkVolatileBases(ar)) {
-       // if any base is volatile, the class is volatile
-       classScope->setVolatile();
-     }
-  }
-}
-
-void InterfaceStatement::analyzeProgram(AnalysisResultPtr ar) {
-  ClassScopeRawPtr classScope = getClassScope();
-  if (m_stmt) {
-    m_stmt->analyzeProgram(ar);
-  }
-
-  checkVolatile(ar);
-
-  if (ar->getPhase() != AnalysisResult::AnalyzeAll) return;
-  std::vector<std::string> bases;
-  if (m_base) m_base->getStrings(bases);
-  for (unsigned int i = 0; i < bases.size(); i++) {
-    ClassScopePtr cls = ar->findClass(bases[i]);
-    if (cls) {
-      if (!cls->isInterface()) {
-        Compiler::Error(
-          Compiler::InvalidDerivation,
-          shared_from_this(),
-          cls->getOriginalName() + " must be an interface");
-      }
-      if (cls->isUserClass()) {
-        cls->addUse(classScope, BlockScope::UseKindParentRef);
-      }
-    }
-  }
 }
 
 ConstructPtr InterfaceStatement::getNthKid(int n) const {
@@ -232,13 +170,6 @@ void InterfaceStatement::setNthKid(int n, ConstructPtr cp) {
       assert(false);
       break;
   }
-}
-
-StatementPtr InterfaceStatement::preOptimize(AnalysisResultConstPtr ar) {
-  if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
-    checkVolatile(ar);
-  }
-  return StatementPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

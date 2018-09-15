@@ -22,6 +22,9 @@ class c {
 class d extends c {
   public $q = 30;
 }
+
+<<__EntryPoint>>
+function main_1409() {
 $x = new c();
 $x->x();
 $x->y();
@@ -39,3 +42,4 @@ c::sf();
 d::sf();
 d::sf();
 d::sf();
+}

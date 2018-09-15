@@ -41,15 +41,18 @@ TypeAnnotation::TypeAnnotation(const std::string &name,
                                 m_typevar(false),
                                 m_typeaccess(false),
                                 m_shape(false),
-                                m_clsCnsShapeField(false) { }
+                                m_allowsUnknownFields(false),
+                                m_clsCnsShapeField(false),
+                                m_optionalShapeField(false),
+                                m_reifiedtype(false) {
+}
 
 std::string TypeAnnotation::vanillaName() const {
   // filter out types that should not be exposed to the runtime
   if (m_nullable || m_soft || m_typevar || m_function || m_typeaccess) {
     return "";
   }
-  if (!strcasecmp(m_name.c_str(), "HH\\mixed") ||
-      !strcasecmp(m_name.c_str(), "HH\\this")) {
+  if (!strcasecmp(m_name.c_str(), "HH\\mixed")) {
     return "";
   }
   return m_name;
@@ -83,33 +86,8 @@ std::string TypeAnnotation::fullName() const {
 }
 
 MaybeDataType TypeAnnotation::dataType() const {
-  if (m_function || m_xhp || m_tuple) {
-    return KindOfObject;
-  }
-  if (m_typeArgs) {
-    return !strcasecmp(m_name.c_str(), "array") ? KindOfArray : KindOfObject;
-  }
-  if (m_nullable || m_soft) {
-    return folly::none;
-  }
-  if (!strcasecmp(m_name.c_str(), "null") ||
-      !strcasecmp(m_name.c_str(), "HH\\void")) {
-    return KindOfNull;
-  }
-  if (!strcasecmp(m_name.c_str(), "HH\\bool"))     return KindOfBoolean;
-  if (!strcasecmp(m_name.c_str(), "HH\\int"))      return KindOfInt64;
-  if (!strcasecmp(m_name.c_str(), "HH\\float"))    return KindOfDouble;
-  if (!strcasecmp(m_name.c_str(), "HH\\num"))      return folly::none;
-  if (!strcasecmp(m_name.c_str(), "HH\\arraykey")) return folly::none;
-  if (!strcasecmp(m_name.c_str(), "HH\\string"))   return KindOfString;
-  if (!strcasecmp(m_name.c_str(), "array"))        return KindOfArray;
-  if (!strcasecmp(m_name.c_str(), "HH\\dict"))     return KindOfDict;
-  if (!strcasecmp(m_name.c_str(), "HH\\vec"))      return KindOfVec;
-  if (!strcasecmp(m_name.c_str(), "HH\\keyset"))   return KindOfKeyset;
-  if (!strcasecmp(m_name.c_str(), "HH\\resource")) return KindOfResource;
-  if (!strcasecmp(m_name.c_str(), "HH\\mixed"))    return folly::none;
-
-  return KindOfObject;
+  return get_datatype(m_name, (bool)m_typeArgs, m_function,
+    m_xhp, m_tuple, m_nullable, m_soft);
 }
 
 void TypeAnnotation::getAllSimpleNames(std::vector<std::string>& names) const {
@@ -130,6 +108,10 @@ void TypeAnnotation::shapeTypeName(std::string& name) const {
   auto sep = "";
   while (shapeField) {
     name += sep;
+
+    if (shapeField->isOptionalShapeField()) {
+      folly::toAppend("?", &name);
+    }
 
     if (shapeField->isClsCnsShapeField()) {
       folly::toAppend(shapeField->m_name, &name);
@@ -282,16 +264,35 @@ TypeStructure::Kind TypeAnnotation::getKind() const {
   if (isMixed()) {
     return TypeStructure::Kind::T_mixed;
   }
+  if (isNonnull()) {
+    return TypeStructure::Kind::T_nonnull;
+  }
   if (m_tuple) {
     return TypeStructure::Kind::T_tuple;
+  }
+  if (m_shape) {
+    return TypeStructure::Kind::T_shape;
   }
   if (m_function) {
     return TypeStructure::Kind::T_fun;
   }
   if (!strcasecmp(m_name.c_str(), "array")) {
-    return (m_shape)
-      ? TypeStructure::Kind::T_shape
-      : TypeStructure::Kind::T_array;
+    return TypeStructure::Kind::T_array;
+  }
+  if (!strcasecmp(m_name.c_str(), "HH\\varray")) {
+    return TypeStructure::Kind::T_varray;
+  }
+  if (!strcasecmp(m_name.c_str(), "HH\\darray")) {
+    return TypeStructure::Kind::T_darray;
+  }
+  if (!strcasecmp(m_name.c_str(), "HH\\varray_or_darray")) {
+    return TypeStructure::Kind::T_varray_or_darray;
+  }
+  if (!strcasecmp(m_name.c_str(), "HH\\vec_or_dict")) {
+    return TypeStructure::Kind::T_vec_or_dict;
+  }
+  if (!strcasecmp(m_name.c_str(), "HH\\arraylike")) {
+    return TypeStructure::Kind::T_arraylike;
   }
   if (!strcasecmp(m_name.c_str(), "HH\\dict")) {
     return TypeStructure::Kind::T_dict;
@@ -312,6 +313,9 @@ TypeStructure::Kind TypeAnnotation::getKind() const {
     // TODO(7657500): in the runtime, resolve this type to a class.
     return TypeStructure::Kind::T_xhp;
   }
+  if (m_reifiedtype) {
+    return TypeStructure::Kind::T_reifiedtype;
+  }
 
   return TypeStructure::Kind::T_unresolved;
 }
@@ -328,21 +332,22 @@ const StaticString
   s_root_name("root_name"),
   s_access_list("access_list"),
   s_fields("fields"),
+  s_allows_unknown_fields("allows_unknown_fields"),
   s_is_cls_cns("is_cls_cns"),
+  s_optional_shape_field("optional_shape_field"),
   s_value("value"),
-  s_typevars("typevars")
+  s_typevars("typevars"),
+  s_id("id")
 ;
 
 /* Turns the argsList linked list of TypeAnnotation into a positioned
  * static array. */
 Array TypeAnnotation::argsListToScalarArray(TypeAnnotationPtr ta) const {
-  int i = 0;
-  auto typeargs = Array::Create();
+  auto typeargs = Array::CreateVArray();
 
   auto typeEl = ta;
   while (typeEl) {
-    typeargs.add(i, Variant(typeEl->getScalarArrayRep()));
-    ++i;
+    typeargs.append(Variant(typeEl->getScalarArrayRep()));
     typeEl = typeEl->m_typeList;
   }
   return typeargs;
@@ -350,86 +355,102 @@ Array TypeAnnotation::argsListToScalarArray(TypeAnnotationPtr ta) const {
 
 void TypeAnnotation::shapeFieldsToScalarArray(Array& rep,
                                               TypeAnnotationPtr ta) const {
-  auto fields = Array::Create();
+  auto fields = Array::CreateDArray();
   auto shapeField = ta;
   while (shapeField) {
     assert(shapeField->m_typeArgs);
-    auto field = Array::Create();
-    if (shapeField->isClsCnsShapeField()) field.add(s_is_cls_cns, true_varNR);
-    field.add(s_value, Variant(shapeField->m_typeArgs->getScalarArrayRep()));
-    fields.add(String(shapeField->m_name), Variant(field.get()));
+
+    auto field = Array::CreateDArray();
+    if (shapeField->isClsCnsShapeField()) {
+      field.set(s_is_cls_cns, true_varNR.tv());
+    }
+    if (shapeField->isOptionalShapeField()) {
+      field.set(s_optional_shape_field, true_varNR.tv());
+    }
+    field.set(s_value, Variant(shapeField->m_typeArgs->getScalarArrayRep()));
+    fields.set(String(shapeField->m_name), Variant(field.get()));
     shapeField = shapeField->m_typeList;
   }
-  rep.add(s_fields, Variant(fields));
+  rep.set(s_fields, Variant(fields));
 }
 
 Array TypeAnnotation::getScalarArrayRep() const {
-  auto rep = Array::Create();
+  auto rep = Array::CreateDArray();
 
   bool nullable = (bool) m_nullable;
   if (nullable) {
-    rep.add(s_nullable, true_varNR);
+    rep.set(s_nullable, true_varNR.tv());
+  }
+
+  bool allowsUnknownFields = (bool) m_allowsUnknownFields;
+  if (allowsUnknownFields) {
+    rep.set(s_allows_unknown_fields, true_varNR.tv());
   }
 
   TypeStructure::Kind kind = getKind();
-  rep.add(s_kind, Variant(static_cast<uint8_t>(kind)));
+  rep.set(s_kind, Variant(static_cast<uint8_t>(kind)));
 
   switch (kind) {
   case TypeStructure::Kind::T_tuple:
     assert(m_typeArgs);
-    rep.add(s_elem_types, Variant(argsListToScalarArray(m_typeArgs)));
+    rep.set(s_elem_types, Variant(argsListToScalarArray(m_typeArgs)));
     break;
   case TypeStructure::Kind::T_fun:
     assert(m_typeArgs);
     // return type is the first of the typeArgs
-    rep.add(s_return_type, Variant(m_typeArgs->getScalarArrayRep()));
-    rep.add(s_param_types,
+    rep.set(s_return_type, Variant(m_typeArgs->getScalarArrayRep()));
+    rep.set(s_param_types,
             Variant(argsListToScalarArray(m_typeArgs->m_typeList)));
     break;
   case TypeStructure::Kind::T_array:
+  case TypeStructure::Kind::T_darray:
+  case TypeStructure::Kind::T_varray:
+  case TypeStructure::Kind::T_varray_or_darray:
   case TypeStructure::Kind::T_dict:
   case TypeStructure::Kind::T_vec:
+  case TypeStructure::Kind::T_vec_or_dict:
   case TypeStructure::Kind::T_keyset:
     if (m_typeArgs) {
-      rep.add(s_generic_types, Variant(argsListToScalarArray(m_typeArgs)));
+      rep.set(s_generic_types, Variant(argsListToScalarArray(m_typeArgs)));
     }
     break;
   case TypeStructure::Kind::T_shape:
     shapeFieldsToScalarArray(rep, m_typeArgs);
     break;
   case TypeStructure::Kind::T_typevar:
-    rep.add(s_name, Variant(m_name));
+    rep.set(s_name, Variant(m_name));
     break;
   case TypeStructure::Kind::T_typeaccess: {
     // for now, only store the vanilla names (strings) as part of the
     // access list
-    rep.add(s_root_name, Variant(m_name));
-    auto accList = Array::Create();
+    rep.set(s_root_name, Variant(m_name));
+    auto accList = Array::CreateVArray();
     auto typeEl = m_typeArgs;
-    int i = 0;
     while (typeEl) {
-      accList.add(i, Variant(typeEl->vanillaName()));
-      ++i;
+      accList.append(Variant(typeEl->vanillaName()));
       typeEl = typeEl->m_typeList;
     }
-    rep.add(s_access_list, Variant(accList));
+    rep.set(s_access_list, Variant(accList));
     break;
   }
   case TypeStructure::Kind::T_xhp:
-    rep.add(s_classname, Variant(m_name));
+    rep.set(s_classname, Variant(m_name));
     break;
   case TypeStructure::Kind::T_unresolved:
-    rep.add(s_classname, Variant(m_name));
+    rep.set(s_classname, Variant(m_name));
     if (m_typeArgs) {
-      rep.add(s_generic_types, Variant(argsListToScalarArray(m_typeArgs)));
+      rep.set(s_generic_types, Variant(argsListToScalarArray(m_typeArgs)));
     }
+    break;
+  case TypeStructure::Kind::T_reifiedtype:
+    rep.set(s_id, Variant(m_name));
     break;
   default:
     break;
   }
 
   if (!m_generics.empty()) {
-    rep.add(s_typevars, Variant(m_generics));
+    rep.set(s_typevars, Variant(m_generics));
   }
 
   rep.setEvalScalar();

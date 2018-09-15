@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/repo.h"
 
 #include "hphp/hhbbc/hhbbc.h"
@@ -45,66 +46,17 @@ namespace HPHP { namespace HHBBC {
 template<class Pred>
 folly::Optional<Type> eval_cell(Pred p) {
   try {
+    assert(!RuntimeOption::EvalJit);
     ThrowAllErrorsSetter taes;
 
     Cell c = p();
     if (isRefcountedType(c.m_type)) {
-      switch (c.m_type) {
-      case KindOfString:
-        {
-          if (c.m_data.pstr->size() > Repo::get().stringLengthLimit()) {
-            tvDecRef(&c);
-            return TStr;
-          }
-          auto const sstr = makeStaticString(c.m_data.pstr);
-          tvDecRef(&c);
-          c = make_tv<KindOfPersistentString>(sstr);
-        }
-        break;
-      case KindOfArray:
-        {
-          auto const sarr = ArrayData::GetScalarArray(c.m_data.parr);
-          tvDecRef(&c);
-          c = make_tv<KindOfPersistentArray>(sarr);
-        }
-        break;
-      case KindOfVec:
-        {
-          auto const sarr = ArrayData::GetScalarArray(c.m_data.parr);
-          tvDecRef(&c);
-          c = make_tv<KindOfPersistentVec>(sarr);
-        }
-        break;
-      case KindOfDict:
-        {
-          auto const sarr = ArrayData::GetScalarArray(c.m_data.parr);
-          tvDecRef(&c);
-          c = make_tv<KindOfPersistentDict>(sarr);
-        }
-        break;
-      case KindOfKeyset:
-        {
-          auto const sarr = ArrayData::GetScalarArray(c.m_data.parr);
-          tvDecRef(&c);
-          c = make_tv<KindOfPersistentKeyset>(sarr);
-        }
-        break;
-      case KindOfUninit:
-      case KindOfNull:
-      case KindOfInt64:
-      case KindOfBoolean:
-      case KindOfDouble:
-      case KindOfPersistentString:
-      case KindOfPersistentArray:
-      case KindOfPersistentVec:
-      case KindOfPersistentDict:
-      case KindOfPersistentKeyset:
-      case KindOfObject:
-      case KindOfResource:
-      case KindOfRef:
-      case KindOfClass:
-        always_assert(0 && "Impossible constant evaluation occurred");
+      if (c.m_type == KindOfString &&
+          c.m_data.pstr->size() > Repo::get().stringLengthLimit()) {
+        tvDecRefCountable(&c);
+        return TStr;
       }
+      tvAsVariant(&c).setEvalScalar();
     }
 
     /*
@@ -114,12 +66,9 @@ folly::Optional<Type> eval_cell(Pred p) {
      * to actually make these into non-reference-counted SStr or
      * SArrs.  If we leave the bytecode alone, though, it generally
      * won't actually be static at runtime.
-     *
-     * TODO(#3696042): loosen_statics here should ideally not give up
-     * on the array or string value, just its staticness.
      */
     auto const t = from_cell(c);
-    return options.ConstantProp ? t : loosen_statics(t);
+    return options.ConstantProp ? t : loosen_staticness(t);
   } catch (const Object&) {
     return folly::none;
   } catch (const std::exception&) {

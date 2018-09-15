@@ -56,6 +56,7 @@ FILE_RCSID("@(#)$File: compress.c,v 1.70 2012/11/07 17:54:48 christos Exp $")
 #include <zlib.h>
 #endif
 
+#include <folly/portability/Stdlib.h>
 #include <folly/portability/SysTime.h>
 #include <folly/portability/Unistd.h>
 
@@ -150,9 +151,8 @@ swrite(int fd, const void *buf, size_t n)
 /*
  * `safe' read for sockets and pipes.
  */
-protected ssize_t
-sread(int fd, void *buf, size_t n, int canbepipe)
-{
+protected
+ssize_t sread(int fd, void* buf, size_t n, int /*canbepipe*/) {
   ssize_t rv;
 #ifdef FIONREAD
   int t = 0;
@@ -393,14 +393,14 @@ uncompressbuf(struct magic_set *ms, int fd, size_t method,
     (void) dup(fdout[1]);
     (void) close(fdout[0]);
     (void) close(fdout[1]);
-#ifndef DEBUG
+#ifdef NDEBUG
     if (compr[method].silent)
       (void)close(2);
 #endif
 
     (void)execvp(compr[method].argv[0],
         (char *const *)(intptr_t)compr[method].argv);
-#ifdef DEBUG
+#ifndef NDEBUG
     (void)fprintf(stderr, "exec `%s' failed (%s)\n",
         compr[method].argv[0], strerror(errno));
 #endif
@@ -422,7 +422,7 @@ uncompressbuf(struct magic_set *ms, int fd, size_t method,
       case 0: /* child */
         (void)close(fdout[0]);
         if (swrite(fdin[1], old, n) != (ssize_t)n) {
-#ifdef DEBUG
+#ifndef NDEBUG
           (void)fprintf(stderr,
               "Write failed (%s)\n",
               strerror(errno));
@@ -433,7 +433,7 @@ uncompressbuf(struct magic_set *ms, int fd, size_t method,
         /*NOTREACHED*/
 
       case -1:
-#ifdef DEBUG
+#ifndef NDEBUG
         (void)fprintf(stderr, "Fork failed (%s)\n",
             strerror(errno));
 #endif
@@ -450,7 +450,7 @@ uncompressbuf(struct magic_set *ms, int fd, size_t method,
     *newch = (unsigned char *) emalloc(HOWMANY + 1);
 
     if ((r = sread(fdout[0], *newch, HOWMANY, 0)) <= 0) {
-#ifdef DEBUG
+#ifndef NDEBUG
       (void)fprintf(stderr, "Read failed (%s)\n",
           strerror(errno));
 #endif

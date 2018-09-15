@@ -2,9 +2,8 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
@@ -16,12 +15,21 @@ val of_id : id:int -> init:Errors.t -> t
 
 val get_id : t -> int
 
-val update : t -> Errors.t -> t
+val update :
+  t ->
+  priority_files:Relative_path.Set.t ->
+  reparsed:Relative_path.Set.t ->
+  rechecked:FileInfo.fast ->
+  global_errors:Errors.t ->
+  full_check_done:bool ->
+  t
 
-val file_has_errors_in_ide : t -> Relative_path.t -> bool
+val error_sources : t -> Relative_path.Set.t
 
 (* Errors ready for sending to client *)
 val pop_errors :
   t ->
-  Relative_path.Set.t -> (* edited files, so we can prioritize them *)
+  global_errors:Errors.t ->
   t * (Pos.absolute Errors.error_ list) SMap.t
+
+val get_pushed_error_length : t -> bool * int

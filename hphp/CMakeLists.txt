@@ -15,6 +15,8 @@
 #   +----------------------------------------------------------------------+
 #
 
+add_definitions("-DHHVM")
+
 if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/facebook")
   # I'm sorry, but facebook's internal repo has the top level dir stored inside
   # of hphp/, so we need to pull that one in first if it exists
@@ -26,7 +28,10 @@ if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/facebook")
   set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/facebook/CMake"
                         "${CMAKE_CURRENT_SOURCE_DIR}/public_tld/CMake"
                         ${CMAKE_MODULE_PATH})
+  include(HPHPCompiler)
 endif()
+
+include(HHVMProject)
 
 include(HHVMExtensionConfig)
 # Before we do anything else, we'll configure the extensions,
@@ -47,7 +52,7 @@ if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/facebook")
 endif()
 
 include(HPHPSetup)
-include(FollySetup)
+include(HPHPFindLibs)
 include(HHVMGenerateConfig)
 HHVM_GENERATE_CONFIG("${CMAKE_CURRENT_BINARY_DIR}/util/hphp-config.h")
 
@@ -101,10 +106,14 @@ install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/tools/oss-repo-mode
   DESTINATION bin
   COMPONENT dev)
 
-add_definitions("-DHHVM")
 add_definitions("-DUSE_CMAKE")
 
 enable_language(ASM)
+
+link_libraries(folly)
+if (NOT PCRE_LIBRARY)
+  link_libraries(pcre)
+endif()
 
 add_subdirectory(tools/hfsort)
 add_subdirectory(tools/version)
@@ -118,9 +127,13 @@ add_subdirectory(parser)
 
 add_subdirectory(runtime)
 add_subdirectory(runtime/ext)
-if (ENABLE_ZEND_COMPAT)
-  add_subdirectory(runtime/ext_zend_compat)
-endif()
+
+# The runtime/test binary require GTest and GMock to be installed globally
+option(RUNTIME_TEST_BIN "Create the HHVM runtime/test binary" OFF)
+if (RUNTIME_TEST_BIN)
+  add_subdirectory(runtime/test)
+endif ()
+
 add_subdirectory(system)
 add_subdirectory(util)
 add_subdirectory(ppc64-asm)
@@ -135,6 +148,8 @@ if (TEST_BIN)
 endif ()
 
 add_subdirectory(tools/gdb)
+
+include(test/dso_test/dso_test.cmake)
 
 # Keep this last
 add_subdirectory(tools/hphpize)

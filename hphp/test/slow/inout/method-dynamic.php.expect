@@ -1,0 +1,15 @@
+string(5) "bravo"
+string(7) "charlie"
+int(42)
+string(5) "delta"
+int(41)
+string(3) "one"
+string(3) "two"
+string(3) "two"
+string(3) "two"
+int(42)
+string(3) "Foo"
+string(3) "Bar"
+string(3) "Foo"
+string(3) "one"
+string(3) "two"

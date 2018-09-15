@@ -15,10 +15,12 @@
 */
 #include "hphp/hhbbc/class-util.h"
 
-#include "hphp/runtime/base/collections.h"
-#include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/index.h"
+#include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-system.h"
+
+#include "hphp/runtime/base/collections.h"
+#include "hphp/runtime/vm/preclass-emitter.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -29,43 +31,26 @@ namespace {
 const StaticString
   s_SimpleXMLElement("SimpleXMLElement"),
   s_Closure("Closure"),
-  s_86pinit("86pinit"),
-  s_86sinit("86sinit"),
   s_MockClass("__MockClass");
-
-bool has_magic_bool_conversion(res::Class) UNUSED;
-bool has_magic_bool_conversion(res::Class cls) {
-  return is_collection(cls) || cls.name()->isame(s_SimpleXMLElement.get());
-}
-
 }
 
 //////////////////////////////////////////////////////////////////////
+
+bool has_magic_bool_conversion(SString clsName) {
+  return
+    collections::isTypeName(clsName) ||
+    clsName->isame(s_SimpleXMLElement.get());
+}
 
 bool is_collection(res::Class cls) {
   auto const name = cls.name();
   return collections::isTypeName(name);
 }
 
-bool could_have_magic_bool_conversion(Type t) {
-  if (!t.couldBe(TObj)) return false;
-  // TODO(#3499765): we need to handle interfaces that the collection
-  // classes implement before we can ever return false here.
-  // Note: exclude s_Pair if we re-enable this.
-  // if (t.strictSubtypeOf(TObj)) {
-  //   return has_magic_bool_conversion(dobj_of(t).cls);
-  // }
-  // if (is_opt(t) && unopt(t).strictSubtypeOf(TObj)) {
-  //   return has_magic_bool_conversion(dobj_of(t).cls);
-  // }
-  return true;
-}
-
-borrowed_ptr<php::Func> find_method(borrowed_ptr<const php::Class> cls,
-                                    SString name) {
+php::Func* find_method(const php::Class* cls, SString name) {
   for (auto& m : cls->methods) {
     if (m->name->isame(name)) {
-      return borrow(m);
+      return m.get();
     }
   }
   return nullptr;
@@ -76,12 +61,44 @@ bool is_special_method_name(SString name) {
   return p && p[0] == '8' && p[1] == '6';
 }
 
-bool is_mock_class(borrowed_ptr<const php::Class> cls) {
+bool is_mock_class(const php::Class* cls) {
   return cls->userAttributes.count(s_MockClass.get());
 }
 
 bool is_closure(const php::Class& c) {
   return c.parentName && c.parentName->isame(s_Closure.get());
+}
+
+bool is_unused_trait(const php::Class& c) {
+  return
+    (c.attrs & (AttrTrait | AttrNoOverride)) == (AttrTrait | AttrNoOverride);
+}
+
+bool is_used_trait(const php::Class& c) {
+  return
+    (c.attrs & (AttrTrait | AttrNoOverride)) == AttrTrait;
+}
+
+std::string normalized_class_name(const php::Class& cls) {
+  auto const name = cls.name->toCppString();
+  if (!PreClassEmitter::IsAnonymousClassName(name)) return name;
+  return name.substr(0, name.find_last_of(';'));
+}
+
+//////////////////////////////////////////////////////////////////////
+
+namespace php {
+
+//////////////////////////////////////////////////////////////////////
+
+ClassBase::ClassBase(const ClassBase& other) {
+  for (auto& m : other.methods) {
+    methods.push_back(std::make_unique<php::Func>(*m));
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/vm/class.h"
 
@@ -54,18 +55,56 @@ IMPL_OPCODE_CALL(AllocObj)
 void cgNewInstanceRaw(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const cls = inst->extra<NewInstanceRaw>()->cls;
-  auto const size = ObjectData::sizeForNProps(cls->numDeclProperties());
 
-  auto const callSpec = size <= kMaxSmallSize
-    ? CallSpec::direct(ObjectData::newInstanceRaw)
-    : CallSpec::direct(ObjectData::newInstanceRawBig);
+  assertx(!cls->getNativeDataInfo());
+  auto const memoSize =
+    cls->hasMemoSlots() ? ObjectData::objOffFromMemoNode(cls) : 0;
+  auto const size =
+    ObjectData::sizeForNProps(cls->numDeclProperties()) + memoSize;
+  auto const index = MemoryManager::size2Index(size);
+  auto const size_class = MemoryManager::sizeIndex2Size(index);
 
-  auto const args = argGroup(env, inst)
-    .imm(reinterpret_cast<uintptr_t>(cls))
-    .imm(size);
+  auto const attrs = cls->getODAttrs();
 
-  cgCallHelper(vmain(env), env, callSpec,
-               callDest(dst), SyncOptions::Sync, args);
+  auto const target = [&]{
+    if (attrs != ObjectData::DefaultAttrs) {
+      if (memoSize > 0) {
+        return size <= kMaxSmallSize
+          ? CallSpec::direct(&ObjectData::newInstanceRawMemoAttrsSmall)
+          : CallSpec::direct(&ObjectData::newInstanceRawMemoAttrsBig);
+      } else {
+        return size <= kMaxSmallSize
+          ? CallSpec::direct(&ObjectData::newInstanceRawAttrsSmall)
+          : CallSpec::direct(&ObjectData::newInstanceRawAttrsBig);
+      }
+    }
+
+    if (memoSize > 0) {
+      return size <= kMaxSmallSize
+        ? CallSpec::direct(&ObjectData::newInstanceRawMemoSmall)
+        : CallSpec::direct(&ObjectData::newInstanceRawMemoBig);
+    } else {
+      return size <= kMaxSmallSize
+        ? CallSpec::direct(&ObjectData::newInstanceRawSmall)
+        : CallSpec::direct(&ObjectData::newInstanceRawBig);
+    }
+  }();
+
+  auto args = argGroup(env, inst).immPtr(cls);
+  size <= kMaxSmallSize
+    ? args.imm(size_class).imm(index)
+    : args.imm(size);
+  if (memoSize > 0) args.imm(memoSize);
+  if (attrs != ObjectData::DefaultAttrs) args.imm(attrs);
+
+  cgCallHelper(
+    vmain(env),
+    env,
+    target,
+    callDest(dst),
+    SyncOptions::Sync,
+    args
+  );
 }
 
 void cgConstructInstance(IRLS& env, const IRInstruction* inst) {
@@ -95,7 +134,8 @@ void implInitObjPropsFast(Vout& v, IRLS& env, const IRInstruction* inst,
       if (!isNullType(initTV.m_type)) {
         emitImmStoreq(v, initTV.m_data.num, dst[propOffset + TVOFF(m_data)]);
       }
-      v << storebi{initTV.m_type, dst[propOffset + TVOFF(m_type)]};
+      v << storebi{static_cast<data_type_t>(initTV.m_type),
+                   dst[propOffset + TVOFF(m_type)]};
     }
     return;
   }
@@ -110,6 +150,30 @@ void implInitObjPropsFast(Vout& v, IRLS& env, const IRInstruction* inst,
                kVoidDest, SyncOptions::None, args);
 }
 
+void implInitObjMemoSlots(Vout& v, IRLS& env, const IRInstruction* inst,
+                          const Class* cls, Vreg obj) {
+  assertx(cls->hasMemoSlots());
+  assertx(!cls->getNativeDataInfo());
+
+  auto const nslots = cls->numMemoSlots();
+  if (nslots < 8) {
+    for (Slot i = 0; i < nslots; ++i) {
+      static_assert(sizeof(MemoSlot) == 16, "");
+      auto const offset = -(sizeof(MemoSlot) * (nslots - i));
+      emitImmStoreq(v, 0, obj[offset]);
+      emitImmStoreq(v, 0, obj[offset+8]);
+    }
+    return;
+  }
+
+  auto const args = argGroup(env, inst)
+    .addr(obj, -safe_cast<int32_t>(sizeof(MemoSlot) * nslots))
+    .imm(0)
+    .imm(sizeof(MemoSlot) * nslots);
+  cgCallHelper(v, env, CallSpec::direct(memset),
+               kVoidDest, SyncOptions::None, args);
+}
+
 }
 
 void cgInitObjProps(IRLS& env, const IRInstruction* inst) {
@@ -117,14 +181,7 @@ void cgInitObjProps(IRLS& env, const IRInstruction* inst) {
   auto const obj = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
-  // Set the attributes, if any.
-  auto const odAttrs = cls->getODAttrs();
-  if (odAttrs) {
-    static_assert(sizeof(ObjectData::Attribute) == 2,
-                  "Codegen expects 2-byte ObjectData attributes");
-    assertx(!(odAttrs & 0xffff0000));
-    v << orwim{odAttrs, obj[ObjectData::attributeOff()], v.makeReg()};
-  }
+  if (cls->hasMemoSlots()) implInitObjMemoSlots(v, env, inst, cls, obj);
 
   // Initialize the properties.
   auto const nprops = cls->numDeclProperties();

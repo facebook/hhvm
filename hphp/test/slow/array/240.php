@@ -5,18 +5,18 @@ class A {
     foreach ($args as $a) {
  var_dump($a);
  }
-    var_dump(array_pop($args));
+    var_dump(array_pop(&$args));
     if (isset($args[1])) {
  var_dump($args[1]);
  }
-    reset($args);
-    if (key($args) === 0) {
+    reset(&$args);
+    if (key(&$args) === 0) {
        $args = array(5);
     }
-    if (current($args) === 0) {
+    if (current(&$args) === 0) {
        $args = array(5);
     }
-    if (next($args) === 0) {
+    if (next(&$args) === 0) {
        $args = array(5);
     }
     var_dump($args['1']);
@@ -25,5 +25,9 @@ class A {
      var_dump($args);
   }
 }
+
+<<__EntryPoint>>
+function main_240() {
 $obj = new A;
 $obj->foo(1, 2, 3);
+}

@@ -1,0 +1,1 @@
+Fatal error: You may not use static properties in a class with reified type parameters in %s on line 4

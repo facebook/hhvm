@@ -12,8 +12,11 @@ class MyElement extends DOMElement {
   }
 }
 
+
 // Custom doc
 
+<<__EntryPoint>>
+function main_native_magic_props_dom() {
 $doc = new MyDocument();
 var_dump($doc->version); // native
 var_dump($doc->nonExisting); // user
@@ -53,3 +56,4 @@ $xpath = new DOMXpath($doc);
 var_dump($xpath->document->doctype->name);
 $elements = $xpath->query("//*[@id]");
 var_dump($elements->length);
+}

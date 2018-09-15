@@ -6,7 +6,7 @@ function h1(&$arr, $i) {
     echo "i=$i key=$k\n";
     if ($k == 0) {
       if ($i > 0) {
-        foreach (h1($arr, $i-1) as $_) {
+        foreach (h1(&$arr, $i-1) as $_) {
 }
       }
  else if ($i == 0) {
@@ -15,9 +15,13 @@ function h1(&$arr, $i) {
       }
     }
   }
-  end($arr);
+  end(&$arr);
 }
+
+<<__EntryPoint>>
+function main_490() {
 $arr = array('a','b','c');
-foreach (h1($arr, 10) as $_) {
+foreach (h1(&$arr, 10) as $_) {
 }
 var_dump($arr);
+}

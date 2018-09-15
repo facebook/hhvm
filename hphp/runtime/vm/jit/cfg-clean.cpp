@@ -44,9 +44,7 @@ bool convertCondBranchToJmp(IRUnit& unit, Block* block) {
                CheckMBase,
                CheckInit,
                CheckInitMem,
-               CheckInitProps,
-               CheckInitSProps,
-               CheckClosureStaticLocInit,
+               CheckRDSInitialized,
                CheckRefInner,
                CheckCtxThis,
                CheckFuncStatic)) {
@@ -80,7 +78,7 @@ bool convertCondBranchToJmp(IRUnit& unit, Block* block) {
   }
 
   if (isUnconditional) {
-    assert(takenBlk);
+    assertx(takenBlk);
     auto const bcctx = term.bcctx();
     term.convertToNop();                // Removes edges to original dests.
     block->push_back(unit.gen(Jmp, bcctx, takenBlk));
@@ -238,6 +236,7 @@ bool collapseDiamond(IRUnit& unit, Block* block) {
  * (2) merge the block with its unique successor block, if it is the unique
  *     predecessor of its successor;
  * (3) fold Jmps, if it fits the Jmp -> Jmp|Jcc or Jcc -> Jmp pattern.
+ * (4) convert control flow diamonds to Select instructions
  *
  * The reverse post order is not essential to the transformation; in the current
  * implementation it helps skipping some blocks after a change happens.

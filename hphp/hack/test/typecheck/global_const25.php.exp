@@ -1,1 +1,2 @@
-No errors
+File "global_const25.php", line 3, characters 1-39:
+No code may exist outside of namespace {} (Parsing[1002])

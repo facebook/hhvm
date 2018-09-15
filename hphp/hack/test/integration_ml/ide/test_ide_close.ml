@@ -2,9 +2,9 @@
  * Copyright (c) 2016, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
  *
  *)
 
@@ -44,19 +44,19 @@ It is incompatible with an int
 "
 
 let foo_ide_contents =
-"<?hh // strict
+"<?hh
 
 {
 "
 
 let foo_ide_errors = "
-File \"/foo.php\", line 4, characters 1-0:
-Expected } (Parsing[1002])
+File \"/foo.php\", line 3, characters 2-2:
+A right brace ('}') is expected here. (Parsing[1002])
 "
 let foo_ide_diagnostics = "
 /foo.php:
-File \"/foo.php\", line 4, characters 1-0:
-Expected } (Parsing[1002])
+File \"/foo.php\", line 3, characters 2-2:
+A right brace ('}') is expected here. (Parsing[1002])
 "
 
 let () =

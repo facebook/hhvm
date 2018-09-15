@@ -1,0 +1,21 @@
+diff --git a/heredoc_strings.php b/heredoc_strings.php
+--- a/heredoc_strings.php
++++ b/heredoc_strings.php
+@@ -4,6 +4,8 @@
+ $title2 = "FISH?";
+
+ $silverstein = <<<EOF
++{$title1}
++
+ I tripped on my shoelace
+ And I fell up--
+ Up to the roof tops,
+@@ -17,6 +19,8 @@
+ I got sick to my stomach
+ And I threw down.
+
++{$title2}
++
+ The little fish eats the tiny fish,
+ The big fish eats the little fish--
+ So only the biggest fish gets fat.

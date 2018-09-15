@@ -1,0 +1,32 @@
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  string(3) "two"
+  [2]=>
+  array(1) {
+    [0]=>
+    int(3)
+  }
+}
+NULL
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  dict(1) {
+    ["b"]=>
+    string(1) "c"
+  }
+}
+NULL
+array(2) {
+  [0]=>
+  string(7) "promote"
+  [1]=>
+  vec(1) {
+    string(2) "me"
+  }
+}
+NULL
+NULL

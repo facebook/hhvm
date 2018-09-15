@@ -152,16 +152,56 @@ struct RequestInjectionData {
   void setFlag(SurpriseFlag);
 
   /*
+   * Flags for rquest-level OOM killer.  The `m_hostOutOfMemory` flag is set on
+   * all requests when host is low in memory, which triggers a memory check upon
+   * checking surprise flags.  The `m_OOMAbort` is set when we decide to kill
+   * the request.
+   */
+  void setHostOOMFlag() {
+    m_hostOutOfMemory.store(true, std::memory_order_release);
+    setFlag(MemExceededFlag);
+  }
+  void clearHostOOMFlag() {
+    clearFlag(MemExceededFlag);
+    m_hostOutOfMemory.store(false, std::memory_order_relaxed);
+  }
+  bool hostOOMFlag() const {
+    return m_hostOutOfMemory.load(std::memory_order_acquire);
+  }
+  void setRequestOOMAbort() {
+    m_OOMAbort = true;
+  }
+  bool shouldOOMAbort() const {
+    return m_OOMAbort;
+  }
+
+  /*
    * Whether the JIT is enabled.
    */
   bool getJit() const;
   void updateJit();
 
   /*
+   * Whether jitting is disabled.
+   *
+   * This is distinct from getJit(), in that it allows us to _run_ jitted code,
+   * but not to _compile_ it.  Also, the restriction applies only to jitting
+   * new code; optimizing retranslations is not affected.
+   */
+  bool isJittingDisabled() const;
+  void setJittingDisabled(bool);
+
+  /*
    * Whether the JIT is performing function folding.
    */
   bool getJitFolding() const;
   void setJitFolding(bool);
+
+  /*
+   * Whether to suppress the emission of Hack array compat notices.
+   */
+  bool getSuppressHackArrayCompatNotices() const;
+  void setSuppressHackArrayCompatNotices(bool);
 
   /*
    * Whether coverage is being collected.
@@ -267,9 +307,14 @@ struct RequestInjectionData {
 
   const std::vector<std::string>& getAllowedDirectoriesProcessed() const;
 
+  // When safe file access is enabled only whitelisted by setAllowedDirectories
+  // may be modified
+  void setSafeFileAccess(bool b);
   bool hasSafeFileAccess() const;
   bool hasTrackErrors() const;
   bool hasHtmlErrors() const;
+
+  bool logFunctionCalls() const;
 
 private:
   RequestTimer m_timer;
@@ -278,8 +323,10 @@ private:
   bool m_debuggerAttached{false};
   bool m_coverage{false};
   bool m_jit{false};
+  bool m_jittingDisabled{false};
   bool m_jitFolding{false};
   bool m_debuggerIntr{false};
+  bool m_suppressHackArrayCompatNotices{false};
 
   bool m_debuggerStepIn{false};
   bool m_debuggerNext{false};
@@ -302,6 +349,18 @@ private:
   bool m_trackErrors{false};
   bool m_htmlErrors{false};
   bool m_safeFileAccess{false};
+  bool m_logFunctionCalls{false};
+
+  /*
+   * `m_hostOutOfMemory` is a flag used together with MemExceededFlag, to
+   * indicate whether the host is running low on memory.  Note that the presence
+   * of this flag doesn't necessarily lead to the request being aborted.  A
+   * request is only affected when it satisfies some other criteria, e.g., when
+   * it uses more memory than RequestMemoryOOMKillBytes.  If we do decide to
+   * abort the request, `m_OOMAbort` is set.
+   */
+  std::atomic<bool> m_hostOutOfMemory{false};
+  bool m_OOMAbort{false};
 
   /* Pointer to surprise flags stored in RDS. */
   std::atomic<size_t>* m_sflagsAndStkPtr{nullptr};
@@ -319,6 +378,7 @@ private:
   std::string m_defaultMimeType;
   std::string m_brotliEnabled;
   std::string m_brotliChunkedEnabled;
+  std::string m_zstdEnabled;
   std::string m_gzipCompressionLevel = "-1";
   std::string m_gzipCompression;
   std::string m_errorLog;
@@ -339,6 +399,7 @@ private:
   int64_t m_zendAssertions;
   int64_t m_brotliLgWindowSize;
   int64_t m_brotliQuality;
+  int64_t m_zstdLevel;
 
   /*
    * Keep track of the open_basedir_separator that may be used so we can

@@ -1,6 +1,6 @@
 File "xor_bad2.php", line 13, characters 3-9:
 Typing error (Typing[4110])
 File "xor_bad2.php", line 13, characters 3-4:
-This is a bool because this is the result of a logical operation
-File "xor_bad2.php", line 12, characters 23-25:
-It is incompatible with an int
+This is an int because this is used in a bitwise operation
+File "xor_bad2.php", line 12, characters 14-17:
+It is incompatible with a bool

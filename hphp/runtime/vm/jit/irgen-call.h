@@ -37,13 +37,18 @@ struct IRGS;
 void fpushActRec(IRGS& env,
                  SSATmp* func,
                  SSATmp* objOrClass,
-                 int32_t numArgs,
-                 const StringData* invName);
+                 uint32_t numArgs,
+                 const StringData* invName,
+                 SSATmp* dynamicCall);
 
-void emitDirectCall(IRGS& env, Func* callee, int32_t numParams,
+void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
                     SSATmp* const* const args);
 
-SSATmp* implFCall(IRGS& env, int32_t numParams);
+SSATmp* implFCall(IRGS& env, uint32_t numParams, bool unpack, uint32_t numOut);
+
+void emitCallerDynamicCallChecks(IRGS& env,
+                                 const Func* callee,
+                                 uint32_t numParams);
 
 Type callReturnType(const Func* callee);
 

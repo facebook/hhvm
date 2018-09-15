@@ -46,36 +46,20 @@ String HHVM_FUNCTION(fb_utf8_substr, const String& str,
 Variant HHVM_FUNCTION(fb_get_code_coverage, bool flush);
 void HHVM_FUNCTION(fb_enable_code_coverage);
 Variant HHVM_FUNCTION(fb_disable_code_coverage);
+Variant HHVM_FUNCTION(HH_disable_code_coverage_with_frequency);
 bool HHVM_FUNCTION(fb_output_compression, bool new_value);
 void HHVM_FUNCTION(fb_set_exit_callback, const Variant& function);
 int64_t HHVM_FUNCTION(fb_get_last_flush_size);
 Variant HHVM_FUNCTION(fb_lazy_lstat, const String& filename);
 Variant HHVM_FUNCTION(fb_lazy_realpath, const String& filename);
 
-Array HHVM_FUNCTION(fb_call_user_func_safe,
-                    const Variant& function,
-                    const Array& argv);
-Variant HHVM_FUNCTION(fb_call_user_func_safe_return,
-                      const Variant& function,
-                      const Variant& def,
-                      const Array& argv);
-Array HHVM_FUNCTION(fb_call_user_func_array_safe,
-                    const Variant& function,
-                    const Array& params);
-
 ///////////////////////////////////////////////////////////////////////////////
-
-enum FBCompactSerializeBehavior {
-  Base,
-  MemoizeParam,
-};
 
 Variant fb_unserialize(const char* str,
                        int len,
                        VRefParam success,
                        int64_t options);
-String fb_compact_serialize(const Variant& thing,
-                            FBCompactSerializeBehavior behavior);
+String fb_compact_serialize(const Variant& thing);
 Variant fb_compact_unserialize(const char* str, int len,
                                VRefParam success,
                                VRefParam errcode = uninit_variant);

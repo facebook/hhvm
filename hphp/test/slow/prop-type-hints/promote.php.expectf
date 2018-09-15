@@ -1,0 +1,239 @@
+Warning: Property 'A::a1' declared as type ?int, array assigned in %s/promote.php on line 126
+
+Warning: Property 'A::a2' declared as type ?int, array assigned in %s/promote.php on line 127
+
+Warning: Property 'A::a3' declared as type ?int, array assigned in %s/promote.php on line 128
+
+Warning: Property 'A::a4' declared as type ?int, array assigned in %s/promote.php on line 129
+
+Warning: Property 'A::a5' declared as type ?int, array assigned in %s/promote.php on line 130
+
+Warning: Property 'A::a6' declared as type ?int, array assigned in %s/promote.php on line 131
+
+Warning: Property 'A::a7' declared as type ?int, array assigned in %s/promote.php on line 132
+
+Warning: Property 'A::a8' declared as type ?int, array assigned in %s/promote.php on line 133
+
+Warning: Property 'A::b1' declared as type string, array assigned in %s/promote.php on line 135
+
+Warning: Property 'A::b2' declared as type string, array assigned in %s/promote.php on line 136
+
+Warning: Property 'A::b3' declared as type string, array assigned in %s/promote.php on line 137
+
+Warning: Property 'A::b4' declared as type string, array assigned in %s/promote.php on line 138
+
+Warning: Property 'A::b5' declared as type string, array assigned in %s/promote.php on line 139
+
+Warning: Property 'A::b6' declared as type string, array assigned in %s/promote.php on line 140
+
+Warning: Property 'A::b7' declared as type string, array assigned in %s/promote.php on line 141
+
+Warning: Property 'A::b8' declared as type string, array assigned in %s/promote.php on line 142
+
+Warning: Property 'A::c1' declared as type bool, array assigned in %s/promote.php on line 144
+
+Warning: Property 'A::c2' declared as type bool, array assigned in %s/promote.php on line 145
+
+Warning: Property 'A::c3' declared as type bool, array assigned in %s/promote.php on line 146
+
+Warning: Property 'A::c4' declared as type bool, array assigned in %s/promote.php on line 147
+
+Warning: Property 'A::c5' declared as type bool, array assigned in %s/promote.php on line 148
+
+Warning: Property 'A::c6' declared as type bool, array assigned in %s/promote.php on line 149
+
+Warning: Property 'A::c7' declared as type bool, array assigned in %s/promote.php on line 150
+
+Warning: Property 'A::c8' declared as type bool, array assigned in %s/promote.php on line 151
+
+Warning: Static property 'A::k1' declared as type ?int, array assigned in %s/promote.php on line 162
+
+Warning: Static property 'A::k2' declared as type ?int, array assigned in %s/promote.php on line 163
+
+Warning: Static property 'A::k3' declared as type ?int, array assigned in %s/promote.php on line 164
+
+Warning: Static property 'A::k4' declared as type ?int, array assigned in %s/promote.php on line 165
+
+Warning: Static property 'A::k5' declared as type ?int, array assigned in %s/promote.php on line 166
+
+Warning: Static property 'A::k6' declared as type ?int, array assigned in %s/promote.php on line 167
+
+Warning: Static property 'A::k7' declared as type ?int, array assigned in %s/promote.php on line 168
+
+Warning: Static property 'A::k8' declared as type ?int, array assigned in %s/promote.php on line 169
+
+Warning: Static property 'A::l1' declared as type string, array assigned in %s/promote.php on line 171
+
+Warning: Static property 'A::l2' declared as type string, array assigned in %s/promote.php on line 172
+
+Warning: Static property 'A::l3' declared as type string, array assigned in %s/promote.php on line 173
+
+Warning: Static property 'A::l4' declared as type string, array assigned in %s/promote.php on line 174
+
+Warning: Static property 'A::l5' declared as type string, array assigned in %s/promote.php on line 175
+
+Warning: Static property 'A::l6' declared as type string, array assigned in %s/promote.php on line 176
+
+Warning: Static property 'A::l7' declared as type string, array assigned in %s/promote.php on line 177
+
+Warning: Static property 'A::l8' declared as type string, array assigned in %s/promote.php on line 178
+
+Warning: Static property 'A::m1' declared as type bool, array assigned in %s/promote.php on line 180
+
+Warning: Static property 'A::m2' declared as type bool, array assigned in %s/promote.php on line 181
+
+Warning: Static property 'A::m3' declared as type bool, array assigned in %s/promote.php on line 182
+
+Warning: Static property 'A::m4' declared as type bool, array assigned in %s/promote.php on line 183
+
+Warning: Static property 'A::m5' declared as type bool, array assigned in %s/promote.php on line 184
+
+Warning: Static property 'A::m6' declared as type bool, array assigned in %s/promote.php on line 185
+
+Warning: Static property 'A::m7' declared as type bool, array assigned in %s/promote.php on line 186
+
+Warning: Static property 'A::m8' declared as type bool, array assigned in %s/promote.php on line 187
+
+Warning: Property 'A::a1' declared as type ?int, stdClass assigned in %s/promote.php on line 200
+
+Warning: Creating default object from empty value in %s/promote.php on line 200
+
+Warning: Property 'A::a2' declared as type ?int, stdClass assigned in %s/promote.php on line 201
+
+Warning: Creating default object from empty value in %s/promote.php on line 201
+
+Warning: Property 'A::a3' declared as type ?int, stdClass assigned in %s/promote.php on line 202
+
+Warning: Creating default object from empty value in %s/promote.php on line 202
+
+Warning: Property 'A::a4' declared as type ?int, stdClass assigned in %s/promote.php on line 203
+
+Warning: Creating default object from empty value in %s/promote.php on line 203
+
+Warning: Property 'A::b1' declared as type string, stdClass assigned in %s/promote.php on line 205
+
+Warning: Creating default object from empty value in %s/promote.php on line 205
+
+Warning: Property 'A::b2' declared as type string, stdClass assigned in %s/promote.php on line 206
+
+Warning: Creating default object from empty value in %s/promote.php on line 206
+
+Warning: Property 'A::b3' declared as type string, stdClass assigned in %s/promote.php on line 207
+
+Warning: Creating default object from empty value in %s/promote.php on line 207
+
+Warning: Property 'A::b4' declared as type string, stdClass assigned in %s/promote.php on line 208
+
+Warning: Creating default object from empty value in %s/promote.php on line 208
+
+Warning: Property 'A::c1' declared as type bool, stdClass assigned in %s/promote.php on line 210
+
+Warning: Creating default object from empty value in %s/promote.php on line 210
+
+Warning: Property 'A::c2' declared as type bool, stdClass assigned in %s/promote.php on line 211
+
+Warning: Creating default object from empty value in %s/promote.php on line 211
+
+Warning: Property 'A::c3' declared as type bool, stdClass assigned in %s/promote.php on line 212
+
+Warning: Creating default object from empty value in %s/promote.php on line 212
+
+Warning: Property 'A::c4' declared as type bool, stdClass assigned in %s/promote.php on line 213
+
+Warning: Creating default object from empty value in %s/promote.php on line 213
+
+Warning: Property 'A::d1' declared as type ?HH\arraylike, stdClass assigned in %s/promote.php on line 215
+
+Warning: Creating default object from empty value in %s/promote.php on line 215
+
+Warning: Property 'A::d2' declared as type ?HH\arraylike, stdClass assigned in %s/promote.php on line 216
+
+Warning: Creating default object from empty value in %s/promote.php on line 216
+
+Warning: Property 'A::d3' declared as type ?HH\arraylike, stdClass assigned in %s/promote.php on line 217
+
+Warning: Creating default object from empty value in %s/promote.php on line 217
+
+Warning: Property 'A::d4' declared as type ?HH\arraylike, stdClass assigned in %s/promote.php on line 218
+
+Warning: Creating default object from empty value in %s/promote.php on line 218
+
+Warning: Creating default object from empty value in %s/promote.php on line 220
+
+Warning: Creating default object from empty value in %s/promote.php on line 221
+
+Warning: Creating default object from empty value in %s/promote.php on line 222
+
+Warning: Creating default object from empty value in %s/promote.php on line 223
+
+Warning: Static property 'A::f1' declared as type ?int, stdClass assigned in %s/promote.php on line 225
+
+Warning: Creating default object from empty value in %s/promote.php on line 225
+
+Warning: Static property 'A::f2' declared as type ?int, stdClass assigned in %s/promote.php on line 226
+
+Warning: Creating default object from empty value in %s/promote.php on line 226
+
+Warning: Static property 'A::f3' declared as type ?int, stdClass assigned in %s/promote.php on line 227
+
+Warning: Creating default object from empty value in %s/promote.php on line 227
+
+Warning: Static property 'A::f4' declared as type ?int, stdClass assigned in %s/promote.php on line 228
+
+Warning: Creating default object from empty value in %s/promote.php on line 228
+
+Warning: Static property 'A::g1' declared as type string, stdClass assigned in %s/promote.php on line 230
+
+Warning: Creating default object from empty value in %s/promote.php on line 230
+
+Warning: Static property 'A::g2' declared as type string, stdClass assigned in %s/promote.php on line 231
+
+Warning: Creating default object from empty value in %s/promote.php on line 231
+
+Warning: Static property 'A::g3' declared as type string, stdClass assigned in %s/promote.php on line 232
+
+Warning: Creating default object from empty value in %s/promote.php on line 232
+
+Warning: Static property 'A::g4' declared as type string, stdClass assigned in %s/promote.php on line 233
+
+Warning: Creating default object from empty value in %s/promote.php on line 233
+
+Warning: Static property 'A::h1' declared as type bool, stdClass assigned in %s/promote.php on line 235
+
+Warning: Creating default object from empty value in %s/promote.php on line 235
+
+Warning: Static property 'A::h2' declared as type bool, stdClass assigned in %s/promote.php on line 236
+
+Warning: Creating default object from empty value in %s/promote.php on line 236
+
+Warning: Static property 'A::h3' declared as type bool, stdClass assigned in %s/promote.php on line 237
+
+Warning: Creating default object from empty value in %s/promote.php on line 237
+
+Warning: Static property 'A::h4' declared as type bool, stdClass assigned in %s/promote.php on line 238
+
+Warning: Creating default object from empty value in %s/promote.php on line 238
+
+Warning: Static property 'A::i1' declared as type ?HH\arraylike, stdClass assigned in %s/promote.php on line 240
+
+Warning: Creating default object from empty value in %s/promote.php on line 240
+
+Warning: Static property 'A::i2' declared as type ?HH\arraylike, stdClass assigned in %s/promote.php on line 241
+
+Warning: Creating default object from empty value in %s/promote.php on line 241
+
+Warning: Static property 'A::i3' declared as type ?HH\arraylike, stdClass assigned in %s/promote.php on line 242
+
+Warning: Creating default object from empty value in %s/promote.php on line 242
+
+Warning: Static property 'A::i4' declared as type ?HH\arraylike, stdClass assigned in %s/promote.php on line 243
+
+Warning: Creating default object from empty value in %s/promote.php on line 243
+
+Warning: Creating default object from empty value in %s/promote.php on line 245
+
+Warning: Creating default object from empty value in %s/promote.php on line 246
+
+Warning: Creating default object from empty value in %s/promote.php on line 247
+
+Warning: Creating default object from empty value in %s/promote.php on line 248

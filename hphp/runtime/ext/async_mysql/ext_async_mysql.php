@@ -133,6 +133,45 @@ final class AsyncMysqlClient {
                                         ): Awaitable<AsyncMysqlConnection>;
 
   /**
+   * Begin an async connection and query  to a MySQL instance.
+   *
+   * Use this to asynchronously connect and query a MySQL instance.
+   *
+   * Normally you would use this to make one query to the
+   * MySQL client.
+   *
+   * If you want to be able to reuse the connection use connect or
+   * connectWithOpts
+   *
+   * @param $host - The hostname to connect to.
+   * @param $port - The port to connect to.
+   * @param $dbname - The initial database to use when connecting.
+   * @param $user - The user to connect as.
+   * @param $password - The password to connect with.
+   * @param $connection_options - A set of options used for connection.
+   * @param $query_attributes - Query attributes. Empty by default.
+   *
+   * @return - an `Awaitable` representing the result of your connect and query
+   * This is a tuple where the latter contains information about the connection
+   * retrieval, and the former has the query results
+   */
+  <<__HipHopSpecific, __Native>>
+    public static function connectAndQuery(
+                                        arraylike<arraykey, string> $queries,
+                                        string $host,
+                                        int $port,
+                                        string $dbname,
+                                        string $user,
+                                        string $password,
+                                        AsyncMysqlConnectionOptions $conn_opts,
+                                        dict<string, string> $query_attributes
+                                            = dict[],
+                                      ): Awaitable<(
+                                          AsyncMysqlConnectResult,
+                                          Vector<AsyncMysqlQueryResult>
+                                      )>;
+
+  /**
    * Create a new async connection from a synchronous MySQL instance.
    *
    * This is a synchronous function. You will block until the connection has
@@ -212,7 +251,7 @@ class AsyncMysqlConnectionPool {
    *                        depending on the option.
    */
   <<__Native>>
-  public function __construct(array $pool_options): void;
+  public function __construct(darray<string, mixed> $pool_options): void;
 
   /**
    * Returns statistical information for the current pool.
@@ -231,7 +270,7 @@ class AsyncMysqlConnectionPool {
    * @return - A string-keyed `array` with the statistical information above.
    */
   <<__HipHopSpecific, __Native>>
-  public function getPoolStats(): array;
+  public function getPoolStats(): darray<string, mixed>;
 
   /**
    * Begin an async connection to a MySQL instance.
@@ -308,6 +347,7 @@ final class AsyncMysqlConnection {
    * @param $timeout_micros - The maximum time, in microseconds, in which the
    *                          query must be completed; -1 for default, 0 for
    *                          no timeout.
+   * @param $query_attributes - Query attributes. Empty by default.
    *
    * @return - an `Awaitable` representing the result of your query. Use
    *           `await` or `join` to get the actual `AsyncMysqlQueryResult`
@@ -315,7 +355,9 @@ final class AsyncMysqlConnection {
    */
   <<__HipHopSpecific, __Native>>
     function query(string $query,
-                   int $timeout_micros = -1): Awaitable<AsyncMysqlQueryResult>;
+                  int $timeout_micros = -1,
+                  dict<string, string> $query_attributes = dict[],
+                  ): Awaitable<AsyncMysqlQueryResult>;
 
   /**
    * Execute a query with placeholders and parameters.
@@ -382,15 +424,17 @@ final class AsyncMysqlConnection {
    * @param $timeout_micros - The maximum time, in microseconds, in which the
    *                          query must be completed; -1 for default, 0 for
    *                          no timeout.
+   * @param $query_attributes - Query attributes. Empty by default.
    *
    * @return - an `Awaitable` representing the result of your multi-query. Use
    *           `await` or `join` to get the actual `Vector` of
    *           `AsyncMysqlQueryResult` objects.
    */
   <<__HipHopSpecific, __Native>>
-  function multiQuery(
-    array $queries,
-    int $timeout_micros = -1): Awaitable<Vector<AsyncMysqlQueryResult>>;
+  function multiQuery(arraylike<arraykey, mixed> $queries,
+                      int $timeout_micros = -1,
+                      dict<string, string> $query_attributes = dict[],
+                      ): Awaitable<Vector<AsyncMysqlQueryResult>>;
 
   /**
    * Escape a string to be safe to include in a raw query.
@@ -614,7 +658,7 @@ class AsyncMysqlConnectionOptions {
   // Sets a map of connection attributes that will be sent to Mysql in the
   // Connection Attributes Handshake field
   <<__HipHopSpecific, __Native>>
-  public function setConnectionAttributes(array<string,string> $attrs): void;
+  public function setConnectionAttributes(darray<string,string> $attrs): void;
 
   // SSL Configuration if SSL is to be used for connection
   <<__HipHopSpecific, __Native>>
@@ -1171,6 +1215,26 @@ final class AsyncMysqlQueryResult extends AsyncMysqlResult {
    */
   <<__HipHopSpecific, __Native>>
   function rowBlocks(): Vector<AsyncMysqlRowBlock>;
+
+  /**
+   * Returns whether or not any of the queries executed did not use an index
+   * during execution
+   *
+   * @return - 'true' if no index was used for any of the queries executed,
+   *              'false' otherwise
+   */
+  <<__HipHopSpecific, __Native>>
+  function noIndexUsed(): bool;
+
+  /**
+   * The GTID of database returned for the current commit.
+   *
+   * This is particularly useful for `INSERT`, `DELETE`, `UPDATE` statements.
+   *
+   * @return - The gtid of the current commit as a `string`.
+   */
+  <<__HipHopSpecific, __Native>>
+  function recvGtid(): string;
 }
 
 /**

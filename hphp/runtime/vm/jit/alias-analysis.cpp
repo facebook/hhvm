@@ -49,14 +49,19 @@ void visit_locations(const BlockList& blocks, Visit visit) {
         [&] (IrrelevantEffects)   {},
         [&] (UnknownEffects)      {},
         [&] (ReturnEffects x)     { visit(x.kills); },
-        [&] (CallEffects x)       { visit(x.kills); visit(x.stack); },
+        [&] (CallEffects x)       { visit(x.kills);
+                                    visit(x.stack);
+                                    visit(x.locals);
+                                    visit(x.callee); },
         [&] (GeneralEffects x)    { visit(x.loads);
                                     visit(x.stores);
                                     visit(x.moves);
                                     visit(x.kills); },
         [&] (PureLoad x)          { visit(x.src); },
         [&] (PureStore x)         { visit(x.dst); },
-        [&] (PureSpillFrame x)    { visit(x.stk); visit(x.ctx); },
+        [&] (PureSpillFrame x)    { visit(x.stk);
+                                    visit(x.ctx);
+                                    visit(x.callee); },
         [&] (ExitEffects x)       { visit(x.live); visit(x.kills); }
       );
     }
@@ -79,6 +84,37 @@ folly::Optional<uint32_t> add_class(AliasAnalysis& ret, AliasClass acls) {
   return meta.index;
 };
 
+// Expand a location into a set of locations that may alias it. This is for
+// locals and class-ref locations where the location may contain a discrete set
+// of local/class-ref slots.
+template<class T>
+ALocBits may_alias_component(const AliasAnalysis& aa,
+                             AliasClass acls,
+                             folly::Optional<T> proj,
+                             const AliasAnalysis::LocationMap& sets,
+                             AliasClass any,
+                             ALocBits pessimistic) {
+  if (proj) {
+    auto ret = ALocBits{};
+    if (proj->ids.hasSingleValue()) {
+      if (auto const slot = aa.find(*proj)) {
+        ret.set(slot->index);
+      }
+      // Otherwise the location is untracked, and cannot interfere with any
+      // tracked location.
+    } else {
+      auto const it = sets.find(*proj);
+      if (it != end(sets)) {
+        ret |= it->second;
+      } else {
+        ret |= pessimistic;
+      }
+    }
+    return ret;
+  }
+  return acls.maybe(any) ? pessimistic : ALocBits{};
+}
+
 template<class T>
 ALocBits may_alias_part(const AliasAnalysis& aa,
                         AliasClass acls,
@@ -93,6 +129,35 @@ ALocBits may_alias_part(const AliasAnalysis& aa,
     return pessimistic;
   }
   return acls.maybe(any) ? pessimistic : ALocBits{};
+}
+
+// Expand a location into a set of locations which definitely contain it. This
+// is for locals and class-ref locations where the location may contain a
+// discrete set of local/class-ref slots.
+template<class T>
+ALocBits expand_component(const AliasAnalysis& aa,
+                          AliasClass acls,
+                          folly::Optional<T> loc,
+                          const AliasAnalysis::LocationMap& sets,
+                          AliasClass any,
+                          ALocBits all) {
+  if (loc) {
+    auto ret = ALocBits{};
+    if (loc->ids.hasSingleValue()) {
+      if (auto const meta = aa.find(*loc)) {
+        ret.set(meta->index);
+      }
+    } else {
+      auto const it = sets.find(*loc);
+      if (it != end(sets)) {
+        ret |= it->second;
+      }
+      // We could iterate over everything and set corresponding bits, but that
+      // seldom adds value.
+    }
+    return ret;
+  }
+  return any <= acls ? all : ALocBits{};
 }
 
 template<class T>
@@ -112,13 +177,40 @@ ALocBits expand_part(const AliasAnalysis& aa,
   return any <= acls ? all : ret;
 }
 
+template<class T>
+bool collect_component(AliasAnalysis& aa,
+                       folly::Optional<T> loc,
+                       AliasAnalysis::LocationMap& map) {
+  if (loc) {
+    assertx(!loc->ids.empty());
+    if (loc->ids.hasSingleValue()) {
+      add_class(aa, *loc);
+    } else {
+      auto complete = true;
+      auto range = ALocBits{};
+      if (loc->ids.size() <= kMaxExpandedSize) {
+        for (uint32_t id = 0; id < AliasIdSet::BitsetMax; ++id) {
+          if (loc->ids.test(id)) {
+            if (auto const index = add_class(aa, T { loc->fp, id })) {
+              range.set(*index);
+            } else {
+              complete = false;
+            }
+          }
+        }
+      }
+      if (complete) map[AliasClass { *loc }] = range;
+    }
+    return true;
+  }
+  return false;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
 
-AliasAnalysis::AliasAnalysis(const IRUnit& unit)
-  : per_frame_bits(unit.numTmps())
-{}
+AliasAnalysis::AliasAnalysis(const IRUnit& /*unit*/) {}
 
 folly::Optional<ALocMeta> AliasAnalysis::find(AliasClass acls) const {
   auto const it = locations.find(acls);
@@ -143,23 +235,12 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
     ret |= may_alias_part(*this, acls, acls.stack(), AStackAny, all_stack);
   }
 
-  if (auto const frame = acls.frame()) {
-    if (frame->ids.hasSingleValue()) {
-      if (auto const slot = find(*frame)) {
-        ret.set(slot->index);
-      }
-      // Otherwise the location is untracked.
-    } else {
-      auto const it = local_sets.find(*frame);
-      if (it != end(local_sets)) {
-        ret |= it->second;
-      } else {
-        ret |= all_frame;
-      }
-    }
-  } else if (acls.maybe(AFrameAny)) {
-    ret |= all_frame;
-  }
+  ret |= may_alias_component(*this, acls, acls.frame(), local_sets,
+                             AFrameAny, all_frame);
+  ret |= may_alias_component(*this, acls, acls.clsRefSlot(), clsref_sets,
+                             AClsRefSlotAny, all_clsRefSlot);
+
+  ret |= may_alias_part(*this, acls, acls.rds(), ARdsAny, all_rds);
 
   if (auto const mis = acls.mis()) {
     auto const add_mis = [&] (AliasClass cls) {
@@ -176,6 +257,7 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
     add_mis(AMIStateTvRef);
     add_mis(AMIStateTvRef2);
     add_mis(AMIStateBase);
+    add_mis(AMIStatePropS);
   }
 
   ret |= may_alias_part(*this, acls, acls.prop(), APropAny, all_props);
@@ -184,6 +266,14 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
   ret |= may_alias_part(*this, acls, acls.iterPos(), AIterPosAny, all_iterPos);
   ret |= may_alias_part(*this, acls, acls.iterBase(), AIterBaseAny,
                         all_iterBase);
+  ret |= may_alias_part(*this, acls, acls.cufIterFunc(), ACufIterFuncAny,
+                        all_cufIterFunc);
+  ret |= may_alias_part(*this, acls, acls.cufIterCtx(), ACufIterCtxAny,
+                        all_cufIterCtx);
+  ret |= may_alias_part(*this, acls, acls.cufIterInvName(), ACufIterInvNameAny,
+                        all_cufIterInvName);
+  ret |= may_alias_part(*this, acls, acls.cufIterDynamic(), ACufIterDynamicAny,
+                        all_cufIterDynamic);
 
   return ret;
 }
@@ -207,22 +297,12 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
     ret |= all_stack;
   }
 
-  if (auto const frame = acls.frame()) {
-    if (frame->ids.hasSingleValue()) {
-      if (auto const meta = find(*frame)) {
-        ret.set(meta->index);
-      }
-    } else {
-      auto const it = local_sets.find(*frame);
-      if (it != end(local_sets)) {
-        ret |= it->second;
-      }
-      // We could iterate over the all the frame locals and set corresponding
-      // bits, but that seldom adds value.
-    }
-  } else if (AFrameAny <= acls) {
-    ret |= all_frame;
-  }
+  ret |= expand_component(*this, acls, acls.frame(), local_sets,
+                          AFrameAny, all_frame);
+  ret |= expand_component(*this, acls, acls.clsRefSlot(), clsref_sets,
+                          AClsRefSlotAny, all_clsRefSlot);
+
+  ret |= expand_part(*this, acls, acls.rds(), ARdsAny, all_rds);
 
   if (auto const mis = acls.mis()) {
     auto const add_mis = [&] (AliasClass cls) {
@@ -238,6 +318,7 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
     add_mis(AMIStateTvRef);
     add_mis(AMIStateTvRef2);
     add_mis(AMIStateBase);
+    add_mis(AMIStatePropS);
   }
 
   ret |= expand_part(*this, acls, acls.prop(), APropAny, all_props);
@@ -245,6 +326,14 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
   ret |= expand_part(*this, acls, acls.ref(), ARefAny, all_ref);
   ret |= expand_part(*this, acls, acls.iterPos(), AIterPosAny, all_iterPos);
   ret |= expand_part(*this, acls, acls.iterBase(), AIterBaseAny, all_iterBase);
+  ret |= expand_part(*this, acls, acls.cufIterFunc(), ACufIterFuncAny,
+                     all_cufIterFunc);
+  ret |= expand_part(*this, acls, acls.cufIterCtx(), ACufIterCtxAny,
+                     all_cufIterCtx);
+  ret |= expand_part(*this, acls, acls.cufIterInvName(), ACufIterInvNameAny,
+                     all_cufIterInvName);
+  ret |= expand_part(*this, acls, acls.cufIterDynamic(), ACufIterDynamicAny,
+                     all_cufIterDynamic);
 
   return ret;
 }
@@ -260,8 +349,8 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
    * object property offsets, and for arrays based only on index.  Everything
    * colliding in that regard is assumed to possibly alias.
    */
-  auto conflict_prop_offset = jit::hash_map<uint32_t,ALocBits>{};
-  auto conflict_array_index = jit::hash_map<int64_t,ALocBits>{};
+  auto conflict_prop_offset = jit::fast_map<uint32_t,ALocBits>{};
+  auto conflict_array_index = jit::fast_map<int64_t,ALocBits>{};
 
   visit_locations(blocks, [&] (AliasClass acls) {
     if (auto const prop = acls.is_prop()) {
@@ -275,6 +364,11 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       if (auto const index = add_class(ret, acls)) {
         conflict_array_index[elemI->idx].set(*index);
       }
+      return;
+    }
+
+    if (acls.is_rds()) {
+      add_class(ret, acls);
       return;
     }
 
@@ -295,30 +389,16 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       return;
     }
 
-    if (auto const frame = acls.frame()) {
-      assertx(!frame->ids.empty());
-      if (frame->ids.hasSingleValue()) {
-        add_class(ret, *frame);
-      } else {
-        auto complete = true;
-        auto range = ALocBits{};
-        if (frame->ids.size() <= kMaxExpandedSize) {
-          for (uint32_t id = 0; id < AliasIdSet::BitsetMax; ++id) {
-            if (frame->ids.test(id)) {
-              if (auto const index = add_class(ret, AFrame { frame->fp, id })) {
-                range.set(*index);
-              } else {
-                complete = false;
-              }
-            }
-          }
-        }
-        if (complete) {
-          ret.local_sets[AliasClass { *frame }] = range;
-        }
-      }
+    if (acls.is_cufIterFunc() ||
+        acls.is_cufIterCtx() ||
+        acls.is_cufIterInvName() ||
+        acls.is_cufIterDynamic()) {
+      add_class(ret, acls);
       return;
     }
+
+    if (collect_component(ret, acls.frame(), ret.local_sets)) return;
+    if (collect_component(ret, acls.clsRefSlot(), ret.clsref_sets)) return;
 
     /*
      * Note that unlike the above we're going to assign location ids to the
@@ -393,7 +473,11 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
 
     if (auto const frame = acls.is_frame()) {
       ret.all_frame.set(meta.index);
-      ret.per_frame_bits[frame->fp].set(meta.index);
+      return;
+    }
+
+    if (auto const slot = acls.is_clsRefSlot()) {
+      ret.all_clsRefSlot.set(meta.index);
       return;
     }
 
@@ -412,9 +496,34 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       return;
     }
 
+    if (acls.is_cufIterFunc()) {
+      ret.all_cufIterFunc.set(meta.index);
+      return;
+    }
+
+    if (acls.is_cufIterCtx()) {
+      ret.all_cufIterCtx.set(meta.index);
+      return;
+    }
+
+    if (acls.is_cufIterInvName()) {
+      ret.all_cufIterInvName.set(meta.index);
+      return;
+    }
+
+    if (acls.is_cufIterDynamic()) {
+      ret.all_cufIterDynamic.set(meta.index);
+      return;
+    }
+
     if (acls.is_ref()) {
       meta.conflicts = ret.all_ref;
       meta.conflicts.reset(meta.index);
+      return;
+    }
+
+    if (acls.is_rds()) {
+      ret.all_rds.set(meta.index);
       return;
     }
 
@@ -461,6 +570,16 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
           ent.second.set(kv.second.index);
         }
       }
+    } else if (kv.first.is_clsRefSlot()) {
+      for (auto& ent : ret.clsref_sets) {
+        if (kv.first <= ent.first) {
+          FTRACE(2, "  ({}) {} <= {}\n",
+            kv.second.index,
+            show(kv.first),
+            show(ent.first));
+          ent.second.set(kv.second.index);
+        }
+      }
     }
   }
 
@@ -483,26 +602,50 @@ std::string show(ALocBits bits) {
 
 std::string show(const AliasAnalysis& ainfo) {
   auto ret = std::string{};
+  std::vector<const decltype(ainfo.locations)::value_type*> sorted;
+  sorted.reserve(ainfo.locations.size());
   for (auto& kv : ainfo.locations) {
-    auto conf = kv.second.conflicts;
-    conf.set(kv.second.index);
+    sorted.push_back(&kv);
+  }
+  std::sort(sorted.begin(), sorted.end(),
+            [](auto const* a, auto const* b) {
+              return a->second.index < b->second.index;
+            });
+
+  for (auto const* kv : sorted) {
+    auto conf = kv->second.conflicts;
+    conf.set(kv->second.index);
     folly::format(&ret, " {: <20} = {: >3} : {}\n",
-      show(kv.first),
-      kv.second.index,
+      show(kv->first),
+      kv->second.index,
       show(conf));
   }
-  folly::format(&ret, " {: <20}       : {}\n"
-                      " {: <20}       : {}\n"
-                      " {: <20}       : {}\n"
-                      " {: <20}       : {}\n"
-                      " {: <20}       : {}\n"
-                      " {: <20}       : {}\n",
-    "all props",    show(ainfo.all_props),
-    "all elemIs",   show(ainfo.all_elemIs),
-    "all refs",     show(ainfo.all_ref),
-    "all iterPos",  show(ainfo.all_iterPos),
-    "all iterBase", show(ainfo.all_iterBase),
-    "all frame",    show(ainfo.all_frame)
+  folly::format(
+      &ret,
+      " {: <20}       : {}\n"
+      " {: <20}       : {}\n"
+      " {: <20}       : {}\n"
+      " {: <20}       : {}\n"
+      " {: <20}       : {}\n"
+      " {: <20}       : {}\n"
+      " {: <20}       : {}\n"
+      " {: <20}       : {}\n"
+      " {: <20}       : {}\n"
+      " {: <20}       : {}\n"
+      " {: <20}       : {}\n",
+
+      "all props",          show(ainfo.all_props),
+      "all elemIs",         show(ainfo.all_elemIs),
+      "all refs",           show(ainfo.all_ref),
+      "all iterPos",        show(ainfo.all_iterPos),
+      "all iterBase",       show(ainfo.all_iterBase),
+      "all cufIterFunc",    show(ainfo.all_cufIterFunc),
+      "all cufIterCtx",     show(ainfo.all_cufIterCtx),
+      "all cufIterInvName", show(ainfo.all_cufIterInvName),
+      "all cufIterDynamic", show(ainfo.all_cufIterDynamic),
+      "all frame",          show(ainfo.all_frame),
+      "all clsRefSlot",     show(ainfo.all_clsRefSlot),
+      "all rds",            show(ainfo.all_rds)
   );
   for (auto& kv : ainfo.local_sets) {
     folly::format(&ret, " ex {: <17}       : {}\n",

@@ -1,0 +1,2 @@
+File "using_bad_syntax_2.php", line 15, characters 5-27:
+Using statement in function scoped form may only be used at the top level of a function or a method (Parsing[1002])

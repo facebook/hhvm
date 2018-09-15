@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_proc_terminate() {
 $cmd = 'sleep 3';
 $descriptors = array();
 
@@ -15,4 +18,5 @@ foreach ($signals as $signal) {
   $process = proc_open($cmd, $descriptors, $pipes);
   $result = proc_terminate($process, $signal);
   var_dump($result);
+}
 }

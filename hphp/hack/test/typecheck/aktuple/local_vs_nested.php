@@ -11,7 +11,7 @@ function test(int $i, int $j, int $k): void {
   hh_show($a);
   take_string($a[0]); // no error
 
-  $v = Vector {array(4)};
+  $v = Vector { array(4) };
   $v[$i][0] = 'aaa'; // we don't know anything about $i and $j, so
   // $v[$j][0] can be both string and int
   hh_show($v[$j]);
@@ -19,4 +19,4 @@ function test(int $i, int $j, int $k): void {
 
 }
 
-function take_string(string $_): void;
+function take_string(string $_): void {}

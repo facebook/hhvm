@@ -6,4 +6,3 @@
 class A {
   public function __construct(static $a) {}
 }
-

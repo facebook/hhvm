@@ -1,0 +1,84 @@
+((script 281
+  ((list 281
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
+       (missing 0 ())))
+     (classish_declaration 15
+      ((missing 0 ()) (missing 0 ()) (() interface 9 ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (classish_body 3
+        ((() { 1 ((whitespace 1))) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (classish_declaration 11
+      ((missing 0 ()) (missing 0 ()) (() class 5 ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (classish_body 3
+        ((() { 1 ((whitespace 1))) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (classish_declaration 84
+      ((missing 0 ()) (missing 0 ()) (() class 5 ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ())
+       (() extends 7 ((whitespace 1)))
+       (list 1
+        ((list_item 1
+          ((simple_type_specifier 1 ((() name 1 ((end_of_line 1)))))
+           (missing 0 ())))))
+       (missing 0 ()) (missing 0 ())
+       (classish_body 66
+        ((() { 1 ((end_of_line 1)))
+         (list 51
+          ((require_clause 18
+            ((((whitespace 2)) require 7 ((whitespace 1)))
+             (() extends 7 ((whitespace 1)))
+             (simple_type_specifier 1 ((() name 1 ())))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
+           (require_clause 21
+            ((((whitespace 2)) require 7 ((whitespace 1)))
+             (() implements 10 ((whitespace 1)))
+             (simple_type_specifier 1 ((() name 1 ())))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))))
+         (() } 1 ((end_of_line 1)))))))
+     (classish_declaration 82
+      ((missing 0 ()) (missing 0 ()) (() interface 9 ((whitespace 1)))
+       (() name 2 ((end_of_line 1))) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (classish_body 69
+        ((() { 1 ((end_of_line 1)))
+         (list 54
+          ((require_clause 18
+            ((((whitespace 2)) require 7 ((whitespace 1)))
+             (() extends 7 ((whitespace 1)))
+             (simple_type_specifier 1 ((() name 1 ())))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 11) (end_of_line 1)))))
+           (require_clause 21
+            ((((whitespace 2)) require 7 ((whitespace 1)))
+             (() implements 10 ((whitespace 1)))
+             (simple_type_specifier 1 ((() name 1 ())))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))))
+         (() } 1 ((end_of_line 1)))))))
+     (classish_declaration 80
+      ((missing 0 ()) (missing 0 ()) (() trait 5 ((whitespace 1)))
+       (() name 1 ((end_of_line 1))) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (classish_body 72
+        ((() { 1 ((end_of_line 1)))
+         (list 54
+          ((require_clause 18
+            ((((whitespace 2)) require 7 ((whitespace 1)))
+             (() extends 7 ((whitespace 1)))
+             (simple_type_specifier 1 ((() name 1 ())))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 11) (end_of_line 1)))))
+           (require_clause 21
+            ((((whitespace 2)) require 7 ((whitespace 1)))
+             (() implements 10 ((whitespace 1)))
+             (simple_type_specifier 1 ((() name 1 ())))
+             (() ";" 1
+              ((whitespace 1) (single_line_comment 11) (end_of_line 1)))))))
+         (() } 1 ((end_of_line 1)))))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

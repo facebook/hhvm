@@ -35,6 +35,9 @@ function refTest($q) {
   $q->refTestHelper($x);
   var_dump($x);
 }
+
+<<__EntryPoint>>
+function main_1209() {
 $q = new z;
 $f = 'minArgTest';
 $q->minArgTest('one',2,3.333,4,5,6,7,8,9,10);
@@ -52,3 +55,4 @@ $q->varArgsTest2('one',2,3.333,4,5,6,7,8,9,10);
 $q->varArgsTest2('one',2,3.333,4,5,6,7,8,9,10,11,12);
 $q->$f('one',2,3.333,4,5,6,7,8,9,10);
 $q->$f('one',2,3.333,4,5,6,7,8,9,10,11,12);
+}

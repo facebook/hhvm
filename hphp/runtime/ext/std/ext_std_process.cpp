@@ -26,7 +26,7 @@
 #include <signal.h>
 
 #include <folly/String.h>
-#include <folly/portability/Environment.h>
+#include <folly/portability/Stdlib.h>
 #include <folly/portability/SysTime.h>
 #include <folly/portability/Unistd.h>
 
@@ -50,6 +50,7 @@
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/vm/repo.h"
 
 #if !defined(_NSIG) && defined(NSIG)
@@ -96,21 +97,19 @@ static char* build_envp(const Array& envs) {
   return envpw;
 }
 #else
-static char **build_envp(const Array& envs, std::vector<String> &senvs) {
+static char **build_envp(const Array& envs, std::vector<std::string> &senvs) {
   char **envp = nullptr;
   int size = envs.size();
   if (size) {
     envp = (char **)malloc((size + 1) * sizeof(char *));
+    for (ArrayIter iter(envs); iter; ++iter) {
+      senvs.push_back(folly::sformat("{}={}",
+                                     iter.first().toString(),
+                                     iter.second().toString()));
+    }
     int i = 0;
-    for (ArrayIter iter(envs); iter; ++iter, ++i) {
-      StringBuffer nvpair;
-      nvpair.append(iter.first().toString());
-      nvpair.append('=');
-      nvpair.append(iter.second().toString());
-
-      String env = nvpair.detach();
-      senvs.push_back(env);
-      *(envp + i) = (char *)env.data();
+    for (auto& env : senvs) {
+      *(envp + i++) = (char *)env.data();
     }
     *(envp + i) = nullptr;
   }
@@ -214,7 +213,7 @@ struct ShellExecContext final {
   }
 
   FILE *exec(const String& cmd_string) {
-    assert(m_proc == nullptr);
+    assertx(m_proc == nullptr);
     const auto cmd = cmd_string.c_str();
     if (RuntimeOption::WhitelistExec && !check_cmd(cmd)) {
       return nullptr;
@@ -704,13 +703,11 @@ static Variant post_proc_open(const String& cmd, Variant& pipes,
   return Variant(std::move(proc));
 }
 
-Variant HHVM_FUNCTION(proc_open,
-                      const String& cmd,
-                      const Array& descriptorspec,
-                      VRefParam pipesParam,
-                      const Variant& cwd /* = uninit_variant */,
-                      const Variant& env /* = uninit_variant */,
-                      const Variant& other_options /* = uninit_variant */) {
+Variant
+HHVM_FUNCTION(proc_open, const String& cmd, const Array& descriptorspec,
+              VRefParam pipesParam, const Variant& cwd /* = uninit_variant */,
+              const Variant& env /* = uninit_variant */,
+              const Variant& /*other_options*/ /* = uninit_variant */) {
   if (RuntimeOption::WhitelistExec && !check_cmd(cmd.data())) {
     return false;
   }
@@ -732,22 +729,26 @@ Variant HHVM_FUNCTION(proc_open,
   Array enva;
 
   if (env.isNull()) {
-    // Build out an environment that conceptually matches what we'd
-    // see if we were to iterate the environment and call getenv()
-    // for each name.
+    if (is_cli_mode()) {
+      enva = cli_env();
+    } else {
+      // Build out an environment that conceptually matches what we'd
+      // see if we were to iterate the environment and call getenv()
+      // for each name.
 
-    // Env vars defined in the hdf file go in first
-    for (const auto& envvar : RuntimeOption::EnvVariables) {
-      enva.set(String(envvar.first), String(envvar.second));
-    }
+      // Env vars defined in the hdf file go in first
+      for (const auto& envvar : RuntimeOption::EnvVariables) {
+        enva.set(String(envvar.first), String(envvar.second));
+      }
 
-    // global environment overrides the hdf
-    for (char **env = environ; env && *env; env++) {
-      char *p = strchr(*env, '=');
-      if (p) {
-        String name(*env, p - *env, CopyString);
-        String val(p + 1, CopyString);
-        enva.set(name, val);
+      // global environment overrides the hdf
+      for (char **env = environ; env && *env; env++) {
+        char *p = strchr(*env, '=');
+        if (p) {
+          String name(*env, p - *env, CopyString);
+          String val(p + 1, CopyString);
+          enva.set(name, val);
+        }
       }
     }
 
@@ -831,7 +832,7 @@ Variant HHVM_FUNCTION(proc_open,
   }
 
   dwCreateFlags = NORMAL_PRIORITY_CLASS;
-  if (RuntimeOption::ClientExecutionMode()) {
+  if (!RuntimeOption::ServerExecutionMode()) {
     dwCreateFlags |= CREATE_NO_WINDOW;
   }
 
@@ -933,20 +934,27 @@ Variant HHVM_FUNCTION(proc_open,
 
     child = LightProcess::proc_open(cmd.c_str(), created, intended,
                                     scwd.c_str(), envs);
-    assert(child);
+    assertx(child);
     return post_proc_open(cmd, pipes, enva, items, child);
-  } else {
+  }
+
+  std::vector<std::string> senvs; // holding those char *
+  char** envp = nullptr;
+
+  {
     /* the unix way */
     Lock lock(DescriptorItem::s_mutex);
     if (!pre_proc_open(descriptorspec, items)) return false;
+    envp = build_envp(enva, senvs);
     child = fork();
     if (child) {
       // the parent process
+      free(envp);
       return post_proc_open(cmd, pipes, enva, items, child);
     }
   }
 
-  assert(child == 0);
+  assertx(child == 0);
   /* this is the child process */
 
   /* close those descriptors that we just opened for the parent stuff,
@@ -958,8 +966,6 @@ Variant HHVM_FUNCTION(proc_open,
   if (scwd.length() > 0 && chdir(scwd.c_str())) {
     // chdir failed, the working directory remains unchanged
   }
-  std::vector<String> senvs; // holding those char *
-  char **envp = build_envp(enva, senvs);
   execle("/bin/sh", "sh", "-c", cmd.data(), nullptr, envp);
   free(envp);
   _exit(127);
@@ -1044,7 +1050,8 @@ Array HHVM_FUNCTION(proc_get_status,
 #ifndef _WIN32
 bool HHVM_FUNCTION(proc_nice,
                    int increment) {
-  if (nice(increment) < 0 && errno) {
+  errno = 0;
+  if (nice(increment) == -1 && errno) {
     raise_warning("Only a super user may attempt to increase the "
                     "priority of a process");
     return false;

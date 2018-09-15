@@ -70,11 +70,11 @@ enum VMRegState : uintptr_t {
 extern __thread VMRegState tl_regState;
 
 inline void checkVMRegState() {
-  assert(tl_regState == VMRegState::CLEAN);
+  assertx(tl_regState == VMRegState::CLEAN);
 }
 
 inline void checkVMRegStateGuarded() {
-  assert(tl_regState != VMRegState::DIRTY);
+  assertx(tl_regState != VMRegState::DIRTY);
 }
 
 inline VMRegs& vmRegsUnsafe() {
@@ -124,18 +124,23 @@ inline ActRec*& vmJitCalledFrame() {
   return vmRegsUnsafe().jitCalledFrame;
 }
 
+inline jit::TCA& vmJitReturnAddr() {
+  return vmRegsUnsafe().jitReturnAddr;
+}
+
 inline void assert_native_stack_aligned() {
 #ifndef _MSC_VER
-  assert(reinterpret_cast<uintptr_t>(__builtin_frame_address(0)) % 16 == 0);
+  assertx(reinterpret_cast<uintptr_t>(__builtin_frame_address(0)) % 16 == 0);
 #endif
 }
 
 inline void interp_set_regs(ActRec* ar, Cell* sp, Offset pcOff) {
-  assert(tl_regState == VMRegState::DIRTY);
+  assertx(tl_regState == VMRegState::DIRTY);
   tl_regState = VMRegState::CLEAN;
   vmfp() = ar;
   vmsp() = sp;
   vmpc() = ar->unit()->at(pcOff);
+  vmJitReturnAddr() = nullptr; // We never elide frames around an interpOne
 }
 
 /*
@@ -197,11 +202,11 @@ struct EagerVMRegAnchor {
       DEBUG_ONLY auto const sp = regs.stack.top();
       DEBUG_ONLY auto const pc = regs.pc;
       VMRegAnchor _;
-      assert(regs.fp == fp);
-      assert(regs.stack.top() == sp);
-      assert(regs.pc == pc);
+      assertx(regs.fp == fp);
+      assertx(regs.stack.top() == sp);
+      assertx(regs.pc == pc);
     }
-    assert(tl_regState < VMRegState::GUARDED_THRESHOLD);
+    assertx(tl_regState < VMRegState::GUARDED_THRESHOLD);
     m_old = tl_regState;
     tl_regState = VMRegState::CLEAN;
   }
@@ -273,9 +278,7 @@ inline ActRec* regAnchorFP(ActRec* cur, Offset* pc = nullptr) {
   // over php-defined builtin functions in order to find the true context.
   auto const context = g_context.getNoCheck();
   if (pc) *pc = cur->m_func->unit()->offsetOf(vmpc());
-  while (cur && cur->skipFrame()) {
-    cur = context->getPrevVMState(cur, pc);
-  }
+  if (cur && cur->skipFrame()) cur = context->getPrevVMStateSkipFrame(cur, pc);
   return cur;
 }
 

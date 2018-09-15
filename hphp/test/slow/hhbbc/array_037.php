@@ -8,4 +8,8 @@ function x() {
   var_dump($r);
   var_dump($x);
 }
+
+<<__EntryPoint>>
+function main_array_037() {
 x();
+}

@@ -19,6 +19,10 @@ function c() {
   var_dump(in_array("o", $a));
 }
 
+
+<<__EntryPoint>>
+function main_in_array() {
 a();
 b();
 c();
+}

@@ -6,6 +6,10 @@ class PrependingException extends Exception {
   }
 }
 
+
+<<__EntryPoint>>
+function main_prepend_exception_trace() {
 $exception = new PrependingException();
 $exception->prepend(array('prepended_value'));
 echo $exception->getTrace()[0];
+}

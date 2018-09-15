@@ -16,9 +16,10 @@
 #ifndef incl_HPHP_RUNTIME_VM_GLOBALS_ARRAY_H
 #define incl_HPHP_RUNTIME_VM_GLOBALS_ARRAY_H
 
-#include "hphp/runtime/vm/name-value-table.h"
-#include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-common.h"
+#include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/tv-val.h"
+#include "hphp/runtime/vm/name-value-table.h"
 
 namespace HPHP {
 
@@ -52,9 +53,10 @@ namespace HPHP {
  * to outlast the lifetime of the GlobalsArray.  (The wrapper is
  * refcounted, as required by ArrayData, but the table pointed to is not.)
  */
-struct GlobalsArray final : ArrayData, type_scan::MarkCountable<GlobalsArray> {
+struct GlobalsArray final : ArrayData,
+                            type_scan::MarkCollectable<GlobalsArray> {
   explicit GlobalsArray(NameValueTable* tab);
-  ~GlobalsArray() {}
+  ~GlobalsArray() = delete;
 
   // We only allow explicit conversions to ArrayData.  Generally you
   // should not be talking to the GlobalsArray directly (see
@@ -69,41 +71,43 @@ public:
   }
   static size_t Vsize(const ArrayData*);
   static Cell NvGetKey(const ArrayData* ad, ssize_t pos);
-  static const Variant& GetValueRef(const ArrayData*, ssize_t pos);
+  static tv_rval GetValueRef(const ArrayData*, ssize_t pos);
 
   static bool ExistsInt(const ArrayData* ad, int64_t k);
   static bool ExistsStr(const ArrayData* ad, const StringData* k);
 
-  static const TypedValue* NvGetInt(const ArrayData*, int64_t k);
+  static tv_rval NvGetInt(const ArrayData*, int64_t k);
   static constexpr auto NvTryGetInt = &NvGetInt;
-  static const TypedValue* NvGetStr(const ArrayData*, const StringData* k);
+  static tv_rval NvGetStr(const ArrayData*, const StringData* k);
   static constexpr auto NvTryGetStr = &NvGetStr;
 
-  static ArrayLval LvalInt(ArrayData*, int64_t k, bool copy);
+  static arr_lval LvalInt(ArrayData*, int64_t k, bool copy);
   static constexpr auto LvalIntRef = &LvalInt;
-  static ArrayLval LvalStr(ArrayData*, StringData* k, bool copy);
+  static arr_lval LvalStr(ArrayData*, StringData* k, bool copy);
   static constexpr auto LvalStrRef = &LvalStr;
-  static ArrayLval LvalNew(ArrayData*, bool copy);
+  static arr_lval LvalNew(ArrayData*, bool copy);
   static constexpr auto LvalNewRef = &LvalNew;
 
   static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
-  static ArrayData* SetRefInt(ArrayData*, int64_t k, Variant& v, bool copy);
-  static ArrayData* SetRefStr(ArrayData*, StringData* k, Variant& v,
-                              bool copy);
-  static constexpr auto AddInt = &SetInt;
-  static constexpr auto AddStr = &SetStr;
+  static ArrayData* SetWithRefInt(ArrayData*, int64_t k,
+                                  TypedValue v, bool copy);
+  static ArrayData* SetWithRefStr(ArrayData*, StringData* k,
+                                  TypedValue v, bool copy);
+  static ArrayData* SetRefInt(ArrayData*, int64_t k,
+                              tv_lval v, bool copy);
+  static ArrayData* SetRefStr(ArrayData*, StringData* k,
+                              tv_lval v, bool copy);
   static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
   static ArrayData* RemoveStr(ArrayData*, const StringData* k, bool copy);
 
   static ArrayData* Append(ArrayData*, Cell v, bool copy);
-  static ArrayData* AppendRef(ArrayData*, Variant& v, bool copy);
-  static ArrayData* AppendWithRef(ArrayData*, const Variant& v, bool copy);
+  static ArrayData* AppendRef(ArrayData*, tv_lval v, bool copy);
+  static ArrayData* AppendWithRef(ArrayData*, TypedValue v, bool copy);
 
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
-  static ArrayData* Prepend(ArrayData*, Cell v, bool copy);
-  static ArrayData* CopyWithStrongIterators(const ArrayData*);
+  static ArrayData* Prepend(ArrayData*, Cell v);
 
   static ssize_t IterBegin(const ArrayData*);
   static ssize_t IterLast(const ArrayData*);
@@ -138,6 +142,9 @@ public:
   static constexpr auto ToVec = &ArrayCommon::ToVec;
   static constexpr auto ToDict = &ArrayCommon::ToDict;
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
+  static constexpr auto ToVArray = &ArrayCommon::ToVArray;
+  static constexpr auto ToDArray = &ArrayCommon::ToDArray;
+  static constexpr auto ToShape = &ArrayCommon::ToShape;
 
 private:
   static GlobalsArray* asGlobals(ArrayData* ad);

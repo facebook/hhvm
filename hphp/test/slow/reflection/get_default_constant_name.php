@@ -15,6 +15,10 @@ function test($param) {
   var_dump($r->getDefaultValueConstantName());
 }
 
+
+<<__EntryPoint>>
+function main_get_default_constant_name() {
 test('one');
 test('four');
 test('ten');
+}

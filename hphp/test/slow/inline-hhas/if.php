@@ -15,5 +15,9 @@ done:
   '));
 }
 
+
+<<__EntryPoint>>
+function main_if() {
 salut(true);
 salut(false);
+}

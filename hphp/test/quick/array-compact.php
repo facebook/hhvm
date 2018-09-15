@@ -1,4 +1,4 @@
-<?php
+<?hh
 function f($a) {
   $a["four"] = 4;
   return $a;

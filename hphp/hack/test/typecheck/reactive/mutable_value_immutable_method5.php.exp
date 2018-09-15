@@ -1,0 +1,6 @@
+File "mutable_value_immutable_method5.php", line 18, characters 22-23:
+Invalid argument (Typing[4260])
+File "mutable_value_immutable_method5.php", line 10, characters 44-45:
+This parameter is not marked as mutable
+File "mutable_value_immutable_method5.php", line 18, characters 22-23:
+But this expression is mutable

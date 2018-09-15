@@ -1,0 +1,4 @@
+File "bad_inout_use_magic_call.php", line 9, characters 24-31:
+Unexpected inout annotation for argument (Typing[4183])
+File "bad_inout_use_magic_call.php", line 4, characters 40-44:
+A variadic parameter can never be inout

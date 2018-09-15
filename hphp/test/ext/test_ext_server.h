@@ -22,7 +22,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 struct TestExtServer : TestCppExt {
-  virtual bool RunTests(const std::string &which);
+  bool RunTests(const std::string& which) override;
 
   bool test_pagelet_server_task_start();
   bool test_pagelet_server_task_status();

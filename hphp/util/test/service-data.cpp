@@ -74,7 +74,7 @@ TEST(ServiceDataTest, TimeSeriesTest) {
     ServiceData::StatsType::RATE
   };
 
-  auto ts = ServiceData::createTimeseries("foo", statsType);
+  auto ts = ServiceData::createTimeSeries("foo", statsType);
   ts->addValue(1);
   ts->addValue(1);
 

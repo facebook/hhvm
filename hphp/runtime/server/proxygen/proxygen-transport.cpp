@@ -205,6 +205,7 @@ void ProxygenTransport::onHeadersComplete(
   m_request->dumpMessage(4);
   auto method = m_request->getMethod();
   const auto& methodStr = m_request->getMethodString();
+  m_extended_method = methodStr.c_str();
   if (method == HTTPMethod::GET) {
     m_method = Transport::Method::GET;
   } else if (method == HTTPMethod::POST ||
@@ -220,10 +221,10 @@ void ProxygenTransport::onHeadersComplete(
     // than libevent:
     //   TRACE, COPY, MOVE, MKACTIVITY, CHECKOUT, MERGE, MSEARCH, NOTIFY,
     //   SUBSCRIBE, UNSUBSCRIBE, PATCH
+    m_method = Transport::Method::Unknown;
     sendErrorResponse(400 /* Bad Request */);
     return;
   }
-  m_extended_method = methodStr.c_str();
 
   const auto& headers = m_request->getHeaders();
   headers.forEach([&] (const std::string &header, const std::string &val) {
@@ -289,8 +290,10 @@ void ProxygenTransport::onHeadersComplete(
     }
   }
 
-  if (m_repost) {
-   beginPartialPostEcho();
+  if (m_shouldRepost) {
+    VLOG(2) << "Reposting transaction's completed receiving header,"
+            << " beginning partial post";
+    beginPartialPostEcho();
   }
   if (!bufferRequest()) {
     m_server->onRequest(shared_from_this());
@@ -303,8 +306,12 @@ void ProxygenTransport::onBody(std::unique_ptr<folly::IOBuf> chain) noexcept {
   m_requestBodyLength += chain->computeChainDataLength();
   if (bufferRequest()) {
     CHECK(!m_enqueued);
-    if (m_repost) {
+    if (m_reposting) {
+      VLOG(2) << "Reposting transaction " << *m_clientTxn
+              << " received body bytes";
       if (m_clientTxn && !m_egressError) {
+        VLOG(2) << "Reposting transaction " << *m_clientTxn
+                << " is sending received body bytes";
         m_clientTxn->sendBody(std::move(chain));
       }
     } else {
@@ -325,8 +332,11 @@ void ProxygenTransport::onEOM() noexcept {
   VLOG(4) << *m_clientTxn << "received eom";
   if (bufferRequest()) {
     CHECK(!m_enqueued);
-    if (m_repost) {
+    if (m_reposting) {
+      VLOG(2) << "Transaction " << *m_clientTxn << " is reposting";
       if (m_clientTxn && !m_egressError) {
+        VLOG(2) << "Transaction " << *m_clientTxn
+                << " is sending EOM for repost";
         m_clientTxn->sendEOM();
       }
       return;
@@ -340,7 +350,15 @@ void ProxygenTransport::onEOM() noexcept {
         m_currentBodyBuf->length();
     }
     m_clientComplete = true;
-    m_server->onRequest(shared_from_this());
+    // If we've already responded to the request (most likely with a call to
+    // sendErrorResponse), then we have nothing to do and don't want to service
+    // this request further.
+    if (m_sendEnded) {
+      LOG(WARNING) << "Transaction " << *m_clientTxn << " has already been "
+              << "sent a response.";
+    } else {
+      m_server->onRequest(shared_from_this());
+    }
     return;
   } else {
     requestDoneLocking();
@@ -457,7 +475,7 @@ size_t ProxygenTransport::getRequestSize() const {
 }
 
 std::string ProxygenTransport::getHeader(const char *name) {
-  assert(name && *name);
+  assertx(name && *name);
 
   HeaderMap::const_iterator iter = m_requestHeaders.find(name);
   if (iter != m_requestHeaders.end()) {
@@ -473,8 +491,8 @@ void ProxygenTransport::getHeaders(HeaderMap &headers) {
 }
 
 void ProxygenTransport::addHeaderImpl(const char *name, const char *value) {
-  assert(name && *name);
-  assert(value);
+  assertx(name && *name);
+  assertx(value);
 
   if (m_sendStarted) {
     Logger::Error("trying to add header '%s: %s' after 1st chunk",
@@ -486,7 +504,7 @@ void ProxygenTransport::addHeaderImpl(const char *name, const char *value) {
 }
 
 void ProxygenTransport::removeHeaderImpl(const char *name) {
-  assert(name && *name);
+  assertx(name && *name);
 
   if (m_sendStarted) {
     Logger::Error("trying to remove header '%s' after 1st chunk", name);
@@ -498,15 +516,15 @@ void ProxygenTransport::removeHeaderImpl(const char *name) {
 
 void ProxygenTransport::addRequestHeaderImpl(const char *name,
                                              const char *value) {
-  assert(name && *name);
-  assert(value);
+  assertx(name && *name);
+  assertx(value);
 
   m_request->getHeaders().add(name, value);
   m_requestHeaders[name].push_back(value);
 }
 
 void ProxygenTransport::removeRequestHeaderImpl(const char *name) {
-  assert(name && *name);
+  assertx(name && *name);
   m_request->getHeaders().remove(name);
   m_requestHeaders.erase(name);
 }
@@ -525,6 +543,7 @@ void ProxygenTransport::sendErrorResponse(uint32_t code) noexcept {
   CHECK(!m_sendStarted);
   m_sendStarted = true;
   m_sendEnded = true;
+  m_headerSent = true;
   m_responseCode = code;
   m_responseCodeInfo = response.getStatusMessage();
   m_server->onRequestError(this);
@@ -584,7 +603,7 @@ HTTPTransaction *ProxygenTransport::getTransaction(uint64_t id,
                                             newPushOk && !m_egressError);
 }
 
-void ProxygenTransport::messageAvailable(ResponseMessage&& message) {
+void ProxygenTransport::messageAvailable(ResponseMessage&& message) noexcept {
   if (!m_clientTxn) {
     return;
   }
@@ -637,7 +656,9 @@ void ProxygenTransport::messageAvailable(ResponseMessage&& message) {
         for (auto it = m_pushHandlers.begin(); it != m_pushHandlers.end(); ) {
           auto pushTxn = it++->second->getTransaction();
           if (pushTxn && !pushTxn->isEgressEOMSeen()) {
-            LOG(ERROR) << "Aborting unfinished push txn=" << *pushTxn;
+            std::ostringstream oss;
+            oss << *pushTxn;
+            Logger::Error("Aborting unfinished push txn=" + oss.str());
             pushTxn->sendAbort();
           }
         }
@@ -651,8 +672,8 @@ void ProxygenTransport::messageAvailable(ResponseMessage&& message) {
 
 void ProxygenTransport::sendImpl(const void *data, int size, int code,
                                  bool chunked, bool eom) {
-  assert(data);
-  assert(!m_sendStarted || chunked);
+  assertx(data);
+  assertx(!m_sendStarted || chunked);
   if (m_sendEnded) {
     // This should never happen, but when it does we have to bail out,
     // since there's no sensible way to send data at this point and
@@ -776,11 +797,27 @@ void ProxygenTransport::pushResourceBody(int64_t id, const void *data,
 }
 
 void ProxygenTransport::beginPartialPostEcho() {
-  if (!bufferRequest() || m_repost || !m_clientTxn || m_egressError) {
+  VLOG(2) << "Beginning partial post";
+  if (!bufferRequest() || m_reposting || !m_clientTxn || m_egressError
+      || getClientComplete() || !m_clientTxn->canSendHeaders()) {
+    VLOG(2) << "beginPartialPostEcho cannot proceed, "
+            << "bufferRequest() = " << bufferRequest()
+            << "m_reposting = " << m_reposting
+            << "m_clientTxn = " << m_clientTxn
+            << "m_egressError = " << m_egressError
+            << "getClientComplete() = " << getClientComplete()
+            << "canSendHeaders() = " << m_clientTxn->canSendHeaders();
     return;
   }
+  VLOG(2) << "beginPartialPostEcho is proceeding, "
+          << "bufferRequest() = " << bufferRequest()
+          << "m_reposting = " << m_reposting
+          << "m_clientTxn = " << m_clientTxn
+          << "m_egressError = " << m_egressError
+          << "getClientComplete() = " << getClientComplete()
+          << "canSendHeaders() = " << m_clientTxn->canSendHeaders();
   CHECK(!m_enqueued);
-  m_repost = true;
+  m_reposting = true;
   HTTPMessage response;
   response.setHTTPVersion(1,1);
   response.setIsChunked(true);
@@ -794,6 +831,7 @@ void ProxygenTransport::beginPartialPostEcho() {
 
   m_clientTxn->sendHeaders(response);
   if (!m_bodyData.empty()) {
+    VLOG(2) << "Reposting body bytes for client transaction " << *m_clientTxn;
     m_clientTxn->sendBody(m_bodyData.move());
   }
 }
@@ -801,13 +839,13 @@ void ProxygenTransport::beginPartialPostEcho() {
 void ProxygenTransport::abort() {
   unlink();
   if (m_clientTxn) {
-    if (m_repost) {
-      m_clientTxn->sendEOM();
-    } else {
-      m_clientTxn->sendAbort();
-    }
+    m_clientTxn->sendAbort();
   }
   s_requestErrorCount->addValue(1);
+}
+
+void ProxygenTransport::trySetMaxThreadCount(int max) {
+  m_server->setMaxThreadCount(max);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

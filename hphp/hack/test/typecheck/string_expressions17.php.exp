@@ -1,2 +1,2 @@
-File "string_expressions17.php", line 14, characters 23-23:
-Expected } (Parsing[1002])
+File "string_expressions17.php", line 14, characters 25-25:
+A right brace ('}') is expected here. (Parsing[1002])

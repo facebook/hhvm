@@ -1,0 +1,2 @@
+File "bad_inout_decl_special_destruct.php", line 4, characters 3-7:
+Method C::__destruct cannot accept any arguments (Parsing[1002])

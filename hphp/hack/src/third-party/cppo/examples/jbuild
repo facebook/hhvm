@@ -1,0 +1,22 @@
+(jbuild_version 1)
+
+(ocamllex (lexer))
+
+(rule
+ ((deps (debug.ml))
+  (targets (debug.out)) 
+   (action (with-stdout-to ${@} (run ${bin:cppo} ${<})))))
+
+(rule
+ ((deps (french.ml))
+  (targets (french.out)) 
+   (action (with-stdout-to ${@} (run ${bin:cppo} ${<})))))
+
+(rule
+ ((deps (lexer.ml))
+  (targets (lexer.out)) 
+   (action (with-stdout-to ${@} (run ${bin:cppo} ${<})))))
+
+(alias
+ ((name DEFAULT)
+  (deps (debug.out french.out lexer.out))))

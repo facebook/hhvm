@@ -72,10 +72,16 @@
   __attribute__((__format__ (__printf__, a1, a2)))
 #define ATTRIBUTE_UNUSED   __attribute__((__unused__))
 #define ATTRIBUTE_USED     __attribute__((__used__))
-#define ALWAYS_INLINE      inline __attribute__((__always_inline__))
+#ifndef NDEBUG
+# define FLATTEN           /*nop*/
+# define ALWAYS_INLINE     inline
+# define INLINE_FLATTEN    inline
+#else
+# define FLATTEN           __attribute__((__flatten__))
+# define ALWAYS_INLINE     inline __attribute__((__always_inline__))
+# define INLINE_FLATTEN    inline __attribute__((__always_inline__,__flatten__))
+#endif
 #define EXTERNALLY_VISIBLE __attribute__((__externally_visible__))
-#define FLATTEN            __attribute__((__flatten__))
-#define INLINE_FLATTEN     inline __attribute__((__always_inline__,__flatten__))
 #define NEVER_INLINE       __attribute__((__noinline__))
 #define UNUSED             __attribute__((__unused__))
 
@@ -95,11 +101,23 @@
 # define HHVM_ATTRIBUTE_WEAK
 #endif
 
-#ifdef DEBUG
+#ifndef NDEBUG
 # define DEBUG_ONLY /* nop */
 #else
 # define DEBUG_ONLY UNUSED
 #endif
+
+
+/*
+ * AARCH64 needs to create a walkable stack frame for
+ * getFrameRegs() when a FixupEntry isIndirect()
+ */
+#ifdef __aarch64__
+#define AARCH64_WALKABLE_FRAME() asm("" ::: "memory");
+#else
+#define AARCH64_WALKABLE_FRAME()
+#endif
+
 
 /*
  * We need to keep some unreferenced functions from being removed by
@@ -152,9 +170,11 @@
 #elif defined(__AARCH64EL__)
 
 # if defined(__clang__)
-#  error Clang implementation not done for ARM
-# endif
+# define DECLARE_FRAME_POINTER(fp) register ActRec* fp = (ActRec*) \
+  __builtin_frame_address(0)
+#else
 # define DECLARE_FRAME_POINTER(fp) register ActRec* fp asm("x29")
+#endif
 
 #elif defined(__powerpc64__)
 
@@ -174,23 +194,36 @@
 //////////////////////////////////////////////////////////////////////
 // CALLEE_SAVED_BARRIER
 
-#if defined(__CYGWIN__) || defined(__MINGW__)
-  #define CALLEE_SAVED_BARRIER()\
-    asm volatile("" : : : "rbx", "rsi", "rdi", "r12", "r13", "r14", "r15");
-#elif defined(_MSC_VER)
+#ifdef _MSC_VER
   // Unfortunately, we have no way to tell MSVC to do this, so we'll
   // probably have to use a pair of assembly stubs to manage this.
   #define CALLEE_SAVED_BARRIER() always_assert(false);
 #elif defined (__powerpc64__)
+ // After gcc 5.4.1 we can't clobber r30 on PPC64 anymore because it's used as
+ // PIC register.
+ #if __GNUC__ > 5 || (__GNUC__ == 5 && (__GNUC_MINOR__ >= 4) && \
+   (__GNUC_PATCHLEVEL__ >= 1))
+   #define  CALLEE_SAVED_BARRIER()\
+     asm volatile("" : : : "r2", "r14", "r15", "r16", "r17", "r18", "r19",\
+                  "r20", "r21", "r22", "r23", "r24", "r25", "r26", "r27", \
+                  "r28", "r29", "cr2", "cr3", "cr4", "v20", "v21", "v22", \
+                  "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", \
+                  "v31");
+ #else
+  // On gcc versions < 5.4.1 we need to include r30 on barrier as it's not
+  // saved by gcc.
   #define CALLEE_SAVED_BARRIER()\
     asm volatile("" : : : "r2", "r14", "r15", "r16", "r17", "r18", "r19",\
-        "r20", "r21", "r22", "r23", "r24", "r25", "r26", "r27", "r28",   \
-        "r29", "r30", "cr2", "cr3", "cr4", "v20", "v21", "v22", "v23",   \
-        "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31");
+                 "r20", "r21", "r22", "r23", "r24", "r25", "r26", "r27", \
+                 "r28", "r29", "r30", "cr2", "cr3", "cr4", "v20", "v21", \
+                 "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", \
+                 "v30", "v31");
+ #endif
 #elif defined (__AARCH64EL__)
   #define CALLEE_SAVED_BARRIER()\
     asm volatile("" : : : "x19", "x20", "x21", "x22", "x23", "x24", "x25",\
-                 "x26", "x27", "x28")
+                 "x26", "x27", "x28", \
+                 "d8", "d9", "d10", "d11", "d12", "d13", "d14", "d15")
 #else
   #define CALLEE_SAVED_BARRIER()\
     asm volatile("" : : : "rbx", "r12", "r13", "r14", "r15");
@@ -239,6 +272,12 @@
 // 2015 RTM doesn't like it when you try to add via a double duration.
 // Bug Report: https://connect.microsoft.com/VisualStudio/feedback/details/1839243
 # define MSVC_NO_STD_CHRONO_DURATION_DOUBLE_ADD 1
+#endif
+
+#ifdef __APPLE__
+#define ASM_LOCAL_LABEL(x) "L" x
+#else
+#define ASM_LOCAL_LABEL(x) ".L" x
 #endif
 
 #endif

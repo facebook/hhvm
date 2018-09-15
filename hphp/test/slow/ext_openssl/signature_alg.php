@@ -1,11 +1,5 @@
 <?php
 
-$test_values = array(
-  OPENSSL_ALGO_SHA1,
-  OPENSSL_ALGO_MD5,
-  OPENSSL_ALGO_MD4,
-);
-
 function run_test($value) {
   $data = 'DATA TO SIGN';
   $signature = 'SIGNATURE';
@@ -29,7 +23,17 @@ function run_test($value) {
   openssl_free_key($key);
 }
 
+
+<<__EntryPoint>>
+function main_signature_alg() {
+$test_values = array(
+  OPENSSL_ALGO_SHA1,
+  OPENSSL_ALGO_MD5,
+  OPENSSL_ALGO_MD4,
+);
+
 $test_values = array_merge($test_values, openssl_get_md_methods());
 foreach ($test_values as $test_value) {
   run_test($test_value);
+}
 }

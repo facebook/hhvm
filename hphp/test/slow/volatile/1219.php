@@ -17,4 +17,8 @@ function foo() {
     echo "no\n";
   }
 }
+
+<<__EntryPoint>>
+function main_1219() {
 foo();
+}

@@ -1,2 +1,2 @@
-<?php
+<?hh
 include "syntax-error.php";

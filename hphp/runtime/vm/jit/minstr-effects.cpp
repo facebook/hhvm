@@ -26,12 +26,10 @@ namespace {
 template<typename T> T bad_value() { not_reached(); }
 
 Opcode canonicalOp(Opcode op) {
-  if (op == ElemUX || op == UnsetElem) {
-    return UnsetElem;
-  }
-  if (op == SetWithRefElem) {
-    return SetWithRefElem;
-  }
+  if (op == ElemUX || op == UnsetElem)     return UnsetElem;
+  if (op == SetWithRefElem)                return SetWithRefElem;
+  if (op == SetRange || op == SetRangeRev) return SetRange;
+
   return opcodeHasFlags(op, MInstrProp) ? SetProp
        : opcodeHasFlags(op, MInstrElem) ? SetElem
        : bad_value<Opcode>();
@@ -72,18 +70,24 @@ void getBaseType(Opcode rawOp, bool predict,
     baseValChanged = true;
   }
 
-  if ((op == SetElem || op == UnsetElem || op == SetWithRefElem) &&
+  if ((op == SetElem || op == SetRange ||
+       op == UnsetElem || op == SetWithRefElem) &&
       baseType.maybe(TArrLike | TStr)) {
     /* Modifying an array or string element, even when COW doesn't kick in,
      * produces a new SSATmp for the base. StaticArr/StaticStr may be promoted
      * to CountedArr/CountedStr. */
     baseValChanged = true;
-    if (baseType.maybe(TArr)) baseType |= TCountedArr;
-    if (baseType.maybe(TVec)) {
-      baseType |= TCountedVec;
-      /* Unsetting a vec element can turn it into a dict */
-      if (op == UnsetElem) baseType |= TDict;
+    if (baseType.maybe(TArr)) {
+      if (rawOp == SetNewElemArray &&
+          (baseType <= Type::Array(ArrayData::kPackedKind) ||
+           baseType <= Type::Array(ArrayData::kEmptyKind))) {
+        baseType = Type::Array(ArrayData::kPackedKind);
+      } else {
+        baseType |= TCountedArr;
+      }
     }
+
+    if (baseType.maybe(TVec)) baseType |= TCountedVec;
     if (baseType.maybe(TDict)) baseType |= TCountedDict;
     if (baseType.maybe(TKeyset)) baseType |= TCountedKeyset;
     if (baseType.maybe(TStr)) baseType |= TCountedStr;
@@ -111,7 +115,7 @@ bool MInstrEffects::supported(const IRInstruction* inst) {
 MInstrEffects::MInstrEffects(const Opcode rawOp, const Type origBase) {
   // Note: MInstrEffects wants to manipulate pointer types in some situations
   // for historical reasons.  We'll eventually change that.
-  bool const is_ptr = origBase <= TPtrToGen;
+  bool const is_ptr = origBase <= TLvalToGen;
   auto const basePtr = is_ptr ? origBase.ptrKind() : Ptr::Bottom;
   baseType = origBase.derefIfPtr();
 
@@ -127,7 +131,7 @@ MInstrEffects::MInstrEffects(const Opcode rawOp, const Type origBase) {
   getBaseType(rawOp, true, inner, baseValChanged);
 
   baseType = inner.box() | outer;
-  baseType = is_ptr ? baseType.ptr(basePtr) : baseType;
+  baseType = is_ptr ? baseType.lval(basePtr) : baseType;
 
   baseTypeChanged = baseType != origBase;
 

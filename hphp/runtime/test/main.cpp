@@ -19,5 +19,6 @@
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
   HPHP::init_for_unit_test();
+  SCOPE_EXIT { HPHP::hphp_process_exit(); };
   return RUN_ALL_TESTS();
 }

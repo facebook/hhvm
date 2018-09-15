@@ -2,13 +2,12 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Core
+open Core_kernel
 open Typing_defs
 open Utils
 
@@ -31,7 +30,8 @@ let expand_typedef_ ?force_expand:(force_expand=false) ety_env env r x argl =
     Errors.cyclic_typedef pos;
     env, (ety_env, (r, Tany))
   end else begin
-    let {td_pos; td_vis; td_tparams; td_type; td_constraint} =
+    let {td_pos; td_vis; td_tparams; td_type; td_constraint;
+        td_decl_errors = _;} =
       unsafe_opt @@ Typing_env.get_typedef env x in
     let should_expand =
       force_expand ||
@@ -56,7 +56,10 @@ let expand_typedef_ ?force_expand:(force_expand=false) ety_env env r x argl =
       else begin
         let env, td_constraint =
           match td_constraint with
-          | None -> env, None
+          | None ->
+            let r_cstr  = Reason.Rimplicit_upper_bound (Reason.to_pos r, "?nonnull") in
+            let cstr = (r_cstr, Toption (r_cstr, Tnonnull)) in
+            env, Some cstr
           | Some cstr ->
             let env, cstr = Phase.localize ~ety_env env cstr in
             env, Some cstr

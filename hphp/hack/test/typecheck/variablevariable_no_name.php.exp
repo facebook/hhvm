@@ -1,2 +1,2 @@
-File "variablevariable_no_name.php", line 4, characters 12-12:
-Expected ; (Parsing[1002])
+File "variablevariable_no_name.php", line 4, characters 10-12:
+Variable variables are not legal; all variable identifiers must be static strings. (Naming[2081])

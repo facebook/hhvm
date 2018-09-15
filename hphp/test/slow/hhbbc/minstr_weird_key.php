@@ -16,4 +16,8 @@ function elem() {
   @var_dump($b[$k]++);
 }
 
+
+<<__EntryPoint>>
+function main_minstr_weird_key() {
 elem();
+}

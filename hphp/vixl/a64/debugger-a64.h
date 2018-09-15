@@ -109,8 +109,8 @@ class Debugger : public Simulator {
  public:
   explicit Debugger(Decoder* decoder, std::ostream& stream);
 
-  virtual void Run();
-  void VisitException(Instruction* instr);
+  void Run() override;
+  void VisitException(Instruction* instr) override;
 
   inline int log_parameters() {
     // The simulator can control disassembly, so make sure that the Debugger's

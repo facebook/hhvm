@@ -17,11 +17,8 @@
 #include "hphp/compiler/compiler.h"
 
 #include "hphp/compiler/analysis/analysis_result.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/emitter.h"
-#include "hphp/compiler/analysis/symbol_table.h"
 #include "hphp/compiler/builtin_symbols.h"
-#include "hphp/compiler/json.h"
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/package.h"
 #include "hphp/compiler/parser/parser.h"
@@ -32,7 +29,9 @@
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/version.h"
 #include "hphp/system/systemlib.h"
 
 #include "hphp/util/async-func.h"
@@ -45,6 +44,9 @@
 #include "hphp/util/process-exec.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/timer.h"
+#ifndef _MSC_VER
+#include "hphp/util/light-process.h"
+#endif
 
 #include "hphp/hhvm/process-init.h"
 
@@ -62,6 +64,8 @@
 #include <boost/filesystem.hpp>
 
 #include <exception>
+
+#include <folly/portability/SysStat.h>
 
 using namespace boost::program_options;
 using std::cout;
@@ -187,9 +191,9 @@ int compiler_main(int argc, char **argv) {
       Logger::Info("all files saved in %s ...", po.outputDir.c_str());
     }
     return ret;
-  } catch (Exception &e) {
+  } catch (Exception& e) {
     Logger::Error("Exception: %s\n", e.getMessage().c_str());
-  } catch (std::exception &e) {
+  } catch (std::exception& e) {
     Logger::Error("std::exception: %s\n", e.what());
   } catch (...) {
     Logger::Error("(unknown exception was thrown)\n");
@@ -208,16 +212,13 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("version", "display version number")
     ("target,t", value<std::string>(&po.target)->default_value("run"),
      "lint | "
-     "php | "
      "hhbc | "
      "filecache | "
      "run (default)")
     ("format,f", value<std::string>(&po.format),
      "lint: (none); \n"
-     "php: trimmed (default) | inlined | pickled |"
-     " <any combination of them by any separator>; \n"
-     "hhbc: binary (default) | text; \n"
-     "run: cluster (default) | file")
+     "hhbc: binary (default) | hhas | text | exe; \n"
+     "run: binary (default) | hhas | text | exe")
     ("input-dir", value<std::string>(&po.inputDir), "input directory")
     ("program", value<std::string>(&po.program)->default_value("program"),
      "final program name to use")
@@ -377,7 +378,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 
   if (po.target != "run"
       && po.target != "lint"
-      && po.target != "php"
       && po.target != "hhbc"
       && po.target != "filecache") {
     Logger::Error("Error in command line: target '%s' is not supported.",
@@ -403,7 +403,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     Logger::LogLevel = Logger::LogInfo;
   }
 
-  MemoryManager::TlsWrapper::getCheck();
+  tl_heap.getCheck();
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;
   for (auto& file : po.config) {
@@ -416,10 +416,34 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     Config::ParseHdfString(po.confStrings[i].c_str(), config);
   }
   Hdf runtime = config["Runtime"];
+  if (config.exists("EnableHipHopSyntax")) {
+    // lots of RuntimeOptions depend on Eval.EnableHipHopSyntax, so we
+    // need to make sure it gets set correctly.
+    runtime["Eval.EnableHipHopSyntax"].set(
+      config["EnableHipHopSyntax"].configGet());
+  }
   // The configuration command line strings were already processed above
   // Don't process them again.
+  //
+  // Note that some options depends on RepoAuthoritative, we thus set/unset them
+  // here. If we reach this code, we are invoking hhvm --hphp, which is
+  // supposed to be in repo mode only. But we are restoring it to false since
+  // we need compile_systemlib_string to actually parse the file instead of
+  // trying to load it from repo (which is the case when RepoAuthoritative is
+  // true).
+  RuntimeOption::RepoAuthoritative = true;
+  // We don't want debug info in repo builds, since we don't support attaching
+  // a debugger in repo authoritative mode, but we want the default for debug
+  // info to be true so that it's present in sandboxes. Override that default
+  // here, since we only get here when building for repo authoritatibe mode.
+  RuntimeOption::RepoDebugInfo = false;
+  // Default RepoLocalMode to off so we build systemlib from source.
+  // This can be overridden when running lots of repo builds (eg
+  // test/run) for better performance.
+  RuntimeOption::RepoLocalMode = "--";
   RuntimeOption::Load(ini, runtime);
   Option::Load(ini, config);
+  RuntimeOption::RepoAuthoritative = false;
   RuntimeOption::EvalJit = false;
 
   initialize_repo();
@@ -471,28 +495,18 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 
   Option::ProgramName = po.program;
 
-  if (po.format.empty()) {
-    if (po.target == "php") {
-      po.format = "trimmed";
-    } else if (po.target == "run") {
-      po.format = "binary";
-    } else if (po.target == "hhbc") {
-      po.format = "binary";
-    }
+  if (po.format.empty() && (po.target == "run" || po.target == "hhbc")) {
+    po.format = "binary";
   }
 
   if (po.optimizeLevel == -1) {
-    po.optimizeLevel = 1;
+    po.optimizeLevel = RuntimeOption::EvalDisableHphpcOpts ? 0 : 1;
   }
 
-  // we always do pre/post opt no matter the opt level
-  Option::PreOptimization = true;
   if (po.optimizeLevel == 0) {
     // --optimize-level=0 is equivalent to --opts=none
     Option::ParseTimeOpts = false;
   }
-
-  initialize_hhbbc_options();
 
   return 0;
 }
@@ -500,16 +514,20 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 ///////////////////////////////////////////////////////////////////////////////
 
 int process(const CompilerOptions &po) {
+#ifndef _MSC_VER
+  LightProcess::Initialize(RuntimeOption::LightProcessFilePrefix,
+                           RuntimeOption::LightProcessCount,
+                           RuntimeOption::EvalRecordSubprocessTimes,
+                           {});
+#endif
+
   if (po.coredump) {
-#if defined(__MINGW__) || defined(_MSC_VER)
+#ifdef _MSC_VER
 /**
  * Windows actually does core dump size and control at a system, not an app
- * level.  So we do nothing here and are at the mercy of Dr. Watson
- *
- * Cygwin has a compat layer in place and does its own core dumping, so we
- * still call setrlimit for core dumps
+ * level.  So we do nothing here and are at the mercy of Dr. Watson.
  */
-#elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__CYGWIN__)
+#elif defined(__APPLE__) || defined(__FreeBSD__)
     struct rlimit rl;
     getrlimit(RLIMIT_CORE, &rl);
     rl.rlim_cur = 80000000LL;
@@ -545,63 +563,63 @@ int process(const CompilerOptions &po) {
   // one time initialization
   BuiltinSymbols::LoadSuperGlobals();
 
-  bool isPickledPHP = (po.target == "php" && po.format == "pickled");
-  if (!isPickledPHP) {
-    bool wp = Option::WholeProgram;
-    Option::WholeProgram = false;
-    BuiltinSymbols::s_systemAr = ar;
-    hphp_process_init();
-    BuiltinSymbols::s_systemAr.reset();
-    Option::WholeProgram = wp;
-    if (po.target == "hhbc" && !Option::WholeProgram) {
-      // We're trying to produce the same bytecode as runtime parsing.
-      // There's nothing to do.
-    } else {
-      if (!BuiltinSymbols::Load(ar)) {
-        return false;
-      }
+  bool processInitRan = false;
+  SCOPE_EXIT {
+    if (processInitRan) {
+      hphp_process_exit();
     }
+  };
+
+  bool wp = Option::WholeProgram;
+  Option::WholeProgram = false;
+  BuiltinSymbols::s_systemAr = ar;
+  hphp_process_init();
+  processInitRan = true;
+  BuiltinSymbols::s_systemAr.reset();
+  Option::WholeProgram = wp;
+  if (po.target == "hhbc" && !Option::WholeProgram) {
+    // We're trying to produce the same bytecode as runtime parsing.
+    // There's nothing to do.
   } else {
-    hphp_process_init();
+    if (!BuiltinSymbols::Load(ar)) {
+      return false;
+    }
   }
 
+  LitstrTable::init();
+  LitstrTable::get().setWriting();
+
   {
-    Timer timer(Timer::WallTime, "parsing inputs");
-    if (!po.inputs.empty() && isPickledPHP) {
-      for (unsigned int i = 0; i < po.inputs.size(); i++) {
-        package.addSourceFile(po.inputs[i].c_str());
-      }
+    Timer timer2(Timer::WallTime, "parsing inputs");
+    ar->setPackage(&package);
+    ar->setParseOnDemand(po.parseOnDemand);
+    if (!po.parseOnDemand) {
+      ar->setParseOnDemandDirs(Option::ParseOnDemandDirs);
+    }
+    if (po.modules.empty() && po.fmodules.empty() &&
+        po.ffiles.empty() && po.inputs.empty() && po.inputList.empty()) {
+      package.addAllFiles(false);
     } else {
-      ar->setPackage(&package);
-      ar->setParseOnDemand(po.parseOnDemand);
-      if (!po.parseOnDemand) {
-        ar->setParseOnDemandDirs(Option::ParseOnDemandDirs);
+      for (unsigned int i = 0; i < po.modules.size(); i++) {
+        package.addDirectory(po.modules[i], false);
       }
-      if (po.modules.empty() && po.fmodules.empty() &&
-          po.ffiles.empty() && po.inputs.empty() && po.inputList.empty()) {
-        package.addAllFiles(false);
-      } else {
-        for (unsigned int i = 0; i < po.modules.size(); i++) {
-          package.addDirectory(po.modules[i], false);
-        }
-        for (unsigned int i = 0; i < po.fmodules.size(); i++) {
-          package.addDirectory(po.fmodules[i], true);
-        }
-        for (unsigned int i = 0; i < po.ffiles.size(); i++) {
-          package.addSourceFile(po.ffiles[i].c_str());
-        }
-        for (unsigned int i = 0; i < po.cmodules.size(); i++) {
-          package.addStaticDirectory(po.cmodules[i].c_str());
-        }
-        for (unsigned int i = 0; i < po.cfiles.size(); i++) {
-          package.addStaticFile(po.cfiles[i].c_str());
-        }
-        for (unsigned int i = 0; i < po.inputs.size(); i++) {
-          package.addSourceFile(po.inputs[i].c_str());
-        }
-        if (!po.inputList.empty()) {
-          package.addInputList(po.inputList.c_str());
-        }
+      for (unsigned int i = 0; i < po.fmodules.size(); i++) {
+        package.addDirectory(po.fmodules[i], true);
+      }
+      for (unsigned int i = 0; i < po.ffiles.size(); i++) {
+        package.addSourceFile(po.ffiles[i]);
+      }
+      for (unsigned int i = 0; i < po.cmodules.size(); i++) {
+        package.addStaticDirectory(po.cmodules[i]);
+      }
+      for (unsigned int i = 0; i < po.cfiles.size(); i++) {
+        package.addStaticFile(po.cfiles[i]);
+      }
+      for (unsigned int i = 0; i < po.inputs.size(); i++) {
+        package.addSourceFile(po.inputs[i]);
+      }
+      if (!po.inputList.empty()) {
+        package.addInputList(po.inputList);
       }
     }
     if (po.target != "filecache") {
@@ -609,7 +627,7 @@ int process(const CompilerOptions &po) {
         return 1;
       }
       if (Option::WholeProgram) {
-        Timer timer(Timer::WallTime, "analyzeProgram");
+        Timer timer3(Timer::WallTime, "analyzeProgram");
         ar->analyzeProgram();
       }
     }
@@ -625,9 +643,9 @@ int process(const CompilerOptions &po) {
     ar->dump();
   }
 
-  ar->setFinish([&po,&timer,&package](AnalysisResultPtr ar) {
+  ar->setFinish([&po,&timer,&package](AnalysisResultPtr res) {
       if (Option::DumpAst) {
-        ar->dump();
+        res->dump();
       }
 
       // saving stats
@@ -642,9 +660,7 @@ int process(const CompilerOptions &po) {
     });
 
   int ret = 0;
-  if (po.target == "php") {
-    ret = phpTarget(po, ar);
-  } else if (po.target == "hhbc") {
+  if (po.target == "hhbc") {
     ret = hhbcTarget(po, std::move(ar), fileCacheThread);
   } else if (po.target == "run") {
     ret = runTargetCheck(po, std::move(ar), fileCacheThread);
@@ -678,76 +694,11 @@ int lintTarget(const CompilerOptions &po) {
       } else {
         Logger::Info("%s parsed successfully...", filename.c_str());
       }
-    } catch (FileOpenException &e) {
+    } catch (FileOpenException& e) {
       Logger::Error("%s", e.getMessage().c_str());
       ret = 1;
     }
   }
-  return ret;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-static void wholeProgramPasses(const CompilerOptions& po,
-                               AnalysisResultPtr ar) {
-  if (Option::PreOptimization) {
-    Timer timer(Timer::WallTime, "pre-optimizing");
-    ar->preOptimize();
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-int phpTarget(const CompilerOptions &po, AnalysisResultPtr ar) {
-  int ret = 0;
-
-  // format
-  int formatCount = 0;
-  if (po.format.find("pickled") != std::string::npos) {
-    Option::GeneratePickledPHP = true;
-    formatCount++;
-  }
-  if (po.format.find("inlined") != std::string::npos) {
-    Option::GenerateInlinedPHP = true;
-    formatCount++;
-  }
-  if (po.format.find("trimmed") != std::string::npos) {
-    Option::GenerateTrimmedPHP = true;
-    formatCount++;
-  }
-  if (formatCount == 0) {
-    Logger::Error("Unknown format for PHP target: %s", po.format.c_str());
-    return 1;
-  }
-
-  // generate
-  ar->setOutputPath(po.outputDir);
-  if (Option::GeneratePickledPHP) {
-    Logger::Info("creating pickled PHP files...");
-    std::string outputDir = po.outputDir;
-    if (formatCount > 1) outputDir += "/pickled";
-    mkdir(outputDir.c_str(), 0777);
-    ar->outputAllPHP(CodeGenerator::PickledPHP);
-  }
-  if (Option::GenerateInlinedPHP) {
-    Logger::Info("creating inlined PHP files...");
-    std::string outputDir = po.outputDir;
-    if (formatCount > 1) outputDir += "/inlined";
-    mkdir(outputDir.c_str(), 0777);
-    if (!ar->outputAllPHP(CodeGenerator::InlinedPHP)) {
-      ret = -1;
-    }
-  }
-  if (Option::GenerateTrimmedPHP) {
-    Logger::Info("creating trimmed PHP files...");
-    std::string outputDir = po.outputDir;
-    if (formatCount > 1) outputDir += "/trimmed";
-    mkdir(outputDir.c_str(), 0777);
-    if (!ar->outputAllPHP(CodeGenerator::TrimmedPHP)) {
-      ret = -1;
-    }
-  }
-
   return ret;
 }
 
@@ -765,15 +716,12 @@ void hhbcTargetInit(const CompilerOptions &po, AnalysisResultPtr ar) {
     RuntimeOption::RepoCentralPath += ".hhbc";
   }
   unlink(RuntimeOption::RepoCentralPath.c_str());
-  RuntimeOption::RepoLocalMode = "--";
-  RuntimeOption::RepoDebugInfo = Option::RepoDebugInfo;
-  RuntimeOption::RepoJournal = "memory";
-  if (HHBBC::options.HardReturnTypeHints) {
-    RuntimeOption::EvalCheckReturnTypeHints = 3;
-  }
 
-  // Turn off commits, because we don't want systemlib to get included
-  RuntimeOption::RepoCommit = false;
+  if (RuntimeOption::RepoLocalMode != "rw") {
+    // No point writing to the central repo, because we're going to
+    // remove it before writing the final repo.
+    RuntimeOption::RepoCommit = false;
+  }
 }
 
 int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
@@ -784,6 +732,11 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
   if (po.format.find("text") != std::string::npos) {
     Option::GenerateTextHHBC = true;
     type = "creating text HHBC files";
+    formatCount++;
+  }
+  if (po.format.find("hhas") != std::string::npos) {
+    Option::GenerateHhasHHBC = true;
+    type = "creating hhas HHBC files";
     formatCount++;
   }
   if (po.format.find("binary") != std::string::npos) {
@@ -802,14 +755,24 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
     return 1;
   }
 
+  Repo::shutdown();
+  RuntimeOption::RepoJournal = "memory";
+  RuntimeOption::RepoLocalMode = "--";
+  unlink(RuntimeOption::RepoCentralPath.c_str());
   /* without this, emitClass allows classes with interfaces to be
      hoistable */
   SystemLib::s_inited = true;
   RuntimeOption::RepoCommit = true;
+  Repo::get();
+
+  // the function is only invoked in hhvm --hphp, which is supposed to be in
+  // repo mode only. we are not setting it earlier in `compiler_main` since we
+  // want systemlib to be built without repo-auth == true, or otherwise,
+  // `compile_systemlib_string` will try to load systemlib from repo, while we
+  // are building it.
+  RuntimeOption::RepoAuthoritative = true;
 
   if (po.optimizeLevel > 0) {
-    ret = 0;
-    wholeProgramPasses(po, ar);
     ar->analyzeProgramFinal();
   }
 
@@ -852,12 +815,6 @@ int runTargetCheck(const CompilerOptions &po, AnalysisResultPtr&& ar,
                    AsyncFileCacheSaver &fcThread) {
   // generate code
   if (hhbcTarget(po, std::move(ar), fcThread)) {
-    return 1;
-  }
-
-  // check error
-  if (Compiler::HasError() && !po.force) {
-    Compiler::DumpErrors(ar);
     return 1;
   }
 

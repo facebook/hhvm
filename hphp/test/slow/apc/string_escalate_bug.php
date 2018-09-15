@@ -13,4 +13,8 @@ function foo() {
   var_dump($x);
 }
 
+
+<<__EntryPoint>>
+function main_string_escalate_bug() {
 foo();
+}

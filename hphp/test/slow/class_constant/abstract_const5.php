@@ -7,4 +7,8 @@ interface I {
   const Z = self::Y . ' via Z';
 }
 
+
+<<__EntryPoint>>
+function main_abstract_const5() {
 var_dump(I::X); // no value!
+}

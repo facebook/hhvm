@@ -1,0 +1,38 @@
+array(4) {
+  [0]=>
+  object(ReflectionProperty)#3 (3) {
+    ["name"]=>
+    string(5) "prop1"
+    ["class"]=>
+    string(3) "Foo"
+    ["forceAccessible":"ReflectionProperty":private]=>
+    bool(false)
+  }
+  [1]=>
+  object(ReflectionProperty)#4 (3) {
+    ["name"]=>
+    string(5) "prop2"
+    ["class"]=>
+    string(3) "Foo"
+    ["forceAccessible":"ReflectionProperty":private]=>
+    bool(false)
+  }
+  [2]=>
+  object(ReflectionProperty)#5 (3) {
+    ["name"]=>
+    string(5) "prop3"
+    ["class"]=>
+    string(3) "Foo"
+    ["forceAccessible":"ReflectionProperty":private]=>
+    bool(false)
+  }
+  [3]=>
+  object(ReflectionProperty)#6 (3) {
+    ["name"]=>
+    string(5) "prop4"
+    ["class"]=>
+    string(3) "Foo"
+    ["forceAccessible":"ReflectionProperty":private]=>
+    bool(false)
+  }
+}

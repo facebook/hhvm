@@ -41,6 +41,9 @@ struct TypeProfile {
     a.type |= b.type;
   }
 
+  void serialize(ProfDataSerializer& ser) const { type.serialize(ser); }
+  void deserialize(ProfDataDeserializer& ser) { type = Type::deserialize(ser); }
+
   Type type; // This gets initialized with 0, which is TBottom.
   static_assert(Type::Bits::kBottom == 0, "Assuming TBottom is 0");
 

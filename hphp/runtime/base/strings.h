@@ -26,7 +26,7 @@ const char* const ASSIGN_THIS_ERROR = "Cannot re-assign $this";
 const char* const FUNCTION_ALREADY_DEFINED = "Function already defined: %s";
 const char* const CONSTANT_ALREADY_DEFINED = "Constant %s already defined";
 const char* const CONSTANTS_MUST_BE_SCALAR =
-  "Constants may only evaluate to scalar values";
+  "Constants may only evaluate to scalar values or arrays";
 const char* const CONSTANTS_CASE_SENSITIVE =
   "Case insensitive constant names are not supported in HipHop";
 const char* const MODULO_BY_ZERO = "Modulo by zero";
@@ -60,6 +60,8 @@ const char* const FUNCTION_NAME_MUST_BE_STRING =
   "Function name must be a string";
 const char* const METHOD_NAME_MUST_BE_STRING =
   "Method name must be a string";
+const char* const MISSING_ARGUMENT_EXCEPTION =
+  "Too few arguments to function %s(), %d passed and %s %d expected";
 const char* const MISSING_ARGUMENT =
   "%s() expects %s 1 parameter, %d given";
 const char* const MISSING_ARGUMENTS =
@@ -94,8 +96,28 @@ const char* const TRAIT_BAD_REQ_IMPLEMENTS =
 const char* const INCONSISTENT_INSTEADOF =
   "Inconsistent insteadof definition. The method %s is to be used from %s, "
   "but %s is also on the exclude list";
+const char* const MULTIPLY_EXCLUDED =
+  "Failed to evaluate a trait precedence (%s). Method of trait %s was defined "
+  "to be excluded multiple times";
 const char* const REDECLARE_BUILTIN = "Cannot redeclare %s()";
 const char* const DISALLOWED_DYNCALL = "%s should not be called dynamically";
+const char* const HACKARR_COMPAT_ARR_MIXEDCMP =
+  "Comparing array with non-array";
+const char* const HACKARR_COMPAT_VARR_IS_ARR = "is_array() called on varray";
+const char* const HACKARR_COMPAT_DARR_IS_ARR = "is_array() called on darray";
+const char* const HACKARR_COMPAT_VEC_IS_ARR = "is_array() called on vec";
+const char* const HACKARR_COMPAT_DICT_IS_ARR = "is_array() called on dict";
+const char* const HACKARR_COMPAT_KEYSET_IS_ARR = "is_array() called on keyset";
+const char* const HACKARR_COMPAT_VARR_IS_VEC = "is_vec() called on varray";
+const char* const HACKARR_COMPAT_VEC_IS_VARR = "is_varray() called on vec";
+const char* const HACKARR_COMPAT_DARR_IS_DICT = "is_dict() called on darray";
+const char* const HACKARR_COMPAT_DICT_IS_DARR = "is_darray() called on dict";
+const char* const HACKARR_COMPAT_TUPLE_IS_DARR =
+  "is/as operator used with darray and tuple";
+const char* const HACKARR_COMPAT_SHAPE_IS_VARR =
+  "is/as operator used with varray and shape";
+const char* const FUNCTION_CALLED_DYNAMICALLY = "'%s' called dynamically";
+
 } // namespace Strings
 } // namespace HPHP
 

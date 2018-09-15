@@ -1,0 +1,5 @@
+    PostXHPVariableSetLinesToCheckForPartialForamtting::go(
+      Vector {1, 2, 3, 4},
+      Vector {5, 6, 7, 8},
+    );
+

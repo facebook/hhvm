@@ -1,4 +1,7 @@
 <?php
+
+<<__EntryPoint>>
+function main_ziparchive_extractto_directory() {
 $dir = tempnam(sys_get_temp_dir(), __FILE__);
 unlink($dir);
 mkdir($dir);
@@ -55,3 +58,4 @@ rmdir("$dir/z");
 rmdir("$dir/simple");
 unlink("$dir/a.zip");
 rmdir($dir);
+}

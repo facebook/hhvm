@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_get_resource_type() {
 $types = array(
   'php://stdin',
   'php://stdout',
@@ -20,3 +23,4 @@ var_dump(get_resource_type(bzopen($tmp, 'w')));
 var_dump(get_resource_type(gzopen($tmp, 'w')));
 var_dump(get_resource_type(imagecreate(110, 20)));
 var_dump(get_resource_type(curl_init()));
+}

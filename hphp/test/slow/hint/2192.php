@@ -1,10 +1,13 @@
 <?php
-
-$WHICH = 0;
 function decide() {
   global $WHICH;
   return $WHICH;
 }
+
+
+<<__EntryPoint>>
+function main_2192() {
+$WHICH = 0;
 if (decide()) {
   class X {
     public function generator() {
@@ -24,4 +27,5 @@ if (decide()) {
 $x = new X;
 foreach ($x->generator() as $v) {
   var_dump($v);
+}
 }

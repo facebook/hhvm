@@ -1,0 +1,176 @@
+array(0) {
+}
+array(4) {
+  [0]=>
+  int(1)
+  [1]=>
+  int(2)
+  [2]=>
+  int(3)
+  [3]=>
+  int(4)
+}
+array(3) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [2]=>
+  string(1) "c"
+}
+array(12) {
+  [0]=>
+  NULL
+  [1]=>
+  bool(true)
+  [2]=>
+  bool(false)
+  [3]=>
+  string(3) "abc"
+  [4]=>
+  int(100)
+  [5]=>
+  float(1.23)
+  [6]=>
+  object(stdClass)#1 (0) {
+  }
+  [7]=>
+  resource(4) of type (xml)
+  [8]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
+  [9]=>
+  vec(2) {
+    int(3)
+    int(4)
+  }
+  [10]=>
+  dict(1) {
+    [1]=>
+    int(2)
+  }
+  [11]=>
+  keyset(1) {
+    string(3) "abc"
+  }
+}
+array(2) {
+  [0]=>
+  array(0) {
+  }
+  [1]=>
+  array(3) {
+    [0]=>
+    string(1) "a"
+    [1]=>
+    int(100)
+    [2]=>
+    bool(false)
+  }
+}
+array(2) {
+  [0]=>
+  array(0) {
+  }
+  [1]=>
+  array(2) {
+    [100]=>
+    string(1) "a"
+    ["b"]=>
+    int(200)
+  }
+}
+array(0) {
+}
+array(4) {
+  [100]=>
+  int(1)
+  [200]=>
+  int(2)
+  [300]=>
+  int(3)
+  [400]=>
+  int(4)
+}
+array(3) {
+  ["key1"]=>
+  string(1) "a"
+  ["key2"]=>
+  string(1) "b"
+  ["key3"]=>
+  string(1) "c"
+}
+array(12) {
+  [10]=>
+  NULL
+  [20]=>
+  bool(true)
+  [30]=>
+  bool(false)
+  ["key1"]=>
+  string(3) "abc"
+  ["key2"]=>
+  int(100)
+  ["key3"]=>
+  float(1.23)
+  [40]=>
+  object(stdClass)#1 (0) {
+  }
+  [50]=>
+  resource(5) of type (xml)
+  [60]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    int(2)
+  }
+  ["key4"]=>
+  vec(2) {
+    int(3)
+    int(4)
+  }
+  ["key5"]=>
+  dict(1) {
+    [1]=>
+    int(2)
+  }
+  [70]=>
+  keyset(1) {
+    string(3) "abc"
+  }
+}
+array(1) {
+  [123]=>
+  string(3) "def"
+}
+array(2) {
+  [123]=>
+  array(0) {
+  }
+  [456]=>
+  array(2) {
+    ["a"]=>
+    int(100)
+    [200]=>
+    string(1) "b"
+  }
+}
+array(2) {
+  ["abc"]=>
+  array(0) {
+  }
+  ["def"]=>
+  array(3) {
+    [0]=>
+    string(1) "a"
+    [1]=>
+    int(100)
+    [2]=>
+    bool(false)
+  }
+}

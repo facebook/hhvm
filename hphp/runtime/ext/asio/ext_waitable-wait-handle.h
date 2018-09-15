@@ -34,12 +34,11 @@ namespace HPHP {
 struct AsioBlockable;
 struct AsioContext;
 
-struct c_WaitableWaitHandle : c_WaitHandle {
+struct c_WaitableWaitHandle : c_Awaitable {
   WAITHANDLE_CLASSOF(WaitableWaitHandle);
   WAITHANDLE_DTOR(WaitableWaitHandle);
 
-  explicit c_WaitableWaitHandle(Class* cls = c_WaitableWaitHandle::classof(),
-                           HeaderKind kind = HeaderKind::WaitHandle) noexcept;
+  explicit c_WaitableWaitHandle(Class*, HeaderKind, type_scan::Index) noexcept;
   ~c_WaitableWaitHandle();
 
  public:
@@ -75,11 +74,6 @@ struct c_WaitableWaitHandle : c_WaitHandle {
   [[noreturn]] NEVER_INLINE
   void throwCycleException(c_WaitableWaitHandle* child) const;
 };
-
-int64_t HHVM_METHOD(WaitableWaitHandle, getContextIdx);
-Object HHVM_METHOD(WaitableWaitHandle, getCreator);
-Array HHVM_METHOD(WaitableWaitHandle, getParents);
-Array HHVM_METHOD(WaitableWaitHandle, getDependencyStack);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -16,9 +16,8 @@
 */
 
 #include "hphp/runtime/base/zend-pack.h"
-#include "hphp/runtime/base/type-conversions.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/util/tiny-vector.h"
+#include "hphp/runtime/base/req-tiny-vector.h"
 
 #include <algorithm>
 
@@ -339,8 +338,8 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     }
   }
 
-  String s = String(outputsize, ReserveString);
-  char *output = s.mutableData();
+  String str = String(outputsize, ReserveString);
+  char *output = str.mutableData();
   outputpos = 0;
   currentarg = 0;
 
@@ -526,8 +525,8 @@ Variant ZendPack::pack(const String& fmt, const Array& argv) {
     }
   }
 
-  s.setSize(outputpos);
-  return s;
+  str.setSize(outputpos);
+  return str;
 }
 
 int64_t ZendPack::unpack(const char *data, int64_t size, int issigned,
@@ -555,7 +554,6 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
   Array ret = Array::Create();
   while (formatlen-- > 0) {
     char type = *(format++);
-    char c;
     int arg = 1, argb;
     const char *name;
     int namelen;
@@ -563,7 +561,7 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
 
     /* Handle format arguments if any */
     if (formatlen > 0) {
-      c = *format;
+      char c = *format;
 
       if (c >= '0' && c <= '9') {
         arg = atoi(format);
@@ -597,6 +595,10 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
       /* Never use any input */
     case 'X':
       size = -1;
+      if (arg < 0) {
+        throw_invalid_argument("Type %c: '*' ignored", type);
+        arg = 1;
+      }
       break;
 
     case '@':

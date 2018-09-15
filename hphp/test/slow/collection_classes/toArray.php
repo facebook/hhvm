@@ -10,4 +10,8 @@ function foo() {
   var_dump($a, $b);
   var_dump($x, $y);
 }
+
+<<__EntryPoint>>
+function main_to_array() {
 foo();
+}

@@ -88,7 +88,7 @@ class RedisSessionModule implements SessionHandlerInterface {
     return true;
   }
 
-  protected function &selectWeight($key) {
+  protected function selectWeight($key) {
     if (count($this->paths) === 1) {
       return $this->paths[0];
     }
@@ -106,14 +106,14 @@ class RedisSessionModule implements SessionHandlerInterface {
   }
 
   protected function connect($key) {
-    $r =& $this->selectWeight($key);
+    $r = $this->selectWeight($key);
     if (!empty($r['connection'])) {
       return $r['connection'];
     }
 
     $redis = new Redis;
     $func = ($r['persistent']) ? 'pconnect' : 'connect';
-    if (!$redis->{$func}($r['host'], $r['port'], $r['timeout'])) {
+    if (!$redis->{$func}($r['host'], $r['port'], (float)$r['timeout'])) {
       return false;
     }
     if (($r['auth'] !== '') &&
@@ -127,8 +127,8 @@ class RedisSessionModule implements SessionHandlerInterface {
     if (!$redis->setOption(Redis::OPT_PREFIX, $r['prefix'])) {
       return false;
     }
-
-    $r['connection'] = $redis;
+    if (count($this->paths) === 1)
+      $r['connection'] = $redis;
     return $redis;
   }
 

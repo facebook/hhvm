@@ -1,12 +1,4 @@
 <?php
-// This file is included in the output.
-
-require 'test3.inc';
-include 'test1.inc';
-include_once 'test2.inc';
-// This should only be listed once in the output.
-require 'test3.inc';
-require_once 'test4.inc';
 
 function foo($files) {
   // Zend and HHVM output in different orders; level the field
@@ -19,5 +11,17 @@ function foo($files) {
     var_dump($suf);
   }
 }
+
+// This file is included in the output.
+
+<<__EntryPoint>>
+function main_get_included_files_test() {
+require 'test3.inc';
+include 'test1.inc';
+include_once 'test2.inc';
+// This should only be listed once in the output.
+require 'test3.inc';
+require_once 'test4.inc';
 foo(get_included_files());
 foo(get_required_files());
+}

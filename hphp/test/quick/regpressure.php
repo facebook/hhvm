@@ -1,4 +1,4 @@
-<?
+<?hh
 
 define('SYMONE', 1);
 $l0 = 1;

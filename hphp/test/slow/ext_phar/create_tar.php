@@ -33,4 +33,8 @@ function main() {
   )), __DIR__);
 }
 
+
+<<__EntryPoint>>
+function main_create_tar() {
 main();
+}

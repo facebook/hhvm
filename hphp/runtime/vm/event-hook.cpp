@@ -17,8 +17,12 @@
 #include "hphp/runtime/vm/event-hook.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/surprise-flags.h"
+#include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/variable-serializer.h"
 
 #include "hphp/runtime/ext/asio/asio-session.h"
 #include "hphp/runtime/ext/hotprofiler/ext_hotprofiler.h"
@@ -26,12 +30,17 @@
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 
+#include "hphp/runtime/server/server-stats.h"
+
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/func.h"
-
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/interp-helpers.h"
+#include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/vm-regs.h"
+
+#include "hphp/util/struct-log.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,6 +57,8 @@ const StaticString
   s_exception("exception"),
   s_name("name"),
   s_return("return");
+
+__thread uint64_t tl_func_sequence_id;
 
 // implemented in runtime/ext/ext_hotprofiler.cpp
 extern void begin_profiler_frame(Profiler *p,
@@ -132,11 +143,7 @@ bool shouldRunUserProfiler(const Func* func) {
 
 ALWAYS_INLINE
 ActRec* getParentFrame(const ActRec* ar) {
-  ActRec* ret = g_context->getPrevVMState(ar);
-  while (ret != nullptr && ret->skipFrame()) {
-    ret = g_context->getPrevVMState(ret);
-  }
-  return ret;
+  return g_context->getPrevVMStateSkipFrame(ar);
 }
 
 void addFramePointers(const ActRec* ar, Array& frameinfo, bool isEnter) {
@@ -171,7 +178,7 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
 
   Array params;
   params.append((isResume && isResumeAware()) ? s_resume : s_enter);
-  params.append(VarNR(ar->func()->fullName()));
+  params.append(make_tv<KindOfPersistentString>(ar->func()->fullName()));
 
   Array frameinfo;
   frameinfo.set(s_args, hhvm_get_frame_args(ar, 0));
@@ -192,7 +199,7 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
 
   Array params;
   params.append((isSuspend && isResumeAware()) ? s_suspend : s_exit);
-  params.append(VarNR(ar->func()->fullName()));
+  params.append(make_tv<KindOfPersistentString>(ar->func()->fullName()));
 
   Array frameinfo;
   if (retval) {
@@ -231,7 +238,7 @@ static Array get_frame_args_with_ref(const ActRec* ar) {
       // ... shuffled into a packed array stored in the variadic capture
       // param on the stack
       for (ArrayIter iter(tvAsCVarRef(local)); iter; ++iter) {
-        retArray.appendWithRef(iter.secondRef());
+        retArray.appendWithRef(iter.secondVal());
       }
     } else {
       // ... or moved into the ExtraArgs datastructure.
@@ -244,6 +251,72 @@ static Array get_frame_args_with_ref(const ActRec* ar) {
   return retArray.toArray();
 }
 
+static Variant call_intercept_handler(
+  const Variant& function,
+  const Variant& called,
+  const Variant& called_on,
+  Array& args,
+  const Variant& ctx,
+  Variant& done
+) {
+  ObjectData* obj = nullptr;
+  Class* cls = nullptr;
+  CallerFrame cf;
+  StringData* invName = nullptr;
+  bool dynamic = false;
+  auto f = vm_decode_function(function, cf(), false,
+                              obj, cls, invName, dynamic);
+  if (!f) {
+    return uninit_null();
+  }
+
+  PackedArrayInit par(5);
+  par.append(called);
+  par.append(called_on);
+  par.append(args);
+  par.append(ctx);
+
+  Variant intArgs;
+
+  auto const inout = f->isInOutWrapper();
+  if (inout) {
+    auto const name = mangleInOutFuncName(f->name(), {2,4});
+
+    if (!f->isMethod()) {
+      f = Unit::lookupFunc(name.get());
+    } else {
+      assertx(cls);
+      f = cls->lookupMethod(name.get());
+    }
+    if (!f) {
+      raise_error(
+        "fb_intercept used with an inout handler with a bad signature "
+        "(expected parameters three and five to be inout)"
+      );
+    }
+    intArgs = par.append(done).toArray();
+  } else {
+    intArgs = par.appendRef(done).toArray();
+  }
+
+  auto ret = Variant::attach(
+    g_context->invokeFunc(f, intArgs, obj, cls,
+                          nullptr, invName, ExecutionContext::InvokeNormal,
+                          dynamic, false)
+  );
+  if (UNLIKELY(isRefType(ret.getRawType()))) {
+    tvUnbox(*ret.asTypedValue());
+  }
+
+  if (inout) {
+    auto& arr = ret.asCArrRef();
+    if (arr[1].isArray()) args = arr[1].toArray();
+    if (arr[2].isBoolean()) done = arr[2].toBoolean();
+    return arr[0];
+  }
+  return ret;
+}
+
 bool EventHook::RunInterceptHandler(ActRec* ar) {
   const Func* func = ar->func();
   if (LIKELY(func->maybeIntercepted() == 0)) return true;
@@ -251,8 +324,14 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   // Intercept only original generator / async function calls, not resumption.
   if (ar->resumed()) return true;
 
-  Variant* h = get_intercept_handler(func->fullNameStr(),
-                                     &func->maybeIntercepted());
+  // Don't intercept inout wrappers. We'll intercept the inner function.
+  if (func->isInOutWrapper()) return true;
+
+  auto const name = func->takesInOutParams()
+    ? stripInOutSuffix(func->fullName())
+    : func->fullName();
+
+  Variant* h = get_intercept_handler(StrNR(name), &func->maybeIntercepted());
   if (!h) return true;
 
   /*
@@ -267,6 +346,8 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
                   "in RepoAuthoritative mode", func->fullName()->data());
     }
   }
+
+  checkForRequiredCallM(ar);
 
   VMRegAnchor _;
 
@@ -284,25 +365,47 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     return init_null();
   }();
 
-  Variant intArgs =
-    PackedArrayInit(5)
-      .append(VarNR(ar->func()->fullName()))
-      .append(called_on)
-      .append(get_frame_args_with_ref(ar))
-      .append(h->asCArrRef()[1])
-      .appendRef(doneFlag)
-      .toArray();
+  auto args = get_frame_args_with_ref(ar);
+  VarNR called(ar->func()->fullDisplayName());
 
-  Variant ret = vm_call_user_func(h->asCArrRef()[0], intArgs);
+  Variant ret = call_intercept_handler(
+    h->asCArrRef()[0], called, called_on, args, h->asCArrRef()[1], doneFlag
+  );
+
   if (doneFlag.toBoolean()) {
     Offset pcOff;
     ActRec* outer = g_context->getPrevVMState(ar, &pcOff);
 
     ar->setLocalsDecRefd();
     frame_free_locals_no_hook(ar);
+
+    // Tear down the callee frame, then push the return value.
     Stack& stack = vmStack();
-    stack.top() = (Cell*)(ar + 1);
-    cellDup(*ret.asCell(), *stack.allocTV());
+    stack.trim((Cell*)(ar + 1));
+    if (UNLIKELY(func->takesInOutParams())) {
+      uint32_t count = func->numInOutParams();
+
+      auto start = stack.topTV();
+      auto const end = start + count;
+
+      auto push = [&] (TypedValue v) {
+        assertx(start < end);
+        tvIncRefGen(v);
+        *start++ = v;
+      };
+
+      uint32_t param = 0;
+      IterateKV(args.get(), [&] (Cell, TypedValue v) {
+        if (param >= func->numParams() || !func->params()[param++].inout) {
+          return;
+        }
+        push(v);
+      });
+
+      while (start < end) push(make_tv<KindOfNull>());
+    }
+
+    cellDup(*ret.toCell(), *stack.allocTV());
 
     vmfp() = outer;
     vmpc() = outer ? outer->func()->unit()->at(pcOff) : nullptr;
@@ -341,12 +444,38 @@ const char* EventHook::GetFunctionNameForProfiler(const Func* func,
   return name;
 }
 
+static bool shouldLog(const Func* /*func*/) {
+  return RID().logFunctionCalls();
+}
+
+void logCommon(StructuredLogEntry sample, const ActRec* ar, ssize_t flags) {
+  sample.setInt("flags", flags);
+  sample.setInt("func_id", ar->func()->getFuncId());
+  sample.setStr("thread_mode",
+    ServerStats::ThreadModeString(ServerStats::GetThreadMode()));
+  sample.setStr("func_name", ar->func()->name()->data());
+  sample.setStr("func_full_name", ar->func()->fullName()->data());
+  sample.setStr("func_filename", ar->func()->filename()->data());
+  addBacktraceToStructLog(
+    createBacktrace(BacktraceArgs()), sample
+  );
+  sample.setInt("sequence_id", tl_func_sequence_id++);
+  StructuredLog::log("hhvm_function_calls2", sample);
+}
+
 void EventHook::onFunctionEnter(const ActRec* ar, int funcType,
                                 ssize_t flags, bool isResume) {
   // User profiler
   if (flags & EventHookFlag) {
     if (shouldRunUserProfiler(ar->func())) {
       runUserProfilerOnFunctionEnter(ar, isResume);
+    }
+    if (shouldLog(ar->func())) {
+      StructuredLogEntry sample;
+      sample.setStr("event_name", "function_enter");
+      sample.setInt("func_type", funcType);
+      sample.setInt("is_resume", isResume);
+      logCommon(sample, ar, flags);
     }
     auto profiler = ThreadInfo::s_threadInfo->m_profiler;
     if (profiler != nullptr &&
@@ -418,6 +547,12 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
       } else {
         // Avoid running PHP code when unwinding C++ exception.
       }
+    }
+    if (shouldLog(ar->func())) {
+      StructuredLogEntry sample;
+      sample.setStr("event_name", "function_exit");
+      sample.setInt("is_suspend", isSuspend);
+      logCommon(sample, ar, flags);
     }
   }
 
@@ -492,34 +627,14 @@ void EventHook::onFunctionResumeYield(const ActRec* ar) {
   onFunctionEnter(ar, EventHook::NormalFunc, flags, true);
 }
 
-// Child is the AFWH we're going to block on, nullptr iff this is a suspending
-// generator.
-void EventHook::onFunctionSuspendR(ActRec* suspending, ObjectData* child) {
-  auto const flags = handle_request_surprise();
-  onFunctionExit(suspending, nullptr, false, nullptr, flags, true);
+// Eagerly executed async function initially suspending at Await.
+void EventHook::onFunctionSuspendAwaitEF(ActRec* suspending,
+                                         const ActRec* resumableAR) {
+  assertx(suspending->func()->isAsyncFunction());
+  assertx(suspending->func() == resumableAR->func());
+  assertx(resumableAR->resumed());
 
-  if ((flags & AsyncEventHookFlag) &&
-      suspending->func()->isAsyncFunction()) {
-    assert(child != nullptr);  // This isn't a generator
-    assert(child->instanceof(c_WaitableWaitHandle::classof()));
-    assert(suspending->resumed());
-    auto const afwh = frame_afwh(suspending);
-    auto const session = AsioSession::Get();
-    if (session->hasOnResumableAwait()) {
-      session->onResumableAwait(
-        afwh,
-        static_cast<c_WaitableWaitHandle*>(child)
-      );
-    }
-  }
-}
-
-void EventHook::onFunctionSuspendE(ActRec* suspending,
-                                   const ActRec* resumableAR) {
-  // When we're suspending an eagerly executing resumable, we've already
-  // teleported the ActRec from suspending over to resumableAR, so we need to
-  // make sure the unwinder knows not to touch the locals, $this, or
-  // VarEnv/ExtraArgs.
+  // The locals were already teleported from suspending to resumableAR.
   suspending->setLocalsDecRefd();
   suspending->trashThis();
   suspending->trashVarEnv();
@@ -528,9 +643,7 @@ void EventHook::onFunctionSuspendE(ActRec* suspending,
     auto const flags = handle_request_surprise();
     onFunctionExit(resumableAR, nullptr, false, nullptr, flags, true);
 
-    if ((flags & AsyncEventHookFlag) &&
-        resumableAR->func()->isAsyncFunction()) {
-      assert(resumableAR->resumed());
+    if (flags & AsyncEventHookFlag) {
       auto const afwh = frame_afwh(resumableAR);
       auto const session = AsioSession::Get();
       if (session->hasOnResumableCreate()) {
@@ -538,17 +651,111 @@ void EventHook::onFunctionSuspendE(ActRec* suspending,
       }
     }
   } catch (...) {
-    auto const resumableObj = [&]() -> ObjectData* {
-      if (resumableAR->func()->isAsyncFunction()) {
-        return frame_afwh(resumableAR);
+    decRefObj(frame_afwh(resumableAR));
+    throw;
+  }
+}
+
+// Eagerly executed async generator that was resumed at Yield suspending
+// at Await.
+void EventHook::onFunctionSuspendAwaitEG(ActRec* suspending) {
+  assertx(suspending->func()->isAsyncGenerator());
+  assertx(suspending->resumed());
+
+  // The generator is still being executed eagerly, make it look like that.
+  auto const gen = frame_async_generator(suspending);
+  auto wh = gen->detachWaitHandle();
+  SCOPE_EXIT { gen->attachWaitHandle(std::move(wh)); };
+
+  try {
+    auto const flags = handle_request_surprise();
+    onFunctionExit(suspending, nullptr, false, nullptr, flags, true);
+
+    if (flags & AsyncEventHookFlag) {
+      auto const session = AsioSession::Get();
+      if (session->hasOnResumableCreate()) {
+        session->onResumableCreate(wh.get(), wh->getChild());
       }
-      assert(resumableAR->func()->isGenerator());
+    }
+  } catch (...) {
+    decRefObj(wh.get());
+    throw;
+  }
+}
+
+// Async function or async generator that was resumed at Await suspending
+// again at Await. The suspending frame has an associated AFWH/AGWH. Child
+// is the WH we are going to block on.
+void EventHook::onFunctionSuspendAwaitR(ActRec* suspending, ObjectData* child) {
+  assertx(suspending->func()->isAsync());
+  assertx(suspending->resumed());
+  assertx(child->isWaitHandle());
+
+  auto const flags = handle_request_surprise();
+  onFunctionExit(suspending, nullptr, false, nullptr, flags, true);
+
+  if (flags & AsyncEventHookFlag) {
+    assertx(child->instanceof(c_WaitableWaitHandle::classof()));
+    auto const session = AsioSession::Get();
+    if (session->hasOnResumableAwait()) {
+      if (!suspending->func()->isGenerator()) {
+        session->onResumableAwait(
+          frame_afwh(suspending),
+          static_cast<c_WaitableWaitHandle*>(child)
+        );
+      } else {
+        session->onResumableAwait(
+          frame_async_generator(suspending)->getWaitHandle(),
+          static_cast<c_WaitableWaitHandle*>(child)
+        );
+      }
+    }
+  }
+}
+
+// Generator or async generator suspending initially at CreateCont.
+void EventHook::onFunctionSuspendCreateCont(ActRec* suspending,
+                                            const ActRec* resumableAR) {
+  assertx(suspending->func()->isGenerator());
+  assertx(suspending->func() == resumableAR->func());
+  assertx(resumableAR->resumed());
+
+  // The locals were already teleported from suspending to resumableAR.
+  suspending->setLocalsDecRefd();
+  suspending->trashThis();
+  suspending->trashVarEnv();
+
+  try {
+    auto const flags = handle_request_surprise();
+    onFunctionExit(resumableAR, nullptr, false, nullptr, flags, true);
+  } catch (...) {
+    auto const resumableObj = [&]() -> ObjectData* {
       return !resumableAR->func()->isAsync()
         ? frame_generator(resumableAR)->toObject()
         : frame_async_generator(resumableAR)->toObject();
     }();
     decRefObj(resumableObj);
     throw;
+  }
+}
+
+// Generator or async generator suspending at Yield.
+void EventHook::onFunctionSuspendYield(ActRec* suspending) {
+  assertx(suspending->func()->isGenerator());
+  assertx(suspending->resumed());
+
+  auto const flags = handle_request_surprise();
+  onFunctionExit(suspending, nullptr, false, nullptr, flags, true);
+
+  if ((flags & AsyncEventHookFlag) && suspending->func()->isAsync()) {
+    auto const ag = frame_async_generator(suspending);
+    if (!ag->isEagerlyExecuted()) {
+      auto const wh = ag->getWaitHandle();
+      auto const session = AsioSession::Get();
+      if (session->hasOnResumableSuccess()) {
+        session->onResumableSuccess(wh, init_null());
+      }
+    }
   }
 }
 
@@ -563,13 +770,18 @@ void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
     onFunctionExit(ar, &retval, false, nullptr, flags, false);
 
     // Async profiler
-    if ((flags & AsyncEventHookFlag) &&
-        ar->func()->isAsyncFunction() && ar->resumed()) {
+    if ((flags & AsyncEventHookFlag) && ar->resumed() &&
+        ar->func()->isAsync()) {
       auto session = AsioSession::Get();
-      // Return @ resumed execution => AsyncFunctionWaitHandle succeeded.
       if (session->hasOnResumableSuccess()) {
-        auto afwh = frame_afwh(ar);
-        session->onResumableSuccess(afwh, cellAsCVarRef(retval));
+        if (!ar->func()->isGenerator()) {
+          session->onResumableSuccess(frame_afwh(ar), cellAsCVarRef(retval));
+        } else {
+          auto ag = frame_async_generator(ar);
+          if (!ag->isEagerlyExecuted()) {
+            session->onResumableSuccess(ag->getWaitHandle(), init_null());
+          }
+        }
       }
     }
   } catch (...) {
@@ -577,7 +789,7 @@ void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
      * We're responsible for freeing the return value if we exit with an
      * exception.  See irgen-ret.
      */
-    tvRefcountedDecRef(retval);
+    tvDecRefGen(retval);
     throw;
   }
 }

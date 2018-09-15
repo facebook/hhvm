@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1852() {
 ($a) = 1;
 var_dump($a);
 $b = array();
@@ -8,3 +11,4 @@ var_dump($b[0]);
 $c = new stdClass;
 ($c)->prop = 3;
 var_dump($c->prop);
+}

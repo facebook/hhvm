@@ -12,4 +12,8 @@ class Bar extends Foo {
     echo "Foo\n";
   }
 }
+
+<<__EntryPoint>>
+function main_2118() {
 Bar::f();
+}

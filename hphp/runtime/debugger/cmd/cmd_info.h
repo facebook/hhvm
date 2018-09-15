@@ -75,15 +75,17 @@ private:
                           const std::string &subsymbol);
   static bool TryProperty(StringBuffer &sb, const Array& info,
                           const std::string &subsymbol);
-  static bool TryMethod(DebuggerClient &client, StringBuffer &sb,
+  static bool TryMethod(DebuggerClient* client, StringBuffer &sb,
                         const Array& info, std::string subsymbol);
 
   static void PrintDocComments(StringBuffer &sb, const Array& info);
-  static void PrintInfo(DebuggerClient &client, StringBuffer &sb,
+  static void PrintHeader(DebuggerClient* client, StringBuffer &sb,
+                          const Array& info);
+
+public:
+  static void PrintInfo(DebuggerClient* client, StringBuffer &sb,
                         const Array& info,
                         const std::string &subsymbol);
-  static void PrintHeader(DebuggerClient &client, StringBuffer &sb,
-                          const Array& info);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

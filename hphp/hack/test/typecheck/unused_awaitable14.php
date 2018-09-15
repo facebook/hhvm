@@ -6,5 +6,5 @@ async function f(): Awaitable<string> {
 
 async function g(): Awaitable<string> {
   $output = f();
-  return '$foo'.(string) $output.'bar';
+  return '$foo'.(string)$output.'bar';
 }

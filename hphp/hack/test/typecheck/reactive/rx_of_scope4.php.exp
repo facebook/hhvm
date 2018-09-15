@@ -1,0 +1,2 @@
+File "rx_of_scope4.php", line 5, characters 23-33:
+<<__RxOfScope>> attribute is only allowed on lambdas. (Naming[2090])

@@ -1,0 +1,69 @@
+[(Fun
+    { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([7:33-39], (Hprim Tstring)));
+      f_name = ([7:10-29], "\\returnsTheStringFoo"); f_tparams = [];
+      f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+      f_body =
+      (NamedBody
+         { Aast.AnnotatedAST.fnb_nast =
+           [(Return ([7:42-55], (Some (([7:49-54], string), (String "foo")))
+               ))
+             ];
+           fnb_unsafe = false });
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
+      f_external = false });
+  (Fun
+     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+       f_ret = (Some ([9:22-26], (Hprim Tvoid)));
+       f_name = ([9:10-14], "\\test"); f_tparams = [];
+       f_where_constraints = []; f_variadic = FVnonVariadic;
+       f_params =
+       [{ Aast.AnnotatedAST.param_annotation = ([9:17-19], C);
+          param_hint = (Some ([9:15-16], (Happly (([9:15-16], "\\C"), []))));
+          param_is_reference = false; param_is_variadic = false;
+          param_pos = [9:17-19]; param_name = "$c"; param_expr = None;
+          param_callconv = None; param_user_attributes = [] }
+         ];
+       f_body =
+       (NamedBody
+          { Aast.AnnotatedAST.fnb_nast =
+            [(Expr
+                (([10:3-15], string),
+                 (Binop ((Eq None),
+                    (([10:3-7], string), (Lvar ([10:3-7], $foo))),
+                    (([10:10-15], string), (String "foo"))))));
+              (Expr
+                 (([11:3-10], ?int),
+                  (Obj_get ((([11:3-5], C), (Lvar ([11:3-5], $c))),
+                     (([11:7-10], ?int), (Id ([11:7-10], "foo"))),
+                     OG_nullthrows))));
+              (Expr
+                 (([12:3-11], _),
+                  (Obj_get ((([12:3-5], C), (Lvar ([12:3-5], $c))),
+                     (([12:7-11], _), (Lvar ([12:7-11], $foo))),
+                     OG_nullthrows))));
+              (Expr
+                 (([13:3-30], _),
+                  (Obj_get ((([13:3-5], C), (Lvar ([13:3-5], $c))),
+                     (([13:8-29], _), Any), OG_nullthrows))))
+              ];
+            fnb_unsafe = false });
+       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
+       f_external = false });
+  (Class
+     { Aast.AnnotatedAST.c_annotation = (); c_mode = <opaque>;
+       c_final = false; c_is_xhp = false; c_kind = Cnormal;
+       c_name = ([3:7-8], "\\C"); c_tparams = <opaque>; c_extends = [];
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = [];
+       c_req_extends = []; c_req_implements = []; c_implements = [];
+       c_consts = []; c_typeconsts = []; c_static_vars = [];
+       c_vars =
+       [{ Aast.AnnotatedAST.cv_final = false; cv_is_xhp = false;
+          cv_visibility = Public;
+          cv_type = (Some ([4:10-14], (Hoption ([4:11-14], (Hprim Tint)))));
+          cv_id = ([4:15-19], "foo"); cv_expr = None; cv_user_attributes = []
+          }
+         ];
+       c_constructor = None; c_static_methods = []; c_methods = [];
+       c_user_attributes = []; c_enum = None })
+  ]

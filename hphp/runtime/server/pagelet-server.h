@@ -67,6 +67,14 @@ struct PageletServer {
                            int64_t timeout_ms);
 
   /**
+   * Get asynchronous results of a task. Returns a tuple of 3 items:
+   * - already flushed strings
+   * - a WaitHandle representing the future results (or null if finished)
+   * - the status code
+   */
+  static Array AsyncTaskResult(const Resource& task);
+
+  /**
    * Add a piece of response to the pipeline.
    */
   static void AddToPipeline(const std::string &s);
@@ -77,6 +85,8 @@ struct PageletServer {
   static int GetActiveWorker();
   static int GetQueuedJobs();
 };
+
+const StaticString s_pagelet("pagelet");
 
 struct PageletTransport final : Transport, Synchronizable {
   PageletTransport(
@@ -103,6 +113,13 @@ struct PageletTransport final : Transport, Synchronizable {
   bool isUploadedFile(const String& filename) override;
   bool getFiles(std::string &files) override;
 
+  /**
+   * Get a description of the type of transport.
+   */
+  String describe() const override {
+    return s_pagelet;
+  }
+
   // task interface
   bool isDone();
 
@@ -116,11 +133,7 @@ struct PageletTransport final : Transport, Synchronizable {
     int64_t timeout_ms
   );
 
-  bool getResults(
-    Array &results,
-    int &code,
-    PageletServerTaskEvent* next_event
-  );
+  Array getAsyncResults(bool allow_empty);
 
   // ref counting
   void incRefCount();
@@ -155,8 +168,7 @@ private:
 };
 
 struct PageletServerTaskEvent final : AsioExternalThreadEvent {
-
-  ~PageletServerTaskEvent() {
+  ~PageletServerTaskEvent() override {
     if (m_job) m_job->decRefCount();
   }
 
@@ -170,33 +182,8 @@ struct PageletServerTaskEvent final : AsioExternalThreadEvent {
   }
 
 protected:
-
-  void unserialize(Cell& result) override final {
-    // Main string responses from pagelet thread.
-    Array responses = Array::Create();
-
-    // Create an event for the next results that might be used.
-    PageletServerTaskEvent *event = new PageletServerTaskEvent();
-
-    int code = 0;
-    // Fetch all results from the transport that are currently available.
-    bool done = m_job->getResults(responses, code, event);
-
-    // Returned tuple/array.
-    Array ret = Array::Create();
-    ret.append(responses);
-
-    if (done) {
-      // If the whole thing is done, then we don't need a next event.
-      event->abandon();
-      ret.append(init_null_variant);
-    } else {
-      // The event was added to the job to be triggered next.
-      ret.append(Variant{event->getWaitHandle()});
-    }
-    ret.append(Variant{code});
-
-    cellDup(*(Variant(ret)).asCell(), result);
+ void unserialize(Cell& result) final {
+   cellCopy(make_array_like_tv(m_job->getAsyncResults(false).detach()), result);
   }
 
 private:

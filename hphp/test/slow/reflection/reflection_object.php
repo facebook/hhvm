@@ -16,4 +16,8 @@ function main() {
   }
 }
 
+
+<<__EntryPoint>>
+function main_reflection_object() {
 main();
+}

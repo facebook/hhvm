@@ -84,7 +84,6 @@ class Redis {
   }
 
   public function close() {
-    $this->processCommand('QUIT');
     fclose($this->connection);
     $this->connection = null;
   }
@@ -282,7 +281,7 @@ class Redis {
                           $start = -1,
                           $count = -1,
                           $store = null) {
-    $limit = (($start > 0) AND ($count > 0)) ? [$start, $count] : null;
+    $limit = (($start > 0) and ($count > 0)) ? [$start, $count] : null;
     return $this->sort($key, [
       'by' => $pattern,
       'get' => $get,
@@ -298,7 +297,7 @@ class Redis {
                                $start = -1,
                                $count = -1,
                                $store = null) {
-    $limit = (($start > 0) AND ($count > 0)) ? [$start, $count] : null;
+    $limit = (($start > 0) and ($count > 0)) ? [$start, $count] : null;
     return $this->sort($key, [
       'by' => $pattern,
       'get' => $get,
@@ -315,7 +314,7 @@ class Redis {
                            $start = -1,
                            $count = -1,
                            $store = null) {
-    $limit = (($start > 0) AND ($count > 0)) ? [$start, $count] : null;
+    $limit = (($start > 0) and ($count > 0)) ? [$start, $count] : null;
     return $this->sort($key, [
       'by' => $pattern,
       'get' => $get,
@@ -331,7 +330,7 @@ class Redis {
                                 $start = -1,
                                 $count = -1,
                                 $store = null) {
-    $limit = (($start > 0) AND ($count > 0)) ? [$start, $count] : null;
+    $limit = (($start > 0) and ($count > 0)) ? [$start, $count] : null;
     return $this->sort($key, [
       'by' => $pattern,
       'get' => $get,
@@ -414,10 +413,10 @@ class Redis {
     if ($weights) {
       $args[] = 'WEIGHTS';
       foreach ($weights as $weight) {
-        if (is_int($weight) OR
-            is_float($weight) OR
-            ($weight ===  'inf') OR
-            ($weight === '-inf') OR
+        if (is_int($weight) or
+            is_float($weight) or
+            ($weight ===  'inf') or
+            ($weight === '-inf') or
             ($weight === '+inf')) {
           $args[] = $weight;
         }
@@ -469,8 +468,8 @@ class Redis {
                                        $end,
                                        array $opts = null) {
     $args = [$this->_prefix($key), $start, $end];
-    if (isset($opts['limit']) AND
-        is_array($opts['limit']) AND
+    if (isset($opts['limit']) and
+        is_array($opts['limit']) and
         (count($opts['limit']) == 2)) {
       list($limit_start, $limit_end) = $opts['limit'];
       $args[] = 'LIMIT';
@@ -613,7 +612,7 @@ class Redis {
     $this->discard();
     $this->processCommand('MULTI');
     $resp = $this->sockReadData($type);
-    if (($type === self::TYPE_LINE) AND ($resp === 'OK')) {
+    if (($type === self::TYPE_LINE) and ($resp === 'OK')) {
       $this->mode = self::MULTI;
       return $this;
     }
@@ -729,7 +728,7 @@ class Redis {
           return false;
         }
         $script = func_get_arg(1);
-        if (!is_string($script) OR empty($script)) {
+        if (!is_string($script) or empty($script)) {
           return false;
         }
         $this->processCommand('SCRIPT', 'load', $script);
@@ -835,6 +834,7 @@ class Redis {
     'popen' => [ 'alias' => 'pconnect' ],
     'ping' => [ 'return' => 'Raw' ],
     'echo' => [ 'format' => 's', 'return' => 'String' ],
+    'quit' => [ 'return' => 'Boolean' ],
 
     // Server
     'bgrewriteaof' => [ 'return' => 'Boolean' ],
@@ -1056,7 +1056,7 @@ class Redis {
       return false;
     }
 
-    if ($auto_reconnect AND
+    if ($auto_reconnect and
         $this->doConnect($this->host, $this->port,
                          $this->timeout_connect,
                          null, $this->retry_interval,
@@ -1095,6 +1095,14 @@ class Redis {
         case self::TYPE_ERR:
           if (!strncmp($line, '-ERR SYNC ', 10)) {
             throw new RedisException("Sync with master in progress");
+          }
+          if (!strncmp($line, 'OOM ', 4)) {
+            throw new RedisException(
+              "OOM command not allowed when used memory > 'maxmemory'");
+          }
+          if (!strncmp($line, 'EXECABORT ', 10)) {
+            throw new RedisException(
+              "Transaction discarded because of previous errors");
           }
           return $line;
         case self::TYPE_INT:
@@ -1137,14 +1145,14 @@ class Redis {
    */
   protected function translateVarArgs(array $args, $flags) {
     // Check alternate vararg schemes first
-    if (($flags & self::VAR_TIMEOUT) AND
-        (count($args) == 2) AND
-        (is_array($args[0])) AND
+    if (($flags & self::VAR_TIMEOUT) and
+        (count($args) == 2) and
+        (is_array($args[0])) and
         (is_int($args[1]))) {
       $args = $args[0] + [$args[1]];
     }
-    if ((!($flags & self::VAR_TIMEOUT)) AND
-        (count($args) == 1) AND
+    if ((!($flags & self::VAR_TIMEOUT)) and
+        (count($args) == 1) and
         (is_array($args[0]))) {
       $args = $args[0];
     }
@@ -1153,13 +1161,13 @@ class Redis {
     if ($flags & self::VAR_TIMEOUT) {
       $timeout = array_pop($args);
     }
-    if (($this->prefix AND ($flags & self::VAR_KEY_MASK)) OR
+    if (($this->prefix and ($flags & self::VAR_KEY_MASK)) or
         ($flags & self::VAR_SERIALIZE)) {
       $first = true;
       $varkey = $flags & self::VAR_KEY_MASK;
       foreach($args as &$arg) {
-        if (( $first AND ($varkey == self::VAR_KEY_FIRST)) OR
-            (!$first AND ($varkey == self::VAR_KEY_NOT_FIRST)) OR
+        if (( $first and ($varkey == self::VAR_KEY_FIRST)) or
+            (!$first and ($varkey == self::VAR_KEY_NOT_FIRST)) or
                          ($varkey == self::VAR_KEY_ALL)) {
           $arg = $this->_prefix($arg);
         } else if ($flags & self::VAR_SERIALIZE) {
@@ -1252,7 +1260,7 @@ class Redis {
       return $this;
     }
     $resp = $this->sockReadData($type);
-    if (($type !== self::TYPE_LINE) AND ($type !== self::TYPE_BULK)) {
+    if (($type !== self::TYPE_LINE) and ($type !== self::TYPE_BULK)) {
       return null;
     }
     $ret = [];
@@ -1316,7 +1324,7 @@ class Redis {
       if ($resp === null) {
         return false;
       }
-      return (($type === self::TYPE_LINE) OR ($type === self::TYPE_BULK))
+      return (($type === self::TYPE_LINE) or ($type === self::TYPE_BULK))
              ? $this->_unserialize($resp) : false;
     }
     $this->multiHandler[] = [ 'cb' => [$this,'processSerializedResponse'] ];
@@ -1329,7 +1337,7 @@ class Redis {
   protected function processBooleanResponse() {
     if ($this->mode === self::ATOMIC) {
       $resp = $this->sockReadData($type);
-      return ($type === self::TYPE_LINE) AND ($resp === 'OK');
+      return ($type === self::TYPE_LINE) and ($resp === 'OK');
     }
     $this->multiHandler[] = [ 'cb' => [$this,'processBooleanResponse'] ];
     if (($this->mode === self::MULTI) && !$this->processQueuedResponse()) {
@@ -1369,7 +1377,7 @@ class Redis {
   protected function processStringResponse() {
     if ($this->mode === self::ATOMIC) {
       $resp = $this->sockReadData($type);
-      return (($type === self::TYPE_LINE) OR ($type === self::TYPE_BULK))
+      return (($type === self::TYPE_LINE) or ($type === self::TYPE_BULK))
              ? ((string)$resp) : null;
     }
     $this->multiHandler[] = [ 'cb' => [$this,'processStringResponse'] ];
@@ -1400,7 +1408,7 @@ class Redis {
     while($count--) {
       $lineNo++;
       $val = $this->sockReadData($type);
-      if ($unser AND (($lineNo % $unser) == 0)) {
+      if ($unser and (($lineNo % $unser) == 0)) {
         $val = $this->_unserialize($val);
       }
       $ret[] = $val !== null ? $val : false;
@@ -1525,14 +1533,14 @@ class Redis {
       return $this;
     }
     $resp = $this->sockReadData($type);
-    if (($type !== self::TYPE_LINE) AND ($type !== self::TYPE_BULK)) {
+    if (($type !== self::TYPE_LINE) and ($type !== self::TYPE_BULK)) {
       return false;
     }
 
     $ret = [];
     $lines = preg_split('/[\r\n]+/', $resp);
     foreach ($lines as $line) {
-      if ((substr($line, 0, 1) == '#') OR
+      if ((substr($line, 0, 1) == '#') or
           !trim($line)) {
         continue;
       }
@@ -1548,7 +1556,7 @@ class Redis {
 
   protected function processQueuedResponse() {
     $resp = $this->sockReadData($type);
-    return ($type === self::TYPE_LINE) AND ($resp === 'QUEUED');
+    return ($type === self::TYPE_LINE) and ($resp === 'QUEUED');
   }
 
   public function _prefix($key) {
@@ -1609,7 +1617,7 @@ class Redis {
     $flen = strlen($format);
     for ($i = 0; $i < $flen; $i++) {
       if (!array_key_exists($i, $args)) {
-        if (isset($func['defaults']) AND
+        if (isset($func['defaults']) and
             array_key_exists($func['defaults'], $i)) {
           $args[$i] = $func['defaults'][$i];
         } else {
@@ -1627,7 +1635,7 @@ class Redis {
         case 'd': $args[$i] = (float)$args[$i]; break;
         case 'b': $args[$i] = (bool)$args[$i]; break;
         case 'p':
-          if (($args[$i] !== self::BEFORE) AND ($args[$i] !== self::AFTER)) {
+          if (($args[$i] !== self::BEFORE) and ($args[$i] !== self::AFTER)) {
             trigger_error(
               "Argument $i to Redis::$fname must be 'before' or 'after'",
               E_ERROR);
@@ -1733,7 +1741,7 @@ class Redis {
         continue;
       }
 
-      if (($k == 'get') AND is_array($v)) {
+      if (($k == 'get') and is_array($v)) {
         foreach ($v as $val) {
           $ret[] = 'GET';
           $ret[] = $val;
@@ -1749,7 +1757,7 @@ class Redis {
       }
 
       if ($k == 'limit') {
-        if (is_array($val) AND (count($val) == 2)) {
+        if (is_array($val) and (count($val) == 2)) {
           list($off, $cnt) = $val;
           $ret[] = 'LIMIT';
           $ret[] = $off;
@@ -1773,6 +1781,7 @@ class Redis {
     return $ret;
   }
 
+  <<__OptionalDestruct>>
   public function __destruct() {
 
   }

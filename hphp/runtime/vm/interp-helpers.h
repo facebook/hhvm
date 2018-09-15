@@ -17,39 +17,60 @@
 #ifndef incl_HPHP_VM_INTERP_HELPERS_H_
 #define incl_HPHP_VM_INTERP_HELPERS_H_
 
-#include "hphp/runtime/vm/act-rec.h"
-#include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/base/thread-info.h"
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/vm/act-rec.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/func.h"
+#include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP {
 
-// In PHP7 the caller specifies if parameter type-checking is strict in the
-// callee. NB: HH files ignore this preference and always use strict checking,
-// except in systemlib. Calls originating in systemlib are always strict.
-inline bool callUsesStrictTypes(ActRec* caller) {
-  if (RuntimeOption::EnableHipHopSyntax || !RuntimeOption::PHP7_ScalarTypes) {
-    return true;
+inline void callerDynamicCallChecks(const Func* func) {
+  if (RuntimeOption::EvalForbidDynamicCalls <= 0) return;
+  if (func->isDynamicallyCallable()) return;
+
+  if (RuntimeOption::EvalForbidDynamicCalls >= 2) {
+    std::string msg;
+    string_printf(
+      msg,
+      Strings::FUNCTION_CALLED_DYNAMICALLY,
+      func->fullDisplayName()->data()
+    );
+    throw_invalid_operation_exception(makeStaticString(msg));
+  } else {
+    raise_notice(
+      Strings::FUNCTION_CALLED_DYNAMICALLY,
+      func->fullDisplayName()->data()
+    );
   }
-  if (!caller) {
-    return true;
-  }
-  auto func = caller->func();
-  return func->isBuiltin() || func->unit()->useStrictTypes();
 }
 
-inline bool builtinCallUsesStrictTypes(const Unit* caller) {
-  if (!RuntimeOption::PHP7_ScalarTypes || RuntimeOption::EnableHipHopSyntax) {
-    return false;
+inline void calleeDynamicCallChecks(const ActRec* ar) {
+  if (!ar->isDynamicCall()) return;
+  auto const func = ar->func();
+
+  if (func->accessesCallerFrame()) {
+    raise_disallowed_dynamic_call(func);
   }
-  return caller->useStrictTypes() && !caller->isHHFile();
+
+  if (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && func->isBuiltin()) {
+    raise_notice(
+      Strings::FUNCTION_CALLED_DYNAMICALLY,
+      func->fullDisplayName()->data()
+    );
+  }
 }
 
-inline void setTypesFlag(ActRec* fp, ActRec* ar) {
-  if (!callUsesStrictTypes(fp)) ar->setUseWeakTypes();
+inline void checkForRequiredCallM(const ActRec* ar) {
+  if (!ar->func()->takesInOutParams()) return;
+
+  if (!ar->isFCallM()) {
+    raise_error("In/out function called dynamically without inout annotations");
+  }
 }
 
 /*

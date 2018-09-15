@@ -51,7 +51,7 @@ struct IntlIterator : IntlError {
   static Object newInstance(icu::StringEnumeration *se = nullptr) {
     if (!c_IntlIterator) {
       c_IntlIterator = Unit::lookupClass(s_IntlIterator.get());
-      assert(c_IntlIterator);
+      assertx(c_IntlIterator);
     }
     Object obj{c_IntlIterator};
     if (se) {
@@ -115,7 +115,7 @@ struct BugStringCharEnumeration : icu::StringEnumeration {
     return uenum_count(uenum, &status);
   }
 
-  const UnicodeString* snext(UErrorCode& status) override {
+  const icu::UnicodeString* snext(UErrorCode& status) override {
     int32_t length;
     const UChar* str = uenum_unext(uenum, &length, &status);
     if (str == 0 || U_FAILURE(status)) {

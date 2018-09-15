@@ -1,0 +1,14 @@
+.main {
+  .try {
+   Int 1
+   Throw
+  }
+  .catch {
+    Nop
+    Catch
+    PopC
+  }
+  PopC
+  Catch
+  RetC
+}

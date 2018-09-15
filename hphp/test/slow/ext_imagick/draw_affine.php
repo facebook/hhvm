@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_draw_affine() {
 $affine_matrix = array(
   'sx' => 1,
   'rx' => 0,
@@ -25,4 +28,5 @@ try {
   $draw->affine(array());
 } catch (Exception $ex) {
   echo "PASS\n";
+}
 }

@@ -84,6 +84,15 @@ struct DebuggerClientExitException : DebuggerException {
   EXCEPTION_COMMON_IMPL(DebuggerClientExitException);
 };
 
+// Exception thrown when a DebuggerClientExitException occurs specifically
+// due to a failure to set hphpd as the active debugger for the HHVM instance.
+struct DebuggerClientAttachFailureException : DebuggerClientExitException {
+  const char* what() const noexcept override {
+    return "Debugger client was unable to attach to the request thread. "
+      "Another debugger is already attached.";
+  }
+};
+
 struct DebuggerRestartException : DebuggerException {
   explicit DebuggerRestartException(
     std::shared_ptr<std::vector<std::string>>& args): m_args(args) {}
@@ -223,8 +232,9 @@ struct Macro {
 struct DebuggerUsageLogger {
   virtual ~DebuggerUsageLogger() {}
   virtual void init() {}
-  virtual void log(const std::string &mode, const std::string &sandboxId,
-                   const std::string &cmd, const std::string &data) {}
+  virtual void
+  log(const std::string& /*mode*/, const std::string& /*sandboxId*/,
+      const std::string& /*cmd*/, const std::string& /*data*/) {}
 };
 
 ///////////////////////////////////////////////////////////////////////////////

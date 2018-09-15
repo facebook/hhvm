@@ -21,6 +21,10 @@ function main(Blah $x = null) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_jmp_type_003() {
 main(new Blah);
 main();
 echo "done\n";
+}

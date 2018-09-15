@@ -1,0 +1,26 @@
+Entering loop
+Logger 0 constructing
+Logger 1 constructing
+loop: 1
+Logger 1 disposing
+Logger 0 disposing
+Logger 2 constructing
+Logger 3 constructing
+loop: 
+Logger 3 disposing
+Logger 2 disposing
+Logger 4 constructing
+In using
+Logger 4 disposing
+After loop
+Logger 5 constructing
+Starting 0
+Ending 0
+Starting 1
+Ending 1
+Starting 2
+Starting 3
+Ending 3
+Starting 4
+Logger 5 disposing
+Done with main

@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_ssl_socket_null_byte() {
 $file = '/etc/passwd'.chr(0).'asdf';
 
 $opt_choices = array(
@@ -24,4 +27,5 @@ foreach ($opt_choices as $opts) {
     $ctx
   );
   var_dump($sock);
+}
 }

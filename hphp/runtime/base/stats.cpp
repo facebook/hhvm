@@ -43,7 +43,7 @@ __thread StatGroupMap* tl_stat_groups = nullptr;
 
 void init() {
   if (!enabledAny()) return;
-  assert(tl_stat_groups == nullptr);
+  assertx(tl_stat_groups == nullptr);
   tl_stat_groups = new StatGroupMap();
 }
 
@@ -106,13 +106,13 @@ void clear() {
   ++epoch;
   memset(&tl_counters[0], 0, sizeof(tl_counters));
 
-  assert(tl_stat_groups);
+  assertx(tl_stat_groups);
   delete tl_stat_groups;
   tl_stat_groups = nullptr;
 }
 
 void incStatGrouped(const StringData* category, const StringData* name, int n) {
-  assert(tl_stat_groups);
+  assertx(tl_stat_groups);
   (*tl_stat_groups)[category->data()][name->data()] += n;
 }
 

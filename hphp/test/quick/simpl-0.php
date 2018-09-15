@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function plus0($x) {
   return $x + 0;

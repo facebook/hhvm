@@ -19,8 +19,11 @@
 
 #include <pthread.h>
 
+#include <atomic>
+
 #include <folly/Portability.h>
 
+#include "hphp/util/alloc.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/synchronizable.h"
@@ -102,8 +105,12 @@ struct AsyncFuncImpl {
 
   /**
    * Called by AsyncFunc<T> so we can call func(obj) back on thread running.
+   *
+   * The NUMA node, the size of stack on huge pages, and the size of an
+   * additional thread-local space collocated with the stack can be specified.
    */
-  AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func);
+  AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func,
+                int numaNode, unsigned hugeStackKb, unsigned tlExtraKb);
   ~AsyncFuncImpl();
 
   /**
@@ -122,6 +129,10 @@ struct AsyncFuncImpl {
 
   /**
    * Waits until this thread finishes running.
+   *
+   * If `seconds' is positive, we wait that many seconds.  If `seconds' is
+   * zero, we wait without a timeout.  If `seconds' is negative, we don't wait
+   * at all, and return false if we aren't already stopped.
    */
   bool waitForEnd(int seconds = 0);
 
@@ -156,23 +167,34 @@ struct AsyncFuncImpl {
   }
 
   void setNoInitFini() { m_noInitFini = true; }
+
+  void setThreadName();
+
+  static uint32_t count() { return s_count; }
 private:
   Synchronizable m_stopMonitor;
 
-  void* m_obj;
-  PFN_THREAD_FUNC* m_func;
+  void* m_obj{nullptr};
+  PFN_THREAD_FUNC* m_func{nullptr};
   static PFN_THREAD_FUNC* s_initFunc;
   static PFN_THREAD_FUNC* s_finiFunc;
   static void* s_initFuncArg;
   static void* s_finiFuncArg;
-  void* m_threadStack;
-  pthread_attr_t m_attr;
-  pthread_t m_threadId;
-  Exception* m_exception; // exception was thrown and thread was terminated
-  int m_node;
-  bool m_stopped;
-  bool m_noInitFini;
+  static std::atomic<uint32_t> s_count;
 
+  char* m_threadStack{nullptr};
+  size_t m_stackAllocSize{0};
+  int m_node{0};
+  unsigned m_hugeStackKb{0};
+  char* m_tlExtraBase{nullptr};
+  unsigned m_tlExtraKb{0};
+  MemBlock m_hugePages{nullptr, 0};
+  pthread_attr_t m_attr;
+  pthread_t m_threadId{0};
+  // exception was thrown and thread was terminated
+  Exception* m_exception{nullptr};
+  bool m_stopped{false};
+  bool m_noInitFini{false};
   /**
    * Called by ThreadFunc() to delegate the work.
    */
@@ -189,9 +211,11 @@ private:
  */
 template<class T>
 struct AsyncFunc : AsyncFuncImpl {
-  AsyncFunc(T *obj, void (T::*member_func)())
-    : AsyncFuncImpl((void*)this, run_), m_obj(obj), m_memberFunc(member_func) {
-  }
+  AsyncFunc(T *obj, void (T::*member_func)(),
+            int numaNode = -1, unsigned hugeStackKb = 0, unsigned tlExtraKb = 0)
+    : AsyncFuncImpl((void*)this, run_, numaNode, hugeStackKb, tlExtraKb)
+    , m_obj(obj)
+    , m_memberFunc(member_func) {}
 
   static void run_(void *obj) {
     AsyncFunc<T> *p = (AsyncFunc<T>*)obj;

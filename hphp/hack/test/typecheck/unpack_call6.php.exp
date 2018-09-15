@@ -1,6 +1,0 @@
-File "unpack_call6.php", line 12, characters 13-17:
-Invalid argument (Typing[4110])
-File "unpack_call6.php", line 12, characters 13-17:
-This is an object of type Container (it is unpacked with '...')
-File "unpack_call6.php", line 11, characters 11-18:
-It is incompatible with a string

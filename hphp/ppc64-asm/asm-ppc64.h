@@ -53,9 +53,6 @@ constexpr uint8_t toc_position_on_frame     = 3 * 8;
 // Currently it skips a "nop" or a "ld 2,24(1)"
 constexpr uint8_t call_skip_bytes_for_ret   = 1 * instr_size_in_bytes;
 
-// Allow TOC usage on branches - disabled at the moment.
-//#define USE_TOC_ON_BRANCH
-
 //////////////////////////////////////////////////////////////////////
 
 enum class RegNumber : uint32_t {};
@@ -194,11 +191,13 @@ struct Label {
   Label(const Label&) = delete;
   Label& operator=(const Label&) = delete;
 
-  void branch(Assembler& a, BranchConditions bc, LinkReg lr);
+  void branch(Assembler& a, BranchConditions bc,
+              LinkReg lr, bool addrMayChange = false);
   void branchFar(Assembler& a,
                   BranchConditions bc,
                   LinkReg lr,
-                  ImmType immt = ImmType::TocOnly);
+                  ImmType immt = ImmType::TocOnly,
+                  bool immMayChange = false);
   void asm_label(Assembler& a);
 
 private:
@@ -239,12 +238,7 @@ public:
   /*
    * Push a 64 bit element into the stack and return its index.
    */
-  int64_t pushElem(int64_t elem);
-
-  /*
-   * Push a 32 bit element into the stack and return its index.
-   */
-  int64_t pushElem(int32_t elem);
+  int64_t pushElem(int64_t elem, bool elemMayChange = false);
 
   /*
    * Get the singleton instance.
@@ -261,10 +255,20 @@ public:
   /*
    * Return a value previously pushed.
    */
-  int64_t getValue(int64_t index, bool qword = false);
+  int64_t getValue(int64_t index, bool qword = true);
+
+  /*
+   * Return the memory address of the index.
+   */
+  uint64_t* getAddr(int64_t index);
+
+  /*
+   * Return TOC index of the element.
+   */
+  int64_t getIndex(uint64_t elem);
 
 private:
-  int64_t allocTOC (int32_t target, bool align = false);
+  int64_t allocTOC (int64_t target);
   void forceAlignment(HPHP::Address& addr);
 
   HPHP::DataBlock *m_tocvector;
@@ -315,6 +319,10 @@ struct Assembler {
 
   bool contains(CodeAddress addr) const {
     return codeBlock.contains(addr);
+  }
+
+  CodeAddress toDestAddress(CodeAddress addr) const {
+    return codeBlock.toDestAddress(addr);
   }
 
   bool empty() const {
@@ -379,14 +387,8 @@ struct Assembler {
   // TOC emit length: (ld/lwz + nop) or (addis + ld/lwz)
   static const uint8_t kTocLen = instr_size_in_bytes * 2;
 
-  // Compile time switch for using TOC or not on branches
-  static const uint8_t kLimmLen =
-#ifdef USE_TOC_ON_BRANCH
-    kTocLen
-#else
-    kLi64Len
-#endif
-    ;
+  // Define using TOC on branches
+  static const uint8_t kLimmLen = kTocLen;
 
   // Jcc using TOC length: toc/li64 + mtctr + nop + nop + bcctr
   static const uint8_t kJccLen = kLimmLen + instr_size_in_bytes * 4;
@@ -709,15 +711,17 @@ struct Assembler {
 
   void branchAuto(Label& l,
                   BranchConditions bc = BranchConditions::Always,
-                  LinkReg lr = LinkReg::DoNotTouch) {
-    l.branch(*this, bc, lr);
+                  LinkReg lr = LinkReg::DoNotTouch,
+                  bool addrMayChange = false) {
+    l.branch(*this, bc, lr, addrMayChange);
   }
 
   void branchAuto(CodeAddress c,
                   BranchConditions bc = BranchConditions::Always,
-                  LinkReg lr = LinkReg::DoNotTouch) {
+                  LinkReg lr = LinkReg::DoNotTouch,
+                  bool addrMayChange = false) {
     Label l(c);
-    l.branch(*this, bc, lr);
+    l.branch(*this, bc, lr, addrMayChange);
   }
 
   void branchAuto(CodeAddress c,
@@ -729,29 +733,33 @@ struct Assembler {
   void branchFar(Label& l,
                  BranchConditions bc = BranchConditions::Always,
                  LinkReg lr = LinkReg::DoNotTouch,
-                 ImmType immt = ImmType::TocOnly) {
-    l.branchFar(*this, bc, lr, immt);
+                 ImmType immt = ImmType::TocOnly,
+                 bool immMayChange = false) {
+    l.branchFar(*this, bc, lr, immt, immMayChange);
   }
 
   void branchFar(CodeAddress c,
                  BranchConditions bc = BranchConditions::Always,
                  LinkReg lr = LinkReg::DoNotTouch,
-                 ImmType immt = ImmType::TocOnly) {
+                 ImmType immt = ImmType::TocOnly,
+                 bool immMayChange = false) {
     Label l(c);
-    l.branchFar(*this, bc, lr, immt);
+    l.branchFar(*this, bc, lr, immt, immMayChange);
   }
 
   void branchFar(CodeAddress c,
                  ConditionCode cc,
                  LinkReg lr = LinkReg::DoNotTouch,
-                 ImmType immt = ImmType::TocOnly) {
-    branchFar(c, BranchParams::convertCC(cc), lr, immt);
+                 ImmType immt = ImmType::TocOnly,
+                 bool immMayChange = false) {
+    branchFar(c, BranchParams::convertCC(cc), lr, immt, immMayChange);
   }
 
   void branchFar(CodeAddress c, BranchParams bp,
-                 ImmType immt = ImmType::TocOnly) {
+                 ImmType immt = ImmType::TocOnly,
+                 bool immMayChange = false) {
     LinkReg lr = (bp.savesLR()) ? LinkReg::Save : LinkReg::DoNotTouch;
-    branchFar(c, static_cast<BranchConditions>(bp), lr, immt);
+    branchFar(c, static_cast<BranchConditions>(bp), lr, immt, immMayChange);
   }
 
   // ConditionCode variants
@@ -782,11 +790,14 @@ struct Assembler {
   // generic template, for CodeAddress and Label
   template <typename T>
   void call(T& target, CallArg ca = CallArg::Internal) {
-    if ((CallArg::SmashInt == ca) || (CallArg::SmashExt == ca)) {
-      branchFar(target, BranchConditions::Always, LinkReg::Save);
-    } else {
+    if (CallArg::Internal == ca) {
       // tries best performance possible
-      branchAuto(target, BranchConditions::Always, LinkReg::Save);
+      branchAuto(target, BranchConditions::Always, LinkReg::Save, true);
+    } else {
+      // branchFar is not only smashable but also it will use r12 so an
+      // external branch can correctly set its TOC address appropriately.
+      branchFar(target, BranchConditions::Always, LinkReg::Save,
+                ImmType::TocOnly, true);
     }
     callEpilogue(ca);
   }
@@ -804,10 +815,15 @@ struct Assembler {
 
   void limmediate(const Reg64& rt,
                   int64_t imm64,
-                  ImmType immt = ImmType::AnyCompact);
+                  ImmType immt = ImmType::TocOnly,
+                  bool immMayChange = false);
 
   // Auxiliary for loading a complete 64bits immediate into a register
   void li64(const Reg64& rt, int64_t imm64, bool fixedSize = false);
+
+  // Auxiliary for loading a complete 64bits immediate into a register from TOC
+  void li64TOC (const Reg64& rt, int64_t imm64,
+                ImmType immt, bool immMayChange);
 
   // Auxiliary for loading a 32bits immediate into a register
   void li32 (const Reg64& rt, int32_t imm32);
@@ -858,7 +874,7 @@ protected:
     assert(static_cast<uint32_t>(ra) < 32);
     assert(static_cast<uint32_t>(rt) < 32);
 
-    XO_form_t xo_formater {
+    XO_form_t xo_formater {{
                             rc,
                             xop,
                             oe,
@@ -866,7 +882,7 @@ protected:
                             static_cast<uint32_t>(ra),
                             static_cast<uint32_t>(rt),
                             op
-                          };
+                          }};
 
     dword(xo_formater.instruction);
   }
@@ -880,12 +896,12 @@ protected:
     assert(static_cast<uint32_t>(rt) < 32);
     assert(static_cast<uint32_t>(ra) < 32);
 
-    D_form_t d_formater {
+    D_form_t d_formater {{
                           static_cast<uint32_t>(imm),
                           static_cast<uint32_t>(ra),
                           static_cast<uint32_t>(rt),
                           op
-                         };
+                         }};
 
     dword(d_formater.instruction);
   }
@@ -895,12 +911,12 @@ protected:
                  const bool aa = 0,
                  const bool lk = 0) {
 
-      I_form_t i_formater {
+      I_form_t i_formater {{
                             lk,
                             aa,
                             imm >> 2,
                             op
-                          };
+                          }};
 
       dword(i_formater.instruction);
   }
@@ -911,25 +927,25 @@ protected:
                   const uint32_t bd,
                   const bool aa = 0,
                   const bool lk = 0) {
-      B_form_t b_formater {
+      B_form_t b_formater {{
                             lk,
                             aa,
                             bd >> 2,
                             bi,
                             bo,
                             op
-                          };
+                          }};
 
        dword(b_formater.instruction);
    }
 
    void EmitSCForm(const uint8_t op,
                    const uint16_t lev) {
-      SC_form_t sc_formater {
+      SC_form_t sc_formater {{
                               1,
                               lev,
                               op
-                            };
+                            }};
 
       dword(sc_formater.instruction);
    }
@@ -946,14 +962,14 @@ protected:
      assert(static_cast<uint32_t>(ra) < 32);
      assert(static_cast<uint32_t>(rt) < 32);
 
-      X_form_t x_formater {
+      X_form_t x_formater {{
                             rc,
                             xop,
                             static_cast<uint32_t>(rb),
                             static_cast<uint32_t>(ra),
                             static_cast<uint32_t>(rt),
                             op
-                          };
+                          }};
 
       dword(x_formater.instruction);
    }
@@ -965,14 +981,14 @@ protected:
                   const uint16_t xop,
                   const bool rc = 0){
 
-      X_form_t x_formater {
+      X_form_t x_formater {{
                             rc,
                             xop,
                             static_cast<uint32_t>(rb),
                             static_cast<uint32_t>(ra),
                             static_cast<uint32_t>(rt),
                             op
-                          };
+                          }};
 
       dword(x_formater.instruction);
    }
@@ -989,13 +1005,13 @@ protected:
      assert(static_cast<uint32_t>(rt) < 32);
      assert(static_cast<uint16_t>(imm << 14) == 0);
 
-      DS_form_t ds_formater {
+      DS_form_t ds_formater {{
                              xop,
                              static_cast<uint32_t>(imm) >> 2,
                              static_cast<uint32_t>(ra),
                              static_cast<uint32_t>(rt),
                              op
-                            };
+                            }};
 
       dword(ds_formater.instruction);
    }
@@ -1009,13 +1025,13 @@ protected:
      assert(static_cast<uint32_t>(ra) < 32);
      assert(static_cast<uint16_t>(imm << 12) == 0);
 
-      DQ_form_t dq_formater {
+      DQ_form_t dq_formater {{
                              0x0, //Reserved
                              static_cast<uint32_t>(rtp),
                              static_cast<uint32_t>(ra),
                              static_cast<uint32_t>(imm) >> 4,
                              op
-                            };
+                            }};
 
       dword(dq_formater.instruction);
    }
@@ -1028,14 +1044,14 @@ protected:
                    const uint16_t xop,
                    const bool lk = 0) {
 
-      XL_form_t xl_formater {
+      XL_form_t xl_formater {{
                              lk,
                              xop,
                              bb,
                              ba,
                              bt,
                              op
-                            };
+                            }};
 
       dword(xl_formater.instruction);
    }
@@ -1054,7 +1070,7 @@ protected:
      assert(static_cast<uint32_t>(rb) < 32);
      assert(static_cast<uint32_t>(bc) < 32);
 
-      A_form_t a_formater {
+      A_form_t a_formater {{
                            rc,
                            xop,
                            static_cast<uint32_t>(bc),
@@ -1062,7 +1078,7 @@ protected:
                            static_cast<uint32_t>(ra),
                            static_cast<uint32_t>(rt),
                            op
-                          };
+                          }};
 
       dword(a_formater.instruction);
    }
@@ -1080,7 +1096,7 @@ protected:
      assert(static_cast<uint32_t>(ra) < 32);
      assert(static_cast<uint32_t>(rb) < 32);
 
-      M_form_t m_formater {
+      M_form_t m_formater {{
                            rc,
                            me,
                            mb,
@@ -1088,7 +1104,7 @@ protected:
                            static_cast<uint32_t>(ra),
                            static_cast<uint32_t>(rs),
                            op
-                          };
+                          }};
 
       dword(m_formater.instruction);
    }
@@ -1105,7 +1121,7 @@ protected:
      assert(static_cast<uint32_t>(ra) < 32);
      assert(static_cast<uint32_t>(rs) < 32);
 
-      MD_form_t md_formater {
+      MD_form_t md_formater {{
         rc,
         static_cast<uint32_t>(sh >> 5),                         // sh5
         xop,
@@ -1114,7 +1130,7 @@ protected:
         static_cast<uint32_t>(ra),
         static_cast<uint32_t>(rs),
         op
-      };
+      }};
 
       dword(md_formater.instruction);
    }
@@ -1132,7 +1148,7 @@ protected:
      assert(static_cast<uint32_t>(ra) < 32);
      assert(static_cast<uint32_t>(rs) < 32);
 
-      MDS_form_t mds_formater {
+      MDS_form_t mds_formater {{
                                rc,
                                xop,
                                mb,
@@ -1140,7 +1156,7 @@ protected:
                                static_cast<uint32_t>(ra),
                                static_cast<uint32_t>(rs),
                                op
-                              };
+                              }};
 
       dword(mds_formater.instruction);
    }
@@ -1154,14 +1170,14 @@ protected:
     // GP Register cannot be greater than 31
     assert(static_cast<uint32_t>(rs) < 32);
 
-    XFX_form_t xfx_formater {
+    XFX_form_t xfx_formater {{
       rsv,
       xo,
       (static_cast<uint32_t>(spr) >> 5) & 0x1F,
       static_cast<uint32_t>(spr) & 0x1F,
       static_cast<uint32_t>(rs),
       op
-    };
+    }};
 
     dword(xfx_formater.instruction);
   }
@@ -1174,14 +1190,14 @@ protected:
     // GP Register cannot be greater than 31
     assert(static_cast<uint32_t>(rs) < 32);
 
-    XFX_form_t xfx_formater {
+    XFX_form_t xfx_formater {{
       rsv,
       xo,
       static_cast<uint32_t>((mask) & 0x1f),
       static_cast<uint32_t>(((mask) >> 5) & 0x1F),
       static_cast<uint32_t>(rs),
       op
-    };
+    }};
 
     dword(xfx_formater.instruction);
   }
@@ -1193,7 +1209,7 @@ protected:
                    const uint16_t xo,
                    const bool bx,
                    const bool tx)  {
-    XX2_form_t xx2_formater {
+    XX2_form_t xx2_formater {{
       tx,
       bx,
       xo,
@@ -1201,7 +1217,7 @@ protected:
       static_cast<uint32_t>(uim & 0x3),
       static_cast<uint32_t>(t),
       op
-    };
+    }};
     dword(xx2_formater.instruction);
   }
 
@@ -1213,7 +1229,7 @@ protected:
                    const bool ax,
                    const bool bx,
                    const bool tx) {
-    XX3_form_t xx3_formater {
+    XX3_form_t xx3_formater {{
       tx,
       bx,
       ax,
@@ -1222,7 +1238,7 @@ protected:
       static_cast<uint32_t>(a),
       static_cast<uint32_t>(t),
       op
-    };
+    }};
     dword(xx3_formater.instruction);
   }
 
@@ -1238,14 +1254,14 @@ protected:
     assert(static_cast<uint32_t>(ra) < 32);
     assert(static_cast<uint32_t>(rb) < 32);
 
-    XX1_form_t xx1_formater {
+    XX1_form_t xx1_formater {{
       tx,
       xo,
       static_cast<uint32_t>(rb),
       static_cast<uint32_t>(ra),
       static_cast<uint32_t>(s),
       op
-    };
+    }};
 
     dword(xx1_formater.instruction);
   }
@@ -1260,13 +1276,13 @@ protected:
     assert(static_cast<uint32_t>(ra) < 32);
     assert(static_cast<uint32_t>(rb) < 32);
 
-    VX_form_t vx_formater {
+    VX_form_t vx_formater {{
       xo,
       static_cast<uint32_t>(rb),
       static_cast<uint32_t>(ra),
       static_cast<uint32_t>(rt),
       op
-    };
+    }};
 
     dword(vx_formater.instruction);
   }
@@ -1282,7 +1298,7 @@ protected:
      assert(static_cast<uint32_t>(rt) < 32);
      assert(static_cast<uint32_t>(ra) < 32);
 
-      XS_form_t xs_formater {
+      XS_form_t xs_formater {{
                             rc,
                             static_cast<uint32_t>(sh >> 5),
                             xop,
@@ -1290,7 +1306,7 @@ protected:
                             static_cast<uint32_t>(ra),
                             static_cast<uint32_t>(rt),
                             op
-                          };
+                          }};
 
       dword(xs_formater.instruction);
    }

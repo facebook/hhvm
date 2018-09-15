@@ -6,4 +6,8 @@ function main() {
   var_dump(sscanf("42", "%d", new stdclass));
 }
 
+
+<<__EntryPoint>>
+function main_bad_ref_args() {
 main();
+}

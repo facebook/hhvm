@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1933() {
 $my_array = array(7, 1, 5, 6);
 $some_value = 6;
 usort($my_array,
@@ -20,3 +23,4 @@ usort($my_array,
     return 1;
   }
 );
+}

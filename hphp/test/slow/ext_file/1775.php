@@ -1,8 +1,14 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1775() {
 error_reporting(0);
-$fp = fopen('/tmp/lock.txt', 'w');
+$tempfile = tempnam(sys_get_temp_dir(), 'lock');
+$fp = fopen($tempfile, 'w');
 fclose($fp);
-$fp = fopen('/tmp/lock.txt', 'r+');
+$fp = fopen($tempfile, 'r+');
 var_dump(flock($fp, 0xf0));
 fclose($fp);
+unlink($tempfile);
+}

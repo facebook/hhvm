@@ -19,6 +19,8 @@ namespace HH\Asio {
  * Only When you `await` or `join` the resulting `Awaitable`, will all of the
  * key/values in the `Map` within the returned `Awaitable` be available.
  *
+ * @deprecated use `Dict\from_async()` instead.
+ *
  * @param $awaitables - The collection of `KeyedTraversable` awaitables.
  *
  * @return - An `Awaitable` of `Map`, where the `Map` was generated from
@@ -27,16 +29,13 @@ namespace HH\Asio {
 async function m<Tk, Tv>(
   KeyedTraversable<Tk, Awaitable<Tv>> $awaitables,
 ): Awaitable<Map<Tk, Tv>> {
-  $wait_handles = Map {};
-  foreach ($awaitables as $index => $awaitable) {
-    $wait_handles[$index] = $awaitable->getWaitHandle();
-  }
-  await AwaitAllWaitHandle::fromMap($wait_handles);
+  $awaitables = new Map($awaitables);
+  await AwaitAllWaitHandle::fromMap($awaitables);
   // TODO: When systemlib supports closures
-  // return $wait_handles->map($o ==> $o->result());
+  // return $awaitables->map($o ==> $o->result());
   $ret = Map {};
-  foreach($wait_handles as $key => $value) {
-    $ret[$key] = $value->result();
+  foreach ($awaitables as $key => $value) {
+    $ret[$key] = \HH\Asio\result($value);
   }
   return $ret;
 }
@@ -55,6 +54,8 @@ async function m<Tk, Tv>(
  * Only When you `await` or `join` the resulting `Awaitable`, will all of the
  * values in the `Vector` within the returned `Awaitable` be available.
  *
+ * @deprecated use `Vec\from_async()` instead.
+ *
  * @param $awaitables - The collection of `Traversable` awaitables.
  *
  * @return - An `Awaitable` of `Vector`, where the `Vector` was generated from
@@ -63,17 +64,13 @@ async function m<Tk, Tv>(
 async function v<Tv>(
   Traversable<Awaitable<Tv>> $awaitables,
 ): Awaitable<Vector<Tv>> {
-  $wait_handles = Vector {};
-  $wait_handles->reserve(count($awaitables));
-  foreach ($awaitables as $awaitable) {
-    $wait_handles[] = $awaitable->getWaitHandle();
-  }
-  await AwaitAllWaitHandle::fromVector($wait_handles);
+  $awaitables = new Vector($awaitables);
+  await AwaitAllWaitHandle::fromVector($awaitables);
   // TODO: When systemlib supports closures
-  // return $wait_handles->map($o ==> $o->result());
+  // return $awaitables->map($o ==> $o->result());
   $ret = Vector {};
-  foreach($wait_handles as $value) {
-    $ret[] = $value->result();
+  foreach ($awaitables as $value) {
+    $ret[] = \HH\Asio\result($value);
   }
   return $ret;
 }
@@ -88,16 +85,15 @@ async function v<Tv>(
  * will return
  *
  *     Awaitable<(T1, T2, ..., Tn)>
+ *
+ * @deprecated Use `Tuple\from_async()` instead.
+ * @fbdeprecated Use `genva()` instead.
  */
-async function va(...$args): Awaitable/*<(...)>*/ {
-  $wait_handles = array();
-  foreach ($args as $value) {
-    $wait_handles[] = $value->getWaitHandle();
-  }
-  await AwaitAllWaitHandle::fromArray($wait_handles);
+async function va(...$awaitables): Awaitable/*<(...)>*/ {
+  await AwaitAllWaitHandle::fromArray($awaitables);
   $ret = array();
-  foreach ($wait_handles as $value) {
-    $ret[] = $value->result();
+  foreach ($awaitables as $value) {
+    $ret[] = \HH\Asio\result($value);
   }
   return $ret;
 }

@@ -49,12 +49,13 @@ struct StringData;
 namespace jit {
 
 struct Block;
-struct IRGS;
 struct IRInstruction;
 struct NormalizedInstruction;
 struct SSATmp;
 
 namespace irgen {
+
+struct IRGS;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -121,14 +122,6 @@ void assertTypeLocation(IRGS&, const Location&, Type);
 void predictType(IRGS&, const Location&, Type);
 
 /*
- * Special type of guards for param-passing reffiness. These checks are needed
- * when an FPush* instruction is in a different region from its FCall, and we
- * don't know statically whether the callee will want arguments by reference.
- */
-void checkRefs(IRGS&, int64_t entryArDelta, const std::vector<bool>& mask,
-               const std::vector<bool>& vals, Offset);
-
-/*
  * After all initial guards instructions have been emitted, the client of this
  * module calls the following function to allow some "region header" code to be
  * emitted.
@@ -152,6 +145,7 @@ void incProfCounter(IRGS&, TransID);
 void checkCold(IRGS&, TransID);
 
 uint64_t curProfCount(const IRGS& env);
+uint64_t calleeProfCount(const IRGS& env, const RegionDesc& calleeRegion);
 
 /*
  * If ringbuffer tracing is enabled, generate a ringbuffer entry associated
@@ -240,7 +234,9 @@ bool beginInlining(IRGS& env,
                    const Func* target,
                    SrcKey startSk,
                    Offset returnBcOffset,
-                   ReturnTarget returnTarget);
+                   ReturnTarget returnTarget,
+                   int cost,
+                   bool conjure);
 
 /*
  * End the current inlined frame, after all its blocks have been emitted.
@@ -249,7 +245,7 @@ bool beginInlining(IRGS& env,
  * eval stack, in addition to the actual control transfer and bookkeeping done
  * by implInlineReturn().
  */
-void endInlining(IRGS& env);
+bool endInlining(IRGS& env);
 
 /*
  * Begin inlining func into a dummy region used to measure the cost of
@@ -315,12 +311,16 @@ Type predictedType(const IRGS&, const Location&);
 
 #define IMM_BLA        const ImmVector&
 #define IMM_SLA        const ImmVector&
-#define IMM_ILA        const ImmVector&
+#define IMM_ILA        const IterTable&
+#define IMM_I32LA      const ImmVector&
+#define IMM_BLLA       const ImmVector&
 #define IMM_VSA        const ImmVector&
-#define IMM_IVA        int32_t
+#define IMM_IVA        uint32_t
 #define IMM_I64A       int64_t
 #define IMM_LA         int32_t
 #define IMM_IA         int32_t
+#define IMM_CAR        uint32_t
+#define IMM_CAW        uint32_t
 #define IMM_DA         double
 #define IMM_SA         const StringData*
 #define IMM_RATA       RepoAuthType
@@ -328,12 +328,15 @@ Type predictedType(const IRGS&, const Location&);
 #define IMM_BA         Offset
 #define IMM_OA(subop)  subop
 #define IMM_KA         MemberKey
+#define IMM_LAR        LocalRange
+#define IMM_FCA        FCallArgs
 
 #define NA /*  */
 #define ONE(x0)              , IMM_##x0
 #define TWO(x0, x1)          , IMM_##x0, IMM_##x1
 #define THREE(x0, x1, x2)    , IMM_##x0, IMM_##x1, IMM_##x2
 #define FOUR(x0, x1, x2, x3) , IMM_##x0, IMM_##x1, IMM_##x2, IMM_##x3
+#define FIVE(x0, x1, x2, x3, x4) , IMM_##x0, IMM_##x1, IMM_##x2, IMM_##x3, IMM_##x4
 
 #define O(name, imms, ...) void emit##name(IRGS& imms);
   OPCODES
@@ -344,16 +347,21 @@ Type predictedType(const IRGS&, const Location&);
 #undef TWO
 #undef THREE
 #undef FOUR
+#undef FIVE
 
 #undef IMM_MA
 #undef IMM_BLA
 #undef IMM_SLA
 #undef IMM_ILA
+#undef IMM_I32LA
+#undef IMM_BLLA
 #undef IMM_VSA
 #undef IMM_IVA
 #undef IMM_I64A
 #undef IMM_LA
 #undef IMM_IA
+#undef IMM_CAR
+#undef IMM_CAW
 #undef IMM_DA
 #undef IMM_SA
 #undef IMM_RATA
@@ -361,6 +369,8 @@ Type predictedType(const IRGS&, const Location&);
 #undef IMM_BA
 #undef IMM_OA
 #undef IMM_KA
+#undef IMM_LAR
+#undef IMM_FCA
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -1,7 +1,7 @@
-let entry = Worker.register_entry_point ~restore:(fun () -> ())
+let entry = WorkerController.register_entry_point ~restore:(fun () -> ())
 
 let make_worker ?call_wrapper heap_handle =
-  Worker.make
+  WorkerController.make
     ?call_wrapper
     ~saved_state:()
     ~entry
@@ -10,7 +10,7 @@ let make_worker ?call_wrapper heap_handle =
     ~heap_handle
 
 let rec wait_until_ready handle =
-  let { Worker.readys; waiters } = Worker.select [handle] in
+  let { WorkerController.readys; waiters; ready_fds = _ } = WorkerController.select [handle] [] in
   match readys with
   | [] -> wait_until_ready handle
   | ready :: _ ->
@@ -22,9 +22,9 @@ let catch_exception_and_custom_exit_wrapper: 'x 'b. ('x -> 'b) -> 'x -> 'b = fun
   | _ -> exit 17
 
 let call_and_verify_result worker f x expected =
-  let result = Worker.call worker f x
+  let result = WorkerController.call worker f x
     |> wait_until_ready
-    |> Worker.get_result
+    |> WorkerController.get_result
   in
   result = expected
 
@@ -33,7 +33,7 @@ let call_and_verify_result worker f x expected =
  * makes the worker exit with code 17. *)
 let test_wrapped_worker_with_custom_exit heap_handle () =
   let workers = make_worker
-    ~call_wrapper:{ Worker.wrap = catch_exception_and_custom_exit_wrapper }
+    ~call_wrapper:{ WorkerController.wrap = catch_exception_and_custom_exit_wrapper }
     heap_handle in
   match workers with
   | [] ->
@@ -42,7 +42,7 @@ let test_wrapped_worker_with_custom_exit heap_handle () =
   | worker :: workers ->
     try call_and_verify_result worker
     (fun () -> raise (Failure "oops")) () "dummy" with
-    | Worker.Worker_exited_abnormally i ->
+    | WorkerController.Worker_failed (_, WorkerController.Worker_quit(Unix.WEXITED i)) ->
       i = 17
 
 let test_worker_uncaught_exception_exits_with_2 heap_handle () =
@@ -54,7 +54,7 @@ let test_worker_uncaught_exception_exits_with_2 heap_handle () =
   | worker :: workers ->
     try call_and_verify_result worker (fun () -> raise (Failure "oops"))
     () "dummy" with
-    | Worker.Worker_exited_abnormally i ->
+    | WorkerController.Worker_failed (_, WorkerController.Worker_quit(Unix.WEXITED i)) ->
       i = 2
 
 let test_simple_worker_spawn heap_handle () =

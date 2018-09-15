@@ -364,6 +364,9 @@ function test_sql_regcase() {
   VS(sql_regcase("Foo - bar."), "[Ff][Oo][Oo] - [Bb][Aa][Rr].");
 }
 
+
+<<__EntryPoint>>
+function main_ext_preg() {
 test_preg_grep();
 test_preg_match();
 test_preg_match_all();
@@ -378,3 +381,4 @@ test_eregi();
 test_split();
 test_spliti();
 test_sql_regcase();
+}

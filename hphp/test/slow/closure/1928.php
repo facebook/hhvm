@@ -9,4 +9,8 @@ class Foo {
     $a();
   }
 }
+
+<<__EntryPoint>>
+function main_1928() {
 Foo::bar();
+}

@@ -5,7 +5,7 @@ class :my-xhp<T> {
 }
 
 function test<T>(T $x): :my-xhp<T> {
-  return <my-xhp foo={Vector {$x}} />;
+  return <my-xhp foo={Vector { $x }} />;
 }
 
 function test2(): Vector<arraykey> {

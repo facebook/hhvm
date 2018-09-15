@@ -36,9 +36,9 @@ struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
   WAITHANDLE_DTOR(ExternalThreadEventWaitHandle);
   void sweep();
 
-  explicit c_ExternalThreadEventWaitHandle(Class* cls =
-      c_ExternalThreadEventWaitHandle::classof())
-    : c_WaitableWaitHandle(cls) {}
+  explicit c_ExternalThreadEventWaitHandle()
+    : c_WaitableWaitHandle(classof(), HeaderKind::WaitHandle,
+        type_scan::getIndexForMalloc<c_ExternalThreadEventWaitHandle>()) {}
   ~c_ExternalThreadEventWaitHandle() {}
 
  public:
@@ -46,11 +46,11 @@ struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
     Create(AsioExternalThreadEvent* event, ObjectData* priv_data);
 
   c_ExternalThreadEventWaitHandle* getNextToProcess() {
-    assert(getState() == STATE_WAITING);
+    assertx(getState() == STATE_WAITING);
     return m_nextToProcess;
   }
   void setNextToProcess(c_ExternalThreadEventWaitHandle* next) {
-    assert(getState() == STATE_WAITING);
+    assertx(getState() == STATE_WAITING);
     m_nextToProcess = next;
   }
   ObjectData* getPrivData() { return m_privData.get(); }
@@ -69,11 +69,19 @@ struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
   void destroyEvent(bool sweeping = false);
 
  private:
+  // Manipulated by other threads; logically part of the linked list
+  // owned by AsioExternalThreadEventQueue::m_received.
   c_ExternalThreadEventWaitHandle* m_nextToProcess;
-  AsioExternalThreadEvent* m_event;
-  Object m_privData;
-  SweepableMember<c_ExternalThreadEventWaitHandle> m_sweepable;
 
+  // The i/o thread-lowned event object, one per ETEWH
+  AsioExternalThreadEvent* m_event;
+
+  Object m_privData;
+
+  // Register for sweep, making this ETEWH also a root. AETE's could
+  // also be tracked as roots but its more complicated since they
+  // are malloc'd and accessed by other threads.
+  SweepableMember<c_ExternalThreadEventWaitHandle> m_sweepable;
  public:
   static const uint8_t STATE_WAITING = 2;
 
@@ -87,8 +95,8 @@ void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnSuccessCallback,
 void HHVM_STATIC_METHOD(ExternalThreadEventWaitHandle, setOnFailCallback,
                         const Variant& callback);
 
-inline c_ExternalThreadEventWaitHandle* c_WaitHandle::asExternalThreadEvent() {
-  assert(getKind() == Kind::ExternalThreadEvent);
+inline c_ExternalThreadEventWaitHandle* c_Awaitable::asExternalThreadEvent() {
+  assertx(getKind() == Kind::ExternalThreadEvent);
   return static_cast<c_ExternalThreadEventWaitHandle*>(this);
 }
 

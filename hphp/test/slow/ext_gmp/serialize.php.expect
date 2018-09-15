@@ -1,0 +1,16 @@
+object(GMP)#1 (3) {
+  ["foo"]=>
+  string(3) "lol"
+  ["bar"]=>
+  string(3) "wut"
+  ["num"]=>
+  string(2) "99"
+}
+object(GMP)#2 (3) {
+  ["foo"]=>
+  string(3) "lol"
+  ["bar"]=>
+  string(3) "wut"
+  ["num"]=>
+  string(2) "99"
+}

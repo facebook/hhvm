@@ -1,4 +1,2 @@
-File "typing_fail_inherit2.php", line 17, characters 26-28:
-The function bar is static (Typing[4091])
-File "typing_fail_inherit2.php", line 18, characters 19-21:
-It is defined as dynamic here
+File "typing_fail_inherit2.php", line 18, characters 3-29:
+Redeclared method Baz::bar (Parsing[1002])

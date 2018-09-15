@@ -17,7 +17,7 @@
 #ifndef incl_HPHP_EVAL_CODE_COVERAGE_H_
 #define incl_HPHP_EVAL_CODE_COVERAGE_H_
 
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
 
 #include <string>
 #include <vector>
@@ -28,16 +28,22 @@ namespace HPHP {
 struct Array;
 
 struct CodeCoverage {
+  static constexpr int kLineExecuted = 1;
+
   void Record(const char* filename, int line0, int line1);
 
   /*
-   * Returns an array in this format,
+   * If report_frequency is passed, returns an array in this format,
+   *
+   * array('filename' => covered_line_count, ....)
+   *
+   * Otherwise, returns an array in this format,
    *
    *  array('filename' => array( line => count, ...))
    *
    * If sys is passed as false, systemlib files are not included.
    */
-  Array Report(bool sys = true);
+  Array Report(bool report_frequency = false, bool sys = true);
 
   /*
    * Write JSON format into the file.
@@ -54,7 +60,7 @@ struct CodeCoverage {
   void Reset();
 
 private:
-  typedef hphp_const_char_map<std::vector<int>> CodeCoverageMap;
+  using CodeCoverageMap = hphp_const_char_map<std::vector<int>>;
   CodeCoverageMap m_hits;
 };
 

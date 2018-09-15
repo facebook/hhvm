@@ -21,7 +21,8 @@
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/tv-helpers.h"
+#include "hphp/runtime/base/tv-mutate.h"
+#include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/vm/class.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
@@ -52,9 +53,9 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void assertSFNonNegative(Vout& v, Vreg sf) {
+void assertSFNonNegative(Vout& v, Vreg sf, Reason reason) {
   if (!RuntimeOption::EvalHHIRGenerateAsserts) return;
-  ifThen(v, CC_NGE, sf, [&] (Vout& v) { v << ud2{}; });
+  ifThen(v, CC_NGE, sf, [&] (Vout& v) { v << trap{reason}; });
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -62,6 +63,24 @@ void assertSFNonNegative(Vout& v, Vreg sf) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+Vreg emitMovtql(Vout& v, Vreg reg) {
+  auto it = v.unit().regToConst.find(reg);
+  if (it != v.unit().regToConst.end() && !it->second.isUndef) {
+    switch (it->second.kind) {
+      case Vconst::Double:
+        always_assert(false);
+      case Vconst::Quad:
+        return v.unit().makeConst(uint32_t(it->second.val));
+      case Vconst::Long:
+      case Vconst::Byte:
+        return reg;
+    }
+  }
+  auto const r = v.makeReg();
+  v << movtql{reg, r};
+  return r;
+}
 
 void emitImmStoreq(Vout& v, Immed64 imm, Vptr ref) {
   if (imm.fits(sz::dword)) {
@@ -76,6 +95,17 @@ void emitLdLowPtr(Vout& v, Vptr mem, Vreg reg, size_t size) {
     v << load{mem, reg};
   } else if (size == 4) {
     v << loadzlq{mem, reg};
+  } else {
+    not_implemented();
+  }
+}
+
+void emitStLowPtr(Vout& v, Vreg reg, Vptr mem, size_t size) {
+  if (size == 8) {
+    v << store{reg, mem};
+  } else if (size == 4) {
+    auto const temp = emitMovtql(v, reg);
+    v << storel{temp, mem};
   } else {
     not_implemented();
   }
@@ -104,60 +134,67 @@ Vreg zeroExtendIfBool(Vout& v, Type ty, Vreg reg) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void storeTV(Vout& v, Vptr dst, Vloc srcLoc, const SSATmp* src) {
-  auto const type = src->type();
+  storeTV(v, src->type(), srcLoc, dst + TVOFF(m_type), dst + TVOFF(m_data));
+}
 
+void storeTV(Vout& v, Type type, Vloc srcLoc, Vptr typePtr, Vptr valPtr) {
   if (srcLoc.isFullSIMD()) {
     // The whole TV is stored in a single SIMD reg.
     assertx(RuntimeOption::EvalHHIRAllocSIMDRegs);
-    v << storeups{srcLoc.reg(), dst};
+    always_assert(typePtr == valPtr + (TVOFF(m_type) - TVOFF(m_data)));
+    v << storeups{srcLoc.reg(), valPtr};
     return;
   }
 
   if (type.needsReg()) {
     assertx(srcLoc.hasReg(1));
-    v << storeb{srcLoc.reg(1), dst + TVOFF(m_type)};
+    v << storeb{srcLoc.reg(1), typePtr};
   } else {
-    v << storeb{v.cns(type.toDataType()), dst + TVOFF(m_type)};
+    v << storeb{v.cns(type.toDataType()), typePtr};
   }
 
   // We ignore the values of statically nullish types.
-  if (src->isA(TNull) || src->isA(TNullptr)) return;
+  if (type <= TNull || type <= TNullptr) return;
 
   // Store the value.
-  if (src->hasConstVal()) {
+  if (type.hasConstVal()) {
     // Skip potential zero-extend if we know the value.
-    v << store{v.cns(src->rawVal()), dst + TVOFF(m_data)};
+    v << store{v.cns(type.rawVal()), valPtr};
   } else {
     assertx(srcLoc.hasReg(0));
-    auto const extended = zeroExtendIfBool(v, src->type(), srcLoc.reg(0));
-    v << store{extended, dst + TVOFF(m_data)};
+    auto const extended = zeroExtendIfBool(v, type, srcLoc.reg(0));
+    v << store{extended, valPtr};
   }
 }
 
 void loadTV(Vout& v, const SSATmp* dst, Vloc dstLoc, Vptr src,
             bool aux /* = false */) {
-  auto const type = dst->type();
+  loadTV(v, dst->type(), dstLoc, src + TVOFF(m_type), src + TVOFF(m_data), aux);
+}
 
+void loadTV(Vout& v, Type type, Vloc dstLoc, Vptr typePtr, Vptr valPtr,
+            bool aux) {
   if (dstLoc.isFullSIMD()) {
     // The whole TV is loaded into a single SIMD reg.
     assertx(RuntimeOption::EvalHHIRAllocSIMDRegs);
-    v << loadups{src, dstLoc.reg()};
+    always_assert(typePtr == valPtr + (TVOFF(m_type) - TVOFF(m_data)));
+    v << loadups{valPtr, dstLoc.reg()};
     return;
   }
 
   if (type.needsReg()) {
     assertx(dstLoc.hasReg(1));
     if (aux) {
-      v << load{src + TVOFF(m_type), dstLoc.reg(1)};
+      v << load{typePtr, dstLoc.reg(1)};
     } else {
-      v << loadb{src + TVOFF(m_type), dstLoc.reg(1)};
+      v << loadb{typePtr, dstLoc.reg(1)};
     }
   }
 
   if (type <= TBool) {
-    v << loadtqb{src + TVOFF(m_data), dstLoc.reg(0)};
+    v << loadtqb{valPtr, dstLoc.reg(0)};
   } else {
-    v << load{src + TVOFF(m_data), dstLoc.reg(0)};
+    v << load{valPtr, dstLoc.reg(0)};
   }
 }
 
@@ -209,60 +246,100 @@ void copyTV(Vout& v, Vloc src, Vloc dst, Type destType) {
   }
 }
 
-void trashTV(Vout& v, Vreg ptr, int32_t offset, char byte) {
+void trashFullTV(Vout& v, Vptr ptr, char byte) {
   int32_t trash32;
   memset(&trash32, byte, sizeof(trash32));
-  static_assert(sizeof(TypedValue) == 16, "");
-  v << storeli{trash32, ptr[offset + 0x0]};
-  v << storeli{trash32, ptr[offset + 0x4]};
-  v << storeli{trash32, ptr[offset + 0x8]};
-  v << storeli{trash32, ptr[offset + 0xc]};
+  static_assert(sizeof(TypedValue) % sizeof(trash32) == 0, "");
+
+  for (int offset = 0; offset < sizeof(TypedValue);
+       offset += sizeof(trash32)) {
+    v << storeli{trash32, ptr + offset};
+  }
 }
 
-void emitAssertRefCount(Vout& v, Vreg data) {
-  auto const sf = v.makeReg();
-  v << cmplim{StaticValue, data[FAST_REFCOUNT_OFFSET], sf};
+void trashTV(Vout& v, Vptr typePtr, Vptr valPtr, char byte) {
+  int32_t trash32;
+  memset(&trash32, byte, sizeof(trash32));
+  static_assert(sizeof(Value) == 8, "");
+  v << storeli{trash32, valPtr};
+  v << storeli{trash32, valPtr + 4};
+
+  static_assert(sizeof(DataType) == 1, "");
+  v << storebi{byte, typePtr};
+}
+
+void emitAssertRefCount(Vout& v, Vreg data, Reason reason) {
+  auto const sf = emitCmpRefCount(v, StaticValue, data);
 
   ifThen(v, CC_NLE, sf, [&] (Vout& v) {
-    auto const sf = v.makeReg();
-    v << cmplim{RefCountMaxRealistic, data[FAST_REFCOUNT_OFFSET], sf};
-
-    ifThen(v, CC_NBE, sf, [&] (Vout& v) { v << ud2{}; });
+    auto const sf = emitCmpRefCount(v, RefCountMaxRealistic, data);
+    ifThen(v, CC_NBE, sf, [&] (Vout& v) { v << trap{reason}; });
   });
 }
 
-void emitIncRef(Vout& v, Vreg base) {
+void emitIncRef(Vout& v, Vreg base, Reason reason) {
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    emitAssertRefCount(v, base);
+    emitAssertRefCount(v, base, reason);
   }
-  auto const sf = v.makeReg();
-  v << inclm{base[FAST_REFCOUNT_OFFSET], sf};
-  assertSFNonNegative(v, sf);
+
+  if (one_bit_refcount) {
+    emitStoreRefCount(v, MultiReference, base);
+  } else {
+    auto const sf = v.makeReg();
+    v << inclm{base[FAST_REFCOUNT_OFFSET], sf};
+    assertSFNonNegative(v, sf, reason);
+  }
 }
 
-Vreg emitDecRef(Vout& v, Vreg base) {
-  auto const sf = v.makeReg();
-  v << declm{base[FAST_REFCOUNT_OFFSET], sf};
-  assertSFNonNegative(v, sf);
+Vreg emitDecRef(Vout& v, Vreg base, Reason reason) {
+  auto const sf = one_bit_refcount ?
+    emitCmpRefCount(v, OneReference, base) :
+    emitDecRefCount(v, base);
 
+  assertSFNonNegative(v, sf, reason);
   return sf;
 }
 
-void emitIncRefWork(Vout& v, Vreg data, Vreg type) {
+void emitIncRefWork(Vout& v, Vreg data, Vreg type, Reason reason) {
   auto const sf = v.makeReg();
-  emitCmpTVType(v, sf, KindOfRefCountThreshold, type);
-  // ifRefCountType
-  ifThen(v, CC_G, sf, [&] (Vout& v) {
-    auto const sf2 = v.makeReg();
-    // ifNonStatic
-    v << cmplim{0, data[FAST_REFCOUNT_OFFSET], sf2};
-    ifThen(v, CC_GE, sf2, [&] (Vout& v) { emitIncRef(v, data); });
+  auto const cc = emitIsTVTypeRefCounted(v, sf, type);
+  // ifRefCountedType
+  ifThen(v, cc, sf, [&] (Vout& v) {
+    // One-bit mode: do the IncRef if m_count == OneReference (0). Normal mode:
+    // do the IncRef if m_count >= 0.
+    auto const sf2 = emitCmpRefCount(v, 0, data);
+    auto const cc = one_bit_refcount ? CC_E : CC_GE;
+    ifThen(v, cc, sf2, [&] (Vout& v) { emitIncRef(v, data, reason); });
   });
 }
 
-void emitDecRefWorkObj(Vout& v, Vreg obj) {
-  auto const shouldRelease = v.makeReg();
-  v << cmplim{1, obj[FAST_REFCOUNT_OFFSET], shouldRelease};
+void emitIncRefWork(Vout& v, Vloc loc, Type type, Reason reason) {
+  // If definitely not ref-counted, nothing to do
+  if (!type.maybe(TCounted)) return;
+
+  if (type <= TCounted) {
+    // Definitely ref-counted
+    emitIncRef(v, loc.reg(), reason);
+    return;
+  }
+
+  // It might be ref-counted, we need to check at runtime.
+
+  if (loc.hasReg(1)) {
+    // We don't know the type, so check it at runtime.
+    emitIncRefWork(v, loc.reg(0), loc.reg(1), reason);
+    return;
+  }
+
+  // We do know the type, but it might be persistent or counted. Check the
+  // ref-count.
+  auto const sf = emitCmpRefCount(v, 0, loc.reg());
+  auto const cc = one_bit_refcount ? CC_E : CC_GE;
+  ifThen(v, cc, sf, [&] (Vout& v) { emitIncRef(v, loc.reg(), reason); });
+}
+
+void emitDecRefWorkObj(Vout& v, Vreg obj, Reason reason) {
+  auto const shouldRelease = emitCmpRefCount(v, OneReference, obj);
   ifThenElse(
     v, CC_E, shouldRelease,
     [&] (Vout& v) {
@@ -271,7 +348,7 @@ void emitDecRefWorkObj(Vout& v, Vreg obj) {
       v << vcall{fn, v.makeVcallArgs({{obj}}), v.makeTuple({})};
     },
     [&] (Vout& v) {
-      emitDecRef(v, obj);
+      emitDecRef(v, obj, reason);
     }
   );
 }
@@ -318,25 +395,24 @@ void emitCall(Vout& v, CallSpec target, RegSet args) {
   not_reached();
 }
 
-Vptr lookupDestructor(Vout& v, Vreg type) {
-  auto const table = reinterpret_cast<intptr_t>(g_destructors);
+Vptr lookupDestructor(Vout& v, Vreg type, bool typeIsQuad) {
+  auto const elem_sz = static_cast<int>(sizeof(g_destructors[0]) / 2);
+  auto const table = reinterpret_cast<intptr_t>(g_destructors) -
+    kMinRefCountedDataType * elem_sz;
 
-  auto const typel = v.makeReg();
-  auto const index = v.makeReg();
-  auto const indexl = v.makeReg();
-
-  // This movzbl is only needed because callers aren't required to zero-extend
-  // the type.
-  v << movzbl{type, typel};
-  v << shrli{kShiftDataTypeToDestrIndex, typel, indexl, v.makeReg()};
-  v << movzlq{indexl, index};
+  auto const index = [&] {
+    if (typeIsQuad) return type;
+    auto const r = v.makeReg();
+    v << movsbq{type, r};
+    return r;
+  }();
 
   // The baseless form is more compact, but isn't supported for 64-bit
   // displacements.
   if (table <= std::numeric_limits<int>::max()) {
-    return baseless(index * 8 + safe_cast<int>(table));
+    return baseless(index * elem_sz + safe_cast<int>(table));
   }
-  return v.cns(table)[index * 8];
+  return v.cns(table)[index * elem_sz];
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -369,8 +445,7 @@ void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg, Vptr mem, size_t size) {
   if (size == 8) {
     v << cmpqm{reg, mem, sf};
   } else if (size == 4) {
-    auto low = v.makeReg();
-    v << movtql{reg, low};
+    auto low = emitMovtql(v, reg);
     v << cmplm{low, mem, sf};
   } else {
     not_implemented();
@@ -381,10 +456,8 @@ void cmpLowPtrImpl(Vout& v, Vreg sf, Vreg reg1, Vreg reg2, size_t size) {
   if (size == 8) {
     v << cmpq{reg1, reg2, sf};
   } else if (size == 4) {
-    auto const l1 = v.makeReg();
-    auto const l2 = v.makeReg();
-    v << movtql{reg1, l1};
-    v << movtql{reg2, l2};
+    auto const l1 = emitMovtql(v, reg1);
+    auto const l2 = emitMovtql(v, reg2);
     v << cmpl{l1, l2, sf};
   } else {
     not_implemented();
@@ -402,12 +475,34 @@ void emitCmpVecLen(Vout& v, Vreg sf, Immed val, Vptr mem) {
   }
 }
 
+/*
+ * Generate range check for isCollection:
+ * set CC_BE if obj->m_kind - HeaderKind::Vector <= HeaderKind::ImmSet
+ */
+Vreg emitIsCollection(Vout& v, Vreg obj) {
+  auto const sf = v.makeReg();
+  auto const mincol = static_cast<int>(HeaderKind::Vector);
+  auto const maxcol = static_cast<int>(HeaderKind::ImmSet);
+  auto const kind = v.makeReg();
+  auto const col_kind = v.makeReg();
+  v << loadzbl{obj[HeaderKindOffset], kind};
+  v << subli{mincol, kind, col_kind, v.makeReg()};
+  v << cmpli{maxcol - mincol, col_kind, sf};
+  return sf;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
+
+static std::atomic<int32_t> s_nextFakeAddress{-1};
 
 void emitEagerSyncPoint(Vout& v, PC pc, Vreg rds, Vreg vmfp, Vreg vmsp) {
   v << store{vmfp, rds[rds::kVmfpOff]};
   v << store{vmsp, rds[rds::kVmspOff]};
   emitImmStoreq(v, intptr_t(pc), rds[rds::kVmpcOff]);
+
+  auto const addr = s_nextFakeAddress.fetch_sub(1, std::memory_order_relaxed);
+  v << storeqi{addr, rds[rds::kVmJitReturnAddrOff]};
+  v << recordstack{(TCA)static_cast<int64_t>(addr)};
 }
 
 void emitRB(Vout& v, Trace::RingBufferType t, const char* msg) {
@@ -417,28 +512,53 @@ void emitRB(Vout& v, Trace::RingBufferType t, const char* msg) {
              v.makeTuple({})};
 }
 
-void emitIncStat(Vout& v, Stats::StatCounter stat, int n, bool force) {
-  if (!force && !Stats::enabled()) return;
+void emitIncStat(Vout& v, Stats::StatCounter stat) {
+  if (!Stats::enabled()) return;
   intptr_t disp = uintptr_t(&Stats::tl_counters[stat]) - tlsBase();
-  v << addqim{n, Vptr{baseless(disp), Vptr::FS}, v.makeReg()};
+  v << incqm{Vptr{baseless(disp), Vptr::FS}, v.makeReg()};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Vreg checkRDSHandleInitialized(Vout& v, rds::Handle ch) {
-  assertx(rds::isNormalHandle(ch));
+static Vptr getRDSHandleGenNumberAddr(rds::Handle handle) {
+  return rvmtl()[rds::genNumberHandleFrom(handle)];
+}
+
+static Vptr getRDSHandleGenNumberAddr(Vreg handle) {
+  return handle[DispReg(rvmtl(), -sizeof(rds::GenNumber))];
+}
+
+template<typename HandleT>
+Vreg doCheckRDSHandleInitialized(Vout& v, HandleT ch) {
   auto const gen = v.makeReg();
   auto const sf = v.makeReg();
-  v << loadb{rvmtl()[rds::genNumberHandleFrom(ch)], gen};
+  v << loadb{getRDSHandleGenNumberAddr(ch), gen};
   v << cmpbm{gen, rvmtl()[rds::currentGenNumberHandle()], sf};
   return sf;
 }
 
-void markRDSHandleInitialized(Vout& v, rds::Handle ch) {
+Vreg checkRDSHandleInitialized(Vout& v, rds::Handle ch) {
   assertx(rds::isNormalHandle(ch));
+  return doCheckRDSHandleInitialized(v, ch);
+}
+Vreg checkRDSHandleInitialized(Vout& v, Vreg ch) {
+  return doCheckRDSHandleInitialized(v, ch);
+}
+
+template<typename HandleT>
+void doMarkRDSHandleInitialized(Vout &v, HandleT ch) {
   auto const gen = v.makeReg();
   v << loadb{rvmtl()[rds::currentGenNumberHandle()], gen};
-  v << storeb{gen, rvmtl()[rds::genNumberHandleFrom(ch)]};
+  v << storeb{gen, getRDSHandleGenNumberAddr(ch)};
+}
+
+void markRDSHandleInitialized(Vout& v, rds::Handle ch) {
+  assertx(rds::isNormalHandle(ch));
+  doMarkRDSHandleInitialized(v, ch);
+}
+
+void markRDSHandleInitialized(Vout& v, Vreg ch) {
+  doMarkRDSHandleInitialized(v, ch);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

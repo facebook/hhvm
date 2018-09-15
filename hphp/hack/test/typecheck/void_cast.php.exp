@@ -1,2 +1,2 @@
 File "void_cast.php", line 13, characters 9-12:
-Cannot cast to void. (Naming[2054])
+Unbound name: void (a global constant) (Naming[2049])

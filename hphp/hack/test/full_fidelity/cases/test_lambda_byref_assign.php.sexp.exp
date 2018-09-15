@@ -1,0 +1,152 @@
+((script 339
+  ((list 339
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4
+        ((() <? 2 ())
+         (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))
+       (missing 0 ())))
+     (expression_statement 39
+      ((binary_expression 38
+        ((variable 2 ((((end_of_line 1)) variable 2 ((whitespace 1)))))
+         (() = 1 ((whitespace 1)))
+         (prefix_unary_expression 33
+          ((() & 1 ())
+           (lambda_expression 32
+            ((missing 0 ()) (missing 0 ()) (missing 0 ())
+             (lambda_signature 2
+              ((() "(" 1 ()) (missing 0 ()) (() ")" 1 ((whitespace 1)))
+               (missing 0 ()) (missing 0 ())))
+             (() ==> 3 ((whitespace 1)))
+             (compound_statement 25
+              ((() { 1 ((whitespace 1)))
+               (list 21
+                ((function_static_statement 10
+                  ((() static 6 ((whitespace 1)))
+                   (list 2
+                    ((list_item 2
+                      ((static_declarator 2
+                        ((() variable 2 ()) (missing 0 ())))
+                       (missing 0 ())))))
+                   (() ";" 1 ((whitespace 1)))))
+                 (return_statement 10
+                  ((() return 6 ((whitespace 1)))
+                   (variable 2 ((() variable 2 ())))
+                   (() ";" 1 ((whitespace 1)))))))
+               (() } 1 ())))))))))
+       (() ";" 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
+     (expression_statement 9
+      ((binary_expression 8
+        ((variable 2 ((() variable 2 ((whitespace 1)))))
+         (() = 1 ((whitespace 1)))
+         (prefix_unary_expression 3
+          ((() & 1 ()) (variable 2 ((() variable 2 ())))))))
+       (() ";" 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
+     (expression_statement 16
+      ((binary_expression 15
+        ((variable 2 ((() variable 2 ((whitespace 1)))))
+         (() = 1 ((whitespace 1)))
+         (prefix_unary_expression 10
+          ((() & 1 ())
+           (function_call_expression 9
+            ((() name 7 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))))
+       (() ";" 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
+     (expression_statement 17
+      ((binary_expression 16
+        ((variable 2 ((() variable 2 ((whitespace 1)))))
+         (() = 1 ((whitespace 1)))
+         (prefix_unary_expression 11
+          ((() & 1 ())
+           (member_selection_expression 10
+            ((variable 2 ((() variable 2 ()))) (() -> 2 ()) (() name 6 ())))))))
+       (() ";" 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
+     (expression_statement 19
+      ((binary_expression 18
+        ((variable 2 ((() variable 2 ((whitespace 1)))))
+         (() = 1 ((whitespace 1)))
+         (prefix_unary_expression 13
+          ((() & 1 ())
+           (function_call_expression 12
+            ((member_selection_expression 10
+              ((variable 2 ((() variable 2 ()))) (() -> 2 ()) (() name 6 ())))
+             (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))))
+       (() ";" 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
+     (expression_statement 14
+      ((binary_expression 13
+        ((variable 2 ((() variable 2 ((whitespace 1)))))
+         (() = 1 ((whitespace 1)))
+         (prefix_unary_expression 8
+          ((() & 1 ())
+           (subscript_expression 7
+            ((variable 3 ((() variable 3 ()))) (() [ 1 ())
+             (variable 2 ((() variable 2 ()))) (() ] 1 ())))))))
+       (() ";" 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
+     (expression_statement 14
+      ((binary_expression 13
+        ((variable 2 ((() variable 2 ((whitespace 1)))))
+         (() = 1 ((whitespace 1)))
+         (prefix_unary_expression 8
+          ((() & 1 ())
+           (prefix_unary_expression 7
+            ((() $ 1 ())
+             (braced_expression 6 ((() { 1 ()) (() name 4 ()) (() } 1 ())))))))))
+       (() ";" 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
+     (expression_statement 25
+      ((binary_expression 24
+        ((variable 2 ((() variable 2 ((whitespace 1)))))
+         (() = 1 ((whitespace 1)))
+         (prefix_unary_expression 19
+          ((() & 1 ())
+           (scope_resolution_expression 18
+            ((() self 4 ()) (() :: 2 ()) (() variable 12 ())))))))
+       (() ";" 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
+     (expression_statement 10
+      ((binary_expression 9
+        ((variable 2 ((() variable 2 ((whitespace 1)))))
+         (() = 1 ((whitespace 1)))
+         (prefix_unary_expression 4
+          ((() & 1 ())
+           (prefix_unary_expression 3
+            ((() $ 1 ()) (variable 2 ((() variable 2 ())))))))))
+       (() ";" 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
+     (expression_statement 14
+      ((binary_expression 13
+        ((variable 2 ((() variable 2 ((whitespace 1)))))
+         (() = 1 ((whitespace 1)))
+         (prefix_unary_expression 8
+          ((() & 1 ())
+           (object_creation_expression 7
+            ((() new 3 ((whitespace 1)))
+             (constructor_call 3
+              ((simple_type_specifier 1 ((() name 1 ()))) (() "(" 1 ())
+               (missing 0 ()) (() ")" 1 ())))))))))
+       (() ";" 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
+     (expression_statement 14
+      ((binary_expression 13
+        ((variable 2 ((() variable 2 ((whitespace 1)))))
+         (() = 1 ((whitespace 1)))
+         (prefix_unary_expression 8
+          ((() & 1 ())
+           (prefix_unary_expression 7
+            ((() $ 1 ())
+             (prefix_unary_expression 6
+              ((() $ 1 ())
+               (prefix_unary_expression 5
+                ((() $ 1 ())
+                 (prefix_unary_expression 4
+                  ((() $ 1 ())
+                   (prefix_unary_expression 3
+                    ((() $ 1 ()) (variable 2 ((() variable 2 ())))))))))))))))))
+       (() ";" 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
+     (expression_statement 22
+      ((binary_expression 21
+        ((variable 2 ((() variable 2 ((whitespace 1)))))
+         (() = 1 ((whitespace 1)))
+         (prefix_unary_expression 16
+          ((() & 1 ())
+           (safe_member_selection_expression 15
+            ((member_selection_expression 9
+              ((variable 4 ((() variable 4 ()))) (() -> 2 ()) (() name 3 ())))
+             (() ?-> 3 ()) (() name 3 ())))))))
+       (() ";" 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

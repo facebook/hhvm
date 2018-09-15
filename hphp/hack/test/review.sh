@@ -14,10 +14,14 @@ if [ -z "${EXP_EXT+x}" ]; then
   EXP_EXT=".exp"
 fi
 
-DIFF=`command -v colordiff || echo diff`
+if [ -z "${NO_COPY+x}" ]; then
+  NO_COPY=false
+fi
 
-for f in $@; do
-  nl --body-numbering=a $f
+DIFF=$(command -v colordiff || echo "command diff")
+
+for f in "$@"; do
+  nl --body-numbering=a "$f"
   if [ -e "$f$EXP_EXT" ]; then
     EXP="$f$EXP_EXT"
   else
@@ -25,9 +29,19 @@ for f in $@; do
   fi
   cat $EXP
   $DIFF $EXP "$f$OUT_EXT"
-  read -p "Copy output to expected output? (y|n|q)" -n 1 -r
+  if [ "$NO_COPY" = true ]; then
+    if [ "$TERM" = "dumb" ]; then
+      read -r -p "Press 'q' to quit, any other key to continue"
+    else
+      read -p "Press 'q' to quit, any other key to continue" -n 1 -r
+    fi
+  elif [ "$TERM" = "dumb" ]; then
+      read -r -p "Copy output to expected output? (y|n|q)"
+  else
+      read -p "Copy output to expected output? (y|n|q)" -n 1 -r
+  fi
   echo ""
-  if [ "$REPLY" = "y" ]; then
+  if [ "$REPLY" = "y" ] && [ "$NO_COPY" = false ]; then
     cp "$f$OUT_EXT" "$f$EXP_EXT"
   elif [ "$REPLY" = "q" ]; then
     exit 0

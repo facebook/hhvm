@@ -11,4 +11,8 @@ function foo() {
     var_dump("oops");
   }
 }
+
+<<__EntryPoint>>
+function main_catch_outside() {
 foo();
+}

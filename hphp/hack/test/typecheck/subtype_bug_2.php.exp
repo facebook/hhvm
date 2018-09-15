@@ -1,6 +1,6 @@
 File "subtype_bug_2.php", line 6, characters 42-43:
 Invalid argument (Typing[4110])
-File "subtype_bug_2.php", line 5, characters 14-19:
+File "subtype_bug_2.php", line 5, characters 14-27:
 This is an object of type ImmMap
-File "subtype_bug_2.php", line 6, characters 15-22:
+File "subtype_bug_2.php", line 6, characters 15-30:
 It is incompatible with an object of type ConstMap

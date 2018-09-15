@@ -31,7 +31,6 @@
 #include "hphp/runtime/vm/unit.h"
 
 #include "hphp/util/fixed-vector.h"
-#include "hphp/util/hash-map-typedefs.h"
 
 #include <atomic>
 #include <utility>
@@ -45,17 +44,38 @@ struct Class;
 struct NamedEntity;
 struct PreClass;
 struct StringData;
+struct StructuredLogEntry;
 template <typename T> struct AtomicVector;
 
 /*
- * C++ builtin function type.
+ * Signature for native functions called by the hhvm using the hhvm
+ * calling convention that provides raw access to the ActRec.
  */
-using BuiltinFunction = TypedValue* (*)(ActRec* ar);
+using ArFunction = TypedValue* (*)(ActRec* ar);
+
+/*
+ * Signature for native functions expecting the platform ABI calling
+ * convention. This must always be casted to a proper signature before
+ * calling, so make something up to prevent accidental mixing with other
+ * function pointer types.
+ */
+struct NativeArgs; // never defined
+using NativeFunction = void(*)(NativeArgs*);
 
 /*
  * Vector of pairs (param index, offset of corresponding DV funclet).
  */
 using DVFuncletsVec = std::vector<std::pair<int, Offset>>;
+
+/*
+ * Call ABI for a function parameter: input only (normal behavior), by
+ * reference (RefData), or inout (desugars to multiple return values).
+ */
+enum class ParamMode : uint8_t {
+  In,
+  Ref,
+  InOut,
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 // EH and FPI tables.
@@ -75,8 +95,10 @@ struct EHEnt {
   Offset m_past;
   int m_iterId;
   int m_parentIndex;
-  Offset m_fault;
-  FixedVector<std::pair<Id,Offset>> m_catches;
+  Offset m_handler;
+  Offset m_end;
+
+  template<class SerDe> void serde(SerDe& sd);
 };
 
 /*
@@ -84,7 +106,7 @@ struct EHEnt {
  */
 struct FPIEnt {
   Offset m_fpushOff;
-  Offset m_fcallOff;
+  Offset m_fpiEndOff;
   Offset m_fpOff; // evaluation stack depth to current frame pointer
   int m_parentIndex;
   int m_fpiDepth;
@@ -137,6 +159,8 @@ struct Func final {
     bool variadic{false};
     // Does this use a NativeArg?
     bool nativeArg{false};
+    // Is this an inout parameter?
+    bool inout{false};
     // DV initializer funclet offset.
     Offset funcletOff{InvalidAbsoluteOffset};
     // Set to Uninit if there is no DV, or if there's a nonscalar DV.
@@ -154,17 +178,15 @@ struct Func final {
    * Static variable info.
    */
   struct SVInfo {
-    template<class SerDe> void serde(SerDe& sd) { sd(name)(phpCode); }
+    template<class SerDe> void serde(SerDe& sd) { sd(name); }
 
     LowStringPtr name;
-    LowStringPtr phpCode; // Eval'able PHP code.
   };
 
-  typedef FixedVector<ParamInfo> ParamInfoVec;
-  typedef FixedVector<SVInfo> SVInfoVec;
-  typedef FixedVector<EHEnt> EHEntVec;
-  typedef FixedVector<FPIEnt> FPIEntVec;
-
+  using ParamInfoVec = FixedVector<ParamInfo>;
+  using SVInfoVec = FixedVector<SVInfo>;
+  using EHEntVec = FixedVector<EHEnt>;
+  using FPIEntVec = FixedVector<FPIEnt, VMAllocator<FPIEnt>>;
 
   /////////////////////////////////////////////////////////////////////////////
   // Creation and destruction.
@@ -226,7 +248,7 @@ struct Func final {
    *
    * FIXME: Currently this method does almost nothing.
    */
-  void validate() const;
+  bool validate() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // FuncId manipulation.
@@ -263,7 +285,6 @@ struct Func final {
    * Whether `id' actually keys a Func*.
    */
   static bool isFuncIdValid(FuncId id);
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Basic info.                                                        [const]
@@ -334,16 +355,15 @@ struct Func final {
   StrNR fullNameStr() const;
 
   /*
-   * The function's display name, which is almost always name(), except for
-   * internal functions, like the dynamic call wrappers. In that case, return
-   * the original builtin's name.
+   * The function's display name, which is almost always name(), except for some
+   * internal functions. In that case, return the original function's name.
    */
   const StringData* displayName() const;
 
   /*
    * The function's full display name, which is almost always fullName(), except
-   * for internal functions, like the dynamic call wrappers. In that case,
-   * return the original builtin's full name.
+   * for some internal functions. In that case, return the original function's
+   * full name.
    */
   const StringData* fullDisplayName() const;
 
@@ -352,8 +372,8 @@ struct Func final {
    *
    * @requires: shared()->m_preClass == nullptr
    */
+  NamedEntity* getNamedEntity();
   const NamedEntity* getNamedEntity() const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // File info.                                                         [const]
@@ -384,7 +404,6 @@ struct Func final {
    * The system- or user-defined doc comment accompanying the function.
    */
   const StringData* docComment() const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Bytecode.                                                          [const]
@@ -436,7 +455,6 @@ struct Func final {
    * next parameter that has a DV funclet.
    */
   Offset getEntryForNumArgs(int numArgsPassed) const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Return type.                                                       [const]
@@ -497,7 +515,6 @@ struct Func final {
    */
   const StringData* returnUserType() const;
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Parameters.                                                        [const]
 
@@ -547,15 +564,36 @@ struct Func final {
    */
   bool discardExtraArgs() const;
 
+  /*
+   * Whether any of the parameters to this function are inout parameters.
+   */
+  bool takesInOutParams() const;
+
+  /*
+   * Returns the number of inout parameters taken by func.
+   */
+  uint32_t numInOutParams() const;
+
+  /*
+   * When isInOutWrapper() is true--
+   *
+   * If takesInOutParams() this function has inout params and wraps a function
+   * which takes parameters by reference
+   *
+   * If !takesInOutParams() this function has reference parameters and wraps a
+   * function with inout paramaters.
+   */
+  bool isInOutWrapper() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Locals, iterators, and stack.                                      [const]
 
   /*
-   * Number of locals, iterators, or named locals.
+   * Number of locals, iterators, class-ref slots, or named locals.
    */
   int numLocals() const;
   int numIterators() const;
+  int numClsRefSlots() const;
   Id numNamedLocals() const;
 
   /*
@@ -603,6 +641,7 @@ struct Func final {
    */
   bool hasForeignThis() const;
 
+  void setHasForeignThis(bool);
 
   /////////////////////////////////////////////////////////////////////////////
   // Static locals.                                                     [const]
@@ -623,7 +662,6 @@ struct Func final {
    * Number of static locals declared in the function.
    */
   int numStaticLocals() const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Definition context.                                                [const]
@@ -697,6 +735,40 @@ struct Func final {
    */
   bool isPreFunc() const;
 
+  /*
+   * Is this func a memoization wrapper?
+   */
+  bool isMemoizeWrapper() const;
+
+  /*
+   * Is this func a memoization wrapper with LSB parameter set?
+   */
+  bool isMemoizeWrapperLSB() const;
+
+  /*
+   * Is this string the name of a memoize implementation.
+   */
+  static bool isMemoizeImplName(const StringData*);
+
+  /*
+   * Is this function a memoization implementation.
+   */
+  bool isMemoizeImpl() const;
+
+  /*
+   * Assuming this func is a memoization wrapper, the name of the function it is
+   * wrapping.
+   *
+   * Pre: isMemoizeWrapper()
+   */
+  const StringData* memoizeImplName() const;
+
+  /*
+   * Given the name of a memoization wrapper function, return the generated name
+   * of the function it wraps. This is static so it can be used in contexts
+   * where the actual Func* is not available.
+   */
+  static const StringData* genMemoizeImplName(const StringData*);
 
   /////////////////////////////////////////////////////////////////////////////
   // Builtins.                                                          [const]
@@ -735,52 +807,34 @@ struct Func final {
   bool accessesCallerFrame() const;
 
   /*
-   * The builtinFuncPtr takes an ActRec*, unpacks it, and usually dispatches to
-   * a nativeFuncPtr.
-   *
-   * All C++ builtins have a builtinFuncPtr, with no exceptions.
-   *
-   * Most HNI functions share a single builtinFuncPtr, which performs
-   * unpacking and dispatch.  The exception is HNI functions declared
-   * with NeedsActRec, which do not have nativeFuncPtr's and have
-   * unique builtinFuncPtr's which do all their work.
+   * This HNI method takes an additional "func_num_args()" value at the
+   * beginning of its signature (after Class* / ObjectData* for methods)
    */
-  BuiltinFunction builtinFuncPtr() const;
+  bool takesNumArgs() const;
 
   /*
-   * The nativeFuncPtr is a type-punned function pointer which takes the actual
-   * argument types of a builtin and does the actual work.
+   * The function returned by arFuncPtr() takes an ActRec*, unpacks it,
+   * and usually dispatches to a nativeFuncPtr() with a specific signature.
+   *
+   * All C++ builtins have an ArFunction, with no exceptions.
+   *
+   * Most HNI functions share a single ArFunction, which performs
+   * unpacking and dispatch. The exception is HNI functions declared
+   * with NeedsActRec, which do not have NativeFunctions, but have unique
+   * ArFunctions which do all their work.
+   */
+  ArFunction arFuncPtr() const;
+
+  /*
+   * The nativeFuncPtr is a type-punned function pointer to the unerlying
+   * function which takes the actual argument types, and does the actual work.
    *
    * These are the functions with names prefixed by f_ or t_.
    *
-   * All C++ builtins have nativeFuncPtr's, with the ironic exception of HNI
-   * (i.e., "Native") functions declared with NeedsActRec.
+   * All C++ builtins have NativeFunctions, with the ironic exception of HNI
+   * functions declared with NeedsActRec.
    */
-  BuiltinFunction nativeFuncPtr() const;
-
-  /*
-   * The dynCallWrapper, if present, is a function identical to this one, except
-   * it has an additional opcode which marks that the function has been
-   * dynamically called. Depending on the `DisallowDynamicVarEnvFuncs` option,
-   * this opcde may cause a fatal, a warning to be raised, or nothing. When this
-   * function is dynamically called, we dispatch to the wrapper instead of this
-   * one (the wrapper cannot be called otherwise). If the opcode doesn't fatal,
-   * the operation of the function runs as normal.
-   *
-   * This should only be present for builtins which may access the caller's
-   * frame and is used to optionally forbid dynamic calls to such builtins.
-   *
-   * @implies accessesCallerFrame() && isBuiltin()
-   */
-  Func* dynCallWrapper() const;
-
-  /*
-   * The dynCallTarget is set for dynamic call wrapper functions (see above) and
-   * indicates which builtin they are associated with.
-   *
-   * @implies accessesCallerFrame() && isBuiltin()
-   */
-  Func* dynCallTarget() const;
+  NativeFunction nativeFuncPtr() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Closures.                                                          [const]
@@ -791,7 +845,6 @@ struct Func final {
    * (All PHP anonymous functions are Closure objects.)
    */
   bool isClosureBody() const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Resumables.                                                        [const]
@@ -835,7 +888,6 @@ struct Func final {
    */
   bool isResumable() const;
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Methods.                                                           [const]
 
@@ -849,14 +901,13 @@ struct Func final {
    */
   bool hasPrivateAncestor() const;
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Magic methods.                                                     [const]
 
   /*
    * Is this a compiler-generated function?
    *
-   * This includes special methods like 86pinit, 86sinit, and 86ctor, as well
+   * This includes special methods like 86pinit and 86sinit as well
    * as all closures.
    */
   bool isGenerated() const;
@@ -886,7 +937,6 @@ struct Func final {
    */
   static bool isSpecial(const StringData* name);
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Persistence.                                                       [const]
 
@@ -910,16 +960,7 @@ struct Func final {
    */
   bool isPersistent() const;
 
-  /*
-   * Is this always the function that's returned when we look up its name from
-   * the context of `fromUnit'?
-   *
-   * A weaker condition than persistence, since a function is always name
-   * binding immutable from the context of the unit in which it is defined.
-   * Used to make some translation-time optimizations which make assumptions
-   * about where function calls will go.
-   */
-  bool isNameBindingImmutable(const Unit* fromUnit) const;
+  bool isInterceptable() const;
 
   /*
    * Given that func would be called when func->name() is invoked on cls,
@@ -965,6 +1006,24 @@ struct Func final {
    */
   bool isParamCoerceMode() const;
 
+  /*
+   * Is this func allowed to be called dynamically?
+   */
+  bool isDynamicallyCallable() const;
+
+  /*
+   * Has this function been determined to be hot by profiling?
+   */
+  bool isHot() const;
+  void setHot();
+
+  /*
+   * Indicates that a function does not make any explicit calls to other PHP
+   * functions.  It may still call other user-level functions via re-entry
+   * (e.g., for destructors and autoload), and it may make calls to builtins
+   * using FCallBuiltin.
+   */
+  bool isPhpLeafFn() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Unit table entries.                                                [const]
@@ -978,10 +1037,37 @@ struct Func final {
   const EHEnt* findEH(Offset o) const;
 
   /*
+   * Find the first EHEnt that covers a given handler, or return null.
+   */
+  const EHEnt* findEHbyHandler(Offset o) const;
+
+  /*
+   * Same as non-static findEH(), but takes as an operand any ehtab-like
+   * container.
+   */
+  template<class Container>
+  static const typename Container::value_type*
+  findEH(const Container& ehtab, Offset o);
+
+  /*
+   * Same as non-static findEHbyHandler(), but takes as an operand any
+   * ehtab-like container.
+   */
+  template<class Container>
+  static const typename Container::value_type*
+  findEHbyHandler(const Container& ehtab, Offset o);
+
+  /*
    * Locate FPI regions by offset.
    */
   const FPIEnt* findFPI(Offset o) const;
   const FPIEnt* findPrecedingFPI(Offset o) const;
+
+  /*
+   * Same as non-static findFPI(), but takes as an operand the start and end
+   * iterators of an fpitab.
+   */
+  static const FPIEnt* findFPI(const FPIEnt* b, const FPIEnt* e, Offset o);
 
   bool shouldSampleJit() const { return m_shouldSampleJit; }
 
@@ -1043,6 +1129,11 @@ struct Func final {
 
   void prettyPrint(std::ostream& out, const PrintOpts& = PrintOpts()) const;
 
+  /*
+   * Print function attributes to out.
+   */
+  static void print_attrs(std::ostream& out, Attr attrs);
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Other methods.
@@ -1078,12 +1169,13 @@ struct Func final {
 
   void setAttrs(Attr attrs);
   void setBaseCls(Class* baseCls);
-  void setFuncHandle(rds::Link<LowPtr<Func>> l);
+  void setFuncHandle(rds::Link<LowPtr<Func>, rds::Mode::NonLocal> l);
   void setHasPrivateAncestor(bool b);
   void setMethodSlot(Slot s);
 
-  void setDynCallWrapper(Func*);
-  void setDynCallTarget(Func*);
+  // Return true, and set the m_serialized flag, iff this Func hasn't
+  // been serialized yet (see prof-data-serialize.cpp).
+  bool serialize() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
@@ -1109,12 +1201,16 @@ struct Func final {
     return offsetof(SharedData, m_base);
   }
 
+  static constexpr ptrdiff_t sharedRefBitPtrOff() {
+    return offsetof(SharedData, m_refBitPtr);
+  }
+
 
   /////////////////////////////////////////////////////////////////////////////
   // SharedData.
 
 private:
-  typedef IndexedStringMap<LowStringPtr, true, Id> NamedLocalsMap;
+  using NamedLocalsMap = IndexedStringMap<LowStringPtr, true, Id>;
 
   // Some 16-bit values in SharedData are stored as small deltas if they fit
   // under this limit.  If not, they're set to the limit value and an
@@ -1126,7 +1222,8 @@ private:
    */
   struct SharedData : AtomicCountable {
     SharedData(PreClass* preClass, Offset base, Offset past,
-               int line1, int line2, bool top, const StringData* docComment);
+               int line1, int line2, bool top, bool isPhpLeafFn,
+               const StringData* docComment);
     ~SharedData();
 
     /*
@@ -1154,8 +1251,9 @@ private:
     EHEntVec m_ehtab;
     FPIEntVec m_fpitab;
 
-    // One byte worth of bools right now.  Check what it does to
-    // sizeof(SharedData) if you are trying to add any more ...
+    /*
+     * Up to 32 bits.
+     */
     bool m_top : 1;
     bool m_isClosureBody : 1;
     bool m_isAsync : 1;
@@ -1164,29 +1262,43 @@ private:
     bool m_isGenerated : 1;
     bool m_hasExtendedSharedData : 1;
     bool m_returnByValue : 1; // only for builtins
+    bool m_isMemoizeWrapper : 1;
+    bool m_isMemoizeWrapperLSB : 1;
+    bool m_isPhpLeafFn : 1;
+    bool m_takesNumArgs : 1;
+    // Needing more than 2 class ref slots basically doesn't happen, so just use
+    // two bits normally. If we actually need more than that, we'll store the
+    // count in ExtendedSharedData.
+    unsigned int m_numClsRefSlots : 2;
+
+    // 19 bits of padding here in LOWPTR builds
 
     LowStringPtr m_retUserType;
     UserAttributeMap m_userAttributes;
-    TypeConstraint m_retTypeConstraint;
+    TypeConstraint m_retTypeConstraint; // NB: sizeof(TypeConstraint) == 12
     LowStringPtr m_originalFilename;
     RepoAuthType m_repoReturnType;
-    RepoAuthType m_repoAwaitedReturnType; // async return type
+    RepoAuthType m_repoAwaitedReturnType;
 
     /*
      * The `past' offset and `line2' are likely to be small, particularly
-     * relative to m_base and m_line1.  So we encode each as a 16-bit
-     * difference.  If the delta doesn't fit, we need to have an
-     * ExtendedSharedData to hold the real values---in that case, the field
-     * here that overflowed is set to kSmallDeltaLimit and the corresponding
-     * field in ExtendedSharedData will be valid.
+     * relative to m_base and m_line1, so we encode each as a 16-bit
+     * difference.
+     *
+     * If the delta doesn't fit, we need to have an ExtendedSharedData to hold
+     * the real values---in that case, the field here that overflowed is set to
+     * kSmallDeltaLimit and the corresponding field in ExtendedSharedData will
+     * be valid.
      */
     uint16_t m_line2Delta;
     uint16_t m_pastDelta;
+
+    // 32 bits free here.
   };
 
   /*
-   * If a Func represents a C++ builtin, or is exceptionally large (either in
-   * line count or bytecode size), it requires extra information that most
+   * If this Func represents a native function or is exceptionally large
+   * (line count or bytecode size), it requires extra information that most
    * Funcs don't need, so it's SharedData is actually one of these extended
    * SharedDatas.
    */
@@ -1201,12 +1313,11 @@ private:
     ExtendedSharedData(ExtendedSharedData&&) = delete;
 
     MaybeDataType m_hniReturnType;
-    BuiltinFunction m_builtinFuncPtr;
-    BuiltinFunction m_nativeFuncPtr;
+    ArFunction m_arFuncPtr;
+    NativeFunction m_nativeFuncPtr;
     Offset m_past;  // Only read if SharedData::m_pastDelta is kSmallDeltaLimit
     int m_line2;    // Only read if SharedData::m_line2 is kSmallDeltaLimit
-    Func* m_dynCallWrapper{nullptr};
-    Func* m_dynCallTarget{nullptr};
+    Id m_actualNumClsRefSlots;
   };
 
   /*
@@ -1278,7 +1389,6 @@ private:
     std::atomic<Attr> m_attrs;
   };
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Constants.
 
@@ -1299,12 +1409,12 @@ public:
   // Do not re-order without checking perf!
 
 private:
-#ifdef DEBUG
+#ifndef NDEBUG
   // For asserts only.
   int m_magic;
 #endif
   AtomicLowPtr<uint8_t> m_funcBody;
-  mutable rds::Link<LowPtr<Func>> m_cachedFunc{rds::kInvalidHandle};
+  mutable rds::Link<LowPtr<Func>, rds::Mode::NonLocal> m_cachedFunc;
   FuncId m_funcId{InvalidFuncId};
   LowStringPtr m_fullName{nullptr};
   LowStringPtr m_name{nullptr};
@@ -1325,6 +1435,9 @@ private:
   bool m_isPreFunc : 1;
   bool m_hasPrivateAncestor : 1;
   bool m_shouldSampleJit : 1;
+  bool m_hot : 1;
+  bool m_serialized : 1;
+  bool m_hasForeignThis : 1;
   int m_maxStackCells{0};
   uint64_t m_refBitVal{0};
   Unit* const m_unit;
@@ -1341,19 +1454,78 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<class Container>
-const typename Container::value_type* findEH(const Container& ehtab, Offset o) {
-  uint32_t i;
-  uint32_t sz = ehtab.size();
+/*
+ * A prologue is identified by the called function and the number of arguments
+ * that the prologue handles.
+ */
+struct PrologueID {
+  PrologueID(FuncId funcId, uint32_t nargs)
+    : m_funcId(funcId)
+    , m_nargs(nargs)
+  { }
 
-  const typename Container::value_type* eh = nullptr;
-  for (i = 0; i < sz; i++) {
-    if (ehtab[i].m_base <= o && o < ehtab[i].m_past) {
-      eh = &ehtab[i];
-    }
+  PrologueID(const Func* func, uint32_t nargs)
+    : m_funcId(func->getFuncId())
+    , m_nargs(nargs)
+  { }
+
+  PrologueID()
+  { }
+
+  FuncId      funcId() const { return m_funcId; }
+  uint32_t    nargs()  const { return m_nargs;  }
+  const Func* func()   const { return Func::fromFuncId(m_funcId); }
+
+  bool operator==(const PrologueID& other) const {
+    return m_funcId == other.m_funcId && m_nargs == other.m_nargs;
   }
-  return eh;
-}
+
+  struct Hasher {
+    size_t operator()(PrologueID pid) const {
+      return pid.funcId() + (size_t(pid.nargs()) << 32);
+    }
+  };
+
+ private:
+  FuncId   m_funcId{InvalidFuncId};
+  uint32_t m_nargs{0xffffffff};
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Whether dynamic calls to builtin functions that touch the caller's frame are
+ * forbidden.
+ */
+bool disallowDynamicVarEnvFuncs();
+
+/*
+ * Could the function write or read to the locals in the environment of
+ * its caller?
+ *
+ * This occurs, e.g., if `func' is extract().
+ */
+bool funcWritesLocals(const Func*);
+bool funcReadsLocals(const Func*);
+
+/*
+ * Could the function `callee` attempt to read the caller frame?
+ *
+ * This occurs, e.g., if `func' is is_callable().
+ */
+bool funcNeedsCallerFrame(const Func*);
+
+/*
+ * Log meta-information about func. Records attributes, number of locals,
+ * parameters, static locals, class ref slots, frame cells, high watermark,
+ * and iterators. Does not record function name or class.
+ */
+void logFunc(const Func* func, StructuredLogEntry& ent);
+
+/*
+ * Convert a function pointer where a string is needed in some context.
+ */
+const StringData* funcToStringHelper(const Func* func);
 
 ///////////////////////////////////////////////////////////////////////////////
 

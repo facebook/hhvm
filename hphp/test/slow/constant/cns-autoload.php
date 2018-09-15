@@ -12,7 +12,11 @@ function test() {
   show(FOO, FOO);
 }
 
+
+<<__EntryPoint>>
+function main_cns_autoload() {
 HH\autoload_set_paths(array('constant' => array(),
                                'failure' => 'def'), "");
 
 test();
+}

@@ -1,0 +1,2 @@
+File "rx_if_enabled4.php", line 6, characters 7-22:
+HH\Rx\IS_ENABLED must be the only condition in an if-statement, and that if-statement must be the only statement in the function body. (NastCheck[3062])

@@ -43,11 +43,6 @@ StatementPtr DoStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void DoStatement::analyzeProgram(AnalysisResultPtr ar) {
-  if (m_stmt) m_stmt->analyzeProgram(ar);
-  m_condition->analyzeProgram(ar);
-}
-
 ConstructPtr DoStatement::getNthKid(int n) const {
   switch (n) {
     case 0:

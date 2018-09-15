@@ -192,6 +192,25 @@ using ArgVec = jit::vector<Arg>;
 template<typename... Args>
 TCA emit_persistent(CodeBlock& cb,
                     DataBlock& data,
+                    CGMeta& meta,
+                    folly::Optional<FPInvOffset> spOff,
+                    ServiceRequest sr,
+                    Args... args);
+template<typename... Args>
+TCA emit_ephemeral(CodeBlock& cb,
+                   DataBlock& data,
+                   CGMeta& meta,
+                   TCA start,
+                   folly::Optional<FPInvOffset> spOff,
+                   ServiceRequest sr,
+                   Args... args);
+/*
+ * These emit service request stubs that may not be relocated.  This distinction
+ * is important, because these discard metadata that allows relocation.
+ */
+template<typename... Args>
+TCA emit_persistent(CodeBlock& cb,
+                    DataBlock& data,
                     folly::Optional<FPInvOffset> spOff,
                     ServiceRequest sr,
                     Args... args);
@@ -209,16 +228,47 @@ TCA emit_ephemeral(CodeBlock& cb,
 TCA emit_bindjmp_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
                       FPInvOffset spOff,
                       TCA jmp, SrcKey target, TransFlags trflags);
-TCA emit_bindjcc1st_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
-                         FPInvOffset spOff, TCA jcc, SrcKey taken, SrcKey next,
-                         ConditionCode cc);
 TCA emit_bindaddr_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
                        FPInvOffset spOff, TCA* addr, SrcKey target,
                        TransFlags trflags);
-TCA emit_retranslate_stub(CodeBlock& cb, DataBlock& data, FPInvOffset spOff,
-                          SrcKey target, TransFlags trflags);
-TCA emit_retranslate_opt_stub(CodeBlock& cb, DataBlock& data, FPInvOffset spOff,
-                              SrcKey sk);
+TCA emit_retranslate_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
+                          FPInvOffset spOff, SrcKey target, TransFlags trflags);
+TCA emit_retranslate_opt_stub(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
+                              FPInvOffset spOff, SrcKey sk);
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Maximum number of arguments a service request can accept.
+ */
+constexpr int kMaxArgs = 4;
+
+namespace x64 {
+  constexpr int kMovLen = 10;
+  constexpr int kLeaVmSpLen = 7;
+}
+
+namespace arm {
+  // vasm lea is emitted in 4 bytes.
+  //   ADD imm
+  constexpr int kLeaVmSpLen = 4;
+  // The largest of vasm setcc, copy, or leap is emitted in 16 bytes.
+  //   AND imm, MOV, LDR + B + dc32, or ADRP + ADD imm
+  constexpr int kMovLen = 12;
+  // The largest of vasm copy or leap is emitted in 16 bytes.
+  //   MOV, LDR + B + dc32, or ADRP + ADD imm
+  constexpr int kPersist = 12;
+  // vasm copy and jmpi is emitted in 16 bytes.
+  //   MOV + LDR + B + dc32
+  constexpr int kSvcReqExit = 16;
+}
+
+namespace ppc64 {
+  // Standard ppc64 instructions are 4 bytes long
+  constexpr int kStdIns = 4;
+  // Leap for ppc64, in worst case, have 5 standard ppc64 instructions.
+  constexpr int kLeaVMSpLen = kStdIns * 5;
+}
 
 /*
  * Space used by an ephemeral stub.
@@ -227,7 +277,34 @@ TCA emit_retranslate_opt_stub(CodeBlock& cb, DataBlock& data, FPInvOffset spOff,
  * dependent size, which is guaranteed to fit all service request types along
  * with a terminal padding instruction.
  */
-size_t stub_size();
+constexpr size_t stub_size() {
+  // The extra args are the request type and the stub address.
+  constexpr auto kTotalArgs = kMaxArgs + 2;
+
+  switch (arch()) {
+    case Arch::X64:
+      return kTotalArgs * x64::kMovLen + x64::kLeaVmSpLen;
+    case Arch::ARM:
+      return arm::kLeaVmSpLen +
+        kTotalArgs * arm::kMovLen +
+        arm::kPersist + arm::kSvcReqExit;
+    case Arch::PPC64:
+      // This calculus was based on the amount of emitted instructions in
+      // emit_svcreq.
+      return (ppc64::kStdIns + ppc64::kLeaVMSpLen) * kTotalArgs +
+          ppc64::kLeaVMSpLen + 3 * ppc64::kStdIns;
+    default:
+      // GCC has a bug with throwing in a constexpr function.
+      // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=67371
+      // throw std::logic_error("Stub size not defined on architecture.");
+      break;
+  }
+  // Because of GCC's issue, we have this assert, and a return value.
+  static_assert(arch() == Arch::X64 || arch() == Arch::ARM ||
+                arch() == Arch::PPC64, "Stub size not defined on architecture");
+  return 0;
+}
+
 
 /*
  * Extract the VM stack offset associated with a service request stub.
@@ -240,11 +317,6 @@ size_t stub_size();
 FPInvOffset extract_spoff(TCA stub);
 
 ///////////////////////////////////////////////////////////////////////////////
-
-/*
- * Maximum number of arguments a service request can accept.
- */
-constexpr int kMaxArgs = 4;
 
 /*
  * Service request metadata.

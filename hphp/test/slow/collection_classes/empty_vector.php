@@ -6,4 +6,8 @@ function test() {
   var_dump($v);
 }
 
+
+<<__EntryPoint>>
+function main_empty_vector() {
 test();
+}

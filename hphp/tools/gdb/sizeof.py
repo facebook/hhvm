@@ -1,9 +1,6 @@
 """
 GDB command for printing the sizes of various containers.
 """
-# @lint-avoid-python-3-compatibility-imports
-# @lint-avoid-pyflakes3
-# @lint-avoid-pyflakes2
 
 from compatibility import *
 
@@ -18,7 +15,7 @@ def sizeof(container):
     container = deref(container)
     t = template_type(rawtype(container.type))
 
-    if t == 'std::vector':
+    if t == 'std::vector' or t == 'HPHP::req::vector':
         impl = container['_M_impl']
         return impl['_M_finish'] - impl['_M_start']
     elif t == 'std::priority_queue':

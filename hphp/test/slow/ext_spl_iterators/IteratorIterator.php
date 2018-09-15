@@ -21,6 +21,10 @@ class D implements IteratorAggregate {
   }
 }
 
+
+<<__EntryPoint>>
+function main_iterator_iterator() {
 foreach (new IteratorIterator(new A) as $v) {
   var_dump($v);
+}
 }

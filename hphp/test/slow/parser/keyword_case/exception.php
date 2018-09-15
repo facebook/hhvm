@@ -1,0 +1,15 @@
+<?php
+
+
+<<__EntryPoint>>
+function main_exception() {
+TRY {
+  ECHO "TRYING\n";
+  Throw NEW Exception('LOL');
+  ECHO "DON'T PRINT ME BRO\n";
+} Catch (Exception $_) {
+  ECHO "CATCHING\n";
+} FINALLY {
+  ECHO "WE'RE DONE HERE\n";
+}
+}

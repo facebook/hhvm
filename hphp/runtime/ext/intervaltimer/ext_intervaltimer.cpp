@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/req-containers.h"
+#include "hphp/runtime/base/req-optional.h"
 #include "hphp/runtime/base/request-local.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/thread-info.h"
@@ -29,7 +29,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct TimerPool final : RequestEventHandler {
-  using TimerSet = req::hash_set<IntervalTimer*>;
+  using TimerSet = req::fast_set<IntervalTimer*>;
   TimerSet& timers() { return *m_timers; }
 
   void requestInit() override {
@@ -48,7 +48,7 @@ struct TimerPool final : RequestEventHandler {
   }
 
  private:
-  folly::Optional<TimerSet> m_timers;
+  req::Optional<TimerSet> m_timers;
 };
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(TimerPool, s_timer_pool);

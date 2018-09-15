@@ -1,4 +1,4 @@
-<?hh
+<?hh // decl
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class Dtor {
@@ -61,4 +61,8 @@ function main() {
   echo "====================================================\n";
 }
 
+
+<<__EntryPoint>>
+function main_convert_dtor() {
 main();
+}

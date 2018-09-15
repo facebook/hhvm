@@ -1,0 +1,35 @@
+((script 50
+  ((list 50
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
+       (missing 0 ())))
+     (classish_declaration 45
+      ((attribute_specification 11
+        ((() << 2 ())
+         (list 6
+          ((list_item 2
+            ((constructor_call 1
+              ((() name 1 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())))
+             (() , 1 ((whitespace 1)))))
+           (list_item 3
+            ((constructor_call 3
+              ((simple_type_specifier 1 ((() name 1 ()))) (() "(" 1 ())
+               (missing 0 ()) (() ")" 1 ((whitespace 1)))))
+             (missing 0 ())))))
+         (() >> 2 ((whitespace 1)))))
+       (missing 0 ()) (() class 5 ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ())
+       (() extends 7 ((whitespace 1)))
+       (list 1
+        ((list_item 1
+          ((simple_type_specifier 1 ((() name 1 ((whitespace 1)))))
+           (missing 0 ())))))
+       (() implements 10 ((whitespace 1)))
+       (list 1
+        ((list_item 1
+          ((simple_type_specifier 1 ((() name 1 ((whitespace 1)))))
+           (missing 0 ())))))
+       (classish_body 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

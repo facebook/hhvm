@@ -5,4 +5,4 @@ bool(true)
 bool(false)
 bool(true)
 
-Warning: unlink(%s): No such file or directory in %s/ext_file/touch.php on line 23
+Warning: unlink(%s): No such file or directory in %s/ext_file/touch.php on line 26

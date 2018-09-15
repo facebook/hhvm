@@ -17,11 +17,9 @@
 #include "hphp/compiler/expression/new_object_expression.h"
 #include "hphp/compiler/expression/scalar_expression.h"
 #include "hphp/compiler/expression/expression_list.h"
-#include "hphp/compiler/analysis/code_error.h"
 #include "hphp/compiler/analysis/class_scope.h"
 #include "hphp/compiler/analysis/function_scope.h"
 #include "hphp/compiler/option.h"
-#include "hphp/compiler/analysis/variable_table.h"
 
 using namespace HPHP;
 
@@ -53,22 +51,13 @@ ExpressionPtr NewObjectExpression::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void NewObjectExpression::analyzeProgram(AnalysisResultPtr ar) {
+void NewObjectExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
   FunctionCall::analyzeProgram(ar);
-
-  if (ar->getPhase() == AnalysisResult::AnalyzeAll ||
-      ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    FunctionScopePtr func;
-    if (!m_origName.empty()) {
-      if (ClassScopePtr cls = resolveClass()) {
-        m_origName = m_origClassName;
-        func = cls->findConstructor(ar, true);
-        if (func) func->addNewObjCaller(getScope());
-      }
-    }
+  if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
+    resolveClass();
 
     if (m_params) {
-      markRefParams(func, "");
+      m_params->markParams();
     }
   }
 }

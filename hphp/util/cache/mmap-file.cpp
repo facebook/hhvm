@@ -23,6 +23,7 @@
 #include <string>
 
 #include <folly/Format.h>
+#include <folly/portability/Fcntl.h>
 #include <folly/portability/SysMman.h>
 
 #include "hphp/util/logger.h"

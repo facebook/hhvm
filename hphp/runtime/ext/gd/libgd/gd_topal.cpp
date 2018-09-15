@@ -342,8 +342,8 @@ typedef my_cquantizer *my_cquantize_ptr;
 
 METHODDEF (void)
 #ifndef ORIGINAL_LIB_JPEG
-prescan_quantize (gdImagePtr oim, gdImagePtr nim, my_cquantize_ptr cquantize)
-{
+prescan_quantize(gdImagePtr oim, gdImagePtr /*nim*/,
+                 my_cquantize_ptr cquantize) {
 #else
 prescan_quantize (j_decompress_ptr cinfo, JSAMPARRAY input_buf,
       JSAMPARRAY output_buf, int num_rows)
@@ -465,8 +465,8 @@ LOCAL (boxptr) find_biggest_volume (boxptr boxlist, int numboxes)
 
 LOCAL (void)
 #ifndef ORIGINAL_LIB_JPEG
-  update_box (gdImagePtr oim, gdImagePtr nim, my_cquantize_ptr cquantize, boxptr boxp)
-{
+update_box(gdImagePtr /*oim*/, gdImagePtr /*nim*/, my_cquantize_ptr cquantize,
+           boxptr boxp) {
 #else
   update_box (j_decompress_ptr cinfo, boxptr boxp)
 /* Shrink the min/max bounds of a box to enclose only nonzero elements, */
@@ -708,9 +708,8 @@ median_cut (gdImagePtr oim, gdImagePtr nim, my_cquantize_ptr cquantize,
 
 LOCAL (void)
 #ifndef ORIGINAL_LIB_JPEG
-  compute_color (gdImagePtr oim, gdImagePtr nim, my_cquantize_ptr cquantize,
-         boxptr boxp, int icolor)
-{
+compute_color(gdImagePtr /*oim*/, gdImagePtr nim, my_cquantize_ptr cquantize,
+              boxptr boxp, int icolor) {
 #else
   compute_color (j_decompress_ptr cinfo, boxptr boxp, int icolor)
 /* Compute representative color for a box, put it in colormap[icolor] */
@@ -925,7 +924,7 @@ find_nearby_colors (
 #ifdef ORIGINAL_LIB_JPEG
          j_decompress_ptr cinfo,
 #else
-         gdImagePtr oim, gdImagePtr nim, my_cquantize_ptr cquantize,
+  gdImagePtr /*oim*/, gdImagePtr nim, my_cquantize_ptr /*cquantize*/,
 #endif
          int minc0, int minc1, int minc2, JSAMPLE colorlist[])
 /* Locate the colormap entries close enough to an update box to be candidates
@@ -1100,7 +1099,7 @@ LOCAL (void) find_best_colors (
 #ifdef ORIGINAL_LIB_JPEG
         j_decompress_ptr cinfo,
 #else
-        gdImagePtr oim, gdImagePtr nim, my_cquantize_ptr cquantize,
+  gdImagePtr /*oim*/, gdImagePtr nim, my_cquantize_ptr /*cquantize*/,
 #endif
         int minc0, int minc1, int minc2,
         int numcolors, JSAMPLE colorlist[],
@@ -1590,7 +1589,8 @@ LOCAL (void)
 #ifdef ORIGINAL_LIB_JPEG
 init_error_limit (j_decompress_ptr cinfo)
 #else
-init_error_limit (gdImagePtr oim, gdImagePtr nim, my_cquantize_ptr cquantize)
+init_error_limit(gdImagePtr /*oim*/, gdImagePtr /*nim*/,
+                 my_cquantize_ptr cquantize)
 #endif
 /* Allocate and fill in the error_limiter table */
 {

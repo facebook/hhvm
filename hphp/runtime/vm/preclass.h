@@ -48,9 +48,8 @@ namespace Native { struct NativeDataInfo; }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using TraitNameSet = std::unordered_set<LowStringPtr,
-                                        string_data_hash,
-                                        string_data_isame>;
+using TraitNameSet = std::set<LowStringPtr,
+                              string_data_lti>;
 
 using BuiltinCtorFunction = LowPtr<ObjectData*(Class*)>;
 using BuiltinDtorFunction = LowPtr<void(ObjectData*, const Class*)>;
@@ -117,29 +116,36 @@ struct PreClass : AtomicCountable {
     Prop(PreClass* preClass,
          const StringData* name,
          Attr attrs,
-         const StringData* typeConstraint,
+         const StringData* userType,
+         const TypeConstraint& typeConstraint,
          const StringData* docComment,
          const TypedValue& val,
-         RepoAuthType repoAuthType);
+         RepoAuthType repoAuthType,
+         UserAttributeMap userAttributes);
 
     void prettyPrint(std::ostream&, const PreClass*) const;
 
     const StringData* name()           const { return m_name; }
     const StringData* mangledName()    const { return m_mangledName; }
     Attr              attrs()          const { return m_attrs; }
-    const StringData* typeConstraint() const { return m_typeConstraint; }
+    const StringData* userType()       const { return m_userType; }
+    const TypeConstraint& typeConstraint() const { return m_typeConstraint; }
     const StringData* docComment()     const { return m_docComment; }
     const TypedValue& val()            const { return m_val; }
     RepoAuthType      repoAuthType()   const { return m_repoAuthType; }
+    const UserAttributeMap&
+                      userAttributes() const { return m_userAttributes; }
 
   private:
     LowStringPtr m_name;
     LowStringPtr m_mangledName;
     Attr m_attrs;
-    LowStringPtr m_typeConstraint;
+    LowStringPtr m_userType;
     LowStringPtr m_docComment;
     TypedValue m_val;
     RepoAuthType m_repoAuthType;
+    TypeConstraint m_typeConstraint;
+    UserAttributeMap m_userAttributes;
   };
 
   /*
@@ -155,8 +161,8 @@ struct PreClass : AtomicCountable {
     const StringData* name()     const { return m_name; }
     const TypedValueAux& val()   const { return m_val; }
     const StringData* phpCode()  const { return m_phpCode; }
-    bool isAbstract()      const { return m_val.constModifiers().m_isAbstract; }
-    bool isType()          const { return m_val.constModifiers().m_isType; }
+    bool isAbstract()      const { return m_val.constModifiers().isAbstract; }
+    bool isType()          const { return m_val.constModifiers().isType; }
 
     template<class SerDe> void serde(SerDe& sd);
 
@@ -248,6 +254,7 @@ struct PreClass : AtomicCountable {
     bool is_extends() const;
     bool is_implements() const;
     bool is_same(const ClassRequirement* other) const;
+    size_t hash() const;
 
     template<class SerDe>
     typename std::enable_if<SerDe::deserializing>::type serde(SerDe& sd);
@@ -324,12 +331,6 @@ public:
   const TypeConstraint& enumBaseTy() const { return m_enumBaseTy; }
 
   /*
-   * Extension builtin classes have custom creation and destruction routines.
-   */
-  BuiltinCtorFunction instanceCtor() const { return m_instanceCtor; }
-  BuiltinDtorFunction instanceDtor() const { return m_instanceDtor; }
-
-  /*
    * Accessors for vectory data.
    */
   const InterfaceVec& interfaces()           const { return m_interfaces; }
@@ -338,6 +339,14 @@ public:
   const TraitPrecRuleVec& traitPrecRules()   const { return m_traitPrecRules; }
   const TraitAliasRuleVec& traitAliasRules() const { return m_traitAliasRules; }
   const UserAttributeMap& userAttributes()   const { return m_userAttributes; }
+
+  /*
+   * If the parent is sealed, enforce that we are in the whitelist.
+   * Note that parent may be derived through a using, extending, or
+   * implementing relationship.
+   */
+  void
+  enforceInMaybeSealedParentWhitelist(const PreClass* parentPreClass) const;
 
   /*
    * Funcs, Consts, and Props all behave similarly.  Define raw accessors
@@ -443,8 +452,6 @@ private:
   int32_t m_numDeclMethods;
   Slot m_ifaceVtableSlot{kInvalidSlot};
   TypeConstraint m_enumBaseTy;
-  BuiltinCtorFunction m_instanceCtor{nullptr};
-  BuiltinDtorFunction m_instanceDtor{nullptr};
   InterfaceVec m_interfaces;
   UsedTraitVec m_usedTraits;
   ClassRequirementsVec m_requirements;

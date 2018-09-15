@@ -1,2 +1,2 @@
-File "class_class_bad_syntax.php", line 16, characters 14-18:
-Expected expression (Parsing[1002])
+File "class_class_bad_syntax.php", line 16, characters 10-17:
+Dynamic class names are not allowed in compile-time ::class fetch (Parsing[1002])

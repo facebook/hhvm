@@ -12,6 +12,9 @@ function __autoload($name) {
   echo __METHOD__ . "\n";
   throw new Exception('__autoload');
 }
+
+<<__EntryPoint>>
+function main_1229() {
 spl_autoload_register('autoload_first');
 spl_autoload_register('autoload_second');
 try {
@@ -36,5 +39,6 @@ try {
 // definition for the class somewhere
 if (true) {
   class A {
+}
 }
 }

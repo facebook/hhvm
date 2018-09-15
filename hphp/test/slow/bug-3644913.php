@@ -27,5 +27,9 @@ final class WTFer {
   }
 }
 
+
+<<__EntryPoint>>
+function main_bug_3644913() {
 WTFer::run();
 echo "ok\n";
+}

@@ -1,0 +1,28 @@
+# starts here
+
+.main {
+  DefCls 0
+  Int 1
+  RetC
+}
+
+.class Foo {
+  .method [public] <"HH\\void" N  > openFoo() {
+    DefCls 1
+    Null
+    RetC
+  }
+  .method [public no_injection] 86ctor() {
+    Null
+    RetC
+  }
+}
+
+.class [nontop] X {
+  .method [public no_injection] 86ctor() {
+    Null
+    RetC
+  }
+}
+
+# ends here

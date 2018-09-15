@@ -38,7 +38,9 @@
 #include "hphp/runtime/ext/hash/hash_joaat.h"
 
 #if defined(HPHP_OSS)
-#define furc_hash furc_hash_internal
+#define furc_hash(a, b, c) furc_hash_internal(                          \
+    (a), (b),                                                           \
+    uint64_t(c) > furc_maximum_pool_size() ? furc_maximum_pool_size() : c)
 #else
 #include "mcrouter/lib/fbi/hash.h" // @nolint
 #endif
@@ -145,8 +147,8 @@ struct HashContext : SweepableResourceData {
   }
 
   explicit HashContext(req::ptr<HashContext>&& ctx) {
-    assert(ctx->ops);
-    assert(ctx->ops->context_size >= 0);
+    assertx(ctx->ops);
+    assertx(ctx->ops->context_size >= 0);
     ops = ctx->ops;
     context = malloc(ops->context_size);
     ops->hash_copy(context, ctx->context);
@@ -162,7 +164,7 @@ struct HashContext : SweepableResourceData {
   ~HashContext() {
     /* Just in case the algo has internally allocated resources */
     if (context) {
-      assert(ops->digest_size >= 0);
+      assertx(ops->digest_size >= 0);
       unsigned char* dummy = (unsigned char*)alloca(
         sizeof(unsigned char) * ops->digest_size);
       ops->hash_final(dummy, context);
@@ -249,7 +251,7 @@ static Variant php_hash_do_hash(const String& algo, const String& data,
 
   if (isfilename) {
     for (Variant chunk = HHVM_FN(fread)(f.toResource(), 1024);
-         !is_empty_string(chunk);
+         !is_empty_string(chunk.asTypedValue());
          chunk = HHVM_FN(fread)(f.toResource(), 1024)) {
       String schunk = chunk.toString();
       ops->hash_update(context, (unsigned char *)schunk.data(), schunk.size());

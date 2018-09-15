@@ -1,0 +1,52 @@
+# Tests that fault funclets are continuous and are
+# dominated by unwind or catch
+
+.main {
+  Int 1
+  PopC
+  .try_fault F1 {
+    Int 1
+    PopC
+    .try_fault F2 {
+      Int 1
+      PopC
+      .try_fault F3 {
+        Int 1
+        PopC
+      }
+      Int 1
+      PopC
+    }
+    Int 1
+    PopC
+  }
+  Int 1
+  RetC
+
+L1:
+  Jmp L2
+
+F1:
+  Int 1
+  RetC
+
+F2:
+  Int 1
+  PopC
+  Jmp L1
+
+L2:
+  Unwind
+
+F3:
+  Int 1
+  PopC
+  Jmp L3
+
+L4:
+  Unwind
+
+L3:
+  Jmp L4
+
+}

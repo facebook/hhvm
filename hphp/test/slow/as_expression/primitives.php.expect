@@ -1,0 +1,13 @@
+$x is 1
+string(24) "Expected string, got int"
+$x is 2
+string(24) "Expected string, got int"
+$x is 3
+string(24) "Expected string, got int"
+$x is 3.14
+string(26) "Expected string, got float"
+string(28) "Expected arraykey, got float"
+$x is Vector
+string(30) "Expected string, got HH\Vector"
+string(32) "Expected arraykey, got HH\Vector"
+$x is hiii

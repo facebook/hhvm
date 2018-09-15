@@ -13,4 +13,8 @@ function to_object($ks) {
   var_dump($obj->blah);
 }
 
+
+<<__EntryPoint>>
+function main_to_object() {
 to_object(keyset['abc', 'foobar', 'def']);
+}

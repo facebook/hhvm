@@ -1,0 +1,8 @@
+---- using DateTime::diff
+bool(false)
+bool(false)
+bool(false)
+---- using DOMXPath::__construct
+string(55) "DOMXPath::__construct expects parameter 1 to be DOMNode"
+string(55) "DOMXPath::__construct expects parameter 1 to be DOMNode"
+string(55) "DOMXPath::__construct expects parameter 1 to be DOMNode"

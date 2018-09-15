@@ -7,5 +7,9 @@ function foo($a) {
   }
   return $r;
 }
+
+<<__EntryPoint>>
+function main_1299() {
 var_dump(foo(true));
 var_dump(foo(false));
+}

@@ -1,0 +1,6 @@
+File "mayberx14.php", line 20, characters 3-33:
+Cannot invoke conditionally reactive function in reactive context, because at least one reactivity condition is not met. (Typing[4237])
+File "mayberx14.php", line 20, characters 8-8:
+Receiver type must be a subtype of \Rx, now \B.
+File "mayberx14.php", line 9, characters 19-19:
+This is the function declaration

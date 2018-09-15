@@ -1,15 +1,19 @@
-#!/bin/sh
+#!/bin/bash
 
-# This fallback is for the cmake build, which won't have an FBCODE_DIR
+function die {
+  echo $1 1>&2
+  exit 1
+}
+
+# This fallback is for the cmake build, which won't have an INSTALL_DIR
 # environment variable, and runs this from the runtime subdir.
-DIR="$( cd "$( dirname "$0" )" && pwd )"
-if [ x"$FBCODE_DIR" = x"" ] ; then
-    FBCODE_DIR="$DIR/../.."
-    INSTALL_DIR="$FBCODE_DIR/hphp/runtime"
+if [ x"$INSTALL_DIR" = x"" ] ; then
+    cd "$(dirname "$(which "$0")")" || die "Can't find script dir for $0" 1>&2
+    INSTALL_DIR="$(pwd)/../runtime"
 fi
 
-SCRIPT=$FBCODE_DIR/hphp/doc/generate-ir-opcodes.pl
-SRC=$FBCODE_DIR/hphp/doc/ir.specification
+SCRIPT=generate-ir-opcodes.pl
+SRC=ir.specification
 OUTPUT=$INSTALL_DIR/ir-opcode-generated.h
 
 perl $SCRIPT $SRC > $OUTPUT

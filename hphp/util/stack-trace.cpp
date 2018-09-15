@@ -20,7 +20,7 @@
 #include <set>
 #include <string>
 
-#if (!defined(__CYGWIN__) && !defined(__MINGW__) && !defined(_MSC_VER))
+#ifndef _MSC_VER
 #include <execinfo.h>
 #endif
 
@@ -39,7 +39,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/conv-10.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/process.h"
 #include "hphp/util/thread-local.h"
@@ -217,9 +217,9 @@ int ALWAYS_INLINE get_backtrace(void** frame, int max) {
 struct StackTraceLog {
   hphp_string_map<std::string> data;
 
-  static DECLARE_THREAD_LOCAL(StackTraceLog, s_logData);
+  static THREAD_LOCAL(StackTraceLog, s_logData);
 };
-IMPLEMENT_THREAD_LOCAL(StackTraceLog, StackTraceLog::s_logData);
+THREAD_LOCAL(StackTraceLog, StackTraceLog::s_logData);
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -430,6 +430,7 @@ void StackTraceNoHeap::log(const char* errorType, int fd, const char* buildId,
   printPair(fd, "ThreadID", (int64_t)Process::GetThreadId());
   printPair(fd, "ThreadPID", Process::GetThreadPid());
   printPair(fd, "Name", Process::GetAppName().c_str());
+  printPair(fd, "CmdLine", Process::GetCommandLine(getpid()).c_str());
   printPair(fd, "Type", errorType ? errorType : "(unknown error)");
   printPair(fd, "Runtime", "hhvm");
   printPair(fd, "Version", buildId);
@@ -440,8 +441,6 @@ void StackTraceNoHeap::log(const char* errorType, int fd, const char* buildId,
     printPair(fd, pair.first.c_str(), pair.second.c_str());
   }
   write(fd, "\n", 1);
-
-  printStackTrace(fd);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -666,7 +665,7 @@ std::shared_ptr<BfdCache> get_bfd_cache(folly::StringPiece filename) {
 }
 
 BfdCache* get_bfd_cache(folly::StringPiece filename, NamedBfdRange bfds) {
-  auto probe = hash_string(filename.begin()) % bfds.size();
+  auto probe = hash_string_cs(filename.begin(), filename.size()) % bfds.size();
 
   // Match on the end of filename instead of the beginning, if necessary.
   if (filename.size() >= MaxKey) {

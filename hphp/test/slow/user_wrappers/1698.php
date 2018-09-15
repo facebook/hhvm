@@ -13,9 +13,13 @@ class TestStream {
     return $this->s >= 2;
   }
 }
+
+<<__EntryPoint>>
+function main_1698() {
 stream_wrapper_register('test', 'TestStream');
 $f = fopen('test://', 'r');
 while (!feof($f)) {
   $line = stream_get_line($f, 99, "\n");
   var_dump($line);
+}
 }

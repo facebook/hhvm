@@ -25,6 +25,7 @@
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/type-system.h"
+#include "hphp/hhbbc/context.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -35,6 +36,12 @@ struct StepFlags;
 struct Bytecode;
 struct ISS;
 namespace php { struct Block; }
+namespace res { struct Func; }
+
+//////////////////////////////////////////////////////////////////////
+
+constexpr auto kReadOnlyConstant = kInvalidDataType;
+constexpr auto kDynamicConstant = kExtraInvalidDataType;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -48,11 +55,26 @@ struct RunFlags {
    * block, with this type.
    */
   folly::Optional<Type> returned;
+
+  /*
+   * If returned is set, and the returned value was a parameter,
+   * retParam will be set to the parameter's id; otherwise it will be
+   * NoLocalId.
+   */
+  LocalId retParam{NoLocalId};
+
+  /*
+   * Map from the local statics whose types were used by this block,
+   * to the type that was used.  This is used to force re-analysis of
+   * the corresponding blocks when the type of the static changes.
+   */
+  std::shared_ptr<hphp_fast_map<LocalId,Type>> usedLocalStatics;
 };
 
 //////////////////////////////////////////////////////////////////////
 
 constexpr int kMaxTrackedLocals = 512;
+constexpr int kMaxTrackedClsRefSlots = 64;
 
 /*
  * StepFlags are information about the effects of a single opcode.
@@ -65,7 +87,7 @@ struct StepFlags {
    *
    * Instructions are assumed to be PEIs unless the abstract
    * interpreter says they aren't.  A PEI must propagate the state
-   * from before the instruction across all factored exit edges.
+   * from before the instruction across all throw exit edges.
    *
    * Some instructions that can throw with mid-opcode states need to
    * handle those cases specially.
@@ -73,21 +95,10 @@ struct StepFlags {
   bool wasPEI = true;
 
   /*
-   * Information about the branch taken by a conditional JmpZ/JmpNZ at
-   * the end of the BB.
-   *
-   * 'Either' indicates that both branches could be taken. 'Taken' indicates
-   * that the conditional branch was known to be taken (e.g. because the
-   * condition was a constant). In this case, the state doesn't need to
-   * be propagated to the fallthrough block.
-   *
-   * 'Fallthrough' indicates that the conditional branch was known to be not
-   * taken, and control goes to the fallthrough block. In this case, the
-   * JmpZ/JmpNZ instruction can be converted to a PopC (no-op).
+   * If set to something other than NoBlockId, then this block
+   * unconditionally falls through to that block.
    */
-  enum class JmpFlags : uint8_t { Either, Taken, Fallthrough };
-
-  JmpFlags jmpFlag = JmpFlags::Either;
+  BlockId jmpDest = NoBlockId;
 
   /*
    * If an instruction sets this flag, it means that if it pushed a
@@ -97,6 +108,16 @@ struct StepFlags {
    * constant.
    */
   bool canConstProp = false;
+
+  /*
+   * If an instruction sets this flag, it means that this
+   * instruction doesn't prevent a call to the containing function
+   * from being discarded if its result is unneeded.
+   *
+   * Instructions that are marked canConstProp that also produce a
+   * constant result automatically set this flag.
+   */
+  bool effectFree = false;
 
   /*
    * If an instruction may read or write to locals, these flags
@@ -126,6 +147,21 @@ struct StepFlags {
    * step, with this type.
    */
   folly::Optional<Type> returned;
+
+  /*
+   * If returned is set, and the returned value was a parameter,
+   * retParam will be set to the parameter's id; otherwise it will be
+   * NoLocalId.
+   */
+  LocalId retParam{NoLocalId};
+
+  /*
+   * Map from the local statics whose types were used by this
+   * instruction, to the type that was used.  This is used to force
+   * re-analysis of the corresponding blocks when the type of the
+   * static changes.
+   */
+  std::shared_ptr<hphp_fast_map<LocalId,Type>> usedLocalStatics;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -138,7 +174,7 @@ struct Interp {
   const Index& index;
   Context ctx;
   CollectedInfo& collect;
-  borrowed_ptr<const php::Block> blk;
+  const php::Block* blk;
   State& state;
 };
 
@@ -157,8 +193,11 @@ StepFlags step(Interp&, const Bytecode& op);
  * If a branch is taken or an exception is thrown, the supplied
  * callback is used to indicate when/where the state referenced in the
  * Interp structure should be propagated.
+ *
+ * If the PropagateFn is called with a nullptr State, it means that
+ * the given block should be re-processed.
  */
-using PropagateFn = std::function<void (php::Block&, const State&)>;
+using PropagateFn = std::function<void (BlockId, const State*)>;
 RunFlags run(Interp&, PropagateFn);
 
 /*
@@ -170,6 +209,24 @@ RunFlags run(Interp&, PropagateFn);
  * which a custom interpreter may need to specialize.
  */
 void default_dispatch(ISS&, const Bytecode&);
+
+/*
+ * Can this call be converted to an FCallBuiltin
+ */
+bool can_emit_builtin(const php::Func* func,
+                      int numParams, bool hasUnpack);
+
+void finish_builtin(ISS& env,
+                    const php::Func* func,
+                    uint32_t numParams,
+                    bool unpack);
+
+bool handle_function_exists(ISS& env, int numArgs, bool allowConstProp);
+
+folly::Optional<Type>
+const_fold(ISS& env, uint32_t nArgs, const res::Func& rfunc);
+
+folly::Optional<Type> thisType(const Interp& interp);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -19,18 +19,28 @@
 #include <folly/Format.h>
 
 #include "hphp/util/hash.h"
-
-#include <boost/algorithm/string/predicate.hpp>
+#include "hphp/util/bstring.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool ParserBase::IsClosureName(const std::string &name) {
-  return boost::istarts_with(name, "closure$");
+  return name.size() >= 8 && bstrcaseeq(name.c_str(), "closure$", 8);
 }
 
 bool ParserBase::IsAnonymousClassName(folly::StringPiece name) {
   return name.find('$') != std::string::npos;
+}
+
+const char* ParserBase::labelScopeName(LabelScopeKind kind) {
+  switch (kind) {
+    case LabelScopeKind::Invalid:     break;
+    case LabelScopeKind::LoopSwitch:  return "into loop or switch";
+    case LabelScopeKind::Finally:     return "into finally";
+    case LabelScopeKind::Using:       return "into or across using";
+
+  }
+  always_assert(false && "Invalid LabelScope");
 }
 
 std::string ParserBase::newClosureName(
@@ -49,8 +59,12 @@ std::string ParserBase::newAnonClassName(
   auto name = prefix + "$";
   if (!className.empty()) {
     name += className + "::";
-  } else if (!namespaceName.empty()) {
-    // If className is present, it already includes the namespace
+  } else if (!namespaceName.empty() &&
+             funcName.find('\\') == std::string::npos) {
+    // If className is present, it already includes the namespace. Or
+    // else we may be passed a function name already qualified by
+    // namespace, and in either case we don't want to include the
+    // namespace twice in the mangled class name.
     name += namespaceName + "\\";
   }
   name += funcName;
@@ -72,8 +86,7 @@ ParserBase::ParserBase(Scanner &scanner, const char *fileName)
 
   // global scope
   m_labelInfos.reserve(3);
-  m_labelInfos.resize(1);
-  pushLabelScope();
+  pushLabelInfo();
 }
 
 ParserBase::~ParserBase() {
@@ -175,20 +188,20 @@ bool ParserBase::isTypeVarInImmediateScope(const std::string &name) {
 // checks GOTO label syntax
 
 void ParserBase::pushLabelInfo() {
-  m_labelInfos.resize(m_labelInfos.size() + 1);
-  pushLabelScope();
+  m_labelInfos.emplace_back();
+  pushLabelScope(LabelScopeKind::Invalid);
 }
 
-void ParserBase::pushLabelScope() {
+void ParserBase::pushLabelScope(LabelScopeKind kind) {
   assert(!m_labelInfos.empty());
   LabelInfo &info = m_labelInfos.back();
-  info.scopes.push_back(++info.scopeId);
+  info.scopes.emplace_back(kind, ++info.scopeId);
 }
 
 void ParserBase::popLabelScope() {
-  assert(!m_labelInfos.empty());
-  LabelInfo &info = m_labelInfos.back();
-  info.scopes.pop_back();
+  assertx(!m_labelInfos.empty());
+  assertx(!m_labelInfos.back().scopes.empty());
+  m_labelInfos.back().scopes.pop_back();
 }
 
 void ParserBase::addLabel(const std::string &label,
@@ -199,16 +212,16 @@ void ParserBase::addLabel(const std::string &label,
   if (info.labels.find(label) != info.labels.end()) {
     error("Label '%s' already defined: %s", label.c_str(),
           getMessage().c_str());
-    invalidateLabel(extractStatement(stmt));
     return;
   }
   assert(!info.scopes.empty());
-  LabelStmtInfo labelInfo;
-  labelInfo.scopeId         = info.scopes.back();
-  labelInfo.stmt            = extractStatement(stmt);
-  labelInfo.loc             = loc;
-  labelInfo.inTryCatchBlock = false;
-  info.labels[label]        = labelInfo;
+  auto const stmtInfo = LabelStmtInfo{
+    extractStatement(stmt),
+    info.scopes.back(),
+    loc,
+    false
+  };
+  info.labels.emplace(label, stmtInfo);
 }
 
 void ParserBase::addGoto(const std::string &label,
@@ -227,41 +240,36 @@ void ParserBase::addGoto(const std::string &label,
 void ParserBase::popLabelInfo() {
   assert(!m_labelInfos.empty());
   LabelInfo &info = m_labelInfos.back();
+  assertx(info.scopes.size() == 1);
+  assertx(info.scopes.back().kind == LabelScopeKind::Invalid);
+
   LabelMap labels = info.labels; // shallow copy
 
   for (unsigned int i = 0; i < info.gotos.size(); i++) {
     const GotoInfo &gotoInfo = info.gotos[i];
     LabelMap::const_iterator iter = info.labels.find(gotoInfo.label);
     if (iter == info.labels.end()) {
-      invalidateGoto(gotoInfo.stmt, UndefLabel);
       error("'goto' to undefined label '%s': %s",
             gotoInfo.label.c_str(), getMessage(gotoInfo.loc).c_str());
       continue;
     }
     const LabelStmtInfo &labelInfo = iter->second;
-    int labelScopeId = labelInfo.scopeId;
+    int labelScopeId = labelInfo.scopeInfo.id;
     bool found = false;
     for (int j = gotoInfo.scopes.size() - 1; j >= 0; j--) {
-      if (labelScopeId == gotoInfo.scopes[j]) {
+      if (labelScopeId == gotoInfo.scopes[j].id) {
         found = true;
         break;
       }
     }
     if (!found) {
-      invalidateGoto(gotoInfo.stmt, InvalidBlock);
-      error("'goto' into loop or switch statement "
-            "is disallowed: %s", getMessage(gotoInfo.loc).c_str());
+      error("'goto' %s statement is disallowed: %s",
+            labelScopeName(labelInfo.scopeInfo.kind),
+            getMessage(gotoInfo.loc).c_str());
       continue;
     } else {
       labels.erase(gotoInfo.label);
     }
-  }
-
-  // now invalidate all un-used labels
-  for (LabelMap::const_iterator it(labels.begin());
-       it != labels.end();
-       ++it) {
-    invalidateLabel(it->second.stmt);
   }
 
   m_labelInfos.pop_back();

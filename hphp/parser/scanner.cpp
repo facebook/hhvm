@@ -274,19 +274,32 @@ bool Scanner::tryParseTypeList(TokenStore::iterator& pos) {
 bool Scanner::tryParseNonEmptyLambdaParams(TokenStore::iterator& pos) {
   for (;; nextLookahead(pos)) {
     if (pos->t == ')' || pos->t == T_LAMBDA_CP) return true;
+    bool inout_param = false;
+    if (pos->t == T_INOUT) {
+      inout_param = true;
+      nextLookahead(pos);
+    }
     if (pos->t != T_VARIABLE) {
-      if (pos->t == T_ELLIPSIS) {
+      /* This is the (...) ==> {} and (...$x) ==> {} cases */
+      if (!inout_param && pos->t == T_ELLIPSIS) {
         nextLookahead(pos);
+        if (pos->t == T_VARIABLE) {
+          nextLookahead(pos);
+        }
         return true;
       }
-      if (!tryParseNSType(pos)) return false;
+      if (!tryParseNSType(pos)) { return false; }
+      /* We may have an ellipsis now, e.g. for (int ...$x) ==> {} */
+      if (!inout_param && pos->t == T_ELLIPSIS) {
+        nextLookahead(pos);
+      }
       if (pos->t == '&') {
         nextLookahead(pos);
       }
       if (pos->t != T_VARIABLE) return false;
     }
     nextLookahead(pos);
-    if (pos->t == '=') {
+    if (!inout_param && pos->t == '=') {
       nextLookahead(pos);
       parseApproxParamDefVal(pos);
     }
@@ -371,10 +384,13 @@ void Scanner::parseApproxParamDefVal(TokenStore::iterator& pos) {
       case T_NS_SEPARATOR:
       case T_NAMESPACE:
       case T_SHAPE:
+      case T_TUPLE:
       case T_ARRAY:
       case T_DICT:
       case T_VEC:
       case T_KEYSET:
+      case T_VARRAY:
+      case T_DARRAY:
       case T_FUNCTION:
       case T_DOUBLE_ARROW:
       case T_DOUBLE_COLON:
@@ -392,9 +408,13 @@ void Scanner::parseApproxParamDefVal(TokenStore::iterator& pos) {
 
 bool Scanner::tryParseFuncTypeList(TokenStore::iterator& pos) {
   for (int parsed = 0;;parsed++) {
+    /* For cases such as function(...):void */
     if (pos->t == T_ELLIPSIS) {
       nextLookahead(pos);
       return true;
+    }
+    if (pos->t == T_INOUT) {
+      nextLookahead(pos);
     }
     auto cpPos = pos;
     if (!tryParseNSType(cpPos)) {
@@ -406,6 +426,11 @@ bool Scanner::tryParseFuncTypeList(TokenStore::iterator& pos) {
       }
     }
     pos = cpPos;
+    /* For cases such as function(int...):void */
+    if (pos->t == T_ELLIPSIS) {
+      nextLookahead(pos);
+      return true;
+    }
     if (pos->t != ',') return true;
     nextLookahead(pos);
   }
@@ -466,6 +491,9 @@ Scanner::tryParseNSType(TokenStore::iterator& pos) {
       case T_DICT:
       case T_VEC:
       case T_KEYSET:
+      case T_VARRAY:
+      case T_DARRAY:
+      case T_TUPLE:
       case T_CALLABLE:
       case T_UNRESOLVED_TYPE:
       case T_UNRESOLVED_NEWTYPE:
@@ -521,30 +549,6 @@ bool Scanner::tryParseShapeType(TokenStore::iterator& pos) {
   }
 
   return false;
-}
-
-bool Scanner::tryParseShapeMemberList(TokenStore::iterator& pos) {
-  assert(pos->t != ')'); // already determined to be nonempty
-
-  for (;;) {
-    if (!nextIfToken(pos, T_CONSTANT_ENCAPSED_STRING) ||
-        !nextIfToken(pos, T_DOUBLE_ARROW)) {
-      return false;
-    }
-    if (!tryParseNSType(pos)) return false;
-    if (pos->t == ')') return true;
-    if (!nextIfToken(pos, ',')) return false;
-    if (pos->t == ')') return true;
-  }
-
-  return false;
-}
-
-static bool isUnresolved(int tokid) {
-  return tokid == T_UNRESOLVED_LT ||
-         tokid == T_UNRESOLVED_NEWTYPE ||
-         tokid == T_UNRESOLVED_TYPE ||
-         tokid == T_UNRESOLVED_OP;
 }
 
 static bool isValidClassConstantName(int tokid) {
@@ -619,13 +623,91 @@ static bool isValidClassConstantName(int tokid) {
   case T_DICT:
   case T_VEC:
   case T_KEYSET:
+  case T_VARRAY:
+  case T_DARRAY:
+  case T_INOUT:
     return true;
   default:
     return false;
   }
 }
 
+bool Scanner::tryParseClassConstant(TokenStore::iterator& pos) {
+  bool sawDoubleColon = false;
+  for (;;) {
+    if (sawDoubleColon) {
+      if (!isValidClassConstantName(pos->t)) return false;
+    } else {
+      // These are all valid class/namespace names under the right conditions,
+      // see also ident_no_semireserved in the parser.
+      switch (pos->t) {
+      case T_STRING:
+      case T_SUPER:
+      case T_XHP_ATTRIBUTE:
+      case T_XHP_CATEGORY:
+      case T_XHP_CHILDREN:
+      case T_XHP_REQUIRED:
+      case T_ENUM:
+      case T_ARRAY:
+      case T_DICT:
+      case T_VEC:
+      case T_KEYSET:
+      case T_VARRAY:
+      case T_DARRAY:
+      case T_CALLABLE:
+      case T_UNRESOLVED_TYPE:
+      case T_UNRESOLVED_NEWTYPE:
+      case T_XHP_LABEL:
+        break;
+      default:
+        return false;
+      }
+    }
+    nextLookahead(pos);
+
+    if (pos->t == T_NS_SEPARATOR) {
+      if (sawDoubleColon) return false;
+    } else if (pos->t == T_DOUBLE_COLON) {
+      sawDoubleColon = true;
+    } else {
+      break;
+    }
+    nextLookahead(pos);
+  }
+  return sawDoubleColon;
+}
+
+bool Scanner::tryParseShapeMemberList(TokenStore::iterator& pos) {
+  assert(pos->t != ')'); // already determined to be nonempty
+
+  for (;;) {
+    if (nextIfToken(pos, T_ELLIPSIS)) {
+      return pos->t == ')';
+    }
+    nextIfToken(pos, '?');
+    if (!nextIfToken(pos, T_CONSTANT_ENCAPSED_STRING) &&
+        !tryParseClassConstant(pos)) {
+      return false;
+    }
+    if (!nextIfToken(pos, T_DOUBLE_ARROW)) return false;
+    if (!tryParseNSType(pos)) return false;
+    if (pos->t == ')') return true;
+    if (!nextIfToken(pos, ',')) return false;
+    if (pos->t == ')') return true;
+  }
+
+  return false;
+}
+
+static bool isUnresolved(int tokid) {
+  return tokid == T_UNRESOLVED_LT ||
+         tokid == T_UNRESOLVED_NEWTYPE ||
+         tokid == T_UNRESOLVED_TYPE ||
+         tokid == T_UNRESOLVED_OP;
+}
+
 int Scanner::getNextToken(ScannerToken &t, Location &l) {
+  int prevTokid = m_lastToken;
   int tokid;
   bool la = !m_lookahead.empty();
   tokid = fetchToken(t, l);
@@ -654,7 +736,14 @@ int Scanner::getNextToken(ScannerToken &t, Location &l) {
     auto pos = m_lookahead.begin();
     auto typePos = pos;
     nextLookahead(pos);
-    if (isValidClassConstantName(pos->t)) {
+    if (
+      isValidClassConstantName(pos->t)
+      || (
+        pos->t == T_NS_SEPARATOR
+        && tokid == T_UNRESOLVED_TYPE
+        && prevTokid == T_USE
+      )
+    ) {
       typePos->t = tokid == T_UNRESOLVED_TYPE ? T_TYPE : T_NEWTYPE;
     } else {
       typePos->t = T_STRING;
@@ -765,7 +854,7 @@ void Scanner::warn(const char* fmt, ...) {
                   m_filename.c_str(), m_loc->r.line0, m_loc->r.char0);
 }
 
-void Scanner::incLoc(const char *rawText, int rawLeng, int type) {
+void Scanner::incLoc(const char* rawText, int rawLeng, int /*type*/) {
   assert(rawText);
   assert(rawLeng > 0);
 

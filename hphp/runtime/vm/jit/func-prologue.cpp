@@ -60,7 +60,8 @@ TransContext prologue_context(TransID transID,
     kind,
     TransFlags{},
     SrcKey{func, entry, SrcKey::PrologueTag{}},
-    FPInvOffset{func->numSlotsInFrame()}
+    FPInvOffset{func->numSlotsInFrame()},
+    0
   );
 }
 
@@ -77,12 +78,6 @@ TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc,
   IRUnit unit{context};
   irgen::IRGS env{unit, nullptr};
 
-  auto& cb = code.main();
-
-  // Dump the func guard in the TC before anything else.
-  emitFuncGuard(func, cb, fixups);
-  auto const start = cb.frontier();
-
   irgen::emitFuncPrologue(env, argc, transID);
   irgen::sealUnit(env);
 
@@ -91,7 +86,19 @@ TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc,
   auto vunit = irlower::lowerUnit(env.unit, CodeKind::CrossTrace);
   emitVunit(*vunit, env.unit, code, fixups);
 
-  return start;
+  // In order to find the start of the (post guard) prologue after
+  // possibly relocating the code, we add a watchpoint that points to
+  // &unit.prologueStart. In some situations (eg tc-relocate) we will
+  // relocate the code again - but at that point, unit has gone (and
+  // tc-relocate tracks the start of the prologue for itself). So we
+  // need to remove it here, to prevent wild writes to dead stack
+  // locations.
+  auto it = std::find_if(fixups.watchpoints.begin(), fixups.watchpoints.end(),
+                         [&] (TCA* p) { return p == &unit.prologueStart; });
+  assertx(it != fixups.watchpoints.end());
+  fixups.watchpoints.erase(it);
+
+  return unit.prologueStart;
 }
 
 TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,

@@ -20,11 +20,14 @@
 #include "hphp/runtime/vm/jit/mcgen.h"
 
 #include "hphp/runtime/vm/jit/debugger.h"
+#include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/translate-region.h"
@@ -34,12 +37,17 @@
 
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/type-profile.h"
+#include "hphp/runtime/vm/workload-stats.h"
 
 #include "hphp/runtime/base/program-functions.h"
+
+#include "hphp/runtime/server/http-server.h"
 
 #include "hphp/util/hfsort.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 
 TRACE_SET_MOD(mcg);
@@ -48,10 +56,28 @@ namespace HPHP { namespace jit { namespace mcgen {
 
 namespace {
 
-tc::FuncMetaInfo optimize(Func* func, TCA localBuf) {
-  tc::FuncMetaInfo info(func, tc::ThreadTCBuffer(localBuf));
-  folly::Optional<UseThreadLocalTC> useLocal;
-  if (localBuf) useLocal.emplace(info.tcBuf);
+std::thread s_retranslateAllThread;
+std::atomic<bool> s_retranslateAllScheduled{false};
+std::atomic<bool> s_retranslateAllComplete{false};
+
+void optimize(tc::FuncMetaInfo& info) {
+  auto const func = info.func;
+
+  folly::Optional<Trace::BumpRelease> bumpRefcount;
+  folly::Optional<Trace::BumpRelease> bumpLoads;
+  folly::Optional<Trace::BumpRelease> bumpStores;
+  folly::Optional<Trace::BumpRelease> bumpPrint;
+  if (func->getFuncId() == RuntimeOption::TraceFuncId ||
+      (!RuntimeOption::TraceFunctions.empty() &&
+       RuntimeOption::TraceFunctions.count(func->fullName()->toCppString()))) {
+    bumpRefcount.emplace(Trace::hhir_refcount, -10);
+    bumpLoads.emplace(Trace::hhir_load, -10);
+    bumpStores.emplace(Trace::hhir_store, -10);
+    bumpPrint.emplace(Trace::printir, -10);
+  } else if (RuntimeOption::EvalJitPrintOptimizedIR) {
+    bumpPrint.emplace(Trace::printir,
+                      -RuntimeOption::EvalJitPrintOptimizedIR);
+  }
 
   // Regenerate the prologues and DV funclets before the actual function body.
   auto const includedBody = regeneratePrologues(func, info);
@@ -61,6 +87,7 @@ tc::FuncMetaInfo optimize(Func* func, TCA localBuf) {
   auto const regions = includedBody ? std::vector<RegionDescPtr>{}
                                     : regionizeFunc(func, transCFGAnnot);
 
+  auto optIndex = 0;
   for (auto region : regions) {
     always_assert(!region->empty());
     auto regionSk = region->start();
@@ -70,88 +97,53 @@ tc::FuncMetaInfo optimize(Func* func, TCA localBuf) {
     }
     transArgs.region = region;
     transArgs.kind = TransKind::Optimize;
+    transArgs.optIndex = optIndex++;
 
     auto const spOff = region->entry()->initialSpOffset();
+    tc::createSrcRec(regionSk, spOff);
     auto data = translate(transArgs, spOff, info.tcBuf.view());
     if (data) {
-      info.translations.emplace_back(std::move(*data));
+      info.add(std::move(*data));
       transCFGAnnot = ""; // so we don't annotate it again
     }
   }
-
-  return info;
 }
 
-enum class RetranslateResult {
-  /* Retranslation failed permanently because ProfData has been deleted. */
-  FAIL,
-  /* Retranslation failed for a transient reason like failure to acquire a
-   * write lease. */
-  RETRY,
-  /* The function has been successfully reoptimized, either by this call or a
-   * previous one. */
-  DONE,
+struct OptimizeData {
+  FuncId id;
+  tc::FuncMetaInfo info;
 };
 
-RetranslateResult retranslateOptImpl(FuncId funcId, bool isWorker) {
-  VMProtect _;
+struct TranslateWorker : JobQueueWorker<OptimizeData*, void*, true, true> {
+  void doJob(OptimizeData* d) override {
+    ProfileNonVMThread nonVM;
 
-  if (isDebuggerAttachedProcess()) return RetranslateResult::RETRY;
-
-  auto const func = const_cast<Func*>(Func::fromFuncId(funcId));
-  if (profData() == nullptr) return RetranslateResult::FAIL;
-  if (profData()->optimized(funcId)) return RetranslateResult::DONE;
-
-  LeaseHolder writer(func, TransKind::Optimize, isWorker);
-  if (!writer) return RetranslateResult::RETRY;
-
-  if (profData()->optimized(funcId)) return RetranslateResult::DONE;
-  profData()->setOptimized(funcId);
-
-  func->setFuncBody(tc::ustubs().funcBodyHelperThunk);
-
-  auto buf = RuntimeOption::EvalEnableOptTCBuffer
-    ? cachedLocalTCBuffer()
-    : nullptr;
-
-  // Invalidate SrcDB's entries for all func's SrcKeys.
-  tc::invalidateFuncProfSrcKeys(func);
-
-  tc::publishOptFunction(optimize(func, buf));
-  tc::checkFreeProfData();
-
-  return RetranslateResult::DONE;
-}
-
-void enqueueRetranslateOptRequest(FuncId funcId);
-
-struct TranslateWorker : JobQueueWorker<FuncId> {
-  void doJob(FuncId id) {
-    hphp_session_init();
+    hphp_session_init(Treadmill::SessionKind::TranslateWorker);
     SCOPE_EXIT {
       hphp_context_exit();
       hphp_session_exit();
     };
 
-    if (!Func::isFuncIdValid(id)) return;
+    // Check if the func was treadmilled before the job started
+    if (!Func::isFuncIdValid(d->id)) return;
 
-    if (retranslateOptImpl(id, true) == RetranslateResult::RETRY) {
-      enqueueRetranslateOptRequest(id);
-    }
+    if (profData()->optimized(d->id)) return;
+    profData()->setOptimized(d->id);
+
+    VMProtect _;
+    optimize(d->info);
   }
 };
 
 using WorkerDispatcher = JobQueueDispatcher<TranslateWorker>;
 std::atomic<WorkerDispatcher*> s_dispatcher;
-std::mutex s_dispatcherCreate;
+std::mutex s_dispatcherMutex;
 
 WorkerDispatcher& dispatcher() {
   if (auto ptr = s_dispatcher.load(std::memory_order_acquire)) return *ptr;
 
-  std::lock_guard<std::mutex> lock{s_dispatcherCreate};
-  if (auto ptr = s_dispatcher.load(std::memory_order_relaxed)) return *ptr;
-
   auto dispatcher = new WorkerDispatcher(
+    RuntimeOption::EvalJitWorkerThreads,
     RuntimeOption::EvalJitWorkerThreads, 0, false, nullptr
   );
   dispatcher->start();
@@ -159,12 +151,15 @@ WorkerDispatcher& dispatcher() {
   return *dispatcher;
 }
 
-void enqueueRetranslateOptRequest(FuncId id) {
-  dispatcher().enqueue(id);
+void enqueueRetranslateOptRequest(OptimizeData* d) {
+  dispatcher().enqueue(d);
 }
 
 hfsort::TargetGraph
 createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
+  ProfData::Session pds;
+  assertx(profData() != nullptr);
+
   using namespace hfsort;
   TargetGraph cg;
   jit::hash_map<FuncId, TargetId> targetID;
@@ -172,9 +167,10 @@ createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
 
   // Create one node (aka target) for each function that was profiled.
   const auto maxFuncId = pd->maxProfilingFuncId();
+
   FTRACE(3, "createCallGraph: maxFuncId = {}\n", maxFuncId);
   for (FuncId fid = 0; fid <= maxFuncId; fid++) {
-    if (!pd->profiling(fid)) continue;
+    if (!Func::isFuncIdValid(fid) || !pd->profiling(fid)) continue;
     const auto transIds = pd->funcProfTransIDs(fid);
     uint32_t size = 1; // avoid zero-sized functions
     for (auto transId : transIds) {
@@ -192,16 +188,17 @@ createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
 
   // Add arcs with weights
 
-  auto addCallersCount = [&](TargetId calleeTargetId,
-                             const std::vector<TCA>& callerAddrs,
+  auto addCallerCount = [&] (TCA callAddr,
+                             TargetId calleeTargetId,
+                             TransID callerTransId,
                              uint32_t& totalCalls) {
-    for (auto callAddr : callerAddrs) {
-      if (!tc::isProfileCodeAddress(callAddr)) continue;
-      const auto callerTransId = pd->jmpTransID(callAddr);
-      assertx(callerTransId != kInvalidTransID);
-      const auto callerFuncId = pd->transRec(callerTransId)->funcId();
-      const auto callerTargetId = targetID[callerFuncId];
-      const auto callCount = pd->transCounter(callerTransId);
+    assertx(callerTransId != kInvalidTransID);
+    auto const callerFuncId = pd->transRec(callerTransId)->funcId();
+    if (!Func::isFuncIdValid(callerFuncId)) return;
+    auto const callerTargetId = targetID[callerFuncId];
+    auto const callCount = pd->transCounter(callerTransId);
+    // Don't create arcs with zero weight
+    if (callCount) {
       cg.incArcWeight(callerTargetId, calleeTargetId, callCount);
       totalCalls += callCount;
       FTRACE(3, "  - adding arc @ {} : {} => {} [weight = {}] \n",
@@ -209,14 +206,24 @@ createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
     }
   };
 
+  auto addCallersCount = [&] (TargetId calleeTargetId,
+                              const auto& callerAddrs,
+                              uint32_t& totalCalls) {
+    for (auto callAddr : callerAddrs) {
+      if (!tc::isProfileCodeAddress(callAddr)) continue;
+      auto const callerTransId = pd->jmpTransID(callAddr);
+      addCallerCount(callAddr, calleeTargetId, callerTransId, totalCalls);
+    }
+  };
+
   for (FuncId fid = 0; fid <= maxFuncId; fid++) {
-    if (!pd->profiling(fid)) continue;
+    if (!Func::isFuncIdValid(fid) || !pd->profiling(fid)) continue;
 
     auto func = Func::fromFuncId(fid);
     const auto calleeTargetId = targetID[fid];
     const auto transIds = pd->funcProfTransIDs(fid);
     uint32_t totalCalls = 0;
-    uint32_t profCount  = 0;
+    uint32_t profCount  = 1; // avoid zero sample counts
     for (int nargs = 0; nargs <= func->numNonVariadicParams() + 1; nargs++) {
       auto transId = pd->proflogueTransId(func, nargs);
       if (transId == kInvalidTransID) continue;
@@ -224,6 +231,10 @@ createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
       FTRACE(3, "  - processing ProfPrologue w/ transId = {}\n", transId);
       const auto trec = pd->transRec(transId);
       assertx(trec->kind() == TransKind::ProfPrologue);
+      auto lock = trec->lockCallerList();
+      for (auto const callerTransId : trec->profCallers()) {
+        addCallerCount(nullptr, calleeTargetId, callerTransId, totalCalls);
+      }
       addCallersCount(calleeTargetId, trec->mainCallers(),  totalCalls);
       addCallersCount(calleeTargetId, trec->guardCallers(), totalCalls);
       profCount += pd->transCounter(transId);
@@ -234,7 +245,7 @@ createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
   return cg;
 }
 
-void print(hfsort::TargetGraph& cg, const char* fileName,
+void print(hfsort::TargetGraph& /*cg*/, const char* fileName,
            const std::vector<hfsort::Cluster>& clusters,
            jit::hash_map<hfsort::TargetId, FuncId>& target2FuncId) {
   FILE* outfile = fopen(fileName, "wt");
@@ -247,6 +258,7 @@ void print(hfsort::TargetGraph& cg, const char* fileName,
             cluster.samples, cluster.size);
     for (auto targetId : cluster.targets) {
       auto funcId = target2FuncId[targetId];
+      if (!Func::isFuncIdValid(funcId)) continue;
       fprintf(outfile, "%s\n", Func::fromFuncId(funcId)->fullName()->data());
     }
   }
@@ -258,24 +270,52 @@ void print(hfsort::TargetGraph& cg, const char* fileName,
  * functions being PGO'd, which enables controlling the order in which the
  * Optimize translations are emitted in the TC.
  *
- * There are 3 main steps in this process:
- *   1) Generating machine code for each of the functions.
- *   2) Selecting an order for the functions.
- *      2.1) Build a call graph for all the profiled functions.
- *      2.2) Run hfsort to sort the functions.
- *   3) Relocating the functions in the TC according to the selected order.
+ * There are 4 main steps in this process:
+ *   1) Build a call graph for all the profiled functions.
+ *   2) Generate machine code for each of the functions.
+ *   3) Select an order for the functions (hfsort to sort the functions).
+ *   4) Relocate the functions in the TC according to the selected order.
  */
 void retranslateAll() {
-  assertx(profData() != nullptr);
-  const bool serverMode = RuntimeOption::ServerExecutionMode();
+  // Return true if we have stopped the server in SerializeAndExit mode.
+  auto const checkSerializeProfData = [] () -> bool {
+    auto const serverMode = RuntimeOption::ServerExecutionMode();
+    auto const mode = RuntimeOption::EvalJitSerdesMode;
+    if (RuntimeOption::RepoAuthoritative &&
+        !RuntimeOption::EvalJitSerdesFile.empty() &&
+        (mode == JitSerdesMode::Serialize ||
+         mode == JitSerdesMode::SerializeAndExit)) {
+      if (serverMode) Logger::Info("retranslateAll: serializing profile data");
+      auto const errMsg = serializeProfData(RuntimeOption::EvalJitSerdesFile);
+      if (serverMode) {
+        if (errMsg.empty()) {
+          Logger::Info("retranslateAll: serializing done");
+        } else {
+          Logger::Error(errMsg);
+        }
+        if (mode == JitSerdesMode::SerializeAndExit) {
+          s_retranslateAllComplete.store(true, std::memory_order_release);
+          HttpServer::Server->stop();
+          return true;
+        }
+      }
+    }
+    return false;
+  };
 
-  if (serverMode) {
-    Logger::Info("Starting to retranslate all optimized translations...");
+  // 0) Check if we should dump profile data in the beginning
+  if (!RuntimeOption::EvalJitDesProfDataAfterRetranslateAll) {
+    if (checkSerializeProfData()) return;
   }
 
-  // TODO: 1) Generate machine code for all the profiled functions.
+  const bool serverMode = RuntimeOption::ServerExecutionMode();
 
-  // 2.1) Create the call graph
+  // 1) Create the call graph
+
+  if (serverMode) {
+    Logger::Info("retranslateAll: starting to build the call graph");
+  }
+
   jit::hash_map<hfsort::TargetId, FuncId> target2FuncId;
   auto cg = createCallGraph(target2FuncId);
 
@@ -283,9 +323,12 @@ void retranslateAll() {
     Logger::Info("retranslateAll: finished building the call graph");
   }
   if (RuntimeOption::EvalJitPGODumpCallGraph) {
+    Treadmill::Session ts(Treadmill::SessionKind::Retranslate);
+
     cg.printDot("/tmp/cg-pgo.dot",
                 [&](hfsort::TargetId targetId) -> const char* {
                   const auto fid = target2FuncId[targetId];
+                  if (!Func::isFuncIdValid(fid)) return "<invalid>";
                   const auto func = Func::fromFuncId(fid);
                   return func->fullName()->data();
                 });
@@ -294,8 +337,51 @@ void retranslateAll() {
     }
   }
 
-  // 2.2) Pass the call graph to hfsort to obtain the order in which things
-  //      should be placed in code.hot
+  // Set the base profile count used to adjust the aggressiveness of inlining
+  // based on hotness.
+  uint64_t total = 0;
+  for (auto& target : cg.targets) {
+    total += target.samples;
+  }
+  if (cg.targets.size() > 0) {
+    setBaseInliningProfCount(total / cg.targets.size());
+  }
+
+  // 2) Generate machine code for all the profiled functions.
+
+  auto const initialSize = 512;
+  auto const ntargets = cg.targets.size();
+  std::vector<OptimizeData> jobs;
+  jobs.reserve(ntargets);
+  std::unique_ptr<uint8_t[]> codeBuffer(new uint8_t[ntargets * initialSize]);
+
+  {
+    std::lock_guard<std::mutex> lock{s_dispatcherMutex};
+
+    {
+      Treadmill::Session session(Treadmill::SessionKind::Retranslate);
+      auto bufp = codeBuffer.get();
+      for (int tid = 0; tid < cg.targets.size(); ++tid, bufp += initialSize) {
+        auto const fid = target2FuncId[tid];
+        auto const func = const_cast<Func*>(Func::fromFuncId(fid));
+        jobs.emplace_back(OptimizeData{
+          fid,
+          tc::FuncMetaInfo(func, tc::LocalTCBuffer(bufp, initialSize))
+        });
+        enqueueRetranslateOptRequest(&jobs.back());
+      }
+    }
+
+    dispatcher().waitEmpty();
+  }
+
+  if (serverMode) {
+    Logger::Info("retranslateAll: finished optimizing functions");
+  }
+
+  // 3) Pass the call graph to hfsort to obtain the order in which things
+  //    should be placed in code.hot
+
   auto clusters = hfsort::clusterize(cg);
   sort(clusters.begin(), clusters.end(), hfsort::compareClustersDensity);
 
@@ -304,6 +390,8 @@ void retranslateAll() {
   }
 
   if (RuntimeOption::EvalJitPGODumpCallGraph) {
+    Treadmill::Session ts(Treadmill::SessionKind::Retranslate);
+
     print(cg, "/tmp/hotfuncs-pgo.txt", clusters, target2FuncId);
     if (serverMode) {
       Logger::Info("retranslateAll: saved sorted list of hot functions at "
@@ -311,21 +399,68 @@ void retranslateAll() {
     }
   }
 
-  // TODO: 3) Relocate the machine code into code.hot in the desired order
+  // 4) Relocate the machine code into code.hot in the desired order
 
-  if (serverMode) {
-    Logger::Info("Finished retranslating all optimized translations!");
-    discardProfData();
+  jit::fast_set<hfsort::TargetId> seen;
+  std::vector<tc::FuncMetaInfo> infos;
+  infos.reserve(ntargets);
+
+  for (auto& cluster : clusters) {
+    for (auto tid : cluster.targets) {
+      seen.emplace(tid);
+      infos.emplace_back(std::move(jobs[tid].info));
+    }
   }
 
+  for (int i = 0; i < ntargets; ++i) {
+    if (!seen.count(i)) {
+      infos.emplace_back(std::move(jobs[i].info));
+    }
+  }
+
+  if (auto const extra = ntargets - seen.size()) {
+    Logger::Info("retranslateAll: %lu functions had no samples!", extra);
+  }
+
+  tc::relocatePublishSortedOptFuncs(std::move(infos));
+
+  s_retranslateAllComplete.store(true, std::memory_order_release);
+  tc::reportJitMaturity();
+
+  if (serverMode) {
+    Logger::Info("retranslateAll: finished retranslating all optimized "
+                 "translations!");
+  }
+
+  // 5) Check if we should dump profile data after retranslateAll
+
+  if (RuntimeOption::EvalJitDesProfDataAfterRetranslateAll) {
+    if (checkSerializeProfData()) return;
+  }
+
+  if (serverMode) {
+    ProfData::Session pds;
+    // The ReusableTC mode assumes that ProfData is never freed, so don't
+    // discard ProfData in this mode.
+    if (!RuntimeOption::EvalEnableReusableTC) {
+      discardProfData();
+    }
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 }
 
-void processExit() {
-  if (auto dispatcher = s_dispatcher.load(std::memory_order_acquire)) {
-    dispatcher->stop();
+void joinWorkerThreads() {
+  if (s_dispatcher.load(std::memory_order_acquire)) {
+    std::lock_guard<std::mutex> lock{s_dispatcherMutex};
+    if (auto dispatcher = s_dispatcher.load(std::memory_order_acquire)) {
+      dispatcher->stop();
+    }
+  }
+
+  if (s_retranslateAllThread.joinable()) {
+    s_retranslateAllThread.join();
   }
 }
 
@@ -333,11 +468,12 @@ folly::Optional<tc::TransMetaInfo>
 translate(TransArgs args, FPInvOffset spOff,
           folly::Optional<CodeCache::View> optView) {
   INC_TPC(translate);
-  assert(args.kind != TransKind::Invalid);
+  assertx(args.kind != TransKind::Invalid);
 
   if (!tc::shouldTranslate(args.sk.func(), args.kind)) return folly::none;
 
   Timer timer(Timer::mcg_translate);
+  WorkloadStats guard(WorkloadStats::InTrans);
 
   auto const srcRec = tc::findSrcRec(args.sk);
   always_assert(srcRec);
@@ -355,7 +491,7 @@ translate(TransArgs args, FPInvOffset spOff,
     }
     auto const transContext =
       TransContext{env.transID, args.kind, args.flags, args.sk,
-                   env.initSpOffset};
+                   env.initSpOffset, args.optIndex};
 
     env.unit = irGenRegion(*args.region, transContext,
                            env.pconds, env.annotations);
@@ -372,11 +508,8 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
   VMProtect _;
 
   auto sr = tc::findSrcRec(args.sk);
-  always_assert(sr);
-  bool locked = sr->tryLock();
-  SCOPE_EXIT {
-    if (locked) sr->freeLock();
-  };
+  auto const initialNumTrans = sr->numTrans();
+
   if (isDebuggerAttachedProcess() && isSrcKeyInDbgBL(args.sk)) {
     // We are about to translate something known to be blacklisted by
     // debugger, exit early
@@ -403,19 +536,26 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
     return nullptr;
   }
 
+  // Don't create live translations of functions that are being optimized. This
+  // prevents a race where retranslate may attempt to form a live translation of
+  // args.func while retranslateAll is still optimizing, which will either fail
+  // the assert below (if the SrcRec has not been cleared and max profile trans
+  // is larger than max trans) or emit a live translation in the retranslation
+  // chain ahead of the optimized translations.
+  if (retranslateAllPending() && args.kind != TransKind::Profile &&
+      profData() &&
+      (profData()->profiling(args.sk.funcID()) ||
+       profData()->optimized(args.sk.funcID()))) {
+    return nullptr;
+  }
+
   LeaseHolder writer(args.sk.func(), args.kind);
   if (!writer || !tc::shouldTranslate(args.sk.func(), kind())) {
     return nullptr;
   }
 
-  if (!locked) {
-    // Even though we knew above that we were going to skip doing another
-    // translation, we wait until we get the write lease, to avoid spinning
-    // through the tracelet guards again and again while another thread is
-    // writing to it.
-    return sr->getTopTranslation();
-  }
-  const auto numTrans = sr->translations().size();
+  const auto numTrans = sr->numTrans();
+  if (numTrans != initialNumTrans) return sr->getTopTranslation();
   if (args.kind == TransKind::Profile) {
     if (numTrans > RuntimeOption::EvalJitMaxProfileTranslations) {
       always_assert(numTrans ==
@@ -427,6 +567,11 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
     return sr->getTopTranslation();
   }
   SKTRACE(1, args.sk, "retranslate\n");
+
+  if (UNLIKELY(RID().isJittingDisabled())) {
+    SKTRACE(2, args.sk, "punting because jitting code was disabled\n");
+    return nullptr;
+  }
 
   args.kind = kind();
   if (!writer.checkKind(args.kind)) return nullptr;
@@ -446,36 +591,85 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
 }
 
 bool retranslateOpt(FuncId funcId) {
-  if (RuntimeOption::EvalJitWorkerThreads > 0) {
-    if (profData() && profData()->shouldQueue(funcId)) {
-      enqueueRetranslateOptRequest(funcId);
-    }
-    return false;
-  }
+  VMProtect _;
 
-  return retranslateOptImpl(funcId, false) == RetranslateResult::DONE;
+  if (isDebuggerAttachedProcess()) return false;
+
+  auto const func = const_cast<Func*>(Func::fromFuncId(funcId));
+  if (profData() == nullptr) return false;
+  if (profData()->optimized(funcId)) return true;
+
+  LeaseHolder writer(func, TransKind::Optimize, false);
+  if (!writer) return false;
+
+  if (profData()->optimized(funcId)) return true;
+  profData()->setOptimized(funcId);
+
+  tc::FuncMetaInfo info(func, tc::LocalTCBuffer());
+  optimize(info);
+  tc::publishOptFunc(std::move(info));
+  tc::checkFreeProfData();
+
+  return true;
 }
 
-void checkRetranslateAll() {
-  static std::atomic<bool> scheduled(false);
+bool retranslateAllEnabled() {
+  return
+    RuntimeOption::EvalJitPGO &&
+    RuntimeOption::EvalJitRetranslateAllRequest != 0 &&
+    RuntimeOption::EvalJitRetranslateAllSeconds != 0;
+}
 
-  if (!RuntimeOption::ServerExecutionMode() ||
-      !RuntimeOption::EvalJitPGO ||
-      RuntimeOption::EvalJitRetranslateAllRequest == 0 ||
-      scheduled.load(std::memory_order_relaxed) ||
-      !hasEnoughProfDataToRetranslateAll()) {
+void checkRetranslateAll(bool force) {
+  if (s_retranslateAllScheduled.load(std::memory_order_relaxed) ||
+      !retranslateAllEnabled() ||
+      !(force || hasEnoughProfDataToRetranslateAll())) {
     return;
   }
-  if (scheduled.exchange(true)) {
+  if (s_retranslateAllScheduled.exchange(true)) {
     // Another thread beat us.
     return;
   }
+
   // We schedule a one-time call to retranslateAll() via the treadmill.  We use
   // the treadmill to ensure that no additional Profile translations are being
   // emitted when retranslateAll() runs, which avoids the need for additional
-  // locking on the ProfData.
-  Logger::Info("Scheduling the retranslation of all profiled translations");
-  Treadmill::enqueue([]{ retranslateAll(); });
+  // locking on the ProfData. We use a fresh thread to avoid stalling the
+  // treadmill, the thread is joined in the processExit handler for mcgen.
+  if (!force && RuntimeOption::ServerExecutionMode()) {
+    Logger::Info("Scheduling the retranslation of all profiled translations");
+    Treadmill::enqueue([] {
+      s_retranslateAllThread = std::thread([] { retranslateAll(); });
+    });
+  } else {
+    s_retranslateAllThread = std::thread([] { retranslateAll(); });
+    s_retranslateAllThread.join();
+  }
+}
+
+bool retranslateAllPending() {
+  return
+    retranslateAllEnabled() &&
+    !s_retranslateAllComplete.load(std::memory_order_acquire);
+}
+
+bool pendingRetranslateAllScheduled() {
+  return s_retranslateAllScheduled.load(std::memory_order_acquire) &&
+    !s_retranslateAllComplete.load(std::memory_order_acquire);
+}
+
+bool retranslateAllComplete() {
+  return s_retranslateAllComplete.load(std::memory_order_acquire);
+}
+
+int getActiveWorker() {
+  if (s_retranslateAllComplete.load(std::memory_order_relaxed)) {
+    return 0;
+  }
+  if (auto disp = s_dispatcher.load(std::memory_order_relaxed)) {
+    return disp->getActiveWorker();
+  }
+  return 0;
 }
 
 }}}

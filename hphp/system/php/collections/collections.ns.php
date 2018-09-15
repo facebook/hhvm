@@ -2,23 +2,34 @@
 
 namespace {
 
-interface ConstCollection extends Countable {
+<<__Sealed(\HH\Collection::class, ConstMap::class, ConstSet::class, ConstVector::class)>>
+interface ConstCollection extends HH\Rx\Countable {
+  <<__Rx, __MaybeMutable>>
   public function isEmpty();
+  <<__Rx, __MaybeMutable>>
   public function count();
+  <<__Rx, __MutableReturn>>
   public function items();
 }
 
+<<__Sealed(\HH\Collection::class)>>
 interface OutputCollection {
+  <<__Rx, __Mutable, __ReturnsVoidToRx>>
   public function add($e);
-  public function addAll($iterable);
+  <<__Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
+  public function addAll(
+    <<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> $iterable
+  );
 }
 
 }
 
 namespace HH {
 
+<<__Sealed(\MutableMap::class, \MutableSet::class, \MutableVector::class)>>
 interface Collection extends \ConstCollection,
                              \OutputCollection {
+  <<__Rx, __Mutable, __ReturnsVoidToRx>>
   public function clear();
 }
 
@@ -26,79 +37,98 @@ interface Collection extends \ConstCollection,
 
 namespace {
 
+<<__Sealed(ConstMapAccess::class, SetAccess::class, ConstSet::class)>>
 interface ConstSetAccess {
+  <<__Rx, __MaybeMutable>>
   public function contains($m);
 }
 
+<<__Sealed(MapAccess::class, MutableSet::class)>>
 interface SetAccess extends ConstSetAccess {
+  <<__Rx, __Mutable, __ReturnsVoidToRx>>
   public function remove($m);
 }
 
+<<__Sealed(ConstMapAccess::class, IndexAccess::class, ConstVector::class)>>
 interface ConstIndexAccess {
+  <<__Rx, __MaybeMutable>>
   public function at($k);
+  <<__Rx, __MaybeMutable>>
   public function get($k);
+  <<__Rx, __MaybeMutable>>
   public function containsKey($k);
 }
 
+<<__Sealed(MapAccess::class, MutableVector::class)>>
 interface IndexAccess extends ConstIndexAccess {
+  <<__Rx, __Mutable, __ReturnsVoidToRx>>
   public function set($k,$v);
-  public function setAll($iterable);
+  <<__Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
+  public function setAll(
+    <<__OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> $iterable
+  );
+  <<__Rx, __Mutable, __ReturnsVoidToRx>>
   public function removeKey($k);
 }
 
+<<__Sealed(ConstMap::class, MapAccess::class)>>
 interface ConstMapAccess extends ConstSetAccess,
                                  ConstIndexAccess {
 }
 
+<<__Sealed(MutableMap::class)>>
 interface MapAccess extends ConstMapAccess,
                             SetAccess,
                             IndexAccess {
 }
 
+<<__Sealed(ConstVector::class, ConstMap::class, ImmMap::class, dict::class, keyset::class, vec::class)>>
 interface Indexish extends \HH\KeyedContainer {
 }
 
-interface MutableKeyedContainer extends \HH\KeyedContainer,
-                                        IndexAccess {
-}
-
+<<__Sealed(ImmVector::class, MutableVector::class, Pair::class)>>
 interface ConstVector extends ConstCollection,
                               ConstIndexAccess,
-                              \HH\KeyedIterable,
+                              \HH\Rx\KeyedIterable,
                               Indexish {
 }
 
+<<__Sealed(Vector::class)>>
 interface MutableVector extends ConstVector,
                                 \HH\Collection,
                                 MutableKeyedContainer {
 }
 
+<<__Sealed(ImmMap::class, MutableMap::class)>>
 interface ConstMap extends ConstCollection,
                            ConstMapAccess,
-                           \HH\KeyedIterable,
+                           \HH\Rx\KeyedIterable,
                            Indexish {
 }
 
+<<__Sealed(Map::class)>>
 interface MutableMap extends ConstMap,
                              \HH\Collection,
                              MutableKeyedContainer,
                              MapAccess {
 }
 
+<<__Sealed(ImmSet::class, MutableSet::class)>>
 interface ConstSet extends ConstCollection,
                            ConstSetAccess,
-                           \HH\KeyedIterable,
+                           \HH\Rx\KeyedIterable,
                            \HH\Container {
 }
 
+<<__Sealed(Set::class)>>
 interface MutableSet extends ConstSet,
                              \HH\Collection,
                              SetAccess {
 }
 
-trait StrictIterable {
+trait StrictIterable implements \HH\Iterable {
   public function toArray() {
-    $arr = array();
+    $arr = varray[];
     foreach ($this as $v) {
       $arr[] = $v;
     }
@@ -225,23 +255,23 @@ trait StrictIterable {
   }
 }
 
-trait StrictKeyedIterable {
+trait StrictKeyedIterable implements \HH\KeyedIterable {
   public function toArray() {
-    $arr = array();
+    $arr = darray[];
     foreach ($this as $k => $v) {
       $arr[$k] = $v;
     }
     return $arr;
   }
   public function toValuesArray() {
-    $arr = array();
+    $arr = varray[];
     foreach ($this as $v) {
       $arr[] = $v;
     }
     return $arr;
   }
   public function toKeysArray() {
-    $arr = array();
+    $arr = varray[];
     foreach ($this as $k => $_) {
       $arr[] = $k;
     }
@@ -403,9 +433,9 @@ trait StrictKeyedIterable {
   }
 }
 
-trait LazyIterable {
+trait LazyIterable implements \HH\Iterable {
   public function toArray() {
-    $arr = array();
+    $arr = varray[];
     foreach ($this as $v) {
       $arr[] = $v;
     }
@@ -478,23 +508,23 @@ trait LazyIterable {
   }
 }
 
-trait LazyKeyedIterable {
+trait LazyKeyedIterable implements \HH\KeyedIterable {
   public function toArray() {
-    $arr = array();
+    $arr = darray[];
     foreach ($this as $k => $v) {
       $arr[$k] = $v;
     }
     return $arr;
   }
   public function toValuesArray() {
-    $arr = array();
+    $arr = varray[];
     foreach ($this as $v) {
       $arr[] = $v;
     }
     return $arr;
   }
   public function toKeysArray() {
-    $arr = array();
+    $arr = varray[];
     foreach ($this as $k => $_) {
       $arr[] = $k;
     }
@@ -1696,7 +1726,7 @@ class LazyIterableView implements \HH\Iterable {
   public function __construct($iterable) { $this->iterable = $iterable; }
   public function getIterator() { return $this->iterable->getIterator(); }
   public function toArray() {
-    $arr = array();
+    $arr = varray[];
     foreach ($this->iterable as $v) {
       $arr[] = $v;
     }
@@ -1775,21 +1805,21 @@ class LazyKeyedIterableView implements \HH\KeyedIterable {
   public function __construct($iterable) { $this->iterable = $iterable; }
   public function getIterator() { return $this->iterable->getIterator(); }
   public function toArray() {
-    $arr = array();
+    $arr = darray[];
     foreach ($this->iterable as $k => $v) {
       $arr[$k] = $v;
     }
     return $arr;
   }
   public function toValuesArray() {
-    $arr = array();
+    $arr = varray[];
     foreach ($this->iterable as $v) {
       $arr[] = $v;
     }
     return $arr;
   }
   public function toKeysArray() {
-    $arr = array();
+    $arr = varray[];
     foreach ($this->iterable as $k => $_) {
       $arr[] = $k;
     }

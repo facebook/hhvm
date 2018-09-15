@@ -23,8 +23,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
-#if (!defined(__APPLE__) && !defined(__FreeBSD__) && \
-     !defined(__CYGWIN__) && !defined(_MSC_VER))
+#if !defined(__APPLE__) && !defined(__FreeBSD__) && !defined(_MSC_VER)
 #include "hphp/runtime/vm/debug/elfwriter.h"
 #define USE_ELF_WRITER 1
 #endif
@@ -34,10 +33,11 @@ using namespace HPHP::jit;
 namespace HPHP {
 namespace Debug {
 
-int g_dwarfCallback(
-  LIBDWARF_CALLBACK_NAME_TYPE name, int size, Dwarf_Unsigned type,
-  Dwarf_Unsigned flags, Dwarf_Unsigned link, Dwarf_Unsigned info,
-  Dwarf_Unsigned *sect_name_index, Dwarf_Ptr handle, int *error) {
+int g_dwarfCallback(LIBDWARF_CALLBACK_NAME_TYPE name, int size,
+                    Dwarf_Unsigned type, Dwarf_Unsigned flags,
+                    Dwarf_Unsigned link, Dwarf_Unsigned info,
+                    Dwarf_Unsigned* /*sect_name_index*/, Dwarf_Ptr handle,
+                    int* /*error*/) {
 #ifdef USE_ELF_WRITER
   ElfWriter *e = reinterpret_cast<ElfWriter *>(handle);
   return e->dwarfCallback(name, size, type, flags, link, info);
@@ -162,7 +162,7 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range,
   if (name) {
     f->name = *name;
   } else {
-    assert(func != nullptr);
+    assertx(func != nullptr);
     f->name = lookupFunction(func, exit, inPrologue, true);
     auto names = func->localNames();
     for (int i = 0; i < func->numNamedLocals(); i++) {
@@ -188,7 +188,7 @@ DwarfChunk* DwarfInfo::addTracelet(TCRange range,
     m_functions.erase(it);
     delete f;
     f = m_functions[end];
-    assert(f->m_chunk != nullptr);
+    assertx(f->m_chunk != nullptr);
     f->m_chunk->clearSynced();
     f->clearPerfSynced();
   } else {

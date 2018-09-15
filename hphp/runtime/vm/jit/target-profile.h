@@ -39,8 +39,31 @@ namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace detail {
-  void addTargetProfileInfo(const rds::Profile& key,
-                            const std::string& dbgInfo);
+void addTargetProfileInfo(const rds::Profile<void>& key,
+                          const std::string& dbgInfo);
+
+template<typename T>
+auto call_reduce(T& out, const T& in, uint32_t size) ->
+  decltype(T::reduce(out, in, size)) {
+  return T::reduce(out, in, size);
+}
+
+template<typename T>
+void call_reduce(T& out, const T& in, uint64_t size) {
+  return T::reduce(out, in);
+}
+
+template<typename T>
+auto call_tostring(const T& t, uint32_t size) ->
+  decltype(t.toString(size)) {
+  return t.toString(size);
+}
+
+template<typename T>
+auto call_tostring(const T& t, uint64_t size) -> decltype(auto) {
+  return t.toString();
+}
+
 }
 
 /*
@@ -71,9 +94,27 @@ namespace detail {
  *      gen(ProfMyTarget, RDSHandleData { prof.handle() }, ...);
  *    }
  *
- * The type must have a toString(...) method returning a std::string with a
- * single human-readable line representing the state of the profile, taking
- * the same set of extra arguments as the reduce function passed to 'data'.
+ * MyType::toString([uint32_t]) should return a std::string with a
+ * single human-readable line representing the state of the
+ * profile. The optional parameter is the actual size allocated in
+ * rds (only needed for variable size types).
+ *
+ * MyType::reduce(T& out, const T& in[, uint32_t]) should accumulate
+ * the in into out, and should assume that another thread might be
+ * writing to in while its reading it. The third, optional, parameter
+ * is the actual size allocated in rds (see SwitchProfile for an
+ * example of a variably sized profiler).
+ *
+ * rds::Profile<MyType> also needs to be added to rds::Symbol.
+ *
+ * If the MyType contains pointers, or other data that needs updating
+ * when serializing/deserializing, it should also define
+ *
+ *  void MyType::serialize(ProfDataSerializer& ser, const T& t) const;
+ *  void MyType::deserialize(ProfDataDeserializer& ser, T& t);
+ *
+ * Note that custom serialization/deserialization is currently not
+ * supported for variable sized profilers.
  */
 template<class T>
 struct TargetProfile {
@@ -100,40 +141,41 @@ struct TargetProfile {
   {}
 
   /*
-   * Access the data we collected during profiling.
+   * Calls T::reduce to fold the data from each local RDS slot.
    *
-   * ReduceFn is used to fold the data from each local RDS slot.  It must have
-   * the signature void(T&, const T&, Args...), and should assume the second
-   * argument might be concurrently written to by other threads running in the
-   * translation cache. Any arguments passed to data() after reduce will be
-   * forwarded to the reduce function.
-   *
-   * Most callers probably want the second overload, for simplicity. The
-   * two-argument version is for variable-sized T, and the caller must ensure
-   * that out is zero-initialized before calling data().
-   *
-   * Pre: optimizing()
+   * Its the caller's responsibility to ensure that size is correct,
+   * and that refers to a block of at least size bytes, which is
+   * initially zeroed.
    */
-  template<class ReduceFn, class... Args>
-  void data(T& out, ReduceFn reduce, Args&&... extraArgs) const {
-    assertx(optimizing());
-    auto const hand = handle();
+  static void reduce(T& out, rds::Handle hand, uint32_t size) {
     for (auto& base : rds::allTLBases()) {
-      reduce(out, rds::handleToRef<T>(base, hand),
-             std::forward<Args>(extraArgs)...);
-    }
-    if (RuntimeOption::EvalDumpTargetProfiles) {
-      detail::addTargetProfileInfo(
-        m_key,
-        out.toString(std::forward<Args>(extraArgs)...)
-      );
+      detail::call_reduce(
+        out, rds::handleToRef<T, rds::Mode::Local>(base, hand), size);
     }
   }
 
-  template<class ReduceFn, class... Args>
-  T data(ReduceFn reduce, Args&&... extraArgs) const {
+  /*
+   * Access the data we collected during profiling.
+   *
+   * It calls reduce to populate out (see description above).
+   *
+   * Most callers want the second overload, for simplicity. This
+   * version is just for variable-sized T (and has the same
+   * assumptions about out and size as reduce).
+   *
+   * Pre: optimizing()
+   */
+  void data(T& out, uint32_t size) const {
+    assertx(optimizing());
+    reduce(out, handle(), size);
+    if (RuntimeOption::EvalDumpTargetProfiles) {
+      detail::addTargetProfileInfo(m_key, detail::call_tostring(out, size));
+    }
+  }
+
+  T data(uint32_t size = sizeof(T)) const {
     auto accum = T{};
-    data(accum, reduce, std::forward<Args>(extraArgs)...);
+    data(accum, size);
     return accum;
   }
 
@@ -155,21 +197,25 @@ struct TargetProfile {
    * if profiling().
    */
   rds::Handle handle() const { return m_link.handle(); }
+  T& value() const { return *m_link; }
 
 private:
-  static rds::Link<T> createLink(TransID profTransID,
-                                 TransKind kind,
-                                 Offset bcOff,
-                                 const StringData* name,
-                                 size_t extraSize) {
-    auto const rdsKey = rds::Profile{profTransID, bcOff, name};
+  static rds::Link<T, rds::Mode::Local>
+  createLink(TransID profTransID,
+             TransKind kind,
+             Offset bcOff,
+             const StringData* name,
+             size_t extraSize) {
+    auto const rdsKey = rds::Profile<T>{profTransID, bcOff, name};
 
     switch (kind) {
     case TransKind::Profile:
-      return rds::bind<T>(rdsKey, rds::Mode::Local, extraSize);
+      return rds::bind<T, rds::Mode::Local>(rdsKey, extraSize);
 
     case TransKind::Optimize:
-      if (isValidTransID(profTransID)) return rds::attach<T>(rdsKey);
+      if (isValidTransID(profTransID)) {
+        return rds::attach<T, rds::Mode::Local>(rdsKey);
+      }
 
       // fallthrough
     case TransKind::Anchor:
@@ -179,18 +225,15 @@ private:
     case TransKind::ProfPrologue:
     case TransKind::OptPrologue:
     case TransKind::Invalid:
-      return rds::Link<T>(rds::kInvalidHandle);
+      return rds::Link<T, rds::Mode::Local>{};
     }
     not_reached();
   }
 
-  static void addDebugInfo(const rds::Profile& key,
-                           const std::string& dbgInfo);
-
 private:
-  rds::Link<T> const m_link;
+  rds::Link<T, rds::Mode::Local> const m_link;
   TransKind const m_kind;
-  rds::Profile const m_key;
+  rds::Profile<void> const m_key;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

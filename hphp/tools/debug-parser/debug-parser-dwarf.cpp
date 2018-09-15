@@ -21,6 +21,8 @@
 #include <folly/Memory.h>
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
+#include <folly/container/F14Map.h>
+#include <folly/container/F14Set.h>
 #include <folly/portability/Unistd.h>
 
 #include <errno.h>
@@ -32,8 +34,10 @@
 #include <libdwarf.h>
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/job-queue.h"
 
 #include "hphp/tools/debug-parser/debug-parser.h"
+#include "hphp/tools/debug-parser/dwarfstate.h"
 
 /*
  * Debug parser for DWARF (using libdwarf)
@@ -54,46 +58,6 @@
 namespace debug_parser { namespace {
 
 ////////////////////////////////////////////////////////////////////////////////
-
-/*
- * libdwarf uses a very low-level janky C-style interface, so provide a simple
- * wrapper class to make some of the common operations easier.
- *
- * In a few cases, libdwarf keeps internal state, which forces you walk the DIEs
- * in a hierarchial manner. For this reason, many of the operations are
- * structured as for-each style iteration.
- */
-
-struct DwarfState {
-  explicit DwarfState(const std::string& filename);
-  ~DwarfState();
-
-  Dwarf_Half getTag(Dwarf_Die die);
-  std::string tagToString(Dwarf_Half tag);
-  std::string getDIEName(Dwarf_Die die);
-  Dwarf_Off getDIEOffset(Dwarf_Die die);
-  Dwarf_Half getAttributeType(Dwarf_Attribute attr);
-  std::string attributeTypeToString(Dwarf_Half type);
-  Dwarf_Half getAttributeForm(Dwarf_Attribute attr);
-  std::string getAttributeValueString(Dwarf_Attribute attr);
-  Dwarf_Bool getAttributeValueFlag(Dwarf_Attribute attr);
-  Dwarf_Unsigned getAttributeValueUData(Dwarf_Attribute attr);
-  Dwarf_Signed getAttributeValueSData(Dwarf_Attribute attr);
-  Dwarf_Addr getAttributeValueAddr(Dwarf_Attribute attr);
-  Dwarf_Off getAttributeValueRef(Dwarf_Attribute attr);
-  Dwarf_Sig8 getAttributeValueSig8(Dwarf_Attribute attr);
-  std::vector<Dwarf_Loc> getAttributeValueExprLoc(Dwarf_Attribute attr);
-
-  template <typename F> void forEachChild(Dwarf_Die die, F&& f);
-  template <typename F> void forEachAttribute(Dwarf_Die die, F&& f);
-  template <typename F> void forEachCompilationUnit(F&& f);
-  template <typename F> auto onDIEAtOffset(Dwarf_Off offset, F&& f) ->
-    decltype(f(std::declval<Dwarf_Die>()));
-
-  int fd;
-  Dwarf_Debug dwarf;
-  std::string filename;
-};
 
 /*
  * Fully qualified names aren't represented explicitly in DWARF. Instead the
@@ -203,15 +167,32 @@ struct Scope {
  */
 
 struct TypeParserImpl : TypeParser {
-  explicit TypeParserImpl(const std::string& filename);
+  explicit TypeParserImpl(const std::string& filename, int num_threads);
 
-  const std::vector<ObjectType>& getAllObjects() const override;
   Object getObject(ObjectTypeKey key) override;
 
+  size_t getObjectBlockCount() const override;
+
+ protected:
+  const std::vector<ObjectType>& getObjectBlock(size_t index) const override;
+
  private:
-  void genNames(Dwarf_Die die,
-                Scope& scope,
-                std::vector<Dwarf_Off>* template_params = nullptr);
+  struct StateBlock;
+
+  // Functions used while concurrently building state. Since these functions are
+  // invoked from multiple threads, they are static and take all their state
+  // explicitly as parameters.
+  static void genNames(StateBlock& state,
+                       DwarfState& dwarf,
+                       Dwarf_Die die,
+                       Scope& scope,
+                       std::vector<Dwarf_Off>* template_params = nullptr);
+  static folly::Optional<Dwarf_Off> findSpecification(DwarfState& dwarf,
+                                                      Dwarf_Die die,
+                                                      bool first);
+  static void fixTemplateLinkage(StateBlock& state);
+
+  // Functions used after state is built. These are not thread-safe.
   Object genObject(Dwarf_Die die,
                    ObjectTypeName name,
                    ObjectTypeKey key);
@@ -221,570 +202,57 @@ struct TypeParserImpl : TypeParser {
   Object::Function genFunction(Dwarf_Die die);
   Object::Base genBase(Dwarf_Die die, const ObjectTypeName& parent_name);
   Object::TemplateParam genTemplateParam(Dwarf_Die die);
-
-  folly::Optional<std::size_t> determineArrayBound(Dwarf_Die die);
-  folly::Optional<Dwarf_Off> findSpecification(Dwarf_Die die, bool first);
+  folly::Optional<size_t> determineArrayBound(Dwarf_Die die);
 
   void fillFuncArgs(Dwarf_Die die, FuncType& func);
 
-  void fixTemplateLinkage();
-
-  DwarfState m_dwarf;
-
-  std::vector<ObjectType> m_all_objs;
-  std::unordered_map<Dwarf_Off, std::size_t> m_offsets;
+  // Map a given offset to the state block which contains state for that offset
+  // (see below).
+  const StateBlock& stateForOffset(Dwarf_Off offset) const {
+    assertx(!m_state_map.empty());
+    auto it = std::upper_bound(
+      m_state_map.begin(),
+      m_state_map.end(),
+      offset,
+      [](Dwarf_Off offset, const std::pair<Dwarf_Off, StateBlock*>& p) {
+        return offset < p.first;
+      }
+    );
+    if (it != m_state_map.begin()) --it;
+    return *it->second;
+  }
 
   struct LinkageDependents {
-    std::unordered_set<Dwarf_Off> m_template_uses;
-    std::unordered_set<Dwarf_Off> m_children;
+    folly::F14FastSet<Dwarf_Off> template_uses;
+    folly::F14FastSet<Dwarf_Off> children;
   };
-  std::unordered_map<Dwarf_Off, LinkageDependents> m_linkage_dependents;
 
-  std::unordered_multimap<Dwarf_Off, Dwarf_Off> m_static_definitions;
+  // All of the parser's persistent state is stored in some number of
+  // blocks. All of the blocks are computed concurrently, one block per
+  // thread. To avoid the overhead of merging the blocks together, they are kept
+  // separated. Instead m_state_map is used to map a given offset into the block
+  // which contains the state for that offset. It is a list of offset/state
+  // pairs. Any offset between the offset given in the pair and the one in the
+  // next pair is mapped to the state block in the pair.
+  //
+  // Note: this scheme only works because each compilation unit is
+  // self-contained and does not reference data in another compilation
+  // unit. However, nothing in DWARF prevents this and its not guaranteed to
+  // always be true.
+  struct StateBlock {
+    std::vector<ObjectType> all_objs;
+    folly::F14FastMap<Dwarf_Off, size_t> obj_offsets;
+    folly::F14FastMap<Dwarf_Off, LinkageDependents> linkage_dependents;
+    std::unordered_multimap<Dwarf_Off, Dwarf_Off> static_definitions;
+  };
+  std::vector<std::unique_ptr<StateBlock>> m_states;
+  std::vector<std::pair<Dwarf_Off, StateBlock*>> m_state_map;
+
+  DwarfState m_dwarf;
 };
 
 // Purposefully fake name to avoid confusion with an actual type.
 const std::string Scope::s_pseudo_type_name = "@_PSEUDO_TY";
-
-DwarfState::DwarfState(const std::string& filename)
-  : fd{-1}
-  , dwarf{nullptr}
-  , filename{filename}
-{
-  fd = open(filename.c_str(), O_RDONLY);
-  if (fd < 0) {
-    throw Exception{
-      folly::sformat(
-        "Unable to open file '{}': {}",
-        filename,
-        folly::errnoStr(errno)
-      )
-    };
-  }
-
-  Dwarf_Error error = nullptr;
-  if (dwarf_init(
-        fd,
-        DW_DLC_READ,
-        nullptr,
-        nullptr,
-        &dwarf,
-        &error
-      ) == DW_DLV_ERROR) {
-    SCOPE_EXIT { if (error) free(error); };
-    SCOPE_EXIT { close(fd); };
-    throw Exception{
-      folly::sformat(
-        "Unable to init libdwarf on file '{}': {}",
-        filename,
-        dwarf_errmsg(error)
-      )
-    };
-  }
-}
-
-DwarfState::~DwarfState() {
-  Dwarf_Error error = nullptr;
-  if (dwarf) dwarf_finish(dwarf, &error);
-  close(fd);
-}
-
-Dwarf_Half DwarfState::getTag(Dwarf_Die die) {
-  Dwarf_Error error = nullptr;
-  SCOPE_EXIT {
-    if (error) dwarf_dealloc(dwarf, error, DW_DLA_ERROR);
-  };
-
-  Dwarf_Half tag = 0;
-  if (dwarf_tag(die, &tag, &error) != DW_DLV_OK) {
-    throw Exception{
-      folly::sformat(
-        "Unable to read DIE tag: {}",
-        dwarf_errmsg(error)
-      )
-    };
-  }
-
-  return tag;
-}
-
-std::string DwarfState::tagToString(Dwarf_Half tag) {
-  const char* tag_name = nullptr;
-  auto result = dwarf_get_TAG_name(tag, &tag_name);
-  if (result == DW_DLV_NO_ENTRY) {
-    return folly::sformat("<UNKNOWN({})>", tag);
-  }
-  return tag_name;
-}
-
-std::string DwarfState::getDIEName(Dwarf_Die die) {
-  Dwarf_Error error = nullptr;
-  SCOPE_EXIT {
-    if (error) dwarf_dealloc(dwarf, error, DW_DLA_ERROR);
-  };
-
-  char* raw_name = nullptr;
-  auto result = dwarf_diename(die, &raw_name, &error);
-  if (result == DW_DLV_ERROR) {
-    throw Exception{
-      folly::sformat(
-          "Unable to read DIE name: {}",
-          dwarf_errmsg(error)
-      )
-    };
-  } else if (result == DW_DLV_NO_ENTRY) {
-    return "";
-  } else {
-    SCOPE_EXIT { dwarf_dealloc(dwarf, raw_name, DW_DLA_STRING); };
-    return raw_name;
-  }
-}
-
-Dwarf_Off DwarfState::getDIEOffset(Dwarf_Die die) {
-  Dwarf_Error error = nullptr;
-  SCOPE_EXIT {
-    if (error) dwarf_dealloc(dwarf, error, DW_DLA_ERROR);
-  };
-
-  Dwarf_Off offset = 0;
-  auto result = dwarf_dieoffset(die, &offset, &error);
-  if (result != DW_DLV_OK) {
-    throw Exception{
-      folly::sformat(
-          "Unable to read DIE offset: {}",
-          dwarf_errmsg(error)
-      )
-    };
-  }
-
-  return offset;
-}
-
-Dwarf_Half DwarfState::getAttributeType(Dwarf_Attribute attr) {
-  Dwarf_Error error = nullptr;
-  SCOPE_EXIT {
-    if (error) dwarf_dealloc(dwarf, error, DW_DLA_ERROR);
-  };
-
-  Dwarf_Half what_attr = 0;
-  auto result = dwarf_whatattr(attr, &what_attr, &error);
-  if (result != DW_DLV_OK) {
-    throw Exception{
-      folly::sformat(
-        "Unable to obtain attribute type: {}",
-        dwarf_errmsg(error)
-      )
-    };
-  }
-
-  return what_attr;
-}
-
-std::string DwarfState::attributeTypeToString(Dwarf_Half type) {
-  const char* attr_name;
-  auto result = dwarf_get_AT_name(type, &attr_name);
-  if (result == DW_DLV_NO_ENTRY) {
-    return folly::sformat("<UNKNOWN({})>", type);
-  }
-  return attr_name;
-}
-
-Dwarf_Half DwarfState::getAttributeForm(Dwarf_Attribute attr) {
-  Dwarf_Error error = nullptr;
-  SCOPE_EXIT {
-    if (error) dwarf_dealloc(dwarf, error, DW_DLA_ERROR);
-  };
-
-  Dwarf_Half form = 0;
-  auto result = dwarf_whatform(attr, &form, &error);
-  if (result != DW_DLV_OK) {
-    throw Exception{
-      folly::sformat(
-        "Unable to obtain attribute form: {}",
-        dwarf_errmsg(error)
-      )
-    };
-  }
-
-  return form;
-}
-
-std::string DwarfState::getAttributeValueString(Dwarf_Attribute attr) {
-  Dwarf_Error error = nullptr;
-  SCOPE_EXIT {
-    if (error) dwarf_dealloc(dwarf, error, DW_DLA_ERROR);
-  };
-
-  char* str = nullptr;
-  auto result = dwarf_formstring(attr, &str, &error);
-  if (result != DW_DLV_OK) {
-    throw Exception{
-      folly::sformat(
-        "Unable to obtain attribute value string: {}",
-        dwarf_errmsg(error)
-      )
-    };
-  }
-
-  SCOPE_EXIT { dwarf_dealloc(dwarf, str, DW_DLA_STRING); };
-  return str;
-}
-
-Dwarf_Bool DwarfState::getAttributeValueFlag(Dwarf_Attribute attr) {
-  Dwarf_Error error = nullptr;
-  SCOPE_EXIT {
-    if (error) dwarf_dealloc(dwarf, error, DW_DLA_ERROR);
-  };
-
-  if (getAttributeForm(attr) == DW_FORM_flag_present) {
-    return true;
-  }
-
-  Dwarf_Bool value;
-  auto result = dwarf_formflag(attr, &value, &error);
-  if (result != DW_DLV_OK) {
-    throw Exception{
-      folly::sformat(
-        "Unable to obtain attribute value flag: {}",
-        dwarf_errmsg(error)
-      )
-    };
-  }
-
-  return value;
-}
-
-Dwarf_Unsigned DwarfState::getAttributeValueUData(Dwarf_Attribute attr) {
-  Dwarf_Error error = nullptr;
-  SCOPE_EXIT {
-    if (error) dwarf_dealloc(dwarf, error, DW_DLA_ERROR);
-  };
-
-  Dwarf_Unsigned value;
-  auto result = dwarf_formudata(attr, &value, &error);
-  if (result != DW_DLV_OK) {
-    throw Exception{
-      folly::sformat(
-        "Unable to obtain attribute value unsigned data: {}",
-        dwarf_errmsg(error)
-      )
-    };
-  }
-
-  return value;
-}
-
-Dwarf_Signed DwarfState::getAttributeValueSData(Dwarf_Attribute attr) {
-  Dwarf_Error error = nullptr;
-  SCOPE_EXIT {
-    if (error) dwarf_dealloc(dwarf, error, DW_DLA_ERROR);
-  };
-
-  Dwarf_Signed value;
-  auto result = dwarf_formsdata(attr, &value, &error);
-  if (result != DW_DLV_OK) {
-    throw Exception{
-      folly::sformat(
-        "Unable to obtain attribute value signed data: {}",
-        dwarf_errmsg(error)
-      )
-    };
-  }
-
-  return value;
-}
-
-Dwarf_Addr DwarfState::getAttributeValueAddr(Dwarf_Attribute attr) {
-  Dwarf_Error error = nullptr;
-  SCOPE_EXIT {
-    if (error) dwarf_dealloc(dwarf, error, DW_DLA_ERROR);
-  };
-
-  Dwarf_Addr value;
-  auto result = dwarf_formaddr(attr, &value, &error);
-  if (result != DW_DLV_OK) {
-    throw Exception{
-      folly::sformat(
-        "Unable to obtain attribute value address: {}",
-        dwarf_errmsg(error)
-      )
-    };
-  }
-
-  return value;
-}
-
-Dwarf_Off DwarfState::getAttributeValueRef(Dwarf_Attribute attr) {
-  Dwarf_Error error = nullptr;
-  SCOPE_EXIT {
-    if (error) dwarf_dealloc(dwarf, error, DW_DLA_ERROR);
-  };
-
-  Dwarf_Off value;
-  auto result = dwarf_global_formref(attr, &value, &error);
-  if (result != DW_DLV_OK) {
-    throw Exception{
-      folly::sformat(
-        "Unable to obtain attribute value ref: {}",
-        dwarf_errmsg(error)
-      )
-    };
-  }
-
-  return value;
-}
-
-Dwarf_Sig8 DwarfState::getAttributeValueSig8(Dwarf_Attribute attr) {
-  Dwarf_Error error = nullptr;
-  SCOPE_EXIT {
-    if (error) dwarf_dealloc(dwarf, error, DW_DLA_ERROR);
-  };
-
-  Dwarf_Sig8 value;
-  auto result = dwarf_formsig8(attr, &value, &error);
-  if (result != DW_DLV_OK) {
-    throw Exception{
-      folly::sformat(
-        "Unable to obtain attribute value sig8: {}",
-        dwarf_errmsg(error)
-      )
-    };
-  }
-
-  return value;
-}
-
-std::vector<Dwarf_Loc>
-DwarfState::getAttributeValueExprLoc(Dwarf_Attribute attr) {
-  Dwarf_Error error = nullptr;
-  SCOPE_EXIT {
-    if (error) dwarf_dealloc(dwarf, error, DW_DLA_ERROR);
-  };
-
-  Dwarf_Ptr raw_ptr;
-  Dwarf_Unsigned raw_len;
-  auto result = dwarf_formexprloc(attr, &raw_len, &raw_ptr, &error);
-  if (result != DW_DLV_OK) {
-    throw Exception{
-      folly::sformat(
-        "Unable to obtain attribute value exprloc: {}",
-        dwarf_errmsg(error)
-      )
-    };
-  }
-
-  Dwarf_Locdesc* locations = nullptr;
-  Dwarf_Signed locations_count = 0;
-  SCOPE_EXIT {
-    if (locations) {
-      for (Dwarf_Signed i = 0; i < locations_count; ++i) {
-        dwarf_dealloc(dwarf, locations[i].ld_s, DW_DLA_LOC_BLOCK);
-      }
-      dwarf_dealloc(dwarf, locations, DW_DLA_LOCDESC);
-    }
-  };
-
-  result = dwarf_loclist_from_expr(
-    dwarf,
-    raw_ptr,
-    raw_len,
-    &locations,
-    &locations_count,
-    &error
-  );
-  if (result != DW_DLV_OK) {
-    throw Exception{
-      folly::sformat(
-        "Unable to turn exprloc into location list: {}",
-        dwarf_errmsg(error)
-      )
-    };
-  }
-
-  if (locations_count != 1) {
-    throw Exception{"Obtained more than one location list from exprloc"};
-  }
-
-  return std::vector<Dwarf_Loc>{
-    locations->ld_s,
-    locations->ld_s + locations->ld_cents
-  };
-}
-
-/*
- * Iterate over all children of this DIE, calling the given callable for
- * each. Iteration is stopped early if any of the calls return false.
- */
-template <typename F> void DwarfState::forEachChild(Dwarf_Die die, F&& f) {
-  Dwarf_Error error = nullptr;
-  SCOPE_EXIT {
-    if (error) dwarf_dealloc(dwarf, error, DW_DLA_ERROR);
-  };
-
-  Dwarf_Die prev = nullptr;
-  SCOPE_EXIT {
-    if (prev) dwarf_dealloc(dwarf, prev, DW_DLA_DIE);
-  };
-
-  if (die) {
-    // prev is null here, and dwarf_child returns the first child if given a
-    // previous DIE of null.
-    auto result = dwarf_child(die, &prev, &error);
-    if (result == DW_DLV_ERROR) {
-      throw Exception{
-        folly::sformat(
-          "Unable to read child DIE: {}",
-          dwarf_errmsg(error)
-        )
-      };
-    } else if (result == DW_DLV_NO_ENTRY || !f(prev)) {
-      return;
-    }
-  }
-
-  while (true) {
-    Dwarf_Die next = nullptr;
-    SCOPE_EXIT {
-      if (next) dwarf_dealloc(dwarf, next, DW_DLA_DIE);
-    };
-
-    auto result = dwarf_siblingof_b(
-      dwarf, prev, true,
-      &next, &error
-    );
-    if (result == DW_DLV_ERROR) {
-      throw Exception{
-        folly::sformat(
-          "Unable to read sibling DIE: {}",
-          dwarf_errmsg(error)
-        )
-      };
-    } else if (result == DW_DLV_NO_ENTRY || !f(next)) {
-      break;
-    }
-
-    // Swap prev and next. This will ensure the previous DIE gets freed (because
-    // of the above SCOPE_EXIT).
-    std::swap(prev, next);
-  }
-}
-
-/*
- * Iterate over all attributes of the given DIE, calling the given callable for
- * each. Iteration is stopped early if any of the calls return false.
- */
-template <typename F> void DwarfState::forEachAttribute(Dwarf_Die die, F&& f) {
-  Dwarf_Error error = nullptr;
-  SCOPE_EXIT {
-    if (error) dwarf_dealloc(dwarf, error, DW_DLA_ERROR);
-  };
-
-  Dwarf_Attribute* attributes;
-  Dwarf_Signed attribute_count;
-  auto result = dwarf_attrlist(die, &attributes, &attribute_count, &error);
-  if (result == DW_DLV_ERROR) {
-    throw Exception{
-      folly::sformat(
-        "Unable to read DIE attribute-list: {}",
-        dwarf_errmsg(error)
-      )
-    };
-  } else if (result == DW_DLV_NO_ENTRY) {
-    return;
-  }
-
-  SCOPE_EXIT {
-    for (Dwarf_Unsigned i = 0; i < attribute_count; ++i) {
-      dwarf_dealloc(dwarf, attributes[i], DW_DLA_ATTR);
-    }
-    dwarf_dealloc(dwarf, attributes, DW_DLA_LIST);
-  };
-
-  for (Dwarf_Unsigned i = 0; i < attribute_count; ++i) {
-    if (!f(attributes[i])) break;
-  }
-}
-
-/*
- * Iterate over all the compilation-units in the file, calling the given
- * callable for each.
- */
-template <typename F> void DwarfState::forEachCompilationUnit(F&& f) {
-  if (!dwarf) return;
-
-  Dwarf_Error error = nullptr;
-  SCOPE_EXIT {
-    if (error) dwarf_dealloc(dwarf, error, DW_DLA_ERROR);
-  };
-
-  while (true) {
-    Dwarf_Unsigned next_cu_header = 0;
-    auto result = dwarf_next_cu_header_d(
-      dwarf, true, nullptr, nullptr,
-      nullptr, nullptr, nullptr, nullptr,
-      nullptr, nullptr, &next_cu_header,
-      nullptr, &error
-    );
-
-    if (result == DW_DLV_NO_ENTRY) {
-      break;
-    } else if (result == DW_DLV_ERROR) {
-      throw Exception{
-        folly::sformat(
-          "Unable to read next compilation-unit header: {}",
-          dwarf_errmsg(error)
-        )
-      };
-    }
-
-    forEachChild(
-      nullptr,
-      [&](Dwarf_Die die){
-        if (getTag(die) != DW_TAG_compile_unit) {
-          throw Exception{
-            folly::sformat(
-              "First tag in compilation-unit is not DW_TAG_compile_unit ({})",
-              tagToString(getTag(die))
-            )
-          };
-        }
-        f(die);
-        return true;
-      }
-    );
-  }
-}
-
-/*
- * Load the DIE at the given offset, and call the given callable on it,
- * returning whatever the callable returns.
- */
-template <typename F> auto DwarfState::onDIEAtOffset(Dwarf_Off offset, F&& f) ->
-  decltype(f(std::declval<Dwarf_Die>())) {
-
-  Dwarf_Error error = nullptr;
-  SCOPE_EXIT {
-    if (error) dwarf_dealloc(dwarf, error, DW_DLA_ERROR);
-  };
-
-  Dwarf_Die die = nullptr;
-  auto result = dwarf_offdie_b(
-    dwarf, offset, true,
-    &die, &error
-  );
-  if (result != DW_DLV_OK) {
-    throw Exception{
-      folly::sformat(
-        "Unable to read DIE at offset {}: {}",
-        offset,
-        dwarf_errmsg(error)
-      )
-    };
-  }
-
-  SCOPE_EXIT { dwarf_dealloc(dwarf, die, DW_DLA_DIE); };
-  return f(die);
-}
 
 ObjectTypeName Scope::name() const {
   auto iter = m_scope.begin();
@@ -797,33 +265,160 @@ ObjectTypeName Scope::name() const {
   return ObjectTypeName{std::move(str), linkage()};
 }
 
-TypeParserImpl::TypeParserImpl(const std::string& filename)
+TypeParserImpl::TypeParserImpl(const std::string& filename, int num_threads)
   : m_dwarf{filename}
 {
-  // First iterate over every DIE, finding all object types and computing their
-  // names (and linkage).
-  m_dwarf.forEachCompilationUnit(
-    [&](Dwarf_Die cu) {
-      Scope scope{m_dwarf.getDIEOffset(cu)};
-      genNames(cu, scope);
+  // Processing each compiliation unit is very expensive, as it involves walking
+  // a large part of the debug information. To speed things up (a lot), we buid
+  // up the state concurrently. Create a job corresponding to each compiliation
+  // unit in the file and enqueue the jobs with a thread pool. We'll find the
+  // offsets of the compiliation unit in the main thread, enqueuing them as we
+  // find them. This lets us not only exploit concurrency between processing
+  // compiliation units, but between finding them and processing them.
+  //
+  // Each worker maintains its own private state which it populates for all the
+  // compiliation units its assigned (each worker can process multiple
+  // compiliation units). Once done, all the different states are kept separate
+  // (merging them would be too expensive), but a mapping is constructed to map
+  // offsets to the appropriate state block.
+  //
+  // This whole scheme is only viable because (right now), debug information in
+  // a given compiliation unit doesn't reference anything outside of that unit,
+  // so the state for any given compiliation unit can be processed
+  // independently.
+
+  // The context serves as the link between a worker and the TypeParserImpl
+  // state (this is forced by the JobQueueWorker interface).
+  struct Context {
+    const std::string& filename;
+    decltype(m_states)& states;
+    decltype(m_state_map)& state_map;
+    // The lock protects states, state_map, and the exception field (but only
+    // when the workers are running).
+    std::mutex lock;
+    // Set to the exception if any of the workers threw (first one wins).
+    std::exception_ptr exception;
+  };
+
+  // Thread worker. We'll end up with a state block for each one of these.
+  struct Worker : HPHP::JobQueueWorker<Dwarf_Off, Context*> {
+    // Constructing a DwarfState is expensive. So, defer its construction until
+    // we know we actually need it and we're running in a separate thread.
+    folly::Optional<DwarfState> dwarf;
+    std::unique_ptr<StateBlock> state;
+    // Remember each offset we processed so we can record it the global state
+    // map when we finish.
+    std::vector<Dwarf_Off> offsets;
+
+    void doJob(Dwarf_Off offset) override {
+      // Process a compiliation unit at the given offset.
+      try {
+        // We're going to use it so let's construct the DwarfState if we haven't
+        // yet.
+        if (!dwarf) {
+          dwarf.emplace(m_context->filename);
+          state = std::make_unique<StateBlock>();
+        }
+
+        offsets.emplace_back(offset);
+
+        // Do the actual processing, adding to the state block:
+        Scope scope{offset};
+        dwarf->onDIEAtOffset(
+          offset,
+          [&](Dwarf_Die cu) { genNames(*state, *dwarf, cu, scope); }
+        );
+      } catch (...) {
+        // Store any exception thrown so it can be rethrown in the main
+        // thread. We only bother to store the first one.
+        stop();
+        std::lock_guard<std::mutex> guard{m_context->lock};
+        if (!m_context->exception) {
+          m_context->exception = std::current_exception();
+        }
+      }
     }
+
+    void onThreadExit() override {
+      // The worker is done (we've been told to stop). Now that we know we won't
+      // be processing anymore offsets, do the needed post-processing on the
+      // rest of the state.
+      try {
+        // Compute a mapping of an object type's offset to its location in the
+        // all_objs vector.
+        state->obj_offsets.reserve(state->all_objs.size());
+        for (auto i = size_t{0}; i < state->all_objs.size(); ++i) {
+          state->obj_offsets.emplace(state->all_objs[i].key.object_id, i);
+        }
+
+        // The linkage of template instantiations need to be fixed up depending
+        // on the linkage of its template parameters. Now that we have all the
+        // types, do so here.
+        fixTemplateLinkage(*state);
+        state->linkage_dependents.clear();
+
+        // Record all the offsets this worker processed (along with the state
+        // block) in the global state map. This is done using a lock because its
+        // quick and only done when the thread is finishing.
+        std::lock_guard<std::mutex> guard{m_context->lock};
+        m_context->states.emplace_back(std::move(state));
+        for (auto offset : offsets) {
+          m_context->state_map.emplace_back(
+            offset,
+            m_context->states.back().get()
+          );
+        }
+      } catch (...) {
+        // Store any exception thrown so it can be rethrown in the main
+        // thread. We only bother to store the first one.
+        stop();
+        std::lock_guard<std::mutex> guard{m_context->lock};
+        if (!m_context->exception) {
+          m_context->exception = std::current_exception();
+        }
+      }
+    }
+  };
+
+  // Fire up the thread pool
+  Context context{filename, m_states, m_state_map};
+  HPHP::JobQueueDispatcher<Worker> dispatcher{
+    num_threads, num_threads, 0, false, &context
+  };
+  dispatcher.start();
+
+  // Iterate over every compilation-unit, enqueuing jobs which will
+  // concurrently scan that unit.
+  m_dwarf.forEachCompilationUnit(
+    [&](Dwarf_Die cu) { dispatcher.enqueue(m_dwarf.getDIEOffset(cu)); }
   );
 
-  // Compute a mapping of an object type's offset to its location in the
-  // m_all_objs vector.
-  for (std::size_t i = 0; i < m_all_objs.size(); ++i) {
-    m_offsets.emplace(m_all_objs[i].key.object_id, i);
-  }
+  // Wait for all the workers to finish.
+  dispatcher.stop();
 
-  // The linkage of template instantiations need to be fixed up depending on the
-  // linkage of its template parameters. Now that we have all the types, do so
-  // here.
-  fixTemplateLinkage();
-  m_linkage_dependents.clear();
+  // If any of the workers caught an exception, rethrow here in the main
+  // thread. We don't need to bother taking the lock because all the workers are
+  // gone.
+  if (context.exception) std::rethrow_exception(context.exception);
+
+  // Since the state map was appended to by the workers in a non-deterministic
+  // order, we need to sort it by offset so we can do efficient lookups later.
+  std::sort(
+    m_state_map.begin(), m_state_map.end(),
+    [&](const std::pair<Dwarf_Off, StateBlock*>& p1,
+        const std::pair<Dwarf_Off, StateBlock*>& p2) {
+      return p1.first < p2.first;
+    }
+  );
 }
 
-const std::vector<ObjectType>& TypeParserImpl::getAllObjects() const {
-  return m_all_objs;
+size_t TypeParserImpl::getObjectBlockCount() const {
+  return m_states.size();
+}
+
+const std::vector<ObjectType>&
+TypeParserImpl::getObjectBlock(size_t index) const {
+  return m_states[index]->all_objs;
 }
 
 /*
@@ -842,17 +437,18 @@ const std::vector<ObjectType>& TypeParserImpl::getAllObjects() const {
  *
  * When the name and initial linkages of all the types was generated, the
  * relationship between templates, their parameters, and nested classes is
- * recorded in m_linkage_dependents, which is used here.
+ * recorded in linkage_dependents, which is used here.
  */
-void TypeParserImpl::fixTemplateLinkage() {
-  std::unordered_set<Dwarf_Off> changed;
+void TypeParserImpl::fixTemplateLinkage(StateBlock& state) {
+  using ChangedSet = folly::F14FastSet<Dwarf_Off>;
+  ChangedSet changed;
 
-  for (const auto& pair : m_linkage_dependents) {
-    if (pair.second.m_template_uses.empty()) continue;
+  for (const auto& pair : state.linkage_dependents) {
+    if (pair.second.template_uses.empty()) continue;
     changed.emplace(pair.first);
   }
 
-  std::unordered_set<Dwarf_Off> old_changed;
+  ChangedSet old_changed;
   while (!changed.empty()) {
     std::swap(changed, old_changed);
 
@@ -860,13 +456,14 @@ void TypeParserImpl::fixTemplateLinkage() {
     // (templates where the type is used as a parameter, or nested classes) with
     // the new linkage, and mark as being changed as well.
     for (auto changed_offset : old_changed) {
-      const auto iter = m_linkage_dependents.find(changed_offset);
-      if (iter == m_linkage_dependents.end()) continue;
+      const auto iter = state.linkage_dependents.find(changed_offset);
+      if (iter == state.linkage_dependents.end()) continue;
 
-      const auto& children = iter->second.m_children;
-      const auto& template_uses = iter->second.m_template_uses;
+      const auto& children = iter->second.children;
+      const auto& template_uses = iter->second.template_uses;
 
-      const auto& changed_obj = m_all_objs[m_offsets[changed_offset]];
+      const auto& changed_obj =
+        state.all_objs[state.obj_offsets[changed_offset]];
 
       // Only update and mark if we actually make the linkage more restrictive.
       switch (changed_obj.name.linkage) {
@@ -874,7 +471,8 @@ void TypeParserImpl::fixTemplateLinkage() {
           break;
         case ObjectTypeName::Linkage::internal: {
           const auto process = [&](Dwarf_Off dependent_offset) {
-            auto& dependent_obj = m_all_objs[m_offsets[dependent_offset]];
+            auto& dependent_obj =
+              state.all_objs[state.obj_offsets[dependent_offset]];
             switch (dependent_obj.name.linkage) {
               case ObjectTypeName::Linkage::external:
                 dependent_obj.name.linkage = changed_obj.name.linkage;
@@ -891,7 +489,8 @@ void TypeParserImpl::fixTemplateLinkage() {
         }
         case ObjectTypeName::Linkage::none: {
           const auto process = [&](Dwarf_Off dependent_offset) {
-            auto& dependent_obj = m_all_objs[m_offsets[dependent_offset]];
+            auto& dependent_obj =
+              state.all_objs[state.obj_offsets[dependent_offset]];
             switch (dependent_obj.name.linkage) {
               case ObjectTypeName::Linkage::external:
               case ObjectTypeName::Linkage::internal:
@@ -908,7 +507,8 @@ void TypeParserImpl::fixTemplateLinkage() {
         }
         case ObjectTypeName::Linkage::pseudo: {
           const auto process = [&](Dwarf_Off dependent_offset) {
-            auto& dependent_obj = m_all_objs[m_offsets[dependent_offset]];
+            auto& dependent_obj =
+              state.all_objs[state.obj_offsets[dependent_offset]];
             switch (dependent_obj.name.linkage) {
               case ObjectTypeName::Linkage::external:
               case ObjectTypeName::Linkage::internal:
@@ -931,11 +531,12 @@ void TypeParserImpl::fixTemplateLinkage() {
 }
 
 Object TypeParserImpl::getObject(ObjectTypeKey key) {
-  auto iter = m_offsets.find(key.object_id);
+  auto const& state = stateForOffset(key.object_id);
+  auto iter = state.obj_offsets.find(key.object_id);
   // If we don't know of an object type at the given location, assume its
   // referring to something we never parsed in the first place, so return the
   // pseudo-type.
-  if (iter == m_offsets.end()) {
+  if (iter == state.obj_offsets.end()) {
     return Object{
       ObjectTypeName{
         Scope::s_pseudo_type_name,
@@ -953,7 +554,7 @@ Object TypeParserImpl::getObject(ObjectTypeKey key) {
     [&](Dwarf_Die die) {
       return genObject(
         die,
-        m_all_objs[iter->second].name,
+        state.all_objs[iter->second].name,
         key
       );
     }
@@ -966,22 +567,25 @@ Object TypeParserImpl::getObject(ObjectTypeKey key) {
  * specification, so they form a chain. Given a DIE, walk the specification
  * chain and return the offset of the actual type declaration.
  */
-folly::Optional<Dwarf_Off> TypeParserImpl::findSpecification(Dwarf_Die die,
+folly::Optional<Dwarf_Off> TypeParserImpl::findSpecification(DwarfState& dwarf,
+                                                             Dwarf_Die die,
                                                              bool first) {
   folly::Optional<Dwarf_Off> offset;
   bool is_inline = false;
-  m_dwarf.forEachAttribute(
+  dwarf.forEachAttribute(
     die,
     [&](Dwarf_Attribute attr) {
-      switch (m_dwarf.getAttributeType(attr)) {
+      switch (dwarf.getAttributeType(attr)) {
         case DW_AT_abstract_origin:
-          offset = m_dwarf.onDIEAtOffset(
-            m_dwarf.getAttributeValueRef(attr),
-            [&](Dwarf_Die die) { return findSpecification(die, false); }
+          offset = dwarf.onDIEAtOffset(
+            dwarf.getAttributeValueRef(attr),
+            [&](Dwarf_Die die2) {
+              return findSpecification(dwarf, die2, false);
+            }
           );
           break;
         case DW_AT_specification:
-          offset = m_dwarf.getAttributeValueRef(attr);
+          offset = dwarf.getAttributeValueRef(attr);
           break;
         case DW_AT_inline:
           is_inline = true;
@@ -1002,17 +606,22 @@ folly::Optional<Dwarf_Off> TypeParserImpl::findSpecification(Dwarf_Die die,
  * provided, the parent DIE is an object type, so template_params should be
  * filled with any template parameters in the child DIE.
  */
-void TypeParserImpl::genNames(Dwarf_Die die,
+void TypeParserImpl::genNames(StateBlock& state,
+                              DwarfState& dwarf,
+                              Dwarf_Die die,
                               Scope& scope,
                               std::vector<Dwarf_Off>* template_params) {
   const auto recurse = [&](std::vector<Dwarf_Off>* params = nullptr){
-    m_dwarf.forEachChild(
+    dwarf.forEachChild(
       die,
-      [&](Dwarf_Die child) { genNames(child, scope, params); return true; }
+      [&](Dwarf_Die child) {
+        genNames(state, dwarf, child, scope, params);
+        return true;
+      }
     );
   };
 
-  auto tag = m_dwarf.getTag(die);
+  auto tag = dwarf.getTag(die);
   switch (tag) {
     case DW_TAG_base_type:
     case DW_TAG_union_type:
@@ -1029,18 +638,18 @@ void TypeParserImpl::genNames(Dwarf_Die die,
         std::string linkage_name;
         bool incomplete = false;
 
-        m_dwarf.forEachAttribute(
+        dwarf.forEachAttribute(
           die,
           [&](Dwarf_Attribute attr) {
-            switch (m_dwarf.getAttributeType(attr)) {
+            switch (dwarf.getAttributeType(attr)) {
               case DW_AT_name:
-                name = m_dwarf.getAttributeValueString(attr);
+                name = dwarf.getAttributeValueString(attr);
                 break;
               case DW_AT_linkage_name:
-                linkage_name = m_dwarf.getAttributeValueString(attr);
+                linkage_name = dwarf.getAttributeValueString(attr);
                 break;
               case DW_AT_declaration:
-                incomplete = m_dwarf.getAttributeValueFlag(attr);
+                incomplete = dwarf.getAttributeValueFlag(attr);
                 break;
               default:
                 break;
@@ -1070,11 +679,11 @@ void TypeParserImpl::genNames(Dwarf_Die die,
         auto const first_member = [&](const char* type,
                                       Dwarf_Half member_type) {
           std::string first_member;
-          m_dwarf.forEachChild(
+          dwarf.forEachChild(
             die,
             [&](Dwarf_Die child) {
-              if (m_dwarf.getTag(child) == member_type) {
-                first_member = m_dwarf.getDIEName(child);
+              if (dwarf.getTag(child) == member_type) {
+                first_member = dwarf.getDIEName(child);
               }
               return first_member.empty();
             }
@@ -1133,7 +742,7 @@ void TypeParserImpl::genNames(Dwarf_Die die,
         );
       }();
 
-      auto offset = m_dwarf.getDIEOffset(die);
+      auto offset = dwarf.getDIEOffset(die);
       auto parent_offset = scope.typeOffset();
 
       // If we inferred a base name, use that to form the fully qualified name,
@@ -1144,7 +753,7 @@ void TypeParserImpl::genNames(Dwarf_Die die,
       SCOPE_EXIT { scope.pop(); };
 
       // Record this object type, with fully qualified name, key, and linkage.
-      m_all_objs.emplace_back(
+      state.all_objs.emplace_back(
         ObjectType{
           scope.name(),
           ObjectTypeKey{offset, scope.cuOffset()},
@@ -1160,10 +769,10 @@ void TypeParserImpl::genNames(Dwarf_Die die,
       recurse(&recurse_template_params);
 
       for (auto param_offset : recurse_template_params) {
-        m_linkage_dependents[param_offset].m_template_uses.emplace(offset);
+        state.linkage_dependents[param_offset].template_uses.emplace(offset);
       }
       if (parent_offset) {
-        m_linkage_dependents[*parent_offset].m_children.emplace(offset);
+        state.linkage_dependents[*parent_offset].children.emplace(offset);
       }
       break;
     }
@@ -1171,7 +780,7 @@ void TypeParserImpl::genNames(Dwarf_Die die,
       // Record the namespace in the scope and recurse. If this is an unnamed
       // namespace, that means any type found in child DIEs will have internal
       // linkage.
-      auto name = m_dwarf.getDIEName(die);
+      auto name = dwarf.getDIEName(die);
       name.empty() ?
         scope.pushUnnamedNamespace() :
         scope.pushNamespace(std::move(name));
@@ -1189,16 +798,16 @@ void TypeParserImpl::genNames(Dwarf_Die die,
 
       // Neither GCC nor Clang record a name for a variable which is a static
       // definition, so ignore any that do have a name. This speeds things up.
-      if (!m_dwarf.getDIEName(die).empty()) break;
+      if (!dwarf.getDIEName(die).empty()) break;
 
-      m_dwarf.forEachAttribute(
+      dwarf.forEachAttribute(
         die,
         [&](Dwarf_Attribute attr) {
-          switch (m_dwarf.getAttributeType(attr)) {
+          switch (dwarf.getAttributeType(attr)) {
             case DW_AT_specification:
-              m_static_definitions.emplace(
-                m_dwarf.getAttributeValueRef(attr),
-                m_dwarf.getDIEOffset(die)
+              state.static_definitions.emplace(
+                dwarf.getAttributeValueRef(attr),
+                dwarf.getDIEOffset(die)
               );
               return false;
             default:
@@ -1216,12 +825,12 @@ void TypeParserImpl::genNames(Dwarf_Die die,
       // DW_TAG_subprogram as well. Certain interesting aspects of a static
       // function are only present in its definition.
 
-      if (!m_dwarf.getDIEName(die).empty()) break;
+      if (!dwarf.getDIEName(die).empty()) break;
 
-      if (auto spec = findSpecification(die, true)) {
-        m_static_definitions.emplace(
+      if (auto spec = findSpecification(dwarf, die, true)) {
+        state.static_definitions.emplace(
           *spec,
-          m_dwarf.getDIEOffset(die)
+          dwarf.getDIEOffset(die)
         );
       }
 
@@ -1240,13 +849,13 @@ void TypeParserImpl::genNames(Dwarf_Die die,
       // vector with the template parameters. Don't recurse because there
       // shouldn't be anything interesting in the children.
       if (template_params) {
-        m_dwarf.forEachAttribute(
+        dwarf.forEachAttribute(
           die,
           [&](Dwarf_Attribute attr) {
-            switch (m_dwarf.getAttributeType(attr)) {
+            switch (dwarf.getAttributeType(attr)) {
               case DW_AT_type:
                 template_params->emplace_back(
-                  m_dwarf.getAttributeValueRef(attr)
+                  dwarf.getAttributeValueRef(attr)
                 );
                 return false;
               default:
@@ -1431,7 +1040,7 @@ Type TypeParserImpl::genType(Dwarf_Die die) {
   const auto recurse = [&](Dwarf_Off offset) {
     return m_dwarf.onDIEAtOffset(
       offset,
-      [&](Dwarf_Die die) { return genType(die); }
+      [&](Dwarf_Die die2) { return genType(die2); }
     );
   };
 
@@ -1446,8 +1055,9 @@ Type TypeParserImpl::genType(Dwarf_Die die) {
     case DW_TAG_enumeration_type:
     case DW_TAG_unspecified_type: {
       auto offset = m_dwarf.getDIEOffset(die);
-      auto iter = m_offsets.find(offset);
-      if (iter == m_offsets.end()) {
+      auto const& state = stateForOffset(offset);
+      auto iter = state.obj_offsets.find(offset);
+      if (iter == state.obj_offsets.end()) {
         // Must be the pseudo-type.
         return ObjectType{
           ObjectTypeName{
@@ -1458,7 +1068,7 @@ Type TypeParserImpl::genType(Dwarf_Die die) {
           true
         };
       } else {
-        return m_all_objs[iter->second];
+        return state.all_objs[iter->second];
       }
     }
     case DW_TAG_pointer_type:
@@ -1615,8 +1225,10 @@ Object::Member TypeParserImpl::genMember(Dwarf_Die die,
   if (is_static) {
     // If this is a static member, look up any definitions which refer to this
     // member, and pull any additional information out of it.
-    auto range = m_static_definitions.equal_range(m_dwarf.getDIEOffset(die));
-    auto count = std::distance(range.first, range.second);
+    auto const static_offset = m_dwarf.getDIEOffset(die);
+    auto const& state = stateForOffset(static_offset);
+    auto const range = state.static_definitions.equal_range(static_offset);
+    auto const count = std::distance(range.first, range.second);
 
     if (count > 1) {
       // Multiple definitions? Technically okay if their information isn't
@@ -1636,9 +1248,9 @@ Object::Member TypeParserImpl::genMember(Dwarf_Die die,
     if (count > 0) {
       m_dwarf.onDIEAtOffset(
         range.first->second,
-        [&](Dwarf_Die die) {
+        [&](Dwarf_Die die2) {
           m_dwarf.forEachAttribute(
-            die,
+            die2,
             [&](Dwarf_Attribute attr) {
               switch (m_dwarf.getAttributeType(attr)) {
                 case DW_AT_linkage_name:
@@ -1662,7 +1274,7 @@ Object::Member TypeParserImpl::genMember(Dwarf_Die die,
 
   auto type = m_dwarf.onDIEAtOffset(
     *die_offset,
-    [&](Dwarf_Die die){ return genType(die); }
+    [&](Dwarf_Die die2){ return genType(die2); }
   );
 
   if (name.empty()) {
@@ -1781,13 +1393,15 @@ Object::Function TypeParserImpl::genFunction(Dwarf_Die die) {
   // function in order to extract linkage information. Unlike static variables,
   // there can be multiple definitions, but we'll only take the first
   // information we see.
-  auto range = m_static_definitions.equal_range(m_dwarf.getDIEOffset(die));
+  auto const offset = m_dwarf.getDIEOffset(die);
+  auto const& state = stateForOffset(offset);
+  auto range = state.static_definitions.equal_range(offset);
   while (range.first != range.second) {
     m_dwarf.onDIEAtOffset(
       range.first->second,
-      [&](Dwarf_Die die) {
+      [&](Dwarf_Die die2) {
         m_dwarf.forEachAttribute(
-          die,
+          die2,
           [&](Dwarf_Attribute attr) {
             switch (m_dwarf.getAttributeType(attr)) {
               case DW_AT_linkage_name:
@@ -1898,7 +1512,7 @@ Object::Base TypeParserImpl::genBase(Dwarf_Die die,
   auto type =
     m_dwarf.onDIEAtOffset(
       *die_offset,
-      [&](Dwarf_Die die) { return genType(die); }
+      [&](Dwarf_Die die2) { return genType(die2); }
     );
 
   if (auto obj = type.asObject()) {
@@ -1939,7 +1553,7 @@ Object::TemplateParam TypeParserImpl::genTemplateParam(Dwarf_Die die) {
     die_offset ?
       m_dwarf.onDIEAtOffset(
         *die_offset,
-        [&](Dwarf_Die die){ return genType(die); }
+        [&](Dwarf_Die die2){ return genType(die2); }
       ) :
       VoidType{}
   };
@@ -2246,12 +1860,12 @@ private:
 }
 
 std::unique_ptr<TypeParser>
-make_dwarf_type_parser(const std::string& filename) {
-  return folly::make_unique<TypeParserImpl>(filename);
+make_dwarf_type_parser(const std::string& filename, int num_threads) {
+  return std::make_unique<TypeParserImpl>(filename, num_threads);
 }
 
 std::unique_ptr<Printer> make_dwarf_printer(const std::string& filename) {
-  return folly::make_unique<PrinterImpl>(filename);
+  return std::make_unique<PrinterImpl>(filename);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

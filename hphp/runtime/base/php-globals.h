@@ -70,7 +70,7 @@ Variant php_global(const StaticString&);
  *
  * Note that the $GLOBALS Array behaves a bit differently than normal
  * PHP arrays: it doesn't do COW, and you need to be much more careful
- * with things like lvalAt or getValueRef, since anything that can
+ * with things like lvalAt or rvalPos, since anything that can
  * invoke arbitrary php-code (e.g. a set invoking an object
  * destructor) could turn around and clobber your pointer, where
  * normally you were protected from that by the COW/value semantics of

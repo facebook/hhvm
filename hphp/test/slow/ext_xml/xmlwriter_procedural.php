@@ -9,6 +9,9 @@ function VERIFY($x) {
   VS($x, true);
 }
 
+
+<<__EntryPoint>>
+function main_xmlwriter_procedural() {
 $xml = xmlwriter_open_memory();
 var_dump($xml);
 VERIFY(xmlwriter_set_indent($xml, true));
@@ -78,3 +81,4 @@ VERIFY(xmlwriter_end_document($xml));
 
 var_dump(xmlwriter_flush($xml));
 var_dump(xmlwriter_output_memory($xml));
+}

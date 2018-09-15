@@ -9,4 +9,8 @@ function f() {
   $s = serialize($v);
   echo $s;
 }
+
+<<__EntryPoint>>
+function main_1864() {
 f();
+}

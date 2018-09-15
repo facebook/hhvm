@@ -20,6 +20,7 @@
 #include "hphp/parser/location.h"
 
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/named-entity.h"
@@ -27,16 +28,20 @@
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/type-alias.h"
 
+#include "hphp/util/compact-vector.h"
 #include "hphp/util/fixed-vector.h"
 #include "hphp/util/functional.h"
-#include "hphp/util/hash-map-typedefs.h"
+#include "hphp/util/hash-map.h"
+#include "hphp/util/lock-free-ptr-wrapper.h"
 #include "hphp/util/md5.h"
 #include "hphp/util/mutex.h"
+#include "hphp/util/service-data.h"
 
 #include <map>
 #include <ostream>
 #include <string>
 #include <vector>
+#include <atomic>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,6 +53,7 @@ struct Func;
 struct PreClass;
 struct String;
 struct StringData;
+struct UnitExtended;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Unit enums.
@@ -164,11 +170,11 @@ private:
  */
 using LineEntry      = TableEntry<int>;
 using SourceLocEntry = TableEntry<SourceLoc>;
-using FuncEntry      = TableEntry<const Func*>;
+using LineInfo       = std::pair<OffsetRange, int>;
 
 using LineTable      = std::vector<LineEntry>;
 using SourceLocTable = std::vector<SourceLocEntry>;
-using FuncTable      = std::vector<FuncEntry>;
+using FuncTable      = CompactVector<const Func*>;
 
 /*
  * Get the line number or SourceLoc for Offset `pc' in `table'.
@@ -176,8 +182,14 @@ using FuncTable      = std::vector<FuncEntry>;
 int getLineNumber(const LineTable& table, Offset pc);
 bool getSourceLoc(const SourceLocTable& table, Offset pc, SourceLoc& sLoc);
 void stashLineTable(const Unit* unit, LineTable table);
+void stashExtendedLineTable(const Unit* unit, SourceLocTable table);
 
 const SourceLocTable& getSourceLocTable(const Unit*);
+
+/*
+ * Sum of all Unit::m_bclen
+ */
+extern ServiceData::ExportedTimeSeries* g_hhbc_size;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -190,6 +202,7 @@ const SourceLocTable& getSourceLocTable(const Unit*);
  * required.
  */
 struct Unit {
+  friend struct UnitExtended;
   friend struct UnitEmitter;
   friend struct UnitRepoProxy;
 
@@ -318,7 +331,6 @@ public:
   void* operator new(size_t sz);
   void operator delete(void* p, size_t sz);
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Basic accessors.                                                   [const]
 
@@ -339,6 +351,10 @@ public:
   const StringData* filepath() const;
   const StringData* dirpath() const;
 
+  /*
+   * Was this unit created in response to an internal compiler error?
+   */
+  bool isICE() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Bytecode.                                                          [const]
@@ -364,7 +380,6 @@ public:
    * Get the Op at `instrOffset'.
    */
   Op getOp(Offset instrOffset) const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Code locations.                                                    [const]
@@ -406,7 +421,6 @@ public:
    */
   const Func* getFunc(Offset pc) const;
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Litstrs and NamedEntitys.                                          [const]
 
@@ -433,8 +447,7 @@ public:
    */
   StringData* lookupLitstrId(Id id) const;
   const NamedEntity* lookupNamedEntityId(Id id) const;
-  const NamedEntityPair& lookupNamedEntityPairId(Id id) const;
-
+  NamedEntityPair lookupNamedEntityPairId(Id id) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Arrays.                                                            [const]
@@ -449,6 +462,10 @@ public:
    */
   const ArrayData* lookupArrayId(Id id) const;
 
+  /*
+   * Look up a RepoAuthType::Array by ID
+   */
+   const RepoAuthType::Array* lookupArrayTypeId(Id id) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Funcs and PreClasses.                                              [const]
@@ -474,6 +491,8 @@ public:
    */
   Func* getMain(Class* cls) const;
 
+  // Return the cached EntryPoint
+  Func* getCachedEntryPoint() const;
   /*
    * The first hoistable Func in the Unit.
    *
@@ -498,35 +517,41 @@ public:
   // Func lookup.                                                      [static]
 
   /*
+   * Define `func' for this request by initializing its RDS handle.
+   */
+  static void defFunc(Func* func, bool debugger);
+
+  /*
    * Look up the defined Func in this request with name `name', or with the name
-   * mapped to the NamedEntity `ne'. The `DynCall` variants are used in dynamic
-   * call contexts. They behave the same as the normal functions, but return the
-   * dynamic call wrapper for the function, if present.
+   * mapped to the NamedEntity `ne'.
    *
    * Return nullptr if the function is not yet defined in this request.
    */
   static Func* lookupFunc(const NamedEntity* ne);
   static Func* lookupFunc(const StringData* name);
-  static Func* lookupDynCallFunc(const StringData* name);
 
   /*
    * Look up, or autoload and define, the Func in this request with name `name',
-   * or with the name mapped to the NamedEntity `ne'. The `DynCall` variants are
-   * used in dynamic call contexts. They behave the same as the normal
-   * functions, but return the dynamic call wrapper for the function, if
-   * present.
+   * or with the name mapped to the NamedEntity `ne'.
    *
    * @requires: NamedEntity::get(name) == ne
    */
   static Func* loadFunc(const NamedEntity* ne, const StringData* name);
   static Func* loadFunc(const StringData* name);
-  static Func* loadDynCallFunc(const StringData* name);
 
   /*
-   * Load or reload `func'---i.e., bind (or rebind) it to the NamedEntity
-   * corresponding to its name.
+   * bind (or rebind) a func to the NamedEntity corresponding to its
+   * name.
    */
-  static void loadFunc(const Func* func);
+  static void bindFunc(Func* func);
+
+  /*
+   * Lookup the builtin in this request with name `name', or nullptr if none
+   * exists. This does not access RDS so it is safe to use from within the
+   * compiler. Note that does not mean imply that the name binding for the
+   * builtin is immutable. The builtin could be renamed or intercepted.
+   */
+  static Func* lookupBuiltin(const StringData* name);
 
   /////////////////////////////////////////////////////////////////////////////
   // Class lookup.                                                     [static]
@@ -549,12 +574,15 @@ public:
   static Class* defClosure(const PreClass* preClass);
 
   /*
-   * Set the NamedEntity for `alias' to refer to the Class `original' in this
+   * Set the NamedEntity for `alias' to refer to the class `original' in this
    * request.
    *
-   * Raises a warning if `alias' already refers to a Class in this request.
+   * Raises a warning and returns false if `alias' already refers to a
+   * Class in this request, or if original is not loaded, and autoload
+   * is false, or it can't be autoloaded. Returns true otherwise.
    */
-  static bool aliasClass(Class* original, const StringData* alias);
+  static bool aliasClass(const StringData* original, const StringData* alias,
+                         bool autoload);
 
   /*
    * Look up the Class in this request with name `name', or with the name
@@ -608,7 +636,6 @@ public:
   static bool classExists(const StringData* name,
                           bool autoload, ClassKind kind);
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Constant lookup.                                                  [static]
 
@@ -618,7 +645,7 @@ public:
    *
    * Return nullptr if no such constant is defined.
    */
-  static const Cell* lookupCns(const StringData* cnsName);
+  static tv_rval lookupCns(const StringData* cnsName);
 
   /*
    * Look up the value of the persistent constant with name `cnsName'.
@@ -632,7 +659,7 @@ public:
    * Look up, or autoload and define, the value of the constant with name
    * `cnsName' for this request.
    */
-  static const Cell* loadCns(const StringData* cnsName);
+  static tv_rval loadCns(const StringData* cnsName);
 
   /*
    * Define a constant (either request-local or persistent) with name `cnsName'
@@ -641,19 +668,16 @@ public:
    * May raise notices or warnings if a constant with the given name is already
    * defined or if value is invalid.
    */
-  static bool defCns(const StringData* cnsName, const TypedValue* value,
-                     bool persistent = false);
+  static bool defCns(const StringData* cnsName, const TypedValue* value);
 
-  using SystemConstantCallback = const Variant& (*)();
   /*
-   * Define a constant with name `cnsName' which stores an arbitrary data
-   * pointer in its TypedValue (with datatype KindOfUnit).
+   * Define a constant with name `cnsName' with a magic callback. The
+   * Cell should be KindOfUninit, with a Native::ConstantCallback in
+   * its m_data.pref.
    *
    * The canonical examples are STDIN, STDOUT, and STDERR.
    */
-  static bool defSystemConstantCallback(const StringData* cnsName,
-                                        SystemConstantCallback callback);
-
+  static bool defNativeConstantCallback(const StringData* cnsName, Cell cell);
 
   /////////////////////////////////////////////////////////////////////////////
   // Type aliases.
@@ -661,14 +685,33 @@ public:
   folly::Range<TypeAlias*> typeAliases();
   folly::Range<const TypeAlias*> typeAliases() const;
 
-  static const TypeAliasReq* loadTypeAlias(const StringData* name);
+  /*
+   * Look up without autoloading a type alias named `name'. Returns nullptr
+   * if one cannot be found.
+   *
+   * If the type alias is found and `persistent' is provided, it will be set to
+   * whether or not the TypeAliasReq's RDS handle is persistent.
+   */
+  static const TypeAliasReq* lookupTypeAlias(const StringData* name,
+                                             bool* persistent = nullptr);
+
+  /*
+   * Look up or attempt to autoload a type alias named `name'. Returns nullptr
+   * if one cannot be found or autoloaded.
+   *
+   * If the type alias is found and `persistent' is provided, it will be set to
+   * whether or not the TypeAliasReq's RDS handle is persistent.
+   */
+  static const TypeAliasReq* loadTypeAlias(const StringData* name,
+                                           bool* persistent = nullptr);
 
   /*
    * Define the type alias given by `id', binding it to the appropriate
    * NamedEntity for this request.
+   *
+   * returns true iff the bound type alias is persistent.
    */
-  void defTypeAlias(Id id);
-
+  bool defTypeAlias(Id id);
 
   /////////////////////////////////////////////////////////////////////////////
   // Merge.
@@ -690,12 +733,12 @@ public:
   bool isEmpty() const;
 
   /*
-   * Get the return value of the pseudomain, or KindOfUnit if not known.
+   * Get the return value of the pseudomain, or KindOfUninit if not
+   * known.
    *
    * @requires: isMergeOnly()
    */
   const TypedValue* getMainReturn() const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Info arrays.                                                      [static]
@@ -712,7 +755,6 @@ public:
    */
   static Array getUserFunctions();
   static Array getSystemFunctions();
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Pretty printer.                                                    [const]
@@ -756,7 +798,6 @@ public:
 
   void prettyPrint(std::ostream&, PrintOpts = PrintOpts()) const;
   std::string toString() const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Other methods.
@@ -804,6 +845,22 @@ public:
    */
   bool useStrictTypes() const;
 
+  /*
+   * Should calls from this unit to builtins use strict types?
+   *
+   * This is true for PHP7 files with declare(strict_types=1), but not for Hack
+   * files or force_hh */
+  bool useStrictTypesForBuiltins() const;
+
+  UserAttributeMap metaData() const;
+
+  // Return true, and set the m_serialized flag, iff this Unit hasn't
+  // been serialized yet (see prof-data-serialize.cpp).
+  bool serialize() const {
+    if (m_serialized) return false;
+    const_cast<Unit*>(this)->m_serialized = true;
+    return true;
+  }
 
   /////////////////////////////////////////////////////////////////////////////
   // Offset accessors.                                                 [static]
@@ -812,15 +869,18 @@ public:
     return offsetof(Unit, m_bc);
   }
 
-
   /////////////////////////////////////////////////////////////////////////////
   // Internal methods.
 
 private:
   void initialMerge();
   template<bool debugger>
-  void mergeImpl(void* tcbase, MergeInfo* mi);
-
+  void mergeImpl(MergeInfo* mi);
+  UnitExtended* getExtended();
+  const UnitExtended* getExtended() const;
+  MergeInfo* mergeInfo() const {
+    return m_mergeInfo.load(std::memory_order_acquire);
+  }
 
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
@@ -831,23 +891,32 @@ private:
   unsigned char const* m_bc{nullptr};
   Offset m_bclen{0};
   LowStringPtr m_filepath{nullptr};
-  MergeInfo* m_mergeInfo{nullptr};
+  std::atomic<MergeInfo*> m_mergeInfo{nullptr};
 
   int8_t m_repoId{-1};
   /*
    * m_mergeState is read without a lock, but only written to under
    * unitInitLock (see unit.cpp).
    */
-  uint8_t m_mergeState{MergeState::Unmerged};
+  std::atomic<uint8_t> m_mergeState{MergeState::Unmerged};
   bool m_mergeOnly: 1;
   bool m_interpretOnly : 1;
   bool m_isHHFile : 1;
   bool m_useStrictTypes : 1;
+  bool m_useStrictTypesForBuiltins : 1;
+  bool m_extended : 1;
+  bool m_serialized : 1;
+  bool m_ICE : 1; // was this unit the result of an internal compiler error
   LowStringPtr m_dirpath{nullptr};
 
   TypedValue m_mainReturn;
-  std::vector<PreClassPtr> m_preClasses;
+  CompactVector<PreClassPtr> m_preClasses;
   FixedVector<TypeAlias> m_typeAliases;
+  /*
+   * Cached the EntryPoint for an unit, since compactMergeInfo() inside of
+   * mergeImpl will drop the original EP.
+   */
+  Func* m_cachedEntryPoint{nullptr};
 
   /*
    * The remaining fields are cold, and arbitrarily ordered.
@@ -855,10 +924,21 @@ private:
 
   int64_t m_sn{-1};             // Note: could be 32-bit
   MD5 m_md5;
-  NamedEntityPairTable m_namedInfo;
   FixedVector<const ArrayData*> m_arrays;
-  FuncTable m_funcTable;
   mutable PseudoMainCacheMap* m_pseudoMainCache{nullptr};
+  mutable LockFreePtrWrapper<CompactVector<LineInfo>> m_lineMap;
+  UserAttributeMap m_metaData;
+};
+
+struct UnitExtended : Unit {
+  friend struct Unit;
+  friend struct UnitEmitter;
+
+  UnitExtended() { m_extended = true; }
+
+  NamedEntityPairTable m_namedInfo;
+  ArrayTypeTable m_arrayTypeTable;
+  FuncTable m_funcTable;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

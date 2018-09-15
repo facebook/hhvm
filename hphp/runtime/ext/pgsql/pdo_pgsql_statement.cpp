@@ -317,19 +317,22 @@ bool PDOPgSqlStatement::fetcher(PDOFetchOrientation ori, long offset){
   }
 }
 
+const StaticString
+  s_pgsql_oid("pgsql:oid"),
+  s_native_type("native_type");
 
 bool PDOPgSqlStatement::getColumnMeta(int64_t colno, Array &return_value){
-  if (!m_result){
+  if (!m_result) {
     return false;
   }
 
-  if(colno < 0 || colno >= column_count){
+  if (colno < 0 || colno >= column_count){
     return false;
   }
 
   Oid coltype = m_pgsql_column_types[colno];
 
-  return_value.add(String("pgsql:oid"), (long)coltype);
+  return_value.set(s_pgsql_oid, (long)coltype);
 
   auto q = std::string("SELECT TYPNAME FROM PG_TYPE WHERE OID=") +
            std::to_string(coltype);
@@ -338,15 +341,15 @@ bool PDOPgSqlStatement::getColumnMeta(int64_t colno, Array &return_value){
 
   ExecStatusType status = res.status();
 
-  if(status != PGRES_TUPLES_OK){
+  if (status != PGRES_TUPLES_OK){
     return true;
   }
 
-  if(res.numTuples() != 1){
+  if (res.numTuples() != 1){
     return true;
   }
 
-  return_value.add(String("native_type"), String(res.getValue(0, 0)));
+  return_value.set(s_native_type, String(res.getValue(0, 0)));
 
   return true;
 }
@@ -390,6 +393,10 @@ bool PDOPgSqlStatement::getColumn(int colno, Variant &value){
       return true;
   }
 }
+
+const StaticString
+  s_t("t"),
+  s_f("f");
 
 bool PDOPgSqlStatement::paramHook(
   PDOBoundParam* param, PDOParamEvent event_type
@@ -469,7 +476,7 @@ bool PDOPgSqlStatement::paramHook(
             // Sadly we need to convert this to a 'real' pgsql boolean literal,
             // ie a string
             param_vals[param->paramno] =
-              param->parameter.asBooleanVal() ? Variant("t") : Variant("f");
+              param->parameter.asBooleanVal() ? Variant(s_t) : Variant(s_f);
             param_ls[param->paramno] = 1;
             param_fs[param->paramno] = 0;
           } else {
@@ -498,7 +505,7 @@ bool PDOPgSqlStatement::paramHook(
       ){
         param->param_type = PDO_PARAM_STR;
         param->parameter =
-          param->parameter.asBooleanVal() ? String("t") : String("f");
+          param->parameter.asBooleanVal() ? String(s_t) : String(s_f);
       }
     }
   }

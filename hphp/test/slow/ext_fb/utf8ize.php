@@ -1,5 +1,6 @@
 <?php
 
+
 // This string includes an invalid UTF-8 sequence.  The first byte
 // suggests this is a three-byte UTF-8 sequence, but it's not valid.
 //
@@ -12,6 +13,8 @@
 // followed by a valid ASCII character.  An ICU-based fb_utf8ize()
 // implementation will transform the three bytes to the two code point
 // sequence \xef\xbf\xbd\x28.
+<<__EntryPoint>>
+function main_utf8ize() {
 $INVALID_UTF_8_STRING = "\xe2\x82\x28";
 
 $s = "hon\xE7k";
@@ -61,3 +64,4 @@ var_dump(fb_utf8_strlen($s));
 fb_utf8ize($s);
 var_dump(strlen($s));
 var_dump(fb_utf8_strlen($s));
+}

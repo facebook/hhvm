@@ -5,8 +5,7 @@ function block() { // simulates blocking I/O
     RescheduleWaitHandle::QUEUE_NO_PENDING_IO,
     1,
   );
-};
-
+}
 class CWithClosures {
   public function __construct(private $a) {}
 
@@ -16,7 +15,7 @@ class CWithClosures {
       var_dump($args);
       var_dump($a);
       var_dump($this->a);
-      $this->variadic($a, $this->a, reset($args));
+      $this->variadic($a, $this->a, reset(&$args));
     };
     $f('a', 'b');
   }
@@ -50,4 +49,9 @@ function main() {
   $c = new CWithClosures('prop-a');
   $c->test('a');
 }
+
+<<__EntryPoint>>
+function main_closures() {
+;
 main();
+}

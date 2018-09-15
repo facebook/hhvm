@@ -173,8 +173,8 @@ struct ShmopRequestLocal final : RequestEventHandler {
   ShmRec* findShm(const char* functionName, int64_t shmid) {
     auto const it = m_records.find(shmid);
     if (it == m_records.end()) {
-      raise_warning("%s(): no shared memory segment with an id of [%ld]",
-                    functionName, shmid);
+      raise_warning("%s(): no shared memory segment with an id of"
+                    " [%" PRId64 "]", functionName, shmid);
       return nullptr;
     } else {
       return it->second.get();
@@ -186,7 +186,7 @@ struct ShmopRequestLocal final : RequestEventHandler {
     // still valid when we use it but this way it's unique per process (although
     // it may get reused).
     int64_t shmid = reinterpret_cast<ssize_t>(p.get());
-    assert(LIKELY(m_records.find(shmid) == m_records.end()));
+    assertx(LIKELY(m_records.find(shmid) == m_records.end()));
     m_records.emplace(shmid, std::move(p));
     return shmid;
   }
@@ -219,7 +219,7 @@ Variant HHVM_FUNCTION(shmop_open,
                              int64_t mode,
                              int64_t size) {
 
-  auto shminfo = folly::make_unique<ShmRec>();
+  auto shminfo = std::make_unique<ShmRec>();
   if (!shminfo->open(key, flags.get(), mode, size)) {
     return Variant(false);
   }

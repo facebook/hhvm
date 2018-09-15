@@ -97,9 +97,6 @@ flood error logs.
     CoreFileSize = 0           # in bytes
     MaxSocket = 0
     SocketDefaultTimeout = 60  # in seconds
-    MaxRSS = 0
-    MaxRSSPollingCycle = 0     # in seconds, how often to check max memory
-    DropCacheCycle = 0         # in seconds, how often to drop disk cache
     MaxSQLRowCount = 0
     SerializationSizeLimit = 0
   }

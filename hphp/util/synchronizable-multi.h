@@ -39,8 +39,9 @@ struct SynchronizableMulti {
    * calling wait().
    */
   enum Priority {
+    Highest,
     High,
-    Middle,
+    Normal,
     Low
   };
   /**
@@ -80,8 +81,7 @@ struct SynchronizableMulti {
 
   std::vector<CondVarNode> m_conds;
 
-  // List with push_middle, to support three priorities.  It is implemented
-  // using two intrusive lists.
+  // List that supports four priorities, implemented using two intrusive lists.
   struct alignas(64) CondVarList {
     CondVarList() = default;
 
@@ -97,17 +97,18 @@ struct SynchronizableMulti {
       else m_midLowPriList.pop_front();
     }
 
-    void push_front(CondVarNode& c) {
+    void push(CondVarNode& c, SynchronizableMulti::Priority pri) {
       c.unlink();
-      m_highPriList.push_front(c);
-    }
-    void push_middle(CondVarNode& c) {
-      c.unlink();
-      m_midLowPriList.push_front(c);
-    }
-    void push_back(CondVarNode& c) {
-      c.unlink();
-      m_midLowPriList.push_back(c);
+      if (pri == Priority::Highest) {
+        m_highPriList.push_front(c);
+      } else if (pri == Priority::High) {
+        m_highPriList.push_back(c);
+      } else if (pri == Priority::Normal) {
+        m_midLowPriList.push_front(c);
+      } else {
+        assertx(pri == Priority::Low);
+        m_midLowPriList.push_back(c);
+      }
     }
 
    private:

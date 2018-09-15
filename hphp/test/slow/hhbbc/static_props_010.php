@@ -16,5 +16,9 @@ class x {
   }
 }
 
+
+<<__EntryPoint>>
+function main_static_props_010() {
 (new x)->get();
 x::go();
+}

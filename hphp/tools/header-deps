@@ -1,0 +1,178 @@
+#!/usr/bin/env php
+<?hh
+
+function usage($name) {
+  $format = <<<EOT
+Usage: %s [--dot] <filename>
+
+This script looks for cycles in the include graph rooted at the given file,
+printing them if any are found. The return status is 0 if no cycles are found,
+and 1 otherwise. filename should be a path to any .h or .cpp file within hphp/,
+relative to cwd.
+
+The logic to search for includes is very naive, and doesn't pay attention to
+#ifdefs.
+
+If --dot is given, the header graph will be dumped as a dot graph instead,
+suitable for piping to something like `dot -T pdf -o out.pdf`. The leading
+hphp/ is stripped from filenames in this mode for readability. Files outside of
+hphp/ are treated as system includes and ignored.
+
+EOT;
+  fprintf(STDERR, $format, $name);
+  exit(1);
+}
+
+// Return an array of all headers included by $file, and whether or not it's a
+// system include (we treat anything outside of hphp/ as system for the
+// purposes of this tool).
+function get_file_headers($file) {
+  $headers = [];
+  if (!is_readable($file)) {
+    fprintf(STDERR, "File %s does not exist\n", $file);
+    exit(1);
+  }
+
+  $f = fopen($file, 'r');
+  while ($line = fgets($f)) {
+    $line = trim($line);
+    if (preg_match(
+          '/^\s*#include ([<"])(.+)[>"]\s*$/', $line, &$matches
+        ) !== 1) {
+      continue;
+    }
+    $file = $matches[2];
+    // Some files are build artifacts that don't live in the source tree. Treat
+    // them as system files.
+    $fake_systems = [
+      'hphp/runtime/ir-opcode-generated.h' => true,
+      'hphp/util/hphp-config.h' => true,
+      'd6bb57672e27b8acd36563390cf86f2a4b111aed' => true,
+    ];
+    $system = strpos($file, 'hphp/') !== 0 ||
+      isset($fake_systems[$file]) || isset($fake_systems[sha1($file)]);
+    $headers[] = [
+      'file' => $file,
+      'system' => $system,
+    ];
+  }
+  fclose($f);
+  return $headers;
+}
+
+function go_deps($file, &$visited, &$edges) {
+  if (isset($visited[$file])) return;
+  $visited[$file] = true;
+
+  foreach (get_file_headers($file) as $header) {
+    if ($header['system']) continue;
+    $target = $header['file'];
+    $edges[$file][] = $target;
+    if (!$header['system']) go_deps($target, &$visited, &$edges);
+  }
+}
+
+// Return the graph of header dependencies rooted at $file, as an array of
+// edges: [$from => [$dep1, $dep2, ...], ...].
+function get_all_deps(...$files) {
+  $visited = [];
+  $edges = [];
+  foreach ($files as $file) {
+    go_deps($file, &$visited, &$edges);
+  }
+  return $edges;
+}
+
+// Return $s with an optional leading hphp/ stripped.
+function strip_hphp($s) {
+  return preg_replace('/^hphp\//', '', $s);
+}
+
+// Generate a dot graph from the output of get_all_deps().
+function make_dot_deps($deps) {
+  $ret = "digraph {\n";
+  foreach ($deps as $src => $headers) {
+    foreach ($headers as $dst) {
+      $ret .= sprintf("  \"%s\" -> \"%s\";\n",
+                      strip_hphp($src), strip_hphp($dst));
+    }
+  }
+  $ret .= "}\n";
+  return $ret;
+}
+
+// Find cycles using DFS with a stack representing the current path from the
+// root.
+function go_cycles($file, $deps, &$visited, &$stack, &$found) {
+  $it = array_search($file, $stack);
+  if ($it !== false) {
+    $cycle = array_slice($stack, $it);
+    $cycle[] = $file;
+    if (!isset($found[$file]) ||
+        array_search($cycle, $found[$file]) === false) {
+        $found[$file][] = $cycle;
+      }
+    return;
+  }
+
+  if (isset($visited[$file])) return;
+  $visited[$file] = true;
+
+  if (!isset($deps[$file])) return;
+
+  $stack[] = $file;
+  foreach ($deps[$file] as $dep) {
+    go_cycles($dep, $deps, &$visited, &$stack, &$found);
+  }
+  array_pop(&$stack);
+}
+
+// Look for cycles in the output of get_all_deps(). Return an array with all
+// unique cycles.
+function find_cycles($deps) {
+  $visited = [];
+  $stack = [];
+  $found = [];
+  foreach ($deps as $src => $headers) {
+    go_cycles($src, $deps, &$visited, &$stack, &$found);
+  }
+  return $found;
+}
+
+function main($argv) {
+  if (count($argv) < 2 ||
+      in_array('-h', $argv) || in_array('--help', $argv)) {
+    usage($argv[0]);
+  }
+
+  $do_dot = $argv[1] === '--dot';
+
+  // Canonicalize $file in case it wasn't give relative to hphp/'s parent,
+  // where we want to work from.
+  $files = array_map(
+    $f ==> is_readable($f) ? realpath($f) : $f
+        |> preg_replace('/.+\/hphp\//', 'hphp/', $$),
+    array_slice($argv, $do_dot ? 2 : 1)
+  );
+  chdir(preg_replace('/\/hphp\/.*/', '', __DIR__));
+  $deps = get_all_deps(...$files);
+
+  if ($argv[1] === '--dot') {
+    echo make_dot_deps($deps);
+    return 0;
+  }
+
+  $cycles = find_cycles($deps);
+  foreach ($cycles as $root => $list) {
+    printf("%d cycles starting at %s:\n", count($list), $root);
+    foreach ($list as $cycle) {
+      foreach ($cycle as $elem) {
+        printf("  %s\n", $elem);
+      }
+      printf("\n");
+    }
+  }
+  return empty($cycles) ? 0 : 1;
+}
+
+exit(main($argv));

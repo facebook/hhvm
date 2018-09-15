@@ -1,2 +1,4 @@
 File "call_time_reference1.php", line 4, characters 12-14:
-Call-time pass-by-reference is not allowed (Parsing[1006])
+This argument should not be annotated with & (Typing[4181])
+File "call_time_reference1.php", line 3, characters 19-20:
+Because this parameter is passed by value

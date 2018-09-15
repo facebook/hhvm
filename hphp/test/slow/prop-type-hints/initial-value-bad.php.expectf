@@ -1,0 +1,358 @@
+Warning: Property 'A::p1' declared as type int, string assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p2' declared as type string, int assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p3' declared as type bool, int assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p4' declared as type float, bool assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p5' declared as type array, HH\vec assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p6' declared as type resource, null assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p7' declared as type nonnull, null assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p8' declared as type num, bool assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p9' declared as type arraykey, HH\keyset assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p10' declared as type HH\vec, HH\dict assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p11' declared as type HH\dict, HH\vec assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p12' declared as type HH\keyset, HH\vec assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p13' declared as type HH\vec_or_dict, array assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p14' declared as type HH\arraylike, null assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p15' declared as type HH\varray, HH\vec assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p16' declared as type HH\darray, HH\dict assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p17' declared as type HH\varray_or_darray, HH\vec assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p20' declared as type Enum1, int assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p21' declared as type Enum2, string assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p22' declared as type Enum3, bool assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p23' declared as type Alias1, string assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p24' declared as type Alias2, int assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p25' declared as type Alias3, int assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p26' declared as type Alias4, string assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p28' declared as type Alias7, bool assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p29' declared as type Alias8, bool assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p30' declared as type Alias9, int assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p32' declared as type Alias11, string assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p33' declared as type CondAlias, string assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p34' declared as type CondEnum1, string assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p35' declared as type HH\Traversable, int assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p36' declared as type HH\Traversable, bool assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p37' declared as type HH\Traversable, float assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p38' declared as type Alias12, int assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p39' declared as type Alias12, bool assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p40' declared as type Alias12, float assigned in %s/initial-value-bad.php on line 227
+
+Warning: Property 'A::p18' declared as type HH\Vector, HH\Map assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p19' declared as type HH\Map, HH\Vector assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p27' declared as type Alias6, HH\Map assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p31' declared as type Alias10, HH\Map assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p41' declared as type int, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p42' declared as type string, int assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p43' declared as type HH\Vector, HH\Map assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p44' declared as type HH\Map, HH\Vector assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p45' declared as type arraykey, bool assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p46' declared as type HH\vec, HH\keyset assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p47' declared as type HH\dict, array assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p48' declared as type array, HH\vec assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p49' declared as type Enum1, int assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p50' declared as type Enum2, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p51' declared as type Enum3, HH\vec assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p52' declared as type Alias1, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p53' declared as type Alias2, int assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p54' declared as type Alias3, int assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p55' declared as type Alias4, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p56' declared as type Alias5, HH\vec assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p57' declared as type Alias6, HH\Pair assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p58' declared as type Alias7, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p59' declared as type Alias8, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p60' declared as type Alias9, int assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p61' declared as type Alias10, HH\Pair assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p62' declared as type Alias11, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p63' declared as type CondAlias, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p64' declared as type CondEnum1, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p65' declared as type int, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p66' declared as type string, int assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p67' declared as type HH\Vector, HH\Pair assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p68' declared as type HH\Map, HH\Vector assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p69' declared as type arraykey, HH\vec assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p70' declared as type HH\vec, HH\keyset assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p71' declared as type HH\dict, HH\vec assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p72' declared as type array, HH\vec assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p73' declared as type Enum1, int assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p74' declared as type Enum2, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p75' declared as type Enum3, HH\vec assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p76' declared as type Alias1, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p77' declared as type Alias2, int assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p78' declared as type Alias3, int assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p79' declared as type Alias4, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p80' declared as type Alias6, HH\Pair assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p81' declared as type Alias7, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p82' declared as type Alias8, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p83' declared as type Alias9, int assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p84' declared as type Alias10, HH\Pair assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p85' declared as type Alias11, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p86' declared as type CondAlias, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'A::p87' declared as type CondEnum1, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s1' declared as type int, string assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s2' declared as type string, int assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s3' declared as type bool, int assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s4' declared as type float, bool assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s5' declared as type array, HH\vec assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s6' declared as type resource, null assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s7' declared as type nonnull, null assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s8' declared as type num, bool assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s9' declared as type arraykey, HH\keyset assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s10' declared as type HH\vec, HH\dict assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s11' declared as type HH\dict, HH\vec assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s12' declared as type HH\keyset, HH\vec assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s13' declared as type HH\vec_or_dict, array assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s14' declared as type HH\arraylike, null assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s15' declared as type HH\varray, HH\vec assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s16' declared as type HH\darray, HH\dict assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s17' declared as type HH\varray_or_darray, HH\vec assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s20' declared as type Enum1, int assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s21' declared as type Enum2, string assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s22' declared as type Enum3, bool assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s23' declared as type Alias1, string assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s24' declared as type Alias2, int assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s25' declared as type Alias3, int assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s26' declared as type Alias4, string assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s28' declared as type Alias7, bool assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s29' declared as type Alias8, bool assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s30' declared as type Alias9, int assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s32' declared as type Alias11, string assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s33' declared as type CondAlias, string assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s34' declared as type CondEnum1, string assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s35' declared as type HH\Traversable, int assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s36' declared as type HH\Traversable, bool assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s37' declared as type HH\Traversable, float assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s38' declared as type Alias12, int assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s39' declared as type Alias12, bool assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s40' declared as type Alias12, float assigned in %s/initial-value-bad.php on line 227
+
+Warning: Static property 'A::s18' declared as type HH\Vector, HH\Map assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s19' declared as type HH\Map, HH\Vector assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s27' declared as type Alias6, HH\Map assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s31' declared as type Alias10, HH\Map assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s41' declared as type int, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s42' declared as type string, int assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s43' declared as type HH\Vector, HH\Map assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s44' declared as type HH\Map, HH\Vector assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s46' declared as type HH\vec, HH\keyset assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s47' declared as type HH\dict, array assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s48' declared as type array, HH\vec assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s49' declared as type Enum1, int assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s50' declared as type Enum2, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s51' declared as type Enum3, HH\vec assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s52' declared as type Alias1, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s53' declared as type Alias2, int assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s54' declared as type Alias3, int assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s55' declared as type Alias4, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s56' declared as type Alias5, HH\vec assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s57' declared as type Alias6, HH\Pair assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s58' declared as type Alias7, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s59' declared as type Alias8, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s60' declared as type Alias9, int assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s61' declared as type Alias10, HH\Pair assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s62' declared as type Alias11, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s63' declared as type CondAlias, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s64' declared as type CondEnum1, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s65' declared as type int, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s66' declared as type string, int assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s67' declared as type HH\Vector, HH\Pair assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s68' declared as type HH\Map, HH\Vector assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s69' declared as type arraykey, HH\vec assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s70' declared as type HH\vec, HH\keyset assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s71' declared as type HH\dict, HH\vec assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s72' declared as type array, HH\vec assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s73' declared as type Enum1, int assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s74' declared as type Enum2, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s75' declared as type Enum3, HH\vec assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s76' declared as type Alias1, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s77' declared as type Alias2, int assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s78' declared as type Alias3, int assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s79' declared as type Alias4, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s80' declared as type Alias6, HH\Pair assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s81' declared as type Alias7, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s82' declared as type Alias8, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s83' declared as type Alias9, int assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s84' declared as type Alias10, HH\Pair assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s85' declared as type Alias11, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s86' declared as type CondAlias, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Static property 'A::s87' declared as type CondEnum1, string assigned in %s/initial-value-bad.php on line 229
+
+Warning: Property 'B::pp1' declared as type int, string assigned in %s/initial-value-bad.php on line 257
+
+Warning: Property 'B::pp2' declared as type string, int assigned in %s/initial-value-bad.php on line 257
+
+Warning: Property 'C::pp1' declared as type int, string assigned in %s/initial-value-bad.php on line 257
+
+Warning: Static property 'B::s1' declared as type int, string assigned in %s/initial-value-bad.php on line 257
+
+Warning: Static property 'B::s2' declared as type string, int assigned in %s/initial-value-bad.php on line 257
+
+Warning: Static property 'C::s1' declared as type int, string assigned in %s/initial-value-bad.php on line 257
+DONE

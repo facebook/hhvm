@@ -1,0 +1,2 @@
+            <x:button use="primary">Submit Form</x:button>
+            {SomeBracedExpression::withArbitraryContents()}

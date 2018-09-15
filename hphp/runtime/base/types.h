@@ -29,8 +29,9 @@ struct Array;
 struct Variant;
 struct VarNR;
 
-extern const Variant uninit_variant;    // uninitialized variant
-extern const Variant init_null_variant; // php null
+#define uninit_variant    tvAsCVarRef(&immutable_uninit_base)
+#define init_null_variant tvAsCVarRef(&immutable_null_base)
+
 extern const VarNR null_varNR;
 extern const VarNR true_varNR;
 extern const VarNR false_varNR;
@@ -58,14 +59,6 @@ using LowStringPtr = LowPtr<const StringData>;
 
 using VRefParam = const struct VRefParamValue&;
 using RefResult = const struct RefResultValue&;
-
-inline const Variant& variant(RefResult v) {
-  return reinterpret_cast<const Variant&>(v);
-}
-
-inline const Variant& variant(const Variant& v) {
-  return v;
-}
 
 /**
  * ref() can be used to cause strong binding.

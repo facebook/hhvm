@@ -1,1 +1,2 @@
-No errors
+File "closure.php", line 16, characters 28-32:
+Cannot use $this as lexical variable (Naming[2077])

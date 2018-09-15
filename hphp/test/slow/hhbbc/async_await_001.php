@@ -15,4 +15,8 @@ function main() {
   $blah->yo();
 }
 
+
+<<__EntryPoint>>
+function main_async_await_001() {
 main();
+}

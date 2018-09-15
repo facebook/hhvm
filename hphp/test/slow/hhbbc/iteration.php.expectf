@@ -1,0 +1,20 @@
+int(6)
+int(3)
+int(0)
+int(4)
+int(3)
+int(3)
+int(0)
+
+Warning: Invalid argument supplied for foreach() in %s/iteration.php on line 110
+int(0)
+int(10)
+
+Warning: Invalid argument supplied for foreach() in %s/iteration.php on line 126
+int(0)
+int(0)
+
+Warning: Invalid argument supplied for foreach() in %s/iteration.php on line 142
+int(0)
+int(0)
+int(6)

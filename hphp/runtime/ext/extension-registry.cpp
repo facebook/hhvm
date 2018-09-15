@@ -1,4 +1,7 @@
 #include "hphp/runtime/ext/extension-registry.h"
+
+#include <sstream>
+
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/litstr-table.h"
@@ -49,7 +52,7 @@ static void sortDependencies();
 ///////////////////////////////////////////////////////////////////////////////
 // dlfcn wrappers
 
-static void* dlopen(const char *dso) {
+static void* dlopen(ATTRIBUTE_UNUSED const char* dso) {
 #ifdef HAVE_LIBDL
   return ::dlopen(dso, DLOPEN_FLAGS);
 #else
@@ -57,7 +60,8 @@ static void* dlopen(const char *dso) {
 #endif
 }
 
-static void* dlsym(void *mod, const char *sym) {
+static void*
+dlsym(ATTRIBUTE_UNUSED void* mod, ATTRIBUTE_UNUSED const char* sym) {
 #ifdef HAVE_LIBDL
 # ifdef LIBDL_NEEDS_UNDERSCORE
   std::string tmp("_");
@@ -89,25 +93,25 @@ void registerExtension(Extension* ext) {
     s_exts = new ExtensionMap;
   }
   const auto& name = ext->getName();
-  assert(s_exts->find(name) == s_exts->end());
+  assertx(s_exts->find(name) == s_exts->end());
   (*s_exts)[name] = ext;
 }
 
 void unregisterExtension(const char* name) {
-  assert(s_exts);
-  assert(s_exts->find(name) != s_exts->end());
+  assertx(s_exts);
+  assertx(s_exts->find(name) != s_exts->end());
   s_exts->erase(name);
 }
 
 bool isLoaded(const char* name, bool enabled_only /*= true */) {
-  assert(s_exts);
+  assertx(s_exts);
   auto it = s_exts->find(name);
   return (it != s_exts->end()) &&
          (!enabled_only || it->second->moduleEnabled());
 }
 
 Extension* get(const char* name, bool enabled_only /*= true */) {
-  assert(s_exts);
+  assertx(s_exts);
   auto it = s_exts->find(name);
   if ((it != s_exts->end()) &&
       (!enabled_only || it->second->moduleEnabled())) {
@@ -117,7 +121,7 @@ Extension* get(const char* name, bool enabled_only /*= true */) {
 }
 
 Array getLoaded(bool enabled_only /*= true */) {
-  assert(s_exts);
+  assertx(s_exts);
   Array ret = Array::Create();
   for (auto& kv : (*s_exts)) {
     if (!enabled_only || kv.second->moduleEnabled()) {
@@ -213,7 +217,7 @@ void moduleLoad(const IniSetting::Map& ini, Hdf hdf) {
   if (extFiles.size() > 0 || !s_sorted) {
     sortDependencies();
   }
-  assert(s_sorted);
+  assertx(s_sorted);
 
   for (auto& ext : s_ordered) {
     ext->moduleLoad(ini, hdf);
@@ -222,16 +226,14 @@ void moduleLoad(const IniSetting::Map& ini, Hdf hdf) {
 
 void moduleInit() {
   bool wasInited = SystemLib::s_inited;
-  if (!RuntimeOption::RepoAuthoritative) LitstrTable::get().setWriting();
   auto const wasDB = RuntimeOption::EvalDumpBytecode;
   RuntimeOption::EvalDumpBytecode &= ~1;
   SCOPE_EXIT {
     SystemLib::s_inited = wasInited;
-    LitstrTable::get().setReading();
     RuntimeOption::EvalDumpBytecode = wasDB;
   };
   SystemLib::s_inited = false;
-  assert(s_sorted);
+  assertx(s_sorted);
   for (auto& ext : s_ordered) {
     ext->moduleInit();
   }
@@ -239,8 +241,8 @@ void moduleInit() {
 }
 
 void moduleShutdown() {
-  assert(s_exts);
-  assert(s_sorted);
+  assertx(s_exts);
+  assertx(s_sorted);
   for (auto it = s_ordered.rbegin();
        it != s_ordered.rend(); ++it) {
     (*it)->moduleShutdown();
@@ -254,14 +256,14 @@ void moduleShutdown() {
 void threadInit() {
   // This can actually happen both before and after LoadModules()
   if (!s_sorted) sortDependencies();
-  assert(s_sorted);
+  assertx(s_sorted);
   for (auto& ext : s_ordered) {
     ext->threadInit();
   }
 }
 
 void threadShutdown() {
-  assert(s_sorted);
+  assertx(s_sorted);
   for (auto it = s_ordered.rbegin();
        it != s_ordered.rend(); ++it) {
     (*it)->threadShutdown();
@@ -269,14 +271,14 @@ void threadShutdown() {
 }
 
 void requestInit() {
-  assert(s_sorted);
+  assertx(s_sorted);
   for (auto& ext : s_ordered) {
     ext->requestInit();
   }
 }
 
 void requestShutdown() {
-  assert(s_sorted);
+  assertx(s_sorted);
   for (auto it = s_ordered.rbegin();
        it != s_ordered.rend(); ++it) {
     (*it)->requestShutdown();
@@ -307,7 +309,7 @@ Extension* findResolvedExt(const Extension::DependencySetMap& unresolved,
 }
 
 static void sortDependencies() {
-  assert(s_exts);
+  assertx(s_exts);
   s_ordered.clear();
 
   Extension::DependencySet resolved;
@@ -352,7 +354,7 @@ static void sortDependencies() {
     throw Exception(ss.str());
   }
 
-  assert(s_ordered.size() == s_exts->size());
+  assertx(s_ordered.size() == s_exts->size());
   s_sorted = true;
 }
 

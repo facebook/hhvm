@@ -3,9 +3,8 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
 
@@ -45,6 +44,7 @@ function inst_meth($inst, string $meth_name); // becomes:
 /**
  * See http://docs.hhvm.com/hack/reference/function/HH.invariant/
  */
+<<__Rx>>
 function invariant(
   $condition, // e.g. is_int($x) or ($y instanceof SomeClass)
   \HH\FormatString<PlainSprintf> $f, ...$f_args

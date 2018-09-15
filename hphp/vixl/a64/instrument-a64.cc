@@ -642,4 +642,8 @@ void Instrument::VisitUnimplemented(Instruction* instr) {
 }
 
 
+void Instrument::VisitLseLdOp(Instruction* instr) {
+  VisitUnimplemented(instr);
+}
+
 }  // namespace v8::internal

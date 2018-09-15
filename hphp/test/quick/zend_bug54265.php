@@ -1,4 +1,4 @@
-<?php
+<?hh
 function my_errorhandler($errno,$errormsg) {
   global $my_var;
   $my_var = 0;

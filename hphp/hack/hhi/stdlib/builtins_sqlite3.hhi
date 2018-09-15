@@ -3,11 +3,11 @@
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  */
+
 define('SQLITE3_ASSOC', 0);
 define('SQLITE3_NUM', 0);
 define('SQLITE3_BOTH', 0);
@@ -25,13 +25,13 @@ class SQLite3 {
   public function busytimeout($msecs) { }
   public function close() { }
   public function exec($sql) { }
-  public function version() { }
+  public static function version() { }
   public function lastinsertrowid() { }
   public function lasterrorcode() { }
   public function lasterrormsg() { }
   public function loadextension($extension) { }
   public function changes() { }
-  public function escapestring($sql) { }
+  public static function escapestring($sql) { }
   public function prepare($sql) { }
   public function query($sql) { }
   public function querysingle($sql, $entire_row = false) { }

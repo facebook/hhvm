@@ -1,5 +1,3 @@
-HH\Awaitable::getWaitHandle
-HH\Awaitable::getWaitHandle
 HH\Iterator::next
 Method Generator::getOrigFuncName does not have a prototype
 Method SimpleXMLElementChild::__construct does not have a prototype

@@ -1,0 +1,6 @@
+File "immutable_catch_shadowing_2.php", line 21, characters 17-17:
+Invalid argument (Typing[4110])
+File "immutable_catch_shadowing_2.php", line 6, characters 22-24:
+This is an object of type ExA
+File "immutable_catch_shadowing_2.php", line 20, characters 12-14:
+It is incompatible with an object of type ExB

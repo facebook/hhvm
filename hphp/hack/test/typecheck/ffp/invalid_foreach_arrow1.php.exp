@@ -1,0 +1,2 @@
+File "invalid_foreach_arrow1.php", line 4, characters 21-21:
+An arrow ('=>') or right parenthesis (')') is expected here. (Parsing[1002])

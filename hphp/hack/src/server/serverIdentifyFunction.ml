@@ -2,13 +2,12 @@
  * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the "hack" directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
  *
  *)
 
-open Core
+open Hh_core
 
 (* Identifying a symbol can be a first step to another operation. For example,
  * you can identify symbol and then highlight other "equal" symbols.
@@ -17,16 +16,14 @@ open Core
  * content ASTs and defs will still be available in shared memory for the
  * subsequent operation. *)
 let get_occurrence_and_map tcopt content line char ~f =
-  let result = ref [] in
-  IdentifySymbolService.attach_hooks result line char;
-  ServerIdeUtils.declare_and_check content ~f:begin fun path file_info ->
-    IdentifySymbolService.detach_hooks ();
-    f path file_info !result
+  ServerIdeUtils.declare_and_check content ~f:begin fun path file_info tast ->
+    let result = IdentifySymbolService.go tast line char in
+    f path file_info result
   end tcopt
 
-let get_occurrence content line char =
-  get_occurrence_and_map content line char ~f:(fun _ _ x -> x)
-
+(** NOTE: the paths of any positions within any returned `SymbolOccurrence` or
+    `SymbolDefinition` objects will be the empty string (`""`) if the symbol is
+    located in the passed in content buffer. *)
 let go content line char (tcopt : TypecheckerOptions.t) =
   (* Order symbols from innermost to outermost *)
   let by_nesting x y =
@@ -50,7 +47,7 @@ let go content line char (tcopt : TypecheckerOptions.t) =
       if stop then
         (* We're stopping here, but also include the other suggestions for
            this span. *)
-        first :: List.take_while rest ~f:(fun x -> by_nesting first x == 0)
+        first :: List.take_while rest ~f:(fun x -> by_nesting first x = 0)
       else first :: take_best_suggestions rest
     | [] -> []
   in
@@ -63,6 +60,9 @@ let go content line char (tcopt : TypecheckerOptions.t) =
       x, symbol_definition)
       )
 
+(** NOTE: the paths of any positions within any returned `SymbolOccurrence` or
+    `SymbolDefinition` objects will be the empty string (`""`) if the symbol is
+    located in the passed in content buffer. *)
 let go_absolute content line char tcopt =
   List.map (go content line char tcopt) begin fun (x, y) ->
     SymbolOccurrence.to_absolute x, Option.map y SymbolDefinition.to_absolute

@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_fputcsv() {
 $tempfile = tempnam('/tmp', 'vmextfiletest');
 
 $fields = array('apple', "\"banana\"");
@@ -17,3 +20,4 @@ $vals = fgetcsv($f, 0, ',', '"', '\\'); // #2511892
 var_dump($vals);
 
 unlink($tempfile);
+}

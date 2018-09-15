@@ -112,7 +112,7 @@ bool UrlFile::open(const String& input_url, const String& mode) {
   }
 
   int code;
-  std::vector<String> responseHeaders;
+  req::vector<String> responseHeaders;
   if (m_get) {
     code = http.get(url.c_str(), m_response, pHeaders, &responseHeaders);
   } else {
@@ -127,16 +127,14 @@ bool UrlFile::open(const String& input_url, const String& mode) {
   }
   VMRegAnchor vra;
   ActRec* fp = vmfp();
-  while (fp->skipFrame()) {
-    fp = g_context->getPrevVMState(fp);
-  }
+  if (fp->skipFrame()) fp = g_context->getPrevVMStateSkipFrame(fp);
   auto id = fp->func()->lookupVarId(s_http_response_header.get());
   if (id != kInvalidId) {
     auto tvTo = frame_local(fp, id);
     Variant varFrom(m_responseHeaders);
     const auto tvFrom(varFrom.asTypedValue());
-    if (tvTo->m_type == KindOfRef) {
-      tvTo = tvTo->m_data.pref->tv();
+    if (isRefType(tvTo->m_type)) {
+      tvTo = tvTo->m_data.pref->cell();
     }
     tvDup(*tvFrom, *tvTo);
   } else if ((fp->func()->attrs() & AttrMayUseVV) && fp->hasVarEnv()) {
@@ -164,14 +162,14 @@ bool UrlFile::open(const String& input_url, const String& mode) {
   }
 }
 
-int64_t UrlFile::writeImpl(const char *buffer, int64_t length) {
-  assert(m_len != -1);
+int64_t UrlFile::writeImpl(const char* /*buffer*/, int64_t /*length*/) {
+  assertx(m_len != -1);
   raise_fatal_error((std::string("cannot write a url stream: ") +
                              getName()).c_str());
 }
 
 bool UrlFile::flush() {
-  assert(m_len != -1);
+  assertx(m_len != -1);
   raise_fatal_error((std::string("cannot flush a url stream: ") +
                              getName()).c_str());
 }

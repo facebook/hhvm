@@ -1,4 +1,4 @@
-<?hh
+<?hh // decl
 
 class ExitOnDestruct {
   private function __destruct() {
@@ -22,4 +22,8 @@ async function crash() {
   echo "should have exited!\n";
 }
 
+
+<<__EntryPoint>>
+function main_await_cpp_exception() {
 HH\Asio\join(crash());
+}

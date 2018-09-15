@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo(&$a) {
   var_dump('foo');
@@ -9,9 +9,13 @@ function bar(&$a) {
   $a = 2;
 }
 function goo($name, $obj, $params, $data, &$done) {
-  return call_user_func_array($data, $params);
+  return $data(&$params[0]);
 }
+
+<<__EntryPoint>>
+function main_1198() {
 fb_intercept('foo', 'goo', 'bar');
 $a = 0;
-foo($a);
+foo(&$a);
 var_dump($a);
+}

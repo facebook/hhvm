@@ -1,6 +1,6 @@
 File "list_array3.php", line 13, characters 3-19:
 Invalid assignment (Typing[4110])
 File "list_array3.php", line 13, characters 3-14:
-This is a tuple
-File "list_array3.php", line 12, characters 16-20:
+This is a tuple of size 2
+File "list_array3.php", line 12, characters 16-30:
 It is incompatible with an array (used like a hashtable)

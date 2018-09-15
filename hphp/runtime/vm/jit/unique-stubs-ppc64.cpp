@@ -78,18 +78,7 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
     auto const data = rarg(0);
     v << load{tv[TVOFF(m_data)], data};
 
-    auto const sf = v.makeReg();
-    v << cmplim{1, data[FAST_REFCOUNT_OFFSET], sf};
-
-    ifThen(v, CC_NL, sf, [&] (Vout& v) {
-      // The refcount is positive, so the value is refcounted.  We need to
-      // either decref or release.
-      ifThen(v, CC_NE, sf, [&] (Vout& v) {
-        // The refcount is greater than 1; decref it.
-        v << declm{data[FAST_REFCOUNT_OFFSET], v.makeReg()};
-        v << ret{live};
-      });
-
+    auto destroy = [&](Vout& v) {
       PhysRegSaver prs{v, live};
 
       auto const dword_size = sizeof(int64_t);
@@ -101,7 +90,7 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
 
       // The refcount is exactly 1; release the value.
       // Avoid 'this' pointer overwriting by reserving it as an argument.
-      v << callm{lookupDestructor(v, type), arg_regs(1)};
+      v << callm{lookupDestructor(v, type, true), arg_regs(1)};
 
       // Between where r1 is now and the saved RIP of the call into the
       // freeLocalsHelpers stub, we have all the live regs we pushed, plus the
@@ -114,7 +103,25 @@ static TCA emitDecRefHelper(CodeBlock& cb, DataBlock& data, CGMeta& fixups,
       v << load{rsp()[0], rfuncln()};
       v << lea {rsp()[2 * dword_size], rsp()};
       v << mtlr{rfuncln()};
-    });
+    };
+
+    auto const sf = emitCmpRefCount(v, OneReference, data);
+
+    if (one_bit_refcount) {
+      ifThen(v, CC_E, sf, destroy);
+    } else {
+      ifThen(v, CC_NL, sf, [&] (Vout& v) {
+        // The refcount is positive, so the value is refcounted.  We need to
+        // either decref or release.
+        ifThen(v, CC_NE, sf, [&] (Vout& v) {
+          // The refcount is greater than 1; decref it.
+          emitDecRefCount(v, data);
+          v << ret{live};
+        });
+
+        destroy(v);
+      });
+    }
 
     // Either we did a decref, or the value was static.
     v << ret{live};
@@ -138,11 +145,11 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     auto const sf = v.makeReg();
 
     // We can't do a byte load here---we have to sign-extend since we use
-    // `type' as a 32-bit array index to the destructor table.
-    v << loadzbl{local[TVOFF(m_type)], type};
-    emitCmpTVType(v, sf, KindOfRefCountThreshold, type);
+    // `type' as a 64-bit array index to the destructor table.
+    v << loadsbq{local[TVOFF(m_type)], type};
+    auto const cc = emitIsTVTypeRefCounted(v, sf, type);
 
-    ifThen(v, CC_G, sf, [&] (Vout& v) {
+    ifThen(v, cc, sf, [&] (Vout& v) {
       auto const dword_size = sizeof(int64_t);
 
       // saving return value on the stack, but keeping it 16-byte aligned
@@ -150,7 +157,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
       v << lea {rsp()[-2 * dword_size], rsp()};
       v << store{rfuncln(), rsp()[0]};
 
-      v << call{release, arg_regs(3)};
+      v << call{release, local | type};
 
       // restore the return value from the stack
       v << load{rsp()[0], rfuncln()};
@@ -171,16 +178,14 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
     // until we hit that point.
     v << lea{rvmfp()[localOffset(kNumFreeLocalsHelpers - 1)], last};
 
-    doWhile(v, CC_NZ, {},
-      [&] (const VregList& in, const VregList& out) {
-        auto const sf = v.makeReg();
+    doWhile(v, CC_NZ, {}, [&](const VregList& /*in*/, const VregList& /*out*/) {
+      auto const sf = v.makeReg();
 
-        decref_local(v);
-        next_local(v);
-        v << cmpq{local, last, sf};
-        return sf;
-      }
-    );
+      decref_local(v);
+      next_local(v);
+      v << cmpq{ local, last, sf };
+      return sf;
+    });
   });
 
   for (auto i = kNumFreeLocalsHelpers - 1; i >= 0; --i) {
@@ -224,7 +229,7 @@ void assert_tc_saved_rip(void* saved_lr_pointer) {
   }
 }
 
-TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& us) {
+TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& /*us*/) {
   ppc64_asm::Assembler a { cb };
   auto const start = a.frontier();
 

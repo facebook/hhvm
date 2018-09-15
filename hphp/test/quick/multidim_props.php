@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function baz(&$x) {
   var_dump($x);
@@ -12,10 +12,10 @@ class A {
   }
   function bar() {
     $y = $this->x->x->x->x->x;
-    baz($y);
+    baz(&$y);
     $y = $this->x->x->x->x->x;
-    baz($y);
-    baz($this->z);
+    baz(&$y);
+    baz(&$this->z);
   }
 
   public function what() {

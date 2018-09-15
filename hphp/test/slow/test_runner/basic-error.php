@@ -4,4 +4,8 @@ function foo(): int {
   return 'Hi';
 }
 
+
+<<__EntryPoint>>
+function main_basic_error() {
 foo();
+}

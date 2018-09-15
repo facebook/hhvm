@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo1($a, $b) {
   return ($a - 4) + ($b - 9);

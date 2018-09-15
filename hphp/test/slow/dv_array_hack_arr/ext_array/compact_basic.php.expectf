@@ -1,0 +1,48 @@
+*** Testing compact() : basic functionality ***
+dict(6) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  float(0.2)
+  ["c"]=>
+  bool(true)
+  ["d"]=>
+  dict(1) {
+    ["key"]=>
+    string(3) "val"
+  }
+  ["e"]=>
+  NULL
+  ["f"]=>
+  string(6) "string"
+}
+dict(6) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  float(0.2)
+  ["c"]=>
+  bool(true)
+  ["d"]=>
+  dict(1) {
+    ["key"]=>
+    string(3) "val"
+  }
+  ["e"]=>
+  NULL
+  ["f"]=>
+  string(6) "string"
+}
+dict(2) {
+  ["a"]=>
+  int(1)
+  ["b"]=>
+  float(0.2)
+}
+dict(0) {
+}
+dict(0) {
+}
+dict(0) {
+}
+Done

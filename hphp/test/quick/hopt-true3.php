@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo() {
   if (true) { return false; }

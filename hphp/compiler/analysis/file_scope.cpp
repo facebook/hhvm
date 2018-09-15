@@ -21,12 +21,9 @@
 
 #include "hphp/compiler/analysis/analysis_result.h"
 #include "hphp/compiler/analysis/class_scope.h"
-#include "hphp/compiler/analysis/code_error.h"
-#include "hphp/compiler/analysis/constant_table.h"
 #include "hphp/compiler/analysis/function_scope.h"
-#include "hphp/compiler/analysis/lambda_names.h"
-#include "hphp/compiler/analysis/variable_table.h"
 
+#include "hphp/compiler/expression/closure_expression.h"
 #include "hphp/compiler/expression/expression_list.h"
 #include "hphp/compiler/expression/include_expression.h"
 #include "hphp/compiler/expression/simple_function_call.h"
@@ -47,10 +44,15 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+__thread FileScope* FileScope::s_current;
+
+///////////////////////////////////////////////////////////////////////////////
+
 FileScope::FileScope(const std::string &fileName, int fileSize, const MD5 &md5)
   : BlockScope("", "", StatementPtr(), BlockScope::FileScope),
     m_size(fileSize), m_md5(md5), m_system(false),
-    m_isHHFile(false), m_useStrictTypes(false), m_preloadPriority(0),
+    m_isHHFile(false), m_useStrictTypes(false),
+    m_useStrictTypesForBuiltins(false), m_preloadPriority(0),
     m_fileName(fileName), m_redeclaredFunctions(0) {
   pushAttribute(); // for global scope
 }
@@ -74,7 +76,7 @@ void FileScope::setFileLevel(StatementListPtr stmtList) {
 }
 
 void FileScope::setSystem() {
-  m_fileName = "/:" + m_fileName;
+  assertx(m_fileName[0] == '/' && m_fileName[1] == ':');
   m_system = true;
 }
 
@@ -86,22 +88,19 @@ void FileScope::setUseStrictTypes() {
   m_useStrictTypes = true;
 }
 
-FunctionScopePtr FileScope::setTree(AnalysisResultConstPtr ar,
+void FileScope::setUseStrictTypesForBuiltins() {
+  m_useStrictTypesForBuiltins = true;
+}
+
+
+FunctionScopePtr FileScope::setTree(AnalysisResultConstRawPtr ar,
                                     StatementListPtr tree) {
   m_tree = tree;
   setFileLevel(tree);
   return createPseudoMain(ar);
 }
 
-void FileScope::cleanupForError(AnalysisResultConstPtr ar) {
-  for (auto iter = m_classes.begin(); iter != m_classes.end(); ++iter) {
-    for (ClassScopePtr cls: iter->second) {
-      cls->getVariables()->cleanupForError(ar);
-    }
-  }
-
-  getConstants()->cleanupForError(ar);
-
+void FileScope::cleanupForError(AnalysisResultConstRawPtr /*ar*/) {
   StringToFunctionScopePtrMap().swap(m_functions);
   delete m_redeclaredFunctions;
   m_redeclaredFunctions = 0;
@@ -112,7 +111,7 @@ void FileScope::cleanupForError(AnalysisResultConstPtr ar) {
 
 template <class Meth>
 void makeFatalMeth(FileScope& file,
-                   AnalysisResultConstPtr ar,
+                   AnalysisResultConstRawPtr ar,
                    const std::string& msg,
                    int line,
                    Meth meth) {
@@ -136,49 +135,43 @@ void makeFatalMeth(FileScope& file,
   file.setOuterScope(const_cast<AnalysisResult*>(ar.get())->shared_from_this());
 }
 
-void FileScope::makeFatal(AnalysisResultConstPtr ar,
+void FileScope::makeFatal(AnalysisResultConstRawPtr ar,
                           const std::string& msg,
                           int line) {
   auto meth = [](SimpleFunctionCallPtr e) { e->setThrowFatal(); };
   makeFatalMeth(*this, ar, msg, line, meth);
 }
 
-void FileScope::makeParseFatal(AnalysisResultConstPtr ar,
+void FileScope::makeParseFatal(AnalysisResultConstRawPtr ar,
                                const std::string& msg,
                                int line) {
   auto meth = [](SimpleFunctionCallPtr e) { e->setThrowParseFatal(); };
   makeFatalMeth(*this, ar, msg, line, meth);
 }
 
-bool FileScope::addFunction(AnalysisResultConstPtr ar,
+void FileScope::addFunction(AnalysisResultConstRawPtr /*ar*/,
                             FunctionScopePtr funcScope) {
-  if (ar->declareFunction(funcScope)) {
-    FunctionScopePtr &fs = m_functions[funcScope->getScopeName()];
-    if (fs) {
-      if (!m_redeclaredFunctions) {
-        m_redeclaredFunctions = new StringToFunctionScopePtrVecMap;
-      }
-      auto& funcVec = (*m_redeclaredFunctions)[funcScope->getScopeName()];
-      if (!funcVec.size()) {
-        fs->setLocalRedeclaring();
-        funcVec.push_back(fs);
-      }
-      funcScope->setLocalRedeclaring();
-      funcVec.push_back(funcScope);
-    } else {
-      fs = funcScope;
-    }
-    return true;
+  FunctionScopePtr &fs = m_functions[funcScope->getScopeName()];
+  if (!fs) {
+    fs = funcScope;
+    return;
   }
-  return false;
+
+  if (!m_redeclaredFunctions) {
+    m_redeclaredFunctions = new StringToFunctionScopePtrVecMap;
+  }
+  auto& funcVec = (*m_redeclaredFunctions)[funcScope->getScopeName()];
+  if (!funcVec.size()) {
+    fs->setLocalRedeclaring();
+    funcVec.push_back(fs);
+  }
+  funcScope->setLocalRedeclaring();
+  funcVec.push_back(funcScope);
 }
 
-bool FileScope::addClass(AnalysisResultConstPtr ar, ClassScopePtr classScope) {
-  if (ar->declareClass(classScope)) {
-    m_classes[classScope->getScopeName()].push_back(classScope);
-    return true;
-  }
-  return false;
+void FileScope::addClass(AnalysisResultConstRawPtr /*ar*/,
+                         ClassScopePtr classScope) {
+  m_classes[classScope->getScopeName()].push_back(classScope);
 }
 
 void FileScope::addAnonClass(ClassStatementPtr stmt) {
@@ -217,22 +210,12 @@ int FileScope::popAttribute() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ExpressionPtr FileScope::getEffectiveImpl(AnalysisResultConstPtr ar) const {
-  if (m_tree) return m_tree->getEffectiveImpl(ar);
-  return ExpressionPtr();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void FileScope::declareConstant(AnalysisResultPtr ar, const std::string &name) {
-  ar->declareConst(shared_from_this(), name);
-}
-
-void FileScope::analyzeProgram(AnalysisResultPtr ar) {
+void FileScope::analyzeProgram(AnalysisResultConstRawPtr ar) {
   if (!m_pseudoMain) return;
-  m_pseudoMain->getStmt()->analyzeProgram(ar);
-
-  resolve_lambda_names(ar, shared_from_this());
+  s_current = this;
+  SCOPE_EXIT { s_current = nullptr; };
+  ar->analyzeProgram(m_pseudoMain->getStmt());
+  ClosureExpression::processLambdas(ar, std::move(m_lambdas));
 }
 
 void FileScope::visit(AnalysisResultPtr ar,
@@ -250,7 +233,7 @@ const std::string &FileScope::pseudoMainName() {
   return m_pseudoMainName;
 }
 
-FunctionScopePtr FileScope::createPseudoMain(AnalysisResultConstPtr ar) {
+FunctionScopePtr FileScope::createPseudoMain(AnalysisResultConstRawPtr ar) {
   StatementListPtr st = m_tree;
   auto labelScope = std::make_shared<LabelScope>();
   auto f =
@@ -279,57 +262,6 @@ FunctionScopePtr FileScope::createPseudoMain(AnalysisResultConstPtr ar) {
   fs = pseudoMain;
   m_pseudoMain = pseudoMain;
   return pseudoMain;
-}
-
-static void getFuncScopesSet(BlockScopeRawPtrQueue &v,
-                             const StringToFunctionScopePtrMap &funcMap) {
-  for (const auto& iter : funcMap) {
-    v.push_back(iter.second);
-  }
-}
-
-void FileScope::getScopesSet(BlockScopeRawPtrQueue &v) {
-  for (const auto& clsVec : getClasses()) {
-    for (const auto cls : clsVec.second) {
-      if (cls->getStmt()) {
-        v.push_back(cls);
-        getFuncScopesSet(v, cls->getFunctions());
-      }
-    }
-  }
-
-  getFuncScopesSet(v, getFunctions());
-  if (const auto redec = m_redeclaredFunctions) {
-    for (const auto& funcVec : *redec) {
-      auto i = funcVec.second.begin(), e = funcVec.second.end();
-      v.insert(v.end(), ++i, e);
-    }
-  }
-}
-
-void FileScope::getClassesFlattened(std::vector<ClassScopePtr>& classes) const {
-  for (const auto& clsVec : m_classes) {
-    for (auto cls : clsVec.second) {
-      classes.push_back(cls);
-    }
-  }
-}
-
-void FileScope::serialize(JSON::DocTarget::OutputStream &out) const {
-  JSON::DocTarget::MapStream ms(out);
-  ms.add("name", getName());
-
-  std::vector<ClassScopePtr> classes;
-  getClassesFlattened(classes);
-  ms.add("classes", classes);
-
-  std::vector<FunctionScopePtr> funcs;
-  getFunctionsFlattened(m_redeclaredFunctions, funcs, true);
-  ms.add("functions", funcs);
-
-  // TODO(stephentu): constants
-
-  ms.done();
 }
 
 }

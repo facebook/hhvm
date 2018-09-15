@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 if (false) {
   function gen1() {

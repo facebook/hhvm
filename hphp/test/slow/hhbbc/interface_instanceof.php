@@ -23,4 +23,8 @@ function main($k) {
   }
 }
 
+
+<<__EntryPoint>>
+function main_interface_instanceof() {
 main(2);
+}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // This test exercises the register allocator, because it results in a single
 // big tracelet that has more live values in flight than there are physical

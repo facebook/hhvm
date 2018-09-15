@@ -5,6 +5,9 @@ function blug() {
   sleep(1);
 }
 
+
+<<__EntryPoint>>
+function main_xhprof_builtins() {
 xhprof_enable();
 blug();
 $stats = xhprof_disable();
@@ -18,4 +21,5 @@ blug();
 $stats = xhprof_disable();
 if (!isset($stats["blug==>sleep"])) {
   echo "ok with flag\n";
+}
 }

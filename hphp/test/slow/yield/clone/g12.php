@@ -17,6 +17,9 @@ function foo($a, &$b) {
   $$var2 += 300;
   yield $$var1 * 10000 + $$var2;
 }
+
+<<__EntryPoint>>
+function main_g12() {
 $a1 = 1;
 $a2 = -999999999;
 $x = foo($a1, $a2);
@@ -53,3 +56,4 @@ for ($x->next(); $x->valid(); $x->next()) {
 }
 echo "--------\n";
 var_dump($a1, $a2);
+}

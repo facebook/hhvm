@@ -41,10 +41,6 @@ namespace Stats {
   STAT(TC_CatchTrace) \
   STAT(TC_CatchSideExit) \
   STAT(TC_DecRef_NZ) \
-  STAT(TC_DecRef_Normal_Decl) \
-  STAT(TC_DecRef_Normal_Destroy) \
-  STAT(TC_DecRef_Likely_Decl) \
-  STAT(TC_DecRef_Likely_Destroy) \
   STAT(TC_DecRef_Profiled_100) \
   STAT(TC_DecRef_Profiled_0) \
   /* Execute pseudomain */ \
@@ -65,6 +61,7 @@ namespace Stats {
   STAT(UnitMerge_mergeable_unique_persistent) \
   STAT(UnitMerge_mergeable_unique_persistent_cache) \
   STAT(UnitMerge_mergeable_define) \
+  STAT(UnitMerge_mergeable_persistent_define) \
   STAT(UnitMerge_mergeable_global) \
   STAT(UnitMerge_mergeable_class) \
   STAT(UnitMerge_mergeable_require) \
@@ -73,10 +70,6 @@ namespace Stats {
   /* stub reuse stats */ \
   STAT(Astub_New) \
   STAT(Astub_Reused) \
-  /* Switches */ \
-  STAT(Switch_Generic) \
-  STAT(Switch_Integer) \
-  STAT(Switch_String) \
   /* ObjectData construction */ \
   STAT(ObjectData_new_dtor_yes) \
   STAT(ObjectData_new_dtor_no) \
@@ -116,12 +109,8 @@ inline void inc(StatCounter stat, int n = 1) {
   }
 }
 
-static_assert(static_cast<uint64_t>(OpLowInvalid) == 0,
-              "stats.h assumes OpLowInvalid == 0");
-
 inline StatCounter opToTranslStat(Op opc) {
-  return StatCounter(Instr_TranslLowInvalid +
-                     STATS_PER_OPCODE * size_t(opc));
+  return StatCounter(STATS_PER_OPCODE * size_t(opc));
 }
 
 extern void init();

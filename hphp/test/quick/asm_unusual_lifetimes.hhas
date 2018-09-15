@@ -16,11 +16,9 @@
   PopC
 
   FPushFuncD 2 "main"
-    FPassL 0 $a
-    UnsetL $a
-    FPassL 1 $b
-    UnsetL $b
-  FCall 2
+    PushL $a
+    PushL $b
+  FCall 2 0 1 - "" ""
   UnboxR
   RetC
 }

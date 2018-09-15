@@ -27,6 +27,11 @@ namespace HPHP {
 
 struct c_WaitableWaitHandle;
 
+/*
+ * AsioBlockable is an intrusive node in an AsioBlockableChain.
+ * Each node contains a pointer to the next node (AsioBlockable*)
+ * as well as a Kind, describing the waithandle that owns *this* node.
+ */
 struct AsioBlockable final {
   enum class Kind : uint8_t {
     AsyncFunctionWaitHandleNode,
@@ -47,17 +52,18 @@ struct AsioBlockable final {
     return static_cast<Kind>(m_bits & kKindMask);
   }
 
+  // return ptr to the WH containing this blockable
   c_WaitableWaitHandle* getWaitHandle() const;
 
   void setNextParent(AsioBlockable* parent, Kind kind) {
-    assert(!(reinterpret_cast<intptr_t>(parent) & ~kParentMask));
-    assert(!(static_cast<intptr_t>(kind) & kParentMask));
+    assertx(!(reinterpret_cast<intptr_t>(parent) & ~kParentMask));
+    assertx(!(static_cast<intptr_t>(kind) & kParentMask));
     m_bits = reinterpret_cast<intptr_t>(parent) | static_cast<intptr_t>(kind);
   }
 
   // Only update the next parent w/o changing kind.
   void updateNextParent(AsioBlockable* parent) {
-    assert(!(reinterpret_cast<intptr_t>(parent) & ~kParentMask));
+    assertx(!(reinterpret_cast<intptr_t>(parent) & ~kParentMask));
     m_bits = (m_bits & ~kParentMask) | reinterpret_cast<intptr_t>(parent);
   }
 
@@ -71,9 +77,19 @@ private:
   // | 63.....................3 | 2....0 |
   // | [Pointer to next parent] | [Kind] |
   // +-----------------------------------+
-  uintptr_t m_bits;
+  union {
+    uintptr_t m_bits;
+    AsioBlockable* m_next;
+  };
+  TYPE_SCAN_CUSTOM() {
+    scanner.scan(m_next);
+  }
 };
 
+/*
+ * AsioBlockableChain is an intrusive linked list of parent
+ * waithandles, formed by AsioBlockable fields in each waithandle.
+ */
 struct AsioBlockableChain final {
   static constexpr ptrdiff_t firstParentOff() {
     return offsetof(AsioBlockableChain, m_firstParent);

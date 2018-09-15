@@ -39,7 +39,7 @@ struct DateTimeData {
   Variant sleep() const {
     return init_null();
   }
-  void wakeup(const Variant& content, ObjectData* obj) {}
+  void wakeup(const Variant& /*content*/, ObjectData* /*obj*/) {}
   int64_t getTimestamp() const {
     bool err = false;
     return m_dt->toTimeStamp(err);
@@ -114,9 +114,12 @@ struct DateTimeZoneData {
     m_tz = other.m_tz->cloneTimeZone();
     return *this;
   }
+
   String getName() const {
     return m_tz->name();
   }
+
+  Array getDebugInfo() const;
 
   static Object wrap(req::ptr<TimeZone> tz);
   static req::ptr<TimeZone> unwrap(const Object& timezone);
@@ -146,11 +149,12 @@ void HHVM_METHOD(DateTimeZone, __construct,
                  const String& timezone);
 Array HHVM_METHOD(DateTimeZone, getLocation);
 String HHVM_METHOD(DateTimeZone, getName);
+Array HHVM_METHOD(DateTimeZone, __debuginfo);
 Variant HHVM_METHOD(DateTimeZone, getOffset,
                     const Object& datetime);
-Array HHVM_METHOD(DateTimeZone, getTransitions,
-                  int64_t timestamp_begin = k_PHP_INT_MIN,
-                  int64_t timestamp_end = k_PHP_INT_MAX);
+TypedValue HHVM_METHOD(DateTimeZone, getTransitions,
+                       int64_t timestamp_begin = k_PHP_INT_MIN,
+                       int64_t timestamp_end = k_PHP_INT_MAX);
 Array HHVM_STATIC_METHOD(DateTimeZone, listAbbreviations);
 Variant HHVM_STATIC_METHOD(DateTimeZone, listIdentifiers,
                            int64_t what,

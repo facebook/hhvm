@@ -1,0 +1,2 @@
+File "mutable_or_immutable5.php", line 5, characters 41-42:
+The method f is annotated with <<__MaybeMutable> attribute, or has this attribute on one of parameters so it must be marked reactive. (NastCheck[3071])

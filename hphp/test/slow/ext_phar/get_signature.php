@@ -1,7 +1,10 @@
 <?php
+
 /**
  * Regular Phar
  */
+<<__EntryPoint>>
+function main_get_signature() {
 echo ".phar:\n";
 var_dump((new Phar(__DIR__."/basic.phar"))->getSignature());
 
@@ -55,3 +58,4 @@ var_dump((new Phar(__DIR__."/basic-tar-bz2.phar"))->getSignature());
  */
 echo "\n.phar (which is .phar.zip):\n";
 var_dump((new Phar(__DIR__."/basic-zip.phar"))->getSignature());
+}

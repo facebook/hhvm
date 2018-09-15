@@ -8,5 +8,9 @@ class a1 {
     a1::foo();
   }
 }
+
+<<__EntryPoint>>
+function main_1893() {
 $obj = new a1;
 $obj->test();
+}

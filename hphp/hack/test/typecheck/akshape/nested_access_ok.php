@@ -5,7 +5,7 @@
  */
 
 function test(): void {
-  $a = Vector {array()};
+  $a = Vector { array() };
   $a[0]['k1'] = 4;
   $a[0]['k2'] = 'aaa';
   take_int($a[0]['k1']);

@@ -136,6 +136,10 @@ static int _gd2GetHeader(gdIOCtxPtr in, int *sx, int *sy, int *cs, int *vers, in
   GD2_DBG(php_gd_error("%d Chunks vertically", *ncy));
 
   if (gd2_compressed(*fmt)) {
+    if (*ncx <= 0 || *ncy <= 0 || *ncx > INT_MAX / *ncy) {
+      GD2_DBG(printf ("Illegal chunk counts: %d * %d\n", *ncx, *ncy));
+      goto fail1;
+    }
     nc = (*ncx) * (*ncy);
     GD2_DBG(php_gd_error("Reading %d chunk index entries", nc));
     if (overflow2(sizeof(t_chunk_info), nc)) {
@@ -187,20 +191,23 @@ static gdImagePtr _gd2CreateFromFile (gdIOCtxPtr in, int *sx, int *sy, int *cs, 
   }
   if (im == NULL) {
     GD2_DBG(php_gd_error("Could not create gdImage"));
-    goto fail1;
+    goto fail2;
   }
 
   if (!_gdGetColors(in, im, (*vers) == 2)) {
     GD2_DBG(php_gd_error("Could not read color palette"));
-    goto fail2;
+    goto fail3;
   }
   GD2_DBG(php_gd_error("Image palette completed: %d colours", im->colorsTotal));
 
   return im;
 
-fail2:
+fail3:
   gdImageDestroy(im);
   return 0;
+
+fail2:
+  gdFree(*cidx);
 
 fail1:
   return 0;
@@ -336,12 +343,16 @@ gdImagePtr gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
           for (x = xlo; x < xhi; x++) {
             if (im->trueColor) {
               if (!gdGetInt(&im->tpixels[y][x], in)) {
-                im->tpixels[y][x] = 0;
+                php_gd_error("gd2: EOF while reading\n");
+                gdImageDestroy(im);
+                return NULL;
               }
             } else {
               int ch;
               if (!gdGetByte(&ch, in)) {
-                ch = 0;
+                php_gd_error("gd2: EOF while reading\n");
+                gdImageDestroy(im);
+                return NULL;
               }
               im->pixels[y][x] = ch;
             }
@@ -670,7 +681,7 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
   }
   if (im->trueColor) {
     fmt += 2;
-                assert(fmt == GD2_FMT_TRUECOLOR_RAW ||
+                assertx(fmt == GD2_FMT_TRUECOLOR_RAW ||
                        fmt == GD2_FMT_TRUECOLOR_COMPRESSED);
   }
   /* Make sure chunk size is valid. These are arbitrary values; 64 because it seems
@@ -687,8 +698,8 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
   }
 
   /* Work out number of chunks. */
-  ncx = im->sx / cs + 1;
-  ncy = im->sy / cs + 1;
+  ncx = (im->sx + cs - 1) / cs;
+  ncy = (im->sy + cs - 1) / cs;
 
   /* Write the standard header. */
   _gd2PutHeader (im, out, cs, fmt, ncx, ncy);

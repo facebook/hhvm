@@ -1,5 +1,8 @@
 <?php
 
+
+<<__EntryPoint>>
+function main_1215() {
 for ($i = 0;
  $i < 4;
  $i++) {
@@ -44,4 +47,5 @@ for ($i = 0;
  else {
     echo "bar does not exists\n";
   }
+}
 }

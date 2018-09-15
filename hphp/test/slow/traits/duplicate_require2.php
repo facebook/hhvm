@@ -1,5 +1,8 @@
 <?hh
 
+
+<<__EntryPoint>>
+function main_duplicate_require2() {
 $n = apc_fetch('foo');
 if (!$n) $n = 0;
 apc_store('foo', ++$n);
@@ -28,4 +31,5 @@ if ($n == 3) {
   class X {
     use T1, T2;
   }
+}
 }

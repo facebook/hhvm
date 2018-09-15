@@ -1,11 +1,5 @@
 <?hh
 
-# This test produces different results on different runtimes (and different
-# minor versions of those runtimes), so if you've changed the output, just make
-# sure it's on purpose.
-
-$x = 1;
-
 function &byref() {
   return $GLOBALS['x'];
 }
@@ -31,4 +25,14 @@ function main() {
   $w = 5;
   var_dump($x);
 }
+
+
+# This test produces different results on different runtimes (and different
+# minor versions of those runtimes), so if you've changed the output, just make
+# sure it's on purpose.
+
+<<__EntryPoint>>
+function main_cuf_by_ref() {
+$x = 1;
 main();
+}

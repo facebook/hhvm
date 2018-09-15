@@ -19,4 +19,8 @@ function main(Base $b) {
   var_dump($y);
 }
 
+
+<<__EntryPoint>>
+function main_magic_call_012() {
 main(new D1);
+}

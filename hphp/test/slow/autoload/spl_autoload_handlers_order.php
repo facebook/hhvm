@@ -5,6 +5,9 @@ function b() {}
 function c() {}
 function d() {}
 
+
+<<__EntryPoint>>
+function main_spl_autoload_handlers_order() {
 var_dump(spl_autoload_functions());
 spl_autoload_register('a');
 var_dump(spl_autoload_functions());
@@ -35,3 +38,4 @@ spl_autoload_register('c', true);
 var_dump(spl_autoload_functions());
 spl_autoload_unregister('a');
 var_dump(spl_autoload_functions());
+}

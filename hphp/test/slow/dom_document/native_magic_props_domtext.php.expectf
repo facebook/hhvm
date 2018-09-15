@@ -4,5 +4,5 @@ string(18) "__get: textContent"
 string(18) "__get: nonExisting"
 string(3) "foo"
 
-Notice: Undefined property: MyTextDirect::$nonExisting in %s/test/slow/dom_document/native_magic_props_domtext.php on line 53
+Notice: Undefined property: MyTextDirect::$nonExisting in %s/test/slow/dom_document/native_magic_props_domtext.php on line 56
 NULL

@@ -1,2 +1,2 @@
-File "foreach_bad_lvalue.php", line 13, characters 24-25:
-Invalid lvalue (Parsing[1002])
+File "foreach_bad_lvalue.php", line 13, characters 24-24:
+literal is not allowed in write context (Parsing[1002])

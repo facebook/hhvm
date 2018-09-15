@@ -27,8 +27,6 @@
 
 #include "hphp/util/trace.h"
 
-#include <folly/MoveWrapper.h>
-
 #include <cstdarg>
 #include <cstdint>
 #include <string>
@@ -96,22 +94,18 @@ TCA TransLoc::coldStart()   const { return tc::offsetToAddr(m_coldOff); }
 TCA TransLoc::frozenStart() const { return tc::offsetToAddr(m_frozenOff); }
 
 void TransLoc::setMainStart(TCA newStart) {
-  assert(tc::isValidCodeAddress(newStart));
+  assertx(tc::isValidCodeAddress(newStart));
   m_mainOff = tc::addrToOffset(newStart);
 }
 
 void TransLoc::setColdStart(TCA newStart) {
-  assert(tc::isValidCodeAddress(newStart));
+  assertx(tc::isValidCodeAddress(newStart));
   m_coldOff = tc::addrToOffset(newStart);
 }
 
 void TransLoc::setFrozenStart(TCA newStart) {
-  assert(tc::isValidCodeAddress(newStart));
+  assertx(tc::isValidCodeAddress(newStart));
   m_frozenOff = tc::addrToOffset(newStart);
-}
-
-void SrcRec::setFuncInfo(const Func* f) {
-  m_unitMd5 = f->unit()->md5();
 }
 
 /*
@@ -151,6 +145,7 @@ void SrcRec::chainFrom(IncomingBranch br) {
 
 void SrcRec::newTranslation(TransLoc loc,
                             GrowableVector<IncomingBranch>& tailBranches) {
+  auto srLock = writelock();
   // When translation punts due to hitting limit, will generate one
   // more translation that will call the interpreter.
   assertx(m_translations.size() <=
@@ -189,6 +184,9 @@ void SrcRec::newTranslation(TransLoc loc,
 }
 
 void SrcRec::relocate(RelocationInfo& rel) {
+  tc::assertOwnsCodeLock();
+
+  auto srLock = writelock();
   if (auto adjusted = rel.adjustedAddressAfter(m_anchorTranslation)) {
     m_anchorTranslation = adjusted;
   }
@@ -254,6 +252,8 @@ void SrcRec::patchIncomingBranches(TCA newStart) {
 }
 
 void SrcRec::removeIncomingBranch(TCA toSmash) {
+  auto srLock = writelock();
+
   auto end = std::remove_if(
     m_incomingBranches.begin(),
     m_incomingBranches.end(),
@@ -264,7 +264,7 @@ void SrcRec::removeIncomingBranch(TCA toSmash) {
 }
 
 void SrcRec::replaceOldTranslations() {
-  tc::assertOwnsCodeLock();
+  auto srLock = writelock();
 
   // Everyone needs to give up on old translations; send them to the anchor,
   // which is a REQ_RETRANSLATE.

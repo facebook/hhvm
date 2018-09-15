@@ -18,4 +18,8 @@ class MyClass {
   }
 }
 
+
+<<__EntryPoint>>
+function main_array_058() {
 var_dump((new MyClass)->makeArray());
+}

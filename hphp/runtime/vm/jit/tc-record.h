@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/util/data-block.h"
 #include "hphp/util/growable-vector.h"
+#include "hphp/util/service-data.h"
 
 namespace HPHP {
 
@@ -32,6 +33,7 @@ namespace jit {
 
 struct CGMeta;
 struct CodeCache;
+struct ProfTransRec;
 struct TransEnv;
 
 namespace tc {
@@ -56,14 +58,23 @@ void recordGdbTranslation(SrcKey sk, const Func* srcFunc, const CodeBlock& cb,
 void recordBCInstr(uint32_t op, const TCA addr, const TCA end, bool cold);
 
 /*
- * Report jit warmup statistics to scribe via StructuredLog.
+ * Update JIT warmup stats and related counters.
  */
-void reportJitMaturity(const CodeCache& code);
+void reportJitMaturity();
 
+/*
+ * Get a code size counter for the named code block ("main", "cold", etc.)
+ */
+ServiceData::ExportedTimeSeries* getCodeSizeCounter(const std::string& name);
 /*
  * Log statistics about a translation to scribe via StructuredLog.
  */
 void logTranslation(const TransEnv& env, const TransRange& range);
+
+/*
+ * Log inlined frames in unit via StructuredLog.
+ */
+void logFrames(const Vunit& unit);
 
 /*
  * Record smashed calls in the TC that may need to be re-smashed in the event
@@ -72,7 +83,7 @@ void logTranslation(const TransEnv& env, const TransRange& range);
  * reclaimed.
  */
 void recordFuncCaller(const Func* func, TCA toSmash, bool immutable,
-                      bool profiled, int numArgs);
+                      ProfTransRec* rec);
 
 /*
  * When a function is treadmilled its bytecode may no longer be available,
@@ -86,6 +97,17 @@ void recordFuncSrcRec(const Func* func, SrcRec* rec);
  * when the function is treadmilled.
  */
 void recordFuncPrologue(const Func* func, TransLoc loc);
+
+/*
+ * This function is like a request-agnostic version of
+ * server_warmup_status().
+ * Three conditions necessary for the jit to qualify as "warmed-up":
+ * 1. Has HHVM evaluated enough requests?
+ * 2. Has retranslateAll happened yet?
+ * 3. Has code size plateaued? Is the rate of new code emission flat?
+ * If the jit is warmed up, this function returns the empty string.
+ */
+std::string warmupStatusString();
 
 }}}
 

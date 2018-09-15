@@ -12,4 +12,8 @@ function test() {
   array_unshift($a, 'foo');
   var_dump(count($a), count($b));
 }
+
+<<__EntryPoint>>
+function main_417() {
 test();
+}

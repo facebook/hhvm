@@ -1,0 +1,2 @@
+File "call_in_static_dict.php", line 7, characters 27-31:
+Invalid expression in constant initializer (Parsing[1002])

@@ -33,4 +33,8 @@ function main() {
   var_dump($obj->genWithAccessTokens());
 }
 
+
+<<__EntryPoint>>
+function main_test38() {
 main();
+}

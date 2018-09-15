@@ -19,7 +19,7 @@
 #define incl_HPHP_EXT_STREAM_USER_FILTERS_H_
 
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/base/req-containers.h"
+#include "hphp/runtime/base/req-list.h"
 
 namespace HPHP {
 

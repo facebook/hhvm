@@ -10,7 +10,7 @@ class CatWrapper {
       0 => array("pipe", "r"),
       1 => array("pipe", "w"),
     );
-    $this->proc = proc_open("cat", $descriptorspec, $this->pipes);
+    $this->proc = proc_open("cat", $descriptorspec, &$this->pipes);
     if (!is_resource($this->proc) ||
         !is_resource($this->pipes[0]) ||
         !is_resource($this->pipes[0])) {
@@ -29,7 +29,7 @@ class CatWrapper {
     fflush($this->pipes[0]);
   }
 
-  public function getWaitHandle(): Awaitable<int> {
+  public function runAsync(): Awaitable<int> {
     return stream_await($this->pipes[1], STREAM_AWAIT_READ, 10.0);
   }
 }
@@ -79,7 +79,7 @@ async function wrongFrame(
 
 async function testBacktrace(): Awaitable<void> {
   $cat = new CatWrapper();
-  $wh = $cat->getWaitHandle();
+  $wh = $cat->runAsync();
 
   // try backtracing wait handle, before anything awaits on it
   $bt = HH\Asio\backtrace($wh);
@@ -115,4 +115,8 @@ async function testBacktrace(): Awaitable<void> {
   }
 }
 
+
+<<__EntryPoint>>
+function main_backtrace() {
 HH\Asio\join(testBacktrace());
+}

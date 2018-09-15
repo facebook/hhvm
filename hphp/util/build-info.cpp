@@ -32,6 +32,7 @@ std::atomic<bool> inited;
 std::mutex mtx;
 std::string repoSchema;
 std::string compiler;
+std::string buildid;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -67,6 +68,7 @@ void readBuildInfo() {
   }
 
   compiler = get("compiler_id");
+  buildid = get("build_id");
 
   inited.store(true, std::memory_order_release);
 }
@@ -83,6 +85,23 @@ folly::StringPiece repoSchemaId() {
 folly::StringPiece compilerId() {
   readBuildInfo();
   return compiler;
+}
+
+folly::StringPiece buildId() {
+  readBuildInfo();
+  return buildid;
+}
+
+const char* kSchemaPlaceholder = "%{schema}";
+
+std::string insertSchema(const char* path) {
+  assert(strstr(repoSchemaId().begin(), kSchemaPlaceholder) == nullptr);
+  std::string result = path;
+  size_t idx;
+  if ((idx = result.find(kSchemaPlaceholder)) != std::string::npos) {
+    result.replace(idx, strlen(kSchemaPlaceholder), repoSchemaId().begin());
+  }
+  return result;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

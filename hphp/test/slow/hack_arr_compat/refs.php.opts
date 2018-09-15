@@ -1,0 +1,4 @@
+-vEval.HackArrCompatNotices=1
+-vEval.HackArrCompatCheckRefBind=1
+-vEval.HackArrCompatCheckFalseyPromote=1
+-vServer.APC.MemModelTreadmill=true

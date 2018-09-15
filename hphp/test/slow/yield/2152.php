@@ -8,9 +8,13 @@ function f($a1, &$a2) {
     }
   }
 }
+
+<<__EntryPoint>>
+function main_2152() {
 $a1 = array(1, 2);
 $a2 = array(1, 2);
-foreach (f($a1, $a2) as $v) {
+foreach (f($a1, &$a2) as $v) {
  var_dump($v);
  }
 var_dump($a2[0], $a2[1]);
+}

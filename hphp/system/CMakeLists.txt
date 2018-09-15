@@ -2,15 +2,12 @@ set(CXX_SOURCES "systemlib.cpp")
 
 add_library(hphp_system STATIC ${CXX_SOURCES})
 if (ENABLE_ASYNC_MYSQL)
-  add_dependencies(hphp_system webscalesqlclient)
+  add_dependencies(hphp_system fbmysqlclient)
 endif ()
+add_dependencies(hphp_system hphp_util)
 
 auto_sources(files "*.h" "${CMAKE_CURRENT_SOURCE_DIR}")
 HHVM_PUBLIC_HEADERS(system ${files})
-
-if (ENABLE_ZEND_COMPAT)
-  add_dependencies(hphp_ext_zend_compat hphp_system)
-endif()
 
 add_dependencies(hphp_runtime_static hphp_system)
 add_dependencies(hphp_runtime_ext hphp_system)

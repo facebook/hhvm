@@ -1,4 +1,4 @@
-<?php
+<?hh
 interface I { public function foo(); }
 interface J extends I {}
 interface K extends I {}

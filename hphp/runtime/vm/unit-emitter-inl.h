@@ -43,7 +43,7 @@ inline Offset UnitEmitter::offsetOf(const unsigned char* pc) const {
 ///////////////////////////////////////////////////////////////////////////////
 // FuncEmitters.
 
-inline FuncEmitter* UnitEmitter::getMain() {
+inline FuncEmitter* UnitEmitter::getMain() const {
   return m_fes[0];
 }
 
@@ -107,18 +107,13 @@ inline void UnitEmitter::emitDouble(double n, int64_t pos) {
   emitImpl(n, pos);
 }
 
-template<>
-inline void UnitEmitter::emitIVA(bool n) {
-  emitByte(n << 1);
-}
-
 template<typename T>
 void UnitEmitter::emitIVA(T n) {
   if (LIKELY((n & 0x7f) == n)) {
-    emitByte((unsigned char)n << 1);
+    emitByte((unsigned char)n);
   } else {
-    assert((n & 0x7fffffff) == n);
-    emitInt32((n << 1) | 0x1);
+    assertx((n & 0x7fffffff) == n);
+    emitInt32((n & 0x7fffff80) << 1 | 0x80 | (n & 0x7f));
   }
 }
 
@@ -134,7 +129,7 @@ void UnitEmitter::emitImpl(T n, int64_t pos) {
     memcpy(&m_bc[m_bclen], c, sizeof(T));
     m_bclen += sizeof(T);
   } else {
-    assert(pos + sizeof(T) <= m_bclen);
+    assertx(pos + sizeof(T) <= m_bclen);
     for (uint32_t i = 0; i < sizeof(T); ++i) {
       m_bc[pos + i] = c[i];
     }

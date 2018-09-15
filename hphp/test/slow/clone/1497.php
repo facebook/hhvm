@@ -9,6 +9,9 @@ class A {
 ";
   }
 }
+
+<<__EntryPoint>>
+function main_1497() {
 $a1 = new A;
 $p = 8;
 $q = 9;
@@ -29,3 +32,4 @@ var_dump($a1);
 var_dump($a2);
 var_dump($p);
 var_dump($q);
+}

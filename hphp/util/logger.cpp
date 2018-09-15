@@ -25,6 +25,8 @@
 #include <folly/portability/Syslog.h>
 #include <folly/portability/Unistd.h>
 
+#include <typeinfo>
+
 #define IMPLEMENT_LOGLEVEL(LOGLEVEL)                                    \
   void Logger::LOGLEVEL(const char *fmt, ...) {                         \
     if (LogLevel < Log ## LOGLEVEL) return;                             \
@@ -70,13 +72,13 @@ ServiceData::ExportedCounter* Logger::s_errorLines =
 ServiceData::ExportedCounter* Logger::s_errorBytes =
     ServiceData::createCounter("errorlog_bytes");
 
-IMPLEMENT_THREAD_LOCAL(Logger::ThreadData, Logger::s_threadData);
+THREAD_LOCAL(Logger::ThreadData, Logger::s_threadData);
 
 std::map<std::string, Logger*> Logger::s_loggers = {
   {Logger::DEFAULT, new Logger()},
 };
 
-void Logger::Log(LogLevelType level, const char *type, const Exception &e,
+void Logger::Log(LogLevelType level, const char* type, const Exception& e,
                  const char *file /* = NULL */, int line /* = 0 */) {
   if (!IsEnabled()) return;
   auto msg = type + e.getMessage();
@@ -210,8 +212,7 @@ std::pair<int, int> Logger::log(LogLevelType level, const std::string &msg,
       threadData->flusher.recordWriteAndMaybeDropCaches(tf, threadBytes);
     }
     if (threadData->hook) {
-      threadData->hook(header.c_str(), msg.c_str(), ending,
-                       threadData->hookData);
+      (*threadData->hook)(header.c_str(), msg.c_str(), ending);
     }
     if (escape) {
       free((void*)escaped);
@@ -250,7 +251,8 @@ std::string Logger::GetHeader() {
 }
 
 char *Logger::EscapeString(const std::string &msg) {
-  char *new_str = (char *)malloc((msg.size() << 2) + 1);
+  auto new_size = msg.size() * 4 + 1;
+  char *new_str = (char *)malloc(new_size);
   const char *source;
   const char *end;
   char *target;
@@ -265,8 +267,11 @@ char *Logger::EscapeString(const std::string &msg) {
       case '\r': *target++ = 'r'; break;
       case '\v': *target++ = 'v'; break;
       case '\b': *target++ = 'b'; break;
-      default: target += sprintf(target, "x%02x", (unsigned char)c);
-      }
+      default: {
+        auto avail = new_size - (target - new_str);
+        target += snprintf(target, avail, "x%02x", (unsigned char)c);
+        assertx(target < new_str + new_size); // we allocated 4x space
+      }}
     } else if (c == '\\') {
       *target++ = c;
       *target++ = c;
@@ -295,10 +300,8 @@ void Logger::ClearThreadLog() {
   }
 }
 
-void Logger::SetThreadHook(PFUNC_LOG func, void *data) {
-  ThreadData *threadData = s_threadData.get();
-  threadData->hook = func;
-  threadData->hookData = data;
+void Logger::SetThreadHook(LoggerHook* hook) {
+  s_threadData.get()->hook = hook;
 }
 
 void Logger::SetTheLogger(const std::string &name, Logger* newLogger) {
@@ -309,6 +312,12 @@ void Logger::SetTheLogger(const std::string &name, Logger* newLogger) {
   } else {
     s_loggers.erase(name);
   }
+}
+
+bool Logger::IsDefaultLogger(const std::string &name) {
+  auto it = s_loggers.find(name);
+  if (it == s_loggers.end()) return true;
+  return typeid(*it->second) == typeid(Logger);
 }
 
 void Logger::UnlimitThreadMessages() {

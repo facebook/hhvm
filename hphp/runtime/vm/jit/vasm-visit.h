@@ -36,8 +36,8 @@ namespace HPHP { namespace jit {
 
 namespace detail {
 
-template<class F, class A1, class A2>
-auto invoke(F&& f, A1&& a1, A2&& a2)
+template <class F, class A1, class A2>
+auto invoke(F&& f, A1&& a1, A2 && /*a2*/)
   -> decltype(std::forward<F>(f)(std::forward<A1>(a1))) {
   return std::forward<F>(f)(std::forward<A1>(a1));
 }
@@ -82,8 +82,8 @@ void visit(const Vunit& unit, VcallArgsId a, F f) {
   for (auto r : args.stkArgs) detail::invoke(f, r, width(r));
 }
 
-template<class F>
-void visit(const Vunit& unit, RegSet regs, F f) {
+template <class F>
+void visit(const Vunit& /*unit*/, RegSet regs, F f) {
   regs.forEach([&](Vreg r) { detail::invoke(f, r, width(r)); });
 }
 
@@ -98,12 +98,16 @@ void visitUses(const Vunit& unit, const Vinstr& inst, Use use) {
       uses \
       break; \
     }
-#define U(s) visit(unit, i.s, use);
-#define UA(s) visit(unit, i.s, use);
+#define U(s)    visit(unit, i.s, use);
+#define UA(s)   visit(unit, i.s, use);
 #define UH(s,h) visit(unit, i.s, use);
+#define UM(s)   visit(unit, i.s, use);
+#define UW(s)   visit(unit, i.s, use);
 #define Un
     VASM_OPCODES
 #undef Un
+#undef UW
+#undef UM
 #undef UH
 #undef UA
 #undef U
@@ -156,6 +160,8 @@ visitOperands(Tinstr& inst, Visitor& visitor) {
 #define U(s) visitor.use(i.s);
 #define UA(s) visitor.across(i.s);
 #define UH(s,h) visitor.useHint(i.s, i.h);
+#define UM(s) visitor.use(i.s);
+#define UW(s) visitor.use(i.s);
 #define D(d) visitor.def(i.d);
 #define DH(d,h) visitor.defHint(i.d, i.h);
 #define Inone
@@ -167,6 +173,8 @@ visitOperands(Tinstr& inst, Visitor& visitor) {
 #undef Inone
 #undef DH
 #undef D
+#undef UW
+#undef UM
 #undef UH
 #undef UA
 #undef U

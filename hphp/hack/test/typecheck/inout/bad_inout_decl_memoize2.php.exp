@@ -1,0 +1,2 @@
+File "bad_inout_decl_memoize2.php", line 5, characters 33-45:
+<<__Memoize>> cannot be used on functions with inout parameters (Parsing[1002])

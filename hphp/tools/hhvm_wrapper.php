@@ -31,7 +31,6 @@ function my_option_map(): OptionInfoMap {
 'pgo-threshold:'  => Pair { '',  'PGO threshold to use' },
 'no-obj-destruct' => Pair { '',
                             'Disable global object destructors in CLI mode' },
-'zend'            => Pair { '',  'Enable ZendCompat functions and classes' },
 'arm'             => Pair { '',  'Emit ARM code and simulate it' },
 'ini[]'           => Pair { '',  'An .ini configuration file or CLI option' },
 'hdf[]'           => Pair { '',  'An .hdf configuration file or CLI option' },
@@ -158,10 +157,8 @@ function determine_flags(OptionMap $opts): string {
     'jit-gdb'         => '-v Eval.JitNoGdb=false ',
     'no-pgo'          => '-v Eval.JitPGO=false ',
     'no-obj-destruct' => '-v Eval.EnableObjDestructCall=0 ',
-    'zend'            => '-v Eval.EnableZendCompat=1 ',
     'hphpd'           => '-m debug ',
     'server'          => '-v Eval.JitPGOHotOnly=0 -m server ',
-    'arm'             => '-v Eval.SimulateARM=1 ',
   };
 
   if ($opts->containsKey('pgo-threshold')) {
@@ -302,7 +299,7 @@ function run_hhvm(OptionMap $opts): void {
   } else {
     // Give the return value of the command back to the caller.
     $retval = null;
-    passthru($cmd, $retval);
+    passthru($cmd, &$retval);
     exit($retval);
   }
 }

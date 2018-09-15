@@ -13,4 +13,8 @@ function main() {
   $x = bar();
   var_dump($x['asdasdasd']);
 }
+
+<<__EntryPoint>>
+function main_array_045() {
 main();
+}

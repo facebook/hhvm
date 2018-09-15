@@ -32,4 +32,8 @@ function test7() {
 }
 }
 
+
+<<__EntryPoint>>
+function main_unset() {
 test7();
+}

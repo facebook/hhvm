@@ -33,19 +33,19 @@ ClassExpression::ClassExpression(
 {
 }
 
-void ClassExpression::analyzeProgram(AnalysisResultPtr ar) {
-  m_cls->analyzeProgram(ar);
-  FunctionCall::analyzeProgram(ar);
+void ClassExpression::analyzeProgram(AnalysisResultConstRawPtr ar) {
+  ar->analyzeProgram(m_cls);
 }
 
 ExpressionPtr ClassExpression::clone() {
   ClassExpressionPtr exp(new ClassExpression(*this));
-  Expression::deepCopy(exp);
+  FunctionCall::deepCopy(exp);
   exp->m_cls = Clone(m_cls);
   return exp;
 }
 
-void ClassExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
+void ClassExpression::outputPHP(CodeGenerator& /*cg*/,
+                                AnalysisResultPtr /*ar*/) {
   // XXX(jezng): I'm not sure how to test this, so leaving unimplemented
   // for now
 }

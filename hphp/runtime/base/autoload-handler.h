@@ -18,7 +18,7 @@
 
 #include <utility>
 
-#include "hphp/runtime/base/req-containers.h"
+#include "hphp/runtime/base/req-deque.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/type-array.h"
@@ -109,7 +109,7 @@ private:
    * This method may return ContinueAutoloading, StopAutoloading, or
    * RetryAutoloading.
    */
-  Result invokeFailureCallback(const Variant& func, const String& kind,
+  Result invokeFailureCallback(const_variant_ref func, const String& kind,
                                const String& name, const Variant& err);
 
   /**

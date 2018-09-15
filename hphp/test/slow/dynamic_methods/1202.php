@@ -10,5 +10,9 @@ class A {
  print 'in B';
 }
  }
- $obj = new B();
+
+ <<__EntryPoint>>
+function main_1202() {
+$obj = new B();
  call_user_func_array(array($obj, 'A::test'), array());
+}

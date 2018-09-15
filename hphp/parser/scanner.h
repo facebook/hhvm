@@ -24,6 +24,9 @@
 #include <cstdlib>
 #include <limits.h>
 
+#include <folly/portability/String.h>
+#include <folly/portability/Unistd.h>
+
 #include "hphp/util/exception.h"
 #include "hphp/util/portability.h"
 #include "hphp/parser/location.h"
@@ -260,7 +263,7 @@ public:
     incLoc(rawText, rawLeng, type);
   }
   void stepPos(const char *rawText, int rawLeng, int type = -1) {
-    if (shortTags()) {
+    if (full()) {
       m_token->setText(rawText, rawLeng);
     }
     incLoc(rawText, rawLeng, type);
@@ -338,6 +341,7 @@ public:
 private:
   bool tryParseShapeType(TokenStore::iterator& pos);
   bool tryParseShapeMemberList(TokenStore::iterator& pos);
+  bool tryParseClassConstant(TokenStore::iterator& pos);
 
   bool nextIfToken(TokenStore::iterator& pos, int tok);
 

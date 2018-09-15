@@ -10,6 +10,9 @@ function arguments_23_defaults($a, $b = NULL, $c = array()) {}
 
 function arguments_123_defaults($a = 1, $b = NULL, $c = array()) {}
 
+
+<<__EntryPoint>>
+function main_reflection_class_is_optional() {
 $functions = array(
   'arguments_1_defaults',
   'arguments_2_defaults',
@@ -33,3 +36,4 @@ foreach ($functions as $function) {
 }
 
 var_dump($results);
+}

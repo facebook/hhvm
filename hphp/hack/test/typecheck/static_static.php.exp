@@ -1,2 +1,2 @@
-File "static_static.php", line 13, characters 3-32:
-Parse error. Duplicate modifier (Parsing[1002])
+File "static_static.php", line 13, characters 3-30:
+A method declaration cannot have duplicate modifiers. (Parsing[1002])

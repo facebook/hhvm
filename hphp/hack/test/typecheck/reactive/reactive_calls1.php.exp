@@ -1,0 +1,4 @@
+File "reactive_calls1.php", line 18, characters 3-7:
+Reactive functions can only call other reactive functions. (Typing[4200])
+File "reactive_calls1.php", line 5, characters 10-12:
+This function is non-reactive.

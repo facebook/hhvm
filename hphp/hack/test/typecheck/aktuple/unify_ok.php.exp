@@ -1,1 +1,6 @@
-No errors
+File "unify_ok.php", line 14, characters 12-16:
+Invalid argument (Typing[4110])
+File "unify_ok.php", line 3, characters 19-21:
+This is a num (int/float)
+File "unify_ok.php", line 11, characters 22-26:
+It is incompatible with a string

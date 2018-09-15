@@ -7,4 +7,8 @@ function foo() {
   unset($t);
   return $perms;
 }
+
+<<__EntryPoint>>
+function main_1095() {
 var_dump(foo());
+}

@@ -1,2 +1,2 @@
-File "test_consts6.php", line 6, characters 17-25:
-Illegal constant value (Naming[2023])
+File "test_consts6.php", line 6, characters 15-24:
+Cannot use static or parent::class in constant declaration (Parsing[1002])

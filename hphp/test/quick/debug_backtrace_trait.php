@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 include 'debug_backtrace_trait_helper.inc';
 class C extends P {

@@ -8,9 +8,13 @@ class A extends B {
     $a = new self();
   }
 }
+
+<<__EntryPoint>>
+function main_1223() {
 if (false) {
  class A {
 }
 ;
 }
 A::make();
+}

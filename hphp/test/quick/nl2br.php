@@ -1,4 +1,4 @@
-<?php
+<?hh
 //Tests issue #3815
 
 //This makes reading the output easier for debugging

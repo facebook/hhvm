@@ -1,0 +1,75 @@
+[
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": {
+      "capabilities": {
+        "textDocumentSync": {
+          "openClose": true,
+          "change": 2,
+          "willSave": false,
+          "willSaveWaitUntil": false,
+          "save": {
+            "includeText": false
+          }
+        },
+        "hoverProvider": true,
+        "completionProvider": {
+          "resolveProvider": true,
+          "triggerCharacters": [
+            "$",
+            ">",
+            "\\",
+            ":",
+            "<"
+          ]
+        },
+        "definitionProvider": true,
+        "referencesProvider": true,
+        "documentHighlightProvider": true,
+        "documentSymbolProvider": true,
+        "workspaceSymbolProvider": true,
+        "codeActionProvider": false,
+        "documentFormattingProvider": true,
+        "documentRangeFormattingProvider": true,
+        "renameProvider": false,
+        "typeCoverageProvider": true,
+        "rageProvider": true
+      }
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "telemetry/event",
+    "params": {
+      "type": 4,
+      "message": "Version in hhconfig=[NoVersion]"
+    }
+  },
+  {
+    "jsonrpc": "2.0",
+    "method": "textDocument/publishDiagnostics",
+    "params": {
+      "uri": "${php_file_uri}",
+      "diagnostics": [
+        {
+          "range": {
+            "start": {
+              "line": 7,
+              "character": 11
+            },
+            "end": {
+              "line": 7,
+              "character": 12
+            }
+          },
+          "severity": 1,
+          "code": 1002,
+          "source": "Hack",
+          "message": "Expected ;",
+          "relatedLocations": []
+        }
+      ]
+    }
+  }
+]

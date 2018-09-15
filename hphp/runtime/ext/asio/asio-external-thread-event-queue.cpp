@@ -36,7 +36,7 @@ AsioExternalThreadEventQueue::AsioExternalThreadEventQueue()
  * May throw C++ exception that may leave some events unprocessed.
  */
 void AsioExternalThreadEventQueue::processAllReceived() {
-  assert(m_received);
+  assertx(m_received);
   do {
     auto ete_wh = m_received;
     m_received = m_received->getNextToProcess();
@@ -50,7 +50,7 @@ void AsioExternalThreadEventQueue::processAllReceived() {
  * Returns true iff provided wait handle was abandoned.
  */
 bool AsioExternalThreadEventQueue::abandonAllReceived(c_ExternalThreadEventWaitHandle* wait_handle) {
-  assert(m_received);
+  assertx(m_received);
   bool seen = false;
   do {
     auto ete_wh = m_received;
@@ -67,9 +67,9 @@ bool AsioExternalThreadEventQueue::abandonAllReceived(c_ExternalThreadEventWaitH
  * Returns true iff at least one event was received.
  */
 bool AsioExternalThreadEventQueue::tryReceiveSome() {
-  assert(!m_received);
+  assertx(!m_received);
   m_received = m_queue.exchange(nullptr);
-  assert(m_received != K_CONSUMER_WAITING);
+  assertx(m_received != K_CONSUMER_WAITING);
   return m_received;
 }
 
@@ -82,12 +82,12 @@ bool AsioExternalThreadEventQueue::tryReceiveSome() {
  */
 bool AsioExternalThreadEventQueue::receiveSomeUntil(
     std::chrono::time_point<std::chrono::steady_clock> waketime) {
-  assert(!m_received);
+  assertx(!m_received);
 
   // try receive external thread events without grabbing lock
   m_received = m_queue.exchange(nullptr);
   if (m_received) {
-    assert(m_received != K_CONSUMER_WAITING);
+    assertx(m_received != K_CONSUMER_WAITING);
     return true;
   }
 
@@ -104,7 +104,7 @@ bool AsioExternalThreadEventQueue::receiveSomeUntil(
         // We timed out without receiving events.  Unflag ourselves as
         // waiting.
         m_received = m_queue.exchange(nullptr);
-        assert(m_received);
+        assertx(m_received);
 
         // If we were still waiting on an event, reset our state and return;
         // otherwise, a send() must have completed, so run with the received
@@ -122,8 +122,8 @@ bool AsioExternalThreadEventQueue::receiveSomeUntil(
   }
 
   m_received = m_queue.exchange(nullptr);
-  assert(m_received);
-  assert(m_received != K_CONSUMER_WAITING);
+  assertx(m_received);
+  assertx(m_received != K_CONSUMER_WAITING);
 
   return true;
 }
@@ -133,7 +133,7 @@ bool AsioExternalThreadEventQueue::receiveSomeUntil(
  */
 void AsioExternalThreadEventQueue::receiveSome() {
   bool received UNUSED = receiveSomeUntil(AsioSession::getLatestWakeTime());
-  assert(received);
+  assertx(received);
 }
 
 /**

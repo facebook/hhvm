@@ -21,6 +21,9 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/container-functions.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/base/libevent-http-client.h"
 #include "hphp/runtime/server/http-protocol.h"
@@ -59,37 +62,59 @@ bool HHVM_FUNCTION(is_callable, const Variant& v, bool syntax /* = false */,
 
 Variant HHVM_FUNCTION(call_user_func, const Variant& function,
                       const Array& params /* = null_array */) {
-  return vm_call_user_func(function, params);
+  return vm_call_user_func(function, params, /* forward */ false,
+                           /* check ref */ true);
 }
 
 Variant HHVM_FUNCTION(call_user_func_array, const Variant& function,
-                      const Array& params) {
-  return vm_call_user_func(function, params);
+                      const Variant& params) {
+  if (UNLIKELY(!isContainer(params))) {
+    raise_warning("call_user_func_array() expects parameter 2 to be an array "
+                  "or collection, %s given",
+                  getDataTypeString(params.getType()).data());
+    return init_null();
+  }
+  return vm_call_user_func(function, params, /* forward */ false,
+                           /* check ref */ true);
 }
 
-Variant HHVM_FUNCTION(check_user_func_async, const Variant& handles,
-                     int timeout /* = -1 */) {
+Variant HHVM_FUNCTION(check_user_func_async, const Variant& /*handles*/,
+                      int /*timeout*/ /* = -1 */) {
   raise_error("%s is no longer supported", __func__);
   return init_null();
 }
 
-Variant HHVM_FUNCTION(end_user_func_async, const Object& handle,
-                     int default_strategy /*= k_GLOBAL_STATE_IGNORE*/,
-                     const Variant& additional_strategies /* = null */) {
+Variant HHVM_FUNCTION(end_user_func_async, const Object& /*handle*/,
+                      int /*default_strategy*/ /*= k_GLOBAL_STATE_IGNORE*/,
+                      const Variant& /*additional_strategies*/ /* = null */) {
   raise_error("%s is no longer supported", __func__);
   return init_null();
 }
 
 Variant HHVM_FUNCTION(forward_static_call_array, const Variant& function,
                       const Array& params) {
+  auto const warning = "forward_static_call_array() is deprecated and subject"
+  " to removal from the Hack language";
+  switch (RuntimeOption::DisableForwardStaticCallArray) {
+    case 0:  break;
+    case 1:  raise_warning(warning); break;
+    default: raise_error(warning);
+  }
   return HHVM_FN(forward_static_call)(function, params);
 }
 
 Variant HHVM_FUNCTION(forward_static_call, const Variant& function,
                               const Array& params /* = null_array */) {
+  auto const warning = "forward_static_call() is deprecated and subject"
+  " to removal from the Hack language";
+  switch (RuntimeOption::DisableForwardStaticCall) {
+    case 0:  break;
+    case 1:  raise_warning(warning); break;
+    default: raise_error(warning);
+  }
   // Setting the bound parameter to true tells vm_call_user_func()
   // propogate the current late bound class
-  return vm_call_user_func(function, params, true);
+  return vm_call_user_func(function, params, true, /* check ref */ true);
 }
 
 String HHVM_FUNCTION(create_function, const String& args, const String& code) {
@@ -145,9 +170,16 @@ Variant HHVM_FUNCTION(func_get_arg, int arg_num) {
   return false;
 }
 
+const StaticString s_call_user_func("call_user_func");
+const StaticString s_call_user_func_array("call_user_func_array");
+
 Array hhvm_get_frame_args(const ActRec* ar, int offset) {
+  while (ar && (ar->func()->name()->isame(s_call_user_func.get()) ||
+                ar->func()->name()->isame(s_call_user_func_array.get()))) {
+    ar = g_context->getPrevVMState(ar);
+  }
   if (ar == nullptr) {
-    return Array();
+    return Array::CreateVArray();
   }
   int numParams = ar->func()->numNonVariadicParams();
   int numArgs = ar->numArgs();
@@ -165,7 +197,7 @@ Array hhvm_get_frame_args(const ActRec* ar, int offset) {
     }
   }
   local -= offset;
-  PackedArrayInit retInit(std::max(numArgs - offset, 0));
+  VArrayInit retInit(std::max(numArgs - offset, 0));
   for (int i = offset; i < numArgs; ++i) {
     if (i < numParams) {
       // This corresponds to one of the function's formal parameters, so it's

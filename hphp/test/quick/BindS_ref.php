@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Foo {
   public static $x;

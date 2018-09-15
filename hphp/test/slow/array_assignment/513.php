@@ -14,6 +14,10 @@ function setNullVariantHelper($f, $value) {
 function setNullVariant($value) {
   setNullVariantHelper('f', $value);
 }
+
+<<__EntryPoint>>
+function main_513() {
 setNullVariant('Surprise!');
 $b = null;
 var_dump($b[1]);
+}

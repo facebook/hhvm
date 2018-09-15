@@ -30,12 +30,12 @@ namespace php { struct Func; struct Local; }
  *
  * Pre: f->isClosureBody
  */
-uint32_t closure_num_use_vars(borrowed_ptr<const php::Func>);
+uint32_t closure_num_use_vars(const php::Func*);
 
 /*
  * Returns whether a given php::Func is the pseudomain of its unit.
  */
-bool is_pseudomain(borrowed_ptr<const php::Func>);
+bool is_pseudomain(const php::Func*);
 
 /*
  * Locals with certain special names can be set in the enclosing scope by
@@ -44,8 +44,24 @@ bool is_pseudomain(borrowed_ptr<const php::Func>);
  * could modify them through $GLOBALS, so in a pseudomain we don't track any
  * local types.
  */
-bool is_volatile_local(borrowed_ptr<const php::Func>,
-                       borrowed_ptr<const php::Local>);
+bool is_volatile_local(const php::Func*, LocalId);
+
+/*
+ * Given a function which is a memoize wrapper, return the name of the function
+ * that the wrapper is wrapping.
+ */
+SString memoize_impl_name(const php::Func*);
+
+/*
+ * Check that passing nArgs params to func has a chance of not warning.
+ */
+bool check_nargs_in_range(const php::Func* func, uint32_t nArgs);
+
+/*
+ * Append the body of src to dst, such that all returns from dst
+ * branch to src instead.
+ */
+bool append_func(php::Func* dst, const php::Func& src);
 
 //////////////////////////////////////////////////////////////////////
 

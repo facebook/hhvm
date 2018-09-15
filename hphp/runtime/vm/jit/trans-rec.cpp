@@ -19,8 +19,6 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 
-#include <unordered_map>
-
 namespace HPHP { namespace jit {
 
 TransRec::TransRec(SrcKey                      _src,
@@ -69,8 +67,7 @@ TransRec::TransRec(SrcKey                      _src,
   }
 }
 
-void
-TransRec::optimizeForMemory() {
+void TransRec::optimizeForMemory() {
   // Dump large annotations to disk.
   for (int i = 0 ; i < annotations.size(); ++i) {
     auto& annotation = annotations[i];
@@ -97,7 +94,7 @@ TransRec::optimizeForMemory() {
 
 TransRec::SavedAnnotation
 TransRec::writeAnnotation(const Annotation& annotation, bool compress) {
-  static std::unordered_map<std::string, bool> fileWritten;
+  static jit::fast_set<std::string> fileWritten;
   SavedAnnotation saved = {
     folly::sformat("{}/tc_annotations.txt{}",
                    RuntimeOption::EvalDumpTCPath,
@@ -107,10 +104,8 @@ TransRec::writeAnnotation(const Annotation& annotation, bool compress) {
   };
   auto const fileName = saved.fileName.c_str();
 
-  auto result = fileWritten.find(saved.fileName);
-  if (result == fileWritten.end()) {
+  if (fileWritten.insert(saved.fileName).second) {
     unlink(fileName);
-    fileWritten[saved.fileName] = true;
   }
 
   FILE* file = fopen(fileName, "a");
@@ -140,8 +135,24 @@ TransRec::writeAnnotation(const Annotation& annotation, bool compress) {
   return saved;
 }
 
-std::string
-TransRec::print(uint64_t profCount) const {
+bool TransRec::isConsistent() const {
+  if (!isValid()) return true;
+
+  const auto aEnd       = aStart       + aLen;
+  const auto acoldEnd   = acoldStart   + acoldLen;
+  const auto afrozenEnd = afrozenStart + afrozenLen;
+
+  for (const auto& b : bcMapping) {
+    if (b.aStart < aStart             || b.aStart > aEnd         ||
+        b.acoldStart < acoldStart     || b.acoldStart > acoldEnd ||
+        b.afrozenStart < afrozenStart || b.afrozenStart > afrozenEnd) {
+      return false;
+    }
+  }
+  return true;
+}
+
+std::string TransRec::print() const {
   if (!isValid()) return "Translation -1 {\n}\n\n";
 
   std::string ret;
@@ -154,13 +165,13 @@ TransRec::print(uint64_t profCount) const {
     "  src.md5 = {}\n"
     "  src.funcId = {}\n"
     "  src.funcName = {}\n"
-    "  src.resumed = {}\n"
+    "  src.resumeMode = {}\n"
     "  src.hasThis = {}\n"
     "  src.bcStart = {}\n"
     "  src.blocks = {}\n",
     id, md5, src.funcID(),
     funcName.empty() ? "Pseudo-main" : funcName,
-    (int32_t)src.resumed(),
+    (int32_t)src.resumeMode(),
     (int32_t)src.hasThis(),
     src.offset(),
     blocks.size());
@@ -211,11 +222,7 @@ TransRec::print(uint64_t profCount) const {
                   annotation.first, annotation.second);
   }
 
-  folly::format(
-    &ret,
-    "  profCount = {}\n"
-    "  bcMapping = {}\n",
-    profCount, bcMapping.size());
+  folly::format(&ret, "  bcMapping = {}\n", bcMapping.size());
 
   for (auto const& info : bcMapping) {
     folly::format(

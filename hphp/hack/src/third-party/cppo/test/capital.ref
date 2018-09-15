@@ -1,0 +1,6 @@
+
+
+
+
+# 6 "capital.cppo"
+ external  onExit  :  unit -> unit = "exit" [@@bs.val]  

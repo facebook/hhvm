@@ -1,1 +1,1 @@
-../dynamic_invoke_functions_test_1_and_2.hphp_opts
+-vDynamicInvokeFunctions.*=test1 -vDynamicInvokeFunctions.*=test2 -d hhvm.php7.all=0

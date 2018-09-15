@@ -1,5 +1,6 @@
 #include "hphp/runtime/ext/curl/curl-resource.h"
 #include "hphp/runtime/ext/curl/curl-pool.h"
+#include "hphp/runtime/ext/curl/curl-share-resource.h"
 #include "hphp/runtime/ext/curl/ext_curl.h"
 
 #include "hphp/runtime/base/array-init.h"
@@ -8,13 +9,14 @@
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/plain-file.h"
+#include "hphp/runtime/base/stack-logger.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include <curl/easy.h>
 #include <curl/multi.h>
-#include <openssl/ssl.h>
+#include <folly/portability/OpenSSL.h>
 
 #define PHP_CURL_STDOUT 0
 #define PHP_CURL_FILE   1
@@ -124,12 +126,25 @@ void CurlResource::sweep() {
   closeForSweep();
 }
 
+void CurlResource::close() {
+  // If we try to close while we're in a callback, warn.
+  if (m_in_callback) {
+    raise_warning(
+      "curl_close(): Attempt to close cURL in callback, ignored."
+    );
+    return;
+  }
+  closeForSweep();
+  m_opts.clear();
+  m_to_free.reset();
+}
+
 void CurlResource::closeForSweep() {
   assertx(!m_exception);
   if (m_cp) {
     if (m_connPool) {
       // reuse this curl handle if we're pooling
-      assert(m_pooledHandle);
+      assertx(m_pooledHandle);
       m_connPool->store(m_pooledHandle);
       m_pooledHandle = nullptr;
     } else {
@@ -203,7 +218,19 @@ Variant CurlResource::execute() {
   {
     IOStatusHelper io("curl_easy_perform", m_url.data());
     SYNC_VM_REGS_SCOPED();
-    m_error_no = curl_easy_perform(m_cp);
+    if (m_in_exec) {
+      log_native_stack("unexpected re-entry into curl_exec");
+    }
+    m_in_exec = true;
+    // T29358191: curl_easy_perform should not throw... trust but verify
+    try {
+      m_error_no = curl_easy_perform(m_cp);
+    } catch (...) {
+      m_in_exec = false;
+      log_native_stack("unexpected exception from curl_easy_perform");
+      throw;
+    }
+    m_in_exec = false;
     check_exception();
   }
   set_curl_statuses(m_cp, m_url.data());
@@ -261,6 +288,13 @@ bool CurlResource::setOption(long option, const Variant& value) {
     ret = setNonCurlOption(option, value);
   } else if (option == CURLOPT_POSTFIELDS) {
     ret = setPostFieldsOption(value);
+  } else if (option == CURLOPT_SHARE) {
+    auto curlsh = dyn_cast_or_null<CurlShareResource>(value);
+    if (!curlsh || curlsh->isInvalid()) {
+      return false;
+    }
+    m_error_no = curlsh->attachToCurlHandle(m_cp);
+    ret = true;
   } else if (option == CURLINFO_HEADER_OUT) {
     if (value.toInt64() == 1) {
       curl_easy_setopt(m_cp, CURLOPT_DEBUGFUNCTION, curl_debug);
@@ -489,6 +523,15 @@ bool CurlResource::isLongOption(long option) {
 #if LIBCURL_VERSION_NUM >= 0x073100 /* Available since 7.49.0 */
     case CURLOPT_TCP_FASTOPEN:
 #endif
+#if LIBCURL_VERSION_NUM >= 0x073300 /* Available since 7.51.0 */
+    case CURLOPT_KEEP_SENDING_ON_ERROR:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073600 /* Available since 7.54.0 */
+    case CURLOPT_SUPPRESS_CONNECT_HEADERS:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073700 /* Available since 7.55.0 */
+    case CURLOPT_SOCKS5_AUTH:
+#endif
 #if CURLOPT_MUTE != 0
     case CURLOPT_MUTE:
 #endif
@@ -679,6 +722,12 @@ bool CurlResource::isNullableStringOption(long option) {
 #if LIBCURL_VERSION_NUM >= 0x072800 /* Available since 7.40.0 */
     case CURLOPT_UNIX_SOCKET_PATH:
 #endif
+#if LIBCURL_VERSION_NUM >= 0x073500 /* Available since 7.53.0 */
+    case CURLOPT_ABSTRACT_UNIX_SOCKET:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073700 /* Available since 7.55.0 */
+    case CURLOPT_REQUEST_TARGET:
+#endif
 #if LIBCURL_VERSION_NUM >= 0x071004 /* Available since 7.16.4 */
     case CURLOPT_KRBLEVEL:
 #else
@@ -744,9 +793,9 @@ bool CurlResource::setPostFieldsOption(const Variant& value) {
         && var_val.toObject()->instanceof(SystemLib::s_CURLFileClass))) {
       Object val = var_val.toObject();
 
-      String name = val.o_get(s_name).toString();
-      String mime = val.o_get(s_mime).toString();
-      String postname = val.o_get(s_postname).toString();
+      String name = val->o_get(s_name).toString();
+      String mime = val->o_get(s_mime).toString();
+      String postname = val->o_get(s_postname).toString();
 
       m_error_no = (CURLcode)curl_formadd
         (&first, &last,
@@ -1025,47 +1074,68 @@ int64_t CurlResource::minTimeoutMS(int64_t timeout) {
   return minTimeoutImpl(timeout, 1000);
 }
 
-Variant CurlResource::do_callback(const Variant& cb, const Array& args) {
+void CurlResource::handle_exception() {
   assertx(!m_exception);
   try {
-    return vm_call_user_func(cb, args);
-  } catch (const Object &e) {
+    throw;
+  } catch (const Object& e) {
     m_exception.assign(e);
-  } catch (Exception &e) {
+  } catch (Exception& e) {
     m_exception.assign(e.clone());
+  } catch (std::exception& e) {
+    m_exception.assign(
+      new FatalErrorException(0,
+                              "Unexpected error in curl callback: %s",
+                              e.what())
+    );
+  } catch (...) {
+    m_exception.assign(
+      new FatalErrorException("Unknown error in curl callback"));
   }
-  return init_null();
 }
 
 size_t CurlResource::curl_read(char *data,
                                size_t size, size_t nmemb, void *ctx) {
   CurlResource *ch = (CurlResource *)ctx;
+  if (!ch->m_in_exec) {
+    // T29358191: who's calling, and are they dealing with m_exception?
+    log_native_stack("unexpected curl_read");
+  }
   ReadHandler *t  = &ch->m_read;
 
   int length = -1;
-  switch (t->method) {
-    case PHP_CURL_DIRECT:
-      if (t->fp) {
-        int data_size = size * nmemb;
-        String ret = t->fp->read(data_size);
-        length = ret.size();
-        if (length) {
-          memcpy(data, ret.data(), length);
+  try {
+    switch (t->method) {
+      case PHP_CURL_DIRECT:
+        if (t->fp) {
+          int data_size = size * nmemb;
+          String ret = t->fp->read(data_size);
+          length = ret.size();
+          if (length) {
+            memcpy(data, ret.data(), length);
+          }
         }
+        break;
+      case PHP_CURL_USER: {
+        int data_size = size * nmemb;
+        ch->m_in_callback = true;
+        SCOPE_EXIT {
+          ch->m_in_callback = false;
+        };
+        Variant ret = vm_call_user_func(
+          t->callback,
+          make_packed_array(Resource(ch), Resource(t->fp), data_size));
+        if (ret.isString()) {
+          String sret = ret.toString();
+          length = data_size < sret.size() ? data_size : sret.size();
+          memcpy(data, sret.data(), length);
+        }
+        break;
       }
-      break;
-    case PHP_CURL_USER: {
-      int data_size = size * nmemb;
-      Variant ret = ch->do_callback(
-        t->callback,
-        make_packed_array(Resource(ch), Resource(t->fp), data_size));
-      if (ret.isString()) {
-        String sret = ret.toString();
-        length = data_size < sret.size() ? data_size : sret.size();
-        memcpy(data, sret.data(), length);
-      }
-      break;
     }
+  } catch (...) {
+    ch->handle_exception();
+    return CURL_READFUNC_ABORT;
   }
   return length;
 }
@@ -1073,67 +1143,91 @@ size_t CurlResource::curl_read(char *data,
 size_t CurlResource::curl_write(char *data,
                                 size_t size, size_t nmemb, void *ctx) {
   CurlResource *ch = (CurlResource *)ctx;
+  if (!ch->m_in_exec) {
+    // T29358191: who's calling, and are they dealing with m_exception?
+    log_native_stack("unexpected curl_write");
+  }
   WriteHandler *t  = &ch->m_write;
   size_t length = size * nmemb;
 
-  switch (t->method) {
-    case PHP_CURL_STDOUT:
-      g_context->write(data, length);
-      break;
-    case PHP_CURL_FILE:
-      return t->fp->write(String(data, length, CopyString), length);
-    case PHP_CURL_RETURN:
-      if (length > 0) {
-        t->buf.append(data, (int)length);
+  try {
+    switch (t->method) {
+      case PHP_CURL_STDOUT:
+        g_context->write(data, length);
+        break;
+      case PHP_CURL_FILE:
+        return t->fp->write(String(data, length, CopyString), length);
+      case PHP_CURL_RETURN:
+        if (length > 0) {
+          t->buf.append(data, (int)length);
+        }
+        break;
+      case PHP_CURL_USER: {
+        ch->m_in_callback = true;
+        SCOPE_EXIT {
+          ch->m_in_callback = false;
+        };
+        Variant ret = vm_call_user_func(
+          t->callback,
+          make_packed_array(Resource(ch), String(data, length, CopyString)));
+        length = ret.toInt64();
+        break;
       }
-      break;
-    case PHP_CURL_USER: {
-      Variant ret = ch->do_callback(
-        t->callback,
-        make_packed_array(Resource(ch), String(data, length, CopyString)));
-      length = ret.toInt64();
-      break;
     }
+  } catch (...) {
+    ch->handle_exception();
+    return 0;
   }
-
   return length;
 }
 
 size_t CurlResource::curl_write_header(char *data,
                                        size_t size, size_t nmemb, void *ctx) {
   CurlResource *ch = (CurlResource *)ctx;
+  if (!ch->m_in_exec) {
+    // T29358191: who's calling, and are they dealing with m_exception?
+    log_native_stack("unexpected curl_write_header");
+  }
   WriteHandler *t  = &ch->m_write_header;
   size_t length = size * nmemb;
 
-  switch (t->method) {
-    case PHP_CURL_STDOUT:
-      // Handle special case write when we're returning the entire transfer
-      if (ch->m_write.method == PHP_CURL_RETURN && length > 0) {
-        ch->m_write.buf.append(data, (int)length);
-      } else {
-        g_context->write(data, length);
-      }
-      break;
-    case PHP_CURL_FILE:
-      return t->fp->write(String(data, length, CopyString), length);
-    case PHP_CURL_USER: {
-        Variant ret = ch->do_callback(
+  try {
+    switch (t->method) {
+      case PHP_CURL_STDOUT:
+        // Handle special case write when we're returning the entire transfer
+        if (ch->m_write.method == PHP_CURL_RETURN && length > 0) {
+          ch->m_write.buf.append(data, (int)length);
+        } else {
+          g_context->write(data, length);
+        }
+        break;
+      case PHP_CURL_FILE:
+        return t->fp->write(String(data, length, CopyString), length);
+      case PHP_CURL_USER: {
+        ch->m_in_callback = true;
+        SCOPE_EXIT {
+          ch->m_in_callback = false;
+        };
+        Variant ret = vm_call_user_func(
           t->callback,
           make_packed_array(Resource(ch), String(data, length, CopyString)));
         length = ret.toInt64();
-      break;
+        break;
+      }
+      case PHP_CURL_IGNORE:
+        return length;
+      default:
+        return (size_t)-1;
     }
-    case PHP_CURL_IGNORE:
-      return length;
-    default:
-      return (size_t)-1;
+  } catch (...) {
+    ch->handle_exception();
+    return 0;
   }
-
   return length;
 }
 
-int CurlResource::curl_debug(CURL *cp, curl_infotype type, char *buf,
-                             size_t buf_len, void *ctx) {
+int CurlResource::curl_debug(CURL* /*cp*/, curl_infotype type, char* buf,
+                             size_t buf_len, void* ctx) {
   CurlResource *ch = (CurlResource *)ctx;
   if (type == CURLINFO_HEADER_OUT && buf_len > 0) {
     ch->m_header = String(buf, buf_len, CopyString);
@@ -1146,6 +1240,10 @@ int CurlResource::curl_progress(void* p,
                                 double ultotal, double ulnow) {
   assertx(p);
   CurlResource* curl = static_cast<CurlResource*>(p);
+  if (!curl->m_in_exec) {
+    // T29358191: who's calling, and are they dealing with m_exception?
+    log_native_stack("unexpected curl_progress");
+  }
 
   PackedArrayInit pai(5);
   pai.append(Resource(curl));
@@ -1154,13 +1252,18 @@ int CurlResource::curl_progress(void* p,
   pai.append(ultotal);
   pai.append(ulnow);
 
-  Variant result = vm_call_user_func(
-    curl->m_progress_callback,
-    pai.toArray()
-  );
-  // Both PHP and libcurl are documented as return 0 to continue, non-zero
-  // to abort, however this is what Zend actually implements
-  return result.toInt64() == 0 ? 0 : 1;
+  try {
+    Variant result = vm_call_user_func(
+      curl->m_progress_callback,
+      pai.toArray()
+    );
+    // Both PHP and libcurl are documented as return 0 to continue, non-zero
+    // to abort, however this is what Zend actually implements
+    return result.toInt64() == 0 ? 0 : 1;
+  } catch (...) {
+    curl->handle_exception();
+    return 1;
+  }
 }
 
 CURLcode CurlResource::ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {

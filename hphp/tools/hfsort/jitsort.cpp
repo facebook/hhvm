@@ -217,8 +217,8 @@ int jitsort(int pid, int time, FILE* perfSymFile, FILE* relocResultsFile) {
     auto perfHitsFileName = folly::sformat("/tmp/perf-{}.out", pid);
 
     auto perfCmd =
-        "perf record -g -p {0} -e instructions -o {1} -- sleep {2} && "
-        "perf script -i {1} -f comm,ip > {3}";
+        "perf record -BN --no-buffering -g -p {0} -e instructions -o {1} -- sleep {2} && "
+        "perf script -i {1} --fields comm,ip > {3}";
 
     auto cmds = std::string("sh -c '(") + perfCmd + ") 2>&1'";
     cmds = folly::sformat(cmds, pid, perfData, time, perfHitsFileName);

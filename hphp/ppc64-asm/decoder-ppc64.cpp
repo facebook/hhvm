@@ -16,6 +16,8 @@
 
 #include "hphp/ppc64-asm/decoder-ppc64.h"
 
+#include <sstream>
+
 #include "hphp/ppc64-asm/branch-ppc64.h"
 #include "hphp/ppc64-asm/isa-ppc64.h"
 #include "hphp/ppc64-asm/asm-ppc64.h"
@@ -297,14 +299,14 @@ std::string DecoderInfo::toString() const {
   for (auto oper : m_operands) {
     auto op = m_image & oper.m_mask;
     if (!(oper.m_flags & PPC_OPERAND_NOSHIFT)) op >>= oper.operandShift();
-    auto toHex = [] (std::string& instr, intptr_t n) {
+    auto toHex = [] (std::string& instruction, intptr_t n) {
       std::stringstream stringStream;
       if (n < 0) {
           stringStream << "-0x";
           n = -n;
       } else stringStream << "0x";
       stringStream << std::hex << n;
-      instr += stringStream.str();
+      instruction += stringStream.str();
     };
     if (oper.m_flags & PPC_OPERAND_GPR)   { instr += "r"; }
     if (oper.m_flags & PPC_OPERAND_GPR_0) { if (op != 0) instr += "r"; }
@@ -656,11 +658,11 @@ const DecoderInfo Decoder::decode(const PPC64Instr* const ip) {
 
     // If instruction found, return it.
     if (position != -1) {
-      auto pdi = m_decoder_table[position];
-      assert(pdi->opcode() == decoded_instr);
-      pdi->instruction_image(*ip);
-      pdi->setIp(ip);
-      return *pdi;
+      DecoderInfo pdi = *m_decoder_table[position];
+      assert(pdi.opcode() == decoded_instr);
+      pdi.instruction_image(*ip);
+      pdi.setIp(ip);
+      return pdi;
     }
   }
 

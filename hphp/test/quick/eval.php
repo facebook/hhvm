@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   print "Test begin\n";
@@ -17,7 +17,7 @@ function main() {
   }
   $i = 1;
   while ($i < 100000) {
-    testEval($i);
+    testEval(&$i);
     var_dump($i);
   }
 

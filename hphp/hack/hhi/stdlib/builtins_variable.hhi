@@ -8,9 +8,9 @@
  *
  */
 
-<<__Rx>>
+<<__PHPStdLib, __Rx>>
 function is_bool($var): bool;
-<<__Rx>>
+<<__PHPStdLib, __Rx>>
 function is_int($var): bool;
 <<__Deprecated('Use is_int().'), __Rx>>
 function is_integer($var): bool;
@@ -18,19 +18,19 @@ function is_integer($var): bool;
 function is_long($var): bool;
 <<__Deprecated('Use is_float().'), __Rx>>
 function is_double($var): bool;
-<<__Rx>>
+<<__PHPStdLib, __Rx>>
 function is_float($var): bool;
 <<__PHPStdLib, __Rx>>
 function is_numeric($var): bool;
 <<__Deprecated('Use is_float().'), __Rx>>
 function is_real($var): bool;
-<<__Rx>>
+<<__PHPStdLib, __Rx>>
 function is_string($var): bool;
 <<__Rx>>
 function is_scalar($var): bool;
 <<__Rx>>
 function is_object($var): bool;
-<<__Rx>>
+<<__PHPStdLib, __Rx>>
 function is_resource($var): bool;
 <<__Rx>>
 function is_null($var): bool;

@@ -642,6 +642,13 @@ let param_template node env =
   }
 
 let pShapeFieldName : shape_field_name parser = fun name env ->
+  let is_valid_shape_literal t =
+    let is_str =
+    (Token.kind t = TK.SingleQuotedStringLiteral ||
+    Token.kind t = TK.DoubleQuotedStringLiteral) in
+    let is_empty = let text = Token.text t in
+        text = "\'\'" || text = "\"\"" in
+    is_str && (not is_empty) in
   match syntax name with
   | ScopeResolutionExpression
     { scope_resolution_qualifier; scope_resolution_name; _ } ->
@@ -651,12 +658,11 @@ let pShapeFieldName : shape_field_name parser = fun name env ->
       )
   | LiteralExpression {
       literal_expression = { syntax = Token t; _ }
-    } when Token.kind t = TK.SingleQuotedStringLiteral ||
-           Token.kind t = TK.DoubleQuotedStringLiteral ->
+    } when is_valid_shape_literal t ->
     let p, n = pos_name name env in SFlit_str (p, mkStr env name unesc_dbl n)
   | _ ->
     raise_parsing_error env (`Node name) SyntaxError.invalid_shape_field_name;
-    missing_syntax "shape field name" name env
+    let p, n = pos_name name env in SFlit_str (p, mkStr env name unesc_dbl n)
 
 let mpShapeExpressionField : ('a, (shape_field_name * 'a)) metaparser =
   fun hintParser node env ->

@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "hphp/util/assertions.h"
+
 #include <folly/Demangle.h>
 #include <folly/Format.h>
 #include <folly/Memory.h>
@@ -23,6 +25,7 @@
 #include <folly/String.h>
 #include <folly/container/F14Map.h>
 #include <folly/portability/Unistd.h>
+#include <folly/experimental/symbolizer/Elf.h>
 
 #include <stdexcept>
 #include <string>
@@ -30,7 +33,6 @@
 #include <functional>
 
 #include <dwarf.h>
-#include <libdwarf.h>
 
 namespace debug_parser {
 
@@ -44,14 +46,16 @@ struct DwarfStateException: std::runtime_error {
 };
 
 struct GlobalOff {
-  GlobalOff(Dwarf_Off off, bool isInfo) : m_value{off * 2 + (isInfo ? 1 : 0)} {
+  GlobalOff(uint64_t off, bool isInfo) : m_value{off * 2 + (isInfo ? 1 : 0)} {
     assert(offset() == off);
   }
+  GlobalOff(int64_t off, bool isInfo) :
+      GlobalOff{ static_cast<uint64_t>(off), isInfo } {}
 
   static GlobalOff fromRaw(uint64_t raw) {
     return GlobalOff{raw};
   }
-  Dwarf_Off offset() const { return m_value >> 1; }
+  uint64_t offset() const { return m_value >> 1; }
   bool isInfo() const { return m_value & 1; }
   uint64_t raw() const { return m_value; }
 
@@ -86,19 +90,22 @@ private:
   uint64_t m_value;
 };
 
-/*
- * libdwarf uses a very low-level janky C-style interface, so provide a simple
- * wrapper class to make some of the common operations easier.
- *
- * In a few cases, libdwarf keeps internal state, which forces you walk the DIEs
- * in a hierarchial manner. For this reason, many of the operations are
- * structured as for-each style iteration.
- */
+struct AbbrevMap {
+  void build(folly::StringPiece debug_abbrev);
+
+  static uint64_t readOne(folly::StringPiece& section,
+                          uint64_t &tag, bool &hasChildren,
+                          folly::StringPiece& attrs);
+
+  std::vector<uint64_t> abbrev_vec;
+  // map from offset to abbrev_vec index
+  folly::F14FastMap<uint64_t, uint64_t> abbrev_map;
+};
 
 struct DwarfState {
   using Sig8Map = folly::F14FastMap<uint64_t, GlobalOff>;
 
-  explicit DwarfState(std::string filename, const Sig8Map* sig8);
+  explicit DwarfState(std::string filename);
   DwarfState(const DwarfState&) = delete;
   DwarfState(DwarfState&&) = delete;
   ~DwarfState();
@@ -106,352 +113,287 @@ struct DwarfState {
   DwarfState& operator=(const DwarfState&) = delete;
   DwarfState& operator=(DwarfState&&) = delete;
 
-  static uint64_t Sig8AsKey(Dwarf_Sig8 sig);
-  Dwarf_Half getTag(Dwarf_Die die);
-  std::string tagToString(Dwarf_Half tag);
-  std::string getDIEName(Dwarf_Die die);
-  GlobalOff getDIEOffset(Dwarf_Die die);
-  Dwarf_Half getAttributeType(Dwarf_Attribute attr);
-  std::string attributeTypeToString(Dwarf_Half type);
-  Dwarf_Half getAttributeForm(Dwarf_Attribute attr);
-  std::string getAttributeValueString(Dwarf_Attribute attr);
-  Dwarf_Bool getAttributeValueFlag(Dwarf_Attribute attr);
-  Dwarf_Unsigned getAttributeValueUData(Dwarf_Attribute attr);
-  Dwarf_Signed getAttributeValueSData(Dwarf_Attribute attr);
-  Dwarf_Addr getAttributeValueAddr(Dwarf_Attribute attr);
-  GlobalOff getAttributeValueRef(Dwarf_Die die, Dwarf_Attribute attr);
-  GlobalOff getAttributeValueRef(Dwarf_Attribute attr);
-  Dwarf_Sig8 getAttributeValueSig8(Dwarf_Attribute attr);
-  std::vector<Dwarf_Loc> getAttributeValueExprLoc(Dwarf_Attribute attr);
-  std::vector<Dwarf_Ranges> getRanges(Dwarf_Off offset);
+  /*
+   * A top level chunk in the .debug_info or .debug_types section.
+   *
+   * Contains a compilation-unit, or type-unit, and all its children.
+   *
+   * section + offset + size points at the start of the next context.
+   */
+  struct Context {
+    const char* section;
+    uint64_t offset;
+    uint64_t size;
+    bool is64Bit;
+    bool isInfo;
+    uint8_t addrSize;
+    uint64_t abbrevOffset;
+    uint64_t typeSignature;
+    uint64_t typeOffset;
+    uint64_t firstDie;
+  };
 
-  template <typename F> void forEachChild(Dwarf_Die die, F&& f);
-  template <typename F> void forEachAttribute(Dwarf_Die die, F&& f);
-  template <typename F> void forEachCompilationUnit(F&& f);
-  template <typename F> void forEachTopLevelUnit(F&& f, bool isInfo);
-  template <typename F> auto onDIEAtOffset(GlobalOff offset, F&& f) ->
-    decltype(f(std::declval<Dwarf_Die>()));
-  template <typename F> auto onDIEAtIncreasingOffset(GlobalOff offset, F&& f) ->
-    decltype(f(std::declval<Dwarf_Die>()));
+  struct Die {
+    const Context* context;
+    // offset within context->section
+    uint64_t offset;
+    uint64_t code;
+    uint64_t tag;
+    // convenience copy from the context.
+    bool is64Bit;
+    bool hasChildren;
+    // offset from start to first attribute
+    uint8_t attrOffset;
+    // if we know where the next sibling is (eg via DW_AT_sibling), and
+    // it fits in uint32_t, the delta we need to add to offset to get
+    // there; otherwise zero.
+    uint32_t siblingDelta;
+    // if we know where the next die is, and it fits in uint32_t, this
+    // is the delta we need to add to offset to get there; otherwise zero.
+    // if there are no children, this will be the same as sibling.
+    uint32_t nextDieDelta;
+    folly::StringPiece attributes;
+  };
 
-  int fd;
-  Dwarf_Debug dwarf;
-  std::string filename;
-  const Sig8Map* sig8_map;
+  struct AttributeSpec {
+    uint64_t name{};
+    uint64_t form{};
 
-  Dwarf_Off cur_info_offset{0};
-  Dwarf_Off next_info_offset{0};
-  Dwarf_Off cur_type_offset{0};
-  Dwarf_Off next_type_offset{0};
+    explicit operator bool() const {
+      return name || form;
+    }
+  };
+
+  struct Attribute : AttributeSpec {
+    Attribute(AttributeSpec spec, Die* die, folly::StringPiece sp) :
+        AttributeSpec{spec}, die{die}, attrValue{sp} {}
+    Die* die;
+    folly::StringPiece attrValue;
+  };
+
+  using Dwarf_Half = uint16_t;
+  struct Dwarf_Loc {
+    Dwarf_Half lr_atom;
+    uint64_t lr_number;
+    uint64_t lr_number2;
+    uint64_t lr_offset;
+  };
+  struct Dwarf_Ranges {
+    static auto constexpr kSelection = uintptr_t(-1);
+
+    uintptr_t dwr_addr1;
+    uintptr_t dwr_addr2;
+  };
+
+  Context getContextAtOffset(GlobalOff off) const;
+  Die getDieAtOffset(const Context* context, GlobalOff off) const;
+  Die getNextSibling(Die* die) const;
+  Dwarf_Half getTag(Die* die) const;
+  std::string tagToString(Dwarf_Half tag) const;
+  std::string getDIEName(Die* die) const;
+  GlobalOff getDIEOffset(Die* die) const;
+  Dwarf_Half getAttributeType(Attribute* attr) const;
+  std::string attributeTypeToString(Dwarf_Half type) const;
+  Dwarf_Half getAttributeForm(Attribute* attr) const;
+  std::string attributeFormToString(Dwarf_Half form) const;
+  std::string opToString(Dwarf_Half form) const;
+  std::string getAttributeValueString(Attribute* attr) const;
+  bool getAttributeValueFlag(Attribute* attr) const;
+  uint64_t getAttributeValueUData(Attribute* attr) const;
+  int64_t getAttributeValueSData(Attribute* attr) const;
+  uintptr_t getAttributeValueAddr(Attribute* attr) const;
+  GlobalOff getAttributeValueRef(Attribute* attr) const;
+  uint64_t getAttributeValueSig8(Attribute* attr) const;
+  std::vector<Dwarf_Loc> getAttributeValueExprLoc(Attribute* attr) const;
+  std::vector<Dwarf_Ranges> getRanges(uint64_t offset) const;
+
+  // Get a string from the .debug_str section
+  folly::StringPiece getStringFromStringSection(uint64_t offset) const;
+
+  template <typename F> void forEachContext(F&& f, bool isInfo) const;
+  template <typename F> void forEachChild(Die* die, F&& f) const;
+  template <typename F> void forEachAttribute(Die* die, F&& f) const;
+  template <typename F> void forEachCompilationUnit(F&& f) const;
+  template <typename F> void forEachTopLevelUnit(F&& f, bool isInfo) const;
+  template <typename F> auto onDIEAtOffset(GlobalOff offset, F&& f) const ->
+    decltype(f(std::declval<Die*>()));
+  template <typename F> auto onDIEAtContextOffset(
+      GlobalOff contextOff, F&& f) const ->
+    decltype(f(std::declval<Die*>()));
+
+  static AttributeSpec readAttributeSpec(folly::StringPiece&);
+  static Attribute readAttribute(Die* die, AttributeSpec spec,
+                                 folly::StringPiece& sp);
+
+  // Read (bitwise) one object of type T
+  template <class T>
+  static typename std::enable_if<std::is_pod<T>::value, T>::type read(
+      folly::StringPiece& sp) {
+    assert(sp.size() >= sizeof(T));
+    T x;
+    memcpy(&x, sp.data(), sizeof(T));
+    sp.advance(sizeof(T));
+    return x;
+  }
 private:
-  template <typename F>
-  static auto caller(const F& f,
-                     Dwarf_Die die,
-                     Dwarf_Sig8 sig,
-                     GlobalOff type_offset) ->
-    decltype(f(die, sig, type_offset));
+  AbbrevMap abbrevMap;
+  Sig8Map sig8_map;
+  std::vector<uint64_t> cuContextOffsets;
+  std::vector<uint64_t> tuContextOffsets;
 
-  template <typename F>
-  static auto caller(const F& f,
-                     Dwarf_Die die,
-                     Dwarf_Sig8 sig,
-                     GlobalOff type_offset) ->
-    decltype(f(die), true);
-  template <typename F> void forEachChildHelper(Dwarf_Die die,
-                                                bool isInit, F&& f);
+  folly::symbolizer::ElfFile elf;
+  folly::StringPiece debug_info;
+  folly::StringPiece debug_types;
+  folly::StringPiece debug_abbrev;
+  folly::StringPiece debug_str;
+  folly::StringPiece debug_ranges;
+
+  // Read a value of "section offset" type, which may be 4 or 8 bytes
+  static uint64_t readOffset(folly::StringPiece& sp, bool is64Bit) {
+    return is64Bit ? read<uint64_t>(sp) : read<uint32_t>(sp);
+  }
+
+  static void updateDelta(uint32_t& delta, uint64_t value) {
+    if (value != static_cast<uint32_t>(value)) {
+      assertx(!delta);
+      return;
+    }
+    if (!delta) {
+      delta = value;
+      return;
+    }
+    assertx(delta == value);
+  }
+
+  void init();
 };
 
-inline uint64_t DwarfState::Sig8AsKey(Dwarf_Sig8 sig) {
-  union {
-    uint64_t val;
-    Dwarf_Sig8 sig;
-  } v;
-  v.sig = sig;
-  return v.val;
-}
+using Dwarf_Die = DwarfState::Die*;
+using Dwarf_Context = DwarfState::Context*;
+using Dwarf_Attribute = DwarfState::Attribute*;
 
 /*
  * Iterate over all children of this DIE, calling the given callable for
  * each. Iteration is stopped early if any of the calls return false.
  */
 template <typename F>
-void DwarfState::forEachChildHelper(Dwarf_Die die, bool isInit, F&& f) {
-  Dwarf_Error error = nullptr;
-  SCOPE_EXIT {
-    if (error) dwarf_dealloc(dwarf, error, DW_DLA_ERROR);
-  };
+void DwarfState::forEachChild(Dwarf_Die die, F&& f) const {
+  if (!die->hasChildren) return;
 
-  Dwarf_Die prev = nullptr;
-  SCOPE_EXIT {
-    if (prev) dwarf_dealloc(dwarf, prev, DW_DLA_DIE);
-  };
-
-  assert(!die || isInit == dwarf_get_die_infotypes_flag(die));
-
-  if (die) {
-    // prev is null here, and dwarf_child returns the first child if given a
-    // previous DIE of null.
-    auto result = dwarf_child(die, &prev, &error);
-    if (result == DW_DLV_ERROR) {
-      throw DwarfStateException{
-        folly::sformat(
-          "Unable to read child DIE: {}",
-          dwarf_errmsg(error)
-        )
-      };
-    } else if (result == DW_DLV_NO_ENTRY || !f(prev)) {
-      return;
-    }
+  if (!die->nextDieDelta) {
+    forEachAttribute(die, [] (Dwarf_Attribute) { return true; });
+    assert(die->nextDieDelta);
   }
 
-  while (true) {
-    Dwarf_Die next = nullptr;
-    SCOPE_EXIT {
-      if (next) dwarf_dealloc(dwarf, next, DW_DLA_DIE);
-    };
-
-    auto result = dwarf_siblingof_b(
-      dwarf, prev, isInit,
-      &next, &error
-    );
-    if (result == DW_DLV_ERROR) {
-      throw DwarfStateException{
-        folly::sformat(
-          "Unable to read sibling DIE: {}",
-          dwarf_errmsg(error)
-        )
-      };
-    } else if (result == DW_DLV_NO_ENTRY || !f(next)) {
-      break;
-    }
-
-    // Swap prev and next. This will ensure the previous DIE gets freed (because
-    // of the above SCOPE_EXIT).
-    std::swap(prev, next);
+  auto sibling = getDieAtOffset(
+      die->context, { die->offset + die->nextDieDelta, die->context->isInfo }
+  );
+  while (sibling.code) {
+    if (!f(&sibling)) return;
+    sibling = getNextSibling(&sibling);
   }
-}
 
-template <typename F>
-void DwarfState::forEachChild(Dwarf_Die die, F&& f) {
-  assert(die);
-  forEachChildHelper(die, dwarf_get_die_infotypes_flag(die), std::move(f));
+  // sibling is a dummy die whose offset is to the code 0 marking the
+  // end of the children. Need to add one to get the offset of the
+  // next die
+  updateDelta(die->siblingDelta, sibling.offset + 1 - die->offset);
 }
 
 /*
  * Iterate over all attributes of the given DIE, calling the given callable for
  * each. Iteration is stopped early if any of the calls return false.
  */
-template <typename F> void DwarfState::forEachAttribute(Dwarf_Die die, F&& f) {
-  Dwarf_Error error = nullptr;
-  SCOPE_EXIT {
-    if (error) dwarf_dealloc(dwarf, error, DW_DLA_ERROR);
+template <typename F>
+void DwarfState::forEachAttribute(Dwarf_Die die, F&& f) const {
+  auto attrs = die->attributes;
+  auto values = folly::StringPiece {
+    die->context->section + die->offset + die->attrOffset,
+    die->context->section + die->context->offset + die->context->size
   };
-
-  Dwarf_Attribute* attributes;
-  Dwarf_Signed attribute_count;
-  auto result = dwarf_attrlist(die, &attributes, &attribute_count, &error);
-  if (result == DW_DLV_ERROR) {
-    throw DwarfStateException{
-      folly::sformat(
-        "Unable to read DIE attribute-list: {}",
-        dwarf_errmsg(error)
-      )
-    };
-  } else if (result == DW_DLV_NO_ENTRY) {
-    return;
-  }
-
-  SCOPE_EXIT {
-    for (Dwarf_Unsigned i = 0; i < attribute_count; ++i) {
-      dwarf_dealloc(dwarf, attributes[i], DW_DLA_ATTR);
+  while (auto const aspec = readAttributeSpec(attrs)) {
+    auto attr = readAttribute(die, aspec, values);
+    if (!die->siblingDelta && attr.name == DW_AT_sibling) {
+      updateDelta(die->siblingDelta,
+                  getAttributeValueRef(&attr).offset() - die->offset);
+      if (!die->hasChildren) {
+        assert(!die->nextDieDelta || die->nextDieDelta == die->siblingDelta);
+        die->nextDieDelta = die->siblingDelta;
+      }
     }
-    dwarf_dealloc(dwarf, attributes, DW_DLA_LIST);
-  };
+    if (!f(&attr)) return;
+  }
 
-  for (Dwarf_Unsigned i = 0; i < attribute_count; ++i) {
-    if (!f(attributes[i])) break;
+  updateDelta(die->nextDieDelta,
+              values.data() - die->context->section - die->offset);
+  if (!die->hasChildren) {
+    assertx(!die->siblingDelta || die->siblingDelta == die->nextDieDelta);
+    die->siblingDelta = die->nextDieDelta;
   }
 }
 
+/*
+ * Iterate over all the contexts in the file, calling the given
+ * callable for each.
+ */
 template <typename F>
-auto DwarfState::caller(const F& f,
-                        Dwarf_Die die,
-                        Dwarf_Sig8 sig,
-                        GlobalOff type_offset) ->
-  decltype(f(die, sig, type_offset)) {
-  return f(die, sig, type_offset);
-}
-
-template <typename F>
-auto DwarfState::caller(const F& f,
-                        Dwarf_Die die,
-                        Dwarf_Sig8,
-                        GlobalOff) ->
-  decltype(f(die), true) {
-  f(die);
-  return true;
+void DwarfState::forEachContext(F&& f, bool isInfo) const {
+  auto const section = isInfo ? debug_info : debug_types;
+  auto sp = section;
+  while (!sp.empty()) {
+    auto context = getContextAtOffset(
+        { sp.data() - section.data(), isInfo }
+    );
+    sp.advance(context.size);
+    f(&context);
+  }
 }
 
 /*
  * Iterate over all the compilation-units in the file, calling the given
  * callable for each.
  */
-template <typename F> void DwarfState::forEachTopLevelUnit(F&& f, bool isInit) {
-  if (!dwarf) return;
-
-  Dwarf_Error error = nullptr;
-  SCOPE_EXIT {
-    if (error) dwarf_dealloc(dwarf, error, DW_DLA_ERROR);
-  };
-
-  Dwarf_Unsigned cur_cu_header = 0;
-  while (true) {
-    Dwarf_Unsigned next_cu_header = 0;
-    Dwarf_Unsigned type_offset;
-    Dwarf_Sig8 sig;
-    auto result = dwarf_next_cu_header_d(
-      dwarf, isInit, nullptr, nullptr,
-      nullptr, nullptr, nullptr, nullptr,
-      &sig, &type_offset, &next_cu_header,
-      nullptr, &error
-    );
-
-    if (result == DW_DLV_NO_ENTRY) {
-      break;
-    }
-
-    if (result == DW_DLV_ERROR) {
-      throw DwarfStateException{
-        folly::sformat(
-          "Unable to read next compilation-unit header: {}",
-          dwarf_errmsg(error)
-        )
-      };
-    }
-
-    forEachChildHelper(
-      nullptr,
-      isInit,
-      [&](Dwarf_Die die){
-        switch (getTag(die)) {
-          case DW_TAG_compile_unit:
-          case DW_TAG_type_unit:
-            return caller(f, die, sig, {cur_cu_header + type_offset, isInit});
-          default:
-            throw DwarfStateException{
-              folly::sformat(
-                  "First tag in compilation-unit is not "
-                  "DW_TAG_compile_unit ({})",
-                  tagToString(getTag(die))
-              )
-            };
-        }
-      }
-    );
-    cur_cu_header = next_cu_header;
-  }
+template <typename F>
+void DwarfState::forEachTopLevelUnit(F&& f, bool isInfo) const {
+  forEachContext(
+      [&] (Dwarf_Context context) {
+        auto die = getDieAtOffset(context, { context->firstDie, isInfo });
+        f(&die);
+      },
+      isInfo
+  );
 }
 
-template <typename F> void DwarfState::forEachCompilationUnit(F&& f) {
-  forEachTopLevelUnit(f, true);
+template <typename F> void DwarfState::forEachCompilationUnit(F&& f) const {
+  forEachTopLevelUnit(std::forward<F>(f), true);
 }
 
 /*
  * Load the DIE at the given offset, and call the given callable on it,
  * returning whatever the callable returns.
  */
-template <typename F> auto DwarfState::onDIEAtOffset(GlobalOff offset, F&& f) ->
+template <typename F> auto DwarfState::onDIEAtOffset(GlobalOff offset,
+                                                     F&& f) const ->
   decltype(f(std::declval<Dwarf_Die>())) {
 
-  Dwarf_Error error = nullptr;
-  SCOPE_EXIT {
-    if (error) dwarf_dealloc(dwarf, error, DW_DLA_ERROR);
-  };
+  auto const& contextOffsets = offset.isInfo() ?
+    cuContextOffsets : tuContextOffsets;
+  auto it = std::upper_bound(
+      contextOffsets.begin(), contextOffsets.end(), offset.offset());
+  assertx(it != contextOffsets.begin());
+  auto const contextOffset = *--it;
+  auto const context = getContextAtOffset({ contextOffset, offset.isInfo() });
 
-  Dwarf_Die die = nullptr;
-  auto result = dwarf_offdie_b(
-      dwarf, offset.offset(), offset.isInfo(),
-      &die, &error
-  );
-  if (result != DW_DLV_OK) {
-    throw DwarfStateException{
-      folly::sformat(
-        "Unable to read DIE at offset {}: {}",
-        offset,
-        dwarf_errmsg(error)
-      )
-    };
-  }
-
-  SCOPE_EXIT { dwarf_dealloc(dwarf, die, DW_DLA_DIE); };
-  return f(die);
+  auto die = getDieAtOffset(&context, offset);
+  return f(&die);
 }
 
 template <typename F>
-auto DwarfState::onDIEAtIncreasingOffset(GlobalOff offset, F&& f) ->
+auto DwarfState::onDIEAtContextOffset(GlobalOff offset, F&& f) const ->
   decltype(f(std::declval<Dwarf_Die>())) {
 
-  Dwarf_Error error = nullptr;
-  SCOPE_EXIT {
-    if (error) dwarf_dealloc(dwarf, error, DW_DLA_ERROR);
-  };
-
-  auto isInfo = offset.isInfo();
-  auto off = offset.offset();
-
-  Dwarf_Unsigned cur_header = isInfo ? cur_info_offset : cur_type_offset;
-  assert(off >= cur_header);
-  Dwarf_Unsigned next_header = isInfo ? next_info_offset : next_type_offset;
-  while (off >= next_header) {
-    cur_header = next_header;
-
-    auto result = dwarf_next_cu_header_d(
-        dwarf, isInfo, nullptr, nullptr,
-        nullptr, nullptr, nullptr, nullptr,
-        nullptr, nullptr, &next_header,
-        nullptr, &error
-    );
-
-    if (result == DW_DLV_NO_ENTRY) {
-      cur_header = next_header = 0;
-      break;
-    }
-
-    if (result == DW_DLV_ERROR) {
-      throw DwarfStateException{
-        folly::sformat(
-            "Unable to read next compilation-unit header: {}",
-            dwarf_errmsg(error)
-        )
-      };
-    }
-  }
-
-  if (isInfo) {
-    cur_info_offset = cur_header;
-    next_info_offset = next_header;
-  } else {
-    cur_type_offset = cur_header;
-    next_type_offset = next_header;
-  }
-
-  Dwarf_Die die = nullptr;
-  auto result = dwarf_offdie_b(
-      dwarf, offset.offset(), offset.isInfo(),
-      &die, &error
-  );
-  if (result != DW_DLV_OK) {
-    throw DwarfStateException{
-      folly::sformat(
-        "Unable to read DIE at offset {}: {}",
-        offset,
-        dwarf_errmsg(error)
-      )
-    };
-  }
-
-  SCOPE_EXIT { dwarf_dealloc(dwarf, die, DW_DLA_DIE); };
-  return f(die);
+  auto context = getContextAtOffset(offset);
+  auto die = getDieAtOffset(&context, { context.firstDie, context.isInfo });
+  return f(&die);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -31,7 +31,6 @@
 #include <sys/types.h>
 
 #include <dwarf.h>
-#include <libdwarf.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/job-queue.h"
@@ -41,7 +40,7 @@
 #include "hphp/tools/debug-parser/dwarfstate.h"
 
 /*
- * Debug parser for DWARF (using libdwarf)
+ * Debug parser for DWARF (using dwarfstate)
  *
  * DWARF is structured as a forest of DIEs (Debug Information Entry). Each DIE
  * has a tag, which describes what kind of DIE it is, and a list of
@@ -196,9 +195,7 @@ struct TypeParserImpl : TypeParser {
   };
 
   struct Env {
-    // Constructing a DwarfState is expensive. So, defer its construction until
-    // we know we actually need it and we're running in a separate thread.
-    folly::Optional<DwarfState> dwarf;
+    const DwarfState* dwarf;
     std::unique_ptr<StateBlock> state;
     folly::F14FastMap<GlobalOff, GlobalOff> local_mappings;
     folly::F14FastMap<GlobalOff, LinkageDependents> linkage_dependents;
@@ -219,9 +216,9 @@ struct TypeParserImpl : TypeParser {
     bool is_member{false};
   };
 
-  static folly::Optional<uintptr_t> interpretLocAddress(DwarfState& dwarf,
+  static folly::Optional<uintptr_t> interpretLocAddress(const DwarfState& dwarf,
                                                         Dwarf_Attribute attr);
-  static folly::Optional<GlobalOff> parseSpecification(DwarfState& dwarf,
+  static folly::Optional<GlobalOff> parseSpecification(const DwarfState& dwarf,
                                                        Dwarf_Die die,
                                                        bool first,
                                                        StaticSpec& spec);
@@ -280,9 +277,6 @@ struct TypeParserImpl : TypeParser {
                            LinkageDependents,
                            GlobalOff::Hash> m_linkage_dependents;
 
-  // Map from sig8 to the corresponding debug_types offset.
-  DwarfState::Sig8Map m_sig8_map;
-
   DwarfState m_dwarf;
 };
 
@@ -319,7 +313,7 @@ void Scope::fixName(ObjectTypeName newName) {
 }
 
 TypeParserImpl::TypeParserImpl(const std::string& filename, int num_threads)
-    : m_dwarf{filename, &m_sig8_map}
+    : m_dwarf{filename}
 {
   // Processing each compiliation unit is very expensive, as it involves walking
   // a large part of the debug information. To speed things up (a lot), we buid
@@ -343,10 +337,9 @@ TypeParserImpl::TypeParserImpl(const std::string& filename, int num_threads)
   // The context serves as the link between a worker and the TypeParserImpl
   // state (this is forced by the JobQueueWorker interface).
   struct Context {
-    const std::string& filename;
+    const decltype(m_dwarf)& dwarf;
     decltype(m_states)& states;
     decltype(m_state_map)& state_map;
-    const decltype(m_sig8_map)* sig8_map;
     decltype(m_linkage_dependents)& linkage_dependents;
     // The lock protects states, state_map, and the exception field (but only
     // when the workers are running).
@@ -366,10 +359,9 @@ TypeParserImpl::TypeParserImpl(const std::string& filename, int num_threads)
     void doJob(GlobalOff offset) override {
       // Process a compiliation unit at the given offset.
       try {
-        // We're going to use it so let's construct the DwarfState if we haven't
-        // yet.
+        // We're going to use it so let's mark this worker active.
         if (!env.dwarf) {
-          env.dwarf.emplace(m_context->filename, m_context->sig8_map);
+          env.dwarf = &m_context->dwarf;
           env.state = std::make_unique<StateBlock>();
         }
 
@@ -377,7 +369,7 @@ TypeParserImpl::TypeParserImpl(const std::string& filename, int num_threads)
 
         // Do the actual processing, adding to the state block:
         Scope scope{offset};
-        env.dwarf->onDIEAtIncreasingOffset(
+        env.dwarf->onDIEAtOffset(
           offset,
           [&](Dwarf_Die cu) { genNames(env, cu, scope); }
         );
@@ -458,20 +450,18 @@ TypeParserImpl::TypeParserImpl(const std::string& filename, int num_threads)
   };
 
   // Create the thread pool
-  Context context{
-    filename, m_states, m_state_map, &m_sig8_map, m_linkage_dependents
-  };
+  Context context{m_dwarf, m_states, m_state_map, m_linkage_dependents};
   HPHP::JobQueueDispatcher<Worker> dispatcher{
     num_threads, num_threads, 0, false, &context
   };
+  dispatcher.start();
+
   size_t num_tu = 0;
   FTRACE(1, "Adding type-units to dispatcher...\n");
   // Iterate over every type-unit, enqueuing jobs which will
-  // concurrently scan that unit, and building the sig8 map. Note we
-  // have to build the map before we start the dispatcher
+  // concurrently scan that unit.
   m_dwarf.forEachTopLevelUnit(
-    [&] (Dwarf_Die tu, Dwarf_Sig8 sig, GlobalOff type_offset) {
-      m_sig8_map.emplace(DwarfState::Sig8AsKey(sig), type_offset);
+    [&] (Dwarf_Die tu) {
       dispatcher.enqueue(m_dwarf.getDIEOffset(tu));
       ++num_tu;
       return true;
@@ -479,9 +469,6 @@ TypeParserImpl::TypeParserImpl(const std::string& filename, int num_threads)
     false
   );
   FTRACE(1, "... {} type-units added.\n", num_tu);
-
-  // Now we've got a sig8 map, start the dispatcher.
-  dispatcher.start();
 
   size_t num_cu = 0;
   FTRACE(1, "Adding compilation-units to dispatcher...\n");
@@ -672,7 +659,8 @@ Object TypeParserImpl::getObject(ObjectTypeKey key) {
 // determined. In theory, this can be any arbitrary expression, but we only
 // support constant addresses right now.
 folly::Optional<uintptr_t>
-TypeParserImpl::interpretLocAddress(DwarfState& dwarf, Dwarf_Attribute attr) {
+TypeParserImpl::interpretLocAddress(const DwarfState& dwarf,
+                                    Dwarf_Attribute attr) {
     auto form = dwarf.getAttributeForm(attr);
     if (form != DW_FORM_exprloc) return folly::none;
     auto exprs = dwarf.getAttributeValueExprLoc(attr);
@@ -682,7 +670,9 @@ TypeParserImpl::interpretLocAddress(DwarfState& dwarf, Dwarf_Attribute attr) {
 }
 
 folly::Optional<GlobalOff>
-TypeParserImpl::parseSpecification(DwarfState& dwarf, Dwarf_Die die, bool first,
+TypeParserImpl::parseSpecification(const DwarfState& dwarf,
+                                   Dwarf_Die die,
+                                   bool first,
                                    StaticSpec &spec) {
   folly::Optional<GlobalOff> offset;
   bool is_inline = false;
@@ -692,14 +682,14 @@ TypeParserImpl::parseSpecification(DwarfState& dwarf, Dwarf_Die die, bool first,
         switch (dwarf.getAttributeType(attr)) {
           case DW_AT_abstract_origin:
             offset = dwarf.onDIEAtOffset(
-                dwarf.getAttributeValueRef(die, attr),
+                dwarf.getAttributeValueRef(attr),
                 [&](Dwarf_Die die2) {
                   return parseSpecification(dwarf, die2, false, spec);
                 }
             );
             break;
           case DW_AT_specification:
-            offset = dwarf.getAttributeValueRef(die, attr);
+            offset = dwarf.getAttributeValueRef(attr);
             break;
           case DW_AT_linkage_name:
             if (spec.linkage_name.empty()) {
@@ -820,12 +810,13 @@ void TypeParserImpl::genNames(Env& env,
                 // and update it based on the definition ignoring the
                 // definition's name (this feels a little backwards,
                 // but its how dwarf works).
-                declarationOffset = dwarf.getAttributeValueRef(die, attr);
+                declarationOffset = dwarf.getAttributeValueRef(attr);
                 break;
               case DW_AT_signature:
                 if (dwarf.getAttributeForm(attr) == DW_FORM_ref_sig8) {
-                  // The actual definition is in another type-unit,
-                  definitionOffset = dwarf.getAttributeValueRef(die, attr);
+                  // The actual definition is in another type-unit, we
+                  // can ignore this declaration.
+                  definitionOffset = dwarf.getAttributeValueRef(attr);
                   break;
                 }
               default:
@@ -854,7 +845,7 @@ void TypeParserImpl::genNames(Env& env,
 
         // Try the first named member
         auto const first_member = [&](const char* type,
-                                      Dwarf_Half member_type) {
+                                      auto member_type) {
           std::string first_member;
           dwarf.forEachChild(
             die,
@@ -1114,7 +1105,7 @@ void TypeParserImpl::genNames(Env& env,
             switch (dwarf.getAttributeType(attr)) {
               case DW_AT_type:
                 template_params->emplace_back(
-                  dwarf.getAttributeValueRef(die, attr)
+                  dwarf.getAttributeValueRef(attr)
                 );
                 return false;
               default:
@@ -1288,13 +1279,13 @@ Type TypeParserImpl::genType(Dwarf_Die die) {
     [&](Dwarf_Attribute attr) {
       switch (m_dwarf.getAttributeType(attr)) {
         case DW_AT_type:
-          type_offset = m_dwarf.getAttributeValueRef(die, attr);
+          type_offset = m_dwarf.getAttributeValueRef(attr);
           break;
         case DW_AT_containing_type:
-          containing_type_offset = m_dwarf.getAttributeValueRef(die, attr);
+          containing_type_offset = m_dwarf.getAttributeValueRef(attr);
           break;
         case DW_AT_signature:
-          definition_offset = m_dwarf.getAttributeValueRef(die, attr);
+          definition_offset = m_dwarf.getAttributeValueRef(attr);
           return false;
         default:
           break;
@@ -1451,7 +1442,7 @@ Object::Member TypeParserImpl::genMember(Dwarf_Die die,
           offset = m_dwarf.getAttributeValueUData(attr);
           break;
         case DW_AT_type:
-          die_offset = m_dwarf.getAttributeValueRef(die, attr);
+          die_offset = m_dwarf.getAttributeValueRef(attr);
           break;
         case DW_AT_declaration:
           is_static = m_dwarf.getAttributeValueFlag(attr);
@@ -1529,7 +1520,7 @@ Object::Function TypeParserImpl::genFunction(Dwarf_Die die) {
           break;
         case DW_AT_type:
           ret_type = m_dwarf.onDIEAtOffset(
-            m_dwarf.getAttributeValueRef(die, attr),
+            m_dwarf.getAttributeValueRef(attr),
             [&](Dwarf_Die ty_die) { return genType(ty_die); }
           );
           break;
@@ -1583,7 +1574,7 @@ Object::Function TypeParserImpl::genFunction(Dwarf_Die die) {
           switch (m_dwarf.getAttributeType(attr)) {
             case DW_AT_type:
               arg_type = m_dwarf.onDIEAtOffset(
-                  m_dwarf.getAttributeValueRef(child, attr),
+                  m_dwarf.getAttributeValueRef(attr),
                   [&](Dwarf_Die ty_die) { return genType(ty_die); }
               );
               break;
@@ -1653,7 +1644,7 @@ Object::Base TypeParserImpl::genBase(Dwarf_Die die,
           name = m_dwarf.getAttributeValueString(attr);
           break;
         case DW_AT_type:
-          die_offset = m_dwarf.getAttributeValueRef(die, attr);
+          die_offset = m_dwarf.getAttributeValueRef(attr);
           break;
         case DW_AT_virtuality:
           is_virtual =
@@ -1727,7 +1718,7 @@ Object::TemplateParam TypeParserImpl::genTemplateParam(Dwarf_Die die) {
     [&](Dwarf_Attribute attr) {
       switch (m_dwarf.getAttributeType(attr)) {
         case DW_AT_type:
-          die_offset = m_dwarf.getAttributeValueRef(die, attr);
+          die_offset = m_dwarf.getAttributeValueRef(attr);
           break;
         default:
           break;
@@ -1796,7 +1787,7 @@ void TypeParserImpl::fillFuncArgs(Dwarf_Die die, FuncType& func) {
             [&](Dwarf_Attribute attr) {
               switch (m_dwarf.getAttributeType(attr)) {
                 case DW_AT_type:
-                  type_offset = m_dwarf.getAttributeValueRef(child, attr);
+                  type_offset = m_dwarf.getAttributeValueRef(attr);
                   break;
                 default:
                   break;
@@ -1837,9 +1828,9 @@ void TypeParserImpl::fillFuncArgs(Dwarf_Die die, FuncType& func) {
  */
 
 void printDIE(std::ostream& os,
-              DwarfState& dwarf,
+              const DwarfState& dwarf,
               Dwarf_Die die,
-              std::pair<Dwarf_Sig8,GlobalOff>* sig,
+              std::pair<uint64_t,GlobalOff>* sig,
               std::size_t begin,
               std::size_t end,
               int indent = 0) {
@@ -1852,7 +1843,7 @@ void printDIE(std::ostream& os,
     // Find the last child DIE which does not start with the begin/end
     // range. This DIE is the first one which contains some data within the
     // begin/end range, so that must be the first one to begin recursion at.
-    folly::Optional<Dwarf_Off> first;
+    folly::Optional<uint64_t> first;
     if (begin > 0) {
       dwarf.forEachChild(
         die,
@@ -1889,18 +1880,8 @@ void printDIE(std::ostream& os,
     return;
   }
 
-  auto const printSig = [&] (Dwarf_Sig8 sig) {
-    return folly::sformat(
-        "ref_sig8:{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}",
-        static_cast<uint8_t>(sig.signature[0]),
-        static_cast<uint8_t>(sig.signature[1]),
-        static_cast<uint8_t>(sig.signature[2]),
-        static_cast<uint8_t>(sig.signature[3]),
-        static_cast<uint8_t>(sig.signature[4]),
-        static_cast<uint8_t>(sig.signature[5]),
-        static_cast<uint8_t>(sig.signature[6]),
-        static_cast<uint8_t>(sig.signature[7])
-    );
+  auto const printSig = [&] (uint64_t sig) {
+    return folly::sformat("ref_sig8:{:016x}", sig);
   };
 
   for (int i = 0; i < indent; ++i) {
@@ -1908,7 +1889,7 @@ void printDIE(std::ostream& os,
   }
   os << "#" << offset << ": " << tag_name << " (" << tag << ") \""
      << name << "\"";
-  if (sig && !dwarf_get_die_infotypes_flag(die)) {
+  if (sig && sig->first) {
     os << folly::sformat(" {{{} -> #{}}}", printSig(sig->first), sig->second);
   }
   os << "\n";
@@ -1916,10 +1897,25 @@ void printDIE(std::ostream& os,
   dwarf.forEachAttribute(
     die,
     [&](Dwarf_Attribute attr) {
-      auto type = dwarf.getAttributeType(attr);
-      auto attr_name = dwarf.attributeTypeToString(type);
+      auto const type = dwarf.getAttributeType(attr);
+      auto const attr_name = dwarf.attributeTypeToString(type);
+      auto const form = dwarf.getAttributeForm(attr);
+      auto const attr_form = dwarf.attributeFormToString(form);
 
       auto attr_value = [&]() -> std::string {
+        if (type == DW_AT_ranges) {
+          auto ranges = dwarf.getRanges(dwarf.getAttributeValueUData(attr));
+          std::string res;
+          for (auto range : ranges) {
+            if (range.dwr_addr1 == DwarfState::Dwarf_Ranges::kSelection) {
+              folly::format(&res, "0x{:x} ", range.dwr_addr2);
+            } else {
+              folly::format(&res, "0x{:x}-0x{:x} ",
+                            range.dwr_addr1, range.dwr_addr2);
+            }
+          }
+          return res;
+        }
         switch (dwarf.getAttributeForm(attr)) {
           case DW_FORM_data1:
           case DW_FORM_data2:
@@ -1954,10 +1950,9 @@ void printDIE(std::ostream& os,
           case DW_FORM_ref8:
           case DW_FORM_ref_udata:
           case DW_FORM_ref_addr:
-            return folly::sformat("#{}", dwarf.getAttributeValueRef(die, attr));
+            return folly::sformat("#{}", dwarf.getAttributeValueRef(attr));
           case DW_FORM_ref_sig8: {
-            auto sig = dwarf.getAttributeValueSig8(attr);
-            return printSig(sig);
+            return printSig(dwarf.getAttributeValueSig8(attr));
           }
 
           case DW_FORM_exprloc: {
@@ -1970,8 +1965,8 @@ void printDIE(std::ostream& os,
                 );
               } else {
                 output += folly::sformat(
-                  "<{:#02x}:{}:{}:{}>,",
-                  expr.lr_atom,
+                  "<{}:{}:{}:{}>,",
+                  dwarf.opToString(expr.lr_atom),
                   expr.lr_number,
                   expr.lr_number2,
                   expr.lr_offset
@@ -1995,8 +1990,9 @@ void printDIE(std::ostream& os,
       for (int i = 0; i < indent; ++i) {
         os << "  ";
       }
-      os << "   **** " << attr_name << " (" << type << ") ==> "
-         << attr_value << '\n';
+      os << folly::sformat("   **** {} ({}) ==> {} [{}:{}]\n",
+                           attr_name, type, attr_value,
+                           attr_form, form);
       return true;
     }
   );
@@ -2009,7 +2005,7 @@ struct PrinterImpl : Printer {
   void operator()(std::ostream& os,
                   std::size_t begin,
                   std::size_t end) const override {
-    DwarfState dwarf{m_filename, nullptr};
+    DwarfState dwarf{m_filename};
 
     print_section(os, dwarf, false, begin, end);
     print_section(os, dwarf, true, begin, end);
@@ -2018,7 +2014,7 @@ struct PrinterImpl : Printer {
   }
 private:
   void print_section(std::ostream& os,
-                     DwarfState& dwarf,
+                     const DwarfState& dwarf,
                      bool isInfo,
                      std::size_t begin,
                      std::size_t end) const {
@@ -2026,7 +2022,7 @@ private:
     // the compilation units. Find the first compilation unit which at least
     // partially lies within the range given by the begin parameter. This is the
     // first compilation unit to begin printing from.
-    folly::Optional<Dwarf_Off> last;
+    folly::Optional<uint64_t> last;
     if (begin > 0) {
       dwarf.forEachTopLevelUnit(
         [&](Dwarf_Die cu) {
@@ -2040,8 +2036,10 @@ private:
     // Now iterate over all the compilation units again. Only actually print out
     // compilation units if they lie within the begin/end parameter range.
     dwarf.forEachTopLevelUnit(
-      [&] (Dwarf_Die cu, Dwarf_Sig8 sig, GlobalOff type_offset) {
-        auto pair = std::make_pair(sig, type_offset);
+      [&] (Dwarf_Die cu) {
+        auto context = cu->context;
+        auto type_offset = GlobalOff { context->typeOffset, context->isInfo };
+        auto pair = std::make_pair(context->typeSignature, type_offset);
         const auto offset = dwarf.getDIEOffset(cu).offset();
         if (offset >= end) return false;
         if ((!last || offset >= *last)) {

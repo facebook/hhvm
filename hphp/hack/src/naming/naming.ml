@@ -2608,6 +2608,7 @@ module Make (GetLocals : GetLocals) = struct
         exprl env el,
         exprl env uel)
     | NewAnonClass _ ->
+      Errors.experimental_feature p "Anonymous classes";
       N.Null
     | Efun (f, idl) ->
         let _ = match (fst env).in_mode with

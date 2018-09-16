@@ -2592,7 +2592,6 @@ module WithStatementAndDeclAndTypeParser
     | _ ->
       (* ERROR RECOVERY: Assume the unexpected token belongs to whatever
          comes next. *)
-      let parser = with_error parser SyntaxError.error1013 in
       let (parser, xhp_open) =
         let (parser, missing) = Make.missing parser (pos parser) in
         Make.xhp_open parser left_angle name attrs missing
@@ -2600,6 +2599,7 @@ module WithStatementAndDeclAndTypeParser
       let pos = pos parser in
       let (parser, missing1) = Make.missing parser1 pos in
       let (parser, missing2) = Make.missing parser pos in
+      let parser = with_error parser SyntaxError.error1013 in
       Make.xhp_expression parser xhp_open missing1 missing2
 
   and parse_possible_xhp_expression ~consume_trailing_trivia parser =

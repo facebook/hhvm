@@ -2605,6 +2605,11 @@ and pClassElt : class_elt list parser = fun node env ->
         ; xhp_attribute_decl_required    = req
         } ->
           let (p, name) = pos_name name env in
+          begin match syntax ty with
+          | TypeConstant _ when is_typechecker env ->
+            raise_parsing_error env (`Node ty) (SyntaxError.xhp_class_attribute_type_constant)
+          | _ -> ()
+          end;
           let pos = if is_missing init then p else Pos.btw p (pPos init env) in
           (* we can either have a typehint or an xhp enum *)
           let hint, enum = match syntax ty with

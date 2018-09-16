@@ -581,3 +581,6 @@ let type_alias_to_type_constant =
 
 let interface_with_memoize =
   "Memoize is not allowed on interface methods"
+
+let xhp_class_attribute_type_constant =
+  "Type constants are not allowed on xhp class attributes"

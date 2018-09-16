@@ -29,6 +29,8 @@
 
 #include "hphp/util/match.h"
 
+#include <tbb/concurrent_hash_map.h>
+
 /*
  * Generic interfaces to query debug information in a platform-agnostic
  * manner. Note that even though debug information (in general) can encode
@@ -540,6 +542,8 @@ struct Printer {
     std::size_t end = std::numeric_limits<std::size_t>::max()
   ) const = 0;
 };
+
+const char* show(ObjectTypeName::Linkage);
 
 ////////////////////////////////////////////////////////////////////////////////
 

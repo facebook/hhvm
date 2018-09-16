@@ -27,10 +27,11 @@ namespace debug_parser {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-DwarfState::DwarfState(std::string filename)
+DwarfState::DwarfState(std::string filename, const Sig8Map* sig8)
   : fd{-1}
   , dwarf{nullptr}
   , filename{std::move(filename)}
+  , sig8_map{sig8}
 {
   fd = open(this->filename.c_str(), O_RDONLY);
   if (fd < 0) {
@@ -127,7 +128,7 @@ std::string DwarfState::getDIEName(Dwarf_Die die) {
   }
 }
 
-Dwarf_Off DwarfState::getDIEOffset(Dwarf_Die die) {
+GlobalOff DwarfState::getDIEOffset(Dwarf_Die die) {
   Dwarf_Error error = nullptr;
   SCOPE_EXIT {
     if (error) dwarf_dealloc(dwarf, error, DW_DLA_ERROR);
@@ -144,7 +145,7 @@ Dwarf_Off DwarfState::getDIEOffset(Dwarf_Die die) {
     };
   }
 
-  return offset;
+  return { offset, static_cast<bool>(dwarf_get_die_infotypes_flag(die)) };
 }
 
 Dwarf_Half DwarfState::getAttributeType(Dwarf_Attribute attr) {
@@ -301,7 +302,12 @@ Dwarf_Addr DwarfState::getAttributeValueAddr(Dwarf_Attribute attr) {
   return value;
 }
 
-Dwarf_Off DwarfState::getAttributeValueRef(Dwarf_Attribute attr) {
+GlobalOff DwarfState::getAttributeValueRef(Dwarf_Attribute attr) {
+  return getAttributeValueRef(nullptr, attr);
+}
+
+GlobalOff DwarfState::getAttributeValueRef(Dwarf_Die die,
+                                           Dwarf_Attribute attr) {
   Dwarf_Error error = nullptr;
   SCOPE_EXIT {
     if (error) dwarf_dealloc(dwarf, error, DW_DLA_ERROR);
@@ -310,6 +316,11 @@ Dwarf_Off DwarfState::getAttributeValueRef(Dwarf_Attribute attr) {
   Dwarf_Off value;
   auto result = dwarf_global_formref(attr, &value, &error);
   if (result != DW_DLV_OK) {
+    if (sig8_map && dwarf_errno(error) == DW_DLE_REF_SIG8_NOT_HANDLED) {
+      auto const sig = getAttributeValueSig8(attr);
+      auto const it = sig8_map->find(Sig8AsKey(sig));
+      if (it != sig8_map->end()) return it->second;
+    }
     throw DwarfStateException{
       folly::sformat(
         "Unable to obtain attribute value ref: {}",
@@ -318,7 +329,9 @@ Dwarf_Off DwarfState::getAttributeValueRef(Dwarf_Attribute attr) {
     };
   }
 
-  return value;
+  return {
+    value, !die || static_cast<bool>(dwarf_get_die_infotypes_flag(die))
+  };
 }
 
 Dwarf_Sig8 DwarfState::getAttributeValueSig8(Dwarf_Attribute attr) {

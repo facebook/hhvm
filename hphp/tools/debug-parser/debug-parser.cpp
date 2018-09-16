@@ -16,6 +16,8 @@
 
 #include "hphp/tools/debug-parser/debug-parser.h"
 
+#include "hphp/util/assertions.h"
+
 #include <folly/Format.h>
 
 namespace debug_parser {
@@ -23,6 +25,16 @@ namespace debug_parser {
 ////////////////////////////////////////////////////////////////////////////////
 
 VoidType Type::s_void_type;
+
+const char* show(ObjectTypeName::Linkage linkage) {
+  switch (linkage) {
+    case ObjectTypeName::Linkage::external: return "external";
+    case ObjectTypeName::Linkage::internal: return "internal";
+    case ObjectTypeName::Linkage::none:     return "none";
+    case ObjectTypeName::Linkage::pseudo:   return "pseudo";
+  }
+  not_reached();
+}
 
 Type::~Type() {
   // Normally a Type can't have an empty DiscriminatedPtr, but it can happen

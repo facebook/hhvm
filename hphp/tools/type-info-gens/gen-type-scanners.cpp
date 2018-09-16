@@ -3351,7 +3351,9 @@ int main(int argc, char** argv) {
      po::value<std::string>()->required(),
      "filename of generated scanners")
     ("skip", "do not scan dwarf, generate conservative scanners")
-    ("num_threads", po::value<int>(), "number of parallel threads");
+    ("num_threads", po::value<int>(), "number of parallel threads")
+    ("print", "dump the dwarf to stdout")
+    ;
 
   try {
     po::variables_map vm;
@@ -3371,6 +3373,7 @@ int main(int argc, char** argv) {
 #endif
 
     po::notify(vm);
+    auto const print = vm.count("print") != 0;
 
     const auto output_filename =
       vm.count("install_dir") ?
@@ -3394,6 +3397,10 @@ int main(int argc, char** argv) {
 
     try {
       const auto source_executable = vm["source_file"].as<std::string>();
+      if (print) {
+        auto const printer = debug_parser::Printer::make(source_executable);
+        (*printer)(std::cout);
+      }
       Generator generator{source_executable, skip};
       std::ofstream output_file{output_filename};
       generator(output_file);

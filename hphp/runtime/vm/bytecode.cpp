@@ -7105,9 +7105,7 @@ static __thread int s_prev_line;
 void recordCodeCoverage(PC /*pc*/) {
   Unit* unit = vmfp()->m_func->unit();
   assertx(unit != nullptr);
-  if (unit == SystemLib::s_nativeFuncUnit ||
-      unit == SystemLib::s_nativeClassUnit ||
-      unit == SystemLib::s_hhas_unit) {
+  if (unit == SystemLib::s_hhas_unit) {
     return;
   }
   int line = unit->getLineNumber(pcOff());

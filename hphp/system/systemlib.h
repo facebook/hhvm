@@ -72,8 +72,6 @@ extern bool s_anyNonPersistentBuiltins;
 extern std::string s_source;
 extern Unit* s_unit;
 extern Unit* s_hhas_unit;
-extern Unit* s_nativeFuncUnit;
-extern Unit* s_nativeClassUnit;
 extern Func* s_nullFunc;
 extern Func* s_nullCtor;
 

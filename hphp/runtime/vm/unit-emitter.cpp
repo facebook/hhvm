@@ -446,7 +446,9 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
 
   try {
     {
-      m_lineTable = createLineTable(m_sourceLocTab, m_bclen);
+      if (!m_sourceLocTab.empty()) {
+        m_lineTable = createLineTable(m_sourceLocTab, m_bclen);
+      }
       urp.insertUnit[repoId].insert(*this, txn, m_sn, m_md5, m_bc,
                                     m_bclen);
     }

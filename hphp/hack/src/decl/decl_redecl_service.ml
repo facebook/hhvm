@@ -272,17 +272,15 @@ let get_maybe_dependent_classes file_info classes files =
     end
   |> SSet.elements
 
-let get_dependent_classes_files c =
-  let c_hash = Dep.make (Dep.Class c) in
-  let c_deps = Decl_compare.get_extend_deps c_hash Typing_deps.DepSet.empty in
-  Typing_deps.get_files c_deps
-
 let get_dependent_classes_files classes =
+  let visited = ref Typing_deps.DepSet.empty in
   SSet.fold classes
-    ~init:Relative_path.Set.empty
-    ~f:begin fun x acc ->
-      Relative_path.Set.union acc @@ get_dependent_classes_files x
-    end
+    ~init:Typing_deps.DepSet.empty
+    ~f:begin fun c acc ->
+      let source_class = Dep.make (Dep.Class c) in
+      Typing_deps.get_extend_deps ~visited ~source_class ~acc
+    end |>
+  Typing_deps.get_files
 
 let filter_dependent_classes classes maybe_dependent_classes =
   List.filter maybe_dependent_classes ~f:(is_dependent_class_of_any classes)

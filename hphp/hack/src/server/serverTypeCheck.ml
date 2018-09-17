@@ -545,6 +545,11 @@ module LazyCheckKind : CheckKindType = struct
      * recheck them sooner than that. We approximate it by taking all the
      * possible dependencies of dependencies and preemptively rechecking them
      * if they are open in the editor *)
+    if Typing_deps.DepSet.cardinal to_redecl_phase2_deps > 1000 then
+      (* inspecting tons of dependencies would take more time that just
+      * rechecking all relevant files. *)
+      Relative_path.Set.union env.editor_open_files (ide_error_sources env)
+    else
     Typing_deps.DepSet.fold to_redecl_phase2_deps
       ~init:Relative_path.Set.empty
       ~f:(fun x acc -> Relative_path.Set.union acc @@ get_related_files x)
@@ -730,6 +735,8 @@ end = functor(CheckKind:CheckKindType) -> struct
     let count = Relative_path.Map.cardinal fast_redecl_phase2_now in
     let logstring = Printf.sprintf "Type-decl %d files" count in
     Hh_logger.log "Begin %s" logstring;
+    Hh_logger.log "Invalidate declarations in %d files"
+      (Relative_path.Map.cardinal lazy_decl_later);
 
     debug_print_fast_keys genv "to_redecl_phase2" fast_redecl_phase2_now;
     debug_print_fast_keys genv "lazy_decl_later" lazy_decl_later;

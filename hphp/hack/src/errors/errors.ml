@@ -2576,9 +2576,9 @@ let gena_expects_array pos1 pos2 ty_str =
 let unify_error left right =
   add_list (Typing.err_code Typing.UnifyError) (left @ right)
 
-let static_dynamic static_position dyn_position method_name =
-  let msg_static = "The function "^method_name^" is static" in
-  let msg_dynamic = "It is defined as dynamic here" in
+let static_dynamic static_position dyn_position method_name ~elt_type =
+  let msg_static = "The "^elt_type^" "^method_name^" is static" in
+  let msg_dynamic = "It is defined as non-static here" in
   add_list (Typing.err_code Typing.StaticDynamic) [
   static_position, msg_static;
   dyn_position, msg_dynamic

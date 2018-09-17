@@ -252,7 +252,7 @@ module type S = sig
   val discarded_awaitable : Pos.t -> Pos.t -> unit
   val gena_expects_array : Pos.t -> Pos.t -> string -> unit
   val unify_error : (Pos.t * string) list -> (Pos.t * string) list -> unit
-  val static_dynamic : Pos.t -> Pos.t -> string -> unit
+  val static_dynamic : Pos.t -> Pos.t -> string -> elt_type:string -> unit
   val null_member : string -> Pos.t -> (Pos.t * string) list -> unit
   val non_object_member : string -> Pos.t -> string -> Pos.t -> unit
   val non_class_member : string -> Pos.t -> string -> Pos.t -> unit

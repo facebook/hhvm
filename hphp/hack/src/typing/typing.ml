@@ -6652,7 +6652,8 @@ and class_def_ env c tc =
       Errors.internal_error pc "The parser should not parse final on enums"
     | Ast.Cnormal -> ()
   end;
-  SMap.iter (check_static_method tc.tc_methods) tc.tc_smethods;
+  SMap.iter (check_static_class_element tc.tc_methods ~elt_type:"method") tc.tc_smethods;
+  SMap.iter (check_static_class_element tc.tc_props ~elt_type:"property") tc.tc_sprops;
   List.iter impl (class_implements_type env c);
   if tc.tc_is_disposable
     then List.iter (c.c_extends @ c.c_uses) (Typing_disposable.enforce_is_disposable env);
@@ -6694,16 +6695,21 @@ and class_def_ env c tc =
     T.c_enum = c.c_enum;
   }
 
-and check_static_method obj method_name static_method =
-  if SMap.mem method_name obj
+and check_static_class_element obj element_name static_element ~elt_type =
+  (* The static properties that we get passed in start with '$', but the
+     non-static properties we're matching against don't, so we need to detect
+     that and remove it if present. *)
+  let element_name = String_utils.lstrip element_name "$" in
+  if SMap.mem element_name obj
   then begin
-    let lazy (static_method_reason, _) = static_method.ce_type in
-    let dyn_method = SMap.find_unsafe method_name obj in
-    let lazy (dyn_method_reason, _) = dyn_method.ce_type in
+    let lazy (static_element_reason, _) = static_element.ce_type in
+    let dyn_element = SMap.find_unsafe element_name obj in
+    let lazy (dyn_element_reason, _) = dyn_element.ce_type in
     Errors.static_dynamic
-      (Reason.to_pos static_method_reason)
-      (Reason.to_pos dyn_method_reason)
-      method_name
+      (Reason.to_pos static_element_reason)
+      (Reason.to_pos dyn_element_reason)
+      element_name
+      ~elt_type
   end
   else ()
 

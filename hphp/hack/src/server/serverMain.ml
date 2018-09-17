@@ -311,6 +311,7 @@ let query_notifier genv env query_kind t =
   let raw_updates = pump_async_updates raw_updates in
 
   let updates = Program.process_updates genv raw_updates in
+  Bad_files.check updates;
   if not @@ Relative_path.Set.is_empty updates then
     HackEventLogger.notifier_returned t (SSet.cardinal raw_updates);
   env, updates, updates_stale

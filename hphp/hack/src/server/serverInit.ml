@@ -649,6 +649,8 @@ module ServerLazyInit : InitKind = struct
         old_saved;
         _},
       changed_while_parsing) ->
+      Bad_files.check dirty_local_files;
+      Bad_files.check changed_while_parsing;
 
       (* Parse and name all dirty files uniformly *)
       let dirty_files =

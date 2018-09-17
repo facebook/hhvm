@@ -30,11 +30,6 @@ inline void php_global_set(const StaticString& name, Variant var) {
   lval = std::move(var);
 }
 
-inline void php_global_bind(const StaticString& name, Variant& v) {
-  auto to = g_context->m_globalVarEnv->lookupAdd(name.get());
-  tvBind(*v.asTypedValue(), *to);
-}
-
 inline Variant php_global_exchange(const StaticString& name, Variant newV) {
   Variant ret;
   auto& lval = tvAsVariant(g_context->m_globalVarEnv->lookupAdd(name.get()));

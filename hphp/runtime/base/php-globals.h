@@ -51,12 +51,6 @@ void php_global_set(const StaticString&, Variant);
 Variant php_global_exchange(const StaticString& key, Variant newV);
 
 /*
- * Strong bind a value to $GLOBALS, making the value into a Ref if it
- * isn't one already.
- */
-void php_global_bind(const StaticString&, Variant&);
-
-/*
  * Read a variable from $GLOBALS, returning a temporary for read-only
  * access.
  *

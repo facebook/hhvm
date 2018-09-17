@@ -690,9 +690,18 @@ let rec convert_expr env st (p, expr_ as expr) =
         let classname, _ = Hhbc_id.Class.elaborate_id st.namespace id in
         p, Happly ((p, Hhbc_id.Class.to_raw_string classname), args)
       | other -> other in
+    let elaborate_fun_param param = { param with
+      param_hint = Option.map param.param_hint add_ns_to_hint } in
+    let elaborate_method meth = { meth with
+      m_params = List.map meth.m_params elaborate_fun_param;
+      m_ret = Option.map meth.m_ret add_ns_to_hint } in
+    let elaborate_class_elt = function
+      | Method meth -> Method (elaborate_method meth)
+      | other -> other in
     let cls = { cls with
       c_extends = List.map cls.c_extends add_ns_to_hint;
-      c_implements = List.map cls.c_implements add_ns_to_hint } in
+      c_implements = List.map cls.c_implements add_ns_to_hint;
+      c_body = List.map cls.c_body elaborate_class_elt } in
     let prev_anonclass_depth = env.anonclass_depth in
     let env = { env with anonclass_depth = prev_anonclass_depth + 1 } in
     let num_hoisted_classes = List.length st.hoisted_classes in

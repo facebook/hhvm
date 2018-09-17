@@ -240,6 +240,7 @@ struct
     T.c_constructor = Option.map c.S.c_constructor (map_method menv);
     T.c_static_methods = List.map c.S.c_static_methods (map_method menv);
     T.c_methods = List.map c.S.c_methods (map_method menv);
+    T.c_namespace = c.S.c_namespace;
     T.c_user_attributes = List.map c.S.c_user_attributes (map_user_attribute menv);
     T.c_enum = c.S.c_enum;
   }
@@ -292,6 +293,7 @@ struct
     T.t_constraint = td.S.t_constraint;
     T.t_vis = td.S.t_vis;
     T.t_kind = td.S.t_kind;
+    T.t_namespace = td.S.t_namespace;
     T.t_user_attributes =
       List.map td.S.t_user_attributes (map_user_attribute menv);
   }

@@ -1067,6 +1067,7 @@ and typedef_decl tdef decl_tcopt =
     t_constraint = tcstr;
     t_kind = concrete_type;
     t_user_attributes = _;
+    t_namespace = _;
     t_mode = mode;
     t_vis = td_vis;
   } = tdef in

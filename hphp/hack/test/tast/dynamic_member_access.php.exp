@@ -65,5 +65,5 @@
           }
          ];
        c_constructor = None; c_static_methods = []; c_methods = [];
-       c_user_attributes = []; c_enum = None })
+       c_namespace = <opaque>; c_user_attributes = []; c_enum = None })
   ]

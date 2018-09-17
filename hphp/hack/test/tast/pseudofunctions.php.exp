@@ -141,5 +141,5 @@
           m_ret = (Some ([5:34-38], (Hprim Tvoid))); m_ret_by_ref = false;
           m_external = false }
          ];
-       c_user_attributes = []; c_enum = None })
+       c_namespace = <opaque>; c_user_attributes = []; c_enum = None })
   ]

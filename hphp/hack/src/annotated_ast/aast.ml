@@ -293,7 +293,8 @@ and class_ = {
   c_constructor    : constructor option;
   c_static_methods : static_method list;
   c_methods        : method_ list     ;
-  c_user_attributes : user_attribute list;
+  c_namespace      : Namespace_env.env [@opaque];
+  c_user_attributes: user_attribute list;
   c_enum           : enum_ option     ;
 }
 
@@ -350,6 +351,7 @@ and typedef = {
   t_user_attributes : user_attribute list;
   t_mode : FileInfo.mode [@opaque];
   t_vis : typedef_visibility;
+  t_namespace : Namespace_env.env [@opaque];
 }
 
 and gconst = {

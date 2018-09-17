@@ -23,8 +23,8 @@
               m_fun_kind = FSync; m_user_attributes = [];
               m_ret = (Some ([4:19-30], (Happly (([4:19-30], "void"), []))));
               m_ret_by_ref = false; m_external = false });
-      c_static_methods = []; c_methods = []; c_user_attributes = [];
-      c_enum = None });
+      c_static_methods = []; c_methods = []; c_namespace = <opaque>;
+      c_user_attributes = []; c_enum = None });
   (Class
      { Aast.AnnotatedAST.c_annotation = (); c_mode = <opaque>;
        c_final = false; c_is_xhp = false; c_kind = Cnormal;
@@ -62,6 +62,6 @@
                m_fun_kind = FSync; m_user_attributes = [];
                m_ret = (Some ([7:19-30], (Happly (([7:19-30], "void"), []))));
                m_ret_by_ref = false; m_external = false });
-       c_static_methods = []; c_methods = []; c_user_attributes = [];
-       c_enum = None })
+       c_static_methods = []; c_methods = []; c_namespace = <opaque>;
+       c_user_attributes = []; c_enum = None })
   ]

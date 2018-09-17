@@ -1233,6 +1233,7 @@ module Make (GetLocals : GetLocals) = struct
         N.c_static_methods = smethods;
         N.c_methods        = methods;
         N.c_user_attributes = attrs;
+        N.c_namespace      = c.c_namespace;
         N.c_enum           = enum
       }
     in
@@ -2886,6 +2887,7 @@ module Make (GetLocals : GetLocals) = struct
       t_kind = hint env ty;
       t_user_attributes = attrs;
       t_mode = tdef.t_mode;
+      t_namespace = tdef.t_namespace;
       t_vis;
     }
 

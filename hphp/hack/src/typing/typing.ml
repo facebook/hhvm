@@ -6690,6 +6690,7 @@ and class_def_ env c tc =
     T.c_static_methods = typed_static_methods;
     T.c_methods = typed_methods;
     T.c_user_attributes = List.map c.c_user_attributes (user_attribute env);
+    T.c_namespace = c.c_namespace;
     T.c_enum = c.c_enum;
   }
 
@@ -7016,6 +7017,7 @@ and typedef_def tcopt typedef  =
     t_user_attributes = _;
     t_vis = _;
     t_mode = _;
+    t_namespace = _;
   } = typedef in
   let ty = TI.instantiable_hint env hint in
   let env, ty = Phase.localize_with_self env ty in
@@ -7042,6 +7044,7 @@ and typedef_def tcopt typedef  =
     T.t_constraint = typedef.t_constraint;
     T.t_kind = typedef.t_kind;
     T.t_tparams = typedef.t_tparams;
+    T.t_namespace = typedef.t_namespace;
   }
 
 and gconst_def tcopt cst =

@@ -91,5 +91,6 @@
         (Hshape
            { Aast_defs.nsi_allows_unknown_fields = false;
              nsi_field_map = [ShapeMap] }));
-       t_user_attributes = []; t_mode = <opaque>; t_vis = Transparent })
+       t_user_attributes = []; t_mode = <opaque>; t_vis = Transparent;
+       t_namespace = <opaque> })
   ]

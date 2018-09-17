@@ -73,7 +73,7 @@
           m_ret = (Some ([5:26-29], (Hprim Tint))); m_ret_by_ref = false;
           m_external = false }
          ];
-       c_user_attributes = []; c_enum = None });
+       c_namespace = <opaque>; c_user_attributes = []; c_enum = None });
   (Class
      { Aast.AnnotatedAST.c_annotation = (); c_mode = <opaque>;
        c_final = false; c_is_xhp = false; c_kind = Cnormal;
@@ -99,5 +99,5 @@
           m_ret = (Some ([11:26-32], (Hprim Tstring))); m_ret_by_ref = false;
           m_external = false }
          ];
-       c_user_attributes = []; c_enum = None })
+       c_namespace = <opaque>; c_user_attributes = []; c_enum = None })
   ]

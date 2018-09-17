@@ -42,5 +42,6 @@
          m_ret = (Some ([15:33-36], (Hprim Tint))); m_ret_by_ref = false;
          m_external = false }
         ];
-      c_methods = []; c_user_attributes = []; c_enum = None })
+      c_methods = []; c_namespace = <opaque>; c_user_attributes = [];
+      c_enum = None })
   ]

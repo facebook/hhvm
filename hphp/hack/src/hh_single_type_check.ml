@@ -57,7 +57,6 @@ type mode =
   | Lint
   | Suggest
   | Dump_deps
-  | Dump_bazooka_deps
   | Dump_toplevel_deps
   | Identify_symbol of int * int
   | Find_local of int * int
@@ -214,11 +213,8 @@ let parse_options () =
       Arg.Set dont_assume_php,
       " Don't assume that undefined names are in PHP files";
     "--dump-deps",
-      Arg.Unit (set_mode (Dump_deps)),
+      Arg.Unit (set_mode Dump_deps),
       " Print dependencies";
-    "--dump-bazooka-deps",
-      Arg.Unit (set_mode (Dump_bazooka_deps)),
-      " Print dependencies, simplified to toplevel";
     "--dump-toplevel-deps",
       Arg.Unit (set_mode Dump_toplevel_deps),
       " Print toplevel dependencies";
@@ -812,7 +808,6 @@ let handle_mode
         exit 2
       end
       else Printf.printf "No lint errors\n"
-  | Dump_bazooka_deps
   | Dump_deps ->
     (* Don't typecheck builtins *)
     let files_info = Relative_path.Map.fold builtins
@@ -1007,9 +1002,7 @@ let handle_mode
 (*****************************************************************************)
 
 let decl_and_run_mode {filename; mode; no_builtins; tcopt } popt =
-  if mode = Dump_deps then Typing_deps.debug_trace := Typing_deps.Full
-  else if mode = Dump_bazooka_deps
-    then Typing_deps.debug_trace := Typing_deps.Bazooka;
+  if mode = Dump_deps then Typing_deps.debug_trace := true;
   Ident.track_names := true;
   let builtins = if no_builtins then Relative_path.Map.empty else builtins in
   let filename = Relative_path.create Relative_path.Dummy filename in

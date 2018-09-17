@@ -34,12 +34,9 @@ module Dep :
 module DepSet : module type of
   Reordered_argument_collections.Reordered_argument_set(Set.Make (Dep))
 
-
-type debug_trace_type = Bazooka | Full | No_trace
-
 val trace : bool ref
 
-val debug_trace : debug_trace_type ref
+val debug_trace : bool ref
 val print_string_hash_set : string HashSet.t -> unit
 val dump_debug_deps : unit -> unit
 
@@ -49,7 +46,6 @@ val allow_dependency_table_reads: bool -> bool
 val add_idep : Dep.variant -> Dep.variant -> unit
 val get_ideps_from_hash : Dep.t -> DepSet.t
 val get_ideps : Dep.variant -> DepSet.t
-val get_bazooka : Dep.variant -> DepSet.t
 val get_files : DepSet.t -> Relative_path.Set.t
 val update_files : FileInfo.t Relative_path.Map.t -> unit
 

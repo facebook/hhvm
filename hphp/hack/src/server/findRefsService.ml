@@ -146,8 +146,8 @@ let get_deps_set classes =
     | None -> acc
     | Some fn ->
       let dep = Typing_deps.Dep.Class class_name in
-      let bazooka = Typing_deps.get_bazooka dep in
-      let files = Typing_deps.get_files bazooka in
+      let ideps = Typing_deps.get_ideps dep in
+      let files = Typing_deps.get_files ideps in
       let files = Relative_path.Set.add files fn in
       Relative_path.Set.union files acc
   end ~init:Relative_path.Set.empty
@@ -157,8 +157,8 @@ let get_deps_set_function f_name =
   | Some pos ->
     let fn = FileInfo.get_pos_filename pos in
     let dep = Typing_deps.Dep.Fun f_name in
-    let bazooka = Typing_deps.get_bazooka dep in
-    let files = Typing_deps.get_files bazooka in
+    let ideps = Typing_deps.get_ideps dep in
+    let files = Typing_deps.get_files ideps in
     Relative_path.Set.add files fn
   | None ->
     Relative_path.Set.empty
@@ -168,8 +168,8 @@ let get_deps_set_gconst cst_name =
   | Some pos ->
     let fn = FileInfo.get_pos_filename pos in
     let dep = Typing_deps.Dep.GConst cst_name in
-    let bazooka = Typing_deps.get_bazooka dep in
-    let files = Typing_deps.get_files bazooka in
+    let ideps = Typing_deps.get_ideps dep in
+    let files = Typing_deps.get_files ideps in
     Relative_path.Set.add files fn
   | None ->
     Relative_path.Set.empty

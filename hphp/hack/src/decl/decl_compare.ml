@@ -224,14 +224,13 @@ let class_big_diff class1 class2 =
 (* GET EVERYTHING, don't think, don't try to be subtle, don't try to be
  * smart what so ever, just get EVERYTHING that ever used the class "cid"
  * (cid = class identifier).
- * Hence the name "get_bazooka".
  *)
 (*****************************************************************************)
 and get_all_dependencies trace cid (changed, to_redecl, to_recheck) =
   let dep = Dep.Class cid in
-  let bazooka = Typing_deps.get_bazooka dep in
-  let to_redecl = DepSet.union bazooka to_redecl in
-  let to_recheck = DepSet.union bazooka to_recheck in
+  let where_class_was_used = Typing_deps.get_ideps dep in
+  let to_redecl = DepSet.union where_class_was_used to_redecl in
+  let to_recheck = DepSet.union where_class_was_used to_recheck in
   let cid_hash = Typing_deps.Dep.make dep in
   let to_redecl = Typing_deps.get_extend_deps trace cid_hash to_redecl in
   add_changed changed dep, to_redecl, to_recheck
@@ -254,9 +253,9 @@ let get_fun_deps old_funs fid (changed, to_redecl, to_recheck) =
    * sites of `foo` to make sure there are no dangling references. *)
   | None, _ | _, None ->
       let dep = Dep.Fun fid in
-      let where_fun_is_used = Typing_deps.get_bazooka dep in
+      let where_fun_is_used = Typing_deps.get_ideps dep in
       let to_recheck = DepSet.union where_fun_is_used to_recheck in
-      let fun_name = Typing_deps.get_bazooka (Dep.FunName fid) in
+      let fun_name = Typing_deps.get_ideps (Dep.FunName fid) in
       add_changed changed dep,
         DepSet.union fun_name to_redecl, DepSet.union fun_name to_recheck
   | Some fty1, Some fty2 ->
@@ -269,7 +268,7 @@ let get_fun_deps old_funs fid (changed, to_redecl, to_recheck) =
         (* No need to add Dep.FunName stuff here -- we found a function with the
          * right name already otherwise we'd be in the None case above. *)
         let dep = Dep.Fun fid in
-        let where_fun_is_used = Typing_deps.get_bazooka dep in
+        let where_fun_is_used = Typing_deps.get_ideps dep in
         add_changed changed dep,
           to_redecl, DepSet.union where_fun_is_used to_recheck
 
@@ -285,8 +284,8 @@ let get_type_deps old_types tid (changed, to_recheck) =
   match SMap.find_unsafe tid old_types, Decl_heap.Typedefs.get tid with
   | None, _ | _, None ->
       let dep = Dep.Class tid in
-      let bazooka = Typing_deps.get_bazooka dep in
-      add_changed changed dep, DepSet.union bazooka to_recheck
+      let where_typedef_was_used = Typing_deps.get_ideps dep in
+      add_changed changed dep, DepSet.union where_typedef_was_used to_recheck
   | Some tdef1, Some tdef2 ->
       let tdef1 = Decl_pos_utils.NormalizeSig.typedef tdef1 in
       let tdef2 = Decl_pos_utils.NormalizeSig.typedef tdef2 in
@@ -313,9 +312,9 @@ let get_gconst_deps old_gconsts cst_id (changed, to_redecl, to_recheck) =
   match cst1, cst2 with
   | None, _ | _, None ->
       let dep = Dep.GConst cst_id in
-      let where_const_is_used = Typing_deps.get_bazooka dep in
+      let where_const_is_used = Typing_deps.get_ideps dep in
       let to_recheck = DepSet.union where_const_is_used to_recheck in
-      let const_name = Typing_deps.get_bazooka (Dep.GConstName cst_id) in
+      let const_name = Typing_deps.get_ideps (Dep.GConstName cst_id) in
       add_changed changed dep,
         DepSet.union const_name to_redecl, DepSet.union const_name to_recheck
   | Some cst1, Some cst2 ->

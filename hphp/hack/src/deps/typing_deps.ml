@@ -13,7 +13,6 @@ open Utils
 (**********************************)
 (* Handling dependencies *)
 (**********************************)
-type debug_trace_type = Bazooka | Full | No_trace
 module Dep = struct
   type variant =
     (* GConst is used for "global" constants, in other words,
@@ -124,35 +123,11 @@ let get_ideps_from_hash x =
 let get_ideps x =
   Graph.get (Dep.make x)
 
-let to_bazooka x =
-  match x with
-  | Dep.AllMembers cid
-  | Dep.Const (cid, _)
-  | Dep.Prop (cid, _)
-  | Dep.SProp (cid, _)
-  | Dep.Method (cid, _)
-  | Dep.Cstr cid
-  | Dep.SMethod (cid, _)
-  | Dep.Extends cid
-  | Dep.Class cid -> Dep.Class cid
-  | x -> x
-
-let simplify x =
-  let x = to_bazooka x in
-  (* Get rid of FunName and GConstName *)
-  match x with
-  | Dep.FunName f -> Dep.Fun f
-  | Dep.GConstName g -> Dep.GConst g
-  | _ -> x
-
-(* Gets ALL the dependencies ... hence the name *)
-let get_bazooka x =
-  get_ideps (to_bazooka x)
-
 let trace = ref true
+
 (* Instead of actually recording the dependencies in shared memory, we record
  * string representations of them for printing out *)
-let debug_trace = ref No_trace
+let debug_trace = ref false
 let dbg_dep_set = HashSet.create 0
 
 let add_idep root obj =
@@ -160,17 +135,9 @@ let add_idep root obj =
   (* Note: this is the inverse of what is actually stored in the shared
    * memory table. I find it easier to read "X depends on Y" instead of
    * "Y is a dependent of X" *)
-  match !debug_trace with
-  | Full ->
+  if !debug_trace then
     HashSet.add dbg_dep_set
       ((Dep.to_string root) ^ " -> " ^ (Dep.to_string obj))
-  | Bazooka ->
-    let root = simplify root in
-    let obj = simplify obj in
-    if root = obj then () else
-    HashSet.add dbg_dep_set
-      ((Dep.to_string root) ^ " -> " ^ (Dep.to_string obj))
-  | No_trace -> ()
 
 let print_string_hash_set set =
   let xs = HashSet.fold (fun x xs -> x :: xs) set [] in
@@ -178,8 +145,6 @@ let print_string_hash_set set =
   List.iter xs print_endline
 
 let dump_debug_deps () = print_string_hash_set dbg_dep_set
-
-
 
 (*****************************************************************************)
 (* Module keeping track which files contain the toplevel definitions. *)

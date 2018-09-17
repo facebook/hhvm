@@ -262,8 +262,21 @@ let log_missing ?(caught = false) ~(env:env) ~expecting node : unit =
     |> EventLogger.log
 
 exception API_Missing_syntax of string * env * node
+
+(* If we fail to lower something, raise an error in the typechecker
+complaining that the code does not parse. Don't raise a parsing error
+if there already is one, since that one will likely be better than this one. *)
+let lowering_error env pos text syntax_kind =
+  if not (is_typechecker env) then () else
+  if not (Errors.currently_has_errors ()) then
+    raise_parsing_error env (`Pos pos)
+      (SyntaxError.lowering_parsing_error text syntax_kind)
+
 let missing_syntax : ?fallback:'a -> string -> node -> env -> 'a =
   fun ?fallback expecting node env ->
+    let pos = pPos node env in
+    let text = (text node) in
+    lowering_error env pos text expecting;
     match fallback with
     | Some x when env.fail_open ->
       let () = log_missing ~env ~expecting node in
@@ -1887,7 +1900,7 @@ and pStmt : stmt parser = fun node env ->
       | CaseLabel { case_expression; _ } ->
         Case (pExpr case_expression env, cont)
       | DefaultLabel _ -> Default cont
-      | _ -> missing_syntax "pSwitchLabel" node env
+      | _ -> missing_syntax "switch label" node env
     in
     let pSwitchSection : case list parser = fun node env ->
       match syntax node with
@@ -2136,6 +2149,9 @@ and pStmt : stmt parser = fun node env ->
     in
     let () = env.max_depth <- outer_max_depth in
     result
+  | FunctionDeclaration _ when is_typechecker env ->
+    raise_parsing_error env (`Node node) SyntaxError.inline_function_def;
+    pos, Noop
   | _ -> missing_syntax ?fallback:(Some (Pos.none,Noop)) "statement" node env in
   pop_docblock ();
   result

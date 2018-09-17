@@ -584,3 +584,9 @@ let interface_with_memoize =
 
 let xhp_class_attribute_type_constant =
   "Type constants are not allowed on xhp class attributes"
+
+let inline_function_def =
+  "Inline function definitions are not supported in Hack"
+
+let lowering_parsing_error text syntax =
+  "Encountered unexpected text '"^text^"', was expecting a "^syntax^"."

@@ -311,3 +311,5 @@ val type_alias_to_type_constant: string
 val method_calls_on_xhp_expression : string
 val interface_with_memoize : string
 val xhp_class_attribute_type_constant : string
+val inline_function_def : string
+val lowering_parsing_error : string -> string -> string

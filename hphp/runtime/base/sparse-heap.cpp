@@ -186,4 +186,8 @@ void* SparseHeap::resizeBig(void* ptr, size_t new_size,
   return newNode;
 }
 
+HeapObject* SparseHeap::find(const void* p) {
+  return m_bigs.find(p).ptr;
+}
+
 }

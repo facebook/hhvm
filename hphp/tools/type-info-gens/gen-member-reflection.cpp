@@ -134,9 +134,12 @@ size_t NumThreads = 24;
 void generate(const std::string& source_executable, std::ostream& o) {
   o << "#include <string>\n";
   o << "#include <unordered_map>\n\n";
+  o << "#include \"hphp/util/portability.h\"\n\n";
 
   o << "extern \"C\" {\n\n"
-    << "auto " << HPHP::detail::kMemberReflectionTableName << " =\n"
+    << "EXTERNALLY_VISIBLE auto "
+    << HPHP::detail::kMemberReflectionTableName
+    << " =\n"
        "  std::unordered_map<\n"
        "    std::string,\n"
        "    const char*(*)(const void*, const void*)\n"

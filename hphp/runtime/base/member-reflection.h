@@ -78,9 +78,9 @@ bool init_member_reflection(const std::string& extractPath,
   HPHP_REFLECTABLES
 #undef X
 
-  template <typename T>
-  const char* nameof_member(const T* /*base*/, const void* /*internal*/) {
-    return nullptr;
+template <typename T>
+const char* nameof_member(const T* /*base*/, const void* /*internal*/) {
+  return nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

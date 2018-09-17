@@ -522,10 +522,16 @@ struct SparseHeap {
   template<class Fn> void iterate(Fn);
 
   /*
-   * call OnBig() on each big HeapObject, and OnSlab() on
-   * each slab, without iterating the blocks within each slab.
+   * call OnBig() on each big HeapObject, and OnSlab() on each slab, without
+   * iterating the blocks within each slab.
    */
   template<class OnBig, class OnSlab> void iterate(OnBig, OnSlab);
+
+  /*
+   * Find the HeapObject* in the heap which contains `p', else nullptr if `p'
+   * is not contained in any heap allocation.
+   */
+  HeapObject* find(const void* p);
 
   /*
    * Return the (likely sparse) address range that contains every slab.
@@ -733,6 +739,12 @@ struct MemoryManager {
    * call fn(ptr, size, type_scan::Index) for each root
    */
   template<class Fn> void iterateRoots(Fn) const;
+
+  /*
+   * Find the HeapObject* in the heap which contains `p', else nullptr if `p'
+   * is not contained in any heap allocation.
+   */
+  HeapObject* find(const void* p);
 
   /////////////////////////////////////////////////////////////////////////////
   // Stats.

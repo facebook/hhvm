@@ -1,0 +1,79 @@
+<?hh
+
+function fb_cs_test($v) {
+  echo "====\n";
+
+  $ret = null;
+  $v_ = $v;
+  $s_ = fb_compact_serialize($v_);
+  var_dump($s_ is string);
+  $ss_ = $s_;
+  var_dump(!empty($ss_));
+  /* check high bit of first character always set */
+  var_dump(preg_match("/^[\x80-\xff]/", $ss_));
+  var_dump(fb_compact_unserialize($s_, &$ret) === $v_);
+  var_dump($ret === true);
+  $ret = null;
+  var_dump(fb_unserialize($s_, &$ret) === $v_);
+  var_dump($ret === true);
+}
+
+function fb_cs_entrypoint(): void {
+  fb_cs_test(null);
+  fb_cs_test(true);
+  fb_cs_test(false);
+  fb_cs_test(1234.5678);
+  fb_cs_test("");
+  fb_cs_test("a");
+  fb_cs_test("\0");
+  fb_cs_test("\0 a");
+  fb_cs_test("0123012301230123");
+  fb_cs_test("0123012301230123a");
+  fb_cs_test("012301230123012");
+  fb_cs_test(varray[]);
+  fb_cs_test(darray[]);
+  fb_cs_test(varray[12345,"abc",0.1234]);
+  fb_cs_test(darray[1 => 12345]);
+  fb_cs_test(darray[1 => 12345, "a" => 123124, "sdf" => 0.1234]);
+  fb_cs_test(varray[varray["a"]]);
+  fb_cs_test(varray[1, varray["a"]]);
+  fb_cs_test(varray[varray["a"], 1]);
+  fb_cs_test(varray[varray["a"], varray[1]]);
+  fb_cs_test(darray[42 => new stdclass(), 47 => new stdclass()]);
+
+  // Test skips
+  fb_cs_test(darray[0 => "a", 1 => "b", 3 => "c"]);
+  fb_cs_test(darray[1 => "a", 2 => "b", 3 => "c"]);
+  fb_cs_test(darray[0 => "a", 2 => "b", 3 => "c"]);
+  fb_cs_test(darray[3 => "a"]);
+  fb_cs_test(darray[2 => 2, 1 => 1, 3 => 3]);
+  // Test for overflow (1ull << 63) - 1
+  fb_cs_test(varray[9223372036854775807, 'a']);
+
+  // Test each power of two, +/- 1 and the negatives of them
+  // Test a single number and packed inside an array
+  for ($i = 0; $i < 64; ++$i) {
+    $n = 1 << $i;
+    fb_cs_test($n);    fb_cs_test(varray[$n]);
+    fb_cs_test($n-1);  fb_cs_test(varray[$n-1]);
+    fb_cs_test($n+1);  fb_cs_test(varray[$n+1]);
+    fb_cs_test(-$n);   fb_cs_test(varray[-$n]);
+    fb_cs_test(-$n-1); fb_cs_test(varray[-$n-1]);
+    fb_cs_test(-$n+1); fb_cs_test(varray[-$n+1]);
+  }
+
+  echo "====\n";
+
+  // Test vector code (PHP can't create those, but they might come form
+  // C++ code in serialized strings)
+  $s = "\xfe\x01\x02\x03\xfc";  // VECTOR, 1, 2, 3, STOP
+  $ret = null;
+  var_dump(fb_compact_unserialize($s, &$ret));
+
+  // Demonstrate vector deserialize issue.
+  // This should be illegal and result in an error.
+  $s = "\xfe\x01\xfd\xfd\x03\xfc";  // VECTOR, 1, SKIP, SKIP, 2, STOP
+  $ret = null;
+  var_dump(fb_compact_unserialize($s, &$ret));
+  var_dump($ret);
+}

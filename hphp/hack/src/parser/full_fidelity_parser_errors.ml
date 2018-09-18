@@ -1038,7 +1038,7 @@ let methodish_memoize_lsb_on_non_static node errors =
   else errors
 
 let function_declaration_contains_attribute node attribute =
-  match node with
+  match syntax node with
   | FunctionDeclaration { function_attribute_spec = attr_spec; _ } ->
     attribute_specification_contains attr_spec attribute
   | _ -> false
@@ -1047,9 +1047,80 @@ let methodish_contains_memoize env node parents =
   (is_typechecker env) && is_inside_interface parents
     && (methodish_contains_attribute node SN.UserAttributes.uaMemoize)
 
+let is_some_reactivity_attribute_name name =
+  name = SN.UserAttributes.uaReactive ||
+  name = SN.UserAttributes.uaShallowReactive ||
+  name = SN.UserAttributes.uaLocalReactive
+
+let is_some_reactivity_attribute n =
+  match syntax n with
+    | ListItem {
+        list_item = {
+          syntax = ConstructorCall { constructor_call_type; _ }; _
+        }; _
+      } ->
+      begin match Syntax.extract_text constructor_call_type with
+        | Some n when is_some_reactivity_attribute_name n -> true
+        | _ -> false
+      end
+    | _ -> false
+
+let attribute_has_reactivity_annotation attr_spec =
+  match syntax attr_spec with
+  | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
+    List.exists (syntax_node_to_list attrs) ~f:is_some_reactivity_attribute
+  | _ -> false
+
+let attribute_missing_reactivity_for_condition attr_spec =
+  let has_attr attr = attribute_specification_contains attr_spec attr in
+  not (attribute_has_reactivity_annotation attr_spec) && (
+    has_attr SN.UserAttributes.uaOnlyRxIfImpl ||
+    has_attr SN.UserAttributes.uaOnlyRxIfArgs_do_not_use ||
+    has_attr SN.UserAttributes.uaAtMostRxAsArgs
+  )
+
+let methodish_missing_reactivity_for_condition node =
+  match syntax node with
+  | MethodishDeclaration { methodish_attribute = attr_spec; _ } ->
+    attribute_missing_reactivity_for_condition attr_spec
+  | _ -> false
+
+let function_missing_reactivity_for_condition node =
+  match syntax node with
+  | FunctionDeclaration { function_attribute_spec = attr_spec; _ } ->
+    attribute_missing_reactivity_for_condition attr_spec
+  | _ -> false
+
+let function_declaration_contains_only_rx_if_impl_attribute node =
+  function_declaration_contains_attribute node SN.UserAttributes.uaOnlyRxIfImpl
+
+let attribute_multiple_reactivity_annotations attr_spec =
+  let rec check l seen =
+    match l with
+    | [] -> false
+    | x :: xs when is_some_reactivity_attribute x ->
+      if seen then true else check xs true
+    | _ :: xs -> check xs seen in
+  match syntax attr_spec with
+  | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
+    check (syntax_node_to_list attrs) false
+  | _ -> false
+
+let methodish_multiple_reactivity_annotations node =
+  match syntax node with
+  | MethodishDeclaration { methodish_attribute = attr_spec; _ } ->
+    attribute_multiple_reactivity_annotations attr_spec
+  | _ -> false
+
+let function_multiple_reactivity_annotations node =
+  match syntax node with
+  | FunctionDeclaration { function_attribute_spec = attr_spec; _ } ->
+    attribute_multiple_reactivity_annotations attr_spec
+  | _ -> false
+
 let function_declaration_header_memoize_lsb parents errors =
   let node = List.hd_exn parents in
-  if function_declaration_contains_attribute (syntax node) SN.UserAttributes.uaMemoizeLSB
+  if function_declaration_contains_attribute node SN.UserAttributes.uaMemoizeLSB
   then
     let e = make_error_from_node node SyntaxError.memoize_lsb_on_non_method
     in e :: errors
@@ -1118,15 +1189,30 @@ let methodish_errors env node parents errors =
   match syntax node with
   (* TODO how to narrow the range of error *)
   | FunctionDeclarationHeader { function_parameter_list; function_type; _} ->
-     let errors =
-       produce_error_for_header errors
-       (class_constructor_destructor_has_non_void_type env)
-       node parents SyntaxError.error2018 function_type in
-     let errors =
-       produce_error_for_header errors class_non_constructor_has_visibility_param
-       node parents SyntaxError.error2010 function_parameter_list in
-     let errors =
-       function_declaration_header_memoize_lsb parents errors in
+    let errors =
+      produce_error_for_header errors
+      (class_constructor_destructor_has_non_void_type env)
+      node parents SyntaxError.error2018 function_type in
+    let errors =
+      produce_error_for_header errors class_non_constructor_has_visibility_param
+      node parents SyntaxError.error2010 function_parameter_list in
+    let errors =
+      function_declaration_header_memoize_lsb parents errors in
+    errors
+  | FunctionDeclaration fd ->
+    let function_attrs = fd.function_attribute_spec in
+    let errors =
+      produce_error errors
+      function_multiple_reactivity_annotations node
+      SyntaxError.multiple_reactivity_annotations function_attrs in
+    let errors =
+      produce_error errors
+      function_declaration_contains_only_rx_if_impl_attribute node
+      SyntaxError.functions_cannot_implement_reactive function_attrs in
+    let errors =
+      produce_error errors
+      function_missing_reactivity_for_condition node
+      SyntaxError.missing_reactivity_for_condition function_attrs in
     errors
   | MethodishDeclaration md ->
     let header_node = md.methodish_function_decl_header in
@@ -1135,6 +1221,7 @@ let methodish_errors env node parents errors =
       ~default:"" in
     let method_name = Option.value (extract_function_name
       md.methodish_function_decl_header) ~default:"" in
+    let method_attrs = md.methodish_attribute in
     let errors =
       produce_error_for_header errors
       (methodish_contains_memoize env)
@@ -1202,8 +1289,15 @@ let methodish_errors env node parents errors =
     let errors =
       if methodish_contains_static node && is_in_reified_class parents then
         make_error_from_node node SyntaxError.static_method_in_reified_class
-        :: errors else errors
-    in
+        :: errors else errors in
+    let errors =
+      produce_error errors
+      methodish_multiple_reactivity_annotations node
+      SyntaxError.multiple_reactivity_annotations method_attrs in
+    let errors =
+      produce_error errors
+      methodish_missing_reactivity_for_condition node
+      SyntaxError.missing_reactivity_for_condition method_attrs in
     errors
   | _ -> errors
 
@@ -3143,6 +3237,7 @@ let find_syntax_errors env =
         let errors = statement_errors env node parents errors in
         trait_require_clauses, names, errors
       | MethodishDeclaration _
+      | FunctionDeclaration _
       | FunctionDeclarationHeader _ ->
         let errors = reified_parameter_errors node errors in
         let names, errors =

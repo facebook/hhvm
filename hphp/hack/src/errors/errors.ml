@@ -1468,18 +1468,6 @@ let const_attribute_prohibited pos kind =
   add (NastCheck.err_code NastCheck.ConstAttributeProhibited) pos
     ("Cannot apply __Const attribute to " ^ kind)
 
-let missing_reactivity_for_condition pos =
-  add (NastCheck.err_code NastCheck.MissingReactivityForCondition) pos (
-    "__OnlyRxIfImpl annotation cannot be used without __Rx, __RxShallow " ^
-    "or __RxLocal."
-  )
-
-let multiple_reactivity_annotations pos =
-  add (NastCheck.err_code NastCheck.MultipleReactivityAnnotations) pos (
-    "Multiple <<__Rx>>, <<__RxLocal>> or <<__RxShallow>> annotations are not " ^
-    "allowed."
-  )
-
 let inout_argument_bad_expr pos =
   add (NastCheck.err_code NastCheck.InoutArgumentBadExpr) pos (
     "Arguments for inout parameters must be local variables or simple " ^
@@ -1490,11 +1478,6 @@ let illegal_destructor pos =
   add (NastCheck.err_code NastCheck.IllegalDestructor) pos (
     "Destructors are not supported in Hack; use other patterns like " ^
     "IDisposable/using or try/catch instead."
-  )
-
-let conditionally_reactive_function pos =
-  add (NastCheck.err_code NastCheck.ConditionallyReactiveFunction) pos (
-    "Function cannot be marked with <<__OnlyRxIfImpl>> annotation."
   )
 
 let multiple_conditionally_reactive_annotations pos name =

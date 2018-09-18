@@ -590,3 +590,13 @@ let inline_function_def =
 
 let lowering_parsing_error text syntax =
   "Encountered unexpected text '"^text^"', was expecting a "^syntax^"."
+
+let multiple_reactivity_annotations =
+  "Multiple __Rx, __RxShallow, or __RxLocal annotations are not allowed."
+
+let functions_cannot_implement_reactive =
+  "__OnlyRxIfImpl annotations are only valid on class methods."
+
+let missing_reactivity_for_condition =
+  "__OnlyRxIfImpl, __OnlyRxIfArgs, and __AtMostRxAsArgs annotations cannot " ^
+  "be used without __Rx, __RxShallow, or __RxLocal."

@@ -380,24 +380,19 @@ let check_conditionally_reactive_annotation_params p params ~is_method =
   | _ -> Errors.conditionally_reactive_annotation_invalid_arguments ~is_method p
 
 let check_conditionally_reactive_annotations is_reactive p method_name user_attributes =
-  ignore @@ List.fold user_attributes
-    ~init:false
-    ~f:(fun seen { ua_name = (_, name); ua_params } ->
-    if name = SN.UserAttributes.uaOnlyRxIfImpl
-    then begin
-      if seen then begin
-        Errors.multiple_conditionally_reactive_annotations p method_name;
-        seen
+  let rec check l seen =
+    match l with
+    | [] -> ()
+    | { ua_name = (_, name); ua_params } :: xs when name = SN.UserAttributes.uaOnlyRxIfImpl ->
+      begin
+        if seen
+          then Errors.multiple_conditionally_reactive_annotations p method_name
+        else if is_reactive
+          then check_conditionally_reactive_annotation_params ~is_method:true p ua_params;
+        check xs true
       end
-      else begin
-        if is_reactive
-        then check_conditionally_reactive_annotation_params ~is_method:true p ua_params
-        else Errors.missing_reactivity_for_condition p;
-        true
-      end
-    end
-    else seen
-  )
+    | _ :: xs -> check xs seen in
+  check user_attributes false
 
 let is_some_reactivity_attribute { ua_name = (_, name); _ } =
   name = SN.UserAttributes.uaReactive ||
@@ -407,20 +402,6 @@ let is_some_reactivity_attribute { ua_name = (_, name); _ } =
 (* During NastCheck, all reactivity kinds are the same *)
 let fun_is_reactive user_attributes =
   List.exists user_attributes ~f:is_some_reactivity_attribute
-
-let ensure_single_reactivity_attribute user_attributes =
-  let rec check l seen =
-    match l with
-    | [] -> ()
-    | x :: xs when is_some_reactivity_attribute x ->
-      if seen
-      then Errors.multiple_reactivity_annotations (fst x.ua_name)
-      else check xs true
-    | _ :: xs -> check xs seen in
-  check user_attributes false
-
-let fun_is_conditionally_reactive user_attributes =
-  Attributes.mem SN.UserAttributes.uaOnlyRxIfImpl user_attributes
 
 let rec fun_ tenv f named_body =
   if !auto_complete then ()
@@ -461,8 +442,6 @@ and func ~is_efun env f named_body =
   if Attributes.mem SN.UserAttributes.uaMutableReturn f.f_user_attributes
     && not env.is_reactive then
     Errors.mutable_return_annotated_decls_must_be_reactive "function" p fname;
-  if fun_is_conditionally_reactive f.f_user_attributes
-  then Errors.conditionally_reactive_function p;
 
   if is_efun
   then begin
@@ -471,9 +450,6 @@ and func ~is_efun env f named_body =
       f.f_user_attributes SN.UserAttributes.uaRxOfScope Errors.rx_of_scope_and_explicit_rx
   end
   else error_if_has_rx_on_scope env f.f_user_attributes;
-
-  if env.is_reactive
-  then ensure_single_reactivity_attribute f.f_user_attributes;
 
   error_if_has_atmost_rx_as_rxfunc_attribute env f.f_user_attributes;
   check_maybe_rx_attributes_on_params env f.f_user_attributes f.f_params;
@@ -1005,9 +981,6 @@ and method_ (env, is_static) m =
   if Attributes.mem SN.UserAttributes.uaMutableReturn m.m_user_attributes
     && not env.is_reactive then
     Errors.mutable_return_annotated_decls_must_be_reactive "method" p name;
-
-  if env.is_reactive
-  then ensure_single_reactivity_attribute m.m_user_attributes;
 
   check_conditionally_reactive_annotations env.is_reactive p name m.m_user_attributes;
   error_if_has_atmost_rx_as_rxfunc_attribute env m.m_user_attributes;

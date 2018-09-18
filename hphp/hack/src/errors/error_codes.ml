@@ -204,11 +204,11 @@ module NastCheck                            = struct
   | MutableAttributeOnFunction
   | MutableReturnAnnotatedDeclsMustBeReactive
   | IllegalDestructor
-  | ConditionallyReactiveFunction
+  | ConditionallyReactiveFunctionDEPRECATED
   | MultipleConditionallyReactiveAnnotations
   | ConditionallyReactiveAnnotationInvalidArguments
-  | MissingReactivityForCondition
-  | MultipleReactivityAnnotations
+  | MissingReactivityForConditionDEPRECATED
+  | MultipleReactivityAnnotationsDEPRECATED
   | RxIsEnabledInvalidLocation
   | MaybeRxInvalidLocation
   | NoOnlyrxIfRxfuncForRxIfArgs

@@ -1,2 +1,2 @@
-File "rx_if_implements11.php", line 7, characters 3-48:
+File "parse_multiple8.php", line 3, characters 1-13:
 Multiple __Rx, __RxShallow, or __RxLocal annotations are not allowed. (Parsing[1002])

@@ -1,0 +1,1 @@
+Fatal error: Multiple __Rx, __RxShallow, or __RxLocal annotations are not allowed. in %s/test/slow/rx/multiple_reactivity1.php on line 4

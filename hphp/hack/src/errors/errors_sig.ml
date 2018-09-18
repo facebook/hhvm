@@ -533,14 +533,11 @@ module type S = sig
   val binding_ref_in_array : Pos.t -> unit
   val return_ref_in_array : Pos.t -> unit
   val passing_array_cell_by_ref : Pos.t -> unit
-  val conditionally_reactive_function : Pos.t -> unit
   val multiple_conditionally_reactive_annotations : Pos.t -> string -> unit
   val conditionally_reactive_annotation_invalid_arguments : is_method:bool -> Pos.t -> unit
   val echo_in_reactive_context : Pos.t -> unit
   val superglobal_in_reactive_context : Pos.t -> string -> unit
   val static_in_reactive_context : Pos.t -> string -> unit
-  val missing_reactivity_for_condition: Pos.t -> unit
-  val multiple_reactivity_annotations: Pos.t -> unit
   val rx_is_enabled_invalid_location: Pos.t -> unit
   val wrong_expression_kind_attribute: string -> Pos.t -> string -> Pos.t -> string -> string -> unit
   val attribute_class_no_constructor_args: Pos.t -> Pos.t -> unit

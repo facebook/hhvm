@@ -1,2 +1,2 @@
-File "rx_if_implements1.php", line 7, characters 10-16:
-Function cannot be marked with <<__OnlyRxIfImpl>> annotation. (NastCheck[3057])
+File "rx_if_implements1.php", line 6, characters 1-35:
+__OnlyRxIfImpl annotations are only valid on class methods. (Parsing[1002])

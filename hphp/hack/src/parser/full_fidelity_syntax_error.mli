@@ -313,3 +313,6 @@ val interface_with_memoize : string
 val xhp_class_attribute_type_constant : string
 val inline_function_def : string
 val lowering_parsing_error : string -> string -> string
+val multiple_reactivity_annotations : string
+val functions_cannot_implement_reactive : string
+val missing_reactivity_for_condition : string

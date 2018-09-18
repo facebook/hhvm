@@ -440,7 +440,11 @@ let process_single_source_unit ?(for_debugger_eval = false) compiler_options
       if compiler_options.extract_facts
       then extract_facts ~pretty:true source_text
       else begin
-        let fail_or_ast = parse_file compiler_options popt filename source_text in
+        let fail_or_ast =
+          match Hackc_parse_delegator.parse_file filename source_text with
+          | Some fail_or_ast -> fail_or_ast
+          | None -> parse_file compiler_options popt filename source_text
+        in
         ignore @@ add_to_time_ref debug_time.parsing_t t;
         do_compile filename compiler_options fail_or_ast debug_time for_debugger_eval
       end in

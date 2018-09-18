@@ -25,10 +25,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   (* some Ai stuff - calls to those will likely never be interleaved with IDE
    * file sync commands (and resulting small checks), but putting it here just
    * to be safe *)
-  | FIND_DEPENDENT_FILES _ -> true
-  | TRACE_AI _ -> true
   | AI_QUERY _ -> true
-  | DUMP_AI_INFO _ -> true
   (* Finding references uses global dependency table *)
   | FIND_REFS _ -> true
   | IDE_FIND_REFS _ -> true

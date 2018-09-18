@@ -65,19 +65,13 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env.files_info genv.workers
     | METHOD_JUMP_BATCH (classes, filter) ->
       env, ServerMethodJumpsBatch.go genv.workers classes filter env
-    | FIND_DEPENDENT_FILES file_list ->
-        env, Ai.ServerFindDepFiles.go genv.workers file_list
-          (ServerArgs.ai_mode genv.options)
     | FIND_REFS find_refs_action ->
         let open Done_or_retry in
-        if ServerArgs.ai_mode genv.options = None then
-          let include_defs = false in
-          ServerFindRefs.(
-            go find_refs_action include_defs genv env |>
-            map_env ~f:to_absolute
-          )
-        else
-          env, Done (Ai.ServerFindRefs.go find_refs_action genv env)
+        let include_defs = false in
+        ServerFindRefs.(
+          go find_refs_action include_defs genv env |>
+          map_env ~f:to_absolute
+        )
     | IDE_FIND_REFS (labelled_file, line, char, include_defs) ->
         let open Done_or_retry in
         ServerFindRefs.(
@@ -104,9 +98,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, (`Error remove_dead_fixme_warning)
     | DUMP_SYMBOL_INFO file_list ->
         env, SymbolInfoService.go genv.workers file_list env
-    | DUMP_AI_INFO file_list ->
-        env, Ai.InfoService.go Typing_check_utils.type_file genv.workers
-          file_list (ServerArgs.ai_mode genv.options) env.tcopt
     | IN_MEMORY_DEP_TABLE_SIZE ->
       env, SaveStateService.get_in_memory_dep_table_entry_count ()
     | SAVE_STATE filename ->
@@ -135,9 +126,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
             insertSpaces = true;
           } in
         env, ServerFormat.go content from to_ legacy_format_options
-    | TRACE_AI action ->
-        env, Ai.TraceService.go action Typing_check_utils.type_file
-           (ServerArgs.ai_mode genv.options) env.tcopt
     | AI_QUERY json ->
         env, Ai.QueryService.go json
     | DUMP_FULL_FIDELITY_PARSE file ->

@@ -90,13 +90,13 @@ module Done_or_retry = struct
 end
 
 module Find_refs = struct
-  type member = Ai.ServerFindRefs.member =
+  type member =
     | Method of string
     | Property of string
     | Class_const of string
     | Typeconst of string
 
-  type action = Ai.ServerFindRefs.action =
+  type action =
     | Class of string
     | Member of string * member
     | Function of string
@@ -205,7 +205,6 @@ type _ t =
       Method_jumps.result list t
   | METHOD_JUMP_BATCH : (string list * Method_jumps.filter) ->
       Method_jumps.result list t
-  | FIND_DEPENDENT_FILES: string list -> string list t
   | FIND_REFS : Find_refs.action -> Find_refs.result_or_retry t
   | IDE_FIND_REFS : labelled_file * int * int * bool ->
       Find_refs.ide_result_or_retry t
@@ -214,7 +213,6 @@ type _ t =
   | REFACTOR : ServerRefactorTypes.action -> Refactor.result_or_retry t
   | IDE_REFACTOR : Ide_refactor_type.t -> Refactor.ide_result_or_retry t
   | DUMP_SYMBOL_INFO : string list -> Symbol_info_service.result t
-  | DUMP_AI_INFO : string list -> Ai.InfoService.result t
   | REMOVE_DEAD_FIXMES : int list -> [`Ok of ServerRefactorTypes.patch list | `Error of string] t
   | IN_MEMORY_DEP_TABLE_SIZE : ((int, string) Pervasives.result) t
   | SAVE_STATE : string -> ((int, string) Pervasives.result) t
@@ -228,7 +226,6 @@ type _ t =
   | DELETE_CHECKPOINT : string -> bool t
   | STATS : Stats.t t
   | FORMAT : ServerFormatTypes.action -> ServerFormatTypes.result t
-  | TRACE_AI : Ai.TraceService.action -> string t
   | AI_QUERY : string -> string t
   | DUMP_FULL_FIDELITY_PARSE : string -> string t
   | OPEN_FILE : string * string -> unit t

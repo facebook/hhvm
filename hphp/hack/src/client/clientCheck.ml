@@ -196,14 +196,6 @@ let main args =
       let conn = connect args in
       ClientSymbolInfo.go conn files expand_path;
       Exit_status.No_error
-    | MODE_DUMP_AI_INFO files ->
-      let conn = connect args in
-      ClientAiInfo.go conn files expand_path;
-      Exit_status.No_error
-    | MODE_FIND_DEPENDENT_FILES files ->
-      let conn = connect args in
-      ClientFindDependentFiles.go conn files expand_path;
-      Exit_status.No_error
     | MODE_REFACTOR (ref_mode, before, after) ->
       let conn = fun () -> connect args in
       ClientRefactor.go conn args ref_mode before after;
@@ -448,18 +440,6 @@ let main args =
       let result =
         rpc args @@ Rpc.FORMAT (content, from, to_) in
       ClientFormat.go result args.output_json;
-      Exit_status.No_error
-    | MODE_TRACE_AI name ->
-      let action =
-        parse_function_or_method_id
-          ~meth_action:(fun class_name method_name ->
-            Ai.TraceService.Member
-              (class_name, Ai.TraceService.Method method_name))
-          ~func_action:(fun fun_name -> Ai.TraceService.Function fun_name)
-          name
-      in
-      let results = rpc args @@ Rpc.TRACE_AI action in
-      ClientTraceAi.go results args.output_json;
       Exit_status.No_error
     | MODE_AI_QUERY json ->
       let results = rpc args @@ Rpc.AI_QUERY json in

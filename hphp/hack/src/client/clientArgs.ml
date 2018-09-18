@@ -175,15 +175,9 @@ let parse_check_args cmd =
     "--coverage",
       Arg.String (fun x -> set_mode (MODE_COVERAGE x) ()),
       " (mode) calculates the extent of typing of a given file or directory";
-    "--find-dependent-files",
-      Arg.String (fun x -> set_mode (MODE_FIND_DEPENDENT_FILES x) ()),
-      " (mode) list all files that make any use of the provided list of files";
     "--find-refs",
       Arg.String (fun x -> set_mode (MODE_FIND_REFS x) ()),
       " (mode) finds references of the provided method name";
-    "--trace_ai",
-      Arg.String (fun x -> set_mode (MODE_TRACE_AI x) ()),
-       "";
     "--find-class-refs",
       Arg.String (fun x -> set_mode (MODE_FIND_CLASS_REFS x) ()),
       " (mode) finds references of the provided class name";
@@ -218,10 +212,6 @@ let parse_check_args cmd =
        *    ]
        *  Note: results list can be in any order *)
       "";
-    "--dump-ai-info",
-      Arg.String (fun files -> set_mode (MODE_DUMP_AI_INFO files) ()),
-        (* Just like --dump-symbol-info, but uses the AI to obtain info *)
-        "";
     "--identify-function",
       Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL1 x) ()),
       " (mode) print the full function name at the position " ^

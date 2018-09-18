@@ -1068,10 +1068,10 @@ void rewriteToParentFrameImpl(IRUnit& /*unit*/, IRInstruction& inst, F dead) {
     cellsToBytes(origFpOffset - getFpOffsetFromTop(fp))
     - frame_clsref_offset(origFunc, slot)
     + frame_clsref_offset(getFunc(fp), 0);
-  assertx((newOffset % sizeof(LowPtr<Class>)) == 0);
+  assertx((newOffset % sizeof(cls_ref)) == 0);
   // Now that we have the new offset in bytes, convert it to an actual slot
   // number.
-  auto const newSlot = newOffset / sizeof(LowPtr<Class>);
+  auto const newSlot = newOffset / sizeof(cls_ref);
 
   // Sanity check that both the before and after result in the same byte offset
   if (debug) {

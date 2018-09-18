@@ -18,6 +18,7 @@
 #error "func-inl.h should only be included by func.h"
 #endif
 
+#include "hphp/runtime/vm/cls-ref.h"
 #include "hphp/runtime/vm/unit-util.h"
 
 namespace HPHP {
@@ -372,7 +373,7 @@ inline int Func::maxStackCells() const {
 inline int Func::numSlotsInFrame() const {
   return shared()->m_numLocals +
     shared()->m_numIterators * (sizeof(Iter) / sizeof(Cell)) +
-    (numClsRefSlots() * sizeof(Class*) + sizeof(Cell) - 1) / sizeof(Cell);
+    (numClsRefSlots() * sizeof(cls_ref) + sizeof(Cell) - 1) / sizeof(Cell);
 }
 
 inline bool Func::hasForeignThis() const {

@@ -274,11 +274,11 @@ struct local_var {
 
 // wrapper for class-ref slot CA(R|W) operand
 struct clsref_slot {
-  LowPtr<Class>* ptr;
+  cls_ref* ptr;
   uint32_t index;
 
   Class* take() const {
-    auto ret = *ptr;
+    auto ret = ptr->cls;
     if (debug) {
       ret->validate();
       memset(ptr, kTrashClsRef, sizeof(*ptr));
@@ -286,7 +286,10 @@ struct clsref_slot {
     return ret.get();
   }
 
-  void put(Class* cls) { *ptr = cls; }
+  void put(Class* cls) {
+    ptr->cls = cls;
+    if (debug) memset(&ptr->reified_types, kTrashClsRef, sizeof(ArrayData*));
+  }
 };
 
 // wrapper to handle unaligned access to variadic immediates

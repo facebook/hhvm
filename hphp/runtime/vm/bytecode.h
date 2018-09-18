@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/cls-ref.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/name-value-table.h"
 #include "hphp/runtime/vm/unit.h"
@@ -310,7 +311,7 @@ constexpr size_t kNumIterCells = sizeof(Iter) / sizeof(Cell);
 constexpr size_t kNumActRecCells = sizeof(ActRec) / sizeof(Cell);
 
 constexpr size_t clsRefCountToCells(size_t n) {
-  return (n * sizeof(LowPtr<Class>*) + sizeof(Cell) - 1) / sizeof(Cell);
+  return (n * sizeof(cls_ref) + sizeof(Cell) - 1) / sizeof(Cell);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

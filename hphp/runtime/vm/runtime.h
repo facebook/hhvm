@@ -58,14 +58,12 @@ void raiseParamRefMismatchForFunc(const Func* func, uint32_t index);
 inline intptr_t frame_clsref_offset(const Func* f, uint32_t slot) {
   return
     -((f->numLocals() + f->numIterators() * kNumIterCells) * sizeof(Cell) +
-      (slot + 1) * sizeof(LowPtr<Class>));
+      (slot + 1) * sizeof(cls_ref));
 }
 
-inline LowPtr<Class>*
+inline cls_ref*
 frame_clsref_slot(const ActRec* fp, uint32_t slot) {
-  return (LowPtr<Class>*)(
-    uintptr_t(fp) + frame_clsref_offset(fp->m_func, slot)
-  );
+  return (cls_ref*)(uintptr_t(fp) + frame_clsref_offset(fp->m_func, slot));
 }
 
 inline Iter*

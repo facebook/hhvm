@@ -182,7 +182,8 @@ void cgLdClsRef(IRLS& env, const IRInstruction* inst) {
     funcFromFp(inst->src(0)),
     inst->extra<ClsRefSlotData>()->slot
   );
-  emitLdLowPtr(vmain(env), fp[off], dst, sizeof(LowPtr<Class>));
+  emitLdLowPtr(vmain(env), fp[off + cls_ref::clsOff()],
+               dst, sizeof(LowPtr<Class>));
 }
 
 void cgStClsRef(IRLS& env, const IRInstruction* inst) {
@@ -192,7 +193,13 @@ void cgStClsRef(IRLS& env, const IRInstruction* inst) {
     funcFromFp(inst->src(0)),
     inst->extra<ClsRefSlotData>()->slot
   );
-  emitStLowPtr(vmain(env), src, fp[off], sizeof(LowPtr<Class>));
+  auto& v = vmain(env);
+  emitStLowPtr(v, src, fp[off + cls_ref::clsOff()], sizeof(LowPtr<Class>));
+  if (debug) {
+    ArrayData* trash;
+    memset(&trash, kTrashClsRef, sizeof(trash));
+    emitImmStoreq(v, trash, fp[off + cls_ref::reifiedOff()]);
+  }
 }
 
 void cgKillClsRef(IRLS& env, const IRInstruction* inst) {
@@ -205,21 +212,11 @@ void cgKillClsRef(IRLS& env, const IRInstruction* inst) {
     inst->extra<ClsRefSlotData>()->slot
   );
 
-  LowPtr<Class> trash;
+  cls_ref trash;
   memset(&trash, kTrashClsRef, sizeof(trash));
-  Immed64 immed(trash.get());
-
-  if (sizeof(trash) == 4) {
-    v << storeli{immed.l(), fp[off]};
-  } else if (sizeof(trash) == 8) {
-    if (immed.fits(sz::dword)) {
-      v << storeqi{immed.l(), fp[off]};
-    } else {
-      v << store{v.cns(immed.q()), fp[off]};
-    }
-  } else {
-    not_implemented();
-  }
+  emitImmStoreq(v, trash.reified_types, fp[off + cls_ref::reifiedOff()]);
+  emitStLowPtr(v, v.cns(trash.cls), fp[off + cls_ref::clsOff()],
+               sizeof(LowPtr<Class>));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

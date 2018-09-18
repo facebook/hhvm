@@ -46,16 +46,22 @@ class ast_get_defs_visitor = object
     def :: acc
 end
 
-let ast_no_pos_mapper = object (self)
-  inherit [_] Ast.endo
+let ast_no_pos_or_docblock_mapper = object (self)
+  inherit [_] Ast.endo as super
   method! private on_pos () _pos = Pos.none
+
+  method! on_fun_ env f = super#on_fun_ env { f with f_doc_comment = None}
+  method! on_class_ env c = super#on_class_ env { c with c_doc_comment = None}
+  method! on_class_vars_ env cv = super#on_class_vars_ env { cv with cv_doc_comment = None}
+  method! on_method_ env m = super#on_method_ env { m with m_doc_comment = None}
+
   (* Skip all blocks because we don't care about method bodies *)
   method! on_block env _ = self#on_list self#on_stmt env [(Pos.none,Ast.Noop)]
 end
 
-(* Given an AST, return an AST with no position info *)
-let remove_pos ast =
-  ast_no_pos_mapper#on_program () ast
+(* Given an AST, return an AST with no position or docblock info *)
+let remove_pos_and_docblock ast =
+  ast_no_pos_or_docblock_mapper#on_program () ast
 
 
 type ignore_attribute_env = {
@@ -109,7 +115,7 @@ let generate_ast_decl_hash ast =
     Using Marshal, we guarantee that the two ASTs are represented by a single
     primitive type, which we hash.
   *)
-  let str = Marshal.to_string (remove_pos ast) [] in
+  let str = Marshal.to_string (remove_pos_and_docblock ast) [] in
   OpaqueDigest.string str
 
 

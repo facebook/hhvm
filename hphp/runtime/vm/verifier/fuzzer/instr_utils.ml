@@ -194,8 +194,8 @@ let stk_data : instruct -> stack_sig = function
   | IOp CastDict
   | IOp CastKeyset
   | IOp InstanceOfD _
-  | IOp IsTypeStruct _
-  | IOp AsTypeStruct _
+  | IOp IsTypeStructC _
+  | IOp AsTypeStructC _
   | IOp Print
   | IOp Clone
   | IOp BitNot

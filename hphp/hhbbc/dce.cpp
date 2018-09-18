@@ -1342,7 +1342,7 @@ void dce(Env& env, const bc::IsTypeL& op) {
     });
 }
 
-void dce(Env& env, const bc::IsTypeStruct& op) {
+void dce(Env& env, const bc::IsTypeStructC& op) {
   stack_ops(env, [&] (UseInfo& ui) {
       if (!env.flags.wasPEI && allUnused(ui)) {
         return PushFlags::MarkUnused;

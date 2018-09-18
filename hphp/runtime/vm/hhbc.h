@@ -365,6 +365,16 @@ enum class SetRangeOp : uint8_t {
 #undef OP
 };
 
+#define TYPE_STRUCT_RESOLVE_OPS \
+  OP(Resolve)                  \
+  OP(DontResolve)
+
+enum class TypeStructResolveOp : uint8_t {
+#define OP(name) name,
+  TYPE_STRUCT_RESOLVE_OPS
+#undef OP
+};
+
 #define CONT_CHECK_OPS                            \
   CONT_CHECK_OP(IgnoreStarted)                    \
   CONT_CHECK_OP(CheckStarted)
@@ -513,8 +523,10 @@ constexpr uint32_t kMaxConcatN = 4;
   O(DblAsBits,       NA,               ONE(CV),         ONE(CV),    NF) \
   O(InstanceOf,      NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(InstanceOfD,     ONE(SA),          ONE(CV),         ONE(CV),    NF) \
-  O(IsTypeStruct,    ONE(AA),          ONE(CV),         ONE(CV),    NF) \
-  O(AsTypeStruct,    ONE(AA),          ONE(CV),         ONE(CV),    NF) \
+  O(IsTypeStructC,   ONE(OA(TypeStructResolveOp)),                      \
+                                       TWO(CV,CV),      ONE(CV),    NF) \
+  O(AsTypeStructC,   ONE(OA(TypeStructResolveOp)),                      \
+                                       TWO(CV,CV),      ONE(CV),    NF) \
   O(CombineAndResolveTypeStruct,                                        \
                      ONE(IVA),         CMANY,           ONE(CV),    NF) \
   O(Select,          NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
@@ -906,6 +918,7 @@ const char* subopToName(SwitchKind);
 const char* subopToName(MOpMode);
 const char* subopToName(QueryMOp);
 const char* subopToName(SetRangeOp);
+const char* subopToName(TypeStructResolveOp);
 const char* subopToName(ContCheckOp);
 const char* subopToName(CudOp);
 const char* subopToName(FPassHint);

@@ -1461,19 +1461,20 @@ void group(ISS& env,
 namespace {
 
 template<class JmpOp>
-void isTypeStructJmpImpl(ISS& env,
-                       const bc::IsTypeStruct& inst,
-                       const JmpOp& jmp) {
+void isTypeStructCJmpImpl(ISS& env,
+                          const bc::IsTypeStructC& inst,
+                          const JmpOp& jmp) {
   auto bail = [&] { impl(env, inst, jmp); };
-
-  auto const locId = topStkEquiv(env);
-  if (locId == NoLocalId) return bail();
-
-  auto ts_type = type_of_type_structure(inst.arr1);
+  auto const a = tv(topC(env));
+  if (!a || isValidTSType(*a, false)) return bail();
+  auto ts_type = type_of_type_structure(a->m_data.parr);
   if (!ts_type) return bail();
 
-  // TODO(T26859386): refine if ($x is nonnull) case
+  auto const locId = topStkEquiv(env, 1);
+  if (locId == NoLocalId) return bail();
 
+  // TODO(T26859386): refine if ($x is nonnull) case
+  popC(env);
   popC(env);
   auto const negate = jmp.op == Op::JmpNZ;
   auto const result = [&] (Type t, bool pass) {
@@ -1504,21 +1505,21 @@ void isTypeStructJmpImpl(ISS& env,
   refineLocation(env, locId, pre, jmp.target, post);
 }
 
-}
+} // namespace
 
 template<class JmpOp>
 void group(ISS& env,
-           const bc::IsTypeStruct& inst,
+           const bc::IsTypeStructC& inst,
            const JmpOp& jmp) {
-  isTypeStructJmpImpl(env, inst, jmp);
+  isTypeStructCJmpImpl(env, inst, jmp);
 }
 
 template<class JmpOp>
 void group(ISS& env,
-           const bc::IsTypeStruct& inst,
+           const bc::IsTypeStructC& inst,
            const bc::Not&,
            const JmpOp& jmp) {
-  isTypeStructJmpImpl(env, inst, invertJmp(jmp));
+  isTypeStructCJmpImpl(env, inst, invertJmp(jmp));
 }
 
 void in(ISS& env, const bc::Switch& op) {
@@ -2361,22 +2362,22 @@ bool isValidTypeOpForIsAs(const IsTypeOp& op) {
 
 template<bool asExpression>
 void isAsTypeStructImpl(ISS& env, SArray ts) {
-  auto const t = topC(env);
+  auto const t = topC(env, 1); // operand to is/as
 
   auto result = [&] (
     const Type& out,
     const folly::Optional<Type>& test = folly::none
   ) {
-    auto const location = topStkEquiv(env);
-    popC(env);
+    if (asExpression && out.subtypeOf(BTrue)) {
+      constprop(env);
+      return reduce(env, bc::PopC {}, bc::Nop {});
+    }
+    auto const location = topStkEquiv(env, 1);
+    popC(env); // type structure
+    popC(env); // operand to is/as
     if (!asExpression) {
       constprop(env);
       return push(env, out);
-    }
-    if (out.subtypeOf(BTrue)) {
-      constprop(env);
-      push(env, t);
-      return reduce(env, bc::Nop {});
     }
     if (out.subtypeOf(BFalse)) {
       push(env, t);
@@ -2412,7 +2413,7 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
     if (asExpression || !op || !isValidTypeOpForIsAs(op.value())) {
       return result(TBool, test);
     }
-    return reduce(env, bc::IsTypeC { *op });
+    return reduce(env, bc::PopC {}, bc::IsTypeC { *op });
   };
 
   auto const is_nullable_ts = is_ts_nullable(ts);
@@ -2463,14 +2464,17 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
       if (is_definitely_null) return result(TFalse);
       if (is_definitely_not_null) return result(TTrue);
       if (!asExpression) {
-        return reduce(env, bc::IsTypeC { IsTypeOp::Null }, bc::Not {});
+        return reduce(env,
+                      bc::PopC {},
+                      bc::IsTypeC { IsTypeOp::Null },
+                      bc::Not {});
       }
       return result(TBool);
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_xhp:
       if (asExpression) return result(TBool);
-      return reduce(env, bc::InstanceOfD { get_ts_classname(ts) });
+      return reduce(env, bc::PopC {}, bc::InstanceOfD { get_ts_classname(ts) });
     case TypeStructure::Kind::T_unresolved: {
       if (asExpression) return result(TBool);
       auto const rcls = env.index.resolve_class(env.ctx, get_ts_classname(ts));
@@ -2479,7 +2483,7 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
       if (!rcls || !rcls->resolved() || rcls->cls()->attrs & AttrEnum) {
         return result(TBool);
       }
-      return reduce(env, bc::InstanceOfD { rcls->name() });
+      return reduce(env, bc::PopC {}, bc::InstanceOfD { rcls->name() });
     }
     case TypeStructure::Kind::T_enum:
     case TypeStructure::Kind::T_resource:
@@ -2506,14 +2510,36 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
 
 }
 
-void in(ISS& env, const bc::IsTypeStruct& op) {
-  assertx(op.arr1->isDictOrDArray());
-  isAsTypeStructImpl<false>(env, op.arr1);
+void in(ISS& env, const bc::IsTypeStructC& op) {
+  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? TDict : TDArr;
+  if (!topC(env).subtypeOf(requiredTSType)) {
+    popC(env);
+    popC(env);
+    return push(env, TBottom);
+  }
+  auto const a = tv(topC(env));
+  if (!a || !isValidTSType(*a, false)) {
+    popC(env);
+    popC(env);
+    return push(env, TBool);
+  }
+  isAsTypeStructImpl<false>(env, a->m_data.parr);
 }
 
-void in(ISS& env, const bc::AsTypeStruct& op) {
-  assertx(op.arr1->isDictOrDArray());
-  isAsTypeStructImpl<true>(env, op.arr1);
+void in(ISS& env, const bc::AsTypeStructC& op) {
+  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? TDict : TDArr;
+  if (!topC(env).subtypeOf(requiredTSType)) {
+    popC(env);
+    popC(env);
+    return push(env, TBottom);
+  }
+  auto const a = tv(topC(env));
+  if (!a || !isValidTSType(*a, false)) {
+    popC(env);
+    push(env, popC(env));
+    return;
+  }
+  isAsTypeStructImpl<true>(env, a->m_data.parr);
 }
 
 void in(ISS& env, const bc::CombineAndResolveTypeStruct& op) {
@@ -4674,7 +4700,7 @@ void interpStep(ISS& env, Iterator& it, Iterator stop) {
 
   switch (o1) {
   X(InstanceOfD)
-  X(IsTypeStruct)
+  X(IsTypeStructC)
   X(IsTypeL)
   X(IsTypeC)
   X(StaticLocCheck)

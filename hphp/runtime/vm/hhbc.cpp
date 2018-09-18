@@ -1027,6 +1027,12 @@ static const char* SetRangeOp_names[] = {
 #undef OP
 };
 
+static const char* TypeStructResolveOp_names[] = {
+#define OP(x) #x,
+  TYPE_STRUCT_RESOLVE_OPS
+#undef OP
+};
+
 static const char* MOpMode_names[] = {
 #define MODE(x) #x,
   M_OP_MODES
@@ -1122,6 +1128,8 @@ X(ObjMethodOp,    static_cast<int>(ObjMethodOp::NullThrows))
 X(SwitchKind,     static_cast<int>(SwitchKind::Unbounded))
 X(QueryMOp,       static_cast<int>(QueryMOp::CGet))
 X(SetRangeOp,     static_cast<int>(SetRangeOp::Forward))
+X(TypeStructResolveOp,
+                  static_cast<int>(TypeStructResolveOp::Resolve))
 X(MOpMode,        static_cast<int>(MOpMode::None))
 X(ContCheckOp,    static_cast<int>(ContCheckOp::IgnoreStarted))
 X(CudOp,          static_cast<int>(CudOp::IgnoreIter))

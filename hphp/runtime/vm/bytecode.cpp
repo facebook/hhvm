@@ -61,6 +61,7 @@
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/type-structure-helpers.h"
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-conversions.h"
@@ -179,15 +180,8 @@ void frame_free_locals_no_hook(ActRec* fp) {
 
 const StaticString s___call("__call");
 const StaticString s___callStatic("__callStatic");
-const StaticString s_allows_unknown_fields("allows_unknown_fields");
-const StaticString s_classname("classname");
-const StaticString s_elem_types("elem_types");
-const StaticString s_fields("fields");
 const StaticString s_file("file");
-const StaticString s_kind("kind");
 const StaticString s_line("line");
-const StaticString s_nullable("nullable");
-const StaticString s_optional_shape_field("optional_shape_field");
 const StaticString s_construct("__construct");
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -213,6 +207,9 @@ inline const char* prettytype(SwitchKind) { return "SwitchKind"; }
 inline const char* prettytype(MOpMode) { return "MOpMode"; }
 inline const char* prettytype(QueryMOp) { return "QueryMOp"; }
 inline const char* prettytype(SetRangeOp) { return "SetRangeOp"; }
+inline const char* prettytype(TypeStructResolveOp) {
+  return "TypeStructResolveOp";
+}
 inline const char* prettytype(FPassHint) { return "FPassHint"; }
 inline const char* prettytype(CudOp) { return "CudOp"; }
 inline const char* prettytype(ContCheckOp) { return "ContCheckOp"; }
@@ -2702,57 +2699,54 @@ Array resolveAndVerifyTypeStructureHelper(
            ts, declaringCls, calledCls, tsList, suppress);
 }
 
+ALWAYS_INLINE Array maybeResolveAndErrorOnTypeStructure(
+  const Cell a, TypeStructResolveOp op, bool suppress
+) {
+  isValidTSType(a, true);
+  Array ts(a.m_data.parr);
+  assertx(!ts.empty());
+
+  if (op == TypeStructResolveOp::Resolve) {
+    req::vector<Array> tsList;
+    return resolveAndVerifyTypeStructureHelper<true>(ts, tsList, suppress);
+  }
+  errorOnIsAsExpressionInvalidTypes(ts);
+  return ts;
+}
+
 } // namespace
 
-OPTBLD_INLINE void iopIsTypeStruct(const ArrayData* a) {
-  auto c1 = vmStack().topC();
-  assertx(c1 != nullptr);
-  req::vector<Array> tsList;
-  auto resolved = resolveAndVerifyTypeStructureHelper<true>(
-                    ArrNR(a), tsList, true);
-  auto b = checkTypeStructureMatchesCell(resolved, *c1);
+OPTBLD_INLINE void iopIsTypeStructC(TypeStructResolveOp op) {
+  auto const a = vmStack().topC();
+  auto const c = vmStack().indC(1);
+  auto const ts = maybeResolveAndErrorOnTypeStructure(*a, op, true);
+  auto b = checkTypeStructureMatchesCell(ts, *c);
+  vmStack().popC(); // pop ts
   vmStack().replaceC<KindOfBoolean>(b);
 }
 
-OPTBLD_INLINE void iopAsTypeStruct(const ArrayData* a) {
-  auto c1 = vmStack().topC();
-  assertx(c1 != nullptr);
+OPTBLD_INLINE void iopAsTypeStructC(TypeStructResolveOp op) {
+  auto const a = vmStack().topC();
+  auto const c = vmStack().indC(1);
+  auto const ts = maybeResolveAndErrorOnTypeStructure(*a, op, false);
   std::string givenType, expectedType, errorKey;
-  req::vector<Array> tsList;
-  auto resolved = resolveAndVerifyTypeStructureHelper<true>(
-                    ArrNR(a), tsList, false);
   if (!checkTypeStructureMatchesCell(
-        resolved, *c1, givenType, expectedType, errorKey)) {
+        ts, *c, givenType, expectedType, errorKey)) {
     throwTypeStructureDoesNotMatchCellException(
       givenType, expectedType, errorKey);
   }
+  vmStack().popC(); // pop ts
 }
-
-namespace {
-
-ALWAYS_INLINE void verifyTSType(const Cell* c) {
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    if (!tvIsDict(c)) {
-      raise_error("Type structure must be a dict");
-    }
-  } else {
-    if (!tvIsArray(c)) {
-      raise_error("Type structure must be an array");
-    }
-  }
-}
-
-} // namespace
 
 OPTBLD_INLINE void iopCombineAndResolveTypeStruct(uint32_t n) {
   assertx(n != 0);
   auto const a = vmStack().topC();
-  verifyTSType(a);
+  isValidTSType(*a, true);
   req::vector<Array> tsList;
 
   for (int i = n - 1; i > 0; --i) {
     auto const a2 = vmStack().indC(i);
-    verifyTSType(a2);
+    isValidTSType(*a2, true);
     tsList.emplace_back(Array::attach(a2->m_data.parr));
   }
   auto resolved = resolveAndVerifyTypeStructureHelper<false>(

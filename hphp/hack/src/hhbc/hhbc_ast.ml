@@ -172,6 +172,10 @@ type instruct_basic =
   | UnboxRNop
   | RGetCNop
 
+type typestruct_resolve_op =
+  | Resolve
+  | DontResolve
+
 type instruct_lit_const =
   | Null
   | True
@@ -261,8 +265,8 @@ type instruct_operator =
   | CastDArray
   | InstanceOf
   | InstanceOfD of class_id
-  | IsTypeStruct of adata_id
-  | AsTypeStruct of adata_id
+  | IsTypeStructC of typestruct_resolve_op
+  | AsTypeStructC of typestruct_resolve_op
   | CombineAndResolveTypeStruct of int
   | Print
   | Clone

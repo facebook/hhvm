@@ -139,6 +139,11 @@ let string_of_lit_const instruction =
     | CnsU (id1, id2) ->
       sep ["CnsU"; string_of_const_id id1; SU.quote_string id2]
 
+
+let string_of_typestruct_resolve_op = function
+  | Resolve -> "Resolve"
+  | DontResolve -> "DontResolve"
+
 let string_of_operator instruction =
   match instruction with
     | Concat -> "Concat"
@@ -186,8 +191,10 @@ let string_of_operator instruction =
     | CastDArray -> "CastDArray"
     | InstanceOf -> "InstanceOf"
     | InstanceOfD id -> sep ["InstanceOfD"; string_of_class_id id]
-    | IsTypeStruct id -> sep ["IsTypeStruct"; string_of_adata_id id]
-    | AsTypeStruct id -> sep ["AsTypeStruct"; string_of_adata_id id]
+    | IsTypeStructC op ->
+      sep ["IsTypeStructC"; string_of_typestruct_resolve_op op]
+    | AsTypeStructC op ->
+      sep ["AsTypeStructC"; string_of_typestruct_resolve_op op]
     | CombineAndResolveTypeStruct n ->
       sep ["CombineAndResolveTypeStruct"; string_of_int n]
     | Print -> "Print"

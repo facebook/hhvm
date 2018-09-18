@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/type-structure-helpers.h"
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/enum-util.h"
@@ -29,13 +30,6 @@
 
 namespace HPHP {
 
-const StaticString s_allows_unknown_fields("allows_unknown_fields");
-const StaticString s_classname("classname");
-const StaticString s_elem_types("elem_types");
-const StaticString s_fields("fields");
-const StaticString s_kind("kind");
-const StaticString s_nullable("nullable");
-const StaticString s_optional_shape_field("optional_shape_field");
 const StaticString s_unresolved("[unresolved]");
 
 bool cellInstanceOf(const Cell* tv, const NamedEntity* ne) {
@@ -350,10 +344,16 @@ bool checkTypeStructureMatchesCellImpl(
             errOnKey(k);
             return true;
           }
-          auto const tsField = ArrNR(tsFieldData);
+          auto const value_field = ts->rval(s_value.get());
+          assertx(value_field == nullptr || isArrayType(value_field.type()));
+          auto const tsField = value_field == nullptr
+            ? tsFieldData
+            : value_field.val().parr;
+
           auto const field = fields->at(k);
           if (!checkTypeStructureMatchesCellImpl<genErrorMessage>(
-              tsField, tvToCell(field), givenType, expectedType, errorKey)) {
+              ArrNR(tsField), tvToCell(field), givenType,
+              expectedType, errorKey)) {
             fieldsDidMatch = false;
             errOnKey(k);
             return true;
@@ -417,8 +417,6 @@ bool checkTypeStructureMatchesCell(
   return checkTypeStructureMatchesCellImpl<true>(
     ts, c1, givenType, expectedType, errorKey);
 }
-
-void errorOnIsAsExpressionInvalidTypes(const Array&);
 
 ALWAYS_INLINE
 void errorOnIsAsExpressionInvalidTypesList(const ArrayData* tsFields) {

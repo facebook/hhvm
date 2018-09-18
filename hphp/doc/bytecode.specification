@@ -1500,16 +1500,24 @@ DblAsBits  [C]  ->   [C]
  If $1 is a double, reinterpret it as an integer (with the same bit-pattern)
  and push it onto the stack. Otherwise, push 0.
 
-IsTypeStruct <scalar array id>    [C]  ->  [C:Bool]
+IsTypeStructC <type struct resolve op>  [C C]  ->  [C:Bool]
 
-  If %1 matches the type structure of a defined type and $1 is a subtype of %1,
+  If $1 matches the type structure of a defined type and $2 is a subtype of $1,
   this instruction pushes true onto the stack, otherwise it pushes false onto
   the stack.
+  If the type struct resolve op is Resolve, then resolves the type structure in
+  $1 before performing the subtype check.
+  If the type struct resolve op is DontResolve and the given type structure is
+  unresolved, then this instruction raises an error.
 
-AsTypeStruct <scalar array id>    [C]  ->  [C]
+AsTypeStructC <type struct resolve op>    [C C]  ->  [C]
 
-  If %1 matches the type structure of a defined type and $1 is a subtype of %1,
+  If $1 matches the type structure of a defined type and $2 is a subtype of $1,
   this instruction pushes $1 onto the stack, otherwise it throws an exception.
+  If the type struct resolve op is Resolve, then resolves the type structure in
+  $1 before performing the subtype check.
+  If the type struct resolve op is DontResolve and the given type structure is
+  unresolved, then this instruction raises an error.
 
 CombineAndResolveTypeStruct <num type structures> [C..C] -> [C]
 

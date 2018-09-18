@@ -707,17 +707,22 @@ void emitInstanceOf(IRGS& env) {
 
 namespace {
 
-SSATmp* resolveTypeStructImpl(IRGS& env, const ArrayData* ts, bool suppress) {
+SSATmp* resolveTypeStructImpl(
+  IRGS& env,
+  SSATmp* ts,
+  bool typeStructureCouldBeNonStatic,
+  bool suppress
+) {
   auto const declaringCls = curFunc(env) ? curClass(env) : nullptr;
   auto const calledCls =
-    declaringCls && typeStructureCouldBeNonStatic(ArrNR(ts))
+    declaringCls && typeStructureCouldBeNonStatic
       ? gen(env, LdClsCtx, ldCtx(env))
       : cns(env, nullptr);
   return gen(
     env,
     ResolveTypeStruct,
     ResolveTypeStructData(declaringCls, suppress),
-    cns(env, ts),
+    ts,
     calledCls
   );
 }
@@ -898,46 +903,76 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
   not_reached();
 }
 
-} // namespace
-
-void emitIsTypeStruct(IRGS& env, const ArrayData* a) {
+SSATmp* handleIsAsResolutionAndCommonOpts(
+  IRGS& env,
+  SSATmp* a,
+  TypeStructResolveOp op,
+  bool asExpr,
+  bool& done
+) {
+  auto const required_ts_type = RuntimeOption::EvalHackArrDVArrs ? TDict : TArr;
+  if (!a->isA(required_ts_type)) PUNT(TypeStructC-NotArrayTypeStruct);
+  if (!a->hasConstVal(required_ts_type)) {
+    return op == TypeStructResolveOp::Resolve
+           ? resolveTypeStructImpl(env, a, true, !asExpr)
+           : a;
+  }
+  auto const ts =
+    RuntimeOption::EvalHackArrDVArrs ? a->dictVal() : a->arrVal();
+  auto maybe_resolved = ts;
   bool partial = true;
   bool invalidType = true;
-  auto const newTS =
-    staticallyResolveTypeStructure(env, a, partial, invalidType);
-  if (emitIsAsTypeStructWithoutResolvingIfPossible(env, newTS, false)) return;
+  if (op == TypeStructResolveOp::Resolve) {
+    maybe_resolved =
+      staticallyResolveTypeStructure(env, ts, partial, invalidType);
+  }
+  if (emitIsAsTypeStructWithoutResolvingIfPossible(env, maybe_resolved,
+                                                   asExpr)) {
+    done = true;
+    return nullptr;
+  }
+  if (op == TypeStructResolveOp::Resolve && (partial || invalidType)) {
+    return resolveTypeStructImpl(
+      env, cns(env, ts), typeStructureCouldBeNonStatic(ArrNR(ts)), !asExpr);
+  }
 
-  auto const tc = partial || invalidType
-    ? resolveTypeStructImpl(env, a, true)
-    : cns(env, newTS);
+  return cns(env, maybe_resolved);
+}
+
+} // namespace
+
+void emitIsTypeStructC(IRGS& env, TypeStructResolveOp op) {
+  auto const a = popC(env);
+  bool done = false;
+  SSATmp* tc = handleIsAsResolutionAndCommonOpts(env, a, op, false, done);
+  if (done) {
+    decRef(env, a);
+    return;
+  }
   auto const c = popC(env);
   auto block = opcodeMayRaise(IsTypeStruct)
     ? create_catch_block(env, [&]{ decRef(env, tc); })
     : nullptr;
   push(env, gen(env, IsTypeStruct, block, tc, c));
   decRef(env, c);
-  decRef(env, tc);
+  decRef(env, a);
 }
 
-void emitAsTypeStruct(IRGS& env, const ArrayData* a) {
+void emitAsTypeStructC(IRGS& env, TypeStructResolveOp op) {
   /*
    * Expecting as-check to fail rarely and since is-check is cheaper,
    * run is-check first and if it fails run the as-check to generate the
    * exception
    */
-  bool partial = true;
-  bool invalidType = true;
-  auto const newTS =
-    staticallyResolveTypeStructure(env, a, partial, invalidType);
-  if (emitIsAsTypeStructWithoutResolvingIfPossible(env, newTS, true)) {
-    // This means that the check will succeed, so this instruction is a no-op
+  auto const a = popC(env);
+  bool done = false;
+  SSATmp* tc = handleIsAsResolutionAndCommonOpts(env, a, op, true, done);
+  if (done) {
     push(env, popC(env));
+    decRef(env, a);
     return;
   }
   auto const c = topC(env);
-  auto const tc = partial || invalidType
-    ? resolveTypeStructImpl(env, a, false)
-    : cns(env, newTS);
   ifThen(
     env,
     [&](Block* taken) {
@@ -952,7 +987,7 @@ void emitAsTypeStruct(IRGS& env, const ArrayData* a) {
       gen(env, AsTypeStruct, block, tc, c);
     }
   );
-  decRef(env, tc);
+  decRef(env, a);
 }
 
 namespace {

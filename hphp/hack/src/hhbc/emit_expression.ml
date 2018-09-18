@@ -667,19 +667,46 @@ and emit_as env pos e h is_nullable =
         instr_label done_label;
       ]
   end else begin
-    let namespace = Emit_env.get_namespace env in
-    let tv = Emit_type_constant.hint_to_type_constant
-      ~tparams:[] ~namespace ~targ_map:SMap.empty h in
+    let ts_instrs, is_static = emit_reified_arg env h in
     gather [
       emit_expr ~need_ref:false env e;
-      instr_astypestruct @@ Emit_adata.get_array_identifier tv
+      begin if is_static then
+          let namespace = Emit_env.get_namespace env in
+          let tv = Emit_type_constant.hint_to_type_constant
+            ~tparams:[] ~namespace ~targ_map:SMap.empty h in
+          let i = Emit_adata.get_array_identifier tv in
+          let ts = if hack_arr_dv_arrs () then
+            instr (ILitConst (Dict i)) else instr (ILitConst (Array i)) in
+          gather [
+            ts;
+            instr_astypestructc Resolve;
+          ]
+        else
+          gather [
+            ts_instrs;
+            instr_astypestructc DontResolve;
+          ]
+      end
     ] end
 
 and emit_is env _pos h =
-  let namespace = Emit_env.get_namespace env in
-  let ts = Emit_type_constant.hint_to_type_constant
-    ~tparams:[] ~namespace ~targ_map:SMap.empty h in
-  instr_istypestruct @@ Emit_adata.get_array_identifier ts
+  let ts_instrs, is_static = emit_reified_arg env h in
+  if is_static then
+    let namespace = Emit_env.get_namespace env in
+    let tv = Emit_type_constant.hint_to_type_constant
+      ~tparams:[] ~namespace ~targ_map:SMap.empty h in
+    let i = Emit_adata.get_array_identifier tv in
+    let ts = if hack_arr_dv_arrs () then
+      instr (ILitConst (Dict i)) else instr (ILitConst (Array i)) in
+    gather [
+      ts;
+      instr_istypestructc Resolve;
+    ]
+  else
+    gather [
+      ts_instrs;
+      instr_istypestructc DontResolve;
+    ]
 
 and emit_cast env pos hint expr =
   let op =
@@ -2957,9 +2984,6 @@ and emit_ignored_expr env ?(pop_pos = Pos.none) e =
     ]
 
 and emit_reified_arg env hint =
-  if not @@ reified_generics ()
-  then Emit_fatal.raise_fatal_parse Pos.none "Reified generics are not allowed"
-  else
   let scope = Emit_env.get_scope env in
   let f is_fun tparam acc =
     match tparam with
@@ -2991,9 +3015,12 @@ and emit_reified_arg env hint =
       | _ -> acc
     end in
   let count, targ_map = visitor#on_hint acc hint in
+  if count > 0 && not @@ reified_generics ()
+  then Emit_fatal.raise_fatal_parse Pos.none "Reified generics are not allowed"
+  else
   match snd hint with
   | A.Happly ((_, name), []) when SMap.mem name current_targs ->
-    get_reified_var_helper name
+    get_reified_var_helper name, false
   | _ ->
     let namespace = Emit_env.get_namespace env in
     let ts = Emit_type_constant.hint_to_type_constant
@@ -3016,7 +3043,7 @@ and emit_reified_arg env hint =
     gather [
       ts_list;
       instr_combine_and_resolve_type_struct (count + 1);
-    ]
+    ], (count = 0)
 
 (* Emit code to construct the argument frame and then make the call *)
 and emit_args_and_call env call_pos reified_targs args uargs async_eager_label =
@@ -3201,7 +3228,8 @@ and emit_args_and_call env call_pos reified_targs args uargs async_eager_label =
   in
   Local.scope @@ fun () ->
     gather [
-      gather @@ List.map reified_targs (emit_reified_arg env);
+      gather @@
+        List.map reified_targs ~f:(fun ta -> fst @@ emit_reified_arg env ta);
       aux 0 all_args []
     ]
 

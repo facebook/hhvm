@@ -86,6 +86,21 @@ ALWAYS_INLINE const StringData* get_ts_classname(const ArrayData* ts) {
   return classname_field.val().pstr;
 }
 
+ALWAYS_INLINE bool isValidTSType(Cell c, bool error) {
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    if (!tvIsDict(c)) {
+      if (error) raise_error("Type structure must be a dict");
+      return false;
+    }
+  } else {
+    if (!tvIsArray(c)) {
+      if (error) raise_error("Type structure must be an array");
+      return false;
+    }
+  }
+  return true;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

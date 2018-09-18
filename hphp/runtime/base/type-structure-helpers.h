@@ -58,6 +58,11 @@ Array resolveAndVerifyTypeStructure(
   bool suppress
 );
 
+/*
+ * Errors when the type structure contains invalid types for is/as expressions
+ */
+void errorOnIsAsExpressionInvalidTypes(const Array& ts);
+
 /**
  * Returns whether the type structure may not be able to be resolved statically,
  * i.e. if it contains `this` references.

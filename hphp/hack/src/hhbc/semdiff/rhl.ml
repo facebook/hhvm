@@ -664,10 +664,10 @@ let check_instruct_operator i i' =
   | BitOr, _ | BitXor, _ | BitNot, _ | Shl, _ | Shr, _ | Floor, _ | Ceil, _
   | CastBool, _ | CastInt, _ | CastDouble, _ | CastString, _ | CastArray, _
   | CastObject, _ | CastVec, _ | CastDict, _ | CastKeyset, _ | CastVArray, _
-  | CastDArray, _ | InstanceOf, _ | InstanceOfD _, _ | IsTypeStruct _, _
+  | CastDArray, _ | InstanceOf, _ | InstanceOfD _, _ | IsTypeStructC _, _
   | CombineAndResolveTypeStruct _, _
   | Print, _ | ResolveFunc _, _ | ResolveObjMethod, _
-  | AsTypeStruct _, _ | Clone, _ ->
+  | AsTypeStructC _, _ | Clone, _ ->
     if i=i' then Some false else None
 
 let check_instruct_special_flow i i' =

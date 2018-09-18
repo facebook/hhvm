@@ -459,8 +459,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
 
   auto checkDArr = [&] (bool is_const) {
     auto t = src()->type();
-    auto cond_type = RuntimeOption::EvalHackArrDVArrs
-      ? TDict : Type::Array(ArrayData::kMixedKind);
+    auto cond_type = RuntimeOption::EvalHackArrDVArrs ? TDict : TArr;
     if (is_const) {
       auto expected = folly::sformat("constant {}", t.toString());
       check(src()->hasConstVal(cond_type), t, expected.c_str());

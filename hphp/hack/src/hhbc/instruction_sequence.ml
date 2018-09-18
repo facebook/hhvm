@@ -104,8 +104,8 @@ let instr_dup = instr (IBasic Dup)
 let instr_nop = instr (IBasic Nop)
 let instr_instanceofd s = instr (IOp (InstanceOfD s))
 let instr_instanceof = instr (IOp InstanceOf)
-let instr_istypestruct s = instr (IOp (IsTypeStruct s))
-let instr_astypestruct s = instr (IOp (AsTypeStruct s))
+let instr_istypestructc mode = instr (IOp (IsTypeStructC mode))
+let instr_astypestructc mode = instr (IOp (AsTypeStructC mode))
 let instr_combine_and_resolve_type_struct i =
   instr (IOp (CombineAndResolveTypeStruct i))
 let instr_int i = instr (ILitConst (Int (Int64.of_int i)))
@@ -766,10 +766,11 @@ let get_input_output_count i =
     begin match i with
     | Concat | Add | Sub | Mul | AddO | SubO | MulO | Div | Mod | Xor | Same
     | NSame | Eq | Neq | Lt | Lte | Gt | Gte | Cmp | BitAnd | BitOr | BitXor
-    | Shl | Shr | InstanceOf | Pow | ResolveObjMethod -> (2, 1)
+    | Shl | Shr | InstanceOf | Pow | ResolveObjMethod | IsTypeStructC _
+    | AsTypeStructC _ -> (2, 1)
     | Sqrt | Not | BitNot | Floor | Ceil | CastBool | CastInt | CastDouble
     | CastString | CastArray | CastObject | CastVec | CastDict | CastKeyset
-    | CastVArray | CastDArray | InstanceOfD _ | IsTypeStruct _ | AsTypeStruct _
+    | CastVArray | CastDArray | InstanceOfD _
     | Print | Clone | Hhbc_ast.Exit | Abs -> (1, 1)
     | Fatal _ -> (1, 0)
     | CombineAndResolveTypeStruct n | ConcatN n -> (n, 1)

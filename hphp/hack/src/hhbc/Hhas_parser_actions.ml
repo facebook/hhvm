@@ -718,6 +718,12 @@ let nullflavorofiarg arg =
   | IAId "NullSafe" -> Ast.OG_nullsafe
   | _ -> report_error "bad null flavor"
 
+let typestructresolveofiarg arg =
+  match arg with
+  | IAId "Resolve" -> Resolve
+  | IAId "DontResovle" -> DontResolve
+  | _ -> report_error "bad null flavor"
+
 let labelofiarg arg =
   match arg with
   | IAId l -> makelabel l
@@ -885,12 +891,8 @@ let makeunaryinst s arg = match s with
    | "InstanceOfD" -> (match arg with
        | IAString sa -> IOp (InstanceOfD (Hhbc_id.Class.from_raw_string sa))
        | _ -> report_error "bad InstanceOfD arg")
-   | "IsTypeStruct" -> (match arg with
-       | IAArrayno n -> IOp (IsTypeStruct n)
-       | _ -> report_error "bad array lit cst")
-   | "AsTypeStruct" -> (match arg with
-       | IAArrayno n -> IOp (AsTypeStruct n)
-       | _ -> report_error "bad array lit cst")
+   | "IsTypeStructC" -> IOp (IsTypeStructC (typestructresolveofiarg arg))
+   | "AsTypeStructC" -> IOp (AsTypeStructC (typestructresolveofiarg arg))
    | "CombineAndResolveTypeStruct" ->
       IOp (CombineAndResolveTypeStruct (intofiarg arg))
    | "ConcatN" -> IOp (ConcatN (intofiarg arg))

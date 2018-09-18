@@ -57,10 +57,6 @@ let ty_opt_equiv env tyopt1 tyopt2 ~are_ty_param =
     let env, ty = ty_equiv env ty1 ty2 ~are_ty_param in env, Some ty
   | _, _ -> raise Not_equiv
 
-let ty_lists_equiv env tyl1 tyl2 ~are_ty_param =
-  try List.map2_env env tyl1 tyl2 ~f:(ty_equiv ~are_ty_param)
-  with Not_equiv | Invalid_argument _ -> raise Not_equiv
-
 (* Performs the union of two types.
  * The union is the least upper bound of the subtyping relation.
  *
@@ -151,10 +147,12 @@ and union_ env ty1 ty2 r =
     with Not_equiv -> raise Dont_unify
     end
   | (_, Ttuple tyl1), (_, Ttuple tyl2) ->
-    let env, tyl =
-      try ty_lists_equiv env tyl1 tyl2 ~are_ty_param:false
-      with Not_equiv -> raise Dont_unify in
-    env, (r, Ttuple tyl)
+    if List.length tyl1 = List.length tyl2
+    then
+      let env, tyl = List.map2_env env tyl1 tyl2 ~f:union in
+      env, (r, Ttuple tyl)
+    else
+      raise Dont_unify
   | (r1, Tshape (fk1, fdm1)), (r2, Tshape (fk2, fdm2)) ->
     let env, ty = union_shapes env (fk1, fdm1, r1) (fk2, fdm2, r2) in
     env, (r, ty)

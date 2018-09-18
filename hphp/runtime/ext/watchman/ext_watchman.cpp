@@ -535,7 +535,7 @@ getWatchmanClientForSocket(const std::string& socket_path) {
     [](folly::exception_wrapper& /*ex*/) { /* (ASYNC) error handler */ }
   );
   return client->connect()
-    .then([client](const folly::dynamic& /*connect_info*/) {
+    .thenValue([client](const folly::dynamic& /*connect_info*/) {
       // (ASYNC)
       return client;
     });
@@ -574,11 +574,11 @@ Object HHVM_FUNCTION(HH_watchman_run,
 
   auto dynamic_query = folly::parseJson(json_query);
   auto res_future = getWatchmanClientForSocket(socket_path)
-    .then([dynamic_query] (std::shared_ptr<watchman::WatchmanClient> client) {
+    .thenValue([dynamic_query] (std::shared_ptr<watchman::WatchmanClient> client) {
       // (ASYNC)
       return client->run(dynamic_query)
         // pass client shared_ptr through to keep client alive
-        .then([client] (const folly::dynamic& result) {
+        .thenValue([client] (const folly::dynamic& result) {
           return std::string(toJson(result).data());
         });
     });
@@ -630,7 +630,7 @@ Object HHVM_FUNCTION(HH_watchman_subscribe,
       name));
   try {
     auto res_future = getWatchmanClientForSocket(socket_path)
-      .then([name] (std::shared_ptr<watchman::WatchmanClient> client)
+      .thenValue([name] (std::shared_ptr<watchman::WatchmanClient> client)
         -> folly::Future<folly::Unit>
       {
         // (ASYNC)
@@ -707,7 +707,7 @@ Object HHVM_FUNCTION(HH_watchman_sync_sub,
   auto start_time = std::chrono::steady_clock::now();
   try {
     auto res_future = sub_entry->second.watchmanFlush(timeout)
-      .then([timeout, start_time, name](folly::Optional<folly::dynamic> flush) {
+      .thenValue([timeout, start_time, name](folly::Optional<folly::dynamic> flush) {
         // (ASYNC)
         if (!flush.hasValue()) {
           // Subscription is broken - no updates to process.

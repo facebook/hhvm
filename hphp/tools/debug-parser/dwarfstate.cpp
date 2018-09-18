@@ -158,11 +158,11 @@ DwarfState::DwarfState(std::string filename) {
   auto getSection = [&] (const char* name, folly::StringPiece& section) {
     auto elfSection = elf.getSectionByName(name);
     if (!elfSection) return false;
-#ifdef SHF_COMPRESSED
+    #ifdef SHF_COMPRESSED
     if (elfSection->sh_flags & SHF_COMPRESSED) {
       return false;
     }
-#endif
+    #endif
     section = elf.getSectionBody(*elfSection);
     return true;
   };
@@ -304,8 +304,8 @@ DwarfState::Die DwarfState::getNextSibling(Dwarf_Die die) const {
   }
 
   return getDieAtOffset(
-      die->context,
-      { sp.data() - die->context->section, die->context->isInfo }
+    die->context,
+    { sp.data() - die->context->section, die->context->isInfo }
   );
 }
 
@@ -407,12 +407,12 @@ auto DwarfState::getTag(Dwarf_Die die) const -> Dwarf_Half {
 std::string DwarfState::getDIEName(Dwarf_Die die) const {
   std::string ret{};
   forEachAttribute(
-      die,
-      [&] (Dwarf_Attribute attr) {
-        if (attr->name != DW_AT_name) return true;
-        ret = getAttributeValueString(attr);
-        return false;
-      }
+    die,
+    [&] (Dwarf_Attribute attr) {
+      if (attr->name != DW_AT_name) return true;
+      ret = getAttributeValueString(attr);
+      return false;
+    }
   );
   return ret;
 }
@@ -436,14 +436,14 @@ std::string DwarfState::getAttributeValueString(Dwarf_Attribute attr) const {
   if (attr->form == DW_FORM_strp) {
     auto sp = attr->attrValue;
     return folly::to<std::string>(
-        getStringFromStringSection(readOffset(sp, attr->die->is64Bit))
+      getStringFromStringSection(readOffset(sp, attr->die->is64Bit))
     );
   }
   throw DwarfStateException{
     folly::sformat(
-        "Unable to obtain attribute value string: {}-{}",
-        attributeTypeToString(attr->name),
-        attributeFormToString(attr->form)
+      "Unable to obtain attribute value string: {}-{}",
+      attributeTypeToString(attr->name),
+      attributeFormToString(attr->form)
     )
   };
 }
@@ -459,9 +459,9 @@ bool DwarfState::getAttributeValueFlag(Dwarf_Attribute attr) const {
 
   throw DwarfStateException{
     folly::sformat(
-        "Unable to obtain attribute value flag: {}-{}",
-        attributeTypeToString(attr->name),
-        attributeFormToString(attr->form)
+      "Unable to obtain attribute value flag: {}-{}",
+      attributeTypeToString(attr->name),
+      attributeFormToString(attr->form)
     )
   };
 }
@@ -491,11 +491,11 @@ int64_t DwarfState::getAttributeValueSData(Dwarf_Attribute attr) const {
     return readSLEB(sp);
   }
   throw DwarfStateException{
-      folly::sformat(
-        "Unable to obtain attribute value signed data: {}-{}",
-        attributeTypeToString(attr->name),
-        attributeFormToString(attr->form)
-      )
+    folly::sformat(
+      "Unable to obtain attribute value signed data: {}-{}",
+      attributeTypeToString(attr->name),
+      attributeFormToString(attr->form)
+    )
   };
 }
 
@@ -505,11 +505,11 @@ uintptr_t DwarfState::getAttributeValueAddr(Dwarf_Attribute attr) const {
     return read<uintptr_t>(sp);
   }
   throw DwarfStateException{
-      folly::sformat(
-        "Unable to obtain attribute value address: {}-{}",
-        attributeTypeToString(attr->name),
-        attributeFormToString(attr->form)
-      )
+    folly::sformat(
+      "Unable to obtain attribute value address: {}-{}",
+      attributeTypeToString(attr->name),
+      attributeFormToString(attr->form)
+    )
   };
 }
 
@@ -554,9 +554,9 @@ uint64_t DwarfState::getAttributeValueSig8(Dwarf_Attribute attr) const {
   }
   throw DwarfStateException{
     folly::sformat(
-        "Unable to obtain attribute value sig8: {}-{}",
-        attributeTypeToString(attr->name),
-        attributeFormToString(attr->form)
+      "Unable to obtain attribute value sig8: {}-{}",
+      attributeTypeToString(attr->name),
+      attributeFormToString(attr->form)
     )
   };
 }
@@ -577,575 +577,575 @@ DwarfState::getRanges(uint64_t offset) const -> std::vector<Dwarf_Ranges> {
 }
 
 #define DW_TAGS(X)                              \
-X(DW_TAG_array_type)                            \
-X(DW_TAG_class_type)                            \
-X(DW_TAG_entry_point)                           \
-X(DW_TAG_enumeration_type)                      \
-X(DW_TAG_formal_parameter)                      \
-X(DW_TAG_imported_declaration)                  \
-X(DW_TAG_label)                                 \
-X(DW_TAG_lexical_block)                         \
-X(DW_TAG_member)                                \
-X(DW_TAG_pointer_type)                          \
-X(DW_TAG_reference_type)                        \
-X(DW_TAG_compile_unit)                          \
-X(DW_TAG_string_type)                           \
-X(DW_TAG_structure_type)                        \
-X(DW_TAG_subroutine_type)                       \
-X(DW_TAG_typedef)                               \
-X(DW_TAG_union_type)                            \
-X(DW_TAG_unspecified_parameters)                \
-X(DW_TAG_variant)                               \
-X(DW_TAG_common_block)                          \
-X(DW_TAG_common_inclusion)                      \
-X(DW_TAG_inheritance)                           \
-X(DW_TAG_inlined_subroutine)                    \
-X(DW_TAG_module)                                \
-X(DW_TAG_ptr_to_member_type)                    \
-X(DW_TAG_set_type)                              \
-X(DW_TAG_subrange_type)                         \
-X(DW_TAG_with_stmt)                             \
-X(DW_TAG_access_declaration)                    \
-X(DW_TAG_base_type)                             \
-X(DW_TAG_catch_block)                           \
-X(DW_TAG_const_type)                            \
-X(DW_TAG_constant)                              \
-X(DW_TAG_enumerator)                            \
-X(DW_TAG_file_type)                             \
-X(DW_TAG_friend)                                \
-X(DW_TAG_namelist)                              \
-X(DW_TAG_namelist_item)                         \
-X(DW_TAG_namelist_items)                        \
-X(DW_TAG_packed_type)                           \
-X(DW_TAG_subprogram)                            \
-X(DW_TAG_template_type_parameter)               \
-X(DW_TAG_template_type_param)                   \
-X(DW_TAG_template_value_parameter)              \
-X(DW_TAG_template_value_param)                  \
-X(DW_TAG_thrown_type)                           \
-X(DW_TAG_try_block)                             \
-X(DW_TAG_variant_part)                          \
-X(DW_TAG_variable)                              \
-X(DW_TAG_volatile_type)                         \
-X(DW_TAG_dwarf_procedure)                       \
-X(DW_TAG_restrict_type)                         \
-X(DW_TAG_interface_type)                        \
-X(DW_TAG_namespace)                             \
-X(DW_TAG_imported_module)                       \
-X(DW_TAG_unspecified_type)                      \
-X(DW_TAG_partial_unit)                          \
-X(DW_TAG_imported_unit)                         \
-X(DW_TAG_mutable_type)                          \
-X(DW_TAG_condition)                             \
-X(DW_TAG_shared_type)                           \
-X(DW_TAG_type_unit)                             \
-X(DW_TAG_rvalue_reference_type)                 \
-X(DW_TAG_template_alias)                        \
-X(DW_TAG_coarray_type)                          \
-X(DW_TAG_generic_subrange)                      \
-X(DW_TAG_dynamic_type)                          \
-X(DW_TAG_atomic_type)                           \
-X(DW_TAG_call_site)                             \
-X(DW_TAG_call_site_parameter)                   \
-X(DW_TAG_lo_user)                               \
-X(DW_TAG_MIPS_loop)                             \
-X(DW_TAG_HP_array_descriptor)                   \
-X(DW_TAG_format_label)                          \
-X(DW_TAG_function_template)                     \
-X(DW_TAG_class_template)                        \
-X(DW_TAG_GNU_BINCL)                             \
-X(DW_TAG_GNU_EINCL)                             \
-X(DW_TAG_GNU_template_template_parameter)       \
-X(DW_TAG_GNU_template_template_param)           \
-X(DW_TAG_GNU_template_parameter_pack)           \
-X(DW_TAG_GNU_formal_parameter_pack)             \
-X(DW_TAG_GNU_call_site)                         \
-X(DW_TAG_GNU_call_site_parameter)               \
-X(DW_TAG_ALTIUM_circ_type)                      \
-X(DW_TAG_ALTIUM_mwa_circ_type)                  \
-X(DW_TAG_ALTIUM_rev_carry_type)                 \
-X(DW_TAG_ALTIUM_rom)                            \
-X(DW_TAG_upc_shared_type)                       \
-X(DW_TAG_upc_strict_type)                       \
-X(DW_TAG_upc_relaxed_type)                      \
-X(DW_TAG_PGI_kanji_type)                        \
-X(DW_TAG_PGI_interface_block)                   \
-X(DW_TAG_SUN_function_template)                 \
-X(DW_TAG_SUN_class_template)                    \
-X(DW_TAG_SUN_struct_template)                   \
-X(DW_TAG_SUN_union_template)                    \
-X(DW_TAG_SUN_indirect_inheritance)              \
-X(DW_TAG_SUN_codeflags)                         \
-X(DW_TAG_SUN_memop_info)                        \
-X(DW_TAG_SUN_omp_child_func)                    \
-X(DW_TAG_SUN_rtti_descriptor)                   \
-X(DW_TAG_SUN_dtor_info)                         \
-X(DW_TAG_SUN_dtor)                              \
-X(DW_TAG_SUN_f90_interface)                     \
-X(DW_TAG_SUN_fortran_vax_structure)             \
-X(DW_TAG_SUN_hi)
+  X(DW_TAG_array_type)                          \
+  X(DW_TAG_class_type)                          \
+  X(DW_TAG_entry_point)                         \
+  X(DW_TAG_enumeration_type)                    \
+  X(DW_TAG_formal_parameter)                    \
+  X(DW_TAG_imported_declaration)                \
+  X(DW_TAG_label)                               \
+  X(DW_TAG_lexical_block)                       \
+  X(DW_TAG_member)                              \
+  X(DW_TAG_pointer_type)                        \
+  X(DW_TAG_reference_type)                      \
+  X(DW_TAG_compile_unit)                        \
+  X(DW_TAG_string_type)                         \
+  X(DW_TAG_structure_type)                      \
+  X(DW_TAG_subroutine_type)                     \
+  X(DW_TAG_typedef)                             \
+  X(DW_TAG_union_type)                          \
+  X(DW_TAG_unspecified_parameters)              \
+  X(DW_TAG_variant)                             \
+  X(DW_TAG_common_block)                        \
+  X(DW_TAG_common_inclusion)                    \
+  X(DW_TAG_inheritance)                         \
+  X(DW_TAG_inlined_subroutine)                  \
+  X(DW_TAG_module)                              \
+  X(DW_TAG_ptr_to_member_type)                  \
+  X(DW_TAG_set_type)                            \
+  X(DW_TAG_subrange_type)                       \
+  X(DW_TAG_with_stmt)                           \
+  X(DW_TAG_access_declaration)                  \
+  X(DW_TAG_base_type)                           \
+  X(DW_TAG_catch_block)                         \
+  X(DW_TAG_const_type)                          \
+  X(DW_TAG_constant)                            \
+  X(DW_TAG_enumerator)                          \
+  X(DW_TAG_file_type)                           \
+  X(DW_TAG_friend)                              \
+  X(DW_TAG_namelist)                            \
+  X(DW_TAG_namelist_item)                       \
+  X(DW_TAG_namelist_items)                      \
+  X(DW_TAG_packed_type)                         \
+  X(DW_TAG_subprogram)                          \
+  X(DW_TAG_template_type_parameter)             \
+  X(DW_TAG_template_type_param)                 \
+  X(DW_TAG_template_value_parameter)            \
+  X(DW_TAG_template_value_param)                \
+  X(DW_TAG_thrown_type)                         \
+  X(DW_TAG_try_block)                           \
+  X(DW_TAG_variant_part)                        \
+  X(DW_TAG_variable)                            \
+  X(DW_TAG_volatile_type)                       \
+  X(DW_TAG_dwarf_procedure)                     \
+  X(DW_TAG_restrict_type)                       \
+  X(DW_TAG_interface_type)                      \
+  X(DW_TAG_namespace)                           \
+  X(DW_TAG_imported_module)                     \
+  X(DW_TAG_unspecified_type)                    \
+  X(DW_TAG_partial_unit)                        \
+  X(DW_TAG_imported_unit)                       \
+  X(DW_TAG_mutable_type)                        \
+  X(DW_TAG_condition)                           \
+  X(DW_TAG_shared_type)                         \
+  X(DW_TAG_type_unit)                           \
+  X(DW_TAG_rvalue_reference_type)               \
+  X(DW_TAG_template_alias)                      \
+  X(DW_TAG_coarray_type)                        \
+  X(DW_TAG_generic_subrange)                    \
+  X(DW_TAG_dynamic_type)                        \
+  X(DW_TAG_atomic_type)                         \
+  X(DW_TAG_call_site)                           \
+  X(DW_TAG_call_site_parameter)                 \
+  X(DW_TAG_lo_user)                             \
+  X(DW_TAG_MIPS_loop)                           \
+  X(DW_TAG_HP_array_descriptor)                 \
+  X(DW_TAG_format_label)                        \
+  X(DW_TAG_function_template)                   \
+  X(DW_TAG_class_template)                      \
+  X(DW_TAG_GNU_BINCL)                           \
+  X(DW_TAG_GNU_EINCL)                           \
+  X(DW_TAG_GNU_template_template_parameter)     \
+  X(DW_TAG_GNU_template_template_param)         \
+  X(DW_TAG_GNU_template_parameter_pack)         \
+  X(DW_TAG_GNU_formal_parameter_pack)           \
+  X(DW_TAG_GNU_call_site)                       \
+  X(DW_TAG_GNU_call_site_parameter)             \
+  X(DW_TAG_ALTIUM_circ_type)                    \
+  X(DW_TAG_ALTIUM_mwa_circ_type)                \
+  X(DW_TAG_ALTIUM_rev_carry_type)               \
+  X(DW_TAG_ALTIUM_rom)                          \
+  X(DW_TAG_upc_shared_type)                     \
+  X(DW_TAG_upc_strict_type)                     \
+  X(DW_TAG_upc_relaxed_type)                    \
+  X(DW_TAG_PGI_kanji_type)                      \
+  X(DW_TAG_PGI_interface_block)                 \
+  X(DW_TAG_SUN_function_template)               \
+  X(DW_TAG_SUN_class_template)                  \
+  X(DW_TAG_SUN_struct_template)                 \
+  X(DW_TAG_SUN_union_template)                  \
+  X(DW_TAG_SUN_indirect_inheritance)            \
+  X(DW_TAG_SUN_codeflags)                       \
+  X(DW_TAG_SUN_memop_info)                      \
+  X(DW_TAG_SUN_omp_child_func)                  \
+  X(DW_TAG_SUN_rtti_descriptor)                 \
+  X(DW_TAG_SUN_dtor_info)                       \
+  X(DW_TAG_SUN_dtor)                            \
+  X(DW_TAG_SUN_f90_interface)                   \
+  X(DW_TAG_SUN_fortran_vax_structure)           \
+  X(DW_TAG_SUN_hi)
 
 #define DW_FORMS(X)                             \
-X(DW_FORM_addr)                                 \
-X(DW_FORM_block2)                               \
-X(DW_FORM_block4)                               \
-X(DW_FORM_data2)                                \
-X(DW_FORM_data4)                                \
-X(DW_FORM_data8)                                \
-X(DW_FORM_string)                               \
-X(DW_FORM_block)                                \
-X(DW_FORM_block1)                               \
-X(DW_FORM_data1)                                \
-X(DW_FORM_flag)                                 \
-X(DW_FORM_sdata)                                \
-X(DW_FORM_strp)                                 \
-X(DW_FORM_udata)                                \
-X(DW_FORM_ref_addr)                             \
-X(DW_FORM_ref1)                                 \
-X(DW_FORM_ref2)                                 \
-X(DW_FORM_ref4)                                 \
-X(DW_FORM_ref8)                                 \
-X(DW_FORM_ref_udata)                            \
-X(DW_FORM_indirect)                             \
-X(DW_FORM_sec_offset)                           \
-X(DW_FORM_exprloc)                              \
-X(DW_FORM_flag_present)                         \
-X(DW_FORM_strx)                                 \
-X(DW_FORM_addrx)                                \
-X(DW_FORM_ref_sup)                              \
-X(DW_FORM_strp_sup)                             \
-X(DW_FORM_data16)                               \
-X(DW_FORM_line_strp)                            \
-X(DW_FORM_ref_sig8)                             \
-X(DW_FORM_GNU_addr_index)                       \
-X(DW_FORM_GNU_str_index)                        \
-X(DW_FORM_GNU_ref_alt)                          \
-X(DW_FORM_GNU_strp_alt)
+  X(DW_FORM_addr)                               \
+  X(DW_FORM_block2)                             \
+  X(DW_FORM_block4)                             \
+  X(DW_FORM_data2)                              \
+  X(DW_FORM_data4)                              \
+  X(DW_FORM_data8)                              \
+  X(DW_FORM_string)                             \
+  X(DW_FORM_block)                              \
+  X(DW_FORM_block1)                             \
+  X(DW_FORM_data1)                              \
+  X(DW_FORM_flag)                               \
+  X(DW_FORM_sdata)                              \
+  X(DW_FORM_strp)                               \
+  X(DW_FORM_udata)                              \
+  X(DW_FORM_ref_addr)                           \
+  X(DW_FORM_ref1)                               \
+  X(DW_FORM_ref2)                               \
+  X(DW_FORM_ref4)                               \
+  X(DW_FORM_ref8)                               \
+  X(DW_FORM_ref_udata)                          \
+  X(DW_FORM_indirect)                           \
+  X(DW_FORM_sec_offset)                         \
+  X(DW_FORM_exprloc)                            \
+  X(DW_FORM_flag_present)                       \
+  X(DW_FORM_strx)                               \
+  X(DW_FORM_addrx)                              \
+  X(DW_FORM_ref_sup)                            \
+  X(DW_FORM_strp_sup)                           \
+  X(DW_FORM_data16)                             \
+  X(DW_FORM_line_strp)                          \
+  X(DW_FORM_ref_sig8)                           \
+  X(DW_FORM_GNU_addr_index)                     \
+  X(DW_FORM_GNU_str_index)                      \
+  X(DW_FORM_GNU_ref_alt)                        \
+  X(DW_FORM_GNU_strp_alt)
 
 #define DW_ATTRIBUTES(X)                        \
-X(DW_AT_sibling)                                \
-X(DW_AT_location)                               \
-X(DW_AT_name)                                   \
-X(DW_AT_ordering)                               \
-X(DW_AT_subscr_data)                            \
-X(DW_AT_byte_size)                              \
-X(DW_AT_bit_offset)                             \
-X(DW_AT_bit_size)                               \
-X(DW_AT_element_list)                           \
-X(DW_AT_stmt_list)                              \
-X(DW_AT_low_pc)                                 \
-X(DW_AT_high_pc)                                \
-X(DW_AT_language)                               \
-X(DW_AT_member)                                 \
-X(DW_AT_discr)                                  \
-X(DW_AT_discr_value)                            \
-X(DW_AT_visibility)                             \
-X(DW_AT_import)                                 \
-X(DW_AT_string_length)                          \
-X(DW_AT_common_reference)                       \
-X(DW_AT_comp_dir)                               \
-X(DW_AT_const_value)                            \
-X(DW_AT_containing_type)                        \
-X(DW_AT_default_value)                          \
-X(DW_AT_inline)                                 \
-X(DW_AT_is_optional)                            \
-X(DW_AT_lower_bound)                            \
-X(DW_AT_producer)                               \
-X(DW_AT_prototyped)                             \
-X(DW_AT_return_addr)                            \
-X(DW_AT_start_scope)                            \
-X(DW_AT_bit_stride)                             \
-X(DW_AT_stride_size)                            \
-X(DW_AT_upper_bound)                            \
-X(DW_AT_abstract_origin)                        \
-X(DW_AT_accessibility)                          \
-X(DW_AT_address_class)                          \
-X(DW_AT_artificial)                             \
-X(DW_AT_base_types)                             \
-X(DW_AT_calling_convention)                     \
-X(DW_AT_count)                                  \
-X(DW_AT_data_member_location)                   \
-X(DW_AT_decl_column)                            \
-X(DW_AT_decl_file)                              \
-X(DW_AT_decl_line)                              \
-X(DW_AT_declaration)                            \
-X(DW_AT_discr_list)                             \
-X(DW_AT_encoding)                               \
-X(DW_AT_external)                               \
-X(DW_AT_frame_base)                             \
-X(DW_AT_friend)                                 \
-X(DW_AT_identifier_case)                        \
-X(DW_AT_macro_info)                             \
-X(DW_AT_namelist_item)                          \
-X(DW_AT_priority)                               \
-X(DW_AT_segment)                                \
-X(DW_AT_specification)                          \
-X(DW_AT_static_link)                            \
-X(DW_AT_type)                                   \
-X(DW_AT_use_location)                           \
-X(DW_AT_variable_parameter)                     \
-X(DW_AT_virtuality)                             \
-X(DW_AT_vtable_elem_location)                   \
-X(DW_AT_allocated)                              \
-X(DW_AT_associated)                             \
-X(DW_AT_data_location)                          \
-X(DW_AT_byte_stride)                            \
-X(DW_AT_stride)                                 \
-X(DW_AT_entry_pc)                               \
-X(DW_AT_use_UTF8)                               \
-X(DW_AT_extension)                              \
-X(DW_AT_ranges)                                 \
-X(DW_AT_trampoline)                             \
-X(DW_AT_call_column)                            \
-X(DW_AT_call_file)                              \
-X(DW_AT_call_line)                              \
-X(DW_AT_description)                            \
-X(DW_AT_binary_scale)                           \
-X(DW_AT_decimal_scale)                          \
-X(DW_AT_small)                                  \
-X(DW_AT_decimal_sign)                           \
-X(DW_AT_digit_count)                            \
-X(DW_AT_picture_string)                         \
-X(DW_AT_mutable)                                \
-X(DW_AT_threads_scaled)                         \
-X(DW_AT_explicit)                               \
-X(DW_AT_object_pointer)                         \
-X(DW_AT_endianity)                              \
-X(DW_AT_elemental)                              \
-X(DW_AT_pure)                                   \
-X(DW_AT_recursive)                              \
-X(DW_AT_signature)                              \
-X(DW_AT_main_subprogram)                        \
-X(DW_AT_data_bit_offset)                        \
-X(DW_AT_const_expr)                             \
-X(DW_AT_enum_class)                             \
-X(DW_AT_linkage_name)                           \
-X(DW_AT_string_length_bit_size)                 \
-X(DW_AT_string_length_byte_size)                \
-X(DW_AT_rank)                                   \
-X(DW_AT_str_offsets_base)                       \
-X(DW_AT_addr_base)                              \
-X(DW_AT_ranges_base)                            \
-X(DW_AT_dwo_id)                                 \
-X(DW_AT_dwo_name)                               \
-X(DW_AT_reference)                              \
-X(DW_AT_rvalue_reference)                       \
-X(DW_AT_macros)                                 \
-X(DW_AT_call_all_calls)                         \
-X(DW_AT_call_all_source_calls)                  \
-X(DW_AT_call_all_tail_calls)                    \
-X(DW_AT_call_return_pc)                         \
-X(DW_AT_call_value)                             \
-X(DW_AT_call_origin)                            \
-X(DW_AT_call_parameter)                         \
-X(DW_AT_call_pc)                                \
-X(DW_AT_call_tail_call)                         \
-X(DW_AT_call_target)                            \
-X(DW_AT_call_target_clobbered)                  \
-X(DW_AT_call_data_location)                     \
-X(DW_AT_call_data_value)                        \
-X(DW_AT_noreturn)                               \
-X(DW_AT_alignment)                              \
-X(DW_AT_export_symbols)                         \
-X(DW_AT_HP_block_index)                         \
-X(DW_AT_lo_user)                                \
-X(DW_AT_MIPS_loop_begin)                        \
-X(DW_AT_MIPS_tail_loop_begin)                   \
-X(DW_AT_MIPS_epilog_begin)                      \
-X(DW_AT_MIPS_loop_unroll_factor)                \
-X(DW_AT_MIPS_software_pipeline_depth)           \
-X(DW_AT_MIPS_linkage_name)                      \
-X(DW_AT_MIPS_stride)                            \
-X(DW_AT_MIPS_abstract_name)                     \
-X(DW_AT_MIPS_clone_origin)                      \
-X(DW_AT_MIPS_has_inlines)                       \
-X(DW_AT_MIPS_stride_byte)                       \
-X(DW_AT_MIPS_stride_elem)                       \
-X(DW_AT_MIPS_ptr_dopetype)                      \
-X(DW_AT_MIPS_allocatable_dopetype)              \
-X(DW_AT_MIPS_assumed_shape_dopetype)            \
-X(DW_AT_MIPS_assumed_size)                      \
-X(DW_AT_HP_unmodifiable)                        \
-X(DW_AT_HP_actuals_stmt_list)                   \
-X(DW_AT_HP_proc_per_section)                    \
-X(DW_AT_HP_raw_data_ptr)                        \
-X(DW_AT_HP_pass_by_reference)                   \
-X(DW_AT_HP_opt_level)                           \
-X(DW_AT_HP_prof_version_id)                     \
-X(DW_AT_HP_opt_flags)                           \
-X(DW_AT_HP_cold_region_low_pc)                  \
-X(DW_AT_HP_cold_region_high_pc)                 \
-X(DW_AT_HP_all_variables_modifiable)            \
-X(DW_AT_HP_linkage_name)                        \
-X(DW_AT_HP_prof_flags)                          \
-X(DW_AT_CPQ_discontig_ranges)                   \
-X(DW_AT_CPQ_semantic_events)                    \
-X(DW_AT_CPQ_split_lifetimes_var)                \
-X(DW_AT_CPQ_split_lifetimes_rtn)                \
-X(DW_AT_CPQ_prologue_length)                    \
-X(DW_AT_INTEL_other_endian)                     \
-X(DW_AT_sf_names)                               \
-X(DW_AT_src_info)                               \
-X(DW_AT_mac_info)                               \
-X(DW_AT_src_coords)                             \
-X(DW_AT_body_begin)                             \
-X(DW_AT_body_end)                               \
-X(DW_AT_GNU_vector)                             \
-X(DW_AT_GNU_guarded_by)                         \
-X(DW_AT_GNU_pt_guarded_by)                      \
-X(DW_AT_GNU_guarded)                            \
-X(DW_AT_GNU_pt_guarded)                         \
-X(DW_AT_GNU_locks_excluded)                     \
-X(DW_AT_GNU_exclusive_locks_required)           \
-X(DW_AT_GNU_shared_locks_required)              \
-X(DW_AT_GNU_odr_signature)                      \
-X(DW_AT_GNU_template_name)                      \
-X(DW_AT_GNU_call_site_value)                    \
-X(DW_AT_GNU_call_site_data_value)               \
-X(DW_AT_GNU_call_site_target)                   \
-X(DW_AT_GNU_call_site_target_clobbered)         \
-X(DW_AT_GNU_tail_call)                          \
-X(DW_AT_GNU_all_tail_call_sites)                \
-X(DW_AT_GNU_all_call_sites)                     \
-X(DW_AT_GNU_all_source_call_sites)              \
-X(DW_AT_GNU_macros)                             \
-X(DW_AT_GNU_dwo_name)                           \
-X(DW_AT_GNU_dwo_id)                             \
-X(DW_AT_GNU_ranges_base)                        \
-X(DW_AT_GNU_addr_base)                          \
-X(DW_AT_GNU_pubnames)                           \
-X(DW_AT_GNU_pubtypes)                           \
-X(DW_AT_GNU_discriminator)                      \
-X(DW_AT_ALTIUM_loclist)                         \
-X(DW_AT_SUN_template)                           \
-X(DW_AT_VMS_rtnbeg_pd_address)                  \
-X(DW_AT_SUN_alignment)                          \
-X(DW_AT_SUN_vtable)                             \
-X(DW_AT_SUN_count_guarantee)                    \
-X(DW_AT_SUN_command_line)                       \
-X(DW_AT_SUN_vbase)                              \
-X(DW_AT_SUN_compile_options)                    \
-X(DW_AT_SUN_language)                           \
-X(DW_AT_SUN_browser_file)                       \
-X(DW_AT_SUN_vtable_abi)                         \
-X(DW_AT_SUN_func_offsets)                       \
-X(DW_AT_SUN_cf_kind)                            \
-X(DW_AT_SUN_vtable_index)                       \
-X(DW_AT_SUN_omp_tpriv_addr)                     \
-X(DW_AT_SUN_omp_child_func)                     \
-X(DW_AT_SUN_func_offset)                        \
-X(DW_AT_SUN_memop_type_ref)                     \
-X(DW_AT_SUN_profile_id)                         \
-X(DW_AT_SUN_memop_signature)                    \
-X(DW_AT_SUN_obj_dir)                            \
-X(DW_AT_SUN_obj_file)                           \
-X(DW_AT_SUN_original_name)                      \
-X(DW_AT_SUN_hwcprof_signature)                  \
-X(DW_AT_SUN_amd64_parmdump)                     \
-X(DW_AT_SUN_part_link_name)                     \
-X(DW_AT_SUN_link_name)                          \
-X(DW_AT_SUN_pass_with_const)                    \
-X(DW_AT_SUN_return_with_const)                  \
-X(DW_AT_SUN_import_by_name)                     \
-X(DW_AT_SUN_f90_pointer)                        \
-X(DW_AT_SUN_pass_by_ref)                        \
-X(DW_AT_SUN_f90_allocatable)                    \
-X(DW_AT_SUN_f90_assumed_shape_array)            \
-X(DW_AT_SUN_c_vla)                              \
-X(DW_AT_SUN_return_value_ptr)                   \
-X(DW_AT_SUN_dtor_start)                         \
-X(DW_AT_SUN_dtor_length)                        \
-X(DW_AT_SUN_dtor_state_initial)                 \
-X(DW_AT_SUN_dtor_state_final)                   \
-X(DW_AT_SUN_dtor_state_deltas)                  \
-X(DW_AT_SUN_import_by_lname)                    \
-X(DW_AT_SUN_f90_use_only)                       \
-X(DW_AT_SUN_namelist_spec)                      \
-X(DW_AT_SUN_is_omp_child_func)                  \
-X(DW_AT_SUN_fortran_main_alias)                 \
-X(DW_AT_SUN_fortran_based)                      \
-X(DW_AT_use_GNAT_descriptive_type)              \
-X(DW_AT_GNAT_descriptive_type)                  \
-X(DW_AT_upc_threads_scaled)                     \
-X(DW_AT_PGI_lbase)                              \
-X(DW_AT_PGI_soffset)                            \
-X(DW_AT_PGI_lstride)                            \
-X(DW_AT_APPLE_optimized)                        \
-X(DW_AT_APPLE_flags)                            \
-X(DW_AT_APPLE_isa)                              \
-X(DW_AT_APPLE_block)                            \
-X(DW_AT_APPLE_major_runtime_vers)               \
-X(DW_AT_APPLE_runtime_class)                    \
-X(DW_AT_APPLE_omit_frame_ptr)                   \
-X(DW_AT_APPLE_closure)                          \
-X(DW_AT_APPLE_major_runtime_vers)               \
-X(DW_AT_APPLE_runtime_class)
+  X(DW_AT_sibling)                              \
+  X(DW_AT_location)                             \
+  X(DW_AT_name)                                 \
+  X(DW_AT_ordering)                             \
+  X(DW_AT_subscr_data)                          \
+  X(DW_AT_byte_size)                            \
+  X(DW_AT_bit_offset)                           \
+  X(DW_AT_bit_size)                             \
+  X(DW_AT_element_list)                         \
+  X(DW_AT_stmt_list)                            \
+  X(DW_AT_low_pc)                               \
+  X(DW_AT_high_pc)                              \
+  X(DW_AT_language)                             \
+  X(DW_AT_member)                               \
+  X(DW_AT_discr)                                \
+  X(DW_AT_discr_value)                          \
+  X(DW_AT_visibility)                           \
+  X(DW_AT_import)                               \
+  X(DW_AT_string_length)                        \
+  X(DW_AT_common_reference)                     \
+  X(DW_AT_comp_dir)                             \
+  X(DW_AT_const_value)                          \
+  X(DW_AT_containing_type)                      \
+  X(DW_AT_default_value)                        \
+  X(DW_AT_inline)                               \
+  X(DW_AT_is_optional)                          \
+  X(DW_AT_lower_bound)                          \
+  X(DW_AT_producer)                             \
+  X(DW_AT_prototyped)                           \
+  X(DW_AT_return_addr)                          \
+  X(DW_AT_start_scope)                          \
+  X(DW_AT_bit_stride)                           \
+  X(DW_AT_stride_size)                          \
+  X(DW_AT_upper_bound)                          \
+  X(DW_AT_abstract_origin)                      \
+  X(DW_AT_accessibility)                        \
+  X(DW_AT_address_class)                        \
+  X(DW_AT_artificial)                           \
+  X(DW_AT_base_types)                           \
+  X(DW_AT_calling_convention)                   \
+  X(DW_AT_count)                                \
+  X(DW_AT_data_member_location)                 \
+  X(DW_AT_decl_column)                          \
+  X(DW_AT_decl_file)                            \
+  X(DW_AT_decl_line)                            \
+  X(DW_AT_declaration)                          \
+  X(DW_AT_discr_list)                           \
+  X(DW_AT_encoding)                             \
+  X(DW_AT_external)                             \
+  X(DW_AT_frame_base)                           \
+  X(DW_AT_friend)                               \
+  X(DW_AT_identifier_case)                      \
+  X(DW_AT_macro_info)                           \
+  X(DW_AT_namelist_item)                        \
+  X(DW_AT_priority)                             \
+  X(DW_AT_segment)                              \
+  X(DW_AT_specification)                        \
+  X(DW_AT_static_link)                          \
+  X(DW_AT_type)                                 \
+  X(DW_AT_use_location)                         \
+  X(DW_AT_variable_parameter)                   \
+  X(DW_AT_virtuality)                           \
+  X(DW_AT_vtable_elem_location)                 \
+  X(DW_AT_allocated)                            \
+  X(DW_AT_associated)                           \
+  X(DW_AT_data_location)                        \
+  X(DW_AT_byte_stride)                          \
+  X(DW_AT_stride)                               \
+  X(DW_AT_entry_pc)                             \
+  X(DW_AT_use_UTF8)                             \
+  X(DW_AT_extension)                            \
+  X(DW_AT_ranges)                               \
+  X(DW_AT_trampoline)                           \
+  X(DW_AT_call_column)                          \
+  X(DW_AT_call_file)                            \
+  X(DW_AT_call_line)                            \
+  X(DW_AT_description)                          \
+  X(DW_AT_binary_scale)                         \
+  X(DW_AT_decimal_scale)                        \
+  X(DW_AT_small)                                \
+  X(DW_AT_decimal_sign)                         \
+  X(DW_AT_digit_count)                          \
+  X(DW_AT_picture_string)                       \
+  X(DW_AT_mutable)                              \
+  X(DW_AT_threads_scaled)                       \
+  X(DW_AT_explicit)                             \
+  X(DW_AT_object_pointer)                       \
+  X(DW_AT_endianity)                            \
+  X(DW_AT_elemental)                            \
+  X(DW_AT_pure)                                 \
+  X(DW_AT_recursive)                            \
+  X(DW_AT_signature)                            \
+  X(DW_AT_main_subprogram)                      \
+  X(DW_AT_data_bit_offset)                      \
+  X(DW_AT_const_expr)                           \
+  X(DW_AT_enum_class)                           \
+  X(DW_AT_linkage_name)                         \
+  X(DW_AT_string_length_bit_size)               \
+  X(DW_AT_string_length_byte_size)              \
+  X(DW_AT_rank)                                 \
+  X(DW_AT_str_offsets_base)                     \
+  X(DW_AT_addr_base)                            \
+  X(DW_AT_ranges_base)                          \
+  X(DW_AT_dwo_id)                               \
+  X(DW_AT_dwo_name)                             \
+  X(DW_AT_reference)                            \
+  X(DW_AT_rvalue_reference)                     \
+  X(DW_AT_macros)                               \
+  X(DW_AT_call_all_calls)                       \
+  X(DW_AT_call_all_source_calls)                \
+  X(DW_AT_call_all_tail_calls)                  \
+  X(DW_AT_call_return_pc)                       \
+  X(DW_AT_call_value)                           \
+  X(DW_AT_call_origin)                          \
+  X(DW_AT_call_parameter)                       \
+  X(DW_AT_call_pc)                              \
+  X(DW_AT_call_tail_call)                       \
+  X(DW_AT_call_target)                          \
+  X(DW_AT_call_target_clobbered)                \
+  X(DW_AT_call_data_location)                   \
+  X(DW_AT_call_data_value)                      \
+  X(DW_AT_noreturn)                             \
+  X(DW_AT_alignment)                            \
+  X(DW_AT_export_symbols)                       \
+  X(DW_AT_HP_block_index)                       \
+  X(DW_AT_lo_user)                              \
+  X(DW_AT_MIPS_loop_begin)                      \
+  X(DW_AT_MIPS_tail_loop_begin)                 \
+  X(DW_AT_MIPS_epilog_begin)                    \
+  X(DW_AT_MIPS_loop_unroll_factor)              \
+  X(DW_AT_MIPS_software_pipeline_depth)         \
+  X(DW_AT_MIPS_linkage_name)                    \
+  X(DW_AT_MIPS_stride)                          \
+  X(DW_AT_MIPS_abstract_name)                   \
+  X(DW_AT_MIPS_clone_origin)                    \
+  X(DW_AT_MIPS_has_inlines)                     \
+  X(DW_AT_MIPS_stride_byte)                     \
+  X(DW_AT_MIPS_stride_elem)                     \
+  X(DW_AT_MIPS_ptr_dopetype)                    \
+  X(DW_AT_MIPS_allocatable_dopetype)            \
+  X(DW_AT_MIPS_assumed_shape_dopetype)          \
+  X(DW_AT_MIPS_assumed_size)                    \
+  X(DW_AT_HP_unmodifiable)                      \
+  X(DW_AT_HP_actuals_stmt_list)                 \
+  X(DW_AT_HP_proc_per_section)                  \
+  X(DW_AT_HP_raw_data_ptr)                      \
+  X(DW_AT_HP_pass_by_reference)                 \
+  X(DW_AT_HP_opt_level)                         \
+  X(DW_AT_HP_prof_version_id)                   \
+  X(DW_AT_HP_opt_flags)                         \
+  X(DW_AT_HP_cold_region_low_pc)                \
+  X(DW_AT_HP_cold_region_high_pc)               \
+  X(DW_AT_HP_all_variables_modifiable)          \
+  X(DW_AT_HP_linkage_name)                      \
+  X(DW_AT_HP_prof_flags)                        \
+  X(DW_AT_CPQ_discontig_ranges)                 \
+  X(DW_AT_CPQ_semantic_events)                  \
+  X(DW_AT_CPQ_split_lifetimes_var)              \
+  X(DW_AT_CPQ_split_lifetimes_rtn)              \
+  X(DW_AT_CPQ_prologue_length)                  \
+  X(DW_AT_INTEL_other_endian)                   \
+  X(DW_AT_sf_names)                             \
+  X(DW_AT_src_info)                             \
+  X(DW_AT_mac_info)                             \
+  X(DW_AT_src_coords)                           \
+  X(DW_AT_body_begin)                           \
+  X(DW_AT_body_end)                             \
+  X(DW_AT_GNU_vector)                           \
+  X(DW_AT_GNU_guarded_by)                       \
+  X(DW_AT_GNU_pt_guarded_by)                    \
+  X(DW_AT_GNU_guarded)                          \
+  X(DW_AT_GNU_pt_guarded)                       \
+  X(DW_AT_GNU_locks_excluded)                   \
+  X(DW_AT_GNU_exclusive_locks_required)         \
+  X(DW_AT_GNU_shared_locks_required)            \
+  X(DW_AT_GNU_odr_signature)                    \
+  X(DW_AT_GNU_template_name)                    \
+  X(DW_AT_GNU_call_site_value)                  \
+  X(DW_AT_GNU_call_site_data_value)             \
+  X(DW_AT_GNU_call_site_target)                 \
+  X(DW_AT_GNU_call_site_target_clobbered)       \
+  X(DW_AT_GNU_tail_call)                        \
+  X(DW_AT_GNU_all_tail_call_sites)              \
+  X(DW_AT_GNU_all_call_sites)                   \
+  X(DW_AT_GNU_all_source_call_sites)            \
+  X(DW_AT_GNU_macros)                           \
+  X(DW_AT_GNU_dwo_name)                         \
+  X(DW_AT_GNU_dwo_id)                           \
+  X(DW_AT_GNU_ranges_base)                      \
+  X(DW_AT_GNU_addr_base)                        \
+  X(DW_AT_GNU_pubnames)                         \
+  X(DW_AT_GNU_pubtypes)                         \
+  X(DW_AT_GNU_discriminator)                    \
+  X(DW_AT_ALTIUM_loclist)                       \
+  X(DW_AT_SUN_template)                         \
+  X(DW_AT_VMS_rtnbeg_pd_address)                \
+  X(DW_AT_SUN_alignment)                        \
+  X(DW_AT_SUN_vtable)                           \
+  X(DW_AT_SUN_count_guarantee)                  \
+  X(DW_AT_SUN_command_line)                     \
+  X(DW_AT_SUN_vbase)                            \
+  X(DW_AT_SUN_compile_options)                  \
+  X(DW_AT_SUN_language)                         \
+  X(DW_AT_SUN_browser_file)                     \
+  X(DW_AT_SUN_vtable_abi)                       \
+  X(DW_AT_SUN_func_offsets)                     \
+  X(DW_AT_SUN_cf_kind)                          \
+  X(DW_AT_SUN_vtable_index)                     \
+  X(DW_AT_SUN_omp_tpriv_addr)                   \
+  X(DW_AT_SUN_omp_child_func)                   \
+  X(DW_AT_SUN_func_offset)                      \
+  X(DW_AT_SUN_memop_type_ref)                   \
+  X(DW_AT_SUN_profile_id)                       \
+  X(DW_AT_SUN_memop_signature)                  \
+  X(DW_AT_SUN_obj_dir)                          \
+  X(DW_AT_SUN_obj_file)                         \
+  X(DW_AT_SUN_original_name)                    \
+  X(DW_AT_SUN_hwcprof_signature)                \
+  X(DW_AT_SUN_amd64_parmdump)                   \
+  X(DW_AT_SUN_part_link_name)                   \
+  X(DW_AT_SUN_link_name)                        \
+  X(DW_AT_SUN_pass_with_const)                  \
+  X(DW_AT_SUN_return_with_const)                \
+  X(DW_AT_SUN_import_by_name)                   \
+  X(DW_AT_SUN_f90_pointer)                      \
+  X(DW_AT_SUN_pass_by_ref)                      \
+  X(DW_AT_SUN_f90_allocatable)                  \
+  X(DW_AT_SUN_f90_assumed_shape_array)          \
+  X(DW_AT_SUN_c_vla)                            \
+  X(DW_AT_SUN_return_value_ptr)                 \
+  X(DW_AT_SUN_dtor_start)                       \
+  X(DW_AT_SUN_dtor_length)                      \
+  X(DW_AT_SUN_dtor_state_initial)               \
+  X(DW_AT_SUN_dtor_state_final)                 \
+  X(DW_AT_SUN_dtor_state_deltas)                \
+  X(DW_AT_SUN_import_by_lname)                  \
+  X(DW_AT_SUN_f90_use_only)                     \
+  X(DW_AT_SUN_namelist_spec)                    \
+  X(DW_AT_SUN_is_omp_child_func)                \
+  X(DW_AT_SUN_fortran_main_alias)               \
+  X(DW_AT_SUN_fortran_based)                    \
+  X(DW_AT_use_GNAT_descriptive_type)            \
+  X(DW_AT_GNAT_descriptive_type)                \
+  X(DW_AT_upc_threads_scaled)                   \
+  X(DW_AT_PGI_lbase)                            \
+  X(DW_AT_PGI_soffset)                          \
+  X(DW_AT_PGI_lstride)                          \
+  X(DW_AT_APPLE_optimized)                      \
+  X(DW_AT_APPLE_flags)                          \
+  X(DW_AT_APPLE_isa)                            \
+  X(DW_AT_APPLE_block)                          \
+  X(DW_AT_APPLE_major_runtime_vers)             \
+  X(DW_AT_APPLE_runtime_class)                  \
+  X(DW_AT_APPLE_omit_frame_ptr)                 \
+  X(DW_AT_APPLE_closure)                        \
+  X(DW_AT_APPLE_major_runtime_vers)             \
+  X(DW_AT_APPLE_runtime_class)
 
 #define DW_OPS(X)                               \
-    X(DW_OP_addr, sizeof(uintptr_t))            \
-    X(DW_OP_deref)                              \
-    X(DW_OP_const1u, 1)                         \
-    X(DW_OP_const1s, 1)                         \
-    X(DW_OP_const2u, 2)                         \
-    X(DW_OP_const2s, 2)                         \
-    X(DW_OP_const4u, 4)                         \
-    X(DW_OP_const4s, 4)                         \
-    X(DW_OP_const8u, 8)                         \
-    X(DW_OP_const8s, 8)                         \
-    X(DW_OP_constu, -1)                         \
-    X(DW_OP_consts, -1)                         \
-    X(DW_OP_dup)                                \
-    X(DW_OP_drop)                               \
-    X(DW_OP_over)                               \
-    X(DW_OP_pick, 1)                            \
-    X(DW_OP_swap)                               \
-    X(DW_OP_rot)                                \
-    X(DW_OP_xderef)                             \
-    X(DW_OP_abs)                                \
-    X(DW_OP_and)                                \
-    X(DW_OP_div)                                \
-    X(DW_OP_minus)                              \
-    X(DW_OP_mod)                                \
-    X(DW_OP_mul)                                \
-    X(DW_OP_neg)                                \
-    X(DW_OP_not)                                \
-    X(DW_OP_or)                                 \
-    X(DW_OP_plus)                               \
-    X(DW_OP_plus_uconst,-1)                     \
-    X(DW_OP_shl)                                \
-    X(DW_OP_shr)                                \
-    X(DW_OP_shra)                               \
-    X(DW_OP_xor)                                \
-    X(DW_OP_bra)                                \
-    X(DW_OP_eq)                                 \
-    X(DW_OP_ge)                                 \
-    X(DW_OP_gt)                                 \
-    X(DW_OP_le)                                 \
-    X(DW_OP_lt)                                 \
-    X(DW_OP_ne)                                 \
-    X(DW_OP_skip, 2)                            \
-    X(DW_OP_lit0)                               \
-    X(DW_OP_lit1)                               \
-    X(DW_OP_lit2)                               \
-    X(DW_OP_lit3)                               \
-    X(DW_OP_lit4)                               \
-    X(DW_OP_lit5)                               \
-    X(DW_OP_lit6)                               \
-    X(DW_OP_lit7)                               \
-    X(DW_OP_lit8)                               \
-    X(DW_OP_lit9)                               \
-    X(DW_OP_lit10)                              \
-    X(DW_OP_lit11)                              \
-    X(DW_OP_lit12)                              \
-    X(DW_OP_lit13)                              \
-    X(DW_OP_lit14)                              \
-    X(DW_OP_lit15)                              \
-    X(DW_OP_lit16)                              \
-    X(DW_OP_lit17)                              \
-    X(DW_OP_lit18)                              \
-    X(DW_OP_lit19)                              \
-    X(DW_OP_lit20)                              \
-    X(DW_OP_lit21)                              \
-    X(DW_OP_lit22)                              \
-    X(DW_OP_lit23)                              \
-    X(DW_OP_lit24)                              \
-    X(DW_OP_lit25)                              \
-    X(DW_OP_lit26)                              \
-    X(DW_OP_lit27)                              \
-    X(DW_OP_lit28)                              \
-    X(DW_OP_lit29)                              \
-    X(DW_OP_lit30)                              \
-    X(DW_OP_lit31)                              \
-    X(DW_OP_reg0)                               \
-    X(DW_OP_reg1)                               \
-    X(DW_OP_reg2)                               \
-    X(DW_OP_reg3)                               \
-    X(DW_OP_reg4)                               \
-    X(DW_OP_reg5)                               \
-    X(DW_OP_reg6)                               \
-    X(DW_OP_reg7)                               \
-    X(DW_OP_reg8)                               \
-    X(DW_OP_reg9)                               \
-    X(DW_OP_reg10)                              \
-    X(DW_OP_reg11)                              \
-    X(DW_OP_reg12)                              \
-    X(DW_OP_reg13)                              \
-    X(DW_OP_reg14)                              \
-    X(DW_OP_reg15)                              \
-    X(DW_OP_reg16)                              \
-    X(DW_OP_reg17)                              \
-    X(DW_OP_reg18)                              \
-    X(DW_OP_reg19)                              \
-    X(DW_OP_reg20)                              \
-    X(DW_OP_reg21)                              \
-    X(DW_OP_reg22)                              \
-    X(DW_OP_reg23)                              \
-    X(DW_OP_reg24)                              \
-    X(DW_OP_reg25)                              \
-    X(DW_OP_reg26)                              \
-    X(DW_OP_reg27)                              \
-    X(DW_OP_reg28)                              \
-    X(DW_OP_reg29)                              \
-    X(DW_OP_reg30)                              \
-    X(DW_OP_reg31)                              \
-    X(DW_OP_breg0, -1)                          \
-    X(DW_OP_breg1, -1)                          \
-    X(DW_OP_breg2, -1)                          \
-    X(DW_OP_breg3, -1)                          \
-    X(DW_OP_breg4, -1)                          \
-    X(DW_OP_breg5, -1)                          \
-    X(DW_OP_breg6, -1)                          \
-    X(DW_OP_breg7, -1)                          \
-    X(DW_OP_breg8, -1)                          \
-    X(DW_OP_breg9, -1)                          \
-    X(DW_OP_breg10, -1)                         \
-    X(DW_OP_breg11, -1)                         \
-    X(DW_OP_breg12, -1)                         \
-    X(DW_OP_breg13, -1)                         \
-    X(DW_OP_breg14, -1)                         \
-    X(DW_OP_breg15, -1)                         \
-    X(DW_OP_breg16, -1)                         \
-    X(DW_OP_breg17, -1)                         \
-    X(DW_OP_breg18, -1)                         \
-    X(DW_OP_breg19, -1)                         \
-    X(DW_OP_breg20, -1)                         \
-    X(DW_OP_breg21, -1)                         \
-    X(DW_OP_breg22, -1)                         \
-    X(DW_OP_breg23, -1)                         \
-    X(DW_OP_breg24, -1)                         \
-    X(DW_OP_breg25, -1)                         \
-    X(DW_OP_breg26, -1)                         \
-    X(DW_OP_breg27, -1)                         \
-    X(DW_OP_breg28, -1)                         \
-    X(DW_OP_breg29, -1)                         \
-    X(DW_OP_breg30, -1)                         \
-    X(DW_OP_breg31, -1)                         \
-    X(DW_OP_regx, -1)                           \
-    X(DW_OP_fbreg, -1)                          \
-    X(DW_OP_bregx, -1, -1)                      \
-    X(DW_OP_piece, 1)                           \
-    X(DW_OP_deref_size, 1)                      \
-    X(DW_OP_xderef_size, 1)                     \
-    X(DW_OP_nop)                                \
-    X(DW_OP_push_object_address)                \
-    X(DW_OP_call2, 2)                           \
-    X(DW_OP_call4, 4)                           \
-    X(DW_OP_call_ref, -2)                       \
-    X(DW_OP_form_tls_address)                   \
-    X(DW_OP_call_frame_cfa)                     \
-    X(DW_OP_bit_piece, -1, -1)                  \
-    X(DW_OP_implicit_value, -1, -3, -4)         \
-    X(DW_OP_stack_value)                        \
-    X(DW_OP_implicit_pointer, -2, -1)           \
-    X(DW_OP_addrx)                              \
-    X(DW_OP_constx)                             \
-    X(DW_OP_entry_value)                        \
-    X(DW_OP_const_type)                         \
-    X(DW_OP_regval_type)                        \
-    X(DW_OP_deref_type)                         \
-    X(DW_OP_xderef_type)                        \
-    X(DW_OP_convert)                            \
-    X(DW_OP_reinterpret)
+  X(DW_OP_addr, sizeof(uintptr_t))              \
+  X(DW_OP_deref)                                \
+  X(DW_OP_const1u, 1)                           \
+  X(DW_OP_const1s, 1)                           \
+  X(DW_OP_const2u, 2)                           \
+  X(DW_OP_const2s, 2)                           \
+  X(DW_OP_const4u, 4)                           \
+  X(DW_OP_const4s, 4)                           \
+  X(DW_OP_const8u, 8)                           \
+  X(DW_OP_const8s, 8)                           \
+  X(DW_OP_constu, -1)                           \
+  X(DW_OP_consts, -1)                           \
+  X(DW_OP_dup)                                  \
+  X(DW_OP_drop)                                 \
+  X(DW_OP_over)                                 \
+  X(DW_OP_pick, 1)                              \
+  X(DW_OP_swap)                                 \
+  X(DW_OP_rot)                                  \
+  X(DW_OP_xderef)                               \
+  X(DW_OP_abs)                                  \
+  X(DW_OP_and)                                  \
+  X(DW_OP_div)                                  \
+  X(DW_OP_minus)                                \
+  X(DW_OP_mod)                                  \
+  X(DW_OP_mul)                                  \
+  X(DW_OP_neg)                                  \
+  X(DW_OP_not)                                  \
+  X(DW_OP_or)                                   \
+  X(DW_OP_plus)                                 \
+  X(DW_OP_plus_uconst,-1)                       \
+  X(DW_OP_shl)                                  \
+  X(DW_OP_shr)                                  \
+  X(DW_OP_shra)                                 \
+  X(DW_OP_xor)                                  \
+  X(DW_OP_bra)                                  \
+  X(DW_OP_eq)                                   \
+  X(DW_OP_ge)                                   \
+  X(DW_OP_gt)                                   \
+  X(DW_OP_le)                                   \
+  X(DW_OP_lt)                                   \
+  X(DW_OP_ne)                                   \
+  X(DW_OP_skip, 2)                              \
+  X(DW_OP_lit0)                                 \
+  X(DW_OP_lit1)                                 \
+  X(DW_OP_lit2)                                 \
+  X(DW_OP_lit3)                                 \
+  X(DW_OP_lit4)                                 \
+  X(DW_OP_lit5)                                 \
+  X(DW_OP_lit6)                                 \
+  X(DW_OP_lit7)                                 \
+  X(DW_OP_lit8)                                 \
+  X(DW_OP_lit9)                                 \
+  X(DW_OP_lit10)                                \
+  X(DW_OP_lit11)                                \
+  X(DW_OP_lit12)                                \
+  X(DW_OP_lit13)                                \
+  X(DW_OP_lit14)                                \
+  X(DW_OP_lit15)                                \
+  X(DW_OP_lit16)                                \
+  X(DW_OP_lit17)                                \
+  X(DW_OP_lit18)                                \
+  X(DW_OP_lit19)                                \
+  X(DW_OP_lit20)                                \
+  X(DW_OP_lit21)                                \
+  X(DW_OP_lit22)                                \
+  X(DW_OP_lit23)                                \
+  X(DW_OP_lit24)                                \
+  X(DW_OP_lit25)                                \
+  X(DW_OP_lit26)                                \
+  X(DW_OP_lit27)                                \
+  X(DW_OP_lit28)                                \
+  X(DW_OP_lit29)                                \
+  X(DW_OP_lit30)                                \
+  X(DW_OP_lit31)                                \
+  X(DW_OP_reg0)                                 \
+  X(DW_OP_reg1)                                 \
+  X(DW_OP_reg2)                                 \
+  X(DW_OP_reg3)                                 \
+  X(DW_OP_reg4)                                 \
+  X(DW_OP_reg5)                                 \
+  X(DW_OP_reg6)                                 \
+  X(DW_OP_reg7)                                 \
+  X(DW_OP_reg8)                                 \
+  X(DW_OP_reg9)                                 \
+  X(DW_OP_reg10)                                \
+  X(DW_OP_reg11)                                \
+  X(DW_OP_reg12)                                \
+  X(DW_OP_reg13)                                \
+  X(DW_OP_reg14)                                \
+  X(DW_OP_reg15)                                \
+  X(DW_OP_reg16)                                \
+  X(DW_OP_reg17)                                \
+  X(DW_OP_reg18)                                \
+  X(DW_OP_reg19)                                \
+  X(DW_OP_reg20)                                \
+  X(DW_OP_reg21)                                \
+  X(DW_OP_reg22)                                \
+  X(DW_OP_reg23)                                \
+  X(DW_OP_reg24)                                \
+  X(DW_OP_reg25)                                \
+  X(DW_OP_reg26)                                \
+  X(DW_OP_reg27)                                \
+  X(DW_OP_reg28)                                \
+  X(DW_OP_reg29)                                \
+  X(DW_OP_reg30)                                \
+  X(DW_OP_reg31)                                \
+  X(DW_OP_breg0, -1)                            \
+  X(DW_OP_breg1, -1)                            \
+  X(DW_OP_breg2, -1)                            \
+  X(DW_OP_breg3, -1)                            \
+  X(DW_OP_breg4, -1)                            \
+  X(DW_OP_breg5, -1)                            \
+  X(DW_OP_breg6, -1)                            \
+  X(DW_OP_breg7, -1)                            \
+  X(DW_OP_breg8, -1)                            \
+  X(DW_OP_breg9, -1)                            \
+  X(DW_OP_breg10, -1)                           \
+  X(DW_OP_breg11, -1)                           \
+  X(DW_OP_breg12, -1)                           \
+  X(DW_OP_breg13, -1)                           \
+  X(DW_OP_breg14, -1)                           \
+  X(DW_OP_breg15, -1)                           \
+  X(DW_OP_breg16, -1)                           \
+  X(DW_OP_breg17, -1)                           \
+  X(DW_OP_breg18, -1)                           \
+  X(DW_OP_breg19, -1)                           \
+  X(DW_OP_breg20, -1)                           \
+  X(DW_OP_breg21, -1)                           \
+  X(DW_OP_breg22, -1)                           \
+  X(DW_OP_breg23, -1)                           \
+  X(DW_OP_breg24, -1)                           \
+  X(DW_OP_breg25, -1)                           \
+  X(DW_OP_breg26, -1)                           \
+  X(DW_OP_breg27, -1)                           \
+  X(DW_OP_breg28, -1)                           \
+  X(DW_OP_breg29, -1)                           \
+  X(DW_OP_breg30, -1)                           \
+  X(DW_OP_breg31, -1)                           \
+  X(DW_OP_regx, -1)                             \
+  X(DW_OP_fbreg, -1)                            \
+  X(DW_OP_bregx, -1, -1)                        \
+  X(DW_OP_piece, 1)                             \
+  X(DW_OP_deref_size, 1)                        \
+  X(DW_OP_xderef_size, 1)                       \
+  X(DW_OP_nop)                                  \
+  X(DW_OP_push_object_address)                  \
+  X(DW_OP_call2, 2)                             \
+  X(DW_OP_call4, 4)                             \
+  X(DW_OP_call_ref, -2)                         \
+  X(DW_OP_form_tls_address)                     \
+  X(DW_OP_call_frame_cfa)                       \
+  X(DW_OP_bit_piece, -1, -1)                    \
+  X(DW_OP_implicit_value, -1, -3, -4)           \
+  X(DW_OP_stack_value)                          \
+  X(DW_OP_implicit_pointer, -2, -1)             \
+  X(DW_OP_addrx)                                \
+  X(DW_OP_constx)                               \
+  X(DW_OP_entry_value)                          \
+  X(DW_OP_const_type)                           \
+  X(DW_OP_regval_type)                          \
+  X(DW_OP_deref_type)                           \
+  X(DW_OP_xderef_type)                          \
+  X(DW_OP_convert)                              \
+  X(DW_OP_reinterpret)
 
 namespace {
 template<typename R, typename T, typename F>

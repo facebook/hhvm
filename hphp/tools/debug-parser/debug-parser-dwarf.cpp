@@ -83,7 +83,7 @@ template<typename It> It end(std::pair<It,It> p) { return p.second; }
 
 struct Scope {
   explicit Scope(GlobalOff cu_offset)
-    : m_cu_offset{cu_offset}
+      : m_cu_offset{cu_offset}
   {
     m_scope.emplace_back(
       ObjectTypeName{std::string{}, ObjectTypeName::Linkage::external},
@@ -155,7 +155,7 @@ struct Scope {
 
   void pop() { m_scope.pop_back(); }
 
- private:
+private:
   struct Context {
     Context(ObjectTypeName name, bool in_namespace_scope)
         : name(std::move(name))
@@ -168,7 +168,7 @@ struct Scope {
   std::vector<Context> m_scope;
   GlobalOff m_cu_offset;
 
- public:
+public:
   static const std::string s_pseudo_type_name;
 };
 
@@ -183,10 +183,10 @@ struct TypeParserImpl : TypeParser {
 
   size_t getObjectBlockCount() const override;
 
- protected:
+protected:
   const std::vector<ObjectType>& getObjectBlock(size_t index) const override;
 
- private:
+private:
   struct StateBlock;
 
   struct LinkageDependents {
@@ -424,7 +424,7 @@ TypeParserImpl::TypeParserImpl(const std::string& filename, int num_threads)
         env.state->obj_offsets.reserve(env.state->all_objs.size());
         for (auto i = size_t{0}; i < env.state->all_objs.size(); ++i) {
           env.state->obj_offsets.emplace(
-              GlobalOff::fromRaw(env.state->all_objs[i].key.object_id), i
+            GlobalOff::fromRaw(env.state->all_objs[i].key.object_id), i
           );
         }
 
@@ -597,7 +597,7 @@ void TypeParserImpl::fixTemplateLinkage() {
       if (changed_obj.name.linkage != ObjectTypeName::Linkage::external) {
         const auto process = [&](GlobalOff dependent_offset) {
           auto& dep_state = const_cast<StateBlock&>(
-              stateForOffset(dependent_offset)
+            stateForOffset(dependent_offset)
           );
           auto const it = dep_state.obj_offsets.find(dependent_offset);
           if (it == dep_state.obj_offsets.end()) return;
@@ -640,7 +640,7 @@ Object TypeParserImpl::getObject(ObjectTypeKey key) {
       key,
       Object::Kind::k_other,
       true
-     };
+    };
   }
 
   return m_dwarf.onDIEAtOffset(
@@ -661,12 +661,12 @@ Object TypeParserImpl::getObject(ObjectTypeKey key) {
 folly::Optional<uintptr_t>
 TypeParserImpl::interpretLocAddress(const DwarfState& dwarf,
                                     Dwarf_Attribute attr) {
-    auto form = dwarf.getAttributeForm(attr);
-    if (form != DW_FORM_exprloc) return folly::none;
-    auto exprs = dwarf.getAttributeValueExprLoc(attr);
-    if (exprs.size() != 1) return folly::none;
-    if (exprs[0].lr_atom != DW_OP_addr) return folly::none;
-    return folly::Optional<uintptr_t>{exprs[0].lr_number};
+  auto form = dwarf.getAttributeForm(attr);
+  if (form != DW_FORM_exprloc) return folly::none;
+  auto exprs = dwarf.getAttributeValueExprLoc(attr);
+  if (exprs.size() != 1) return folly::none;
+  if (exprs[0].lr_atom != DW_OP_addr) return folly::none;
+  return folly::Optional<uintptr_t>{exprs[0].lr_number};
 }
 
 folly::Optional<GlobalOff>
@@ -677,54 +677,54 @@ TypeParserImpl::parseSpecification(const DwarfState& dwarf,
   folly::Optional<GlobalOff> offset;
   bool is_inline = false;
   dwarf.forEachAttribute(
-      die,
-      [&](Dwarf_Attribute attr) {
-        switch (dwarf.getAttributeType(attr)) {
-          case DW_AT_abstract_origin:
-            offset = dwarf.onDIEAtOffset(
-                dwarf.getAttributeValueRef(attr),
-                [&](Dwarf_Die die2) {
-                  return parseSpecification(dwarf, die2, false, spec);
-                }
-            );
-            break;
-          case DW_AT_specification:
-            offset = dwarf.getAttributeValueRef(attr);
-            break;
-          case DW_AT_linkage_name:
-            if (spec.linkage_name.empty()) {
-              spec.linkage_name = dwarf.getAttributeValueString(attr);
+    die,
+    [&](Dwarf_Attribute attr) {
+      switch (dwarf.getAttributeType(attr)) {
+        case DW_AT_abstract_origin:
+          offset = dwarf.onDIEAtOffset(
+            dwarf.getAttributeValueRef(attr),
+            [&](Dwarf_Die die2) {
+              return parseSpecification(dwarf, die2, false, spec);
             }
-            break;
-          case DW_AT_location:
-            if (spec.address == StaticSpec::kNoAddress) {
-              if (auto const address = interpretLocAddress(dwarf, attr)) {
-                spec.address = *address;
-              }
+          );
+          break;
+        case DW_AT_specification:
+          offset = dwarf.getAttributeValueRef(attr);
+          break;
+        case DW_AT_linkage_name:
+          if (spec.linkage_name.empty()) {
+            spec.linkage_name = dwarf.getAttributeValueString(attr);
+          }
+          break;
+        case DW_AT_location:
+          if (spec.address == StaticSpec::kNoAddress) {
+            if (auto const address = interpretLocAddress(dwarf, attr)) {
+              spec.address = *address;
             }
-            break;
-          case DW_AT_low_pc:
-            if (spec.address == StaticSpec::kNoAddress) {
-              spec.address = dwarf.getAttributeValueAddr(attr);
-              // Sometimes GCC and Clang will emit invalid function
-              // addresses. Usually zero, but sometimes a very low
-              // number. These numbers have the appearance of being
-              // un-relocated addresses, but its in the final executable. As
-              // a safety net, if an address is provided, but its abnormally
-              // low, ignore it.
-              if (spec.address < 4096) spec.address = StaticSpec::kNoAddress;
-            }
-            break;
-          case DW_AT_object_pointer:
-            // Just in case we actually have a definition, use it to infer
-            // member-ness.
-            spec.is_member = true;
-            break;
-          default:
-            break;
-        }
-        return true;
+          }
+          break;
+        case DW_AT_low_pc:
+          if (spec.address == StaticSpec::kNoAddress) {
+            spec.address = dwarf.getAttributeValueAddr(attr);
+            // Sometimes GCC and Clang will emit invalid function
+            // addresses. Usually zero, but sometimes a very low
+            // number. These numbers have the appearance of being
+            // un-relocated addresses, but its in the final executable. As
+            // a safety net, if an address is provided, but its abnormally
+            // low, ignore it.
+            if (spec.address < 4096) spec.address = StaticSpec::kNoAddress;
+          }
+          break;
+        case DW_AT_object_pointer:
+          // Just in case we actually have a definition, use it to infer
+          // member-ness.
+          spec.is_member = true;
+          break;
+        default:
+          break;
       }
+      return true;
+    }
   );
   if (first && (is_inline ||
                 (spec.linkage_name.empty() &&
@@ -941,20 +941,20 @@ void TypeParserImpl::genNames(Env& env,
         );
         if (!map.empty()) {
           dwarf.onDIEAtOffset(
-              *definitionOffset,
-              [&] (Dwarf_Die orig) {
-                dwarf.forEachChild(
-                    orig,
-                    [&] (Dwarf_Die child) {
-                      auto it = map.find(dwarf.getDIEName(child));
-                      if (it != map.end()) {
-                        env.local_mappings.emplace(it->second,
-                                                   dwarf.getDIEOffset(child));
-                      }
-                      return true;
-                    }
-                );
-              }
+            *definitionOffset,
+            [&] (Dwarf_Die orig) {
+              dwarf.forEachChild(
+                orig,
+                [&] (Dwarf_Die child) {
+                  auto it = map.find(dwarf.getDIEName(child));
+                  if (it != map.end()) {
+                    env.local_mappings.emplace(it->second,
+                                               dwarf.getDIEOffset(child));
+                  }
+                  return true;
+                }
+              );
+            }
           );
         }
       }
@@ -1574,8 +1574,8 @@ Object::Function TypeParserImpl::genFunction(Dwarf_Die die) {
           switch (m_dwarf.getAttributeType(attr)) {
             case DW_AT_type:
               arg_type = m_dwarf.onDIEAtOffset(
-                  m_dwarf.getAttributeValueRef(attr),
-                  [&](Dwarf_Die ty_die) { return genType(ty_die); }
+                m_dwarf.getAttributeValueRef(attr),
+                [&](Dwarf_Die ty_die) { return genType(ty_die); }
               );
               break;
             case DW_AT_artificial:

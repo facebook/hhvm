@@ -978,6 +978,7 @@ TypedValue HHVM_FUNCTION(array_slice,
   // preserve_keys is true, or when preserve_keys is false but the container
   // is packed so we know the keys already map to [0,N].
   if (offset == 0 && len == num_in && (preserve_keys || input_is_packed)) {
+    SuppressHackArrCompatNotices suppress;
     if (isArrayType(cell_input.m_type)) {
       return tvReturn(Variant{cell_input.m_data.parr});
     }

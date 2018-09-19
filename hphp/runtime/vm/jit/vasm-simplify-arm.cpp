@@ -84,17 +84,8 @@ bool simplify(Env& env, const cmovq& inst, Vlabel b, size_t i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<Vinstr::Opcode op>
-bool is_inst(const Env& env, Vlabel b, size_t i)
-{
-  auto const& code = env.unit.blocks[b].code;
-  if (i > code.size()) return false;
-  return code[i].op == op;
-}
-
 bool simplify(Env& env, const loadb& inst, Vlabel b, size_t i) {
-  if (is_inst<Vinstr::movzbl>(env, b, i + 1)) {
-    return if_inst<Vinstr::movzbl>(env, b, i + 1, [&] (const movzbl& mov) {
+  if (if_inst<Vinstr::movzbl>(env, b, i + 1, [&] (const movzbl& mov) {
       // loadb{s, tmp}; movzbl{tmp, d}; -> loadzbl{s, d};
       if (!(env.use_counts[inst.d] == 1 &&
             inst.d == mov.s)) return false;
@@ -102,10 +93,10 @@ bool simplify(Env& env, const loadb& inst, Vlabel b, size_t i) {
       return simplify_impl(env, b, i, [&] (Vout& v) {
         v << loadzbl{inst.s, mov.d};
         return 2;
-      }); });
-  }
-  if (is_inst<Vinstr::movsbl>(env, b, i + 1)) {
-    return if_inst<Vinstr::movsbl>(env, b, i + 1, [&] (const movsbl& mov) {
+      }); })
+    ) return true;
+
+  if (if_inst<Vinstr::movsbl>(env, b, i + 1, [&] (const movsbl& mov) {
       // loadb{s, tmp}; movsbl{tmp, d}; -> loadsbl{s, d};
       if (!(env.use_counts[inst.d] == 1 &&
             inst.d == mov.s)) return false;
@@ -113,8 +104,9 @@ bool simplify(Env& env, const loadb& inst, Vlabel b, size_t i) {
       return simplify_impl(env, b, i, [&] (Vout& v) {
         v << loadsbl{inst.s, mov.d};
         return 2;
-      }); });
-  }
+      }); })
+  ) return true;
+
   return false;
 }
 

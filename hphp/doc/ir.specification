@@ -1264,11 +1264,14 @@ To string conversions:
   it cannot define the constant.  These should only be executed if LdCns on the
   same constant has failed.
 
-| LookupCnsU<T,constName,fallbackName>, DCns, CStr CStr, PRc
+| LookupCnsU<T,constName,fallbackName>,  DCns, CStr CStr, PRc
+
+| LookupCnsUE<T,constName,fallbackName>, DCns, CStr CStr, PRc
 
   Load an unqualified constant via the RDS, first by trying constName, then by
-  trying fallbackName.  Raises a notice if neither can be found.  Should only
-  be executed if LdCns on the same constant has failed.
+  trying fallbackName.  If neither can be found, LookupCnsUE will throw
+  a fatal error, while LookupCnsU will raise a notice.  These should
+  only be executed if LdCns on the same constant has failed.
 
 | LdClsCns<className,constantName>, D(PtrToGen), NA, B
 

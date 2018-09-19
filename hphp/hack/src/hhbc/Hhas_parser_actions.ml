@@ -1005,6 +1005,7 @@ match s with
  | "NewLikeArrayL" ->
      ILitConst(NewLikeArrayL(localidofiarg arg1, intofiarg arg2))
  | "CnsU" -> ILitConst(CnsU (const_id_of_iarg arg1, stringofiarg arg2))
+ | "CnsUE" -> ILitConst(CnsUE (const_id_of_iarg arg1, stringofiarg arg2))
  | "ClsCns" -> ILitConst(ClsCns (const_id_of_iarg arg1, intofiarg arg2))
  | "ClsCnsD" ->
    ILitConst(ClsCnsD (const_id_of_iarg arg1, class_id_of_iarg arg2))

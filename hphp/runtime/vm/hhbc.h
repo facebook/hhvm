@@ -475,6 +475,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(Cns,             ONE(SA),          NOV,             ONE(CV),    NF) \
   O(CnsE,            ONE(SA),          NOV,             ONE(CV),    NF) \
   O(CnsU,            TWO(SA,SA),       NOV,             ONE(CV),    NF) \
+  O(CnsUE,           TWO(SA,SA),       NOV,             ONE(CV),    NF) \
   O(ClsCns,          TWO(SA,CAR),      NOV,             ONE(CV),    NF) \
   O(ClsCnsD,         TWO(SA,SA),       NOV,             ONE(CV),    NF) \
   O(ClsRefName,      ONE(CAR),         NOV,             ONE(CV),    NF) \

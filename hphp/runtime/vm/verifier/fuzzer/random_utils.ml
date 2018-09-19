@@ -133,6 +133,7 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
     (fun () -> ILitConst (Cns (Const.from_raw_string "")));
     (fun () -> ILitConst (CnsE (Const.from_raw_string "")));
     (fun () -> ILitConst (CnsU (Const.from_raw_string "", "")));
+    (fun () -> ILitConst (CnsUE (Const.from_raw_string "", "")));
     (fun () -> ILitConst (ClsCnsD (Const.from_raw_string "",
                                    Class.from_raw_string "")));
     (fun () -> ILitConst File);

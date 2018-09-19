@@ -1355,6 +1355,7 @@ bool sideEffect(Op op) {
     case Op::ClsCnsD:
     case Op::ClsCns:
     case Op::CnsU:
+    case Op::CnsUE:
     case Op::NewMixedArray:
     case Op::NewLikeArrayL:
     case Op::NewPackedArray:

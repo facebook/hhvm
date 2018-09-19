@@ -138,6 +138,8 @@ let string_of_lit_const instruction =
     | CnsE cnsid -> sep ["CnsE"; string_of_const_id cnsid]
     | CnsU (id1, id2) ->
       sep ["CnsU"; string_of_const_id id1; SU.quote_string id2]
+    | CnsUE (id1, id2) ->
+      sep ["CnsUE"; string_of_const_id id1; SU.quote_string id2]
 
 
 let string_of_typestruct_resolve_op = function

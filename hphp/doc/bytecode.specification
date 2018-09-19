@@ -1220,6 +1220,12 @@ CnsU <litstr id> <litstr fallback>  []  ->  [C:Null|Bool|Int|Dbl|Str|Arr|Vec|Dic
   Get constant. Identical to Cns except returns constant named %2 if the
   constant named %1 is undefined.
 
+CnsUE <litstr id> <litstr fallback>  []  ->  [C:Null|Bool|Int|Dbl|Str|Arr|Vec|Dict|Keyset|Resource]
+
+  Get constant. Identical to Cns except returns constant named %2 if the
+  constant named %1 is undefined. If there is no constant named %2, throws a
+  fatal error.
+
 ClsCns <litstr id> <class-ref slot>  []  ->  [C:Null|Bool|Int|Dbl|Str|Arr|Vec|Dict|Keyset|Resource]
 
   Get class constant. This instruction pushes the value of the class constant

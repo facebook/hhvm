@@ -212,7 +212,8 @@ Cell lookupCnsHelperPersistent(rds::Handle tv_handle,
 }
 
 Cell lookupCnsUHelperNormal(rds::Handle tv_handle,
-                            StringData* nm, StringData* fallback) {
+                            StringData* nm, StringData* fallback,
+                            bool error) {
   assertx(rds::isNormalHandle(tv_handle));
 
   // Lookup qualified name in thread-local constants.
@@ -231,11 +232,12 @@ Cell lookupCnsUHelperNormal(rds::Handle tv_handle,
   }
 
   // Lookup unqualified name in thread-local constants.
-  return lookupCnsHelper(fallback, false);
+  return lookupCnsHelper(fallback, error);
 }
 
 Cell lookupCnsUHelperPersistent(rds::Handle tv_handle,
-                                StringData* nm, StringData* fallback) {
+                                StringData* nm, StringData* fallback,
+                                bool error) {
   assertx(rds::isPersistentHandle(tv_handle));
 
   // Lookup qualified name in thread-local constants.
@@ -254,7 +256,7 @@ Cell lookupCnsUHelperPersistent(rds::Handle tv_handle,
     return c1;
   }
 
-  return lookupCnsHelper(fallback, false);
+  return lookupCnsHelper(fallback, error);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -282,6 +284,30 @@ void implLookupCns(IRLS& env, const IRInstruction* inst) {
   );
 }
 
+void implLookupCnsU(IRLS& env, const IRInstruction* inst) {
+  auto const cnsName = inst->src(0)->strVal();
+  auto const fallbackName = inst->src(1)->strVal();
+
+  auto const fallbackCh = makeCnsHandle(fallbackName);
+  assertx(rds::isHandleBound(fallbackCh));
+
+  auto const args = argGroup(env, inst)
+    .imm(fallbackCh)
+    .immPtr(cnsName)
+    .immPtr(fallbackName)
+    .imm(inst->is(LookupCnsUE));
+
+  cgCallHelper(
+    vmain(env), env,
+    rds::isNormalHandle(fallbackCh)
+      ? CallSpec::direct(lookupCnsUHelperNormal)
+      : CallSpec::direct(lookupCnsUHelperPersistent),
+    callDestTV(env, inst),
+    SyncOptions::Sync,
+    args
+  );
+}
+
 }
 
 void cgLookupCns(IRLS& env, const IRInstruction* inst) {
@@ -293,26 +319,11 @@ void cgLookupCnsE(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgLookupCnsU(IRLS& env, const IRInstruction* inst) {
-  auto const cnsName = inst->src(0)->strVal();
-  auto const fallbackName = inst->src(1)->strVal();
+  implLookupCnsU(env, inst);
+}
 
-  auto const fallbackCh = makeCnsHandle(fallbackName);
-  assertx(rds::isHandleBound(fallbackCh));
-
-  auto const args = argGroup(env, inst)
-    .imm(fallbackCh)
-    .immPtr(cnsName)
-    .immPtr(fallbackName);
-
-  cgCallHelper(
-    vmain(env), env,
-    rds::isNormalHandle(fallbackCh)
-      ? CallSpec::direct(lookupCnsUHelperNormal)
-      : CallSpec::direct(lookupCnsUHelperPersistent),
-    callDestTV(env, inst),
-    SyncOptions::Sync,
-    args
-  );
+void cgLookupCnsUE(IRLS& env, const IRInstruction* inst) {
+  implLookupCnsU(env, inst);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

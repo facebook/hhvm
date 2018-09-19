@@ -65,7 +65,6 @@ void implCns(IRGS& env,
              const StringData* name,
              const StringData* fallbackName,
              bool error) {
-  assertx(fallbackName == nullptr || !error);
   auto const cnsNameTmp = cns(env, name);
   auto const tv = Unit::lookupPersistentCns(name);
   SSATmp* result = nullptr;
@@ -101,10 +100,11 @@ void implCns(IRGS& env,
         hint(env, Block::Hint::Unlikely);
 
         if (fallbackNameTmp) {
-          return gen(env,
-                     LookupCnsU,
-                     cnsNameTmp,
-                     fallbackNameTmp);
+          if (error) {
+            return gen(env, LookupCnsUE, cnsNameTmp, fallbackNameTmp);
+          } else {
+            return gen(env, LookupCnsU, cnsNameTmp, fallbackNameTmp);
+          }
         }
         if (error) {
           return gen(env, LookupCnsE, cnsNameTmp);
@@ -185,10 +185,12 @@ void emitCnsE(IRGS& env, const StringData* name) {
   implCns(env, name, nullptr, true);
 }
 
-void emitCnsU(IRGS& env,
-              const StringData* name,
-              const StringData* fallback) {
+void emitCnsU(IRGS& env, const StringData* name, const StringData* fallback) {
   implCns(env, name, fallback, false);
+}
+
+void emitCnsUE(IRGS& env, const StringData* name, const StringData* fallback) {
+  implCns(env, name, fallback, true);
 }
 
 void emitClsCnsD(IRGS& env,

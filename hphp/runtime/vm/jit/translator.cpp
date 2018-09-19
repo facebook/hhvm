@@ -141,6 +141,7 @@ static const struct {
   { OpCns,         {None,             Stack1,       OutCns          }},
   { OpCnsE,        {None,             Stack1,       OutCns          }},
   { OpCnsU,        {None,             Stack1,       OutCns          }},
+  { OpCnsUE,       {None,             Stack1,       OutCns          }},
   { OpClsCns,      {None,             Stack1,       OutUnknown      }},
   { OpClsCnsD,     {None,             Stack1,       OutUnknown      }},
   { OpFile,        {None,             Stack1,       OutString       }},
@@ -969,6 +970,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Cns:
   case Op::CnsE:
   case Op::CnsU:
+  case Op::CnsUE:
   case Op::ColFromArray:
   case Op::CombineAndResolveTypeStruct:
   case Op::ConcatN:

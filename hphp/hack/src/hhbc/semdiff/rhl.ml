@@ -641,7 +641,7 @@ let check_instruct_lit_const asn i i' =
   | NewVecArray _, _ | NewKeysetArray _, _
   | NewVArray _, _ | NewDArray _, _ | NewStructDArray _, _ | NewPair, _
   | AddElemC, _ | AddElemV, _ | AddNewElemC, _ | AddNewElemV, _ | NewCol _, _
-  | ColFromArray _, _ | Cns _, _ | CnsE _, _ | CnsU _, _
+  | ColFromArray _, _ | Cns _, _ | CnsE _, _ | CnsU _, _ | CnsUE _, _
   | ClsCns _, _ | ClsCnsD _, _ | File, _ | Dir, _ | Method, _  (*| NameA, _ *)->
     if i=i' then Some asn else None
 

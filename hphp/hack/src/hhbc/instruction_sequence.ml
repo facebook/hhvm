@@ -726,7 +726,7 @@ let get_input_output_count i =
     | Null | True | False | NullUninit | Int _ | Double _ | String _
     | Array _ | Vec _ | Dict _ | Keyset _ | NewArray _ | NewMixedArray _
     | NewDictArray _ | NewDArray _ | NewLikeArrayL _ | Cns _ | CnsE _
-    | CnsU _ | ClsCns _ | ClsCnsD _ | File | Dir | Method | NewCol _ -> (0, 1)
+    | CnsU _ | CnsUE _ | ClsCns _ | ClsCnsD _ | File | Dir | Method | NewCol _ -> (0, 1)
     | NewVArray c | NewVecArray c | NewKeysetArray c
     | NewPackedArray c -> (c, 1)
     | NewStructArray l | NewStructDArray l | NewStructDict l -> (List.length l, 1)

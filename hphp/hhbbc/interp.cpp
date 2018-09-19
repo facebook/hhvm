@@ -590,6 +590,7 @@ void doCns(ISS& env, SString str, SString fallback)  {
 void in(ISS& env, const bc::Cns& op)  { doCns(env, op.str1, nullptr); }
 void in(ISS& env, const bc::CnsE& op) { doCns(env, op.str1, nullptr); }
 void in(ISS& env, const bc::CnsU& op) { doCns(env, op.str1, op.str2); }
+void in(ISS& env, const bc::CnsUE& op) { doCns(env, op.str1, op.str2); }
 
 void in(ISS& env, const bc::ClsCns& op) {
   auto const& t1 = peekClsRefSlot(env, op.slot);

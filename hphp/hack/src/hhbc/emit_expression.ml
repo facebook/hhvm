@@ -264,6 +264,9 @@ let is_global_namespace env =
 let enable_intrinsics_extension () =
   Hhbc_options.enable_intrinsics_extension !Hhbc_options.compiler_options
 
+let phpism_undefined_const_as_string () =
+  Hhbc_options.phpism_undefined_const_as_string !Hhbc_options.compiler_options
+
 let optimize_null_check () =
   Hhbc_options.optimize_null_check !Hhbc_options.compiler_options
 
@@ -1146,13 +1149,19 @@ and emit_id env (p, s as id) =
     | Some id ->
       Emit_symbol_refs.add_constant (Hhbc_id.Const.to_raw_string fq_id);
       Emit_symbol_refs.add_constant id;
+      let opcode =
+        if phpism_undefined_const_as_string ()
+        then CnsU (fq_id, id) else CnsUE (fq_id, id)
+      in
       emit_pos_then p @@
-      instr (ILitConst (CnsU (fq_id, id)))
+      instr (ILitConst opcode)
     | None ->
       Emit_symbol_refs.add_constant (snd id);
-      emit_pos_then p @@
-      instr (ILitConst
-        (if contains_backslash then CnsE fq_id else Cns fq_id))
+      let opcode =
+        if contains_backslash || not @@ phpism_undefined_const_as_string ()
+        then CnsE fq_id else Cns fq_id
+      in
+      emit_pos_then p @@ instr (ILitConst opcode)
     end
 
 and rename_xhp (p, s) = (p, SU.Xhp.mangle s)

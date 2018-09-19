@@ -476,11 +476,11 @@ struct RuntimeOption {
   static int64_t HeapLowWaterMark;
   static int64_t HeapHighWaterMark;
 
-  // Disables PHP's compact() function. Valid values are 0 => enabled (default),
-  // 1 => warning, 2 => error.
+  // Disables PHP's compact() function.
+  // 0 => enabled (default), 1 => warning, 2 => error.
   static uint64_t DisableCompact;
-  // Disables PHP's extract() function. Valid values are 0 => enabled (default),
-  // 1 => warning, 2 => error.
+  // Disables PHP's extract() function.
+  // 0 => enabled (default), 1 => warning, 2 => error.
   static uint64_t DisableExtract;
   // Disables PHP's forward_static_call function.
   // Valid values are 0 => enabled (default),
@@ -490,7 +490,10 @@ struct RuntimeOption {
   // Valid values are 0 => enabled (default),
   // 1 => warning, 2 => error.
   static uint64_t DisableForwardStaticCallArray;
-
+  // Controls PHP's behavior of evaluating undefined constants as string
+  // literals.
+  // true => evaluate as string (default), false => error.
+  static bool UndefinedConstAsString;
 
   static int GetScannerType();
 

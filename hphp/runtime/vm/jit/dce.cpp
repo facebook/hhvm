@@ -429,6 +429,7 @@ bool canDCE(IRInstruction* inst) {
   case LookupCns:
   case LookupCnsE:
   case LookupCnsU:
+  case LookupCnsUE:
   case LdClsCns:
   case InitClsCns:
   case LdSubClsCns:

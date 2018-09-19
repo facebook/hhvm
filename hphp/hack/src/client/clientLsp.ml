@@ -18,7 +18,6 @@ open Hh_json_helpers
 type env = {
   from: string; (* The source where the client was spawned from, i.e. nuclide, vim, emacs, etc. *)
   use_ffp_autocomplete: bool; (* Flag to turn on the (experimental) FFP based autocomplete *)
-  use_enhanced_hover: bool; (* Flag to turn on enhanced hover information *)
 }
 
 (* We cache the state of the typecoverageToggle button, so that when Hack restarts,
@@ -750,22 +749,6 @@ let do_didChange
   ()
 
 let do_hover
-    (conn: server_conn)
-    (ref_unblocked_time: float ref)
-    (params: Hover.params)
-  : Hover.result =
-  let (file, line, column) = lsp_file_position_to_hack params in
-  let command =
-    ServerCommandTypes.(INFER_TYPE (FileName file, line, column, false)) in
-  let inferred_type = rpc conn ref_unblocked_time command in
-  match inferred_type with
-  (* Hack server uses None to indicate absence of a result. *)
-  (* We're also catching the non-result "" just in case...  *)
-  | None -> None
-  | Some ("", _) -> None
-  | Some (s, _) -> Some { Hover.contents = [MarkedString s]; range = None; }
-
-let do_enhanced_hover
     (conn: server_conn)
     (ref_unblocked_time: float ref)
     (params: Hover.params)
@@ -2136,8 +2119,7 @@ let handle_event
   (* textDocument/hover request *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/hover" ->
     cancel_if_stale client c short_timeout;
-    let hover_command = if env.use_enhanced_hover then do_enhanced_hover else do_hover in
-    parse_hover c.params |> hover_command menv.conn ref_unblocked_time
+    parse_hover c.params |> do_hover menv.conn ref_unblocked_time
       |> print_hover |> Jsonrpc.respond to_stdout c
 
   (* textDocument/definition request *)

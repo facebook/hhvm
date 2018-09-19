@@ -119,25 +119,6 @@ let get_closest_svn_ancestor rev repo =
       in
       Future.merge primary_mergebase p2_mergebase max_svn
 
-
-  (**
-    * List the revisions between start and finish revisions, inclusive.
-    *
-    * hg log --rev start::finish -T {node}\n
-    *)
-  let revs_between_revs_inclusive ~start ~finish repo =
-    let rev_range = Printf.sprintf "%s::%s" (rev_string start) (rev_string finish) in
-    let process = exec_hg [
-      "log";
-      "--rev";
-      rev_range;
-      "-T";
-      "{node}\n";
-      "--cwd";
-      repo;
-    ] in
-    Future.make process Sys_utils.split_lines
-
   (** Returns the files changed since the given svn_rev
    *
    * hg status -n --rev r<svn_rev> --cwd <repo> *)
@@ -158,13 +139,7 @@ let get_closest_svn_ancestor rev repo =
    * i.e. If we start at "start" revision, what files need be changed to get us
    * to "finish" revision.
    *
-   * hg status -n --rev "start::end-start"
-   *
-   * Note, this is different from: hg status -n --rev "start::end"
-   *
-   * by subtracting out start from the rev range. Itmust be subtracted out
-   * because we don't care about the files inside the start revision itself
-   * (only what files were changed since then)
+   * hg status -n --rev start --rev end --cwd repo
    *)
   let files_changed_since_rev_to_rev ~start ~finish repo =
     if String.equal (rev_string start) (rev_string finish) then
@@ -174,42 +149,17 @@ let get_closest_svn_ancestor rev repo =
        * *)
       Future.of_value []
     else
-      let rev_list = revs_between_revs_inclusive ~start ~finish repo in
-      let rev_range = Printf.sprintf "%s::%s-%s"
-        (rev_string start) (rev_string finish) (rev_string start) in
       let process = exec_hg [
         "status";
         "-n";
         "--rev";
-        rev_range;
+        (rev_string start);
+        "--rev";
+        (rev_string finish);
         "--cwd";
         repo;
       ] in
-      let file_list = Future.make process Sys_utils.split_lines in
-      let merge_result file_list rev_list = match file_list, rev_list with
-        | Ok file_list, _ ->
-          (** We were able t retrieve the list of files. Just return them. *)
-          Ok file_list
-        | Error e, Ok rev_list -> begin
-          (**
-           * Getting list of files errored. This could happen if "start" and "end"
-           * refer to the same rev (but appear different, since there are different
-           * ways to describe revs, such as the hash itself vs. something
-           * like ".~10"). If they do refer to the same rev, then the
-           * number of revs between them will be exactly 1 (the rev itself).
-           * So we return an empty list of files.
-           *)
-          if (List.length rev_list) = 1 then
-            Ok []
-          else
-            (** "start" and "end" rev are not the same, but get the list of
-             * files errored. So just return that error. *)
-            Error e
-        end
-        | Error e, _ ->
-          Error e
-      in
-      Future.merge file_list rev_list merge_result
+      Future.make process Sys_utils.split_lines
 
   (** hg update --rev r<svn_rev> --cwd <repo> *)
   let update_to_rev rev repo =

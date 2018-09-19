@@ -1,1 +1,16 @@
+string(167) "DateTime::__construct(): Failed to parse time string (2010-05-15 00:00:00 Canada/East-Saskatchewan) at position 20 (C): The timezone could not be found in the database"
+Array
+(
+    [warning_count] => 0
+    [warnings] => Array
+        (
+        )
+
+    [error_count] => 1
+    [errors] => Array
+        (
+            [20] => The timezone could not be found in the database
+        )
+
+)
 string(30) "this should be the only output"

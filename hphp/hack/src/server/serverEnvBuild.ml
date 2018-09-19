@@ -115,6 +115,8 @@ let make_genv options config local_config handle =
         | Watchman.State_enter (name, metadata) ->
           Notifier_state_enter (name, metadata)
         | Watchman.State_leave (name, metadata) ->
+          if local_config.SLC.hg_aware then
+            ServerRevisionTracker.on_state_leave root name metadata;
           Notifier_state_leave (name, metadata)
         | Watchman.Files_changed changes ->
           Notifier_async_changes changes

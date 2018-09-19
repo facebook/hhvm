@@ -782,6 +782,10 @@ end = functor(CheckKind:CheckKindType) -> struct
     let _ : bool = Typing_deps.allow_dependency_table_reads
       deptable_unlocked in
 
+    (* Checking this before starting typechecking because we want to attribtue
+    * big rechecks to rebases. *)
+    let t = ServerRevisionTracker.check_changes t in
+
     (* TYPE CHECKING *)
     let fast, lazy_check_later = CheckKind.get_defs_to_recheck
       files_to_parse fast files_info to_recheck env in

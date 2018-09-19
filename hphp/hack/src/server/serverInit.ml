@@ -639,6 +639,7 @@ module ServerLazyInit : InitKind = struct
     let state_future =
       load_mini_approach >>= invoke_approach genv root in
     let timeout = genv.local_config.SLC.load_mini_script_timeout in
+    let hg_aware = genv.local_config.SLC.hg_aware in
     let state_future = state_future >>= fun f ->
       with_loader_timeout timeout "wait_for_state" f
     in
@@ -650,8 +651,10 @@ module ServerLazyInit : InitKind = struct
         dirty_local_files;
         dirty_master_files;
         old_saved;
+        mergebase_rev;
         _},
       changed_while_parsing) ->
+      if hg_aware then Option.iter mergebase_rev ~f:ServerRevisionTracker.initialize;
       Bad_files.check dirty_local_files;
       Bad_files.check changed_while_parsing;
 

@@ -48,6 +48,7 @@ type loaded_info =
  {
    saved_state_fn : string;
    corresponding_rev : Hg.rev;
+   mergebase_rev : Hg.svn_rev option;
   (* Files changed between saved state revision and current public merge base *)
    dirty_master_files : Relative_path.Set.t;
   (* Files changed between public merge base and current revision *)
@@ -157,6 +158,7 @@ module ServerInitCommon = struct
       Ok {
         saved_state_fn = result.State_loader.saved_state_fn;
         corresponding_rev = result.State_loader.corresponding_rev;
+        mergebase_rev = result.State_loader.mergebase_rev;
         dirty_master_files;
         dirty_local_files;
         old_saved;
@@ -178,6 +180,7 @@ module ServerInitCommon = struct
       let get_loaded_info = (fun () -> Ok {
         saved_state_fn;
         corresponding_rev = (Hg.Svn_rev (int_of_string (corresponding_base_revision)));
+        mergebase_rev  = None;
         dirty_master_files = prechecked_changes;
         dirty_local_files = changes;
         old_saved;

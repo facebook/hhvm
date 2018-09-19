@@ -49,6 +49,7 @@ type t = {
   option_enable_hhjs                      : bool;
   option_hhjs_env_import_path             : string;
   option_phpism_undefined_const_as_string : bool;
+  option_phpism_undefined_const_fallback  : bool;
 }
 
 let default = {
@@ -91,6 +92,7 @@ let default = {
   option_enable_hhjs = false;
   option_hhjs_env_import_path = "";
   option_phpism_undefined_const_as_string = true;
+  option_phpism_undefined_const_fallback = true;
 }
 
 let enable_hiphop_syntax o = o.option_enable_hiphop_syntax
@@ -130,6 +132,7 @@ let enable_intrinsics_extension o = o.option_enable_intrinsics_extension
 let enable_hhjs o = o.option_enable_hhjs
 let hhjs_env_import_path o = o.option_hhjs_env_import_path
 let phpism_undefined_const_as_string o = o.option_phpism_undefined_const_as_string
+let phpism_undefined_const_fallback o = o.option_phpism_undefined_const_fallback
 let to_string o =
   let dynamic_invokes =
     String.concat ~sep:", " (SSet.elements (dynamic_invoke_functions o)) in
@@ -177,6 +180,7 @@ let to_string o =
     ; Printf.sprintf "enable_hhjs: %B" @@ enable_hhjs o
     ; Printf.sprintf "hhjs_env_import_path: %s" @@ hhjs_env_import_path o
     ; Printf.sprintf "phpism_undefined_const_as_string: %B" @@ phpism_undefined_const_as_string o
+    ; Printf.sprintf "phpism_undefined_const_fallback: %B" @@ phpism_undefined_const_fallback o
     ]
 
 (* The Hack.Lang.IntsOverflowToInts setting overrides the
@@ -257,6 +261,8 @@ let set_option options name value =
     { options with option_hhjs_env_import_path = value }
   | "hack.lang.phpism.undefinedconstasstring" ->
     { options with option_phpism_undefined_const_as_string = as_bool value}
+  | "hack.lang.phpism.undefinedconstfallback" ->
+    { options with option_phpism_undefined_const_fallback = as_bool value}
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -385,6 +391,8 @@ let value_setters = [
      fun opts v -> { opts with option_hhjs_env_import_path = v });
   (set_value "hhvm.hack.lang.phpism.undefined_const_as_string" get_value_from_config_int @@
      fun opts v -> { opts with option_phpism_undefined_const_as_string = (v = 1)});
+  (set_value "hhvm.hack.lang.phpism.undefined_const_fallback" get_value_from_config_int @@
+     fun opts v -> { opts with option_phpism_undefined_const_fallback = (v = 1)});
 ]
 
 let extract_config_options_from_json ~init config_json =

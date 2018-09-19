@@ -426,6 +426,7 @@ uint64_t RuntimeOption::DisableExtract = 0;
 uint64_t RuntimeOption::DisableForwardStaticCall = 0;
 uint64_t RuntimeOption::DisableForwardStaticCallArray = 0;
 bool RuntimeOption::UndefinedConstAsString = true;
+bool RuntimeOption::UndefinedConstFallback = true;
 
 #ifdef HHVM_DYNAMIC_EXTENSION_DIR
 std::string RuntimeOption::ExtensionDir = HHVM_DYNAMIC_EXTENSION_DIR;
@@ -1183,6 +1184,7 @@ void RuntimeOption::Load(
                  "ResourceLimit.HeapHighWaterMark",HeapHighWaterMark);
   }
   {
+    // PHPisms
     Config::Bind(DisableCompact, ini, config,
                  "Hack.Lang.Phpism.DisableCompact", DisableCompact);
     Config::Bind(DisableExtract, ini, config,
@@ -1196,6 +1198,9 @@ void RuntimeOption::Load(
     Config::Bind(UndefinedConstAsString, ini, config,
                  "Hack.Lang.Phpism.UndefinedConstAsString",
                  UndefinedConstAsString);
+    Config::Bind(UndefinedConstFallback, ini, config,
+                 "Hack.Lang.Phpism.UndefinedConstFallback",
+                 UndefinedConstFallback);
   }
   {
     // Repo

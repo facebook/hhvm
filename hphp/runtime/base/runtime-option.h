@@ -494,6 +494,10 @@ struct RuntimeOption {
   // literals.
   // true => evaluate as string (default), false => error.
   static bool UndefinedConstAsString;
+  // Controls PHP's behavior of falling back to the default namespace for
+  // undefined constants.
+  // true => fall back to default namespace (default), false => error.
+  static bool UndefinedConstFallback;
 
   static int GetScannerType();
 

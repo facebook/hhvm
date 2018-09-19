@@ -708,6 +708,7 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::EvalEnableHHJS ? '1' : '0')
     + RuntimeOption::EvalHHJSEnvImportPath + '\0'
     + (RuntimeOption::UndefinedConstAsString ? '1' : '0')
+    + (RuntimeOption::UndefinedConstFallback ? '1' : '0')
     + mangleUnitPHP7Options()
     + mangleAliasedNamespaces()
     + hackc_version();

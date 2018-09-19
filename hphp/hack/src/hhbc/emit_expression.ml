@@ -267,6 +267,9 @@ let enable_intrinsics_extension () =
 let phpism_undefined_const_as_string () =
   Hhbc_options.phpism_undefined_const_as_string !Hhbc_options.compiler_options
 
+let phpism_undefined_const_fallback () =
+  Hhbc_options.phpism_undefined_const_fallback !Hhbc_options.compiler_options
+
 let optimize_null_check () =
   Hhbc_options.optimize_null_check !Hhbc_options.compiler_options
 
@@ -1146,7 +1149,7 @@ and emit_id env (p, s as id) =
     let fq_id, id_opt, contains_backslash =
       Hhbc_id.Const.elaborate_id (Emit_env.get_namespace env) id in
     begin match id_opt with
-    | Some id ->
+    | Some id when phpism_undefined_const_fallback () ->
       Emit_symbol_refs.add_constant (Hhbc_id.Const.to_raw_string fq_id);
       Emit_symbol_refs.add_constant id;
       let opcode =
@@ -1155,6 +1158,7 @@ and emit_id env (p, s as id) =
       in
       emit_pos_then p @@
       instr (ILitConst opcode)
+    | Some _
     | None ->
       Emit_symbol_refs.add_constant (snd id);
       let opcode =

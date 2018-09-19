@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/reverse-data-map.h"
+#include "hphp/runtime/vm/rx.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
@@ -631,6 +632,8 @@ void Func::print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrNoInjection) { out << " (no_injection)"; }
   if (attrs & AttrReference) { out << " (reference)"; }
   if (attrs & AttrDynamicallyCallable) { out << " (dyn_callable)"; }
+  auto rxl = rxLevelFromAttr(attrs);
+  if (rxl != RxLevel::None) out << " (" << rxLevelToAttrString(rxl) << ")";
 }
 
 void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {

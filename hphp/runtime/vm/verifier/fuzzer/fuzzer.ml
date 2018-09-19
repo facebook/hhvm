@@ -726,7 +726,8 @@ let mutate_metadata (input : HP.t)  =
         (m |> Hhas_method.is_closure_body   |> mutate_bool)
         (m |> Hhas_method.is_return_by_ref  |> mutate_bool)
         (m |> Hhas_method.is_interceptable  |> mutate_bool)
-        (m |> Hhas_method.is_memoize_impl   |> mutate_bool) in
+        (m |> Hhas_method.is_memoize_impl   |> mutate_bool)
+        (m |> Hhas_method.rx_level) in
     let mutate_property (prop : Hhas_property.t) : Hhas_property.t =
       Hhas_property.make
         (prop |> Hhas_property.attributes)
@@ -803,7 +804,8 @@ let mutate_metadata (input : HP.t)  =
       (f |> Hhas_function.inout_wrapper     |> mutate_bool)
       (f |> Hhas_function.is_return_by_ref  |> mutate_bool)
       (f |> Hhas_function.is_interceptable  |> mutate_bool)
-      (f |> Hhas_function.is_memoize_impl   |> mutate_bool) in
+      (f |> Hhas_function.is_memoize_impl   |> mutate_bool)
+      (f |> Hhas_function.rx_level) in
   let mutate_typedef (typedef : Hhas_typedef.t) : Hhas_typedef.t =
     Hhas_typedef.make
       (typedef |> Hhas_typedef.name)

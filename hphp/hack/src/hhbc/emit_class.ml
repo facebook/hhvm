@@ -88,6 +88,7 @@ let make_86method
     method_is_return_by_ref
     method_is_interceptable
     method_is_memoize_impl
+    Rx.NonRx
 
 let from_extends ~namespace ~is_enum _tparams extends =
   if is_enum

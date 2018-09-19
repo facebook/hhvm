@@ -67,6 +67,7 @@ let emit_function : A.fun_ * Closure_convert.hoist_kind -> Hhas_function.t list 
     then original_id else renamed_id in
   let is_interceptable =
     Interceptable.is_function_interceptable namespace ast_fun function_attributes in
+  let function_rx_level = Rx.rx_level_from_ast ast_fun.Ast.f_user_attributes in
   let normal_function =
     Hhas_function.make
       function_attributes
@@ -82,6 +83,7 @@ let emit_function : A.fun_ * Closure_convert.hoist_kind -> Hhas_function.t list 
       is_return_by_ref
       is_interceptable
       is_memoize (*is_memoize_impl*)
+      function_rx_level
   in
   let decl_vars = Hhas_body.decl_vars @@ Hhas_function.body normal_function in
   if is_memoize

@@ -1,0 +1,86 @@
+(**
+ * Copyright (c) 2018, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
+ *)
+
+open Core_kernel
+
+(* The possible Rx levels of a function or method *)
+type t =
+  | NonRx
+  | ConditionalRxLocal
+  | ConditionalRxShallow
+  | ConditionalRx
+  | RxLocal
+  | RxShallow
+  | Rx
+
+let attr_is_rx ast_attr =
+  snd ast_attr.Ast.ua_name = Naming_special_names.UserAttributes.uaReactive
+
+let any_attr_is_rx ast_attrs =
+  List.exists ast_attrs ~f:attr_is_rx
+
+let attr_is_rx_shallow ast_attr =
+  snd ast_attr.Ast.ua_name = Naming_special_names.UserAttributes.uaShallowReactive
+
+let any_attr_is_rx_shallow ast_attrs =
+  List.exists ast_attrs ~f:attr_is_rx_shallow
+
+let attr_is_rx_local ast_attr =
+  snd ast_attr.Ast.ua_name = Naming_special_names.UserAttributes.uaLocalReactive
+
+let any_attr_is_rx_local ast_attrs =
+  List.exists ast_attrs ~f:attr_is_rx_local
+
+let attr_is_rx_if_impl ast_attr =
+  snd ast_attr.Ast.ua_name = Naming_special_names.UserAttributes.uaOnlyRxIfImpl
+
+let any_attr_is_rx_if_impl ast_attrs =
+  List.exists ast_attrs ~f:attr_is_rx_if_impl
+
+let attr_is_rx_as_args ast_attr =
+  let name = snd ast_attr.Ast.ua_name in
+  name = Naming_special_names.UserAttributes.uaOnlyRxIfArgs_do_not_use
+    || name = Naming_special_names.UserAttributes.uaAtMostRxAsArgs
+
+let any_attr_is_rx_as_args ast_attrs =
+  List.exists ast_attrs ~f:attr_is_rx_as_args
+
+let rx_level_from_ast ast_attrs =
+  let rx = any_attr_is_rx ast_attrs in
+  let rx_shallow = any_attr_is_rx_shallow ast_attrs in
+  let rx_local = any_attr_is_rx_local ast_attrs in
+  let rx_conditional = any_attr_is_rx_if_impl ast_attrs
+    || any_attr_is_rx_as_args ast_attrs in
+  match (rx_conditional, rx_local, rx_shallow, rx) with
+    | (false, false, false, false) -> NonRx
+    | (true,  true,  false, false) -> ConditionalRxLocal
+    | (true,  false, true,  false) -> ConditionalRxShallow
+    | (true,  false, false, true ) -> ConditionalRx
+    | (false, true,  false, false) -> RxLocal
+    | (false, false, true,  false) -> RxShallow
+    | (false, false, false, true ) -> Rx
+    | _ -> failwith "invalid combination of Rx attributes escaped the parser"
+
+let rx_level_to_attr_string level = match level with
+  | NonRx                -> None
+  | ConditionalRxLocal   -> Some "conditional_rx_local"
+  | ConditionalRxShallow -> Some "conditional_rx_shallow"
+  | ConditionalRx        -> Some "conditional_rx"
+  | RxLocal              -> Some "rx_local"
+  | RxShallow            -> Some "rx_shallow"
+  | Rx                   -> Some "rx"
+
+let rx_level_from_attr_string s = match s with
+  | "conditional_rx_local"   -> Some ConditionalRxLocal
+  | "conditional_rx_shallow" -> Some ConditionalRxShallow
+  | "conditional_rx"         -> Some ConditionalRx
+  | "rx_local"               -> Some RxLocal
+  | "rx_shallow"             -> Some RxShallow
+  | "rx"                     -> Some Rx
+  | _                        -> None

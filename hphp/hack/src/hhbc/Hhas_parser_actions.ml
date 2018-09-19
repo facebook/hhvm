@@ -227,6 +227,13 @@ let isasync ss = List.mem ~equal:(=) ss "isAsync"
 let isgenerator ss = List.mem ~equal:(=) ss "isGenerator"
 let ispairgenerator ss = List.mem ~equal:(=) ss "isPairGenerator"
 
+let rx_level attrs =
+  let rx_levels = List.filter_map attrs ~f:Rx.rx_level_from_attr_string in
+  match rx_levels with
+    | [] -> Rx.NonRx
+    | [rxl] -> rxl
+    | _ -> report_error "function has multiple rx attributes"
+
 let makelabel s =
  let len = String.length s in
    match s.[0] with

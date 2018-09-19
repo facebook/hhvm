@@ -1470,6 +1470,10 @@ let function_attributes f =
     if Hhas_function.is_return_by_ref f then "reference" :: attrs else attrs in
   let attrs =
     if Hhas_function.is_interceptable f then "interceptable" :: attrs else attrs in
+  let attrs = match Rx.rx_level_to_attr_string (Hhas_function.rx_level f) with
+    | Some s -> s :: attrs
+    | None -> attrs
+  in
   let text = String.concat ~sep:" " attrs in
   if text = "" then "" else "[" ^ text ^ "] "
 
@@ -1534,6 +1538,10 @@ let method_attributes m =
   let attrs = if Hhas_method.is_private m then "private" :: attrs else attrs in
   let attrs = if Hhas_method.is_return_by_ref m then "reference" :: attrs else attrs in
   let attrs = if Hhas_method.is_interceptable m then "interceptable" :: attrs else attrs in
+  let attrs = match Rx.rx_level_to_attr_string (Hhas_method.rx_level m) with
+    | Some s -> s :: attrs
+    | None -> attrs
+  in
   attributes_to_string attrs
 
 let typedef_attributes t =

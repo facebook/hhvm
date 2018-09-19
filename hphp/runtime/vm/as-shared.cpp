@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/vm/as-shared.h"
+#include "hphp/runtime/vm/rx.h"
 
 #include <folly/gen/Base.h>
 #include <folly/gen/String.h>
@@ -98,6 +99,9 @@ std::vector<std::string> attrs_to_vec(AttrContext ctx, Attr attrs) {
   if (supported(mask, ctx) && (attrs & attr)) vec.push_back(str);
   HHAS_ATTRS
 #undef X
+
+  auto const rxl = rxLevelFromAttr(attrs);
+  if (rxl != RxLevel::None) vec.push_back(rxLevelToAttrString(rxl));
 
   return vec;
 }

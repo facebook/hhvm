@@ -21,6 +21,7 @@ type t = {
   function_is_return_by_ref  : bool;
   function_is_interceptable  : bool;
   function_is_memoize_impl   : bool;
+  function_rx_level          : Rx.t;
 }
 
 let make
@@ -36,7 +37,8 @@ let make
   function_inout_wrapper
   function_is_return_by_ref
   function_is_interceptable
-  function_is_memoize_impl =
+  function_is_memoize_impl
+  function_rx_level =
   {
     function_attributes;
     function_name;
@@ -51,6 +53,7 @@ let make
     function_is_return_by_ref;
     function_is_interceptable;
     function_is_memoize_impl;
+    function_rx_level;
   }
 
 let attributes f = f.function_attributes
@@ -69,6 +72,7 @@ let inout_wrapper f = f.function_inout_wrapper
 let is_return_by_ref f = f.function_is_return_by_ref
 let is_interceptable f = f.function_is_interceptable
 let is_memoize_impl f = f.function_is_memoize_impl
+let rx_level f = f.function_rx_level
 
 let with_body f function_body = { f with function_body }
 let params f = f.function_body.Hhas_body.body_params

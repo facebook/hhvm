@@ -230,6 +230,7 @@ let from_ast_wrapper : bool -> _ ->
   let method_is_interceptable =
     Interceptable.is_method_interceptable
       namespace ast_class original_method_id method_attributes in
+  let method_rx_level = Rx.rx_level_from_ast ast_method.Ast.m_user_attributes in
   let method_span =
     if is_native_opcode_impl then (0, 0)
     else Hhas_pos.pos_to_span ast_method.Ast.m_span in
@@ -255,6 +256,7 @@ let from_ast_wrapper : bool -> _ ->
       is_return_by_ref
       method_is_interceptable
       is_memoize (*method_is_memoize_impl*)
+      method_rx_level
   in
   let decl_vars = Hhas_body.decl_vars @@ Hhas_method.body normal_function in
   if has_inout_args && not (method_is_abstract && has_ref_params)

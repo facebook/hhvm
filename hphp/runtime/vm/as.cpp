@@ -98,6 +98,7 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
+#include "hphp/runtime/vm/rx.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/system/systemlib.h"
@@ -2172,6 +2173,7 @@ Attr parse_attribute_list(AsmState& as, AttrContext ctx,
   as.in.getc();
 
   std::string word;
+  auto seen_rxl = false;
   for (;;) {
     as.in.skipWhitespace();
     if (as.in.peek() == ']') break;
@@ -2188,6 +2190,13 @@ Attr parse_attribute_list(AsmState& as, AttrContext ctx,
     }
     if (isTop && word == "nontop") {
       *isTop = false;
+      continue;
+    }
+    auto const rxl = rxLevelFromAttrString(word);
+    if (rxl != RxLevel::None) {
+      if (seen_rxl) as.error("multiple rx attributes");
+      seen_rxl = true;
+      ret |= rxLevelToAttr(rxl);
       continue;
     }
 

@@ -30,36 +30,29 @@ let from_attribute_base namespace attribute_id arguments =
     Emit_fatal.raise_fatal_parse (fst attribute_id)
       "User-defined constants are not allowed in user attribute expressions"
 
-let from_ast : Namespace_env.env -> A.user_attribute -> Hhas_attribute.t =
-  fun namespace ast_attr ->
+let from_ast namespace ast_attr =
   from_attribute_base namespace ast_attr.A.ua_name ast_attr.A.ua_params
 
 let from_asts namespace ast_attributes =
   List.map ast_attributes (from_ast namespace)
 
-let ast_is_memoize : A.user_attribute -> bool =
-  fun ast_attr ->
+let ast_is_memoize ast_attr =
   snd ast_attr.A.ua_name = Naming_special_names.UserAttributes.uaMemoize ||
   snd ast_attr.A.ua_name = Naming_special_names.UserAttributes.uaMemoizeLSB
 
-let ast_is_memoize_lsb : A.user_attribute -> bool =
-  fun ast_attr ->
+let ast_is_memoize_lsb ast_attr =
   snd ast_attr.A.ua_name = Naming_special_names.UserAttributes.uaMemoizeLSB
 
-let ast_is_deprecated : A.user_attribute -> bool =
-  fun ast_attr ->
+let ast_is_deprecated ast_attr =
   snd ast_attr.A.ua_name = Naming_special_names.UserAttributes.uaDeprecated
 
-let ast_any_is_memoize : A.user_attribute list -> bool =
-  fun ast_attrs ->
+let ast_any_is_memoize ast_attrs =
   List.exists ast_attrs ast_is_memoize
 
-let ast_any_is_memoize_lsb : A.user_attribute list -> bool =
-  fun ast_attrs ->
+let ast_any_is_memoize_lsb ast_attrs =
   List.exists ast_attrs ast_is_memoize_lsb
 
-let ast_any_is_deprecated : A.user_attribute list -> bool =
-  fun ast_attrs ->
+let ast_any_is_deprecated ast_attrs =
   List.exists ast_attrs ast_is_deprecated
 
 let add_reified_attribute attrs params =

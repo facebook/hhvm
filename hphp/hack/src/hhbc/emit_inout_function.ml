@@ -163,6 +163,7 @@ let emit_wrapper_function
     return_by_ref
     is_interceptable
     false (* is_memoize_impl *)
+    Rx.NonRx
 
 let emit_wrapper_method
   ~is_closure ~decl_vars ~original_id ~renamed_id ast_class ast_method =
@@ -255,3 +256,4 @@ let emit_wrapper_method
     method_is_return_by_ref
     method_is_interceptable
     false (*method_is_memoize_impl*)
+    Rx.NonRx

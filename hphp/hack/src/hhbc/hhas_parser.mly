@@ -136,6 +136,7 @@ fundecl:
             (List.mem ~equal:(=) attrs "reference")
             (List.mem ~equal:(=) attrs "interceptable")
             false (* is_memoize_impl *)
+            (rx_level attrs)
         }
 ;
 nl:
@@ -301,9 +302,10 @@ methoddecl:
     (List.mem ~equal:(=) $7 "isGenerator")
     (List.mem ~equal:(=) $7 "isPairGenerator")
     (List.mem ~equal:(=) $7 "isClosureBody")
-    (List.mem ~equal:(=) $7 "reference")
-    (List.mem ~equal:(=) $7 "interceptable")
+    (List.mem ~equal:(=) (snd $2) "reference")
+    (List.mem ~equal:(=) (snd $2) "interceptable")
     false (* is_memoize_impl *)
+    (rx_level (snd $2))
   }
 ;
 numclsrefslots:

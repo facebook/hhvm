@@ -113,19 +113,19 @@ enum Attr {
   // Traits have been flattened on this class.
   AttrNoExpandTrait        = (1u << 12), //    X  |          |         //
                                          //       |          |         //
+  // Indicates that a function is a builtin that takes variadic arguments,
+  // where the arguments are either by ref or optionally by ref.  It is
+  // equivalent to ClassInfo's (RefVariableArguments).
+  AttrVariadicByRef        = (1u << 12), //       |          |    X    //
+                                         //       |          |         //
   // Only valid in WholeProgram mode.  Indicates on a class that the class is
   // not extended, or on a method that no extending class defines the method.
   AttrNoOverride           = (1u << 13), //    X  |          |    X    //
                                          //       |          |         //
-  // Indicates that a function is a builtin that takes variadic arguments,
-  // where the arguments are either by ref or optionally by ref.  It is
-  // equivalent to ClassInfo's (RefVariableArguments).
-  AttrVariadicByRef        = (1u << 15), //       |          |    X    //
-                                         //       |          |         //
-  // Indicates that a function may need to use a VarEnv or varargs (i.e.,
-  // extraArgs) at runtime.  If the debugger is enabled, all functions
-  // must be treated as having this flag.
-  AttrMayUseVV             = (1u << 16), //       |          |    X    //
+  // The RxBit attrs are used to encode the reactivity of a function
+  AttrRxBit0               = (1u << 14), //       |          |    X    //
+  AttrRxBit1               = (1u << 15), //       |          |    X    //
+  AttrRxBit2               = (1u << 16), //       |          |    X    //
                                          //       |          |         //
   // Indicates that the function, class or static property can be loaded
   // once and then persisted across all requests. |          |         //
@@ -134,6 +134,11 @@ enum Attr {
   // Indicates that this property cannot be initialized on an ObjectData by
   // simply memcpy-ing from the initializer vector.          |         //
   AttrDeepInit             = (1u << 18), //       |    X     |         //
+                                         //       |          |         //
+  // Indicates that a function may need to use a VarEnv or varargs (i.e.,
+  // extraArgs) at runtime.  If the debugger is enabled, all functions
+  // must be treated as having this flag.
+  AttrMayUseVV             = (1u << 18), //       |          |    X    //
                                          //       |          |         //
   // Set on functions to mark them as being able to be dynamically called
   AttrDynamicallyCallable  = (1u << 19), //       |          |    X    //

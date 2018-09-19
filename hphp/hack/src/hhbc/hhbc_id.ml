@@ -11,21 +11,9 @@ open Core_kernel
 
 module SU = Hhbc_string_utils
 
-(* TODO: Remove this once we start reading this off of HHVM's config.hdf *)
-let default_auto_aliased_namespaces = [
-  "Arrays", "HH\\Lib\\Arrays"
-  ; "C", "HH\\Lib\\C"
-  ; "Dict", "HH\\Lib\\Dict"
-  ; "Keyset", "HH\\Lib\\Keyset"
-  ; "Math", "HH\\Lib\\Math"
-  ; "PHP", "HH\\Lib\\PHP"
-  ; "Str", "HH\\Lib\\Str"
-  ; "Vec", "HH\\Lib\\Vec"
-  ; "Rx", "HH\\Rx"
-  ]
 let auto_namespace_map () =
   Option.value Hhbc_options.(aliased_namespaces !compiler_options)
-    ~default:default_auto_aliased_namespaces
+    ~default:[]
 
 let elaborate_id ns kind id =
   let autoimport =

@@ -1199,9 +1199,14 @@ void VariableSerializer::writeArrayValue(
   case Type::Internal:
   case Type::APCSerialize:
   case Type::DebuggerSerialize:
-    // Do not count referenced values after the first
-    if (!(value.isReferenced() &&
-          m_refs[value.asTypedValue()].m_id != NO_ID)) {
+    // Do not count referenced refs after the first time we see them (for
+    // compatibility with PHP).
+    // Do not count values in keysets because they're also keys, and it's not
+    // possible to have back references to keys.
+    if (!(
+      (value.isReferenced() && m_refs[value.asTypedValue()].m_id != NO_ID) ||
+      kind == VariableSerializer::ArrayKind::Keyset
+    )) {
       m_valueCount++;
     }
     write(value);

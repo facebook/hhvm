@@ -10,7 +10,7 @@
 (* Emit wrapper function for functions with inout arguments *)
 val emit_wrapper_function :
   decl_vars: string list ->
-  is_top: bool ->
+  hoisted: Closure_convert.hoist_kind ->
   (* Whether this is wrapper for inout or reference *)
   wrapper_type: Emit_inout_helpers.wrapper_type ->
   (* Original identifer for function, used for the wrapper *)

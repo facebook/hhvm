@@ -7,8 +7,10 @@
  *
 *)
 
+type hoist_kind = TopLevel | Hoisted
+
 type convert_result = {
-  ast_defs: (bool * Ast.def) list;
+  ast_defs: (hoist_kind * Ast.def) list;
   global_state: Emit_env.global_state;
   strict_types: bool option;
 }

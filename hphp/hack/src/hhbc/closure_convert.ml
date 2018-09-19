@@ -22,8 +22,12 @@ let constant_folding () =
 let hacksperimental () =
   Hhbc_options.hacksperimental !Hhbc_options.compiler_options
 
+type hoist_kind =
+  | TopLevel (* Def that is already at top-level *)
+  | Hoisted (* Def that was hoisted to top-level *)
+
 type convert_result = {
-  ast_defs: (bool * Ast.def) list;
+  ast_defs: (hoist_kind * Ast.def) list;
   global_state: Emit_env.global_state;
   strict_types: bool option;
 }
@@ -1287,7 +1291,7 @@ and convert_defs env class_count typedef_count st dl =
     let st = { st with let_vars = SMap.empty } in
     let st, fd = convert_fun env st fd in
     let st, dl = convert_defs env class_count typedef_count st dl in
-    { st with let_vars = let_vars_copy }, (true, Fun fd) :: dl
+    { st with let_vars = let_vars_copy }, (TopLevel, Fun fd) :: dl
     (* Convert a top-level class definition into a true class definition and
      * a stub class that just corresponds to the DefCls instruction *)
   | Class cd :: dl ->
@@ -1297,11 +1301,11 @@ and convert_defs env class_count typedef_count st dl =
     let stub_class = make_defcls cd class_count in
     let st, dl = convert_defs env (class_count + 1) typedef_count st dl in
     { st with let_vars = let_vars_copy },
-      (true, Class cd) :: (true, Stmt (Pos.none, Def_inline (Class stub_class))) :: dl
+      (TopLevel, Class cd) :: (TopLevel, Stmt (Pos.none, Def_inline (Class stub_class))) :: dl
   | Stmt stmt :: dl ->
     let st, stmt = convert_stmt env st stmt in
     let st, dl = convert_defs env class_count typedef_count st dl in
-    st, (true, Stmt stmt) :: dl
+    st, (TopLevel, Stmt stmt) :: dl
   | Typedef td :: dl ->
     let st, dl = convert_defs env class_count (typedef_count + 1) st dl in
     let st, t_user_attributes =
@@ -1309,20 +1313,20 @@ and convert_defs env class_count typedef_count st dl =
     let td = { td with t_user_attributes } in
     let stub_td = { td with t_id =
       (fst td.t_id, string_of_int (typedef_count)) } in
-    st, (true, Typedef td) :: (true, Stmt (Pos.none, Def_inline (Typedef stub_td))) :: dl
+    st, (TopLevel, Typedef td) :: (TopLevel, Stmt (Pos.none, Def_inline (Typedef stub_td))) :: dl
   | Constant c :: dl ->
     let st, c = convert_gconst env st c in
     let st, dl = convert_defs env class_count typedef_count st dl in
-    st, (true, Constant c) :: dl
+    st, (TopLevel, Constant c) :: dl
   | Namespace(_id, dl) :: dl' ->
     convert_defs env class_count typedef_count st (dl @ dl')
   | NamespaceUse x :: dl ->
     let st, dl = convert_defs env class_count typedef_count st dl in
-    st, (true, NamespaceUse x) :: dl
+    st, (TopLevel, NamespaceUse x) :: dl
   | SetNamespaceEnv ns :: dl ->
     let st = set_namespace st ns in
     let st, dl = convert_defs env class_count typedef_count st dl in
-    st, (true, SetNamespaceEnv ns) :: dl
+    st, (TopLevel, SetNamespaceEnv ns) :: dl
 
 let count_classes defs =
   List.count defs ~f:(function Class _ -> true | _ -> false)
@@ -1353,8 +1357,8 @@ let convert_toplevel_prog defs =
   (* Reorder the functions so that they appear first. This matches the
    * behaviour of HHVM. *)
   let original_defs = hoist_toplevel_functions original_defs in
-  let fun_defs = List.rev_map st.hoisted_functions (fun fd -> false, Fun fd) in
-  let class_defs = List.rev_map st.hoisted_classes (fun cd -> false, Class cd) in
+  let fun_defs = List.rev_map st.hoisted_functions (fun fd -> Hoisted, Fun fd) in
+  let class_defs = List.rev_map st.hoisted_classes (fun cd -> Hoisted, Class cd) in
   let ast_defs = fun_defs @ original_defs @ class_defs in
   let global_state =
     Emit_env.(

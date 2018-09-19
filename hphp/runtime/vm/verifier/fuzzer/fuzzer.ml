@@ -177,6 +177,14 @@ let should_mutate () = Random.float 1.0 < !mut_prob
 
 let mutate_bool b = if should_mutate() then not b else b
 
+let mutate_hoisted h =
+  if should_mutate () then
+    match h with
+    | Closure_convert.TopLevel -> Closure_convert.Hoisted
+    | Closure_convert.Hoisted -> Closure_convert.TopLevel
+  else
+    h
+
 (* adds a random integer in range [-c, c] to n, produces the result if it is
    positive, or 0 otherwise *)
 let mutate_int n c =
@@ -762,15 +770,15 @@ let mutate_metadata (input : HP.t)  =
       (cls |> HC.name)
       (cls |> HC.span)
       (cls |> HC.is_final           |> mutate_bool)
+      (cls |> HC.is_sealed          |> mutate_bool)
       (cls |> HC.is_abstract        |> mutate_bool)
       (cls |> HC.is_interface       |> mutate_bool)
       (cls |> HC.is_trait           |> mutate_bool)
       (cls |> HC.is_xhp             |> mutate_bool)
-      (cls |> HC.is_top             |> mutate_bool)
+      (cls.HC.class_hoisted         |> mutate_hoisted)
       (cls |> HC.is_immutable       |> mutate_bool)
       (cls |> HC.has_immutable      |> mutate_bool)
       (cls |> HC.no_dynamic_props   |> mutate_bool)
-      (cls |> HC.is_sealed          |> mutate_bool)
       (cls |> HC.class_uses)
       (cls |> HC.class_use_aliases)
       (cls |> HC.class_use_precedences)
@@ -790,7 +798,7 @@ let mutate_metadata (input : HP.t)  =
       (f |> Hhas_function.is_async          |> mutate_bool)
       (f |> Hhas_function.is_generator      |> mutate_bool)
       (f |> Hhas_function.is_pair_generator |> mutate_bool)
-      (f |> Hhas_function.is_top            |> mutate_bool)
+      (f.Hhas_function.function_hoisted     |> mutate_hoisted)
       (f |> Hhas_function.no_injection      |> mutate_bool)
       (f |> Hhas_function.inout_wrapper     |> mutate_bool)
       (f |> Hhas_function.is_return_by_ref  |> mutate_bool)

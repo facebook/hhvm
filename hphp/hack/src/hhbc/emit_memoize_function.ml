@@ -119,7 +119,7 @@ let emit_wrapper_function
     false (* is_async *)
     false (* is_generator *)
     false (* is_pair_generator *)
-    true  (* is_top *)
+    Closure_convert.TopLevel
     false (* no_injection *)
     false (* inout_wrapper *)
     ret_by_ref

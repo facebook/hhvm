@@ -27,7 +27,7 @@ type t = {
   class_is_interface : bool;
   class_is_trait     : bool;
   class_is_xhp       : bool;
-  class_is_top       : bool;
+  class_hoisted      : Closure_convert.hoist_kind;
   class_is_immutable : bool;
   class_has_immutable : bool;
   class_no_dynamic_props : bool;
@@ -56,7 +56,7 @@ let make
   class_is_interface
   class_is_trait
   class_is_xhp
-  class_is_top
+  class_hoisted
   class_is_immutable
   class_has_immutable
   class_no_dynamic_props
@@ -82,7 +82,7 @@ let make
     class_is_interface;
     class_is_trait;
     class_is_xhp;
-    class_is_top;
+    class_hoisted;
     class_is_immutable;
     class_has_immutable;
     class_no_dynamic_props;
@@ -109,7 +109,10 @@ let is_abstract hhas_class = hhas_class.class_is_abstract
 let is_interface hhas_class = hhas_class.class_is_interface
 let is_trait hhas_class = hhas_class.class_is_trait
 let is_xhp hhas_class = hhas_class.class_is_xhp
-let is_top hhas_class = hhas_class.class_is_top
+let is_top hhas_class =
+  match hhas_class.class_hoisted with
+  | Closure_convert.TopLevel -> true
+  | Closure_convert.Hoisted -> false
 let is_immutable hhas_class = hhas_class.class_is_immutable
 let has_immutable hhas_class = hhas_class.class_has_immutable
 let no_dynamic_props hhas_class = hhas_class.class_no_dynamic_props

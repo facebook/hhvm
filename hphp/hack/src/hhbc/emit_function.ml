@@ -14,8 +14,8 @@ module A = Ast
 (* Given a function definition, emit code, and in the case of <<__Memoize>>,
  * a wrapper function
  *)
-let emit_function : A.fun_ * bool -> Hhas_function.t list =
-  fun (ast_fun, is_top) ->
+let emit_function : A.fun_ * Closure_convert.hoist_kind -> Hhas_function.t list =
+  fun (ast_fun, hoisted) ->
   let namespace = ast_fun.A.f_namespace in
   let original_id, _ =
     Hhbc_id.Function.elaborate_id namespace ast_fun.A.f_name in
@@ -76,7 +76,7 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
       function_is_async
       function_is_generator
       function_is_pair_generator
-      is_top
+      hoisted
       is_no_injection
       false (*inout_wrapper*)
       is_return_by_ref
@@ -97,7 +97,7 @@ let emit_function : A.fun_ * bool -> Hhas_function.t list =
     let wrapper_fn =
       Emit_inout_function.emit_wrapper_function
               ~decl_vars
-              ~is_top
+              ~hoisted
               ~wrapper_type
               ~original_id
               ~renamed_id

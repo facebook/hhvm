@@ -227,8 +227,8 @@ let validate_class_name ns (p, class_name) =
         (if is_reserved_global_name then name else Utils.strip_ns class_name) in
     Emit_fatal.raise_fatal_parse p message
 
-let emit_class : A.class_ * bool -> Hhas_class.t =
-  fun (ast_class, is_top) ->
+let emit_class : A.class_ * Closure_convert.hoist_kind -> Hhas_class.t =
+  fun (ast_class, hoisted) ->
   let namespace = ast_class.Ast.c_namespace in
   validate_class_name namespace ast_class.Ast.c_name;
 
@@ -476,7 +476,7 @@ let emit_class : A.class_ * bool -> Hhas_class.t =
     class_is_interface
     class_is_trait
     ast_class.A.c_is_xhp
-    is_top
+    hoisted
     class_is_immutable
     class_has_immutable
     class_no_dynamic_props

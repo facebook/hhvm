@@ -107,7 +107,7 @@ let make_wrapper_body env doc decl_vars return_type params instrs =
     (Some env)
 
 let emit_wrapper_function
-  ~decl_vars ~is_top ~wrapper_type ~original_id ~renamed_id ast_fun =
+  ~decl_vars ~hoisted ~wrapper_type ~original_id ~renamed_id ast_fun =
   (* Wrapper methods may not have iterators *)
   Iterator.reset_iterator ();
   let scope = [Ast_scope.ScopeItem.Function ast_fun] in
@@ -157,7 +157,7 @@ let emit_wrapper_function
     false (* is_async *)
     false (* is_generator *)
     false (* is_pair_generator *)
-    is_top
+    hoisted
     true (* no_injection *)
     true (* inout_wrapper *)
     return_by_ref

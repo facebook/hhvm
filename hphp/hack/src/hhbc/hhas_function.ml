@@ -15,7 +15,7 @@ type t = {
   function_is_async          : bool;
   function_is_generator      : bool;
   function_is_pair_generator : bool;
-  function_is_top            : bool;
+  function_hoisted           : Closure_convert.hoist_kind;
   function_no_injection      : bool;
   function_inout_wrapper     : bool;
   function_is_return_by_ref  : bool;
@@ -31,7 +31,7 @@ let make
   function_is_async
   function_is_generator
   function_is_pair_generator
-  function_is_top
+  function_hoisted
   function_no_injection
   function_inout_wrapper
   function_is_return_by_ref
@@ -45,7 +45,7 @@ let make
     function_is_async;
     function_is_generator;
     function_is_pair_generator;
-    function_is_top;
+    function_hoisted;
     function_no_injection;
     function_inout_wrapper;
     function_is_return_by_ref;
@@ -60,7 +60,10 @@ let span f = f.function_span
 let is_async f = f.function_is_async
 let is_generator f = f.function_is_generator
 let is_pair_generator f = f.function_is_pair_generator
-let is_top f = f.function_is_top
+let is_top f =
+  match f.function_hoisted with
+  | Closure_convert.TopLevel -> true
+  | Closure_convert.Hoisted -> false
 let no_injection f = f.function_no_injection
 let inout_wrapper f = f.function_inout_wrapper
 let is_return_by_ref f = f.function_is_return_by_ref

@@ -104,6 +104,12 @@ fundecl:
       functionflags LBRACE nl functionbodywithdirectives RBRACE
         {
           let user_attrs, attrs = $2 in
+          let is_top = not (List.mem attrs ~equal:(=) "nontop") in
+          let hoisted = if is_top then
+            Closure_convert.TopLevel
+          else
+            Closure_convert.Hoisted
+          in
           Hhas_function.make
             user_attrs (*attributes*)
             (Hhbc_id.Function.from_raw_string $5) (*name*)
@@ -124,7 +130,7 @@ fundecl:
             (isasync $7)
             (isgenerator $7)
             (ispairgenerator $7)
-            (not (List.mem ~equal:(=) attrs "nontop"))
+            hoisted
             (List.mem ~equal:(=) attrs "no_injection")
             (List.mem ~equal:(=) attrs "inout_wrapper")
             (List.mem ~equal:(=) attrs "reference")
@@ -227,6 +233,8 @@ classdecl:
      classproperties methods nl RBRACE nl
         {
           let user_attrs, attrs = $2 in
+          let is_top = not (List.mem attrs ~equal:(=) "nontop") in
+          let hoisted = if is_top then Closure_convert.TopLevel else Closure_convert.Hoisted in
           Hhas_class.make
           user_attrs (*attributes*)
           (fst $5) (*base*)
@@ -239,7 +247,7 @@ classdecl:
           (List.mem attrs ~equal:(=) "interface") (*isinterface*)
           (List.mem attrs ~equal:(=) "trait") (*istrait*)
           false (*isxhp*)
-          (not (List.mem attrs ~equal:(=) "nontop")) (*istop*)
+          hoisted
           (List.mem attrs ~equal:(=) "is_immutable") (*is_immutable*)
           (List.mem attrs ~equal:(=) "has_immutable") (*has_immutable*)
           (List.mem attrs ~equal:(=) "no_dynamic_props") (*no_dynamic_props*)

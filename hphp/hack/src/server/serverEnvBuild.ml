@@ -106,26 +106,36 @@ let make_genv options config local_config handle =
        * Watchamn.Watchman_dead and Watchman_alive). We need to update
        * a reference to the new instance. *)
       let watchman = ref (Watchman.Watchman_alive watchman_env) in
+      let open ServerNotifierTypes in
+      let on_changes = function
+        | Watchman.Changed_merge_base _ ->
+          let () = Hh_logger.log
+            "Error: Typechecker does not use Source Control Aware mode" in
+          raise Exit_status.(Exit_with Watchman_invalid_result)
+        | Watchman.State_enter (name, metadata) ->
+          Notifier_state_enter (name, metadata)
+        | Watchman.State_leave (name, metadata) ->
+          Notifier_state_leave (name, metadata)
+        | Watchman.Files_changed changes ->
+          Notifier_async_changes changes
+      in
+      let concat_changes_list = List.fold_left begin fun acc changes ->
+        match on_changes changes with
+        | Notifier_unavailable
+        | Notifier_state_enter _
+        | Notifier_state_leave _ -> acc
+        | Notifier_synchronous_changes changes
+        | Notifier_async_changes changes -> SSet.union acc changes
+        end SSet.empty
+      in
       let notifier_async () =
         let watchman', changes = Watchman.get_changes !watchman in
         watchman := watchman';
-        let open ServerNotifierTypes in
         match changes with
         | Watchman.Watchman_unavailable -> Notifier_unavailable
-        | Watchman.Watchman_pushed changes -> begin match changes with
-          | Watchman.Changed_merge_base _ ->
-            let () = Hh_logger.log
-              "Error: Typechecker does not use Source Control Aware mode" in
-            raise Exit_status.(Exit_with Watchman_invalid_result)
-          | Watchman.State_enter (name, metadata) ->
-            Notifier_state_enter (name, metadata)
-          | Watchman.State_leave (name, metadata) ->
-            Notifier_state_leave (name, metadata)
-          | Watchman.Files_changed changes ->
-            Notifier_async_changes changes
-          end
+        | Watchman.Watchman_pushed changes -> on_changes changes
         | Watchman.Watchman_synchronous changes ->
-          Notifier_synchronous_changes changes
+          Notifier_synchronous_changes (concat_changes_list changes)
       in
       let notifier_async_reader () =
         Watchman.get_reader !watchman
@@ -136,7 +146,7 @@ let make_genv options config local_config handle =
           Watchman.get_changes_synchronously
             ~timeout:(local_config.SLC.watchman_synchronous_timeout) !watchman in
         watchman := watchman';
-        changes
+        concat_changes_list changes
       in
       HackEventLogger.set_use_watchman ();
       (* The initial watch-project command blocks until watchman's crawl is

@@ -2,31 +2,34 @@ module Watchman_changes_comparator = struct
   type t = Watchman.changes
   let to_string changes =
     let open Watchman in
+    let pushed_to_string = function
+      | Changed_merge_base (hg_rev, changes, clock) ->
+        let changes = String.concat ", " (SSet.elements changes) in
+        Printf.sprintf "Changed_merge_base(%s, %s, %s)"
+          hg_rev
+          changes
+          clock
+      | State_enter (name, json) ->
+        Printf.sprintf "State_enter(%s, %s)"
+          name
+          (Asserter.Hh_json_json_option_comparator.to_string json)
+      | State_leave (name, json) ->
+        Printf.sprintf "State_leave(%s, %s)"
+          name
+          (Asserter.Hh_json_json_option_comparator.to_string json)
+      | Files_changed s ->
+        Printf.sprintf
+          "Watchman_push files [%s]"
+          (String.concat ", " @@ SSet.elements s)
+    in
     match changes with
     | Watchman_unavailable ->
       "Watchman_unavailable"
-    | Watchman_pushed (Changed_merge_base (hg_rev, changes, clock)) ->
-      let changes = String.concat ", " (SSet.elements changes) in
-      Printf.sprintf "Changed_merge_base(%s, %s, %s)"
-        hg_rev
-        changes
-        clock
-    | Watchman_pushed (State_enter (name, json)) ->
-      Printf.sprintf "State_enter(%s, %s)"
-        name
-        (Asserter.Hh_json_json_option_comparator.to_string json)
-    | Watchman_pushed (State_leave (name, json)) ->
-      Printf.sprintf "State_leave(%s, %s)"
-        name
-        (Asserter.Hh_json_json_option_comparator.to_string json)
-    | Watchman_pushed (Files_changed s) ->
-      Printf.sprintf
-        "Watchman_push files [%s]"
-        (String.concat ", " @@ SSet.elements s)
+    | Watchman_pushed changes -> pushed_to_string changes
     | Watchman_synchronous s ->
       Printf.sprintf
         "Watchman_synchronous [%s]"
-        (String.concat ", " @@ SSet.elements s)
+        (String.concat ", " @@ List.map pushed_to_string s)
 
     let pushed_is_equal exp actual =
       let open Watchman in
@@ -57,7 +60,7 @@ module Watchman_changes_comparator = struct
       | Watchman_pushed exp, Watchman_pushed actual ->
         pushed_is_equal exp actual
       | Watchman_synchronous exp, Watchman_synchronous actual ->
-        SSet.equal exp actual
+        List.for_all2 pushed_is_equal exp actual
       | _ ->
         false
 
@@ -85,7 +88,7 @@ let test_mock_basic () =
   Asserter.String_asserter.assert_option_equals
     (Some "hello") result "init_returns";
   let expected_changes = Watchman.Watchman_synchronous
-    (SSet.of_list ["some_file.php"]) in
+    [Watchman.Files_changed (SSet.singleton "some_file.php")] in
   Watchman.Mocking.get_changes_returns expected_changes;
   let _, actual_changes = Watchman.get_changes
     (Watchman.Watchman_alive (Watchman.Testing.get_test_env ())) in

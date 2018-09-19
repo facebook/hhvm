@@ -243,7 +243,7 @@ and func_unnamed_body = {
   (* Unnamed AST for the function type params *)
   fub_tparams   : Ast.tparam list [@opaque];
   (* Namespace info *)
-  fub_namespace : Namespace_env.env [@opaque];
+  fub_namespace : nsenv;
 }
 
 and func_named_body = {
@@ -293,7 +293,7 @@ and class_ = {
   c_constructor    : constructor option;
   c_static_methods : static_method list;
   c_methods        : method_ list     ;
-  c_namespace      : Namespace_env.env [@opaque];
+  c_namespace      : nsenv;
   c_user_attributes: user_attribute list;
   c_enum           : enum_ option     ;
 }
@@ -342,6 +342,8 @@ and method_ = {
   m_external        : bool                ;  (* see f_external above for context *)
 }
 
+and nsenv = Namespace_env.env [@opaque]
+
 and typedef = {
   t_annotation : env_annotation;
   t_name : sid;
@@ -351,7 +353,7 @@ and typedef = {
   t_user_attributes : user_attribute list;
   t_mode : FileInfo.mode [@opaque];
   t_vis : typedef_visibility;
-  t_namespace : Namespace_env.env [@opaque];
+  t_namespace : nsenv;
 }
 
 and gconst = {
@@ -368,9 +370,9 @@ and fun_def = fun_
 and def =
   | Fun of fun_def
   | Class of class_
+  | Stmt of stmt
   | Typedef of typedef
   | Constant of gconst
-  | Stmt of stmt
 
 let expr_to_string expr =
   match expr with

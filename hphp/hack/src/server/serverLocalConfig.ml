@@ -47,6 +47,7 @@ type t = {
   prechecked_files : bool;
   predeclare_ide : bool;
   watchman_debug_logging : bool;
+  hg_aware : bool;
 }
 
 let default = {
@@ -82,6 +83,7 @@ let default = {
   prechecked_files = false;
   predeclare_ide = false;
   watchman_debug_logging = false;
+  hg_aware = false;
 }
 
 let path =
@@ -188,6 +190,8 @@ let load_ fn ~silent =
     ~default:default.predeclare_ide config in
   let watchman_debug_logging = bool_if_version "watchman_debug_logging"
     ~default:default.watchman_debug_logging config in
+  let hg_aware = bool_if_version "hg_aware"
+    ~default:default.hg_aware config in
   {
     use_watchman;
     watchman_init_timeout;
@@ -220,6 +224,7 @@ let load_ fn ~silent =
     prechecked_files;
     predeclare_ide;
     watchman_debug_logging;
+    hg_aware;
   }
 
 let load ~silent =

@@ -11,6 +11,7 @@ let set_use_watchman _ = ()
 let set_use_full_fidelity_parser _ = ()
 let set_lazy_incremental _ = ()
 let set_search_chunk_size _ = ()
+let set_changed_mergebase () = ()
 let bad_exit _ _ _ ~is_oom:_ = ()
 let init
   ~exit_on_parent_exit:_
@@ -112,6 +113,8 @@ let hg_cat_exn _ = ()
 let prechecked_update_rechecked _ = ()
 let prechecked_evaluate_init _ _ = ()
 let prechecked_evaluate_incremental _ _ = ()
+let check_mergebase_failed _ _ = ()
+let check_mergebase_success _ = ()
 
 let with_id ~stage:_ _ f = f ()
 let with_rechecked_stats _ _ _ f = f ()

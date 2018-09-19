@@ -15,7 +15,7 @@ module TV = Typed_value
 let from_attribute_base namespace attribute_id arguments =
   try
     let attribute_arguments =
-      Ast_constant_folder.literals_from_exprs_with_index namespace arguments
+      Ast_constant_folder.literals_from_exprs namespace arguments
     in
     let fq_id =
       let id = snd attribute_id in

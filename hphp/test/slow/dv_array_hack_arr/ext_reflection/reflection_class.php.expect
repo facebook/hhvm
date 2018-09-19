@@ -30,19 +30,15 @@ dict(1) {
 }
 dict(1) {
   ["__Attr1"]=>
-  array(2) {
-    [0]=>
+  vec(2) {
     int(3)
-    [1]=>
     int(4)
   }
 }
 dict(1) {
   ["__Attr1"]=>
-  array(2) {
-    [0]=>
+  vec(2) {
     int(3)
-    [1]=>
     int(4)
   }
 }

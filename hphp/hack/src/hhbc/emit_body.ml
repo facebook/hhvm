@@ -232,7 +232,6 @@ let emit_deprecation_warning scope = function
   | None -> empty
   | Some args ->
     (* Drop the indexes *)
-    let args = List.filteri ~f:(fun i _ -> i mod 2 <> 0) args in
     let strip_id id = SU.strip_global_ns (snd id) in
     let class_name, trait_instrs, concat_instruction =
       match Ast_scope.Scope.get_class scope with

@@ -487,3 +487,9 @@ let literals_from_exprs_with_index ns exprs =
       [TV.Int (Int64.of_int index); expr_to_typed_value ns (fold_expr ns e)])
   with
   | NotLiteral -> failwith "literals_from_exprs_with_index: not literal"
+
+let literals_from_exprs ns exprs =
+  try
+    List.map exprs ~f:(fun e -> expr_to_typed_value ns (fold_expr ns e))
+  with
+  | NotLiteral -> failwith "literals_from_exprs: not literal"

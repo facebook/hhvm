@@ -4,26 +4,22 @@ dict(1) {
 }
 dict(2) {
   ["A"]=>
-  array(2) {
-    [0]=>
+  vec(2) {
     int(1)
-    [1]=>
     int(2)
   }
   ["B"]=>
-  array(0) {
+  vec(0) {
   }
 }
 dict(2) {
   ["A"]=>
-  array(2) {
-    [0]=>
+  vec(2) {
     int(1)
-    [1]=>
     int(2)
   }
   ["B"]=>
-  array(0) {
+  vec(0) {
   }
 }
 vec(3) {
@@ -165,15 +161,15 @@ dict(0) {
 }
 dict(1) {
   ["Bing"]=>
-  array(0) {
+  vec(0) {
   }
 }
 dict(2) {
   ["Bing"]=>
-  array(0) {
+  vec(0) {
   }
   ["Bar"]=>
-  array(0) {
+  vec(0) {
   }
 }
 vec(1) {

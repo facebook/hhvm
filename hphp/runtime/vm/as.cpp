@@ -2143,12 +2143,14 @@ void parse_user_attribute(AsmState& as,
 
   as.in.expectWs(')');
 
-  if (!var.isPHPArray()) {
+  if (!var.isArray()) {
     as.error("user attribute values must be arrays");
   }
 
   userAttrs[name] =
-    make_tv<KindOfArray>(ArrayData::GetScalarArray(std::move(var)));
+    RuntimeOption::EvalHackArrDVArrs
+      ? make_tv<KindOfVec>(ArrayData::GetScalarArray(std::move(var)))
+      : make_tv<KindOfArray>(ArrayData::GetScalarArray(std::move(var)));
 }
 
 /*

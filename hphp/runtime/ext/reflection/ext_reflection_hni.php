@@ -270,10 +270,10 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * Gets all attributes
    *
-   * @return  array<arraykey, array<int, mixed>>
+   * @return  array<arraykey, array<mixed>>
    */
   <<__Native>>
-  final public function getAttributes(): darray<arraykey, array<mixed>>;
+  final public function getAttributes(): darray<arraykey, varray<mixed>>;
 
   /**
    * ( excerpt from
@@ -281,7 +281,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * Returns all attributes with given key.
    *
-   * @return  ?array<int, mixed>
+   * @return  ?array<mixed>
    */
   final public function getAttribute(string $name) {
     return hphp_array_idx($this->getAttributes(), $name, null);
@@ -296,7 +296,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    * @return  array<arraykey, array<int, mixed>>
    */
   public function getAttributesRecursive(
-  ): darray<arraykey, array<int, mixed>> {
+  ): darray<arraykey, varray<mixed>> {
     return $this->getAttributes();
   }
 
@@ -307,7 +307,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * Returns all attributes with given key from a class and its parents.
    *
-   * @return array<arraykey, array<int, mixed>>
+   * @return array<arraykey, array<mixed>>
    */
   public function getAttributeRecursive($name) {
     return $this->getAttribute($name);

@@ -76,7 +76,8 @@ let attribute_to_string a =
   let name = Hhas_attribute.name a in
   let args = Hhas_attribute.arguments a in
   let b = Acc.create () in
-  Printf.sprintf "\"%s\"(\"\"\"a:%n:{" name (List.length args / 2)
+  Printf.sprintf
+    "\"%s\"(\"\"\"%s:%n:{" name adata_varray_prefix (List.length args)
     |> Acc.add b;
   List.iter args ~f:(adata_to_buffer b);
   Acc.add b "}\"\"\")";

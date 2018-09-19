@@ -1823,6 +1823,42 @@ let class_type_designator_errors node =
     []
   | _ -> new_variable_errors node
 
+let rec check_reference node errors =
+  match syntax node with
+  | ScopeResolutionExpression { scope_resolution_name; _}
+    when token_kind scope_resolution_name = Some TokenKind.Name ->
+    make_error_from_node node
+      SyntaxError.reference_to_static_scope_resolution :: errors
+  | PrefixUnaryExpression { prefix_unary_operator; _ }
+    when token_kind prefix_unary_operator <> Some TokenKind.Dollar ->
+    make_error_from_node node SyntaxError.nested_unary_reference :: errors
+  | FunctionCallExpression _
+  | FunctionCallWithTypeArgumentsExpression _
+  | ListExpression _
+  | MemberSelectionExpression _
+  | ObjectCreationExpression _
+  | PipeVariableExpression _
+  | SafeMemberSelectionExpression _
+  | ScopeResolutionExpression _
+  | SubscriptExpression _
+  | VariableExpression _ -> errors
+  | Token token when Token.kind token = TokenKind.Variable -> errors
+  | PrefixUnaryExpression {
+    prefix_unary_operator = { syntax = Token token; _ };
+    prefix_unary_operand = {
+      syntax = PrefixUnaryExpression { prefix_unary_operator = op; _ };
+      _
+    }
+  } when Token.kind token = TokenKind.Dollar && token_kind op = Some TokenKind.Dollar ->
+    errors
+  | PrefixUnaryExpression {
+    prefix_unary_operator = { syntax = Token token; _ };
+    prefix_unary_operand = { syntax = BracedExpression _ | VariableExpression _; _ }
+  } when Token.kind token = TokenKind.Dollar -> errors
+  | ParenthesizedExpression { parenthesized_expression_expression; _ } ->
+    check_reference parenthesized_expression_expression errors
+  | _ -> make_error_from_node node SyntaxError.invalid_reference :: errors
+
 let expression_errors env namespace_name node parents errors =
   let is_decimal_or_hexadecimal_literal token =
     match Token.kind token with
@@ -2024,16 +2060,7 @@ let expression_errors env namespace_name node parents errors =
       errors
   | PrefixUnaryExpression { prefix_unary_operator; prefix_unary_operand }
     when token_kind prefix_unary_operator = Some TokenKind.Ampersand ->
-    begin match syntax prefix_unary_operand with
-      | ScopeResolutionExpression { scope_resolution_name; _}
-        when token_kind scope_resolution_name = Some TokenKind.Name ->
-        make_error_from_node node
-          SyntaxError.reference_to_static_scope_resolution :: errors
-      | PrefixUnaryExpression { prefix_unary_operator; _ }
-        when token_kind prefix_unary_operator <> Some TokenKind.Dollar ->
-        make_error_from_node node SyntaxError.nested_unary_reference :: errors
-      | _ -> errors
-    end
+    check_reference prefix_unary_operand errors
   | PrefixUnaryExpression { prefix_unary_operator; prefix_unary_operand }
     when token_kind prefix_unary_operator = Some TokenKind.Dollar ->
     let original_node = node in
@@ -3107,39 +3134,9 @@ let assignment_errors _env node errors =
   | BinaryExpression
     { binary_left_operand = loperand
     ; binary_operator = op
-    ; binary_right_operand = roperand
+    ; _
     } when does_op_create_write_on_left (token_kind op) ->
       let errors = check_lvalue loperand errors in
-      let errors = match syntax roperand with
-        | PrefixUnaryExpression
-          { prefix_unary_operator = op
-          ; prefix_unary_operand = operand
-          } when token_kind op = Some TokenKind.Ampersand ->
-            begin match syntax operand with
-            | FunctionCallExpression _
-            | FunctionCallWithTypeArgumentsExpression _
-            | MemberSelectionExpression _
-            | ObjectCreationExpression _
-            | SafeMemberSelectionExpression _
-            | ScopeResolutionExpression _
-            | SubscriptExpression _
-            | VariableExpression _ -> errors
-            | PrefixUnaryExpression {
-              prefix_unary_operator = { syntax = Token token; _ };
-              prefix_unary_operand = {
-                syntax = PrefixUnaryExpression { prefix_unary_operator = op; _ };
-                _
-              }
-            } when Token.kind token = TokenKind.Dollar && token_kind op = Some TokenKind.Dollar ->
-              errors
-            | PrefixUnaryExpression {
-              prefix_unary_operator = { syntax = Token token; _ };
-              prefix_unary_operand = { syntax = BracedExpression _ | VariableExpression _; _ }
-            } when Token.kind token = TokenKind.Dollar -> errors
-            | _ -> (make_error_from_node operand SyntaxError.incorrect_byref_assignment) :: errors
-            end
-        | _ -> errors
-      in
       errors
   | ForeachStatement
     { foreach_key = k;

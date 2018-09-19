@@ -1,1 +1,1 @@
-(3,7)-(3,38) Only variables, members, and function calls can be assigned by reference
+(3,7)-(3,38) Only variables, members, and the results of function calls can be used as references

@@ -146,6 +146,11 @@ type t = {
   *)
  tco_disallow_scrutinee_case_value_type_mismatch: bool;
 
+ (*
+  * Flag to disallow (string) casting non-Stringish values
+  *)
+ tco_disallow_string_cast_nonstringish : bool;
+
  (* Error codes for which we do not allow HH_FIXMEs *)
  ignored_fixme_codes : ISet.t;
 
@@ -176,6 +181,7 @@ val make :
   tco_disallow_implicit_returns_in_non_void_functions: bool ->
   tco_disallow_unset_on_varray: bool ->
   tco_disallow_scrutinee_case_value_type_mismatch: bool ->
+  tco_disallow_string_cast_nonstringish: bool ->
   ignored_fixme_codes: ISet.t ->
   forward_compatibility_level: ForwardCompatibilityLevel.t ->
   t
@@ -204,6 +210,7 @@ val tco_disable_primitive_refinement : t -> bool
 val tco_disallow_implicit_returns_in_non_void_functions : t -> bool
 val tco_disallow_unset_on_varray : t -> bool
 val tco_disallow_scrutinee_case_value_type_mismatch : t -> bool
+val tco_disallow_string_cast_nonstringish : t -> bool
 val default : t
 val make_permissive : t -> t
 val tco_experimental_instanceof : string

@@ -164,6 +164,7 @@ module type S = sig
   val private_class_meth : Pos.t -> Pos.t -> unit
   val protected_class_meth : Pos.t -> Pos.t -> unit
   val array_cast : Pos.t -> unit
+  val string_cast : Pos.t -> string -> unit
   val anonymous_recursive : Pos.t -> unit
   val static_outside_class : Pos.t -> unit
   val self_outside_class : Pos.t -> unit

@@ -90,6 +90,11 @@ let subtype env ty_sub ty_super =
     (fun () -> Typing_subtype.sub_type env ty_sub ty_super, true)
     (fun _ -> env, false)
 
+let is_stringish ?allow_mixed env ty =
+  Errors.try_
+    (fun () -> let _ = Typing_subtype.sub_string ?allow_mixed Pos.none env ty in true)
+    (fun _ -> false)
+
 let referenced_typeconsts env root ids =
   let root = hint_to_ty env root in
   let ety_env = {(Typing_phase.env_with_self env) with

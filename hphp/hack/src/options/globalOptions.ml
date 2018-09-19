@@ -32,6 +32,7 @@ type t = {
   tco_disallow_implicit_returns_in_non_void_functions : bool;
   tco_disallow_unset_on_varray: bool;
   tco_disallow_scrutinee_case_value_type_mismatch : bool;
+  tco_disallow_string_cast_nonstringish : bool;
   ignored_fixme_codes : ISet.t;
   forward_compatibility_level : ForwardCompatibilityLevel.t;
 } [@@deriving show]
@@ -198,6 +199,7 @@ let default = {
  tco_disallow_implicit_returns_in_non_void_functions = true;
  tco_disallow_unset_on_varray = false;
  tco_disallow_scrutinee_case_value_type_mismatch = false;
+ tco_disallow_string_cast_nonstringish = false;
  ignored_fixme_codes = Errors.default_ignored_fixme_codes;
  forward_compatibility_level = ForwardCompatibilityLevel.default;
 }
@@ -239,6 +241,7 @@ let make ~tco_assume_php
          ~tco_disallow_implicit_returns_in_non_void_functions
          ~tco_disallow_unset_on_varray
          ~tco_disallow_scrutinee_case_value_type_mismatch
+         ~tco_disallow_string_cast_nonstringish
          ~ignored_fixme_codes
          ~forward_compatibility_level = {
                    tco_assume_php;
@@ -266,6 +269,7 @@ let make ~tco_assume_php
                    tco_disallow_implicit_returns_in_non_void_functions;
                    tco_disallow_unset_on_varray;
                    tco_disallow_scrutinee_case_value_type_mismatch;
+                   tco_disallow_string_cast_nonstringish;
                    forward_compatibility_level;
         }
 let tco_assume_php t = t.tco_assume_php
@@ -301,5 +305,6 @@ let tco_disallow_implicit_returns_in_non_void_functions t =
 let tco_disallow_unset_on_varray t = t.tco_disallow_unset_on_varray
 let tco_disallow_scrutinee_case_value_type_mismatch t =
   t.tco_disallow_scrutinee_case_value_type_mismatch
+let tco_disallow_string_cast_nonstringish t = t.tco_disallow_string_cast_nonstringish
 let ignored_fixme_codes t = t.ignored_fixme_codes
 let forward_compatibility_level t = t.forward_compatibility_level

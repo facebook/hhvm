@@ -1948,6 +1948,13 @@ let array_cast pos =
     "(array) cast forbidden; arrays with unspecified \
     key and value types are not allowed"
 
+let string_cast pos ty =
+  add (Typing.err_code Typing.StringCast) pos @@
+    Printf.sprintf
+      "Cannot cast a value of type %s to string.\n\
+      Only Stringish objects and primitives may be used in a (string) cast."
+      ty
+
 let nullable_cast pos ty ty_pos =
   add_list (Typing.err_code Typing.NullableCast) [
     pos, "Casting from a nullable type is forbidden";

@@ -146,6 +146,12 @@ val is_fresh_generic_parameter: string -> bool
 val subtype: env -> Tast.ty -> Tast.ty -> env * bool
 (** Return {true} when the first type is a subtype of the second type. *)
 
+val is_stringish: ?allow_mixed:bool -> env -> Tast.ty -> bool
+(** Return {true} when the given type can be considered a subtype of Stringish
+    after resolving unbound type variables in the type (if any).
+    If {allow_mixed} is {true}, then mixed, nonnull, and abstract types with no
+    known concrete supertypes are considered Stringish. *)
+
 val referenced_typeconsts :
   env -> Aast.hint -> Aast.sid list -> (string * string * Pos.t) list
 (** Returns (class_name, tconst_name, tconst_reference_position) for each type

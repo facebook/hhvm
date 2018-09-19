@@ -1703,9 +1703,11 @@ let rec try_union env ty tyl =
     | _, _ -> ty' :: try_union env ty tyl'
 
 let rec sub_string
+  ?(allow_mixed = false)
   (p : Pos.Map.key)
   (env : Env.env)
   (ty2 : locl ty) : Env.env =
+  let sub_string = sub_string ~allow_mixed in
   let env, ety2 = Env.expand_type env ty2 in
   let fail () =
     TUtils.uerror (Reason.Rwitness p) (Tprim Nast.Tstring) (fst ety2) (snd ety2);
@@ -1723,6 +1725,8 @@ let rec sub_string
       env
   | (_, Tabstract _) ->
     begin match TUtils.get_concrete_supertypes env ty2 with
+      | _, [] when allow_mixed ->
+        env
       | _, [] ->
         fail ()
       | env, tyl ->
@@ -1745,6 +1749,8 @@ let rec sub_string
   | _, (Tany | Terr | Tdynamic) ->
     env (* Tany, Terr and Tdynamic are considered Stringish by default *)
   | _, Tobject -> env
+  | _, (Tmixed | Tnonnull) when allow_mixed ->
+    env
   | _, (Tmixed | Tnonnull | Tarraykind _ | Tvar _
     | Ttuple _ | Tanon (_, _) | Tfun _ | Tshape _) ->
   fail ()

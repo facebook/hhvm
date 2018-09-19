@@ -1,0 +1,3 @@
+File "string_cast2.php", line 8, characters 3-16:
+Cannot cast a value of type CNonStringish to string.
+Only Stringish objects and primitives may be used in a (string) cast. (Typing[4281])

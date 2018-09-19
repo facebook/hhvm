@@ -72,4 +72,5 @@ let disallow_implicit_returns_in_non_void_functions =
 let disallow_unset_on_varray = GlobalOptions.tco_disallow_unset_on_varray
 let disallow_scrutinee_case_value_type_mismatch =
   GlobalOptions.tco_disallow_scrutinee_case_value_type_mismatch
+let disallow_string_cast_nonstringish = GlobalOptions.tco_disallow_string_cast_nonstringish
 let forward_compatibility_level = GlobalOptions.forward_compatibility_level

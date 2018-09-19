@@ -274,6 +274,7 @@ let load config_filename options =
     (bool_ "disallow_unset_on_varray" ~default:false config)
     (bool_ "disallow_scrutinee_case_value_type_mismatch"
        ~default:true config)
+    (bool_ "disallow_string_cast_nonstringish" ~default:false config)
     (prepare_ignored_fixme_codes config)
     forward_compat_level
   in

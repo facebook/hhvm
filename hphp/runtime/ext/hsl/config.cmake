@@ -1,3 +1,10 @@
+HHVM_DEFINE_EXTENSION("hsl_io"
+  SOURCES
+    ext_hsl_io.cpp
+  SYSTEMLIB
+    ext_hsl_io.php
+)
+
 HHVM_DEFINE_EXTENSION("hsl_random"
   SOURCES
     ext_hsl_random.cpp

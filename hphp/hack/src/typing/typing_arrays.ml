@@ -69,13 +69,9 @@ class virtual downcast_tabstract_to_array_type_mapper = object(this)
   method virtual on_type : env -> locl ty -> result
 end
 
-let union env tyl =
-  let env, union_ty = Env.fresh_unresolved_type env in
-  let env = List.fold_left tyl ~init:env ~f:begin fun env ty ->
-    let env, ty = Typing_env.unbind env ty in
-    TUtils.sub_type env ty union_ty
-  end in
-  env, union_ty
+let union env tyl = match tyl with
+  | [] -> Env.fresh_unresolved_type env
+  | ty::tyl' -> List.fold_left_env env tyl' ~init:ty ~f:TUtils.union
 
 let union_keys = union
 

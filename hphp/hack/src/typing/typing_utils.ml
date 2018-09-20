@@ -78,6 +78,10 @@ type expand_typeconst =
 let (expand_typeconst_ref: expand_typeconst ref) = ref not_implemented
 let expand_typeconst x = !expand_typeconst_ref x
 
+type union = Env.env -> locl ty -> locl ty -> Env.env * locl ty
+let (union_ref: union ref) = ref not_implemented
+let union x = !union_ref x
+
 (* Convenience function for creating `this` types *)
 let this_of ty = Tabstract (AKdependent (`this, []), Some ty)
 

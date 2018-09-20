@@ -435,3 +435,5 @@ and union_reason r1 r2 =
     if r2 = Reason.none then r1 else
       if (Reason.compare r1 r2) <= 0 then r1
       else r2
+
+let () = Typing_utils.union_ref := union

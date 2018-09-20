@@ -254,7 +254,7 @@ module type Errors_modes = sig
 
 end
 
-(** Errors don't hace backtraces embedded. *)
+(** Errors don't have backtraces embedded. *)
 module NonTracingErrors: Errors_modes = struct
   type 'a error_ = error_code * 'a message list
   type error = Pos.t error_

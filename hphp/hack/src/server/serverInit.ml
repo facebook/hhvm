@@ -45,17 +45,17 @@ let load_mini_exn_to_string err = match err with
 type files_changed_while_parsing = Relative_path.Set.t
 
 type loaded_info =
- {
-   saved_state_fn : string;
-   corresponding_rev : Hg.rev;
-   mergebase_rev : Hg.svn_rev option;
+{
+  saved_state_fn : string;
+  corresponding_rev : Hg.rev;
+  mergebase_rev : Hg.svn_rev option;
   (* Files changed between saved state revision and current public merge base *)
-   dirty_master_files : Relative_path.Set.t;
+  dirty_master_files : Relative_path.Set.t;
   (* Files changed between public merge base and current revision *)
-   dirty_local_files : Relative_path.Set.t;
-   old_saved : FileInfo.saved_state_info;
-   state_distance: int option;
- }
+  dirty_local_files : Relative_path.Set.t;
+  old_saved : FileInfo.saved_state_info;
+  state_distance: int option;
+}
 
 type state_result = (loaded_info * files_changed_while_parsing, exn) result
 

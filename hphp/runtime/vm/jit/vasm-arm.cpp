@@ -1513,7 +1513,7 @@ void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
     lowerVptr(i.m, v);                                      \
     auto r0 = v.makeReg(), r1 = v.makeReg();                \
     v << load_opc{i.m, r0};                                 \
-    v << lower_opc{arg, r0, r1, i.sf};                      \
+    v << lower_opc{arg, r0, r1, i.sf, i.fl};                \
     v << store_opc{r1, i.m};                                \
   });                                                       \
 }
@@ -1537,7 +1537,7 @@ void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
       auto r0 = v.makeReg(), r1 = v.makeReg();              \
       v << movs_opc{i.s0, r0};                              \
       v << movs_opc{i.s1, r1};                              \
-      v << lower_opc{r0, r1, i.sf};                         \
+      v << lower_opc{r0, r1, i.sf, i.fl};                   \
     } else {                                                \
       v << i;                                               \
     }                                                       \
@@ -1555,7 +1555,7 @@ void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) { \
     if (i.fl != static_cast<Vflags>(StatusFlags::Z)) {      \
       auto r = v.makeReg();                                 \
       v << movs_opc{i.s1, r};                               \
-      v << lower_opc{i.s0, r, i.sf};                        \
+      v << lower_opc{i.s0, r, i.sf, i.fl};                  \
     } else {                                                \
       v << i;                                               \
     }                                                       \
@@ -1573,7 +1573,7 @@ void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) {      \
     lowerVptr(i.s1, v);                                          \
     auto r = e.allow_vreg() ? v.makeReg() : Vreg(PhysReg(rAsm)); \
     v << load_opc{i.s1, r};                                      \
-    v << lower_opc{i.s0, r, i.sf};                               \
+    v << lower_opc{i.s0, r, i.sf, i.fl};                         \
   });                                                            \
 }
 
@@ -1607,7 +1607,7 @@ void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) {       \
     auto r0 = e.allow_vreg() ? v.makeReg() : Vreg(PhysReg(rAsm)); \
     auto r1 = e.allow_vreg() ? v.makeReg() : Vreg(PhysReg(rAsm)); \
     v << load_opc{i.m, r0};                                       \
-    v << lower_opc{r0, r1, i.sf};                                 \
+    v << lower_opc{r0, r1, i.sf, i.fl};                           \
     v << store_opc{r1, i.m};                                      \
   });                                                             \
 }
@@ -1837,7 +1837,7 @@ void lower_cmpm(const VLS& e, cmpm& i, Vlabel b, size_t z) {
     Vreg tmp0 = i.s0;
     auto tmp1 = v.makeReg();
     v << load_op{i.s1, tmp1};
-    v << cmp_op{tmp0, tmp1, i.sf};
+    v << cmp_op{tmp0, tmp1, i.sf, i.fl};
   });
 }
 

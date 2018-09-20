@@ -2860,8 +2860,8 @@ let rec check_constant_expression errors node =
   | _ ->
     (make_error_from_node node SyntaxError.invalid_constant_initializer) :: errors
 
-let check_static_in_constant_decl constant_declarator_initializer  =
-  match syntax constant_declarator_initializer with
+let check_static_in_initializer initializer_ =
+  match syntax initializer_ with
   | SimpleInitializer {
     simple_initializer_value = {
       syntax = ScopeResolutionExpression {
@@ -2893,7 +2893,7 @@ let const_decl_errors _env node parents namespace_name names errors =
     let errors =
       check_constant_expression errors cd.constant_declarator_initializer in
     let errors =
-      produce_error errors check_static_in_constant_decl cd.constant_declarator_initializer
+      produce_error errors check_static_in_initializer cd.constant_declarator_initializer
       SyntaxError.parent_static_const_decl cd.constant_declarator_initializer in
     let errors =
       match syntax cd.constant_declarator_initializer with
@@ -3327,7 +3327,13 @@ let find_syntax_errors env =
       | XHPExpression _ ->
         let errors = xhp_errors env node errors in
         trait_require_clauses, names, errors
-      | PropertyDeclarator { property_initializer = init; _ }
+      | PropertyDeclarator { property_initializer = init; _ } ->
+        let errors =
+          produce_error errors check_static_in_initializer init
+          SyntaxError.parent_static_prop_decl init in
+        let errors = check_constant_expression errors init in
+        trait_require_clauses, names, errors
+
       | StaticDeclarator { static_initializer = init; _ }
       | XHPClassAttribute { xhp_attribute_decl_initializer = init; _ } ->
         let errors = check_constant_expression errors init in

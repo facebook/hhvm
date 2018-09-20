@@ -309,6 +309,7 @@ let double_variadic = "Parameter redundantly marked as variadic ('...')."
 let double_reference = "Parameter redundantly marked as reference ('&')."
 let global_in_const_decl = "Cannot have globals in constant declaration"
 let parent_static_const_decl = "Cannot use static or parent::class in constant declaration"
+let parent_static_prop_decl = "Cannot use static or parent::class in property declaration"
 
 let conflicting_trait_require_clauses ~name =
   "Conflicting requirements for '" ^ name ^ "'"

@@ -1,0 +1,2 @@
+File "parent_in_prop_decl.php", line 6, characters 24-37:
+Cannot use static or parent::class in property declaration (Parsing[1002])

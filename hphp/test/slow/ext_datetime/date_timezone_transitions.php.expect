@@ -57,14 +57,14 @@ array(1) {
     ["time"]=>
     string(24) "1901-12-13T20:45:52+0000"
     ["offset"]=>
-    int(21200)
+    int(19270)
     ["isdst"]=>
     bool(false)
     ["abbr"]=>
-    string(3) "HMT"
+    string(3) "MMT"
   }
 }
-array(5) {
+array(6) {
   [0]=>
   array(5) {
     ["ts"]=>
@@ -72,26 +72,39 @@ array(5) {
     ["time"]=>
     string(24) "1901-12-13T20:45:52+0000"
     ["offset"]=>
-    int(21200)
+    int(19270)
     ["isdst"]=>
     bool(false)
     ["abbr"]=>
-    string(3) "HMT"
+    string(3) "MMT"
   }
   [1]=>
   array(5) {
     ["ts"]=>
-    int(-891582800)
+    int(-2019705670)
     ["time"]=>
-    string(24) "1941-09-30T18:06:40+0000"
+    string(24) "1905-12-31T18:38:50+0000"
     ["offset"]=>
-    int(23400)
+    int(19800)
     ["isdst"]=>
     bool(false)
     ["abbr"]=>
-    string(4) "BURT"
+    string(3) "IST"
   }
   [2]=>
+  array(5) {
+    ["ts"]=>
+    int(-891581400)
+    ["time"]=>
+    string(24) "1941-09-30T18:30:00+0000"
+    ["offset"]=>
+    int(23400)
+    ["isdst"]=>
+    bool(true)
+    ["abbr"]=>
+    string(5) "+0630"
+  }
+  [3]=>
   array(5) {
     ["ts"]=>
     int(-872058600)
@@ -104,7 +117,7 @@ array(5) {
     ["abbr"]=>
     string(3) "IST"
   }
-  [3]=>
+  [4]=>
   array(5) {
     ["ts"]=>
     int(-862637400)
@@ -115,9 +128,9 @@ array(5) {
     ["isdst"]=>
     bool(true)
     ["abbr"]=>
-    string(3) "IST"
+    string(5) "+0630"
   }
-  [4]=>
+  [5]=>
   array(5) {
     ["ts"]=>
     int(-764145000)
@@ -171,7 +184,7 @@ array(2) {
     ["isdst"]=>
     bool(true)
     ["abbr"]=>
-    string(3) "IST"
+    string(5) "+0630"
   }
 }
 array(1) {
@@ -201,7 +214,7 @@ array(1) {
     ["isdst"]=>
     bool(true)
     ["abbr"]=>
-    string(3) "IST"
+    string(5) "+0630"
   }
 }
 array(1) {
@@ -216,7 +229,7 @@ array(1) {
     ["isdst"]=>
     bool(true)
     ["abbr"]=>
-    string(3) "IST"
+    string(5) "+0630"
   }
 }
 array(1) {
@@ -231,7 +244,7 @@ array(1) {
     ["isdst"]=>
     bool(true)
     ["abbr"]=>
-    string(3) "IST"
+    string(5) "+0630"
   }
 }
 array(1) {

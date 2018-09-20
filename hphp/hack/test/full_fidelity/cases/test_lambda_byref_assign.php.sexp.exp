@@ -1,5 +1,5 @@
-((script 565
-  ((list 565
+((script 566
+  ((list 566
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4
@@ -35,9 +35,20 @@
                    (() ";" 1 ((whitespace 1)))))))
                (() } 1 ())))))))))
        (() ";" 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
+     (expression_statement 22
+      ((binary_expression 21
+        ((variable 2 ((() variable 2 ((whitespace 1)))))
+         (() = 1 ((whitespace 1)))
+         (prefix_unary_expression 16
+          ((() & 1 ())
+           (safe_member_selection_expression 15
+            ((member_selection_expression 9
+              ((variable 4 ((() variable 4 ()))) (() -> 2 ()) (() name 3 ())))
+             (() ?-> 3 ()) (() name 3 ())))))))
+       (() ";" 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
      (expression_statement 9
       ((binary_expression 8
-        ((variable 2 ((() variable 2 ((whitespace 1)))))
+        ((variable 2 ((((end_of_line 1)) variable 2 ((whitespace 1)))))
          (() = 1 ((whitespace 1)))
          (prefix_unary_expression 3
           ((() & 1 ()) (variable 2 ((() variable 2 ())))))))
@@ -137,17 +148,6 @@
                   ((() $ 1 ())
                    (prefix_unary_expression 3
                     ((() $ 1 ()) (variable 2 ((() variable 2 ())))))))))))))))))
-       (() ";" 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
-     (expression_statement 22
-      ((binary_expression 21
-        ((variable 2 ((() variable 2 ((whitespace 1)))))
-         (() = 1 ((whitespace 1)))
-         (prefix_unary_expression 16
-          ((() & 1 ())
-           (safe_member_selection_expression 15
-            ((member_selection_expression 9
-              ((variable 4 ((() variable 4 ()))) (() -> 2 ()) (() name 3 ())))
-             (() ?-> 3 ()) (() name 3 ())))))))
        (() ";" 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
      (expression_statement 54
       ((binary_expression 53

@@ -1,6 +1,8 @@
 <?hh // strict
 
 $f = &() ==> { static $x; return $x; }; // error
+$x = &$foo->bar?->baz; // error
+
 $f = &$x; // legal
 $f = &my_func(); // legal
 $f = &$x->member; // legal
@@ -11,7 +13,6 @@ $f = &self::$mySelfThing; // legal
 $f = &$$s; // legal
 $f = &new C(); // legal
 $y = &$$$$$$x; // legal
-$x = &$foo->bar?->baz; // legal
 $y = $foo->x(function() use (&$foo) { return $foo; }); // legal
 $x = &($foo->bar()); // legal
 $x = &(Arrays::slice(self::NORMALIZED_REQUIRED_COLUMN_NAMES, 0)); // legal

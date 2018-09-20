@@ -3117,6 +3117,17 @@ let assignment_errors _env node errors =
          * a new syntax is added people need to consider whether the syntax
          * can be a valid lvalue or not. However, there are too many of them. *)
   in
+  let check_rvalue roperand errors : SyntaxError.t list =
+    match syntax roperand with
+    | PrefixUnaryExpression { prefix_unary_operator = op; prefix_unary_operand = operand }
+        when token_kind op = Some TokenKind.Ampersand ->
+      begin match syntax operand with
+      | SafeMemberSelectionExpression _ ->
+        append_errors roperand errors (SyntaxError.not_allowed_in_write "?->")
+      | _ -> errors
+      end
+    | _ -> errors
+  in
   match syntax node with
   | (PrefixUnaryExpression
     { prefix_unary_operator = op
@@ -3134,10 +3145,10 @@ let assignment_errors _env node errors =
   | BinaryExpression
     { binary_left_operand = loperand
     ; binary_operator = op
-    ; _
+    ; binary_right_operand = roperand
     } when does_op_create_write_on_left (token_kind op) ->
       let errors = check_lvalue loperand errors in
-      errors
+      check_rvalue roperand errors
   | ForeachStatement
     { foreach_key = k;
       foreach_value = v;

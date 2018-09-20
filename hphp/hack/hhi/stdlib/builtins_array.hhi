@@ -162,6 +162,7 @@ function array_values<Tv>(Container<Tv> $input): array<Tv>;
 function array_walk_recursive(&$input, $funcname, $userdata = null);
 <<__PHPStdLib>>
 function array_walk(&$input, $funcname, $userdata = null);
+<<__PHPStdLib>>
 function compact($varname, ...);
 <<__PHPStdLib>>
 function shuffle(&$array);

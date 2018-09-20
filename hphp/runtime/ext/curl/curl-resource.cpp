@@ -532,6 +532,20 @@ bool CurlResource::isLongOption(long option) {
 #if LIBCURL_VERSION_NUM >= 0x073700 /* Available since 7.55.0 */
     case CURLOPT_SOCKS5_AUTH:
 #endif
+#if LIBCURL_VERSION_NUM >= 0x073800 /* Available since 7.56.0 */
+    case CURLOPT_SSH_COMPRESSION:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073b00 /* Available since 7.59.0 */
+    case CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS:
+    case CURLOPT_TIMEVALUE_LARGE:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073c00 /* Available since 7.60.0 */
+    case CURLOPT_DNS_SHUFFLE_ADDRESSES:
+    case CURLOPT_HAPROXYPROTOCOL:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073d00 /* Available since 7.61.0 */
+    case CURLOPT_DISALLOW_USERNAME_IN_URL:
+#endif
 #if CURLOPT_MUTE != 0
     case CURLOPT_MUTE:
 #endif
@@ -663,6 +677,10 @@ bool CurlResource::isStringOption(long option) {
 #endif
 #if LIBCURL_VERSION_NUM >= 0x072d00 /* Available since 7.45.0 */
     case CURLOPT_DEFAULT_PROTOCOL:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073d00 /* Available since 7.61.0 */
+    case CURLOPT_PROXY_TLS13_CIPHERS:
+    case CURLOPT_TLS13_CIPHERS:
 #endif
       return true;
     default:

@@ -358,7 +358,7 @@ let facts_to_json md5 facts =
     type_aliases_json; ]
 
 let from_text php5_compat_mode hhvm_compat_mode force_hh enable_xhp s =
-  let env = Full_fidelity_parser_env.make ~php5_compat_mode ~hhvm_compat_mode
+  let env = Full_fidelity_parser_env.make ~codegen:true ~php5_compat_mode ~hhvm_compat_mode
     ~force_hh ~enable_xhp () in
   let text = Full_fidelity_source_text.make Relative_path.default s in
   let (parser, root) =

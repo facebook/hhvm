@@ -109,6 +109,10 @@ function f7() {
 
 function f6() {
   define('CO5', 1);
+
+  nEw stdclass; // make sure the parser can handle "weird" keywords
+  NeW stdclass;
+  NEW stdclass;
 }
 
 # Does not compile.

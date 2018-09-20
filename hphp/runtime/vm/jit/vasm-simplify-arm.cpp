@@ -87,27 +87,23 @@ bool simplify(Env& env, const cmovq& inst, Vlabel b, size_t i) {
 bool simplify(Env& env, const loadb& inst, Vlabel b, size_t i) {
   if (if_inst<Vinstr::movzbl>(env, b, i + 1, [&] (const movzbl& mov) {
       // loadb{s, tmp}; movzbl{tmp, d}; -> loadzbl{s, d};
-      if (!(env.use_counts[inst.d] == 1 &&
-            inst.d == mov.s)) return false;
+      if (!(env.use_counts[inst.d] == 1 && inst.d == mov.s)) return false;
 
       return simplify_impl(env, b, i, [&] (Vout& v) {
         v << loadzbl{inst.s, mov.d};
         return 2;
-      }); })
-    ) return true;
+      }); })) {
+      return true;
+    }
 
-  if (if_inst<Vinstr::movsbl>(env, b, i + 1, [&] (const movsbl& mov) {
+  return if_inst<Vinstr::movsbl>(env, b, i + 1, [&] (const movsbl& mov) {
       // loadb{s, tmp}; movsbl{tmp, d}; -> loadsbl{s, d};
-      if (!(env.use_counts[inst.d] == 1 &&
-            inst.d == mov.s)) return false;
+      if (!(env.use_counts[inst.d] == 1 && inst.d == mov.s)) return false;
 
       return simplify_impl(env, b, i, [&] (Vout& v) {
         v << loadsbl{inst.s, mov.d};
         return 2;
-      }); })
-  ) return true;
-
-  return false;
+      }); });
 }
 
 ///////////////////////////////////////////////////////////////////////////////

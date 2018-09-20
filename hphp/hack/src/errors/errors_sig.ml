@@ -551,6 +551,7 @@ module type S = sig
   val illegal_return_by_ref: Pos.t -> unit
   val illegal_by_ref_expr: Pos.t -> string -> unit
   val variadic_byref_param: Pos.t -> unit
+  val classname_const_instanceof: string -> Pos.t -> unit
   val reference_in_strict_mode: Pos.t -> unit
   val invalid_type_for_atmost_rx_as_rxfunc_parameter: Pos.t -> string -> unit
   val missing_annotation_for_atmost_rx_as_rxfunc_parameter: Pos.t -> unit

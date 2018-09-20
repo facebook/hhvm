@@ -1324,8 +1324,14 @@ and expr_ env p = function
       expr env e2;
       expr env e3;
       ()
-  | Assert (AE_assert e)
-  | InstanceOf (e, _) ->
+  | Assert (AE_assert e) ->
+      expr env e;
+      ()
+  | InstanceOf (e, e2) ->
+      (match e2 with
+      | _, CIexpr (_, Class_const ((_, CI ((_, classname), _)), (p, "class"))) ->
+        Errors.classname_const_instanceof (Utils.strip_ns classname) p;
+      | _ -> ());
       expr env e;
       ()
   | Is (e, h)

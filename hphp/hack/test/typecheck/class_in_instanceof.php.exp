@@ -1,0 +1,2 @@
+File "class_in_instanceof.php", line 4, characters 26-30:
+C::class is redundant in an instanceof, just write 'C'. (NastCheck[3076])

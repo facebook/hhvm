@@ -654,7 +654,10 @@ and emit_instanceof env pos e1 e2 =
       instr_instanceof ]
 
 and emit_as env pos e h is_nullable =
-  if is_nullable then begin
+  (* Creates equivalent to while avoiding double evaluation of e
+   * (e is h) ? e : (gather [e; else_block])
+   *)
+  let emit_as_if_then_else_block else_block =
     Local.scope @@ fun () ->
       let local = Local.get_unnamed_local () in
       let true_label = Label.next_regular () in
@@ -662,21 +665,25 @@ and emit_as env pos e h is_nullable =
       gather [
         emit_expr ~need_ref:false env e;
         instr_setl local;
-        (* (e is h) ? e : null *)
         emit_is env pos h;
         instr_jmpnz true_label;
-        instr_null;
-        instr_unsetl local;
+        instr_pushl local;
+        else_block;
         instr_jmp done_label;
         instr_label true_label;
         instr_pushl local;
         instr_label done_label;
       ]
-  end else begin
-    let ts_instrs, is_static = emit_reified_arg env h in
-    gather [
-      emit_expr ~need_ref:false env e;
-      begin if is_static then
+  in
+  if is_nullable then
+    (* (e is h) ? e : null *)
+    emit_as_if_then_else_block @@ gather [ instr_popc; instr_null ]
+  else
+    (* (e is h) ? e : (e as h) *)
+    emit_as_if_then_else_block @@
+      Local.scope @@ fun () -> begin
+        let ts_instrs, is_static = emit_reified_arg env h in
+        begin if is_static then
           let namespace = Emit_env.get_namespace env in
           let tv = Emit_type_constant.hint_to_type_constant
             ~tparams:[] ~namespace ~targ_map:SMap.empty h in
@@ -692,8 +699,8 @@ and emit_as env pos e h is_nullable =
             ts_instrs;
             instr_astypestructc DontResolve;
           ]
+        end
       end
-    ] end
 
 and emit_is env _pos h =
   let ts_instrs, is_static = emit_reified_arg env h in

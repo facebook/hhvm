@@ -1532,16 +1532,14 @@ Y(orlim, orqi, loadl, storel, i.s0, m)
 
 #define Y(vasm_opc, lower_opc, movs_opc)                                \
 void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) {             \
-  lower_impl(e.unit, b, z, [&] (Vout& v) {                              \
-    if (!i.fl || (i.fl & static_cast<Vflags>(StatusFlags::NV))) {       \
+  if (!i.fl || (i.fl & static_cast<Vflags>(StatusFlags::NV))) {         \
+    lower_impl(e.unit, b, z, [&] (Vout& v) {                            \
       auto r0 = v.makeReg(), r1 = v.makeReg();                          \
       v << movs_opc{i.s0, r0};                                          \
       v << movs_opc{i.s1, r1};                                          \
       v << lower_opc{r0, r1, i.sf, i.fl};                               \
-    } else {                                                            \
-      v << i;                                                           \
-    }                                                                   \
-  });                                                                   \
+    });                                                                 \
+  }                                                                     \
 }
 
 Y(cmpb, cmpl, movsbl)
@@ -1551,15 +1549,13 @@ Y(cmpw, cmpl, movswl)
 
 #define Y(vasm_opc, lower_opc, movs_opc)                                \
 void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) {             \
-  lower_impl(e.unit, b, z, [&] (Vout& v) {                              \
-    if (!i.fl || (i.fl & static_cast<Vflags>(StatusFlags::NV))) {       \
+  if (!i.fl || (i.fl & static_cast<Vflags>(StatusFlags::NV))) {         \
+    lower_impl(e.unit, b, z, [&] (Vout& v) {                            \
       auto r = v.makeReg();                                             \
       v << movs_opc{i.s1, r};                                           \
       v << lower_opc{i.s0, r, i.sf, i.fl};                              \
-    } else {                                                            \
-      v << i;                                                           \
-    }                                                                   \
-  });                                                                   \
+    });                                                                 \
+  }                                                                     \
 }
 
 Y(cmpbi, cmpli, movsbl)
@@ -1579,6 +1575,8 @@ void lower(const VLS& e, vasm_opc& i, Vlabel b, size_t z) {      \
 
 Y(cmpbim, cmpbi, loadb)
 Y(cmplim, cmpli, loadl)
+Y(cmpbm, cmpb, loadb)
+Y(cmpwm, cmpw, loadb)
 Y(cmplm, cmpl, loadl)
 Y(cmpqim, cmpqi, load)
 Y(cmpqm, cmpq, load)
@@ -1828,25 +1826,6 @@ void lower(const VLS& e, movtdq& i, Vlabel b, size_t z) {
   lower_impl(e.unit, b, z, [&] (Vout& v) {
     v << copy{i.s, i.d};
   });
-}
-
-template<typename load_op, typename cmp_op, typename cmpm>
-void lower_cmpm(const VLS& e, cmpm& i, Vlabel b, size_t z) {
-  lower_impl(e.unit, b, z, [&] (Vout& v) {
-    lowerVptr(i.s1, v);
-    Vreg tmp0 = i.s0;
-    auto tmp1 = v.makeReg();
-    v << load_op{i.s1, tmp1};
-    v << cmp_op{tmp0, tmp1, i.sf, i.fl};
-  });
-}
-
-void lower(const VLS& e, cmpbm& i, Vlabel b, size_t z) {
-  lower_cmpm<loadzbl, cmpl>(e, i, b, z);
-}
-
-void lower(const VLS& e, cmpwm& i, Vlabel b, size_t z) {
-  lower_cmpm<loadw, cmpl>(e, i, b, z);
 }
 
 #define Y(vasm_opc, lower_opc, load_opc, imm, zr, sz)   \

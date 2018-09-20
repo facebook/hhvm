@@ -766,6 +766,7 @@ bool simplify(Env& env, const cmpl& vcmp, Vlabel b, size_t i) {
 bool simplify(Env& env, const cmpw& vcmp, Vlabel b, size_t i) {
   if (flip_operands_helper(env, vcmp, b, i)) return true;
 
+  if (arch() == Arch::ARM) return false;
   if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
     return simplify_impl(env, b, i,
                          cmpwm { vcmp.s0, *vptr, vcmp.sf });
@@ -776,6 +777,7 @@ bool simplify(Env& env, const cmpw& vcmp, Vlabel b, size_t i) {
 bool simplify(Env& env, const cmpb& vcmp, Vlabel b, size_t i) {
   if (flip_operands_helper(env, vcmp, b, i)) return true;
 
+  if (arch() == Arch::ARM) return false;
   if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
     return simplify_impl(env, b, i,
                          cmpbm { vcmp.s0, *vptr, vcmp.sf });

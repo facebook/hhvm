@@ -177,6 +177,7 @@ int RuntimeOption::ServerHugeThreadCount = 0;
 int RuntimeOption::ServerHugeStackKb = 384;
 uint32_t RuntimeOption::ServerLoopSampleRate = 0;
 int RuntimeOption::ServerWarmupThrottleRequestCount = 0;
+int RuntimeOption::ServerWarmupThrottleThreadCount = 0;
 int RuntimeOption::ServerThreadDropCacheTimeoutSeconds = 0;
 int RuntimeOption::ServerThreadJobLIFOSwitchThreshold = INT_MAX;
 int RuntimeOption::ServerThreadJobMaxQueuingMilliSeconds = -1;
@@ -1598,6 +1599,9 @@ void RuntimeOption::Load(
     Config::Bind(ServerWarmupThrottleRequestCount, ini, config,
                  "Server.WarmupThrottleRequestCount",
                  ServerWarmupThrottleRequestCount);
+    Config::Bind(ServerWarmupThrottleThreadCount, ini, config,
+                 "Server.WarmupThrottleThreadCount",
+                 Process::GetCPUCount());
     Config::Bind(ServerThreadDropCacheTimeoutSeconds, ini, config,
                  "Server.ThreadDropCacheTimeoutSeconds", 0);
     if (Config::GetBool(ini, config, "Server.ThreadJobLIFO")) {

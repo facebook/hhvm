@@ -20,10 +20,10 @@
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/http-client.h"
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/server/admin-request-handler.h"
@@ -70,8 +70,6 @@ time_t HttpServer::OldServerStopTime;
 std::vector<ShutdownStat> HttpServer::ShutdownStats;
 folly::MicroSpinLock HttpServer::StatsLock;
 
-const int kNumProcessors = sysconf(_SC_NPROCESSORS_ONLN);
-
 static void on_kill(int sig) {
   signal(sig, SIG_DFL);
   // There is a small race condition here with HttpServer::reset in
@@ -95,11 +93,11 @@ HttpServer::HttpServer()
   LockProfiler::s_pfunc_profile = server_stats_log_mutex;
 
   int startingThreadCount = RuntimeOption::ServerThreadCount;
-  if (RuntimeOption::ServerWarmupThrottleRequestCount > 0 &&
-      RuntimeOption::ServerThreadCount > kNumProcessors) {
-    startingThreadCount = kNumProcessors;
+  if (RuntimeOption::ServerWarmupThrottleRequestCount > 0) {
+    startingThreadCount =
+      std::min(startingThreadCount,
+               RuntimeOption::ServerWarmupThrottleThreadCount);
   }
-
   auto serverFactory = ServerFactoryRegistry::getInstance()->getFactory
       (RuntimeOption::ServerType);
   const std::string address = RuntimeOption::ServerFileSocket.empty()

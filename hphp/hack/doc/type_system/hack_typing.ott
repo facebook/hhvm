@@ -70,6 +70,9 @@ grammar
 %% We need to know about three special interfaces for special subtyping
 %% rules for array types
 
+b :: 'bool_' ::= {{ com booleans }}
+  | True :: :: True
+  | False :: :: False
 
 N, C, I :: 'typename_' ::= {{ com named types }} {{ coq string }}
   | ` typeid ` :: :: User
@@ -1672,10 +1675,28 @@ C declares static x : t
 G ; K |- C :: x := t ,
 
 G ; K , skip : G' |- e1 : t1
+is_hack_collection t1 = False
 G' ; K , skip : G'' |- t1 [ e2 ] := t => t1'
 G'' ; K , skip : G''' |- e1 := t1' , U
--------------------------------------------------- :: indexing
+-------------------------------------------------- :: indexing_non_hack_collection
 G ; K , skip : G''' |- e1 [ e2 ] := t , U
+
+G ; K , skip : G' |- e1 : t1
+is_hack_collection t1 = True
+G' ; K , skip : G'' |- t1 [ e2 ] := t => t1'
+-------------------------------------------------- :: indexing_hack_collection
+G ; K , skip : G'' |- e1 [ e2 ] := t ,
+
+{{ com In the last rule, one could replace $[[t1']]$ with $[[t1]]$ because
+$$
+[[is_hack_collection t1 = True]]
+$$
+and
+$$
+[[G ; K |- t1 [ e2 ] := t => t1']]
+$$
+imply $[[G |- t1 == t1']]$ (the proof is by induction on the derivation of
+the former judgement). }}
 
 {{ com \subsection*{Array append} }}
 {{ com \addcontentsline{toc}{subsection}{Array append} }}
@@ -1809,6 +1830,61 @@ G |- u1 -> x := t
 G |- u2 -> x := t
 ------------------- :: union
 G |- (u1 | u2) -> x := t
+
+{{ com \subsection*{Hack collections} }}
+{{ com \addcontentsline{toc}{subsection}{Hack collections} }}
+
+defn
+  is_hack_collection t = b :: :: is_hack_collection :: 'is_hack_collection_'
+  {{ com Is type [[t]] a Hack collection? }}
+  {{ tex \kwd{is\_hack\_collection}\;[[t]] = [[b]] }}
+by
+
+-------------------------------------------------- :: vector
+is_hack_collection ( `Vector` < t > ) = True
+
+-------------------------------------------------- :: map
+is_hack_collection ( `Map` < t1 , t2 > ) = True
+
+-------------------------------------------------- :: set
+is_hack_collection ( `Set` < t > ) = True
+
+is_hack_collection t1 = True
+is_hack_collection t2 = True
+-------------------------------------------------- :: union_true
+is_hack_collection ( t1 | t2 ) = True
+
+-------------------------------------------------- :: vec
+is_hack_collection ( vec < t > ) = False
+
+-------------------------------------------------- :: dict
+is_hack_collection ( dict < t1 , t2 > ) = False
+
+-------------------------------------------------- :: keyset
+is_hack_collection ( keyset < t > ) = False
+
+-------------------------------------------------- :: vecarray
+is_hack_collection ( array < t > ) = False
+
+-------------------------------------------------- :: maparray
+is_hack_collection ( array < t1 , t2 > ) = False
+
+-------------------------------------------------- :: closed_shape
+is_hack_collection ( shape ( sft1 , .. , sftn ) ) = False
+
+-------------------------------------------------- :: open_shape
+is_hack_collection ( shape ( sft1 , .. , sftn , vardots ) ) = False
+
+-------------------------------------------------- :: tuple
+is_hack_collection ( t1 , .. , tn ) = False
+
+is_hack_collection t1 = False
+-------------------------------------------------- :: union_left_false
+is_hack_collection ( t1 | t2 ) = False
+
+is_hack_collection t2 = False
+-------------------------------------------------- :: union_right_false
+is_hack_collection ( t1 | t2 ) = False
 
 {{ com \section*{Statements} }}
 {{ com \addcontentsline{toc}{section}{Statements} }}

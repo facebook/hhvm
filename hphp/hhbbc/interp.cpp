@@ -1292,46 +1292,6 @@ std::pair<Type, bool> memoizeImplRetType(ISS& env) {
   return { retTy, effectFree };
 }
 
-/*
- * Propagate a more specific type to the taken/fall-through branches of a jmp
- * operation when the jmp is done because of a type test. Given a type `valTy`,
- * being tested against the type `testTy`, propagate `failTy` to the branch
- * representing test failure, and `testTy` to the branch representing test
- * success.
- */
-template<class JmpOp>
-void typeTestPropagate(ISS& env, Type valTy, Type testTy,
-                       Type failTy, const JmpOp& jmp) {
-  nothrow(env);
-  auto const takenOnSuccess = jmp.op == Op::JmpNZ;
-
-  if (valTy.subtypeOf(testTy) || failTy.subtypeOf(BBottom)) {
-    push(env, std::move(valTy));
-    if (takenOnSuccess) {
-      jmp_setdest(env, jmp.target);
-      env.propagate(jmp.target, &env.state);
-    } else {
-      jmp_nevertaken(env);
-    }
-    return;
-  }
-  if (!valTy.couldBe(testTy)) {
-    push(env, failTy);
-    if (takenOnSuccess) {
-      jmp_nevertaken(env);
-    } else {
-      jmp_setdest(env, jmp.target);
-      env.propagate(jmp.target, &env.state);
-    }
-    return;
-  }
-
-  push(env, std::move(takenOnSuccess ? testTy : failTy));
-  env.propagate(jmp.target, &env.state);
-  discard(env, 1);
-  push(env, std::move(takenOnSuccess ? failTy : testTy));
-}
-
 // After a StaticLocCheck, we know the local is bound on the true path,
 // and not changed on the false path.
 template<class JmpOp>

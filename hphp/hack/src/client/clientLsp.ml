@@ -414,13 +414,13 @@ let get_next_event (state: state) (client: Jsonrpc.queue) : event =
 (* respond_to_error: if we threw an exception during the handling of a request,
    report the exception to the client as the response to their request. *)
 let respond_to_error (event: event option) (e: exn) (stack: string): unit =
+  let open Error in
+  let e = error_of_exn e in
   match event with
-  | Some (Client_message c)
-    when c.Jsonrpc.kind = Jsonrpc.Request ->
+  | Some (Client_message c) when c.Jsonrpc.kind = Jsonrpc.Request ->
     print_error e stack |> Jsonrpc.respond to_stdout c
   | _ ->
-    let (code, message, _original_data) = get_error_info e in
-    Lsp_helpers.telemetry_error to_stdout (Printf.sprintf "%s [%i]\n%s" message code stack)
+    Lsp_helpers.telemetry_error to_stdout (Printf.sprintf "%s [%i]\n%s" e.message e.code stack)
 
 
 (* request_showMessage: pops up a dialog *)
@@ -1001,7 +1001,8 @@ let do_completion_legacy
     | Some c -> c.triggerKind == Invoked
   in
   let delimit_on_namespaces = true in
-  let command = ServerCommandTypes.IDE_AUTOCOMPLETE (filename, pos, delimit_on_namespaces, is_manually_invoked) in
+  let command = ServerCommandTypes.IDE_AUTOCOMPLETE
+    (filename, pos, delimit_on_namespaces, is_manually_invoked) in
   let result = rpc conn ref_unblocked_time command in
   make_ide_completion_response result filename
 
@@ -1707,7 +1708,7 @@ let rec connect (state: state) : state =
     (*   present but connection-attempt to the monitor times out - maybe it's *)
     (*   under DDOS, or maybe it's declining to answer new connections.       *)
     let stack = Printexc.get_backtrace () in
-    let (code, message, _data) = Lsp_fmt.get_error_info e in
+    let {Lsp.Error.code; message; _} = Lsp_fmt.error_of_exn e in
     let longMessage = Printf.sprintf "connect failed: %s [%i]\n%s" message code stack in
     let () = Lsp_helpers.telemetry_error to_stdout longMessage in
     let open Exit_status in

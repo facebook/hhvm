@@ -23,7 +23,7 @@
 #include <memory>
 #include <vector>
 #include "hphp/runtime/ext/soap/sdl.h"
-#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/util/lock.h"

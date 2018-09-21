@@ -16,7 +16,7 @@
 */
 
 #include "hphp/runtime/ext/extension-registry.h"
-#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/rds-local.h"
 
 #include <sys/shm.h>
 

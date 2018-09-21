@@ -36,6 +36,7 @@
 #include "hphp/util/type-scan.h"
 
 #include "hphp/runtime/base/rds-header.h"
+#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
@@ -638,6 +639,8 @@ void processInit() {
 
   s_persistentTrue.bind(Mode::Persistent);
   *s_persistentTrue = true;
+
+  RDSLocalDetail::iterate<RDSLocalDetail::RDSAllocInit>();
 }
 
 void requestInit() {
@@ -683,8 +686,11 @@ void flush() {
   if (jit::mcgen::retranslateAllEnabled() &&
       !jit::mcgen::retranslateAllPending()) {
     size_t offset = s_local_frontier & ~0xfff;
+    size_t protectedSpace = RDSLocalDetail::s_rds_local_usedbytes +
+                            (-RDSLocalDetail::s_rds_local_usedbytes & 0xfff);
     if (madvise(static_cast<char*>(tl_base) + offset,
-                s_local_base - offset, MADV_DONTNEED)) {
+                s_local_base - protectedSpace - offset,
+                MADV_DONTNEED)) {
       Logger::Warning("RDS local madvise failure: %s\n",
                       folly::errnoStr(errno).c_str());
     }
@@ -826,10 +832,16 @@ void threadInit(bool shouldRegister) {
   }
 
   header()->currentGen = 1;
+  if (shouldRegister) {
+    RDSLocalDetail::rl_hotSection.tl_base_copy = tl_base;
+    RDSLocalDetail::iterate<RDSLocalDetail::RDSInit>();
+  }
 }
 
 void threadExit(bool shouldUnregister) {
   if (shouldUnregister) {
+    RDSLocalDetail::iterate<RDSLocalDetail::RDSFini>();
+    RDSLocalDetail::rl_hotSection.tl_base_copy = nullptr;
     Guard g(s_tlBaseListLock);
     auto it = std::find(begin(s_tlBaseList), end(s_tlBaseList), tl_base);
     if (it != end(s_tlBaseList)) {

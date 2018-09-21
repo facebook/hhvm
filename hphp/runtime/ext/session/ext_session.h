@@ -20,7 +20,7 @@
 
 #include "hphp/runtime/ext/extension.h"
 #include <vector>
-#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
 
 namespace HPHP {

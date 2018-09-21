@@ -23,8 +23,9 @@
 #include <unicode/ucnv.h>
 #include <unicode/unistr.h>
 #include <unicode/ustring.h>
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/runtime/base/request-local.h"
 
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////

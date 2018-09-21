@@ -16,8 +16,9 @@
 */
 
 #include "hphp/runtime/ext/mbstring/ext_mbstring.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/ext/mbstring/php_unicode.h"
 #include "hphp/runtime/ext/mbstring/unicode_data.h"
 #include "hphp/runtime/ext/string/ext_string.h"

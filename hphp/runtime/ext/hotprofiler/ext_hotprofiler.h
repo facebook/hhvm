@@ -18,7 +18,8 @@
 #ifndef incl_HPHP_EXT_HOTPROFILER_H_
 #define incl_HPHP_EXT_HOTPROFILER_H_
 
-#include "hphp/runtime/base/request-local.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/rds-local.h"
 
 #ifdef __FreeBSD__
 #include <sys/param.h>

@@ -1,0 +1,6 @@
+File "assign_vector_bad.php", line 5, characters 3-12:
+Invalid assignment (Typing[4110])
+File "assign_vector_bad.php", line 4, characters 22-27:
+This is a string
+File "assign_vector_bad.php", line 5, characters 11-12:
+It is incompatible with an int

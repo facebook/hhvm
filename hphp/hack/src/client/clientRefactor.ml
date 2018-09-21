@@ -55,17 +55,18 @@ let write_patches_to_buffer buf original_content patch_list =
   List.iter patch_list begin fun res ->
     let pos = get_pos res in
     let char_start, char_end = Pos.info_raw pos in
-    (* char_end will point to the last character so we need to increment it by 1 *)
-    let next_char = char_end + 1 in
     add_original_content char_start;
     match res with
       | ServerRefactorTypes.Insert patch ->
           Buffer.add_string buf patch.ServerRefactorTypes.text
       | ServerRefactorTypes.Replace patch ->
           Buffer.add_string buf patch.ServerRefactorTypes.text;
-          i := next_char
+          i := char_end
       | ServerRefactorTypes.Remove _ ->
-          i := next_char
+          (* We only expect `Remove` to be used with HH_FIXMEs, in which case
+           * char_end will point to the last character. Consequently, we should
+           * increment it by 1 *)
+          i := char_end + 1
   end;
   add_original_content len
 

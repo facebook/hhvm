@@ -321,7 +321,7 @@ struct VxlsContext {
         tmp = reg::xmm15; // reserve xmm15 to break shuffle cycles
         break;
       case Arch::ARM:
-        tmp = vixl::x17; // also used as tmp1 by MacroAssembler
+        tmp = vixl::d31;
         break;
       case Arch::PPC64:
         tmp = ppc64_asm::reg::v29;

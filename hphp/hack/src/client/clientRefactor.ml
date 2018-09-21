@@ -41,12 +41,13 @@ let write_string_to_file fn str =
 
 let write_patches_to_buffer buf original_content patch_list =
   let i = ref 0 in
+  let len = String.length original_content in
   (* advances to requested character and adds the original content
      from the current position to that point to the buffer *)
   let add_original_content j =
     if j <= !i then () else
-    let size = (j - !i + 1) in
-    let size = min (-(!i) + String.length original_content) size in
+    let size = (j - !i) in
+    let size = min (-(!i) + len) size in
     let str_to_write = String.sub original_content !i size in
     Buffer.add_string buf str_to_write;
     i := !i + size
@@ -54,17 +55,19 @@ let write_patches_to_buffer buf original_content patch_list =
   List.iter patch_list begin fun res ->
     let pos = get_pos res in
     let char_start, char_end = Pos.info_raw pos in
-    add_original_content (char_start - 1);
+    (* char_end will point to the last character so we need to increment it by 1 *)
+    let next_char = char_end + 1 in
+    add_original_content char_start;
     match res with
       | ServerRefactorTypes.Insert patch ->
           Buffer.add_string buf patch.ServerRefactorTypes.text
       | ServerRefactorTypes.Replace patch ->
           Buffer.add_string buf patch.ServerRefactorTypes.text;
-          i := char_end
+          i := next_char
       | ServerRefactorTypes.Remove _ ->
-          i := char_end
+          i := next_char
   end;
-  add_original_content (String.length original_content - 1)
+  add_original_content len
 
 let apply_patches_to_file fn patch_list =
   let old_content = Sys_utils.cat fn in

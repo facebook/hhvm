@@ -3137,7 +3137,7 @@ let scour_comments
            let txt = Trivia.text t in
            try
              ignore (search_forward ignore_error txt 0);
-             let p = pos_of_offset (Trivia.start_offset t) (Pos.start_cnum pos) in
+             let p = pos_of_offset (Trivia.start_offset t) (Trivia.end_offset t) in
              let code = int_of_string (matched_group 2 txt) in
              let ignores = IMap.add code p ignores in
              cmts, IMap.add line ignores fm

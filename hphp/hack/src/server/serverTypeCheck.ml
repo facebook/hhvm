@@ -802,8 +802,9 @@ end = functor(CheckKind:CheckKindType) -> struct
     then env.editor_open_files
     else Relative_path.Set.empty in
     let interrupt = get_interrupt_config genv env in
+    let memory_cap = genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb in
     let errorl', env , cancelled = Typing_check_service.go_with_interrupt
-      genv.workers env.tcopt dynamic_view_files fast ~interrupt in
+      genv.workers env.tcopt dynamic_view_files fast ~interrupt ~memory_cap in
     let errorl' = match ServerArgs.ai_mode genv.options with
       | None -> errorl'
       | Some ai_opt ->

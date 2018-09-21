@@ -342,7 +342,8 @@ module ServerInitCommon = struct
       let logstring = Printf.sprintf "Type-check %d files" count in
       Hh_logger.log "Begin %s" logstring;
       let errorl =
-        Typing_check_service.go genv.workers env.tcopt Relative_path.Set.empty fast in
+        let memory_cap = genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb in
+        Typing_check_service.go genv.workers env.tcopt Relative_path.Set.empty fast ~memory_cap in
       let hs = SharedMem.heap_size () in
       Hh_logger.log "Heap size: %d" hs;
       HackEventLogger.type_check_end count count t;

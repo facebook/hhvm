@@ -52,6 +52,11 @@ module Getters = struct
   let int_ key ~default config =
     Option.value_map (SMap.get key config) ~default ~f:int_of_string
 
+  let int_opt key config =
+    match SMap.get key config with
+    | Some s -> int_of_string_opt s
+    | None -> None
+
   let bool_ key ~default config =
     Option.value_map (SMap.get key config) ~default ~f:bool_of_string
 

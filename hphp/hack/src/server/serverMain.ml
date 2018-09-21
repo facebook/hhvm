@@ -824,6 +824,7 @@ let setup_server ~informant_managed ~monitor_pid options handle =
     interrupt_on_watchman;
     interrupt_on_client;
     predeclare_ide;
+    max_typechecker_worker_memory_mb;
     _
   } as local_config = local_config in
   List.iter (ServerConfig.ignored_paths config) ~f:FilesToIgnore.ignore_path;
@@ -845,7 +846,8 @@ let setup_server ~informant_managed ~monitor_pid options handle =
     ~interrupt_on_watchman
     ~interrupt_on_client
     ~prechecked_files
-    ~predeclare_ide;
+    ~predeclare_ide
+    ~max_typechecker_worker_memory_mb;
   let root_s = Path.to_string root in
   let check_mode = ServerArgs.check_mode options in
   if not check_mode && Sys_utils.is_nfs root_s && not enable_on_nfs then begin

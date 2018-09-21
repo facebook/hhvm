@@ -27,12 +27,14 @@ let init
   ~interrupt_on_client:_
   ~prechecked_files:_
   ~predeclare_ide:_
+  ~max_typechecker_worker_memory_mb:_
   = ()
 let init_monitor
   ?exit_on_parent_exit:_
   ~search_chunk_size:_
   ~prechecked_files:_
   ~predeclare_ide:_
+  ~max_typechecker_worker_memory_mb:_
   _ _ _ _ = ()
 let init_end ~state_distance:_ ~approach_name:_ ~init_error:_ _ _ = ()
 let starting_first_server _ = ()

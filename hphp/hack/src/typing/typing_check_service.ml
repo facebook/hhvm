@@ -7,10 +7,18 @@
  *
  *)
 
+module Hack_bucket = Bucket
 open Core_kernel
+module Bucket = Hack_bucket
 
 module Env = Typing_env
 module TLazyHeap = Typing_lazy_heap
+
+type file = Relative_path.t * FileInfo.names
+type progress = {
+  checked_files: file list;
+  unchecked_files: file list;
+}
 
 (*****************************************************************************)
 (* The place where we store the shared data in cache *)
@@ -91,7 +99,7 @@ let check_file dynamic_view_files opts errors (fn, file_infos) =
   end in
   Errors.merge errors' errors
 
-let check_files dynamic_view_files opts errors fnl  =
+let check_files dynamic_view_files opts errors progress ~memory_cap =
   SharedMem.invalidate_caches();
   File_heap.FileHeap.LocalChanges.push_stack ();
   Parser_heap.ParserHeap.LocalChanges.push_stack ();
@@ -103,37 +111,117 @@ let check_files dynamic_view_files opts errors fnl  =
       let t' = Sys.time () in
       let duration = t' -. t in
       let filepath = Relative_path.suffix (fst fn) in
-        TypingLogger.log_typing_time duration filepath;
-        !Utils.log (Printf.sprintf "%f %s [type-check]" duration filepath);
-        result)
-    else check_file dynamic_view_files opts in
-  let errors = List.fold_left fnl ~f:check_file ~init:errors in
+      TypingLogger.log_typing_time duration filepath;
+      !Utils.log (Printf.sprintf "%f %s [type-check]" duration filepath);
+      result)
+    else check_file dynamic_view_files opts
+  in
+  let rec check_or_exit errors progress =
+    match progress.unchecked_files with
+    | fn :: fns ->
+      let errors = check_file errors fn in
+      let progress = {
+        checked_files = fn :: progress.checked_files;
+        unchecked_files = fns;
+      } in
+      (* Use [quick_stat] instead of [stat] in order to avoid walking the major
+         heap on each call, and just check the major heap because the minor
+         heap is a) small and b) fixed size. *)
+      let should_exit = match memory_cap with
+        | None -> false
+        | Some max_heap_mb ->
+          let heap_size_mb = Gc.((quick_stat ()).Stat.heap_words) * 8 / 1024 / 1024 in
+          if heap_size_mb > max_heap_mb then
+            let error_msg =
+              Printf.sprintf "Exiting worker due to memory pressure: %d MB" heap_size_mb
+            in
+            !Utils.log error_msg;
+            true
+          else false
+      in
+      if should_exit then (errors, progress) else check_or_exit errors progress
+    | [] -> errors, progress
+  in
+  let result = check_or_exit errors progress in
   TypingLogger.flush_buffer ();
   Parser_heap.ParserHeap.LocalChanges.pop_stack ();
   File_heap.FileHeap.LocalChanges.pop_stack ();
-  errors
+  result
 
-let load_and_check_files dynamic_view_files acc fnl =
+let load_and_check_files dynamic_view_files errors progress ~memory_cap =
   let opts = TypeCheckStore.load() in
-  check_files dynamic_view_files opts acc fnl
+  check_files dynamic_view_files opts errors progress ~memory_cap
 
 (*****************************************************************************)
 (* Let's go! That's where the action is *)
 (*****************************************************************************)
 
-let parallel_check dynamic_view_files workers opts fnl ~interrupt =
+(** Merge the results from multiple workers.
+
+    We don't really care about which files are left unchecked since we use
+    (gasp) mutation to track that, so combine the errors but always return an
+    empty list for the list of unchecked files. *)
+let merge files_to_check files_in_progress files_checked (errors, results) acc =
+  files_to_check := results.unchecked_files @ !files_to_check;
+  List.iter ~f:(Hash_set.Poly.remove files_in_progress) results.checked_files;
+  files_checked := results.checked_files @ !files_checked;
+  Decl_service.merge_lazy_decl errors acc
+
+let next workers ~num_jobs files_to_check files_in_progress =
+  let max_size = Bucket.max_size () in
+  let num_workers = (match workers with Some w -> List.length w | None -> 1) in
+  let bucket_size = Bucket.calculate_bucket_size ~num_jobs ~num_workers ~max_size in
+  fun () ->
+    match !files_to_check with
+    | [] when Hash_set.Poly.is_empty files_in_progress -> Bucket.Done
+    | [] -> Bucket.Wait
+    | jobs ->
+      let unchecked_files, remaining_jobs = List.split_n jobs bucket_size in
+
+      (* Update our shared mutable state, because hey: it's not like we're
+         writing OCaml or anything. *)
+      files_to_check := remaining_jobs;
+      List.iter ~f:(Hash_set.Poly.add files_in_progress) unchecked_files;
+      Bucket.Job { checked_files = []; unchecked_files }
+
+let on_cancelled next files_to_check files_in_progress =
+  fun () ->
+    (* The size of [files_to_check] is bounded only by repo size, but
+      [files_in_progress] is capped at [(worker count) * (max bucket size)]. *)
+    files_to_check := (Hash_set.Poly.to_list files_in_progress) @ !files_to_check;
+    let rec add_next acc =
+      match next () with
+      | Bucket.Job j -> add_next (j :: acc)
+      | Bucket.Wait
+      | Bucket.Done -> acc
+    in
+    add_next []
+
+let parallel_check dynamic_view_files workers opts fnl ~interrupt ~memory_cap =
   TypeCheckStore.store opts;
-  let result, env, cancelled =
+  let files_to_check = ref fnl in
+  let files_in_progress = Hash_set.Poly.create () in
+  let files_checked = ref [] in
+  let num_jobs = List.length fnl in
+  let next = next ~num_jobs workers files_to_check files_in_progress in
+  let errors, env, cancelled =
     MultiWorker.call_with_interrupt
       workers
-      ~job:(load_and_check_files dynamic_view_files)
+      ~job:(load_and_check_files dynamic_view_files ~memory_cap)
       ~neutral
-      ~merge:Decl_service.merge_lazy_decl
-      ~next:(MultiWorker.next workers fnl)
+      ~merge:(merge files_to_check files_in_progress files_checked)
+      ~next
+      ~on_cancelled:(on_cancelled next files_to_check files_in_progress)
       ~interrupt
   in
   TypeCheckStore.clear();
-  result, env, List.concat cancelled
+  let sort =
+    List.sort ~compare:(fun (path1, _) (path2, _) -> Relative_path.S.compare path1 path2)
+  in
+  (* TODO: (wipi) Remove this check and [files_checked] after we have more
+  confidence that the worker memory cap logic is well-formed. *)
+  if cancelled = [] && Option.is_some memory_cap then assert (sort fnl = sort !files_checked);
+  errors, env, List.concat (cancelled |> List.map ~f:(fun progress -> progress.unchecked_files))
 
 type 'a job = Relative_path.t * 'a
 type ('a, 'b, 'c) job_result = 'b * 'c * 'a job list
@@ -174,16 +262,19 @@ module Mocking =
   else (module NoMocking : Mocking_sig)
 ))
 
-let go_with_interrupt workers opts dynamic_view_files fast ~interrupt =
+let go_with_interrupt workers opts dynamic_view_files fast ~interrupt ~memory_cap =
   let fnl = Relative_path.Map.elements fast in
   Mocking.with_test_mocking fnl @@ fun fnl ->
     if List.length fnl < 10
-    then check_files dynamic_view_files opts neutral fnl, interrupt.MultiThreadedCall.env, []
-    else parallel_check dynamic_view_files workers opts fnl ~interrupt
+    then
+      let progress = { checked_files = []; unchecked_files = fnl } in
+      let (errors, _) = check_files dynamic_view_files opts neutral progress ~memory_cap:None in
+      errors, interrupt.MultiThreadedCall.env, []
+    else parallel_check dynamic_view_files workers opts fnl ~interrupt ~memory_cap
 
-let go workers opts dynamic_view_files fast =
+let go workers opts dynamic_view_files fast ~memory_cap =
   let interrupt = MultiThreadedCall.no_interrupt () in
   let res, (), cancelled =
-    go_with_interrupt workers opts dynamic_view_files fast interrupt in
+    go_with_interrupt workers opts dynamic_view_files fast ~interrupt ~memory_cap in
   assert (cancelled = []);
   res

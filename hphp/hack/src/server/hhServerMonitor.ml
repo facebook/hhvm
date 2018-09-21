@@ -45,15 +45,21 @@ let monitor_daemon_main (options: ServerArgs.options) =
   let config, local_config  =
     ServerConfig.(load filename options) in
   if Sys_utils.is_test_mode ()
-  then EventLogger.init ~exit_on_parent_exit
+  then begin EventLogger.init ~exit_on_parent_exit
     EventLogger.Event_logger_fake 0.0
-  else HackEventLogger.init_monitor
-    ~exit_on_parent_exit
-    ~search_chunk_size:local_config.ServerLocalConfig.search_chunk_size
-    ~prechecked_files:(ServerPrecheckedFiles.should_use options local_config)
-    ~predeclare_ide:local_config.ServerLocalConfig.predeclare_ide
-    (ServerArgs.root options) init_id
-    (Unix.gettimeofday ()) false;
+  end else begin
+    let max_typechecker_worker_memory_mb =
+      local_config.ServerLocalConfig.max_typechecker_worker_memory_mb
+    in
+    HackEventLogger.init_monitor
+      ~exit_on_parent_exit
+      ~search_chunk_size:local_config.ServerLocalConfig.search_chunk_size
+      ~prechecked_files:(ServerPrecheckedFiles.should_use options local_config)
+      ~predeclare_ide:local_config.ServerLocalConfig.predeclare_ide
+      ~max_typechecker_worker_memory_mb
+      (ServerArgs.root options) init_id
+      (Unix.gettimeofday ()) false
+  end;
   Utils.profile := ServerArgs.profile_log options;
   Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
 

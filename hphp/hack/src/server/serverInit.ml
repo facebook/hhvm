@@ -769,19 +769,12 @@ let ai_check genv files_info env t =
       List.map ~f:(fun k -> (k, Errors.get_failed_files env.errorl k))
           [ Errors.Parsing; Errors.Decl; Errors.Naming; Errors.Typing ]
     in
-    let phase_to_string = function  (* Not exposed in Errors module *)
-      | Errors.Init -> "Init"
-      | Errors.Parsing -> "Parsing"
-      | Errors.Naming -> "Naming"
-      | Errors.Decl -> "Decl"
-      | Errors.Typing -> "Typing"
-    in
     let all_passed = List.for_all failures
         ~f:(fun (k, m) ->
           if Relative_path.Set.is_empty m then true
           else begin
             Hh_logger.log "Cannot run AI because of errors in source in phase %s"
-              (phase_to_string k);
+              (Errors.phase_to_string k);
             false
           end)
     in

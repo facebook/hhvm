@@ -46,6 +46,7 @@ module type S = sig
   val make_error : int -> (Pos.t * string) list -> error
 
   val error_code_to_string : int -> string
+  val phase_to_string : phase -> string
 
   val internal_error : Pos.t -> string -> unit
   val unimplemented_feature : Pos.t -> string -> unit

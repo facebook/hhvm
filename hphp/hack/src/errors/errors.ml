@@ -186,6 +186,14 @@ module Common = struct
     let error_number = Printf.sprintf "%04d" error_code in
     error_kind^"["^error_number^"]"
 
+  let phase_to_string (phase: error_phase) : string =
+    match phase with
+    | Init -> "Init"
+    | Parsing -> "Parsing"
+    | Naming -> "Naming"
+    | Decl -> "Decl"
+    | Typing -> "Typing"
+
   let sort get_pos err =
     List.sort ~cmp:begin fun x y ->
       Pos.compare (get_pos x) (get_pos y)
@@ -676,6 +684,8 @@ let get_failed_files err phase =
 (*****************************************************************************)
 
 let error_code_to_string = Common.error_code_to_string
+
+let phase_to_string = Common.phase_to_string
 
 let internal_error pos msg =
   add 0 pos ("Internal error: "^msg)

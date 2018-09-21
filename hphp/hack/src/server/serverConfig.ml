@@ -235,6 +235,19 @@ let load config_filename options =
   let config_hash, config = Config_file.parse (Relative_path.to_absolute config_filename) in
   process_untrusted_mode config;
   let local_config = ServerLocalConfig.load ~silent:false in
+  let local_config =
+    if ServerArgs.ai_mode options <> None then
+      ServerLocalConfig.{
+        local_config with
+        use_watchman = false;
+        watchman_subscribe = false;
+        interrupt_on_watchman = false;
+        interrupt_on_client = false;
+        trace_parsing = false;
+      }
+    else
+      local_config
+  in
   let version = SMap.get config "version" in
   let ignored_paths = process_ignored_paths config in
   let extra_paths = process_extra_paths config in

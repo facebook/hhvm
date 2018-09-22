@@ -7,7 +7,6 @@ import json
 import os
 import shlex
 import stat
-import tempfile
 import time
 import unittest
 
@@ -16,7 +15,11 @@ import hierarchy_tests
 
 from hh_paths import hh_client
 
-from mini_state_test_driver import MiniStateTestDriver, MiniStateClassicTestDriver
+from mini_state_test_driver import (
+    MiniStateTestDriver,
+    MiniStateClassicTestDriver,
+    SaveStateResult)
+
 
 def write_echo_json(f, obj):
     f.write("echo %s\n" % shlex.quote(json.dumps(obj)))
@@ -141,25 +144,30 @@ return A::foo();
 }
             """)
 
-    def change_return_type_on_base_class(self, filename):
-        # Change the return type from into to string
+    def change_return_type_on_base_class(
+            self,
+            filename: str,
+            type: str = "string",
+            value: str = "\"Hello\""):
+        # Change the return type
         with open(filename, 'w') as f:
             f.write("""<?hh // strict
 
 class B {
 
-public static function foo () : string {
-  return "hello";
+public static function foo () : %s {
+  return %s;
 }
 }
-            """)
+            """ % (type, value))
 
     def test_incrementally_generated_saved_state(self):
-        old_saved_state = self.dump_saved_state()
+        old_saved_state: SaveStateResult = self.dump_saved_state()
         new_file = os.path.join(self.repo_dir, 'class_3b.php')
         self.add_file_that_depends_on_class_a(new_file)
         self.check_cmd(['No errors!'], assert_loaded_mini_state=False)
-        new_saved_state = self.dump_saved_state(assert_edges_added=True)
+        new_saved_state: SaveStateResult = (
+            self.dump_saved_state(assert_edges_added=True))
         self.change_return_type_on_base_class(
             os.path.join(self.repo_dir, 'class_1.php'))
         self.check_cmd([
@@ -173,7 +181,9 @@ public static function foo () : string {
         self.proc_call([hh_client, 'stop', self.repo_dir])
         # Start server with the original saved state. Will be missing the
         # second error because of the missing edge.
-        self.start_hh_server(changed_files=['class_1.php'], saved_state_path=old_saved_state)
+        self.start_hh_server(
+            changed_files=['class_1.php'],
+            saved_state_path=old_saved_state.path)
         self.check_cmd([
             '{root}class_3.php:5:12,19: Invalid return type (Typing[4110])',
             '  {root}class_3.php:4:28,30: This is an int',
@@ -182,7 +192,8 @@ public static function foo () : string {
         self.proc_call([hh_client, 'stop', self.repo_dir])
         # Start another server with the new saved state. Will have both errors.
         self.start_hh_server(
-            changed_files=['class_1.php'], saved_state_path=new_saved_state)
+            changed_files=['class_1.php'],
+            saved_state_path=new_saved_state.path)
         self.check_cmd([
             '{root}class_3.php:5:12,19: Invalid return type (Typing[4110])',
             '  {root}class_3.php:4:28,30: This is an int',
@@ -217,7 +228,8 @@ public static function foo () : string {
         # Start server with the original saved state. Will be missing the
         # second error because of the missing edge.
         self.start_hh_server(
-            changed_files=['class_1.php'], saved_state_path=old_saved_state)
+            changed_files=['class_1.php'],
+            saved_state_path=old_saved_state.path)
         self.check_cmd([
             '{root}class_3.php:5:12,19: Invalid return type (Typing[4110])',
             '  {root}class_3.php:4:28,30: This is an int',
@@ -225,7 +237,9 @@ public static function foo () : string {
         ])
         self.proc_call([hh_client, 'stop', self.repo_dir])
         # Start another server with the new saved state. Will have both errors.
-        self.start_hh_server(changed_files=['class_1.php'], saved_state_path=new_saved_state)
+        self.start_hh_server(
+            changed_files=['class_1.php'],
+            saved_state_path=new_saved_state.path)
         self.check_cmd([
             '{root}class_3.php:5:12,19: Invalid return type (Typing[4110])',
             '  {root}class_3.php:4:28,30: This is an int',
@@ -234,3 +248,63 @@ public static function foo () : string {
             '  {root}class_3b.php:4:26,28: This is an int',
             '  {root}class_1.php:5:33,38: It is incompatible with a string',
         ])
+
+    def test_incrementally_generated_saved_state_with_errors(self):
+        # Introduce an error in "master"
+        self.change_return_type_on_base_class(
+            os.path.join(self.repo_dir, 'class_1.php'))
+
+        saved_state_with_1_error: SaveStateResult = self.dump_saved_state(
+            ignore_errors=True)
+
+        self.proc_call([hh_client, 'stop', self.repo_dir])
+
+        # Start server with the saved state, assume there are no local changes.
+        self.start_hh_server(
+            changed_files=None,
+            saved_state_path=saved_state_with_1_error.path)
+
+        # We still expect that the error from the saved state shows up.
+        self.check_cmd([
+            '{root}class_3.php:5:12,19: Invalid return type (Typing[4110])',
+            '  {root}class_3.php:4:28,30: This is an int',
+            '  {root}class_1.php:5:33,38: It is incompatible with a string',
+        ])
+
+        self.proc_call([hh_client, 'stop', self.repo_dir])
+
+        new_file = os.path.join(self.repo_dir, 'class_3b.php')
+        self.add_file_that_depends_on_class_a(new_file)
+
+        # Start server with the saved state, the only change is in the new file.
+        self.start_hh_server(
+            changed_files=['class_3b.php'],
+            saved_state_path=saved_state_with_1_error.path)
+
+        # Now we expect 2 errors - one from the saved state and one
+        # from the change.
+        self.check_cmd([
+            '{root}class_3.php:5:12,19: Invalid return type (Typing[4110])',
+            '  {root}class_3.php:4:28,30: This is an int',
+            '  {root}class_1.php:5:33,38: It is incompatible with a string',
+            '{root}class_3b.php:5:8,15: Invalid return type (Typing[4110])',
+            '  {root}class_3b.php:4:26,28: This is an int',
+            '  {root}class_1.php:5:33,38: It is incompatible with a string',
+        ], assert_loaded_mini_state=False)
+
+        saved_state_with_2_errors = self.dump_saved_state(ignore_errors=True)
+
+        self.proc_call([hh_client, 'stop', self.repo_dir])
+
+        # Let's fix the error
+        self.change_return_type_on_base_class(
+            filename=os.path.join(self.repo_dir, 'class_1.php'),
+            type="int",
+            value="11")
+
+        # Start another server with the new saved state. Will have both errors.
+        self.start_hh_server(
+            changed_files=['class_1.php'],
+            saved_state_path=saved_state_with_2_errors.path)
+
+        self.check_cmd(['No errors!'], assert_loaded_mini_state=True)

@@ -59,6 +59,7 @@ module type S = sig
   (* Setters *)
   (****************************************************************************)
 
+  val set_gen_saved_ignore_type_errors : options -> bool -> options
   val set_no_load         : options -> bool -> options
   val set_mini_state_target : options -> ServerMonitorUtils.target_mini_state option -> options
 

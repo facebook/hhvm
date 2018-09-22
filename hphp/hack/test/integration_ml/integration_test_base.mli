@@ -17,6 +17,8 @@ val setup_disk: ServerEnv.env -> disk_changes_type -> ServerEnv.env
 
 val save_state: disk_changes_type -> string -> unit
 
+val save_state_with_errors: disk_changes_type -> string -> string -> unit
+
 val load_state:
   saved_state_dir:string ->
   disk_state:disk_changes_type ->
@@ -98,6 +100,8 @@ val assert_no_errors: ServerEnv.env -> unit
 val assert_errors: Errors.t -> string -> unit
 
 val assert_env_errors: ServerEnv.env -> string -> unit
+
+val assert_errors_in_phase: ServerEnv.env -> int -> Errors.phase -> ServerEnv.env
 
 val assertSingleError: string -> Errors.error list -> unit
 

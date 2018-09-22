@@ -12,10 +12,16 @@ import tempfile
 import common_tests
 
 from hh_paths import hh_server, hh_client
+from typing import List, NamedTuple
 
 
 def write_echo_json(f, obj):
     f.write("echo %s\n" % shlex.quote(json.dumps(obj)))
+
+
+class SaveStateResult(NamedTuple):
+    path: str
+    retcode: int
 
 
 class MiniStateTestDriver(common_tests.CommonTestDriver):
@@ -43,16 +49,29 @@ class MiniStateTestDriver(common_tests.CommonTestDriver):
         return os.path.join(cls.saved_state_dir, 'foo')
 
     @classmethod
-    def save_command(cls, init_dir, saved_state_path=None, assert_edges_added=False):
-        if saved_state_path is None:
-            saved_state_path = cls.saved_state_path()
-        stdout, stderr, retcode = cls.proc_call([
+    def save_command(
+            cls,
+            init_dir: str,
+            saved_state_path: str = None,
+            assert_edges_added: bool = False,
+            ignore_errors: bool = False) -> int:
+
+        actual_saved_state_path: str = (
+            saved_state_path if saved_state_path is not None else
+            cls.saved_state_path())
+
+        hh_command: List[str] = [
             hh_client,
             '--json',
-            '--save-state', saved_state_path,
+            '--save-state', actual_saved_state_path,
             init_dir,
-        ])
-        if retcode != 0:
+        ]
+
+        if (ignore_errors):
+            hh_command.append("--gen-saved-ignore-type-errors")
+
+        stdout, stderr, retcode = cls.proc_call(hh_command)
+        if retcode != 0 and not ignore_errors:
             raise Exception('Failed to save! stdout: "%s" stderr: "%s"' %
                             (stdout, stderr))
         if assert_edges_added:
@@ -63,18 +82,23 @@ class MiniStateTestDriver(common_tests.CommonTestDriver):
             if obj['result'] <= 0:
                 raise Exception('Failed. Expected some edges added: "%s" stderr: "%s"' %
                                 (stdout, stderr))
-
+        return retcode
 
     @classmethod
-    def dump_saved_state(cls, assert_edges_added=False):
+    def dump_saved_state(
+            cls,
+            assert_edges_added: bool = False,
+            ignore_errors: bool = False) -> SaveStateResult:
         # Dump a saved state to a temporary directory.
         # Return the path to the saved state.
         saved_state_path = os.path.join(tempfile.mkdtemp(), 'new_saved_state')
-        cls.save_command(
+        retcode: int = cls.save_command(
             cls.repo_dir,
-            saved_state_path=saved_state_path,
-            assert_edges_added=assert_edges_added)
-        return saved_state_path
+            saved_state_path,
+            assert_edges_added,
+            ignore_errors)
+
+        return SaveStateResult(saved_state_path, retcode)
 
     def write_local_conf(self):
         with open(os.path.join(self.repo_dir, 'hh.conf'), 'w') as f:
@@ -111,23 +135,28 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
     def start_hh_server(self, changed_files=None, saved_state_path=None):
         if changed_files is None:
             changed_files = []
+
         # Yeah, gross again. This function's default value for a parameter
         # is from the object's state.
         if saved_state_path is None:
             saved_state_path = self.saved_state_path()
+
         state = {
             'state': saved_state_path,
             'corresponding_base_revision': '1',
             'is_cached': True,
             'deptable': saved_state_path + '.sql',
         }
+
         if changed_files:
             state['changes'] = changed_files
         else:
             state['changes'] = []
+
         with_state_arg = {
             'data_dump': state
         }
+
         cmd = [
             hh_server,
             '--daemon',
@@ -135,6 +164,7 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
             json.dumps(with_state_arg),
             self.repo_dir
         ]
+
         self.proc_call(cmd)
         self.wait_until_server_ready()
 

@@ -70,6 +70,7 @@ type client_check_env = {
   ignore_hh_version: bool;
   dynamic_view: bool;
   sort_results: bool;
+  gen_saved_ignore_type_errors: bool;
   prechecked : bool option;
 }
 

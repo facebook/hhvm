@@ -339,7 +339,7 @@ let main args =
       (** Convert to real path because Client and Server may have
        * different cwd and we want to use the client processes' cwd. *)
       let path = Path.make path in
-      let result = rpc args @@ Rpc.SAVE_STATE (Path.to_string path) in
+      let result = rpc args @@ Rpc.SAVE_STATE (Path.to_string path, args.gen_saved_ignore_type_errors) in
       ClientResultPrinter.Int_printer.go result args.output_json;
       Exit_status.No_error
     | MODE_STATUS ->

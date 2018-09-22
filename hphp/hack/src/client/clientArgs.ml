@@ -82,6 +82,7 @@ let parse_check_args cmd =
   let profile_log = ref false in
   let timeout = ref None in
   let autostart = ref true in
+  let gen_saved_ignore_type_errors = ref false in
   let force_dormant_start = ref false in
   let from = ref "" in
   let version = ref false in
@@ -409,6 +410,9 @@ let parse_check_args cmd =
       Arg.String (fun x -> set_mode (MODE_SAVE_STATE x) ()),
       (" (mode) Save a saved state to the given file." ^
       " Returns number of edges dumped from memory to the database.");
+    "--gen-saved-ignore-type-errors",
+      Arg.Set gen_saved_ignore_type_errors,
+      " generate a saved state even if there are type errors (default: false).";
     "--autostart-server",
       Arg.Bool (fun x -> autostart := x),
       " automatically start hh_server if it's not running (default: true)";
@@ -497,6 +501,7 @@ let parse_check_args cmd =
     ignore_hh_version = !ignore_hh_version;
     dynamic_view = !dynamic_view;
     sort_results = !sort_results;
+    gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
     prechecked = !prechecked;
   }
 

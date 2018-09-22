@@ -643,6 +643,8 @@ void checkRetranslateAll(bool force) {
     });
   } else {
     s_retranslateAllThread = std::thread([] { retranslateAll(); });
+  }
+  if (!RuntimeOption::ServerExecutionMode()) { // script mode
     s_retranslateAllThread.join();
   }
 }
@@ -651,6 +653,10 @@ bool retranslateAllPending() {
   return
     retranslateAllEnabled() &&
     !s_retranslateAllComplete.load(std::memory_order_acquire);
+}
+
+bool retranslateAllScheduled() {
+  return s_retranslateAllScheduled.load(std::memory_order_acquire);
 }
 
 bool pendingRetranslateAllScheduled() {

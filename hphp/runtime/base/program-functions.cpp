@@ -1223,6 +1223,12 @@ static int start_server(const std::string &username, int xhprof) {
     SlabManager::init();
   }
 
+  if (jit::mcgen::retranslateAllScheduled()) {
+    // We ran retranslateAll from deserialized profile.
+    jit::mcgen::joinWorkerThreads();
+    BootStats::mark("mcgen::retranslateAll"); // delta from previous mark.
+  }
+
   HttpServer::Server->runOrExitProcess();
   HttpServer::Server.reset();
 
@@ -2441,8 +2447,9 @@ void hphp_process_init() {
         RuntimeOption::EvalJitWorkerThreads = numWorkers;
         RuntimeOption::ServerWarmupThrottleRequestCount /= 4;
 
+        // Run retranslateAll asynchronously, without waiting for it to finish
+        // here.
         jit::mcgen::checkRetranslateAll(true);
-        BootStats::mark("mcgen::retranslateAll");
         if (mode == JitSerdesMode::DeserializeAndExit) {
           if (RuntimeOption::ServerExecutionMode()) {
             Logger::Info("JitDeserialize finished; exiting");

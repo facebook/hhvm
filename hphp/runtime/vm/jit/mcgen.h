@@ -153,6 +153,10 @@ bool dumpTCAnnotation(const Func& func, TransKind transKind);
  * Is still a pending call to retranslateAll()
  */
 bool retranslateAllPending();
+/*
+ * Whether retranslateAll has been scheduled (and possibly already completed).
+ */
+bool retranslateAllScheduled();
 
 /*
  * Whether retranslateAll has been scheduled but has not complete.

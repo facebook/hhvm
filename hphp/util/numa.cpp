@@ -51,7 +51,7 @@ void initNuma() {
   numa_set_interleave_mask(numa_all_nodes_ptr);
 
   int max_node = numa_max_node();
-  if (!max_node || max_node >= 32) return;
+  if (max_node >= 32) return;
 
   bool ret = true;
   bitmask* run_nodes = numa_get_run_node_mask();

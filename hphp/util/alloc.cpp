@@ -225,8 +225,6 @@ static uint32_t base_arena;
 static bool threads_bind_local = false;
 
 void enable_numa(bool local) {
-  if (!numa_node_mask) return;
-
   if (local) {
     threads_bind_local = true;
 
@@ -261,6 +259,8 @@ void enable_numa(bool local) {
     }
   }
 
+  if (numa_available() < 0) return;
+
   /*
    * libnuma is only partially aware of taskset. If on entry,
    * you have completely disabled a node via taskset, the node
@@ -292,17 +292,21 @@ void enable_numa(bool local) {
 }
 
 void set_numa_binding(int node) {
-  if (node < 0 || !use_numa) return;
+  if (node < 0) return;
 
   s_numaNode = node;
-  numa_sched_setaffinity(0, node_to_cpu_mask[node]);
-  if (threads_bind_local) {
-    numa_set_interleave_mask(numa_no_nodes_ptr);
-    bitmask* nodes = numa_allocate_nodemask();
-    numa_bitmask_setbit(nodes, node);
-    numa_set_membind(nodes);
-    numa_bitmask_free(nodes);
 
+  if (use_numa) {
+    numa_sched_setaffinity(0, node_to_cpu_mask[node]);
+    if (threads_bind_local) {
+      numa_set_interleave_mask(numa_no_nodes_ptr);
+      bitmask* nodes = numa_allocate_nodemask();
+      numa_bitmask_setbit(nodes, node);
+      numa_set_membind(nodes);
+      numa_bitmask_free(nodes);
+    }
+  }
+  if (threads_bind_local) {
     int arena = base_arena + node;
     mallctlWrite("thread.arena", arena);
   }
@@ -311,7 +315,7 @@ void set_numa_binding(int node) {
 void* mallocx_on_node(size_t size, int node, size_t align) {
   assert((align & (align - 1)) == 0);
   int flags = MALLOCX_ALIGN(align);
-  if (node < 0 || !use_numa) return mallocx(size, flags);
+  if (node < 0) return mallocx(size, flags);
   int arena = base_arena + node;
 #ifdef MALLOCX_TCACHE_NONE
   flags |= MALLOCX_ARENA(arena) | MALLOCX_TCACHE_NONE;

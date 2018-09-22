@@ -62,6 +62,7 @@
 #include "hphp/util/logger.h"
 #include "hphp/util/managed-arena.h"
 #include "hphp/util/mutex.h"
+#include "hphp/util/numa.h"
 #include "hphp/util/process.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/service-data.h"
@@ -776,6 +777,20 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     if (cmd == "ini-get-all") {
       auto out = IniSetting::GetAllAsJSON();
       transport->sendString(out.c_str());
+      break;
+    }
+
+    if (cmd == "numa-info") {
+      std::ostringstream out;
+#ifdef HAVE_NUMA
+      out << "use_numa: " << use_numa << endl;
+      out << "numa_num_nodes: " << numa_num_nodes << endl;
+      out << "numa_node_mask: " << numa_node_mask << endl;
+      out << "numa_node_set: " << numa_node_set << endl;
+#else
+      out << "HAVE_NUMA not defined" << endl;
+#endif
+      transport->sendString(out.str());
       break;
     }
 

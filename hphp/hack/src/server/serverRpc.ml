@@ -99,13 +99,13 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | DUMP_SYMBOL_INFO file_list ->
         env, SymbolInfoService.go genv.workers file_list env
     | IN_MEMORY_DEP_TABLE_SIZE ->
-      env, SaveStateService.get_in_memory_dep_table_entry_count ()
+      env, (SaveStateService.get_in_memory_dep_table_entry_count ())
     | SAVE_STATE filename ->
         if Errors.is_empty env.errorl then
           (** TODO: file_info_on_disk should be read from the RPC, not from ServerEnv. *)
           let file_info_on_disk = ServerArgs.file_info_on_disk genv.ServerEnv.options in
           env, SaveStateService.go ~file_info_on_disk
-            env.ServerEnv.files_info filename
+            env.ServerEnv.files_info env.errorl filename
         else
           env, Error "There are typecheck errors; cannot generate saved state."
     | SEARCH (query, type_) ->

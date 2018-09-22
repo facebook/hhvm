@@ -54,6 +54,7 @@ type loaded_info =
   (* Files changed between public merge base and current revision *)
   dirty_local_files : Relative_path.Set.t;
   old_saved : FileInfo.saved_state_info;
+  old_errors : SaveStateService.saved_state_errors;
   state_distance: int option;
 }
 
@@ -139,8 +140,8 @@ module ServerInitCommon = struct
       |> Core_result.map_error ~f:native_load_error
       >>= fun result ->
     lock_and_load_deptable result.State_loader.deptable_fn ~ignore_hh_version;
-    let old_saved = open_in result.State_loader.saved_state_fn
-      |> Marshal.from_channel in
+    let (old_saved, old_errors) =
+      SaveStateService.load_saved_state result.State_loader.saved_state_fn in
     let get_loaded_info = (fun () ->
       let t = Unix.time () in
       result.State_loader.dirty_files
@@ -162,6 +163,7 @@ module ServerInitCommon = struct
         dirty_master_files;
         dirty_local_files;
         old_saved;
+        old_errors;
         state_distance = Some result.State_loader.state_distance;
       }
     ) in
@@ -175,8 +177,7 @@ module ServerInitCommon = struct
       lock_and_load_deptable deptable_fn ~ignore_hh_version;
       let changes = Relative_path.set_of_list changes in
       let prechecked_changes = Relative_path.set_of_list prechecked_changes in
-      let chan = open_in saved_state_fn in
-      let old_saved = Marshal.from_channel chan in
+      let (old_saved, old_errors) = SaveStateService.load_saved_state saved_state_fn in
       let get_loaded_info = (fun () -> Ok {
         saved_state_fn;
         corresponding_rev = (Hg.Svn_rev (int_of_string (corresponding_base_revision)));
@@ -184,6 +185,7 @@ module ServerInitCommon = struct
         dirty_master_files = prechecked_changes;
         dirty_local_files = changes;
         old_saved;
+        old_errors;
         state_distance = None;
       }) in
       Core_result.try_with (fun () -> fun () -> Ok get_loaded_info)
@@ -575,11 +577,13 @@ module ServerEagerInit : InitKind = struct
       if lazy_level <> Off then env, t
       else type_decl genv env fast t in
 
+    (* TODO: remove saved state logic from eager init - T34269654 *)
     let state = get_state_future genv root state_future timeout in
     match state with
     | Ok ({
       dirty_master_files;
       dirty_local_files = dirty_files;
+      old_errors;
       old_saved;
       _}, changed_while_parsing) ->
       (* TODO: not implemented *)
@@ -600,11 +604,17 @@ module ServerEagerInit : InitKind = struct
        * errors. *)
       let dirty_files =
         Relative_path.Set.union dirty_files changed_while_parsing in
+      let (decl_and_typing_error_files, naming_and_parsing_error_files) =
+        SaveStateService.partition_error_files_tf old_errors [ Errors.Decl; Errors.Typing ] in
+      let disk_needs_parsing =
+        Relative_path.Set.union naming_and_parsing_error_files (
+        Relative_path.Set.union env.disk_needs_parsing changed_while_parsing) in
+      (* We must also take into account the old errors. *)
       (* But we still want to keep it in the set of things that need to be
        * reparsed in the next round of incremental updates. *)
       let env = { env with
-        disk_needs_parsing =
-          Relative_path.Set.union env.disk_needs_parsing changed_while_parsing;
+        disk_needs_parsing;
+        needs_recheck = Relative_path.Set.union env.needs_recheck decl_and_typing_error_files;
       } in
 
       let dirty_master_files = Relative_path.Set.empty in
@@ -653,17 +663,45 @@ module ServerLazyInit : InitKind = struct
         dirty_master_files;
         old_saved;
         mergebase_rev;
+        old_errors;
         _},
       changed_while_parsing) ->
+      Hh_logger.log "Successfully loaded mini-state";
+
       if hg_aware then Option.iter mergebase_rev ~f:ServerRevisionTracker.initialize;
       Bad_files.check dirty_local_files;
       Bad_files.check changed_while_parsing;
 
+      let (decl_and_typing_error_files, naming_and_parsing_error_files) =
+        SaveStateService.partition_error_files_tf
+          old_errors
+          [ Errors.Decl; Errors.Typing; ] in
+
+      let (_old_parsing_phase, old_parsing_error_files) = match List.find
+        old_errors
+        ~f:(fun (phase, _files) -> (phase = Errors.Parsing)) with
+          | Some (a, b) -> (a, b)
+          | None -> (Errors.Parsing, Relative_path.Set.empty)
+      in
+
+      Hh_logger.log
+        "Number of files with Decl and Typing errors: %d"
+        (Relative_path.Set.cardinal decl_and_typing_error_files);
+
+      Hh_logger.log
+        "Number of files with Naming and Parsing errors: %d"
+        (Relative_path.Set.cardinal naming_and_parsing_error_files);
+
+      let (decl_and_typing_error_files, naming_and_parsing_error_files) =
+        SaveStateService.partition_error_files_tf
+          old_errors
+          [ Errors.Decl; Errors.Typing; ] in
+
       (* Parse and name all dirty files uniformly *)
       let dirty_files =
-        Relative_path.Set.union dirty_master_files dirty_local_files in
+        Relative_path.Set.union naming_and_parsing_error_files (
+        Relative_path.Set.union dirty_master_files dirty_local_files) in
       let build_targets, tracked_targets = get_build_targets env in
-      Hh_logger.log "Successfully loaded mini-state";
       let t = Unix.gettimeofday () in
       (* Build targets are untracked by version control, so we must always
        * recheck them. While we could query hg / git for the untracked files,
@@ -749,14 +787,19 @@ module ServerLazyInit : InitKind = struct
 
       let env = { env with
         files_info=Relative_path.Map.union env.files_info old_info;
+        (* The only reason old_parsing_error_files are added to disk_needs_parsing
+          here is because of an issue that seems to be already tracked in T30786759 *)
+        disk_needs_parsing = old_parsing_error_files;
+        needs_recheck = Relative_path.Set.union env.needs_recheck decl_and_typing_error_files;
       } in
       (* Update the fileinfo object's dependencies now that we have full fast *)
       let t = update_files genv env.files_info t in
 
       let t = update_search genv old_saved t in
 
-      type_check_dirty genv env old_fast fast
-        dirty_master_files dirty_local_files similar_files t, state
+      let result = type_check_dirty genv env old_fast fast
+        dirty_master_files dirty_local_files similar_files t, state in
+      result
     | Error err ->
       (* Fall back to type-checking everything *)
       fallback_init genv env err, state
@@ -824,7 +867,7 @@ let save_state genv env fn =
   if do_save_state then
   let file_info_on_disk = ServerArgs.file_info_on_disk genv.ServerEnv.options in
   let _ : int = SaveStateService.save_state
-    ~file_info_on_disk env.ServerEnv.files_info fn in
+    ~file_info_on_disk env.ServerEnv.files_info env.errorl fn in
   ()
 
 let get_lazy_level genv =

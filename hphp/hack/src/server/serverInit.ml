@@ -418,19 +418,19 @@ module ServerInitCommon = struct
       if Relative_path.Set.mem s k then FileInfo.merge_names v acc
       else acc
     end ~init:FileInfo.empty_names in
-    (* TODO: do we need to add extend deps to master deps? *)
     let master_deps = names dirty_master_files |> names_to_deps in
     let local_deps = names dirty_local_files |> names_to_deps in
 
     let env, to_recheck = if use_prechecked_files genv then begin
+      (* Start with dirty files and fan-out of local changes only *)
+      let deps = Typing_deps.add_all_deps local_deps in
+      let to_recheck = Typing_deps.get_files deps in
       ServerPrecheckedFiles.set env (Initial_typechecking {
-          rechecked_files = Relative_path.Set.empty;
-          dirty_local_deps = local_deps;
-          dirty_master_deps = master_deps;
-          clean_local_deps = Typing_deps.DepSet.empty;
-      }),
-      (* Start with dirty files only *)
-      Relative_path.Set.empty
+        rechecked_files = Relative_path.Set.empty;
+        dirty_local_deps = local_deps;
+        dirty_master_deps = master_deps;
+        clean_local_deps = Typing_deps.DepSet.empty;
+      }), to_recheck
     end else begin
       (* Start with full fan-out immediately *)
       let deps = Typing_deps.DepSet.union master_deps local_deps in

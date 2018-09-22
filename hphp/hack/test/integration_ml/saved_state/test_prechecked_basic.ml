@@ -68,18 +68,29 @@ let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
     ~use_precheked_files:true
   in
 
+  (* Files that changed *)
   Test.assert_needs_recheck env "a.php";
   Test.assert_needs_recheck env "c.php";
+  (* Dependency of master change *)
   Test.assert_needs_no_recheck env "b.php";
-  Test.assert_needs_no_recheck env "d.php";
+  (* Dependency of local change *)
+  Test.assert_needs_recheck env "d.php";
+
+  (match env.ServerEnv.prechecked_files with
+  | ServerEnv.Initial_typechecking _ -> ()
+  | _ -> assert false);
 
   ServerMain.force_break_recheck_loop_for_test true;
   let env, _ = Test.full_check env in
 
+  (match env.ServerEnv.prechecked_files with
+  | ServerEnv.Prechecked_files_ready _ -> ()
+  | _ -> assert false);
+
   Test.assert_needs_no_recheck env "a.php";
   Test.assert_needs_no_recheck env "b.php"; (* important part: no "b" *)
   Test.assert_needs_no_recheck env "c.php";
-  Test.assert_needs_recheck env "d.php";
+  Test.assert_needs_no_recheck env "d.php";
 
   let env, _ = Test.(run_loop_once env default_loop_input) in
 

@@ -777,13 +777,13 @@ module ServerLazyInit : InitKind = struct
             false
         ) dirty_files in
 
-     let similar_master_files, dirty_master_files =
-       partition_similar dirty_master_files in
-     let similar_local_files, dirty_local_files =
-       partition_similar dirty_local_files in
+      let similar_master_files, dirty_master_files =
+        partition_similar dirty_master_files in
+      let similar_local_files, dirty_local_files =
+        partition_similar dirty_local_files in
 
-     let similar_files =
-       Relative_path.Set.union similar_master_files similar_local_files in
+      let similar_files =
+        Relative_path.Set.union similar_master_files similar_local_files in
 
       let env = { env with
         files_info=Relative_path.Map.union env.files_info old_info;

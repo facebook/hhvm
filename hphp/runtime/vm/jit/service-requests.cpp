@@ -75,13 +75,6 @@ void emit_svcreq(CodeBlock& cb,
   auto const realAddr = is_reused ? start : cb.toDestAddress(start);
   stub.init(start, realAddr, stub_size(), "svcreq_stub");
 
-  if (!persist && arch() == Arch::ARM) {
-    // This should not need to insert nops, as it enforces no alignment.  It is
-    // only present to make sure we do not emit a literal pool in the middle of
-    // this sequence.  We don't want to put a literal pool in an ephemeral stub,
-    // since it may be freed.
-    align(stub, &meta, Alignment::EphemeralStub, AlignContext::Dead);
-  }
   {
     Vauto vasm{stub, stub, data, meta};
     auto& v = vasm.main();

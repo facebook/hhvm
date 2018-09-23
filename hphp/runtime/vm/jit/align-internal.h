@@ -45,8 +45,6 @@ void align(CodeBlock& cb, CGMeta* meta,
     { cache_line_size(),  cache_line_size() / 2,  0 }, /* CacheLineRoundUp */ \
     { kJmpTargetAlign,    kJmpTargetAlign,        0 }, /* JmpTarget */        \
     { 8,                  8,                      0 }, /* QWord Lit */        \
-    { 0,                  funcGuardLen(),         0 }, /* FuncGuard */        \
-    { 0,                  svcreq::stub_size(),    0 }, /* EphemeralStub */    \
     { smashableAlignTo(), smashableMovqLen(),     kSmashMovqImmOff },         \
     { smashableAlignTo(), smashableCmpqLen(),     kSmashCmpqImmOff },         \
     { smashableAlignTo(), smashableCallLen(),     0 },                        \

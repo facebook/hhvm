@@ -57,12 +57,6 @@ vixl::MemOperand M(Vptr p) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
-  // This should not need to insert nops, as it enforces no alignment.  It is
-  // only present to make sure we do not emit a literal pool in the middle of
-  // this sequence.  We don't want a literal pool in this sequence, because
-  // it messes up the arithmetic in funcGuardFromPrologue.
-  align(cb, &fixups, Alignment::FuncGuard, AlignContext::Dead);
-
   vixl::MacroAssembler a { cb };
   vixl::Label after;
   vixl::Label target_data;
@@ -92,9 +86,10 @@ void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
 TCA funcGuardFromPrologue(TCA prologue, const Func* /*func*/) {
   if (!isPrologueStub(prologue)) {
     // Typically a func guard is a smashable movq followed by an ldr, cmp, b.eq,
-    // ldr, and a br. However, relocation can shorten the sequence,
-    // so search backwards until the smashable movq is found.
-    for (int length = 0; length <= (4 * 4) + 4; length += 4) {
+    // ldr, and a br. However, relocation can shorten the sequence, or even
+    // increase it (turning the ldr into mov+movk), so search backwards until
+    // the smashable movq is found.
+    for (int length = 0; length <= vixl::kInstructionSize * 6; length += 4) {
       TCA inst = prologue - (smashableMovqLen() + length);
       if (possiblySmashableMovq(inst)) return inst;
     }

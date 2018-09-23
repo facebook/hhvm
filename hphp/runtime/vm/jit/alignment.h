@@ -60,13 +60,6 @@ enum class Alignment : uint32_t {
   QuadWordSmashable,
 
   /*
-   * Continuous range constraints needed for FuncGuards, and ephemeral stubs
-   * on ARM.
-   */
-  FuncGuard,
-  EphemeralStub,
-
-  /*
    * Alignments needed by smashable instructions.
    */
   SmashMovq,

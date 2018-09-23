@@ -700,6 +700,7 @@ function find_tests($files, array $options = null) {
     $tests = explode("\n", shell_exec(
       "find $files '(' " .
           "-name '*.php' " .
+          "-o -name '*.js' " .
           "-o -name '*.php.type-errors' " .
           "-o -name '*.hhas' " .
         "')' " .

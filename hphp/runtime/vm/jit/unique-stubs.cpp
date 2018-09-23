@@ -1096,9 +1096,9 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(funcPrologueRedispatch, emitFuncPrologueRedispatch(hot(), data));
   ADD(fcallHelperThunk,       emitFCallHelperThunk(cold, frozen, data));
   ADD(funcBodyHelperThunk,    emitFuncBodyHelperThunk(cold, data));
-  ADD(functionEnterHelper, emitFunctionEnterHelper(cold, frozen, data, *this));
+  ADD(functionEnterHelper, emitFunctionEnterHelper(hot(), cold, data, *this));
   ADD(functionSurprisedOrStackOverflow,
-      emitFunctionSurprisedOrStackOverflow(cold, frozen, data, *this));
+      emitFunctionSurprisedOrStackOverflow(hot(), cold, data, *this));
 
   ADD(retHelper,                  emitInterpRet(hot(), data));
   ADD(genRetHelper,               emitInterpGenRet<false>(cold, data));

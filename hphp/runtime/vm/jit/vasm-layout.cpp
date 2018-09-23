@@ -62,7 +62,7 @@ TRACE_SET_MOD(layout);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-jit::vector<Vlabel> rpoLayout(const Vunit& unit) {
+jit::vector<Vlabel> rpoLayout(Vunit& unit) {
   auto labels = sortBlocks(unit);
 
   auto const blk = [&] (Vlabel b) -> const Vblock& { return unit.blocks[b]; };
@@ -79,6 +79,15 @@ jit::vector<Vlabel> rpoLayout(const Vunit& unit) {
       return blk(b).area_idx == AreaIndex::Cold &&
              blk(b).code.back().op != Vinstr::fallthru;
     });
+
+  if (!RuntimeOption::EvalJitLayoutPrologueSplitHotCold &&
+      unit.context && isPrologue(unit.context->kind)) {
+    for (auto b : labels) {
+      if (unit.blocks[b].area_idx == AreaIndex::Cold) {
+        unit.blocks[b].area_idx = AreaIndex::Main;
+      }
+    }
+  }
 
   // We put fallthru{} blocks at the end, but we also need to make sure it's
   // still partitioned with those blocks that share a code area.  This should
@@ -277,7 +286,7 @@ struct Clusterizer {
     initClusters();
     clusterize();
     sortClusters();
-    if (RuntimeOption::EvalJitLayoutSplitHotCold) {
+    if (RuntimeOption::EvalJitPGOLayoutSplitHotCold) {
       splitHotColdClusters();
     }
     FTRACE(1, "{}", toString());
@@ -524,7 +533,7 @@ jit::vector<Vlabel> pgoLayout(Vunit& unit) {
       });
   }
 
-  if (!RuntimeOption::EvalJitLayoutSplitHotCold) {
+  if (!RuntimeOption::EvalJitPGOLayoutSplitHotCold) {
     for (auto b : labels) {
       if (unit.blocks[b].area_idx == AreaIndex::Cold) {
         unit.blocks[b].area_idx = AreaIndex::Main;

@@ -625,7 +625,11 @@ static inline int retranslateAllSecondsDefault() {
   return RuntimeOption::ServerExecutionMode() ? 180 : 0;
 }
 
-static inline bool layoutSplitHotColdDefault() {
+static inline bool pgoLayoutSplitHotColdDefault() {
+  return arch() != Arch::ARM;
+}
+
+static inline bool layoutPrologueSplitHotColdDefault() {
   return arch() != Arch::ARM;
 }
 

@@ -615,7 +615,7 @@ To string conversions:
   If S0 is a string representing an integer value (same criteria as array key
   conversion), return that value as an integer. Otherwise return S0.
 
-| ConvPtrToLval,               DLvalOfPtr, S(PtrToGen),                   P
+| ConvPtrToLval,               DLvalOfPtr, S(PtrToGen),                   NF
 
   Convert S0 to an equivalent lval.
 

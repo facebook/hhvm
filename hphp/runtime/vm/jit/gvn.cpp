@@ -312,6 +312,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case Select:
   case StrictlyIntegerConv:
   case LookupSPropSlot:
+  case ConvPtrToLval:
     return true;
 
   case SameArr:

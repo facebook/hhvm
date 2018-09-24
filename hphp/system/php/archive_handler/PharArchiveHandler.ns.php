@@ -37,7 +37,7 @@ namespace __SystemLib {
         throw new PharException(Phar::HALT_TOKEN.' must be declared in a phar');
       }
 
-      $this->parsePhar($pos);
+      $this->parsePhar(&$pos);
     }
 
     private function haltTokenPosition(): int {
@@ -59,19 +59,19 @@ namespace __SystemLib {
 
     private function parsePhar(&$pos) {
       $start = $pos;
-      $len = $this->bytesToInt($pos, 4);
-      $count = $this->bytesToInt($pos, 4);
-      $this->apiVersion = $this->bytesToInt($pos, 2);
-      $this->archiveFlags = $this->bytesToInt($pos, 4);
-      $alias_len = $this->bytesToInt($pos, 4);
-      $this->alias = $this->substr($pos, $alias_len);
-      $metadata_len = $this->bytesToInt($pos, 4);
+      $len = $this->bytesToInt(&$pos, 4);
+      $count = $this->bytesToInt(&$pos, 4);
+      $this->apiVersion = $this->bytesToInt(&$pos, 2);
+      $this->archiveFlags = $this->bytesToInt(&$pos, 4);
+      $alias_len = $this->bytesToInt(&$pos, 4);
+      $this->alias = $this->substr(&$pos, $alias_len);
+      $metadata_len = $this->bytesToInt(&$pos, 4);
       if ($metadata_len > 0) {
         $this->metadata = unserialize(
-          $this->substr($pos, $metadata_len)
+          $this->substr(&$pos, $metadata_len)
         );
       }
-      $this->parseFileInfo($count, $pos);
+      $this->parseFileInfo($count, &$pos);
       if ($pos != $start + $len + 4) {
         throw new PharException(
           "Malformed manifest. Expected $len bytes, got $pos"
@@ -102,7 +102,7 @@ namespace __SystemLib {
         }
 
         $pos = $signatureStart + $signatureSize - 8;
-        $this->signatureType = $this->bytesToInt($pos, 4);
+        $this->signatureType = $this->bytesToInt(&$pos, 4);
         switch ($this->signatureType) {
           case Phar::MD5:
             $digestSize = 16;
@@ -144,15 +144,15 @@ namespace __SystemLib {
 
     private function parseFileInfo(int $count, &$pos) {
       for ($i = 0; $i < $count; $i++) {
-        $filename_len = $this->bytesToInt($pos, 4);
-        $filename = $this->substr($pos, $filename_len);
-        $filesize = $this->bytesToInt($pos, 4);
-        $timestamp = $this->bytesToInt($pos, 4);
-        $compressed_filesize = $this->bytesToInt($pos, 4);
-        $crc32 = $this->bytesToInt($pos, 4);
-        $flags = $this->bytesToInt($pos, 4);
-        $metadata_len = $this->bytesToInt($pos, 4);
-        $metadata = $this->bytesToInt($pos, $metadata_len);
+        $filename_len = $this->bytesToInt(&$pos, 4);
+        $filename = $this->substr(&$pos, $filename_len);
+        $filesize = $this->bytesToInt(&$pos, 4);
+        $timestamp = $this->bytesToInt(&$pos, 4);
+        $compressed_filesize = $this->bytesToInt(&$pos, 4);
+        $crc32 = $this->bytesToInt(&$pos, 4);
+        $flags = $this->bytesToInt(&$pos, 4);
+        $metadata_len = $this->bytesToInt(&$pos, 4);
+        $metadata = $this->bytesToInt(&$pos, $metadata_len);
         $this->fileInfo[$filename] = array(
           $filesize,
           $timestamp,

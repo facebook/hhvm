@@ -1876,7 +1876,7 @@ class ReflectionClass implements Reflector {
         }
       }
       $ordering = array_values($props_index);
-      array_multisort($ordering, $properties);
+      array_multisort(&$ordering, &$properties);
       self::$propInfoCache[$this->getName()]
         = $props_map = new ImmMap($properties);
       // the $props_index does not need to be cached because $props are now

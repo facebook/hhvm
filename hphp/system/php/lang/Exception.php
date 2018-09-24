@@ -1,4 +1,6 @@
-<?php
+<?hh
+
+namespace {
 
 class Exception implements Throwable {
   use \__SystemLib\BaseException;
@@ -42,4 +44,6 @@ class Exception implements Throwable {
 
     $this->previous = $previous;
   }
+}
+
 }

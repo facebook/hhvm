@@ -1,4 +1,7 @@
-<?php
+<?hh
+
+namespace {
+
 class Error implements Throwable {
   use \__SystemLib\BaseException;
   /**
@@ -37,3 +40,5 @@ class AssertionError extends Error {}
 class DivisionByZeroError extends Error {}
 class ParseError extends Error {}
 class TypeError extends Error {}
+
+}

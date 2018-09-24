@@ -94,7 +94,7 @@ function _wddx_deserialize_recursive($node) {
   //array
   if ($type == "array" ) {
     foreach ($subchildren as $subchild) {
-        array_push($array, _wddx_deserialize_recursive($subchild));
+        array_push(&$array, _wddx_deserialize_recursive($subchild));
     }
     return $array;
   }
@@ -157,7 +157,7 @@ function _wddx_deserialize_recursive($node) {
       if ($type == "field") {
         $subarray = array();
           foreach ($subchildren as $subchild) {
-              array_push($subarray, _wddx_deserialize_recursive($subchild));
+              array_push(&$subarray, _wddx_deserialize_recursive($subchild));
           }
         $array[$key] = $subarray;
       }

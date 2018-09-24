@@ -190,7 +190,7 @@ class Collator {
 function collator_asort(collator $coll,
                         mixed &$arr,
                         int $sort_flag = Collator::SORT_REGULAR): bool {
-  return $coll->asort($arr, $sort_flag);
+  return $coll->asort(&$arr, $sort_flag);
 }
 
 /**
@@ -345,7 +345,7 @@ function collator_set_strength(collator $coll,
  */
 function collator_sort_with_sort_keys(collator $coll,
                                       mixed &$arr): bool {
-  return $coll->sortWithSortKeys($arr);
+  return $coll->sortWithSortKeys(&$arr);
 }
 
 /**
@@ -365,5 +365,5 @@ function collator_sort_with_sort_keys(collator $coll,
 function collator_sort(collator $coll,
                        mixed &$arr,
                        int $sort_flag = Collator::SORT_REGULAR): bool {
-  return $coll->sort($arr, $sort_flag);
+  return $coll->sort(&$arr, $sort_flag);
 }

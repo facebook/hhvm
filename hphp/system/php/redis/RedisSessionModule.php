@@ -49,7 +49,7 @@ class RedisSessionModule implements SessionHandlerInterface {
         'database' => 0
       ];
       if (isset($url['query'])) {
-        parse_str($url['query'], $query);
+        parse_str($url['query'], &$query);
         foreach ($args as $key => &$val) {
           if (!isset($query[$key])) continue;
           if (is_string($val)) {

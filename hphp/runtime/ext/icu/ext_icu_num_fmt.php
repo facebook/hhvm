@@ -398,7 +398,7 @@ function numfmt_parse_currency(NumberFormatter $fmt,
                                $value,
                                &$currency,
                                &$position = null): mixed {
-  return $fmt->parseCurrency($value, $currency, $position);
+  return $fmt->parseCurrency($value, &$currency, &$position);
 }
 
 /**
@@ -417,7 +417,7 @@ function numfmt_parse(NumberFormatter $fmt,
                       $value,
                       $type = NumberFormatter::TYPE_DOUBLE,
                       &$position = null): mixed {
-  return $fmt->parse($value, $type, $position);
+  return $fmt->parse($value, $type, &$position);
 }
 
 /**

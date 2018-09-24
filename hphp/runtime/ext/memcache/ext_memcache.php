@@ -538,7 +538,7 @@ function memcache_replace(Memcache $memcache,
 function memcache_get(Memcache $memcache,
                       mixed $key,
                       mixed &$flags = null): mixed {
-  return $memcache->get($key, $flags);
+  return $memcache->get($key, &$flags);
 }
 
 /* Memcache::delete() deletes item with the key. If parameter timeout is
@@ -862,7 +862,7 @@ class MemcacheSessionModule implements SessionHandlerInterface {
 
       if (array_key_exists('query', $parsedUrlData)) {
         $optionList = array();
-        parse_str($parsedUrlData['query'], $optionList);
+        parse_str($parsedUrlData['query'], &$optionList);
         if (count($optionList) > 0) {
           foreach ($optionList as $key => $value) {
             switch ($key) {

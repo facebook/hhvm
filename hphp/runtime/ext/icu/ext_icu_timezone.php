@@ -298,7 +298,7 @@ function intltz_from_date_time_zone(DateTimeZone $zoneId): IntlTimeZone {
  */
 function intltz_get_canonical_id(string $zoneId,
                                  mixed &$isSystemID = null): mixed {
-  return IntlTimeZone::getCanonicalID($zoneId, $isSystemID);
+  return IntlTimeZone::getCanonicalID($zoneId, &$isSystemID);
 }
 
 function intltz_get_region(string $str): mixed {
@@ -399,7 +399,7 @@ function intltz_get_offset(IntlTimeZone $obj,
                            bool $local,
                            int &$rawOffset,
                            int &$dstOffset): bool {
-  return $obj->getOffset($date, $local, $rawOffset, $dstOffset);
+  return $obj->getOffset($date, $local, &$rawOffset, &$dstOffset);
 }
 
 /**

@@ -1147,7 +1147,7 @@ class Phar extends RecursiveDirectoryIterator
     $pieces = explode('/', substr($filename_or_alias, 7));
 
     if (count($pieces) > 0 && isset(self::$aliases[$pieces[0]])) {
-      $alias = array_shift($pieces);
+      $alias = array_shift(&$pieces);
       return array(
         self::$aliases[$alias],
         self::resolveDotDots($pieces)
@@ -1156,7 +1156,7 @@ class Phar extends RecursiveDirectoryIterator
 
     $filename = '';
     while ($pieces) {
-      $filename .= '/'.array_shift($pieces);
+      $filename .= '/'.array_shift(&$pieces);
       if (is_file($filename)) {
 
         if (!isset(self::$aliases[$filename])) {

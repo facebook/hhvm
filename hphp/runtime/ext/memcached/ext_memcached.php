@@ -340,7 +340,7 @@ class Memcached {
   public function get(mixed $key,
                       ?mixed $cache_cb = null,
                       ?mixed &$cas_token = null): mixed {
-    return $this->getByKey('', $key, $cache_cb, $cas_token);
+    return $this->getByKey('', $key, $cache_cb, &$cas_token);
   }
 
   /* Memcached::getAllKeys() Gets the keys stored on all the servers
@@ -412,7 +412,7 @@ class Memcached {
   public function getMulti(mixed $keys,
                            mixed &$cas_tokens = null,
                            int $flags = 0): mixed {
-    return $this->getMultiByKey('', $keys, $cas_tokens, $flags);
+    return $this->getMultiByKey('', $keys, &$cas_tokens, $flags);
   }
 
   /**

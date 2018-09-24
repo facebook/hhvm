@@ -508,7 +508,7 @@ function datefmt_is_lenient(IntlDateFormatter $fmt): bool {
 function datefmt_localtime(IntlDateFormatter $fmt,
                            $value,
                            &$position): mixed {
-  return $fmt->localTime($value, $position);
+  return $fmt->localTime($value, &$position);
 }
 
 /**
@@ -529,7 +529,7 @@ function datefmt_localtime(IntlDateFormatter $fmt,
 function datefmt_parse(IntlDateFormatter $fmt,
                        $value,
                        &$position = null): mixed {
-  return $fmt->parse($value, $position);
+  return $fmt->parse($value, &$position);
 }
 
 /**

@@ -65,7 +65,7 @@ function dns_check_record(mixed $host, mixed $type = 'MX'): bool {
  * Alias of getmxrr
  */
 function dns_get_mx(mixed $host, mixed &$mxhosts, mixed &$weight = null) {
-  return getmxrr($host, $mxhosts, $weight);
+  return getmxrr($host, &$mxhosts, &$weight);
 }
 
 /**

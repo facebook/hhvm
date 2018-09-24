@@ -2982,9 +2982,6 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
                      then BaseR (base_offset, base_mode) else BaseC (base_offset, base_mode))))
        1
 
-and use_pass_by_ref_hint () =
-  Emit_env.is_hh_syntax_enabled () && not (Emit_env.is_systemlib ())
-
 and get_pass_by_ref_hint expr =
   if expr_starts_with_ref expr then Ref else Cell
 
@@ -3073,7 +3070,7 @@ and emit_args_and_call env call_pos reified_targs args uargs async_eager_label =
     if has_inout_args args
     then InoutLocals.collect_written_variables env args
     else SMap.empty in
-  let use_hint = use_pass_by_ref_hint () in
+  let use_hint = Emit_env.is_hh_syntax_enabled () in
   let throw_on_mismatch = use_hint &&
     Hhbc_options.throw_on_call_by_ref_annotation_mismatch
     !Hhbc_options.compiler_options in

@@ -1,0 +1,2 @@
+File "property_declaration_with_attribute_missing_visibility_modifier.php", line 3, characters 3-25:
+Property declarations require a visibility modifier such as public, private or protected. (Parsing[1002])

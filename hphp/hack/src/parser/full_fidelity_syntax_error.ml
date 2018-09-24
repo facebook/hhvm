@@ -419,6 +419,9 @@ let final_property = "Properties cannot be declared final"
 let var_property = "Properties cannot be declared as var; a type is required"
 let property_has_multiple_visibilities name =
   "Multiple access type modifiers are not allowed: properties of " ^ name
+let property_requires_visibility =
+  "Property declarations require a visibility modifier " ^
+  "such as public, private or protected."
 let invalid_is_as_expression_hint n hint =
   hint ^ " typehints cannot be used with " ^ n ^ "-expressions"
 let elvis_operator_space = "An Elvis operator ('?:') is expected here."

@@ -396,6 +396,11 @@ let list_contains_duplicate node =
     result
   | _ ->  false
 
+let is_empty_list_or_missing node =
+  match syntax node with
+  | SyntaxList [] | Missing -> true
+  | _ -> false
+
 let token_kind node =
   match syntax node with
   | Token t -> Some (Token.kind t)
@@ -2930,13 +2935,21 @@ let const_decl_errors _env node parents namespace_name names errors =
   | _ -> names, errors
 
 
-let class_property_multiple_visibility_error _env node parents errors =
+let class_property_visibility_errors _env node parents errors =
   match syntax node with
-  | PropertyDeclaration cd ->
+  | PropertyDeclaration { property_modifiers; _ } ->
     let first_parent_name = Option.value (first_parent_class_name parents) ~default:"" in
-    produce_error errors
-    declaration_multiple_visibility node
-    (SyntaxError.property_has_multiple_visibilities first_parent_name) cd.property_modifiers
+    let errors =
+      produce_error errors
+        declaration_multiple_visibility node
+        (SyntaxError.property_has_multiple_visibilities first_parent_name) property_modifiers
+    in
+    let errors =
+      produce_error errors
+        is_empty_list_or_missing property_modifiers
+        SyntaxError.property_requires_visibility node
+    in
+    errors
   | _ -> errors
 
 
@@ -3318,8 +3331,7 @@ let find_syntax_errors env =
             (namespace_name = global_namespace_name) names errors in
         trait_require_clauses, names, errors
       | PropertyDeclaration _ ->
-        let errors =
-          class_property_multiple_visibility_error env node parents errors in
+        let errors = class_property_visibility_errors env node parents errors in
         let errors = class_reified_param_errors node parents errors in
         trait_require_clauses, names, errors
       | Enumerator _ ->

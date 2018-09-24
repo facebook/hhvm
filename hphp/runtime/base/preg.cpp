@@ -1442,22 +1442,9 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
     return false;
   }
   const pcre_cache_entry* pce = accessor.get();
-  bool eval = pce->preg_options & PREG_REPLACE_EVAL;
-  if (eval) {
-    if (RuntimeOption::EvalAuthoritativeMode) {
-      throw Exception(
-        "You can't use eval in RepoAuthoritative mode. It breaks all sorts of "
-        "assumptions we use for speed. Switch to using preg_replace_callback()."
-      );
-    }
-    if (callable) {
-      raise_warning(
-        "Modifier /e cannot be used with replacement callback."
-      );
-      return init_null();
-    }
-    raise_deprecated(
-      "preg_replace(): The /e modifier is deprecated, use "
+  if (pce->preg_options & PREG_REPLACE_EVAL) {
+    throw Exception(
+      "preg_replace(): Support for the /e modifier has been removed, use "
       "preg_replace_callback instead"
     );
   }
@@ -1528,12 +1515,11 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
         /* Set the match location in subject */
         match = subject.data() + offsets[0];
 
-        /* If evaluating, do it and add the return string's length */
-        String eval_result;
+        String callable_result;
         if (callable) {
           /* Use custom function to get replacement string and its length. */
-          eval_result = preg_do_repl_func(replace_var, subject, offsets,
-                                          subpat_names, count);
+          callable_result = preg_do_repl_func(replace_var, subject, offsets,
+                                              subpat_names, count);
         } else { /* do regular substitution */
           walk = replace;
           walk_last = 0;
@@ -1547,16 +1533,6 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
               if (preg_get_backref(&walk, &backref)) {
                 if (backref < count) {
                   match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
-                  if (eval) {
-                    String esc_match = HHVM_FN(addslashes)(
-                      String(
-                        subject.data() + offsets[backref<<1],
-                        match_len,
-                        CopyString
-                      )
-                    );
-                    match_len = esc_match.length();
-                  }
                 }
                 continue;
               }
@@ -1572,25 +1548,15 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
         /* copy replacement and backrefs */
         int result_len = result.size();
 
-        /* If evaluating or using custom function, copy result to the buffer
-         * and clean up. */
         if (callable) {
-          result.append(eval_result.data(), eval_result.size());
-          result_len += eval_result.size();
+          /* Copy result from custom function to buffer and clean up. */
+          result.append(callable_result.data(), callable_result.size());
+          result_len += callable_result.size();
         } else { /* do regular backreference copying */
           walk = replace;
           walk_last = 0;
           Array params;
-          int lastStart = result.size();
           while (walk < replace_end) {
-            bool handleQuote = eval && '"' == *walk && walk_last != '\\';
-            if (handleQuote && lastStart != result.size()) {
-              String str(result.data() + lastStart, result.size() - lastStart,
-                         CopyString);
-              params.append(str);
-              lastStart = result.size();
-              handleQuote = false;
-            }
             if ('\\' == *walk || '$' == *walk) {
               if (walk_last == '\\') {
                 result.set(result.size() - 1, *walk++);
@@ -1600,69 +1566,16 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
               if (preg_get_backref(&walk, &backref)) {
                 if (backref < count) {
                   match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
-                  if (eval) {
-                    String esc_match = HHVM_FN(addslashes)(
-                      String(
-                        subject.data() + offsets[backref<<1],
-                        match_len,
-                        CopyString
-                      )
-                    );
-                    match_len = esc_match.length();
-                    result.append(esc_match.data(), match_len);
-                  } else {
-                    result.append(
-                      subject.data() + offsets[backref<<1],
-                      match_len
-                    );
-                  }
+                  result.append(
+                    subject.data() + offsets[backref<<1],
+                    match_len
+                  );
                 }
                 continue;
               }
             }
             result.append(*walk++);
             walk_last = walk[-1];
-            if (handleQuote && lastStart != result.size()) {
-              lastStart = result.size();
-            }
-          }
-          auto full_len = result.size();
-          auto data = result.data() + result_len;
-          if (eval) {
-            VMRegAnchor _;
-            auto const ar = GetCallerFrame();
-            // reserve space for "<?php return " + code + ";"
-            String prefixedCode(full_len - result_len + 14, ReserveString);
-            prefixedCode +=
-              (ar->unit()->isHHFile() ? "<?hh return " : "<?php return ");
-            prefixedCode += folly::StringPiece{data, full_len - result_len};
-            prefixedCode += ";";
-            auto const unit = g_context->compileEvalString(prefixedCode.get());
-            auto const ctx = ar->func()->cls();
-            auto const func = unit->getMain(ctx);
-            ObjectData* thiz;
-            Class* cls;
-            if (ctx) {
-              if (ar->hasThis()) {
-                thiz = ar->getThis();
-                cls = thiz->getVMClass();
-              } else {
-                thiz = nullptr;
-                cls = ar->getClass();
-              }
-            } else {
-              thiz = nullptr;
-              cls = nullptr;
-            }
-            auto v = Variant::attach(
-              g_context->invokeFunc(func, init_null_variant,
-                                    thiz, cls, nullptr, nullptr,
-                                    ExecutionContext::InvokePseudoMain)
-            );
-            eval_result = v.toString();
-
-            result.resize(result_len);
-            result.append(eval_result.data(), eval_result.size());
           }
         }
 

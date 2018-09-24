@@ -87,89 +87,7 @@ phpbb_avatar_manager_test::test_localize_errors
 phpbb_avatar_manager_test::test_prepare_driver_name
 .
 phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #0
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #1
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #10
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #11
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #12
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #13
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #14
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #15
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #16
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #17
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #18
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #19
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #2
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #20
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #21
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #22
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #23
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #24
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #25
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #26
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #27
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #28
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #29
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #3
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #30
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #31
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #32
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #33
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #34
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #35
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #36
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #37
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #38
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #39
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #4
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #40
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #41
-I
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #5
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #6
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #7
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #8
-.
-phpbb_bbcode_parser_test::test_bbcode_firstpass with data set #9
-.
+FATAL
 phpbb_build_hidden_fields_for_query_params_test::test_build_hidden_fields_for_query_params with data set #0
 .
 phpbb_build_hidden_fields_for_query_params_test::test_build_hidden_fields_for_query_params with data set #1
@@ -4059,15 +3977,7 @@ S
 phpbb_update_rows_avoiding_duplicates_test::test_update with data set #3
 S
 phpbb_url_bbcode_test::test_url with data set #0
-.
-phpbb_url_bbcode_test::test_url with data set #1
-.
-phpbb_url_bbcode_test::test_url with data set #2
-.
-phpbb_url_bbcode_test::test_url with data set #3
-.
-phpbb_url_bbcode_test::test_url with data set #4
-.
+FATAL
 phpbb_user_lang_test::test_user_lang_sprintf
 .
 phpbb_user_loader_test::test_load_get

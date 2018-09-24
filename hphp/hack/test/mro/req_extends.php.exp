@@ -1,0 +1,10 @@
+Linearization for class \I:
+[\I]
+Linearization for class \C:
+[\C]
+Linearization for class \T:
+[\T, \I, \C]
+Linearization for class \T2:
+[\T2]
+Linearization for class \D:
+[\D, \T, \I, \C]

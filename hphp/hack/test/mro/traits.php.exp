@@ -1,0 +1,20 @@
+Linearization for class \T1:
+[\T1]
+Linearization for class \T2:
+[\T2]
+Linearization for class \T3:
+[\T3]
+Linearization for class \C:
+[\C, \T3, \T2, \T1]
+Linearization for class \T:
+[\T, \T3, \T2]
+Linearization for class \D:
+[\D, \T3, \T, \T2]
+Linearization for class \I:
+[\I]
+Linearization for class \I2:
+[\I2]
+Linearization for class \Timplements:
+[\Timplements, \I]
+Linearization for class \A:
+[\A, \Timplements, \I, \I2]

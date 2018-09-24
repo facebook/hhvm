@@ -62,12 +62,26 @@ bool HHVM_FUNCTION(is_callable, const Variant& v, bool syntax /* = false */,
 
 Variant HHVM_FUNCTION(call_user_func, const Variant& function,
                       const Array& params /* = null_array */) {
+    auto const warning = "call_user_func() is deprecated and subject"
+   " to removal from the Hack language";
+   switch (RuntimeOption::DisableCallUserFunc) {
+     case 0:  break;
+     case 1:  raise_warning(warning); break;
+     default: raise_error(warning);
+   }
   return vm_call_user_func(function, params, /* forward */ false,
                            /* check ref */ true);
 }
 
 Variant HHVM_FUNCTION(call_user_func_array, const Variant& function,
                       const Variant& params) {
+  auto const warning = "call_user_func_array() is deprecated and subject"
+  " to removal from the Hack language";
+  switch (RuntimeOption::DisableCallUserFuncArray) {
+    case 0:  break;
+    case 1:  raise_warning(warning); break;
+    default: raise_error(warning);
+  }
   if (UNLIKELY(!isContainer(params))) {
     raise_warning("call_user_func_array() expects parameter 2 to be an array "
                   "or collection, %s given",

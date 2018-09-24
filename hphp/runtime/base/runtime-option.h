@@ -499,6 +499,15 @@ struct RuntimeOption {
   // undefined constants.
   // true => fall back to default namespace (default), false => error.
   static bool UndefinedConstFallback;
+  // Disables PHP's call_user_func function.
+  // Valid values are 0 => enabled (default),
+  // 1 => warning, 2 => error.
+  static uint64_t DisableCallUserFunc;
+  // Disables PHP's call_user_func_array function.
+  // Valid values are 0 => enabled (default),
+  // 1 => warning, 2 => error.
+  static uint64_t DisableCallUserFuncArray;
+
 
   static int GetScannerType();
 

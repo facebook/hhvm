@@ -426,6 +426,8 @@ uint64_t RuntimeOption::DisableCompact = 0;
 uint64_t RuntimeOption::DisableExtract = 0;
 uint64_t RuntimeOption::DisableForwardStaticCall = 0;
 uint64_t RuntimeOption::DisableForwardStaticCallArray = 0;
+uint64_t RuntimeOption::DisableCallUserFunc = 0;
+uint64_t RuntimeOption::DisableCallUserFuncArray = 0;
 bool RuntimeOption::UndefinedConstAsString = true;
 bool RuntimeOption::UndefinedConstFallback = true;
 
@@ -1206,6 +1208,12 @@ void RuntimeOption::Load(
     Config::Bind(UndefinedConstFallback, ini, config,
                  "Hack.Lang.Phpism.UndefinedConstFallback",
                  UndefinedConstFallback);
+    Config::Bind(DisableCallUserFunc, ini, config,
+                 "Hack.Lang.Phpism.DisableCallUserFunc",
+                 DisableCallUserFunc);
+    Config::Bind(DisableCallUserFuncArray, ini, config,
+                 "Hack.Lang.Phpism.DisableCallUserFuncArray",
+                 DisableCallUserFuncArray);
   }
   {
     // Repo

@@ -967,7 +967,7 @@ and emit_load_class_const env pos cexpr id =
       load_const
     ]
 
-and emit_class_expr ?(null_coalesce_assignment=false) env cexpr prop =
+and emit_class_expr env cexpr prop =
   match cexpr with
   | Class_expr ((pos, (A.BracedExpr _ |
                      A.Dollar _ |
@@ -1021,7 +1021,6 @@ and emit_class_expr ?(null_coalesce_assignment=false) env cexpr prop =
       emit_expr ~need_ref:false env e, true
   in
   let load_cls_ref = emit_load_class_ref env (fst prop) cexpr in
-  let load_prop = if null_coalesce_assignment then empty else load_prop in
   if load_prop_first then load_prop, load_cls_ref
   else load_cls_ref, load_prop
 
@@ -4016,7 +4015,7 @@ and emit_lval_op_nonlist_steps ?(null_coalesce_assignment=false)
       let final_instr =
         emit_pos_then pos @@
         emit_final_static_op cid prop op in
-      of_pair @@ emit_class_expr ~null_coalesce_assignment env cexpr prop,
+      of_pair @@ emit_class_expr env cexpr prop,
       rhs_instrs,
       final_instr
     end

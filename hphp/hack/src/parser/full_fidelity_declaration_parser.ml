@@ -719,13 +719,23 @@ module WithExpressionAndStatementAndTypeParser
     | kind when Parser.expects parser kind ->
       Make.missing parser (pos parser)
     | _ ->
+      (* If this is a property declaration which is missing its visibility
+         modifier (or the "var" keyword), accept it here, but emit an error in a
+         later pass. *)
+      let (parser1, property) =
+        let (parser, missing1) = Make.missing parser (pos parser) in
+        let (parser, missing2) = Make.missing parser (pos parser) in
+        parse_property_declaration parser missing1 missing2 in
+      if parser.errors = parser1.errors then
+        parser1, property
+      else
         (* TODO ERROR RECOVERY could be improved here. *)
-      let (parser, token) = fetch_token parser in
-      let parser = with_error parser SyntaxError.error1033 in
-      Make.error parser token
-    (* Parser does not detect the error where non-static instance variables
-      or methods are within abstract final classes in its first pass, but
-      instead detects it in its second pass. *)
+        let (parser, token) = fetch_token parser in
+        let parser = with_error parser SyntaxError.error1033 in
+        Make.error parser token
+      (* Parser does not detect the error where non-static instance variables
+        or methods are within abstract final classes in its first pass, but
+        instead detects it in its second pass. *)
 
   and parse_classish_element_list_opt parser =
     (* TODO: ERROR RECOVERY: consider bailing if the token cannot possibly

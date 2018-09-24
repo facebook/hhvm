@@ -1,3 +1,1 @@
-(3,7)-(3,7) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(3,9)-(3,9) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
-(3,10)-(4,1) A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here.
+(3,3)-(3,9) Property declarations require a visibility modifier such as public, private or protected.

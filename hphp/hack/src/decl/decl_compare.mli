@@ -22,11 +22,23 @@ end
 
 val get_extend_deps : DepSet.elt -> DepSet.t -> DepSet.t
 
-val get_classes_deps : Classes.t option SMap.t -> Classes.t option SMap.t ->
-  SSet.t -> DepSet.t * DepSet.t * DepSet.t
+val get_classes_deps :
+  conservative_redecl:bool ->
+  Classes.t option SMap.t ->
+  Classes.t option SMap.t ->
+  SSet.t ->
+  DepSet.t * DepSet.t * DepSet.t
 
-val get_funs_deps : Funs.t option SMap.t -> SSet.t -> DepSet.t * DepSet.t * DepSet.t
+val get_funs_deps :
+  conservative_redecl:bool ->
+  Funs.t option SMap.t ->
+  SSet.t ->
+  DepSet.t * DepSet.t * DepSet.t
 
 val get_types_deps : Typedef.t option SMap.t -> SSet.t ->  DepSet.t * DepSet.t
 
-val get_gconsts_deps : GConsts.t option SMap.t -> SSet.t -> DepSet.t * DepSet.t * DepSet.t
+val get_gconsts_deps :
+  conservative_redecl:bool ->
+  GConsts.t option SMap.t ->
+  SSet.t ->
+  DepSet.t * DepSet.t * DepSet.t

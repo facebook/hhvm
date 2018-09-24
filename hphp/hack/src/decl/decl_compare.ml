@@ -220,16 +220,35 @@ let class_big_diff class1 class2 =
   SSet.compare class1.dc_xhp_attr_deps class2.dc_xhp_attr_deps <> 0 ||
   class1.dc_enum_type <> class2.dc_enum_type
 
-(*****************************************************************************)
-(* GET EVERYTHING, don't think, don't try to be subtle, don't try to be
- * smart what so ever, just get EVERYTHING that ever used the class "cid"
- * (cid = class identifier).
- *)
-(*****************************************************************************)
-and get_all_dependencies trace cid (changed, to_redecl, to_recheck) =
+(** Originally, the policy here was "GET EVERYTHING--don't think, don't try to be
+    subtle, don't try to be smart whatsoever, just get EVERYTHING that ever used
+    the class with the given identifier in ANY way, then redeclare and recheck
+    all of those dependents".
+
+    Now, though (2018-09), we would like to be a little smarter, since this
+    policy leads to massive fanouts in some common circumstances. We can't work
+    out any reason why *redeclaring* the entire set of files where the class or
+    its members were referenced (this is what get_ideps gives us for a
+    Dep.Class) is necessary. If some file has a typing dependency on a changed
+    class (for example, because it invokes a method on an instance of that
+    class), we shouldn't need to *redeclare* it when that class changes; just
+    *recheck* it. Of course, we do need to redeclare classes which *extend* the
+    changed class, but we shouldn't need to redeclare anything else.
+
+    The conservative_redecl flag opts in to the redeclaration of all class
+    dependencies (and is enabled by default until we are confident that this is
+    safe). Even without conservative redecl, we still typecheck everything that
+    ever used the given class, and we still redeclare all classes which extend
+    it.
+*)
+and get_all_dependencies ~conservative_redecl trace cid (changed, to_redecl, to_recheck) =
   let dep = Dep.Class cid in
   let where_class_was_used = Typing_deps.get_ideps dep in
-  let to_redecl = DepSet.union where_class_was_used to_redecl in
+  let to_redecl =
+    if conservative_redecl
+    then DepSet.union where_class_was_used to_redecl
+    else to_redecl
+  in
   let to_recheck = DepSet.union where_class_was_used to_recheck in
   let cid_hash = Typing_deps.Dep.make dep in
   let to_redecl = Typing_deps.get_extend_deps trace cid_hash to_redecl in
@@ -243,7 +262,7 @@ let get_extend_deps cid_hash to_redecl =
  * the old and the new type signature of "fid" (function identifier).
 *)
 (*****************************************************************************)
-let get_fun_deps old_funs fid (changed, to_redecl, to_recheck) =
+let get_fun_deps ~conservative_redecl old_funs fid (changed, to_redecl, to_recheck) =
   match SMap.find_unsafe fid old_funs, Decl_heap.Funs.get fid with
   (* Note that we must include all dependencies even if we get the None, None
    * case. Due to the fact we can declare types lazily, there may be no
@@ -256,8 +275,12 @@ let get_fun_deps old_funs fid (changed, to_redecl, to_recheck) =
       let where_fun_is_used = Typing_deps.get_ideps dep in
       let to_recheck = DepSet.union where_fun_is_used to_recheck in
       let fun_name = Typing_deps.get_ideps (Dep.FunName fid) in
-      add_changed changed dep,
-        DepSet.union fun_name to_redecl, DepSet.union fun_name to_recheck
+      let to_redecl =
+        if conservative_redecl
+        then DepSet.union fun_name to_redecl
+        else to_redecl
+      in
+      add_changed changed dep, to_redecl, DepSet.union fun_name to_recheck
   | Some fty1, Some fty2 ->
       let fty1 = Decl_pos_utils.NormalizeSig.fun_type fty1 in
       let fty2 = Decl_pos_utils.NormalizeSig.fun_type fty2 in
@@ -272,8 +295,9 @@ let get_fun_deps old_funs fid (changed, to_redecl, to_recheck) =
         add_changed changed dep,
           to_redecl, DepSet.union where_fun_is_used to_recheck
 
-let get_funs_deps old_funs funs =
-  SSet.fold (get_fun_deps old_funs) funs (DepSet.empty, DepSet.empty, DepSet.empty)
+let get_funs_deps ~conservative_redecl old_funs funs =
+  SSet.fold (get_fun_deps ~conservative_redecl old_funs) funs
+    (DepSet.empty, DepSet.empty, DepSet.empty)
 
 (*****************************************************************************)
 (* Determine which functions/classes have to be rechecked after comparing
@@ -306,7 +330,7 @@ let get_types_deps old_types types =
  * changed.
  *)
 (*****************************************************************************)
-let get_gconst_deps old_gconsts cst_id (changed, to_redecl, to_recheck) =
+let get_gconst_deps ~conservative_redecl old_gconsts cst_id (changed, to_redecl, to_recheck) =
   let cst1 = SMap.find_unsafe cst_id old_gconsts in
   let cst2 = Decl_heap.GConsts.get cst_id in
   match cst1, cst2 with
@@ -315,8 +339,12 @@ let get_gconst_deps old_gconsts cst_id (changed, to_redecl, to_recheck) =
       let where_const_is_used = Typing_deps.get_ideps dep in
       let to_recheck = DepSet.union where_const_is_used to_recheck in
       let const_name = Typing_deps.get_ideps (Dep.GConstName cst_id) in
-      add_changed changed dep,
-        DepSet.union const_name to_redecl, DepSet.union const_name to_recheck
+      let to_redecl =
+        if conservative_redecl
+        then DepSet.union const_name to_redecl
+        else to_redecl
+      in
+      add_changed changed dep, to_redecl, DepSet.union const_name to_recheck
   | Some cst1, Some cst2 ->
       let is_same_signature = cst1 = cst2 in
       if is_same_signature
@@ -327,8 +355,8 @@ let get_gconst_deps old_gconsts cst_id (changed, to_redecl, to_recheck) =
         let to_recheck = DepSet.union where_type_is_used to_recheck in
         add_changed changed dep, to_redecl, to_recheck
 
-let get_gconsts_deps old_gconsts gconsts =
-  SSet.fold (get_gconst_deps old_gconsts) gconsts
+let get_gconsts_deps ~conservative_redecl old_gconsts gconsts =
+  SSet.fold (get_gconst_deps ~conservative_redecl old_gconsts) gconsts
     (DepSet.empty, DepSet.empty, DepSet.empty)
 
 (*****************************************************************************)
@@ -336,13 +364,15 @@ let get_gconsts_deps old_gconsts gconsts =
  * the old and the new type signature of "cid" (class identifier).
 *)
 (*****************************************************************************)
-let get_class_deps old_classes new_classes trace cid
+let get_class_deps ~conservative_redecl old_classes new_classes trace cid
     (changed, to_redecl, to_recheck) =
   match SMap.find_unsafe cid old_classes, SMap.find_unsafe cid new_classes with
   | None, _ | _, None ->
-      get_all_dependencies trace cid (changed, to_redecl, to_recheck)
+      get_all_dependencies ~conservative_redecl
+        trace cid (changed, to_redecl, to_recheck)
   | Some class1, Some class2 when class_big_diff class1 class2 ->
-      get_all_dependencies trace cid (changed, to_redecl, to_recheck)
+      get_all_dependencies ~conservative_redecl
+        trace cid (changed, to_redecl, to_recheck)
   | Some class1, Some class2 ->
       let nclass1 = Decl_pos_utils.NormalizeSig.class_type class1 in
       let nclass2 = Decl_pos_utils.NormalizeSig.class_type class2 in
@@ -382,11 +412,15 @@ let get_class_deps old_classes new_classes trace cid
        *)
       let deps, is_changed = ClassEltDiff.compare class1 class2 in
       let changed = if is_changed = `Changed then add_changed changed dep else changed in
-      (* TODO: should not need to add to to_redecl *)
-      changed, DepSet.union deps to_redecl, DepSet.union deps to_recheck
+      let to_redecl =
+        if conservative_redecl
+        then DepSet.union deps to_redecl
+        else to_redecl
+      in
+      changed, to_redecl, DepSet.union deps to_recheck
 
-let get_classes_deps old_classes new_classes classes =
+let get_classes_deps ~conservative_redecl old_classes new_classes classes =
   SSet.fold
-    (get_class_deps old_classes new_classes (ref DepSet.empty))
+    (get_class_deps ~conservative_redecl old_classes new_classes (ref DepSet.empty))
     classes
     (DepSet.empty, DepSet.empty, DepSet.empty)

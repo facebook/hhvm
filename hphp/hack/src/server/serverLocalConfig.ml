@@ -49,6 +49,19 @@ type t = {
   max_typechecker_worker_memory_mb : int option;
   watchman_debug_logging : bool;
   hg_aware : bool;
+  (* Flag to disable conservative behavior in incremental-mode typechecks.
+   *
+   * By default, when a class has changed and we do not have access to the old
+   * version of its declaration (and thus cannot determine HOW it has changed),
+   * we conservatively redeclare the entire set of files where the class or any
+   * of its members were referenced. Likewise for definitions of functions or
+   * global constants.
+   *
+   * This flag disables that behavior--instead, when a class has changed, we
+   * only redeclare files with an Extends dependency on the class, and we do not
+   * redeclare any files when a function or global constant changes.
+   *)
+  disable_conservative_redecl : bool;
 }
 
 let default = {
@@ -86,6 +99,7 @@ let default = {
   max_typechecker_worker_memory_mb = None;
   watchman_debug_logging = false;
   hg_aware = false;
+  disable_conservative_redecl = false;
 }
 
 let path =
@@ -195,6 +209,8 @@ let load_ fn ~silent =
     ~default:default.watchman_debug_logging config in
   let hg_aware = bool_if_version "hg_aware"
     ~default:default.hg_aware config in
+  let disable_conservative_redecl = bool_if_version "disable_conservative_redecl"
+    ~default:default.disable_conservative_redecl config in
   {
     use_watchman;
     watchman_init_timeout;
@@ -229,6 +245,7 @@ let load_ fn ~silent =
     max_typechecker_worker_memory_mb;
     watchman_debug_logging;
     hg_aware;
+    disable_conservative_redecl;
   }
 
 let load ~silent =

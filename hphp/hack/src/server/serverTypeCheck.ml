@@ -712,6 +712,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     let defs_to_redecl = get_defs fast in
     let _, changes, to_redecl_phase2_deps, to_recheck1 =
       Decl_redecl_service.redo_type_decl
+        ~conservative_redecl:(not genv.local_config.ServerLocalConfig.disable_conservative_redecl)
         ~bucket_size genv.workers env.tcopt oldified_defs fast defs_to_redecl in
 
     (* Things that were redeclared are no longer in old heap, so we substract
@@ -748,7 +749,9 @@ end = functor(CheckKind:CheckKindType) -> struct
 
     let defs_to_redecl_phase2 = get_defs fast_redecl_phase2_now in
     let errorl', _changes, _to_redecl2, to_recheck2 =
-      Decl_redecl_service.redo_type_decl ~bucket_size genv.workers
+      Decl_redecl_service.redo_type_decl
+        ~conservative_redecl:(not genv.local_config.ServerLocalConfig.disable_conservative_redecl)
+        ~bucket_size genv.workers
         env.tcopt oldified_defs fast_redecl_phase2_now defs_to_redecl_phase2 in
 
     let errors = Errors.(incremental_update_map errors

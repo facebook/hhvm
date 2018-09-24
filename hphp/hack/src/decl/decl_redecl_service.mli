@@ -13,6 +13,7 @@ open Typing_deps
 val redo_type_decl :
   MultiWorker.worker list option ->
   bucket_size:int ->
+  conservative_redecl:bool ->
   TypecheckerOptions.t ->
   FileInfo.names ->
   FileInfo.fast ->

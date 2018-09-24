@@ -55,10 +55,10 @@ let on_the_fly_decl_file tcopt errors fn =
  *)
 (*****************************************************************************)
 
-let compute_classes_deps old_classes new_classes acc classes =
+let compute_classes_deps ~conservative_redecl old_classes new_classes acc classes =
   let changed, to_redecl, to_recheck = acc in
   let rc, rdd, rdc =
-    Decl_compare.get_classes_deps old_classes new_classes classes
+    Decl_compare.get_classes_deps ~conservative_redecl old_classes new_classes classes
   in
   let changed = DepSet.union rc changed in
   let to_redecl = DepSet.union rdd to_redecl in
@@ -71,8 +71,8 @@ let compute_classes_deps old_classes new_classes acc classes =
  *)
 (*****************************************************************************)
 
-let compute_funs_deps old_funs (changed, to_redecl, to_recheck) funs =
-  let rc, rdd, rdc = Decl_compare.get_funs_deps old_funs funs in
+let compute_funs_deps ~conservative_redecl old_funs (changed, to_redecl, to_recheck) funs =
+  let rc, rdd, rdc = Decl_compare.get_funs_deps ~conservative_redecl old_funs funs in
   let changed = DepSet.union rc changed in
   let to_redecl = DepSet.union rdd to_redecl in
   let to_recheck = DepSet.union rdc to_recheck in
@@ -97,8 +97,8 @@ let compute_types_deps old_types (changed, to_redecl, to_recheck) types =
  *)
 (*****************************************************************************)
 
-let compute_gconsts_deps old_gconsts (changed, to_redecl, to_recheck) gconsts =
-  let rc, rdd, rdc = Decl_compare.get_gconsts_deps old_gconsts gconsts in
+let compute_gconsts_deps ~conservative_redecl old_gconsts (changed, to_redecl, to_recheck) gconsts =
+  let rc, rdd, rdc = Decl_compare.get_gconsts_deps ~conservative_redecl old_gconsts gconsts in
   let changed = DepSet.union rc changed in
   let to_redecl = DepSet.union rdd to_redecl in
   let to_recheck = DepSet.union rdc to_recheck in
@@ -121,7 +121,7 @@ let otf_decl_files tcopt filel =
   (* Redeclaring the files *)
   redeclare_files tcopt filel
 
-let compute_deps fast filel =
+let compute_deps ~conservative_redecl fast filel =
   let infol =
     List.map filel (fun fn -> Relative_path.Map.find_unsafe fast fn) in
   let names =
@@ -130,17 +130,17 @@ let compute_deps fast filel =
   let acc = DepSet.empty, DepSet.empty, DepSet.empty in
   (* Fetching everything at once is faster *)
   let old_funs = Decl_heap.Funs.get_old_batch n_funs in
-  let acc = compute_funs_deps old_funs acc n_funs in
+  let acc = compute_funs_deps ~conservative_redecl old_funs acc n_funs in
 
   let old_types = Decl_heap.Typedefs.get_old_batch n_types in
   let acc = compute_types_deps old_types acc n_types in
 
   let old_consts = Decl_heap.GConsts.get_old_batch n_consts in
-  let acc = compute_gconsts_deps old_consts acc n_consts in
+  let acc = compute_gconsts_deps ~conservative_redecl old_consts acc n_consts in
 
   let old_classes = Decl_heap.Classes.get_old_batch n_classes in
   let new_classes = Decl_heap.Classes.get_batch n_classes in
-  let compare_classes = compute_classes_deps old_classes new_classes in
+  let compare_classes = compute_classes_deps ~conservative_redecl old_classes new_classes in
   let (changed, to_redecl, to_recheck) = compare_classes acc n_classes in
 
   changed, to_redecl, to_recheck
@@ -158,10 +158,10 @@ let load_and_otf_decl_files _ filel =
     Out_channel.flush stdout;
     raise e
 
-let load_and_compute_deps _acc filel =
+let load_and_compute_deps ~conservative_redecl _acc filel =
   try
     let _, fast = OnTheFlyStore.load() in
-    compute_deps fast filel
+    compute_deps ~conservative_redecl fast filel
   with e ->
     Printf.printf "Error: %s\n" (Exn.to_string e);
     Out_channel.flush stdout;
@@ -182,7 +182,7 @@ let merge_compute_deps
 (*****************************************************************************)
 (* The parallel worker *)
 (*****************************************************************************)
-let parallel_otf_decl workers bucket_size tcopt fast fnl =
+let parallel_otf_decl ~conservative_redecl workers bucket_size tcopt fast fnl =
   try
     OnTheFlyStore.store (tcopt, fast);
     let errors =
@@ -196,7 +196,7 @@ let parallel_otf_decl workers bucket_size tcopt fast fnl =
     let changed, to_redecl, to_recheck =
       MultiWorker.call
         workers
-        ~job:load_and_compute_deps
+        ~job:(load_and_compute_deps ~conservative_redecl)
         ~neutral:compute_deps_neutral
         ~merge:merge_compute_deps
         ~next:(MultiWorker.next ~max_size:bucket_size workers fnl)
@@ -339,7 +339,7 @@ let get_elems workers ~bucket_size ~old defs =
 (* The main entry point *)
 (*****************************************************************************)
 
-let redo_type_decl workers ~bucket_size tcopt all_oldified_defs fast defs =
+let redo_type_decl workers ~bucket_size ~conservative_redecl tcopt all_oldified_defs fast defs =
   (* Some of the defintions are already in the old heap, left there by a
    * previous lazy check *)
   let oldified_defs, current_defs =
@@ -360,9 +360,9 @@ let redo_type_decl workers ~bucket_size tcopt all_oldified_defs fast defs =
     if List.length fnl < 10
     then
       let errors = otf_decl_files tcopt fnl in
-      let changed, to_redecl, to_recheck = compute_deps fast fnl in
+      let changed, to_redecl, to_recheck = compute_deps ~conservative_redecl fast fnl in
       errors, changed, to_redecl, to_recheck
-    else parallel_otf_decl workers bucket_size tcopt fast fnl
+    else parallel_otf_decl ~conservative_redecl workers bucket_size tcopt fast fnl
   in
   remove_old_defs defs all_elems;
   result

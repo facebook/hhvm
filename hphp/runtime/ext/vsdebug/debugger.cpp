@@ -351,6 +351,12 @@ void Debugger::getAllThreadInfo(folly::dynamic& threads) {
     },
     false /* includeDummyRequest */
   );
+
+  // the dummy request isn't in the request map, so add info for it manually
+  threads.push_back(folly::dynamic::object);
+  folly::dynamic& threadInfo = threads[threads.size() - 1];
+  threadInfo["id"] = 0;
+  threadInfo["name"] = std::string("Console/REPL request");
 }
 
 void Debugger::shutdown() {

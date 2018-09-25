@@ -855,8 +855,14 @@ end = functor(CheckKind:CheckKindType) -> struct
     then begin
       Measure.print_stats ();
       Measure.print_distributions ();
-      (* For full checks, we'd like to log lambda counts to a Scuba table *)
-      if full_check_done then TypingLogger.log_lambda_counts ();
+      (* Log lambda counts for full checks where we don't load from a saved state *)
+      if
+        (genv.ServerEnv.options |> ServerArgs.no_load) &&
+        full_check_done &&
+        reparse_count = 0 (* Ignore incremental updates *)
+      then begin
+        TypingLogger.log_lambda_counts ();
+      end;
     end;
     ServerDebug.info genv "incremental_done";
 

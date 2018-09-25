@@ -518,6 +518,7 @@ let parse_start_env command =
   let ai_mode = ref None in
   let ignore_hh_version = ref false in
   let prechecked = ref None in
+  let from = ref "" in
   let wait_deprecation_msg () = Printf.eprintf
     "WARNING: --wait is deprecated, does nothing, and will be going away \
      soon!\n%!" in
@@ -527,6 +528,7 @@ let parse_start_env command =
     "--no-load", Arg.Set no_load,
     " start from a fresh state";
     Common_argspecs.watchman_debug_logging watchman_debug_logging;
+    Common_argspecs.from from;
     "--profile-log", Arg.Set profile_log,
     " enable profile logging";
     "--ai", Arg.String (fun x -> ai_mode := Some x),
@@ -547,6 +549,7 @@ let parse_start_env command =
         exit 1 in
   { ClientStart.
     root = root;
+    from = !from;
     no_load = !no_load;
     watchman_debug_logging = !watchman_debug_logging;
     profile_log = !profile_log;
@@ -572,7 +575,10 @@ let parse_stop_args () =
       Stop a hack server\n\n\
       WWW-ROOT is assumed to be current directory if unspecified\n"
       Sys.argv.(0) in
-  let options = [] in
+  let from = ref "" in
+  let options = [
+    Common_argspecs.from from;
+  ] in
   let args = parse_without_command options usage "stop" in
   let root =
     match args with
@@ -582,12 +588,12 @@ let parse_stop_args () =
         Printf.fprintf stderr
           "Error: please provide at most one www directory\n%!";
         exit 1
-  in CStop {ClientStop.root = root}
+  in CStop {ClientStop.root = root; from = !from;}
 
 let parse_build_args () =
   let usage =
     Printf.sprintf
-      "Usage: %s build [WWW-ROOT]\n\
+      "Usage: %s build [OPTION]... [WWW-ROOT]\n\
       Generates build files\n"
       Sys.argv.(0) in
   let force_dormant_start = ref false in
@@ -606,6 +612,7 @@ let parse_build_args () =
   let check = ref false in
   let is_push = ref false in
   let clean = ref false in
+  let from = ref "" in
   (* todo: for now better to default to true here, but this is temporary! *)
   let clean_before_build = ref true in
   let run_scripts = ref true in
@@ -627,6 +634,7 @@ let parse_build_args () =
     "--serial", Arg.Set serial,
     " run without parallel worker processes";
     Common_argspecs.force_dormant_start force_dormant_start;
+    Common_argspecs.from from;
     "--test-dir", Arg.String (fun x -> test_dir := Some x),
     " <dir> generates into <dir> and compares with root";
     "--no-grade", Arg.Clear grade,
@@ -655,6 +663,7 @@ let parse_build_args () =
   CBuild { ClientBuild.
     retries = !retries;
     root = root;
+    from = !from;
     wait = !wait;
     force_dormant_start = !force_dormant_start;
     build_opts = { ServerBuild.
@@ -703,8 +712,11 @@ let parse_lsp_args () =
 
 let parse_debug_args () =
   let usage =
-    Printf.sprintf "Usage: %s debug [WWW-ROOT]\n" Sys.argv.(0) in
-  let options = [] in
+    Printf.sprintf "Usage: %s debug [OPTION]... [WWW-ROOT]\n" Sys.argv.(0) in
+  let from = ref "" in
+  let options = [
+    Common_argspecs.from from;
+  ] in
   let args = parse_without_command options usage "debug" in
   let root =
     match args with
@@ -712,7 +724,8 @@ let parse_debug_args () =
     | [x] -> ClientArgsUtils.get_root (Some x)
     | _ -> Printf.printf "%s\n" usage; exit 2 in
   CDebug { ClientDebug.
-    root
+    root;
+    from = !from;
   }
 
 let parse_args () =
@@ -732,5 +745,5 @@ let root = function
   | CStart { ClientStart.root; _ }
   | CRestart { ClientStart.root; _ }
   | CStop { ClientStop.root; _ }
-  | CDebug { ClientDebug.root } -> root
+  | CDebug { ClientDebug.root; _ } -> root
   | CLsp _ -> Path.dummy_path

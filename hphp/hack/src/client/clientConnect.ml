@@ -13,6 +13,7 @@ exception Server_hung_up
 
 type env = {
   root : Path.t;
+  from : string;
   autostart : bool;
   force_dormant_start : bool;
   retries : int option;
@@ -326,6 +327,7 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
       if env.autostart then begin
         ClientStart.start_server { ClientStart.
           root = env.root;
+          from = env.from;
           no_load = env.no_load;
           watchman_debug_logging = env.watchman_debug_logging;
           profile_log = env.profile_log;

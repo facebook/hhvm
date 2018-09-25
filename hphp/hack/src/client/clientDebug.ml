@@ -9,12 +9,14 @@
 
 type env = {
   root : Path.t;
+  from : string;
 }
 
 let main env =
   let {ClientConnect.channels = ic, oc; _} =
       ClientConnect.connect { ClientConnect.
     root = env.root;
+    from = env.from;
     autostart = true;
     force_dormant_start = false;
     ai_mode = None;

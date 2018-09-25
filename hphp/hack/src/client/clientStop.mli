@@ -9,7 +9,8 @@
 
 type env = {
   root: Path.t;
+  from: string;
 }
 
-val kill_server : Path.t -> unit
+val kill_server : Path.t -> string -> unit
 val main : env -> Exit_status.t

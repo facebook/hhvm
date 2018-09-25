@@ -75,6 +75,7 @@ let parse_position_string arg =
 let connect ?(use_priority_pipe=false) args =
   ClientConnect.connect { ClientConnect.
     root = args.root;
+    from = args.from;
     autostart = args.autostart;
     force_dormant_start = args.force_dormant_start;
     retries = Some args.retries;

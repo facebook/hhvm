@@ -9,6 +9,7 @@
 
 type env = {
   root: Path.t;
+  from: string;
   no_load: bool;
   watchman_debug_logging : bool;
   profile_log : bool;

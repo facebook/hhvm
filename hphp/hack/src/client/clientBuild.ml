@@ -13,6 +13,7 @@ type env = {
   (** Number of times to retry establishing a connection to the server. *)
   retries : int;
   root : Path.t;
+  from : string;
   wait : bool;
   (** Force the monitor to start a server if one isn't running. *)
   force_dormant_start : bool;
@@ -56,10 +57,12 @@ let handle_response env ic =
 let main_exn env =
   let build_type = ServerBuild.build_type_of env.build_opts in
   let request_id = env.build_opts.ServerBuild.id in
+  HackEventLogger.client_set_from env.from;
   HackEventLogger.client_build build_type request_id;
   let ClientConnect.{channels = ic, oc; _} =
       ClientConnect.connect { ClientConnect.
     root = env.root;
+    from = env.from;
     autostart = true;
     (** When running Hack Build, we want to force the monitor to start
      * a Hack server if one isn't running. This is for the case where

@@ -20,6 +20,7 @@ let get_hhserver () =
 
 type env = {
   root: Path.t;
+  from: string;
   no_load : bool;
   watchman_debug_logging : bool;
   profile_log : bool;
@@ -121,10 +122,11 @@ let should_start env =
   | Error SMUtils.Monitor_establish_connection_timeout
   | Error SMUtils.Monitor_connection_failure ->
     Printf.eprintf "Replacing unresponsive server for %s\n%!" root_s;
-    ClientStop.kill_server env.root;
+    ClientStop.kill_server env.root env.from;
     true
 
 let main env =
+  HackEventLogger.client_set_from env.from;
   HackEventLogger.client_start ();
   (* TODO(ljw): There are some race conditions here. First scenario: two      *)
   (* processes simultaneously do 'hh start' while the server isn't running.   *)

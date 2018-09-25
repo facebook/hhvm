@@ -15,6 +15,7 @@ exception FailedToKill
 
 type env = {
   root: Path.t;
+  from: string;
 }
 
 let wait_for_death root secs =
@@ -91,8 +92,9 @@ let do_kill env =
       raise Exit_status.(Exit_with Kill_error)
 
 let main env =
+  HackEventLogger.client_set_from env.from;
   HackEventLogger.client_stop ();
   do_kill env;
   Exit_status.No_error
 
-let kill_server root = do_kill {root}
+let kill_server root from = do_kill {root; from;}

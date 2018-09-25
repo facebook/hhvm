@@ -148,6 +148,7 @@ let hhconfig_version: string ref = ref "[NotYetInitialized]"
 let can_autostart_after_mismatch: bool ref = ref true
 let callbacks_outstanding: (on_result * on_error) IdMap.t ref = ref IdMap.empty
 let hh_server_state: (float * hh_server_state) list ref = ref [] (* head is newest *)
+let ref_from: string ref = ref ""
 
 let initialize_params_exc () : Lsp.Initialize.params =
   match !initialize_params_ref with
@@ -1560,6 +1561,7 @@ let rec connect_client
   let env_connect =
     { ClientConnect.
       root;
+      from = !ref_from;
       autostart;
       force_dormant_start = false;
       watchman_debug_logging = false; (* If you want this, start the server manually in terminal. *)
@@ -1637,6 +1639,7 @@ let start_server (root: Path.t) : unit =
   let env_start =
     { ClientStart.
       root;
+      from = !ref_from;
       no_load = false;
       watchman_debug_logging = false;
       profile_log = false;
@@ -2331,6 +2334,7 @@ let handle_event
 let main (env: env) : 'a =
   let open Marshal_tools in
   Printexc.record_backtrace true;
+  ref_from := env.from;
   HackEventLogger.client_set_from env.from;
   let client = Jsonrpc.make_queue () in
   let deferred_action = ref None in

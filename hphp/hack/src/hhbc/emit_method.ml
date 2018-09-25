@@ -187,7 +187,7 @@ let from_ast_wrapper : bool -> _ ->
      Ast_scope.ScopeItem.Class ast_class] in
   let scope =
     if method_is_closure_body
-    then Ast_scope.ScopeItem.Lambda :: scope else scope in
+    then Ast_scope.ScopeItem.Lambda method_is_async :: scope else scope in
   let closure_namespace = SMap.get class_name (Emit_env.get_closure_namespaces ()) in
   let namespace = Option.value closure_namespace ~default:namespace in
   let is_return_by_ref = ast_method.Ast.m_ret_by_ref in

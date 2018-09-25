@@ -73,7 +73,7 @@ let get_pos_for_error env =
     | Ast_scope.ScopeItem.Class cd :: _ ->
       aux_pos @@ Some cd.Ast.c_span
     | Ast_scope.ScopeItem.Method _ :: scope
-    | Ast_scope.ScopeItem.Lambda :: scope
+    | Ast_scope.ScopeItem.Lambda _ :: scope
     | Ast_scope.ScopeItem.LongLambda _ :: scope -> aux_scope scope
     | _ -> aux_pos None
   in

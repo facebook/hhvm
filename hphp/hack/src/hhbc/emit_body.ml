@@ -442,7 +442,7 @@ let emit_body
     match scope with
     | [] -> Emit_env.get_unique_id_for_main ()
     | ScopeItem.Method md :: ScopeItem.Class cls :: _
-    | ScopeItem.Lambda :: ScopeItem.Method md :: ScopeItem.Class cls :: _ ->
+    | ScopeItem.Lambda _ :: ScopeItem.Method md :: ScopeItem.Class cls :: _ ->
       Emit_env.get_unique_id_for_method cls md
     | ScopeItem.Function fd :: _ ->
       Emit_env.get_unique_id_for_function fd

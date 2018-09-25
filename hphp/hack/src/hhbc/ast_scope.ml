@@ -11,6 +11,7 @@ open Core_kernel
 module ScopeItem =
 struct
   type is_static = bool
+  type is_async = bool
   type t =
   (* Named class *)
   | Class of Ast.class_
@@ -19,9 +20,9 @@ struct
   (* Method in class *)
   | Method of Ast.method_
   (* PHP-style closure *)
-  | LongLambda of is_static
+  | LongLambda of is_static * is_async
   (* Short lambda *)
-  | Lambda
+  | Lambda of is_async
 end
 
 module Scope =
@@ -68,7 +69,7 @@ struct
   let rec has_this scope =
     match scope with
     | [] -> true (* Assume top level has this *)
-    | ScopeItem.Lambda :: scope
+    | ScopeItem.Lambda _ :: scope
     | ScopeItem.LongLambda _ :: scope -> has_this scope
     | ScopeItem.Class _ :: _ -> false
     | ScopeItem.Function _ :: _ -> false
@@ -79,8 +80,8 @@ struct
   let rec is_in_static_method scope =
     match scope with
     | ScopeItem.Method md :: _ -> List.mem ~equal:(=) md.Ast.m_kind Ast.Static
-    | ScopeItem.Lambda :: scope -> is_in_static_method scope
-    | ScopeItem.LongLambda is_static :: scope ->
+    | ScopeItem.Lambda _ :: scope -> is_in_static_method scope
+    | ScopeItem.LongLambda (is_static, _) :: scope ->
       not is_static && is_in_static_method scope
     | _ -> false
 

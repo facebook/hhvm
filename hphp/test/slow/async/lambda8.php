@@ -1,0 +1,5 @@
+<?hh
+
+function() {
+  await null;
+};

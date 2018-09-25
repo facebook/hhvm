@@ -173,7 +173,7 @@ let reset_in_using env =
 
 let is_in_lambda scope =
   match scope with
-  | ScopeItem.Lambda | ScopeItem.LongLambda _ -> true
+  | ScopeItem.Lambda _ | ScopeItem.LongLambda _ -> true
   | _ -> false
 
 let should_capture_var env var =
@@ -279,11 +279,15 @@ let env_with_function_like env e ~is_closure_body fd =
   env_with_function_like_ env e ~is_closure_body fd.Ast.f_params
     fd.Ast.f_span fd.Ast.f_body
 
+let fun_is_async = function FAsync | FAsyncGenerator -> true | _ -> false
+
 let env_with_lambda env fd =
-  env_with_function_like env ScopeItem.Lambda ~is_closure_body:true fd
+  let is_async = fun_is_async fd.Ast.f_fun_kind in
+  env_with_function_like env (ScopeItem.Lambda is_async) ~is_closure_body:true fd
 
 let env_with_longlambda env is_static fd =
-  env_with_function_like env (ScopeItem.LongLambda is_static) ~is_closure_body:true fd
+  let is_async = fun_is_async fd.Ast.f_fun_kind in
+  env_with_function_like env (ScopeItem.LongLambda (is_static, is_async)) ~is_closure_body:true fd
 
 let strip_id id = SU.strip_global_ns (snd id)
 let make_class_name cd = SU.Xhp.mangle_id (strip_id cd.c_name)
@@ -518,12 +522,12 @@ let convert_id (env:env) p (pid, str as id) =
       (* for lambdas nested in trait methods HHVM replaces __METHOD__
          with enclosing method name - do the same and bubble up from lambdas *)
       else List.drop_while env.scope ~f:(function
-        | ScopeItem.Lambda | ScopeItem.LongLambda _ -> true
+        | ScopeItem.Lambda _ | ScopeItem.LongLambda _ -> true
         | _ -> false) in
     begin match scope with
       | ScopeItem.Function fd :: _ -> return (prefix ^ strip_id fd.f_name)
       | ScopeItem.Method md :: _ -> return (prefix ^ strip_id md.m_name)
-      | (ScopeItem.Lambda | ScopeItem.LongLambda _) :: _ ->
+      | (ScopeItem.Lambda _ | ScopeItem.LongLambda _) :: _ ->
         return (prefix ^ "{closure}")
       (* PHP weirdness: __METHOD__ inside a class outside a method
        * returns class name *)
@@ -535,7 +539,7 @@ let convert_id (env:env) p (pid, str as id) =
     begin match env.scope with
     | ScopeItem.Function fd :: _ -> return (strip_id fd.f_name)
     | ScopeItem.Method md :: _ -> return (strip_id md.m_name)
-    | (ScopeItem.Lambda | ScopeItem.LongLambda _) :: _ -> return "{closure}"
+    | (ScopeItem.Lambda _ | ScopeItem.LongLambda _) :: _ -> return "{closure}"
     | _ -> return ""
     end
   | "__LINE__" ->
@@ -546,9 +550,8 @@ let convert_id (env:env) p (pid, str as id) =
     (p, Id id)
 
 let check_if_in_async_context { scope; pos; _ } =
-  let check_valid_fun_kind (_, name) =
-    function | FAsync | FAsyncGenerator -> ()
-             | _ -> Emit_fatal.raise_fatal_parse pos @@
+  let check_valid_fun_kind (_, name) fk =
+    if not (fun_is_async fk) then Emit_fatal.raise_fatal_parse pos @@
     "Function '"
     ^ (SU.strip_global_ns name)
     ^ "' contains 'await' but is not declared as async."
@@ -556,11 +559,10 @@ let check_if_in_async_context { scope; pos; _ } =
   match scope with
   | [] -> Emit_fatal.raise_fatal_parse pos
             "'await' can only be used inside a function"
-  | ScopeItem.Lambda :: _
-  | ScopeItem.LongLambda _ :: _ ->
-   (* TODO: In a lambda, we dont see whether there is a
-    * async keyword in front or not >.> so assume this is fine, for now. *)
-    ()
+  | ScopeItem.Lambda is_async :: _
+  | ScopeItem.LongLambda (_, is_async) :: _ ->
+    if not is_async then
+      Emit_fatal.raise_fatal_parse pos "Await may only appear in an async function"
   | ScopeItem.Class _ :: _ -> () (* Syntax error, wont get here *)
   | ScopeItem.Function fd :: _ ->
     check_valid_fun_kind fd.f_name fd.f_fun_kind
@@ -845,12 +847,12 @@ and convert_lambda env st p fd use_vars_opt =
 
   let rec is_scope_static scope =
     match scope with
-    | ScopeItem.LongLambda is_static :: scope ->
+    | ScopeItem.LongLambda (is_static, _) :: scope ->
       is_static || is_scope_static scope
     | ScopeItem.Function _ :: _ -> false
     | ScopeItem.Method md :: _ ->
       List.mem ~equal:(=) md.m_kind Static
-    | ScopeItem.Lambda :: scope ->
+    | ScopeItem.Lambda _ :: scope ->
       is_scope_static scope
     | _ -> false in
 

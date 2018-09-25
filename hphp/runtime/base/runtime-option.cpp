@@ -1318,6 +1318,7 @@ void RuntimeOption::Load(
       X(Deserialize);
       X(DeserializeOrFail);
       X(DeserializeOrGenerate);
+      X(DeserializeAndDelete);
       X(DeserializeAndExit);
       #undef X
       return JitSerdesMode::Off;

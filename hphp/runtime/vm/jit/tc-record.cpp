@@ -327,6 +327,7 @@ void logTranslation(const TransEnv& env, const TransRange& range) {
     case JitSerdesMode::Deserialize:
     case JitSerdesMode::DeserializeOrFail:
     case JitSerdesMode::DeserializeOrGenerate:
+    case JitSerdesMode::DeserializeAndDelete:
     case JitSerdesMode::DeserializeAndExit:
       cols.setInt("func_id", context.func->getFuncId());
       break;

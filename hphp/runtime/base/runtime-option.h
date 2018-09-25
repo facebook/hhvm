@@ -54,6 +54,7 @@ enum class JitSerdesMode {
   Deserialize,
   DeserializeOrFail,
   DeserializeOrGenerate,
+  DeserializeAndDelete,
   DeserializeAndExit,
 };
 

@@ -2436,6 +2436,7 @@ void hphp_process_init() {
       case JitSerdesMode::Deserialize:
       case JitSerdesMode::DeserializeOrFail:
       case JitSerdesMode::DeserializeOrGenerate:
+      case JitSerdesMode::DeserializeAndDelete:
       case JitSerdesMode::DeserializeAndExit:
       if (RuntimeOption::ServerExecutionMode()) {
         Logger::FInfo("JitDeserializeFrom: {}",
@@ -2445,6 +2446,16 @@ void hphp_process_init() {
         RuntimeOption::EvalJitWorkerThreadsForSerdes : Process::GetCPUCount();
       auto const errMsg =
         jit::deserializeProfData(RuntimeOption::EvalJitSerdesFile, numWorkers);
+
+      if (mode == JitSerdesMode::DeserializeAndDelete) {
+        // Delete the serialized profile data when we finish reading
+        if (RuntimeOption::ServerExecutionMode()) {
+          Logger::FInfo("Deleting serialized profile-data file: {}",
+                        RuntimeOption::EvalJitSerdesFile);
+        }
+        unlink(RuntimeOption::EvalJitSerdesFile.c_str());
+      }
+
       if (errMsg.empty()) {
         if (RuntimeOption::ServerExecutionMode()) {
           Logger::FInfo("JitDeserialize: Loaded {} Units with {} workers",

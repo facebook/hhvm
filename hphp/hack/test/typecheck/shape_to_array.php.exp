@@ -7,5 +7,5 @@ File "shape_to_array.php", line 16, characters 3-57:
 File "shape_to_array.php", line 17, characters 3-65:
   array<int, ^(int | string)>
 File "shape_to_array.php", line 20, characters 3-30:
-  array<string, int>
+  array<string, ^(int)>
 No errors

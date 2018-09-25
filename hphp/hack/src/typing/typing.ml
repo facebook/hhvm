@@ -1390,11 +1390,6 @@ and expr_
         (Env.get_options env)
         TypecheckerOptions.experimental_disable_shape_and_tuple_arrays in
 
-  let null_coalesce_assignment_enabled =
-      TypecheckerOptions.experimental_feature_enabled
-        (Env.get_options env)
-        TypecheckerOptions.experimental_null_coalesce_assignment in
-
   let re_prefixed_strings_enabled =
       TypecheckerOptions.experimental_feature_enabled
         (Env.get_options env)
@@ -2010,11 +2005,12 @@ and expr_
      * TODO TAST: is this right? e1 will get evaluated more than once
      *)
   | Binop (Ast.Eq (Some op), e1, e2) ->
-      if op = Ast.QuestionQuestion && not null_coalesce_assignment_enabled
-      then begin
-        Errors.experimental_feature p "null coalesce assignment operator";
+      begin match op, snd e1 with
+      | Ast.QuestionQuestion, Class_get _ ->
+        Errors.experimental_feature p
+          "null coalesce assignment operator with static properties";
         expr_error env p (Reason.Rnone)
-      end else
+      | _ ->
       let e_fake = (p, Binop (Ast.Eq None, e1, (p, Binop (op, e1, e2)))) in
       let env, te_fake, ty = raw_expr env e_fake in
       begin match snd te_fake with
@@ -2022,6 +2018,7 @@ and expr_
           let te = T.Binop (Ast.Eq (Some op), te1, te2) in
           make_result env te ty
         | _ -> assert false
+      end
       end
   | Binop (Ast.Eq None, e1, e2) ->
       let forbid_uref = match e1, e2 with

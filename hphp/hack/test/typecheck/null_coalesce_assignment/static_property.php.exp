@@ -1,0 +1,2 @@
+File "static_property.php", line 8, characters 3-15:
+Cannot use experimental feature: null coalesce assignment operator with static properties (Other[0000])

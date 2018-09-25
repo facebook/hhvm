@@ -73,35 +73,6 @@ TEST(ARRAY, Constructors) {
   EXPECT_TRUE(arr.isPHPArray());
   EXPECT_FALSE(arr.isHackArray());
 
-  arr = Array::Create("name", 1);
-  EXPECT_TRUE(!arr.empty());
-  EXPECT_TRUE(arr.size() == 1);
-  EXPECT_TRUE(arr.length() == 1);
-  EXPECT_TRUE(!arr.isNull());
-  EXPECT_TRUE(arr[s_name].toInt32() == 1);
-  EXPECT_TRUE(arr.isPHPArray());
-  EXPECT_FALSE(arr.isHackArray());
-
-  arr = Array::Create(s_name, "test");
-  EXPECT_TRUE(!arr.empty());
-  EXPECT_TRUE(arr.size() == 1);
-  EXPECT_TRUE(arr.length() == 1);
-  EXPECT_TRUE(!arr.isNull());
-  EXPECT_TRUE(equal(arr[s_name], String("test")));
-  EXPECT_TRUE(arr.isPHPArray());
-  EXPECT_FALSE(arr.isHackArray());
-
-  arrCopy = arr;
-  arr = Array::Create(s_name, arr);
-  EXPECT_TRUE(!arr.empty());
-  EXPECT_TRUE(arr.size() == 1);
-  EXPECT_TRUE(arr.length() == 1);
-  EXPECT_TRUE(!arr.isNull());
-  EXPECT_TRUE(equal(arr[s_name], arrCopy));
-  EXPECT_TRUE(arr[s_name].toArray().size() == 1);
-  EXPECT_TRUE(arr.isPHPArray());
-  EXPECT_FALSE(arr.isHackArray());
-
   arr = Array::CreateVec();
   EXPECT_TRUE(arr.empty());
   EXPECT_TRUE(arr.size() == 0);
@@ -412,7 +383,7 @@ TEST(ARRAY, Membership) {
     EXPECT_TRUE(arr.exists(0));
     arr.remove(0);
     EXPECT_TRUE(!arr.exists(0));
-    EXPECT_TRUE(equal(arr, Array::Create(1, "v2")));
+    EXPECT_TRUE(equal(arr, make_map_array(1, "v2")));
     arr.append("v3");
     EXPECT_TRUE(equal(arr, make_map_array(1, "v2", 2, "v3")));
   }
@@ -466,7 +437,7 @@ TEST(ARRAY, Membership) {
     EXPECT_TRUE(arr.exists(s_n1));
     arr.remove(s_n1);
     EXPECT_TRUE(!arr.exists(s_n1));
-    EXPECT_TRUE(equal(arr, Array::Create(s_n2, "v2")));
+    EXPECT_TRUE(equal(arr, make_map_array(s_n2, "v2")));
     arr.append("v3");
     EXPECT_TRUE(equal(arr, make_map_array("n2", "v2", 0, "v3")));
   }
@@ -574,12 +545,12 @@ TEST(ARRAY, Merge) {
     arr = Array::Create("s0").merge(Array::Create("s1"));
     EXPECT_TRUE(equal(arr, make_packed_array("s0", "s1")));
 
-    arr = Array::Create("n0", "s0") + Array::Create("n1", "s1");
+    arr = make_map_array("n0", "s0") + make_map_array("n1", "s1");
     EXPECT_TRUE(equal(arr, make_map_array("n0", "s0", "n1", "s1")));
     arr += make_map_array("n0", "s0", "n1", "s1");
     EXPECT_TRUE(equal(arr, make_map_array("n0", "s0", "n1", "s1")));
 
-    arr = Array::Create("n0", "s0").merge(Array::Create("n1", "s1"));
+    arr = make_map_array("n0", "s0").merge(make_map_array("n1", "s1"));
     EXPECT_TRUE(equal(arr, make_map_array("n0", "s0", "n1", "s1")));
     Array arrX = make_map_array("n0", "s2", "n1", "s3");
     arr = arr.merge(arrX);

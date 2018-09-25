@@ -69,16 +69,6 @@ void ArrNR::compileTimeAssertions() {
 ///////////////////////////////////////////////////////////////////////////////
 // constructors
 
-Array Array::Create(const Variant& name, const Variant& var) {
-  return Array{
-    ArrayData::Create(
-      name.isString() ? name.toKey(staticEmptyArray()) : name,
-      var
-    ),
-    NoIncRef{}
-  };
-}
-
 Array::~Array() {}
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -111,8 +111,6 @@ public:
     return Array(ArrayData::Create(value), NoIncRef{});
   }
 
-  static Array Create(const Variant& key, const Variant& value);
-
   /////////////////////////////////////////////////////////////////////////////
 
   Array() {}

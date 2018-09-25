@@ -140,11 +140,17 @@ val get_upper_bounds: env -> string -> Type_parameter_env.tparam_bounds
 
 val is_fresh_generic_parameter: string -> bool
 (** Return whether the type parameter with the given name was implicity created
-    as part of an `instamceof`, `is`, or `as` expression (instead of being
+    as part of an `instanceof`, `is`, or `as` expression (instead of being
     explicitly declared in code by the user). *)
 
 val subtype: env -> Tast.ty -> Tast.ty -> env * bool
-(** Return {true} when the first type is a subtype of the second type. *)
+(** Return {true} when the first type can be considered a subtype of the second
+    type after resolving unbound type variables in both types (if any), and an
+    {!env} reflecting the new state of these type variables. *)
+
+val can_subtype: env -> Tast.ty -> Tast.ty -> bool
+(** Return {true} when the first type can be considered a subtype of the second
+    type after resolving unbound type variables in both types (if any). *)
 
 val is_stringish: ?allow_mixed:bool -> env -> Tast.ty -> bool
 (** Return {true} when the given type can be considered a subtype of Stringish

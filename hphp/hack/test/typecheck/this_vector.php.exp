@@ -1,1 +1,2 @@
-No errors
+File "this_vector.php", line 31, characters 12-16:
+Invalid condition: a value of type <static> will always be truthy (Typing[4273])

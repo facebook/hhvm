@@ -1,1 +1,6 @@
-No errors
+File "valid_hints.php", line 11, characters 7-13:
+Invalid condition: a value of type C will always be truthy (Typing[4273])
+File "valid_hints.php", line 21, characters 14-43:
+Invalid condition: a value of type shape('foo' => int, ...) will always be truthy (Typing[4273])
+File "valid_hints.php", line 23, characters 14-33:
+Invalid condition: a value of type (int, ?string) will always be truthy (Typing[4273])

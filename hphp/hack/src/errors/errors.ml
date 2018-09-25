@@ -3330,6 +3330,11 @@ let lateinit_with_default pos =
   add (Typing.err_code Typing.LateInitWithDefault) pos
     "A late-initialized property cannot have a default value"
 
+let invalid_truthiness_test pos ty =
+  add (Typing.err_code Typing.InvalidTruthinessTest) pos @@
+    Printf.sprintf
+      "Invalid condition: a value of type %s will always be truthy" ty
+
 let forward_compatibility_not_current pos value =
   let current = ForwardCompatibilityLevel.current in
   add (Init.err_code Init.ForwardCompatibilityNotCurrent)

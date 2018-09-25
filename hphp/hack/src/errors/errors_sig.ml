@@ -565,6 +565,7 @@ module type S = sig
   val shapes_key_exists_always_false: Pos.t -> string -> Pos.t -> [< `Undefined | `Unset] -> unit
   val shapes_idx_with_non_existent_field: Pos.t -> string -> Pos.t -> [< `Undefined | `Unset] -> unit
   val ambiguous_object_access: Pos.t -> string -> Pos.t -> string -> Pos.t -> string -> string -> unit
+  val invalid_truthiness_test: Pos.t -> string -> unit
   val forward_compatibility_not_current: Pos.t -> ForwardCompatibilityLevel.t -> unit
   val forward_compatibility_below_minimum: Pos.t -> ForwardCompatibilityLevel.t -> unit
   val invalid_argument_type_for_condition_in_rx:

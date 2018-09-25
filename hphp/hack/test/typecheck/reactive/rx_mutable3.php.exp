@@ -1,1 +1,2 @@
-No errors
+File "rx_mutable3.php", line 22, characters 23-25:
+Invalid condition: a value of type A will always be truthy (Typing[4273])

@@ -1,0 +1,2 @@
+File "truthiness_test_18.php", line 4, characters 7-8:
+Invalid condition: a value of type Pair<int, int> will always be truthy (Typing[4273])

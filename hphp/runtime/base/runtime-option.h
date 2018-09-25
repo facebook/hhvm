@@ -508,7 +508,10 @@ struct RuntimeOption {
   // Valid values are 0 => enabled (default),
   // 1 => warning, 2 => error.
   static uint64_t DisableCallUserFuncArray;
-
+  // Disables PHP's parse_str function with one argument
+  // valid values are 0 => enabled (default)
+  // 1 => warning, 2 => error
+  static uint64_t DisableParseStrSingleArg;
 
   static int GetScannerType();
 

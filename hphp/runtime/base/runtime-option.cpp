@@ -428,6 +428,7 @@ uint64_t RuntimeOption::DisableForwardStaticCall = 0;
 uint64_t RuntimeOption::DisableForwardStaticCallArray = 0;
 uint64_t RuntimeOption::DisableCallUserFunc = 0;
 uint64_t RuntimeOption::DisableCallUserFuncArray = 0;
+uint64_t RuntimeOption::DisableParseStrSingleArg = 0;
 bool RuntimeOption::UndefinedConstAsString = true;
 bool RuntimeOption::UndefinedConstFallback = true;
 
@@ -1214,6 +1215,9 @@ void RuntimeOption::Load(
     Config::Bind(DisableCallUserFuncArray, ini, config,
                  "Hack.Lang.Phpism.DisableCallUserFuncArray",
                  DisableCallUserFuncArray);
+    Config::Bind(DisableParseStrSingleArg, ini, config,
+                 "Hack.Lang.Phpism.DisableParseStrSingleArg",
+                 DisableParseStrSingleArg);
   }
   {
     // Repo

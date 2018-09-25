@@ -639,6 +639,14 @@ int64_t HHVM_FUNCTION(extract,
 void HHVM_FUNCTION(parse_str,
                    const String& str,
                    VRefParam arr /* = null */) {
+  if (!arr.isReferenced()) {
+    auto const warning = "parse_str() requires two arguments";
+    switch (RuntimeOption::DisableParseStrSingleArg) {
+      case 0:  break;
+      case 1:  raise_warning(warning); break;
+      default: raise_error(warning);
+    }
+  }
   SuppressHackArrCompatNotices suppress;
   Array result = Array::Create();
   HttpProtocol::DecodeParameters(result, str.data(), str.size());

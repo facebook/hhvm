@@ -14,13 +14,13 @@
          { Aast.AnnotatedAST.fnb_nast =
            [(If (
                (([4:7-18], bool),
-                (Binop (EQeqeq, (([4:7-9], ?int), (Lvar ([4:7-9], $x))),
+                (Binop (Eqeqeq, (([4:7-9], ?int), (Lvar ([4:7-9], $x))),
                    (([4:14-18], ?int), Null)))),
                [(Return ([4:20-29], (Some (([4:27-28], int), (Int "1")))))],
                [Noop]));
              (If (
                 (([5:7-18], bool),
-                 (Binop (EQeqeq, (([5:7-11], int), Null),
+                 (Binop (Eqeqeq, (([5:7-11], int), Null),
                     (([5:16-18], int), (Lvar ([5:16-18], $x)))))),
                 [(Return ([5:20-29], (Some (([5:27-28], int), (Int "2")))))],
                 [Noop]));

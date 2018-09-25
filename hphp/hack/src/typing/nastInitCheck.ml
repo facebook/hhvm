@@ -443,8 +443,8 @@ and expr_ env acc p e =
   | Binop (Ast.Eq None, e1, e2) ->
       let acc = expr acc e2 in
       assign_expr env acc e1
-  | Binop (Ast.AMpamp, e, _)
-  | Binop (Ast.BArbar, e, _) ->
+  | Binop (Ast.Ampamp, e, _)
+  | Binop (Ast.Barbar, e, _) ->
       expr acc e
   | Binop (_, e1, e2) ->
       let acc = expr acc e1 in

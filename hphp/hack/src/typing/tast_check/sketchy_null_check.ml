@@ -94,8 +94,8 @@ let handler = object
     | Binop (Eqeq, e, (_, Null)) -> sketchy_null_check env e `Eq
     | Eif (e, Some _, _)
     | Assert (AE_assert e) -> sketchy_null_check env e `Neq
-    | Binop (AMpamp, e1, e2)
-    | Binop (BArbar, e1, e2) ->
+    | Binop (Ampamp, e1, e2)
+    | Binop (Barbar, e1, e2) ->
       sketchy_null_check env e1 `Neq;
       sketchy_null_check env e2 `Neq;
     | _ -> ()

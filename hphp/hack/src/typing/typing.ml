@@ -2033,8 +2033,8 @@ and expr_
       | _ ->
           make_result env (T.Binop(Ast.Eq None, te1, te2)) ty
       )
-  | Binop ((Ast.AMpamp | Ast.BArbar as bop), e1, e2) ->
-      let c = bop = Ast.AMpamp in
+  | Binop ((Ast.Ampamp | Ast.Barbar as bop), e1, e2) ->
+      let c = bop = Ast.Ampamp in
       let env, te1, _ = expr env e1 in
       let lenv = env.Env.lenv in
       let env = condition env c te1 in
@@ -2044,7 +2044,7 @@ and expr_
         (Reason.Rlogic_ret p, Tprim Tbool)
   | Binop (bop, e1, e2) when Env.is_strict env
                         && (snd e1 = Nast.Null || snd e2 = Nast.Null)
-                        && (bop = Ast.EQeqeq || bop = Ast.Diff2) ->
+                        && (bop = Ast.Eqeqeq || bop = Ast.Diff2) ->
       let e, ne = if snd e2 = Nast.Null then e1, e2 else e2, e1 in
       let env, te, ty = raw_expr env e in
       let tne = T.make_typed_expr (fst ne) ty T.Null in
@@ -5569,7 +5569,7 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
     end
   | Ast.Eqeq  | Ast.Diff  ->
       make_result env te1 te2 (Reason.Rcomp p, Tprim Tbool)
-  | Ast.EQeqeq | Ast.Diff2 ->
+  | Ast.Eqeqeq | Ast.Diff2 ->
       make_result env te1 te2 (Reason.Rcomp p, Tprim Tbool)
   | Ast.Lt | Ast.Lte | Ast.Gt | Ast.Gte | Ast.Cmp ->
       let ty_result = match bop with Ast.Cmp -> Tprim Tint | _ -> Tprim Tbool in
@@ -5614,7 +5614,7 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
       let env = SubType.sub_string p1 env ty1 in
       let env = SubType.sub_string p2 env ty2 in
       make_result env te1 te2 (Reason.Rconcat_ret p, Tprim Tstring)
-  | Ast.BArbar | Ast.AMpamp | Ast.LogXor ->
+  | Ast.Barbar | Ast.Ampamp | Ast.LogXor ->
       make_result env te1 te2 (Reason.Rlogic_ret p, Tprim Tbool)
   | Ast.QuestionQuestion
   | Ast.Eq _ ->
@@ -5710,8 +5710,8 @@ and condition ?lhs_of_null_coalesce env tparamet
   | T.Call (Cnormal, (_, T.Id (_, func)), _, [te], [])
     when SN.StdlibFunctions.is_null = func ->
       condition_nullity ~nonnull:(not tparamet) env te
-  | T.Binop ((Ast.Eqeq | Ast.EQeqeq), (_, T.Null), e)
-  | T.Binop ((Ast.Eqeq | Ast.EQeqeq), e, (_, T.Null)) ->
+  | T.Binop ((Ast.Eqeq | Ast.Eqeqeq), (_, T.Null), e)
+  | T.Binop ((Ast.Eqeq | Ast.Eqeqeq), e, (_, T.Null)) ->
       condition_nullity ~nonnull:(not tparamet) env e
   | (T.Lvar _ | T.Obj_get _ | T.Class_get _ | T.Binop (Ast.Eq None, _, _)) ->
       let env, ety = Env.expand_type env ty in
@@ -5724,18 +5724,18 @@ and condition ?lhs_of_null_coalesce env tparamet
         ) ->
           condition_nullity ~nonnull:tparamet env te)
   | T.Binop ((Ast.Diff | Ast.Diff2 as op), e1, e2) ->
-      let op = if op = Ast.Diff then Ast.Eqeq else Ast.EQeqeq in
+      let op = if op = Ast.Diff then Ast.Eqeq else Ast.Eqeqeq in
       condition env (not tparamet) (pty, T.Binop (op, e1, e2))
   | T.Id (_, s) when s = SN.Rx.is_enabled ->
       (* when Rx\IS_ENABLED is false - switch env to non-reactive *)
       if not tparamet
       then Env.set_env_reactive env Nonreactive
       else env
-  | T.Binop (Ast.AMpamp, e1, e2) when tparamet ->
+  | T.Binop (Ast.Ampamp, e1, e2) when tparamet ->
       let env = condition env true e1 in
       let env = condition env true e2 in
       env
-  | T.Binop (Ast.BArbar, e1, e2) when not tparamet ->
+  | T.Binop (Ast.Barbar, e1, e2) when not tparamet ->
       let env = condition env false e1 in
       let env = condition env false e2 in
       env

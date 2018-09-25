@@ -57,8 +57,8 @@ and fun_kind =
 
 and bop =
 | Plus
-| Minus | Star | Slash | Eqeq | EQeqeq | Starstar
-| Diff | Diff2 | AMpamp | BArbar | LogXor | Lt
+| Minus | Star | Slash | Eqeq | Eqeqeq | Starstar
+| Diff | Diff2 | Ampamp | Barbar | LogXor | Lt
 | Lte | Gt | Gte | Dot | Amp | Bar | Ltlt
 | Gtgt | Percent | Xor | Cmp
 | QuestionQuestion

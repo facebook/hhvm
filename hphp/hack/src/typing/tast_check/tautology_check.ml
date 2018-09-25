@@ -27,7 +27,7 @@ let handler = object
   method! minimum_forward_compat_level = 2018_05_23
 
   method! at_expr env = function
-    | (p, _), Binop ((EQeqeq | Diff2) as bop, te1, te2) ->
+    | (p, _), Binop ((Eqeqeq | Diff2) as bop, te1, te2) ->
       trivial_equality_check p bop env te1 te2
     | _ -> ()
 end

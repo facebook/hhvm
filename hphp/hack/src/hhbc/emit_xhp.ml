@@ -163,7 +163,7 @@ let from_attribute_declaration ~ns ast_class xal xual =
    * }
    *)
   let null_ = p, A.Null in
-  let cond = p, A.Binop (A.EQeqeq, var_r, null_) in
+  let cond = p, A.Binop (A.Eqeqeq, var_r, null_) in
   let arg1 =
     p, A.Call (
       (p, A.Class_const ((p, A.Id (p, "parent")), (p, "__xhpAttributeDeclaration"))),

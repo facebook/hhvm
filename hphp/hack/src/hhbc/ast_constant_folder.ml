@@ -378,10 +378,10 @@ let binop_on_values binop v1 v2 =
 
   | A.LogXor -> TV.logical_xor v1 v2
   | A.Xor -> TV.bitwise_xor v1 v2
-  | A.AMpamp -> TV.logical_and v1 v2
-  | A.BArbar -> TV.logical_or v1 v2
+  | A.Ampamp -> TV.logical_and v1 v2
+  | A.Barbar -> TV.logical_or v1 v2
   | A.Eqeq -> TV.eqeq v1 v2
-  | A.EQeqeq -> TV.eqeqeq v1 v2
+  | A.Eqeqeq -> TV.eqeqeq v1 v2
   | A.Diff -> TV.diff v1 v2
   | A.Diff2 -> TV.diff2 v1 v2
   | A.Gt -> TV.greater_than v1 v2

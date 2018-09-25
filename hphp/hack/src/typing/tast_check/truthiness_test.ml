@@ -38,8 +38,8 @@ let handler = object
     | Unop (Unot, e)
     | Eif (e, _, _)
     | Assert (AE_assert e) -> truthiness_test env e
-    | Binop (AMpamp, e1, e2)
-    | Binop (BArbar, e1, e2) ->
+    | Binop (Ampamp, e1, e2)
+    | Binop (Barbar, e1, e2) ->
       truthiness_test env e1;
       truthiness_test env e2;
     | _ -> ()

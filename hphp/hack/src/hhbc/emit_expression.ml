@@ -295,7 +295,7 @@ let from_binop op =
   | A.Star -> instr (IOp (if ints_overflow_to_ints then Mul else MulO))
   | A.Slash -> instr (IOp Div)
   | A.Eqeq -> instr (IOp Eq)
-  | A.EQeqeq -> instr (IOp Same)
+  | A.Eqeqeq -> instr (IOp Same)
   | A.Starstar -> instr (IOp Pow)
   | A.Diff -> instr (IOp Neq)
   | A.Diff2 -> instr (IOp NSame)
@@ -314,8 +314,8 @@ let from_binop op =
   | A.LogXor -> instr (IOp Xor)
   | A.Eq _ -> failwith "assignment is emitted differently"
   | A.QuestionQuestion -> failwith "null coalescence is emitted differently"
-  | A.AMpamp
-  | A.BArbar ->
+  | A.Ampamp
+  | A.Barbar ->
     failwith "short-circuiting operator cannot be generated as a simple binop"
 
 let binop_to_eqop op =
@@ -546,7 +546,7 @@ and emit_binop ~need_ref env pos op e1 e2 =
       from_binop op
     ] in
   match op with
-  | A.AMpamp | A.BArbar ->
+  | A.Ampamp | A.Barbar ->
     emit_box_if_necessary pos need_ref @@
       emit_short_circuit_op env pos (A.Binop (op, e1, e2))
   | A.Eq None ->
@@ -577,9 +577,9 @@ and emit_binop ~need_ref env pos op e1 e2 =
     then default ()
     else
     match op with
-    | A.EQeqeq when snd e2 = A.Null ->
+    | A.Eqeqeq when snd e2 = A.Null ->
       emit_box_if_necessary pos need_ref @@ emit_is_null env e1
-    | A.EQeqeq when snd e1 = A.Null ->
+    | A.Eqeqeq when snd e1 = A.Null ->
       emit_box_if_necessary pos need_ref @@ emit_is_null env e2
     | A.Diff2 when snd e2 = A.Null ->
       emit_box_if_necessary pos need_ref @@ gather [
@@ -2151,7 +2151,7 @@ and emit_jmpz env (pos, expr_ as expr) label: emit_jmp_result =
     begin match expr_ with
     | A.Unop(A.Unot, e) ->
       emit_jmpnz env e label
-    | A.Binop(A.BArbar, e1, e2) ->
+    | A.Binop(A.Barbar, e1, e2) ->
       let skip_label = Label.next_regular () in
       let r1 = emit_jmpnz env e1 skip_label in
       if not r1.is_fallthrough
@@ -2172,7 +2172,7 @@ and emit_jmpz env (pos, expr_ as expr) label: emit_jmp_result =
         { instrs = with_pos instrs;
           is_fallthrough = r2.is_fallthrough || r1.is_label_used;
           is_label_used = r2.is_label_used }
-    | A.Binop(A.AMpamp, e1, e2) ->
+    | A.Binop(A.Ampamp, e1, e2) ->
       let r1 = emit_jmpz env e1 label in
       if not r1.is_fallthrough
       then
@@ -2184,8 +2184,8 @@ and emit_jmpz env (pos, expr_ as expr) label: emit_jmp_result =
         { instrs = with_pos @@ gather [ r1.instrs; r2.instrs; ];
           is_fallthrough = r2.is_fallthrough;
            is_label_used = r1.is_label_used || r2.is_label_used }
-    | A.Binop(A.EQeqeq, e, (_, A.Null))
-    | A.Binop(A.EQeqeq, (_, A.Null), e) when opt ->
+    | A.Binop(A.Eqeqeq, e, (_, A.Null))
+    | A.Binop(A.Eqeqeq, (_, A.Null), e) when opt ->
       { instrs = with_pos @@ gather [
           emit_is_null env e;
           instr_jmpz label;
@@ -2233,7 +2233,7 @@ and emit_jmpnz env (pos, expr_ as expr) label: emit_jmp_result =
     begin match expr_ with
     | A.Unop(A.Unot, e) ->
       emit_jmpz env e label
-    | A.Binop(A.BArbar, e1, e2) ->
+    | A.Binop(A.Barbar, e1, e2) ->
       let r1 = emit_jmpnz env e1 label in
       if not r1.is_fallthrough then r1
       else
@@ -2241,7 +2241,7 @@ and emit_jmpnz env (pos, expr_ as expr) label: emit_jmp_result =
         { instrs = with_pos @@ gather [ r1.instrs; r2.instrs ];
           is_fallthrough = r2.is_fallthrough;
           is_label_used = r1.is_label_used || r2.is_label_used }
-    | A.Binop(A.AMpamp, e1, e2) ->
+    | A.Binop(A.Ampamp, e1, e2) ->
       let skip_label = Label.next_regular () in
       let r1 = emit_jmpz env e1 skip_label in
       if not r1.is_fallthrough
@@ -2262,8 +2262,8 @@ and emit_jmpnz env (pos, expr_ as expr) label: emit_jmp_result =
           is_fallthrough = r2.is_fallthrough || r1.is_label_used;
           is_label_used = r2.is_label_used }
       end
-    | A.Binop(A.EQeqeq, e, (_, A.Null))
-    | A.Binop(A.EQeqeq, (_, A.Null), e) when opt ->
+    | A.Binop(A.Eqeqeq, e, (_, A.Null))
+    | A.Binop(A.Eqeqeq, (_, A.Null), e) when opt ->
       { instrs = with_pos @@ gather [
           emit_is_null env e;
           instr_jmpnz label;

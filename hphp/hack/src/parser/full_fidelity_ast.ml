@@ -401,10 +401,10 @@ let pBop : (expr -> expr -> expr_) parser = fun node env lhs rhs ->
   | Some TK.Star                        -> Binop (Star,              lhs, rhs)
   | Some TK.Or                          ->
     if not env.codegen then raise_parsing_error env (`Node node) SyntaxError.do_not_use_or;
-    Binop (BArbar,            lhs, rhs)
+    Binop (Barbar,            lhs, rhs)
   | Some TK.And                         ->
     if not env.codegen then raise_parsing_error env (`Node node) SyntaxError.do_not_use_and;
-    Binop (AMpamp,            lhs, rhs)
+    Binop (Ampamp,            lhs, rhs)
   | Some TK.Xor                         ->
     if not env.codegen then raise_parsing_error env (`Node node) SyntaxError.do_not_use_xor;
     Binop (LogXor,            lhs, rhs)
@@ -429,11 +429,11 @@ let pBop : (expr -> expr -> expr_) parser = fun node env lhs rhs ->
   | Some TK.PercentEqual                -> Binop (Eq (Some Percent), lhs, rhs)
   | Some TK.CaratEqual                  -> Binop (Eq (Some Xor),     lhs, rhs)
   | Some TK.AmpersandEqual              -> Binop (Eq (Some Amp),     lhs, rhs)
-  | Some TK.BarBar                      -> Binop (BArbar,            lhs, rhs)
-  | Some TK.AmpersandAmpersand          -> Binop (AMpamp,            lhs, rhs)
+  | Some TK.BarBar                      -> Binop (Barbar,            lhs, rhs)
+  | Some TK.AmpersandAmpersand          -> Binop (Ampamp,            lhs, rhs)
   | Some TK.LessThanLessThan            -> Binop (Ltlt,              lhs, rhs)
   | Some TK.GreaterThanGreaterThan      -> Binop (Gtgt,              lhs, rhs)
-  | Some TK.EqualEqualEqual             -> Binop (EQeqeq,            lhs, rhs)
+  | Some TK.EqualEqualEqual             -> Binop (Eqeqeq,            lhs, rhs)
   | Some TK.LessThanLessThanEqual       -> Binop (Eq (Some Ltlt),    lhs, rhs)
   | Some TK.GreaterThanGreaterThanEqual -> Binop (Eq (Some Gtgt),    lhs, rhs)
   | Some TK.LessThanGreaterThan         -> Binop (Diff,              lhs, rhs)

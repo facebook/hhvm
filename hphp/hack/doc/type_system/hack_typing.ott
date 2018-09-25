@@ -370,12 +370,12 @@ bop :: '' ::= {{ com binary operations }}
   | * :: :: Star {{ com multiplication }} {{ tex \kwd{*} }}
   | / :: :: Slash {{ com division }} {{ tex \kwd{/} }}
   | == :: :: Eqeq {{ com equality }} {{ tex \kwd{==} }}
-  | === :: :: EQeqeq {{ com equality }} {{ tex \kwd{===} }}
+  | === :: :: Eqeqeq {{ com equality }} {{ tex \kwd{===} }}
   | ** :: :: Starstar {{ com exponentiation }} {{ tex \kwd{**} }}
   | != :: :: Diff {{ com dis-equality }} {{ tex \kwd{!=} }}
   | !== :: :: Diff2 {{ com dis-equality }} {{ tex \kwd{!==} }}
-  | && :: :: AMpamp {{ com logical and }} {{ tex \kwd{\&\&} }}
-  | '||' :: :: BArbar {{ com logical or }} {{ tex \kwd{||} }}
+  | && :: :: Ampamp {{ com logical and }} {{ tex \kwd{\&\&} }}
+  | '||' :: :: Barbar {{ com logical or }} {{ tex \kwd{||} }}
   | xor :: :: LogXor {{ com logical xor }} {{ tex \kwd{xor} }}
   | < :: :: Lt {{ com less than }} {{ tex \kwd{<} }}
   | <= :: :: Lte {{ com less than or equal }} {{ tex \kwd{<=} }}

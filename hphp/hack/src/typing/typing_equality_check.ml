@@ -22,7 +22,7 @@ module Phase = Typing_phase
 
 let trivial_result_str bop =
   match bop with
-    | Ast.EQeqeq -> "false"
+    | Ast.Eqeqeq -> "false"
     | Ast.Diff2 -> "true"
     | _ -> assert false
 

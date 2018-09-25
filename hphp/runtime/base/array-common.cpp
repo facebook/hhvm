@@ -82,6 +82,7 @@ ArrayData* ArrayCommon::ToVec(ArrayData* a, bool) {
         if (v.m_data.pref->isReferenced()) {
           throwRefInvalidArrayValueException(init.toArray());
         }
+        FOLLY_SDT(hhvm, hhvm_demote_ToVec);
       }
       init.append(v);
     }
@@ -100,6 +101,7 @@ ArrayData* ArrayCommon::ToDict(ArrayData* a, bool) {
         if (v.m_data.pref->isReferenced()) {
           throwRefInvalidArrayValueException(init.toArray());
         }
+        FOLLY_SDT(hhvm, hhvm_demote_ToDict);
       }
       init.setValidKey(k, v);
     }
@@ -118,6 +120,7 @@ ArrayData* ArrayCommon::ToKeyset(ArrayData* a, bool) {
         if (v.m_data.pref->isReferenced()) {
           throwRefInvalidArrayValueException(init.toArray());
         }
+        FOLLY_SDT(hhvm, hhvm_demote_ToKeyset);
         v = *v.m_data.pref->cell();
         assertx(!isRefType(v.m_type));
       }

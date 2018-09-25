@@ -333,6 +333,7 @@ bool PackedArray::CopyPackedHelper(const ArrayData* adIn, ArrayData* ad) {
       auto ref = elm->m_data.pref;
       // See also tvDupWithRef()
       if (!ref->isReferenced() && ref->cell()->m_data.parr != adIn) {
+        FOLLY_SDT(hhvm, hhvm_demote_CopyPacked);
         cellDup(*ref->cell(), *elm);
         continue;
       } else if (convertingPackedToVec) {

@@ -23,6 +23,8 @@
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/typed-value.h"
 
+#include <folly/tracing/StaticTracepoint.h>
+
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -230,9 +232,11 @@ tvDupWithRef(const TypedValue& fr, T&& to, Fn should_demote) {
   }
   auto ref = fr.m_data.pref;
   if (should_demote(ref)) {
+    FOLLY_SDT(hhvm, hhvm_demote_other);
     cellDup(*ref->cell(), to);
     return;
   }
+  FOLLY_SDT(hhvm, hhvm_alias_other);
   assertx(isRefType(type(to)));
   val(to).pref->incRefCount();
 }

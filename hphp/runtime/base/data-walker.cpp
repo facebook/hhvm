@@ -93,6 +93,7 @@ bool DataWalker::visitTypedValue(TypedValue rval,
                                  PointerMap* seenArrs) const {
   if (isRefType(rval.m_type)) {
     if (rval.m_data.pref->isReferenced()) {
+      // optimization: only check mark if we see a shared ref
       if (markVisited(rval.m_data.pref, features, visited)) {
         // Don't recurse forever; we already went down this path, and
         // stop the walk if we've already got everything we need.

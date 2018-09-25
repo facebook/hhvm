@@ -1479,10 +1479,16 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
       for (int i = nextra_regular - 1; i >= 0; --i) {
         TypedValue* to = extraArgs->getExtraArg(nextra_regular - i - 1);
         const TypedValue* from = stack.indTV(i);
-        if (isRefType(from->m_type) && from->m_data.pref->isReferenced()) {
-          refCopy(*from, *to);
+        if (isRefType(from->m_type)) {
+          if (from->m_data.pref->isReferenced()) {
+            FOLLY_SDT(hhvm, hhvm_alias_call);
+            refCopy(*from, *to);
+          } else {
+            FOLLY_SDT(hhvm, hhvm_demote_call);
+            cellCopy(*from->m_data.pref->cell(), *to);
+          }
         } else {
-          cellCopy(*tvToCell(from), *to);
+          cellCopy(*from, *to);
         }
         if (hasVarParam) {
           // appendWithRef bumps the refcount: this accounts for the fact

@@ -519,6 +519,7 @@ void ArrayUtil::Walk(Variant& input, PFUNC_WALK walk_function,
       ArrayData *arr = v.getArrayData();
 
       if (v.isReferenced()) {
+        // optimization: only check the seen set if v is a shared Ref
         if (seen->find(arr) != seen->end()) {
           raise_warning("array_walk_recursive(): recursion detected");
           return;

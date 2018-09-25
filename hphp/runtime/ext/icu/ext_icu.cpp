@@ -93,6 +93,8 @@ static Variant HHVM_FUNCTION(icu_match, const String& pattern,
     matched = 1;
 
     if (matches.isReferenced()) {
+      // optimization: this is really an is-ref check, but only does
+      // the work if the ref has another observer (count>1).
       int32_t count = matcher->groupCount();
 
       for (int32_t i = 0; i <= count; i++) {

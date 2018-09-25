@@ -511,6 +511,7 @@ let invalid_variable_name =
 
 let invalid_reference = "Only variables, members, and the results of function calls \
   can be used as references"
+let invalid_variable_variable = "Variable Variables are not legal"
 
 let function_modifier s =
   Printf.sprintf "Top-level function cannot have modifier '%s'" s

@@ -1349,7 +1349,10 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
             if not env.codegen
             then raise_parsing_error env (`Node operator) SyntaxError.invalid_variable_name;
             Lvar (p, "$" ^ s)
-          | _ -> Dollar expr
+          | _ ->
+            if is_typechecker env then
+            raise_parsing_error env (`Node operator) SyntaxError.invalid_variable_variable;
+            Dollar expr
           )
 
         | _ -> missing_syntax "unary operator" node env

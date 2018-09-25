@@ -48,6 +48,7 @@ let start_server env =
   let hh_server_args =
     Array.concat [
       [|hh_server; "-d"; Path.to_string env.root|];
+      if env.from = "" then [||] else [| "--from"; env.from|];
       if env.no_load then [| "--no-load" |] else [||];
       if env.watchman_debug_logging then [| "--watchman-debug-logging" |] else [||];
       if env.profile_log then [| "--profile-log" |] else [||];
@@ -126,7 +127,7 @@ let should_start env =
     true
 
 let main env =
-  HackEventLogger.client_set_from env.from;
+  HackEventLogger.set_from env.from;
   HackEventLogger.client_start ();
   (* TODO(ljw): There are some race conditions here. First scenario: two      *)
   (* processes simultaneously do 'hh start' while the server isn't running.   *)

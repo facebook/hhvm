@@ -2335,7 +2335,7 @@ let main (env: env) : 'a =
   let open Marshal_tools in
   Printexc.record_backtrace true;
   ref_from := env.from;
-  HackEventLogger.client_set_from env.from;
+  HackEventLogger.set_from env.from;
   let client = Jsonrpc.make_queue () in
   let deferred_action = ref None in
   let state = ref Pre_init in

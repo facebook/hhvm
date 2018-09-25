@@ -39,6 +39,7 @@ module type S = sig
   val check_mode          : options -> bool
   val json_mode           : options -> bool
   val root                : options -> Path.t
+  val from                : options -> string
   val should_detach       : options -> bool
   val convert             : options -> Path.t option
   val max_procs           : options -> int

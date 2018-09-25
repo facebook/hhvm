@@ -18,6 +18,7 @@ type options = {
   check_mode       : bool;
   json_mode        : bool;
   root             : Path.t;
+  from             : string;
   should_detach    : bool;
   convert          : Path.t option;
   max_procs        : int;
@@ -50,9 +51,10 @@ module Messages = struct
   let check         = " check and exit"
   let json          = " output errors in json format (arc lint mode)"
   let daemon        = " detach process"
-  let from_vim      = " passed from hh_client"
-  let from_emacs    = " passed from hh_client"
-  let from_hhclient = " passed from hh_client"
+  let from          = " so we know who's invoking - e.g. nuclide, vim, emacs, vscode"
+  let from_vim      = " DEPRECATED"
+  let from_emacs    = " DEPRECATED"
+  let from_hhclient = " DEPRECATED"
   let convert       = " adds type annotations automatically"
   let save          = " DEPRECATED"
   let save_mini     = " save mini server state to file"
@@ -168,6 +170,7 @@ let verify_with_mini_state v = match !v with
 
 let parse_options () =
   let root          = ref "" in
+  let from          = ref "" in
   let from_vim      = ref false in
   let from_emacs    = ref false in
   let from_hhclient = ref false in
@@ -200,6 +203,7 @@ let parse_options () =
   let set_wait      = fun fd ->
     waiting_client := Some (Handle.wrap_handle fd) in
   let set_with_mini_state = fun s -> with_mini_state := Some s in
+  let set_from      = fun s -> from := s in
   let prechecked = ref None in
   let options =
     ["--debug"         , Arg.Set debug           , Messages.debug;
@@ -208,6 +212,7 @@ let parse_options () =
      "--json"          , Arg.Set json_mode       , Messages.json; (*CAREFUL!!!*)
      "--daemon"        , Arg.Set should_detach   , Messages.daemon;
      "-d"              , Arg.Set should_detach   , Messages.daemon;
+     "--from"          , Arg.String set_from     , Messages.from;
      "--from-vim"      , Arg.Set from_vim        , Messages.from_vim;
      "--from-emacs"    , Arg.Set from_emacs      , Messages.from_emacs;
      "--from-hhclient" , Arg.Set from_hhclient   , Messages.from_hhclient;
@@ -227,7 +232,8 @@ let parse_options () =
      "--ignore-hh-version", Arg.Set ignore_hh  , Messages.ignore_hh_version;
      "--file-info-on-disk", Arg.Set file_info_on_disk , Messages.file_info_on_disk;
      "--dynamic-view", Arg.Set dynamic_view,     Messages.dynamic_view;
-     "--gen-saved-ignore-type-errors", Arg.Set gen_saved_ignore_type_errors, Messages.gen_saved_ignore_type_errors;
+     "--gen-saved-ignore-type-errors", Arg.Set gen_saved_ignore_type_errors,
+       Messages.gen_saved_ignore_type_errors;
      "--prechecked",    Arg.Unit (fun () -> prechecked := Some true),
       Messages.prechecked;
      "--no-prechecked", Arg.Unit (fun () -> prechecked := Some false),
@@ -273,6 +279,7 @@ let parse_options () =
     ai_mode       = !ai_mode;
     check_mode    = check_mode;
     root          = root_path;
+    from          = !from;
     should_detach = !should_detach;
     convert       = convert;
     max_procs     = !max_procs;
@@ -296,6 +303,7 @@ let default_options ~root = {
   check_mode = false;
   json_mode = false;
   root = Path.make root;
+  from = "";
   should_detach = false;
   convert = None;
   max_procs = GlobalConfig.nbr_procs;
@@ -321,6 +329,7 @@ let ai_mode options = options.ai_mode
 let check_mode options = options.check_mode
 let json_mode options = options.json_mode
 let root options = options.root
+let from options = options.from
 let should_detach options = options.should_detach
 let convert options = options.convert
 let max_procs options = options.max_procs
@@ -360,6 +369,7 @@ let to_string
     ai_mode;
     check_mode;
     root;
+    from;
     should_detach;
     convert;
     max_procs;
@@ -400,6 +410,7 @@ let to_string
       "ai_mode: "; ai_mode_str; ", ";
       "check_mode: "; string_of_bool check_mode; ", ";
       "root: "; Path.to_string root; ", ";
+      "from: "; from; ", ";
       "should_detach: "; string_of_bool should_detach; ", ";
       "convert: "; convert_str; ", ";
       "maxprocs: "; string_of_int max_procs; ", ";

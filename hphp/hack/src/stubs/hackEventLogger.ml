@@ -12,6 +12,7 @@ let set_use_full_fidelity_parser _ = ()
 let set_lazy_incremental _ = ()
 let set_search_chunk_size _ = ()
 let set_changed_mergebase () = ()
+let set_from _ = ()
 let bad_exit _ _ _ ~is_oom:_ = ()
 let init
   ~exit_on_parent_exit:_
@@ -31,6 +32,7 @@ let init
   = ()
 let init_monitor
   ?exit_on_parent_exit:_
+  ~from:_
   ~search_chunk_size:_
   ~prechecked_files:_
   ~predeclare_ide:_
@@ -56,7 +58,6 @@ let type_check_dirty ~start_t:_ ~dirty_count:_ ~recheck_count:_ = ()
 let out_of_date _ = ()
 let lock_stolen _ = ()
 let client_init ?exit_on_parent_exit:_ _ = ()
-let client_set_from _ = ()
 let client_set_mode _ = ()
 let client_check () = ()
 let client_build _ _ = ()

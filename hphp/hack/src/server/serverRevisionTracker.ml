@@ -53,16 +53,17 @@ let check_changes start_t =
   else begin
     Hh_logger.log "Querying Mercurial for mergebase changes";
     Queue.iter begin fun hg_rev ->
-      let elapsed_t = (Unix.gettimeofday ()) -. start_t in
+      let current_t = Unix.gettimeofday () in
+      let elapsed_t = current_t -. start_t in
       let timeout = max 0 (int_of_float (30.0 -. elapsed_t)) in
       let future = Hashtbl.find mergebase_queries hg_rev in
       match Future.get ~timeout future with
       | Error e ->
         let e = Future.error_to_string e in
-        HackEventLogger.check_mergebase_failed (Future.start_t future) e;
+        HackEventLogger.check_mergebase_failed current_t e;
         Hh_logger.log "ServerRevisionTracker: %s" e;
       | Ok new_svn_rev ->
-        HackEventLogger.check_mergebase_success (Future.start_t future);
+        HackEventLogger.check_mergebase_success current_t;
         match !current_mergebase with
         | Some svn_rev when svn_rev <> new_svn_rev ->
             current_mergebase := Some new_svn_rev;

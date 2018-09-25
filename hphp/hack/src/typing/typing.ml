@@ -1179,23 +1179,35 @@ and bind_as_expr env loop_ty ty aexpr =
   let env, eloop_ty = Env.expand_type env loop_ty in
   let ty1, ty2 = if TUtils.is_dynamic env eloop_ty then
     (fst ty1, Tdynamic), (fst ty2, Tdynamic) else ty1, ty2 in
+  let check_reassigned_mutable env te =
+    if Env.env_local_reactive env
+    then Typing_mutability.handle_assignment_mutability env te None
+    else env in
   match aexpr with
     | As_v ev ->
       let env, te, _ = assign p env ev ty2 in
+      let env = check_reassigned_mutable env te in
       env, T.As_v te
     | Await_as_v (p, ev) ->
       let env, te, _ = assign p env ev ty2 in
+      let env = check_reassigned_mutable env te in
       env, T.Await_as_v(p, te)
     | As_kv ((p, ImmutableVar ((_, k) as id)), ev)
     | As_kv ((p, Lvar ((_, k) as id)), ev) ->
       let env, ty1' = set_valid_rvalue p env k ty1 in
       let env, te, _ = assign p env ev ty2 in
-      env, T.As_kv(T.make_typed_expr p ty1' (T.Lvar id), te)
+      let tk = T.make_typed_expr p ty1' (T.Lvar id) in
+      let env = check_reassigned_mutable env tk in
+      let env = check_reassigned_mutable env te in
+      env, T.As_kv(tk, te)
     | Await_as_kv (p, (p1, ImmutableVar ((_, k) as id)), ev)
     | Await_as_kv (p, (p1, Lvar ((_, k) as id)), ev) ->
       let env, ty1' = set_valid_rvalue p env k ty1 in
       let env, te, _ = assign p env ev ty2 in
-      env, T.Await_as_kv(p, T.make_typed_expr p1 ty1' (T.Lvar id), te)
+      let tk = T.make_typed_expr p1 ty1' (T.Lvar id) in
+      let env = check_reassigned_mutable env tk in
+      let env = check_reassigned_mutable env te in
+      env, T.Await_as_kv(p, tk, te)
     | _ -> (* TODO Probably impossible, should check that *)
       assert false
 
@@ -2034,7 +2046,7 @@ and expr_
       let env, te1, ty = assign p env e1 ty2 in
       let env =
         if Env.env_local_reactive env then
-        Typing_mutability.handle_assignment_mutability env te1 te2
+        Typing_mutability.handle_assignment_mutability env te1 (Some (snd te2))
         else env
       in
       (* If we are assigning a local variable to another local variable then
@@ -5798,7 +5810,7 @@ and unop ~is_func_arg ~forbid_uref p env uop te ty =
         let env, t = check_num env p ty (Reason.Rarith p) in
         let env =
           if Env.env_local_reactive env then
-          Typing_mutability.handle_assignment_mutability env te te
+          Typing_mutability.handle_assignment_mutability env te (Some (snd te))
           else env
         in
         match snd t with

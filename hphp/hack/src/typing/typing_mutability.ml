@@ -407,13 +407,13 @@ let check_unset_target
 
 (* Checks for assignment errors as a pass on the TAST *)
 let handle_assignment_mutability
- (env : Typing_env.env) (te1 : T.expr) (te2 : T.expr)
+ (env : Typing_env.env) (te1 : T.expr) (te2 : T.expr_ option)
  : Typing_env.env =
  check_assignment_or_unset_target env te1 Errors.obj_set_reactive;
  (* If e2 is a mutable expression, then e1 is added to the mutability env *)
  let mut_env = Env.get_env_mutability env in
- let mut_env = match snd te1, snd te2 with
- | _, T.Lvar(p, id2) when LMap.mem id2 mut_env ->
+ let mut_env = match snd te1, te2 with
+ | _, Some T.Lvar(p, id2) when LMap.mem id2 mut_env ->
    Env.error_if_reactive_context env @@ begin fun () ->
      (* Reassigning mutables is not allowed; error *)
      match LMap.find id2 mut_env with
@@ -421,13 +421,13 @@ let handle_assignment_mutability
      | _ -> Errors.reassign_mutable_var p
    end;
    mut_env
- | _, T.This when Env.function_is_mutable env ->
+ | _, Some T.This when Env.function_is_mutable env ->
    Env.error_if_reactive_context env @@ begin fun () ->
      Errors.reassign_mutable_this (T.get_position te1)
    end;
    mut_env
  (* var = mutable(v) - add the var to the env since it points to a owned mutable value *)
- | T.Lvar (_, id), T.Call(_, (_, T.Id (_, n)), _, _, _) when n = SN.Rx.mutable_ ->
+ | T.Lvar (_, id), Some T.Call(_, (_, T.Id (_, n)), _, _, _) when n = SN.Rx.mutable_ ->
     LMap.add id (T.get_position te1, Mutable) mut_env
  (* If the Lvar gets reassigned and shadowed to something that
    isn't a mutable, it is now a regular immutable variable.

@@ -952,14 +952,14 @@ struct CompactReader {
         readCollectionEnd();
         return Variant(std::move(ret));
       } else {
-        ArrayInit ainit(size, ArrayInit::Mixed{});
+        ArrayInit arr(size, ArrayInit::Mixed{});
         for (uint32_t i = 0; i < size; i++) {
-          Variant key = readField(keySpec, keyType);
-          Variant value = readField(valueSpec, valueType);
-          ainit.setUnknownKey(key, value);
+          auto key = readField(keySpec, keyType);
+          auto value = readField(valueSpec, valueType);
+          set_with_intish_key_cast(arr, key, value);
         }
         readCollectionEnd();
-        return ainit.toVariant();
+        return arr.toVariant();
       }
     }
 
@@ -1037,7 +1037,7 @@ struct CompactReader {
         ArrayInit ainit(size, ArrayInit::Mixed{});
         for (uint32_t i = 0; i < size; i++) {
           Variant value = readField(valueSpec, valueType);
-          ainit.setUnknownKey(value, true);
+          set_with_intish_key_cast(ainit, value, true);
         }
         readCollectionEnd();
         return ainit.toVariant();

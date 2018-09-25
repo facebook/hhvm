@@ -5,6 +5,7 @@ HHVM_DEFINE_EXTENSION("thrift"
     ext_thrift.cpp
     spec-holder.cpp
   HEADERS
+    util.h
     ext_thrift.h
     spec-holder.h
     transport.h

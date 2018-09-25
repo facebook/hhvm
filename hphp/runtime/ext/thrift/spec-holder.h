@@ -18,21 +18,14 @@
 #ifndef incl_HPHP_EXT_SPEC_HOLDER_H_
 #define incl_HPHP_EXT_SPEC_HOLDER_H_
 
-#include "hphp/runtime/ext/thrift/transport.h"
 #include "hphp/runtime/ext/thrift/ext_thrift.h"
+#include "hphp/runtime/ext/thrift/transport.h"
+#include "hphp/runtime/ext/thrift/util.h"
 #include "hphp/util/fixed-vector.h"
 
 #include <folly/AtomicHashMap.h>
 
 namespace HPHP { namespace thrift {
-
-enum TError {
-  ERR_UNKNOWN = 0,
-  ERR_INVALID_DATA = 1,
-  ERR_BAD_VERSION = 4
-};
-
-[[noreturn]] void thrift_error(const String& what, TError why);
 
 Array get_tspec(const Class* cls);
 

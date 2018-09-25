@@ -15,32 +15,44 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/thrift/spec-holder.h"
+#ifndef incl_HPHP_EXT_THRIFT_UTIL_H
+#define incl_HPHP_EXT_THRIFT_UTIL_H
 
 #include "hphp/runtime/base/array-init.h"
 
 namespace HPHP { namespace thrift {
 
-Array get_tspec(const Class* cls) {
-  /*
-    passing in cls will short-circuit the accessibility checks,
-    but does mean we'll allow a private or protected s_TSPEC.
-    passing in nullptr would do the correct checks. Not sure it matters
-  */
-  auto lookup = cls->getSProp(cls, s_TSPEC.get());
-  if (!lookup.val) {
-    thrift_error(
-      folly::sformat("Class {} does not have a property named {}",
-                     cls->name(), s_TSPEC),
-      ERR_INVALID_DATA);
-  }
-  Variant structSpec = tvAsVariant(lookup.val);
-  if (!structSpec.isArray()) {
-    thrift_error("invalid type of spec", ERR_INVALID_DATA);
-  }
-  return structSpec.toArray();
+enum TError {
+  ERR_UNKNOWN = 0,
+  ERR_INVALID_DATA = 1,
+  ERR_BAD_VERSION = 4
+};
+
+[[noreturn]] inline void thrift_error(const String& what, TError why) {
+  throw_object(s_TProtocolException, make_packed_array(what, why));
 }
 
-SpecCacheMap SpecHolder::s_specCacheMap(1000);
+inline void set_with_intish_key_cast(
+  ArrayInit& arr,
+  const Variant& key,
+  const Variant& value
+) {
+  if (key.isString()) {
+    int64_t intish_key;
+    if (key.getStringData()->isStrictlyInteger(intish_key)) {
+      arr.set(intish_key, value);
+    } else {
+      arr.set(key.toString(), value);
+    }
+  } else if (key.isInteger()) {
+    arr.set(key.toInt64(), value);
+  } else {
+    thrift_error(
+        "Unable to deserialize non int/string array keys",
+        ERR_INVALID_DATA);
+  }
+}
 
 }}
+
+#endif // incl_HPHP_EXT_THRIFT_UTIL_H

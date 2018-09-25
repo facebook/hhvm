@@ -30,9 +30,14 @@ inline FPInvOffset Location::stackIdx() const {
   return m_stack.stackIdx;
 }
 
-inline uint32_t Location::clsRefSlot() const {
-  assertx(m_tag == LTag::CSlot);
-  return m_clsref.slot;
+inline uint32_t Location::clsRefClsSlot() const {
+  assertx(m_tag == LTag::CSlotCls);
+  return m_clsrefcls.slot;
+}
+
+inline uint32_t Location::clsRefTSSlot() const {
+  assertx(m_tag == LTag::CSlotTS);
+  return m_clsrefts.slot;
 }
 
 inline bool Location::operator==(const Location& other) const {
@@ -45,8 +50,10 @@ inline bool Location::operator==(const Location& other) const {
       return stackIdx() == other.stackIdx();
     case LTag::MBase:
       return true;
-    case LTag::CSlot:
-      return clsRefSlot() == other.clsRefSlot();
+    case LTag::CSlotCls:
+      return clsRefClsSlot() == other.clsRefClsSlot();
+    case LTag::CSlotTS:
+      return clsRefTSSlot() == other.clsRefTSSlot();
   }
   not_reached();
   return false;
@@ -66,8 +73,10 @@ inline bool Location::operator<(const Location& other) const {
       return stackIdx() < other.stackIdx();
     case LTag::MBase:
       return false;
-    case LTag::CSlot:
-      return clsRefSlot() < other.clsRefSlot();
+    case LTag::CSlotCls:
+      return clsRefClsSlot() < other.clsRefClsSlot();
+    case LTag::CSlotTS:
+      return clsRefTSSlot() < other.clsRefTSSlot();
   }
   not_reached();
   return false;

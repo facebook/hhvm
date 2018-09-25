@@ -428,7 +428,10 @@ SSATmp* IRBuilder::preOptimizeLdStk(IRInstruction* inst) {
 }
 
 SSATmp* IRBuilder::preOptimizeLdClsRef(IRInstruction* inst) {
-  return preOptimizeLdLocation(inst, cslot(inst->extra<LdClsRef>()->slot));
+  return preOptimizeLdLocation(
+    inst,
+    cslotcls(inst->extra<LdClsRef>()->slot)
+  );
 }
 
 SSATmp* IRBuilder::preOptimizeCastStk(IRInstruction* inst) {
@@ -709,7 +712,7 @@ bool IRBuilder::constrainValue(SSATmp* const val, GuardConstraint gc) {
 bool IRBuilder::constrainLocation(Location l, GuardConstraint gc,
                                   const std::string& why) {
   if (!shouldConstrainGuards() ||
-      l.tag() == LTag::CSlot ||
+      l.tag() == LTag::CSlotCls || l.tag() == LTag::CSlotTS ||
       gc.empty()) return false;
 
   ITRACE(1, "constraining {} to {} (for {})\n", show(l), gc, why);
@@ -841,8 +844,12 @@ const StackState& IRBuilder::stack(IRSPRelOffset offset, GuardConstraint gc) {
   return m_state.stack(offset);
 }
 
-const CSlotState& IRBuilder::clsRefSlot(uint32_t slot) {
-  return m_state.clsRefSlot(slot);
+const CSlotClsState& IRBuilder::clsRefClsSlot(uint32_t slot) {
+  return m_state.clsRefClsSlot(slot);
+}
+
+const CSlotTSState& IRBuilder::clsRefTSSlot(uint32_t slot) {
+  return m_state.clsRefTSSlot(slot);
 }
 
 SSATmp* IRBuilder::valueOf(Location l, GuardConstraint gc) {
@@ -885,8 +892,11 @@ Location IRBuilder::stk(IRSPRelOffset off) const {
   auto const fpRel = off.to<FPInvOffset>(m_state.irSPOff());
   return Location::Stack { fpRel };
 }
-Location IRBuilder::cslot(uint32_t slot) const {
-  return Location::CSlot { slot };
+Location IRBuilder::cslotcls(uint32_t slot) const {
+  return Location::CSlotCls { slot };
+}
+Location IRBuilder::cslotts(uint32_t slot) const {
+  return Location::CSlotTS { slot };
 }
 
 ///////////////////////////////////////////////////////////////////////////////

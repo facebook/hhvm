@@ -556,11 +556,12 @@ Flags handle_call_effects(Local& env,
    * away the values.  We are just doing this to avoid extending lifetimes
    * across php calls, which currently always leads to spilling.
    */
-  auto const keep = env.global.ainfo.all_stack       |
-                    env.global.ainfo.all_frame       |
-                    env.global.ainfo.all_clsRefSlot  |
-                    env.global.ainfo.all_cufIterFunc |
-                    env.global.ainfo.all_cufIterCtx  |
+  auto const keep = env.global.ainfo.all_stack          |
+                    env.global.ainfo.all_frame          |
+                    env.global.ainfo.all_clsRefClsSlot  |
+                    env.global.ainfo.all_clsRefTSSlot   |
+                    env.global.ainfo.all_cufIterFunc    |
+                    env.global.ainfo.all_cufIterCtx     |
                     env.global.ainfo.all_cufIterInvName |
                     env.global.ainfo.all_cufIterDynamic;
   env.state.avail &= keep;

@@ -927,7 +927,7 @@ inline void killClsRef(IRGS& env, uint32_t slot) {
 }
 
 inline SSATmp* peekClsRef(IRGS& env, uint32_t slot) {
-  auto const knownType = env.irb->clsRefSlot(slot).type;
+  auto const knownType = env.irb->clsRefClsSlot(slot).type;
   return gen(env, LdClsRef, knownType, ClsRefSlotData{slot}, fp(env));
 }
 

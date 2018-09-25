@@ -237,8 +237,10 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
 
   ret |= may_alias_component(*this, acls, acls.frame(), local_sets,
                              AFrameAny, all_frame);
-  ret |= may_alias_component(*this, acls, acls.clsRefSlot(), clsref_sets,
-                             AClsRefSlotAny, all_clsRefSlot);
+  ret |= may_alias_component(*this, acls, acls.clsRefClsSlot(), clsrefcls_sets,
+                             AClsRefClsSlotAny, all_clsRefClsSlot);
+  ret |= may_alias_component(*this, acls, acls.clsRefTSSlot(), clsrefts_sets,
+                             AClsRefTSSlotAny, all_clsRefTSSlot);
 
   ret |= may_alias_part(*this, acls, acls.rds(), ARdsAny, all_rds);
 
@@ -299,8 +301,10 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
 
   ret |= expand_component(*this, acls, acls.frame(), local_sets,
                           AFrameAny, all_frame);
-  ret |= expand_component(*this, acls, acls.clsRefSlot(), clsref_sets,
-                          AClsRefSlotAny, all_clsRefSlot);
+  ret |= expand_component(*this, acls, acls.clsRefClsSlot(), clsrefcls_sets,
+                          AClsRefClsSlotAny, all_clsRefClsSlot);
+  ret |= expand_component(*this, acls, acls.clsRefTSSlot(), clsrefts_sets,
+                          AClsRefTSSlotAny, all_clsRefTSSlot);
 
   ret |= expand_part(*this, acls, acls.rds(), ARdsAny, all_rds);
 
@@ -398,7 +402,10 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
     }
 
     if (collect_component(ret, acls.frame(), ret.local_sets)) return;
-    if (collect_component(ret, acls.clsRefSlot(), ret.clsref_sets)) return;
+    if (collect_component(ret, acls.clsRefClsSlot(), ret.clsrefcls_sets)) {
+      return;
+    }
+    if (collect_component(ret, acls.clsRefTSSlot(), ret.clsrefts_sets)) return;
 
     /*
      * Note that unlike the above we're going to assign location ids to the
@@ -476,8 +483,13 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       return;
     }
 
-    if (auto const slot = acls.is_clsRefSlot()) {
-      ret.all_clsRefSlot.set(meta.index);
+    if (auto const slot = acls.is_clsRefClsSlot()) {
+      ret.all_clsRefClsSlot.set(meta.index);
+      return;
+    }
+
+    if (auto const slot = acls.is_clsRefTSSlot()) {
+      ret.all_clsRefTSSlot.set(meta.index);
       return;
     }
 
@@ -570,8 +582,18 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
           ent.second.set(kv.second.index);
         }
       }
-    } else if (kv.first.is_clsRefSlot()) {
-      for (auto& ent : ret.clsref_sets) {
+    } else if (kv.first.is_clsRefClsSlot()) {
+      for (auto& ent : ret.clsrefcls_sets) {
+        if (kv.first <= ent.first) {
+          FTRACE(2, "  ({}) {} <= {}\n",
+            kv.second.index,
+            show(kv.first),
+            show(ent.first));
+          ent.second.set(kv.second.index);
+        }
+      }
+    } else if (kv.first.is_clsRefTSSlot()) {
+      for (auto& ent : ret.clsrefts_sets) {
         if (kv.first <= ent.first) {
           FTRACE(2, "  ({}) {} <= {}\n",
             kv.second.index,
@@ -644,7 +666,8 @@ std::string show(const AliasAnalysis& ainfo) {
       "all cufIterInvName", show(ainfo.all_cufIterInvName),
       "all cufIterDynamic", show(ainfo.all_cufIterDynamic),
       "all frame",          show(ainfo.all_frame),
-      "all clsRefSlot",     show(ainfo.all_clsRefSlot),
+      "all clsRefClsSlot",  show(ainfo.all_clsRefClsSlot),
+      "all clsRefTSSlot",   show(ainfo.all_clsRefTSSlot),
       "all rds",            show(ainfo.all_rds)
   );
   for (auto& kv : ainfo.local_sets) {

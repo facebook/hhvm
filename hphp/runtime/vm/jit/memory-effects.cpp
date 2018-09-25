@@ -487,9 +487,11 @@ GeneralEffects interp_one_effects(const IRInstruction& inst) {
   for (auto i = uint32_t{0}; i < extra->nChangedClsRefSlots; ++i) {
     auto const& slot = extra->changedClsRefSlots[i];
     if (slot.write) {
-      stores = stores | AClsRefSlot { inst.src(1), slot.id };
+      stores = stores | AClsRefClsSlot { inst.src(1), slot.id } |
+               AClsRefTSSlot { inst.src(1), slot.id };
     } else {
-      loads = loads | AClsRefSlot { inst.src(1), slot.id };
+      loads = loads | AClsRefClsSlot { inst.src(1), slot.id } |
+              AClsRefTSSlot { inst.src(1), slot.id };
     }
   }
 
@@ -721,7 +723,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
        * stores must not be sunk past DefInlineFP where they could clobber a
        * local.
        */
-      AFrameAny | AClsRefSlotAny | ACufIterAny  |
+      AFrameAny | AClsRefSlotAny | ACufIterAny |
         stack_below(inst.dst(), FPRelOffset{0}) |
         inline_fp_frame(&inst),
       AFrameAny | AClsRefSlotAny | ACufIterAny |
@@ -1063,19 +1065,19 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case LdClsRef:
     return PureLoad {
-      AClsRefSlot { inst.src(0), inst.extra<LdClsRef>()->slot }
+      AClsRefClsSlot { inst.src(0), inst.extra<LdClsRef>()->slot }
     };
 
   case StClsRef:
     return PureStore {
-      AClsRefSlot { inst.src(0), inst.extra<StClsRef>()->slot },
+      AClsRefClsSlot { inst.src(0), inst.extra<StClsRef>()->slot },
       inst.src(1)
     };
 
   case KillClsRef:
     return may_load_store_kill(
       AEmpty, AEmpty,
-      AClsRefSlot { inst.src(0), inst.extra<KillClsRef>()->slot }
+      AClsRefClsSlot { inst.src(0), inst.extra<KillClsRef>()->slot }
     );
 
   //////////////////////////////////////////////////////////////////////
@@ -2248,7 +2250,8 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
 
   auto check = [&] (AliasClass a) {
     if (auto const fr = a.frame()) check_fp(fr->fp);
-    if (auto const sl = a.clsRefSlot()) check_fp(sl->fp);
+    if (auto const sl = a.clsRefClsSlot()) check_fp(sl->fp);
+    if (auto const sl = a.clsRefTSSlot()) check_fp(sl->fp);
     if (auto const pr = a.prop())  check_obj(pr->obj);
   };
 

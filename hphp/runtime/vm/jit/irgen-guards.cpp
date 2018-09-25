@@ -152,7 +152,8 @@ void assertTypeLocation(IRGS& env, const Location& loc, Type type) {
     case LTag::MBase:
       assertTypeMBase(env, type);
       break;
-    case LTag::CSlot:
+    case LTag::CSlotCls:
+    case LTag::CSlotTS:
       assertx("Attempting to emit assert-type for class-ref slot" && false);
       break;
   }
@@ -173,7 +174,8 @@ void checkType(IRGS& env, const Location& loc,
     case LTag::MBase:
       checkTypeMBase(env, type, dest, outerOnly);
       break;
-    case LTag::CSlot:
+    case LTag::CSlotCls:
+    case LTag::CSlotTS:
       assertx("Attempting to emit check-type for class-ref slot" && false);
       break;
   }

@@ -76,7 +76,8 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
   case A::BMIBase:         break;
   case A::BMIPropS:        break;
   case A::BRef:            break;
-  case A::BClsRefSlot:     break;
+  case A::BClsRefClsSlot:  break;
+  case A::BClsRefTSSlot:   break;
   case A::BRds:            break;
   }
 
@@ -114,7 +115,8 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
     case A::BMIBase:         ret += "MiB"; break;
     case A::BMIPropS:        ret += "MiP"; break;
     case A::BRef:            ret += "Ref"; break;
-    case A::BClsRefSlot:     ret += "Cls"; break;
+    case A::BClsRefClsSlot:  ret += "Cls"; break;
+    case A::BClsRefTSSlot:   ret += "TS"; break;
     case A::BRds:            ret += "Rds"; break;
     }
   }
@@ -202,10 +204,14 @@ size_t AliasClass::Hash::operator()(AliasClass acls) const {
     return folly::hash::hash_combine(hash,
                                      acls.m_frame.fp,
                                      acls.m_frame.ids.raw());
-  case STag::ClsRefSlot:
+  case STag::ClsRefClsSlot:
     return folly::hash::hash_combine(hash,
-                                     acls.m_clsRefSlot.fp,
-                                     acls.m_clsRefSlot.ids.raw());
+                                     acls.m_clsRefClsSlot.fp,
+                                     acls.m_clsRefClsSlot.ids.raw());
+  case STag::ClsRefTSSlot:
+   return folly::hash::hash_combine(hash,
+                                    acls.m_clsRefTSSlot.fp,
+                                    acls.m_clsRefTSSlot.ids.raw());
   case STag::Prop:
     return folly::hash::hash_combine(hash,
                                      acls.m_prop.obj,
@@ -259,7 +265,8 @@ X(ElemI, elemI)
 X(ElemS, elemS)
 X(Stack, stack)
 X(Ref, ref)
-X(ClsRefSlot, clsRefSlot)
+X(ClsRefClsSlot, clsRefClsSlot)
+X(ClsRefTSSlot, clsRefTSSlot)
 X(Rds, rds)
 
 #undef X
@@ -276,7 +283,8 @@ X(ElemI, elemI)
 X(ElemS, elemS)
 X(Stack, stack)
 X(Ref, ref)
-X(ClsRefSlot, clsRefSlot)
+X(ClsRefClsSlot, clsRefClsSlot)
+X(ClsRefTSSlot, clsRefTSSlot)
 X(Rds, rds)
 
 #undef X
@@ -343,7 +351,8 @@ AliasClass::rep AliasClass::stagBits(STag tag) {
   case STag::Stack:          return BStack;
   case STag::Ref:            return BRef;
   case STag::Rds:            return BRds;
-  case STag::ClsRefSlot:     return BClsRefSlot;
+  case STag::ClsRefClsSlot:  return BClsRefClsSlot;
+  case STag::ClsRefTSSlot:   return BClsRefTSSlot;
   case STag::IterBoth:       return static_cast<rep>(BIterPos | BIterBase);
   case STag::CufIterAll:     return static_cast<rep>(BCufIterFunc |
                                                      BCufIterCtx  |
@@ -370,9 +379,13 @@ bool AliasClass::checkInvariants() const {
     assertx(m_frame.fp->isA(TFramePtr));
     assertx(!m_frame.ids.empty());
     break;
-  case STag::ClsRefSlot:
-    assertx(m_clsRefSlot.fp->isA(TFramePtr));
-    assertx(!m_clsRefSlot.ids.empty());
+  case STag::ClsRefClsSlot:
+    assertx(m_clsRefClsSlot.fp->isA(TFramePtr));
+    assertx(!m_clsRefClsSlot.ids.empty());
+    break;
+  case STag::ClsRefTSSlot:
+    assertx(m_clsRefTSSlot.fp->isA(TFramePtr));
+    assertx(!m_clsRefTSSlot.ids.empty());
     break;
   case STag::Stack:
     assertx(m_stack.size > 0);          // use AEmpty if you want that
@@ -399,8 +412,10 @@ bool AliasClass::equivData(AliasClass o) const {
   case STag::None:     return true;
   case STag::Frame:    return m_frame.fp == o.m_frame.fp &&
                               m_frame.ids == o.m_frame.ids;
-  case STag::ClsRefSlot: return m_clsRefSlot.fp == o.m_clsRefSlot.fp &&
-                                m_clsRefSlot.ids == o.m_clsRefSlot.ids;
+  case STag::ClsRefClsSlot: return m_clsRefClsSlot.fp == o.m_clsRefClsSlot.fp &&
+                                m_clsRefClsSlot.ids == o.m_clsRefClsSlot.ids;
+  case STag::ClsRefTSSlot: return m_clsRefTSSlot.fp == o.m_clsRefTSSlot.fp &&
+                                m_clsRefTSSlot.ids == o.m_clsRefTSSlot.ids;
   case STag::IterPos:  return framelike_equal(m_iterPos, o.m_iterPos);
   case STag::IterBase: return framelike_equal(m_iterBase, o.m_iterBase);
   case STag::IterBoth: return framelike_equal(m_iterBoth, o.m_iterBoth);
@@ -471,18 +486,35 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
       return ret;
     }
 
-  case STag::ClsRefSlot:
+  case STag::ClsRefClsSlot:
     {
       auto ret = AliasClass{newBits};
-      auto const slotA = a.m_clsRefSlot;
-      auto const slotB = b.m_clsRefSlot;
+      auto const slotA = a.m_clsRefClsSlot;
+      auto const slotB = b.m_clsRefClsSlot;
       if (slotA.fp != slotB.fp) return ret;
 
       auto const newIds = slotA.ids | slotB.ids;
       // Even when newIds.isAny(), we still know it won't alias class-ref slots
       // in other frames, so keep the specialization tag.
-      ret.m_stag = STag::ClsRefSlot;
-      ret.m_clsRefSlot = AClsRefSlot { slotA.fp, newIds };
+      ret.m_stag = STag::ClsRefClsSlot;
+      ret.m_clsRefClsSlot = AClsRefClsSlot { slotA.fp, newIds };
+      assertx(ret.checkInvariants());
+      assertx(a <= ret && b <= ret);
+      return ret;
+    }
+
+  case STag::ClsRefTSSlot:
+    {
+      auto ret = AliasClass{newBits};
+      auto const slotA = a.m_clsRefTSSlot;
+      auto const slotB = b.m_clsRefTSSlot;
+      if (slotA.fp != slotB.fp) return ret;
+
+      auto const newIds = slotA.ids | slotB.ids;
+      // Even when newIds.isAny(), we still know it won't alias class-ref slots
+      // in other frames, so keep the specialization tag.
+      ret.m_stag = STag::ClsRefTSSlot;
+      ret.m_clsRefTSSlot = AClsRefTSSlot { slotA.fp, newIds };
       assertx(ret.checkInvariants());
       assertx(a <= ret && b <= ret);
       return ret;
@@ -644,8 +676,11 @@ AliasClass AliasClass::operator|(AliasClass o) const {
     new (&ret.m_cufIterAll) UCufIterAll(chosen->m_cufIterAll);
     break;
   case STag::Frame:    new (&ret.m_frame) AFrame(chosen->m_frame); break;
-  case STag::ClsRefSlot:
-    new (&ret.m_clsRefSlot) AClsRefSlot(chosen->m_clsRefSlot);
+  case STag::ClsRefClsSlot:
+    new (&ret.m_clsRefClsSlot) AClsRefClsSlot(chosen->m_clsRefClsSlot);
+    break;
+  case STag::ClsRefTSSlot:
+    new (&ret.m_clsRefTSSlot) AClsRefTSSlot(chosen->m_clsRefTSSlot);
     break;
   case STag::Prop:     new (&ret.m_prop) AProp(chosen->m_prop); break;
   case STag::ElemI:    new (&ret.m_elemI) AElemI(chosen->m_elemI); break;
@@ -678,9 +713,12 @@ bool AliasClass::subclassData(AliasClass o) const {
     return equivData(o);
   case STag::Frame:
     return m_frame.fp == o.m_frame.fp && m_frame.ids <= o.m_frame.ids;
-  case STag::ClsRefSlot:
-    return m_clsRefSlot.fp == o.m_clsRefSlot.fp &&
-           m_clsRefSlot.ids <= o.m_clsRefSlot.ids;
+  case STag::ClsRefClsSlot:
+    return m_clsRefClsSlot.fp == o.m_clsRefClsSlot.fp &&
+           m_clsRefClsSlot.ids <= o.m_clsRefClsSlot.ids;
+  case STag::ClsRefTSSlot:
+    return m_clsRefTSSlot.fp == o.m_clsRefTSSlot.fp &&
+           m_clsRefTSSlot.ids <= o.m_clsRefTSSlot.ids;
   case STag::Stack:
     return m_stack.offset <= o.m_stack.offset &&
            lowest_offset(m_stack) >= lowest_offset(o.m_stack);
@@ -698,7 +736,8 @@ folly::Optional<AliasClass::UIterBoth> AliasClass::asUIter() const {
   case STag::Ref:
   case STag::Rds:
   case STag::Stack:
-  case STag::ClsRefSlot:
+  case STag::ClsRefClsSlot:
+  case STag::ClsRefTSSlot:
   case STag::CufIterFunc:
   case STag::CufIterCtx:
   case STag::CufIterInvName:
@@ -722,7 +761,8 @@ folly::Optional<AliasClass::UCufIterAll> AliasClass::asUCufIter() const {
   case STag::Ref:
   case STag::Rds:
   case STag::Stack:
-  case STag::ClsRefSlot:
+  case STag::ClsRefClsSlot:
+  case STag::ClsRefTSSlot:
   case STag::IterPos:
   case STag::IterBase:
   case STag::IterBoth:
@@ -853,9 +893,12 @@ bool AliasClass::maybeData(AliasClass o) const {
     return framelike_equal(m_cufIterAll, o.m_cufIterAll);
   case STag::Frame:
     return m_frame.fp == o.m_frame.fp && m_frame.ids.maybe(o.m_frame.ids);
-  case STag::ClsRefSlot:
-    return m_clsRefSlot.fp == o.m_clsRefSlot.fp &&
-           m_clsRefSlot.ids.maybe(o.m_clsRefSlot.ids);
+  case STag::ClsRefClsSlot:
+    return m_clsRefClsSlot.fp == o.m_clsRefClsSlot.fp &&
+           m_clsRefClsSlot.ids.maybe(o.m_clsRefClsSlot.ids);
+  case STag::ClsRefTSSlot:
+    return m_clsRefTSSlot.fp == o.m_clsRefTSSlot.fp &&
+            m_clsRefTSSlot.ids.maybe(o.m_clsRefTSSlot.ids);
   case STag::Prop:
     /*
      * We can't tell if two objects could be the same from here in general, but
@@ -947,7 +990,10 @@ bool AliasClass::isSingleLocation() const {
   if (auto const frame = is_frame()) {
     return frame->ids.hasSingleValue();
   }
-  if (auto const slot = is_clsRefSlot()) {
+  if (auto const slot = is_clsRefClsSlot()) {
+    return slot->ids.hasSingleValue();
+  }
+  if (auto const slot = is_clsRefTSSlot()) {
     return slot->ids.hasSingleValue();
   }
   if (auto const stk = is_stack()) {
@@ -993,7 +1039,8 @@ AliasClass canonicalize(AliasClass a) {
   case T::Stack:          return a;
   case T::Ref:            return a;
   case T::Rds:            return a;
-  case T::ClsRefSlot:     return a;
+  case T::ClsRefClsSlot:  return a;
+  case T::ClsRefTSSlot:   return a;
   case T::Prop:     a.m_prop.obj = canonical(a.m_prop.obj);   return a;
   case T::ElemI:    a.m_elemI.arr = canonical(a.m_elemI.arr); return a;
   case T::ElemS:    a.m_elemS.arr = canonical(a.m_elemS.arr); return a;
@@ -1018,9 +1065,13 @@ std::string show(AliasClass acls) {
     folly::format(&ret, "Fr t{}:{}", acls.m_frame.fp->id(),
                   show(acls.m_frame.ids));
     break;
-  case A::STag::ClsRefSlot:
-    folly::format(&ret, "Cls t{}:{}", acls.m_clsRefSlot.fp->id(),
-                  show(acls.m_clsRefSlot.ids));
+  case A::STag::ClsRefClsSlot:
+    folly::format(&ret, "ClsC t{}:{}", acls.m_clsRefClsSlot.fp->id(),
+                  show(acls.m_clsRefClsSlot.ids));
+    break;
+  case A::STag::ClsRefTSSlot:
+    folly::format(&ret, "ClsTS t{}:{}", acls.m_clsRefTSSlot.fp->id(),
+                  show(acls.m_clsRefTSSlot.ids));
     break;
   case A::STag::IterPos:
     folly::format(&ret, "ItP t{}:{}", acls.m_iterPos.fp->id(),

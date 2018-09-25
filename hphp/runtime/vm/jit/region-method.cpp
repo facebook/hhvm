@@ -173,7 +173,8 @@ RegionDescPtr selectMethod(const RegionContext& context) {
       case LTag::Stack:
       case LTag::MBase:
         break;
-      case LTag::CSlot:
+      case LTag::CSlotCls:
+      case LTag::CSlotTS:
         assertx("Class-ref slot live-type" && false);
         break;
     }

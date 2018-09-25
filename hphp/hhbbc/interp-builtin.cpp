@@ -475,7 +475,7 @@ void finish_builtin(ISS& env,
                     const php::Func* func,
                     uint32_t numArgs,
                     bool unpack) {
-  std::vector<Bytecode> repl;
+  BytecodeVec repl;
   assert(!unpack ||
          (numArgs + 1 == func->params.size() &&
           func->params.back().isVariadic));

@@ -34,7 +34,7 @@ namespace HPHP { namespace HHBBC {
  * the ConcatPeephole.
  */
 struct BasicPeephole {
-  explicit BasicPeephole(std::vector<Bytecode>& stream,
+  explicit BasicPeephole(BytecodeVec& stream,
                          const Index& index, const Context& ctx)
       : m_index(index), m_ctx(ctx), m_next(stream)
   {}
@@ -50,7 +50,7 @@ struct BasicPeephole {
 private:
   const Index& m_index;
   const Context& m_ctx;
-  std::vector<Bytecode>& m_next;
+  BytecodeVec& m_next;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -110,7 +110,7 @@ using Peephole = ConcatPeephole;
  * Create the chain of peephole objects.  The interface to all the Peepholes is
  * the same as the interface to ConcatPeephole, above.
  */
-inline Peephole make_peephole(std::vector<Bytecode>& sink,
+inline Peephole make_peephole(BytecodeVec& sink,
                               const Index& index, const Context& ctx) {
   return ConcatPeephole(BasicPeephole(sink, index, ctx));
 }

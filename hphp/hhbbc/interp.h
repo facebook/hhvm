@@ -22,10 +22,11 @@
 
 #include <folly/Optional.h>
 
-#include "hphp/hhbbc/misc.h"
-#include "hphp/hhbbc/index.h"
-#include "hphp/hhbbc/type-system.h"
+#include "hphp/hhbbc/bc.h"
 #include "hphp/hhbbc/context.h"
+#include "hphp/hhbbc/index.h"
+#include "hphp/hhbbc/misc.h"
+#include "hphp/hhbbc/type-system.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -140,7 +141,7 @@ struct StepFlags {
    * If the instruction on this step could've been replaced with
    * cheaper bytecode, this is the list of bytecode that can be used.
    */
-  folly::Optional<std::vector<Bytecode>> strengthReduced;
+  folly::Optional<BytecodeVec> strengthReduced;
 
   /*
    * If this is not none, the interpreter executed a return on this

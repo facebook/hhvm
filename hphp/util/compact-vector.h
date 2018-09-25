@@ -88,8 +88,13 @@ struct CompactVector : private Alloc::template rebind<char>::other {
   void pop_back();
   void erase(iterator);
   void erase(iterator, iterator);
-  iterator insert(iterator p, const T& v) { return insert_impl(p, v); }
-  iterator insert(iterator p, T&& v) { return insert_impl(p, std::move(v)); };
+  iterator insert(iterator p, const T& v) { return insert_impl(p, 1, v); }
+  iterator insert(iterator p, T&& v) { return insert_impl(p, 1, std::move(v)); };
+  iterator insert(iterator p, size_t num, const T& v) {
+    return insert_impl(p, num, v);
+  };
+  template<typename U>
+  iterator insert(iterator p, U i1, U i2);
   void resize(size_type sz);
   void resize(size_type sz, const value_type& value);
   void shrink_to_fit();
@@ -111,8 +116,9 @@ private:
     uint32_t m_capacity;
   };
 
+  iterator insert_elems(iterator, size_t num);
   template <class U>
-  iterator insert_impl(iterator, U&&);
+  iterator insert_impl(iterator, size_t num, U&&);
   void assign(const CompactVector& other);
   void grow();
   T* get(size_type index) const;
@@ -377,25 +383,55 @@ void CompactVector<T, A>::reserve(size_type new_capacity) {
 }
 
 template <typename T, typename A>
-template <typename U>
 typename CompactVector<T, A>::iterator
-CompactVector<T, A>::insert_impl(iterator before, U&& val) {
+CompactVector<T, A>::insert_elems(iterator before, size_t num) {
+  if (!num) return before;
   auto const sz = size();
   assert(sz <= capacity());
-  if (sz == capacity()) {
+  auto cap = capacity();
+  if (sz + num > cap) {
     auto const pos = sz ? before - elems() : 0;
     assert(pos <= sz);
-    grow();
+    cap <<= 1;
+    if (sz + num > cap) {
+      cap = sz + num;
+      if (cap < initial_capacity) cap = initial_capacity;
+    }
+    reserve(cap);
     before = elems() + pos;
   }
-  ++(m_data->m_len);
 
   auto e = end();
-  while (--e != before) {
-    new (e) T(std::move(e[-1]));
-    e[-1].~T();
+  m_data->m_len += num;
+  while (e != before) {
+    --e;
+    new (e + num) T(std::move(*e));
+    e->~T();
   }
-  new (e) T(std::forward<U>(val));
+  return e;
+}
+
+
+template <typename T, typename A>
+template <typename U>
+typename CompactVector<T, A>::iterator
+CompactVector<T, A>::insert_impl(iterator before, size_t num, U&& val) {
+  auto e = insert_elems(before, num);
+  while (num--) {
+    new (e + num) T(std::forward<U>(val));
+  }
+  return e;
+}
+
+template <typename T, typename A>
+template <typename U>
+typename CompactVector<T, A>::iterator
+CompactVector<T, A>::insert(iterator before, U i1, U i2) {
+  auto e = insert_elems(before, i2 - i1);
+  auto i = e;
+  while (i1 != i2) {
+    new (i++) T(*i1++);
+  }
   return e;
 }
 

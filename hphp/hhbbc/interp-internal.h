@@ -78,7 +78,7 @@ struct ISS {
   bool recordUsedParams{true};
 };
 
-void impl_vec(ISS& env, bool reduce, std::vector<Bytecode>&& bcs);
+void impl_vec(ISS& env, bool reduce, BytecodeVec&& bcs);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -139,7 +139,7 @@ void impl(ISS& env, Ts&&... ts) {
  * will have been constant-propagated, and the canConstProp flag will
  * be clear; otherwise canConstProp will be set as for impl.
  */
-void reduce(ISS& env, std::vector<Bytecode>&& bcs) {
+void reduce(ISS& env, BytecodeVec&& bcs) {
   impl_vec(env, true, std::move(bcs));
 }
 

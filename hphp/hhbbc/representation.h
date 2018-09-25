@@ -86,7 +86,7 @@ struct Block {
   /*
    * Instructions in the block.  Never empty guarantee.
    */
-  std::vector<Bytecode> hhbcs;
+  BytecodeVec hhbcs;
 
   /*
    * The pointer for this block's exception region, or nullptr if

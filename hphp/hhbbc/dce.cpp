@@ -2119,7 +2119,7 @@ void dce_perform(const php::Func& func,
                  const DceActionMap& actionMap,
                  const DceReplaceMap& replaceMap) {
 
-  using It = std::vector<Bytecode>::iterator;
+  using It = BytecodeVec::iterator;
   auto setloc = [] (int32_t srcLoc, It start, int n) {
     while (n--) {
       start++->srcLoc = srcLoc;

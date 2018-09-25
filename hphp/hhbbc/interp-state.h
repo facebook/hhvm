@@ -417,7 +417,7 @@ struct CollectedInfo {
   bool readsUntrackedConstants{false};
   const CollectionOpts opts{CollectionOpts::TrackConstantArrays};
   bool (*propagate_constants)(const Bytecode& bc, State& state,
-                              std::vector<Bytecode>& out) = nullptr;
+                              BytecodeVec& out) = nullptr;
   CompactVector<Type> localStaticTypes;
   /*
    * See FuncAnalysisResult for details.

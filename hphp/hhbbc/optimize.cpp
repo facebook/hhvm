@@ -317,7 +317,7 @@ void insert_assertions(const Index& index,
                        CollectedInfo& collect,
                        php::Block* const blk,
                        State state) {
-  std::vector<Bytecode> newBCs;
+  BytecodeVec newBCs;
   newBCs.reserve(blk->hhbcs.size());
 
   auto& arrTable = *index.array_table_builder();
@@ -480,7 +480,7 @@ bool propagate_constants(const Bytecode& op, State& state, Gen gen) {
 }
 
 bool propagate_constants(const Bytecode& bc, State& state,
-                         std::vector<Bytecode>& out) {
+                         BytecodeVec& out) {
   return propagate_constants(bc, state, [&] (const Bytecode& bc) {
       out.push_back(bc);
     });
@@ -538,7 +538,7 @@ void first_pass(const Index& index,
                 State state) {
   auto const ctx = ainfo.ctx;
 
-  std::vector<Bytecode> newBCs;
+  BytecodeVec newBCs;
   newBCs.reserve(blk->hhbcs.size());
 
   auto interp = Interp { index, ctx, collect, blk, state };
@@ -977,7 +977,7 @@ void optimize_iterators(const Index& index,
       continue;
     }
 
-    std::vector<Bytecode> newOps;
+    BytecodeVec newOps;
     assertx(fixup.base != NoLocalId);
 
     // Rewrite the iteration op to its liter equivalent:

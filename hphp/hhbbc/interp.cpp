@@ -72,8 +72,8 @@ const StaticString s_trigger_error("trigger_error");
 
 //////////////////////////////////////////////////////////////////////
 
-void impl_vec(ISS& env, bool reduce, std::vector<Bytecode>&& bcs) {
-  std::vector<Bytecode> currentReduction;
+void impl_vec(ISS& env, bool reduce, BytecodeVec&& bcs) {
+  BytecodeVec currentReduction;
   if (!options.StrengthReduce) reduce = false;
 
   env.flags.wasPEI          = false;
@@ -651,7 +651,7 @@ void concatHelper(ISS& env, uint32_t n) {
     i++;
   }
   if (result && i >= 2) {
-    std::vector<Bytecode> bcs(i, bc::PopC {});
+    BytecodeVec bcs(i, bc::PopC {});
     bcs.push_back(gen_constant(make_tv<KindOfString>(result)));
     if (i < n) {
       bcs.push_back(bc::ConcatN { n - i + 1 });
@@ -3372,7 +3372,7 @@ void fcallKnownImpl(ISS& env, const FCallArgs& fca) {
           env.ctx, func, std::move(args));
       }();
       if (auto v = tv(ty)) {
-        std::vector<Bytecode> repl { fca.numArgs, bc::PopC {} };
+        BytecodeVec repl { fca.numArgs, bc::PopC {} };
         repl.push_back(gen_constant(*v));
         repl.push_back(bc::RGetCNop {});
         fpiPop(env);

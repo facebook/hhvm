@@ -25,6 +25,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/match.h"
 #include "hphp/util/low-ptr.h"
+#include "hphp/util/compact-vector.h"
 
 namespace HPHP {
 struct StringData;
@@ -42,6 +43,9 @@ namespace HPHP { namespace HHBBC {
 using SString  = const StringData*;
 using LSString = LowPtr<const StringData>;
 using SArray   = const ArrayData*;
+
+struct Bytecode;
+using BytecodeVec = CompactVector<Bytecode>;
 
 /*
  * HHBC evaluation stack flavors.

@@ -347,7 +347,7 @@ let handle_existing_file args filename =
   if args.full_fidelity_s_expr then begin
     let root = SyntaxTree.root syntax_tree in
     let str = DebugPos.dump_syntax root in
-    Printf.printf "%s" str
+    Printf.printf "%s\n" str
   end;
   if args.full_fidelity_ast_s_expr then begin
     let module Lowerer = Full_fidelity_ast in
@@ -369,7 +369,7 @@ let handle_existing_file args filename =
     in
     let res = Lowerer.from_file env in
     let str = Debug.dump_ast @@ Ast.AProgram res.Lowerer.ast in
-    Printf.printf "%s" str
+    Printf.printf "%s\n" str
   end;
   if args.full_fidelity_json then begin
     let json = SyntaxTree.to_json syntax_tree in

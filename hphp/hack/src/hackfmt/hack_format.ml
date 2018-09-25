@@ -262,15 +262,26 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       property_type = prop_type;
       property_declarators = declarators;
       property_semicolon = semi } ->
-    Concat [
-      t env attr;
-      when_present attr newline;
-      handle_possible_list env ~after_each:(fun _ -> Space) modifiers;
-      t env prop_type;
-      handle_declarator_list env declarators;
-      t env semi;
-      Newline;
-    ]
+    let declaration =
+      Concat [
+        handle_possible_list env ~after_each:(fun _ -> Space) modifiers;
+        t env prop_type;
+        handle_declarator_list env declarators;
+        t env semi;
+        Newline;
+      ]
+    in
+    if Syntax.is_missing attr
+    then declaration
+    else
+      WithLazyRule (Rule.Parental,
+        t env attr,
+        Concat [
+          Space;
+          Split;
+          declaration;
+        ]
+      )
   | Syntax.NamespaceDeclaration {
       namespace_keyword = kw;
       namespace_name = name;

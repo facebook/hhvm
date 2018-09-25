@@ -49,18 +49,22 @@ bool auto_mount_hugetlbfs();
 // mapping won't be changed.  If `node` is -1, any NUMA node is OK.
 void* mmap_1g(void* addr, int node, bool map_fixed);
 
-// For 2M pages, we want more control over protection and mapping flags.  Note
-// that MAP_FIXED can overwrite the existing mapping without checking/failing.
-void* mmap_2m(void* addr, int prot, int node, bool map_shared, bool map_fixed);
+// mmap_2m() maps a 2M hugetlb page from the specified NUMA node.  It returns
+// nullptr upon failure. If node is set to -1, no NUMA policy is enforced.
+void* mmap_2m(int node);
+
+// remap_2m() is simiar to mmap_2m(), except that it is used to replace an
+// existing memory range [addr, addr + size2m) using hugetlb pages.  All data in
+// that range will be erased.
+void* remap_2m(void* addr, int node);
 
 // When you already have the memory mapped in, remap them it to use huge pages,
-// and try to interleave across all enabled numa nodes (no guarantee).  Return
-// the number of pages that are actually backed by huge pages.
+// and try to interleave across all enabled numa nodes.  Return the number of
+// pages that are actually backed by hugetlb pages (the rest may be implemented
+// as transparent huge pages).
 //
-// Beware this function wipes out data on existing pages, and yep, that is what
-// it is designed to do.
-size_t remap_interleaved_2m_pages(void* addr, size_t pages, int prot,
-                                  bool map_shared = false);
+// Beware this function wipes out data on existing pages.
+int remap_interleaved_2m_pages(void* addr, size_t pages);
 
 // Information from /sys/devices/system/node/node*/hugepages/*hugepages
 struct HugePageInfo {

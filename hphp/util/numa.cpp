@@ -76,7 +76,7 @@ void initNuma() {
 }
 
 int next_numa_node(std::atomic_int& curr_node) {
-  if (!use_numa) return 0;
+  if (!use_numa) return -1;
   int node;
   do {
     node = curr_node.fetch_add(1, std::memory_order_relaxed);

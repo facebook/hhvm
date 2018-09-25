@@ -25,7 +25,7 @@
 
 #include "hphp/util/alloc.h"
 #include "hphp/util/asm-x64.h"
-#include "hphp/util/maphuge.h"
+#include "hphp/util/hugetlb.h"
 #include "hphp/util/numa.h"
 #include "hphp/util/trace.h"
 
@@ -154,10 +154,8 @@ CodeCache::CodeCache()
     if (CodeCache::MapTCHuge) {
       assertx((uintptr_t(base) & (kRoundUp - 1)) == 0);
       assertx(numMB < (1 << 12));
-      hintHugeDeleteData((char*)base, numMB << 20,
-                         PROT_READ | PROT_WRITE | PROT_EXEC,
-                         false /* MAP_SHARED */);
 #ifdef __linux__
+      remap_interleaved_2m_pages(base, /* number of 2M pages */ numMB / 2);
       madvise(base, numMB << 20, MADV_DONTFORK);
 #endif
     }

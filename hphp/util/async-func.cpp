@@ -94,7 +94,7 @@ static char* mmap_offset_aligned(size_t size, size_t alignOffset,
   auto const allocSize = size + (alignment > 16) * alignment;
   char* start = (char*)mmap(nullptr, allocSize,
                             PROT_READ | PROT_WRITE,
-                            MAP_PRIVATE | MAP_ANON,
+                            MAP_PRIVATE | MAP_ANONYMOUS,
                             -1, 0);
   // Check if `mmap()` returned -1, and throw an exception in that case.
   folly::checkUnixError(reinterpret_cast<intptr_t>(start),
@@ -180,11 +180,7 @@ void AsyncFuncImpl::start() {
       auto const hugeStart = m_threadStack + hugeStartOffset;
       assertx(reinterpret_cast<uintptr_t>(hugeStart) % size2m == 0);
       for (size_t i = 0; i < nHugePages; i++) {
-        if (!mmap_2m(hugeStart + i * size2m, PROT_READ | PROT_WRITE, m_node,
-                     /* MAP_SHARED */ false, /* MAP_FIXED */ true)) {
-          // Try transparent huge pages if we are unable to get reserved ones.
-          hintHuge(hugeStart + i * size2m, size2m);
-        }
+        remap_2m(hugeStart + i * size2m, m_node);
       }
       m_hugePages = MemBlock { hugeStart, nHugePages * size2m };
     }

@@ -32,6 +32,7 @@
 
 #include "hphp/util/kernel-version.h"
 #include "hphp/util/numa.h"
+#include "hphp/util/portability.h"
 
 #endif
 
@@ -40,6 +41,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <atomic>
+#include <stdexcept>
 
 namespace HPHP {
 
@@ -259,11 +263,13 @@ bool auto_mount_hugetlbfs() {
 // Beware that MAP_FIXED overrides existing mapping silently.  If the specified
 // memory was mapped in, it may no longer be after this function fails.
 // mincore() can be used to check if a memory region is stilled mapped in.
-inline void* mmap_2m_impl(void* addr, int prot, bool shared, bool fixed) {
+NEVER_INLINE void* mmap_2m_impl(void* addr, bool fixed) {
   void* ret = MAP_FAILED;
-  int flags = MAP_ANONYMOUS | MAP_HUGETLB
-    | (shared ? MAP_SHARED : MAP_PRIVATE)
-    | (fixed ? MAP_FIXED : 0);
+  int flags = MAP_ANONYMOUS | MAP_PRIVATE | MAP_HUGETLB;
+  if (fixed) {
+    flags |= MAP_FIXED;
+    assert(addr != nullptr);
+  }
   // MAP_HUGE_2MB can be specified after 3.8 kernel.
   static KernelVersion version;
   if (version.m_major > 3 || (version.m_major == 3 && version.m_minor >= 8)) {
@@ -272,7 +278,7 @@ inline void* mmap_2m_impl(void* addr, int prot, bool shared, bool fixed) {
 #endif
     flags |= MAP_HUGE_2MB;
   }
-  ret = mmap(addr, size2m, prot, flags, -1, 0);
+  ret = mmap(addr, size2m, PROT_READ | PROT_WRITE, flags, -1, 0);
   if (ret == MAP_FAILED) {
     record_err_msg("mmap() with MAP_HUGE_2MB failed: ");
     return nullptr;
@@ -413,8 +419,7 @@ struct SavedNumaPolicy {
 }
 #endif
 
-void* mmap_2m(void* addr, int prot, int node /* = -1 */,
-              bool map_shared /* = false */, bool map_fixed /* = false */) {
+void* mmap_2m(int node) {
 #ifdef __linux__
   if (get_huge2m_info(node).free_hugepages <= 0) return nullptr;
   if (node >= 0 && !numa_node_allowed(node)) return nullptr;
@@ -426,61 +431,79 @@ void* mmap_2m(void* addr, int prot, int node /* = -1 */,
     set_mempolicy(MPOL_BIND, &singleNodeMask, sizeof(singleNodeMask));
   }
 #endif
-  void* ret = mmap_2m_impl(addr, prot, map_shared, map_fixed);
-  s_num2MPages += !!ret;
+  void* ret = mmap_2m_impl(nullptr, /* fixed */ false);
+  s_num2MPages += (ret != nullptr);
   return ret;
 #else  // not linux
   return nullptr;
 #endif
 }
 
-size_t remap_interleaved_2m_pages(void* addr, size_t pages, int prot,
-                                  bool shared /* = false */) {
+void* remap_2m(void* addr, int node) {
+  assert(addr != nullptr);
+  assert(reinterpret_cast<uintptr_t>(addr) % size2m == 0);
+#ifdef __linux__
+  if (node >= 0 && !numa_node_allowed(node)) return nullptr;
+  if (get_huge2m_info(node).free_hugepages <= 0) return nullptr;
+#ifdef HAVE_NUMA
+  SavedNumaPolicy numaPolicy;
+  unsigned long singleNodeMask = (1ull << 32) - 1;
+  if (node >= 0 && numa_num_nodes > 1) {
+    numaPolicy.save();
+    singleNodeMask = 1ul << node;
+    set_mempolicy(MPOL_BIND, &singleNodeMask, sizeof(singleNodeMask));
+  }
+#endif
+  void* ret = mmap_2m_impl(addr, /* fixed */ true);
+  if (!ret) {
+    // When mmap_2m_impl() fails, pages in the range [addr, addr + size2m) may
+    // have been unmapped, depending on the implementation of the kernel.  Remap
+    // the range in that case.
+    unsigned char v[size2m / size4k];
+    if (mincore(addr, size2m, v) == -1 && errno == ENOMEM) {
+      // [addr, addr + size2m) contains an unmapped page.
+      int flags = MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED;
+      int prot = PROT_READ | PROT_WRITE;
+      void* normalPages = mmap(addr, size2m, prot, flags, -1, 0);
+      if (normalPages != addr) {
+        // Either the mmap() failed again without trying to get huge pages, or
+        // it has returned something other than addr even with MAP_FIXED.  In
+        // either case, we need to bail out.
+        throw std::runtime_error{"mmap() failure with MAP_FIXED"};
+      }
+#ifdef HAVE_NUMA
+      // Enforce the NUMA node spec.
+      if (node >= 0 && numa_num_nodes > 1) {
+        mbind(normalPages, size2m, MPOL_BIND,
+              &singleNodeMask, 32 /* maxnode */, 0 /* flags */);
+      }
+#endif
+      // Since hugetlb pages are not available, try transparent huge pages.
+      madvise(normalPages, size2m, MADV_HUGEPAGE);
+    }
+  } else {
+    ++s_num2MPages;
+  }
+
+  return ret;
+#else  // not linux
+  return nullptr;
+#endif
+}
+
+int remap_interleaved_2m_pages(void* addr, size_t pages) {
 #ifdef __linux__
   assert(reinterpret_cast<uintptr_t>(addr) % size2m == 0);
   assert(addr != nullptr);
-
-  if (pages == 0) return 0;
-
-#ifdef HAVE_NUMA
-  SavedNumaPolicy numaPolicy;
-  const int maxNode = numa_max_node();
-  unsigned long singleNodeMask;
-  if (maxNode > 0) {
-    numaPolicy.save();
+  int count = 0;
+  std::atomic_int node{0};
+  while (pages > 0) {
+    int curr_node = next_numa_node(node);
+    count += (remap_2m(addr, curr_node) != nullptr);
+    addr = (char*)addr + size2m;
+    --pages;
   }
-#else
-  constexpr int maxNode = 0;
-#endif
-  int node = -1;
-  int failed = 0;                       // consecutive failure count
-  int mapped_count = 0;
-  do {
-#ifdef HAVE_NUMA
-    if (maxNode > 0) {
-      if (++node > maxNode) node = 0;
-      if (!numa_node_allowed(node)) {
-        // Numa policy forbids allocation on node
-        if (++failed > maxNode) break;
-        continue;
-      }
-      singleNodeMask = 1ul << node;
-      set_mempolicy(MPOL_BIND, &singleNodeMask, sizeof(singleNodeMask));
-    }
-#endif
-    // Fail early if we don't have huge pages reserved.
-    if (get_huge2m_info(node).free_hugepages > 0 &&
-        mmap_2m_impl(addr, prot, shared, true /* MAP_FIXED */)) {
-      addr = (char*)addr + size2m;
-      ++mapped_count;
-      failed = 0;
-      continue;
-    }
-    // We failed on node, give up if we have failed on all nodes
-    if (++failed > maxNode) break;
-  } while (mapped_count < pages);
-
-  return mapped_count;
+  return count;
 #else  // not linux
   return 0;
 #endif

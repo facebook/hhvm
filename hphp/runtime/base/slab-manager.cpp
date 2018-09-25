@@ -92,8 +92,7 @@ void SlabManager::init() {
       slabManager->addRange(ptr, size1g);
     }
     for (unsigned i = 0; i < num2MPages; ++i) {
-      auto ptr = mmap_2m(nullptr, PROT_READ | PROT_WRITE, node,
-                          /* MAP_SHARED */ false, /* MAP_FIXED */ false);
+      auto ptr = mmap_2m(node);
       if (!ptr) {
         Logger::Warning("Insufficient 2M huge pages for slabs "
                         "on NUMA node %u, desired %u, actual %u",

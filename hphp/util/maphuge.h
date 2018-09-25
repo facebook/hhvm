@@ -39,11 +39,6 @@ inline void hintHuge(void* mem, size_t length) {
 #endif
 }
 
-// Will delete whatever data on the pages when remapping.  Caller is responsible
-// to copy the data back if desired.
-void hintHugeDeleteData(char* mem, size_t length, int prot,
-                        bool shared = false);
-
 }
 
 #endif

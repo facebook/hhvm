@@ -910,6 +910,13 @@ module Make (GetLocals : GetLocals) = struct
       N.Haccess ((pos, root_ty), id :: ids)
     | Hshape ast_shape_info ->
       N.Hshape (ast_shape_info_to_nast_shape_info env ast_shape_info)
+    | Hreified h ->
+      if not (TypecheckerOptions.experimental_feature_enabled
+          (fst env).tcopt
+        TypecheckerOptions.experimental_reified_generics)
+      then
+        Errors.experimental_feature Pos.none "reified generics";
+      snd @@ hint ~allow_retonly env h
 
   and hint_id ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth
     env (p, x as id) hl =

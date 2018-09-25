@@ -1,2 +1,4 @@
-File "reified-generic-as-param.php", line 3, characters 25-33:
-Invalid place to put reified (Parsing[1002])
+File "", line 0, characters 0-0:
+Cannot use experimental feature: reified generics (Other[0000])
+File "reified-generic-as-param.php", line 3, characters 20-20:
+Cannot use experimental feature: reified generics (Other[0000])

@@ -63,3 +63,9 @@ let add_reified_attribute attrs params =
   (Hhas_attribute.make "__Reified" @@
     List.concat_mapi reified_tparams
       (fun index p -> [TV.Int (Int64.of_int index); TV.String p])) :: attrs
+
+let add_reified_parent_attribute attrs = function
+  | ((_, Ast.Happly (_, hl))) :: _ ->
+    if List.exists hl ~f:(function (_, Ast.Hreified _) -> true | _ -> false)
+    then (Hhas_attribute.make "__HasReifiedParent" []) :: attrs else attrs
+  | _ -> attrs

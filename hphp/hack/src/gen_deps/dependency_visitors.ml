@@ -190,6 +190,7 @@ class dependency_visitor = object(this)
     | Hshape _
     | Hoption _
     | Hsoft _
+    | Hreified _
     | Hfun _
     | Htuple _ -> ());
     super#on_hint dep_env hint

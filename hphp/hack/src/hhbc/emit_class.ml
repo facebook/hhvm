@@ -237,6 +237,8 @@ let emit_class : A.class_ * Closure_convert.hoist_kind -> Hhas_class.t =
     Emit_attribute.from_asts namespace ast_class.Ast.c_user_attributes in
   let class_attributes = Emit_attribute.add_reified_attribute
     class_attributes ast_class.Ast.c_tparams in
+  let class_attributes = Emit_attribute.add_reified_parent_attribute
+    class_attributes ast_class.Ast.c_extends in
   let class_is_immutable = Hhas_attribute.has_const class_attributes in
   (* In the future, we intend to set class_no_dynamic_props independently from
    * class_is_immutable, but for now class_is_immutable is the only thing that

@@ -430,7 +430,7 @@ uint64_t RuntimeOption::DisableCallUserFunc = 0;
 uint64_t RuntimeOption::DisableCallUserFuncArray = 0;
 uint64_t RuntimeOption::DisableParseStrSingleArg = 0;
 bool RuntimeOption::UndefinedConstAsString = true;
-bool RuntimeOption::UndefinedConstFallback = true;
+uint64_t RuntimeOption::UndefinedConstFallback = 0;
 
 #ifdef HHVM_DYNAMIC_EXTENSION_DIR
 std::string RuntimeOption::ExtensionDir = HHVM_DYNAMIC_EXTENSION_DIR;

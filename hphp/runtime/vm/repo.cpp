@@ -208,6 +208,8 @@ void Repo::loadGlobalData(bool allowFailure /* = false */,
     RuntimeOption::EvalReffinessInvariance  = s_globalData.ReffinessInvariance;
     RuntimeOption::EvalCheckPropTypeHints   = s_globalData.CheckPropTypeHints;
     RuntimeOption::EvalHackArrDVArrs        = s_globalData.HackArrDVArrs;
+    RuntimeOption::UndefinedConstFallback =
+      s_globalData.UndefinedConstFallback;
     RuntimeOption::EvalAbortBuildOnVerifyError =
       s_globalData.AbortBuildOnVerifyError;
     RuntimeOption::DisallowDynamicVarEnvFuncs =

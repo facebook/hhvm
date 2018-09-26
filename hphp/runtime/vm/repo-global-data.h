@@ -207,6 +207,12 @@ struct Repo::GlobalData {
   bool AbortBuildOnVerifyError = false;
 
   /*
+   * Controls PHP's behavior of falling back to the default namespace for
+   * undefined constants.
+   */
+  uint64_t UndefinedConstFallback = 0;
+
+  /*
    * A more-or-less unique identifier for the repo
    */
   uint64_t Signature = 0;
@@ -251,6 +257,7 @@ struct Repo::GlobalData {
       (Signature)
       (DisableReturnByReference)
       (AbortBuildOnVerifyError)
+      (UndefinedConstFallback)
       ;
   }
 };

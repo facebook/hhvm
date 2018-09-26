@@ -707,7 +707,7 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::EvalDisableReturnByReference ? '1' : '0')
     + (RuntimeOption::EvalEnableHHJS ? '1' : '0')
     + (RuntimeOption::UndefinedConstAsString ? '1' : '0')
-    + (RuntimeOption::UndefinedConstFallback ? '1' : '0')
+    + std::to_string(RuntimeOption::UndefinedConstFallback)
     + mangleUnitPHP7Options()
     + mangleAliasedNamespaces()
     + hackc_version();

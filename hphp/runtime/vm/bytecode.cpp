@@ -2349,6 +2349,7 @@ OPTBLD_INLINE void iopCnsE(const StringData* s) {
 OPTBLD_INLINE void iopCnsU(const StringData* name, const StringData* fallback) {
   auto cns = Unit::loadCns(name);
   if (cns == nullptr) {
+    raise_undefined_const_fallback_notice(name, fallback);
     return iopCns(fallback);
   }
   auto const c1 = vmStack().allocC();
@@ -2358,6 +2359,7 @@ OPTBLD_INLINE void iopCnsU(const StringData* name, const StringData* fallback) {
 OPTBLD_INLINE void iopCnsUE(const StringData* name, const StringData* fallback) {
   auto cns = Unit::loadCns(name);
   if (cns == nullptr) {
+    raise_undefined_const_fallback_notice(name, fallback);
     return iopCnsE(fallback);
   }
   auto const c1 = vmStack().allocC();

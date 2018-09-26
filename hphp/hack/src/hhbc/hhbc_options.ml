@@ -256,7 +256,7 @@ let set_option options name value =
   | "hack.lang.phpism.undefinedconstasstring" ->
     { options with option_phpism_undefined_const_as_string = as_bool value}
   | "hack.lang.phpism.undefinedconstfallback" ->
-    { options with option_phpism_undefined_const_fallback = as_bool value}
+    { options with option_phpism_undefined_const_fallback = int_of_string value < 2 }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -384,7 +384,7 @@ let value_setters = [
   (set_value "hhvm.hack.lang.phpism.undefined_const_as_string" get_value_from_config_int @@
      fun opts v -> { opts with option_phpism_undefined_const_as_string = (v = 1)});
   (set_value "hhvm.hack.lang.phpism.undefined_const_fallback" get_value_from_config_int @@
-     fun opts v -> { opts with option_phpism_undefined_const_fallback = (v = 1)});
+     fun opts v -> { opts with option_phpism_undefined_const_fallback = (v < 2) });
 ]
 
 let extract_config_options_from_json ~init config_json =

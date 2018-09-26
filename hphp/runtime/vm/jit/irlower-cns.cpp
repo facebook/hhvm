@@ -221,6 +221,7 @@ Cell lookupCnsUHelperNormal(rds::Handle tv_handle,
 
   // Try cache handle for unqualified name.
   if (UNLIKELY(!cns && rds::isHandleInit(tv_handle, rds::NormalTag{}))) {
+    raise_undefined_const_fallback_notice(nm, fallback);
     cns = rds::handleToPtr<TypedValue, rds::Mode::Normal>(tv_handle);
     assertx(type(cns) != KindOfUninit);
   }
@@ -232,6 +233,7 @@ Cell lookupCnsUHelperNormal(rds::Handle tv_handle,
   }
 
   // Lookup unqualified name in thread-local constants.
+  raise_undefined_const_fallback_notice(nm, fallback);
   return lookupCnsHelper(fallback, error);
 }
 
@@ -247,7 +249,10 @@ Cell lookupCnsUHelperPersistent(rds::Handle tv_handle,
     // Try cache handle for unqualified name.
     auto const tv =
       rds::handleToPtr<TypedValue, rds::Mode::Persistent>(tv_handle);
-    if (tv->m_type != KindOfUninit) cns = tv;
+    if (tv->m_type != KindOfUninit) {
+      raise_undefined_const_fallback_notice(nm, fallback);
+      cns = tv;
+    }
   }
 
   if (LIKELY(cns != nullptr)) {
@@ -256,6 +261,7 @@ Cell lookupCnsUHelperPersistent(rds::Handle tv_handle,
     return c1;
   }
 
+  raise_undefined_const_fallback_notice(nm, fallback);
   return lookupCnsHelper(fallback, error);
 }
 

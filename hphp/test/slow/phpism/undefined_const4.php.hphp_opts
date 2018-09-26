@@ -1,2 +1,2 @@
 -vRuntime.Hack.Lang.Phpism.UndefinedConstAsString=false
--vRuntime.Hack.Lang.Phpism.UndefinedConstFallback=false
+-vRuntime.Hack.Lang.Phpism.UndefinedConstFallback=2

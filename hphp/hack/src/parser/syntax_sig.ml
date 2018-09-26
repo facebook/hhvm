@@ -1055,6 +1055,7 @@ module type Syntax_S = sig
   val make_missing : Full_fidelity_source_text.t -> int -> t
   val make_list : Full_fidelity_source_text.t -> int -> t list -> t
   val is_namespace_prefix : t -> bool
+  val syntax_list_fold : init:'a -> f:('a -> t -> 'a) -> t -> 'a
   val make_end_of_file : t -> t
   val make_script : t -> t
   val make_qualified_name : t -> t

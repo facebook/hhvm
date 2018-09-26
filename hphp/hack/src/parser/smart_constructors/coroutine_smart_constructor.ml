@@ -65,9 +65,26 @@ module WithSyntax(Syntax : Positioned_syntax_sig.PositionedSyntax_S) = struct
     state, Syntax.make_awaitable_creation_expression r1 r2 coroutine r4
 
   let make_attribute_specification left attribute_name right state =
-    let attribute_string = Syntax.extract_text attribute_name in
-    let state = state ||
-      Option.value_map attribute_string ~default:false ~f:(fun name -> name = "__PPL") in
+    let open Syntax in
+    let is_ppl_attribute_folder has_seen_ppl constructor_call =
+      if has_seen_ppl then has_seen_ppl else
+      match Syntax.syntax constructor_call with
+      | Syntax.ConstructorCall {
+          constructor_call_type;
+          constructor_call_left_paren;
+          constructor_call_argument_list;
+          constructor_call_right_paren;
+        } ->
+          Syntax.is_missing constructor_call_left_paren
+          && Syntax.is_missing constructor_call_argument_list
+          && Syntax.is_missing constructor_call_right_paren
+          && Option.value_map
+            (Syntax.extract_text constructor_call_type)
+            ~default:false
+            ~f:(fun text -> text = ppl_macro_string)
+      | _ -> false in
+    let state = state
+      || syntax_list_fold ~init:false ~f:is_ppl_attribute_folder attribute_name in
     state, Syntax.make_attribute_specification left attribute_name right
 
 end (* WithSyntax *)

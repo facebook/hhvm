@@ -469,6 +469,19 @@ module WithToken(Token: TokenType) = struct
     let is_ampersand  = is_specific_token TokenKind.Ampersand
     let is_inout      = is_specific_token TokenKind.Inout
 
+    let syntax_list_fold ~init ~f node =
+      match syntax node with
+      | SyntaxList sl ->
+        List.fold_left
+          ~init
+          ~f:(fun init li -> match syntax li with
+              | ListItem { list_item; _; }-> f init list_item
+              | Missing -> init
+              | _ -> f init li)
+          sl
+      | Missing -> init
+      | _ -> f init node
+
     let fold_over_children f acc syntax =
       match syntax with
       | Missing -> acc

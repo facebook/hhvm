@@ -986,7 +986,7 @@ let handle_mode
       ~f:begin fun k _ acc -> Relative_path.Map.remove acc k end
       ~init:files_info
     in
-    Relative_path.Map.iter files_info ~f:(fun _ info ->
+    Relative_path.Map.iter files_info ~f:(fun file info ->
       let { FileInfo.classes; _} = info in
       (* For each class, grab the declaration from the decl_heap*)
       let linearizations = List.map classes
@@ -996,6 +996,14 @@ let handle_mode
         end in
       List.iter linearizations ~f:(fun (classname, linearization) ->
         Printf.printf "Linearization for class %s:\n" classname;
+        let linearization = List.map linearization (fun mro ->
+          let name = mro.Decl_defs.mro_name in
+          let params = List.map mro.Decl_defs.mro_params (fun ty ->
+              let tenv = Typing_env.empty tcopt ~droot:None file in
+              Typing_print.full tenv ty
+            ) in
+          if params = [] then name else name ^ "<" ^ (String.concat "," params) ^ ">"
+          ) in
         Printf.printf "[%s]\n" (String.concat ", " linearization)
       )
     )

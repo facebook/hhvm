@@ -41,7 +41,14 @@ type subst_context = {
   sc_from_req_extends : bool;
 }
 
-type linearization = string list
+type mro_element = {
+  (* The class's name *)
+  mro_name : string;
+  (* The type parameters on the class *)
+  mro_params : decl ty list;
+}
+
+type linearization = mro_element list
 
 type decl_class_type = {
   dc_need_init           : bool;

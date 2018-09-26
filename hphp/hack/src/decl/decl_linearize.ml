@@ -8,13 +8,24 @@
  *)
 open Core_kernel
 open Nast
-(* Module calculating the Member Resolution Order of a class *)
-type result = Decl_defs.linearization
+open Decl_defs
 
-let get_linearization (env : Decl_env.env) (class_name : string) : result =
-  match Decl_env.get_class_dep env class_name with
+
+(* Module calculating the Member Resolution Order of a class *)
+type result = linearization
+
+let get_linearization (env : Decl_env.env)
+                      (class_name : string)
+                      (type_params : Nast.hint list) : result =
+  let type_params = List.map type_params (Decl_hint.hint env) in
+  let result = match Decl_env.get_class_dep env class_name with
   | Some l -> l.Decl_defs.dc_linearization
-  | None -> []
+  | None -> [] in
+  (* Fill in the type parameterization of the starting class *)
+  match result with
+  | c::rest ->
+    { c with mro_params = type_params }::rest
+  | [] -> []
 
 let add_linearization (acc : result) (lin : result) : result =
   List.fold_left lin ~init:acc ~f:(fun acc e ->
@@ -23,8 +34,8 @@ let add_linearization (acc : result) (lin : result) : result =
   )
 
 let from_class (env : Decl_env.env) (hint : Nast.hint) : result =
-  let _, class_name, _ = Decl_utils.unwrap_class_hint hint in
-  get_linearization env class_name
+  let _, class_name, type_params = Decl_utils.unwrap_class_hint hint in
+  get_linearization env class_name type_params
 
 
 let from_list (env : Decl_env.env) (l : Nast.hint list) (acc : result) : result =
@@ -46,7 +57,9 @@ let from_parent (env : Decl_env.env) (c : Nast.class_) (acc : result) : result =
 
 (* Linearize a class declaration given its nast *)
 let linearize (env : Decl_env.env) (c : Nast.class_) : result =
-  let child = snd c.c_name in
+  let mro_name = snd c.c_name in
+  (* The first class doesn't have its type parameters filled in *)
+  let child = { mro_name; mro_params = [] } in
   let acc = add_linearization [] [child] in
   (* Add traits in backwards order *)
   let acc = from_list env (List.rev c.c_uses) acc in

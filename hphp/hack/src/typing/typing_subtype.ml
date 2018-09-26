@@ -1707,6 +1707,8 @@ let rec sub_string
   (p : Pos.Map.key)
   (env : Env.env)
   (ty2 : locl ty) : Env.env =
+  let stringish_deprecated =
+    TypecheckerOptions.disallow_stringish_magic (Env.get_options env) in
   let sub_string = sub_string ~allow_mixed in
   let env, ety2 = Env.expand_type env ty2 in
   let fail () =
@@ -1741,6 +1743,8 @@ let rec sub_string
            * that will be converted to a string *)
           when tc.tc_name = SN.Classes.cStringish
           || SMap.mem SN.Classes.cStringish tc.tc_ancestors ->
+        if stringish_deprecated
+        then Errors.object_string_deprecated p;
         env
       | Some _ ->
         Errors.object_string p (Reason.to_pos r2);

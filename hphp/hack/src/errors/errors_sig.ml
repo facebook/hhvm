@@ -244,6 +244,7 @@ module type S = sig
   val fun_variadicity_hh_vs_php56 : Pos.t -> Pos.t -> unit
   val expected_tparam : Pos.t -> int -> unit
   val object_string : Pos.t -> Pos.t -> unit
+  val object_string_deprecated : Pos.t -> unit
   val type_param_arity : Pos.t -> string -> string -> unit
   val cyclic_typedef : Pos.t -> unit
   val type_arity_mismatch : Pos.t -> string -> Pos.t -> string -> unit

@@ -1966,7 +1966,7 @@ let string_cast pos ty =
   add (Typing.err_code Typing.StringCast) pos @@
     Printf.sprintf
       "Cannot cast a value of type %s to string.\n\
-      Only Stringish objects and primitives may be used in a (string) cast."
+      Only primitives may be used in a (string) cast."
       ty
 
 let nullable_cast pos ty ty_pos =
@@ -2358,6 +2358,11 @@ let object_string pos1 pos2 =
   pos1, "You cannot use this object as a string";
   pos2, "This object doesn't implement __toString";
 ]
+
+let object_string_deprecated pos =
+  add (Typing.err_code Typing.ObjectString) pos
+    "You cannot use this object as a string\n\
+    Implicit conversions of Stringish objects to string are deprecated."
 
 let type_param_arity pos x n =
   add (Typing.err_code Typing.TypeParamArity) pos (

@@ -153,10 +153,10 @@ val can_subtype: env -> Tast.ty -> Tast.ty -> bool
     type after resolving unbound type variables in both types (if any). *)
 
 val is_stringish: ?allow_mixed:bool -> env -> Tast.ty -> bool
-(** Return {true} when the given type can be considered a subtype of Stringish
-    after resolving unbound type variables in the type (if any).
+(** Return {true} when the given type can be used in a context where string is
+    required after resolving unbound type variables in the type (if any).
     If {allow_mixed} is {true}, then mixed, nonnull, and abstract types with no
-    known concrete supertypes are considered Stringish. *)
+    known concrete supertypes are considered valid. *)
 
 val referenced_typeconsts :
   env -> Aast.hint -> Aast.sid list -> (string * string * Pos.t) list

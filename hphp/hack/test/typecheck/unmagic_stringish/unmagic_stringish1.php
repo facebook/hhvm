@@ -28,14 +28,24 @@ function test(): void {
   $mixed = make_mixed();
   $nonnull = make_nonnull();
 
-  (string) $bool;
-  (string) $int;
-  (string) $float;
-  (string) $string;
-  (string) $null;
-  (string) $num;
-  (string) $arraykey;
+  "$bool";
+  ''.$bool;
 
-  (string) $mixed;
-  (string) $nonnull;
+  "$int";
+  ''.$int;
+
+  "$float";
+  ''.$float;
+
+  "$string";
+  ''.$string;
+
+  "$null";
+  ''.$null;
+
+  "$num";
+  ''.$num;
+
+  "$arraykey";
+  ''.$arraykey;
 }

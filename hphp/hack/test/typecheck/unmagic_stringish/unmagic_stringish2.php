@@ -63,11 +63,21 @@ function test(): void {
   $cimptuse = new CImplicitTuse();
   $cimptreq = new CImplicitTreq();
 
-  (string) $cnon;
+  "$cnon";
+  ''.$cnon;
 
-  (string) $cexp;
-  (string) $cimp;
-  (string) $cimpintf;
-  (string) $cimptuse;
-  (string) $cimptreq;
+  "$cexp";
+  ''.$cexp;
+
+  "$cimp";
+  ''.$cimp;
+
+  "$cimpintf";
+  ''.$cimpintf;
+
+  "$cimptuse";
+  ''.$cimptuse;
+
+  "$cimptreq";
+  ''.$cimptreq;
 }

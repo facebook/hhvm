@@ -115,6 +115,9 @@ ExecutionContext::ExecutionContext()
   VariableSerializer::serializationSizeLimit =
     RuntimeOption::SerializationSizeLimit;
   tvWriteUninit(m_headerCallback);
+
+  m_shutdowns = Array::CreateDArray();
+  m_shutdownsBackup = Array::CreateDArray();
 }
 
 // See header for why this is required.
@@ -539,15 +542,18 @@ void ExecutionContext::registerShutdownFunction(const Variant& function,
                                                 Array arguments,
                                                 ShutdownType type) {
   Array callback = make_map_array(s_name, function, s_args, arguments);
+  if (!m_shutdowns.exists(type)) {
+    m_shutdowns.set(type, Array::CreateVArray());
+  }
   auto const funcs = m_shutdowns.lvalAt(type);
-  forceToArray(funcs).append(callback);
+  forceToDArray(funcs).append(callback);
 }
 
 bool ExecutionContext::removeShutdownFunction(const Variant& function,
                                               ShutdownType type) {
   bool ret = false;
-  auto& funcs = forceToArray(m_shutdowns.lvalAt(type));
-  PackedArrayInit newFuncs(funcs.size());
+  auto& funcs = forceToDArray(m_shutdowns.lvalAt(type));
+  VArrayInit newFuncs(funcs.size());
 
   for (ArrayIter iter(funcs); iter; ++iter) {
     if (!same(iter.second().toArray()[s_name], function)) {
@@ -561,7 +567,7 @@ bool ExecutionContext::removeShutdownFunction(const Variant& function,
 }
 
 bool ExecutionContext::hasShutdownFunctions(ShutdownType type) {
-  return !m_shutdowns.isNull() && m_shutdowns.exists(type) &&
+  return m_shutdowns.exists(type) &&
     m_shutdowns[type].toArray().size() >= 1;
 }
 
@@ -656,7 +662,7 @@ void ExecutionContext::executeFunctions(ShutdownType type) {
   RID().resetTimer(RuntimeOption::PspTimeoutSeconds);
   RID().resetCPUTimer(RuntimeOption::PspCpuTimeoutSeconds);
 
-  if (!m_shutdowns.isNull() && m_shutdowns.exists(type)) {
+  if (m_shutdowns.exists(type)) {
     SCOPE_EXIT {
       try { m_shutdowns.remove(type); } catch (...) {}
     };

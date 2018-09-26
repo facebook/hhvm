@@ -539,7 +539,20 @@ std::string readline(FILE* f) {
   ssize_t len = 0;
   SCOPE_EXIT { free(line); };
 
-  if ((len = getline(&line, &mx, f)) < 0) {
+  for (auto tries = 0; tries < 10; tries++) {
+    if ((len = getline(&line, &mx, f)) >= 0) {
+      break;
+    }
+    if (errno == EINTR) {
+      // Signal. Maybe Xenon? Just try again within reason.
+      ::clearerr(f);
+      continue;
+    }
+    // Non-EINTR error.
+    break;
+  }
+
+  if (len < 0) {
     throwErrno("error reading line");
   }
 

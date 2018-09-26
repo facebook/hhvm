@@ -112,8 +112,8 @@ add_definitions(${LIBXML2_DEFINITIONS})
 
 # libsqlite3
 find_package(LibSQLite)
-if (LIBSQLITE_INCLUDE_DIR)
-  include_directories(${LIBSQLITE_INCLUDE_DIR})
+if (LIBSQLITE3_INCLUDE_DIR)
+  include_directories(${LIBSQLITE3_INCLUDE_DIR})
 endif ()
 
 # libdouble-conversion

@@ -3672,31 +3672,22 @@ and can_use_as_rhs_in_list_assignment expr =
   match expr with
   | A.Call ((_, A.Id (_, s)), _, _, _) when String.lowercase s = "echo" ->
     false
-  | A.Lvar _
-  | A.Dollar _
-  | A.Array_get _
-  | A.Obj_get _
-  | A.Class_get _
-  | A.Call _
-  | A.New _
-  | A.Expr_list _
-  | A.Yield _
-  | A.Cast _
-  | A.Eif _
-  | A.Array _
-  | A.Varray _
-  | A.Darray _
-  | A.Collection _
-  | A.Clone _
-  | A.Unop _
-  | A.Await _ -> true
+  | A.Lvar _ | A.Dollar _ | A.Array_get _ | A.Obj_get _ | A.Class_get _
+  | A.Call _ | A.New _ | A.Expr_list _ | A.Yield _ | A.Cast _ | A.Eif _
+  | A.Array _ | A.Varray _ | A.Darray _ | A.Collection _ | A.Clone _ | A.Unop _
+  | A.As _ | A.Await _ -> true
   | A.Pipe (_, (_, r))
   | A.Binop ((A.Eq None), (_, A.List _), (_, r)) ->
     can_use_as_rhs_in_list_assignment r
-  | A.Binop (A.Plus, _, _)
-  | A.Binop (A.QuestionQuestion, _, _)
+  | A.Binop (A.Plus, _, _) | A.Binop (A.QuestionQuestion, _, _)
   | A.Binop (A.Eq _, _, _) -> true
-  | _ -> false
+  (* Everything below is false *)
+  | A.Binop _ | A.Shape _ | A.Null | A.True | A.False | A.Omitted | A.Id _
+  | A.Class_const _ | A.Int _ | A.Float _ | A.String _ | A.String2 _
+  | A.PrefixedString _ | A.Yield_break | A.Yield_from _ | A.Suspend _
+  | A.InstanceOf _ | A.Is _ | A.BracedExpr _ | A.ParenthesizedExpr _
+  | A.NewAnonClass _ | A.Efun _ | A.Lfun _ | A.Xml _ | A.Unsafeexpr _
+  | A.Import _ | A.Callconv _ | A.Execution_operator _ | A.List _ -> false
 
 
 (* Generate code for each lvalue assignment in a list destructuring expression.

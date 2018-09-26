@@ -153,6 +153,77 @@ function sodium_crypto_secretbox_open(
   string $key,
 ): mixed /* string | false */;
 
+
+/**
+ * Initialize a stream on the read side.
+ *
+ * @param $header a header created by the write side via
+ *   `sodium_crypto_secretstream_xchacha20poly1305_init_push()`
+ * @param $key a pre-shared key created with
+ *   `sodium_crypto_secretstream_xchacha20poly1305_keygen()`
+ *
+ * @return string an opaque state blob
+ */
+<<__Native>>
+function sodium_crypto_secretstream_xchacha20poly1305_init_pull(
+  string $header,
+  string $key
+): string;
+
+/**
+ * Initialize a stream on the write side, with the specified key.
+ *
+ * @param $key a pre-shared key created with
+ *   `sodium_crypto_secretstream_xchacha20poly1305_keygen()`
+ * @return (string $state, string $header) - both are opaque blobs. `$header`
+ *   should be passed to the read side.
+ */
+<<__Native>>
+function sodium_crypto_secretstream_xchacha20poly1305_init_push(
+  string $key,
+): varray;
+
+/**
+ * Generate a random key for use with other secretstream functions
+ */
+function sodium_crypto_secretstream_xchacha20poly1305_keygen(): string {
+  return random_bytes(SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_KEYBYTES);
+}
+
+/**
+ * Read data from a secret stream.
+ *
+ * @param $state an opaque state blob
+ * @param $c the ciphertext
+ * @param ?string $ad optional additional data for authentication
+ * @return (string $message, int $tag)
+ * @return false if it fails
+ */
+<<__Native>>
+function sodium_crypto_secretstream_xchacha20poly1305_pull(
+  mixed &$state,
+  string $c,
+  mixed $ad = null,
+): mixed;
+
+/* Write data to a secret stream.
+ *
+ * @param $state an opaque state blob
+ * @param $msg the plaintext message to send
+ * @param $ad optional additional data for authentication
+ * @return $string the ciphertext
+ */
+<<__Native>>
+function sodium_crypto_secretstream_xchacha20poly1305_push(
+  mixed &$state,
+  string $msg,
+  ?string $ad = null,
+  int $tag = 0,
+): string;
+
+<<__Native>>
+function sodium_crypto_secretstream_xchacha20poly1305_rekey(mixed &$state): void;
+
 ///// Asymetric (public-key) encryption key management
 
 <<__Native>>

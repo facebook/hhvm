@@ -154,6 +154,75 @@ function sodium_crypto_secretbox_open(
   string $key,
 ): mixed /* string | false */;
 
+/**
+ * Initialize a stream on the read side.
+ *
+ * @param $header a header created by the write side via
+ *   `sodium_crypto_secretstream_xchacha20poly1305_init_push()`
+ * @param $key a pre-shared key created with
+ *   `sodium_crypto_secretstream_xchacha20poly1305_keygen()`
+ *
+ * @return string an opaque state blob
+ */
+<<__PHPStdLib>>
+function sodium_crypto_secretstream_xchacha20poly1305_init_pull(
+  string $header,
+  string $key
+): string;
+
+/**
+ * Initialize a stream on the write side, with the specified key.
+ *
+ * @param $key a pre-shared key created with
+ *   `sodium_crypto_secretstream_xchacha20poly1305_keygen()`
+ * @return (string $state, string $header) - both are opaque blobs. `$header`
+ *   should be passed to the read side.
+ */
+<<__PHPStdLib>>
+function sodium_crypto_secretstream_xchacha20poly1305_init_push(
+  string $key,
+): (string, string);
+
+/**
+ * Generate a random key for use with other secretstream functions
+ */
+<<__PHPStdLib>>
+function sodium_crypto_secretstream_xchacha20poly1305_keygen(): string;
+
+/**
+ * Read data from a secret stream.
+ *
+ * @param $state an opaque state blob
+ * @param $c the ciphertext
+ * @param ?string $ad optional additional data for authentication
+ * @return (string $message, int $tag)
+ * @return false if it fails
+ */
+<<__PHPStdLib>>
+function sodium_crypto_secretstream_xchacha20poly1305_pull(
+  string &$state,
+  string $c,
+  ?string $ad = null,
+): mixed;
+
+/* Write data to a secret stream.
+ *
+ * @param $state an opaque state blob
+ * @param $msg the plaintext message to send
+ * @param $ad optional additional data for authentication
+ * @return $string the ciphertext
+ */
+<<__PHPStdLib>>
+function sodium_crypto_secretstream_xchacha20poly1305_push(
+  string &$state,
+  string $msg,
+  ?string $ad = null,
+  int $tag = 0,
+): string;
+
+<<__PHPStdLib>>
+function sodium_crypto_secretstream_xchacha20poly1305_rekey(string &$state): void;
+
 ///// Asymetric (public-key) encryption key management
 
 <<__PHPStdLib>>

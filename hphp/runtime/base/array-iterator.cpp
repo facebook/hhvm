@@ -662,16 +662,10 @@ static inline void iter_value_cell_local_impl(Iter* iter, TypedValue* out) {
   if (typeArray) {
     auto const cur = arrIter.nvSecond();
     if (isRefType(cur.type())) {
-      if (withRef) {
-        if (!cur.val().pref->isReferenced()) {
-          FOLLY_SDT(hhvm, hhvm_demote_iter);
-          cellDup(*(cur.val().pref->cell()), *out);
-        } else {
-          FOLLY_SDT(hhvm, hhvm_alias_iter);
-          refDup(cur.tv(), *out);
-        }
-      } else {
+      if (!withRef || !cur.val().pref->isReferenced()) {
         cellDup(*(cur.val().pref->cell()), *out);
+      } else {
+        refDup(cur.tv(), *out);
       }
     } else {
       cellDup(cur.tv(), *out);

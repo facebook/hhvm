@@ -403,12 +403,9 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
       auto ref = e.data.m_data.pref;
       // See also tvDupWithRef()
       if (!ref->isReferenced() && ref->cell()->m_data.parr != &other) {
-        FOLLY_SDT(hhvm, hhvm_demote_CopyMixed);
         cellDup(*ref->cell(), *reinterpret_cast<Cell*>(&e.data));
         continue;
-      }
-      FOLLY_SDT(hhvm, hhvm_alias_CopyMixed);
-      if (dest_hk == HeaderKind::Dict) {
+      } else if (dest_hk == HeaderKind::Dict) {
         ad->m_used = i;
         ad->m_size = i;
         ad->m_pos = 0;
@@ -857,7 +854,6 @@ MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
         auto ref = elm->data.m_data.pref;
         // See also tvDupWithRef()
         if (!ref->isReferenced() && ref->cell()->m_data.parr != old) {
-          FOLLY_SDT(hhvm, hhvm_demote_GrowMixed);
           cellDup(*ref->cell(), elm->data);
           continue;
         }

@@ -441,7 +441,6 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
                                       Array &arr1, const Array& arr2) {
   auto const arr1_ptr = arr1.get();
   if (check) {
-    // optimization: only manipulate seen set for shared refs and globals
     if (seen.find(arr1_ptr) != seen.end()) {
       raise_warning("array_merge_recursive(): recursion detected");
       return;
@@ -636,7 +635,6 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
 
   auto const arr1_ptr = arr1.get();
   if (check) {
-    // optimization: only trace seen arrays if they were in a shared Ref
     if (seen.find(arr1_ptr) != seen.end()) {
       raise_warning("array_replace_recursive(): recursion detected");
       return;
@@ -1323,7 +1321,6 @@ static void compact(PointerSet& seen, VarEnv* v, Array& ret,
     auto adata = var.getArrayData();
     auto check = couldRecur(var, adata);
     if (check) {
-      // optimization: only manipulate seen set for shared refs and globals
       if (seen.find(adata) != seen.end()) {
         raise_warning("compact(): recursion detected");
         return;

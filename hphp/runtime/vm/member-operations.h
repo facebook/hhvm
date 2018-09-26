@@ -541,12 +541,9 @@ inline tv_rval Elem(TypedValue& tvRef,
   assertx(mode != MOpMode::Define && mode != MOpMode::Unset);
   assertx(tvIsPlausible(base.tv()));
 
-  if (mode == MOpMode::InOut && UNLIKELY(tvIsRef(base))) {
-    if (!base.val().pref->isReferenced()) {
-      FOLLY_SDT(hhvm, hhvm_demote_Elem);
+  if (mode == MOpMode::InOut) {
+    if (UNLIKELY(tvIsRef(base) && !base.val().pref->isReferenced())) {
       base = base.unboxed();
-    } else {
-      FOLLY_SDT(hhvm, hhvm_alias_Elem);
     }
   }
 

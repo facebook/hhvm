@@ -65,13 +65,3 @@ hhvm_mut_setrange lsize rsize
 
   lsize: size in bytes of the original string
   rsize: number of bytes copied into the string (size * count)
-
-hhvm_demote_{op}
-
-  A PHP ref was demoted in an array or object copy created by operation {op}.
-  The underlying value was copied, but the ref was left unmodified in the
-  original.
-
-hhvm_alias_{op}
-
-  A PHP ref was preserved, gaining an additional reference, during {op}.

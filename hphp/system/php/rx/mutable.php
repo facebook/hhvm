@@ -7,8 +7,9 @@ namespace HH\Rx {
  * variable pointing to an object.
  */
 <<__Rx>>
-function freeze(mixed $obj): void {
+function freeze<T>(T $obj): T {
   invariant(is_object($obj), 'HH\\Rx\\freeze() operates only on objects');
+  return $obj;
 }
 
 /*

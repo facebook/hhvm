@@ -56,7 +56,6 @@ module Messages = struct
   let from_emacs    = " DEPRECATED"
   let from_hhclient = " DEPRECATED"
   let convert       = " adds type annotations automatically"
-  let save          = " DEPRECATED"
   let save_mini     = " save mini server state to file"
   let max_procs     = " max numbers of workers"
   let no_load       = " don't load from a saved state"
@@ -198,7 +197,6 @@ let parse_options () =
   let set_ai        = fun s ->
     ai_mode := Some (Ai_options.prepare ~server:true s) in
   let set_max_procs = fun s -> max_procs := min !max_procs s in
-  let set_save ()   = Printf.eprintf "DEPRECATED\n"; exit 1 in
   let set_save_mini = fun s -> save := Some s in
   let set_wait      = fun fd ->
     waiting_client := Some (Handle.wrap_handle fd) in
@@ -217,8 +215,8 @@ let parse_options () =
      "--from-emacs"    , Arg.Set from_emacs      , Messages.from_emacs;
      "--from-hhclient" , Arg.Set from_hhclient   , Messages.from_hhclient;
      "--convert"       , Arg.String cdir         , Messages.convert;
-     "--save"          , Arg.Unit set_save       , Messages.save;
      "--save-mini"     , Arg.String set_save_mini, Messages.save_mini;
+     "-s"              , Arg.String set_save_mini, Messages.save_mini;
      "--max-procs"     , Arg.Int set_max_procs   , Messages.max_procs;
      "--no-load"       , Arg.Set no_load         , Messages.no_load;
      "--profile-log"   , Arg.Set profile_log     , Messages.profile_log;
@@ -232,8 +230,9 @@ let parse_options () =
      "--ignore-hh-version", Arg.Set ignore_hh  , Messages.ignore_hh_version;
      "--file-info-on-disk", Arg.Set file_info_on_disk , Messages.file_info_on_disk;
      "--dynamic-view", Arg.Set dynamic_view,     Messages.dynamic_view;
-     "--gen-saved-ignore-type-errors", Arg.Set gen_saved_ignore_type_errors,
-       Messages.gen_saved_ignore_type_errors;
+     "--gen-saved-ignore-type-errors",
+        Arg.Set gen_saved_ignore_type_errors,
+        Messages.gen_saved_ignore_type_errors;
      "--prechecked",    Arg.Unit (fun () -> prechecked := Some true),
       Messages.prechecked;
      "--no-prechecked", Arg.Unit (fun () -> prechecked := Some false),

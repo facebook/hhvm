@@ -155,14 +155,15 @@ let save_state
     let t = Unix.gettimeofday () in
     dump_saved_state output_filename files_info errors;
     let () = if file_info_on_disk then begin
-      Hh_logger.log "do save all file info sqlite\n";
+      Hh_logger.log "Saving file info into a SQLite table.\n";
       (save_all_file_info_sqlite db_name files_info : unit)
     end else begin
-      Hh_logger.log "skip save all file info sqlite\n"
+      Hh_logger.log "Skipping saving file info into a SQLite table.\n"
     end in
-    let edges_added = SharedMem.save_dep_table_sqlite db_name Build_id.build_revision in
+    let dep_table_edges_added =
+      SharedMem.save_dep_table_sqlite db_name Build_id.build_revision in
     let _ : float = Hh_logger.log_duration "Saving saved state took" t in
-    edges_added
+    dep_table_edges_added
   | Some old_table_filename ->
     (** If server is running from a loaded saved state, it's in-memory
      * tracked depdnencies are incomplete - most of the actual dependencies

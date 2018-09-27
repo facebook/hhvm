@@ -49,4 +49,41 @@ class FreshInitTestDriver(common_tests.CommonTestDriver):
 
 class TestFreshInit(common_tests.CommonTests, FreshInitTestDriver,
         unittest.TestCase):
-    pass
+
+    def test_remove_dead_fixmes(self):
+        with open(os.path.join(self.repo_dir, 'foo_4.php'), 'w') as f:
+            f.write("""<?hh // strict
+                function foo(?string $s): void {
+                  /* HH_FIXME[4010] We can delete this one */
+                  /* HH_FIXME[4089] We need to keep this one */
+                  /* HH_FIXME[4099] We can delete this one */
+                  if (/* HH_FIXME[4011] We can delete this one */   $s) {
+                    print "hello";
+                  } else {
+                    print "world";
+                  }
+                  /* HH_FIXME[4099] We can delete this one */
+                  /* HH_FIXME[4098] We can delete this one */
+                  print "done\n";
+                }
+            """)
+
+        self.start_hh_server(changed_files=['foo_4.php'], args=["--no-load"])
+        self.check_cmd(
+            expected_output=None,
+            options=['--remove-dead-fixmes'],
+        )
+
+        with open(os.path.join(self.repo_dir, 'foo_4.php')) as f:
+            out = f.read()
+            self.assertEqual(out, """<?hh // strict
+                function foo(?string $s): void {
+                  /* HH_FIXME[4089] We need to keep this one */
+                  if ($s) {
+                    print "hello";
+                  } else {
+                    print "world";
+                  }
+                  print "done\n";
+                }
+            """)

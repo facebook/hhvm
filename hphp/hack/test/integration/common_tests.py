@@ -65,14 +65,21 @@ class CommonTestDriver(object):
         time.sleep(2)
         self.run_check()
 
-    def start_hh_server(self, changed_files=None, saved_state_path=None):
+    def start_hh_server(
+        self,
+        changed_files=None,
+        saved_state_path=None,
+        args=None,
+    ):
         """ Start an hh_server. changed_files is ignored here (as it
         has no meaning) and is only exposed in this API for the derived
         classes.
         """
         if changed_files is None:
             changed_files = []
-        cmd = [hh_server, "--daemon", "--max-procs", "2", self.repo_dir]
+        if args is None:
+            args = []
+        cmd = [hh_server, "--daemon", "--max-procs", "2", self.repo_dir] + args
         self.proc_call(cmd)
         self.wait_until_server_ready()
 

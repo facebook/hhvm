@@ -41,10 +41,23 @@ let write_string_to_file fn str =
 
 let write_patches_to_buffer buf original_content patch_list =
   let i = ref 0 in
+  let trim_leading_whitespace = ref false in
   let len = String.length original_content in
+  let is_whitespace c =
+    match c with
+    | '\n' | ' ' | '\012' | '\r' | '\t' -> true
+    | _ -> false
+  in
   (* advances to requested character and adds the original content
      from the current position to that point to the buffer *)
   let add_original_content j =
+    while
+      !trim_leading_whitespace &&
+      !i < len &&
+      is_whitespace original_content.[!i]
+    do
+      i := !i + 1
+    done;
     if j <= !i then () else
     let size = (j - !i) in
     let size = min (-(!i) + len) size in
@@ -56,6 +69,7 @@ let write_patches_to_buffer buf original_content patch_list =
     let pos = get_pos res in
     let char_start, char_end = Pos.info_raw pos in
     add_original_content char_start;
+    trim_leading_whitespace := false;
     match res with
       | ServerRefactorTypes.Insert patch ->
           Buffer.add_string buf patch.ServerRefactorTypes.text
@@ -66,7 +80,8 @@ let write_patches_to_buffer buf original_content patch_list =
           (* We only expect `Remove` to be used with HH_FIXMEs, in which case
            * char_end will point to the last character. Consequently, we should
            * increment it by 1 *)
-          i := char_end + 1
+          i := char_end + 1;
+          trim_leading_whitespace := true
   end;
   add_original_content len
 

@@ -47,6 +47,7 @@ type t = {
   option_enable_reified_generics          : bool;
   option_enable_intrinsics_extension      : bool;
   option_enable_hhjs                      : bool;
+  option_dump_hhjs                        : bool;
   option_phpism_undefined_const_as_string : bool;
   option_phpism_undefined_const_fallback  : bool;
 }
@@ -89,6 +90,7 @@ let default = {
   option_enable_reified_generics = false;
   option_enable_intrinsics_extension = false;
   option_enable_hhjs = false;
+  option_dump_hhjs = false;
   option_phpism_undefined_const_as_string = true;
   option_phpism_undefined_const_fallback = true;
 }
@@ -128,6 +130,7 @@ let disable_return_by_reference o = o.option_disable_return_by_reference
 let enable_reified_generics o = o.option_enable_reified_generics
 let enable_intrinsics_extension o = o.option_enable_intrinsics_extension
 let enable_hhjs o = o.option_enable_hhjs
+let dump_hhjs o = o.option_dump_hhjs
 let phpism_undefined_const_as_string o = o.option_phpism_undefined_const_as_string
 let phpism_undefined_const_fallback o = o.option_phpism_undefined_const_fallback
 let to_string o =
@@ -253,6 +256,8 @@ let set_option options name value =
     { options with option_disable_return_by_reference = as_bool value}
   | "eval.enablehhjs" ->
     { options with option_enable_hhjs = as_bool value }
+  | "eval.dumphhjs" ->
+    { options with option_dump_hhjs = as_bool value }
   | "hack.lang.phpism.undefinedconstasstring" ->
     { options with option_phpism_undefined_const_as_string = as_bool value}
   | "hack.lang.phpism.undefinedconstfallback" ->
@@ -381,6 +386,8 @@ let value_setters = [
      fun opts v -> { opts with option_disable_return_by_reference = (v = 1)});
   (set_value "hhvm.enable_hhjs" get_value_from_config_int @@
      fun opts v -> { opts with option_enable_hhjs = (v = 1) });
+  (set_value "hhvm.dump_hhjs" get_value_from_config_int @@
+     fun opts v -> { opts with option_dump_hhjs = (v = 1) });
   (set_value "hhvm.hack.lang.phpism.undefined_const_as_string" get_value_from_config_int @@
      fun opts v -> { opts with option_phpism_undefined_const_as_string = (v = 1)});
   (set_value "hhvm.hack.lang.phpism.undefined_const_fallback" get_value_from_config_int @@

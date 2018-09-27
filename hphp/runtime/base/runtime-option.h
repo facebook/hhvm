@@ -606,6 +606,7 @@ struct RuntimeOption {
   F(bool, LogThreadCreateBacktraces,   false)                           \
   F(bool, FailJitPrologs,              false)                           \
   F(bool, EnableHHJS,                  false)                           \
+  F(bool, DumpHHJS,                    false)                           \
   F(bool, UseHHBBC,                    !getenv("HHVM_DISABLE_HHBBC"))   \
   /* Generate warning of side effect of the pseudomain is called by     \
      top-level code.*/                                                  \

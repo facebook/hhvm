@@ -167,12 +167,23 @@ let check_memoizelsb_method member_source parent_class_elt class_elt =
     let pos = Reason.to_pos elt_pos in
     Errors.override_memoizelsb parent_pos pos
 
+let check_lateinit parent_class_elt class_elt =
+  let is_override = parent_class_elt.ce_origin <> class_elt.ce_origin in
+  let lateinit_diff = parent_class_elt.ce_lateinit <> class_elt.ce_lateinit in
+  if is_override && lateinit_diff then
+    let lazy (parent_reason, _) = parent_class_elt.ce_type in
+    let lazy (child_reason, _) = class_elt.ce_type in
+    let parent_pos = Reason.to_pos parent_reason in
+    let child_pos = Reason.to_pos child_reason in
+    Errors.bad_lateinit_override parent_class_elt.ce_lateinit parent_pos child_pos
+
 (* Check that overriding is correct *)
 let check_override env member_name mem_source ?(ignore_fun_return = false)
     (parent_class, parent_ty) (class_, class_ty) parent_class_elt class_elt =
   (* We first verify that we aren't overriding a final method *)
   check_final_method mem_source parent_class_elt class_elt;
   check_memoizelsb_method mem_source parent_class_elt class_elt;
+  check_lateinit parent_class_elt class_elt;
   let class_known, check_params = should_check_params parent_class class_ in
   let check_vis = class_known || check_partially_known_method_visibility in
   if check_vis then check_visibility parent_class_elt class_elt else ();
@@ -303,6 +314,7 @@ let default_constructor_ce class_ =
   in { ce_final       = false;
        ce_is_xhp_attr = false;
        ce_const       = false;
+       ce_lateinit    = false;
        ce_override    = false;
        ce_memoizelsb  = false;
        ce_synthesized = true;

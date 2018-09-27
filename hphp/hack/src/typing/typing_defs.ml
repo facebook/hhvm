@@ -450,6 +450,7 @@ and class_elt = {
   ce_synthesized : bool;
   ce_visibility  : visibility;
   ce_const       : bool;
+  ce_lateinit    : bool;
   ce_type        : decl ty Lazy.t;
   (* identifies the class from which this elt originates *)
   ce_origin      : string;

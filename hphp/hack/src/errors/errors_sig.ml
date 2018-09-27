@@ -593,6 +593,7 @@ module type S = sig
   val misplaced_rx_of_scope: Pos.t -> unit
   val rx_of_scope_and_explicit_rx: Pos.t -> unit
   val lateinit_with_default: Pos.t -> unit
+  val bad_lateinit_override: bool -> Pos.t -> Pos.t -> unit
   val interface_use_trait: Pos.t -> unit
   val nonstatic_method_in_abstract_final_class: Pos.t -> unit
   val mutable_on_static: Pos.t -> unit

@@ -37,7 +37,7 @@ let element_to_class_elt ce_type {
   elt_abstract = _;
   elt_is_xhp_attr = ce_is_xhp_attr;
   elt_const = ce_const;
-  elt_lateinit = _;
+  elt_lateinit = ce_lateinit;
   elt_origin = ce_origin;
   elt_visibility = ce_visibility;
   elt_reactivity = _
@@ -46,6 +46,7 @@ let element_to_class_elt ce_type {
     ce_final;
     ce_is_xhp_attr;
     ce_const;
+    ce_lateinit;
     ce_override;
     ce_memoizelsb;
     ce_synthesized;

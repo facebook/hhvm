@@ -20,10 +20,12 @@ let visitor = Tast_visitor.iter_with [
   Ppl_check.handler;
   Coroutine_check.handler;
   Redundant_nullsafe_check.handler;
-  Switch_check.handler @@ fun t ->
+  Switch_check.handler begin fun t ->
     if TypecheckerOptions.disallow_scrutinee_case_value_type_mismatch t
     then Errors.invalid_switch_case_value_type
-    else fun _ _ _ -> ();
+    else fun _ _ _ -> ()
+  end;
+  Void_return_check.handler;
 ]
 
 let program = visitor#go

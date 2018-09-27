@@ -783,31 +783,12 @@ and stmt env = function
         | _ -> ()
       end;
       let return_type = TR.strip_condition_type_in_return env return_type in
+      let env, rty = Env.unbind env rty in
       let rty = Typing_return.wrap_awaitable env p rty in
-      let env, rty = (match snd (Env.expand_type env return_type) with
-        | r, Tprim Tvoid ->
-            (* Yell about returning a value from a void function. This catches
-             * more issues than just unifying with void would do -- in particular
-             * just unifying allows you to return a Typing_utils.tany env from a void function,
-             * which is clearly wrong. Note this check is best-effort; if the
-             * function returns a generic type which later ends up being Tvoid
-             * then there's not much we can do here. *)
-            Errors.return_in_void p (Reason.to_pos r);
-            env, T.Return(p, Some te)
-        | _, Tunresolved _ ->
-            (* we allow return types to grow for anonymous functions *)
-            let env, rty = TUtils.unresolved env rty in
-            let env = Type.coerce_type pos Reason.URreturn env rty return_type in
-            env, T.Return(p, Some te)
-        | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tprim _
-          | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
-          | Tanon (_, _) | Tobject | Tshape _ | Tdynamic) ->
-            Typing_suggest.save_return env return_type rty;
-            let env = Type.coerce_type pos Reason.URreturn env rty return_type in
-            env, T.Return(p, Some te)
-        ) in
+      Typing_suggest.save_return env return_type rty;
+      let env = Type.coerce_type pos Reason.URreturn env rty return_type in
       let env = LEnv.move_and_merge_next_in_cont env C.Exit in
-      env, rty
+      env, T.Return (p, Some te)
   | Do (b, e) as st ->
     (* NOTE: leaks scope as currently implemented; this matches
        the behavior in naming (cf. `do_stmt` in naming/naming.ml).

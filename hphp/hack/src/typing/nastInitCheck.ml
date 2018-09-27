@@ -94,7 +94,7 @@ module Env = struct
 
   type t = {
     methods : method_status ref SMap.t ;
-    props   : Decl_defs.element option SMap.t ;
+    props   : SSet.t ;
     tenv    : Typing_env.env ;
   }
 
@@ -109,13 +109,13 @@ module Env = struct
       | Some parent_id -> Typing_env.set_parent_id tenv parent_id in
     let methods = List.fold_left ~f:method_ ~init:SMap.empty c.c_methods in
     let decl_env = tenv.Typing_env.decl_env in
-    let props = SMap.empty
-      |> DICheck.own_props c SMap.add
+    let props = SSet.empty
+      |> DICheck.own_props c
       (* If we define our own constructor, we need to pretend any traits we use
        * did *not* define a constructor, because they are not reachable through
        * parent::__construct or similar functions. *)
-      |> DICheck.trait_props decl_env c SMap.add
-      |> DICheck.parent decl_env c SMap.add in
+      |> DICheck.trait_props decl_env c
+      |> DICheck.parent decl_env c in
     { methods; props; tenv; }
 
   and method_ acc m =
@@ -162,18 +162,13 @@ let rec class_ tenv c =
     let inits = constructor env c.c_constructor in
 
     let check_inits inits =
-      let uninit_props = SMap.filter (fun prop elt ->
-        if SSet.mem prop inits then false
-        else Option.value_map elt
-          ~f:(fun e -> not e.Decl_defs.elt_lateinit)
-          ~default:true
-      ) env.props in
-      if SMap.empty <> uninit_props then begin
-        if SMap.mem DICheck.parent_init_prop uninit_props then
-          Errors.no_construct_parent p
-        else
-          Errors.not_initialized (p, snd c.c_name) (SMap.keys uninit_props)
-      end in
+    let uninit_props = SSet.diff env.props inits in
+    if SSet.empty <> uninit_props then begin
+      if SSet.mem DICheck.parent_init_prop uninit_props then
+        Errors.no_construct_parent p
+      else
+        Errors.not_initialized (p, snd c.c_name) (SSet.elements uninit_props)
+    end in
 
     let check_throws_or_init_all inits =
       match inits with
@@ -331,10 +326,10 @@ and block env acc l =
     raise (InitReturn acc_before_block)
 
 and are_all_init env set =
-  SMap.fold (fun cv _ acc -> acc && S.mem cv set) env.props true
+  SSet.fold (fun cv acc -> acc && S.mem cv set) env.props true
 
 and check_all_init p env acc =
-  SMap.iter begin fun cv _ ->
+  SSet.iter begin fun cv ->
     if not (S.mem cv acc)
     then Errors.call_before_init p cv
   end env.props
@@ -365,7 +360,7 @@ and expr_ env acc p e =
   | ImmutableVar _
   | Lplaceholder _ | Dollardollar _ -> acc
   | Obj_get ((_, This), (_, Id (_, vx as v)), _) ->
-      if SMap.mem vx env.props && not (S.mem vx acc)
+      if SSet.mem vx env.props && not (S.mem vx acc)
       then (Errors.read_before_write v; acc)
       else acc
   | Clone e -> expr acc e

@@ -186,7 +186,7 @@ module ServerInitCommon = struct
       (genv: ServerEnv.genv)
       (root: Path.t)
       (approach: load_mini_approach)
-    : (unit -> (unit -> (loaded_info, exn) result, 'a) result, exn) result =
+    : unit -> (unit -> (loaded_info, exn) result, 'a) result =
     let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
     match approach with
     | Precomputed { ServerArgs.saved_state_fn;
@@ -205,11 +205,11 @@ module ServerInitCommon = struct
         old_errors;
         state_distance = None;
       }) in
-      Ok (fun () -> Ok get_loaded_info)
+      fun () -> Ok get_loaded_info
     | Load_state_natively use_canary ->
-      Ok (fun () -> invoke_loading_state_natively ~use_canary  genv root)
+      fun () -> invoke_loading_state_natively ~use_canary  genv root
     | Load_state_natively_with_target target ->
-      Ok (fun () -> invoke_loading_state_natively ~target genv root)
+      fun () -> invoke_loading_state_natively ~target genv root
 
   let is_check_mode (options: ServerArgs.options) : bool =
     ServerArgs.check_mode options &&
@@ -658,7 +658,7 @@ module ServerLazyInit : InitKind = struct
     Hh_logger.log "Begin loading mini-state";
     let trace = genv.local_config.SLC.trace_parsing in
     let state_future =
-      load_mini_approach >>= invoke_approach genv root in
+      load_mini_approach >>| invoke_approach genv root in
     let timeout = genv.local_config.SLC.load_mini_script_timeout in
     let hg_aware = genv.local_config.SLC.hg_aware in
     let state_future = state_future >>= fun f ->

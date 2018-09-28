@@ -26,7 +26,7 @@ type 'a delayed = {
 
 type 'a promise =
   | Complete : 'a -> 'a promise
-  | Complete_but_transformer_raised of (Process_types.info * exn)
+  | Complete_but_transformer_raised of (Process_types.invocation_info * exn)
     (** Delayed is useful for deterministic testing. Must be tapped by "is ready" or
      * "check_status" the remaining number of times before it is ready. *)
   | Delayed : 'a delayed -> 'a promise

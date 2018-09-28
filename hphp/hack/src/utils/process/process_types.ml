@@ -7,11 +7,12 @@
  *
  *)
 
-type info =
-  {
-    name : string;
-    args : string list;
-  }
+(* Invocation info is passed to the various 'exec' functions. It is retained
+ * in the Process.t structure for subsequent examination. *)
+type invocation_info = {
+  name : string;
+  args : string list;
+}
 
 type failure =
   (**
@@ -46,7 +47,7 @@ type process_status =
   | Process_aborted of abort_reason
 
 type t = {
-  info : info;
+  info : invocation_info;
   stdin_fd : Unix.file_descr option ref;
   stdout_fd : Unix.file_descr option ref;
   stderr_fd : Unix.file_descr option ref;

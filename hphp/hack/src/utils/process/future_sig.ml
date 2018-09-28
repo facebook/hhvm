@@ -20,7 +20,7 @@ module Types = struct
     | Process_aborted
     | Transformer_raised of exn
 
-  type error = Process_types.info * error_mode
+  type error = Process_types.invocation_info * error_mode
 
   type age = (** milliseconds *) float
 

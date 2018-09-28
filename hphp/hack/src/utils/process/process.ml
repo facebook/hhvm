@@ -24,18 +24,23 @@ module Entry = struct
 
 end
 
-let chunk_size = 65536
-
 (** In the blocking read_and_wait_pid call, we alternate between
  * non-blocking consuming of output and a nonblocking waitpid.
  * To avoid pegging the CPU at 100%, sleep for a short time between
  * those. *)
 let sleep_seconds_per_retry = 0.04
 
+let chunk_size = 65536
+
 (** Reuse the buffer for reading. Just an allocation optimization. *)
 let buffer = Bytes.create chunk_size
 
-let make_result status stdout stderr =
+(* make_result returns either (stdout,stderr) or a failure. *)
+let make_result
+    (status: Unix.process_status)
+    (stdout: string)
+    (stderr: string)
+  : (string * string, Process_types.failure) result =
   let open Process_types in
   match status with
   | Unix.WEXITED 0 ->
@@ -47,7 +52,11 @@ let make_result status stdout stderr =
 
 (** Read from the FD if there is something to be read. FD is a reference
  * so when EOF is read from it, it is set to None. *)
-let rec maybe_consume ?(max_time=0.0) fd_ref acc =
+let rec maybe_consume
+    ?(max_time:float = 0.0)
+    (fd_ref: Unix.file_descr option ref)
+    (acc: string Stack_utils.Stack.t)
+  : unit =
   if max_time < 0.0 then
     ()
   else
@@ -69,24 +78,25 @@ let rec maybe_consume ?(max_time=0.0) fd_ref acc =
           maybe_consume ~max_time fd_ref acc
     end
 
-let filter_none refs =
-  List.fold_left refs ~init:[] ~f:(fun acc ref ->
-    match !ref with
-    | None -> acc
-    | Some x -> x :: acc
-  )
-
-(** Non-blockingly consumes from pipes and non-blockingly waitpids.
- * Accumulators and process_status references are mutated accordingly. *)
-let read_and_wait_pid_nonblocking process =
+(**
+ * Read data from stdout and stderr until EOF is reached. Waits for
+ * process to terminate returns the stderr and stdout
+ * and stderr.
+ *
+ * Idempotent.
+ *
+ * If process exits with something other than (Unix.WEXITED 0), will return a
+ * Error
+ *)
+let read_and_wait_pid_nonblocking (process: Process_types.t) : unit =
   let open Process_types in
   let {
-  stdin_fd = _stdin_fd;
-  stdout_fd;
-  stderr_fd;
-  process_status;
-  acc;
-  acc_err; _ } = process in
+    stdin_fd = _stdin_fd;
+    stdout_fd;
+    stderr_fd;
+    process_status;
+    acc;
+    acc_err; _ } = process in
   match !process_status with
   | Process_aborted _
   | Process_exited _ ->
@@ -104,7 +114,8 @@ let read_and_wait_pid_nonblocking process =
       let () = maybe_consume stderr_fd acc_err in
       ()
 
-let is_ready process =
+(** Returns true if read_and_close_pid would be nonblocking. *)
+let is_ready (process: Process_types.t) : bool =
   read_and_wait_pid_nonblocking process;
   let open Process_types in
   match !(process.process_status) with
@@ -112,12 +123,9 @@ let is_ready process =
   | Process_aborted Input_too_large
   | Process_exited _ -> true
 
-let kill_and_cleanup_fds pid fds =
+let kill_and_cleanup_fds (pid: int) (fds: Unix.file_descr option ref list) : unit =
   Unix.kill pid Sys.sigkill;
-  let maybe_close fd_ref = Option.iter !fd_ref ~f:begin fun fd ->
-    Unix.close fd;
-    fd_ref := None
-  end in
+  let maybe_close fd_ref = Option.iter !fd_ref ~f:(fun fd -> Unix.close fd; fd_ref := None) in
   List.iter fds ~f:maybe_close
 
 (**
@@ -140,15 +148,18 @@ let kill_and_cleanup_fds pid fds =
  *
  * We must do some weird alternating between them.
  *)
-let rec read_and_wait_pid ~retries process =
+let rec read_and_wait_pid
+    ~(retries: int)
+    (process: Process_types.t)
+  : (string * string, Process_types.failure) result =
   let open Process_types in
   let {
-  stdin_fd = _stdin_fd;
-  stdout_fd;
-  stderr_fd;
-  process_status;
-  acc;
-  acc_err; _} = process in
+    stdin_fd = _stdin_fd;
+    stdout_fd;
+    stderr_fd;
+    process_status;
+    acc;
+    acc_err; _} = process in
   read_and_wait_pid_nonblocking process;
   match !process_status with
   | Process_exited status ->
@@ -156,7 +167,7 @@ let rec read_and_wait_pid ~retries process =
   | Process_aborted Input_too_large ->
     Error Process_aborted_input_too_large
   | Process_running pid ->
-  let fds = filter_none [stdout_fd; stderr_fd;] in
+  let fds = Core_list.rev_filter_map ~f:(!) [stdout_fd; stderr_fd;] in
   if fds = []
   then
     (** EOF reached for all FDs. Blocking wait. *)
@@ -186,25 +197,33 @@ let rec read_and_wait_pid ~retries process =
       let () = process_status := Process_exited status in
       make_result status (Stack.merge_bytes acc) (Stack.merge_bytes acc_err)
 
-let read_and_wait_pid ~timeout process =
-  let retries = int_of_float @@
-    (float_of_int timeout) /. sleep_seconds_per_retry in
+let read_and_wait_pid
+    ~(timeout: int)
+    (process: Process_types.t)
+  : (string * string, Process_types.failure) result =
+  let retries = (float_of_int timeout) /. sleep_seconds_per_retry |> int_of_float in
   read_and_wait_pid ~retries process
 
-let failure_msg failure =
+let failure_msg (failure: Process_types.failure) : string =
   let open Process_types in
   match failure with
-    | Timed_out (stdout, stderr) ->
-      Printf.sprintf "Process timed out. stdout:\n%s\nstderr:\n%s\n"
-      stdout stderr
-    | Process_exited_abnormally (_, stdout, stderr) ->
-      Printf.sprintf "Process exited abnormally. stdout:\n%s\nstderr:\n%s\n"
-      stdout stderr
-    | Process_aborted_input_too_large ->
-      "Process_aborted_input_too_large"
+  | Timed_out (stdout, stderr) ->
+    Printf.sprintf "Process timed out. stdout:\n%s\nstderr:\n%s\n"
+    stdout stderr
+  | Process_exited_abnormally (_, stdout, stderr) ->
+    Printf.sprintf "Process exited abnormally. stdout:\n%s\nstderr:\n%s\n"
+    stdout stderr
+  | Process_aborted_input_too_large ->
+    "Process_aborted_input_too_large"
 
 let send_input_and_form_result
-?input ~info ~pid ~stdin_parent ~stdout_parent ~stderr_parent =
+    ?(input: bytes option)
+    ~(info: Process_types.invocation_info)
+    ~(pid: int)
+    ~(stdin_parent: Unix.file_descr)
+    ~(stdout_parent: Unix.file_descr)
+    ~(stderr_parent: Unix.file_descr)
+  : Process_types.t =
   let open Process_types in
   let input_failed = match input with
     | None -> false
@@ -232,7 +251,12 @@ let send_input_and_form_result
   }
 
 
-let exec_no_chdir prog ?input ?env args =
+let exec_no_chdir
+    (prog: string)
+    ?(input: bytes option)
+    ?(env: string list option)
+    (args: string list)
+  : Process_types.t =
   let info = {
     Process_types.name = prog;
     args = args;
@@ -262,7 +286,21 @@ let exec_no_chdir prog ?input ?env args =
 
 let register_entry_point = Entry.register
 
-let run_entry ?input entry params =
+type chdir_params = {
+  cwd: string;
+  prog: string;
+  env: string list option;
+  args: string list;
+}
+
+(** Wraps a entry point inside a Process, so we get Process's
+ * goodness for free (read_and_wait_pid and is_ready). The entry will be
+ * spawned into a separate process. *)
+let run_entry
+    ?(input: bytes option)
+    (entry: 'a Entry.t)
+    (params: 'a)
+  : Process_types.t =
   let stdin_child, stdin_parent = Unix.pipe () in
   let stdout_parent, stdout_child = Unix.pipe () in
   let stderr_parent, stderr_child = Unix.pipe () in
@@ -276,28 +314,49 @@ let run_entry ?input entry params =
   send_input_and_form_result ?input ~info ~pid ~stdin_parent
     ~stdout_parent ~stderr_parent
 
-let chdir_main (cwd, prog, env_opt, args) =
-  Unix.chdir cwd;
-  let args = Array.of_list (prog :: args) in
-  Unix.execvpe prog args (Array.of_list @@ Option.value env_opt ~default:[])
+let chdir_main (p: chdir_params) : 'a =
+  Unix.chdir p.cwd;
+  let args = Array.of_list (p.prog :: p.args) in
+  Unix.execvpe p.prog args (Array.of_list @@ Option.value p.env ~default:[])
 
-let chdir_entry = Entry.register "chdir_main" chdir_main
+let chdir_entry: (chdir_params, 'a, 'b) Daemon.entry = Entry.register "chdir_main" chdir_main
 
+
+let exec_
+    ~(cwd: string option)
+    ~(prog: string)
+    ~(input:string option)
+    ~(env: string list option)
+    ~(args: string list)
+  : Process_types.t =
+  match cwd with
+  | None ->
+    exec_no_chdir prog ?input ?env args
+  | Some cwd ->
+    run_entry ?input chdir_entry {cwd; prog; env; args;}
 
 (** Exec the given program with these args. If input is set, send it to
  * the stdin on the spawned program and then close the file descriptor.
  *
  * Note: See Input_too_large
  *)
-let exec_ ~cwd ~prog ~(input:string option) ~env ~args =
-  match cwd with
-  | None ->
-    exec_no_chdir prog ?input ?env args
-  | Some cwd ->
-    run_entry ?input chdir_entry (cwd, prog, env, args)
-
-let exec ?cwd prog ?input ?env args =
+let exec
+    ?(cwd: string option)
+    (prog: string)
+    ?(input: string option)
+    ?(env: string list option)
+    (args: string list)
+  : Process_types.t =
   exec_ ~cwd ~prog ~input ~env ~args
 
-let exec_with_replacement_env ?cwd prog ~env ?input args =
+(* spawns a process just like exec, EXCEPT that the environment is REPLACED instead
+ * of AUGMENTED. This is almost certainly not what you want to do. The program you
+ * are calling or one of the things it calls probably depends on "PATH". *)
+let exec_with_replacement_env
+    ?(cwd: string option)
+    (prog: string)
+    ~(env: string list)
+    ?(input: string option)
+    (args: string list)
+  : Process_types.t =
   exec_ ~cwd ~prog ~input ~env:(Some env) ~args

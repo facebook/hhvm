@@ -48,7 +48,8 @@ type genv = {
      * something from it. *)
     notifier_async_reader : unit -> Buffered_line_reader.t option;
     notifier         : unit -> SSet.t;
-    (* If daemons are spawned as part of the init process, wait for them here *)
+    (* If daemons are spawned as part of the init process, wait for them here
+     * e.g. wait until dfindlib is ready (in the case that watchman is absent) *)
     wait_until_ready : unit -> unit;
     mutable debug_channels   : (Timeout.in_channel * out_channel) option;
   }

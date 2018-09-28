@@ -262,6 +262,10 @@ let parse_text compiler_options popt fn text =
     not (Hhbc_options.source_mapping !Hhbc_options.compiler_options) in
   let enable_hh_syntax =
     Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options in
+  let disallow_execution_operator =
+    Hhbc_options.phpism_disallow_execution_operator !Hhbc_options.compiler_options in
+  let popt =
+    ParserOptions.with_disallow_execution_operator popt disallow_execution_operator in
   let enable_xhp =
     Hhbc_options.enable_xhp !Hhbc_options.compiler_options in
   let php5_compat_mode =

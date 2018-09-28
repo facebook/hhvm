@@ -514,6 +514,9 @@ struct RuntimeOption {
   // valid values are 0 => enabled (default)
   // 1 => warning, 2 => error
   static uint64_t DisableParseStrSingleArg;
+  // Disables PHP's backtick language
+  // true => error, false => default behaviour
+  static bool DisallowExecutionOperator;
 
   static int GetScannerType();
 

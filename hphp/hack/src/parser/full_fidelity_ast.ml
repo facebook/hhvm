@@ -1534,6 +1534,8 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         (* TODO: We are dropping generics here *)
         Id name
     | LiteralExpression { literal_expression = expr } ->
+      let disallow_execution_operator =
+      (is_hack env && ParserOptions.disallow_execution_operator env.parser_options) in
       (match syntax expr with
       | Token _ ->
         let s = text expr in
@@ -1575,14 +1577,14 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           | _       -> missing_syntax ("boolean (not: " ^ s ^ ")") expr env
           )
         | _, Some TK.ExecutionStringLiteral ->
-          if is_typechecker env then
+          if (is_typechecker env  || disallow_execution_operator) then
             raise_parsing_error env (`Node node) SyntaxError.execution_operator;
           Execution_operator [pos, String (mkStr env expr Php_escaping.unescape_backtick s)]
         | _ -> missing_syntax "literal" expr env
         )
       | SyntaxList ({ syntax = Token token; _ } :: _ as ts)
         when Token.kind token = TK.ExecutionStringLiteralHead ->
-        if is_typechecker env then
+        if (is_typechecker env || disallow_execution_operator) then
           raise_parsing_error env (`Node node) SyntaxError.execution_operator;
         Execution_operator (pString2 InBacktickedString (prepString2 env ts) env)
       | SyntaxList ts -> String2 (pString2 InDoubleQuotedString (prepString2 env ts) env)

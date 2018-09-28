@@ -12,6 +12,7 @@ let global_options =
     ~tco_safe_vector_array:true
     ~po_deregister_php_stdlib:false
     ~po_use_full_fidelity:true
+    ~po_disallow_execution_operator:false
     ~tco_user_attrs:None
     ~tco_experimental_features:TypecheckerOptions.experimental_all
     ~tco_migration_flags:SSet.empty

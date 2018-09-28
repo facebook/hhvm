@@ -50,6 +50,7 @@ type t = {
   option_dump_hhjs                        : bool;
   option_phpism_undefined_const_as_string : bool;
   option_phpism_undefined_const_fallback  : bool;
+  option_phpism_disallow_execution_operator: bool;
 }
 
 let default = {
@@ -93,6 +94,7 @@ let default = {
   option_dump_hhjs = false;
   option_phpism_undefined_const_as_string = true;
   option_phpism_undefined_const_fallback = true;
+  option_phpism_disallow_execution_operator = false;
 }
 
 let enable_hiphop_syntax o = o.option_enable_hiphop_syntax
@@ -133,6 +135,7 @@ let enable_hhjs o = o.option_enable_hhjs
 let dump_hhjs o = o.option_dump_hhjs
 let phpism_undefined_const_as_string o = o.option_phpism_undefined_const_as_string
 let phpism_undefined_const_fallback o = o.option_phpism_undefined_const_fallback
+let phpism_disallow_execution_operator o = o.option_phpism_disallow_execution_operator
 let to_string o =
   let dynamic_invokes =
     String.concat ~sep:", " (SSet.elements (dynamic_invoke_functions o)) in
@@ -180,6 +183,7 @@ let to_string o =
     ; Printf.sprintf "enable_hhjs: %B" @@ enable_hhjs o
     ; Printf.sprintf "phpism_undefined_const_as_string: %B" @@ phpism_undefined_const_as_string o
     ; Printf.sprintf "phpism_undefined_const_fallback: %B" @@ phpism_undefined_const_fallback o
+    ; Printf.sprintf "phpism_disallow_execution_operator %B" @@ phpism_disallow_execution_operator o
     ]
 
 (* The Hack.Lang.IntsOverflowToInts setting overrides the
@@ -259,9 +263,11 @@ let set_option options name value =
   | "eval.dumphhjs" ->
     { options with option_dump_hhjs = as_bool value }
   | "hack.lang.phpism.undefinedconstasstring" ->
-    { options with option_phpism_undefined_const_as_string = as_bool value}
+    { options with option_phpism_undefined_const_as_string = as_bool value }
   | "hack.lang.phpism.undefinedconstfallback" ->
     { options with option_phpism_undefined_const_fallback = int_of_string value < 2 }
+  | "hack.lang.phpism.disallowexecutionoperator" ->
+    { options with option_phpism_disallow_execution_operator = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -392,6 +398,8 @@ let value_setters = [
      fun opts v -> { opts with option_phpism_undefined_const_as_string = (v = 1)});
   (set_value "hhvm.hack.lang.phpism.undefined_const_fallback" get_value_from_config_int @@
      fun opts v -> { opts with option_phpism_undefined_const_fallback = (v < 2) });
+  (set_value "hhvm.hack.lang.phpism.disallow_execution_operator" get_value_from_config_int @@
+     fun opts v -> { opts with option_phpism_disallow_execution_operator = (v = 1) })
 ]
 
 let extract_config_options_from_json ~init config_json =

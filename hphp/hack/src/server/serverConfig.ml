@@ -267,6 +267,7 @@ let load config_filename options =
      * to end up in the parser options to reach all consumers of it.
      *)
     local_config.ServerLocalConfig.use_full_fidelity_parser
+    false (* disallow_execution_operator, off by default *)
     (config_user_attributes config)
     (config_experimental_tc_features config)
     (config_tc_migration_flags config)

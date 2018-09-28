@@ -431,6 +431,7 @@ uint64_t RuntimeOption::DisableCallUserFuncArray = 0;
 uint64_t RuntimeOption::DisableParseStrSingleArg = 0;
 bool RuntimeOption::UndefinedConstAsString = true;
 uint64_t RuntimeOption::UndefinedConstFallback = 0;
+bool RuntimeOption::DisallowExecutionOperator = false;
 
 #ifdef HHVM_DYNAMIC_EXTENSION_DIR
 std::string RuntimeOption::ExtensionDir = HHVM_DYNAMIC_EXTENSION_DIR;
@@ -1218,6 +1219,9 @@ void RuntimeOption::Load(
     Config::Bind(DisableParseStrSingleArg, ini, config,
                  "Hack.Lang.Phpism.DisableParseStrSingleArg",
                  DisableParseStrSingleArg);
+    Config::Bind(DisallowExecutionOperator, ini, config,
+                 "Hack.Lang.Phpism.DisallowExecutionOperator",
+                 DisallowExecutionOperator);
   }
   {
     // Repo

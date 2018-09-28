@@ -38,7 +38,8 @@ type init_result =
   | Mini_load_failed of string
 
 
-let load_mini_exn_to_string err = match err with
+let load_mini_exn_to_string (exn: exn) : string =
+  match exn with
   | Future.Failure e ->
     Printf.sprintf "%s\n%s" (Future.error_to_string e) (Printexc.get_backtrace ())
   | e -> Printexc.to_string e
@@ -64,7 +65,7 @@ type state_result = (loaded_info * files_changed_while_parsing, exn) result
 
 module ServerInitCommon = struct
 
-  let lock_and_load_deptable fn ~ignore_hh_version =
+  let lock_and_load_deptable (fn: string) ~(ignore_hh_version: bool) : unit =
     (* The sql deptable must be loaded in the master process *)
     try
       (* Take a lock on the info file for the sql *)
@@ -82,7 +83,7 @@ module ServerInitCommon = struct
       raise e
 
   (* Return all the files that we need to typecheck *)
-  let make_next_files genv : Relative_path.t list Bucket.next =
+  let make_next_files (genv: ServerEnv.genv) : Relative_path.t list Bucket.next =
     let next_files_root = compose
       (List.map ~f:(Relative_path.(create Root)))
       (genv.indexer FindUtils.file_filter) in
@@ -114,12 +115,21 @@ module ServerInitCommon = struct
       let next = concat_next_files [next_files_hhi; next_files_extra; next_files_root] () in
       Bucket.of_list next
 
-  let with_loader_timeout timeout stage f =
+  let with_loader_timeout
+      (timeout: int)
+      (stage: string)
+      (f: (unit -> ('a, exn) result))
+    : ('a, exn) result =
     Core_result.join @@ Core_result.try_with @@ fun () ->
     Timeout.with_timeout ~timeout ~do_:(fun _ -> f ())
       ~on_timeout:(fun _ -> raise @@ Loader_timeout stage)
 
-  let invoke_loading_state_natively ?(use_canary=false) ?target genv root =
+  let invoke_loading_state_natively
+      ?(use_canary=false)
+      ?(target: ServerMonitorUtils.target_mini_state option)
+      (genv: ServerEnv.genv)
+      (root: Path.t)
+    : (unit -> (loaded_info, exn) result, 'a) result =
     let mini_state_handle = begin match target with
     | None -> None
     | Some { ServerMonitorUtils.mini_state_everstore_handle; target_svn_rev; watchman_mergebase } ->
@@ -170,7 +180,11 @@ module ServerInitCommon = struct
     ) in
     Ok get_loaded_info
 
-  let invoke_approach genv root approach =
+  let invoke_approach
+      (genv: ServerEnv.genv)
+      (root: Path.t)
+      (approach: load_mini_approach)
+    : (unit -> (unit -> (loaded_info, exn) result, 'a) result, exn) result =
     let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
     match approach with
     | Precomputed { ServerArgs.saved_state_fn;
@@ -199,13 +213,13 @@ module ServerInitCommon = struct
         (fun () -> invoke_loading_state_natively ~target genv root)
       )
 
-  let is_check_mode options =
+  let is_check_mode (options: ServerArgs.options) : bool =
     ServerArgs.check_mode options &&
     ServerArgs.convert options = None &&
     (* Note: we need to run update_files to get an accurate saved state *)
     ServerArgs.save_filename options = None
 
-  let indexing genv =
+  let indexing (genv: ServerEnv.genv) : Relative_path.t list Bucket.next * float =
     let logstring = "Indexing" in
     Hh_logger.log "Begin %s" logstring;
     let t = Unix.gettimeofday () in
@@ -214,7 +228,15 @@ module ServerInitCommon = struct
     let t = Hh_logger.log_duration logstring t in
     get_next, t
 
-  let parsing ~lazy_parse genv env ~get_next ?count t ~trace =
+  let parsing
+      ~(lazy_parse: bool)
+      (genv: ServerEnv.genv)
+      (env: ServerEnv.env)
+      ~(get_next: Relative_path.t list Bucket.next)
+      ?(count: int option)
+      (t: float)
+      ~(trace: bool)
+    : ServerEnv.env * float =
     let logstring =
       match count with
       | None -> "Parsing"
@@ -241,14 +263,18 @@ module ServerInitCommon = struct
     } in
     env, (Hh_logger.log_duration logstring t)
 
-  let update_files genv files_info t =
+  let update_files
+      (genv: ServerEnv.genv)
+      (files_info: FileInfo.t Relative_path.Map.t)
+      (t: float)
+    : float =
     if is_check_mode genv.options then t else begin
       Typing_deps.update_files files_info;
       HackEventLogger.updating_deps_end t;
       Hh_logger.log_duration "Updating deps" t
     end
 
-  let naming env t =
+  let naming (env: ServerEnv.env) (t: float) : ServerEnv.env * float =
     let logstring = "Naming" in
     Hh_logger.log "Begin %s" logstring;
     let env =
@@ -266,7 +292,12 @@ module ServerInitCommon = struct
     HackEventLogger.global_naming_end t;
     env, (Hh_logger.log_duration logstring t)
 
-  let type_decl genv env fast t =
+  let type_decl
+      (genv: ServerEnv.genv)
+      (env: ServerEnv.env)
+      (fast: FileInfo.fast)
+      (t: float)
+    : ServerEnv.env * float =
     let logstring = "Type-decl" in
     Hh_logger.log "Begin %s" logstring;
     let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
@@ -287,7 +318,7 @@ module ServerInitCommon = struct
    * No errors are generated because we assume the fast is directly from
    * a clean state.
    *)
-  let naming_with_fast fast t =
+  let naming_with_fast (fast: FileInfo.names Relative_path.Map.t) (t: float) : float =
     Relative_path.Map.iter fast ~f:begin fun k info ->
     let { FileInfo.n_classes=classes;
          n_types=typedefs;
@@ -305,7 +336,7 @@ module ServerInitCommon = struct
    * parsing hooks. During lazy init, need to do it manually from the fast
    * instead since we aren't parsing the codebase.
    *)
-  let update_search genv saved t =
+  let update_search (genv: ServerEnv.genv) (saved: FileInfo.saved_state_info) (t: float) : float =
     (* Don't update search index when in check mode *)
     (* We can't use is_check_mode here because we want to
       skip this step even while saving saved states.
@@ -326,13 +357,18 @@ module ServerInitCommon = struct
 
   (* Prechecked files are gated with a flag and not supported in AI/check/saving
    * of saved state modes. *)
-  let use_prechecked_files genv =
+  let use_prechecked_files (genv: ServerEnv.genv) : bool =
     ServerPrecheckedFiles.should_use genv.options genv.local_config &&
     ServerArgs.ai_mode genv.options = None &&
     (not @@ is_check_mode genv.options) &&
     ServerArgs.save_filename genv.options = None
 
-  let type_check genv env fast t =
+  let type_check
+      (genv: ServerEnv.genv)
+      (env: ServerEnv.env)
+      (fast: FileInfo.names Relative_path.Map.t)
+      (t: float)
+    : ServerEnv.env * float =
     if ServerArgs.ai_mode genv.options <> None then env, t
     else if
       is_check_mode genv.options ||
@@ -370,7 +406,11 @@ module ServerInitCommon = struct
       env, t
     end
 
-  let get_dirty_fast old_fast fast dirty =
+  let get_dirty_fast
+      (old_fast: FileInfo.names Relative_path.Map.t)
+      (fast: FileInfo.names Relative_path.Map.t)
+      (dirty: Relative_path.Set.t)
+    : FileInfo.names Relative_path.Map.t =
     Relative_path.Set.fold dirty ~f:begin fun fn acc ->
       let dirty_fast = Relative_path.Map.get fast fn in
       let dirty_old_fast = Relative_path.Map.get old_fast fn in
@@ -380,7 +420,8 @@ module ServerInitCommon = struct
       | None -> acc
     end ~init:Relative_path.Map.empty
 
-  let names_to_deps {FileInfo.n_funs; n_classes; n_types; n_consts} =
+  let names_to_deps (names: FileInfo.names) : DepSet.t =
+    let {FileInfo.n_funs; n_classes; n_types; n_consts} = names in
     let add_deps_of_sset dep_ctor sset depset =
       SSet.fold sset ~init:depset ~f:begin fun n acc ->
         DepSet.add acc (Dep.make (dep_ctor n))
@@ -411,8 +452,16 @@ module ServerInitCommon = struct
    * similar_files: we only need to typecheck these,
    *    not their dependencies since their decl are unchanged
    **)
-  let type_check_dirty genv env old_fast fast
-      dirty_master_files dirty_local_files similar_files t =
+  let type_check_dirty
+      (genv: ServerEnv.genv)
+      (env: ServerEnv.env)
+      (old_fast: FileInfo.names Relative_path.Map.t)
+      (fast: FileInfo.names Relative_path.Map.t)
+      (dirty_master_files: Relative_path.Set.t)
+      (dirty_local_files: Relative_path.Set.t)
+      (similar_files: Relative_path.Set.t)
+      (t: float)
+    : ServerEnv.env * float =
     let dirty_files =
       Relative_path.Set.union dirty_master_files dirty_local_files in
     let start_t = Unix.gettimeofday () in
@@ -453,7 +502,8 @@ module ServerInitCommon = struct
       (Relative_path.Set.cardinal to_recheck);
     result
 
-  let get_build_targets env =
+  (* get the (untracked, tracked) build targets *)
+  let get_build_targets (env: ServerEnv.env) : Relative_path.Set.t * Relative_path.Set.t =
     let untracked, tracked = BuildMain.get_live_targets env in
     let untracked =
       List.map untracked Relative_path.from_root in
@@ -461,7 +511,12 @@ module ServerInitCommon = struct
       List.map tracked Relative_path.from_root in
     Relative_path.set_of_list untracked, Relative_path.set_of_list tracked
 
-  let get_state_future genv root state_future timeout =
+  let get_state_future
+      (genv: ServerEnv.genv)
+      (root: Path.t)
+      (state_future: (unit -> ('a, exn) result, exn) result)
+      (timeout: int)
+    : ('a * Relative_path.Set.t, exn) result =
     state_future
     >>= with_loader_timeout timeout "wait_for_changes"
     >>= fun loaded_info ->
@@ -481,7 +536,11 @@ module ServerInitCommon = struct
     Ok (loaded_info, changed_while_parsing)
 
     (* If we fail to load a saved state, fall back to typechecking everything *)
-    let fallback_init genv env err =
+    let fallback_init
+        (genv: ServerEnv.genv)
+        (env: ServerEnv.env)
+        (err: exn)
+      : ServerEnv.env * float =
       SharedMem.cleanup_sqlite ();
       if err <> No_loader then begin
         let err_str = load_mini_exn_to_string err in
@@ -546,7 +605,13 @@ end
 module ServerEagerInit : InitKind = struct
   open ServerInitCommon
 
-  let init ~load_mini_approach genv lazy_level env root =
+  let init
+      ~(load_mini_approach: (load_mini_approach, exn) result)
+      (genv: ServerEnv.genv)
+      (lazy_level: lazy_level)
+      (env: ServerEnv.env)
+      (root: Path.t)
+    : (ServerEnv.env * float) * (loaded_info * Relative_path.Set.t, exn) result =
     (* We don't support a saved state for eager init. *)
     ignore (load_mini_approach, root);
     let get_next, t = indexing genv in
@@ -584,7 +649,13 @@ end
 module ServerLazyInit : InitKind = struct
   open ServerInitCommon
 
-  let init ~load_mini_approach genv lazy_level env root =
+  let init
+    ~(load_mini_approach: (load_mini_approach, exn) result)
+    (genv: ServerEnv.genv)
+    (lazy_level: lazy_level)
+    (env: ServerEnv.env)
+    (root: Path.t)
+  : (ServerEnv.env * float) * (loaded_info * Relative_path.Set.t, exn) result =
     assert(lazy_level = Init);
     Hh_logger.log "Begin loading mini-state";
     let trace = genv.local_config.SLC.trace_parsing in
@@ -747,7 +818,12 @@ module ServerLazyInit : InitKind = struct
 end
 
 
-let ai_check genv files_info env t =
+let ai_check
+    (genv: ServerEnv.genv)
+    (files_info: FileInfo.t Relative_path.Map.t)
+    (env: ServerEnv.env)
+    (t: float)
+  : ServerEnv.env * float =
   match ServerArgs.ai_mode genv.options with
   | Some ai_opt ->
     let failures =
@@ -775,7 +851,7 @@ let ai_check genv files_info env t =
       env, (Hh_logger.log_duration "Ai" t)
   | None -> env, t
 
-let run_search genv t =
+let run_search (genv: ServerEnv.genv) (t: float) : unit =
   if SearchServiceRunner.should_run_completely genv
   then begin
     (* The duration is already logged by SearchServiceRunner *)
@@ -784,7 +860,7 @@ let run_search genv t =
   end
   else ()
 
-let save_state genv env fn =
+let save_state (genv: ServerEnv.genv) (env: ServerEnv.env) (fn: string) : unit =
   let ignore_errors =
     ServerArgs.gen_saved_ignore_type_errors genv.ServerEnv.options in
   let has_errors = not (Errors.is_empty env.errorl) in
@@ -811,7 +887,7 @@ let save_state genv env fn =
     ~file_info_on_disk env.ServerEnv.files_info env.errorl fn in
   ()
 
-let get_lazy_level genv =
+let get_lazy_level (genv: ServerEnv.genv) : lazy_level =
   let lazy_decl = Option.is_none (ServerArgs.ai_mode genv.options) in
   let lazy_parse = genv.local_config.SLC.lazy_parse in
   let lazy_initialize = genv.local_config.SLC.lazy_init in
@@ -822,7 +898,10 @@ let get_lazy_level genv =
   | _ -> Off
 
 (* entry point *)
-let init ?load_mini_approach genv =
+let init
+    ?(load_mini_approach: load_mini_approach option)
+    (genv: ServerEnv.genv)
+  : ServerEnv.env * init_result =
   let lazy_lev = get_lazy_level genv in
   let load_mini_approach = Core_result.of_option load_mini_approach
     ~error:No_loader in

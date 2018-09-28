@@ -43,6 +43,11 @@ module Common_argspecs = struct
   let no_prechecked value_ref =
     "--no-prechecked", Arg.Unit (fun () -> value_ref := Some false),
     " override value of \"prechecked_files\" flag from hh.conf"
+
+  let config value_ref =
+    "--config",
+    Arg.String (fun s -> value_ref := (String_utils.split2_exn '=' s) :: !value_ref),
+    " override arbitrary value from hh.conf (format: <key>=<value>)"
 end
 
 
@@ -97,6 +102,7 @@ let parse_check_args cmd =
   let dynamic_view = ref false in
   let sort_results = ref false in
   let prechecked = ref None in
+  let config = ref [] in
 
   (* custom behaviors *)
   let set_from x () = from := x in
@@ -434,6 +440,7 @@ let parse_check_args cmd =
       " sort output for CST search.";
     Common_argspecs.prechecked prechecked;
     Common_argspecs.no_prechecked prechecked;
+    Common_argspecs.config config;
 
     (* deprecated *)
     "--retry-if-init",
@@ -509,6 +516,7 @@ let parse_check_args cmd =
     file_info_on_disk = !file_info_on_disk;
     gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
     prechecked = !prechecked;
+    config = !config;
   }
 
 let parse_start_env command =
@@ -525,6 +533,7 @@ let parse_start_env command =
   let ignore_hh_version = ref false in
   let prechecked = ref None in
   let from = ref "" in
+  let config = ref [] in
   let wait_deprecation_msg () = Printf.eprintf
     "WARNING: --wait is deprecated, does nothing, and will be going away \
      soon!\n%!" in
@@ -543,6 +552,7 @@ let parse_start_env command =
       " ignore hh_version check when loading saved states (default: false)";
     Common_argspecs.prechecked prechecked;
     Common_argspecs.no_prechecked prechecked;
+    Common_argspecs.config config;
   ] in
   let args = parse_without_command options usage command in
   let root =
@@ -566,6 +576,7 @@ let parse_start_env command =
     ignore_hh_version = !ignore_hh_version;
     dynamic_view = false;
     prechecked = !prechecked;
+    config = !config;
   }
 
 let parse_start_args () =

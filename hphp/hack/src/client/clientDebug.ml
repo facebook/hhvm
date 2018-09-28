@@ -30,6 +30,7 @@ let main env =
     ignore_hh_version = false;
     use_priority_pipe = false;
     prechecked = None;
+    config = [];
   } in
   ServerCommand.connect_debug oc;
   (* Exit this via ctrl-C *)

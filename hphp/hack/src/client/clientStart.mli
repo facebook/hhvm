@@ -20,6 +20,7 @@ type env = {
   ignore_hh_version: bool;
   dynamic_view: bool;
   prechecked : bool option;
+  config : (string * string) list;
 }
 
 val main : env -> Exit_status.t

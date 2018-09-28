@@ -83,6 +83,7 @@ let main_exn env =
     ignore_hh_version = false;
     use_priority_pipe = false;
     prechecked = None;
+    config = [];
   } in
   let old_svnrev = Option.try_with begin fun () ->
     Sys_utils.read_file ServerBuild.svnrev_path

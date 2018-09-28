@@ -89,6 +89,7 @@ let connect ?(use_priority_pipe=false) args =
     ignore_hh_version = args.ignore_hh_version;
     use_priority_pipe;
     prechecked = args.prechecked;
+    config = args.config;
   }
 
 (* This is a function, because server closes the connection after each command,

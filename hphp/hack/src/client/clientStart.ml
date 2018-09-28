@@ -31,6 +31,7 @@ type env = {
   ignore_hh_version : bool;
   dynamic_view : bool;
   prechecked : bool option;
+  config : (string * string) list;
 }
 
 let start_server env =
@@ -39,6 +40,12 @@ let start_server env =
   let in_fd, out_fd = Unix.pipe () in
   Unix.set_close_on_exec in_fd;
   let ic = Unix.in_channel_of_descr in_fd in
+
+  let serialize_config_overrides config =
+    config
+    |> List.map (fun (key, value) -> [| "--config"; Printf.sprintf "%s=%s" key value |])
+    |> Array.concat
+  in
 
   let ai_options =
     match env.ai_mode with
@@ -64,6 +71,7 @@ let start_server env =
       if env.dynamic_view then [| "--dynamic-view"|] else [||];
       if env.prechecked = Some true then [| "--prechecked" |] else [||];
       if env.prechecked = Some false then [| "--no-prechecked" |] else [||];
+      if env.config <> [] then serialize_config_overrides env.config else [||];
       match env.debug_port with
         | None -> [| |]
         | Some fd ->

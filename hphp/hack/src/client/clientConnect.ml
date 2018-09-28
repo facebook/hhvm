@@ -27,6 +27,7 @@ type env = {
   ignore_hh_version : bool;
   use_priority_pipe : bool;
   prechecked : bool option;
+  config : (string * string) list;
 }
 
 type conn = {
@@ -338,6 +339,7 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
           ignore_hh_version = env.ignore_hh_version;
           dynamic_view = false;
           prechecked = env.prechecked;
+          config = env.config;
         };
         connect env retries start_time tail_env
       end else begin

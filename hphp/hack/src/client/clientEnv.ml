@@ -73,6 +73,7 @@ type client_check_env = {
   file_info_on_disk: bool;
   gen_saved_ignore_type_errors: bool;
   prechecked : bool option;
+  config : (string * string) list;
 }
 
 let mode_to_string = function

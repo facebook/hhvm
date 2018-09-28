@@ -55,6 +55,7 @@ module type S = sig
   val dynamic_view        : options -> bool
   val gen_saved_ignore_type_errors  : options -> bool
   val prechecked          : options -> bool option
+  val config              : options -> (string * string) list
 
   (****************************************************************************)
   (* Setters *)

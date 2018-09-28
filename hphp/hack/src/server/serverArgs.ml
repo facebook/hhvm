@@ -34,6 +34,7 @@ type options = {
   dynamic_view      : bool;
   gen_saved_ignore_type_errors : bool;
   prechecked       : bool option;
+  config           : (string * string) list;
 }
 
 (*****************************************************************************)
@@ -88,6 +89,7 @@ module Messages = struct
   let dynamic_view      = " start with dynamic view for IDE files on by default."
   let gen_saved_ignore_type_errors = " generate a saved state even if there are type errors."
   let prechecked = " override value of \"prechecked_files\" flag from hh.conf"
+  let config = " override arbitrary value from hh.conf (format: <key>=<value>)"
 end
 
 let print_json_version () =
@@ -204,6 +206,7 @@ let parse_options () =
   let set_with_mini_state = fun s -> with_mini_state := Some s in
   let set_from      = fun s -> from := s in
   let prechecked = ref None in
+  let config = ref [] in
   let options =
     ["--debug"         , Arg.Set debug           , Messages.debug;
      "--ai"            , Arg.String set_ai       , Messages.ai;
@@ -238,6 +241,8 @@ let parse_options () =
       Messages.prechecked;
      "--no-prechecked", Arg.Unit (fun () -> prechecked := Some false),
       Messages.prechecked;
+     "--config", Arg.String (fun s -> config := (String_utils.split2_exn '=' s) :: !config),
+      Messages.config
     ] in
   let options = Arg.align options in
   Arg.parse options (fun s -> root := s) usage;
@@ -295,6 +300,7 @@ let parse_options () =
     dynamic_view      = !dynamic_view;
     gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
     prechecked = !prechecked;
+    config = !config;
   }
 
 (* useful in testing code *)
@@ -319,6 +325,7 @@ let default_options ~root = {
   dynamic_view = false;
   gen_saved_ignore_type_errors = false;
   prechecked = None;
+  config = [];
 }
 
 (*****************************************************************************)
@@ -345,6 +352,7 @@ let file_info_on_disk options = options.file_info_on_disk
 let dynamic_view options = options.dynamic_view
 let gen_saved_ignore_type_errors options = options.gen_saved_ignore_type_errors
 let prechecked options = options.prechecked
+let config options = options.config
 
 (*****************************************************************************)
 (* Setters *)
@@ -385,6 +393,7 @@ let to_string
     dynamic_view;
     gen_saved_ignore_type_errors;
     prechecked;
+    config;
   } =
     let ai_mode_str = match ai_mode with
       | None -> "<>"
@@ -404,6 +413,9 @@ let to_string
     let prechecked_str = match prechecked with
       | None -> "<>"
       | Some b -> string_of_bool b in
+    let config_str = Printf.sprintf "[%s]"
+      (String.concat ", " @@ List.map (fun (key, value) -> Printf.sprintf "%s=%s" key value) config)
+    in
     ([
       "ServerArgs.options({";
       "json_mode: "; string_of_bool json_mode; ", ";
@@ -425,6 +437,7 @@ let to_string
       "file_info_on_disk: "; string_of_bool file_info_on_disk; ", ";
       "dynamic_view: "; string_of_bool dynamic_view; ", ";
       "gen_saved_ignore_type_errors: "; string_of_bool gen_saved_ignore_type_errors; ", ";
-      "prechecked: "; prechecked_str;
+      "prechecked: "; prechecked_str; ", ";
+      "config: "; config_str;
       "})"
     ] |> String.concat "")

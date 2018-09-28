@@ -779,15 +779,15 @@ end = functor(CheckKind:CheckKindType) -> struct
     let env = CheckKind.get_env_after_decl
       ~old_env:env ~files_info ~failed_naming in
     Hh_logger.log "Begin evaluating prechecked changes";
-    let env = ServerPrecheckedFiles.update_after_local_changes env changes in
+    let env = ServerPrecheckedFiles.update_after_local_changes genv env changes in
     let t = Hh_logger.log_duration "Evaluating prechecked changes" t in
 
     let _ : bool = Typing_deps.allow_dependency_table_reads
       deptable_unlocked in
 
     (* Checking this before starting typechecking because we want to attribtue
-    * big rechecks to rebases. *)
-    let t = ServerRevisionTracker.check_changes t in
+     * big rechecks to rebases. *)
+    ServerRevisionTracker.check_blocking ();
 
     (* TYPE CHECKING *)
     let fast, lazy_check_later = CheckKind.get_defs_to_recheck
@@ -874,7 +874,7 @@ end = functor(CheckKind:CheckKindType) -> struct
       diag_subscribe
     in
     let deptable_unlocked = Typing_deps.allow_dependency_table_reads true in
-    let new_env = ServerPrecheckedFiles.update_after_recheck new_env fast in
+    let new_env = ServerPrecheckedFiles.update_after_recheck genv new_env fast in
     let _ : bool = Typing_deps.allow_dependency_table_reads deptable_unlocked in
 
     new_env, {reparse_count; total_rechecked_count;}

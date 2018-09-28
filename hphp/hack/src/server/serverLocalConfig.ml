@@ -49,6 +49,9 @@ type t = {
   max_typechecker_worker_memory_mb : int option;
   watchman_debug_logging : bool;
   hg_aware : bool;
+  hg_aware_parsing_restart_threshold : int;
+  hg_aware_redecl_restart_threshold : int;
+  hg_aware_recheck_restart_threshold : int;
   (* Flag to disable conservative behavior in incremental-mode typechecks.
    *
    * By default, when a class has changed and we do not have access to the old
@@ -99,6 +102,9 @@ let default = {
   max_typechecker_worker_memory_mb = None;
   watchman_debug_logging = false;
   hg_aware = false;
+  hg_aware_parsing_restart_threshold = 0;
+  hg_aware_redecl_restart_threshold = 0;
+  hg_aware_recheck_restart_threshold = 0;
   disable_conservative_redecl = false;
 }
 
@@ -211,6 +217,12 @@ let load_ fn ~silent =
     ~default:default.hg_aware config in
   let disable_conservative_redecl = bool_if_version "disable_conservative_redecl"
     ~default:default.disable_conservative_redecl config in
+  let hg_aware_parsing_restart_threshold = int_ "hg_aware_parsing_restart_threshold"
+    ~default:default.hg_aware_parsing_restart_threshold config in
+  let hg_aware_redecl_restart_threshold = int_ "hg_aware_redecl_restart_threshold"
+    ~default:default.hg_aware_redecl_restart_threshold config in
+  let hg_aware_recheck_restart_threshold = int_ "hg_aware_recheck_restart_threshold"
+    ~default:default.hg_aware_recheck_restart_threshold config in
   {
     use_watchman;
     watchman_init_timeout;
@@ -245,6 +257,9 @@ let load_ fn ~silent =
     max_typechecker_worker_memory_mb;
     watchman_debug_logging;
     hg_aware;
+    hg_aware_parsing_restart_threshold;
+    hg_aware_redecl_restart_threshold;
+    hg_aware_recheck_restart_threshold;
     disable_conservative_redecl;
   }
 

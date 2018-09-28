@@ -50,33 +50,38 @@ let on_state_leave root state_name state_metadata =
       | _ -> add_query ~hg_rev root
     end
 
-let check_changes start_t =
+let check_query future ~timeout ~current_t =
+  match Future.get ~timeout future with
+  | Error e ->
+    let e = Future.error_to_string e in
+    HackEventLogger.check_mergebase_failed current_t e;
+    Hh_logger.log "ServerRevisionTracker: %s" e;
+  | Ok new_svn_rev ->
+    HackEventLogger.check_mergebase_success current_t;
+    match !current_mergebase with
+    | Some svn_rev when svn_rev <> new_svn_rev ->
+        current_mergebase := Some new_svn_rev;
+        HackEventLogger.set_changed_mergebase true;
+        Hh_logger.log "ServerRevisionTracker: Changing mergebase from r%d to r%d"
+          svn_rev new_svn_rev;
+        ()
+    | Some _ -> ()
+    | None -> initialize new_svn_rev
+
+let check_blocking () =
   if Queue.is_empty pending_queries then
-    start_t
+    ()
   else begin
+    let start_t = Unix.gettimeofday () in
     Hh_logger.log "Querying Mercurial for mergebase changes";
     Queue.iter begin fun hg_rev ->
       let current_t = Unix.gettimeofday () in
       let elapsed_t = current_t -. start_t in
       let timeout = max 0 (int_of_float (30.0 -. elapsed_t)) in
       let future = Hashtbl.find mergebase_queries hg_rev in
-      match Future.get ~timeout future with
-      | Error e ->
-        let e = Future.error_to_string e in
-        HackEventLogger.check_mergebase_failed current_t e;
-        Hh_logger.log "ServerRevisionTracker: %s" e;
-      | Ok new_svn_rev ->
-        HackEventLogger.check_mergebase_success current_t;
-        match !current_mergebase with
-        | Some svn_rev when svn_rev <> new_svn_rev ->
-            current_mergebase := Some new_svn_rev;
-            HackEventLogger.set_changed_mergebase ();
-            Hh_logger.log "ServerRevisionTracker: Changing mergebase from r%d to r%d"
-              svn_rev new_svn_rev;
-            ()
-        | Some _ -> ()
-        | None -> initialize new_svn_rev
+      check_query future ~timeout ~current_t
     end pending_queries;
     Queue.clear pending_queries;
-    Hh_logger.log_duration "Finished querying Mercurial" start_t
+    let _ : float = Hh_logger.log_duration "Finished querying Mercurial" start_t in
+    ()
   end

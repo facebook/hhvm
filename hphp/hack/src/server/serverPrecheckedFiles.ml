@@ -15,7 +15,7 @@ let should_use options local_config =
 
 let set env prechecked_files = { env with prechecked_files }
 
-let intersect_with_master_deps ~deps ~dirty_master_deps ~rechecked_files env =
+let intersect_with_master_deps ~deps ~dirty_master_deps ~rechecked_files genv env =
   (* Compute maximum fan-out of input dep set *)
   let deps = Typing_deps.add_all_deps deps in
   (* See if it intersects in any way with dirty_master_deps *)
@@ -32,6 +32,7 @@ let intersect_with_master_deps ~deps ~dirty_master_deps ~rechecked_files env =
 
   let size = Relative_path.Set.cardinal needs_recheck in
   let env = if size = 0 then env else begin
+    ignore genv; (* TODO: use this to compare size to restart thresholds  *)
     Hh_logger.log "Adding %d files to recheck" size;
     let needs_recheck =
        Relative_path.Set.union env.needs_recheck needs_recheck in
@@ -60,7 +61,7 @@ let update_rechecked_files env rechecked =
   HackEventLogger.prechecked_update_rechecked t;
   env
 
-let update_after_recheck env rechecked =
+let update_after_recheck genv env rechecked =
   let env = update_rechecked_files env rechecked in
     match env.full_check, env.prechecked_files with
   | Full_check_done, Initial_typechecking {
@@ -78,7 +79,7 @@ let update_after_recheck env rechecked =
       ~deps:dirty_local_deps
       ~dirty_master_deps
       ~rechecked_files
-      env
+      genv env
     in
     let env = if (size = 0) then env else begin
       let full_check = Full_check_started in
@@ -97,7 +98,7 @@ let update_after_recheck env rechecked =
     })
   | _ -> env
 
-let update_after_local_changes env changes =
+let update_after_local_changes genv env changes =
   match env.prechecked_files with
   | Prechecked_files_disabled -> env
   | Initial_typechecking dirty_deps ->
@@ -117,7 +118,7 @@ let update_after_local_changes env changes =
       ~deps:changes
       ~dirty_master_deps:dirty_deps.dirty_master_deps
       ~rechecked_files:dirty_deps.rechecked_files
-      env
+      genv env
     in
     let env = if (size = 0) then env else begin
       let full_check = match env.full_check with

@@ -1,0 +1,4 @@
+File "typing_fail_uninstantiable_in_shape_return.php", line 14, characters 38-57:
+CannotBeInstantiated is uninstantiable (Typing[4002])
+File "typing_fail_uninstantiable_in_shape_return.php", line 11, characters 22-41:
+Declaration is here

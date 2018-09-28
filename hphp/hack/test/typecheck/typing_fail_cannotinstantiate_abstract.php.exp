@@ -1,0 +1,4 @@
+File "typing_fail_cannotinstantiate_abstract.php", line 15, characters 23-42:
+CannotBeInstantiated is uninstantiable (Typing[4002])
+File "typing_fail_cannotinstantiate_abstract.php", line 11, characters 22-41:
+Declaration is here

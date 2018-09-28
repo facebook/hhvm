@@ -126,12 +126,28 @@ module ServerInitCommon = struct
     with exn ->
       Error exn
 
+(* invoke_loading_state_natively:
+ * - Eagerly does mk_state_future which synchronously downloads saved-state
+ *   and kicks off an asynchronous hg query
+ *   + might eagerly raise on missing config hash
+ *   + might eagerly return an error result which we raise as an exception
+ * - Eagerly does lock_and_load_deptable
+ *   + might raise on SQL failure
+ * - Eagerly does load_saved_state
+ *   + might raise because it interacts with the OS
+ *
+ * Next it returns a lamdba, so the caller can determine when the following happens:
+ *
+ * - Lazily waits 200s for the async hg query to finish
+ *   + might return "Error" if that async process didn't succeed
+ *   + might return "Ok" if it did
+ *)
   let invoke_loading_state_natively
       ?(use_canary=false)
       ?(target: ServerMonitorUtils.target_mini_state option)
       (genv: ServerEnv.genv)
       (root: Path.t)
-    : (unit -> (loaded_info, exn) result, 'a) result =
+    : unit -> (loaded_info, exn) result =
     let open ServerMonitorUtils in
     let mini_state_handle = match target with
       | None -> None
@@ -186,7 +202,7 @@ module ServerInitCommon = struct
         state_distance = Some result.State_loader.state_distance;
       }
     ) in
-    Ok get_loaded_info
+    get_loaded_info
 
   let invoke_approach
       (genv: ServerEnv.genv)
@@ -213,9 +229,9 @@ module ServerInitCommon = struct
       }) in
       fun () -> Ok get_loaded_info
     | Load_state_natively use_canary ->
-      fun () -> invoke_loading_state_natively ~use_canary  genv root
+      fun () -> Ok (invoke_loading_state_natively ~use_canary  genv root)
     | Load_state_natively_with_target target ->
-      fun () -> invoke_loading_state_natively ~target genv root
+      fun () -> Ok (invoke_loading_state_natively ~target genv root)
 
   let is_check_mode (options: ServerArgs.options) : bool =
     ServerArgs.check_mode options &&

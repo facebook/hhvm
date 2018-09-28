@@ -205,17 +205,11 @@ module ServerInitCommon = struct
         old_errors;
         state_distance = None;
       }) in
-      begin try Ok (fun () -> Ok get_loaded_info)
-        with exn -> Error exn
-      end
+      Ok (fun () -> Ok get_loaded_info)
     | Load_state_natively use_canary ->
-      begin try Ok (fun () -> invoke_loading_state_natively ~use_canary  genv root)
-        with exn -> Error exn
-      end
+      Ok (fun () -> invoke_loading_state_natively ~use_canary  genv root)
     | Load_state_natively_with_target target ->
-      begin try Ok (fun () -> invoke_loading_state_natively ~target genv root)
-        with exn -> Error exn
-      end
+      Ok (fun () -> invoke_loading_state_natively ~target genv root)
 
   let is_check_mode (options: ServerArgs.options) : bool =
     ServerArgs.check_mode options &&

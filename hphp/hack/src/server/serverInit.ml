@@ -118,11 +118,11 @@ module ServerInitCommon = struct
   let with_loader_timeout
       (timeout: int)
       (stage: string)
-      (f: (unit -> ('a, exn) result))
+      (f: unit -> 'a)
     : ('a, exn) result =
     try
-      Timeout.with_timeout ~timeout ~do_:(fun _id -> f ())
-        ~on_timeout:(fun () -> raise (Loader_timeout stage))
+      Ok (Timeout.with_timeout ~timeout ~do_:(fun _id -> f ())
+        ~on_timeout:(fun () -> raise (Loader_timeout stage)))
     with exn ->
       Error exn
 
@@ -204,11 +204,19 @@ module ServerInitCommon = struct
     ) in
     get_loaded_info
 
+  (* invoke_approach:
+   * This returns a "double-lambda", and thus the caller determines deferred execution.
+   * First lambda: upon the caller executing this, download the saved state,
+   *   read some files on disk, kick off async work for an hg query, load saved
+   *   state, maybe raise exceptions along the way.
+   * Second lambda: upon the caller executing this, we wait up to 200s for the aysnc
+   *   hg query to finish, returning either loaded_info or an exception.
+   *)
   let invoke_approach
       (genv: ServerEnv.genv)
       (root: Path.t)
       (approach: load_mini_approach)
-    : unit -> (unit -> (loaded_info, exn) result, 'a) result =
+    : unit -> unit -> (loaded_info, exn) result =
     let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
     match approach with
     | Precomputed { ServerArgs.saved_state_fn;
@@ -227,11 +235,11 @@ module ServerInitCommon = struct
         old_errors;
         state_distance = None;
       }) in
-      fun () -> Ok get_loaded_info
+      fun () -> get_loaded_info
     | Load_state_natively use_canary ->
-      fun () -> Ok (invoke_loading_state_natively ~use_canary  genv root)
+      fun () -> (invoke_loading_state_natively ~use_canary genv root)
     | Load_state_natively_with_target target ->
-      fun () -> Ok (invoke_loading_state_natively ~target genv root)
+      fun () -> (invoke_loading_state_natively ~target genv root)
 
   let is_check_mode (options: ServerArgs.options) : bool =
     ServerArgs.check_mode options &&
@@ -534,12 +542,21 @@ module ServerInitCommon = struct
   let get_state_future
       (genv: ServerEnv.genv)
       (root: Path.t)
-      (state_future: (unit -> ('a, exn) result, exn) result)
+      (state_future: (unit -> (loaded_info, exn) result, exn) result)
       (timeout: int)
-    : ('a * Relative_path.Set.t, exn) result =
-    state_future
-    >>= with_loader_timeout timeout "wait_for_changes"
-    >>= fun loaded_info ->
+    : (loaded_info * Relative_path.Set.t, exn) result =
+    (* Here we execute the remaining lambda of state_future, whose implementation *)
+    (* I happen to know will wait up to 200s for a certain async process to terminate *)
+    (* and will return Ok loaded_info or Error exn for the results of that process. *)
+    (* But we're executing it inside our own wrapper timeout. *)
+    (* The outer result represents any errors that happened during that wrapper wait_for_timeout. *)
+    (* The inner result represents any errors that happened during the process's 200s. *)
+    let loaded_result : ((loaded_info, exn) result, exn) result = state_future
+      >>= with_loader_timeout timeout "wait_for_changes" in
+    (* Let's coalesce the outer and inner results, i.e. both sources of errors. *)
+    let loaded_result : (loaded_info, exn) result = Core_result.join loaded_result in
+
+    loaded_result >>= fun loaded_info ->
     genv.wait_until_ready ();
     let root = Path.to_string root in
     let updates = genv.notifier_async () in
@@ -679,15 +696,20 @@ module ServerLazyInit : InitKind = struct
     assert(lazy_level = Init);
     Hh_logger.log "Begin loading mini-state";
     let trace = genv.local_config.SLC.trace_parsing in
-    let state_future =
+    let state_future : (unit -> unit -> (loaded_info, exn) result, exn) result =
       load_mini_approach >>| invoke_approach genv root in
     let timeout = genv.local_config.SLC.load_mini_script_timeout in
     let hg_aware = genv.local_config.SLC.hg_aware in
-    let state_future = state_future >>= fun f ->
-      with_loader_timeout timeout "wait_for_state" f
+    (* If state_future was Ok, then we'll execute the first lambda in it. *)
+    (* This kicks off an async process, and does some other preparatory stuff. *)
+    (* Any exceptions in it, or the timeout exceeded, will result in Error exn. *)
+    let state_future : (unit -> (loaded_info, exn) result, exn) result =
+      state_future >>= with_loader_timeout timeout "wait_for_state"
     in
 
-    let state = get_state_future genv root state_future timeout in
+    let state : (loaded_info * Relative_path.Set.t, exn) result =
+      get_state_future genv root state_future timeout
+    in
 
     match state with
     | Ok ({

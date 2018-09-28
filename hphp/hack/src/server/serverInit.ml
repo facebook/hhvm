@@ -25,6 +25,7 @@ module SLC = ServerLocalConfig
 exception Native_loader_failure of string
 exception No_loader
 exception Loader_timeout of string
+exception Saved_state_not_supported
 
 type load_mini_approach =
   | Precomputed of ServerArgs.mini_state_target_info
@@ -546,13 +547,8 @@ module ServerEagerInit : InitKind = struct
   open ServerInitCommon
 
   let init ~load_mini_approach genv lazy_level env root =
-    (* Spawn this first so that it can run in the background while parsing is
-     * going on. The script can fail in a variety of ways, but the resolution
-     * is always the same -- we fall back to rechecking everything. Running it
-     * in the Result monad provides a convenient way to locate the error
-     * handling code in one place. *)
-    let state_future =
-     load_mini_approach >>= invoke_approach genv root in
+    (* We don't support a saved state for eager init. *)
+    ignore (load_mini_approach, root);
     let get_next, t = indexing genv in
     let lazy_parse = lazy_level = Parse in
     (* Parsing entire repo, too many files to trace. TODO: why do we parse
@@ -562,10 +558,6 @@ module ServerEagerInit : InitKind = struct
     let env, t = parsing ~lazy_parse genv env ~get_next t ~trace in
     if not (ServerArgs.check_mode genv.options) then
       SearchServiceRunner.update_fileinfo_map env.files_info;
-    let timeout = genv.local_config.SLC.load_mini_script_timeout in
-    let state_future = state_future >>=
-      with_loader_timeout timeout "wait_for_state"
-    in
 
     let t = update_files genv env.files_info t in
     let env, t = naming env t in
@@ -577,60 +569,9 @@ module ServerEagerInit : InitKind = struct
       if lazy_level <> Off then env, t
       else type_decl genv env fast t in
 
-    (* TODO: remove saved state logic from eager init - T34269654 *)
-    let state = get_state_future genv root state_future timeout in
-    match state with
-    | Ok ({
-      dirty_master_files;
-      dirty_local_files = dirty_files;
-      old_errors;
-      old_saved;
-      _}, changed_while_parsing) ->
-      (* TODO: not implemented *)
-      assert (Relative_path.Set.is_empty dirty_master_files);
-      let old_fast = FileInfo.saved_to_fast old_saved in
-      (* During eager init, we don't need to worry about tracked targets since
-         they we end up parsing everything anyways
-      *)
-      let build_targets, _ = get_build_targets env in
-      Hh_logger.log "Successfully loaded mini-state";
-      (* Build targets are untracked by version control, so we must always
-       * recheck them. While we could query hg / git for the untracked files,
-       * it's much slower. *)
-      let dirty_files =
-        Relative_path.Set.union dirty_files build_targets in
-      (* If a file has changed while we were parsing, we may have parsed the
-       * new version, so we must treat it as possibly creating new type
-       * errors. *)
-      let dirty_files =
-        Relative_path.Set.union dirty_files changed_while_parsing in
-      let (decl_and_typing_error_files, naming_and_parsing_error_files) =
-        SaveStateService.partition_error_files_tf old_errors [ Errors.Decl; Errors.Typing ] in
-      let disk_needs_parsing =
-        Relative_path.Set.union naming_and_parsing_error_files (
-        Relative_path.Set.union env.disk_needs_parsing changed_while_parsing) in
-      (* We must also take into account the old errors. *)
-      (* But we still want to keep it in the set of things that need to be
-       * reparsed in the next round of incremental updates. *)
-      let env = { env with
-        disk_needs_parsing;
-        needs_recheck = Relative_path.Set.union env.needs_recheck decl_and_typing_error_files;
-      } in
-
-      let dirty_master_files = Relative_path.Set.empty in
-      let similar_files = Relative_path.Set.empty in
-
-      type_check_dirty genv env old_fast fast
-        dirty_master_files dirty_files similar_files t, state
-    | Error err ->
-      (* Fall back to type-checking everything *)
-      SharedMem.cleanup_sqlite ();
-      if err <> No_loader then begin
-        let err_str = load_mini_exn_to_string err in
-        HackEventLogger.load_mini_exn err_str;
-        Hh_logger.log "Could not load mini state: %s" err_str;
-      end;
-      type_check genv env fast t, state
+    (* Type-checking everything *)
+    SharedMem.cleanup_sqlite ();
+    type_check genv env fast t, Error Saved_state_not_supported
 end
 
 (* Lazy Initialization:

@@ -44,8 +44,11 @@ let on_state_leave root state_name state_metadata =
   if state_name <> "hg.update" then () else
   let open Option.Monad_infix in
   Option.iter (state_metadata >>= Watchman_utils.rev_in_state_change)
-    ~f:(fun hg_rev -> add_query ~hg_rev root);
-  ()
+    ~f:begin fun hg_rev ->
+      match state_metadata >>= Watchman_utils.merge_in_state_change with
+      | Some true -> Hh_logger.log "ServerRevisionTracker: Ignoring merge rev %s" hg_rev;
+      | _ -> add_query ~hg_rev root
+    end
 
 let check_changes start_t =
   if Queue.is_empty pending_queries then

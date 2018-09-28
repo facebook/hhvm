@@ -785,15 +785,14 @@ let program_init genv =
       init_type;
     }
   } in
-  let timeout = genv.local_config.ServerLocalConfig.load_mini_script_timeout in
-  EventLogger.set_init_type init_type;
-  HackEventLogger.init_end ~state_distance ~approach_name ~init_error init_type timeout;
   Hh_logger.log "Waiting for daemon(s) to be ready...";
   genv.wait_until_ready ();
   ServerStamp.touch_stamp ();
   let informant_use_xdb = genv.local_config.ServerLocalConfig.informant_use_xdb in
-  HackEventLogger.init_lazy_end ~informant_use_xdb ~state_distance ~approach_name
-    ~init_error init_type;
+  let load_script_timeout = genv.local_config.ServerLocalConfig.load_mini_script_timeout in
+  EventLogger.set_init_type init_type;
+  HackEventLogger.init_lazy_end ~informant_use_xdb ~load_script_timeout ~state_distance
+    ~approach_name ~init_error ~init_type;
   env
 
 let setup_server ~informant_managed ~monitor_pid options handle =

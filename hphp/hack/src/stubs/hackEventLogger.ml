@@ -38,13 +38,14 @@ let init_monitor
   ~predeclare_ide:_
   ~max_typechecker_worker_memory_mb:_
   _ _ _ _ = ()
-let init_end ~state_distance:_ ~approach_name:_ ~init_error:_ _ _ = ()
 let starting_first_server _ = ()
 let init_lazy_end
   ~informant_use_xdb:_
+  ~load_script_timeout:_
   ~state_distance:_
   ~approach_name:_
-  ~init_error:_ _ = ()
+  ~init_error:_
+  ~init_type:_ = ()
 let load_deptable_end _ = ()
 let nfs_root _ = ()
 let load_mini_worker_end ~is_cached:_ _ _ = ()

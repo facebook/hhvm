@@ -387,6 +387,7 @@ module Revision_tracker = struct
 
   type instance =
     | Initializing of init_settings * (Hg.svn_rev Future.t)
+    | Reinitializng of env * (Hg.svn_rev Future.t)
     | Tracking of env
 
   (** Revision_tracker has lots of mutable state anyway, so might as well
@@ -426,6 +427,11 @@ module Revision_tracker = struct
         init_settings.ignore_hh_version;
       state_changes = Queue.create() ;
     }
+
+  let reinitialized_env env base_svn_rev = { env with
+    current_base_revision = ref base_svn_rev;
+    state_changes = Queue.create();
+  }
 
   let get_jump_distance svn_rev env =
     abs @@ svn_rev - !(env.current_base_revision)
@@ -689,24 +695,55 @@ module Revision_tracker = struct
     in
     List.fold_left max_report Move_along reports
 
+  let reinit t =
+    (* The results of old initialization query might be stale by now, so we need
+     * to cancel it and issue a new one *)
+    let cancel_future future =
+      (* timeout=0 should immediately kill and cleanup all queries that were not ready by now *)
+      let _ : ('a, Future.error) result = Future.get future ~timeout:0 in
+      () in
+    let make_new_future root = Hg.current_working_copy_base_rev (Path.to_string root) in
+    match !t with
+    | Initializing (init_settings, future) ->
+      cancel_future future;
+      t := Initializing (init_settings, make_new_future init_settings.root)
+    | Reinitializng  (env, future) ->
+      cancel_future future;
+      t := Reinitializng (env, make_new_future env.inits.root)
+    | Tracking env ->
+      t := Reinitializng (env, make_new_future env.inits.root)
+
+  let check_init_future future =
+    if not @@ Future.is_ready future then None else
+    let svn_rev = Future.get future
+      |> Core_result.map_error ~f:Future.error_to_string
+      |> Core_result.map_error ~f:HackEventLogger.revision_tracker_init_svn_rev_failed
+      |> Core_result.ok
+      |> Option.value ~default:0
+    in
+    let () = Hh_logger.log "Initialized Revision_tracker to SVN rev: %d" svn_rev in
+    Some svn_rev
+
   let make_report server_state t =
     match !t with
     | Initializing (init_settings, future) ->
-      if Future.is_ready future
-      then
-        let svn_rev = Future.get future
-          |> Core_result.map_error ~f:Future.error_to_string
-          |> Core_result.map_error ~f:HackEventLogger.revision_tracker_init_svn_rev_failed
-          |> Core_result.ok
-          |> Option.value ~default:0
-        in
-        let () = Hh_logger.log "Initialized Revision_tracker to SVN rev: %d"
-          svn_rev in
-        let env = active_env init_settings svn_rev in
-        let () = t := Tracking env in
-        process server_state env
-      else
-        Informant_sig.Move_along
+      begin match check_init_future future with
+        | Some svn_rev ->
+          let env = active_env init_settings svn_rev in
+          let () = t := Tracking env in
+          process server_state env
+        | None ->
+          Informant_sig.Move_along
+      end
+    | Reinitializng  (env, future) ->
+      begin match check_init_future future with
+        | Some svn_rev ->
+          let env = reinitialized_env env svn_rev in
+          let () = t := Tracking env in
+          process server_state env
+        | None ->
+          Informant_sig.Move_along
+      end
     | Tracking env ->
       process server_state env
 
@@ -784,6 +821,12 @@ let init {
           root;
         watchman_event_watcher = WEWClient.init root;
       }
+
+let reinit t = match t with
+  | Resigned -> ()
+  | Active env ->
+    Hh_logger.log "Reinitializing Informant";
+    Revision_tracker.reinit env.revision_tracker
 
 let should_start_first_server t = match t with
   | Resigned ->

@@ -40,6 +40,7 @@
 #include "hphp/util/mutex.h"
 #include "hphp/util/process.h"
 #include "hphp/util/rank.h"
+#include "hphp/util/smalllocks.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
 
@@ -112,9 +113,24 @@ struct CachedUnit {
  * they don't need to be littered with RepoAuthoritative checks.
  */
 
+struct CachedUnitRepoAuth {
+  CachedUnitRepoAuth() = default;
+
+  CachedUnitRepoAuth(const CachedUnitRepoAuth& src)
+    : unit(src.unit)
+    , rdsBitId(src.rdsBitId)
+  {}
+
+  operator CachedUnit() const { return CachedUnit { unit, rdsBitId }; }
+
+  mutable AtomicLowPtr<Unit> unit{reinterpret_cast<Unit*>(0x1)};
+  mutable SmallLock lock{};
+  mutable size_t rdsBitId{-1u};
+};
+
 using RepoUnitCache = RankedCHM<
   const StringData*,     // must be static
-  CachedUnit,
+  CachedUnitRepoAuth,
   StringDataHashCompare,
   RankUnitCache
 >;
@@ -124,10 +140,17 @@ CachedUnit lookupUnitRepoAuth(const StringData* path,
                               const Native::FuncTable& nativeFuncs) {
   path = makeStaticString(path);
 
-  RepoUnitCache::accessor acc;
-  if (!s_repoUnitCache.insert(acc, path)) {
-    return acc->second;
-  }
+  RepoUnitCache::const_accessor acc;
+  s_repoUnitCache.insert(acc, path);
+  auto const& cu = acc->second;
+
+  // Check for initialization before we grab the futex; the entry is
+  // write-once.
+  if (!(reinterpret_cast<uintptr_t>(cu.unit.get()) & 0x1)) return cu;
+
+  std::unique_lock<SmallLock> lock(cu.lock);
+
+  if (!(reinterpret_cast<uintptr_t>(cu.unit.get()) & 0x1)) return cu;
 
   try {
     /*
@@ -142,22 +165,24 @@ CachedUnit lookupUnitRepoAuth(const StringData* path,
     if (Repo::get().findFile(path->data(),
                              RuntimeOption::SourceRoot,
                              md5) == RepoStatus::error) {
-      return acc->second;
+      cu.unit = nullptr;
+      return cu;
     }
 
-    acc->second.unit = Repo::get().loadUnit(
+    cu.unit = Repo::get().loadUnit(
         path->data(),
         md5,
         nativeFuncs)
       .release();
-    if (acc->second.unit) {
-      acc->second.rdsBitId = rds::allocBit();
+    if (cu.unit) {
+      cu.rdsBitId = rds::allocBit();
     }
   } catch (...) {
+    lock.unlock();
     s_repoUnitCache.erase(acc);
     throw;
   }
-  return acc->second;
+  return cu;
 }
 
 //////////////////////////////////////////////////////////////////////

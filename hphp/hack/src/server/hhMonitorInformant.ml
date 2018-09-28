@@ -108,7 +108,7 @@ module Revision_map = struct
     let find_svn_rev hg_rev t =
       let future = Hashtbl.find t.svn_queries hg_rev in
       match Future.check_status future with
-      | Future.In_progress age when age > 60.0 ->
+      | Future.In_progress {age} when age > 60.0 ->
         (** Fail if lookup up SVN rev number takes more than 60 s.
          * Delete the query so we can retry again if we encounter this hg_rev
          * again. Return fake "0" SVN rev number. *)
@@ -205,7 +205,7 @@ module Revision_map = struct
         match query, !prefetcher with
         | query, Some prefetcher -> begin
           match Future.check_status prefetcher with
-          | Future.In_progress age when age > 90.0 ->
+          | Future.In_progress {age} when age > 90.0 ->
             (** If prefetcher has taken longer than 90 seconds, we consider
              * this as having no saved states. *)
             let () = Hh_logger.log "Informant prefetcher timed out" in
@@ -228,7 +228,7 @@ module Revision_map = struct
           end
         | query, None ->
           begin match Future.check_status query with
-          | Future.In_progress age when age > 15.0 ->
+          | Future.In_progress {age} when age > 15.0 ->
             (** If lookup in XDB table has taken more than 15 seconds, we
              * we consider this as having no saved state. *)
             let () = HackEventLogger.find_xdb_match_timed_out (Future.start_t query) in

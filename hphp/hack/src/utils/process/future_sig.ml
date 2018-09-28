@@ -11,22 +11,17 @@
 type 'a deserializer = string -> 'a
 
 module Types = struct
-  type stdout = string
-  type stderr = string
   type error_mode =
-    | Process_failure of Unix.process_status * stderr
-    (** string is stderr output received so far. *)
-    | Timed_out of stdout * stderr
+    | Process_failure of { status: Unix.process_status; stderr: string; }
+    | Timed_out of { stdout: string; stderr: string; }
     | Process_aborted
-    | Transformer_raised of exn
+    | Transformer_raised of exn * Utils.callstack
 
   type error = Process_types.invocation_info * error_mode
 
-  type age = (** milliseconds *) float
-
   type 'a status =
     | Complete_with_result of ('a, error) result
-    | In_progress of age
+    | In_progress of { age: float; }
 
   exception Failure of error
 

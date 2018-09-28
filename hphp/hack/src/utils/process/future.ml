@@ -26,7 +26,7 @@ type 'a delayed = {
 
 type 'a promise =
   | Complete : 'a -> 'a promise
-  | Complete_but_transformer_raised of (Process_types.invocation_info * exn)
+  | Complete_but_transformer_raised of (Process_types.invocation_info * exn * Utils.callstack)
     (** Delayed is useful for deterministic testing. Must be tapped by "is ready" or
      * "check_status" the remaining number of times before it is ready. *)
   | Delayed : 'a delayed -> 'a promise
@@ -57,13 +57,13 @@ let error_to_string (info, e) =
     | Unix.WSTOPPED i -> Printf.sprintf "(%s WSTOPPED %d)" info i
   in
   match e with
-  | Process_failure (status, stderr) ->
+  | Process_failure {status; stderr;} ->
     Printf.sprintf "Process_failure(%s, stderr: %s)" (status_string status) stderr
-  | Timed_out (stdout , stderr) ->
+  | Timed_out {stdout; stderr;} ->
     Printf.sprintf "Timed_out(%s (stdout: %s) (stderr: %s))" info stdout stderr
   | Process_aborted ->
     Printf.sprintf "Process_aborted(%s)" info
-  | Transformer_raised e ->
+  | Transformer_raised (e, _stack) ->
     Printf.sprintf "Transformer_raised(%s %s)" info (Printexc.to_string e)
 
 let error_to_exn e = raise (Failure e)
@@ -71,12 +71,13 @@ let error_to_exn e = raise (Failure e)
 let rec get : 'a. ?timeout:int -> 'a t -> ('a, error) result =
   fun ?(timeout=30) (promise, _) -> match !promise with
   | Complete v -> Ok v
-  | Complete_but_transformer_raised (info, e) ->
-    Error (info, Transformer_raised e)
+  | Complete_but_transformer_raised (info, e, stack) ->
+    Error (info, Transformer_raised (e, stack))
   | Delayed { value; remaining; _ } when remaining <= 0 ->
     Ok value
   | Delayed _ ->
-    Error (Process_types.dummy.Process_types.info, Timed_out ("", "Delayed value not ready yet"))
+    let error = Timed_out {stdout=""; stderr="Delayed value not ready yet";} in
+    Error (Process_types.dummy.Process_types.info, error)
   | Merged (a, b, handler) ->
     let start_t = Unix.time () in
     let a = get ~timeout a in
@@ -94,17 +95,18 @@ let rec get : 'a. ?timeout:int -> 'a t -> ('a, error) result =
     | Ok {Process_types.stdout; _} -> begin
       try
         let result = transformer stdout in
-        let () = promise := Complete result in
+        promise := Complete result;
         Ok result
       with
       | e ->
-        let () = promise := (Complete_but_transformer_raised (info, e)) in
-        Error (info, Transformer_raised e)
+        let stack = Utils.Callstack (Printexc.get_backtrace ()) in
+        promise := (Complete_but_transformer_raised (info, e, stack));
+        Error (info, Transformer_raised (e, stack))
       end
     | Error (Process_types.Abnormal_exit {status; stderr; _}) ->
-      Error (info, Process_failure (status, stderr))
+      Error (info, Process_failure {status; stderr;})
     | Error (Process_types.Timed_out {stdout; stderr;}) ->
-      Error (info, Timed_out (stdout, stderr))
+      Error (info, Timed_out {stdout; stderr;})
     | Error Process_types.Overflow_stdin ->
       Error (info, Process_aborted)
 
@@ -130,11 +132,11 @@ let merge_status stat_a stat_b handler =
   match stat_a, stat_b with
   | Complete_with_result a, Complete_with_result b ->
     Complete_with_result (handler a b)
-  | In_progress age_a, In_progress age_b when age_a > age_b ->
-    In_progress age_a
-  | In_progress age, _
-  | _, In_progress age ->
-    In_progress age
+  | In_progress {age}, In_progress {age=age_b} when age > age_b ->
+    In_progress {age}
+  | In_progress {age}, _
+  | _, In_progress {age} ->
+    In_progress {age}
 
 let start_t : 'a. 'a t -> float = fun (_, time) -> time
 
@@ -146,13 +148,13 @@ let rec check_status : 'a. 'a t -> 'a status = fun (promise, start_t) ->
   match !promise with
   | Complete v ->
     Complete_with_result (Ok v)
-  | Complete_but_transformer_raised (info, e) ->
-    Complete_with_result (Error (info, Transformer_raised e))
+  | Complete_but_transformer_raised (info, e, stack) ->
+    Complete_with_result (Error (info, Transformer_raised (e, stack)))
   | Delayed { value; remaining; _ } when remaining <= 0 ->
     Complete_with_result (Ok value)
   | Delayed { tapped; remaining; value; } ->
     promise := Delayed { tapped = tapped + 1; remaining = remaining - 1; value; };
-    In_progress (float_of_int tapped)
+    In_progress {age = float_of_int tapped;}
   | Merged (a, b, handler) ->
     merge_status (check_status a) (check_status b) handler
   | Incomplete (process, _) ->
@@ -160,4 +162,4 @@ let rec check_status : 'a. 'a t -> 'a status = fun (promise, start_t) ->
       Complete_with_result (get (promise, start_t))
     else
       let age = Unix.time () -. start_t in
-      In_progress age
+      In_progress {age;}

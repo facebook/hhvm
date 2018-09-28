@@ -82,6 +82,7 @@ let parse_check_args cmd =
   let profile_log = ref false in
   let timeout = ref None in
   let autostart = ref true in
+  let file_info_on_disk = ref false in
   let gen_saved_ignore_type_errors = ref false in
   let force_dormant_start = ref false in
   let from = ref "" in
@@ -410,6 +411,10 @@ let parse_check_args cmd =
       Arg.String (fun x -> set_mode (MODE_SAVE_STATE x) ()),
       (" (mode) Save a saved state to the given file." ^
       " Returns number of edges dumped from memory to the database.");
+    "--file-info-on-disk",
+      Arg.Set file_info_on_disk,
+      " [experimental] a saved state option to store file info" ^
+      " (the naming table) in SQLite. Only has meaning in --saved-state mode.";
     "--gen-saved-ignore-type-errors",
       Arg.Set gen_saved_ignore_type_errors,
       " generate a saved state even if there are type errors (default: false).";
@@ -501,6 +506,7 @@ let parse_check_args cmd =
     ignore_hh_version = !ignore_hh_version;
     dynamic_view = !dynamic_view;
     sort_results = !sort_results;
+    file_info_on_disk = !file_info_on_disk;
     gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
     prechecked = !prechecked;
   }

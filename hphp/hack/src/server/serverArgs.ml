@@ -83,7 +83,8 @@ module Messages = struct
   let watchman_debug_logging =
     " Enable debug logging on Watchman client. This is very noisy"
   let ignore_hh_version = " ignore hh_version check when loading saved states"
-  let file_info_on_disk = " [experimental] store file-info in sqlite db."
+  let file_info_on_disk = " [experimental] a saved state option to store file info" ^
+                          " (the naming table) in SQLite. Only has meaning in --saved-state mode."
   let dynamic_view      = " start with dynamic view for IDE files on by default."
   let gen_saved_ignore_type_errors = " generate a saved state even if there are type errors."
   let prechecked = " override value of \"prechecked_files\" flag from hh.conf"

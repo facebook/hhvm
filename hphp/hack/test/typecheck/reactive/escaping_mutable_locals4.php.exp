@@ -1,0 +1,2 @@
+File "escaping_mutable_locals4.php", line 16, characters 7-8:
+Neither a Mutable nor MaybeMutable object may be captured by an anonymous function. (Typing[4283])

@@ -357,6 +357,7 @@ let empty tcopt file ~droot = {
   in_case  = false;
   inside_constructor = false;
   inside_ppl_class = false;
+  disallow_this = false;
   decl_env = {
     mode = FileInfo.Mstrict;
     droot;

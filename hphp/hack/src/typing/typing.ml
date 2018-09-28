@@ -1299,16 +1299,22 @@ and eif env ~expected ~coalesce p c e1 e2 =
   let te = if coalesce then T.Binop(Ast.QuestionQuestion, tc, te2) else T.Eif(tc, te1, te2) in
   env, T.make_typed_expr p ty te, ty
 
+and is_parameter env x = Local_id.Map.mem x (Env.get_params env)
 and check_escaping_var env (pos, x) =
   if Env.is_using_var env x
   then
     if x = this
     then Errors.escaping_this pos
     else
-    if Option.is_some (Local_id.Map.get x (Env.get_params env))
+    if is_parameter env x
     then Errors.escaping_disposable_parameter pos
     else Errors.escaping_disposable pos
   else ()
+
+and check_escaping_mutable env (pos, x) =
+  let mut_env = Env.get_env_mutability env in
+  if (x = this && Env.function_is_mutable env) || Local_id.Map.mem x mut_env
+  then Errors.escaping_mutable_object pos
 
 and exprs ?(accept_using_var = false) ?(allow_non_awaited_awaitable_in_rx=false)
   ?is_func_arg ?expected env el =
@@ -1625,6 +1631,8 @@ and expr_
       let r, _ = Env.get_self env in
       if r = Reason.Rnone
       then Errors.this_var_outside_class p;
+      if env.Env.disallow_this
+      then Errors.escaping_mutable_object p;
       if not accept_using_var
       then check_escaping_var env (p,this);
       let (_, ty) = Env.get_local env this in
@@ -2384,8 +2392,18 @@ and expr_
           function as reactivity of lambda *)
         if has_rx_of_scope then TR.strip_conditional_reactivity (Env.env_reactivity env)
         else fun_reactivity env.Env.decl_env f.f_user_attributes f.f_params in
+      let old_disallow_this = env.Env.disallow_this in
+      let disallow_this =
+        if reactivity <> Nonreactive
+        then begin
+          List.iter idl (check_escaping_mutable env);
+          (* disallow referencing $this in lambdas if containing method mutable *)
+          old_disallow_this || Env.function_is_mutable env
+          end
+        else false in
       let check_body_under_known_params ?ret_ty ft =
         let old_reactivity = Env.env_reactivity env in
+        let env = { env with Env.disallow_this = disallow_this } in
         let env = Env.set_env_reactive env reactivity in
         let old_inside_ppl_class = env.Typing_env.inside_ppl_class in
         let env = { env with Typing_env.inside_ppl_class = false } in
@@ -2393,7 +2411,9 @@ and expr_
         let ft = { ft with ft_is_coroutine = is_coroutine; ft_reactive = reactivity } in
         let (env, tefun, ty) = anon ?ret_ty env ft.ft_params ft.ft_arity in
         let env = Env.set_env_reactive env old_reactivity in
-        let env = { env with Typing_env.inside_ppl_class = old_inside_ppl_class } in
+        let env = { env with
+          Typing_env.inside_ppl_class = old_inside_ppl_class;
+          Env.disallow_this = old_disallow_this } in
         let inferred_ty =
           if is_explicit_ret
           then (Reason.Rwitness p, Tfun { ft with ft_ret = declared_ft.ft_ret })
@@ -2503,6 +2523,7 @@ and expr_
               let reactivity = fun_reactivity env.Env.decl_env f.f_user_attributes f.f_params in
               let old_reactivity = Env.env_reactivity env in
               let env = Env.set_env_reactive env reactivity in
+              let env = { env with Env.disallow_this = disallow_this } in
               let is_coroutine, counter, pos, anon = anon_make env p f declared_ft idl in
               let env, tefun, _, anon_id = Errors.try_with_error
                 (fun () ->
@@ -2520,6 +2541,7 @@ and expr_
                   let env, anon_id = Env.add_anonymous env anon_fun in
                   env, tefun, ty, anon_id) in
               let env = Env.set_env_reactive env old_reactivity in
+              let env = { env with Env.disallow_this = old_disallow_this } in
               let anon_ty = (Reason.Rwitness p, Tanon (declared_ft.ft_arity, anon_id)) in
               let ((ep,_efun_ty),efun) = tefun in
               let tefun = ((ep, anon_ty), efun) in

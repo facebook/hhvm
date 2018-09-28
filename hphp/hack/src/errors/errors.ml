@@ -1870,6 +1870,11 @@ let escaping_this pos =
     "$this implementing IDisposable or IAsyncDisposable may only be used as receiver in method \
     invocation or passed to another function with <<__AcceptDisposable>> parameter attribute"
 
+let escaping_mutable_object pos =
+  add (Typing.err_code Typing.EscapingMutableObject) pos
+    "Neither a Mutable nor MaybeMutable object may be captured by an \
+    anonymous function."
+
 let must_extend_disposable pos =
   add (Typing.err_code Typing.MustExtendDisposable) pos
     "A disposable type may not extend a class or use a trait that is not disposable"

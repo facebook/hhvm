@@ -507,4 +507,5 @@ ClassVarTypeGenericParam = 4279
 InvalidSwitchCaseValueType = 4280
 StringCast = 4281
 BadLateInitOverride = 4282
+EscapingMutableObject = 4283
   |}]

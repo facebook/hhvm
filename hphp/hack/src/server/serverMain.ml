@@ -310,7 +310,14 @@ let query_notifier genv env query_kind t =
     HackEventLogger.notifier_returned t (SSet.cardinal raw_updates);
   env, updates, updates_stale
 
-(* When a rebase occurs, Watchman/dfind takes a while to give us the full list
+(* This function loops until it has processed all outstanding changes.
+ *
+ * One reason for doing this is is so that, if a client makes a request,
+ * then we can process all outstanding changes prior to handling that request.
+ * THat way the client will get an up-to-date answer.
+ *
+ * Another reason is to get meaningful logging in case of watchman events.
+ * When a rebase occurs, Watchman/dfind takes a while to give us the full list
  * of updates, and it often comes in batches. To get an accurate measurement
  * of rebase time, we use the heuristic that any changes that come in
  * right after one rechecking round finishes to be part of the same
@@ -500,8 +507,9 @@ let serve_one_iteration genv env client_provider =
   let start_t = Unix.gettimeofday () in
   let stage = if env.init_env.needs_full_init then `Init else `Recheck in
   HackEventLogger.with_id ~stage recheck_id @@ fun () ->
-  let env = recheck_loop genv env client
-    has_persistent_connection_request in
+  (* We'll first do "recheck_loop" to handle all outstanding changes, so that *)
+  (* after that we'll be able to give an up-to-date answer to the client. *)
+  let env = recheck_loop genv env client has_persistent_connection_request in
   let stats = env.recent_recheck_loop_stats in
   if stats.total_rechecked_count > 0 then begin
     HackEventLogger.recheck_end start_t

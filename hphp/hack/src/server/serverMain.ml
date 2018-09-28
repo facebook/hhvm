@@ -114,18 +114,12 @@ module Program =
       to_recheck
   end
 
-let finalize_init genv init_env =
+let finalize_init init_env =
   ServerUtils.print_hash_stats ();
+  let t' = Unix.gettimeofday () in
   Hh_logger.log "Heap size: %d" (SharedMem.heap_size ());
   Hh_logger.log "Server is READY";
-  let t' = Unix.gettimeofday () in
-  Hh_logger.log "Took %f seconds to initialize." (t' -. init_env.init_start_t);
-  HackEventLogger.init_really_end
-    ~informant_use_xdb:genv.local_config.ServerLocalConfig.informant_use_xdb
-    ~state_distance:init_env.state_distance
-    ~approach_name:init_env.approach_name
-    ~init_error:init_env.init_error
-    init_env.init_type
+  Hh_logger.log "Took %f seconds to initialize." (t' -. init_env.init_start_t)
 
 let shutdown_persistent_client client env  =
   ClientProvider.shutdown_client client;
@@ -274,7 +268,7 @@ let recheck genv old_env check_kind =
   let new_env = { new_env with can_interrupt = true } in
   if old_env.init_env.needs_full_init &&
       not new_env.init_env.needs_full_init then
-        finalize_init genv new_env.init_env;
+        finalize_init new_env.init_env;
   ServerStamp.touch_stamp_errors (Errors.get_error_list old_env.errorl)
                                  (Errors.get_error_list new_env.errorl);
   new_env, res
@@ -737,7 +731,7 @@ let serve genv env in_fds =
   MultiThreadedCall.on_exception ServerUtils.exit_on_exception;
   let client_provider = ClientProvider.provider_from_file_descriptors in_fds in
   (* This is needed when typecheck_after_init option is disabled. *)
-  if not env.init_env.needs_full_init then finalize_init genv env.init_env;
+  if not env.init_env.needs_full_init then finalize_init env.init_env;
   let env = setup_interrupts env client_provider in
   let env = ref env in
   while true do

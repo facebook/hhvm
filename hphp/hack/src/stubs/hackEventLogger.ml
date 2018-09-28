@@ -45,11 +45,6 @@ let init_lazy_end
   ~state_distance:_
   ~approach_name:_
   ~init_error:_ _ = ()
-let init_really_end
-  ~informant_use_xdb:_
-  ~state_distance:_
-  ~approach_name:_
-  ~init_error:_ _ = ()
 let load_deptable_end _ = ()
 let nfs_root _ = ()
 let load_mini_worker_end ~is_cached:_ _ _ = ()

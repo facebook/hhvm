@@ -120,9 +120,11 @@ module ServerInitCommon = struct
       (stage: string)
       (f: (unit -> ('a, exn) result))
     : ('a, exn) result =
-    Core_result.join @@ Core_result.try_with @@ fun () ->
-    Timeout.with_timeout ~timeout ~do_:(fun _ -> f ())
-      ~on_timeout:(fun _ -> raise @@ Loader_timeout stage)
+    try
+      Timeout.with_timeout ~timeout ~do_:(fun _id -> f ())
+        ~on_timeout:(fun () -> raise (Loader_timeout stage))
+    with exn ->
+      Error exn
 
   let invoke_loading_state_natively
       ?(use_canary=false)

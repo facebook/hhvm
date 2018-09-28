@@ -724,6 +724,8 @@ end = functor(CheckKind:CheckKindType) -> struct
     let hs = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" hs;
     HackEventLogger.first_redecl_end t hs;
+    ServerRevisionTracker.decl_changed genv.ServerEnv.local_config
+      (Relative_path.Set.cardinal to_redecl_phase2);
     let t = Hh_logger.log_duration "Determining changes" t in
 
     (* DECLARING TYPES: Phase2 *)
@@ -775,6 +777,8 @@ end = functor(CheckKind:CheckKindType) -> struct
     let hs = SharedMem.heap_size () in
     Hh_logger.log "Heap size: %d" hs;
     HackEventLogger.second_redecl_end t hs;
+    ServerRevisionTracker.typing_changed genv.local_config
+      (Relative_path.Set.cardinal to_recheck);
     let t = Hh_logger.log_duration logstring t in
     let env = CheckKind.get_env_after_decl
       ~old_env:env ~files_info ~failed_naming in
@@ -786,8 +790,9 @@ end = functor(CheckKind:CheckKindType) -> struct
       deptable_unlocked in
 
     (* Checking this before starting typechecking because we want to attribtue
-     * big rechecks to rebases. *)
-    ServerRevisionTracker.check_blocking ();
+     * big rechecks to rebases, even when restarting is disabled *)
+    if genv.local_config.ServerLocalConfig.hg_aware_recheck_restart_threshold = 0 then
+      ServerRevisionTracker.check_blocking ();
 
     (* TYPE CHECKING *)
     let fast, lazy_check_later = CheckKind.get_defs_to_recheck
@@ -875,6 +880,9 @@ end = functor(CheckKind:CheckKindType) -> struct
     in
     let deptable_unlocked = Typing_deps.allow_dependency_table_reads true in
     let new_env = ServerPrecheckedFiles.update_after_recheck genv new_env fast in
+    (* We might have completed a full check, which might mean that a rebase was
+     * successfully processed. *)
+    ServerRevisionTracker.check_non_blocking new_env;
     let _ : bool = Typing_deps.allow_dependency_table_reads deptable_unlocked in
 
     new_env, {reparse_count; total_rechecked_count;}

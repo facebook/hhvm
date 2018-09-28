@@ -7,7 +7,7 @@
  *)
 
 
-(** Note: the tracking in this module is for approximate logging purposes only;
+(** Note: the tracking in this module is best effort only;
  * it's not guaranteed to always reflect accurate merge base transitions:
  * - in some init types, initial merge base is not known so we will only notice
  *   the second transition
@@ -15,13 +15,27 @@
  *   seconds and are not retried in case of errors
  * - we only record "new" mergebases as we see them, not detecting transitions
  *   between already visited revisions
- *
- * In other words: do not depend on anything in this module for things more
- * critical than logging (like HackEventLogger.set_changed_mergebase ())
  **)
 
 (* This will be None after init in case of canaries and Precomputed loads *)
 let current_mergebase : Hg.svn_rev option ref = ref None
+
+(* Do we think that this server have processed a mergebase change? If we are
+ * in this state and get notified about changes to a huge number of files (or
+ * even small number of files that fan-out to a huge amount of work), we might
+ * decide that restarting the server is a better option than going through with
+ * incremental processing (See ServerLocalConfig.hg_aware_*_restart_threshold).
+ * It is likely to be faster because:
+ * - a better saved state might be available
+ * - even with same saved state, during init we can treat all those changes
+ *   (if they were indeed due to non-local commits ) as prechecked (see ServerPrecheckedFiles)
+ *    and avoid processing them.
+ * There is some room for false positives, when small inconsequential rebase is immediately
+ * followed by a big local change, but that seems unlikely to happen often compared to
+ * the hours we waste processing incremental rebases.
+ *)
+let did_change_mergebase = ref false
+
 let mergebase_queries : (Hg.hg_rev, (Hg.svn_rev Future.t)) Hashtbl.t = Hashtbl.create 200
 (* Keys from mergebase_queries that contain futures that were not resolved yet *)
 let pending_queries : Hg.hg_rev Queue.t = Queue.create ()
@@ -61,6 +75,7 @@ let check_query future ~timeout ~current_t =
     match !current_mergebase with
     | Some svn_rev when svn_rev <> new_svn_rev ->
         current_mergebase := Some new_svn_rev;
+        did_change_mergebase := true;
         HackEventLogger.set_changed_mergebase true;
         Hh_logger.log "ServerRevisionTracker: Changing mergebase from r%d to r%d"
           svn_rev new_svn_rev;
@@ -85,3 +100,45 @@ let check_blocking () =
     let _ : float = Hh_logger.log_duration "Finished querying Mercurial" start_t in
     ()
   end
+
+let rec check_non_blocking env =
+  if Queue.is_empty pending_queries then begin
+    if ServerEnv.(env.full_check = Full_check_done) && !did_change_mergebase then begin
+      Hh_logger.log "ServerRevisionTracker: Full check completed despite mergebase changes";
+      (* Clearing this flag because we somehow managed to get through this rebase,
+       * so no need to restart anymore *)
+      did_change_mergebase := false;
+      HackEventLogger.set_changed_mergebase false;
+    end
+  end else
+    let hg_rev = Queue.peek pending_queries in
+    let future = Hashtbl.find mergebase_queries hg_rev in
+    if Future.is_ready future then begin
+      let _ : Hg.hg_rev = Queue.pop pending_queries in
+      check_query future ~timeout:30 ~current_t:(Unix.gettimeofday ());
+      check_non_blocking env
+    end
+
+let make_decision threshold count name =
+  if threshold = 0 || count < threshold then () else begin
+    (* Enough files / declarations / typings have changed to possibly warrant
+     * a restart. Let's wait for Mercurial to decide if we want to before
+     * proceeding. *)
+    check_blocking ();
+    if !did_change_mergebase then begin
+      Hh_logger.log "Changed %d %s due to rebase. Restarting!" count name;
+      Exit_status.(exit Big_rebase_detected)
+    end
+  end
+
+let files_changed local_config count =
+  make_decision (local_config.ServerLocalConfig.hg_aware_parsing_restart_threshold)
+    count "files"
+
+let decl_changed local_config count =
+  make_decision (local_config.ServerLocalConfig.hg_aware_redecl_restart_threshold)
+  count "declarations"
+
+let typing_changed local_config count =
+  make_decision (local_config.ServerLocalConfig.hg_aware_recheck_restart_threshold)
+    count "file typings"

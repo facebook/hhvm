@@ -119,6 +119,7 @@ let make_genv options config local_config handle =
             ServerRevisionTracker.on_state_leave root name metadata;
           Notifier_state_leave (name, metadata)
         | Watchman.Files_changed changes ->
+          ServerRevisionTracker.files_changed local_config (SSet.cardinal changes);
           Notifier_async_changes changes
       in
       let concat_changes_list = List.fold_left begin fun acc changes ->

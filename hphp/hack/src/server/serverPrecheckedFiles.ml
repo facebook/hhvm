@@ -32,7 +32,7 @@ let intersect_with_master_deps ~deps ~dirty_master_deps ~rechecked_files genv en
 
   let size = Relative_path.Set.cardinal needs_recheck in
   let env = if size = 0 then env else begin
-    ignore genv; (* TODO: use this to compare size to restart thresholds  *)
+    ServerRevisionTracker.typing_changed genv.local_config size;
     Hh_logger.log "Adding %d files to recheck" size;
     let needs_recheck =
        Relative_path.Set.union env.needs_recheck needs_recheck in

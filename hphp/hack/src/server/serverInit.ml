@@ -132,26 +132,32 @@ module ServerInitCommon = struct
       (genv: ServerEnv.genv)
       (root: Path.t)
     : (unit -> (loaded_info, exn) result, 'a) result =
-    let mini_state_handle = begin match target with
-    | None -> None
-    | Some { ServerMonitorUtils.mini_state_everstore_handle; target_svn_rev; watchman_mergebase } ->
-      Some
-      {
-        State_loader.mini_state_everstore_handle = mini_state_everstore_handle;
-        mini_state_for_rev = (Hg.Svn_rev target_svn_rev);
-        watchman_mergebase;
-      }
-    end in
-    let native_load_error e = raise (Native_loader_failure (State_loader.error_string e)) in
+    let open ServerMonitorUtils in
+    let mini_state_handle = match target with
+      | None -> None
+      | Some { mini_state_everstore_handle; target_svn_rev; watchman_mergebase } ->
+        Some {
+          State_loader.mini_state_everstore_handle = mini_state_everstore_handle;
+          mini_state_for_rev = (Hg.Svn_rev target_svn_rev);
+          watchman_mergebase;
+        } in
     let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
     let use_prechecked_files = ServerPrecheckedFiles.should_use genv.options genv.local_config in
-    State_loader.mk_state_future ~config:genv.local_config.SLC.state_loader_timeouts
-      ~use_canary ?mini_state_handle
-      ~config_hash:(ServerConfig.config_hash genv.config) root
-      ~ignore_hh_version
-      ~use_prechecked_files
-      |> Core_result.map_error ~f:native_load_error
-      >>= fun result ->
+
+    let state_future : (State_loader.native_load_result, State_loader.error) result =
+      State_loader.mk_state_future
+        ~config:genv.local_config.SLC.state_loader_timeouts
+        ~use_canary ?mini_state_handle
+        ~config_hash:(ServerConfig.config_hash genv.config) root
+        ~ignore_hh_version
+        ~use_prechecked_files in
+
+    (* The function "mk_state_future" raises if the config_hash argument is None, *)
+    (* but returns an Error in other cases. Here we turn all cases into exceptions. *)
+    let result : State_loader.native_load_result = match state_future with
+      | Ok result -> result
+      | Error error -> raise (Native_loader_failure (State_loader.error_string error)) in
+
     lock_and_load_deptable result.State_loader.deptable_fn ~ignore_hh_version;
     let (old_saved, old_errors) =
       SaveStateService.load_saved_state result.State_loader.saved_state_fn in

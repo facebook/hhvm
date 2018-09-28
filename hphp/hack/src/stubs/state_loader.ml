@@ -14,6 +14,8 @@ type mini_state_handle = {
   watchman_mergebase : ServerMonitorUtils.watchman_mergebase option;
 }
 
+type error = unit
+
 let error_string _ = ""
 
 let cached_state

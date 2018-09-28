@@ -40,15 +40,15 @@ let make_result
     (status: Unix.process_status)
     (stdout: string)
     (stderr: string)
-  : (string * string, Process_types.failure) result =
+  : Process_types.process_result =
   let open Process_types in
   match status with
   | Unix.WEXITED 0 ->
-    Ok (stdout, stderr)
+    Ok {stdout; stderr;}
   | Unix.WEXITED _
   | Unix.WSIGNALED _
   | Unix.WSTOPPED _ ->
-    Error (Process_exited_abnormally (status, stdout, stderr))
+    Error (Abnormal_exit {status; stdout; stderr;})
 
 (** Read from the FD if there is something to be read. FD is a reference
  * so when EOF is read from it, it is set to None. *)
@@ -94,21 +94,21 @@ let read_and_wait_pid_nonblocking (process: Process_types.t) : unit =
     stdin_fd = _stdin_fd;
     stdout_fd;
     stderr_fd;
-    process_status;
+    lifecycle;
     acc;
     acc_err; _ } = process in
-  match !process_status with
-  | Process_aborted _
-  | Process_exited _ ->
+  match !lifecycle with
+  | Lifecycle_killed_due_to_overflow_stdin
+  | Lifecycle_exited _ ->
     ()
-  | Process_running pid ->
+  | Lifecycle_running {pid;} ->
     maybe_consume stdout_fd acc;
     maybe_consume stderr_fd acc_err;
     match Unix.waitpid [Unix.WNOHANG] pid with
     | 0, _ ->
       ()
     | _, status ->
-      let () = process_status := Process_exited status in
+      let () = lifecycle := Lifecycle_exited status in
       (** Process has exited. Non-blockingly consume residual output. *)
       let () = maybe_consume stdout_fd acc in
       let () = maybe_consume stderr_fd acc_err in
@@ -118,10 +118,10 @@ let read_and_wait_pid_nonblocking (process: Process_types.t) : unit =
 let is_ready (process: Process_types.t) : bool =
   read_and_wait_pid_nonblocking process;
   let open Process_types in
-  match !(process.process_status) with
-  | Process_running _ -> false
-  | Process_aborted Input_too_large
-  | Process_exited _ -> true
+  match !(process.lifecycle) with
+  | Lifecycle_running _ -> false
+  | Lifecycle_killed_due_to_overflow_stdin
+  | Lifecycle_exited _ -> true
 
 let kill_and_cleanup_fds (pid: int) (fds: Unix.file_descr option ref list) : unit =
   Unix.kill pid Sys.sigkill;
@@ -151,28 +151,28 @@ let kill_and_cleanup_fds (pid: int) (fds: Unix.file_descr option ref list) : uni
 let rec read_and_wait_pid
     ~(retries: int)
     (process: Process_types.t)
-  : (string * string, Process_types.failure) result =
+  : Process_types.process_result =
   let open Process_types in
   let {
     stdin_fd = _stdin_fd;
     stdout_fd;
     stderr_fd;
-    process_status;
+    lifecycle;
     acc;
     acc_err; _} = process in
   read_and_wait_pid_nonblocking process;
-  match !process_status with
-  | Process_exited status ->
+  match !lifecycle with
+  | Lifecycle_exited status ->
     make_result status (Stack.merge_bytes acc) (Stack.merge_bytes acc_err)
-  | Process_aborted Input_too_large ->
-    Error Process_aborted_input_too_large
-  | Process_running pid ->
+  | Lifecycle_killed_due_to_overflow_stdin ->
+    Error Overflow_stdin
+  | Lifecycle_running {pid;} ->
   let fds = Core_list.rev_filter_map ~f:(!) [stdout_fd; stderr_fd;] in
   if fds = []
   then
     (** EOF reached for all FDs. Blocking wait. *)
     let _, status = Unix.waitpid [] pid in
-    let () = process_status := Process_exited status in
+    let () = lifecycle := Lifecycle_exited status in
     make_result status (Stack.merge_bytes acc) (Stack.merge_bytes acc_err)
   else
     (** Consume output to clear the buffers which might
@@ -185,8 +185,9 @@ let rec read_and_wait_pid
     | 0, _ ->
       if retries <= 0 then
         let () = kill_and_cleanup_fds pid [stdout_fd; stderr_fd] in
-        Error (Timed_out
-          ((Stack.merge_bytes acc), (Stack.merge_bytes acc_err)))
+        let stdout = Stack.merge_bytes acc in
+        let stderr = Stack.merge_bytes acc_err in
+        Error (Timed_out {stdout; stderr; })
       else
         (** And here we switch from waitpid back to reading. *)
         read_and_wait_pid ~retries:(retries - 1) process
@@ -194,27 +195,25 @@ let rec read_and_wait_pid
       (** Process has exited. Non-blockingly consume residual output. *)
       let () = maybe_consume stdout_fd acc in
       let () = maybe_consume stderr_fd acc_err in
-      let () = process_status := Process_exited status in
+      let () = lifecycle := Lifecycle_exited status in
       make_result status (Stack.merge_bytes acc) (Stack.merge_bytes acc_err)
 
 let read_and_wait_pid
     ~(timeout: int)
     (process: Process_types.t)
-  : (string * string, Process_types.failure) result =
+  : Process_types.process_result =
   let retries = (float_of_int timeout) /. sleep_seconds_per_retry |> int_of_float in
   read_and_wait_pid ~retries process
 
 let failure_msg (failure: Process_types.failure) : string =
   let open Process_types in
   match failure with
-  | Timed_out (stdout, stderr) ->
-    Printf.sprintf "Process timed out. stdout:\n%s\nstderr:\n%s\n"
-    stdout stderr
-  | Process_exited_abnormally (_, stdout, stderr) ->
-    Printf.sprintf "Process exited abnormally. stdout:\n%s\nstderr:\n%s\n"
-    stdout stderr
-  | Process_aborted_input_too_large ->
-    "Process_aborted_input_too_large"
+  | Timed_out {stdout; stderr;} ->
+    Printf.sprintf "Process timed out. stdout:\n%s\nstderr:\n%s\n" stdout stderr
+  | Abnormal_exit {stdout; stderr; _} ->
+    Printf.sprintf "Process exited abnormally. stdout:\n%s\nstderr:\n%s\n" stdout stderr
+  | Overflow_stdin ->
+    Printf.sprintf "Process_aborted_input_too_large"
 
 let send_input_and_form_result
     ?(input: bytes option)
@@ -225,20 +224,14 @@ let send_input_and_form_result
     ~(stderr_parent: Unix.file_descr)
   : Process_types.t =
   let open Process_types in
-  let input_failed = match input with
-    | None -> false
+  let input_succeeded = match input with
+    | None -> true
     | Some input ->
       let written = Unix.write stdin_parent input 0 (String.length input) in
-      written <> String.length input
-  in
-  let process_status = if input_failed then begin
-    Unix.kill pid Sys.sigkill;
-    Process_aborted Input_too_large
-  end
-  else begin
-    Process_running pid
-  end
-  in
+      written = String.length input in
+  let lifecycle = if input_succeeded
+    then Lifecycle_running {pid;}
+    else let () = Unix.kill pid Sys.sigkill in Lifecycle_killed_due_to_overflow_stdin in
   Unix.close stdin_parent;
   {
     info;
@@ -247,7 +240,7 @@ let send_input_and_form_result
     stderr_fd = ref @@ Some stderr_parent;
     acc = Stack.create ();
     acc_err = Stack.create ();
-    process_status = ref @@ process_status;
+    lifecycle = ref @@ lifecycle;
   }
 
 
@@ -260,6 +253,7 @@ let exec_no_chdir
   let info = {
     Process_types.name = prog;
     args = args;
+    stack = Utils.Callstack (Printexc.get_callstack 100 |> Printexc.raw_backtrace_to_string);
   } in
   let args = Array.of_list (prog :: args) in
   let stdin_child, stdin_parent = Unix.pipe () in
@@ -307,6 +301,7 @@ let run_entry
   let info = {
     Process_types.name = Daemon.name_of_entry entry;
     args = [];
+    stack = Utils.Callstack (Printexc.get_callstack 100 |> Printexc.raw_backtrace_to_string);
   } in
   let { Daemon.pid; _ } as daemon = Daemon.spawn
     (stdin_child, stdout_child, stderr_child) entry params in

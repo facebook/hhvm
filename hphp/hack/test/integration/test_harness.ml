@@ -55,8 +55,8 @@ let exec_hh_client args harness =
 let get_server_logs harness =
   let process = exec_hh_client ["--logname"] harness in
   match Process.read_and_wait_pid ~timeout:5 process with
-  | Ok (log_path, _) ->
-    let log_path = Path.make (String.trim log_path) in
+  | Ok {Process_types.stdout; _} ->
+    let log_path = Path.make (String.trim stdout) in
     (try Some (Sys_utils.cat (Path.to_string log_path)) with
     | Sys_error(m)
       when Sys_utils.string_contains m "No such file or directory" ->
@@ -90,16 +90,16 @@ let check_cmd harness =
   let process = exec_hh_client ["check"] harness in
   Printf.eprintf "Waiting for process\n%!";
   match Process.read_and_wait_pid ~timeout:30 process with
-  | Ok (result, _) ->
-    Sys_utils.split_lines result
+  | Ok {Process_types.stdout; _} ->
+    Sys_utils.split_lines stdout
   | Error failure ->
     raise @@ Process_failed failure
 
 let stop_server harness =
   let process = exec_hh_client ["stop"] harness in
   match Process.read_and_wait_pid ~timeout:30 process with
-  | Ok (result, _) ->
-    result
+  | Ok {Process_types.stdout; _} ->
+    stdout
   | Error failure ->
     raise @@ Process_failed failure
 
@@ -169,8 +169,7 @@ config test_case =
     in
     let with_exception_printing test_case harness =
       let result = try test_case harness with
-      | Process_failed (Process_types.Process_exited_abnormally
-          (status, _stdout, stderr)) as e ->
+      | Process_failed (Process_types.Abnormal_exit {status; stderr; _}) as e ->
             Printf.eprintf "Process exited abnormally (%s). See also Stderr: %s\n"
               (Tools.process_status_to_string status)
               (Tools.boxed_string stderr);

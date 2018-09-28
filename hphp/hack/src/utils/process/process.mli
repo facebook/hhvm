@@ -27,14 +27,12 @@ val exec : ?cwd:string -> string -> ?input:string -> ?env:string list ->
   string list -> Process_types.t
 
 (* spawns a process just like exec, EXCEPT that the environment is REPLACED instead
- * of AUGMENTED. This is almost certainly not what you want to do. The program you
+ * of AUGMENTED. This is almost certainly not what you want to do... the program you
  * are calling or one of the things it calls probably depends on "PATH". *)
 val exec_with_replacement_env : ?cwd:string -> string -> env:string list -> ?input:string ->
   string list -> Process_types.t
 
-val register_entry_point :
-  string -> ('param -> unit) ->
-  'param Entry.t
+val register_entry_point : string -> ('param -> unit) -> 'param Entry.t
 
 (** Wraps a entry point inside a Process, so we get Process's
  * goodness for free (read_and_wait_pid and is_ready). The entry will be
@@ -51,9 +49,7 @@ val run_entry : ?input:string -> 'a Entry.t -> 'a -> Process_types.t
  * If process exits with something other than (Unix.WEXITED 0), will return a
  * Error
  *)
-val read_and_wait_pid :
-  timeout: int -> Process_types.t ->
-  ((string * string), failure) result
+val read_and_wait_pid : timeout: int -> Process_types.t -> process_result
 
 val failure_msg : failure -> string
 

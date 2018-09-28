@@ -25,11 +25,11 @@ open Process
 let test_proc_env () =
   let () = Unix.putenv "B" "1" in
   let proc_t = exec "bash" ~env:["A=1"] ["-c"; "case \"$B\" in 1) exit 0;; *) exit 1;; esac"] in
-  let proc_stat_ref = proc_t.Process_types.process_status in
+  let proc_stat_ref = proc_t.Process_types.lifecycle in
   let proc_stat = !proc_stat_ref in
   match proc_stat with
-  | Process_types.Process_aborted _ -> failwith "process aborted"
-  | Process_types.Process_running pid -> begin
+  | Process_types.Lifecycle_killed_due_to_overflow_stdin -> failwith "process aborted"
+  | Process_types.Lifecycle_running {pid;} -> begin
       match Unix.waitpid [] pid with
       | caught_pid, Unix.WEXITED(status) -> begin
           match caught_pid = pid, status with

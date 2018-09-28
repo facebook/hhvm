@@ -20,8 +20,8 @@ module RA = Asserter.Make_asserter(Response_comparator)
 
 let assert_process_completes_ok ?(timeout=30) ~msg p =
   match Process.read_and_wait_pid ~timeout p with
-  | Ok result ->
-    result
+  | Ok {Process_types.stdout; stderr;} ->
+    (stdout, stderr)
   | Error f -> begin
     Printf.eprintf "%s failed because:\n%s\n" msg (Process.failure_msg f);
     raise Process_failed

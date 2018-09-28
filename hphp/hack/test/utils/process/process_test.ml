@@ -3,8 +3,8 @@ open Asserter
 let test_echo () =
   let process = Process.exec "echo" [ "hello world"; ] in
   match Process.read_and_wait_pid ~timeout:2 process with
-  | Ok (result, _err) ->
-    let () = String_asserter.assert_equals "hello world\n" result "" in
+  | Ok {Process_types.stdout; _} ->
+    let () = String_asserter.assert_equals "hello world\n" stdout "" in
     true
   | _ ->
     false
@@ -24,15 +24,15 @@ let test_process_read_idempotent () =
   let process = Process.exec "echo" [ "hello world"; ] in
   let result = Process.read_and_wait_pid ~timeout:2 process in
   let () = match result with
-    | Ok (result, _err) ->
-      String_asserter.assert_equals "hello world\n" result ""
+    | Ok {Process_types.stdout; _} ->
+      String_asserter.assert_equals "hello world\n" stdout ""
     | _ ->
       ()
   in
   let result = Process.read_and_wait_pid ~timeout:2 process in
   match result with
-  | Ok (result, _err) ->
-    String_asserter.assert_equals "hello world\n" result "";
+  | Ok {Process_types.stdout; _} ->
+    String_asserter.assert_equals "hello world\n" stdout "";
     true
   | _ ->
     false
@@ -40,8 +40,8 @@ let test_process_read_idempotent () =
 let test_env_variable () =
   let process = Process.exec_with_replacement_env "printenv" ~env:[ "NAME=world" ] [ ] in
   match Process.read_and_wait_pid ~timeout:2 process with
-  | Ok (result, _stderr) ->
-    let () = String_asserter.assert_equals "NAME=world\n" result "" in
+  | Ok {Process_types.stdout; _} ->
+    let () = String_asserter.assert_equals "NAME=world\n" stdout "" in
     true
   | _ ->
     false
@@ -96,8 +96,8 @@ let test_delayed_future () =
 let test_stdin_input () =
   let process = Process.exec "sed" ~input:"hello" [ "s/hello/world/g"; ] in
   match Process.read_and_wait_pid ~timeout:3 process with
-  | Ok (msg, _) ->
-    String_asserter.assert_equals "world" msg
+  | Ok {Process_types.stdout; _} ->
+    String_asserter.assert_equals "world" stdout
       "sed should replace hello with world";
     true
   | Error failure ->
@@ -114,8 +114,8 @@ let test_entry_point () =
   let process = Process.run_entry print_string_entry "hello" in
   let result = Process.read_and_wait_pid ~timeout:10 process in
   match result with
-  | Ok (out, _err) ->
-    let () = String_asserter.assert_equals "hello\n" out "" in
+  | Ok {Process_types.stdout; _} ->
+    let () = String_asserter.assert_equals "hello\n" stdout "" in
     true
   | _ ->
     false
@@ -124,17 +124,16 @@ let test_chdir () =
   let process = Process.exec ~cwd:"/tmp" "pwd" [] in
   let result = Process.read_and_wait_pid ~timeout:10 process in
   match result with
-  | Ok (out, _err) ->
-    let () = String_asserter.assert_equals "/tmp\n" out "" in
+  | Ok {Process_types.stdout; _} ->
+    let () = String_asserter.assert_equals "/tmp\n" stdout "" in
     true
   | Error (Process_types.Timed_out _) ->
     Printf.eprintf "Process timed out\n";
     false
-  | Error Process_types.Process_aborted_input_too_large ->
+  | Error Process_types.Overflow_stdin ->
     Printf.eprintf "Unexpected error process input too large\n";
     false
-  | Error (Process_types.Process_exited_abnormally
-    (_, stdout, stderr)) ->
+  | Error (Process_types.Abnormal_exit {stdout; stderr; _}) ->
       Printf.eprintf "Process exited abnormally\n";
       Printf.eprintf "See stdout: %s\n" stdout;
       Printf.eprintf "See stderr: %s\n" stderr;

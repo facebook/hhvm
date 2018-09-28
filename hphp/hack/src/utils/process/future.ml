@@ -91,7 +91,7 @@ let rec get : 'a. ?timeout:int -> 'a t -> ('a, error) result =
   | Incomplete (process, transformer) ->
     let info = process.Process_types.info in
     match Process.read_and_wait_pid ~timeout process with
-    | Ok (stdout, _stderr) -> begin
+    | Ok {Process_types.stdout; _} -> begin
       try
         let result = transformer stdout in
         let () = promise := Complete result in
@@ -100,13 +100,12 @@ let rec get : 'a. ?timeout:int -> 'a t -> ('a, error) result =
       | e ->
         let () = promise := (Complete_but_transformer_raised (info, e)) in
         Error (info, Transformer_raised e)
-    end
-    | Error (Process_types.Process_exited_abnormally
-        (status, _, stderr)) ->
+      end
+    | Error (Process_types.Abnormal_exit {status; stderr; _}) ->
       Error (info, Process_failure (status, stderr))
-    | Error (Process_types.Timed_out (stdout, stderr)) ->
+    | Error (Process_types.Timed_out {stdout; stderr;}) ->
       Error (info, Timed_out (stdout, stderr))
-    | Error Process_types.Process_aborted_input_too_large ->
+    | Error Process_types.Overflow_stdin ->
       Error (info, Process_aborted)
 
 let get_exn ?timeout x = get ?timeout x

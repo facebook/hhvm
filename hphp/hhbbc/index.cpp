@@ -2162,7 +2162,9 @@ bool merge_xinits(Attr attr,
     }
   }
 
-  assertx(xinit);
+  // TODO reimplement assertion check after fixing T34583281
+  //assertx(xinit);
+  if (!xinit) return true;
   if (empty) {
     ITRACE(5, "merge_xinits: adding {}::{} to method table\n",
            xinit->cls->name, xinit->name);

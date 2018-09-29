@@ -103,14 +103,18 @@ bool InfoCommand::executeImpl(
     if (requestedObject.size() >= 2) {
       pos = requestedObject.find("::");
     }
-
     if (pos != std::string::npos) {
       subSymbol = requestedObject.substr(pos + 2);
       requestedObject = requestedObject.substr(0, pos);
     }
-
     tryAddClassInfo(requestedObject, subSymbol, sb);
     tryAddFunctionInfo(requestedObject, sb);
+  }
+
+  if (sb.empty()) {
+    throw DebuggerCommandException(
+      "Couldn't find any info for the requested object."
+    );
   }
 
   (*responseMsg)["body"] = folly::dynamic::object;

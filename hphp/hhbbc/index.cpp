@@ -2967,6 +2967,57 @@ void mark_unique_entities(ISStringToMany<T>& entities, F marker) {
   }
 }
 
+const StaticString s__86reifiedinit("86reifiedinit");
+const StaticString s__Reified("__Reified");
+
+/*
+ * Emitter adds a 86reifiedinit method to all base classes and also to
+ * classes that have reified generics. All base classes need to have this
+ * method so that when we call parent::86reifeidinit(...), there is a stopping
+ * point. Since while emitting we do not know whether a base class will have
+ * reified parents, it will have to be there unconditionally. At this phase,
+ * we remove 86reifeidinit methods from base classes that do not have any
+ * reified classes that extend it.
+ */
+void clean_86reifiedinit_methods(IndexData& index) {
+  folly::F14FastSet<const php::Class*> needsinit;
+
+  // Find all classes that still need their 86reifiedinit methods
+  for (auto& cinfo : index.allClassInfos) {
+    auto ual = cinfo->cls->userAttributes;
+    // Each class that has at least one reified generic has an attribute
+    // __Reified added by the emitter
+    auto has_reification = ual.find(s__Reified.get()) != ual.end();
+    if (!has_reification) continue;
+    // Add the base class for this reified class
+    needsinit.emplace(cinfo->baseList[0]->cls);
+  }
+
+  // Remove 86reifiedinit from the ones that do not need it
+  for (auto& cinfo : index.allClassInfos) {
+    if (cinfo->parent == nullptr && needsinit.count(cinfo->cls) == 0) {
+      auto const cls = const_cast<php::Class*>(cinfo->cls);
+      auto const pos_in_cls =
+        std::find_if(cls->methods.begin(),
+                     cls->methods.end(),
+                     [&](const std::unique_ptr<php::Func>& f) {
+                       return f->name == s__86reifiedinit.get();
+                     });
+      if (pos_in_cls != cls->methods.end()) {
+        FTRACE(2, "Erasing {}::{} from cls\n", cls->name,
+          s__86reifiedinit.get());
+        cls->methods.erase(pos_in_cls);
+      }
+      auto const pos_in_cinfo = cinfo->methods.find(s__86reifiedinit.get());
+      if (pos_in_cinfo != cinfo->methods.end()) {
+        FTRACE(2, "Erasing {}::{} from classinfo\n", cls->name,
+          s__86reifiedinit.get());
+        cinfo->methods.erase(pos_in_cinfo);
+      }
+    }
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void check_invariants(const ClassInfo* cinfo) {
@@ -3417,6 +3468,7 @@ Index::Index(php::Program* program,
   check_invariants(*m_data);
 
   mark_no_override_classes(*m_data);    // uses AttrUnique
+  clean_86reifiedinit_methods(*m_data); // uses the base class lists
 
   if (RuntimeOption::EvalCheckReturnTypeHints == 3) {
     trace_time tracer("initialize return types");

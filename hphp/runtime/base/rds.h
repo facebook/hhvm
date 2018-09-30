@@ -343,7 +343,8 @@ struct Link {
   Link<T,M>& operator=(const Link<T,M>&);
 
   template<Mode OM> /* implicit */ Link(
-    const typename std::enable_if<in<M>(OM), Link<T,OM>>::type&);
+      const Link<T,OM>&,
+      typename std::enable_if<in<M>(OM), bool>::type = false);
 
   template<Mode OM> typename std::enable_if<in<M>(OM),Link<T,M>>::type&
   operator=(const Link<T,OM>&);

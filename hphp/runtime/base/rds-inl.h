@@ -142,7 +142,9 @@ Link<T,M>::Link(const Link<T,M>& l) : m_handle(l.raw()) {}
 
 template<class T, Mode M>
 template<Mode OM>
-Link<T,M>::Link(const typename std::enable_if<in<M>(OM), Link<T,OM>>::type& l)
+Link<T,M>::Link(
+    const Link<T,OM>& l,
+    typename std::enable_if<in<M>(OM), bool>::type)
   : m_handle(l.raw()) {}
 
 template<class T, Mode M>

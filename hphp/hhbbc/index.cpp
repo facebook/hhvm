@@ -2117,7 +2117,9 @@ bool merge_xinits(Attr attr,
 
   auto const needsXinit = [&] {
     for (auto const& p : cinfo->traitProps) {
-      if (xinitMatch(p.attrs) && p.val.m_type == KindOfUninit) {
+      if (xinitMatch(p.attrs) &&
+          p.val.m_type == KindOfUninit &&
+          !(p.attrs & AttrLateInit)) {
         ITRACE(5, "merge_xinits: {}: Needs merge for {}{}prop `{}'\n",
                cls->name, attr & AttrStatic ? "static " : "",
                attr & AttrLSB ? "lsb " : "", p.name);
@@ -2162,9 +2164,7 @@ bool merge_xinits(Attr attr,
     }
   }
 
-  // TODO reimplement assertion check after fixing T34583281
-  //assertx(xinit);
-  if (!xinit) return true;
+  assertx(xinit);
   if (empty) {
     ITRACE(5, "merge_xinits: adding {}::{} to method table\n",
            xinit->cls->name, xinit->name);

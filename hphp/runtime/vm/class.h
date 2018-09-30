@@ -1241,6 +1241,7 @@ private:
   };
 
   struct ExtraData {
+    ExtraData() = default;
     ~ExtraData();
 
     /*

@@ -1102,13 +1102,10 @@ and case_list parent_locals ty env switch_pos cl =
   | [] -> env, []
   | Default b :: rl ->
     let env = initialize_next_cont env in
-      (* TODO this is wrong, should continue on to the other cases, but it
-       * doesn't matter in practice since our parser won't parse default
-       * anywhere but in the last position :) Should fix all of this as well
-       * as totality detection for switch. *)
     let env, tb = block env b in
     check_fallthrough env switch_pos Pos.none b rl ~is_default:true;
-    env, [T.Default tb]
+    let env, tcl = case_list parent_locals ty env switch_pos rl in
+    env, T.Default tb::tcl
   | (Case ((pos, _) as e, b)) :: rl ->
     let env = initialize_next_cont env in
     let env, te, _ = expr env e in

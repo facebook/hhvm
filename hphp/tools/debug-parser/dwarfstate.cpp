@@ -712,7 +712,8 @@ DwarfState::getRanges(uint64_t offset) const -> std::vector<Dwarf_Ranges> {
   X(DW_FORM_flag_present)                       \
   X(DW_FORM_strx)                               \
   X(DW_FORM_addrx)                              \
-  X(DW_FORM_ref_sup)                            \
+  X(DW_FORM_ref_sup4)                           \
+  X(DW_FORM_ref_sup8)                           \
   X(DW_FORM_strp_sup)                           \
   X(DW_FORM_data16)                             \
   X(DW_FORM_line_strp)                          \
@@ -825,7 +826,7 @@ DwarfState::getRanges(uint64_t offset) const -> std::vector<Dwarf_Ranges> {
   X(DW_AT_rank)                                 \
   X(DW_AT_str_offsets_base)                     \
   X(DW_AT_addr_base)                            \
-  X(DW_AT_ranges_base)                          \
+  X(DW_AT_rnglists_base)                        \
   X(DW_AT_dwo_id)                               \
   X(DW_AT_dwo_name)                             \
   X(DW_AT_reference)                            \

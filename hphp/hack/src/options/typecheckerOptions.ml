@@ -55,8 +55,6 @@ let experimental_null_coalesce_assignment =
   GlobalOptions.tco_experimental_null_coalesce_assignment
 let experimental_reified_generics =
   GlobalOptions.tco_experimental_reified_generics
-let experimental_re_prefixed_strings =
-  GlobalOptions.tco_experimental_re_prefixed_strings
 
 let experimental_decl_linearization =
   GlobalOptions.tco_experimental_decl_linearization

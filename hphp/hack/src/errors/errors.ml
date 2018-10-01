@@ -913,10 +913,15 @@ let void_cast pos =
 let unset_cast pos =
   add (Naming.err_code Naming.UnsetCast) pos "Don't use (unset), just assign null!"
 
-let object_cast pos x =
-  add (Naming.err_code Naming.ObjectCast) pos ("Object casts are unsupported. "^
-    "Try 'if ($var instanceof "^x^")' or "^
-    "'invariant($var instanceof "^x^", ...)'.")
+let object_cast pos cls_opt =
+  let msg1 = "Object casts are unsupported." in
+  let msg2 =
+    match cls_opt with
+    | Some c ->
+      " Try 'if ($var instanceof "^c^")' or 'invariant($var instanceof "^c^", ...)'."
+    | None -> ""
+  in
+  add (Naming.err_code Naming.ObjectCast) pos (msg1 ^ msg2)
 
 let this_hint_outside_class pos =
    add (Naming.err_code Naming.ThisHintOutsideClass) pos

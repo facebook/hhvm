@@ -2483,10 +2483,7 @@ module Make (GetLocals : GetLocals) = struct
         match x with
         | x when x = SN.Typehints.object_cast ->
             (* (object) is a valid cast but not a valid type annotation *)
-            (* FIXME we are not modeling the correct runtime behavior here --
-             * the runtime result type is an stdClass if the original type is
-             * primitive. But we should probably just disallow object casts
-             * altogether. *)
+            if (fst env).in_mode = FileInfo.Mstrict then Errors.object_cast p None;
             p, N.Hany
         | x when x = SN.Typehints.void ->
             Errors.void_cast p;
@@ -2498,7 +2495,7 @@ module Make (GetLocals : GetLocals) = struct
             (* Let's just assume that any other invalid cases are attempts to
              * cast to specific objects *)
             let h = hint ~allow_typedef:false env ty in
-            Errors.object_cast p x;
+            Errors.object_cast p (Some x);
             h
         end in
         N.Cast (ty, expr env e2)

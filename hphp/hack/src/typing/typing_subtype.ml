@@ -148,7 +148,7 @@ let check_mutability
     valid env
 
 let rec process_simplify_subtype_result ~this_ty ~fail env prop =
-  Typing_logic.log_prop 2 env.Env.pos "process_simplify_subtype_result" env prop;
+  Typing_log.log_prop 2 env.Env.pos "process_simplify_subtype_result" env prop;
   match prop with
   | TL.Unsat f ->
     f ();

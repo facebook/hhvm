@@ -82,23 +82,3 @@ and is_unsat p =
   | Unsat _ -> true
   | Sub (_, _) -> false
   | Eq (_, _) -> false
-
-let rec to_string env p =
-  match p with
-  | Unsat _ -> "UNSAT"
-  | Conj [] -> "TRUE"
-  | Conj ps -> String.concat " & " (List.map ~f:(to_string env) ps)
-  | Disj [] -> "FALSE"
-  | Disj ps -> String.concat " | " (List.map ~f:(fun x -> "(" ^ to_string env x ^ ")") ps)
-  | Sub(ty1, ty2) ->
-    Typing_print.debug_with_tvars env ty1 ^ "<:" ^ Typing_print.debug_with_tvars env ty2
-  | Eq(ty1, ty2) ->
-    Typing_print.debug_with_tvars env ty1 ^ "=" ^ Typing_print.debug_with_tvars env ty2
-
-let log_prop level p message env prop =
-  if Typing_log.get_log_level() >= level then
-    Typing_log.log_position p (fun () ->
-      Typing_log.lprintf (Tty.Bold Tty.Green) "%s: " message;
-      Typing_log.lprintf (Tty.Normal Tty.Green) "%s" (to_string env prop);
-    Typing_log.lnewline ())
-  else ()

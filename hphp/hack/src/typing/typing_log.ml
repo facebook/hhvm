@@ -269,6 +269,14 @@ let log_types level p env items =
       go items)
   else ()
 
+let log_prop level p message env prop =
+  if get_log_level() >= level then
+    log_position p (fun () ->
+      lprintf (Tty.Bold Tty.Green) "%s: " message;
+      lprintf (Tty.Normal Tty.Green) "%s" (Typing_print.subtype_prop env prop);
+    lnewline ())
+  else ()
+
 let increment_feature_count env s =
   if GlobalOptions.tco_language_feature_logging (Env.get_options env)
   then Measure.sample s 1.0

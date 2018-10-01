@@ -53,8 +53,6 @@ let experimental_null_coalesce_assignment =
   GlobalOptions.tco_experimental_null_coalesce_assignment
 let experimental_reified_generics =
   GlobalOptions.tco_experimental_reified_generics
-let experimental_re_prefixed_strings =
-  GlobalOptions.tco_experimental_re_prefixed_strings
 
 let experimental_all = GlobalOptions.tco_experimental_all
 let migration_flags_all = GlobalOptions.tco_migration_flags_all

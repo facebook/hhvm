@@ -1376,10 +1376,9 @@ module WithStatementAndDeclAndTypeParser
       function-call-expression:
         postfix-expression  (  argument-expression-list-opt  )
     *)
-    let (parser, left, args, right) = parse_expression_list_opt parser in
-    let (parser, result) =
-      Make.function_call_expression parser receiver left args right
-    in
+    let (parser, result) = with_as_expresssions parser ~enabled:true (fun parser ->
+      let (parser, left, args, right) = parse_expression_list_opt parser in
+        Make.function_call_expression parser receiver left args right) in
     parse_remaining_expression parser result
 
   and parse_variable_or_lambda parser =

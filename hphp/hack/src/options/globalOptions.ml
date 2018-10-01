@@ -21,6 +21,7 @@ type t = {
   po_deregister_php_stdlib : bool;
   po_use_full_fidelity : bool;
   po_disallow_execution_operator : bool;
+  po_disable_variable_variables : bool;
   tco_disallow_ambiguous_lambda : bool;
   tco_disallow_array_typehint: bool;
   tco_disallow_array_literal: bool;
@@ -189,6 +190,7 @@ let default = {
  po_disallow_execution_operator = false;
  po_deregister_php_stdlib = false;
  po_use_full_fidelity = false;
+ po_disable_variable_variables = false;
  tco_disallow_ambiguous_lambda = false;
  tco_disallow_array_typehint = false;
  tco_disallow_array_literal = false;
@@ -232,6 +234,7 @@ let make ~tco_assume_php
          ~tco_dynamic_view
          ~tco_disallow_array_as_tuple
          ~po_auto_namespace_map
+         ~po_disable_variable_variables
          ~tco_disallow_ambiguous_lambda
          ~tco_disallow_array_typehint
          ~tco_disallow_array_literal
@@ -261,6 +264,7 @@ let make ~tco_assume_php
                    po_deregister_php_stdlib;
                    po_use_full_fidelity;
                    po_disallow_execution_operator;
+                   po_disable_variable_variables;
                    tco_disallow_ambiguous_lambda;
                    tco_disallow_array_typehint;
                    tco_disallow_array_literal;
@@ -294,6 +298,7 @@ let tco_disallow_array_as_tuple t =
 let po_auto_namespace_map t = t.po_auto_namespace_map
 let po_deregister_php_stdlib t = t.po_deregister_php_stdlib
 let po_use_full_fidelity t = t.po_use_full_fidelity
+let po_disable_variable_variables t = t.po_disable_variable_variables
 let po_enable_hh_syntax_for_hhvm t = t.po_enable_hh_syntax_for_hhvm
 let po_disallow_execution_operator t = t.po_disallow_execution_operator
 let tco_disallow_ambiguous_lambda t = t.tco_disallow_ambiguous_lambda

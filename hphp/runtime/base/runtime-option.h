@@ -517,6 +517,9 @@ struct RuntimeOption {
   // Disables PHP's backtick language
   // true => error, false => default behaviour
   static bool DisallowExecutionOperator;
+  // Disables PHP's variable variables
+  // true => error, false => allows use of variable variables
+  static bool DisableVariableVariables;
 
   static int GetScannerType();
 

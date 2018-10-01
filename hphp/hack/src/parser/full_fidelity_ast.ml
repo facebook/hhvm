@@ -1320,6 +1320,8 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
          * the two operatores for which AST /does/ differentiate between
          * fixities.
          *)
+        let disable_variable_variables =
+        is_hack env && ParserOptions.disable_variable_variables env.parser_options in
         let postfix = kind node = SyntaxKind.PostfixUnaryExpression in
         let kind = token_kind operator in
         (match kind with
@@ -1349,7 +1351,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
             then raise_parsing_error env (`Node operator) SyntaxError.invalid_variable_name;
             Lvar (p, "$" ^ s)
           | _ ->
-            if is_typechecker env then
+            if (is_typechecker env || disable_variable_variables) then
             raise_parsing_error env (`Node operator) SyntaxError.invalid_variable_variable;
             Dollar expr
           )

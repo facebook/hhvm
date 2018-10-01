@@ -276,6 +276,7 @@ let load config_filename options =
     false (* typechecker dynamic_view option to set Tany as Tdynamic, off by default *)
     (bool_ "disallow_array_as_tuple" ~default:false config)
     (prepare_auto_namespace_map config)
+    false  (* disable_variable_variables, off by default *)
     (bool_ "disallow_ambiguous_lambda" ~default:false config)
     (bool_ "disallow_array_typehint" ~default:false config)
     (bool_ "disallow_array_literal" ~default:false config)

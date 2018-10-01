@@ -260,6 +260,10 @@ let parse_text compiler_options popt fn text =
   let () = set_stats_if_enabled ~compiler_options in
   let ignore_pos =
     not (Hhbc_options.source_mapping !Hhbc_options.compiler_options) in
+  let disable_variable_variables =
+    Hhbc_options.disable_variable_variables !Hhbc_options.compiler_options in
+  let popt =
+    ParserOptions.with_disable_variable_variables popt disable_variable_variables in
   let enable_hh_syntax =
     Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options in
   let disallow_execution_operator =

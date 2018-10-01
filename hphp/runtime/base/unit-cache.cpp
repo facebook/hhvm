@@ -735,6 +735,7 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::UndefinedConstAsString ? '1' : '0')
     + std::to_string(RuntimeOption::UndefinedConstFallback)
     + (RuntimeOption::DisallowExecutionOperator ? '1' : '0')
+    + (RuntimeOption::DisableVariableVariables ? '1' : '0')
     + mangleUnitPHP7Options()
     + mangleAliasedNamespaces()
     + hackc_version();

@@ -175,7 +175,7 @@ const Func* funcFromFp(const SSATmp* fp) {
 
 }
 
-void cgLdClsRef(IRLS& env, const IRInstruction* inst) {
+void cgLdClsRefCls(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const off = frame_clsref_offset(
@@ -186,7 +186,17 @@ void cgLdClsRef(IRLS& env, const IRInstruction* inst) {
                dst, sizeof(LowPtr<Class>));
 }
 
-void cgStClsRef(IRLS& env, const IRInstruction* inst) {
+void cgLdClsRefTS(IRLS& env, const IRInstruction* inst) {
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const off = frame_clsref_offset(
+    funcFromFp(inst->src(0)),
+    inst->extra<ClsRefSlotData>()->slot
+  );
+  vmain(env) << load{fp[off + cls_ref::reifiedOff()], dst};
+}
+
+void cgStClsRefCls(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const src = srcLoc(env, inst, 1).reg();
   auto const off = frame_clsref_offset(
@@ -195,14 +205,19 @@ void cgStClsRef(IRLS& env, const IRInstruction* inst) {
   );
   auto& v = vmain(env);
   emitStLowPtr(v, src, fp[off + cls_ref::clsOff()], sizeof(LowPtr<Class>));
-  if (debug) {
-    ArrayData* trash;
-    memset(&trash, kTrashClsRef, sizeof(trash));
-    emitImmStoreq(v, trash, fp[off + cls_ref::reifiedOff()]);
-  }
 }
 
-void cgKillClsRef(IRLS& env, const IRInstruction* inst) {
+void cgStClsRefTS(IRLS& env, const IRInstruction* inst) {
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const src = srcLoc(env, inst, 1).reg();
+  auto const off = frame_clsref_offset(
+    funcFromFp(inst->src(0)),
+    inst->extra<ClsRefSlotData>()->slot
+  );
+  vmain(env) << store{src, fp[off + cls_ref::reifiedOff()]};
+}
+
+void cgKillClsRefCls(IRLS& env, const IRInstruction* inst) {
   if (!debug) return;
 
   auto& v = vmain(env);
@@ -212,11 +227,25 @@ void cgKillClsRef(IRLS& env, const IRInstruction* inst) {
     inst->extra<ClsRefSlotData>()->slot
   );
 
-  cls_ref trash;
+  LowPtr<Class> trash;
   memset(&trash, kTrashClsRef, sizeof(trash));
-  emitImmStoreq(v, trash.reified_types, fp[off + cls_ref::reifiedOff()]);
-  emitStLowPtr(v, v.cns(trash.cls), fp[off + cls_ref::clsOff()],
+  emitStLowPtr(v, v.cns(trash), fp[off + cls_ref::clsOff()],
                sizeof(LowPtr<Class>));
+}
+
+void cgKillClsRefTS(IRLS& env, const IRInstruction* inst) {
+  if (!debug) return;
+
+  auto& v = vmain(env);
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const off = frame_clsref_offset(
+    funcFromFp(inst->src(0)),
+    inst->extra<ClsRefSlotData>()->slot
+  );
+
+  ArrayData* trash;
+  memset(&trash, kTrashClsRef, sizeof(trash));
+  emitImmStoreq(v, trash, fp[off + cls_ref::reifiedOff()]);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

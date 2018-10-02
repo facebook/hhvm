@@ -922,23 +922,47 @@ SSATmp* boxHelper(IRGS& env, SSATmp* value, F rewrite) {
 //////////////////////////////////////////////////////////////////////
 // Class-ref slots
 
+inline void killClsRefTS(IRGS& env, uint32_t slot) {
+  gen(env, KillClsRefTS, ClsRefSlotData{slot}, fp(env));
+}
+
 inline void killClsRef(IRGS& env, uint32_t slot) {
-  gen(env, KillClsRef, ClsRefSlotData{slot}, fp(env));
+  killClsRefTS(env, slot);
+  gen(env, KillClsRefCls, ClsRefSlotData{slot}, fp(env));
 }
 
-inline SSATmp* peekClsRef(IRGS& env, uint32_t slot) {
+inline SSATmp* peekClsRefCls(IRGS& env, uint32_t slot) {
   auto const knownType = env.irb->clsRefClsSlot(slot).type;
-  return gen(env, LdClsRef, knownType, ClsRefSlotData{slot}, fp(env));
+  return gen(env, LdClsRefCls, knownType, ClsRefSlotData{slot}, fp(env));
 }
 
-inline SSATmp* takeClsRef(IRGS& env, uint32_t slot) {
-  auto const cls = peekClsRef(env, slot);
+inline SSATmp* peekClsRefTS(IRGS& env, uint32_t slot) {
+  return gen(env, LdClsRefTS, ClsRefSlotData{slot}, fp(env));
+}
+
+inline SSATmp* takeClsRefCls(IRGS& env, uint32_t slot) {
+  auto const cls = peekClsRefCls(env, slot);
   killClsRef(env, slot);
   return cls;
 }
 
-inline void putClsRef(IRGS& env, uint32_t slot, SSATmp* cls) {
-  gen(env, StClsRef, ClsRefSlotData{slot}, fp(env), cls);
+inline std::pair<SSATmp*, SSATmp*> takeClsRef(IRGS& env, uint32_t slot) {
+  auto const ts = peekClsRefTS(env, slot);
+  auto const cls = peekClsRefCls(env, slot);
+  killClsRef(env, slot);
+  return std::make_pair(ts, cls);
+}
+
+inline void putClsRef(
+  IRGS& env, uint32_t slot, SSATmp* cls, SSATmp* reified_generic = nullptr
+) {
+  if (!reified_generic) {
+    gen(env, StClsRefCls, ClsRefSlotData{slot}, fp(env), cls);
+    killClsRefTS(env, slot);
+    return;
+  }
+  gen(env, StClsRefCls, ClsRefSlotData{slot}, fp(env), cls);
+  gen(env, StClsRefTS, ClsRefSlotData{slot}, fp(env), reified_generic);
 }
 
 //////////////////////////////////////////////////////////////////////

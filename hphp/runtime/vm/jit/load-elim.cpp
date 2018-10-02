@@ -292,7 +292,7 @@ bool refinable_load_eligible(const IRInstruction& inst) {
     case LdLoc:
     case LdStk:
     case LdMBase:
-    case LdClsRef:
+    case LdClsRefCls:
     case LdCufIterFunc:
     case LdCufIterCtx:
     case LdCufIterInvName:

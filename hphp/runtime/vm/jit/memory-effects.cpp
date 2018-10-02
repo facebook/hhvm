@@ -1063,21 +1063,38 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   //////////////////////////////////////////////////////////////////////
   // Instructions that manipulate class-ref slots
 
-  case LdClsRef:
+  case LdClsRefCls:
     return PureLoad {
-      AClsRefClsSlot { inst.src(0), inst.extra<LdClsRef>()->slot }
+      AClsRefClsSlot { inst.src(0), inst.extra<LdClsRefCls>()->slot }
     };
 
-  case StClsRef:
+  case LdClsRefTS:
+    return PureLoad {
+      AClsRefTSSlot { inst.src(0), inst.extra<LdClsRefTS>()->slot }
+    };
+
+  case StClsRefCls:
     return PureStore {
-      AClsRefClsSlot { inst.src(0), inst.extra<StClsRef>()->slot },
+      AClsRefClsSlot { inst.src(0), inst.extra<StClsRefCls>()->slot },
       inst.src(1)
     };
 
-  case KillClsRef:
+  case StClsRefTS:
+    return PureStore {
+      AClsRefTSSlot { inst.src(0), inst.extra<StClsRefTS>()->slot },
+      inst.src(1)
+    };
+
+  case KillClsRefCls:
     return may_load_store_kill(
       AEmpty, AEmpty,
-      AClsRefClsSlot { inst.src(0), inst.extra<KillClsRef>()->slot }
+      AClsRefClsSlot { inst.src(0), inst.extra<KillClsRefCls>()->slot }
+    );
+
+  case KillClsRefTS:
+    return may_load_store_kill(
+      AEmpty, AEmpty,
+      AClsRefTSSlot { inst.src(0), inst.extra<KillClsRefTS>()->slot }
     );
 
   //////////////////////////////////////////////////////////////////////

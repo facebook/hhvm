@@ -200,7 +200,7 @@ void emitClsCnsD(IRGS& env,
 }
 
 void emitClsCns(IRGS& env, const StringData* cnsNameStr, uint32_t clsRefSlot) {
-  auto const clsTmp = peekClsRef(env, clsRefSlot);
+  auto const clsTmp = peekClsRefCls(env, clsRefSlot);
   auto const clsTy = clsTmp->type();
   if (!clsTy.clsSpec() || !isNormalClass(clsTy.clsSpec().cls())) {
     if (RuntimeOption::RepoAuthoritative) {

@@ -401,7 +401,8 @@ bool canConvertToStack(IRInstruction& inst) {
 }
 
 bool canRewriteToParent(const IRInstruction& inst) {
-  return inst.is(LdClsRef, StClsRef, KillClsRef);
+  return inst.is(LdClsRefCls, LdClsRefTS, StClsRefCls, StClsRefTS,
+                 KillClsRefCls, KillClsRefTS);
 }
 
 /*

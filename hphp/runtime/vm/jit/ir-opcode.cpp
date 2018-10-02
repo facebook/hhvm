@@ -774,7 +774,8 @@ bool opcodeMayRaise(Opcode opc) {
   case KeysetGetQuiet:
   case KeysetIdx:
   case KeysetIsset:
-  case KillClsRef:
+  case KillClsRefCls:
+  case KillClsRefTS:
   case KillCufIter:
   case LdAFWHActRec:
   case LdARCtx:
@@ -799,7 +800,8 @@ bool opcodeMayRaise(Opcode opc) {
   case LdClsMethodCacheFunc:
   case LdClsMethodFCacheFunc:
   case LdClsName:
-  case LdClsRef:
+  case LdClsRefCls:
+  case LdClsRefTS:
   case LdCns:
   case LdColDict:
   case LdColVec:
@@ -961,7 +963,8 @@ bool opcodeMayRaise(Opcode opc) {
   case StArResumeAddr:
   case StClosureArg:
   case StClosureCtx:
-  case StClsRef:
+  case StClsRefCls:
+  case StClsRefTS:
   case StContArKey:
   case StContArState:
   case StContArValue:

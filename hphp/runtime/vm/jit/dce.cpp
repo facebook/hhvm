@@ -167,7 +167,8 @@ bool canDCE(IRInstruction* inst) {
   case UnboxPtr:
   case LdStk:
   case LdLoc:
-  case LdClsRef:
+  case LdClsRefCls:
+  case LdClsRefTS:
   case LdStkAddr:
   case LdLocAddr:
   case LdRDSAddr:
@@ -489,7 +490,8 @@ bool canDCE(IRInstruction* inst) {
   case StLoc:
   case StLocPseudoMain:
   case StLocRange:
-  case StClsRef:
+  case StClsRefCls:
+  case StClsRefTS:
   case StRef:
   case EagerSyncVMRegs:
   case ReqBindJmp:
@@ -737,7 +739,8 @@ bool canDCE(IRInstruction* inst) {
   case MemoSetLSBCache:
   case MemoSetInstanceValue:
   case MemoSetInstanceCache:
-  case KillClsRef:
+  case KillClsRefCls:
+  case KillClsRefTS:
   case KillCufIter:
   case BoxPtr:
   case AsTypeStruct:
@@ -919,9 +922,12 @@ bool findWeakActRecUses(const BlockList& blocks,
     case LdLocAddr:
     case HintLocInner:
     // these can be rewritten to use an outer frame pointer
-    case LdClsRef:
-    case StClsRef:
-    case KillClsRef:
+    case LdClsRefCls:
+    case LdClsRefTS:
+    case StClsRefCls:
+    case StClsRefTS:
+    case KillClsRefCls:
+    case KillClsRefTS:
       incWeak(inst, inst->src(0));
       break;
 
@@ -981,7 +987,8 @@ IRSPRelOffset locToStkOff(IRInstruction& inst) {
  */
 template <typename F>
 void rewriteToParentFrameImpl(IRUnit& /*unit*/, IRInstruction& inst, F dead) {
-  assertx(inst.is(LdClsRef, StClsRef, KillClsRef));
+  assertx(inst.is(LdClsRefCls, LdClsRefTS, StClsRefCls, StClsRefTS,
+                  KillClsRefCls, KillClsRefTS));
 
   auto fp = inst.src(0);
   assertx(canonical(fp)->inst()->is(DefInlineFP, DefLabel));
@@ -1091,9 +1098,12 @@ void rewriteToParentFrameImpl(IRUnit& /*unit*/, IRInstruction& inst, F dead) {
   // Update the instruction:
   inst.setSrc(0, fp);
   switch (inst.op()) {
-    case LdClsRef:   inst.extra<LdClsRef>()->slot = newSlot; break;
-    case StClsRef:   inst.extra<StClsRef>()->slot = newSlot; break;
-    case KillClsRef: inst.extra<KillClsRef>()->slot = newSlot; break;
+    case LdClsRefCls:   inst.extra<LdClsRefCls>()->slot = newSlot;   break;
+    case LdClsRefTS:    inst.extra<LdClsRefTS>()->slot = newSlot;    break;
+    case StClsRefCls:   inst.extra<StClsRefCls>()->slot = newSlot;   break;
+    case StClsRefTS:    inst.extra<StClsRefTS>()->slot = newSlot;    break;
+    case KillClsRefCls: inst.extra<KillClsRefCls>()->slot = newSlot; break;
+    case KillClsRefTS:  inst.extra<KillClsRefTS>()->slot = newSlot;  break;
     default: not_reached();
   }
 }
@@ -1158,9 +1168,12 @@ void performActRecFixups(const BlockList& blocks,
         }
         break;
 
-      case LdClsRef:
-      case StClsRef:
-      case KillClsRef:
+      case LdClsRefCls:
+      case LdClsRefTS:
+      case StClsRefCls:
+      case StClsRefTS:
+      case KillClsRefCls:
+      case KillClsRefTS:
         if (state[inst.src(0)->inst()].isDead()) {
           rewriteToParentFrameImpl(
             unit,

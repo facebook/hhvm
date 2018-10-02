@@ -163,7 +163,7 @@ void emitCGetS(IRGS& env, uint32_t slot) {
     PUNT(CGetS-PropNameNotString);
   }
 
-  auto const ssaCls    = takeClsRef(env, slot);
+  auto const ssaCls    = takeClsRefCls(env, slot);
   auto const propAddr  =
     ldClsPropAddr(env, ssaCls, ssaPropName, true, false).propPtr;
   auto const unboxed   = gen(env, UnboxPtr, propAddr);
@@ -181,7 +181,7 @@ void emitSetS(IRGS& env, uint32_t slot) {
   }
 
   auto const value  = popC(env, DataTypeCountness);
-  auto const ssaCls = peekClsRef(env, slot);
+  auto const ssaCls = peekClsRefCls(env, slot);
   auto const lookup = ldClsPropAddr(env, ssaCls, ssaPropName, true, true);
 
   if (lookup.tc) {
@@ -211,7 +211,7 @@ void emitIssetS(IRGS& env, uint32_t slot) {
   if (!ssaPropName->isA(TStr)) {
     PUNT(IssetS-PropNameNotString);
   }
-  auto const ssaCls = takeClsRef(env, slot);
+  auto const ssaCls = takeClsRefCls(env, slot);
 
   auto const ret = cond(
     env,
@@ -238,7 +238,7 @@ void emitEmptyS(IRGS& env, uint32_t slot) {
     PUNT(EmptyS-PropNameNotString);
   }
 
-  auto const ssaCls = takeClsRef(env, slot);
+  auto const ssaCls = takeClsRefCls(env, slot);
   auto const ret = cond(
     env,
     [&] (Block* taken) {
@@ -266,7 +266,7 @@ void emitIncDecS(IRGS& env, IncDecOp subop, uint32_t slot) {
     PUNT(IncDecS-PropNameNotString);
   }
 
-  auto const ssaCls  = peekClsRef(env, slot);
+  auto const ssaCls  = peekClsRefCls(env, slot);
   auto const lookup  = ldClsPropAddr(env, ssaCls, ssaPropName, true, false);
   auto const unboxed = gen(env, UnboxPtr, lookup.propPtr);
   auto const oldVal  = gen(env, LdMem, unboxed->type().deref(), unboxed);

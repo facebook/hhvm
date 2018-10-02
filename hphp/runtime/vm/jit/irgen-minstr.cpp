@@ -1254,7 +1254,7 @@ void baseGImpl(IRGS& env, SSATmp* name, MOpMode mode) {
 
 void baseSImpl(IRGS& env, SSATmp* name, uint32_t clsRefSlot, MOpMode mode) {
   if (!name->isA(TStr)) PUNT(BaseS-non-string-name);
-  auto const cls = takeClsRef(env, clsRefSlot);
+  auto const cls = takeClsRefCls(env, clsRefSlot);
   auto const spropPtr = ldClsPropAddr(env, cls, name, true, false).propPtr;
   stMBase(env, spropPtr);
   setClsMIPropState(env, spropPtr, mode, cls, name);

@@ -302,7 +302,7 @@ void emitParent(IRGS& env, uint32_t slot) {
 }
 
 void emitClsRefName(IRGS& env, uint32_t slot) {
-  auto const cls = takeClsRef(env, slot);
+  auto const cls = takeClsRefCls(env, slot);
   push(env, gen(env, LdClsName, cls));
 }
 

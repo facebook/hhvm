@@ -1092,10 +1092,15 @@ To string conversions:
   instruction is used for loading locals in pseudo-mains, where they can alias
   globals.
 
-| LdClsRef<T,slot>, DParamMayRelax(Cls), S(FramePtr), NF
+| LdClsRefCls<T,slot>, DParamMayRelax(Cls), S(FramePtr), NF
 
-  Loads class-ref from slot `slot` in frame S0 and puts the value in D as type
-  T. T must be a sub-type of TCls.
+  Loads class-ref's cls from slot `slot` in frame S0 and puts the value in D
+  as type T. T must be a sub-type of TCls.
+
+| LdClsRefTS<slot>, DVArr, S(FramePtr), NF
+
+  Loads class-ref's reified generics from slot `slot` in frame S0 and puts the
+  value in D.
 
 | LdStkAddr<T,offset>, D(PtrToStkGen), S(StkPtr), NF
 
@@ -1896,9 +1901,14 @@ To string conversions:
   Store S1 to the local variables corresponding to localIds, on the frame
   pointed to by S0.
 
-| StClsRef<slot>, ND, S(FramePtr) S(Cls), NF
+| StClsRefCls<slot>, ND, S(FramePtr) S(Cls), NF
 
-  Store S1 to class-ref slot `slot` on the frame pointed to by S0.
+  Store S1 to class-ref's cls slot `slot` on the frame pointed to by S0.
+
+| StClsRefTS<slot>, ND, S(FramePtr) SVArr, NF
+
+  Store S1 to class-ref's reified generic slot `slot` on the frame pointed to
+  by S0.
 
 | StRef, ND, S(BoxedCell) S(Cell), NF
 
@@ -2402,11 +2412,17 @@ To string conversions:
   that this cannot be used for CLOCK_THREAD_CPUTIME_ID, as HHVM provides
   different semantics for that counter.
 
-| KillClsRef<slot>, ND, S(FramePtr), NF
+| KillClsRefCls<slot>, ND, S(FramePtr), NF
 
-  Mark the class-ref slot `slot` in frame S0 as no longer containing a
+  Mark the class-ref's cls slot `slot` in frame S0 as no longer containing a
   meaningful value. This is used to aid in memory analysis. In debugging
   builds, it may overwrite the slot with a poison value.
+
+| KillClsRefTS<slot>, ND, S(FramePtr), NF
+
+  Mark the class-ref's reified generic slot `slot` in frame S0 as no longer
+  containing a meaningful value. This is used to aid in memory analysis.
+  In debugging builds, it may overwrite the slot with a poison value.
 
 15. Generators & Closures
 

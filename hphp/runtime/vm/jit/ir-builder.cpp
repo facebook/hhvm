@@ -427,10 +427,10 @@ SSATmp* IRBuilder::preOptimizeLdStk(IRInstruction* inst) {
   return preOptimizeLdLocation(inst, stk(inst->extra<LdStk>()->offset));
 }
 
-SSATmp* IRBuilder::preOptimizeLdClsRef(IRInstruction* inst) {
+SSATmp* IRBuilder::preOptimizeLdClsRefCls(IRInstruction* inst) {
   return preOptimizeLdLocation(
     inst,
-    cslotcls(inst->extra<LdClsRef>()->slot)
+    cslotcls(inst->extra<LdClsRefCls>()->slot)
   );
 }
 
@@ -483,7 +483,7 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   X(CheckMBase)
   X(LdLoc)
   X(LdStk)
-  X(LdClsRef)
+  X(LdClsRefCls)
   X(CastStk)
   X(CoerceStk)
   X(LdARFuncPtr)

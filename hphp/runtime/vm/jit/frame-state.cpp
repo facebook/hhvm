@@ -631,13 +631,17 @@ void FrameStateMgr::update(const IRInstruction* inst) {
                           inst->src(1)->type());
     break;
 
-  case StClsRef:
-    setValue(cslotcls(inst->extra<StClsRef>()->slot), inst->src(1));
+  case StClsRefCls:
+    setValue(cslotcls(inst->extra<StClsRefCls>()->slot), inst->src(1));
     break;
 
-  case LdClsRef:
+  case StClsRefTS:
+    setValue(cslotts(inst->extra<StClsRefTS>()->slot), inst->src(1));
+    break;
+
+  case LdClsRefCls:
     {
-      auto const slot = inst->extra<LdClsRef>()->slot;
+      auto const slot = inst->extra<LdClsRefCls>()->slot;
       refinePredictedTmpType(
         inst->dst(),
         cur().clsRefClsSlots[slot].predictedType
@@ -646,8 +650,16 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     }
     break;
 
-  case KillClsRef:
-    setValue(cslotcls(inst->extra<KillClsRef>()->slot), nullptr);
+  case LdClsRefTS:
+    setValue(cslotts(inst->extra<LdClsRefTS>()->slot), inst->dst());
+    break;
+
+  case KillClsRefCls:
+    setValue(cslotcls(inst->extra<KillClsRefCls>()->slot), nullptr);
+    break;
+
+  case KillClsRefTS:
+    setValue(cslotts(inst->extra<KillClsRefTS>()->slot), nullptr);
     break;
 
   case CastStk:

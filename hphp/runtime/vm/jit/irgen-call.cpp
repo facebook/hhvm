@@ -869,7 +869,7 @@ void emitFPushCufIter(IRGS& env, uint32_t numParams, int32_t itId) {
 }
 
 void emitFPushCtor(IRGS& env, uint32_t numParams, uint32_t slot) {
-  auto const cls  = takeClsRef(env, slot);
+  auto const cls  = takeClsRefCls(env, slot);
   auto const func = gen(env, LdClsCtor, cls, fp(env));
   auto const obj  = gen(env, AllocObj, cls);
   pushIncRef(env, obj);
@@ -1295,7 +1295,7 @@ void emitFPushClsMethod(IRGS& env,
   fpushClsMethodCommon(
     env,
     numParams,
-    [&] { return peekClsRef(env, slot); },
+    [&] { return peekClsRefCls(env, slot); },
     [&] { return popC(env); },
     [&] { killClsRef(env, slot); },
     false,

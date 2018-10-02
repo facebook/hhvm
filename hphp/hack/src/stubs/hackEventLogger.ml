@@ -33,6 +33,7 @@ let init
 let init_monitor
   ?exit_on_parent_exit:_
   ~from:_
+  ~proc_stack:_
   ~search_chunk_size:_
   ~prechecked_files:_
   ~predeclare_ide:_

@@ -36,7 +36,7 @@ let set_file_info options =
 (** Main method of the server monitor daemon. The daemon is responsible for
  * listening to socket requests from hh_client, checking Build ID, and relaying
  * requests to the typechecker process. *)
-let monitor_daemon_main (options: ServerArgs.options) =
+let monitor_daemon_main (options: ServerArgs.options) ~(proc_stack: string list) =
   let www_root = (ServerArgs.root options) in
   Relative_path.set_path_prefix Relative_path.Root www_root;
   let () = set_file_info options in
@@ -53,6 +53,7 @@ let monitor_daemon_main (options: ServerArgs.options) =
     HackEventLogger.init_monitor
       ~exit_on_parent_exit
       ~from:(ServerArgs.from options)
+      ~proc_stack
       ~search_chunk_size:local_config.ServerLocalConfig.search_chunk_size
       ~prechecked_files:(ServerPrecheckedFiles.should_use options local_config)
       ~predeclare_ide:local_config.ServerLocalConfig.predeclare_ide
@@ -121,15 +122,15 @@ let monitor_daemon_main (options: ServerArgs.options) =
 let daemon_entry =
   Daemon.register_entry_point
     "monitor_daemon_main"
-    (fun (options: ServerArgs.options) (_ic, _oc) ->
-       monitor_daemon_main options)
+    (fun ((options, proc_stack): (ServerArgs.options * string list)) (_ic, _oc) ->
+       monitor_daemon_main options ~proc_stack)
 
 (* Starts a monitor daemon if one doesn't already exist. Otherwise,
  * immediately exits with non-zero exit code. This is because the monitor
  * should never actually be attempted to be started if one is already running
  * (i.e. hh_client should play nice and only start a server monitor if one
  * isn't running by first checking the liveness lock file.) *)
-let start_daemon options =
+let start_daemon (options: ServerArgs.options) ~(proc_stack: string list) : Exit_status.t =
   let root = ServerArgs.root options in
   let log_link = ServerFiles.monitor_log_link root in
   (try Sys.rename log_link (log_link ^ ".old") with _ -> ());
@@ -137,7 +138,7 @@ let start_daemon options =
   let in_fd = Daemon.null_fd () in
   let out_fd = Daemon.fd_of_path log_file_path in
   let {Daemon.pid; _} =
-    Daemon.spawn (in_fd, out_fd, out_fd) daemon_entry options in
+    Daemon.spawn (in_fd, out_fd, out_fd) daemon_entry (options, proc_stack) in
   Printf.eprintf "Spawned typechecker (child pid=%d)\n" pid;
   Printf.eprintf "Logs will go to %s\n%!" log_file_path;
   Exit_status.No_error
@@ -149,10 +150,13 @@ let start () =
    * the proper code *)
   try
     Daemon.check_entry_point (); (* this call might not return *)
+    let proc_stack = match Proc.get_proc_stack ~max_length:300 (Unix.getpid()) with
+      | Ok proc_stack -> proc_stack
+      | Error e -> [ e ] in
     let options = ServerArgs.parse_options () in
     if ServerArgs.should_detach options
-    then Exit_status.exit (start_daemon options)
-    else monitor_daemon_main options
+    then Exit_status.exit (start_daemon options ~proc_stack)
+    else monitor_daemon_main options ~proc_stack
   with
   | SharedMem.Out_of_shared_memory ->
       Exit_status.(exit Out_of_shared_memory)

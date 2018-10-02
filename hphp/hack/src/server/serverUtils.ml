@@ -52,7 +52,7 @@ let connect_to_monitor ~timeout root =
 
 let print_hash_stats () =
   Core_result.try_with SharedMem.dep_stats
-  |> Core_result.map_error ~f:Hh_logger.exc
+  |> Core_result.map_error ~f:Hh_logger.exc_with_dodgy_backtrace
   |> Core_result.iter ~f:begin fun { SharedMem.
     used_slots;
     slots;
@@ -62,7 +62,7 @@ let print_hash_stats () =
       used_slots slots load_factor
   end;
   Core_result.try_with SharedMem.hash_stats
-  |> Core_result.map_error ~f:Hh_logger.exc
+  |> Core_result.map_error ~f:Hh_logger.exc_with_dodgy_backtrace
   |> Core_result.iter ~f:begin fun { SharedMem.
     used_slots;
     slots;
@@ -73,7 +73,9 @@ let print_hash_stats () =
       used_slots slots load_factor nonempty_slots
   end
 
-let exit_on_exception = function
+let exit_on_exception (exn: exn) ~(stack: Utils.callstack) =
+  let (Utils.Callstack stack) = stack in
+  match exn with
   | SharedMem.Out_of_shared_memory ->
     print_hash_stats ();
     Printf.eprintf "Error: failed to allocate in the shared heap.\n%!";
@@ -83,11 +85,11 @@ let exit_on_exception = function
     Printf.eprintf "Error: failed to allocate in the shared hashtable.\n%!";
     Exit_status.(exit Hash_table_full)
   | Watchman.Watchman_error s as e ->
-    Hh_logger.exc e;
+    Hh_logger.exc ~stack e;
     Hh_logger.log "Exiting. Failed due to watchman error: %s" s;
     Exit_status.(exit Watchman_failed)
   | MultiThreadedCall.Coalesced_failures failures as e -> begin
-    Hh_logger.exc e;
+    Hh_logger.exc ~stack e;
     let failure_msg =
       MultiThreadedCall.coalesced_failures_to_string failures in
     Hh_logger.log "%s" failure_msg;
@@ -121,17 +123,17 @@ let exit_on_exception = function
   (** In single-threaded mode, WorkerController exceptions are raised directly
    * instead of being grouped into MultiThreaadedCall.Coalesced_failures *)
   | WorkerController.(Worker_failed (_, Worker_oomed)) as e->
-    Hh_logger.exc e;
+    Hh_logger.exc ~stack e;
     Exit_status.(exit Worker_oomed)
   | WorkerController.Worker_busy as e ->
-    Hh_logger.exc e;
+    Hh_logger.exc ~stack e;
     Exit_status.(exit Worker_busy)
   | (WorkerController.(Worker_failed (_, Worker_quit(Unix.WEXITED i)))) as e ->
-    Hh_logger.exc e;
+    Hh_logger.exc ~stack e;
     (** Exit with the same exit code that that worker used. *)
     exit i
   | WorkerController.Worker_failed_to_send_job _ as e->
-    Hh_logger.exc e;
+    Hh_logger.exc ~stack e;
     Exit_status.(exit Worker_failed_to_send_job)
   | File_heap.File_heap_stale ->
     Exit_status.(exit File_heap_stale)
@@ -140,10 +142,10 @@ let exit_on_exception = function
   | Decl.Decl_not_found _->
     Exit_status.(exit Decl_not_found)
   | SharedMem.C_assertion_failure _ as e ->
-    Hh_logger.exc e;
+    Hh_logger.exc ~stack e;
     Exit_status.(exit Shared_mem_assertion_failure)
   | SharedMem.Sql_assertion_failure err_num as e ->
-    Hh_logger.exc e;
+    Hh_logger.exc ~stack e;
     let exit_code = match err_num with
       | 11 -> Exit_status.Sql_corrupt
       | 14 -> Exit_status.Sql_cantopen
@@ -154,8 +156,12 @@ let exit_on_exception = function
   | Exit_status.Exit_with ec ->
     Exit_status.(exit ec)
   | e ->
-    Hh_logger.exc e;
+    Hh_logger.exc ~stack e;
     Exit_status.(exit Uncaught_exception)
 
 let with_exit_on_exception f =
-  try f () with | x -> exit_on_exception x
+  try
+    f ()
+  with exn ->
+    let stack = Utils.Callstack (Printexc.get_backtrace ()) in
+    exit_on_exception exn ~stack

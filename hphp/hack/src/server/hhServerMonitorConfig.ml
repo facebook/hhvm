@@ -112,7 +112,7 @@ module HhServerConfig = struct
         "Failed to send sigusr2 signal to server process. Trying \
          violently";
       try Unix.kill process.ServerProcess.pid Sys.sigkill with e ->
-        Hh_logger.exc ~prefix: "Failed to violently kill server process: " e
+        Hh_logger.exc_with_dodgy_backtrace ~prefix: "Failed to violently kill server process: " e
 
   let rec wait_for_server_exit process start_t =
     let exit_status = Unix.waitpid [Unix.WNOHANG; Unix.WUNTRACED] process.ServerProcess.pid in

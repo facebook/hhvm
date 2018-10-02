@@ -601,7 +601,7 @@ let job
           "Error while running CST search on path %s:\n"
           (Relative_path.to_absolute path)
         in
-        Hh_logger.exc e ~prefix;
+        Hh_logger.exc_with_dodgy_backtrace e ~prefix;
         raise e
     )
 

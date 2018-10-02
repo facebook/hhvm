@@ -353,6 +353,13 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
     return show(m);
   };
 
+  auto print_fca = [&] (FCallArgs fca) {
+    auto const aeLabel = fca.asyncEagerOffset != kInvalidOffset
+      ? rel_label(fca.asyncEagerOffset)
+      : "-";
+    return show(fca, aeLabel);
+  };
+
 #define IMM_BLA    print_switch();
 #define IMM_SLA    print_sswitch();
 #define IMM_ILA    print_itertab();
@@ -375,7 +382,7 @@ void print_instr(Output& out, const FuncInfo& finfo, PC pc) {
 #define IMM_VSA    print_stringvec();
 #define IMM_KA     out.fmt(" {}", print_mk(decode_member_key(pc, finfo.unit)));
 #define IMM_LAR    out.fmt(" {}", show(decodeLocalRange(pc)));
-#define IMM_FCA    out.fmt(" {}", show(decodeFCallArgs(pc)));
+#define IMM_FCA    out.fmt(" {}", print_fca(decodeFCallArgs(pc)));
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x

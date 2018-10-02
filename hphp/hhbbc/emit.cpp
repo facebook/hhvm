@@ -633,7 +633,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       if (!(op == Op::FCall && inst.FCall.fca.hasUnpack)) {
         ret.containsCalls = true;
       }
-      end_fpi(startOffset);
     };
 
     auto ret_assert = [&] { assert(currentStackDepth == inst.numPop()); };
@@ -693,7 +692,10 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define IMM_VSA(n)     emit_vsa(data.keys);
 #define IMM_KA(n)      encode_member_key(make_member_key(data.mkey), ue);
 #define IMM_LAR(n)     emit_lar(data.locrange);
-#define IMM_FCA(n)     encodeFCallArgs(ue, data.fca);
+#define IMM_FCA(n)     encodeFCallArgs(                                    \
+                         ue, data.fca,                                     \
+                         data.fca.asyncEagerTarget != NoBlockId,           \
+                         [&] { emit_branch(data.fca.asyncEagerTarget); });
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x(1)
@@ -738,6 +740,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       if (Op::opcode != Op::MemoGet) {                  \
         PUSH_##outputs                                  \
       }                                                 \
+      if (isFCallStar(Op::opcode)) end_fpi(startOffset);\
       IMM_##imms                                        \
       if (Op::opcode == Op::MemoGet) {                  \
         PUSH_##outputs                                  \

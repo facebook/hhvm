@@ -43,6 +43,10 @@ struct TargetVisitor : boost::static_visitor<void> {
   typename std::enable_if<has_target<T>::value,void>::type
   operator()(T const& t) const { f(t.target); }
 
+  void operator()(const bc::FCall& fcall) const {
+    if (fcall.fca.asyncEagerTarget != NoBlockId) f(fcall.fca.asyncEagerTarget);
+  }
+
   void operator()(const bc::Switch& b) const {
     for (auto& t : b.targets) f(t);
   }

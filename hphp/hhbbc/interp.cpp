@@ -3323,12 +3323,31 @@ void in(ISS& env, const bc::FThrowOnRefMismatch& op) {
 
 void in(ISS& /*env*/, const bc::FHandleRefMismatch& /*op*/) {}
 
+Type typeFromWH(Type t) {
+  if (!t.couldBe(BObj)) {
+    // Exceptions will be thrown if a non-object is awaited.
+    return TBottom;
+  }
+
+  // Throw away non-obj component.
+  t &= TObj;
+
+  // If we aren't even sure this is a wait handle, there's nothing we can
+  // infer here.
+  if (!is_specialized_wait_handle(t)) {
+    return TInitCell;
+  }
+
+  return wait_handle_inner(t);
+}
+
 void pushCallReturnType(ISS& env, Type&& ty, const FCallArgs& fca) {
   if (ty == TBottom) {
     // The callee function never returns.  It might throw, or loop forever.
     unreachable(env);
   }
   if (fca.numRets != 1) {
+    assertx(fca.asyncEagerTarget == NoBlockId);
     for (auto i = uint32_t{0}; i < fca.numRets - 1; ++i) popU(env);
     if (is_specialized_vec(ty)) {
       for (int32_t i = 1; i < fca.numRets; i++) {
@@ -3340,13 +3359,19 @@ void pushCallReturnType(ISS& env, Type&& ty, const FCallArgs& fca) {
     }
     return;
   }
+  if (fca.asyncEagerTarget != NoBlockId) {
+    push(env, typeFromWH(ty));
+    assertx(topC(env) != TBottom);
+    env.propagate(fca.asyncEagerTarget, &env.state);
+    popC(env);
+  }
   return push(env, std::move(ty));
 }
 
 const StaticString s_defined { "defined" };
 const StaticString s_function_exists { "function_exists" };
 
-void fcallKnownImpl(ISS& env, const FCallArgs& fca) {
+folly::Optional<FCallArgs> fcallKnownImpl(ISS& env, const FCallArgs& fca) {
   auto const ar = fpiTop(env);
   always_assert(ar.func.hasValue());
 
@@ -3380,14 +3405,15 @@ void fcallKnownImpl(ISS& env, const FCallArgs& fca) {
         repl.push_back(gen_constant(*v));
         repl.push_back(bc::RGetCNop {});
         fpiPop(env);
-        return reduce(env, std::move(repl));
+        reduce(env, std::move(repl));
+        return folly::none;
       }
     }
     fpiNotFoldable(env);
     fpiPop(env);
     discard(env, fca.numArgs + (fca.hasUnpack ? 1 : 0));
     for (auto i = uint32_t{0}; i < fca.numRets; ++i) push(env, TBottom);
-    return;
+    return folly::none;
   }
 
   auto returnType = [&] {
@@ -3414,6 +3440,13 @@ void fcallKnownImpl(ISS& env, const FCallArgs& fca) {
     return union_of(std::move(ty), std::move(ty2));
   }();
 
+  if (fca.asyncEagerTarget != NoBlockId && typeFromWH(returnType) == TBottom) {
+    // Kill the async eager target if the function never returns.
+    auto newFCA = fca;
+    newFCA.asyncEagerTarget = NoBlockId;
+    return newFCA;
+  }
+
   fpiPop(env);
   specialFunctionEffects(env, ar);
 
@@ -3438,6 +3471,7 @@ void fcallKnownImpl(ISS& env, const FCallArgs& fca) {
   if (fca.hasUnpack) popC(env);
   for (auto i = uint32_t{0}; i < fca.numArgs; ++i) popCV(env);
   pushCallReturnType(env, std::move(returnType), fca);
+  return folly::none;
 }
 
 void in(ISS& env, const bc::FCall& op) {
@@ -3456,7 +3490,10 @@ void in(ISS& env, const bc::FCall& op) {
         return reduce(env, bc::FCall {
           fca, staticEmptyString(), ar.func->name() });
       }
-      return fcallKnownImpl(env, fca);
+      if (auto const newFCA = fcallKnownImpl(env, fca)) {
+        return reduce(env, bc::FCall { *newFCA, op.str2, op.str3 });
+      }
+      return;
     case FPIKind::Builtin:
       assertx(fca.numRets == 1);
       return finish_builtin(
@@ -3486,7 +3523,10 @@ void in(ISS& env, const bc::FCall& op) {
     case FPIKind::ObjMethNS:
       // If we didn't return a reduce above, we still can compute a
       // partially-known FCall effect with our res::Func.
-      return fcallKnownImpl(env, fca);
+      if (auto const newFCA = fcallKnownImpl(env, fca)) {
+        return reduce(env, bc::FCall { *newFCA, op.str2, op.str3 });
+      }
+      return;
     }
   }
 
@@ -3494,6 +3534,12 @@ void in(ISS& env, const bc::FCall& op) {
   for (auto i = uint32_t{0}; i < fca.numArgs; ++i) popCV(env);
   fpiPop(env);
   specialFunctionEffects(env, ar);
+  if (fca.asyncEagerTarget != NoBlockId) {
+    assertx(fca.numRets == 1);
+    push(env, TInitCell);
+    env.propagate(fca.asyncEagerTarget, &env.state);
+    popC(env);
+  }
   for (auto i = uint32_t{0}; i < fca.numRets - 1; ++i) popU(env);
   for (auto i = uint32_t{0}; i < fca.numRets; ++i) {
     push(env, fca.numRets == 1 ? TInitGen : TInitCell);
@@ -4293,32 +4339,9 @@ void in(ISS& env, const bc::ContCurrent&) { push(env, TInitCell); }
 void in(ISS& env, const bc::ContGetReturn&) { push(env, TInitCell); }
 
 void pushTypeFromWH(ISS& env, Type t) {
-  if (!t.couldBe(BObj)) {
-    // These opcodes require an object descending from WaitHandle.
-    // Exceptions will be thrown for any non-object.
-    push(env, TBottom);
-    unreachable(env);
-    return;
-  }
-
-  // Throw away non-obj component.
-  t &= TObj;
-
-  // If we aren't even sure this is a wait handle, there's nothing we can
-  // infer here.
-  if (!is_specialized_wait_handle(t)) {
-    return push(env, TInitCell);
-  }
-
-  auto inner = wait_handle_inner(t);
-  if (inner.subtypeOf(BBottom)) {
-    // If it's a WaitH<Bottom>, we know it's going to throw an exception, and
-    // the fallthrough code is not reachable.
-    push(env, TBottom);
-    unreachable(env);
-    return;
-  }
-
+  auto inner = typeFromWH(t);
+  // The next opcode is unreachable if awaiting a non-object or WaitH<Bottom>.
+  if (inner.subtypeOf(BBottom)) unreachable(env);
   push(env, std::move(inner));
 }
 

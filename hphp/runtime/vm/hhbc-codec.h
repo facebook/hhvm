@@ -119,6 +119,10 @@ template<class T> T decode_oa(PC& pc) {
   return decode_raw<T>(pc);
 }
 
+ALWAYS_INLINE Offset decode_ba(PC& pc) {
+  return decode_raw<Offset>(pc);
+}
+
 ALWAYS_INLINE uint32_t decode_iva(PC& pc) {
   auto const small = *pc;
   if (UNLIKELY(int8_t(small) < 0)) {
@@ -171,8 +175,16 @@ LocalRange decodeLocalRange(const unsigned char*&);
 
 //////////////////////////////////////////////////////////////////////
 
-void encodeFCallArgs(UnitEmitter&, const FCallArgs&);
+void encodeFCallArgsBase(UnitEmitter&, const FCallArgsBase&,
+                         bool hasAsyncEagerOffset);
 FCallArgs decodeFCallArgs(PC&);
+
+template<typename T>
+void encodeFCallArgs(UnitEmitter& ue, const FCallArgsBase& fca,
+                     bool hasAsyncEagerOffset, T emitAsyncEagerOffset) {
+  encodeFCallArgsBase(ue, fca, hasAsyncEagerOffset);
+  if (hasAsyncEagerOffset) emitAsyncEagerOffset();
+}
 
 //////////////////////////////////////////////////////////////////////
 

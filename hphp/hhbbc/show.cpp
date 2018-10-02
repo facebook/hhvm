@@ -207,7 +207,12 @@ std::string show(const Func& func, const Bytecode& bc) {
 #define IMM_VSA(n)     ret += " "; append_vsa(data.keys);
 #define IMM_KA(n)      ret += " "; append_mkey(data.mkey);
 #define IMM_LAR(n)     ret += " "; append_lar(data.locrange);
-#define IMM_FCA(n)     folly::toAppend(" ", show(data.fca), &ret);
+#define IMM_FCA(n)     do {                                     \
+  auto const aeTarget = data.fca.asyncEagerTarget != NoBlockId  \
+    ? folly::sformat("<aeblk:{}>", data.fca.asyncEagerTarget)   \
+    : "<aeblk:->";                                              \
+  folly::toAppend(" ", show(data.fca, aeTarget), &ret);         \
+} while (false);
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x(1)

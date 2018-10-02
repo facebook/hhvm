@@ -170,7 +170,10 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
     auto const nextOff = offset + instrLen(pc);
     auto const atLast = nextOff == fe.past;
     auto const op = peek_op(pc);
-    auto const breaksBB = instrIsNonCallControlFlow(op) || instrFlags(op) & TF;
+    auto const breaksBB =
+      instrIsNonCallControlFlow(op) ||
+      instrFlags(op) & TF ||
+      (isFCallStar(op) && instrJumpOffset(pc) != kInvalidOffset);
 
     if (options.TraceBytecodes.count(op)) traceBc = true;
 
@@ -846,7 +849,17 @@ void populate_block(ParseUnitState& puState,
                                        <= func.locals.size());           \
                          return LocalRange { range.first, range.count }; \
                        }();
-#define IMM_FCA(n)     auto fca = decodeFCallArgs(pc);
+#define IMM_FCA(n)     auto fca = [&] {                                   \
+                         auto const fca = decodeFCallArgs(pc);            \
+                         /*auto const aeOffset = fca.asyncEagerOffset;*/  \
+                         auto const aeOffset = kInvalidOffset;            \
+                         auto const aeTarget = aeOffset != kInvalidOffset \
+                           ? findBlock(opPC + aeOffset - ue.bc())->id     \
+                           : NoBlockId;                                   \
+                         assertx(aeTarget == NoBlockId || next == past);  \
+                         return FCallArgs(fca.numArgs, fca.hasUnpack,     \
+                                          fca.numRets, aeTarget);         \
+                       }();
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x(1)

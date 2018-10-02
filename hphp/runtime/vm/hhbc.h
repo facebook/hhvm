@@ -50,22 +50,30 @@ struct LocalRange {
 };
 
 // Arguments to FCall opcodes.
-// hhas format: <numArgs> <hasUnpack> <numRets>
-// hhbc format: <uint8:flags> ?<iva:numArgs> ?<iva:numRets>
-//   numArgs   = flags >> 2 ? flags >> 2 - 1 : decode_iva()
-//   hasUnpack = flags & 1
-//   numRets   = flags & 2 ? decode_iva() : 1
-struct FCallArgs {
-  explicit FCallArgs(uint32_t numArgs, bool hasUnpack = false,
-                     uint32_t numRets = 1)
+// hhas format: <numArgs> <hasUnpack> <numRets> <asyncEagerOffset>
+// hhbc format: <uint8:flags> ?<iva:numArgs> ?<iva:numRets> ?<ba:asyncEagerOffset>
+//   numArgs          = flags >> 3 ? flags >> 3 - 1 : decode_iva()
+//   hasUnpack        = flags & 1
+//   numRets          = flags & 2 ? decode_iva() : 1
+//   asyncEagerOffset = flags & 4 ? decode_ba() : kInvalidOffset
+struct FCallArgsBase {
+  explicit FCallArgsBase(uint32_t numArgs, bool hasUnpack, uint32_t numRets)
     : numArgs(numArgs), numRets(numRets), hasUnpack(hasUnpack) {}
   uint32_t numArgs;
   uint32_t numRets;
   bool hasUnpack;
 };
+struct FCallArgs : FCallArgsBase {
+  explicit FCallArgs(uint32_t numArgs, bool hasUnpack = false,
+                     uint32_t numRets = 1,
+                     Offset asyncEagerOffset = kInvalidOffset)
+    : FCallArgsBase(numArgs, hasUnpack, numRets)
+    , asyncEagerOffset(asyncEagerOffset) {}
+  Offset asyncEagerOffset;
+};
 
 std::string show(const LocalRange&);
-std::string show(const FCallArgs&);
+std::string show(const FCallArgsBase&, std::string asyncEagerLabel);
 
 /*
  * Variable-size immediates are implemented as follows: To determine which size

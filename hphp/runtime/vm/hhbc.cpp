@@ -315,7 +315,11 @@ Offset instrJumpOffset(const PC origPC) {
 
   auto pc = origPC;
   auto const op = decode_op(pc);
-  assertx(!isSwitch(op));  // BLA doesn't work here
+  assertx(!isSwitch(op));     // BLA doesn't work here
+
+  if (isFCallStar(op)) {
+    return decodeFCallArgs(pc).asyncEagerOffset;
+  }
 
   int immNum;
   switch (jumpMask[size_t(op)]) {
@@ -749,18 +753,15 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
     );
   };
 
+  auto showOffset = [&](Offset offset) {
+    if (u == nullptr) return folly::sformat("{}", offset);
+    auto const unitOff = offsetOf(iStart + offset);
+    return folly::sformat("{} ({})", offset, unitOff);
+  };
+
   switch (op) {
 
 #define READ(t) folly::format(&out, " {}", *((t*)&*it)); it += sizeof(t)
-
-#define READOFF() do {                                          \
-  Offset _value = *(Offset*)it;                                 \
-  folly::format(&out, " {}", _value);                           \
-  if (u != nullptr) {                                           \
-    folly::format(&out, " ({})", offsetOf(iStart + _value));    \
-  }                                                             \
-  it += sizeof(Offset);                                         \
-} while (false)
 
 #define READV() folly::format(&out, " {}", decode_iva(it));
 
@@ -871,7 +872,7 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
 #define H_CAR READV()
 #define H_CAW READV()
 #define H_DA READ(double)
-#define H_BA READOFF()
+#define H_BA (out += ' ', out += showOffset(decode_ba(it)))
 #define H_OA(type) READOA(type)
 #define H_SA READLITSTR(" ")
 #define H_RATA readRATA()
@@ -889,7 +890,14 @@ std::string instrToString(PC it, Either<const Unit*, const UnitEmitter*> u) {
 } while (false)
 #define H_KA (out += ' ', out += show(decode_member_key(it, u)))
 #define H_LAR (out += ' ', out += show(decodeLocalRange(it)))
-#define H_FCA (out += ' ', out += show(decodeFCallArgs(it)))
+#define H_FCA do {                                               \
+  auto const fca = decodeFCallArgs(it);                          \
+  auto const aeOffset = fca.asyncEagerOffset != kInvalidOffset   \
+    ? showOffset(fca.asyncEagerOffset)                           \
+    : "-";                                                       \
+  out += ' ';                                                    \
+  out += show(fca, aeOffset);                                    \
+} while (false)
 
 #define O(name, imm, push, pop, flags)    \
   case Op##name: {                        \
@@ -1232,9 +1240,9 @@ std::string show(const LocalRange& range) {
   );
 }
 
-std::string show(const FCallArgs& fca) {
+std::string show(const FCallArgsBase& fca, std::string asyncEagerLabel) {
   return folly::sformat(
-    "{} {} {} -", fca.numArgs, (int)fca.hasUnpack, fca.numRets
+    "{} {} {} {}", fca.numArgs, (int)fca.hasUnpack, fca.numRets, asyncEagerLabel
   );
 }
 

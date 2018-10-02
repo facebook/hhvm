@@ -123,6 +123,12 @@ auto fixupBlockIds(Opcode& op, BlockId delta) -> decltype(op.target, void()) {
   op.target += delta;
 }
 
+// exact match if there's a fca field
+template<typename Opcode>
+auto fixupBlockIds(Opcode& op, BlockId delta) -> decltype(op.fca, void()) {
+  if (op.fca.asyncEagerTarget != NoBlockId) op.fca.asyncEagerTarget += delta;
+}
+
 void fixupBlockIds(Bytecode& bc, BlockId delta) {
 #define O(opcode, ...) case Op::opcode: return fixupBlockIds(bc.opcode, delta);
   switch (bc.op) { OPCODES }

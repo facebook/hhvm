@@ -1312,12 +1312,13 @@ LocalRange read_local_range(AsmState& as) {
   return LocalRange{uint32_t(firstLoc), count};
 }
 
-FCallArgs read_fcall_args(AsmState& as) {
+std::pair<FCallArgsBase, std::string> read_fcall_args(AsmState& as) {
   auto const numArgs = read_opcode_arg<uint32_t>(as);
   auto const hasUnpack = read_opcode_arg<uint32_t>(as);
   auto const numRets = read_opcode_arg<uint32_t>(as);
-  UNUSED auto const asyncEagerLabel = read_opcode_arg<std::string>(as);
-  return FCallArgs(numArgs, hasUnpack != 0, numRets);
+  auto const asyncEagerLabel = read_opcode_arg<std::string>(as);
+  return std::make_pair(
+    FCallArgsBase(numArgs, hasUnpack != 0, numRets), asyncEagerLabel);
 }
 
 Id create_litstr_id(AsmState& as) {
@@ -1367,9 +1368,13 @@ std::map<std::string,ParserFunc> opcode_parsers;
                      read_opcode_arg<int32_t>(as)))
 #define IMM_OA(ty) as.ue->emitByte(read_subop<ty>(as));
 #define IMM_LAR    encodeLocalRange(*as.ue, read_local_range(as))
-#define IMM_FCA do {                                      \
-    immFCA = read_fcall_args(as);                         \
-    encodeFCallArgs(*as.ue, immFCA);                      \
+#define IMM_FCA do {                                                \
+    auto const fca = read_fcall_args(as);                           \
+    encodeFCallArgs(*as.ue, fca.first, fca.second != "-", [&] {     \
+      labelJumps.emplace_back(fca.second, as.ue->bcPos());          \
+      as.ue->emitInt32(0);                                          \
+    });                                                             \
+    immFCA = fca.first;                                             \
   } while (0)
 
 // Record the offset of the immediate so that we can correlate it with its
@@ -1473,7 +1478,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
 
 #define O(name, imm, pop, push, flags)                                 \
   void parse_opcode_##name(AsmState& as) {                             \
-    UNUSED auto immFCA = FCallArgs(-1);                                \
+    UNUSED auto immFCA = FCallArgsBase(-1, false, -1);                 \
     UNUSED uint32_t immIVA[kMaxHhbcImms];                              \
     UNUSED auto const thisOpcode = Op::name;                           \
     UNUSED const Offset curOpcodeOff = as.ue->bcPos();                 \

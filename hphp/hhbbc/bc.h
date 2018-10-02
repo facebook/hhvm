@@ -109,10 +109,18 @@ inline bool operator!=(const LocalRange& a, const LocalRange& b) {
   return !(a == b);
 }
 
+struct FCallArgs : FCallArgsBase {
+  explicit FCallArgs(uint32_t numArgs, bool hasUnpack = false,
+                     uint32_t numRets = 1, BlockId asyncEagerTarget = NoBlockId)
+    : FCallArgsBase(numArgs, hasUnpack, numRets)
+    , asyncEagerTarget(asyncEagerTarget) {}
+  BlockId asyncEagerTarget;
+};
+
 inline bool operator==(const FCallArgs& a, const FCallArgs& b) {
   return
     a.numArgs == b.numArgs && a.hasUnpack == b.hasUnpack &&
-    a.numRets == b.numRets;
+    a.numRets == b.numRets && a.asyncEagerTarget == b.asyncEagerTarget;
 }
 
 inline bool operator!=(const FCallArgs& a, const FCallArgs& b) {
@@ -191,10 +199,10 @@ struct hasher_impl {
   }
 
   static size_t hash(FCallArgs fca) {
-    return HPHP::hash_int64_pair(
-      (fca.numArgs << 1) + (fca.hasUnpack ? 1 : 0),
-      fca.numRets
-    );
+    uint64_t hash = (fca.numArgs << 1) + (fca.hasUnpack ? 1 : 0);
+    hash = HPHP::hash_int64_pair(hash, fca.numRets);
+    hash = HPHP::hash_int64_pair(hash, fca.asyncEagerTarget);
+    return static_cast<size_t>(hash);
   }
 
   template<class T>

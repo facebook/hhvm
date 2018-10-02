@@ -239,10 +239,6 @@ inline const ArrayData* decode_litarr(PC& pc) {
   return liveUnit()->lookupArrayId(decode<Id>(pc));
 }
 
-ALWAYS_INLINE Offset decode_ba(PC& pc) {
-  return decode<Offset>(pc);
-}
-
 // find the AR for the current FPI region using func metadata
 static inline ActRec* arFromInstr(PC pc) {
   const ActRec* fp = vmfp();

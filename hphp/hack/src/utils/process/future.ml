@@ -66,6 +66,11 @@ let error_to_string (info, e) =
   | Transformer_raised (e, _stack) ->
     Printf.sprintf "Transformer_raised(%s %s)" info (Printexc.to_string e)
 
+let error_to_string_verbose (info, e) =
+  let {Process_types.name; args; stack=Utils.Callstack stack;} = info in
+  let msg = error_to_string (info, e) in
+  Printf.sprintf "%s\nNAME=%s\nARGS=%s\nSTACK=%s" msg name (String.concat "," args) stack
+
 let error_to_exn e = raise (Failure e)
 
 let rec get : 'a. ?timeout:int -> 'a t -> ('a, error) result =

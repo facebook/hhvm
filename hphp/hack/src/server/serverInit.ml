@@ -70,7 +70,7 @@ let error_to_verbose_string (err: error) : string =
       (Printexc.to_string exn) stack
   | Native_loader_failure err ->
     Printf.sprintf "Error downloading saved-state: %s"
-      (State_loader.error_string err)
+      (State_loader.error_string_verbose err)
   | Wait_for_dirty_unhandled_exception {exn; stack=Utils.Callstack stack;} ->
     Printf.sprintf "Unhandled exception waiting for dirty files: %s\n%s"
       (Printexc.to_string exn) stack

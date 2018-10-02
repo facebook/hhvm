@@ -16,7 +16,7 @@ type mini_state_handle = {
 
 type error = unit
 
-let error_string _ = ""
+let error_string_verbose _ = ""
 
 let cached_state
   ?mini_state_handle:_

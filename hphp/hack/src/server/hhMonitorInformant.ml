@@ -42,7 +42,7 @@ module State_loader_prefetcher_real = struct
         ~config_hash:hhconfig_hash
         handle in
       result
-      |> Core_result.map_error ~f:State_loader.error_string
+      |> Core_result.map_error ~f:State_loader.error_string_verbose
       |> Core_result.ok_or_failwith
       |> ignore
 

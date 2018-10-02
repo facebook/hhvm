@@ -313,6 +313,9 @@ let get_tpenv_tparams env =
     end
   env.lenv.tpenv SSet.empty
 
+let add_subtype_prop env prop =
+  {env with subtype_prop = Typing_logic.conj env.subtype_prop prop}
+
 (* Replace types for locals with empty environment *)
 let env_with_locals env locals =
   { env with lenv =
@@ -389,7 +392,8 @@ let empty tcopt file ~droot = {
     anons   = IMap.empty;
     file    = file;
   };
-  global_tpenv = SMap.empty
+  global_tpenv = SMap.empty;
+  subtype_prop = Typing_logic.valid;
 }
 
 let set_env_reactive env reactive =

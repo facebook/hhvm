@@ -1197,6 +1197,12 @@ and sub_type_inner
     [Typing_log.Log_sub ("Typing_subtype.sub_type_inner", types)];
   let env, prop =
     simplify_subtype ~deep:false ~this_ty ty_sub ty_super env in
+  let env =
+    if TypecheckerOptions.experimental_feature_enabled
+         (Env.get_tcopt env)
+         TypecheckerOptions.experimental_track_subtype_prop
+    then Env.add_subtype_prop env prop
+    else env in
   process_simplify_subtype_result ~this_ty
     ~fail:(fun () -> TUtils.uerror (fst ty_super) (snd ty_super) (fst ty_sub) (snd ty_sub))
     env

@@ -71,6 +71,7 @@
    disallow_this: bool;
    (* A set of constraints that are global to a given method *)
    global_tpenv : tpenv ;
+   subtype_prop : Typing_logic.subtype_prop;
  }
 and genv = {
   tcopt   : TypecheckerOptions.t;

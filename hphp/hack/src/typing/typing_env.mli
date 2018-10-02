@@ -148,3 +148,4 @@ val in_case : env -> (env -> env * 'a) -> env * 'a
 val save : tpenv -> env -> Tast.saved_env
 val set_condition_type: env -> SMap.key -> Typing_defs.decl Typing_defs.ty -> env
 val get_condition_type: env -> SMap.key -> Typing_defs.decl Typing_defs.ty option
+val add_subtype_prop: env -> Typing_logic.subtype_prop -> env

@@ -212,6 +212,11 @@ let log_position p f =
     indentEnv (Pos.string (Pos.to_absolute p)
       ^ (if n = 1 then "" else "[" ^ string_of_int n ^ "]")) f
 
+let log_subtype_prop env message prop =
+  lprintf (Tty.Bold Tty.Green) "%s: " message;
+  lprintf (Tty.Normal Tty.Green) "%s" (Typing_print.subtype_prop env prop);
+  lnewline ()
+
 (* Log the environment: local_types, subst, tenv and tpenv *)
 let hh_show_env p env =
   log_position p
@@ -221,7 +226,8 @@ let hh_show_env p env =
        log_fake_members env;
        log_return_type env;
        log_env_diff (!lastenv) env;
-       log_tpenv env);
+       log_tpenv env;
+       log_subtype_prop env "subtype_prop" env.Env.subtype_prop);
   lastenv := env
 
 (* Log the type of an expression *)
@@ -271,10 +277,7 @@ let log_types level p env items =
 
 let log_prop level p message env prop =
   if get_log_level() >= level then
-    log_position p (fun () ->
-      lprintf (Tty.Bold Tty.Green) "%s: " message;
-      lprintf (Tty.Normal Tty.Green) "%s" (Typing_print.subtype_prop env prop);
-    lnewline ())
+    log_position p (fun () -> log_subtype_prop env message prop)
   else ()
 
 let increment_feature_count env s =

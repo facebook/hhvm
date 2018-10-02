@@ -71,4 +71,5 @@ let disallow_unset_on_varray = GlobalOptions.tco_disallow_unset_on_varray
 let disallow_scrutinee_case_value_type_mismatch =
   GlobalOptions.tco_disallow_scrutinee_case_value_type_mismatch
 let disallow_stringish_magic = GlobalOptions.tco_disallow_stringish_magic
+let unresolved_as_union = GlobalOptions.tco_unresolved_as_union
 let forward_compatibility_level = GlobalOptions.forward_compatibility_level

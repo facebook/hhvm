@@ -48,6 +48,7 @@ let global_opts = GlobalOptions.make
   ~tco_disallow_unset_on_varray:false
   ~tco_disallow_scrutinee_case_value_type_mismatch:false
   ~tco_disallow_stringish_magic:false
+  ~tco_unresolved_as_union:false
   ~ignored_fixme_codes: ISet.empty
   ~forward_compatibility_level: ForwardCompatibilityLevel.default
 

@@ -67,7 +67,11 @@ let add env x ty =
 
 let fresh_unresolved_type env =
   let v = Ident.tmp () in
-  add env v (Reason.Rnone, Tunresolved []), (Reason.Rnone, Tvar v)
+  let env =
+    if TypecheckerOptions.unresolved_as_union env.genv.tcopt
+    then env
+    else add env v (Reason.Rnone, Tunresolved []) in
+  env, (Reason.Rnone, Tvar v)
 
 let get_type env x_reason x =
   let env, x = get_var env x in

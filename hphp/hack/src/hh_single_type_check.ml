@@ -158,6 +158,7 @@ let parse_options () =
   let unsafe_rx = ref false in
   let disable_primitive_refinement = ref false in
   let disallow_stringish_magic = ref false in
+  let unresolved_as_union = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -330,7 +331,10 @@ let parse_options () =
         " Grabs the linearization of all classes in a file.";
     "--disallow-stringish-magic",
         Arg.Set disallow_stringish_magic,
-        " Disallow using objects in contexts where strings are required."
+        " Disallow using objects in contexts where strings are required.";
+    "--unresolved-as-union",
+        Arg.Set unresolved_as_union,
+        " Interpret unresolved in type inference only as union."
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := Some fn) usage;
@@ -357,6 +361,7 @@ let parse_options () =
       GlobalOptions.tco_disallow_array_cell_pass_by_ref = not !allow_array_cell_pass_by_ref;
       GlobalOptions.tco_disallow_unset_on_varray = !disallow_unset_on_varray;
       GlobalOptions.tco_disallow_stringish_magic = !disallow_stringish_magic;
+      GlobalOptions.tco_unresolved_as_union = !unresolved_as_union;
       GlobalOptions.po_auto_namespace_map = !auto_namespace_map;
   } in
   let tcopt = {

@@ -101,11 +101,15 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | IN_MEMORY_DEP_TABLE_SIZE ->
       env, (SaveStateService.get_in_memory_dep_table_entry_count ())
     | SAVE_STATE (filename, gen_saved_ignore_type_errors, file_info_on_disk) ->
-        if Errors.is_empty env.errorl || gen_saved_ignore_type_errors then
-          env, SaveStateService.go ~file_info_on_disk
-            env.ServerEnv.files_info env.errorl filename
-        else
-          env, Error "There are typecheck errors; cannot generate saved state."
+      if Errors.is_empty env.errorl || gen_saved_ignore_type_errors then
+        env,
+        SaveStateService.go
+          ~file_info_on_disk
+          env.ServerEnv.files_info
+          env.errorl
+          filename
+      else
+        env, Error "There are typecheck errors; cannot generate saved state."
     | SEARCH (query, type_) ->
        env, ServerSearch.go env.tcopt genv.workers query type_
     | COVERAGE_COUNTS path -> env, ServerCoverageMetric.go path genv env

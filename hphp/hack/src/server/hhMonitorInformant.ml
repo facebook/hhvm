@@ -165,6 +165,7 @@ module Revision_map = struct
                 ~svn_rev
                 ~hh_version
                 ~hhconfig_hash
+              |> fst
           end in
           let () = Hashtbl.add t.xdb_queries svn_rev (future, ref None) in
           None

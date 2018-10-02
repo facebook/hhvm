@@ -6,6 +6,8 @@ type sql_result = {
   hhconfig_hash : string;
 }
 
+type sql_query = Sql_query of string
+
 let hack_db_name = "";;
 let saved_states_table = ""
 
@@ -15,4 +17,4 @@ let find_nearest ~db ~db_table ~svn_rev ~hh_version ~hhconfig_hash =
   ignore svn_rev;
   ignore hh_version;
   ignore hhconfig_hash;
-  Future.of_value []
+  (Future.of_value [], Sql_query "")

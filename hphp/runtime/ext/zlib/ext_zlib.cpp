@@ -442,15 +442,22 @@ struct ChunkedInflator {
   ChunkedInflator(): m_eof(false) {
     m_zstream.zalloc = (alloc_func) Z_NULL;
     m_zstream.zfree = (free_func) Z_NULL;
-    int status = inflateInit2(&m_zstream, -MAX_WBITS);
-    if (status != Z_OK) {
-      raise_error("Failed to init zlib: %d", status);
-    }
   }
 
   ~ChunkedInflator() {
     if (!eof()) {
       inflateEnd(&m_zstream);
+    }
+  }
+
+  void init(const int window = -MAX_WBITS) {
+    if (window < -MAX_WBITS || window > MAX_WBITS + 32) {
+      raise_error("Invalid parameter give for window size. (%d)", window);
+    }
+
+    int status = inflateInit2(&m_zstream, window);
+    if (status != Z_OK) {
+      raise_error("Failed to init zlib: %d", status);
     }
   }
 
@@ -502,6 +509,12 @@ struct ChunkedInflator {
 #define FETCH_CHUNKED_INFLATOR(dest, src) \
   auto dest = Native::data<ChunkedInflator>(src);
 
+void HHVM_METHOD(ChunkedInflator, __construct, int window /* = -15 */) {
+  FETCH_CHUNKED_INFLATOR(data, this_);
+  assertx(data);
+  data->init(window);
+}
+
 bool HHVM_METHOD(ChunkedInflator, eof) {
   FETCH_CHUNKED_INFLATOR(data, this_);
   assertx(data);
@@ -515,6 +528,8 @@ String HHVM_METHOD(ChunkedInflator,
   assertx(data);
   return data->inflateChunk(chunk);
 }
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -563,6 +578,8 @@ struct ZlibExtension final : Extension {
     HHVM_FE(nzcompress);
     HHVM_FE(nzuncompress);
 
+    HHVM_NAMED_ME(__SystemLib\\ChunkedInflator, __construct,
+                  HHVM_MN(ChunkedInflator, __construct));
     HHVM_NAMED_ME(__SystemLib\\ChunkedInflator, eof,
                   HHVM_MN(ChunkedInflator, eof));
     HHVM_NAMED_ME(__SystemLib\\ChunkedInflator, inflateChunk,

@@ -360,6 +360,10 @@ function nzuncompress(string $compressed): mixed;
 namespace __SystemLib {
 <<__NativeData("__SystemLib\\ChunkedInflator")>>
 class ChunkedInflator {
+
+  <<__Native>>
+  function __construct(int $window = -15): void;
+
   <<__Native>>
   function eof(): bool;
 

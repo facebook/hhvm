@@ -185,7 +185,11 @@ namespace __SystemLib {
 
   class InflateStreamFilter extends \php_user_filter {
     public function onCreate(): bool {
-      $this->impl = new \__SystemLib\ChunkedInflator();
+      $window = -15;
+      if (isset($this->params['window'])) {
+        $window = (int)$this->params['window'];
+      }
+      $this->impl = new \__SystemLib\ChunkedInflator($window);
       return true;
     }
 

@@ -1,0 +1,6 @@
+string(7) "rfc1952"
+string(7) "rfc1950"
+string(7) "rfc1951"
+
+Warning: Failed to extract chunk in %s/test/slow/streams/inflate_stream_filter_window.php on line %d
+string(0) ""

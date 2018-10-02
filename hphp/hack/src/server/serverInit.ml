@@ -22,10 +22,23 @@ module DepSet = Typing_deps.DepSet
 module Dep = Typing_deps.Dep
 module SLC = ServerLocalConfig
 
-exception Native_loader_failure of string
-exception No_loader
-exception Loader_timeout of string
-exception Saved_state_not_supported
+type error =
+  (* With_timout exceeded the timeout *)
+  | Timeout of {stage: string;}
+  (* With_timeout got an unhandled exception *)
+  | Timeout_unhandled_exception of {stage: string; exn: exn; stack: Utils.callstack;}
+  (* the hg process to fetch dirty files exited abnormally *)
+  | Dirty_files_failure of Future.error
+  (* the load_mini_approach passed to 'init' was None *)
+  | No_loader
+  (* we did an eager init; saved states aren't implemented for that case *)
+  | Saved_state_not_supported_for_eager_init
+  (* an unhandled exception in invoke_loading_state_natively *)
+  | Download_and_load_ss_unhandled_exception of {exn: exn; stack: Utils.callstack;}
+  (* an error reported by mk_state_future as invoked by invoke_loading_state_natively *)
+  | Native_loader_failure of State_loader.error
+  (* an unhandled exception in the lambda returned by invoke_loading_state_natively *)
+  | Wait_for_dirty_unhandled_exception of {exn: exn; stack: Utils.callstack;}
 
 type load_mini_approach =
   | Precomputed of ServerArgs.mini_state_target_info
@@ -37,12 +50,30 @@ type init_result =
   | Mini_load of int option
   | Mini_load_failed of string
 
-
-let load_mini_exn_to_string (exn: exn) : string =
-  match exn with
-  | Future.Failure e ->
-    Printf.sprintf "%s\n%s" (Future.error_to_string e) (Printexc.get_backtrace ())
-  | e -> Printexc.to_string e
+let error_to_verbose_string (err: error) : string =
+  match err with
+  | Timeout {stage} ->
+    Printf.sprintf "Timeout during stage %s" stage
+  | Timeout_unhandled_exception {stage; exn; stack=Utils.Callstack stack;} ->
+    Printf.sprintf "Unhandled exception during stage %s: %s\n%s"
+      stage (Printexc.to_string exn) stack
+  | Dirty_files_failure error ->
+    let ({Process_types.stack=Utils.Callstack stack; _}, _) = error in
+    Printf.sprintf "Hg query dirty files error: %s\n%s"
+      (Future.error_to_string error) stack
+  | No_loader ->
+    Printf.sprintf "load_mini_approach was None"
+  | Saved_state_not_supported_for_eager_init ->
+    Printf.sprintf "Saved-state not supported for eager init"
+  | Download_and_load_ss_unhandled_exception {exn; stack=Utils.Callstack stack;} ->
+    Printf.sprintf "Unhandled exception downloading+loading ss: %s\n%s"
+      (Printexc.to_string exn) stack
+  | Native_loader_failure err ->
+    Printf.sprintf "Error downloading saved-state: %s"
+      (State_loader.error_string err)
+  | Wait_for_dirty_unhandled_exception {exn; stack=Utils.Callstack stack;} ->
+    Printf.sprintf "Unhandled exception waiting for dirty files: %s\n%s"
+      (Printexc.to_string exn) stack
 
 type files_changed_while_parsing = Relative_path.Set.t
 
@@ -60,7 +91,6 @@ type loaded_info =
   state_distance: int option;
 }
 
-type state_result = (loaded_info * files_changed_while_parsing, exn) result
 
 
 module ServerInitCommon = struct
@@ -119,104 +149,115 @@ module ServerInitCommon = struct
       (timeout: int)
       (stage: string)
       (f: unit -> 'a)
-    : ('a, exn) result =
+    : ('a, error) result =
     try
-      Ok (Timeout.with_timeout ~timeout ~do_:(fun _id -> f ())
-        ~on_timeout:(fun () -> raise (Loader_timeout stage)))
+      Timeout.with_timeout ~timeout ~do_:(fun _id -> Ok (f ()))
+        ~on_timeout:(fun () -> Error (Timeout {stage}))
     with exn ->
-      Error exn
+      let stack = Utils.Callstack (Printexc.get_backtrace ()) in
+      Error (Timeout_unhandled_exception {stage; exn; stack;})
 
 (* invoke_loading_state_natively:
- * - Eagerly does mk_state_future which synchronously downloads saved-state
- *   and kicks off an asynchronous hg query
- *   + might eagerly raise on missing config hash
- *   + might eagerly return an error result which we raise as an exception
+ * - Eagerly does mk_state_future which synchronously downloads ss and kicks of async dirty query
  * - Eagerly does lock_and_load_deptable
- *   + might raise on SQL failure
  * - Eagerly does load_saved_state
- *   + might raise because it interacts with the OS
- *
  * Next it returns a lamdba, so the caller can determine when the following happens:
+ * - Lazily waits 200s for the async dirty query to finish
  *
- * - Lazily waits 200s for the async hg query to finish
- *   + might return "Error" if that async process didn't succeed
- *   + might return "Ok" if it did
+ * All errors and internal exceptions are returned in the result monad.
+ * In particular, you'll never see the errors from the eager steps until
+ * you invoke the lambda.
  *)
   let invoke_loading_state_natively
       ?(use_canary=false)
       ?(target: ServerMonitorUtils.target_mini_state option)
       (genv: ServerEnv.genv)
       (root: Path.t)
-    : unit -> (loaded_info, exn) result =
+    : unit -> (loaded_info, error) result =
     let open ServerMonitorUtils in
-    let mini_state_handle = match target with
-      | None -> None
-      | Some { mini_state_everstore_handle; target_svn_rev; watchman_mergebase } ->
-        Some {
-          State_loader.mini_state_everstore_handle = mini_state_everstore_handle;
-          mini_state_for_rev = (Hg.Svn_rev target_svn_rev);
-          watchman_mergebase;
-        } in
-    let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
-    let use_prechecked_files = ServerPrecheckedFiles.should_use genv.options genv.local_config in
+    let download_and_load_result = begin try
+      let mini_state_handle = match target with
+        | None -> None
+        | Some { mini_state_everstore_handle; target_svn_rev; watchman_mergebase } ->
+          Some {
+            State_loader.mini_state_everstore_handle = mini_state_everstore_handle;
+            mini_state_for_rev = (Hg.Svn_rev target_svn_rev);
+            watchman_mergebase;
+          } in
+      let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
+      let use_prechecked_files = ServerPrecheckedFiles.should_use genv.options genv.local_config in
 
-    let state_future : (State_loader.native_load_result, State_loader.error) result =
-      State_loader.mk_state_future
-        ~config:genv.local_config.SLC.state_loader_timeouts
-        ~use_canary ?mini_state_handle
-        ~config_hash:(ServerConfig.config_hash genv.config) root
-        ~ignore_hh_version
-        ~use_prechecked_files in
+      let state_future : (State_loader.native_load_result, State_loader.error) result =
+        State_loader.mk_state_future
+          ~config:genv.local_config.SLC.state_loader_timeouts
+          ~use_canary ?mini_state_handle
+          ~config_hash:(ServerConfig.config_hash genv.config) root
+          ~ignore_hh_version
+          ~use_prechecked_files in
 
-    (* The function "mk_state_future" raises if the config_hash argument is None, *)
-    (* but returns an Error in other cases. Here we turn all cases into exceptions. *)
-    let result : State_loader.native_load_result = match state_future with
-      | Ok result -> result
-      | Error error -> raise (Native_loader_failure (State_loader.error_string error)) in
+      match state_future with
+      | Error error ->
+        Error (Native_loader_failure error)
+      | Ok result ->
+        lock_and_load_deptable result.State_loader.deptable_fn ~ignore_hh_version;
+        let (old_saved, old_errors) =
+          SaveStateService.load_saved_state result.State_loader.saved_state_fn in
+        Ok (old_saved, old_errors, result)
+    with exn ->
+      let stack = Utils.Callstack (Printexc.get_backtrace ()) in
+      Error (Download_and_load_ss_unhandled_exception {exn; stack;})
+    end in
 
-    lock_and_load_deptable result.State_loader.deptable_fn ~ignore_hh_version;
-    let (old_saved, old_errors) =
-      SaveStateService.load_saved_state result.State_loader.saved_state_fn in
-    let get_loaded_info = (fun () ->
-      let t = Unix.time () in
-      result.State_loader.dirty_files
-        (** Mercurial can respond with 90 thousand file changes in about 3 minutes. *)
-        |> Future.get ~timeout:200
-        |> Core_result.map_error ~f:Future.error_to_exn
-        >>= fun (dirty_master_files, dirty_local_files) ->
-      let () = HackEventLogger.state_loader_dirty_files t in
-      let list_to_set x =
-        List.map x Relative_path.from_root |> Relative_path.set_of_list in
+    match download_and_load_result with
+    | Error err ->
+      fun () -> Error err
+    | Ok (old_saved, old_errors, result) ->
+      (* Upon error we'll want to record the callstack associated with when *)
+      (* the lazy lambda was created, not when it was invoked. *)
+      let call_stack = Printexc.get_callstack 100 |> Printexc.raw_backtrace_to_string in
+      fun () -> begin try
+        let t = Unix.time () in
+        result.State_loader.dirty_files
+          (** Mercurial can respond with 90 thousand file changes in about 3 minutes. *)
+          |> Future.get ~timeout:200
+          |> Core_result.map_error ~f:(fun error -> Dirty_files_failure error)
+          >>= fun (dirty_master_files, dirty_local_files) ->
+        let () = HackEventLogger.state_loader_dirty_files t in
+        let list_to_set x =
+          List.map x Relative_path.from_root |> Relative_path.set_of_list in
 
-      let dirty_master_files = list_to_set dirty_master_files in
-      let dirty_local_files = list_to_set dirty_local_files in
+        let dirty_master_files = list_to_set dirty_master_files in
+        let dirty_local_files = list_to_set dirty_local_files in
 
-      Ok {
-        saved_state_fn = result.State_loader.saved_state_fn;
-        corresponding_rev = result.State_loader.corresponding_rev;
-        mergebase_rev = result.State_loader.mergebase_rev;
-        dirty_master_files;
-        dirty_local_files;
-        old_saved;
-        old_errors;
-        state_distance = Some result.State_loader.state_distance;
-      }
-    ) in
-    get_loaded_info
+        Ok {
+          saved_state_fn = result.State_loader.saved_state_fn;
+          corresponding_rev = result.State_loader.corresponding_rev;
+          mergebase_rev = result.State_loader.mergebase_rev;
+          dirty_master_files;
+          dirty_local_files;
+          old_saved;
+          old_errors;
+          state_distance = Some result.State_loader.state_distance;
+        }
+      with exn ->
+        let raise_stack = Printexc.get_backtrace () in
+        let stack = Utils.Callstack (Printf.sprintf "%s\nRAISED AT:\n%s" call_stack raise_stack) in
+        Error (Wait_for_dirty_unhandled_exception {exn; stack;})
+      end
 
   (* invoke_approach:
    * This returns a "double-lambda", and thus the caller determines deferred execution.
    * First lambda: upon the caller executing this, download the saved state,
-   *   read some files on disk, kick off async work for an hg query, load saved
-   *   state, maybe raise exceptions along the way.
+   *   read some files on disk, kick off async work for an hg query, load s.s.
+   *   Any and all errors in this stage are deferred until the second lambda.
    * Second lambda: upon the caller executing this, we wait up to 200s for the aysnc
-   *   hg query to finish, returning either loaded_info or an exception.
+   *   hg query to finish, returning either loaded_info or an error.
    *)
   let invoke_approach
       (genv: ServerEnv.genv)
       (root: Path.t)
       (approach: load_mini_approach)
-    : unit -> unit -> (loaded_info, exn) result =
+    : unit -> unit -> (loaded_info, error) result =
     let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
     match approach with
     | Precomputed { ServerArgs.saved_state_fn;
@@ -542,19 +583,19 @@ module ServerInitCommon = struct
   let get_state_future
       (genv: ServerEnv.genv)
       (root: Path.t)
-      (state_future: (unit -> (loaded_info, exn) result, exn) result)
+      (state_future: (unit -> (loaded_info, error) result, error) result)
       (timeout: int)
-    : (loaded_info * Relative_path.Set.t, exn) result =
+    : (loaded_info * Relative_path.Set.t, error) result =
     (* Here we execute the remaining lambda of state_future, whose implementation *)
     (* I happen to know will wait up to 200s for a certain async process to terminate *)
-    (* and will return Ok loaded_info or Error exn for the results of that process. *)
+    (* and will return Ok loaded_info or Error for the results of that process. *)
     (* But we're executing it inside our own wrapper timeout. *)
     (* The outer result represents any errors that happened during that wrapper wait_for_timeout. *)
     (* The inner result represents any errors that happened during the process's 200s. *)
-    let loaded_result : ((loaded_info, exn) result, exn) result = state_future
+    let loaded_result : ((loaded_info, error) result, error) result = state_future
       >>= with_loader_timeout timeout "wait_for_changes" in
     (* Let's coalesce the outer and inner results, i.e. both sources of errors. *)
-    let loaded_result : (loaded_info, exn) result = Core_result.join loaded_result in
+    let loaded_result : (loaded_info, error) result = Core_result.join loaded_result in
 
     loaded_result >>= fun loaded_info ->
     genv.wait_until_ready ();
@@ -576,12 +617,14 @@ module ServerInitCommon = struct
     let fallback_init
         (genv: ServerEnv.genv)
         (env: ServerEnv.env)
-        (err: exn)
+        (err: error)
       : ServerEnv.env * float =
       SharedMem.cleanup_sqlite ();
       if err <> No_loader then begin
-        let err_str = load_mini_exn_to_string err in
+        let err_str = error_to_verbose_string err in
         HackEventLogger.load_mini_exn err_str;
+        (* CARE! the following string literal is matched by clientConnect.ml *)
+        (* in its log-scraping function. Do not change. *)
         Hh_logger.log "Could not load mini state: %s" err_str;
       end;
       let get_next, t = indexing genv in
@@ -608,12 +651,12 @@ type lazy_level = Off | Decl | Parse | Init
 
 module type InitKind = sig
   val init :
-    load_mini_approach:(load_mini_approach, exn) result ->
+    load_mini_approach:(load_mini_approach, error) result ->
     ServerEnv.genv ->
     lazy_level ->
     ServerEnv.env ->
     Path.t ->
-    (ServerEnv.env * float) * state_result
+    (ServerEnv.env * float) * (loaded_info * files_changed_while_parsing, error) result
 end
 
 (* Eager Initialization:
@@ -643,12 +686,12 @@ module ServerEagerInit : InitKind = struct
   open ServerInitCommon
 
   let init
-      ~(load_mini_approach: (load_mini_approach, exn) result)
+      ~(load_mini_approach: (load_mini_approach, error) result)
       (genv: ServerEnv.genv)
       (lazy_level: lazy_level)
       (env: ServerEnv.env)
       (root: Path.t)
-    : (ServerEnv.env * float) * (loaded_info * Relative_path.Set.t, exn) result =
+    : (ServerEnv.env * float) * (loaded_info * Relative_path.Set.t, error) result =
     (* We don't support a saved state for eager init. *)
     ignore (load_mini_approach, root);
     let get_next, t = indexing genv in
@@ -673,7 +716,7 @@ module ServerEagerInit : InitKind = struct
 
     (* Type-checking everything *)
     SharedMem.cleanup_sqlite ();
-    type_check genv env fast t, Error Saved_state_not_supported
+    type_check genv env fast t, Error Saved_state_not_supported_for_eager_init
 end
 
 (* Lazy Initialization:
@@ -687,27 +730,27 @@ module ServerLazyInit : InitKind = struct
   open ServerInitCommon
 
   let init
-    ~(load_mini_approach: (load_mini_approach, exn) result)
+    ~(load_mini_approach: (load_mini_approach, error) result)
     (genv: ServerEnv.genv)
     (lazy_level: lazy_level)
     (env: ServerEnv.env)
     (root: Path.t)
-  : (ServerEnv.env * float) * (loaded_info * Relative_path.Set.t, exn) result =
+  : (ServerEnv.env * float) * (loaded_info * Relative_path.Set.t, error) result =
     assert(lazy_level = Init);
     Hh_logger.log "Begin loading mini-state";
     let trace = genv.local_config.SLC.trace_parsing in
-    let state_future : (unit -> unit -> (loaded_info, exn) result, exn) result =
+    let state_future : (unit -> unit -> (loaded_info, error) result, error) result =
       load_mini_approach >>| invoke_approach genv root in
     let timeout = genv.local_config.SLC.load_mini_script_timeout in
     let hg_aware = genv.local_config.SLC.hg_aware in
     (* If state_future was Ok, then we'll execute the first lambda in it. *)
     (* This kicks off an async process, and does some other preparatory stuff. *)
-    (* Any exceptions in it, or the timeout exceeded, will result in Error exn. *)
-    let state_future : (unit -> (loaded_info, exn) result, exn) result =
+    (* Any exceptions in it, or the timeout exceeded, will result in Error. *)
+    let state_future : (unit -> (loaded_info, error) result, error) result =
       state_future >>= with_loader_timeout timeout "wait_for_state"
     in
 
-    let state : (loaded_info * Relative_path.Set.t, exn) result =
+    let state : (loaded_info * Relative_path.Set.t, error) result =
       get_state_future genv root state_future timeout
     in
 
@@ -945,8 +988,7 @@ let init
     (genv: ServerEnv.genv)
   : ServerEnv.env * init_result =
   let lazy_lev = get_lazy_level genv in
-  let load_mini_approach = Core_result.of_option load_mini_approach
-    ~error:No_loader in
+  let load_mini_approach = Core_result.of_option load_mini_approach ~error:No_loader in
   let env = ServerEnvBuild.make_env genv.config in
   let init_errors, () = Errors.do_with_context ServerConfig.filename Errors.Init begin fun() ->
     let fcl = ServerConfig.forward_compatibility_level genv.config in
@@ -975,9 +1017,8 @@ let init
   let result = match state with
     | Ok ({state_distance; _}, _) ->
       Mini_load state_distance
-    | Error (Future.Failure e) ->
-      Mini_load_failed (Future.error_to_string e)
-    | Error e ->
-      Mini_load_failed (Printexc.to_string e)
+    | Error err ->
+      let err_str = error_to_verbose_string err in
+      Mini_load_failed err_str
   in
   env, result

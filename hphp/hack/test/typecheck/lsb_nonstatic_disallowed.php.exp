@@ -1,0 +1,2 @@
+File "lsb_nonstatic_disallowed.php", line 4, characters 5-9:
+__LSB attribute may only be used on static properties (Naming[2094])

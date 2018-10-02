@@ -94,7 +94,7 @@ val get_concrete_supertypes : env -> Tast.ty -> env * Tast.ty list
 
 val is_visible :
   env ->
-  Typing_defs.visibility ->
+  Typing_defs.visibility * bool ->
   Nast.class_id_ option ->
   Typing_defs.class_type ->
   bool

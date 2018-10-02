@@ -1507,13 +1507,15 @@ module Make (GetLocals : GetLocals) = struct
     | ClassVars
       { cv_kinds = kl; cv_hint = h; cv_names = cvl; cv_user_attributes = ua; _ }
       when List.mem kl Static ~equal:(=) ->
-      (* Static variables are shared for all classes in the hierarchy.
+      (* Non-LSB Static variables are shared for all classes in the hierarchy.
        * This makes the 'this' type completely unsafe as a type for a
        * static variable. See test/typecheck/this_tparam_static.php as
        * an example of what can occur.
        *)
-      let h = Option.map h (hint ~forbid_this:true env) in
       let attrs = user_attributes env ua in
+      let lsb = Attributes.mem SN.UserAttributes.uaLSB attrs in
+      let forbid_this = not lsb in
+      let h = Option.map h (hint ~forbid_this env) in
       let cvl = List.map cvl (fun cv ->
         let cv = class_prop_ env cv in
         let cv = fill_prop kl h cv in
@@ -1543,6 +1545,13 @@ module Make (GetLocals : GetLocals) = struct
       let cvl = List.map cv_names (class_prop_ env) in
       let cvl = List.map cvl (fill_prop cv_kinds h) in
       let attrs = user_attributes env cv_user_attributes in
+      let lsb_pos = Attributes.mem_pos SN.UserAttributes.uaLSB attrs in
+      (* Non-static properties cannot have attribute __LSB *)
+      let () = (match lsb_pos with
+        | Some pos ->
+          Errors.nonstatic_property_with_lsb pos
+        | None -> ()
+        ) in
       (* if class is __Const, make all member fields __Const *)
       let attrs = match const with
       | Some c -> if not (Attributes.mem SN.UserAttributes.uaConst attrs)

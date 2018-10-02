@@ -132,6 +132,7 @@ module UserAttributes = struct
   let uaOptionalDestruct    = "__OptionalDestruct"
   let uaOnlyRxIfImpl        = "__OnlyRxIfImpl"
   let uaProbabilisticModel  = "__PPL"
+  let uaLSB                 = "__LSB"
   (* DEPRECATED: remove after codemodding www *)
   let uaOnlyRxIfRxFunc_do_not_use = "__OnlyRxIfRxFunc"
   let uaAtMostRxAsFunc      = "__AtMostRxAsFunc"
@@ -166,6 +167,7 @@ module UserAttributes = struct
       uaOptionalDestruct;
       uaOnlyRxIfImpl;
       uaProbabilisticModel;
+      uaLSB;
       uaOnlyRxIfRxFunc_do_not_use;
       uaOnlyRxIfArgs_do_not_use;
       uaSealed;

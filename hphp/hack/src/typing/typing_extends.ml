@@ -31,6 +31,10 @@ let is_private = function
   | { ce_visibility = Vprivate _; _ } -> true
   | _ -> false
 
+let is_lsb = function
+  | { ce_lsb = true; _ } -> true
+  | _ -> false
+
 (*****************************************************************************)
 (* Given a map of members, check that the overriding is correct.
  * Please note that 'members' has a very general meaning here.
@@ -167,6 +171,20 @@ let check_memoizelsb_method member_source parent_class_elt class_elt =
     let pos = Reason.to_pos elt_pos in
     Errors.override_memoizelsb parent_pos pos
 
+let check_lsb_overrides member_source member_name parent_class_elt class_elt =
+  let is_sprop = match member_source with
+    | `FromSProp -> true
+    | _ -> false in
+  let parent_is_lsb = parent_class_elt.ce_lsb in
+  let is_override = parent_class_elt.ce_origin <> class_elt.ce_origin in
+  if is_sprop && parent_is_lsb && is_override then
+    (* __LSB attribute is being overridden *)
+    let lazy (parent_pos, _) = parent_class_elt.ce_type in
+    let lazy (elt_pos, _) = class_elt.ce_type in
+    let parent_pos = Reason.to_pos parent_pos in
+    let pos = Reason.to_pos elt_pos in
+    Errors.override_lsb member_name parent_pos pos
+
 let check_lateinit parent_class_elt class_elt =
   let is_override = parent_class_elt.ce_origin <> class_elt.ce_origin in
   let lateinit_diff = parent_class_elt.ce_lateinit <> class_elt.ce_lateinit in
@@ -183,6 +201,8 @@ let check_override env member_name mem_source ?(ignore_fun_return = false)
   (* We first verify that we aren't overriding a final method *)
   check_final_method mem_source parent_class_elt class_elt;
   check_memoizelsb_method mem_source parent_class_elt class_elt;
+  (* Verify that we are not overriding an __LSB property *)
+  check_lsb_overrides mem_source member_name parent_class_elt class_elt;
   check_lateinit parent_class_elt class_elt;
   let class_known, check_params = should_check_params parent_class class_ in
   let check_vis = class_known || check_partially_known_method_visibility in
@@ -240,7 +260,7 @@ let check_const_override env
 (* Privates are only visible in the parent, we don't need to check them *)
 let filter_privates members =
   SMap.fold begin fun name class_elt acc ->
-    if is_private class_elt
+    if is_private class_elt && not (is_lsb class_elt)
     then acc
     else SMap.add name class_elt acc
   end members SMap.empty
@@ -316,6 +336,7 @@ let default_constructor_ce class_ =
        ce_const       = false;
        ce_lateinit    = false;
        ce_override    = false;
+       ce_lsb         = false;
        ce_memoizelsb  = false;
        ce_synthesized = true;
        ce_visibility  = Vpublic;

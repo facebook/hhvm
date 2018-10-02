@@ -25,6 +25,14 @@ let find x xs =
 let find2 x1 x2 xs =
   List.find xs (fun { ua_name = (_, n); _ } -> x1 = n || x2 = n)
 
+let mem_pos x xs =
+  let attr = find x xs in
+  match attr with
+  | Some { ua_name = (pos, _); _ } ->
+    Some pos
+  | None ->
+    None
+
 (* TODO: generalize the arity check / argument check here to handle attributes
  * in general, not just __Deprecated *)
 let deprecated ~kind (_, name) attrs =

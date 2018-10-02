@@ -1,0 +1,4 @@
+File "lsb_self_disallowed.php", line 7, characters 18-20:
+__LSB properties cannot be accessed with self:: (Typing[4112])
+File "lsb_self_disallowed.php", line 4, characters 28-30:
+This member is private

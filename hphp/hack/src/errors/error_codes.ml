@@ -141,6 +141,7 @@ module Naming                               = struct
   | RxOfScopeAndExplicitRx
   | UnsupportedFeature
   | TraitInterfaceConstructorPromo
+  | NonstaticPropertyWithLSB
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@ deriving enum, show { with_path = false } ]
   let err_code = to_enum
@@ -514,6 +515,7 @@ module Typing                               = struct
   | StringCast
   | BadLateInitOverride
   | EscapingMutableObject
+  | OverrideLSB
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@ deriving enum, show { with_path = false } ]
   let err_code = to_enum

@@ -129,7 +129,7 @@ let autocomplete_new cid env =
 
 let get_class_elt_types env class_ cid elts =
   let elts = SMap.filter elts begin fun _ x ->
-    Tast_env.is_visible env x.ce_visibility cid class_
+    Tast_env.is_visible env (x.ce_visibility, x.ce_lsb) cid class_
   end in
   SMap.map elts (fun { ce_type = lazy ty; _ } -> ty)
 

@@ -145,6 +145,7 @@ MisplacedRxOfScope = 2090
 RxOfScopeAndExplicitRx = 2091
 UnsupportedFeature = 2092
 TraitInterfaceConstructorPromo = 2093
+NonstaticPropertyWithLSB = 2094
 
 NastCheck Errors:
 AbstractBody = 3001
@@ -508,4 +509,5 @@ InvalidSwitchCaseValueType = 4280
 StringCast = 4281
 BadLateInitOverride = 4282
 EscapingMutableObject = 4283
+OverrideLSB = 4284
   |}]

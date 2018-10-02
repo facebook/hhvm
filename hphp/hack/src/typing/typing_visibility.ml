@@ -73,7 +73,36 @@ let is_visible_for_obj env vis =
   | Vprotected x ->
     is_protected_visible env x self_id
 
-let is_visible_for_class env vis cid cty =
+(* The only permitted way to access an LSB property is via
+   static::, ClassName::, or $class_name:: *)
+let is_lsb_permitted cid =
+  match cid with
+  | CIself -> Some "__LSB properties cannot be accessed with self::"
+  | CIparent -> Some "__LSB properties cannot be accessed with parent::"
+  | _ -> None
+
+(* LSB property accessibility is relative to the defining class *)
+let is_lsb_accessible env vis =
+  let self_id = Env.get_self_id env in
+  match vis with
+  | Vpublic -> None
+  | (Vprivate _ | Vprotected _) when Env.is_outside_class env ->
+    Some "You cannot access this member"
+  | Vprivate x ->
+    if x = self_id then None
+    else Some "You cannot access this member"
+  | Vprotected x ->
+    is_protected_visible env x self_id
+
+
+let is_lsb_visible_for_class env vis cid =
+  match is_lsb_permitted cid with
+  | Some x -> Some x
+  | None -> is_lsb_accessible env vis
+
+let is_visible_for_class env (vis, lsb) cid cty =
+  if lsb then is_lsb_visible_for_class env vis cid
+  else
   let self_id = Env.get_self_id env in
   match vis with
   | Vpublic -> None
@@ -88,9 +117,9 @@ let is_visible_for_class env vis cid cty =
              (did you mean to use static:: or self::?)"
      | _ -> is_protected_visible env x self_id)
 
-let is_visible env vis cid class_ =
+let is_visible env (vis, lsb) cid class_ =
   let msg_opt = match cid with
-    | Some cid -> is_visible_for_class env vis cid class_
+    | Some cid -> is_visible_for_class env (vis, lsb) cid class_
     | None -> is_visible_for_obj env vis
   in
   Option.is_none msg_opt
@@ -106,8 +135,8 @@ let check_obj_access p env (p_vis, vis) =
   | Some msg ->
     visibility_error p msg (p_vis, vis)
 
-let check_class_access p env (p_vis, vis) cid class_ =
-  match is_visible_for_class env vis cid class_ with
+let check_class_access p env (p_vis, vis, lsb) cid class_ =
+  match is_visible_for_class env (vis, lsb) cid class_ with
   | None -> ()
   | Some msg ->
     visibility_error p msg (p_vis, vis)

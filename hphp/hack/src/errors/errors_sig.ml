@@ -102,6 +102,7 @@ module type S = sig
   val this_no_argument : Pos.t -> unit
   val this_hint_outside_class : Pos.t -> unit
   val this_type_forbidden : Pos.t -> unit
+  val nonstatic_property_with_lsb : Pos.t -> unit
   val lowercase_this : Pos.t -> string -> unit
   val classname_param : Pos.t -> unit
   val invalid_instanceof : Pos.t -> unit
@@ -277,6 +278,7 @@ module type S = sig
     string -> Pos.t -> Pos.t -> string -> unit
   val override_final : parent:Pos.t -> child:Pos.t -> unit
   val override_memoizelsb : parent:Pos.t -> child:Pos.t -> unit
+  val override_lsb : member_name:string -> parent:Pos.t -> child:Pos.t -> unit
   val should_be_override : Pos.t -> string -> string -> unit
   val override_per_trait : Pos.t * string -> string -> Pos.t -> unit
   val missing_assign : Pos.t -> unit

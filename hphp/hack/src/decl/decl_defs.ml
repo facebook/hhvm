@@ -110,6 +110,7 @@ and element = {
   elt_is_xhp_attr : bool;
   elt_const: bool;
   elt_lateinit: bool;
+  elt_lsb: bool;
 
   elt_origin : string;
   elt_visibility : visibility;

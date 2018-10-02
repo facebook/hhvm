@@ -932,6 +932,10 @@ let this_type_forbidden pos =
     "The type \"this\" cannot be used as a constraint on a class' generic, \
      or as the type of a static member variable"
 
+let nonstatic_property_with_lsb pos =
+  add (Naming.err_code Naming.NonstaticPropertyWithLSB) pos
+    "__LSB attribute may only be used on static properties"
+
 let lowercase_this pos type_ =
   add (Naming.err_code Naming.LowercaseThis) pos (
   "Invalid Hack type \""^type_^"\". Use \"this\" instead"
@@ -2903,6 +2907,11 @@ let override_memoizelsb ~parent ~child =
   add_list (Typing.err_code Typing.OverrideMemoizeLSB) [
     child, "__MemoizeLSB method may not be an override (temporary due to HHVM bug)";
     parent, "This method is being overridden"]
+
+let override_lsb ~member_name ~parent ~child =
+  add_list (Typing.err_code Typing.OverrideLSB) [
+    child, "Member " ^ member_name ^ " may not override __LSB member of parent";
+    parent, "This is being overridden"]
 
 let should_be_override pos class_id id =
   add (Typing.err_code Typing.ShouldBeOverride) pos

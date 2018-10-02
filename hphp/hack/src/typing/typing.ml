@@ -4781,9 +4781,9 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
               | None ->
                 smember_not_found p ~is_const ~is_method class_ mid;
                 env, (Reason.Rnone, Typing_utils.terr env), None
-              | Some {ce_visibility = vis; ce_type = lazy (r, Tfun ft); _} ->
+              | Some {ce_visibility = vis; ce_lsb = lsb; ce_type = lazy (r, Tfun ft); _} ->
                 let p_vis = Reason.to_pos r in
-                TVis.check_class_access p env (p_vis, vis) cid class_;
+                TVis.check_class_access p env (p_vis, vis, lsb) cid class_;
                 let env, ft =
                   Phase.localize_ft ~use_pos:p ~ety_env ~explicit_tparams:explicit_tparams env ft in
                 let arity_pos = match ft.ft_params with
@@ -4796,9 +4796,9 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
                 } in
                 env, (r, Tfun ft), None
               | _ -> assert false)
-          | Some { ce_visibility = vis; ce_type = lazy method_; _ } ->
+          | Some { ce_visibility = vis; ce_lsb = lsb; ce_type = lazy method_; _ } ->
             let p_vis = Reason.to_pos (fst method_) in
-            TVis.check_class_access p env (p_vis, vis) cid class_;
+            TVis.check_class_access p env (p_vis, vis, lsb) cid class_;
             let env, method_ =
               begin match method_ with
                 (* We special case Tfun here to allow passing in explicit tparams to localize_ft. *)

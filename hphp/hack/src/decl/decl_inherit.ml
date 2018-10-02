@@ -228,6 +228,7 @@ let mark_as_synthesized inh =
 
 let filter_privates class_type =
   let is_not_private _ elt = match elt.elt_visibility with
+    | Vprivate _ when elt.elt_lsb -> true
     | Vprivate _ -> false
     | Vpublic | Vprotected _ -> true
   in

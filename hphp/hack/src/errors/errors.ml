@@ -1935,7 +1935,8 @@ let return_in_void pos1 pos2 =
 ]
 
 let this_in_static p =
-  add (Typing.err_code Typing.ThisInStatic) p "Don't use $this in a static method"
+  add (Typing.err_code Typing.ThisInStatic) p
+  "Don't use $this in a static method, use static:: instead"
 
 let this_var_outside_class p =
   add (Typing.err_code Typing.ThisVarOutsideClass) p "Can't use $this outside of a class"

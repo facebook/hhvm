@@ -456,13 +456,13 @@ Array Variant::toPHPArrayHelper() const {
   switch (m_type) {
     case KindOfUninit:
     case KindOfNull:          return empty_array();
-    case KindOfBoolean:       return Array::Create(*this);
-    case KindOfInt64:         return Array::Create(m_data.num);
-    case KindOfDouble:        return Array::Create(*this);
+    case KindOfBoolean:       return make_packed_array(*this);
+    case KindOfInt64:         return make_packed_array(m_data.num);
+    case KindOfDouble:        return make_packed_array(*this);
     case KindOfPersistentString:
-      return Array::Create(Variant{m_data.pstr, PersistentStrInit{}});
+      return make_packed_array(Variant{m_data.pstr, PersistentStrInit{}});
     case KindOfString:
-      return Array::Create(Variant{m_data.pstr});
+      return make_packed_array(Variant{m_data.pstr});
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
@@ -476,11 +476,11 @@ Array Variant::toPHPArrayHelper() const {
     case KindOfObject:        return m_data.pobj->toArray();
     case KindOfResource:      return m_data.pres->data()->o_toArray();
     case KindOfFunc:
-      return Array::Create(Variant{funcToStringHelper(m_data.pfunc),
-                                   PersistentStrInit{}});
+      return make_packed_array(Variant{funcToStringHelper(m_data.pfunc),
+                                       PersistentStrInit{}});
     case KindOfClass:
-      return Array::Create(Variant{classToStringHelper(m_data.pclass),
-                                   PersistentStrInit{}});
+      return make_packed_array(Variant{classToStringHelper(m_data.pclass),
+                                       PersistentStrInit{}});
     case KindOfRef:           return m_data.pref->var()->toArray();
       always_assert(false);
 

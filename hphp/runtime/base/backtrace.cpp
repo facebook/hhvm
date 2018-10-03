@@ -314,7 +314,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       frame.set(s_line, unit->getLineNumber(curPc));
       if (btArgs.m_parserFrame) {
         frame.set(s_function, s_include);
-        frame.set(s_args, Array::Create(btArgs.m_parserFrame->filename));
+        frame.set(s_args, make_packed_array(btArgs.m_parserFrame->filename));
       }
       bt.append(frame.toVariant());
       depth++;

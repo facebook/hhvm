@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/base/object-data.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/container-functions.h"
@@ -655,7 +656,7 @@ Array ObjectData::toArray(bool pubOnly /* = false */,
     assertx(storage.is_set());
     return tvCastToArrayLike(storage.tv());
   } else if (UNLIKELY(instanceof(c_Closure::classof()))) {
-    return Array::Create(Object(const_cast<ObjectData*>(this)));
+    return make_packed_array(Object(const_cast<ObjectData*>(this)));
   } else if (UNLIKELY(instanceof(DateTimeData::getClass()))) {
     return Native::data<DateTimeData>(this)->getDebugInfo();
   } else {

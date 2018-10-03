@@ -74,10 +74,7 @@ private:
 
 public:
   /*
-   * Create an empty array or an array with one element.
-   *
-   * Note these are different than the copy (or copy-like) constructors that
-   * also take one value.
+   * Create an empty array.
    */
   static Array Create() {
     return Array(ArrayData::Create(), NoIncRef{});
@@ -105,10 +102,6 @@ public:
 
   static Array CreateDArray() {
     return Array(ArrayData::CreateDArray(), NoIncRef{});
-  }
-
-  static Array Create(const Variant& value) {
-    return Array(ArrayData::Create(value), NoIncRef{});
   }
 
   /////////////////////////////////////////////////////////////////////////////

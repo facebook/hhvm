@@ -25,6 +25,7 @@
 #include "hphp/runtime/ext/string/ext_string.h" // nolint - see above
 #include "hphp/util/bstring.h"
 #include "hphp/runtime/ext/hash/hash_murmur.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/actrec-args.h"
@@ -1491,7 +1492,7 @@ Array HHVM_FUNCTION(str_getcsv,
                     const String& enclosure /* = "\"" */,
                     const String& escape /* = "\\" */) {
   if (str.empty()) {
-    return Array::Create(uninit_variant);
+    return make_packed_array(uninit_variant);
   }
 
   auto check_arg = [](const String& arg, char default_arg) {

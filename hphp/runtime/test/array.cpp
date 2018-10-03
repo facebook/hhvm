@@ -44,7 +44,7 @@ TEST(ARRAY, Constructors) {
   EXPECT_TRUE(arr.isPHPArray());
   EXPECT_FALSE(arr.isHackArray());
 
-  arr = Array::Create(0);
+  arr = make_packed_array(0);
   EXPECT_TRUE(!arr.empty());
   EXPECT_TRUE(arr.size() == 1);
   EXPECT_TRUE(arr.length() == 1);
@@ -53,7 +53,7 @@ TEST(ARRAY, Constructors) {
   EXPECT_TRUE(arr.isPHPArray());
   EXPECT_FALSE(arr.isHackArray());
 
-  arr = Array::Create("test");
+  arr = make_packed_array("test");
   EXPECT_TRUE(!arr.empty());
   EXPECT_TRUE(arr.size() == 1);
   EXPECT_TRUE(arr.length() == 1);
@@ -63,7 +63,7 @@ TEST(ARRAY, Constructors) {
   EXPECT_FALSE(arr.isHackArray());
 
   Array arrCopy = arr;
-  arr = Array::Create(arr);
+  arr = make_packed_array(arrCopy);
   EXPECT_TRUE(!arr.empty());
   EXPECT_TRUE(arr.size() == 1);
   EXPECT_TRUE(arr.length() == 1);
@@ -176,7 +176,7 @@ TEST(ARRAY, Conversions) {
   EXPECT_TRUE(arr0.toDouble() == 0.0);
   EXPECT_TRUE(arr0.toString().empty());
 
-  Array arr1 = Array::Create("test");
+  Array arr1 = make_packed_array("test");
   EXPECT_TRUE(arr1.toBoolean() == true);
   EXPECT_TRUE(arr1.toByte() == 1);
   EXPECT_TRUE(arr1.toInt16() == 1);
@@ -532,17 +532,17 @@ TEST(ARRAY, Membership) {
 
 TEST(ARRAY, Merge) {
   {
-    Array arr = Array::Create(0) + Array::Create(1);
-    EXPECT_TRUE(equal(arr, Array::Create(0)));
+    Array arr = make_packed_array(0) + make_packed_array(1);
+    EXPECT_TRUE(equal(arr, make_packed_array(0)));
     arr += make_packed_array(0, 1);
     EXPECT_TRUE(equal(arr, make_packed_array(0, 1)));
 
-    arr = Array::Create(0).merge(Array::Create(1));
+    arr = make_packed_array(0).merge(make_packed_array(1));
     EXPECT_TRUE(equal(arr, make_packed_array(0, 1)));
     arr = arr.merge(make_packed_array(0, 1));
     EXPECT_TRUE(equal(arr, make_packed_array(0, 1, 0, 1)));
 
-    arr = Array::Create("s0").merge(Array::Create("s1"));
+    arr = make_packed_array("s0").merge(make_packed_array("s1"));
     EXPECT_TRUE(equal(arr, make_packed_array("s0", "s1")));
 
     arr = make_map_array("n0", "s0") + make_map_array("n1", "s1");

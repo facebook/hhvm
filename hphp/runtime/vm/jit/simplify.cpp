@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/simplify.h"
 
 #include "hphp/runtime/base/array-data-defs.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/double-to-int64.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -2003,7 +2004,7 @@ SSATmp* convToDArrImpl(State& env, const IRInstruction* inst, G get) {
 SSATmp* convNonArrToArrImpl(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->hasConstVal()) {
-    auto arr = Array::Create(src->variantVal());
+    auto arr = make_packed_array(src->variantVal());
     return cns(env, ArrayData::GetScalarArray(std::move(arr)));
   }
   return nullptr;

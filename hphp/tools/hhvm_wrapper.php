@@ -150,7 +150,7 @@ function determine_flags(OptionMap $opts): string {
 
   $simple_args = Map {
     'dump-hhbc'       => '-v Eval.DumpBytecode=1 ',
-    'dump-hhas'       => '-v Eval.DumpHhas=true ',
+    'dump-hhas'       => '-v Eval.DumpHhas=1 ',
     'dump-tc'         => '-v Eval.DumpTC=1 ',
     'php7'            => '-d hhvm.php7.all=1 ',
     'opt-ir'          => '-v Eval.HHIRGenerateAsserts=0 ',

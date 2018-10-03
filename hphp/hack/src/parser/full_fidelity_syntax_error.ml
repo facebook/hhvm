@@ -296,6 +296,9 @@ let function_name_is_already_in_use ~name ~short_name =
   "Cannot use function " ^ name ^ " as " ^ short_name ^
   " because the name is already in use"
 
+let empty_method_name =
+  "Expected a method name"
+
 let const_name_is_already_in_use ~name ~short_name =
   "Cannot use const " ^ name ^ " as " ^ short_name ^
   " because the name is already in use"

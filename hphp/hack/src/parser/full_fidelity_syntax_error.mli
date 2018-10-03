@@ -298,6 +298,7 @@ val collection_intrinsic_generic: string
 val invalid_shape_field_name : string
 val invalid_reference : string
 val invalid_hack_mode : string
+val empty_method_name : string
 val pair_initializer_needed : string
 val pair_initializer_arity : string
 val nested_unary_reference : string

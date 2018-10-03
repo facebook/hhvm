@@ -2250,6 +2250,8 @@ and pFunHdr check_modifier : fun_hdr parser = fun node env ->
       let is_autoload =
         String.lowercase @@ (text function_name)
           = Naming_special_names.SpecialFunctions.autoload in
+      if is_missing function_name then
+        raise_parsing_error env (`Node function_name) SyntaxError.empty_method_name;
       let num_params = List.length (syntax_to_list_no_separators function_parameter_list) in
       if is_autoload && num_params > 1 then
         raise_parsing_error env (`Node node) SyntaxError.autoload_takes_one_argument;

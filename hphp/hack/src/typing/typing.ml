@@ -3944,7 +3944,8 @@ and is_abstract_ft fty = match fty with
                 env, vars, tr
               else if List.length hl <> List.length args + 1 then begin
                 let env, tr = Env.fresh_unresolved_type env in
-                Errors.expected_tparam fty.ft_pos (1 + (List.length args));
+                Errors.expected_tparam ~use_pos:fpos ~definition_pos:fty.ft_pos
+                  (1 + (List.length args));
                 let env, vars = List.map_env env args
                   ~f:(fun env _ -> Env.fresh_unresolved_type env) in
                 env, vars, tr end

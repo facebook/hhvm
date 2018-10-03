@@ -265,7 +265,7 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
         then default ()
         else if List.length explicit_tparams <> List.length ft.ft_tparams
         then begin
-          Errors.expected_tparam ft.ft_pos (List.length ft.ft_tparams);
+          Errors.expected_tparam ~definition_pos:ft.ft_pos ~use_pos (List.length ft.ft_tparams);
           default ()
         end
         else

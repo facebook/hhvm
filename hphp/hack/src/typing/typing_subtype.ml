@@ -566,8 +566,8 @@ and simplify_subtype
         if List.length class_sub.tc_tparams <> List.length tyl_sub
         then
           invalid_with (fun () ->
-          Errors.expected_tparam
-            (Reason.to_pos p_sub) (List.length class_sub.tc_tparams))
+          Errors.expected_tparam ~definition_pos:class_sub.tc_pos
+            ~use_pos:(Reason.to_pos p_sub) (List.length class_sub.tc_tparams))
         else
           let ety_env =
           (* NOTE: We rely on the fact that we fold all ancestors of
@@ -1383,8 +1383,8 @@ and sub_type_inner_helper env ~this_ty
           in
             if List.length class_.tc_tparams <> List.length tyl_sub
             then
-              Errors.expected_tparam
-                (Reason.to_pos p_sub) (List.length class_.tc_tparams);
+              Errors.expected_tparam ~definition_pos:class_.tc_pos
+                ~use_pos:(Reason.to_pos p_sub) (List.length class_.tc_tparams);
           if class_.tc_kind = Ast.Ctrait || class_.tc_kind = Ast.Cinterface then
           (* NOTE: We rely on the fact that we fold all ancestors of
            * ty_sub in its class_type so we will never hit this case

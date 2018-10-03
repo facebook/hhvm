@@ -2357,15 +2357,17 @@ let echo_in_reactive_context pos =
     "'echo' or 'print' are not allowed in reactive or shallow-reactive functions."
   )
 
-let expected_tparam pos n =
-  add (Typing.err_code Typing.ExpectedTparam) pos (
-  "Expected " ^
-  (match n with
-  | 0 -> "no type parameter"
-  | 1 -> "a type parameter"
-  | n -> string_of_int n ^ " type parameters"
-  )
- )
+let expected_tparam ~use_pos ~definition_pos n =
+  add_list (Typing.err_code Typing.ExpectedTparam)
+    [
+      use_pos, "Expected " ^
+        (match n with
+        | 0 -> "no type parameter"
+        | 1 -> "a type parameter"
+        | n -> string_of_int n ^ " type parameters"
+        );
+      definition_pos, "Definition is here"
+    ]
 
 let object_string pos1 pos2 =
   add_list (Typing.err_code Typing.ObjectString) [

@@ -1,6 +1,8 @@
 <?hh
 
-function f(string $s): void {}
+function f(string $s): string {
+  return $s;
+}
 
 function g(): void {
   $xhp =

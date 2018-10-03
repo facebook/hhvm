@@ -1,4 +1,6 @@
 File "void_usage_placeholder_param.php", line 10, characters 16-17:
-You are using the return value of a void function (Typing[4119])
+Invalid argument (Typing[4110])
+File "void_usage_placeholder_param.php", line 7, characters 25-26:
+This is an object of type C2
 File "void_usage_placeholder_param.php", line 10, characters 16-17:
-A void function doesn't return a value ($_ is a placeholder variable not meant to be used)
+It is incompatible with void ($_ is a placeholder variable not meant to be used)

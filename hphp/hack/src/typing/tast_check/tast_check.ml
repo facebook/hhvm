@@ -26,6 +26,7 @@ let visitor = Tast_visitor.iter_with [
     else fun _ _ _ -> ()
   end;
   Void_return_check.handler;
+  Rvalue_check.handler;
 ]
 
 let program = visitor#go

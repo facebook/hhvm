@@ -56,9 +56,9 @@ let rec unify ?(opts=TUtils.default_unify_opt) env ty1 ty2 =
   | ty, (Reason.Rnone, Tunresolved []) -> env, ty
   | (r, Tunresolved tyl), (_, ty_ as ty)
   | (_, ty_ as ty), (r, Tunresolved tyl) ->
-      let p1 = TUtils.find_pos (Reason.to_pos r) tyl in
+      let r1 = TUtils.find_pos r tyl in
       let str_ty = Typing_print.error ty_ in
-      let r = Reason.Rcoerced (p1, env.Env.pos, str_ty) in
+      let r = Reason.Rcoerced (r1, env.Env.pos, str_ty) in
       let env = List.fold_left tyl
         ~f:(fun env x -> TUtils.sub_type env x ty) ~init:env in
       env, (r, ty_)

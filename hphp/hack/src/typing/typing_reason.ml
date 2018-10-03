@@ -57,7 +57,7 @@ type t =
   | Ryield_asyncnull of Pos.t
   | Ryield_send      of Pos.t
   | Rlost_info       of string * t * Pos.t
-  | Rcoerced         of Pos.t * Pos.t * string
+  | Rcoerced         of t * Pos.t * string
   | Rformat          of Pos.t * string * t
   | Rclass_class     of Pos.t * string
   | Runknown_class   of Pos.t
@@ -326,7 +326,7 @@ and to_pos = function
   | Ryield_asyncgen p -> p
   | Ryield_asyncnull p -> p
   | Ryield_send  p -> p
-  | Rcoerced    (p, _, _) -> p
+  | Rcoerced    (r, _, _) -> to_pos r
   | Rlost_info (_, r, _) -> to_pos r
   | Rformat      (p, _, _) -> p
   | Rclass_class (p, _) -> p
@@ -476,8 +476,20 @@ match r with
   | Rincdec_dynamic _ -> "Rincdec_dynamic"
   | Rnull _ -> "Rnull"
 
-let is_rnull = function
+let rec is_rnull = function
   | Rnull _ -> true
+  | Ridx (_, r) -> is_rnull r
+  | Rarith_ret_float (_, r, _) -> is_rnull r
+  | Rarith_ret_num (_, r, _) -> is_rnull r
+  | Rlost_info (_, r, _) -> is_rnull r
+  | Rcoerced (r, _, _) -> is_rnull r
+  | Rformat (_, _, r) -> is_rnull r
+  | Rinstantiate (r, _, _) -> is_rnull r
+  | Rarray_filter (_, r) -> is_rnull r
+  | Rtype_access (_, _, r) -> is_rnull r
+  | Rexpr_dep_type (r, _, _) -> is_rnull r
+  | Rcontravariant_generic (r, _) -> is_rnull r
+  | Rinvariant_generic (r, _) -> is_rnull r
   | _ -> false
 
 let pp fmt r =

@@ -3205,34 +3205,7 @@ and check_shape_keys_validity env pos keys =
         let env, pos, info = get_field_info env witness in
         List.fold_left ~f:(check_field pos info) ~init:env rest_keys
 
-and check_valid_rvalue p env ty =
-    let rec iter_over_types env tyl =
-      match tyl with
-      | [] ->
-        env, ty
-
-      | ty::tyl ->
-        let env, ety = Env.expand_type env ty in
-        match ety with
-        | r, Tprim Tnoreturn ->
-          Errors.noreturn_usage p
-            (Reason.to_string "A noreturn function always throws or exits" r);
-          env, (r, Typing_utils.terr env)
-
-        | r, Tprim Tvoid when not @@ Reason.is_rnull r ->
-          Errors.void_usage p
-            (Reason.to_string "A void function doesn't return a value" r);
-          env, (r, Typing_utils.terr env)
-
-        | _, Tunresolved tyl2 ->
-          iter_over_types env (tyl2 @ tyl)
-
-        | _, _ ->
-          iter_over_types env tyl in
-    iter_over_types env [ty]
-
 and set_valid_rvalue p env x ty =
-  let env, ty = check_valid_rvalue p env ty in
   let env = set_local env (p, x) ty in
   (* We are assigning a new value to the local variable, so we need to
    * generate a new expression id
@@ -3454,7 +3427,6 @@ and assign_ p ur env e1 ty2 =
 
 and assign_simple pos ur env e1 ty2 =
   let env, te1, ty1 = lvalue env e1 in
-  let env, ty2 = check_valid_rvalue pos env ty2 in
   let env, ty2 = TUtils.unresolved env ty2 in
   let env = Type.coerce_type pos ur env ty2 ty1 in
   env, te1, ty2
@@ -5467,7 +5439,7 @@ and call_ ~expected ~method_call_info ~is_expr_statement pos env fty el uel =
   | _, (Terr | Tany | Tunresolved [] | Tdynamic) ->
     let el = el @ uel in
     let env, tel = List.map_env env el begin fun env elt ->
-      let env, te, arg_ty =
+      let env, te, _ =
         expr ~expected:(pos, Reason.URparam, (Reason.Rnone, Typing_utils.tany env))
         ~is_func_arg:true env elt
       in
@@ -5480,7 +5452,6 @@ and call_ ~expected ~method_call_info ~is_expr_statement pos env fty el uel =
           let env, _te, _ty = assign_ (fst e1) Reason.URparam env e1 efty in
           env
         | _ -> env in
-      let env, _arg_ty = check_valid_rvalue pos env arg_ty in
       env, te
     end in
     let env = call_untyped_unpack env uel in
@@ -5708,7 +5679,6 @@ and call_param env param ((pos, _ as e), arg_ty) ~is_variadic =
   | Some name -> Typing_suggest.save_param name env param.fp_type arg_ty
   );
   param_modes ~is_variadic param e;
-  let env, arg_ty = check_valid_rvalue pos env arg_ty in
 
   (* When checking params the type 'x' may be expression dependent. Since
    * we store the expression id in the local env for Lvar, we want to apply
@@ -6067,7 +6037,6 @@ and condition_isset env = function
 and condition ?lhs_of_null_coalesce env tparamet
     ((p, ty as pty), e as te: Tast.expr) =
   Async.enforce_nullable_or_not_awaitable env p ty;
-  let env, ty = check_valid_rvalue p env ty in
   let condition = condition ?lhs_of_null_coalesce in
   let enable_primitive_refinement =
     not (TypecheckerOptions.disable_primitive_refinement (Env.get_tcopt env))

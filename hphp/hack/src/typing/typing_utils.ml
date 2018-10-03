@@ -328,15 +328,15 @@ let simplified_uerror env ty1 ty2 =
   else
     uerror (fst ty1) (snd ty1) (fst ty2) (snd ty2)
 
-(* Find the first defined position in a list of types *)
-let rec find_pos p_default tyl =
+(* Find the first reason with defined position in a list of types *)
+let rec find_pos r_default tyl =
   match tyl with
-  | [] -> p_default
+  | [] -> r_default
   | (r, _) :: rl ->
       let p = Reason.to_pos r in
       if p = Pos.none
-      then find_pos p_default rl
-      else p
+      then find_pos r_default rl
+      else r
 
 (*****************************************************************************)
 (* Applies a function to 2 shapes simultaneously, raises an error if

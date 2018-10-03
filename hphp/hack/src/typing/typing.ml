@@ -4187,6 +4187,18 @@ and is_abstract_ft fty = match fty with
       | _  -> env, res
     end
 
+  (* Special function `Shapes::toDict` *)
+  | Class_const ((_, CI((_, shapes), _)) as class_id, ((_, to_array) as method_id))
+    when shapes = SN.Shapes.cShapes && to_array = SN.Shapes.toDict ->
+    check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.toDict;
+    overload_function p env class_id method_id el uel
+    begin fun env _ res el -> match el with
+      | [shape] ->
+         let env, _te, shape_ty = expr env shape in
+         Typing_shapes.to_dict env shape_ty res
+      | _  -> env, res
+    end
+
   (* Special function `parent::__construct` *)
   | Class_const ((pos, CIparent), ((_, construct) as id))
     when construct = SN.Members.__construct ->

@@ -389,6 +389,7 @@ module Shapes = struct
   let keyExists              = "keyExists"
   let removeKey              = "removeKey"
   let toArray                = "toArray"
+  let toDict                 = "toDict"
 end
 
 module Superglobals = struct

@@ -1,0 +1,2 @@
+
+Fatal error: Do not use '<>', it performs type coercion. Use '!==' instead in %s on line %d

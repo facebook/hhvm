@@ -507,7 +507,7 @@ let do_not_use_and =
   "Do not use \"and\", it has surprising precedence. Use \"&&\" instead"
 
 let do_not_use_ltgt =
-  "Do not use '<>', it performs type coercion. use '!==' instead"
+  "Do not use '<>', it performs type coercion. Use '!==' instead"
 
 let invalid_foreach_element = "An arrow ('=>') or right parenthesis (')') \
   is expected here."

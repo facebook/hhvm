@@ -28,6 +28,7 @@ let visitor = Tast_visitor.iter_with [
   Void_return_check.handler;
   Rvalue_check.handler;
   Callconv_check.handler;
+  Xhp_check.handler;
 ]
 
 let program = visitor#go

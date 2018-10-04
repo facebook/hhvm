@@ -2566,7 +2566,7 @@ and expr_
       in
       let env, _te, obj = expr env (fst sid, New ((fst sid, cid), [], [])) in
       let env, typed_attrs, attr_types = xhp_attribute_exprs env class_info attrl in
-      let env, tel = List.fold_left el ~init:(env, []) ~f:fold_xhp_body_elements in
+      let env, tel = List.map_env env el ~f:(fun env e -> let env, te, _ = expr env e in env, te) in
       let txml = T.Xml (sid, typed_attrs, List.rev tel) in
       (match class_info with
        | None -> make_result env txml (Reason.Runknown_class p, Tobject)
@@ -2696,25 +2696,6 @@ and xhp_attribute_exprs env cid attrl =
   in
   let env, typed_attrl, attr_ptyl = List.fold_left ~f:handle_attr ~init:(env, [], []) attrl in
   env, List.rev typed_attrl, List.rev attr_ptyl
-
-and check_xhp_children env pos ty =
-  let tys = match ty with
-    | _, Tunresolved ts -> ts
-    | _ -> [ty] in
-  if List.for_all ~f:(Typing_xhp.xhp_child env pos) tys then env
-  else begin
-    let ty_str = Typing_print.error (snd ty) in
-    let msgl = Reason.to_string ("This is "^ty_str) (fst ty) in
-    Errors.illegal_xhp_child pos msgl; env
-  end
-
-and fold_xhp_body_elements (env, tel) body =
-  let expr_pos = fst body in
-  let env, te, ty = expr env body in
-  let env, ty = Env.expand_type env ty in
-  let env, ty = TUtils.fold_unresolved env ty in
-  let env = check_xhp_children env expr_pos ty in
-  env, te::tel
 
 (*****************************************************************************)
 (* Anonymous functions. *)

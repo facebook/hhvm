@@ -210,3 +210,6 @@ val can_coerce : env -> Tast.ty -> Tast.ty -> env option
 (** Return None when coercion cannot occur from the second arg to the third,
     otherwise return Some env where env is the first arg updated with coercion
     constraints. *)
+
+val is_xhp_child : env -> Pos.t -> Tast.ty -> bool
+(** Verify that an XHP body expression is legal. *)

@@ -105,7 +105,7 @@ and get_spread_attributes env pos onto_xhp cty =
  * Until XHPChild type inference is improved, there is a cascading set of
  * checks here to allow for parity with what the runtime accepts.
  *)
-and xhp_child env pos ty =
+let is_xhp_child env pos ty =
   let reason = Reason.Rwitness pos in
   (* ?XHPChild *)
   let ty_child = reason, Tclass ((Pos.none, SN.Classes.cXHPChild), []) in

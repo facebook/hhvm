@@ -24,7 +24,7 @@ val get_spread_attributes :
 (**
  * Verify that an XHP body expression is legal.
  *)
-val xhp_child :
+val is_xhp_child :
   Typing_env.env ->
   Pos.t ->
   Typing_defs.locl Typing_defs.ty ->

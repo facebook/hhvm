@@ -160,8 +160,9 @@ createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
   ProfData::Session pds;
   assertx(profData() != nullptr);
 
-  using namespace hfsort;
-  TargetGraph cg;
+  using hfsort::TargetId;
+
+  hfsort::TargetGraph cg;
   jit::hash_map<FuncId, TargetId> targetID;
   auto pd = profData();
 

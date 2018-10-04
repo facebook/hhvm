@@ -141,6 +141,13 @@ let get_value_collection_inst ty =
       c = SN.Collections.cTraversable ||
       c = SN.Collections.cContainer ->
     Some vty
+    (* If we're expecting a mixed or a nonnull then we can just assume
+     * that the element type is mixed *)
+  | (_, (Tmixed | Tnonnull)) ->
+    let mixed = (Reason.Rnone, TUtils.desugar_mixed Reason.Rnone) in
+    Some mixed
+  | (_, Tany) ->
+    Some ty
   | _ ->
     None
 
@@ -156,6 +163,13 @@ let get_key_value_collection_inst ty =
       c = SN.Collections.cKeyedContainer ||
       c = SN.Collections.cIndexish ->
     Some (kty, vty)
+    (* If we're expecting a mixed or a nonnull then we can just assume
+     * that the value and key types are mixed *)
+  | (_, (Tmixed | Tnonnull)) ->
+    let mixed = (Reason.Rnone, Tmixed) in
+    Some (mixed, mixed)
+  | (_, Tany) ->
+    Some (ty, ty)
   | _ ->
     None
 
@@ -1359,15 +1373,19 @@ and expr_
       match expected with
       | None -> Env.fresh_unresolved_type env
       | Some (_, _, ty) -> env, ty in
-    let subtype_value env ty =
-      Type.sub_type p Reason.URarray_value env ty supertype in
-    let env = List.fold_left tys ~init:env ~f:subtype_value in
-    if List.exists tys (fun (_, ty) -> ty = Typing_utils.tany env) then
-      (* If one of the values comes from PHP land, we have to be conservative
-       * and consider that we don't know what the type of the values are. *)
-      env, (Reason.Rwitness p, Typing_utils.tany env)
-    else
-      env, supertype in
+    match supertype with
+      (* No need to check individual subtypes if expected type is mixed or any! *)
+      | (_, (Tmixed | Tany)) -> env, supertype
+      | _ ->
+      let subtype_value env ty =
+        Type.sub_type p Reason.URarray_value env ty supertype in
+      let env = List.fold_left tys ~init:env ~f:subtype_value in
+      if List.exists tys (fun (_, ty) -> ty = Typing_utils.tany env) then
+        (* If one of the values comes from PHP land, we have to be conservative
+         * and consider that we don't know what the type of the values are. *)
+        env, (Reason.Rwitness p, Typing_utils.tany env)
+      else
+        env, supertype in
 
   (**
    * Given a 'a list and a method to extract an expr and its ty from a 'a, this
@@ -2978,9 +2996,9 @@ and expand_expected env expected =
   | Some (p, ur, ty) ->
     let env, ty = Env.expand_type env ty in
     match ty with
-    | _, Tany -> env, None
     | _, Tunresolved [ty] -> env, Some (p, ur, ty)
     | _, Toption ty -> env, Some (p, ur, ty)
+    | _, Tmixed -> env, Some (p, ur, (Reason.Rnone, Tnonnull))
     | _ -> env, Some (p, ur, ty)
 
 (* Do a subtype check of inferred type against expected type *)

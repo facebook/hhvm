@@ -52,6 +52,7 @@ type t = {
   option_phpism_undefined_const_fallback  : bool;
   option_phpism_disallow_execution_operator: bool;
   option_disable_variable_variables       : bool;
+  option_phpism_disable_define            : bool;
 }
 
 let default = {
@@ -97,6 +98,7 @@ let default = {
   option_phpism_undefined_const_fallback = true;
   option_phpism_disallow_execution_operator = false;
   option_disable_variable_variables = false;
+  option_phpism_disable_define = true;
 }
 
 let enable_hiphop_syntax o = o.option_enable_hiphop_syntax
@@ -139,6 +141,7 @@ let phpism_undefined_const_as_string o = o.option_phpism_undefined_const_as_stri
 let phpism_undefined_const_fallback o = o.option_phpism_undefined_const_fallback
 let phpism_disallow_execution_operator o = o.option_phpism_disallow_execution_operator
 let disable_variable_variables o = o.option_disable_variable_variables
+let phpism_disable_define o = o.option_phpism_disable_define
 let to_string o =
   let dynamic_invokes =
     String.concat ~sep:", " (SSet.elements (dynamic_invoke_functions o)) in
@@ -188,6 +191,7 @@ let to_string o =
     ; Printf.sprintf "phpism_undefined_const_fallback: %B" @@ phpism_undefined_const_fallback o
     ; Printf.sprintf "phpism_disallow_execution_operator %B" @@ phpism_disallow_execution_operator o
     ; Printf.sprintf "disable_variable_variables: %B" @@ disable_variable_variables o
+    ; Printf.sprintf "phpism_disable_define: %B" @@ phpism_disable_define o
     ]
 
 (* The Hack.Lang.IntsOverflowToInts setting overrides the
@@ -274,6 +278,8 @@ let set_option options name value =
     { options with option_phpism_disallow_execution_operator = as_bool value }
   | "hhvm.hack.lang.phpism.disablevariablevariables" ->
     { options with option_disable_variable_variables = as_bool value }
+  | "hack.lang.phpism.disabledefine" ->
+    { options with option_phpism_disable_define = int_of_string value > 0 }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -408,6 +414,8 @@ let value_setters = [
      fun opts v -> { opts with option_phpism_disallow_execution_operator = (v = 1) });
   (set_value "hhvm.hack.lang.phpism.disable_variable_variables" get_value_from_config_int @@
      fun opts v -> { opts with option_disable_variable_variables = (v = 1) });
+  (set_value "hhvm.hack.lang.phpism.disable_define" get_value_from_config_int @@
+     fun opts v -> { opts with option_phpism_disable_define = (v > 0) });
 ]
 
 let extract_config_options_from_json ~init config_json =

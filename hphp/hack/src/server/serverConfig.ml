@@ -270,6 +270,7 @@ let load config_filename options =
      *)
     local_config.ServerLocalConfig.use_full_fidelity_parser
     false (* disallow_execution_operator, off by default *)
+    false (* disable_define - off by detault *)
     (config_user_attributes config)
     (config_experimental_tc_features config)
     (config_tc_migration_flags config)

@@ -2986,7 +2986,7 @@ let pProgram : program parser = fun node env  ->
           ]
         , []
         )
-      )))) :: el) ->
+      )))) :: el) when not(ParserOptions.disable_define env.parser_options) ->
       let const = Constant
         { cst_mode      = mode_annotation env.fi_mode
         ; cst_kind      = Cst_define

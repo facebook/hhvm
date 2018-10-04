@@ -84,6 +84,8 @@ type t = {
 
  (* Flag for disabling the use of variable variables *)
  po_disable_variable_variables : bool;
+ (* Flag to disable PHP's define method *)
+ po_disable_define : bool;
 
  (*
   * Flag to disallow any lambda that has to be checked using the legacy
@@ -175,6 +177,7 @@ val make :
   po_deregister_php_stdlib: bool ->
   po_use_full_fidelity: bool ->
   po_disallow_execution_operator: bool ->
+  po_disable_define: bool ->
   tco_user_attrs: SSet.t option ->
   tco_experimental_features: SSet.t ->
   tco_migration_flags: SSet.t ->
@@ -213,6 +216,7 @@ val po_deregister_php_stdlib : t -> bool
 val po_use_full_fidelity : t -> bool
 val po_disallow_execution_operator : t -> bool
 val po_disable_variable_variables : t -> bool
+val po_disable_define : t -> bool
 val po_enable_hh_syntax_for_hhvm : t -> bool
 val tco_disallow_ambiguous_lambda : t -> bool
 val tco_disallow_array_typehint : t -> bool

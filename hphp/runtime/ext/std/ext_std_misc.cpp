@@ -421,6 +421,13 @@ Variant HHVM_FUNCTION(constant, const String& name) {
 
 bool HHVM_FUNCTION(define, const String& name, const Variant& value,
               bool case_insensitive /* = false */) {
+  auto const warning =
+    "define() is deprecated and subject to removal from the Hack language";
+  switch (RuntimeOption::DisableDefine) {
+    case 0:  break;
+    case 1:  raise_warning(warning); break;
+    default: raise_error(warning);
+  }
   if (case_insensitive) {
     raise_warning(Strings::CONSTANTS_CASE_SENSITIVE);
   }

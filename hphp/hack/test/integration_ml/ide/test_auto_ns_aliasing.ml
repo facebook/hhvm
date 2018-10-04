@@ -107,6 +107,7 @@ let () =
     ~po_deregister_php_stdlib: true
     ~po_use_full_fidelity:true
     ~po_disallow_execution_operator:false
+    ~po_disable_define:false
     ~tco_disallow_ambiguous_lambda:false
     ~tco_disallow_array_typehint:false
     ~tco_disallow_array_literal:false

@@ -429,6 +429,7 @@ uint64_t RuntimeOption::DisableForwardStaticCallArray = 0;
 uint64_t RuntimeOption::DisableCallUserFunc = 0;
 uint64_t RuntimeOption::DisableCallUserFuncArray = 0;
 uint64_t RuntimeOption::DisableParseStrSingleArg = 0;
+uint64_t RuntimeOption::DisableDefine = 0;
 bool RuntimeOption::UndefinedConstAsString = true;
 uint64_t RuntimeOption::UndefinedConstFallback = 0;
 bool RuntimeOption::DisallowExecutionOperator = false;
@@ -1226,6 +1227,9 @@ void RuntimeOption::Load(
     Config::Bind(DisableVariableVariables, ini, config,
                   "Hack.Lang.Phpism.DisableVariableVariables",
                   DisableVariableVariables);
+    Config::Bind(DisableDefine, ini, config,
+                 "Hack.Lang.Phpism.DisableDefine",
+                 DisableDefine);
   }
   {
     // Repo

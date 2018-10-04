@@ -272,6 +272,10 @@ let parse_text compiler_options popt fn text =
     ParserOptions.with_disallow_execution_operator popt disallow_execution_operator in
   let enable_xhp =
     Hhbc_options.enable_xhp !Hhbc_options.compiler_options in
+  let disable_define =
+     Hhbc_options.phpism_disable_define !Hhbc_options.compiler_options in
+   let popt =
+     ParserOptions.with_disable_define popt disable_define in
   let php5_compat_mode =
     not (Hhbc_options.enable_uniform_variable_syntax !Hhbc_options.compiler_options) in
   let hacksperimental =

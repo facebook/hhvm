@@ -44,7 +44,8 @@ let rec emit_def env def =
   | Ast.Constant c ->
     let cns_name = snd c.Ast.cst_name in
     if c.Ast.cst_kind = Ast.Cst_define &&
-       not (Namespace_env.is_global_namespace c.Ast.cst_namespace)
+       (not (Namespace_env.is_global_namespace c.Ast.cst_namespace) ||
+        Hhbc_options.phpism_disable_define !Hhbc_options.compiler_options)
     then
       (* replace 'define' in namespace with call to 'define' function *)
       let env =

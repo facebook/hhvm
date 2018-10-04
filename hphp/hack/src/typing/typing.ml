@@ -3561,7 +3561,9 @@ and check_parent_construct pos env el uel env_parent =
     new_object ~expected:None ~check_parent:true ~check_not_abstract
       ~is_using_clause:false
       pos env CIparent el uel in
-  let env, parent = Type.unify pos (Reason.URnone) env env_parent parent in
+  (* Not sure why we need to equate these types *)
+  let env = Type.sub_type pos (Reason.URnone) env env_parent parent in
+  let env = Type.sub_type pos (Reason.URnone) env parent env_parent in
   env, tel, tuel, (Reason.Rwitness pos, Tprim Tvoid), parent, fty
 
 and call_parent_construct pos env el uel =

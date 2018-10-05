@@ -118,14 +118,22 @@ struct CachedUnitRepoAuth {
 
   CachedUnitRepoAuth(const CachedUnitRepoAuth& src)
     : unit(src.unit)
-    , rdsBitId(src.rdsBitId)
+    , rdsBitId(src.rdsBitId.load(std::memory_order_relaxed))
   {}
 
-  operator CachedUnit() const { return CachedUnit { unit, rdsBitId }; }
+  operator CachedUnit() const {
+    auto const u = unit;
+    auto const bits = rdsBitId.load(std::memory_order_relaxed);
+    return CachedUnit { u, bits };
+  }
 
-  mutable AtomicLowPtr<Unit> unit{reinterpret_cast<Unit*>(0x1)};
+  mutable AtomicLowPtr<
+    Unit,
+    std::memory_order_acquire,
+    std::memory_order_release
+  > unit{reinterpret_cast<Unit*>(0x1)};
   mutable SmallLock lock{};
-  mutable size_t rdsBitId{-1u};
+  mutable std::atomic<size_t> rdsBitId{-1u};
 };
 
 using RepoUnitCache = RankedCHM<
@@ -169,13 +177,14 @@ CachedUnit lookupUnitRepoAuth(const StringData* path,
       return cu;
     }
 
-    cu.unit = Repo::get().loadUnit(
+    auto const unit = Repo::get().loadUnit(
         path->data(),
         md5,
         nativeFuncs)
       .release();
-    if (cu.unit) {
-      cu.rdsBitId = rds::allocBit();
+    if (unit) {
+      cu.rdsBitId.store(rds::allocBit(), std::memory_order_relaxed);
+      cu.unit = unit;
     }
   } catch (...) {
     lock.unlock();

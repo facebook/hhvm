@@ -26,9 +26,6 @@
 namespace HPHP {
 namespace VSDEBUG {
 
-#define VSDEBUG_NAME "vsdebug"
-#define VSDEBUG_VERSION "1.1"
-
 struct VSDebugExtension final : Extension {
   VSDebugExtension() : Extension(VSDEBUG_NAME, VSDEBUG_VERSION) { }
   ~VSDebugExtension();
@@ -54,6 +51,10 @@ private:
   static bool s_configEnabled;
   static std::string s_logFilePath;
   static int s_attachListenPort;
+
+  // If specified and nonempty, the debugger will listen locally on a
+  // UNIX domain socket on this path, rather than using a TCP socket.
+  static std::string& getUnixSocketPath();
 };
 
 }

@@ -177,11 +177,11 @@ void DebugTransport::processOutgoingMessages() {
 
   pollFds[abortIdx] = {0};
   pollFds[abortIdx].fd = m_abortPipeFd[0];
-  pollFds[abortIdx].events = POLLIN | POLLERR | POLLHUP;
+  pollFds[abortIdx].events = POLLIN | POLLERR | POLLHUP | POLLRDHUP;
 
   pollFds[transportIdx] = {0};
   pollFds[transportIdx].fd = fd;
-  pollFds[transportIdx].events = POLLOUT | POLLERR | POLLHUP;
+  pollFds[transportIdx].events = POLLOUT | POLLERR | POLLHUP | POLLRDHUP;
 
   while (true) {
     std::list<std::string> messagesToSend;
@@ -255,7 +255,8 @@ void DebugTransport::processOutgoingMessages() {
           return;
         } else {
           // TransportFD hangup or error.
-          assert((pollFds[transportIdx].revents & (POLLERR | POLLHUP)) != 0);
+          assert((pollFds[transportIdx].revents &
+                 (POLLERR | POLLHUP | POLLRDHUP)) != 0);
           VSDebugLogger::Log(
             VSDebugLogger::LogLevelInfo,
             "Transport write thread: error event on fd."
@@ -286,7 +287,7 @@ void DebugTransport::processIncomingMessages() {
   // Wait for data to be available, or a termination event to occur.
   constexpr int abortIdx = 0;
   constexpr int transportIdx = 1;
-  int eventMask = POLLIN | POLLERR | POLLHUP;
+  int eventMask = POLLIN | POLLERR | POLLHUP | POLLRDHUP;
   struct pollfd pollFds[2];
   memset(pollFds, 0, sizeof(pollFds));
   pollFds[abortIdx].fd = m_abortPipeFd[0];

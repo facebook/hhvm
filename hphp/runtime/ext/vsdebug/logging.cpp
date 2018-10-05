@@ -62,7 +62,7 @@ int VSDebugLogger::OpenLogFile() {
   Log(VSDebugLogger::LogLevelInfo, "Created new log file.");
   Log(VSDebugLogger::LogLevelInfo,
       "Debugger version: %s",
-      VSDEBUG_DEBUGGER_VERSION_STR
+      VSDEBUG_VERSION
   );
 
   return 0;

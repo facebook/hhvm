@@ -45,6 +45,13 @@ void VSDebugExtension::moduleLoad(const IniSetting::Map& ini, const Hdf hdf) {
     "Eval.Debugger.VSDebugListenPort",
     DefaultListenPort);
 
+  Config::Bind(
+    getUnixSocketPath(),
+    ini,
+    hdf,
+    "Eval.Debugger.VSDebugDomainSocketPath",
+    "");
+
   bool commandLineEnabled = RuntimeOption::EnableVSDebugger;
   if (!s_configEnabled && !commandLineEnabled) {
    m_enabled = false;
@@ -80,13 +87,20 @@ void VSDebugExtension::moduleInit() {
   }
 
   DebugTransport* transport = nullptr;
+  SocketTransportOptions opts{};
+
   if (RuntimeOption::ServerExecutionMode()) {
     // If HHVM is running in server mode, start up the debugger socket server
     // and listen for debugger clients to connect.
     VSDebugLogger::Log(VSDebugLogger::LogLevelInfo,
                        "Extension started in SERVER mode");
 
-    transport = new SocketTransport(s_debugger, s_attachListenPort);
+    VSDebugLogger::Log(VSDebugLogger::LogLevelInfo,
+                       "Socket path: %s",
+                       getUnixSocketPath().c_str());
+    opts.domainSocketPath = getUnixSocketPath();
+    opts.tcpListenPort = s_attachListenPort;
+    transport = new SocketTransport(s_debugger, opts);
   } else {
     // Otherwise, HHVM is running in script or interactive mode. Communicate
     // with the debugger client locally via known file descriptors.
@@ -105,10 +119,9 @@ void VSDebugExtension::moduleInit() {
         RuntimeOption::VSDebuggerListenPort
       );
 
-      transport = new SocketTransport(
-        s_debugger,
-        RuntimeOption::VSDebuggerListenPort
-      );
+      opts.tcpListenPort = RuntimeOption::VSDebuggerListenPort;
+      opts.domainSocketPath = "";
+      transport = new SocketTransport(s_debugger, opts);
     } else {
       try {
         transport = new FdTransport(s_debugger);
@@ -177,6 +190,11 @@ void VSDebugExtension::requestShutdown() {
 
   assertx(s_debugger != nullptr);
   s_debugger->requestShutdown();
+}
+
+std::string& VSDebugExtension::getUnixSocketPath() {
+  static std::string s_unixSocketPath = "";
+  return s_unixSocketPath;
 }
 
 // Linkage for the debugger extension.

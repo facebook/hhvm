@@ -24,10 +24,15 @@ namespace VSDEBUG {
 
 struct Debugger;
 
+struct SocketTransportOptions {
+  std::string domainSocketPath;
+  int tcpListenPort;
+};
+
 // SocketTransport transport speaks to the debugger client via a TCP socket
 // listening on a predetermined port.
 struct SocketTransport : public DebugTransport {
-  SocketTransport(Debugger* debugger, int listenPort);
+  SocketTransport(Debugger* debugger, const SocketTransportOptions& options);
   virtual ~SocketTransport();
 
   void onClientDisconnected() override;
@@ -35,14 +40,23 @@ struct SocketTransport : public DebugTransport {
   void cleanupFd(int fd) override;
 
 private:
+  struct ClientInfo {
+    std::string clientUser;
+    pid_t clientPid;
+  };
 
   void createAbortPipe();
   void listenForClientConnection();
 
-  bool bindAndListen(
+  bool bindAndListenTCP(
     struct addrinfo* address,
     std::vector<int>& socketFds
   );
+
+  bool bindAndListenDomain(std::vector<int>& socketFds);
+  bool useDomainSocket() const;
+
+  static bool validatePeerCreds(int fd, ClientInfo& info);
 
   void waitForConnection(
     std::vector<int>& socketFds,
@@ -51,15 +65,32 @@ private:
 
   void stopConnectionThread();
 
-  static void rejectClientWithMsg(int newFd, int abortFd);
+  enum RejectReason {
+    None,
+    ClientAlreadyAttached,
+    AuthenticationFailed
+  };
+
+  static void rejectClientWithMsg(
+    int newFd,
+    int abortFd,
+    RejectReason reason,
+    ClientInfo& existingClientInfo
+  );
+
   static void shutdownSocket(int sockFd, int abortFd);
 
   mutable Mutex m_lock;
   bool m_terminating;
   bool m_clientConnected;
   int m_listenPort;
+  std::string m_domainSocketPath;
   int m_abortPipeFd[2] {-1, -1};
   AsyncFunc<SocketTransport> m_connectThread;
+
+  // Information about the connected client ID, only available
+  // when using a UNIX domain socket connection.
+  ClientInfo m_clientInfo;
 };
 
 }

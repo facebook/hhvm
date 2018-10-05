@@ -39,7 +39,9 @@
 namespace HPHP {
 namespace VSDEBUG {
 
-#define VSDEBUG_DEBUGGER_VERSION_STR ("1.0.1")
+#define VSDEBUG_NAME "vsdebug"
+#define VSDEBUG_VERSION "1.2"
+
 
 struct DebugTransport;
 struct DebuggerSession;

@@ -571,7 +571,9 @@ let in_var env ty =
 
 let unresolved_tparam env (_, (pos, _), _, _) =
   let reason = Reason.Rwitness pos in
-  in_var env (reason, Tunresolved [])
+  if TypecheckerOptions.unresolved_as_union (Typing_env.get_tcopt env)
+  then env, (reason, Tvar (Env.fresh ()))
+  else in_var env (reason, Tunresolved [])
 
 (*****************************************************************************)
 (*****************************************************************************)
@@ -604,10 +606,13 @@ let string_of_visibility = function
   | Vprotected _ -> "protected"
 
 let unresolved env ty =
-  let env, ety = Env.expand_type env ty in
-  match ety with
-  | _, Tunresolved _ -> in_var env ety
-  | _ -> in_var env (fst ty, Tunresolved [ty])
+  if TypecheckerOptions.unresolved_as_union (Typing_env.get_tcopt env)
+  then env, ty
+  else
+    let env, ety = Env.expand_type env ty in
+    match ety with
+    | _, Tunresolved _ -> in_var env ety
+    | _ -> in_var env (fst ty, Tunresolved [ty])
 
 let unwrap_class_hint = function
   | (_, N.Happly ((pos, class_name), type_parameters)) ->

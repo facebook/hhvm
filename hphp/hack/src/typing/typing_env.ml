@@ -838,6 +838,9 @@ end
  *)
 
 let rec unbind seen env ty =
+  if TypecheckerOptions.unresolved_as_union (get_tcopt env)
+  then env, ty
+  else
   let env, ty = expand_type env ty in
   if List.exists seen (fun ty' ->
     let _, ty' = expand_type env ty' in Typing_defs.ty_equal ty ty')

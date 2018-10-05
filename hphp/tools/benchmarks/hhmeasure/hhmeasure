@@ -1,6 +1,8 @@
 #!/bin/bash
 if [ -e ~/fbcode/_build/opt/hphp/hhvm/hhvm ] ;
   then hhvmpath=~/fbcode/_build/opt/hphp/hhvm;
+elif [ -e ~/fbsource/fbcode/buck-out/gen/hphp/hhvm/hhvm ] ;
+  then hhvmpath=~/fbsource/fbcode/buck-out/gen/hphp/hhvm/hhvm;
 elif [ -e /usr/local/hphpi/bin ] ;
   then hhvmpath=/usr/local/hphpi/bin;
 else

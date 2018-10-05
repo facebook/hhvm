@@ -44,6 +44,15 @@ Warning: Division by zero in %s on line 48
 1.0 / 0.0 --> 
 Warning: Division by zero in %s on line 49
 
+7 % 3 --> 1
+-7 % 3 --> -1
+7 % -3 --> 1
+-7 % -3 --> -1
+7 % -1 --> 0
+7 % 1 --> 0
+2147483647 % 2147483647 --> 0
+123 % 2147483647 --> 123
+10 % -2147483648 --> 10
 2 % 2 --> 0
 2.5 % 5 --> 2
 5 % 2.0 --> 1
@@ -53,13 +62,13 @@ Warning: Division by zero in %s on line 49
 5.5 % "5" --> 0
 "5.5" % "5" --> 0
 1 % 0 --> 
-Warning: Division by zero in %s on line 60
+Warning: Division by zero in %s on line 69
 1.0 % 0 --> 
-Warning: Division by zero in %s on line 61
+Warning: Division by zero in %s on line 70
 1 % 0.0 --> 
-Warning: Division by zero in %s on line 62
+Warning: Division by zero in %s on line 71
 1.0 % 0.0 --> 
-Warning: Division by zero in %s on line 63
+Warning: Division by zero in %s on line 72
 
 5 & 3 --> 1
 5.0 & 3.0 --> 1

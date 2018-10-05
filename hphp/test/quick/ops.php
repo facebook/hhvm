@@ -49,6 +49,15 @@ print "1 / 0.0 --> "; print 1 / 0.0;
 print "1.0 / 0.0 --> "; print 1.0 / 0.0;
 print "\n";
 
+print "7 % 3 --> "; print 7 % 3; print "\n";
+print "-7 % 3 --> "; print -7 % 3; print "\n";
+print "7 % -3 --> "; print 7 % -3; print "\n";
+print "-7 % -3 --> "; print -7 % -3; print "\n";
+print "7 % -1 --> "; print 7 % -1; print "\n";
+print "7 % 1 --> "; print 7 % 1; print "\n";
+print "2147483647 % 2147483647 --> "; print 2147483647 % 2147483647; print "\n";
+print "123 % 2147483647 --> "; print 123 % 2147483647; print "\n";
+print "10 % -2147483648 --> "; print 10 % -2147483648; print "\n";
 print "2 % 2 --> "; print 2 % 2; print "\n";
 print "2.5 % 5 --> "; print 2.5 % 5; print "\n";
 print "5 % 2.0 --> "; print 5 % 2.0; print "\n";

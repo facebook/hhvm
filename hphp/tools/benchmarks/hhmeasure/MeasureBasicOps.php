@@ -958,6 +958,32 @@ class Runner {
         $loop_regular_setinstanceintprop);
   }
 
+  public static function runMathOp() {
+    $loop_modulus = function($count) {
+      $instance = new MathTest();
+      $result = 0;
+      for ($iter = 0; $iter < $count; $iter++) {
+        $result += $instance->intMod(\rand(PHP_INT_MIN, PHP_INT_MAX));
+      }
+      return $result;
+    };
+    TimeHHOperations::
+      timeop('run_modulus',
+        $loop_modulus);
+
+    $loop_modulus_opt = function($count) {
+      $instance = new MathTest();
+      $result = 0;
+      for ($iter = 0; $iter < $count; $iter++) {
+        $result += $instance->intModOpt(\rand(PHP_INT_MIN, PHP_INT_MAX));
+      }
+      return $result;
+    };
+    TimeHHOperations::
+      timeop('run_modulus_opt',
+        $loop_modulus_opt);
+  }
+
   public static function closefile() {
     TimeHHOperations::closefile();
   }
@@ -1076,6 +1102,7 @@ else {
   Runner::runtestsIteration();
   Runner::runtestsRegex();
   Runner::runtestsReflection();
+  Runner::runMathOp();
 }
 Runner::closefile();
 Runner::reportresults();

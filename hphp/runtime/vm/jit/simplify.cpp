@@ -749,6 +749,9 @@ SSATmp* simplifyMulIntO(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+/*
+Integer Modulo/Remainder Operator: a % b = a - a / b * b
+*/
 SSATmp* simplifyMod(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
@@ -756,17 +759,28 @@ SSATmp* simplifyMod(State& env, const IRInstruction* inst) {
   if (!src2->hasConstVal()) return nullptr;
 
   auto const src2Val = src2->intVal();
-  if (src2Val == 0 || src2Val == -1) {
+
+  if (src2Val == 0) {
     // Undefined behavior, so we might as well constant propagate whatever we
     // want. If we're being asked to simplify this, it better be dynamically
     // unreachable code.
+    // TODO we can do `return gen(env, Unreachable, ASSERT_REASON);` here
     return cns(env, 0);
   }
 
-  if (src1->hasConstVal()) return cns(env, src1->intVal() % src2Val);
-  // X % 1 --> 0
-  if (src2Val == 1) return cns(env, 0);
+  // X % 1 --> 0, X % -1 --> 0
+  if (src2Val == -1 || src2Val == 1) return cns(env, 0);
 
+  if (src1->hasConstVal()) return cns(env, src1->intVal() % src2Val);
+
+  // Optimization: x % 2^n == x & (2^n - 1)
+  if (folly::popcount(llabs(src2Val)) == 1) {
+    // (x & (y - 1)) | (-y & (x >> 63))
+    return gen(env, OrInt,
+               gen(env, AndInt, src1, cns(env, src2Val - 1)),
+               gen(env, AndInt,
+                 gen(env, Shr, src1, cns(env, 63)), cns(env, -src2Val)));
+  }
   return nullptr;
 }
 

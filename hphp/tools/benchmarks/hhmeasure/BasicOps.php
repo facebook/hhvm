@@ -788,3 +788,13 @@ class ReflectionTest {
     return 1;
   }
 }
+
+class MathTest {
+  public function intMod(int $a) {
+    return $a % 97;
+  }
+
+  public function intModOpt(int $a) {
+    return $a % 1024;
+  }
+}

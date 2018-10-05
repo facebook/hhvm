@@ -924,6 +924,7 @@ struct RuntimeOption {
   /* Switches on miscellaneous junk. */                                 \
   F(bool, NoticeOnCreateDynamicProp, false)                             \
   F(bool, NoticeOnReadDynamicProp, false)                               \
+  F(bool, NoticeOnImplicitInvokeToString, false)                        \
   F(bool, CreateInOutWrapperFunctions, true)                            \
   F(bool, ReffinessInvariance, false)                                   \
   F(bool, NoticeOnBuiltinDynamicCalls, false)                           \

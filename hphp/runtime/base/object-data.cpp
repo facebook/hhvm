@@ -2163,6 +2163,10 @@ void ObjectData::raiseReadDynamicProp(const StringData* key) const {
   }
 }
 
+void ObjectData::raiseImplicitInvokeToString() const {
+  raise_notice("Implicitly invoked %s::__toString", m_cls->name()->data());
+}
+
 static Variant invokeSimple(ObjectData* obj, const StaticString& name) {
   auto const meth = obj->methodNamed(name.get());
   return meth
@@ -2198,6 +2202,9 @@ String ObjectData::invokeToString() {
     // If the user error handler decides to allow execution to continue,
     // we return the empty string.
     return empty_string();
+  }
+  if (RuntimeOption::EvalNoticeOnImplicitInvokeToString) {
+    raiseImplicitInvokeToString();
   }
   auto const tv = g_context->invokeMethod(this, method, InvokeArgs{}, false);
   if (!isStringType(tv.m_type)) {

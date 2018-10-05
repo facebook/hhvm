@@ -2595,12 +2595,9 @@ and emit_obj_get ?(null_coalesce_assignment=false) ~need_ref env pos qop expr pr
       instr, querym_n_unpopped
     end
 
-and is_special_class_constant_accessed_with_class_id env (_, cName) id =
-  (* TODO(T21932293): HHVM does not match Zend here.
-   * Eventually remove this to match PHP7 *)
+and is_special_class_constant_accessed_with_class_id (_, cName) id =
   SU.is_class id &&
-  (not (SU.is_self cName || SU.is_parent cName || SU.is_static cName)
-  || (Ast_scope.Scope.is_in_trait (Emit_env.get_scope env)) && SU.is_self cName)
+  (not (SU.is_self cName || SU.is_parent cName || SU.is_static cName))
 
 and emit_elem_instrs env ~local_temp_kind ?(null_coalesce_assignment=false) opt_elem_expr =
   match opt_elem_expr with
@@ -2612,7 +2609,7 @@ and emit_elem_instrs env ~local_temp_kind ?(null_coalesce_assignment=false) opt_
     else if null_coalesce_assignment then instr_cgetl (get_local env pid), 1
     else empty, 0
   | Some (_, (A.Class_const ((_, A.Id cid), (_, id))))
-    when is_special_class_constant_accessed_with_class_id env cid id -> empty, 0
+    when is_special_class_constant_accessed_with_class_id cid id -> empty, 0
   | Some expr -> emit_expr ~need_ref:false env expr, 1
   | None -> empty, 0
 
@@ -2638,10 +2635,7 @@ and get_elem_member_key ?(null_coalesce_assignment=false) env stack_index opt_ex
   | Some (_, A.String str) -> MemberKey.ET str
   (* Special case for class name *)
   | Some (_, (A.Class_const ((_, A.Id (p, cName as cid)), (_, id))))
-    when is_special_class_constant_accessed_with_class_id env cid id ->
-    (* Special case for self::class in traits *)
-    (* TODO(T21932293): HHVM does not match Zend here.
-     * Eventually remove this to match PHP7 *)
+    when is_special_class_constant_accessed_with_class_id cid id ->
     let cName =
       match SU.is_self cName,
             Ast_scope.Scope.get_class (Emit_env.get_scope env)

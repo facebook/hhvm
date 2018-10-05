@@ -32,7 +32,6 @@ let global_opts = GlobalOptions.make
   ~tco_disallow_array_as_tuple: false
   ~po_auto_namespace_map: []
   ~po_deregister_php_stdlib:true
-  ~po_use_full_fidelity:true
   ~po_disallow_execution_operator:false
   ~po_disable_variable_variables: false
   ~po_disable_define:false

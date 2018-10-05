@@ -11,7 +11,6 @@ let global_options =
     ~tco_safe_array:true
     ~tco_safe_vector_array:true
     ~po_deregister_php_stdlib:false
-    ~po_use_full_fidelity:true
     ~po_disallow_execution_operator:false
     ~po_disable_define:false
     ~tco_user_attrs:None

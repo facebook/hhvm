@@ -76,9 +76,6 @@ type t = {
  (* Flag for disabling functions in HHI files with the __PHPStdLib attribute *)
  po_deregister_php_stdlib : bool;
 
- (* Flag to signal whether parsing via FFP or legacy parser *)
- po_use_full_fidelity : bool;
-
  (* Flag to disable the backticks execution operator *)
  po_disallow_execution_operator : bool;
 
@@ -175,7 +172,6 @@ val make :
   tco_safe_array: bool ->
   tco_safe_vector_array: bool ->
   po_deregister_php_stdlib: bool ->
-  po_use_full_fidelity: bool ->
   po_disallow_execution_operator: bool ->
   po_disable_define: bool ->
   tco_user_attrs: SSet.t option ->
@@ -213,7 +209,6 @@ val tco_disallow_array_as_tuple : t -> bool
 val tco_allowed_attribute : t -> SSet.elt -> bool
 val po_auto_namespace_map : t -> (string * string) list
 val po_deregister_php_stdlib : t -> bool
-val po_use_full_fidelity : t -> bool
 val po_disallow_execution_operator : t -> bool
 val po_disable_variable_variables : t -> bool
 val po_disable_define : t -> bool

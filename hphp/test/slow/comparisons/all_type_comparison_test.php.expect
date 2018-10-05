@@ -32288,4 +32288,4 @@ F       T       T       T       F       T       T       T       -1
 Dynamic props (a, b) cmp Dynamic props (b, c):
 F       T       F       F       F       T       Err     Err     1
 Dynamic props (b, c) cmp Dynamic props (a, b):
-F       T       Err     Err     Err     Err     Err     F       Err
+F       T       Err     Err     Err     Err     F       F       Err

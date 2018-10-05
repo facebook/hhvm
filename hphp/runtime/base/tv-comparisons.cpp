@@ -778,6 +778,77 @@ struct Lt {
   }
 };
 
+struct Lte {
+  using RetType = bool;
+
+  template<class T, class U>
+  typename std::enable_if<
+    !std::is_pointer<T>::value &&
+    !std::is_pointer<U>::value,
+    bool
+  >::type operator()(T t, U u) const { return t <= u; }
+
+  bool operator()(const StringData* sd1, const StringData* sd2) const {
+    return sd1->compare(sd2) <= 0;
+  }
+
+  bool operator()(const ArrayData* ad1, const ArrayData* ad2) const {
+    assertx(ad1->isPHPArray());
+    assertx(ad2->isPHPArray());
+    return ArrayData::Lte(ad1, ad2);
+  }
+
+  bool operator()(const ObjectData* od1, const ObjectData* od2) const {
+    assertx(od1);
+    assertx(od2);
+    // compare is not symmetrical; order of operands matters here
+    return od1->compare(*od2) <= 0;
+  }
+
+  bool operator()(const ResourceData* rd1, const ResourceData* rd2) const {
+    return rd1->o_toInt64() <= rd2->o_toInt64();
+  }
+  bool operator()(const ResourceHdr* rd1, const ResourceHdr* rd2) const {
+    return rd1->data()->o_toInt64() <= rd2->data()->o_toInt64();
+  }
+
+  bool vec(const ArrayData* ad1, const ArrayData* ad2) const {
+    assertx(ad1->isVecArray());
+    assertx(ad2->isVecArray());
+    return PackedArray::VecLte(ad1, ad2);
+  }
+  bool dict(const ArrayData* ad1, const ArrayData* ad2) const {
+    assertx(ad1->isDictOrShape());
+    assertx(ad2->isDictOrShape());
+    throw_dict_compare_exception();
+  }
+  bool keyset(const ArrayData* ad1, const ArrayData* ad2) const {
+    assertx(ad1->isKeyset());
+    assertx(ad2->isKeyset());
+    throw_keyset_compare_exception();
+  }
+
+  bool vecVsNonVec() const {
+    throw_vec_compare_exception();
+  }
+  bool dictVsNonDict() const {
+    throw_dict_compare_exception();
+  }
+  bool keysetVsNonKeyset() const {
+    throw_keyset_compare_exception();
+  }
+  bool collectionVsNonObj() const {
+    throw_collection_compare_exception();
+  }
+
+  bool noticeOnArrNonArr() const {
+    return checkHACCompare();
+  }
+  bool noticeOnArrHackArr() const {
+    return checkHACCompare();
+  }
+};
+
 struct Gt {
   using RetType = bool;
 
@@ -815,6 +886,77 @@ struct Gt {
     assertx(ad1->isVecArray());
     assertx(ad2->isVecArray());
     return PackedArray::VecGt(ad1, ad2);
+  }
+  bool dict(const ArrayData* ad1, const ArrayData* ad2) const {
+    assertx(ad1->isDictOrShape());
+    assertx(ad2->isDictOrShape());
+    throw_dict_compare_exception();
+  }
+  bool keyset(const ArrayData* ad1, const ArrayData* ad2) const {
+    assertx(ad1->isKeyset());
+    assertx(ad2->isKeyset());
+    throw_keyset_compare_exception();
+  }
+
+  bool vecVsNonVec() const {
+    throw_vec_compare_exception();
+  }
+  bool dictVsNonDict() const {
+    throw_dict_compare_exception();
+  }
+  bool keysetVsNonKeyset() const {
+    throw_keyset_compare_exception();
+  }
+  bool collectionVsNonObj() const {
+    throw_collection_compare_exception();
+  }
+
+  bool noticeOnArrNonArr() const {
+    return checkHACCompare();
+  }
+  bool noticeOnArrHackArr() const {
+    return checkHACCompare();
+  }
+};
+
+struct Gte {
+  using RetType = bool;
+
+  template<class T, class U>
+  typename std::enable_if<
+    !std::is_pointer<T>::value &&
+    !std::is_pointer<U>::value,
+    bool
+  >::type operator()(T t, U u) const { return t >= u; }
+
+  bool operator()(const StringData* sd1, const StringData* sd2) const {
+    return sd1->compare(sd2) >= 0;
+  }
+
+  bool operator()(const ArrayData* ad1, const ArrayData* ad2) const {
+    assertx(ad1->isPHPArray());
+    assertx(ad2->isPHPArray());
+    return ArrayData::Gte(ad1, ad2);
+  }
+
+  bool operator()(const ObjectData* od1, const ObjectData* od2) const {
+    assertx(od1);
+    assertx(od2);
+    // compare is not symmetrical; order of operands matters here
+    return od2->compare(*od1) <= 0;
+  }
+
+  bool operator()(const ResourceData* rd1, const ResourceData* rd2) const {
+    return rd1->o_toInt64() >= rd2->o_toInt64();
+  }
+  bool operator()(const ResourceHdr* rd1, const ResourceHdr* rd2) const {
+    return rd1->data()->o_toInt64() >= rd2->data()->o_toInt64();
+  }
+
+  bool vec(const ArrayData* ad1, const ArrayData* ad2) const {
+    assertx(ad1->isVecArray());
+    assertx(ad2->isVecArray());
+    return PackedArray::VecGte(ad1, ad2);
   }
   bool dict(const ArrayData* ad1, const ArrayData* ad2) const {
     assertx(ad1->isDictOrShape());
@@ -1220,36 +1362,13 @@ int64_t tvCompare(TypedValue tv1, TypedValue tv2) {
 bool cellLessOrEqual(Cell c1, Cell c2) {
   assertx(cellIsPlausible(c1));
   assertx(cellIsPlausible(c2));
-
-  if ((isArrayLikeType(c1.m_type) && isArrayLikeType(c2.m_type)) ||
-      (c1.m_type == KindOfObject && c2.m_type == KindOfObject) ||
-      (c1.m_type == KindOfResource && c2.m_type == KindOfResource)) {
-    return cellLess(c1, c2) || cellEqual(c1, c2);
-  }
-
-  // We have to treat NaN specially: NAN <= NAN is false, for example, so we
-  // can't just say !(NAN > NAN).
-  if ((c1.m_type == KindOfDouble && std::isnan(c1.m_data.dbl)) ||
-      (c2.m_type == KindOfDouble && std::isnan(c2.m_data.dbl))) {
-    return cellLess(c1, c2) || cellEqual(c1, c2);
-  }
-  return !cellGreater(c1, c2);
+  return cellRelOp(Lte(), c1, c2);
 }
 
 bool cellGreaterOrEqual(Cell c1, Cell c2) {
   assertx(cellIsPlausible(c1));
   assertx(cellIsPlausible(c2));
-
-  if ((isArrayLikeType(c1.m_type) && isArrayLikeType(c2.m_type)) ||
-      (c1.m_type == KindOfObject && c2.m_type == KindOfObject) ||
-      (c1.m_type == KindOfResource && c2.m_type == KindOfResource)) {
-    return cellGreater(c1, c2) || cellEqual(c1, c2);
-  }
-  if ((c1.m_type == KindOfDouble && std::isnan(c1.m_data.dbl)) ||
-      (c2.m_type == KindOfDouble && std::isnan(c2.m_data.dbl))) {
-    return cellGreater(c1, c2) || cellEqual(c1, c2);
-  }
-  return !cellLess(c1, c2);
+  return cellRelOp(Gte(), c1, c2);
 }
 
 //////////////////////////////////////////////////////////////////////

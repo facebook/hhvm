@@ -80,6 +80,14 @@ public:
     return Array(ArrayData::Create(), NoIncRef{});
   }
 
+  /*
+   * There are existing callsites that we intentionally want to create a
+   * "traditional" PHP array with no specialization. Array::CreatePHPArray()
+   * are calls that have been audited and determined that the callsite should
+   * never be converted.
+   */
+  static constexpr auto CreatePHPArray = &Create;
+
   static Array CreateVec() {
     return Array(ArrayData::CreateVec(), NoIncRef{});
   }

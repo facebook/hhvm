@@ -44,6 +44,12 @@ TEST(ARRAY, Constructors) {
   EXPECT_TRUE(arr.isPHPArray());
   EXPECT_FALSE(arr.isHackArray());
 
+  arr = Array::CreatePHPArray();
+  arr.append(1);
+  EXPECT_TRUE(!arr.empty());
+  EXPECT_TRUE(arr.size() == 1);
+  EXPECT_TRUE(arr.length() == 1);
+
   arr = make_packed_array(0);
   EXPECT_TRUE(!arr.empty());
   EXPECT_TRUE(arr.size() == 1);

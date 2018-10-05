@@ -2995,6 +2995,18 @@ void clean_86reifiedinit_methods(IndexData& index) {
     needsinit.emplace(cinfo->baseList[0]->cls);
   }
 
+  // Remove it from index.methods first since this is not a unique pointer
+  auto const range = index.methods.equal_range(s__86reifiedinit.get());
+  for (auto it = range.first; it != range.second; ) {
+    if (!it->second->cls->parentName && needsinit.count(it->second->cls) == 0) {
+      FTRACE(2, "Erasing {}::{} from methods\n", it->second->cls->name,
+        s__86reifiedinit.get());
+      it = index.methods.erase(it);
+      continue;
+    }
+    ++it;
+  }
+
   // Remove 86reifiedinit from the ones that do not need it
   for (auto& cinfo : index.allClassInfos) {
     if (cinfo->parent == nullptr && needsinit.count(cinfo->cls) == 0) {
@@ -3460,6 +3472,7 @@ Index::Index(php::Program* program,
   // index invariants hold.  These each may depend on computations from
   // previous functions, so be careful changing the order here.
   compute_subclass_list(*m_data);
+  clean_86reifiedinit_methods(*m_data); // uses the base class lists
   mark_no_override_methods(*m_data);    // uses AttrUnique
   define_func_families(*m_data);        // uses AttrNoOverride functions
   find_magic_methods(*m_data);          // uses the subclass lists
@@ -3470,7 +3483,6 @@ Index::Index(php::Program* program,
   check_invariants(*m_data);
 
   mark_no_override_classes(*m_data);    // uses AttrUnique
-  clean_86reifiedinit_methods(*m_data); // uses the base class lists
 
   if (RuntimeOption::EvalCheckReturnTypeHints == 3) {
     trace_time tracer("initialize return types");

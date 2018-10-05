@@ -1,43 +1,43 @@
 File "generics.php--file2.php", line 64, characters 3-13:
-  A as A<int>
+  exact A<int>
 File "generics.php--file2.php", line 67, characters 3-13:
-  A as A<^[unresolved]>
+  exact A<[unresolved]>
 File "generics.php--file2.php", line 70, characters 3-13:
-  A as A<int>
+  exact A<int>
 File "generics.php--file2.php", line 73, characters 3-13:
-  B as B<int>
+  exact B<int>
 File "generics.php--file2.php", line 76, characters 3-13:
-  B as B<^(int)>
+  exact B<int>
 File "generics.php--file2.php", line 79, characters 3-13:
   A<int>
 File "generics.php--file2.php", line 82, characters 3-13:
-  (A<int> | A as A<^[unresolved]>)
+  (A<int> | exact A<[unresolved]>)
 File "generics.php--file2.php", line 85, characters 3-13:
-  (A<T> | A as A<^[unresolved]>)
+  (A<T> | exact A<[unresolved]>)
 File "generics.php--file2.php", line 88, characters 3-13:
-  (A<T> | A as A<int>)
+  (A<T> | exact A<int>)
 File "generics.php--file2.php", line 91, characters 3-13:
   (A<T> | A<int>)
 File "generics.php--file2.php", line 94, characters 3-13:
   A<T>
 File "generics.php--file2.php", line 97, characters 3-13:
-  A as (A<int> | A<string>)
+  exact (A<int> | A<string>)
 File "generics.php--file2.php", line 98, characters 3-35:
-  ^(bool | bool)
+  (bool | bool)
 File "generics.php--file2.php", line 101, characters 3-13:
-  A as (A<num> | A<arraykey>)
+  exact (A<num> | A<arraykey>)
 File "generics.php--file2.php", line 102, characters 3-34:
-  ^(bool | bool)
+  (bool | bool)
 File "generics.php--file2.php", line 105, characters 3-13:
-  (A as A<int> | B as B<^(int)>)
+  (exact A<int> | exact B<int>)
 File "generics.php--file2.php", line 106, characters 3-25:
-  ^(bool | bool)
+  (bool | bool)
 File "generics.php--file2.php", line 109, characters 3-13:
   D<(int | string)>
 File "generics.php--file2.php", line 112, characters 3-13:
-  D as D<(int | string)>
+  exact D<(int | string)>
 File "generics.php--file2.php", line 115, characters 3-13:
-  (D<int> | D as D<string>)
+  (D<int> | exact D<string>)
 File "generics.php--file2.php", line 118, characters 3-13:
   E<int>
 File "generics.php--file2.php", line 121, characters 3-13:

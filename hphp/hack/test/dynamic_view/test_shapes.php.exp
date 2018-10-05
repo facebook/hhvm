@@ -1,5 +1,5 @@
 File "test_shapes.php", line 6, characters 3-13:
-  shape(NotRealClass::const => ^(int))
+  shape(NotRealClass::const => int)
 File "test_shapes.php", line 3, characters 14-32:
 A shape field name must be an int or string (Typing[4052])
   File "test_shapes.php", line 3, characters 14-25:

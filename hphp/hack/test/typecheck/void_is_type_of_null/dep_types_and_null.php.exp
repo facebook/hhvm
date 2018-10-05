@@ -1,13 +1,13 @@
 File "dep_types_and_null.php", line 15, characters 3-13:
-  Ref as Ref<^(void)>
+  exact Ref<void>
 File "dep_types_and_null.php", line 17, characters 3-13:
-  Ref as Ref<^?string>
+  exact Ref<?string>
 File "dep_types_and_null.php", line 18, characters 3-20:
-  ^?string
+  ?string
 File "dep_types_and_null.php", line 24, characters 3-13:
-  Ref as Ref<^(void)>
+  exact Ref<void>
 File "dep_types_and_null.php", line 25, characters 3-20:
-  ^(void)
+  void
 File "dep_types_and_null.php", line 28, characters 3-13:
-  Ref as Ref<^(Exception as Exception | <expr#1> as Exception | void)>
+  exact Ref<(exact Exception | <expr#1> as Exception | void)>
 No errors

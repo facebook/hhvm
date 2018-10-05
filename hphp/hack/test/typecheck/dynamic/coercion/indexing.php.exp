@@ -3,7 +3,7 @@ File "indexing.php", line 5, characters 3-13:
 File "indexing.php", line 10, characters 3-13:
   dict<int, int>
 File "indexing.php", line 17, characters 3-16:
-  dict<^(int | dynamic), ^(int)>
+  dict<(int | dynamic), int>
 File "indexing.php", line 21, characters 3-16:
-  dict<^(dynamic | int), ^(int)>
+  dict<(dynamic | int), int>
 No errors

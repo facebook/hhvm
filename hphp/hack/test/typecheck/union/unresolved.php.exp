@@ -5,9 +5,9 @@ File "unresolved.php", line 22, characters 3-13:
 File "unresolved.php", line 30, characters 3-13:
   ?(bool | int | string)
 File "unresolved.php", line 37, characters 3-13:
-  (A as A | string | int)
+  (exact A | string | int)
 File "unresolved.php", line 44, characters 3-13:
-  ?(A as A | string | bool | int)
+  ?(exact A | string | bool | int)
 File "unresolved.php", line 51, characters 3-13:
   (nonnull | string)
 File "unresolved.php", line 54, characters 3-13:

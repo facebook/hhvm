@@ -1,7 +1,7 @@
 File "test_arrays.php", line 7, characters 3-13:
   dynamic
 File "test_arrays.php", line 10, characters 3-13:
-  array<^(dynamic)>
+  array<dynamic>
 File "test_arrays.php", line 11, characters 10-11:
 Invalid return type (Typing[4110])
   File "test_arrays.php", line 5, characters 25-27:

@@ -87,12 +87,12 @@ let test_mypair_cases = [
   ("test_mypair.php", 6, 8), "MyPair<A>";
   ("test_mypair.php", 6, 15), "(function(): A)";
   ("test_mypair.php", 6, 19), "A";
-  ("test_mypair.php", 8, 4), "MyPair";
+  ("test_mypair.php", 8, 4), "MyPair<A>";
   ("test_mypair.php", 8, 19), "B";
   ("test_mypair.php", 10, 14), "A";
   ("test_mypair.php", 12, 10), "(function(MyPair<A> $v): MyPair<A>)";
   ("test_mypair.php", 12, 21), "MyPair<A>";
-  ("test_mypair.php", 12, 22), "MyPair";
+  ("test_mypair.php", 12, 22), "MyPair<A>";
 ]
 
 let loop_assignment = "<?hh // strict

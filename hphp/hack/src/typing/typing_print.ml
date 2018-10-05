@@ -252,7 +252,7 @@ end
 (*****************************************************************************)
 (* Pretty-printer of the "full" type.                                        *)
 (* This is used in server/symbolTypeService and elsewhere                    *)
-(* With debug_mode set it is used for hh_show and hh_show_env                *)
+(* With debug_mode set it is used for hh_show_env                            *)
 (*****************************************************************************)
 
 module Full = struct
@@ -359,8 +359,6 @@ module Full = struct
         else
         (* For hh_show_env we further show the type variable number *)
         if !show_tvars then (text ("#" ^ (string_of_int n)))
-        (* In debug mode just show where type variables appear *)
-        else if !debug_mode then text "^"
         else Nothing
       in
       let _, ety = Env.expand_type env (Reason.Rnone, x) in
@@ -380,14 +378,17 @@ module Full = struct
     | Tclass ((_, s), tyl) -> to_doc s ^^ list "<" k tyl ">"
     | Tabstract (AKnewtype (s, []), _) -> to_doc s
     | Tabstract (AKnewtype (s, tyl), _) -> to_doc s ^^ list "<" k tyl ">"
+    (* This is an "exact" type. Show bound, for generics etc *)
+    | Tabstract (AKdependent (`cls _, []), Some ty) ->
+      if !debug_mode then Concat [text "exact"; Space; k ty]
+      else k ty
     | Tabstract (ak, cstr) ->
-      let debug_info = if !debug_mode then
+      let cstr_info = if !debug_mode then
         match cstr with
         | None -> Nothing
         | Some ty -> Concat [Space; text "as"; Space; k ty]
-      else Nothing
-      in
-      Concat [to_doc @@ AbstractKind.to_string ak; debug_info]
+      else Nothing in
+      Concat [to_doc @@ AbstractKind.to_string ak; cstr_info]
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
     *)
     | Tapply ((_, s), tyl) -> to_doc s ^^ list "<" k tyl ">"
@@ -401,7 +402,7 @@ module Full = struct
       end
     | Tunresolved [] -> text "[unresolved]"
     | Tunresolved [ty] ->
-      if !debug_mode then Concat [text "("; k ty; text ")"] else k ty
+      if !show_tvars then Concat [text "("; k ty; text ")"] else k ty
     | Tunresolved tyl -> delimited_list (Space ^^ text "|" ^^ Space) "(" k tyl ")"
     | Tobject -> text "object"
     | Tshape (fields_known, fdm) ->

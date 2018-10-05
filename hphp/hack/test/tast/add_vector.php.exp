@@ -17,10 +17,10 @@
       (NamedBody
          { Aast.AnnotatedAST.fnb_nast =
            [(Expr
-               (([33:3-27], MyPhonyVector),
+               (([33:3-27], MyPhonyVector<X>),
                 (Binop ((Eq None),
-                   (([33:3-5], MyPhonyVector), (Lvar ([33:3-5], $x))),
-                   (([33:8-27], MyPhonyVector),
+                   (([33:3-5], MyPhonyVector<X>), (Lvar ([33:3-5], $x))),
+                   (([33:8-27], MyPhonyVector<X>),
                     (New (
                        (([33:12-25], MyPhonyVector<[unresolved]>),
                         (CI (([33:12-25], "\\MyPhonyVector"), []))),
@@ -31,7 +31,7 @@
                  (Call (Cnormal,
                     (([34:3-10], (function(X $x): void)),
                      (Obj_get (
-                        (([34:3-5], MyPhonyVector), (Lvar ([34:3-5], $x))),
+                        (([34:3-5], MyPhonyVector<X>), (Lvar ([34:3-5], $x))),
                         (([34:7-10], (function(X $x): void)),
                          (Id ([34:7-10], "add"))),
                         OG_nullthrows))),
@@ -47,7 +47,7 @@
                  (Call (Cnormal,
                     (([35:3-10], (function(X $x): void)),
                      (Obj_get (
-                        (([35:3-5], MyPhonyVector), (Lvar ([35:3-5], $x))),
+                        (([35:3-5], MyPhonyVector<X>), (Lvar ([35:3-5], $x))),
                         (([35:7-10], (function(X $x): void)),
                          (Id ([35:7-10], "add"))),
                         OG_nullthrows))),
@@ -64,7 +64,7 @@
                     (([36:3-7], (function(MyPhonyVector<X> $v): void)),
                      (Id ([36:3-7], "\\test"))),
                     [],
-                    [(([36:8-10], MyPhonyVector), (Lvar ([36:8-10], $x)))],
+                    [(([36:8-10], MyPhonyVector<X>), (Lvar ([36:8-10], $x)))],
                     []))))
              ];
            fnb_unsafe = false });

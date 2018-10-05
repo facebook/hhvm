@@ -55,7 +55,6 @@ type mode =
   | Errors
   | AllErrors
   | Lint
-  | Suggest
   | Dump_deps
   | Dump_toplevel_deps
   | Identify_symbol of int * int
@@ -205,9 +204,6 @@ let parse_options () =
     "--lint",
       Arg.Unit (set_mode Lint),
       " Produce lint errors";
-    "--suggest",
-      Arg.Unit (set_mode Suggest),
-      " Suggest missing typehints";
     "--no-builtins",
       Arg.Set no_builtins,
       " Don't use builtins (e.g. ConstSet)";
@@ -419,23 +415,9 @@ let compute_least_type tcopt popt fn =
 let infer_return tcopt fn info  =
   let names = FileInfo.simplify info in
   let fast = Relative_path.Map.singleton fn names in
-  let files = Typing_suggest_service.keys fast in
+  let keys map = Relative_path.Map.fold map ~init:[] ~f:(fun x _ y -> x :: y) in
+  let files = keys fast in
   Typing_infer_return.(get_inferred_types tcopt files ~process:format_types)
-
-let suggest_and_print tcopt fn info =
-  let names = FileInfo.simplify info in
-  let fast = Relative_path.Map.singleton fn names in
-  let patch_map = Typing_suggest_service.go None fast tcopt in
-  match Relative_path.Map.get patch_map fn with
-    | None -> ()
-    | Some l -> begin
-      (* Sort so that the unit tests come out in a consistent order, normally
-       * doesn't matter. *)
-      let l = List.sort ~cmp: (fun (x, _, _) (y, _, _) -> x - y) l
-      in
-      List.iter ~f: (ServerConvert.print_patch fn tcopt) l
-
-    end
 
 (* This allows one to fake having multiple files in one file. This
  * is used only in unit test files.
@@ -959,7 +941,6 @@ let handle_mode
     let file = cat (Relative_path.to_absolute filename) in
     let results = ServerHighlightRefs.go (file, line, column) tcopt  in
     ClientHighlightRefs.go results ~output_json:false;
-  | Suggest
   | Infer_return_types
   | Errors ->
       (* Don't typecheck builtins *)
@@ -968,8 +949,6 @@ let handle_mode
         ~init:files_info
       in
       let errors = check_errors tcopt errors files_info in
-      if mode = Suggest
-      then Relative_path.Map.iter files_info (suggest_and_print tcopt);
       if mode = Infer_return_types
       then
         Option.iter ~f:(infer_return tcopt filename)

@@ -52,6 +52,5 @@ set "max=8"
 "%python3%" test\verify.py --max-workers "%max%" --program bin\hh_single_type_check.exe test\colour
 "%python3%" test\verify.py --max-workers "%max%" --program bin\hh_single_type_check.exe test\coverage
 "%python3%" test\verify.py --max-workers "%max%" --program bin\hh_single_type_check.exe test\dumpsymbolinfo
-"%python3%" test\verify.py --max-workers "%max%" --program bin\hh_single_type_check.exe test\suggest
 "%python3%" test\verify.py --max-workers "%max%" --program bin\hh_single_type_check.exe test\typecheck
 :end

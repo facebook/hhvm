@@ -70,8 +70,6 @@ module Program =
         None
         (ServerArgs.json_mode genv.options)
         (List.map (Errors.get_error_list env.errorl) Errors.to_absolute) stdout;
-      match ServerArgs.convert genv.options with
-      | None ->
          WorkerController.killall ();
          (* as Warnings shouldn't break CI, don't change the exit status except
           * for Errors *)
@@ -82,10 +80,6 @@ module Program =
                (Errors.get_error_list env.errorl)
          in
          exit (if has_errors then 1 else 0)
-      | Some dirname ->
-         ServerConvert.go genv env dirname;
-         WorkerController.killall ();
-         exit 0
 
     (* filter and relativize updated file paths *)
     let process_updates genv updates =

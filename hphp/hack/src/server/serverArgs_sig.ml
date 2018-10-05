@@ -38,7 +38,6 @@ module type S = sig
   val ai_mode: options -> Ai_options.t option
   val check_mode: options -> bool
   val config: options -> (string * string) list
-  val convert: options -> Path.t option
   val dynamic_view: options -> bool
   val file_info_on_disk: options -> bool
   val from: options -> string

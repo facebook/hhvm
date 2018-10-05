@@ -17,7 +17,6 @@ type options = {
   ai_mode: Ai_options.t option;
   check_mode: bool;
   config: (string * string) list;
-  convert: Path.t option;
   dynamic_view: bool;
   file_info_on_disk: bool;
   from: string;
@@ -50,7 +49,6 @@ module Messages = struct
   let ai = " run ai with options"
   let check = " check and exit"
   let config = " override arbitrary value from hh.conf (format: <key>=<value>)"
-  let convert = " adds type annotations automatically"
   let daemon = " detach process"
   let dynamic_view = " start with dynamic view for IDE files on by default."
   let file_info_on_disk = " [experimental] a saved state option to store file info" ^
@@ -174,7 +172,6 @@ let parse_options () =
   let ai_mode = ref None in
   let check_mode = ref false in
   let config = ref [] in
-  let convert_dir = ref None  in
   let dynamic_view = ref false in
   let file_info_on_disk = ref false in
   let from = ref "" in
@@ -198,7 +195,6 @@ let parse_options () =
   let with_mini_state = ref None in
 
   let set_ai = fun s -> ai_mode := Some (Ai_options.prepare ~server:true s) in
-  let set_convert_dir = fun s -> convert_dir := Some s in
   let set_max_procs = fun s -> max_procs := min !max_procs s in
   let set_save_mini = fun s -> save := Some s in
   let set_wait = fun fd -> waiting_client := Some (Handle.wrap_handle fd) in
@@ -211,7 +207,6 @@ let parse_options () =
       "--config",
         Arg.String (fun s -> config := (String_utils.split2_exn '=' s) :: !config),
         Messages.config;
-      "--convert", Arg.String set_convert_dir, Messages.convert;
       "--daemon", Arg.Set should_detach, Messages.daemon;
       "--dynamic-view", Arg.Set dynamic_view, Messages.dynamic_view;
       "--file-info-on-disk", Arg.Set file_info_on_disk, Messages.file_info_on_disk;
@@ -247,9 +242,6 @@ let parse_options () =
   end;
   (* --json and --save both imply check *)
   let check_mode = !check_mode || !json_mode || !save <> None; in
-  (* Conversion mode implies check *)
-  let check_mode = check_mode || !convert_dir <> None in
-  let convert = Option.map ~f:Path.make !convert_dir in
   if check_mode && !waiting_client <> None then begin
     Printf.eprintf "--check is incompatible with wait modes!\n";
     Exit_status.(exit Input_error)
@@ -277,7 +269,6 @@ let parse_options () =
     ai_mode = !ai_mode;
     check_mode = check_mode;
     config = !config;
-    convert = convert;
     dynamic_view = !dynamic_view;
     file_info_on_disk = !file_info_on_disk;
     from = !from;
@@ -302,7 +293,6 @@ let default_options ~root = {
   ai_mode = None;
   check_mode = false;
   config = [];
-  convert = None;
   dynamic_view = false;
   file_info_on_disk = false;
   from = "";
@@ -329,7 +319,6 @@ let default_options ~root = {
 let ai_mode options = options.ai_mode
 let check_mode options = options.check_mode
 let config options = options.config
-let convert options = options.convert
 let dynamic_view options = options.dynamic_view
 let file_info_on_disk options = options.file_info_on_disk
 let from options = options.from
@@ -370,7 +359,6 @@ let to_string
     ai_mode;
     check_mode;
     config;
-    convert;
     dynamic_view;
     file_info_on_disk;
     from;
@@ -398,9 +386,6 @@ let to_string
     let waiting_client_str = match waiting_client with
       | None -> "<>"
       | Some _ -> "WaitingClient(...)" in
-    let convert_str = match convert with
-      | None -> "<>"
-      | Some path -> Path.to_string path in
     let save_filename_str = match save_filename with
       | None -> "<>"
       | Some path -> path in
@@ -415,7 +400,6 @@ let to_string
         "ai_mode: "; ai_mode_str; ", ";
         "check_mode: "; string_of_bool check_mode; ", ";
         "config: "; config_str;
-        "convert: "; convert_str; ", ";
         "dynamic_view: "; string_of_bool dynamic_view; ", ";
         "file_info_on_disk: "; string_of_bool file_info_on_disk; ", ";
         "from: "; from; ", ";

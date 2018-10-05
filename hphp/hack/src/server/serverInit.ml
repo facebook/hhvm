@@ -227,7 +227,6 @@ module ServerInitCommon = struct
 
   let is_check_mode (options: ServerArgs.options) : bool =
     ServerArgs.check_mode options &&
-    ServerArgs.convert options = None &&
     (* Note: we need to run update_files to get an accurate saved state *)
     ServerArgs.save_filename options = None
 

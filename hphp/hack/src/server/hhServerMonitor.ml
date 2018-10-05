@@ -19,6 +19,7 @@
 *)
 
 let exit_on_parent_exit () = Parent.exit_on_parent_exit 10 60
+let () = Random.self_init ()
 
 module SM = ServerMonitor.Make_monitor
   (HhServerMonitorConfig.HhServerConfig) (HhMonitorInformant);;

@@ -1,6 +1,8 @@
 module WEW = WatchmanEventWatcher
 module Config = WatchmanEventWatcherConfig
 
+let () = Random.self_init ()
+
 module Args = struct
 
   type t = {

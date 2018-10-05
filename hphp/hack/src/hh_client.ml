@@ -38,6 +38,7 @@
  *)
 
 let exit_on_parent_exit () = Parent.exit_on_parent_exit 10 60
+let () = Random.self_init ()
 
 let () =
   (* no-op, needed at entry-point for Daemon hookup *)

@@ -417,8 +417,10 @@ and simplify_subtype
       let td = Env.get_typedef env name_super in
       begin match td with
         | Some {td_tparams; _} ->
-          simplify_subtype_variance ~deep name_sub td_tparams tyl_sub tyl_super env
-        | None -> default ()
+          let variancel = List.map td_tparams (fun (var,_,_,_) -> var) in
+          simplify_subtype_variance ~deep name_sub variancel tyl_sub tyl_super env
+        | None ->
+          default ()
       end
 
   | (_, Tabstract (AKdependent d_sub, Some ty_sub)),
@@ -539,19 +541,19 @@ and simplify_subtype
       else if List.is_empty tyl_sub && List.is_empty tyl_super
       then valid ()
       else
-        begin match class_def_sub with
-        | None ->
-          default ()
+        let variancel =
+          match class_def_sub with
+          | None ->
+            List.map tyl_sub (fun _ -> Ast.Invariant)
+          | Some class_sub ->
+            List.map class_sub.tc_tparams (fun (var, _, _, _) -> var) in
 
-        | Some class_sub ->
           (* C<t1, .., tn> <: C<u1, .., un> iff
            *   t1 <:v1> u1 /\ ... /\ tn <:vn> un
            * where vi is the variance of the i'th generic parameter of C,
            * and <:v denotes the appropriate direction of subtyping for variance v
            *)
-          simplify_subtype_variance ~deep cid_sub
-            class_sub.tc_tparams tyl_sub tyl_super env
-        end
+          simplify_subtype_variance ~deep cid_sub variancel tyl_sub tyl_super env
     else
       begin match class_def_sub with
       | None ->
@@ -657,16 +659,16 @@ and simplify_subtype
 and simplify_subtype_variance
   ~(deep : bool)
   (cid : string)
-  (tparams : decl tparam list)
+  (variancel : Ast.variance list)
   (children_tyl : locl ty list)
   (super_tyl : locl ty list)
   : Env.env -> Env.env * TL.subtype_prop
   = fun env ->
-  match tparams, children_tyl, super_tyl with
+  match variancel, children_tyl, super_tyl with
   | [], _, _
   | _, [], _
   | _, _, [] -> valid env
-  | (variance,_,_,_) :: tparams, child :: childrenl, super :: superl ->
+  | variance :: variancel, child :: childrenl, super :: superl ->
       begin match variance with
       | Ast.Covariant ->
         simplify_subtype ~deep ~this_ty:None child super env
@@ -675,17 +677,17 @@ and simplify_subtype_variance
           Utils.strip_ns cid), snd super) in
         simplify_subtype ~deep ~this_ty:None super child env
       | Ast.Invariant ->
+        let super' = (Reason.Rinvariant_generic (fst super,
+          Utils.strip_ns cid), snd super) in
         if deep
         then
           env |>
-          simplify_subtype ~deep ~this_ty:None child super &&&
+          simplify_subtype ~deep ~this_ty:None child super' &&&
           simplify_subtype ~deep ~this_ty:None super child
         else
-          let super = (Reason.Rinvariant_generic (fst super,
-            Utils.strip_ns cid), snd super) in
-          env, TL.Eq (child, super)
+          env, TL.Eq (child, super')
       end &&&
-      simplify_subtype_variance ~deep cid tparams childrenl superl
+      simplify_subtype_variance ~deep cid variancel childrenl superl
 
 and simplify_subtype_params
   ~deep
@@ -1195,8 +1197,8 @@ and sub_type_inner
     ~f:(fun ty -> Typing_log.Log_type ("this_ty", ty) :: types) in
   Typing_log.log_types 2 (Reason.to_pos (fst ty_sub)) env
     [Typing_log.Log_sub ("Typing_subtype.sub_type_inner", types)];
-  let env, prop =
-    simplify_subtype ~deep:false ~this_ty ty_sub ty_super env in
+  let deep = TypecheckerOptions.unresolved_as_union (Env.get_tcopt env) in
+  let env, prop = simplify_subtype ~deep ~this_ty ty_sub ty_super env in
   let env =
     if TypecheckerOptions.experimental_feature_enabled
          (Env.get_tcopt env)
@@ -1220,6 +1222,12 @@ and sub_type_inner_helper env ~this_ty
   let fail () =
     TUtils.uerror (fst ety_super) (snd ety_super) (fst ety_sub) (snd ety_sub);
     env in
+
+  Typing_log.log_types 2 (Reason.to_pos (fst ty_sub)) env
+  [Typing_log.Log_sub
+    ("Typing_subtype.sub_type_inner_helper",
+     [Typing_log.Log_type ("ty_sub", ty_sub);
+     Typing_log.Log_type ("ty_super", ty_super)])];
 
   match ety_sub, ety_super with
   | (_, Terr), _
@@ -1253,8 +1261,7 @@ and sub_type_inner_helper env ~this_ty
 (****************************************************************************)
   | (r_sub, _), (_, Tunresolved _) ->
       let ty_sub = (r_sub, Tunresolved [ty_sub]) in
-      sub_type_inner_helper env ~this_ty
-        ty_sub ty_super
+      sub_type_inner env ~this_ty ty_sub ty_super
    (* This case is for when Tany comes from expanding an empty Tvar - it will
     * result in binding the type variable to the other type. *)
   | _, (_, Tany) -> fst (Unify.unify env ty_super ty_sub)
@@ -1375,16 +1382,6 @@ and sub_type_inner_helper env ~this_ty
       begin match class_ with
         | None -> env
         | Some class_ ->
-          (* We handle the case where a generic A<T> is used as A *)
-          let tyl_sub =
-            if List.is_empty tyl_sub && not (Env.is_strict env)
-            then List.map class_.tc_tparams (fun _ -> (p_sub, Tany))
-            else tyl_sub
-          in
-            if List.length class_.tc_tparams <> List.length tyl_sub
-            then
-              Errors.expected_tparam ~definition_pos:class_.tc_pos
-                ~use_pos:(Reason.to_pos p_sub) (List.length class_.tc_tparams);
           if class_.tc_kind = Ast.Ctrait || class_.tc_kind = Ast.Cinterface then
           (* NOTE: We rely on the fact that we fold all ancestors of
            * ty_sub in its class_type so we will never hit this case

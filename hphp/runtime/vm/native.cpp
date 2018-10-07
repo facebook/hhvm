@@ -831,5 +831,15 @@ bool registerConstant(const StringData* cnsName,
   return true;
 }
 
+template
+void callFunc<true>(const Func* func, void *ctx,
+                    TypedValue *args, int32_t numNonDefault,
+                    TypedValue& ret);
+
+template
+void callFunc<false>(const Func* func, void *ctx,
+                     TypedValue *args, int32_t numNonDefault,
+                     TypedValue& ret);
+
 //////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Native

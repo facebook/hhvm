@@ -1042,9 +1042,19 @@ bool ObjectData::less(const ObjectData& other) const {
   return compare(other) < 0;
 }
 
+bool ObjectData::lessEqual(const ObjectData& other) const {
+  // compare is not symmetrical; order of operands matters here
+  return compare(other) <= 0;
+}
+
 bool ObjectData::more(const ObjectData& other) const {
   // compare is not symmetrical; order of operands matters here
   return other.compare(*this) < 0;
+}
+
+bool ObjectData::moreEqual(const ObjectData& other) const {
+  // compare is not symmetrical; order of operands matters here
+  return other.compare(*this) <= 0;
 }
 
 int64_t ObjectData::compare(const ObjectData& other) const {

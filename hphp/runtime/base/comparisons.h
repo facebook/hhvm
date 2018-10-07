@@ -1054,8 +1054,7 @@ inline bool less(const ObjectData* v1, const ObjectData* v2) {
 inline bool lessEqual(const ObjectData* v1, const ObjectData* v2) {
   assertx(v1);
   assertx(v2);
-  // compare is not symmetrical; order of operands matters here
-  return v1->compare(*v2) <= 0;
+  return v1->lessEqual(*v2);
 }
 
 inline bool more(const ObjectData* v1, const ObjectData* v2) {
@@ -1067,8 +1066,7 @@ inline bool more(const ObjectData* v1, const ObjectData* v2) {
 inline bool moreEqual(const ObjectData* v1, const ObjectData* v2) {
   assertx(v1);
   assertx(v2);
-  // compare is not symmetrical; order of operands matters here
-  return v2->compare(*v1) <= 0;
+  return v1->moreEqual(*v2);
 }
 
 inline int64_t compare(const ObjectData* v1, const ObjectData* v2) {

@@ -323,7 +323,9 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
    */
   bool equal(const ObjectData&) const;
   bool less(const ObjectData&) const;
+  bool lessEqual(const ObjectData&) const;
   bool more(const ObjectData&) const;
+  bool moreEqual(const ObjectData&) const;
   int64_t compare(const ObjectData&) const;
 
   /*

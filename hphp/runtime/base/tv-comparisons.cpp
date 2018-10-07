@@ -801,8 +801,7 @@ struct Lte {
   bool operator()(const ObjectData* od1, const ObjectData* od2) const {
     assertx(od1);
     assertx(od2);
-    // compare is not symmetrical; order of operands matters here
-    return od1->compare(*od2) <= 0;
+    return od1->lessEqual(*od2);
   }
 
   bool operator()(const ResourceData* rd1, const ResourceData* rd2) const {
@@ -942,8 +941,7 @@ struct Gte {
   bool operator()(const ObjectData* od1, const ObjectData* od2) const {
     assertx(od1);
     assertx(od2);
-    // compare is not symmetrical; order of operands matters here
-    return od2->compare(*od1) <= 0;
+    return od1->moreEqual(*od2);
   }
 
   bool operator()(const ResourceData* rd1, const ResourceData* rd2) const {
@@ -1015,7 +1013,7 @@ struct Cmp {
   }
 
   int64_t operator()(const ObjectData* od1, const ObjectData* od2) const {
-    return HPHP::compare(od1, od2);
+    return od1->compare(*od2);
   }
 
   int64_t operator()(const ResourceData* rd1, const ResourceData* rd2) const {

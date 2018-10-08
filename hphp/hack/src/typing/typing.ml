@@ -586,25 +586,13 @@ and fun_implicit_return env pos ret = function
      * "void" type *)
     let env = check_inout_return env in
     let rty = Reason.Rno_return pos, Tprim Nast.Tvoid in
-    Typing_suggest.save_return env ret rty;
-    if TypecheckerOptions.disallow_implicit_returns_in_non_void_functions
-         (Env.get_tcopt env)
-    then
-      fst (Type.unify pos Reason.URreturn env rty ret)
-    else
-      Type.coerce_type pos Reason.URreturn env rty ret
+    Typing_return.implicit_return env pos ~expected:ret ~actual:rty
   | Ast.FAsync ->
     (* An async function without a terminal block has an implicit return;
      * the Awaitable<void> type *)
     let r = Reason.Rno_return_async pos in
     let rty = r, Tclass ((pos, SN.Classes.cAwaitable), [r, Tprim Nast.Tvoid]) in
-    Typing_suggest.save_return env ret rty;
-    if TypecheckerOptions.disallow_implicit_returns_in_non_void_functions
-         (Env.get_tcopt env)
-    then
-      fst (Type.unify pos Reason.URreturn env rty ret)
-    else
-      Type.coerce_type pos Reason.URreturn env rty ret
+    Typing_return.implicit_return env pos ~expected:ret ~actual:rty
 
 (* Perform provided typing function only if the Next continuation is present.
  * If the Next continuation is absent, it means that we are typechecking
@@ -759,14 +747,7 @@ and stmt env = function
       let env = check_inout_return env in
       let rty = Typing_return.wrap_awaitable env p (Reason.Rwitness p, Tprim Tvoid) in
       let { Typing_env_return_info.return_type = expected_return; _ } = Env.get_return env in
-      Typing_suggest.save_return env expected_return rty;
-      let env =
-        if TypecheckerOptions.disallow_implicit_returns_in_non_void_functions
-              (Env.get_tcopt env)
-        then
-          fst (Type.unify p Reason.URreturn env rty expected_return)
-        else
-          Type.coerce_type p Reason.URreturn env rty expected_return in
+      let env = Typing_return.implicit_return env p ~expected:expected_return ~actual:rty in
       let env = LEnv.move_and_merge_next_in_cont env C.Exit in
       env, T.Return (p, None)
   | Return (p, Some e) ->

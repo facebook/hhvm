@@ -117,3 +117,11 @@ let async_suggest_return fkind hint pos =
     | Nast.Happly (s, _) ->
         if snd s <> Naming_special_names.Classes.cAwaitable then e_func pos
     | _ -> e_func pos
+
+let implicit_return env pos ~expected ~actual =
+  Typing_suggest.save_return env expected actual;
+  let env =
+    if TypecheckerOptions.disallow_implicit_returns_in_non_void_functions (Env.get_tcopt env)
+    then Typing_ops.sub_type pos Reason.URreturn env expected actual
+    else env in
+  Typing_ops.coerce_type pos Reason.URreturn env actual expected

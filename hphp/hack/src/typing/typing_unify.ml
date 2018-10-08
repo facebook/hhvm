@@ -72,9 +72,6 @@ let rec unify ?(opts=TUtils.default_unify_opt) env ty1 ty2 =
   | (r2, Tmixed), (_, Toption ty1)
   | (_, Toption ty1), (r2, Tmixed) ->
     unify ~opts env ty1 (r2, Tmixed)
-  | (_, Tprim Nast.Tvoid), (_, Toption _ as ty)
-  | (_, Toption _ as ty), (_, Tprim Nast.Tvoid) ->
-    env, ty
   | (r1, ty1), (r2, ty2) ->
       let r = unify_reason r1 r2 in
       let env, ty = unify_ ~opts env r1 ty1 r2 ty2 in

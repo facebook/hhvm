@@ -101,14 +101,12 @@ module Graph = struct
 
   let add x y = hh_add_dep ((x lsl 31) lor y)
 
-  let union_deps l1 l2 = List.dedup (List.append l1 l2)
-
   let get x =
     hh_assert_allow_dependency_table_reads ();
-    let l = union_deps (hh_get_dep x) (hh_get_dep_sqlite x) in
-    List.fold_left l ~f:begin fun acc node ->
-      DepSet.add acc node
-    end ~init:DepSet.empty
+    let deps = DepSet.empty in
+    let deps = List.fold_left ~init:deps ~f:DepSet.add (hh_get_dep x) in
+    let deps = List.fold_left ~init:deps ~f:DepSet.add (hh_get_dep_sqlite x) in
+    deps
 end
 
 (*****************************************************************************)

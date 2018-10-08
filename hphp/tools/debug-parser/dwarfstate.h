@@ -126,6 +126,7 @@ struct DwarfState {
     uint64_t size;
     bool is64Bit;
     bool isInfo;
+    uint8_t version;
     uint8_t addrSize;
     uint64_t abbrevOffset;
     uint64_t typeSignature;
@@ -205,7 +206,7 @@ struct DwarfState {
   GlobalOff getAttributeValueRef(Attribute* attr) const;
   uint64_t getAttributeValueSig8(Attribute* attr) const;
   std::vector<Dwarf_Loc> getAttributeValueExprLoc(Attribute* attr) const;
-  std::vector<Dwarf_Ranges> getRanges(uint64_t offset) const;
+  std::vector<Dwarf_Ranges> getRanges(Attribute* attr) const;
 
   // Get a string from the .debug_str section
   folly::StringPiece getStringFromStringSection(uint64_t offset) const;

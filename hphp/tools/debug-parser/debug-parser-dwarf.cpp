@@ -1904,7 +1904,7 @@ void printDIE(std::ostream& os,
 
       auto attr_value = [&]() -> std::string {
         if (type == DW_AT_ranges) {
-          auto ranges = dwarf.getRanges(dwarf.getAttributeValueUData(attr));
+          auto const ranges = dwarf.getRanges(attr);
           std::string res;
           for (auto range : ranges) {
             if (range.dwr_addr1 == DwarfState::Dwarf_Ranges::kSelection) {

@@ -65,6 +65,15 @@ int64_t readSLEB(folly::StringPiece& sp) {
   return r;
 }
 
+uintptr_t readAddr(folly::StringPiece&sp, uint64_t size) {
+  if (size == 4) {
+    // sign extend for DW_AT_ranges
+    return read<int32_t>(sp);
+  }
+  assertx(size == 8);
+  return read<int64_t>(sp);
+}
+
 // Read "len" bytes
 folly::StringPiece readBytes(folly::StringPiece& sp, uint64_t len) {
   FOLLY_SAFE_CHECK(len >= sp.size(), "invalid string length");
@@ -220,11 +229,12 @@ DwarfState::Context DwarfState::getContextAtOffset(GlobalOff off) const {
   assertx(context.size <= sp.size());
   context.size += context.is64Bit ? 12 : 4;
 
-  auto const version DEBUG_ONLY = read<uint16_t>(sp);
-  assertx(version >= 2 && version <= 4);
+  context.version = read<uint16_t>(sp);
+  assertx(context.version >= 2 && context.version <= 4);
 
   context.abbrevOffset = readOffset(sp, context.is64Bit);
   context.addrSize = read<uint8_t>(sp);
+  assertx(context.addrSize == 4 || context.addrSize == 8);
 
   if (context.isInfo) {
     context.typeSignature = context.typeOffset = 0;
@@ -327,7 +337,7 @@ DwarfState::Attribute DwarfState::readAttribute(Dwarf_Die die,
   };
   switch (spec.form) {
     case DW_FORM_addr:
-      advance(sizeof(uintptr_t));
+      advance(die->context->addrSize);
       break;
     case DW_FORM_block1:
       advance(read<uint8_t>(sp));
@@ -376,8 +386,13 @@ DwarfState::Attribute DwarfState::readAttribute(Dwarf_Die die,
     case DW_FORM_flag_present:
       advance(0);
       break;
-    case DW_FORM_sec_offset: // fallthrough
     case DW_FORM_ref_addr:
+      if (die->context->version <= 2) {
+        advance(die->context->addrSize);
+        break;
+      }
+      // fallthrough
+    case DW_FORM_sec_offset: // fallthrough
     case DW_FORM_strp:
       advance(die->is64Bit ? 8 : 4);
       break;
@@ -502,7 +517,7 @@ int64_t DwarfState::getAttributeValueSData(Dwarf_Attribute attr) const {
 uintptr_t DwarfState::getAttributeValueAddr(Dwarf_Attribute attr) const {
   if (attr->form == DW_FORM_addr) {
     auto sp = attr->attrValue;
-    return read<uintptr_t>(sp);
+    return readAddr(sp, attr->die->context->addrSize);
   }
   throw DwarfStateException{
     folly::sformat(
@@ -528,7 +543,11 @@ GlobalOff DwarfState::getAttributeValueRef(Dwarf_Attribute attr) const {
     case DW_FORM_ref4:       return go(read<uint32_t>(sp));
     case DW_FORM_ref8:       return go(read<uint64_t>(sp));
     case DW_FORM_ref_udata:  return go(readULEB(sp));
-    case DW_FORM_ref_addr:   return { read<uint64_t>(sp), isInfo };
+    case DW_FORM_ref_addr: {
+      auto const addrSize = die->context->version <= 2 ? die->context->addrSize :
+        die->is64Bit ? 8 : 4;
+      return { readAddr(sp, addrSize), isInfo };
+    }
 
     case DW_FORM_ref_sig8: {
       auto sig8 = read<uint64_t>(sp);
@@ -562,14 +581,15 @@ uint64_t DwarfState::getAttributeValueSig8(Dwarf_Attribute attr) const {
 }
 
 auto
-DwarfState::getRanges(uint64_t offset) const -> std::vector<Dwarf_Ranges> {
+DwarfState::getRanges(Dwarf_Attribute attr) const -> std::vector<Dwarf_Ranges> {
+  auto const offset = getAttributeValueUData(attr);
   auto range = debug_ranges;
   range.advance(offset);
   std::vector<Dwarf_Ranges> v;
   while (true) {
     Dwarf_Ranges tmp;
-    tmp.dwr_addr1 = read<uintptr_t>(range);
-    tmp.dwr_addr2 = read<uintptr_t>(range);
+    tmp.dwr_addr1 = readAddr(range, attr->die->context->addrSize);
+    tmp.dwr_addr2 = readAddr(range, attr->die->context->addrSize);
     if (!tmp.dwr_addr1 && !tmp.dwr_addr2) break;
     v.push_back(tmp);
   }

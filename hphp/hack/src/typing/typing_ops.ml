@@ -8,13 +8,11 @@
  *)
 
 open Core_kernel
-open Typing_defs
 
 module Reason  = Typing_reason
 module TUtils  = Typing_utils
 module Env     = Typing_env
 module Inst    = Decl_instantiate
-module Unify   = Typing_unify
 module TDef    = Typing_tdef
 module SubType = Typing_subtype
 module Phase   = Typing_phase
@@ -40,12 +38,6 @@ let coerce_type ?sub_fn:(sub=sub_type) p ur env ty_have ty_expect =
 
 let can_coerce env ty_have ty_expect =
   Typing_coercion.can_coerce env ty_have ty_expect
-
-let unify p ur env ty1 ty2 =
-  let env = { env with Env.pos = p; Env.outer_pos = p; Env.outer_reason = ur } in
-  Errors.try_add_err p (Reason.string_of_ureason ur)
-    (fun () -> Unify.unify env ty1 ty2)
-    (fun () -> env, (Reason.Rwitness p, Tany))
 
 let sub_type_decl p ur env ty_sub ty_super =
   let env, ty_super = Phase.localize_with_self env ty_super in

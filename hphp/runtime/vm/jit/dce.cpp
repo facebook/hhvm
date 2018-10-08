@@ -1142,12 +1142,14 @@ void performActRecFixups(const BlockList& blocks,
     for (auto& inst : *block) {
       ITRACE(5, "{}\n", inst.toString());
 
+      bool adjustedMarkerFp = false;
       if (auto const fp = inst.marker().fp()) {
         if (state[fp->inst()].isDead()) {
           always_assert(fp->inst()->is(DefInlineFP));
           auto const prev = fp->inst()->src(1);
           inst.marker() = inst.marker().adjustFP(prev);
           assertx(!state[prev->inst()].isDead());
+          adjustedMarkerFp = true;
         }
       }
 
@@ -1193,7 +1195,7 @@ void performActRecFixups(const BlockList& blocks,
       case MemoSetStaticValue:
       case MemoSetLSBValue:
       case MemoSetInstanceValue:
-        if (inst.marker().func() != outerFunc) {
+        if (adjustedMarkerFp) {
           ITRACE(3, "pushing stack depth of {} to {}\n", safeDepth, inst);
           inst.marker() = inst.marker().adjustSP(FPInvOffset{safeDepth});
         }

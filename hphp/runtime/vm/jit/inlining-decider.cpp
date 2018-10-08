@@ -124,7 +124,9 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee,
     }
     // Refuse if the variadic parameter actually captures something.
     auto pc = callSK.pc();
-    auto const numArgs = getImm(pc, 0).u_FCA.numArgs;
+    auto const numArgs = callSK.op() == OpFCall
+      ? getImm(pc, 0).u_FCA.numArgs
+      : getImm(pc, 0).u_IVA;
     auto const numParams = callee->numParams();
     if (numArgs >= numParams) {
       return refuse("callee has variadic capture with non-empty value");
@@ -162,24 +164,32 @@ bool checkNumArgs(SrcKey callSK, const Func* callee, Annotations& annotations) {
   };
 
   auto pc = callSK.pc();
-  auto const fca = getImm(pc, 0).u_FCA;
+  uint32_t numArgs;
+  if (callSK.op() == OpFCall) {
+    auto const fca = getImm(pc, 0).u_FCA;
+    numArgs = fca.numArgs;
+
+    if (fca.hasUnpack) {
+      return refuse("callee called with variadic arguments");
+    }
+
+    if (fca.numRets != 1) {
+      return refuse("callee with multiple returns");
+    }
+  } else {
+    assertx(callSK.op() == OpFCallAwait);
+    numArgs = getImm(pc, 0).u_IVA;
+  }
+
   auto const numParams = callee->numParams();
 
-  if (fca.numArgs > numParams) {
+  if (numArgs > numParams) {
     return refuse("callee called with too many arguments");
-  }
-
-  if (fca.hasUnpack) {
-    return refuse("callee called with variadic arguments");
-  }
-
-  if (fca.numRets != 1) {
-    return refuse("callee with multiple returns");
   }
 
   // It's okay if we passed fewer arguments than there are parameters as long
   // as the gap can be filled in by DV funclets.
-  for (auto i = fca.numArgs; i < numParams; ++i) {
+  for (auto i = numArgs; i < numParams; ++i) {
     auto const& param = callee->params()[i];
     if (!param.hasDefaultValue() &&
         (i < numParams - 1 || !callee->hasVariadicCaptureParam())) {
@@ -748,8 +758,10 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
                                  InliningDecider& inl,
                                  int32_t maxBCInstrs,
                                  Annotations& annotations) {
-  assertx(sk.op() == Op::FCall);
-  auto const numArgs = getImm(sk.pc(), 0).u_FCA.numArgs;
+  assertx(sk.op() == OpFCall || sk.op() == OpFCallAwait);
+  auto const numArgs = sk.op() == OpFCall
+    ? getImm(sk.pc(), 0).u_FCA.numArgs
+    : getImm(sk.pc(), 0).u_IVA;
 
   auto const& fpiStack = irgs.irb->fs().fpiStack();
   assertx(!fpiStack.empty());

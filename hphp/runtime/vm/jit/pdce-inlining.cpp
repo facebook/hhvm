@@ -306,6 +306,20 @@ InlineAnalysis analyze(IRUnit& unit) {
         mainFPs.insert(inst.src(0));
         ITRACE(2, "Found InlineReturn (depth = {}, fp = {}): {}\n",
                depth, inst, *fpInst->dst());
+      } else if (inst.is(InlineSuspend)) {
+        assertx(depth && fpInst->is(DefInlineFP));
+        assertx(fpInst == inst.src(0)->inst());
+
+        // Note that even though this block isn't necessarily an exit, we treat
+        // it as though it were an exit block for this FP, as we will need to
+        // sink the DefInlineFP to here.
+        addFPUse(inst, inst.src(0));
+        ia.exitBlocks[fpInst->dst()].insert(info.block);
+
+        depth--;
+        fpInst = fpInst->src(1)->inst();
+        ITRACE(2, "Found InlineSuspend (depth = {}, fp = {}): {}\n",
+               depth, inst, *fpInst->dst());
       } else if (inst.is(DefFP)) {
         assertx(!depth && !fpInst);
         fpInst = &inst;

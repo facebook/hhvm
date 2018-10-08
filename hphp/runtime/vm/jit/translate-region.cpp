@@ -725,11 +725,14 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
 
         assertx(calleeRegion->instrSize() <= budgetBCInstrs);
 
+        auto const numArgs = inst.op() == OpFCall
+          ? inst.imm[0].u_FCA.numArgs
+          : inst.imm[0].u_IVA;
         FTRACE(1, "\nstarting inlined call from {} to {} with {} args "
                "and stack:\n{}\n",
                block.func()->fullName()->data(),
                callee->fullName()->data(),
-               inst.imm[0].u_FCA.numArgs,
+               numArgs,
                show(irgs));
 
         auto returnSk = inst.nextSk();
@@ -744,7 +747,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
         };
         auto returnFuncOff = returnSk.offset() - block.func()->base();
 
-        if (irgen::beginInlining(irgs, inst.imm[0].u_FCA.numArgs, callee,
+        if (irgen::beginInlining(irgs, numArgs, callee,
                                  calleeRegion->start(),
                                  returnFuncOff,
                                  returnTarget,

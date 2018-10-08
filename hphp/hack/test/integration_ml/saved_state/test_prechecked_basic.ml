@@ -56,7 +56,7 @@ let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
    * "a" change is among master, "prechecked" files, we don't fan-out to "b" and
    * only see error in "d". *)
   let env = Test.load_state
-    ~saved_state_dir:temp_dir
+    temp_dir
     ~disk_state:[
       "a.php", x_contents "a" "string";
       "b.php", y_contents "b" "a";

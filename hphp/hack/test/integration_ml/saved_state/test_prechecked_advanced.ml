@@ -41,7 +41,7 @@ let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
   ] temp_dir;
 
   let env = Test.load_state
-    ~saved_state_dir:temp_dir
+    temp_dir
     ~disk_state:[
       "A.php", x_contents "A" "int";
       (* changes B::foo return type to string *)

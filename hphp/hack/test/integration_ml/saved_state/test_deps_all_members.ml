@@ -47,7 +47,7 @@ let save_state saved_state_dir =
 
 let load_state saved_state_dir =
   Test.load_state
-    ~saved_state_dir
+    saved_state_dir
     ~disk_state:init_disk_contents
     ~master_changes:[]
     ~local_changes:[]

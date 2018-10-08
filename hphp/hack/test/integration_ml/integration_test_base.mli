@@ -20,11 +20,11 @@ val save_state: disk_changes_type -> string -> unit
 val save_state_with_errors: disk_changes_type -> string -> string -> unit
 
 val load_state:
-  saved_state_dir:string ->
+  ?master_changes:string list ->
+  ?local_changes:string list ->
+  ?use_precheked_files:bool ->
   disk_state:disk_changes_type ->
-  master_changes:string list ->
-  local_changes:string list ->
-  use_precheked_files:bool ->
+  string (* saved_state_dir *) ->
   ServerEnv.env
 
 val in_daemon : (unit -> unit) -> unit

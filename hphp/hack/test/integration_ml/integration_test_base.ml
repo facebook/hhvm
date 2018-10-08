@@ -417,11 +417,11 @@ let save_state_with_errors disk_changes temp_dir expected_error =
   end
 
 let load_state
-    ~saved_state_dir
+    ?(master_changes = [])
+    ?(local_changes = [])
+    ?(use_precheked_files = ServerLocalConfig.(default.prechecked_files))
     ~disk_state
-    ~master_changes
-    ~local_changes
-    ~use_precheked_files =
+    saved_state_dir =
   (* In production, saved state is only used in conjunction with lazy init
    * right now, and I'm not convinced if it even works in any other
    * configuration. *)

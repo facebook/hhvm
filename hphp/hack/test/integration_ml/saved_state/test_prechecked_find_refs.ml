@@ -36,7 +36,7 @@ let save_state temp_dir =
 let test saved_state_dir test_request assert_response () =
   (* Change to foo changes A::bar() invocation in test to actually be B::bar() *)
   let env = Test.load_state
-    ~saved_state_dir
+    saved_state_dir
     ~disk_state:[
       "A.php", bar_contents "A";
       "B.php", bar_contents "B";

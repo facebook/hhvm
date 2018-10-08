@@ -39,7 +39,7 @@ let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
   (* No changes between saving and loading state *)
   Test.save_state disk_state temp_dir;
   let env = Test.load_state
-    ~saved_state_dir:temp_dir
+    temp_dir
     ~disk_state
     ~master_changes:[]
     ~local_changes:[]

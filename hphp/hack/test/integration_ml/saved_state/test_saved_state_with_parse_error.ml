@@ -26,7 +26,7 @@ let test_parsing_error (expected_error: string) (bad_contents: string) : unit =
     Test.save_state_with_errors disk_state temp_dir expected_error;
 
     let env = Test.load_state
-      ~saved_state_dir:temp_dir
+      temp_dir
       ~disk_state:disk_state
       ~master_changes:[]
       ~local_changes:[]

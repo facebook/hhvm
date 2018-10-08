@@ -26,7 +26,7 @@ let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
   ] temp_dir expected_error;
 
   let env = Test.load_state
-    ~saved_state_dir:temp_dir
+    temp_dir
     ~disk_state:[
       "foo.php", foo_contents_with_error;
       "baz.php", baz_contents;

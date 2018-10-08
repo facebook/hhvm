@@ -86,7 +86,7 @@ let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
   ] saved_state_dir;
 
   let env = Test.load_state
-    ~saved_state_dir:saved_state_dir
+    saved_state_dir
     ~disk_state:[
       foo_name, foo_similar_contents;
       test_name, test_contests;

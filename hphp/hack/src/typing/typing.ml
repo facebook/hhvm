@@ -27,7 +27,6 @@ module Inst         = Decl_instantiate
 module Type         = Typing_ops
 module Env          = Typing_env
 module LEnv         = Typing_lenv
-module Dep          = Typing_deps.Dep
 module Async        = Typing_async
 module SubType      = Typing_subtype
 module Unify        = Typing_unify
@@ -876,7 +875,6 @@ and stmt env = function
   | Switch ((pos, _) as e, cl) ->
       let env, te, ty = expr env e in
       Async.enforce_not_awaitable env (fst e) ty;
-      let env = check_exhaustiveness env (fst e) ty cl in
       (* NB: A 'continue' inside a 'switch' block is equivalent to a 'break'.
        * See the note in
        * http://php.net/manual/en/control-structures.continue.php *)
@@ -983,39 +981,6 @@ and stmt env = function
     | _ -> env
     in
     env, T.Let (id, h, t_rhs)
-
-and check_exhaustiveness env pos ty caselist =
-  check_exhaustiveness_ env pos ty caselist false
-
-and check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
-  (* Right now we only do exhaustiveness checking for enums. *)
-  (* This function has a built in hack where if Tunresolved has an enum
-     inside then it tells the enum exhaustiveness checker to
-     not punish for extra default *)
-  let env, (_, ty) = Env.expand_type env ty in
-  match ty with
-    | Tunresolved tyl ->
-      let new_enum = enum_coming_from_unresolved ||
-        (List.length tyl> 1 && List.exists tyl ~f:begin fun cur_ty ->
-        let _, (_, cur_ty) = Env.expand_type env cur_ty in
-        match cur_ty with
-          | Tabstract (AKenum _, _) -> true
-          | _ -> false
-      end) in
-      List.fold_left tyl ~init:env ~f:begin fun env ty ->
-        check_exhaustiveness_ env pos ty caselist new_enum
-      end
-    | Tabstract (AKenum id, _) ->
-      let dep = Dep.AllMembers id in
-      Option.iter env.Env.decl_env.Decl_env.droot
-        (fun root -> Typing_deps.add_idep root dep);
-      let tc = unsafe_opt @@ Env.get_enum env id in
-      Typing_enum.check_enum_exhaustiveness pos tc
-        caselist enum_coming_from_unresolved;
-      env
-    | Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tclass _ | Toption _
-      | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Ttuple _ | Tanon (_, _)
-      | Tobject | Tshape _ | Tdynamic -> env
 
 and finally_cont fb env ctx =
   let env = LEnv.replace_cont env C.Next (Some ctx) in

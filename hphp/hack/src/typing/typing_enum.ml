@@ -16,7 +16,6 @@
 open Core_kernel
 open Nast
 open Typing_defs
-open Utils
 
 module SN = Naming_special_names
 module Phase = Typing_phase
@@ -134,35 +133,3 @@ let enum_class_check env tc consts const_types =
         List.fold2_exn ~f:(enum_check_const ty_exp) ~init:env consts const_types
 
     | None -> env
-
-let get_constant tc (seen, has_default) = function
-  | Default _ -> (seen, true)
-  | Case ((pos, Class_const ((_, CI ((_, cls), _)), (_, const))), _) ->
-    if cls <> tc.tc_name then
-      (Errors.enum_switch_wrong_class pos (strip_ns tc.tc_name) (strip_ns cls);
-       (seen, has_default))
-    else
-      (match SMap.get const seen with
-        | None -> (SMap.add const pos seen, has_default)
-        | Some old_pos ->
-          Errors.enum_switch_redundant const old_pos pos;
-          (seen, has_default))
-  | Case ((pos, _), _) ->
-    Errors.enum_switch_not_const pos;
-    (seen, has_default)
-
-let check_enum_exhaustiveness pos tc caselist coming_from_unresolved =
-  (* If this check comes from an enum inside a Tunresolved, then
-     don't punish for having an extra default case *)
-  let (seen, has_default) =
-    List.fold_left ~f:(get_constant tc) ~init:(SMap.empty, false) caselist in
-  let consts = SMap.remove SN.Members.mClass tc.tc_consts in
-  let all_cases_handled = SMap.cardinal seen = SMap.cardinal consts in
-  match (all_cases_handled, has_default, coming_from_unresolved) with
-    | false, false, _ ->
-      let const_list = SMap.keys consts in
-      let unhandled =
-        List.filter const_list (function k -> not (SMap.mem k seen)) in
-      Errors.enum_switch_nonexhaustive pos unhandled tc.tc_pos
-    | true, true, false -> Errors.enum_switch_redundant_default pos tc.tc_pos
-    | _ -> ()

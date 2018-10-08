@@ -7,11 +7,78 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Tast
 open Typing_defs
+open Utils
 
 module Env = Tast_env
+
+let get_constant tc (seen, has_default) = function
+  | Default _ -> (seen, true)
+  | Case (((pos, _), Class_const ((_, CI ((_, cls), _)), (_, const))), _) ->
+    if cls <> tc.tc_name then
+      (Errors.enum_switch_wrong_class pos (strip_ns tc.tc_name) (strip_ns cls);
+       (seen, has_default))
+    else
+      (match SMap.get const seen with
+        | None -> (SMap.add const pos seen, has_default)
+        | Some old_pos ->
+          Errors.enum_switch_redundant const old_pos pos;
+          (seen, has_default))
+  | Case (((pos, _), _), _) ->
+    Errors.enum_switch_not_const pos;
+    (seen, has_default)
+
+let check_enum_exhaustiveness pos tc caselist coming_from_unresolved =
+  (* If this check comes from an enum inside a Tunresolved, then
+     don't punish for having an extra default case *)
+  let (seen, has_default) =
+    List.fold_left ~f:(get_constant tc) ~init:(SMap.empty, false) caselist in
+  let consts = SMap.remove SN.Members.mClass tc.tc_consts in
+  let all_cases_handled = SMap.cardinal seen = SMap.cardinal consts in
+  match (all_cases_handled, has_default, coming_from_unresolved) with
+    | false, false, _ ->
+      let const_list = SMap.keys consts in
+      let unhandled =
+        List.filter const_list (function k -> not (SMap.mem k seen)) in
+      Errors.enum_switch_nonexhaustive pos unhandled tc.tc_pos
+    | true, true, false -> Errors.enum_switch_redundant_default pos tc.tc_pos
+    | _ -> ()
+
+let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
+  (* Right now we only do exhaustiveness checking for enums. *)
+  (* This function has a built in hack where if Tunresolved has an enum
+     inside then it tells the enum exhaustiveness checker to
+     not punish for extra default *)
+  let env, (_, ty) = Env.expand_type env ty in
+  match ty with
+    | Tunresolved tyl ->
+      let new_enum = enum_coming_from_unresolved ||
+        (List.length tyl> 1 && List.exists tyl ~f:begin fun cur_ty ->
+        let _, (_, cur_ty) = Env.expand_type env cur_ty in
+        match cur_ty with
+          | Tabstract (AKenum _, _) -> true
+          | _ -> false
+      end) in
+      List.fold_left tyl ~init:env ~f:begin fun env ty ->
+        check_exhaustiveness_ env pos ty caselist new_enum
+      end
+    | Tabstract (AKenum id, _) ->
+      let dep = Typing_deps.Dep.AllMembers id in
+      let decl_env = Env.get_decl_env env in
+      Option.iter decl_env.Decl_env.droot
+        (fun root -> Typing_deps.add_idep root dep);
+      let tc = unsafe_opt @@ Env.get_enum env id in
+      check_enum_exhaustiveness pos tc
+        caselist enum_coming_from_unresolved;
+      env
+    | Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tclass _ | Toption _
+      | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Ttuple _ | Tanon (_, _)
+      | Tobject | Tshape _ | Tdynamic -> env
+
+let check_exhaustiveness env pos ty caselist =
+  ignore (check_exhaustiveness_ env pos ty caselist false)
 
 let ensure_valid_switch_case_value_types env scrutinee_ty casel errorf =
   let is_subtype ty_sub ty_super = snd (Env.subtype env ty_sub ty_super) in
@@ -34,7 +101,8 @@ let handler errorf = object
 
   method! at_stmt env x =
     match x with
-    | Switch (((_, scrutinee_ty), _), casel) ->
+    | Switch (((scrutinee_pos, scrutinee_ty), _), casel) ->
+      check_exhaustiveness env scrutinee_pos scrutinee_ty casel;
       ensure_valid_switch_case_value_types env scrutinee_ty casel errorf
     | _ -> ()
 end

@@ -213,3 +213,5 @@ val can_coerce : env -> Tast.ty -> Tast.ty -> env option
 
 val is_xhp_child : env -> Pos.t -> Tast.ty -> bool
 (** Verify that an XHP body expression is legal. *)
+
+val get_enum : env -> string -> Typing_defs.class_type option

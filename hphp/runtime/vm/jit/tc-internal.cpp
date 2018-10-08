@@ -343,11 +343,11 @@ bool shouldProfileNewFuncs() {
 bool profileFunc(const Func* func) {
   if (!shouldPGOFunc(func)) return false;
 
-  // If retranslateAll is enabled and we already passed the point that it should
-  // be scheduled to execute (via the treadmill), then we can't emit more
-  // Profile translations.  This is to ensure that, when retranslateAll() runs,
-  // no more Profile translations are being added to ProfData.
-  if (mcgen::retranslateAllEnabled() && hasEnoughProfDataToRetranslateAll()) {
+  // If retranslateAll has been scheduled (including cases when it is going on,
+  // or has finished), we can't emit more Profile translations.  This is to
+  // ensure that, when retranslateAll() runs, no more Profile translations are
+  // being added to ProfData.
+  if (mcgen::retranslateAllScheduled()) {
     return false;
   }
 

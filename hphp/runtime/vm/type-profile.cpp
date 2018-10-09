@@ -16,17 +16,6 @@
 
 #include "hphp/runtime/vm/type-profile.h"
 
-#include <atomic>
-#include <cstdint>
-#include <queue>
-#include <utility>
-
-#include <tbb/concurrent_hash_map.h>
-
-#include "hphp/util/lock.h"
-#include "hphp/util/logger.h"
-#include "hphp/util/trace.h"
-
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
@@ -38,10 +27,19 @@
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 #include "hphp/runtime/vm/treadmill.h"
-
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/boot-stats.h"
+#include "hphp/util/lock.h"
+#include "hphp/util/logger.h"
 #include "hphp/util/struct-log.h"
+#include "hphp/util/trace.h"
+
+#include <atomic>
+#include <cstdint>
+#include <queue>
+#include <utility>
+
+#include <tbb/concurrent_hash_map.h>
 
 namespace HPHP {
 

@@ -35,19 +35,19 @@
 #include "hphp/util/hdf.h"
 #include "hphp/util/logger.h"
 
+#include "hphp/runtime/base/apc-file-storage.h"
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/comparisons.h"
+#include "hphp/runtime/base/concurrent-shared-store.h"
+#include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/ext/apc/snapshot-builder.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
-#include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/concurrent-shared-store.h"
-#include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/config.h"
-#include "hphp/runtime/base/apc-file-storage.h"
 #include "hphp/runtime/server/cli-server.h"
 
 using HPHP::ScopedMem;
@@ -639,7 +639,8 @@ void apc_load(int thread) {
       !apcExtension::Enable) {
     return;
   }
-  BootStats::Block timer("loading APC data");
+  BootStats::Block timer("loading APC data",
+                         RuntimeOption::ServerExecutionMode());
   if (apc_store().primeFromSnapshot(apcExtension::PrimeLibrary.c_str())) {
     return;
   }
@@ -671,7 +672,6 @@ void apc_load(int thread) {
 
   apc_store().primeDone();
   if (!upgradeDest.empty()) {
-    BootStats::Block block("SnapshotBuilder::writeToFile");
     s_snapshotBuilder.writeToFile(upgradeDest);
   }
 

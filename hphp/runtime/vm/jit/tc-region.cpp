@@ -45,6 +45,7 @@
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/treadmill.h"
 
+#include "hphp/util/boot-stats.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
@@ -500,6 +501,8 @@ void publishOptFuncCode(FuncMetaInfo& info,
 void relocateSortedOptFuncs(std::vector<FuncMetaInfo>& infos,
                             PrologueTCAMap& prologueTCAs,
                             SrcKeyTransMap& srcKeyTrans) {
+  BootStats::Block timer("RTA_relocate",
+                         RuntimeOption::ServerExecutionMode());
   size_t failedBytes = 0;
   bool hasSpace = checkTCLimits();
 
@@ -697,6 +700,8 @@ void smashOptJumps(CGMeta& meta,
 void smashOptSortedOptFuncs(std::vector<FuncMetaInfo>& infos,
                             const PrologueTCAMap& prologueTCAs,
                             const SrcKeyTransMap& srcKeyTrans) {
+  BootStats::Block timer("RTA_smash_opt_funcs",
+                         RuntimeOption::ServerExecutionMode());
   for (auto& finfo : infos) {
     if (!Func::isFuncIdValid(finfo.fid)) continue;
 
@@ -720,6 +725,8 @@ void smashOptSortedOptFuncs(std::vector<FuncMetaInfo>& infos,
 }
 
 void invalidateFuncsProfSrcKeys(const std::vector<FuncMetaInfo>& infos) {
+  BootStats::Block timer("RTA_invalidate_prof_srckeys",
+                         RuntimeOption::ServerExecutionMode());
   for (auto& finfo : infos) {
     if (Func::isFuncIdValid(finfo.fid)) {
       invalidateFuncProfSrcKeys(Func::fromFuncId(finfo.fid));
@@ -728,6 +735,8 @@ void invalidateFuncsProfSrcKeys(const std::vector<FuncMetaInfo>& infos) {
 }
 
 void publishSortedOptFuncsMeta(std::vector<FuncMetaInfo>& infos) {
+  BootStats::Block timer("RTA_publish_meta",
+                         RuntimeOption::ServerExecutionMode());
   for (auto& finfo : infos) {
     if (Func::isFuncIdValid(finfo.fid)) {
       publishOptFuncMeta(finfo);
@@ -737,6 +746,8 @@ void publishSortedOptFuncsMeta(std::vector<FuncMetaInfo>& infos) {
 
 void publishSortedOptFuncsCode(std::vector<FuncMetaInfo>& infos,
                                jit::hash_set<TCA>* publishedSet) {
+  BootStats::Block timer("RTA_publish_code",
+                         RuntimeOption::ServerExecutionMode());
   for (auto& finfo : infos) {
     if (Func::isFuncIdValid(finfo.fid)) {
       publishOptFuncCode(finfo, publishedSet);

@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/file-util-defs.h"
 #include "hphp/runtime/base/hhprof.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/member-reflection.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/perf-mem-event.h"
@@ -39,9 +40,8 @@
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/surprise-flags.h"
-#include "hphp/runtime/base/init-fini-node.h"
-#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/thread-safe-setlocale.h"
+#include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/zend-math.h"
 #include "hphp/runtime/base/zend-strtod.h"
@@ -49,33 +49,33 @@
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
-#include "hphp/runtime/ext/xhprof/ext_xhprof.h"
 #include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
+#include "hphp/runtime/ext/xhprof/ext_xhprof.h"
 #include "hphp/runtime/server/admin-request-handler.h"
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/http-request-handler.h"
-#include "hphp/runtime/server/log-writer.h"
-#include "hphp/runtime/server/rpc-request-handler.h"
 #include "hphp/runtime/server/http-server.h"
+#include "hphp/runtime/server/log-writer.h"
 #include "hphp/runtime/server/pagelet-server.h"
 #include "hphp/runtime/server/replay-transport.h"
+#include "hphp/runtime/server/rpc-request-handler.h"
 #include "hphp/runtime/server/server-note.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/vm/debug/debug.h"
-#include "hphp/runtime/vm/jit/code-cache.h"
-#include "hphp/runtime/vm/jit/tc.h"
-#include "hphp/runtime/vm/jit/mcgen.h"
-#include "hphp/runtime/vm/jit/mcgen-translate.h"
-#include "hphp/runtime/vm/jit/prof-data.h"
-#include "hphp/runtime/vm/jit/prof-data-serialize.h"
-#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/extern-compiler.h"
+#include "hphp/runtime/vm/jit/code-cache.h"
+#include "hphp/runtime/vm/jit/mcgen-translate.h"
+#include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/prof-data-serialize.h"
+#include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/tc.h"
+#include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -899,7 +899,6 @@ static void pagein_self(void) {
   auto constexpr try_map_huge = false;
 #endif
 
-  BootStats::Block timer("mapping self");
   char mapname[PATH_MAX];
   // pad due to the spaces between the inode number and the mapname
   auto const bufsz =
@@ -1092,7 +1091,8 @@ static int start_server(const std::string &username, int xhprof) {
       !RuntimeOption::RepoLocalPath.empty()) {
     HttpServer::CheckMemAndWait();
     readaheadThread = std::make_unique<std::thread>([&] {
-        BootStats::Block timer("Readahead Repo");
+        assertx(RuntimeOption::ServerExecutionMode());
+        BootStats::Block timer("Readahead Repo", true);
         auto path = RuntimeOption::RepoLocalPath.c_str();
         Logger::Info("readahead %s", path);
 #ifdef __linux__
@@ -1134,13 +1134,13 @@ static int start_server(const std::string &username, int xhprof) {
   }
 
   if (RuntimeOption::ServerInternalWarmupThreads > 0) {
-    BootStats::Block timer("concurrentWaitForEnd");
+    BootStats::Block timer("concurrentWaitForEnd", true);
     InitFiniNode::WarmupConcurrentWaitForEnd();
   }
 
   if (RuntimeOption::RepoPreload) {
     HttpServer::CheckMemAndWait();
-    BootStats::Block timer("Preloading Repo");
+    BootStats::Block timer("Preloading Repo", true);
     profileWarmupStart();
     preloadRepo();
     profileWarmupEnd();
@@ -1160,8 +1160,8 @@ static int start_server(const std::string &username, int xhprof) {
       auto pos = f.rfind('/');
       std::string str(pos == f.npos ? file : f.subpiece(pos + 1).str());
       auto count = seen[str];
-      BootStats::Block timer(folly::sformat("warmup:{}:{}", str, count++));
-      seen[str] = count;
+      BootStats::Block timer(folly::sformat("warmup:{}:{}", str, count), true);
+      seen[str] = ++count;
 
       HttpRequestHandler handler(0);
       ReplayTransport rt;
@@ -1226,7 +1226,7 @@ static int start_server(const std::string &username, int xhprof) {
   if (jit::mcgen::retranslateAllScheduled()) {
     // We ran retranslateAll from deserialized profile.
     jit::mcgen::joinWorkerThreads();
-    BootStats::mark("mcgen::retranslateAll"); // delta from previous mark.
+    BootStats::mark("waitForRetranslateAll"); // delta from previous mark.
   }
 
   HttpServer::Server->runOrExitProcess();
@@ -2514,7 +2514,6 @@ void hphp_process_init() {
 
   if (apcLoadingThread) {
     apcLoadingThread->join();
-    BootStats::mark("apc_load");        // it was run in the background
   }
   // TODO(9755792): Add real execution mode for snapshot generation.
   if (apcExtension::PrimeLibraryUpgradeDest != "") {

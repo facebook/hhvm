@@ -44,6 +44,7 @@
 
 #include "hphp/runtime/server/http-server.h"
 
+#include "hphp/util/boot-stats.h"
 #include "hphp/util/hfsort.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/logger.h"
@@ -157,6 +158,8 @@ void enqueueRetranslateOptRequest(OptimizeData* d) {
 
 hfsort::TargetGraph
 createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
+  BootStats::Block timer("RTA_create_callgraph",
+                         RuntimeOption::ServerExecutionMode());
   ProfData::Session pds;
   assertx(profData() != nullptr);
 
@@ -358,7 +361,8 @@ void retranslateAll() {
 
   {
     std::lock_guard<std::mutex> lock{s_dispatcherMutex};
-
+    BootStats::Block timer("RTA_translate",
+                           RuntimeOption::ServerExecutionMode());
     {
       Treadmill::Session session(Treadmill::SessionKind::Retranslate);
       auto bufp = codeBuffer.get();
@@ -632,18 +636,23 @@ void checkRetranslateAll(bool force) {
     return;
   }
 
-  // We schedule a one-time call to retranslateAll() via the treadmill.  We use
-  // the treadmill to ensure that no additional Profile translations are being
-  // emitted when retranslateAll() runs, which avoids the need for additional
-  // locking on the ProfData. We use a fresh thread to avoid stalling the
-  // treadmill, the thread is joined in the processExit handler for mcgen.
   if (!force && RuntimeOption::ServerExecutionMode()) {
+    // We schedule a one-time call to retranslateAll() via the treadmill.  We
+    // use the treadmill to ensure that no additional Profile translations are
+    // being emitted when retranslateAll() runs, which avoids the need for
+    // additional locking on the ProfData. We use a fresh thread to avoid
+    // stalling the treadmill, the thread is joined in the processExit handler
+    // for mcgen.
     Logger::Info("Scheduling the retranslation of all profiled translations");
     Treadmill::enqueue([] {
       s_retranslateAllThread = std::thread([] { retranslateAll(); });
     });
   } else {
-    s_retranslateAllThread = std::thread([] { retranslateAll(); });
+    s_retranslateAllThread = std::thread([] {
+      BootStats::Block timer("retranslateall",
+                             RuntimeOption::ServerExecutionMode());
+      retranslateAll();
+    });
   }
   if (!RuntimeOption::ServerExecutionMode()) { // script mode
     s_retranslateAllThread.join();

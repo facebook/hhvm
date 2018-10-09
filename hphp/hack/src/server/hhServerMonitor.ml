@@ -151,7 +151,7 @@ let start () =
    * the proper code *)
   try
     Daemon.check_entry_point (); (* this call might not return *)
-    let proc_stack = match Proc.get_proc_stack ~max_length:300 (Unix.getpid()) with
+    let proc_stack = match Proc.get_proc_stack ~max_length:1000 (Unix.getpid()) with
       | Ok proc_stack -> proc_stack
       | Error e -> [ e ] in
     let options = ServerArgs.parse_options () in

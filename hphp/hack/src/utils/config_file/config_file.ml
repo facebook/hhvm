@@ -35,7 +35,8 @@ let parse_contents contents =
 let parse fn =
   let contents = try cat fn
     with e ->
-      Hh_logger.exc_with_dodgy_backtrace ~prefix:".hhconfig deleted: " e;
+      let stack = Printexc.get_backtrace () in
+      Hh_logger.exc ~prefix:".hhconfig deleted: " ~stack e;
       Exit_status.(exit Hhconfig_deleted) in
   let parsed = parse_contents contents in
   let hash = Sha1.digest contents in

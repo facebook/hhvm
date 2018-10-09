@@ -597,11 +597,12 @@ let job
         | Some result -> (path, result) :: acc
         | None -> acc
       with e ->
+        let stack = Printexc.get_backtrace () in
         let prefix = Printf.sprintf
           "Error while running CST search on path %s:\n"
           (Relative_path.to_absolute path)
         in
-        Hh_logger.exc_with_dodgy_backtrace e ~prefix;
+        Hh_logger.exc ~prefix ~stack e;
         raise e
     )
 

@@ -107,12 +107,16 @@ module HhServerConfig = struct
       start_hh_server ~informant_managed options
 
   let kill_server process =
-    try Unix.kill process.ServerProcess.pid Sys.sigusr2 with
-    | _ -> Hh_logger.log
-        "Failed to send sigusr2 signal to server process. Trying \
-         violently";
-      try Unix.kill process.ServerProcess.pid Sys.sigkill with e ->
-        Hh_logger.exc_with_dodgy_backtrace ~prefix: "Failed to violently kill server process: " e
+    try
+      Unix.kill process.ServerProcess.pid Sys.sigusr2
+    with _ -> begin
+      Hh_logger.log "Failed to send sigusr2 signal to server process. Trying violently";
+      try
+        Unix.kill process.ServerProcess.pid Sys.sigkill
+      with e ->
+        let stack = Printexc.get_backtrace () in
+        Hh_logger.exc ~prefix: "Failed to violently kill server process: " ~stack e
+    end
 
   let rec wait_for_server_exit process start_t =
     let exit_status = Unix.waitpid [Unix.WNOHANG; Unix.WUNTRACED] process.ServerProcess.pid in

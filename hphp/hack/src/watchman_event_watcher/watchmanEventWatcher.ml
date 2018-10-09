@@ -295,19 +295,23 @@ let init root =
     }
 
 let to_channel_no_exn oc data =
-  try Daemon.to_channel oc ~flush:true data with
-  | e ->
-    Hh_logger.exc_with_dodgy_backtrace ~prefix:"Warning: writing to channel failed" e
+  try
+    Daemon.to_channel oc ~flush:true data
+  with e ->
+    let stack = Printexc.get_backtrace () in
+    Hh_logger.exc ~prefix:"Warning: writing to channel failed" ~stack e
 
 let main root =
   Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
   let result = init root in
   match result with
   | Ok env -> begin
-      try serve env with
-      | e ->
-        let () = Hh_logger.exc_with_dodgy_backtrace
-          ~prefix:"WatchmanEventWatcheer uncaught exception. exiting." e in
+      try
+        serve env
+      with e ->
+        let stack = Printexc.get_backtrace () in
+        let () = Hh_logger.exc
+          ~prefix:"WatchmanEventWatcher uncaught exception. exiting." ~stack e in
         raise e
     end
   | Error Failure_daemon_already_running

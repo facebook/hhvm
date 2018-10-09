@@ -1,0 +1,34 @@
+From c73ea3fc8aacb41fb7a54236d9e9bcca3284e934 Mon Sep 17 00:00:00 2001
+From: William Lee <wkl@fb.com>
+Date: Tue, 2 Oct 2018 12:37:47 -0700
+Subject: [PATCH] Close file descriptors in case of zip_fdopen errors
+
+In certain error cases when trying to open invalid ZIP files, zip_fdopen leaks
+file descriptors since it internally creates dup()-ed FDs and ends up not
+freeing them.
+---
+ lib/zip_fdopen.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/third-party/libzip/src/lib/zip_fdopen.c b/third-party/libzip/src/lib/zip_fdopen.c
+index bbcdf4f..3a6766c 100644
+--- a/third-party/libzip/src/lib/zip_fdopen.c
++++ b/third-party/libzip/src/lib/zip_fdopen.c
+@@ -68,12 +68,14 @@ zip_fdopen(int fd_orig, int _flags, int *zep)
+ 
+     zip_error_init(&error);
+     if ((src = zip_source_filep_create(fp, 0, -1, &error)) == NULL) {
++	fclose(fp);
+ 	_zip_set_open_error(zep, &error, 0);
+ 	zip_error_fini(&error);
+ 	return NULL;
+     }
+ 
+     if ((za = zip_open_from_source(src, _flags, &error)) == NULL) {
++	zip_source_free(src);
+ 	_zip_set_open_error(zep, &error, 0);
+ 	zip_error_fini(&error);
+ 	return NULL;
+-- 
+2.17.1
+

@@ -152,9 +152,8 @@ let handle_connection_exception
     env
   | exn ->
     HackEventLogger.handle_connection_exception exn (Utils.Callstack stack);
-    let msg = Printexc.to_string exn in
-    EventLogger.master_exception exn (Some stack);
-    Printf.fprintf stderr "Error: %s\n%s\n%!" msg stack;
+    EventLogger.master_exception exn stack;
+    Printf.fprintf stderr "Error: %s\n%s\n%!" (Printexc.to_string exn) stack;
     ClientProvider.shutdown_client client;
     env
 [@@@warning "+52"] (* CARE! scope of suppression should be only handle_connection_exception *)
@@ -167,10 +166,13 @@ let handle_connection_try return client env f =
   try
     f ()
   with
-  | ServerCommand.Nonfatal_rpc_exception (exn, stack, env) ->
+  | ServerCommand.Nonfatal_rpc_exception (exn, original_stack, env) ->
+    let stack = Printexc.get_backtrace () in
+    let stack = Printf.sprintf "STACK=%s\nRAISED AT=%s\n" original_stack stack in
     return (handle_connection_exception ~env ~client ~exn ~stack)
   | exn ->
     let stack = Printexc.get_backtrace () in
+    let stack = Printf.sprintf "RAISED AT=%s\n" stack in
     return (handle_connection_exception ~env ~client ~exn ~stack)
 
 let handle_connection_ genv env client =
@@ -216,7 +218,7 @@ let report_persistent_exception
   let push = if is_fatal then ServerCommandTypes.FATAL_EXCEPTION { message; stack; }
   else ServerCommandTypes.NONFATAL_EXCEPTION { message; stack; } in
   begin try ClientProvider.send_push_message_to_client client push with _ -> () end;
-  EventLogger.master_exception e (Some stack);
+  EventLogger.master_exception e stack;
   Printf.eprintf "Error: %s\n%s\n%!" message stack
 
 (* Same as handle_connection_try, but for persistent clients *)

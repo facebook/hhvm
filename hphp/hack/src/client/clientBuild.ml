@@ -49,9 +49,8 @@ let handle_response env ic =
      * This admittedly won't help us root cause this, but at least
      * this will help us identify where it is occurring
      *)
-    let backtrace = Printexc.get_backtrace () in
-    let e_str = Printexc.to_string e in
-    Printf.fprintf stderr "Unexpected error: %s\n%s%!" e_str backtrace;
+    let stack = Printexc.get_backtrace () in
+    Printf.fprintf stderr "Unexpected error: %s\n%s%!" (Printexc.to_string e) stack;
     raise e
 
 let main_exn env =

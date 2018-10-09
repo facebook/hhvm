@@ -51,8 +51,8 @@ let connect_to_monitor ~timeout root =
   MC.connect_once ~timeout (hh_monitor_config root)
 
 let print_hash_stats () =
-  Core_result.try_with SharedMem.dep_stats
-  |> Core_result.map_error ~f:Hh_logger.exc_with_dodgy_backtrace
+  Utils.try_with_stack SharedMem.dep_stats
+  |> Core_result.map_error ~f:(fun (exn, Utils.Callstack stack) -> Hh_logger.exc ~stack exn)
   |> Core_result.iter ~f:begin fun { SharedMem.
     used_slots;
     slots;
@@ -61,8 +61,8 @@ let print_hash_stats () =
     Hh_logger.log "Dependency table load factor: %d / %d (%.02f)"
       used_slots slots load_factor
   end;
-  Core_result.try_with SharedMem.hash_stats
-  |> Core_result.map_error ~f:Hh_logger.exc_with_dodgy_backtrace
+  Utils.try_with_stack SharedMem.hash_stats
+  |> Core_result.map_error ~f:(fun (exn, Utils.Callstack stack) -> Hh_logger.exc ~stack exn)
   |> Core_result.iter ~f:begin fun { SharedMem.
     used_slots;
     slots;

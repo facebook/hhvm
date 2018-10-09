@@ -177,9 +177,9 @@ let save_state
     update_save_state ~file_info_on_disk files_info errors output_filename
 
 let get_in_memory_dep_table_entry_count () : (int, string) result =
-  Core_result.try_with (fun () ->
+  Utils.try_with_stack (fun () ->
     SharedMem.get_in_memory_dep_table_entry_count ())
-  |> Core_result.map_error ~f:Printexc.to_string
+  |> Core_result.map_error ~f:(fun (exn, _stack) -> Printexc.to_string exn)
 
 (* If successful, returns the # of edges from the dependency table that were written. *)
 (* TODO: write some other stats, e.g., the number of names, the number of errors, etc. *)
@@ -188,6 +188,6 @@ let go
     (files_info: FileInfo.t Relative_path.Map.t)
     (errors: Errors.t)
     (output_filename: string) : (int, string) result =
-  Core_result.try_with (fun () ->
+  Utils.try_with_stack (fun () ->
     save_state ~file_info_on_disk files_info errors output_filename)
-  |> Core_result.map_error ~f:Printexc.to_string
+  |> Core_result.map_error ~f:(fun (exn, _stack) -> Printexc.to_string exn)

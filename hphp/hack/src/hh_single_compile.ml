@@ -340,11 +340,11 @@ let log_success compiler_options filename debug_time =
     ~printing_t:!(debug_time.printing_t)
     ~mode:(mode_to_string compiler_options.mode)
 
-let log_fail compiler_options filename exc =
+let log_fail compiler_options filename exc ~stack =
   Logger.fail
     ~filename:(Relative_path.to_absolute filename)
     ~mode:(mode_to_string compiler_options.mode)
-    ~exc:(Caml.Printexc.to_string exc ^ "\n" ^ Caml.Printexc.get_backtrace ())
+    ~exc:(Caml.Printexc.to_string exc ^ "\n" ^ stack)
 
 let modify_prog_for_debugger_eval ast hhas_prog =
   (* The AST currently always starts with a Markup statement, so a length of 2
@@ -462,8 +462,9 @@ let process_single_source_unit ?(for_debugger_eval = false) compiler_options
       end in
     handle_output filename output debug_time
   with exc ->
+    let stack = Caml.Printexc.get_backtrace () in
     if compiler_options.log_stats
-    then log_fail compiler_options filename exc;
+    then log_fail compiler_options filename exc ~stack;
     handle_exception filename exc
 
 let decl_and_run_mode compiler_options popt =
@@ -665,5 +666,6 @@ let _ =
     let options = parse_options () in
     main_hack options
   with exc ->
-    Caml.Printexc.get_backtrace () |> prerr_endline;
+    let stack = Caml.Printexc.get_backtrace () in
+    prerr_endline stack;
     die (Caml.Printexc.to_string exc)

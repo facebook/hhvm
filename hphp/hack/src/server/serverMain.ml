@@ -128,7 +128,13 @@ let shutdown_persistent_client client env  =
 (*****************************************************************************)
 
 [@@@warning "-52"] (* we have no alternative but to depend on Sys_error strings *)
-let handle_connection_exception env client e stack = match e with
+let handle_connection_exception
+    ~(env: ServerEnv.env)
+    ~(client: ClientProvider.client)
+    ~(exn: exn)
+    ~(stack: string)
+  : ServerEnv.env =
+  match exn with
   | ClientProvider.Client_went_away | ServerCommandTypes.Read_command_timeout ->
     ClientProvider.shutdown_client client;
     env
@@ -144,12 +150,11 @@ let handle_connection_exception env client e stack = match e with
     Hh_logger.log "Client channel went bad. Shutting down client connection";
     ClientProvider.shutdown_client client;
     env
-  | e ->
-    HackEventLogger.handle_connection_exception e;
-    let msg = Printexc.to_string e in
-    EventLogger.master_exception e stack;
-    Printf.fprintf stderr "Error: %s\n%!" msg;
-    Printexc.print_backtrace stderr;
+  | exn ->
+    HackEventLogger.handle_connection_exception exn (Utils.Callstack stack);
+    let msg = Printexc.to_string exn in
+    EventLogger.master_exception exn (Some stack);
+    Printf.fprintf stderr "Error: %s\n%s\n%!" msg stack;
     ClientProvider.shutdown_client client;
     env
 [@@@warning "+52"] (* CARE! scope of suppression should be only handle_connection_exception *)
@@ -159,11 +164,14 @@ let handle_connection_exception env client e stack = match e with
  * environment from Nonfatal_rpc_exception). "return" is a constructor
  * wrapping the return value to make it match return type of f *)
 let handle_connection_try return client env f =
-  try f () with
-  | ServerCommand.Nonfatal_rpc_exception (e, stack, env) ->
-    return (handle_connection_exception env client e (Some stack))
-  | e ->
-    return (handle_connection_exception env client e None)
+  try
+    f ()
+  with
+  | ServerCommand.Nonfatal_rpc_exception (exn, stack, env) ->
+    return (handle_connection_exception ~env ~client ~exn ~stack)
+  | exn ->
+    let stack = Printexc.get_backtrace () in
+    return (handle_connection_exception ~env ~client ~exn ~stack)
 
 let handle_connection_ genv env client =
   let open ServerCommandTypes in
@@ -555,7 +563,8 @@ let serve_one_iteration genv env client_provider =
       env
     with
     | e ->
-      HackEventLogger.handle_connection_exception e;
+      let stack = Utils.Callstack (Printexc.get_backtrace ()) in
+      HackEventLogger.handle_connection_exception e stack;
       Hh_logger.log "Handling client failed. Ignoring.";
       env
   end in
@@ -586,7 +595,8 @@ let serve_one_iteration genv env client_provider =
       env
     with
     | e ->
-      HackEventLogger.handle_persistent_connection_exception e;
+      let stack = Utils.Callstack (Printexc.get_backtrace ()) in
+      HackEventLogger.handle_persistent_connection_exception e stack;
       Hh_logger.log "Handling persistent client failed. Ignoring.";
       env)
   else env in

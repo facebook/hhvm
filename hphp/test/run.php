@@ -485,7 +485,8 @@ function get_options($argv) {
     '*srcloc' => '',
     '*hack-only' => '',
     '*ignore-oids' => '',
-    'jitsample:' => ''
+    'jitsample:' => '',
+    '*hh_single_type_check:' => '',
   );
   $options = array();
   $files = array();
@@ -904,6 +905,11 @@ function hhvm_cmd_impl() {
     if (!isset($options['cores'])) {
       $args[] = '-vResourceLimit.CoreFileSize=0';
     }
+
+    if (isset($options['hh_single_type_check'])) {
+      $args[] = '--hh_single_type_check='.$options['hh_single_type_check'];
+    }
+
     $cmds[] = implode(' ', array_merge($args, $extra_args));
   }
   if (count($cmds) != 1) return $cmds;
@@ -2651,10 +2657,13 @@ function print_failure($argv, $results, $options) {
   asort(&$failed);
   print "\n".count($failed)." tests failed\n";
   if (empty($options['no-fun'])) {
-    print "(╯°□°）╯︵ ┻━┻\n";
+    // Unicode for table-flipping emoticon
+    print "(\u{256F}\u{00B0}\u{25A1}\u{00B0}\u{FF09}\u{256F}\u{FE35} \u{253B}";
+    print "\u{2501}\u{253B}\n";
     // TODO: Google indicates that this is some old emoji-thing relating to
     // table flipping... Maybe replace to stop other people spending time
     // trying to decipher it?
+    // https://knowyourmeme.com/memes/flipping-tables
   }
 
   if (isset($options['srcloc'])) {

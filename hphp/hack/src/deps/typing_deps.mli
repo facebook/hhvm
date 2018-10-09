@@ -37,7 +37,6 @@ module DepSet : module type of
 val trace : bool ref
 
 val debug_trace : bool ref
-val print_string_hash_set : string HashSet.t -> unit
 val dump_debug_deps : unit -> unit
 
 (* returns the previous value of the flag *)

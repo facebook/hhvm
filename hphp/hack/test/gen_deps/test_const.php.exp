@@ -1,9 +1,0 @@
-Fun \B\test -> GConst \Y
-Fun \B\test2 -> GConst \B\X
-Fun \B\test2 -> GConst \X
-Fun \B\test2 -> GConst \Y
-Fun \B\test3 -> GConst \B\X
-Fun \test -> GConst \X
-GConst \B\X -> GConst \B\X
-GConst \X -> GConst \X
-GConst \Y -> GConst \Y

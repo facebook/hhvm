@@ -56,7 +56,6 @@ type mode =
   | AllErrors
   | Lint
   | Dump_deps
-  | Dump_toplevel_deps
   | Identify_symbol of int * int
   | Find_local of int * int
   | Outline
@@ -214,9 +213,6 @@ let parse_options () =
     "--dump-deps",
       Arg.Unit (set_mode Dump_deps),
       " Print dependencies";
-    "--dump-toplevel-deps",
-      Arg.Unit (set_mode Dump_toplevel_deps),
-      " Print toplevel dependencies";
     "--dump-inheritance",
       Arg.Unit (set_mode Dump_inheritance),
       " Print inheritance";
@@ -816,16 +812,6 @@ let handle_mode
     end;
     Typing_deps.dump_debug_deps ()
 
-  | Dump_toplevel_deps ->
-    (* Don't typecheck builtins *)
-    let files_info = Relative_path.Map.fold builtins
-      ~f:begin fun k _ acc -> Relative_path.Map.remove acc k end
-      ~init:files_info
-    in
-    Relative_path.Map.iter files_info begin fun fn _fileinfo ->
-      let ast = Parser_heap.get_from_parser_heap popt fn in
-      Dependency_visitors.print_deps popt ast
-    end
   | Dump_inheritance ->
     let open ServerCommandTypes.Method_jumps in
     Typing_deps.update_files files_info;

@@ -1,6 +1,0 @@
-Class \A -> Class \B
-Fun \function_hint -> Class \A
-Fun \function_hint -> Class \B
-Fun \function_hint -> Class \C
-Fun \hint_on_shape -> Class \B
-Fun \optional_hint -> Class \B

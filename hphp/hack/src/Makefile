@@ -55,7 +55,6 @@ MODULES=\
   format\
   hackfmt/debug\
   hackfmt\
-	gen_deps\
   globals\
   hackfmt/error\
   heap\

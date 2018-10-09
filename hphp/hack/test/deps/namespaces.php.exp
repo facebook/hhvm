@@ -1,14 +1,8 @@
-Class \Bar -> Class \Bar
 Class \Bar -> Class \Baz
-Class \Baz -> Class \Baz
 Class \Foo -> Class \Bar
 Class \Foo -> Class \Baz
-Class \Foo -> Class \Foo
-Class \N\Bar -> Class \N\Bar
 Class \N\Foo -> Class \N\Bar
-Class \N\Foo -> Class \N\Foo
 Class \N\Foo -> Class \Qux
-Class \Qux -> Class \Qux
 Cstr \Bar -> Class \Baz
 Cstr \Foo -> Class \Bar
 Cstr \N\Foo -> Class \N\Bar

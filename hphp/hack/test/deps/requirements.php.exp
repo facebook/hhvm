@@ -1,16 +1,11 @@
-Class \Bar -> Class \Bar
 Class \Bar -> Class \Foo
-Class \Foo -> Class \Foo
 Class \FooParent -> Class \Bar
 Class \FooParent -> Class \Foo
-Class \FooParent -> Class \FooParent
 Class \FooParent -> Class \IFoo
 Class \G -> Class \Bar
 Class \G -> Class \Foo
-Class \G -> Class \G
 Class \G -> Class \IFoo
 Class \IFoo -> Class \Foo
-Class \IFoo -> Class \IFoo
 Cstr \Bar -> Class \Foo
 Cstr \FooParent -> Class \Bar
 Cstr \FooParent -> Class \Foo

@@ -116,10 +116,15 @@ end
 let allow_dependency_table_reads = Graph.hh_allow_dependency_table_reads
 
 let get_ideps_from_hash x =
-  Graph.get x
+  (* FIXME: It shouldn't be necessary to add x to the result set here. We do so
+     because historically, we added self-referential edges to the dependency
+     graph (e.g., Class "\Foo" -> Class "\Foo"). We no longer do this in order
+     to save memory, but we aren't yet confident that these edges were not
+     relied upon anywhere. *)
+  DepSet.add (Graph.get x) x
 
 let get_ideps x =
-  Graph.get (Dep.make x)
+  get_ideps_from_hash (Dep.make x)
 
 let trace = ref true
 
@@ -129,13 +134,16 @@ let debug_trace = ref false
 let dbg_dep_set = HashSet.create 0
 
 let add_idep root obj =
-  if !trace then Graph.add (Dep.make obj) (Dep.make root);
-  (* Note: this is the same direction as the mapping which is actually stored in
-     the shared memory table. The line "X -> Y" can be read, "X is used by Y",
-     or "X is a dependency of Y", or "when X changes, Y must be rechecked". *)
-  if !debug_trace then
-    HashSet.add dbg_dep_set
-      ((Dep.to_string obj) ^ " -> " ^ (Dep.to_string root))
+  if root = obj then () else begin
+    if !trace then Graph.add (Dep.make obj) (Dep.make root);
+    (* Note: this is the same direction as the mapping which is actually stored
+       in the shared memory table. The line "X -> Y" can be read, "X is used by
+       Y", or "X is a dependency of Y", or "when X changes, Y must be
+       rechecked". *)
+    if !debug_trace then
+      HashSet.add dbg_dep_set
+        ((Dep.to_string obj) ^ " -> " ^ (Dep.to_string root))
+  end
 
 let print_string_hash_set set =
   let xs = HashSet.fold (fun x xs -> x :: xs) set [] in

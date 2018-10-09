@@ -49,6 +49,7 @@
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/vm/unit.h"
 
+#include "hphp/util/boot-stats.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/process.h"
 
@@ -199,6 +200,8 @@ void write_global_array_map(ProfDataSerializer& ser) {
 }
 
 void read_global_array_map(ProfDataDeserializer& ser) {
+  BootStats::Block timer("DES_read_global_array_map",
+                         RuntimeOption::ServerExecutionMode());
   auto sz DEBUG_ONLY = read_raw<uint32_t>(ser);
   assertx(sz == globalArrayTypeTable().size());
   for (auto arr : globalArrayTypeTable()) {
@@ -610,6 +613,8 @@ void write_classes_and_type_aliases(ProfDataSerializer& ser, ProfData* pd) {
 }
 
 void read_classes_and_type_aliases(ProfDataDeserializer& ser) {
+  BootStats::Block timer("DES_read_classes_and_type_aliases",
+                         RuntimeOption::ServerExecutionMode());
   while (read_type_alias_or_class(ser)) {
     // nothing to do. this was just to make sure everything is loaded
     // into the NamedEntity table
@@ -637,6 +642,8 @@ void write_prof_data(ProfDataSerializer& ser, ProfData* pd) {
 }
 
 void read_prof_data(ProfDataDeserializer& ser, ProfData* pd) {
+  BootStats::Block timer("DES_read_prof_data",
+                         RuntimeOption::ServerExecutionMode());
   read_profiled_funcs(ser, pd);
 
   pd->resetCounters(read_raw<int64_t>(ser));
@@ -759,6 +766,8 @@ struct SymbolFixup : boost::static_visitor<void> {
 };
 
 void read_target_profiles(ProfDataDeserializer& ser) {
+  BootStats::Block timer("DES_read_target_profiles",
+                         RuntimeOption::ServerExecutionMode());
   while (true) {
     auto const size = read_raw<uint32_t>(ser);
     if (!size) break;
@@ -770,6 +779,8 @@ void read_target_profiles(ProfDataDeserializer& ser) {
 }
 
 void merge_loaded_units(int numWorkers) {
+  BootStats::Block timer("DES_merge_loaded_units",
+                         RuntimeOption::ServerExecutionMode());
   auto units = loadedUnitsRepoAuth();
 
   std::vector<std::thread> workers;

@@ -14,7 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#pragma once
+#ifndef incl_HPHP_BOOT_STATS
+#define incl_HPHP_BOOT_STATS
 
 #include <chrono>
 #include <cstdint>
@@ -45,9 +46,9 @@ struct ResourceUsage {
   int64_t rssMb() const { return m_rssMb; }
   std::string toString() const;
 
-private:
+ private:
   ResourceUsage(TimeUnit wall, TimeUnit cpu, int64_t rssMb)
-      : m_wall{wall}, m_cpu{cpu}, m_rssMb(rssMb) {}
+    : m_wall{wall}, m_cpu{cpu}, m_rssMb(rssMb) {}
   TimeUnit m_wall;
   TimeUnit m_cpu;
   int64_t m_rssMb;
@@ -81,15 +82,16 @@ struct BootStats {
   static void mark(const std::string& name);
 
   struct Block {
-    explicit Block(const std::string& name);
+    explicit Block(const std::string& name, bool enabled);
     ~Block();
 
-  private:
+   private:
     std::string m_name;
+    bool m_enabled{false};
     ResourceUsage m_start;
   };
 
-private:
+ private:
   static void add(const std::string& name, const ResourceUsage value);
 
   struct Impl;
@@ -101,3 +103,5 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#endif

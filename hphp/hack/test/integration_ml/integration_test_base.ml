@@ -432,6 +432,7 @@ let load_state
     ?(master_changes = [])
     ?(local_changes = [])
     ?(use_precheked_files = ServerLocalConfig.(default.prechecked_files))
+    ?(disable_conservative_redecl = ServerLocalConfig.(default.disable_conservative_redecl))
     ~disk_state
     saved_state_dir =
   (* In production, saved state is only used in conjunction with lazy init
@@ -443,6 +444,7 @@ let load_state
       lazy_init = true;
       prechecked_files = use_precheked_files;
       predeclare_ide = true;
+      disable_conservative_redecl;
     }
   };
   test_init_common ();

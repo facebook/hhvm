@@ -23,6 +23,7 @@ val load_state:
   ?master_changes:string list ->
   ?local_changes:string list ->
   ?use_precheked_files:bool ->
+  ?disable_conservative_redecl:bool ->
   disk_state:disk_changes_type ->
   string (* saved_state_dir *) ->
   ServerEnv.env

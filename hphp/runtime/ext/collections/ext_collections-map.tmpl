@@ -45,27 +45,13 @@ PART2
 ;
   if ($withKey) {
     echo "    loop:   FPushCufIter 2 0\n";
-    echo "            FIsParamByRefCufIter 0 Any 0\n";
-    echo "            JmpNZ by_ref_k\n";
     echo "            CGetL \$k\n";
-    echo "            Jmp pass_v\n";
-    echo "    by_ref_k:\n";
-    echo "            VGetL \$k\n";
-    echo "    pass_v: FIsParamByRefCufIter 1 Any 0\n";
-    echo "            JmpNZ by_ref_v\n";
     echo "            CGetL \$v\n";
-    echo "            Jmp call\n";
-    echo "    by_ref_v:\n";
-    echo "            VGetL \$v\n";
-    echo "    call:   FCall 2 0 1 - \"\" \"\"\n";
+    echo "            FCall 2 0 1 - \"\" \"\"\n";
   } else {
     echo "    loop:   FPushCufIter 1 0\n";
-    echo "            FIsParamByRefCufIter 0 Any 0\n";
-    echo "            JmpNZ by_ref\n";
     echo "            CGetL \$v\n";
-    echo "            Jmp call\n";
-    echo "    by_ref: VGetL \$v\n";
-    echo "    call:   FCall 1 0 1 - \"\" \"\"\n";
+    echo "            FCall 1 0 1 - \"\" \"\"\n";
   }
 
   if ($filter) {

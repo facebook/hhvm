@@ -435,7 +435,7 @@ void SocketTransport::shutdownSocket(int sockFd, int abortFd) {
     return;
   }
 
-  int eventMask = POLLIN | POLLERR | POLLHUP | POLLRDHUP;
+  int eventMask = POLLIN | POLLERR | POLLHUP | g_platformPollFlags;
   constexpr int abortIdx = 0;
   constexpr int readIdx = 1;
 
@@ -453,8 +453,7 @@ void SocketTransport::shutdownSocket(int sockFd, int abortFd) {
                fds[abortIdx].revents != 0 ||
                fds[readIdx].revents & POLLERR ||
                fds[readIdx].revents & POLLHUP ||
-               fds[readIdx].revents & POLLRDHUP
-               ) {
+               fds[readIdx].revents & g_platformPollFlags) {
 
       break;
     } else if (fds[readIdx].revents & POLLIN) {
@@ -499,7 +498,7 @@ void SocketTransport::waitForConnection(
   // fds[0] will contain the read end of our "abort" pipe. Another thread will
   // write data to tihs pipe to signal it's time for this worker to stop
   // blocking in poll() and terminate.
-  int eventMask = POLLIN | POLLERR | POLLHUP | POLLRDHUP;
+  int eventMask = POLLIN | POLLERR | POLLHUP | g_platformPollFlags;
   fds[0].fd = abortFd;
   fds[0].events = eventMask;
 
@@ -591,6 +590,7 @@ void SocketTransport::waitForConnection(
 }
 
 bool SocketTransport::validatePeerCreds(int newFd, ClientInfo& info) {
+#ifdef SO_PEERCRED
   struct ucred ucred = {0};
   socklen_t len = sizeof(ucred);
 
@@ -656,6 +656,9 @@ bool SocketTransport::validatePeerCreds(int newFd, ClientInfo& info) {
   info.clientUser = std::string(pw.pw_name);
   info.clientPid = ucred.pid;
   return pw.pw_name != nullptr && strlen(pw.pw_name) > 0;
+#else
+  return true;
+#endif
 }
 
 }

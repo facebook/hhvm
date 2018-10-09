@@ -95,6 +95,12 @@ struct DebugTransport {
   static constexpr char* OutputLevelStdout = "stdout";
   static constexpr char* OutputLevelStderr = "stderr";
 
+  #ifdef POLLRDHUP // Linux-only
+    static constexpr int g_platformPollFlags = POLLRDHUP;
+  #else
+    static constexpr int g_platformPollFlags = 0;
+  #endif
+
 protected:
 
   const std::string wrapOutgoingMessage(

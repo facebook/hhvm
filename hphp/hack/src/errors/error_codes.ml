@@ -142,6 +142,7 @@ module Naming                               = struct
   | UnsupportedFeature
   | TraitInterfaceConstructorPromo
   | NonstaticPropertyWithLSB
+  | ReferenceInAnonUseClause
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@ deriving enum, show { with_path = false } ]
   let err_code = to_enum

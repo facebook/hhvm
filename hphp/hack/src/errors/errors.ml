@@ -1184,6 +1184,12 @@ let reference_in_strict_mode pos =
   add (Naming.err_code Naming.ReferenceInStrictMode) pos
     "Don't use references!"
 
+let anon_use_capture_by_ref pos =
+  add (Naming.err_code Naming.ReferenceInAnonUseClause) pos (
+    "Capturing variables by PHP reference is no longer supported on anonymous "^
+    "functions. If the variable is a value type, store it on an object "^
+    "instead or refactor your code to avoid using a closure.")
+
 (*****************************************************************************)
 (* Init check errors *)
 (*****************************************************************************)

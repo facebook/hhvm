@@ -289,6 +289,7 @@ let load config_filename options =
     (bool_ "disallow_scrutinee_case_value_type_mismatch"
        ~default:true config)
     (bool_ "disallow_stringish_magic" ~default:false config)
+    (bool_ "disallow_anon_use_capture_by_ref" ~default:false config)
     (bool_ "unresolved_as_union" ~default:false config)
     (prepare_ignored_fixme_codes config)
     forward_compat_level

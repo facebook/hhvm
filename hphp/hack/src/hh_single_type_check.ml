@@ -150,6 +150,7 @@ let parse_options () =
   let allow_array_as_tuple = ref false in
   let allow_return_by_ref = ref false in
   let allow_array_cell_pass_by_ref = ref false in
+  let allow_anon_use_capture_by_ref = ref false in
   let void_is_type_of_null = ref false in
   let disallow_unset_on_varray = ref false in
   let auto_namespace_map = ref [] in
@@ -310,6 +311,9 @@ let parse_options () =
     "--allow-array-cell-pass-by-ref",
         Arg.Set allow_array_cell_pass_by_ref,
         " Allow binding of array cells by reference as arguments to function calls";
+    "--allow-anon-use-capture-by-ref",
+        Arg.Set allow_anon_use_capture_by_ref,
+        " Allow binding of local variables by reference in anonymous function use clauses";
     "--void-is-type-of-null",
         Arg.Set void_is_type_of_null,
         " Make void the type of null";
@@ -355,6 +359,7 @@ let parse_options () =
       GlobalOptions.tco_disallow_array_as_tuple = not !allow_array_as_tuple;
       GlobalOptions.tco_disallow_return_by_ref = not !allow_return_by_ref;
       GlobalOptions.tco_disallow_array_cell_pass_by_ref = not !allow_array_cell_pass_by_ref;
+      GlobalOptions.tco_disallow_anon_use_capture_by_ref = not !allow_anon_use_capture_by_ref;
       GlobalOptions.tco_disallow_unset_on_varray = !disallow_unset_on_varray;
       GlobalOptions.tco_disallow_stringish_magic = !disallow_stringish_magic;
       GlobalOptions.tco_unresolved_as_union = !unresolved_as_union;

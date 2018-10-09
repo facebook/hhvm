@@ -2625,11 +2625,15 @@ module Make (GetLocals : GetLocals) = struct
       Errors.experimental_feature p "Anonymous classes";
       N.Null
     | Efun (f, idl) ->
-        let _ = match (fst env).in_mode with
-        | FileInfo.Mstrict -> List.iter idl ~f:(function
-          | (p, _), is_ref when is_ref -> Errors.reference_in_strict_mode p;
-          | _ -> ())
-        | _ -> () in
+        let use_ref_disallowed =
+          TypecheckerOptions.disallow_anon_use_capture_by_ref (fst env).tcopt in
+        if use_ref_disallowed || (fst env).in_mode = FileInfo.Mstrict
+        then List.iter idl ~f:(function
+          | (p, _), is_ref when is_ref ->
+            if use_ref_disallowed
+            then Errors.anon_use_capture_by_ref p
+            else Errors.reference_in_strict_mode p
+          | _ -> ());
         let idl =
           List.fold_right idl
             ~init:[]

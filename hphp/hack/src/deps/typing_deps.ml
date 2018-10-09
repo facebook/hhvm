@@ -130,12 +130,12 @@ let dbg_dep_set = HashSet.create 0
 
 let add_idep root obj =
   if !trace then Graph.add (Dep.make obj) (Dep.make root);
-  (* Note: this is the inverse of what is actually stored in the shared
-   * memory table. I find it easier to read "X depends on Y" instead of
-   * "Y is a dependent of X" *)
+  (* Note: this is the same direction as the mapping which is actually stored in
+     the shared memory table. The line "X -> Y" can be read, "X is used by Y",
+     or "X is a dependency of Y", or "when X changes, Y must be rechecked". *)
   if !debug_trace then
     HashSet.add dbg_dep_set
-      ((Dep.to_string root) ^ " -> " ^ (Dep.to_string obj))
+      ((Dep.to_string obj) ^ " -> " ^ (Dep.to_string root))
 
 let print_string_hash_set set =
   let xs = HashSet.fold (fun x xs -> x :: xs) set [] in

@@ -168,5 +168,5 @@ let test_cleanup () =
   expect_same used_slots after_used_slots
 
 let () =
-  test_cleanup();
-  test_early_revive()
+  Test.in_daemon test_cleanup;
+  Test.in_daemon test_early_revive

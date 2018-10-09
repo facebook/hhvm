@@ -12,7 +12,7 @@ class Baz {
 }
 |}
 
-let test_parsing_error (expected_error: string) (bad_contents: string) : unit =
+let test_parsing_error (expected_error: string) (bad_contents: string) () : unit =
   Tempfile.with_real_tempdir @@ fun temp_dir ->
     let temp_dir = Path.to_string temp_dir in
 
@@ -58,7 +58,7 @@ let () =
 
   let bad_contents = "asdl;jaflj" in
 
-  test_parsing_error expected_error bad_contents;
+  Test.in_daemon @@ test_parsing_error expected_error bad_contents;
 
   let expected_error =
     "File \"/foo.php\", line 4, characters 1-2:\n" ^
@@ -66,4 +66,4 @@ let () =
 
   let bad_contents = "?>" in
 
-  test_parsing_error expected_error bad_contents;
+  Test.in_daemon @@ test_parsing_error expected_error bad_contents;

@@ -60,8 +60,19 @@ let genv = ref { ServerEnvBuild.default_genv with
   ServerEnv.config = server_config
 }
 
+let did_init = ref false
+
 (* Init part common to fresh and saved state init *)
 let test_init_common () =
+  if !did_init then begin
+    failwith
+      ("Initializing the server twice in same process. There is no guarantee of global state " ^
+       "cleanup between them. Split your test in multiple separate tests, or run individual test " ^
+       "cases in separate processes using Test.in_daemon.")
+  end else begin
+    did_init := true;
+  end;
+
   Printexc.record_backtrace true;
   EventLogger.init EventLogger.Event_logger_fake 0.0;
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);

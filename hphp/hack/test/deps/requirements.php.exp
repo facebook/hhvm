@@ -1,17 +1,9 @@
 Class Bar -> Class Foo
-Class FooParent -> Class Bar
-Class FooParent -> Class Foo
-Class FooParent -> Class IFoo
-Class G -> Class Bar
-Class G -> Class Foo
-Class G -> Class IFoo
+Class FooParent -> Class Bar, Class Foo, Class IFoo
+Class G -> Class Bar, Class Foo, Class IFoo
 Class IFoo -> Class Foo
 Cstr Bar -> Class Foo
-Cstr FooParent -> Class Bar
-Cstr FooParent -> Class Foo
-Cstr FooParent -> Class IFoo
+Cstr FooParent -> Class Bar, Class Foo, Class IFoo
 Extends Bar -> Class Foo
-Extends FooParent -> Class Bar
-Extends FooParent -> Class Foo
-Extends FooParent -> Class IFoo
+Extends FooParent -> Class Bar, Class Foo, Class IFoo
 Extends IFoo -> Class Foo

@@ -1,13 +1,9 @@
 Class Bar -> Class Baz
-Class Foo -> Class Bar
-Class Foo -> Class Baz
-Class N\Foo -> Class N\Bar
-Class N\Foo -> Class Qux
+Class Foo -> Class Bar, Class Baz
+Class N\Foo -> Class N\Bar, Class Qux
 Cstr Bar -> Class Baz
 Cstr Foo -> Class Bar
-Cstr N\Foo -> Class N\Bar
-Cstr N\Foo -> Class Qux
+Cstr N\Foo -> Class N\Bar, Class Qux
 Extends Bar -> Class Baz
 Extends Foo -> Class Bar
-Extends N\Foo -> Class N\Bar
-Extends N\Foo -> Class Qux
+Extends N\Foo -> Class N\Bar, Class Qux

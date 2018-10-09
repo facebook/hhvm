@@ -2100,7 +2100,7 @@ Variant HHVM_FUNCTION(strtr,
     return str;
   }
 
-  SuppressHackArrCompatNotices suppress;
+  SuppressHACIntishCastNotices shacn;
 
   for (ArrayIter iter(arr); iter; ++iter) {
     auto const search = iter.first().toString();

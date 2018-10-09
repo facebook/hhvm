@@ -4002,7 +4002,7 @@ static OPTBLD_INLINE void setWithRefImpl(TypedValue key, TypedValue* value) {
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatNotices)) {
     mstate.base = [&] {
       if (LIKELY(!isRefType(value->m_type))) {
-        SuppressHackArrCompatNotices shacn;
+        SuppressHACFalseyPromoteNotices shacn;
         return ElemD<MOpMode::Define, false, false>(
           mstate.tvRef, mstate.base, key, &mstate.propState
         );
@@ -4015,7 +4015,7 @@ static OPTBLD_INLINE void setWithRefImpl(TypedValue key, TypedValue* value) {
         raiseHackArrCompatRefBind(key);
       }
 
-      SuppressHackArrCompatNotices shacn;
+      SuppressHACFalseyPromoteNotices shacn;
       return ElemD<MOpMode::Define, true, false>(
         mstate.tvRef, mstate.base, key, &mstate.propState
       );

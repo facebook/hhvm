@@ -2237,12 +2237,12 @@ static void update_constants_and_options() {
   // have been now bound to their proper value.
   IniSettingMap ini = IniSettingMap();
   for (auto& filename: s_config_files) {
-    SuppressHackArrCompatNotices shacn;
+    SuppressHACFalseyPromoteNotices shacn;
     Config::ParseIniFile(filename, ini, true);
   }
   // Reset the INI settings from the CLI.
   for (auto& iniStr: s_ini_strings) {
-    SuppressHackArrCompatNotices shacn;
+    SuppressHACFalseyPromoteNotices shacn;
     Config::ParseIniString(iniStr, ini, true);
   }
 

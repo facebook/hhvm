@@ -1362,13 +1362,13 @@ void throwVecUnsetException() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void raiseHackArrCompatRefBind(int64_t k) {
-  raise_hackarr_compat_notice(
+  raise_hac_ref_bind_notice(
     folly::sformat("Binding ref in array with key {}", k)
   );
 }
 
 void raiseHackArrCompatRefBind(const StringData* k) {
-  raise_hackarr_compat_notice(
+  raise_hac_ref_bind_notice(
     folly::sformat("Binding ref in array with key \"{}\"", k)
   );
 }
@@ -1383,19 +1383,19 @@ void raiseHackArrCompatRefBind(TypedValue tv) {
 }
 
 void raiseHackArrCompatRefNew() {
-  raise_hackarr_compat_notice("Binding new-element ref in array");
+  raise_hac_ref_bind_notice("Binding new-element ref in array");
 }
 
 void raiseHackArrCompatRefIter() {
-  raise_hackarr_compat_notice("Ref binding iteration on array");
+  raise_hac_ref_bind_notice("Ref binding iteration on array");
 }
 
 void raiseHackArrCompatAdd() {
-  raise_hackarr_compat_notice("Using + operator on arrays");
+  raise_hac_misc_notice("Using + operator on arrays");
 }
 
 void raiseHackArrCompatArrMixedCmp() {
-  raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_ARR_MIXEDCMP);
+  raise_hac_compare_notice(Strings::HACKARR_COMPAT_ARR_MIXEDCMP);
 }
 
 void raiseHackArrCompatDVArrCmp(const ArrayData* ad1, const ArrayData* ad2) {
@@ -1410,11 +1410,11 @@ void raiseHackArrCompatDVArrCmp(const ArrayData* ad1, const ArrayData* ad2) {
 }
 
 void raiseHackArrCompatMissingIncDec() {
-  raise_hackarr_compat_notice("Inc/dec on missing array element");
+  raise_hac_falsey_promote_notice("Inc/dec on missing array element");
 }
 
 void raiseHackArrCompatMissingSetOp() {
-  raise_hackarr_compat_notice("Set-op on missing array element");
+  raise_hac_falsey_promote_notice("Set-op on missing array element");
 }
 
 std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key) {
@@ -1425,7 +1425,7 @@ std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key) {
 }
 
 void raiseHackArrCompatImplicitArrayKey(const TypedValue* key) {
-  raise_hackarr_compat_notice(makeHackArrCompatImplicitArrayKeyMsg(key));
+  raise_hac_misc_notice(makeHackArrCompatImplicitArrayKeyMsg(key));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -157,18 +157,23 @@ void raise_disallowed_dynamic_call(const Func* f) {
 }
 
 void raise_intish_index_cast() {
-  if (UNLIKELY(RID().getSuppressHackArrayCompatNotices())) return;
+  if (UNLIKELY(RID().getSuppressHACIntishCastNotices())) return;
   raise_notice("Hack Array Compat: Intish index cast");
 }
 
 void raise_hackarr_compat_notice(const std::string& msg) {
-  if (UNLIKELY(RID().getSuppressHackArrayCompatNotices())) return;
   raise_notice("Hack Array Compat: %s", msg.c_str());
 }
 
+#define HC(Opt, opt) \
+  void raise_hac_##opt##_notice(const std::string& msg) {       \
+    if (UNLIKELY(RID().getSuppressHAC##Opt##Notices())) return; \
+    raise_notice("Hack Array Compat: %s", msg.c_str());         \
+  }
+HAC_CHECK_OPTS
+#undef HC
 
 void raise_hack_arr_compat_serialize_notice(const ArrayData* arr) {
-  if (UNLIKELY(RID().getSuppressHackArrayCompatNotices())) return;
   auto const type = [&]{
     if (arr->isVecArray()) return "vec";
     if (arr->isDict())     return "dict";
@@ -180,7 +185,6 @@ void raise_hack_arr_compat_serialize_notice(const ArrayData* arr) {
 
 void
 raise_hack_arr_compat_array_producing_func_notice(const std::string& name) {
-  if (UNLIKELY(RID().getSuppressHackArrayCompatNotices())) return;
   raise_notice("Hack Array Compat: Calling array producing function %s",
                name.c_str());
 }
@@ -221,8 +225,6 @@ void raise_hackarr_compat_type_hint_impl(const Func* func,
                                          const ArrayData* ad,
                                          AnnotType at,
                                          folly::Optional<int> param) {
-  if (UNLIKELY(RID().getSuppressHackArrayCompatNotices())) return;
-
   auto const name = arrayAnnotTypeToName(at);
   auto const given = arrayToName(ad);
 
@@ -284,7 +286,6 @@ void raise_hackarr_compat_type_hint_outparam_notice(const Func* func,
                                                     const ArrayData* ad,
                                                     AnnotType at,
                                                     int param) {
-  if (UNLIKELY(RID().getSuppressHackArrayCompatNotices())) return;
   auto const name = arrayAnnotTypeToName(at);
   auto const given = arrayToName(ad);
   raise_notice(
@@ -299,7 +300,6 @@ void raise_hackarr_compat_type_hint_property_notice(const Class* declCls,
                                                     AnnotType at,
                                                     const StringData* propName,
                                                     bool isStatic) {
-  if (UNLIKELY(RID().getSuppressHackArrayCompatNotices())) return;
   auto const name = arrayAnnotTypeToName(at);
   auto const given = arrayToName(ad);
   raise_notice(
@@ -627,14 +627,16 @@ void raise_message(ErrorMode mode,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SuppressHackArrCompatNotices::SuppressHackArrCompatNotices()
-  : old{RID().getSuppressHackArrayCompatNotices()} {
-  RID().setSuppressHackArrayCompatNotices(true);
-}
-
-SuppressHackArrCompatNotices::~SuppressHackArrCompatNotices() {
-  RID().setSuppressHackArrayCompatNotices(old);
-}
+#define HC(Opt, ...) \
+  SuppressHAC##Opt##Notices::SuppressHAC##Opt##Notices()    \
+    : old{RID().getSuppressHAC##Opt##Notices()} {           \
+    RID().setSuppressHAC##Opt##Notices(true);               \
+  }                                                         \
+  SuppressHAC##Opt##Notices::~SuppressHAC##Opt##Notices() { \
+    RID().setSuppressHAC##Opt##Notices(old);                \
+  }
+HAC_CHECK_OPTS
+#undef HC
 
 ///////////////////////////////////////////////////////////////////////////////
 

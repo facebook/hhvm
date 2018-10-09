@@ -211,7 +211,7 @@ arr_lval MixedArray::addLvalImpl(K k) {
   if (!p.found) {
     tvWriteNull(p.tv);
     if (warn && checkHACFalseyPromote()) {
-      raise_hackarr_compat_notice("Lval on missing array element");
+      raise_hac_falsey_promote_notice("Lval on missing array element");
     }
   }
   return arr_lval { this, &p.tv };

@@ -131,7 +131,7 @@ TypedValue HHVM_FUNCTION(array_column,
                          const Variant& input,
                          const Variant& val_key,
                          const Variant& idx_key /* = uninit_variant */) {
-  SuppressHackArrCompatNotices suppress;
+  SuppressHACIntishCastNotices shacn;
 
   getCheckedContainer(input);
   Variant val = val_key, idx = idx_key;
@@ -174,7 +174,7 @@ TypedValue HHVM_FUNCTION(array_column,
 TypedValue HHVM_FUNCTION(array_combine,
                          const Variant& keys,
                          const Variant& values) {
-  SuppressHackArrCompatNotices suppress;
+  SuppressHACIntishCastNotices shacn;
 
   const auto& cell_keys = *keys.toCell();
   const auto& cell_values = *values.toCell();
@@ -204,7 +204,7 @@ TypedValue HHVM_FUNCTION(array_combine,
 
 TypedValue HHVM_FUNCTION(array_count_values,
                          const Variant& input) {
-  SuppressHackArrCompatNotices suppress;
+  SuppressHACIntishCastNotices shacn;
   if (!isContainer(input)) {
     raise_warning("array_count_values() expects parameter 1 to be array, "
                   "%s given",
@@ -223,7 +223,7 @@ TypedValue HHVM_FUNCTION(array_count_values,
 TypedValue HHVM_FUNCTION(array_fill_keys,
                          const Variant& keys,
                          const Variant& value) {
-  SuppressHackArrCompatNotices suppress;
+  SuppressHACIntishCastNotices shacn;
 
   folly::Optional<ArrayInit> ai;
   auto ok = IterateV(
@@ -287,7 +287,7 @@ TypedValue HHVM_FUNCTION(array_fill,
 
 TypedValue HHVM_FUNCTION(array_flip,
                          const Variant& trans) {
-  SuppressHackArrCompatNotices suppress;
+  SuppressHACIntishCastNotices shacn;
 
   auto const& transCell = *trans.toCell();
   if (UNLIKELY(!isContainer(transCell))) {
@@ -978,7 +978,7 @@ TypedValue HHVM_FUNCTION(array_slice,
   // preserve_keys is true, or when preserve_keys is false but the container
   // is packed so we know the keys already map to [0,N].
   if (offset == 0 && len == num_in && (preserve_keys || input_is_packed)) {
-    SuppressHackArrCompatNotices suppress;
+    SuppressHACIntishCastNotices shacn;
     if (isArrayType(cell_input.m_type)) {
       return tvReturn(Variant{cell_input.m_data.parr});
     }
@@ -1856,7 +1856,7 @@ TypedValue HHVM_FUNCTION(array_diff,
                          const Variant& container1,
                          const Variant& container2,
                          const Array& args /* = null array */) {
-  SuppressHackArrCompatNotices suppress;
+  SuppressHACIntishCastNotices shacn;
   ARRAY_DIFF_PRELUDE()
   // Put all of the values from all the containers (except container1 into a
   // Set. All types aside from integer and string will be cast to string, and
@@ -1888,7 +1888,7 @@ TypedValue HHVM_FUNCTION(array_diff_key,
                          const Variant& container1,
                          const Variant& container2,
                          const Array& args /* = null array */) {
-  SuppressHackArrCompatNotices suppress;
+  SuppressHACIntishCastNotices shacn;
 
   ARRAY_DIFF_PRELUDE()
   // If we're only dealing with two containers and if they are both arrays,
@@ -2237,7 +2237,7 @@ TypedValue HHVM_FUNCTION(array_intersect,
                          const Variant& container1,
                          const Variant& container2,
                          const Array& args /* = null array */) {
-  SuppressHackArrCompatNotices suppress;
+  SuppressHACIntishCastNotices shacn;
 
   ARRAY_INTERSECT_PRELUDE()
   // Build up a Set containing the values that are present in all the
@@ -2791,7 +2791,7 @@ bool HHVM_FUNCTION(uksort,
 TypedValue HHVM_FUNCTION(array_unique,
                          const Variant& array,
                          int sort_flags /* = 2 */) {
-  SuppressHackArrCompatNotices suppress;
+  SuppressHACIntishCastNotices shacn;
   // NOTE, PHP array_unique accepts ArrayAccess objects as well,
   // which is not supported here.
   getCheckedArray(array);

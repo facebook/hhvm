@@ -18,6 +18,7 @@
 #define incl_HPHP_REQUEST_INJECTION_DATA_H_
 
 #include "hphp/runtime/base/rds-header.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/vm/async-flow-stepper.h"
 #include "hphp/runtime/vm/pc-filter.h"
@@ -200,8 +201,11 @@ struct RequestInjectionData {
   /*
    * Whether to suppress the emission of Hack array compat notices.
    */
-  bool getSuppressHackArrayCompatNotices() const;
-  void setSuppressHackArrayCompatNotices(bool);
+#define HC(Opt, ...) \
+  bool getSuppressHAC##Opt##Notices() const;  \
+  void setSuppressHAC##Opt##Notices(bool);
+  HAC_CHECK_OPTS
+#undef HC
 
   /*
    * Whether coverage is being collected.
@@ -326,7 +330,10 @@ private:
   bool m_jittingDisabled{false};
   bool m_jitFolding{false};
   bool m_debuggerIntr{false};
-  bool m_suppressHackArrayCompatNotices{false};
+
+#define HC(Opt, ...) bool m_suppressHAC##Opt{false};
+  HAC_CHECK_OPTS
+#undef HC
 
   bool m_debuggerStepIn{false};
   bool m_debuggerNext{false};

@@ -148,7 +148,7 @@ TypedValue HHVM_FUNCTION(json_encode, const Variant& value,
 
 TypedValue HHVM_FUNCTION(json_decode, const String& json,
                          bool assoc, int64_t depth, int64_t options) {
-  SuppressHackArrCompatNotices suppress;
+  SuppressHACIntishCastNotices shacn;
 
   json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
 

@@ -645,7 +645,9 @@ void RequestInjectionData::reset() {
   m_debuggerStepIn = false;
   m_debuggerStepOut = StepOutState::None;
   m_debuggerNext = false;
-  m_suppressHackArrayCompatNotices = false;
+#define HC(Opt, ...) m_suppressHAC##Opt = false;
+  HAC_CHECK_OPTS
+#undef HC
   m_breakPointFilter.clear();
   m_flowFilter.clear();
   m_lineBreakPointFilter.clear();

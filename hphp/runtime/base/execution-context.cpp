@@ -2123,7 +2123,7 @@ Variant ExecutionContext::getEvaledArg(const StringData* val,
                           init_null_variant, nullptr, nullptr, nullptr, nullptr,
                           InvokePseudoMain)
   );
-  SuppressHackArrCompatNotices suppress;
+  SuppressHACFalseyPromoteNotices shacn;
   auto const lv = m_evaledArgs.lvalAt(key, AccessFlags::Key);
   tvSet(*v.asTypedValue(), lv);
   return Variant::wrap(lv.tv());

@@ -228,7 +228,7 @@ static void StartRequest(Array& server) {
 void HttpProtocol::PrepareSystemVariables(Transport *transport,
                                           const RequestURI &r,
                                           const SourceRootInfo &sri) {
-  SuppressHackArrCompatNotices suppress;
+  SuppressHACIntishCastNotices shacn;
 
   auto const vhost = VirtualHost::GetCurrent();
   auto const g = get_global_variables()->asArrayData();

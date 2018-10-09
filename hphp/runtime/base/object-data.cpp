@@ -447,7 +447,7 @@ tv_lval ObjectData::makeDynProp(const StringData* key) {
   if (RuntimeOption::EvalNoticeOnCreateDynamicProp) {
     raiseCreateDynamicProp(key);
   }
-  SuppressHackArrCompatNotices shacn;
+  SuppressHACFalseyPromoteNotices shacn;
   return reserveProperties().lvalAt(StrNR(key), AccessFlags::Key);
 }
 

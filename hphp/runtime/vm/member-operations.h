@@ -207,9 +207,9 @@ ALWAYS_INLINE void checkPromotion(tv_rval base, const MInstrPropState* pState) {
   if (LIKELY(!checkHACFalseyPromote())) return;
 
   if (tvIsNull(base)) {
-    raise_hackarr_compat_notice("Promoting null to array");
+    raise_hac_falsey_promote_notice("Promoting null to array");
   } else if (tvIsBool(base)) {
-    raise_hackarr_compat_notice("Promoting false to array");
+    raise_hac_falsey_promote_notice("Promoting false to array");
   }
 }
 
@@ -1006,7 +1006,7 @@ void SetWithRefMLElem(TypedValue& tvRef, tv_lval base,
             !HPHP::val(base).parr->isGlobalsArray()) {
           raiseHackArrCompatRefBind(key);
         }
-        SuppressHackArrCompatNotices shacn;
+        SuppressHACFalseyPromoteNotices shacn;
         return ElemDArray<mode, reffy, intishWarn, keyType>(base, key);
       }
       case KindOfObject:

@@ -2498,7 +2498,7 @@ void DebuggerClient::loadConfig() {
   // We are guaranteed to have an ini file given how m_configFileName is set
   // above
   {
-    SuppressHackArrCompatNotices suppress;
+    SuppressHACIntishCastNotices shacn;
     Config::ParseIniFile(m_configFileName);
   }
 

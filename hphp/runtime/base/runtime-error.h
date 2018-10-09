@@ -193,22 +193,29 @@ void raise_hackarr_compat_type_hint_property_notice(const Class* declCls,
 
 void raise_hackarr_compat_notice(const std::string& msg);
 
+#define HC(Opt, opt) void raise_hac_##opt##_notice(const std::string& msg);
+HAC_CHECK_OPTS
+#undef HC
+
 /*
- * RAII mechanism to temporarily suppress Hack array compat notices within a
- * scope.
+ * RAII mechanism to temporarily suppress a specific Hack array compat notice
+ * within a scope.
  */
-struct SuppressHackArrCompatNotices {
-  SuppressHackArrCompatNotices();
-  ~SuppressHackArrCompatNotices();
-  SuppressHackArrCompatNotices(const SuppressHackArrCompatNotices&) = delete;
-  SuppressHackArrCompatNotices(SuppressHackArrCompatNotices&&) = delete;
-  SuppressHackArrCompatNotices&
-  operator=(const SuppressHackArrCompatNotices&) = delete;
-  SuppressHackArrCompatNotices&
-  operator=(SuppressHackArrCompatNotices&&) = delete;
-private:
-  bool old;
-};
+#define HC(Opt, ...) \
+  struct SuppressHAC##Opt##Notices {  \
+    SuppressHAC##Opt##Notices();      \
+    ~SuppressHAC##Opt##Notices();     \
+    SuppressHAC##Opt##Notices(const SuppressHAC##Opt##Notices&) = delete; \
+    SuppressHAC##Opt##Notices(SuppressHAC##Opt##Notices&&) = delete;      \
+    SuppressHAC##Opt##Notices&                              \
+      operator=(const SuppressHAC##Opt##Notices&) = delete; \
+    SuppressHAC##Opt##Notices&                              \
+      operator=(SuppressHAC##Opt##Notices&&) = delete;      \
+  private:    \
+    bool old; \
+  };
+HAC_CHECK_OPTS
+#undef HC
 
 ///////////////////////////////////////////////////////////////////////////////
 /*

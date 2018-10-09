@@ -542,6 +542,13 @@ struct RuntimeOption {
 
   static std::vector<std::string> TzdataSearchPaths;
 
+#define HAC_CHECK_OPTS              \
+  HC(IntishCast, intish_cast)       \
+  HC(RefBind, ref_bind)             \
+  HC(FalseyPromote, falsey_promote) \
+  HC(Compare, compare)              \
+  HC(Misc, misc)
+
 #define EVALFLAGS()                                                     \
   /* F(type, name, defaultVal) */                                       \
   /*                                                                    \

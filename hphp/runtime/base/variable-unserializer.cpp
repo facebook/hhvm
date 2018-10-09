@@ -576,7 +576,7 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
     // Unserialize as a dynamic property. If this is the first, we need to
     // pre-allocate space in the array to ensure the elements don't move during
     // unserialization.
-    SuppressHackArrCompatNotices shacn;
+    SuppressHACFalseyPromoteNotices shacn;
     t = obj->makeDynProp(realKey.get());
   } else {
     // We'll check if this doesn't violate the type-hint once we're done
@@ -1096,7 +1096,7 @@ void VariableUnserializer::unserializeVariant(
                     obj->raiseCreateDynamicProp(key.get());
                   }
                   auto t = [&]() {
-                    SuppressHackArrCompatNotices shacn;
+                    SuppressHACFalseyPromoteNotices shacn;
                     auto& arr = obj->dynPropArray();
                     return arr.lvalAt(key, AccessFlags::Key);
                   }();
@@ -1247,7 +1247,7 @@ Array VariableUnserializer::unserializeArray() {
            !arr.exists(key, true));
 
     auto value = [&]() {
-      SuppressHackArrCompatNotices shacn;
+      SuppressHACFalseyPromoteNotices shacn;
       return arr.lvalAt(key, AccessFlags::Key);
     }();
     if (UNLIKELY(isRefcountedType(value.type()))) {
@@ -1303,7 +1303,7 @@ Array VariableUnserializer::unserializeDict() {
            !arr.exists(key, true));
 
     auto const lval = [&] {
-      SuppressHackArrCompatNotices shacn;
+      SuppressHACFalseyPromoteNotices shacn;
       return key.isInteger()
         ? MixedArray::LvalIntDict(arr.get(), key.asInt64Val(), false)
         : MixedArray::LvalStrDict(arr.get(), key.asCStrRef().get(), false);
@@ -1432,7 +1432,7 @@ Array VariableUnserializer::unserializeVArray() {
 
   for (int64_t i = 0; i < size; i++) {
     auto lval = [&]() -> decltype(auto) {
-      SuppressHackArrCompatNotices shacn;
+      SuppressHACFalseyPromoteNotices shacn;
       return arr.lvalAt();
     }();
     assertx(lval.arr == arr.get());
@@ -1501,7 +1501,7 @@ Array VariableUnserializer::unserializeDArray() {
            !arr.exists(key, true));
 
     auto value = [&]() {
-      SuppressHackArrCompatNotices shacn;
+      SuppressHACFalseyPromoteNotices shacn;
       return arr.lvalAt(key, AccessFlags::Key);
     }();
     if (UNLIKELY(isRefcountedType(value.type()))) {

@@ -692,7 +692,7 @@ void HHVM_FUNCTION(thrift_protocol_write_binary,
 
   const Object& obj_request_struct = request_struct;
 
-  SuppressHackArrCompatNotices suppressNotices;
+  SuppressHACIntishCastNotices shacn;
 
   Variant spec(get_tspec(obj_request_struct->getVMClass()));
   binary_serialize_spec(obj_request_struct, transport, spec.toArray());

@@ -62,19 +62,19 @@ module Dep = struct
   let compare = (-)
 
   let to_string = function
-    | GConst s -> "GConst "^s
-    | GConstName s -> "GConstName "^s
-    | Const (cls, s) -> spf "Const %s::%s" cls s
-    | Class s -> "Class "^s
-    | Fun s -> "Fun "^s
-    | FunName s -> "FunName "^s
-    | Prop (cls, s) -> spf "Prop %s::%s" cls s
-    | SProp (cls, s) -> spf "SProp %s::%s" cls s
-    | Method (cls, s) -> spf "Method %s::%s" cls s
-    | SMethod (cls, s) -> spf "SMethod %s::%s" cls s
-    | Cstr s -> "Cstr "^s
-    | AllMembers s -> "AllMembers "^s
-    | Extends s -> "Extends "^s
+    | GConst s -> "GConst "^Utils.strip_ns s
+    | GConstName s -> "GConstName "^Utils.strip_ns s
+    | Const (cls, s) -> spf "Const %s::%s" (Utils.strip_ns cls) s
+    | Class s -> "Class "^Utils.strip_ns s
+    | Fun s -> "Fun "^Utils.strip_ns s
+    | FunName s -> "FunName "^Utils.strip_ns s
+    | Prop (cls, s) -> spf "Prop %s::%s" (Utils.strip_ns cls) s
+    | SProp (cls, s) -> spf "SProp %s::%s" (Utils.strip_ns cls) s
+    | Method (cls, s) -> spf "Method %s::%s" (Utils.strip_ns cls) s
+    | SMethod (cls, s) -> spf "SMethod %s::%s" (Utils.strip_ns cls) s
+    | Cstr s -> "Cstr "^Utils.strip_ns s
+    | AllMembers s -> "AllMembers "^Utils.strip_ns s
+    | Extends s -> "Extends "^Utils.strip_ns s
 
 end
 

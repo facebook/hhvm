@@ -40,7 +40,6 @@
 #include "hphp/util/mutex.h"
 #include "hphp/util/process.h"
 #include "hphp/util/rank.h"
-#include "hphp/util/smalllocks.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
 
@@ -92,15 +91,31 @@ private:
 };
 
 struct CachedUnit {
-  CachedUnit() = default;
-  explicit CachedUnit(Unit* unit, size_t rdsBitId)
-    : unit(unit)
-    , rdsBitId(rdsBitId)
-  {}
-
-  Unit* unit{nullptr};  // null if there is no Unit for this path
-  size_t rdsBitId{-1u}; // id of the RDS bit for whether the Unit is included
+  Unit* unit{};
+  size_t rdsBitId{-1uL};
 };
+
+struct CachedUnitInternal {
+  CachedUnitInternal() = default;
+  CachedUnitInternal(const CachedUnitInternal& src) :
+      unit{src.unit.copy()},
+      rdsBitId{src.rdsBitId} {}
+  CachedUnitInternal& operator=(const CachedUnitInternal&) = delete;
+
+  static Unit* const Uninit;
+
+  CachedUnit cachedUnit() const {
+    return CachedUnit { *unit.get().get(), rdsBitId };
+  }
+
+  // nullptr if there is no Unit for this path, Uninit if the CachedUnit
+  // hasn't been initialized yet.
+  mutable LockFreePtrWrapper<Unit*> unit{Uninit};
+  // id of the RDS bit for whether the Unit is included
+  mutable size_t rdsBitId{-1u};
+};
+
+Unit* const CachedUnitInternal::Uninit = reinterpret_cast<Unit*>(-8);
 
 //////////////////////////////////////////////////////////////////////
 // RepoAuthoritative mode unit caching
@@ -112,33 +127,9 @@ struct CachedUnit {
  * Because of this it pays to keep it separate from the other cases so
  * they don't need to be littered with RepoAuthoritative checks.
  */
-
-struct CachedUnitRepoAuth {
-  CachedUnitRepoAuth() = default;
-
-  CachedUnitRepoAuth(const CachedUnitRepoAuth& src)
-    : unit(src.unit)
-    , rdsBitId(src.rdsBitId.load(std::memory_order_relaxed))
-  {}
-
-  operator CachedUnit() const {
-    auto const u = unit;
-    auto const bits = rdsBitId.load(std::memory_order_relaxed);
-    return CachedUnit { u, bits };
-  }
-
-  mutable AtomicLowPtr<
-    Unit,
-    std::memory_order_acquire,
-    std::memory_order_release
-  > unit{reinterpret_cast<Unit*>(0x1)};
-  mutable SmallLock lock{};
-  mutable std::atomic<size_t> rdsBitId{-1u};
-};
-
 using RepoUnitCache = RankedCHM<
   const StringData*,     // must be static
-  CachedUnitRepoAuth,
+  CachedUnitInternal,
   StringDataHashCompare,
   RankUnitCache
 >;
@@ -152,46 +143,42 @@ CachedUnit lookupUnitRepoAuth(const StringData* path,
   s_repoUnitCache.insert(acc, path);
   auto const& cu = acc->second;
 
-  // Check for initialization before we grab the futex; the entry is
-  // write-once.
-  if (!(reinterpret_cast<uintptr_t>(cu.unit.get()) & 0x1)) return cu;
+  if (cu.unit.copy() != CachedUnitInternal::Uninit) return cu.cachedUnit();
 
-  std::unique_lock<SmallLock> lock(cu.lock);
-
-  if (!(reinterpret_cast<uintptr_t>(cu.unit.get()) & 0x1)) return cu;
+  cu.unit.lock_for_update();
+  if (cu.unit.copy() != CachedUnitInternal::Uninit) {
+    // Someone else updated the unit while we were waiting on the lock
+    cu.unit.unlock();
+    return cu.cachedUnit();
+  }
 
   try {
     /*
-     * Insert path.  Find the Md5 for this path, and then the unit for
-     * this Md5.  If either aren't found we return the
-     * default-constructed cache entry.
-     *
-     * NB: we're holding the CHM lock on this bucket while we're doing
-     * this.
+     * We got the lock, so we're responsible for updating the entry.
      */
     MD5 md5;
     if (Repo::get().findFile(path->data(),
                              RuntimeOption::SourceRoot,
                              md5) == RepoStatus::error) {
-      cu.unit = nullptr;
-      return cu;
+      cu.unit.update_and_unlock(nullptr);
+      return cu.cachedUnit();
     }
 
-    auto const unit = Repo::get().loadUnit(
+    auto unit = Repo::get().loadUnit(
         path->data(),
         md5,
         nativeFuncs)
       .release();
     if (unit) {
-      cu.rdsBitId.store(rds::allocBit(), std::memory_order_relaxed);
-      cu.unit = unit;
+      cu.rdsBitId = rds::allocBit();
     }
+    cu.unit.update_and_unlock(std::move(unit));
   } catch (...) {
-    lock.unlock();
+    cu.unit.unlock();
     s_repoUnitCache.erase(acc);
     throw;
   }
-  return cu;
+  return cu.cachedUnit();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -202,25 +189,49 @@ struct CachedUnitWithFree {
   explicit CachedUnitWithFree(const CachedUnitWithFree&) = delete;
   CachedUnitWithFree& operator=(const CachedUnitWithFree&) = delete;
 
-  explicit CachedUnitWithFree(const CachedUnit& src) : cu(src) {}
+  explicit CachedUnitWithFree(const CachedUnit& src,
+                              const struct stat* statInfo,
+                              bool needsTreadmill) :
+      cu(src), needsTreadmill{needsTreadmill} {
+    if (statInfo) {
+#ifdef _MSC_VER
+      mtime      = statInfo->st_mtime;
+#else
+      mtime      = statInfo->st_mtim;
+      ctime      = statInfo->st_ctim;
+#endif
+      ino        = statInfo->st_ino;
+      devId      = statInfo->st_dev;
+    }
+  }
   ~CachedUnitWithFree() {
     if (auto oldUnit = cu.unit) {
-      Treadmill::enqueue([oldUnit] { delete oldUnit; });
+      if (needsTreadmill) {
+        Treadmill::enqueue([oldUnit] { delete oldUnit; });
+      } else {
+        delete oldUnit;
+      }
     }
   }
   CachedUnit cu;
+
+#ifdef _MSC_VER
+  mutable time_t mtime;
+#else
+  mutable struct timespec mtime;
+  mutable struct timespec ctime;
+#endif
+  mutable ino_t ino;
+  mutable dev_t devId;
+  bool needsTreadmill;
 };
 
 struct CachedUnitNonRepo {
-  std::shared_ptr<CachedUnitWithFree> cachedUnit;
-#ifdef _MSC_VER
-  time_t mtime;
-#else
-  struct timespec mtime;
-  struct timespec ctime;
-#endif
-  ino_t ino;
-  dev_t devId;
+  CachedUnitNonRepo() = default;
+  CachedUnitNonRepo(const CachedUnitNonRepo& other) :
+      cachedUnit{other.cachedUnit.copy()} {}
+
+  mutable LockFreePtrWrapper<copy_ptr<CachedUnitWithFree>> cachedUnit;
 };
 
 using NonRepoUnitCache = RankedCHM<
@@ -255,22 +266,22 @@ bool stressUnitCache() {
   return ++g_units_seen_count % RuntimeOption::EvalStressUnitCacheFreq == 0;
 }
 
-bool isChanged(const CachedUnitNonRepo& cu, const struct stat* s) {
+bool isChanged(copy_ptr<CachedUnitWithFree> cachedUnit, const struct stat* s) {
   // If the cached unit is null, we always need to consider it out of date (in
   // case someone created the file).  This case should only happen if something
   // successfully stat'd the file, but then it was gone by the time we tried to
   // open() it.
   if (!s) return false;
-  return !cu.cachedUnit ||
-         cu.cachedUnit->cu.unit == nullptr ||
+  return !cachedUnit ||
+         cachedUnit->cu.unit == nullptr ||
 #ifdef _MSC_VER
-         cu.mtime - s->st_mtime < 0 ||
+         cachedUnit->mtime - s->st_mtime < 0 ||
 #else
-         timespecCompare(cu.mtime, s->st_mtim) < 0 ||
-         timespecCompare(cu.ctime, s->st_ctim) < 0 ||
+         timespecCompare(cachedUnit->mtime, s->st_mtim) < 0 ||
+         timespecCompare(cachedUnit->ctime, s->st_ctim) < 0 ||
 #endif
-         cu.ino != s->st_ino ||
-         cu.devId != s->st_dev ||
+         cachedUnit->ino != s->st_ino ||
+         cachedUnit->devId != s->st_dev ||
          stressUnitCache();
 }
 
@@ -433,65 +444,73 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
   Unit* releaseUnit = nullptr;
   SCOPE_EXIT { if (releaseUnit) delete releaseUnit; };
 
-  auto const updateStatInfo = [&] (NonRepoUnitCache::accessor& acc) {
-    if (statInfo) {
-#ifdef _MSC_VER
-      acc->second.mtime      = statInfo->st_mtime;
-#else
-      acc->second.mtime      = statInfo->st_mtim;
-      acc->second.ctime      = statInfo->st_ctim;
-#endif
-      acc->second.ino        = statInfo->st_ino;
-      acc->second.devId      = statInfo->st_dev;
+  auto const updateAndUnlock = [] (auto& cachedUnit, auto p) {
+    auto old = cachedUnit.update_and_unlock(std::move(p));
+    if (old) {
+      // We don't need to do anything explicitly; the copy_ptr
+      // destructor will take care of it.
+      Treadmill::enqueue([old = std::move(old)] () {});
     }
   };
 
-  auto const cuptr = [&] {
-    NonRepoUnitCache::accessor rpathAcc;
+  auto cuptr = [&] {
+    NonRepoUnitCache::const_accessor rpathAcc;
 
-    if (!cache.insert(rpathAcc, rpath)) {
-      if (!isChanged(rpathAcc->second, statInfo)) {
-        if (ent) ent->setStr("type", "cache_hit_writelock");
-        return rpathAcc->second.cachedUnit;
+    cache.insert(rpathAcc, rpath);
+    auto& cachedUnit = rpathAcc->second.cachedUnit;
+    if (auto const tmp = cachedUnit.copy()) {
+      if (!isChanged(tmp, statInfo)) {
+        if (ent) ent->setStr("type", "cache_hit_readlock");
+        return tmp;
       }
-      if (ent) ent->setStr("type", "cache_stale");
-    } else {
-      if (ent) ent->setStr("type", "cache_miss");
     }
 
-    /*
-     * NB: the new-unit creation path is here, and is done while holding the tbb
-     * lock on s_nonRepoUnitCache.  This was originally done deliberately to
-     * avoid wasting time in the compiler (during server startup, many requests
-     * hit the same code initial paths that are shared, and would all be
-     * compiling the same files).  It's not 100% clear if this is the best way
-     * to handle that idea, though (tbb locks spin aggressively and are
-     * expected to be low contention).
-     */
+    cachedUnit.lock_for_update();
+    try {
+      if (auto const tmp = cachedUnit.copy()) {
+        if (!isChanged(tmp, statInfo)) {
+          cachedUnit.unlock();
+          if (ent) ent->setStr("type", "cache_hit_writelock");
+          return tmp;
+        }
+        if (ent) ent->setStr("type", "cache_stale");
+      } else {
+        if (ent) ent->setStr("type", "cache_miss");
+      }
 
-    auto const cu = createUnitFromFile(rpath, &releaseUnit, w, ent,
-                                       nativeFuncs);
-    auto const p = std::make_shared<CachedUnitWithFree>(cu);
-    // Don't cache the unit if it was created in response to an internal error
-    // in ExternCompiler. Such units represent transient events.
-    if (LIKELY(!cu.unit || !cu.unit->isICE())) {
-      rpathAcc->second.cachedUnit = p;
-      updateStatInfo(rpathAcc);
+      auto const cu = createUnitFromFile(rpath, &releaseUnit, w, ent,
+                                         nativeFuncs);
+      auto const isICE = cu.unit && cu.unit->isICE();
+      auto p = copy_ptr<CachedUnitWithFree>(cu, statInfo, isICE);
+      // Don't cache the unit if it was created in response to an internal error
+      // in ExternCompiler. Such units represent transient events.
+      if (UNLIKELY(isICE)) {
+        cachedUnit.unlock();
+        return p;
+      }
+      updateAndUnlock(cachedUnit, p);
+      return p;
+    } catch (...) {
+      cachedUnit.unlock();
+      throw;
     }
-
-    return p;
   }();
 
-  if (!cuptr->cu.unit || !cuptr->cu.unit->isICE()) {
+  auto const ret = cuptr->cu;
+
+  if (!ret.unit || !ret.unit->isICE()) {
     if (path != rpath) {
-      NonRepoUnitCache::accessor pathAcc;
+      NonRepoUnitCache::const_accessor pathAcc;
       cache.insert(pathAcc, path);
-      pathAcc->second.cachedUnit = cuptr;
-      updateStatInfo(pathAcc);
+      if (pathAcc->second.cachedUnit.get().get() != cuptr) {
+        auto& cachedUnit = pathAcc->second.cachedUnit;
+        cachedUnit.lock_for_update();
+        updateAndUnlock(cachedUnit, std::move(cuptr));
+      }
     }
   }
 
-  return cuptr->cu;
+  return ret;
 }
 
 CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
@@ -501,14 +520,16 @@ CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
   // Steady state, its probably already in the cache. Try that first
   {
     NonRepoUnitCache::const_accessor acc;
-    if (s_nonRepoUnitCache.find(acc, requestedPath) &&
-        !isChanged(acc->second, statInfo)) {
-      auto const cu = acc->second.cachedUnit->cu;
-      if (!cu.unit || !RuntimeOption::CheckSymLink ||
-          !strcmp(StatCache::realpath(requestedPath->data()).c_str(),
-                  cu.unit->filepath()->data())) {
-        if (ent) ent->setStr("type", "cache_hit_readlock");
-        return cu;
+    if (s_nonRepoUnitCache.find(acc, requestedPath)) {
+      auto const cachedUnit = acc->second.cachedUnit.copy();
+      if (!isChanged(cachedUnit, statInfo)) {
+        auto const cu = cachedUnit->cu;
+        if (!cu.unit || !RuntimeOption::CheckSymLink ||
+            !strcmp(StatCache::realpath(requestedPath->data()).c_str(),
+                    cu.unit->filepath()->data())) {
+          if (ent) ent->setStr("type", "cache_hit_readlock");
+          return cu;
+        }
       }
     }
   }
@@ -761,8 +782,10 @@ std::vector<Unit*> loadedUnitsRepoAuth() {
   std::vector<Unit*> units;
   units.reserve(s_repoUnitCache.size());
   for (auto const& elm : s_repoUnitCache) {
-    if (elm.second.unit) {
-      units.push_back(elm.second.unit);
+    if (auto const unit = elm.second.unit.copy()) {
+      if (unit != CachedUnitInternal::Uninit) {
+        units.push_back(unit);
+      }
     }
   }
   return units;
@@ -902,6 +925,12 @@ void preloadRepo() {
   for (auto& worker : workers) {
     worker.join();
   }
+}
+
+void clearUnitCacheForExit() {
+  s_nonRepoUnitCache.clear();
+  s_repoUnitCache.clear();
+  s_perUserUnitCaches.clear();
 }
 
 //////////////////////////////////////////////////////////////////////

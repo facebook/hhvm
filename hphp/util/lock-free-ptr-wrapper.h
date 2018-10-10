@@ -56,6 +56,7 @@ struct LockFreePtrWrapper {
   LockFreePtrWrapper(const LockFreePtrWrapper<T>&) = delete;
   LockFreePtrWrapper<T>& operator=(const LockFreePtrWrapper<T>&) = delete;
   LockFreePtrWrapper() : val{} { assertx(!(raw() & ~kPtrMask)); };
+  LockFreePtrWrapper(const T& v) : val{v} { assertx(!(raw() & ~kPtrMask)); };
   ~LockFreePtrWrapper() {
     assertx(!(raw() & ~kPtrMask));
     val.~T();
@@ -68,8 +69,8 @@ struct LockFreePtrWrapper {
    * same effect as returning a T*.
    */
   struct Holder {
-    const T* get() { return &val; }
-    T* operator->() { return &val; }
+    auto get() { return getter(val, false); }
+    auto operator->() { return get(); }
     Holder(const Holder& h) : bits{h.bits} { assertx(!(bits & ~kPtrMask)); }
     Holder(uintptr_t bits) : bits{bits} { assertx(!(bits & ~kPtrMask)); }
     Holder(T&& val) : val{std::move(val)} { assertx(!(bits & ~kPtrMask)); }
@@ -78,6 +79,15 @@ struct LockFreePtrWrapper {
       uintptr_t bits;
       T         val;
     };
+  private:
+    template<typename U>
+    static const U* getter(const U& p, int f) { return &p; }
+    template<typename U>
+    static const U* getter(const U* p, int f) { return p; }
+    template<typename U>
+    static auto getter(const U& p, bool f) -> decltype(p.operator->(), p) {
+      return p;
+    }
   };
 
   // Get a bitwise copy of the current value
@@ -92,8 +102,23 @@ struct LockFreePtrWrapper {
     return x.val;
   }
 
+  /*
+   * Get an exclusive lock on the wrapped value. Other threads can
+   * still read its current value via get() or copy(). After calling
+   * this, you must unlock it either with update_and_unlock (if you
+   * want to change the value), or unlock (if you don't).
+   */
   void lock_for_update();
+  /*
+   * Unlock it.
+   */
   void unlock();
+  /*
+   * Update the wrapped value, and return the old value. The old value
+   * will typically need to be destroyed via a treadmill-like
+   * mechanism, because other threads may have read the old value just
+   * prior to the update (and still be using it).
+   */
   T update_and_unlock(T&& v);
 private:
   uintptr_t unlock_helper(uintptr_t rep);

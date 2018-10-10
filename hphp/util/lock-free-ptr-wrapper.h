@@ -69,8 +69,8 @@ struct LockFreePtrWrapper {
    * same effect as returning a T*.
    */
   struct Holder {
-    const T* get() { return &val; }
-    T* operator->() { return &val; }
+    auto get() { return getter(val, false); }
+    auto operator->() { return get(); }
     Holder(const Holder& h) : bits{h.bits} { assertx(!(bits & ~kPtrMask)); }
     Holder(uintptr_t bits) : bits{bits} { assertx(!(bits & ~kPtrMask)); }
     Holder(T&& val) : val{std::move(val)} { assertx(!(bits & ~kPtrMask)); }
@@ -79,6 +79,15 @@ struct LockFreePtrWrapper {
       uintptr_t bits;
       T         val;
     };
+  private:
+    template<typename U>
+    static const U* getter(const U& p, int f) { return &p; }
+    template<typename U>
+    static const U* getter(const U* p, int f) { return p; }
+    template<typename U>
+    static auto getter(const U& p, bool f) -> decltype(p.operator->(), p) {
+      return p;
+    }
   };
 
   // Get a bitwise copy of the current value

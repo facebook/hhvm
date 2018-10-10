@@ -545,6 +545,10 @@ bool InliningDecider::shouldInline(SrcKey callerSk,
     return false;
   };
 
+  auto isAwaitish = [&] (Op opcode) {
+    return opcode == OpAwait || opcode == OpFCallAwait || opcode == OpAwaitAll;
+  };
+
   // Try to inline CPP builtin functions.
   // The NativeImpl opcode may appear later in the function because of Asserts
   // generated in hhbbc
@@ -581,9 +585,18 @@ bool InliningDecider::shouldInline(SrcKey callerSk,
                                     opcodeToName(op)).str().c_str());
       }
 
-      // Count the returns.
+      // Detect that the region contains a return.
       if (isReturnish(op)) {
         hasRet = true;
+      }
+
+      // In optimized regions consider an await to be a returnish instruction,
+      // if no returns appeared in the region then we likely suspend on all
+      // calls to the callee.
+      if (block->profTransID() != kInvalidTransID) {
+        if (region.isExit(block->id()) && i + 1 == n && isAwaitish(op)) {
+          hasRet = true;
+        }
       }
     }
   }

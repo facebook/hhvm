@@ -112,7 +112,14 @@ passes may depend on (most notably DCE and partial-DCE):
   - BeginInlining must dominate every instruction within the callee.
   - Excluding side-exits and early returns, InlineReturn must post-dominate
     every instruction in the callee.
-  - The callee must contain a return.
+  - The callee must contain a return or await.
+
+When a callee contains awaits, these will be implemented as either an await of
+the caller (in the case of FCallAwait) or a return from the callee and side-exit
+from the caller, unless the callee does not contain a return (e.g. the caller
+was profiled as always suspending), in which case the callee will return the
+awaitable waithandle to the caller rather than side-exiting in the case of a
+non-FCallAwait.
 
 Below is an unmaintainable diagram of a pair of an async function inlined into a
 pair of callers with FCallAwait and FCall (*) respectively,
@@ -519,28 +526,28 @@ void implReturnBlock(IRGS& env) {
   }
 }
 
-void implSuspendBlock(IRGS& env) {
+bool implSuspendBlock(IRGS& env, bool exitOnAwait) {
   auto const rt = env.inlineReturnTarget.back();
   // Start a new IR block to hold the remainder of this block.
   auto const did_start = env.irb->startBlock(rt.suspendTarget, false);
-  if (!did_start) return;
+  if (!did_start) return false;
 
   // We strive to inline regions which will mostly eagerly terminate.
-  hint(env, Block::Hint::Unlikely);
+  if (exitOnAwait) hint(env, Block::Hint::Unlikely);
 
   auto const label = env.unit.defLabel(1, env.irb->nextBCContext());
   auto const wh = label->dst(0);
   rt.suspendTarget->push_back(label);
   retypeDests(label, &env.unit);
 
-  auto const is = implInlineReturn(env, true);
-  SCOPE_EXIT { pushInlineState(env, is); };
+  auto const is = implInlineReturn(env, exitOnAwait);
+  SCOPE_EXIT { if (exitOnAwait) pushInlineState(env, is); };
 
   switch (rt.returnType) {
     case InlineType::Normal: always_assert(false);
     case InlineType::Async:
       push(env, wh);
-      gen(env, Jmp, makeExit(env, nextBcOff(env)));
+      if (exitOnAwait) gen(env, Jmp, makeExit(env, nextBcOff(env)));
       break;
     case InlineType::AwaitedAsync:
       if (resumeMode(env) == ResumeMode::Async) {
@@ -550,6 +557,8 @@ void implSuspendBlock(IRGS& env) {
       }
       break;
   }
+
+  return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -560,12 +569,16 @@ void implInlineReturn(IRGS& env) {
 }
 
 bool endInlining(IRGS& env) {
-  implSuspendBlock(env);
-
   auto const rt = env.inlineReturnTarget.back();
-  auto const did_start = env.irb->startBlock(rt.callerTarget, false);
 
-  if (!did_start) return false;
+  if (env.irb->canStartBlock(rt.callerTarget)) {
+    implSuspendBlock(env, true);
+  } else {
+    return implSuspendBlock(env, false);
+  }
+
+  auto const did_start = env.irb->startBlock(rt.callerTarget, false);
+  always_assert(did_start);
 
   implReturnBlock(env);
 

@@ -3677,10 +3677,10 @@ and can_use_as_rhs_in_list_assignment expr =
   | A.Binop ((A.Eq None), (_, A.List _), (_, r)) ->
     can_use_as_rhs_in_list_assignment r
   | A.Binop (A.Plus, _, _) | A.Binop (A.QuestionQuestion, _, _)
-  | A.Binop (A.Eq _, _, _) -> true
+  | A.Binop (A.Eq _, _, _) | A.Class_const _ -> true
   (* Everything below is false *)
   | A.Binop _ | A.Shape _ | A.Null | A.True | A.False | A.Omitted | A.Id _
-  | A.Class_const _ | A.Int _ | A.Float _ | A.String _ | A.String2 _
+  | A.Int _ | A.Float _ | A.String _ | A.String2 _
   | A.PrefixedString _ | A.Yield_break | A.Yield_from _ | A.Suspend _
   | A.InstanceOf _ | A.Is _ | A.BracedExpr _ | A.ParenthesizedExpr _
   | A.NewAnonClass _ | A.Efun _ | A.Lfun _ | A.Xml _ | A.Unsafeexpr _

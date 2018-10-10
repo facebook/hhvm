@@ -19,7 +19,7 @@ function f2(resource $x): void {
 
 function f3(): void {
   $x = f1();
-  if (is_resource($x)) {
+  if ($x is resource) {
     f2($x);
   }
 }

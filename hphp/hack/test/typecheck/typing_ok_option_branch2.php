@@ -20,14 +20,14 @@ function f1(): mixed {
 function f2(): void {
   $x = f1();
   $y = null;
-  if (is_bool($x) && $x === false) {
+  if ($x is bool && $x === false) {
     $y = 10;
-  } else if (is_int($x)) {
+  } else if ($x is int) {
     $y = $x;
   } else {
     return;
   }
-  if (!is_int($y)) {
+  if (!($y is int)) {
     return;
   }
   $y = $y + 10;

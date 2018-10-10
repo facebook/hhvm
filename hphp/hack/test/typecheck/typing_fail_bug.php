@@ -10,7 +10,7 @@
  */
 
 function f(mixed $arg): void {
-  if (is_int($arg)) {
+  if ($arg is int) {
     $tmp = 0;
   } else {
     throw new Exception('');

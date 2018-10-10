@@ -20,7 +20,7 @@ class X {
   }
 
   public function getX(): int {
-    if(is_int($this->x)) {
+    if($this->x is int) {
       return $this->x;
     }
     return 0;

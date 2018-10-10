@@ -249,16 +249,8 @@ end
 
 module StdlibFunctions = struct
 
-  let is_int      = "\\is_int"
-  let is_bool     = "\\is_bool"
   let is_array    = "\\is_array"
-  let is_vec      = "\\is_vec"
-  let is_dict     = "\\is_dict"
-  let is_keyset   = "\\is_keyset"
-  let is_float    = "\\is_float"
-  let is_string   = "\\is_string"
   let is_null     = "\\is_null"
-  let is_resource = "\\is_resource"
 
   let get_class = "\\get_class"
   let get_called_class = "\\get_called_class" (* treated as static::class *)

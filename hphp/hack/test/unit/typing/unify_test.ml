@@ -28,7 +28,6 @@ let global_options =
     ~tco_untyped_nonstrict_lambda_parameters:false
     ~tco_language_feature_logging:false
     ~tco_unsafe_rx:false
-    ~tco_disable_primitive_refinement:false
     ~tco_disallow_implicit_returns_in_non_void_functions:true
     ~tco_disallow_unset_on_varray:false
     ~tco_disallow_scrutinee_case_value_type_mismatch:false

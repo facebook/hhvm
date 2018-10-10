@@ -155,7 +155,6 @@ let parse_options () =
   let auto_namespace_map = ref [] in
   let dont_assume_php = ref false in
   let unsafe_rx = ref false in
-  let disable_primitive_refinement = ref false in
   let disallow_stringish_magic = ref false in
   let unresolved_as_union = ref false in
   let options = [
@@ -319,9 +318,6 @@ let parse_options () =
     "--unsafe-rx",
         Arg.Set unsafe_rx,
         " Disables reactivity related errors";
-    "--disable-primitive-refinement",
-      Arg.Set disable_primitive_refinement,
-      " Disable type refinement of is_{bool, float, int, string, etc.}.";
     "--mro",
         Arg.Unit (set_mode Linearization),
         " Grabs the linearization of all classes in a file.";
@@ -342,7 +338,6 @@ let parse_options () =
       GlobalOptions.tco_assume_php = not !dont_assume_php;
       GlobalOptions.tco_unsafe_rx = !unsafe_rx;
       GlobalOptions.tco_user_attrs = Some SSet.empty;
-      GlobalOptions.tco_disable_primitive_refinement = !disable_primitive_refinement;
       GlobalOptions.tco_safe_array = !safe_array;
       GlobalOptions.tco_safe_vector_array = !safe_vector_array;
       GlobalOptions.po_deregister_php_stdlib = !deregister_attributes;

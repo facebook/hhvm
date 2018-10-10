@@ -8,7 +8,7 @@ function badInt(bool $b): int {
     $x = 3.4;
   }
   $z = 3 * $x;
-  if (is_int($z)) {
+  if ($z is int) {
     echo 'int';
   } else {
     echo 'not int';

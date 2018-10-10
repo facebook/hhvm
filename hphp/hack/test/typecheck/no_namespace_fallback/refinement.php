@@ -12,7 +12,7 @@
 namespace NS;
 
 function returns_int(mixed $in): ?int {
-  if (is_int($in)) {
+  if ($in is int) {
     return $in;
   }
   return null;
@@ -27,7 +27,7 @@ function returns_array(mixed $in): ?array {
 }
 
 function returns_vec(mixed $in): ?vec<mixed> {
-  if (is_vec($in)) {
+  if ($in is vec<_>) {
     return $in;
   }
   return null;

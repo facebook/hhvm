@@ -15,7 +15,7 @@ function meh(): void {
       array(
         'isNull' => true,
       ));
-  } else if (is_int($v)) {
+  } else if ($v is int) {
     $outputRow[$key] = new sps_DBResultField(
       array(
         'isNull' => false,

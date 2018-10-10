@@ -31,7 +31,7 @@ function filters() {
 
   $dump(array(1,2,3,4,5,6),         $x ==> $x % 2 == 0);
   $dump(array("a", "b", "ac", "k"), $x ==> $x[0] == "a");
-  $dump(array("asd", new box(123)), $x ==> is_string($x));
+  $dump(array("asd", new box(123)), $x ==> $x is string);
 }
 filters();
 
@@ -48,7 +48,7 @@ function collection() {
 
   var_dump(
     $blah->map($x ==> $x->get())
-         ->filter($x ==> !is_string($x))
+         ->filter($x ==> !($x is string))
          ->filter($x ==> $x % 2 == 0)
   );
 }

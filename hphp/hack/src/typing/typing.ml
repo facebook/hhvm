@@ -5963,9 +5963,6 @@ and condition ?lhs_of_null_coalesce env tparamet
     ((p, ty as pty), e as te: Tast.expr) =
   Async.enforce_nullable_or_not_awaitable env p ty;
   let condition = condition ?lhs_of_null_coalesce in
-  let enable_primitive_refinement =
-    not (TypecheckerOptions.disable_primitive_refinement (Env.get_tcopt env))
-  in
   match e with
   | T.True
   | T.Expr_list [] when not tparamet ->
@@ -6016,30 +6013,6 @@ and condition ?lhs_of_null_coalesce env tparamet
   | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_array ->
       is_array env `PHPArray p f lv
-  | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
-    when tparamet && f = SN.StdlibFunctions.is_vec && enable_primitive_refinement ->
-      is_array env `HackVec p f lv
-  | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
-    when tparamet && f = SN.StdlibFunctions.is_dict && enable_primitive_refinement ->
-      is_array env `HackDict p f lv
-  | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
-    when tparamet && f = SN.StdlibFunctions.is_keyset && enable_primitive_refinement ->
-      is_array env `HackKeyset p f lv
-  | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
-    when tparamet && f = SN.StdlibFunctions.is_int && enable_primitive_refinement ->
-      is_type env lv Tint (Reason.Rpredicated (p, f))
-  | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
-    when tparamet && f = SN.StdlibFunctions.is_bool && enable_primitive_refinement ->
-      is_type env lv Tbool (Reason.Rpredicated (p, f))
-  | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
-    when tparamet && f = SN.StdlibFunctions.is_float && enable_primitive_refinement ->
-      is_type env lv Tfloat (Reason.Rpredicated (p, f))
-  | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
-    when tparamet && f = SN.StdlibFunctions.is_string && enable_primitive_refinement ->
-      is_type env lv Tstring (Reason.Rpredicated (p, f))
-  | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
-    when tparamet && f = SN.StdlibFunctions.is_resource && enable_primitive_refinement ->
-      is_type env lv Tresource (Reason.Rpredicated (p, f))
   | T.Call (
       Cnormal,
       (_, T.Class_const ((_, T.CI ((_, class_name), _)), (_, method_name))),
@@ -6326,9 +6299,6 @@ and get_instance_var env = function
   | _, Lvar (p, x) -> env, (p, x)
   | p, This -> env, (p, this)
   | _ -> failwith "Should only be called when is_instance_var is true"
-
-and is_type env te tprim r =
-  refine_lvalue_type env te ~refine:(fun env _ -> env, (r, Tprim tprim))
 
 (* Refine type for is_array, is_vec, is_keyset and is_dict tests
  * `pred_name` is the function name itself (e.g. 'is_vec')

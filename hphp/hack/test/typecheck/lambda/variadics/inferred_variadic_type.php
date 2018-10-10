@@ -24,7 +24,7 @@ function test(): void {
       if ($x instanceof C) {
         return $x->foo();
       }
-      if (is_int($x)) {
+      if ($x is int) {
         return $x;
       }
       return 0;

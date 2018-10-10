@@ -24,7 +24,7 @@ function foo(): void {
 }
 
 function foo2(mixed $x): int {
-  if(!is_int($x)) {
+  if(!($x is int)) {
     $x = 0;
   }
   return $x;

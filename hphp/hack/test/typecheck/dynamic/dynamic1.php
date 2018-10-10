@@ -45,7 +45,7 @@ async function test(dynamic $x, classname<dynamic> $cx, $y): Awaitable<mixed> {
   hh_show($y);
   $y = expect_string("$x");
   hh_show($y);
-  invariant(is_string($x), "");
+  invariant($x is string, "");
   hh_show($x);
   $x = expect_string($x);
   hh_show($x);

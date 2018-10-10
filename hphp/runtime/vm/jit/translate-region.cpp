@@ -548,6 +548,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
                                 double profFactor,
                                 Annotations& annotations) {
   const Timer irGenTimer(Timer::irGenRegionAttempt);
+  IRInstruction* checkStackInst{nullptr};
   auto prevRegion      = irgs.region;      irgs.region      = &region;
   auto prevProfFactor  = irgs.profFactor;  irgs.profFactor  = profFactor;
   auto prevProfTransID = irgs.profTransID; irgs.profTransID = kInvalidTransID;
@@ -555,6 +556,18 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     irgs.region      = prevRegion;
     irgs.profFactor  = prevProfFactor;
     irgs.profTransID = prevProfTransID;
+    if (checkStackInst) {
+      if (inl.maxStackDepth() >= kStackCheckLeafPadding) {
+        checkStackInst->extra<CheckStackOverflow>()->cells =
+          inl.maxStackDepth();
+      } else {
+        auto inst = irgs.unit.gen(
+          Jmp, checkStackInst->bcctx(), checkStackInst->next()
+        );
+        checkStackInst->become(irgs.unit, inst);
+        inst->convertToNop();
+      }
+    }
   };
 
   FTRACE(1, "translateRegion (mode={}, profFactor={:.2}) starting with:\n{}\n",
@@ -655,6 +668,18 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     auto const isEntry = &block == region.entry().get() && !inl.inlining();
     auto const checkOuterTypeOnly = !irb.guardFailBlock() &&
       (!isEntry || irgs.context.kind != TransKind::Profile);
+
+    if (isEntry) {
+      irgen::gen(
+        irgs,
+        CheckStackOverflow,
+        CheckStackOverflowData{0, false},
+        irgen::create_catch_block(irgs, []{}),
+        irgs.unit.mainSP()
+      );
+      checkStackInst = &irBlock->back();
+    }
+
     emitPredictionsAndPreConditions(irgs, region, block, isEntry,
                                     checkOuterTypeOnly);
     irb.resetGuardFailBlock();

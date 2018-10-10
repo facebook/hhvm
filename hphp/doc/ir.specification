@@ -3449,7 +3449,7 @@ fields of that struct for holding intermediate values.
 
   Stash the return address of the call in m_savedRip.
 
-| CheckStackOverflow, ND, S(FramePtr), NF
+| CheckStackOverflow, ND, S(FramePtr,StkPtr), NF
 
   Check if the stack depth has exceeded its limit.  If it has, jump to the
   stack overflow helper stub, which will throw.

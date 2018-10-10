@@ -2625,13 +2625,16 @@ let null_member s pos r =
 )
 
 let non_object_member s pos1 ty pos2 =
+  let msg_start = ("You are trying to access the member "^s^
+   " but this is not an object, it is "^ty) in
+  let msg =
+    if ty = "a shape" then
+      msg_start ^ ". Did you mean $foo['" ^ s ^ "'] instead?"
+    else
+      msg_start in
   add_list (Typing.err_code Typing.NonObjectMember) [
-  pos1,
-  ("You are trying to access the member "^s^
-   " but this is not an object, it is "^
-   ty);
-  pos2,
-  "Check this out"
+  pos1, msg;
+  pos2, "Check this out"
   ]
 
 let non_class_member s pos1 ty pos2 =

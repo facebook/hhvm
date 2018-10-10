@@ -1,0 +1,29 @@
+array(1) {
+  ["results"]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      [0]=>
+      object(FQLStatement)#1 (4) {
+        ["select"]=>
+        array(1) {
+          [0]=>
+          object(FQLFieldExpression)#2 (2) {
+            ["field_name"]=>
+            string(4) "name"
+            ["other_fields"]=>
+            array(0) {
+            }
+          }
+        }
+        ["from"]=>
+        string(4) "user"
+        ["where"]=>
+        object(FQLComparisonExpression)#5 (0) {
+        }
+        ["reused"]=>
+        bool(false)
+      }
+    }
+  }
+}

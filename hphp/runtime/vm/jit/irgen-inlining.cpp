@@ -543,7 +543,11 @@ void implSuspendBlock(IRGS& env) {
       gen(env, Jmp, makeExit(env, nextBcOff(env)));
       break;
     case InlineType::AwaitedAsync:
-      implAwaitE(env, wh, nextBcOff(env), true);
+      if (resumeMode(env) == ResumeMode::Async) {
+        implAwaitR(env, wh, nextBcOff(env), true);
+      } else {
+        implAwaitE(env, wh, nextBcOff(env), true);
+      }
       break;
   }
 }

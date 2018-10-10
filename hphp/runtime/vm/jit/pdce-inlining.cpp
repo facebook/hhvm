@@ -881,6 +881,9 @@ bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn) {
   auto def = fp->inst();
   assertx(def->is(DefInlineFP));
 
+  auto const parentResumed =
+    def->src(1)->inst()->marker().resumeMode() != ResumeMode::None;
+
   OptimizeContext ctx {env.unit, fp, inlineReturn, &env.fpUses};
   ctx.mainBlocks = findMainBlocks(def->block(), inlineReturn->block());
 
@@ -889,10 +892,13 @@ bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn) {
   auto hasMainUse = std::any_of(
     uses.begin(),
     uses.end(),
-    [&] (IRInstruction* inst) { return ctx.mainBlocks.count(inst->block()) &&
-                                       !canConvertToStack(*inst) &&
-                                       !canRewriteToParent(*inst) &&
-                                       !canAdjustFrame(*inst); }
+    [&] (IRInstruction* inst) {
+      return
+        ctx.mainBlocks.count(inst->block()) &&
+        !canConvertToStack(*inst) &&
+        (parentResumed || !canRewriteToParent(*inst)) &&
+        !canAdjustFrame(*inst);
+      }
   );
   if (hasMainUse) {
     ITRACE(2, "skipping unsuitable InlineReturn (uses = {})\n", uses.size());

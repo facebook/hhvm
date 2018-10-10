@@ -34,6 +34,12 @@ struct IRGS;
 void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset,
                 bool useNextBcOff);
 
+/*
+ * Suspend from an resumed async context.
+ */
+void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset,
+                bool useNextBcOff);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

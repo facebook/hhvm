@@ -884,6 +884,18 @@ WorkList initInstructions(const IRUnit& unit, const BlockList& blocks,
 
 //////////////////////////////////////////////////////////////////////
 
+SSATmp* chaseFpTmp(const SSATmp* s) {
+  s = canonical(s);
+  assertx(s->inst()->is(DefInlineFP, DefLabel, DefFP));
+  auto i = s->inst();
+  if (UNLIKELY(i->is(DefLabel))) {
+    i = resolveFpDefLabel(s);
+    assertx(i);
+  }
+  always_assert(i->is(DefFP, DefInlineFP));
+  return i->dst();
+}
+
 /*
  * A use of an inlined frame that can be modified to work without the
  * frame is called a "weak use" here.  For example, storing to a local
@@ -921,15 +933,24 @@ bool findWeakActRecUses(const BlockList& blocks,
     case AssertLoc:
     case LdLocAddr:
     case HintLocInner:
+      incWeak(inst, inst->src(0));
+      break;
     // these can be rewritten to use an outer frame pointer
     case LdClsRefCls:
     case LdClsRefTS:
     case StClsRefCls:
     case StClsRefTS:
     case KillClsRefCls:
-    case KillClsRefTS:
-      incWeak(inst, inst->src(0));
+    case KillClsRefTS: {
+      auto const fp = chaseFpTmp(inst->src(0));
+      if (fp->inst()->is(DefInlineFP)) {
+        auto const parent = fp->inst()->src(1)->inst();
+        if (parent->marker().resumeMode() == ResumeMode::None) {
+          incWeak(inst, inst->src(0));
+        }
+      }
       break;
+    }
 
     case InlineReturn:
       {
@@ -990,21 +1011,7 @@ void rewriteToParentFrameImpl(IRUnit& /*unit*/, IRInstruction& inst, F dead) {
   assertx(inst.is(LdClsRefCls, LdClsRefTS, StClsRefCls, StClsRefTS,
                   KillClsRefCls, KillClsRefTS));
 
-  auto fp = inst.src(0);
-  assertx(canonical(fp)->inst()->is(DefInlineFP, DefLabel));
-
-  auto const chaseFpTmp = [](const SSATmp* s) {
-    s = canonical(s);
-    auto i = s->inst();
-    if (UNLIKELY(i->is(DefLabel))) {
-      i = resolveFpDefLabel(s);
-      assertx(i);
-    }
-    always_assert(i->is(DefFP, DefInlineFP));
-    return i->dst();
-  };
-
-  fp = chaseFpTmp(fp);
+  auto fp = chaseFpTmp(inst.src(0));
   assertx(fp->inst()->is(DefInlineFP));
 
   // Figure out the FPInvOffset of the stack pointer from the outermost frame
@@ -1045,6 +1052,10 @@ void rewriteToParentFrameImpl(IRUnit& /*unit*/, IRInstruction& inst, F dead) {
   do {
     fp = chaseFpTmp(fp->inst()->src(1));
   } while (!fp->inst()->is(DefFP) && dead(fp->inst()));
+
+  // We can't rewrite clsref slots when the parent function was resumed as its
+  // frame will no longer be on the stack.
+  assertx(fp->inst()->marker().resumeMode() == ResumeMode::None);
 
   // Calculate the new offset (in bytes) that should be used to calculate the
   // new slot. Take the difference between the original frame pointer offset and

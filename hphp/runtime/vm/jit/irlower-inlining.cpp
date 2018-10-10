@@ -22,6 +22,8 @@
 
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
+#include "hphp/runtime/vm/jit/analysis.h"
+#include "hphp/runtime/vm/jit/dce.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
@@ -76,11 +78,41 @@ void cgDefInlineFP(IRLS& env, const IRInstruction* inst) {
   v << lea{ar, dstLoc(env, inst, 0).reg()};
 }
 
+namespace {
+
+bool isResumedParent(const IRInstruction* inst) {
+  auto const fp = inst->src(0);
+  assertx(canonical(fp)->inst()->is(DefInlineFP, DefLabel));
+
+  auto const chaseFpTmp = [](const SSATmp* s) {
+    s = canonical(s);
+    auto i = s->inst();
+    if (UNLIKELY(i->is(DefLabel))) {
+      i = resolveFpDefLabel(s);
+      assertx(i);
+    }
+    always_assert(i->is(DefFP, DefInlineFP));
+    return i->dst();
+  };
+
+  auto const calleeFp = chaseFpTmp(fp);
+  assertx(calleeFp->inst()->is(DefInlineFP));
+
+  auto const callerFp = calleeFp->inst()->src(1);
+  return callerFp->inst()->marker().resumeMode() != ResumeMode::None;
+}
+
+}
+
 void cgInlineReturn(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const fp = srcLoc(env, inst, 0).reg();
-  auto const callerFPOff = inst->extra<InlineReturn>()->offset;
-  v << lea{fp[cellsToBytes(callerFPOff.offset)], rvmfp()};
+  if (isResumedParent(inst)) {
+    v << load{fp[AROFF(m_sfp)], rvmfp()};
+  } else {
+    auto const callerFPOff = inst->extra<InlineReturn>()->offset;
+    v << lea{fp[cellsToBytes(callerFPOff.offset)], rvmfp()};
+  }
   v << popframe{};
   v << inlineend{};
 }
@@ -88,8 +120,12 @@ void cgInlineReturn(IRLS& env, const IRInstruction* inst) {
 void cgInlineSuspend(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const fp = srcLoc(env, inst, 0).reg();
-  auto const callerFPOff = inst->extra<InlineSuspend>()->offset;
-  v << lea{fp[cellsToBytes(callerFPOff.offset)], rvmfp()};
+  if (isResumedParent(inst)) {
+    v << load{fp[AROFF(m_sfp)], rvmfp()};
+  } else {
+    auto const callerFPOff = inst->extra<InlineSuspend>()->offset;
+    v << lea{fp[cellsToBytes(callerFPOff.offset)], rvmfp()};
+  }
   v << popframe{};
   v << inlineend{};
 }
@@ -98,10 +134,12 @@ void cgInlineReturnNoFrame(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    auto const extra = inst->extra<InlineReturnNoFrame>();
-    auto const offset = cellsToBytes(extra->offset.offset);
-    for (auto i = 0; i < kNumActRecCells; ++i) {
-      trashFullTV(v, rvmfp()[offset - cellsToBytes(i)], kTVTrashJITFrame);
+    if (env.unit.context().resumeMode == ResumeMode::None) {
+      auto const extra = inst->extra<InlineReturnNoFrame>();
+      auto const offset = cellsToBytes(extra->offset.offset);
+      for (auto i = 0; i < kNumActRecCells; ++i) {
+        trashFullTV(v, rvmfp()[offset - cellsToBytes(i)], kTVTrashJITFrame);
+      }
     }
   }
 

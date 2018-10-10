@@ -218,14 +218,6 @@ bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee,
     return traceRefusal(callSK, callee, "Not FCall/FCallAwait", annotations);
   }
 
-  // Don't inline from resumed functions.  The inlining mechanism doesn't have
-  // support for these---it has no way to redefine stack pointers relative to
-  // the frame pointer, because in a resumed function the frame pointer points
-  // into the heap instead of into the eval stack.
-  if (callSK.resumeMode() != ResumeMode::None) {
-    return traceRefusal(callSK, callee, "Resumed", annotations);
-  }
-
   // TODO(#4238160): Inlining into pseudomain callsites is still buggy.
   if (callSK.func()->isPseudoMain()) {
     return traceRefusal(callSK, callee, "PseudoMain", annotations);

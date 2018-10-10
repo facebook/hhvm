@@ -79,13 +79,19 @@ struct BCMarker {
   SrcKey      sk()          const { assertx(valid()); return m_sk;             }
   const Func* func()        const { assertx(hasFunc()); return m_sk.func();    }
   Offset      bcOff()       const { assertx(valid()); return m_sk.offset();    }
-  ResumeMode  resumeMode()  const { assertx(valid()); return m_sk.resumeMode();}
   bool        hasThis()     const { assertx(valid()); return m_sk.hasThis();   }
   bool        prologue()    const { assertx(valid()); return m_sk.prologue();  }
   FPInvOffset spOff()       const { assertx(valid()); return m_spOff;          }
   TransID     profTransID() const { assertx(valid()); return m_profTransID;    }
   SSATmp*     fp()          const { assertx(valid()); return m_fp;             }
   SrcKey      fixupSk()     const { assertx(valid()); return m_fixupSk;        }
+
+  // Use the FixupSK resumeMode, if we've elided the frame we will need to
+  // ensure that the sp is tracked properly for a resumed function.
+  ResumeMode resumeMode() const {
+    assertx(valid());
+    return m_fixupSk.resumeMode();
+  }
 
   const Func* fixupFunc() const {
     assertx(valid());

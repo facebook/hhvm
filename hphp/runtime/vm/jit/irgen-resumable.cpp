@@ -128,8 +128,6 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset,
   }
 }
 
-namespace {
-
 void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset,
                 bool useNextBcOff) {
   assertx(curFunc(env)->isAsync());
@@ -164,6 +162,8 @@ void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset,
   auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
   gen(env, AsyncSwitchFast, IRSPRelOffsetData { spAdjust }, sp(env), fp(env));
 }
+
+namespace {
 
 SSATmp* implYieldGen(IRGS& env, SSATmp* key, SSATmp* value) {
   if (key != nullptr) {

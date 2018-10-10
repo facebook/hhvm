@@ -42,9 +42,4 @@ module Make : functor (GetLocals : GetLocals) -> sig
   (* Solves the local names in class method bodies *)
   val class_meth_bodies: TypecheckerOptions.t -> Nast.class_ -> Nast.class_
 
-  (* Uses a default empty environment to extract the use list
-    of a lambda expression. This exists only for the sake of
-    the dehackificator and is not meant for general use. *)
-  val uselist_lambda: Ast.fun_ -> string list
-
 end

@@ -25,7 +25,6 @@
   *)
  type expression_id = Ident.t
  type local = locl ty * expression_id
- type old_local = locl ty list * locl ty * expression_id
  type local_id_map = local Local_id.Map.t
  type local_types = local_id_map Typing_continuations.Map.t
 

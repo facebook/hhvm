@@ -30,8 +30,6 @@ type fake_members = {
  *)
 type expression_id = Ident.t [@@deriving show]
 type local = locl_ty * expression_id [@@deriving show]
-type local_history = locl_ty list [@@deriving show]
-type old_local = locl_ty list * locl_ty * expression_id [@@deriving show]
 
 let show_local_id_map _ = "<local_id_map>"
 let pp_local_id_map _ _ = Printf.printf "%s\n" "<local_id_map>"

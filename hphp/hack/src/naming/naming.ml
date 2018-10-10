@@ -2650,9 +2650,6 @@ module Make (GetLocals : GetLocals) = struct
     | Lfun f ->
       (* We have to build the capture list while we're finding names in
          the closure body---accumulate it in to_capture. *)
-      (* semantic duplication: The logic here is also used in `uselist_lambda`.
-         The differences are enough that it does not make sense to refactor
-         this out for now. *)
       let to_capture = ref [] in
       let handle_unbound (p, x) =
         let cap = Env.lvar env (p, x) in
@@ -2939,24 +2936,6 @@ module Make (GetLocals : GetLocals) = struct
       cst_value = e;
       cst_is_define = (cst.cst_kind = Ast.Cst_define);
     }
-
-  (* Uses a default empty environment to extract the use list
-    of a lambda expression. This exists only for the sake of
-    the dehackificator and is not meant for general use. *)
-  let uselist_lambda f =
-    (* semantic duplication: This is copied from the implementation of the
-      `Lfun` variant of `expr_` defined earlier in this file. *)
-    let to_capture = ref [] in
-    let handle_unbound (p, x) =
-      to_capture := x :: !to_capture;
-      p, Local_id.tmp()
-    in
-    let tcopt = TypecheckerOptions.make_permissive TypecheckerOptions.default in
-    let genv = Env.make_fun_decl_genv tcopt SMap.empty f in
-    let lenv = Env.empty_local @@ UBMFunc handle_unbound in
-    let env = genv, lenv in
-    ignore (expr_lambda env f);
-    List.dedup_and_sort !to_capture ~compare:String.compare
 
   (**************************************************************************)
   (* The entry point to CHECK the program, and transform the program *)

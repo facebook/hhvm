@@ -8,7 +8,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 
 let throws f =
   try let _ = f() in false with _ -> true
@@ -19,8 +19,8 @@ let test_escape_unescape_data = [
   "tab\t";
   "carriage return\r";
   "backslash\\";
-  "magic char" ^ (String.make 1 (Char.chr 8));
-  "magic_char_with_hexadecimal_digit" ^ (String.make 1 (Char.chr 26));
+  "magic char" ^ (String.make 1 (Char.of_int_exn 8));
+  "magic_char_with_hexadecimal_digit" ^ (String.make 1 (Char.of_int_exn 26));
 ]
 
 let test_escape_unescape () =

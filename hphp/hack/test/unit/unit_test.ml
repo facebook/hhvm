@@ -8,7 +8,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 
 
 exception Expected_throw_missing
@@ -17,12 +17,12 @@ exception Thrown_exception_mismatched of (exn * exn)
 let expect_throws e f x =
   try
     let _ = f x in
-    Printf.eprintf "Error. Did not throw expected: %s\n" (Printexc.to_string e);
+    Printf.eprintf "Error. Did not throw expected: %s\n" (Exn.to_string e);
     false
   with | err ->
     if e <> err then
       let () = Printf.eprintf "Error. Expected exn: %s. But got : %s\n"
-      (Printexc.to_string e) (Printexc.to_string err) in
+      (Exn.to_string e) (Exn.to_string err) in
       false
     else
       true
@@ -31,7 +31,7 @@ let run (name, f) =
   Printf.printf "Running %s ... %!" name;
   let result = try f () with
     | e ->
-      let () = Printf.printf "Exception %s\n" (Printexc.to_string e) in
+      let () = Printf.printf "Exception %s\n" (Exn.to_string e) in
       let () = Printf.printf "Backtrace %s\n" (Printexc.get_backtrace ()) in
       false
   in

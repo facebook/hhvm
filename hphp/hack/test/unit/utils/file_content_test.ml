@@ -8,7 +8,7 @@
  *
 *)
 
-open Hh_core
+open Core_kernel
 open File_content
 
 let expect_has_content fc content =
@@ -115,7 +115,7 @@ let test_end_of_line_edit () =
   expect_has_content edited_fc "aa"
 
 let utf8 x =
-  String.concat "" (List.map x ~f:(fun x -> String.make 1 (Char.chr x)))
+  String.concat ~sep:"" (List.map x ~f:(fun x -> String.make 1 (Char.of_int_exn x)))
 
 let delete_nth x =
   {

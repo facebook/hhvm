@@ -1,3 +1,5 @@
+open Core_kernel
+
 module Target_mini_state_comparator = struct
   type t = ServerMonitorUtils.target_mini_state
   let to_string {

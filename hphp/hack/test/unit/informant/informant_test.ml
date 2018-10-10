@@ -1,3 +1,5 @@
+open Core_kernel
+
 module Report_comparator : Asserter.Comparator
   with type t = Informant_sig.report = struct
     open Informant_sig

@@ -246,6 +246,12 @@ struct OptimizeContext {
    * region.
    */
   FPMap fpMap;
+
+  /*
+   * If the region contains an InitCtx with a *constant* value it can be pushed
+   * into a side exit along with the DefInlineFP.
+   */
+  const IRInstruction* initCtx{nullptr};
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -620,6 +626,11 @@ void insertDefInlineFPs(OptimizeContext& ctx, BlockList& heads) {
     assertx(block->numPreds() == 1);
     auto newDef = ctx.unit->clone(ctx.deadFp->inst());
     auto newFp  = newDef->dst();
+    if (ctx.initCtx) {
+      auto newInit = ctx.unit->clone(ctx.initCtx);
+      newInit->setSrc(0, newFp);
+      block->prepend(newInit);
+    }
     block->prepend(newDef);
     replace(block, ctx.deadFp, newFp, *ctx.fpUses);
     ctx.fpMap[block] = newFp;
@@ -765,6 +776,10 @@ void transformUses(OptimizeContext& ctx, InstructionSet& uses) {
     } else if (isDangerousActRecInst(*inst)) {
       // It's okay to have these in side exits
       always_assert(ctx.mainBlocks.count(block) == 0);
+    } else if (inst->is(InitCtx)) {
+      always_assert(inst->src(1)->type().hasConstVal());
+      always_assert(ctx.initCtx == inst);
+      inst->convertToNop();
     } else {
       /*
        * All uses that weren't dealt with in side exiting traces need to be
@@ -887,6 +902,15 @@ bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn) {
   OptimizeContext ctx {env.unit, fp, inlineReturn, &env.fpUses};
   ctx.mainBlocks = findMainBlocks(def->block(), inlineReturn->block());
 
+  auto canMoveInitCtx = [&] (const IRInstruction& inst) {
+    if (ctx.initCtx) return false;
+    if (inst.is(InitCtx) && inst.src(1)->type().hasConstVal()) {
+      ctx.initCtx = &inst;
+      return true;
+    }
+    return false;
+  };
+
   // Check if this callee is a candidate for DefInlineFP sinking
   auto& uses = env.fpUses[fp];
   auto hasMainUse = std::any_of(
@@ -897,7 +921,8 @@ bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn) {
         ctx.mainBlocks.count(inst->block()) &&
         !canConvertToStack(*inst) &&
         (parentResumed || !canRewriteToParent(*inst)) &&
-        !canAdjustFrame(*inst);
+        !canAdjustFrame(*inst) &&
+        !canMoveInitCtx(*inst);
       }
   );
   if (hasMainUse) {

@@ -952,6 +952,12 @@ bool findWeakActRecUses(const BlockList& blocks,
       break;
     }
 
+    // InitCtx can just be deleted, if no one is reading the frame, no one is
+    // extracting the ctx.
+    case InitCtx:
+      incWeak(inst, inst->src(0));
+      break;
+
     case InlineReturn:
       {
         auto const frameInst = inst->src(0)->inst();
@@ -1168,6 +1174,12 @@ void performActRecFixups(const BlockList& blocks,
       case DefInlineFP:
         ITRACE(3, "DefInlineFP ({}): weak/strong uses: {}/{}\n",
              inst, state[inst].weakUseCount(), uses[inst.dst()]);
+        break;
+
+      case InitCtx:
+        if (state[inst.src(0)->inst()].isDead()) {
+          state[&inst].setDead();
+        }
         break;
 
       case StLoc:

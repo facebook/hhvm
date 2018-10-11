@@ -252,7 +252,7 @@ void DebuggerSession::runDummy() {
     m_debugger->sendUserMessage(
       "No startup document was specified, not loading any Hack/PHP "
         "types for the console.",
-      DebugTransport::OutputLevelWarning
+      DebugTransport::OutputLevelInfo
     );
   }
 

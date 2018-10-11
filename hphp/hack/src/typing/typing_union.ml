@@ -233,27 +233,35 @@ and union_unresolved env tyl1 tyl2 r =
     let rec go env tyl ty2 missed res_is_opt =
       match tyl with
       | [] -> env, ty2::missed, res_is_opt
-      | (_, Tunresolved tyl)::tyl1 ->
-        go env (tyl@tyl1) ty2 missed res_is_opt
-      | (r, Toption ty)::tyl1 ->
-        go env (ty::tyl1) ty2 missed (Some r)
       | ty1::tyl ->
-        begin match unify env ty1 ty2 with
-        | _, None -> go env tyl ty2 (ty1::missed) res_is_opt
-        | env, Some ty -> env, missed @ (ty::tyl), res_is_opt end in
+        let env, ety1 = Env.expand_type env ty1 in
+        begin match ety1 with
+        | _, Tunresolved tyl1 ->
+          go env (tyl1@tyl) ty2 missed res_is_opt
+        | r, Toption ty ->
+          go env (ty::tyl) ty2 missed (Some r)
+        | _ ->
+          begin match unify env ety1 ty2 with
+          | _, None -> go env tyl ty2 (ety1::missed) res_is_opt
+          | env, Some ty -> env, missed @ (ty::tyl), res_is_opt
+          end
+        end in
     go env tyl ty2 [] res_is_opt in
 
   let rec normalize_union env tyl1 tyl2 res_is_opt =
     match tyl2 with
     | [] -> env, tyl1, res_is_opt
-    | (_, Tunresolved tyl)::tyl2 ->
-      normalize_union env tyl1 (tyl@tyl2) res_is_opt
-    | (r, Toption ty)::tyl2 ->
-      normalize_union env tyl1 (ty::tyl2) (Some r)
     | ty2::tyl2 ->
-      let env, tyl1, res_is_opt = attempt_union env tyl1 ty2 res_is_opt in
-      normalize_union env tyl1 tyl2 res_is_opt in
-
+      let env, ety2 = Env.expand_type env ty2 in
+      begin match ety2 with
+      | _, Tunresolved tyl ->
+        normalize_union env tyl1 (tyl@tyl2) res_is_opt
+      | r, Toption ty ->
+        normalize_union env tyl1 (ty::tyl2) (Some r)
+      | _ ->
+        let env, tyl1, res_is_opt = attempt_union env tyl1 ety2 res_is_opt in
+        normalize_union env tyl1 tyl2 res_is_opt
+      end in
   let env, tyl, res_is_opt = normalize_union env tyl1 tyl2 None in
   let ty = (r, Tunresolved tyl) in
   let ty = match res_is_opt with

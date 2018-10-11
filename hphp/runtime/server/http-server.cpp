@@ -147,9 +147,7 @@ HttpServer::HttpServer()
   m_adminServer->setRequestHandlerFactory<AdminRequestHandler>(
     RuntimeOption::RequestTimeoutSeconds);
 
-  for (unsigned int i = 0; i < RuntimeOption::SatelliteServerInfos.size();
-       i++) {
-    auto info = RuntimeOption::SatelliteServerInfos[i];
+  for (auto const& info : RuntimeOption::SatelliteServerInfos) {
     auto satellite(SatelliteServer::Create(info));
     if (satellite) {
       m_satellites.push_back(std::move(satellite));

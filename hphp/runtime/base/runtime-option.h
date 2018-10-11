@@ -287,7 +287,6 @@ struct RuntimeOption {
   static int XboxDefaultRemoteTimeoutSeconds;
   static int XboxServerInfoMaxRequest;
   static int XboxServerInfoDuration;
-  static std::string XboxServerInfoWarmupDoc;
   static std::string XboxServerInfoReqInitFunc;
   static std::string XboxServerInfoReqInitDoc;
   static bool XboxServerInfoAlwaysReset;

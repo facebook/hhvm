@@ -295,7 +295,6 @@ int RuntimeOption::XboxDefaultLocalTimeoutMilliSeconds = 500;
 int RuntimeOption::XboxDefaultRemoteTimeoutSeconds = 5;
 int RuntimeOption::XboxServerInfoMaxRequest = 500;
 int RuntimeOption::XboxServerInfoDuration = 120;
-std::string RuntimeOption::XboxServerInfoWarmupDoc;
 std::string RuntimeOption::XboxServerInfoReqInitFunc;
 std::string RuntimeOption::XboxServerInfoReqInitDoc;
 bool RuntimeOption::XboxServerInfoAlwaysReset = false;
@@ -1923,8 +1922,6 @@ void RuntimeOption::Load(
                  "Xbox.ServerInfo.MaxRequest", 500);
     Config::Bind(XboxServerInfoDuration, ini, config,
                  "Xbox.ServerInfo.MaxDuration", 120);
-    Config::Bind(XboxServerInfoWarmupDoc, ini, config,
-                 "Xbox.ServerInfo.WarmupDocument", "");
     Config::Bind(XboxServerInfoReqInitFunc, ini, config,
                  "Xbox.ServerInfo.RequestInitFunction", "");
     Config::Bind(XboxServerInfoReqInitDoc, ini, config,

@@ -105,22 +105,24 @@ end
  *   If assertion is unsatisfiable (e.g. arraykey <: string) then
  *     we record this in the failed field of the result.
  *)
-let with_error f (env, p) =
+let with_error (f : unit -> unit) ((env, p) : (Env.env * TL.subtype_prop))
+  : Env.env * TL.subtype_prop =
   env, TL.conj p (TL.Unsat f)
 
 (* If `b` is false then fail with error function `f` *)
 let maybe_with_error b f r = if b then with_error f r else r
 
-let valid env = env, TL.valid
+let valid env : Env.env * TL.subtype_prop = env, TL.valid
 
-let (&&&) (env,p1) f =
+let (&&&) (env, p1) (f : Env.env -> Env.env * TL.subtype_prop) =
   let env, p2 = f env in
   env, TL.conj p1 p2
 
-let (|||) (env,p1) f =
+let (|||) (env,p1) (f : Env.env -> Env.env * TL.subtype_prop) =
   let env, p2 = f env in
   env, TL.disj p1 p2
 
+(** Check that a mutability type is a subtype of another mutability type *)
 let check_mutability
   ~(is_receiver: bool)
   (p_sub : Pos.t)
@@ -1171,20 +1173,13 @@ and check_subtype_funs_attributes
   then simplify_subtype ~deep ft_sub.ft_ret ft_super.ft_ret
   else valid
 
+(* One of the main entry points to this module *)
 and sub_type
   (env : Env.env)
   (ty_sub : locl ty)
   (ty_super : locl ty) : Env.env =
     sub_type_inner env ~this_ty:None ty_sub ty_super
 
-(**
- * Checks that ty_sub is a subtype of ty_super, and returns an env.
- *
- * E.g. sub_type env ?int int   => env
- *      sub_type env int alpha  => env where alpha==int
- *      sub_type env ?int alpha => env where alpha==?int
- *      sub_type env int string => error
-*)
 and sub_type_inner
   (env : Env.env)
   ~(this_ty : locl ty option)
@@ -1634,12 +1629,6 @@ and is_sub_type
     result
   end
 
-(* Non-side-effecting test for subtypes, using simplify_subtype.
- * Result is
- *   result = Some true implies ty1 <: ty2
- *   result = Some false implies NOT ty1 <: ty2
- *   result = None, we don't know
- *)
 and is_sub_type_alt env ty1 ty2 =
   let _env, prop = simplify_subtype ~deep:true ~this_ty:(Some ty1) ty1 ty2 env in
   if TL.is_valid prop then Some true
@@ -1762,7 +1751,7 @@ let rec sub_string
     | Ttuple _ | Tanon (_, _) | Tfun _ | Tshape _) ->
   fail ()
 
- (* Check that the method with signature ft_sub can be used to override
+(** Check that the method with signature ft_sub can be used to override
  * (is a subtype of) method with signature ft_super.
  *
  * This goes beyond subtyping on function types because methods can have

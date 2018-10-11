@@ -27,7 +27,6 @@ open Nast
 open String_utils
 open Typing_defs
 open Utils
-open Typing_subtype
 
 module Env = Typing_env
 module Inst = Decl_instantiate

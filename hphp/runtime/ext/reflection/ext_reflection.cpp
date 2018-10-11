@@ -904,7 +904,7 @@ static Array get_function_user_attributes(const Func* func) {
   return ai.toArray();
 }
 
-static Array HHVM_METHOD(ReflectionFunctionAbstract, getAttributes) {
+static Array HHVM_METHOD(ReflectionFunctionAbstract, getAttributesNamespaced) {
   auto const func = ReflectionFuncHandle::GetFuncFor(this_);
   return get_function_user_attributes(func);
 }
@@ -1473,7 +1473,7 @@ static Array HHVM_METHOD(ReflectionClass, getOrderedTypeConstants) {
   return st->toPHPArray();
 }
 
-static Array HHVM_METHOD(ReflectionClass, getAttributes) {
+static Array HHVM_METHOD(ReflectionClass, getAttributesNamespaced) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   // UserAttributes are stored exclusively on the PreClass.
   auto const pcls = cls->preClass();
@@ -1487,7 +1487,7 @@ static Array HHVM_METHOD(ReflectionClass, getAttributes) {
   return ai.toArray();
 }
 
-static Array HHVM_METHOD(ReflectionClass, getAttributesRecursive) {
+static Array HHVM_METHOD(ReflectionClass, getAttributesRecursiveNamespaced) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
 
   Array ret = Array::CreateDArray(); // no reasonable idea about sizing
@@ -1964,7 +1964,7 @@ static TypedValue HHVM_METHOD(ReflectionProperty, getDefaultValue) {
   }
 }
 
-static Array HHVM_METHOD(ReflectionProperty, getAttributes) {
+static Array HHVM_METHOD(ReflectionProperty, getAttributesNamespaced) {
   auto const data = Native::data<ReflectionPropHandle>(this_);
   auto attrs = Array::CreateDict();
   switch (data->getType()) {
@@ -1986,31 +1986,6 @@ static Array HHVM_METHOD(ReflectionProperty, getAttributes) {
     }
     case ReflectionPropHandle::Type::Dynamic:
       return attrs;
-    default:
-      reflection_property_internal_error();
-  }
-}
-
-static TypedValue HHVM_METHOD(ReflectionProperty, getAttribute,
-                              StringArg name) {
-  auto const data = Native::data<ReflectionPropHandle>(this_);
-  switch (data->getType()) {
-    case ReflectionPropHandle::Type::Instance: {
-      auto const prop = data->getProp();
-      auto const preProp = prop->cls->preClass()->lookupProp(prop->name);
-      auto const attrs = preProp->userAttributes();
-      auto const attr = attrs.find(name.get());
-      return attr != attrs.end() ? attr->second : make_tv<KindOfNull>();
-    }
-    case ReflectionPropHandle::Type::Static: {
-      auto const prop = data->getSProp();
-      auto const preProp = prop->cls->preClass()->lookupProp(prop->name);
-      auto const attrs = preProp->userAttributes();
-      auto const attr = attrs.find(name.get());
-      return attr != attrs.end() ? attr->second : make_tv<KindOfNull>();
-    }
-    case ReflectionPropHandle::Type::Dynamic:
-      return make_tv<KindOfNull>();
     default:
       reflection_property_internal_error();
   }
@@ -2052,7 +2027,7 @@ static String HHVM_METHOD(ReflectionTypeAlias, getAssignedTypeText) {
   return TypeStructure::toString(typeStructure);
 }
 
-static Array HHVM_METHOD(ReflectionTypeAlias, getAttributes) {
+static Array HHVM_METHOD(ReflectionTypeAlias, getAttributesNamespaced) {
   auto const req = ReflectionTypeAliasHandle::GetTypeAliasReqFor(this_);
   assertx(req);
   auto const userAttrs = req->userAttrs;
@@ -2107,7 +2082,7 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionFunctionAbstract, getReturnTypeHint);
     HHVM_ME(ReflectionFunctionAbstract, getNumberOfParameters);
     HHVM_ME(ReflectionFunctionAbstract, getParamInfo);
-    HHVM_ME(ReflectionFunctionAbstract, getAttributes);
+    HHVM_ME(ReflectionFunctionAbstract, getAttributesNamespaced);
     HHVM_ME(ReflectionFunctionAbstract, getRetTypeInfo);
 
     HHVM_ME(ReflectionMethod, __init);
@@ -2145,12 +2120,11 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionProperty, getDocComment);
     HHVM_ME(ReflectionProperty, getTypeText);
     HHVM_ME(ReflectionProperty, getDefaultValue);
-    HHVM_ME(ReflectionProperty, getAttributes);
-    HHVM_ME(ReflectionProperty, getAttribute);
+    HHVM_ME(ReflectionProperty, getAttributesNamespaced);
 
     HHVM_ME(ReflectionTypeAlias, __init);
     HHVM_ME(ReflectionTypeAlias, getTypeStructure);
-    HHVM_ME(ReflectionTypeAlias, getAttributes);
+    HHVM_ME(ReflectionTypeAlias, getAttributesNamespaced);
     HHVM_ME(ReflectionTypeAlias, getAssignedTypeText);
     HHVM_ME(ReflectionTypeAlias, getFileName);
 
@@ -2184,8 +2158,8 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionClass, getOrderedAbstractConstants);
     HHVM_ME(ReflectionClass, getOrderedTypeConstants);
 
-    HHVM_ME(ReflectionClass, getAttributes);
-    HHVM_ME(ReflectionClass, getAttributesRecursive);
+    HHVM_ME(ReflectionClass, getAttributesNamespaced);
+    HHVM_ME(ReflectionClass, getAttributesRecursiveNamespaced);
 
     HHVM_ME(ReflectionClass, getClassPropertyInfo);
     HHVM_ME(ReflectionClass, getDynamicPropertyInfos);

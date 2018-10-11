@@ -1,0 +1,30 @@
+array(1) {
+  [0]=>
+  int(1)
+}
+NULL
+array(1) {
+  ["A"]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+}
+
+Deprecated: ReflectionFunctionAbstract::getAttributeRecursive: This function is being removed as it has been broken for some time in %s on line 13
+array(1) {
+  [0]=>
+  int(1)
+}
+
+Deprecated: ReflectionFunctionAbstract::getAttributeRecursive: This function is being removed as it has been broken for some time in %s on line 14
+NULL
+
+Deprecated: ReflectionFunctionAbstract::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 15
+array(1) {
+  ["A"]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+}

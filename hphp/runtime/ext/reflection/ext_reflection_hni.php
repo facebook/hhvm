@@ -273,19 +273,9 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    * @return  array<arraykey, array<mixed>>
    */
   <<__Native>>
-  final public function getAttributes(): darray<arraykey, varray<mixed>>;
+  final public function getAttributesNamespaced(): darray<arraykey, varray<mixed>>;
 
-  /**
-   * ( excerpt from
-   *   http://php.net/manual/en/reflectionclass.getattribute.php )
-   *
-   * Returns all attributes with given key.
-   *
-   * @return  ?array<mixed>
-   */
-  final public function getAttribute(string $name) {
-    return hphp_array_idx($this->getAttributes(), $name, null);
-  }
+  use ReflectionLegacyAttribute;
 
   /**
    * ( excerpt from
@@ -295,6 +285,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * @return  array<arraykey, array<int, mixed>>
    */
+  <<__Deprecated("This function is being removed as it has been broken for some time")>>
   public function getAttributesRecursive(
   ): darray<arraykey, varray<mixed>> {
     return $this->getAttributes();
@@ -309,6 +300,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * @return array<arraykey, array<mixed>>
    */
+  <<__Deprecated("This function is being removed as it has been broken for some time")>>
   public function getAttributeRecursive($name) {
     return $this->getAttribute($name);
   }
@@ -1086,6 +1078,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
   <<__Native>>
   private function getPrototypeClassname(): string; // ?string
 
+  <<__Deprecated("This function is being removed as it has been broken for some time")>>
   public function getAttributeRecursive($name) {
     $attrs = $this->getAttributes();
     if (isset($attrs[$name])) {
@@ -1102,6 +1095,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
     return $rm->getAttributeRecursive($name);
   }
 
+  <<__Deprecated("This function is being removed as it has been broken for some time")>>
   public function getAttributesRecursive(
   ): darray<arraykey, array<int, mixed>> {
     $attrs = $this->getAttributes();
@@ -2204,17 +2198,14 @@ class ReflectionClass implements Reflector {
   <<__Native>>
   public function getDocComment(): mixed;
 
-  public function getAttribute($name) {
-    // Note: not particularly optimal ... could be a fast-terminating
-    // __Native loop
-    return hphp_array_idx($this->getAttributes(), $name, null);
-  }
-
   use ReflectionTypedAttribute;
 
   <<__Native>>
-  public function getAttributes(): darray<string, array<mixed>>;
+  public function getAttributesNamespaced(): darray<string, array<mixed>>;
 
+  use ReflectionLegacyAttribute;
+
+  <<__Deprecated("This function is being removed as it has been broken for some time")>>
   public function getAttributeRecursive($name) {
     // Note: not particularly optimal ... could be a fast-terminating
     // __Native loop
@@ -2222,7 +2213,18 @@ class ReflectionClass implements Reflector {
   }
 
   <<__Native>>
-  public function getAttributesRecursive(): darray<string, array<mixed>>;
+  public function getAttributesRecursiveNamespaced(): darray<string, array<mixed>>;
+
+  <<__Deprecated("This function is being removed as it has been broken for some time")>>
+  public function getAttributesRecursive() {
+    $denamespaced = darray[];
+    foreach ($this->getAttributesRecursiveNamespaced() as $name => $args) {
+      $pos = strrpos($name, '\\');
+      $name = ($pos === false) ? $name : substr($name, $pos + 1);
+      $denamespaced[$name] = $args;
+    }
+    return $denamespaced;
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2440,16 +2442,9 @@ class ReflectionTypeAlias implements Reflector {
    * @return  array<arraykey, array<int, mixed>>
    */
   <<__Native>>
-  final public function getAttributes(): darray<arraykey, array<int, mixed>>;
+  final public function getAttributesNamespaced(): darray<arraykey, array<int, mixed>>;
 
-  /**
-   * Returns all attributes with given key.
-   *
-   * @return  ?array<int, mixed>
-   */
-  final public function getAttribute(string $name) {
-    return hphp_array_idx($this->getAttributes(), $name, null);
-  }
+  use ReflectionLegacyAttribute;
 
   use ReflectionTypedAttribute;
 

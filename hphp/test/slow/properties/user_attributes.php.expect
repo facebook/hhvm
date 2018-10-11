@@ -1,18 +1,18 @@
-dict(1) {
+array(1) {
   ["A"]=>
   array(1) {
     [0]=>
     int(1)
   }
 }
-dict(1) {
+array(1) {
   ["B"]=>
   array(1) {
     [0]=>
     string(3) "two"
   }
 }
-dict(1) {
+array(1) {
   ["C"]=>
   array(1) {
     [0]=>
@@ -21,7 +21,7 @@ dict(1) {
     }
   }
 }
-dict(1) {
+array(1) {
   ["D"]=>
   array(1) {
     [0]=>

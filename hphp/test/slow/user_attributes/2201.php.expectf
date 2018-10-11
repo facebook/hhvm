@@ -9,9 +9,13 @@ array(0) {
 
 ---- recursive: ----
 p1:
+
+Deprecated: ReflectionParameter::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 35
 array(0) {
 }
 p2:
+
+Deprecated: ReflectionParameter::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 35
 array(0) {
 }
 
@@ -26,6 +30,8 @@ array(1) {
 
 ---- recursive: ----
 param:
+
+Deprecated: ReflectionParameter::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 35
 array(1) {
   ["Attribute"]=>
   array(0) {
@@ -49,12 +55,16 @@ array(1) {
 
 ---- recursive: ----
 p1:
+
+Deprecated: ReflectionParameter::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 35
 array(1) {
   ["Attr1"]=>
   array(0) {
   }
 }
 p2:
+
+Deprecated: ReflectionParameter::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 35
 array(1) {
   ["Attr2"]=>
   array(0) {
@@ -78,6 +88,8 @@ array(1) {
 
 ---- recursive: ----
 param:
+
+Deprecated: ReflectionParameter::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 35
 array(1) {
   ["Attr"]=>
   array(3) {
@@ -104,6 +116,8 @@ array(2) {
 
 ---- recursive: ----
 param:
+
+Deprecated: ReflectionParameter::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 35
 array(2) {
   ["Bar"]=>
   array(0) {
@@ -126,6 +140,8 @@ array(1) {
 
 ---- recursive: ----
 param:
+
+Deprecated: ReflectionParameter::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 35
 array(1) {
   ["Hi"]=>
   array(1) {
@@ -159,6 +175,8 @@ array(2) {
 
 ---- recursive: ----
 param:
+
+Deprecated: ReflectionParameter::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 35
 array(2) {
   ["A"]=>
   array(2) {
@@ -190,6 +208,8 @@ array(1) {
 
 ---- recursive: ----
 tuv:
+
+Deprecated: ReflectionParameter::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 35
 array(1) {
   ["RS"]=>
   array(0) {
@@ -213,12 +233,16 @@ array(1) {
 
 ---- recursive: ----
 z:
+
+Deprecated: ReflectionParameter::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 35
 array(1) {
   ["And_"]=>
   array(0) {
   }
 }
 wont_you_sing_with_me:
+
+Deprecated: ReflectionParameter::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 35
 array(1) {
   ["NextTime"]=>
   array(0) {
@@ -233,6 +257,8 @@ array(0) {
 
 ---- recursive: ----
 param:
+
+Deprecated: ReflectionParameter::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 35
 array(1) {
   ["Attr"]=>
   array(3) {
@@ -259,6 +285,8 @@ array(2) {
 
 ---- recursive: ----
 param:
+
+Deprecated: ReflectionParameter::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 35
 array(2) {
   ["Bar"]=>
   array(0) {
@@ -281,6 +309,8 @@ array(1) {
 
 ---- recursive: ----
 param:
+
+Deprecated: ReflectionParameter::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 35
 array(1) {
   ["Hi"]=>
   array(1) {
@@ -314,6 +344,8 @@ array(2) {
 
 ---- recursive: ----
 param:
+
+Deprecated: ReflectionParameter::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 35
 array(2) {
   ["A"]=>
   array(2) {
@@ -342,6 +374,8 @@ array(0) {
 
 ---- recursive: ----
 rstuv:
+
+Deprecated: ReflectionParameter::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 35
 array(1) {
   ["RS"]=>
   array(0) {
@@ -362,6 +396,8 @@ array(0) {
 
 ---- recursive: ----
 z:
+
+Deprecated: ReflectionParameter::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 35
 array(2) {
   ["And_"]=>
   array(0) {
@@ -371,9 +407,10 @@ array(2) {
   }
 }
 wont_you_sing_with_me:
+
+Deprecated: ReflectionParameter::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 35
 array(1) {
   ["NextTime"]=>
   array(0) {
   }
 }
-

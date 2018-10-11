@@ -1,4 +1,4 @@
-dict(2) {
+array(2) {
   ["A"]=>
   array(0) {
   }
@@ -15,7 +15,7 @@ dict(2) {
     }
   }
 }
-dict(2) {
+array(2) {
   ["C"]=>
   array(0) {
   }
@@ -30,7 +30,7 @@ dict(2) {
     }
   }
 }
-dict(2) {
+array(2) {
   ["E"]=>
   array(0) {
   }
@@ -44,5 +44,5 @@ dict(2) {
     }
   }
 }
-dict(0) {
+array(0) {
 }

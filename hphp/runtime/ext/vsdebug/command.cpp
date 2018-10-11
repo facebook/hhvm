@@ -305,6 +305,7 @@ const folly::dynamic VSCommand::getDebuggerCapabilities() {
   capabilities["supportsDelayedStackTraceLoading"] = true;
   capabilities["supportsLoadedSourcesRequest"] = false;
   capabilities["supportsTerminateThreadsRequest"] = true;
+  capabilities["supportsBreakpointIdOnStop"] = true;
 
   // Non-standard capability to indicate we send a custom event when
   // the startup doc for the console REPL is complete, so that a client

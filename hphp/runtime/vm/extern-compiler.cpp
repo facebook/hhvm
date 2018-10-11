@@ -218,6 +218,26 @@ struct ExternCompiler {
     }
   }
 
+  std::string ffp_parse_file(
+    const std::string& filename,
+    folly::StringPiece code
+  ) {
+    if (!isRunning()) {
+      start();
+    }
+    try {
+      writeParseFile(filename, code);
+      return readResult(nullptr /* structured log entry */);
+    }
+    catch (CompileException& ex) {
+      stop();
+      if (m_options.verboseErrors) {
+        Logger::FError("ExternCompiler Error (parse): {}", ex.what());
+      }
+      throw;
+    }
+  }
+
   int64_t logTime(
     StructuredLogEntry& log,
     int64_t t,
@@ -327,6 +347,7 @@ private:
   void writeProgram(const char* filename, MD5 md5, folly::StringPiece code,
                     bool forDebuggerEval);
   void writeExtractFacts(const std::string& filename, folly::StringPiece code);
+  void writeParseFile(const std::string& filename, folly::StringPiece code);
 
   std::string readVersion() const;
   std::string readResult(StructuredLogEntry* log) const;
@@ -363,6 +384,7 @@ struct CompilerPool {
                          bool forDebuggerEval,
                          AsmCallbacks* callbacks,
                          bool& internal_error);
+  FfpResult parse(std::string name, const char* code, int len);
   ParseFactsResult extract_facts(const CompilerGuard& compiler,
                                  const std::string& filename,
                                  const char* code,
@@ -551,6 +573,20 @@ CompilerResult CompilerPool::compile(const char* code,
     internal_error);
 }
 
+FfpResult CompilerPool::parse(std::string file, const char* code, int len) {
+  auto compile = [&](const CompilerGuard& c) {
+    auto result = c->ffp_parse_file(file, folly::StringPiece(code, len));
+    return FfpJSONString { result };
+  };
+  auto internal_error = false;
+  return run_compiler(
+    CompilerGuard(*this),
+    m_options.maxRetries,
+    m_options.verboseErrors,
+    compile,
+    internal_error);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 std::string readline(FILE* f) {
@@ -723,6 +759,16 @@ void ExternCompiler::writeExtractFacts(
 ) {
   folly::dynamic header = folly::dynamic::object
     ("type", "facts")
+    ("file", filename);
+  writeMessage(header, code);
+}
+
+void ExternCompiler::writeParseFile(
+  const std::string& filename,
+  folly::StringPiece code
+) {
+  folly::dynamic header = folly::dynamic::object
+    ("type", "parse")
     ("file", filename);
   writeMessage(header, code);
 }
@@ -1055,6 +1101,11 @@ ParseFactsResult extract_facts(
     maxRetries,
     verboseErrors);
 }
+
+FfpResult ffp_parse_file(std::string file, const char *contents, int size) {
+  return s_manager.get_hackc_pool().parse(file, contents, size);
+}
+
 
 std::string hackc_version() {
   return s_manager.get_hackc_pool().getVersionString();

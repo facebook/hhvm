@@ -23,12 +23,17 @@
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/file-stream-wrapper.h"
+#include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
+#include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/memo-cache.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/util/file.h"
+#include "hphp/util/match.h"
 
 namespace HPHP {
 
@@ -406,6 +411,51 @@ bool HHVM_FUNCTION(clear_static_memoization,
   return false;
 }
 
+String HHVM_FUNCTION(ffp_parse_file_native, const String& str) {
+  std::string filename = str.get()->data();
+
+  // Implementation taken from ext_factparse.cpp
+  struct stat st;
+  FfpResult result;
+  auto w = Stream::getWrapperFromURI(StrNR(filename));
+  if (w && !dynamic_cast<FileStreamWrapper*>(w)) {
+    if (w->stat(filename.c_str(), &st)) {
+      result = "";
+    } else if (S_ISDIR(st.st_mode)) {
+      result = "";
+    } else {
+      const auto f = w->open(StrNR(filename), "r", 0, nullptr);
+      if (!f) {
+        result = "";
+      } else {
+        auto str = f->read();
+        result = ffp_parse_file(filename, str.data(), str.size());
+      }
+    }
+  } else {
+    if (stat(filename.c_str(), &st)) {
+      result = "";
+    } else if (S_ISDIR(st.st_mode)) {
+      result = "";
+    } else {
+      result = ffp_parse_file(filename, "", 0);
+    }
+  }
+
+  FfpJSONString res;
+  match<void>(
+    result,
+    [&](FfpJSONString& r) {
+      res = std::move(r);
+    },
+    [&](std::string& err) {
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "FFP failed to parse file");
+    }
+  );
+  return res.value;
+}
+
 bool HHVM_FUNCTION(clear_lsb_memoization,
                    const String& clsStr, TypedValue funcStr) {
   auto const clear = [](const Class* cls, const Func* func) {
@@ -488,6 +538,8 @@ static struct HHExtension final : Extension {
                   HHVM_FN(serialize_memoize_param));
     HHVM_NAMED_FE(HH\\clear_static_memoization,
                   HHVM_FN(clear_static_memoization));
+    HHVM_NAMED_FE(HH\\ffp_parse_file_native,
+                  HHVM_FN(ffp_parse_file_native));
     HHVM_NAMED_FE(HH\\clear_lsb_memoization,
                   HHVM_FN(clear_lsb_memoization));
     HHVM_NAMED_FE(HH\\clear_instance_memoization,

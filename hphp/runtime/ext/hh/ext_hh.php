@@ -69,6 +69,51 @@ function serialize_memoize_param(mixed $param): arraykey;
 <<__Native, __ParamCoerceModeFalse>>
 function clear_static_memoization(?string $cls, ?string $func = null) : bool;
 
+<<__Native>>
+function ffp_parse_file_native(string $file): string;
+
+function ffp_parse_file(string $file): array {
+  $json = ffp_parse_file_native($file);
+  // 2048 is MAX_JSON_DEPTH to avoid making a global constant
+  return json_decode($json, true, 2048);
+}
+
+// Simple depth-first search, supports early return
+function ffp_json_dfs(
+  mixed $json, // this can be any value type valid in JSON
+  bool $right,
+  (function (array): array) $predicate,
+  (function (array): bool) $skip_node = (($_) ==> false),
+) {
+  if (!is_array($json)) {
+    return null;
+  }
+
+  if (array_key_exists("kind", $json)) {
+    // early return
+    if ($skip_node($json)) {
+      return null;
+    }
+
+    // base case
+    $b = $predicate($json);
+    if ($b !== null) {
+      return $b;
+    }
+  }
+
+  // recursive case
+  if ($right) {
+    $json = array_reverse($json);
+  }
+  foreach ($json as $v) {
+    $b = ffp_json_dfs($v, $right, $predicate, $skip_node);
+    if ($b !== null) {
+      return $b;
+    }
+  }
+}
+
 /**
  * Clear __MemoizeLSB data
  *  - if $func is non-null, clear cache for $cls::$func

@@ -13,6 +13,8 @@ open Sys_utils
 module P = Printf
 module SyntaxError = Full_fidelity_syntax_error
 module SourceText = Full_fidelity_source_text
+module SyntaxTree = Full_fidelity_syntax_tree
+  .WithSyntax(Full_fidelity_positioned_syntax)
 module Lex = Full_fidelity_lexer
 module Logger = HackcEventLogger
 
@@ -46,6 +48,7 @@ type message_handlers = {
   set_config : message_handler;
   compile    : message_handler;
   facts      : message_handler;
+  parse      : message_handler;
   error      : message_handler;
 }
 
@@ -243,6 +246,7 @@ let rec dispatch_loop handlers =
     | "error"  -> handlers.error header body
     | "config" -> handlers.set_config header body
     | "facts"  -> handlers.facts header body
+    | "parse"  -> handlers.parse header body
     | _        -> fail_daemon None ("Unhandled message type '" ^ msg_type ^ "'"));
   dispatch_loop handlers
 
@@ -439,6 +443,13 @@ let extract_facts ?pretty text =
   |> Option.value_map ~default:"" ~f:(Hh_json.json_to_string ?pretty)
   |> fun x -> [x]
 
+let parse_hh_file filename body =
+  let file = Relative_path.create Relative_path.Dummy filename in
+  let source_text = SourceText.make file body in
+  let syntax_tree = SyntaxTree.make source_text in
+  let json = SyntaxTree.to_json syntax_tree in
+  [Hh_json.json_to_string json]
+
 (*****************************************************************************)
 (* Main entry point *)
 (*****************************************************************************)
@@ -566,8 +577,21 @@ let decl_and_run_mode compiler_options popt =
           handle_output
             (Relative_path.create Relative_path.Dummy filename)
             (extract_facts body))
-            (new_debug_time ())
-        )} in
+            (new_debug_time ()))
+        ; parse = (fun header body -> (
+          let filename = get_field
+            (get_string "file")
+            (fun af -> fail_daemon None ("Cannot determine file name of source unit: " ^ af))
+            header in
+          let body =
+            if String.length body = 0
+            then Sys_utils.cat filename
+            else body in
+          handle_output
+            (Relative_path.create Relative_path.Dummy filename)
+            (parse_hh_file filename body))
+            (new_debug_time ()))
+        } in
       dispatch_loop handlers
 
     | CLI ->

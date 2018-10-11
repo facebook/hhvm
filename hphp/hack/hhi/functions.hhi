@@ -79,6 +79,8 @@ namespace HH {
     string $root,
   ): bool;
 
+  function ffp_parse_file(string $file): varray_or_darray;
+
   function clear_static_memoization(?string $cls, ?string $func = null) : bool;
   function clear_lsb_memoization(string $cls, ?string $func = null) : bool;
   function clear_instance_memoization($obj) : bool;

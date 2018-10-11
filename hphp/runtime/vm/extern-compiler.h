@@ -57,14 +57,20 @@ struct FactsJSONString {
   std::string value;
 };
 
+struct FfpJSONString {
+  std::string value;
+};
+
 // On success returns a Json with value containing json-serialized results of
 // facts extraction and on failure returns a string with error text
 using ParseFactsResult = boost::variant<FactsJSONString, std::string>;
+using FfpResult = boost::variant<FfpJSONString, std::string>;
 
 ParseFactsResult extract_facts(const FactsParser&,
                                const std::string& filename,
                                const char* code,
                                int len);
+FfpResult ffp_parse_file(std::string file, const char* contents, int size);
 
 std::string hackc_version();
 

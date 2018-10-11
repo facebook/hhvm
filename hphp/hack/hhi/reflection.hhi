@@ -53,8 +53,8 @@ class ReflectionClass implements Reflector {
   final public function getAttributes(): darray<string, varray<mixed>>;
   final public function getAttribute(string $name): ?varray<mixed>;
   final public function getAttributeClass<T as HH\ClassLikeAttribute>(classname<T> $c): ?T;
-  final public function getAttributesRecursive(): darray<string, varray<mixed>>;
-  final public function getAttributeRecursive(string $name): ?varray<mixed>;
+  <<__Deprecated("This function is being removed as it has been broken for some time")>> final public function getAttributesRecursive(): darray<string, varray<mixed>>;
+  <<__Deprecated("This function is being removed as it has been broken for some time")>> final public function getAttributeRecursive(string $name): ?varray<mixed>;
   public function getMethod(string $name): ReflectionMethod;
   public function getMethods(?int $filter = null): varray<ReflectionMethod>;
   public function getModifiers(): int;
@@ -188,8 +188,8 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
   public function getDeclaringClass();
   public function getPrototype();
   public function setAccessible($accessible);
-  final public function getAttributesRecursive(): darray<string, varray<mixed>>;
-  final public function getAttributeRecursive(string $name): ?varray<mixed>;
+  <<__Deprecated("This function is being removed as it has been broken for some time")>> final public function getAttributesRecursive(): darray<string, varray<mixed>>;
+  <<__Deprecated("This function is being removed as it has been broken for some time")>> final public function getAttributeRecursive(string $name): ?varray<mixed>;
   final public function getAttributeClass<T as HH\MethodAttribute>(classname<T> $c): ?T;
 }
 
@@ -224,8 +224,8 @@ class ReflectionParameter implements Reflector {
   final public function getAttribute(string $name);
   final public function getAttributeClass<T as HH\ParameterAttribute>(classname<T> $c): ?T;
   final public function getAttributes();
-  final public function getAttributeRecursive(string $name);
-  final public function getAttributesRecursive();
+  <<__Deprecated("This function is being removed as it has been broken for some time")>> final public function getAttributeRecursive(string $name);
+  <<__Deprecated("This function is being removed as it has been broken for some time")>> final public function getAttributesRecursive();
 }
 
 class ReflectionProperty implements Reflector {

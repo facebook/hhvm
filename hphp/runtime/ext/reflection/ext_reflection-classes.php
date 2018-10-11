@@ -23,9 +23,25 @@ interface Reflector {
   public function __toString();
 }
 
+trait ReflectionLegacyAttribute {
+  final public function getAttributes(): darray<arraykey, varray<mixed>> {
+    $denamespaced = darray[];
+    foreach ($this->getAttributesNamespaced() as $name => $args) {
+      $pos = strrpos($name, '\\');
+      $name = ($pos === false) ? $name : substr($name, $pos + 1);
+      $denamespaced[$name] = $args;
+    }
+    return $denamespaced;
+  }
+
+  final public function getAttribute(string $name): ?varray<mixed> {
+    return hphp_array_idx($this->getAttributes(), $name, null);
+  }
+}
+
 trait ReflectionTypedAttribute {
   final public function getAttributeClass(classname $c) {
-    $attrs = $this->getAttributes();
+    $attrs = $this->getAttributesNamespaced();
     $args = hphp_array_idx($attrs, $c, null);
 
     if ($args === null) {
@@ -512,22 +528,21 @@ class ReflectionParameter implements Reflector {
     return $this->info['index'];
   }
 
-  final public function getAttribute(string $name) {
-    $attrs = $this->info['attributes'];
-    return isset($attrs[$name]) ? $attrs[$name] : null;
-  }
-
   use ReflectionTypedAttribute;
 
-  final public function getAttributes() {
+  final public function getAttributesNamespaced() {
     return $this->info['attributes'];
   }
 
+  use ReflectionLegacyAttribute;
+
+  <<__Deprecated("This function is being removed as it has been broken for some time")>>
   final public function getAttributeRecursive(string $name) {
     $attrs = $this->getAttributesRecursive();
     return isset($attrs[$name]) ? $attrs[$name] : null;
   }
 
+  <<__Deprecated("This function is being removed as it has been broken for some time")>>
   final public function getAttributesRecursive() {
     if (!isset($this->info['class'])) {
       return $this->getAttributes();
@@ -959,14 +974,9 @@ class ReflectionProperty implements Reflector {
    * Get the user defined attributes from the property declaration.
    */
   <<__Native>>
-  public function getAttributes(): dict<string, mixed>;
+  public function getAttributesNamespaced(): dict<string, mixed>;
 
-  /**
-   * Get the value of the given user-defined attribute from the property
-   * declaration; returns null if the named attribute was not present.
-   */
-  <<__Native>>
-  public function getAttribute(string $name): mixed;
+  use ReflectionLegacyAttribute;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

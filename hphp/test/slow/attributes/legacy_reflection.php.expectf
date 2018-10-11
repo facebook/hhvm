@@ -1,0 +1,64 @@
+array(1) {
+  ["Dog"]=>
+  array(1) {
+    [0]=>
+    int(3)
+  }
+}
+array(1) {
+  [0]=>
+  int(3)
+}
+array(1) {
+  ["Hippo"]=>
+  array(1) {
+    [0]=>
+    int(7)
+  }
+}
+array(1) {
+  [0]=>
+  int(7)
+}
+array(1) {
+  ["Cat"]=>
+  array(1) {
+    [0]=>
+    int(4)
+  }
+}
+array(1) {
+  [0]=>
+  int(4)
+}
+array(1) {
+  ["Dolphin"]=>
+  array(1) {
+    [0]=>
+    int(5)
+  }
+}
+array(1) {
+  [0]=>
+  int(5)
+}
+array(1) {
+  ["Baboon"]=>
+  array(1) {
+    [0]=>
+    int(6)
+  }
+}
+array(1) {
+  [0]=>
+  int(6)
+}
+
+Deprecated: ReflectionClass::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 36
+array(1) {
+  ["Dolphin"]=>
+  array(1) {
+    [0]=>
+    int(5)
+  }
+}

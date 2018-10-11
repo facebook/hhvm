@@ -1,36 +1,33 @@
-array(1) {
+dict(1) {
   ["foo"]=>
   NULL
 }
-array(2) {
+dict(2) {
   ["A"]=>
-  array(2) {
-    [0]=>
+  vec(2) {
     int(1)
-    [1]=>
     int(2)
   }
   ["B"]=>
-  array(0) {
+  vec(0) {
   }
 }
-array(2) {
+
+Deprecated: ReflectionFunctionAbstract::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 27
+dict(2) {
   ["A"]=>
-  array(2) {
-    [0]=>
+  vec(2) {
     int(1)
-    [1]=>
     int(2)
   }
   ["B"]=>
-  array(0) {
+  vec(0) {
   }
 }
-array(3) {
-  [0]=>
+vec(3) {
   object(ReflectionParameter)#2 (3) {
     ["info"]=>
-    array(10) {
+    dict(10) {
       ["index"]=>
       int(0)
       ["name"]=>
@@ -56,7 +53,7 @@ array(3) {
     ["name"]=>
     string(1) "a"
     ["paramTypeInfo"]=>
-    array(3) {
+    dict(3) {
       ["name"]=>
       string(0) ""
       ["nullable"]=>
@@ -65,10 +62,9 @@ array(3) {
       bool(false)
     }
   }
-  [1]=>
   object(ReflectionParameter)#3 (3) {
     ["info"]=>
-    array(12) {
+    dict(12) {
       ["index"]=>
       int(1)
       ["name"]=>
@@ -98,7 +94,7 @@ array(3) {
     ["name"]=>
     string(1) "b"
     ["paramTypeInfo"]=>
-    array(3) {
+    dict(3) {
       ["name"]=>
       string(0) ""
       ["nullable"]=>
@@ -107,10 +103,9 @@ array(3) {
       bool(false)
     }
   }
-  [2]=>
   object(ReflectionParameter)#4 (3) {
     ["info"]=>
-    array(12) {
+    dict(12) {
       ["index"]=>
       int(2)
       ["name"]=>
@@ -140,7 +135,7 @@ array(3) {
     ["name"]=>
     string(1) "c"
     ["paramTypeInfo"]=>
-    array(3) {
+    dict(3) {
       ["name"]=>
       string(0) ""
       ["nullable"]=>
@@ -152,7 +147,7 @@ array(3) {
 }
 object(ReflectionType)#5 (1) {
   ["type_hint_info":"ReflectionType":private]=>
-  array(3) {
+  dict(3) {
     ["name"]=>
     string(7) "HH\void"
     ["nullable"]=>
@@ -161,30 +156,32 @@ object(ReflectionType)#5 (1) {
     bool(false)
   }
 }
-array(1) {
-  [0]=>
+vec(1) {
   int(1)
 }
-array(0) {
+dict(0) {
 }
-array(1) {
+dict(1) {
   ["Bing"]=>
-  array(0) {
+  vec(0) {
   }
 }
-array(2) {
+
+Deprecated: ReflectionMethod::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 34
+
+Deprecated: ReflectionMethod::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 34
+dict(2) {
   ["Bing"]=>
-  array(0) {
+  vec(0) {
   }
   ["Bar"]=>
-  array(0) {
+  vec(0) {
   }
 }
-array(1) {
-  [0]=>
+vec(1) {
   object(ReflectionParameter)#6 (3) {
     ["info"]=>
-    array(11) {
+    dict(11) {
       ["index"]=>
       int(0)
       ["name"]=>
@@ -212,7 +209,7 @@ array(1) {
     ["name"]=>
     string(1) "a"
     ["paramTypeInfo"]=>
-    array(3) {
+    dict(3) {
       ["name"]=>
       string(0) ""
       ["nullable"]=>

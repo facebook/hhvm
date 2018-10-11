@@ -1,25 +1,27 @@
-dict(1) {
+array(1) {
   ["ONE"]=>
   NULL
 }
-dict(1) {
+array(1) {
   ["TWO"]=>
   string(3) "TWO"
 }
-vec(1) {
+array(1) {
+  [0]=>
   object(ReflectionTypeConstant)#2 (0) {
   }
 }
-dict(2) {
+array(2) {
   ["prop"]=>
   NULL
   ["static_prop"]=>
   NULL
 }
-vec(1) {
+array(1) {
+  [0]=>
   string(3) "Foo"
 }
-dict(1) {
+array(1) {
   ["Foo"]=>
   object(ReflectionClass)#4 (2) {
     ["name"]=>
@@ -28,27 +30,35 @@ dict(1) {
     NULL
   }
 }
-dict(1) {
+array(1) {
   ["__Attr1"]=>
-  vec(2) {
+  array(2) {
+    [0]=>
     int(3)
+    [1]=>
     int(4)
   }
 }
-dict(1) {
+
+Deprecated: ReflectionClass::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 42
+array(1) {
   ["__Attr1"]=>
-  vec(2) {
+  array(2) {
+    [0]=>
     int(3)
+    [1]=>
     int(4)
   }
 }
-vec(2) {
+array(2) {
+  [0]=>
   object(ReflectionMethod)#5 (2) {
     ["name"]=>
     string(3) "baz"
     ["class"]=>
     string(1) "A"
   }
+  [1]=>
   object(ReflectionMethod)#6 (2) {
     ["name"]=>
     string(3) "bar"
@@ -56,7 +66,8 @@ vec(2) {
     string(3) "Foo"
   }
 }
-vec(2) {
+array(2) {
+  [0]=>
   object(ReflectionProperty)#6 (3) {
     ["name"]=>
     string(4) "prop"
@@ -65,6 +76,7 @@ vec(2) {
     ["forceAccessible":"ReflectionProperty":private]=>
     bool(false)
   }
+  [1]=>
   object(ReflectionProperty)#7 (3) {
     ["name"]=>
     string(11) "static_prop"
@@ -74,7 +86,7 @@ vec(2) {
     bool(false)
   }
 }
-dict(1) {
+array(1) {
   ["static_prop"]=>
   NULL
 }
@@ -82,12 +94,13 @@ object(B)#9 (1) {
   ["prop":protected]=>
   NULL
 }
-dict(0) {
+array(0) {
 }
-vec(1) {
+array(1) {
+  [0]=>
   string(5) "TBing"
 }
-dict(1) {
+array(1) {
   ["TBing"]=>
   object(ReflectionClass)#9 (2) {
     ["name"]=>
@@ -96,10 +109,11 @@ dict(1) {
     NULL
   }
 }
-vec(1) {
+array(1) {
+  [0]=>
   string(1) "A"
 }
-dict(1) {
+array(1) {
   ["A"]=>
   object(ReflectionClass)#10 (2) {
     ["name"]=>

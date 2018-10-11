@@ -109,18 +109,21 @@ void VSDebugExtension::moduleInit() {
       "Extension started in SCRIPT mode."
     );
 
-    // If a listen port was specified on the command line, use the TCP socket
-    // transport even in script mode. Otherwise, fall back to using a pipe with
-    // our parent process.
-    if (RuntimeOption::VSDebuggerListenPort > 0) {
+    // If a listen port or domain socket was specified on the command line,
+    // use socket transport even in script mode. Otherwise, fall back to
+    // using a pipe with our parent process.
+    if (RuntimeOption::VSDebuggerListenPort > 0 ||
+        !RuntimeOption::VSDebuggerDomainSocketPath.empty()) {
       VSDebugLogger::Log(
         VSDebugLogger::LogLevelInfo,
-        "Blocking script startup. Waiting for debugger to attach on port: %d",
-        RuntimeOption::VSDebuggerListenPort
+        "Blocking script startup. Waiting for debugger to attach: %s",
+        RuntimeOption::VSDebuggerDomainSocketPath.empty()
+          ? std::to_string(RuntimeOption::VSDebuggerListenPort).c_str()
+          : RuntimeOption::VSDebuggerDomainSocketPath.c_str()
       );
 
       opts.tcpListenPort = RuntimeOption::VSDebuggerListenPort;
-      opts.domainSocketPath = "";
+      opts.domainSocketPath = RuntimeOption::VSDebuggerDomainSocketPath;
       transport = new SocketTransport(s_debugger, opts);
     } else {
       try {
@@ -161,11 +164,12 @@ void VSDebugExtension::requestInit() {
 
   assertx(s_debugger != nullptr);
 
-  // If we're in SCRIPT mode and a TCP listen port was specified on the command
+  // If we're in SCRIPT mode and a listen port/path was specified on the command
   // line, we need to block starting the script until the debugger client
   // connects.
   if (!RuntimeOption::ServerExecutionMode() &&
-      RuntimeOption::VSDebuggerListenPort > 0) {
+      (RuntimeOption::VSDebuggerListenPort > 0 ||
+        !RuntimeOption::VSDebuggerDomainSocketPath.empty())) {
 
     if (!RuntimeOption::VSDebuggerNoWait) {
       VSDebugLogger::Log(

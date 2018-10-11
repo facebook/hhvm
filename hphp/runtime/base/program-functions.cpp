@@ -202,6 +202,7 @@ struct ProgramOptions {
   std::string show;
   std::string parse;
   int vsDebugPort;
+  std::string vsDebugDomainSocket;
   bool vsDebugNoWait;
   Eval::DebuggerClientOptions debugger_options;
 };
@@ -1536,10 +1537,14 @@ static int execute_program_impl(int argc, char** argv) {
     ("xhprof-flags", value<int>(&po.xhprofFlags)->default_value(0),
      "Set XHProf flags")
     ("vsDebugPort", value<int>(&po.vsDebugPort)->default_value(-1),
+      "Debugger TCP port to listen on for the VS Code debugger extension")
+    ("vsDebugDomainSocketPath",
+      value<std::string>(&po.vsDebugDomainSocket)->default_value(""),
       "Debugger port to listen on for the VS Code debugger extension")
     ("vsDebugNoWait", value<bool>(&po.vsDebugNoWait)->default_value(false),
       "Indicates the debugger should not block script startup waiting for "
-      "a debugger client to attach. Only applies if vsDebugPort is specified.")
+      "a debugger client to attach. Only applies if vsDebugPort or "
+        "vsDebugDomainSocketPath is specified.")
     ;
 
   positional_options_description p;
@@ -1709,6 +1714,7 @@ static int execute_program_impl(int argc, char** argv) {
   if (po.mode == "vsdebug") {
     RuntimeOption::EnableVSDebugger = true;
     RuntimeOption::VSDebuggerListenPort = po.vsDebugPort;
+    RuntimeOption::VSDebuggerDomainSocketPath = po.vsDebugDomainSocket;
     RuntimeOption::VSDebuggerNoWait = po.vsDebugNoWait;
   }
 

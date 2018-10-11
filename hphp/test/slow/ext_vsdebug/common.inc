@@ -247,20 +247,34 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = []) 
      2 => array("pipe", "w")  // stderr
   );
 
-  // Grab an available port.
-  $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-  socket_bind($sock, "localhost", 0) or die("Could not bind socket");
-  socket_getsockname($sock, &$ip, &$port);
-  socket_close($sock);
+  if (!idx($GLOBALS, 'USE_UNIX_SOCKET')) {
+    // Grab an available port.
+    $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+    socket_bind($sock, "localhost", 0) or die("Could not bind socket");
+    socket_getsockname($sock, &$ip, &$port);
+    socket_close($sock);
 
-  $addr = gethostbyname("localhost");
-  $cmd = vec[
-    getHhvmPath(),
-    '-d', 'hhvm.hack.lang.look_for_typechecker=0',
-    '--mode', 'vsdebug',
-    '--vsDebugPort', (string) $port,
-    $scriptPath,
-  ] |> array_map($x ==> escapeshellarg($x), $$) |> implode(' ', $$);
+    $addr = gethostbyname("localhost");
+    $uri = "tcp://$addr:$port";
+    $cmd = vec[
+      getHhvmPath(),
+      '-d', 'hhvm.hack.lang.look_for_typechecker=0',
+      '--mode', 'vsdebug',
+      '--vsDebugPort', (string) $port,
+      $scriptPath,
+    ];
+  } else {
+    $uri = "unix:///tmp/hhvm_unit_test";
+    $cmd = vec[
+      getHhvmPath(),
+      '-d', 'hhvm.hack.lang.look_for_typechecker=0',
+      '--mode', 'vsdebug',
+      '--vsDebugDomainSocketPath', '/tmp/hhvm_unit_test',
+      $scriptPath,
+    ];
+  }
+
+  $cmd = $cmd |> array_map($x ==> escapeshellarg($x), $$) |> implode(' ', $$);
   $process = proc_open($cmd, $descriptorspec, &$pipes);
   if (!is_resource($process)) {
     throw new UnexpectedValueException("Failed to open child process!");
@@ -271,7 +285,7 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = []) 
   $tries = 0;
   while ($client === false) {
     try {
-      $client = @stream_socket_client("tcp://$addr:$port", $errno, $errorMessage);
+      $client = @stream_socket_client($uri, $errno, $errorMessage);
     } catch (Exception $e) {
     }
     if ($client === false && $tries > 5) {

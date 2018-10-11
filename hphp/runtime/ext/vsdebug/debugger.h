@@ -434,7 +434,8 @@ struct Debugger final {
 
   static bool hasSameTty() {
     return !RuntimeOption::ServerExecutionMode() &&
-      RuntimeOption::VSDebuggerListenPort <= 0;
+      RuntimeOption::VSDebuggerListenPort <= 0 &&
+      RuntimeOption::VSDebuggerDomainSocketPath.empty();
   }
 
   // Returns the current stdout hook if one is installed, or nullptr otherwise.

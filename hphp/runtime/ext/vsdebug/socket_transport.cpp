@@ -57,6 +57,10 @@ SocketTransport::~SocketTransport() {
   }
 
   stopConnectionThread();
+
+  if (useDomainSocket() && !m_domainSocketPath.empty()) {
+    unlink(m_domainSocketPath.c_str());
+  }
 }
 
 void SocketTransport::stopConnectionThread() {

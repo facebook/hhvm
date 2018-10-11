@@ -106,6 +106,7 @@ struct Debugger {
 
   // Usage logging
   static void SetUsageLogger(DebuggerUsageLogger *usageLogger);
+  static DebuggerUsageLogger* GetUsageLogger();
   static void InitUsageLogging();
   static void UsageLog(const std::string &mode,
                        const std::string &sandboxId,

@@ -653,6 +653,11 @@ void Debugger::SetUsageLogger(DebuggerUsageLogger *usageLogger) {
   get().m_usageLogger = usageLogger;
 }
 
+DebuggerUsageLogger* Debugger::GetUsageLogger() {
+  TRACE(1, "Debugger::GetUsageLogger\n");
+  return get().m_usageLogger;
+}
+
 void Debugger::InitUsageLogging() {
   TRACE(1, "Debugger::InitUsageLogging\n");
   if (get().m_usageLogger) get().m_usageLogger->init();

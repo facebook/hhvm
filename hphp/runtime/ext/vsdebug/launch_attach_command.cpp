@@ -56,6 +56,9 @@ bool LaunchAttachCommand::executeImpl(DebuggerSession* /*session*/,
   bool notifyOnBpCalibration =
     tryGetBool(args, "notifyOnBpCalibration", false);
 
+  bool disableUniqueVarRef =
+    tryGetBool(args, "disableUniqueVarRef", false);
+
   const auto& logFilePath =
     tryGetString(args, "logFilePath", emptyString);
 
@@ -94,6 +97,7 @@ bool LaunchAttachCommand::executeImpl(DebuggerSession* /*session*/,
   options.showDummyOnAsyncPause = showDummyOnAsyncPause;
   options.warnOnInterceptedFunctions = warnOnInterceptedFunctions;
   options.notifyOnBpCalibration = notifyOnBpCalibration;
+  options.disableUniqueVarRef = disableUniqueVarRef;
   m_debugger->setDebuggerOptions(options);
 
   // Send the InitializedEvent to indicate to the front-end that we are up

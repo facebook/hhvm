@@ -304,9 +304,20 @@ unsigned int DebuggerSession::generateScopeId(
   int depth,
   ScopeType scopeType
 ) {
-  const unsigned int objectId = ++s_nextObjectId;
-  ScopeObject* scope = new ScopeObject(objectId, requestId, depth, scopeType);
+  unsigned int objectId;
+  RequestInfo* ri = m_debugger->getRequestInfo();
+  auto& existingScopes = ri->m_scopeIds;
+  auto it = existingScopes.find((int)scopeType);
+  if (it != existingScopes.end()) {
+    // This scope type for this request already has an ID assigned.
+    // Reuse it.
+    objectId = it->second;
+  } else {
+    objectId = ++s_nextObjectId;
+    existingScopes.emplace((int)scopeType, objectId);
+  }
 
+  ScopeObject* scope = new ScopeObject(objectId, requestId, depth, scopeType);
   assertx(requestId == m_debugger->getCurrentThreadId());
   registerRequestObject(objectId, scope);
   return objectId;
@@ -316,9 +327,8 @@ unsigned int DebuggerSession::generateVariableId(
   request_id_t requestId,
   Variant& variable
 ) {
-  const unsigned int objectId = ++s_nextObjectId;
+  const unsigned int objectId = generateOrReuseVariableId(variable);
   VariableObject* varObj = new VariableObject(objectId, requestId, variable);
-
   assertx(requestId == m_debugger->getCurrentThreadId());
   registerRequestObject(objectId, varObj);
   return objectId;
@@ -345,6 +355,47 @@ unsigned int DebuggerSession::generateVariableSubScope(
   return objectId;
 }
 
+unsigned int DebuggerSession::generateOrReuseVariableId(
+  const Variant& variable
+) {
+  // Generate a new object ID if we haven't seen this variant before. Ensure
+  // IDs are stable for variants that contain objects or arrays, based on the
+  // address of the object to which they point.
+  RequestInfo* ri = m_debugger->getRequestInfo();
+  const auto options = m_debugger->getDebuggerOptions();
+
+  void* key = nullptr;
+  auto& existingVariables = ri->m_objectIds;
+  if (!options.disableUniqueVarRef) {
+    if (variable.isArray()) {
+      key = (void*)variable.getArrayDataOrNull();
+    } else if (variable.isObject()) {
+      key = (void*)variable.getObjectDataOrNull();
+    }
+
+    if (key != nullptr) {
+      const auto it = existingVariables.find(key);
+      if (it != existingVariables.end()) {
+        const unsigned int objectId = it->second;
+        return objectId;
+      }
+    }
+  }
+
+  // Allocate a new ID.
+  const unsigned int objectId = ++s_nextObjectId;
+
+  if (key != nullptr) {
+    // Remember the object ID for complex types (Objects, Arrays).
+    // Since simple types have no children, and cannot be expanded
+    // in clients' Variables/Scopes windows, it is not important
+    // that they receive the same object ID across requests.
+    existingVariables.emplace(key, objectId);
+  }
+
+  return objectId;
+}
+
 ScopeObject* DebuggerSession::getScopeObject(unsigned int objectId) {
   auto object = getServerObject(objectId);
   if (object != nullptr) {
@@ -365,7 +416,16 @@ void DebuggerSession::registerRequestObject(
   RequestInfo* ri = m_debugger->getRequestInfo();
 
   // Add this object to the per-request list of objects.
-  std::unordered_map<unsigned int, ServerObject*>& objs = ri->m_serverObjects;
+  auto& objs = ri->m_serverObjects;
+  auto it = objs.find(objectId);
+  if (it != objs.end()) {
+    // Replacing server object by ID. Free the old object.
+    ServerObject* object = it->second;
+    objs.erase(it);
+    onServerObjectDestroyed(objectId);
+    delete object;
+  }
+
   objs.emplace(objectId, obj);
 
   // Add this object to the per-session global list of objects.

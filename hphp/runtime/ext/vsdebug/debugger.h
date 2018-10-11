@@ -97,6 +97,10 @@ struct RequestInfo {
   const char* m_stepReason {nullptr};
   CommandQueue m_commandQueue;
   RequestBreakpointInfo* m_breakpointInfo {nullptr};
+
+  // Object IDs sent to the debugger client.
+  std::unordered_map<int, unsigned int> m_scopeIds;
+  std::unordered_map<void*, unsigned int> m_objectIds;
   std::unordered_map<unsigned int, ServerObject*> m_serverObjects;
 
   struct {
@@ -177,6 +181,9 @@ struct DebuggerOptions {
 
   // Tell the user if breakpoint calibration moves their bp.
   bool notifyOnBpCalibration;
+
+  // Don't try to unique variable references by address.
+  bool disableUniqueVarRef;
 };
 
 struct ClientInfo {
@@ -469,11 +476,13 @@ struct Debugger final {
       VSDebugLogger::LogLevelInfo,
       "Client options set:\n"
         "showDummyOnAsyncPause: %s\n"
-        "warnOnInterceptedFunctions: %s\n",
-        "notifyOnBpCalibration: %s\n",
+        "warnOnInterceptedFunctions: %s\n"
+        "notifyOnBpCalibration: %s\n"
+        "disableUniqueVarRef: %s\n",
       options.showDummyOnAsyncPause ? "YES" : "NO",
       options.warnOnInterceptedFunctions ? "YES" : "NO",
-      options.notifyOnBpCalibration ? "YES" : "NO"
+      options.notifyOnBpCalibration ? "YES" : "NO",
+      options.disableUniqueVarRef ? "YES" : "NO"
     );
   }
 

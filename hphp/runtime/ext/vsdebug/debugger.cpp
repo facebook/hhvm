@@ -329,6 +329,9 @@ void Debugger::cleanupRequestInfo(ThreadInfo* ti, RequestInfo* ri) {
     delete ri->m_breakpointInfo;
   }
 
+  ri->m_scopeIds.clear();
+  ri->m_objectIds.clear();
+
   assertx(ri->m_serverObjects.size() == 0);
   delete ri;
 }

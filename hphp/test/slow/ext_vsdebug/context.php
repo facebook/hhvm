@@ -150,7 +150,7 @@ $msg = json_decode(getNextVsDebugMessage(), true);
 $seq = sendVsCommand(array(
   "command" => "variables",
   "type" => "request",
-  "arguments" => array("variablesReference" => 10)));
+  "arguments" => array("variablesReference" => 3)));
 $msg = json_decode(getNextVsDebugMessage(), true);
 checkObjEqualRecursively($msg, array(
     "type" => "response",
@@ -202,7 +202,7 @@ if (count($msg{"body"}{"variables"}) != 6) {
 $seq = sendVsCommand(array(
   "command" => "variables",
   "type" => "request",
-  "arguments" => array("variablesReference" => 17)));
+  "arguments" => array("variablesReference" => 14)));
 
 $msg = json_decode(getNextVsDebugMessage(), true);
 checkObjEqualRecursively($msg, array(
@@ -217,7 +217,7 @@ checkObjEqualRecursively($msg, array(
           "name" => "\$aObj",
           "value" => "A",
           "namedVariables" => 2,
-          "variablesReference" => 19,
+          "variablesReference" => 16,
           "presentationHint" => array(
             "visibility" => "public"
           )
@@ -241,7 +241,7 @@ checkObjEqualRecursively($msg, array(
 
         // The private props should contain the base class's copy of $a, only.
         array(
-          "variablesReference" => 20,
+          "variablesReference" => 17,
           "name" => "Private props",
           "value" => "class A",
           "namedVariables" => 1,
@@ -253,7 +253,7 @@ checkObjEqualRecursively($msg, array(
         // Two constants should be visible on A, HELLOA and HELLOB, and one
         // on class B.
         array(
-          "variablesReference" => 21,
+          "variablesReference" => 18,
           "name" => "Class Constants",
           "value" => "class B",
           "namedVariables" => 3,
@@ -263,7 +263,7 @@ checkObjEqualRecursively($msg, array(
         ),
 
         array(
-          "variablesReference" => 22,
+          "variablesReference" => 19,
           "name" => "Static Props",
           "value" => "class B",
           "namedVariables" => 1,
@@ -278,7 +278,7 @@ checkObjEqualRecursively($msg, array(
 $seq = sendVsCommand(array(
   "command" => "variables",
   "type" => "request",
-  "arguments" => array("variablesReference" => 19)));
+  "arguments" => array("variablesReference" => 16)));
 
 $msg = json_decode(getNextVsDebugMessage(), true);
 checkObjEqualRecursively($msg, array(
@@ -332,7 +332,7 @@ if (count($msg{"body"}{"variables"}) != 4) {
 $seq = sendVsCommand(array(
   "command" => "variables",
   "type" => "request",
-  "arguments" => array("variablesReference" => 20)));
+  "arguments" => array("variablesReference" => 17)));
 $msg = json_decode(getNextVsDebugMessage(), true);
 checkObjEqualRecursively($msg, array(
     "type" => "response",
@@ -360,7 +360,7 @@ if (count($msg{"body"}{"variables"}) != 1) {
 $seq = sendVsCommand(array(
   "command" => "variables",
   "type" => "request",
-  "arguments" => array("variablesReference" => 22)));
+  "arguments" => array("variablesReference" => 19)));
 $msg = json_decode(getNextVsDebugMessage(), true);
 checkObjEqualRecursively($msg, array(
     "type" => "response",
@@ -388,7 +388,7 @@ if (count($msg{"body"}{"variables"}) != 1) {
 $seq = sendVsCommand(array(
   "command" => "variables",
   "type" => "request",
-  "arguments" => array("variablesReference" => 21)));
+  "arguments" => array("variablesReference" => 18)));
 $msg = json_decode(getNextVsDebugMessage(), true);
 checkObjEqualRecursively($msg, array(
     "type" => "response",
@@ -432,7 +432,7 @@ if (count($msg{"body"}{"variables"}) != 3) {
 $seq = sendVsCommand(array(
   "command" => "variables",
   "type" => "request",
-  "arguments" => array("variablesReference" => 15)));
+  "arguments" => array("variablesReference" => 12)));
   $msg = json_decode(getNextVsDebugMessage(), true);
   checkObjEqualRecursively($msg, array(
       "type" => "response",
@@ -467,7 +467,7 @@ if (count($msg{"body"}{"variables"}) != 3) {
 $seq = sendVsCommand(array(
   "command" => "variables",
   "type" => "request",
-  "arguments" =>array("variablesReference" => 15, "count" => 2)));
+  "arguments" =>array("variablesReference" => 12, "count" => 2)));
   $msg = json_decode(getNextVsDebugMessage(), true);
   checkObjEqualRecursively($msg, array(
       "type" => "response",
@@ -497,7 +497,7 @@ if (count($msg{"body"}{"variables"}) != 2) {
 $seq = sendVsCommand(array(
   "command" => "variables",
   "type" => "request",
-  "arguments" => array("variablesReference" => 16)));
+  "arguments" => array("variablesReference" => 13)));
   $msg = json_decode(getNextVsDebugMessage(), true);
   checkObjEqualRecursively($msg, array(
       "type" => "response",
@@ -515,7 +515,7 @@ $seq = sendVsCommand(array(
             "type" => "array",
             "name" => "1",
             "value" => "array[2]",
-            "variablesReference" => 25
+            "variablesReference" => 22
           )
         ]
       ]));
@@ -528,7 +528,7 @@ if (count($msg{"body"}{"variables"}) != 2) {
 $seq = sendVsCommand(array(
   "command" => "variables",
   "type" => "request",
-  "arguments" => array("variablesReference" => 25)));
+  "arguments" => array("variablesReference" => 22)));
   $msg = json_decode(getNextVsDebugMessage(), true);
   checkObjEqualRecursively($msg, array(
       "type" => "response",
@@ -558,7 +558,7 @@ if (count($msg{"body"}{"variables"}) != 2) {
 $seq = sendVsCommand(array(
   "command" => "variables",
   "type" => "request",
-  "arguments" => array("variablesReference" => 18)));
+  "arguments" => array("variablesReference" => 15)));
   $msg = json_decode(getNextVsDebugMessage(), true);
   checkObjEqualRecursively($msg, array(
       "type" => "response",
@@ -571,13 +571,13 @@ $seq = sendVsCommand(array(
             "type" => "B",
             "name" => "0",
             "value" => "B",
-            "variablesReference" => 26
+            "variablesReference" => 14
           ),
           array(
             "type" => "B",
             "name" => "1",
             "value" => "B",
-            "variablesReference" => 27
+            "variablesReference" => 14
           )
         ]
       ]));
@@ -589,7 +589,7 @@ if (count($msg{"body"}{"variables"}) != 2) {
 $seq = sendVsCommand(array(
   "command" => "variables",
   "type" => "request",
-  "arguments" => array("variablesReference" => 26)));
+  "arguments" => array("variablesReference" => 14)));
 
 $msg = json_decode(getNextVsDebugMessage(), true);
 checkObjEqualRecursively($msg, array(
@@ -604,7 +604,7 @@ checkObjEqualRecursively($msg, array(
         "name" => "\$aObj",
         "value" => "A",
         "namedVariables" => 2,
-        "variablesReference" => 28,
+        "variablesReference" => 16,
         "presentationHint" => array(
           "visibility" => "public"
         )
@@ -628,7 +628,7 @@ checkObjEqualRecursively($msg, array(
 
       // The private props should contain the base class's copy of $a, only.
       array(
-        "variablesReference" => 29,
+        "variablesReference" => 23,
         "name" => "Private props",
         "value" => "class A",
         "namedVariables" => 1,
@@ -640,7 +640,7 @@ checkObjEqualRecursively($msg, array(
       // Two constants should be visible on A, HELLOA and HELLOB, and one
       // on class B.
       array(
-        "variablesReference" => 30,
+        "variablesReference" => 24,
         "name" => "Class Constants",
         "value" => "class B",
         "namedVariables" => 3,
@@ -650,7 +650,7 @@ checkObjEqualRecursively($msg, array(
       ),
 
       array(
-        "variablesReference" => 31,
+        "variablesReference" => 25,
         "name" => "Static Props",
         "value" => "class B",
         "namedVariables" => 1,
@@ -667,7 +667,7 @@ $seq = sendVsCommand(array(
   "type" => "request",
   "seq" => 27,
   "arguments" => array(
-    "variablesReference" => 15,
+    "variablesReference" => 12,
     "start" => 1,
     "count" => 1
   )));
@@ -697,7 +697,7 @@ $seq = sendVsCommand(array(
   "type" => "request",
   "arguments" =>
   array(
-    "variablesReference" => 21,
+    "variablesReference" => 24,
     "start" => 1,
     "count" => 2
   )));
@@ -738,7 +738,7 @@ $seq = sendVsCommand(array(
   "type" => "request",
   "arguments" =>
   array(
-    "variablesReference" => 21,
+    "variablesReference" => 24,
     "start" => 100,
     "count" => 1
   )));
@@ -769,7 +769,7 @@ $seq = sendVsCommand(array(
   "type" => "request",
   "arguments" =>
   array(
-    "variablesReference" => 21,
+    "variablesReference" => 24,
     "start" => 1,
     "count" => 100
   )));

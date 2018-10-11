@@ -95,6 +95,10 @@ struct DebuggerSession final {
 
 private:
 
+  unsigned int generateOrReuseVariableId(
+    const Variant& variable
+  );
+
   void registerRequestObject(
     unsigned int objectId,
     ServerObject* obj
@@ -120,8 +124,7 @@ private:
 
   // When a request is paused, the backend must maintain state about scopes,
   // frames and variable IDs sent to the front end. The IDs are globally
-  // unique, and the objects to which they refer are valid per-request and
-  // only until that request resumes.
+  // unique, and the objects to which they refer are valid per-request..
   static unsigned int s_nextObjectId;
   std::unordered_map<unsigned int, ServerObject*> m_serverObjects;
 

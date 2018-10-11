@@ -383,31 +383,42 @@ InlineAnalysis analyze(IRUnit& unit) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void replace(IRInstruction& inst, SSATmp* oldSrc, SSATmp* newSrc) {
+bool replaceFP(IRInstruction& inst, SSATmp* oldSrc, SSATmp* newSrc) {
+  bool replaced = false;
   for (int i = 0; i < inst.numSrcs(); ++i) {
     if (inst.src(i) == oldSrc) {
       ITRACE(5, "Replacing use (oldFp = {}, newFp = {}); {}\n",
              *oldSrc, *newSrc, inst);
       inst.setSrc(i, newSrc);
+      replaced = true;
     }
   }
+  return replaced;
 }
 
-void replace(Block* block, SSATmp* oldSrc, SSATmp* newSrc, FPUseMap& map) {
-  ITRACE(4, "replace(): oldFp = {}, newFp = {}\n", *oldSrc, *newSrc);
+/**
+ * Replace uses of DefInlineFP in the block. Returns true iff this block returns
+ * from the inlined callee into the caller.
+ */
+bool replaceFP(Block* block, SSATmp* oldSrc, SSATmp* newSrc, FPUseMap& map) {
+  ITRACE(4, "replaceFP(): oldFp = {}, newFp = {}\n", *oldSrc, *newSrc);
   Trace::Indent _i;
 
-  if (oldSrc == newSrc) return;
+  assertx(oldSrc != newSrc);
 
   for (auto& inst : *block) {
-    replace(inst, oldSrc, newSrc);
+    auto const replaced = replaceFP(inst, oldSrc, newSrc);
     // Intentionally only adjusting the fp here, as the stack offsets should be
     // unchanged in places where we've sunk the DefInlineFP
     if (inst.marker().fp() == oldSrc) {
       inst.marker() = inst.marker().adjustFP(newSrc);
     }
     if (map.count(oldSrc)) map[oldSrc].erase(&inst);
+    assertx(!(replaced && inst.is(InlineReturn)));
+    if (replaced && inst.is(InlineSuspend)) return true;
   }
+
+  return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -482,7 +493,7 @@ void adjustFrame(IRUnit& unit,
                  SSATmp* newFp) {
   assertx(canAdjustFrame(inst));
 
-  replace(inst, oldFp, newFp);
+  replaceFP(inst, oldFp, newFp);
   if (!inst.is(Call)) return;
   /*
    * At various points we may walk the rbp chain to do such things as generate
@@ -621,23 +632,22 @@ void recordNewUse(OptimizeContext& ctx, IRInstruction* inst, SSATmp* use) {
   if (it != ctx.fpUses->end()) it->second.insert(inst);
 }
 
-void insertDefInlineFPs(OptimizeContext& ctx, BlockList& heads) {
-  for (auto block : heads) {
-    assertx(block->numPreds() == 1);
-    auto newDef = ctx.unit->clone(ctx.deadFp->inst());
-    auto newFp  = newDef->dst();
-    if (ctx.initCtx) {
-      auto newInit = ctx.unit->clone(ctx.initCtx);
-      newInit->setSrc(0, newFp);
-      block->prepend(newInit);
-    }
-    block->prepend(newDef);
-    replace(block, ctx.deadFp, newFp, *ctx.fpUses);
-    ctx.fpMap[block] = newFp;
-    recordNewUse(ctx, newDef, newDef->src(1));
-    ITRACE(3, "Initializing exit head (block id = {}): {}\n",
-           block->id(), *newDef);
+bool insertDefInlineFP(OptimizeContext& ctx, Block* block) {
+  assertx(block->numPreds() == 1);
+  auto newDef = ctx.unit->clone(ctx.deadFp->inst());
+  auto newFp  = newDef->dst();
+  if (ctx.initCtx) {
+    auto newInit = ctx.unit->clone(ctx.initCtx);
+    newInit->setSrc(0, newFp);
+    block->prepend(newInit);
   }
+  block->prepend(newDef);
+  auto const inlineExit = replaceFP(block, ctx.deadFp, newFp, *ctx.fpUses);
+  ctx.fpMap[block] = newFp;
+  recordNewUse(ctx, newDef, newDef->src(1));
+  ITRACE(3, "Initializing exit head (block id = {}): {}\n",
+         block->id(), *newDef);
+  return !inlineExit;
 }
 
 /*
@@ -657,8 +667,7 @@ bool process(OptimizeContext& ctx, Block* pred, Block* succ,
   // The map does not contain succ, we have not processed it before
   if (!ctx.fpMap.count(succ)) {
     ctx.fpMap[succ] = predCurFp;
-    replace(succ, ctx.deadFp, predCurFp, *ctx.fpUses);
-    return true;
+    return !replaceFP(succ, ctx.deadFp, predCurFp, *ctx.fpUses);
   }
 
   // We processed this succ and its fp is already the same as pred
@@ -673,8 +682,7 @@ bool process(OptimizeContext& ctx, Block* pred, Block* succ,
   // update all instances of predOldFp with predCurFp
   if (curFp == predOldFp) {
     ctx.fpMap[succ] = predCurFp;
-    replace(succ, curFp, predCurFp, *ctx.fpUses);
-    return true;
+    return !replaceFP(succ, curFp, predCurFp, *ctx.fpUses);
   }
 
   // Multiple preds define different FPs which will require a DefLabel to phi
@@ -708,7 +716,8 @@ bool process(OptimizeContext& ctx, Block* pred, Block* succ,
   ITRACE(3, "pred fp: {}, succ old fp: {}, succ new fp: {}\n",
          *predCurFp, *curFp, *newFp);
 
-  replace(succ, curFp, newFp, *ctx.fpUses);
+  auto const cont =
+    curFp != newFp && !replaceFP(succ, curFp, newFp, *ctx.fpUses);
 
   ITRACE(3, "Updating pred jmps\n");
   {
@@ -734,7 +743,7 @@ bool process(OptimizeContext& ctx, Block* pred, Block* succ,
   // If we didn't change the fp for this block we don't need to re-process it's
   // successors.
   ITRACE(3, "succ fp was {}\n", curFp != newFp ? "changed" : "unchanged");
-  return curFp != newFp;
+  return cont;
 }
 
 void transformUses(OptimizeContext& ctx, InstructionSet& uses) {
@@ -930,16 +939,15 @@ bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn) {
     return false;
   }
 
-  auto heads = findExitHeads(ctx, env.exitBlocks[fp]);
-
-  // We won't need to create more DefInlineFP's after this, and if they're
-  // completely unused in any of these traces DCE will clean it up.
-  insertDefInlineFPs(ctx, heads);
-
   // Update FP's in all blocks reachable from the exit heads
+  auto heads = findExitHeads(ctx, env.exitBlocks[fp]);
   std::deque<std::pair<Block*,SSATmp*>> workQ;
   for (auto h : heads) {
-    workQ.push_back(std::make_pair(h, ctx.deadFp));
+    // We won't need to create more DefInlineFP's after this, and if they're
+    // completely unused in any of these traces DCE will clean it up.
+    if (insertDefInlineFP(ctx, h)) {
+      workQ.push_back(std::make_pair(h, ctx.deadFp));
+    }
   }
 
   while (!workQ.empty()) {

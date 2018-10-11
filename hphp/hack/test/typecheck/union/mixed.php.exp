@@ -15,7 +15,7 @@ File "mixed.php", line 72, characters 3-13:
 File "mixed.php", line 76, characters 3-13:
   (int | string)
 File "mixed.php", line 79, characters 3-13:
-  (int | float)
+  num
 File "mixed.php", line 82, characters 3-13:
   (float | string)
 File "mixed.php", line 85, characters 3-13:

@@ -79,6 +79,10 @@ let rec union env (r1, _ as ty1) (r2, _ as ty2) =
 and union_ env ty1 ty2 r =
   try
   begin match ty1, ty2 with
+  | (r1, Tprim Nast.Tint), (r2, Tprim Nast.Tfloat)
+  | (r1, Tprim Nast.Tfloat), (r2, Tprim Nast.Tint) ->
+    let r = union_reason r1 r2 in
+    env, (r, Tprim Nast.Tnum)
   | (r, Tprim Nast.Tvoid), ty
   | ty, (r, Tprim Nast.Tvoid) ->
     let r = match r with Reason.Rnull p -> Reason.Rwitness p | _ -> r in

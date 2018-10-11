@@ -2292,7 +2292,8 @@ class ReflectionClass implements Reflector {
   }
 
   <<__Native>>
-  public function getAttributesRecursiveNamespaced(): darray<string, array<mixed>>;
+  public function getAttributesRecursiveNamespaced(
+  ): darray<string, varray<mixed>>;
 
   <<__Deprecated("This function is being removed as it has been broken for some time")>>
   public function getAttributesRecursive() {
@@ -2518,10 +2519,11 @@ class ReflectionTypeAlias implements Reflector {
   /**
    * Gets all attributes
    *
-   * @return  array<arraykey, array<int, mixed>>
+   * @return  darray<arraykey, varray<mixed>>
    */
   <<__Native>>
-  final public function getAttributesNamespaced(): darray<arraykey, array<int, mixed>>;
+  final public function getAttributesNamespaced(
+  ): darray<arraykey, varray<mixed>>;
 
   use ReflectionLegacyAttribute;
 

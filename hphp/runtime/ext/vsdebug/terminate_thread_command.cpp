@@ -66,7 +66,6 @@ bool TerminateThreadsCommand::executeImpl(DebuggerSession* /*session*/,
 
   const folly::dynamic& message = getMessage();
   const auto dispatchRequest = [&](request_id_t requestId) {
-    m_debugger->sendUserMessage(std::to_string(requestId).c_str());
     if (requestId > 0) {
       m_debugger->dispatchCommandToRequest(
         requestId,

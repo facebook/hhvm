@@ -1,10 +1,12 @@
+open Core_kernel
+
 module Watchman_changes_comparator = struct
   type t = Watchman.changes
   let to_string changes =
     let open Watchman in
     let pushed_to_string = function
       | Changed_merge_base (hg_rev, changes, clock) ->
-        let changes = String.concat ", " (SSet.elements changes) in
+        let changes = String.concat ~sep:", " (SSet.elements changes) in
         Printf.sprintf "Changed_merge_base(%s, %s, %s)"
           hg_rev
           changes
@@ -20,7 +22,7 @@ module Watchman_changes_comparator = struct
       | Files_changed s ->
         Printf.sprintf
           "Watchman_push files [%s]"
-          (String.concat ", " @@ SSet.elements s)
+          (String.concat ~sep:", " @@ SSet.elements s)
     in
     match changes with
     | Watchman_unavailable ->
@@ -29,7 +31,7 @@ module Watchman_changes_comparator = struct
     | Watchman_synchronous s ->
       Printf.sprintf
         "Watchman_synchronous [%s]"
-        (String.concat ", " @@ List.map pushed_to_string s)
+        (String.concat ~sep:", " @@ List.map ~f:pushed_to_string s)
 
     let pushed_is_equal exp actual =
       let open Watchman in
@@ -60,7 +62,7 @@ module Watchman_changes_comparator = struct
       | Watchman_pushed exp, Watchman_pushed actual ->
         pushed_is_equal exp actual
       | Watchman_synchronous exp, Watchman_synchronous actual ->
-        List.for_all2 pushed_is_equal exp actual
+        List.for_all2_exn ~f:pushed_is_equal exp actual
       | _ ->
         false
 

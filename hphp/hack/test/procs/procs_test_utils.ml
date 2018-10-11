@@ -1,3 +1,4 @@
+open Core_kernel
 let entry = WorkerController.register_entry_point ~restore:(fun _ -> ())
 
 let try_finalize f x finally y =

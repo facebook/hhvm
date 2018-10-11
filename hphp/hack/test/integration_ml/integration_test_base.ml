@@ -8,7 +8,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Integration_test_base_types
 open Reordered_argument_collections
 open ServerCommandTypes
@@ -172,16 +172,16 @@ let prepend_root x = root ^ x
 
 let fail x =
   print_endline x;
-  Printexc.(get_callstack 100 |> print_raw_backtrace stderr);
+  Caml.Printexc.(get_callstack 100 |> print_raw_backtrace stderr);
   exit 1
 
 (******************************************************************************(
  * Utility functions to help format/throw errors for informative errors
 )******************************************************************************)
 let indent_string_with (indent : string) (error : string) : string =
-  indent ^ String.concat ("\n" ^ indent) Str.(split (regexp "\n") error)
+  indent ^ String.concat ~sep:("\n" ^ indent) Str.(split (regexp "\n") error)
 let indent_strings_with (indent : string) (errors : string list) : string =
-  String.concat "" @@ List.map ~f:(indent_string_with indent) errors
+  String.concat ~sep:"" @@ List.map ~f:(indent_string_with indent) errors
 let fail_on_none (error : string) optional_thing =
   match optional_thing with
   | None -> fail error
@@ -190,8 +190,8 @@ let assert_responded (error : string) loop_output =
   fail_on_none error loop_output.persistent_client_response
 
 let assertEqual expected got =
-  let expected = String.trim expected in
-  let got = String.trim got in
+  let expected = String.strip expected in
+  let got = String.strip got in
   if expected <> got then fail
     (Printf.sprintf "Expected:\n%s\nGot:\n%s\n" expected got)
 
@@ -525,7 +525,7 @@ let assert_coverage_levels loop_output expected =
   in
   let results_as_string =
     List.map results coverage_levels_to_str_helper
-      |> List.sort ~cmp:compare |> List.append strings_of_stats
+      |> List.sort ~compare |> List.append strings_of_stats
       |> list_to_string in
   let expected_as_string = list_to_string expected in
   assertEqual expected_as_string results_as_string
@@ -537,8 +537,8 @@ let assert_autocomplete loop_output expected =
   in
   let results = results |> List.map ~f:(fun x -> x.AutocompleteTypes.res_name) in
   (* The autocomplete results out of hack are unsorted *)
-  let results_as_string = results |> List.sort ~cmp:compare |> list_to_string in
-  let expected_as_string = expected |> List.sort ~cmp:compare |> list_to_string in
+  let results_as_string = results |> List.sort ~compare |> list_to_string in
+  let expected_as_string = expected |> List.sort ~compare |> list_to_string in
   assertEqual expected_as_string results_as_string
 
 let assert_ide_autocomplete loop_output expected =
@@ -637,7 +637,7 @@ let assert_refactor loop_output expected =
 
 let assert_ide_refactor loop_output expected =
   let results = assert_response loop_output in
-  let results = Core_result.ok_or_failwith results in
+  let results = Result.ok_or_failwith results in
   let results_as_string = ClientRefactor.patches_to_json_string results in
   assertEqual expected results_as_string
 

@@ -1,4 +1,4 @@
-open Hh_core
+open Core_kernel
 
 module Tools = struct
 
@@ -48,7 +48,7 @@ type config = {
 (** Invoke a subprocess on the harness's repo with its environment. *)
 let exec_hh_client args harness =
   Printf.eprintf "executing hh_client. Args: %s\n%!"
-    (String.concat ", " args);
+    (String.concat ~sep:", " args);
   Process.exec_with_replacement_env harness.hh_client_path
     ~env:harness.test_env (args @ [Path.to_string harness.repo_dir])
 
@@ -56,7 +56,7 @@ let get_server_logs harness =
   let process = exec_hh_client ["--logname"] harness in
   match Process.read_and_wait_pid ~timeout:5 process with
   | Ok {Process_types.stdout; _} ->
-    let log_path = Path.make (String.trim stdout) in
+    let log_path = Path.make (String.strip stdout) in
     (try Some (Sys_utils.cat (Path.to_string log_path)) with
     | Sys_error(m)
       when Sys_utils.string_contains m "No such file or directory" ->
@@ -81,7 +81,7 @@ let get_recording_path harness =
       (Path.make (Str.matched_group 1 logs)),
       (Path.make (Str.matched_group 2 logs)))
   end with
-  | Not_found ->
+  | Caml.Not_found ->
     Printf.eprintf "recorder path or lock file not found\n%!";
     Printf.eprintf "See also server logs: %s\n%!" logs;
     None

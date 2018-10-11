@@ -1,3 +1,4 @@
+open Core_kernel
 module Test = Integration_test_base
 open Integration_test_base_types
 

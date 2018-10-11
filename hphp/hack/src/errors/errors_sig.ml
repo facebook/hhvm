@@ -603,4 +603,5 @@ module type S = sig
   val mutable_on_static: Pos.t -> unit
   val trait_interface_constructor_promo: Pos.t -> unit
   val escaping_mutable_object: Pos.t -> unit
+  val multiple_concrete_defs : Pos.t -> Pos.t -> string -> string -> string -> string -> unit
 end

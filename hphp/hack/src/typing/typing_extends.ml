@@ -128,6 +128,7 @@ let check_types_for_const env
  * for this class. We cannot make this choice earlier during typing_decl because
  * a class we depend on during the subtyping may not have been declared yet.
  *)
+ (* TODO(jjwu): get rid of this for type constants too, and we can delete *)
 let check_ambiguous_inheritance f parent child pos class_ origin =
     Errors.try_when
       (f parent child)
@@ -196,7 +197,7 @@ let check_lateinit parent_class_elt class_elt =
     Errors.bad_lateinit_override parent_class_elt.ce_lateinit parent_pos child_pos
 
 (* Check that overriding is correct *)
-let check_override env member_name mem_source ?(ignore_fun_return = false)
+let check_override env ~check_member_unique member_name mem_source ?(ignore_fun_return = false)
     (parent_class, parent_ty) (class_, class_ty) parent_class_elt class_elt =
   (* We first verify that we aren't overriding a final method *)
   check_final_method mem_source parent_class_elt class_elt;
@@ -231,6 +232,18 @@ let check_override env member_name mem_source ?(ignore_fun_return = false)
           (class_known || check_partially_known_method_returns)
         ) in
       let check (r1, ft1) (r2, ft2) () =
+        if check_member_unique then
+        begin match ft1.ft_abstract, ft2.ft_abstract with
+        | false, false ->
+          (* Multiple concrete trait definitions, error *)
+          Errors.multiple_concrete_defs
+            (Reason.to_pos r_child)
+            (Reason.to_pos r_parent)
+            (Utils.strip_ns class_elt.ce_origin)
+            (Utils.strip_ns parent_class_elt.ce_origin)
+            member_name
+            (Utils.strip_ns class_.tc_name)
+        | _ -> () end;
         ignore(subtype_funs env r2 ft2 r1 ft1) in
       check_ambiguous_inheritance check (r_parent, ft_parent) (r_child, ft_child)
         (Reason.to_pos r_child) class_ class_elt.ce_origin
@@ -270,16 +283,39 @@ let check_members check_private env (parent_class, psubst, parent_ty)
     (mem_source, parent_members, members, dep) =
   let parent_members = if check_private then parent_members
     else filter_privates parent_members in
+  let should_check_member_unique class_elt parent_class_elt =
+    (* We want to check if there are conflicting trait or interface declarations
+    of a class member. This means that if the parent class is a trait or interface,
+    we need to check that the child member is *uniquely inherited*.
+
+    A member is uniquely inherited if any of the following hold:
+    1. It is synthetic (from a requirement)
+    2. It is defined on the child class
+    3. It is concretely defined in exactly one place
+    4. It is abstract, and all other declarations are identical
+    *)
+    match parent_class.tc_kind with
+    | Ast.Cinterface | Ast.Ctrait ->
+      (* Synthetic  *)
+      not class_elt.ce_synthesized
+      (* The parent we are checking is synthetic, no point in checking *)
+      && not parent_class_elt.ce_synthesized
+      (* defined on original class *)
+      && class_elt.ce_origin <> class_.tc_name
+      (* defined from parent class, nothing to check *)
+      && class_elt.ce_origin <> parent_class_elt.ce_origin
+    | _ -> false in
   SMap.iter begin fun member_name parent_class_elt ->
     match SMap.get member_name members with
     | Some class_elt ->
       let parent_class_elt = Inst.instantiate_ce psubst parent_class_elt in
       let class_elt = Inst.instantiate_ce subst class_elt in
+      let check_member_unique = should_check_member_unique class_elt parent_class_elt in
       if parent_class_elt.ce_origin <> class_elt.ce_origin then
         Typing_deps.add_idep
           (Dep.Class class_.tc_name)
           (dep parent_class_elt.ce_origin member_name);
-      check_override env member_name mem_source
+      check_override ~check_member_unique env member_name mem_source
         (parent_class, parent_ty) (class_, class_ty)
         parent_class_elt class_elt
     | None -> ()
@@ -363,7 +399,7 @@ let check_constructors env (parent_class, parent_ty) (class_, class_ty) psubst s
           Typing_deps.add_idep
             (Dep.Class class_.tc_name)
             (Dep.Cstr parent_cstr.ce_origin);
-        check_override env "__construct" `FromMethod
+        check_override env ~check_member_unique:false "__construct" `FromMethod
           ~ignore_fun_return:true
           (parent_class, parent_ty) (class_, class_ty) parent_cstr cstr
       | None, Some cstr when explicit_consistency ->
@@ -374,7 +410,7 @@ let check_constructors env (parent_class, parent_ty) (class_, class_ty) psubst s
           Typing_deps.add_idep
             (Dep.Class class_.tc_name)
             (Dep.Cstr parent_cstr.ce_origin);
-        check_override env "__construct" `FromMethod
+        check_override env ~check_member_unique:false "__construct" `FromMethod
           ~ignore_fun_return:true (parent_class, parent_ty) (class_, class_ty) parent_cstr cstr
       | None, _ -> ()
   ) else (

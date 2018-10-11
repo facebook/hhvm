@@ -3059,6 +3059,15 @@ let ambiguous_inheritance pos class_ origin (error: error) =
   let code, msgl = (get_code error), (to_list error) in
   add_list code (msgl @ [pos, message])
 
+let multiple_concrete_defs child_pos parent_pos child_origin parent_origin name class_ =
+  add_list (Typing.err_code Typing.MultipleConcreteDefs) [
+    child_pos, child_origin ^ " and " ^ parent_origin ^
+      " both declare ambiguous implementations of " ^ name ^ ".";
+    child_pos, child_origin ^ "'s definition is here.";
+    parent_pos, parent_origin ^ "'s definition is here.";
+    child_pos, "Redeclare " ^ name ^ " in " ^ class_ ^ " with a compatible signature.";
+  ]
+
 let explain_contravariance pos c_name error =
   let message = "Considering that this type argument is contravariant "^
                 "with respect to " ^ strip_ns c_name in

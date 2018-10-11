@@ -179,6 +179,12 @@ struct DebuggerOptions {
   bool notifyOnBpCalibration;
 };
 
+struct ClientInfo {
+  std::string clientUser;
+  pid_t clientPid;
+  uid_t clientUid;
+};
+
 struct Debugger final {
   Debugger();
   virtual ~Debugger() {
@@ -195,7 +201,11 @@ struct Debugger final {
   // connected or not. Many debugger events will be skipped if no client is
   // connected to avoid impacting perf when there is no debugger client
   // attached.
-  void setClientConnected(bool connected, bool synchronous = false);
+  void setClientConnected(
+    bool connected,
+    bool synchronous = false,
+    ClientInfo* clientInfo = nullptr
+  );
 
   // Shuts down the debugger session and cleans up any resources. This will also
   // unblock any requests that are broken in to the debugger.
@@ -249,6 +259,8 @@ struct Debugger final {
   // Called by the debugger transport when a new message is received from
   // a connected debugger client.
   void onClientMessage(folly::dynamic& message);
+
+  void logClientCommand(VSCommand* command);
 
   // Enters the debugger if the program is paused.
   void enterDebuggerIfPaused(RequestInfo* requestInfo);

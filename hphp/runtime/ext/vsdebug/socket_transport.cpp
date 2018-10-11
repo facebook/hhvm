@@ -578,7 +578,11 @@ void SocketTransport::waitForConnection(
             // We have established a connection with a client.
             m_clientConnected = true;
             setTransportFd(newFd);
-            m_debugger->setClientConnected(true);
+            m_debugger->setClientConnected(
+              true,
+              false,
+              domainSocket ? &m_clientInfo : nullptr
+            );
           }
         }
       }
@@ -655,6 +659,7 @@ bool SocketTransport::validatePeerCreds(int newFd, ClientInfo& info) {
 
   info.clientUser = std::string(pw.pw_name);
   info.clientPid = ucred.pid;
+  info.clientUid = ucred.uid;
   return pw.pw_name != nullptr && strlen(pw.pw_name) > 0;
 #else
   return true;

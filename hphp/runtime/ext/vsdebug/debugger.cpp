@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/intercept.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
@@ -80,7 +81,8 @@ void Debugger::runSessionCleanupThread() {
 
 void Debugger::setClientConnected(
   bool connected,
-  bool synchronous /*= false*/
+  bool synchronous /* = false */,
+  ClientInfo* clientInfo /* = nullptr */
 ) {
   DebuggerSession* sessionToDelete = nullptr;
   SCOPE_EXIT {
@@ -128,6 +130,41 @@ void Debugger::setClientConnected(
     }
 
     if (connected) {
+      // Ensure usage logging is initialized if configured. Init is a no-op if
+      // the logger is already initialized.
+      auto logger = Eval::Debugger::GetUsageLogger();
+      if (logger != nullptr) {
+        logger->init();
+
+        if (clientInfo == nullptr) {
+          VSDebugLogger::Log(
+            VSDebugLogger::LogLevelInfo,
+            "Clearing client info. Connected client has no ID."
+          );
+          logger->clearClientInfo();
+        } else {
+          VSDebugLogger::Log(
+            VSDebugLogger::LogLevelInfo,
+            "Setting connected client info: user=%s,uid=%d,pid=%d",
+            clientInfo->clientUser.c_str(),
+            clientInfo->clientUid,
+            clientInfo->clientPid
+          );
+          logger->setClientInfo(
+            clientInfo->clientUser,
+            clientInfo->clientUid,
+            clientInfo->clientPid
+          );
+        }
+      } else {
+        VSDebugLogger::Log(
+          VSDebugLogger::LogLevelWarning,
+          "Not logging user: no usage logger configured."
+        );
+      }
+
+      VSDebugLogger::LogFlush();
+
       // Create a new debugger session.
       assertx(m_session == nullptr);
       m_session = new DebuggerSession(this);
@@ -185,6 +222,14 @@ void Debugger::setClientConnected(
         m_connectionNotifyCondition.notify_all();
       }
     } else {
+      auto logger = Eval::Debugger::GetUsageLogger();
+      if (logger != nullptr) {
+        VSDebugLogger::Log(
+          VSDebugLogger::LogLevelInfo,
+          "Clearing client info - user disconnected."
+        );
+        logger->clearClientInfo();
+      }
 
       // The client has detached. Walk through any requests we are currently
       // attached to and release them if they are blocked in the debugger.
@@ -913,6 +958,9 @@ bool Debugger::executeClientCommand(
       m_pendingEventMessages.clear();
     };
 
+    // Log command if logging is enabled.
+    logClientCommand(command);
+
     bool resumeThread = callback(m_session, responseMsg);
     if (command->commandTarget() != CommandTarget::WorkItem) {
       sendCommandResponse(command, responseMsg);
@@ -1114,6 +1162,48 @@ void Debugger::dispatchCommandToRequest(
     delete command;
   } else {
     ri->m_commandQueue.dispatchCommand(command);
+  }
+}
+
+void Debugger::logClientCommand(
+  VSCommand* command
+) {
+  auto logger = Eval::Debugger::GetUsageLogger();
+  if (logger == nullptr) {
+    return;
+  }
+
+  const std::string cmd(command->commandName());
+
+  // Don't bother logging certain very chatty commands. These can
+  // be sent frequently by the client UX and their arguments aren't
+  // interesting from a security perspective.
+  if (cmd == "CompletionsCommand" ||
+      cmd == "ContinueCommand" ||
+      cmd == "StackTraceCommand" ||
+      cmd == "ThreadsCommand") {
+    return;
+  }
+
+  try {
+    folly::json::serialization_opts jsonOptions;
+    jsonOptions.sort_keys = true;
+    jsonOptions.pretty_formatting = true;
+
+    const std::string sandboxId = g_context.isNull()
+      ? ""
+      : g_context->getSandboxId().toCppString();
+    const std::string data =
+      folly::json::serialize(command->getMessage(), jsonOptions);
+    const std::string mode = RuntimeOption::ServerExecutionMode()
+      ? "vsdebug-webserver"
+      : "vsdebug-script";
+    logger->log(mode, sandboxId, cmd, data);
+  } catch (...) {
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelError,
+      "Error logging client command"
+    );
   }
 }
 

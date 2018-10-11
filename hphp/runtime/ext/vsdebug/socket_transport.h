@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_VSDEBUG_SOCKET_TRANSPORT_H_
 #define incl_HPHP_VSDEBUG_SOCKET_TRANSPORT_H_
 
+#include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/transport.h"
 
 namespace HPHP {
@@ -40,10 +41,6 @@ struct SocketTransport : public DebugTransport {
   void cleanupFd(int fd) override;
 
 private:
-  struct ClientInfo {
-    std::string clientUser;
-    pid_t clientPid;
-  };
 
   void createAbortPipe();
   void listenForClientConnection();

@@ -2024,7 +2024,7 @@ and expr_
       let env, te1, _ = expr env e1 in
       let lenv = env.Env.lenv in
       let env = condition env c te1 in
-      let env, te2, _ = raw_expr env e2 in
+      let env, te2, _ = expr env e2 in
       let env = { env with Env.lenv = lenv } in
       make_result env (T.Binop(bop, te1, te2))
         (Reason.Rlogic_ret p, Tprim Tbool)
@@ -6016,13 +6016,14 @@ and condition ?lhs_of_null_coalesce env tparamet
       if not tparamet
       then Env.set_env_reactive env Nonreactive
       else env
-  | T.Binop (Ast.Ampamp, e1, e2) when tparamet ->
-      let env = condition env true e1 in
-      let env = condition env true e2 in
-      env
-  | T.Binop (Ast.Barbar, e1, e2) when not tparamet ->
-      let env = condition env false e1 in
-      let env = condition env false e2 in
+  | T.Binop ((Ast.Ampamp | Ast.Barbar) as bop, e1, e2)
+    when tparamet = (bop = Ast.Ampamp) ->
+      let env = condition env tparamet e1 in
+      (* This is necessary in case there is an assignment in e2
+       * We essentially redo what has been undone in the
+       * `Binop (AMpamp|BArbar)` case of `expr` *)
+      let env, _, _ = expr env (Tast.to_nast_expr e2) in
+      let env = condition env tparamet e2 in
       env
   | T.Call (Cnormal, ((p, _), T.Id (_, f)), _, [lv], [])
     when tparamet && f = SN.StdlibFunctions.is_array ->

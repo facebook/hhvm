@@ -1354,12 +1354,26 @@ and expr_
     let ty_arraykey = Reason.Ridx_dict key_pos, Tprim Tarraykey in
     Type.sub_type p (Reason.index_class class_name) env key_ty ty_arraykey in
 
+  let forget_fake_members env p callexpr =
+    (* Some functions are well known to not change the types of members, e.g.
+     * `is_null`.
+     * There are a lot of usages like
+     *   if (!is_null($x->a) && !is_null($x->a->b))
+     * where the second is_null call invalidates the first condition.
+     * This function is a bit best effort. Add stuff here when you want
+     * To avoid adding too many undue HH_FIXMEs. *)
+    match callexpr with
+    | _, Id (_, func) when (
+      func = SN.StdlibFunctions.is_null ||
+      func = SN.PseudoFunctions.isset) -> env
+    | _ -> Env.forget_members env p in
+
   let check_call
     ~is_using_clause ~expected ~is_expr_statement env p call_type e hl el uel ~in_suspend =
     let env, te, result =
       dispatch_call
       ~is_using_clause ~expected ~is_expr_statement p env call_type e hl el uel ~in_suspend in
-    let env = Env.forget_members env p in
+    let env = forget_fake_members env p e in
     env, te, result in
 
   try

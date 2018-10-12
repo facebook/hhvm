@@ -169,9 +169,9 @@ template<class GenFn>
 void emitStubCatch(Vout& v, const UniqueStubs& us, GenFn gen) {
   always_assert(us.endCatchHelper);
   v << landingpad{};
-  gen(v);
+  auto const args = gen(v);
   v << stubunwind{};
-  v << jmpi{us.endCatchHelper};
+  v << jmpi{us.endCatchHelper, args};
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -306,7 +306,7 @@ TCA emitFCallHelperThunk(CodeBlock& main, CodeBlock& cold, DataBlock& data) {
 
       // Return to the caller. This unbalances the return stack buffer, but if
       // we're intercepting, we probably don't care.
-      v << jmpr{saved_rip};
+      v << jmpr{saved_rip, php_return_regs()};
     });
 
     // Jump to the func prologue.
@@ -349,8 +349,6 @@ TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
     // So, we need to save these values for later.
     v << pushpm{ar[AROFF(m_savedRip)], ar[AROFF(m_sfp)]};
 
-    v << copy2{ar, v.cns(EventHook::NormalFunc), rarg(0), rarg(1)};
-
     auto const done = v.makeBlock();
     auto const ctch = vc.makeBlock();
     auto const should_continue = v.makeReg();
@@ -371,6 +369,7 @@ TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
       v << lea{rsp()[16], rsp()};
       // Undo our stub frame, so that rvmfp() points to the parent VM frame.
       v << load{rsp()[AROFF(m_sfp)], rvmfp()};
+      return rsp() | rvmfp();
     });
 
     v = done;
@@ -398,7 +397,7 @@ TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
 
       // Return to the caller.  This unbalances the return stack buffer, but if
       // we're intercepting, we probably don't care.
-      v << jmpr{saved_rip};
+      v << jmpr{saved_rip, php_return_regs()};
     });
 
     // Skip past the stuff we saved for the intercept case.
@@ -430,7 +429,7 @@ TCA emitFunctionSurprisedOrStackOverflow(CodeBlock& main,
                  v.makeVcallArgs({{rvmfp()}}), v.makeTuple({}),
                  {done, ctch}};
     vc = ctch;
-    emitStubCatch(vc, us, [](Vout& /*v*/) {});
+    emitStubCatch(vc, us, [](Vout&) { return RegSet{}; });
 
     v = done;
     v << tailcallstub{us.functionEnterHelper};
@@ -478,6 +477,7 @@ TCA emitInterpRet(CodeBlock& cb, DataBlock& data) {
 
     v << lea{rvmsp()[-kArRetOff], r_svcreq_arg(0)};
     v << copy{rvmfp(), r_svcreq_arg(1)};
+    v << fallthru{r_svcreq_arg(0) | r_svcreq_arg(1)};
   });
   svcreq::emit_persistent(cb, data, folly::none, REQ_POST_INTERP_RET);
   return start;
@@ -494,6 +494,7 @@ TCA emitInterpGenRet(CodeBlock& cb, DataBlock& data) {
 
     loadGenFrame<async>(v, r_svcreq_arg(0));
     v << copy{rvmfp(), r_svcreq_arg(1)};
+    v << fallthru{r_svcreq_arg(0) | r_svcreq_arg(1)};
   });
   svcreq::emit_persistent(cb, data, folly::none, REQ_POST_INTERP_RET);
   return start;
@@ -609,7 +610,13 @@ TCA emitFCallUnpackHelper(CodeBlock& main, CodeBlock& cold,
       DestType::SSA
     };
     vc = ctch;
-    emitStubCatch(vc, us, [] (Vout& v) { loadVMRegs(v); });
+    emitStubCatch(
+      vc, us,
+      [] (Vout& v) {
+        loadVMRegs(v);
+        return php_return_regs();
+      }
+    );
 
     v = done;
 
@@ -625,7 +632,7 @@ TCA emitFCallUnpackHelper(CodeBlock& main, CodeBlock& cold,
       // will have popped the pre-live ActRec already, so we can just return to
       // the caller after syncing the return regs.
       loadReturnRegs(v);
-      v << stubret{};
+      v << stubret{php_return_regs()};
     });
     v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
 
@@ -665,6 +672,7 @@ ResumeHelperEntryPoints emitResumeHelpers(CodeBlock& cb, DataBlock& data) {
   });
   rh.resumeHelper = vwrap(cb, data, [] (Vout& v) {
     v << ldimmb{0, rarg(0)};
+    v << fallthru{RegSet{rarg(0)}};
   });
 
   rh.handleResume = vwrap(cb, data, [] (Vout& v) {
@@ -682,7 +690,7 @@ ResumeHelperEntryPoints emitResumeHelpers(CodeBlock& cb, DataBlock& data) {
     loadVMRegs(v);
     loadReturnRegs(v);  // spurious load if we're not returning
 
-    v << jmpr{target};
+    v << jmpr{target, php_return_regs()};
   });
 
   return rh;
@@ -967,7 +975,7 @@ TCA emitHandleSRHelper(CodeBlock& cb, DataBlock& data) {
     loadVMRegs(v);
     loadReturnRegs(v);
 
-    v << jmpr{ret};
+    v << jmpr{ret, php_return_regs()};
   });
 }
 

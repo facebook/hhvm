@@ -174,6 +174,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
         v << ret{};
       } else {
         next_local(v);
+        v << fallthru{RegSet{local}};
       }
     }, true);
   }

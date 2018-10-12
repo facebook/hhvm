@@ -191,7 +191,10 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
   for (auto i = kNumFreeLocalsHelpers - 1; i >= 0; --i) {
     us.freeLocalsHelpers[i] = vwrap(cb, data, [&] (Vout& v) {
       decref_local(v);
-      if (i != 0) next_local(v);
+      if (i != 0) {
+        next_local(v);
+        v << fallthru{RegSet{local}};
+      }
     });
   }
 

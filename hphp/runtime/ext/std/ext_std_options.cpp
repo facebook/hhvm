@@ -202,6 +202,14 @@ static Variant eval_for_assert(ActRec* const curFP, const String& codeStr) {
 
 static Variant HHVM_FUNCTION(assert, const Variant& assertion,
                              const Variant& message /* = null */) {
+ auto const warning = "assert() is deprecated and subject"
+   " to removal from the Hack language";
+   switch (RuntimeOption::DisableAssert) {
+     case 0:  break;
+     case 1:  raise_warning(warning); break;
+     default: raise_error(warning);
+   }
+
   if (!s_option_data->assertActive) return true;
 
   CallerFrame cf;

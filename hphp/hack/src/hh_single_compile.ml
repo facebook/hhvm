@@ -264,22 +264,10 @@ let parse_text compiler_options popt fn text =
   let () = set_stats_if_enabled ~compiler_options in
   let ignore_pos =
     not (Hhbc_options.source_mapping !Hhbc_options.compiler_options) in
-  let disable_variable_variables =
-    Hhbc_options.disable_variable_variables !Hhbc_options.compiler_options in
-  let popt =
-    ParserOptions.with_disable_variable_variables popt disable_variable_variables in
   let enable_hh_syntax =
     Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options in
-  let disallow_execution_operator =
-    Hhbc_options.phpism_disallow_execution_operator !Hhbc_options.compiler_options in
-  let popt =
-    ParserOptions.with_disallow_execution_operator popt disallow_execution_operator in
   let enable_xhp =
     Hhbc_options.enable_xhp !Hhbc_options.compiler_options in
-  let disable_define =
-     Hhbc_options.phpism_disable_define !Hhbc_options.compiler_options in
-   let popt =
-     ParserOptions.with_disable_define popt disable_define in
   let php5_compat_mode =
     not (Hhbc_options.enable_uniform_variable_syntax !Hhbc_options.compiler_options) in
   let hacksperimental =
@@ -454,9 +442,23 @@ let parse_hh_file filename body =
 (* Main entry point *)
 (*****************************************************************************)
 
+let make_popt () =
+  ParserOptions.make
+    ~auto_namespace_map:
+      (Option.value Hhbc_options.(aliased_namespaces !compiler_options) ~default:[])
+    ~disallow_execution_operator:
+      Hhbc_options.(phpism_disallow_execution_operator !compiler_options)
+    ~disable_variable_variables:
+      Hhbc_options.(disable_variable_variables !compiler_options)
+    ~disable_define:
+      Hhbc_options.(phpism_disable_define !compiler_options)
+    ~enable_hh_syntax_for_hhvm:
+      Hhbc_options.(enable_hiphop_syntax !compiler_options)
+
 let process_single_source_unit ?(for_debugger_eval = false) compiler_options
-  popt handle_output handle_exception filename source_text =
+  handle_output handle_exception filename source_text =
   try
+    let popt = make_popt () in
     let debug_time = new_debug_time () in
     let t = Unix.gettimeofday () in
     let output =
@@ -478,7 +480,7 @@ let process_single_source_unit ?(for_debugger_eval = false) compiler_options
     then log_fail compiler_options filename exc ~stack;
     handle_exception filename exc
 
-let decl_and_run_mode compiler_options popt =
+let decl_and_run_mode compiler_options =
   let open Hh_json in
   let open Access in
 
@@ -559,7 +561,6 @@ let decl_and_run_mode compiler_options popt =
           process_single_source_unit
             ~for_debugger_eval
             compiler_options
-            popt
             handle_output
             handle_exception
             (Relative_path.create Relative_path.Dummy filename)
@@ -606,7 +607,7 @@ let decl_and_run_mode compiler_options popt =
         let filename = Relative_path.create Relative_path.Dummy filename in
         let abs_path = Relative_path.to_absolute filename in
         process_single_source_unit
-          compiler_options popt handle_output handle_exception filename (cat abs_path) in
+          compiler_options handle_output handle_exception filename (cat abs_path) in
 
       let filenames, handle_output = match compiler_options.input_file_list with
         (* List of source files explicitly given *)
@@ -669,10 +670,9 @@ let decl_and_run_mode compiler_options popt =
       in List.iter filenames (process_single_file handle_output)
 
 let main_hack opts =
-  let popt = ParserOptions.default in
   let start_time = Unix.gettimeofday () in
   if opts.log_stats then Logger.init start_time;
-  decl_and_run_mode opts popt
+  decl_and_run_mode opts
 
 (* command line driver *)
 let _ =

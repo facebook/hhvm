@@ -15,11 +15,19 @@ let disallow_execution_operator = GlobalOptions.po_disallow_execution_operator
 let disable_variable_variables = GlobalOptions.po_disable_variable_variables
 let default = GlobalOptions.default
 let disable_define = GlobalOptions.po_disable_define
-let with_disable_define po b =
-  { po with GlobalOptions.po_disable_define = b }
 let with_hh_syntax_for_hhvm po b =
   { po with GlobalOptions.po_enable_hh_syntax_for_hhvm = b }
-let with_disallow_execution_operator po b =
-  { po with GlobalOptions.po_disallow_execution_operator = b }
-let with_disable_variable_variables po b =
-  { po with GlobalOptions.po_disable_variable_variables = b }
+
+let make
+  ~auto_namespace_map
+  ~enable_hh_syntax_for_hhvm
+  ~disallow_execution_operator
+  ~disable_variable_variables
+  ~disable_define = {
+  default with
+  GlobalOptions.po_auto_namespace_map = auto_namespace_map;
+  GlobalOptions.po_enable_hh_syntax_for_hhvm = enable_hh_syntax_for_hhvm;
+  GlobalOptions.po_disallow_execution_operator = disallow_execution_operator;
+  GlobalOptions.po_disable_variable_variables = disable_variable_variables;
+  GlobalOptions.po_disable_define = disable_define;
+}

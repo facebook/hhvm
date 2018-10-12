@@ -186,7 +186,9 @@ const StaticString s_hphp_cli_server_api_version("hphp.cli_server_api_version");
 struct CLIClientGuardedFile : PlainFile {
   explicit CLIClientGuardedFile(int fd, const char* mode) :
     PlainFile(fdopen(fd, mode))
-  { }
+  {
+    setFd(fd);
+  }
 
   int64_t readImpl(char *buffer, int64_t length) override {
     assertClientAlive();

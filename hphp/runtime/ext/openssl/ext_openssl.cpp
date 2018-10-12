@@ -1001,7 +1001,21 @@ Variant HHVM_FUNCTION(openssl_csr_get_public_key, const Variant& csr) {
   auto pcsr = CSRequest::Get(csr);
   if (!pcsr) return false;
 
-  return Variant(req::make<Key>(X509_REQ_get_pubkey(pcsr->csr())));
+  auto input_csr = pcsr->csr();
+
+#if OPENSSL_VERSION_NUMBER >= 0x10100000
+  /* Due to changes in OpenSSL 1.1 related to locking when decoding CSR,
+   * the pub key is not changed after assigning. It means if we pass
+   * a private key, it will be returned including the private part.
+   * If we duplicate it, then we get just the public part which is
+   * the same behavior as for OpenSSL 1.0 */
+  input_csr = X509_REQ_dup(input_csr);
+  /* We need to free the CSR as it was duplicated */
+  SCOPE_EXIT { X509_REQ_free(input_csr); };
+#endif
+  auto pubkey = X509_REQ_get_pubkey(input_csr);
+  if (!pubkey) return false;
+  return Variant(req::make<Key>(pubkey));
 }
 
 Variant HHVM_FUNCTION(openssl_csr_get_subject, const Variant& csr,

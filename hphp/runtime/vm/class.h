@@ -1172,6 +1172,15 @@ public:
    */
   MaybeDataType enumBaseTy() const;
 
+  /*
+   * Returns whether this class has reified generics
+   */
+  bool hasReifiedGenerics() const;
+
+  /*
+   * Returns whether any of this class's parents have reified generics
+   */
+  bool hasReifiedParent() const;
 
   bool needsInitSProps() const;
 
@@ -1470,7 +1479,11 @@ private:
   /* This class has a property with an initial value which might not satisfy its
    * type-hint (and therefore requires a check when initialized). */
   bool m_needsPropInitialCheck   : 1;
-  // NB: 21 bits available here (in USE_LOWPTR builds).
+  /* This class has reified generics */
+  bool m_hasReifiedGenerics      : 1;
+  /* This class has a refied parent */
+  bool m_hasReifiedParent        : 1;
+  // NB: 19 bits available here (in USE_LOWPTR builds).
 
   /*
    * Vector of 86pinit() methods that need to be called to complete instance

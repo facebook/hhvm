@@ -19,8 +19,10 @@
 
 #include <folly/Range.h>
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/base/type-structure.h"
 
 namespace HPHP {
 
@@ -113,6 +115,48 @@ inline String mangleInOutFuncName(const StringData* name,
   return String(makeStaticString(
     mangleInOutFuncName(name->data(), std::move(params))
   ));
+}
+
+inline std::string mangleReifiedGenericsName(const ArrayData* tsList) {
+  std::vector<std::string> l;
+  IterateV(
+    tsList,
+    [&](TypedValue v) {
+      assertx(isArrayLikeType(v.m_type));
+      auto str =
+        TypeStructure::toStringForDisplay(ArrNR(v.m_data.parr)).toCppString();
+      str.erase(remove_if(str.begin(), str.end(), isspace), str.end());
+      l.emplace_back(str);
+    }
+  );
+  return folly::sformat("<{}>", folly::join(",", l));
+}
+
+inline std::string mangleReifiedName(
+  const StringData* name,
+  const std::string& tsName
+) {
+  return folly::sformat("{}$${}", name, tsName);
+}
+
+inline bool isReifiedName(const StringData* name) {
+  return name->toCppString().find("$$<") != std::string::npos;
+}
+
+inline std::string stripClsOrFnNameFromReifiedName(const std::string& name) {
+  auto i = name.find("$$<");
+  if (i == std::string::npos) raise_error("Not a reified name");
+  return name.substr(i + 2, name.size() - i - 2);
+}
+
+inline std::string stripTypeFromReifiedName(const std::string& name) {
+  auto i = name.find("$$<");
+  if (i == std::string::npos) raise_error("Not a reified name");
+  return name.substr(0, i);
+}
+
+inline StringData* stripTypeFromReifiedName(const StringData* name) {
+  return makeStaticString(stripTypeFromReifiedName(name->toCppString()));
 }
 
 //////////////////////////////////////////////////////////////////////

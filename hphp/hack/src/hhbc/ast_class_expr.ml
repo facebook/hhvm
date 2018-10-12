@@ -21,6 +21,7 @@ type class_expr =
 | Class_id of Ast.id
 | Class_expr of Ast.expr
 | Class_unnamed_local of Local.t
+| Class_reified of Instruction_sequence.t
 
 let get_original_class_name ~resolve_self ~check_traits scope =
   match Ast_scope.Scope.get_class scope with

@@ -643,6 +643,7 @@ and emit_instanceof env pos e1 e2 =
         lhs;
         instr_instanceofd n;
       ]
+    | Class_reified _
     | Class_expr _
     | Class_unnamed_local _ ->
       failwith "cannot get this shape from from A.Id"
@@ -802,7 +803,22 @@ and emit_new env pos expr targs args uargs =
     (Emit_env.get_scope env) expr in
   let cexpr = match cexpr with
     | Class_id (_, name) ->
-      Option.value ~default:cexpr (get_reified_var_cexpr env name)
+      let cexpr =
+        Option.value ~default:cexpr (get_reified_var_cexpr env name) in
+      if List.length reified_targs = 0 then cexpr else
+      begin
+        Class_reified (
+          gather [
+            gather @@
+              List.map reified_targs (fun h -> fst @@ emit_reified_arg env h);
+            (match cexpr with
+            | Class_id (_, name) -> instr_string name
+            | Class_expr e -> emit_expr ~need_ref:false env e
+            | Class_reified instrs -> instrs
+            | _ -> failwith "Internal error: This node can only be id or expr");
+            instr_reified_name (List.length reified_targs + 1)
+          ])
+      end
     | _ -> cexpr in
   match cexpr with
     (* Special case for statically-known class *)
@@ -949,6 +965,12 @@ and emit_load_class_ref env pos cexpr =
         instr_clsrefgetc
       ]
     end
+  | Class_reified instrs ->
+    gather [
+      emit_pos pos;
+      instrs;
+      instr_clsrefgetc
+    ]
 
 and emit_load_class_const env pos cexpr id =
   (* TODO(T21932293): HHVM does not match Zend here.
@@ -1703,47 +1725,44 @@ and emit_inline_hhas s =
   | None ->
     failwith @@ "impossible: cannot find parsed inline hhas for '" ^ s ^ "'"
 
-and get_reified_var ~is_fun name =
-  let p = Pos.none in
-  if is_fun then
-    p, A.Lvar (p, SU.Reified.mangle_reified_param name)
-  else
-    (* $this->reified_var *)
-    let expr = p, A.Lvar (p, "$this") in
-    let prop = p, A.Id (p, SU.Reified.mangle_reified_param ~nodollar:true name) in
-    p, A.Obj_get (expr, prop, A.OG_nullthrows)
-
+(* Returns either Some index or None *)
 and is_reified_tparam ~is_fun env name =
   let scope = Emit_env.get_scope env in
-  let f tparam acc =
-    match tparam with
-    | _, (_, id), _, true -> SSet.add id acc
-    | _ -> acc
-  in
   let tparams =
     if is_fun then Ast_scope.Scope.get_fun_tparams scope
-    else Ast_scope.Scope.get_class_tparams scope in
-  let current_targs = List.fold_right tparams ~init:SSet.empty ~f in
-  SSet.mem name current_targs
+    else Ast_scope.Scope.get_class_tparams scope
+  in
+  tparams
+  |> List.filter_map ~f:(function (_, (_, id), _, true) -> Some id | _ -> None)
+  |> List.findi ~f:(fun _i id -> id = name)
+  |> Option.map ~f:fst
 
 and get_reified_var_cexpr env name =
-  let p = Pos.none in
-  let aux base = (* $base['classname'] *)
-    Class_expr (p, A.Array_get (base, Some (p, A.String ("classname")))) in
-  if is_reified_tparam ~is_fun:true env name then
-    Some (aux @@ get_reified_var ~is_fun:true name)
-  else if is_reified_tparam ~is_fun:false env name then
-    Some (aux @@ get_reified_var ~is_fun:false name)
-  else
-    None
+  match emit_reified_type_opt env name with
+  | None -> None
+  | Some instrs -> Some (Class_reified (
+    gather [
+      instrs;
+      instr_basec 0 MemberOpMode.Warn;
+      instr_querym 1 QueryOp.CGet (MemberKey.ET "classname");
+    ]))
+
+and emit_reified_type_opt env name =
+  if Option.is_some @@ is_reified_tparam ~is_fun:true env name then
+    Some (instr_cgetl (Local.Named (SU.Reified.mangle_reified_param name)))
+  else if Option.is_some @@ is_reified_tparam ~is_fun:false env name then
+    (* $this->reified_var *)
+    let p = Pos.none in
+    let expr = p, A.Lvar (p, "$this") in
+    let prop = p, A.Id (p, SU.Reified.mangle_reified_param ~nodollar:true name) in
+    let expr = p, A.Obj_get (expr, prop, A.OG_nullthrows) in
+    Some (emit_expr ~need_ref:false env expr)
+  else None
 
 and emit_reified_type env name =
-  if is_reified_tparam ~is_fun:true env name then
-    emit_expr ~need_ref:false env @@ get_reified_var ~is_fun:true name
-  else if is_reified_tparam ~is_fun:false env name then
-    emit_expr ~need_ref:false env @@ get_reified_var ~is_fun:false name
-  else
-    Emit_fatal.raise_fatal_runtime Pos.none "Invalid reified param"
+  match emit_reified_type_opt env name with
+  | Some instrs -> instrs
+  | None -> Emit_fatal.raise_fatal_runtime Pos.none "Invalid reified param"
 
 and emit_expr env ?last_pos ~need_ref (pos, expr_ as expr) =
   match expr_ with
@@ -3011,13 +3030,6 @@ and emit_reified_arg env hint =
     List.fold_right (Ast_scope.Scope.get_class_tparams scope)
       ~init:current_targs ~f:(f false)
   in
-  let get_reified_var_helper name =
-    match SMap.get name current_targs with
-    | Some is_fun ->
-      (* This is already resolved by the previous caller *)
-      emit_expr ~need_ref:false env @@ get_reified_var ~is_fun name
-    | _ -> failwith "impossible, already checked for membership"
-  in
   let acc = (0, SMap.empty) in
   let visitor = object(_)
     inherit [int * int SMap.t] Ast_visitor.ast_visitor
@@ -3033,7 +3045,7 @@ and emit_reified_arg env hint =
   else
   match snd hint with
   | A.Happly ((_, name), []) when SMap.mem name current_targs ->
-    get_reified_var_helper name, false
+    emit_reified_type env name, false
   | _ ->
     let namespace = Emit_env.get_namespace env in
     let ts = Emit_type_constant.hint_to_type_constant
@@ -3046,7 +3058,7 @@ and emit_reified_arg env hint =
       let values =
         SMap.bindings targ_map
         |> List.sort ~compare:(fun (_, x) (_, y) -> Pervasives.compare x y)
-        |> List.map ~f:(fun (v, _) -> get_reified_var_helper v)
+        |> List.map ~f:(fun (v, _) -> emit_reified_type env v)
       in
       gather [
         gather values;

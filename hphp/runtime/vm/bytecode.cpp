@@ -105,6 +105,7 @@
 #include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/php-debug.h"
+#include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/resumable.h"
@@ -2759,6 +2760,49 @@ OPTBLD_INLINE void iopCombineAndResolveTypeStruct(uint32_t n) {
   } else {
     vmStack().pushArray(resolved.detach());
   }
+}
+
+namespace {
+
+// Creates a static list of reified generics from the stack and adds them
+// to the reified generics table
+ALWAYS_INLINE std::pair<std::string, ArrayData*>
+recordReifiedGenericsAndGetName(uint32_t first, uint32_t n) {
+  assertx(first < n);
+  auto tsList = ArrayData::CreateVArray();
+  for (int i = 0; i < n - first; ++i) {
+    auto a = vmStack().indC(n - i - 1);
+    isValidTSType(*a, true);
+    tsList = tsList->append(*a, false);
+  }
+  ArrayData::GetScalarArray(&tsList);
+  auto const mangledName = mangleReifiedGenericsName(tsList);
+  addToReifiedGenericsTable(mangledName, tsList);
+  return std::make_pair(mangledName, tsList);
+}
+
+} // namespace
+
+OPTBLD_INLINE void iopRecordReifiedGeneric(uint32_t n) {
+  assertx(n != 0);
+  auto const result = recordReifiedGenericsAndGetName(0, n);
+  vmStack().ndiscard(n);
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    vmStack().pushStaticVec(result.second);
+  } else {
+    vmStack().pushStaticArray(result.second);
+  }
+}
+
+OPTBLD_INLINE void iopReifiedName(uint32_t n) {
+  assertx(n != 0);
+  auto const name = vmStack().topC();
+  if (!tvIsString(name)) raise_error("Reified name must be a string");
+  auto const result = recordReifiedGenericsAndGetName(1, n);
+  auto const mangledName = mangleReifiedName(name->m_data.pstr, result.first);
+  vmStack().popC();
+  vmStack().ndiscard(n-1);
+  vmStack().pushStaticString(makeStaticString(mangledName));
 }
 
 OPTBLD_INLINE void iopPrint() {

@@ -564,6 +564,8 @@ let string_of_misc instruction =
     | Parent id -> sep ["Parent"; string_of_classref id]
     | LateBoundCls id -> sep ["LateBoundCls"; string_of_classref id]
     | ClsRefName id -> sep ["ClsRefName"; string_of_classref id]
+    | ReifiedName n -> sep ["ReifiedName"; string_of_int n]
+    | RecordReifiedGeneric n -> sep ["RecordReifiedGeneric"; string_of_int n]
     | VerifyParamType id -> sep ["VerifyParamType"; string_of_param_id id]
     | VerifyOutType id -> sep ["VerifyOutType"; string_of_param_id id]
     | VerifyRetTypeC -> "VerifyRetTypeC"

@@ -697,6 +697,9 @@ constexpr uint32_t kMaxConcatN = 4;
   O(Self,            ONE(CAW),         NOV,             NOV,        NF) \
   O(Parent,          ONE(CAW),         NOV,             NOV,        NF) \
   O(LateBoundCls,    ONE(CAW),         NOV,             NOV,        NF) \
+  O(RecordReifiedGeneric,                                               \
+                     ONE(IVA),         CMANY,           ONE(CV),    NF) \
+  O(ReifiedName,     ONE(IVA),         CMANY,           ONE(CV),    NF) \
   O(NativeImpl,      NA,               NOV,             NOV,        CF_TF) \
   O(CreateCl,        TWO(IVA,IVA),     CVUMANY,         ONE(CV),    NF) \
   O(CreateCont,      NA,               NOV,             ONE(CV),    CF) \

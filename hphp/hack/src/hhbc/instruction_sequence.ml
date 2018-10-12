@@ -108,6 +108,8 @@ let instr_istypestructc mode = instr (IOp (IsTypeStructC mode))
 let instr_astypestructc mode = instr (IOp (AsTypeStructC mode))
 let instr_combine_and_resolve_type_struct i =
   instr (IOp (CombineAndResolveTypeStruct i))
+let instr_reified_name i = instr (IMisc (ReifiedName i))
+let instr_record_reified_generic i = instr (IMisc (RecordReifiedGeneric i))
 let instr_int i = instr (ILitConst (Int (Int64.of_int i)))
 let instr_int64 i = instr (ILitConst (Int i))
 let instr_int_of_string litstr =
@@ -802,6 +804,7 @@ let get_input_output_count i =
     | CreateCl (n, _) -> (n, 1)
     | MemoGet _ -> (0, 1) | MemoSet _ -> (0, 0)
     | Idx | ArrayIdx -> (3, 1)
+    | ReifiedName n | RecordReifiedGeneric n -> (n, 1)
     end
   | IGet i ->
     begin match i with

@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/litstr-table.h"
+#include "hphp/runtime/vm/unit-util.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -330,7 +331,22 @@ inline Class* Unit::loadClass(const StringData* name) {
   if (normStr) {
     name = normStr.get();
   }
-  return loadClass(ne, name);
+  auto class_ = loadClass(ne, name);
+  if (LIKELY(class_ != nullptr) || !isReifiedName(name)) return class_;
+  // We are loading a reified class for the first time
+  name = stripTypeFromReifiedName(name);
+  auto generic_ne = NamedEntity::get(name, true, &normStr);
+  if (normStr) {
+    name = normStr.get();
+  }
+  class_ = loadClass(generic_ne, name);
+  // If the class still does not exists, return null
+  if (!class_) return nullptr;
+  assertx(class_->hasReifiedGenerics());
+  ne->m_cachedClass.bind(
+    classHasPersistentRDS(class_) ? rds::Mode::Persistent : rds::Mode::Normal);
+  ne->setCachedClass(class_);
+  return class_;
 }
 
 inline Class* Unit::getClass(const StringData* name, bool tryAutoload) {

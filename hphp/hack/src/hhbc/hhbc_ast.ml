@@ -527,6 +527,8 @@ type instruct_misc =
   | Parent of classref_id
   | LateBoundCls of classref_id
   | ClsRefName of classref_id
+  | ReifiedName of int
+  | RecordReifiedGeneric of int
   | NativeImpl
   | AKExists
   | CreateCl of num_params * class_num

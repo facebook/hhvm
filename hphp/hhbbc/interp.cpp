@@ -2519,6 +2519,34 @@ void in(ISS& env, const bc::CombineAndResolveTypeStruct& op) {
   push(env, valid ? requiredTSType : TBottom);
 }
 
+void in(ISS& env, const bc::RecordReifiedGeneric& op) {
+  // TODO(T31677864): implement real optimizations
+  assertx(op.arg1 > 0);
+  auto valid = true;
+  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? TDict : TDArr;
+  auto const resultingArray = RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
+  for (int i = 0; i < op.arg1; ++i) {
+    auto const t = popC(env);
+    valid &= t.subtypeOf(requiredTSType);
+  }
+  if (valid) nothrow(env);
+  push(env, valid ? resultingArray : TBottom);
+}
+
+void in(ISS& env, const bc::ReifiedName& op) {
+  // TODO(T31677864): implement real optimizations
+  assertx(op.arg1 > 0);
+  auto const name = popC(env);
+  auto valid = name.subtypeOf(TStr);
+  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? TDict : TDArr;
+  for (int i = 1; i < op.arg1; ++i) {
+    auto const t = popC(env);
+    valid &= t.subtypeOf(requiredTSType);
+  }
+  if (valid) nothrow(env);
+  push(env, valid ? TStr : TBottom);
+}
+
 namespace {
 
 /*

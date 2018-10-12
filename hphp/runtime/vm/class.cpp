@@ -60,6 +60,7 @@ const StaticString s_86linit("86linit");
 const StaticString s___destruct("__destruct");
 const StaticString s___OptionalDestruct("__OptionalDestruct");
 const StaticString s___MockClass("__MockClass");
+const StaticString s___Reified("__Reified");
 
 Mutex g_classesMutex;
 
@@ -1559,6 +1560,14 @@ void Class::setInstanceBitsImpl() {
   m_instanceBits = bits;
 }
 
+bool Class::hasReifiedGenerics() const {
+  return m_hasReifiedGenerics;
+}
+
+bool Class::hasReifiedParent() const {
+  return m_hasReifiedParent;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Private methods.
 //
@@ -1944,6 +1953,8 @@ Class::Class(PreClass* preClass, Class* parent,
   , m_maybeRedefsPropTy{false}
   , m_selfMaybeRedefsPropTy{false}
   , m_needsPropInitialCheck{false}
+  , m_hasReifiedGenerics{false}
+  , m_hasReifiedParent{false}
   , m_preClass(PreClassPtr(preClass))
   , m_classVecLen(always_safe_cast<decltype(m_classVecLen)>(classVecLen))
   , m_funcVecLen(always_safe_cast<decltype(m_funcVecLen)>(funcVecLen))
@@ -1972,6 +1983,13 @@ Class::Class(PreClass* preClass, Class* parent,
   // we'll fatal trying to define that class, so this has to happen after all
   // of those fatals could be thrown.
   setInterfaceVtables();
+
+  auto const ua = m_preClass->userAttributes();
+  if (ua.find(s___Reified.get()) != ua.end()) m_hasReifiedGenerics = true;
+  if (m_parent.get() != nullptr) {
+    m_hasReifiedParent = m_parent->m_hasReifiedGenerics ||
+                         m_parent->m_hasReifiedParent;
+  }
 }
 
 void Class::methodOverrideCheck(const Func* parentMethod, const Func* method) {

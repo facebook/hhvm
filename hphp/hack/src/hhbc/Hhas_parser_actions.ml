@@ -902,6 +902,8 @@ let makeunaryinst s arg = match s with
    | "AsTypeStructC" -> IOp (AsTypeStructC (typestructresolveofiarg arg))
    | "CombineAndResolveTypeStruct" ->
       IOp (CombineAndResolveTypeStruct (intofiarg arg))
+   | "ReifiedName" -> IMisc (ReifiedName (intofiarg arg))
+   | "RecordReifiedGeneric" -> IMisc (RecordReifiedGeneric (intofiarg arg))
    | "ConcatN" -> IOp (ConcatN (intofiarg arg))
 
 (* instruct_control_flow *)

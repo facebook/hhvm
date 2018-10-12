@@ -212,6 +212,8 @@ let stk_data : instruct -> stack_sig = function
   | ILitConst ColFromArray _               -> ["C"], ["C"]
   | IMisc VerifyRetTypeV                   -> ["V"], ["V"]
   | IOp CombineAndResolveTypeStruct n      -> produce "C" n, ["C"]
+  | IMisc RecordReifiedGeneric n           -> produce "C" n, ["C"]
+  | IMisc ReifiedName n                    -> produce "C" n, ["C"]
   | ILitConst NewPair
   | IOp _
   | ILitConst AddNewElemC                  -> ["C"; "C"], ["C"]

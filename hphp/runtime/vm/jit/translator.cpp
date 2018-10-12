@@ -405,6 +405,9 @@ static const struct {
   { OpSelf,        {None,             None,         OutNone         }},
   { OpParent,      {None,             None,         OutNone         }},
   { OpLateBoundCls,{None,             None,         OutNone         }},
+  { OpRecordReifiedGeneric,
+                   {StackN,           Stack1,       OutVArray       }},
+  { OpReifiedName, {StackN,           Stack1,       OutString       }},
   { OpNativeImpl,  {None,             None,         OutNone         }},
   { OpCreateCl,    {BStackN,          Stack1,       OutObject       }},
   { OpIdx,         {StackTop3,        Stack1,       OutUnknown      }},
@@ -561,6 +564,8 @@ int64_t getStackPopped(PC pc) {
     case Op::NewVArray:
     case Op::ConcatN:
     case Op::CombineAndResolveTypeStruct:
+    case Op::RecordReifiedGeneric:
+    case Op::ReifiedName:
     case Op::FCallBuiltin:
     case Op::CreateCl:
       return getImm(pc, 0).u_IVA;
@@ -770,6 +775,8 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
                    ni.op() == Op::NewKeysetArray ||
                    ni.op() == Op::NewVArray ||
                    ni.op() == Op::CombineAndResolveTypeStruct ||
+                   ni.op() == Op::RecordReifiedGeneric ||
+                   ni.op() == Op::ReifiedName ||
                    ni.op() == Op::ConcatN)
       ? ni.imm[0].u_IVA
       : ni.immVec.numStackValues();
@@ -973,6 +980,8 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::CnsUE:
   case Op::ColFromArray:
   case Op::CombineAndResolveTypeStruct:
+  case Op::RecordReifiedGeneric:
+  case Op::ReifiedName:
   case Op::ConcatN:
   case Op::Concat:
   case Op::ContCheck:

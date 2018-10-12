@@ -393,6 +393,13 @@ static Class* getClassByName(const char* name, int len) {
 }
 
 Variant HHVM_FUNCTION(constant, const String& name) {
+  auto const warning = "constant() is deprecated and subject"
+  " to removal from the Hack language";
+  switch (RuntimeOption::DisableConstant) {
+    case 0:  break;
+    case 1:  raise_warning(warning); break;
+    default: raise_error(warning);
+  }
   if (!name.get()) return init_null();
   const char *data = name.data();
   int len = name.length();

@@ -434,6 +434,7 @@ uint64_t RuntimeOption::UndefinedConstFallback = 0;
 uint64_t RuntimeOption::DisableAssert = 0;
 bool RuntimeOption::DisallowExecutionOperator = false;
 bool RuntimeOption::DisableVariableVariables = false;
+uint64_t RuntimeOption::DisableConstant = 0;
 
 #ifdef HHVM_DYNAMIC_EXTENSION_DIR
 std::string RuntimeOption::ExtensionDir = HHVM_DYNAMIC_EXTENSION_DIR;
@@ -1226,14 +1227,17 @@ void RuntimeOption::Load(
                  "Hack.Lang.Phpism.DisallowExecutionOperator",
                  DisallowExecutionOperator);
     Config::Bind(DisableVariableVariables, ini, config,
-                  "Hack.Lang.Phpism.DisableVariableVariables",
-                  DisableVariableVariables);
+                 "Hack.Lang.Phpism.DisableVariableVariables",
+                 DisableVariableVariables);
     Config::Bind(DisableDefine, ini, config,
                  "Hack.Lang.Phpism.DisableDefine",
                  DisableDefine);
     Config::Bind(DisableAssert, ini, config,
                  "Hack.Lang.Phpism.DisableAssert",
                  DisableAssert);
+    Config::Bind(DisableConstant, ini, config,
+                 "Hack.Lang.Phpism.DisableConstant",
+                 DisableConstant);
   }
   {
     // Repo

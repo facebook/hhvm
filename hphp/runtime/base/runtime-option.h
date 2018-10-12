@@ -519,6 +519,10 @@ struct RuntimeOption {
   // Disables PHP's variable variables
   // true => error, false => allows use of variable variables
   static bool DisableVariableVariables;
+  // Disables PHP's constant function
+  // valid values are 0 => enabled (default)
+  // 1 => warning, 2 => error
+  static uint64_t DisableConstant;
   // Disables PHP's define() function
   // valid values are 0 => enabled (default)
   // 1 => warning, 2 => error

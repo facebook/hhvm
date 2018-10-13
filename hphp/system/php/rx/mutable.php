@@ -22,4 +22,15 @@ function mutable<T>(T $obj): T {
   return $obj;
 }
 
+/*
+ * A noop implementation of what will become a builtin that allows a mutable
+ * object that is owned by the current scope to be passed to another function
+ * together with the ownership
+ */
+<<__Rx, __MutableReturn>>
+function move<T>(<<__OwnedMutable>> T $obj): T {
+  invariant(is_object($obj), 'HH\\Rx\\move() operates only on objects');
+  return $obj;
+}
+
 } // namespace

@@ -65,6 +65,9 @@ const Func* lookupMethodCtx(const Class* cls,
   } else {
     assertx(callType == CallType::ObjMethod || callType == CallType::ClsMethod);
     assertx(methodName != nullptr);
+    if (isReifiedName(methodName)) {
+      methodName = stripTypeFromReifiedName(methodName);
+    }
     method = cls->lookupMethod(methodName);
     while (!method) {
       if (UNLIKELY(methodName->isame(s___construct.get()))) {

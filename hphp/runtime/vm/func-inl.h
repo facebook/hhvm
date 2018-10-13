@@ -633,6 +633,10 @@ inline bool Func::isPhpLeafFn() const {
   return shared()->m_isPhpLeafFn;
 }
 
+inline bool Func::hasReifiedGenerics() const {
+  return shared()->m_hasReifiedGenerics;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Unit table entries.
 

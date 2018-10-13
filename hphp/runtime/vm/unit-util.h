@@ -136,11 +136,16 @@ inline std::string mangleReifiedName(
   const StringData* name,
   const std::string& tsName
 ) {
-  return folly::sformat("{}$${}", name, tsName);
+  return folly::sformat("$${}$${}", name, tsName);
 }
 
 inline bool isReifiedName(const StringData* name) {
-  return name->toCppString().find("$$<") != std::string::npos;
+  // Length larger than $$name$$<type>
+  return name->size() > 7 &&
+         name->data()[0] == '$' &&
+         name->data()[1] == '$' &&
+         folly::qfind(name->slice(), folly::StringPiece("$$<"))
+          != std::string::npos;
 }
 
 inline std::string stripClsOrFnNameFromReifiedName(const std::string& name) {
@@ -151,8 +156,9 @@ inline std::string stripClsOrFnNameFromReifiedName(const std::string& name) {
 
 inline std::string stripTypeFromReifiedName(const std::string& name) {
   auto i = name.find("$$<");
-  if (i == std::string::npos) raise_error("Not a reified name");
-  return name.substr(0, i);
+  if (i == std::string::npos || i < 2) raise_error("Not a reified name");
+  // Remove the initial $$
+  return name.substr(2, i - 2);
 }
 
 inline StringData* stripTypeFromReifiedName(const StringData* name) {

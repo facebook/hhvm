@@ -1025,6 +1025,11 @@ struct Func final {
    */
   bool isPhpLeafFn() const;
 
+  /*
+   * Does this function has reified generics?
+   */
+  bool hasReifiedGenerics() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Unit table entries.                                                [const]
 
@@ -1266,12 +1271,13 @@ private:
     bool m_isMemoizeWrapperLSB : 1;
     bool m_isPhpLeafFn : 1;
     bool m_takesNumArgs : 1;
+    bool m_hasReifiedGenerics : 1;
     // Needing more than 2 class ref slots basically doesn't happen, so just use
     // two bits normally. If we actually need more than that, we'll store the
     // count in ExtendedSharedData.
     unsigned int m_numClsRefSlots : 2;
 
-    // 19 bits of padding here in LOWPTR builds
+    // 18 bits of padding here in LOWPTR builds
 
     LowStringPtr m_retUserType;
     UserAttributeMap m_userAttributes;

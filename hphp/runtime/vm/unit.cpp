@@ -712,7 +712,22 @@ Func* Unit::loadFunc(const StringData* name) {
   if (normStr) {
     name = normStr.get();
   }
-  return loadFunc(ne, name);
+  auto func_ = loadFunc(ne, name);
+  if (LIKELY(func_ != nullptr) || !isReifiedName(name)) return func_;
+  // We are loading a reified function for the first time
+  name = stripTypeFromReifiedName(name);
+  auto generic_ne = NamedEntity::get(name, true, &normStr);
+  if (normStr) {
+    name = normStr.get();
+  }
+  func_ = loadFunc(generic_ne, name);
+  // If the function still does not exists, return null
+  if (!func_) return nullptr;
+  assertx(func_->hasReifiedGenerics());
+  ne->m_cachedFunc.bind(
+    func_->isPersistent() ? rds::Mode::Persistent : rds::Mode::Normal);
+  ne->setCachedFunc(func_);
+  return func_;
 }
 
 void Unit::bindFunc(Func *func) {

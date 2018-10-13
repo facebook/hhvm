@@ -133,6 +133,8 @@ void FuncEmitter::commit(RepoTxn& txn) const {
      .insert(*this, txn, usn, m_sn, m_pce ? m_pce->id() : -1, name, top);
 }
 
+const StaticString s___Reified("__Reified");
+
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   bool isGenerated = isdigit(name->data()[0]) || needsStripInOut(name);
 
@@ -222,6 +224,9 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     makeStaticString(RuntimeOption::SourceRoot +
                      originalFilename->toCppString());
 
+  auto m_hasReifiedGenerics =
+    userAttributes.find(s___Reified.get()) != userAttributes.end();
+
   f->shared()->m_localNames.create(m_localNames);
   f->shared()->m_numLocals = m_numLocals;
   f->shared()->m_numIterators = m_numIterators;
@@ -243,6 +248,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_isMemoizeWrapper = isMemoizeWrapper;
   f->shared()->m_isMemoizeWrapperLSB = isMemoizeWrapperLSB;
   f->shared()->m_numClsRefSlots = m_numClsRefSlots;
+  f->shared()->m_hasReifiedGenerics = m_hasReifiedGenerics;
 
   if (isNative) {
     auto const ex = f->extShared();

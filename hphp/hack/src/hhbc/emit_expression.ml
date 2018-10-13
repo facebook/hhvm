@@ -3284,8 +3284,40 @@ and emit_call_lhs_with_this env instrs = Local.scope @@ fun () ->
 and has_inout_args es =
   List.exists es ~f:(function _, A.Callconv (A.Pinout, _) -> true | _ -> false)
 
-and emit_call_lhs env outer_pos (pos, expr_ as expr) nargs has_splat inout_arg_positions =
+and emit_call_lhs
+  env outer_pos (pos, expr_ as expr) targs nargs has_splat inout_arg_positions =
   let has_inout_args = List.length inout_arg_positions <> 0 in
+  let reified_targs =
+    List.filter_map targs ~f:(function (_, false) -> None | (h, true) ->
+      Some (fst @@ emit_reified_arg env h)) in
+  let reified_call_body name =
+    gather [
+      gather reified_targs;
+      instr_string name;
+      instr_reified_name (List.length reified_targs + 1);
+    ] in
+  let reified_fun_name_call name =
+    gather [
+      reified_call_body name;
+      instr_fpushfunc nargs inout_arg_positions;
+    ] in
+  let reified_objmethod_call name nullf =
+    gather [
+      reified_call_body name;
+      instr_fpushobjmethod nargs nullf inout_arg_positions;
+    ] in
+  let reified_clsmethod_call name cid =
+    gather [
+      reified_call_body name;
+      instr_string cid;
+      instr_clsrefgetc;
+      instr_fpushclsmethod nargs [];
+    ] in
+  let reified_clsmethods_call name clsref =
+    gather [
+      reified_call_body name;
+      instr_fpushclsmethods nargs clsref;
+    ] in
   match expr_ with
   | A.Obj_get (obj, (_, A.Id ((_, str) as id)), null_flavor)
     when str.[0] = '$' ->
@@ -3305,9 +3337,12 @@ and emit_call_lhs env outer_pos (pos, expr_ as expr) nargs has_splat inout_arg_p
     gather [
       emit_object_expr env ~last_pos:outer_pos obj;
       emit_pos outer_pos;
-      instr_fpushobjmethodd nargs name null_flavor;
+      (if List.is_empty reified_targs then
+        instr_fpushobjmethodd nargs name null_flavor
+      else
+        reified_objmethod_call id null_flavor)
     ]
-  | A.Obj_get(obj, method_expr, null_flavor) ->
+  | A.Obj_get (obj, method_expr, null_flavor) ->
     gather [
       emit_pos outer_pos;
       emit_object_expr env ~last_pos:outer_pos obj;
@@ -3324,6 +3359,7 @@ and emit_call_lhs env outer_pos (pos, expr_ as expr) nargs has_splat inout_arg_p
       then Hhbc_id.Method.add_suffix method_id
         (Emit_inout_helpers.inout_suffix inout_arg_positions)
       else method_id in
+    let method_id_string = Hhbc_id.Method.to_raw_string method_id in
     let cexpr = match cexpr with
       | Class_id (_, name) ->
         Option.value ~default:cexpr (get_reified_var_cexpr env name)
@@ -3332,24 +3368,36 @@ and emit_call_lhs env outer_pos (pos, expr_ as expr) nargs has_splat inout_arg_p
     (* Statically known *)
     | Class_id cid ->
       let fq_cid, _ = Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) cid in
-      Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string fq_cid);
-      instr_fpushclsmethodd nargs method_id fq_cid
+      let fq_cid_string = Hhbc_id.Class.to_raw_string fq_cid in
+      Emit_symbol_refs.add_class fq_cid_string;
+      (if List.is_empty reified_targs then
+        instr_fpushclsmethodd nargs method_id fq_cid
+      else
+        reified_clsmethod_call method_id_string fq_cid_string)
     | Class_static ->
-      instr_fpushclsmethodsd nargs SpecialClsRef.Static method_id
+      if List.is_empty reified_targs then
+        instr_fpushclsmethodsd nargs SpecialClsRef.Static method_id
+      else reified_clsmethods_call method_id_string SpecialClsRef.Static
     | Class_self ->
-      instr_fpushclsmethodsd nargs SpecialClsRef.Self method_id
+      if List.is_empty reified_targs then
+        instr_fpushclsmethodsd nargs SpecialClsRef.Self method_id
+      else reified_clsmethods_call method_id_string SpecialClsRef.Self
     | Class_parent ->
-      instr_fpushclsmethodsd nargs SpecialClsRef.Parent method_id
+      if List.is_empty reified_targs then
+        instr_fpushclsmethodsd nargs SpecialClsRef.Parent method_id
+      else reified_clsmethods_call method_id_string SpecialClsRef.Parent
     | Class_expr (_, A.Lvar (_, x)) when x = SN.SpecialIdents.this ->
-       let method_name = Hhbc_id.Method.to_raw_string method_id in
+       let name_instrs =
+        if List.is_empty reified_targs then instr_string method_id_string
+        else reified_call_body method_id_string in
        gather [
-         emit_call_lhs_with_this env @@ instr_string method_name;
+         emit_call_lhs_with_this env name_instrs;
          instr_fpushclsmethod nargs []
        ]
     | _ ->
-      let method_name = Hhbc_id.Method.to_raw_string method_id in
+      (* TODO(T31677864): Implement reification here *)
       gather [
-        of_pair @@ emit_class_expr env cexpr (Pos.none, A.Id (Pos.none, method_name));
+        of_pair @@ emit_class_expr env cexpr (Pos.none, A.Id (Pos.none, method_id_string));
         instr_fpushclsmethod nargs []
       ]
     end
@@ -3403,12 +3451,16 @@ and emit_call_lhs env outer_pos (pos, expr_ as expr) nargs has_splat inout_arg_p
       else fq_id in
     emit_pos_then outer_pos @@
     begin match id_opt with
+    | _ when not @@ List.is_empty reified_targs ->
+      reified_fun_name_call (Hhbc_id.Function.to_raw_string fq_id)
     | Some id -> instr (ICall (FPushFuncU (nargs, fq_id, id)))
     | None -> instr (ICall (FPushFuncD (nargs, fq_id)))
     end
   | A.String s ->
     emit_pos_then outer_pos @@
-    instr_fpushfuncd nargs (Hhbc_id.Function.from_raw_string s)
+    (if List.is_empty reified_targs then
+      instr_fpushfuncd nargs (Hhbc_id.Function.from_raw_string s)
+     else reified_fun_name_call s)
   | _ ->
     gather [
       emit_expr ~need_ref:false env expr;
@@ -3579,7 +3631,7 @@ and emit_call env pos (_, expr_ as expr) targs args uargs async_eager_label =
     gather [
       gather @@ List.init num_uninit ~f:(fun _ -> instr_nulluninit);
       emit_call_lhs
-        env pos expr nargs (not (List.is_empty uargs)) inout_arg_positions;
+        env pos expr targs nargs (not (List.is_empty uargs)) inout_arg_positions;
       emit_args_and_call env pos reified_targs args uargs async_eager_label;
     ], flavor in
 

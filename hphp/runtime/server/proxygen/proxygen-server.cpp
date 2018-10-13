@@ -224,7 +224,7 @@ ProxygenServer::ProxygenServer(
 ProxygenServer::~ProxygenServer() {
   Logger::Verbose("%p: destroying ProxygenServer", this);
   waitForEnd();
-  Logger::Verbose("%p: ProxygenServer destroyed", this);
+  Logger::Info("%p: ProxygenServer destroyed", this);
 }
 
 int ProxygenServer::onTakeoverRequest(TakeoverAgent::RequestType type) {

@@ -893,6 +893,12 @@ void preloadRepo() {
   }
 }
 
+void clearUnitCacheForExit() {
+  s_nonRepoUnitCache.clear();
+  s_repoUnitCache.clear();
+  s_perUserUnitCaches.clear();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }

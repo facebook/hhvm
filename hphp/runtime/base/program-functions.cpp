@@ -2861,6 +2861,7 @@ void hphp_process_exit() noexcept {
   LOG_AND_IGNORE(folly::SingletonVault::singleton()->destroyInstances())
   LOG_AND_IGNORE(embedded_data_cleanup())
   LOG_AND_IGNORE(Debug::destroyDebugInfo())
+  LOG_AND_IGNORE(clearUnitCacheForExit())
 #undef LOG_AND_IGNORE
 }
 

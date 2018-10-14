@@ -106,6 +106,14 @@ String resolveVmInclude(StringData* path,
 
 void preloadRepo();
 
+/*
+ * Needed to avoid order of destruction issues. Destroying the unit
+ * caches destroys the units, which destroys the classes, which tries
+ * to grab global mutexes, which can fail if the mutexes have already
+ * been destroyed.
+ */
+void clearUnitCacheForExit();
+
 //////////////////////////////////////////////////////////////////////
 
 }

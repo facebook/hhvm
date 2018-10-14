@@ -689,10 +689,19 @@ and save_and_merge_next_in_catch env =
     then LEnv.save_and_merge_next_in_cont env C.Catch
     else env
 
+and gather_defined_in_block env b =
+  let locals = Typing_gather_defined.block env b in
+  Env.env_with_locals env locals
+
+and gather_defined_in_expr env e =
+  let locals = Typing_gather_defined.expr env e in
+  Env.env_with_locals env locals
+
 and stmt env = function
   | Unsafe_block b ->
     (* Do not run inference on the block, since unsafe is sometimes used to work
        around inference performance problems. *)
+    let env = gather_defined_in_block env b in
     let tcopt = Env.get_tcopt env in
     let tb = NastTanyMapper.map_block (ntm_env tcopt) b in
     env, T.Unsafe_block tb
@@ -2545,6 +2554,7 @@ and expr_
   | Unsafe_expr e ->
     (* Do not run inference on the expression, since unsafe is sometimes used to
        work around inference performance problems. *)
+    let env = gather_defined_in_expr env e in
     let tcopt = Env.get_tcopt env in
     let te = NastTanyMapper.map_expr (ntm_env tcopt) e in
     make_result env (T.Unsafe_expr te) (Reason.Rnone, Tany)

@@ -46,6 +46,11 @@ val save_and_merge_next_in_cont :
 val move_and_merge_next_in_cont :
   Typing_env.env ->
   Typing_continuations.t -> Typing_env.env
+val union:
+  Typing_env.env ->
+  Typing_env.local ->
+  Typing_env.local ->
+  Typing_env.env * Typing_env.local
 val union_by_cont :
   Typing_env.env ->
   Typing_env.local_env ->

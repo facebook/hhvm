@@ -11,6 +11,8 @@ open Core_kernel
 open Ast
 open Namespace_env
 
+module SN = Naming_special_names
+
 (* When dealing with an <?hh file, HHVM automatically imports a few
  * "core" classes into every namespace, mostly collections. Their
  * unqualified names always refer to this global version.
@@ -117,10 +119,10 @@ let autoimport_set =
  * Return false as first value if it is not auto imported
  *)
 let get_autoimport_name_namespace id =
-  if Naming_special_names.Typehints.is_reserved_global_name id
+  if SN.Typehints.is_reserved_global_name id
   then (true, None)
   else
-  if Naming_special_names.Typehints.is_reserved_hh_name id ||
+  if SN.Typehints.is_reserved_hh_name id ||
      SSet.mem id autoimport_set
   then (true, Some "HH")
   else (false, None)
@@ -204,6 +206,10 @@ let elaborate_id_impl ~autoimport nsenv kind (p, id) =
   else
   let was_renamed, fully_qualified =
     begin
+      let global_id = Utils.add_ns id in
+      if kind = ElaborateConst && SN.PseudoConsts.is_pseudo_const global_id
+      then false, global_id
+      else
       (* Expand "use" imports. *)
       let (bslash_loc, has_bslash) =
         match String.index id '\\' with

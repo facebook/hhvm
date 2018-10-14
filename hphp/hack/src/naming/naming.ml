@@ -493,44 +493,6 @@ end = struct
   let get_name genv get_pos x =
     lookup genv get_pos x; x
 
-  (* For dealing with namespace fallback on constants *)
-  let elaborate_and_get_name_with_fallback
-    mk_dep
-    genv
-    (get_pos : string -> FileInfo.pos option) x =
-    let get_name x = get_name genv get_pos x in
-    let fq_x = NS.elaborate_id genv.namespace NS.ElaborateConst x in
-    let need_fallback =
-      genv.namespace.Namespace_env.ns_name <> None &&
-      not (String.contains (snd x) '\\') in
-    let use_fallback =
-      need_fallback &&
-      (* __FILE__, __LINE__ etc *)
-      (string_starts_with (snd x) "__") && (string_ends_with (snd x) "__") in
-    if use_fallback then begin
-      let global_x = (fst x, "\\" ^ (snd x)) in
-      (* Explicitly add dependencies on both of the consts we could be
-       * referring to here. Normally naming doesn't have to deal with
-       * deps at all -- they are added during typechecking just by the
-       * nature of looking up a class or function name. However, we're
-       * flattening namespaces here, and the fallback behavior of
-       * consts means that we might suddenly be referring to a
-       * different const without any change to the callsite at
-       * all. Adding both dependencies explicitly captures this
-       * action-at-a-distance. *)
-      Typing_deps.add_idep genv.droot (mk_dep (snd fq_x));
-      Typing_deps.add_idep genv.droot (mk_dep (snd global_x));
-      let mem (_, s) = get_pos s in
-      match mem fq_x, mem global_x with
-      (* Found in the current namespace *)
-      | Some _, _ -> get_name fq_x
-      (* Found in the global namespace *)
-      | _, Some _ -> get_name global_x
-      (* Not found. Pick the more specific one to error on. *)
-      | None, None -> get_name fq_x
-    end else
-      get_name fq_x
-
   (* For dealing with namespace resolution on functions *)
   let elaborate_and_get_name_with_canonicalized_fallback
       genv
@@ -543,13 +505,9 @@ end = struct
     let fq_x = canonicalize fq_x `func in
     get_name fq_x
 
-  let global_const (genv, _env) x  =
-    elaborate_and_get_name_with_fallback
-      (* Same idea as Dep.FunName, see below. *)
-      (fun x -> Typing_deps.Dep.GConstName x)
-      genv
-      (Naming_heap.ConstPosHeap.get)
-      x
+  let global_const (genv, _env) x =
+    let fq_x = NS.elaborate_id genv.namespace NS.ElaborateConst x in
+    get_name genv (Naming_heap.ConstPosHeap.get) fq_x
 
   let type_name (genv, _) x ~allow_typedef =
     (* Generic names are not allowed to shadow class names *)
@@ -2916,11 +2874,19 @@ module Make (GetLocals : GetLocals) = struct
     | None
     | Some _ -> ()
 
+  let check_constant_name genv cst =
+    if genv.namespace.Namespace_env.ns_name <> None then
+      let pos, name = cst.cst_name in
+      let name = Utils.strip_all_ns name in
+      if SN.PseudoConsts.is_pseudo_const (Utils.add_ns name) then
+        Errors.name_is_reserved name pos
+
   let global_const genv cst =
     let env = Env.make_const_env genv cst in
     let hint = Option.map cst.cst_type (hint env) in
     let e = match cst.cst_kind with
     | Ast.Cst_const ->
+      check_constant_name (fst env) cst;
       check_constant_hint cst;
       Some (constant_expr env cst.cst_value)
     (* Define allows any expression, so don't call check_constant.

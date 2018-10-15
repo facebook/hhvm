@@ -332,6 +332,7 @@ let actually_handle genv client msg full_recheck_needed ~is_stale = fun env ->
   | Rpc cmd ->
       ClientProvider.ping client;
       let t = Unix.gettimeofday () in
+      Sys_utils.start_gc_profiling ();
       let new_env, response = try
         ServerRpc.handle ~is_stale genv env cmd
       with e ->
@@ -340,7 +341,9 @@ let actually_handle genv client msg full_recheck_needed ~is_stale = fun env ->
         else raise (Nonfatal_rpc_exception (e, stack, env))
       in
       let cmd_string = ServerCommandTypesUtils.debug_describe_t cmd in
-      HackEventLogger.handled_command cmd_string t;
+      let major_gc_time, minor_gc_time = Sys_utils.get_gc_time () in
+      HackEventLogger.handled_command cmd_string
+        ~start_t:t ~major_gc_time ~minor_gc_time;
       ClientProvider.send_response_to_client client response t;
       if ServerCommandTypes.is_disconnect_rpc cmd ||
           not @@ (ClientProvider.is_persistent client)

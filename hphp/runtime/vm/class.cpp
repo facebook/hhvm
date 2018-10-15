@@ -57,6 +57,7 @@ const StaticString s_86cinit("86cinit");
 const StaticString s_86pinit("86pinit");
 const StaticString s_86sinit("86sinit");
 const StaticString s_86linit("86linit");
+const StaticString s_86reified_prop("86reified_prop");
 const StaticString s___destruct("__destruct");
 const StaticString s___OptionalDestruct("__OptionalDestruct");
 const StaticString s___MockClass("__MockClass");
@@ -1971,6 +1972,7 @@ Class::Class(PreClass* preClass, Class* parent,
   setInterfaces();
   setConstants();
   setProperties();    // must run before setInitializers
+  setReifiedData();
   setInitializers();
   setClassVec();
   setRequirements();
@@ -1983,13 +1985,6 @@ Class::Class(PreClass* preClass, Class* parent,
   // we'll fatal trying to define that class, so this has to happen after all
   // of those fatals could be thrown.
   setInterfaceVtables();
-
-  auto const ua = m_preClass->userAttributes();
-  if (ua.find(s___Reified.get()) != ua.end()) m_hasReifiedGenerics = true;
-  if (m_parent.get() != nullptr) {
-    m_hasReifiedParent = m_parent->m_hasReifiedGenerics ||
-                         m_parent->m_hasReifiedParent;
-  }
 }
 
 void Class::methodOverrideCheck(const Func* parentMethod, const Func* method) {
@@ -3023,6 +3018,15 @@ void Class::addTraitPropInitializers(std::vector<const Func*>& thisInitVec,
       f->setHasPrivateAncestor(false);
       thisInitVec.push_back(f);
     }
+  }
+}
+
+void Class::setReifiedData() {
+  auto const ua = m_preClass->userAttributes();
+  if (ua.find(s___Reified.get()) != ua.end()) m_hasReifiedGenerics = true;
+  if (m_parent.get() != nullptr) {
+    m_hasReifiedParent = m_parent->m_hasReifiedGenerics ||
+                         m_parent->m_hasReifiedParent;
   }
 }
 

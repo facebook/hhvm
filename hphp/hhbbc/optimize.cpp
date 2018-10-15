@@ -261,6 +261,7 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::CombineAndResolveTypeStruct:
   case Op::RecordReifiedGeneric:
   case Op::ReifiedName:
+  case Op::ReifiedGeneric:
   case Op::InstanceOf:
   case Op::Print:
   case Op::Exit:

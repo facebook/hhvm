@@ -117,11 +117,12 @@ bool CallSpec::verifySignature(const CallDest& dest,
     } else if (!(args[argi] <= param)) {
       // A few instructions pass Cls|Nullptr to helpers that take
       // Class*. Handle that special case here.
-      if (!(param <= TCls && args[argi].maybe(TNullptr))) {
-        fail(
-          "Incompatible type {} for {} parameter {}", args[argi], param, parami
-        );
-      }
+      if (param <= TCls && args[argi].maybe(TNullptr)) continue;
+      // Similarly for ArrayData|NullPtr|TSOrTrash
+      if (param <= TArrLike && args[argi].maybe(TNullptr|TTSOrTrash)) continue;
+      fail(
+        "Incompatible type {} for {} parameter {}", args[argi], param, parami
+      );
     }
   }
 

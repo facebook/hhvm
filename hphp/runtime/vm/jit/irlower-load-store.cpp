@@ -175,6 +175,9 @@ const Func* funcFromFp(const SSATmp* fp) {
 
 }
 
+IMPL_OPCODE_CALL(IsReifiedName)
+IMPL_OPCODE_CALL(LdReifiedGeneric)
+
 void cgLdClsRefCls(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();

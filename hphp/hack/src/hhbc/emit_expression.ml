@@ -797,8 +797,7 @@ and emit_conditional_expression env pos etest etrue efalse =
 and emit_new env pos expr targs args uargs =
   let reified_targs = List.filter_map targs
     ~f:(function (_, false) -> None | (h, true) -> Some h) in
-  let nargs =
-    List.length reified_targs + List.length args + List.length uargs in
+  let nargs = List.length args + List.length uargs in
   let cexpr = expr_to_class_expr ~resolve_self:true
     (Emit_env.get_scope env) expr in
   let cexpr = match cexpr with
@@ -829,35 +828,35 @@ and emit_new env pos expr targs args uargs =
     gather [
       emit_pos pos;
       instr_fpushctord nargs fq_id;
-      emit_args_and_call env pos reified_targs args uargs None;
+      emit_args_and_call env pos [] args uargs None;
       instr_popr
       ]
   | Class_static ->
     gather [
       emit_pos pos;
       instr_fpushctors nargs SpecialClsRef.Static;
-      emit_args_and_call env pos reified_targs args uargs None;
+      emit_args_and_call env pos [] args uargs None;
       instr_popr
       ]
   | Class_self ->
     gather [
       emit_pos pos;
       instr_fpushctors nargs SpecialClsRef.Self;
-      emit_args_and_call env pos reified_targs args uargs None;
+      emit_args_and_call env pos [] args uargs None;
       instr_popr
       ]
   | Class_parent ->
     gather [
       emit_pos pos;
       instr_fpushctors nargs SpecialClsRef.Parent;
-      emit_args_and_call env pos reified_targs args uargs None;
+      emit_args_and_call env pos [] args uargs None;
       instr_popr
       ]
   | _ ->
     gather [
       emit_load_class_ref env pos cexpr;
       instr_fpushctor nargs 0;
-      emit_args_and_call env pos reified_targs args uargs None;
+      emit_args_and_call env pos [] args uargs None;
       instr_popr
     ]
 
@@ -1750,14 +1749,9 @@ and get_reified_var_cexpr env name =
 and emit_reified_type_opt env name =
   if Option.is_some @@ is_reified_tparam ~is_fun:true env name then
     Some (instr_cgetl (Local.Named (SU.Reified.mangle_reified_param name)))
-  else if Option.is_some @@ is_reified_tparam ~is_fun:false env name then
-    (* $this->reified_var *)
-    let p = Pos.none in
-    let expr = p, A.Lvar (p, "$this") in
-    let prop = p, A.Id (p, SU.Reified.mangle_reified_param ~nodollar:true name) in
-    let expr = p, A.Obj_get (expr, prop, A.OG_nullthrows) in
-    Some (emit_expr ~need_ref:false env expr)
-  else None
+  else
+    Option.map ~f:(instr_reified_generic ClsGeneric)
+      (is_reified_tparam ~is_fun:false env name)
 
 and emit_reified_type env name =
   match emit_reified_type_opt env name with

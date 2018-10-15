@@ -869,9 +869,11 @@ void emitFPushCufIter(IRGS& env, uint32_t numParams, int32_t itId) {
 }
 
 void emitFPushCtor(IRGS& env, uint32_t numParams, uint32_t slot) {
-  auto const cls  = takeClsRefCls(env, slot);
+  auto const clsref = takeClsRef(env, slot);
+  auto const reified_generic = clsref.first;
+  auto const cls  = clsref.second;
   auto const func = gen(env, LdClsCtor, cls, fp(env));
-  auto const obj  = gen(env, AllocObj, cls);
+  auto const obj  = gen(env, AllocObjMaybeReified, cls, reified_generic);
   pushIncRef(env, obj);
   fpushActRec(env, func, obj, numParams, nullptr, cns(env, true));
 }

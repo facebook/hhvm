@@ -1578,6 +1578,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     // AllocObj re-enters to call constructors, but if it weren't for that we
     // could ignore its loads and stores since it's a new object.
     return may_reenter(inst, may_load_store(AEmpty, AEmpty));
+  case AllocObjMaybeReified:
+    // Similar to AllocObj but also stores the reification
+    return may_reenter(inst, may_load_store(AEmpty, AHeapAny));
 
   //////////////////////////////////////////////////////////////////////
   // Instructions that explicitly manipulate the stack.
@@ -1774,6 +1777,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckCtxThis:
   case CheckFuncStatic:
   case IsFuncDynCallable:
+  case IsReifiedName:
   case LdARNumParams:
   case LdRDSAddr:
   case ExitPlaceholder:
@@ -2167,6 +2171,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case AddNewElemVec:
   case IsTypeStruct:
+  case LdReifiedGeneric:
     return may_load_store(AElemAny, AEmpty);
 
   case ConvArrToKeyset: // Decrefs input values

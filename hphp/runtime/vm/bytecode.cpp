@@ -50,6 +50,7 @@
 #include "hphp/runtime/base/hhprof.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/rds.h"
@@ -92,6 +93,7 @@
 
 #include "hphp/runtime/vm/act-rec-defs.h"
 #include "hphp/runtime/vm/act-rec.h"
+#include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/event-hook.h"
@@ -211,6 +213,7 @@ inline const char* prettytype(SetRangeOp) { return "SetRangeOp"; }
 inline const char* prettytype(TypeStructResolveOp) {
   return "TypeStructResolveOp";
 }
+inline const char* prettytype(ReifiedGenericOp) { return "ReifiedGenericOp"; }
 inline const char* prettytype(FPassHint) { return "FPassHint"; }
 inline const char* prettytype(CudOp) { return "CudOp"; }
 inline const char* prettytype(ContCheckOp) { return "ContCheckOp"; }
@@ -274,18 +277,18 @@ struct clsref_slot {
   cls_ref* ptr;
   uint32_t index;
 
-  Class* take() const {
-    auto ret = ptr->cls;
+  std::pair<ArrayData*, Class*> take() const {
+    auto cls = ptr->cls;
+    auto ret = std::make_pair(ptr->reified_types, cls.get());
     if (debug) {
-      ret->validate();
+      cls->validate();
       memset(ptr, kTrashClsRef, sizeof(*ptr));
     }
-    return ret.get();
+    return ret;
   }
 
-  void put(Class* cls) {
-    ptr->cls = cls;
-    if (debug) memset(&ptr->reified_types, kTrashClsRef, sizeof(ArrayData*));
+  void put(ArrayData* reified_types, Class* cls) {
+    *ptr = cls_ref{reified_types, cls};
   }
 };
 
@@ -2063,7 +2066,7 @@ OPTBLD_INLINE void iopMethod() {
 }
 
 OPTBLD_INLINE void iopClsRefName(clsref_slot slot) {
-  auto const cls  = slot.take();
+  auto const cls  = slot.take().second;
   auto const name = cls->name();
   vmStack().pushStaticString(name);
 }
@@ -2363,7 +2366,7 @@ OPTBLD_INLINE void iopDefCns(const StringData* s) {
 }
 
 OPTBLD_INLINE void iopClsCns(const StringData* clsCnsName, clsref_slot slot) {
-  auto const cls    = slot.take();
+  auto const cls    = slot.take().second;
   auto const clsCns = cls->clsCnsGet(clsCnsName);
 
   if (clsCns.m_type == KindOfUninit) {
@@ -2803,6 +2806,38 @@ OPTBLD_INLINE void iopReifiedName(uint32_t n) {
   vmStack().popC();
   vmStack().ndiscard(n-1);
   vmStack().pushStaticString(makeStaticString(mangledName));
+}
+
+OPTBLD_INLINE void iopReifiedGeneric(ReifiedGenericOp op, uint32_t n) {
+  if (op == ReifiedGenericOp::FunGeneric) {
+    // TODO(T31677864): Implement it for functions
+    not_implemented();
+  }
+  Class* cls = arGetContextClass(vmfp());
+  if (!cls) {
+    raise_error(
+      "Cannot access reified class generic when no class scope is active");
+  }
+  if (!cls->hasReifiedGenerics()) {
+    raise_error("%s has no reified generics", cls->name()->data());
+  }
+
+  auto const this_ = vmfp()->getThis();
+  auto const slot = cls->lookupReifiedInitProp();
+  assertx(slot != kInvalidSlot);
+  auto tv = this_->propVec()[slot];
+  assertx(RuntimeOption::EvalHackArrDVArrs ? tvIsVec(tv) : tvIsArray(tv));
+  auto reifiedTypes = tv.m_data.parr;
+  if (n >= reifiedTypes->size()) {
+    raise_error("There is no reified generic at index %u", n);
+  }
+  auto const rg = reifiedTypes->rval(n);
+  assertx(isArrayType(rg.type()));
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    vmStack().pushStaticDict(rg.val().parr);
+  } else {
+    vmStack().pushStaticArray(rg.val().parr);
+  }
 }
 
 OPTBLD_INLINE void iopPrint() {
@@ -3394,12 +3429,13 @@ OPTBLD_INLINE void iopThrow() {
 OPTBLD_INLINE void iopClsRefGetC(clsref_slot slot) {
   auto const cell = vmStack().topC();
   auto const cls  = lookupClsRef(cell);
-  slot.put(cls);
+  ArrayData* reified_types = getReifiedGenericsOpt(*cell);
+  slot.put(reified_types, cls);
   vmStack().popC();
 }
 
 OPTBLD_INLINE void iopClsRefGetL(local_var fr, clsref_slot slot) {
-  slot.put(lookupClsRef(tvToCell(fr.ptr)));
+  slot.put(nullptr, lookupClsRef(tvToCell(fr.ptr)));
 }
 
 static void raise_undefined_local(ActRec* fp, Id pind) {
@@ -3517,7 +3553,7 @@ struct SpropState {
 };
 
 SpropState::SpropState(Stack& vmstack, clsref_slot cslot, bool ignoreLateInit) {
-  cls = cslot.take();
+  cls = cslot.take().second;
   auto nameCell = output = vmstack.topTV();
   lookup_sprop(vmfp(), cls, name, nameCell, val,
                slot, visible, accessible, ignoreLateInit);
@@ -3622,7 +3658,7 @@ OPTBLD_INLINE void iopBaseGL(local_var loc, MOpMode mode) {
 static inline tv_lval baseSImpl(TypedValue* key,
                                 clsref_slot slot,
                                 MOpMode mode) {
-  auto const class_ = slot.take();
+  auto const class_ = slot.take().second;
 
   auto const name = lookup_name(key);
   SCOPE_EXIT { decRefStr(name); };
@@ -4670,7 +4706,7 @@ OPTBLD_INLINE void iopSetG() {
 
 OPTBLD_INLINE void iopSetS(clsref_slot cslot) {
   TypedValue* tv1 = vmStack().topTV();
-  Class* cls = cslot.take();
+  Class* cls = cslot.take().second;
   TypedValue* propn = vmStack().indTV(1);
   TypedValue* output = propn;
   StringData* name;
@@ -4737,7 +4773,7 @@ OPTBLD_INLINE void iopSetOpG(SetOpOp op) {
 
 OPTBLD_INLINE void iopSetOpS(SetOpOp op, clsref_slot cslot) {
   Cell* fr = vmStack().topC();
-  Class* cls = cslot.take();
+  Class* cls = cslot.take().second;
   TypedValue* propn = vmStack().indTV(1);
   TypedValue* output = propn;
   StringData* name;
@@ -4888,7 +4924,7 @@ OPTBLD_INLINE void iopBindG() {
 
 OPTBLD_INLINE void iopBindS(clsref_slot cslot) {
   TypedValue* fr = vmStack().topTV();
-  Class* cls = cslot.take();
+  Class* cls = cslot.take().second;
   TypedValue* propn = vmStack().indTV(1);
   TypedValue* output = propn;
   StringData* name;
@@ -5411,7 +5447,7 @@ OPTBLD_INLINE void iopFPushClsMethod(uint32_t numArgs, clsref_slot slot,
   if (!isStringType(c1->m_type)) {
     raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
   }
-  auto const cls = slot.take();
+  auto const cls = slot.take().second;
   auto name = c1->m_data.pstr;
 
   if (UNLIKELY(args.size)) {
@@ -5475,13 +5511,15 @@ OPTBLD_INLINE void iopFPushClsMethodSD(uint32_t numArgs,
 
 namespace {
 
-void fpushCtorImpl(uint32_t numArgs, Class* cls, bool dynamic) {
+void fpushCtorImpl(
+  uint32_t numArgs, Class* cls, ArrayData* reified_types, bool dynamic
+) {
   const Func* f;
   auto const res UNUSED =
     lookupCtorMethod(f, cls, arGetContextClass(vmfp()), true);
   assertx(res == LookupResult::MethodFoundWithThis);
   // Replace input with uninitialized instance.
-  auto this_ = newInstance(cls);
+  auto this_ = newInstanceMaybeReified(cls, reified_types);
   TRACE(2, "FPushCtor: just new'ed an instance of class %s: %p\n",
         cls->name()->data(), this_);
   vmStack().pushObject(this_);
@@ -5497,7 +5535,8 @@ void fpushCtorImpl(uint32_t numArgs, Class* cls, bool dynamic) {
 }
 
 OPTBLD_INLINE void iopFPushCtor(uint32_t numArgs, clsref_slot slot) {
-  fpushCtorImpl(numArgs, slot.take(), true);
+  auto cls_ref = slot.take();
+  fpushCtorImpl(numArgs, cls_ref.second, cls_ref.first, true);
 }
 
 OPTBLD_INLINE void iopFPushCtorD(uint32_t numArgs, Id id) {
@@ -5508,18 +5547,19 @@ OPTBLD_INLINE void iopFPushCtorD(uint32_t numArgs, Id id) {
     raise_error(Strings::UNKNOWN_CLASS,
                 vmfp()->m_func->unit()->lookupLitstrId(id)->data());
   }
-  fpushCtorImpl(numArgs, cls, false);
+  fpushCtorImpl(numArgs, cls, nullptr, false);
 }
 
 OPTBLD_INLINE void iopFPushCtorI(uint32_t numArgs, uint32_t clsIx) {
   auto const func = vmfp()->m_func;
   auto const preCls = func->unit()->lookupPreClassId(clsIx);
   auto const cls = Unit::defClass(preCls, true);
-  fpushCtorImpl(numArgs, cls, false);
+  fpushCtorImpl(numArgs, cls, nullptr, false);
 }
 
 OPTBLD_INLINE void iopFPushCtorS(uint32_t numArgs, SpecialClsRef ref) {
-  fpushCtorImpl(numArgs, specialClsRefToCls(ref), false);
+  // TODO(T31677864): implement reification for `new static` etc...
+  fpushCtorImpl(numArgs, specialClsRefToCls(ref), nullptr, false);
 }
 
 OPTBLD_INLINE
@@ -6286,7 +6326,7 @@ OPTBLD_INLINE void iopLateBoundCls(clsref_slot slot) {
   if (!cls) {
     raise_error(HPHP::Strings::CANT_ACCESS_STATIC);
   }
-  slot.put(cls);
+  slot.put(nullptr, cls);
 }
 
 OPTBLD_INLINE void iopVerifyParamType(local_var param) {
@@ -6370,7 +6410,7 @@ OPTBLD_INLINE void iopSelf(clsref_slot slot) {
   if (!clss) {
     raise_error(HPHP::Strings::CANT_ACCESS_SELF);
   }
-  slot.put(clss);
+  slot.put(nullptr, clss);
 }
 
 OPTBLD_INLINE void iopParent(clsref_slot slot) {
@@ -6382,7 +6422,7 @@ OPTBLD_INLINE void iopParent(clsref_slot slot) {
   if (!parent) {
     raise_error(HPHP::Strings::CANT_ACCESS_PARENT_WHEN_NO_PARENT);
   }
-  slot.put(parent);
+  slot.put(nullptr, parent);
 }
 
 OPTBLD_INLINE void iopCreateCl(uint32_t numArgs, uint32_t clsIx) {

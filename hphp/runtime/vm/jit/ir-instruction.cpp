@@ -249,6 +249,7 @@ Type allocObjReturn(const IRInstruction* inst) {
       return Type::ExactObj(inst->extra<NewInstanceRaw>()->cls);
 
     case AllocObj:
+    case AllocObjMaybeReified:
       return inst->src(0)->hasConstVal()
         ? Type::ExactObj(inst->src(0)->clsVal())
         : TObj;

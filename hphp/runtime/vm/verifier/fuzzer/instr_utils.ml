@@ -153,6 +153,7 @@ let stk_data : instruct -> stack_sig = function
   | IIsset IsTypeL _
   | IMutator IncDecL _
   | IMutator CheckProp _
+  | IMisc ReifiedGeneric _
   | IMisc This
   | IMisc BareThis _
   | IMisc StaticLocCheck _

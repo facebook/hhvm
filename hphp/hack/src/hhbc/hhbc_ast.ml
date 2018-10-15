@@ -176,6 +176,10 @@ type typestruct_resolve_op =
   | Resolve
   | DontResolve
 
+type reified_generic_op =
+  | ClsGeneric
+  | FunGeneric
+
 type instruct_lit_const =
   | Null
   | True
@@ -528,6 +532,7 @@ type instruct_misc =
   | LateBoundCls of classref_id
   | ClsRefName of classref_id
   | ReifiedName of int
+  | ReifiedGeneric of reified_generic_op * int
   | RecordReifiedGeneric of int
   | NativeImpl
   | AKExists

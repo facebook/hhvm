@@ -20,6 +20,8 @@
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/reified-generics.h"
+#include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/set-array.h"
@@ -30,10 +32,50 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-void implClsRefGet(IRGS& env, SSATmp* classSrc, uint32_t slot) {
+void emitClsRefWithReifiedGenerics(
+  IRGS& env, SSATmp* cls, const StringData* name, uint32_t slot
+) {
+  auto ts =
+    getReifiedTypeList(stripClsOrFnNameFromReifiedName(name->toCppString()));
+  putClsRef(env, slot, cls, cns(env, ts));
+}
+
+void implClsRefGet(IRGS& env, SSATmp* classSrc, uint32_t slot, bool cflavor) {
   auto const cls = (classSrc->type() <= TStr)
     ? ldCls(env, classSrc)
     : gen(env, LdObjClass, classSrc);
+  if (cflavor) {
+    if (cls->hasConstVal()) {
+      auto const clsval = cls->clsVal();
+      auto name = clsval->name();
+      if (clsval->hasReifiedGenerics() && isReifiedName(name)) {
+        emitClsRefWithReifiedGenerics(env, cls, name, slot);
+        return;
+      }
+    } else if (classSrc->hasConstVal(TStr)) {
+      auto const name = classSrc->strVal();
+      if (isReifiedName(name)) {
+        emitClsRefWithReifiedGenerics(env, cls, name, slot);
+        return;
+      }
+    } else {
+      if (classSrc->isA(TStr)) {
+        ifThenElse(
+          env,
+          [&] (Block* taken) {
+            auto const isreified = gen(env, IsReifiedName, classSrc);
+            gen(env, JmpZero, taken, isreified);
+          },
+          [&] {
+            auto ts = gen(env, LdReifiedGeneric, classSrc);
+            putClsRef(env, slot, cls, ts);
+          },
+          [&] { putClsRef(env, slot, cls); }
+        );
+        return;
+      }
+    }
+  }
   putClsRef(env, slot, cls);
 }
 
@@ -45,7 +87,7 @@ void emitClsRefGetC(IRGS& env, uint32_t slot) {
   auto const name = topC(env);
   if (name->type().subtypeOfAny(TObj, TStr)) {
     popC(env);
-    implClsRefGet(env, name, slot);
+    implClsRefGet(env, name, slot, true);
     decRef(env, name);
   } else {
     interpOne(env, *env.currentNormalizedInstruction);
@@ -57,7 +99,7 @@ void emitClsRefGetL(IRGS& env, int32_t id, uint32_t slot) {
   auto const ldPMExit = makePseudoMainExit(env);
   auto const src = ldLocInner(env, id, ldrefExit, ldPMExit, DataTypeSpecific);
   if (src->type().subtypeOfAny(TObj, TStr)) {
-    implClsRefGet(env, src, slot);
+    implClsRefGet(env, src, slot, false);
   } else {
     PUNT(ClsRefGetL);
   }

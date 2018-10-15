@@ -146,6 +146,10 @@ let string_of_typestruct_resolve_op = function
   | Resolve -> "Resolve"
   | DontResolve -> "DontResolve"
 
+let string_of_reifiedgeneric_op = function
+  | ClsGeneric -> "ClsGeneric"
+  | FunGeneric -> "FunGeneric"
+
 let string_of_operator instruction =
   match instruction with
     | Concat -> "Concat"
@@ -565,6 +569,8 @@ let string_of_misc instruction =
     | LateBoundCls id -> sep ["LateBoundCls"; string_of_classref id]
     | ClsRefName id -> sep ["ClsRefName"; string_of_classref id]
     | ReifiedName n -> sep ["ReifiedName"; string_of_int n]
+    | ReifiedGeneric (op, n) ->
+      sep ["ReifiedGeneric"; string_of_reifiedgeneric_op op; string_of_int n]
     | RecordReifiedGeneric n -> sep ["RecordReifiedGeneric"; string_of_int n]
     | VerifyParamType id -> sep ["VerifyParamType"; string_of_param_id id]
     | VerifyOutType id -> sep ["VerifyOutType"; string_of_param_id id]

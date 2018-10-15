@@ -4060,6 +4060,13 @@ ReifiedName <num args> [C:Str C..C] -> [C:Str]
   This instruction also performs RecordReifiedGeneric instruction's recording
   duty but it can be implemented more efficiently subsumed in this instruction.
 
+ReifiedGeneric <op> <id>     []   ->   [C:Arr|Dict]
+
+  Returns the reified generic at the index id for the current class or function,
+  determined by the op. This instruction throws a fatal error if the op is
+  ClsGeneric and the current method is defined outside of a class or if the
+  class or method, depending on op, does not have a reified generic at index id.
+
 NativeImpl    []  ->  []
 
   Native implementation. This instruction invokes the native implementation

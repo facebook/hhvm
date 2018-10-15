@@ -302,6 +302,7 @@ bool opcodeMayRaise(Opcode opc) {
   case AFWHPrepareChild:
   case AKExistsObj:
   case AllocObj:
+  case AllocObjMaybeReified:
   case ArrayAdd:
   case ArrayGet:
   case ArraySet:
@@ -428,6 +429,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdClsCtor:
   case LdClsPropAddrOrNull:
   case LdClsPropAddrOrRaise:
+  case LdReifiedGeneric:
   case LdClsTypeCns:
   case LdFunc:
   case LdFuncCached:
@@ -758,6 +760,7 @@ bool opcodeMayRaise(Opcode opc) {
   case IsCol:
   case IsDVArray:
   case IsFuncDynCallable:
+  case IsReifiedName:
   case IsNType:
   case IsNTypeMem:
   case IsType:

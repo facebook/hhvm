@@ -383,6 +383,16 @@ enum class TypeStructResolveOp : uint8_t {
 #undef OP
 };
 
+#define REIFIED_GENERIC_OPS \
+  OP(ClsGeneric)            \
+  OP(FunGeneric)
+
+enum class ReifiedGenericOp : uint8_t {
+#define OP(name) name,
+  REIFIED_GENERIC_OPS
+#undef OP
+};
+
 #define CONT_CHECK_OPS                            \
   CONT_CHECK_OP(IgnoreStarted)                    \
   CONT_CHECK_OP(CheckStarted)
@@ -700,6 +710,8 @@ constexpr uint32_t kMaxConcatN = 4;
   O(RecordReifiedGeneric,                                               \
                      ONE(IVA),         CMANY,           ONE(CV),    NF) \
   O(ReifiedName,     ONE(IVA),         CMANY,           ONE(CV),    NF) \
+  O(ReifiedGeneric,  TWO(OA(ReifiedGenericOp),IVA),                     \
+                                       NOV,             ONE(CV),    NF) \
   O(NativeImpl,      NA,               NOV,             NOV,        CF_TF) \
   O(CreateCl,        TWO(IVA,IVA),     CVUMANY,         ONE(CV),    NF) \
   O(CreateCont,      NA,               NOV,             ONE(CV),    CF) \
@@ -931,6 +943,7 @@ const char* subopToName(MOpMode);
 const char* subopToName(QueryMOp);
 const char* subopToName(SetRangeOp);
 const char* subopToName(TypeStructResolveOp);
+const char* subopToName(ReifiedGenericOp);
 const char* subopToName(ContCheckOp);
 const char* subopToName(CudOp);
 const char* subopToName(FPassHint);

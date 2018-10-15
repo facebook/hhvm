@@ -26,7 +26,10 @@
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/base/tv-conversions.h"
+
+#include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/runtime.h"
+#include "hphp/runtime/vm/unit-util.h"
 
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -275,6 +278,8 @@ static CallMap s_callMap {
                            {{TV, 0}, {TV, 1}}},
     {AllocObj,           newInstance, DSSA, SSync,
                            {{SSA, 0}}},
+    {AllocObjMaybeReified, newInstanceMaybeReified, DSSA, SSync,
+                           {{SSA, 0}, {SSA, 1}}},
     {InitProps,          &Class::initProps, DNone, SSync,
                            {{extra(&ClassData::cls)}}},
     {InitSProps,         &Class::initSProps, DNone, SSync,
@@ -593,6 +598,10 @@ static CallMap s_callMap {
     {GetTime, TimeStamp::CurrentSecond, DSSA, SNone, {}},
     /* clock_gettime_ns($clk_id) */
     {GetTimeNs, folly::chrono::clock_gettime_ns, DSSA, SNone, {{SSA, 0}}},
+
+    /* reified generics operations */
+    {IsReifiedName, isReifiedName, DSSA, SNone, {{SSA, 0}}},
+    {LdReifiedGeneric, getReifiedGenerics, DSSA, SSync, {{SSA, 0}}},
 };
 
 CallMap::CallMap(CallInfoList infos) {

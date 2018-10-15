@@ -244,4 +244,10 @@ end
 module Reified = struct
   let mangle_reified_param ?(nodollar = false) s =
     (if nodollar then "" else "$") ^ "__reified$" ^ s
+
+  let reified_prop_name = "86reified_prop"
+
+  let reified_init_method_name = "86reifiedinit"
+
+  let reified_init_method_param_name = "$__typestructures"
 end

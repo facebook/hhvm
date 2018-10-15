@@ -689,6 +689,11 @@ public:
   Slot lookupSProp(const StringData* sPropName) const;
 
   /*
+   * Returns the 86reified_init property's slot
+   */
+  Slot lookupReifiedInitProp() const;
+
+  /*
    * The RepoAuthType of the declared instance property or static property at
    * `index' in the corresponding table.
    */
@@ -1399,6 +1404,7 @@ private:
   void setRTAttributes();
   void setConstants();
   void setProperties();
+  void setReifiedData();
   void setInitializers();
   void setInterfaces();
   void setInterfaceVtables();

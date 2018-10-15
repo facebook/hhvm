@@ -731,6 +731,12 @@ let typestructresolveofiarg arg =
   | IAId "DontResovle" -> DontResolve
   | _ -> report_error "bad null flavor"
 
+let reifiedgenericopofiarg arg =
+  match arg with
+  | IAId "ClsGeneric" -> ClsGeneric
+  | IAId "FunGeneric" -> FunGeneric
+  | _ -> report_error "bad reified generic op"
+
 let labelofiarg arg =
   match arg with
   | IAId l -> makelabel l
@@ -1100,6 +1106,9 @@ match s with
 
  | "AliasCls" ->
    IIncludeEvalDefine (AliasCls(stringofiarg arg1, stringofiarg arg2))
+
+ | "ReifiedGeneric" ->
+   IMisc (ReifiedGeneric (reifiedgenericopofiarg arg1, intofiarg arg2))
 
  | _ -> failwith ("NYI binary: " ^ s)
 

@@ -2547,6 +2547,11 @@ void in(ISS& env, const bc::ReifiedName& op) {
   push(env, valid ? TStr : TBottom);
 }
 
+void in(ISS& env, const bc::ReifiedGeneric& op) {
+  // TODO(T31677864): implement real optimizations
+  push(env, RuntimeOption::EvalHackArrDVArrs ? TDict : TDArr);
+}
+
 namespace {
 
 /*

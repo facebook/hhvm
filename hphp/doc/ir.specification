@@ -1097,7 +1097,7 @@ To string conversions:
   Loads class-ref's cls from slot `slot` in frame S0 and puts the value in D
   as type T. T must be a sub-type of TCls.
 
-| LdClsRefTS<slot>, DVArr, S(FramePtr), NF
+| LdClsRefTS<slot>, D(TSOrTrash), S(FramePtr), NF
 
   Loads class-ref's reified generics from slot `slot` in frame S0 and puts the
   value in D.
@@ -1529,11 +1529,26 @@ To string conversions:
 
   Tests for Func::m_attrs & AttrDynamicallyCallable.
 
+| IsReifiedName, D(Bool), S(Str), NF
+
+  Tests whether the name in S0 is name of a reified class or function.
+
+| LdReifiedGeneric, DVArr, S(Str), NF
+
+  Loads the reified generics associated with the name at S0. This name can be a
+  class name or a function name. Raises an error if this name does not have
+  any associated reified generics.
+
 8. Allocation
 
 | AllocObj, DAllocObj, S(Cls), PRc
 
   Allocates a new object of class S1.
+
+| AllocObjMaybeReified, DAllocObj, S(Cls) S(TSOrTrash,Nullptr), PRc
+
+  Allocates a new object of class S1 and if the class is reified sets S2 as the
+  reified generics.
 
 | RegisterLiveObj, ND, S(Obj), NF
 

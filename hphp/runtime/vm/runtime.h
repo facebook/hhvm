@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -181,10 +182,21 @@ frame_free_args(TypedValue* args, int count) {
   for (auto i = count; i--; ) tvDecRefGen(*(args - i));
 }
 
-// Create a new class instance, and register it in the live object table if
-// necessary. The initial ref-count of the instance will be greater than zero.
-inline ObjectData*
-newInstance(Class* cls) {
+extern const StaticString s_86reifiedinit;
+
+namespace {
+
+inline void setReifiedGenerics(
+  ObjectData* inst, Class* cls, ArrayData* reifiedTypes
+) {
+  auto const arg = RuntimeOption::EvalHackArrDVArrs
+    ? make_tv<KindOfVec>(reifiedTypes) : make_tv<KindOfArray>(reifiedTypes);
+  auto const meth = cls->lookupMethod(s_86reifiedinit.get());
+  assertx(meth != nullptr);
+  g_context->invokeMethod(inst, meth, InvokeArgs(&arg, 1));
+}
+
+inline ObjectData* newInstanceImpl(Class* cls) {
   assertx(cls);
   auto* inst = ObjectData::newInstance(cls);
   assertx(inst->checkCount());
@@ -193,6 +205,33 @@ newInstance(Class* cls) {
 
   if (UNLIKELY(RuntimeOption::EnableObjDestructCall && cls->getDtor())) {
     g_context->m_liveBCObjs.insert(inst);
+  }
+  return inst;
+}
+
+} // namespace
+
+// Create a new class instance, and register it in the live object table if
+// necessary. The initial ref-count of the instance will be greater than zero.
+inline ObjectData* newInstance(Class* cls) {
+  auto* inst = newInstanceImpl(cls);
+  if (cls->hasReifiedParent()) {
+    setReifiedGenerics(inst, cls, ArrayData::CreateVArray());
+  }
+  return inst;
+}
+
+// Does the same work as newInstance but also if the class denoted as `cls` is
+// reified, then sets the reified generics on this class.
+inline ObjectData*
+newInstanceMaybeReified(Class* cls, ArrayData* reifiedTypes) {
+  auto* inst = newInstanceImpl(cls);
+  auto hasReifiedGenerics = cls->hasReifiedGenerics();
+  if (hasReifiedGenerics || cls->hasReifiedParent()) {
+    if (hasReifiedGenerics) assertx(reifiedTypes != nullptr);
+    setReifiedGenerics(inst, cls, hasReifiedGenerics
+                                  ? reifiedTypes
+                                  : ArrayData::CreateVArray());
   }
   return inst;
 }

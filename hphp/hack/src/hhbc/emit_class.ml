@@ -11,8 +11,13 @@ open Core_kernel
 open Instruction_sequence
 open Emit_expression
 
+module H = Hhbc_ast
 module SU = Hhbc_string_utils
 module SN = Naming_special_names
+module TV = Typed_value
+
+let hack_arr_dv_arrs () =
+  Hhbc_options.hack_arr_dv_arrs !Hhbc_options.compiler_options
 
 let ast_is_interface ast_class =
   ast_class.A.c_kind = Ast.Cinterface
@@ -34,14 +39,16 @@ let add_symbol_refs
   end
 
 let make_86method
-  ~name ~params ~is_static ~is_private ~is_abstract ~span instrs =
+  ~name ~params ~is_static ~is_private ~is_abstract ~span ~is_protected instrs =
+  if is_private && is_protected
+  then failwith "Invalid visibility modifier combination";
   let method_attributes = [] in
   (* TODO: move this. We just know that there are no iterators in 86methods *)
   Iterator.reset_iterator ();
   let method_is_final = false in
   let method_is_private = is_private in
-  let method_is_protected = false in
-  let method_is_public = not is_private in
+  let method_is_protected = is_protected in
+  let method_is_public = not is_private && not is_protected in
   let method_return_type = None in
   let method_decl_vars = [] in
   let method_is_async = false in
@@ -228,6 +235,83 @@ let validate_class_name ns (p, class_name) =
         (if is_reserved_global_name then name else Utils.strip_ns class_name) in
     Emit_fatal.raise_fatal_parse p message
 
+let emit_reified_extends_params env ast_class =
+  let reified_params = match ast_class.Ast.c_extends with
+    | (_, Ast.Happly (_, l)):: _ ->
+      List.filter_map l ~f:(function (_, Ast.Hreified h) -> Some h | _ -> None)
+    | _ -> [] in
+  let n = List.length reified_params in
+  if n = 0 then
+    let tv = if hack_arr_dv_arrs () then TV.Vec [] else TV.VArray [] in
+    instr (H.ILitConst (H.TypedValue tv))
+  else
+    gather [
+      gather @@ List.map reified_params ~f:(fun h ->
+        fst @@ Emit_expression.emit_reified_arg env h);
+      instr_record_reified_generic n;
+    ]
+
+let emit_reified_init_body env is_reified ast_class =
+  let set_prop = if not is_reified then empty else
+    (* $this->86reified_prop = $__typestructures *)
+    gather [
+      instr_checkthis;
+      instr_cgetl (Local.Named SU.Reified.reified_init_method_param_name);
+      instr_baseh;
+      instr_setm_pt 0
+        (Hhbc_id.Prop.from_raw_string SU.Reified.reified_prop_name);
+      instr_popc;
+    ] in
+  let return = gather [ instr_null; instr_retc; ] in
+  if ast_class.Ast.c_extends = [] then gather [ set_prop; return ] else begin
+    let generic_arr = emit_reified_extends_params env ast_class in
+    (* parent::86reifiedinit($generic_arr) *)
+    let call_parent =
+      gather [
+        instr_fpushclsmethodsd 1 Hhbc_ast.SpecialClsRef.Parent
+          (Hhbc_id.Method.from_raw_string SU.Reified.reified_init_method_name);
+        generic_arr;
+        instr_fcall (make_fcall_args 1);
+        instr_popr;
+      ] in
+    gather [
+      set_prop;
+      call_parent;
+      return;
+    ]
+  end
+
+let emit_reified_init_method env ast_class =
+  let is_base_class = List.is_empty ast_class.Ast.c_extends in
+  let is_reified =
+    List.exists ast_class.Ast.c_tparams ~f:(function (_, _, _, b) -> b) in
+  let has_reified_parents = match ast_class.Ast.c_extends with
+    | (_, Ast.Happly (_, l)):: _ ->
+      List.exists l ~f:(function (_, Ast.Hreified _) -> true | _ -> false)
+    | _ -> false in
+  if not (is_reified || has_reified_parents) && not is_base_class then [] else
+  let tc = Hhas_type_constraint.make (Some "HH\\varray") [] in
+  let params =
+    [ Hhas_param.make
+      SU.Reified.reified_init_method_param_name
+      false (* reference *)
+      false (* variadic *)
+      false (* inout *)
+      [] (* uattrs *)
+      (Some (Hhas_type_info.make (Some "HH\\varray") tc))
+      None (* default value *)
+    ] in
+  let instrs = emit_reified_init_body env is_reified ast_class in
+  [make_86method
+    ~name:SU.Reified.reified_init_method_name
+    ~params
+    ~is_static:false
+    ~is_private:false
+    ~is_protected:true
+    ~is_abstract:false
+    ~span:(Hhas_pos.pos_to_span ast_class.Ast.c_span)
+    instrs]
+
 let emit_class : A.class_ * Closure_convert.hoist_kind -> Hhas_class.t =
   fun (ast_class, hoisted) ->
   let namespace = ast_class.Ast.c_namespace in
@@ -388,6 +472,7 @@ let emit_class : A.class_ * Closure_convert.hoist_kind -> Hhas_class.t =
         ~params:[]
         ~is_static:true
         ~is_private:true
+        ~is_protected:false
         ~is_abstract:false
         ~span:class_span
         instrs]
@@ -443,11 +528,16 @@ let emit_class : A.class_ * Closure_convert.hoist_kind -> Hhas_class.t =
         ~params
         ~is_static:true
         ~is_private:true
+        ~is_protected:false
         ~is_abstract:class_is_interface
         ~span:class_span
         instrs] in
+  let should_emit_reified_init = not (Emit_env.is_systemlib () ||
+    is_closure_class || class_is_interface || class_is_trait) in
+  let reified_init_method = if not should_emit_reified_init then [] else
+    emit_reified_init_method env ast_class in
   let additional_methods =
-    additional_methods @
+    additional_methods @ reified_init_method @
     pinit_methods @ sinit_methods @ linit_methods @ cinit_methods in
   let methods = ast_methods class_body in
   let class_methods = Emit_method.from_asts ast_class methods in

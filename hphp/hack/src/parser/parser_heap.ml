@@ -39,6 +39,14 @@ let get_file_mode text =
 
 let parse_failure_scuba_table = Scuba.Table.of_name "hh_parse_failure"
 
+let parse_count_ref = ref 0
+
+let start_profiling () =
+  parse_count_ref := 0
+
+let stop_profiling () =
+  !parse_count_ref
+
 let get_from_local_cache ~full popt file_name =
   let fn = Relative_path.to_absolute file_name in
   match LocalParserCache.get file_name with
@@ -50,6 +58,7 @@ let get_from_local_cache ~full popt file_name =
       match get_file_mode source with
       | None -> []
       | Some _ ->
+        incr parse_count_ref;
         (Full_fidelity_ast.defensive_program
           ~quick:(not full)
           popt

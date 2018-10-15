@@ -133,7 +133,7 @@ inline Cell cellToKey(Cell cell, const ArrayData* ad) {
   if (!ad->useWeakKeys()) {
     throwInvalidArrayKeyException(&cell, ad);
   }
-  if (checkHACMisc()) {
+  if (checkHACArrayKeyCast()) {
     raiseHackArrCompatImplicitArrayKey(&cell);
   }
 

@@ -227,7 +227,7 @@ Array SourceRootInfo::setServerVariables(Array server) const {
   }
 
   {
-    SuppressHACMiscNotices shacn;
+    SuppressHACArrayPlusNotices shacn;
     if (!m_serverVars.empty()) {
       server += m_serverVars;
     }

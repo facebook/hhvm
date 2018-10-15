@@ -1030,7 +1030,8 @@ bool checkHACIntishCast();
 bool checkHACRefBind();
 bool checkHACFalseyPromote();
 bool checkHACCompare();
-bool checkHACMisc();
+bool checkHACArrayPlus();
+bool checkHACArrayKeyCast();
 
 ///////////////////////////////////////////////////////////////////////////////
 

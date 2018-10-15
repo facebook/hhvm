@@ -1,0 +1,19 @@
+array(4) {
+  [""]=>
+  string(12) "empty string"
+  [1]=>
+  string(3) "one"
+  [0]=>
+  string(4) "zero"
+  ["more stuff"]=>
+  string(3) "yep"
+}
+
+Notice: Hack Array Compat: Implicit conversion of null to array key in %s on line %d
+string(12) "empty string"
+
+Notice: Hack Array Compat: Implicit conversion of bool to array key in %s on line %d
+string(3) "one"
+
+Notice: Hack Array Compat: Implicit conversion of double to array key in %s on line %d
+string(4) "zero"

@@ -2151,7 +2151,7 @@ void emitAKExists(IRGS& env) {
   if (!arr->isA(TArr) && !arr->isA(TObj)) PUNT(AKExists_badArray);
 
   if (key->isA(TInitNull)) {
-    if (checkHACMisc()) {
+    if (checkHACArrayKeyCast()) {
       gen(
         env,
         RaiseHackArrCompatNotice,

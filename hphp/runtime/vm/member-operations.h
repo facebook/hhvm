@@ -1643,7 +1643,7 @@ inline ArrayData* SetElemArrayPre(ArrayData* a,
       a, const_cast<StringData*>(funcToStringHelper(key.m_data.pfunc)), value
     );
   }
-  if (checkHACMisc()) {
+  if (checkHACArrayKeyCast()) {
     raiseHackArrCompatImplicitArrayKey(&key);
   }
   if (isNullType(key.m_type)) {

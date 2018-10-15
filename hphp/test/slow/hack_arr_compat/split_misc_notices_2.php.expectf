@@ -1,0 +1,15 @@
+
+Notice: Hack Array Compat: Using + operator on arrays in %s on line %d
+array(4) {
+  [""]=>
+  string(12) "empty string"
+  [1]=>
+  string(3) "one"
+  [0]=>
+  string(4) "zero"
+  ["more stuff"]=>
+  string(3) "yep"
+}
+string(12) "empty string"
+string(3) "one"
+string(4) "zero"

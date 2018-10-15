@@ -554,7 +554,8 @@ struct RuntimeOption {
   HC(RefBind, ref_bind)             \
   HC(FalseyPromote, falsey_promote) \
   HC(Compare, compare)              \
-  HC(Misc, misc)
+  HC(ArrayKeyCast, array_key_cast)  \
+  HC(ArrayPlus, array_plus)
 
 #define EVALFLAGS()                                                     \
   /* F(type, name, defaultVal) */                                       \
@@ -917,7 +918,8 @@ struct RuntimeOption {
   F(bool, HackArrCompatCheckRefBind, false)                             \
   F(bool, HackArrCompatCheckFalseyPromote, false)                       \
   F(bool, HackArrCompatCheckCompare, false)                             \
-  F(bool, HackArrCompatCheckMisc, false)                                \
+  F(bool, HackArrCompatCheckArrayPlus, false)                           \
+  F(bool, HackArrCompatCheckArrayKeyCast, false)                        \
   /* Raise notices when is_array is called with any hack array */       \
   F(bool, HackArrCompatIsArrayNotices, false)                           \
   /* Raise notices when is_vec or is_dict  is called with a v/darray */ \

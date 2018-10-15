@@ -273,7 +273,8 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
     RuntimeOption::EvalHackArrCompatCheckRefBind =
     RuntimeOption::EvalHackArrCompatCheckFalseyPromote =
     RuntimeOption::EvalHackArrCompatCheckCompare =
-    RuntimeOption::EvalHackArrCompatCheckMisc =
+    RuntimeOption::EvalHackArrCompatCheckArrayPlus =
+    RuntimeOption::EvalHackArrCompatCheckArrayKeyCast =
       gd.HackArrCompatNotices;
   RuntimeOption::EvalAllowObjectDestructors  = gd.AllowObjectDestructors;
   RuntimeOption::EvalForbidDynamicCalls      = gd.ForbidDynamicCalls;

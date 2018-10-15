@@ -167,7 +167,7 @@ ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2) {
   assertx(a1->isPHPArray());
   assertx(a2->isPHPArray());
 
-  if (checkHACMisc()) raiseHackArrCompatAdd();
+  if (checkHACArrayPlus()) raiseHackArrCompatAdd();
 
   if (!a2->empty()) {
     if (a1->empty()) {

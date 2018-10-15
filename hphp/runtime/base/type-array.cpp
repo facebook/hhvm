@@ -314,7 +314,7 @@ Array& Array::plusImpl(ArrayData *data) {
   if (m_arr == nullptr || data == nullptr) {
     throw_bad_array_merge();
   }
-  if (checkHACMisc()) raiseHackArrCompatAdd();
+  if (checkHACArrayPlus()) raiseHackArrCompatAdd();
   if (!data->empty()) {
     if (m_arr->empty()) {
       m_arr = data;
@@ -751,7 +751,7 @@ decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
     if (!ad->useWeakKeys()) {
       throwInvalidArrayKeyException(&immutable_uninit_base, ad);
     }
-    if (checkHACMisc()) {
+    if (checkHACArrayKeyCast()) {
       raiseHackArrCompatImplicitArrayKey(&immutable_uninit_base);
     }
     return fn(make_tv<KindOfPersistentString>(staticEmptyString()),

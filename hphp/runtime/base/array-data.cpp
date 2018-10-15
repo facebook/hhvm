@@ -1391,7 +1391,7 @@ void raiseHackArrCompatRefIter() {
 }
 
 void raiseHackArrCompatAdd() {
-  raise_hac_misc_notice("Using + operator on arrays");
+  raise_hac_array_plus_notice("Using + operator on arrays");
 }
 
 void raiseHackArrCompatArrMixedCmp() {
@@ -1425,7 +1425,7 @@ std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key) {
 }
 
 void raiseHackArrCompatImplicitArrayKey(const TypedValue* key) {
-  raise_hac_misc_notice(makeHackArrCompatImplicitArrayKeyMsg(key));
+  raise_hac_array_key_cast_notice(makeHackArrCompatImplicitArrayKeyMsg(key));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

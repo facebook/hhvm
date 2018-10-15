@@ -335,7 +335,7 @@ bool HHVM_FUNCTION(array_key_exists,
   switch (cell->m_type) {
     case KindOfUninit:
     case KindOfNull:
-      if (checkHACMisc() && ad->useWeakKeys()) {
+      if (checkHACArrayKeyCast() && ad->useWeakKeys()) {
         raiseHackArrCompatImplicitArrayKey(cell);
       }
       return ad->useWeakKeys() && ad->exists(staticEmptyString());
@@ -357,7 +357,7 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfFunc:
     case KindOfClass:
       if (!ad->useWeakKeys()) throwInvalidArrayKeyException(cell, ad);
-      if (checkHACMisc()) {
+      if (checkHACArrayKeyCast()) {
         raiseHackArrCompatImplicitArrayKey(cell);
       }
       raise_warning("Array key should be either a string or an integer");

@@ -90,14 +90,22 @@ let check_file dynamic_view_files opts errors (fn, file_infos) =
     ignore(check_typedef opts fn name) in
   let ignore_check_const opts fn name =
     ignore(check_const opts fn name) in
-  let errors', () = Errors.do_with_context fn Errors.Typing
-      begin fun () ->
-    SSet.iter (ignore_type_fun opts fn) n_funs;
-    SSet.iter (ignore_type_class opts fn) n_classes;
-    SSet.iter (ignore_check_typedef opts fn) n_types;
-    SSet.iter (ignore_check_const opts fn) n_consts;
-  end in
-  Errors.merge errors' errors
+  try
+    let errors', () = Errors.do_with_context fn Errors.Typing
+        begin fun () ->
+      SSet.iter (ignore_type_fun opts fn) n_funs;
+      SSet.iter (ignore_type_class opts fn) n_classes;
+      SSet.iter (ignore_check_typedef opts fn) n_types;
+      SSet.iter (ignore_check_const opts fn) n_consts;
+    end in
+    Errors.merge errors' errors
+  with e ->
+    let () = prerr_endline ("Exception on file " ^ (Relative_path.S.to_string fn)) in
+    let msg = Exn.to_string e in
+    let stack = Printexc.get_backtrace () in
+    let () = prerr_endline ("Exception: " ^ msg) in
+    let () = prerr_endline ("Stack trace: " ^ stack) in
+    raise e
 
 let check_files dynamic_view_files opts errors progress ~memory_cap =
   SharedMem.invalidate_caches();

@@ -1,7 +1,7 @@
 File "abstract_implement2.php", line 20, characters 7-12:
-Class BClass does not correctly implement all required methods  (Typing[4110])
+Class BClass does not correctly implement all required members  (Typing[4110])
 File "abstract_implement2.php", line 20, characters 22-27:
-Some methods are incompatible with those declared in type AClass
+Some members are incompatible with those declared in type AClass
 Read the following to see why:
 File "abstract_implement2.php", line 21, characters 19-21:
 Member foo has the wrong type

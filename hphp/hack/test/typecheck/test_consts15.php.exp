@@ -1,7 +1,7 @@
 File "test_consts15.php", line 7, characters 16-16:
-Class D does not correctly implement all required methods  (Typing[4142])
+Class D does not correctly implement all required members  (Typing[4142])
 File "test_consts15.php", line 7, characters 26-26:
-Some methods are incompatible with those declared in type C
+Some members are incompatible with those declared in type C
 Read the following to see why:
 File "test_consts15.php", line 8, characters 18-20:
 Cannot re-declare this constant as abstract

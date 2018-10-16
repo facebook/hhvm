@@ -1,7 +1,7 @@
 File "trait_matching2.php", line 20, characters 7-7:
-Class C does not correctly implement all required methods  (Typing[4110])
+Class C does not correctly implement all required members  (Typing[4110])
 File "trait_matching2.php", line 21, characters 7-13:
-Some methods are incompatible with those declared in type MyTrait
+Some members are incompatible with those declared in type MyTrait
 Read the following to see why:
 File "trait_matching2.php", line 23, characters 22-24:
 Member lol has the wrong type

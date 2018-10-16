@@ -1,7 +1,7 @@
 File "var_args_inheritance2.php", line 16, characters 7-7:
-Class B does not correctly implement all required methods  (Typing[4041])
+Class B does not correctly implement all required members  (Typing[4041])
 File "var_args_inheritance2.php", line 16, characters 17-17:
-Some methods are incompatible with those declared in type A
+Some members are incompatible with those declared in type A
 Read the following to see why:
 File "var_args_inheritance2.php", line 17, characters 19-20:
 Member f1 has the wrong type

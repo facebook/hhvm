@@ -1,7 +1,7 @@
 File "override_member.php", line 16, characters 7-7:
-Class Y does not correctly implement all required methods  (Typing[4110])
+Class Y does not correctly implement all required members  (Typing[4110])
 File "override_member.php", line 16, characters 17-17:
-Some methods are incompatible with those declared in type X
+Some members are incompatible with those declared in type X
 Read the following to see why:
 File "override_member.php", line 17, characters 10-13:
 Member x has the wrong type

@@ -1,7 +1,7 @@
 File "interface_constructor.php", line 16, characters 7-7:
-Class A does not correctly implement all required methods  (Typing[4056])
+Class A does not correctly implement all required members  (Typing[4056])
 File "interface_constructor.php", line 16, characters 20-22:
-Some methods are incompatible with those declared in type Foo
+Some members are incompatible with those declared in type Foo
 Read the following to see why:
 File "interface_constructor.php", line 13, characters 19-29:
 The constructor is not implemented

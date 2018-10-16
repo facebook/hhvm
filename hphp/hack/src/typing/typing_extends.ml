@@ -239,10 +239,10 @@ let check_override env ~check_member_unique member_name mem_source ?(ignore_fun_
           Errors.multiple_concrete_defs
             (Reason.to_pos r_child)
             (Reason.to_pos r_parent)
-            (Utils.strip_ns class_elt.ce_origin)
-            (Utils.strip_ns parent_class_elt.ce_origin)
+            (class_elt.ce_origin)
+            (parent_class_elt.ce_origin)
             member_name
-            (Utils.strip_ns class_.tc_name)
+            (class_.tc_name)
         | _ -> () end;
         ignore(subtype_funs env r2 ft2 r1 ft1) in
       check_ambiguous_inheritance check (r_parent, ft_parent) (r_child, ft_child)
@@ -263,12 +263,38 @@ let check_override env ~check_member_unique member_name mem_source ?(ignore_fun_
 
 
 let check_const_override env
-    parent_class class_ parent_class_const class_const =
+    const_name parent_class class_ parent_class_const class_const =
   let _class_known, check_params = should_check_params parent_class class_ in
+  let member_not_unique =
+    (* Similar to should_check_member_unique, we check if there are multiple
+      concrete implementations of class constants with no override.
+      (Currently overriding interface constants is not supported in HHVM, but
+      we should allow it in Hack files)
+    *)
+    match parent_class.tc_kind with
+    | Ast.Cinterface ->
+      (* Synthetic  *)
+      not class_const.cc_synthesized
+      (* The parent we are checking is synthetic, no point in checking *)
+      && not parent_class_const.cc_synthesized
+      (* defined on original class *)
+      && class_const.cc_origin <> class_.tc_name
+      (* defined from parent class, nothing to check *)
+      && class_const.cc_origin <> parent_class_const.cc_origin
+      (* Only check if there are multiple concrete definitions *)
+      && not class_const.cc_abstract
+      && not parent_class_const.cc_abstract
+    | _ -> false in
+
   if check_params then
-    check_types_for_const env
-      parent_class_const.cc_abstract parent_class_const.cc_type
-      class_const.cc_abstract class_const.cc_type
+    if member_not_unique then
+      Errors.multiple_concrete_defs class_const.cc_pos parent_class_const.cc_pos
+      class_const.cc_origin parent_class_const.cc_origin
+      const_name class_.tc_name
+    else
+      check_types_for_const env
+        parent_class_const.cc_abstract parent_class_const.cc_type
+        class_const.cc_abstract class_const.cc_type
 
 (* Privates are only visible in the parent, we don't need to check them *)
 let filter_privates members =
@@ -502,7 +528,7 @@ let check_consts env parent_class class_ psubst subst =
         (* skip checks for typeconst derived class constants *)
         (match SMap.get const_name class_.tc_typeconsts with
          | None ->
-           check_const_override env parent_class class_ parent_const const
+           check_const_override env const_name parent_class class_ parent_const const
          | Some _ -> ())
       | None ->
         let parent_pos = Reason.to_pos (fst parent_const.cc_type) in

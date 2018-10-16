@@ -1,7 +1,7 @@
 File "constraint_override_bad.php", line 9, characters 7-7:
-Class C does not correctly implement all required methods  (Typing[4110])
+Class C does not correctly implement all required members  (Typing[4110])
   File "constraint_override_bad.php", line 9, characters 17-17:
-  Some methods are incompatible with those declared in type B
+  Some members are incompatible with those declared in type B
 Read the following to see why:
   File "constraint_override_bad.php", line 10, characters 19-21:
   Member foo has the wrong type

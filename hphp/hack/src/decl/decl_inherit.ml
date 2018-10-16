@@ -220,6 +220,7 @@ let mark_as_synthesized inh =
     ih_sprops   = SMap.map mark_elt inh.ih_sprops;
     ih_methods  = SMap.map mark_elt inh.ih_methods;
     ih_smethods = SMap.map mark_elt inh.ih_smethods;
+    ih_consts = SMap.map (fun const -> { const with cc_synthesized = true } ) inh.ih_consts;
   }
 
 (*****************************************************************************)

@@ -1,7 +1,7 @@
 File "interface_mismatch.php", line 16, characters 7-9:
-Class Foo does not correctly implement all required methods  (Typing[4054])
+Class Foo does not correctly implement all required members  (Typing[4054])
 File "interface_mismatch.php", line 16, characters 22-25:
-Some methods are incompatible with those declared in type IFoo
+Some members are incompatible with those declared in type IFoo
 Read the following to see why:
 File "interface_mismatch.php", line 16, characters 7-9:
 This type doesn't implement the method whatever

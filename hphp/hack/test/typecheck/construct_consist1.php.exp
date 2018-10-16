@@ -1,7 +1,7 @@
 File "construct_consist1.php", line 6, characters 7-8:
-Class C2 does not correctly implement all required methods  (Typing[4041])
+Class C2 does not correctly implement all required members  (Typing[4041])
 File "construct_consist1.php", line 6, characters 18-19:
-Some methods are incompatible with those declared in type C1
+Some members are incompatible with those declared in type C1
 Read the following to see why:
 File "construct_consist1.php", line 8, characters 19-29:
 Member __construct has the wrong type

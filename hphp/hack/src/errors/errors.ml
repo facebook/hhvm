@@ -1590,12 +1590,10 @@ let member_not_implemented member_name parent_pos pos defn_pos =
   add_list (Typing.err_code Typing.MemberNotImplemented) [msg1; msg2; msg3]
 
 let bad_decl_override parent_pos parent_name pos name (error: error) =
-  (* TODO: T24193254 reword this error message, says methods when error can
-   * occur on member field *)
   let msg1 = pos, ("Class " ^ (strip_ns name)
-      ^ " does not correctly implement all required methods ") in
+      ^ " does not correctly implement all required members ") in
   let msg2 = parent_pos,
-    ("Some methods are incompatible with those declared in type "
+    ("Some members are incompatible with those declared in type "
      ^ (strip_ns parent_name) ^
      "\nRead the following to see why:"
     ) in
@@ -3060,6 +3058,9 @@ let ambiguous_inheritance pos class_ origin (error: error) =
   add_list code (msgl @ [pos, message])
 
 let multiple_concrete_defs child_pos parent_pos child_origin parent_origin name class_ =
+  let child_origin = strip_ns child_origin in
+  let parent_origin = strip_ns parent_origin in
+  let class_ = strip_ns class_ in
   add_list (Typing.err_code Typing.MultipleConcreteDefs) [
     child_pos, child_origin ^ " and " ^ parent_origin ^
       " both declare ambiguous implementations of " ^ name ^ ".";

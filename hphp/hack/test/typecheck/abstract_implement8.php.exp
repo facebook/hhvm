@@ -1,7 +1,7 @@
 File "abstract_implement8.php", line 15, characters 16-16:
-Class A does not correctly implement all required methods  (Typing[4110])
+Class A does not correctly implement all required members  (Typing[4110])
 File "abstract_implement8.php", line 15, characters 29-33:
-Some methods are incompatible with those declared in type Alpha
+Some members are incompatible with those declared in type Alpha
 Read the following to see why:
 File "abstract_implement8.php", line 16, characters 19-27:
 Member getMyName has the wrong type

@@ -35,9 +35,9 @@ class B extends A {
 
 let errors = {|
 File "/B.php", line 9, characters 7-7:
-Class B does not correctly implement all required methods  (Typing[4203])
+Class B does not correctly implement all required members  (Typing[4203])
 File "/B.php", line 9, characters 17-17:
-Some methods are incompatible with those declared in type A
+Some members are incompatible with those declared in type A
 Read the following to see why:
 File "/B.php", line 10, characters 19-19:
 Member f has the wrong type

@@ -624,6 +624,15 @@ void in(ISS& env, const bc::Dir&)    { effect_free(env); push(env, TSStr); }
 void in(ISS& env, const bc::Method&) { effect_free(env); push(env, TSStr); }
 
 void in(ISS& env, const bc::ClsRefName& op) {
+  auto ty = peekClsRefSlot(env, op.slot);
+  if (is_specialized_cls(ty)) {
+    auto const dcls = dcls_of(ty);
+    if (dcls.type == DCls::Exact) {
+      return reduce(env,
+                    bc::DiscardClsRef { op.slot },
+                    bc::String { dcls.cls.name() });
+    }
+  }
   nothrow(env);
   takeClsRefSlot(env, op.slot);
   push(env, TSStr);
@@ -4006,6 +4015,7 @@ void in(ISS& env, const bc::This&) {
 }
 
 void in(ISS& env, const bc::LateBoundCls& op) {
+  if (env.ctx.cls) effect_free(env);
   auto const ty = selfCls(env);
   putClsRefSlot(env, op.slot, setctx(ty ? *ty : TCls));
 }

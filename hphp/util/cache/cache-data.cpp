@@ -31,7 +31,7 @@
 #include "hphp/util/cache/magic-numbers.h"
 #include "hphp/util/cache/mmap-file.h"
 #include "hphp/util/assertions.h"
-#include "hphp/util/compression.h"
+#include "hphp/util/gzip.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {

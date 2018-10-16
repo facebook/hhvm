@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/server/static-content-cache.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/util/compression.h"
+#include "hphp/util/gzip.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {

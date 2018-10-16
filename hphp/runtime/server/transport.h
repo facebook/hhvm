@@ -22,8 +22,8 @@
 #include <unordered_map>
 #include <utility>
 
-#include "hphp/util/compression.h"
 #include "hphp/util/functional.h"
+#include "hphp/util/gzip.h"
 #include "hphp/runtime/base/debuggable.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-holder.h"
@@ -40,6 +40,7 @@ struct Array;
 struct Variant;
 struct StructuredLogEntry;
 
+struct GzipCompressor;
 struct ZstdCompressor;
 
 /**
@@ -513,7 +514,7 @@ protected:
   bool m_acceptedEncodings[CompressionType::Max];
   // encoding we decided to use
   CompressionType m_encodingType;
-  std::unique_ptr<StreamCompressor> m_compressor;
+  std::unique_ptr<GzipCompressor> m_gzipCompressor;
   std::unique_ptr<brotli::BrotliCompressor> m_brotliCompressor;
   std::unique_ptr<ZstdCompressor> m_zstdCompressor;
 

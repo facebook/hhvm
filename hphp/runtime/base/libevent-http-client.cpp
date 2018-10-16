@@ -23,7 +23,7 @@
 
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/util/compression.h"
+#include "hphp/util/gzip.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/timer.h"
 

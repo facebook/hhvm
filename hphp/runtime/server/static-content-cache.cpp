@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/boot-stats.h"
-#include "hphp/util/compression.h"
+#include "hphp/util/gzip.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 

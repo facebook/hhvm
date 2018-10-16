@@ -36,7 +36,7 @@
 
 #include "hphp/util/brotli.h"
 #include "hphp/util/compatibility.h"
-#include "hphp/util/compression.h"
+#include "hphp/util/gzip.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/service-data.h"
@@ -948,13 +948,13 @@ StringHolder Transport::compressGzip(const void *data, int size,
       level <= RuntimeOption::GzipMaxCompressionLevel) {
     compressionLevel = level;
   }
-  if (m_compressor == nullptr) {
-    m_compressor = std::make_unique<StreamCompressor>(
+  if (m_gzipCompressor == nullptr) {
+    m_gzipCompressor = std::make_unique<GzipCompressor>(
         compressionLevel, CODING_GZIP, true);
   }
   int len = size;
   char *compressedData =
-    m_compressor->compress((const char*)data, len, last);
+    m_gzipCompressor->compress((const char*)data, len, last);
   if (compressedData) {
     StringHolder deleter(compressedData, len, true);
     if (m_chunkedEncoding || len < size ||
@@ -1139,7 +1139,7 @@ void Transport::sendRawInternal(const void *data, int size,
 
 void Transport::onSendEnd() {
   bool eomSent = false;
-  if ((m_compressor || m_brotliCompressor) && m_chunkedEncoding) {
+  if ((m_gzipCompressor || m_brotliCompressor) && m_chunkedEncoding) {
     assertx(m_headerSent);
     bool compressed = false;
     StringHolder response = prepareResponse("", 0, compressed, true);

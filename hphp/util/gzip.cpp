@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/util/compression.h"
+#include "hphp/util/gzip.h"
 
 #include "hphp/util/exception.h"
 #include "hphp/util/logger.h"
@@ -163,9 +163,9 @@ bool is_compressible_file(const char *filename) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// StreamCompressor
+// GzipCompressor
 
-StreamCompressor::StreamCompressor(int level, int encoding_mode, bool header)
+GzipCompressor::GzipCompressor(int level, int encoding_mode, bool header)
   : m_encoding(encoding_mode), m_header(header),
     m_ended(false) {
   if (level < -1 || level > 9) {
@@ -203,13 +203,13 @@ StreamCompressor::StreamCompressor(int level, int encoding_mode, bool header)
   }
 }
 
-StreamCompressor::~StreamCompressor() {
+GzipCompressor::~GzipCompressor() {
   if (!m_ended) {
     deflateEnd(&m_stream);
   }
 }
 
-char *StreamCompressor::compress(const char *data, int &len, bool trailer) {
+char *GzipCompressor::compress(const char *data, int &len, bool trailer) {
   // middle chunks should never be zero size
   assert(len || trailer);
 

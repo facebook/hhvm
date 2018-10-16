@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_COMPRESSION_H_
-#define incl_HPHP_COMPRESSION_H_
+#ifndef incl_HPHP_GZIP_H_
+#define incl_HPHP_GZIP_H_
 
 #include <zlib.h>
 
@@ -34,9 +34,11 @@ char *gzdecode(const char *data, int &len);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct StreamCompressor {
-  StreamCompressor(int level, int encoding_mode, bool header);
-  ~StreamCompressor();
+// Supports producing GZIP- or DEFLATE-compatible output via the encoding_mode
+// flag.
+struct GzipCompressor {
+  GzipCompressor(int level, int encoding_mode, bool header);
+  ~GzipCompressor();
 
   /**
    * Compress one chunk a time.
@@ -54,4 +56,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif  // incl_HPHP_COMPRESSION_H_
+#endif  // incl_HPHP_GZIP_H_

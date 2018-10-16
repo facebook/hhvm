@@ -235,8 +235,8 @@ void HHVM_FUNCTION(pcntl_exec,
                     errno, folly::errnoStr(errno).c_str());
   }
 
-  free(envp);
-  free(argv);
+  req::free(envp);
+  req::free(argv);
 }
 
 int64_t HHVM_FUNCTION(pcntl_fork) {

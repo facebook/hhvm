@@ -1,6 +1,6 @@
 Linearization for class \I:
-[\I]
+[\I(child)]
 Linearization for class \T:
-[\T, \I]
+[\T(child), \I(interface), \I(parent)]
 Linearization for class \C:
-[\C, \T, \I]
+[\C(child), \T(trait), \I(trait)]

@@ -1,20 +1,20 @@
 Linearization for class \T1:
-[\T1]
+[\T1(child)]
 Linearization for class \T2:
-[\T2]
+[\T2(child)]
 Linearization for class \T3:
-[\T3]
+[\T3(child)]
 Linearization for class \C:
-[\C, \T3, \T2, \T1]
+[\C(child), \T3(trait), \T2(trait), \T1(trait)]
 Linearization for class \T:
-[\T, \T3, \T2]
+[\T(child), \T3(trait), \T2(trait)]
 Linearization for class \D:
-[\D, \T3, \T, \T2]
+[\D(child), \T3(trait), \T(trait), \T2(trait)]
 Linearization for class \I:
-[\I]
+[\I(child)]
 Linearization for class \I2:
-[\I2]
+[\I2(child)]
 Linearization for class \Timplements:
-[\Timplements, \I]
+[\Timplements(child), \I(interface), \I(parent)]
 Linearization for class \A:
-[\A, \Timplements, \I, \I2]
+[\A(child), \Timplements(trait), \I(trait), \I2(interface)]

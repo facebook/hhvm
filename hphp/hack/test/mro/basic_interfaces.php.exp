@@ -1,10 +1,10 @@
 Linearization for class \Foo:
-[\Foo]
+[\Foo(child)]
 Linearization for class \Bar:
-[\Bar, \Foo]
+[\Bar(child), \Foo(parent)]
 Linearization for class \I:
-[\I]
+[\I(child)]
 Linearization for class \I2:
-[\I2, \I]
+[\I2(child), \I(parent)]
 Linearization for class \I3:
-[\I3, \I, \I2]
+[\I3(child), \I(parent), \I2(parent)]

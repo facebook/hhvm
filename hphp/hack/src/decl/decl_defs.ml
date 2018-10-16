@@ -41,11 +41,28 @@ type subst_context = {
   sc_from_req_extends : bool;
 }
 
+type source_type = Child | Parent | Trait | XHPAttr | Interface | ReqImpl | ReqExtends
+
+let source_type_to_string = function
+  | Child -> "child"
+  | Parent -> "parent"
+  | Trait -> "trait"
+  | XHPAttr -> "xhp"
+  | Interface -> "interface"
+  | ReqImpl -> "req impl"
+  | ReqExtends -> "req ext"
+
 type mro_element = {
   (* The class's name *)
   mro_name : string;
   (* The type parameters on the class *)
   mro_params : decl ty list;
+  (* The relationship this class has to the linearized class. (Not the original
+    relationship it had with the linearization that the class came from, but to the
+    original linearized class. For example, if a class C uses trait T, and T extends
+    TParent, mro_source for TParent would be Parent for the linearization of T, but
+    Trait for the linearization of C.) *)
+  mro_source : source_type;
 }
 
 type linearization = mro_element list

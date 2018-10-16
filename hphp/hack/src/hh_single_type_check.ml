@@ -972,7 +972,11 @@ let handle_mode
               let tenv = Typing_env.empty tcopt ~droot:None file in
               Typing_print.full tenv ty
             ) in
-          if params = [] then name else name ^ "<" ^ (String.concat "," params) ^ ">"
+          let params = if params = [] then "" else "<"^(String.concat "," params)^">" in
+           Printf.sprintf "%s%s(%s)"
+             name
+             params
+             (Decl_defs.source_type_to_string mro.Decl_defs.mro_source)
           ) in
         Printf.printf "[%s]\n" (String.concat ", " linearization)
       )

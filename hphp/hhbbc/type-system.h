@@ -409,6 +409,7 @@ constexpr const trep& operator|=(trep&a, trep b) {
 // can't actually occur, but are convenient masks.
 constexpr auto BArrLikeE = BArrE | BVecE | BDictE | BKeysetE;
 constexpr auto BArrLikeN = BArrN | BVecN | BDictN | BKeysetN;
+constexpr auto BArrLike = BArrLikeE | BArrLikeN;
 constexpr auto BSArrLike = BSArr | BSVec | BSDict | BSKeyset;
 
 #define DATATAGS                                                \
@@ -677,7 +678,7 @@ private:
   friend Type set_trep(Type&, trep);
   friend Type remove_uninit(Type t);
   friend Type to_cell(Type t);
-
+  friend bool inner_types_might_raise(const Type& t1, const Type& t2);
 private:
   union Data {
     Data() {}
@@ -1520,6 +1521,11 @@ bool could_run_destructor(const Type& t);
  * Returns true iff an IsType testing for testTy on valTy might raise.
  */
 bool is_type_might_raise(const Type& testTy, const Type& valTy);
+
+/*
+ * Returns true iff a compare of two types might raise a HAC notice
+ */
+bool compare_might_raise(const Type& t1, const Type& t2);
 
 //////////////////////////////////////////////////////////////////////
 

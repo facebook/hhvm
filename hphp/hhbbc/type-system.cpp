@@ -4781,6 +4781,133 @@ bool is_type_might_raise(const Type& testTy, const Type& valTy) {
   return false;
 }
 
+bool inner_types_might_raise(const Type& t1, const Type& t2) {
+  assertx(t1.subtypeOf(BArrLike));
+  assertx(t2.subtypeOf(BArrLike));
+
+  // If either is an empty array, there are no inner elements to warn about.
+  if (!t1.couldBe(BArrLikeN) || !t2.couldBe(BArrLikeN)) return false;
+
+  auto const checkOne = [&] (const Type& t, folly::Optional<size_t>& sz) {
+    switch (t.m_dataTag) {
+      case DataTag::None:
+        return true;
+
+      case DataTag::Str:
+      case DataTag::Obj:
+      case DataTag::Int:
+      case DataTag::Dbl:
+      case DataTag::Cls:
+      case DataTag::RefInner:
+        not_reached();
+
+      case DataTag::ArrLikeVal:
+        sz = t.m_data.aval->size();
+        return true;
+      case DataTag::ArrLikePacked:
+        sz = t.m_data.packed->elems.size();
+        return true;
+      case DataTag::ArrLikePackedN:
+        return t.m_data.packedn->type.couldBe(BArrLike | BObj);
+      case DataTag::ArrLikeMap:
+        sz = t.m_data.map->map.size();
+        return true;
+      case DataTag::ArrLikeMapN:
+        return t.m_data.mapn->val.couldBe(BArrLike | BObj);
+    }
+    not_reached();
+  };
+
+  folly::Optional<size_t> sz1;
+  if (!checkOne(t1, sz1)) return false;
+  folly::Optional<size_t> sz2;
+  if (!checkOne(t2, sz2)) return false;
+
+  // if the arrays have different sizes, we don't even check their contents
+  if (sz1 && sz2 && *sz1 != *sz2) return false;
+  size_t numToCheck = 1;
+  if (sz1 && *sz1 > numToCheck) numToCheck = *sz1;
+  if (sz2 && *sz2 > numToCheck) numToCheck = *sz2;
+
+  union ArrPos {
+    ArrPos() : pos{} {}
+    size_t pos;
+    MapElems::iterator it;
+  } p1, p2;
+
+  for (size_t i = 0; i < numToCheck; i++) {
+    auto const nextType = [&] (const Type& t, ArrPos& p) {
+      switch (t.m_dataTag) {
+        case DataTag::None:
+          return TInitCell;
+
+        case DataTag::Str:
+        case DataTag::Obj:
+        case DataTag::Int:
+        case DataTag::Dbl:
+        case DataTag::Cls:
+        case DataTag::RefInner:
+          not_reached();
+
+        case DataTag::ArrLikeVal:
+          if (!i) {
+            p.pos = t.m_data.aval->iter_begin();
+          } else {
+            p.pos = t.m_data.aval->iter_advance(p.pos);
+          }
+          return from_cell(t.m_data.aval->atPos(p.pos));
+        case DataTag::ArrLikePacked:
+          return t.m_data.packed->elems[i];
+        case DataTag::ArrLikePackedN:
+          return t.m_data.packedn->type;
+        case DataTag::ArrLikeMap:
+          if (!i) {
+            p.it = t.m_data.map->map.begin();
+          } else {
+           ++p.it;
+          }
+          return p.it->second;
+        case DataTag::ArrLikeMapN:
+          return t.m_data.mapn->val;
+      }
+      not_reached();
+    };
+    if (compare_might_raise(nextType(t1, p1), nextType(t2, p2))) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool compare_might_raise(const Type& t1, const Type& t2) {
+  if (!RuntimeOption::EvalHackArrCompatNotices &&
+      !RuntimeOption::EvalHackArrCompatDVCmpNotices) {
+    return false;
+  }
+
+  auto checkOne = [&] (const trep bits) -> folly::Optional<bool> {
+    if (t1.subtypeOf(bits) && t2.subtypeOf(bits)) {
+      return inner_types_might_raise(t1, t2);
+    }
+    if (t1.couldBe(bits) && t2.couldBe(BArrLike)) return true;
+    if (t2.couldBe(bits) && t1.couldBe(BArrLike)) return true;
+    return folly::none;
+  };
+
+  if (RuntimeOption::EvalHackArrCompatDVCmpNotices) {
+    if (auto const f = checkOne(BPArr)) return *f;
+    if (auto const f = checkOne(BDArr)) return *f;
+    if (auto const f = checkOne(BVArr)) return *f;
+  } else {
+    if (auto const f = checkOne(BArr)) return *f;
+  }
+  if (auto const f = checkOne(BDict)) return *f;
+  if (auto const f = checkOne(BVec)) return *f;
+  if (auto const f = checkOne(BKeyset)) return *f;
+
+  return t1.couldBe(BObj) && t2.couldBe(BObj);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 ArrKey disect_vec_key(const Type& keyTy) {

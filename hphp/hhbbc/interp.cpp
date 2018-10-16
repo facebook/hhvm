@@ -738,9 +738,9 @@ std::pair<Type,bool> resolveSame(ISS& env) {
   // EvalHackArrCompatNotices will notice on === and !== between PHP arrays and
   // Hack arrays. We can't really do better than this in general because of
   // arrays inside these arrays.
-  auto const mightWarn =
-    RuntimeOption::EvalHackArrCompatNotices ||
-    RuntimeOption::EvalHackArrCompatDVCmpNotices;
+  auto warningsEnabled =
+    (RuntimeOption::EvalHackArrCompatNotices ||
+     RuntimeOption::EvalHackArrCompatDVCmpNotices);
 
   auto const result = [&] {
     auto const v1 = tv(t1);
@@ -758,14 +758,19 @@ std::pair<Type,bool> resolveSame(ISS& env) {
 
     if (v1 && v2) {
       if (auto r = eval_cell_value([&]{ return cellSame(*v2, *v1); })) {
+        // we wouldn't get here if cellSame raised a warning
+        warningsEnabled = false;
         return r != NSame ? TTrue : TFalse;
       }
     }
 
     return NSame ? typeNSame(t1, t2) : typeSame(t1, t2);
-  };
+  }();
 
-  return { result(), mightWarn };
+  if (warningsEnabled && result == (NSame ? TFalse : TTrue)) {
+    warningsEnabled = false;
+  }
+  return { result, warningsEnabled && compare_might_raise(t1, t2) };
 }
 
 template<bool Negate>

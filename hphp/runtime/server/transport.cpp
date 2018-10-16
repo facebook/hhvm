@@ -510,18 +510,6 @@ std::string Transport::getCookie(const std::string &name) {
 bool Transport::decideCompression() {
   assertx(m_compressionDecision == CompressionDecision::NotDecidedYet);
 
-  if (!RuntimeOption::ForceCompressionURL.empty() &&
-      getCommand() == RuntimeOption::ForceCompressionURL) {
-    // ForceCompression exists only to support cases when proxy removes
-    // Accept-Encoding header but browser can read compressed data. This
-    // feature is much less relevant since HTTPS does not allow proxies to
-    // remove headers. So we won't expand support for this feature to
-    // new compression types.
-    m_acceptedEncodings[CompressionType::Gzip] = true;
-    m_compressionDecision = CompressionDecision::HasTo;
-    return true;
-  }
-
   bool acceptsEncoding = false;
   if (acceptEncoding("br")) {
     m_acceptedEncodings[CompressionType::Brotli] = true;
@@ -539,15 +527,6 @@ bool Transport::decideCompression() {
 
   if (acceptsEncoding) {
     m_compressionDecision = CompressionDecision::Should;
-    return true;
-  }
-
-  if ((!RuntimeOption::ForceCompressionCookie.empty() &&
-       cookieExists(RuntimeOption::ForceCompressionCookie.c_str())) ||
-      (!RuntimeOption::ForceCompressionParam.empty() &&
-       paramExists(RuntimeOption::ForceCompressionParam.c_str()))) {
-    m_compressionDecision = CompressionDecision::Should;
-    m_acceptedEncodings[CompressionType::Gzip] = true;
     return true;
   }
 
@@ -731,12 +710,12 @@ void Transport::prepareHeaders(bool compressed, bool chunked,
   if (RuntimeOption::ServerAddVaryEncoding) {
     /*
      * Our response may vary depending on the Accept-Encoding header if
-     *  - we compressed it, and compression was not forced; or
-     *  - we didn't compress it because the client does not accept gzip
-     *    or brotli.
+     *  - we compressed it or
+     *  - we didn't compress it because this client does not accept compression.
+     * The alternative was that we could have compressed it but made our own
+     * choice not to, in which case it doesn't matter what the client accepts.
      */
-    if (compressed ? m_compressionDecision != CompressionDecision::HasTo
-                   : (isCompressionEnabled() &&
+    if (compressed || (isCompressionEnabled() &&
                       !(acceptEncoding("gzip") || acceptEncoding("br") ||
                         acceptEncoding("zstd")))) {
       addHeaderImpl("Vary", "Accept-Encoding");
@@ -908,8 +887,7 @@ StringHolder Transport::prepareResponse(const void* data,
 
     // Gzip has 20 bytes header, so anything smaller than a few bytes probably
     // wouldn't benefit much from compression
-    if (m_chunkedEncoding || size > 50 ||
-        m_compressionDecision == CompressionDecision::HasTo) {
+    if (m_chunkedEncoding || size > 50) {
       if (m_acceptedEncodings[CompressionType::Zstd]) {
         // for the moment, prefer zstd
         m_encodingType = CompressionType::Zstd;
@@ -957,8 +935,7 @@ StringHolder Transport::compressGzip(const void *data, int size,
     m_gzipCompressor->compress((const char*)data, len, last);
   if (compressedData) {
     StringHolder deleter(compressedData, len, true);
-    if (m_chunkedEncoding || len < size ||
-        m_compressionDecision == CompressionDecision::HasTo) {
+    if (m_chunkedEncoding || len < size) {
       response = std::move(deleter);
       compressed = true;
     }

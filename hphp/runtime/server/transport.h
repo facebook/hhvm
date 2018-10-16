@@ -524,7 +524,6 @@ protected:
     NotDecidedYet,
     ShouldNot,
     Should,
-    HasTo,
   };
   CompressionDecision m_compressionDecision;
 

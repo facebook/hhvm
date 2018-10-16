@@ -238,9 +238,6 @@ int RuntimeOption::ZstdCompressionEnabled = -1;
 int RuntimeOption::ZstdCompressionLevel = 3;
 int RuntimeOption::GzipCompressionLevel = 3;
 int RuntimeOption::GzipMaxCompressionLevel = 9;
-std::string RuntimeOption::ForceCompressionURL;
-std::string RuntimeOption::ForceCompressionCookie;
-std::string RuntimeOption::ForceCompressionParam;
 bool RuntimeOption::EnableKeepAlive = true;
 bool RuntimeOption::ExposeHPHP = true;
 bool RuntimeOption::ExposeXFBServer = false;
@@ -1734,12 +1731,6 @@ void RuntimeOption::Load(
                  "Server.GzipCompressionLevel", 3);
     Config::Bind(GzipMaxCompressionLevel, ini, config,
                  "Server.GzipMaxCompressionLevel", 9);
-    Config::Bind(ForceCompressionURL, ini, config,
-                 "Server.ForceCompression.URL");
-    Config::Bind(ForceCompressionCookie, ini, config,
-                 "Server.ForceCompression.Cookie");
-    Config::Bind(ForceCompressionParam, ini, config,
-                 "Server.ForceCompression.Param");
     Config::Bind(EnableKeepAlive, ini, config, "Server.EnableKeepAlive", true);
     Config::Bind(ExposeHPHP, ini, config, "Server.ExposeHPHP", true);
     Config::Bind(ExposeXFBServer, ini, config, "Server.ExposeXFBServer", false);

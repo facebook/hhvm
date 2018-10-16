@@ -231,9 +231,6 @@ struct RuntimeOption {
   static int ZstdCompressionLevel;
   static int GzipCompressionLevel;
   static int GzipMaxCompressionLevel;
-  static std::string ForceCompressionURL;
-  static std::string ForceCompressionCookie;
-  static std::string ForceCompressionParam;
   static bool EnableKeepAlive;
   static bool ExposeHPHP;
   static bool ExposeXFBServer;

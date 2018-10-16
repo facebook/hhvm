@@ -257,7 +257,7 @@ void ExecutionContext::writeStdout(const char *s, int len) {
 
 void ExecutionContext::writeTransport(const char *s, int len) {
   if (m_transport) {
-    m_transport->sendRaw((void*)s, len, 200, false, true);
+    m_transport->sendRaw(s, len, 200, false, true);
   } else {
     writeStdout(s, len);
   }

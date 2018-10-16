@@ -185,7 +185,7 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
   // should not attempt to compress it.
   transport->disableCompression();
 
-  transport->sendRaw((void*)data, len, 200, compressed);
+  transport->sendRaw(data, len, 200, compressed);
   transport->onSendEnd();
 }
 
@@ -465,7 +465,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
 
   if (ret) {
     String content = context->obDetachContents();
-    transport->sendRaw((void*)content.data(), content.size());
+    transport->sendRaw(content.data(), content.size());
     code = transport->getResponseCode();
   } else if (error) {
     code = 500;
@@ -489,7 +489,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
                         RuntimeOption::EvalPreludePath);
       if (ret) {
         String content = context->obDetachContents();
-        transport->sendRaw((void*)content.data(), content.size());
+        transport->sendRaw(content.data(), content.size());
         code = transport->getResponseCode();
       } else {
         Logger::Error("Unable to invoke error page %s", errorPage.c_str());
@@ -576,7 +576,7 @@ bool HttpRequestHandler::handleProxyRequest(Transport *transport, bool force) {
   if (!respData) {
     respData = "";
   }
-  transport->sendRaw((void*)respData, response.size(), code);
+  transport->sendRaw(respData, response.size(), code);
   return true;
 }
 

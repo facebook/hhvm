@@ -1030,8 +1030,8 @@ bool Transport::isCompressionEnabled() const {
          m_compressionEnabled[CompressionType::Gzip];
 }
 
-void Transport::sendRaw(void *data, int size, int code /* = 200 */,
-                        bool compressed /* = false */,
+void Transport::sendRaw(const char *data, int size, int code /* = 200 */,
+                        bool precompressed /* = false */,
                         bool chunked /* = false */,
                         const char *codeInfo /* = nullptr */
                        ) {
@@ -1042,7 +1042,7 @@ void Transport::sendRaw(void *data, int size, int code /* = 200 */,
     return;
   }
 
-  if (!compressed && RuntimeOption::ForceChunkedEncoding) {
+  if (!precompressed && RuntimeOption::ForceChunkedEncoding) {
     chunked = true;
   }
 
@@ -1054,18 +1054,18 @@ void Transport::sendRaw(void *data, int size, int code /* = 200 */,
 
   if (m_chunkedEncoding) {
     chunked = true;
-    assertx(!compressed);
+    assertx(!precompressed);
   } else if (chunked) {
     m_chunkedEncoding = true;
-    assertx(!compressed);
+    assertx(!precompressed);
   }
 
-  sendRawInternal(data, size, code, compressed, codeInfo);
+  sendRawInternal(data, size, code, precompressed, codeInfo);
 }
 
-void Transport::sendRawInternal(const void *data, int size,
+void Transport::sendRawInternal(const char *data, int size,
                                 int code /* = 200 */,
-                                bool compressed /* = false */,
+                                bool precompressed /* = false */,
                                 const char *codeInfo /* = nullptr */
                                ) {
 
@@ -1089,7 +1089,7 @@ void Transport::sendRawInternal(const void *data, int size,
 
   // compression handling
   ServerStatsHelper ssh("send");
-  StringHolder response = prepareResponse(data, size, compressed, !chunked);
+  StringHolder response = prepareResponse(data, size, precompressed, !chunked);
 
   if (m_responseCode < 0) {
     setResponse(code, codeInfo);
@@ -1097,7 +1097,7 @@ void Transport::sendRawInternal(const void *data, int size,
 
   // HTTP header handling
   if (!m_headerSent) {
-    prepareHeaders(compressed, chunked, response,
+    prepareHeaders(precompressed, chunked, response,
                    StringHolder(static_cast<const char*>(data), size));
     m_headerSent = true;
   }

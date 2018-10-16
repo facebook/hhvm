@@ -405,7 +405,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
             "Serialization of the return value failed", 500);
         m_reset = true;
       } else {
-        transport->sendRaw((void*)response.data(), response.size());
+        transport->sendRaw(response.data(), response.size());
         code = transport->getResponseCode();
       }
     } else if (error) {

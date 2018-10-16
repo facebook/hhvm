@@ -392,23 +392,23 @@ public:
   void setResponse(int code, const char *info = nullptr);
   const std::string &getResponseInfo() const { return m_responseCodeInfo; }
   bool headersSent() { return m_headerSent;}
-  void sendRaw(void *data, int size, int code = 200,
-               bool compressed = false, bool chunked = false,
+  void sendRaw(const char *data, int size, int code = 200,
+               bool precompressed = false, bool chunked = false,
                const char *codeInfo = nullptr);
 private:
-  void sendRawInternal(const void *data, int size, int code = 200,
-                       bool compressed = false,
+  void sendRawInternal(const char *data, int size, int code = 200,
+                       bool precompressed = false,
                        const char *codeInfo = nullptr);
 public:
-  void sendString(const char *data, int code = 200, bool compressed = false,
+  void sendString(const char *data, int code = 200, bool precompressed = false,
                   bool chunked = false,
                   const char * codeInfo = nullptr) {
-    sendRaw((void*)data, strlen(data), code, compressed, chunked, codeInfo);
+    sendRaw(data, strlen(data), code, precompressed, chunked, codeInfo);
   }
   void sendString(const std::string &data, int code = 200,
-                  bool compressed = false, bool chunked = false,
+                  bool precompressed = false, bool chunked = false,
                   const char *codeInfo = nullptr) {
-    sendRaw((void*)data.c_str(), data.length(), code, compressed, chunked,
+    sendRaw(data.c_str(), data.length(), code, precompressed, chunked,
             codeInfo);
   }
   void redirect(const char *location, int code, const char *info = nullptr);

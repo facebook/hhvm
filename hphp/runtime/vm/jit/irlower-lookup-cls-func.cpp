@@ -311,6 +311,7 @@ void loadFuncContextImpl(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
   ObjectData* inst = nullptr;
   Class* cls = nullptr;
   StringData* invName = nullptr;
+  ArrayData* reifiedGenerics = nullptr;
   bool dynamic = false;
 
   auto func = vm_decode_function(
@@ -321,6 +322,7 @@ void loadFuncContextImpl(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
     cls,
     invName,
     dynamic,
+    reifiedGenerics,
     DecodeFlags::NoWarn
   );
   assertx(dynamic);
@@ -339,6 +341,9 @@ void loadFuncContextImpl(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
   }
   if (UNLIKELY(invName != nullptr)) {
     preLiveAR->setMagicDispatch(invName);
+  }
+  if (func->hasReifiedGenerics()) {
+    preLiveAR->setReifiedGenerics(reifiedGenerics);
   }
 }
 

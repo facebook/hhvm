@@ -83,6 +83,7 @@ struct ActRec {
     VarEnv* m_varEnv;       // Variable environment when live
     ExtraArgs* m_extraArgs; // Lightweight extra args, when live
     StringData* m_invName;  // Invoked name, used for __call(), when pre-live
+    ArrayData* m_reifiedGenerics; // Used to store a pointer to reified generics
   };
 
   TYPE_SCAN_CUSTOM_FIELD(m_thisUnsafe) {
@@ -139,6 +140,7 @@ struct ActRec {
   static constexpr uintptr_t kTrashedVarEnvSlot = 0xfeeefeee000f000f;
   static constexpr uintptr_t kTrashedThisSlot = 0xfeeefeeef00fe00e;
   static constexpr uintptr_t kTrashedFuncSlot = 0xfeeefeeef00fe00d;
+  static constexpr uintptr_t kTrashedReifiedGenericsSlot = 0xfeeefeeef00fe00c;
 
   /////////////////////////////////////////////////////////////////////////////
 
@@ -307,6 +309,24 @@ struct ActRec {
    * Write garbage to the m_this/m_cls union (in debug mode only).
    */
   void trashThis();
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Reified Generics.
+
+  /*
+   * Sets to reified generics slot
+   */
+   void setReifiedGenerics(ArrayData* rg);
+
+  /*
+   * Gets reified generics
+   */
+   ArrayData* getReifiedGenerics() const;
+
+  /*
+   * Trashes the reified generics
+   */
+   void trashReifiedGenerics();
 
   /////////////////////////////////////////////////////////////////////////////
   // VarEnv / ExtraArgs.

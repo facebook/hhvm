@@ -104,6 +104,7 @@ void FuncCache::lookup(rds::Handle handle,
       ObjectData *this_ = nullptr;
       Class* self_ = nullptr;
       StringData* inv = nullptr;
+      ArrayData* reifiedGenerics = nullptr;
       bool dynamic = false;
       try {
         func = vm_decode_function(
@@ -114,6 +115,7 @@ void FuncCache::lookup(rds::Handle handle,
           self_,
           inv,
           dynamic,
+          reifiedGenerics,
           DecodeFlags::NoWarn);
         if (!func) {
           raise_call_to_undefined(sd);

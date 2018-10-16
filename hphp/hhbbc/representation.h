@@ -403,6 +403,11 @@ struct Func : FuncBase {
   bool isMemoizeImpl : 1;
 
   /*
+   * This is a reified function.
+   */
+  bool isReified : 1;
+
+  /*
    * Return type specified in the source code (ex. "function foo(): Bar").
    * HHVM checks if the a function's return value matches it's return type
    * constraint via the VerifyRetType* instructions.

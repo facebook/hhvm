@@ -369,10 +369,6 @@ let emit_body
     Emit_param.from_asts
       ~namespace ~tparams ~generate_defaults:(not is_memoize) ~scope params
   in
-  let params =
-    if not @@ Hhbc_options.enable_reified_generics !Hhbc_options.compiler_options
-    then params
-    else Emit_param.emit_reified_params immediate_tparams @ params in
   let params = if is_closure_body
     then List.map ~f:Hhas_param.switch_inout_to_reference params else params in
   let num_out, verify_out = if is_closure_body then 0, empty else emit_verify_out params in
@@ -437,6 +433,8 @@ let emit_body
       | _ :: Ast_scope.ScopeItem.Class _ :: _ -> move_this decl_vars
       | _ when Ast_scope.Scope.is_toplevel scope -> move_this decl_vars
       | _ -> decl_vars in
+  let decl_vars = if List.exists ~f:(fun (_, _, _, b) -> b) immediate_tparams
+    then "$0ReifiedGenerics" :: decl_vars else decl_vars in
 
   let function_state_key =
     let open Ast_scope in

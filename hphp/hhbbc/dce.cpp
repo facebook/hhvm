@@ -2248,8 +2248,9 @@ void remove_unused_locals(Context const ctx,
    */
   if (func->isClosureBody) return;
 
-  for (auto loc = func->locals.begin() + func->params.size();
-       loc != func->locals.end(); ++loc) {
+  // For reified functions, skip the first non-param local
+  auto loc = func->locals.begin() + func->params.size() + (int)func->isReified;
+  for (; loc != func->locals.end(); ++loc) {
     if (loc->killed) {
       assert(loc->id < kMaxTrackedLocals && !usedLocals.test(loc->id));
       continue;

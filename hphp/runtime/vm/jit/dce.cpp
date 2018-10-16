@@ -272,6 +272,8 @@ bool canDCE(IRInstruction* inst) {
   case LdCufIterDynamic:
   case LdStaticLoc:
   case LdARNumArgsAndFlags:
+  case LdARReifiedGenerics:
+  case KillARReifiedGenerics:
   case IsFuncDynCallable:
   case StrictlyIntegerConv:
   case GetMemoKeyScalar:
@@ -708,6 +710,7 @@ bool canDCE(IRInstruction* inst) {
   case CheckARMagicFlag:
   case StARNumArgsAndFlags:
   case StARInvName:
+  case StARReifiedGenerics:
   case ExitPlaceholder:
   case ThrowOutOfBounds:
   case ThrowInvalidArrayKey:

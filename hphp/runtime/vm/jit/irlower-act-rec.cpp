@@ -269,6 +269,27 @@ void cgLdARCtx(IRLS& env, const IRInstruction* inst) {
   vmain(env) << load{sp[off + AROFF(m_thisUnsafe)], dst};
 }
 
+void cgStARReifiedGenerics(IRLS& env, const IRInstruction* inst) {
+  auto const sp = srcLoc(env, inst, 0).reg();
+  auto const src = srcLoc(env, inst, 1).reg();
+  auto const off =
+    cellsToBytes(inst->extra<StARReifiedGenerics>()->offset.offset);
+  vmain(env) << store{src, sp[off + AROFF(m_reifiedGenerics)]};
+}
+
+void cgLdARReifiedGenerics(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const fp = srcLoc(env, inst, 0).reg();
+  vmain(env) << load{fp[AROFF(m_reifiedGenerics)], dst};
+}
+
+void cgKillARReifiedGenerics(IRLS& env, const IRInstruction* inst) {
+  if (!debug) return;
+  auto const fp = srcLoc(env, inst, 0).reg();
+  emitImmStoreq(vmain(env), ActRec::kTrashedReifiedGenericsSlot,
+    fp[AROFF(m_reifiedGenerics)]);
+}
+
 void cgLdARNumArgsAndFlags(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const fp = srcLoc(env, inst, 0).reg();

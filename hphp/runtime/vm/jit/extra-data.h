@@ -1712,6 +1712,7 @@ X(AssertARFunc,                 IRSPRelOffsetData);
 X(LdARFuncPtr,                  IRSPRelOffsetData);
 X(LdARIsDynamic,                IRSPRelOffsetData);
 X(LdARCtx,                      IRSPRelOffsetData);
+X(StARReifiedGenerics,          IRSPRelOffsetData);
 X(EndCatch,                     IRSPRelOffsetData);
 X(EagerSyncVMRegs,              IRSPRelOffsetData);
 X(JmpSSwitchDest,               IRSPRelOffsetData);

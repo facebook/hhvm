@@ -554,6 +554,7 @@ bool VarEnv::unset(const StringData* name) {
 }
 
 const StaticString s_closure_var("0Closure");
+const StaticString s_reified_generics_var("0ReifiedGenerics");
 
 Array VarEnv::getDefinedVariables() const {
   Array ret = Array::Create();
@@ -562,8 +563,9 @@ Array VarEnv::getDefinedVariables() const {
   for (; iter.valid(); iter.next()) {
     auto const sd = iter.curKey();
     auto const tv = iter.curVal();
-    // Closures have an interal 0Closure variable
-    if (s_closure_var.equal(sd)) {
+    // Closures have an internal 0Closure variable
+    // Reified functions have an internal 0ReifiedGenerics variable
+    if (s_closure_var.equal(sd) || s_reified_generics_var.equal(sd)) {
       continue;
     }
     if (tvAsCVarRef(tv).isReferenced()) {
@@ -1564,6 +1566,13 @@ static void prepareFuncEntry(ActRec *ar, PC& pc, StackArgsState stk) {
   bool raiseMissingArgumentWarnings = false;
   const int nparams = func->numNonVariadicParams();
   auto& stack = vmStack();
+  ArrayData* reified_generics = nullptr;
+
+  if (ar->m_func->hasReifiedGenerics()) {
+    // This means that the first local is $0ReifiedGenerics
+    reified_generics = ar->getReifiedGenerics();
+    ar->trashReifiedGenerics();
+  }
 
   if (stk == StackArgsState::Trimmed &&
       (ar->func()->attrs() & AttrMayUseVV) &&
@@ -1630,6 +1639,18 @@ static void prepareFuncEntry(ActRec *ar, PC& pc, StackArgsState stk) {
     stack.nalloc(nuse);
     nlocals += nuse;
     func = ar->m_func;
+  }
+
+  if (reified_generics) {
+    // Currently does not work with closures
+    assertx(!func->isClosureBody());
+    // push for first local
+    if (RuntimeOption::EvalHackArrDVArrs) {
+      stack.pushStaticVec(reified_generics);
+    } else {
+      stack.pushStaticArray(reified_generics);
+    }
+    nlocals++;
   }
 
   pushFrameSlots(func, nlocals);
@@ -2809,30 +2830,36 @@ OPTBLD_INLINE void iopReifiedName(uint32_t n) {
 }
 
 OPTBLD_INLINE void iopReifiedGeneric(ReifiedGenericOp op, uint32_t n) {
+  ArrayData* reifiedTypes;
   if (op == ReifiedGenericOp::FunGeneric) {
-    // TODO(T31677864): Implement it for functions
-    not_implemented();
-  }
-  Class* cls = arGetContextClass(vmfp());
-  if (!cls) {
-    raise_error(
-      "Cannot access reified class generic when no class scope is active");
-  }
-  if (!cls->hasReifiedGenerics()) {
-    raise_error("%s has no reified generics", cls->name()->data());
-  }
+    // First local is always $0ReifiedGenerics which comes right after params
+    auto const tv = frame_local(vmfp(), vmfp()->m_func->numParams());
+    assertx(tv && (RuntimeOption::EvalHackArrDVArrs ? tvIsVec(tv)
+                                                    : tvIsArray(tv)));
+    reifiedTypes = tv->m_data.parr;
+  } else {
+    Class* cls = arGetContextClass(vmfp());
+    if (!cls) {
+      raise_error(
+        "Cannot access reified class generic when no class scope is active");
+    }
+    if (!cls->hasReifiedGenerics()) {
+      raise_error("%s has no reified generics", cls->name()->data());
+    }
 
-  auto const this_ = vmfp()->getThis();
-  auto const slot = cls->lookupReifiedInitProp();
-  assertx(slot != kInvalidSlot);
-  auto tv = this_->propVec()[slot];
-  assertx(RuntimeOption::EvalHackArrDVArrs ? tvIsVec(tv) : tvIsArray(tv));
-  auto reifiedTypes = tv.m_data.parr;
+    auto const this_ = vmfp()->getThis();
+    auto const slot = cls->lookupReifiedInitProp();
+    assertx(slot != kInvalidSlot);
+    auto tv = this_->propVec()[slot];
+    assertx(RuntimeOption::EvalHackArrDVArrs ? tvIsVec(tv) : tvIsArray(tv));
+    reifiedTypes = tv.m_data.parr;
+  }
   if (n >= reifiedTypes->size()) {
     raise_error("There is no reified generic at index %u", n);
   }
   auto const rg = reifiedTypes->rval(n);
-  assertx(isArrayType(rg.type()));
+  assertx(RuntimeOption::EvalHackArrDVArrs ? isDictType(rg.type())
+                                           : isArrayType(rg.type()));
   if (RuntimeOption::EvalHackArrDVArrs) {
     vmStack().pushStaticDict(rg.val().parr);
   } else {
@@ -4984,12 +5011,15 @@ OPTBLD_INLINE void iopUnsetG() {
   vmStack().popC();
 }
 
-OPTBLD_INLINE ActRec* fPushFuncImpl(const Func* func, int numArgs) {
+OPTBLD_INLINE ActRec* fPushFuncImpl(
+  const Func* func, int numArgs, ArrayData* reifiedGenerics
+) {
   DEBUGGER_IF(phpBreakpointEnabled(func->name()->data()));
   ActRec* ar = vmStack().allocA();
   ar->m_func = func;
   ar->initNumArgs(numArgs);
   ar->trashVarEnv();
+  if (reifiedGenerics != nullptr) ar->setReifiedGenerics(reifiedGenerics);
   return ar;
 }
 
@@ -5033,7 +5063,7 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
     }
 
     vmStack().discard();
-    ActRec* ar = fPushFuncImpl(func, numArgs);
+    ActRec* ar = fPushFuncImpl(func, numArgs, nullptr);
     if (func->isStaticInPrologue()) {
       ar->setClass(origObj->getVMClass());
       decRefObj(origObj);
@@ -5089,6 +5119,7 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
     HPHP::Class* cls = nullptr;
     StringData* invName = nullptr;
     bool dynamic = false;
+    ArrayData* reifiedGenerics = nullptr;
 
     auto const func = vm_decode_function(
       v,
@@ -5098,6 +5129,7 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
       cls,
       invName,
       dynamic,
+      reifiedGenerics,
       DecodeFlags::NoWarn
     );
     assertx(dynamic);
@@ -5111,7 +5143,7 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
     }
 
     vmStack().discard();
-    auto const ar = fPushFuncImpl(func, numArgs);
+    auto const ar = fPushFuncImpl(func, numArgs, reifiedGenerics);
     if (thiz) {
       thiz->incRefCount();
       ar->setThis(thiz);
@@ -5137,6 +5169,7 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
   if (c1->m_type == KindOfFunc) {
     const Func* func = c1->m_data.pfunc;
     assertx(func != nullptr);
+    ArrayData* reifiedGenerics = nullptr;
 
     // Handle inout name mangling
     if (UNLIKELY(n)) {
@@ -5154,12 +5187,13 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
         cls,
         invName,
         dynamic,
+        reifiedGenerics,
         DecodeFlags::NoWarn
       );
       if (func == nullptr) raise_call_to_undefined(func_name);
     }
     vmStack().discard();
-    auto const ar = fPushFuncImpl(func, numArgs);
+    auto const ar = fPushFuncImpl(func, numArgs, reifiedGenerics);
     ar->trashThis();
     return;
   }
@@ -5174,7 +5208,7 @@ OPTBLD_FLT_INLINE void iopFPushFuncD(uint32_t numArgs, Id id) {
   if (func == nullptr) {
     raise_call_to_undefined(vmfp()->m_func->unit()->lookupLitstrId(id));
   }
-  ActRec* ar = fPushFuncImpl(func, numArgs);
+  ActRec* ar = fPushFuncImpl(func, numArgs, nullptr);
   ar->trashThis();
 }
 
@@ -5189,7 +5223,7 @@ OPTBLD_INLINE void iopFPushFuncU(uint32_t numArgs, Id nsFunc, Id globalFunc) {
       raise_call_to_undefined(unit->lookupLitstrId(nsFunc));
     }
   }
-  ActRec* ar = fPushFuncImpl(func, numArgs);
+  ActRec* ar = fPushFuncImpl(func, numArgs, nullptr);
   ar->trashThis();
 }
 
@@ -5226,6 +5260,12 @@ void fPushObjMethodImpl(StringData* name,
   } else {
     ar->trashVarEnv();
     decRefStr(name);
+  }
+  if (f->hasReifiedGenerics()) {
+    assertx(isReifiedName(name));
+    auto const reifiedGenerics =
+      getReifiedTypeList(stripClsOrFnNameFromReifiedName(name->toCppString()));
+    ar->setReifiedGenerics(reifiedGenerics);
   }
 }
 
@@ -5335,6 +5375,7 @@ OPTBLD_INLINE void iopResolveObjMethod() {
   HPHP::Class* cls = nullptr;
   StringData* invName = nullptr;
   bool dynamic = false;
+  ArrayData* reifiedGenerics = nullptr;
   VArrayInit ai{2};
   ai.append(cellAsVariant(*c2));
   ai.append(cellAsVariant(*c1));
@@ -5347,6 +5388,7 @@ OPTBLD_INLINE void iopResolveObjMethod() {
     cls,
     invName,
     dynamic,
+    reifiedGenerics,
     DecodeFlags::NoWarn
   );
   assertx(dynamic);
@@ -5418,6 +5460,13 @@ void pushClsMethodImpl(Class* cls,
   } else {
     ar->trashVarEnv();
     decRefStr(const_cast<StringData*>(name));
+  }
+
+  if (f->hasReifiedGenerics()) {
+    assertx(isReifiedName(name));
+    auto const reifiedGenerics =
+      getReifiedTypeList(stripClsOrFnNameFromReifiedName(name->toCppString()));
+    ar->setReifiedGenerics(reifiedGenerics);
   }
 }
 
@@ -5570,6 +5619,7 @@ void iopDecodeCufIter(PC& pc, Iter* it, PC takenpc) {
   HPHP::Class* cls = nullptr;
   StringData* invName = nullptr;
   bool dynamic = false;
+  ArrayData* reifiedGenerics = nullptr;
   TypedValue *func = vmStack().topTV();
 
   ActRec* ar = vmfp();
@@ -5579,7 +5629,7 @@ void iopDecodeCufIter(PC& pc, Iter* it, PC takenpc) {
   const Func* f = vm_decode_function(tvAsVariant(func),
                                      ar, false,
                                      obj, cls, invName,
-                                     dynamic,
+                                     dynamic, reifiedGenerics,
                                      DecodeFlags::NoWarn);
 
   if (f == nullptr) {

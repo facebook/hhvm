@@ -331,13 +331,14 @@ int64_t decodeCufIterHelper(Iter* it, TypedValue func, ActRec* ar) {
   ObjectData* obj = nullptr;
   Class* cls = nullptr;
   StringData* invName = nullptr;
+  ArrayData* reifiedGenerics = nullptr;
   bool dynamic = false;
 
   if (LIKELY(ar->func()->isBuiltin())) {
     ar = g_context->getOuterVMFrame(ar);
   }
   auto const f = vm_decode_function(tvAsVariant(&func), ar, false,
-                                    obj, cls, invName, dynamic,
+                                    obj, cls, invName, dynamic, reifiedGenerics,
                                     DecodeFlags::NoWarn);
   if (UNLIKELY(!f)) return false;
 

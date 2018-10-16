@@ -96,10 +96,12 @@ bool vm_decode_function_cufiter(const Variant& function,
   ObjectData* obj = nullptr;
   Class* cls = nullptr;
   StringData* invName = nullptr;
+  ArrayData* reifiedGenerics = nullptr;
   bool dynamic;
   // Don't warn here, let the caller decide what to do if the func is nullptr.
   const HPHP::Func* func = vm_decode_function(function, GetCallerFrame(), false,
                                               obj, cls, invName, dynamic,
+                                              reifiedGenerics,
                                               DecodeFlags::NoWarn);
   if (func == nullptr) {
     return false;

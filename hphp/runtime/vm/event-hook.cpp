@@ -263,9 +263,10 @@ static Variant call_intercept_handler(
   Class* cls = nullptr;
   CallerFrame cf;
   StringData* invName = nullptr;
+  ArrayData* reifiedGenerics = nullptr;
   bool dynamic = false;
   auto f = vm_decode_function(function, cf(), false,
-                              obj, cls, invName, dynamic);
+                              obj, cls, invName, dynamic, reifiedGenerics);
   if (!f) {
     return uninit_null();
   }

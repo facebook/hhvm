@@ -40,6 +40,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/repo.h"
+#include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/unit.h"
 
@@ -117,9 +118,10 @@ bool is_callable(const Variant& v) {
   ObjectData* obj = nullptr;
   HPHP::Class* cls = nullptr;
   StringData* invName = nullptr;
+  ArrayData* reifiedGenerics = nullptr;
   bool dynamic;
   const HPHP::Func* f = vm_decode_function(v, GetCallerFrame(), false, obj, cls,
-                                           invName, dynamic,
+                                           invName, dynamic, reifiedGenerics,
                                            DecodeFlags::LookupOnly);
   if (invName != nullptr) {
     decRefStr(invName);
@@ -211,6 +213,7 @@ vm_decode_function(const_variant_ref function,
                    HPHP::Class*& cls,
                    StringData*& invName,
                    bool& dynamic,
+                   ArrayData*& reifiedGenerics,
                    DecodeFlags flags /* = DecodeFlags::Warn */) {
   invName = nullptr;
   dynamic = true;
@@ -390,6 +393,12 @@ vm_decode_function(const_variant_ref function,
         return nullptr;
       }
       assertx(f && f->preClass() == nullptr);
+      if (f->hasReifiedGenerics()) {
+        assertx(isReifiedName(name.get()));
+        reifiedGenerics =
+          getReifiedTypeList(stripClsOrFnNameFromReifiedName(
+            name.toCppString()));
+      }
       return f;
     }
     assertx(cls);
@@ -492,9 +501,10 @@ Variant vm_call_user_func(const_variant_ref function, const Variant& params,
   Class* cls = nullptr;
   CallerFrame cf;
   StringData* invName = nullptr;
+  ArrayData* reifiedGenerics = nullptr;
   bool dynamic;
-  const Func* f = vm_decode_function(function, cf(), forwarding,
-                                     obj, cls, invName, dynamic);
+  const Func* f = vm_decode_function(function, cf(), forwarding, obj, cls,
+                                     invName, dynamic, reifiedGenerics);
   if (f == nullptr || (!isContainer(params) && !params.isNull())) {
     return uninit_null();
   }

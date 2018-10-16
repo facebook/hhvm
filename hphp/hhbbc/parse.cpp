@@ -67,6 +67,7 @@ const StaticString s_86linit("86linit");
 const StaticString s_86pinit("86pinit");
 const StaticString s_attr_Deprecated("__Deprecated");
 const StaticString s_class_alias("class_alias");
+const StaticString s_Reified("__Reified");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1181,6 +1182,8 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->isMemoizeWrapper    = fe.isMemoizeWrapper;
   ret->isMemoizeWrapperLSB = fe.isMemoizeWrapperLSB;
   ret->isMemoizeImpl       = Func::isMemoizeImplName(fe.name);
+  ret->isReified           = fe.userAttributes.find(s_Reified.get()) !=
+                             fe.userAttributes.end();
 
   add_frame_variables(*ret, fe);
 

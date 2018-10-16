@@ -89,6 +89,15 @@ void init_params(IRGS& env, const Func* func, uint32_t argc) {
 
   auto const nparams = func->numNonVariadicParams();
 
+  if (func->hasReifiedGenerics()) {
+    // Currently does not work with closures
+    assertx(!func->isClosureBody());
+    auto const reified_generics = gen(env, LdARReifiedGenerics, fp(env));
+    gen(env, KillARReifiedGenerics, fp(env));
+    // $0ReifiedGenerics is the first local
+    gen(env, StLoc, LocalId{func->numParams()}, fp(env), reified_generics);
+  }
+
   if (argc < nparams) {
     // Too few arguments; set everything else to Uninit.
     if (nparams - argc <= kMaxParamsInitUnroll || env.inlineLevel) {
@@ -202,6 +211,8 @@ void init_locals(IRGS& env, const Func* func) {
                       func->numStaticLocals();
     num_inited += 1 + nuse;
   }
+
+  if (func->hasReifiedGenerics()) num_inited++;
 
   // We set to Uninit all locals beyond any params and any closure use vars.
   if (num_inited < nlocals) {

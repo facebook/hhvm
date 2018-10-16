@@ -143,6 +143,17 @@ State entry_state(const Index& index, Context const ctx,
     ? index.lookup_closure_use_vars(ctx.func)
     : std::vector<Type>{};
 
+  /*
+   * Reified functions have a hidden local that's always the first
+   * (non-parameter) local, which stores reified generics.
+   */
+  if (ctx.func->isReified) {
+    // Currently closures cannot be reified
+    assert(!ctx.func->isClosureBody);
+    assert(locId < ret.locals.size());
+    ret.locals[locId++] = RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
+  }
+
   auto afterParamsLocId = uint32_t{0};
   for (; locId < ctx.func->locals.size(); ++locId, ++afterParamsLocId) {
     /*

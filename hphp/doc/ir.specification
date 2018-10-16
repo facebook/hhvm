@@ -3532,6 +3532,22 @@ fields of that struct for holding intermediate values.
   when we know that S0's m_type and m_aux were both materialized into the same
   64-bit register.
 
+| StARReifiedGenerics<spoff>, ND, S(StkPtr) SVArr, NF
+
+  Store S1 to m_reifiedGenerics on the ActRec pointed to by the stack pointer
+  S0 and the stack pointer offet.
+
+| LdARReifiedGenerics, DVArr, S(FramePtr), NF
+
+  Load the value of m_reifiedGenerics on the ActRec pointed to by the frame
+  pointer S0.
+
+| KillARReifiedGenerics, ND, S(FramePtr), NF
+
+  Mark the ActRec's m_reifiedGenerics pointer in frame S0 as no longer
+  containing a meaningful value. This can used to aid in memory analysis.
+  In debugging builds, it may overwrite the pointer with a poison value.
+
 /* Local Variables: */
 /* fill-column: 79 */
 /* End: */

@@ -828,35 +828,35 @@ and emit_new env pos expr targs args uargs =
     gather [
       emit_pos pos;
       instr_fpushctord nargs fq_id;
-      emit_args_and_call env pos [] args uargs None;
+      emit_args_and_call env pos args uargs None;
       instr_popr
       ]
   | Class_static ->
     gather [
       emit_pos pos;
       instr_fpushctors nargs SpecialClsRef.Static;
-      emit_args_and_call env pos [] args uargs None;
+      emit_args_and_call env pos args uargs None;
       instr_popr
       ]
   | Class_self ->
     gather [
       emit_pos pos;
       instr_fpushctors nargs SpecialClsRef.Self;
-      emit_args_and_call env pos [] args uargs None;
+      emit_args_and_call env pos args uargs None;
       instr_popr
       ]
   | Class_parent ->
     gather [
       emit_pos pos;
       instr_fpushctors nargs SpecialClsRef.Parent;
-      emit_args_and_call env pos [] args uargs None;
+      emit_args_and_call env pos args uargs None;
       instr_popr
       ]
   | _ ->
     gather [
       emit_load_class_ref env pos cexpr;
       instr_fpushctor nargs 0;
-      emit_args_and_call env pos [] args uargs None;
+      emit_args_and_call env pos args uargs None;
       instr_popr
     ]
 
@@ -865,7 +865,7 @@ and emit_new_anon env pos cls_idx args uargs =
   gather [
     instr_defcls cls_idx;
     instr_fpushctori nargs cls_idx;
-    emit_args_and_call env pos [] args uargs None;
+    emit_args_and_call env pos args uargs None;
     instr_popr
     ]
 
@@ -1747,11 +1747,10 @@ and get_reified_var_cexpr env name =
     ]))
 
 and emit_reified_type_opt env name =
-  if Option.is_some @@ is_reified_tparam ~is_fun:true env name then
-    Some (instr_cgetl (Local.Named (SU.Reified.mangle_reified_param name)))
-  else
-    Option.map ~f:(instr_reified_generic ClsGeneric)
-      (is_reified_tparam ~is_fun:false env name)
+  match is_reified_tparam ~is_fun:true env name with
+  | Some i -> Some (instr_reified_generic FunGeneric i)
+  | None -> Option.map ~f:(instr_reified_generic ClsGeneric)
+              (is_reified_tparam ~is_fun:false env name)
 
 and emit_reified_type env name =
   match emit_reified_type_opt env name with
@@ -3065,7 +3064,7 @@ and emit_reified_arg env hint =
     ], (count = 0)
 
 (* Emit code to construct the argument frame and then make the call *)
-and emit_args_and_call env call_pos reified_targs args uargs async_eager_label =
+and emit_args_and_call env call_pos args uargs async_eager_label =
   let args_count = List.length args in
   let all_args = args @ uargs in
   let aliases =
@@ -3082,7 +3081,7 @@ and emit_args_and_call env call_pos reified_targs args uargs async_eager_label =
     | [] ->
       let use_unpack = uargs <> [] in
       let num_inout = List.length inout_setters in
-      let nargs = List.length reified_targs + List.length args in
+      let nargs = List.length args in
       let instr_enforce_hint =
         if throw_on_mismatch && args <> []
         then instr_fthrow_on_ref_mismatch (List.map args expr_starts_with_ref)
@@ -3245,12 +3244,7 @@ and emit_args_and_call env call_pos reified_targs args uargs async_eager_label =
             instr_popc;
           ]
   in
-  Local.scope @@ fun () ->
-    gather [
-      gather @@
-        List.map reified_targs ~f:(fun ta -> fst @@ emit_reified_arg env ta);
-      aux 0 all_args []
-    ]
+  Local.scope @@ fun () -> aux 0 all_args []
 
 (* Expression that appears in an object context, such as expr->meth(...) *)
 and emit_object_expr env ?last_pos (_, expr_ as expr) =
@@ -3613,10 +3607,7 @@ and emit_call env pos (_, expr_ as expr) targs args uargs async_eager_label =
   (match expr_ with
     | A.Id (_, s) -> Emit_symbol_refs.add_function s
     | _ -> ());
-  let reified_targs = List.filter_map targs
-    ~f:(function (_, false) -> None | (h, true) -> Some h) in
-  let nargs =
-    List.length reified_targs + List.length args + List.length uargs in
+  let nargs = List.length args + List.length uargs in
   let inout_arg_positions = get_inout_arg_positions args in
   let num_uninit = List.length inout_arg_positions in
   let default () =
@@ -3626,7 +3617,7 @@ and emit_call env pos (_, expr_ as expr) targs args uargs async_eager_label =
       gather @@ List.init num_uninit ~f:(fun _ -> instr_nulluninit);
       emit_call_lhs
         env pos expr targs nargs (not (List.is_empty uargs)) inout_arg_positions;
-      emit_args_and_call env pos reified_targs args uargs async_eager_label;
+      emit_args_and_call env pos args uargs async_eager_label;
     ], flavor in
 
   match expr_, args with

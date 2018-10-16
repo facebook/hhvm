@@ -16,6 +16,7 @@
 #include "hphp/runtime/vm/jit/irgen-call.h"
 
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/runtime/vm/jit/call-target-profile.h"
@@ -973,6 +974,45 @@ SSATmp* specialClsRefToCls(IRGS& env, SpecialClsRef ref) {
   always_assert(false);
 }
 
+void storeReifiedGenerics(IRGS& env, SSATmp* funName) {
+  if (funName->hasConstVal(TStr)) {
+    auto const name = funName->strVal();
+    if (!isReifiedName(name)) return;
+    auto const ts = getReifiedTypeList(stripClsOrFnNameFromReifiedName(
+      name->toCppString()));
+    gen(env,
+        StARReifiedGenerics,
+        IRSPRelOffsetData { spOffBCFromIRSP(env) },
+        sp(env),
+        cns(env, ts));
+    return;
+  }
+  ifElse(
+    env,
+    [&] (Block* not_reified_block) {
+      // Lets do a quick check before calling IsReifiedName since that's an
+      // expensive native call
+      // Reified names always start with a $
+      // It is also safe to read the 0th char without checking the length since
+      // if it is an empty string, then we'll be reading the null terminator
+      auto const first_char = gen(env, OrdStrIdx, funName, cns(env, 0));
+      auto const issame = gen(env, EqInt, cns(env, (uint64_t)'$'), first_char);
+      gen(env, JmpZero, not_reified_block, issame);
+      auto const isreified = gen(env, IsReifiedName, funName);
+      gen(env, JmpZero, not_reified_block, isreified);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      auto const ts = gen(env, LdReifiedGeneric, funName);
+      gen(env,
+          StARReifiedGenerics,
+          IRSPRelOffsetData { spOffBCFromIRSP(env) },
+          sp(env),
+          ts);
+    }
+  );
+}
+
 }
 
 void emitFPushCtorS(IRGS& env, uint32_t numParams, SpecialClsRef ref) {
@@ -1028,6 +1068,8 @@ void emitFPushFunc(IRGS& env, uint32_t numParams, const ImmVector& v) {
 
   updateMarker(env);
   env.irb->exceptionStackBoundary();
+
+  storeReifiedGenerics(env, funcName);
 
   gen(env, LdFunc,
       IRSPRelOffsetData { spOffBCFromIRSP(env) },

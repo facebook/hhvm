@@ -223,6 +223,22 @@ inline void ActRec::trashThis() {
 
 /////////////////////////////////////////////////////////////////////////////
 
+inline void ActRec::setReifiedGenerics(ArrayData* rg) {
+  m_reifiedGenerics = rg;
+}
+
+inline ArrayData* ActRec::getReifiedGenerics() const {
+  return m_reifiedGenerics;
+}
+
+inline void ActRec::trashReifiedGenerics() {
+  if (debug) {
+    setReifiedGenerics(reinterpret_cast<ArrayData*>(
+      kTrashedReifiedGenericsSlot));
+  }
+}
+/////////////////////////////////////////////////////////////////////////////
+
 inline void ActRec::trashVarEnv() {
   if (debug) setVarEnv(reinterpret_cast<VarEnv*>(kTrashedVarEnvSlot));
 }

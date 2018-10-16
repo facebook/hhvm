@@ -777,6 +777,7 @@ bool opcodeMayRaise(Opcode opc) {
   case KeysetGetQuiet:
   case KeysetIdx:
   case KeysetIsset:
+  case KillARReifiedGenerics:
   case KillClsRefCls:
   case KillClsRefTS:
   case KillCufIter:
@@ -787,6 +788,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdARIsDynamic:
   case LdARNumArgsAndFlags:
   case LdARNumParams:
+  case LdARReifiedGenerics:
   case LdBindAddr:
   case LdCctx:
   case LdClosure:
@@ -963,6 +965,7 @@ bool opcodeMayRaise(Opcode opc) {
   case Sqrt:
   case StARInvName:
   case StARNumArgsAndFlags:
+  case StARReifiedGenerics:
   case StArResumeAddr:
   case StClosureArg:
   case StClosureCtx:

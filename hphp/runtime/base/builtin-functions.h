@@ -156,6 +156,7 @@ vm_decode_function(const_variant_ref function,
                    HPHP::Class*& cls,
                    StringData*& invName,
                    bool& dynamic,
+                   ArrayData*& reifiedGenerics,
                    DecodeFlags flags = DecodeFlags::Warn);
 
 inline void
@@ -164,8 +165,10 @@ vm_decode_function(const_variant_ref function,
                    bool forwarding,
                    CallCtx& ctx,
                    DecodeFlags flags = DecodeFlags::Warn) {
+  ArrayData* reifiedGenerics = nullptr;
   ctx.func = vm_decode_function(function, ar, forwarding, ctx.this_, ctx.cls,
-                                ctx.invName, ctx.dynamic, flags);
+                                ctx.invName, ctx.dynamic, reifiedGenerics,
+                                flags);
 }
 
 Variant vm_call_user_func(const_variant_ref function, const Variant& params,

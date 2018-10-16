@@ -19,8 +19,8 @@ val elaborate_id : ?autoimport:bool -> Namespace_env.env ->
 
 val elaborate_id_impl : autoimport:bool -> Namespace_env.env ->
                    elaborate_kind ->
-                   Ast.id ->
-                   bool * Ast.id
+                   string ->
+                   bool * string
 (* This function processes only top-level declarations and does not dive
   into inline classes/functions - those are disallowed in Hack and doing it will
   incur a perf hit that everybody will have to pay. For codegen purposed

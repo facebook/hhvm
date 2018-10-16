@@ -199,68 +199,59 @@ let elaborate_defined_id nsenv kind (p, id) =
  * works out. (Fully qualifying identifiers is of course idempotent, but there
  * used to be other schemes here.)
  *)
-let elaborate_id_impl ~autoimport nsenv kind (p, id) =
-  (* Go ahead and fully-qualify the name first. *)
-  if id <> "" && id.[0] = '\\'
-  then false, (p, id)
+let elaborate_id_impl ~autoimport nsenv kind id =
+  if id <> "" && id.[0] = '\\' then
+    false, id (* The name is already fully-qualified. *)
   else
-  let was_renamed, fully_qualified =
-    begin
-      let global_id = Utils.add_ns id in
-      if kind = ElaborateConst && SN.PseudoConsts.is_pseudo_const global_id
-      then false, global_id
-      else
-      (* Expand "use" imports. *)
-      let (bslash_loc, has_bslash) =
-        match String.index id '\\' with
-          | Some i -> i, true
-          | None -> String.length id, false in
-      (* "use function" and "use const" only apply if the id is completely
-       * unqualified, otherwise the normal "use" imports apply. *)
-      let uses = if has_bslash then nsenv.ns_ns_uses else match kind with
-        | ElaborateClass -> nsenv.ns_class_uses
-        | ElaborateFun -> nsenv.ns_fun_uses
-        | ElaborateConst -> nsenv.ns_const_uses in
-      let prefix = String.sub id 0 bslash_loc in
-      if prefix = "namespace" && id <> "namespace" then begin
-        (* Strip off the 'namespace\' (including the slash) from id, then
-        elaborate back into the current namespace. *)
-        let len = (String.length id) - bslash_loc  - 1 in
-        false, elaborate_into_current_ns nsenv (String.sub id (bslash_loc + 1) len)
-      end
-      else
-      begin
-      match SMap.get prefix uses with
-        | None ->
-          let unaliased_id = aliased_to_fully_qualified_id
-            nsenv.ns_auto_namespace_map id in
-          if unaliased_id <> id
-          then false, ("\\" ^ unaliased_id)
-          else if autoimport
-          then
-            match get_autoimport_name_namespace id with
-            | true, ns_name ->
-              false,
-              if ParserOptions.enable_hh_syntax_for_hhvm nsenv.ns_popt && kind = ElaborateClass
-              then elaborate_into_ns ns_name id
-              else "\\" ^ id
-            | false, _ ->
-              false, elaborate_into_current_ns nsenv id
-          else false, elaborate_into_current_ns nsenv id
-        | Some use -> begin
-          (* Strip off the "use" from id, but *not* the backslash after that
-           * (so "use\foo" will become "\foo") and then prepend the new
-           * namespace. *)
-          let len = (String.length id) - bslash_loc in
-          true, use ^ (String.sub id bslash_loc len)
-        end
-      end
-    end in
-  was_renamed, (p, fully_qualified)
 
-let elaborate_id ?(autoimport=true) nsenv kind id =
+  let global_id = Utils.add_ns id in
+  if kind = ElaborateConst && SN.PseudoConsts.is_pseudo_const global_id then
+    false, global_id (* Pseudo-constants are always global. *)
+  else
+
+  let bslash_loc, has_bslash =
+    match String.index id '\\' with
+    | Some i -> i, true
+    | None -> String.length id, false
+  in
+  let prefix = String.sub id 0 bslash_loc in
+  if prefix = "namespace" then
+    false, elaborate_into_current_ns nsenv (String_utils.lstrip id "namespace\\")
+  else
+
+  (* Expand "use" imports. "use function" and "use const" only apply if the id
+   * is completely unqualified, otherwise the normal "use" imports apply. *)
+  let uses = if has_bslash then nsenv.ns_ns_uses else
+    match kind with
+    | ElaborateClass -> nsenv.ns_class_uses
+    | ElaborateFun -> nsenv.ns_fun_uses
+    | ElaborateConst -> nsenv.ns_const_uses
+  in
+  match SMap.get prefix uses with
+  | Some use ->
+    true, use ^ (String_utils.lstrip id prefix)
+  | None ->
+    let fq_id =
+      let unaliased_id =
+        aliased_to_fully_qualified_id nsenv.ns_auto_namespace_map id in
+      if unaliased_id <> id then
+        "\\" ^ unaliased_id
+      else if not autoimport then
+        elaborate_into_current_ns nsenv id
+      else
+        match get_autoimport_name_namespace id with
+        | false, _ ->
+          elaborate_into_current_ns nsenv id
+        | true, ns_name ->
+          if ParserOptions.enable_hh_syntax_for_hhvm nsenv.ns_popt && kind = ElaborateClass
+          then elaborate_into_ns ns_name id
+          else global_id
+    in
+    false, fq_id
+
+let elaborate_id ?(autoimport=true) nsenv kind (p, id) =
   let _, newid = elaborate_id_impl ~autoimport nsenv kind id in
-  newid
+  p, newid
 
 (* First pass of flattening namespaces, run super early in the pipeline, right
  * after parsing.

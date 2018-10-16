@@ -3202,7 +3202,7 @@ let elaborate_toplevel_and_std_constants ast (env: env) source_text =
                 ~autoimport:true
                 nsenv
                 NS.ElaborateConst
-                (p, text) in
+                text in
             if was_renamed then p, Ast.Id (p, text)
             else expr
           | _ -> super#on_expr env expr

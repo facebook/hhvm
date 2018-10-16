@@ -21,13 +21,10 @@ let elaborate_id ns kind id =
       Hh_autoimport.autoimport_only_for_typechecker (SU.strip_ns @@ snd id)
     then false else Emit_env.is_hh_syntax_enabled () in
 
+  let ns = Namespace_env.with_auto_namespace_map ns (auto_namespace_map ()) in
   let was_renamed, fully_qualified_id =
-    let ns = Namespace_env.with_auto_namespace_map ns (auto_namespace_map ()) in
-    let was_renamed, (_, fully_qualified_id) =
-      Namespaces.elaborate_id_impl ~autoimport ns kind id in
-    was_renamed, fully_qualified_id
+    Namespaces.elaborate_id_impl ~autoimport ns kind (snd id)
   in
-
   let stripped_fully_qualified_id = SU.strip_global_ns fully_qualified_id in
   let clean_id = SU.strip_ns fully_qualified_id in
   let need_fallback =

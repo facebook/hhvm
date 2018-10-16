@@ -293,8 +293,9 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   string path = reqURI.path().data();
   string absPath = reqURI.absolutePath().data();
 
-  // determine whether we should compress response
-  bool compressed = transport->decideCompression();
+  // determine whether we can use a precompressed response
+  // (the cache stores compressed values using gzip)
+  bool acceptsPrecompressed = transport->acceptEncoding("gzip");
 
   const char *data; int len;
   const char *ext = reqURI.ext();
@@ -316,7 +317,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
 
   // If this is not a php file, check the static content cache
   if (treatAsContent) {
-    bool original = compressed;
+    bool compressed = acceptsPrecompressed;
     // check against static content cache
     if (StaticContentCache::TheCache.find(path, data, len, compressed)) {
       ScopedMem decompressed_data;
@@ -324,7 +325,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
       // local cache file is not valuable, maybe misleading. This way
       // the Last-Modified header will not show in response.
       // stat(RuntimeOption::FileCache.c_str(), &st);
-      if (!original && compressed) {
+      if (!acceptsPrecompressed && compressed) {
         data = gzdecode(data, len);
         if (data == nullptr) {
           raise_fatal_error("cannot unzip compressed data");

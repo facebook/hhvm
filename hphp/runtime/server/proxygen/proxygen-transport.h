@@ -155,7 +155,7 @@ struct ProxygenTransport final
    * Get request header(s).
    */
   std::string getHeader(const char *name) override;
-  void getHeaders(HeaderMap &headers) override;
+  const HeaderMap& getHeaders() override;
 
   /**
    * Get a description of the type of transport.

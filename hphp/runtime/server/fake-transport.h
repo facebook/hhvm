@@ -71,7 +71,7 @@ struct FakeTransport final : Transport {
    * Get request header(s).
    */
   std::string getHeader(const char* /*name*/) override { return ""; };
-  void getHeaders(HeaderMap& /*headers*/) override {
+  const HeaderMap& getHeaders() override {
     LOG(FATAL) << "FakeTransport::getHeaders";
   }
   /**

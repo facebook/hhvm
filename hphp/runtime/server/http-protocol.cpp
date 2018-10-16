@@ -769,8 +769,7 @@ void HttpProtocol::PrepareServerVariable(Array& server,
   // HTTP_ headers -- we don't exclude headers we handle elsewhere (e.g.,
   // Content-Type, Authorization), since the CGI "spec" merely says the server
   // "may" exclude them; this is not what APE does, but it's harmless.
-  HeaderMap headers;
-  transport->getHeaders(headers);
+  auto const& headers = transport->getHeaders();
   // Do this first so other methods can overwrite them
   CopyHeaderVariables(server, headers);
   CopyServerInfo(server, transport, vhost);
@@ -999,8 +998,7 @@ bool HttpProtocol::ProxyRequest(Transport *transport, bool force,
     return false;
   }
 
-  HeaderMap requestHeaders;
-  transport->getHeaders(requestHeaders);
+  auto requestHeaders = transport->getHeaders();
   if (extraHeaders) {
     for (HeaderMap::const_iterator iter = extraHeaders->begin();
          iter != extraHeaders->end(); ++iter) {

@@ -187,7 +187,7 @@ public:
    * Get request header(s).
    */
   virtual std::string getHeader(const char *name) = 0;
-  virtual void getHeaders(HeaderMap &headers) = 0;
+  virtual const HeaderMap& getHeaders() = 0;
   virtual void getTransportParams(HeaderMap& /*serverParams*/){};
 
   /**

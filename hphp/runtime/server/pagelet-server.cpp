@@ -115,8 +115,8 @@ std::string PageletTransport::getHeader(const char *name) {
   return "";
 }
 
-void PageletTransport::getHeaders(HeaderMap &headers) {
-  headers = m_requestHeaders;
+const HeaderMap& PageletTransport::getHeaders() {
+  return m_requestHeaders;
 }
 
 void PageletTransport::addHeaderImpl(const char *name, const char *value) {

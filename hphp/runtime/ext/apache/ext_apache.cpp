@@ -53,8 +53,7 @@ Variant HHVM_FUNCTION(apache_note, const String& note_name,
 Array HHVM_FUNCTION(apache_request_headers) {
   Transport *transport = g_context->getTransport();
   if (transport) {
-    HeaderMap headers;
-    transport->getHeaders(headers);
+    auto const& headers = transport->getHeaders();
     return get_headers<PackedArrayInit, MixedArrayInit>(headers);
   }
   return empty_array();
@@ -109,8 +108,7 @@ Array HHVM_FUNCTION(apache_get_config) {
 Array HHVM_FUNCTION(get_headers_secure) {
   Transport *transport = g_context->getTransport();
   if (transport) {
-    HeaderMap headers;
-    transport->getHeaders(headers);
+    auto const& headers = transport->getHeaders();
     return get_headers<VArrayInit, DArrayInit>(headers, true);
   }
   return Array::CreateVArray();

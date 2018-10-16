@@ -45,7 +45,10 @@ void ReplayTransport::recordInput(Transport* transport, const char *filename) {
   hdf["remote_host"] = transport->getRemoteHost();
   hdf["remote_port"] = transport->getRemotePort();
 
-  transport->getHeaders(m_requestHeaders);
+  auto const& headers = transport->getHeaders();
+  for (auto const& pair : headers) {
+    m_requestHeaders[pair.first] = pair.second;
+  }
   int index = 0;
   for (HeaderMap::const_iterator iter = m_requestHeaders.begin();
        iter != m_requestHeaders.end(); ++iter) {
@@ -123,8 +126,8 @@ std::string ReplayTransport::getHeader(const char *name) {
   return "";
 }
 
-void ReplayTransport::getHeaders(HeaderMap &headers) {
-  headers = m_requestHeaders;
+const HeaderMap& ReplayTransport::getHeaders() {
+  return m_requestHeaders;
 }
 
 void ReplayTransport::addHeaderImpl(const char *name, const char *value) {

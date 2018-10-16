@@ -126,7 +126,10 @@ struct XboxTransport final : Transport, Synchronizable {
    * Manage headers.
    */
   std::string getHeader(const char *name) override;
-  void getHeaders(HeaderMap& /*headers*/) override {}
+  const HeaderMap& getHeaders() override {
+    static const HeaderMap emptyMap{};
+    return emptyMap;
+  }
   void addHeaderImpl(const char* /*name*/, const char* /*value*/) override {}
   void removeHeaderImpl(const char* /*name*/) override {}
 

@@ -502,7 +502,10 @@ struct TestTransport final : Transport {
   uint16_t getRemotePort() override { return 0; }
   Method getMethod() override { return Transport::Method::GET; }
   std::string getHeader(const char* /*name*/) override { return ""; }
-  void getHeaders(HeaderMap& /*headers*/) override {}
+  const HeaderMap& getHeaders() override {
+    static const HeaderMap emptyMap{};
+    return emptyMap;
+  }
   void addHeaderImpl(const char* /*name*/, const char* /*value*/) override {}
   void removeHeaderImpl(const char* /*name*/) override {}
 
@@ -662,8 +665,7 @@ struct EchoHandler final : RequestHandler {
   // implementing RequestHandler
   void handleRequest(Transport *transport) override {
     g_context.getCheck();
-    HeaderMap headers;
-    transport->getHeaders(headers);
+    const HeaderMap& headers = transport->getHeaders();
 
     std::string response;
     response = "\nGET param: name = ";

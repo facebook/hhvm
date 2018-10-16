@@ -484,10 +484,8 @@ std::string ProxygenTransport::getHeader(const char *name) {
   return "";
 }
 
-void ProxygenTransport::getHeaders(HeaderMap &headers) {
-  if (&m_requestHeaders != &headers) {
-    headers = m_requestHeaders;
-  }
+const HeaderMap& ProxygenTransport::getHeaders() {
+  return m_requestHeaders;
 }
 
 void ProxygenTransport::addHeaderImpl(const char *name, const char *value) {

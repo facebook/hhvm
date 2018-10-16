@@ -173,7 +173,7 @@ struct FastCGITransport final : Transport, private Synchronizable {
 
   // HEADER data
   std::string getHeader(const char* name) override;          // unmangled name
-  void getHeaders(HeaderMap& headers) override;              // HTTP headers
+  const HeaderMap& getHeaders() override;                    // HTTP headers
   void getTransportParams(HeaderMap& serverParams) override; // FCGI parameters
 
   // Modified properties
@@ -280,6 +280,7 @@ private:
   std::string m_serverObject;
   Method m_method{Method::Unknown};
   std::unordered_map<std::string, std::string> m_requestParams;
+  HeaderMap m_unmangledRequestParams;
 
   folly::IOBufQueue m_txBuf; // buffer for sending messages
 

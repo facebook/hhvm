@@ -49,7 +49,7 @@ struct ReplayTransport final : Transport {
   const void *getPostData(size_t &size) override;
   Method getMethod() override;
   std::string getHeader(const char *name) override;
-  void getHeaders(HeaderMap &headers) override;
+  const HeaderMap& getHeaders() override;
   void addHeaderImpl(const char *name, const char *value) override;
   void removeHeaderImpl(const char *name) override;
   void sendImpl(const void *data, int size, int code, bool chunked, bool eom)

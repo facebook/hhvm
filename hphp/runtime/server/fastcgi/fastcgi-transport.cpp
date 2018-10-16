@@ -116,13 +116,17 @@ std::string FastCGITransport::getHeader(const char* name) {
   return "";
 }
 
-void FastCGITransport::getHeaders(HeaderMap& headers) {
-  for (auto& pair : m_requestParams) {
-    auto key = unmangleHeader(pair.first);
-    if (!key.empty()) {
-      headers[key] = { pair.second };
+const HeaderMap& FastCGITransport::getHeaders() {
+  // lazily construct unmangled headers
+  if (m_unmangledRequestParams.empty()) {
+    for (auto& pair : m_requestParams) {
+      auto key = unmangleHeader(pair.first);
+      if (!key.empty()) {
+        m_unmangledRequestParams[key] = { pair.second };
+      }
     }
   }
+  return m_unmangledRequestParams;
 }
 
 void FastCGITransport::getTransportParams(HeaderMap& serverParams) {
@@ -220,6 +224,14 @@ void FastCGITransport::onHeader(std::unique_ptr<folly::IOBuf> key_chain,
   auto value = valCur.readFixedString(value_chain->computeChainDataLength());
 
   m_requestParams[key] = value;
+
+  // if we've already built the unmangled map, add to that as well
+  if (!m_unmangledRequestParams.empty()) {
+    auto unmangledKey = unmangleHeader(key);
+    if (!unmangledKey.empty()) {
+      m_unmangledRequestParams[unmangledKey] = { value };
+    }
+  }
 }
 
 void FastCGITransport::onHeadersComplete() {

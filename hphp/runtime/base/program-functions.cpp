@@ -66,6 +66,7 @@
 #include "hphp/runtime/server/rpc-request-handler.h"
 #include "hphp/runtime/server/server-note.h"
 #include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/server/warmup-request-handler.h"
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/extern-compiler.h"
@@ -1156,41 +1157,27 @@ static int start_server(const std::string &username, int xhprof) {
     Logger::Info("Warming up");
     if (!RuntimeOption::EvalJitProfileWarmupRequests) profileWarmupStart();
     SCOPE_EXIT { profileWarmupEnd(); };
-    std::map<std::string, int> seen;
-    for (auto& file : RuntimeOption::ServerWarmupRequests) {
+    using WarmupThread = AsyncFunc<InternalWarmupWorker>;
+    std::vector<std::unique_ptr<InternalWarmupWorker>> workers;
+    std::vector<std::unique_ptr<WarmupThread>> threads;
+    std::map<std::string, unsigned> seen;
+    for (auto const& file : RuntimeOption::ServerWarmupRequests) {
       HttpServer::CheckMemAndWait();
-      // Take only the last part
-      folly::StringPiece f(file);
-      auto pos = f.rfind('/');
-      std::string str(pos == f.npos ? file : f.subpiece(pos + 1).str());
-      auto count = seen[str];
-      BootStats::Block timer(folly::sformat("warmup:{}:{}", str, count), true);
-      seen[str] = ++count;
-
-      HttpRequestHandler handler(0);
-      ReplayTransport rt;
-      timespec start;
-      Timer::GetMonotonicTime(start);
-      std::string error;
-      Logger::Info("Replaying warmup request %s", file.c_str());
-
-      try {
-        rt.onRequestStart(start);
-        rt.replayInput(Hdf(file));
-        handler.run(&rt);
-
-        timespec stop;
-        Timer::GetMonotonicTime(stop);
-        Logger::Info("Finished successfully in %ld seconds",
-                     stop.tv_sec - start.tv_sec);
-      } catch (std::exception& e) {
-        error = e.what();
-      }
-
-      if (error.size()) {
-        Logger::Info("Got exception during warmup: %s", error.c_str());
+      auto const count = ++seen[file];
+      auto worker = std::make_unique<InternalWarmupWorker>(file, count);
+      auto workerThread =
+        std::make_unique<WarmupThread>(worker.get(),
+                                       &InternalWarmupWorker::run);
+      workerThread->start();
+      if (RuntimeOption::ServerWarmupConcurrently) {
+        // destruct worker and workerThread later, after the threads are joined.
+        workers.emplace_back(std::move(worker));
+        threads.emplace_back(std::move(workerThread));
+      } else {
+        workerThread->waitForEnd();
       }
     }
+    for (auto& t : threads) t->waitForEnd();
   }
   BootStats::mark("warmup");
 

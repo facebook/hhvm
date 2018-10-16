@@ -19,6 +19,13 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/program-functions.h"
 
+#include "hphp/runtime/server/replay-transport.h"
+
+#include "hphp/util/boot-stats.h"
+#include "hphp/util/timer.h"
+
+#include <folly/Range.h>
+#include <folly/Format.h>
 #include <folly/Memory.h>
 
 using std::make_unique;
@@ -65,6 +72,36 @@ void WarmupRequestHandlerFactory::bumpReqCount() {
 
   Logger::Info("Finished warmup; saturating worker threads");
   m_server->saturateWorkers();
+}
+
+void InternalWarmupWorker::run() {
+  folly::StringPiece f(m_hdfFile);
+  auto pos = f.rfind('/');
+  auto const str = (pos == f.npos) ? f : f.subpiece(pos + 1);
+  BootStats::Block timer(folly::sformat("warmup:{}:{}", str, m_index),
+                         RuntimeOption::ServerExecutionMode());
+
+  // hphp_thread_init() and hphp_thread_exit() are called when we create the
+  // thread, through AsyncFuncImpl::SetThreadInitFunc() and
+  // AsyncFuncImpl::SetThreadFiniFunc().
+  //
+  // HttpRequestHandler takes care of doing hphp_session_init(),
+  // hphp_session_exit(), and hphp_context_exit().
+
+  try {
+    HttpRequestHandler handler(0);
+    ReplayTransport rt;
+    Logger::FInfo("Replaying warmup request {}:{}", m_hdfFile, m_index);
+
+    timespec start;
+    Timer::GetMonotonicTime(start);
+    rt.onRequestStart(start);
+    rt.replayInput(Hdf(m_hdfFile));
+    handler.run(&rt);
+  } catch (std::exception& e) {
+    Logger::FWarning("Got exception during warmup request {}:{}, {}",
+                     m_hdfFile, m_index, e.what());
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

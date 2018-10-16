@@ -72,6 +72,18 @@ private:
   Server *m_server;
 };
 
+// Play an internal warmup request.
+struct InternalWarmupWorker {
+  InternalWarmupWorker(const std::string& file, unsigned index)
+    : m_hdfFile(file)
+    , m_index(index) {}
+  void run();
+ private:
+  const std::string m_hdfFile;
+  const unsigned m_index;
+};
+
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

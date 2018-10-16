@@ -68,6 +68,10 @@ type is_sub_type_type = Env.env -> locl ty -> locl ty -> bool
 let (is_sub_type_ref: is_sub_type_type ref) = ref not_implemented
 let is_sub_type x = !is_sub_type_ref x
 
+type is_sub_type_alt_type = Env.env -> locl ty -> locl ty -> bool option
+let (is_sub_type_alt_ref: is_sub_type_alt_type ref) = ref not_implemented
+let is_sub_type_alt x = !is_sub_type_alt_ref x
+
 type add_constraint = Pos.Map.key -> Env.env -> Ast.constraint_kind -> locl ty -> locl ty -> Env.env
 let (add_constraint_ref: add_constraint ref) = ref not_implemented
 let add_constraint x = !add_constraint_ref x
@@ -487,7 +491,10 @@ let rec member_inter env ty tyl acc =
   | x :: rl ->
       Errors.try_
         begin fun () ->
-          let env, ty = unify env x ty in
+          let env, ty =
+            if is_sub_type_alt env x ty = Some true then env, ty
+            else if is_sub_type_alt env ty x = Some true then env, x
+            else unify env x ty in
           env, List.rev_append acc (ty :: rl)
         end
         begin fun _ ->

@@ -2040,3 +2040,4 @@ let add_constraint
 let () = Typing_utils.sub_type_ref := sub_type
 let () = Typing_utils.add_constraint_ref := add_constraint
 let () = Typing_utils.is_sub_type_ref := is_sub_type
+let () = Typing_utils.is_sub_type_alt_ref := is_sub_type_alt

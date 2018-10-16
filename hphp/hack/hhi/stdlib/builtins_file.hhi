@@ -52,7 +52,7 @@ const GLOB_NOSORT  = 4;
 const GLOB_NOCHECK = 16;
 const GLOB_ESCAPE  = 64;
 const GLOB_BRACE   = 1024;
-const GLOB_ONLYDIR = 8129;
+const GLOB_ONLYDIR = 8192;
 
 <<__PHPStdLib>>
 function fopen($filename, $mode, $use_include_path = false, $context = null);

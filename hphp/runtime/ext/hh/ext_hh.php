@@ -78,6 +78,15 @@ function ffp_parse_file(string $file): array {
   return json_decode($json, true, 2048);
 }
 
+<<__Native>>
+function ffp_parse_string_native(string $program): string;
+
+function ffp_parse_string(string $program): array {
+  $json = ffp_parse_string_native($program);
+  // 2048 is MAX_JSON_DEPTH to avoid making a global constant
+  return json_decode($json, true, 2048);
+}
+
 // Simple depth-first search, supports early return
 function ffp_json_dfs(
   mixed $json, // this can be any value type valid in JSON

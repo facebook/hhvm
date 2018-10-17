@@ -456,6 +456,25 @@ String HHVM_FUNCTION(ffp_parse_file_native, const String& str) {
   return res.value;
 }
 
+String HHVM_FUNCTION(ffp_parse_string_native, const String& str) {
+  std::string program = str.get()->data();
+
+  auto result = ffp_parse_file("", program.c_str(), program.size());
+
+  FfpJSONString res;
+  match<void>(
+    result,
+    [&](FfpJSONString& r) {
+      res = std::move(r);
+    },
+    [&](std::string& err) {
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "FFP failed to parse string");
+    }
+  );
+  return res.value;
+}
+
 bool HHVM_FUNCTION(clear_lsb_memoization,
                    const String& clsStr, TypedValue funcStr) {
   auto const clear = [](const Class* cls, const Func* func) {
@@ -540,6 +559,8 @@ static struct HHExtension final : Extension {
                   HHVM_FN(clear_static_memoization));
     HHVM_NAMED_FE(HH\\ffp_parse_file_native,
                   HHVM_FN(ffp_parse_file_native));
+    HHVM_NAMED_FE(HH\\ffp_parse_string_native,
+                  HHVM_FN(ffp_parse_string_native));
     HHVM_NAMED_FE(HH\\clear_lsb_memoization,
                   HHVM_FN(clear_lsb_memoization));
     HHVM_NAMED_FE(HH\\clear_instance_memoization,

@@ -51,3 +51,7 @@ val declare_class_in_file:
 
 val declare_fun_in_file:
   TypecheckerOptions.t -> Relative_path.t -> string -> unit
+
+val start_tracking : unit -> unit
+
+val stop_tracking : unit -> FileInfo.names

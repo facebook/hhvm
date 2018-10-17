@@ -27,6 +27,45 @@ module SN = Naming_special_names
 
 exception Decl_not_found of string
 
+let tracked_names = ref None
+
+let start_tracking () =
+  tracked_names := Some FileInfo.empty_names
+
+let record_fun s = match !tracked_names with
+  | None -> ()
+  | Some names -> tracked_names := Some FileInfo.{ names with
+      n_funs = SSet.add s names.n_funs
+  }
+
+let record_class s = match !tracked_names with
+  | None -> ()
+  | Some names -> tracked_names := Some FileInfo.{ names with
+      n_classes = SSet.add s names.n_classes
+  }
+
+let record_typedef s = match !tracked_names with
+  | None -> ()
+  | Some names -> tracked_names := Some FileInfo.{ names with
+      n_types = SSet.add s names.n_types
+  }
+
+let record_const s = match !tracked_names with
+  | None -> ()
+  | Some names -> tracked_names := Some FileInfo.{ names with
+      n_consts = SSet.add s names.n_consts
+  }
+
+let stop_tracking () =
+  let res = match !tracked_names with
+    | None ->
+      Hh_logger.log "Warning: called Decl.stop_tracking without corresponding start_tracking";
+      FileInfo.empty_names
+    | Some names -> names
+  in
+  tracked_names := None;
+  res
+
 let conditionally_reactive_attribute_to_hint env { ua_params = l; _ } =
   match l with
   (* convert class const expression to non-generic type hint *)
@@ -288,6 +327,7 @@ and fun_decl f decl_tcopt =
     fun_decl_in_env env f
   end in
   let ft = { ft with ft_decl_errors = Some errors } in
+  record_fun (snd f.f_name);
   Decl_heap.Funs.add (snd f.f_name) ft;
   ()
 
@@ -430,6 +470,7 @@ and class_naming_and_decl (class_env:class_env) cid c =
     class_parents_decl class_env c;
     class_decl class_env.tcopt c
   end in
+  record_class (snd c.c_name);
   Decl_heap.Classes.add (snd c.c_name) { tc with dc_decl_errors = Some errors };
   ()
 
@@ -1089,6 +1130,7 @@ and typedef_decl tdef decl_tcopt =
 and type_typedef_naming_and_decl tcopt tdef =
   let tdef = Errors.ignore_ (fun () -> Naming.typedef tcopt tdef) in
   let errors, tdecl = Errors.do_ (fun () -> typedef_decl tdef tcopt) in
+  record_typedef (snd tdef.t_name);
   Decl_heap.Typedefs.add (snd tdef.t_name)
     { tdecl with td_decl_errors = Some errors};
   ()
@@ -1116,6 +1158,7 @@ let const_decl cst decl_tcopt =
 let iconst_decl tcopt cst =
   let cst = Errors.ignore_ (fun () -> Naming.global_const tcopt cst) in
   let errors, hint_ty = Errors.do_ (fun() -> const_decl cst tcopt) in
+  record_const (snd cst.cst_name);
   Decl_heap.GConsts.add (snd cst.cst_name) (hint_ty, errors);
   ()
 

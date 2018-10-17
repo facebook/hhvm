@@ -1872,6 +1872,7 @@ module WithExpressionAndStatementAndTypeParser
       Make.markup_section parser missing1 missing2 missing3 missing4
 
   let parse_script parser =
+    Full_fidelity_parser_profiling.record_parse ();
     let rec aux parser acc =
       let (parser1, token) = next_token parser in
       match Token.kind token with

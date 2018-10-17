@@ -371,7 +371,7 @@ let actually_handle genv client msg full_recheck_needed ~is_stale = fun env ->
       ClientProvider.ping client;
       let t = Unix.gettimeofday () in
       Sys_utils.start_gc_profiling ();
-      Parser_heap.start_profiling ();
+      Full_fidelity_parser_profiling.start_profiling ();
       let (new_env, response), declared_names = try
         with_decl_tracking @@ fun () -> ServerRpc.handle ~is_stale genv env cmd
       with e ->
@@ -380,7 +380,7 @@ let actually_handle genv client msg full_recheck_needed ~is_stale = fun env ->
         else raise (Nonfatal_rpc_exception (e, stack, env))
       in
       let cmd_string = ServerCommandTypesUtils.debug_describe_t cmd in
-      let parsed_files = Parser_heap.stop_profiling () in
+      let parsed_files = Full_fidelity_parser_profiling.stop_profiling () in
       predeclare_ide_deps genv env declared_names;
       let major_gc_time, minor_gc_time = Sys_utils.get_gc_time () in
       HackEventLogger.handled_command cmd_string

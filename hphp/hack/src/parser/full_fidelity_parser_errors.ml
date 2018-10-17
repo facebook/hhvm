@@ -1292,10 +1292,6 @@ let methodish_errors env node parents errors =
       special_method_param_errors
       md.methodish_function_decl_header parents errors in
     let errors =
-      if methodish_contains_static node && is_in_reified_class parents then
-        make_error_from_node node SyntaxError.static_method_in_reified_class
-        :: errors else errors in
-    let errors =
       produce_error errors
       methodish_multiple_reactivity_annotations node
       SyntaxError.multiple_reactivity_annotations method_attrs in

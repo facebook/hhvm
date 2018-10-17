@@ -571,8 +571,10 @@ let shadowing_reified =
   "You may not shadow a reified parameter"
 let static_property_in_reified_class =
   "You may not use static properties in a class with reified type parameters"
-let static_method_in_reified_class =
-  "You may not use static methods in a class with reified type parameters"
+let cls_reified_generic_in_static_method =
+  "You may not use reified generics of the class in a static method"
+let static_method_reified_obj_creation =
+  "You may not use object creation for reified self or parent from a static method"
 
 let dollar_unary = "The dollar sign ('$') cannot be used as a unary operator"
 

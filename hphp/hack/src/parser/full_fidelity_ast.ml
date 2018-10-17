@@ -8,6 +8,7 @@
  *)
 
 module SyntaxError = Full_fidelity_syntax_error
+module SN = Naming_special_names
 open Core_kernel
 open Prim_defs
 (* What we are lowering to *)
@@ -52,6 +53,9 @@ type env =
   *)
   ; saw_compiler_halt_offset : (int option) ref
   ; recursion_depth : int ref
+  ; cls_reified_generics : SSet.t ref
+  ; in_static_method : bool ref
+  ; parent_is_reified : bool ref
   }[@@deriving show]
 
 let make_env
@@ -112,6 +116,9 @@ let make_env
     ; saw_std_constant_redefinition = false
     ; saw_compiler_halt_offset = ref None
     ; recursion_depth = ref 0
+    ; cls_reified_generics = ref SSet.empty
+    ; in_static_method = ref false
+    ; parent_is_reified = ref false
     }
 
 type result =
@@ -734,6 +741,35 @@ let unwrap_extra_block (stmt : block) : block =
   | [_, Block b] -> de_noop b
   | blk -> blk
 
+let fail_if_invalid_class_creation env node (_, id) =
+  if not !(env.in_static_method) then () else begin
+    if (id = SN.Classes.cSelf && not @@ SSet.is_empty !(env.cls_reified_generics)) ||
+      (id = SN.Classes.cParent && !(env.parent_is_reified)) then
+        raise_parsing_error env (`Node node) SyntaxError.static_method_reified_obj_creation;
+  end
+
+let fail_if_invalid_reified_generic env node (_, id) =
+  if not !(env.in_static_method) then () else begin
+    if SSet.mem id !(env.cls_reified_generics) then
+      raise_parsing_error env (`Node node) SyntaxError.cls_reified_generic_in_static_method
+  end
+
+let check_valid_reified_hint env node h =
+  if not !(env.in_static_method) then () else
+  let reified_hint_visitor = object(self) inherit [_] iter as super
+    method! on_hint env hint =
+      match snd hint with
+      | Happly (id, hl) ->
+        fail_if_invalid_reified_generic env node id;
+        List.iter hl ~f:(self#on_hint env)
+      | Haccess (id1, id2, ids) ->
+        fail_if_invalid_reified_generic env node id1;
+        fail_if_invalid_reified_generic env node id2;
+        List.iter ids ~f:(fail_if_invalid_reified_generic env node)
+      | _ -> super#on_hint env hint
+    end in
+  reified_hint_visitor#on_hint env h
+
 let rec pHint : hint parser = fun node env ->
   let rec pHint_ : hint_ parser = fun node env ->
     match syntax node with
@@ -853,7 +889,9 @@ let rec pHint : hint parser = fun node env ->
       Hreified (pHint t env)
     | _ -> missing_syntax "type hint" node env
   in
-  pPos node env, pHint_ node env
+  let hint = pPos node env, pHint_ node env in
+  check_valid_reified_hint env node hint;
+  hint
 
 let pTarg node env =
   match syntax node with
@@ -1486,6 +1524,11 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           let name = pos_name constructor_call_type env in
           (fst name, Id name), []
         | _ -> pExpr constructor_call_type env, [] in
+      (match snd e with
+      | Id name ->
+        fail_if_invalid_reified_generic env node name;
+        fail_if_invalid_class_creation env node name
+      | _ -> ());
       New
       ( e
       , hl
@@ -2214,11 +2257,14 @@ and pTConstraint : (constraint_kind * hint) parser = fun node env ->
     )
   | _ -> missing_syntax "type constraint" node env
 
-and pTParaml : tparam list parser = fun node env ->
+and pTParaml ?(is_class=false): tparam list parser = fun node env ->
   let pTParam : tparam parser = fun node env ->
     match syntax node with
     | TypeParameter
       { type_reified; type_variance; type_name; type_constraints } ->
+      let is_reified = not @@ is_missing type_reified in
+      if is_class && is_reified then
+        env.cls_reified_generics := SSet.add (text type_name) !(env.cls_reified_generics);
       ( (match token_kind type_variance with
         | Some TK.Plus  -> Covariant
         | Some TK.Minus -> Contravariant
@@ -2226,7 +2272,7 @@ and pTParaml : tparam list parser = fun node env ->
         )
       , pos_name type_name env
       , couldMap ~f:pTConstraint type_constraints env
-      , not @@ is_missing type_reified
+      , is_reified
       )
     | _ -> missing_syntax "type parameter" node env
   in
@@ -2535,8 +2581,10 @@ and pClassElt : class_elt list parser = fun node env ->
         in
         member_init @ body
       in
-      let body, body_has_yield = mpYielding pBody methodish_function_body env in
       let kind = pKinds (fun _ -> ()) h.function_modifiers env in
+      env.in_static_method := (List.exists kind ~f:(function Static -> true | _ -> false));
+      let body, body_has_yield = mpYielding pBody methodish_function_body env in
+      env.in_static_method := false;
       let is_external = is_semicolon methodish_function_body in
       member_def @ [Method
       { m_kind            = kind
@@ -2802,8 +2850,13 @@ and pDef : def list parser = fun node env ->
         | _ -> false
       in
       let c_name = pos_name name env in
-      let c_tparams = pTParaml tparaml env in
+      env.cls_reified_generics := SSet.empty;
+      let c_tparams = pTParaml ~is_class:true tparaml env in
       let c_extends = couldMap ~f:pHint exts env in
+      env.parent_is_reified := (match c_extends with
+        | (_, Happly (_, hl)) :: _ ->
+          List.exists hl ~f:(function _, Hreified _ -> true | _ -> false)
+        | _ -> false);
       let c_implements = couldMap ~f:pHint impls env in
       let c_body =
         let rec aux acc ns =

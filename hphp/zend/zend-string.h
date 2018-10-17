@@ -53,6 +53,7 @@ struct Md5Digest {
 };
 
 std::string string_md5(folly::StringPiece);
+std::string string_sha1(folly::StringPiece);
 
 /*
  * Convert input[len] to a malloced, nul-terminated, lowercase, hex string

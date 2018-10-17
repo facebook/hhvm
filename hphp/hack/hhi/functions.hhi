@@ -79,8 +79,9 @@ namespace HH {
     string $root,
   ): bool;
 
-  function ffp_parse_file(string $file): varray_or_darray;
-  function ffp_parse_string(string $program): varray_or_darray;
+  newtype ParseTree = darray<string, mixed>;
+  function ffp_parse_file(string $file): ParseTree;
+  function ffp_parse_string(string $program): ParseTree;
 
   function clear_static_memoization(?string $cls, ?string $func = null) : bool;
   function clear_lsb_memoization(string $cls, ?string $func = null) : bool;

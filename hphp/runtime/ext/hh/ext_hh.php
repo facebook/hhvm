@@ -87,42 +87,6 @@ function ffp_parse_string(string $program): array {
   return json_decode($json, true, 2048);
 }
 
-// Simple depth-first search, supports early return
-function ffp_json_dfs(
-  mixed $json, // this can be any value type valid in JSON
-  bool $right,
-  (function (array): array) $predicate,
-  (function (array): bool) $skip_node = (($_) ==> false),
-) {
-  if (!is_array($json)) {
-    return null;
-  }
-
-  if (array_key_exists("kind", $json)) {
-    // early return
-    if ($skip_node($json)) {
-      return null;
-    }
-
-    // base case
-    $b = $predicate($json);
-    if ($b !== null) {
-      return $b;
-    }
-  }
-
-  // recursive case
-  if ($right) {
-    $json = array_reverse($json);
-  }
-  foreach ($json as $v) {
-    $b = ffp_json_dfs($v, $right, $predicate, $skip_node);
-    if ($b !== null) {
-      return $b;
-    }
-  }
-}
-
 /**
  * Clear __MemoizeLSB data
  *  - if $func is non-null, clear cache for $cls::$func

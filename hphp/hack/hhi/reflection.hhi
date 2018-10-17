@@ -129,9 +129,6 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function getDocComment(): mixed; // string | false
   public function getStaticVariables(): darray<string, mixed>;
   public function returnsReference(): bool;
-  public static function find_single_function(varray_or_darray $json, int $line): ?varray_or_darray;
-  public static function find_all_functions(varray_or_darray $json): dict<int, varray_or_darray>;
-  public static function body_bounds(varray_or_darray $function): ((int, int), (int, int));
   public function getReturnTypeText();
   final public function getAttributes(): darray<string, varray<mixed>>;
   final public function getAttribute(string $name): ?varray<mixed>;

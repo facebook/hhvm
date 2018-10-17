@@ -12,3 +12,4 @@ function extract_shape_comments(ShapeNode $shape): dict<string, vec<string>>;
 newtype ClassBodyNode = darray<string, mixed>;
 function find_class_body(\HH\ParseTree $json, string $name): ?ClassBodyNode;
 function find_class_shape_type_constant(ClassBodyNode $class_body, string $name): ?ShapeNode;
+function find_class_method_shape_return_type(ClassBodyNode $class_body, string $name): ?ShapeNode;

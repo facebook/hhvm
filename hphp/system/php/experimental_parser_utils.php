@@ -80,6 +80,33 @@ namespace HH\ExperimentalParserUtils {
     );
   }
 
+  function find_class_method_shape_return_type(array $class_body, string $name): ?array {
+    $m = find_class_method($class_body, $name);
+    if ($m === null) {
+      return null;
+    }
+    $type = $m["methodish_function_decl_header"]["function_type"];
+    $shape = extract_shape_from_type($type);
+    return $shape;
+  }
+
+  function find_class_method(array $class_body, string $name): ?array {
+    $elements = $class_body["classish_body_elements"];
+    if ($elements["kind"] === "missing") {
+      return null;
+    }
+
+    foreach ($elements["elements"] as $e) {
+      if ($e["kind"] === "methodish_declaration") {
+        $true_name = $e["methodish_function_decl_header"]["function_name"]["token"]["text"];
+        if (strcasecmp($true_name, $name) === 0) {
+          return $e;
+        }
+      }
+    }
+    return null;
+  }
+
   function find_class_body(array $json, string $name): ?array {
     $decls = $json["parse_tree"]["script_declarations"]["elements"];
     foreach ($decls as $d) {

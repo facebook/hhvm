@@ -1,4 +1,2 @@
-File "naming_fail_test3.php", line 21, characters 3-4:
-The variable $x is defined (Naming[2007])
-File "naming_fail_test3.php", line 16, characters 5-6:
-But in a different scope
+File "naming_fail_test3.php", line 23, characters 3-4:
+Variable $x is undefined, or there exists at least one control flow path reaching this point which does not define $x. (Naming[2050])

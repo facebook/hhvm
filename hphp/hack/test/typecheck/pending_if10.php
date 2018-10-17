@@ -1,8 +1,8 @@
 <?hh // strict
 
-function test(): void {
-  if (true) {
-    if (false) {
+function test(bool $b, bool $c): void {
+  if ($b) {
+    if ($c) {
     }
     echo $x;
     $x = 1;

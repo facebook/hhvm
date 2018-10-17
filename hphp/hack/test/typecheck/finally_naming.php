@@ -8,11 +8,13 @@
  *
  *
  */
+function might_throw(): void {}
 
 function naming_finally(): int {
   $a = 23;
   try {
     $a = 456;
+    might_throw();
     $b = 789;
   } catch (YourException $e) {
     return $b = 23;

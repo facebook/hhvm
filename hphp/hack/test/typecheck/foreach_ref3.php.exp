@@ -1,2 +1,2 @@
-File "foreach_ref3.php", line 5, characters 26-28:
-Undefined variable: $v1 (Naming[2050])
+File "foreach_ref3.php", line 5, characters 20-34:
+Binding a reference in an array is no longer supported in Hack. (Typing[4225])

@@ -9,10 +9,10 @@
  *
  */
 
-function f(): int {
-  if (true) {
+function f(bool $b, bool $c): int {
+  if ($b) {
     $x = 1;
-  } else if (false) {
+  } else if ($c) {
     $x = 2;
   } else {
   }

@@ -1166,6 +1166,8 @@ and expr
     ?(allow_non_awaited_awaitable_in_rx=false)
     ?is_func_arg
     ?forbid_uref
+    ?(valkind = `other)
+    ?(check_defined = true)
     env e =
   begin match expected with
   | None -> ()
@@ -1174,7 +1176,7 @@ and expr
     [Typing_log.Log_sub ("Typing.expr " ^ Typing_reason.string_of_ureason r,
        [Typing_log.Log_type ("expected_ty", ty)])] end;
   raw_expr ~accept_using_var ~is_using_clause ~is_expr_statement
-    ~allow_non_awaited_awaitable_in_rx
+    ~allow_non_awaited_awaitable_in_rx ~valkind ~check_defined
     ?is_func_arg ?forbid_uref ?expected env e
 
 and raw_expr
@@ -1187,12 +1189,13 @@ and raw_expr
   ?is_func_arg
   ?forbid_uref
   ?valkind:(valkind=`other)
+  ?(check_defined = true)
   env e =
   debug_last_pos := fst e;
   let env, te, ty =
     expr_ ~accept_using_var ~is_using_clause ~is_expr_statement ?expected
       ?lhs_of_null_coalesce ?is_func_arg ?forbid_uref
-      ~valkind env e in
+      ~valkind ~check_defined env e in
   let () = match !expr_hook with
     | Some f -> f e (Typing_expand.fully_expand env ty)
     | None -> () in
@@ -1208,7 +1211,15 @@ and raw_expr
 
 and lvalue env e =
   let valkind = `lvalue in
-  expr_ ~valkind env e
+  expr_ ~valkind ~check_defined:false env e
+
+and lvalues env el =
+  match el with
+  | [] -> env, [], []
+  | e::el ->
+    let env, te, ty = lvalue env e in
+    let env, tel, tyl = lvalues env el in
+    env, te::tel, ty::tyl
 
 and is_pseudo_function s =
   s = SN.PseudoFunctions.hh_show ||
@@ -1282,17 +1293,23 @@ and check_escaping_mutable env (pos, x) =
   if (x = this && Env.function_is_mutable env) || Local_id.Map.mem x mut_env
   then Errors.escaping_mutable_object pos
 
-and exprs ?(accept_using_var = false) ?(allow_non_awaited_awaitable_in_rx=false)
-  ?is_func_arg ?expected env el =
+and exprs
+  ?(accept_using_var = false)
+  ?(allow_non_awaited_awaitable_in_rx = false)
+  ?is_func_arg
+  ?expected
+  ?(valkind = `other)
+  ?(check_defined = true)
+  env el =
   match el with
   | [] ->
     env, [], []
 
   | e::el ->
     let env, te, ty = expr ~accept_using_var ~allow_non_awaited_awaitable_in_rx
-      ?is_func_arg ?expected env e in
+      ?is_func_arg ?expected ~valkind ~check_defined env e in
     let env, tel, tyl = exprs ~accept_using_var ~allow_non_awaited_awaitable_in_rx
-      ?is_func_arg ?expected env el in
+      ?is_func_arg ?expected ~valkind ~check_defined env el in
     env, te::tel, ty::tyl
 
 and exprs_expected (pos, ur, expected_tyl) env el =
@@ -1312,10 +1329,15 @@ and expr_
   ?(is_using_clause = false)
   ?(is_expr_statement = false)
   ?lhs_of_null_coalesce
-  ?(is_func_arg=false)
-  ?(forbid_uref=false)
+  ?(is_func_arg = false)
+  ?(forbid_uref = false)
   ~(valkind: [> `lvalue | `lvalue_subexpr | `other ])
+  ~check_defined
   env (p, e) =
+  let expr = expr ~check_defined in
+  let exprs = exprs ~check_defined in
+  let raw_expr = raw_expr ~check_defined in
+
   let make_result env te ty =
     env, T.make_typed_expr p ty te, ty in
 
@@ -1871,8 +1893,8 @@ and expr_
   | Dollardollar _ when valkind = `lvalue ->
       Errors.dollardollar_lvalue p;
       expr_error env p (Reason.Rwitness p)
-  | Dollardollar ((_, x) as id) ->
-      let ty = Env.get_local env x in
+  | Dollardollar id ->
+      let ty = Env.get_local_check_defined env id in
       let env = save_and_merge_next_in_catch env in
       make_result env (T.Dollardollar id) ty
   | Lvar ((_, x) as id) ->
@@ -1883,7 +1905,9 @@ and expr_
       end;
       if not accept_using_var
       then check_escaping_var env id;
-      let ty = Env.get_local env x in
+      let ty = if check_defined
+        then Env.get_local_check_defined env id
+        else Env.get_local env x in
       make_result env (T.Lvar id) ty
   | ImmutableVar ((_, x) as id) ->
     let ty = Env.get_local env x in
@@ -1893,13 +1917,15 @@ and expr_
     (** Can't easily track any typing information for variable variable. *)
     make_result env (T.Dollar te) (Reason.Rwitness p, Typing_utils.tany env)
   | List el ->
-      let env, expected = expand_expected env expected in
-      let env, tel, tyl =
-        match expected with
-        | Some (pos, ur, (_, Ttuple expected_tyl)) ->
-          exprs_expected (pos, ur, expected_tyl) env el
-        | _ ->
-          exprs env el
+      let env, tel, tyl = match valkind with
+        | `lvalue | `lvalue_subexpr -> lvalues env el
+        | `other ->
+          let env, expected = expand_expected env expected in
+          match expected with
+          | Some (pos, ur, (_, Ttuple expected_tyl)) ->
+            exprs_expected (pos, ur, expected_tyl) env el
+          | _ ->
+            exprs env el
       in
       (* TODO TAST: figure out role of unbind here *)
       let env, tyl = List.map_env env tyl Typing_env.unbind in
@@ -3670,7 +3696,8 @@ and is_abstract_ft fty = match fty with
   (* Special function `isset` *)
   | Id ((_, pseudo_func) as id) when pseudo_func = SN.PseudoFunctions.isset ->
     check_function_in_suspend SN.PseudoFunctions.isset;
-    let env, tel, _ = exprs ~accept_using_var:true env el in
+    let env, tel, _ =
+      exprs ~accept_using_var:true ~check_defined:false env el in
     if uel <> [] then
       Errors.unpacking_disallowed_builtin_function p pseudo_func;
     if Env.is_strict env then
@@ -7016,7 +7043,7 @@ and update_array_type ?lhs_of_null_coalesce p env e1 e2 valkind  =
   match valkind with
     | `lvalue | `lvalue_subexpr ->
       let env, te1, ty1 =
-        raw_expr ~valkind:`lvalue_subexpr env e1 in
+        raw_expr ~valkind:`lvalue_subexpr ~check_defined:false env e1 in
       let env, ty1 = type_mapper env ty1 in
       begin match e1 with
         | (_, Lvar (_, x)) ->

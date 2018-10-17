@@ -17,7 +17,9 @@ open Typing_env_return_info
 open Type_parameter_env
 
 module Dep = Typing_deps.Dep
+module LID = Local_id
 module TLazyHeap = Typing_lazy_heap
+module SG = SN.Superglobals
 module LEnvC = Typing_lenv_cont
 module C = Typing_continuations
 
@@ -335,8 +337,8 @@ let empty_local tpenv local_reactive = {
   tpenv = tpenv;
   fake_members = empty_fake_members;
   local_types = LEnvC.empty_locals;
-  local_using_vars = Local_id.Set.empty;
-  local_mutability = Local_id.Map.empty;
+  local_using_vars = LID.Set.empty;
+  local_mutability = LID.Map.empty;
   local_reactive = local_reactive;
 }
 
@@ -344,8 +346,8 @@ let initial_local tpenv local_reactive = {
   tpenv = tpenv;
   fake_members = empty_fake_members;
   local_types = LEnvC.initial_locals;
-  local_using_vars = Local_id.Set.empty;
-  local_mutability = Local_id.Map.empty;
+  local_using_vars = LID.Set.empty;
+  local_mutability = LID.Map.empty;
   local_reactive = local_reactive;
 }
 
@@ -380,7 +382,7 @@ let empty tcopt file ~droot = {
       return_by_ref = false;
       return_void_to_rx = false;
     };
-    params  = Local_id.Map.empty;
+    params  = LID.Map.empty;
     condition_types = SMap.empty;
     self_id = "";
     self    = Reason.none, Tany;
@@ -605,11 +607,11 @@ let set_params env params =
 
 let set_param env x param =
   let params = get_params env in
-  let params = Local_id.Map.add x param params in
+  let params = LID.Map.add x param params in
   set_params env params
 
 let clear_params env =
-  set_params env Local_id.Map.empty
+  set_params env LID.Map.empty
 
 let with_env env f =
   let ret = get_return env in
@@ -777,7 +779,7 @@ module FakeMembers = struct
       | _, Lvar (_, x) -> x
       | _ -> assert false
     in
-    Local_id.to_string obj_name^"->"^member_name
+    LID.to_string obj_name^"->"^member_name
 
   let make_static_id cid member_name =
     let class_name = class_id_to_str cid in
@@ -818,12 +820,12 @@ module FakeMembers = struct
   let make _ env obj_name member_name =
     let my_fake_local_id = make_id obj_name member_name in
     let env = add_member env my_fake_local_id in
-    env, Local_id.get my_fake_local_id
+    env, LID.get my_fake_local_id
 
- let make_static _ env class_name member_name =
-   let my_fake_local_id = make_static_id class_name member_name in
-   let env = add_member env my_fake_local_id in
-   env, Local_id.get my_fake_local_id
+  let make_static _ env class_name member_name =
+    let my_fake_local_id = make_static_id class_name member_name in
+    let env = add_member env my_fake_local_id in
+    env, LID.get my_fake_local_id
 
 end
 
@@ -867,7 +869,7 @@ let set_local env x new_type =
     | _, Tunresolved [ty] -> ty
     | _ -> new_type in
   let next_cont = LEnvC.get_cont C.Next local_types in
-  let expr_id = match Local_id.Map.get x next_cont with
+  let expr_id = match LID.Map.get x next_cont with
     | None -> Ident.tmp()
     | Some (_, y) -> y in
   let local = new_type, expr_id in
@@ -879,18 +881,18 @@ let set_local env x new_type =
   env
 
 let is_using_var env x =
-  Local_id.Set.mem x env.lenv.local_using_vars
+  LID.Set.mem x env.lenv.local_using_vars
 
 let set_using_var env x =
   { env with lenv = {
-    env.lenv with local_using_vars = Local_id.Set.add x env.lenv.local_using_vars } }
+    env.lenv with local_using_vars = LID.Set.add x env.lenv.local_using_vars } }
 
 let unset_local env local =
   let {fake_members; local_types; local_using_vars; tpenv; local_mutability;
     local_reactive; } = env.lenv in
   let local_types = LEnvC.remove_from_cont C.Next local local_types in
-  let local_using_vars = Local_id.Set.remove local local_using_vars in
-  let local_mutability = Local_id.Map.remove local local_mutability in
+  let local_using_vars = LID.Set.remove local local_using_vars in
+  let local_mutability = LID.Map.remove local local_mutability in
   let env = { env with
     lenv = {fake_members; local_types; local_using_vars;
             tpenv; local_mutability; local_reactive} }
@@ -900,44 +902,62 @@ let unset_local env local =
 
 let is_mutable env local =
   let module TME = Typing_mutability_env in
-  match Local_id.Map.get local env.lenv.local_mutability with
+  match LID.Map.get local env.lenv.local_mutability with
   | Some (_, (TME.Mutable | TME.Borrowed)) -> true
   | _ -> false
 
 let add_mutable_var env local mutability_type =
 env_with_mut
   env
-  (Local_id.Map.add local mutability_type env.lenv.local_mutability)
+  (LID.Map.add local mutability_type env.lenv.local_mutability)
 
 let get_locals env =
   LEnvC.get_cont C.Next env.lenv.local_types
 
-let get_local_in_ctx x ctx =
-  let lcl = Local_id.Map.get x ctx in
+let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx =
+  let not_found_is_ok x =
+    let x = LID.to_string x in
+    SG.is_superglobal x ||
+    SSet.mem x env.lenv.fake_members.valid in
+  let error_if_pos_provided posopt =
+    match posopt with
+    | Some p when not !Autocomplete.auto_complete ->
+      Errors.undefined p (LID.to_string x);
+    | _ -> () in
+  let lcl = LID.Map.get x ctx in
   match lcl with
-  | None -> (Reason.Rnone, Tany)
+  | None ->
+    if not_found_is_ok x then () else error_if_pos_provided p;
+    (Reason.Rnone, Tany)
   | Some (x, _) -> x
 
-let get_local_ env x =
+let get_local_in_next_continuation ?error_if_undef_at_pos:p env x =
   let next_cont = get_locals env in
-  get_local_in_ctx x next_cont
+  get_local_in_ctx env ?error_if_undef_at_pos:p x next_cont
 
 (* While checking todos at the end of a function body, the Next continuation
  * might have been moved to the 'Exit' (if there is a `return` statement)
  * or the 'Catch' continuation (if the function always throws). So we find
  * which continuation is still present and get the local from there. *)
-let get_local_for_todo env x =
+let get_local_for_todo ?error_if_undef_at_pos:p env x =
   let local_types = env.lenv.local_types in
   let ctx = LEnvC.try_get_conts [C.Next; C.Exit; C.Catch] local_types in
-  get_local_in_ctx x ctx
+  get_local_in_ctx env ?error_if_undef_at_pos:p x ctx
 
-let get_local env x =
-  if env.checking_todos then get_local_for_todo env x else get_local_ env x
+let get_local_ ?error_if_undef_at_pos:p env x =
+  if env.checking_todos
+    then get_local_for_todo ?error_if_undef_at_pos:p env x
+    else get_local_in_next_continuation ?error_if_undef_at_pos:p env x
+
+let get_local env x = get_local_ env x
+
+let get_local_check_defined env (p, x) =
+  get_local_ ~error_if_undef_at_pos:p env x
 
 let set_local_expr_id env x new_eid =
   let local_types = env.lenv.local_types in
   let next_cont = LEnvC.get_cont C.Next local_types in
-  match Local_id.Map.get x next_cont with
+  match LID.Map.get x next_cont with
   | Some (type_, eid) when eid <> new_eid ->
       let local = type_, new_eid in
       let local_types = LEnvC.add_to_cont C.Next x local local_types in
@@ -948,7 +968,7 @@ let set_local_expr_id env x new_eid =
 
 let get_local_expr_id env x =
   let next_cont = LEnvC.get_cont C.Next env.lenv.local_types in
-  let lcl = Local_id.Map.get x next_cont in
+  let lcl = LID.Map.get x next_cont in
   Option.map lcl ~f:(fun (_, x) -> x)
 
 (*****************************************************************************)

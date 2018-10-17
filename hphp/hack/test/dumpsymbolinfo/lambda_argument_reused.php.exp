@@ -27,7 +27,7 @@
     {
       "pos":{"filename":"lambda_argument_reused.php","line":12,"char_start":3,"char_end":4},
       "type":"[fun]",
-      "ident":4
+      "ident":0
     },
     {
       "pos":{"filename":"lambda_argument_reused.php","line":12,"char_start":8,"char_end":9},
@@ -37,7 +37,7 @@
     {
       "pos":{"filename":"lambda_argument_reused.php","line":13,"char_start":5,"char_end":6},
       "type":"_",
-      "ident":3
+      "ident":0
     },
     {
       "pos":{
@@ -57,17 +57,17 @@
         "char_end":13
       },
       "type":"_",
-      "ident":3
+      "ident":0
     },
     {
       "pos":{"filename":"lambda_argument_reused.php","line":16,"char_start":3,"char_end":4},
       "type":"[fun]",
-      "ident":4
+      "ident":0
     },
     {
       "pos":{"filename":"lambda_argument_reused.php","line":17,"char_start":3,"char_end":4},
       "type":"[fun]",
-      "ident":4
+      "ident":0
     }
   ]
 }

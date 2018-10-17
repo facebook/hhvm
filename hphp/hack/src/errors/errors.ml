@@ -840,7 +840,10 @@ let different_scope pos var_name pos' =
 ]
 
 let undefined pos var_name =
-  add (Naming.err_code Naming.Undefined) pos ("Undefined variable: "^var_name)
+  add (Naming.err_code Naming.Undefined) pos ("Variable "^var_name^
+    " is undefined, "^
+    "or there exists at least one control flow path reaching this point which "^
+    "does not define "^var_name^".")
 
 let this_reserved pos =
   add (Naming.err_code Naming.ThisReserved) pos

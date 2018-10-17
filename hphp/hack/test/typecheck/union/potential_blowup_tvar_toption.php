@@ -6,6 +6,12 @@ function make_tvaropt<T>(): ?T {
 
 // This test mimicks something found in www
 function test(bool $b, int $e): void {
+  $a = 0;
+  $b = true;
+  $c = 1;
+  $d = false;
+  $e = "";
+
   while ($b) {
     // a dependency chain to typecheck this loop block multiple times
     $a = $b;

@@ -17,12 +17,12 @@
     {
       "pos":{"filename":"new_parent.php","line":9,"char_start":5,"char_end":6},
       "type":"B",
-      "ident":3
+      "ident":0
     },
     {
       "pos":{"filename":"new_parent.php","line":10,"char_start":5,"char_end":6},
       "type":"B",
-      "ident":3
+      "ident":0
     }
   ]
 }

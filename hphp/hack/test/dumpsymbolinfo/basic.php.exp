@@ -46,12 +46,12 @@
     {
       "pos":{"filename":"basic.php","line":4,"char_start":3,"char_end":6},
       "type":"AnotherTestClass",
-      "ident":3
+      "ident":0
     },
     {
       "pos":{"filename":"basic.php","line":5,"char_start":3,"char_end":6},
       "type":"AnotherTestClass",
-      "ident":3
+      "ident":0
     },
     {
       "pos":{"filename":"basic.php","line":6,"char_start":10,"char_end":13},
@@ -76,17 +76,17 @@
     {
       "pos":{"filename":"basic.php","line":21,"char_start":5,"char_end":8},
       "type":"AnotherTestClass",
-      "ident":4
+      "ident":0
     },
     {
       "pos":{"filename":"basic.php","line":22,"char_start":5,"char_end":8},
       "type":"AnotherTestClass",
-      "ident":4
+      "ident":0
     },
     {
       "pos":{"filename":"basic.php","line":27,"char_start":12,"char_end":15},
       "type":"AnotherTestClass",
-      "ident":4
+      "ident":0
     }
   ]
 }

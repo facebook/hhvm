@@ -1,2 +1,2 @@
 File "pending_trycatch1.php", line 14, characters 10-11:
-Undefined variable: $x (Naming[2050])
+Variable $x is undefined, or there exists at least one control flow path reaching this point which does not define $x. (Naming[2050])

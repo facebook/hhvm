@@ -21,7 +21,7 @@
     {
       "pos":{"filename":"lambda_argument.php","line":8,"char_start":3,"char_end":4},
       "type":"[fun]",
-      "ident":4
+      "ident":0
     },
     {
       "pos":{"filename":"lambda_argument.php","line":8,"char_start":8,"char_end":12},
@@ -31,7 +31,7 @@
     {
       "pos":{"filename":"lambda_argument.php","line":9,"char_start":5,"char_end":6},
       "type":"vec<_>",
-      "ident":3
+      "ident":0
     },
     {
       "pos":{"filename":"lambda_argument.php","line":9,"char_start":14,"char_end":18},
@@ -51,7 +51,7 @@
     {
       "pos":{"filename":"lambda_argument.php","line":11,"char_start":3,"char_end":4},
       "type":"[fun]",
-      "ident":4
+      "ident":0
     }
   ]
 }

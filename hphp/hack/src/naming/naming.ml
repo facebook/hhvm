@@ -119,7 +119,7 @@ module Env : sig
 
   val add_lvar : genv * lenv -> Ast.id -> positioned_ident -> unit
   val add_param : genv * lenv -> N.fun_param -> genv * lenv
-  val new_lvar : genv * lenv -> Ast.id -> positioned_ident
+  val new_lvar : ?fresh_id:bool -> genv * lenv -> Ast.id -> positioned_ident
   val new_let_local : genv * lenv -> Ast.id -> positioned_ident
   val found_dollardollar : genv * lenv -> Pos.t -> positioned_ident
   val get_dollardollar : genv * lenv -> positioned_ident option
@@ -387,9 +387,9 @@ end = struct
     | Some _ -> p, name
     | None -> handle_unbound_name genv get_full_pos get_canon (p, name) kind
 
-  let check_variable_scoping env (p, x) =
+  let check_variable_scoping env (_p, x) =
     match SMap.get x !(env.all_locals) with
-    | Some p' -> Errors.different_scope p x p'
+    | Some _p' -> () (*Errors.different_scope p x p'*)
     | None -> ()
 
   (* Adds a local variable, without any check *)
@@ -408,15 +408,16 @@ end = struct
      Side effects:
      1) if the local is not in the local environment then it is added.
      Return value: the given position and deduced/created identifier. *)
-  let new_lvar (_, lenv) (p, x) =
+  let new_lvar ?(fresh_id=false) (_, lenv) (p, x) =
     let lcl = SMap.get x !(lenv.locals) in
     let ident =
       match lcl with
       | Some lcl -> snd lcl
       | None ->
-          let ident = match SMap.get x !(lenv.pending_locals) with
+          let ident = (match SMap.get x !(lenv.pending_locals) with
             | Some (_, ident) -> ident
-            | None -> Local_id.make x in
+            | None ->
+              if fresh_id then Local_id.make x else Local_id.without_ident x) in
           lenv.all_locals := SMap.add x p !(lenv.all_locals);
           lenv.locals := SMap.add x (p, ident) !(lenv.locals);
           ident
@@ -440,7 +441,7 @@ end = struct
   let found_dollardollar (genv, lenv) p =
     if not !(lenv.inside_pipe) then
       Errors.undefined p SN.SpecialIdents.dollardollar;
-    new_lvar (genv, lenv) (p, SN.SpecialIdents.dollardollar)
+    new_lvar ~fresh_id:true (genv, lenv) (p, SN.SpecialIdents.dollardollar)
 
   (* Check if dollardollar is defined in the current environment *)
   let get_dollardollar (_genv, lenv) =
@@ -452,7 +453,7 @@ end = struct
   let new_pending_lvar (_, lenv) (p, x) =
     match SMap.get x !(lenv.locals), SMap.get x !(lenv.pending_locals) with
     | None, None ->
-        let y = p, Local_id.make x in
+        let y = p, Local_id.without_ident x in
         lenv.pending_locals := SMap.add x y !(lenv.pending_locals)
     | _ -> ()
 
@@ -465,14 +466,14 @@ end = struct
 
   let handle_undefined_variable (_genv, env) (p, x) =
     match env.unbound_mode with
-    | UBMErr -> Errors.undefined p x; p, Local_id.make x
+    | UBMErr -> (*Errors.undefined p x;*) p, Local_id.without_ident x
     | UBMFunc f -> f (p, x)
 
   (* Function used to name a local variable *)
   let lvar (genv, env) (p, x) =
     let p, ident =
       if SN.Superglobals.is_superglobal x && genv.in_mode = FileInfo.Mpartial
-      then p, Local_id.make x
+      then p, Local_id.without_ident x
       else
         let lcl = SMap.get x !(env.locals) in
         match lcl with
@@ -2079,7 +2080,8 @@ module Make (GetLocals : GetLocals) = struct
       (* isolate finally from the rest of the try-catch: if the first
        * statement of the try is an uncaught exception, finally will
        * still be executed *)
-      let _all_finally, fb = branch ({genv with in_finally = true}, lenv) fb in
+      let all_finally, fb = branch ({genv with in_finally = true}, lenv) fb in
+      Env.extend_all_locals env all_finally;
       let all_locals_b, b = branch ({genv with in_try = true}, lenv) b in
       let all_locals_cl, cl = catchl env cl in
       List.iter all_locals_cl (Env.extend_all_locals env);

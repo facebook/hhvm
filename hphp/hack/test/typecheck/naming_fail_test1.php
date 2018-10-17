@@ -11,8 +11,8 @@
 
 // testing that names existing on both sides of if is defined
 
-function stmt(): void {
-  if(true) {
+function stmt(bool $b): void {
+  if ($b) {
     $x = 0;
   }
   else {

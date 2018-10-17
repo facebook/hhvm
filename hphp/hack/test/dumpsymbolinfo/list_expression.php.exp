@@ -4,12 +4,12 @@
     {
       "pos":{"filename":"list_expression.php","line":4,"char_start":8,"char_end":9},
       "type":"int",
-      "ident":3
+      "ident":0
     },
     {
       "pos":{"filename":"list_expression.php","line":4,"char_start":12,"char_end":13},
       "type":"string",
-      "ident":4
+      "ident":0
     }
   ]
 }

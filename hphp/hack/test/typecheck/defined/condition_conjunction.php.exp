@@ -1,0 +1,53 @@
+File "condition_conjunction.php", line 10, characters 16-17:
+Invalid argument (Typing[4110])
+  File "condition_conjunction.php", line 39, characters 21-23:
+  This is an int
+  File "condition_conjunction.php", line 3, characters 19-22:
+  It is incompatible with a nullable type
+File "condition_conjunction.php", line 11, characters 20-21:
+Variable $z is undefined, or there exists at least one control flow path reaching this point which does not define $z. (Naming[2050])
+File "condition_conjunction.php", line 12, characters 20-21:
+Variable $u is undefined, or there exists at least one control flow path reaching this point which does not define $u. (Naming[2050])
+File "condition_conjunction.php", line 16, characters 14-15:
+Invalid argument (Typing[4110])
+  File "condition_conjunction.php", line 39, characters 21-23:
+  This is an int
+  File "condition_conjunction.php", line 3, characters 19-22:
+  It is incompatible with a nullable type
+File "condition_conjunction.php", line 17, characters 18-19:
+Variable $z is undefined, or there exists at least one control flow path reaching this point which does not define $z. (Naming[2050])
+File "condition_conjunction.php", line 18, characters 18-19:
+Variable $u is undefined, or there exists at least one control flow path reaching this point which does not define $u. (Naming[2050])
+File "condition_conjunction.php", line 19, characters 18-19:
+Variable $t is undefined, or there exists at least one control flow path reaching this point which does not define $t. (Naming[2050])
+File "condition_conjunction.php", line 4, characters 34-40:
+You are using a sketchy null check on a primitive type ...
+Use $x !== null instead (Typing[4089])
+File "condition_conjunction.php", line 4, characters 8-14:
+You are using a sketchy null check on a primitive type ...
+Use $x !== null instead (Typing[4089])
+File "condition_conjunction.php", line 8, characters 14-20:
+You are using a sketchy null check on a primitive type ...
+Use $x !== null instead (Typing[4089])
+File "condition_conjunction.php", line 29, characters 20-21:
+Variable $z is undefined, or there exists at least one control flow path reaching this point which does not define $z. (Naming[2050])
+File "condition_conjunction.php", line 30, characters 20-21:
+Variable $u is undefined, or there exists at least one control flow path reaching this point which does not define $u. (Naming[2050])
+File "condition_conjunction.php", line 34, characters 18-19:
+Variable $z is undefined, or there exists at least one control flow path reaching this point which does not define $z. (Naming[2050])
+File "condition_conjunction.php", line 35, characters 18-19:
+Variable $u is undefined, or there exists at least one control flow path reaching this point which does not define $u. (Naming[2050])
+File "condition_conjunction.php", line 36, characters 18-19:
+Variable $t is undefined, or there exists at least one control flow path reaching this point which does not define $t. (Naming[2050])
+File "condition_conjunction.php", line 23, characters 36-42:
+You are using a sketchy null check on a primitive type ...
+Use $x !== null instead (Typing[4089])
+File "condition_conjunction.php", line 23, characters 10-16:
+You are using a sketchy null check on a primitive type ...
+Use $x !== null instead (Typing[4089])
+File "condition_conjunction.php", line 23, characters 23-29:
+You are using a sketchy null check on a primitive type ...
+Use $x !== null instead (Typing[4089])
+File "condition_conjunction.php", line 27, characters 14-20:
+You are using a sketchy null check on a primitive type ...
+Use $x !== null instead (Typing[4089])

@@ -1,0 +1,2 @@
+File "assign_in_conditional.php", line 7, characters 14-15:
+Variable $x is undefined, or there exists at least one control flow path reaching this point which does not define $x. (Naming[2050])

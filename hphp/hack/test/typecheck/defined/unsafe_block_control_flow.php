@@ -6,8 +6,6 @@ function test1(): void {
     $x = 1;
     break;
   }
-  /* TODO for now we have an error because Naming is broken, but there should
-   * not be any. */
   expect_string($x);
 }
 
@@ -31,8 +29,6 @@ function test3(bool $b): void {
     }
     $x = "";
   } while ($b);
-  /* TODO for now we have no error because Naming is broken, but there should
-   * be one. */
   expect_string($x);
 }
 

@@ -1,0 +1,6 @@
+File "assign_in_cond.php", line 4, characters 7-14:
+You are using a sketchy null check on a primitive type ...
+Use $x !== null instead (Typing[4089])
+File "assign_in_cond.php", line 10, characters 7-13:
+You are using a sketchy null check on a primitive type ...
+Use $x !== null instead (Typing[4089])

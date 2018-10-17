@@ -101,6 +101,7 @@ val set_using_var : env -> Local_id.t -> env
 val unset_local : env -> Local_id.t -> env
 val get_locals : env -> local Local_id.Map.t
 val get_local : env -> Local_id.t -> locl ty
+val get_local_check_defined : env -> Nast.lid -> locl ty
 val set_local_expr_id : env -> Local_id.t -> expression_id -> env
 val get_local_expr_id : env -> Local_id.t -> expression_id option
 val get_tpenv_lower_bounds : tpenv -> string -> tparam_bounds

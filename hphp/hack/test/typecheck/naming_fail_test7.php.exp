@@ -1,4 +1,2 @@
 File "naming_fail_test7.php", line 18, characters 3-4:
-The variable $k is defined (Naming[2007])
-File "naming_fail_test7.php", line 15, characters 17-18:
-But in a different scope
+Variable $k is undefined, or there exists at least one control flow path reaching this point which does not define $k. (Naming[2050])

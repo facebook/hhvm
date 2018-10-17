@@ -9,10 +9,12 @@
  *
  */
 
-// testing exception scoping
+function might_throw(): void {}
 
+// testing exception scoping
 function stmt(): void {
   try {
+    might_throw();
     $x = 0;
     throw new Exception('this is a test');
   }

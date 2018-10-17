@@ -24,7 +24,7 @@ abstract class C {
       $c = $c1;
       hh_show($c->get());
     } else {
-      // $c will have the same expression id as $c1 in this branch
+      // $c will have the same expression id as $c2 in this branch
       $c = $c2;
       hh_show($c->get());
     }

@@ -76,13 +76,8 @@ type genv = {
   namespace: Namespace_env.env;
 }
 
-(* How to behave when we see an unbound name.  Either we raise an
- * error, or we call a function first and continue if it can resolve
- * the name.  This is used to nest environments when processing
- * closures. *)
-type unbound_mode =
-  | UBMErr
-  | UBMFunc of ((Pos.t * string) -> positioned_ident)
+(* Handler called when we see an unbound name. *)
+type unbound_handler = (Pos.t * string) -> positioned_ident
 
 (* The primitives to manipulate the naming environment *)
 module Env : sig
@@ -90,7 +85,7 @@ module Env : sig
   type all_locals
   type lenv
 
-  val empty_local : unbound_mode -> lenv
+  val empty_local : unbound_handler option -> lenv
   val make_class_genv :
     TypecheckerOptions.t ->
     type_constraint SMap.t ->
@@ -198,13 +193,14 @@ end = struct
      * can be nested. *)
     pipe_locals: pipe_scope list ref;
 
-    (* Tag controlling what we do when we encounter an unbound name.
-     * This is used when processing a lambda expression body that has
-     * an automatic use list.
+    (* Handler called when we see an unbound name.
+     * This is used to compute an approximation of the list of captured
+     * variables for closures: when we see an undefined variable, we add it
+     * to the list of captured variables.
      *
      * See expr_lambda for details.
      *)
-    unbound_mode: unbound_mode;
+    unbound_handler: unbound_handler option;
 
     (* The presence of an "UNSAFE" in the function body changes the
      * verifiability of the function's return type, since the unsafe
@@ -225,13 +221,13 @@ end = struct
     goto_targets: Pos.t SMap.t ref;
   }
 
-  let empty_local unbound_mode = {
+  let empty_local unbound_handler = {
     locals     = ref SMap.empty;
     all_locals = ref SMap.empty;
     pending_locals = ref SMap.empty;
     let_locals = ref SMap.empty;
     pipe_locals = ref [];
-    unbound_mode;
+    unbound_handler;
     has_unsafe = ref false;
     goto_labels = ref SMap.empty;
     goto_targets = ref SMap.empty;
@@ -276,7 +272,7 @@ end = struct
       (fun { ua_name; _ } -> snd ua_name = SN.UserAttributes.uaProbabilisticModel) in
     let genv = make_class_genv tcopt tparams c.c_mode
       (c.c_name, c.c_kind) c.c_namespace is_ppl in
-    let lenv = empty_local UBMErr in
+    let lenv = empty_local None in
     let env  = genv, lenv in
     env
 
@@ -296,7 +292,7 @@ end = struct
 
   let make_typedef_env genv cstrs tdef =
     let genv = make_typedef_genv genv cstrs tdef in
-    let lenv = empty_local UBMErr in
+    let lenv = empty_local None in
     let env  = genv, lenv in
     env
 
@@ -333,7 +329,7 @@ end = struct
 
   let make_const_env nenv cst =
     let genv = make_const_genv nenv cst in
-    let lenv = empty_local UBMErr in
+    let lenv = empty_local None in
     let env  = genv, lenv in
     env
 
@@ -475,9 +471,9 @@ end = struct
     | None -> ()
 
   let handle_undefined_variable (_genv, env) (p, x) =
-    match env.unbound_mode with
-    | UBMErr -> (*Errors.undefined p x;*) p, Local_id.make_unscoped x
-    | UBMFunc f -> f (p, x)
+    match env.unbound_handler with
+    | None -> p, Local_id.make_unscoped x
+    | Some f -> f (p, x)
 
   (* Function used to name a local variable *)
   let lvar (genv, env) (p, x) =
@@ -1708,7 +1704,7 @@ module Make (GetLocals : GetLocals) = struct
 
   and method_ genv m =
     let genv = extend_params genv m.m_tparams in
-    let env = genv, Env.empty_local UBMErr in
+    let env = genv, Env.empty_local None in
     (* Cannot use 'this' if it is a public instance method *)
     let variadicity, paraml = fun_paraml env m.m_params in
     let contains_visibility = List.exists m.m_kind ~f:(
@@ -1822,7 +1818,7 @@ module Make (GetLocals : GetLocals) = struct
   and fun_ nenv f =
     let tparams = make_constraints f.f_tparams in
     let genv = Env.make_fun_decl_genv nenv tparams f in
-    let lenv = Env.empty_local UBMErr in
+    let lenv = Env.empty_local None in
     let env = genv, lenv in
     let where_constraints = type_where_constraints env f.f_constrs in
     let h = Option.map f.f_ret (hint ~allow_retonly:true env) in
@@ -2573,7 +2569,7 @@ module Make (GetLocals : GetLocals) = struct
                else id :: acc)
         in
         let idl' = List.map idl (Env.lvar env) in
-        let env = (fst env, Env.empty_local UBMErr) in
+        let env = (fst env, Env.empty_local None) in
         List.iter2_exn idl idl' (Env.add_lvar env);
         let f = expr_lambda env f in
         N.Efun (f, idl')
@@ -2586,7 +2582,7 @@ module Make (GetLocals : GetLocals) = struct
         to_capture := cap :: !to_capture;
         cap
       in
-      let lenv = Env.empty_local @@ UBMFunc handle_unbound in
+      let lenv = Env.empty_local @@ Some handle_unbound in
       (* Extend the current let binding into the scope of lambda *)
       Env.copy_let_locals env (fst env, lenv);
       let env = (fst env, lenv) in
@@ -2750,7 +2746,7 @@ module Make (GetLocals : GetLocals) = struct
         let genv = Env.make_fun_genv nenv
           SMap.empty f.N.f_mode (snd f.N.f_name) fub_namespace in
         let genv = extend_params genv fub_tparams in
-        let lenv = Env.empty_local UBMErr in
+        let lenv = Env.empty_local None in
         let env = genv, lenv in
         let env =
           List.fold_left ~f:Env.add_param f.N.f_params ~init:env in
@@ -2772,7 +2768,7 @@ module Make (GetLocals : GetLocals) = struct
       | N.UnnamedBody {N.fub_ast; N.fub_tparams; N.fub_namespace; _} ->
         let genv = {genv with namespace = fub_namespace} in
         let genv = extend_params genv fub_tparams in
-        let env = genv, Env.empty_local UBMErr in
+        let env = genv, Env.empty_local None in
         let env =
           List.fold_left ~f:Env.add_param m.N.m_params ~init:env in
         let env = match m.N.m_variadic with

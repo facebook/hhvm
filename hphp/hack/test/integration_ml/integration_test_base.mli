@@ -24,6 +24,7 @@ val load_state:
   ?local_changes:string list ->
   ?use_precheked_files:bool ->
   ?disable_conservative_redecl:bool ->
+  ?predeclare_ide_deps:bool ->
   disk_state:disk_changes_type ->
   string (* saved_state_dir *) ->
   ServerEnv.env

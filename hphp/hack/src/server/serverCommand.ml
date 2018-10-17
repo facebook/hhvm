@@ -313,6 +313,44 @@ let with_dependency_table_reads full_recheck_needed f =
     end
   end
 
+(* Given a set of declaration names, put them in shared memory. We do it here, because
+ * declarations computed while handling IDE commands will likely be useful for subsequent IDE
+ * commands too, but are not persisted outside of make_then_revert_local_changes closure. *)
+let predeclare_ide_deps genv env {FileInfo.n_funs; n_classes; n_types; n_consts} =
+  if genv.ServerEnv.local_config.ServerLocalConfig.predeclare_ide_deps then begin
+    Utils.try_finally ~f:begin fun () ->
+      (* We only want to populate declaration heap, without wasting space in lower
+       * heaps (similar to what Typing_check_service.check_files does) *)
+      File_heap.FileHeap.LocalChanges.push_stack ();
+      Parser_heap.ParserHeap.LocalChanges.push_stack ();
+      let iter: type a.
+          (string -> bool) ->
+          (TypecheckerOptions.t -> string -> a) ->
+          SSet.t -> unit =
+        fun mem declare s -> SSet.iter begin fun x ->
+        (* Depending on Typing_lazy_heap putting the thing we ask for in shared memory *)
+        if not @@ mem x then ignore @@ ((declare env.ServerEnv.tcopt x) : a)
+      end s in
+      iter Decl_heap.Funs.mem Typing_lazy_heap.get_fun n_funs;
+      iter Decl_heap.Classes.mem Typing_lazy_heap.get_class n_classes;
+      iter Decl_heap.Typedefs.mem Typing_lazy_heap.get_typedef n_types;
+      iter Decl_heap.GConsts.mem Typing_lazy_heap.get_gconst n_consts
+    end ~finally:begin fun () ->
+      Parser_heap.ParserHeap.LocalChanges.pop_stack ();
+      File_heap.FileHeap.LocalChanges.pop_stack ()
+    end
+  end
+
+(* Run f while collecting all declarations that it caused. *)
+let with_decl_tracking f =
+  try
+    Decl.start_tracking ();
+    let res = f () in
+    res, Decl.stop_tracking ()
+  with e ->
+    let _ : FileInfo.names = Decl.stop_tracking () in
+    raise e
+
 (* Construct a continuation that will finish handling the command and update
  * the environment. Server can execute the continuation immediately, or store it
  * to be completed later (when full recheck is completed, when workers are
@@ -334,8 +372,8 @@ let actually_handle genv client msg full_recheck_needed ~is_stale = fun env ->
       let t = Unix.gettimeofday () in
       Sys_utils.start_gc_profiling ();
       Parser_heap.start_profiling ();
-      let new_env, response = try
-        ServerRpc.handle ~is_stale genv env cmd
+      let (new_env, response), declared_names = try
+        with_decl_tracking @@ fun () -> ServerRpc.handle ~is_stale genv env cmd
       with e ->
         let stack = Printexc.get_backtrace () in
         if ServerCommandTypes.is_critical_rpc cmd then raise e
@@ -343,6 +381,7 @@ let actually_handle genv client msg full_recheck_needed ~is_stale = fun env ->
       in
       let cmd_string = ServerCommandTypesUtils.debug_describe_t cmd in
       let parsed_files = Parser_heap.stop_profiling () in
+      predeclare_ide_deps genv env declared_names;
       let major_gc_time, minor_gc_time = Sys_utils.get_gc_time () in
       HackEventLogger.handled_command cmd_string
         ~start_t:t ~major_gc_time ~minor_gc_time ~parsed_files;

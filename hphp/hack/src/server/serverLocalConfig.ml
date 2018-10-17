@@ -46,6 +46,7 @@ type t = {
   trace_parsing : bool;
   prechecked_files : bool;
   predeclare_ide : bool;
+  predeclare_ide_deps : bool;
   max_typechecker_worker_memory_mb : int option;
   watchman_debug_logging : bool;
   hg_aware : bool;
@@ -99,6 +100,7 @@ let default = {
   trace_parsing = false;
   prechecked_files = false;
   predeclare_ide = false;
+  predeclare_ide_deps = false;
   max_typechecker_worker_memory_mb = None;
   watchman_debug_logging = false;
   hg_aware = false;
@@ -210,6 +212,8 @@ let load_ fn ~silent =
     ~default:default.prechecked_files config in
   let predeclare_ide = bool_if_version "predeclare_ide"
     ~default:default.predeclare_ide config in
+  let predeclare_ide_deps = bool_if_version "predeclare_ide_deps"
+    ~default:default.predeclare_ide_deps config in
   let max_typechecker_worker_memory_mb = int_opt "max_typechecker_worker_memory_mb" config in
   let watchman_debug_logging = bool_if_version "watchman_debug_logging"
     ~default:default.watchman_debug_logging config in
@@ -261,6 +265,7 @@ let load_ fn ~silent =
     hg_aware_redecl_restart_threshold;
     hg_aware_recheck_restart_threshold;
     disable_conservative_redecl;
+    predeclare_ide_deps;
   }
 
 let load ~silent =

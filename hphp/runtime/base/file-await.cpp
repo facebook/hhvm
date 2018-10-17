@@ -4,6 +4,8 @@
 
 #include "hphp/util/compatibility.h"
 
+#include <fcntl.h>
+
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
@@ -93,6 +95,21 @@ Object File::await(uint16_t events, double timeout) {
   if (!events) {
     SystemLib::throwExceptionObject(
       "Must await for reading, writing, or both.");
+  }
+  const auto originalFlags = ::fcntl(fd(), F_GETFL);
+  // This always succeeds...
+  ::fcntl(fd(), F_SETFL, originalFlags | O_ASYNC);
+  // ... but sometimes doesn't actually do anything
+  const bool isAsyncableFd = ::fcntl(fd(), F_GETFL) & O_ASYNC;
+  ::fcntl(fd(), F_SETFL, originalFlags);
+
+  if (!isAsyncableFd) {
+    SystemLib::throwInvalidOperationExceptionObject(
+      folly::sformat(
+        "File descriptor {} is not awaitable - real file?",
+        fd()
+      )
+    );
   }
 
   auto ev = new FileAwait(fd(), events, timeout);

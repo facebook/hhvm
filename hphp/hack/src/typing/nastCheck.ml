@@ -427,6 +427,8 @@ and func ~is_efun env f named_body =
     Phase.localize_generic_parameters_with_bounds env.tenv f.f_tparams
        ~ety_env:(Phase.env_with_self env.tenv) in
   let tenv = add_constraints p tenv constraints in
+  Typing_instantiability.check_tparams_instantiable tenv f.f_tparams;
+  Typing_instantiability.check_params_instantiable tenv f.f_params;
   let env = { env with
     tenv = Env.set_mode tenv f.f_mode;
     t_is_finally = false;
@@ -477,6 +479,7 @@ and func ~is_efun env f named_body =
   );
   (match f.f_variadic with
     | FVvariadicArg vparam ->
+      Typing_instantiability.check_param_instantiable tenv vparam;
       if vparam.param_is_reference then
         Errors.variadic_byref_param vparam.param_pos
     | _ -> ()
@@ -623,6 +626,7 @@ and class_ tenv c =
                tenv (fst c.c_tparams)
                ~ety_env:(Phase.env_with_self tenv) in
   let tenv = add_constraints (fst c.c_name) tenv constraints in
+  Typing_instantiability.check_tparams_instantiable tenv (fst c.c_tparams);
   let env = { env with tenv = Env.set_mode tenv c.c_mode } in
 
   error_if_has_atmost_rx_as_rxfunc_attribute env c.c_user_attributes;
@@ -943,6 +947,8 @@ and method_ (env, is_static) m =
     Phase.localize_generic_parameters_with_bounds env.tenv m.m_tparams
                ~ety_env:(Phase.env_with_self env.tenv) in
   let tenv = add_constraints (fst m.m_name) tenv constraints in
+  Typing_instantiability.check_tparams_instantiable tenv m.m_tparams;
+  Typing_instantiability.check_params_instantiable tenv m.m_params;
   let env = { env with tenv = tenv } in
 
   (* If this is a destructor make sure it is allowed *)
@@ -1004,6 +1010,7 @@ and method_ (env, is_static) m =
   );
   (match m.m_variadic with
     | FVvariadicArg vparam ->
+      Typing_instantiability.check_param_instantiable tenv vparam;
       if vparam.param_is_reference then
         Errors.variadic_byref_param vparam.param_pos
     | _ -> ()

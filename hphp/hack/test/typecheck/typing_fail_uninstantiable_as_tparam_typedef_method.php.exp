@@ -1,0 +1,4 @@
+File "typing_fail_uninstantiable_as_tparam_typedef_method.php", line 13, characters 12-14:
+Bar is uninstantiable (Typing[4002])
+File "typing_fail_uninstantiable_as_tparam_typedef_method.php", line 11, characters 22-24:
+Declaration is here

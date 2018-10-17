@@ -500,8 +500,6 @@ and fun_def tcopt f =
           Phase.localize_with_self env ty in
       let return = Typing_return.make_info f.f_fun_kind f.f_user_attributes env
         ~is_explicit:(Option.is_some f.f_ret) ~is_by_ref:f.f_ret_by_ref ty in
-      TI.check_params_instantiable env f.f_params;
-      TI.check_tparams_instantiable env f.f_tparams;
       let env, param_tys =
         List.map_env env f.f_params make_param_local_ty in
       if Env.is_strict env then
@@ -511,7 +509,6 @@ and fun_def tcopt f =
         bind_param in
       let env, t_variadic = match f.f_variadic with
         | FVvariadicArg vparam ->
-          TI.check_param_instantiable env vparam;
           let env, ty = make_param_local_ty env vparam in
           if Env.is_strict env then
             check_param env vparam ty;
@@ -6550,7 +6547,6 @@ and class_def_ env c tc =
   let impl = List.map
     (c.c_extends @ c.c_implements @ c.c_uses)
     (Decl_hint.hint env.Env.decl_env) in
-  TI.check_tparams_instantiable env (fst c.c_tparams);
   let env, constraints =
     Phase.localize_generic_parameters_with_bounds env (fst c.c_tparams)
       ~ety_env:(Phase.env_with_self env) in
@@ -6842,7 +6838,6 @@ and method_def env m =
   let env, constraints =
     Phase.localize_generic_parameters_with_bounds env m.m_tparams
     ~ety_env:ety_env in
-  TI.check_tparams_instantiable env m.m_tparams;
   let env = add_constraints pos env constraints in
   let env =
     localize_where_constraints ~ety_env env m.m_where_constraints in
@@ -6872,7 +6867,6 @@ and method_def env m =
       Phase.localize ~ety_env env ret in
   let return = Typing_return.make_info m.m_fun_kind m.m_user_attributes env
     ~is_explicit:(Option.is_some m.m_ret) ~is_by_ref:m.m_ret_by_ref ty in
-  TI.check_params_instantiable env m.m_params;
   let env, param_tys =
     List.map_env env m.m_params make_param_local_ty in
   if Env.is_strict env then begin
@@ -6883,7 +6877,6 @@ and method_def env m =
     List.map_env env (List.zip_exn param_tys m.m_params) bind_param in
   let env, t_variadic = match m.m_variadic with
     | FVvariadicArg vparam ->
-      TI.check_param_instantiable env vparam;
       let env, ty = make_param_local_ty env vparam in
       if Env.is_strict env then
         check_param env vparam ty;

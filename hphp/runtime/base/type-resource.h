@@ -142,14 +142,6 @@ public:
   String toString() const;
   Array toArray() const;
 
-  /**
-   * Comparisons
-   */
-  bool same (const Resource& v2) const { return m_res == v2.m_res; }
-  bool equal(const Resource& v2) const { return m_res == v2.m_res; }
-  bool less(const Resource& v2) const { return toInt64() < v2.toInt64(); }
-  bool more(const Resource& v2) const { return toInt64() > v2.toInt64(); }
-
 private:
   //
   // The deref and detach functions are only for use by the heap tracer,

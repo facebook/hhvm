@@ -858,8 +858,10 @@ function hhvm_cmd_impl() {
       '-vEval.ProfileHWEnable=false',
 
       // use a fixed path for embedded data
-      '-vEval.HackCompilerExtractPath='.bin_root().'/hackc_%{schema}',
-      '-vEval.EmbeddedDataExtractPath='.bin_root().'/hhvm_%{type}_%{buildid}',
+      '-vEval.HackCompilerExtractPath='
+        .escapeshellarg(bin_root().'/hackc_%{schema}'),
+      '-vEval.EmbeddedDataExtractPath='
+        .escapeshellarg(bin_root().'/hhvm_%{type}_%{buildid}'),
 
       extra_args($options),
     );
@@ -1072,7 +1074,8 @@ function hphp_cmd($options, $test, $program) {
     find_test_ext($test, 'ini', 'hphp_config'),
     '-vRuntime.ResourceLimit.CoreFileSize=0',
     '-vRuntime.Eval.EnableIntrinsicsExtension=true',
-    '-vRuntime.Eval.HackCompilerExtractPath='.bin_root().'/hackc_%{schema}',
+    '-vRuntime.Eval.HackCompilerExtractPath='
+      .escapeshellarg(bin_root().'/hackc_%{schema}'),
     '-vParserThreadCount=' . ($options['repo-threads'] ?? 1),
     '--nofork=1 -thhbc -l1 -k1',
     "-o \"$test.repo\" --program $program.hhbc \"$test\"",
@@ -1090,7 +1093,8 @@ function hhbbc_cmd($options, $test, $program) {
     '--no-logging',
     '--no-cores',
     '--parallel-num-threads=' . ($options['repo-threads'] ?? 1),
-    '--hack-compiler-extract-path='.bin_root().'/hackc_%{schema}',
+    '--hack-compiler-extract-path='
+      .escapeshellarg(bin_root().'/hackc_%{schema}'),
     read_opts_file("$test.hhbbc_opts"),
     "-o \"$test.repo/$program.hhbbc\" \"$test.repo/$program.hhbc\"",
   ));

@@ -135,29 +135,6 @@ public:
   String  toString () const;
   Array   toArray  () const;
 
-  int64_t toInt64ForCompare() const;
-  double toDoubleForCompare() const;
-
-  /**
-   * Comparisons
-   */
-  bool same(const Object& v2) const { return m_obj == v2.m_obj; }
-  bool equal(const Object& v2) const {
-    return m_obj ?
-      (v2.m_obj && m_obj->equal(*v2.m_obj.get())) :
-      !v2.m_obj;
-  }
-  bool less(const Object& v2) const {
-    return m_obj ?
-      (v2.m_obj && m_obj->less(*v2.m_obj.get())) :
-      static_cast<bool>(v2.m_obj);
-  }
-  bool lessEqual(const Object& v2) const { return less(v2) || equal(v2); }
-  bool more(const Object& v2) const {
-    return m_obj && (!v2.m_obj || m_obj->more(*v2.m_obj.get()));
-  }
-  bool moreEqual(const Object& v2) const { return more(v2) || equal(v2); }
-
   // Transfer ownership of our reference to this object.
   ObjectData *detach() { return m_obj.detach(); }
 

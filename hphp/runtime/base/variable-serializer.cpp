@@ -622,7 +622,7 @@ void VariableSerializer::write(const Object& v) {
       assertx(!v->isCollection());
       Variant ret = v->o_invoke_few_args(s_jsonSerialize, 0);
       // for non objects or when $this is not returned
-      if (!ret.isObject() || (ret.isObject() && !same(ret, v))) {
+      if (!ret.isObject() || ret.getObjectData() != v.get()) {
         if (ret.isArray() || ret.isObject()) {
           preventOverflow(v, [&ret, this]() {
             write(ret);

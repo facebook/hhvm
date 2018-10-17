@@ -761,16 +761,6 @@ void throw_late_init_prop(const Class* cls,
   );
 }
 
-void check_collection_compare(const ObjectData* obj) {
-  if (obj && obj->isCollection()) throw_collection_compare_exception();
-}
-
-void check_collection_compare(const ObjectData* obj1, const ObjectData* obj2) {
-  if (obj1 && obj2 && (obj1->isCollection() || obj2->isCollection())) {
-    throw_collection_compare_exception();
-  }
-}
-
 void check_collection_cast_to_array() {
   if (RuntimeOption::WarnOnCollectionToArray) {
     raise_warning("Casting a collection to an array is an expensive operation "

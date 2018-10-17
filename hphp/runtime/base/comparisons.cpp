@@ -63,16 +63,6 @@ bool same(const Variant& v1, const Array& v2) {
   return v1.asCArrRef().same(v2);
 }
 
-bool same(const Variant& v1, const Object& v2) {
-  bool null1 = v1.isNull();
-  bool null2 = v2.isNull();
-  if (null1 && null2) return true;
-  if (null1 || null2) return false;
-  if (!v1.isObject()) return false;
-  auto const od = v1.getObjectData();
-  return od == v2.get();
-}
-
 bool same(const Variant& v1, const Resource& v2) {
   bool null1 = v1.isNull();
   bool null2 = v2.isNull();

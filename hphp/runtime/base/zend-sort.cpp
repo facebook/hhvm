@@ -143,7 +143,7 @@ static inline int zend_regular_compare(const Variant& v1,
   } else if (v1.isObject() && v2.isObject()) {
     const auto &v1_obj = v1.toObject();
     const auto &v2_obj = v2.toObject();
-    COMPARE_AND_RETURN(v1_obj, v2_obj);
+    COMPARE_AND_RETURN(v1_obj.get(), v2_obj.get());
   } else {
     /* Out of options. Do what the zend-collator code does */
     const auto &v1_mod = convert_object_for_comparison(v1);

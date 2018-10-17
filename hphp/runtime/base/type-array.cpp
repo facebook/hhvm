@@ -409,10 +409,6 @@ bool Array::same(const Array& v2) const {
   not_reached();
 }
 
-bool Array::same(const Object& /*v2*/) const {
-  return false;
-}
-
 bool Array::equal(const Array& v2) const {
   if (isPHPArray()) {
     if (UNLIKELY(!v2.isPHPArray())) {
@@ -457,15 +453,6 @@ bool Array::equal(const Array& v2) const {
   not_reached();
 }
 
-bool Array::equal(const Object& v2) const {
-  if (LIKELY(isPHPArray())) {
-    if (m_arr == nullptr || v2.get() == nullptr) {
-      return HPHP::equal(toBoolean(), v2.toBoolean());
-    }
-  }
-  return false;
-}
-
 bool Array::less(const Array& v2, bool flip /* = false */) const {
   if (isPHPArray()) {
     if (UNLIKELY(!v2.isPHPArray())) {
@@ -498,23 +485,6 @@ bool Array::less(const Array& v2, bool flip /* = false */) const {
   if (UNLIKELY(checkHACCompare() && v2.isPHPArray() && !v2.isNull())) {
     raiseHackArrCompatArrMixedCmp();
   }
-  if (m_arr->isDict()) throw_dict_compare_exception();
-  if (m_arr->isKeyset()) throw_keyset_compare_exception();
-  not_reached();
-}
-
-bool Array::less(const Object& v2) const {
-  if (LIKELY(isPHPArray())) {
-    if (UNLIKELY(checkHACCompare() && m_arr)) {
-      raiseHackArrCompatArrMixedCmp();
-    }
-    if (m_arr == nullptr || v2.get() == nullptr) {
-      return HPHP::less(toBoolean(), v2.toBoolean());
-    }
-    check_collection_compare(v2.get());
-    return true;
-  }
-  if (m_arr->isVecArray()) throw_vec_compare_exception();
   if (m_arr->isDict()) throw_dict_compare_exception();
   if (m_arr->isKeyset()) throw_keyset_compare_exception();
   not_reached();
@@ -566,23 +536,6 @@ bool Array::more(const Array& v2, bool flip /* = true */) const {
   }
   if (m_arr->isDict()) throw_dict_compare_exception();
   if (m_arr->isKeyset()) throw_keyset_compare_exception();
-  not_reached();
-}
-
-bool Array::more(const Object& v2) const {
-  if (LIKELY(isPHPArray())) {
-    if (UNLIKELY(checkHACCompare() && m_arr)) {
-      raiseHackArrCompatArrMixedCmp();
-    }
-    if (m_arr == nullptr || v2.get() == nullptr) {
-      return HPHP::more(toBoolean(), v2.toBoolean());
-    }
-    check_collection_compare(v2.get());
-    return false;
-  }
-  if (isVecArray()) throw_vec_compare_exception();
-  if (isDict()) throw_dict_compare_exception();
-  if (isKeyset()) throw_keyset_compare_exception();
   not_reached();
 }
 

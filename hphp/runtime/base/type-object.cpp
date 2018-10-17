@@ -48,16 +48,6 @@ String Object::toString() const {
   return m_obj ? m_obj->invokeToString() : String();
 }
 
-int64_t Object::toInt64ForCompare() const {
-  check_collection_compare(get());
-  return toInt64();
-}
-
-double Object::toDoubleForCompare() const {
-  check_collection_compare(get());
-  return toDouble();
-}
-
 const char* Object::classname_cstr() const {
   return m_obj->getClassName().c_str();
 }

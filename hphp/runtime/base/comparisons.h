@@ -44,7 +44,8 @@ bool same(const Variant& v1, const StringData* v2);
 bool same(const Variant& v1, const String& v2);
 bool same(const Variant& v1, const char* v2) = delete;
 bool same(const Variant& v1, const Array& v2);
-bool same(const Variant& v1, const Object& v2);
+bool same(const Variant& v1, const Object& v2) = delete;
+bool same(const Variant& v1, const ObjectData* v2) = delete;
 bool same(const Variant& v1, const Resource& v2);
 inline bool same(const Variant& v1, const Variant& v2) {
   return tvSame(*v1.asTypedValue(), *v2.asTypedValue());
@@ -74,10 +75,7 @@ inline bool equal(const Variant& v1, const Array& v2) {
   if (!v2.get()) return cellEqual(*v1.toCell(), false);
   return cellEqual(*v1.toCell(), v2.get());
 }
-inline bool equal(const Variant& v1, const Object& v2) {
-  if (!v2.get()) return cellEqual(*v1.toCell(), false);
-  return cellEqual(*v1.toCell(), v2.get());
-}
+inline bool equal(const Variant& v1, const Object& v2) = delete;
 inline bool equal(const Variant& v1, const Resource& v2) {
   if (!v2) return cellEqual(*v1.toCell(), false);
   return cellEqual(*v1.toCell(), deref<ResourceData>(v2));
@@ -110,10 +108,7 @@ inline bool less(const Variant& v1, const Array& v2) {
   if (!v2.get()) return cellLess(*v1.toCell(), false);
   return cellLess(*v1.toCell(), v2.get());
 }
-inline bool less(const Variant& v1, const Object& v2) {
-  if (!v2.get()) return cellLess(*v1.toCell(), false);
-  return cellLess(*v1.toCell(), v2.get());
-}
+inline bool less(const Variant& v1, const Object& v2) = delete;
 inline bool less(const Variant& v1, const Resource& v2) {
   if (!v2) return cellLess(*v1.toCell(), false);
   return cellLess(*v1.toCell(), deref<ResourceData>(v2));
@@ -146,10 +141,7 @@ inline bool more(const Variant& v1, const Array& v2) {
   if (!v2.get()) return cellGreater(*v1.toCell(), false);
   return cellGreater(*v1.toCell(), v2.get());
 }
-inline bool more(const Variant& v1, const Object& v2) {
-  if (!v2.get()) return cellGreater(*v1.toCell(), false);
-  return cellGreater(*v1.toCell(), v2.get());
-}
+inline bool more(const Variant& v1, const Object& v2) = delete;
 inline bool more(const Variant& v1, const Resource& v2) {
   if (!v2) return cellGreater(*v1.toCell(), false);
   return cellGreater(*v1.toCell(), deref<ResourceData>(v2));
@@ -179,9 +171,7 @@ inline bool same(bool v1, const char* v2) = delete;
 inline bool same(bool /*v1*/, const Array& /*v2*/) {
   return false;
 }
-inline bool same(bool /*v1*/, const Object& /*v2*/) {
-  return false;
-}
+inline bool same(bool /*v1*/, const Object& /*v2*/) = delete;
 inline bool same(bool /*v1*/, const Resource& /*v2*/) {
   return false;
 }
@@ -200,7 +190,7 @@ inline bool equal(bool v1, const Array& v2) {
   if (LIKELY(v2.isPHPArray())) return v1 == v2.toBoolean();
   return false;
 }
-inline bool equal(bool v1, const Object& v2) { return v1 == v2.toBoolean(); }
+inline bool equal(bool v1, const Object& v2) = delete;
 inline bool equal(bool v1, const Resource& v2) { return v1 == v2.toBoolean(); }
 inline bool equal(bool v1, const Variant& v2) { return equal(v2, v1); }
 
@@ -223,7 +213,7 @@ inline bool less(bool v1, const Array& v2) {
   assertx(v2.isKeyset());
   throw_keyset_compare_exception();
  }
-inline bool less(bool v1, const Object& v2) { return less(v1,v2.toBoolean()); }
+inline bool less(bool v1, const Object& v2) = delete;
 inline bool less(bool v1, const Resource& v2) {
   return less(v1,v2.toBoolean());
 }
@@ -248,7 +238,7 @@ inline bool more(bool v1, const Array& v2) {
   assertx(v2.isKeyset());
   throw_keyset_compare_exception();
 }
-inline bool more(bool v1, const Object& v2) { return more(v1,v2.toBoolean()); }
+inline bool more(bool v1, const Object& v2) = delete;
 inline bool more(bool v1, const Resource& v2) {
   return more(v1,v2.toBoolean());
 }
@@ -273,9 +263,7 @@ inline bool same(int v1, const char* v2)  = delete;
 inline bool same(int /*v1*/, const Array& /*v2*/) {
   return false;
 }
-inline bool same(int /*v1*/, const Object& /*v2*/) {
-  return false;
-}
+inline bool same(int /*v1*/, const Object& /*v2*/) = delete;
 inline bool same(int /*v1*/, const Resource& /*v2*/) {
   return false;
 }
@@ -291,9 +279,7 @@ inline bool equal(int v1, const char* v2) = delete;
 inline bool equal(int /*v1*/, const Array& /*v2*/) {
   return false;
 }
-inline bool equal(int v1, const Object& v2) {
-  return v2->isCollection() ? false : equal(v1, v2.toInt64());
-}
+inline bool equal(int v1, const Object& v2) = delete;
 inline bool equal(int v1, const Resource& v2) {
   return equal(v1, v2.toInt64());
 }
@@ -316,9 +302,7 @@ inline bool less(int /*v1*/, const Array& v2) {
   assertx(v2.isKeyset());
   throw_keyset_compare_exception();
 }
-inline bool less(int v1, const Object& v2) {
-  return less(v1, v2.toInt64ForCompare());
-}
+inline bool less(int v1, const Object& v2) = delete;
 inline bool less(int v1, const Resource& v2) { return less(v1, v2.toInt64()); }
 inline bool less(int v1, const Variant& v2) { return more(v2, v1); }
 
@@ -339,9 +323,7 @@ inline bool more(int /*v1*/, const Array& v2) {
   assertx(v2.isKeyset());
   throw_keyset_compare_exception();
 }
-inline bool more(int v1, const Object& v2) {
-  return more(v1, v2.toInt64ForCompare());
-}
+inline bool more(int v1, const Object& v2) = delete;
 inline bool more(int v1, const Resource& v2) { return more(v1, v2.toInt64()); }
 inline bool more(int v1, const Variant& v2) { return less(v2, v1); }
 
@@ -366,9 +348,7 @@ inline bool same(int64_t v1, const char* v2)  = delete;
 inline bool same(int64_t /*v1*/, const Array& /*v2*/) {
   return false;
 }
-inline bool same(int64_t /*v1*/, const Object& /*v2*/) {
-  return false;
-}
+inline bool same(int64_t /*v1*/, const Object& /*v2*/) = delete;
 inline bool same(int64_t /*v1*/, const Resource& /*v2*/) {
   return false;
 }
@@ -384,9 +364,7 @@ inline bool equal(int64_t v1, const char* v2) = delete;
 inline bool equal(int64_t /*v1*/, const Array& /*v2*/) {
   return false;
 }
-inline bool equal(int64_t v1, const Object& v2) {
-  return v2->isCollection() ? false : equal(v1, v2.toInt64());
-}
+inline bool equal(int64_t v1, const Object& v2) = delete;
 inline bool equal(int64_t v1, const Resource& v2) {
   return equal(v1, v2.toInt64());
 }
@@ -415,9 +393,7 @@ inline bool less(int64_t /*v1*/, const Array& v2) {
   assertx(v2.isKeyset());
   throw_keyset_compare_exception();
 }
-inline bool less(int64_t v1, const Object& v2) {
-  return less(v1, v2.toInt64ForCompare());
-}
+inline bool less(int64_t v1, const Object& v2) = delete;
 inline bool less(int64_t v1, const Resource& v2) {
   return less(v1, v2.toInt64());
 }
@@ -444,9 +420,7 @@ inline bool more(int64_t /*v1*/, const Array& v2) {
   assertx(v2.isKeyset());
   throw_keyset_compare_exception();
 }
-inline bool more(int64_t v1, const Object& v2) {
-  return more(v1, v2.toInt64ForCompare());
-}
+inline bool more(int64_t v1, const Object& v2) = delete;
 inline bool more(int64_t v1, const Resource& v2) {
   return more(v1, v2.toInt64());
 }
@@ -475,9 +449,7 @@ inline bool same(double v1, const char* v2)  = delete;
 inline bool same(double /*v1*/, const Array& /*v2*/) {
   return false;
 }
-inline bool same(double /*v1*/, const Object& /*v2*/) {
-  return false;
-}
+inline bool same(double /*v1*/, const Object& /*v2*/) = delete;
 inline bool same(double /*v1*/, const Resource& /*v2*/) {
   return false;
 }
@@ -495,10 +467,7 @@ inline bool equal(double v1, const char* v2) = delete;
 inline bool equal(double /*v1*/, const Array& /*v2*/) {
   return false;
 }
-inline bool equal(double v1, const Object& v2) {
-  if (v2->isCollection()) return false;
-  return equal(v1, v2.toDouble());
-}
+inline bool equal(double v1, const Object& v2) = delete;
 inline bool equal(double v1, const Resource& v2) {
   return equal(v1, v2.toDouble());
 }
@@ -525,9 +494,7 @@ inline bool less(double /*v1*/, const Array& v2) {
   assertx(v2.isKeyset());
   throw_keyset_compare_exception();
 }
-inline bool less(double v1, const Object& v2) {
-  return less(v1, v2.toDoubleForCompare());
-}
+inline bool less(double v1, const Object& v2) = delete;
 inline bool less(double v1, const Resource& v2) {
   return less(v1, v2.toDouble());
 }
@@ -554,9 +521,7 @@ inline bool more(double /*v1*/, const Array& v2) {
   assertx(v2.isKeyset());
   throw_keyset_compare_exception();
 }
-inline bool more(double v1, const Object& v2) {
-  return more(v1, v2.toDoubleForCompare());
-}
+inline bool more(double v1, const Object& v2) = delete;
 inline bool more(double v1, const Resource& v2) {
   return more(v1, v2.toDouble());
 }
@@ -587,9 +552,7 @@ inline bool same(const StringData *v1, const char* v2) = delete;
 inline bool same(const StringData* /*v1*/, const Array& /*v2*/) {
   return false;
 }
-inline bool same(const StringData* /*v1*/, const Object& /*v2*/) {
-  return false;
-}
+inline bool same(const StringData* /*v1*/, const Object& /*v2*/) = delete;
 inline bool same(const StringData* /*v1*/, const Resource& /*v2*/) {
   return false;
 }
@@ -623,14 +586,7 @@ inline bool equal(const StringData *v1, const Array& v2) {
   }
   return false;
 }
-inline bool equal(const StringData *v1, const Object& v2) {
-  if (v1 == nullptr || v2.get() == nullptr) {
-    return equal(v1 ? v1->toBoolean() : false, v2.toBoolean());
-  }
-  if (v2->isCollection()) return false;
-  if (!v2->hasToString()) return false;
-  return equal(v1, v2.toString());
-}
+inline bool equal(const StringData *v1, const Object& v2) = delete;
 
 inline bool equal(const StringData *v1, const Resource& v2) {
   if (!v1 || !v2) {
@@ -675,14 +631,7 @@ inline bool less(const StringData *v1, const Array& v2) {
   assertx(v2.isKeyset());
   throw_keyset_compare_exception();
 }
-inline bool less(const StringData *v1, const Object& v2) {
-  if (v1 == nullptr || v2.get() == nullptr) {
-    return less(v1 ? v1->toBoolean() : false, v2.toBoolean());
-  }
-  check_collection_compare(v2.get());
-  if (!v2->hasToString()) return true;
-  return less(v1, v2.toString());
-}
+inline bool less(const StringData *v1, const Object& v2) = delete;
 inline bool less(const StringData *v1, const Resource& v2)  {
   if (!v1 || !v2) {
     return less(v1 ? v1->toBoolean() : false, v2.toBoolean());
@@ -728,14 +677,7 @@ inline bool more(const StringData *v1, const Array& v2) {
   assertx(v2.isKeyset());
   throw_keyset_compare_exception();
 }
-inline bool more(const StringData *v1, const Object& v2) {
-  if (v1 == nullptr || v2.get() == nullptr) {
-    return more(v1 ? v1->toBoolean() : false, v2.toBoolean());
-  }
-  check_collection_compare(v2.get());
-  if (!v2->hasToString()) return false;
-  return more(v1, v2.toString());
-}
+inline bool more(const StringData *v1, const Object& v2) = delete;
 inline bool more(const StringData *v1, const Resource& v2)  {
   if (!v1 || !v2) {
     return more(v1 ? v1->toBoolean() : false, v2.toBoolean());
@@ -777,9 +719,7 @@ inline bool same(const String& v1, const char* v2)  = delete;
 inline bool same(const String& v1, const Array& v2) {
   return same(v1.get(), v2);
 }
-inline bool same(const String& v1, const Object& v2) {
-  return same(v1.get(), v2);
-}
+inline bool same(const String& v1, const Object& v2) = delete;
 inline bool same(const String& v1, const Resource& v2) {
   return same(v1.get(), v2);
 }
@@ -797,9 +737,7 @@ inline bool equal(const String& v1, const char* v2) = delete;
 inline bool equal(const String& v1, const Array& v2) {
   return equal(v1.get(), v2);
 }
-inline bool equal(const String& v1, const Object& v2) {
-  return equal(v1.get(), v2);
-}
+inline bool equal(const String& v1, const Object& v2) = delete;
 inline bool equal(const String& v1, const Resource& v2) {
   return equal(v1.get(), v2);
 }
@@ -817,9 +755,7 @@ inline bool less(const String& v1, const char* v2)  = delete;
 inline bool less(const String& v1, const Array& v2) {
   return less(v1.get(), v2);
 }
-inline bool less(const String& v1, const Object& v2) {
-  return less(v1.get(), v2);
-}
+inline bool less(const String& v1, const Object& v2) = delete;
 inline bool less(const String& v1, const Resource& v2) {
   return less(v1.get(), v2);
 }
@@ -837,9 +773,7 @@ inline bool more(const String& v1, const char* v2)  = delete;
 inline bool more(const String& v1, const Array& v2) {
   return more(v1.get(), v2);
 }
-inline bool more(const String& v1, const Object& v2) {
-  return more(v1.get(), v2);
-}
+inline bool more(const String& v1, const Object& v2) = delete;
 inline bool more(const String& v1, const Resource& v2) {
   return more(v1.get(), v2);
 }
@@ -907,7 +841,7 @@ inline bool same(const Array& v1, const StringData *v2) { return same(v2, v1); }
 inline bool same(const Array& v1, const String& v2) { return same(v2, v1); }
 inline bool same(const Array& v1, const char* v2)  = delete;
 inline bool same(const Array& v1, const Array& v2) { return v1.same(v2); }
-inline bool same(const Array& v1, const Object& v2) { return v1.same(v2); }
+inline bool same(const Array& v1, const Object& v2) = delete;
 inline bool same(const Array& /*v1*/, const Resource& /*v2*/) {
   return false;
 }
@@ -923,7 +857,7 @@ inline bool equal(const Array& v1, const StringData *v2) {
 inline bool equal(const Array& v1, const String& v2) { return equal(v2, v1); }
 inline bool equal(const Array& v1, const char* v2) = delete;
 inline bool equal(const Array& v1, const Array& v2) { return v1.equal(v2); }
-inline bool equal(const Array& v1, const Object& v2) { return v1.equal(v2); }
+inline bool equal(const Array& v1, const Object& v2) = delete;
 inline bool equal(const Array& /*v1*/, const Resource& /*v2*/) {
   return false;
 }
@@ -937,7 +871,7 @@ inline bool less(const Array& v1, const StringData *v2) { return more(v2, v1); }
 inline bool less(const Array& v1, const String& v2) { return more(v2, v1); }
 inline bool less(const Array& v1, const char* v2) = delete;
 inline bool less(const Array& v1, const Array& v2) { return v1.less(v2); }
-inline bool less(const Array& v1, const Object& v2) { return v1.less(v2); }
+inline bool less(const Array& v1, const Object& v2) = delete;
 inline bool less(const Array& v1, const Resource& /*v2*/) {
   if (v1.isPHPArray()) detail::hackArrCompatCheck(v1);
   return false;
@@ -952,7 +886,7 @@ inline bool more(const Array& v1, const StringData *v2) { return less(v2, v1); }
 inline bool more(const Array& v1, const String& v2) { return less(v2, v1); }
 inline bool more(const Array& v1, const char* v2)  = delete;
 inline bool more(const Array& v1, const Array& v2) { return v1.more(v2); }
-inline bool more(const Array& v1, const Object& v2) { return v1.more(v2); }
+inline bool more(const Array& v1, const Object& v2) = delete;
 inline bool more(const Array& v1, const Resource& /*v2*/) {
   if (v1.isPHPArray()) detail::hackArrCompatCheck(v1);
   return true;
@@ -962,78 +896,58 @@ inline bool more(const Array& v1, const Variant& v2) { return v1.more(v2); }
 ///////////////////////////////////////////////////////////////////////////////
 // Object
 
-inline bool same(const Object& v1, bool    v2) { return same(v2, v1); }
-inline bool same(const Object& v1, int     v2) { return same(v2, v1); }
-inline bool same(const Object& v1, int64_t v2) { return same(v2, v1); }
-inline bool same(const Object& v1, double  v2) { return same(v2, v1); }
-inline bool same(const Object& v1, const StringData *v2) {
-  return same(v2, v1);
-}
-inline bool same(const Object& v1, const String& v2) { return same(v2, v1); }
+inline bool same(const Object& v1, bool    v2) = delete;
+inline bool same(const Object& v1, int     v2) = delete;
+inline bool same(const Object& v1, int64_t v2) = delete;
+inline bool same(const Object& v1, double  v2) = delete;
+inline bool same(const Object& v1, const StringData *v2) = delete;
+inline bool same(const Object& v1, const String& v2) = delete;
 inline bool same(const Object& v1, const char* v2)  = delete;
-inline bool same(const Object& v1, const Array& v2) { return same(v2, v1); }
-inline bool same(const Object& v1, const Object& v2) { return v1.same(v2); }
-inline bool same(const Object& /*v1*/, const Resource& /*v2*/) {
-  return false;
-}
-inline bool same(const Object& v1, const Variant& v2) { return same(v2, v1); }
+inline bool same(const Object& v1, const Array& v2) = delete;
+inline bool same(const Object& v1, const Object& v2) = delete;
+inline bool same(const Object& /*v1*/, const Resource& /*v2*/) = delete;
+inline bool same(const Object& v1, const Variant& v2) = delete;
 
-inline bool equal(const Object& v1, bool    v2) { return equal(v2, v1); }
-inline bool equal(const Object& v1, int     v2) { return equal(v2, v1); }
-inline bool equal(const Object& v1, int64_t v2) { return equal(v2, v1); }
-inline bool equal(const Object& v1, double  v2) { return equal(v2, v1); }
-inline bool equal(const Object& v1, const StringData *v2) {
-  return equal(v2, v1);
-}
-inline bool equal(const Object& v1, const String& v2) { return equal(v2, v1); }
+inline bool equal(const Object& v1, bool    v2) = delete;
+inline bool equal(const Object& v1, int     v2) = delete;
+inline bool equal(const Object& v1, int64_t v2) = delete;
+inline bool equal(const Object& v1, double  v2) = delete;
+inline bool equal(const Object& v1, const StringData *v2) = delete;
+inline bool equal(const Object& v1, const String& v2) = delete;
 inline bool equal(const Object& v1, const char* v2) = delete;
-inline bool equal(const Object& v1, const Array& v2) { return equal(v2, v1); }
-inline bool equal(const Object& v1, const Object& v2) { return v1.equal(v2); }
-inline bool equal(const Object& /*v1*/, const Resource& /*v2*/) {
-  return false;
-}
-inline bool equal(const Object& v1, const Variant& v2) { return equal(v2, v1); }
+inline bool equal(const Object& v1, const Array& v2) = delete;
+inline bool equal(const Object& v1, const Object& v2) = delete;
+inline bool equal(const Object& /*v1*/, const Resource& /*v2*/) = delete;
+inline bool equal(const Object& v1, const Variant& v2) = delete;
 
-inline bool less(const Object& v1, bool    v2) { return more(v2, v1); }
-inline bool less(const Object& v1, int     v2) { return more(v2, v1); }
-inline bool less(const Object& v1, int64_t v2) { return more(v2, v1); }
-inline bool less(const Object& v1, double  v2) { return more(v2, v1); }
-inline bool less(const Object& v1, const StringData *v2) {
-  return more(v2, v1);
-}
-inline bool less(const Object& v1, const String& v2) { return more(v2, v1); }
+inline bool less(const Object& v1, bool    v2) = delete;
+inline bool less(const Object& v1, int     v2) = delete;
+inline bool less(const Object& v1, int64_t v2) = delete;
+inline bool less(const Object& v1, double  v2) = delete;
+inline bool less(const Object& v1, const StringData *v2) = delete;
+inline bool less(const Object& v1, const String& v2) = delete;
 inline bool less(const Object& v1, const char* v2)  = delete;
-inline bool less(const Object& v1, const Array& v2) { return more(v2, v1); }
-inline bool less(const Object& v1, const Object& v2) { return v1.less(v2); }
-inline bool less(const Object& /*v1*/, const Resource& /*v2*/) {
-  return false;
-}
-inline bool less(const Object& v1, const Variant& v2) {
-  if (v2.isObject()) return v1.less(v2.toObject());
-  return more(v2, v1);
-}
+inline bool less(const Object& v1, const Array& v2) = delete;
+inline bool less(const Object& v1, const Object& v2) = delete;
+inline bool less(const Object& /*v1*/, const Resource& /*v2*/) = delete;
+inline bool less(const Object& v1, const Variant& v2) = delete;
 
-inline bool more(const Object& v1, bool    v2) { return less(v2, v1); }
-inline bool more(const Object& v1, int     v2) { return less(v2, v1); }
-inline bool more(const Object& v1, int64_t v2) { return less(v2, v1); }
-inline bool more(const Object& v1, double  v2) { return less(v2, v1); }
-inline bool more(const Object& v1, const StringData *v2) {
-  return less(v2, v1);
-}
-inline bool more(const Object& v1, const String& v2) { return less(v2, v1); }
-inline bool more(const Object& v1, const char* v2)  = delete;
-inline bool more(const Object& v1, const Array& v2) { return less(v2, v1); }
-inline bool more(const Object& v1, const Object& v2) { return v1.more(v2); }
-inline bool more(const Object& /*v1*/, const Resource& /*v2*/) {
-  return false;
-}
-inline bool more(const Object& v1, const Variant& v2) {
-  if (v2.isObject()) return v1.more(v2.toObject());
-  return less(v2, v1);
-}
+inline bool more(const Object& v1, bool    v2) = delete;
+inline bool more(const Object& v1, int     v2) = delete;
+inline bool more(const Object& v1, int64_t v2) = delete;
+inline bool more(const Object& v1, double  v2) = delete;
+inline bool more(const Object& v1, const StringData *v2) = delete;
+inline bool more(const Object& v1, const String& v2) = delete;
+inline bool more(const Object& v1, const char* v2) = delete;
+inline bool more(const Object& v1, const Array& v2) = delete;
+inline bool more(const Object& v1, const Object& v2) = delete;
+inline bool more(const Object& /*v1*/, const Resource& /*v2*/) = delete;
+inline bool more(const Object& v1, const Variant& v2) = delete;
 
 ///////////////////////////////////////////////////////////////////////////////
 // ObjectData*
+
+bool same(const ObjectData* v1, const Variant& v2) = delete;
 
 inline bool equal(const ObjectData* v1, const ObjectData* v2) {
   assertx(v1);
@@ -1090,9 +1004,7 @@ inline bool same(const Resource& v1, const char* v2)  = delete;
 inline bool same(const Resource& /*v1*/, const Array& /*v2*/) {
   return false;
 }
-inline bool same(const Resource& /*v1*/, const Object& /*v2*/) {
-  return false;
-}
+inline bool same(const Resource& /*v1*/, const Object& /*v2*/) = delete;
 inline bool same(const Resource& v1, const Resource& v2) { return v1.same(v2); }
 inline bool same(const Resource& v1, const Variant& v2) { return same(v2, v1); }
 
@@ -1110,9 +1022,7 @@ inline bool equal(const Resource& v1, const char* v2) = delete;
 inline bool equal(const Resource& /*v1*/, const Array& /*v2*/) {
   return false;
 }
-inline bool equal(const Resource& /*v1*/, const Object& /*v2*/) {
-  return false;
-}
+inline bool equal(const Resource& /*v1*/, const Object& /*v2*/) = delete;
 inline bool equal(const Resource& v1, const Resource& v2) {
   return v1.equal(v2);
 }
@@ -1139,9 +1049,7 @@ inline bool less(const Resource& /*v1*/, const Array& v2) {
   assertx(v2.isKeyset());
   throw_keyset_compare_exception();
 }
-inline bool less(const Resource& /*v1*/, const Object& /*v2*/) {
-  return false;
-}
+inline bool less(const Resource& /*v1*/, const Object& /*v2*/) = delete;
 inline bool less(const Resource& v1, const Resource& v2) { return v1.less(v2); }
 inline bool less(const Resource& v1, const Variant& v2) { return more(v2, v1); }
 
@@ -1164,9 +1072,7 @@ inline bool more(const Resource& /*v1*/, const Array& v2) {
   assertx(v2.isKeyset());
   throw_keyset_compare_exception();
 }
-inline bool more(const Resource& /*v1*/, const Object& /*v2*/) {
-  return false;
-}
+inline bool more(const Resource& /*v1*/, const Object& /*v2*/) = delete;
 inline bool more(const Resource& v1, const Resource& v2) { return v1.more(v2); }
 inline bool more(const Resource& v1, const Variant& v2) { return less(v2, v1); }
 

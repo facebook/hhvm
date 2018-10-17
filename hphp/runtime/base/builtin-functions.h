@@ -213,8 +213,6 @@ void throw_instance_method_fatal(const char *name);
                                        const StringData* propName,
                                        bool isSProp);
 
-void check_collection_compare(const ObjectData* obj);
-void check_collection_compare(const ObjectData* obj1, const ObjectData* obj2);
 void check_collection_cast_to_array();
 
 Object create_object_only(const String& s);

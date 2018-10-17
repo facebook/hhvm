@@ -572,7 +572,7 @@ let has_expanded {type_expansions; _} x =
   end
 
 (* The identifier for this *)
-let this = Local_id.make "$this"
+let this = Local_id.make_scoped "$this"
 
 let arity_min ft_arity : int = match ft_arity with
   | Fstandard (min, _) | Fvariadic (min, _) | Fellipsis (min, _) -> min

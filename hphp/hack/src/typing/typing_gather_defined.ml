@@ -7,18 +7,29 @@
  *
  *)
 
-(* This modules allows to traverse an AST and gather all local variables
- * that are defined by simple assignments like
- *
- *   $x = ...
- *
- * This is useful to gather variables that are defined in unsafe blocks
- * while not performing any typechecking.
- *
- * There is no need to gather other created variables, like the ones
- * created in a `foreach` or a `catch`, because those won't survive outside
- * the block.
- *)
+(** This modules allows to traverse an AST and gather all local variables
+that are defined by simple assignments like
+
+  $x = ...
+
+This is useful to gather variables that are defined in unsafe blocks
+while not performing any typechecking.
+
+We gather defined variables in a control-flow sensitive way:
+variables that are only assigned in some code paths are ignored.
+E.g. in the following if statement:
+
+  if ($mybool) {
+    $x = 1;
+  } else {}
+
+we consider that no variable is defined after the `if` since there is at least
+one control-flow path (the second branch) where no variable is defined.
+
+Similarly, there is no need to gather other created variables, like the ones
+created in a `foreach` or a `catch`, because those won't survive outside
+the block.
+*)
 
 open Core_kernel
 open Nast

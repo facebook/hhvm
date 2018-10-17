@@ -424,7 +424,7 @@ end = struct
       | None ->
           let ident = (match SMap.get x !(lenv.pending_locals) with
             | Some (_, ident) -> ident
-            | None -> Local_id.without_ident x) in
+            | None -> Local_id.make_unscoped x) in
           lenv.all_locals := SMap.add x p !(lenv.all_locals);
           lenv.locals := SMap.add x (p, ident) !(lenv.locals);
           ident
@@ -438,7 +438,7 @@ end = struct
    * variable *)
    (* TODO: Emit warning if names are getting shadowed T28436131 *)
   let new_let_local (_, lenv) (p, x) =
-    let ident = Local_id.make x in
+    let ident = Local_id.make_scoped x in
     lenv.all_locals := SMap.add x p !(lenv.all_locals);
     lenv.let_locals := SMap.add x (p, ident) !(lenv.let_locals);
     p, ident
@@ -449,7 +449,7 @@ end = struct
     match !(lenv.pipe_locals) with
     | [] ->
       Errors.undefined p SN.SpecialIdents.dollardollar; (* TODO better error *)
-      Local_id.make SN.SpecialIdents.dollardollar
+      Local_id.make_scoped SN.SpecialIdents.dollardollar
     | pipe_scope :: scopes ->
       let pipe_scope = { pipe_scope with used_dollardollar = true } in
       lenv.pipe_locals := pipe_scope :: scopes;
@@ -463,7 +463,7 @@ end = struct
   let new_pending_lvar (_, lenv) (p, x) =
     match SMap.get x !(lenv.locals), SMap.get x !(lenv.pending_locals) with
     | None, None ->
-        let y = p, Local_id.without_ident x in
+        let y = p, Local_id.make_unscoped x in
         lenv.pending_locals := SMap.add x y !(lenv.pending_locals)
     | _ -> ()
 
@@ -476,14 +476,14 @@ end = struct
 
   let handle_undefined_variable (_genv, env) (p, x) =
     match env.unbound_mode with
-    | UBMErr -> (*Errors.undefined p x;*) p, Local_id.without_ident x
+    | UBMErr -> (*Errors.undefined p x;*) p, Local_id.make_unscoped x
     | UBMFunc f -> f (p, x)
 
   (* Function used to name a local variable *)
   let lvar (genv, env) (p, x) =
     let p, ident =
       if SN.Superglobals.is_superglobal x && genv.in_mode = FileInfo.Mpartial
-      then p, Local_id.without_ident x
+      then p, Local_id.make_unscoped x
       else
         let lcl = SMap.get x !(env.locals) in
         match lcl with
@@ -646,7 +646,7 @@ end = struct
    * *)
   let pipe_scope env name_e2 =
     let _, lenv = env in
-    let pipe_var_ident = Local_id.make SN.SpecialIdents.dollardollar in
+    let pipe_var_ident = Local_id.make_scoped SN.SpecialIdents.dollardollar in
     let pipe_scope = {
       dollardollar = pipe_var_ident;
       used_dollardollar = false;

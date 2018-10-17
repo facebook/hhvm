@@ -617,6 +617,10 @@ inline bool Func::isParamCoerceMode() const {
   return attrs() & (AttrParamCoerceModeFalse | AttrParamCoerceModeNull);
 }
 
+inline bool Func::supportsAsyncEagerReturn() const {
+  return m_attrs & AttrSupportsAsyncEagerReturn;
+}
+
 inline bool Func::isDynamicallyCallable() const {
   return m_attrs & AttrDynamicallyCallable;
 }

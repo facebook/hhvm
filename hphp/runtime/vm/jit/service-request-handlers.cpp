@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/jit/service-request-handlers.h"
 
+#include "hphp/runtime/ext/asio/ext_static-wait-handle.h"
+
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/func-guard.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
@@ -154,10 +156,6 @@ TCA getTranslation(TransArgs args) {
 
   LeaseHolder writer(sk.func(), args.kind);
   if (!writer || !tc::shouldTranslate(sk.func(), args.kind)) return nullptr;
-
-  if (RuntimeOption::EvalFailJitPrologs && sk.op() == Op::FCallAwait) {
-    return nullptr;
-  }
 
   tc::createSrcRec(sk, liveSpOff());
 
@@ -346,13 +344,16 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
       Unit* destUnit = caller->func()->unit();
       // Set PC so logging code in getTranslation doesn't get confused.
       vmpc() = destUnit->at(caller->m_func->base() + ar->m_soff);
-      if (ar->isFCallAwait()) {
-        // If there was an interped FCallAwait, and we return via the
-        // jit, we need to deal with the suspend case here.
-        assertx(ar->retSlot()->m_aux.u_fcallAwaitFlag < 2);
-        if (ar->retSlot()->m_aux.u_fcallAwaitFlag) {
-          start = tc::ustubs().fcallAwaitSuspendHelper;
-          break;
+      if (ar->isAsyncEagerReturn()) {
+        // When returning to the interpreted FCall, the execution continues at
+        // the next opcode, not honoring the request for async eager return.
+        // If the callee returned eagerly, we need to wrap the result into
+        // StaticWaitHandle.
+        assertx(ar->retSlot()->m_aux.u_asyncNonEagerReturnFlag < 2);
+        if (!ar->retSlot()->m_aux.u_asyncNonEagerReturnFlag) {
+          auto const retval = tvAssertCell(*ar->retSlot());
+          auto const waitHandle = c_StaticWaitHandle::CreateSucceeded(retval);
+          cellCopy(make_tv<KindOfObject>(waitHandle), *ar->retSlot());
         }
       }
       assertx(caller == vmfp());
@@ -424,20 +425,6 @@ TCA handleBindCall(TCA toSmash, ActRec* calleeFrame, bool isImmutable) {
   }
 
   return start;
-}
-
-TCA handleFCallAwaitSuspend() {
-  assert_native_stack_aligned();
-  FTRACE(1, "handleFCallAwaitSuspend\n");
-
-  tl_regState = VMRegState::CLEAN;
-
-  vmJitCalledFrame() = vmfp();
-  SCOPE_EXIT { vmJitCalledFrame() = nullptr; };
-
-  auto start = suspendStack(vmpc());
-  tl_regState = VMRegState::DIRTY;
-  return start ? start : tc::ustubs().resumeHelper;
 }
 
 TCA handleResume(bool interpFirst) {

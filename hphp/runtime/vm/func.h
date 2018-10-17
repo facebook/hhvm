@@ -1007,6 +1007,11 @@ struct Func final {
   bool isParamCoerceMode() const;
 
   /*
+   * Supports async eager return optimization?
+   */
+  bool supportsAsyncEagerReturn() const;
+
+  /*
    * Is this func allowed to be called dynamically?
    */
   bool isDynamicallyCallable() const;

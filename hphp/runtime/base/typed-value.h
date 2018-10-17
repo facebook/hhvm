@@ -78,8 +78,10 @@ struct ConstModifiers {
 union AuxUnion {
   // Undiscriminated raw value.
   uint32_t u_raw;
-  // True if we're suspending an FCallAwait.
-  uint32_t u_fcallAwaitFlag;
+  // Valid only if the async eager return optimization was requested.
+  // True if the function returned an Awaitable. The Awaitable may be
+  // already finished, as interpreter's RetC always boxes the result.
+  uint32_t u_asyncNonEagerReturnFlag;
   // Key type and hash for MixedArray.
   int32_t u_hash;
   // Magic number for asserts in VarNR.

@@ -274,6 +274,7 @@ bool canDCE(IRInstruction* inst) {
   case LdARNumArgsAndFlags:
   case LdARReifiedGenerics:
   case KillARReifiedGenerics:
+  case FuncSupportsAsyncEagerReturn:
   case IsFuncDynCallable:
   case StrictlyIntegerConv:
   case GetMemoKeyScalar:

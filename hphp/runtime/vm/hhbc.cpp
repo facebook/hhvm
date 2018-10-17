@@ -408,7 +408,6 @@ int instrNumPops(PC pc) {
 #define MFINAL -3
 #define C_MFINAL(n) -10 - n
 #define V_MFINAL C_MFINAL(1)
-#define CVMANY -3
 #define CVUMANY -3
 #define FCALL -4
 #define CMANY -3
@@ -424,7 +423,6 @@ int instrNumPops(PC pc) {
 #undef MFINAL
 #undef C_MFINAL
 #undef V_MFINAL
-#undef CVMANY
 #undef CVUMANY
 #undef FCALL
 #undef CMANY
@@ -436,7 +434,7 @@ int instrNumPops(PC pc) {
   // For most instructions, we know how many values are popped based
   // solely on the opcode
   if (n >= 0) return n;
-  // FCallAwait, NewPackedArray, and some final member operations specify how
+  // NewPackedArray and some final member operations specify how
   // many values are popped in their first immediate
   if (n == -3) return getImm(pc, 0).u_IVA;
   // FCall pops numArgs, unpack and (numRets - 1) uninit values
@@ -527,7 +525,6 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #define MFINAL return manyFlavor(op, idx, CRV);
 #define C_MFINAL(n) return idx < n ? CV : CRV;
 #define V_MFINAL return idx == 0 ? VV : CRV;
-#define CVMANY return manyFlavor(op, idx, CVV);
 #define CVUMANY return manyFlavor(op, idx, CVUV);
 #define FCALL return fcallFlavor(op, idx);
 #define CMANY return manyFlavor(op, idx, CV);
@@ -546,7 +543,6 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #undef MFINAL
 #undef C_MFINAL
 #undef V_MFINAL
-#undef CVMANY
 #undef CVUMANY
 #undef FCALL
 #undef CMANY

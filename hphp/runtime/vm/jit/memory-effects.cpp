@@ -1776,6 +1776,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ProfileSubClsCns:
   case CheckCtxThis:
   case CheckFuncStatic:
+  case FuncSupportsAsyncEagerReturn:
   case IsFuncDynCallable:
   case IsReifiedName:
   case LdARNumParams:

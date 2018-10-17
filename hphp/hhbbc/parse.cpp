@@ -852,8 +852,7 @@ void populate_block(ParseUnitState& puState,
                        }();
 #define IMM_FCA(n)     auto fca = [&] {                                   \
                          auto const fca = decodeFCallArgs(pc);            \
-                         /*auto const aeOffset = fca.asyncEagerOffset;*/  \
-                         auto const aeOffset = kInvalidOffset;            \
+                         auto const aeOffset = fca.asyncEagerOffset;      \
                          auto const aeTarget = aeOffset != kInvalidOffset \
                            ? findBlock(opPC + aeOffset - ue.bc())->id     \
                            : NoBlockId;                                   \

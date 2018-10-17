@@ -714,14 +714,6 @@ TCA emitResumeInterpHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us,
     v << jmpi{rh.handleResume, RegSet(rarg(0))};
   });
 
-  us.fcallAwaitSuspendHelper = vwrap(cb, data, [&] (Vout& v) {
-    v << load{rvmtl()[rds::kVmfpOff], rvmfp()};
-
-    auto const handler = reinterpret_cast<TCA>(svcreq::handleFCallAwaitSuspend);
-    v << call{handler, arg_regs(2)};
-    v << jmpi{rh.reenterTC, RegSet()};
-  });
-
   return us.resumeHelperRet;
 }
 

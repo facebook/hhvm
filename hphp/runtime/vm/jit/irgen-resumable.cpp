@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/resumable.h"
 
+#include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/irgen-call.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
@@ -39,13 +40,10 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 template<class Hook>
-void suspendHook(IRGS& env, bool useNextBcOff, Hook hook) {
+void suspendHook(IRGS& env, Hook hook) {
   // Sync the marker to let the unwinder know that the consumed input is
-  // no longer on the eval stack. Use the next BC offset if requested by
-  // the FCallAwait opcode, otherwise the unwinder will expect to find
-  // a PreLive ActRec on the stack.
-  auto const bcOffset = useNextBcOff ? nextBcOff(env) : bcOff(env);
-  env.irb->setCurMarker(makeMarker(env, bcOffset));
+  // no longer on the eval stack.
+  env.irb->setCurMarker(makeMarker(env, bcOff(env)));
   env.irb->exceptionStackBoundary();
 
   ringbufferMsg(env, Trace::RBTypeFuncExit, curFunc(env)->fullName());
@@ -62,10 +60,7 @@ void suspendHook(IRGS& env, bool useNextBcOff, Hook hook) {
   );
 }
 
-}
-
-void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset,
-                bool useNextBcOff) {
+void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset) {
   assertx(curFunc(env)->isAsync());
   assertx(resumeMode(env) != ResumeMode::Async);
   assertx(child->type() <= TObj);
@@ -92,7 +87,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset,
     auto const asyncAR = gen(env, LdAFWHActRec, waitHandle);
 
     // Call the suspend hook.
-    suspendHook(env, useNextBcOff, [&] {
+    suspendHook(env, [&] {
       gen(env, SuspendHookAwaitEF, fp(env), asyncAR, waitHandle);
     });
 
@@ -117,7 +112,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset,
       gen(env, CreateAGWH, fp(env), resumeAddr, cns(env, resumeOffset), child);
 
     // Call the suspend hook.
-    suspendHook(env, useNextBcOff, [&] {
+    suspendHook(env, [&] {
       gen(env, SuspendHookAwaitEG, fp(env), waitHandle);
     });
 
@@ -128,8 +123,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset,
   }
 }
 
-void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset,
-                bool useNextBcOff) {
+void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset) {
   assertx(curFunc(env)->isAsync());
   assertx(resumeMode(env) == ResumeMode::Async);
   assertx(child->isA(TObj));
@@ -138,7 +132,7 @@ void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset,
   // We must do this before we do anything, because it can throw, and we can't
   // start tearing down the AFWH before that or the unwinder won't be able to
   // react.
-  suspendHook(env, useNextBcOff, [&] {
+  suspendHook(env, [&] {
     gen(env, SuspendHookAwaitR, fp(env), child);
   });
 
@@ -162,8 +156,6 @@ void implAwaitR(IRGS& env, SSATmp* child, Offset resumeOffset,
   auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
   gen(env, AsyncSwitchFast, IRSPRelOffsetData { spAdjust }, sp(env), fp(env));
 }
-
-namespace {
 
 SSATmp* implYieldGen(IRGS& env, SSATmp* key, SSATmp* value) {
   if (key != nullptr) {
@@ -216,7 +208,7 @@ void implYield(IRGS& env, bool withKey) {
 
   if (resumeMode(env) == ResumeMode::Async) PUNT(Yield-AsyncGenerator);
 
-  suspendHook(env, false, [&] {
+  suspendHook(env, [&] {
     gen(env, SuspendHookYield, fp(env));
   });
 
@@ -247,16 +239,78 @@ void implYield(IRGS& env, bool withKey) {
   gen(env, RetCtrl, retData, sp(env), fp(env), retVal);
 }
 
-Type returnTypeAwaited(SSATmp* retVal) {
-  while (retVal->inst()->isPassthrough()) {
-    retVal = retVal->inst()->getPassthroughValue();
+/*
+ * HHBBC may have proven something about the inner type of this awaitable.
+ *
+ * So, we may have an assertion on the type of the top of the stack after
+ * this instruction.  We know the next bytecode instruction is reachable from
+ * fallthrough on the Await, so if it is an AssertRATStk 0, anything coming
+ * out of the awaitable must be a subtype of that type, so this is a safe
+ * and conservative way to do this optimization (even if our successor
+ * bytecode offset is a jump target from things we aren't thinking about
+ * here).
+ */
+Type awaitedTypeFromHHBBC(IRGS& env, Offset nextBcOff) {
+  auto pc = curUnit(env)->at(nextBcOff);
+  if (decode_op(pc) != Op::AssertRATStk) return TInitCell;
+  auto const stkLoc = decode_iva(pc);
+  if (stkLoc != 0) return TInitCell;
+  auto const rat = decodeRAT(curUnit(env), pc);
+  return typeFromRAT(rat, curClass(env));
+}
+
+/*
+ * Try to determine the inner awaitable type from the source of SSATmp.
+ */
+Type awaitedTypeFromSSATmp(const SSATmp* awaitable) {
+  awaitable = canonical(awaitable);
+
+  auto const inst = awaitable->inst();
+  if (inst->is(Call)) {
+    auto const callee = inst->extra<Call>()->callee;
+    return callee ? awaitedCallReturnType(callee) : TInitCell;
   }
-  auto const inst = retVal->inst();
-  if (!inst->is(Call)) return TInitCell;
-  auto const callee = inst->extra<Call>()->callee;
-  return callee
-    ? typeFromRAT(callee->repoAwaitedReturnType(), inst->func()->cls())
-    : TInitCell;
+  if (inst->is(CreateAFWH)) {
+    return awaitedCallReturnType(inst->func());
+  }
+  if (inst->is(DefLabel)) {
+    auto ty = TBottom;
+    auto const dsts = inst->dsts();
+    inst->block()->forEachSrc(
+      std::find(dsts.begin(), dsts.end(), awaitable) - dsts.begin(),
+      [&] (const IRInstruction*, const SSATmp* src) {
+        ty = ty | awaitedTypeFromSSATmp(src);
+      }
+    );
+    return ty;
+  }
+
+  return TInitCell;
+}
+
+Type awaitedType(IRGS& env, SSATmp* awaitable, Offset nextBcOff) {
+  return awaitedTypeFromHHBBC(env, nextBcOff) &
+         awaitedTypeFromSSATmp(awaitable);
+}
+
+bool likelySuspended(const SSATmp* awaitable) {
+  awaitable = canonical(awaitable);
+  auto const inst = awaitable->inst();
+  if (inst->is(Call) && inst->extra<Call>()->asyncEagerReturn) return true;
+  if (inst->is(CreateAFWH)) return true;
+  if (inst->is(DefLabel)) {
+    auto likely = true;
+    auto const dsts = inst->dsts();
+    inst->block()->forEachSrc(
+      std::find(dsts.begin(), dsts.end(), awaitable) - dsts.begin(),
+      [&] (const IRInstruction*, const SSATmp* src) {
+        likely = likely && likelySuspended(src);
+      }
+    );
+    return likely;
+  }
+
+  return false;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -276,7 +330,8 @@ void emitWHResult(IRGS& env) {
     "we test state for non-zero, success must be zero"
   );
   gen(env, JmpNZero, exitSlow, gen(env, LdWHState, child));
-  auto const res = gen(env, LdWHResult, returnTypeAwaited(child), child);
+  auto const awaitedTy = awaitedType(env, child, nextBcOff(env));
+  auto const res = gen(env, LdWHResult, awaitedTy, child);
   gen(env, IncRef, res);
   decRef(env, child);
   push(env, res);
@@ -302,26 +357,6 @@ void emitAwait(IRGS& env) {
 
   auto const state = gen(env, LdWHState, child);
 
-  /*
-   * HHBBC may have proven something about the inner type of this wait handle.
-   *
-   * So, we may have an assertion on the type of the top of the stack after
-   * this instruction.  We know the next bytecode instruction is reachable from
-   * fallthrough on the Await, so if it is an AssertRATStk 0, anything coming
-   * out of the wait handle must be a subtype of that type, so this is a safe
-   * and conservative way to do this optimization (even if our successor
-   * bytecode offset is a jump target from things we aren't thinking about
-   * here).
-   */
-  auto const knownTy = [&] {
-    auto pc = curUnit(env)->at(resumeOffset);
-    if (decode_op(pc) != Op::AssertRATStk) return TInitCell;
-    auto const stkLoc = decode_iva(pc);
-    if (stkLoc != 0) return returnTypeAwaited(child);
-    auto const rat = decodeRAT(curUnit(env), pc);
-    return typeFromRAT(rat, curClass(env));
-  }();
-
   ifThenElse(
     env,
     [&] (Block* taken) {
@@ -336,16 +371,24 @@ void emitAwait(IRGS& env) {
       auto const failed = gen(env, EqInt, state, cns(env, kFailed));
       gen(env, JmpNZero, exitSlow, failed);
       if (resumeMode(env) == ResumeMode::Async) {
-        implAwaitR(env, child, resumeOffset, false);
+        implAwaitR(env, child, resumeOffset);
       } else {
-        implAwaitE(env, child, resumeOffset, false);
+        implAwaitE(env, child, resumeOffset);
       }
     },
     [&] { // Taken: retrieve the result from the wait handle
-      auto const res = gen(env, LdWHResult, knownTy, child);
+      auto const awaitedTy = awaitedType(env, child, resumeOffset);
+      auto const res = gen(env, LdWHResult, awaitedTy, child);
       gen(env, IncRef, res);
       decRef(env, child);
       push(env, res);
+
+      if (likelySuspended(child)) {
+        // Coming from a call with request for async eager return that did
+        // not return eagerly.
+        hint(env, Block::Hint::Unlikely);
+        gen(env, Jmp, makeExit(env, resumeOffset));
+      }
     }
   );
 }
@@ -402,47 +445,12 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
       );
 
       if (resumeMode(env) == ResumeMode::Async) {
-        implAwaitR(env, wh, resumeOffset, false);
+        implAwaitR(env, wh, resumeOffset);
       } else {
-        implAwaitE(env, wh, resumeOffset, false);
+        implAwaitE(env, wh, resumeOffset);
       }
     }
   );
-}
-
-void emitFCallAwait(IRGS& env,
-                    uint32_t numParams,
-                    const StringData*,
-                    const StringData*) {
-  auto const resumeOffset = nextBcOff(env);
-  assertx(curFunc(env)->isAsync());
-
-  // doesn't happen yet, as hhbbc doesn't create FCallAwait in async generators
-  if (curFunc(env)->isAsyncGenerator() &&
-      resumeMode(env) == ResumeMode::Async) PUNT(Await-AsyncGenerator);
-
-  auto const ret = implFCall(env, numParams, false, 0);
-  assertTypeStack(env, BCSPRelOffset{0}, TInitCell);
-  ifThen(
-    env,
-    [&] (Block* taken) {
-      auto const aux = gen(env, LdTVAux, LdTVAuxData { 1 }, ret);
-      gen(env, JmpNZero, taken, aux);
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      IRUnit::Hinter h(env.irb->unit(), Block::Hint::Unlikely);
-      assertTypeStack(env, BCSPRelOffset{0}, TObj);
-
-      auto const child = popC(env);
-      if (resumeMode(env) == ResumeMode::Async) {
-        implAwaitR(env, child, resumeOffset, true);
-      } else {
-        implAwaitE(env, child, resumeOffset, true);
-      }
-    }
-  );
-  assertTypeStack(env, BCSPRelOffset{0}, returnTypeAwaited(ret));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -474,7 +482,7 @@ void emitCreateCont(IRGS& env) {
         IsAsyncData(curFunc(env)->isAsync()),
         cont);
 
-  suspendHook(env, false, [&] {
+  suspendHook(env, [&] {
     gen(env, SuspendHookCreateCont, fp(env), contAR, cont);
   });
 

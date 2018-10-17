@@ -221,7 +221,6 @@ let stk_data : instruct -> stack_sig = function
   | ICall FCall ((n, u, r, _), _, _)       ->
     produce "C" (n + (if u then 1 else 0)),
     produce (if r = 1 then "R" else "C") r
-  | ICall FCallAwait (n, _, _)             -> produce "C" n, ["R"]
   | ICall FCallBuiltin (n, _, _)           -> produce "C" n, ["R"]
   | ILitConst _                            -> [], ["C"]
   | ICall _                                -> ["C"], []

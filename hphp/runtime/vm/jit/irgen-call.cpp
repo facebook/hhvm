@@ -28,6 +28,7 @@
 
 #include "hphp/runtime/vm/jit/irgen-basic.h"
 #include "hphp/runtime/vm/jit/irgen-builtin.h"
+#include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-create.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
@@ -1559,7 +1560,10 @@ void emitCallerDynamicCallChecks(IRGS& env,
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* implFCall(IRGS& env, uint32_t numParams, bool unpack, uint32_t numOut) {
+void emitFCall(IRGS& env,
+               FCallArgs fca,
+               const StringData*,
+               const StringData*) {
   auto const callee = env.currentNormalizedInstruction->funcd;
 
   auto const writeLocals = callee
@@ -1569,57 +1573,92 @@ SSATmp* implFCall(IRGS& env, uint32_t numParams, bool unpack, uint32_t numOut) {
     ? funcReadsLocals(callee)
     : callReadsLocals(*env.currentNormalizedInstruction, curFunc(env));
 
-  emitCallerDynamicCallChecks(env, callee, numParams + (unpack ? 1 : 0));
+  emitCallerDynamicCallChecks(
+    env, callee, fca.numArgs + (fca.hasUnpack ? 1 : 0));
 
-  if (unpack) {
+  if (fca.hasUnpack != 0) {
     auto const data = CallUnpackData {
       spOffBCFromIRSP(env),
-      numParams + 1,
-      numOut,
+      fca.numArgs + 1,
+      fca.numRets - 1,
       bcOff(env),
       nextBcOff(env),
       callee,
       writeLocals,
       readLocals
     };
-    auto const retVal = gen(env, CallUnpack, data, sp(env), fp(env));
-    push(env, retVal);
-    return retVal;
-  } else {
-    auto const returnBcOffset = nextBcOff(env) - curFunc(env)->base();
-    auto const needsCallerFrame = callee
-      ? funcNeedsCallerFrame(callee)
-      : callNeedsCallerFrame(
-        *env.currentNormalizedInstruction,
-        curFunc(env)
-      );
+    push(env, gen(env, CallUnpack, data, sp(env), fp(env)));
+    return;
+  }
 
-    auto op = curFunc(env)->unit()->getOp(bcOff(env));
-    auto const retVal = gen(
+  auto const needsCallerFrame = callee
+    ? funcNeedsCallerFrame(callee)
+    : callNeedsCallerFrame(
+      *env.currentNormalizedInstruction,
+      curFunc(env)
+    );
+  auto const call = [&](bool asyncEagerReturn) {
+    return gen(
       env,
       Call,
       CallData {
         spOffBCFromIRSP(env),
-        static_cast<uint32_t>(numParams),
-        numOut,
-        returnBcOffset,
+        fca.numArgs,
+        fca.numRets - 1,
+        nextBcOff(env) - curFunc(env)->base(),
         callee,
         writeLocals,
         readLocals,
         needsCallerFrame,
-        op == Op::FCallAwait
+        asyncEagerReturn,
       },
       sp(env),
       fp(env)
     );
+  };
 
-    push(env, retVal);
-    return retVal;
+  if (fca.asyncEagerOffset == kInvalidOffset ||
+      (callee && !callee->supportsAsyncEagerReturn())) {
+    push(env, call(false));
+    return;
   }
-}
 
-void emitFCall(IRGS& env, FCallArgs fca, const StringData*, const StringData*) {
-  implFCall(env, fca.numArgs, fca.hasUnpack, fca.numRets - 1);
+  ifThenElse(
+    env,
+    [&] (Block* taken) {
+      auto const supportsAsyncEagerReturn = gen(
+        env,
+        FuncSupportsAsyncEagerReturn,
+        ldPreLiveFunc(env)
+      );
+      gen(env, JmpNZero, taken, supportsAsyncEagerReturn);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      push(env, call(false));
+    },
+    [&] {
+      auto const retVal = call(true);
+
+      ifThenElse(
+        env,
+        [&] (Block* taken) {
+          auto const aux = gen(env, LdTVAux, LdTVAuxData { 1 }, retVal);
+          gen(env, JmpNZero, taken, aux);
+        },
+        [&] {
+          auto const ty = callee ? awaitedCallReturnType(callee) : TInitCell;
+          push(env, gen(env, AssertType, ty, retVal));
+          jmpImpl(env, bcOff(env) + fca.asyncEagerOffset);
+        },
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          auto const ty = callee ? callReturnType(callee) : TInitGen;
+          push(env, gen(env, AssertType, ty, retVal));
+        }
+      );
+    }
+  );
 }
 
 void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
@@ -1685,6 +1724,17 @@ Type callReturnType(const Func* callee) {
 
   // Otherwise use HHBBC's analysis if present
   return typeFromRAT(callee->repoReturnType(), callee->cls());
+}
+
+Type awaitedCallReturnType(const Func* callee) {
+  // Don't make any assumptions about functions which can be intercepted. The
+  // interception functions can return arbitrary types.
+  if (RuntimeOption::EvalJitEnableRenameFunction ||
+      callee->attrs() & AttrInterceptable) {
+    return TInitCell;
+  }
+
+  return typeFromRAT(callee->repoAwaitedReturnType(), callee->cls());
 }
 
 //////////////////////////////////////////////////////////////////////

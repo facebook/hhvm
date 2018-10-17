@@ -68,7 +68,7 @@ struct Env {
     , startSk(sk)
     , region(std::make_shared<RegionDesc>())
     , curBlock(region->addBlock(sk, 0, ctx.spOffset))
-    , blockFinished(false)
+    , prevBlocks()
     // TODO(#5703534): this is using a different TransContext than actual
     // translation will use.
     , unit(TransContext{kInvalidTransID, kind, TransFlags{},
@@ -93,7 +93,7 @@ struct Env {
   NormalizedInstruction inst;
   RegionDescPtr region;
   RegionDesc::Block* curBlock;
-  bool blockFinished;
+  jit::hash_map<Offset, jit::vector<RegionDesc::Block*>> prevBlocks;
   IRUnit unit;
   irgen::IRGS irgs;
   ActRecState arState;
@@ -186,14 +186,15 @@ bool consumeInput(Env& env, const InputInfo& input) {
  * Add the current instruction to the region.
  */
 void addInstruction(Env& env) {
-  if (env.blockFinished) {
+  auto prevBlocksIt = env.prevBlocks.find(env.sk.offset());
+  if (prevBlocksIt != env.prevBlocks.end()) {
     FTRACE(2, "selectTracelet adding new block at {} after:\n{}\n",
            showShort(env.sk), show(*env.curBlock));
     always_assert(env.sk.func() == curFunc(env));
-    auto newCurBlock = env.region->addBlock(env.sk, 0, curSpOffset(env));
-    env.region->addArc(env.curBlock->id(), newCurBlock->id());
-    env.curBlock = newCurBlock;
-    env.blockFinished = false;
+    env.curBlock = env.region->addBlock(env.sk, 0, curSpOffset(env));
+    for (auto block : prevBlocksIt->second) {
+      env.region->addArc(block->id(), env.curBlock->id());
+    }
   }
 
   FTRACE(2, "selectTracelet adding instruction {}\n", env.inst.toString());
@@ -209,9 +210,6 @@ void addInstruction(Env& env) {
 bool prepareInstruction(Env& env) {
   env.inst.~NormalizedInstruction();
   new (&env.inst) NormalizedInstruction(env.sk, curUnit(env));
-  if (RuntimeOption::EvalFailJitPrologs && env.inst.op() == Op::FCallAwait) {
-    return false;
-  }
   auto const breaksBB =
     (env.profiling && instrBreaksProfileBB(&env.inst)) ||
     opcodeBreaksBB(env.inst.op(), env.inlining);
@@ -238,6 +236,19 @@ bool prepareInstruction(Env& env) {
   addInstruction(env);
 
   if (isFPush(env.inst.op())) env.arState.pushFunc(env.inst);
+  if (isFCallStar(env.inst.op())) {
+    auto const asyncEagerOffset = env.inst.imm[0].u_FCA.asyncEagerOffset;
+    if (asyncEagerOffset != kInvalidOffset) {
+      // Note that the arc between the block containing asyncEagerOffset and
+      // the previous block is not added to the region on purpose, as it comes
+      // from the slow path (await of a finished Awaitable after failed async
+      // eager return, which usually produces unfinished Awaitable) with
+      // possibly unknown type pessimizing next execution.
+      auto const sk = env.sk;
+      env.prevBlocks[sk.advanced().offset()].push_back(env.curBlock);
+      env.prevBlocks[sk.offset() + asyncEagerOffset].push_back(env.curBlock);
+    }
+  }
 
   return true;
 }
@@ -289,7 +300,7 @@ bool traceThroughJmp(Env& env) {
   }
 
   env.numJmps++;
-  env.blockFinished = true;
+  env.prevBlocks[env.sk.offset()].push_back(env.curBlock);
   return true;
 }
 

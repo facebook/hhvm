@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_VM_HHBC_CODEC_H_
 #define incl_HPHP_VM_HHBC_CODEC_H_
 
+#include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/util/either.h"
 

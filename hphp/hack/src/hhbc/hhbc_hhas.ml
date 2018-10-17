@@ -543,9 +543,6 @@ let string_of_call instruction =
     sep ["FCall";
       string_of_fcall_args fcall_args;
       string_of_class_id c; string_of_function_id f]
-  | FCallAwait (n, c, f) ->
-    sep ["FCallAwait";
-      string_of_int n; string_of_class_id c; string_of_function_id f]
   | FCallBuiltin (n1, n2, id) ->
     sep ["FCallBuiltin"; string_of_int n1; string_of_int n2; SU.quote_string id]
 

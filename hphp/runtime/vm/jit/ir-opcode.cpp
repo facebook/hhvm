@@ -712,6 +712,7 @@ bool opcodeMayRaise(Opcode opc) {
   case FinishMemberOp:
   case Floor:
   case FuncGuard:
+  case FuncSupportsAsyncEagerReturn:
   case FwdCtxStaticCall:
   case GenericRetDecRefs:
   case GetMemoKeyScalar:

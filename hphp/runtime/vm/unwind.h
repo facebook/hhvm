@@ -92,14 +92,6 @@ struct VMSwitchMode : BaseException {
 };
 
 /*
- * Similar to VMSwitchMode, but when we were in the middle of a
- * suspendStack operation.
- */
-struct VMSuspendStack : BaseException {
-  const char* what() const noexcept override { return "VMSuspendStack"; }
-};
-
-/*
  * Thrown for stack overflow in a jitted prologue.
  */
 struct VMStackOverflow : BaseException {

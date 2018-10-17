@@ -66,9 +66,9 @@ void cgDefInlineFP(IRLS& env, const IRInstruction* inst) {
   if (extra->target->attrs() & AttrMayUseVV) {
     v << storeqi{0, ar + AROFF(m_invName)};
   }
-  if (extra->isFCallAwait) {
+  if (extra->asyncEagerReturn) {
     v << orlim{
-      static_cast<int32_t>(ActRec::Flags::IsFCallAwait),
+      static_cast<int32_t>(ActRec::Flags::AsyncEagerRet),
       ar + AROFF(m_numArgsAndFlags),
       v.makeReg()
     };

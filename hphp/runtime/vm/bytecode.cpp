@@ -3310,18 +3310,6 @@ OPTBLD_INLINE TCA ret(PC& pc) {
   // in that case if necessary.
   frame_free_locals_inl(vmfp(), vmfp()->func()->numLocals(), &retval);
 
-  // If in an eagerly executed async function, not called by
-  // FCallAwait, wrap the return value into succeeded
-  // StaticWaitHandle.
-  if (UNLIKELY(vmfp()->mayNeedStaticWaitHandle() &&
-               vmfp()->func()->isAsyncFunction())) {
-    auto const& retvalCell = *tvAssertCell(&retval);
-    // Heads up that we're assuming CreateSucceeded can't throw, or we won't
-    // decref the return value.  (It can't right now.)
-    auto const waitHandle = c_StaticWaitHandle::CreateSucceeded(retvalCell);
-    cellCopy(make_tv<KindOfObject>(waitHandle), retval);
-  }
-
   if (isProfileRequest()) {
     profileIncrementFuncCounter(vmfp()->func());
   }
@@ -3331,14 +3319,25 @@ OPTBLD_INLINE TCA ret(PC& pc) {
   Offset soff = vmfp()->m_soff;
 
   if (LIKELY(!vmfp()->resumed())) {
+    // If in an eagerly executed async function, wrap the return value into
+    // succeeded StaticWaitHandle. Async eager return requests are currently
+    // not respected, as we don't have a way to obtain the async eager offset.
+    if (UNLIKELY(vmfp()->func()->isAsyncFunction())) {
+      auto const& retvalCell = *tvAssertCell(&retval);
+      // Heads up that we're assuming CreateSucceeded can't throw, or we won't
+      // decref the return value.  (It can't right now.)
+      auto const waitHandle = c_StaticWaitHandle::CreateSucceeded(retvalCell);
+      cellCopy(make_tv<KindOfObject>(waitHandle), retval);
+    }
+
     // Free ActRec and store the return value.
     vmStack().ndiscard(vmfp()->func()->numSlotsInFrame());
     vmStack().ret();
     *vmStack().topTV() = retval;
     assertx(vmStack().topTV() == vmfp()->retSlot());
-    // In case we were called by a jitted FCallAwait, let it know
-    // that we finished eagerly.
-    vmStack().topTV()->m_aux.u_fcallAwaitFlag = 0;
+    // In case async eager return was requested by the caller, pretend that
+    // we did not finish eagerly as we already boxed the value.
+    vmStack().topTV()->m_aux.u_asyncNonEagerReturnFlag = 1;
   } else if (vmfp()->func()->isAsyncFunction()) {
     // Mark the async function as succeeded and store the return value.
     assertx(!sfp);
@@ -5792,23 +5791,11 @@ void iopFCall(PC& pc, ActRec* ar, FCallArgs fca,
   if (ar->isDynamicCall()) callerDynamicCallChecks(func);
   checkStack(vmStack(), func, 0);
   if (fca.numRets != 1) ar->setFCallM();
+  auto const asyncEagerReturn =
+    fca.asyncEagerOffset != kInvalidOffset && func->supportsAsyncEagerReturn();
+  if (asyncEagerReturn) ar->setAsyncEagerReturn();
   ar->setReturn(vmfp(), pc, jit::tc::ustubs().retHelper);
   doFCall(ar, pc, fca.numArgs, fca.hasUnpack);
-}
-
-OPTBLD_INLINE
-void iopFCallAwait(PC& pc, ActRec* ar, uint32_t numArgs,
-                   const StringData* /*clsName*/, const StringData* funcName) {
-  if (!RuntimeOption::EvalJitEnableRenameFunction &&
-      !(ar->m_func->attrs() & AttrInterceptable)) {
-    assertx(ar->m_func->name()->isame(funcName));
-  }
-  assertx(numArgs == ar->numArgs());
-  if (ar->isDynamicCall()) callerDynamicCallChecks(ar->func());
-  checkStack(vmStack(), ar->m_func, 0);
-  ar->setReturn(vmfp(), pc, jit::tc::ustubs().retHelper);
-  ar->setFCallAwait();
-  doFCall(ar, pc, numArgs, false);
 }
 
 OPTBLD_FLT_INLINE
@@ -6913,12 +6900,12 @@ OPTBLD_INLINE void asyncSuspendE(PC& pc) {
     ActRec* sfp = fp->sfp();
     Offset soff = fp->m_soff;
 
-    // Free ActRec and store the return value. In case we were called by
-    // a jitted FCallAwait, let it know that we suspended.
+    // Free ActRec and store the return value. In case async eager return was
+    // requested by the caller, let it know that we did not finish eagerly.
     vmStack().ndiscard(func->numSlotsInFrame());
     vmStack().ret();
     tvCopy(make_tv<KindOfObject>(waitHandle), *vmStack().topTV());
-    vmStack().topTV()->m_aux.u_fcallAwaitFlag = 1;
+    vmStack().topTV()->m_aux.u_asyncNonEagerReturnFlag = 1;
     assertx(vmStack().topTV() == fp->retSlot());
 
     // Return control to the caller.
@@ -6975,6 +6962,22 @@ OPTBLD_INLINE void asyncSuspendR(PC& pc) {
   vmfp() = nullptr;
 }
 
+namespace {
+
+TCA suspendStack(PC &pc) {
+  auto const jitReturn = jitReturnPre(vmfp());
+  if (resumeModeFromActRec(vmfp()) == ResumeMode::Async) {
+    // suspend resumed execution
+    asyncSuspendR(pc);
+  } else {
+    // suspend eager execution
+    asyncSuspendE(pc);
+  }
+  return jitReturnPost(jitReturn);
+}
+
+}
+
 OPTBLD_INLINE TCA iopAwait(PC& pc) {
   auto const awaitable = vmStack().topC();
   auto wh = c_Awaitable::fromCell(*awaitable);
@@ -7018,43 +7021,6 @@ OPTBLD_INLINE TCA iopAwaitAll(PC& pc, LocalRange locals) {
 
   vmStack().pushObjectNoRc(obj.detach());
   return suspendStack(pc);
-}
-
-TCA suspendStack(PC &pc) {
-  while (true) {
-    auto const jitReturn = [&] {
-      try {
-        return jitReturnPre(vmfp());
-      } catch (VMSwitchMode&) {
-        vmpc() = pc;
-        throw VMSuspendStack();
-      } catch (...) {
-        // We're halfway through a bytecode; we can't recover
-        always_assert(false);
-      }
-    }();
-
-    if (resumeModeFromActRec(vmfp()) == ResumeMode::Async) {
-      // suspend resumed execution
-      asyncSuspendR(pc);
-      return jitReturnPost(jitReturn);
-    }
-
-    auto const suspendOuter = vmfp()->isFCallAwait();
-    assertx(jitReturn.sfp || !suspendOuter);
-
-    // suspend eager execution
-    asyncSuspendE(pc);
-
-    auto retIp = jitReturnPost(jitReturn);
-    if (!suspendOuter) return retIp;
-    if (retIp) {
-      auto const& us = jit::tc::ustubs();
-      if (retIp == us.resumeHelper) retIp = us.fcallAwaitSuspendHelper;
-      return retIp;
-    }
-    vmpc() = pc;
-  }
 }
 
 OPTBLD_INLINE void iopWHResult() {
@@ -7307,12 +7273,6 @@ ALWAYS_INLINE ActRec* ar_for_inst(PC origpc, Imm) {
 template<>
 ALWAYS_INLINE ActRec* ar_for_inst<Op::FCall, FCallArgs>(PC, FCallArgs fca) {
   return arFromSp(fca.numArgs + (fca.hasUnpack ? 1 : 0));
-}
-
-template<>
-ALWAYS_INLINE ActRec* ar_for_inst<Op::FCallAwait, uint32_t>(PC,
-                                                            uint32_t numArgs) {
-  return arFromSp(numArgs);
 }
 
 /*

@@ -61,8 +61,6 @@ struct NormalizedInstruction;
 struct ProfData;
 namespace irgen { struct IRGS; }
 
-enum class InlineType { Normal, Async, AwaitedAsync };
-
 constexpr uint32_t transCountersPerChunk = 1024 * 1024 / 8;
 
 

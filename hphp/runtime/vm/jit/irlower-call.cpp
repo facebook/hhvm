@@ -128,9 +128,9 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   v << store{fp, calleeAR + AROFF(m_sfp)};
   v << storeli{safe_cast<int32_t>(extra->after), calleeAR + AROFF(m_soff)};
 
-  if (extra->fcallAwait) {
+  if (extra->asyncEagerReturn) {
     v << orlim{
-      static_cast<int32_t>(ActRec::Flags::IsFCallAwait),
+      static_cast<int32_t>(ActRec::Flags::AsyncEagerRet),
       calleeAR + AROFF(m_numArgsAndFlags),
       v.makeReg()
     };

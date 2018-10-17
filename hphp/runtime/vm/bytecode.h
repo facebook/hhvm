@@ -921,7 +921,6 @@ bool doFCall(ActRec* ar, PC& pc, uint32_t numArgs, bool unpack);
 jit::TCA dispatchBB();
 void pushFrameSlots(const Func* func, int nparams = 0);
 Array getDefinedVariables(const ActRec*);
-jit::TCA suspendStack(PC& pc);
 
 enum class StackArgsState { // tells prepareFuncEntry how much work to do
   // the stack may contain more arguments than the function expects

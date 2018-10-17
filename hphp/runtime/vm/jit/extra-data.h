@@ -599,7 +599,7 @@ struct DefInlineFPData : IRExtraData {
   FPInvOffset retSPOff;
   IRSPRelOffset spOffset; // offset from caller SP to bottom of callee's ActRec
   uint32_t numNonDefault;
-  bool isFCallAwait;
+  bool asyncEagerReturn;
 };
 
 struct SyncReturnBCData : IRExtraData {
@@ -699,7 +699,7 @@ struct CallData : IRExtraData {
                     bool writeLocals,
                     bool readLocals,
                     bool needsFrame,
-                    bool fcallAwait)
+                    bool asyncEagerReturn)
     : spOffset(spOffset)
     , numParams(numParams)
     , numOut(numOut)
@@ -708,7 +708,7 @@ struct CallData : IRExtraData {
     , writeLocals(writeLocals)
     , readLocals(readLocals)
     , needsCallerFrame(needsFrame)
-    , fcallAwait(fcallAwait)
+    , asyncEagerReturn(asyncEagerReturn)
   {}
 
   std::string show() const {
@@ -720,7 +720,7 @@ struct CallData : IRExtraData {
       writeLocals ? ",writeLocals" : "",
       readLocals ? ",readLocals" : "",
       needsCallerFrame ? ",needsCallerFrame" : "",
-      fcallAwait ? ",fcallAwait" : ""
+      asyncEagerReturn ? ",asyncEagerReturn" : ""
     );
   }
 
@@ -732,7 +732,7 @@ struct CallData : IRExtraData {
   bool writeLocals;
   bool readLocals;
   bool needsCallerFrame;
-  bool fcallAwait;
+  bool asyncEagerReturn;
 };
 
 struct RetCtrlData : IRExtraData {

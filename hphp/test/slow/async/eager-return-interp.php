@@ -5,7 +5,7 @@ async function a() {
   // make sure we suspend
   await RescheduleWaitHandle::create(0, 0);
 
-  // FCallAwait
+  // uses async eager return
   await b();
 }
 
@@ -18,16 +18,16 @@ async function c() {
 }
 
 async function d() {
-  // not a FCallAwait
+  // does not use async eager return
   await a();
 }
 
 
 <<__EntryPoint>>
-function main_fcallawait_interp() {
-try {
-  \HH\Asio\join(a());
-} catch (Exception $e) {
-  echo "Caught!\n";
-}
+async function main_eager_return_interp() {
+  try {
+    await a();
+  } catch (Exception $e) {
+    echo "Caught!\n";
+  }
 }

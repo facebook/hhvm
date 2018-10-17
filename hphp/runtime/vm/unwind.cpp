@@ -250,9 +250,10 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
     decRefLocals();
     if (UNLIKELY(func->isAsyncFunction()) &&
         phpException &&
-        !fp->isFCallAwait()) {
-      // If in an eagerly executed async function, wrap the user exception
-      // into a failed StaticWaitHandle and return it to the caller.
+        !fp->isAsyncEagerReturn()) {
+      // If in an eagerly executed async function without request for async
+      // eager return, wrap the user exception into a failed StaticWaitHandle
+      // and return it to the caller.
       auto const waitHandle = c_StaticWaitHandle::CreateFailed(phpException);
       phpException = nullptr;
       stack.ndiscard(func->numSlotsInFrame());

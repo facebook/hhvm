@@ -332,7 +332,6 @@ static const struct {
    * runtime stack are outside the boundaries of the tracelet abstraction.
    */
   { OpFCall,       {FStack,           StackN,       OutUnknown      }},
-  { OpFCallAwait,  {FStack,           Stack1,       OutUnknown      }},
   { OpFCallBuiltin,{BStackN|DontGuardAny,
                                       Stack1,       OutUnknown      }},
   { OpDecodeCufIter,{Stack1,          None,         OutNone         }},
@@ -548,8 +547,6 @@ int64_t countOperands(uint64_t mask) {
 int64_t getStackPopped(PC pc) {
   auto const op = peek_op(pc);
   switch (op) {
-    case Op::FCallAwait:
-      return getImm(pc, 0).u_IVA + kNumActRecCells;
     case Op::FCall: {
       auto const fca = getImm(pc, 0).u_FCA;
       return fca.numArgs + (fca.hasUnpack ? 1 : 0) + fca.numRets +
@@ -741,11 +738,9 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
 
   if (flags & FStack) {
     assertx(isFCallStar(ni.op()));
-    // arguments consumed
-    stackOff -= ni.op() == Op::FCallAwait
-      ? ni.imm[0].u_IVA
-      : ni.imm[0].u_FCA.numArgs + (ni.imm[0].u_FCA.hasUnpack ? 1 : 0);
-    stackOff -= kNumActRecCells; // ActRec is torn down as well
+    stackOff -= ni.imm[0].u_FCA.numArgs;  // arguments consumed
+    stackOff -= (ni.imm[0].u_FCA.hasUnpack ? 1 : 0);  // unpack
+    stackOff -= kNumActRecCells;  // ActRec is torn down as well
   }
   if (flags & IgnoreInnerType) ni.ignoreInnerType = true;
 
@@ -890,7 +885,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Jmp:
   case Op::JmpNS:
   case Op::FCall:
-  case Op::FCallAwait:
   case Op::ClsCnsD:
   case Op::FIsParamByRef:
   case Op::FIsParamByRefCufIter:
@@ -1182,7 +1176,6 @@ bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
   if (instrIsNonCallControlFlow(inst->op()) ||
       inst->op() == OpAwait || // may branch to scheduler and suspend execution
       inst->op() == OpAwaitAll || // similar to Await
-      inst->op() == OpFCallAwait || // similar to Await
       inst->op() == OpClsCnsD || // side exits if misses in the RDS
       inst->op() == OpVerifyParamType) { // avoids combinatorial explosion with
                                          // nullable types

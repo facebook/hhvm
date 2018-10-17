@@ -50,9 +50,9 @@ struct ReturnTarget {
   Block* suspendTarget;
 
   /*
-   * Type of return to create for this inline region.
+   * Offset from FCall to return control to if the callee finished eagerly.
    */
-  InlineType returnType;
+  Offset asyncEagerOffset;
 };
 
 /*

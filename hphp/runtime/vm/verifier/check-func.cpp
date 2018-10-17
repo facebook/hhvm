@@ -790,7 +790,6 @@ bool FuncChecker::checkSig(PC pc, int len, const FlavorDesc* args,
 const FlavorDesc* FuncChecker::sig(PC pc) {
   static const FlavorDesc inputSigs[][kMaxHhbcImms] = {
   #define NOV { },
-  #define CVMANY { },
   #define CVUMANY { },
   #define FCALL { },
   #define CMANY { },
@@ -811,7 +810,6 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef F_MFINAL
   #undef C_MFINAL
   #undef V_MFINAL
-  #undef CVMANY
   #undef CVUMANY
   #undef FCALL
   #undef CMANY
@@ -846,11 +844,6 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::BindM:
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = i == n - 1 ? VV : CRV;
-    }
-    return m_tmp_sig;
-  case Op::FCallAwait:   // THREE(IVA,SA,SA),    CVMANY,  ONE(CV)
-    for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
-      m_tmp_sig[i] = CVV;
     }
     return m_tmp_sig;
   case Op::FCall: {      // THREE(FCA,SA,SA), FCALL, FCALL
@@ -1037,21 +1030,7 @@ bool FuncChecker::checkFpi(State* cur, PC pc) {
   FpiState& fpi = cur->fpi[cur->fpilen - 1];
   auto const op = peek_op(pc);
 
-  if (op == OpFCallAwait) {
-    --cur->fpilen;
-    int call_params = getImmIva(pc);
-    int push_params = getImmIva(at(fpi.fpush));
-    if (call_params != push_params) {
-      error("FCall* param_count (%d) doesn't match FPush* (%d)\n",
-             call_params, push_params);
-      ok = false;
-    }
-    if (cur->stklen != fpi.stkmin) {
-      error("wrong # of params were passed; got %d expected %d\n",
-            push_params + cur->stklen - fpi.stkmin, push_params);
-      ok = false;
-    }
-  } else if (isFCallStar(op)) {
+  if (isFCallStar(op)) {
     --cur->fpilen;
     auto const fca = getImm(pc, 0).u_FCA;
     int call_params = fca.numArgs + (fca.hasUnpack ? 1 : 0);
@@ -1459,7 +1438,6 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       }
       // Fall-through
     }
-    case Op::FCallAwait:
     case Op::Await: {
       if (!m_func->isAsync) {
         ferror("{} may only appear in an async function\n", opcodeToName(op));

@@ -50,17 +50,6 @@ TCA handleServiceRequest(ReqInfo& info) noexcept;
 TCA handleBindCall(TCA toSmash, ActRec* calleeFrame, bool isImmutable);
 
 /*
- * If we suspend an FCallAwait frame we need to suspend the caller. Returning
- * to the jitted code will automatically take care of that, but if we're
- * returning in the interpreter, we have to handle it separately. If the frame
- * we're returning from was the vmJitCalledFrame(), we have to exit from
- * handleResume (see comments for jitReturnPre and jitReturnPost). After
- * exiting from there, there is no correct bytecode to resume at, so we use
- * this helper to cleanup and continue.
- */
-TCA handleFCallAwaitSuspend();
-
-/*
  * Look up (or create) and return the address of a translation for the current
  * VM location.
  *

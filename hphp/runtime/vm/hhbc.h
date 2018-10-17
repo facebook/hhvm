@@ -651,7 +651,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(FHandleRefMismatch, THREE(IVA,OA(FPassHint),SA),                    \
                                        NOV,             NOV,        NF) \
   O(FCall,           THREE(FCA,SA,SA), FCALL,           FCALL,      CF_FF) \
-  O(FCallAwait,      THREE(IVA,SA,SA), CVMANY,          ONE(CV),    CF_FF) \
   O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(RV),    NF) \
   O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
   O(MIterInit,       THREE(IA,BA,LA),  ONE(VV),         NOV,        CF) \
@@ -1079,7 +1078,6 @@ constexpr bool isFPushFunc(Op opcode) {
 inline bool isFCallStar(Op opcode) {
   switch (opcode) {
     case Op::FCall:
-    case Op::FCallAwait:
       return true;
     default:
       return false;

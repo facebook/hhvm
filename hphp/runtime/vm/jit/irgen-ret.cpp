@@ -102,8 +102,8 @@ void normalReturn(IRGS& env, SSATmp* retval) {
     gen(env, DbgTrashRetVal, fp(env));
   }
   // If we're on the eager side of an async function, we have to zero-out the
-  // TV aux of the return value, because it might be used as a flag if we were
-  // called with FCallAwait.
+  // TV aux of the return value, because it might be used as a flag if async
+  // eager return was requested.
   auto const aux =
     (curFunc(env)->isAsyncFunction() && resumeMode(env) == ResumeMode::None)
       ? folly::make_optional(AuxUnion{0})
@@ -118,15 +118,15 @@ void asyncFunctionReturn(IRGS& env, SSATmp* retVal) {
     retSurpriseCheck(env, retVal, []{});
 
     // Return from an eagerly-executed async function: wrap the return value in
-    // a StaticWaitHandle object and return that normally, unless we were called
-    // via FCallAwait
+    // a StaticWaitHandle object and return that normally, unless async eager
+    // return was requested.
     auto const wrapped = cond(
       env,
       [&] (Block* taken) {
         auto flags = gen(env, LdARNumArgsAndFlags, fp(env));
         auto test = gen(
           env, AndInt, flags,
-          cns(env, static_cast<int32_t>(ActRec::Flags::IsFCallAwait)));
+          cns(env, static_cast<int32_t>(ActRec::Flags::AsyncEagerRet)));
         gen(env, JmpNZero, taken, test);
       },
       [&] {

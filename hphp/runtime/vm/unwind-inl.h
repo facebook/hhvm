@@ -80,14 +80,6 @@ inline void exception_handler(Action action) {
     return;
   }
 
-  catch (VMSuspendStack&) {
-    checkVMRegState();
-    ITRACE_MOD(Trace::unwind, 1, "unwind: VMSuspendStack from {}\n",
-               vmfp()->m_func->fullName()->data());
-    suspendStack(vmpc());
-    return;
-  }
-
   catch (VMStackOverflow&) {
     checkVMRegState();
     ITRACE_MOD(Trace::unwind, 1, "unwind: VMStackOverflow\n");

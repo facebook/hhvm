@@ -76,6 +76,12 @@ enum Attr {
   // Indicates that a static property has the <<__LSB>> attribute.
   // Such a property is implicitly redeclared in all derived classes.
   AttrLSB                  = (1u <<  7), //       |    X     |         //
+  // Does this function support the async eager return optimization? If so,
+  // instead of returning a finished Awaitable, this function may return the
+  // unpacked result of the Awaitable, assuming the AsyncEagerRet ActRec flag
+  // was set by the caller.
+  AttrSupportsAsyncEagerReturn
+                           = (1u <<  7), //       |          |    X    //
   // Is this class a trait?  On methods, or properties, this indicates that
   // the method was imported from a trait.
   AttrTrait                = (1u <<  8), //    X  |    X     |    X    //

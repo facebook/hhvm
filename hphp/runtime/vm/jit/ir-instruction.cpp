@@ -402,8 +402,8 @@ Type callReturn(const IRInstruction* inst) {
   assertx(inst->is(Call, CallUnpack));
 
   if (inst->is(Call)) {
-    // FCallAwait needs to load TVAux
-    if (inst->extra<Call>()->fcallAwait) return TInitGen;
+    // Async eager return needs to load TVAux
+    if (inst->extra<Call>()->asyncEagerReturn) return TInitCell;
     if (inst->extra<Call>()->numOut) return TInitCell;
     auto callee = inst->extra<Call>()->callee;
     return callee ? irgen::callReturnType(callee) : TInitGen;

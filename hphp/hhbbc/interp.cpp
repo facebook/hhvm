@@ -3593,30 +3593,6 @@ void in(ISS& env, const bc::FCall& op) {
   }
 }
 
-void in(ISS& env, const bc::FCallAwait& op) {
-  auto const ar = fpiTop(env);
-  if (ar.foldable) {
-    discard(env, op.arg1);
-    fpiNotFoldable(env);
-    fpiPop(env);
-    return push(env, TBottom);
-  }
-  if ((ar.func && ar.func->name() != op.str3) ||
-      (ar.cls && ar.cls->name() != op.str2)) {
-    // We've found a more precise type for the call, so update it
-    return reduce(
-      env,
-      bc::FCallAwait {
-        op.arg1, ar.cls ? ar.cls->name() : staticEmptyString(), ar.func->name()
-      }
-    );
-  }
-  impl(env,
-       bc::FCall { FCallArgs(op.arg1), op.str2, op.str3 },
-       bc::UnboxRNop {},
-       bc::Await {});
-}
-
 void in(ISS& env, const bc::DecodeCufIter& op) {
   popC(env); // func
   env.propagate(op.target, &env.state); // before iter is modifed

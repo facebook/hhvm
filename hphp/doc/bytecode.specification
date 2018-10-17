@@ -2317,6 +2317,12 @@ FCall* opcodes
   the cost of Awaitable construction if the callee is an async function that
   finished eagerly and the caller awaits the Awaitable immediately upon return.
 
+  If %4 was specified and the callee raised an exception, the exception will
+  continue to propagate thru the caller instead of being wrapped into Awaitable.
+  Note that for the purposes of exception handling inside the caller, the PC
+  will point after the FCall rather than %4 so it is not advised to have
+  different EH entries for these two locations.
+
 FCall <fca> <class name> <func name>  [C|V..C|V]  ->  [R | C..C]
 
   FPI call. This instruction pops the current FPI off the FPI stack and calls
@@ -2328,17 +2334,6 @@ FCall <fca> <class name> <func name>  [C|V..C|V]  ->  [R | C..C]
     empty     | empty     | unknown
     empty     | non-empty | function %3
     non-empty | non-empty | method %2::%3
-
-FCallAwait <num params> <class name> <func name> [C|V..C|V] -> [R]
-
-  FPI call direct to a known async function. Equivalent to the sequence
-
-    FCall
-    UnboxRNop
-    Await
-
-  but may enable the runtime to avoid creating a StaticWaitHandle in the event
-  that the called function returns eagerly.
 
 FCallBuiltin  <total params> <passed params> <litstr id> [C|V|U..C|V|U]  -> [R]
 

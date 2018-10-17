@@ -932,8 +932,7 @@ bool breaksRegion(SrcKey sk) {
 
     case Op::Await:
     case Op::AwaitAll:
-    case Op::FCallAwait:
-      // We break regions at resumed Await/FCallAwait instructions, to avoid
+      // We break regions at resumed Await instructions, to avoid
       // duplicating the translation of the resumed SrcKey after the
       // Await.
       return sk.resumeMode() == ResumeMode::Async;

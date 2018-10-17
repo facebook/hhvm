@@ -495,7 +495,7 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
                                        int32_t maxBCInstrs,
                                        int& calleeCost,
                                        Annotations& annotations) {
-  if (psk.srcKey.op() != Op::FCall && psk.srcKey.op() != Op::FCallAwait) {
+  if (psk.srcKey.op() != Op::FCall) {
     return nullptr;
   }
 
@@ -749,17 +749,15 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       }
 
       if (calleeRegion) {
-        always_assert(inst.op() == Op::FCall || inst.op() == Op::FCallAwait);
+        always_assert(inst.op() == Op::FCall);
         auto const* callee = inst.funcd;
+        auto const numArgs = inst.imm[0].u_FCA.numArgs;
 
         // We shouldn't be inlining profiling translations.
         assertx(irgs.context.kind != TransKind::Profile);
 
         assertx(calleeRegion->instrSize() <= budgetBCInstrs);
 
-        auto const numArgs = inst.op() == OpFCall
-          ? inst.imm[0].u_FCA.numArgs
-          : inst.imm[0].u_IVA;
         FTRACE(1, "\nstarting inlined call from {} to {} with {} args "
                "and stack:\n{}\n",
                block.func()->fullName()->data(),
@@ -770,12 +768,10 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
         auto returnSk = inst.nextSk();
         auto returnBlock = irb.unit().defBlock(irgen::curProfCount(irgs));
         auto suspendRetBlock = irb.unit().defBlock(irgen::curProfCount(irgs));
-        auto retType =
-          !callee->isAsync() ? InlineType::Normal :
-          inst.op() == Op::FCallAwait ? InlineType::AwaitedAsync :
-          InlineType::Async;
+        auto asyncEagerOffset = callee->supportsAsyncEagerReturn()
+          ? inst.imm[0].u_FCA.asyncEagerOffset : kInvalidOffset;
         auto returnTarget = irgen::ReturnTarget {
-          returnBlock, suspendRetBlock, retType
+          returnBlock, suspendRetBlock, asyncEagerOffset
         };
         auto returnFuncOff = returnSk.offset() - block.func()->base();
 
@@ -824,6 +820,10 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
             return TranslateResult::Retry;
           }
 
+          // Recursive calls to irGenRegionImpl will reset the successor block
+          // mapping
+          setSuccIRBlocks(irgs, region, blockId, blockIdToIRBlock);
+
           // Native calls end inlining before CallBuiltin
           if (!callee->isCPPBuiltin()) {
             // If the inlined region failed to contain any returns then the
@@ -838,10 +838,6 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
             // For native calls we don't use a return block
             assertx(returnBlock->empty());
           }
-
-          // Recursive calls to irGenRegionImpl will reset the successor block
-          // mapping
-          setSuccIRBlocks(irgs, region, blockId, blockIdToIRBlock);
 
           // Don't emit the FCall
           skipTrans = true;
@@ -1026,9 +1022,8 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
     auto const entry = irb.unit().entry();
     auto returnBlock = irb.unit().defBlock();
     auto suspendRetBlock = irb.unit().defBlock();
-    auto retType = func->isAsync() ? InlineType::Async : InlineType::Normal;
     auto returnTarget = irgen::ReturnTarget {
-      returnBlock, suspendRetBlock, retType
+      returnBlock, suspendRetBlock, kInvalidOffset
     };
 
     // Set the profCount of the entry and return blocks we just created.

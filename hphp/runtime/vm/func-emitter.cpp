@@ -172,6 +172,10 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
       attrs |= AttrVariadicByRef;
     }
   }
+  if (isAsync && !isGenerator) {
+    // Async functions can return results directly.
+    attrs |= AttrSupportsAsyncEagerReturn;
+  }
 
   assertx(!m_pce == !preClass);
   auto f = m_ue.newFunc(this, unit, name, attrs, params.size());

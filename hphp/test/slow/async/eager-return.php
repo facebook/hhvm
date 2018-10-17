@@ -23,10 +23,11 @@ async function bar($x) {
   return await foo($x);
 }
 
-function main() {
+async function run() {
   for ($i =0; $i < 7; $i++) {
     try {
-      var_dump(\HH\Asio\join(bar($i)));
+      $res = await bar($i);
+      var_dump($res);
     } catch (Exception $e) {
       var_dump("Caught exception: i=$i");
     }
@@ -35,9 +36,9 @@ function main() {
 
 
 <<__EntryPoint>>
-function main_fcall_await() {
-main();
-fb_setprofile(function($when, $func, $args) {
+async function main_eager_return() {
+  await run();
+  fb_setprofile(function($when, $func, $args) {
     if ($when == 'exit' &&
         $func == 'baz' &&
         $args === null) {
@@ -45,6 +46,5 @@ fb_setprofile(function($when, $func, $args) {
       throw new Exception;
     }
   });
-
-main();
+  await run();
 }

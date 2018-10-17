@@ -433,7 +433,6 @@ type instruct_call =
   | FThrowOnRefMismatch of bool list
   | FHandleRefMismatch of param_num * fpass_hint * string
   | FCall of fcall_args * class_id * function_id
-  | FCallAwait of num_params * class_id * function_id
   | FCallBuiltin of num_params * num_params * string
 
 type instruct_base =

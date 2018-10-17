@@ -407,6 +407,7 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
     }
 
     cellDup(*ret.toCell(), *stack.allocTV());
+    stack.topTV()->m_aux.u_asyncNonEagerReturnFlag = 1;
 
     vmfp() = outer;
     vmpc() = outer ? outer->func()->unit()->at(pcOff) : nullptr;

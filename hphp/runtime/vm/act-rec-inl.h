@@ -56,12 +56,8 @@ inline bool ActRec::resumed() const {
   return (flags() & kExecutionModeMask) == InResumed;
 }
 
-inline bool ActRec::isFCallAwait() const {
-  return (flags() & kExecutionModeMask) == IsFCallAwait;
-}
-
-inline bool ActRec::mayNeedStaticWaitHandle() const {
-  return !(m_numArgsAndFlags & (InResumed|IsFCallAwait));
+inline bool ActRec::isAsyncEagerReturn() const {
+  return (flags() & kExecutionModeMask) == AsyncEagerRet;
 }
 
 inline bool ActRec::magicDispatch() const {
@@ -103,7 +99,7 @@ inline void ActRec::setFCallM() {
 }
 
 inline void ActRec::setResumed() {
-  assertx((flags() & ~(IsFCallAwait | DynamicCall))
+  assertx((flags() & ~(AsyncEagerRet | DynamicCall))
          == Flags::None);
   m_numArgsAndFlags = encodeNumArgsAndFlags(
     numArgs(),
@@ -111,11 +107,11 @@ inline void ActRec::setResumed() {
   );
 }
 
-inline void ActRec::setFCallAwait() {
+inline void ActRec::setAsyncEagerReturn() {
   assertx((flags() & ~DynamicCall) == Flags::None);
   m_numArgsAndFlags = encodeNumArgsAndFlags(
     numArgs(),
-    static_cast<Flags>(IsFCallAwait | (flags() & DynamicCall))
+    static_cast<Flags>(AsyncEagerRet | (flags() & DynamicCall))
   );
 }
 

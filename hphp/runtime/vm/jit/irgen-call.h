@@ -44,13 +44,12 @@ void fpushActRec(IRGS& env,
 void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
                     SSATmp* const* const args);
 
-SSATmp* implFCall(IRGS& env, uint32_t numParams, bool unpack, uint32_t numOut);
-
 void emitCallerDynamicCallChecks(IRGS& env,
                                  const Func* callee,
                                  uint32_t numParams);
 
 Type callReturnType(const Func* callee);
+Type awaitedCallReturnType(const Func* callee);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -631,6 +631,7 @@ void Func::print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrIsFoldable) { out << " (foldable)"; }
   if (attrs & AttrNoInjection) { out << " (no_injection)"; }
   if (attrs & AttrReference) { out << " (reference)"; }
+  if (attrs & AttrSupportsAsyncEagerReturn) { out << " (can_async_eager_ret)"; }
   if (attrs & AttrDynamicallyCallable) { out << " (dyn_callable)"; }
   auto rxl = rxLevelFromAttr(attrs);
   if (rxl != RxLevel::None) out << " (" << rxLevelToAttrString(rxl) << ")";

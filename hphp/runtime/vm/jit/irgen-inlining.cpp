@@ -71,36 +71,48 @@ value moved into the caller. The sequence for this is annotated below.
                   # it back to its proper location once the return is complete
                   # so that the value is live in the caller.
 
-We also support inlining of async functions which may suspend. Suspending from
-an inlined region is handled differently depending on whether or not the caller
-entered the region with an FCallAwait. The suspend block for FCallAwait is
-annotated below.
+We also support inlining of async functions. Returning from an inlined region
+is handled differently depending on whether or not the caller entered the
+region using FCall with an async eager offset. If the offset was specified,
+the execution continues at that offset. Otherwise the result is wrapped in
+a StaticWaitHandle and the execution continues at the next opcode.
+
+Async functions may also exit by suspending. The suspend block is annotated
+below:
 
 tCallee := DefLabel   # The callee region may suspend from multiple locations,
                       # but after constructing the waithandle they must all
-                      # branch to a common suspend block which will handle
-                      # suspending the caller for FCallAwait.
+                      # branch to a common suspend block which will continue
+                      # execution of the caller at the opcode following FCall,
+                      # usually an Await.
 
 InlineSuspend         # This instruction behaves identically to InlineReturn,
                       # killing the callee region. Note that in this case we
                       # do not DecRef locals or context as these have been moved
                       # into the waithandle.
 
-tCaller := CreateAFWH # An AFWH is constructed for the caller, as FCallAwait
-                      # must suspend the caller in cases where the callee does
-                      # not execute eagerly.
+If a FCall with an async eager offset was followed by an Await, this HHIR
+sequence follows the InlineSuspend:
+
+tState := LdWhState   # Check the state of the waithandle representing the
+JmpZero succeeded     # suspended callee. It may have finished in meanwhile due
+EqInt 1               # to ability of surprise hooks to execute arbitrary Hack
+JmpNZero failed       # code, so side-exit if that's the case.
+
+tCaller := CreateAFWH # An AFWH is constructed for the caller, as Await must
+                      # suspend if waithandle is not finished.
 
 CheckSurpriseFlags    # The caller suspend hook is entered if requested.
 
 RetCtrl               # Control is returned, suspending the caller. In the case
-                      # of nested inlined FCallAwait instructions this return
-                      # would simply be a branch to the suspend block for the
-                      # next most nested callee.
+                      # of nested inlined FCall instructions this return would
+                      # simply be a branch to the suspend block for the next
+                      # most nested callee.
 
-Non-FCallAwait calls to async functions use an analogous suspend block which
-side-exits rather than suspending the caller. This is done so that the fast
-path through the callee will return only StaticWaitHandles which may be elided
-by the DCE and simplifier passes.
+Calls to async functions without async eager offset use an analogous suspend
+block which side-exits rather than continuing at the next opcode. This is done
+so that the fast path through the callee will return only StaticWaitHandles
+which may be elided by the DCE and simplifier passes.
 
 Inlined regions maintain the following invariants, which later optimization
 passes may depend on (most notably DCE and partial-DCE):
@@ -115,19 +127,21 @@ passes may depend on (most notably DCE and partial-DCE):
   - The callee must contain a return or await.
 
 When a callee contains awaits, these will be implemented as either an await of
-the caller (in the case of FCallAwait) or a return from the callee and side-exit
-from the caller, unless the callee does not contain a return (e.g. the caller
-was profiled as always suspending), in which case the callee will return the
-awaitable waithandle to the caller rather than side-exiting in the case of a
-non-FCallAwait.
+the nested callee (in the case of FCall) or a return from the callee and
+side-exit from the caller, unless the callee does not contain a return (e.g.
+the caller was profiled as always suspending), in which case the callee will
+return the waithandle to the caller rather than side-exiting in the case of a
+FCall without async eager offset.
 
 Below is an unmaintainable diagram of a pair of an async function inlined into a
-pair of callers with FCallAwait and FCall (*) respectively,
+pair of callers with and without (*) async eager offset respectively,
 
 
 Outer:                                 | Inner:
   ...                                  |   ...
-  FCallAwait "Inner" or FCall "Inner"  |   FCallAwait "Other"
+  FCall "Inner" aeo1 or FCall "Inner"  |   FCall "Other" aeo2
+  Await                                |   Await
+ aeo1:                                 |  aeo2:
   ...                                  |   ...
 
           ...
@@ -151,23 +165,25 @@ Outer:                                 | Inner:
 +-------------------+    | ta = CreateAWFH tx  |
            |             | SuspendHook         |
            v             | StStk ta            |
-+-------------------+    | Jmp SuspendTarget   |--- or (*) ----+
++-------------------+    | Jmp suspendTarget   |--- or (*) ----+
 | StStk tx          |    +---------------------+               |
-| ...               |               |                          |
-| Jmp returnTarget  |               v                          v
-+-------------------+    +---------------------+    +---------------------+
-           |             | tb = LdStk          |    | tb = LdStk          |
-           v             | InlineSuspend       |    | InlineSuspend       |
-+-------------------+    | StStk tb            |    | StStk tb            |
-| DecRef Locals     |    | tc = LdStk          |    +---------------------+
-| DecRef This       |    | td = CreateAFWH tc  |               |
-| tr = LdStk        |    | SuspendHook         |               v
-| InlineReturn      |    | RetCtrl td          |          *Side Exit*
-| StStk tr          |    +---------------------+
-+-------------------+
-           |
-           v
-          ...
+| ... // aeo2       |               |                          v
+| Jmp returnTarget  |               v               +---------------------+
++-------------------+    +---------------------+    | tb = LdStk          |
+           |             | tb = LdStk          |    | InlineSuspend       |
+           v             | InlineSuspend       |    | StStk tb            |
++-------------------+    | StStk tb            |    +---------------------+
+| DecRef Locals     |    | tc = LdStk          |               |
+| DecRef This       |    | te = LdWhState tc   |               v
+| tr = LdStk        |    | JmpZero te          |--------->*Side Exit*
+| InlineReturn      |    +---------------------+
+| StStk tr          |               |
+| CreateSSWH (*)    |               v
++-------------------+    +---------------------+
+           |             | td = CreateAFWH tc  |
+           v             | SuspendHook         |
+          ...            | RetCtrl td          |
+                         +---------------------+
 */
 
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
@@ -176,9 +192,9 @@ Outer:                                 | Inner:
 #include "hphp/runtime/vm/jit/mutation.h"
 
 #include "hphp/runtime/vm/jit/irgen-call.h"
+#include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-func-prologue.h"
-#include "hphp/runtime/vm/jit/irgen-resumable.h"
 #include "hphp/runtime/vm/jit/irgen-sprop-global.h"
 
 #include "hphp/runtime/vm/hhbc-codec.h"
@@ -320,7 +336,7 @@ bool beginInlining(IRGS& env,
   data.retSPOff      = prevBCSPOff;
   data.spOffset      = calleeAROff;
   data.numNonDefault = numParams;
-  data.isFCallAwait  = returnTarget.returnType == InlineType::AwaitedAsync;
+  data.asyncEagerReturn = returnTarget.asyncEagerOffset != kInvalidOffset;
 
   assertx(startSk.func() == target &&
           startSk.offset() == target->getEntryForNumArgs(numParams) &&
@@ -509,20 +525,26 @@ void implReturnBlock(IRGS& env) {
   decRefLocalsInline(env);
   decRefThis(env);
 
-  auto const awaitedTy = typeFromRAT(
-    curFunc(env)->repoAwaitedReturnType(), curClass(env)
-  );
+  auto const callee = curFunc(env);
+  auto retVal = pop(env, DataTypeGeneric);
+  implInlineReturn(env, false);
 
-  switch (rt.returnType) {
-    case InlineType::Async: {
-      auto const retval = pop(env, DataTypeGeneric);
-      push(env, gen(env, CreateSSWH, gen(env, AssertType, awaitedTy, retval)));
-      break;
-    }
+  if (!callee->isAsyncFunction()) {
+    // Non-async function. Just push the result on the stack.
+    push(env, gen(env, AssertType, callReturnType(callee), retVal));
+    return;
+  }
 
-    case InlineType::Normal:
-    case InlineType::AwaitedAsync:
-      break;
+  retVal = gen(env, AssertType, awaitedCallReturnType(callee), retVal);
+  if (rt.asyncEagerOffset == kInvalidOffset) {
+    // Async eager return was not requested. Box the returned value and
+    // continue execution at the next opcode.
+    push(env, gen(env, CreateSSWH, retVal));
+  } else {
+    // Async eager return was requested. Continue execution at the async eager
+    // offset with the unboxed value.
+    push(env, retVal);
+    jmpImpl(env, bcOff(env) + rt.asyncEagerOffset);
   }
 }
 
@@ -535,6 +557,7 @@ bool implSuspendBlock(IRGS& env, bool exitOnAwait) {
   // We strive to inline regions which will mostly eagerly terminate.
   if (exitOnAwait) hint(env, Block::Hint::Unlikely);
 
+  assertx(curFunc(env)->isAsyncFunction());
   auto const label = env.unit.defLabel(1, env.irb->nextBCContext());
   auto const wh = label->dst(0);
   rt.suspendTarget->push_back(label);
@@ -543,21 +566,14 @@ bool implSuspendBlock(IRGS& env, bool exitOnAwait) {
   auto const is = implInlineReturn(env, exitOnAwait);
   SCOPE_EXIT { if (exitOnAwait) pushInlineState(env, is); };
 
-  switch (rt.returnType) {
-    case InlineType::Normal: always_assert(false);
-    case InlineType::Async:
-      push(env, wh);
-      if (exitOnAwait) gen(env, Jmp, makeExit(env, nextBcOff(env)));
-      break;
-    case InlineType::AwaitedAsync:
-      if (resumeMode(env) == ResumeMode::Async) {
-        implAwaitR(env, wh, nextBcOff(env), true);
-      } else {
-        implAwaitE(env, wh, nextBcOff(env), true);
-      }
-      break;
+  push(env, wh);
+  if (exitOnAwait) {
+    if (rt.asyncEagerOffset == kInvalidOffset) {
+      gen(env, Jmp, makeExit(env, nextBcOff(env)));
+    } else {
+      jmpImpl(env, nextBcOff(env));
+    }
   }
-
   return true;
 }
 
@@ -581,24 +597,6 @@ bool endInlining(IRGS& env) {
   always_assert(did_start);
 
   implReturnBlock(env);
-
-  auto const retTy = callReturnType(curFunc(env));
-  auto const awaitedTy = typeFromRAT(
-    curFunc(env)->repoAwaitedReturnType(), curClass(env)
-  );
-  auto const retVal = pop(env, DataTypeGeneric);
-  implInlineReturn(env);
-
-  switch (rt.returnType) {
-    case InlineType::Async:
-    case InlineType::Normal:
-      push(env, gen(env, AssertType, retTy, retVal));
-      break;
-
-    case InlineType::AwaitedAsync:
-      push(env, gen(env, AssertType, awaitedTy, retVal));
-      break;
-  }
 
   FTRACE(1, "]]] end inlining: {}\n", curFunc(env)->fullName()->data());
   return true;

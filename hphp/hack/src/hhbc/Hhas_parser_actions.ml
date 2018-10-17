@@ -1133,9 +1133,6 @@ let maketernaryinst s arg1 arg2 arg3 =
                                  (intofiarg arg1, specialclsrefofiarg arg2, method_id_of_iarg arg3))
  | "FIsParamByRefCufIter" ->
     ICall (FIsParamByRefCufIter (intofiarg arg1, fpasshintof arg2, iterofiarg arg3))
- | "FCallAwait" ->
-    ICall(FCallAwait (intofiarg arg1,
-      class_id_of_iarg arg2, function_id_of_iarg arg3))
  | "FCallBuiltin" ->
     ICall(FCallBuiltin (intofiarg arg1, intofiarg arg2, stringofiarg arg3))
  | "FHandleRefMismatch" ->

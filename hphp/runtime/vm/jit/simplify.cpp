@@ -320,6 +320,14 @@ SSATmp* simplifyCheckFuncStatic(State& env, const IRInstruction* inst) {
   return mergeBranchDests(env, inst);
 }
 
+SSATmp* simplifyFuncSupportsAsyncEagerReturn(State& env,
+                                             const IRInstruction* inst) {
+  auto const funcTmp = inst->src(0);
+  return funcTmp->hasConstVal(TFunc)
+    ? cns(env, funcTmp->funcVal()->supportsAsyncEagerReturn())
+    : nullptr;
+}
+
 SSATmp* simplifyIsFuncDynCallable(State& env, const IRInstruction* inst) {
   auto const funcTmp = inst->src(0);
   return funcTmp->hasConstVal(TFunc)
@@ -3864,6 +3872,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(MethodExists)
   X(CheckCtxThis)
   X(CheckFuncStatic)
+  X(FuncSupportsAsyncEagerReturn)
   X(IsFuncDynCallable)
   X(RaiseMissingThis)
   X(LdObjClass)

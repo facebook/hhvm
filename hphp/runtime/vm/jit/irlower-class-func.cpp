@@ -183,6 +183,20 @@ void cgLdFuncNumParams(IRLS& env, const IRInstruction* inst) {
   v << shrqi{1, tmp, dst, v.makeReg()};
 }
 
+void cgFuncSupportsAsyncEagerReturn(IRLS& env, const IRInstruction* inst) {
+  auto const func = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  auto const sf = v.makeReg();
+  v << testlim{
+    static_cast<int32_t>(AttrSupportsAsyncEagerReturn),
+    func[Func::attrsOff()],
+    sf
+  };
+  v << setcc{CC_NZ, sf, dst};
+}
+
 void cgIsFuncDynCallable(IRLS& env, const IRInstruction* inst) {
   auto const func = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();

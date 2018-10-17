@@ -140,37 +140,6 @@ void BasicPeephole::push_back(const Bytecode& next) {
       return;
     }
 
-    // transform suitable FCall; UnboxRNop; Await to FCallAwait
-    if (!m_ctx.func->isGenerator &&
-        m_next.size() > 1 &&
-        cur.op == Op::UnboxRNop &&
-        next.op == Op::Await) {
-      auto& prev = (&cur)[-1];
-      if (prev.op == Op::FCall) {
-        auto& call = prev.FCall;
-        auto async = [&]() {
-          if (call.fca.hasUnpack || call.fca.numRets != 1) return false;
-          if (call.str3->empty()) return false;
-          if (call.str2->empty()) {
-            return m_index.is_async_func(
-              m_index.resolve_func(m_ctx, call.str3));
-          }
-          auto cls = m_index.resolve_class(m_ctx, call.str2);
-          assert(cls);
-          auto func = m_index.resolve_method(m_ctx, subCls(*cls),
-                                             call.str3);
-          return m_index.is_async_func(func);
-        }();
-        if (async) {
-          prev = bc::FCallAwait {
-            call.fca.numArgs, call.str2, call.str3
-          };
-          m_next.pop_back();
-          return;
-        }
-      }
-    }
-
     // transform SetL; PopC to PopL
     if (cur.op == Op::SetL && next.op == Op::PopC) {
       cur = bc_with_loc(next.srcLoc, bc::PopL { cur.SetL.loc1 });

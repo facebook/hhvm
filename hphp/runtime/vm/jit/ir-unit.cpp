@@ -144,7 +144,7 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
     // end of the bytecode instruction to be the non-suspending path.
     case RetCtrl: {
       auto const op = inst.marker().sk().op();
-      return op != Op::Await && op != Op::AwaitAll && op != Op::FCallAwait;
+      return op != Op::Await && op != Op::AwaitAll;
     }
 
     case AsyncFuncRet:

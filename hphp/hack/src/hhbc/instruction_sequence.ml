@@ -790,7 +790,7 @@ let get_input_output_count i =
     | FPushCtor _ | FPushCtorD _ | FPushCtorI _ | FPushCtorS _
     | FIsParamByRef _ | FIsParamByRefCufIter _ -> (0, 1)
     | FCall ((n1, u, n2, _), _, _) -> (n1 + (if u then 1 else 0), n2)
-    | FCallAwait (n, _, _) | FCallBuiltin (n, _, _) -> (n, 1)
+    | FCallBuiltin (n, _, _) -> (n, 1)
     end
   | IMisc i ->
     begin match i with

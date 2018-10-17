@@ -1469,7 +1469,6 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define NUM_POP_MFINAL immIVA[0]
 #define NUM_POP_C_MFINAL(n) (immIVA[0] + n)
 #define NUM_POP_V_MFINAL NUM_POP_C_MFINAL(1)
-#define NUM_POP_CVMANY immIVA[0] /* number of arguments */
 #define NUM_POP_CVUMANY immIVA[0] /* number of arguments */
 #define NUM_POP_FCALL (immFCA.numArgs + (immFCA.hasUnpack ? 1 : 0) +   \
                        immFCA.numRets - 1)
@@ -1525,8 +1524,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
     }                                                                  \
                                                                        \
     /* FCalls with unpack perform their own bounds checking. */        \
-    if ((Op##name == OpFCall && !immFCA.hasUnpack) ||                  \
-        Op##name == OpFCallAwait) {                                    \
+    if (Op##name == OpFCall && !immFCA.hasUnpack) {                    \
       as.fe->containsCalls = true;                                     \
     }                                                                  \
                                                                        \
@@ -1598,7 +1596,6 @@ OPCODES
 #undef NUM_POP_MFINAL
 #undef NUM_POP_C_MFINAL
 #undef NUM_POP_V_MFINAL
-#undef NUM_POP_CVMANY
 #undef NUM_POP_CVUMANY
 #undef NUM_POP_FCALL
 #undef NUM_POP_CMANY

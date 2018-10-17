@@ -115,9 +115,8 @@ struct ActRec {
 
     // Four mutually exclusive execution mode states in these 2 bits.
     InResumed     = (1u << 30),
-    IsFCallAwait  = (1u << 31),
-    MagicDispatch = InResumed|IsFCallAwait,
-    // MayNeedStaticWaitHandle, if neither bit is set.
+    AsyncEagerRet = (1u << 31),
+    MagicDispatch = InResumed|AsyncEagerRet,
   };
 
   static constexpr int kNumArgsBits = 26;
@@ -188,8 +187,7 @@ struct ActRec {
   Flags flags() const;
   bool localsDecRefd() const;
   bool resumed() const;
-  bool isFCallAwait() const;
-  bool mayNeedStaticWaitHandle() const;
+  bool isAsyncEagerReturn() const;
   bool magicDispatch() const;
   bool isDynamicCall() const;
   bool isFCallM() const;
@@ -213,7 +211,7 @@ struct ActRec {
    */
   void setLocalsDecRefd();
   void setResumed();
-  void setFCallAwait();
+  void setAsyncEagerReturn();
   void setDynamicCall();
   void setFCallM();
 

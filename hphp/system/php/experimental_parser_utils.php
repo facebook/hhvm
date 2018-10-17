@@ -80,6 +80,37 @@ namespace HH\ExperimentalParserUtils {
     );
   }
 
+  function find_class_body(array $json, string $name): ?array {
+    $decls = $json["parse_tree"]["script_declarations"]["elements"];
+    foreach ($decls as $d) {
+      if ($d["kind"] === "classish_declaration") {
+        $true_name = $d["classish_name"]["token"]["text"];
+        if (strcasecmp($true_name, $name) === 0) {
+          return $d["classish_body"];
+        }
+      }
+    }
+    return null;
+  }
+
+  function find_class_shape_type_constant(array $class_body, string $name): ?array {
+    $elements = $class_body["classish_body_elements"];
+    if ($elements["kind"] === "missing") {
+      return null;
+    }
+
+    foreach ($elements["elements"] as $e) {
+      if ($e["kind"] === "type_const_declaration") {
+        $true_name = $e["type_const_name"]["token"]["text"];
+        if (strcasecmp($true_name, $name) === 0) {
+          $shape = extract_shape_from_type($e["type_const_type_specifier"]);
+          return $shape;
+        }
+      }
+    }
+    return null;
+  }
+
   function find_single_shape_type_alias(array $json, string $name): ?(string, array) {
     $decls = $json["parse_tree"]["script_declarations"]["elements"];
     foreach ($decls as $d) {

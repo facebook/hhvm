@@ -233,15 +233,14 @@ APCLocalArray::SetRefStr(ArrayData* ad, StringData* k, tv_lval v, bool) {
   return helper.release(helper.escalated->setRef(k, v, false));
 }
 
-ArrayData* APCLocalArray::RemoveInt(ArrayData* ad, int64_t k, bool /*copy*/) {
+ArrayData* APCLocalArray::RemoveInt(ArrayData* ad, int64_t k) {
   EscalateHelper helper{ad};
-  return helper.release(helper.escalated->remove(k, false));
+  return helper.release(helper.escalated->removeInPlace(k));
 }
 
-ArrayData*
-APCLocalArray::RemoveStr(ArrayData* ad, const StringData* k, bool /*copy*/) {
+ArrayData* APCLocalArray::RemoveStr(ArrayData* ad, const StringData* k) {
   EscalateHelper helper{ad};
-  return helper.release(helper.escalated->remove(k, false));
+  return helper.release(helper.escalated->removeInPlace(k));
 }
 
 ArrayData* APCLocalArray::Copy(const ArrayData* ad) {

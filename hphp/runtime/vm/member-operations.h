@@ -2515,44 +2515,41 @@ inline Cell IncDecNewElem(
  * UnsetElemArray when key is an Int64
  */
 template <bool intishWarn>
-inline ArrayData* UnsetElemArrayPre(ArrayData* a, int64_t key,
-                                    bool copy) {
-  return a->remove(key, copy);
+inline ArrayData* UnsetElemArrayPre(ArrayData* a, int64_t key) {
+  return a->remove(key);
 }
 
 /**
  * UnsetElemArray when key is a String
  */
 template <bool intishWarn>
-inline ArrayData* UnsetElemArrayPre(ArrayData* a, StringData* key,
-                                    bool copy) {
+inline ArrayData* UnsetElemArrayPre(ArrayData* a, StringData* key) {
   int64_t n;
   assertx(a->isPHPArray());
   if (key->isStrictlyInteger(n)) {
     if (intishWarn) raise_intish_index_cast();
-    return a->remove(n, copy);
+    return a->remove(n);
   } else {
-    return a->remove(key, copy);
+    return a->remove(key);
   }
 }
 
 template <bool intishWarn>
-inline ArrayData* UnsetElemArrayPre(ArrayData* a, TypedValue key,
-                                    bool copy) {
+inline ArrayData* UnsetElemArrayPre(ArrayData* a, TypedValue key) {
   if (isStringType(key.m_type)) {
-    return UnsetElemArrayPre<intishWarn>(a, key.m_data.pstr, copy);
+    return UnsetElemArrayPre<intishWarn>(a, key.m_data.pstr);
   }
   if (key.m_type == KindOfInt64) {
-    return UnsetElemArrayPre<false>(a, key.m_data.num, copy);
+    return UnsetElemArrayPre<false>(a, key.m_data.num);
   }
   if (isFuncType(key.m_type)) {
     return UnsetElemArrayPre<intishWarn>(
-      a, const_cast<StringData*>(funcToStringHelper(key.m_data.pfunc)), copy
+      a, const_cast<StringData*>(funcToStringHelper(key.m_data.pfunc))
     );
   }
   auto const k = tvToKey(key, a);
   if (isNullType(k.m_type)) return a;
-  return a->remove(k, copy);
+  return a->remove(k);
 }
 
 /**
@@ -2563,7 +2560,7 @@ inline void UnsetElemArray(tv_lval base, key_type<keyType> key) {
   assertx(tvIsArrayOrShape(base));
   assertx(tvIsPlausible(*base));
   ArrayData* a = val(base).parr;
-  ArrayData* a2 = UnsetElemArrayPre<intishWarn>(a, key, a->cowCheck());
+  ArrayData* a2 = UnsetElemArrayPre<intishWarn>(a, key);
 
   if (a2 != a) {
     type(base) = KindOfArray;
@@ -2577,22 +2574,20 @@ inline void UnsetElemArray(tv_lval base, key_type<keyType> key) {
  * UnsetElem when base is a Vec
  */
 
-inline ArrayData* UnsetElemVecPre(ArrayData* a, int64_t key,
-                                  bool copy) {
-  return PackedArray::RemoveIntVec(a, key, copy);
+inline ArrayData* UnsetElemVecPre(ArrayData* a, int64_t key) {
+  return PackedArray::RemoveIntVec(a, key);
 }
 
 inline ArrayData*
-UnsetElemVecPre(ArrayData* a, StringData* /*key*/, bool /*copy*/) {
+UnsetElemVecPre(ArrayData* a, StringData* /*key*/) {
   /* Never contains strings, so a no-op. */
   return a;
 }
 
-inline ArrayData* UnsetElemVecPre(ArrayData* a, TypedValue key,
-                                  bool copy) {
+inline ArrayData* UnsetElemVecPre(ArrayData* a, TypedValue key) {
   auto const dt = key.m_type;
-  if (LIKELY(isIntType(dt))) return UnsetElemVecPre(a, key.m_data.num, copy);
-  if (isStringType(dt))      return UnsetElemVecPre(a, key.m_data.pstr, copy);
+  if (LIKELY(isIntType(dt))) return UnsetElemVecPre(a, key.m_data.num);
+  if (isStringType(dt))      return UnsetElemVecPre(a, key.m_data.pstr);
   throwInvalidArrayKeyException(&key, a);
 }
 
@@ -2601,7 +2596,7 @@ inline void UnsetElemVec(tv_lval base, key_type<keyType> key) {
   assertx(tvIsVec(base));
   assertx(tvIsPlausible(*base));
   ArrayData* a = val(base).parr;
-  ArrayData* a2 = UnsetElemVecPre(a, key, a->cowCheck());
+  ArrayData* a2 = UnsetElemVecPre(a, key);
   assertx(a2->isVecArray() || a2->isDict());
 
   if (a2 != a) {
@@ -2616,21 +2611,18 @@ inline void UnsetElemVec(tv_lval base, key_type<keyType> key) {
  * UnsetElem when base is a Dict
  */
 
-inline ArrayData* UnsetElemDictPre(ArrayData* a, int64_t key,
-                                   bool copy) {
-  return MixedArray::RemoveIntDict(a, key, copy);
+inline ArrayData* UnsetElemDictPre(ArrayData* a, int64_t key) {
+  return MixedArray::RemoveIntDict(a, key);
 }
 
-inline ArrayData* UnsetElemDictPre(ArrayData* a, StringData* key,
-                                   bool copy) {
-  return MixedArray::RemoveStrDict(a, key, copy);
+inline ArrayData* UnsetElemDictPre(ArrayData* a, StringData* key) {
+  return MixedArray::RemoveStrDict(a, key);
 }
 
-inline ArrayData* UnsetElemDictPre(ArrayData* a, TypedValue key,
-                                   bool copy) {
+inline ArrayData* UnsetElemDictPre(ArrayData* a, TypedValue key) {
   auto const dt = key.m_type;
-  if (isIntType(dt))    return UnsetElemDictPre(a, key.m_data.num, copy);
-  if (isStringType(dt)) return UnsetElemDictPre(a, key.m_data.pstr, copy);
+  if (isIntType(dt))    return UnsetElemDictPre(a, key.m_data.num);
+  if (isStringType(dt)) return UnsetElemDictPre(a, key.m_data.pstr);
   throwInvalidArrayKeyException(&key, a);
 }
 
@@ -2639,7 +2631,7 @@ inline void UnsetElemDict(tv_lval base, key_type<keyType> key) {
   assertx(tvIsDict(base));
   assertx(tvIsPlausible(*base));
   ArrayData* a = val(base).parr;
-  ArrayData* a2 = UnsetElemDictPre(a, key, a->cowCheck());
+  ArrayData* a2 = UnsetElemDictPre(a, key);
 
   if (a2 != a) {
     type(base) = KindOfDict;
@@ -2653,21 +2645,18 @@ inline void UnsetElemDict(tv_lval base, key_type<keyType> key) {
  * UnsetElem when base is a Keyset
  */
 
-inline ArrayData* UnsetElemKeysetPre(ArrayData* a, int64_t key,
-                                     bool copy) {
-  return SetArray::RemoveInt(a, key, copy);
+inline ArrayData* UnsetElemKeysetPre(ArrayData* a, int64_t key) {
+  return SetArray::RemoveInt(a, key);
 }
 
-inline ArrayData* UnsetElemKeysetPre(ArrayData* a, StringData* key,
-                                     bool copy) {
-  return SetArray::RemoveStr(a, key, copy);
+inline ArrayData* UnsetElemKeysetPre(ArrayData* a, StringData* key) {
+  return SetArray::RemoveStr(a, key);
 }
 
-inline ArrayData* UnsetElemKeysetPre(ArrayData* a, TypedValue key,
-                                     bool copy) {
+inline ArrayData* UnsetElemKeysetPre(ArrayData* a, TypedValue key) {
   auto const dt = key.m_type;
-  if (isIntType(dt))    return UnsetElemKeysetPre(a, key.m_data.num, copy);
-  if (isStringType(dt)) return UnsetElemKeysetPre(a, key.m_data.pstr, copy);
+  if (isIntType(dt))    return UnsetElemKeysetPre(a, key.m_data.num);
+  if (isStringType(dt)) return UnsetElemKeysetPre(a, key.m_data.pstr);
   throwInvalidArrayKeyException(&key, a);
 }
 
@@ -2676,7 +2665,7 @@ inline void UnsetElemKeyset(tv_lval base, key_type<keyType> key) {
   assertx(tvIsKeyset(base));
   assertx(tvIsPlausible(*base));
   ArrayData* a = val(base).parr;
-  ArrayData* a2 = UnsetElemKeysetPre(a, key, a->cowCheck());
+  ArrayData* a2 = UnsetElemKeysetPre(a, key);
 
   if (a2 != a) {
     type(base) = KindOfKeyset;

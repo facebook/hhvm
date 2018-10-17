@@ -98,8 +98,10 @@ public:
                               tv_lval v, bool copy);
   static ArrayData* SetRefStr(ArrayData*, StringData* k,
                               tv_lval v, bool copy);
-  static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
-  static ArrayData* RemoveStr(ArrayData*, const StringData* k, bool copy);
+  static ArrayData* RemoveIntInPlace(ArrayData*, int64_t k);
+  static constexpr auto RemoveInt = &RemoveIntInPlace;
+  static ArrayData* RemoveStrInPlace(ArrayData*, const StringData* k);
+  static constexpr auto RemoveStr = &RemoveStrInPlace;
 
   static ArrayData* Append(ArrayData*, Cell v, bool copy);
   static ArrayData* AppendRef(ArrayData*, tv_lval v, bool copy);

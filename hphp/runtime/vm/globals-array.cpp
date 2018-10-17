@@ -178,12 +178,12 @@ ArrayData* GlobalsArray::SetRefStr(ArrayData* ad, StringData* k,
 }
 
 ArrayData*
-GlobalsArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
-  return RemoveStr(ad, String(k).get(), copy);
+GlobalsArray::RemoveIntInPlace(ArrayData* ad, int64_t k) {
+  return RemoveStrInPlace(ad, String(k).get());
 }
 
 ArrayData*
-GlobalsArray::RemoveStr(ArrayData* ad, const StringData* k, bool /*copy*/) {
+GlobalsArray::RemoveStrInPlace(ArrayData* ad, const StringData* k) {
   auto a = asGlobals(ad);
   a->m_tab->unset(k);
   return a;

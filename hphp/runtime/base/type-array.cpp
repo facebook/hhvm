@@ -670,7 +670,7 @@ bool Array::existsImpl(const T& key) const {
 template<typename T> ALWAYS_INLINE
 void Array::removeImpl(const T& key) {
   if (m_arr) {
-    ArrayData* escalated = m_arr->remove(key, m_arr->cowCheck());
+    ArrayData* escalated = m_arr->remove(key);
     if (escalated != m_arr) m_arr = Ptr::attach(escalated);
   }
 }

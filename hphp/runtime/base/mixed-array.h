@@ -363,8 +363,10 @@ public:
                               tv_lval v, bool copy);
   static ArrayData* AddInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* AddStr(ArrayData*, StringData* k, Cell v, bool copy);
-  static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
-  static ArrayData* RemoveStr(ArrayData*, const StringData* k, bool copy);
+  static ArrayData* RemoveInt(ArrayData*, int64_t k);
+  static ArrayData* RemoveIntInPlace(ArrayData*, int64_t k);
+  static ArrayData* RemoveStr(ArrayData*, const StringData* k);
+  static ArrayData* RemoveStrInPlace(ArrayData*, const StringData* k);
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, Cell v, bool copy);
@@ -441,7 +443,9 @@ public:
   static constexpr auto LvalStrDict = &LvalStr;
   static constexpr auto LvalNewDict = &LvalNew;
   static constexpr auto RemoveIntDict = &RemoveInt;
+  static constexpr auto RemoveIntInPlaceDict = &RemoveIntInPlace;
   static constexpr auto RemoveStrDict = &RemoveStr;
+  static constexpr auto RemoveStrInPlaceDict = &RemoveStrInPlace;
   static constexpr auto IterBeginDict = &IterBegin;
   static constexpr auto IterLastDict = &IterLast;
   static constexpr auto IterEndDict = &IterEnd;
@@ -535,7 +539,9 @@ public:
   static constexpr auto LvalStrShape = &LvalStr;
   static constexpr auto LvalNewShape = &LvalNew;
   static constexpr auto RemoveIntShape = &RemoveInt;
+  static constexpr auto RemoveIntInPlaceShape = &RemoveIntInPlace;
   static constexpr auto RemoveStrShape = &RemoveStr;
+  static constexpr auto RemoveStrInPlaceShape = &RemoveStrInPlace;
   static constexpr auto IterBeginShape = &IterBegin;
   static constexpr auto IterLastShape = &IterLast;
   static constexpr auto IterEndShape = &IterEnd;
@@ -733,6 +739,9 @@ private:
   using HashTable<MixedArray, MixedArrayElm>::findForRemove;
   int32_t findForRemove(int64_t ki, inthash_t h, bool updateNext);
   int32_t findForRemove(const StringData* s, strhash_t h);
+
+  static ArrayData* RemoveIntImpl(ArrayData*, int64_t, bool);
+  static ArrayData* RemoveStrImpl(ArrayData*, const StringData*, bool);
 
   bool nextInsert(Cell);
   ArrayData* nextInsertRef(tv_lval data);

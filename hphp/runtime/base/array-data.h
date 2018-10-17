@@ -514,16 +514,19 @@ public:
   ArrayData* setRef(const Variant& k, Variant& v, bool copy);
 
   /*
-   * Remove the value at key `k', making a copy first if `copy' is set.
+   * Remove the value at key `k'. remove() will make a copy first if necesary;
+   * removeInPlace() will never copy, but may escalate.
    *
    * Return `this' if copy/escalation are not needed, or a copied/escalated
    * array data.
    */
-  ArrayData* remove(int64_t k, bool copy);
-  ArrayData* remove(const StringData* k, bool copy);
-  ArrayData* remove(Cell k, bool copy);
-  ArrayData* remove(const String& k, bool copy);
-  ArrayData* remove(const Variant& k, bool copy);
+  ArrayData* remove(int64_t k);
+  ArrayData* remove(const StringData* k);
+  ArrayData* remove(Cell k);
+  ArrayData* remove(const String& k);
+  ArrayData* remove(const Variant& k);
+  ArrayData* removeInPlace(int64_t k);
+  ArrayData* removeInPlace(const StringData* k);
 
   /**
    * Append `v' to the array, making a copy first if `copy' is set.
@@ -948,8 +951,10 @@ struct ArrayFunctions {
                               tv_lval v, bool copy);
   ArrayData* (*setRefStr[NK])(ArrayData*, StringData* k,
                               tv_lval v, bool copy);
-  ArrayData* (*removeInt[NK])(ArrayData*, int64_t k, bool copy);
-  ArrayData* (*removeStr[NK])(ArrayData*, const StringData* k, bool copy);
+  ArrayData* (*removeInt[NK])(ArrayData*, int64_t k);
+  ArrayData* (*removeIntInPlace[NK])(ArrayData*, int64_t k);
+  ArrayData* (*removeStr[NK])(ArrayData*, const StringData* k);
+  ArrayData* (*removeStrInPlace[NK])(ArrayData*, const StringData* k);
   ssize_t (*iterBegin[NK])(const ArrayData*);
   ssize_t (*iterLast[NK])(const ArrayData*);
   ssize_t (*iterEnd[NK])(const ArrayData*);

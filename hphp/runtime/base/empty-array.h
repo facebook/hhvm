@@ -84,12 +84,10 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
                                   TypedValue v, bool copy);
   static ArrayData* SetWithRefStr(ArrayData*, StringData* k,
                                   TypedValue v, bool copy);
-  static ArrayData* RemoveInt(ArrayData* ad, int64_t, bool) {
-    return ad;
-  }
-  static ArrayData* RemoveStr(ArrayData* ad, const StringData*, bool) {
-    return ad;
-  }
+  static ArrayData* RemoveInt(ArrayData* ad, int64_t);
+  static constexpr auto RemoveIntInPlace = &RemoveInt;
+  static ArrayData* RemoveStr(ArrayData* ad, const StringData*);
+  static constexpr auto RemoveStrInPlace = &RemoveStr;
   static size_t Vsize(const ArrayData*);
   static tv_rval GetValueRef(const ArrayData* ad, ssize_t pos);
   static bool IsVectorData(const ArrayData*) {

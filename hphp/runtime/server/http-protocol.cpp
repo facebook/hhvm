@@ -234,11 +234,11 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   auto const g = get_global_variables()->asArrayData();
   Variant emptyArr(staticEmptyArray());
   for (auto& key : s_arraysToClear) {
-    g->remove(key.get(), false);
+    g->removeInPlace(key.get());
     g->set(key.get(), emptyArr, false);
   }
   for (auto& key : s_arraysToUnset) {
-    g->remove(key.get(), false);
+    g->removeInPlace(key.get());
   }
 
   // according to doc if content type is multipart/form-data

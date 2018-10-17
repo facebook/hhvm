@@ -1248,21 +1248,37 @@ void MixedArray::eraseNoCompact(ssize_t pos) {
   tvDecRefGen(oldTV);
 }
 
-ArrayData* MixedArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
+ArrayData* MixedArray::RemoveIntImpl(ArrayData* ad, int64_t k, bool copy) {
   auto a = asMixed(ad);
   if (copy) a = a->copyMixed();
-  auto pos = a->findForRemove(k, hash_int64(k), false);
+  auto pos = a->findForRemove(k, hash_int64(k), false/*updateNext*/);
   if (validPos(pos)) a->erase(pos);
   return a;
 }
 
+ArrayData* MixedArray::RemoveInt(ArrayData* ad, int64_t k) {
+  return RemoveIntImpl(ad, k, ad->cowCheck());
+}
+
+ArrayData* MixedArray::RemoveIntInPlace(ArrayData* ad, int64_t k) {
+  return RemoveIntImpl(ad, k, false/*copy*/);
+}
+
 ArrayData*
-MixedArray::RemoveStr(ArrayData* ad, const StringData* key, bool copy) {
+MixedArray::RemoveStrImpl(ArrayData* ad, const StringData* key, bool copy) {
   auto a = asMixed(ad);
   if (copy) a = a->copyMixed();
   auto pos = a->findForRemove(key, key->hash());
   if (validPos(pos)) a->erase(pos);
   return a;
+}
+
+ArrayData* MixedArray::RemoveStr(ArrayData* ad, const StringData* key) {
+  return RemoveStrImpl(ad, key, ad->cowCheck());
+}
+
+ArrayData* MixedArray::RemoveStrInPlace(ArrayData* ad, const StringData* key) {
+  return RemoveStrImpl(ad, key, false/*copy*/);
 }
 
 ArrayData* MixedArray::Copy(const ArrayData* ad) {

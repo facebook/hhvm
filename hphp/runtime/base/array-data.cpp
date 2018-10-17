@@ -464,22 +464,26 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(SetRefStr)
 
   /*
-   * ArrayData* RemoveInt(ArrayData*, int64_t key, bool copy)
+   * ArrayData* RemoveInt(ArrayData*, int64_t key)
    *
    *   Remove an array element with an integer key.  If there was no
-   *   entry for that element, this function does not remove it, and
-   *   may or may not cow.  This function has copy/grow semantics.
+   *   entry for that element, this function does not remove it, but
+   *   may still copy first. RemoveInt can copy or escalate,
+   *   but RemoveIntInPlace may only escalate.
    */
   DISPATCH(RemoveInt)
+  DISPATCH(RemoveIntInPlace)
 
   /*
-   * ArrayData* RemoveStr(ArrayData*, const StringData*, bool copy)
+   * ArrayData* RemoveStr(ArrayData*, const StringData*)
    *
    *   Remove an array element with a string key.  If there was no
-   *   entry for that element, this function does not remove it, and
-   *   may or may not cow.  This function has copy/grow semantics.
+   *   entry for that element, this function does not remove it, but
+   *   may still copy first. RemoveStr has copy/grow semantics;
+   *   RemoveStrInPlace may only reallocate or escalate.
    */
   DISPATCH(RemoveStr)
+  DISPATCH(RemoveStrInPlace)
 
   /*
    * ssize_t IterEnd(const ArrayData*)

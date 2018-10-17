@@ -980,7 +980,7 @@ void adjustMArrayIterAfterPop(ArrayData* ad) {
 
 }
 
-ArrayData* PackedArray::RemoveInt(ArrayData* adIn, int64_t k, bool copy) {
+ArrayData* PackedArray::RemoveImpl(ArrayData* adIn, int64_t k, bool copy) {
   assertx(checkInvariants(adIn));
   assertx(adIn->isPacked());
   if (size_t(k) < adIn->m_size) {
@@ -989,16 +989,22 @@ ArrayData* PackedArray::RemoveInt(ArrayData* adIn, int64_t k, bool copy) {
     // TODO(#2606310): if we're removing the /last/ element, we
     // probably could stay packed, but this needs to be verified.
     auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
-    auto pos = mixed->findForRemove(k, hash_int64(k), false);
-    if (validPos(pos)) mixed->erase(pos);
-    return mixed;
+    return MixedArray::RemoveIntInPlace(mixed, k);
   }
   // Key doesn't exist---we're still packed.
   return copy ? Copy(adIn) : adIn;
 }
 
+ArrayData* PackedArray::RemoveInt(ArrayData* adIn, int64_t k) {
+  return RemoveImpl(adIn, k, adIn->cowCheck());
+}
+
+ArrayData* PackedArray::RemoveIntInPlace(ArrayData* adIn, int64_t k) {
+  return RemoveImpl(adIn, k, false/*copy*/);
+}
+
 ArrayData*
-PackedArray::RemoveIntVec(ArrayData* adIn, int64_t k, bool copy) {
+PackedArray::RemoveImplVec(ArrayData* adIn, int64_t k, bool copy) {
   assertx(checkInvariants(adIn));
   assertx(adIn->isVecArray());
 
@@ -1018,8 +1024,16 @@ PackedArray::RemoveIntVec(ArrayData* adIn, int64_t k, bool copy) {
   throwVecUnsetException();
 }
 
+ArrayData* PackedArray::RemoveIntVec(ArrayData* adIn, int64_t k) {
+  return RemoveImplVec(adIn, k, adIn->cowCheck());
+}
+
+ArrayData* PackedArray::RemoveIntInPlaceVec(ArrayData* adIn, int64_t k) {
+  return RemoveImplVec(adIn, k, false/*copy*/);
+}
+
 ArrayData*
-PackedArray::RemoveStr(ArrayData* adIn, const StringData*, bool) {
+PackedArray::RemoveStr(ArrayData* adIn, const StringData*) {
   assertx(checkInvariants(adIn));
   return adIn;
 }

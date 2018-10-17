@@ -695,10 +695,10 @@ ArrayData* SetArray::SetWithRefStr(ArrayData*, StringData*, TypedValue, bool) {
   );
 }
 
-ArrayData* SetArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
+template<class K> ArrayData*
+SetArray::RemoveImpl(ArrayData* ad, K k, bool copy, SetArrayElm::hash_t h) {
   auto a = asSet(ad);
   if (copy) a = a->copySet();
-  auto const h = hash_int64(k);
   auto const loc = a->findForRemove(k, h);
   if (validPos(loc)) {
     a->erase(loc);
@@ -706,15 +706,20 @@ ArrayData* SetArray::RemoveInt(ArrayData* ad, int64_t k, bool copy) {
   return a;
 }
 
-ArrayData* SetArray::RemoveStr(ArrayData* ad, const StringData* k, bool copy) {
-  auto a = asSet(ad);
-  if (copy) a = a->copySet();
-  auto const h = k->hash();
-  auto const loc = a->findForRemove(k, h);
-  if (validPos(loc)) {
-    a->erase(loc);
-  }
-  return a;
+ArrayData* SetArray::RemoveInt(ArrayData* ad, int64_t k) {
+  return RemoveImpl(ad, k, ad->cowCheck(), hash_int64(k));
+}
+
+ArrayData* SetArray::RemoveIntInPlace(ArrayData* ad, int64_t k) {
+  return RemoveImpl(ad, k, false/*copy*/, hash_int64(k));
+}
+
+ArrayData* SetArray::RemoveStr(ArrayData* ad, const StringData* k) {
+  return RemoveImpl(ad, k, ad->cowCheck(), k->hash());
+}
+
+ArrayData* SetArray::RemoveStrInPlace(ArrayData* ad, const StringData* k) {
+  return RemoveImpl(ad, k, false/*copy*/, k->hash());
 }
 
 bool SetArray::AdvanceMArrayIter(ArrayData*, MArrayIter&) {

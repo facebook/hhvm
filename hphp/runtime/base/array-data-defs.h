@@ -209,12 +209,20 @@ inline ArrayData* ArrayData::setRef(StringData* k, tv_lval v, bool copy) {
   return g_array_funcs.setRefStr[kind()](this, k, v, copy);
 }
 
-inline ArrayData* ArrayData::remove(int64_t k, bool copy) {
-  return g_array_funcs.removeInt[kind()](this, k, copy);
+inline ArrayData* ArrayData::remove(int64_t k) {
+  return g_array_funcs.removeInt[kind()](this, k);
 }
 
-inline ArrayData* ArrayData::remove(const StringData* k, bool copy) {
-  return g_array_funcs.removeStr[kind()](this, k, copy);
+inline ArrayData* ArrayData::removeInPlace(int64_t k) {
+  return g_array_funcs.removeIntInPlace[kind()](this, k);
+}
+
+inline ArrayData* ArrayData::remove(const StringData* k) {
+  return g_array_funcs.removeStr[kind()](this, k);
+}
+
+inline ArrayData* ArrayData::removeInPlace(const StringData* k) {
+  return g_array_funcs.removeStrInPlace[kind()](this, k);
 }
 
 inline ArrayData* ArrayData::append(Cell v, bool copy) {
@@ -435,10 +443,10 @@ inline ArrayData* ArrayData::setRef(Cell k, Variant& v, bool copy) {
   return setRef(k, tv_lval{v.asTypedValue()}, copy);
 }
 
-inline ArrayData* ArrayData::remove(Cell k, bool copy) {
+inline ArrayData* ArrayData::remove(Cell k) {
   assertx(IsValidKey(k));
-  return detail::isIntKey(k) ? remove(detail::getIntKey(k), copy)
-                             : remove(detail::getStringKey(k), copy);
+  return detail::isIntKey(k) ? remove(detail::getIntKey(k))
+                             : remove(detail::getStringKey(k));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -521,13 +529,13 @@ inline ArrayData* ArrayData::setRef(const Variant& k, Variant& v, bool copy) {
   return setRef(k, tv_lval{v.asTypedValue()}, copy);
 }
 
-inline ArrayData* ArrayData::remove(const String& k, bool copy) {
+inline ArrayData* ArrayData::remove(const String& k) {
   assertx(IsValidKey(k));
-  return remove(k.get(), copy);
+  return remove(k.get());
 }
 
-inline ArrayData* ArrayData::remove(const Variant& k, bool copy) {
-  return remove(*k.toCell(), copy);
+inline ArrayData* ArrayData::remove(const Variant& k) {
+  return remove(*k.toCell());
 }
 
 inline ArrayData* ArrayData::appendRef(Variant& v, bool copy) {

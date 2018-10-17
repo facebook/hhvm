@@ -429,8 +429,10 @@ public:
   static ArrayData* SetWithRefStr(ArrayData*, StringData*, TypedValue, bool);
   static ArrayData* SetRefInt(ArrayData*, int64_t, tv_lval, bool);
   static ArrayData* SetRefStr(ArrayData*, StringData*, tv_lval, bool);
-  static ArrayData* RemoveInt(ArrayData*, int64_t, bool);
-  static ArrayData* RemoveStr(ArrayData*, const StringData*, bool);
+  static ArrayData* RemoveInt(ArrayData*, int64_t);
+  static ArrayData* RemoveIntInPlace(ArrayData*, int64_t);
+  static ArrayData* RemoveStr(ArrayData*, const StringData*);
+  static ArrayData* RemoveStrInPlace(ArrayData*, const StringData*);
   static constexpr auto ValidMArrayIter = &ArrayCommon::ValidMArrayIter;
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter&);
   static ArrayData* Copy(const ArrayData*);
@@ -459,6 +461,10 @@ public:
   static bool NotSame(const ArrayData*, const ArrayData*);
 
 //////////////////////////////////////////////////////////////////////
+
+private:
+  template<class K>
+  static ArrayData* RemoveImpl(ArrayData*, K key, bool, SetArrayElm::hash_t);
 
 private:
   struct Initializer;

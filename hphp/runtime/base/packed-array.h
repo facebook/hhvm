@@ -116,8 +116,10 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
                               tv_lval v, bool copy);
   static ArrayData* SetRefStr(ArrayData*, StringData* k,
                               tv_lval v, bool copy);
-  static ArrayData* RemoveInt(ArrayData*, int64_t k, bool copy);
-  static ArrayData* RemoveStr(ArrayData*, const StringData* k, bool copy);
+  static ArrayData* RemoveInt(ArrayData*, int64_t k);
+  static ArrayData* RemoveIntInPlace(ArrayData*, int64_t k);
+  static ArrayData* RemoveStr(ArrayData*, const StringData* k);
+  static constexpr auto RemoveStrInPlace = &RemoveStr;
   static ssize_t IterBegin(const ArrayData*);
   static ssize_t IterLast(const ArrayData*);
   static ssize_t IterEnd(const ArrayData*);
@@ -164,7 +166,8 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
                                      TypedValue v, bool copy);
   static ArrayData* SetWithRefStrVec(ArrayData*, StringData* k,
                                      TypedValue v, bool copy);
-  static ArrayData* RemoveIntVec(ArrayData*, int64_t, bool);
+  static ArrayData* RemoveIntVec(ArrayData*, int64_t);
+  static ArrayData* RemoveIntInPlaceVec(ArrayData*, int64_t);
   static arr_lval LvalIntVec(ArrayData*, int64_t, bool);
   static arr_lval LvalStrVec(ArrayData*, StringData*, bool);
   static arr_lval LvalIntRefVec(ArrayData*, int64_t, bool);
@@ -193,6 +196,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static constexpr auto ExistsStrVec = &ExistsStr;
   static constexpr auto LvalNewVec = &LvalNew;
   static constexpr auto RemoveStrVec = &RemoveStr;
+  static constexpr auto RemoveStrInPlaceVec = &RemoveStr;
   static constexpr auto IterBeginVec = &IterBegin;
   static constexpr auto IterLastVec = &IterLast;
   static constexpr auto IterEndVec = &IterEnd;
@@ -337,6 +341,9 @@ private:
 
   static bool VecEqualHelper(const ArrayData*, const ArrayData*, bool);
   static int64_t VecCmpHelper(const ArrayData*, const ArrayData*);
+
+  static ArrayData* RemoveImpl(ArrayData*, int64_t, bool);
+  static ArrayData* RemoveImplVec(ArrayData*, int64_t, bool);
 
   struct VecInitializer;
   static VecInitializer s_vec_initializer;

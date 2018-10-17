@@ -246,6 +246,14 @@ ArrayData* EmptyArray::SetWithRefStr(ArrayData* ad, StringData* k,
   return lval.arr;
 }
 
+ArrayData* EmptyArray::RemoveInt(ArrayData* ad, int64_t) {
+  return ad;
+}
+
+ArrayData* EmptyArray::RemoveStr(ArrayData* ad, const StringData*) {
+  return ad;
+}
+
 arr_lval EmptyArray::LvalInt(ArrayData*, int64_t k, bool) {
   return k == 0 ? EmptyArray::MakePacked(make_tv<KindOfNull>())
                 : EmptyArray::MakeMixed(k, make_tv<KindOfNull>());

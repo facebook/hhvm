@@ -2595,6 +2595,10 @@ folly::Optional<std::pair<Type, LocalId>> moveToLocImpl(ISS& env,
     } else {
       equivLoc = op.loc1;
     }
+    if (any(env.collect.opts & CollectionOpts::Inlining) &&
+        !could_run_destructor(peekLocRaw(env, op.loc1))) {
+      effect_free(env);
+    }
   } else {
     equivLoc = NoLocalId;
   }

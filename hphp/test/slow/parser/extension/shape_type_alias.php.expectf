@@ -1,0 +1,48 @@
+dict(7) {
+  ["some_int"]=>
+  vec(1) {
+    string(18) "// Int description"
+  }
+  ["no_description"]=>
+  vec(1) {
+    string(38) "/* BEGIN MANUAL SECTION words words */"
+  }
+  ["some_float"]=>
+  vec(1) {
+    string(20) "// Float description"
+  }
+  ["some_string"]=>
+  vec(4) {
+    string(11) "// Multiple"
+    string(2) "//"
+    string(13) "// paragraphs"
+    string(26) "/*
+
+  Another paragraph.*/"
+  }
+  ["some_bool"]=>
+  vec(11) {
+    string(7) "// Long"
+    string(17) "/*     long    */"
+    string(13) "//description"
+    string(2) "//"
+    string(14) "// Paragraph 2"
+    string(7) "/*
+  */"
+    string(15) "/* Paragraph */"
+    string(5) "//..."
+    string(5) "/*3*/"
+    string(4) "/**/"
+    string(13) "//... still 3"
+  }
+  ["pound_comment"]=>
+  vec(1) {
+    string(6) "#hello"
+  }
+  ["star_comment"]=>
+  vec(1) {
+    string(22) "/**
+   * comment
+   */"
+  }
+}

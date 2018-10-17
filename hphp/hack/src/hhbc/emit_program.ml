@@ -10,11 +10,11 @@
 open Instruction_sequence
 open Hhbc_ast
 
-let emit_main is_evaled defs =
+let emit_main is_evaled popt defs =
   let body, _is_generator, _is_pair_generator =
     Emit_body.emit_body
       ~pos:Pos.none
-      ~namespace:Namespace_env.empty_with_default_popt
+      ~namespace:(Namespace_env.empty popt)
       ~is_closure_body:false
       ~is_memoize:false
       ~is_native:false
@@ -54,7 +54,7 @@ let emit_fatal_program ~ignore_message op pos message =
   Hhas_program.make
     false [] [] [] [] body Emit_symbol_refs.empty_symbol_refs None
 
-let from_ast ~is_hh_file ~is_evaled ast =
+let from_ast ~is_hh_file ~is_evaled ~popt ast =
   Utils.try_finally
   ~f:begin fun () ->
     try
@@ -62,7 +62,7 @@ let from_ast ~is_hh_file ~is_evaled ast =
       (* Convert closures to top-level classes;
        * also hoist inner classes and functions *)
       let { ast_defs = closed_ast; global_state; strict_types } =
-        convert_toplevel_prog ast in
+        convert_toplevel_prog ~popt ast in
       let strict_types =
         (* is scalar_types is set - always assume strict_types to have value *)
         if Hhbc_options.php7_scalar_types !(Hhbc_options.compiler_options)
@@ -73,7 +73,7 @@ let from_ast ~is_hh_file ~is_evaled ast =
         else None in
       Emit_env.set_global_state global_state;
       let flat_closed_ast = List.map snd closed_ast in
-      let compiled_defs = emit_main is_evaled flat_closed_ast in
+      let compiled_defs = emit_main is_evaled popt flat_closed_ast in
       let compiled_funs = Emit_function.emit_functions_from_program closed_ast in
       let compiled_classes = Emit_class.emit_classes_from_program closed_ast in
       let compiled_typedefs = Emit_typedef.emit_typedefs_from_program flat_closed_ast in

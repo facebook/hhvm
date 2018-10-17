@@ -108,7 +108,7 @@ let constant_folding o = o.option_constant_folding
 let optimize_null_check o = o.option_optimize_null_check
 let max_array_elem_size_on_the_stack o =
   o.option_max_array_elem_size_on_the_stack
-let aliased_namespaces o = o.option_aliased_namespaces
+let aliased_namespaces o = Option.value o.option_aliased_namespaces ~default:[]
 let source_mapping o = o.option_source_mapping
 let relabel o = o.option_relabel
 let enable_uniform_variable_syntax o = o.option_php7_uvs

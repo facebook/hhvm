@@ -232,8 +232,8 @@ let elaborate_id_impl ~autoimport nsenv kind id =
     true, use ^ (String_utils.lstrip id prefix)
   | None ->
     let fq_id =
-      let unaliased_id =
-        aliased_to_fully_qualified_id nsenv.ns_auto_namespace_map id in
+      let unaliased_id = aliased_to_fully_qualified_id
+        (ParserOptions.auto_namespace_map nsenv.ns_popt) id in
       if unaliased_id <> id then
         "\\" ^ unaliased_id
       else if not autoimport then

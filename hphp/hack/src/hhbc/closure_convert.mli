@@ -16,4 +16,7 @@ type convert_result = {
 }
 
 (* Convert entire program *)
-val convert_toplevel_prog : Ast.program -> convert_result
+val convert_toplevel_prog :
+  popt:ParserOptions.t ->
+  Ast.program ->
+  convert_result

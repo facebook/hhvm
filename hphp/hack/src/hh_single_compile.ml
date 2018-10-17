@@ -377,7 +377,7 @@ let modify_prog_for_debugger_eval ast hhas_prog =
       end
     | _ -> hhas_prog
 
-let do_compile filename compiler_options fail_or_ast debug_time for_debugger_eval =
+let do_compile filename compiler_options popt fail_or_ast debug_time for_debugger_eval =
   let t = Unix.gettimeofday () in
   let t = add_to_time_ref debug_time.parsing_t t in
   let hhas_prog =
@@ -397,6 +397,7 @@ let do_compile filename compiler_options fail_or_ast debug_time for_debugger_eva
         let hhas_prog = Emit_program.from_ast
           is_hh_file
           (is_file_path_for_evaled_code filename)
+          popt
           ast in
         if for_debugger_eval
           then modify_prog_for_debugger_eval ast hhas_prog
@@ -445,7 +446,7 @@ let parse_hh_file filename body =
 let make_popt () =
   ParserOptions.make
     ~auto_namespace_map:
-      (Option.value Hhbc_options.(aliased_namespaces !compiler_options) ~default:[])
+      Hhbc_options.(aliased_namespaces !compiler_options)
     ~disallow_execution_operator:
       Hhbc_options.(phpism_disallow_execution_operator !compiler_options)
     ~disable_variable_variables:
@@ -471,7 +472,7 @@ let process_single_source_unit ?(for_debugger_eval = false) compiler_options
           | None -> parse_file compiler_options popt filename source_text
         in
         ignore @@ add_to_time_ref debug_time.parsing_t t;
-        do_compile filename compiler_options fail_or_ast debug_time for_debugger_eval
+        do_compile filename compiler_options popt fail_or_ast debug_time for_debugger_eval
       end in
     handle_output filename output debug_time
   with exc ->

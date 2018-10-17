@@ -140,7 +140,7 @@ let set_has_goto st =
   else { st with current_function_state =
        { st.current_function_state with has_goto = true } }
 
-let initial_state =
+let initial_state popt =
 {
   closure_cnt_per_fun = 0;
   anon_cls_cnt_per_fun = 0;
@@ -149,7 +149,7 @@ let initial_state =
   hoisted_classes = [];
   hoisted_functions = [];
   inout_wrappers = [];
-  namespace = Namespace_env.empty_with_default_popt;
+  namespace = Namespace_env.empty popt;
   static_vars = ULS.empty;
   explicit_use_set = SSet.empty;
   closure_namespaces = SMap.empty;
@@ -1294,7 +1294,7 @@ let hoist_toplevel_functions all_defs =
  * The closure classes and hoisted definitions are placed after the existing
  * definitions.
  *)
-let convert_toplevel_prog defs =
+let convert_toplevel_prog ~popt defs =
   let defs =
     if constant_folding ()
     then Ast_constant_folder.fold_program defs else defs in
@@ -1302,7 +1302,8 @@ let convert_toplevel_prog defs =
    * integer identifiers for the generated classes. .main counts as a top-level
    * function and we place hoisted functions just after that *)
   let env = env_toplevel (count_classes defs) 1 defs in
-  let st, original_defs = convert_defs env 0 0 initial_state defs in
+  let st = initial_state popt in
+  let st, original_defs = convert_defs env 0 0 st defs in
   let main_state = st.current_function_state in
   let st =
     record_function_state (Emit_env.get_unique_id_for_main ()) main_state st in

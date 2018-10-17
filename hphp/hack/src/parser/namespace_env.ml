@@ -16,7 +16,6 @@ type env = {
   ns_const_uses: string SMap.t;
   ns_name: string option;
   ns_popt: ParserOptions.t;
-  ns_auto_namespace_map: (string * string) list;
 }
 
 let empty popt = {
@@ -26,7 +25,6 @@ let empty popt = {
   ns_const_uses = SMap.empty;
   ns_name = None;
   ns_popt = popt;
-  ns_auto_namespace_map = ParserOptions.auto_namespace_map popt;
 }
 
 let empty_with_default_popt =
@@ -34,6 +32,3 @@ let empty_with_default_popt =
 
 let is_global_namespace env =
   Option.is_none env.ns_name
-
-let with_auto_namespace_map env ns_auto_namespace_map =
-  { env with ns_auto_namespace_map }

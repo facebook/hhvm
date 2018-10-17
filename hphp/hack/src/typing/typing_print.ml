@@ -1029,11 +1029,12 @@ let class_kind c_kind final = ErrorString.class_kind c_kind final
 let rec subtype_prop env = function
   | Unsat _ -> "UNSAT"
   | Conj [] -> "TRUE"
-  | Conj ps -> String.concat ~sep:" & " (List.map ~f:(subtype_prop env) ps)
+  | Conj ps ->
+    "(" ^ (String.concat ~sep:" && " (List.map ~f:(subtype_prop env) ps)) ^ ")"
   | Disj [] -> "FALSE"
   | Disj ps ->
-    String.concat ~sep:" | " (List.map ~f:(fun x -> "(" ^ subtype_prop env x ^ ")") ps)
+    "(" ^ (String.concat ~sep:" || " (List.map ~f:(subtype_prop env) ps)) ^ ")"
   | Sub (ty1, ty2) ->
-    debug_with_tvars env ty1 ^ "<:" ^ debug_with_tvars env ty2
+    debug_with_tvars env ty1 ^ " <: " ^ debug_with_tvars env ty2
   | Eq (ty1, ty2) ->
-    debug_with_tvars env ty1 ^ "=" ^ debug_with_tvars env ty2
+    debug_with_tvars env ty1 ^ " = " ^ debug_with_tvars env ty2

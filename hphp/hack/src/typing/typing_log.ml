@@ -256,29 +256,31 @@ type log_structure =
 | Log_sub of string * log_structure list
 | Log_type of string * Typing_defs.locl Typing_defs.ty
 
+let log_with_level level log_f =
+  if get_log_level () >= level then
+    log_f ()
+
 let log_types level p env items =
-  if get_log_level() >= level then
-  log_position p
-    (fun () ->
-      let rec go items =
-        List.iter items (fun item ->
-          match item with
-          | Log_sub (message, items) ->
-            let color =
-              if level < get_log_level() then Bold Yellow else Normal Yellow in
-            indentEnv ~color:color message (fun () -> go items)
-          | Log_type (message, ty) ->
-            let s = Typing_print.debug_with_tvars env ty in
-            lprintf (Bold Green) "%s: " message;
-            lprintf (Normal Green) "%s" s;
-            lnewline ()) in
-      go items)
-  else ()
+  log_with_level level (fun () ->
+    log_position p
+      (fun () ->
+        let rec go items =
+          List.iter items (fun item ->
+            match item with
+            | Log_sub (message, items) ->
+              let color =
+                if level < get_log_level() then Bold Yellow else Normal Yellow in
+              indentEnv ~color:color message (fun () -> go items)
+            | Log_type (message, ty) ->
+              let s = Typing_print.debug_with_tvars env ty in
+              lprintf (Bold Green) "%s: " message;
+              lprintf (Normal Green) "%s" s;
+              lnewline ()) in
+        go items))
 
 let log_prop level p message env prop =
-  if get_log_level() >= level then
-    log_position p (fun () -> log_subtype_prop env message prop)
-  else ()
+  log_with_level level (fun () ->
+    log_position p (fun () -> log_subtype_prop env message prop))
 
 let increment_feature_count env s =
   if GlobalOptions.tco_language_feature_logging (Env.get_options env)

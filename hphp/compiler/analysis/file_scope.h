@@ -30,7 +30,6 @@
 
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/deprecated/declare-boost-types.h"
-#include "hphp/util/md5.h"
 #include "hphp/util/text-util.h"
 
 namespace HPHP {
@@ -65,15 +64,13 @@ struct FileScope : BlockScope, FunctionContainer {
   };
 
 public:
-  FileScope(const std::string &fileName, int fileSize, const MD5 &md5);
+  FileScope(const std::string &fileName, int fileSize);
   ~FileScope() override {
     delete m_redeclaredFunctions;
   }
   int getSize() const { return m_size;}
 
   const std::string &getName() const { return m_fileName;}
-  const MD5& getMd5() const { return m_md5; }
-  void setMd5(const MD5& md5) { m_md5 = md5; }
   StatementListPtr getStmt() const { return m_tree;}
   const StringToClassScopePtrVecMap &getClasses() const {
     return m_classes;
@@ -143,7 +140,6 @@ public:
   void addLambda(ClosureExpressionRawPtr c) { m_lambdas.push_back(c); }
 private:
   int m_size;
-  MD5 m_md5;
   unsigned m_system : 1;
   unsigned m_isHHFile : 1;
   unsigned m_useStrictTypes : 1;

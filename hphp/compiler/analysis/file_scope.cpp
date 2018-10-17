@@ -48,9 +48,9 @@ __thread FileScope* FileScope::s_current;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-FileScope::FileScope(const std::string &fileName, int fileSize, const MD5 &md5)
+FileScope::FileScope(const std::string &fileName, int fileSize)
   : BlockScope("", "", StatementPtr(), BlockScope::FileScope),
-    m_size(fileSize), m_md5(md5), m_system(false),
+    m_size(fileSize), m_system(false),
     m_isHHFile(false), m_useStrictTypes(false),
     m_useStrictTypesForBuiltins(false), m_preloadPriority(0),
     m_fileName(fileName), m_redeclaredFunctions(0) {

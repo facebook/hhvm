@@ -251,10 +251,33 @@ let emit_reified_extends_params env ast_class =
       instr_record_reified_generic n;
     ]
 
-let emit_reified_init_body env is_reified ast_class =
-  let set_prop = if not is_reified then empty else
+let emit_reified_init_body env num_reified ast_class =
+  let check_length =
+    let label = Label.next_regular () in
+    let plural = if num_reified = 1 then "generic" else "generics" in
+    gather [
+      instr_string @@
+        Printf.sprintf "Class %s expects %d reified %s but "
+          (SU.strip_global_ns @@ snd ast_class.A.c_name) num_reified plural;
+      instr_cgetl (Local.Named SU.Reified.reified_init_method_param_name);
+      instr_int 0; (* COUNT_NORMAL *)
+      instr_fcallbuiltin 2 1 "count";
+      instr_unboxr_nop;
+      instr_dup;
+      instr_int num_reified;
+      instr_eq;
+      instr_jmpnz label;
+      instr_string " given";
+      instr_concatn 3;
+      instr (H.IOp (H.Fatal H.FatalOp.Runtime));
+      instr_label label;
+      instr_popc; (* pop the dupped number *)
+      instr_popc; (* pop the error message *)
+    ] in
+  let set_prop = if num_reified = 0 then empty else
     (* $this->86reified_prop = $__typestructures *)
     gather [
+      check_length;
       instr_checkthis;
       instr_cgetl (Local.Named SU.Reified.reified_init_method_param_name);
       instr_baseh;
@@ -283,13 +306,13 @@ let emit_reified_init_body env is_reified ast_class =
 
 let emit_reified_init_method env ast_class =
   let is_base_class = List.is_empty ast_class.Ast.c_extends in
-  let is_reified =
-    List.exists ast_class.Ast.c_tparams ~f:(function (_, _, _, b) -> b) in
+  let num_reified =
+    List.count ast_class.Ast.c_tparams ~f:(function (_, _, _, b) -> b) in
   let has_reified_parents = match ast_class.Ast.c_extends with
     | (_, Ast.Happly (_, l)):: _ ->
       List.exists l ~f:(function (_, Ast.Hreified _) -> true | _ -> false)
     | _ -> false in
-  if not (is_reified || has_reified_parents) && not is_base_class then [] else
+  if not (num_reified > 0 || has_reified_parents) && not is_base_class then [] else
   let tc = Hhas_type_constraint.make (Some "HH\\varray") [] in
   let params =
     [ Hhas_param.make
@@ -301,7 +324,7 @@ let emit_reified_init_method env ast_class =
       (Some (Hhas_type_info.make (Some "HH\\varray") tc))
       None (* default value *)
     ] in
-  let instrs = emit_reified_init_body env is_reified ast_class in
+  let instrs = emit_reified_init_body env num_reified ast_class in
   [make_86method
     ~name:SU.Reified.reified_init_method_name
     ~params

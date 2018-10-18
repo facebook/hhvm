@@ -13,3 +13,6 @@ newtype ClassBodyNode = darray<string, mixed>;
 function find_class_body(\HH\ParseTree $json, string $name): ?ClassBodyNode;
 function find_class_shape_type_constant(ClassBodyNode $class_body, string $name): ?ShapeNode;
 function find_class_method_shape_return_type(ClassBodyNode $class_body, string $name): ?ShapeNode;
+newtype MethodParametersNode = darray<string, mixed>;
+function find_method_parameters(\HH\ParseTree $json, string $method_name, int $line_number): MethodParametersNode;
+function extract_parameter_comments(MethodParametersNode $params): dict<string, vec<string>>;

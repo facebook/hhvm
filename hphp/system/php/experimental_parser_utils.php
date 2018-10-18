@@ -80,6 +80,67 @@ namespace HH\ExperimentalParserUtils {
     );
   }
 
+  /**
+   * Instead of doing a full recursion like the lambda extractor, this function
+   * can do a shallow search of the tree to collect methods by name.
+   * If there is a tie, use the line number
+   */
+  function find_method_parameters(array $json, string $method_name, int $line_number): array {
+    $candidates = vec[];
+    $decls = $json["parse_tree"]["script_declarations"]["elements"];
+    foreach ($decls as $d) {
+      if ($d["kind"] === "classish_declaration") {
+        $inner_decls = $d["classish_body"]["classish_body_elements"];
+        if ($inner_decls["kind"] === "list") {
+          foreach ($inner_decls["elements"] as $id) {
+            if ($id["kind"] === "methodish_declaration") {
+              $true_name = $id["methodish_function_decl_header"]["function_name"]["token"]["text"];
+              if (strcasecmp($true_name, $method_name) === 0) {
+                $candidates[] = $id;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    $method = null;
+    if (count($candidates) === 1) {
+      $method = $candidates[0];
+    } else { // tiebreaker
+      foreach ($candidates as $c) {
+        $t = find_boundary_token($c, false);
+        invariant($t !== null, "Failed to find function boundary");
+        list($l, $_) = $t;
+        if ($l === $line_number) {
+          $method = $c;
+          break;
+        }
+      }
+    }
+
+    invariant($method !== null, "Failed to find method in file");
+    return $method["methodish_function_decl_header"]["function_parameter_list"];
+  }
+
+  function extract_parameter_comments(array $params): dict<string, vec<string>> {
+    $result = dict[];
+    if ($params["kind"] === "missing") {
+      return $result;
+    }
+
+    foreach ($params["elements"] as $param) {
+      $param_name_token = $param["list_item"]["parameter_name"]["token"];
+      $param_name = substr($param_name_token["text"], 1); // remove $
+
+      $description = collect_comments($param);
+
+      $result[$param_name] = $description;
+    }
+
+    return $result;
+  }
+
   function find_class_method_shape_return_type(array $class_body, string $name): ?array {
     $m = find_class_method($class_body, $name);
     if ($m === null) {

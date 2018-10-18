@@ -892,20 +892,19 @@ VGETELEM_HELPER_TABLE(X)
 template <bool intishWarn>
 inline ArrayData* checkedSet(ArrayData* a,
                              StringData* key,
-                             Cell value,
-                             bool copy) {
+                             Cell value) {
   int64_t i;
   assertx(a->isPHPArray());
   if (UNLIKELY(key->isStrictlyInteger(i))) {
     if (intishWarn) raise_intish_index_cast();
-    return a->set(i, value, copy);
+    return a->set(i, value);
   } else {
-    return a->set(key, value, copy);
+    return a->set(key, value);
   }
 }
 
 template <bool intishWarn>
-inline ArrayData* checkedSet(ArrayData*, int64_t, Cell, bool) {
+inline ArrayData* checkedSet(ArrayData*, int64_t, Cell) {
   not_reached();
 }
 
@@ -918,9 +917,8 @@ arraySetImpl(ArrayData* a, key_type<keyType> key, Cell value, TypedValue* ref) {
                 "KeyType::Any is not supported in arraySetMImpl");
   assertx(cellIsPlausible(value));
   assertx(a->isPHPArray());
-  const bool copy = a->cowCheck();
-  ArrayData* ret = checkForInt ? checkedSet<intishWarn>(a, key, value, copy)
-                               : a->set(key, value, copy);
+  ArrayData* ret = checkForInt ? checkedSet<intishWarn>(a, key, value)
+                               : a->set(key, value);
   return arrayRefShuffle<setRef, KindOfArray>(a, ret, ref);
 }
 
@@ -967,8 +965,7 @@ template<bool setRef>
 auto vecSetImpl(ArrayData* a, int64_t key, Cell value, TypedValue* ref) {
   assertx(cellIsPlausible(value));
   assertx(a->isVecArray());
-  const bool copy = a->cowCheck();
-  ArrayData* ret = PackedArray::SetIntVec(a, key, value, copy);
+  ArrayData* ret = PackedArray::SetIntVec(a, key, value);
   return arrayRefShuffle<setRef, KindOfVec>(a, ret, ref);
 }
 
@@ -984,10 +981,10 @@ inline void vecSetIR(ArrayData* a, int64_t key, Cell value,
 //////////////////////////////////////////////////////////////////////
 
 inline ArrayData* dictSetImplPre(ArrayData* a, int64_t i, Cell val) {
-  return MixedArray::SetIntDict(a, i, val, a->cowCheck());
+  return MixedArray::SetIntDict(a, i, val);
 }
 inline ArrayData* dictSetImplPre(ArrayData* a, StringData* s, Cell val) {
-  return MixedArray::SetStrDict(a, s, val, a->cowCheck());
+  return MixedArray::SetStrDict(a, s, val);
 }
 
 template<KeyType keyType, bool setRef>

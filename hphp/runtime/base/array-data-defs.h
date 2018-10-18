@@ -58,6 +58,10 @@ inline ArrayData* ArrayData::CreateRef(const Variant& name, tv_lval value) {
 ///////////////////////////////////////////////////////////////////////////////
 // ArrayFunction dispatch.
 
+inline bool ArrayData::notCyclic(Cell v) const {
+  return !tvIsArrayLike(v) || v.m_data.parr != this;
+}
+
 inline ArrayData* ArrayData::copy() const {
   return g_array_funcs.copy[kind()](this);
 }
@@ -166,47 +170,82 @@ inline Cell ArrayData::nvGetKey(ssize_t pos) const {
   return g_array_funcs.nvGetKey[kind()](this, pos);
 }
 
-inline bool ArrayData::notCyclic(Cell v) const {
-  return !tvIsArrayLike(v) || v.m_data.parr != this;
-}
-
-inline ArrayData* ArrayData::set(int64_t k, Cell v, bool copy) {
+inline ArrayData* ArrayData::set(int64_t k, Cell v) {
   assertx(cellIsPlausible(v));
-  assertx(copy || notCyclic(v));
-  return g_array_funcs.setInt[kind()](this, k, v, copy);
+  assertx(cowCheck() || notCyclic(v));
+  return g_array_funcs.setInt[kind()](this, k, v);
 }
 
-inline ArrayData* ArrayData::set(StringData* k, Cell v, bool copy) {
+inline ArrayData* ArrayData::setInPlace(int64_t k, Cell v) {
   assertx(cellIsPlausible(v));
-  assertx(copy || notCyclic(v));
-  return g_array_funcs.setStr[kind()](this, k, v, copy);
+  assertx(notCyclic(v));
+  return g_array_funcs.setIntInPlace[kind()](this, k, v);
 }
 
-inline ArrayData* ArrayData::set(int64_t k, const Variant& v, bool copy) {
-  return g_array_funcs.setInt[kind()](this, k, *v.toCell(), copy);
+inline ArrayData* ArrayData::set(StringData* k, Cell v) {
+  assertx(cellIsPlausible(v));
+  assertx(cowCheck() || notCyclic(v));
+  return g_array_funcs.setStr[kind()](this, k, v);
 }
 
-inline ArrayData* ArrayData::set(StringData* k, const Variant& v, bool copy) {
-  return g_array_funcs.setStr[kind()](this, k, *v.toCell(), copy);
+inline ArrayData* ArrayData::setInPlace(StringData* k, Cell v) {
+  assertx(cellIsPlausible(v));
+  assertx(notCyclic(v));
+  return g_array_funcs.setStrInPlace[kind()](this, k, v);
 }
 
-inline ArrayData* ArrayData::setWithRef(int64_t k, TypedValue v, bool copy) {
+inline ArrayData* ArrayData::set(int64_t k, const Variant& v) {
+  auto c = *v.toCell();
+  assertx(cowCheck() || notCyclic(c));
+  return g_array_funcs.setInt[kind()](this, k, c);
+}
+
+inline ArrayData* ArrayData::set(StringData* k, const Variant& v) {
+  auto c = *v.toCell();
+  assertx(cowCheck() || notCyclic(c));
+  return g_array_funcs.setStr[kind()](this, k, c);
+}
+
+inline ArrayData* ArrayData::setInPlace(StringData* k, const Variant& v) {
+  auto c = *v.toCell();
+  assertx(notCyclic(c));
+  return g_array_funcs.setStrInPlace[kind()](this, k, c);
+}
+
+inline ArrayData* ArrayData::setWithRef(int64_t k, TypedValue v) {
   assertx(tvIsPlausible(v));
-  return g_array_funcs.setWithRefInt[kind()](this, k, v, copy);
+  return g_array_funcs.setWithRefInt[kind()](this, k, v);
 }
 
-inline ArrayData* ArrayData::setWithRef(StringData* k,
-                                        TypedValue v, bool copy) {
+inline ArrayData* ArrayData::setWithRefInPlace(int64_t k, TypedValue v) {
   assertx(tvIsPlausible(v));
-  return g_array_funcs.setWithRefStr[kind()](this, k, v, copy);
+  return g_array_funcs.setWithRefIntInPlace[kind()](this, k, v);
 }
 
-inline ArrayData* ArrayData::setRef(int64_t k, tv_lval v, bool copy) {
-  return g_array_funcs.setRefInt[kind()](this, k, v, copy);
+inline ArrayData* ArrayData::setWithRef(StringData* k, TypedValue v) {
+  assertx(tvIsPlausible(v));
+  return g_array_funcs.setWithRefStr[kind()](this, k, v);
 }
 
-inline ArrayData* ArrayData::setRef(StringData* k, tv_lval v, bool copy) {
-  return g_array_funcs.setRefStr[kind()](this, k, v, copy);
+inline ArrayData* ArrayData::setWithRefInPlace(StringData* k, TypedValue v) {
+  assertx(tvIsPlausible(v));
+  return g_array_funcs.setWithRefStrInPlace[kind()](this, k, v);
+}
+
+inline ArrayData* ArrayData::setRef(int64_t k, tv_lval v) {
+  return g_array_funcs.setRefInt[kind()](this, k, v);
+}
+
+inline ArrayData* ArrayData::setRefInPlace(int64_t k, tv_lval v) {
+  return g_array_funcs.setRefIntInPlace[kind()](this, k, v);
+}
+
+inline ArrayData* ArrayData::setRef(StringData* k, tv_lval v) {
+  return g_array_funcs.setRefStr[kind()](this, k, v);
+}
+
+inline ArrayData* ArrayData::setRefInPlace(StringData* k, tv_lval v) {
+  return g_array_funcs.setRefStrInPlace[kind()](this, k, v);
 }
 
 inline ArrayData* ArrayData::remove(int64_t k) {
@@ -407,40 +446,64 @@ inline TypedValue ArrayData::atPos(ssize_t pos) const {
   return rvalPos(pos).tv();
 }
 
-inline ArrayData* ArrayData::set(Cell k, Cell v, bool copy) {
+inline ArrayData* ArrayData::set(Cell k, Cell v) {
   assertx(cellIsPlausible(k));
   assertx(cellIsPlausible(v));
   assertx(IsValidKey(k));
 
-  return detail::isIntKey(k) ? set(detail::getIntKey(k), v, copy)
-                             : set(detail::getStringKey(k), v, copy);
+  return detail::isIntKey(k) ? set(detail::getIntKey(k), v)
+                             : set(detail::getStringKey(k), v);
 }
 
-inline ArrayData* ArrayData::setWithRef(Cell k, TypedValue v, bool copy) {
+inline ArrayData* ArrayData::setInPlace(Cell k, Cell v) {
+  assertx(cellIsPlausible(k));
+  assertx(cellIsPlausible(v));
+  assertx(IsValidKey(k));
+
+  return detail::isIntKey(k) ? setInPlace(detail::getIntKey(k), v)
+                             : setInPlace(detail::getStringKey(k), v);
+}
+
+inline ArrayData* ArrayData::setWithRef(Cell k, TypedValue v) {
   assertx(cellIsPlausible(k));
   assertx(tvIsPlausible(v));
   assertx(IsValidKey(k));
 
-  return detail::isIntKey(k) ? setWithRef(detail::getIntKey(k), v, copy)
-                             : setWithRef(detail::getStringKey(k), v, copy);
+  return detail::isIntKey(k) ? setWithRef(detail::getIntKey(k), v)
+                             : setWithRef(detail::getStringKey(k), v);
 }
 
-inline ArrayData* ArrayData::setRef(Cell k, tv_lval v, bool copy) {
+inline ArrayData* ArrayData::setWithRefInPlace(Cell k, TypedValue v) {
+  assertx(cellIsPlausible(k));
+  assertx(tvIsPlausible(v));
   assertx(IsValidKey(k));
-  return detail::isIntKey(k) ? setRef(detail::getIntKey(k), v, copy)
-                             : setRef(detail::getStringKey(k), v, copy);
+
+  return detail::isIntKey(k) ? setWithRefInPlace(detail::getIntKey(k), v)
+                             : setWithRefInPlace(detail::getStringKey(k), v);
 }
 
-inline ArrayData* ArrayData::setRef(int64_t k, Variant& v, bool copy) {
-  return setRef(k, tv_lval{v.asTypedValue()}, copy);
+inline ArrayData* ArrayData::setRef(Cell k, tv_lval v) {
+  assertx(IsValidKey(k));
+  return detail::isIntKey(k) ? setRef(detail::getIntKey(k), v)
+                             : setRef(detail::getStringKey(k), v);
 }
 
-inline ArrayData* ArrayData::setRef(StringData* k, Variant& v, bool copy) {
-  return setRef(k, tv_lval{v.asTypedValue()}, copy);
+inline ArrayData* ArrayData::setRefInPlace(Cell k, tv_lval v) {
+  assertx(IsValidKey(k));
+  return detail::isIntKey(k) ? setRefInPlace(detail::getIntKey(k), v)
+                             : setRefInPlace(detail::getStringKey(k), v);
 }
 
-inline ArrayData* ArrayData::setRef(Cell k, Variant& v, bool copy) {
-  return setRef(k, tv_lval{v.asTypedValue()}, copy);
+inline ArrayData* ArrayData::setRef(int64_t k, Variant& v) {
+  return setRef(k, tv_lval{v.asTypedValue()});
+}
+
+inline ArrayData* ArrayData::setRef(StringData* k, Variant& v) {
+  return setRef(k, tv_lval{v.asTypedValue()});
+}
+
+inline ArrayData* ArrayData::setRef(Cell k, Variant& v) {
+  return setRef(k, tv_lval{v.asTypedValue()});
 }
 
 inline ArrayData* ArrayData::remove(Cell k) {
@@ -487,46 +550,63 @@ inline tv_rval ArrayData::get(const Variant& k, bool error) const {
   return get(*k.toCell(), error);
 }
 
-inline ArrayData* ArrayData::set(const String& k, Cell v, bool copy) {
+inline ArrayData* ArrayData::set(const String& k, Cell v) {
   assertx(cellIsPlausible(v));
   assertx(IsValidKey(k));
-  return set(k.get(), v, copy);
+  return set(k.get(), v);
 }
 
-inline ArrayData* ArrayData::set(const String& k, const Variant& v,
-                                 bool copy) {
-  return set(k, *v.toCell(), copy);
+inline ArrayData* ArrayData::setInPlace(const String& k, Cell v) {
+  assertx(cellIsPlausible(v));
+  assertx(IsValidKey(k));
+  return setInPlace(k.get(), v);
 }
 
-inline ArrayData* ArrayData::set(const Variant& k, const Variant& v,
-                                 bool copy) {
-  return set(*k.toCell(), *v.toCell(), copy);
+inline ArrayData* ArrayData::set(const String& k, const Variant& v) {
+  return set(k, *v.toCell());
 }
 
-inline ArrayData* ArrayData::setWithRef(const String& k,
-                                        TypedValue v, bool copy) {
+inline ArrayData* ArrayData::setInPlace(const String& k, const Variant& v) {
+  return setInPlace(k, *v.toCell());
+}
+
+inline ArrayData* ArrayData::set(const Variant& k, const Variant& v) {
+  return set(*k.toCell(), *v.toCell());
+}
+
+inline ArrayData* ArrayData::setInPlace(const Variant& k, const Variant& v) {
+  return setInPlace(*k.toCell(), *v.toCell());
+}
+
+inline ArrayData* ArrayData::setWithRef(const String& k, TypedValue v) {
   assertx(tvIsPlausible(v));
   assertx(IsValidKey(k));
-  return setWithRef(k.get(), v, copy);
+  return setWithRef(k.get(), v);
 }
 
-inline ArrayData*
-ArrayData::setRef(const String& k, tv_lval v, bool copy) {
+inline ArrayData* ArrayData::setWithRefInPlace(const String& k, TypedValue v) {
+  assertx(tvIsPlausible(v));
   assertx(IsValidKey(k));
-  return setRef(k.get(), v, copy);
+  return setWithRefInPlace(k.get(), v);
 }
 
 inline ArrayData*
-ArrayData::setRef(const Variant& k, tv_lval v, bool copy) {
-  return setRef(*k.toCell(), v, copy);
+ArrayData::setRef(const String& k, tv_lval v) {
+  assertx(IsValidKey(k));
+  return setRef(k.get(), v);
 }
 
-inline ArrayData* ArrayData::setRef(const String& k, Variant& v, bool copy) {
-  return setRef(k, tv_lval{v.asTypedValue()}, copy);
+inline ArrayData*
+ArrayData::setRef(const Variant& k, tv_lval v) {
+  return setRef(*k.toCell(), v);
 }
 
-inline ArrayData* ArrayData::setRef(const Variant& k, Variant& v, bool copy) {
-  return setRef(k, tv_lval{v.asTypedValue()}, copy);
+inline ArrayData* ArrayData::setRef(const String& k, Variant& v) {
+  return setRef(k, tv_lval{v.asTypedValue()});
+}
+
+inline ArrayData* ArrayData::setRef(const Variant& k, Variant& v) {
+  return setRef(k, tv_lval{v.asTypedValue()});
 }
 
 inline ArrayData* ArrayData::remove(const String& k) {

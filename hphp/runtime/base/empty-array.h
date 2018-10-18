@@ -78,12 +78,14 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   }
 
   static Cell NvGetKey(const ArrayData*, ssize_t pos);
-  static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
-  static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
-  static ArrayData* SetWithRefInt(ArrayData*, int64_t k,
-                                  TypedValue v, bool copy);
-  static ArrayData* SetWithRefStr(ArrayData*, StringData* k,
-                                  TypedValue v, bool copy);
+  static ArrayData* SetInt(ArrayData*, int64_t k, Cell v);
+  static constexpr auto SetIntInPlace = &SetInt;
+  static ArrayData* SetStr(ArrayData*, StringData* k, Cell v);
+  static constexpr auto SetStrInPlace = &SetStr;
+  static ArrayData* SetWithRefInt(ArrayData*, int64_t k, TypedValue v);
+  static constexpr auto SetWithRefIntInPlace = &SetWithRefInt;
+  static ArrayData* SetWithRefStr(ArrayData*, StringData* k, TypedValue v);
+  static constexpr auto SetWithRefStrInPlace = &SetWithRefStr;
   static ArrayData* RemoveInt(ArrayData* ad, int64_t);
   static constexpr auto RemoveIntInPlace = &RemoveInt;
   static ArrayData* RemoveStr(ArrayData* ad, const StringData*);
@@ -105,10 +107,10 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   static arr_lval LvalStrRef(ArrayData*, StringData* k, bool copy);
   static arr_lval LvalNew(ArrayData*, bool copy);
   static arr_lval LvalNewRef(ArrayData*, bool copy);
-  static ArrayData* SetRefInt(ArrayData*, int64_t k,
-                              tv_lval v, bool copy);
-  static ArrayData* SetRefStr(ArrayData*, StringData* k,
-                              tv_lval v, bool copy);
+  static ArrayData* SetRefInt(ArrayData*, int64_t k, tv_lval v);
+  static constexpr auto SetRefIntInPlace = &SetRefInt;
+  static ArrayData* SetRefStr(ArrayData*, StringData* k, tv_lval v);
+  static constexpr auto SetRefStrInPlace = &SetRefStr;
   static constexpr auto IterBegin = &ArrayCommon::ReturnInvalidIndex;
   static constexpr auto IterLast = &ArrayCommon::ReturnInvalidIndex;
   static constexpr auto IterEnd = &ArrayCommon::ReturnInvalidIndex;

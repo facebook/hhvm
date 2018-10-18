@@ -93,12 +93,14 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
     return GetValueRef(ad, pos);
   }
   static Cell NvGetKey(const ArrayData*, ssize_t pos);
-  static ArrayData* SetInt(ArrayData*, int64_t k, Cell v, bool copy);
-  static ArrayData* SetStr(ArrayData*, StringData* k, Cell v, bool copy);
-  static ArrayData* SetWithRefInt(ArrayData*, int64_t k,
-                                  TypedValue v, bool copy);
-  static ArrayData* SetWithRefStr(ArrayData*, StringData* k,
-                                  TypedValue v, bool copy);
+  static ArrayData* SetInt(ArrayData*, int64_t k, Cell v);
+  static ArrayData* SetIntInPlace(ArrayData*, int64_t k, Cell v);
+  static ArrayData* SetStr(ArrayData*, StringData* k, Cell v);
+  static ArrayData* SetStrInPlace(ArrayData*, StringData* k, Cell v);
+  static ArrayData* SetWithRefInt(ArrayData*, int64_t k, TypedValue v);
+  static ArrayData* SetWithRefIntInPlace(ArrayData*, int64_t k, TypedValue v);
+  static ArrayData* SetWithRefStr(ArrayData*, StringData* k, TypedValue v);
+  static ArrayData* SetWithRefStrInPlace(ArrayData*, StringData*, TypedValue);
   static size_t Vsize(const ArrayData*);
   static tv_rval GetValueRef(const ArrayData* ad, ssize_t pos);
   static bool IsVectorData(const ArrayData*) {
@@ -112,10 +114,10 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static arr_lval LvalStrRef(ArrayData*, StringData* k, bool copy);
   static arr_lval LvalNew(ArrayData*, bool copy);
   static arr_lval LvalNewRef(ArrayData*, bool copy);
-  static ArrayData* SetRefInt(ArrayData*, int64_t k,
-                              tv_lval v, bool copy);
-  static ArrayData* SetRefStr(ArrayData*, StringData* k,
-                              tv_lval v, bool copy);
+  static ArrayData* SetRefInt(ArrayData*, int64_t k, tv_lval v);
+  static ArrayData* SetRefIntInPlace(ArrayData*, int64_t k, tv_lval v);
+  static ArrayData* SetRefStr(ArrayData*, StringData* k, tv_lval v);
+  static ArrayData* SetRefStrInPlace(ArrayData*, StringData* k, tv_lval v);
   static ArrayData* RemoveInt(ArrayData*, int64_t k);
   static ArrayData* RemoveIntInPlace(ArrayData*, int64_t k);
   static ArrayData* RemoveStr(ArrayData*, const StringData* k);
@@ -160,12 +162,14 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
 
   static tv_rval NvTryGetIntVec(const ArrayData*, int64_t);
   static tv_rval NvTryGetStrVec(const ArrayData*, const StringData*);
-  static ArrayData* SetIntVec(ArrayData*, int64_t, Cell, bool);
-  static ArrayData* SetStrVec(ArrayData*, StringData*, Cell, bool);
-  static ArrayData* SetWithRefIntVec(ArrayData*, int64_t k,
-                                     TypedValue v, bool copy);
-  static ArrayData* SetWithRefStrVec(ArrayData*, StringData* k,
-                                     TypedValue v, bool copy);
+  static ArrayData* SetIntVec(ArrayData*, int64_t, Cell);
+  static ArrayData* SetIntInPlaceVec(ArrayData*, int64_t, Cell);
+  static ArrayData* SetStrVec(ArrayData*, StringData*, Cell);
+  static constexpr auto SetStrInPlaceVec = &SetStrVec;
+  static ArrayData* SetWithRefIntVec(ArrayData*, int64_t k, TypedValue v);
+  static ArrayData* SetWithRefIntInPlaceVec(ArrayData*, int64_t, TypedValue);
+  static ArrayData* SetWithRefStrVec(ArrayData*, StringData* k, TypedValue v);
+  static constexpr auto SetWithRefStrInPlaceVec = &SetWithRefStrVec;
   static ArrayData* RemoveIntVec(ArrayData*, int64_t);
   static ArrayData* RemoveIntInPlaceVec(ArrayData*, int64_t);
   static arr_lval LvalIntVec(ArrayData*, int64_t, bool);
@@ -173,8 +177,10 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static arr_lval LvalIntRefVec(ArrayData*, int64_t, bool);
   static arr_lval LvalStrRefVec(ArrayData*, StringData*, bool);
   static arr_lval LvalNewRefVec(ArrayData*, bool);
-  static ArrayData* SetRefIntVec(ArrayData*, int64_t, tv_lval, bool);
-  static ArrayData* SetRefStrVec(ArrayData*, StringData*, tv_lval, bool);
+  static ArrayData* SetRefIntVec(ArrayData*, int64_t, tv_lval);
+  static constexpr auto SetRefIntInPlaceVec = &SetRefIntVec;
+  static ArrayData* SetRefStrVec(ArrayData*, StringData*, tv_lval);
+  static constexpr auto SetRefStrInPlaceVec = &SetRefStrVec;
   static ArrayData* AppendRefVec(ArrayData*, tv_lval, bool);
   static ArrayData* AppendWithRefVec(ArrayData*, TypedValue, bool);
   static ArrayData* PlusEqVec(ArrayData*, const ArrayData*);
@@ -344,6 +350,15 @@ private:
 
   static ArrayData* RemoveImpl(ArrayData*, int64_t, bool);
   static ArrayData* RemoveImplVec(ArrayData*, int64_t, bool);
+
+  static ArrayData* SetWithRefIntImpl(ArrayData*, int64_t k, TypedValue v,
+                                      bool copy);
+  static ArrayData* SetWithRefStrImpl(ArrayData*, StringData* k, TypedValue v,
+                                      bool copy);
+  static ArrayData* SetWithRefIntVecImpl(ArrayData*, int64_t k,
+                                         TypedValue v, bool copy);
+  static ArrayData* SetRefIntImpl(ArrayData*, int64_t k, tv_lval v, bool copy);
+  static ArrayData* SetRefStrImpl(ArrayData*, StringData*, tv_lval, bool copy);
 
   struct VecInitializer;
   static VecInitializer s_vec_initializer;

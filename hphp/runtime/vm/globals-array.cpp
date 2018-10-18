@@ -139,39 +139,36 @@ arr_lval GlobalsArray::LvalNew(ArrayData* ad, bool /*copy*/) {
   return arr_lval { ad, lvalBlackHole().asTypedValue() };
 }
 
-ArrayData* GlobalsArray::SetInt(ArrayData* ad,
-                                         int64_t k,
-                                         Cell v,
-                                         bool copy) {
-  return SetStr(ad, String(k).get(), v, copy);
+ArrayData* GlobalsArray::SetIntInPlace(ArrayData* ad, int64_t k, Cell v) {
+  return SetStrInPlace(ad, String(k).get(), v);
 }
 
 ArrayData*
-GlobalsArray::SetStr(ArrayData* ad, StringData* k, Cell v, bool /*copy*/) {
+GlobalsArray::SetStrInPlace(ArrayData* ad, StringData* k, Cell v) {
   auto a = asGlobals(ad);
   cellSet(v, *tvToCell(a->m_tab->lookupAdd(k)));
   return a;
 }
 
-ArrayData* GlobalsArray::SetWithRefInt(ArrayData* ad, int64_t k,
-                                       TypedValue v, bool copy) {
-  return SetWithRefStr(ad, String(k).get(), v, copy);
+ArrayData*
+GlobalsArray::SetWithRefIntInPlace(ArrayData* ad, int64_t k, TypedValue v) {
+  return SetWithRefStrInPlace(ad, String(k).get(), v);
 }
 
-ArrayData* GlobalsArray::SetWithRefStr(ArrayData* ad, StringData* k,
-                                       TypedValue v, bool) {
+ArrayData*
+GlobalsArray::SetWithRefStrInPlace(ArrayData* ad, StringData* k, TypedValue v) {
   auto a = asGlobals(ad);
   tvSetWithRef(v, *a->m_tab->lookupAdd(k));
   return a;
 }
 
-ArrayData* GlobalsArray::SetRefInt(ArrayData* ad, int64_t k,
-                                   tv_lval v, bool copy) {
-  return asGlobals(ad)->setRef(String(k).get(), v, copy);
+ArrayData*
+GlobalsArray::SetRefIntInPlace(ArrayData* ad, int64_t k, tv_lval v) {
+  return SetRefStrInPlace(ad, String(k).get(), v);
 }
 
-ArrayData* GlobalsArray::SetRefStr(ArrayData* ad, StringData* k,
-                                   tv_lval v, bool) {
+ArrayData*
+GlobalsArray::SetRefStrInPlace(ArrayData* ad, StringData* k, tv_lval v) {
   auto a = asGlobals(ad);
   tvAsVariant(a->m_tab->lookupAdd(k)).assignRef(v);
   return a;

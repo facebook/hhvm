@@ -198,39 +198,39 @@ arr_lval APCLocalArray::LvalNewRef(ArrayData* ad, bool /*copy*/) {
 }
 
 ArrayData*
-APCLocalArray::SetInt(ArrayData* ad, int64_t k, Cell v, bool /*copy*/) {
+APCLocalArray::SetInt(ArrayData* ad, int64_t k, Cell v) {
   EscalateHelper helper{ad};
-  return helper.release(helper.escalated->set(k, v, false));
+  return helper.release(helper.escalated->setInPlace(k, v));
 }
 
 ArrayData*
-APCLocalArray::SetStr(ArrayData* ad, StringData* k, Cell v, bool /*copy*/) {
+APCLocalArray::SetStr(ArrayData* ad, StringData* k, Cell v) {
   EscalateHelper helper{ad};
-  return helper.release(helper.escalated->set(k, v, false));
+  return helper.release(helper.escalated->setInPlace(k, v));
 }
 
 ArrayData*
-APCLocalArray::SetWithRefInt(ArrayData* ad, int64_t k, TypedValue v, bool) {
+APCLocalArray::SetWithRefInt(ArrayData* ad, int64_t k, TypedValue v) {
   EscalateHelper helper{ad};
-  return helper.release(helper.escalated->setWithRef(k, v, false));
+  return helper.release(helper.escalated->setWithRefInPlace(k, v));
 }
 
 ArrayData*
-APCLocalArray::SetWithRefStr(ArrayData* ad, StringData* k, TypedValue v, bool) {
+APCLocalArray::SetWithRefStr(ArrayData* ad, StringData* k, TypedValue v) {
   EscalateHelper helper{ad};
-  return helper.release(helper.escalated->setWithRef(k, v, false));
+  return helper.release(helper.escalated->setWithRefInPlace(k, v));
 }
 
 ArrayData*
-APCLocalArray::SetRefInt(ArrayData* ad, int64_t k, tv_lval v, bool) {
+APCLocalArray::SetRefInt(ArrayData* ad, int64_t k, tv_lval v) {
   EscalateHelper helper{ad};
-  return helper.release(helper.escalated->setRef(k, v, false));
+  return helper.release(helper.escalated->setRefInPlace(k, v));
 }
 
 ArrayData*
-APCLocalArray::SetRefStr(ArrayData* ad, StringData* k, tv_lval v, bool) {
+APCLocalArray::SetRefStr(ArrayData* ad, StringData* k, tv_lval v) {
   EscalateHelper helper{ad};
-  return helper.release(helper.escalated->setRef(k, v, false));
+  return helper.release(helper.escalated->setRefInPlace(k, v));
 }
 
 ArrayData* APCLocalArray::RemoveInt(ArrayData* ad, int64_t k) {

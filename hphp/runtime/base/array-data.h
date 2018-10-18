@@ -468,50 +468,72 @@ public:
   tv_rval get(const Variant& k, bool error = false) const;
 
   /*
-   * Set the element at key `k' to `v', making a copy first if `copy' is set.
-   * If `v' is a ref, its inner value is used.
+   * Set the element at key `k' to `v'. set() methods make a copy first if
+   * cowCheck() returns true. If `v' is a ref, its inner value is used.
+   *
+   * setInPlace() methods attempt to modify the array in place without
+   * calling cowCheck(), but may still return a new array for escalation
+   * or reallocating to grow.
    *
    * Return `this' if copy/escalation are not needed, or a copied/escalated
    * array data.
    */
-  ArrayData* set(int64_t k, Cell v, bool copy);
-  ArrayData* set(StringData* k, Cell v, bool copy);
-  ArrayData* set(const StringData*, Cell, bool) = delete;
-  ArrayData* set(Cell k, Cell v, bool copy);
-  ArrayData* set(const String& k, Cell v, bool copy);
+  ArrayData* set(int64_t k, Cell v);
+  ArrayData* set(StringData* k, Cell v);
+  ArrayData* set(Cell k, Cell v);
+  ArrayData* set(const String& k, Cell v);
+  ArrayData* setInPlace(int64_t k, Cell v);
+  ArrayData* setInPlace(StringData* k, Cell v);
+  ArrayData* setInPlace(Cell k, Cell v);
+  ArrayData* setInPlace(const String& k, Cell v);
 
-  ArrayData* set(int64_t k, const Variant& v, bool copy);
-  ArrayData* set(StringData* k, const Variant& v, bool copy);
-  ArrayData* set(const StringData*, const Variant&, bool) = delete;
-  ArrayData* set(const String& k, const Variant& v, bool copy);
-  ArrayData* set(const Variant& k, const Variant& v, bool copy);
+  ArrayData* set(int64_t k, const Variant& v);
+  ArrayData* set(StringData* k, const Variant& v);
+  ArrayData* set(const String& k, const Variant& v);
+  ArrayData* set(const Variant& k, const Variant& v);
+  ArrayData* setInPlace(StringData* k, const Variant& v);
+  ArrayData* setInPlace(const String& k, const Variant& v);
+  ArrayData* setInPlace(const Variant& k, const Variant& v);
+
+  ArrayData* set(const StringData*, Cell) = delete;
+  ArrayData* set(const StringData*, const Variant&) = delete;
+  ArrayData* setInPlace(const StringData*, Cell) = delete;
+  ArrayData* setInPlace(const StringData*, const Variant&) = delete;
 
   /*
    * Like set(), except the reffiness of `v' is preserved unless it is
    * singly-referenced.
    */
-  ArrayData* setWithRef(int64_t k, TypedValue v, bool copy);
-  ArrayData* setWithRef(StringData* k, TypedValue v, bool copy);
-  ArrayData* setWithRef(const StringData*, TypedValue, bool) = delete;
-  ArrayData* setWithRef(Cell k, TypedValue v, bool copy);
-  ArrayData* setWithRef(const String& k, TypedValue v, bool copy);
+  ArrayData* setWithRef(int64_t k, TypedValue v);
+  ArrayData* setWithRef(StringData* k, TypedValue v);
+  ArrayData* setWithRef(Cell k, TypedValue v);
+  ArrayData* setWithRef(const String& k, TypedValue v);
+  ArrayData* setWithRef(const StringData*, TypedValue) = delete;
+  ArrayData* setWithRefInPlace(Cell k, TypedValue v);
+  ArrayData* setWithRefInPlace(const String& k, TypedValue v);
+  ArrayData* setWithRefInPlace(StringData* k, TypedValue v);
+  ArrayData* setWithRefInPlace(int64_t k, TypedValue v);
 
   /*
    * Like set(), except `v' is first boxed if it's not already a ref.
    */
-  ArrayData* setRef(int64_t k, tv_lval v, bool copy);
-  ArrayData* setRef(StringData* k, tv_lval v, bool copy);
-  ArrayData* setRef(const StringData*, tv_lval, bool) = delete;
-  ArrayData* setRef(Cell k, tv_lval v, bool copy);
-  ArrayData* setRef(const String& k, tv_lval v, bool copy);
-  ArrayData* setRef(const Variant& k, tv_lval v, bool copy);
+  ArrayData* setRef(int64_t k, tv_lval v);
+  ArrayData* setRef(StringData* k, tv_lval v);
+  ArrayData* setRef(Cell k, tv_lval v);
+  ArrayData* setRef(const String& k, tv_lval v);
+  ArrayData* setRef(const Variant& k, tv_lval v);
+  ArrayData* setRefInPlace(StringData* k, tv_lval v);
+  ArrayData* setRefInPlace(int64_t k, tv_lval v);
+  ArrayData* setRefInPlace(Cell k, tv_lval v);
 
-  ArrayData* setRef(int64_t k, Variant& v, bool copy);
-  ArrayData* setRef(StringData* k, Variant& v, bool copy);
-  ArrayData* setRef(const StringData*, Variant&, bool) = delete;
-  ArrayData* setRef(Cell k, Variant& v, bool copy);
-  ArrayData* setRef(const String& k, Variant& v, bool copy);
-  ArrayData* setRef(const Variant& k, Variant& v, bool copy);
+  ArrayData* setRef(int64_t k, Variant& v);
+  ArrayData* setRef(StringData* k, Variant& v);
+  ArrayData* setRef(Cell k, Variant& v);
+  ArrayData* setRef(const String& k, Variant& v);
+  ArrayData* setRef(const Variant& k, Variant& v);
+
+  ArrayData* setRef(const StringData*, tv_lval) = delete;
+  ArrayData* setRef(const StringData*, Variant&) = delete;
 
   /*
    * Remove the value at key `k'. remove() will make a copy first if necesary;
@@ -930,12 +952,15 @@ struct ArrayFunctions {
   tv_rval (*nvGetStr[NK])(const ArrayData*, const StringData* k);
   tv_rval (*nvTryGetStr[NK])(const ArrayData*, const StringData* k);
   Cell (*nvGetKey[NK])(const ArrayData*, ssize_t pos);
-  ArrayData* (*setInt[NK])(ArrayData*, int64_t k, Cell v, bool copy);
-  ArrayData* (*setStr[NK])(ArrayData*, StringData* k, Cell v, bool copy);
-  ArrayData* (*setWithRefInt[NK])(ArrayData*, int64_t k,
-                                  TypedValue v, bool copy);
-  ArrayData* (*setWithRefStr[NK])(ArrayData*, StringData* k,
-                                  TypedValue v, bool copy);
+  ArrayData* (*setInt[NK])(ArrayData*, int64_t k, Cell v);
+  ArrayData* (*setIntInPlace[NK])(ArrayData*, int64_t k, Cell v);
+  ArrayData* (*setStr[NK])(ArrayData*, StringData* k, Cell v);
+  ArrayData* (*setStrInPlace[NK])(ArrayData*, StringData* k, Cell v);
+  ArrayData* (*setWithRefInt[NK])(ArrayData*, int64_t k, TypedValue v);
+  ArrayData* (*setWithRefIntInPlace[NK])(ArrayData*, int64_t k, TypedValue v);
+  ArrayData* (*setWithRefStr[NK])(ArrayData*, StringData* k, TypedValue v);
+  ArrayData* (*setWithRefStrInPlace[NK])(ArrayData*, StringData* k,
+                                         TypedValue v);
   size_t (*vsize[NK])(const ArrayData*);
   tv_rval (*nvGetPos[NK])(const ArrayData*, ssize_t pos);
   bool (*isVectorData[NK])(const ArrayData*);
@@ -947,10 +972,10 @@ struct ArrayFunctions {
   arr_lval (*lvalStrRef[NK])(ArrayData*, StringData* k, bool copy);
   arr_lval (*lvalNew[NK])(ArrayData*, bool copy);
   arr_lval (*lvalNewRef[NK])(ArrayData*, bool copy);
-  ArrayData* (*setRefInt[NK])(ArrayData*, int64_t k,
-                              tv_lval v, bool copy);
-  ArrayData* (*setRefStr[NK])(ArrayData*, StringData* k,
-                              tv_lval v, bool copy);
+  ArrayData* (*setRefInt[NK])(ArrayData*, int64_t k, tv_lval v);
+  ArrayData* (*setRefIntInPlace[NK])(ArrayData*, int64_t k, tv_lval v);
+  ArrayData* (*setRefStr[NK])(ArrayData*, StringData* k, tv_lval v);
+  ArrayData* (*setRefStrInPlace[NK])(ArrayData*, StringData* k, tv_lval v);
   ArrayData* (*removeInt[NK])(ArrayData*, int64_t k);
   ArrayData* (*removeIntInPlace[NK])(ArrayData*, int64_t k);
   ArrayData* (*removeStr[NK])(ArrayData*, const StringData* k);

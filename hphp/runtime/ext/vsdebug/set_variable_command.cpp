@@ -248,10 +248,10 @@ bool SetVariableCommand::setArrayVariable(
       auto keyVariant = iter.first();
       if (keyVariant.isString()) {
         HPHP::String key = keyVariant.toString();
-        arr->set(key, tvToInitCell(*arrayValue), false);
+        arr->setInPlace(key, tvToInitCell(*arrayValue));
       } else if (keyVariant.isInteger()) {
         int64_t key = keyVariant.toInt64();
-        arr->set(key, tvToInitCell(*arrayValue), false);
+        arr->setInPlace(key, tvToInitCell(*arrayValue));
       } else {
         throw DebuggerCommandException("Unsupported array key type.");
       }

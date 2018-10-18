@@ -235,7 +235,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   Variant emptyArr(staticEmptyArray());
   for (auto& key : s_arraysToClear) {
     g->removeInPlace(key.get());
-    g->set(key.get(), emptyArr, false);
+    g->setInPlace(key.get(), emptyArr);
   }
   for (auto& key : s_arraysToUnset) {
     g->removeInPlace(key.get());
@@ -252,12 +252,12 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   }
 
   if (shouldSetHttpRawPostData) {
-    g->set(s_HTTP_RAW_POST_DATA, empty_string_variant_ref, false);
+    g->setInPlace(s_HTTP_RAW_POST_DATA, empty_string_variant_ref);
   }
 
 #define X(name)                                       \
   Array name##arr(Array::Create());                   \
-  SCOPE_EXIT { g->set(s__##name, name##arr, false); };
+  SCOPE_EXIT { g->setInPlace(s__##name, name##arr); };
 
   X(ENV)
   X(GET)
@@ -272,7 +272,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   Variant HTTP_RAW_POST_DATA;
   SCOPE_EXIT {
     if (shouldSetHttpRawPostData) {
-      g->set(s_HTTP_RAW_POST_DATA.get(), HTTP_RAW_POST_DATA, false);
+      g->setInPlace(s_HTTP_RAW_POST_DATA.get(), HTTP_RAW_POST_DATA);
     }
   };
 

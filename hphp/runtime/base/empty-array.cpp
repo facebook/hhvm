@@ -209,7 +209,7 @@ arr_lval EmptyArray::MakeMixed(int64_t key, TypedValue val) {
 
 //////////////////////////////////////////////////////////////////////
 
-ArrayData* EmptyArray::SetInt(ArrayData*, int64_t k, Cell v, bool) {
+ArrayData* EmptyArray::SetInt(ArrayData*, int64_t k, Cell v) {
   // TODO(#3888164): we should make it so we don't need KindOfUninit checks
   if (v.m_type == KindOfUninit) v.m_type = KindOfNull;
   tvIncRefGen(v);
@@ -219,29 +219,28 @@ ArrayData* EmptyArray::SetInt(ArrayData*, int64_t k, Cell v, bool) {
 }
 
 ArrayData*
-EmptyArray::SetStr(ArrayData*, StringData* k, Cell v, bool /*copy*/) {
+EmptyArray::SetStr(ArrayData*, StringData* k, Cell v) {
   tvIncRefGen(v);
   // TODO(#3888164): we should make it so we don't need KindOfUninit checks
   if (v.m_type == KindOfUninit) v.m_type = KindOfNull;
   return EmptyArray::MakeMixed(k, v).arr;
 }
 
-ArrayData* EmptyArray::SetWithRefInt(ArrayData* ad, int64_t k,
-                                     TypedValue v, bool copy) {
+ArrayData* EmptyArray::SetWithRefInt(ArrayData* ad, int64_t k, TypedValue v) {
   if (checkHACRefBind() && tvIsReferenced(v)) {
     raiseHackArrCompatRefBind(k);
   }
-  auto const lval = LvalInt(ad, k, copy);
+  auto const lval = LvalInt(ad, k, ad->cowCheck());
   tvSetWithRef(v, lval);
   return lval.arr;
 }
 
 ArrayData* EmptyArray::SetWithRefStr(ArrayData* ad, StringData* k,
-                                     TypedValue v, bool copy) {
+                                     TypedValue v) {
   if (checkHACRefBind() && tvIsReferenced(v)) {
     raiseHackArrCompatRefBind(k);
   }
-  auto const lval = LvalStr(ad, k, copy);
+  auto const lval = LvalStr(ad, k, ad->cowCheck());
   tvSetWithRef(v, lval);
   return lval.arr;
 }
@@ -282,8 +281,7 @@ arr_lval EmptyArray::LvalNewRef(ArrayData* ad, bool copy) {
   return LvalNew(ad, copy);
 }
 
-ArrayData* EmptyArray::SetRefInt(ArrayData*, int64_t k,
-                                 tv_lval v, bool) {
+ArrayData* EmptyArray::SetRefInt(ArrayData*, int64_t k, tv_lval v) {
   if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
   tvBoxIfNeeded(v);
   tvIncRefCountable(v.tv());
@@ -292,8 +290,7 @@ ArrayData* EmptyArray::SetRefInt(ArrayData*, int64_t k,
   return lval.arr;
 }
 
-ArrayData* EmptyArray::SetRefStr(ArrayData*, StringData* k,
-                                 tv_lval v, bool) {
+ArrayData* EmptyArray::SetRefStr(ArrayData*, StringData* k, tv_lval v) {
   if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
   tvBoxIfNeeded(v);
   tvIncRefCountable(v.tv());

@@ -1601,42 +1601,31 @@ auto arrayRefShuffle(ArrayData* oldData, ArrayData* newData, tv_lval base) {
  * SetElem helper with Array base and Int64 key
  */
 template<bool setResult, bool intishWarn>
-inline ArrayData* SetElemArrayPre(ArrayData* a,
-                                  int64_t key,
-                                  Cell* value) {
-  return a->set(key, *value, a->cowCheck());
+inline ArrayData* SetElemArrayPre(ArrayData* a, int64_t key, Cell* value) {
+  return a->set(key, *value);
 }
 
 /**
  * SetElem helper with Array base and String key
  */
 template<bool setResult, bool intishWarn>
-inline ArrayData* SetElemArrayPre(ArrayData* a,
-                                  StringData* key,
-                                  Cell* value) {
+inline ArrayData* SetElemArrayPre(ArrayData* a, StringData* key, Cell* value) {
   int64_t n;
   assertx(a->isPHPArray());
-  bool copy = a->cowCheck();
   if (key->isStrictlyInteger(n)) {
     if (intishWarn) raise_intish_index_cast();
-    return a->set(n, *value, copy);
+    return a->set(n, *value);
   }
-  return a->set(key, *value, copy);
+  return a->set(key, *value);
 }
 
 template<bool setResult, bool intishWarn>
-inline ArrayData* SetElemArrayPre(ArrayData* a,
-                                  TypedValue key,
-                                  Cell* value) {
+inline ArrayData* SetElemArrayPre(ArrayData* a, TypedValue key, Cell* value) {
   if (isStringType(key.m_type)) {
-    return SetElemArrayPre<setResult, intishWarn>(
-      a, key.m_data.pstr, value
-    );
+    return SetElemArrayPre<setResult, intishWarn>(a, key.m_data.pstr, value);
   }
   if (key.m_type == KindOfInt64) {
-    return SetElemArrayPre<setResult, false>(
-      a, key.m_data.num, value
-    );
+    return SetElemArrayPre<setResult, false>(a, key.m_data.num, value);
   }
   if (isFuncType(key.m_type)) {
     return SetElemArrayPre<setResult, intishWarn>(
@@ -1647,7 +1636,7 @@ inline ArrayData* SetElemArrayPre(ArrayData* a,
     raiseHackArrCompatImplicitArrayKey(&key);
   }
   if (isNullType(key.m_type)) {
-    return a->set(staticEmptyString(), *value, a->cowCheck());
+    return a->set(staticEmptyString(), *value);
   }
   if (!isArrayLikeType(key.m_type) && key.m_type != KindOfObject) {
     return SetElemArrayPre<setResult, false>(a, tvAsCVarRef(&key).toInt64(),
@@ -1669,8 +1658,7 @@ inline ArrayData* SetElemArrayPre(ArrayData* a,
  * SetElem when base is an Array
  */
 template <bool setResult, KeyType keyType, bool intishWarn>
-inline void SetElemArray(tv_lval base, key_type<keyType> key,
-                         Cell* value) {
+inline void SetElemArray(tv_lval base, key_type<keyType> key, Cell* value) {
   assertx(tvIsArrayOrShape(base));
   assertx(tvIsPlausible(*base));
 
@@ -1688,7 +1676,7 @@ template<bool setResult>
 inline ArrayData* SetElemVecPre(ArrayData* a,
                                 int64_t key,
                                 Cell* value) {
-  return PackedArray::SetIntVec(a, key, *value, a->cowCheck());
+  return PackedArray::SetIntVec(a, key, *value);
 }
 
 template <bool setResult>
@@ -1712,8 +1700,7 @@ inline ArrayData* SetElemVecPre(ArrayData* a,
 }
 
 template <bool setResult, KeyType keyType>
-inline void SetElemVec(tv_lval base, key_type<keyType> key,
-                       Cell* value) {
+inline void SetElemVec(tv_lval base, key_type<keyType> key, Cell* value) {
   assertx(tvIsVec(base));
   assertx(tvIsPlausible(*base));
 
@@ -1731,14 +1718,14 @@ template<bool setResult>
 inline ArrayData* SetElemDictPre(ArrayData* a,
                                  int64_t key,
                                  Cell* value) {
-  return MixedArray::SetIntDict(a, key, *value, a->cowCheck());
+  return MixedArray::SetIntDict(a, key, *value);
 }
 
 template<bool setResult>
 inline ArrayData* SetElemDictPre(ArrayData* a,
                                  StringData* key,
                                  Cell* value) {
-  return MixedArray::SetStrDict(a, key, *value, a->cowCheck());
+  return MixedArray::SetStrDict(a, key, *value);
 }
 
 template<bool setResult>

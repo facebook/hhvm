@@ -663,33 +663,33 @@ arr_lval SetArray::LvalNewRef(ArrayData* ad, bool) {
   throwRefInvalidArrayValueException(ad);
 }
 
-ArrayData* SetArray::SetRefInt(ArrayData* ad, int64_t, tv_lval, bool) {
+ArrayData* SetArray::SetRefInt(ArrayData* ad, int64_t, tv_lval) {
   throwRefInvalidArrayValueException(ad);
 }
 
-ArrayData* SetArray::SetRefStr(ArrayData* ad, StringData*, tv_lval, bool) {
+ArrayData* SetArray::SetRefStr(ArrayData* ad, StringData*, tv_lval) {
   throwRefInvalidArrayValueException(ad);
 }
 
-ArrayData* SetArray::SetInt(ArrayData*, int64_t, Cell, bool) {
+ArrayData* SetArray::SetInt(ArrayData*, int64_t, Cell) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (set int)"
   );
 }
 
-ArrayData* SetArray::SetStr(ArrayData*, StringData*, Cell, bool) {
+ArrayData* SetArray::SetStr(ArrayData*, StringData*, Cell) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (set string)"
   );
 }
 
-ArrayData* SetArray::SetWithRefInt(ArrayData*, int64_t, TypedValue, bool) {
+ArrayData* SetArray::SetWithRefInt(ArrayData*, int64_t, TypedValue) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (set with ref int)"
   );
 }
 
-ArrayData* SetArray::SetWithRefStr(ArrayData*, StringData*, TypedValue, bool) {
+ArrayData* SetArray::SetWithRefStr(ArrayData*, StringData*, TypedValue) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (set with ref string)"
   );

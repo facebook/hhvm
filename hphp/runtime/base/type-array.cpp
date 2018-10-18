@@ -633,7 +633,7 @@ void Array::setImpl(const T& key, TypedValue v) {
   if (!m_arr) {
     m_arr = Ptr::attach(ArrayData::Create(key, v));
   } else {
-    auto const escalated = m_arr->set(key, tvToCell(v), m_arr->cowCheck());
+    auto const escalated = m_arr->set(key, tvToCell(v));
     if (escalated != m_arr) m_arr = Ptr::attach(escalated);
   }
 }
@@ -643,7 +643,7 @@ void Array::setWithRefImpl(const T& key, TypedValue v) {
   if (!m_arr) {
     m_arr = Ptr::attach(ArrayData::CreateWithRef(key, v));
   } else {
-    auto const escalated = m_arr->setWithRef(key, v, m_arr->cowCheck());
+    auto const escalated = m_arr->setWithRef(key, v);
     if (escalated != m_arr) m_arr = Ptr::attach(escalated);
   }
 }
@@ -659,7 +659,7 @@ void Array::setRefImpl(const T& key, tv_lval v) {
     m_arr = Ptr::attach(ArrayData::CreateRef(key, v));
   } else {
     escalate();
-    auto const escalated = m_arr->setRef(key, v, m_arr->cowCheck());
+    auto const escalated = m_arr->setRef(key, v);
     if (escalated != m_arr) m_arr = Ptr::attach(escalated);
   }
 }

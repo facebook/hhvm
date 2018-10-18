@@ -92,8 +92,7 @@ ArrayData* addElemIntKeyHelper(ArrayData* ad,
   // this does not re-enter
   // set will decRef any old value that may have been overwritten
   // if appropriate
-  ArrayData* retval = ad->set(key, tvAsCVarRef(&value),
-                              ad->cowCheck());
+  ArrayData* retval = ad->set(key, tvAsCVarRef(&value));
   // TODO Task #1970153: It would be great if there were set()
   // methods that didn't bump up the refcount so that we didn't
   // have to decrement it here
@@ -107,17 +106,15 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
                                   TypedValue value) {
   assertx(ad->isPHPArray());
   assertx(cellIsPlausible(value));
-  // this does not re-enter
-  bool copy = ad->cowCheck();
   // set will decRef any old value that may have been overwritten
   // if appropriate
   int64_t intkey;
   ArrayData* retval;
   if (UNLIKELY(key->isStrictlyInteger(intkey))) {
     if (intishWarn) raise_intish_index_cast();
-    retval = ad->set(intkey, *tvToCell(&value), copy);
+    retval = ad->set(intkey, *tvToCell(&value));
   } else {
-    retval = ad->set(key, *tvToCell(&value), copy);
+    retval = ad->set(key, *tvToCell(&value));
   }
   // TODO Task #1970153: It would be great if there were set()
   // methods that didn't bump up the refcount so that we didn't
@@ -138,8 +135,7 @@ ArrayData* dictAddElemIntKeyHelper(ArrayData* ad,
   assertx(ad->isDict());
   // set will decRef any old value that may have been overwritten
   // if appropriate
-  ArrayData* retval =
-    MixedArray::SetIntDict(ad, key, *tvAssertCell(&value), ad->cowCheck());
+  ArrayData* retval = MixedArray::SetIntDict(ad, key, *tvAssertCell(&value));
   // TODO Task #1970153: It would be great if there were set()
   // methods that didn't bump up the refcount so that we didn't
   // have to decrement it here
@@ -153,8 +149,7 @@ ArrayData* dictAddElemStringKeyHelper(ArrayData* ad,
   assertx(ad->isDict());
   // set will decRef any old value that may have been overwritten
   // if appropriate
-  ArrayData* retval =
-    MixedArray::SetStrDict(ad, key, *tvAssertCell(&value), ad->cowCheck());
+  ArrayData* retval = MixedArray::SetStrDict(ad, key, *tvAssertCell(&value));
   // TODO Task #1970153: It would be great if there were set()
   // methods that didn't bump up the refcount so that we didn't
   // have to decrement it here

@@ -327,38 +327,44 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(NvGetKey)
 
   /*
-   * ArrayData* SetInt(ArrayData*, int64_t key, Cell v, bool copy)
+   * ArrayData* SetInt(ArrayData*, int64_t key, Cell v)
    *
-   *   Set a value in the array for an integer key.  This function has
-   *   copy/grow semantics.
+   *   Set a value in the array for an integer key. SetInt() has copy/grow
+   *   semantics; SetIntInPlace() may only escalate or grow.
    */
   DISPATCH(SetInt)
+  DISPATCH(SetIntInPlace)
 
   /*
-   * ArrayData* SetStr(ArrayData*, StringData*, Cell v, bool copy)
+   * ArrayData* SetStr(ArrayData*, StringData*, Cell v)
    *
    *   Set a value in the array for a string key.  The string must not
-   *   be an integer-like string.  This function has copy/grow
-   *   semantics.
+   *   be an integer-like string. SetStr() has copy/grow semantics;
+   *   SetStrInPlace() may only escalate or grow.
    */
   DISPATCH(SetStr)
+  DISPATCH(SetStrInPlace)
 
   /*
-   * ArrayData* SetWithRefInt(ArrayData*, int64_t k, Cell v, bool copy)
+   * ArrayData* SetWithRefInt(ArrayData*, int64_t k, Cell v)
    *
    *   Set a value in the array for an integer key, preserving refs unless they
-   *   are singly-referenced.  This function has copy/grow semantics.
+   *   are singly-referenced. SetWithRefInt() has copy/grow semantics;
+   *   SetWithRefIntInPlace() may only escalate or grow.
    */
   DISPATCH(SetWithRefInt)
+  DISPATCH(SetWithRefIntInPlace)
 
   /*
-   * ArrayData* SetWithRefStr(ArrayData*, StringData* k, Cell v, bool copy)
+   * ArrayData* SetWithRefStr(ArrayData*, StringData* k, Cell v)
    *
    *   Set a value in the array for a string key, preserving refs unless they
-   *   are singly-referenced.  This function has copy/grow semantics, and is
-   *   not responsible for intish-string casts.
+   *   are singly-referenced. SetWithRefStr() has copy/grow semantics, and is
+   *   not responsible for intish-string casts. SetWithRefStrInPlace() may
+   *   only escalate or grow.
    */
   DISPATCH(SetWithRefStr)
+  DISPATCH(SetWithRefStrInPlace)
 
   /*
    * size_t Vsize(const ArrayData*)
@@ -445,23 +451,27 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(LvalNewRef)
 
   /*
-   * ArrayData* SetRefInt(ArrayData*, int64_t key, tv_lval v, bool copy)
+   * ArrayData* SetRefInt(ArrayData*, int64_t key, tv_lval v)
    *
    *   Binding set with an integer key.  Box `v' if it is not already
    *   boxed, and then insert a KindOfRef that points to v's RefData.
-   *   This function has copy/grow semantics.
+   *   SetRefInt() has copy/grow semantics; SetRefIntInPlace may only
+   *   grow or escalate.
    */
   DISPATCH(SetRefInt)
+  DISPATCH(SetRefIntInPlace)
 
   /*
-   * ArrayData* SetRefStr(ArrayData*, StringData* key, tv_lval v, bool copy)
+   * ArrayData* SetRefStr(ArrayData*, StringData* key, tv_lval v)
    *
    *  Binding set with a string key.  The string `key' must not be an
    *  integer-like string.  Box `v' if it is not already boxed, and
-   *  then insert a KindOfRef that points to v's RefData.  This
-   *  function has copy/grow semantics.
+   *  then insert a KindOfRef that points to v's RefData. SetRefStr()
+   *  has copy/grow semantics; SetRefStrInPlace() may only grow or
+   *  escalate.
    */
   DISPATCH(SetRefStr)
+  DISPATCH(SetRefStrInPlace)
 
   /*
    * ArrayData* RemoveInt(ArrayData*, int64_t key)

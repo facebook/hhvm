@@ -1183,6 +1183,11 @@ public:
   bool hasReifiedGenerics() const;
 
   /*
+   * Returns how many reified generics this class has
+   */
+  size_t numReifiedGenerics() const;
+
+  /*
    * Returns whether any of this class's parents have reified generics
    */
   bool hasReifiedParent() const;

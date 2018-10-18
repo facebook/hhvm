@@ -393,6 +393,16 @@ enum class ReifiedGenericOp : uint8_t {
 #undef OP
 };
 
+#define HAS_GENERICS_OPS \
+  OP(NoGenerics)         \
+  OP(HasGenerics)
+
+enum class HasGenericsOp : uint8_t {
+#define OP(name) name,
+  HAS_GENERICS_OPS
+#undef OP
+};
+
 #define CONT_CHECK_OPS                            \
   CONT_CHECK_OP(IgnoreStarted)                    \
   CONT_CHECK_OP(CheckStarted)
@@ -637,7 +647,8 @@ constexpr uint32_t kMaxConcatN = 4;
   O(FPushClsMethodSD,THREE(IVA,OA(SpecialClsRef),SA),                   \
                                        NOV,             NOV,        PF) \
   O(FPushClsMethodD, THREE(IVA,SA,SA), NOV,             NOV,        PF) \
-  O(FPushCtor,       TWO(IVA,CAR),     NOV,             ONE(CV),    PF) \
+  O(FPushCtor,       THREE(IVA,CAR,OA(HasGenericsOp)),                  \
+                                       NOV,             ONE(CV),    PF) \
   O(FPushCtorD,      TWO(IVA,SA),      NOV,             ONE(CV),    PF) \
   O(FPushCtorI,      TWO(IVA,IVA),     NOV,             ONE(CV),    PF) \
   O(FPushCtorS,      TWO(IVA,OA(SpecialClsRef)),                        \
@@ -943,6 +954,7 @@ const char* subopToName(QueryMOp);
 const char* subopToName(SetRangeOp);
 const char* subopToName(TypeStructResolveOp);
 const char* subopToName(ReifiedGenericOp);
+const char* subopToName(HasGenericsOp);
 const char* subopToName(ContCheckOp);
 const char* subopToName(CudOp);
 const char* subopToName(FPassHint);

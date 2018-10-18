@@ -215,24 +215,32 @@ inline ObjectData* newInstanceImpl(Class* cls) {
 // necessary. The initial ref-count of the instance will be greater than zero.
 inline ObjectData* newInstance(Class* cls) {
   auto* inst = newInstanceImpl(cls);
+  if (cls->hasReifiedGenerics()) {
+    raise_error("Cannot create a new instance of a reified class without "
+                "the reified generics");
+  }
   if (cls->hasReifiedParent()) {
     setReifiedGenerics(inst, cls, ArrayData::CreateVArray());
   }
   return inst;
 }
 
-// Does the same work as newInstance but also if the class denoted as `cls` is
-// reified, then sets the reified generics on this class.
-inline ObjectData*
-newInstanceMaybeReified(Class* cls, ArrayData* reifiedTypes) {
+// Does the same work as newInstance but also sets the reified generics on the
+// class denoted as `cls`. If this class is not reified, this function raises
+// an error.
+inline ObjectData* newInstanceReified(Class* cls, ArrayData* reifiedTypes) {
   auto* inst = newInstanceImpl(cls);
-  auto hasReifiedGenerics = cls->hasReifiedGenerics();
-  if (hasReifiedGenerics || cls->hasReifiedParent()) {
-    if (hasReifiedGenerics) assertx(reifiedTypes != nullptr);
-    setReifiedGenerics(inst, cls, hasReifiedGenerics
-                                  ? reifiedTypes
-                                  : ArrayData::CreateVArray());
+  if (!cls->hasReifiedGenerics()) {
+    raise_error("Cannot create a new instance of a non-reified class with "
+                "the reified generics");
   }
+  assertx(reifiedTypes != nullptr);
+  if (cls->numReifiedGenerics() != reifiedTypes->size()) {
+    raise_error("This class requires %zu reified generics but %zu given",
+                cls->numReifiedGenerics(),
+                reifiedTypes->size());
+  }
+  setReifiedGenerics(inst, cls, reifiedTypes);
   return inst;
 }
 

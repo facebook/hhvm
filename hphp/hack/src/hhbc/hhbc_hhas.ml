@@ -150,6 +150,10 @@ let string_of_reifiedgeneric_op = function
   | ClsGeneric -> "ClsGeneric"
   | FunGeneric -> "FunGeneric"
 
+let string_of_has_generics_op = function
+  | NoGenerics -> "NoGenerics"
+  | HasGenerics -> "HasGenerics"
+
 let string_of_operator instruction =
   match instruction with
     | Concat -> "Concat"
@@ -517,8 +521,11 @@ let string_of_call instruction =
           string_of_int n;
           SpecialClsRef.to_string r;
           string_of_method_id id]
-  | FPushCtor (n, id) ->
-    sep ["FPushCtor"; string_of_int n; string_of_int id]
+  | FPushCtor (n, id, op) ->
+    sep ["FPushCtor";
+         string_of_int n;
+         string_of_int id;
+         string_of_has_generics_op op]
   | FPushCtorD (n, cid) ->
     sep ["FPushCtorD"; string_of_int n; string_of_class_id cid]
   | FPushCtorI (n, id) ->

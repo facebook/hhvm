@@ -1097,7 +1097,7 @@ To string conversions:
   Loads class-ref's cls from slot `slot` in frame S0 and puts the value in D
   as type T. T must be a sub-type of TCls.
 
-| LdClsRefTS<slot>, D(TSOrTrash), S(FramePtr), NF
+| LdClsRefTS<slot>, DVArr, S(FramePtr), NF
 
   Loads class-ref's reified generics from slot `slot` in frame S0 and puts the
   value in D.
@@ -1549,10 +1549,10 @@ To string conversions:
 
   Allocates a new object of class S1.
 
-| AllocObjMaybeReified, DAllocObj, S(Cls) S(TSOrTrash,Nullptr), PRc
+| AllocObjReified, DAllocObj, S(Cls) SVArr, PRc
 
-  Allocates a new object of class S1 and if the class is reified sets S2 as the
-  reified generics.
+  Allocates a new object of class S1 and sets S2 as the reified generics of this
+  class. If this class is not reified, this instruction raises an error.
 
 | RegisterLiveObj, ND, S(Obj), NF
 

@@ -1578,7 +1578,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     // AllocObj re-enters to call constructors, but if it weren't for that we
     // could ignore its loads and stores since it's a new object.
     return may_reenter(inst, may_load_store(AEmpty, AEmpty));
-  case AllocObjMaybeReified:
+  case AllocObjReified:
     // Similar to AllocObj but also stores the reification
     return may_reenter(inst, may_load_store(AEmpty, AHeapAny));
 

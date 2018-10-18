@@ -2223,10 +2223,10 @@ FPushClsMethodSD <num params> <mode> <litstr id>        []   ->  []
   __call method or a __callStatic method could not be found, this instruction
   throws a fatal error.
 
-FPushCtor <num params> <class-ref slot>   []  ->  [C]
-FPushCtorD <num params> <litstr id>       []  ->  [C]
-FPushCtorI <num params> <class id>        []  ->  [C]
-FPushCtorS <num params> <mode>            []  ->  [C]
+FPushCtor <num params> <class-ref slot> <has-generics-op>  []  ->  [C]
+FPushCtorD <num params> <litstr id>                        []  ->  [C]
+FPushCtorI <num params> <class id>                         []  ->  [C]
+FPushCtorS <num params> <mode>                             []  ->  [C]
 
   FPI push constructor. First, these instructions load a value into x as given
   by the following table:
@@ -2249,6 +2249,9 @@ FPushCtorS <num params> <mode>            []  ->  [C]
   new entry on the FPI stack, initializing it with the number of parameters
   being passed (given by %1) and a reference to the FPI structure for the
   constructor for class x.
+
+  If HasGenerics is passed to FPushCtor, this indicates that the data at cls-ref
+  slot's reified generics portion is valid.
 
 DecodeCufIter <iterator id> <rel offset>   [C]  ->  []
 

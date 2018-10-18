@@ -364,11 +364,12 @@ let mut_imms (is : IS.t) : IS.t =
         FPushObjMethodD(i, m, if should_mutate()
                               then Ast_defs.OG_nullthrows
                               else Ast_defs.OG_nullsafe)
-    | FPushCtor     (i, id) -> FPushCtor  (i, mutate_int        id !mag)
-    | FPushCtorI    (i, id) -> FPushCtorI (i, mutate_int        id !mag)
-    | DecodeCufIter (i, id) -> DecodeCufIter (i, mutate_label data id)
-    | FIsParamByRef (i, h)  -> FIsParamByRef (mutate_int        i  !mag,
-                                              mutate_fpasshint  h)
+    | FPushCtor     (i, id, op) -> FPushCtor     (i, mutate_int        id !mag,
+                                                  op)
+    | FPushCtorI    (i, id)     -> FPushCtorI    (i, mutate_int        id !mag)
+    | DecodeCufIter (i, id)     -> DecodeCufIter (i, mutate_label data id)
+    | FIsParamByRef (i, h)      -> FIsParamByRef (mutate_int        i  !mag,
+                                                  mutate_fpasshint  h)
     | _ -> s in
   let mutate_base s =
     match s with

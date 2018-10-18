@@ -278,7 +278,7 @@ static CallMap s_callMap {
                            {{TV, 0}, {TV, 1}}},
     {AllocObj,           newInstance, DSSA, SSync,
                            {{SSA, 0}}},
-    {AllocObjMaybeReified, newInstanceMaybeReified, DSSA, SSync,
+    {AllocObjReified,    newInstanceReified, DSSA, SSync,
                            {{SSA, 0}, {SSA, 1}}},
     {InitProps,          &Class::initProps, DNone, SSync,
                            {{extra(&ClassData::cls)}}},

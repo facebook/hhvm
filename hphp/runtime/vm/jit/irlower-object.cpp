@@ -51,7 +51,7 @@ void cgLdObjClass(IRLS& env, const IRInstruction* inst) {
 }
 
 IMPL_OPCODE_CALL(AllocObj)
-IMPL_OPCODE_CALL(AllocObjMaybeReified)
+IMPL_OPCODE_CALL(AllocObjReified)
 
 void cgNewInstanceRaw(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();

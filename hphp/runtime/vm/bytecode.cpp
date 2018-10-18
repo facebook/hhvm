@@ -214,6 +214,7 @@ inline const char* prettytype(TypeStructResolveOp) {
   return "TypeStructResolveOp";
 }
 inline const char* prettytype(ReifiedGenericOp) { return "ReifiedGenericOp"; }
+inline const char* prettytype(HasGenericsOp) { return "HasGenericsOp"; }
 inline const char* prettytype(FPassHint) { return "FPassHint"; }
 inline const char* prettytype(CudOp) { return "CudOp"; }
 inline const char* prettytype(ContCheckOp) { return "ContCheckOp"; }
@@ -5567,7 +5568,8 @@ void fpushCtorImpl(
     lookupCtorMethod(f, cls, arGetContextClass(vmfp()), true);
   assertx(res == LookupResult::MethodFoundWithThis);
   // Replace input with uninitialized instance.
-  auto this_ = newInstanceMaybeReified(cls, reified_types);
+  auto this_ = !reified_types ? newInstance(cls)
+                              : newInstanceReified(cls, reified_types);
   TRACE(2, "FPushCtor: just new'ed an instance of class %s: %p\n",
         cls->name()->data(), this_);
   vmStack().pushObject(this_);
@@ -5582,9 +5584,13 @@ void fpushCtorImpl(
 
 }
 
-OPTBLD_INLINE void iopFPushCtor(uint32_t numArgs, clsref_slot slot) {
+OPTBLD_INLINE void iopFPushCtor(
+  uint32_t numArgs, clsref_slot slot, HasGenericsOp op
+) {
   auto cls_ref = slot.take();
-  fpushCtorImpl(numArgs, cls_ref.second, cls_ref.first, true);
+  auto const reified_types =
+    HasGenericsOp::HasGenerics == op ? cls_ref.first : nullptr;
+  fpushCtorImpl(numArgs, cls_ref.second, reified_types, true);
 }
 
 OPTBLD_INLINE void iopFPushCtorD(uint32_t numArgs, Id id) {

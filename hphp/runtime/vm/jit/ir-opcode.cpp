@@ -302,7 +302,7 @@ bool opcodeMayRaise(Opcode opc) {
   case AFWHPrepareChild:
   case AKExistsObj:
   case AllocObj:
-  case AllocObjMaybeReified:
+  case AllocObjReified:
   case ArrayAdd:
   case ArrayGet:
   case ArraySet:

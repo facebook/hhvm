@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-structure.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/instance-bits.h"
@@ -1567,6 +1568,18 @@ bool Class::hasReifiedGenerics() const {
 
 bool Class::hasReifiedParent() const {
   return m_hasReifiedParent;
+}
+
+size_t Class::numReifiedGenerics() const {
+  if (!m_hasReifiedGenerics) return 0;
+  auto const ua = m_preClass->userAttributes();
+  auto const it = ua.find(s___Reified.get());
+  // Since m_hasReifiedGenerics is true, it should exist
+  assertx(it != ua.end());
+  auto tv = it->second;
+  assertx(RuntimeOption::EvalHackArrDVArrs ? tvIsVec(tv) : tvIsArray(tv));
+  // userattribute array counts the indices too, so we need to divide by 2
+  return tv.m_data.parr->size() / 2;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

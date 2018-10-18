@@ -3269,7 +3269,7 @@ void in(ISS& env, const bc::FPushCtorS& op) {
 
 void in(ISS& env, const bc::FPushCtor& op) {
   auto const& t1 = peekClsRefSlot(env, op.slot);
-  if (is_specialized_cls(t1)) {
+  if (is_specialized_cls(t1) && op.subop3 == HasGenericsOp::NoGenerics) {
     auto const dcls = dcls_of(t1);
     auto const rfunc = env.index.resolve_ctor(env.ctx, dcls.cls, false);
     if (dcls.type == DCls::Exact && rfunc && !rfunc->mightCareAboutDynCalls()) {

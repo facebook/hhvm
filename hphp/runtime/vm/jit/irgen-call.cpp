@@ -870,12 +870,25 @@ void emitFPushCufIter(IRGS& env, uint32_t numParams, int32_t itId) {
   gen(env, SpillFrame, info, sp(env), func, ctx, invName, dynamic);
 }
 
-void emitFPushCtor(IRGS& env, uint32_t numParams, uint32_t slot) {
-  auto const clsref = takeClsRef(env, slot);
-  auto const reified_generic = clsref.first;
-  auto const cls  = clsref.second;
-  auto const func = gen(env, LdClsCtor, cls, fp(env));
-  auto const obj  = gen(env, AllocObjMaybeReified, cls, reified_generic);
+void emitFPushCtor(
+  IRGS& env, uint32_t numParams, uint32_t slot, HasGenericsOp op
+) {
+  auto const ret = [&] {
+    if (HasGenericsOp::NoGenerics == op) {
+      auto const cls  = takeClsRefCls(env, slot);
+      auto const func = gen(env, LdClsCtor, cls, fp(env));
+      auto const obj  = gen(env, AllocObj, cls);
+      return std::make_pair(func, obj);
+    }
+    auto const clsref = takeClsRef(env, slot);
+    auto const reified_generic = clsref.first;
+    auto const cls  = clsref.second;
+    auto const func = gen(env, LdClsCtor, cls, fp(env));
+    auto const obj  = gen(env, AllocObjReified, cls, reified_generic);
+    return std::make_pair(func, obj);
+  }();
+  auto const func = ret.first;
+  auto const obj  = ret.second;
   pushIncRef(env, obj);
   fpushActRec(env, func, obj, numParams, nullptr, cns(env, true));
 }

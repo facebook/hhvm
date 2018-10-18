@@ -800,11 +800,11 @@ and emit_new env pos expr targs args uargs =
   let nargs = List.length args + List.length uargs in
   let cexpr = expr_to_class_expr ~resolve_self:true
     (Emit_env.get_scope env) expr in
-  let cexpr = match cexpr with
+  let cexpr, has_generics = match cexpr with
     | Class_id (_, name) ->
       let cexpr =
         Option.value ~default:cexpr (get_reified_var_cexpr env name) in
-      if List.length reified_targs = 0 then cexpr else
+      if List.length reified_targs = 0 then cexpr, false else
       begin
         Class_reified (
           gather [
@@ -816,9 +816,9 @@ and emit_new env pos expr targs args uargs =
             | Class_reified instrs -> instrs
             | _ -> failwith "Internal error: This node can only be id or expr");
             instr_reified_name (List.length reified_targs + 1)
-          ])
+          ]), true
       end
-    | _ -> cexpr in
+    | _ -> cexpr, false in
   match cexpr with
     (* Special case for statically-known class *)
   | Class_id id ->
@@ -853,9 +853,10 @@ and emit_new env pos expr targs args uargs =
       instr_popr
       ]
   | _ ->
+    let op = if has_generics then H.HasGenerics else H.NoGenerics in
     gather [
       emit_load_class_ref env pos cexpr;
-      instr_fpushctor nargs 0;
+      instr_fpushctor nargs 0 op;
       emit_args_and_call env pos args uargs None;
       instr_popr
     ]

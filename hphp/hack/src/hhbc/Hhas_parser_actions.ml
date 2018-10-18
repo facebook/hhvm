@@ -729,13 +729,19 @@ let typestructresolveofiarg arg =
   match arg with
   | IAId "Resolve" -> Resolve
   | IAId "DontResovle" -> DontResolve
-  | _ -> report_error "bad null flavor"
+  | _ -> report_error "bad type struct resolve op"
 
 let reifiedgenericopofiarg arg =
   match arg with
   | IAId "ClsGeneric" -> ClsGeneric
   | IAId "FunGeneric" -> FunGeneric
   | _ -> report_error "bad reified generic op"
+
+let hasgenericsopofiarg arg =
+  match arg with
+  | IAId "NoGenerics" -> NoGenerics
+  | IAId "HasGenerics" -> HasGenerics
+  | _ -> report_error "bad has generics op"
 
 let labelofiarg arg =
   match arg with
@@ -1046,7 +1052,6 @@ match s with
  | "FPushFunc" -> ICall(FPushFunc (intofiarg arg1, listofintofiarg arg2))
  | "FPushFuncD" -> ICall (FPushFuncD (intofiarg arg1, function_id_of_iarg arg2))
  | "FPushClsMethodS" -> ICall (FPushClsMethodS (intofiarg arg1, specialclsrefofiarg arg2))
- | "FPushCtor" -> ICall (FPushCtor (intofiarg arg1, intofiarg arg2))
  | "FPushCtorD" -> ICall (FPushCtorD (intofiarg arg1, class_id_of_iarg arg2))
  | "FPushCtorI" -> ICall (FPushCtorI (intofiarg arg1, intofiarg arg2))
  | "FPushCtorS" -> ICall (FPushCtorS (intofiarg arg1, specialclsrefofiarg arg2))
@@ -1120,6 +1125,7 @@ let maketernaryinst s arg1 arg2 arg3 =
                                              listoflabelsofiarg arg3))
 
  (* instruct_call *)
+ | "FPushCtor" -> ICall (FPushCtor (intofiarg arg1, intofiarg arg2, hasgenericsopofiarg arg3))
  | "FPushFuncU" ->
     ICall(FPushFuncU (intofiarg arg1, function_id_of_iarg arg2, stringofiarg arg3))
  | "FPushObjMethod" ->

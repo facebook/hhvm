@@ -457,7 +457,7 @@ bool canDCE(IRInstruction* inst) {
   case LdFuncCachedU:
   case LookupFuncCached:
   case AllocObj:
-  case AllocObjMaybeReified:
+  case AllocObjReified:
   case RegisterLiveObj:
   case InitProps:
   case PropTypeRedefineCheck:

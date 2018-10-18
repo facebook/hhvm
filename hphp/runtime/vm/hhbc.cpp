@@ -1043,6 +1043,12 @@ static const char* ReifiedGenericOp_names[] = {
 #undef OP
 };
 
+static const char* HasGenericsOp_names[] = {
+#define OP(x) #x,
+  HAS_GENERICS_OPS
+#undef OP
+};
+
 static const char* MOpMode_names[] = {
 #define MODE(x) #x,
   M_OP_MODES
@@ -1142,6 +1148,7 @@ X(TypeStructResolveOp,
                   static_cast<int>(TypeStructResolveOp::Resolve))
 X(ReifiedGenericOp,
                   static_cast<int>(ReifiedGenericOp::ClsGeneric))
+X(HasGenericsOp,  static_cast<int>(HasGenericsOp::NoGenerics))
 X(MOpMode,        static_cast<int>(MOpMode::None))
 X(ContCheckOp,    static_cast<int>(ContCheckOp::IgnoreStarted))
 X(CudOp,          static_cast<int>(CudOp::IgnoreIter))

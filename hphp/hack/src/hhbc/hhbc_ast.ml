@@ -180,6 +180,10 @@ type reified_generic_op =
   | ClsGeneric
   | FunGeneric
 
+type has_generics_op =
+  | NoGenerics
+  | HasGenerics
+
 type instruct_lit_const =
   | Null
   | True
@@ -422,7 +426,7 @@ type instruct_call =
   | FPushClsMethodD of num_params * method_id * class_id
   | FPushClsMethodS of num_params * SpecialClsRef.t
   | FPushClsMethodSD of num_params * SpecialClsRef.t * method_id
-  | FPushCtor of num_params * classref_id
+  | FPushCtor of num_params * classref_id * has_generics_op
   | FPushCtorD of num_params * class_id
   | FPushCtorI of num_params * classref_id
   | FPushCtorS of num_params * SpecialClsRef.t

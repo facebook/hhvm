@@ -16,3 +16,6 @@ function find_class_method_shape_return_type(ClassBodyNode $class_body, string $
 newtype MethodParametersNode = darray<string, mixed>;
 function find_method_parameters(\HH\ParseTree $json, string $method_name, int $line_number): MethodParametersNode;
 function extract_parameter_comments(MethodParametersNode $params): dict<string, vec<string>>;
+newtype EnumBodyNode = darray<string, mixed>;
+function find_enum_body(\HH\ParseTree $json, string $name): ?EnumBodyNode;
+function extract_enum_comments(EnumBodyNode $enumerators): dict<string, vec<string>>;

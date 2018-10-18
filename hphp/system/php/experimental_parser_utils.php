@@ -80,6 +80,34 @@ namespace HH\ExperimentalParserUtils {
     );
   }
 
+  function find_enum_body(array $json, string $name): ?array {
+    $decls = $json["parse_tree"]["script_declarations"]["elements"];
+    foreach ($decls as $d) {
+      if ($d["kind"] === "enum_declaration") {
+        $true_name = $d["enum_name"]["token"]["text"];
+        if (strcasecmp($true_name, $name) === 0) {
+          return $d["enum_enumerators"];
+        }
+      }
+    }
+    return null;
+  }
+
+  function extract_enum_comments(array $enumerators): dict<string, vec<string>> {
+    $result = dict[];
+    if ($enumerators["kind"] === "missing") {
+      return $result;
+    }
+
+    foreach ($enumerators["elements"] as $e) {
+      $e_name = $e["enumerator_name"]["token"]["text"];
+      $description = collect_comments($e);
+      $result[$e_name] = $description;
+    }
+
+    return $result;
+  }
+
   /**
    * Instead of doing a full recursion like the lambda extractor, this function
    * can do a shallow search of the tree to collect methods by name.

@@ -1,0 +1,10 @@
+dict(2) {
+  ["DOG"]=>
+  vec(1) {
+    string(6) "// Dog"
+  }
+  ["CAT"]=>
+  vec(1) {
+    string(6) "// Cat"
+  }
+}

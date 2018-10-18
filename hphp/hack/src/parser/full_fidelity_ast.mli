@@ -92,6 +92,7 @@ val defensive_program :
   ?fail_open:bool ->
   ?keep_errors:bool ->
   ?elaborate_namespaces:bool ->
+  ?include_line_comments:bool ->
   ParserOptions.t ->
   Relative_path.t ->
   string -> Parser_return.t

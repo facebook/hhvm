@@ -3508,6 +3508,7 @@ let defensive_program
   ?(fail_open=false)
   ?(keep_errors=false)
   ?(elaborate_namespaces=true)
+  ?(include_line_comments=false)
   parser_options fn content =
   try begin
     let source = Full_fidelity_source_text.make fn content in
@@ -3519,6 +3520,7 @@ let defensive_program
       ~keep_errors:(keep_errors || (not fail_open))
       ~parser_options
       ~hacksperimental
+      ~include_line_comments
       fn
     in
     legacy @@ from_text env source

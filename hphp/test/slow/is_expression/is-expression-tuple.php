@@ -10,22 +10,25 @@ function is_tuple(mixed $x): void {
 
 
 <<__EntryPoint>>
-function main_is_expression_tuple() {
-is_tuple(null);
-is_tuple(new stdClass());
-is_tuple(darray[
-  'one' => 2,
-  'false' => false,
-  'string' => 'string',
-]);
-is_tuple(darray[
-  0 => 2,
-  1 => false,
-  2 => 'string',
-]); // TODO(T29967020)
-is_tuple(varray[]);
-is_tuple(tuple(1, false));
-is_tuple(tuple(1, 'string'));
-is_tuple(tuple(1, null, 1.5));
-is_tuple(tuple(1, null, 'string'));
+function main() {
+  is_tuple(null);
+  is_tuple(new stdClass());
+  is_tuple(darray[
+    'one' => 2,
+    'false' => false,
+    'string' => 'string',
+  ]);
+  is_tuple(darray[
+    0 => 2,
+    1 => false,
+    2 => 'string',
+  ]); // TODO(T29967020)
+  is_tuple(varray[]);
+  is_tuple(tuple(1, false));
+  is_tuple(tuple(1, 'string'));
+  is_tuple(tuple(1, null, 1.5));
+  is_tuple(tuple(1, null, 'string'));
+  is_tuple(varray[1, null, 'string']);
+  is_tuple(vec[1, null, 'string']);
+  is_tuple(array(1, null, 'string'));
 }

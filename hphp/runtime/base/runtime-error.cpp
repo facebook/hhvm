@@ -312,6 +312,14 @@ void raise_hackarr_compat_type_hint_property_notice(const Class* declCls,
   );
 }
 
+void raise_hackarr_compat_is_operator(const char* source, const char* target) {
+  raise_notice(
+    "Hack Array Compat: is/as operator used with %s and %s",
+    source,
+    target
+  );
+}
+
 void raise_resolve_undefined(const StringData* name, const Class* cls) {
   raise_func_undefined("Failure to resolve", name, cls);
 }

@@ -9,3 +9,8 @@ not tuple
 not tuple
 not tuple
 tuple
+tuple
+not tuple
+
+Notice: Hack Array Compat: is/as operator used with array and tuple in %s on line %d
+tuple

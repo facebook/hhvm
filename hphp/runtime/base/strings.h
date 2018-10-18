@@ -112,10 +112,6 @@ auto constexpr HACKARR_COMPAT_VARR_IS_VEC = "is_vec() called on varray";
 auto constexpr HACKARR_COMPAT_VEC_IS_VARR = "is_varray() called on vec";
 auto constexpr HACKARR_COMPAT_DARR_IS_DICT = "is_dict() called on darray";
 auto constexpr HACKARR_COMPAT_DICT_IS_DARR = "is_darray() called on dict";
-auto constexpr HACKARR_COMPAT_TUPLE_IS_DARR =
-  "is/as operator used with darray and tuple";
-auto constexpr HACKARR_COMPAT_SHAPE_IS_VARR =
-  "is/as operator used with varray and shape";
 auto constexpr FUNCTION_CALLED_DYNAMICALLY = "'%s' called dynamically";
 
 } // namespace Strings

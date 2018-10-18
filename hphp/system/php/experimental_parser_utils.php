@@ -80,6 +80,49 @@ namespace HH\ExperimentalParserUtils {
     );
   }
 
+  // expects JSON of a file with a single type alias that is a shape
+  function extract_type_of_only_shape_type_alias(array $json): dict<string, (string, bool)> {
+    $elements = $json["parse_tree"]["script_declarations"]["elements"];
+    invariant(count($elements) === 3, "Supplied JSON must be parse tree of a single type alias.");
+    invariant($elements[0]["kind"] === "markup_section",
+      "Supplied JSON has unexpected form.");
+    $type_alias = $elements[1];
+    invariant($type_alias["kind"] === "alias_declaration",
+      "Supplied JSON has unexpected form.");
+    invariant($elements[2]["kind"] === "end_of_file",
+      "Supplied JSON has unexpected form.");
+
+    $shape_type = $type_alias["alias_type"];
+    invariant($shape_type["kind"] === "shape_type_specifier",
+      "Type alias does not point to a shape");
+
+    $result = dict[];
+    $fields = $shape_type["shape_type_fields"];
+    if ($fields["kind"] === "missing") {
+      return $result;
+    }
+
+    $ptext = $json["program_text"];
+    foreach ($fields["elements"] as $field) {
+      $field = $field["list_item"];
+      $field_name = trim($field["field_name"]["literal_expression"]["token"]["text"], "\"'");
+
+      $ty = $field["field_type"];
+      $left = find_boundary_token($ty, false);
+      $right = find_boundary_token($ty, true);
+      invariant($left !== null, "Failed to find left bound of field type");
+      invariant($right !== null, "Failed to find right bound of field type");
+      list($_, $l) = $left;
+      list($_, $r) = $right;
+
+      $type = substr($ptext, $l, $r - $l);
+      $optional = $field["field_question"]["kind"] !== "missing";
+      $result[$field_name] = tuple($type, $optional);
+    }
+
+    return $result;
+  }
+
   function find_enum_body(array $json, string $name): ?array {
     $decls = $json["parse_tree"]["script_declarations"]["elements"];
     foreach ($decls as $d) {

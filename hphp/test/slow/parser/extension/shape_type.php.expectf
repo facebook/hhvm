@@ -1,0 +1,16 @@
+dict(2) {
+  ["a"]=>
+  array(2) {
+    [0]=>
+    string(2) "?X"
+    [1]=>
+    bool(false)
+  }
+  ["b"]=>
+  array(2) {
+    [0]=>
+    string(28) "(function (): Awaitable<?Y>)"
+    [1]=>
+    bool(true)
+  }
+}

@@ -19,3 +19,4 @@ function extract_parameter_comments(MethodParametersNode $params): dict<string, 
 newtype EnumBodyNode = darray<string, mixed>;
 function find_enum_body(\HH\ParseTree $json, string $name): ?EnumBodyNode;
 function extract_enum_comments(EnumBodyNode $enumerators): dict<string, vec<string>>;
+function extract_type_of_only_shape_type_alias(\HH\ParseTree $json): dict<string, (string, bool)>;

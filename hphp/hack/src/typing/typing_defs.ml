@@ -796,6 +796,18 @@ let rec ty_compare ty1 ty2 =
     | AKvarray_or_darray ty1, AKvarray_or_darray ty2
     | AKvec ty1, AKvec ty2 ->
       ty_compare ty1 ty2
+    | AKshape fields1, AKshape fields2 ->
+      List.compare (fun (k1, (v1', v1'')) (k2, (v2', v2'')) ->
+        match compare k1 k2 with
+        | 0 -> tyl_compare [v1'; v1''] [v2'; v2'']
+        | n -> n)
+        (Nast.ShapeMap.elements fields1) (Nast.ShapeMap.elements fields2)
+    | AKtuple tyl1, AKtuple tyl2 ->
+      List.compare (fun (k1, v1) (k2, v2) ->
+        match compare k1 k2 with
+        | 0 -> ty_compare v1 v2
+        | n -> n)
+        (IMap.elements tyl1) (IMap.elements tyl2)
     | _ ->
       array_kind_con_ordinal ak1 - array_kind_con_ordinal ak2
 

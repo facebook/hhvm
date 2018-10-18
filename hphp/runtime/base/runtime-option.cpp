@@ -46,6 +46,7 @@
 #include "hphp/util/process.h"
 #include "hphp/util/file-cache.h"
 #include "hphp/util/log-file-flusher.h"
+#include "hphp/util/service-data.h"
 
 #if defined (__linux__) && defined (__aarch64__)
 #include <sys/auxv.h>
@@ -88,6 +89,7 @@ namespace HPHP {
 std::string RuntimeOption::BuildId;
 std::string RuntimeOption::InstanceId;
 std::string RuntimeOption::DeploymentId;
+int64_t RuntimeOption::ConfigId = 0;
 std::string RuntimeOption::PidFile = "www.pid";
 
 bool RuntimeOption::ServerMode = false;
@@ -1006,6 +1008,13 @@ void RuntimeOption::Load(
 
   Config::Bind(PidFile, ini, config, "PidFile", "www.pid");
   Config::Bind(DeploymentId, ini, config, "DeploymentId");
+
+  {
+    // Config ID
+    Config::Bind(ConfigId, ini, config, "ConfigId", 0);
+    auto configIdCounter = ServiceData::createCounter("vm.config.id");
+    configIdCounter->setValue(ConfigId);
+  }
 
   Config::Bind(DynamicInvokeFunctions, ini, config, "DynamicInvokeFunctions",
                DynamicInvokeFunctions);

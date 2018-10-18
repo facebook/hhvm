@@ -102,6 +102,7 @@ struct RuntimeOption {
   static std::string BuildId;
   static std::string InstanceId;
   static std::string DeploymentId; // ID for set of instances deployed at once
+  static int64_t ConfigId; // Queryable to verify a specific config was read
   static std::string PidFile;
 
   static std::map<std::string, ErrorLogFileData> ErrorLogs;

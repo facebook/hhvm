@@ -233,7 +233,6 @@ val make_permissive : t -> t
 val tco_experimental_instanceof : string
 val tco_experimental_isarray : string
 val tco_experimental_goto : string
-val tco_experimental_tconst_on_generics : string
 val tco_experimental_disable_shape_and_tuple_arrays : string
 val tco_experimental_stronger_shape_idx_ret : string
 val tco_experimental_unresolved_fix : string

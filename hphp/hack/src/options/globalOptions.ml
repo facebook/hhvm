@@ -46,9 +46,6 @@ let tco_experimental_isarray = "is_array"
 
 let tco_experimental_goto = "goto"
 
-(* Whether allow accessing tconsts on generics *)
-let tco_experimental_tconst_on_generics = "tconst_on_generics"
-
 (**
  * Prevents arraus from being promoted to shape-like or tuple-like arrays.
  *)
@@ -151,7 +148,6 @@ let tco_experimental_all =
      tco_experimental_instanceof;
      tco_experimental_isarray;
      tco_experimental_goto;
-     tco_experimental_tconst_on_generics;
      tco_experimental_disable_shape_and_tuple_arrays;
      tco_experimental_stronger_shape_idx_ret;
      tco_experimental_annotate_function_calls;

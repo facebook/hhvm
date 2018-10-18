@@ -27,8 +27,6 @@ let make_permissive = GlobalOptions.make_permissive
 let experimental_instanceof = GlobalOptions.tco_experimental_instanceof
 let experimental_isarray = GlobalOptions.tco_experimental_isarray
 let experimental_goto = GlobalOptions.tco_experimental_goto
-let experimental_tconst_on_generics =
-  GlobalOptions.tco_experimental_tconst_on_generics
 let experimental_disable_shape_and_tuple_arrays =
   GlobalOptions.tco_experimental_disable_shape_and_tuple_arrays
 let experimental_stronger_shape_idx_ret =

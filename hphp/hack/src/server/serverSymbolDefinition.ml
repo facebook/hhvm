@@ -32,17 +32,20 @@ and class_element_ =
 let get_class_by_name opt x =
   Naming_heap.TypeIdHeap.get x >>= fun (pos, _) ->
   let fn = FileInfo.get_pos_filename pos in
-  Parser_heap.find_class_in_file opt fn x
+  Ide_parser_cache.with_ide_cache @@ fun () ->
+    Parser_heap.find_class_in_file opt fn x
 
 let get_function_by_name opt x =
   Naming_heap.FunPosHeap.get x >>= fun pos ->
   let fn = FileInfo.get_pos_filename pos in
-  Parser_heap.find_fun_in_file opt fn x
+  Ide_parser_cache.with_ide_cache @@ fun () ->
+    Parser_heap.find_fun_in_file opt fn x
 
 let get_gconst_by_name opt x =
   Naming_heap.ConstPosHeap.get x >>= fun pos ->
   let fn = FileInfo.get_pos_filename pos in
-  Parser_heap.find_const_in_file opt fn x
+  Ide_parser_cache.with_ide_cache @@ fun () ->
+    Parser_heap.find_const_in_file opt fn x
 
 (* Span information is stored only in parsing AST *)
 let get_member_def opt (x : class_element) =
@@ -165,8 +168,12 @@ let go tcopt ast result =
         ast result.SymbolOccurrence.name result.SymbolOccurrence.pos
 
 let get_definition_cst_node_from_pos kind source_text pos =
-  let env = Full_fidelity_parser_env.default in
-  let tree = SyntaxTree.make ~env source_text in
+  let tree = if Ide_parser_cache.is_enabled () then
+    Ide_parser_cache.(with_ide_cache @@ fun () -> get_cst source_text)
+  else begin
+    let env = Full_fidelity_parser_env.default in
+    SyntaxTree.make ~env source_text
+  end in
   let (line, start, _) = Pos.info_pos pos in
   let offset = SourceText.position_to_offset source_text (line, start) in
   let parents = Syntax.parentage (SyntaxTree.root tree) offset in

@@ -66,6 +66,7 @@ type t = {
    * redeclare any files when a function or global constant changes.
    *)
   disable_conservative_redecl : bool;
+  ide_parser_cache : bool;
 }
 
 let default = {
@@ -108,6 +109,7 @@ let default = {
   hg_aware_redecl_restart_threshold = 0;
   hg_aware_recheck_restart_threshold = 0;
   disable_conservative_redecl = false;
+  ide_parser_cache = false;
 }
 
 let path =
@@ -227,6 +229,8 @@ let load_ fn ~silent =
     ~default:default.hg_aware_redecl_restart_threshold config in
   let hg_aware_recheck_restart_threshold = int_ "hg_aware_recheck_restart_threshold"
     ~default:default.hg_aware_recheck_restart_threshold config in
+  let ide_parser_cache = bool_if_version "ide_parser_cache"
+    ~default:default.ide_parser_cache config in
   {
     use_watchman;
     watchman_init_timeout;
@@ -266,6 +270,7 @@ let load_ fn ~silent =
     hg_aware_recheck_restart_threshold;
     disable_conservative_redecl;
     predeclare_ide_deps;
+    ide_parser_cache;
   }
 
 let load ~silent =

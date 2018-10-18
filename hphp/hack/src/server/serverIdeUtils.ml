@@ -17,6 +17,8 @@ let make_local_changes () =
   File_heap.FileHeap.LocalChanges.push_stack();
   Parser_heap.ParserHeap.LocalChanges.push_stack();
 
+  Ide_parser_cache.activate ();
+
   Naming_heap.FunPosHeap.LocalChanges.push_stack();
   Naming_heap.FunCanonHeap.LocalChanges.push_stack();
   Naming_heap.TypeIdHeap.LocalChanges.push_stack();
@@ -41,6 +43,8 @@ let revert_local_changes () =
   Fixmes.DECL_HH_FIXMES.LocalChanges.pop_stack();
   File_heap.FileHeap.LocalChanges.pop_stack();
   Parser_heap.ParserHeap.LocalChanges.pop_stack();
+
+  Ide_parser_cache.deactivate ();
 
   Naming_heap.FunPosHeap.LocalChanges.pop_stack();
   Naming_heap.FunCanonHeap.LocalChanges.pop_stack();
@@ -130,16 +134,19 @@ let declare_and_check_ast ?(path=path) ~make_ast ~f tcopt =
  *)
 let declare_and_check ?(path=path) content ~f tcopt =
   let make_ast () =
-    (* We need to fail open since IDE services need to be able to run over
-       malformed files. *)
-    (Full_fidelity_ast.defensive_program
-      ~fail_open:true
-      ~keep_errors:true
-      ~quick:false
-      tcopt
-      path
-      content
-    ).Parser_return.ast
+    if Ide_parser_cache.is_enabled () then
+      (Ide_parser_cache.get_ast tcopt path content).Parser_return.ast
+    else
+      (* We need to fail open since IDE services need to be able to run over
+         malformed files. *)
+      (Full_fidelity_ast.defensive_program
+        ~fail_open:true
+        ~keep_errors:true
+        ~quick:false
+        tcopt
+        path
+        content
+      ).Parser_return.ast
   in
   try
     declare_and_check_ast ~make_ast ~f ~path tcopt
@@ -166,7 +173,14 @@ let check_file_input tcopt files_info fi =
   | ServerCommandTypes.FileName fn ->
       let path = Relative_path.create Relative_path.Root fn in
       match Relative_path.Map.get files_info path with
-      | Some fileinfo -> List.hd_exn (recheck tcopt [(path, fileinfo)])
+      | Some fileinfo ->
+        let wrapper = if Ide_parser_cache.is_enabled () then
+          (* Protect shared memory with local changes when using Ide_parser_cache *)
+          fun f -> make_then_revert_local_changes f ()
+        else
+          fun f -> f ()
+        in
+        wrapper (fun () -> List.hd_exn (recheck tcopt [(path, fileinfo)]))
       | None -> path, []
 
 let check_ast tcopt ast =

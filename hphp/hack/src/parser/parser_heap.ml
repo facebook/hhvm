@@ -46,26 +46,29 @@ let get_from_local_cache ~full popt file_name =
   | None ->
     let f contents =
       let contents = if (FindUtils.file_filter fn) then contents else "" in
-      let source = Full_fidelity_source_text.make file_name contents in
-      match get_file_mode source with
-      | None -> []
-      | Some _ ->
-        (Full_fidelity_ast.defensive_program
-          ~quick:(not full)
-          popt
-          file_name
-          contents
-        ).Parser_return.ast
-    in
-    let ast = Option.value_map ~default:[] ~f (File_heap.get_contents file_name) in
-    let ast =
-      if (Relative_path.prefix file_name = Relative_path.Hhi)
-      && ParserOptions.deregister_php_stdlib popt
-      then Ast_utils.deregister_ignored_attributes ast
-      else ast
-    in
-    let () = if full then LocalParserCache.add file_name ast in
-    ast
+      match Ide_parser_cache.get_ast_if_active popt file_name contents with
+      | Some ast -> ast.Parser_return.ast
+      | None ->
+        let source = Full_fidelity_source_text.make file_name contents in
+        match get_file_mode source with
+        | None -> []
+        | Some _ ->
+          (Full_fidelity_ast.defensive_program
+            ~quick:(not full)
+            popt
+            file_name
+            contents
+          ).Parser_return.ast
+      in
+      let ast = Option.value_map ~default:[] ~f (File_heap.get_contents file_name) in
+      let ast =
+        if (Relative_path.prefix file_name = Relative_path.Hhi)
+        && ParserOptions.deregister_php_stdlib popt
+        then Ast_utils.deregister_ignored_attributes ast
+        else ast
+      in
+      let () = if full then LocalParserCache.add file_name ast in
+      ast
 
 let get_class defs class_name =
   let rec get acc defs =

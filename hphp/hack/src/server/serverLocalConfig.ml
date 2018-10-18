@@ -67,6 +67,7 @@ type t = {
    *)
   disable_conservative_redecl : bool;
   ide_parser_cache : bool;
+  ide_tast_cache : bool;
 }
 
 let default = {
@@ -110,6 +111,7 @@ let default = {
   hg_aware_recheck_restart_threshold = 0;
   disable_conservative_redecl = false;
   ide_parser_cache = false;
+  ide_tast_cache = false;
 }
 
 let path =
@@ -231,6 +233,8 @@ let load_ fn ~silent =
     ~default:default.hg_aware_recheck_restart_threshold config in
   let ide_parser_cache = bool_if_version "ide_parser_cache"
     ~default:default.ide_parser_cache config in
+  let ide_tast_cache = bool_if_version "ide_tast_cache"
+    ~default:default.ide_tast_cache config in
   {
     use_watchman;
     watchman_init_timeout;
@@ -271,6 +275,7 @@ let load_ fn ~silent =
     disable_conservative_redecl;
     predeclare_ide_deps;
     ide_parser_cache;
+    ide_tast_cache;
   }
 
 let load ~silent =

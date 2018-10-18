@@ -21,6 +21,9 @@ val deactivate: unit -> unit
 (* Wraps a method in activate / deactivate *)
 val with_ide_cache : (unit -> 'a) -> 'a
 
+(* Cache key assigned to the file with this path and contents *)
+val get_digest: Relative_path.t -> string -> string
+
 (* Gets the AST from cache (or compute it if missing). The cache is keyed by hash
  * of path and content, and we assume that all callers will pass in ParserOptions
  * that result in equivalent AST.

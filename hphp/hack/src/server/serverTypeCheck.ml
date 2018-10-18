@@ -769,6 +769,9 @@ end = functor(CheckKind:CheckKindType) -> struct
     let to_recheck2 = Typing_deps.get_files to_recheck2 in
     let to_recheck2 = Relative_path.Set.union to_recheck2
       (CheckKind.get_to_recheck2_approximation to_redecl_phase2_deps env) in
+    (* We have changed declarations, which means that typed ASTs could have
+     * changed too. *)
+    Ide_tast_cache.invalidate ();
 
     (* DECLARING TYPES: merging results of the 2 phases *)
     let fast = Relative_path.Map.union fast fast_redecl_phase2_now in

@@ -79,7 +79,7 @@ let make_then_revert_local_changes f () =
 
 let path = Relative_path.default
 
-let declare_and_check_ast ?(path=path) ~make_ast ~f tcopt =
+let declare_and_check_ast ?(path=path) ?content ~make_ast ~f tcopt =
   let tcopt = TypecheckerOptions.make_permissive tcopt in
   Autocomplete.auto_complete := false;
   Errors.do_ @@ make_then_revert_local_changes begin fun () ->
@@ -118,8 +118,15 @@ let declare_and_check_ast ?(path=path) ~make_ast ~f tcopt =
      * ensure that hooks attached to decl phase are executed. *)
     Decl.name_and_declare_types_program tcopt ast;
 
-    let nast = Naming.program tcopt ast in
-    let tast = Typing.nast_to_tast tcopt nast in
+    let make_tast () =
+      let nast = Naming.program tcopt ast in
+      Typing.nast_to_tast tcopt nast
+    in
+
+    let tast = match content with
+      | None -> make_tast ()
+      | Some content -> Ide_tast_cache.get path content make_tast
+    in
     f path file_info tast
   end
 
@@ -149,7 +156,7 @@ let declare_and_check ?(path=path) content ~f tcopt =
       ).Parser_return.ast
   in
   try
-    declare_and_check_ast ~make_ast ~f ~path tcopt
+    declare_and_check_ast ~make_ast ~f ~path ~content tcopt
   with Decl_class.Decl_heap_elems_bug -> begin
     Hh_logger.log "%s" content;
     Exit_status.(exit Decl_heap_elems_bug)

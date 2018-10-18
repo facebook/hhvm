@@ -243,9 +243,10 @@ bool checkTypeStructureMatchesCellImpl(
       }
       auto const elems = data.parr;
       if (!elems->isVecOrVArray()) {
-        if (!RuntimeOption::EvalHackArrDVArrs && elems->isDArray()) {
+        if (!RuntimeOption::EvalHackArrDVArrs && elems->isPHPArray()) {
           // TODO(T29967020) If this is pre-migration, we should allow darrays
-          // for tuples and log a warning. Fall through here.
+          // and plain PHP arrays for tuples and log a warning.
+          // Fall through here.
         } else {
           result = false;
           break;
@@ -282,11 +283,15 @@ bool checkTypeStructureMatchesCellImpl(
         result = false;
         break;
       }
-      if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
-        if (elemsDidMatch && elems->isDArray()) {
-          // TODO(T29967020) If this is pre-migration, we should allow darrays
-          // for tuples and log a warning.
-          raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_TUPLE_IS_DARR);
+      if (UNLIKELY(
+        RuntimeOption::EvalHackArrCompatIsArrayNotices &&
+        elemsDidMatch &&
+        elems->isPHPArray()
+      )) {
+        if (elems->isDArray()) {
+          raise_hackarr_compat_is_operator("darray", "tuple");
+        } else if (!elems->isVArray()) {
+          raise_hackarr_compat_is_operator("array", "tuple");
         }
       }
       return elemsDidMatch;
@@ -298,9 +303,10 @@ bool checkTypeStructureMatchesCellImpl(
       }
       auto const fields = data.parr;
       if (!fields->isDictOrDArray()) {
-        if (!RuntimeOption::EvalHackArrDVArrs && fields->isVArray()) {
+        if (!RuntimeOption::EvalHackArrDVArrs && fields->isPHPArray()) {
           // TODO(T29967020) If this is pre-migration, we should allow varrays
-          // for shapes and log a warning. Fall through here.
+          // and plain PHP arrays for shapes and log a warning.
+          // Fall through here.
         } else {
           result = false;
           break;
@@ -367,11 +373,15 @@ bool checkTypeStructureMatchesCellImpl(
         break;
       }
       bool didSucceed = allowsUnknownFields || numFields == numExpectedFields;
-      if (UNLIKELY(RuntimeOption::EvalHackArrCompatIsArrayNotices)) {
-        if (didSucceed && fields->isVArray()) {
-          // TODO(T29967020) If this is pre-migration, we should allow varrays
-          // for shapes and log a warning.
-          raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_SHAPE_IS_VARR);
+      if (UNLIKELY(
+        RuntimeOption::EvalHackArrCompatIsArrayNotices &&
+        didSucceed &&
+        fields->isPHPArray()
+      )) {
+        if (fields->isVArray()) {
+          raise_hackarr_compat_is_operator("varray", "shape");
+        } else if (!fields->isDArray()) {
+          raise_hackarr_compat_is_operator("array", "shape");
         }
       }
       return didSucceed;

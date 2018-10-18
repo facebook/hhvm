@@ -2,3 +2,6 @@ shape
 
 Notice: Hack Array Compat: is/as operator used with varray and shape in %s on line %d
 shape
+
+Notice: Hack Array Compat: is/as operator used with array and shape in %s on line %d
+shape

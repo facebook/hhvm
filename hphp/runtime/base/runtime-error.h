@@ -191,6 +191,8 @@ void raise_hackarr_compat_type_hint_property_notice(const Class* declCls,
                                                     const StringData* propName,
                                                     bool isStatic);
 
+void raise_hackarr_compat_is_operator(const char* source, const char* target);
+
 void raise_hackarr_compat_notice(const std::string& msg);
 
 #define HC(Opt, opt) void raise_hac_##opt##_notice(const std::string& msg);

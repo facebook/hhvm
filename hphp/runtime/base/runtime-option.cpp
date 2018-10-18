@@ -430,6 +430,7 @@ uint64_t RuntimeOption::DisableDefine = 0;
 bool RuntimeOption::UndefinedConstAsString = true;
 uint64_t RuntimeOption::UndefinedConstFallback = 0;
 uint64_t RuntimeOption::DisableAssert = 0;
+bool RuntimeOption::DisableReservedVariables = false;
 bool RuntimeOption::DisallowExecutionOperator = false;
 bool RuntimeOption::DisableVariableVariables = false;
 uint64_t RuntimeOption::DisableConstant = 0;
@@ -1236,6 +1237,9 @@ void RuntimeOption::Load(
     Config::Bind(DisableConstant, ini, config,
                  "Hack.Lang.Phpism.DisableConstant",
                  DisableConstant);
+    Config::Bind(DisableReservedVariables, ini, config,
+                 "Hack.Lang.Phpism.DisableReservedVariables",
+                 DisableReservedVariables);
   }
   {
     // Repo

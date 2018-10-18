@@ -859,11 +859,13 @@ void ExecutionContext::handleError(const std::string& msg,
       }
       assertx(fp);
       auto id = fp->func()->lookupVarId(s_php_errormsg.get());
-      if (id != kInvalidId) {
-        auto local = frame_local(fp, id);
-        tvSet(*msg.asTypedValue(), *tvToCell(local));
-      } else if ((fp->func()->attrs() & AttrMayUseVV) && fp->hasVarEnv()) {
-        fp->getVarEnv()->set(s_php_errormsg.get(), msg.asTypedValue());
+      if (!RuntimeOption::DisableReservedVariables) {
+        if (id != kInvalidId) {
+          auto local = frame_local(fp, id);
+          tvSet(*msg.asTypedValue(), *tvToCell(local));
+        } else if ((fp->func()->attrs() & AttrMayUseVV) && fp->hasVarEnv()) {
+          fp->getVarEnv()->set(s_php_errormsg.get(), msg.asTypedValue());
+        }
       }
     }
 

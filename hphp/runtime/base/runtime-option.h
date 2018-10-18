@@ -530,6 +530,9 @@ struct RuntimeOption {
   // 1 => warning, 2 => error
   static uint64_t DisableAssert;
 
+  // Disables the setting of reserved variable php_errorsmg
+  // true => error, false => php_errormsg can be set
+  static bool DisableReservedVariables;
   static int GetScannerType();
 
   static std::set<std::string, stdltistr> DynamicInvokeFunctions;

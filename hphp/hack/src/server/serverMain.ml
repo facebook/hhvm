@@ -79,7 +79,11 @@ module Program =
              List.exists ~f:(fun e -> Errors.get_severity e = Errors.Error)
                (Errors.get_error_list env.errorl)
          in
-         exit (if has_errors then 1 else 0)
+         let is_saving_state_and_ignoring_errors =
+          ServerArgs.gen_saved_ignore_type_errors genv.options &&
+          Option.is_some (ServerArgs.save_filename genv.options)
+         in
+         exit (if has_errors && (not is_saving_state_and_ignoring_errors) then 1 else 0)
 
     (* filter and relativize updated file paths *)
     let process_updates genv updates =

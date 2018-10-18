@@ -55,16 +55,17 @@ test -f "$tempdir/type_error.php" || err 30 'cannot write type_error.php'
 touch "$tempdir"/.hhconfig
 test -f "$tempdir"/.hhconfig || err 40 'cannot create empty .hhconfig'
 
-# hh_server must exit with a nonzero exit status DESPITE producing
-# a saved state (because of the presence of type errors)
+# hh_server must not exit with a nonzero exit status DESPITE finding
+# type errors (because its job is to produce a saved state)
 (
     cd "$tempdir" || exit 50
     "$hh_server" --gen-saved-ignore-type-errors --save-mini savestate . \
       1>"$tempdir"/out.log 2>"$tempdir"/err.log
 )
 status="$?"
-[[ "$status" = 0 ]] && \
-  err 50 'hh_server must exit abnormally if there are type errors'
+[[ "$status" = 1 ]] && \
+  err 50 'hh_server must not exit abnormally if there are type errors'
+[[ "$status" = 2 ]] && err 50 'trying to overwrite an existing state?'
 [[ "$status" = 50 ]] && err 50 'cannot navigate to tempdir'
 
 # saved state file should exist

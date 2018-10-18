@@ -187,6 +187,24 @@ let get_concrete_supertypes env ty =
     let env, resl = iter SSet.empty env TySet.empty [ty] in
     env, TySet.elements resl
 
+(* Try running function on each concrete supertype in turn. Return all
+ * successful results
+ *)
+let try_over_concrete_supertypes env ty f =
+  let env, tyl = get_concrete_supertypes env ty in
+  (* If there is just a single result then don't swallow errors *)
+  match tyl with
+  | [ty] ->
+    [f env ty]
+  | _ ->
+    let rec iter_over_types env resl tyl =
+      match tyl with
+        [] -> resl
+      | ty::tyl ->
+        Errors.try_
+          (fun () -> iter_over_types env (f env ty::resl) tyl)
+          (fun _ -> iter_over_types env resl tyl) in
+  iter_over_types env [] tyl
 
 (*****************************************************************************)
 (* Dynamicism  *)
@@ -204,6 +222,25 @@ let rec find_dynamic env tyl =
 
 let is_dynamic env ty =
   find_dynamic env [ty] <> None
+
+let rec is_hack_collection env ty =
+  let env, ety = Env.expand_type env ty in
+  match ety with
+  | _, Tclass ((_, n), _)
+    when n = SN.Collections.cVector
+      || n = SN.Collections.cImmVector
+      || n = SN.Collections.cMap
+      || n = SN.Collections.cImmMap
+      || n = SN.Collections.cSet
+      || n = SN.Collections.cImmSet
+      || n = SN.Collections.cPair -> true
+  | _, Tabstract (AKgeneric _, _) ->
+    let env, tyl = get_concrete_supertypes env ty in
+    List.exists tyl (is_hack_collection env)
+  | _, Tunresolved tyl -> List.for_all tyl ~f:(is_hack_collection env)
+  | (_, (Tany | Tmixed | Tnonnull | Tdynamic | Terr | Toption _ | Tprim _ |
+         Tfun _ | Ttuple _ | Tshape _ | Tvar _ | Tabstract _ | Tanon _ |
+         Tobject | Tclass _ | Tarraykind _)) -> false
 
 (*****************************************************************************)
 (* Check if type is any or a variant thereof  *)

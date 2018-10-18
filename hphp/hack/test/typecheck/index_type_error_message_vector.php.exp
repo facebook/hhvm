@@ -1,4 +1,4 @@
-File "index_type_error_message_vector.php", line 14, characters 3-9:
+File "index_type_error_message_vector.php", line 14, characters 3-15:
 Invalid index type for this Vector (Typing[4110])
 File "index_type_error_message_vector.php", line 14, characters 6-8:
 This is an int because only int can be used to index into a Vector or vec.

@@ -1,0 +1,6 @@
+File "assign_map_bad.php", line 5, characters 3-18:
+Invalid assignment (Typing[4110])
+File "assign_map_bad.php", line 4, characters 27-29:
+This is an int
+File "assign_map_bad.php", line 5, characters 15-18:
+It is incompatible with a float

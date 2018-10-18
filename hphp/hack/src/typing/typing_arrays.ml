@@ -246,12 +246,6 @@ let update_array_type p access_type ~lvar_assignment env ty =
   let env, ty = mapper#on_type (fresh_env env) ty in
   env, ty
 
-(* When the type is updated because of "$a[...] = ..." statement, we can infer
- * a bit more about the new type than when it happens in nested expression like
- * $a[$i][...] = ... *)
-let update_array_type_on_lvar_assignment p access_type env ty =
-  update_array_type p access_type ~lvar_assignment:true env ty
-
 let update_array_type p access_type env ty =
   update_array_type p access_type ~lvar_assignment:false env ty
 

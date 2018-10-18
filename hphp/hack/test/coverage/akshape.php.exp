@@ -1,9 +1,9 @@
 == array_get ==
-Unchecked: 0
+Unchecked: 1
 Partial: 0
-Checked: 4
-Checked / Total: 1.000000
-(Checked + Partial * 0.5) / Total: 1.000000
+Checked: 3
+Checked / Total: 0.750000
+(Checked + Partial * 0.5) / Total: 0.750000
 == call ==
 Unchecked: 1
 Partial: 0
@@ -12,13 +12,13 @@ Checked / Total: 0.500000
 (Checked + Partial * 0.5) / Total: 0.500000
 == lvar ==
 Unchecked: 0
-Partial: 0
-Checked: 10
-Checked / Total: 1.000000
-(Checked + Partial * 0.5) / Total: 1.000000
+Partial: 2
+Checked: 8
+Checked / Total: 0.800000
+(Checked + Partial * 0.5) / Total: 0.900000
 == total ==
-Unchecked: 1
-Partial: 0
-Checked: 15
-Checked / Total: 0.937500
-(Checked + Partial * 0.5) / Total: 0.937500
+Unchecked: 2
+Partial: 2
+Checked: 12
+Checked / Total: 0.750000
+(Checked + Partial * 0.5) / Total: 0.812500

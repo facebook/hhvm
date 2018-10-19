@@ -472,6 +472,8 @@ const char* describe_actual_type(tv_rval val, bool isHHType);
 
 bool call_uses_strict_types(const Func* func);
 
+bool verify_fail_may_coerce(const Func* callee);
+
 }
 
 #endif

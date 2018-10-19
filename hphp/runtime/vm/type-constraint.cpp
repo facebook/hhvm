@@ -843,6 +843,11 @@ bool call_uses_strict_types(const Func* callee) {
   return caller->unit()->useStrictTypes();
 }
 
+bool verify_fail_may_coerce(const Func* callee) {
+  if (callee->isBuiltin()) return true;
+  return !RuntimeOption::EnableHipHopSyntax;
+}
+
 ALWAYS_INLINE
 folly::Optional<AnnotType> TypeConstraint::checkDVArray(tv_rval val) const {
   auto const check = [&](AnnotType at) -> folly::Optional<AnnotType> {
@@ -996,6 +1001,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
       // builtins currently only guard on kind not class so the following wil
       // generate false positives for objects.
       if (*dt != KindOfObject) {
+        assertx(verify_fail_may_coerce(func));
         // HNI conversions implicitly unbox references, this behavior is wrong,
         // in particular it breaks the way type conversion works for PHP 7
         // scalar type hints
@@ -1017,9 +1023,9 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
     // PHP 7 allows for a widening conversion from Int to Float. We still ban
     // this in HH files.
     if (auto dt = underlyingDataType()) {
-      if (*dt == KindOfDouble && tv->m_type == KindOfInt64 &&
-          tvCoerceParamToDoubleInPlace(tv, func->isBuiltin())) {
-        return;
+      if (*dt == KindOfDouble && tv->m_type == KindOfInt64) {
+        assertx(verify_fail_may_coerce(func));
+        if (tvCoerceParamToDoubleInPlace(tv, func->isBuiltin())) return;
       }
     }
   }

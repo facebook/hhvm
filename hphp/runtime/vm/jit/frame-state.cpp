@@ -899,10 +899,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     break;
 
   case VerifyParamFail:
-    if (!func()->unit()->isHHFile() && !RuntimeOption::EnableHipHopSyntax &&
-        RuntimeOption::PHP7_ScalarTypes) {
-      // In PHP 7 mode scalar types can sometimes coerce; we do this during the
-      // VerifyParamFail call -- we never allow this in HH files.
+    if (verify_fail_may_coerce(func())) {
       auto id = inst->src(0)->intVal();
       setType(loc(id), TGen);
     }

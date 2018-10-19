@@ -57,6 +57,7 @@ module type SyntaxKind_S = sig
   val is_where_clause : r -> bool
   val is_where_constraint : r -> bool
   val is_methodish_declaration : r -> bool
+  val is_methodish_trait_resolution : r -> bool
   val is_classish_declaration : r -> bool
   val is_classish_body : r -> bool
   val is_trait_use_precedence_item : r -> bool
@@ -250,6 +251,7 @@ module SyntaxKind(SC : SC_S)
   let make_where_clause arg0 arg1 state = compose SK.WhereClause (SC.make_where_clause (snd arg0) (snd arg1) state)
   let make_where_constraint arg0 arg1 arg2 state = compose SK.WhereConstraint (SC.make_where_constraint (snd arg0) (snd arg1) (snd arg2) state)
   let make_methodish_declaration arg0 arg1 arg2 arg3 state = compose SK.MethodishDeclaration (SC.make_methodish_declaration (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
+  let make_methodish_trait_resolution arg0 arg1 arg2 arg3 arg4 state = compose SK.MethodishTraitResolution (SC.make_methodish_trait_resolution (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) state)
   let make_classish_declaration arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 state = compose SK.ClassishDeclaration (SC.make_classish_declaration (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) (snd arg7) (snd arg8) (snd arg9) state)
   let make_classish_body arg0 arg1 arg2 state = compose SK.ClassishBody (SC.make_classish_body (snd arg0) (snd arg1) (snd arg2) state)
   let make_trait_use_precedence_item arg0 arg1 arg2 state = compose SK.TraitUsePrecedenceItem (SC.make_trait_use_precedence_item (snd arg0) (snd arg1) (snd arg2) state)
@@ -425,6 +427,7 @@ module SyntaxKind(SC : SC_S)
   let is_where_clause                                 = has_kind SK.WhereClause
   let is_where_constraint                             = has_kind SK.WhereConstraint
   let is_methodish_declaration                        = has_kind SK.MethodishDeclaration
+  let is_methodish_trait_resolution                   = has_kind SK.MethodishTraitResolution
   let is_classish_declaration                         = has_kind SK.ClassishDeclaration
   let is_classish_body                                = has_kind SK.ClassishBody
   let is_trait_use_precedence_item                    = has_kind SK.TraitUsePrecedenceItem

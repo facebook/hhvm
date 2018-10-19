@@ -446,6 +446,51 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env semi;
       Newline;
     ]
+  | Syntax.MethodishTraitResolution {
+      methodish_trait_attribute = attr;
+      methodish_trait_function_decl_header = func_decl;
+      methodish_trait_equal = equal;
+      methodish_trait_name = name;
+      methodish_trait_semicolon = semi } ->
+    Concat [
+      t env attr;
+      when_present attr newline;
+      (
+        let fn_name, args_and_where = match Syntax.syntax func_decl with
+          | Syntax.FunctionDeclarationHeader {
+              function_modifiers = modifiers;
+              function_keyword = kw;
+              function_ampersand = amp;
+              function_name = name;
+              function_type_parameter_list = type_params;
+              function_left_paren = leftp;
+              function_parameter_list = params;
+              function_right_paren = rightp;
+              function_colon = colon;
+              function_type = ret_type;
+              function_where_clause = where } ->
+            Concat (
+              transform_fn_decl_name env
+                modifiers
+                kw
+                amp
+                name
+                type_params
+                leftp
+            ),
+            transform_fn_decl_args env params rightp colon ret_type where
+          | _ -> failwith "Expected FunctionDeclarationHeader"
+        in
+        Concat [
+          Span [fn_name];
+          args_and_where;
+        ]
+      );
+      t env equal;
+      t env name;
+      t env semi;
+      Newline;
+    ]
   | Syntax.ClassishDeclaration {
       classish_attribute = attr;
       classish_modifiers = modifiers;

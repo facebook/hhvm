@@ -1719,6 +1719,15 @@ module WithExpressionAndStatementAndTypeParser
       let (parser, missing) = Make.missing parser1 (pos parser) in
       let (parser, semicolon) = Make.token parser token in
       Make.methodish_declaration parser attribute_spec header missing semicolon
+    | Equal ->
+      let (parser, equal) = assert_token parser Equal in
+      let (parser, name) =
+        let (parser, qualifier) = parse_qualified_name_type parser in
+        let (parser, cc_token) = require_coloncolon parser in
+        let (parser, name) = require_token_one_of parser [Name; Construct] SyntaxError.error1004 in
+        Make.scope_resolution_expression parser qualifier cc_token name in
+      let (parser, semi) = require_semicolon parser in
+      Make.methodish_trait_resolution parser attribute_spec header equal name semi
     | _ ->
       (* ERROR RECOVERY: We expected either a block or a semicolon; we got
       neither. Use the offending token as the body of the method.

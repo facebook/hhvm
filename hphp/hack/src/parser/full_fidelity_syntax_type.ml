@@ -276,6 +276,13 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; methodish_function_body                            : t
     ; methodish_semicolon                                : t
     }
+  | MethodishTraitResolution                of
+    { methodish_trait_attribute                          : t
+    ; methodish_trait_function_decl_header               : t
+    ; methodish_trait_equal                              : t
+    ; methodish_trait_name                               : t
+    ; methodish_trait_semicolon                          : t
+    }
   | ClassishDeclaration                     of
     { classish_attribute                                 : t
     ; classish_modifiers                                 : t
@@ -1277,14 +1284,15 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | ParamParameterDeclaration of parameter_declaration
   | ParamVariadicParameter    of variadic_parameter
   and class_body_declaration =
-  | BodyProperty          of property_declaration
-  | BodyMethodish         of methodish_declaration
-  | BodyRequireClause     of require_clause
-  | BodyConst             of const_declaration
-  | BodyTypeConst         of type_const_declaration
-  | BodyXHPChildren       of xhp_children_declaration
-  | BodyXHPCategory       of xhp_category_declaration
-  | BodyXHPClassAttribute of xhp_class_attribute_declaration
+  | BodyProperty                 of property_declaration
+  | BodyMethodish                of methodish_declaration
+  | BodyMethodishTraitResolution of methodish_trait_resolution
+  | BodyRequireClause            of require_clause
+  | BodyConst                    of const_declaration
+  | BodyTypeConst                of type_const_declaration
+  | BodyXHPChildren              of xhp_children_declaration
+  | BodyXHPCategory              of xhp_category_declaration
+  | BodyXHPClassAttribute        of xhp_class_attribute_declaration
   and statement =
   | StmtInclusionDirective           of inclusion_directive
   | StmtCompound                     of compound_statement
@@ -1569,6 +1577,13 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; methodish_function_decl_header: function_declaration_header value
     ; methodish_function_body: compound_statement option value
     ; methodish_semicolon: Token.t option value
+    }
+  and methodish_trait_resolution =
+    { methodish_trait_attribute: attribute_specification option value
+    ; methodish_trait_function_decl_header: function_declaration_header value
+    ; methodish_trait_equal: Token.t value
+    ; methodish_trait_name: specifier value
+    ; methodish_trait_semicolon: Token.t value
     }
   and classish_declaration =
     { classish_attribute: attribute_specification option value

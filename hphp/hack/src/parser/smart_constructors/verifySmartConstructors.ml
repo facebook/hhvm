@@ -263,6 +263,14 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
     
+  let make_methodish_trait_resolution p0 p1 p2 p3 p4 stack =
+    match stack with
+    | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
+      let () = verify ~stack [p0; p1; p2; p3; p4] [a0; a1; a2; a3; a4] "methodish_trait_resolution" in
+      let node = Syntax.make_methodish_trait_resolution p0 p1 p2 p3 p4 in
+      node :: rem, node
+    | _ -> failwith "Unexpected stack state"
+    
   let make_classish_declaration p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 stack =
     match stack with
     | a9 :: a8 :: a7 :: a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->

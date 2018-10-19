@@ -324,6 +324,20 @@ let schema : schema_node list =
       ; "semicolon", ZeroOrOne Token
       ]
     }
+  ; { kind_name   = "MethodishTraitResolution"
+    ; type_name   = "methodish_trait_resolution"
+    ; func_name   = "methodish_trait_resolution"
+    ; description = "methodish_trait_resolution"
+    ; prefix      = "methodish_trait"
+    ; aggregates  = [ ClassBodyDeclaration ]
+    ; fields =
+      [ "attribute", ZeroOrOne (Just "AttributeSpecification")
+      ; "function_decl_header", Just "FunctionDeclarationHeader"
+      ; "equal", Token
+      ; "name", Aggregate Specifier
+      ; "semicolon", Token
+      ]
+    }
   ; { kind_name   = "ClassishDeclaration"
     ; type_name   = "classish_declaration"
     ; func_name   = "classish_declaration"

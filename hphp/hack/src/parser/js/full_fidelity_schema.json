@@ -682,6 +682,17 @@
         { "field_name" : "function_body" },
         { "field_name" : "semicolon" }
       ] },
+    { "kind_name" : "MethodishTraitResolution",
+      "type_name" : "methodish_trait_resolution",
+      "description" : "methodish_trait_resolution",
+      "prefix" : "methodish_trait",
+      "fields" : [
+        { "field_name" : "attribute" },
+        { "field_name" : "function_decl_header" },
+        { "field_name" : "equal" },
+        { "field_name" : "name" },
+        { "field_name" : "semicolon" }
+      ] },
     { "kind_name" : "ClassishDeclaration",
       "type_name" : "classish_declaration",
       "description" : "classish_declaration",

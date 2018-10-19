@@ -45,6 +45,7 @@ type t =
   | WhereClause
   | WhereConstraint
   | MethodishDeclaration
+  | MethodishTraitResolution
   | ClassishDeclaration
   | ClassishBody
   | TraitUsePrecedenceItem
@@ -221,6 +222,7 @@ let to_string kind =
   | WhereClause                             -> "where_clause"
   | WhereConstraint                         -> "where_constraint"
   | MethodishDeclaration                    -> "methodish_declaration"
+  | MethodishTraitResolution                -> "methodish_trait_resolution"
   | ClassishDeclaration                     -> "classish_declaration"
   | ClassishBody                            -> "classish_body"
   | TraitUsePrecedenceItem                  -> "trait_use_precedence_item"

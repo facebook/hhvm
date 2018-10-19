@@ -354,6 +354,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     match Syntax.syntax x with
     | Syntax.PropertyDeclaration _ -> tag validate_property_declaration (fun x -> BodyProperty x) x
     | Syntax.MethodishDeclaration _ -> tag validate_methodish_declaration (fun x -> BodyMethodish x) x
+    | Syntax.MethodishTraitResolution _ -> tag validate_methodish_trait_resolution (fun x -> BodyMethodishTraitResolution x) x
     | Syntax.RequireClause _ -> tag validate_require_clause (fun x -> BodyRequireClause x) x
     | Syntax.ConstDeclaration _ -> tag validate_const_declaration (fun x -> BodyConst x) x
     | Syntax.TypeConstDeclaration _ -> tag validate_type_const_declaration (fun x -> BodyTypeConst x) x
@@ -363,14 +364,15 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | s -> aggregation_fail Def.ClassBodyDeclaration s
   and invalidate_class_body_declaration : class_body_declaration invalidator = fun (value, thing) ->
     match thing with
-    | BodyProperty          thing -> invalidate_property_declaration           (value, thing)
-    | BodyMethodish         thing -> invalidate_methodish_declaration          (value, thing)
-    | BodyRequireClause     thing -> invalidate_require_clause                 (value, thing)
-    | BodyConst             thing -> invalidate_const_declaration              (value, thing)
-    | BodyTypeConst         thing -> invalidate_type_const_declaration         (value, thing)
-    | BodyXHPChildren       thing -> invalidate_xhp_children_declaration       (value, thing)
-    | BodyXHPCategory       thing -> invalidate_xhp_category_declaration       (value, thing)
-    | BodyXHPClassAttribute thing -> invalidate_xhp_class_attribute_declaration (value, thing)
+    | BodyProperty                 thing -> invalidate_property_declaration           (value, thing)
+    | BodyMethodish                thing -> invalidate_methodish_declaration          (value, thing)
+    | BodyMethodishTraitResolution thing -> invalidate_methodish_trait_resolution     (value, thing)
+    | BodyRequireClause            thing -> invalidate_require_clause                 (value, thing)
+    | BodyConst                    thing -> invalidate_const_declaration              (value, thing)
+    | BodyTypeConst                thing -> invalidate_type_const_declaration         (value, thing)
+    | BodyXHPChildren              thing -> invalidate_xhp_children_declaration       (value, thing)
+    | BodyXHPCategory              thing -> invalidate_xhp_category_declaration       (value, thing)
+    | BodyXHPClassAttribute        thing -> invalidate_xhp_class_attribute_declaration (value, thing)
   and validate_statement : statement validator = fun x ->
     match Syntax.syntax x with
     | Syntax.InclusionDirective _ -> tag validate_inclusion_directive (fun x -> StmtInclusionDirective x) x
@@ -1110,6 +1112,26 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; methodish_function_decl_header = invalidate_function_declaration_header x.methodish_function_decl_header
       ; methodish_function_body = invalidate_option_with (invalidate_compound_statement) x.methodish_function_body
       ; methodish_semicolon = invalidate_option_with (invalidate_token) x.methodish_semicolon
+      }
+    ; Syntax.value = v
+    }
+  and validate_methodish_trait_resolution : methodish_trait_resolution validator = function
+  | { Syntax.syntax = Syntax.MethodishTraitResolution x; value = v } -> v,
+    { methodish_trait_semicolon = validate_token x.methodish_trait_semicolon
+    ; methodish_trait_name = validate_specifier x.methodish_trait_name
+    ; methodish_trait_equal = validate_token x.methodish_trait_equal
+    ; methodish_trait_function_decl_header = validate_function_declaration_header x.methodish_trait_function_decl_header
+    ; methodish_trait_attribute = validate_option_with (validate_attribute_specification) x.methodish_trait_attribute
+    }
+  | s -> validation_fail (Some SyntaxKind.MethodishTraitResolution) s
+  and invalidate_methodish_trait_resolution : methodish_trait_resolution invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.MethodishTraitResolution
+      { methodish_trait_attribute = invalidate_option_with (invalidate_attribute_specification) x.methodish_trait_attribute
+      ; methodish_trait_function_decl_header = invalidate_function_declaration_header x.methodish_trait_function_decl_header
+      ; methodish_trait_equal = invalidate_token x.methodish_trait_equal
+      ; methodish_trait_name = invalidate_specifier x.methodish_trait_name
+      ; methodish_trait_semicolon = invalidate_token x.methodish_trait_semicolon
       }
     ; Syntax.value = v
     }

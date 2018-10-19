@@ -55,6 +55,7 @@ module type SmartConstructors_S = sig
   val make_where_clause : r -> r -> t -> t * r
   val make_where_constraint : r -> r -> r -> t -> t * r
   val make_methodish_declaration : r -> r -> r -> r -> t -> t * r
+  val make_methodish_trait_resolution : r -> r -> r -> r -> r -> t -> t * r
   val make_classish_declaration : r -> r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
   val make_classish_body : r -> r -> r -> t -> t * r
   val make_trait_use_precedence_item : r -> r -> r -> t -> t * r
@@ -238,6 +239,7 @@ end) = struct
     let where_clause parser arg0 arg1 = call parser (SCI.make_where_clause arg0 arg1)
     let where_constraint parser arg0 arg1 arg2 = call parser (SCI.make_where_constraint arg0 arg1 arg2)
     let methodish_declaration parser arg0 arg1 arg2 arg3 = call parser (SCI.make_methodish_declaration arg0 arg1 arg2 arg3)
+    let methodish_trait_resolution parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_methodish_trait_resolution arg0 arg1 arg2 arg3 arg4)
     let classish_declaration parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 = call parser (SCI.make_classish_declaration arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9)
     let classish_body parser arg0 arg1 arg2 = call parser (SCI.make_classish_body arg0 arg1 arg2)
     let trait_use_precedence_item parser arg0 arg1 arg2 = call parser (SCI.make_trait_use_precedence_item arg0 arg1 arg2)

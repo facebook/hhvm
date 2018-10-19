@@ -84,6 +84,7 @@ module WithToken(Token: TokenType) = struct
       | WhereClause                             _ -> SyntaxKind.WhereClause
       | WhereConstraint                         _ -> SyntaxKind.WhereConstraint
       | MethodishDeclaration                    _ -> SyntaxKind.MethodishDeclaration
+      | MethodishTraitResolution                _ -> SyntaxKind.MethodishTraitResolution
       | ClassishDeclaration                     _ -> SyntaxKind.ClassishDeclaration
       | ClassishBody                            _ -> SyntaxKind.ClassishBody
       | TraitUsePrecedenceItem                  _ -> SyntaxKind.TraitUsePrecedenceItem
@@ -266,6 +267,7 @@ module WithToken(Token: TokenType) = struct
     let is_where_clause                                 = has_kind SyntaxKind.WhereClause
     let is_where_constraint                             = has_kind SyntaxKind.WhereConstraint
     let is_methodish_declaration                        = has_kind SyntaxKind.MethodishDeclaration
+    let is_methodish_trait_resolution                   = has_kind SyntaxKind.MethodishTraitResolution
     let is_classish_declaration                         = has_kind SyntaxKind.ClassishDeclaration
     let is_classish_body                                = has_kind SyntaxKind.ClassishBody
     let is_trait_use_precedence_item                    = has_kind SyntaxKind.TraitUsePrecedenceItem
@@ -723,6 +725,19 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc methodish_function_decl_header in
          let acc = f acc methodish_function_body in
          let acc = f acc methodish_semicolon in
+         acc
+      | MethodishTraitResolution {
+        methodish_trait_attribute;
+        methodish_trait_function_decl_header;
+        methodish_trait_equal;
+        methodish_trait_name;
+        methodish_trait_semicolon;
+      } ->
+         let acc = f acc methodish_trait_attribute in
+         let acc = f acc methodish_trait_function_decl_header in
+         let acc = f acc methodish_trait_equal in
+         let acc = f acc methodish_trait_name in
+         let acc = f acc methodish_trait_semicolon in
          acc
       | ClassishDeclaration {
         classish_attribute;
@@ -2569,6 +2584,19 @@ module WithToken(Token: TokenType) = struct
         methodish_function_body;
         methodish_semicolon;
       ]
+      | MethodishTraitResolution {
+        methodish_trait_attribute;
+        methodish_trait_function_decl_header;
+        methodish_trait_equal;
+        methodish_trait_name;
+        methodish_trait_semicolon;
+      } -> [
+        methodish_trait_attribute;
+        methodish_trait_function_decl_header;
+        methodish_trait_equal;
+        methodish_trait_name;
+        methodish_trait_semicolon;
+      ]
       | ClassishDeclaration {
         classish_attribute;
         classish_modifiers;
@@ -4414,6 +4442,19 @@ module WithToken(Token: TokenType) = struct
         "methodish_function_decl_header";
         "methodish_function_body";
         "methodish_semicolon";
+      ]
+      | MethodishTraitResolution {
+        methodish_trait_attribute;
+        methodish_trait_function_decl_header;
+        methodish_trait_equal;
+        methodish_trait_name;
+        methodish_trait_semicolon;
+      } -> [
+        "methodish_trait_attribute";
+        "methodish_trait_function_decl_header";
+        "methodish_trait_equal";
+        "methodish_trait_name";
+        "methodish_trait_semicolon";
       ]
       | ClassishDeclaration {
         classish_attribute;
@@ -6339,6 +6380,20 @@ module WithToken(Token: TokenType) = struct
           methodish_function_decl_header;
           methodish_function_body;
           methodish_semicolon;
+        }
+      | (SyntaxKind.MethodishTraitResolution, [
+          methodish_trait_attribute;
+          methodish_trait_function_decl_header;
+          methodish_trait_equal;
+          methodish_trait_name;
+          methodish_trait_semicolon;
+        ]) ->
+        MethodishTraitResolution {
+          methodish_trait_attribute;
+          methodish_trait_function_decl_header;
+          methodish_trait_equal;
+          methodish_trait_name;
+          methodish_trait_semicolon;
         }
       | (SyntaxKind.ClassishDeclaration, [
           classish_attribute;
@@ -8461,6 +8516,23 @@ module WithToken(Token: TokenType) = struct
           methodish_function_decl_header;
           methodish_function_body;
           methodish_semicolon;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_methodish_trait_resolution
+        methodish_trait_attribute
+        methodish_trait_function_decl_header
+        methodish_trait_equal
+        methodish_trait_name
+        methodish_trait_semicolon
+      =
+        let syntax = MethodishTraitResolution {
+          methodish_trait_attribute;
+          methodish_trait_function_decl_header;
+          methodish_trait_equal;
+          methodish_trait_name;
+          methodish_trait_semicolon;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

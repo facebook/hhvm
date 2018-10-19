@@ -132,6 +132,8 @@ class EditableSyntax
       return WhereConstraint.from_json(json, position, source);
     case 'methodish_declaration':
       return MethodishDeclaration.from_json(json, position, source);
+    case 'methodish_trait_resolution':
+      return MethodishTraitResolution.from_json(json, position, source);
     case 'classish_declaration':
       return ClassishDeclaration.from_json(json, position, source);
     case 'classish_body':
@@ -5386,6 +5388,133 @@ class MethodishDeclaration extends EditableSyntax
         'function_body',
         'semicolon'];
     return MethodishDeclaration._children_keys;
+  }
+}
+class MethodishTraitResolution extends EditableSyntax
+{
+  constructor(
+    attribute,
+    function_decl_header,
+    equal,
+    name,
+    semicolon)
+  {
+    super('methodish_trait_resolution', {
+      attribute: attribute,
+      function_decl_header: function_decl_header,
+      equal: equal,
+      name: name,
+      semicolon: semicolon });
+  }
+  get attribute() { return this.children.attribute; }
+  get function_decl_header() { return this.children.function_decl_header; }
+  get equal() { return this.children.equal; }
+  get name() { return this.children.name; }
+  get semicolon() { return this.children.semicolon; }
+  with_attribute(attribute){
+    return new MethodishTraitResolution(
+      attribute,
+      this.function_decl_header,
+      this.equal,
+      this.name,
+      this.semicolon);
+  }
+  with_function_decl_header(function_decl_header){
+    return new MethodishTraitResolution(
+      this.attribute,
+      function_decl_header,
+      this.equal,
+      this.name,
+      this.semicolon);
+  }
+  with_equal(equal){
+    return new MethodishTraitResolution(
+      this.attribute,
+      this.function_decl_header,
+      equal,
+      this.name,
+      this.semicolon);
+  }
+  with_name(name){
+    return new MethodishTraitResolution(
+      this.attribute,
+      this.function_decl_header,
+      this.equal,
+      name,
+      this.semicolon);
+  }
+  with_semicolon(semicolon){
+    return new MethodishTraitResolution(
+      this.attribute,
+      this.function_decl_header,
+      this.equal,
+      this.name,
+      semicolon);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var attribute = this.attribute.rewrite(rewriter, new_parents);
+    var function_decl_header = this.function_decl_header.rewrite(rewriter, new_parents);
+    var equal = this.equal.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
+    if (
+      attribute === this.attribute &&
+      function_decl_header === this.function_decl_header &&
+      equal === this.equal &&
+      name === this.name &&
+      semicolon === this.semicolon)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new MethodishTraitResolution(
+        attribute,
+        function_decl_header,
+        equal,
+        name,
+        semicolon), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let attribute = EditableSyntax.from_json(
+      json.methodish_trait_attribute, position, source);
+    position += attribute.width;
+    let function_decl_header = EditableSyntax.from_json(
+      json.methodish_trait_function_decl_header, position, source);
+    position += function_decl_header.width;
+    let equal = EditableSyntax.from_json(
+      json.methodish_trait_equal, position, source);
+    position += equal.width;
+    let name = EditableSyntax.from_json(
+      json.methodish_trait_name, position, source);
+    position += name.width;
+    let semicolon = EditableSyntax.from_json(
+      json.methodish_trait_semicolon, position, source);
+    position += semicolon.width;
+    return new MethodishTraitResolution(
+        attribute,
+        function_decl_header,
+        equal,
+        name,
+        semicolon);
+  }
+  get children_keys()
+  {
+    if (MethodishTraitResolution._children_keys == null)
+      MethodishTraitResolution._children_keys = [
+        'attribute',
+        'function_decl_header',
+        'equal',
+        'name',
+        'semicolon'];
+    return MethodishTraitResolution._children_keys;
   }
 }
 class ClassishDeclaration extends EditableSyntax
@@ -21441,6 +21570,7 @@ exports.FunctionDeclarationHeader = FunctionDeclarationHeader;
 exports.WhereClause = WhereClause;
 exports.WhereConstraint = WhereConstraint;
 exports.MethodishDeclaration = MethodishDeclaration;
+exports.MethodishTraitResolution = MethodishTraitResolution;
 exports.ClassishDeclaration = ClassishDeclaration;
 exports.ClassishBody = ClassishBody;
 exports.TraitUsePrecedenceItem = TraitUsePrecedenceItem;

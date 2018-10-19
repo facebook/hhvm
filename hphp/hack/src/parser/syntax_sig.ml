@@ -161,6 +161,13 @@ module type Syntax_S = sig
     ; methodish_function_body                            : t
     ; methodish_semicolon                                : t
     }
+  | MethodishTraitResolution                of
+    { methodish_trait_attribute                          : t
+    ; methodish_trait_function_decl_header               : t
+    ; methodish_trait_equal                              : t
+    ; methodish_trait_name                               : t
+    ; methodish_trait_semicolon                          : t
+    }
   | ClassishDeclaration                     of
     { classish_attribute                                 : t
     ; classish_modifiers                                 : t
@@ -1080,6 +1087,7 @@ module type Syntax_S = sig
   val make_where_clause : t -> t -> t
   val make_where_constraint : t -> t -> t -> t
   val make_methodish_declaration : t -> t -> t -> t -> t
+  val make_methodish_trait_resolution : t -> t -> t -> t -> t -> t
   val make_classish_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_classish_body : t -> t -> t -> t
   val make_trait_use_precedence_item : t -> t -> t -> t
@@ -1254,6 +1262,7 @@ module type Syntax_S = sig
   val is_where_clause : t -> bool
   val is_where_constraint : t -> bool
   val is_methodish_declaration : t -> bool
+  val is_methodish_trait_resolution : t -> bool
   val is_classish_declaration : t -> bool
   val is_classish_body : t -> bool
   val is_trait_use_precedence_item : t -> bool

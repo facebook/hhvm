@@ -49,7 +49,7 @@ function count_leaves($container) {
 # obtained by counting leaves, allowing for multiple levels of categorization.
 function print_map($header, $map, $total) {
   printf("%s\n", $header);
-  uasort($map, ($a, $b) ==> count_leaves($b) - count_leaves($a));
+  uasort(&$map, ($a, $b) ==> count_leaves($b) - count_leaves($a));
 
   foreach ($map as $name => $samples) {
     $count = count_leaves($samples);

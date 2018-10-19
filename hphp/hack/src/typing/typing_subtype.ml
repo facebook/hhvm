@@ -122,6 +122,15 @@ let (|||) (env,p1) (f : Env.env -> Env.env * TL.subtype_prop) =
   let env, p2 = f env in
   env, TL.disj p1 p2
 
+let log_prop env prop =
+  if TypecheckerOptions.log_inference_constraints Env.(env.genv.tcopt) then
+    let p_as_string = Typing_print.subtype_prop env prop in
+    let pos = Pos.string (Pos.to_absolute env.Env.pos) in
+    let size = TL.size prop in
+    let n_disj = TL.n_disj prop in
+    let n_conj = TL.n_conj prop in
+    TypingLogger.InferenceCnstr.log p_as_string ~pos ~size ~n_disj ~n_conj
+
 (** Check that a mutability type is a subtype of another mutability type *)
 let check_mutability
   ~(is_receiver: bool)
@@ -1200,6 +1209,7 @@ and sub_type_inner
          TypecheckerOptions.experimental_track_subtype_prop
     then Env.add_subtype_prop env prop
     else env in
+  log_prop env prop;
   process_simplify_subtype_result ~this_ty
     ~fail:(fun () -> TUtils.uerror (fst ty_super) (snd ty_super) (fst ty_sub) (snd ty_sub))
     env

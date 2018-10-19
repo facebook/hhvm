@@ -261,37 +261,41 @@ let load config_filename options =
     Option.map (SMap.get config "formatter_override") maybe_relative_path in
   let forward_compat_level = process_forward_compatibility_level config in
   let global_opts = GlobalOptions.make
-    (bool_ "assume_php" ~default:true config)
-    (bool_ "safe_array" ~default:true config)
-    (bool_ "safe_vector_array" ~default:true config)
-    (bool_ "deregister_php_stdlib" ~default:false config)
-    false (* disallow_execution_operator, off by default *)
-    false (* disable_define - off by detault *)
-    (config_user_attributes config)
-    (config_experimental_tc_features config)
-    (config_tc_migration_flags config)
-    false (* typechecker dynamic_view option to set Tany as Tdynamic, off by default *)
-    (bool_ "disallow_array_as_tuple" ~default:false config)
-    (prepare_auto_namespace_map config)
-    false  (* disable_variable_variables, off by default *)
-    (bool_ "disallow_ambiguous_lambda" ~default:false config)
-    (bool_ "disallow_array_typehint" ~default:false config)
-    (bool_ "disallow_array_literal" ~default:false config)
-    (bool_ "untyped_nonstrict_lambda_parameters" ~default:false config)
-    (bool_ "disallow_return_by_ref" ~default:false config)
-    (bool_ "disallow_array_cell_pass_by_ref" ~default:false config)
-    (bool_ "language_feature_logging" ~default:false config)
-    (bool_ "unsafe_rx" ~default:true config)
-    (bool_ "disallow_implicit_returns_in_non_void_functions"
-       ~default:false config)
-    (bool_ "disallow_unset_on_varray" ~default:false config)
-    (bool_ "disallow_scrutinee_case_value_type_mismatch"
-       ~default:true config)
-    (bool_ "disallow_stringish_magic" ~default:false config)
-    (bool_ "disallow_anon_use_capture_by_ref" ~default:false config)
-    (bool_ "unresolved_as_union" ~default:false config)
-    (prepare_ignored_fixme_codes config)
-    forward_compat_level
+    ~tco_assume_php:(bool_ "assume_php" ~default:true config)
+    ~tco_safe_array:(bool_ "safe_array" ~default:true config)
+    ~tco_safe_vector_array:(bool_ "safe_vector_array" ~default:true config)
+    ~po_deregister_php_stdlib:(bool_ "deregister_php_stdlib" ~default:false config)
+    ~po_disallow_execution_operator:false
+    ~po_disable_define:false
+    ~tco_user_attrs:(config_user_attributes config)
+    ~tco_experimental_features:(config_experimental_tc_features config)
+    ~tco_migration_flags:(config_tc_migration_flags config)
+    ~tco_dynamic_view:false (* option to set Tany as Tdynamic *)
+    ~tco_disallow_array_as_tuple:(bool_ "disallow_array_as_tuple" ~default:false config)
+    ~po_auto_namespace_map:(prepare_auto_namespace_map config)
+    ~po_disable_variable_variables:false
+    ~tco_disallow_ambiguous_lambda:(bool_ "disallow_ambiguous_lambda" ~default:false config)
+    ~tco_disallow_array_typehint:(bool_ "disallow_array_typehint" ~default:false config)
+    ~tco_disallow_array_literal:(bool_ "disallow_array_literal" ~default:false config)
+    ~tco_untyped_nonstrict_lambda_parameters:(bool_
+      "untyped_nonstrict_lambda_parameters" ~default:false config)
+    ~tco_disallow_return_by_ref:(bool_ "disallow_return_by_ref" ~default:false config)
+    ~tco_disallow_array_cell_pass_by_ref:(bool_
+      "disallow_array_cell_pass_by_ref" ~default:false config)
+    ~tco_language_feature_logging:(bool_ "language_feature_logging" ~default:false config)
+    ~tco_log_inference_constraints:(ServerArgs.log_inference_constraints options)
+    ~tco_unsafe_rx:(bool_ "unsafe_rx" ~default:true config)
+    ~tco_disallow_implicit_returns_in_non_void_functions:(bool_
+      "disallow_implicit_returns_in_non_void_functions" ~default:false config)
+    ~tco_disallow_unset_on_varray:(bool_ "disallow_unset_on_varray" ~default:false config)
+    ~tco_disallow_scrutinee_case_value_type_mismatch:(bool_
+      "disallow_scrutinee_case_value_type_mismatch" ~default:true config)
+    ~tco_disallow_stringish_magic:(bool_ "disallow_stringish_magic" ~default:false config)
+    ~tco_disallow_anon_use_capture_by_ref:(bool_
+      "disallow_anon_use_capture_by_ref" ~default:false config)
+    ~tco_unresolved_as_union:(bool_ "unresolved_as_union" ~default:false config)
+    ~ignored_fixme_codes:(prepare_ignored_fixme_codes config)
+    ~forward_compatibility_level:forward_compat_level
   in
   Errors.ignored_fixme_codes :=
     (GlobalOptions.ignored_fixme_codes global_opts);

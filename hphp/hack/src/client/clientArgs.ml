@@ -14,10 +14,10 @@ open Utils
 
 (** Arg specs shared across more than 1 arg parser. *)
 module Common_argspecs = struct
-let config value_ref =
-  "--config",
-    Arg.String (fun s -> value_ref := (String_utils.split2_exn '=' s) :: !value_ref),
-    " override arbitrary value from hh.conf (format: <key>=<value>)"
+  let config value_ref =
+    "--config",
+      Arg.String (fun s -> value_ref := (String_utils.split2_exn '=' s) :: !value_ref),
+      " override arbitrary value from hh.conf (format: <key>=<value>)"
 
   let force_dormant_start value_ref =
     ("--force-dormant-start",
@@ -90,6 +90,7 @@ let parse_check_args cmd =
   let gen_saved_ignore_type_errors = ref false in
   let ignore_hh_version = ref false in
   let logname = ref false in
+  let log_inference_constraints = ref false in
   let mode = ref None in
   let monitor_logname = ref false in
   let no_load = ref false in
@@ -346,6 +347,10 @@ let parse_check_args cmd =
     "--list-modes",
       Arg.Unit (set_mode MODE_LIST_MODES),
       " (mode) list all files with their associated hack modes";
+    "--log-inference-constraints",
+      Arg.Set log_inference_constraints,
+      "  (for hh debugging purpose only) log type" ^
+      " inference constraints into external logger (e.g. Scuba)";
     "--logname",
       Arg.Set logname,
       " (mode) show log filename and exit\n";
@@ -499,6 +504,7 @@ let parse_check_args cmd =
     from = !from;
     gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
     ignore_hh_version = !ignore_hh_version;
+    log_inference_constraints = !log_inference_constraints;
     mode = Option.value !mode ~default:MODE_STATUS;
     no_load = !no_load || (
       match !mode with
@@ -522,6 +528,7 @@ let parse_start_env command =
       %s a Hack server\n\n\
       WWW-ROOT is assumed to be current directory if unspecified\n"
       Sys.argv.(0) command (String.capitalize_ascii command) in
+  let log_inference_constraints = ref false in
   let no_load = ref false in
   let watchman_debug_logging = ref false in
   let profile_log = ref false in
@@ -542,6 +549,9 @@ let parse_start_env command =
     Common_argspecs.from from;
     "--profile-log", Arg.Set profile_log,
     " enable profile logging";
+    "--log-inference-constraints", Arg.Set log_inference_constraints,
+      "  (for hh debugging purpose only) log type" ^
+      " inference constraints into external logger (e.g. Scuba)";
     "--ai", Arg.String (fun x -> ai_mode := Some x),
     "  run ai with options ";
     "--ignore-hh-version", Arg.Set ignore_hh_version,
@@ -567,6 +577,7 @@ let parse_start_env command =
     exit_on_failure = true;
     from = !from;
     ignore_hh_version = !ignore_hh_version;
+    log_inference_constraints = !log_inference_constraints;
     no_load = !no_load;
     prechecked = !prechecked;
     profile_log = !profile_log;

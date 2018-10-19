@@ -1568,6 +1568,7 @@ let rec connect_client
       retries = Some 3; (* each retry takes up to 1 second *)
       expiry = None; (* we can limit retries by time as well as by count *)
       no_load = false; (* only relevant when autostart=true *)
+      log_inference_constraints = false; (* irrelevant *)
       profile_log = false; (* irrelevant *)
       ai_mode = None; (* only relevant when autostart=true *)
       progress_callback = ClientConnect.null_progress_reporter; (* we're fast! *)
@@ -1643,6 +1644,7 @@ let start_server (root: Path.t) : unit =
       from = !ref_from;
       no_load = false;
       watchman_debug_logging = false;
+      log_inference_constraints = false;
       profile_log = false;
       ai_mode = None;
       silent = true;

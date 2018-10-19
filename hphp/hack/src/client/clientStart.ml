@@ -23,6 +23,7 @@ type env = {
   from: string;
   no_load : bool;
   watchman_debug_logging : bool;
+  log_inference_constraints : bool;
   profile_log : bool;
   silent : bool;
   exit_on_failure : bool;
@@ -58,6 +59,7 @@ let start_server env =
       if env.from = "" then [||] else [| "--from"; env.from|];
       if env.no_load then [| "--no-load" |] else [||];
       if env.watchman_debug_logging then [| "--watchman-debug-logging" |] else [||];
+      if env.log_inference_constraints then [| "--log-inference-constraints" |] else [||];
       if env.profile_log then [| "--profile-log" |] else [||];
       ai_options;
       (** If the client starts up a server monitor process, the output of that

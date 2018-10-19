@@ -63,6 +63,7 @@ type client_check_env = {
   from: string;
   gen_saved_ignore_type_errors: bool;
   ignore_hh_version: bool;
+  log_inference_constraints: bool;
   mode: client_mode;
   no_load: bool;
   output_json: bool;

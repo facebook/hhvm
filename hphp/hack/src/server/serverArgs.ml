@@ -24,6 +24,7 @@ type options = {
   ignore_hh_version: bool;
   json_mode: bool;
   load_state_canary: bool;
+  log_inference_constraints: bool;
   max_procs: int;
   no_load: bool;
   prechecked: bool option;
@@ -62,6 +63,8 @@ module Messages = struct
   let json = " output errors in json format (arc lint mode)"
   let load_state_canary = " Look up a saved state using the hg commit" ^
                           " hash instead of the SVN rev."
+  let log_inference_constraints = " (for hh debugging purpose only) log type" ^
+    " inference constraints into external logger (e.g. Scuba)"
   let max_procs = " max numbers of workers"
   let mini_state_json_descr =
     "Either\n" ^
@@ -182,6 +185,7 @@ let parse_options () =
   let ignore_hh = ref false in
   let json_mode = ref false in
   let load_state_canary = ref false in
+  let log_inference_constraints = ref false in
   let max_procs = ref GlobalConfig.nbr_procs in
   let no_load = ref false in
   let prechecked = ref None in
@@ -220,6 +224,7 @@ let parse_options () =
       "--ignore-hh-version", Arg.Set ignore_hh, Messages.ignore_hh_version;
       "--json", Arg.Set json_mode, Messages.json;
       "--load-state-canary", Arg.Set load_state_canary, Messages.load_state_canary;
+      "--log-inference-constraints", Arg.Set log_inference_constraints, Messages.log_inference_constraints;
       "--max-procs", Arg.Int set_max_procs, Messages.max_procs;
       "--no-load", Arg.Set no_load, Messages.no_load;
       "--no-prechecked", Arg.Unit (fun () -> prechecked := Some false), Messages.prechecked;
@@ -276,6 +281,7 @@ let parse_options () =
     ignore_hh_version = !ignore_hh;
     json_mode = !json_mode;
     load_state_canary = !load_state_canary;
+    log_inference_constraints = !log_inference_constraints;
     max_procs = !max_procs;
     no_load = !no_load;
     prechecked = !prechecked;
@@ -300,6 +306,7 @@ let default_options ~root = {
   ignore_hh_version = false;
   json_mode = false;
   load_state_canary = false;
+  log_inference_constraints = false;
   max_procs = GlobalConfig.nbr_procs;
   no_load = true;
   prechecked = None;
@@ -326,6 +333,7 @@ let gen_saved_ignore_type_errors options = options.gen_saved_ignore_type_errors
 let ignore_hh_version options = options.ignore_hh_version
 let json_mode options = options.json_mode
 let load_state_canary options = options.load_state_canary
+let log_inference_constraints options = options.log_inference_constraints
 let max_procs options = options.max_procs
 let no_load options = options.no_load
 let prechecked options = options.prechecked
@@ -366,6 +374,7 @@ let to_string
     ignore_hh_version;
     json_mode;
     load_state_canary;
+    log_inference_constraints;
     max_procs;
     no_load;
     prechecked;
@@ -407,6 +416,7 @@ let to_string
         "ignore_hh_version: "; string_of_bool ignore_hh_version; ", ";
         "json_mode: "; string_of_bool json_mode; ", ";
         "load_state_canary: "; string_of_bool load_state_canary; ", ";
+        "log_inference_constraints: "; string_of_bool log_inference_constraints; ", ";
         "maxprocs: "; string_of_int max_procs; ", ";
         "no_load: "; string_of_bool no_load; ", ";
         "prechecked: "; prechecked_str;

@@ -75,6 +75,7 @@ let main_exn env =
     expiry = None;
     no_load = false;
     watchman_debug_logging = false; (** Start a server manually in terminal if you want this. *)
+    log_inference_constraints = false;
     profile_log = false;
     ai_mode = None;
     progress_callback = ClientConnect.tty_progress_reporter ();

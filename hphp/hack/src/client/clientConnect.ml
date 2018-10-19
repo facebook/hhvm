@@ -20,6 +20,7 @@ type env = {
   expiry : float option;
   no_load : bool;
   watchman_debug_logging : bool;
+  log_inference_constraints : bool;
   profile_log : bool;
   ai_mode : string option;
   progress_callback: string option -> unit;
@@ -331,6 +332,7 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
           from = env.from;
           no_load = env.no_load;
           watchman_debug_logging = env.watchman_debug_logging;
+          log_inference_constraints = env.log_inference_constraints;
           profile_log = env.profile_log;
           silent = false;
           exit_on_failure = false;

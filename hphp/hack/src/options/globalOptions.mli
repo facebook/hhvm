@@ -84,6 +84,9 @@ type t = {
  (* Flag to disable PHP's define method *)
  po_disable_define : bool;
 
+ (** Print types of size bigger than 1000 after performing a type union. *)
+ tco_log_inference_constraints : bool;
+
  (*
   * Flag to disallow any lambda that has to be checked using the legacy
   * per-use technique
@@ -175,6 +178,7 @@ val make :
   po_deregister_php_stdlib: bool ->
   po_disallow_execution_operator: bool ->
   po_disable_define: bool ->
+  tco_log_inference_constraints : bool ->
   tco_user_attrs: SSet.t option ->
   tco_experimental_features: SSet.t ->
   tco_migration_flags: SSet.t ->
@@ -214,6 +218,7 @@ val po_disallow_execution_operator : t -> bool
 val po_disable_variable_variables : t -> bool
 val po_disable_define : t -> bool
 val po_enable_hh_syntax_for_hhvm : t -> bool
+val tco_log_inference_constraints : t -> bool
 val tco_disallow_ambiguous_lambda : t -> bool
 val tco_disallow_array_typehint : t -> bool
 val tco_disallow_array_literal : t -> bool

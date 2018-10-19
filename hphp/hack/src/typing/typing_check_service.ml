@@ -119,7 +119,7 @@ let check_files dynamic_view_files opts errors progress ~memory_cap =
       let t' = Sys.time () in
       let duration = t' -. t in
       let filepath = Relative_path.suffix (fst fn) in
-      TypingLogger.log_typing_time duration filepath;
+      TypingLogger.TypingTimes.log duration filepath;
       !Utils.log (Printf.sprintf "%f %s [type-check]" duration filepath);
       result)
     else check_file dynamic_view_files opts
@@ -151,7 +151,7 @@ let check_files dynamic_view_files opts errors progress ~memory_cap =
     | [] -> errors, progress
   in
   let result = check_or_exit errors progress in
-  TypingLogger.flush_buffer ();
+  TypingLogger.flush_buffers ();
   Parser_heap.ParserHeap.LocalChanges.pop_stack ();
   File_heap.FileHeap.LocalChanges.pop_stack ();
   result

@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Typing_defs
 
 (* Logical proposition about types *)
@@ -23,6 +23,42 @@ type subtype_prop =
 (* Equivalent to Disj [], but with an error message function attached.
  * TODO: actually store the error rather than a suspension *)
 | Unsat of (unit -> unit)
+
+let rec size (p : subtype_prop) : int =
+  match p with
+  | Sub _ | Eq _ | Unsat _ -> 1
+  | Conj l | Disj l ->
+    let sizes = List.map l ~f:size in
+    List.fold ~init:0 ~f:(+) sizes
+
+(** Sum of the sizes of the disjunctions. *)
+let rec n_disj (p : subtype_prop) : int =
+  match p with
+  | Sub _ | Eq _ | Unsat _ -> 0
+  | Conj l ->
+    let n_disjs = List.map l ~f:n_disj in
+    List.fold ~init:0 ~f:(+) n_disjs
+  | Disj l ->
+    let n_disjs = List.map l ~f:n_disj in
+    (List.length l) + (List.fold ~init:0 ~f:(+) n_disjs)
+
+(** Sum of the sizes of the conjunctions. *)
+let rec n_conj (p : subtype_prop) : int =
+  match p with
+  | Sub _ | Eq _ | Unsat _ -> 0
+  | Disj l ->
+    let n_conjs = List.map l ~f:n_conj in
+    List.fold ~init:0 ~f:(+) n_conjs
+  | Conj l ->
+    let n_conjs = List.map l ~f:n_conj in
+    (List.length l) + (List.fold ~init:0 ~f:(+) n_conjs)
+
+let rec has_disj p =
+  match p with
+  | Disj _ -> true
+  | Sub _ | Eq _ | Unsat _ -> false
+  | Conj l ->
+    List.exists l ~f:has_disj
 
 let valid = Conj []
 

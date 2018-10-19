@@ -7,6 +7,14 @@
  *
  *)
 
-let log_typing_time _ _ = ()
-let flush_buffer _ = ()
+module TypingTimes = struct
+  let log _ _ = ()
+end
+
 let log_lambda_counts _ = ()
+
+module InferenceCnstr = struct
+  let log _ ~pos:_ ~size:_ ~n_disj:_ ~n_conj:_ = ()
+end
+
+let flush_buffers _ = ()

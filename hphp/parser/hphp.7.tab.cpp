@@ -658,11 +658,12 @@ static void xhp_children_stmt(Parser *_p, Token &out, Token &children) {
   {
     _p->onStatementListStart(stmts0);
   }
+   
   Token stmts1;
   {
-    // return children;
+    // return children
     Token arr;
-    if (children.num() == 2) {
+    if (std::equal(children.num(), 2)) {
       arr = children;
     } else if (children.num() >= 0) {
       scalar_num(_p, arr, children.num());

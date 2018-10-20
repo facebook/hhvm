@@ -55,6 +55,14 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
+struct PeepholeStackElem {
+  PeepholeStackElem() = default;
+  PeepholeStackElem(Op op, bool is_str) : op{op}, is_str{is_str} {}
+
+  Op    op{Op::Nop};
+  bool  is_str{false};
+};
+
 /*
  * Perform a block-local optimization that folds sequences of Concat opcodes
  * into ConcatN opcodes.
@@ -77,23 +85,30 @@ struct ConcatPeephole {
    * The srcStack reflects the pre-interp state.
    */
   void append(const Bytecode& op,
-              const std::vector<std::pair<Op,bool>>& srcStack);
+              const std::vector<PeepholeStackElem>& srcStack);
 
 private:
+  enum class CSKind {
+    Normal,
+    Concat
+  };
+
   /*
    * A working stream used to reorder and accumulate Concat's as ConcatN's.
    * The stream is reorderable up through the concats-th Concat opcode.
    */
   struct ConcatStream {
-    std::vector<std::pair<Bytecode,bool>> stream;
-                  // The working stream; contains bytecode, plus whether
-                  // or not the bytecode is a rewriteable Concat.
-    int stacksz;  // Stack size at the beginning of the stream.
-    int concats;  // Number of concats to accumulate.
+    // The working stream; contains bytecode, plus whether or not the
+    // bytecode is a rewriteable Concat.
+    std::vector<std::pair<Bytecode,CSKind>> stream;
+    // Stack index of the concat result
+    int stackix;
+    // Number of CSKind::Concat's in the stream
+    int concats;
   };
 
 private:
-  void push_back(const Bytecode& op, bool is_concat = false);
+  void push_back(const Bytecode& op, CSKind = CSKind::Normal);
   void squash();
 
 private:

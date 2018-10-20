@@ -161,26 +161,32 @@ void ConcatPeephole::finalize() {
 }
 
 void ConcatPeephole::append(const Bytecode& op,
-                            const std::vector<std::pair<Op,bool>>& srcStack) {
-  FTRACE(1, "ConcatPeephole::append {}\n", m_next.show(op));
+                            const std::vector<PeepholeStackElem>& srcStack) {
+  FTRACE(1,
+         "ConcatPeephole::append {} (working-size {})\n",
+         m_next.show(op), m_working.size());
   int nstack = srcStack.size();
 
-  // Size of the stack at the previous Concat.
-  int prevsz = m_working.empty() ? -1 : m_working.back().stacksz;
-
-  // Squash the innermost concat stream if we consumed its concat result.
-  if (nstack < prevsz - 1 || (nstack == prevsz - 1 &&
-                              srcStack[nstack - 1].first != Op::Concat)) {
-    squash();
-  }
+  auto const stackix = [&] {
+    while (!m_working.empty()) {
+      auto const p = m_working.back().stackix;
+      if (nstack > p && srcStack[p].op == Op::Concat) return p;
+      // something overwrote or popped the result of the Concat, so we're done.
+      FTRACE(5, "ConcatPeephole - squash: stackix={} op={}\n",
+             p, opcodeToName(srcStack[p].op));
+      squash();
+    }
+    return -1;
+  }();
 
   if (op.op == Op::Concat) {
-    auto ind1 = nstack - 1;
-    auto ind2 = nstack - 2;
+    auto const ind1 = nstack - 1;
+    auto const ind2 = nstack - 2;
 
     // Non-string concat; just append, squashing if this terminates a stream.
-    if (!srcStack[ind1].second || !srcStack[ind2].second) {
-      if (nstack == prevsz) {
+    if (!srcStack[ind1].is_str || !srcStack[ind2].is_str) {
+      if (nstack == stackix + 2) {
+        FTRACE(5, "ConcatPeephole - squash: not strings (nstack={})\n", nstack);
         squash();
       }
       return push_back(op);
@@ -188,27 +194,36 @@ void ConcatPeephole::append(const Bytecode& op,
 
     // If the first concat operand is from the previous concat in the
     // stream, continue the current stream.
-    if (srcStack[ind2].first == Op::Concat && nstack == prevsz) {
-      return push_back(op, true);
+    if (ind2 == stackix) {
+      assertx(srcStack[ind2].op == Op::Concat);
+      return push_back(op, CSKind::Concat);
     }
 
     // If the second concat operand is from the previous concat in the
-    // stream, continue the current stream.
-    if (srcStack[ind1].first == Op::Concat && nstack == prevsz - 1) {
-      m_working.back().stacksz--;
-      return push_back(op, true);
-    }
-
-    // Correction for cases where we might have bizarre opcode sequences like
-    // [stk: 2] Concat, [stk: 1] CGetL2, [stk: 2] Concat, where it's unsafe
-    // to reorder.
-    if (nstack == prevsz) {
-      squash();
+    // stream, continue the current stream, merging into the previous
+    // stream if necessary.
+    if (ind1 == stackix) {
+      assertx(srcStack[ind1].op == Op::Concat);
+      auto const back = &m_working.back();
+      back->stackix--;
+      if (m_working.size() >= 2) {
+        auto const prev = back - 1;
+        if (back->stackix == prev->stackix) {
+          prev->stream.insert(prev->stream.end(),
+                              back->stream.begin(), back->stream.end());
+          prev->concats += back->concats;
+          m_working.pop_back();
+        }
+      }
+      return push_back(op, CSKind::Concat);
     }
 
     // Start a new stream.
-    m_working.push_back({{}, nstack, 0});
-    return push_back(op, true);
+    m_working.push_back({{}, nstack - 2, 0});
+    FTRACE(2,
+           "New stream: working-size={}, stackix={}",
+           m_working.size(), nstack - 2);
+    return push_back(op, CSKind::Concat);
   }
 
   // Just push by default.
@@ -218,14 +233,14 @@ void ConcatPeephole::append(const Bytecode& op,
 /*
  * Push to the innermost stream.
  */
-void ConcatPeephole::push_back(const Bytecode& op, bool is_concat) {
+void ConcatPeephole::push_back(const Bytecode& op, CSKind kind) {
   if (m_working.empty()) {
     m_next.push_back(op);
   } else {
     auto& inner = m_working.back();
 
-    if (is_concat) ++inner.concats;
-    inner.stream.emplace_back(op, is_concat);
+    if (kind == CSKind::Concat) ++inner.concats;
+    inner.stream.emplace_back(op, kind);
   }
 }
 
@@ -246,11 +261,10 @@ void ConcatPeephole::squash() {
   assert(workstream.stream.front().first.op == Op::Concat);
 
   for (auto& item : workstream.stream) {
-    auto& op = item.first;
-    auto& is_concat = item.second;
+    auto const& op = item.first;
 
     // If we passed the last concat, just append the remaining bytecode.
-    if (ntotal < workstream.concats && is_concat) {
+    if (ntotal < workstream.concats && item.second == CSKind::Concat) {
       // Bump counters.
       ++naccum;
       ++ntotal;

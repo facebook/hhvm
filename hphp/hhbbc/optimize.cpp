@@ -549,8 +549,7 @@ void first_pass(const Index& index,
   if (options.ConstantProp) collect.propagate_constants = propagate_constants;
 
   auto peephole = make_peephole(newBCs, index, ctx);
-  std::vector<std::pair<Op,bool>> srcStack(state.stack.size(),
-                                           {Op::Nop, false});
+  std::vector<PeepholeStackElem> srcStack(state.stack.size());
 
   for (auto& op : blk->hhbcs) {
     FTRACE(2, "  == {}\n", show(ctx.func, op));
@@ -573,6 +572,9 @@ void first_pass(const Index& index,
       if (op.op == Op::CGetL2) {
         srcStack.emplace(srcStack.end() - 1,
                          op.op, (state.stack.end() - 2)->type.subtypeOf(BStr));
+        // The CGetL was the last thing to write this too (even though
+        // it just copied it).
+        srcStack.back().op = op.op;
       } else {
         FTRACE(2, "   srcStack: pop {} push {}\n", op.numPop(), op.numPush());
         for (int i = 0; i < op.numPop(); i++) {

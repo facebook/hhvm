@@ -628,7 +628,7 @@ private:
   friend Type unnullish(Type);
   friend bool is_opt(const Type&);
   friend bool is_nullish(const Type&);
-  template<typename R>
+  template<typename R, bool>
   friend R tvImpl(const Type&);
   friend Type scalarize(Type t);
   friend Type return_with_context(Type, Type);
@@ -1196,6 +1196,16 @@ Type objcls(const Type& t);
  * The returned Cell can only contain non-reference-counted types.
  */
 folly::Optional<Cell> tv(const Type& t);
+
+/*
+ * If the type t has a known constant value, return it as a Cell.
+ * Otherwise return folly::none.
+ *
+ * The returned Cell may contain reference-counted types.
+ *
+ * You are responsible for any required ref-counting.
+ */
+folly::Optional<Cell> tvNonStatic(const Type& t);
 
 /*
  * If the type t has a known constant value, return true.

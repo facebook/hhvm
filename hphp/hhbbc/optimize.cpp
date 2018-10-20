@@ -554,17 +554,21 @@ void first_pass(const Index& index,
   for (auto& op : blk->hhbcs) {
     FTRACE(2, "  == {}\n", show(ctx.func, op));
 
+    auto const flags = step(interp, op);
+
     auto gen = [&] (const Bytecode& newBC) {
       const_cast<Bytecode&>(newBC).srcLoc = op.srcLoc;
       FTRACE(2, "   + {}\n", show(ctx.func, newBC));
       if (options.Peephole) {
-        peephole.append(newBC, srcStack);
+        peephole.append(
+          newBC,
+          !flags.wasPEI &&
+          !any(collect.opts & CollectionOpts::TrackConstantArrays),
+          srcStack, state.stack);
       } else {
         newBCs.push_back(newBC);
       }
     };
-
-    auto const flags = step(interp, op);
 
     // The peephole wants the old values of srcStack, so defer the update to the
     // end of the loop.
@@ -1138,10 +1142,12 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
 
   bool again;
   folly::Optional<CollectedInfo> collect;
+  auto collectionOpts = isFinal ?
+    CollectionOpts::TrackConstantArrays : CollectionOpts{};
 
   collect.emplace(
     index, ainfo.ctx, nullptr, nullptr,
-    CollectionOpts::TrackConstantArrays, &ainfo
+    collectionOpts, &ainfo
   );
 
   optimize_iterators(index, ainfo, *collect);
@@ -1171,12 +1177,10 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
        * We need to perform a final type analysis before we do
        * anything else.
        */
-      ainfo = analyze_func(index,
-                           ainfo.ctx,
-                           CollectionOpts::TrackConstantArrays);
+      ainfo = analyze_func(index, ainfo.ctx, collectionOpts);
       collect.emplace(
         index, ainfo.ctx, nullptr, nullptr,
-        CollectionOpts::TrackConstantArrays, &ainfo
+        collectionOpts, &ainfo
       );
     }
 

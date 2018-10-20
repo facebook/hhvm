@@ -21,6 +21,7 @@
 
 #include <folly/Optional.h>
 
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/type-system.h"
@@ -31,7 +32,7 @@ namespace HPHP { namespace HHBBC {
 
 /*
  * Very simple peephole rules based on last few tokens.  This runs behind
- * the ConcatPeephole.
+ * the AppendPeephole.
  */
 struct BasicPeephole {
   explicit BasicPeephole(BytecodeVec& stream,
@@ -67,12 +68,13 @@ struct PeepholeStackElem {
  * Perform a block-local optimization that folds sequences of Concat opcodes
  * into ConcatN opcodes.
  */
-struct ConcatPeephole {
-  explicit ConcatPeephole(BasicPeephole next)
+struct AppendPeephole {
+  explicit AppendPeephole(BasicPeephole next)
     : m_next(next)
   {}
-  ConcatPeephole(ConcatPeephole&&) = default;
-  ConcatPeephole& operator=(const ConcatPeephole&) = delete;
+  AppendPeephole(AppendPeephole&&) = default;
+  AppendPeephole& operator=(const AppendPeephole&) = delete;
+  AppendPeephole& operator=(AppendPeephole&&) = delete;
 
   /*
    * Ensure the output stream is in a finished state.
@@ -85,49 +87,62 @@ struct ConcatPeephole {
    * The srcStack reflects the pre-interp state.
    */
   void append(const Bytecode& op,
-              const std::vector<PeepholeStackElem>& srcStack);
+              bool squashAddElem,
+              const std::vector<PeepholeStackElem>& srcStack,
+              const CompactVector<StackElem>& stack);
 
 private:
-  enum class CSKind {
+  enum class ASKind {
     Normal,
-    Concat
+    Concat,
+    AddElem
   };
 
   /*
    * A working stream used to reorder and accumulate Concat's as ConcatN's.
    * The stream is reorderable up through the concats-th Concat opcode.
    */
-  struct ConcatStream {
+  struct AppendStream {
+    AppendStream(int stackix, Op generator) :
+        stackix{stackix},
+        concats{0},
+        generator{generator} {}
+
     // The working stream; contains bytecode, plus whether or not the
     // bytecode is a rewriteable Concat.
-    std::vector<std::pair<Bytecode,CSKind>> stream;
+    std::vector<std::pair<Bytecode,ASKind>> stream;
     // Stack index of the concat result
     int stackix;
-    // Number of CSKind::Concat's in the stream
+    // Number of ASKind::Concat's in the stream
     int concats;
+    // The opcode generating this stream
+    Op generator;
+    // When dealing with an Add*ElemC stream, the current value,
+    // possibly refcounted.
+    Variant addElemResult;
   };
 
 private:
-  void push_back(const Bytecode& op, CSKind = CSKind::Normal);
+  void push_back(const Bytecode& op, ASKind = ASKind::Normal);
   void squash();
 
 private:
   BasicPeephole m_next;
   // Concat streams, nested at increasing stack depths.
-  std::vector<ConcatStream> m_working;
+  std::vector<AppendStream> m_working;
 };
 
 //////////////////////////////////////////////////////////////////////
 
-using Peephole = ConcatPeephole;
+using Peephole = AppendPeephole;
 
 /*
  * Create the chain of peephole objects.  The interface to all the Peepholes is
- * the same as the interface to ConcatPeephole, above.
+ * the same as the interface to AppendPeephole, above.
  */
 inline Peephole make_peephole(BytecodeVec& sink,
                               const Index& index, const Context& ctx) {
-  return ConcatPeephole(BasicPeephole(sink, index, ctx));
+  return AppendPeephole(BasicPeephole(sink, index, ctx));
 }
 
 //////////////////////////////////////////////////////////////////////

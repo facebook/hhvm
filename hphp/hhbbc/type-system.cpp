@@ -1242,7 +1242,7 @@ using DualDispatchIntersection = Commute<DualDispatchIntersectionImpl>;
 //////////////////////////////////////////////////////////////////////
 // Helpers for creating literal array-like types
 
-template<typename AInit>
+template<typename AInit, bool force_static>
 folly::Optional<Cell> fromTypeVec(const std::vector<Type> &elems) {
   AInit ai(elems.size());
   for (auto const& t : elems) {
@@ -1251,8 +1251,8 @@ folly::Optional<Cell> fromTypeVec(const std::vector<Type> &elems) {
     ai.append(tvAsCVarRef(&*v));
   }
   auto var = ai.toVariant();
-  var.setEvalScalar();
-  return *var.asTypedValue();
+  if (force_static) var.setEvalScalar();
+  return tvReturn(std::move(var));
 }
 
 bool checkTypeVec(const std::vector<Type> &elems) {
@@ -1277,7 +1277,7 @@ void add(KeysetInit& ai, const Variant& key, const Variant& value) {
   ai.add(key);
 }
 
-template<typename AInit, typename Key>
+template<typename AInit, bool force_static, typename Key>
 folly::Optional<Cell> fromTypeMap(const ArrayLikeMap<Key> &elems) {
   auto val = eval_cell_value([&] () -> Cell {
     AInit ai(elems.size());
@@ -1287,8 +1287,8 @@ folly::Optional<Cell> fromTypeMap(const ArrayLikeMap<Key> &elems) {
       add(ai, keyHelper(elm.first), tvAsCVarRef(&*v));
     }
     auto var = ai.toVariant();
-    var.setEvalScalar();
-    return *var.asTypedValue();
+    if (force_static) var.setEvalScalar();
+    return tvReturn(std::move(var));
   });
   if (val && val->m_type == KindOfUninit) val.clear();
   return val;
@@ -2613,7 +2613,7 @@ CompactVector<LSString> get_string_keys(const Type& t) {
   return strs;
 }
 
-template<typename R>
+template<typename R, bool force_static>
 struct tvHelper {
   template<DataType dt,typename... Args>
   static R make(Args&&... args) {
@@ -2621,16 +2621,16 @@ struct tvHelper {
   }
   template<typename Init, typename... Args>
   static R fromMap(Args&&... args) {
-    return fromTypeMap<Init>(std::forward<Args>(args)...);
+    return fromTypeMap<Init, force_static>(std::forward<Args>(args)...);
   }
   template<typename Init, typename... Args>
   static R fromVec(Args&&... args) {
-    return fromTypeVec<Init>(std::forward<Args>(args)...);
+    return fromTypeVec<Init, force_static>(std::forward<Args>(args)...);
   }
 };
 
-template<>
-struct tvHelper<bool> {
+template<bool ignored>
+struct tvHelper<bool, ignored> {
   template <DataType dt, typename... Args>
   static bool make(Args&&... /*args*/) {
     return true;
@@ -2645,10 +2645,10 @@ struct tvHelper<bool> {
   }
 };
 
-template<typename R>
+template<typename R, bool force_static>
 R tvImpl(const Type& t) {
   assert(t.checkInvariants());
-  using H = tvHelper<R>;
+  using H = tvHelper<R, force_static>;
 
   switch (t.m_bits) {
   case BUninit:      return H::template make<KindOfUninit>();
@@ -2777,11 +2777,15 @@ R tvImpl(const Type& t) {
 }
 
 folly::Optional<Cell> tv(const Type& t) {
-  return tvImpl<folly::Optional<Cell>>(t);
+  return tvImpl<folly::Optional<Cell>, true>(t);
+}
+
+folly::Optional<Cell> tvNonStatic(const Type& t) {
+  return tvImpl<folly::Optional<Cell>, false>(t);
 }
 
 bool is_scalar(const Type& t) {
-  return tvImpl<bool>(t);
+  return tvImpl<bool, true>(t);
 }
 
 Type scalarize(Type t) {

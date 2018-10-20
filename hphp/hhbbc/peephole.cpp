@@ -15,13 +15,14 @@
 */
 #include "hphp/hhbbc/peephole.h"
 
-#include <vector>
+#include "hphp/hhbbc/interp-state.h"
+#include "hphp/hhbbc/optimize.h"
+#include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/type-system.h"
 
 #include "hphp/runtime/vm/hhbc.h"
-#include "hphp/hhbbc/interp-state.h"
-#include "hphp/hhbbc/type-system.h"
-#include "hphp/hhbbc/representation.h"
-#include "hphp/hhbbc/context.h"
+
+#include <vector>
 
 namespace HPHP { namespace HHBBC {
 
@@ -153,93 +154,144 @@ std::string BasicPeephole::show(const Bytecode& op) {
   return php::show(m_ctx.func, op);
 }
 
-void ConcatPeephole::finalize() {
+void AppendPeephole::finalize() {
   while (!m_working.empty()) {
     squash();
   }
   m_next.finalize();
 }
 
-void ConcatPeephole::append(const Bytecode& op,
-                            const std::vector<PeepholeStackElem>& srcStack) {
+void AppendPeephole::append(
+    const Bytecode& op,
+    bool squashAddElem,
+    const std::vector<PeepholeStackElem>& srcStack,
+    const HPHP::CompactVector<HPHP::HHBBC::StackElem>& stack) {
   FTRACE(1,
-         "ConcatPeephole::append {} (working-size {})\n",
+         "AppendPeephole::append {} (working-size {})\n",
          m_next.show(op), m_working.size());
-  int nstack = srcStack.size();
 
-  auto const stackix = [&] {
+  auto const squashTo = [&] (int depth) {
     while (!m_working.empty()) {
-      auto const p = m_working.back().stackix;
-      if (nstack > p && srcStack[p].op == Op::Concat) return p;
+      auto const &b = m_working.back();
+      if (depth > b.stackix && srcStack[b.stackix].op == b.generator) {
+        return b.stackix;
+      }
       // something overwrote or popped the result of the Concat, so we're done.
-      FTRACE(5, "ConcatPeephole - squash: stackix={} op={}\n",
-             p, opcodeToName(srcStack[p].op));
+      FTRACE(5, "AppendPeephole - squash: stackix={} op={}\n",
+             b.stackix, opcodeToName(srcStack[b.stackix].op));
       squash();
     }
     return -1;
-  }();
+  };
 
-  if (op.op == Op::Concat) {
-    auto const ind1 = nstack - 1;
-    auto const ind2 = nstack - 2;
+  const int nstack = srcStack.size();
 
-    // Non-string concat; just append, squashing if this terminates a stream.
-    if (!srcStack[ind1].is_str || !srcStack[ind2].is_str) {
-      if (nstack == stackix + 2) {
-        FTRACE(5, "ConcatPeephole - squash: not strings (nstack={})\n", nstack);
-        squash();
+  switch (op.op) {
+    case Op::Concat: {
+      auto const ind1 = nstack - 1;
+      auto const ind2 = nstack - 2;
+
+      // Non-string concat; treat like any other opcode
+      if (!srcStack[ind1].is_str || !srcStack[ind2].is_str) {
+        break;
       }
-      return push_back(op);
-    }
 
-    // If the first concat operand is from the previous concat in the
-    // stream, continue the current stream.
-    if (ind2 == stackix) {
-      assertx(srcStack[ind2].op == Op::Concat);
-      return push_back(op, CSKind::Concat);
-    }
+      auto const stackix = squashTo(nstack);
+      if (stackix >= 0 && m_working.back().generator == Op::Concat) {
+        // If the first concat operand is from the previous concat in the
+        // stream, continue the current stream.
+        if (ind2 == stackix) {
+          assertx(srcStack[ind2].op == Op::Concat);
+          return push_back(op, ASKind::Concat);
+        }
 
-    // If the second concat operand is from the previous concat in the
-    // stream, continue the current stream, merging into the previous
-    // stream if necessary.
-    if (ind1 == stackix) {
-      assertx(srcStack[ind1].op == Op::Concat);
-      auto const back = &m_working.back();
-      back->stackix--;
-      if (m_working.size() >= 2) {
-        auto const prev = back - 1;
-        if (back->stackix == prev->stackix) {
-          prev->stream.insert(prev->stream.end(),
-                              back->stream.begin(), back->stream.end());
-          prev->concats += back->concats;
-          m_working.pop_back();
+        // If the second concat operand is from the previous concat in the
+        // stream, continue the current stream, merging into the previous
+        // stream if necessary.
+        if (ind1 == stackix) {
+          assertx(srcStack[ind1].op == Op::Concat);
+          auto const back = &m_working.back();
+          back->stackix--;
+          if (m_working.size() >= 2) {
+            auto const prev = back - 1;
+            if (back->stackix == prev->stackix) {
+              prev->stream.insert(prev->stream.end(),
+                                  back->stream.begin(), back->stream.end());
+              prev->concats += back->concats;
+              m_working.pop_back();
+            }
+          }
+          return push_back(op, ASKind::Concat);
         }
       }
-      return push_back(op, CSKind::Concat);
-    }
 
-    // Start a new stream.
-    m_working.push_back({{}, nstack - 2, 0});
-    FTRACE(2,
-           "New stream: working-size={}, stackix={}",
-           m_working.size(), nstack - 2);
-    return push_back(op, CSKind::Concat);
+      squashTo(nstack - 2);
+      // Start a new stream.
+      m_working.emplace_back(nstack - 2, Op::Concat);
+      FTRACE(2,
+             "New stream: working-size={}, stackix={}",
+             m_working.size(), nstack - 2);
+      return push_back(op, ASKind::Concat);
+    }
+    case Op::AddElemC:
+    case Op::AddNewElemC: {
+      if (!squashAddElem) break;
+      auto const& type = stack.back().type;
+      auto value = tvNonStatic(type);
+      if (!value || !isArrayLikeType(value->m_type)) {
+        break;
+      }
+
+      // finish any streams in progress for the key or value
+      auto const stackix = squashTo(stack.size());
+      // start a new stream if necessary
+      if (stackix != stack.size() - 1 ||
+          m_working.back().addElemResult.isNull()) {
+        squashTo(stack.size() - 1);
+        // Start a new stream.
+        m_working.emplace_back(stack.size() - 1, op.op);
+      }
+
+      auto& working = m_working.back();
+      if (!working.addElemResult.isNull()) {
+        for (auto i = working.stream.size(); i--; ) {
+          if (working.stream[i].second == ASKind::AddElem) {
+            auto numToPop = working.stream[i].first.numPop() - 1;
+            assertx(numToPop == 1 || numToPop == 2);
+            auto pop = std::make_pair(
+              bc_with_loc(working.stream[i].first.srcLoc, bc::PopC{}),
+              ASKind::Normal
+            );
+            working.stream[i] = pop;
+            if (numToPop == 2) {
+              working.stream.emplace(working.stream.begin() + i + 1, pop);
+            }
+            break;
+          }
+        }
+      }
+      working.addElemResult = std::move(tvAsVariant(&*value));
+      working.generator = op.op;
+      return push_back(op, ASKind::AddElem);
+    }
+    default:
+      break;
   }
 
-  // Just push by default.
+  squashTo(nstack - op.numPop());
   push_back(op);
 }
 
 /*
  * Push to the innermost stream.
  */
-void ConcatPeephole::push_back(const Bytecode& op, CSKind kind) {
+void AppendPeephole::push_back(const Bytecode& op, ASKind kind) {
   if (m_working.empty()) {
     m_next.push_back(op);
   } else {
     auto& inner = m_working.back();
 
-    if (kind == CSKind::Concat) ++inner.concats;
+    if (kind == ASKind::Concat) ++inner.concats;
     inner.stream.emplace_back(op, kind);
   }
 }
@@ -248,7 +300,7 @@ void ConcatPeephole::push_back(const Bytecode& op, CSKind kind) {
  * Reorder and rewrite the most nested concat subsequence, and append it to
  * the previous subsequence in the stack.
  */
-void ConcatPeephole::squash() {
+void AppendPeephole::squash() {
   assert(!m_working.empty());
 
   auto workstream = std::move(m_working.back());
@@ -258,32 +310,59 @@ void ConcatPeephole::squash() {
   uint32_t naccum = 1;
   int ntotal = 0;
 
-  assert(workstream.stream.front().first.op == Op::Concat);
+  if (workstream.generator == Op::Concat) {
+    assert(workstream.stream.front().first.op == Op::Concat);
+
+    for (auto& item : workstream.stream) {
+      auto const& op = item.first;
+      assertx(item.second != ASKind::AddElem);
+
+      // If we passed the last concat, just append the remaining bytecode.
+      if (ntotal < workstream.concats && item.second == ASKind::Concat) {
+        // Bump counters.
+        ++naccum;
+        ++ntotal;
+
+        // Emit a ConcatN if we hit the limit, or if we hit the final Concat.
+        if (naccum == kMaxConcatN || ntotal == workstream.concats) {
+          if (naccum >= 2) {
+            if (naccum == 2) {
+              push_back(bc_with_loc(op.srcLoc, bc::Concat {}));
+            } else {
+              push_back(bc_with_loc(op.srcLoc, bc::ConcatN {naccum}));
+            }
+          }
+          naccum = 1;
+        }
+        continue;
+      }
+
+      push_back(op);
+    }
+    return;
+  }
+
+  assertx(workstream.generator == Op::AddElemC ||
+          workstream.generator == Op::AddNewElemC);
 
   for (auto& item : workstream.stream) {
-    auto const& op = item.first;
-
-    // If we passed the last concat, just append the remaining bytecode.
-    if (ntotal < workstream.concats && item.second == CSKind::Concat) {
-      // Bump counters.
-      ++naccum;
-      ++ntotal;
-
-      // Emit a ConcatN if we hit the limit, or if we hit the final Concat.
-      if (naccum == kMaxConcatN || ntotal == workstream.concats) {
-        if (naccum >= 2) {
-          if (naccum == 2) {
-            push_back(bc::Concat {});
-          } else {
-            push_back(bc::ConcatN {naccum});
-          }
-        }
-        naccum = 1;
-      }
+    if (item.second != ASKind::AddElem) {
+      assertx(item.second == ASKind::Normal);
+      push_back(item.first);
       continue;
     }
-
-    push_back(op);
+    auto numPop = item.first.numPop();
+    assertx(numPop == 2 || numPop == 3);
+    auto pop = bc_with_loc(item.first.srcLoc, bc::PopC{});
+    while (numPop--) {
+      push_back(pop);
+    }
+    assertx(isArrayLikeType(workstream.addElemResult.getRawType()));
+    workstream.addElemResult.setEvalScalar();
+    push_back(
+      bc_with_loc(item.first.srcLoc,
+                  gen_constant(*workstream.addElemResult.toCell()))
+    );
   }
 }
 

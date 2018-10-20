@@ -2201,6 +2201,10 @@ Variant ObjectData::invokeDebugInfo() {
 }
 
 String ObjectData::invokeToString() {
+  if (RuntimeOption::EvalFatalOnConvertObjectToString) {
+    raise_convert_object_to_string(classname_cstr());
+  }
+
   const Func* method = m_cls->getToString();
   if (!method) {
     // If the object does not define a __toString() method, raise a

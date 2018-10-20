@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open File_content
 open String_utils
 open Sys_utils
@@ -102,7 +102,7 @@ let magic_builtins = [|
 |]
 
 (* Take the builtins (file, contents) array and create relative paths *)
-let builtins = Array.fold_left begin fun acc (f, src) ->
+let builtins = Caml.Array.fold_left begin fun acc (f, src) ->
   Relative_path.Map.add acc
     ~key:(Relative_path.create Relative_path.Dummy f)
     ~data:src
@@ -116,12 +116,12 @@ let exit_on_parent_exit () = Parent.exit_on_parent_exit 10 60
 
 let die str =
   let oc = stderr in
-  output_string oc str;
-  close_out oc;
+  Out_channel.output_string oc str;
+  Out_channel.close oc;
   exit 2
 
 let error ?(indent=false) l =
-  output_string stderr (Errors.to_string ~indent (Errors.to_absolute l))
+  Out_channel.output_string stderr (Errors.to_string ~indent (Errors.to_absolute l))
 
 let parse_options () =
   let fn_ref = ref None in
@@ -462,9 +462,9 @@ let file_to_files file =
       try
         Str.matched_group 3 first_line
       with
-        Not_found -> abs_fn in
+        Caml.Not_found -> abs_fn in
     let file = Relative_path.create Relative_path.Dummy (dir ^ file_name) in
-    let content = String.concat "\n" (List.tl_exn contentl) in
+    let content = String.concat ~sep:"\n" (List.tl_exn contentl) in
     Relative_path.Map.singleton file content
   else
     Relative_path.Map.singleton file content
@@ -483,7 +483,7 @@ let print_colored fn type_acc =
   let results = ColorFile.go content type_acc in
   if Unix.isatty Unix.stdout
   then Tty.cprint (ClientColorFile.replace_colors results)
-  else print_string (List.map ~f: replace_color results |> String.concat "")
+  else print_string (List.map ~f: replace_color results |> String.concat ~sep:"")
 
 let print_coverage type_acc =
   ClientCoverageMetric.go ~json:false (Some (Coverage_level.Leaf type_acc))
@@ -495,13 +495,13 @@ let check_errors opts errors files_info =
   end ~init:errors
 
 let create_nasts opts files_info =
-  let open Core_result in
+  let open Result in
   let open Nast in
   let build_nast fn {FileInfo.funs; classes; typedefs; consts; _} =
-    List.map ~f:Core_result.ok_or_failwith (
+    List.map ~f:Result.ok_or_failwith (
       List.map funs begin fun (_, x) ->
         Parser_heap.find_fun_in_file ~full:true opts fn x
-        |> Core_result.of_option ~error:(Printf.sprintf "Couldn't find function %s" x)
+        |> Result.of_option ~error:(Printf.sprintf "Couldn't find function %s" x)
         >>| Naming.fun_ opts
         >>| (fun f -> {f with f_body = (NamedBody (Typing_naming_body.func_body opts f))})
         >>| (fun f -> Nast.Fun f)
@@ -509,7 +509,7 @@ let create_nasts opts files_info =
       @
       List.map classes begin fun (_, x) ->
         Parser_heap.find_class_in_file ~full:true opts fn x
-        |> Core_result.of_option ~error:(Printf.sprintf "Couldn't find class %s" x)
+        |> Result.of_option ~error:(Printf.sprintf "Couldn't find class %s" x)
         >>| Naming.class_ opts
         >>| Typing_naming_body.class_meth_bodies opts
         >>| (fun c -> Nast.Class c)
@@ -517,14 +517,14 @@ let create_nasts opts files_info =
       @
       List.map typedefs begin fun (_, x) ->
         Parser_heap.find_typedef_in_file ~full:true opts fn x
-        |> Core_result.of_option ~error:(Printf.sprintf "Couldn't find typedef %s" x)
+        |> Result.of_option ~error:(Printf.sprintf "Couldn't find typedef %s" x)
         >>| Naming.typedef opts
         >>| (fun t -> Nast.Typedef t)
       end
       @
       List.map consts begin fun (_, x) ->
         Parser_heap.find_const_in_file ~full:true opts fn x
-        |> Core_result.of_option ~error:(Printf.sprintf "Couldn't find const %s" x)
+        |> Result.of_option ~error:(Printf.sprintf "Couldn't find const %s" x)
         >>| Naming.global_const opts
         >>| fun g -> Nast.Constant g
       end
@@ -591,7 +591,7 @@ let parse_name_and_decl popt files_contents tcopt =
   end
 
 let add_newline contents =
-  let x = String.index contents '\n' in
+  let x = String.index_exn contents '\n' in
   String.((sub contents 0 x) ^ "\n" ^ (sub contents x ((length contents) - x)))
 
 let get_decls defs =
@@ -716,7 +716,7 @@ let handle_mode
             { line = int_of_string row; column = int_of_string column }
           | _ -> failwith "Invalid test file: no flags found"
         with
-          Not_found -> failwith "Invalid test file: no flags found"
+          Caml.Not_found -> failwith "Invalid test file: no flags found"
         in
         let result =
           FfpAutocompleteService.auto_complete tcopt file_text position
@@ -752,7 +752,7 @@ let handle_mode
         end
       end
   | Cst_search ->
-    let open Core_result.Monad_infix in
+    let open Result.Monad_infix in
     let source_text = Full_fidelity_source_text.from_file filename in
     let syntax_tree = PositionedTree.make source_text in
 
@@ -788,7 +788,7 @@ let handle_mode
         end in
       if lint_errors <> []
       then begin
-        let lint_errors = List.sort ~cmp: begin fun x y ->
+        let lint_errors = List.sort ~compare: begin fun x y ->
           Pos.compare (Lint.get_pos x) (Lint.get_pos y)
         end lint_errors in
         let lint_errors = List.map ~f: Lint.to_absolute lint_errors in
@@ -972,13 +972,13 @@ let handle_mode
               let tenv = Typing_env.empty tcopt ~droot:None file in
               Typing_print.full tenv ty
             ) in
-          let params = if params = [] then "" else "<"^(String.concat "," params)^">" in
+          let params = if params = [] then "" else "<"^(String.concat ~sep:"," params)^">" in
            Printf.sprintf "%s%s(%s)"
              name
              params
              (Decl_defs.source_type_to_string mro.Decl_defs.mro_source)
           ) in
-        Printf.printf "[%s]\n" (String.concat ", " linearization)
+        Printf.printf "[%s]\n" (String.concat ~sep:", " linearization)
       )
     )
 
@@ -1029,6 +1029,6 @@ let _ =
        stdout.  The 'text mode' would not hurt the user in general, but
        it breaks the testsuite where the output is compared to the
        expected one (i.e. in given file without CRLF). *)
-    set_binary_mode_out stdout true;
+    Out_channel.set_binary_mode stdout true;
     let options = parse_options () in
     Unix.handle_unix_error main_hack options

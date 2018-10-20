@@ -117,6 +117,32 @@
               "end": {
                 "line": 2,
                 "character": 15
+             }
+           },
+           "newText": "HistoryClass"
+         },
+         {
+           "range": {
+             "start": {
+               "line": 88,
+               "character": 8
+             },
+             "end": {
+               "line": 88,
+               "character": 17
+             }
+           },
+           "newText": "HistoryClass"
+         },
+         {
+           "range": {
+             "start": {
+               "line": 84,
+               "character": 8
+             },
+             "end": {
+               "line": 84,
+               "character": 17
               }
             },
             "newText": "HistoryClass"
@@ -274,6 +300,32 @@
           {
             "range": {
               "start": {
+               "line": 88,
+               "character": 19
+             },
+             "end": {
+               "line": 88,
+               "character": 31
+             }
+           },
+           "newText": "ANOTHER_STR_CONSTANT"
+         },
+         {
+           "range": {
+             "start": {
+               "line": 84,
+               "character": 19
+             },
+             "end": {
+               "line": 84,
+               "character": 31
+             }
+           },
+           "newText": "ANOTHER_STR_CONSTANT"
+         },
+         {
+           "range": {
+             "start": {
                 "line": 53,
                 "character": 26
               },
@@ -715,6 +767,32 @@
           {
             "range": {
               "start": {
+               "line": 87,
+               "character": 8
+             },
+             "end": {
+               "line": 87,
+               "character": 22
+             }
+           },
+           "newText": "TSHIRT_SIZES"
+         },
+         {
+           "range": {
+             "start": {
+               "line": 81,
+               "character": 8
+             },
+             "end": {
+               "line": 81,
+               "character": 22
+             }
+           },
+           "newText": "TSHIRT_SIZES"
+         },
+         {
+           "range": {
+             "start": {
                 "line": 57,
                 "character": 10
               },

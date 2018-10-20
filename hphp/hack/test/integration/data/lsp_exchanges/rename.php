@@ -77,3 +77,14 @@ function test_rename_localvar(int $local): void {      //  Should match
   $lambda4 = function($b) use($local) {                 //  Should match
     return $local + $b; };                              //  Should match
 }
+
+type RenameShapeKeyEnum =
+  shape(RenameTestEnum::SMALL => int); // 4. Rename STR_CONSTANT
+
+type RenameShapeKeyConstant =
+  shape(TestClass::STR_CONSTANT => int); // 4. Rename STR_CONSTANT
+
+function test_rename_shape_keys(): void {
+  shape(RenameTestEnum::SMALL => 123); // 4. Rename STR_CONSTANT
+  shape(TestClass::STR_CONSTANT => 123); // 13. Rename TestEnum
+}

@@ -248,6 +248,19 @@
         "uri": "file://${root_path}${path_sep}references.php",
         "range": {
           "start": {
+            "line": 46,
+            "character": 17
+          },
+          "end": {
+            "line": 46,
+            "character": 28
+          }
+        }
+      },
+      {
+        "uri": "file://${root_path}${path_sep}references.php",
+        "range": {
+          "start": {
             "line": 45,
             "character": 10
           },

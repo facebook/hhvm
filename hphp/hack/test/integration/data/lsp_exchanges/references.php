@@ -44,4 +44,5 @@ function ref_test_2(int $x): void {   //  Should match
   $lambda4 = function($b) use($x) {   //  Should match
     return $x + $b; };                //  Should match
   $size = RefTestEnum::SMALL;
+  $shape = shape(RefTestEnum::SMALL => 123);
 }

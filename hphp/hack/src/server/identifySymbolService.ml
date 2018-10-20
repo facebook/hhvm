@@ -284,6 +284,12 @@ let visitor = object (self)
       let ognfa = self#on_og_null_flavor env ognf in
       self#plus obja ognfa
     | _ -> super#on_Obj_get env obj member ognf
+
+  method! on_SFclass_const env cid mid =
+    let (+) = Result_set.union in
+    process_class_id cid +
+    process_member (snd cid) mid ~is_method:false ~is_const:true +
+    super#on_SFclass_const env cid mid
 end
 
 let all_symbols tast =

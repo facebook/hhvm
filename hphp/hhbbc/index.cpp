@@ -2982,6 +2982,7 @@ const StaticString s__Reified("__Reified");
  * reified classes that extend it.
  */
 void clean_86reifiedinit_methods(IndexData& index) {
+  trace_time tracer("clean 86reifiedinit methods");
   folly::F14FastSet<const php::Class*> needsinit;
 
   // Find all classes that still need their 86reifiedinit methods
@@ -2995,17 +2996,25 @@ void clean_86reifiedinit_methods(IndexData& index) {
     needsinit.emplace(cinfo->baseList[0]->cls);
   }
 
-  // Remove it from index.methods first since this is not a unique pointer
+  // Remove them from index.methods first since index.methods does not
+  // own the pointers
+  //
+  // Removing elements from unordered_multimap seems to be O(n) in the
+  // number of equal elements; since we expect a *lot* of these
+  // methods, do a remove_if-like operation to get rid of them.
   auto const range = index.methods.equal_range(s__86reifiedinit.get());
-  for (auto it = range.first; it != range.second; ) {
-    if (!it->second->cls->parentName && needsinit.count(it->second->cls) == 0) {
-      FTRACE(2, "Erasing {}::{} from methods\n", it->second->cls->name,
-        s__86reifiedinit.get());
-      it = index.methods.erase(it);
-      continue;
+  auto i1 = range.first, i2 = range.first;
+  while (i1 != range.second) {
+    if (i1->second->cls->parentName || needsinit.count(i1->second->cls)) {
+      if (i1 != i2) i2->second = std::move(i1->second);
+      ++i2;
+    } else {
+      FTRACE(2, "Erasing {}::{} from methods\n", i1->second->cls->name,
+             s__86reifiedinit.get());
     }
-    ++it;
+    ++i1;
   }
+  if (i1 != i2) index.methods.erase(i2, i1);
 
   // Remove 86reifiedinit from the ones that do not need it
   for (auto& cinfo : index.allClassInfos) {

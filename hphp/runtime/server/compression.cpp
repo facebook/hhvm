@@ -55,109 +55,22 @@ void finalizeCompressionOnOff(int8_t& state, const char* ini_key) {
     state = isOff(value) ? 0 : 1;
   }
 }
-} // anonymous namespace
 
-
-const char*
-ResponseCompressor::ENCODING_TYPE_TO_NAME[CompressionType::Max + 1] =
-    { "br", "br", "zstd", "gzip", "", "" };
-
-ResponseCompressor::ResponseCompressor(ITransportHeaders* headers)
-  : m_encodingType(CompressionType::Max),
-    m_compressionDecision(CompressionDecision::NotDecidedYet),
-    m_headers(headers) {
-  assertx(m_headers);
-
-  enableCompression();
+std::vector<std::unique_ptr<ResponseCompressor>> makeImpls(ITransportHeaders* headers) {
+  std::vector<std::unique_ptr<ResponseCompressor>> impls;
+  impls.push_back(std::make_unique<ZstdResponseCompressor>(headers));
+  impls.push_back(std::make_unique<BrotliResponseCompressor>(headers));
+  impls.push_back(std::make_unique<GzipResponseCompressor>(headers));
+  return impls;
 }
 
-void ResponseCompressor::enableCompression() {
-  assertx(m_compressionDecision == CompressionDecision::NotDecidedYet);
-  m_compressionEnabled[CompressionType::Brotli] =
-      RuntimeOption::BrotliCompressionEnabled;
-  m_compressionEnabled[CompressionType::BrotliChunked] =
-      RuntimeOption::BrotliChunkedCompressionEnabled;
-  m_compressionEnabled[CompressionType::Zstd] =
-      RuntimeOption::ZstdCompressionEnabled;
-  m_compressionEnabled[CompressionType::Gzip] =
-      RuntimeOption::GzipCompressionLevel ? 1 : 0;
-}
-
-void ResponseCompressor::disableCompression() {
-  assertx(m_compressionDecision == CompressionDecision::NotDecidedYet);
-  for (int i = 0; i < CompressionType::Max; ++i) {
-    m_compressionEnabled[i] = 0;
-  }
-}
-
-bool ResponseCompressor::isCompressionEnabled() const {
-  return m_compressionEnabled[CompressionType::Brotli] ||
-         m_compressionEnabled[CompressionType::BrotliChunked] ||
-         m_compressionEnabled[CompressionType::Zstd] ||
-         m_compressionEnabled[CompressionType::Gzip];
-}
-
-bool ResponseCompressor::acceptCompression() const {
-  return acceptsEncoding("br") ||
-         acceptsEncoding("zstd") ||
-         acceptsEncoding("gzip");
-}
-
-bool ResponseCompressor::isCompressed() const {
-  assertx(m_compressionDecision != CompressionDecision::NotDecidedYet);
-  return m_encodingType != CompressionType::None;
-}
-
-void ResponseCompressor::decideCompression(int size, bool chunkedEncoding) {
-  assertx(m_compressionDecision == CompressionDecision::NotDecidedYet);
-  m_compressionDecision = CompressionDecision::Decided;
-
-  m_chunkedEncoding = chunkedEncoding;
-
-  // needs to be done here rather than at construction time since these are
-  // things we allow userspace to set up until the first packet goes out.
-  finalizeCompressionOnOff(
-      m_compressionEnabled[CompressionType::Brotli], "brotli.compression");
-  finalizeCompressionOnOff(
-      m_compressionEnabled[CompressionType::BrotliChunked],
-      "brotli.chunked_compression");
-  finalizeCompressionOnOff(
-      m_compressionEnabled[CompressionType::Zstd], "zstd.compression");
-  finalizeCompressionOnOff(
-      m_compressionEnabled[CompressionType::Gzip], "zlib.output_compression");
-
-  m_encodingType = CompressionType::None;
-
-  // Gzip has 20 bytes header, so anything smaller than a few bytes probably
-  // wouldn't benefit much from compression
-  if (m_chunkedEncoding || size > 50) {
-    if (acceptsEncoding("zstd") &&
-        m_compressionEnabled[CompressionType::Zstd]) {
-      // for the moment, prefer zstd
-      m_encodingType = CompressionType::Zstd;
-    } else if (m_chunkedEncoding &&
-               acceptsEncoding("br") &&
-               m_compressionEnabled[CompressionType::BrotliChunked]) {
-      m_encodingType = CompressionType::Brotli;
-    } else if (!m_chunkedEncoding &&
-               acceptsEncoding("br") &&
-               m_compressionEnabled[CompressionType::Brotli]) {
-      m_encodingType = CompressionType::Brotli;
-    } else if (acceptsEncoding("gzip") &&
-               m_compressionEnabled[CompressionType::Gzip]) {
-      m_encodingType = CompressionType::Gzip;
-    }
-  }
-}
-
-bool ResponseCompressor::acceptsEncoding(const char *encoding) const {
+bool acceptsEncoding(std::string header, const char *encoding) {
   // Examples of valid encodings that we want to accept
   // gzip;q=1.0, identity; q=0.5, *;q=0
   // compress;q=0.5, gzip;q=1.0
   // For now, we don't care about the qvalue
 
   assertx(encoding && *encoding);
-  auto header = m_headers->getHeader("Accept-Encoding");
 
   // Handle leading and trailing quotes
   size_t len = header.length();
@@ -185,109 +98,116 @@ bool ResponseCompressor::acceptsEncoding(const char *encoding) const {
   }
   return false;
 }
+} // anonymous namespace
 
-const char* ResponseCompressor::compressionName(CompressionType type) {
-  return ENCODING_TYPE_TO_NAME[static_cast<int>(type)];
+bool acceptsEncoding(ITransportHeaders* headers, const char *encoding) {
+  const auto& map = headers->getHeaders();
+  auto it = map.find("Accept-Encoding");
+  if (it == map.end()) {
+    return false;
+  }
+  const auto& vec = it->second;
+  if (vec.empty()) {
+    return false;
+  }
+  return acceptsEncoding(it->second[0], encoding);
 }
 
-StringHolder ResponseCompressor::compressResponse(
-    const char *data, int len, bool last) {
-  bool first = m_compressionDecision == CompressionDecision::NotDecidedYet;
-  if (first) {
-    decideCompression(len, !last);
+ResponseCompressor::ResponseCompressor(ITransportHeaders *headers)
+  : m_headers(headers),
+    m_accepted(-1) {
+  assertx(m_headers);
+}
+
+bool ResponseCompressor::isAccepted() {
+  if (m_accepted >= 0) {
+    return m_accepted > 0;
   }
+  m_accepted = acceptsEncoding(m_headers, encodingName());
+  return m_accepted;
+}
 
-  StringHolder response(nullptr, 0);
+/*************
+ * Gzip Impl *
+ *************/
 
-  switch (m_encodingType) {
-  case CompressionType::None:
-    // pass
-    break;
-  case CompressionType::Zstd:
-    response = compressZstd(data, len, last);
-    break;
-  case CompressionType::Brotli:
-    response = compressBrotli(data, len, last);
-    break;
-  case CompressionType::Gzip:
-    response = compressGzip(data, len, last);
-    break;
-  default:
-    raise_error("Unsupported compression type selected!");
-  }
+GzipResponseCompressor::GzipResponseCompressor(ITransportHeaders* headers)
+  : ResponseCompressor(headers),
+    m_enabled(RuntimeOption::GzipCompressionLevel > 0) {}
 
-  if (response.data() == nullptr && m_encodingType != CompressionType::None) {
-    if (m_chunkedEncoding && !first) {
-      raise_error("Failed to compress and we've already committed to compressing.");
-    } else {
-      m_encodingType = CompressionType::None;
+void GzipResponseCompressor::enable() {
+  m_enabled = RuntimeOption::GzipCompressionLevel > 0;
+}
+
+void GzipResponseCompressor::disable() {
+  m_enabled = false;
+}
+
+GzipCompressor* GzipResponseCompressor::getCompressor() {
+  if (!m_compressor) {
+    finalizeCompressionOnOff(m_enabled, "zlib.output_compression");
+    if (!isEnabled()) {
+      return nullptr;
     }
-  }
-
-  if (first) {
-    setResponseHeaders();
-  }
-
-  return response;
-}
-
-void ResponseCompressor::setResponseHeaders() {
-  assertx(m_compressionDecision != CompressionDecision::NotDecidedYet);
-
-  if (m_encodingType != CompressionType::None) {
-    auto encodingName = compressionName(m_encodingType);
-    m_headers->addHeader("Content-Encoding", encodingName);
-  }
-  if (RuntimeOption::ServerAddVaryEncoding) {
-    /*
-     * Our response may vary depending on the Accept-Encoding header if
-     *  - we compressed it or
-     *  - we didn't compress it because this client does not accept compression
-     * (The alternative there being that we could have compressed it but made
-     * our own choice not to, in which case it doesn't matter what the client
-     * tells us it accepts.)
-     */
-    if (isCompressed() || (isCompressionEnabled() && !acceptCompression())) {
-      m_headers->addHeader("Vary", "Accept-Encoding");
+    int compressionLevel = RuntimeOption::GzipCompressionLevel;
+    String compressionLevelStr;
+    IniSetting::Get("zlib.output_compression_level", compressionLevelStr);
+    int level = compressionLevelStr.toInt64();
+    if (level > compressionLevel &&
+        level <= RuntimeOption::GzipMaxCompressionLevel) {
+      compressionLevel = level;
     }
-  }
-}
-
-StringHolder ResponseCompressor::compressGzip(
-    const char *data, int size, bool last) {
-  StringHolder response(nullptr, 0);
-
-  int compressionLevel = RuntimeOption::GzipCompressionLevel;
-  String compressionLevelStr;
-  IniSetting::Get("zlib.output_compression_level", compressionLevelStr);
-  int level = compressionLevelStr.toInt64();
-  if (level > compressionLevel &&
-      level <= RuntimeOption::GzipMaxCompressionLevel) {
-    compressionLevel = level;
-  }
-  if (m_gzipCompressor == nullptr) {
-    m_gzipCompressor = std::make_unique<GzipCompressor>(
+    m_compressor = std::make_unique<GzipCompressor>(
         compressionLevel, CODING_GZIP, true);
   }
-  int len = size;
-  char *compressedData =
-    m_gzipCompressor->compress((const char*)data, len, last);
-  if (compressedData) {
-    StringHolder deleter(compressedData, len, true);
-    if (m_chunkedEncoding || len < size) {
-      response = std::move(deleter);
-    }
-  } else {
-    Logger::Error("Unable to compress response: level=%d len=%d",
-                  compressionLevel, len);
-  }
 
-  return response;
+  return m_compressor.get();
 }
 
-StringHolder ResponseCompressor::compressBrotli(
-    const char *data, int size, bool last) {
-  if (m_brotliCompressor == nullptr) {
+StringHolder GzipResponseCompressor::compressResponse(
+    const char *data, int len, bool last) {
+  auto compressor = getCompressor();
+  const char *compressedData = compressor ? compressor->compress(data, len, last) : nullptr;
+  if (!compressedData) {
+    m_compressor.reset();
+    Logger::Error("Unable to compress response: len=%d", len);
+    return StringHolder(nullptr, 0);
+  }
+  return StringHolder(compressedData, len, true);
+}
+
+/***************
+ * Brotli Impl *
+ ***************/
+
+BrotliResponseCompressor::BrotliResponseCompressor(ITransportHeaders* headers)
+  : ResponseCompressor(headers),
+    m_enabled(RuntimeOption::BrotliCompressionEnabled),
+    m_chunkedEnabled(RuntimeOption::BrotliChunkedCompressionEnabled) {}
+
+void BrotliResponseCompressor::enable() {
+  m_enabled = RuntimeOption::BrotliCompressionEnabled;
+  m_chunkedEnabled = RuntimeOption::BrotliChunkedCompressionEnabled;
+}
+
+void BrotliResponseCompressor::disable() {
+  m_enabled = false;
+  m_chunkedEnabled = false;
+}
+
+brotli::BrotliCompressor* BrotliResponseCompressor::getCompressor(
+    int size, bool last) {
+  if (!m_compressor) {
+    if (last) {
+      finalizeCompressionOnOff(m_enabled, "brotli.compression");
+      m_chunkedEnabled = false;
+    } else {
+      m_enabled = false;
+      finalizeCompressionOnOff(m_chunkedEnabled, "brotli.chunked_compression");
+    }
+    if (!isEnabled()) {
+      return nullptr;
+    }
     brotli::BrotliParams params;
     params.mode =
         (brotli::BrotliParams::Mode)RuntimeOption::BrotliCompressionMode;
@@ -299,7 +219,7 @@ StringHolder ResponseCompressor::compressBrotli(
     Variant lgWindowSize;
     IniSetting::Get("brotli.compression_lgwin", lgWindowSize);
     params.lgwin = lgWindowSize.asInt64Val();
-    if (size && !m_chunkedEncoding) {
+    if (size && !m_chunkedEnabled) {
       // If there is only one block (i.e. non-chunked content) set a maximum
       // brotli window of ceil(log2(size)). This way the reader doesn't have
       // to waste memory constructing a larger window which will never be used.
@@ -308,38 +228,209 @@ StringHolder ResponseCompressor::compressBrotli(
           folly::findLastSet(static_cast<unsigned int>(size) - 1));
     }
 
-    m_brotliCompressor = std::make_unique<brotli::BrotliCompressor>(params);
+    m_compressor = std::make_unique<brotli::BrotliCompressor>(params);
   }
 
-  size_t len = size;
-  auto compressedData =
-      HPHP::compressBrotli(m_brotliCompressor.get(), data, len, last);
-  if (!compressedData) {
-    Logger::Error("Unable to compress response to brotli: size=%d", size);
-    return StringHolder(nullptr, 0);
-  }
-
-  return StringHolder(compressedData, len, true);
+  return m_compressor.get();
 }
 
-StringHolder ResponseCompressor::compressZstd(
-    const char *data, int size, bool last) {
-  if (m_zstdCompressor == nullptr) {
+StringHolder BrotliResponseCompressor::compressResponse(
+    const char *data, int len, bool last) {
+  auto compressor = getCompressor(len, last);
+  size_t size = len;
+  const char *compressedData = compressor ?
+      HPHP::compressBrotli(compressor, data, size, last) :
+      nullptr;
+  if (!compressedData) {
+    m_compressor.reset();
+    Logger::Error("Unable to compress response to brotli: len=%d", len);
+    return StringHolder(nullptr, 0);
+  }
+  return StringHolder(compressedData, size, true);
+}
+
+/*************
+ * Zstd Impl *
+ *************/
+
+ZstdResponseCompressor::ZstdResponseCompressor(ITransportHeaders* headers)
+  : ResponseCompressor(headers),
+    m_enabled(RuntimeOption::ZstdCompressionEnabled) {}
+
+void ZstdResponseCompressor::enable() {
+  m_enabled = RuntimeOption::ZstdCompressionEnabled;
+}
+
+void ZstdResponseCompressor::disable() {
+  m_enabled = false;
+}
+
+ZstdCompressor* ZstdResponseCompressor::getCompressor() {
+  if (!m_compressor) {
+    finalizeCompressionOnOff(m_enabled, "zstd.compression");
+    if (!isEnabled()) {
+      return nullptr;
+    }
     Variant quality;
     IniSetting::Get("zstd.compression_level", quality);
     auto compression_level = quality.asInt64Val();
 
-    m_zstdCompressor = std::make_unique<ZstdCompressor>(compression_level);
+    m_compressor = std::make_unique<ZstdCompressor>(compression_level);
   }
 
-  size_t len = size;
-  auto compressedData = m_zstdCompressor->compress(data, len, last);
+  return m_compressor.get();
+}
+
+StringHolder ZstdResponseCompressor::compressResponse(
+    const char *data, int len, bool last) {
+  auto compressor = getCompressor();
+  size_t size = len;
+  const char *compressedData = compressor ? compressor->compress(data, size, last) : nullptr;
   if (!compressedData) {
-    Logger::Error("Unable to compress response to zstd: size=%d", size);
+    m_compressor.reset();
+    Logger::Error("Unable to compress response to zstd: len=%d", len);
     return StringHolder(nullptr, 0);
   }
+  return StringHolder(compressedData, size, true);
+}
 
-  return StringHolder(compressedData, len, true);
+/**************
+ * Dispatcher *
+ **************/
+
+ResponseCompressorManager::ResponseCompressorManager(
+    ITransportHeaders *headers)
+  : ResponseCompressorManager(headers, makeImpls(headers)) {}
+
+ResponseCompressorManager::ResponseCompressorManager(
+    ITransportHeaders *headers,
+    std::vector<std::unique_ptr<ResponseCompressor>> impls)
+  : m_headers(headers),
+    m_compressionDecision(CompressionDecision::NotDecidedYet),
+    m_impls(std::move(impls)),
+    m_selectedImpl(nullptr),
+    m_chunkedEncoding(false) {
+  enable();
+}
+
+void ResponseCompressorManager::enable() {
+  assertx(m_compressionDecision == CompressionDecision::NotDecidedYet);
+  for (auto &impl : m_impls) {
+    impl->enable();
+  }
+}
+
+void ResponseCompressorManager::disable() {
+  assertx(m_compressionDecision == CompressionDecision::NotDecidedYet);
+  for (auto &impl : m_impls) {
+    impl->disable();
+  }
+}
+
+bool ResponseCompressorManager::isEnabled() const {
+  for (const auto &impl : m_impls) {
+    if (impl->isEnabled()) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool ResponseCompressorManager::isAccepted() {
+  for (const auto &impl : m_impls) {
+    if (impl->isEnabled() && impl->isAccepted()) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool ResponseCompressorManager::isCompressed() const {
+  assertx(m_compressionDecision != CompressionDecision::NotDecidedYet);
+  return m_selectedImpl ? m_selectedImpl->isCompressed() : false;
+}
+
+const char* ResponseCompressorManager::encodingName() const {
+  assertx(m_compressionDecision != CompressionDecision::NotDecidedYet);
+  return m_selectedImpl ? m_selectedImpl->encodingName() : nullptr;
+}
+
+StringHolder ResponseCompressorManager::compressResponse(
+    const char *data, int len, bool last) {
+  auto first = m_compressionDecision == CompressionDecision::NotDecidedYet;
+  m_chunkedEncoding |= !last;
+  StringHolder response(nullptr, 0);
+  if (first) {
+    m_compressionDecision = CompressionDecision::Decided;
+    // Select first impl that:
+    // - is enabled
+    // - is accepted by the client
+    // - successfully compresses
+    if (!m_chunkedEncoding && len < 75) {
+      // probably not worth compressing. skip.
+    } else {
+      for (auto &impl : m_impls) {
+        if (impl->isEnabled() && impl->isAccepted()) {
+          response = impl->compressResponse(data, len, last);
+          if (response.data() == nullptr) {
+            // doesn't necessarily indicate a failure, impl is allowed to do
+            // last-minute decision making about whether it can be used, e.g.,
+            // by inspecting ini settings
+          } else {
+            m_selectedImpl = impl.get();
+            break;
+          }
+        }
+      }
+    }
+  } else {
+    if (m_selectedImpl) {
+      response = m_selectedImpl->compressResponse(data, len, last);
+      if (response.data() == nullptr) {
+        m_selectedImpl = nullptr;
+        raise_error(
+            "Failed to compress a chunk. "
+            "This is unrecoverable because previous chunks have already "
+            "committed us to using this algorithm. :("
+        );
+      }
+    }
+  }
+
+  if (!m_chunkedEncoding &&
+      response.size() + 50 /* estimated http header cost */ > len) {
+    // If we still have freedom to decide, not compressing will produce a
+    // better outcome. Do that.
+    m_selectedImpl = nullptr;
+    response = StringHolder(nullptr, 0);
+  }
+
+  if (first) {
+    setResponseHeaders();
+  }
+
+  return response;
+}
+
+void ResponseCompressorManager::setResponseHeaders() {
+  if (isCompressed()) {
+    auto encoding = encodingName();
+    assertx(encoding && *encoding);
+    m_headers->addHeader("Content-Encoding", encoding);
+  }
+  if (RuntimeOption::ServerAddVaryEncoding) {
+    /*
+     * Our response may vary depending on the Accept-Encoding header if
+     *  - we compressed it or
+     *  - we didn't compress it because this client does not accept compression
+     * (The alternative there being that we could have compressed it but made
+     * our own choice not to, in which case it doesn't matter what the client
+     * tells us it accepts.)
+     */
+    if (isCompressed() || (isEnabled() && !isAccepted())) {
+      m_headers->addHeader("Vary", "Accept-Encoding");
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

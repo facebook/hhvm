@@ -34,7 +34,7 @@ namespace HPHP {
 
 struct Array;
 struct Variant;
-struct ResponseCompressor;
+struct ResponseCompressorManager;
 struct StructuredLogEntry;
 
 /**
@@ -501,7 +501,7 @@ protected:
   std::string m_mimeType;
   bool m_sendContentType;
 
-  std::unique_ptr<ResponseCompressor> m_compressor;
+  std::unique_ptr<ResponseCompressorManager> m_compressor;
 
   bool m_isSSL;
 
@@ -515,7 +515,7 @@ protected:
   bool splitHeader(const String& header, String &name, const char *&value);
   std::list<std::string> getCookieLines();
 
-  ResponseCompressor& getCompressor();
+  ResponseCompressorManager& getCompressor();
 
 
 private:

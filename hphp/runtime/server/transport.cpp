@@ -461,7 +461,7 @@ std::string Transport::getCookie(const std::string &name) {
 }
 
 bool Transport::acceptEncoding(const char *encoding) {
-  return getCompressor().acceptsEncoding(encoding);
+  return acceptsEncoding(this, encoding);
 }
 
 void Transport::setResponse(int code, const char *info) {
@@ -754,23 +754,23 @@ StringHolder Transport::compressResponse(
   return response;
 }
 
-ResponseCompressor& Transport::getCompressor() {
+ResponseCompressorManager& Transport::getCompressor() {
   if (!m_compressor) {
-    m_compressor = std::make_unique<ResponseCompressor>(this);
+    m_compressor = std::make_unique<ResponseCompressorManager>(this);
   }
   return *m_compressor;
 }
 
 void Transport::enableCompression() {
-  getCompressor().enableCompression();
+  getCompressor().enable();
 }
 
 void Transport::disableCompression() {
-  getCompressor().disableCompression();
+  getCompressor().disable();
 }
 
 bool Transport::isCompressionEnabled() {
-  return getCompressor().isCompressionEnabled();
+  return getCompressor().isEnabled();
 }
 
 void Transport::sendRaw(const char *data, int size, int code /* = 200 */,
@@ -833,7 +833,7 @@ void Transport::sendRawInternal(const char *data, int size,
   ServerStatsHelper ssh("send");
 
   if (precompressed) {
-    getCompressor().disableCompression();
+    disableCompression();
   }
   StringHolder response = compressResponse(data, size, !chunked);
 

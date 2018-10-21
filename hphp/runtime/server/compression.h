@@ -28,93 +28,146 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct GzipCompressor;
-struct ZstdCompressor;
+/**
+ * Test whether a request indicates it accepts a certain encoding.
+ */
+bool acceptsEncoding(ITransportHeaders *headers, const char *encoding);
 
+/**
+ * The ResponseCompressor interface is an abstraction that different compression
+ * schemes can implement to interface with the transport layer.
+ *
+ * A ResponseCompressor object is only valid for a single compression stream
+ * (whether single-shot or chunked).
+ */
 struct ResponseCompressor {
-  explicit ResponseCompressor(ITransportHeaders* headers);
+  explicit ResponseCompressor(ITransportHeaders *headers);
+
+  virtual ~ResponseCompressor() = default;
 
   /**
    * These functions are callable only before the first call to
    * `compressResponse`. After that point we're committed, and calling these
    * will blow up in your face to make sure you know it.
    */
-  void enableCompression();
-  void disableCompression();
+  virtual void enable() = 0;
+  virtual void disable() = 0;
 
   /**
-   * Tests whether any compression mechanisms are enabled, irrespective of
-   * whether the client can accept them.
+   * Tests whether any of the implemented compression mechanisms are enabled,
+   * irrespective of whether the client can accept them.
    */
-  bool isCompressionEnabled() const;
+  virtual bool isEnabled() const = 0;
 
   /**
-   * Test whether client accepts a certain encoding.
+   * Tests whether the client accepts this compression scheme.
+   *
+   * Note isEnabled() && isAccepted() does not imply isCompressed().
    */
-  bool acceptsEncoding(const char *encoding) const;
+  virtual bool isAccepted();
 
   /**
    * Only callable after the first `compressResponse` call.
    *
    * Returns whether the response is compressed.
    */
-  bool isCompressed() const;
+  virtual bool isCompressed() const = 0;
+
+  /**
+   * The name of the encoding this compressor will use.
+   */
+  virtual const char* encodingName() const = 0;
 
   /**
    * Returns compressed response. If compression failed or would be
    * ineffective, returns StringHolder(nullptr, 0).
    */
+  virtual StringHolder compressResponse(const char *data, int len, bool last) = 0;
+
+ protected:
+  ITransportHeaders * const m_headers;
+  int8_t m_accepted{-1}; // cached value: -1 unknown, 0 false, 1 true.
+};
+
+struct GzipResponseCompressor : ResponseCompressor {
+  explicit GzipResponseCompressor(ITransportHeaders *headers);
+  void enable() override;
+  void disable() override;
+  bool isEnabled() const override { return m_enabled; };
+  bool isCompressed() const override { return m_compressor != nullptr; };
+  const char* encodingName() const override { return "gzip"; };
+  StringHolder compressResponse(const char *data, int len, bool last) override;
+
+ private:
+  GzipCompressor* getCompressor();
+
+  int8_t m_enabled;
+  std::unique_ptr<GzipCompressor> m_compressor;
+};
+
+struct BrotliResponseCompressor : ResponseCompressor {
+  explicit BrotliResponseCompressor(ITransportHeaders *headers);
+  void enable() override;
+  void disable() override;
+  bool isEnabled() const override { return m_enabled || m_chunkedEnabled; };
+  bool isCompressed() const override { return m_compressor != nullptr; };
+  const char* encodingName() const override { return "br"; };
+  StringHolder compressResponse(const char *data, int len, bool last) override;
+
+ private:
+  brotli::BrotliCompressor* getCompressor(int size, bool last);
+
+  int8_t m_enabled;
+  int8_t m_chunkedEnabled;
+  std::unique_ptr<brotli::BrotliCompressor> m_compressor;
+};
+
+struct ZstdResponseCompressor : ResponseCompressor {
+  explicit ZstdResponseCompressor(ITransportHeaders *headers);
+  void enable() override;
+  void disable() override;
+  bool isEnabled() const override { return m_enabled; };
+  bool isCompressed() const override { return m_compressor != nullptr; };
+  const char* encodingName() const override { return "zstd"; };
+  StringHolder compressResponse(const char *data, int len, bool last) override;
+
+ private:
+  ZstdCompressor* getCompressor();
+
+  int8_t m_enabled;
+  std::unique_ptr<ZstdCompressor> m_compressor;
+};
+
+struct ResponseCompressorManager {
+  explicit ResponseCompressorManager(ITransportHeaders *headers);
+
+  // for testing
+  explicit ResponseCompressorManager(
+      ITransportHeaders *headers,
+      std::vector<std::unique_ptr<ResponseCompressor>> impls);
+
+  void enable();
+  void disable();
+  bool isEnabled() const;
+  bool isAccepted();
+  bool isCompressed() const;
+  const char* encodingName() const;
   StringHolder compressResponse(const char *data, int len, bool last);
 
  private:
-  enum CompressionType {
-    Brotli,
-    BrotliChunked,
-    Zstd,
-    Gzip,
-    None,
-    Max,
-  };
   enum class CompressionDecision {
     NotDecidedYet,
     Decided,
   };
 
-  void decideCompression(int size, bool chunkedEncoding);
-
-  /**
-   * Test whether client accepts any encodings.
-   */
-  bool acceptCompression() const;
-
-  static const char* ENCODING_TYPE_TO_NAME[CompressionType::Max + 1];
-
-  const char* compressionName(CompressionType type);
-
-  StringHolder compressGzip(
-      const char *data, int size, bool last);
-  StringHolder compressBrotli(
-      const char *data, int size, bool last);
-  StringHolder compressZstd(
-    const char *data, int size, bool last);
-
   void setResponseHeaders();
 
-  //  0 - disabled
-  //  1 - enabled, ini_set("off) allows to disable
-  // -1 - disabled, ini_set("on") allows to enable
-  int8_t m_compressionEnabled[CompressionType::Max];
-  // encoding we decided to use
-  CompressionType m_encodingType;
+  ITransportHeaders * const m_headers;
   CompressionDecision m_compressionDecision;
-
-  ITransportHeaders* m_headers;
-
+  // stored in preference order, more preferred first.
+  std::vector<std::unique_ptr<ResponseCompressor>> m_impls;
+  ResponseCompressor* m_selectedImpl;
   bool m_chunkedEncoding;
-
-  std::unique_ptr<GzipCompressor> m_gzipCompressor;
-  std::unique_ptr<brotli::BrotliCompressor> m_brotliCompressor;
-  std::unique_ptr<ZstdCompressor> m_zstdCompressor;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

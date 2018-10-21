@@ -64,35 +64,50 @@ std::vector<std::unique_ptr<ResponseCompressor>> makeImpls(ITransportHeaders* he
   return impls;
 }
 
-bool acceptsEncoding(std::string header, const char *encoding) {
+bool acceptsEncoding(folly::StringPiece header, const char *encoding) {
   // Examples of valid encodings that we want to accept
   // gzip;q=1.0, identity; q=0.5, *;q=0
   // compress;q=0.5, gzip;q=1.0
   // For now, we don't care about the qvalue
 
+  // TODO: handle *
+  // TODO: handle priorities
+  // TODO: handle q=0 disabling
+
   assertx(encoding && *encoding);
 
   // Handle leading and trailing quotes
-  size_t len = header.length();
+  size_t len = header.size();
   if (len >= 2
       && ((header[0] == '"' && header[len-1] == '"')
       || (header[0] == '\'' && header[len-1] == '\''))) {
-    header = header.substr(1, len - 2);
+    header = folly::StringPiece(header.data() + 1, len - 2);
   }
 
   // Split the header by ','
-  std::vector<std::string> cTokens;
+  std::vector<folly::StringPiece> cTokens;
   folly::split(',', header, cTokens);
   for (size_t i = 0; i < cTokens.size(); ++i) {
     // Then split by ';'
     auto& cToken = cTokens[i];
-    std::vector<std::string> scTokens;
+    std::vector<folly::StringPiece> scTokens;
     folly::split(';', cToken, scTokens);
     assertx(scTokens.size() > 0);
+    auto& scToken = scTokens[0];
+    auto begin = scToken.begin();
+    auto end = scToken.end();
+    while (begin < end && std::isspace(*begin)) {
+      ++begin;
+    }
+    while (begin < end && std::isspace(*(end-1))) {
+      --end;
+    }
+    scToken = folly::StringPiece(begin, end);
+
     // lhs contains the encoding
     // rhs, if it exists, contains the qvalue
-    std::string lhs = boost::trim_copy(scTokens[0]);
-    if (strcasecmp(lhs.c_str(), encoding) == 0) {
+    if (scToken.size() == strlen(encoding) &&
+        strncasecmp(scToken.data(), encoding, scToken.size()) == 0) {
       return true;
     }
   }

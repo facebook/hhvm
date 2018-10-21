@@ -296,6 +296,74 @@ struct ResponseCompressorTest : Test {
 //////////////////////////////////////////////////////////////////////
 }
 
+/*************************
+ * Accept-Encoding Tests *
+ *************************/
+
+TEST_F(ResponseCompressorTest, testAcceptEncodingNoHeader) {
+  EXPECT_FALSE(acceptsEncoding(&mh, "foo"));
+}
+
+TEST_F(ResponseCompressorTest, testAcceptEncodingEmptyHeader) {
+  mh.addRequestHeader("Accept-Encoding", "");
+  EXPECT_FALSE(acceptsEncoding(&mh, "foo"));
+}
+
+TEST_F(ResponseCompressorTest, testAcceptEncodingEmptySpaceHeader) {
+  mh.addRequestHeader("Accept-Encoding", " ");
+  EXPECT_FALSE(acceptsEncoding(&mh, "foo"));
+}
+
+TEST_F(ResponseCompressorTest, testAcceptEncodingOtherValue) {
+  mh.addRequestHeader("Accept-Encoding", "bar");
+  EXPECT_FALSE(acceptsEncoding(&mh, "foo"));
+}
+
+TEST_F(ResponseCompressorTest, testAcceptEncodingOtherValuePrefix) {
+  mh.addRequestHeader("Accept-Encoding", "fooo");
+  EXPECT_FALSE(acceptsEncoding(&mh, "foo"));
+}
+
+TEST_F(ResponseCompressorTest, testAcceptEncodingPrefix) {
+  mh.addRequestHeader("Accept-Encoding", "fo");
+  EXPECT_FALSE(acceptsEncoding(&mh, "foo"));
+}
+
+TEST_F(ResponseCompressorTest, testAcceptEncodingOtherValues) {
+  mh.addRequestHeader("Accept-Encoding", "bar, quux");
+  EXPECT_FALSE(acceptsEncoding(&mh, "foo"));
+}
+
+TEST_F(ResponseCompressorTest, testAcceptEncodingOtherValuesWithOptions) {
+  mh.addRequestHeader("Accept-Encoding", "bar ; some_opt=foo, quux;q=2.5;foo");
+  EXPECT_FALSE(acceptsEncoding(&mh, "foo"));
+}
+
+TEST_F(ResponseCompressorTest, testAcceptEncoding) {
+  mh.addRequestHeader("Accept-Encoding", "foo");
+  EXPECT_TRUE(acceptsEncoding(&mh, "foo"));
+}
+
+TEST_F(ResponseCompressorTest, testAcceptEncodingSpace) {
+  mh.addRequestHeader("Accept-Encoding", " \t foo\t");
+  EXPECT_TRUE(acceptsEncoding(&mh, "foo"));
+}
+
+TEST_F(ResponseCompressorTest, testAcceptEncodingMultipleValues) {
+  mh.addRequestHeader("Accept-Encoding", "bar, foo, quux");
+  EXPECT_TRUE(acceptsEncoding(&mh, "foo"));
+}
+
+TEST_F(ResponseCompressorTest, testAcceptEncodingOptions) {
+  mh.addRequestHeader("Accept-Encoding", "foo;q=1");
+  EXPECT_TRUE(acceptsEncoding(&mh, "foo"));
+}
+
+TEST_F(ResponseCompressorTest, testAcceptEncodingOptionsSpace) {
+  mh.addRequestHeader("Accept-Encoding", "   foo \t; q=1\t;  x=y \t ");
+  EXPECT_TRUE(acceptsEncoding(&mh, "foo"));
+}
+
 /**************
  * Gzip Tests *
  **************/

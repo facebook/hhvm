@@ -632,6 +632,10 @@ TEST_F(ResponseCompressorTest, testZstdChunkedCompression) {
  ********************/
 
 TEST_F(ResponseCompressorTest, testManagerConstruction) {
+  auto dispatcher = std::make_unique<ResponseCompressorManager>(&mh);
+}
+
+TEST_F(ResponseCompressorTest, testManagerConstructionWithMock) {
   auto mockPtr = std::make_unique<MockResponseCompressor>();
   auto& mock = *mockPtr;
   std::vector<std::unique_ptr<ResponseCompressor>> vec;

@@ -113,6 +113,32 @@ bool acceptsEncoding(folly::StringPiece header, const char *encoding) {
   }
   return false;
 }
+
+std::unique_ptr<ResponseCompressor> makeGzipResponseCompressor(
+    ITransportHeaders *headers) {
+  return std::make_unique<GzipResponseCompressor>(headers);
+}
+
+std::unique_ptr<ResponseCompressor> makeBrotliResponseCompressor(
+    ITransportHeaders *headers) {
+  return std::make_unique<BrotliResponseCompressor>(headers);
+}
+
+std::unique_ptr<ResponseCompressor> makeZstdResponseCompressor(
+    ITransportHeaders *headers) {
+  return std::make_unique<ZstdResponseCompressor>(headers);
+}
+
+struct StaticInitTrigger {
+  StaticInitTrigger() {
+    // priorities as described in header file comment
+    ResponseCompressorManager::addImpl(makeZstdResponseCompressor, 30);
+    ResponseCompressorManager::addImpl(makeBrotliResponseCompressor, 20);
+    ResponseCompressorManager::addImpl(makeGzipResponseCompressor, 10);
+  }
+};
+
+const StaticInitTrigger trigger;
 } // anonymous namespace
 
 bool acceptsEncoding(ITransportHeaders* headers, const char *encoding) {
@@ -312,6 +338,37 @@ StringHolder ZstdResponseCompressor::compressResponse(
 /**************
  * Dispatcher *
  **************/
+
+std::unique_ptr<std::vector<std::pair<ResponseCompressorManager::Factory, int>>>
+    ResponseCompressorManager::s_implFactories;
+
+void ResponseCompressorManager::addImpl(Factory implFactory, int priority) {
+  if (!s_implFactories) {
+    s_implFactories = std::make_unique<std::vector<std::pair<Factory, int>>>();
+  }
+  s_implFactories->emplace_back(implFactory, priority);
+  // prefer repeatedly sorting at static init time rather than at use time
+  std::sort(
+      s_implFactories->begin(),
+      s_implFactories->end(),
+      [](const std::pair<Factory, int>& a, const std::pair<Factory, int>& b) {
+        return a.second > b.second;
+      });
+}
+
+std::vector<std::unique_ptr<ResponseCompressor>>
+ResponseCompressorManager::makeImpls(ITransportHeaders *headers) {
+  std::vector<std::unique_ptr<ResponseCompressor>> impls;
+  if (s_implFactories) {
+    impls.reserve(s_implFactories->size());
+    for (const auto& pair : *s_implFactories) {
+      auto factory = pair.first;
+      impls.push_back(factory(headers));
+    }
+  }
+  return impls;
+}
+
 
 ResponseCompressorManager::ResponseCompressorManager(
     ITransportHeaders *headers)

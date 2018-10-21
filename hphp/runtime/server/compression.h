@@ -146,6 +146,23 @@ struct ResponseCompressorManager {
       ITransportHeaders *headers,
       std::vector<std::unique_ptr<ResponseCompressor>> impls);
 
+  using Factory = std::unique_ptr<ResponseCompressor>(*)(ITransportHeaders *headers);
+
+  /**
+   * Adds another response compressor implementation that will be considered
+   * for use in compressing responses. The DispatchedResponseCompressor will
+   * use the first response compressor (ordered by priority high to low) that
+   * is enabled, accepted, and successfully compresses the response.
+   *
+   * The above implementations are included by default with these priorities:
+   * - Zstd, 30
+   * - Brotli, 20
+   * - Gzip, 10
+   *
+   * Not thread safe, call only at static-init time.
+   */
+  static void addImpl(Factory implFactory, int priority);
+
   void enable();
   void disable();
   bool isEnabled() const;
@@ -168,6 +185,14 @@ struct ResponseCompressorManager {
   std::vector<std::unique_ptr<ResponseCompressor>> m_impls;
   ResponseCompressor* m_selectedImpl;
   bool m_chunkedEncoding;
+
+  static std::vector<std::unique_ptr<ResponseCompressor>> makeImpls(
+      ITransportHeaders *headers);
+
+  // unique_ptrs are correctly empty-init'ed in the first pass of static
+  // initialization, whereas vectors are not. Using a unique_ptr makes this
+  // safe to access from other static initialization contexts.
+  static std::unique_ptr<std::vector<std::pair<Factory, int>>> s_implFactories;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

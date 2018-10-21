@@ -19,9 +19,7 @@
 
 #include <cstddef>
 
-namespace brotli {
-  class BrotliCompressor;
-};
+#include <enc/encode.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

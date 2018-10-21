@@ -29,19 +29,13 @@
 #include "hphp/runtime/base/string-holder.h"
 #include "hphp/runtime/base/type-string.h"
 
-namespace brotli {
-  class BrotliCompressor;
-};
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Array;
 struct Variant;
+struct ResponseCompressor;
 struct StructuredLogEntry;
-
-struct GzipCompressor;
-struct ZstdCompressor;
 
 /**
  * For storing headers and cookies.
@@ -238,7 +232,7 @@ public:
    */
   void enableCompression();
   void disableCompression();
-  bool isCompressionEnabled() const;
+  bool isCompressionEnabled();
 
   /**
    * Set cookie response header.
@@ -398,11 +392,6 @@ public:
   std::string getCookie(const std::string &name);
 
   /**
-   * Test whether client is okay to accept compressed response.
-   */
-  bool decideCompression();
-
-  /**
    * Sending back a response.
    */
   void setResponse(int code, const char *info = nullptr);
@@ -509,39 +498,12 @@ protected:
 
   std::vector<int> m_chunksSentSizes;
 
-  // Supported compression types.
-  enum CompressionType {
-    Brotli,
-    BrotliChunked,
-    Zstd,
-    Gzip,
-    Max,
-  };
-  static const char* ENCODING_TYPE_TO_NAME[CompressionType::Max + 1];
-  const char* compressionName(CompressionType type);
-
   std::string m_mimeType;
   bool m_sendContentType;
-  //  0 - disabled
-  //  1 - enabled, ini_set("off) allows to disable
-  // -1 - disabled, ini_set("on") allows to enable
-  int8_t m_compressionEnabled[CompressionType::Max];
-  // encodings accepted by the client, and enabled
-  bool m_acceptedEncodings[CompressionType::Max];
-  // encoding we decided to use
-  CompressionType m_encodingType;
-  std::unique_ptr<GzipCompressor> m_gzipCompressor;
-  std::unique_ptr<brotli::BrotliCompressor> m_brotliCompressor;
-  std::unique_ptr<ZstdCompressor> m_zstdCompressor;
+
+  std::unique_ptr<ResponseCompressor> m_compressor;
 
   bool m_isSSL;
-
-  enum class CompressionDecision {
-    NotDecidedYet,
-    ShouldNot,
-    Should,
-  };
-  CompressionDecision m_compressionDecision;
 
   ThreadType m_threadType;
 
@@ -553,17 +515,12 @@ protected:
   bool splitHeader(const String& header, String &name, const char *&value);
   std::list<std::string> getCookieLines();
 
-  StringHolder prepareResponse(const void *data, int size, bool &compressed,
-                               bool last);
-  StringHolder compressGzip(const void *data, int size, bool &compressed,
-                            bool last);
-  StringHolder compressBrotli(const void *data, int size, bool &compressed,
-                              bool last);
-  StringHolder compressZstd(const void *data, int size, bool &compressed,
-                            bool last);
+  ResponseCompressor& getCompressor();
+
 
 private:
-  void prepareHeaders(bool compressed, bool chunked,
+  StringHolder compressResponse(const char *data, int size, bool last);
+  void prepareHeaders(bool precompressed, bool chunked,
     const StringHolder &response, const StringHolder& orig_response);
 };
 

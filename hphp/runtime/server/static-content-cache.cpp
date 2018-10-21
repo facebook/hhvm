@@ -17,8 +17,8 @@
 #include "hphp/runtime/server/static-content-cache.h"
 
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/server/compression.h"
 #include "hphp/util/boot-stats.h"
-#include "hphp/util/gzip.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 

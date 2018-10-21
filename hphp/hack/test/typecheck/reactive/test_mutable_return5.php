@@ -39,23 +39,9 @@ class A {
   }
 
   <<__Rx, __MutableReturn>>
-  public function f5(bool $b): C {
-    // OK - returns conditional that returns mutably owned value
-    $a = \HH\Rx\mutable(make());
-    return $b ? $a : make();
-  }
-
-  <<__Rx, __MutableReturn>>
-  public function f6(): C {
-    // OK - returns null coalescing operator that returns mutably owned value
-    $a = \HH\Rx\mutable(make());
-    return $a ?? make();
-  }
-
-  <<__Rx, __MutableReturn>>
   public function f7(): C {
     // OK - pipe where right hand side returns mutably owned value
-    return 1 |> make2($$);
+    return 1 |> \HH\Rx\mutable(make2($$));
   }
 
   <<__Rx, __MutableReturn>>

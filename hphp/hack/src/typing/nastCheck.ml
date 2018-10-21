@@ -103,7 +103,7 @@ module CheckFunctionBody = struct
     | _, Throw (_, e) ->
         expr f_type env e
     | _, Expr e ->
-        expr_allow_await f_type env e;
+        expr_allow_await_or_rx_move f_type env e;
         ()
     | _, ( Noop | Fallthrough | GotoLabel _ | Goto _ | Break _ | Continue _
          | Static_var _ | Global_var _ | Unsafe_block _ ) -> ()
@@ -202,15 +202,38 @@ module CheckFunctionBody = struct
     | _ ->
       expr_allow_await f_type env e
 
-  and expr_allow_await f_type env (p, exp) = match f_type, exp with
+  and expr_allow_await ?(is_rhs=false) f_type env (p, exp) = match f_type, exp with
     | Ast.FAsync, Await e
     | Ast.FAsyncGenerator, Await e -> expr f_type env e; ()
     | Ast.FAsync, Binop (Ast.Eq None, e1, (_, Await e))
-    | Ast.FAsyncGenerator, Binop (Ast.Eq None, e1, (_, Await e)) ->
+    | Ast.FAsyncGenerator, Binop (Ast.Eq None, e1, (_, Await e)) when not is_rhs ->
       expr f_type env e1;
       expr f_type env e;
       ()
     | _ -> expr_ p f_type env exp; ()
+
+  and expr_allow_rx_move orelse f_type env  exp  =
+    match exp with
+    | _, Call (_, e, _, el, uel) when is_rx_move e ->
+      expr f_type env e;
+      List.iter el ~f:(expr f_type env);
+      List.iter uel ~f:(expr f_type env);
+      ()
+    | _ ->
+      orelse f_type env exp
+
+  and expr_allow_await_or_rx_move f_type env exp =
+    match exp with
+    | _, Binop (Ast.Eq None, e1, rhs) ->
+      expr f_type env e1;
+      expr_allow_rx_move (expr_allow_await ~is_rhs:true) f_type env rhs
+    | _ ->
+      expr_allow_await f_type env exp
+
+  and is_rx_move e =
+    match e with
+    | _, Id (_, v) -> v = SN.Rx.move
+    | _ -> false
 
   and expr2 f_type env (e1, e2) =
     expr f_type env e1;
@@ -267,10 +290,13 @@ module CheckFunctionBody = struct
         expr f_type env e;
         maybe (expr f_type) env eopt;
         ()
+    | _, Call (_, e, _, _, _) when is_rx_move e ->
+        Errors.rx_move_invalid_location (fst e);
+        ()
     | _, Call (_, e, _, el, uel) ->
         expr f_type env e;
-        List.iter el (expr f_type env);
-        List.iter uel (expr f_type env);
+        List.iter el (expr_allow_rx_move expr f_type env);
+        List.iter uel (expr_allow_rx_move expr f_type env);
         ()
     | _, True | _, False | _, Int _
     | _, Float _ | _, Null | _, String _ -> ()
@@ -1087,9 +1113,6 @@ and fun_param env (pos, name) f_type byref param =
   then Errors.reference_in_rx pos;
 
   error_if_has_rx_on_scope env param.param_user_attributes;
-
-  if is_mutable && is_maybe_mutable
-  then Errors.conflicting_mutable_and_maybe_mutable_attributes pos;
 
   match param.param_callconv with
   | None -> ()

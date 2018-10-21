@@ -15,7 +15,7 @@ function g(): void {
   $a = \HH\Rx\mutable(new A(10));
   // OK to pass mutable as maybe mutable
   $v1 = f($a);
-  \HH\Rx\freeze($a);
+  $a1 = \HH\Rx\freeze($a);
   // OK to pass immutable as maybe mutable
-  $v2 = f($a);
+  $v2 = f($a1);
 }

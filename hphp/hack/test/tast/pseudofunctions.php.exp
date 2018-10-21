@@ -95,12 +95,15 @@
                         [])))
                     ))));
               (Expr
-                 (([29:3-20], void),
-                  (Call (Cnormal,
-                     (([29:3-16], (function($x): void)),
-                      (Id ([29:3-16], "\\HH\\Rx\\freeze"))),
-                     [], [(([29:17-19], C), (Lvar ([29:17-19], $c)))], 
-                     []))))
+                 (([29:3-26], C),
+                  (Binop ((Eq None), (([29:3-6], C), (Lvar ([29:3-6], $c1))),
+                     (([29:9-26], C),
+                      (Call (Cnormal,
+                         (([29:9-22], (function(C $x): C)),
+                          (Id ([29:9-22], "\\HH\\Rx\\freeze"))),
+                         [], [(([29:23-25], C), (Lvar ([29:23-25], $c)))], 
+                         [])))
+                     ))))
               ];
             fnb_unsafe = false });
        f_fun_kind = FSync;

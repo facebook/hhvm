@@ -17,9 +17,14 @@
 namespace HH\Rx;
 
 // freeze is a special function for mutability
-function freeze($x) : void;
+<<__Rx>>
+function freeze<T>(T $x) : T;
 
 // mutable is a special function to indicate ownership
 // transfer for fresh mutable values
 <<__Rx>>
 function mutable<T>(T $x): T;
+
+// used to transfer ownership of mutably owned values
+<<__Rx>>
+function move<T>(T $x): T;

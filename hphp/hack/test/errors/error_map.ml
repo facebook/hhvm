@@ -147,6 +147,7 @@ UnsupportedFeature = 2092
 TraitInterfaceConstructorPromo = 2093
 NonstaticPropertyWithLSB = 2094
 ReferenceInAnonUseClause = 2095
+RxMoveInvalidLocation = 2096
 
 NastCheck Errors:
 AbstractBody = 3001
@@ -512,4 +513,9 @@ BadLateInitOverride = 4282
 EscapingMutableObject = 4283
 OverrideLSB = 4284
 MultipleConcreteDefs = 4285
+MoveInNonreactiveContext = 4286
+InvalidMoveUse = 4287
+InvalidMoveTarget = 4288
+IgnoredResultOfFreeze = 4289
+IgnoredResultOfMove = 4290
   |}]

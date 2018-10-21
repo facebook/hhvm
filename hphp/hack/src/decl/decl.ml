@@ -264,8 +264,10 @@ let fun_returns_void_to_rx user_attributes =
   Attributes.mem SN.UserAttributes.uaReturnsVoidToRx user_attributes
 
 let get_param_mutability user_attributes =
-  if Attributes.mem SN.UserAttributes.uaMutable user_attributes
-  then Some Param_mutable
+  if Attributes.mem SN.UserAttributes.uaOwnedMutable user_attributes
+  then Some Param_owned_mutable
+  else if Attributes.mem SN.UserAttributes.uaMutable user_attributes
+  then Some Param_borrowed_mutable
   else if Attributes.mem SN.UserAttributes.uaMaybeMutable user_attributes
   then Some Param_maybe_mutable
   else None

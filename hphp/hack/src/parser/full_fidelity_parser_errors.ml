@@ -1090,6 +1090,9 @@ let methodish_missing_reactivity_for_condition node =
     attribute_missing_reactivity_for_condition attr_spec
   | _ -> false
 
+let methodish_contains_owned_mutable_attribute node =
+  methodish_contains_attribute (syntax node) SN.UserAttributes.uaOwnedMutable
+
 let function_missing_reactivity_for_condition node =
   match syntax node with
   | FunctionDeclaration { function_attribute_spec = attr_spec; _ } ->
@@ -1098,6 +1101,9 @@ let function_missing_reactivity_for_condition node =
 
 let function_declaration_contains_only_rx_if_impl_attribute node =
   function_declaration_contains_attribute node SN.UserAttributes.uaOnlyRxIfImpl
+
+let function_declaration_contains_owned_mutable_attribute node =
+  function_declaration_contains_attribute node SN.UserAttributes.uaOwnedMutable
 
 let attribute_multiple_reactivity_annotations attr_spec =
   let rec check l seen =
@@ -1218,6 +1224,10 @@ let methodish_errors env node parents errors =
       produce_error errors
       function_missing_reactivity_for_condition node
       SyntaxError.missing_reactivity_for_condition function_attrs in
+    let errors =
+      produce_error errors
+      function_declaration_contains_owned_mutable_attribute node
+      SyntaxError.misplaced_owned_mutable function_attrs in
     errors
   | MethodishDeclaration md ->
     let header_node = md.methodish_function_decl_header in
@@ -1299,6 +1309,10 @@ let methodish_errors env node parents errors =
       produce_error errors
       methodish_missing_reactivity_for_condition node
       SyntaxError.missing_reactivity_for_condition method_attrs in
+    let errors =
+      produce_error errors
+      methodish_contains_owned_mutable_attribute node
+      SyntaxError.misplaced_owned_mutable method_attrs in
     errors
   | _ -> errors
 
@@ -1408,6 +1422,60 @@ let decoration_errors node errors =
   let errors = produce_error errors is_double_reference node SyntaxError.double_reference node in
   errors
 
+let parameter_rx_errors parents errors node =
+  match syntax node with
+  | ParameterDeclaration { parameter_attribute = spec; _ } ->
+    let has_owned_mutable =
+      attribute_specification_contains spec SN.UserAttributes.uaOwnedMutable in
+    let errors =
+      let has_mutable =
+          attribute_specification_contains spec SN.UserAttributes.uaMutable in
+      let has_maybemutable =
+          attribute_specification_contains spec SN.UserAttributes.uaMaybeMutable in
+      let errors =
+        match has_mutable, has_owned_mutable, has_maybemutable with
+        | true, true, _ ->
+          make_error_from_node node
+            SyntaxError.conflicting_mutable_and_owned_mutable_attributes :: errors
+        | true, _, true ->
+          make_error_from_node node
+            SyntaxError.conflicting_mutable_and_maybe_mutable_attributes :: errors
+        | _, true, true ->
+          make_error_from_node node
+            SyntaxError.conflicting_owned_mutable_and_maybe_mutable_attributes :: errors
+        | _ -> errors in
+      errors in
+    let errors =
+      if has_owned_mutable
+      then
+        let parent_func_is_rx =
+          let rec get_containing_function_attrs l =
+            match l with
+            | [] -> None
+            | ({ syntax = AnonymousFunction { anonymous_attribute_spec = s; _ }; _ } |
+               { syntax = Php7AnonymousFunction { php7_anonymous_attribute_spec = s; _ }; _ } |
+               { syntax = LambdaExpression { lambda_attribute_spec = s; _ }; _ } |
+               { syntax = FunctionDeclaration { function_attribute_spec = s; _ }; _ } |
+               { syntax = MethodishDeclaration { methodish_attribute = s; _ }; _ })
+              :: _ -> Some s
+            | _ :: tl -> get_containing_function_attrs tl
+          in
+          get_containing_function_attrs parents
+          |> Option.value_map ~default:false ~f:attribute_has_reactivity_annotation
+        in
+        if not parent_func_is_rx
+        then make_error_from_node node
+          SyntaxError.mutably_owned_attribute_on_non_rx_function :: errors
+        else errors
+      else errors
+    in
+    errors
+  | _ -> errors
+
+let parameters_rx_errors params parents errors =
+  syntax_to_list_no_separators params
+  |> List.fold_left ~init:errors ~f:(parameter_rx_errors parents)
+
 let parameter_errors env node parents namespace_name names errors =
   match syntax node with
   | ParameterDeclaration p ->
@@ -1417,6 +1485,7 @@ let parameter_errors env node parents namespace_name names errors =
     let errors =
       produce_error_from_check errors param_with_callconv_has_default
       node (SyntaxError.error2074 callconv_text) in
+    let errors = parameter_rx_errors parents errors node in
     let errors =
       produce_error_from_check errors param_with_callconv_is_byref
       node (SyntaxError.error2075 callconv_text) in
@@ -1463,12 +1532,13 @@ let parameter_errors env node parents namespace_name names errors =
     names, errors
   | FunctionDeclarationHeader { function_parameter_list = params; _ }
   | AnonymousFunction { anonymous_parameters = params; _ }
-  | ClosureTypeSpecifier { closure_parameter_list = params; _ } ->
-    params_errors env params namespace_name names errors
+  | ClosureTypeSpecifier { closure_parameter_list = params; _ }
   | LambdaExpression
-    { lambda_signature = {syntax = LambdaSignature { lambda_parameters; _ }; _}
+    { lambda_signature = {syntax = LambdaSignature { lambda_parameters = params; _ }; _}
     ; _
-    } -> params_errors env lambda_parameters namespace_name names errors
+    } ->
+    let errors = parameters_rx_errors params parents errors in
+    params_errors env params namespace_name names errors
   | DecoratedExpression _ -> names, decoration_errors node errors
   | _ -> names, errors
 

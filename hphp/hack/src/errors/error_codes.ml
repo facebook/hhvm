@@ -143,6 +143,7 @@ module Naming                               = struct
   | TraitInterfaceConstructorPromo
   | NonstaticPropertyWithLSB
   | ReferenceInAnonUseClause
+  | RxMoveInvalidLocation
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@ deriving enum, show { with_path = false } ]
   let err_code = to_enum
@@ -518,6 +519,11 @@ module Typing                               = struct
   | EscapingMutableObject
   | OverrideLSB
   | MultipleConcreteDefs
+  | MoveInNonreactiveContext
+  | InvalidMoveUse
+  | InvalidMoveTarget
+  | IgnoredResultOfFreeze
+  | IgnoredResultOfMove
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@ deriving enum, show { with_path = false } ]
   let err_code = to_enum

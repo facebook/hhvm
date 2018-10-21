@@ -604,4 +604,11 @@ module type S = sig
   val trait_interface_constructor_promo: Pos.t -> unit
   val escaping_mutable_object: Pos.t -> unit
   val multiple_concrete_defs : Pos.t -> Pos.t -> string -> string -> string -> string -> unit
+  val move_in_nonreactive_context: Pos.t -> unit
+  val invalid_move_target : Pos.t -> Pos.t -> string -> unit
+  val invalid_move_use : Pos.t -> unit
+  val ignored_result_of_freeze : Pos.t -> unit
+  val ignored_result_of_move : Pos.t -> unit
+  val mutably_owned_argument_mismatch: arg_is_owned_local: bool -> Pos.t -> Pos.t -> unit
+  val rx_move_invalid_location: Pos.t -> unit
 end

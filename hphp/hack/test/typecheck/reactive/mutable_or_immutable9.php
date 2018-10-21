@@ -32,9 +32,9 @@ function g(): void {
   // OK to call maybe mutable method on mutable instance
   $v2 = $a->f();
 
-  \HH\Rx\freeze($a);
+  $a1 = \HH\Rx\freeze($a);
   // OK to pass immutable as maybe mutable
-  $v3 = f($a);
+  $v3 = f($a1);
   // OK to call maybe mutable method on immutable instance
-  $v4 = $a->f();
+  $v4 = $a1->f();
 }

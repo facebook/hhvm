@@ -479,7 +479,8 @@ and pp_fun_type : type a. Format.formatter -> a fun_type -> unit = fun fmt x ->
 and show_param_mutability : param_mutability option -> string = fun x ->
   match x with
   | None -> "none"
-  | Some Param_mutable -> "mutable"
+  | Some Param_owned_mutable -> "owned mutable"
+  | Some Param_borrowed_mutable -> "mutable"
   | Some Param_maybe_mutable -> "maybe-mutable"
 
 and show_fun_type : type a. a fun_type -> string = fun x ->

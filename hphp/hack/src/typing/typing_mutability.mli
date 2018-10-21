@@ -14,15 +14,16 @@ val handle_assignment_mutability :
   T.expr_ option ->
   Typing_env.env
 val freeze_local : Pos.t -> Typing_env.env -> T.expr list -> Typing_env.env
+val move_local : Pos.t -> Typing_env.env -> T.expr list -> Typing_env.env
 val check_rx_mutable_arguments : Pos.t -> Typing_env.env -> T.expr list -> unit
 val enforce_mutable_call : Typing_env.env -> T.expr -> unit
 val enforce_mutable_constructor_call:
   Typing_env.env -> 'a Typing_defs.ty -> T.expr list -> unit
-val check_function_return_value:
+val handle_value_in_return:
   function_returns_mutable: bool ->
   function_returns_void_for_rx: bool ->
   Typing_env.env ->
   Pos.t ->
   T.expr ->
-  unit
+  Typing_env.env
 val check_unset_target: Typing_env.env -> T.expr -> unit

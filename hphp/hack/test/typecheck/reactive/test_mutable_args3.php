@@ -17,6 +17,6 @@ function test(): void {
   $y = \HH\Rx\mutable(new Test(7));
   $z = \HH\Rx\mutable(new Foo());
   $z->bar($x, $y);
-  \HH\Rx\freeze($x);
-  $z->bar($x, $y);
+  $x1 = \HH\Rx\freeze($x);
+  $z->bar($x1, $y);
 }

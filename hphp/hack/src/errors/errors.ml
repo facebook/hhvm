@@ -839,6 +839,10 @@ let different_scope pos var_name pos' =
   pos', ("But in a different scope")
 ]
 
+let rx_move_invalid_location pos =
+  add (Naming.err_code Naming.RxMoveInvalidLocation) pos
+    "Rx\\move is only allowed in argument position or as right hand side of the assignment."
+
 let undefined pos var_name =
   add (Naming.err_code Naming.Undefined) pos ("Variable "^var_name^
     " is undefined, "^
@@ -2515,6 +2519,19 @@ let immutable_argument_mismatch param_pos arg_pos =
     arg_pos, "But this expression is mutable";
   ]
 
+let mutably_owned_argument_mismatch ~arg_is_owned_local param_pos arg_pos =
+  let arg_msg =
+    if arg_is_owned_local
+    then "Owned mutable locals used as argument should be passed via \
+      Rx\\move function"
+    else "But this expression is not owned mutable" in
+  add_list (Typing.err_code Typing.ImmutableArgumentMismatch)
+  [
+    arg_pos, "Invalid argument";
+    param_pos, "This parameter is marked with <<__OwnedMutable>>";
+    arg_pos, arg_msg;
+  ]
+
 let maybe_mutable_argument_mismatch param_pos arg_pos =
   add_list (Typing.err_code Typing.MaybeMutableArgumentMismatch)
   [
@@ -2526,9 +2543,10 @@ let maybe_mutable_argument_mismatch param_pos arg_pos =
 let invalid_mutable_return_result error_pos function_pos value_kind =
   add_list (Typing.err_code Typing.InvalidMutableReturnResult)
   [
-    error_pos, "Functions marked <<__MutableReturn>> must return mutably owned values";
+    error_pos, "Functions marked <<__MutableReturn>> must return mutably owned values: \
+    mutably owned local variables and results of calling Rx\\mutable.";
     function_pos, "This function is marked <<__MutableReturn>>";
-    error_pos, "This expression is (" ^ value_kind ^ ")"
+    error_pos, "This expression is " ^ value_kind
   ]
 
 let freeze_in_nonreactive_context pos1 =
@@ -2538,6 +2556,11 @@ let freeze_in_nonreactive_context pos1 =
 let mutable_in_nonreactive_context pos =
   add (Typing.err_code Typing.MutableInNonreactiveContext) pos
   ("\\HH\\Rx\\mutable can only be used in reactive functions")
+
+let move_in_nonreactive_context pos =
+  add (Typing.err_code Typing.MoveInNonreactiveContext) pos
+  ("\\HH\\Rx\\move can only be used in reactive functions")
+
 
 let invalid_argument_type_for_condition_in_rx
   ~is_receiver f_pos def_pos arg_pos expected_type actual_type =
@@ -2585,10 +2608,32 @@ let invalid_freeze_use pos1 =
   add (Typing.err_code Typing.InvalidFreezeUse) pos1
   ("freeze takes a single mutably-owned local variable as an argument")
 
+let invalid_move_use pos1 =
+  add (Typing.err_code Typing.InvalidMoveUse) pos1
+  ("move takes a single mutably-owned local variable as an argument")
+
+let ignored_result_of_freeze pos =
+  add (Typing.err_code Typing.IgnoredResultOfFreeze) pos
+  ("Result of freeze operation is unused. Note that freeze unsets local variable \
+    that was passed as an argument so it won't be accessible after calling freeze.")
+
+let ignored_result_of_move pos =
+  add (Typing.err_code Typing.IgnoredResultOfMove) pos
+  ("Result of move operation is unused. Note that move unsets local variable \
+    that was passed as an argument so it won't be accessible after calling move.")
+
+
 let invalid_freeze_target pos1 var_pos var_mutability_str =
   add_list (Typing.err_code Typing.InvalidFreezeTarget)
   [
     pos1, "Invalid argument - freeze() takes a single mutable variable";
+    var_pos, "This variable is "^var_mutability_str;
+  ]
+
+let invalid_move_target pos1 var_pos var_mutability_str =
+  add_list (Typing.err_code Typing.InvalidMoveTarget)
+  [
+    pos1, "Invalid argument - move() takes a single mutably-owned variable";
     var_pos, "This variable is "^var_mutability_str;
   ]
 

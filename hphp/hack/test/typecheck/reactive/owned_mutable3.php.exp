@@ -1,0 +1,2 @@
+File "owned_mutable3.php", line 5, characters 21-51:
+Parameter cannot have both __Mutable and __OwnedMutable annotations. (Parsing[1002])

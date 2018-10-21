@@ -142,17 +142,22 @@ let check_mutability
   let str m =
     match m with
     | None -> "immutable"
-    | Some Param_mutable -> "mutable"
+    | Some Param_owned_mutable -> "owned mutable"
+    | Some Param_borrowed_mutable -> "mutable"
     | Some Param_maybe_mutable -> "maybe-mutable" in
+  (* maybe-mutable <------immutable
+                      |
+                       <--mutable <-- owned mutable  *)
   match mut_sub, mut_super with
   (* immutable is not compatible with mutable *)
-  | None, Some Param_mutable
+  | None, Some (Param_borrowed_mutable | Param_owned_mutable)
   (* mutable is not compatible with immutable  *)
-  | Some Param_mutable, None
-  (* maybe-mutable is not compatible with immutable *)
-  | Some Param_maybe_mutable, None
-  (* maybe mutable is not compatible with immutable *)
-  | Some Param_maybe_mutable, Some Param_mutable ->
+  | Some (Param_borrowed_mutable | Param_owned_mutable), None
+  (* borrowed mutable is not compatible with owned mutable *)
+  | Some Param_borrowed_mutable, Some Param_owned_mutable
+  (* maybe-mutable is not compatible with immutable/mutable *)
+  | Some Param_maybe_mutable, (None | Some (Param_borrowed_mutable | Param_owned_mutable))
+    ->
     env, TL.Unsat (fun () -> Errors.mutability_mismatch
       ~is_receiver p_sub (str mut_sub) p_super (str mut_super))
   | _ ->

@@ -9,15 +9,15 @@ class C {
 function basic(): void {
   $z = \HH\Rx\mutable(new C(7)); // $z is mutable
   if (true) {
-    \HH\Rx\freeze($z);
+    $z1 = \HH\Rx\freeze($z);
   } else {
     $z->val = 5;
-    \HH\Rx\freeze($z);
+    $z1 = \HH\Rx\freeze($z);
   }
-  // valid, $z is now immutable
+  // valid, $z1 is now immutable
   $y = \HH\Rx\mutable(new C(2));
   if (true) {
-    \HH\Rx\freeze($y);
+    $y1 = \HH\Rx\freeze($y);
   } else {
 
   }

@@ -20,7 +20,8 @@ function foo(Test $x): void {
   // this is allowed
   $z->val = 5;
   // so is this
-  \HH\Rx\freeze($z);
-  // not allowed, $z is immutable
-  $z->setVal(7);
+  $z1 = \HH\Rx\freeze($z);
+  hh_show($z1);
+  // not allowed, $z1 is immutable
+  $z1->setVal(7);
 }

@@ -144,6 +144,7 @@ module UserAttributes = struct
   let uaMaybeMutable        = "__MaybeMutable"
   let uaRxOfScope           = "__RxOfScope"
   let uaLateInit            = "__LateInit"
+  let uaOwnedMutable        = "__OwnedMutable"
 
   let as_set = List.fold_right ~f:SSet.add ~init:SSet.empty
     [
@@ -177,6 +178,7 @@ module UserAttributes = struct
       uaLateInit;
       uaAtMostRxAsFunc;
       uaAtMostRxAsArgs;
+      uaOwnedMutable;
     ]
 end
 
@@ -373,6 +375,7 @@ module Rx = struct
   let cTraversable = "\\HH\\Rx\\Traversable"
   let is_enabled = "\\HH\\Rx\\IS_ENABLED"
   let cKeyedTraversable = "\\HH\\Rx\\KeyedTraversable"
+  let move = "\\HH\\Rx\\move"
 end
 
 module Shapes = struct

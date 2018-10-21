@@ -4,5 +4,5 @@ class A {}
 
 <<__Rx, __MutableReturn>>
 function f1(): A {
-  return new A();
+  return \HH\Rx\mutable(new A());
 }

@@ -381,7 +381,8 @@ and reactivity =
   | RxVar of reactivity option
 
 and param_mutability =
-  | Param_mutable
+  | Param_owned_mutable
+  | Param_borrowed_mutable
   | Param_maybe_mutable
 
 (* The type of a function AND a method.

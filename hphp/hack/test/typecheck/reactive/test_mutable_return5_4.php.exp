@@ -1,0 +1,6 @@
+File "test_mutable_return5_4.php", line 20, characters 12-34:
+Functions marked <<__MutableReturn>> must return mutably owned values: mutably owned local variables and results of calling Rx\mutable. (Typing[4216])
+File "test_mutable_return5_4.php", line 18, characters 19-20:
+This function is marked <<__MutableReturn>>
+File "test_mutable_return5_4.php", line 20, characters 12-34:
+This expression is not valid return value for __MutableReturn functions.

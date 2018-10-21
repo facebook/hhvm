@@ -15,6 +15,6 @@ function test(): void {
   $x = \HH\Rx\mutable(new Foo(7));
   foo($x); // no errors
   foo(\HH\Rx\mutable(new Foo(8))); // no problemo
-  \HH\Rx\freeze($x);
-  foo($x); // error
+  $y = \HH\Rx\freeze($x);
+  foo($y); // error
 }

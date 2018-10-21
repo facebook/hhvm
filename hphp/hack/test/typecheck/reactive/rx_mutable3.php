@@ -14,10 +14,4 @@ function f(bool $x): void {
   $b = \HH\Rx\mutable(g());
   // OK
   $b = \HH\Rx\mutable(new A());
-  // OK
-  $b = \HH\Rx\mutable($x ? new A() : g());
-  // OK
-  $b = \HH\Rx\mutable(g() ?? new A());
-  // OK
-  $b = \HH\Rx\mutable(g() ?: new A());
 }

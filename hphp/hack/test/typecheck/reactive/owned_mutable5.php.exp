@@ -1,0 +1,2 @@
+File "owned_mutable5.php", line 4, characters 12-33:
+__OwnedMutable annotated parameters are only allowed in reactive functions. (Parsing[1002])

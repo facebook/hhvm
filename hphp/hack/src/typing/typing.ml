@@ -223,9 +223,11 @@ let has_accept_disposable_attribute param =
 
 let get_param_mutability param =
   if param_has_attribute param SN.UserAttributes.uaMutable
-  then Some Param_mutable
+  then Some Param_borrowed_mutable
   else if param_has_attribute param SN.UserAttributes.uaMaybeMutable
   then Some Param_maybe_mutable
+  else if param_has_attribute param SN.UserAttributes.uaOwnedMutable
+  then Some Param_owned_mutable
   else None
 
 (* Check whether this is a function type that (a) either returns a disposable
@@ -400,8 +402,10 @@ let rec bind_param env (ty1, param) =
             then Env.set_using_var env id else env in
   let env =
     match get_param_mutability param with
-    | Some Param_mutable ->
+    | Some Param_borrowed_mutable ->
       Env.add_mutable_var env id (param.param_pos, Typing_mutability_env.Borrowed)
+    | Some Param_owned_mutable ->
+      Env.add_mutable_var env id (param.param_pos, Typing_mutability_env.Mutable)
     | Some Param_maybe_mutable ->
       Env.add_mutable_var env id (param.param_pos, Typing_mutability_env.MaybeMutable)
     | None -> env in
@@ -746,15 +750,17 @@ and stmt env = function
         else Some (pos, Reason.URreturn, (Reason.Rwitness p, Typing_utils.tany env)) in
       if return_disposable then enforce_return_disposable env e;
       let env, te, rty = expr ~is_using_clause:return_disposable ?expected:expected env e in
-      if Env.env_reactivity env <> Nonreactive
-      then begin
-        Typing_mutability.check_function_return_value
-          ~function_returns_mutable:return_mutable
-          ~function_returns_void_for_rx: return_void_to_rx
-          env
-          env.Env.function_pos
-          te
-      end;
+      let env =
+        if Env.env_reactivity env <> Nonreactive
+        then begin
+          Typing_mutability.handle_value_in_return
+            ~function_returns_mutable:return_mutable
+            ~function_returns_void_for_rx: return_void_to_rx
+            env
+            env.Env.function_pos
+            te
+        end
+        else env in
       if return_by_ref
       then begin match snd e with
         | Array_get _ -> Errors.return_ref_in_array p
@@ -3653,16 +3659,6 @@ and is_abstract_ft fty = match fty with
           end;
         | _ ->
           make_call_special_from_def env id tel (Tprim Tvoid))
-  (* Special function `freeze` *)
-  | Id ((_, freeze) as id) when freeze = SN.Rx.freeze ->
-      check_function_in_suspend SN.Rx.freeze;
-      let env, tel, _ = exprs env el in
-      if uel <> [] then
-        Errors.unpacking_disallowed_builtin_function p freeze;
-      if not (Env.env_local_reactive env) then
-        Errors.freeze_in_nonreactive_context p;
-      let env = Typing_mutability.freeze_local p env tel in
-      make_call_special_from_def env id tel (Tprim Tvoid)
   (* Pseudo-function `get_called_class` *)
   | Id (_, get_called_class) when
       get_called_class = SN.StdlibFunctions.get_called_class
@@ -4234,11 +4230,39 @@ and is_abstract_ft fty = match fty with
       check_coroutine_call env fty;
       let env, tel, tuel, ty =
         call ~expected ~is_expr_statement p env fty el uel in
-      if id = SN.Rx.mutable_ then begin
-        Typing_mutability.check_rx_mutable_arguments p env tel;
-        if not (Env.env_local_reactive env) then
-          Errors.mutable_in_nonreactive_context p;
+      let is_mutable = id = SN.Rx.mutable_ in
+      let is_move = id = SN.Rx.move in
+      let is_freeze = id = SN.Rx.freeze in
+      (* error when rx builtins are used in non-reactive context *)
+      if not (Env.env_local_reactive env) then begin
+        if is_mutable then Errors.mutable_in_nonreactive_context p
+        else if is_move then Errors.move_in_nonreactive_context p
+        else if is_freeze then Errors.freeze_in_nonreactive_context p
       end;
+      (* ban unpacking when calling builtings *)
+      if (is_mutable || is_move || is_freeze) && uel <> [] then begin
+        Errors.unpacking_disallowed_builtin_function p id
+      end;
+      (* check arguments of Rx\mutable *)
+      if is_mutable then begin
+        Typing_mutability.check_rx_mutable_arguments p env tel;
+      end;
+      (* error if result of Rx\freeze or Rx\move is ignored *)
+      if is_expr_statement
+      then begin
+         if is_freeze
+         then Errors.ignored_result_of_freeze p
+         else if is_move
+         then Errors.ignored_result_of_move p
+      end;
+      (* adjust env for Rx\freeze or Rx\move calls *)
+      let env =
+        if is_freeze
+        then Typing_mutability.freeze_local p env tel
+        else if is_move
+        then Typing_mutability.move_local p env tel
+        else env
+      in
       make_call env (T.make_typed_expr fpos fty (T.Id x)) hl tel tuel ty
   | _ ->
       let env, te, fty = expr env e in

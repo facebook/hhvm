@@ -614,3 +614,18 @@ let functions_cannot_implement_reactive =
 let missing_reactivity_for_condition =
   "__OnlyRxIfImpl, __OnlyRxIfArgs, and __AtMostRxAsArgs annotations cannot " ^
   "be used without __Rx, __RxShallow, or __RxLocal."
+
+let misplaced_owned_mutable =
+  "__OwnedMutable annotation can only be placed on parameters."
+
+let conflicting_mutable_and_owned_mutable_attributes =
+  "Parameter cannot have both __Mutable and __OwnedMutable annotations."
+
+let conflicting_mutable_and_maybe_mutable_attributes =
+  "Parameter cannot have both __Mutable and __MaybeMutable annotations."
+
+let conflicting_owned_mutable_and_maybe_mutable_attributes =
+  "Parameter cannot have both __OwnedMutable and __MaybeMutable annotations."
+
+let mutably_owned_attribute_on_non_rx_function =
+  "__OwnedMutable annotated parameters are only allowed in reactive functions."

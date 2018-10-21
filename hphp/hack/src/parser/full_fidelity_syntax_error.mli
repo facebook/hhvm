@@ -322,3 +322,8 @@ val lowering_parsing_error : string -> string -> string
 val multiple_reactivity_annotations : string
 val functions_cannot_implement_reactive : string
 val missing_reactivity_for_condition : string
+val misplaced_owned_mutable: string
+val conflicting_mutable_and_owned_mutable_attributes: string
+val conflicting_mutable_and_maybe_mutable_attributes: string
+val conflicting_owned_mutable_and_maybe_mutable_attributes: string
+val mutably_owned_attribute_on_non_rx_function: string

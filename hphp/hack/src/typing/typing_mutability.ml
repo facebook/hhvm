@@ -23,60 +23,57 @@ end)
 
 type args_mut_map = (Pos.t * param_mutability option) Borrowable_args.t
 
+(* true if function has <<__ReturnMutable>> annotation, otherwise false *)
 let fun_returns_mutable (env : Typing_env.env) (id : Nast.sid) =
   match Env.get_fun env (snd id) with
   | None -> false
-  | Some fty ->
+  | Some fty -> fty.ft_returns_mutable
+
+let is_fun_call_returning_mutable (env : Typing_env.env) (e : T.expr): bool =
+  match snd e with
+  (* Function call *)
+  | T.Call (_, (_, T.Id id), _, _, _)
+  | T.Call (_, (_, T.Fun_id id), _, _, _) ->
+    fun_returns_mutable env id
+  | T.Call (_, ((_, (_, Tfun fty)), T.Obj_get _), _, _, _)
+  | T.Call (_, ((_, (_, Tfun fty)), T.Class_const _), _, _, _)->
     fty.ft_returns_mutable
+  | _ -> false
 
-(* Returns true if the expression returns a new owned mutable *)
-let rec expr_returns_owned_mutable
- (env : Typing_env.env) (e : T.expr)
- : bool =
- match snd e with
- | T.New _
- | T.KeyValCollection ((`Map | `ImmMap), _)
- | T.ValCollection ((`Vector | `ImmVector | `Set | `ImmSet), _)
- | T.Pair _ ->
-  true
- (* Function call *)
- | T.Call (_, (_, T.Id id), _, _, _)
- | T.Call (_, (_, T.Fun_id id), _, _, _) ->
-   fun_returns_mutable env id
- | T.Call (_, ((_, (_, Tfun fty)), T.Obj_get _), _, _, _)
- | T.Call (_, ((_, (_, Tfun fty)), T.Class_const _), _, _, _)->
-   fty.ft_returns_mutable
- (* conditional operator returns owned mutable if both consequence and alternative
-    return owned mutable *)
- | T.Eif (_, e1_opt, e2) ->
-   Option.value_map e1_opt ~default:true ~f:(expr_returns_owned_mutable env) &&
-   expr_returns_owned_mutable env e2
- (* ?? operator returns owned mutable if both left hand side and right hand side
-    return owned mutable *)
- | T.Binop (Ast.QuestionQuestion, l, r) ->
-   expr_returns_owned_mutable env l && expr_returns_owned_mutable env r
- (* cast returns owned mutable if its expression part is owned mutable *)
- | T.Cast (_, e) ->
-   expr_returns_owned_mutable env e
- (* XHP expression is considered owned mutable *)
- | T.Xml _ -> true
- (* l |> r returns owned mutable if r yields owned mutable *)
- | T.Pipe (_, _, r) ->
-   expr_returns_owned_mutable env r
- | _ -> false
 
-let check_function_return_value
+(* Returns true if the expression is valid argument for Rx\mutable *)
+let is_valid_rx_mutable_arg env e =
+  match snd e with
+  | T.New _
+  | T.KeyValCollection ((`Map | `ImmMap), _)
+  | T.ValCollection ((`Vector | `ImmVector | `Set | `ImmSet), _)
+  | T.Pair _
+  | T.Xml _ ->
+    true
+  | _ -> is_fun_call_returning_mutable env e
+
+(* checks arguments to Rx\mutable function - should be owned mutable value
+  excluding locals  *)
+let check_rx_mutable_arguments
+  (p : Pos.t) (env : Typing_env.env) (tel : T.expr list) =
+  match tel with
+  | [e] when is_valid_rx_mutable_arg env e -> ()
+  | _ ->
+    (* HH\Rx\mutable function expects single fresh mutably owned value *)
+    Errors.invalid_argument_of_rx_mutable_function p
+
+let handle_value_in_return
   ~function_returns_mutable
   ~function_returns_void_for_rx
   (env: Typing_env.env)
   fun_pos
-  (e: T.expr) =
+  (e: T.expr): Typing_env.env =
   let error_mutable e mut_opt =
     let kind =
       match mut_opt with
-      | None -> "non-mutable"
-      | Some MaybeMutable -> "maybe-mutable"
-      | Some Borrowed -> "borrowed"
+      | None -> "(non-mutable)"
+      | Some MaybeMutable -> "(maybe-mutable)"
+      | Some Borrowed -> "(borrowed)"
       | Some Mutable -> assert false in
     Errors.invalid_mutable_return_result (T.get_position e) fun_pos kind in
   let error_borrowed_as_immutable e =
@@ -86,71 +83,84 @@ let check_function_return_value
       (T.get_position e) in
   let rec aux e =
     match snd e with
+    (* ignore nulls - it is ok to return then from functions
+       that return nullable types and for non-nullable return types it will
+       be an error anyways *)
+    | T.Null -> env
+    (* allow bare new expressions
+       - implicit Rx\mutable in __MutableReturn functions *)
+    | T.New _  | T.Xml _ -> env
+    | T.Call(_, (_, T.Id (_, id)), _, _, _) when id = SN.Rx.mutable_ ->
+      (* ok to return result of Rx\mutable - implicit Rx\move *)
+      env
+    | T.Pipe (_, _, r) ->
+      (* ok for pipe if rhs returns mutable *)
+      aux r
     | T.Lvar (_, id) ->
       let mut_env = Env.get_env_mutability env in
       begin match LMap.get id mut_env with
       | Some (_, Mutable) ->
         (* it is ok to return mutably owned values *)
-        ()
+        let env = Env.env_with_mut env (LMap.remove id mut_env) in
+        Env.unset_local env id
       | Some (_, mut) when function_returns_mutable ->
-        error_mutable e (Some mut)
+        error_mutable e (Some mut);
+        env
       | Some (_, Borrowed) when not function_returns_mutable ->
         (* attempt to return borrowed value as immutable
            unless function is marked with __ReturnsVoidToRx in which case caller
            will not be able to alias the value *)
         if not function_returns_void_for_rx
-        then error_borrowed_as_immutable e
+        then error_borrowed_as_immutable e;
+        env
       | _ ->
-        if function_returns_mutable then error_mutable e None
+        if function_returns_mutable then error_mutable e None;
+        env
       end
     | T.This when not function_returns_mutable && Env.function_is_mutable env ->
       (* mutable this is treated as borrowed and this cannot be returned as immutable
          unless function is marked with __ReturnsVoidToRx in which case caller
          will not be able to alias the value *)
       if not function_returns_void_for_rx
-      then error_borrowed_as_immutable e
-    | T.Eif (_, e1_opt, e2) ->
-      Option.iter e1_opt ~f:aux;
-      aux e2
-      (* ?? operator returns owned mutable if both left hand side and right hand side
-      return owned mutable *)
-    | T.Binop (Ast.QuestionQuestion, l, r) ->
-      aux l;
-      aux r;
-    (* cast returns owned mutable if its expression part is owned mutable *)
-    | T.Cast (_, e) ->
-      aux e
-    (* XHP expression is considered owned mutable *)
-    | T.Xml _ -> ()
-    (* l |> r returns owned mutable if r yields owned mutable *)
-    | T.Pipe (_, _, r) ->
-      aux r
-      (* NOTE: we only consider mutable objects as legal return values so
-      literals, arrays/varrays/darrays/collections, unary/binary expressions
-      that does not yield objects, ints/floats are not considered valid
-
-      CONSIDER: We might consider to report special error message for scenarios when
-      return value is known to be literal\primitive\value with immutable semantics.
-      *)
-    (* ignore nulls - it is ok to return then from functions
-       that return nullable types and for non-nullable return types it will
-       be an error anyways *)
-    | T.Null -> ()
+      then error_borrowed_as_immutable e;
+      env
     | _ ->
-      if function_returns_mutable && not (expr_returns_owned_mutable env e)
-      then error_mutable e None in
- aux e
+      (* for __MutableReturn functions allow delegating calls
+        to __MutableReturn functions *)
+      if function_returns_mutable && not (is_fun_call_returning_mutable env e)
+      then begin
+        let kind = "not valid return value for __MutableReturn functions." in
+        let kind =
+          if is_valid_rx_mutable_arg env e
+          then kind ^ " Did you forget to wrap it in Rx\\mutable?"
+          else kind in
+        Errors.invalid_mutable_return_result (T.get_position e) fun_pos kind
+      end;
+      env in
+  aux e
 
-(* Returns true if we can modify properties of the expression *)
-let expr_is_mutable
-  (env : Typing_env.env) (e : T.expr) : bool =
- match snd e with
- | T.Callconv (Ast.Pinout, (_, T.Lvar id))
- | T.Lvar id ->
-    Env.is_mutable env (snd id)
- | T.This when Env.function_is_mutable env -> true
- | T.Call(_, (_, T.Id (_, id)), _, _, _) when id = SN.Rx.mutable_ -> true
- | _ -> false
+(* true if expression is valid argument for __OwnedMutable parameter:
+  - Rx\move(owned-local)
+  - Rx\mutable(call or new) *)
+let expr_is_valid_owned_arg (e : T.expr) : bool =
+  match snd e with
+  | T.Call(_, (_, T.Id (_, id)), _, _, _) -> id = SN.Rx.mutable_ || id = SN.Rx.move
+  | _ -> false
+
+(* true if expression is valid argument for __Mutable parameter:
+  - Rx\move(owned-local)
+  - Rx\mutable(call or new)
+  - owned-or-borrowed-local *)
+let expr_is_valid_borrowed_arg env (e: T.expr): bool =
+  expr_is_valid_owned_arg e || begin
+    match snd e with
+    | T.Callconv (Ast.Pinout, (_, T.Lvar id))
+    | T.Lvar id ->
+      Env.is_mutable env (snd id)
+    | T.This when Env.function_is_mutable env -> true
+    | _ ->
+      false
+  end
 
 let expr_is_maybe_mutable
   (env: Typing_env.env)
@@ -164,37 +174,59 @@ let expr_is_maybe_mutable
     end
   | _ -> false
 
-let check_rx_mutable_arguments
-  (p : Pos.t) (env : Typing_env.env) (tel : T.expr list) =
-  match tel with
-  | [e] when expr_returns_owned_mutable env e -> ()
-  | _ ->
-    (* HH\Rx\mutable function expects single fresh mutably owned value *)
-    Errors.invalid_argument_of_rx_mutable_function p
+let is_owned_local env e =
+  match snd e with
+  | T.Lvar (_, id) ->
+    begin match LMap.get id (Env.get_env_mutability env) with
+    | Some (_, Mutable) -> true
+    | _ -> false
+    end
+  | _ -> false
 
-let freeze_local (p : Pos.t) (env : Typing_env.env) (tel : T.expr list)
-: Typing_env.env =
+let freeze_or_move_local
+  (p : Pos.t)
+  (env : Typing_env.env)
+  (tel : T.expr list)
+  (invalid_target : Pos.t -> Pos.t -> string -> unit)
+  (invalid_use : Pos.t -> unit)
+  : Typing_env.env =
   match tel with
   | [(_, T.Lvar (id_pos, id));] ->
     let mut_env = Env.get_env_mutability env in
-    let mut_env =
-    match LMap.get id mut_env with
+    begin match LMap.get id mut_env with
     | Some (_, Mutable) ->
-      LMap.remove id mut_env
+      let env = Env.env_with_mut env (LMap.remove id mut_env) in
+      Env.unset_local env id
     | Some x ->
-      Errors.invalid_freeze_target p id_pos (to_string x);
-      mut_env
+      invalid_target p id_pos (to_string x);
+      env
     | None ->
-      Errors.invalid_freeze_target p id_pos "immutable";
-      mut_env in
-    Env.env_with_mut env mut_env
+      invalid_target p id_pos "immutable";
+      env
+    end
   | [((id_pos, _), T.This);] ->
-      Errors.invalid_freeze_target p id_pos "the this type, which is mutably borrowed";
+      invalid_target p id_pos "the this type, which is mutably borrowed";
       env
   | _ ->
-    (* Error, freeze takes a single local as an argument *)
-    Errors.invalid_freeze_use p;
+    (* Error, freeze/move takes a single local as an argument *)
+    invalid_use p;
     env
+
+let freeze_local
+  (p : Pos.t)
+  (env : Typing_env.env)
+  (tel : T.expr list)
+  : Typing_env.env =
+  freeze_or_move_local p env tel
+    Errors.invalid_freeze_target Errors.invalid_freeze_use
+
+let move_local
+  (p : Pos.t)
+  (env : Typing_env.env)
+  (tel : T.expr list)
+  : Typing_env.env =
+  freeze_or_move_local p env tel
+    Errors.invalid_move_target Errors.invalid_move_use
 
 let with_mutable_value env e ~default ~f =
   match snd e with
@@ -212,7 +244,8 @@ let check_borrowing
   let mut_to_string m =
     match m with
     | None -> "immutable"
-    | Some Param_mutable -> "mutable"
+    | Some Param_owned_mutable -> "owned mutable"
+    | Some Param_borrowed_mutable -> "mutable"
     | Some Param_maybe_mutable -> "maybe mutable" in
   let check key =
     (* only check mutable expressions *)
@@ -222,8 +255,9 @@ let check_borrowing
     (* error case 1, expression was already passed as mutable parameter *)
     (* error case 2, expression was passed a maybe mutable parameter before and
        now is passed again as mutable *)
-    | Some (pos, (Some Param_mutable as mut)), _
-    | Some (pos, (Some Param_maybe_mutable as mut)), Some Param_mutable ->
+    | Some (pos, (Some Param_owned_mutable as mut)), _
+    | Some (pos, (Some Param_borrowed_mutable as mut)), _
+    | Some (pos, (Some Param_maybe_mutable as mut)), Some Param_borrowed_mutable ->
       Errors.mutable_expression_as_multiple_mutable_arguments
         (T.get_position e)(mut_to_string p.fp_mutability) pos (mut_to_string mut);
       mut_args
@@ -244,20 +278,29 @@ let rec check_param_mutability (env : Typing_env.env)
     (* maybe mutable parameters allow anything *)
     if param.fp_mutability <> Some Param_maybe_mutable
     then Env.error_if_reactive_context env @@ begin fun () ->
-      let is_mutable = expr_is_mutable env e in
-      let is_maybe_mutable = expr_is_maybe_mutable env e in
       begin match param.fp_mutability with
       (* maybe-mutable argument value *)
-      | _ when is_maybe_mutable ->
+      | _ when expr_is_maybe_mutable env e ->
         Errors.maybe_mutable_argument_mismatch
           (param.fp_pos)
           (T.get_position e)
-      | Some Param_mutable when not is_mutable ->
+      | Some Param_owned_mutable when
+        not (expr_is_valid_owned_arg e) ->
+        (*  __OwnedMutable requires argument to be
+            - Rx\mutable for all expressions except variable expressions
+            - Rx\move for variable expression *)
+        let arg_is_owned_local = is_owned_local env e in
+        Errors.mutably_owned_argument_mismatch
+          ~arg_is_owned_local
+          (param.fp_pos)
+          (T.get_position e)
+      | Some Param_borrowed_mutable when
+        not (expr_is_valid_borrowed_arg env e) ->
       (* mutable parameter, immutable argument *)
         Errors.mutable_argument_mismatch
           (param.fp_pos)
           (T.get_position e)
-      | None when is_mutable ->
+      | None when expr_is_valid_borrowed_arg env e ->
       (* immutable parameter, mutable argument *)
         Errors.immutable_argument_mismatch
           (param.fp_pos)
@@ -275,29 +318,38 @@ let check_mutability_fun_params env mut_args fty el =
   else
   let params = fty.ft_params in
   let mut_args, remaining_exprs = check_param_mutability env mut_args params el in
-  let rec error_on_first_mismatched_argument ~needs_mutable param es =
+  let rec error_on_first_mismatched_argument ~req_mut param es =
     match es with
     | [] -> ()
     | e::es ->
       if expr_is_maybe_mutable env e then
         Errors.maybe_mutable_argument_mismatch (param.fp_pos) (T.get_position e)
-      else if expr_is_mutable env e <> needs_mutable then begin
-        if needs_mutable
-        then Errors.mutable_argument_mismatch (param.fp_pos) (T.get_position e)
-        else Errors.immutable_argument_mismatch (param.fp_pos) (T.get_position e)
+      else begin
+        match req_mut with
+        (* non mutable parameter - disallow anythin mutable *)
+        | None when expr_is_valid_borrowed_arg env e ->
+          Errors.immutable_argument_mismatch (param.fp_pos) (T.get_position e)
+        | Some Param_borrowed_mutable when not (expr_is_valid_borrowed_arg env e) ->
+        (* mutably borrowed parameter - complain on immutable or mutably owned parameters.
+          mutably owned are not allowed because Rx\move will unset the original local *)
+          Errors.mutable_argument_mismatch (param.fp_pos) (T.get_position e)
+        | Some Param_owned_mutable when not (expr_is_valid_owned_arg e) ->
+        (* mutably owned parameter - all arguments need to be passed with Rx\move *)
+          Errors.mutably_owned_argument_mismatch
+            ~arg_is_owned_local:(is_owned_local env e)
+            (param.fp_pos)
+            (T.get_position e)
+        | _ ->
+          error_on_first_mismatched_argument ~req_mut param es
       end
-      else error_on_first_mismatched_argument ~needs_mutable param es in
+  in
   Env.error_if_reactive_context env @@ begin fun () ->
     begin match fty.ft_arity with
     (* maybe mutable variadic parameter *)
     | Fvariadic (_, ({ fp_mutability = Some Param_maybe_mutable; _ })) ->
       ()
-    (* mutable variadic parameter, ensure that all values being passed are mutable *)
-    | Fvariadic (_, ({ fp_mutability = Some Param_mutable; _ } as param)) ->
-      error_on_first_mismatched_argument ~needs_mutable:true param remaining_exprs
-    (* immutable variadic parameter, ensure that all values being passed are immutable *)
-    | Fvariadic (_, ({ fp_mutability = None; _ } as param)) ->
-      error_on_first_mismatched_argument ~needs_mutable:false param remaining_exprs
+    | Fvariadic (_, ({ fp_mutability = req_mut; _ } as param)) ->
+      error_on_first_mismatched_argument ~req_mut param remaining_exprs
     | _ -> ()
     end;
     begin match fty.ft_arity with
@@ -307,7 +359,6 @@ let check_mutability_fun_params env mut_args fty el =
     | _ -> ()
     end
   end
-
 let enforce_mutable_constructor_call env ctor_fty el =
   match ctor_fty with
   | _, Tfun fty ->
@@ -332,20 +383,22 @@ let enforce_mutable_call (env : Typing_env.env) (te : T.expr) =
     if fty.ft_reactive <> Nonreactive
     then begin Env.error_if_reactive_context env @@ begin fun () ->
       let fpos = Reason.to_pos r in
+      (* OwnedMutable annotation is not allowed on methods so
+         we ignore it here since it already syntax error *)
       match fty.ft_mutability with
       (* mutable-or-immutable function - ok *)
       | Some Param_maybe_mutable -> ()
       (* mutable call on mutable-or-immutable value - error *)
-      | Some Param_mutable when expr_is_maybe_mutable env expr ->
+      | Some Param_borrowed_mutable when expr_is_maybe_mutable env expr ->
         Errors.invalid_call_on_maybe_mutable ~fun_is_mutable:true pos fpos
       (* non-mutable call on mutable-or-immutable value - error *)
       | None when expr_is_maybe_mutable env expr ->
         Errors.invalid_call_on_maybe_mutable ~fun_is_mutable:false pos fpos
       (* mutable call on immutable value - error *)
-      | Some Param_mutable when not (expr_is_mutable env expr) ->
+      | Some Param_borrowed_mutable when not (expr_is_valid_borrowed_arg env expr) ->
         Errors.mutable_call_on_immutable fpos pos
       (* immutable call on mutable value - error *)
-      | None when expr_is_mutable env expr ->
+      | None when expr_is_valid_borrowed_arg env expr ->
         Errors.immutable_call_on_mutable fpos pos
       (* anything else - ok *)
       | _ -> ()
@@ -382,7 +435,7 @@ let rec is_valid_mutable_subscript_expression_target env v =
     is_valid_mutable_subscript_expression_target env e
   | (_, ty), T.Obj_get (e, _, _) ->
     is_byval_collection_type env ty &&
-    (is_valid_mutable_subscript_expression_target env e || expr_is_mutable env e)
+    (is_valid_mutable_subscript_expression_target env e || expr_is_valid_borrowed_arg env e)
   | _ -> false
 
 let check_assignment_or_unset_target
@@ -391,9 +444,9 @@ let check_assignment_or_unset_target
     (* Check for modifying immutable objects *)
     match snd te1 with
      (* Setting mutable locals is okay *)
-    | T.Obj_get (e1, _, _) when expr_is_mutable env e1 -> ()
+    | T.Obj_get (e1, _, _) when expr_is_valid_borrowed_arg env e1 -> ()
     | T.Array_get (e1, _)
-      when expr_is_mutable env e1 ||
+      when expr_is_valid_borrowed_arg env e1 ||
            is_valid_mutable_subscript_expression_target env e1 -> ()
     | T.Class_get _
     | T.Obj_get _
@@ -426,8 +479,9 @@ let handle_assignment_mutability
      Errors.reassign_mutable_this (T.get_position te1)
    end;
    mut_env
- (* var = mutable(v) - add the var to the env since it points to a owned mutable value *)
- | T.Lvar (_, id), Some T.Call(_, (_, T.Id (_, n)), _, _, _) when n = SN.Rx.mutable_ ->
+ (* var = mutable(v)/move(v) - add the var to the env since it points to a owned mutable value *)
+ | T.Lvar (_, id), Some T.Call(_, (_, T.Id (_, n)), _, _, _) when
+    n = SN.Rx.mutable_ || n = SN.Rx.move ->
     LMap.add id (T.get_position te1, Mutable) mut_env
  (* If the Lvar gets reassigned and shadowed to something that
    isn't a mutable, it is now a regular immutable variable.

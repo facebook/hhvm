@@ -104,8 +104,6 @@ struct ResponseCompressor {
   //  1 - enabled, ini_set("off) allows to disable
   // -1 - disabled, ini_set("on") allows to enable
   int8_t m_compressionEnabled[CompressionType::Max];
-  // encodings accepted by the client
-  bool m_acceptedEncodings[CompressionType::Max];
   // encoding we decided to use
   CompressionType m_encodingType;
   CompressionDecision m_compressionDecision;

@@ -67,18 +67,6 @@ ResponseCompressor::ResponseCompressor(ITransportHeaders* headers)
     m_compressionDecision(CompressionDecision::NotDecidedYet),
     m_headers(headers) {
   assertx(m_headers);
-  memset(m_acceptedEncodings, 0, sizeof(m_acceptedEncodings));
-
-  if (acceptsEncoding("br")) {
-    m_acceptedEncodings[CompressionType::Brotli] = true;
-    m_acceptedEncodings[CompressionType::BrotliChunked] = true;
-  }
-  if (acceptsEncoding("zstd")) {
-    m_acceptedEncodings[CompressionType::Zstd] = true;
-  }
-  if (acceptsEncoding("gzip")) {
-    m_acceptedEncodings[CompressionType::Gzip] = true;
-  }
 
   enableCompression();
 }
@@ -110,10 +98,9 @@ bool ResponseCompressor::isCompressionEnabled() const {
 }
 
 bool ResponseCompressor::acceptCompression() const {
-  return m_acceptedEncodings[CompressionType::Brotli] ||
-         m_acceptedEncodings[CompressionType::BrotliChunked] ||
-         m_acceptedEncodings[CompressionType::Zstd] ||
-         m_acceptedEncodings[CompressionType::Gzip];
+  return acceptsEncoding("br") ||
+         acceptsEncoding("zstd") ||
+         acceptsEncoding("gzip");
 }
 
 bool ResponseCompressor::isCompressed() const {
@@ -144,19 +131,19 @@ void ResponseCompressor::decideCompression(int size, bool chunkedEncoding) {
   // Gzip has 20 bytes header, so anything smaller than a few bytes probably
   // wouldn't benefit much from compression
   if (m_chunkedEncoding || size > 50) {
-    if (m_acceptedEncodings[CompressionType::Zstd] &&
+    if (acceptsEncoding("zstd") &&
         m_compressionEnabled[CompressionType::Zstd]) {
       // for the moment, prefer zstd
       m_encodingType = CompressionType::Zstd;
     } else if (m_chunkedEncoding &&
-               m_acceptedEncodings[CompressionType::BrotliChunked] &&
+               acceptsEncoding("br") &&
                m_compressionEnabled[CompressionType::BrotliChunked]) {
       m_encodingType = CompressionType::Brotli;
     } else if (!m_chunkedEncoding &&
-               m_acceptedEncodings[CompressionType::Brotli] &&
+               acceptsEncoding("br") &&
                m_compressionEnabled[CompressionType::Brotli]) {
       m_encodingType = CompressionType::Brotli;
-    } else if (m_acceptedEncodings[CompressionType::Gzip] &&
+    } else if (acceptsEncoding("gzip") &&
                m_compressionEnabled[CompressionType::Gzip]) {
       m_encodingType = CompressionType::Gzip;
     }

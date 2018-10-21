@@ -84,6 +84,13 @@ struct ResponseCompressor {
    */
   virtual StringHolder compressResponse(const char *data, int len, bool last) = 0;
 
+  /**
+   * When the manager knows it will use this compressor, it will call this
+   * method so that the compressor has an opportunity to set any additional
+   * response headers needed (the manager sets "Vary" and "Content-Encoding").
+   */
+  virtual void setResponseHeaders() {}
+
  protected:
   ITransportHeaders * const m_headers;
   int8_t m_accepted{-1}; // cached value: -1 unknown, 0 false, 1 true.

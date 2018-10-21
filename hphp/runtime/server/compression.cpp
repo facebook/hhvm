@@ -503,6 +503,9 @@ void ResponseCompressorManager::setResponseHeaders() {
       m_headers->addHeader("Vary", "Accept-Encoding");
     }
   }
+  if (m_selectedImpl) {
+    m_selectedImpl->setResponseHeaders();
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

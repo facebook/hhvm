@@ -53,6 +53,22 @@ using CaseInsenMap =
 using HeaderMap = CaseInsenMap<std::vector<std::string>>;
 using CookieList = std::vector<std::pair<std::string, std::string>>;
 
+struct ITransportHeaders {
+  /* Request header methods */
+  virtual std::string getHeader(const char *name) = 0;
+  virtual const HeaderMap& getHeaders() = 0;
+
+  /* Response header methods */
+  virtual void addHeaderNoLock(const char *name, const char *value) = 0;
+  virtual void addHeader(const char *name, const char *value) = 0;
+  virtual void addHeader(const String& header) = 0;
+  virtual void replaceHeader(const char *name, const char *value) = 0;
+  virtual void replaceHeader(const String& header) = 0;
+  virtual void removeHeader(const char *name) = 0;
+  virtual void removeAllHeaders() = 0;
+  virtual void getResponseHeaders(HeaderMap& headers) = 0;
+};
+
 /**
  * A class defining an interface that request handler can use to query
  * transport related information.
@@ -60,7 +76,7 @@ using CookieList = std::vector<std::pair<std::string, std::string>>;
  * Note that one transport object is created for each request, and
  * one transport is ONLY accessed from one single thread.
  */
-struct Transport : IDebuggable {
+struct Transport : IDebuggable, ITransportHeaders {
   enum class Method {
     Unknown,
 
@@ -198,14 +214,14 @@ public:
   /**
    * Get/set response headers.
    */
-  void addHeaderNoLock(const char *name, const char *value);
-  void addHeader(const char *name, const char *value);
-  void addHeader(const String& header);
-  void replaceHeader(const char *name, const char *value);
-  void replaceHeader(const String& header);
-  void removeHeader(const char *name);
-  void removeAllHeaders();
-  void getResponseHeaders(HeaderMap &headers);
+  void addHeaderNoLock(const char *name, const char *value) override;
+  void addHeader(const char *name, const char *value) override;
+  void addHeader(const String& header) override;
+  void replaceHeader(const char *name, const char *value) override;
+  void replaceHeader(const String& header) override;
+  void removeHeader(const char *name) override;
+  void removeAllHeaders() override;
+  void getResponseHeaders(HeaderMap &headers) override;
   std::string getFirstHeaderFile() const { return m_firstHeaderFile;}
   int getFirstHeaderLine() const { return m_firstHeaderLine;}
 

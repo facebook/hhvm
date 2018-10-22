@@ -114,7 +114,13 @@ class TypedValuePrinter(object):
             val = data['pstr'].dereference()
 
         elif (t == V('HPHP::KindOfArray') or
-              t == V('HPHP::KindOfPersistentArray')):
+              t == V('HPHP::KindOfPersistentArray') or
+              t == V('HPHP::KindOfDict') or
+              t == V('HPHP::KindOfPersistentDict') or
+              t == V('HPHP::KindOfVec') or
+              t == V('HPHP::KindOfPersistentVec') or
+              t == V('HPHP::KindOfKeyset') or
+              t == V('HPHP::KindOfPersistentKeyset')):
             val = data['parr']
             if _tv_recurse:
                 val = val.dereference()

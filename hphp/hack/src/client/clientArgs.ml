@@ -87,6 +87,7 @@ let parse_check_args cmd =
   let force_dormant_start = ref false in
   let format_from = ref 0 in
   let from = ref "" in
+  let hot_classes_threshold = ref 0 in
   let gen_saved_ignore_type_errors = ref false in
   let ignore_hh_version = ref false in
   let logname = ref false in
@@ -243,6 +244,13 @@ let parse_check_args cmd =
        --from vim --retries 0";
     "--full-fidelity-schema",
       Arg.Unit (set_mode MODE_FULL_FIDELITY_SCHEMA), "";
+    "--gen-hot-classes-file",
+      Arg.Tuple ([
+        Arg.Int (fun x -> hot_classes_threshold := x);
+        Arg.String (fun x -> set_mode (MODE_GEN_HOT_CLASSES (!hot_classes_threshold, x)) ());
+      ]),
+      " generate a JSON file listing all classes with more dependents than the" ^
+      " given threshold. Usage: --gen-hot-classes-file 500 ~/hh_hot_classes.json";
     "--gen-saved-ignore-type-errors",
       Arg.Set gen_saved_ignore_type_errors,
       " generate a saved state even if there are type errors (default: false).";

@@ -244,6 +244,7 @@ type _ t =
   | DYNAMIC_VIEW: bool -> unit t
   | CST_SEARCH: cst_search_input -> (Hh_json.json, string) result t
   | NO_PRECHECKED_FILES: unit t
+  | GEN_HOT_CLASSES: int -> string t
 
 let is_disconnect_rpc : type a. a t -> bool = function
   | DISCONNECT -> true

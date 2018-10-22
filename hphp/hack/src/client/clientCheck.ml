@@ -177,6 +177,20 @@ let main args =
       let results = rpc_with_retry args @@ Rpc.FIND_REFS action in
       ClientFindRefs.go results args.output_json;
       Exit_status.No_error
+    | MODE_GEN_HOT_CLASSES (threshold, filename) ->
+      let content = rpc args @@ Rpc.GEN_HOT_CLASSES threshold in
+      begin try
+        let oc = Pervasives.open_out filename in
+        output_string oc content;
+        output_char oc '\n';
+        Pervasives.close_out oc;
+        Exit_status.No_error
+      with exn ->
+        Printf.eprintf "Failed to save hot classes file: %s\n" @@
+          Printexc.to_string exn;
+        Printexc.print_backtrace stderr;
+        Exit_status.No_error
+      end
     | MODE_IDE_FIND_REFS arg ->
       let line, char = parse_position_string arg in
       let include_defs = false in

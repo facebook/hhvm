@@ -215,3 +215,5 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       end
     | NO_PRECHECKED_FILES ->
       ServerPrecheckedFiles.expand_all env, ()
+    | GEN_HOT_CLASSES threshold ->
+      env, ServerHotClasses.go genv.workers env threshold

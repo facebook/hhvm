@@ -24,6 +24,8 @@
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/zend-functions.h"
+#include "hphp/runtime/ext/collections/ext_collections.h"
+#include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/server/http-protocol.h"
 
@@ -278,6 +280,143 @@ void HHVM_FUNCTION(var_dump, const Variant& expression,
 void HHVM_FUNCTION(debug_zval_dump, const Variant& variable) {
   VariableSerializer vs(VariableSerializer::Type::DebugDump);
   vs.serialize(variable, false);
+}
+
+/*
+ * container intrinsic for HH\traversable, including
+ * 1. array:
+ *   array, vec, dict, keyset
+ * 2. collection: Vector, Map, Set
+ * not including Objects that implement \HH\Iterable or \Iterator.
+ */
+Variant HHVM_FUNCTION(HH_first, const Variant& v) {
+  // 1. array, vec, dict, keyset
+  if (v.isArray()) {
+    auto arr = v.asCArrRef();
+    if (arr->empty()) {
+      return init_null();
+    }
+    return arr->getValue(arr->iter_begin());
+  }
+
+  if (v.isObject()) {
+    auto obj = v.asCObjRef();
+    // 2. collection
+    if (obj->isCollection()) {
+      // Pair
+      if (obj->collectionType() == CollectionType::Pair) {
+        auto const pair = static_cast<c_Pair*>(obj.get());
+        return Variant::wrap(*pair->at(0));
+      }
+
+      // Vector, Map, Set, and Imm variants
+      auto arr = collections::asArray(obj.get());
+      if (arr->empty()) {
+        return init_null();
+      }
+      return arr->getValue(arr->iter_begin());
+    }
+  }
+  SystemLib::throwInvalidArgumentExceptionObject(
+    "Argument 1 passed to HH\\Lib\\_Private\\Native\\first() "
+     "must be a Container");
+}
+
+Variant HHVM_FUNCTION(HH_last, const Variant& v) {
+  // 1. array, vec, dict, keyset
+  if (v.isArray()) {
+    auto arr = v.asCArrRef();
+    if (arr->empty()) {
+      return init_null();
+    }
+    return arr->getValue(arr->iter_last());
+  }
+
+  if (v.isObject()) {
+    auto obj = v.asCObjRef();
+    // 2. collection
+    if (obj->isCollection()) {
+      // Pair
+      if (obj->collectionType() == CollectionType::Pair) {
+        auto const pair = static_cast<c_Pair*>(obj.get());
+        return Variant::wrap(*pair->at(1));
+      }
+
+      // Vector, Map, Set, and Imm variants
+      auto arr = collections::asArray(obj.get());
+      if (arr->empty()) {
+        return init_null();
+      }
+      return arr->getValue(arr->iter_last());
+    }
+  }
+  SystemLib::throwInvalidArgumentExceptionObject(
+    "Argument 1 passed to HH\\Lib\\_Private\\Native\\last() "
+    "must be a Container");
+}
+
+Variant HHVM_FUNCTION(HH_first_key, const Variant& v) {
+  // 1. array, vec, dict, keyset
+  if (v.isArray()) {
+    auto arr = v.asCArrRef();
+    if (arr->empty()) {
+      return init_null();
+    }
+    return arr->getKey(arr->iter_begin());
+  }
+
+  if (v.isObject()) {
+    auto obj = v.asCObjRef();
+    // 2. collection
+    if (obj->isCollection()) {
+      // Pair
+      if (obj->collectionType() == CollectionType::Pair) {
+        return Variant::wrap(make_tv<KindOfInt64>(0));
+      }
+
+      // Vector, Map, Set, and Imm variants
+      auto arr = collections::asArray(obj.get());
+      if (arr->empty()) {
+        return init_null();
+      }
+      return arr->getKey(arr->iter_begin());
+    }
+  }
+  SystemLib::throwInvalidArgumentExceptionObject(
+    "Argument 1 passed to HH\\Lib\\_Private\\Native\\first_key() "
+    "must be a Container");
+}
+
+Variant HHVM_FUNCTION(HH_last_key, const Variant& v) {
+  // 1. array, vec, dict, keyset
+  if (v.isArray()) {
+    auto arr = v.asCArrRef();
+    if (arr->empty()) {
+      return init_null();
+    }
+    return arr->getKey(arr->iter_last());
+  }
+
+  if (v.isObject()) {
+    auto obj = v.asCObjRef();
+    // 2. collection
+    if (obj->isCollection()) {
+      // Pair
+      if (obj->collectionType() == CollectionType::Pair) {
+        return Variant::wrap(make_tv<KindOfInt64>(1));
+      }
+
+      // Vector, Map, Set, and Imm variants
+      auto arr = collections::asArray(obj.get());
+      if (arr->empty()) {
+        return init_null();
+      }
+      return arr->getKey(arr->iter_last());
+    }
+  }
+  SystemLib::throwInvalidArgumentExceptionObject(
+    "Argument 1 passed to HH\\Lib\\_Private\\Native\\last_key() "
+    "must be a Container");
 }
 
 namespace {
@@ -709,6 +848,10 @@ void StandardExtension::initVariable() {
   HHVM_FE(parse_str);
   HHVM_FALIAS(HH\\object_prop_array, HH_object_prop_array);
   HHVM_FALIAS(HH\\serialize_with_options, HH_serialize_with_options);
+  HHVM_FALIAS(HH\\Lib\\_Private\\Native\\first, HH_first);
+  HHVM_FALIAS(HH\\Lib\\_Private\\Native\\last, HH_last);
+  HHVM_FALIAS(HH\\Lib\\_Private\\Native\\first_key, HH_first_key);
+  HHVM_FALIAS(HH\\Lib\\_Private\\Native\\last_key, HH_last_key);
 
   if (RuntimeOption::EnableIntrinsicsExtension) {
     HHVM_FALIAS(__hhvm_intrinsics\\serialize_keep_dvarrays,

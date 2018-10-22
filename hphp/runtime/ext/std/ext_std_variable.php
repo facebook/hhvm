@@ -263,5 +263,33 @@ namespace HH {
    */
   <<__Native>>
   function object_prop_array(object $obj): array;
+}
 
+namespace HH\Lib\_Private\Native {
+  /*
+  * container intrinsic for HH\traversable
+  */
+  <<__Native, __IsFoldable, __Rx, __AtMostRxAsArgs>>
+  function first(
+    <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>>
+    mixed $iterable
+  ): mixed;
+
+  <<__Native, __IsFoldable, __Rx, __AtMostRxAsArgs>>
+  function first_key(
+    <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>>
+    mixed $iterable
+  ): mixed;
+
+  <<__Native, __IsFoldable, __Rx, __AtMostRxAsArgs>>
+  function last(
+    <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>>
+    mixed $iterable
+  ): mixed;
+
+  <<__Native, __IsFoldable, __Rx, __AtMostRxAsArgs>>
+  function last_key(
+    <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>>
+    mixed $iterable
+  ): mixed;
 }

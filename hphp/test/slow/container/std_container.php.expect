@@ -1,0 +1,228 @@
+==========
+vec
+==========
+first: int(4)
+first_key: int(0)
+last: int(6)
+last_key: int(2)
+first: int(4)
+first_key: int(0)
+last: int(4)
+last_key: int(0)
+first: NULL
+first_key: NULL
+last: NULL
+last_key: NULL
+==========
+dict
+==========
+first: int(5)
+first_key: string(3) "foo"
+last: int(7)
+last_key: string(2) "lo"
+first: int(7)
+first_key: string(2) "lo"
+last: int(5)
+last_key: int(0)
+first: int(5)
+first_key: string(3) "foo"
+last: int(5)
+last_key: string(3) "foo"
+first: NULL
+first_key: NULL
+last: NULL
+last_key: NULL
+first: int(10)
+first_key: string(1) "3"
+last: int(321)
+last_key: int(-1)
+==========
+keyset
+==========
+first: int(6)
+first_key: int(6)
+last: int(8)
+last_key: int(8)
+first: int(8)
+first_key: int(8)
+last: string(1) "6"
+last_key: string(1) "6"
+first: int(6)
+first_key: int(6)
+last: int(6)
+last_key: int(6)
+first: NULL
+first_key: NULL
+last: NULL
+last_key: NULL
+first: int(100)
+first_key: int(100)
+last: string(2) "10"
+last_key: string(2) "10"
+==========
+array
+==========
+first: int(7)
+first_key: int(0)
+last: int(9)
+last_key: int(2)
+first: int(7)
+first_key: int(0)
+last: int(7)
+last_key: int(0)
+first: NULL
+first_key: NULL
+last: NULL
+last_key: NULL
+first: string(3) "321"
+first_key: int(100)
+last: string(2) "10"
+last_key: int(-1)
+==========
+tuple
+==========
+first: float(7.9)
+first_key: int(0)
+last: string(4) "nine"
+last_key: int(2)
+first: string(4) "nine"
+first_key: int(0)
+last: string(4) "nine"
+last_key: int(0)
+first: NULL
+first_key: NULL
+last: NULL
+last_key: NULL
+==========
+Pair
+==========
+first: string(5) "first"
+first_key: int(0)
+last: string(6) "second"
+last_key: int(1)
+first: string(5) "first"
+first_key: int(0)
+last: int(2)
+last_key: int(1)
+==========
+Vector
+==========
+first: int(4)
+first_key: int(0)
+last: int(6)
+last_key: int(2)
+first: int(4)
+first_key: int(0)
+last: int(4)
+last_key: int(0)
+first: NULL
+first_key: NULL
+last: NULL
+last_key: NULL
+==========
+Map
+==========
+first: int(5)
+first_key: string(3) "foo"
+last: int(7)
+last_key: string(2) "lo"
+first: int(7)
+first_key: string(2) "lo"
+last: int(5)
+last_key: string(3) "foo"
+first: int(5)
+first_key: string(3) "foo"
+last: int(5)
+last_key: string(3) "foo"
+first: NULL
+first_key: NULL
+last: NULL
+last_key: NULL
+==========
+Set
+==========
+first: int(6)
+first_key: int(6)
+last: int(8)
+last_key: int(8)
+first: int(8)
+first_key: int(8)
+last: int(6)
+last_key: int(6)
+first: int(6)
+first_key: int(6)
+last: int(6)
+last_key: int(6)
+first: NULL
+first_key: NULL
+last: NULL
+last_key: NULL
+==========
+ImmVector
+==========
+first: int(4)
+first_key: int(0)
+last: int(6)
+last_key: int(2)
+first: int(4)
+first_key: int(0)
+last: int(4)
+last_key: int(0)
+first: NULL
+first_key: NULL
+last: NULL
+last_key: NULL
+==========
+ImmMap
+==========
+first: int(5)
+first_key: string(3) "foo"
+last: int(7)
+last_key: string(2) "lo"
+first: int(7)
+first_key: string(2) "lo"
+last: int(5)
+last_key: string(3) "foo"
+first: int(5)
+first_key: string(3) "foo"
+last: int(5)
+last_key: string(3) "foo"
+first: NULL
+first_key: NULL
+last: NULL
+last_key: NULL
+==========
+ImmSet
+==========
+first: int(6)
+first_key: int(6)
+last: int(8)
+last_key: int(8)
+first: int(8)
+first_key: int(8)
+last: int(6)
+last_key: int(6)
+first: int(6)
+first_key: int(6)
+last: int(6)
+last_key: int(6)
+first: NULL
+first_key: NULL
+last: NULL
+last_key: NULL
+first: Argument 1 passed to HH\Lib\_Private\Native\first() must be a Container
+first_key: Argument 1 passed to HH\Lib\_Private\Native\first_key() must be a Container
+last: Argument 1 passed to HH\Lib\_Private\Native\last() must be a Container
+last_key: Argument 1 passed to HH\Lib\_Private\Native\last_key() must be a Container
+first: Argument 1 passed to HH\Lib\_Private\Native\first() must be a Container
+first_key: Argument 1 passed to HH\Lib\_Private\Native\first_key() must be a Container
+last: Argument 1 passed to HH\Lib\_Private\Native\last() must be a Container
+last_key: Argument 1 passed to HH\Lib\_Private\Native\last_key() must be a Container
+first: Argument 1 passed to HH\Lib\_Private\Native\first() must be a Container
+first_key: Argument 1 passed to HH\Lib\_Private\Native\first_key() must be a Container
+last: Argument 1 passed to HH\Lib\_Private\Native\last() must be a Container
+last_key: Argument 1 passed to HH\Lib\_Private\Native\last_key() must be a Container
+first: Argument 1 passed to HH\Lib\_Private\Native\first() must be a Container
+first_key: Argument 1 passed to HH\Lib\_Private\Native\first_key() must be a Container
+last: Argument 1 passed to HH\Lib\_Private\Native\last() must be a Container
+last_key: Argument 1 passed to HH\Lib\_Private\Native\last_key() must be a Container

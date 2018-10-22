@@ -665,7 +665,7 @@ let check_instruct_operator i i' =
   | CastObject, _ | CastVec, _ | CastDict, _ | CastKeyset, _ | CastVArray, _
   | CastDArray, _ | InstanceOf, _ | InstanceOfD _, _ | IsTypeStructC _, _
   | CombineAndResolveTypeStruct _, _
-  | Print, _ | ResolveFunc _, _ | ResolveObjMethod, _
+  | Print, _ | ResolveFunc _, _ | ResolveObjMethod, _ | ResolveClsMethod, _
   | AsTypeStructC _, _ | Clone, _ ->
     if i=i' then Some false else None
 

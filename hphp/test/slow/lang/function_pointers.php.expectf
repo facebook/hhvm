@@ -32,3 +32,5 @@ string(9) "inst_meth"
 string(4) "meth"
 function(foo)fun('foo')function(foo)
 string(5) ""foo""
+string(10) "s:3:"foo";"
+string(3) "foo"

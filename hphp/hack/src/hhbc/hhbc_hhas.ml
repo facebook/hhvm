@@ -212,6 +212,7 @@ let string_of_operator instruction =
     | H.Exit -> "Exit"
     | ResolveFunc id -> sep ["ResolveFunc"; string_of_function_id id]
     | ResolveObjMethod -> sep ["ResolveObjMethod"]
+    | ResolveClsMethod -> sep ["ResolveClsMethod"]
     | Fatal op -> sep ["Fatal"; FatalOp.to_string op]
 
 let string_of_get x =

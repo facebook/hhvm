@@ -82,4 +82,6 @@ print_r($f);
 var_export($f);
 var_dump($f);
 var_dump(json_encode($f));
-serialize($f);
+$ser = serialize($f);
+var_dump($ser);
+var_dump(unserialize($ser));

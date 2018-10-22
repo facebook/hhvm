@@ -424,6 +424,8 @@ static const struct {
   { OpResolveFunc, {None,             Stack1,       OutFunc         }},
   { OpResolveObjMethod,
                    {StackTop2,        Stack1,       OutVArray        }},
+  { OpResolveClsMethod,
+                   {StackTop2,        Stack1,       OutVArray        }},
 
   /*** 14. Generator instructions ***/
 
@@ -1010,6 +1012,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::FPushFuncU:
   case Op::FPushObjMethodD:
   case Op::ResolveFunc:
+  case Op::ResolveClsMethod:
   case Op::ResolveObjMethod:
   case Op::False:
   case Op::File:

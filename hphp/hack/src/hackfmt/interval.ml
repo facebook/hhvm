@@ -9,7 +9,7 @@
 
 (** Helpers for half-open intervals *)
 
-open Hh_core
+open Core_kernel
 
 type t = int * int
 

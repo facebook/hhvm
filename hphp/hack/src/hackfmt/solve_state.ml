@@ -9,7 +9,7 @@
 
 module Env = Format_env
 
-open Hh_core
+open Core_kernel
 
 type t = {
   chunk_group: Chunk_group.t;
@@ -121,7 +121,7 @@ let build_candidate_rules_and_update_rbm rbm lines rule_dependency_map =
   let deps = rule_dependency_map in
   let candidate_rules = ISet.fold (fun id acc ->
     ISet.union acc @@
-      try ISet.of_list @@ IMap.find_unsafe id deps with Not_found -> ISet.empty
+      try ISet.of_list @@ IMap.find_unsafe id deps with Caml.Not_found -> ISet.empty
   ) base_candidate_rules base_candidate_rules in
 
   let dead_rules = ISet.diff dead_rules candidate_rules in
@@ -270,7 +270,7 @@ let is_overlapping s1 s2 =
       s1_rules
 
 let compare_rule_sets s1 s2 =
-  let bound_rule_ids = List.sort_uniq ~cmp:Pervasives.compare @@
+  let bound_rule_ids = Caml.List.sort_uniq Pervasives.compare @@
     IMap.keys s1.rbm @ IMap.keys s2.rbm in
   let is_split rule_id state =
     IMap.get rule_id state.rbm
@@ -307,5 +307,5 @@ let __debug t =
     string_of_int k ^ ": " ^ string_of_bool v
   ) in
   let rule_count = string_of_int (Chunk_group.get_rule_count t.chunk_group) in
-  let rule_str = rule_count ^ " [" ^ (String.concat "," rule_strings) ^ "]" in
+  let rule_str = rule_count ^ " [" ^ (String.concat ~sep:"," rule_strings) ^ "]" in
   (string_of_int t.overflow) ^ "," ^ (string_of_int t.cost) ^ " " ^ rule_str

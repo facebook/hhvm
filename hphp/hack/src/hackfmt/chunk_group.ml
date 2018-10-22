@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 
 type t = {
   chunks: Chunk.t list;
@@ -28,7 +28,7 @@ let get_rule_kind t id =
   r.Rule.kind
 
 let get_char_range t =
-  t.chunks |> List.fold ~init:(max_int,0)
+  t.chunks |> List.fold ~init:(Int.max_value,0)
     ~f:(fun (start_char, end_char) chunk ->
       let chunk_start, chunk_end = Chunk.get_range chunk in
       min start_char chunk_start,
@@ -42,7 +42,7 @@ let propagate_breakage t initial_bindings =
   |> List.fold ~init:initial_bindings ~f:begin fun acc rule_id ->
     let dependencies =
       try IMap.find_unsafe rule_id t.rule_dependency_map
-      with Not_found -> []
+      with Caml.Not_found -> []
     in
     dependencies
     |> List.filter ~f:(fun id -> Rule.cares_about_children (get_rule_kind t id))
@@ -76,7 +76,7 @@ let is_dependency_satisfied parent_kind parent_val child_val =
 let are_rule_bindings_valid t rbm =
   let valid_map = IMap.mapi (fun rule_id v ->
     let parent_list = try IMap.find_unsafe rule_id t.rule_dependency_map
-      with Not_found -> []
+      with Caml.Not_found -> []
     in
     List.for_all parent_list ~f:(fun parent_id ->
       let parent_rule = IMap.find_unsafe parent_id t.rule_map in
@@ -90,6 +90,6 @@ let dependency_map_to_string t =
   let get_map_values map = List.map ~f:snd @@ IMap.bindings @@ map in
   let str_list = get_map_values @@ IMap.mapi (fun k v_list ->
     let values = List.map v_list ~f:string_of_int in
-    string_of_int k ^ ": [" ^ String.concat ", " values ^ "]"
+    string_of_int k ^ ": [" ^ String.concat ~sep:", " values ^ "]"
   ) t.rule_dependency_map in
-  "{" ^ String.concat ", " str_list ^ "}"
+  "{" ^ String.concat ~sep:", " str_list ^ "}"

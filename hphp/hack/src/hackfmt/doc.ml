@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 
 type t =
   (* Null case *)
@@ -206,7 +206,7 @@ let dump ?(ignored=false) node =
     | Ignore (text, _) ->
       if ignored then
         print (sprintf "Ignored \"%s\""
-          (String.concat "\\n"
+          (String.concat ~sep:"\\n"
             (Str.split_delim (Str.regexp "\n") text)))
     | MultilineString (strings, _) ->
       print "MultilineString [";

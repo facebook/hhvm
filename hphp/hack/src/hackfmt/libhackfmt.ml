@@ -13,7 +13,7 @@ module EditableSyntax = Full_fidelity_editable_syntax
 module SourceText = Full_fidelity_source_text
 module Env = Format_env
 
-open Hh_core
+open Core_kernel
 open Printf
 
 let get_line_boundaries text =
@@ -38,7 +38,7 @@ let expand_to_line_boundaries ?ranges source_text range =
     | Some ranges -> ranges
     | None -> get_line_boundaries (SourceText.text source_text)
   in
-  Array.fold_left (fun (st, ed) (line_start, line_end) ->
+  Caml.Array.fold_left (fun (st, ed) (line_start, line_end) ->
     let st = if st > line_start && st < line_end then line_start else st in
     let ed = if ed > line_start && ed < line_end then line_end else ed in
     st, ed
@@ -68,11 +68,11 @@ let expand_to_atom_boundaries boundaries (r_st, r_ed) =
   let rev_bounds = List.rev boundaries in
   let st =
     try fst (List.find_exn rev_bounds ~f:(fun (b_st, _) -> b_st <= r_st)) with
-    | Not_found -> r_st
+    | Caml.Not_found -> r_st
   in
   let ed =
     try snd (List.find_exn boundaries ~f:(fun (_, b_ed) -> b_ed >= r_ed)) with
-    | Not_found -> r_ed
+    | Caml.Not_found -> r_ed
   in
   st, ed
 
@@ -165,7 +165,7 @@ let format_intervals ?config intervals tree =
     |> List.map ~f:(fun (st, ed) -> st - 1, ed + 1)
     |> List.map ~f:(expand_to_atom_boundaries atom_boundaries)
     |> Interval.union_list
-    |> List.sort ~cmp:Interval.comparator
+    |> List.sort ~compare:Interval.comparator
   in
   let solve_states = Line_splitter.find_solve_states env
     ~source_text:(SourceText.text source_text) chunk_groups in

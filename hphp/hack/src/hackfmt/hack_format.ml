@@ -7,6 +7,8 @@
  *
  *)
 
+open Core_kernel
+
 module Env = Format_env
 module SourceText = Full_fidelity_source_text
 module Syntax = Full_fidelity_editable_syntax
@@ -16,8 +18,6 @@ module TokenKind = Full_fidelity_token_kind
 module Trivia = Full_fidelity_editable_trivia
 module TriviaKind = Full_fidelity_trivia_kind
 module Rewriter = Full_fidelity_rewriter.WithSyntax(Syntax)
-
-open Hh_core
 open Doc
 
 let make_list = Syntax.make_list SourceText.empty 0
@@ -2976,7 +2976,7 @@ and replace_leading_trivia node new_leading_trivia =
   | Some leading_token ->
     let rewritten_node = Rewriter.rewrite_pre (fun node_to_rewrite ->
       match Syntax.syntax node_to_rewrite with
-      | Syntax.Token t when t == leading_token ->
+      | Syntax.Token t when phys_equal t leading_token ->
         Rewriter.Replace
           (Syntax.make_token {t with Token.leading = new_leading_trivia})
       | _  -> Rewriter.Keep
@@ -2989,7 +2989,7 @@ and remove_leading_trivia node =
   | Some leading_token ->
     let rewritten_node = Rewriter.rewrite_pre (fun rewrite_node ->
       match Syntax.syntax rewrite_node with
-      | Syntax.Token t when t == leading_token ->
+      | Syntax.Token t when phys_equal t leading_token ->
         Rewriter.Replace
           (Syntax.make_token {t with Token.leading = []})
       | _  -> Rewriter.Keep
@@ -3002,7 +3002,7 @@ and remove_trailing_trivia node =
   | Some trailing_token ->
     let rewritten_node = Rewriter.rewrite_pre (fun rewrite_node ->
       match Syntax.syntax rewrite_node with
-      | Syntax.Token t when t == trailing_token ->
+      | Syntax.Token t when phys_equal t trailing_token ->
         Rewriter.Replace
           (Syntax.make_token {t with Token.trailing = []})
       | _  -> Rewriter.Keep
@@ -3214,7 +3214,7 @@ and leading_ignore_comment trivia_list =
     trivia_list
     ~f:(fun trivia ->
       try (Str.search_forward ignore_re (Trivia.text trivia) 0) < 0
-      with Not_found -> true) in
+      with Caml.Not_found -> true) in
   let _, including_and_after = List.split_n trivia_list (List.length before) in
   (before, including_and_after)
 

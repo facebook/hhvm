@@ -9,7 +9,7 @@
 
 module Env = Format_env
 
-open Hh_core
+open Core_kernel
 
 (* A subchunk is one of these variants, representing a substring of the final
  * string representation of a chunk in the formatted output.

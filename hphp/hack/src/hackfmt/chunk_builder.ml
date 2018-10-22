@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 
 type open_span = {
   open_span_start: int;
@@ -30,7 +30,7 @@ type string_type =
   | Other
 
 let builder = object (this)
-  val open_spans = Stack.create ();
+  val open_spans = Caml.Stack.create ();
   val mutable rules = [];
   val mutable lazy_rules = ISet.empty;
 
@@ -60,7 +60,7 @@ let builder = object (this)
    * having this reset method
    *)
   method private reset () =
-    Stack.clear open_spans;
+    Caml.Stack.clear open_spans;
     rules <- [];
     lazy_rules <- ISet.empty;
     chunks <- [];
@@ -129,7 +129,7 @@ let builder = object (this)
       next_lazy_rules <- ISet.empty;
 
       for _ = 1 to num_pending_spans do
-        Stack.push (open_span (List.length chunks - 1)) open_spans
+        Caml.Stack.push (open_span (List.length chunks - 1)) open_spans
       done;
       num_pending_spans <- 0;
 
@@ -291,7 +291,7 @@ let builder = object (this)
   method private end_span () =
     num_pending_spans <- match num_pending_spans with
       | 0 ->
-        let os = Stack.pop open_spans in
+        let os = Caml.Stack.pop open_spans in
         let sa, span = Span_allocator.make_span span_alloc in
         span_alloc <- sa;
         let r_chunks = List.rev chunks in

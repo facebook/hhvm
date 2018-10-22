@@ -12,7 +12,7 @@ module Syntax = Full_fidelity_positioned_syntax
 module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(Syntax)
 module DebugPos = Debug.WithSyntax(Syntax)
 
-open Hh_core
+open Core_kernel
 
 type debug_config = {
   print_ast: bool;
@@ -60,7 +60,7 @@ let debug_nesting chunk_group =
   List.iteri chunk_group.Chunk_group.chunks ~f:(fun i c ->
     let nesting_list =
       Nesting.get_self_and_parent_list (Some c.Chunk.nesting) in
-    let list_string = String.concat ", "
+    let list_string = String.concat ~sep:", "
       @@ List.map nesting_list ~f:string_of_int in
     Printf.printf "Chunk %d - [ %s ]\n" i list_string;
   )

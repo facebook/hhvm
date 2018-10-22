@@ -7,12 +7,12 @@
  *
  *)
 
+open Core_kernel
 module SyntaxTree = Full_fidelity_syntax_tree
 module SourceText = Full_fidelity_source_text
 module Logger = HackfmtEventLogger
 module FEnv = Format_env
 
-open Hh_core
 open Printf
 open Libhackfmt
 open Hackfmt_error
@@ -239,7 +239,7 @@ let read_stdin () =
   let buf = Buffer.create 256 in
   try
     while true do
-      Buffer.add_string buf (read_line());
+      Buffer.add_string buf (Out_channel.(flush stdout); In_channel.(input_line_exn stdin));
       Buffer.add_char buf '\n';
     done;
     assert false
@@ -314,9 +314,9 @@ let output ?text_source str =
   let with_out_channel f =
     match text_source with
     | Some (File filename) ->
-      let out_channel = open_out filename in
+      let out_channel = Out_channel.create filename in
       f out_channel;
-      close_out out_channel
+      Out_channel.close out_channel
     | Some (Stdin _)
     | None -> f stdout
   in
@@ -466,7 +466,7 @@ let () =
         | InvalidDiff s ->
           err_str ^ ": " ^ s
         | _ ->
-          err_str ^ ": " ^ (Printexc.to_string exn)
+          err_str ^ ": " ^ (Exn.to_string exn)
       in
       Some err_msg, exit_code
   in

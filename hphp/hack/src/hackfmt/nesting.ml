@@ -7,6 +7,8 @@
  *
  *)
 
+open Core_kernel
+
 type t = {
   id: int;
   indent: bool;

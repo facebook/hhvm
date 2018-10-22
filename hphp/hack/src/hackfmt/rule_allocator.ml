@@ -7,7 +7,7 @@
  *
  *)
 
- open Hh_core
+ open Core_kernel
 
  type t = {
    rule_map: Rule.t IMap.t;

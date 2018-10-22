@@ -24,7 +24,7 @@ Json = Mapping[str, Any]
 
 
 class TranscriptEntry(NamedTuple):
-    sent: Json
+    sent: Optional[Json]
     received: Optional[Json]
 
 
@@ -111,7 +111,7 @@ class LspCommandProcessor:
             "id": -1,
             "params": {"query": "my test query"},
         }
-        id = self._request_id(dummy_command)
+        id = self._client_request_id(dummy_command)
 
         def has_error_message(entry: TranscriptEntry, message: str) -> bool:
             if (
@@ -173,8 +173,7 @@ class LspCommandProcessor:
                 sent = existing_entry.sent
             if not received:
                 received = existing_entry.received
-        else:
-            assert sent is not None
+        assert sent is not None or received is not None
 
         transcript[id] = TranscriptEntry(sent=sent, received=received)
         return transcript
@@ -182,16 +181,21 @@ class LspCommandProcessor:
     def _transcript_id(self, sent: Optional[Json], received: Optional[Json]) -> str:
         assert sent is not None or received is not None
 
-        def make_id(json: Json, idgen: Callable[[], str]) -> str:
+        def make_id(json: Json, is_client_request: bool, idgen: Callable[[], str]) -> str:
             if LspCommandProcessor._has_id(json):
-                return LspCommandProcessor._request_id(json)
+                if is_client_request:
+                    return LspCommandProcessor._client_request_id(json)
+                else:
+                    return LspCommandProcessor._server_request_id(json)
             else:
                 return idgen()
 
         if sent:
-            return make_id(sent, LspCommandProcessor._client_notify_id)
+            is_client_request = LspCommandProcessor._is_request(sent)
+            return make_id(sent, is_client_request, LspCommandProcessor._client_notify_id)
         elif received:
-            return make_id(received, LspCommandProcessor._server_notify_id)
+            is_client_request = not LspCommandProcessor._is_request(received)
+            return make_id(received, is_client_request, LspCommandProcessor._server_notify_id)
         else:
             raise Exception("This should have failed up above in the assert")
 
@@ -207,6 +211,10 @@ class LspCommandProcessor:
         return "id" in json
 
     @staticmethod
+    def _is_request(json: Json) -> bool:
+        return "id" in json and "method" in json
+
+    @staticmethod
     def _client_notify_id() -> str:
         return LspCommandProcessor._notify_id("NOTIFY_CLIENT_TO_SERVER_")
 
@@ -219,13 +227,14 @@ class LspCommandProcessor:
         return prefix + str(uuid.uuid4())
 
     @staticmethod
-    def _request_id(json_command: Json) -> str:
-        return LspCommandProcessor.request_id(json_command["id"])
+    def _client_request_id(json_command: Json) -> str:
+        return "REQUEST_CLIENT_TO_SERVER_" + str(json_command["id"])
 
     @staticmethod
-    def request_id(id: str) -> str:
-        return "REQUEST_" + str(id)
+    def _server_request_id(json_command: Json) -> str:
+        return "REQUEST_SERVER_TO_CLIENT_" + str(json_command["id"])
 
     @staticmethod
     def dummy_request_id() -> str:
-        return LspCommandProcessor._request_id({"id": -1})
+        return LspCommandProcessor._client_request_id({"id": -1})
+

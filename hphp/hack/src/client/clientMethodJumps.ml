@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 
 module MethodJumps = ServerCommandTypes.Method_jumps
 

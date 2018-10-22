@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Ocaml_overrides
 open ServerCommandTypes
 open String_utils
@@ -67,7 +67,7 @@ let is_stale_msg liveness =
 let warn_unsaved_changes () =
   (* Make sure any buffered diagnostics are printed before printing this
      warning. *)
-  flush stdout;
+  Out_channel.flush stdout;
   Tty.cprintf (Tty.Bold Tty.Yellow) "Warning: " ~out_channel:stderr;
   prerr_endline
 {|there is an editor connected to the Hack server.

@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open ClientCommand
 open ClientEnv
 open Utils
@@ -54,7 +54,7 @@ end
 let parse_command () =
   if Array.length Sys.argv < 2
   then CKNone
-  else match String.lowercase_ascii Sys.argv.(1) with
+  else match String.lowercase Sys.argv.(1) with
   | "check" -> CKCheck
   | "start" -> CKStart
   | "stop" -> CKStop
@@ -68,7 +68,7 @@ let parse_without_command options usage command =
   let args = ref [] in
   Arg.parse (Arg.align options) (fun x -> args := x::!args) usage;
   match List.rev !args with
-  | x::rest when (String.lowercase_ascii x) = (String.lowercase_ascii command)
+  | x::rest when (String.lowercase x) = (String.lowercase command)
     -> rest
   | args -> args
 
@@ -527,7 +527,7 @@ let parse_start_env command =
       "Usage: %s %s [OPTION]... [WWW-ROOT]\n\
       %s a Hack server\n\n\
       WWW-ROOT is assumed to be current directory if unspecified\n"
-      Sys.argv.(0) command (String.capitalize_ascii command) in
+      Sys.argv.(0) command (String.capitalize command) in
   let log_inference_constraints = ref false in
   let no_load = ref false in
   let watchman_debug_logging = ref false in

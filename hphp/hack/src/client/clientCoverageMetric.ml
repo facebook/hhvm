@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Coverage_level
 open Hh_json
 open Ide_api_types
@@ -83,7 +83,7 @@ let print_reasons reasons_stats =
 
 let print_counts counts =
   CLMap.iter (fun k v ->
-    let level_name = String.capitalize_ascii (string_of_level k) in
+    let level_name = String.capitalize (string_of_level k) in
     Printf.printf "%s: %d\n" level_name v.count;
     print_reasons v.reason_stats) counts;
   Printf.printf "Checked / Total: %f\n" (calc_percentage 0.0 counts);
@@ -103,7 +103,7 @@ let print_pretty_entry = function
           merge_and_sum counts acc) r empty_counter in
         Printf.printf "== total ==\n";
         print_counts total_counts;
-        flush stdout
+        Out_channel.flush stdout
       end
 
 let print_pretty = function

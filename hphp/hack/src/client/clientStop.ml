@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 module MC = MonitorConnection
 module SMUtils = ServerMonitorUtils
 
@@ -77,7 +77,7 @@ let mean_kill env =
       end;
       wait_for_death env.root 3
     with e ->
-      print_endline (Printexc.to_string e);
+      print_endline (Exn.to_string e);
       false
   in
   if not success then begin

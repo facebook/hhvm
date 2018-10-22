@@ -7,7 +7,7 @@
  *
 *)
 
-open Hh_core
+open Core_kernel
 open Lsp
 open Lsp_fmt
 open Hh_json_helpers
@@ -66,7 +66,7 @@ type server_message = {
 
 type server_conn = {
   ic: Timeout.in_channel;
-  oc: out_channel;
+  oc: Out_channel.t;
   pending_messages: server_message Queue.t; (* ones that arrived during current rpc *)
 }
 
@@ -261,7 +261,7 @@ let read_hhconfig_version () : string =
       let version = SMap.get "version" config in
       Option.value version ~default:"[NoVersion]"
     with e ->
-      Printf.sprintf "[NoHhconfig:%s]" (Printexc.to_string e)
+      Printf.sprintf "[NoHhconfig:%s]" (Exn.to_string e)
 
 
 (* get_uris_with_unsaved_changes is the set of files for which we've          *)
@@ -309,7 +309,7 @@ let rpc
   : 'a =
   let callback () push =
     update_hh_server_state_if_necessary (Server_message {push; has_updated_server_state=false;});
-    Queue.push {push; has_updated_server_state=true;} server_conn.pending_messages
+    Queue.enqueue server_conn.pending_messages {push; has_updated_server_state=true;}
   in
   let result = ServerCommand.rpc_persistent
     (server_conn.ic, server_conn.oc) () callback command in
@@ -322,7 +322,7 @@ let rpc
   | Error ((), Utils.Callstack _, ServerCommand.Remote_nonfatal_exception remote_e_data) ->
     raise (Server_nonfatal_exception remote_e_data)
   | Error ((), Utils.Callstack stack, e) ->
-    let message = Printexc.to_string e in
+    let message = Exn.to_string e in
     raise (Server_fatal_connection_exception { Marshal_tools.message; stack; })
 
 let rpc_with_retry server_conn ref_unblocked_time command =
@@ -348,7 +348,7 @@ let get_message_source
   let client_read_fd = Jsonrpc.get_read_fd client in
   let readable, _, _ = Unix.select [server_read_fd; client_read_fd] [] [] 1.0 in
   if readable = [] then `No_source
-  else if List.mem readable server_read_fd then `From_server
+  else if List.mem ~equal:(=) readable server_read_fd then `From_server
   else `From_client
 
 
@@ -375,7 +375,7 @@ let read_message_from_server (server: server_conn) : event =
     | Hello -> Server_hello
     | Ping -> failwith "unexpected ping on persistent connection"
   with e ->
-    let message = Printexc.to_string e in
+    let message = Exn.to_string e in
     let stack = Printexc.get_backtrace () in
     raise (Server_fatal_connection_exception { Marshal_tools.message; stack; })
 
@@ -388,7 +388,7 @@ let get_next_event (state: state) (client: Jsonrpc.queue) : event =
   let from_server (server: server_conn) =
     if Queue.is_empty server.pending_messages
     then read_message_from_server server
-    else Server_message (Queue.take server.pending_messages)
+    else Server_message (Queue.dequeue_exn server.pending_messages)
   in
 
   let from_client (client: Jsonrpc.queue) =
@@ -669,9 +669,9 @@ let do_rage (state: state) (ref_unblocked_time: float ref): Rage.result =
     let stack = try Sys_utils.exec_read_lines ~reverse:true ("pstack " ^ pid)
     with _ -> begin
       try Sys_utils.exec_read_lines ~reverse:true ("gstack " ^ pid)
-      with e -> ["unable to pstack - " ^ (Printexc.to_string e)]
+      with e -> ["unable to pstack - " ^ (Exn.to_string e)]
     end in
-    add_data (Printf.sprintf "PSTACK %s (%s) - %s\n\n" pid reason (String.concat "\n" stack))
+    add_data (Printf.sprintf "PSTACK %s (%s) - %s\n\n" pid reason (String.concat ~sep:"\n" stack))
   in
   (* logfiles *)
   begin match get_root_opt () with
@@ -685,7 +685,7 @@ let do_rage (state: state) (ref_unblocked_time: float ref): Rage.result =
           let is_interesting (_, reason) = not (String_utils.string_starts_with reason "slave") in
           List.filter pids ~f:is_interesting |> List.iter ~f:add_stack
         with e ->
-          let message = Printexc.to_string e in
+          let message = Exn.to_string e in
           let stack = Printexc.get_backtrace () in
           add_data (Printf.sprintf "Failed to get PIDs: %s - %s" message stack)
       end
@@ -704,7 +704,7 @@ let do_rage (state: state) (ref_unblocked_time: float ref): Rage.result =
     Printf.sprintf "[%02d:%02d:%02d.%03d] [%03.3fs ago] %s\n"
       tm.tm_hour tm.tm_min tm.tm_sec ms tdiff state in
   let server_state_strings = List.map ~f:server_state_to_string !hh_server_state in
-  add_data (String.concat "" ("LSP belief of hh_server_state:\n" :: server_state_strings));
+  add_data (String.concat ~sep:"" ("LSP belief of hh_server_state:\n" :: server_state_strings));
   (* server *)
   begin match state with
     | Main_loop menv -> begin
@@ -916,7 +916,7 @@ let make_ide_completion_response
     | Some details ->
       (* "(type1 $param1, ...)" *)
       let f param = Printf.sprintf "%s %s" param.param_ty param.param_name in
-      let params = String.concat ", " (List.map details.params ~f) in
+      let params = String.concat ~sep:", " (List.map details.params ~f) in
       Printf.sprintf "(%s)" params
   (** Returns a tuple of (insertText, insertTextFormat, textEdits). *)
   in
@@ -931,7 +931,7 @@ let make_ide_completion_response
     | Some details, _ when Lsp_helpers.supports_snippets p && not is_caret_followed_by_lparen ->
       (* "method(${1:arg1}, ...)" but for args we just use param names. *)
       let f i param = Printf.sprintf "${%i:%s}" (i + 1) param.param_name in
-      let params = String.concat ", " (List.mapi details.params ~f) in
+      let params = String.concat ~sep:", " (List.mapi details.params ~f) in
       (`InsertText (Printf.sprintf "%s(%s)" completion.res_name params), SnippetFormat)
     | _, false ->
       (`InsertText completion.res_name, PlainText)
@@ -1010,7 +1010,7 @@ let do_completion_legacy
   let filename = lsp_uri_to_path params.loc.TextDocumentPositionParams.textDocument.uri in
   let is_manually_invoked = match params.context with
     | None -> false
-    | Some c -> c.triggerKind == Invoked
+    | Some c -> c.triggerKind = Invoked
   in
   let delimit_on_namespaces = true in
   let command = ServerCommandTypes.IDE_AUTOCOMPLETE
@@ -1550,7 +1550,7 @@ let connect_after_hello
       in
       ImmQueue.iter file_edits ~f:handle_file_edit;
     with e ->
-      let message = Printexc.to_string e in
+      let message = Exn.to_string e in
       let stack = Printexc.get_backtrace () in
       raise (Server_fatal_connection_exception { message; stack; })
   end;
@@ -1776,7 +1776,7 @@ and reconnect_from_lost_if_necessary
       (* client to restart us. Note that we can't do clientStart because that *)
       (* would start our (old) version of hh_server, not the new one!         *)
       let unsaved = get_uris_with_unsaved_changes state |> SSet.elements in
-      let unsaved_str = if unsaved = [] then "[None]" else String.concat "\n" unsaved in
+      let unsaved_str = if unsaved = [] then "[None]" else String.concat ~sep:"\n" unsaved in
       let message = "Unsaved files:\n" ^ unsaved_str ^
         "\nVersion in hhconfig that spawned the current hh_client: " ^ !hhconfig_version ^
         "\nVersion in hhconfig currently: " ^ current_version ^
@@ -1868,7 +1868,7 @@ and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_e
       (* we don't want to clear the flag that's now there for the second     *)
       (* dialog. This != test achieves that. But ocaml only guarantees       *)
       (* behavior of != on mutable things, which ours is not...              *)
-      if lenv.dialog != !dialog_ref then Lost_server lenv
+      if not (phys_equal lenv.dialog !dialog_ref) then Lost_server lenv
       else Lost_server { lenv with dialog = ShowMessageRequest.Absent; }
     | _ -> state
   in
@@ -2493,7 +2493,7 @@ let main (env: env) : 'a =
       hack_log_error !ref_event edata.message stack "from_server" !ref_unblocked_time;
       respond_to_error !ref_event (Error.Unknown edata.message) stack
     | e ->
-      let message = Printexc.to_string e in
+      let message = Exn.to_string e in
       let stack = Printexc.get_backtrace () in
       respond_to_error !ref_event e stack;
       hack_log_error !ref_event message stack "from_lsp" !ref_unblocked_time;

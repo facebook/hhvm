@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 module SS = HackSearchService
 module SUtils = SearchUtils
 

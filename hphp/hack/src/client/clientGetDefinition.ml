@@ -7,7 +7,7 @@
  *
 *)
 
-open Hh_core
+open Core_kernel
 
 let print_json res =
   Nuclide_rpc_message_printer.
@@ -23,10 +23,10 @@ let print_readable ?short_pos:(short_pos=false) x =
     begin match definition with
     | None -> Printf.printf " None\n"
     | Some definition ->
-      print_newline ();
+      Out_channel.newline stdout;
       FileOutline.print_def ~short_pos " " definition
     end;
-    print_newline ()
+    Out_channel.newline stdout
   end
 
 let go res output_json =

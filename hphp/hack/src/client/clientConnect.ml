@@ -7,6 +7,7 @@
  *
  *)
 
+open Core_kernel
 module SMUtils = ServerMonitorUtils
 
 exception Server_hung_up
@@ -32,7 +33,7 @@ type env = {
 }
 
 type conn = {
-  channels : Timeout.in_channel * out_channel;
+  channels : Timeout.in_channel * Out_channel.t;
   conn_retries : int option;
   conn_progress_callback: string option -> unit;
   conn_start_time: float;
@@ -81,7 +82,7 @@ let begin_re = Str.regexp_string "Begin"
 let count_re = Str.regexp "\\([0-9]+\\) files"
 
 let matches_re re s =
-  let pos = try Str.search_forward re s 0 with Not_found -> -1 in
+  let pos = try Str.search_forward re s 0 with Caml.Not_found -> -1 in
   pos > -1
 
 let re_list =
@@ -102,7 +103,7 @@ let re_list =
   ]
 
 let is_valid_line s =
-  List.exists (fun re -> matches_re re s) re_list
+  List.exists ~f:(fun re -> matches_re re s) re_list
 
 type load_state_failure =
   | No_failure
@@ -134,7 +135,7 @@ let msg_of_tail tail_env =
   let count_suffix line =
     if matches_re count_re line then
       try let c = Str.matched_group 1 line in " " ^ c ^ " files"
-        with Not_found -> ""
+        with Caml.Not_found -> ""
     else "" in
   let final_suffix = if (!saved_state_failed) <> No_failure
     then " - this can take a long time because loading saved state failed]"
@@ -387,9 +388,9 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
             else Printf.sprintf "%n seconds" (secs) in
           Printf.eprintf
             "  hh_server '%s' was launched %s ago;\n  hh_client '%s' launched now.\n%!"
-            (String.concat " " mismatch_info.existing_argv)
+            (String.concat ~sep:" " mismatch_info.existing_argv)
             time
-            (String.concat " " (Array.to_list Sys.argv));
+            (String.concat ~sep:" " (Array.to_list Sys.argv));
           ()
       end;
       if env.autostart
@@ -433,7 +434,7 @@ let rpc : type a. conn -> a ServerCommandTypes.t -> a
     tail_env
   } cmd ->
   Marshal.to_channel oc (ServerCommandTypes.Rpc cmd) [];
-  flush oc;
+  Out_channel.flush oc;
   with_server_hung_up @@ fun () ->
     let res = wait_for_server_message
       ~expected_message:None

@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 
 let go results output_json =
   if output_json

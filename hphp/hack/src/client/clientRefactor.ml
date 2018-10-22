@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open ClientEnv
 
 let compare_pos pos1 pos2 =
@@ -35,9 +35,9 @@ let map_patches_to_filename acc res =
   | None -> SMap.add fn [res] acc
 
 let write_string_to_file fn str =
-  let oc = open_out fn in
-  output_string oc str;
-  close_out oc
+  let oc = Out_channel.create fn in
+  Out_channel.output_string oc str;
+  Out_channel.close oc
 
 let write_patches_to_buffer buf original_content patch_list =
   let i = ref 0 in

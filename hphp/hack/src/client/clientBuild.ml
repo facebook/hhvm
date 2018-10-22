@@ -7,6 +7,7 @@
  *
  *)
 
+open Core_kernel
 open Utils
 
 type env = {
@@ -50,7 +51,7 @@ let handle_response env ic =
      * this will help us identify where it is occurring
      *)
     let stack = Printexc.get_backtrace () in
-    Printf.fprintf stderr "Unexpected error: %s\n%s%!" (Printexc.to_string e) stack;
+    Printf.fprintf stderr "Unexpected error: %s\n%s%!" (Exn.to_string e) stack;
     raise e
 
 let main_exn env =

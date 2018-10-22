@@ -7,10 +7,10 @@
  *
  *)
 
+open Core_kernel
 module PositionedSyntax = Full_fidelity_positioned_syntax
 open FfpAutocompleteContextParser
 open AutocompleteTypes
-open Hh_core
 
 let should_complete_class (context:context) : bool =
   let open ContextPredicates in

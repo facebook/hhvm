@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Reordered_argument_collections
 
 let checkpoints = ref SMap.empty

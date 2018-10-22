@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open ServerEnv
 open Reordered_argument_collections
 open String_utils
@@ -157,7 +157,7 @@ let handle_connection_exception
   | exn ->
     HackEventLogger.handle_connection_exception exn (Utils.Callstack stack);
     EventLogger.master_exception exn stack;
-    Printf.fprintf stderr "Error: %s\n%s\n%!" (Printexc.to_string exn) stack;
+    Printf.fprintf stderr "Error: %s\n%s\n%!" (Exn.to_string exn) stack;
     ClientProvider.shutdown_client client;
     env
 [@@@warning "+52"] (* CARE! scope of suppression should be only handle_connection_exception *)
@@ -218,7 +218,7 @@ let report_persistent_exception
     ~(is_fatal: bool)
   : unit =
   let open Marshal_tools in
-  let message = Printexc.to_string e in
+  let message = Exn.to_string e in
   let push = if is_fatal then ServerCommandTypes.FATAL_EXCEPTION { message; stack; }
   else ServerCommandTypes.NONFATAL_EXCEPTION { message; stack; } in
   begin try ClientProvider.send_push_message_to_client client push with _ -> () end;
@@ -825,8 +825,8 @@ let setup_server ~informant_managed ~monitor_pid options handle =
   ServerDynamicView.toggle := ServerArgs.dynamic_view options;
   (* The OCaml default is 500, but we care about minimizing the memory
    * overhead *)
-  let gc_control = Gc.get () in
-  Gc.set {gc_control with Gc.max_overhead = 200};
+  let gc_control = Caml.Gc.get () in
+  Caml.Gc.set {gc_control with Caml.Gc.max_overhead = 200};
   let config, local_config = ServerConfig.(load filename options) in
   let {ServerLocalConfig.
     cpu_priority;

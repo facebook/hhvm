@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Ide_api_types
 
 (*****************************************************************************)
@@ -43,37 +43,37 @@ end
 (*****************************************************************************)
 
 let rec flatten_ acc stack = function
-  | [] | [_] as l when Stack.is_empty stack -> l @ acc
+  | [] | [_] as l when Caml.Stack.is_empty stack -> l @ acc
   | [] ->
-      let elem = Stack.pop stack in
+      let elem = Caml.Stack.pop stack in
       flatten_ acc stack [elem]
-  | (pos, _ as elt) :: rl when not (Stack.is_empty stack) &&
-    Compare.pos pos (fst (Stack.top stack)) = 1 ->
-      let elem = Stack.pop stack in
+  | (pos, _ as elt) :: rl when not (Caml.Stack.is_empty stack) &&
+    Compare.pos pos (fst (Caml.Stack.top stack)) = 1 ->
+      let elem = Caml.Stack.pop stack in
       flatten_ acc stack (elem :: elt :: rl)
   | [elt] ->
       flatten_ (elt :: acc) stack []
   | (pos1, x as elt1) :: ((pos2, _) :: _ as rl) ->
       if snd pos1 <= fst pos2
       then (* Intervals are disjoint *)
-        if Stack.is_empty stack
+        if Caml.Stack.is_empty stack
         then
           flatten_ (elt1 :: acc) stack rl
         else
-          let elem = Stack.pop stack in
+          let elem = Caml.Stack.pop stack in
           flatten_ (elt1 :: acc) stack (elem :: rl)
       else begin (* interval 2 is nested within interval 1 *)
         (* avoid creating zero-length intervals *)
         if snd pos1 <> snd pos2
         then
           (let pos1_rest = (snd pos2, snd pos1) in
-          Stack.push (pos1_rest, x) stack);
+          Caml.Stack.push (pos1_rest, x) stack);
         let pos1_head = (fst pos1, fst pos2) in
         flatten_ ((pos1_head, x) :: acc) stack rl
       end
 
 let flatten xs =
-  flatten_ [] (Stack.create ()) xs |> List.rev
+  flatten_ [] (Caml.Stack.create ()) xs |> List.rev
 
 (*****************************************************************************)
 (* Walks the content of a string and adds colors at the given positions. *)

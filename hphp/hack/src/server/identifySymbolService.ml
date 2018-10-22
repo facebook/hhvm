@@ -7,11 +7,11 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open SymbolOccurrence
 open Typing_defs
 
-module Result_set = Set.Make(struct
+module Result_set = Caml.Set.Make(struct
   type t = Relative_path.t SymbolOccurrence.t
   let compare = Pervasives.compare
 end)

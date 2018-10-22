@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open ServerEnv
 
 module SearchServiceRunner  = struct
@@ -37,7 +37,7 @@ module SearchServiceRunner  = struct
     let rec iter acc n =
       if n <= 0 || Queue.is_empty queue then acc
       else
-        let x = Queue.pop queue in
+        let x = Queue.dequeue_exn queue in
         iter (x::acc) (n-1) in
     let fast = iter [] num_files in
     let update_single_search _ fast_list =
@@ -79,9 +79,9 @@ module SearchServiceRunner  = struct
     end
     else ()
 
-  let update x = Queue.push x queue
+  let update x = Queue.enqueue queue x
 
-  let update_full fn ast = Queue.push (fn, Full ast) queue
+  let update_full fn ast = Queue.enqueue queue (fn, Full ast)
 
   let should_run_completely genv =
    chunk_size genv = 0

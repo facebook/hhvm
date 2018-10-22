@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open ServerCommandTypes
 
 exception Client_went_away
@@ -15,7 +15,7 @@ exception Client_went_away
 (* default pipe, priority pipe *)
 type t = Unix.file_descr * Unix.file_descr
 type client =
-  | Non_persistent_client of Timeout.in_channel * out_channel
+  | Non_persistent_client of Timeout.in_channel * Out_channel.t
   | Persistent_client of Unix.file_descr
 
 let provider_from_file_descriptors x = x

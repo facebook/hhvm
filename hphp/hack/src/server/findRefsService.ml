@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Option.Monad_infix
 open Reordered_argument_collections
 open ServerCommandTypes.Find_refs
@@ -99,7 +99,7 @@ let find_child_classes tcopt target_class_name files_info files =
       List.fold_left classes ~init:acc ~f:begin fun acc cid ->
         add_if_extends_class tcopt target_class_name (snd cid) acc
       end
-    with Not_found ->
+    with Caml.Not_found ->
       acc)
   end
 

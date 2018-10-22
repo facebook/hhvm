@@ -13,7 +13,7 @@ module SyntaxKind = Full_fidelity_syntax_kind
 module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(PositionedSyntax)
 module TokenKind = Full_fidelity_token_kind
 
-open Hh_core
+open Core_kernel
 open AutocompleteTypes
 
 let empty_autocomplete_token = "PLACEHOLDER"
@@ -102,5 +102,5 @@ let auto_complete
   [keyword_completions; type_based_completions; global_completions]
   |> List.concat_no_order
   |> filter_results
-  |> List.sort ~cmp:(fun a b -> compare a.res_name b.res_name)
+  |> List.sort ~compare:(fun a b -> compare a.res_name b.res_name)
   |> List.remove_consecutive_duplicates ~equal:(fun a b -> a.res_name = b.res_name)

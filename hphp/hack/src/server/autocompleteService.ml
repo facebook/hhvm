@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Reordered_argument_collections
 open Typing_defs
 open Utils
@@ -61,7 +61,7 @@ let get_replace_pos_exn ~delimit_on_namespaces =
     let open Ide_api_types in
     let range = pos_to_range pos in
     let st = if delimit_on_namespaces
-      then match String.rindex_opt text '\\' with
+      then match String.rindex text '\\' with
         | Some index ->
           { range.st with column = range.st.column + index }
         | None -> range.st
@@ -292,7 +292,7 @@ let compute_complete_global
         (* name="Str\\co" gname="S" -> false *)
         (* name="Str\\co" gname="Str\\co" -> true *)
         string_starts_with stripped_name gname &&
-          not (String.contains_from stripped_name (String.length gname) '\\')
+          not (String.contains stripped_name ~pos:(String.length gname) '\\')
       else
         string_starts_with stripped_name gname
     in
@@ -303,7 +303,7 @@ let compute_complete_global
         (* returns the part of 'name' after its rightmost slash *)
         try
           let len = String.length stripped_name in
-          let i = (String.rindex stripped_name '\\') + 1 in
+          let i = (String.rindex_exn stripped_name '\\') + 1 in
           String.sub stripped_name i (len - i)
         with _ ->
           stripped_name

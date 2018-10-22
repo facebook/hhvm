@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Reordered_argument_collections
 open SymbolDefinition
 module Parser = Full_fidelity_ast

@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Reordered_argument_collections
 open ServerCommandTypes.Method_jumps
 open Typing_defs

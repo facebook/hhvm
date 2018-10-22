@@ -7,7 +7,9 @@
  *
  *)
 
-open Hh_core
+module Hh_bucket = Bucket
+open Core_kernel
+open Common
 
 module Syntax = Full_fidelity_positioned_syntax
 module SyntaxKind = Full_fidelity_syntax_kind
@@ -425,7 +427,7 @@ let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
             "valid child types for a node of kind '%s' are: %s")
             child_name
             kind
-            (String.concat ", " valid_types))
+            (String.concat ~sep:", " valid_types))
       | Some _ -> Ok (ChildType child_name)
     in
     let children_patterns =
@@ -550,7 +552,7 @@ let result_to_json ~(sort_results: bool) (result: result option): Hh_json.json =
     let matched_nodes = result.matched_nodes in
     let matched_nodes =
       if sort_results
-      then List.sort matched_nodes ~cmp:Pervasives.compare
+      then List.sort matched_nodes ~compare:Pervasives.compare
       else matched_nodes
     in
     let matched_nodes =
@@ -635,7 +637,7 @@ let go
     then done_searching := true;
   in
 
-  let next_files: (Relative_path.t * pattern) list Bucket.next =
+  let next_files: (Relative_path.t * pattern) list Hh_bucket.next =
     let with_relative_path path =
       (Relative_path.create_detect_prefix path, pattern)
     in
@@ -654,7 +656,7 @@ let go
       begin fun () ->
         let files = indexer () |> List.map ~f:with_relative_path in
         progress_fn ~total:0 ~start:0 ~length:(List.length files);
-        Bucket.of_list files
+        Hh_bucket.of_list files
       end
   in
   let results = MultiWorker.call
@@ -667,7 +669,7 @@ let go
 
   let results =
     if sort_results
-    then List.sort results ~cmp:Pervasives.compare
+    then List.sort results ~compare:Pervasives.compare
     else results
   in
 

@@ -11,7 +11,7 @@
  * Parses and gathers information from the .hhconfig in the repo.
  *)
 
-open Hh_core
+open Core_kernel
 open Config_file.Getters
 open Reordered_argument_collections
 
@@ -22,7 +22,7 @@ type t = {
 
   (* Configures only the workers. Workers can have more relaxed GC configs as
    * they are short-lived processes *)
-  gc_control       : Gc.control;
+  gc_control       : Caml.Gc.control;
   sharedmem_config : SharedMem.config;
   tc_options       : TypecheckerOptions.t;
   parser_options   : ParserOptions.t;
@@ -48,12 +48,12 @@ let is_compatible c1 c2 =
   c1 = c2
 
 let make_gc_control config =
-  let {Gc.minor_heap_size; space_overhead; _} = GlobalConfig.gc_control in
+  let {Caml.Gc.minor_heap_size; space_overhead; _} = GlobalConfig.gc_control in
   let minor_heap_size =
     int_ "gc_minor_heap_size" ~default:minor_heap_size config in
   let space_overhead =
     int_ "gc_space_overhead" ~default:space_overhead config in
-  { GlobalConfig.gc_control with Gc.minor_heap_size; space_overhead; }
+  { GlobalConfig.gc_control with Caml.Gc.minor_heap_size; space_overhead; }
 
 let make_sharedmem_config config options local_config =
   let { SharedMem.
@@ -108,7 +108,7 @@ let config_user_attributes config =
       Some (List.fold_left custom_attrs ~f:SSet.add ~init:SSet.empty)
 
 let process_experimental sl =
-  match List.map sl String.lowercase_ascii with
+  match List.map sl String.lowercase with
     | ["false"] -> SSet.empty
     | ["true"] -> TypecheckerOptions.experimental_all
     | features -> List.fold_left features ~f:SSet.add ~init:SSet.empty
@@ -135,7 +135,7 @@ let process_migration_flags sl =
 let config_tc_migration_flags config =
   SMap.get config "enable_tc_migration_flags"
   |> Option.value_map ~f:(Str.split config_list_regexp) ~default:[]
-  |> List.map ~f:String.lowercase_ascii
+  |> List.map ~f:String.lowercase
   |> process_migration_flags
 
 
@@ -191,7 +191,7 @@ let process_untrusted_mode config =
         "sharedmem_";
       ] in
       let invalid_keys = SMap.filter ~f:(fun ck _ ->
-        let ck = String.lowercase_ascii ck in
+        let ck = String.lowercase ck in
         let exact_match = List.find ~f:(fun bli -> bli = ck) blacklist in
         let prefix_match = List.find
           ~f:(fun blp -> String_utils.string_starts_with ck blp)
@@ -202,7 +202,7 @@ let process_untrusted_mode config =
           | _ -> true
       ) config |> SMap.keys in
       if not (List.is_empty invalid_keys)
-      then failwith ("option not permitted in untrusted_mode: "^(String.concat ", " invalid_keys))
+      then failwith ("option not permitted in untrusted_mode: "^(String.concat ~sep:", " invalid_keys))
     else failwith "untrusted_mode can only be enabled, not disabled"
   | _ -> ()
 

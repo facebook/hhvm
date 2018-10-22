@@ -7,7 +7,7 @@
  *
  *)
 
-module List = Hh_core.List
+open Core_kernel
 
 (* An alias for the errors type that we marshal to and unmarshal from the saved state *)
 type saved_state_errors = (Errors.phase * Relative_path.Set.t) list
@@ -74,21 +74,21 @@ let partition_error_files_tf
   (phases: Errors.phase list): (Relative_path.Set.t * Relative_path.Set.t) =
 
   let (errors_in_phases_t, errors_in_phases_f) =
-    List.partition_tf errors_in_phases ~f:(fun (phase, _error_files) -> List.mem phases phase) in
+    List.partition_tf errors_in_phases ~f:(fun (phase, _error_files) -> List.mem ~equal:(=) phases phase) in
 
   ((fold_error_files errors_in_phases_t), (fold_error_files errors_in_phases_f))
 
 (* Loads the file info and the errors, if any. *)
 let load_saved_state
     (saved_state_filename: string) : (FileInfo.saved_state_info * saved_state_errors) =
-  let chan = open_in_bin saved_state_filename in
+  let chan = In_channel.create ~binary:true saved_state_filename in
   let (old_saved: FileInfo.saved_state_info) =
     Marshal.from_channel chan in
   Sys_utils.close_in_no_fail saved_state_filename chan;
 
   let errors_filename = get_errors_filename saved_state_filename in
   let (old_errors: saved_state_errors) = if not (Sys.file_exists errors_filename) then [] else
-    Marshal.from_channel (open_in_bin errors_filename) in
+    Marshal.from_channel (In_channel.create ~binary:true errors_filename) in
   (old_saved, old_errors)
 
 (* Writes some OCaml object to a file with the given filename. *)
@@ -177,7 +177,7 @@ let save_state
 let get_in_memory_dep_table_entry_count () : (int, string) result =
   Utils.try_with_stack (fun () ->
     SharedMem.get_in_memory_dep_table_entry_count ())
-  |> Core_result.map_error ~f:(fun (exn, _stack) -> Printexc.to_string exn)
+  |> Core_result.map_error ~f:(fun (exn, _stack) -> Exn.to_string exn)
 
 (* If successful, returns the # of edges from the dependency table that were written. *)
 (* TODO: write some other stats, e.g., the number of names, the number of errors, etc. *)
@@ -188,4 +188,4 @@ let go
     (output_filename: string) : (int, string) result =
   Utils.try_with_stack (fun () ->
     save_state ~file_info_on_disk files_info errors output_filename)
-  |> Core_result.map_error ~f:(fun (exn, _stack) -> Printexc.to_string exn)
+  |> Core_result.map_error ~f:(fun (exn, _stack) -> Exn.to_string exn)

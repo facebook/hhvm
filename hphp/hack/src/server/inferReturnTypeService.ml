@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Nast
 open Core_result
 open Typing_infer_return

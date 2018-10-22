@@ -68,6 +68,12 @@ type t = {
   disable_conservative_redecl : bool;
   ide_parser_cache : bool;
   ide_tast_cache : bool;
+  (* When enabled, save hot class declarations (for now, specified in a special
+     file in the repository) when generating a saved state. *)
+  store_decls_in_saved_state : bool;
+  (* When enabled, load class declarations stored in the saved state, if any, on
+     server init. *)
+  load_decls_from_saved_state : bool;
 }
 
 let default = {
@@ -112,6 +118,8 @@ let default = {
   disable_conservative_redecl = false;
   ide_parser_cache = false;
   ide_tast_cache = false;
+  store_decls_in_saved_state = false;
+  load_decls_from_saved_state = false;
 }
 
 let path =
@@ -225,6 +233,10 @@ let load_ fn ~silent =
     ~default:default.hg_aware config in
   let disable_conservative_redecl = bool_if_version "disable_conservative_redecl"
     ~default:default.disable_conservative_redecl config in
+  let store_decls_in_saved_state = bool_if_version "store_decls_in_saved_state"
+    ~default:default.store_decls_in_saved_state config in
+  let load_decls_from_saved_state = bool_if_version "load_decls_from_saved_state"
+    ~default:default.load_decls_from_saved_state config in
   let hg_aware_parsing_restart_threshold = int_ "hg_aware_parsing_restart_threshold"
     ~default:default.hg_aware_parsing_restart_threshold config in
   let hg_aware_redecl_restart_threshold = int_ "hg_aware_redecl_restart_threshold"
@@ -276,6 +288,8 @@ let load_ fn ~silent =
     predeclare_ide_deps;
     ide_parser_cache;
     ide_tast_cache;
+    store_decls_in_saved_state;
+    load_decls_from_saved_state;
   }
 
 let load ~silent =

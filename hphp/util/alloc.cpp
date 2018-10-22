@@ -407,6 +407,55 @@ void setup_high_arena(unsigned n1GPages) {
   high_arena_tcache_create();           // set up high_arena_flags
 }
 
+// Set up extra arenas for use in non-VM threads, when we have short bursts of
+// worker threads running, e.g., during deserialization of profile data.
+static std::vector<std::pair<std::vector<DefaultArena*>,
+                             std::atomic_uint*>> s_extra_arenas;
+static unsigned s_extra_arena_per_node;
+bool setup_extra_arenas(unsigned count) {
+  if (count == 0) return false;
+  // This may be called when we have many other threads running.  So hold the
+  // lock while making changes.
+  static std::mutex lock;
+  std::lock_guard<std::mutex> g(lock);
+  // only the first call allocate the arenas.
+  if (!s_extra_arenas.empty()) {
+    return count <= s_extra_arenas.size() * s_extra_arenas[0].first.size();
+  }
+  // `count` needs to be a multiple of `num_numa_nodes()`, if it isn't, we round
+  // it up to make it easy to balance across nodes.
+  const unsigned nNodes = std::max(1, num_numa_nodes());
+  s_extra_arena_per_node = (count + nNodes - 1) / nNodes;
+  assert(s_extra_arena_per_node >= 1);
+  s_extra_arenas.resize(nNodes);
+  for (unsigned n = 0; n < nNodes; ++n) {
+    s_extra_arenas[n].first.resize(s_extra_arena_per_node);
+    auto constexpr kArenaSize =
+      (sizeof(DefaultArena) + alignof(DefaultArena) - 1)
+      / alignof(DefaultArena) * alignof(DefaultArena);
+    auto const allocSize = kArenaSize * s_extra_arena_per_node
+      + sizeof(std::atomic_uint);
+    void* addr = mallocx_on_node(allocSize, n, alignof(DefaultArena));
+    memset(addr, 0, allocSize);
+    for (unsigned i = 0; i < s_extra_arena_per_node; ++i) {
+      s_extra_arenas[n].first[i] = DefaultArena::CreateAt(addr);
+      addr = (char*)addr + kArenaSize;
+    }
+    s_extra_arenas[n].second = static_cast<std::atomic_uint*>(addr);
+  }
+  return true;
+}
+
+DefaultArena* next_extra_arena(int node) {
+  if (s_extra_arena_per_node == 0) return nullptr;
+  if (node >= s_extra_arenas.size()) return nullptr;
+  if (node < 0) node = 0;
+  auto const n = static_cast<unsigned>(node);
+  auto counter = s_extra_arenas[n].second;
+  auto const next = counter->fetch_add(1, std::memory_order_relaxed);
+  return s_extra_arenas[n].first[next % s_extra_arena_per_node];
+}
+
 void* huge_page_extent_alloc(extent_hooks_t* extent_hooks, void* addr,
                              size_t size, size_t alignment, bool* zero,
                              bool* commit, unsigned arena_ind) {

@@ -164,7 +164,8 @@ static_assert(MAX_MANAGED_ARENA_COUNT >= 1, "");
 // All ManagedArena's represented as an array of pair<id, pointer>.  Each
 // pointer can be casted to the underlying ExtentAllocator/Arena. We use this
 // to access the state of ExtentAllocators in extent hooks.  An id of zero
-// indicates an empty entry.
+// indicates an empty entry.  If the arena doesn't have a custom extent hook,
+// the arena won't be registered here.
 using ArenaArray = std::array<std::pair<unsigned, void*>,
                               MAX_MANAGED_ARENA_COUNT>;
 extern ArenaArray g_arenas;

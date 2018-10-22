@@ -39,6 +39,39 @@
 
 namespace HPHP { namespace alloc {
 
+template<typename T> struct extent_allocator_traits {
+ public:
+  constexpr static extent_hooks_t* get_hooks() {
+    return get_hooks_internal<T>(nullptr);
+  }
+  constexpr static ssize_t get_decay_ms() {
+    return get_decay_ms_internal<T>(nullptr);
+  }
+
+ private:
+  template<typename A>
+  static constexpr extent_hooks_t* get_hooks_internal(decltype(&(A::s_hooks))) {
+    return &(A::s_hooks);
+  }
+  template<typename A>
+  static constexpr extent_hooks_t* get_hooks_internal(...) {
+    return nullptr;
+  }
+  template<typename A>
+  static constexpr ssize_t get_decay_ms_internal(decltype(&(A::s_decay_ms))) {
+    return A::s_decay_ms;
+  }
+  template<typename A>
+  static constexpr ssize_t get_decay_ms_internal(...) {
+    return 60 * 1000;                   // purge every minute by default
+  }
+};
+
+/**
+ * Default extent hooks used by jemalloc.
+ */
+struct DefaultExtentAllocator {};
+
 /**
  * Extent hooks that do bump mapping for ManagedArena.
  */
@@ -60,6 +93,11 @@ struct BumpExtentAllocator : private BumpAllocState {
 
   BumpMapper* const m_mapper;
 };
+
+static_assert(extent_allocator_traits<BumpExtentAllocator>::get_hooks(), "");
+static_assert(!extent_allocator_traits<DefaultExtentAllocator>::get_hooks(), "");
+static_assert(extent_allocator_traits<BumpExtentAllocator>::
+              get_decay_ms() == 60000, "");
 
 }}
 

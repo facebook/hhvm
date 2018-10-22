@@ -583,6 +583,7 @@ struct RuntimeOption {
   F(int, JitThreads,                   4)                               \
   F(int, JitWorkerThreads,             Process::GetCPUCount() / 2)      \
   F(int, JitWorkerThreadsForSerdes,    0)                               \
+  F(int, JitWorkerArenas,              Process::GetCPUCount() / 4)      \
   F(bool, JitDesProfDataAfterRetranslateAll, true)                      \
   F(int, JitLdimmqSpan,                8)                               \
   F(int, JitPrintOptimizedIR,          0)                               \

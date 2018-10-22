@@ -48,7 +48,8 @@
 #include "hphp/util/hfsort.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/logger.h"
-#include "hphp/util/match.h"
+#include "hphp/util/managed-arena.h"
+#include "hphp/util/numa.h"
 #include "hphp/util/trace.h"
 
 TRACE_SET_MOD(mcg);
@@ -134,6 +135,14 @@ struct TranslateWorker : JobQueueWorker<OptimizeData*, void*, true, true> {
     VMProtect _;
     optimize(d->info);
   }
+
+#if USE_JEMALLOC_EXTENT_HOOKS
+  void onThreadEnter() override {
+    if (auto arena = next_extra_arena(s_numaNode)) {
+      arena->bindCurrentThread();
+    }
+  }
+#endif
 };
 
 using WorkerDispatcher = JobQueueDispatcher<TranslateWorker>;

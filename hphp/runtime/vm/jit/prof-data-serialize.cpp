@@ -51,6 +51,8 @@
 
 #include "hphp/util/boot-stats.h"
 #include "hphp/util/build-info.h"
+#include "hphp/util/managed-arena.h"
+#include "hphp/util/numa.h"
 #include "hphp/util/process.h"
 
 #include <folly/portability/Unistd.h>
@@ -790,9 +792,23 @@ void merge_loaded_units(int numWorkers) {
   // the first worker to finish.
   auto const batchSize{std::max(units.size() / numWorkers / 16, size_t(1))};
   std::atomic<size_t> index{0};
+  UNUSED std::atomic_int curr_node{0};
   for (auto worker = 0; worker < numWorkers; ++worker) {
     workers.push_back(std::thread([&] {
       ProfileNonVMThread nonVM;
+#if USE_JEMALLOC_EXTENT_HOOKS
+      auto const numaNode = next_numa_node(curr_node);
+#ifdef HAVE_NUMA
+      if (use_numa) {
+        s_numaNode = numaNode;
+        numa_sched_setaffinity(0, node_to_cpu_mask[numaNode]);
+      }
+#endif
+      if (auto arena = next_extra_arena(numaNode)) {
+        arena->bindCurrentThread();
+      }
+#endif
+
       hphp_thread_init();
       hphp_session_init(Treadmill::SessionKind::PreloadRepo);
 

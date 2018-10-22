@@ -70,6 +70,7 @@ template<typename ExtentAllocator>
 std::string ManagedArena<ExtentAllocator>::reportStats() {
   mallctl_epoch();
   char buffer[128];
+  using Traits = extent_allocator_traits<ExtentAllocator>;
   std::snprintf(buffer, sizeof(buffer),
                 "Arena %d: capacity %zd, max_capacity %zd, used %zd\n",
                 id(),
@@ -88,6 +89,8 @@ size_t ManagedArena<ExtentAllocator>::unusedSize() {
 
 template<typename ExtentAllocator>
 void ManagedArena<ExtentAllocator>::init() {
+  using Traits = extent_allocator_traits<ExtentAllocator>;
+
   if (!g_mib_initialized) {
     initializeMibs();
   }
@@ -101,36 +104,40 @@ void ManagedArena<ExtentAllocator>::init() {
     throw std::runtime_error{"arenas.create"};
   }
   char command[32];
-  std::snprintf(command, sizeof(command), "arena.%d.extent_hooks", m_arenaId);
-  extent_hooks_t* hooks_ptr = &ExtentAllocator::s_hooks;
-  if (mallctl(command, nullptr, nullptr, &hooks_ptr, sizeof(hooks_ptr))) {
-    throw std::runtime_error{command};
+  if (extent_hooks_t* hooks_ptr = Traits::get_hooks()) {
+    std::snprintf(command, sizeof(command), "arena.%d.extent_hooks", m_arenaId);
+    if (mallctl(command, nullptr, nullptr, &hooks_ptr, sizeof(hooks_ptr))) {
+      throw std::runtime_error{command};
+    }
   }
-  // Purge infrequently. Most of the purging will fail if hugetlb pages are
-  // used, yet it is possible to use normal pages when hugetlb pages are
-  // unavailable.
-  ssize_t decay_ms = 60 * 1000;
+  ssize_t decay_ms = Traits::get_decay_ms();
   std::snprintf(command, sizeof(command),
                 "arena.%d.dirty_decay_ms", m_arenaId);
   if (mallctl(command, nullptr, nullptr, &decay_ms, sizeof(decay_ms))) {
     throw std::runtime_error{command};
   }
-  assert(GetByArenaId<ManagedArena>(m_arenaId) == nullptr);
-  for (auto& i : g_arenas) {
-    if (!i.first) {
-      i.first = m_arenaId;
-      i.second = this;
-      return;
+
+  if (Traits::get_hooks() != nullptr) {
+    // The only place where we need `GetByArenaId` is in custom extent hooks.
+    assert(GetByArenaId<ManagedArena>(m_arenaId) == nullptr);
+    for (auto& i : g_arenas) {
+      if (!i.first) {
+        i.first = m_arenaId;
+        i.second = this;
+        return;
+      }
     }
+    // Should never reached here, as there should be spare entries in g_arenas.
+    throw std::out_of_range{
+      "too many ManagedArena's, check MAX_MANAGED_ARENA_COUNT"};
   }
-  // Should never reached here, as there should be spare entries in g_arenas.
-  throw std::out_of_range{
-    "too many ManagedArena's, check MAX_HUGE_ARENA_COUNT"};
 }
 
 template void ManagedArena<BumpExtentAllocator>::init();
 template size_t ManagedArena<BumpExtentAllocator>::unusedSize();
 template std::string ManagedArena<BumpExtentAllocator>::reportStats();
+
+template void ManagedArena<DefaultExtentAllocator>::init();
 
 }}
 

@@ -85,8 +85,8 @@
 #include "hphp/util/arch.h"
 #include "hphp/util/boot-stats.h"
 #include "hphp/util/build-info.h"
-#include "hphp/util/compatibility.h"
 #include "hphp/util/capability.h"
+#include "hphp/util/compatibility.h"
 #include "hphp/util/embedded-data.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/hphp-config.h"
@@ -94,6 +94,7 @@
 #ifndef _MSC_VER
 #include "hphp/util/light-process.h"
 #endif
+#include "hphp/util/managed-arena.h"
 #include "hphp/util/maphuge.h"
 #include "hphp/util/perf-event.h"
 #include "hphp/util/process-exec.h"
@@ -2440,6 +2441,12 @@ void hphp_process_init() {
       }
       auto const numWorkers = RuntimeOption::EvalJitWorkerThreadsForSerdes ?
         RuntimeOption::EvalJitWorkerThreadsForSerdes : Process::GetCPUCount();
+#if USE_JEMALLOC_EXTENT_HOOKS
+      auto const numArenas =
+        std::min(RuntimeOption::EvalJitWorkerArenas,
+                 std::max(RuntimeOption::EvalJitWorkerThreads, numWorkers));
+      setup_extra_arenas(numArenas);
+#endif
       auto const errMsg =
         jit::deserializeProfData(RuntimeOption::EvalJitSerdesFile, numWorkers);
 

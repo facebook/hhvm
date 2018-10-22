@@ -43,7 +43,7 @@ template <typename ExtentAllocator>
 struct ManagedArena : public ExtentAllocator {
  private:
   // Constructor forwards all arguments.  The only correct way to create a
-  // ManagedArena is `CreateAt()` on statically allocated memory.
+  // ManagedArena is `CreateAt()` on preallocated memory.
   template<typename... Args>
   explicit ManagedArena(Args&&... args)
     : ExtentAllocator(std::forward<Args>(args)...) {
@@ -58,8 +58,12 @@ struct ManagedArena : public ExtentAllocator {
   ~ManagedArena() = delete;
 
  public:
-  inline unsigned id() const {
+  unsigned id() const {
     return m_arenaId;
+  }
+
+  void bindCurrentThread() {
+    mallctlWrite("thread.arena", id());
   }
 
   // For stats reporting
@@ -94,7 +98,24 @@ inline HighArena* highArena() {
   return nullptr;
 }
 
-}}
+}
+
+using DefaultArena = alloc::ManagedArena<alloc::DefaultExtentAllocator>;
+
+/*
+ * Make sure we have at least `count` extra arenas, with the same number of
+ * extra arenas for each NUMA node.  Returns whether we have enough arenas to
+ * meet the required count.  This function tries to create the extra arenas at
+ * the first time it is called with nonzero count.  Subsequent calls won't
+ * change the number of extra arenas.
+ */
+bool setup_extra_arenas(unsigned count);
+/*
+ * Get the next extra arena on the specified NUMA node.
+ */
+DefaultArena* next_extra_arena(int node);
+
+}
 
 #endif // USE_JEMALLOC_EXTENT_HOOKS
 #endif

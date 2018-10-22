@@ -142,6 +142,8 @@ bool mayHaveData(trep bits) {
   case BUnc:
   case BArrKey:
   case BUncArrKey:
+  case BStrLike:
+  case BUncStrLike:
   case BOptTrue:
   case BOptFalse:
   case BOptBool:
@@ -171,6 +173,8 @@ bool mayHaveData(trep bits) {
   case BOptRes:
   case BOptArrKey:
   case BOptUncArrKey:
+  case BOptStrLike:
+  case BOptUncStrLike:
   case BOptFunc:
   case BInitCell:
   case BCell:
@@ -237,6 +241,8 @@ bool canBeOptional(trep bits) {
   case BStr:
   case BUncArrKey:
   case BArrKey:
+  case BUncStrLike:
+  case BStrLike:
   case BSArr:
   case BArrE:
   case BArrN:
@@ -313,6 +319,8 @@ bool canBeOptional(trep bits) {
   case BOptRes:
   case BOptUncArrKey:
   case BOptArrKey:
+  case BOptUncStrLike:
+  case BOptStrLike:
   case BOptFunc:
     return false;
 
@@ -2824,7 +2832,7 @@ Type type_of_istype(IsTypeOp op) {
   case IsTypeOp::Bool:   return TBool;
   case IsTypeOp::Int:    return TInt;
   case IsTypeOp::Dbl:    return TDbl;
-  case IsTypeOp::Str:    return TStr;
+  case IsTypeOp::Str:    return TStrLike;
   case IsTypeOp::Res:    return TRes;
   case IsTypeOp::Arr:    return TArr;
   case IsTypeOp::Vec:    return TVec;
@@ -3394,6 +3402,9 @@ Type union_of(Type a, Type b) {
 
   Y(UncArrKey)
   Y(ArrKey)
+
+  Y(UncStrLike)
+  Y(StrLike)
 
   // non-optional types that contain other types above (and hence
   // must come after them).
@@ -5179,10 +5190,16 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
   X(OptKeyset)
   X(Obj)
   X(OptObj)
+  X(Func)
+  X(OptFunc)
   X(UncArrKey)
   X(ArrKey)
   X(OptUncArrKey)
   X(OptArrKey)
+  X(UncStrLike)
+  X(StrLike)
+  X(OptUncStrLike)
+  X(OptStrLike)
   X(InitUnc)
   X(Unc)
   X(InitCell)

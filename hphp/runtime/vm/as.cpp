@@ -1020,6 +1020,8 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   X("Null",     T::Null);
   X("Obj",      T::Obj);
   X("?Obj",     T::OptObj);
+  X("Func",     T::Func);
+  X("?Func",    T::OptFunc);
   X("Ref",      T::Ref);
   X("?Res",     T::OptRes);
   X("Res",      T::Res);
@@ -1044,6 +1046,10 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   X("?ArrKey",  T::OptArrKey);
   X("UncArrKey",T::UncArrKey);
   X("ArrKey",   T::ArrKey);
+  X("?UncStrLike",T::OptUncStrLike);
+  X("?StrLike",T::OptStrLike);
+  X("UncStrLike",T::UncStrLike);
+  X("StrLike",T::StrLike);
   X("Uninit",   T::Uninit);
 
 #undef X
@@ -1093,12 +1099,18 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   case T::OptKeyset:
   case T::Obj:
   case T::OptObj:
+  case T::Func:
+  case T::OptFunc:
   case T::InitUnc:
   case T::Unc:
   case T::OptUncArrKey:
   case T::OptArrKey:
   case T::UncArrKey:
   case T::ArrKey:
+  case T::OptUncStrLike:
+  case T::OptStrLike:
+  case T::UncStrLike:
+  case T::StrLike:
   case T::InitCell:
   case T::Cell:
   case T::Ref:

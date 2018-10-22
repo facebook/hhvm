@@ -110,8 +110,11 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::OptDbl:
   case T::OptRes:
   case T::OptObj:
+  case T::OptFunc:
   case T::OptArrKey:
   case T::OptUncArrKey:
+  case T::OptStrLike:
+  case T::OptUncStrLike:
   case T::Null:
   case T::Cell:
   case T::Ref:
@@ -119,6 +122,8 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::Unc:
   case T::ArrKey:
   case T::UncArrKey:
+  case T::StrLike:
+  case T::UncStrLike:
   case T::InitCell:
   case T::InitGen:
   case T::Gen:
@@ -131,6 +136,7 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::SStr:
   case T::Str:
   case T::Obj:
+  case T::Func:
     return true;
 
   case T::SVec:
@@ -208,6 +214,9 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
   case T::OptObj:       if (initNull) return true;
                         // fallthrough
   case T::Obj:          return tv.m_type == KindOfObject;
+  case T::OptFunc:      if (initNull) return true;
+                        // fallthrough
+  case T::Func:         return tv.m_type == KindOfFunc;
 
   case T::OptSStr:
     if (initNull) return true;
@@ -400,6 +409,19 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     return (isStringType(tv.m_type) && !tv.m_data.pstr->isRefCounted()) ||
       tv.m_type == KindOfInt64;
 
+  case T::OptStrLike:
+    if (initNull) return true;
+    // fallthrough
+  case T::StrLike:
+    return isStringType(tv.m_type) || tv.m_type == KindOfFunc;
+
+  case T::OptUncStrLike:
+    if (initNull) return true;
+    // fallthrough
+  case T::UncStrLike:
+    return (isStringType(tv.m_type) && !tv.m_data.pstr->isRefCounted()) ||
+      tv.m_type == KindOfFunc;
+
   case T::InitCell:
     if (tv.m_type == KindOfUninit) return false;
     // fallthrough
@@ -422,34 +444,40 @@ std::string show(RepoAuthType rat) {
   auto const tag = rat.tag();
   using T = RepoAuthType::Tag;
   switch (tag) {
-  case T::OptBool:  return "?Bool";
-  case T::OptInt:   return "?Int";
-  case T::OptSStr:  return "?SStr";
-  case T::OptStr:   return "?Str";
-  case T::OptDbl:   return "?Dbl";
-  case T::OptRes:   return "?Res";
-  case T::OptObj:   return "?Obj";
-  case T::OptUncArrKey: return "?UncArrKey";
-  case T::OptArrKey: return "?ArrKey";
-  case T::Null:     return "Null";
-  case T::Cell:     return "Cell";
-  case T::Ref:      return "Ref";
-  case T::InitUnc:  return "InitUnc";
-  case T::Unc:      return "Unc";
-  case T::UncArrKey:return "UncArrKey";
-  case T::ArrKey:   return "ArrKey";
-  case T::InitCell: return "InitCell";
-  case T::InitGen:  return "InitGen";
-  case T::Gen:      return "Gen";
-  case T::Uninit:   return "Uninit";
-  case T::InitNull: return "InitNull";
-  case T::Bool:     return "Bool";
-  case T::Int:      return "Int";
-  case T::Dbl:      return "Dbl";
-  case T::Res:      return "Res";
-  case T::SStr:     return "SStr";
-  case T::Str:      return "Str";
-  case T::Obj:      return "Obj";
+  case T::OptBool:       return "?Bool";
+  case T::OptInt:        return "?Int";
+  case T::OptSStr:       return "?SStr";
+  case T::OptStr:        return "?Str";
+  case T::OptDbl:        return "?Dbl";
+  case T::OptRes:        return "?Res";
+  case T::OptObj:        return "?Obj";
+  case T::OptFunc:       return "?Func";
+  case T::OptUncArrKey:  return "?UncArrKey";
+  case T::OptArrKey:     return "?ArrKey";
+  case T::OptUncStrLike: return "?UncStrLike";
+  case T::OptStrLike:    return "?StrLike";
+  case T::Null:          return "Null";
+  case T::Cell:          return "Cell";
+  case T::Ref:           return "Ref";
+  case T::InitUnc:       return "InitUnc";
+  case T::Unc:           return "Unc";
+  case T::UncArrKey:     return "UncArrKey";
+  case T::ArrKey:        return "ArrKey";
+  case T::UncStrLike:    return "UncStrLike";
+  case T::StrLike:       return "StrLike";
+  case T::InitCell:      return "InitCell";
+  case T::InitGen:       return "InitGen";
+  case T::Gen:           return "Gen";
+  case T::Uninit:        return "Uninit";
+  case T::InitNull:      return "InitNull";
+  case T::Bool:          return "Bool";
+  case T::Int:           return "Int";
+  case T::Dbl:           return "Dbl";
+  case T::Res:           return "Res";
+  case T::SStr:          return "SStr";
+  case T::Str:           return "Str";
+  case T::Obj:           return "Obj";
+  case T::Func:          return "Func";
 
   case T::OptSArr:
   case T::OptArr:

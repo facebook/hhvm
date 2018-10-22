@@ -370,7 +370,13 @@ enum trep : uint64_t {
   BOptUncArrKey = BInitNull | BUncArrKey,
   BOptArrKey    = BInitNull | BArrKey,
 
-  BInitPrim = BInitNull | BBool | BNum,
+  BStrLike    = BFunc | BStr,
+  BUncStrLike = BFunc | BSStr,
+
+  BOptStrLike    = BInitNull | BStrLike,
+  BOptUncStrLike = BInitNull | BUncStrLike,
+
+  BInitPrim = BInitNull | BBool | BNum | BFunc,
   BPrim     = BInitPrim | BUninit,
   BInitUnc  = BInitPrim | BSStr | BSArr | BSVec | BSDict | BSKeyset,
   BUnc      = BInitUnc | BUninit,
@@ -827,6 +833,8 @@ X(DArrN)                                        \
 X(DArr)                                         \
 X(UncArrKey)                                    \
 X(ArrKey)                                       \
+X(UncStrLike)                                 \
+X(StrLike)                                    \
 X(InitPrim)                                     \
 X(Prim)                                         \
 X(InitUnc)                                      \
@@ -886,6 +894,8 @@ X(OptDArrN)                                     \
 X(OptDArr)                                      \
 X(OptUncArrKey)                                 \
 X(OptArrKey)                                    \
+X(OptUncStrLike)                              \
+X(OptStrLike)                                 \
 X(InitCell)                                     \
 X(Cell)                                         \
 X(InitGen)                                      \

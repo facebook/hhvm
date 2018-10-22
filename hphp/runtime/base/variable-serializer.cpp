@@ -1464,7 +1464,8 @@ void VariableSerializer::serializeFunc(const Func* func) {
     case Type::Internal:
     case Type::APCSerialize:
     case Type::DebuggerSerialize:
-      raise_error("Unable to serialize a function value");
+      write(StrNR(funcToStringHelper(func)));
+      break;
   }
 }
 

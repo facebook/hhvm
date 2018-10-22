@@ -19,22 +19,26 @@
 #include <array>
 #include <tbb/concurrent_unordered_set.h>
 
-#include "hphp/util/exception.h"
-#include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/empty-array.h"
-#include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/array-common.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/vm/globals-array.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/empty-array.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/set-array.h"
+#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/variable-serializer.h"
+
+#include "hphp/runtime/vm/globals-array.h"
+#include "hphp/runtime/vm/interp-helpers.h"
+
+#include "hphp/util/exception.h"
+
 #include "hphp/zend/zend-string.h"
 
 namespace HPHP {
@@ -184,6 +188,7 @@ void ArrayData::GetScalarArray(ArrayData** parr) {
     return replace(staticEmptyArray());
   }
 
+  checkNativeStack();
   arr->onSetEvalScalar();
 
   s_cachedHash.first = arr;

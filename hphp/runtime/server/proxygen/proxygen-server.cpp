@@ -683,6 +683,8 @@ bool ProxygenServer::initialCertHandler(const std::string& /*server_name*/,
   }
   try {
     wangle::SSLContextConfig sslCtxConfig;
+    sslCtxConfig.clientVerification =
+      folly::SSLContext::SSLVerifyPeerEnum::NO_VERIFY;
     sslCtxConfig.setCertificate(cert_file, key_file, "");
     sslCtxConfig.sslVersion = folly::SSLContext::TLSv1;
     sslCtxConfig.sniNoMatchFn =
@@ -725,6 +727,8 @@ bool ProxygenServer::dynamicCertHandler(const std::string& /*server_name*/,
                                         const std::string& cert_file) {
   try {
     wangle::SSLContextConfig sslCtxConfig;
+    sslCtxConfig.clientVerification =
+      folly::SSLContext::SSLVerifyPeerEnum::NO_VERIFY;
     sslCtxConfig.setCertificate(cert_file, key_file, "");
     sslCtxConfig.sslVersion = folly::SSLContext::TLSv1;
     sslCtxConfig.sniNoMatchFn =
@@ -794,6 +798,8 @@ bool ProxygenServer::enableSSLWithPlainText() {
 
 wangle::SSLContextConfig ProxygenServer::createContextConfig() {
   wangle::SSLContextConfig cfg;
+  // TODO add config to request a client cert
+  cfg.clientVerification = folly::SSLContext::SSLVerifyPeerEnum::NO_VERIFY;
   if (RuntimeOption::SSLCertificateFile != "" &&
       RuntimeOption::SSLCertificateKeyFile != "") {
     try {

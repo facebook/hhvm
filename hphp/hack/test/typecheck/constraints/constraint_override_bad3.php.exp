@@ -5,10 +5,6 @@ Class BadSub does not correctly implement all required members  (Typing[4110])
 Read the following to see why:
   File "constraint_override_bad3.php", line 24, characters 19-21:
   Member foo has the wrong type
-  File "constraint_override_bad3.php", line 12, characters 36-44:
-  Some type constraint(s) here are violated
-  File "constraint_override_bad3.php", line 24, characters 67-68:
-  'Tz' is a constrained type parameter
   File "constraint_override_bad3.php", line 24, characters 73-73:
   This is an object of type B
   File "constraint_override_bad3.php", line 12, characters 70-78:

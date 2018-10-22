@@ -5,10 +5,6 @@ Class C does not correctly implement all required members  (Typing[4110])
 Read the following to see why:
   File "constraint_override_bad.php", line 10, characters 19-21:
   Member foo has the wrong type
-  File "", line 0, characters 0-0:
-  Some type constraint(s) here are violated
-  File "constraint_override_bad.php", line 10, characters 23-23:
-  'T' is a constrained type parameter
   File "constraint_override_bad.php", line 5, characters 31-31:
   This is an object of type C
   File "constraint_override_bad.php", line 10, characters 31-31:

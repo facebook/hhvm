@@ -423,6 +423,17 @@ let respond_to_error (event: event option) (e: exn) (stack: string): unit =
   | _ ->
     Lsp_helpers.telemetry_error to_stdout (Printf.sprintf "%s [%i]\n%s" e.message e.code stack)
 
+(* request_showStatus: pops up a dialog *)
+let request_showStatus
+    ?(on_result: on_result = fun ~result:_ state -> state)
+    ?(on_error: on_error = fun ~code:_ ~message:_ ~data:_ state -> state)
+    (params: ShowStatus.params)
+  : unit =
+  let id = NumberId (Jsonrpc.get_next_request_id ()) in
+  let json = Lsp_fmt.print_lsp (RequestMessage (id, ShowStatusRequest params)) in
+  to_stdout json;
+  (* save the callback-handlers *)
+  callbacks_outstanding := IdMap.add id (on_result, on_error) !callbacks_outstanding
 
 (* request_showMessage: pops up a dialog *)
 let request_showMessage
@@ -1784,6 +1795,39 @@ and reconnect_from_lost_if_necessary
 and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_env.params) : state =
   let open Lost_env in
   set_hh_server_state p.new_hh_server_state;
+
+  let open ShowStatus in
+  let open ShowMessageRequest in
+  let restart_command = "Restart Hack Server" in
+  let on_result ~result state =
+    let result = Jget.string_d result "title" ~default:"" in
+    match result, state with
+    | command, Lost_server _ ->
+      if command = restart_command then begin
+        let root = match get_root_opt () with
+          | None -> failwith "we should have root by now"
+          | Some root -> root
+        in
+        start_server root;
+        reconnect_from_lost_if_necessary state `Force_regain
+      end else state
+    | _ -> state
+  in
+  request_showStatus
+  ~on_result
+  {
+    request = {
+      type_ = MessageType.ErrorMessage;
+      message =
+        "hh_server has stopped. "
+        ^ "Language features such as autocomplete are currently unavailable.";
+      actions = [{title = "Restart Hack Server"}];
+    };
+    progress = None;
+    total = None;
+    shortMessage = None
+  };
+
   let initialize_params = initialize_params_exc () in
 
   let no_op = match p.explanation, state with
@@ -2132,6 +2176,21 @@ let handle_event
 
   (* idle tick while waiting for server to complete initialization *)
   | In_init ienv, Tick ->
+    let open ShowStatus in
+    let open ShowMessageRequest in
+    let statusFrames = [|"□";"■"|] in
+    let time = Unix.time () in
+    request_showStatus {
+      request = {
+        type_ = MessageType.WarningMessage;
+        message = "hh_server is initializing. This may take up to 5 minutes.";
+        actions = [];
+      };
+      progress = Some 1;
+      total = Some 2;
+      shortMessage = Some ("initializing " ^ statusFrames.(int_of_float time mod 2))
+    };
+
     let open In_init_env in
     let time = Unix.time () in
     let delay_in_secs = int_of_float (time -. ienv.most_recent_start_time) in
@@ -2145,6 +2204,18 @@ let handle_event
 
   (* server completes initialization *)
   | In_init ienv, Server_hello ->
+    let open ShowStatus in
+    let open ShowMessageRequest in
+    request_showStatus {
+      request = {
+        type_ = MessageType.InfoMessage;
+        message = "hh_server is initialized and running correctly.";
+        actions = [];
+      };
+      progress = None;
+      total = None;
+      shortMessage = None;
+    };
     connect_after_hello ienv.In_init_env.conn ienv.In_init_env.file_edits;
     state := report_connect_end ienv
 

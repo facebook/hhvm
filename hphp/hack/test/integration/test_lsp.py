@@ -114,7 +114,7 @@ class TestLsp(LspTestDriver, unittest.TestCase):
             if received is None:
                 continue
             method = received.get("method") or ""
-            if method == "window/progress" or method == "window/actionRequired":
+            if method in ["window/progress", "window/actionRequired", "window/showStatus"]:
                 continue
             yield received
 

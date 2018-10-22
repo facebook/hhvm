@@ -1,0 +1,540 @@
+string(5) "hello"
+bool(true)
+int(5)
+notice(foo): Implicit Func to string conversion for type-hint
+string(3) "foo"
+bool(true)
+int(3)
+string(5) "hello"
+bool(true)
+int(5)
+function(bar)
+notice(bar): Func used in is_string
+bool(true)
+notice(%s): Func to string conversion
+int(3)
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+string(3) "baz"
+bool(true)
+bool(true)
+string(3) "baz"
+notice(main): Func used in is_string
+notice(main): Func used in is_string
+notice(main): Func used in is_string
+function(buz)
+bool(true)
+bool(true)
+function(buz)
+notice(Closure$main): Implicit Func to string conversion for type-hint
+caught: Property 'Props::a' declared as type string, func assigned
+notice(Closure$main#2): Implicit Func to string conversion for type-hint
+caught: Static property 'Props::b' declared as type string, func assigned
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+function(foo)
+notice(io): Implicit Func to string conversion for type-hint
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+function(foo)
+notice(io): Implicit Func to string conversion for type-hint
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(5) "hello"
+bool(true)
+int(5)
+notice(foo): Implicit Func to string conversion for type-hint
+string(3) "foo"
+bool(true)
+int(3)
+string(5) "hello"
+bool(true)
+int(5)
+function(bar)
+notice(bar): Func used in is_string
+bool(true)
+notice(%s): Func to string conversion
+int(3)
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+string(3) "baz"
+bool(true)
+bool(true)
+string(3) "baz"
+notice(main): Func used in is_string
+notice(main): Func used in is_string
+notice(main): Func used in is_string
+function(buz)
+bool(true)
+bool(true)
+function(buz)
+notice(Closure$main): Implicit Func to string conversion for type-hint
+caught: Property 'Props::a' declared as type string, func assigned
+notice(Closure$main#2): Implicit Func to string conversion for type-hint
+caught: Static property 'Props::b' declared as type string, func assigned
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+function(foo)
+notice(io): Implicit Func to string conversion for type-hint
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+function(foo)
+notice(io): Implicit Func to string conversion for type-hint
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(5) "hello"
+bool(true)
+int(5)
+notice(foo): Implicit Func to string conversion for type-hint
+string(3) "foo"
+bool(true)
+int(3)
+string(5) "hello"
+bool(true)
+int(5)
+function(bar)
+notice(bar): Func used in is_string
+bool(true)
+notice(%s): Func to string conversion
+int(3)
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+string(3) "baz"
+bool(true)
+bool(true)
+string(3) "baz"
+notice(main): Func used in is_string
+notice(main): Func used in is_string
+notice(main): Func used in is_string
+function(buz)
+bool(true)
+bool(true)
+function(buz)
+notice(Closure$main): Implicit Func to string conversion for type-hint
+caught: Property 'Props::a' declared as type string, func assigned
+notice(Closure$main#2): Implicit Func to string conversion for type-hint
+caught: Static property 'Props::b' declared as type string, func assigned
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+function(foo)
+notice(io): Implicit Func to string conversion for type-hint
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+function(foo)
+notice(io): Implicit Func to string conversion for type-hint
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(5) "hello"
+bool(true)
+int(5)
+notice(foo): Implicit Func to string conversion for type-hint
+string(3) "foo"
+bool(true)
+int(3)
+string(5) "hello"
+bool(true)
+int(5)
+function(bar)
+notice(bar): Func used in is_string
+bool(true)
+notice(%s): Func to string conversion
+int(3)
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+string(3) "baz"
+bool(true)
+bool(true)
+string(3) "baz"
+notice(main): Func used in is_string
+notice(main): Func used in is_string
+notice(main): Func used in is_string
+function(buz)
+bool(true)
+bool(true)
+function(buz)
+notice(Closure$main): Implicit Func to string conversion for type-hint
+caught: Property 'Props::a' declared as type string, func assigned
+notice(Closure$main#2): Implicit Func to string conversion for type-hint
+caught: Static property 'Props::b' declared as type string, func assigned
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+function(foo)
+notice(io): Implicit Func to string conversion for type-hint
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+function(foo)
+notice(io): Implicit Func to string conversion for type-hint
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(5) "hello"
+bool(true)
+int(5)
+notice(foo): Implicit Func to string conversion for type-hint
+string(3) "foo"
+bool(true)
+int(3)
+string(5) "hello"
+bool(true)
+int(5)
+function(bar)
+notice(bar): Func used in is_string
+bool(true)
+notice(%s): Func to string conversion
+int(3)
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+string(3) "baz"
+bool(true)
+bool(true)
+string(3) "baz"
+notice(main): Func used in is_string
+notice(main): Func used in is_string
+notice(main): Func used in is_string
+function(buz)
+bool(true)
+bool(true)
+function(buz)
+notice(Closure$main): Implicit Func to string conversion for type-hint
+caught: Property 'Props::a' declared as type string, func assigned
+notice(Closure$main#2): Implicit Func to string conversion for type-hint
+caught: Static property 'Props::b' declared as type string, func assigned
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+function(foo)
+notice(io): Implicit Func to string conversion for type-hint
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+function(foo)
+notice(io): Implicit Func to string conversion for type-hint
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(5) "hello"
+bool(true)
+int(5)
+notice(foo): Implicit Func to string conversion for type-hint
+string(3) "foo"
+bool(true)
+int(3)
+string(5) "hello"
+bool(true)
+int(5)
+function(bar)
+notice(bar): Func used in is_string
+bool(true)
+notice(%s): Func to string conversion
+int(3)
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+string(3) "baz"
+bool(true)
+bool(true)
+string(3) "baz"
+notice(main): Func used in is_string
+notice(main): Func used in is_string
+notice(main): Func used in is_string
+function(buz)
+bool(true)
+bool(true)
+function(buz)
+notice(Closure$main): Implicit Func to string conversion for type-hint
+caught: Property 'Props::a' declared as type string, func assigned
+notice(Closure$main#2): Implicit Func to string conversion for type-hint
+caught: Static property 'Props::b' declared as type string, func assigned
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+function(foo)
+notice(io): Implicit Func to string conversion for type-hint
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+function(foo)
+notice(io): Implicit Func to string conversion for type-hint
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(5) "hello"
+bool(true)
+int(5)
+notice(foo): Implicit Func to string conversion for type-hint
+string(3) "foo"
+bool(true)
+int(3)
+string(5) "hello"
+bool(true)
+int(5)
+function(bar)
+notice(bar): Func used in is_string
+bool(true)
+notice(%s): Func to string conversion
+int(3)
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+string(3) "baz"
+bool(true)
+bool(true)
+string(3) "baz"
+notice(main): Func used in is_string
+notice(main): Func used in is_string
+notice(main): Func used in is_string
+function(buz)
+bool(true)
+bool(true)
+function(buz)
+notice(Closure$main): Implicit Func to string conversion for type-hint
+caught: Property 'Props::a' declared as type string, func assigned
+notice(Closure$main#2): Implicit Func to string conversion for type-hint
+caught: Static property 'Props::b' declared as type string, func assigned
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+function(foo)
+notice(io): Implicit Func to string conversion for type-hint
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+function(foo)
+notice(io): Implicit Func to string conversion for type-hint
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(5) "hello"
+bool(true)
+int(5)
+notice(foo): Implicit Func to string conversion for type-hint
+string(3) "foo"
+bool(true)
+int(3)
+string(5) "hello"
+bool(true)
+int(5)
+function(bar)
+notice(bar): Func used in is_string
+bool(true)
+notice(%s): Func to string conversion
+int(3)
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+string(3) "baz"
+bool(true)
+bool(true)
+string(3) "baz"
+notice(main): Func used in is_string
+notice(main): Func used in is_string
+notice(main): Func used in is_string
+function(buz)
+bool(true)
+bool(true)
+function(buz)
+notice(Closure$main): Implicit Func to string conversion for type-hint
+caught: Property 'Props::a' declared as type string, func assigned
+notice(Closure$main#2): Implicit Func to string conversion for type-hint
+caught: Static property 'Props::b' declared as type string, func assigned
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+function(foo)
+notice(io): Implicit Func to string conversion for type-hint
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+function(foo)
+notice(io): Implicit Func to string conversion for type-hint
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(5) "hello"
+bool(true)
+int(5)
+notice(foo): Implicit Func to string conversion for type-hint
+string(3) "foo"
+bool(true)
+int(3)
+string(5) "hello"
+bool(true)
+int(5)
+function(bar)
+notice(bar): Func used in is_string
+bool(true)
+notice(%s): Func to string conversion
+int(3)
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+string(3) "baz"
+bool(true)
+bool(true)
+string(3) "baz"
+notice(main): Func used in is_string
+notice(main): Func used in is_string
+notice(main): Func used in is_string
+function(buz)
+bool(true)
+bool(true)
+function(buz)
+notice(Closure$main): Implicit Func to string conversion for type-hint
+caught: Property 'Props::a' declared as type string, func assigned
+notice(Closure$main#2): Implicit Func to string conversion for type-hint
+caught: Static property 'Props::b' declared as type string, func assigned
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+function(foo)
+notice(io): Implicit Func to string conversion for type-hint
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+function(foo)
+notice(io): Implicit Func to string conversion for type-hint
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(5) "hello"
+bool(true)
+int(5)
+notice(foo): Implicit Func to string conversion for type-hint
+string(3) "foo"
+bool(true)
+int(3)
+string(5) "hello"
+bool(true)
+int(5)
+function(bar)
+notice(bar): Func used in is_string
+bool(true)
+notice(%s): Func to string conversion
+int(3)
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+notice(baz): Implicit Func to string conversion for type-hint
+string(3) "baz"
+bool(true)
+bool(true)
+string(3) "baz"
+notice(main): Func used in is_string
+notice(main): Func used in is_string
+notice(main): Func used in is_string
+function(buz)
+bool(true)
+bool(true)
+function(buz)
+notice(Closure$main): Implicit Func to string conversion for type-hint
+caught: Property 'Props::a' declared as type string, func assigned
+notice(Closure$main#2): Implicit Func to string conversion for type-hint
+caught: Static property 'Props::b' declared as type string, func assigned
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+function(foo)
+notice(io): Implicit Func to string conversion for type-hint
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"
+function(foo)
+notice(io): Implicit Func to string conversion for type-hint
+notice(io): Implicit Func to string conversion for type-hint
+string(3) "foo"
+string(3) "foo"
+string(3) "foo"

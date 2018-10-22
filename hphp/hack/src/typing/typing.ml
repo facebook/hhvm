@@ -6076,20 +6076,21 @@ and check_implements_tparaml (env: Env.env) ht =
       let size2 = List.length paraml in
       if size1 <> size2 then Errors.class_arity p class_.dc_pos c size1;
       let subst = Inst.make_subst class_.dc_tparams paraml in
-      iter2_shortest begin fun (_, (p, _), cstrl, _) ty ->
+      iter2_shortest begin fun (_, (_typaram_pos, _), cstrl, _) ty ->
+        let ty_pos = Reason.to_pos (fst ty) in
         List.iter cstrl begin fun (ck, cstr) ->
           (* Constraint might contain uses of generic type parameters *)
           let cstr = Inst.instantiate subst cstr in
           match ck with
           | Ast.Constraint_as ->
-            Type.sub_type_decl p Reason.URnone env ty cstr
+            Type.sub_type_decl ty_pos Reason.URnone env ty cstr
           | Ast.Constraint_eq ->
             (* This code could well be unreachable, because we don't allow
              * equality constraints on class generics. *)
-            Type.sub_type_decl p Reason.URnone env ty cstr;
-            Type.sub_type_decl p Reason.URnone env cstr ty
+            Type.sub_type_decl ty_pos Reason.URnone env ty cstr;
+            Type.sub_type_decl ty_pos Reason.URnone env cstr ty
           | Ast.Constraint_super ->
-            Type.sub_type_decl p Reason.URnone env cstr ty
+            Type.sub_type_decl ty_pos Reason.URnone env cstr ty
         end
       end class_.dc_tparams paraml
 

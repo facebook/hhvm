@@ -1,0 +1,14 @@
+File "constraint_bad_usepos.php", line 12, characters 11-15:
+Some type constraint(s) here are violated (Typing[4110])
+  File "constraint_bad_usepos.php", line 6, characters 9-10:
+  'TC' is a constrained type parameter
+  File "constraint_bad_usepos.php", line 6, characters 15-15:
+  This is an object of type I
+  File "constraint_bad_usepos.php", line 12, characters 13-14:
+  It is incompatible with a value of generic type TD
+File "constraint_bad_usepos.php", line 12, characters 13-14:
+Typing error (Typing[4110])
+  File "constraint_bad_usepos.php", line 6, characters 15-15:
+  This is an object of type I
+  File "constraint_bad_usepos.php", line 12, characters 13-14:
+  It is incompatible with a value of generic type TD

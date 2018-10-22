@@ -136,7 +136,9 @@ enum class AnnotAction {
   VArrayCheck,
   DArrayCheck,
   VArrayOrDArrayCheck,
-  NonVArrayOrDArrayCheck
+  NonVArrayOrDArrayCheck,
+  WarnFunc,
+  ConvertFunc,
 };
 
 /*
@@ -252,6 +254,10 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
   }
 
   assertx(metatype == AnnotMetaType::Precise);
+  if (at == AnnotType::String && dt == KindOfFunc) {
+    return RuntimeOption::EvalStringHintNotices
+      ? AnnotAction::WarnFunc : AnnotAction::ConvertFunc;
+  }
   if (at != AnnotType::Object) {
     // If `at' is "bool", "int", "float", "string", "array", or "resource",
     // then equivDataTypes() can definitively tell us whether or not `dt'

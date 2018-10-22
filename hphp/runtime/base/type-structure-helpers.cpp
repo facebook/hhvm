@@ -160,8 +160,8 @@ bool checkTypeStructureMatchesCellImpl(
       break;
     case TypeStructure::Kind::T_string:
       if (isFuncType(type)) {
-        if (RuntimeOption::EvalRaiseFuncConversionWarning) {
-          raise_warning("Func to string conversion");
+        if (RuntimeOption::EvalIsStringNotices) {
+          raise_notice("Func used in is_string");
         }
         result = true;
         break;

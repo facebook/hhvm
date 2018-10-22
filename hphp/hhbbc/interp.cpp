@@ -2382,7 +2382,7 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
     const folly::Optional<Type> type,
     const folly::Optional<Type> deopt = folly::none
   ) {
-    if (!type) return result(TBool);
+    if (!type || is_type_might_raise(*type, t)) return result(TBool);
     auto const test = type.value();
     if (t.subtypeOf(test)) return result(TTrue);
     if (!t.couldBe(test) && (!deopt || !t.couldBe(deopt.value()))) {
@@ -4154,8 +4154,7 @@ void in(ISS& env, const bc::VerifyParamType& op) {
   if (env.index.satisfies_constraint(env.ctx,
                                      locAsCell(env, op.loc1),
                                      constraint)) {
-    reduce(env, bc::Nop {});
-    return;
+    if (!locAsCell(env, op.loc1).couldBe(TFunc)) return reduce(env, bc::Nop {});
   }
 
   if (!RuntimeOption::EvalHardTypeHints) return;
@@ -4242,7 +4241,12 @@ void verifyRetImpl(ISS& env, TypeConstraint& constraint, bool reduce_this) {
     tcT = is_opt(tcT) ? TOptObj : TObj;
   }
 
+  // VerifyRetType will convert a TFunc to a TStr implicitly (and possibly warn)
+  auto const convFunc = tcT.subtypeOf(TStr) && stackT.couldBe(TFunc);
+
   auto retT = intersection_of(std::move(tcT), std::move(stackT));
+  if (convFunc) retT |= TStr;
+
   if (retT.subtypeOf(BBottom)) {
     unreachable(env);
     return;

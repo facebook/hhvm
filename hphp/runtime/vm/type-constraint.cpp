@@ -502,6 +502,10 @@ bool TypeConstraint::checkTypeAliasNonObj(tv_rval val) const {
       case AnnotAction::NonVArrayOrDArrayCheck:
         assertx(tvIsArrayOrShape(val));
         return Assert || val.val().parr->isNotDVArray();
+      case AnnotAction::WarnFunc:
+        raise_notice("Implicit Func to string conversion for type-hint");
+      case AnnotAction::ConvertFunc:
+        return false; // verifyFail will deal with the conversion
     }
     assertx(result == AnnotAction::ObjectCheck);
     assertx(td->type == AnnotType::Object);
@@ -695,6 +699,10 @@ bool TypeConstraint::checkImpl(tv_rval val,
     case AnnotAction::NonVArrayOrDArrayCheck:
       assertx(tvIsArrayOrShape(val));
       return isAssert || val.val().parr->isNotDVArray();
+    case AnnotAction::WarnFunc:
+      raise_notice("Implicit Func to string conversion for type-hint");
+    case AnnotAction::ConvertFunc:
+      return false; // verifyFail will handle the conversion
   }
   not_reached();
 }
@@ -730,7 +738,7 @@ void TypeConstraint::verifyReturn(TypedValue* tv, const Func* func) const {
   }
 }
 
-void TypeConstraint::verifyOutParam(const TypedValue* tv,
+void TypeConstraint::verifyOutParam(TypedValue* tv,
                                     const Func* func,
                                     int paramNum) const {
   if (UNLIKELY(!check(tv, func->cls()))) {
@@ -894,13 +902,19 @@ void TypeConstraint::verifyParamFail(const Func* func, TypedValue* tv,
 }
 
 void TypeConstraint::verifyOutParamFail(const Func* func,
-                                        const TypedValue* tv,
+                                        TypedValue* tv,
                                         int paramNum) const {
-  auto const c = tvToCell(tv);
+  auto c = tvToCell(tv);
   if (auto const at = checkDVArray(c)) {
     raise_hackarr_compat_type_hint_outparam_notice(
       func, c->m_data.parr, *at, paramNum
     );
+    return;
+  }
+
+  if (isString() && !isSoft() && c->m_type == KindOfFunc) {
+    c->m_data.pstr = const_cast<StringData*>(c->m_data.pfunc->fullName());
+    c->m_type = KindOfPersistentString;
     return;
   }
 
@@ -1028,6 +1042,12 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
         if (tvCoerceParamToDoubleInPlace(tv, func->isBuiltin())) return;
       }
     }
+  }
+
+  if (isString() && !isSoft() && c->m_type == KindOfFunc) {
+    c->m_data.pstr = const_cast<StringData*>(c->m_data.pfunc->fullName());
+    c->m_type = KindOfPersistentString;
+    return;
   }
 
   // Handle return type constraint failures

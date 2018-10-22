@@ -370,7 +370,7 @@ struct TypeConstraint {
   void verifyParam(TypedValue* tv, const Func* func, int paramNum) const;
   void verifyReturn(TypedValue* tv, const Func* func) const;
   void verifyReturnNonNull(TypedValue* tv, const Func* func) const;
-  void verifyOutParam(const TypedValue* tv, const Func* func,
+  void verifyOutParam(TypedValue* tv, const Func* func,
                       int paramNum) const;
   void verifyProperty(tv_rval val,
                       const Class* thisCls,
@@ -383,7 +383,7 @@ struct TypeConstraint {
 
   void verifyFail(const Func* func, TypedValue* tv, int id) const;
   void verifyParamFail(const Func* func, TypedValue* tv, int paramNum) const;
-  void verifyOutParamFail(const Func* func, const TypedValue* tv,
+  void verifyOutParamFail(const Func* func, TypedValue* tv,
                           int paramNum) const;
   void verifyReturnFail(const Func* func, TypedValue* tv) const {
     verifyFail(func, tv, ReturnId);

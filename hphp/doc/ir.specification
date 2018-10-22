@@ -1511,6 +1511,10 @@ To string conversions:
 
   Returns the value of func->numParams().
 
+| LdFuncFullName, D(StaticStr), S(Func), NF
+
+  Loads the full name of S0.
+
 | LdStrLen, D(Int), S(Str), NF
 
   Load the length of the string in S0.

@@ -2884,7 +2884,7 @@ folly::Optional<Type> type_of_type_structure(SArray ts) {
     case TypeStructure::Kind::T_float:
       return is_nullable ? TOptDbl : TDbl;
     case TypeStructure::Kind::T_string:
-      return is_nullable ? TOptStr : TStr;
+      return is_nullable ? TOptStrLike : TStrLike;
     case TypeStructure::Kind::T_resource:
       return is_nullable ? TOptRes : TRes;
     case TypeStructure::Kind::T_num:
@@ -4793,6 +4793,7 @@ bool is_type_might_raise(const Type& testTy, const Type& valTy) {
     if (testTy.subtypeOf(BVec))  return valTy.couldBe(BVArr);
     if (testTy.subtypeOf(BDict)) return valTy.couldBe(BDArr);
   }
+  if (testTy.subtypeOf(BStrLike)) return valTy.couldBe(BFunc);
   return false;
 }
 

@@ -83,8 +83,8 @@ inline bool is_double(const Cell* c) {
 inline bool is_string(const Cell* c) {
   if (tvIsString(c)) return true;
   if (tvIsFunc(c)) {
-    if (RuntimeOption::EvalRaiseFuncConversionWarning) {
-      raise_warning("Func to string conversion");
+    if (RuntimeOption::EvalIsStringNotices) {
+      raise_notice("Func used in is_string");
     }
     return true;
   }

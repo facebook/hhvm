@@ -150,6 +150,7 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
  * - PredInner: When the value is a BoxedInitCell, return the predicted inner
  *              type of the value.
  * - ColToArr:  Emit code to deal with any collection to array conversions.
+ * - FuncToStr: Emit code to deal with any func to string conversions.
  * - Fail:      Emit code to deal with the type check failing.
  * - HackArr:   Emit code to deal with a d/varray mismatch.
  * - Callable:  Emit code to verify that the given value is callable.
@@ -164,6 +165,7 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
 template <typename GetVal,
           typename PredInner,
           typename ColToArr,
+          typename FuncToStr,
           typename Fail,
           typename HackArr,
           typename Callable,
@@ -176,6 +178,7 @@ void verifyTypeImpl(IRGS& env,
                     GetVal getVal,
                     PredInner predInner,
                     ColToArr colToArr,
+                    FuncToStr funcToStr,
                     Fail fail,
                     HackArr hackArr,
                     Callable callable,
@@ -282,6 +285,21 @@ void verifyTypeImpl(IRGS& env,
         },
         genDVArrFail
       );
+      return;
+    case AnnotAction::WarnFunc:
+      assertx(valType <= TFunc);
+      gen(
+        env,
+        RaiseNotice,
+        cns(
+          env,
+          makeStaticString("Implicit Func to string conversion for type-hint")
+        )
+      );
+
+    case AnnotAction::ConvertFunc:
+      assertx(valType <= TFunc);
+      if (!funcToStr(val)) return genFail();
       return;
   }
   assertx(result == AnnotAction::ObjectCheck);
@@ -505,6 +523,32 @@ SSATmp* isVecImpl(IRGS& env, SSATmp* src) {
     [&](Block* taken) { gen(env, CheckType, TVec, taken, src); },
     [&]{ return cns(env, true); },
     [&]{ varrCheck(); return cns(env, false); }
+  );
+}
+
+const StaticString s_FUNC_CONVERSION("Func to string conversion");
+const StaticString s_FUNC_IS_STRING("Func used in is_string");
+const StaticString s_CLASS_CONVERSION("Class to string conversion");
+
+SSATmp* isStrImpl(IRGS& env, SSATmp* src) {
+  return cond(
+    env,
+    [&] (Block* taken) { gen(env, CheckType, TStr, taken, src); },
+    [&] { return cns(env, true); },
+    [&] {
+      return cond(
+        env,
+        [&] (Block* taken) { gen(env, CheckType, TFunc, taken, src); },
+        [&] {
+          if (RuntimeOption::EvalIsStringNotices) {
+            gen(env, RaiseNotice, cns(env, s_FUNC_IS_STRING.get())
+            );
+          }
+          return cns(env, true);
+        },
+        [&] { return cns(env, false); }
+      );
+    }
   );
 }
 
@@ -782,8 +826,6 @@ void chain_is_type(IRGS& env, SSATmp* c, bool nullable,
   );
 };
 
-const StaticString s_FUNC_CONVERSION("Func to string conversion");
-const StaticString s_CLASS_CONVERSION("Class to string conversion");
 bool emitIsAsTypeStructWithoutResolvingIfPossible(
   IRGS& env,
   const ArrayData* ts,
@@ -842,7 +884,7 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_float:       return primitive(TDbl);
     case TypeStructure::Kind::T_string: {
       if (t->isA(TFunc) && RuntimeOption::EvalRaiseFuncConversionWarning) {
-        gen(env, RaiseWarning, cns(env, s_FUNC_CONVERSION.get()));
+        gen(env, RaiseWarning, cns(env, s_FUNC_IS_STRING.get()));
       } else if (t->isA(TCls) &&
         RuntimeOption::EvalRaiseClassConversionWarning) {
         gen(env, RaiseWarning, cns(env, s_CLASS_CONVERSION.get()));
@@ -1012,6 +1054,12 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, bool onlyCheckNullability) {
       PUNT(VerifyReturnTypeBoxed);
     },
     [] (Type) {}, // Collection to array conversion
+    [&] (SSATmp* val) { // func to string conversions
+      auto const str = gen(env, LdFuncFullName, val);
+      discard(env, 1);
+      push(env, str);
+      return true;
+    },
     [&] (Type, bool hard) { // Check failure
       updateMarker(env);
       env.irb->exceptionStackBoundary();
@@ -1079,6 +1127,11 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
           !func->mustBeRef(id) && valType <= TObj) {
         PUNT(VerifyParamType-collectionToArray);
       }
+    },
+    [&] (SSATmp* val) { // func to string conversions
+      auto const str = gen(env, LdFuncFullName, val);
+      stLocRaw(env, id, fp(env), str);
+      return true;
     },
     [&] (Type valType, bool hard) { // Check failure
       auto const failHard = hard && RuntimeOption::EvalHardTypeHints &&
@@ -1154,6 +1207,7 @@ void verifyPropType(IRGS& env,
       always_assert(false);
     },
     [&] (Type) {}, // No collection to array automatic conversions
+    [&] (SSATmp*) { return false; }, // No func to string automatic conversions
     [&] (Type, bool hard) { // Check failure
       auto const failHard =
         hard && RuntimeOption::EvalCheckPropTypeHints >= 3;
@@ -1281,6 +1335,8 @@ void emitIsTypeC(IRGS& env, IsTypeOp subop) {
     push(env, isDictImpl(env, src));
   } else if (subop == IsTypeOp::Scalar) {
     push(env, isScalarImpl(env, src));
+  } else if (subop == IsTypeOp::Str) {
+    push(env, isStrImpl(env, src));
   } else {
     auto const t = typeOpToType(subop);
     if (t <= TObj) {
@@ -1308,6 +1364,8 @@ void emitIsTypeL(IRGS& env, int32_t id, IsTypeOp subop) {
     push(env, isDictImpl(env, val));
   } else if (subop == IsTypeOp::Scalar) {
     push(env, isScalarImpl(env, val));
+  } else if (subop == IsTypeOp::Str) {
+    push(env, isStrImpl(env, val));
   } else {
     auto const t = typeOpToType(subop);
     if (t <= TObj) {

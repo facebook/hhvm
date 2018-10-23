@@ -241,7 +241,9 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
   // Always normalize name before autoloading
   const String& name = normalizeNS(clsName);
   auto const type_map = m_map.get()->get(kind).unboxed();
-  if (!isArrayType(type_map.type())) return Failure;
+  if (!isArrayType(type_map.type()) && !isDictType(type_map.type())) {
+    return Failure;
+  }
   String canonicalName = toLower ? HHVM_FN(strtolower)(name) : name;
   auto const file = type_map.val().parr->get(canonicalName).unboxed();
   bool ok = false;

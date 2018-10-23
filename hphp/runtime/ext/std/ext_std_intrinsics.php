@@ -46,4 +46,9 @@ function serialize_keep_dvarrays(mixed $value): string;
 <<__Native, __ParamCoerceModeFalse>>
 function deserialize_keep_dvarrays(string $str): mixed;
 
+/* dummy builtin written in hack for testing param coercion */
+function id_string(string $value): string {
+  return $value;
+}
+
 }

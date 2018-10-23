@@ -181,13 +181,13 @@ let main args =
       let content = rpc args @@ Rpc.GEN_HOT_CLASSES threshold in
       begin try
         let oc = Pervasives.open_out filename in
-        output_string oc content;
-        output_char oc '\n';
+        Out_channel.output_string oc content;
+        Out_channel.output_char oc '\n';
         Pervasives.close_out oc;
         Exit_status.No_error
       with exn ->
         Printf.eprintf "Failed to save hot classes file: %s\n" @@
-          Printexc.to_string exn;
+          Exn.to_string exn;
         Printexc.print_backtrace stderr;
         Exit_status.No_error
       end

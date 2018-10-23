@@ -59,7 +59,7 @@ final class Map implements \MutableMap {
    * KeyedIterable.
    * @param mixed $iterable
    */
-  <<__Native, __Rx, __OnlyRxIfArgs>>
+  <<__Native, __Rx, __AtMostRxAsArgs>>
   public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> mixed $iterable = null): void;
 
   /* Returns true if the Map is empty, false otherwise.
@@ -130,7 +130,7 @@ final class Map implements \MutableMap {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
+  <<__Native, __Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
   public function setAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> mixed $iterable): object;
 
   /* Removes all key/value pairs from the Map.
@@ -181,7 +181,7 @@ final class Map implements \MutableMap {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
+  <<__Native, __Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
   public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Instructs this Map to grow its capacity to accommodate the given number of
@@ -271,7 +271,7 @@ final class Map implements \MutableMap {
   /* @param mixed $it
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function differenceByKey(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> mixed $it): object;
 
   /* Returns an iterator that points to beginning of this Map.
@@ -285,7 +285,7 @@ final class Map implements \MutableMap {
    * @param mixed $callback
    * @return object
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function map(<<__OnlyRxIfRxFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
@@ -341,7 +341,7 @@ EOT
    * @param mixed $callback
    * @return object
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function mapWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
@@ -398,7 +398,7 @@ EOT
    * @param mixed $callback
    * @return object
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function filter(<<__OnlyRxIfRxFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
@@ -457,7 +457,7 @@ EOT
    * @param mixed $callback
    * @return object
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function filterWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
@@ -533,7 +533,7 @@ EOT
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a Map containing the first n key/value pairs of this Map.
@@ -549,7 +549,7 @@ EOT
    * @param mixed $callback
    * @return object
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function takeWhile(<<__OnlyRxIfRxFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
@@ -618,7 +618,7 @@ EOT
    * @param mixed $fn
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function skipWhile(<<__OnlyRxIfRxFunc>> mixed $fn): object;
 
   /* Returns a Map containing the specified range of key/value pairs from this
@@ -638,7 +638,7 @@ EOT
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function concat(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns the first value from this Map, or null if this Map is empty.
@@ -709,7 +709,7 @@ EOT
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a Map built from the keys and values from the specified array.
@@ -728,7 +728,7 @@ final class ImmMap implements \ConstMap {
    * KeyedIterable.
    * @param mixed $iterable
    */
-  <<__Native, __Rx, __OnlyRxIfArgs>>
+  <<__Native, __Rx, __AtMostRxAsArgs>>
   public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> mixed $iterable = null): void;
 
   /* Returns true if the ImmMap is empty, false otherwise.
@@ -879,7 +879,7 @@ final class ImmMap implements \ConstMap {
   /* @param mixed $it
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MaybeMutable>>
   public function differenceByKey(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> mixed $it): object;
 
   /* Returns an iterator that points to beginning of this ImmMap.
@@ -893,7 +893,7 @@ final class ImmMap implements \ConstMap {
    * @param mixed $callback
    * @return object
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function map(<<__OnlyRxIfRxFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
@@ -954,7 +954,7 @@ EOT
    * @param mixed $callback
    * @return object
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function mapWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
@@ -1016,7 +1016,7 @@ EOT
    * @param mixed $callback
    * @return object
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function filter(<<__OnlyRxIfRxFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
@@ -1078,7 +1078,7 @@ EOT
    * @param mixed $callback
    * @return object
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function filterWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
@@ -1141,7 +1141,7 @@ EOT
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a ImmMap containing the first n key/value pairs of this ImmMap.
@@ -1157,7 +1157,7 @@ EOT
    * @param mixed $callback
    * @return object
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function takeWhile(<<__OnlyRxIfRxFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
@@ -1229,7 +1229,7 @@ EOT
    * @param mixed $fn
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function skipWhile(<<__OnlyRxIfRxFunc>> mixed $fn): object;
 
   /* Returns a ImmMap containing the specified range of key/value pairs from
@@ -1249,7 +1249,7 @@ EOT
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function concat(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns the first value from this ImmMap, or null if this ImmMap is empty.
@@ -1320,7 +1320,7 @@ EOT
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MaybeMutable>>
   public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 }
 

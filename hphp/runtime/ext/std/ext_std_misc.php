@@ -275,7 +275,7 @@ namespace __SystemLib {
  * @param mixed $arg2 - The second operand of max.
  * @return mixed - The max of two operands.
  */
-<<__Native, __HipHopSpecific, __IsFoldable>>
+<<__Native, __HipHopSpecific, __IsFoldable, __Rx>>
 function max2(mixed $arg1, mixed $arg2): mixed;
 
 /* min2() returns the min of two operands (optimized FCallBuiltin for min).
@@ -283,7 +283,7 @@ function max2(mixed $arg1, mixed $arg2): mixed;
  * @param mixed $arg2 - The second operand of min.
  * @return mixed - The min of two operands.
  */
-<<__Native, __HipHopSpecific, __IsFoldable>>
+<<__Native, __HipHopSpecific, __IsFoldable, __Rx>>
 function min2(mixed $arg1, mixed $arg2): mixed;
 
 }

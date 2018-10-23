@@ -62,6 +62,7 @@ namespace HH {
  *                         default, this is null.
  * @return mixed Value at array index if it exists, or the default value if not.
  */
+<<__RxLocal>>
 function idx($arr, $idx, $default=null) {
   if (\HH\is_any_array($arr)) {
     return \hphp_array_idx($arr, $idx, $default);

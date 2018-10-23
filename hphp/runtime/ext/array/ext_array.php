@@ -1375,19 +1375,19 @@ namespace __SystemLib {
 }
 
 namespace HH {
-  <<__Native, __IsFoldable, __Rx, __OnlyRxIfArgs>>
+  <<__Native, __IsFoldable, __Rx, __AtMostRxAsArgs>>
   function dict(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>> mixed $arr): dict;
 
-  <<__Native, __IsFoldable, __Rx, __OnlyRxIfArgs>>
+  <<__Native, __IsFoldable, __Rx, __AtMostRxAsArgs>>
   function vec(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>> mixed $arr): vec;
 
-  <<__Native, __IsFoldable, __Rx, __OnlyRxIfArgs>>
+  <<__Native, __IsFoldable, __Rx, __AtMostRxAsArgs>>
   function keyset(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>> mixed $arr): keyset;
 
-  <<__Native, __IsFoldable, __Rx, __OnlyRxIfArgs>>
+  <<__Native, __IsFoldable, __Rx, __AtMostRxAsArgs>>
   function varray(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>> mixed $arr): varray;
 
-  <<__Native, __IsFoldable, __Rx, __OnlyRxIfArgs>>
+  <<__Native, __IsFoldable, __Rx, __AtMostRxAsArgs>>
   function darray(<<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>> mixed $arr): darray;
 
   /**
@@ -1406,6 +1406,6 @@ namespace HH {
    *
    * @return arraykey - Returns the converted value.
    */
-  <<__Native, __IsFoldable>>
+  <<__Native, __IsFoldable, __Rx>>
   function array_key_cast(mixed $key): arraykey;
 }

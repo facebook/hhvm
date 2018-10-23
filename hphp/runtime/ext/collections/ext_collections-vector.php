@@ -52,7 +52,7 @@ final class Vector implements \MutableVector {
   /* Returns a Vector built from the values produced by the specified Iterable.
    * @param mixed $iterable
    */
-  <<__Native, __Rx, __OnlyRxIfArgs>>
+  <<__Native, __Rx, __AtMostRxAsArgs>>
   public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable = null): void;
 
   /* Returns true if the Vector is empty, false otherwise.
@@ -133,7 +133,7 @@ final class Vector implements \MutableVector {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
+  <<__Native, __Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
   public function setAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> mixed $iterable): object;
 
   /* Removes all values from the Vector.
@@ -201,7 +201,7 @@ final class Vector implements \MutableVector {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
+  <<__Native, __Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
   public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Adds the keys of the specified KeyedContainer to the end of this Vector
@@ -318,7 +318,7 @@ final class Vector implements \MutableVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function map(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a Vector of the values produced by applying the specified callback
@@ -326,7 +326,7 @@ final class Vector implements \MutableVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function mapWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a Vector of all the values from this Vector for which the specified
@@ -334,7 +334,7 @@ final class Vector implements \MutableVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function filter(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a Vector of all the values from this Vector for which the specified
@@ -342,7 +342,7 @@ final class Vector implements \MutableVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function filterWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a KeyedIterable produced by combined the specified Iterables
@@ -350,7 +350,7 @@ final class Vector implements \MutableVector {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a Vector containing the first n values of this Vector.
@@ -366,7 +366,7 @@ final class Vector implements \MutableVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function takeWhile(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a Vector containing all the values except the first n of this
@@ -382,7 +382,7 @@ final class Vector implements \MutableVector {
    * @param mixed $fn
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function skipWhile(<<__OnlyRxIfRxFunc>> mixed $fn): object;
 
   /* Returns a Vector containing the specified range of values from this Vector.
@@ -401,7 +401,7 @@ final class Vector implements \MutableVector {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function concat(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns the first value from this Vector, or null if this Vector is empty.
@@ -504,7 +504,7 @@ final class Vector implements \MutableVector {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a Vector built from the keys of the specified container.
@@ -531,7 +531,7 @@ final class ImmVector implements \ConstVector {
    * Iterable.
    * @param mixed $iterable
    */
-  <<__Native, __Rx, __OnlyRxIfArgs>>
+  <<__Native, __Rx, __AtMostRxAsArgs>>
   public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable = null): void;
 
   /* Returns an ImmVector built from the values produced by the specified
@@ -539,7 +539,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MaybeMutable>>
   public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a ImmVector built from the keys of the specified container.
@@ -613,7 +613,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function map(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a Vector of the values produced by applying the specified callback
@@ -621,7 +621,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function mapWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a Vector of all the values from this ImmVector for which the
@@ -629,7 +629,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function filter(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a Vector of all the values from this ImmVector for which the
@@ -637,7 +637,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function filterWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a KeyedIterable produced by combined the specified Iterables
@@ -645,7 +645,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a ImmVector containing the first n values of this ImmVector.
@@ -661,7 +661,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $callback
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function takeWhile(<<__OnlyRxIfRxFunc>> mixed $callback): object;
 
   /* Returns a ImmVector containing all values except the first n of this
@@ -677,7 +677,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $fn
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function skipWhile(<<__OnlyRxIfRxFunc>> mixed $fn): object;
 
   /* Returns an ImmVector containing the specified range of values from this
@@ -696,7 +696,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function concat(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns the first value from this ImmVector, or null if this ImmVector is

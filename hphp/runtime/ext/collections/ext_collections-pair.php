@@ -284,7 +284,7 @@ final class Pair implements \ConstVector {
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function map<Tu>(<<__OnlyRxIfRxFunc>> (function(mixed): Tu) $callback): ImmVector<Tu> {
     return ImmVector { $callback($this[0]), $callback($this[1]) };
   }
@@ -303,7 +303,7 @@ final class Pair implements \ConstVector {
    * @return - an `ImmVector` containing the values after a user-specified
    *           operation on the current `Pair`'s keys and values is applied.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function mapWithKey<Tu>(<<__OnlyRxIfRxFunc>> (function(int, mixed): Tu) $callback):
     ImmVector<Tu> {
     return ImmVector { $callback(0, $this[0]), $callback(1, $this[1]) };
@@ -324,7 +324,7 @@ final class Pair implements \ConstVector {
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function filter(<<__OnlyRxIfRxFunc>> (function(mixed): bool) $callback): ImmVector<mixed> {
     $values = $this->toArray();
     if (!$callback($values[0])) { unset($values[0]); }
@@ -347,7 +347,7 @@ final class Pair implements \ConstVector {
    *           condition is applied to the keys and values of the current
    *           `Pair`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function filterWithKey(<<__OnlyRxIfRxFunc>> (function(int, mixed): bool) $callback):
     ImmVector<mixed> {
     $values = $this->toArray();
@@ -371,7 +371,7 @@ final class Pair implements \ConstVector {
    * @return - The `ImmVector` that combines the values of the current `Pair`
    *           with the provided `Traversable`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
     ImmVector<\HH\Pair<mixed, Tu>> {
     $ret = \HH\Vector {};
@@ -419,7 +419,7 @@ final class Pair implements \ConstVector {
    * @return - An `ImmVector` that contains the values of the current `Pair` up
    *           until the callback returns `false`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function takeWhile(<<__OnlyRxIfRxFunc>> (function(mixed): bool) $callback):
     ImmVector<mixed> {
     $pair = $this->toArray();
@@ -466,7 +466,7 @@ final class Pair implements \ConstVector {
    * @return - An `ImmVector` that contains the values of the current `Pair`
    *           starting after the callback returns `true`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function skipWhile(<<__OnlyRxIfRxFunc>> (function(mixed): bool) $callback):
     ImmVector<mixed> {
     $pair = $this->toArray();
@@ -537,7 +537,7 @@ final class Pair implements \ConstVector {
    *
    * @guide /hack/generics/constraints
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function concat<Tu super mixed>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
     ImmVector<Tu> {
     $ret = $this->toVector();

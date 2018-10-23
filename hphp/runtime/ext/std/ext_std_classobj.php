@@ -65,7 +65,7 @@ function class_exists(string $class_name,
  * @return string - Returns the class name. Returns FALSE if called from
  *   outside a class.
  */
-<<__Native>>
+<<__Native, __Rx>>
 function get_called_class(): mixed;
 
 /**
@@ -170,7 +170,7 @@ function get_object_vars(object $object): darray<string, mixed>;
  *   returned.    If called without parameter outside object, this function
  *   returns FALSE.
  */
-<<__Native>>
+<<__Native, __Rx>>
 function get_parent_class(mixed $object = null): mixed;
 
 /**
@@ -199,8 +199,8 @@ function interface_exists(string $interface_name,
  * @return bool - Returns TRUE if the object is of this class or has this
  *   class as one of its parents, FALSE otherwise.
  */
-<<__Native>>
-function is_a(mixed $object,
+<<__Native, __Rx>>
+function is_a(<<__MaybeMutable>> mixed $object,
               string $class_name,
               bool $allow_string = false): bool;
 
@@ -216,8 +216,8 @@ function is_a(mixed $object,
  * @return bool - This function returns TRUE if the object object,
  *   belongs to a class which is a subclass of class_name, FALSE otherwise.
  */
-<<__Native>>
-function is_subclass_of(mixed $object,
+<<__Native, __Rx>>
+function is_subclass_of(<<__MaybeMutable>> mixed $object,
                         string $class_name,
                         bool $allow_string = true): bool;
 
@@ -230,8 +230,8 @@ function is_subclass_of(mixed $object,
  * @return bool - Returns TRUE if the method given by method_name has
  *   been defined for the given object, FALSE otherwise.
  */
-<<__Native>>
-function method_exists(mixed $object,
+<<__Native, __Rx>>
+function method_exists(<<__MaybeMutable>> mixed $object,
                        string $method_name): bool;
 
 /**
@@ -244,8 +244,8 @@ function method_exists(mixed $object,
  * @return bool - Returns TRUE if the property exists, FALSE if it
  *   doesn't exist or NULL in case of an error.
  */
-<<__Native>>
-function property_exists(mixed $class,
+<<__Native, __Rx>>
+function property_exists(<<__MaybeMutable>> mixed $class,
                          string $property): ?bool;
 
 /**

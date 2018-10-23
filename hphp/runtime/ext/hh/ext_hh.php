@@ -130,3 +130,21 @@ interface StaticPropertyAttribute extends PropertyAttribute {}
 interface ParameterAttribute {}
 
 }
+
+
+namespace HH\Rx {
+/**
+  * Reactive version of HH\IMemoizeParam.
+  * Classes that implement this interface may be passed to
+  * serialize_memoize_param() and may be used as params on
+  * <<__Memoize>> functions
+  */
+interface IMemoizeParam extends \HH\IMemoizeParam {
+   /**
+   * Serialize this object to a string that can be used as a
+   * dictionary key to differentiate instances of this class.
+   */
+  <<__Rx>>
+  public function getInstanceKey(): string;
+}
+}

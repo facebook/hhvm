@@ -12,8 +12,8 @@ open ServerCommandTypes
 
 exception Client_went_away
 
-(* default pipe, priority pipe *)
-type t = Unix.file_descr * Unix.file_descr
+(* default pipe, priority pipe, force formant start only pipe *)
+type t = Unix.file_descr * Unix.file_descr * Unix.file_descr
 type client =
   | Non_persistent_client of Timeout.in_channel * Out_channel.t
   | Persistent_client of Unix.file_descr
@@ -40,14 +40,15 @@ let accept_client_opt parent_in_fd =
 (* - If we should read from persistent_client, then (None, true)            *)
 (* - If we should read from in_fd, then (Some (Non_persist in_fd)), false)  *)
 (* - If there's nothing to read, then (None, false)                         *)
-let sleep_and_check (default_in_fd, priority_in_fd) persistent_client_opt
+let sleep_and_check (default_in_fd, priority_in_fd, force_dormant_start_only) persistent_client_opt
     ~ide_idle kind =
-  let in_fds = [default_in_fd; priority_in_fd] in
+  let in_fds = [default_in_fd; priority_in_fd; force_dormant_start_only] in
   let is_persistent x = match persistent_client_opt with
     | Some (Persistent_client fd) when fd = x -> true
     | _ -> false
   in
   let l = match kind, persistent_client_opt with
+    | `Force_dormant_start_only, _ -> [force_dormant_start_only]
     | `Priority, _ -> [priority_in_fd]
     | `Any, Some (Persistent_client fd) ->
       (* If we are not sure that there are no more IDE commands, do not even
@@ -73,7 +74,7 @@ let has_persistent_connection_request = function
     ready <> []
   | _ -> false
 
-let priority_fd (_, x) = Some x
+let priority_fd (_, x, _) = Some x
 
 let get_client_fd = function
   | Persistent_client fd -> Some fd

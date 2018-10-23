@@ -13,7 +13,7 @@ module type S = sig
 
   exception Client_went_away
 
-  val provider_from_file_descriptors : (Unix.file_descr * Unix.file_descr) -> t
+  val provider_from_file_descriptors : (Unix.file_descr * Unix.file_descr * Unix.file_descr) -> t
   val provider_for_test : unit -> t
 
   val sleep_and_check : t ->
@@ -22,7 +22,7 @@ module type S = sig
     (* Whether the most recent message received from persistent client
      * was IDE_IDLE *)
     ide_idle:bool ->
-    [`Any | `Priority] ->
+    [`Any | `Priority | `Force_dormant_start_only] ->
     (** Returns an optional new client, and a boolean for whether there is
      * a request on the persistent client. *)
     client option * bool

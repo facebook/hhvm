@@ -14,10 +14,12 @@ module SP = ServerProcess
 type pipe_type =
   | Default
   | Priority
+  | Force_dormant_start_only
 
 let pipe_type_to_string = function
   | Default -> "default"
   | Priority -> "priority"
+  | Force_dormant_start_only -> "force_dormant_start_only"
 
 let start_server_daemon ~informant_managed options log_link daemon_entry =
   let log_fds =
@@ -43,13 +45,20 @@ let start_server_daemon ~informant_managed options log_link daemon_entry =
   let () = Unix.set_close_on_exec parent_priority_fd in
   let () = Unix.clear_close_on_exec child_priority_fd in
 
+  let parent_force_dormant_start_only_fd, child_force_dormant_start_only_force_fd =
+    Unix.socketpair Unix.PF_UNIX Unix.SOCK_STREAM 0 in
+  let () = Unix.set_close_on_exec parent_force_dormant_start_only_fd in
+  let () = Unix.clear_close_on_exec child_force_dormant_start_only_force_fd in
+
   let {Daemon.pid; Daemon.channels = (ic, oc)} =
     Daemon.spawn
       ~channel_mode:`socket
       log_fds
       daemon_entry
-      (informant_managed, state, options, monitor_pid, child_priority_fd) in
+      (informant_managed, state, options, monitor_pid,
+        child_priority_fd, child_force_dormant_start_only_force_fd) in
   Unix.close child_priority_fd;
+  Unix.close child_force_dormant_start_only_force_fd;
   Hh_logger.log "Just started typechecker server with pid: %d." pid;
   let server =
     SP.({
@@ -58,6 +67,7 @@ let start_server_daemon ~informant_managed options log_link daemon_entry =
       out_fds = [
         pipe_type_to_string Default, Daemon.descr_of_out_channel oc;
         pipe_type_to_string Priority, parent_priority_fd;
+        pipe_type_to_string Force_dormant_start_only, parent_force_dormant_start_only_fd;
       ];
       start_t = start_t;
       last_request_handoff = ref (Unix.time());

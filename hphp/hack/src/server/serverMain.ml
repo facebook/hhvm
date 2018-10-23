@@ -909,10 +909,13 @@ let daemon_main_exn ~informant_managed options monitor_pid in_fds =
   let env = MainInit.go genv options init_id (fun () -> program_init genv) in
   serve genv env in_fds
 
-let daemon_main (informant_managed, state, options, monitor_pid, priority_in_fd)
-  (default_ic, _) =
+let daemon_main
+    (informant_managed, state, options,
+      monitor_pid, priority_in_fd, force_dormant_start_only_in_fd)
+    (default_ic, _) =
   (* Avoid leaking this fd further *)
   let () = Unix.set_close_on_exec priority_in_fd in
+  let () = Unix.set_close_on_exec force_dormant_start_only_in_fd in
   let default_in_fd = Daemon.descr_of_in_channel default_ic in
   (* Restore the root directory and other global states from monitor *)
   ServerGlobalState.restore state;
@@ -922,7 +925,7 @@ let daemon_main (informant_managed, state, options, monitor_pid, priority_in_fd)
 
   ServerUtils.with_exit_on_exception @@ fun () ->
   daemon_main_exn ~informant_managed options monitor_pid
-    (default_in_fd, priority_in_fd)
+    (default_in_fd, priority_in_fd, force_dormant_start_only_in_fd)
 
 
 let entry =

@@ -508,8 +508,6 @@ let serve_one_iteration genv env client_provider =
       (fun () -> SharedMem.collect `aggressive);
     let t = Unix.gettimeofday () in
     if t -. env.last_idle_job_time > 0.5 then begin
-      (* Check on pending queries periodically *)
-      ServerRevisionTracker.check_non_blocking env;
       ServerIdle.go ();
       { env with last_idle_job_time = t }
     end else env

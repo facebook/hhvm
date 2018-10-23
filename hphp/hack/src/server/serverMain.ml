@@ -476,18 +476,27 @@ let has_pending_disk_changes genv =
 let serve_one_iteration genv env client_provider =
   let recheck_id = new_serve_iteration_id () in
   ServerMonitorUtils.exit_if_parent_dead ();
-  let client_kind =
+  let has_default_client_pending =
+    Option.is_some env.default_client_pending_command_needs_full_check in
+  let can_accept_clients = not @@ ServerRevisionTracker.is_in_hg_update_state () in
+  let client_kind = match can_accept_clients, has_default_client_pending with
     (* If we are already blocked on some client, do not accept more of them.
      * Other clients (that connect through priority pipe, or persistent clients)
-     * can still be handled *)
-    if Option.is_some env.default_client_pending_command_needs_full_check
-    then `Priority else `Any in
-  let client, has_persistent_connection_request =
-    ClientProvider.sleep_and_check
-      client_provider
-      env.persistent_client
-      ~ide_idle:env.ide_idle
-      client_kind
+     * can still be handled - unless we are in hg.update state, where we want to
+     * stop accepting any new clients, with the exception of forced ones. *)
+    | true, true -> Some `Priority
+    | true, false -> Some `Any
+    | false, true -> None
+    | false, false -> Some `Force_dormant_start_only
+  in
+  let client, has_persistent_connection_request = match client_kind with
+    | None -> None, false
+    | Some client_kind ->
+      ClientProvider.sleep_and_check
+        client_provider
+        env.persistent_client
+        ~ide_idle:env.ide_idle
+        client_kind
   in
   (* client here is "None" if we should either handle from our existing  *)
   (* persistent client (i.e. has_persistent_connection_request), or if   *)
@@ -661,6 +670,7 @@ let priority_client_interrupt_handler genv client_provider env =
   end else
 
   let client, has_persistent_connection_request =
+    if ServerRevisionTracker.is_in_hg_update_state () then None, false else
     ClientProvider.sleep_and_check
       client_provider
       env.persistent_client

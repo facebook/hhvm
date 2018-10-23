@@ -287,7 +287,8 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
   let handoff_options = {
     MonitorRpc.force_dormant_start = env.force_dormant_start;
     pipe_name = HhServerMonitorConfig.(pipe_type_to_string
-      (if env.use_priority_pipe then Priority else Default))
+      (if env.force_dormant_start then Force_dormant_start_only else
+          if env.use_priority_pipe then Priority else Default))
   } in
   let retries, conn =
     let start_t = Unix.gettimeofday () in

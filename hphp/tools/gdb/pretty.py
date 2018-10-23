@@ -311,7 +311,7 @@ class ArrayDataPrinter(object):
         kind_ty = T('HPHP::ArrayData::ArrayKind')
         self.kind = val['m_kind'].cast(kind_ty)
 
-        if self.kind == self._kind('Mixed'):
+        if self.kind == self._kind('Mixed') or self.kind == self._kind('Dict'):
             self.val = val.cast(T('HPHP::MixedArray'))
         else:
             self.val = val
@@ -334,10 +334,10 @@ class ArrayDataPrinter(object):
         data = self.val.address.cast(T('char').pointer()) + \
                self.val.type.sizeof
 
-        if self.kind == self._kind('Packed'):
+        if self.kind == self._kind('Packed') or self.kind == self._kind('Vec'):
             pelm = data.cast(T('HPHP::TypedValue').pointer())
             return self._packed_iterator(pelm, pelm + self.val['m_size'])
-        if self.kind == self._kind('Mixed'):
+        if self.kind == self._kind('Mixed') or self.kind == self._kind('Dict'):
             pelm = data.cast(T('HPHP::MixedArray::Elm').pointer())
             return self._mixed_iterator(pelm, pelm + self.val['m_used'])
         return self._packed_iterator(0, 0)

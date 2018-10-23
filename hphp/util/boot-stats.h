@@ -81,6 +81,11 @@ struct BootStats {
   // method and stores it as a sample with the given name
   static void mark(const std::string& name);
 
+  // Add a column with name and string value.
+  static void set(const std::string& name, const std::string& value);
+  // Add a column with name and int value.
+  static void set(const std::string& name, int64_t value);
+
   struct Block {
     explicit Block(const std::string& name, bool enabled);
     ~Block();

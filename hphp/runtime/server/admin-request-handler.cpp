@@ -21,29 +21,30 @@
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/hhprof.h"
 #include "hphp/runtime/base/http-client.h"
-#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/base/thread-hooks.h"
+#include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/base/unit-cache.h"
 
+#include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/fixup.h"
-#include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/relocation.h"
-#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/tc-record.h"
+#include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/repo.h"
-#include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/type-profile.h"
 
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/ext/json/ext_json.h"
@@ -57,6 +58,7 @@
 #include "hphp/runtime/server/server-stats.h"
 
 #include "hphp/util/alloc.h"
+#include "hphp/util/build-info.h"
 #include "hphp/util/hphp-config.h"
 #include "hphp/util/hugetlb.h"
 #include "hphp/util/logger.h"
@@ -64,7 +66,6 @@
 #include "hphp/util/mutex.h"
 #include "hphp/util/numa.h"
 #include "hphp/util/process.h"
-#include "hphp/util/build-info.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/stacktrace-profiler.h"
 #include "hphp/util/timer.h"
@@ -315,6 +316,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 
         "/xenon-snap:      generate a Xenon snapshot, which is logged later\n"
         "/hugepage:        show stats about hugepage usage\n"
+        "/jit-des-info:    show information about deserialized profile data\n"
 
         "/const-ss:        get const_map_size\n"
         "/static-strings:  get number of static strings\n"
@@ -639,6 +641,17 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 #endif
       break;
     }
+    if (strncmp(cmd.c_str(), "jit-des-info", 13) == 0) {
+      if (jit::ProfDataDeserializer::getBuildTime() == 0) {
+        transport->sendString("", 200);
+        break;
+      }
+      auto msg = folly::sformat("{}:{}",
+                                jit::ProfDataDeserializer::getBuildHost(),
+                                jit::ProfDataDeserializer::getBuildTime());
+      transport->sendString(msg, 200);
+    }
+
     if (strncmp(cmd.c_str(), "const-ss", 8) == 0 &&
         handleConstSizeRequest(cmd, transport)) {
       break;

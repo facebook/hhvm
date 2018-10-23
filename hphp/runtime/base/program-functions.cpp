@@ -2465,7 +2465,10 @@ void hphp_process_init() {
                         numLoadedUnits(), numWorkers);
         }
         BootStats::mark("jit::deserializeProfData");
-        StructuredLog::log("", {});
+        BootStats::set("prof_data_source_host",
+                       jit::ProfDataDeserializer::getBuildHost());
+        BootStats::set("prof_data_timestamp",
+                       jit::ProfDataDeserializer::getBuildTime());
         RuntimeOption::EvalNumSingleJitRequests = 0;
         RuntimeOption::EvalJitProfileInterpRequests = 0;
         RuntimeOption::EvalJitProfileRequests = 0;

@@ -115,12 +115,13 @@ bool RuntimeOption::EnableIsExprPrimitiveMigration = true;
 bool RuntimeOption::EnableReifiedGenerics = false;
 bool RuntimeOption::Hacksperimental = false;
 bool RuntimeOption::CheckParamTypeInvariance = true;
-bool RuntimeOption::DumpPreciseProfileData = true;
+bool RuntimeOption::DumpPreciseProfData = true;
 bool RuntimeOption::EnableCoroutines = true;
 uint32_t RuntimeOption::EvalInitialStaticStringTableSize =
   kDefaultInitialStaticStringTableSize;
 uint32_t RuntimeOption::EvalInitialNamedEntityTableSize = 30000;
 JitSerdesMode RuntimeOption::EvalJitSerdesMode{};
+int RuntimeOption::ProfDataTTLHours = 24;
 std::string RuntimeOption::EvalJitSerdesFile;
 
 std::map<std::string, ErrorLogFileData> RuntimeOption::ErrorLogs = {
@@ -1371,8 +1372,10 @@ void RuntimeOption::Load(
       ((EvalJitSerdesMode == JitSerdesMode::Serialize) ||
        (EvalJitSerdesMode == JitSerdesMode::SerializeAndExit) ||
        (EvalJitSerdesMode == JitSerdesMode::DeserializeOrGenerate));
-    Config::Bind(DumpPreciseProfileData, ini, config,
-                 "Eval.DumpPreciseProfileData", couldDump);
+    Config::Bind(DumpPreciseProfData, ini, config,
+                 "Eval.DumpPreciseProfData", couldDump);
+    Config::Bind(ProfDataTTLHours, ini, config,
+                 "Eval.ProfDataTTLHours", ProfDataTTLHours);
 
     if (EnableHipHopSyntax) {
       // If EnableHipHopSyntax is true, it forces EnableXHP to true
@@ -1418,7 +1421,7 @@ void RuntimeOption::Load(
         EvalJitSerdesMode = JitSerdesMode::Off;
       }
       EvalJitSerdesFile.clear();
-      DumpPreciseProfileData = false;
+      DumpPreciseProfData = false;
     }
     low_malloc_huge_pages(EvalMaxLowMemHugePages);
     HardwareCounter::Init(EvalProfileHWEnable,

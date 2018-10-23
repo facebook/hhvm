@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/variable-serializer.h"
@@ -889,6 +890,9 @@ ProfDataSerializer::~ProfDataSerializer() {
   }
 }
 
+std::string ProfDataDeserializer::s_buildHost;
+int64_t ProfDataDeserializer::s_buildTime{0};
+
 ProfDataDeserializer::ProfDataDeserializer(const std::string& name) {
   fd = open(name.c_str(), O_CLOEXEC | O_RDONLY);
   if (fd == -1) throw std::runtime_error("Failed to open: " + name);
@@ -1272,6 +1276,11 @@ std::string serializeProfData(const std::string& filename) {
     write_raw(ser, schema.size());
     write_raw(ser, schema.begin(), schema.size());
 
+    auto host = Process::GetHostName();
+    write_raw(ser, host.size());
+    write_raw(ser, &host[0], host.size());
+    write_raw(ser, TimeStamp::Current());
+
     Func::s_treadmill = true;
     hphp_thread_init();
     hphp_session_init(Treadmill::SessionKind::ProfData);
@@ -1323,6 +1332,21 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
     if (schema != repoSchemaId()) {
       throw std::runtime_error("Mismatched repo-schema");
     }
+
+    size = read_raw<size_t>(ser);
+    ProfDataDeserializer::s_buildHost.resize(size);
+    read_raw(ser, &ProfDataDeserializer::s_buildHost[0], size);
+
+    int64_t buildTime;
+    read_raw(ser, buildTime);
+    auto const currTime = TimeStamp::Current();
+    if (buildTime <= currTime - 3600 * RuntimeOption::ProfDataTTLHours) {
+      throw std::runtime_error(
+          "Stale profile data (check Eval.ProfDataTTLHours)");
+    } else if (buildTime >= currTime) {
+      throw std::runtime_error("profile data dumped in the future?");
+    }
+    ProfDataDeserializer::s_buildTime = buildTime;
 
     InstanceBits::deserialize(ser);
     read_global_array_map(ser);

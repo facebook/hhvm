@@ -78,6 +78,8 @@ private:
   ResourceUsage m_last;
   std::mutex m_marks_guard_;
   std::map<std::string, ResourceUsage> m_marks;
+  std::map<std::string, std::string> m_strs;
+  std::map<std::string, int64_t> m_ints;
 };
 
 void BootStats::Impl::add(const std::string& info, ResourceUsage value) {
@@ -141,9 +143,15 @@ void BootStats::done() {
   if (StructuredLog::enabled()) {
     std::lock_guard<std::mutex> lock(s_instance->m_marks_guard_);
     StructuredLogEntry cols;
-    for (auto sample : s_instance->m_marks) {
+    for (auto const& sample : s_instance->m_marks) {
       cols.setInt(sample.first, sample.second.wall().count());
       cols.setInt(sample.first + " CPU", sample.second.cpu().count());
+    }
+    for (auto const& strCol : s_instance->m_strs) {
+      cols.setStr(strCol.first, strCol.second);
+    }
+    for (auto const intCol : s_instance->m_strs) {
+      cols.setStr(intCol.first, intCol.second);
     }
     StructuredLog::log("hhvm_boot_timer", cols);
     cols.clear();
@@ -164,6 +172,16 @@ void BootStats::mark(const std::string& info) {
 void BootStats::add(const std::string& info, const ResourceUsage value) {
   if (!s_started) return;
   BootStats::s_instance->add(info, value);
+}
+
+void BootStats::set(const std::string& name, const std::string& value) {
+  if (!s_started) return;
+  BootStats::s_instance->m_strs[name] = value;
+}
+
+void BootStats::set(const std::string& name, int64_t value) {
+  if (!s_started) return;
+  BootStats::s_instance->m_ints[name] = value;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

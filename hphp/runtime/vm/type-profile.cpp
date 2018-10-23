@@ -222,7 +222,7 @@ void profileRequestStart() {
   auto const retranslateAllScheduled =
     jit::mcgen::pendingRetranslateAllScheduled();
   auto const forceInterp =
-    (retranslateAllScheduled && RuntimeOption::DumpPreciseProfileData) ||
+    (retranslateAllScheduled && RuntimeOption::DumpPreciseProfData) ||
     (requestKind != RequestKind::Standard);
 
   // When retranslateAll is scheduled to run, we don't want to generate more

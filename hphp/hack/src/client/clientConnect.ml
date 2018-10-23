@@ -352,6 +352,14 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
         end;
         raise Exit_status.(Exit_with No_server_running)
       end
+    | SMUtils.Server_dormant_out_of_retries ->
+      Printf.eprintf begin
+        "Ran out of retries while waiting for Mercurial to finish rebase. Starting " ^^
+        "the server in the middle of rebase is strongly not recommended and you should " ^^
+        "first finish the rebase before retrying. If you really " ^^
+        "know what you're doing, maybe try --force-dormant-start\n%!"
+      end;
+      raise Exit_status.(Exit_with Out_of_retries)
     | SMUtils.Server_dormant ->
       Printf.eprintf begin
         "Error: No server running and connection limit reached for waiting"^^

@@ -125,7 +125,8 @@ let should_start env =
       | SMUtils.Build_id_mismatched _
       | SMUtils.Server_died
       ) -> true
-  | Error SMUtils.Server_dormant ->
+  | Error SMUtils.Server_dormant
+  | Error SMUtils.Server_dormant_out_of_retries ->
     Printf.eprintf
       "Server already exists but is dormant";
     false

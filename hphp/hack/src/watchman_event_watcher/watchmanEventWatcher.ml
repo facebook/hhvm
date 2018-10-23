@@ -166,7 +166,7 @@ let process_changes changes env =
     let env = { env with state = Left_at mergebase; } in
     let () = notify_waiting_clients env in
     env
-  | Watchman_pushed (State_enter (name, json)) ->
+  | Watchman_pushed (State_enter (name, json)) when name = "hg.update" ->
     Hh_logger.log "State_enter %s" name;
     let (>>=) = Option.(>>=) in
     let (>>|) = Option.(>>|) in
@@ -174,7 +174,10 @@ let process_changes changes env =
       Hh_logger.log "Revision: %s" hg_rev
     end);
     { env with state = Entering_to name; }
-  | Watchman_pushed (State_leave (name, json)) ->
+  | Watchman_pushed (State_enter (name, _json))  ->
+    Hh_logger.log "Ignoring State_enter %s" name;
+    env
+  | Watchman_pushed (State_leave (name, json)) when name = "hg.update" ->
     Hh_logger.log "State_leave %s" name;
     let (>>=) = Option.(>>=) in
     let (>>|) = Option.(>>|) in
@@ -183,6 +186,9 @@ let process_changes changes env =
     end);
     let env = { env with state = Left_at name; } in
     let () = notify_waiting_clients env in
+    env
+  | Watchman_pushed (State_leave (name, _json))  ->
+    Hh_logger.log "Ignoring State_leave %s" name;
     env
   | Watchman_pushed (Files_changed set) when (SSet.is_empty set)->
     env

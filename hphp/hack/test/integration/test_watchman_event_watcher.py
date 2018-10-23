@@ -181,7 +181,7 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
                 time.sleep(retry_wait)
                 retries -= 1
                 continue
-            elif ignore and line.strip() in ignore:
+            elif ignore and any(x in line.strip() for x in ignore):
                 err_print_ln('ignoring from ignore list. retrying.')
                 time.sleep(retry_wait)
                 retries -= 1
@@ -285,11 +285,20 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
                 initialized_msg,
                 'initialized message')
             self.check_call(['hg', 'update', '.~1'])
-            state_enter = self.poll_line(f, retry_eof=True)
-            state_leave = self.poll_line(f, retry_eof=True)
-            sentinel_file = self.poll_line(f, retries=300, retry_eof=True)
+            ignore = [
+                "Ignoring State_enter hg.transaction",
+                "Ignoring State_leave hg.transaction"
+            ]
+            state_enter = self.poll_line(f, retry_eof=True, ignore=ignore)
+            state_enter_revision = self.poll_line(f, retry_eof=True, ignore=ignore)
+            state_leave = self.poll_line(f, retry_eof=True, ignore=ignore)
+            state_leave_revision = self.poll_line(f, retry_eof=True, ignore=ignore)
+            sentinel_file = self.poll_line(
+                f, retries=300, retry_eof=True, ignore=ignore)
             self.assertIn('State_enter hg.update', state_enter, 'state enter')
+            self.assertIn('Revision: ', state_enter_revision, 'state enter revision')
             self.assertIn('State_leave hg.update', state_leave, 'state leave')
+            self.assertIn('Revision: ', state_leave_revision, 'state leave revision')
             self.assertIn('Changes', sentinel_file, 'has changes')
             self.assertIn(
                 'updatestate',

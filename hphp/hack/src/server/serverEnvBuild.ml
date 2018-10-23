@@ -112,6 +112,8 @@ let make_genv options config local_config handle =
             "Error: Typechecker does not use Source Control Aware mode" in
           raise Exit_status.(Exit_with Watchman_invalid_result)
         | Watchman.State_enter (name, metadata) ->
+          if local_config.SLC.hg_aware then
+            ServerRevisionTracker.on_state_enter name;
           Notifier_state_enter (name, metadata)
         | Watchman.State_leave (name, metadata) ->
           if local_config.SLC.hg_aware then

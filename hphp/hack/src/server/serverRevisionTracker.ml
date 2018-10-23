@@ -20,6 +20,8 @@
 (* This will be None after init in case of canaries and Precomputed loads *)
 let current_mergebase : Hg.svn_rev option ref = ref None
 
+let is_in_hg_update_state = ref false
+
 (* Do we think that this server have processed a mergebase change? If we are
  * in this state and get notified about changes to a huge number of files (or
  * even small number of files that fan-out to a huge amount of work), we might
@@ -54,15 +56,26 @@ let add_query ~hg_rev root =
     Queue.add hg_rev pending_queries
   end
 
+let on_state_enter state_name  =
+  if state_name <> "hg.update" then () else begin
+    Hh_logger.log "ServerRevisionTracker: entering hg.update";
+    is_in_hg_update_state := true;
+  end
+
 let on_state_leave root state_name state_metadata =
-  if state_name <> "hg.update" then () else
-  let open Option.Monad_infix in
-  Option.iter (state_metadata >>= Watchman_utils.rev_in_state_change)
-    ~f:begin fun hg_rev ->
-      match state_metadata >>= Watchman_utils.merge_in_state_change with
-      | Some true -> Hh_logger.log "ServerRevisionTracker: Ignoring merge rev %s" hg_rev;
-      | _ -> add_query ~hg_rev root
-    end
+  if state_name <> "hg.update" then () else begin
+    is_in_hg_update_state := false;
+    Hh_logger.log "ServerRevisionTracker: leaving hg.update";
+    let open Option.Monad_infix in
+    Option.iter (state_metadata >>= Watchman_utils.rev_in_state_change)
+      ~f:begin fun hg_rev ->
+        match state_metadata >>= Watchman_utils.merge_in_state_change with
+        | Some true -> Hh_logger.log "ServerRevisionTracker: Ignoring merge rev %s" hg_rev;
+        | _ -> add_query ~hg_rev root
+      end
+  end
+
+let is_in_hg_update_state () = !is_in_hg_update_state
 
 let check_query future ~timeout ~current_t =
   match Future.get ~timeout future with

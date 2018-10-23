@@ -8,11 +8,17 @@
 
 val initialize : Hg.svn_rev -> unit
 
+val on_state_enter :
+  string -> (* state name *)
+  unit
+
 val on_state_leave :
   Path.t -> (* project root *)
   string -> (* state name *)
   Hh_json.json option -> (* state metadata *)
   unit
+
+val is_in_hg_update_state : unit -> bool
 
 val check_blocking : unit -> unit
 val check_non_blocking : ServerEnv.env -> unit

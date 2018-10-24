@@ -9,6 +9,7 @@
 
 open Core_kernel
 open Tast
+open Ast_defs
 open Typing_defs
 
 module Env = Tast_env
@@ -60,15 +61,20 @@ let visitor = object(this)
     update acc @@ Invalid (r, Tunresolved tyl)
   method! on_tobject acc r = update acc @@ Invalid (r, Tobject)
   method! on_tclass acc r cls tyl =
-    match tyl with
+    match Env.get_class acc.env (snd cls) with
+    | Some { tc_kind = Ctrait; _ } ->
+      update acc @@ Invalid (r, Tclass (cls, tyl))
+    | _ ->
+      begin match tyl with
       | [] -> acc
       | tyl when List.for_all tyl this#is_wildcard -> acc
       | _ ->
         let acc = super#on_tclass acc r cls tyl in
         begin match acc.validity with
-          | Valid -> update acc @@ Partial (r, Tclass (cls, tyl))
-          | _ -> acc
+        | Valid -> update acc @@ Partial (r, Tclass (cls, tyl))
+        | _ -> acc
         end
+      end
   method! on_tapply acc r ((_, name) as id) tyl =
     if tyl <> [] && Typing_env.is_typedef name
     then update acc @@ Invalid (r, Tapply (id, tyl))
@@ -81,11 +87,17 @@ let visitor = object(this)
     | _ -> false
 end
 
-let print_type: type a. a ty_ -> string = function
+let print_type: type a. Env.env -> a ty_ -> string = fun env ty_ ->
+  match ty_ with
   | Tclass (_, tyl) when tyl <> [] ->
     "a type with generics, because generics are erased at runtime"
   | Tapply (_, tyl) when tyl <> [] ->
     "a type with generics, because generics are erased at runtime"
+  | Tclass (cls, _) ->
+    begin match Env.get_class env (snd cls) with
+    | Some info -> string_of_class_kind info.tc_kind
+    | _ -> Typing_print.error ty_
+    end
   | ty_ -> Typing_print.error ty_
 
 let validate_hint env hint op =
@@ -97,12 +109,12 @@ let validate_hint env hint op =
       | Invalid (r, ty_) ->
         if not !should_suppress
         then Errors.invalid_is_as_expression_hint
-          op (fst hint) (Reason.to_pos r) (print_type ty_);
+          op (fst hint) (Reason.to_pos r) (print_type env ty_);
         should_suppress := true
       | Partial (r, ty_) ->
         if not !should_suppress
         then Errors.partially_valid_is_as_expression_hint
-          op (fst hint) (Reason.to_pos r) (print_type ty_)
+          op (fst hint) (Reason.to_pos r) (print_type env ty_)
       | Valid -> ()
   in
   let env, hint_ty = Env.localize_with_dty_validator

@@ -45,6 +45,9 @@ val get_self : env -> Tast.ty option
 (** Return the type of the enclosing class definition.
     When not in a class definition, return {!None}. *)
 
+val get_class : env -> Typing_heap.Classes.key -> Typing_heap.Classes.t option
+(** Return the info of the given class from the typing heap. *)
+
 val is_static : env -> bool
 (** Return {true} when in the definition of a static property or method. *)
 

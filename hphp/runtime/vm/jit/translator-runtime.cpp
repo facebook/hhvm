@@ -757,6 +757,31 @@ TypedValue keysetIdxS(ArrayData* a, StringData* key, TypedValue def) {
   return getDefaultIfNullCell(SetArray::RvalStr(a, key), def);
 }
 
+template <bool isFirst>
+TypedValue vecFirstLast(ArrayData* a) {
+  assertx(a->isVecArray());
+  int64_t idx = isFirst ? 0 : a->size() - 1;
+  auto rval = a->rval(idx);
+  return UNLIKELY(!rval) ? make_tv<KindOfNull>() : rval.tv();
+}
+
+template TypedValue vecFirstLast<true>(ArrayData*);
+template TypedValue vecFirstLast<false>(ArrayData*);
+
+template <bool isFirst, bool isKey>
+TypedValue arrFirstLast(ArrayData* a) {
+  if (UNLIKELY(a->empty())) {
+    return make_tv<KindOfNull>();
+  }
+  auto pos = isFirst ? a->iter_begin() : a->iter_last();
+  return isKey ? a->nvGetKey(pos) : a->atPos(pos);
+}
+
+template TypedValue arrFirstLast<true, false>(ArrayData*);
+template TypedValue arrFirstLast<false, false>(ArrayData*);
+template TypedValue arrFirstLast<true, true>(ArrayData*);
+template TypedValue arrFirstLast<false, true>(ArrayData*);
+
 TypedValue* getSPropOrNull(const Class* cls,
                            const StringData* name,
                            Class* ctx,

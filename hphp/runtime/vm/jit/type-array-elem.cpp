@@ -323,6 +323,92 @@ std::pair<Type, bool> keysetElemType(Type arr, Type idx) {
   return {type, false};
 }
 
+std::pair<Type, bool> vecFirstLastType(
+  Type arr, bool isFirst, const Class* ctx) {
+  // Relax for packed array
+  assertx(arr <= (TVec | Type::Array(ArrayData::kPackedKind)));
+
+  if (arr.hasConstVal()) {
+    auto arrVal = arr.arrVal();
+    if (arrVal->empty()) {
+      return {TBottom, false};
+    }
+    auto pos = isFirst ? arrVal->iter_begin() : arrVal->iter_end();
+    return {Type::cns(arrVal->atPos(pos)), true};
+  }
+
+  auto type = (arr <= (TPersistentVec | TPersistentArr)) ?
+    TUncountedInit : TInitGen;
+
+  auto const arrTy = arr.arrSpec().type();
+  if (!arrTy) {
+    return {type, false};
+  }
+
+  using E = RepoAuthType::Array::Empty;
+  using T = RepoAuthType::Array::Tag;
+  auto const maybeEmpty = arrTy->emptiness() == E::Maybe;
+
+  switch (arrTy->tag()) {
+    case T::Packed: {
+      auto sz = arrTy->size();
+      if (sz == 0) {
+        return {TBottom, false};
+      }
+      if (isFirst) {
+        type &= typeFromRAT(arrTy->packedElem(0), ctx);
+      } else {
+        type &= typeFromRAT(arrTy->packedElem(sz - 1), ctx);
+      }
+
+      return {type, !maybeEmpty};
+    }
+    case T::PackedN: {
+      type &= typeFromRAT(arrTy->elemType(), ctx);
+      return {type, !maybeEmpty};
+    }
+  }
+  return {type, false};
+}
+
+std::pair<Type, bool> dictFirstLastType(Type arr, bool isFirst, bool isKey) {
+  // Relax for maxed array
+  assertx(arr <= (TDict | Type::Array(ArrayData::kMixedKind)));
+
+  if (arr.hasConstVal()) {
+    auto arrVal = arr.arrVal();
+    if (arrVal->empty()) {
+      return {TBottom, false};
+    }
+    auto pos = isFirst ? arrVal->iter_begin() : arrVal->iter_end();
+    auto tv = isKey ? arrVal->nvGetKey(pos) : arrVal->atPos(pos);
+    return {Type::cns(tv), true};
+  }
+
+  auto const type = (arr <= (TPersistentDict | TPersistentArr)) ?
+    TUncountedInit : TInitCell;
+  return {type, false};
+}
+
+std::pair<Type, bool> keysetFirstLastType(Type arr, bool isFirst) {
+  assertx(arr <= TKeyset);
+
+  if (arr.hasConstVal()) {
+    auto arrVal = arr.arrVal();
+    if (arrVal->empty()) {
+      return {TBottom, false};
+    }
+    auto pos = isFirst ? arrVal->iter_begin() : arrVal->iter_end();
+    return {Type::cns(arrVal->atPos(pos)), true};
+  }
+
+  auto type = TStr | TInt;
+  if (arr <= TPersistentKeyset) {
+    type &= TUncountedInit;
+  }
+  return {type, false};
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

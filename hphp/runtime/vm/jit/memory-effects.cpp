@@ -1384,6 +1384,29 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ElemKeysetK:
     return IrrelevantEffects {};
 
+  case VecFirst: {
+    auto const base = inst.src(0);
+    return may_load_store(AElemI { base, 0 }, AEmpty);
+  }
+  case VecLast: {
+    auto const base = inst.src(0);
+    if (base->hasConstVal(TArr)) {
+      return may_load_store(
+          AElemI { base, static_cast<int64_t>(base->arrVal()->size() - 1) },
+          AEmpty);
+    }
+    return may_load_store(AElemIAny, AEmpty);
+  }
+  case DictFirst:
+  case DictLast:
+  case KeysetFirst:
+  case KeysetLast:
+    return may_load_store(AElemAny, AEmpty);
+
+  case DictFirstKey:
+  case DictLastKey:
+    return may_load_store(AEmpty, AEmpty);
+
   case ProfileMixedArrayOffset:
   case CheckMixedArrayOffset:
   case CheckArrayCOW:

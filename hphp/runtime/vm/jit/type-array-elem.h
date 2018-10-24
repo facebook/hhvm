@@ -57,6 +57,14 @@ std::pair<Type, bool> vecElemType(Type arr, Type idx, const Class* ctx);
 std::pair<Type, bool> dictElemType(Type arr, Type idx);
 std::pair<Type, bool> keysetElemType(Type arr, Type idx);
 
+/*
+* Get the type of first or last element for different array type.
+*/
+std::pair<Type, bool> vecFirstLastType(
+  Type arr, bool isFirst, const Class* ctx);
+std::pair<Type, bool> dictFirstLastType(Type arr, bool isFirst, bool isKey);
+std::pair<Type, bool> keysetFirstLastType(Type arr, bool isFirst);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

@@ -292,6 +292,51 @@ Type arrElemReturn(const IRInstruction* inst) {
   return elem.first;
 }
 
+/*
+* Analyze the type of return element (key or value) for different container.
+*/
+Type vecFirstLastReturn(const IRInstruction* inst, bool first) {
+  assertx(inst->is(VecFirst, VecLast));
+  assertx(inst->src(0)->isA(TVec | Type::Array(ArrayData::kPackedKind)));
+
+  auto elem = vecFirstLastType(inst->src(0)->type(), first, inst->ctx());
+  if (!elem.second) {
+    elem.first |= TInitNull;
+  }
+  if (inst->hasTypeParam()) {
+    elem.first &= inst->typeParam();
+  }
+  return elem.first;
+}
+
+Type dictFirstLastReturn(const IRInstruction* inst, bool first, bool isKey) {
+  assertx(inst->is(DictFirst, DictLast, DictFirstKey, DictLastKey));
+  assertx(inst->src(0)->isA(TDict | Type::Array(ArrayData::kMixedKind)));
+
+  auto elem = dictFirstLastType(inst->src(0)->type(), isKey, first);
+  if (!elem.second) {
+    elem.first |= TInitNull;
+  }
+  if (inst->hasTypeParam()) {
+    elem.first &= inst->typeParam();
+  }
+  return elem.first;
+}
+
+Type keysetFirstLastReturn(const IRInstruction* inst, bool first) {
+  assertx(inst->is(KeysetFirst, KeysetLast));
+  assertx(inst->src(0)->isA(TKeyset));
+
+  auto elem = keysetFirstLastType(inst->src(0)->type(), first);
+  if (!elem.second) {
+    elem.first |= TInitNull;
+  }
+  if (inst->hasTypeParam()) {
+    elem.first &= inst->typeParam();
+  }
+  return elem.first;
+}
+
 Type vecElemReturn(const IRInstruction* inst) {
   assertx(inst->is(LdVecElem));
   assertx(inst->src(0)->isA(TVec));
@@ -476,6 +521,16 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DVecElem        return vecElemReturn(inst);
 #define DDictElem       return dictElemReturn(inst);
 #define DKeysetElem     return keysetElemReturn(inst);
+// Get the type of first or last element for different array type
+#define DVecFirstElem     return vecFirstLastReturn(inst, true);
+#define DVecLastElem      return vecFirstLastReturn(inst, false);
+#define DVecKey           return TInt | TInitNull;
+#define DDictFirstElem    return dictFirstLastReturn(inst, true, false);
+#define DDictLastElem     return dictFirstLastReturn(inst, false, false);
+#define DDictFirstKey     return dictFirstLastReturn(inst, true, true);
+#define DDictLastKey      return dictFirstLastReturn(inst, false, true);
+#define DKeysetFirstElem  return keysetFirstLastReturn(inst, true);
+#define DKeysetLastElem   return keysetFirstLastReturn(inst, false);
 #define DArrPacked      return Type::Array(ArrayData::kPackedKind);
 #define DArrMixed       return Type::Array(ArrayData::kMixedKind);
 #define DVArr           return (RuntimeOption::EvalHackArrDVArrs \
@@ -524,6 +579,15 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DVecElem
 #undef DDictElem
 #undef DKeysetElem
+#undef DVecFirstElem
+#undef DVecLastElem
+#undef DVecKey
+#undef DDictFirstElem
+#undef DDictLastElem
+#undef DDictFirstKey
+#undef DDictLastKey
+#undef DKeysetFirstElem
+#undef DKeysetLastElem
 #undef DArrPacked
 #undef DArrMixed
 #undef DVArr

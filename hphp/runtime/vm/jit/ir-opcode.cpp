@@ -56,6 +56,15 @@ TRACE_SET_MOD(hhir);
 #define DVecElem       HasDest
 #define DDictElem      HasDest
 #define DKeysetElem    HasDest
+#define DVecFirstElem     HasDest
+#define DVecLastElem      HasDest
+#define DVecKey           HasDest
+#define DDictFirstElem    HasDest
+#define DDictLastElem     HasDest
+#define DDictFirstKey     HasDest
+#define DDictLastKey      HasDest
+#define DKeysetFirstElem  HasDest
+#define DKeysetLastElem   HasDest
 #define DArrPacked     HasDest
 #define DArrMixed      HasDest
 #define DVArr          HasDest
@@ -124,6 +133,15 @@ OpInfo g_opInfo[] = {
 #undef DVecElem
 #undef DDictElem
 #undef DKeysetElem
+#undef DVecFirstElem
+#undef DVecLastElem
+#undef DVecKey
+#undef DDictFirstElem
+#undef DDictLastElem
+#undef DDictFirstKey
+#undef DDictLastKey
+#undef DKeysetFirstElem
+#undef DKeysetLastElem
 #undef DArrPacked
 #undef DArrMixed
 #undef DVArr
@@ -686,10 +704,14 @@ bool opcodeMayRaise(Opcode opc) {
   case DefLabel:
   case DefSP:
   case DictEmptyElem:
+  case DictFirst:
+  case DictFirstKey:
   case DictGetK:
   case DictGetQuiet:
   case DictIdx:
   case DictIsset:
+  case DictLast:
+  case DictLastKey:
   case DivDbl:
   case DivInt:
   case EagerSyncVMRegs:
@@ -778,10 +800,12 @@ bool opcodeMayRaise(Opcode opc) {
   case JmpSwitchDest:
   case JmpZero:
   case KeysetEmptyElem:
+  case KeysetFirst:
   case KeysetGetK:
   case KeysetGetQuiet:
   case KeysetIdx:
   case KeysetIsset:
+  case KeysetLast:
   case KillARReifiedGenerics:
   case KillClsRefCls:
   case KillClsRefTS:
@@ -999,6 +1023,8 @@ bool opcodeMayRaise(Opcode opc) {
   case UnboxPtr:
   case Unreachable:
   case UnwindCheckSideExit:
+  case VecFirst:
+  case VecLast:
   case VectorIsset:
   case XorBool:
   case XorInt:

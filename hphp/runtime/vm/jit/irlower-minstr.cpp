@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/minstr-helpers.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
+#include "hphp/runtime/vm/jit/translator-runtime.h"
 
 #include "hphp/util/immed.h"
 #include "hphp/util/stack-trace.h"
@@ -825,6 +826,46 @@ void cgArrayIdx(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDestTV(env, inst), SyncOptions::Sync,
                arrArgs(env, inst, keyInfo).typedValue(2));
+}
+
+template <TypedValue (*f)(ArrayData*)>
+void containerFirstLastHelper(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(f),
+              callDestTV(env, inst), SyncOptions::None,
+              argGroup(env, inst).ssa(0));
+}
+
+void cgVecFirst(IRLS& env, const IRInstruction* inst) {
+  containerFirstLastHelper<vecFirstLast<true>>(env, inst);
+}
+
+void cgVecLast(IRLS& env, const IRInstruction* inst) {
+  containerFirstLastHelper<vecFirstLast<false>>(env, inst);
+}
+
+void cgDictFirst(IRLS& env, const IRInstruction* inst) {
+  containerFirstLastHelper<arrFirstLast<true, false>>(env, inst);
+}
+
+void cgDictLast(IRLS& env, const IRInstruction* inst) {
+  containerFirstLastHelper<arrFirstLast<false, false>>(env, inst);
+}
+
+void cgDictFirstKey(IRLS& env, const IRInstruction* inst) {
+  containerFirstLastHelper<arrFirstLast<true, true>>(env, inst);
+}
+
+void cgDictLastKey(IRLS& env, const IRInstruction* inst) {
+  containerFirstLastHelper<arrFirstLast<false, true>>(env, inst);
+}
+
+void cgKeysetFirst(IRLS& env, const IRInstruction* inst) {
+  containerFirstLastHelper<arrFirstLast<true, false>>(env, inst);
+}
+
+void cgKeysetLast(IRLS& env, const IRInstruction* inst) {
+  containerFirstLastHelper<arrFirstLast<false, false>>(env, inst);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

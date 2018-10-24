@@ -168,6 +168,12 @@ TypedValue dictIdxS(ArrayData*, StringData*, TypedValue);
 TypedValue keysetIdxI(ArrayData*, int64_t, TypedValue);
 TypedValue keysetIdxS(ArrayData*, StringData*, TypedValue);
 
+// Get the first/last key or value from ArrLike type.
+template <bool isFirst>
+TypedValue vecFirstLast(ArrayData* a);
+template <bool isFirst, bool isKey>
+TypedValue arrFirstLast(ArrayData* a);
+
 TypedValue* ldGblAddrDefHelper(StringData* name);
 
 TypedValue* getSPropOrNull(const Class* cls,

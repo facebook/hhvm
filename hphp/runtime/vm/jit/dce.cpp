@@ -259,6 +259,14 @@ bool canDCE(IRInstruction* inst) {
   case KeysetIsset:
   case KeysetEmptyElem:
   case KeysetIdx:
+  case VecFirst:
+  case VecLast:
+  case DictFirst:
+  case DictFirstKey:
+  case DictLast:
+  case DictLastKey:
+  case KeysetFirst:
+  case KeysetLast:
   case GetTime:
   case GetTimeNs:
   case Select:

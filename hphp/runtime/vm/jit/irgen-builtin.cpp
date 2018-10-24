@@ -108,7 +108,11 @@ const StaticString
   s_type_structure("hh\\type_structure"),
   s_is_list_like("hh\\is_list_like"),
   s_one("1"),
-  s_empty("");
+  s_empty(""),
+  s_container_first("HH\\Lib\\_Private\\Native\\first"),
+  s_container_last("HH\\Lib\\_Private\\Native\\last"),
+  s_container_first_key("HH\\Lib\\_Private\\Native\\first_key"),
+  s_container_last_key("HH\\Lib\\_Private\\Native\\last_key");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -780,6 +784,130 @@ SSATmp* opt_foldable(IRGS& env,
   return nullptr;
 }
 
+/*
+* Container intrinsic for HH\traversable
+*/
+SSATmp* opt_container_first(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) {
+    return nullptr;
+  }
+  auto const value = params[0].value;
+  auto const type = value->type();
+  if (type <= TVec || type <= Type::Array(ArrayData::kPackedKind)) {
+    auto const r = gen(env, VecFirst, value);
+    gen(env, IncRef, r);
+    return r;
+  }
+  if (type <= TDict || type <= Type::Array(ArrayData::kMixedKind)) {
+    auto const r = gen(env, DictFirst, value);
+    gen(env, IncRef, r);
+    return r;
+  }
+  if (type <= TKeyset) {
+    auto const r = gen(env, KeysetFirst, value);
+    gen(env, IncRef, r);
+    return r;
+  }
+  return nullptr;
+}
+
+SSATmp* opt_container_last(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) {
+    return nullptr;
+  }
+  auto const value = params[0].value;
+  auto const type = value->type();
+  if (type <= TVec || type <= Type::Array(ArrayData::kPackedKind)) {
+    auto const r = gen(env, VecLast, value);
+    gen(env, IncRef, r);
+    return r;
+  }
+  if (type <= TDict || type <= Type::Array(ArrayData::kMixedKind)) {
+    auto const r = gen(env, DictLast, value);
+    gen(env, IncRef, r);
+    return r;
+  }
+  if (type <= TKeyset) {
+    auto const r = gen(env, KeysetLast, value);
+    gen(env, IncRef, r);
+    return r;
+  }
+  return nullptr;
+}
+
+SSATmp* opt_container_first_key(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) {
+    return nullptr;
+  }
+  auto const value = params[0].value;
+  auto const type = value->type();
+
+  if (type <= TVec || type <= Type::Array(ArrayData::kPackedKind)) {
+    return cond(
+      env,
+      [&](Block* taken) {
+        auto const length = type <= TVec ?
+          gen(env, CountVec, value) : gen(env, CountArray, value);
+        gen(env, JmpZero, taken, length);
+      },
+      [&] {
+        return cns(env, 0);
+       },
+      [&] {
+        return cns(env, TInitNull);
+       }
+    );
+  }
+  if (type <= TDict || type <= Type::Array(ArrayData::kMixedKind)) {
+    auto const r = gen(env, DictFirstKey, value);
+    gen(env, IncRef, r);
+    return r;
+  }
+  if (type <= TKeyset) {
+    auto const r = gen(env, KeysetFirst, value);
+    gen(env, IncRef, r);
+    return r;
+  }
+  return nullptr;
+}
+
+SSATmp* opt_container_last_key(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 1) {
+    return nullptr;
+  }
+  auto const value = params[0].value;
+  auto const type = value->type();
+
+  if (type <= TVec || type <= Type::Array(ArrayData::kPackedKind)) {
+    return cond(
+      env,
+      [&](Block* taken) {
+        auto const length = type <= TVec ?
+          gen(env, CountVec, value) : gen(env, CountArray, value);
+        gen(env, JmpZero, taken, length);
+        return length;
+      },
+      [&] (SSATmp* next) {
+        return gen(env, SubInt, next, cns(env, 1));
+       },
+      [&] {
+        return cns(env, TInitNull);
+       }
+    );
+  }
+  if (type <= TDict || type <= Type::Array(ArrayData::kMixedKind)) {
+    auto const r = gen(env, DictLastKey, value);
+    gen(env, IncRef, r);
+    return r;
+  }
+  if (type <= TKeyset) {
+    auto const r = gen(env, KeysetLast, value);
+    gen(env, IncRef, r);
+    return r;
+  }
+  return nullptr;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* optimizedFCallBuiltin(IRGS& env,
@@ -821,6 +949,10 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
     X(array_key_cast)
     X(type_structure)
     X(is_list_like)
+    X(container_first)
+    X(container_last)
+    X(container_first_key)
+    X(container_last_key)
 
 #undef X
 

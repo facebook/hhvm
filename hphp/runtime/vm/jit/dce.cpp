@@ -124,10 +124,6 @@ bool canDCE(IRInstruction* inst) {
   case CmpBool:
   case SameObj:
   case NSameObj:
-  case SameVec:
-  case NSameVec:
-  case SameDict:
-  case NSameDict:
   case EqKeyset:
   case NeqKeyset:
   case SameKeyset:
@@ -766,7 +762,13 @@ bool canDCE(IRInstruction* inst) {
   case NSameShape:
   case SameArr:
   case NSameArr:
-    return !RuntimeOption::EvalHackArrCompatDVCmpNotices;
+  case SameVec:
+  case NSameVec:
+  case SameDict:
+  case NSameDict:
+    return
+      !RuntimeOption::EvalHackArrCompatCheckCompare &&
+      !RuntimeOption::EvalHackArrCompatDVCmpNotices;
 
   case IsTypeStruct:
     return !opcodeMayRaise(IsTypeStruct);

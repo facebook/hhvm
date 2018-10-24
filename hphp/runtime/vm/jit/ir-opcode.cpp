@@ -286,6 +286,10 @@ bool opcodeMayRaise(Opcode opc) {
   case SameShape:
   case NSameArr:
   case SameArr:
+  case NSameDict:
+  case NSameVec:
+  case SameDict:
+  case SameVec:
     return RuntimeOption::EvalHackArrCompatDVCmpNotices ||
       RuntimeOption::EvalHackArrCompatCheckCompare;
 
@@ -926,11 +930,9 @@ bool opcodeMayRaise(Opcode opc) {
   case NewStructDict:
   case NInstanceOfBitmask:
   case Nop:
-  case NSameDict:
   case NSameKeyset:
   case NSameObj:
   case NSameStr:
-  case NSameVec:
   case OrdStr:
   case OrInt:
   case PackMagicArgs:
@@ -955,11 +957,9 @@ bool opcodeMayRaise(Opcode opc) {
   case ReservePackedArrayDataNewElem:
   case RestoreErrorLevel:
   case RetCtrl:
-  case SameDict:
   case SameKeyset:
   case SameObj:
   case SameStr:
-  case SameVec:
   case Select:
   case Shl:
   case Shr:

@@ -174,6 +174,12 @@ enum class CodeKind : uint8_t {
   Trace,
 
   /*
+   * Code for function prologues. Similar to CrossTrace, but may allow more
+   * registers.
+   */
+  Prologue,
+
+  /*
    * Code at the TC boundaries, e.g., service requests, unique stubs.
    */
   CrossTrace,

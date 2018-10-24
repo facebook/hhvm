@@ -228,8 +228,13 @@ void getEffects(const Abi& abi, const Vinstr& i,
     case Vinstr::callm:
     case Vinstr::callr:
     case Vinstr::calls:
-    case Vinstr::callstub:
       defs = abi.all() - (abi.calleeSaved | rvmfp());
+      break;
+
+    case Vinstr::callstub:
+      defs =
+        (abi.all() - (abi.calleeSaved | rvmfp()))
+        | jit::abi(CodeKind::CrossTrace).unreserved();
       break;
 
     case Vinstr::callfaststub:

@@ -55,8 +55,8 @@ void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
   const auto tmp1 = ppc64_asm::reg::r3;
   const auto tmp2 = ppc64_asm::reg::r4;
 
-  assertx(ppc64::abi(CodeKind::CrossTrace).gpUnreserved.contains(tmp1));
-  assertx(ppc64::abi(CodeKind::CrossTrace).gpUnreserved.contains(tmp2));
+  assertx(ppc64::abi(CodeKind::Prologue).gpUnreserved.contains(tmp1));
+  assertx(ppc64::abi(CodeKind::Prologue).gpUnreserved.contains(tmp2));
 
   emitSmashableMovq(a.code(), fixups, uint64_t(func), tmp1);
   a.  ld     (tmp2, rvmfp()[AROFF(m_func)]);

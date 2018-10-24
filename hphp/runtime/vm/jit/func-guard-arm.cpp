@@ -62,7 +62,7 @@ void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
   vixl::Label target_data;
   auto const begin = cb.frontier();
 
-  assertx(arm::abi(CodeKind::CrossTrace).gpUnreserved.contains(vixl::x0));
+  assertx(arm::abi(CodeKind::Prologue).gpUnreserved.contains(vixl::x0));
 
   emitSmashableMovq(cb, fixups, uint64_t(func), vixl::x0);
   a.  Ldr   (rAsm, M(rvmfp()[AROFF(m_func)]));

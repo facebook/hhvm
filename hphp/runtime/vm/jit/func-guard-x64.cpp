@@ -59,7 +59,7 @@ void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
   using namespace reg;
   X64Assembler a { cb };
 
-  assertx(x64::abi(CodeKind::CrossTrace).gpUnreserved.contains(rax));
+  assertx(x64::abi(CodeKind::Prologue).gpUnreserved.contains(rax));
 
   auto const funcImm = Immed64(func);
 

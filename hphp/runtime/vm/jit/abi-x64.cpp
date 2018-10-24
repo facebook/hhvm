@@ -72,10 +72,15 @@ const RegSet kSF = RegSet(RegSF{0});
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
+ * Registers that can safely be used within a prologue.
+ */
+const RegSet kPrologueRegs =
+  kXMMCallerSaved | (kGPUnreserved - x64::vm_regs_with_sp());
+
+/*
  * Registers that can safely be used for scratch purposes in-between traces.
  */
-const RegSet kScratchCrossTraceRegs =
-  kXMMCallerSaved | (kGPUnreserved - x64::vm_regs_with_sp());
+const RegSet kScratchCrossTraceRegs = kPrologueRegs - reg::r15;
 
 /*
  * Helper code ABI registers.
@@ -93,6 +98,16 @@ const Abi trace_abi {
   kCalleeSaved,
   kSF,
   true,
+};
+
+const Abi prologue_abi {
+  trace_abi.gp() & kPrologueRegs,
+  trace_abi.gp() - kPrologueRegs,
+  trace_abi.simd() & kPrologueRegs,
+  trace_abi.simd() - kPrologueRegs,
+  trace_abi.calleeSaved & kPrologueRegs,
+  trace_abi.sf,
+  false
 };
 
 const Abi cross_trace_abi {
@@ -150,6 +165,8 @@ const Abi& abi(CodeKind kind) {
   switch (kind) {
     case CodeKind::Trace:
       return trace_abi;
+    case CodeKind::Prologue:
+      return prologue_abi;
     case CodeKind::CrossTrace:
       return cross_trace_abi;
     case CodeKind::Helper:

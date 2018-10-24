@@ -146,6 +146,7 @@ const Abi& abi(CodeKind kind) {
     case CodeKind::Trace:
       return trace_abi;
     case CodeKind::CrossTrace:
+    case CodeKind::Prologue:
       return cross_trace_abi;
     case CodeKind::Helper:
       return helper_abi;

@@ -1206,9 +1206,9 @@ void isTypeHelper(ISS& env,
 
   auto const negate = jmp.op == Op::JmpNZ;
   auto const was_true = [&] (Type t) {
-    if (testTy.subtypeOf(BNull)) return intersection_of(t, TNull);
+    if (testTy.subtypeOf(BNull)) return TNull;
     assertx(!testTy.couldBe(BNull));
-    return intersection_of(t, testTy);
+    return testTy;
   };
   auto const was_false = [&] (Type t) {
     auto tinit = remove_uninit(t);
@@ -1445,8 +1445,30 @@ void isTypeStructCJmpImpl(ISS& env,
                           const JmpOp& jmp) {
   auto bail = [&] { impl(env, inst, jmp); };
   auto const a = tv(topC(env));
-  if (!a || isValidTSType(*a, false)) return bail();
+  if (!a || !isValidTSType(*a, false)) return bail();
   auto ts_type = type_of_type_structure(a->m_data.parr);
+
+  auto const ts_kind = get_ts_kind(a->m_data.parr);
+  // type_of_type_structure does not resolve these types.  It is important we
+  // do resolve them here, or we may have issues when we reduce the checks to
+  // InstanceOfD checks.  If we bail the taken branch will be assigned the
+  // current best known type, but if the typestructure is checking an
+  // interface, InstanceOfD will use the interface type for the taken branch.
+  // Since there is not necessarily a relationship between the interface and
+  // the current best known type, we may worsen types, and break index
+  // invariants.
+  if (ts_kind == TypeStructure::Kind::T_class ||
+      ts_kind == TypeStructure::Kind::T_interface ||
+      ts_kind == TypeStructure::Kind::T_xhp ||
+      ts_kind == TypeStructure::Kind::T_unresolved) {
+    auto const rcls = env.index.resolve_class(env.ctx,
+                                              get_ts_classname(a->m_data.parr));
+    if (!rcls || !rcls->resolved() || rcls->cls()->attrs & AttrEnum) {
+      return bail();
+    }
+    ts_type = subObj(*rcls);
+  }
+
   if (!ts_type) return bail();
 
   auto const locId = topStkEquiv(env, 1);
@@ -1473,11 +1495,9 @@ void isTypeStructCJmpImpl(ISS& env,
       return t;
     }
     if (t.couldBe(BUninit) && ts_type->couldBe(BNull)) {
-      return union_of(intersection_of(std::move(t),
-                                      std::move(ts_type.value())),
-                      TUninit);
+      return union_of(ts_type.value(), TUninit);
     }
-    return intersection_of(std::move(t), std::move(ts_type.value()));
+    return ts_type.value();
   };
   auto const pre  = [&] (Type t) { return result(std::move(t), negate); };
   auto const post = [&] (Type t) { return result(std::move(t), !negate); };

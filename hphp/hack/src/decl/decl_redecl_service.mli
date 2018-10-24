@@ -17,7 +17,6 @@ val redo_type_decl :
   TypecheckerOptions.t ->
   FileInfo.names ->
   FileInfo.fast ->
-  FileInfo.names ->
   Errors.t * DepSet.t * DepSet.t * DepSet.t
 
 (**
@@ -30,14 +29,14 @@ val redo_type_decl :
 val get_dependent_classes :
   MultiWorker.worker list option ->
   bucket_size:int ->
-  FileInfo.t Relative_path.Map.t ->
+  (Relative_path.t -> SSet.t) ->
   SSet.t ->
   SSet.t
 
 val oldify_type_decl :
   ?collect_garbage:bool ->
   MultiWorker.worker list option ->
-  FileInfo.t Relative_path.Map.t ->
+  (Relative_path.t -> SSet.t) ->
   bucket_size:int ->
   FileInfo.names ->
   FileInfo.names ->
@@ -47,4 +46,10 @@ val remove_defs :
   FileInfo.names ->
   Decl_class_elements.t SMap.t ->
   collect_garbage:bool ->
+  unit
+
+val remove_old_defs :
+  bucket_size:int ->
+  MultiWorker.worker list option ->
+  FileInfo.names ->
   unit

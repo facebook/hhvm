@@ -259,16 +259,11 @@ let is_dependent_class_of_any classes c =
       c.Decl_defs.dc_req_ancestors_extends) ||
     (intersection_nonempty classes SSet.mem c.Decl_defs.dc_condition_types)
 
-let get_maybe_dependent_classes_in_file file_info path =
-  match Relative_path.Map.get file_info path with
-  | None -> SSet.empty
-  | Some info -> SSet.of_list @@ List.map info.FileInfo.classes snd
-
-let get_maybe_dependent_classes file_info classes files =
+let get_maybe_dependent_classes get_classes classes files =
   Relative_path.Set.fold files
     ~init:classes
     ~f:begin fun x acc ->
-      SSet.union acc @@ get_maybe_dependent_classes_in_file file_info x
+      SSet.union acc @@ get_classes x
     end
   |> SSet.elements
 
@@ -311,9 +306,9 @@ let filter_dependent_classes_parallel workers ~bucket_size
     res
   end
 
-let get_dependent_classes workers ~bucket_size file_info classes =
+let get_dependent_classes workers ~bucket_size get_classes classes =
   get_dependent_classes_files classes |>
-  get_maybe_dependent_classes file_info classes |>
+  get_maybe_dependent_classes get_classes classes |>
   filter_dependent_classes_parallel workers ~bucket_size classes |>
   SSet.of_list
 
@@ -339,7 +334,10 @@ let get_elems workers ~bucket_size ~old defs =
 (* The main entry point *)
 (*****************************************************************************)
 
-let redo_type_decl workers ~bucket_size ~conservative_redecl tcopt all_oldified_defs fast defs =
+let redo_type_decl workers ~bucket_size ~conservative_redecl tcopt all_oldified_defs fast =
+  let defs =
+    Relative_path.Map.fold fast
+      ~init:FileInfo.empty_names ~f:(fun _ -> FileInfo.merge_names) in
   (* Some of the defintions are already in the old heap, left there by a
    * previous lazy check *)
   let oldified_defs, current_defs =
@@ -369,7 +367,7 @@ let redo_type_decl workers ~bucket_size ~conservative_redecl tcopt all_oldified_
 
 let oldify_type_decl
     ?collect_garbage:(collect_garbage=true)
-    workers file_info ~bucket_size all_oldified_defs defs =
+    workers get_classes ~bucket_size all_oldified_defs defs =
 
   (* Some defs are already oldified, waiting for their recheck *)
   let oldified_defs, current_defs =
@@ -389,10 +387,14 @@ let oldify_type_decl
    * need to remove all of them too to avoid dangling references *)
   let all_classes = defs.FileInfo.n_classes in
   let dependent_classes =
-    get_dependent_classes workers file_info ~bucket_size all_classes in
+    get_dependent_classes workers get_classes ~bucket_size all_classes in
 
   let dependent_classes = FileInfo.({ empty_names with
     n_classes = SSet.diff dependent_classes all_classes
   }) in
 
   remove_defs dependent_classes SMap.empty ~collect_garbage
+
+let remove_old_defs ~bucket_size workers names =
+  let elems = get_elems workers ~bucket_size names ~old:true in
+  remove_old_defs names elems

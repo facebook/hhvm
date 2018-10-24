@@ -658,9 +658,15 @@ let test_decl_compare filename popt files_contents tcopt files_info =
   (* For the purpose of this test, we can ignore other heaps *)
   Parser_heap.ParserHeap.remove_batch files;
 
+  let get_classes path =
+    match Relative_path.Map.get files_info path with
+    | None -> SSet.empty
+    | Some info -> SSet.of_list @@ List.map info.FileInfo.classes snd
+  in
+
   (* We need to oldify, not remove, for ClassEltDiff to work *)
   Decl_redecl_service.oldify_type_decl
-    None files_info ~bucket_size:1 FileInfo.empty_names defs
+    None get_classes ~bucket_size:1 FileInfo.empty_names defs
       ~collect_garbage:false;
 
   let files_contents = Relative_path.Map.map files_contents ~f:add_newline in

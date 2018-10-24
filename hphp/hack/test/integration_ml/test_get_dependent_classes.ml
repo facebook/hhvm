@@ -40,10 +40,16 @@ let () =
 
   Test.assert_no_errors env;
 
+  let get_classes path =
+    match Relative_path.Map.get env.ServerEnv.files_info path with
+    | None -> SSet.empty
+    | Some info -> SSet.of_list @@ List.map info.FileInfo.classes snd
+  in
+
   let dependent_classes = Decl_redecl_service.get_dependent_classes
     None
     ~bucket_size:1
-    env.ServerEnv.files_info
+    get_classes
     (SSet.of_list ["\\C"; "\\H"; "\\J"; "\\:M";])
   in
 

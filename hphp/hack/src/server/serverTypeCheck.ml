@@ -713,7 +713,7 @@ end = functor(CheckKind:CheckKindType) -> struct
     let _, changes, to_redecl_phase2_deps, to_recheck1 =
       Decl_redecl_service.redo_type_decl
         ~conservative_redecl:(not genv.local_config.ServerLocalConfig.disable_conservative_redecl)
-        ~bucket_size genv.workers env.tcopt oldified_defs fast defs_to_redecl in
+        ~bucket_size genv.workers env.tcopt oldified_defs fast in
 
     (* Things that were redeclared are no longer in old heap, so we substract
      * defs_ro_redecl from oldified_defs *)
@@ -744,17 +744,21 @@ end = functor(CheckKind:CheckKindType) -> struct
     debug_print_fast_keys genv "to_redecl_phase2" fast_redecl_phase2_now;
     debug_print_fast_keys genv "lazy_decl_later" lazy_decl_later;
 
+    let get_classes path =
+      match Relative_path.Map.get files_info path with
+      | None -> SSet.empty
+      | Some info -> SSet.of_list @@ List.map info.FileInfo.classes snd
+    in
     let defs_to_oldify = get_defs lazy_decl_later in
     Decl_redecl_service.oldify_type_decl ~bucket_size
-      genv.workers files_info oldified_defs defs_to_oldify;
+      genv.workers get_classes oldified_defs defs_to_oldify;
     let oldified_defs = FileInfo.merge_names oldified_defs defs_to_oldify in
 
-    let defs_to_redecl_phase2 = get_defs fast_redecl_phase2_now in
     let errorl', _changes, _to_redecl2, to_recheck2 =
       Decl_redecl_service.redo_type_decl
         ~conservative_redecl:(not genv.local_config.ServerLocalConfig.disable_conservative_redecl)
         ~bucket_size genv.workers
-        env.tcopt oldified_defs fast_redecl_phase2_now defs_to_redecl_phase2 in
+        env.tcopt oldified_defs fast_redecl_phase2_now in
 
     let errors = Errors.(incremental_update_map errors
       errorl' fast_redecl_phase2_now Decl) in

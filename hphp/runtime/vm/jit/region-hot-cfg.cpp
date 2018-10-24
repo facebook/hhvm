@@ -19,6 +19,7 @@
 
 #include "hphp/util/trace.h"
 
+#include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/region-prune-arcs.h"
@@ -170,6 +171,17 @@ private:
     auto tidInstrs = tidRegion->instrSize();
     if (tidInstrs > m_numBCInstrs) {
       ITRACE(5, "- visit: skipping {} due to region size\n", tid);
+      if (!m_inlining) {
+        logLowPriPerfWarning(
+          "selectHotCFG",
+          [&](StructuredLogEntry& cols) {
+            cols.setInt("maxBCInstrSize", m_numBCInstrs);
+            cols.setInt("tidRegionInstrSize", tidInstrs);
+            auto sd = rec->func()->fullName();
+            cols.setStr("funcName", sd->data());
+          }
+        );
+      }
       return;
     }
 

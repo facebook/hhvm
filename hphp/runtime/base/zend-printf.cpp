@@ -21,6 +21,7 @@
 
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/zend-strtod.h"
@@ -688,6 +689,10 @@ inline static void appenddouble(StringBuffer *buffer,
     return;
   }
 
+  if (g_context->getThrowAllErrors()) {
+    raise_notice("depends on locale: do not fold");
+  }
+
 #if defined(HAVE_LOCALE_H)
   struct lconv *lconv;
   lconv = localeconv();
@@ -818,7 +823,7 @@ String string_printf(const char *format, int len, const Array& args) {
     return empty_string();
   }
 
-  int size = 240;
+  int size = 256 - kStringOverhead;
   StringBuffer result(size);
 
   int argnum = 0, currarg = 1;

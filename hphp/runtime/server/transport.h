@@ -195,10 +195,8 @@ public:
   virtual size_t getRequestSize() const;
 
   /**
-   * Get request header(s).
+   * Get transport params.
    */
-  virtual std::string getHeader(const char *name) = 0;
-  virtual const HeaderMap& getHeaders() = 0;
   virtual void getTransportParams(HeaderMap& /*serverParams*/){};
 
   /**

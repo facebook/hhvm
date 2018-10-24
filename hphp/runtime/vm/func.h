@@ -1182,6 +1182,7 @@ struct Func final {
   void setFuncHandle(rds::Link<LowPtr<Func>, rds::Mode::NonLocal> l);
   void setHasPrivateAncestor(bool b);
   void setMethodSlot(Slot s);
+  void setGenerated(bool b);
 
   // Return true, and set the m_serialized flag, iff this Func hasn't
   // been serialized yet (see prof-data-serialize.cpp).

@@ -31,6 +31,7 @@ type t = {
   class_is_immutable : bool;
   class_has_immutable : bool;
   class_no_dynamic_props : bool;
+  class_needs_no_reifiedinit : bool;
   class_uses         : string list;
   class_use_aliases  :
     (string option * string * string option * Ast.kind list) list;
@@ -60,6 +61,7 @@ let make
   class_is_immutable
   class_has_immutable
   class_no_dynamic_props
+  class_needs_no_reifiedinit
   class_uses
   class_use_aliases
   class_use_precedences
@@ -86,6 +88,7 @@ let make
     class_is_immutable;
     class_has_immutable;
     class_no_dynamic_props;
+    class_needs_no_reifiedinit;
     class_uses;
     class_use_aliases;
     class_use_precedences;
@@ -116,6 +119,7 @@ let is_top hhas_class =
 let is_immutable hhas_class = hhas_class.class_is_immutable
 let has_immutable hhas_class = hhas_class.class_has_immutable
 let no_dynamic_props hhas_class = hhas_class.class_no_dynamic_props
+let needs_no_reifiedinit hhas_class = hhas_class.class_needs_no_reifiedinit
 let class_uses hhas_class = hhas_class.class_uses
 let class_use_aliases hhas_class = hhas_class.class_use_aliases
 let class_use_precedences hhas_class = hhas_class.class_use_precedences

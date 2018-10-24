@@ -781,6 +781,7 @@ let mutate_metadata (input : HP.t)  =
       (cls |> HC.is_immutable       |> mutate_bool)
       (cls |> HC.has_immutable      |> mutate_bool)
       (cls |> HC.no_dynamic_props   |> mutate_bool)
+      (cls |> HC.needs_no_reifiedinit |> mutate_bool)
       (cls |> HC.class_uses)
       (cls |> HC.class_use_aliases)
       (cls |> HC.class_use_precedences)

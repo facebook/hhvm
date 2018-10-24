@@ -167,6 +167,9 @@ enum Attr {
   // (e.g., array_map evalutates its callback in the context of the caller).
   AttrSkipFrame            = (1u << 22), //       |          |    X    //
                                          //       |          |         //
+  // Set on base classes that do not have any reified classes that extend it.
+  AttrNoReifiedInit        = (1u << 23), //    X  |          |         //
+                                         //       |          |         //
   // Indicates that the function might read from the caller's frame. Only
   // allowed for builtins.
   AttrReadsCallerFrame     = (1u << 23), //       |          |    X    //

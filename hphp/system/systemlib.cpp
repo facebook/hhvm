@@ -36,6 +36,7 @@ namespace {
 
 const StaticString s_message("message");
 const StaticString s_code("code");
+const StaticString s_86reifiedinit("86reifiedinit");
 const Slot s_messageIdx{0};
 const Slot s_codeIdx{2};
 
@@ -309,8 +310,7 @@ void mergePersistentUnits() {
   }
 }
 
-void setupNullCtor(Class* cls) {
-  assertx(!s_nullCtor);
+Func* setupNullClsMethod(Class* cls, StringData* name) {
   if (!s_nullFunc) {
     s_nullFunc =
       Unit::lookupFunc(makeStaticString("__SystemLib\\__86null"));
@@ -318,13 +318,26 @@ void setupNullCtor(Class* cls) {
     assertx(s_nullFunc->isPhpLeafFn());
   }
 
-  auto clone = s_nullFunc->clone(cls, makeStaticString("86ctor"));
+  auto clone = s_nullFunc->clone(cls, name);
   clone->setNewFuncId();
   clone->setAttrs(static_cast<Attr>(
                     AttrPublic | AttrNoInjection | AttrSkipFrame |
                     AttrRequiresThis | AttrDynamicallyCallable));
-  clone->setHasForeignThis(true);
-  s_nullCtor = clone;
+  return clone;
+}
+
+void setupNullCtor(Class* cls) {
+  assertx(!s_nullCtor);
+  s_nullCtor = setupNullClsMethod(cls, makeStaticString("86ctor"));
+  s_nullCtor->setHasForeignThis(true);
+}
+
+Func* getNull86reifiedinit(Class* cls) {
+  auto f = setupNullClsMethod(cls, s_86reifiedinit.get());
+  f->setBaseCls(cls);
+  f->setGenerated(true);
+  return f;
+
 }
 
 /////////////////////////////////////////////////////////////////////////////

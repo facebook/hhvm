@@ -59,6 +59,7 @@ const StaticString s_86pinit("86pinit");
 const StaticString s_86sinit("86sinit");
 const StaticString s_86linit("86linit");
 const StaticString s_86reified_prop("86reified_prop");
+const StaticString s_86reifiedinit("86reifiedinit");
 const StaticString s___destruct("__destruct");
 const StaticString s___OptionalDestruct("__OptionalDestruct");
 const StaticString s___MockClass("__MockClass");
@@ -266,6 +267,10 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto const classVecLen = parent != nullptr ? parent->m_classVecLen + 1 : 1;
   auto funcVecLen = (parent != nullptr ? parent->m_methods.size() : 0)
     + preClass->numMethods();
+  if (parent == nullptr && !(preClass->attrs() & AttrNoReifiedInit)) {
+      // We will need to add 86reifiedinit method
+      funcVecLen++;
+    }
 
   CompactVector<ClassPtr> usedTraits;
   auto numTraitMethodsEstimate = loadUsedTraits(preClass, usedTraits);
@@ -2123,6 +2128,13 @@ void Class::setMethods() {
       f->setHasPrivateAncestor(false);
       builder.add(method->name(), f);
     }
+  }
+
+  // Add 86reifiedinit to base classes that do not have AttrNoReifiedInit set
+  if (m_parent.get() == nullptr && !(attrs() & AttrNoReifiedInit)) {
+    assertx(builder.find(s_86reifiedinit.get()) == builder.end());
+    auto f = SystemLib::getNull86reifiedinit(this);
+    builder.add(f->name(), f);
   }
 
   auto const traitsBeginIdx = builder.size();

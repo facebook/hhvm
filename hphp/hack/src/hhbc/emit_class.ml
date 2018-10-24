@@ -305,14 +305,13 @@ let emit_reified_init_body env num_reified ast_class =
   end
 
 let emit_reified_init_method env ast_class =
-  let is_base_class = List.is_empty ast_class.Ast.c_extends in
   let num_reified =
     List.count ast_class.Ast.c_tparams ~f:(function (_, _, _, b) -> b) in
   let has_reified_parents = match ast_class.Ast.c_extends with
     | (_, Ast.Happly (_, l)):: _ ->
       List.exists l ~f:(function (_, Ast.Hreified _) -> true | _ -> false)
     | _ -> false in
-  if not (num_reified > 0 || has_reified_parents) && not is_base_class then [] else
+  if num_reified = 0 && not has_reified_parents then [] else
   let tc = Hhas_type_constraint.make (Some "HH\\varray") [] in
   let params =
     [ Hhas_param.make
@@ -559,6 +558,9 @@ let emit_class : A.class_ * Closure_convert.hoist_kind -> Hhas_class.t =
     is_closure_class || class_is_interface || class_is_trait) in
   let reified_init_method = if not should_emit_reified_init then [] else
     emit_reified_init_method env ast_class in
+  let no_reifiedinit_needed =
+    not (List.is_empty reified_init_method)
+      && List.is_empty ast_class.Ast.c_extends in
   let additional_methods =
     additional_methods @ reified_init_method @
     pinit_methods @ sinit_methods @ linit_methods @ cinit_methods in
@@ -596,6 +598,7 @@ let emit_class : A.class_ * Closure_convert.hoist_kind -> Hhas_class.t =
     class_is_immutable
     class_has_immutable
     class_no_dynamic_props
+    no_reifiedinit_needed
     class_uses
     class_use_aliases
     class_use_precedences

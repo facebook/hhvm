@@ -252,6 +252,7 @@ classdecl:
           (List.mem attrs ~equal:(=) "is_immutable") (*is_immutable*)
           (List.mem attrs ~equal:(=) "has_immutable") (*has_immutable*)
           (List.mem attrs ~equal:(=) "no_dynamic_props") (*no_dynamic_props*)
+          (List.mem attrs ~equal:(=) "noreifiedinit") (*needs_no_reifiedinit*)
           ((fun (x, _, _) -> x) $8)(*uses*)
           ((fun (_, x, _) -> x) $8)(*use_aliases*)
           ((fun (_, _, x) -> x) $8)(*use_precedences*)

@@ -384,6 +384,10 @@ inline void Func::setHasForeignThis(bool hasForeignThis) {
   m_hasForeignThis = hasForeignThis;
 }
 
+inline void Func::setGenerated(bool isGenerated) {
+  shared()->m_isGenerated = isGenerated;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Static locals.
 

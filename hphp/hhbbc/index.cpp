@@ -2969,16 +2969,16 @@ void mark_unique_entities(ISStringToMany<T>& entities, F marker) {
   }
 }
 
-const StaticString s__86reifiedinit("86reifiedinit");
 const StaticString s__Reified("__Reified");
 
 /*
- * Emitter adds a 86reifiedinit method to all base classes and also to
- * classes that have reified generics. All base classes need to have this
- * method so that when we call parent::86reifeidinit(...), there is a stopping
- * point. Since while emitting we do not know whether a base class will have
- * reified parents, it will have to be there unconditionally. At this phase,
- * we remove 86reifeidinit methods from base classes that do not have any
+ * Emitter adds a 86reifiedinit method to all classes that have reified
+ * generics. All base classes also need to have this method so that when we
+ * call parent::86reifeidinit(...), there is a stopping point.
+ * Since while emitting we do not know whether a base class will have
+ * reified parents, during JIT time we need to add 86reifiedinit
+ * unless AttrNoReifiedInit attribute is set. At this phase,
+ * we set AttrNoReifiedInit attribute on classes do not have any
  * reified classes that extend it.
  */
 void clean_86reifiedinit_methods(IndexData& index) {
@@ -2996,47 +2996,11 @@ void clean_86reifiedinit_methods(IndexData& index) {
     needsinit.emplace(cinfo->baseList[0]->cls);
   }
 
-  // Remove them from index.methods first since index.methods does not
-  // own the pointers
-  //
-  // Removing elements from unordered_multimap seems to be O(n) in the
-  // number of equal elements; since we expect a *lot* of these
-  // methods, do a remove_if-like operation to get rid of them.
-  auto const range = index.methods.equal_range(s__86reifiedinit.get());
-  auto i1 = range.first, i2 = range.first;
-  while (i1 != range.second) {
-    if (i1->second->cls->parentName || needsinit.count(i1->second->cls)) {
-      if (i1 != i2) i2->second = std::move(i1->second);
-      ++i2;
-    } else {
-      FTRACE(2, "Erasing {}::{} from methods\n", i1->second->cls->name,
-             s__86reifiedinit.get());
-    }
-    ++i1;
-  }
-  if (i1 != i2) index.methods.erase(i2, i1);
-
-  // Remove 86reifiedinit from the ones that do not need it
+  // Add AttrNoReifiedInit to the base classes that do not need this method
   for (auto& cinfo : index.allClassInfos) {
     if (cinfo->parent == nullptr && needsinit.count(cinfo->cls) == 0) {
-      auto const cls = const_cast<php::Class*>(cinfo->cls);
-      auto const pos_in_cls =
-        std::find_if(cls->methods.begin(),
-                     cls->methods.end(),
-                     [&](const std::unique_ptr<php::Func>& f) {
-                       return f->name == s__86reifiedinit.get();
-                     });
-      if (pos_in_cls != cls->methods.end()) {
-        FTRACE(2, "Erasing {}::{} from cls\n", cls->name,
-          s__86reifiedinit.get());
-        cls->methods.erase(pos_in_cls);
-      }
-      auto const pos_in_cinfo = cinfo->methods.find(s__86reifiedinit.get());
-      if (pos_in_cinfo != cinfo->methods.end()) {
-        FTRACE(2, "Erasing {}::{} from classinfo\n", cls->name,
-          s__86reifiedinit.get());
-        cinfo->methods.erase(pos_in_cinfo);
-      }
+      FTRACE(2, "Adding AttrNoReifiedInit on class {}", cinfo->cls->name);
+      attribute_setter(cinfo->cls->attrs, true, AttrNoReifiedInit);
     }
   }
 }

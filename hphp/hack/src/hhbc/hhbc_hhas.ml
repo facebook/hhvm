@@ -1593,6 +1593,8 @@ let add_method_def buf method_def =
 let class_special_attributes c =
   let user_attrs = Hhas_class.attributes c in
   let attrs = Emit_adata.attributes_to_strings user_attrs in
+  let attrs = if Hhas_class.needs_no_reifiedinit c
+    then "noreifiedinit" :: attrs else attrs in
   let attrs = if Hhas_class.no_dynamic_props c
     then "no_dynamic_props" :: attrs else attrs in
   let attrs =

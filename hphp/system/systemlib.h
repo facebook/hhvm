@@ -161,6 +161,11 @@ void mergePersistentUnits();
  */
 void setupNullCtor(Class* cls);
 
+/*
+ * Return a fresh 86reifiedinit method.
+ */
+Func* getNull86reifiedinit(Class* cls);
+
 ///////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::SystemLib
 

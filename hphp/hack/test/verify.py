@@ -3,6 +3,7 @@
 import argparse
 import os.path
 import os
+import re
 import subprocess
 import sys
 import difflib
@@ -40,6 +41,7 @@ def get_test_flags(path: str) -> List[str]:
 
 def run_test_program(test_cases: List[TestCase],
                      program: str,
+                     default_expect_regex,
                      get_flags: Callable[[str], List[str]]) -> List[Result]:
     """
     Run the program and return a list of results.
@@ -62,7 +64,7 @@ def run_test_program(test_cases: List[TestCase],
             # we don't care about nonzero exit codes... for instance, type
             # errors cause hh_single_type_check to produce them
             output = e.output
-        return check_result(test_case, output)
+        return check_result(test_case, default_expect_regex, output)
 
     executor = ThreadPoolExecutor(max_workers=max_workers)
     futures = [executor.submit(run, test_case) for test_case in test_cases]
@@ -88,12 +90,22 @@ def filter_ocaml_stacktrace(text: str) -> str:
     return "\n".join(out)
 
 
-def check_result(test_case: TestCase, out: str) -> Result:
-    is_failure = (
-        test_case.expected != out and
-        test_case.expected != filter_ocaml_stacktrace(out))
+def check_result(test_case: TestCase, default_expect_regex, out: str) -> Result:
+    """
+    Check that the output of the test in :out corresponds to the expected
+    output, or if a :default_expect_regex is provided,
+    check that the output in :out contains the provided regex.
+    """
+    is_ok = (
+        test_case.expected == out or
+        test_case.expected == filter_ocaml_stacktrace(out) or
+        (
+            default_expect_regex is not None and
+            re.search(default_expect_regex, out) is not None
+        )
+    )
 
-    return Result(test_case=test_case, output=out, is_failure=is_failure)
+    return Result(test_case=test_case, output=out, is_failure=not is_ok)
 
 
 def record_results(results: List[Result], out_ext: str) -> None:
@@ -200,6 +212,7 @@ def run_tests(files: List[str],
               out_extension: str,
               use_stdin: str,
               program: str,
+              default_expect_regex,
               get_flags: Callable[[str], List[str]]) -> List[Result]:
     # for each file, create a test case
     test_cases = [
@@ -209,7 +222,8 @@ def run_tests(files: List[str],
             input=get_content(file) if use_stdin else None)
         for file in files]
 
-    results = run_test_program(test_cases, program, get_flags)
+    results = run_test_program(test_cases, program, default_expect_regex,
+        get_flags)
 
     failures = [result for result in results if result.is_failure]
 
@@ -234,6 +248,7 @@ def run_idempotence_tests(results: List[Result],
                           expected_extension: str,
                           out_extension: str,
                           program: str,
+                          default_expect_regex,
                           get_flags: Callable[[str], List[str]]) -> None:
     idempotence_test_cases = [
         TestCase(
@@ -243,7 +258,7 @@ def run_idempotence_tests(results: List[Result],
         for result in results]
 
     idempotence_results = run_test_program(
-        idempotence_test_cases, program, get_flags)
+        idempotence_test_cases, program, default_expect_regex, get_flags)
 
     num_idempotence_results = len(idempotence_results)
 
@@ -292,6 +307,7 @@ if __name__ == '__main__':
     parser.add_argument('--program', type=abspath)
     parser.add_argument('--out-extension', type=str, default='.out')
     parser.add_argument('--expect-extension', type=str, default='.exp')
+    parser.add_argument('--default-expect-regex', type=str)
     parser.add_argument('--in-extension', type=str, default='.php')
     parser.add_argument('--disabled-extension', type=str,
                         default='.no_typecheck')
@@ -315,8 +331,8 @@ if __name__ == '__main__':
 
     max_workers = args.max_workers
     verbose = args.verbose
-    dump_on_failure = args.diff
 
+    dump_on_failure = args.diff
     if os.getenv('SANDCASTLE') is not None:
         dump_on_failure = True
 
@@ -340,6 +356,7 @@ if __name__ == '__main__':
         args.out_extension,
         args.stdin,
         args.program,
+        args.default_expect_regex,
         get_flags)
 
     # Doesn't make sense to check failures for idempotence
@@ -351,4 +368,5 @@ if __name__ == '__main__':
             args.expect_extension,
             args.out_extension,
             args.program,
+            args.default_expect_regex,
             get_flags)

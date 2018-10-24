@@ -27,6 +27,9 @@ val expand_type : env -> locl ty -> env * locl ty
 val make_ft : Pos.t -> reactivity -> bool -> decl fun_params -> decl ty -> decl fun_type
 val get_shape_field_name : Nast.shape_field_name -> string
 val empty_fake_members : fake_members
+val empty_local_id_map : local_id_map
+val add_to_local_id_map :
+  Local_id.t -> local -> local_id_map -> local_id_map
 val empty_local : tpenv -> reactivity -> local_env
 val initial_local : tpenv -> reactivity -> local_env
 val empty : TypecheckerOptions.t -> Relative_path.t ->

@@ -333,6 +333,8 @@ let empty_fake_members = {
   valid     = SSet.empty;
 }
 
+let empty_local_id_map = Local_id.Map.empty
+
 let empty_local tpenv local_reactive = {
   tpenv = tpenv;
   fake_members = empty_fake_members;
@@ -856,6 +858,8 @@ let rec unbind seen env ty =
     | ty -> env, ty
 
 let unbind = unbind []
+
+let add_to_local_id_map = Local_id.Map.add ?combine:None
 
 (* We maintain 2 states for a local: the type
  * that the local currently has, and an expression_id generated from

@@ -62,6 +62,7 @@ type mode =
   | Dump_nast
   | Dump_stripped_tast
   | Dump_tast
+  | Check_tast
   | Dump_typed_full_fidelity_json
   | Find_refs of int * int
   | Highlight_refs of int * int
@@ -120,8 +121,21 @@ let die str =
   Out_channel.close oc;
   exit 2
 
-let error ?(indent=false) l =
+let print_error ?(indent=false) l =
   Out_channel.output_string stderr (Errors.to_string ~indent (Errors.to_absolute l))
+
+let print_error_list errors =
+  if errors <> []
+  then List.iter ~f:(print_error ~indent:true) errors
+  else Printf.printf "No errors\n"
+
+let print_first_error errors =
+  if errors <> []
+  then print_error (List.hd_exn errors)
+  else Printf.printf "No errors\n"
+
+let print_errors (errors:Errors.t) =
+  print_error_list (Errors.get_error_list errors)
 
 let parse_options () =
   let fn_ref = ref None in
@@ -236,6 +250,9 @@ let parse_options () =
     "--tast",
       Arg.Unit (set_mode Dump_tast),
       " Print out the typed AST";
+    "--tast-check",
+      Arg.Unit (set_mode Check_tast),
+      " Typecheck the tast";
     "--stripped-tast",
       Arg.Unit (set_mode Dump_stripped_tast),
       " Print out the typed AST, stripped of type information." ^
@@ -488,7 +505,7 @@ let print_colored fn type_acc =
 let print_coverage type_acc =
   ClientCoverageMetric.go ~json:false (Some (Coverage_level.Leaf type_acc))
 
-let check_errors opts errors files_info =
+let check_file opts errors files_info =
   Relative_path.Map.fold files_info ~f:begin fun fn fileinfo errors ->
     errors @ Errors.get_error_list
         (Typing_check_utils.check_defs opts fn fileinfo)
@@ -680,15 +697,54 @@ let test_decl_compare filename popt files_contents tcopt files_info =
   ()
 
 (* Returns a list of Tast defs, along with associated type environments. *)
-let get_tast opts filename files_info =
+let compute_tasts opts files_info interesting_files
+  : Errors.t * Tast.program Relative_path.Map.t =
+  let _f = fun _k nast x -> match nast, x with
+  | Some nast, Some _ -> Some nast
+  | _ -> None in
   Errors.do_ begin fun () ->
     let nasts = create_nasts opts files_info in
-    let nast = Relative_path.Map.find filename nasts in
-    Typing.nast_to_tast opts nast
+    (* Interesting files are usually the non hhi ones. *)
+    let filter_non_interesting nasts = Relative_path.Map.merge nasts
+      interesting_files
+      (fun _k nast x ->
+        match nast, x with
+        | Some nast, Some _ -> Some nast
+        | _ -> None) in
+    let nasts = filter_non_interesting nasts in
+    Relative_path.Map.map nasts ~f:(Typing.nast_to_tast opts)
   end
 
+(**
+ * Compute TASTs for some files, then expand all type variables.
+ *)
+let compute_tasts_expand_types opts files_info interesting_files =
+  let errors, tasts = compute_tasts opts files_info interesting_files in
+  let tasts = Relative_path.Map.map tasts Tast_expand.expand_program in
+  errors, tasts
+
+let print_tasts tasts tcopt =
+  let dummy_filename = Relative_path.default in
+  let env = Typing_env.empty tcopt dummy_filename ~droot:None in
+  let stringify_types tast =
+    let print_pos_and_ty (pos, ty) =
+      Format.asprintf "(%a, %s)" Pos.pp pos (Typing_print.full_strip_ns env ty)
+    in
+    TASTStringMapper.map_program tast
+      ~map_env_annotation:(fun () -> ())
+      ~map_expr_annotation:print_pos_and_ty in
+  Relative_path.Map.iter tasts (fun _k tast ->
+    let string_ast = stringify_types tast in
+    Printf.printf "%s\n" (StringNAST.show_program string_ast))
+
+let typecheck_tasts tasts tcopt (filename:Relative_path.t) =
+  let env = Typing_env.empty tcopt filename ~droot:None in
+  let tasts = Relative_path.Map.values tasts in
+  let typecheck_tast tast = Errors.get_error_list (Tast_typecheck.check env tast) in
+  List.concat_map tasts ~f:typecheck_tast
+
 let handle_mode
-  mode filename tcopt popt files_contents files_info errors =
+  mode filename tcopt popt files_contents files_info parse_errors =
   match mode with
   | Ai _ -> ()
   | Autocomplete
@@ -858,7 +914,8 @@ let handle_mode
     let nast = Relative_path.Map.find filename nasts in
     Printf.printf "%s\n" (Nast.show_program nast)
   | Dump_tast ->
-    let errors, tast = get_tast tcopt filename files_info in
+    let errors, tasts = compute_tasts_expand_types tcopt files_info
+      files_contents in
     (match Errors.get_error_list errors with
     | [] -> ()
     | errors ->
@@ -868,19 +925,19 @@ let handle_mode
           Format.printf "  %a %s" Pos.pp pos msg;
           Format.print_newline ()))
     );
-    let env = Typing_env.empty tcopt filename ~droot:None in
-    let stringify_types tast =
-      let tast = Tast_expand.expand_program tast in
-      let print_pos_and_ty (pos, ty) =
-        Format.asprintf "(%a, %s)" Pos.pp pos (Typing_print.full_strip_ns env ty)
-      in
-      TASTStringMapper.map_program tast
-        ~map_env_annotation:(fun () -> ())
-        ~map_expr_annotation:print_pos_and_ty
-    in
-    let string_ast = stringify_types tast in
-    Printf.printf "%s\n" (StringNAST.show_program string_ast)
-
+    print_tasts tasts tcopt
+  | Check_tast ->
+    let errors, tasts = compute_tasts_expand_types tcopt files_info
+      files_contents in
+    print_tasts tasts tcopt;
+    if not @@ Errors.is_empty errors then begin
+      print_errors errors;
+      Printf.printf "Did not typecheck the TAST as there are typing errors.";
+      exit 2
+    end else
+      let tast_check_errors = typecheck_tasts tasts tcopt filename in
+      print_error_list tast_check_errors;
+      if tast_check_errors <> [] then exit 2
   | Dump_typed_full_fidelity_json ->
     (*
       Ideally we'd reuse ServerTypedAst.go here. Unfortunately relative file
@@ -889,18 +946,20 @@ let handle_mode
     *)
 
     (* get the typed ast *)
-    let _, tast = get_tast tcopt filename files_info in
+    let _, tasts = compute_tasts tcopt files_info files_contents in
 
     (* get the parse tree *)
     let source_text = Full_fidelity_source_text.from_file filename in
     let positioned_tree = PositionedTree.make source_text in
-    let typed_tree = ServerTypedAst.create_typed_parse_tree
-      ~filename ~positioned_tree ~tast in
+    Relative_path.Map.iter tasts ~f:(fun _k tast ->
+      let typed_tree = ServerTypedAst.create_typed_parse_tree
+        ~filename ~positioned_tree ~tast in
 
-    let result = ServerTypedAst.typed_parse_tree_to_json typed_tree in
-    Printf.printf "%s\n" (Hh_json.json_to_string result);
+      let result = ServerTypedAst.typed_parse_tree_to_json typed_tree in
+      Printf.printf "%s\n" (Hh_json.json_to_string result))
   | Dump_stripped_tast ->
-    let _, tast = get_tast tcopt filename files_info in
+    let _, tasts = compute_tasts tcopt files_info files_contents in
+    let tast = Relative_path.Map.find_unsafe tasts filename in
     let nast = Tast.to_nast tast in
     Printf.printf "%s\n" (Nast.show_program nast)
   | Find_refs (line, column) ->
@@ -940,24 +999,22 @@ let handle_mode
         ~f:begin fun k _ acc -> Relative_path.Map.remove acc k end
         ~init:files_info
       in
-      let errors = check_errors tcopt errors files_info in
+      let errors = check_file tcopt parse_errors files_info in
       if mode = Infer_return_types
       then
         Option.iter ~f:(infer_return tcopt filename)
           (Relative_path.Map.get files_info filename);
-      if errors <> []
-      then (error (List.hd_exn errors); exit 2)
-      else Printf.printf "No errors\n"
+      print_first_error errors;
+      if errors <> [] then exit 2
   | AllErrors ->
-      let errors = check_errors tcopt errors files_info in
-      if errors <> []
-      then (List.iter ~f:(error ~indent:true) errors; exit 2)
-      else Printf.printf "No errors\n"
+      let errors = check_file tcopt parse_errors files_info in
+      print_error_list errors;
+      if errors <> [] then exit 2
   | Decl_compare ->
     test_decl_compare filename popt files_contents tcopt files_info
   | Least_upper_bound-> compute_least_type tcopt popt filename
   | Linearization ->
-    if errors <> [] then  (error (List.hd_exn errors); exit 2);
+    if parse_errors <> [] then (print_error (List.hd_exn parse_errors); exit 2);
     let files_info = Relative_path.Map.fold builtins
       ~f:begin fun k _ acc -> Relative_path.Map.remove acc k end
       ~init:files_info

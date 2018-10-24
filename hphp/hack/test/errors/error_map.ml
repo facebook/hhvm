@@ -518,4 +518,5 @@ InvalidMoveUse = 4287
 InvalidMoveTarget = 4288
 IgnoredResultOfFreeze = 4289
 IgnoredResultOfMove = 4290
+UnexpectedTy = 4291
   |}]

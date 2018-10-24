@@ -1066,6 +1066,11 @@ let gen_array_rec_arity pos =
   add (Naming.err_code Naming.GenArrayRecArity) pos
     "gen_array_rec() expects exactly 1 argument"
 
+let unexpected_ty_in_tast pos ~actual_ty ~expected_ty =
+  add (Typing.err_code Typing.UnexpectedTy) pos (
+    "Unexpected type in TAST: expected " ^ expected_ty ^ ", got " ^ actual_ty
+  )
+
 let uninstantiable_class usage_pos decl_pos name reason_msgl =
   let name = strip_ns name in
   let msgl = [

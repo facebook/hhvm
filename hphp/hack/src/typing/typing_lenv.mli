@@ -15,7 +15,7 @@ val get_all_locals :
   Typing_env.env -> Typing_env.local_types
 val get_cont :
   Typing_env.env ->
-    Typing_continuations.t -> Typing_env.local_id_map
+  Typing_continuations.t -> Typing_env.local_id_map
 val get_cont_option :
   Typing_env.env ->
   Typing_continuations.t -> Typing_env.local_id_map option

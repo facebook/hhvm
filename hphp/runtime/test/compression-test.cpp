@@ -95,6 +95,10 @@ struct MockHeaders : ITransportHeaders {
       respHeaders(std::move(resp)) {}
 
   /* Request header methods */
+  const char *getUrl() override {
+    return nullptr;
+  }
+
   std::string getHeader(const char *name) override {
     static const std::string emptyStr;
     auto it = reqHeaders.find(name);

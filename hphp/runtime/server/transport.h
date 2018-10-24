@@ -49,6 +49,7 @@ using CookieList = std::vector<std::pair<std::string, std::string>>;
 
 struct ITransportHeaders {
   /* Request header methods */
+  virtual const char *getUrl() = 0;
   virtual std::string getHeader(const char *name) = 0;
   virtual const HeaderMap& getHeaders() = 0;
 

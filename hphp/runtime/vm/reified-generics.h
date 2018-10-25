@@ -25,6 +25,7 @@
 
 namespace HPHP {
 
+struct ActRec;
 struct ArrayData;
 struct StringData;
 
@@ -43,6 +44,12 @@ extern ReifiedGenericsTable g_reified_generics_table;
 void addToReifiedGenericsTable(const std::string& mangledName,
                                ArrayData* tsList);
 ArrayData* getReifiedTypeList(const std::string& name);
+
+///////////////////////////////////////////////////////////////////////////////
+
+// Returns the value on the property that holds reified generics
+// If the cls does not have any reified generics, then returns nullptr
+ArrayData* getClsReifiedGenericsProp(Class* cls, ActRec* ar);
 
 ///////////////////////////////////////////////////////////////////////////////
 

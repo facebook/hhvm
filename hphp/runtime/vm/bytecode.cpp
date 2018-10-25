@@ -2847,13 +2847,7 @@ OPTBLD_INLINE void iopReifiedGeneric(ReifiedGenericOp op, uint32_t n) {
     if (!cls->hasReifiedGenerics()) {
       raise_error("%s has no reified generics", cls->name()->data());
     }
-
-    auto const this_ = vmfp()->getThis();
-    auto const slot = cls->lookupReifiedInitProp();
-    assertx(slot != kInvalidSlot);
-    auto tv = this_->propVec()[slot];
-    assertx(RuntimeOption::EvalHackArrDVArrs ? tvIsVec(tv) : tvIsArray(tv));
-    reifiedTypes = tv.m_data.parr;
+    reifiedTypes = getClsReifiedGenericsProp(cls, vmfp());
   }
   if (n >= reifiedTypes->size()) {
     raise_error("There is no reified generic at index %u", n);

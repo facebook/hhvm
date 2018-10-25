@@ -1,0 +1,3 @@
+#0 %s(12): C<int,shape('a'=>int,'b'=>string)>->g<string>()
+#1 %s(17): C<int,shape('a'=>int,'b'=>string)>->f<string>()
+#2 {main}

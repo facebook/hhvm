@@ -323,12 +323,27 @@ AliasClass backtrace_locals(const IRInstruction& inst) {
     return ac | AFrame { inst.marker().fp(), local };
   };
 
-  if (!RuntimeOption::EnableArgsInBacktraces || !func->numParams()) {
-    return add86meta(AEmpty);
+  auto ac = AEmpty;
+  auto const numParams = func->numParams();
+
+  if (!RuntimeOption::EnableArgsInBacktraces) return add86meta(ac);
+
+  if (func->hasReifiedGenerics()) {
+    // First non param local contains reified generics
+    AliasIdSet reifiedgenerics{ AliasIdSet::IdRange{numParams, numParams + 1} };
+    ac |= AFrame { inst.marker().fp(), reifiedgenerics };
   }
 
-  AliasIdSet params{ AliasIdSet::IdRange{0, func->numParams()} };
-  return add86meta(AFrame { inst.marker().fp(), params });
+  if (func->cls() && func->cls()->hasReifiedGenerics()) {
+    // There is no way to access the SSATmp for ObjectData of `this` here,
+    // so be very pessimistic
+    ac |= APropAny;
+  }
+
+  if (!numParams) return add86meta(ac);
+
+  AliasIdSet params{ AliasIdSet::IdRange{0, numParams} };
+  return add86meta(ac | AFrame { inst.marker().fp(), params });
 }
 
 /////////////////////////////////////////////////////////////////////

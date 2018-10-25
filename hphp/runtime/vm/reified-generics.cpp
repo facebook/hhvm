@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/vm/reified-generics.h"
 
+#include "hphp/runtime/vm/act-rec.h"
+
 #include "hphp/util/debug.h"
 
 namespace HPHP {
@@ -50,6 +52,16 @@ ArrayData* getReifiedTypeList(const std::string& name) {
     return e->second;
   }
   raise_error("No such entry in the reified classes table");
+}
+
+ArrayData* getClsReifiedGenericsProp(Class* cls, ActRec* ar) {
+  if (!cls->hasReifiedGenerics()) return nullptr;
+  auto const this_ = ar->getThis();
+  auto const slot = cls->lookupReifiedInitProp();
+  assertx(slot != kInvalidSlot);
+  auto tv = this_->propVec()[slot];
+  assertx(RuntimeOption::EvalHackArrDVArrs ? tvIsVec(tv) : tvIsArray(tv));
+  return tv.m_data.parr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

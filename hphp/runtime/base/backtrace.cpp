@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/jit/tc.h"
@@ -383,13 +384,29 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       else funcname = s_include;
     }
 
+    if (RuntimeOption::EnableArgsInBacktraces &&
+      fp->func()->hasReifiedGenerics()) {
+      // First local is always $0ReifiedGenerics which comes right after params
+      auto const tv = frame_local(fp, fp->func()->numParams());
+      assertx(tv && (RuntimeOption::EvalHackArrDVArrs ? tvIsVec(tv)
+                                                      : tvIsArray(tv)));
+      auto const reified_generics = tv->m_data.parr;
+      funcname += mangleReifiedGenericsName(reified_generics);
+    }
+
     frame.set(s_function, funcname);
 
     if (!funcname.same(s_include)) {
       // Closures have an m_this but they aren't in object context.
       auto ctx = arGetContextClass(fp);
       if (ctx != nullptr && !fp->func()->isClosureBody()) {
-        frame.set(s_class, Variant{const_cast<StringData*>(ctx->name())});
+        String clsname{const_cast<StringData*>(ctx->name())};
+        if (RuntimeOption::EnableArgsInBacktraces &&
+          ctx->hasReifiedGenerics()) {
+          auto const reified_generics = getClsReifiedGenericsProp(ctx, fp);
+          clsname += mangleReifiedGenericsName(reified_generics);
+        }
+        frame.set(s_class, clsname);
         if (!isReturning && fp->hasThis()) {
           if (btArgs.m_withThis) {
             frame.set(s_object, Object(fp->getThis()));

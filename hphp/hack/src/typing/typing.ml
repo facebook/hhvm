@@ -6694,7 +6694,7 @@ and update_array_type ?lhs_of_null_coalesce p env e1 e2 valkind  =
   match valkind with
     | `lvalue | `lvalue_subexpr ->
       let env, te1, ty1 =
-        raw_expr ~valkind:`lvalue_subexpr ~check_defined:false env e1 in
+        raw_expr ~valkind:`lvalue_subexpr ~check_defined:true env e1 in
       let env, ty1 = type_mapper env ty1 in
       begin match e1 with
         | (_, Lvar (_, x)) ->

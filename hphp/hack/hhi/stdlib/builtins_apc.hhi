@@ -1,4 +1,4 @@
-<?hh     /* -*- php -*- */
+<?hh // decl
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -31,7 +31,7 @@ function apc_cas($key, $old_cas, $new_cas, $cache_id = 0) { }
 <<__PHPStdLib>>
 function apc_exists($key, $cache_id = 0) { }
 <<__PHPStdLib>>
-function apc_size(string $key): ?int { }
+function apc_size(string $key): ?int;
 
 // The following are php std lib functions not supported by HHVM:
 //

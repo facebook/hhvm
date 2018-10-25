@@ -256,13 +256,16 @@ Object APCObject::createObject() const {
     // not yet exposed to PHP.
     unsigned i = 0;
     try {
+      obj->setHasUninitProps();
       for (; i < numProps; ++i) {
         new (objProp + i) Variant(apcProp[i]->toLocal());
       }
+      obj->clearHasUninitProps();
     } catch (...) {
       for (; i < numProps; ++i) {
         new (objProp + i) Variant();
       }
+      obj->clearHasUninitProps();
       throw;
     }
   } else {

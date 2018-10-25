@@ -153,7 +153,8 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
                                // finished. Only set during construction when
                                // the class has immutable properties (to
                                // temporarily allow writing to them).
-    UsedMemoCache      = 0x10  // Object has had data set in its memo slots
+    UsedMemoCache      = 0x10, // Object has had data set in its memo slots
+    HasUninitProps     = 0x20  // The object's properties are being initialized
   };
 
   static constexpr size_t offsetofAttrs() {
@@ -286,6 +287,13 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   // Is this an object with (some) immutable properties for which construction
   // has not finished yet?
   bool isBeingConstructed() const;
+
+  // Set if we might re-enter while some of the properties contain
+  // garbage, eg after calling newInstanceNoPropInit, and before
+  // initializing all the props.
+  bool hasUninitProps() const;
+  void setHasUninitProps();
+  void clearHasUninitProps();
 
   // Whether the object is a collection, [and [not] mutable].
   bool isCollection() const;

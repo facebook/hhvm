@@ -221,6 +221,18 @@ inline bool ObjectData::isBeingConstructed() const {
   return getAttribute(Attribute::IsBeingConstructed);
 }
 
+inline bool ObjectData::hasUninitProps() const {
+  return getAttribute(HasUninitProps);
+}
+
+inline void ObjectData::setHasUninitProps() {
+  setAttribute(HasUninitProps);
+}
+
+inline void ObjectData::clearHasUninitProps() {
+  m_aux16 &= ~HasUninitProps;
+}
+
 inline bool ObjectData::isCollection() const {
   return m_kind >= HeaderKind::Vector && m_kind <= HeaderKind::ImmSet;
 }

@@ -585,7 +585,9 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
   std::vector<const ObjectData*> ptrs;
   forEachHeapObject([&](HeapObject* h, size_t) {
     if (auto obj = innerObj(h)) {
-      ptrs.push_back(obj);
+      if (!obj->hasUninitProps()) {
+        ptrs.push_back(obj);
+      }
     }
   });
   for (auto ptr : ptrs) {

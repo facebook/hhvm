@@ -1079,7 +1079,8 @@ let main_hack ({filename; mode; tcopt; _} as opts) =
   Hhi.set_hhi_root_for_unit_test tmp_hhi;
   match mode with
   | Ai ai_options ->
-    Ai.do_ Typing_check_utils.type_file filename ai_options
+    let filecontents = filename |> Relative_path.create Relative_path.Dummy |> file_to_files in
+    Ai.do_ Typing_check_utils.type_file filecontents ai_options
   | _ ->
     decl_and_run_mode opts tcopt
 

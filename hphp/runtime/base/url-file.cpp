@@ -129,17 +129,20 @@ bool UrlFile::open(const String& input_url, const String& mode) {
   ActRec* fp = vmfp();
   if (fp->skipFrame()) fp = g_context->getPrevVMStateSkipFrame(fp);
   auto id = fp->func()->lookupVarId(s_http_response_header.get());
-  if (id != kInvalidId) {
-    auto tvTo = frame_local(fp, id);
-    Variant varFrom(m_responseHeaders);
-    const auto tvFrom(varFrom.asTypedValue());
-    if (isRefType(tvTo->m_type)) {
-      tvTo = tvTo->m_data.pref->cell();
+
+  if (!RuntimeOption::DisableReservedVariables) {
+    if (id != kInvalidId) {
+      auto tvTo = frame_local(fp, id);
+      Variant varFrom(m_responseHeaders);
+      const auto tvFrom(varFrom.asTypedValue());
+      if (isRefType(tvTo->m_type)) {
+        tvTo = tvTo->m_data.pref->cell();
+      }
+      tvDup(*tvFrom, *tvTo);
+    } else if ((fp->func()->attrs() & AttrMayUseVV) && fp->hasVarEnv()) {
+      fp->getVarEnv()->set(s_http_response_header.get(),
+                           Variant(m_responseHeaders).asTypedValue());
     }
-    tvDup(*tvFrom, *tvTo);
-  } else if ((fp->func()->attrs() & AttrMayUseVV) && fp->hasVarEnv()) {
-    fp->getVarEnv()->set(s_http_response_header.get(),
-                         Variant(m_responseHeaders).asTypedValue());
   }
 
   /*

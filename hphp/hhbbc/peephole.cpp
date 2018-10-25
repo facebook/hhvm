@@ -156,9 +156,27 @@ std::string BasicPeephole::show(const Bytecode& op) {
 
 void AppendPeephole::finalize() {
   while (!m_working.empty()) {
-    squash();
+    squash(nullptr);
   }
   m_next.finalize();
+}
+
+void AppendPeephole::prestep(
+    const Bytecode& op,
+    const std::vector<PeepholeStackElem>& srcStack,
+    HPHP::CompactVector<HPHP::HHBBC::StackElem>& stack) {
+
+  switch (op.op) {
+    case Op::Concat:
+      return;
+    case Op::AddElemC:
+    case Op::AddNewElemC:
+      squashAbove(srcStack, srcStack.size() - op.numPop() + 1, &stack);
+      return;
+    default:
+      squashAbove(srcStack, srcStack.size() - op.numPop(), &stack);
+      return;
+  }
 }
 
 void AppendPeephole::append(
@@ -171,17 +189,7 @@ void AppendPeephole::append(
          m_next.show(op), m_working.size());
 
   auto const squashTo = [&] (int depth) {
-    while (!m_working.empty()) {
-      auto const &b = m_working.back();
-      if (depth > b.stackix && srcStack[b.stackix].op == b.generator) {
-        return b.stackix;
-      }
-      // something overwrote or popped the result of the Concat, so we're done.
-      FTRACE(5, "AppendPeephole - squash: stackix={} op={}\n",
-             b.stackix, opcodeToName(srcStack[b.stackix].op));
-      squash();
-    }
-    return -1;
+    return squashAbove(srcStack, depth, nullptr);
   };
 
   const int nstack = srcStack.size();
@@ -237,13 +245,50 @@ void AppendPeephole::append(
     case Op::AddNewElemC: {
       if (!squashAddElem) break;
       auto const& type = stack.back().type;
-      auto value = tvNonStatic(type);
+
+      // finish any streams in progress for the key or value
+      auto const stackix = squashTo(stack.size());
+
+      // Attempt to avoid O(n^2) time complexity of tvNonStatic. If
+      // the array prior to the AddElem is one element smaller than
+      // the array after the addelem, we can just append the last
+      // element of the new array (which will almost certainly be
+      // represented as a MapElems) to the old one, which is amortized
+      // constant time.
+      auto value = [&] () -> folly::Optional<Cell> {
+        if (stackix != stack.size() - 1) return folly::none;
+        auto& cur = m_working.back().addElemResult;
+        if (cur.isNull()) return folly::none;
+        auto sz = array_size(type);
+        if (!sz) return folly::none;
+        auto const arr = cur.asTypedValue()->m_data.parr;
+        if (arr->size() + 1 != *sz) return folly::none;
+        auto const last = array_get_by_index(type, -1);
+        if (!last || !last->first.subtypeOf(BArrKey)) return folly::none;
+        auto const key = tv(last->first);
+        auto const val = tv(last->second);
+        if (!key || !val) return folly::none;
+        if (op.op == Op::AddElemC) {
+          int64_t ikey{};
+          if (arr->isPHPArray() && isStringType(key->m_type) &&
+              key->m_data.pstr->isStrictlyInteger(ikey)) {
+            cur.asTypedValue()->m_data.parr = arr->set(ikey, *val);
+          } else {
+            cur.asTypedValue()->m_data.parr = arr->set(*key, *val);
+          }
+        } else {
+          cur.asTypedValue()->m_data.parr =
+            arr->append(*val, arr->cowCheck());
+        }
+        cur.asTypedValue()->m_data.parr->incRefCount();
+        return *cur.asTypedValue();
+      }();
+      if (!value) value = tvNonStatic(type);
+
       if (!value || !isArrayLikeType(value->m_type)) {
         break;
       }
 
-      // finish any streams in progress for the key or value
-      auto const stackix = squashTo(stack.size());
       // start a new stream if necessary
       if (stackix != stack.size() - 1 ||
           m_working.back().addElemResult.isNull()) {
@@ -296,11 +341,27 @@ void AppendPeephole::push_back(const Bytecode& op, ASKind kind) {
   }
 }
 
+int AppendPeephole::squashAbove(const std::vector<PeepholeStackElem>& srcStack,
+                                int depth,
+                                CompactVector<StackElem>* stack) {
+  while (!m_working.empty()) {
+    auto const &b = m_working.back();
+    if (depth > b.stackix && srcStack[b.stackix].op == b.generator) {
+      return b.stackix;
+    }
+    // something overwrote or popped the result of the Concat, so we're done.
+    FTRACE(5, "AppendPeephole - squash: stackix={} op={}\n",
+           b.stackix, opcodeToName(srcStack[b.stackix].op));
+    squash(stack);
+  }
+  return -1;
+}
+
 /*
  * Reorder and rewrite the most nested concat subsequence, and append it to
  * the previous subsequence in the stack.
  */
-void AppendPeephole::squash() {
+void AppendPeephole::squash(CompactVector<StackElem>* stack) {
   assert(!m_working.empty());
 
   auto workstream = std::move(m_working.back());
@@ -359,6 +420,10 @@ void AppendPeephole::squash() {
     }
     assertx(isArrayLikeType(workstream.addElemResult.getRawType()));
     workstream.addElemResult.setEvalScalar();
+    if (stack && stack->size() > workstream.stackix) {
+      (*stack)[workstream.stackix].type =
+        from_cell(*workstream.addElemResult.toCell());
+    }
     push_back(
       bc_with_loc(item.first.srcLoc,
                   gen_constant(*workstream.addElemResult.toCell()))

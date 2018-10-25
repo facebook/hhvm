@@ -2826,6 +2826,85 @@ Type scalarize(Type t) {
   not_reached();
 }
 
+folly::Optional<size_t> array_size(const Type& t) {
+  if (!t.subtypeOf(BArrLike)) return folly::none;
+  switch (t.m_dataTag) {
+    case DataTag::None:
+      if (t.subtypeOf(BArrLikeE)) return 0;
+      // fall through
+    case DataTag::Int:
+    case DataTag::Dbl:
+    case DataTag::Str:
+    case DataTag::RefInner:
+    case DataTag::ArrLikePackedN:
+    case DataTag::ArrLikeMapN:
+    case DataTag::Obj:
+    case DataTag::Cls:
+      return folly::none;
+    case DataTag::ArrLikeVal:
+      return t.m_data.aval->size();
+    case DataTag::ArrLikeMap:
+      return t.m_data.map->map.size();
+    case DataTag::ArrLikePacked:
+      return t.m_data.packed->elems.size();
+  }
+  not_reached();
+}
+
+folly::Optional<std::pair<Type,Type>>
+array_get_by_index(const Type& t, ssize_t index) {
+  if (!t.subtypeOf(BArrLike)) return folly::none;
+  switch (t.m_dataTag) {
+    case DataTag::None:
+    case DataTag::Int:
+    case DataTag::Dbl:
+    case DataTag::Str:
+    case DataTag::RefInner:
+    case DataTag::ArrLikePackedN:
+    case DataTag::ArrLikeMapN:
+    case DataTag::Obj:
+    case DataTag::Cls:
+      return folly::none;
+
+    case DataTag::ArrLikeVal: {
+      ssize_t pos{};
+      if (index < 0) {
+        index = -index - 1;
+        if (index >= t.m_data.aval->size()) {
+          return folly::none;
+        }
+        pos = t.m_data.aval->iter_end();
+        while (index--) pos = t.m_data.aval->iter_advance(pos);
+      } else {
+        if (index >= t.m_data.aval->size()) {
+          return folly::none;
+        }
+        pos = t.m_data.aval->iter_begin();
+        while (index--) pos = t.m_data.aval->iter_advance(pos);
+      }
+      auto k = eval_cell([&]{ return t.m_data.aval->atPos(pos); });
+      auto v = eval_cell([&]{ return t.m_data.aval->nvGetKey(pos); });
+      if (k && v) return std::make_pair(*k, *v);
+      return folly::none;
+    }
+    case DataTag::ArrLikeMap: {
+      if ((index < 0 ? -index - 1 : index) >= t.m_data.map->map.size()) {
+        return folly::none;
+      }
+      auto it = index < 0 ? t.m_data.map->map.end() : t.m_data.map->map.begin();
+      std::advance(it, index);
+      return std::make_pair(from_cell(it->first), it->second);
+    }
+    case DataTag::ArrLikePacked:
+      if (index < 0) index += t.m_data.packed->elems.size();
+      if (index < 0 || index >= t.m_data.packed->elems.size()) {
+        return folly::none;
+      }
+      return std::make_pair(ival(index), t.m_data.packed->elems[index]);
+  }
+  not_reached();
+}
+
 Type type_of_istype(IsTypeOp op) {
   switch (op) {
   case IsTypeOp::Null:   return TNull;

@@ -65,8 +65,8 @@ struct PeepholeStackElem {
 };
 
 /*
- * Perform a block-local optimization that folds sequences of Concat opcodes
- * into ConcatN opcodes.
+ * Perform a block-local optimization that folds sequences of Concat,
+ * Add*Elem opcodes.
  */
 struct AppendPeephole {
   explicit AppendPeephole(BasicPeephole next)
@@ -82,9 +82,21 @@ struct AppendPeephole {
   void finalize();
 
   /*
+   * Called before we interpret op
+   *
+   * srcStack and stack reflect the pre-interp state, and stack may be
+   * modified eg to reflect the staticness of types.
+   */
+  void prestep(const Bytecode& op,
+               const std::vector<PeepholeStackElem>& srcStack,
+               CompactVector<StackElem>& stack);
+
+  /*
    * Register the next bytecode into the stream.
    *
    * The srcStack reflects the pre-interp state.
+   *
+   * stack is the post-interp state.
    */
   void append(const Bytecode& op,
               bool squashAddElem,
@@ -124,7 +136,10 @@ private:
 
 private:
   void push_back(const Bytecode& op, ASKind = ASKind::Normal);
-  void squash();
+  void squash(CompactVector<StackElem>* stack);
+  int squashAbove(const std::vector<PeepholeStackElem>& srcStack,
+                  int depth,
+                  CompactVector<StackElem>* stack);
 
 private:
   BasicPeephole m_next;

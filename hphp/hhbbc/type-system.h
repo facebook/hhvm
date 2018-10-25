@@ -637,6 +637,10 @@ private:
   template<typename R, bool>
   friend R tvImpl(const Type&);
   friend Type scalarize(Type t);
+  friend folly::Optional<size_t> array_size(const Type& t);
+  friend folly::Optional<std::pair<Type,Type>>
+  array_get_by_index(const Type& t, ssize_t index);
+
   friend Type return_with_context(Type, Type);
   friend Type setctx(Type, bool);
   friend Type unctx(Type);
@@ -1235,6 +1239,20 @@ bool is_scalar(const Type& t);
  * pre: is_scalar(t).
  */
 Type scalarize(Type t);
+
+/*
+ * If t represents an array, and we know its size, return it.
+ */
+folly::Optional<size_t> array_size(const Type& t);
+
+/*
+ * If t represents an array, and we know the index'th element (by
+ * iteration order), return the key/value pair.
+ *
+ * Negative values of index work backwards from the last element.
+ */
+folly::Optional<std::pair<Type,Type>>
+array_get_by_index(const Type& t, ssize_t index);
 
 /*
  * Get the type in our typesystem that corresponds to an hhbc

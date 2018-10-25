@@ -554,6 +554,10 @@ void first_pass(const Index& index,
   for (auto& op : blk->hhbcs) {
     FTRACE(2, "  == {}\n", show(ctx.func, op));
 
+    if (options.Peephole) {
+      peephole.prestep(op, srcStack, state.stack);
+    }
+
     auto const flags = step(interp, op);
 
     auto gen = [&] (const Bytecode& newBC) {

@@ -781,6 +781,45 @@ bool ConcurrentTableSharedStore::exists(const String& keyStr) {
   return true;
 }
 
+int64_t ConcurrentTableSharedStore::size(const String& key, bool& found) {
+  found = false;
+  SharedMutex::ReadHolder l(m_lock);
+
+  Map::accessor acc;
+  if (!m_vars.find(acc, tagStringData(key.get()))) {
+    return 0;
+  }
+  auto* sval = &acc->second;
+  if (sval->expired()) return 0;
+
+  // We no longer need to worry about expiration: we are reading the already
+  // computed dataSize field on APCHandle svals and primed values that we
+  // unserialize never expire.
+  if (sval->data().left()) {
+    found = true;
+    return sval->dataSize;
+  }
+
+  std::lock_guard<SmallLock> sval_lock(sval->lock);
+
+  // Recheck this, since we are under the lock now
+  if (sval->data().left()) {
+    found = true;
+    return sval->dataSize;
+  }
+
+  // Same disclaimer as in get(); we are actually waking up the primed
+  // data, which could theoretically call on the same lock we already have for
+  // this key...but it's primed so we'll pretend it doesn't happen.
+  auto *handle = unserialize(key, const_cast<StoreValue*>(sval));
+  if (handle) {
+    found = true;
+    return sval->dataSize;
+  }
+
+  return 0;
+}
+
 static int64_t adjust_ttl(int64_t ttl, bool overwritePrime) {
   if (apcExtension::TTLLimit > 0 && !overwritePrime) {
     if (ttl == 0 || ttl > apcExtension::TTLLimit) {

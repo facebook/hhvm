@@ -274,6 +274,12 @@ struct ConcurrentTableSharedStore {
   bool exists(const String& key);
 
   /*
+   * Returns the size of an entry if it exists. Sets `found` to true if it
+   * exists and false if not.
+   */
+  int64_t size(const String& key, bool& found);
+
+  /*
    * Remove the specified key, if it exists in the table.
    *
    * Returns: false if the key was not in the table, true if the key was in the

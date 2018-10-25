@@ -200,3 +200,14 @@ function apc_cas(string $key,
  */
 <<__Native>>
 function apc_exists(mixed $key): mixed;
+
+/**
+ * Find the in-memory size of a key in APC, for debugging purposes.
+ *
+ * @param string $key - The key to find the size of.
+ *
+ * @return mixed - Returns the current size of a key or null on failure.
+ *
+ */
+<<__Native>>
+function apc_size(string $key): ?int;

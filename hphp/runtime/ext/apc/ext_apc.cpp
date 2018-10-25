@@ -256,6 +256,7 @@ void apcExtension::moduleInit() {
   HHVM_FE(apc_dec);
   HHVM_FE(apc_cas);
   HHVM_FE(apc_exists);
+  HHVM_FE(apc_size);
   HHVM_FE(apc_cache_info);
   HHVM_FE(apc_sma_info);
   loadSystemlib();
@@ -521,6 +522,14 @@ Variant HHVM_FUNCTION(apc_exists,
   return apc_store().exists(key.toString());
 }
 
+TypedValue HHVM_FUNCTION(apc_size, const String& key) {
+  if (!apcExtension::Enable) return make_tv<KindOfNull>();
+
+  bool found = false;
+  int64_t size = apc_store().size(key, found);
+
+  return found ? make_tv<KindOfInt64>(size) : make_tv<KindOfNull>();
+}
 
 const StaticString s_user("user");
 const StaticString s_start_time("start_time");

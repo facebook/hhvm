@@ -107,6 +107,8 @@ bool HHVM_FUNCTION(apc_cas,
                    int64_t new_cas);
 Variant HHVM_FUNCTION(apc_exists,
                       const Variant& key);
+TypedValue HHVM_FUNCTION(apc_size, const String& key);
+
 
 ///////////////////////////////////////////////////////////////////////////////
 

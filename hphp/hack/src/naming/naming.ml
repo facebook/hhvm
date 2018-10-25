@@ -1160,6 +1160,7 @@ module Make (GetLocals : GetLocals) = struct
     check_tparams_shadow class_tparam_names smethods;
     let named_class =
       { N.c_annotation     = ();
+        N.c_span           = c.c_span;
         N.c_mode           = c.c_mode;
         N.c_final          = c.c_final;
         N.c_is_xhp         = c.c_is_xhp;
@@ -1734,6 +1735,7 @@ module Make (GetLocals : GetLocals) = struct
     ) in
     let attrs = user_attributes env m.m_user_attributes in
     { N.m_annotation      = ()          ;
+      N.m_span            = m.m_span    ;
       N.m_final           = final       ;
       N.m_visibility      = vis         ;
       N.m_abstract        = abs         ;
@@ -1838,6 +1840,7 @@ module Make (GetLocals : GetLocals) = struct
     in
     let named_fun = {
       N.f_annotation = ();
+      f_span = f.f_span;
       f_mode = f.f_mode;
       f_ret = h;
       f_name = x;
@@ -2633,6 +2636,7 @@ module Make (GetLocals : GetLocals) = struct
       fnb_nast = body_nast;
     } in {
       N.f_annotation = ();
+      f_span = f.f_span;
       f_mode = (fst env).in_mode;
       f_ret = h;
       f_name = f.f_name;

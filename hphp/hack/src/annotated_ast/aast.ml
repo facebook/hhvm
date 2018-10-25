@@ -217,6 +217,7 @@ and fun_variadicity = (* does function take varying number of args? *)
   | FVnonVariadic (* standard non variadic function *)
 
 and fun_ = {
+  f_span     : pos;
   f_annotation : env_annotation;
   f_mode     : FileInfo.mode [@opaque];
   f_ret      : hint option;
@@ -267,6 +268,7 @@ and static_method = method_
 and constructor = method_
 
 and class_ = {
+  c_span           : pos              ;
   c_annotation     : env_annotation   ;
   c_mode           : FileInfo.mode [@opaque];
   c_final          : bool             ;
@@ -325,6 +327,7 @@ and class_var = {
 }
 
 and method_ = {
+  m_span            : pos                 ;
   m_annotation      : env_annotation      ;
   m_final           : bool                ;
   m_abstract        : bool                ;

@@ -1,6 +1,6 @@
 [(Fun
-    { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([3:35-38], (Hprim Tint)));
+    { Aast.AnnotatedAST.f_span = [3:1-15:2]; f_annotation = ();
+      f_mode = <opaque>; f_ret = (Some ([3:35-38], (Hprim Tint)));
       f_name = ([3:10-14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
@@ -33,8 +33,8 @@
                     (([5:3-5], (function(): int)), (Lvar ([5:3-5], $f))),
                     (([5:8-12:4], (function(): int)),
                      (Efun (
-                        { Aast.AnnotatedAST.f_annotation = ();
-                          f_mode = <opaque>;
+                        { Aast.AnnotatedAST.f_span = [5:8-12:4];
+                          f_annotation = (); f_mode = <opaque>;
                           f_ret = (Some ([5:12-15], (Hprim Tint)));
                           f_name = ([5:8-12:4], ";anonymous");
                           f_tparams = []; f_where_constraints = [];

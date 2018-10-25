@@ -1,7 +1,7 @@
 [(Fun
-    { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>; f_ret = None;
-      f_name = ([12:10-13], "\\foo"); f_tparams = [];
-      f_where_constraints = []; f_variadic = FVnonVariadic;
+    { Aast.AnnotatedAST.f_span = [12:1-21:2]; f_annotation = ();
+      f_mode = <opaque>; f_ret = None; f_name = ([12:10-13], "\\foo");
+      f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
       [{ Aast.AnnotatedAST.param_annotation = ([12:19-21], bool);
          param_hint = (Some ([12:14-18], (Hprim Tbool)));

@@ -513,6 +513,7 @@ and fun_def tcopt f =
       end;
       let fundef =       {
         T.f_annotation = Env.save local_tpenv env;
+        T.f_span = f.f_span;
         T.f_mode = f.f_mode;
         T.f_ret = f.f_ret;
         T.f_name = f.f_name;
@@ -2889,6 +2890,7 @@ and anon_make tenv p f ft idl =
         is_typing_self := false;
         let tfun_ = {
           T.f_annotation = Env.save local_tpenv env;
+          T.f_span = f.f_span;
           T.f_mode = f.f_mode;
           T.f_ret = f.f_ret;
           T.f_name = f.f_name;
@@ -6252,6 +6254,7 @@ and class_def_ env c tc =
     List.map c.c_static_vars (class_var_def env ~is_static:true c) in
   let typed_static_methods = List.map c.c_static_methods (method_def env) in
   {
+    T.c_span = c.c_span;
     T.c_annotation = Env.save env.Env.lenv.Env.tpenv env;
     T.c_mode = c.c_mode;
     T.c_final = c.c_final;
@@ -6565,6 +6568,7 @@ and method_def env m =
   let m = { m with m_ret = m_ret; } in
   let method_def = {
     T.m_annotation = Env.save local_tpenv env;
+    T.m_span = m.m_span;
     T.m_final = m.m_final;
     T.m_abstract = m.m_abstract;
     T.m_visibility = m.m_visibility;

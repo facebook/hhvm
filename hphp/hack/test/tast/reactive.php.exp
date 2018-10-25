@@ -1,5 +1,6 @@
 [(Fun
-    { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+    { Aast.AnnotatedAST.f_span = [2:1-5:2]; f_annotation = ();
+      f_mode = <opaque>;
       f_ret =
       (Some ([3:18-45],
              (Hfun (FReactive, false, [([3:32-35], (Hprim Tint))], [None],

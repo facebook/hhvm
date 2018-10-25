@@ -1,5 +1,6 @@
 [(Fun
-    { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
+    { Aast.AnnotatedAST.f_span = [3:1-70]; f_annotation = ();
+      f_mode = <opaque>;
       f_ret =
       (Some ([3:38-55],
              (Happly (([3:38-47], "\\Awaitable"),
@@ -23,8 +24,8 @@
       f_fun_kind = FAsync; f_user_attributes = []; f_ret_by_ref = false;
       f_external = false });
   (Fun
-     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-       f_ret = (Some ([5:18-22], (Hprim Tvoid)));
+     { Aast.AnnotatedAST.f_span = [5:1-12:2]; f_annotation = ();
+       f_mode = <opaque>; f_ret = (Some ([5:18-22], (Hprim Tvoid)));
        f_name = ([5:10-14], "\\test"); f_tparams = [];
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
@@ -37,8 +38,8 @@
                      (Lvar ([6:3-6], $f0))),
                     (([6:9-8:4], (function(): Awaitable<_>)),
                      (Efun (
-                        { Aast.AnnotatedAST.f_annotation = ();
-                          f_mode = <opaque>; f_ret = None;
+                        { Aast.AnnotatedAST.f_span = [6:9-8:4];
+                          f_annotation = (); f_mode = <opaque>; f_ret = None;
                           f_name = ([6:9-8:4], ";anonymous"); f_tparams = [];
                           f_where_constraints = [];
                           f_variadic = FVnonVariadic; f_params = [];
@@ -74,9 +75,9 @@
                      (([9:3-6], [fun]), (Lvar ([9:3-6], $f1))),
                      (([9:9-11:4], [fun]),
                       (Efun (
-                         { Aast.AnnotatedAST.f_annotation = ();
-                           f_mode = <opaque>; f_ret = None;
-                           f_name = ([9:9-11:4], ";anonymous");
+                         { Aast.AnnotatedAST.f_span = [9:9-11:4];
+                           f_annotation = (); f_mode = <opaque>;
+                           f_ret = None; f_name = ([9:9-11:4], ";anonymous");
                            f_tparams = []; f_where_constraints = [];
                            f_variadic = FVnonVariadic;
                            f_params =

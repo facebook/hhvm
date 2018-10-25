@@ -1,6 +1,6 @@
 [(Fun
-    { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([2:26-30], (Hprim Tvoid)));
+    { Aast.AnnotatedAST.f_span = [2:1-7:2]; f_annotation = ();
+      f_mode = <opaque>; f_ret = (Some ([2:26-30], (Hprim Tvoid)));
       f_name = ([2:10-22], "\\test_lambda1"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
@@ -15,8 +15,8 @@
                  (Binop ((Eq None), (([4:3-5], [fun]), (Lvar ([4:3-5], $f))),
                     (([4:8-41], HackSuggest<(function(int): string), (function(string): string)>),
                      (Efun (
-                        { Aast.AnnotatedAST.f_annotation = ();
-                          f_mode = <opaque>; f_ret = None;
+                        { Aast.AnnotatedAST.f_span = [4:8-41];
+                          f_annotation = (); f_mode = <opaque>; f_ret = None;
                           f_name = ([4:8-41], ";anonymous"); f_tparams = [];
                           f_where_constraints = [];
                           f_variadic = FVnonVariadic;

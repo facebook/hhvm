@@ -1,6 +1,6 @@
 [(Fun
-    { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([32:37-41], (Hprim Tvoid)));
+    { Aast.AnnotatedAST.f_span = [32:1-37:2]; f_annotation = ();
+      f_mode = <opaque>; f_ret = (Some ([32:37-41], (Hprim Tvoid)));
       f_name = ([32:10-14], "\\test"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
@@ -71,13 +71,13 @@
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
       f_external = false });
   (Class
-     { Aast.AnnotatedAST.c_annotation = (); c_mode = <opaque>;
-       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([12:7-20], "\\MyPhonyVector"); c_tparams = <opaque>;
-       c_extends = []; c_uses = []; c_xhp_attr_uses = [];
-       c_xhp_category = []; c_req_extends = []; c_req_implements = [];
-       c_implements = []; c_consts = []; c_typeconsts = [];
-       c_static_vars = [];
+     { Aast.AnnotatedAST.c_span = [12:1-26:2]; c_annotation = ();
+       c_mode = <opaque>; c_final = false; c_is_xhp = false;
+       c_kind = Cnormal; c_name = ([12:7-20], "\\MyPhonyVector");
+       c_tparams = <opaque>; c_extends = []; c_uses = [];
+       c_xhp_attr_uses = []; c_xhp_category = []; c_req_extends = [];
+       c_req_implements = []; c_implements = []; c_consts = [];
+       c_typeconsts = []; c_static_vars = [];
        c_vars =
        [{ Aast.AnnotatedAST.cv_final = false; cv_is_xhp = false;
           cv_visibility = Private;
@@ -89,8 +89,8 @@
           }
          ];
        c_constructor =
-       (Some { Aast.AnnotatedAST.m_annotation = (); m_final = false;
-               m_abstract = false; m_visibility = Public;
+       (Some { Aast.AnnotatedAST.m_span = [15:3-17:4]; m_annotation = ();
+               m_final = false; m_abstract = false; m_visibility = Public;
                m_name = ([15:19-30], "__construct"); m_tparams = [];
                m_where_constraints = []; m_variadic = FVnonVariadic;
                m_params = [];
@@ -116,8 +116,8 @@
                m_ret_by_ref = false; m_external = false });
        c_static_methods = [];
        c_methods =
-       [{ Aast.AnnotatedAST.m_annotation = (); m_final = false;
-          m_abstract = false; m_visibility = Public;
+       [{ Aast.AnnotatedAST.m_span = [19:3-21:4]; m_annotation = ();
+          m_final = false; m_abstract = false; m_visibility = Public;
           m_name = ([19:19-22], "add"); m_tparams = [];
           m_where_constraints = []; m_variadic = FVnonVariadic;
           m_params =
@@ -147,8 +147,8 @@
           m_fun_kind = FSync; m_user_attributes = [];
           m_ret = (Some ([19:30-34], (Hprim Tvoid))); m_ret_by_ref = false;
           m_external = false };
-         { Aast.AnnotatedAST.m_annotation = (); m_final = false;
-           m_abstract = false; m_visibility = Public;
+         { Aast.AnnotatedAST.m_span = [23:3-25:4]; m_annotation = ();
+           m_final = false; m_abstract = false; m_visibility = Public;
            m_name = ([23:19-22], "get"); m_tparams = [];
            m_where_constraints = []; m_variadic = FVnonVariadic;
            m_params =
@@ -179,18 +179,19 @@
          ];
        c_namespace = <opaque>; c_user_attributes = []; c_enum = None });
   (Class
-     { Aast.AnnotatedAST.c_annotation = (); c_mode = <opaque>;
-       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([28:7-8], "\\X"); c_tparams = <opaque>; c_extends = [];
-       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = [];
-       c_req_extends = []; c_req_implements = []; c_implements = [];
-       c_consts = []; c_typeconsts = []; c_static_vars = []; c_vars = [];
-       c_constructor = None; c_static_methods = []; c_methods = [];
-       c_namespace = <opaque>; c_user_attributes = []; c_enum = None });
+     { Aast.AnnotatedAST.c_span = [28:1-11]; c_annotation = ();
+       c_mode = <opaque>; c_final = false; c_is_xhp = false;
+       c_kind = Cnormal; c_name = ([28:7-8], "\\X"); c_tparams = <opaque>;
+       c_extends = []; c_uses = []; c_xhp_attr_uses = [];
+       c_xhp_category = []; c_req_extends = []; c_req_implements = [];
+       c_implements = []; c_consts = []; c_typeconsts = [];
+       c_static_vars = []; c_vars = []; c_constructor = None;
+       c_static_methods = []; c_methods = []; c_namespace = <opaque>;
+       c_user_attributes = []; c_enum = None });
   (Class
-     { Aast.AnnotatedAST.c_annotation = (); c_mode = <opaque>;
-       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([29:7-8], "\\A"); c_tparams = <opaque>;
+     { Aast.AnnotatedAST.c_span = [29:1-21]; c_annotation = ();
+       c_mode = <opaque>; c_final = false; c_is_xhp = false;
+       c_kind = Cnormal; c_name = ([29:7-8], "\\A"); c_tparams = <opaque>;
        c_extends = [([29:17-18], (Happly (([29:17-18], "\\X"), [])))];
        c_uses = []; c_xhp_attr_uses = []; c_xhp_category = [];
        c_req_extends = []; c_req_implements = []; c_implements = [];
@@ -198,9 +199,9 @@
        c_constructor = None; c_static_methods = []; c_methods = [];
        c_namespace = <opaque>; c_user_attributes = []; c_enum = None });
   (Class
-     { Aast.AnnotatedAST.c_annotation = (); c_mode = <opaque>;
-       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([30:7-8], "\\B"); c_tparams = <opaque>;
+     { Aast.AnnotatedAST.c_span = [30:1-21]; c_annotation = ();
+       c_mode = <opaque>; c_final = false; c_is_xhp = false;
+       c_kind = Cnormal; c_name = ([30:7-8], "\\B"); c_tparams = <opaque>;
        c_extends = [([30:17-18], (Happly (([30:17-18], "\\X"), [])))];
        c_uses = []; c_xhp_attr_uses = []; c_xhp_category = [];
        c_req_extends = []; c_req_implements = []; c_implements = [];

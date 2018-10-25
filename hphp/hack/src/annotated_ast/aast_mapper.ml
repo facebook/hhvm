@@ -120,6 +120,7 @@ struct
 
   and map_fun menv fd =
   {
+    T.f_span = fd.S.f_span;
     T.f_annotation = menv.map_env_annotation fd.S.f_annotation;
     T.f_mode = fd.S.f_mode;
     T.f_ret = fd.S.f_ret;
@@ -219,6 +220,7 @@ struct
 
   and map_class menv c =
   {
+    T.c_span = c.S.c_span;
     T.c_annotation = menv.map_env_annotation c.S.c_annotation;
     T.c_mode = c.S.c_mode;
     T.c_final = c.S.c_final;
@@ -268,6 +270,7 @@ struct
 
   and map_method menv m =
     {
+      T.m_span = m.S.m_span;
       T.m_annotation = menv.map_env_annotation m.S.m_annotation;
       T.m_final = m.S.m_final;
       T.m_abstract = m.S.m_abstract;

@@ -1,6 +1,6 @@
 [(Fun
-    { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([3:35-39], (Hprim Tvoid)));
+    { Aast.AnnotatedAST.f_span = [3:1-42]; f_annotation = ();
+      f_mode = <opaque>; f_ret = (Some ([3:35-39], (Hprim Tvoid)));
       f_name = ([3:10-22], "\\takes_string"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
@@ -15,8 +15,8 @@
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
       f_external = false });
   (Fun
-     { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-       f_ret = (Some ([5:30-34], (Hprim Tvoid)));
+     { Aast.AnnotatedAST.f_span = [5:1-9:2]; f_annotation = ();
+       f_mode = <opaque>; f_ret = (Some ([5:30-34], (Hprim Tvoid)));
        f_name = ([5:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
        f_variadic =
        (FVvariadicArg
@@ -47,16 +47,17 @@
        f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
        f_external = false });
   (Class
-     { Aast.AnnotatedAST.c_annotation = (); c_mode = <opaque>;
-       c_final = false; c_is_xhp = false; c_kind = Cnormal;
-       c_name = ([11:7-9], "\\C1"); c_tparams = <opaque>; c_extends = [];
-       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = [];
-       c_req_extends = []; c_req_implements = []; c_implements = [];
-       c_consts = []; c_typeconsts = []; c_static_vars = []; c_vars = [];
-       c_constructor = None; c_static_methods = [];
+     { Aast.AnnotatedAST.c_span = [11:1-13:2]; c_annotation = ();
+       c_mode = <opaque>; c_final = false; c_is_xhp = false;
+       c_kind = Cnormal; c_name = ([11:7-9], "\\C1"); c_tparams = <opaque>;
+       c_extends = []; c_uses = []; c_xhp_attr_uses = [];
+       c_xhp_category = []; c_req_extends = []; c_req_implements = [];
+       c_implements = []; c_consts = []; c_typeconsts = [];
+       c_static_vars = []; c_vars = []; c_constructor = None;
+       c_static_methods = [];
        c_methods =
-       [{ Aast.AnnotatedAST.m_annotation = (); m_final = false;
-          m_abstract = false; m_visibility = Public;
+       [{ Aast.AnnotatedAST.m_span = [12:3-42]; m_annotation = ();
+          m_final = false; m_abstract = false; m_visibility = Public;
           m_name = ([12:19-23], "meth"); m_tparams = [];
           m_where_constraints = [];
           m_variadic =

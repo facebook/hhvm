@@ -78,6 +78,7 @@ let emit_body_instrs_ref params call_instrs =
     List.filter_map params ~f:(fun p ->
         if Hhas_param.is_reference p
         then Some (instr_cgetl (Local.Named (Hhas_param.name p))) else None) in
+  let param_get_instrs = List.rev param_get_instrs in
   let fcall_instr =
     if is_last_param_variadic param_count params
     then instr_fcallunpack param_count

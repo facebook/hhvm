@@ -255,6 +255,4 @@ end
 (*****************************************************************************)
 (* Returns a signature with all the positions replaced with Pos.none *)
 (*****************************************************************************)
-module NormalizeSig = struct
-  include TraversePos(struct let pos _ = Pos.none end)
-end
+module NormalizeSig = TraversePos(struct let pos _ = Pos.none end)

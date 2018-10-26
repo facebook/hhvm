@@ -2261,15 +2261,6 @@ let extend_sealed child_pos parent_pos parent_name parent_kind verb =
     parent_pos, "Declaration is here"
   ]
 
-let trait_implement_sealed child_pos parent_pos parent_name =
-  let name = (strip_ns parent_name) in
-  add_list (Typing.err_code Typing.ExtendSealed) [
-    child_pos, (
-      "A trait cannot implement sealed interface "^name^
-      ". Use `require implements` instead");
-    parent_pos, "Declaration is here"
-  ]
-
 let extend_ppl
   child_pos child_class_type child_is_ppl parent_pos parent_class_type parent_name verb =
   let name = (strip_ns parent_name) in

@@ -6142,8 +6142,6 @@ and check_parent_sealed child_type parent_type =
         if not (SSet.mem child_name whitelist)
         then Errors.extend_sealed child_pos parent_pos parent_name kind action in
       begin match parent_type.dc_kind, child_type.tc_kind with
-        | Ast.Cinterface, Ast.Ctrait ->
-          Errors.trait_implement_sealed child_pos parent_pos parent_name
         | Ast.Cinterface, Ast.Cinterface -> check "interface" "extend"
         | Ast.Cinterface, _ -> check "interface" "implement"
         | Ast.Ctrait, _ -> check "trait" "use"

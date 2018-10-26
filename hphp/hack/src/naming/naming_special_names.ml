@@ -145,6 +145,7 @@ module UserAttributes = struct
   let uaRxOfScope           = "__RxOfScope"
   let uaLateInit            = "__LateInit"
   let uaOwnedMutable        = "__OwnedMutable"
+  let uaNonRx               = "__NonRx"
 
   let as_set = List.fold_right ~f:SSet.add ~init:SSet.empty
     [
@@ -179,6 +180,7 @@ module UserAttributes = struct
       uaAtMostRxAsFunc;
       uaAtMostRxAsArgs;
       uaOwnedMutable;
+      uaNonRx;
     ]
 end
 

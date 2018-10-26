@@ -9,5 +9,7 @@ File "constraint_gen_fail3.php", line 23, characters 22-22:
 This is an object of type A
 File "constraint_gen_fail3.php", line 20, characters 27-27:
   via this generic T
+File "constraint_gen_fail3.php", line 23, characters 9-9:
+It is incompatible with a value of generic type T
 File "constraint_gen_fail3.php", line 24, characters 27-27:
-It is incompatible with a nonnull value arising from an implicit 'as ?nonnull' constraint on this type
+  via this generic T

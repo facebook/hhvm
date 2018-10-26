@@ -5471,13 +5471,9 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
   let make_result env te1 te2 ty =
     env, T.make_typed_expr p ty (T.Binop (bop, te1, te2)), ty in
   let is_any = TUtils.is_any env in
-  if is_any ty1
-  then make_result env te1 te2 ty1
-  else if is_any ty2
-  then make_result env te1 te2 ty2
-  else (* args aren't any or a variant thereof so can actually do stuff *)
+  let contains_any = (is_any ty1) || (is_any ty2) in
   match bop with
-  | Ast.Plus ->
+  | Ast.Plus when not contains_any ->
     let env, t1 = check_num env p ty1 (Reason.Rarith p1) in
     let env, t2 = check_num env p ty2 (Reason.Rarith p2) in
     (* postcondition: t1 and t2 are dynamic or subtypes of num and
@@ -5496,7 +5492,7 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
       | Tdynamic, Tdynamic -> make_result env te1 te2 (Reason.Rsum_dynamic p, Tdynamic)
       | _ -> make_result env te1 te2 (Reason.Rarith_ret p, Tprim Tnum)
     end
-  | Ast.Minus | Ast.Star ->
+  | Ast.Minus | Ast.Star when not contains_any ->
     let env, t1 = check_num env p ty1 (Reason.Rarith p1) in
     let env, t2 = check_num env p ty2 (Reason.Rarith p2) in
     (* postcondition: t1 and t2 are dynamic or subtypes of num and
@@ -5514,7 +5510,7 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
         make_result env te1 te2 ((Reason.Rarith_ret_num (p, fst t2, Reason.Asecond)), Tprim Tnum)
       | _ -> make_result env te1 te2 (Reason.Rarith_ret p, Tprim Tnum)
     end
-  | Ast.Slash | Ast.Starstar ->
+  | Ast.Slash | Ast.Starstar when not contains_any ->
     let env, t1 = check_num env p ty1 (Reason.Rarith p1) in
     let env, t2 = check_num env p ty2 (Reason.Rarith p2) in
     (* postcondition: t1 and t2 are dynamic or subtypes of num and
@@ -5530,7 +5526,7 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
         make_result env te1 te2 ((Reason.Rarith_ret_float (p, fst t2, Reason.Asecond)), Tprim Tfloat)
       | _ -> make_result env te1 te2 (r, Tprim Tnum)
     end
-  | Ast.Percent | Ast.Ltlt | Ast.Gtgt ->
+  | Ast.Percent | Ast.Ltlt | Ast.Gtgt when not contains_any ->
     let env, _ = check_int env p ty1 (Reason.Rarith p1) in
     let env, _ = check_int env p ty2 (Reason.Rarith p2) in
     (* postcondition: t1 and t2 are dynamic or int and
@@ -5539,7 +5535,7 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
       | Ast.Percent -> Reason.Rarith_ret_int p
       | _ -> Reason.Rbitwise_ret p in
     make_result env te1 te2 (r, Tprim Tint)
-  | Ast.Xor | Ast.Amp | Ast.Bar ->
+  | Ast.Xor | Ast.Amp | Ast.Bar when not contains_any ->
     let env, t1 = check_int env p ty1 (Reason.Rbitwise p1) in
     let env, t2 = check_int env p ty2 (Reason.Rbitwise p2) in
     (* postcondition: t1 and t2 are dynamic or int and
@@ -5577,8 +5573,10 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
        * num | string | DateTime | DateTimeImmutable | dynamic. Better union
        * handling would be an improvement.
        *)
-      if not (both_sub [ty_num; ty_dynamic] || both_sub [ty_string; ty_dynamic] ||
-        both_sub [ty_datetime; ty_datetimeimmutable; ty_dynamic])
+      if not contains_any &&
+        not (both_sub [ty_num; ty_dynamic]
+          || both_sub [ty_string; ty_dynamic]
+          || both_sub [ty_datetime; ty_datetimeimmutable; ty_dynamic])
       then begin
         let ty1 = Typing_expand.fully_expand env ty1 in
         let ty2 = Typing_expand.fully_expand env ty2 in
@@ -5599,8 +5597,13 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
   | Ast.Barbar | Ast.Ampamp | Ast.LogXor ->
       make_result env te1 te2 (Reason.Rlogic_ret p, Tprim Tbool)
   | Ast.QuestionQuestion
-  | Ast.Eq _ ->
+  | Ast.Eq _ when not contains_any ->
       assert false
+  | _ ->
+    assert contains_any;
+    if is_any ty1
+    then make_result env te1 te2 ty1
+    else make_result env te1 te2 ty2
 
 and make_a_local_of env e =
   match e with

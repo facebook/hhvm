@@ -33,9 +33,9 @@
                           (NamedBody
                              { Aast.AnnotatedAST.fnb_nast =
                                [(Return ([4:17-39],
-                                   (Some (([4:24-38], _),
+                                   (Some (([4:24-38], string),
                                           (Binop (Dot,
-                                             (([4:24-31], _),
+                                             (([4:24-31], string),
                                               (Binop (Dot,
                                                  (([4:24-26], _),
                                                   (Lvar ([4:24-26], $n))),

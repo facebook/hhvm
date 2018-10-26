@@ -21,6 +21,7 @@ module Env = Typing_env
 module EnvFromDef(ASTAnnotations: Aast.ASTAnnotationTypes) = struct
   module AnnotatedAST = Aast.AnnotatedAST(ASTAnnotations)
   open AnnotatedAST
+  open Aast
 
   let fun_env tcopt f =
     let file = Pos.filename (fst f.f_name) in
@@ -52,6 +53,11 @@ module EnvFromDef(ASTAnnotations: Aast.ASTAnnotationTypes) = struct
       | Ast.Cinterface | Ast.Cabstract | Ast.Ctrait
       | Ast.Cnormal -> Typing_phase.localize_with_self env self in
     let env = Env.set_self env self in
+    let env = match c.c_extends with
+    | (_, Happly ((_, parent_id), _) as _parent_ty) :: _ ->
+      Env.set_parent_id env parent_id
+    | _ -> env
+    in
     (* Set the ppl env flag *)
     let is_ppl =
       List.exists

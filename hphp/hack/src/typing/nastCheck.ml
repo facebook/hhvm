@@ -242,13 +242,24 @@ module CheckFunctionBody = struct
 
   and expr_ p f_type env exp = match f_type, exp with
     | _, Any -> ()
+    | _, Class_const ((_pos, CIparent), ((_, construct)))
+      when construct = SN.Members.__construct ->
+      let () = match Env.get_class env.tenv (Env.get_parent_id env.tenv) with
+        | Some parent_class ->
+          begin match fst parent_class.tc_construct with
+          | None when parent_class.tc_kind = Ast.Cabstract ->
+              Errors.parent_abstract_call construct p parent_class.tc_pos;
+          | _ -> ()
+          end
+        | _ -> () in
+      ()
+    | _, Class_const _
     | _, Fun_id _
     | _, Method_id _
     | _, Smethod_id _
     | _, Method_caller _
     | _, This
     | _, Class_get _
-    | _, Class_const _
     | _, Typename _
     | _, Lplaceholder _
     | _, Dollardollar _ -> ()

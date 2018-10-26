@@ -1,0 +1,4 @@
+File "parent_abstract_missing.php", line 7, characters 5-23:
+Cannot call parent::__construct(); it is abstract (Typing[4073])
+File "parent_abstract_missing.php", line 3, characters 16-24:
+Declaration is here

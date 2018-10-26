@@ -1,0 +1,4 @@
+File "parent_abstract_override.php", line 9, characters 5-25:
+Cannot call parent::__construct(); it is abstract (Typing[4073])
+File "parent_abstract_override.php", line 4, characters 28-38:
+Declaration is here

@@ -13,6 +13,7 @@ let deregister_php_stdlib = GlobalOptions.po_deregister_php_stdlib
 let enable_hh_syntax_for_hhvm = GlobalOptions.po_enable_hh_syntax_for_hhvm
 let disallow_execution_operator = GlobalOptions.po_disallow_execution_operator
 let disable_variable_variables = GlobalOptions.po_disable_variable_variables
+let allow_goto = GlobalOptions.po_allow_goto
 let default = GlobalOptions.default
 let disable_define = GlobalOptions.po_disable_define
 let with_hh_syntax_for_hhvm po b =

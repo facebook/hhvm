@@ -2156,6 +2156,8 @@ and pStmt : stmt parser = fun node env ->
     let label_name = text goto_label_name in
     pos, Ast.GotoLabel (pos_label, label_name)
   | GotoStatement { goto_statement_label_name; _ } ->
+    if is_typechecker env && not (ParserOptions.allow_goto env.parser_options)
+    then raise_parsing_error env (`Node node) SyntaxError.goto;
     pos, Goto  (pos_name goto_statement_label_name env)
   | EchoStatement  { echo_keyword  = kw; echo_expressions = exprs; _ }
   | UnsetStatement { unset_keyword = kw; unset_variables  = exprs; _ }

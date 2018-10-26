@@ -35,6 +35,7 @@ let global_opts = GlobalOptions.make
   ~po_disallow_execution_operator:false
   ~po_disable_variable_variables: false
   ~po_disable_define:false
+  ~po_allow_goto:false
   ~tco_log_inference_constraints:false
   ~tco_disallow_ambiguous_lambda:false
   ~tco_disallow_array_typehint:false

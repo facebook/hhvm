@@ -541,6 +541,7 @@ let alternate_control_flow =
   "Alternate control flow syntax is not allowed in Hack files"
 let execution_operator =
   "The execution operator is not allowed in Hack files"
+let goto = "The `goto` operator is not allowed in Hack files"
 let invalid_octal_integer = "Invalid octal integers"
 let php7_anonymous_function =
   "Php7 anonymous functions are not allowed in Hack files, prefer moving the type annotation before the use clause"

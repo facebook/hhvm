@@ -290,6 +290,7 @@ val invalid_brace_kind_in_collection_initializer: string
 val nested_ternary: string
 val alternate_control_flow : string
 val execution_operator : string
+val goto : string
 val invalid_octal_integer : string
 val php7_anonymous_function : string
 val prefixed_invalid_string_kind : string

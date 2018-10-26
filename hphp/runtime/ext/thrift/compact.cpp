@@ -20,6 +20,8 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
@@ -37,7 +39,9 @@
 #include <folly/AtomicHashMap.h>
 #include <folly/Format.h>
 
+#include <limits>
 #include <stack>
+#include <type_traits>
 #include <utility>
 
 namespace HPHP { namespace thrift {
@@ -216,7 +220,8 @@ struct CompactWriter {
         TType fieldType = field.type;
         writeFieldBegin(field.fieldNum, fieldType);
         ArrNR fieldSpec(field.spec);
-        writeField(fieldVal, fieldSpec.asArray(), fieldType);
+        writeField(fieldVal, fieldSpec.asArray(), fieldType, obj->getVMClass(),
+            field.fieldNum);
         writeFieldEnd();
       }
     }
@@ -244,7 +249,8 @@ struct CompactWriter {
             TType fieldType = fields[i].type;
             ArrNR fieldSpec(fields[i].spec);
             writeFieldBegin(fields[i].fieldNum, fieldType);
-            writeField(fieldVal, fieldSpec.asArray(), fieldType);
+            writeField(fieldVal, fieldSpec.asArray(), fieldType, cls,
+                fields[i].fieldNum);
             writeFieldEnd();
           } else if (UNLIKELY(fieldVal.is(KindOfUninit)) &&
                      (prop[i].attrs & AttrLateInit)) {
@@ -295,7 +301,9 @@ struct CompactWriter {
 
     void writeField(const Variant& value,
                     const Array& valueSpec,
-                    TType type) {
+                    TType type,
+                    Class* cls = nullptr,
+                    int16_t fieldNum = 0) {
       switch (type) {
         case T_STOP:
         case T_VOID:
@@ -328,7 +336,11 @@ struct CompactWriter {
           break;
 
         case T_I16:
+          writeIChecked<std::int16_t>(value, cls, fieldNum);
+          break;
         case T_I32:
+          writeIChecked<std::int32_t>(value, cls, fieldNum);
+          break;
         case T_I64:
         case T_U64:
           writeI(value.toInt64());
@@ -506,6 +518,28 @@ struct CompactWriter {
 
     void writeI(int64_t n) {
       writeVarint(i64ToZigzag(n));
+    }
+
+    template <typename T>
+    void writeIChecked(const Variant& value, Class *cls, int16_t fieldNum) {
+      static_assert(std::is_integral<T>::value, "not an integral type");
+      auto n = value.toInt64();
+      using limits = std::numeric_limits<T>;
+      auto forbidInvalid =
+        RuntimeOption::EvalForbidThriftIntegerValuesOutOfRange;
+      if (forbidInvalid != 0 && (n < limits::min() || n > limits::max())) {
+        std::string message = folly::sformat("Value {} is out of range", n);
+        if (cls) {
+          message += folly::sformat(
+              " in field {} of {}", fieldNum, cls->nameStr().c_str());
+        }
+        if (forbidInvalid == 1) {
+          raise_warning(message);
+        } else {
+          thrift_error(message, ERR_INVALID_DATA);
+        }
+      }
+      writeI(n);
     }
 
     void writeVarint(uint64_t n) {

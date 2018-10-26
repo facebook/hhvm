@@ -969,6 +969,15 @@ struct RuntimeOption {
    *                                                                    \
    */                                                                   \
   F(int32_t, ForbidDynamicCalls, 0)                                     \
+  /*                                                                    \
+   * Control handling of out-of-range integer values in the compact     \
+   * Thrift serializer.                                                 \
+   *                                                                    \
+   * 0 - Nothing                                                        \
+   * 1 - Warn                                                           \
+   * 2 - Throw exception                                                \
+   */                                                                   \
+  F(int32_t, ForbidThriftIntegerValuesOutOfRange, 0)                    \
   F(int32_t, ServerOOMAdj, 0)                                           \
   F(std::string, PreludePath, "")                                       \
   F(uint32_t, NonSharedInstanceMemoCaches, 10)                          \

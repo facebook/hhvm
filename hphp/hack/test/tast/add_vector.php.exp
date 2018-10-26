@@ -90,10 +90,10 @@
          ];
        c_constructor =
        (Some { Aast.AnnotatedAST.m_span = [15:3-17:4]; m_annotation = ();
-               m_final = false; m_abstract = false; m_visibility = Public;
-               m_name = ([15:19-30], "__construct"); m_tparams = [];
-               m_where_constraints = []; m_variadic = FVnonVariadic;
-               m_params = [];
+               m_final = false; m_abstract = false; m_static = false;
+               m_visibility = Public; m_name = ([15:19-30], "__construct");
+               m_tparams = []; m_where_constraints = [];
+               m_variadic = FVnonVariadic; m_params = [];
                m_body =
                (NamedBody
                   { Aast.AnnotatedAST.fnb_nast =
@@ -117,9 +117,10 @@
        c_static_methods = [];
        c_methods =
        [{ Aast.AnnotatedAST.m_span = [19:3-21:4]; m_annotation = ();
-          m_final = false; m_abstract = false; m_visibility = Public;
-          m_name = ([19:19-22], "add"); m_tparams = [];
-          m_where_constraints = []; m_variadic = FVnonVariadic;
+          m_final = false; m_abstract = false; m_static = false;
+          m_visibility = Public; m_name = ([19:19-22], "add");
+          m_tparams = []; m_where_constraints = [];
+          m_variadic = FVnonVariadic;
           m_params =
           [{ Aast.AnnotatedAST.param_annotation = ([19:25-27], T);
              param_hint = (Some ([19:23-24], (Habstr "T")));
@@ -148,9 +149,10 @@
           m_ret = (Some ([19:30-34], (Hprim Tvoid))); m_ret_by_ref = false;
           m_external = false };
          { Aast.AnnotatedAST.m_span = [23:3-25:4]; m_annotation = ();
-           m_final = false; m_abstract = false; m_visibility = Public;
-           m_name = ([23:19-22], "get"); m_tparams = [];
-           m_where_constraints = []; m_variadic = FVnonVariadic;
+           m_final = false; m_abstract = false; m_static = false;
+           m_visibility = Public; m_name = ([23:19-22], "get");
+           m_tparams = []; m_where_constraints = [];
+           m_variadic = FVnonVariadic;
            m_params =
            [{ Aast.AnnotatedAST.param_annotation = ([23:27-29], int);
               param_hint = (Some ([23:23-26], (Hprim Tint)));

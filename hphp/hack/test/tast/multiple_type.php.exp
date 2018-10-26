@@ -61,8 +61,8 @@
        c_static_methods = [];
        c_methods =
        [{ Aast.AnnotatedAST.m_span = [5:3-7:4]; m_annotation = ();
-          m_final = false; m_abstract = false; m_visibility = Public;
-          m_name = ([5:19-22], "foo"); m_tparams = [];
+          m_final = false; m_abstract = false; m_static = false;
+          m_visibility = Public; m_name = ([5:19-22], "foo"); m_tparams = [];
           m_where_constraints = []; m_variadic = FVnonVariadic;
           m_params = [];
           m_body =
@@ -86,10 +86,10 @@
        c_static_methods = [];
        c_methods =
        [{ Aast.AnnotatedAST.m_span = [11:3-13:4]; m_annotation = ();
-          m_final = false; m_abstract = false; m_visibility = Public;
-          m_name = ([11:19-22], "foo"); m_tparams = [];
-          m_where_constraints = []; m_variadic = FVnonVariadic;
-          m_params = [];
+          m_final = false; m_abstract = false; m_static = false;
+          m_visibility = Public; m_name = ([11:19-22], "foo");
+          m_tparams = []; m_where_constraints = [];
+          m_variadic = FVnonVariadic; m_params = [];
           m_body =
           (NamedBody
              { Aast.AnnotatedAST.fnb_nast =

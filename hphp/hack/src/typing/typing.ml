@@ -6568,6 +6568,7 @@ and method_def env m =
     T.m_annotation = Env.save local_tpenv env;
     T.m_span = m.m_span;
     T.m_final = m.m_final;
+    T.m_static = m.m_static;
     T.m_abstract = m.m_abstract;
     T.m_visibility = m.m_visibility;
     T.m_name = m.m_name;

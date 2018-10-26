@@ -40,8 +40,8 @@ Errors:
        c_constructor = None; c_static_methods = [];
        c_methods =
        [{ Aast.AnnotatedAST.m_span = [10:3-12:4]; m_annotation = ();
-          m_final = false; m_abstract = false; m_visibility = Public;
-          m_name = ([10:20-21], "f"); m_tparams = [];
+          m_final = false; m_abstract = false; m_static = false;
+          m_visibility = Public; m_name = ([10:20-21], "f"); m_tparams = [];
           m_where_constraints = []; m_variadic = FVnonVariadic;
           m_params = [];
           m_body =

@@ -331,6 +331,7 @@ and method_ = {
   m_annotation      : env_annotation      ;
   m_final           : bool                ;
   m_abstract        : bool                ;
+  m_static          : bool                ;
   m_visibility      : visibility          ;
   m_name            : sid                 ;
   m_tparams         : tparam list         ;

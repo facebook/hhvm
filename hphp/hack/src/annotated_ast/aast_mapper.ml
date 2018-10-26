@@ -273,6 +273,7 @@ struct
       T.m_span = m.S.m_span;
       T.m_annotation = menv.map_env_annotation m.S.m_annotation;
       T.m_final = m.S.m_final;
+      T.m_static = m.S.m_static;
       T.m_abstract = m.S.m_abstract;
       T.m_visibility = m.S.m_visibility;
       T.m_name = m.S.m_name;

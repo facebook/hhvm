@@ -1713,8 +1713,8 @@ module Make (GetLocals : GetLocals) = struct
       ) in
     if not contains_visibility then
       Errors.method_needs_visibility (fst m.m_name);
-    let acc = false, false, N.Public in
-    let final, abs, vis = List.fold_left ~f:kind ~init:acc m.m_kind in
+    let acc = false, false, false, N.Public in
+    let final, abs, static, vis = List.fold_left ~f:kind ~init:acc m.m_kind in
     List.iter m.m_tparams check_constraint;
     let tparam_l = type_paraml env m.m_tparams in
     let where_constraints = type_where_constraints env m.m_constrs in
@@ -1739,6 +1739,7 @@ module Make (GetLocals : GetLocals) = struct
       N.m_final           = final       ;
       N.m_visibility      = vis         ;
       N.m_abstract        = abs         ;
+      N.m_static          = static      ;
       N.m_name            = m.Ast.m_name;
       N.m_tparams         = tparam_l    ;
       N.m_where_constraints = where_constraints ;
@@ -1752,13 +1753,13 @@ module Make (GetLocals : GetLocals) = struct
       N.m_external        = m.m_external;
     }
 
-  and kind (final, abs, vis) = function
-    | Final -> true, abs, vis
-    | Static -> final, abs, vis
-    | Abstract -> final, true, vis
-    | Private -> final, abs, N.Private
-    | Public -> final, abs, N.Public
-    | Protected -> final, abs, N.Protected
+  and kind (final, abs, static, vis) = function
+    | Final -> true, abs, static, vis
+    | Static -> final, abs, true, vis
+    | Abstract -> final, true, static, vis
+    | Private -> final, abs, static, N.Private
+    | Public -> final, abs, static, N.Public
+    | Protected -> final, abs, static, N.Protected
 
   and fun_paraml env l =
     let _names = List.fold_left ~f:check_repetition ~init:SSet.empty l in

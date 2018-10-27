@@ -17,7 +17,13 @@ class C {
   static public function getCallable() {
     return class_meth(self::class, 'private_meth');
   }
+  static public function mth() {
+    return 1;
+  }
 }
+
+$m = class_meth(C::class, 'mth');
+var_dump($m());
 
 $pub = class_meth(C::class, 'getCallable');
 C::caller($pub(), 'created in C');

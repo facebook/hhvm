@@ -1319,7 +1319,8 @@ void emitResolveClsMethod(IRGS& env) {
     funcTmp = loadClsMethodUnknown(env, data, slowExit);
     clsTmp = gen(env, LdClsCached, cns(env, className));
   }
-  auto methPair = gen(env, AllocVArray, PackedArrayData { 2 });
+  auto op = RuntimeOption::EvalHackArrDVArrs ? AllocVecArray : AllocVArray;
+  auto methPair = gen(env, op, PackedArrayData { 2 });
   gen(env, InitPackedLayoutArray, IndexData { 0 }, methPair, clsTmp);
   gen(env, InitPackedLayoutArray, IndexData { 1 }, methPair, funcTmp);
   decRef(env, name);

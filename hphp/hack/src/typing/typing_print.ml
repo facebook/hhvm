@@ -1156,6 +1156,11 @@ let to_locl_ty
         in
         ty (Tshape (fields_known, fields))
 
+    | "union" ->
+      get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
+      aux_args args ~keytrace >>= fun tyl ->
+      ty (Tunresolved tyl)
+
     | _ ->
       Error (Not_supported "not yet implemented")
 

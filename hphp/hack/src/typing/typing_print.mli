@@ -81,7 +81,11 @@ val subtype_prop: Typing_env.env -> Typing_logic.subtype_prop -> string
  *         { "kind":"expr" }
  *)
 val to_json: Typing_env.env -> 'a Typing_defs.ty -> Hh_json.json
+
+(* Attempt to deserialize a previously-serialized type back into a type we can
+manipulate. Note that this function accesses the global state in
+`Typing_lazy_heap` to verify that certain type names exist. *)
 val json_to_locl_ty:
-  Typing_env.env
+  TypecheckerOptions.t
   -> Hh_json.json
   -> (Typing_defs.locl Typing_defs.ty, Typing_defs.deserialization_error) result

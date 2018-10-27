@@ -165,7 +165,8 @@ let handler = object
     try
       let ty = Tast_expand.expand_ty env ty in
       let serialized_ty = Tast_env.ty_to_json env ty in
-      let deserialized_ty = Tast_env.json_to_locl_ty env serialized_ty in
+      let tcopt = Tast_env.get_tcopt env in
+      let deserialized_ty = Tast_env.json_to_locl_ty tcopt serialized_ty in
       match deserialized_ty with
       | Ok deserialized_ty ->
         let ty = strip_ty ty in

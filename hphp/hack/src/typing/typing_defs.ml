@@ -550,8 +550,17 @@ type phase_ty =
   | LoclTy of locl ty
 
 type deserialization_error =
+  (* The type was valid, but some component thereof was a decl ty when we
+  expected a locl ty, or vice versa. *)
   | Wrong_phase of string
+
+  (* The specific type or some component thereof is not one that we support
+  deserializing, usually because not enough information was serialized to be
+  able to deserialize it again. For example, lambda types (`Tanon`) contain a
+  reference to an identifier (`Ident.t`), which is not serialized. *)
   | Not_supported of string
+
+  (* The input JSON was invalid for some reason. *)
   | Deserialization_error of string
 
 (* Tracks information about how a type was expanded *)

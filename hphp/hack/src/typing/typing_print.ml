@@ -914,6 +914,51 @@ let to_locl_ty
           ~keytrace:path_kind_keytrace
       end
 
+    | "darray" ->
+      get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
+      begin match args with
+      | [ty1; ty2] ->
+        aux ty1 ~keytrace:("0" :: keytrace) >>= fun ty1 ->
+        aux ty2 ~keytrace:("1" :: keytrace) >>= fun ty2 ->
+        ty (Tarraykind (AKdarray (ty1, ty2)))
+
+      | _ ->
+        deserialization_error
+          ~message:(Printf.sprintf
+            "Invalid number of type arguments to darray (expected 2): %d"
+            (List.length args))
+          ~keytrace
+      end
+
+    | "varray" ->
+      get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
+      begin match args with
+      | [ty1] ->
+        aux ty1 ~keytrace:("0" :: keytrace) >>= fun ty1 ->
+        ty (Tarraykind (AKvarray ty1))
+      | _ ->
+        deserialization_error
+          ~message:(Printf.sprintf
+            "Invalid number of type arguments to varray (expected 1): %d"
+            (List.length args))
+          ~keytrace
+      end
+
+    | "varray_or_darray" ->
+      get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
+      begin match args with
+      | [ty1] ->
+        aux ty1 ~keytrace:("0" :: keytrace) >>= fun ty1 ->
+        ty (Tarraykind (AKvarray_or_darray ty1))
+
+      | _ ->
+        deserialization_error
+          ~message:(Printf.sprintf
+            "Invalid number of type arguments to varray_or_darray (expected 1): %d"
+            (List.length args))
+          ~keytrace
+      end
+
     | _ ->
       Error (Not_supported "not yet implemented")
 

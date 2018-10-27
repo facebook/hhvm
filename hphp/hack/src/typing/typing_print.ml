@@ -803,7 +803,6 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
 
 type 'a deserialized_result = ('a ty, deserialization_error) result
 
-[@@@warning "-32"] (* @nocommit -- will remove later *)
 let wrap_json_accessor f = fun x ->
   match (f x) with
   | Ok value -> Ok value
@@ -825,7 +824,6 @@ let not_supported ~message ~keytrace =
 let wrong_phase ~message ~keytrace =
   Error (Wrong_phase
     (message ^ (Hh_json.Access.keytrace_to_string keytrace)))
-[@@@warning "+32"] (* @nocommit -- will remove later *)
 
 let to_locl_ty
   (env: Typing_env.env)

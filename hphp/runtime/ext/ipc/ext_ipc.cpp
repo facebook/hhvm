@@ -191,11 +191,11 @@ bool HHVM_FUNCTION(msg_set_queue,
     value = data[s_msg_perm_uid];
     if (!value.isNull()) stat.msg_perm.uid = value.toInt64();
     value = data[s_msg_perm_gid];
-    if (!value.isNull()) stat.msg_perm.uid = value.toInt64();
+    if (!value.isNull()) stat.msg_perm.gid = value.toInt64();
     value = data[s_msg_perm_mode];
-    if (!value.isNull()) stat.msg_perm.uid = value.toInt64();
+    if (!value.isNull()) stat.msg_perm.mode = value.toInt64();
     value = data[s_msg_qbytes];
-    if (!value.isNull()) stat.msg_perm.uid = value.toInt64();
+    if (!value.isNull()) stat.msg_qbytes = value.toInt64();
 
     return msgctl(q->id, IPC_SET, &stat) == 0;
   }

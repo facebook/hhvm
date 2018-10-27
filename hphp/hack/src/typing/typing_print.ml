@@ -840,6 +840,11 @@ let to_locl_ty
           ~message:"Tgeneric is a decl-phase type."
           ~keytrace
 
+    | "enum" ->
+      get_string "name" (json, keytrace) >>= fun (name, _name_keytrace) ->
+      aux_as json ~keytrace >>= fun as_opt ->
+      ty (Tabstract (AKenum name, as_opt))
+
     | _ ->
       Error (Not_supported "not yet implemented")
 

@@ -79,6 +79,9 @@ function idx($arr, $idx, $default=null) {
           return $idx;
         }
       } else if ($arr instanceof \ArrayAccess) {
+        if (ini_get('hhvm.no_array_access_in_idx')) {
+          trigger_error('ArrayAccess passed to idx', E_WARNING);
+        }
         if ($arr->offsetExists($idx)) {
           return $arr->offsetGet($idx);
         }

@@ -573,17 +573,7 @@ and fun_implicit_return env pos ret = function
     let rty = r, Tclass ((pos, SN.Classes.cAwaitable), [r, Tprim Nast.Tvoid]) in
     Typing_return.implicit_return env pos ~expected:ret ~actual:rty
 
-(* Perform provided typing function only if the Next continuation is present.
- * If the Next continuation is absent, it means that we are typechecking
- * unreachable code. *)
-and if_next tyf env node =
-  match LEnv.get_cont_option env C.Next with
-  | None -> env, None
-  | Some _ ->
-    let env, tn = tyf env node in
-    env, Some tn
-
-and block env stl = List.filter_map_env env stl ~f:(if_next stmt)
+and block env (stl : block) = List.map_env env stl ~f:stmt
 
 (* Set a local; must not be already assigned if it is a using variable *)
 and set_local ?(is_using_clause = false) env (pos,x) ty =
@@ -1012,16 +1002,11 @@ and try_catch env tb cl fb =
   let env, (ttb, tcb) = Env.in_try env (fun env ->
     let env, ttb = block env tb in
     let env = LEnv.move_and_merge_next_in_cont env C.Finally in
-    (* If there is no catch continuation, this means the try block has not
-     * thrown, so the catch blocks are not reached, so we don't typecheck them. *)
-    let env, tcb = match LEnv.get_cont_option env C.Catch with
-    | None -> env, []
-    | Some catchctx ->
-      let env, lenvtcblist = List.map_env env ~f:(catch catchctx) cl in
-      let lenvl, tcb = List.unzip lenvtcblist in
-      let env = LEnv.union_lenv_list env env.Env.lenv lenvl in
-      let env = LEnv.move_and_merge_next_in_cont env C.Finally in
-      env, tcb in
+    let catchctx = LEnv.get_cont_option env C.Catch in
+    let env, lenvtcblist = List.map_env env ~f:(catch catchctx) cl in
+    let lenvl, tcb = List.unzip lenvtcblist in
+    let env = LEnv.union_lenv_list env env.Env.lenv lenvl in
+    let env = LEnv.move_and_merge_next_in_cont env C.Finally in
     env, (ttb, tcb)) in
   let env, tfb = finally env fb in
   let env = LEnv.drop_cont env C.Finally in
@@ -1066,7 +1051,7 @@ and case_list parent_locals ty env switch_pos cl =
     env, T.Case (te, tb)::tcl
 
 and catch catchctx env (sid, exn, b) =
-  let env = LEnv.replace_cont env C.Next (Some catchctx) in
+  let env = LEnv.replace_cont env C.Next catchctx in
   let cid = CI (sid, []) in
   let ety_p = (fst sid) in
   let env, _, _ = instantiable_cid ety_p env cid in
@@ -2604,7 +2589,7 @@ and expr_
       make_result env (T.Shape (ShapeMap.map (fun (te,_) -> te) tfdm))
         (Reason.Rwitness p, Tshape (FieldsFullyKnown, fdm))
   with Typing_lenv_cont.Continuation_not_found _ ->
-    expr_error env p (Reason.Rwitness p)
+    expr_any env p (Reason.Rwitness p)
 
 and class_const ?(incl_tc=false) env p ((cpos, cid), mid) =
   let env, ce, cty = static_class_id ~check_constraints:false cpos env cid in

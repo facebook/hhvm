@@ -1,2 +1,2 @@
-File "test_freeze2.php", line 10, characters 3-4:
+File "test_freeze2.php", line 18, characters 3-4:
 This variable is frozen in one scope but not the other (Typing[4209])

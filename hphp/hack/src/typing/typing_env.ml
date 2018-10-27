@@ -866,23 +866,19 @@ let add_to_local_id_map = Local_id.Map.add ?combine:None
  * the last assignment to this local.
  *)
 let set_local env x new_type =
-  let {fake_members; local_types; local_using_vars;
-       tpenv; local_mutability; local_reactive} = env.lenv in
   let env, new_type = unbind env new_type in
   let new_type = match new_type with
     | _, Tunresolved [ty] -> ty
     | _ -> new_type in
-  let next_cont = LEnvC.get_cont C.Next local_types in
-  let expr_id = match LID.Map.get x next_cont with
-    | None -> Ident.tmp()
-    | Some (_, y) -> y in
-  let local = new_type, expr_id in
-  let local_types = LEnvC.add_to_cont C.Next x local local_types in
-  let env = { env with
-    lenv = {fake_members; local_types; local_using_vars;
-            tpenv; local_mutability; local_reactive; } }
-  in
-  env
+  match LEnvC.get_cont_option C.Next env.lenv.local_types with
+  | None -> env
+  | Some next_cont ->
+    let expr_id = match LID.Map.get x next_cont with
+      | None -> Ident.tmp()
+      | Some (_, y) -> y in
+    let local = new_type, expr_id in
+    let local_types = LEnvC.add_to_cont C.Next x local env.lenv.local_types in
+    { env with lenv = { env.lenv with local_types } }
 
 let is_using_var env x =
   LID.Set.mem x env.lenv.local_using_vars
@@ -960,15 +956,18 @@ let get_local_check_defined env (p, x) =
 
 let set_local_expr_id env x new_eid =
   let local_types = env.lenv.local_types in
-  let next_cont = LEnvC.get_cont C.Next local_types in
-  match LID.Map.get x next_cont with
-  | Some (type_, eid) when eid <> new_eid ->
-      let local = type_, new_eid in
-      let local_types = LEnvC.add_to_cont C.Next x local local_types in
-      let env ={ env with lenv = { env.lenv with local_types } }
-      in
-      env
-  | _ -> env
+  match LEnvC.get_cont_option C.Next local_types with
+  | None -> env
+  | Some next_cont ->
+    begin match LID.Map.get x next_cont with
+    | Some (type_, eid) when eid <> new_eid ->
+        let local = type_, new_eid in
+        let local_types = LEnvC.add_to_cont C.Next x local local_types in
+        let env ={ env with lenv = { env.lenv with local_types } }
+        in
+        env
+    | _ -> env
+    end
 
 let get_local_expr_id env x =
   let next_cont = LEnvC.get_cont C.Next env.lenv.local_types in

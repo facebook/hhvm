@@ -798,9 +798,39 @@ let wrong_phase ~message ~keytrace =
 
 let to_locl_ty
   (_env: Typing_env.env)
-  (_json: Hh_json.json)
+  (json: Hh_json.json)
   : locl deserialized_result =
-  Error (Not_supported "not yet implemented")
+  let reason = Reason.none in
+  let ty (ty: locl ty_): locl deserialized_result =
+    Ok (reason, ty)
+  in
+
+  let aux
+    (json: Hh_json.json)
+    ~(keytrace: Hh_json.Access.keytrace)
+    : locl deserialized_result =
+    let open Result.Monad_infix in
+    get_string "kind" (json, keytrace) >>= fun (kind, _kind_keytrace) ->
+    match kind with
+    | "this"->
+      not_supported
+        ~message:"Cannot deserialize 'this' type."
+        ~keytrace
+
+    | "any" ->
+      ty Tany
+    | "mixed" ->
+      ty Tmixed
+    | "nonnull" ->
+      ty Tnonnull
+    | "dynamic" ->
+      ty Tdynamic
+
+    | _ ->
+      Error (Not_supported "not yet implemented")
+  in
+
+  aux json ~keytrace:[]
 
 end
 

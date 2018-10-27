@@ -798,7 +798,7 @@ let wrong_phase ~message ~keytrace =
 [@@@warning "+32"] (* @nocommit -- will remove later *)
 
 let to_locl_ty
-  (_env: Typing_env.env)
+  (env: Typing_env.env)
   (json: Hh_json.json)
   : locl deserialized_result =
   let reason = Reason.none in
@@ -845,8 +845,52 @@ let to_locl_ty
       aux_as json ~keytrace >>= fun as_opt ->
       ty (Tabstract (AKenum name, as_opt))
 
+    | "newtype" ->
+      get_string "name" (json, keytrace) >>= fun (name, name_keytrace) ->
+      begin match Typing_env.get_typedef env name with
+      | Some _typedef ->
+        (* We end up only needing the name of the typedef. *)
+        Ok name
+      | None ->
+        if name = "HackSuggest"
+        then
+          not_supported
+            ~message:"HackSuggest types for lambdas are not supported"
+            ~keytrace
+        else
+          deserialization_error
+            ~message:("Unknown newtype: " ^ name)
+            ~keytrace:name_keytrace
+      end >>= fun typedef_name ->
+
+      get_array "args" (json, keytrace) >>= fun (args, args_keytrace) ->
+      aux_args args ~keytrace:args_keytrace >>= fun args ->
+      aux_as json ~keytrace >>= fun as_opt ->
+      ty (Tabstract (AKnewtype (typedef_name, args), as_opt))
+
     | _ ->
       Error (Not_supported "not yet implemented")
+
+  and map_array:
+    type a.
+    Hh_json.json list ->
+    f:
+      (Hh_json.json ->
+      keytrace: Hh_json.Access.keytrace ->
+      (a, deserialization_error) result) ->
+    keytrace: Hh_json.Access.keytrace ->
+    (a list, deserialization_error) result =
+    fun array ~f ~keytrace ->
+    let array = List.mapi array ~f:(fun i elem ->
+      f elem ~keytrace:((string_of_int i) :: keytrace)
+    ) in
+    Result.all array
+
+  and aux_args
+    (args: Hh_json.json list)
+    ~(keytrace: Hh_json.Access.keytrace)
+    : (locl ty list, deserialization_error) result =
+    map_array args ~keytrace ~f:aux
 
   and aux_as
     (json: Hh_json.json)

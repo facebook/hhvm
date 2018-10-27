@@ -841,7 +841,7 @@ let to_locl_ty
     ~(keytrace: Hh_json.Access.keytrace)
     : locl deserialized_result =
     let open Result.Monad_infix in
-    get_string "kind" (json, keytrace) >>= fun (kind, _kind_keytrace) ->
+    get_string "kind" (json, keytrace) >>= fun (kind, kind_keytrace) ->
     match kind with
     | "this"->
       not_supported
@@ -1235,7 +1235,11 @@ let to_locl_ty
         ~keytrace
 
     | _ ->
-      Error (Not_supported "not yet implemented")
+      deserialization_error
+        ~message:(Printf.sprintf
+          "Unknown or unsupported kind '%s' to convert to locl phase"
+          kind)
+        ~keytrace:kind_keytrace
 
   and map_array:
     type a.

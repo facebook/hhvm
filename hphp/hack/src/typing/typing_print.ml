@@ -642,10 +642,16 @@ let prim = function
   | Nast.Tarraykey -> "arraykey"
   | Nast.Tnoreturn -> "noreturn"
 
-let param_mode = function
-  | FPnormal -> "normal"
-  | FPref -> "ref"
-  | FPinout -> "inout"
+let param_mode_to_string = function
+   | FPnormal -> "normal"
+   | FPref -> "ref"
+   | FPinout -> "inout"
+
+let string_to_param_mode = function
+  | "normal" -> Some FPnormal
+  | "ref" -> Some FPref
+  | "inout" -> Some FPinout
+  | _ -> None
 
 let rec from_type: type a. Typing_env.env -> a ty -> json =
   function env -> function ty ->
@@ -760,9 +766,10 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
     obj @@ kind "path" @ typ ty @ path (List.map ids snd)
   | Tfun ft ->
     let fun_kind =
-      if ft.ft_is_coroutine then kind "coroutine" @ kind "function"
+      if ft.ft_is_coroutine
+      then kind "coroutine"
       else kind "function" in
-    let callconv cc = ["callConvention", JSON_String (param_mode cc)] in
+    let callconv cc = ["callConvention", JSON_String (param_mode_to_string cc)] in
     let param fp = obj @@ callconv fp.fp_kind @ typ fp.fp_type in
     let params fps = ["params", JSON_Array (List.map fps param)] in
     obj @@ fun_kind @ params ft.ft_params @ result ft.ft_ret
@@ -1160,6 +1167,67 @@ let to_locl_ty
       get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
       aux_args args ~keytrace >>= fun tyl ->
       ty (Tunresolved tyl)
+
+    | "function"
+    | "coroutine" as kind ->
+      let ft_is_coroutine = (kind = "coroutine") in
+      get_array "params" (json, keytrace) >>= fun (params, params_keytrace) ->
+      let params = map_array
+        params
+        ~keytrace:params_keytrace
+        ~f:(fun param ~keytrace ->
+          get_string "callConvention" (param, keytrace)
+            >>= fun (callconv, callconv_keytrace) ->
+          begin match (string_to_param_mode callconv) with
+          | Some callconv ->
+            Ok callconv
+          | None ->
+            deserialization_error
+              ~message:("Unknown calling convention: " ^ callconv)
+              ~keytrace:callconv_keytrace
+          end >>= fun callconv ->
+
+          get_obj "type" (param, keytrace)
+            >>= fun (param_type, param_type_keytrace) ->
+          aux param_type ~keytrace:param_type_keytrace
+            >>= fun param_type ->
+          Ok {
+            fp_type = param_type;
+            fp_kind = callconv;
+
+            (* Dummy values: these aren't currently serialized. *)
+            fp_pos = Pos.none;
+            fp_name = None;
+            fp_accept_disposable = false;
+            fp_mutability = None;
+            fp_rx_annotation = None;
+          }
+        )
+      in
+      params >>= fun ft_params ->
+
+      get_obj "result" (json, keytrace) >>= fun (result, result_keytrace) ->
+      aux result ~keytrace:result_keytrace >>= fun ft_ret ->
+      ty (Tfun {
+        ft_is_coroutine;
+        ft_params;
+        ft_ret;
+
+        (* Dummy values: these aren't currently serialized. *)
+        ft_pos = Pos.none;
+        ft_deprecated = None;
+        ft_abstract = false;
+        ft_arity = Fstandard (0, 0);
+        ft_tparams = [];
+        ft_where_constraints = [];
+        ft_ret_by_ref = false;
+        ft_reactive = Nonreactive;
+        ft_return_disposable = false;
+        ft_mutability = None;
+        ft_returns_mutable = false;
+        ft_decl_errors = None;
+        ft_returns_void_to_rx = false;
+      })
 
     | _ ->
       Error (Not_supported "not yet implemented")

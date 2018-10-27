@@ -657,6 +657,7 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
   let obj x = JSON_Object x in
   let name x = ["name", JSON_String x] in
   let optional x = ["optional", JSON_Bool x] in
+  let is_array x = ["is_array", JSON_Bool x] in
   let make_field (k, v) =
     obj @@
     name (Typing_env.get_shape_field_name k) @
@@ -695,9 +696,9 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
   | Tdynamic ->
     obj @@ kind "dynamic"
   | Tgeneric s ->
-    obj @@ kind "generic" @ name s
-  | Tabstract (AKgeneric s, _) ->
-    obj @@ kind "generic" @ name s
+    obj @@ kind "generic" @ is_array false @ name s
+  | Tabstract (AKgeneric s, opt_ty) ->
+    obj @@ kind "generic" @ is_array true @ name s @ as_type opt_ty
   | Tabstract (AKenum s, opt_ty) ->
     obj @@ kind "enum" @ name s @ as_type opt_ty
   | Tabstract (AKnewtype (s, tys), opt_ty) ->
@@ -805,7 +806,7 @@ let to_locl_ty
     Ok (reason, ty)
   in
 
-  let aux
+  let rec aux
     (json: Hh_json.json)
     ~(keytrace: Hh_json.Access.keytrace)
     : locl deserialized_result =
@@ -826,8 +827,39 @@ let to_locl_ty
     | "dynamic" ->
       ty Tdynamic
 
+    | "generic" ->
+      get_string "name" (json, keytrace) >>= fun (name, _name_keytrace) ->
+      get_bool "is_array" (json, keytrace)
+        >>= fun (is_array, _is_array_keytrace) ->
+
+      if is_array then
+        aux_as json ~keytrace >>= fun as_opt ->
+        ty (Tabstract ((AKgeneric name), as_opt))
+      else
+        wrong_phase
+          ~message:"Tgeneric is a decl-phase type."
+          ~keytrace
+
     | _ ->
       Error (Not_supported "not yet implemented")
+
+  and aux_as
+    (json: Hh_json.json)
+    ~(keytrace: Hh_json.Access.keytrace)
+    : (locl ty option, deserialization_error) result =
+    let open Result.Monad_infix in
+    (* as-constraint is optional, check to see if it exists. *)
+    match Hh_json.Access.get_obj "as" (json, keytrace) with
+    | Ok (as_json, as_keytrace) ->
+      aux as_json ~keytrace:as_keytrace >>= fun as_ty ->
+      Ok (Some as_ty)
+    | Error (Hh_json.Access.Missing_key_error _) ->
+      Ok None
+    | Error access_failure ->
+      deserialization_error
+        ~message:("Invalid as-constraint: "
+          ^ Hh_json.Access.access_failure_to_string access_failure)
+        ~keytrace
   in
 
   aux json ~keytrace:[]

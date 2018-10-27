@@ -1034,6 +1034,24 @@ let to_locl_ty
       end >>= fun prim_ty ->
       ty (Tprim prim_ty)
 
+    | "class" ->
+      get_string "name" (json, keytrace) >>= fun (name, _name_keytrace) ->
+      let class_pos =
+        match Typing_env.get_class env name with
+        | Some class_ty ->
+          class_ty.tc_pos
+        | None ->
+          (* Class may not exist (such as in non-strict modes). *)
+          Pos.none
+      in
+
+      get_array "args" (json, keytrace) >>= fun (args, _args_keytrace) ->
+      aux_args args ~keytrace >>= fun tyl ->
+
+      (* NB: "class" could have come from either a `Tapply` or a `Tclass`. Right
+      now, we always return a `Tclass`. *)
+      ty (Tclass ((class_pos, name), tyl))
+
     | _ ->
       Error (Not_supported "not yet implemented")
 

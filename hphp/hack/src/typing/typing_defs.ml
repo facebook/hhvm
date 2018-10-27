@@ -549,6 +549,11 @@ type phase_ty =
   | DeclTy of decl ty
   | LoclTy of locl ty
 
+type deserialization_error =
+  | Wrong_phase of string
+  | Not_supported of string
+  | Deserialization_error of string
+
 (* Tracks information about how a type was expanded *)
 type expand_env = {
   (* A list of the type defs and type access we have expanded thus far. Used
@@ -651,23 +656,22 @@ let is_suggest_mode = ref false
 (* Ordinal value for type constructor, for localized types *)
 let ty_con_ordinal ty =
   match snd ty with
-  | Tany -> 0
-  | Tmixed -> 1
+  | Tany | Terr -> 0
+  | Tmixed | Toption (_, Tnonnull) -> 1
   | Tnonnull -> 2
   | Tdynamic -> 3
-  | Terr -> 4
-  | Toption _ -> 5
-  | Tprim _ -> 6
-  | Tfun _ -> 7
-  | Ttuple _ -> 8
-  | Tshape _ -> 9
-  | Tvar _ -> 10
-  | Tabstract _ -> 11
-  | Tanon _ -> 12
-  | Tunresolved _ -> 13
-  | Tobject -> 14
-  | Tclass _ -> 15
-  | Tarraykind _ -> 16
+  | Toption _ -> 4
+  | Tprim _ -> 5
+  | Tfun _ -> 6
+  | Ttuple _ -> 7
+  | Tshape _ -> 8
+  | Tvar _ -> 9
+  | Tabstract _ -> 10
+  | Tanon _ -> 11
+  | Tunresolved _ -> 12
+  | Tobject -> 13
+  | Tclass _ -> 14
+  | Tarraykind _ -> 15
 
 let array_kind_con_ordinal ak =
   match ak with

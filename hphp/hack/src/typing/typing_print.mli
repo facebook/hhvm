@@ -81,3 +81,7 @@ val subtype_prop: Typing_env.env -> Typing_logic.subtype_prop -> string
  *         { "kind":"expr" }
  *)
 val to_json: Typing_env.env -> 'a Typing_defs.ty -> Hh_json.json
+val json_to_locl_ty:
+  Typing_env.env
+  -> Hh_json.json
+  -> (Typing_defs.locl Typing_defs.ty, Typing_defs.deserialization_error) result

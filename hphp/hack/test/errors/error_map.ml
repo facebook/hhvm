@@ -519,4 +519,5 @@ InvalidMoveTarget = 4288
 IgnoredResultOfFreeze = 4289
 IgnoredResultOfMove = 4290
 UnexpectedTy = 4291
+UnserializableType = 4292
   |}]

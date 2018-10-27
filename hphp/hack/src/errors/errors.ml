@@ -3466,6 +3466,11 @@ let invalid_switch_case_value_type case_value_p case_value_ty scrutinee_ty =
       case_value_ty
       scrutinee_ty
 
+let unserializable_type pos message =
+  add (Typing.err_code Typing.UnserializableType) pos
+    ("Unserializable type (could not be converted to JSON and back again): "
+     ^ message)
+
 (*****************************************************************************)
 (* Convert relative paths to absolute. *)
 (*****************************************************************************)

@@ -29,6 +29,12 @@ val print_ty_with_identity :
 val ty_to_json : env -> 'a Typing_defs.ty -> Hh_json.json
 (** Return a JSON representation of the given type. *)
 
+val json_to_locl_ty :
+  env ->
+  Hh_json.json ->
+  (Typing_defs.locl Typing_defs.ty, Typing_defs.deserialization_error) result
+(** Convert a JSON representation of a type back into a locl-phase type. *)
+
 val get_self_id_exn : env -> string
 (** Return the name of the enclosing class definition.
     When not in a class definition, raise {!Not_in_class}. *)

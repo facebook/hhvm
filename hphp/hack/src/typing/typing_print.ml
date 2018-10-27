@@ -770,9 +770,42 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
   | Tarraykind AKempty ->
     obj @@ kind "array" @ args []
 
+type 'a deserialized_result = ('a ty, deserialization_error) result
+
+[@@@warning "-32"] (* @nocommit -- will remove later *)
+let wrap_json_accessor f = fun x ->
+  match (f x) with
+  | Ok value -> Ok value
+  | Error access_failure ->
+    Error (Deserialization_error
+      (Hh_json.Access.access_failure_to_string access_failure))
+
+let get_string x = wrap_json_accessor (Hh_json.Access.get_string x)
+let get_bool x = wrap_json_accessor (Hh_json.Access.get_bool x)
+let get_array x = wrap_json_accessor (Hh_json.Access.get_array x)
+let get_val x = wrap_json_accessor (Hh_json.Access.get_val x)
+let get_obj x = wrap_json_accessor (Hh_json.Access.get_obj x)
+let deserialization_error ~message ~keytrace =
+  Error (Deserialization_error
+    (message ^ (Hh_json.Access.keytrace_to_string keytrace)))
+let not_supported ~message ~keytrace =
+  Error (Not_supported
+    (message ^ (Hh_json.Access.keytrace_to_string keytrace)))
+let wrong_phase ~message ~keytrace =
+  Error (Wrong_phase
+    (message ^ (Hh_json.Access.keytrace_to_string keytrace)))
+[@@@warning "+32"] (* @nocommit -- will remove later *)
+
+let to_locl_ty
+  (_env: Typing_env.env)
+  (_json: Hh_json.json)
+  : locl deserialized_result =
+  Error (Not_supported "not yet implemented")
+
 end
 
 let to_json = Json.from_type
+let json_to_locl_ty = Json.to_locl_ty
 
 (*****************************************************************************)
 (* Prints the internal type of a class, this code is meant to be used for

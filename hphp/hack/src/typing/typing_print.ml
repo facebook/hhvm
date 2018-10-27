@@ -868,6 +868,52 @@ let to_locl_ty
       aux_as json ~keytrace >>= fun as_opt ->
       ty (Tabstract (AKnewtype (typedef_name, args), as_opt))
 
+    | "path" ->
+      get_obj "type" (json, keytrace) >>= fun (type_json, type_keytrace) ->
+      get_string "kind" (type_json, type_keytrace) >>=
+      fun (path_kind, path_kind_keytrace) ->
+
+      get_array "path" (json, keytrace) >>= fun (ids_array, ids_keytrace) ->
+      let ids = map_array
+        ids_array
+        ~keytrace:ids_keytrace
+        ~f:(fun id_str ~keytrace ->
+          match id_str with
+          | JSON_String id ->
+            Ok id
+          | _ ->
+            deserialization_error
+              ~message:"Expected a string"
+              ~keytrace
+        ) in
+      ids >>= fun ids ->
+
+      begin match path_kind with
+      | "class" ->
+        get_string "name" (type_json, type_keytrace)
+          >>= fun (class_name, _class_name_keytrace) ->
+        aux_as json ~keytrace >>= fun as_opt ->
+        ty (Tabstract (AKdependent (`cls class_name, ids), as_opt))
+
+      | "expr" ->
+        not_supported
+          ~message:"Cannot deserialize path-dependent type involving an expression"
+          ~keytrace
+
+      | "this" ->
+        aux_as json ~keytrace >>= fun as_opt ->
+        ty (Tabstract (AKdependent (`this, ids), as_opt))
+
+      | "static" ->
+        aux_as json ~keytrace >>= fun as_opt ->
+        ty (Tabstract (AKdependent (`static, ids), as_opt))
+
+      | path_kind ->
+        deserialization_error
+          ~message:("Unknown path kind: " ^ path_kind)
+          ~keytrace:path_kind_keytrace
+      end
+
     | _ ->
       Error (Not_supported "not yet implemented")
 

@@ -1064,9 +1064,7 @@ class Redis {
       if ($this->password) {
         $this->auth($this->password);
       }
-      if ($this->dbNumber) {
-        $this->select($this->dbNumber);
-      }
+      $this->select($this->dbNumber);
       return true;
     }
 
@@ -1708,10 +1706,13 @@ class Redis {
     $this->persistent = $persistent;
     $this->persistent_id = $persistent_id;
     $this->connection = $conn;
-    $this->dbNumber = 0;
     $this->commands = [];
     $this->multiHandler = [];
     $this->mode = self::ATOMIC;
+
+    if (is_null($this->dbNumber)) {
+      $this->dbNumber = 0;
+    }
 
     if (!$this->connection) {
       trigger_error(

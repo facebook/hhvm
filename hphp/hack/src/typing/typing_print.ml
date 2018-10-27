@@ -1015,6 +1015,25 @@ let to_locl_ty
           ~keytrace
       end
 
+    | "primitive" ->
+      get_string "name" (json, keytrace) >>= fun (name, keytrace) ->
+      begin match name with
+      | "void" -> Ok Nast.Tvoid
+      | "int" -> Ok Nast.Tint
+      | "bool" -> Ok Nast.Tbool
+      | "float" -> Ok Nast.Tfloat
+      | "string" -> Ok Nast.Tstring
+      | "resource" -> Ok Nast.Tresource
+      | "num" -> Ok Nast.Tnum
+      | "arraykey" -> Ok Nast.Tarraykey
+      | "noreturn" -> Ok Nast.Tnoreturn
+      | _ ->
+        deserialization_error
+          ~message:("Unknown primitive type: " ^ kind)
+          ~keytrace
+      end >>= fun prim_ty ->
+      ty (Tprim prim_ty)
+
     | _ ->
       Error (Not_supported "not yet implemented")
 

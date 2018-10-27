@@ -1052,6 +1052,9 @@ let to_locl_ty
       now, we always return a `Tclass`. *)
       ty (Tclass ((class_pos, name), tyl))
 
+    | "object" ->
+      ty Tobject
+
     | _ ->
       Error (Not_supported "not yet implemented")
 

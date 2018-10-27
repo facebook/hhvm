@@ -660,8 +660,19 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
   let is_array x = ["is_array", JSON_Bool x] in
   let empty x = ["empty", JSON_Bool x] in
   let make_field (k, v) =
+    let shape_field_name_to_json shape_field =
+      (* TODO: need to update userland tooling? *)
+      match shape_field with
+      | Ast.SFlit_int (_, s) -> Hh_json.JSON_Number s
+      | Ast.SFlit_str (_, s) -> Hh_json.JSON_String s
+      | Ast.SFclass_const ((_, s1), (_, s2)) ->
+        Hh_json.JSON_Array [
+          Hh_json.JSON_String s1;
+          Hh_json.JSON_String s2;
+        ]
+    in
     obj @@
-    name (Typing_env.get_shape_field_name k) @
+    ["name", (shape_field_name_to_json k)] @
     optional v.sft_optional @
     typ v.sft_ty in
   let fields fl =
@@ -728,8 +739,19 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
     obj @@ kind "class" @ name cid @ args tys
   | Tobject ->
     obj @@ kind "object"
-  | Tshape (_, fl) ->
-    obj @@ kind "shape" @ fields (Nast.ShapeMap.elements fl)
+  | Tshape (fields_known, fl) ->
+    let fields_known =
+      match fields_known with
+      | FieldsFullyKnown -> true
+      | FieldsPartiallyKnown _ ->
+        (* TODO: maybe don't drop the partially-known fields? *)
+        false
+    in
+    obj @@
+      kind "shape" @
+      is_array false @
+      ["fields_known", JSON_Bool fields_known] @
+      fields (Nast.ShapeMap.elements fl)
   | Tunresolved [ty] ->
     from_type env ty
   | Tunresolved tyl ->
@@ -767,7 +789,8 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
   | Tarraykind (AKtuple fields) ->
     obj @@ kind "tuple" @ is_array true @ args (List.rev (IMap.values fields))
   | Tarraykind (AKshape fl) ->
-    obj @@ kind "shape" @ shape_like_array_fields (Nast.ShapeMap.elements fl)
+    obj @@ kind "shape" @ is_array true
+      @ shape_like_array_fields (Nast.ShapeMap.elements fl)
   | Tarraykind AKempty ->
     obj @@ kind "array" @ empty true @ args []
 
@@ -1054,6 +1077,84 @@ let to_locl_ty
 
     | "object" ->
       ty Tobject
+
+    | "shape" ->
+      get_array "fields" (json, keytrace) >>= fun (fields, fields_keytrace) ->
+      get_bool "is_array" (json, keytrace)
+        >>= fun (is_array, _is_array_keytrace) ->
+
+      let unserialize_field
+        field_json
+        ~keytrace
+        : (
+          (Ast_defs.shape_field_name * locl Typing_defs.shape_field_type),
+          deserialization_error
+        ) result =
+        get_val "name" (field_json, keytrace)
+          >>= fun (name, name_keytrace) ->
+
+        (* We don't need position information for shape field names. They're
+        only used for error messages and the like. *)
+        let dummy_pos = Pos.none in
+        begin match name with
+        | Hh_json.JSON_Number name ->
+          Ok (Ast.SFlit_int (dummy_pos, name))
+        | Hh_json.JSON_String name ->
+          Ok (Ast.SFlit_str (dummy_pos, name))
+        | Hh_json.JSON_Array [
+            Hh_json.JSON_String name1;
+            Hh_json.JSON_String name2;
+          ] ->
+          Ok (Ast.SFclass_const ((dummy_pos, name1), (dummy_pos, name2)))
+        | _ ->
+          deserialization_error
+            ~message:"Unexpected format for shape field name"
+            ~keytrace:name_keytrace
+        end >>= fun shape_field_name ->
+
+        (* Optional field may be absent for shape-like arrays. *)
+        begin match get_val "optional" (field_json, keytrace) with
+        | Ok _ ->
+          get_bool "optional" (field_json, keytrace)
+            >>| fun (optional, _optional_keytrace) ->
+          optional
+        | Error _ -> Ok false
+        end >>= fun optional ->
+
+        get_obj "type" (field_json, keytrace)
+          >>= fun (shape_type, shape_type_keytrace) ->
+        aux shape_type ~keytrace:shape_type_keytrace >>= fun shape_field_type ->
+        let shape_field_type = {
+          sft_optional = optional;
+          sft_ty = shape_field_type;
+        } in
+        Ok (shape_field_name, shape_field_type)
+      in
+      map_array fields ~keytrace:fields_keytrace ~f:unserialize_field
+        >>= fun fields ->
+
+      if is_array then
+        (* We don't have enough information to perfectly reconstruct shape-like
+        arrays. We're missing the keys in the shape map of the shape fields. *)
+        not_supported
+          ~message:"Cannot deserialize shape-like array type"
+          ~keytrace
+      else
+        get_bool "fields_known" (json, keytrace)
+          >>= fun (fields_known, _fields_known_keytrace) ->
+        let fields_known =
+          if fields_known
+          then FieldsFullyKnown
+          else FieldsPartiallyKnown Nast.ShapeMap.empty
+        in
+        let fields = List.fold
+          fields
+          ~init:Nast.ShapeMap.empty
+          ~f:(fun shape_map (k, v) ->
+            Nast.ShapeMap.add k v shape_map
+          )
+        in
+        ty (Tshape (fields_known, fields))
 
     | _ ->
       Error (Not_supported "not yet implemented")

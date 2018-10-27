@@ -735,7 +735,7 @@ let rec ty_compare ?(normalize_unresolved = false) ty1 ty2 =
         begin match shape_fields_known_compare known1 known2 with
         | 0 ->
           List.compare (fun (k1,v1) (k2,v2) ->
-            match compare k1 k2 with
+            match Ast.ShapeField.compare k1 k2 with
             | 0 -> shape_field_type_compare v1 v2
             | n -> n)
             (Nast.ShapeMap.elements fields1) (Nast.ShapeMap.elements fields2)
@@ -754,7 +754,8 @@ let rec ty_compare ?(normalize_unresolved = false) ty1 ty2 =
       | FieldsFullyKnown, FieldsPartiallyKnown _ -> -1
       | FieldsPartiallyKnown _, FieldsFullyKnown -> 1
       | FieldsPartiallyKnown f1, FieldsPartiallyKnown f2 ->
-        compare (Nast.ShapeMap.keys f1) (Nast.ShapeMap.keys f2)
+        List.compare Ast.ShapeField.compare
+          (Nast.ShapeMap.keys f1) (Nast.ShapeMap.keys f2)
 
     and shape_field_type_compare sft1 sft2 =
       match ty_compare sft1.sft_ty sft2.sft_ty with

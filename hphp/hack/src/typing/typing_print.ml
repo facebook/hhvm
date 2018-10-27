@@ -1229,6 +1229,11 @@ let to_locl_ty
         ft_returns_void_to_rx = false;
       })
 
+    | "anon" ->
+      not_supported
+        ~message:"Cannot deserialize lambda expression type"
+        ~keytrace
+
     | _ ->
       Error (Not_supported "not yet implemented")
 

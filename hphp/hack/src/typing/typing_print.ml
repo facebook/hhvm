@@ -658,6 +658,7 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
   let name x = ["name", JSON_String x] in
   let optional x = ["optional", JSON_Bool x] in
   let is_array x = ["is_array", JSON_Bool x] in
+  let empty x = ["empty", JSON_Bool x] in
   let make_field (k, v) =
     obj @@
     name (Typing_env.get_shape_field_name k) @
@@ -753,23 +754,22 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
     obj @@ kind "varray_or_darray" @ args [ty]
   | Tarraykind (AKvarray_or_darray ty) ->
     obj @@ kind "varray_or_darray" @ args [ty]
-    (* Is it worth distinguishing these X-like arrays from X? *)
   | Tarraykind AKany ->
-    obj @@ kind "array" @ args []
+    obj @@ kind "array" @ empty false @ args []
   | Tarraykind (AKdarray(ty1, ty2)) ->
     obj @@ kind "darray" @ args [ty1; ty2]
   | Tarraykind (AKvarray ty) ->
     obj @@ kind "varray" @ args [ty]
   | Tarraykind (AKvec ty) ->
-    obj @@ kind "array" @ args [ty]
+    obj @@ kind "array" @ empty false @ args [ty]
   | Tarraykind (AKmap (ty1, ty2)) ->
-    obj @@ kind "array" @ args [ty1; ty2]
+    obj @@ kind "array" @ empty false @ args [ty1; ty2]
   | Tarraykind (AKtuple fields) ->
     obj @@ kind "tuple" @ args (List.rev (IMap.values fields))
   | Tarraykind (AKshape fl) ->
     obj @@ kind "shape" @ shape_like_array_fields (Nast.ShapeMap.elements fl)
   | Tarraykind AKempty ->
-    obj @@ kind "array" @ args []
+    obj @@ kind "array" @ empty true @ args []
 
 type 'a deserialized_result = ('a ty, deserialization_error) result
 
@@ -955,6 +955,32 @@ let to_locl_ty
         deserialization_error
           ~message:(Printf.sprintf
             "Invalid number of type arguments to varray_or_darray (expected 1): %d"
+            (List.length args))
+          ~keytrace
+      end
+
+    | "array" ->
+      get_bool "empty" (json, keytrace) >>= fun (empty, _empty_keytrace) ->
+      get_array "args" (json, keytrace) >>= fun (args, _args_keytrace) ->
+      begin match args with
+      | [] ->
+        if empty
+        then ty (Tarraykind AKempty)
+        else ty (Tarraykind AKany)
+
+      | [ty1] ->
+        aux ty1 ~keytrace:("0" :: keytrace) >>= fun ty1 ->
+        ty (Tarraykind (AKvec ty1))
+
+      | [ty1; ty2] ->
+        aux ty1 ~keytrace:("0" :: keytrace) >>= fun ty1 ->
+        aux ty2 ~keytrace:("1" :: keytrace) >>= fun ty2 ->
+        ty (Tarraykind (AKmap (ty1, ty2)))
+
+      | _ ->
+        deserialization_error
+          ~message:(Printf.sprintf
+            "Invalid number of type arguments to array (expected 0-2): %d"
             (List.length args))
           ~keytrace
       end

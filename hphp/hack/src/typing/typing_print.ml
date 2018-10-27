@@ -687,7 +687,7 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
   | Tthis ->
     obj @@ kind "this"
   | Ttuple tys ->
-    obj @@ kind "tuple" @ args tys
+    obj @@ kind "tuple" @ is_array false @ args tys
   | Tany | Terr ->
     obj @@ kind "any"
   | Tmixed ->
@@ -752,7 +752,7 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
     obj @@ kind "varray" @ args [ty]
   | Tvarray_or_darray ty ->
     obj @@ kind "varray_or_darray" @ args [ty]
-  | Tarraykind (AKvarray_or_darray ty) ->
+    | Tarraykind (AKvarray_or_darray ty) ->
     obj @@ kind "varray_or_darray" @ args [ty]
   | Tarraykind AKany ->
     obj @@ kind "array" @ empty false @ args []
@@ -765,7 +765,7 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
   | Tarraykind (AKmap (ty1, ty2)) ->
     obj @@ kind "array" @ empty false @ args [ty1; ty2]
   | Tarraykind (AKtuple fields) ->
-    obj @@ kind "tuple" @ args (List.rev (IMap.values fields))
+    obj @@ kind "tuple" @ is_array true @ args (List.rev (IMap.values fields))
   | Tarraykind (AKshape fl) ->
     obj @@ kind "shape" @ shape_like_array_fields (Nast.ShapeMap.elements fl)
   | Tarraykind AKempty ->
@@ -984,6 +984,22 @@ let to_locl_ty
             (List.length args))
           ~keytrace
       end
+
+    | "tuple" ->
+      get_bool "is_array" (json, keytrace)
+        >>= fun (is_array, _is_array_keytrace) ->
+      get_array "args" (json, keytrace) >>= fun (args, args_keytrace) ->
+      aux_args args ~keytrace:args_keytrace >>= fun args ->
+      if is_array then
+        let args =
+          List.foldi
+            (List.rev args)
+            ~init:IMap.empty
+            ~f:(fun k acc v -> IMap.add k v acc)
+        in
+        ty (Tarraykind (AKtuple args))
+      else
+        ty (Ttuple args)
 
     | _ ->
       Error (Not_supported "not yet implemented")

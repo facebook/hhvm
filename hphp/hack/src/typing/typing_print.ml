@@ -1001,6 +1001,20 @@ let to_locl_ty
       else
         ty (Ttuple args)
 
+    | "nullable" ->
+      get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
+      begin match args with
+      | [nullable_ty] ->
+        aux nullable_ty ~keytrace:("0" :: keytrace) >>= fun nullable_ty ->
+        ty (Toption nullable_ty)
+      | _ ->
+        deserialization_error
+          ~message:(Printf.sprintf
+            "Unsupported number of args for nullable type: %d"
+            (List.length args))
+          ~keytrace
+      end
+
     | _ ->
       Error (Not_supported "not yet implemented")
 

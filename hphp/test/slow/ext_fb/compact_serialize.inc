@@ -1,11 +1,26 @@
 <?hh
 
+function hexdump(string $s): string {
+  $out = "\n";
+  for ($i=0; $i < strlen($s); ++$i) {
+    $out .= sprintf('%02X', ord($s[$i]));
+    $c = $i + 1;
+    if ($c % 8) {
+      $out .= ' ';
+    } else {
+      $out .= ($c % 16 === 0) ? "\n" : "  ";
+    }
+  }
+  return $out;
+}
+
 
 function fb_cs_test(...$vv) {
   foreach ($vv as $v) {
     fb_cs_test_impl($v);
   }
 }
+
 function fb_cs_test_impl($v) {
   printf("\n====\nx = %s\n", var_export($v, true));
 
@@ -28,6 +43,7 @@ function fb_cs_test_impl($v) {
   }
   $s_ = fb_compact_serialize($v_);
   var_dump($s_ is string);
+  var_dump(hexdump($s_));
   $ss_ = $s_;
   var_dump(!empty($ss_));
   /* check high bit of first character always set */

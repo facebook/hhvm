@@ -16,7 +16,7 @@ module TCO = TypecheckerOptions
 let should_enforce env =
   TCO.disallow_stringish_magic (Env.get_tcopt env)
 
-(** Produce an error on (string) casts of objects. Currently it is allowed to
+(** Produce an error on (string) casts of objects. Currently it is allowed in HHVM to
     cast an object if it is Stringish (i.e., has a __toString() method), but all
     (string) casts of objects will be banned in the future. Eventually,
     __toString/(string) casts of objects will be removed from HHVM entirely. *)

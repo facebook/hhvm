@@ -385,13 +385,15 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     }
 
     if (RuntimeOption::EnableArgsInBacktraces &&
-      fp->func()->hasReifiedGenerics()) {
+        fp->func()->hasReifiedGenerics()) {
       // First local is always $0ReifiedGenerics which comes right after params
       auto const tv = frame_local(fp, fp->func()->numParams());
-      assertx(tv && (RuntimeOption::EvalHackArrDVArrs ? tvIsVec(tv)
-                                                      : tvIsArray(tv)));
-      auto const reified_generics = tv->m_data.parr;
-      funcname += mangleReifiedGenericsName(reified_generics);
+      if (tv->m_type != KindOfUninit) {
+        assertx(tv && (RuntimeOption::EvalHackArrDVArrs ? tvIsVec(tv)
+                       : tvIsArray(tv)));
+        auto const reified_generics = tv->m_data.parr;
+        funcname += mangleReifiedGenericsName(reified_generics);
+      }
     }
 
     frame.set(s_function, funcname);

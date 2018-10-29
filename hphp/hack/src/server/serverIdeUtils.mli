@@ -7,6 +7,9 @@
  *
  *)
 
+
+val make_local_changes: unit -> unit
+val revert_local_changes: unit -> unit
 (* When typechecking a content buffer in IDE mode,
 * this is the path that will be assigned to it *)
 val path: Relative_path.t

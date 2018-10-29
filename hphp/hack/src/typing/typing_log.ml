@@ -17,6 +17,7 @@ open Tty
 (*****************************************************************************)
 
 (* Eventual input to Tty.cprint *)
+let out_channel = ref stdout
 let logBuffer = ref []
 let indentLevel = ref 0
 let accumulatedLength = ref 0
@@ -25,7 +26,7 @@ let lnewline () =
   | [] -> ()
   | _ ->
     begin
-      cprint ~color_mode:Color_Auto
+      cprint ~out_channel:!out_channel ~color_mode:Color_Auto
         ((Normal White, String.make (2 * !indentLevel) ' ') ::
            List.rev ((Normal White, "\n") :: !logBuffer));
        accumulatedLength := 0;

@@ -53,7 +53,6 @@ type mode =
   | Dump_symbol_info
   | Dump_inheritance
   | Errors
-  | AllErrors
   | Lint
   | Dump_deps
   | Identify_symbol of int * int
@@ -70,11 +69,13 @@ type mode =
   | Infer_return_types
   | Least_upper_bound
   | Linearization
+  | Batch_errors
 
 type options = {
   files : string list;
   mode : mode;
   no_builtins : bool;
+  all_errors : bool;
   tcopt : GlobalOptions.t;
 }
 
@@ -121,8 +122,21 @@ let die str =
   Out_channel.close oc;
   exit 2
 
-let print_error ?(indent=false) l =
-  Out_channel.output_string stderr (Errors.to_string ~indent (Errors.to_absolute l))
+
+let print_error ?(oc = stderr) ?(indent=false) l =
+  Out_channel.output_string oc (Errors.to_string ~indent (Errors.to_absolute l))
+
+let write_error_list errors oc =
+  (if errors <> []
+  then List.iter ~f:(print_error ~oc ~indent:true) errors
+  else Out_channel.output_string oc "No errors\n");
+  Out_channel.close oc
+
+let write_first_error errors oc =
+  (if errors <> []
+  then print_error ~oc (List.hd_exn errors)
+  else Out_channel.output_string oc "No errors\n");
+  Out_channel.close oc
 
 let print_error_list errors =
   if errors <> []
@@ -171,12 +185,13 @@ let parse_options () =
   let unsafe_rx = ref false in
   let disallow_stringish_magic = ref false in
   let unresolved_as_union = ref false in
+  let all_errors = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
     " Run the abstract interpreter";
     "--all-errors",
-      Arg.Unit (set_mode AllErrors),
+      Arg.Set all_errors,
       " List all errors not just the first one";
     "--deregister-attributes",
       Arg.Set deregister_attributes,
@@ -343,7 +358,10 @@ let parse_options () =
         " Disallow using objects in contexts where strings are required.";
     "--unresolved-as-union",
         Arg.Set unresolved_as_union,
-        " Interpret unresolved in type inference only as union."
+        " Interpret unresolved in type inference only as union.";
+    "--batch-files",
+        Arg.Unit (set_mode Batch_errors),
+        " Typecheck each file passed in independently";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -390,6 +408,7 @@ let parse_options () =
   { files = fns;
     mode = !mode;
     no_builtins = !no_builtins;
+    all_errors = !all_errors;
     tcopt;
   }
 
@@ -744,7 +763,7 @@ let typecheck_tasts tasts tcopt (filename:Relative_path.t) =
   List.concat_map tasts ~f:typecheck_tast
 
 let handle_mode
-  mode filenames tcopt popt files_contents files_info parse_errors =
+  mode filenames tcopt popt files_contents files_info parse_errors all_errors =
   let expect_single_file () : Relative_path.t =
     match filenames with
     | [x] -> x
@@ -1025,10 +1044,10 @@ let handle_mode
   | Infer_return_types
   | Errors ->
       (* Don't typecheck builtins *)
-      let files_info = Relative_path.Map.fold builtins
+      let files_info = if all_errors then files_info else
+      Relative_path.Map.fold builtins
         ~f:begin fun k _ acc -> Relative_path.Map.remove acc k end
-        ~init:files_info
-      in
+        ~init:files_info in
       let errors = check_file tcopt parse_errors files_info in
       if mode = Infer_return_types
       then
@@ -1036,12 +1055,28 @@ let handle_mode
         Option.iter ~f:(infer_return tcopt filename)
           (Relative_path.Map.get files_info filename)
         );
-      print_first_error errors;
+      (if all_errors then
+        print_error_list errors
+      else
+        print_first_error errors);
       if errors <> [] then exit 2
-  | AllErrors ->
-      let errors = check_file tcopt parse_errors files_info in
-      print_error_list errors;
-      if errors <> [] then exit 2
+  | Batch_errors ->
+      (* For each file in our batch, run typechecking serially.
+        Reset the heaps every time in between. *)
+      (* This means builtins had errors, so lets just print those if we see them *)
+      if parse_errors <> [] then (print_error (List.hd_exn parse_errors); exit 2);
+      iter_over_files (fun filename ->
+        let oc = Out_channel.create ((Relative_path.to_absolute filename) ^ ".out") in
+        Typing_log.out_channel := oc;
+        ServerIdeUtils.make_local_changes ();
+        let files_contents = file_to_files filename in
+        let parse_errors, individual_file_info = parse_name_and_decl popt files_contents tcopt in
+        let errors = check_file tcopt (Errors.get_error_list parse_errors) individual_file_info in
+        (if all_errors then write_error_list errors oc
+        else write_first_error errors oc);
+        ServerIdeUtils.revert_local_changes ()
+      )
+
   | Decl_compare ->
     let filename = expect_single_file () in
     test_decl_compare filename popt files_contents tcopt files_info
@@ -1081,13 +1116,11 @@ let handle_mode
       )
     )
 
-
-
 (*****************************************************************************)
 (* Main entry point *)
 (*****************************************************************************)
 
-let decl_and_run_mode {files; mode; no_builtins; tcopt } popt =
+let decl_and_run_mode {files; mode; no_builtins; tcopt; all_errors } popt =
   if mode = Dump_deps then Typing_deps.debug_trace := true;
   Ident.track_names := true;
   let builtins = if no_builtins then Relative_path.Map.empty else builtins in
@@ -1102,11 +1135,13 @@ let decl_and_run_mode {files; mode; no_builtins; tcopt } popt =
     ~f:begin fun k src acc -> Relative_path.Map.add acc ~key:k ~data:src end
     ~init:files_contents
   in
-
+  (* Don't declare all the filenames in batch_errors mode *)
+  let to_decl = if mode = Batch_errors then builtins else files_contents_with_builtins in
   let errors, files_info =
-    parse_name_and_decl popt files_contents_with_builtins tcopt in
+    parse_name_and_decl popt to_decl tcopt in
+
   handle_mode mode files tcopt popt files_contents files_info
-    (Errors.get_error_list errors)
+    (Errors.get_error_list errors) all_errors
 
 let main_hack ({files; mode; tcopt; _} as opts) =
   (* TODO: We should have a per file config *)

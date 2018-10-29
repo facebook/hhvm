@@ -15,6 +15,7 @@ from typing import Callable, Dict, List
 max_workers = 48
 verbose = False
 dump_on_failure = False
+batch_size = 100
 
 
 TestCase = namedtuple('TestCase', ['file_path', 'input', 'expected'])
@@ -39,10 +40,76 @@ def get_test_flags(path: str) -> List[str]:
         return shlex.split(file.read().strip())
 
 
+def run_batch_tests(test_cases: List[TestCase],
+                    program: str,
+                    default_expect_regex,
+                    get_flags: Callable[[str], List[str]],
+                    out_extension: str) -> List[Result]:
+    """
+    Run the program with batches of files and return a list of results.
+    """
+    # Each directory needs to be in a separate batch because flags are different
+    # for each directory.
+    # Compile a list of directories to test cases, and then
+    dirs_to_files : Dict[str, List[TestCase]] = {}
+    for case in test_cases:
+        test_dir = os.path.dirname(case.file_path)
+        dirs_to_files.setdefault(test_dir, []).append(case)
+
+    # run a list of test cases.
+    # The contract here is that the program will write to
+    # filename.out_extension for each file, and we read that
+    # for the output.
+    def run(test_cases : List[TestCase]):
+        if not test_cases:
+            assert False
+        first_test = test_cases[0]
+        test_dir = os.path.dirname(first_test.file_path)
+        flags = get_flags(test_dir)
+        test_flags = get_test_flags(first_test.file_path)
+        cmd = [program, "--batch-files"]
+        cmd += flags + test_flags
+        cmd += [os.path.basename(case.file_path) for case in test_cases]
+        if verbose:
+            print('Executing', ' '.join(cmd))
+        try:
+            subprocess.call(
+                cmd, stderr=subprocess.STDOUT, cwd=test_dir,
+                universal_newlines=True)
+        except subprocess.CalledProcessError as e:
+            # we don't care about nonzero exit codes... for instance, type
+            # errors cause hh_single_type_check to produce them
+            pass
+        results = []
+        for case in test_cases:
+            with open(case.file_path + out_extension, "r") as f:
+                output : str = f.read()
+                result = check_result(case, default_expect_regex, output)
+                results.append(result)
+        return results
+    # Create a list of batched cases.
+    all_batched_cases : List[List[TestCase]] = []
+
+    # For each directory, we split all the test cases
+    # into chunks of batch_size. Then each of these lists
+    # is a separate job for each thread in the threadpool.
+    for cases in dirs_to_files.values():
+        batched_cases : List[List[TestCase]] = \
+            [cases[i:i + batch_size] for i in range(0, len(case), batch_size)]
+        all_batched_cases += batched_cases
+
+    executor = ThreadPoolExecutor(max_workers=max_workers)
+    futures = [executor.submit(run, test_batch) for test_batch in all_batched_cases]
+
+    results = [future.result() for future in futures]
+    # Flatten the list
+    return [item for sublist in results for item in sublist]
+
 def run_test_program(test_cases: List[TestCase],
                      program: str,
                      default_expect_regex,
                      get_flags: Callable[[str], List[str]]) -> List[Result]:
+
     """
     Run the program and return a list of results.
     """
@@ -213,7 +280,9 @@ def run_tests(files: List[str],
               use_stdin: str,
               program: str,
               default_expect_regex,
+              batch_mode: str,
               get_flags: Callable[[str], List[str]]) -> List[Result]:
+
     # for each file, create a test case
     test_cases = [
         TestCase(
@@ -221,9 +290,12 @@ def run_tests(files: List[str],
             expected=get_content(file, expected_extension),
             input=get_content(file) if use_stdin else None)
         for file in files]
-
-    results = run_test_program(test_cases, program, default_expect_regex,
-        get_flags)
+    if batch_mode:
+        results = run_batch_tests(test_cases, program, default_expect_regex,
+            get_flags, out_extension)
+    else:
+        results = run_test_program(test_cases, program, default_expect_regex,
+            get_flags)
 
     failures = [result for result in results if result.is_failure]
 
@@ -322,6 +394,8 @@ if __name__ == '__main__':
     parser.add_argument('--flags', nargs=argparse.REMAINDER)
     parser.add_argument('--stdin', action='store_true',
                         help='Pass test input file via stdin')
+    parser.add_argument('--batch', action='store_true',
+                        help='Run tests in batches to the test program')
     parser.epilog = "Unless --flags is passed as an argument, "\
                     "%s looks for a file named HH_FLAGS in the same directory" \
                     " as the test files it is executing. If found, the " \
@@ -357,6 +431,7 @@ if __name__ == '__main__':
         args.stdin,
         args.program,
         args.default_expect_regex,
+        args.batch,
         get_flags)
 
     # Doesn't make sense to check failures for idempotence

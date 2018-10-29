@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/tv-val.h"
 
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/unit-util.h"
 
 #include "hphp/util/hash-map.h"
@@ -70,6 +71,15 @@ inline ArrayData* getReifiedGenericsOpt(Cell cell) {
   return getReifiedGenerics(cell.m_data.pstr);
 }
 
+// Raises a runtime error if n does not match the number of reified generics
+// of f
+inline void raiseReifiedGenericMismatch(const Func* f, size_t n) {
+  if (f->numReifiedGenerics() == n) return;
+  raise_error("Function %s requires %zu reified generics but %zu given",
+              f->fullName()->data(),
+              f->numReifiedGenerics(),
+              n);
+}
 }
 
 #endif

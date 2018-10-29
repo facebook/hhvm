@@ -72,6 +72,10 @@ inline bool ActRec::isFCallM() const {
   return flags() & MultiReturn;
 }
 
+inline bool ActRec::hasReifiedGenerics() const {
+  return flags() & HasReifiedGenerics;
+}
+
 inline uint32_t ActRec::encodeNumArgsAndFlags(uint32_t numArgs, Flags flags) {
   assertx((numArgs & kFlagsMask) == 0);
   assertx((uint32_t{flags} & kNumArgsMask) == 0);
@@ -96,6 +100,10 @@ inline void ActRec::setDynamicCall() {
 
 inline void ActRec::setFCallM() {
   m_numArgsAndFlags |= MultiReturn;
+}
+
+inline void ActRec::setHasReifiedGenerics() {
+  m_numArgsAndFlags |= HasReifiedGenerics;
 }
 
 inline void ActRec::setResumed() {
@@ -220,6 +228,7 @@ inline void ActRec::trashThis() {
 /////////////////////////////////////////////////////////////////////////////
 
 inline void ActRec::setReifiedGenerics(ArrayData* rg) {
+  m_numArgsAndFlags |= HasReifiedGenerics;
   m_reifiedGenerics = rg;
 }
 
@@ -228,10 +237,8 @@ inline ArrayData* ActRec::getReifiedGenerics() const {
 }
 
 inline void ActRec::trashReifiedGenerics() {
-  if (debug) {
-    setReifiedGenerics(reinterpret_cast<ArrayData*>(
-      kTrashedReifiedGenericsSlot));
-  }
+  if (!debug) return;
+  m_reifiedGenerics = reinterpret_cast<ArrayData*>(kTrashedReifiedGenericsSlot);
 }
 /////////////////////////////////////////////////////////////////////////////
 

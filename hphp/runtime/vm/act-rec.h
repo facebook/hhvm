@@ -74,7 +74,7 @@ struct ActRec {
 #endif
   const Func* m_func;  // Function.
   uint32_t m_soff;     // offset of caller from its bytecode start.
-  uint32_t m_numArgsAndFlags; // arg_count:28, flags:4
+  uint32_t m_numArgsAndFlags; // arg_count:26, flags:6
   union {
     ObjectData* m_thisUnsafe; // This.
     Class* m_clsUnsafe;       // Late bound class.
@@ -107,6 +107,9 @@ struct ActRec {
 
     // Set if this corresponds to a dynamic call
     DynamicCall = (1u << 27),
+
+    // Set if m_reifiedGenerics contains valid data
+    HasReifiedGenerics = (1u << 28),
 
     // This bit can be independently set on ActRecs with any other flag state.
     // It's used by the unwinder to know that an ActRec has been partially torn
@@ -191,6 +194,7 @@ struct ActRec {
   bool magicDispatch() const;
   bool isDynamicCall() const;
   bool isFCallM() const;
+  bool hasReifiedGenerics() const;
 
   /*
    * Pack `numArgs' and `flags' into the format expected by m_numArgsAndFlags.
@@ -214,6 +218,7 @@ struct ActRec {
   void setAsyncEagerReturn();
   void setDynamicCall();
   void setFCallM();
+  void setHasReifiedGenerics();
 
   /*
    * Set or clear both m_invName and the MagicDispatch flag.
@@ -313,6 +318,7 @@ struct ActRec {
 
   /*
    * Sets to reified generics slot
+   * It also sets HasReifiedGenerics on the m_numArgsAndFlags
    */
    void setReifiedGenerics(ArrayData* rg);
 

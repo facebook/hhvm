@@ -243,6 +243,21 @@ struct IfaceMethodData : IRExtraData {
 };
 
 /*
+ * Func
+ */
+struct FuncData : IRExtraData {
+  explicit FuncData(const Func* f)
+    : func(f)
+  {}
+
+  std::string show() const {
+    return folly::format("{}", func->fullName()).str();
+  }
+
+  const Func* func;
+};
+
+/*
  * Func with argument index.
  */
 struct FuncArgData : IRExtraData {
@@ -1637,6 +1652,7 @@ X(RaiseParamRefMismatchForFuncName,
                                 ParamData);
 X(RaiseArrayIndexNotice,        RaiseArrayIndexNoticeData);
 X(RaiseArrayKeyNotice,          RaiseArrayKeyNoticeData);
+X(RaiseReifiedGenericMismatch,  FuncData);
 X(InterpOne,                    InterpOneData);
 X(InterpOneCF,                  InterpOneData);
 X(StClosureArg,                 ByteOffsetData);

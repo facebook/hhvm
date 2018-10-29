@@ -2240,6 +2240,11 @@ To string conversions:
   raise a warning or throw an exception indicating that the func specified in
   S0 was called dynamically (and should not be).
 
+| RaiseReifiedGenericMismatch<func>, ND, S(Int), NF
+
+  Raises a runtime error if the number provided in S1 does not match the number
+  of reified generics S0 expects.
+
 | CheckStaticLoc<func,staticLocalName>, ND, NA, B
 
   Check whether the static local variable named 'staticLocalName' for
@@ -3584,7 +3589,8 @@ fields of that struct for holding intermediate values.
 | StARReifiedGenerics<spoff>, ND, S(StkPtr) SVArr, NF
 
   Store S1 to m_reifiedGenerics on the ActRec pointed to by the stack pointer
-  S0 and the stack pointer offet.
+  S0 and the stack pointer offet. Also, sets the HasReifiedGenerics bit of the
+  m_numArgsAndFlags on the same ActRec.
 
 | LdARReifiedGenerics, DVArr, S(FramePtr), NF
 

@@ -75,6 +75,114 @@ void prologDispatch(IRGS& env, const Func* func, Body body) {
   );
 }
 
+// Check if HasReifiedGenerics flag is set
+SSATmp* emitARHasReifiedGenericsTest(IRGS& env) {
+  auto const flags = gen(env, LdARNumArgsAndFlags, fp(env));
+  auto const test = gen(
+    env, AndInt, flags,
+    cns(env, static_cast<int32_t>(ActRec::Flags::HasReifiedGenerics))
+  );
+  return test;
+}
+
+// Load the reified generics from ActRec if the bit is set otherwise set
+// it uninit. We will error at the end of the prologue
+SSATmp* emitLdARReifiedGenericsSafe(IRGS& env) {
+  return cond(
+    env,
+    [&] (Block* taken) {
+      auto const test = emitARHasReifiedGenericsTest(env);
+      gen(env, JmpZero, taken, test);
+    },
+    [&] { return gen(env, LdARReifiedGenerics, fp(env)); },
+    // taken
+    [&] { return cns(env, TUninit); }
+  );
+}
+
+const StaticString s_reified_generics_not_given(
+  Strings::REIFIED_GENERICS_NOT_GIVEN
+);
+const StaticString s_reified_generics_should_not_be_given(
+  Strings::REIFIED_GENERICS_SHOULD_NOT_BE_GIVEN
+);
+
+// Check whether HasReifiedGenerics is set on the ActRec
+void emitARHasReifiedGenericsCheck(IRGS& env) {
+  auto const func = curFunc(env);
+  // It is possible to create a reified function and call it with reified
+  // parameters but then, on sandboxes, make this function unreified yet
+  // still call it with reified parameters. We need to catch this, hence
+  // the following check has to happen not only on reified functions but
+  // on all functions when we are not in repo mode.
+  if (!func->hasReifiedGenerics() &&
+      (func->cls() ? func->cls()->attrs() & AttrUnique : func->isUnique()) &&
+      RuntimeOption::RepoAuthoritative) {
+    return;
+  }
+  ifThenElse(
+    env,
+    [&] (Block* taken) {
+      auto const test = emitARHasReifiedGenericsTest(env);
+      gen(env, JmpZero, taken, test);
+    },
+    [&] {
+      if (func->hasReifiedGenerics()) return;
+      gen(
+        env,
+        RaiseError,
+        cns(env, s_reified_generics_should_not_be_given.get())
+      );
+    },
+    [&] {
+      if (!func->hasReifiedGenerics()) return;
+      // null out VarEnv before raising error
+      gen(env, RaiseError, cns(env, s_reified_generics_not_given.get()));
+    }
+  );
+  if (!func->hasReifiedGenerics()) return;
+  // Now that we know that first local is not Tuninit,
+  // lets tell that to the JIT
+  gen(
+    env,
+    AssertLoc,
+    RuntimeOption::EvalHackArrDVArrs ? TVec : TArr,
+    LocalId{func->numParams()},
+    fp(env)
+  );
+}
+
+// Check whether the count of reified generics matches the one we expect
+void emitCorrectNumOfReifiedGenericsCheck(IRGS& env) {
+  auto const func = curFunc(env);
+  if (!func->hasReifiedGenerics()) return;
+  // First local contains the reified generics
+  auto const reified_generics =
+    gen(
+      env,
+      LdLoc,
+      RuntimeOption::EvalHackArrDVArrs ? TVec : TArr,
+      LocalId{func->numParams()},
+      fp(env)
+    );
+  auto const num_generics = RuntimeOption::EvalHackArrDVArrs
+    ? gen(env, CountVec, reified_generics)
+    : gen(env, CountArray, reified_generics);
+  auto const num_expected_generics = func->numReifiedGenerics();
+  ifThen(
+    env,
+    [&] (Block* taken) {
+      auto const test = gen(env, EqInt, num_generics,
+                            cns(env, num_expected_generics));
+      gen(env, JmpZero, taken, test);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, RaiseReifiedGenericMismatch, FuncData{func}, num_generics);
+    }
+  );
+}
+
 /*
  * Initialize parameters.
  *
@@ -92,7 +200,7 @@ void init_params(IRGS& env, const Func* func, uint32_t argc) {
   if (func->hasReifiedGenerics()) {
     // Currently does not work with closures
     assertx(!func->isClosureBody());
-    auto const reified_generics = gen(env, LdARReifiedGenerics, fp(env));
+    auto const reified_generics = emitLdARReifiedGenericsSafe(env);
     gen(env, KillARReifiedGenerics, fp(env));
     // $0ReifiedGenerics is the first local
     gen(env, StLoc, LocalId{func->numParams()}, fp(env), reified_generics);
@@ -347,6 +455,8 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
     gen(env, CheckSurpriseFlagsEnter, FuncEntryData { func, argc }, fp(env));
   }
 
+  emitARHasReifiedGenericsCheck(env);
+  emitCorrectNumOfReifiedGenericsCheck(env);
   emitCalleeDynamicCallCheck(env);
   emitCallMCheck(env);
 

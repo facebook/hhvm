@@ -275,6 +275,11 @@ void cgStARReifiedGenerics(IRLS& env, const IRInstruction* inst) {
   auto const off =
     cellsToBytes(inst->extra<StARReifiedGenerics>()->offset.offset);
   vmain(env) << store{src, sp[off + AROFF(m_reifiedGenerics)]};
+  vmain(env) << orlim{
+     static_cast<int32_t>(ActRec::Flags::HasReifiedGenerics),
+     sp[off + AROFF(m_numArgsAndFlags)],
+     vmain(env).makeReg()
+   };
 }
 
 void cgLdARReifiedGenerics(IRLS& env, const IRInstruction* inst) {

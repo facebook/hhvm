@@ -113,6 +113,10 @@ auto constexpr HACKARR_COMPAT_VEC_IS_VARR = "is_varray() called on vec";
 auto constexpr HACKARR_COMPAT_DARR_IS_DICT = "is_dict() called on darray";
 auto constexpr HACKARR_COMPAT_DICT_IS_DARR = "is_darray() called on dict";
 auto constexpr FUNCTION_CALLED_DYNAMICALLY = "'%s' called dynamically";
+auto constexpr REIFIED_GENERICS_NOT_GIVEN =
+  "Cannot call a reified function without the reified generics";
+auto constexpr REIFIED_GENERICS_SHOULD_NOT_BE_GIVEN =
+  "Cannot call a non-reified function with reified generics";
 
 } // namespace Strings
 } // namespace HPHP

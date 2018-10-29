@@ -1035,6 +1035,11 @@ struct Func final {
    */
   bool hasReifiedGenerics() const;
 
+  /*
+   * Returns how many reified generics this function has
+   */
+  size_t numReifiedGenerics() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Unit table entries.                                                [const]
 

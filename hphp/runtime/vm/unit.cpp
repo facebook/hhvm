@@ -721,9 +721,11 @@ Func* Unit::loadFunc(const StringData* name) {
     name = normStr.get();
   }
   func_ = loadFunc(generic_ne, name);
-  // If the function still does not exists, return null
+  // If the function still does not exist, return null
   if (!func_) return nullptr;
-  assertx(func_->hasReifiedGenerics());
+  if (!func_->hasReifiedGenerics()) {
+    raise_error(Strings::REIFIED_GENERICS_SHOULD_NOT_BE_GIVEN);
+  }
   ne->m_cachedFunc.bind(
     func_->isPersistent() ? rds::Mode::Persistent : rds::Mode::Normal);
   ne->setCachedFunc(func_);

@@ -608,6 +608,22 @@ void Func::resetPrologue(int numParams) {
   m_prologueTable[numParams] = stubs.fcallHelperThunk;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Reified Generics
+
+const StaticString s___Reified("__Reified");
+
+size_t Func::numReifiedGenerics() const {
+  if (!shared()->m_hasReifiedGenerics) return 0;
+  auto const ua = shared()->m_userAttributes;
+  auto const it = ua.find(s___Reified.get());
+  // Since m_hasReifiedGenerics is true, it should exist
+  assertx(it != ua.end());
+  auto tv = it->second;
+  assertx(RuntimeOption::EvalHackArrDVArrs ? tvIsVec(tv) : tvIsArray(tv));
+  // userattribute array counts the indices too, so we need to divide by 2
+  return tv.m_data.parr->size() / 2;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Pretty printer.

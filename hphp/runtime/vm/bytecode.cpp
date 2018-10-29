@@ -1570,8 +1570,10 @@ static void prepareFuncEntry(ActRec *ar, PC& pc, StackArgsState stk) {
   ArrayData* reified_generics = nullptr;
 
   if (ar->m_func->hasReifiedGenerics()) {
-    // This means that the first local is $0ReifiedGenerics
-    reified_generics = ar->getReifiedGenerics();
+    if (ar->hasReifiedGenerics()) {
+      // This means that the first local is $0ReifiedGenerics
+      reified_generics = ar->getReifiedGenerics();
+    }
     ar->trashReifiedGenerics();
   }
 
@@ -1642,14 +1644,19 @@ static void prepareFuncEntry(ActRec *ar, PC& pc, StackArgsState stk) {
     func = ar->m_func;
   }
 
-  if (reified_generics) {
+  if (ar->m_func->hasReifiedGenerics()) {
     // Currently does not work with closures
     assertx(!func->isClosureBody());
-    // push for first local
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      stack.pushStaticVec(reified_generics);
+    if (!ar->hasReifiedGenerics()) {
+      stack.pushUninit();
     } else {
-      stack.pushStaticArray(reified_generics);
+      assertx(reified_generics != nullptr);
+      // push for first local
+      if (RuntimeOption::EvalHackArrDVArrs) {
+        stack.pushStaticVec(reified_generics);
+      } else {
+        stack.pushStaticArray(reified_generics);
+      }
     }
     nlocals++;
   }
@@ -1672,6 +1679,25 @@ static void prepareFuncEntry(ActRec *ar, PC& pc, StackArgsState stk) {
     HPHP::jit::raiseMissingArgument(func, ar->numArgs());
   }
 }
+
+namespace {
+// Check whether HasReifiedGenerics is set on the ActRec
+// Check whether the count of reified generics matches the one we expect
+void checkForReifiedGenericsErrors(const ActRec* ar) {
+  if (!ar->m_func->hasReifiedGenerics() && !ar->hasReifiedGenerics()) return;
+  if (!ar->m_func->hasReifiedGenerics()) {
+    raise_error(Strings::REIFIED_GENERICS_SHOULD_NOT_BE_GIVEN);
+  }
+  if (!ar->hasReifiedGenerics()) {
+    raise_error(Strings::REIFIED_GENERICS_NOT_GIVEN);
+  }
+  auto const tv = frame_local(ar, ar->m_func->numParams());
+  assertx(tv && (RuntimeOption::EvalHackArrDVArrs ? tvIsVec(tv)
+                                                  : tvIsArray(tv)));
+  auto const reified_generics = tv->m_data.parr;
+  raiseReifiedGenericMismatch(ar->m_func, reified_generics->size());
+}
+} // namespace
 
 static void dispatch();
 
@@ -1716,6 +1742,7 @@ void enterVMAtFunc(ActRec* enterFnAr, StackArgsState stk, VarEnv* varEnv) {
 
   if (!EventHook::FunctionCall(enterFnAr, EventHook::NormalFunc)) return;
   checkStack(vmStack(), enterFnAr->m_func, 0);
+  checkForReifiedGenericsErrors(enterFnAr);
   calleeDynamicCallChecks(enterFnAr);
   checkForRequiredCallM(enterFnAr);
   assertx(vmfp()->func()->contains(vmpc()));
@@ -5774,6 +5801,7 @@ bool doFCall(ActRec* ar, PC& pc, uint32_t numArgs, bool unpack) {
     pc = vmpc();
     return false;
   }
+  checkForReifiedGenericsErrors(ar);
   calleeDynamicCallChecks(ar);
   checkForRequiredCallM(ar);
   return true;

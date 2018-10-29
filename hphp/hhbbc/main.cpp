@@ -35,6 +35,7 @@
 
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/rds-local.h"
 #include "hphp/hhvm/process-init.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/repo.h"
@@ -494,6 +495,9 @@ int main(int argc, char** argv) try {
     RuntimeOption::EvalInitialStaticStringTableSize =
       gd.InitialStaticStringTableSize;
   }
+
+  rds::local::init();
+  SCOPE_EXIT { rds::local::fini(); };
 
   Hdf config;
   IniSetting::Map ini = IniSetting::Map::object;

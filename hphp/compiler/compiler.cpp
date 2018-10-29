@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/program-functions.h"
+#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/vm/extern-compiler.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/version.h"
@@ -403,6 +404,8 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     Logger::LogLevel = Logger::LogInfo;
   }
 
+  rds::local::init();
+  SCOPE_EXIT { rds::local::fini(); };
   tl_heap.getCheck();
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;

@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/rds-header.h"
+#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/ref-data.h"
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/resource-data.h"
@@ -336,6 +337,8 @@ template<class Fn> void iterateExactRoots(Fn fn) {
   if (rds) {
     rds::forEachLocalAlloc(fn);
   }
+
+  rds::local::iterateRoots(fn);
 
   // Root handles & sweep lists
   tl_heap->iterateRoots(fn);

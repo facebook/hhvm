@@ -640,7 +640,7 @@ void processInit() {
   s_persistentTrue.bind(Mode::Persistent);
   *s_persistentTrue = true;
 
-  RDSLocalDetail::iterate<RDSLocalDetail::RDSAllocInit>();
+  local::RDSInit();
 }
 
 void requestInit() {
@@ -686,8 +686,8 @@ void flush() {
   if (jit::mcgen::retranslateAllEnabled() &&
       !jit::mcgen::retranslateAllPending()) {
     size_t offset = s_local_frontier & ~0xfff;
-    size_t protectedSpace = RDSLocalDetail::s_rds_local_usedbytes +
-                            (-RDSLocalDetail::s_rds_local_usedbytes & 0xfff);
+    size_t protectedSpace = local::detail::s_usedbytes +
+                            (-local::detail::s_usedbytes & 0xfff);
     if (madvise(static_cast<char*>(tl_base) + offset,
                 s_local_base - protectedSpace - offset,
                 MADV_DONTNEED)) {
@@ -833,15 +833,13 @@ void threadInit(bool shouldRegister) {
 
   header()->currentGen = 1;
   if (shouldRegister) {
-    RDSLocalDetail::rl_hotSection.tl_base_copy = tl_base;
-    RDSLocalDetail::iterate<RDSLocalDetail::RDSInit>();
+    local::init();
   }
 }
 
 void threadExit(bool shouldUnregister) {
   if (shouldUnregister) {
-    RDSLocalDetail::iterate<RDSLocalDetail::RDSFini>();
-    RDSLocalDetail::rl_hotSection.tl_base_copy = nullptr;
+    local::fini();
     Guard g(s_tlBaseListLock);
     auto it = std::find(begin(s_tlBaseList), end(s_tlBaseList), tl_base);
     if (it != end(s_tlBaseList)) {

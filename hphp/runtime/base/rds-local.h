@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_RDS_LOCAL_H_
 #define incl_HPHP_RDS_LOCAL_H_
 
+#include "hphp/util/alloc.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/thread-local.h"
 
@@ -24,11 +25,18 @@
 
 namespace HPHP {
 
+struct RequestEventHandler;
+
+namespace rds {
+namespace local {
+
 /**
- * RDSLocals are stored in RDS.  Their destructor is called as a RDS is
- * cleaned up. They expose the same API as thread locals, and can be used in
- * a similar manner.  The core difference is that they are tied to a request
- * data segment rather than a thread local section.
+ * RDSLocals are stored in RDS on request threads, and in a malloc'ed buffer on
+ * non request threads.  Their destructor is called as a RDS is cleaned up, or
+ * as the backing space is cleaned up. They expose the same API as thread
+ * locals, and can be used in a similar manner.  The core difference is that
+ * they will be tied to a request data segment on request threads, rather than
+ * a thread local section.
  * There are two options for how RDS locals should be initialized:
  *   - FirstUse
  *     - Similar to standard thread locals.
@@ -46,7 +54,6 @@ namespace HPHP {
  * the HotRDSLocals struct, which stores the data flat in thread local storage.
  * Swapping RDS sections requires copying this data in and out of backing RDS
  * storage.  Avoid using these if possible.
- *
  *
  * How to use rds local macros:
  *
@@ -78,23 +85,23 @@ namespace HPHP {
 #define DECLARE_RDS_LOCAL_HOTVALUE(T, f) \
   struct RLHotWrapper_ ## f { \
     RLHotWrapper_ ## f& operator=(T&& v) { \
-      ::HPHP::RDSLocalDetail::rl_hotSection.f = v; \
+      ::HPHP::rds::local::detail::rl_hotSection.f = v; \
       return *this; \
     } \
     operator T&() { \
-      return ::HPHP::RDSLocalDetail::rl_hotSection.f; \
+      return ::HPHP::rds::local::detail::rl_hotSection.f; \
     } \
   } f;
 
 #define IMPLEMENT_RDS_LOCAL_HOTVALUE(T, f) \
   RLHotWrapper_ ## f f;
 
-namespace RDSLocalDetail {
+namespace detail {
 
 struct HotRDSLocals {
-  void* tl_base_copy;  // This copy of tl_base will not be VMProtected.
+  void* rdslocal_base;
 
-  TYPE_SCAN_IGNORE_FIELD(tl_base_copy);
+  TYPE_SCAN_IGNORE_FIELD(rdslocal_base);
 };
 static_assert(sizeof(HotRDSLocals) <= 16,
               "It is essential HotRDSLocals is small.  Consider using "
@@ -102,7 +109,7 @@ static_assert(sizeof(HotRDSLocals) <= 16,
               "every user level context switch.");
 
 extern __thread HotRDSLocals rl_hotSection;
-extern size_t s_rds_local_usedbytes;
+extern uint32_t s_usedbytes;
 
 }
 
@@ -110,43 +117,39 @@ extern size_t s_rds_local_usedbytes;
 // RDS Local
 
 #define RDS_LOCAL(T, f) \
-  ::HPHP::RDSLocal<T, Initialize::FirstUse> f
+  ::HPHP::rds::local::RDSLocal<T, ::HPHP::rds::local::Initialize::FirstUse> f
 
 #define RDS_LOCAL_NO_CHECK(T, f) \
-  ::HPHP::RDSLocal<T, Initialize::Explicitly> f
+  ::HPHP::rds::local::RDSLocal<T, ::HPHP::rds::local::Initialize::Explicitly> f
 
-struct RequestEventHandler;
-
-namespace RDSLocalDetail {
+namespace detail {
 
 struct RDSLocalNode {
-  virtual void allocInit() = 0;
-  virtual void rdsInit() = 0;
-  virtual void rdsFini() = 0;
+  virtual void init() = 0;
+  virtual void fini() = 0;
+
+  virtual void* nodeLocation() = 0;
+  virtual size_t nodeSize() = 0;
+  virtual type_scan::Index nodeTypeIndex() = 0;
+
+
   RDSLocalNode* m_next;
+  // s_RDSLocalsBase is the base of the RDSLocal section in RDS.  Its only
+  // used for computing RDS offsets for use in the JIT.
+  static Handle s_RDSLocalsBase;
+
+  template<typename Fn>
+  void iterateRoot(Fn fn) {
+    fn(nodeLocation(), nodeSize(), nodeTypeIndex());
+  }
 };
+
 extern RDSLocalNode* head;
 
-enum InitType {
-  RDSAllocInit,
-  RDSInit,
-  RDSFini,
-};
-
-template<InitType IT>
-void iterate() {
+template<typename Fn>
+void iterate(Fn fn) {
   for (auto p = head; p != nullptr; p = p->m_next) {
-    switch (IT) {
-      case RDSAllocInit:
-        p->allocInit();
-        break;
-      case RDSInit:
-        p->rdsInit();
-        break;
-      case RDSFini:
-        p->rdsFini();
-        break;
-    }
+    fn(p);
   }
 }
 
@@ -155,13 +158,26 @@ void initializeRequestEventHandler(RequestEventHandler* h);
 ///////////////////////////////////////////////////////////////////////////////
 }
 
+void RDSInit();
+// init is called to allocate and initialize the rdslocals.
+void init();
+// fini deallocates the rdslocals.
+void fini();
+
+template<typename Fn>
+void iterateRoots(Fn fn) {
+  detail::iterate([&](detail::RDSLocalNode* p) {
+    p->iterateRoot(fn);
+  });
+}
+
 enum class Initialize : uint8_t {
   FirstUse,
   Explicitly,
 };
 
 template<typename T, Initialize Init>
-struct RDSLocal : private RDSLocalDetail::RDSLocalNode {
+struct RDSLocal : private detail::RDSLocalNode {
   static auto constexpr REH = std::is_base_of<RequestEventHandler, T>::value;
   template<typename T1>
   using REH_t = std::enable_if_t<REH, T1>;
@@ -175,7 +191,7 @@ struct RDSLocal : private RDSLocalDetail::RDSLocalNode {
   NEVER_INLINE void create();
   void destroy();
 
-  bool isNull() const { return !(RDSLocalDetail::rl_hotSection.tl_base_copy &&
+  bool isNull() const { return !(detail::rl_hotSection.rdslocal_base &&
                                  node().has_value()); }
   explicit operator bool() const { return !isNull(); }
 
@@ -193,7 +209,7 @@ struct RDSLocal : private RDSLocalDetail::RDSLocalNode {
 
   template<typename B = bool>
   NREH_t<B> getInited() const {
-    !isNull();
+    return !isNull();
   }
 
   template<typename B = bool>
@@ -202,21 +218,16 @@ struct RDSLocal : private RDSLocalDetail::RDSLocalNode {
   }
 
   size_t getRDSOffset() const {
-    return m_link.handle();
+    return s_RDSLocalsBase + m_offset;
   }
 
 private:
-  void allocInit() override {
-    m_link = rds::alloc<Node, rds::Mode::Local>();
-    RDSLocalDetail::s_rds_local_usedbytes = rds::usedLocalBytes();
+  void init() override {
+    assertx(detail::rl_hotSection.rdslocal_base);
+    // Initialize the Node so that it is unset.
+    new (&node()) Node();
   }
-  void rdsInit() override {
-    if (RDSLocalDetail::rl_hotSection.tl_base_copy) {
-      // Initialize the Node so that it is unset.
-      new (m_link.get()) Node();
-    }
-  }
-  void rdsFini() override {
+  void fini() override {
     destroy();
   }
 
@@ -229,7 +240,7 @@ private:
   template<typename V = void>
   REH_t<V> rehInit() const {
     if (!getInited()) {
-      RDSLocalDetail::initializeRequestEventHandler(getNoCheck());
+      detail::initializeRequestEventHandler(getNoCheck());
     }
   }
   template<typename V = void>
@@ -271,25 +282,33 @@ private:
   };
 
   Node& node() const {
-    return *rds::handleToPtr<Node, rds::Mode::Local>(
-      RDSLocalDetail::rl_hotSection.tl_base_copy,
-      m_link.handle());
+    return *reinterpret_cast<Node*>(
+      ((char*)detail::rl_hotSection.rdslocal_base + m_offset));
   }
 
-  rds::Link<Node, rds::Mode::Local> m_link;
+  void* nodeLocation() override { return &node(); }
+  size_t nodeSize() override { return sizeof(Node); }
+  type_scan::Index nodeTypeIndex() override {
+    return type_scan::getIndexForScan<Node>();
+  }
+
+  uint32_t m_offset;
 };
 
-// The RDS space backing these locals is reserved as the RDS allocator is
-// initialized.  The space will be zeroed as each RDS is created.  Any remaining
-// RDS local will be destroyed at RDS destruction.  The initialisation of the
-// RDS locals will happen at first use, or through explicit initialisation
-// calls.  RDS locals are stored in the local section, so they are not
-// assigned generation numbers, and are not invalidated at the end of a request.
+// The initialisation of the RDS locals will happen at first use, or through
+// explicit initialisation calls.  RDS locals are stored in the rds local
+// section on request threads, so they are not assigned generation numbers, and
+// are not invalidated at the end of a request.
+//
+// On non request threads RDS locals are stored in a block allocated in the
+// heap.  This is destroyed as rds::local::fini is called.
 
 template<typename T, Initialize Init>
 RDSLocal<T, Init>::RDSLocal() {
-  m_next = RDSLocalDetail::head;
-  RDSLocalDetail::head = this;
+  m_next = detail::head;
+  detail::head = this;
+  m_offset = detail::s_usedbytes;
+  detail::s_usedbytes += sizeof(Node);
 }
 
 template<typename T, Initialize Init>
@@ -306,7 +325,7 @@ void RDSLocal<T, Init>::destroy() {
 
 template<typename T, Initialize Init>
 T* RDSLocal<T, Init>::getCheck() const {
-  assertx(RDSLocalDetail::rl_hotSection.tl_base_copy);
+  assertx(detail::rl_hotSection.rdslocal_base);
   if (!node().has_value()) {
     const_cast<RDSLocal*>(this)->create();
   }
@@ -329,16 +348,25 @@ T* RDSLocal<T, Init>::get() const {
 // using these.
 
 #define IMPLEMENT_REQUEST_LOCAL(T,f)     \
-  HPHP::RDSLocal<T, Initialize::FirstUse> f
+  ::HPHP::rds::local::RDSLocal<T, ::HPHP::rds::local::Initialize::FirstUse> f
 
 #define DECLARE_STATIC_REQUEST_LOCAL(T,f)    \
-  static HPHP::RDSLocal<T, Initialize::FirstUse> f
+  static ::HPHP::rds::local::RDSLocal< \
+    T, \
+    ::HPHP::rds::local::Initialize::FirstUse \
+  > f
 
 #define IMPLEMENT_STATIC_REQUEST_LOCAL(T,f)     \
-  static HPHP::RDSLocal<T, Initialize::FirstUse> f
+  static ::HPHP::rds::local::RDSLocal< \
+    T, \
+    ::HPHP::rds::local::Initialize::FirstUse \
+  > f
 
 #define DECLARE_EXTERN_REQUEST_LOCAL(T,f)    \
-  extern HPHP::RDSLocal<T, Initialize::FirstUse> f
+  extern ::HPHP::rds::local::RDSLocal< \
+    T, \
+    ::HPHP::rds::local::Initialize::FirstUse \
+  > f
 
 
 /**
@@ -377,6 +405,6 @@ T* RDSLocal<T, Init>::get() const {
  */
 
 ///////////////////////////////////////////////////////////////////////////////
-}
+}}}
 
 #endif // incl_HPHP_RDS_LOCAL_H_

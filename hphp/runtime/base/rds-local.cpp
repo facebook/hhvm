@@ -19,7 +19,9 @@
 #include "hphp/runtime/base/execution-context.h"
 
 namespace HPHP {
-namespace RDSLocalDetail {
+namespace rds {
+namespace local {
+namespace detail {
 
 RDSLocalNode* head = nullptr;
 
@@ -32,7 +34,9 @@ RDSLocalNode* head = nullptr;
 
 static RDS_LOCAL(HotRDSLocals, rl_hotBackingStore);
 __thread HotRDSLocals rl_hotSection;
-size_t s_rds_local_usedbytes = 0;
+uint32_t s_usedbytes = 0;
+
+Handle RDSLocalNode::s_RDSLocalsBase;
 
 void initializeRequestEventHandler(RequestEventHandler* h) {
   h->setInited(true);
@@ -48,5 +52,48 @@ void initializeRequestEventHandler(RequestEventHandler* h) {
   };
 }
 
+///////////////////////////////////////////////////////////////////////////////
 }
+
+void RDSInit() {
+  assertx(!isHandleBound(detail::RDSLocalNode::s_RDSLocalsBase));
+  detail::RDSLocalNode::s_RDSLocalsBase =
+    rds::detail::allocUnlocked(Mode::Local, detail::s_usedbytes,
+                               std::min(detail::s_usedbytes, 16U),
+                               type_scan::kIndexUnknown);
 }
+
+void init() {
+  // We may have already been initialized in the case of a thread creating an
+  // RDS segment after we already decided to malloc some memory for RDS locals.
+  // This should not happen on request threads or RDS locals might not be
+  // accessible from the JIT.
+  if (detail::rl_hotSection.rdslocal_base != nullptr) return;
+  if (tl_base) {
+    detail::rl_hotSection.rdslocal_base =
+      handleToPtr<void, Mode::Local>(detail::RDSLocalNode::s_RDSLocalsBase);
+  } else {
+    detail::rl_hotSection.rdslocal_base = malloc(detail::s_usedbytes);
+  }
+  always_assert(detail::rl_hotSection.rdslocal_base);
+  detail::iterate([](detail::RDSLocalNode* p) { p->init(); });
+}
+
+void fini() {
+  // This may be called twice on threads that create a malloced rdslocal area,
+  // and then initialize a full RDS segment.  As the RDS segment is detroyed
+  // Fini is called, and it is called again from the context that created the
+  // malloced area.
+  if (!detail::rl_hotSection.rdslocal_base) return;
+  detail::iterate([](detail::RDSLocalNode* p) { p->fini(); });
+  if (!tl_base ||
+      !localSection().contains({
+        (const char*)detail::rl_hotSection.rdslocal_base,
+        detail::s_usedbytes
+      })) {
+    free(detail::rl_hotSection.rdslocal_base);
+  }
+  detail::rl_hotSection.rdslocal_base = nullptr;
+}
+
+}}}

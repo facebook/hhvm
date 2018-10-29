@@ -1718,6 +1718,8 @@ static int execute_program_impl(int argc, char** argv) {
   evthread_use_pthreads();
   #endif
 
+  rds::local::init();
+  SCOPE_EXIT { rds::local::fini(); };
   tl_heap.getCheck();
   if (RuntimeOption::ServerExecutionMode()) {
     // Create the hardware counter before reading options,

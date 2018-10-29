@@ -35,7 +35,7 @@ for f in "$@"; do
   # Use git diff to give us color and word diffs. The patience algorithm
   # produces more readable diffs in some situations.
   git --no-pager diff --diff-algorithm=histogram --color=always \
-    --word-diff=color --word-diff-regex='[a-zA-A0-9_:;-]+' \
+    --word-diff=color --word-diff-regex='[a-zA-Z0-9_:;-]+' \
     $EXP "$f$OUT_EXT" | tail -n +5
   echo
   if [ "$NO_COPY" = true ]; then

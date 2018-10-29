@@ -1259,10 +1259,20 @@ static Variant preg_match_impl(const StringData* pattern,
                 // preg_match() practical; given that existing code gets
                 // nothing for unmatched captures, we don't need to set both
                 // here.
-                if (subpat_names[i]) {
-                  result_set.set(String(subpat_names[i]), empty_string());
+                if (offset_capture) {
+                  add_offset_pair_match(
+                    forceToOutput(*subpats, hackArrOutput),
+                    empty_string(),
+                    offsets[i<<1],
+                    subpat_names[i],
+                    hackArrOutput
+                  );
+                } else {
+                  if (subpat_names[i]) {
+                    result_set.set(String(subpat_names[i]), empty_string());
+                  }
+                  result_set.append(empty_string());
                 }
-                result_set.append(empty_string());
               }
             }
             /* And add it to the output array */
@@ -1294,12 +1304,22 @@ static Variant preg_match_impl(const StringData* pattern,
           }
           if (includeNonMatchingCaptures && count < num_subpats) {
             for (; i < num_subpats; i++) {
-              if (subpat_names[i]) {
-                forceToOutput(*subpats, hackArrOutput).set(
-                  String(subpat_names[i]), empty_string()
+              if (offset_capture) {
+                add_offset_pair_match(
+                  forceToOutput(*subpats, hackArrOutput),
+                  empty_string(),
+                  offsets[i<<1],
+                  subpat_names[i],
+                  hackArrOutput
                 );
+              } else {
+                if (subpat_names[i]) {
+                  forceToOutput(*subpats, hackArrOutput).set(
+                    String(subpat_names[i]), empty_string()
+                  );
+                }
+                forceToOutput(*subpats, hackArrOutput).append(empty_string());
               }
-              forceToOutput(*subpats, hackArrOutput).append(empty_string());
             }
           }
         }

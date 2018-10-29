@@ -72,7 +72,7 @@ type mode =
   | Linearization
 
 type options = {
-  filename : string;
+  files : string list;
   mode : mode;
   no_builtins : bool;
   tcopt : GlobalOptions.t;
@@ -138,7 +138,7 @@ let print_errors (errors:Errors.t) =
   print_error_list (Errors.get_error_list errors)
 
 let parse_options () =
-  let fn_ref = ref None in
+  let fn_ref = ref [] in
   let usage = Printf.sprintf "Usage: %s filename\n" Sys.argv.(0) in
   let mode = ref Errors in
   let no_builtins = ref false in
@@ -346,10 +346,10 @@ let parse_options () =
         " Interpret unresolved in type inference only as union."
   ] in
   let options = Arg.align ~limit:25 options in
-  Arg.parse options (fun fn -> fn_ref := Some fn) usage;
-  let fn = match !fn_ref with
-    | Some fn -> fn
-    | None -> die usage in
+  Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
+  let fns = match !fn_ref with
+    | [] -> die usage
+    | x -> x in
   let tcopt = {
     GlobalOptions.default with
       GlobalOptions.tco_assume_php = not !dont_assume_php;
@@ -387,7 +387,7 @@ let parse_options () =
         else true
       end tcopt.GlobalOptions.tco_experimental_features;
   } in
-  { filename = fn;
+  { files = fns;
     mode = !mode;
     no_builtins = !no_builtins;
     tcopt;
@@ -651,10 +651,10 @@ let compare_classes c1 c2 =
   let _, is_unchanged = Decl_compare.ClassEltDiff.compare c1 c2 in
   if is_unchanged = `Changed then fail_comparison "ClassEltDiff"
 
-let test_decl_compare filename popt files_contents tcopt files_info =
+let test_decl_compare filenames popt files_contents tcopt files_info =
   (* skip some edge cases that we don't handle now... ugly! *)
-  if (Relative_path.suffix filename) = "capitalization3.php" then () else
-  if (Relative_path.suffix filename) = "capitalization4.php" then () else
+  if (Relative_path.suffix filenames) = "capitalization3.php" then () else
+  if (Relative_path.suffix filenames) = "capitalization4.php" then () else
   (* do not analyze builtins over and over *)
   let files_info = Relative_path.Map.fold builtins
     ~f:begin fun k _ acc -> Relative_path.Map.remove acc k end
@@ -744,11 +744,18 @@ let typecheck_tasts tasts tcopt (filename:Relative_path.t) =
   List.concat_map tasts ~f:typecheck_tast
 
 let handle_mode
-  mode filename tcopt popt files_contents files_info parse_errors =
+  mode filenames tcopt popt files_contents files_info parse_errors =
+  let expect_single_file () : Relative_path.t =
+    match filenames with
+    | [x] -> x
+    | _ -> die "Only single file expected" in
+  let iter_over_files f : unit =
+    List.iter filenames f in
   match mode with
   | Ai _ -> ()
   | Autocomplete
   | Autocomplete_manually_invoked ->
+      let filename = expect_single_file () in
       let token = "AUTO332" in
       let token_len = String.length token in
       let file = cat (Relative_path.to_absolute filename) in
@@ -766,41 +773,43 @@ let handle_mode
         Printf.printf "%s %s\n" r.res_name r.res_ty
       end result.Utils.With_complete_flag.value
   | Ffp_autocomplete ->
-      begin try
-        let file_text = cat (Relative_path.to_absolute filename) in
-        (* TODO: Use a magic word/symbol to identify autocomplete location instead *)
-        let args_regex = Str.regexp "AUTOCOMPLETE [1-9][0-9]* [1-9][0-9]*" in
-        let position = try
-          let _ = Str.search_forward args_regex file_text 0 in
-          let raw_flags = Str.matched_string file_text in
-          match split ' ' raw_flags with
-          | [ _; row; column] ->
-            { line = int_of_string row; column = int_of_string column }
-          | _ -> failwith "Invalid test file: no flags found"
+      iter_over_files begin fun filename ->
+        begin try
+          let file_text = cat (Relative_path.to_absolute filename) in
+          (* TODO: Use a magic word/symbol to identify autocomplete location instead *)
+          let args_regex = Str.regexp "AUTOCOMPLETE [1-9][0-9]* [1-9][0-9]*" in
+          let position = try
+            let _ = Str.search_forward args_regex file_text 0 in
+            let raw_flags = Str.matched_string file_text in
+            match split ' ' raw_flags with
+            | [ _; row; column] ->
+              { line = int_of_string row; column = int_of_string column }
+            | _ -> failwith "Invalid test file: no flags found"
+          with
+            Caml.Not_found -> failwith "Invalid test file: no flags found"
+          in
+          let result =
+            FfpAutocompleteService.auto_complete tcopt file_text position
+            ~filter_by_token:true
+          in
+          match result with
+          | [] -> Printf.printf "No result found\n"
+          | res -> List.iter res ~f:begin fun r ->
+              let open AutocompleteTypes in
+              Printf.printf "%s\n" r.res_name
+            end
         with
-          Caml.Not_found -> failwith "Invalid test file: no flags found"
-        in
-        let result =
-          FfpAutocompleteService.auto_complete tcopt file_text position
-          ~filter_by_token:true
-        in
-        match result with
-        | [] -> Printf.printf "No result found\n"
-        | res -> List.iter res ~f:begin fun r ->
-            let open AutocompleteTypes in
-            Printf.printf "%s\n" r.res_name
-          end
-      with
-      | Failure msg
-      | Invalid_argument msg ->
-        Printf.printf "%s\n" msg;
-        exit 1
+        | Failure msg
+        | Invalid_argument msg ->
+          Printf.printf "%s\n" msg;
+          exit 1
+        end
       end
   | Color ->
       Relative_path.Map.iter files_info begin fun fn fileinfo ->
         if Relative_path.Map.mem builtins fn then () else begin
           let tast, _ = Typing_check_utils.type_file tcopt fn fileinfo in
-          let result = Coverage_level.get_levels tast filename in
+          let result = Coverage_level.get_levels tast fn in
           print_colored fn result;
         end
       end
@@ -809,11 +818,12 @@ let handle_mode
       Relative_path.Map.iter files_info begin fun fn fileinfo ->
         if Relative_path.Map.mem builtins fn then () else begin
           let tast, _ = Typing_check_utils.type_file p_tcopt fn fileinfo in
-          let type_acc = ServerCoverageMetric.accumulate_types tast filename in
+          let type_acc = ServerCoverageMetric.accumulate_types tast fn in
           print_coverage type_acc;
         end
       end
   | Cst_search ->
+    iter_over_files (fun filename ->
     let open Result.Monad_infix in
     let source_text = Full_fidelity_source_text.from_file filename in
     let syntax_tree = PositionedTree.make source_text in
@@ -830,8 +840,9 @@ let handle_mode
     | Error message ->
       Printf.printf "%s\n" message;
       exit 1
-    end
+    end)
   | Dump_symbol_info ->
+    iter_over_files (fun filename ->
       begin match Relative_path.Map.get files_info filename with
         | Some fileinfo ->
             let raw_result =
@@ -841,6 +852,7 @@ let handle_mode
             print_endline (Hh_json.json_to_multiline result_json)
         | None -> ()
       end
+    )
   | Lint ->
       let lint_errors = Relative_path.Map.fold files_contents ~init:[]
         ~f:begin fun fn content lint_errors ->
@@ -895,24 +907,30 @@ let handle_mode
       end
     end;
   | Identify_symbol (line, column) ->
+    let filename = expect_single_file () in
     let file = cat (Relative_path.to_absolute filename) in
     begin match ServerIdentifyFunction.go_absolute file line column tcopt with
       | [] -> print_endline "None"
       | result -> ClientGetDefinition.print_readable ~short_pos:true result
     end
   | Find_local (line, column) ->
+    let filename = expect_single_file () in
     let file = cat (Relative_path.to_absolute filename) in
     let result = ServerFindLocals.go popt filename file line column in
     let print pos = Printf.printf "%s\n" (Pos.string_no_file pos) in
     List.iter result print
   | Outline ->
+    iter_over_files (fun filename ->
     let file = cat (Relative_path.to_absolute filename) in
     let results = FileOutline.outline popt file in
     FileOutline.print ~short_pos:true results
+    )
   | Dump_nast ->
+    iter_over_files (fun filename ->
     let nasts = create_nasts tcopt files_info in
     let nast = Relative_path.Map.find filename nasts in
     Printf.printf "%s\n" (Nast.show_program nast)
+    )
   | Dump_tast ->
     let errors, tasts = compute_tasts_expand_types tcopt files_info
       files_contents in
@@ -927,6 +945,9 @@ let handle_mode
     );
     print_tasts tasts tcopt
   | Check_tast ->
+    iter_over_files (fun filename ->
+    let files_contents = Relative_path.Map.filter files_contents ~f:(fun k _v ->
+        k = filename) in
     let errors, tasts = compute_tasts_expand_types tcopt files_info
       files_contents in
     print_tasts tasts tcopt;
@@ -938,14 +959,17 @@ let handle_mode
       let tast_check_errors = typecheck_tasts tasts tcopt filename in
       print_error_list tast_check_errors;
       if tast_check_errors <> [] then exit 2
+    )
   | Dump_typed_full_fidelity_json ->
+    iter_over_files (fun filename ->
     (*
       Ideally we'd reuse ServerTypedAst.go here. Unfortunately relative file
       paths are not compatible between hh_single_type_check and server modules.
       So we copy here instead.
     *)
-
     (* get the typed ast *)
+    let files_contents = Relative_path.Map.filter files_contents ~f:(fun k _v ->
+        k = filename) in
     let _, tasts = compute_tasts tcopt files_info files_contents in
 
     (* get the parse tree *)
@@ -954,15 +978,20 @@ let handle_mode
     Relative_path.Map.iter tasts ~f:(fun _k tast ->
       let typed_tree = ServerTypedAst.create_typed_parse_tree
         ~filename ~positioned_tree ~tast in
-
       let result = ServerTypedAst.typed_parse_tree_to_json typed_tree in
       Printf.printf "%s\n" (Hh_json.json_to_string result))
+    )
   | Dump_stripped_tast ->
+    iter_over_files (fun filename ->
+    let files_contents = Relative_path.Map.filter files_contents ~f:(fun k _v ->
+        k = filename) in
     let _, tasts = compute_tasts tcopt files_info files_contents in
     let tast = Relative_path.Map.find_unsafe tasts filename in
     let nast = Tast.to_nast tast in
     Printf.printf "%s\n" (Nast.show_program nast)
+    )
   | Find_refs (line, column) ->
+    let filename = expect_single_file () in
     Typing_deps.update_files files_info;
     Relative_path.set_path_prefix Relative_path.Root (Path.make "/");
     Relative_path.set_path_prefix Relative_path.Hhi (Path.make "hhi");
@@ -989,6 +1018,7 @@ let handle_mode
     ) in
     ClientFindRefs.print_ide_readable results;
   | Highlight_refs (line, column) ->
+    let filename = expect_single_file () in
     let file = cat (Relative_path.to_absolute filename) in
     let results = ServerHighlightRefs.go (file, line, column) tcopt  in
     ClientHighlightRefs.go results ~output_json:false;
@@ -1002,8 +1032,10 @@ let handle_mode
       let errors = check_file tcopt parse_errors files_info in
       if mode = Infer_return_types
       then
+        iter_over_files (fun filename ->
         Option.iter ~f:(infer_return tcopt filename)
-          (Relative_path.Map.get files_info filename);
+          (Relative_path.Map.get files_info filename)
+        );
       print_first_error errors;
       if errors <> [] then exit 2
   | AllErrors ->
@@ -1011,8 +1043,12 @@ let handle_mode
       print_error_list errors;
       if errors <> [] then exit 2
   | Decl_compare ->
+    let filename = expect_single_file () in
     test_decl_compare filename popt files_contents tcopt files_info
-  | Least_upper_bound-> compute_least_type tcopt popt filename
+  | Least_upper_bound ->
+    iter_over_files (fun filename ->
+      compute_least_type tcopt popt filename
+    )
   | Linearization ->
     if parse_errors <> [] then (print_error (List.hd_exn parse_errors); exit 2);
     let files_info = Relative_path.Map.fold builtins
@@ -1051,12 +1087,16 @@ let handle_mode
 (* Main entry point *)
 (*****************************************************************************)
 
-let decl_and_run_mode {filename; mode; no_builtins; tcopt } popt =
+let decl_and_run_mode {files; mode; no_builtins; tcopt } popt =
   if mode = Dump_deps then Typing_deps.debug_trace := true;
   Ident.track_names := true;
   let builtins = if no_builtins then Relative_path.Map.empty else builtins in
-  let filename = Relative_path.create Relative_path.Dummy filename in
-  let files_contents = file_to_files filename in
+  let files = List.map ~f:(Relative_path.create Relative_path.Dummy) files in
+  let files_contents = List.fold files
+  ~f:(fun acc filename ->
+    let files_contents = file_to_files filename in
+    Relative_path.Map.union acc files_contents
+  ) ~init:Relative_path.Map.empty in
   (* Merge in builtins *)
   let files_contents_with_builtins = Relative_path.Map.fold builtins
     ~f:begin fun k src acc -> Relative_path.Map.add acc ~key:k ~data:src end
@@ -1065,11 +1105,10 @@ let decl_and_run_mode {filename; mode; no_builtins; tcopt } popt =
 
   let errors, files_info =
     parse_name_and_decl popt files_contents_with_builtins tcopt in
-
-  handle_mode mode filename tcopt popt files_contents files_info
+  handle_mode mode files tcopt popt files_contents files_info
     (Errors.get_error_list errors)
 
-let main_hack ({filename; mode; tcopt; _} as opts) =
+let main_hack ({files; mode; tcopt; _} as opts) =
   (* TODO: We should have a per file config *)
   Sys_utils.signal Sys.sigusr1
     (Sys.Signal_handle Typing.debug_print_last_pos);
@@ -1079,8 +1118,12 @@ let main_hack ({filename; mode; tcopt; _} as opts) =
   Hhi.set_hhi_root_for_unit_test tmp_hhi;
   match mode with
   | Ai ai_options ->
-    let filecontents = filename |> Relative_path.create Relative_path.Dummy |> file_to_files in
-    Ai.do_ Typing_check_utils.type_file filecontents ai_options
+    begin match files with
+    | [filename] ->
+      let filecontents = filename |> Relative_path.create Relative_path.Dummy |> file_to_files in
+      Ai.do_ Typing_check_utils.type_file filecontents ai_options
+    | _ -> die "Ai mode does not support multiple files"
+    end
   | _ ->
     decl_and_run_mode opts tcopt
 

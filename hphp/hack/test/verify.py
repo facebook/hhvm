@@ -15,7 +15,7 @@ from typing import Callable, Dict, List
 max_workers = 48
 verbose = False
 dump_on_failure = False
-batch_size = 100
+batch_size = 500
 
 
 TestCase = namedtuple('TestCase', ['file_path', 'input', 'expected'])
@@ -95,7 +95,7 @@ def run_batch_tests(test_cases: List[TestCase],
     # is a separate job for each thread in the threadpool.
     for cases in dirs_to_files.values():
         batched_cases : List[List[TestCase]] = \
-            [cases[i:i + batch_size] for i in range(0, len(case), batch_size)]
+            [cases[i:i + batch_size] for i in range(0, len(cases), batch_size)]
         all_batched_cases += batched_cases
 
     executor = ThreadPoolExecutor(max_workers=max_workers)

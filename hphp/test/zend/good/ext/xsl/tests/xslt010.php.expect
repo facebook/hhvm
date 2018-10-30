@@ -74,18 +74,18 @@ Test 10: EXSLT Support
     second-in-minute     : NaN
   
   Test Date : -0004-02-29
-    year                 : -4
-    leap-year            : true
-    month-in-year        : 2
-    month-name           : February
-    month-abbreviation   : Feb
-    week-in-year         : 9
-    day-in-year          : 60
-    day-in-month         : 29
-    day-of-week-in-month : 5
-    day-in-week          : 1
-    day-name             : Sunday
-    day-abbreviation     : Sun
+    year                 : NaN
+    leap-year            : NaN
+    month-in-year        : NaN
+    month-name           : 
+    month-abbreviation   : 
+    week-in-year         : NaN
+    day-in-year          : NaN
+    day-in-month         : NaN
+    day-of-week-in-month : NaN
+    day-in-week          : NaN
+    day-name             : 
+    day-abbreviation     : 
     time                 : 
     hour-in-day          : NaN
     minute-in-hour       : NaN

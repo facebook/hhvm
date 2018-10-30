@@ -115,6 +115,13 @@ bool register_intercept(const String& name, const Variant& callback,
       }
     }
 
+    // We've cleared out all the intercepts, so we don't need to pay the
+    // surprise flag cost anymore
+    if (s_intercept_data->empty() &&
+        s_intercept_data->global_handler().isNull()) {
+      EventHook::DisableIntercept();
+    }
+
     return true;
   }
 

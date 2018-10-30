@@ -752,8 +752,8 @@ and simplify_subtype
   | _, (_, Toption (_, Tnonnull)) -> valid ()
 
   (* mixed is not a subtype of any concrete type except mixed *)
-  | (_, (Tmixed | Toption (_, Tnonnull))),
-    (_, (Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tarraykind _ | Tclass _ | Tobject | Tanon _)) ->
+  | (_, Tmixed),
+    (_, (Tdynamic | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tarraykind _ | Tclass _ | Tobject | Tanon _ | Tabstract ((AKnewtype _ | AKenum _), _))) ->
     invalid ()
 
   (* void is the type of null and is a subtype of any option type. *)
@@ -840,9 +840,6 @@ and simplify_subtype
   | _, (_, Tabstract (AKgeneric name_super, _)) ->
     simplify_subtype_generic_super ty_sub name_super env
 
-  | (_, Toption ty_sub'), (_, Tprim Nast.Tvoid) ->
-    simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub' ty_super env
-
   (* Subtype is known to be nullable, so never a subtype of nonnull *)
   | (_, (Tprim Nast.Tvoid | Tmixed | Tdynamic | Toption _
     | Tabstract (AKdependent _, None))), (_, Tnonnull) ->
@@ -873,7 +870,7 @@ and simplify_subtype
   | (_, Tprim p1), (_, Tprim p2) ->
     if p1 = p2 then valid () else invalid ()
   | (_, Tprim _),
-    (_, (Tfun _ | Ttuple _ | Tshape _ | Tanon _  | Tobject | Tclass _ |
+    (_, (Tdynamic | Tfun _ | Ttuple _ | Tshape _ | Tanon _  | Tobject | Tclass _ |
          Tarraykind _ | Tabstract ((AKnewtype _ | AKenum _), _))) ->
     invalid ()
 
@@ -884,62 +881,52 @@ and simplify_subtype
   | (_, (Tmixed | Tdynamic)), (_, Toption ty_super) ->
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super env
 
-  | (_, (Tmixed | Tnonnull | Tprim _)), (_, Tdynamic) -> invalid ()
+  | (_, Toption _), (_, Tabstract (AKdependent _, _)) -> default ()
 
-  | (_, Toption (_, Tnonnull)), (_, Tdynamic) -> invalid ()
-
-  | (_, Tdynamic), (_, Tdynamic) -> valid ()
-
-  | (_, Toption _),
-    (_, Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), _)) -> default ()
+  | (_, Toption ty_sub'), (_, Tprim Nast.Tvoid) ->
+    simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub' ty_super env
 
   | (_, Toption _),
     (_, (Tprim Nast.(Tint | Tbool | Tfloat | Tstring | Tresource | Tnum | Tarraykey | Tnoreturn) |
-         Tdynamic | Tobject | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tclass _ | Tarraykind _)) -> invalid ()
+         Tdynamic | Tobject | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tabstract ((AKnewtype _ | AKenum _), _) | Tclass _ | Tarraykind _)) -> invalid ()
 
   | (_, Tprim _), (_, Tabstract (AKdependent _, _)) -> default ()
 
-  | (_, Tnonnull),
-    (_, Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), _)) -> default ()
+  | (_, Tnonnull), (_, Tabstract (AKdependent _, _)) -> default ()
 
   | (_, Tnonnull),
-    (_, (Tobject | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tclass _ | Tarraykind _)) -> invalid ()
+    (_, (Tdynamic | Tobject | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tabstract ((AKnewtype _ | AKenum _), _) | Tclass _ | Tarraykind _)) -> invalid ()
+
+  | (_, Tfun _), (_, Tabstract (AKdependent _, _)) -> default ()
 
   | (_, Tfun _),
-    (_, Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), _)) -> default ()
-
-  | (_, Tfun _),
-    (_, (Tdynamic | Tobject | Tprim _ | Ttuple _ | Tshape _ | Tanon _ | Tclass _ | Tarraykind _)) -> invalid ()
+    (_, (Tdynamic | Tobject | Tprim _ | Ttuple _ | Tshape _ | Tanon _ | Tabstract ((AKnewtype _ | AKenum _), _) | Tclass _ | Tarraykind _)) -> invalid ()
 
   | (_, Ttuple _), (_, Tabstract (AKdependent _, _)) -> default ()
 
   | (_, Tshape _), (_, Tabstract (AKdependent _, _)) -> default ()
 
-  | (_, Tanon _),
-    (_, Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), _)) -> default ()
+  | (_, Tanon _), (_, Tabstract (AKdependent _, _)) -> default ()
 
   | (_, Tanon _),
-    (_, (Tdynamic | Tobject | Tprim _ | Ttuple _ | Tshape _ | Tanon _ |Tclass _ | Tarraykind _)) -> invalid ()
+    (_, (Tdynamic | Tobject | Tprim _ | Ttuple _ | Tshape _ | Tanon _ | Tabstract ((AKnewtype _ | AKenum _), _) | Tclass _ | Tarraykind _)) -> invalid ()
 
   | (_, Tobject), (_, Tobject) -> valid ()
 
-  | (_, Tobject),
-    (_, Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), _)) -> default ()
+  | (_, Tobject), (_, Tabstract (AKdependent _, _)) -> default ()
 
   | (_, Tobject),
-    (_, (Tdynamic | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tarraykind _)) -> invalid ()
+    (_, (Tdynamic | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tabstract ((AKnewtype _ | AKenum _), _) | Tarraykind _)) -> invalid ()
+
+  | (_, Tclass _), (_, Tabstract (AKdependent _, _)) -> default ()
 
   | (_, Tclass _),
-    (_, Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), _)) -> default ()
+    (_, (Tdynamic | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tabstract ((AKnewtype _ | AKenum _), _) | Tarraykind _)) -> invalid ()
 
-  | (_, Tclass _),
-    (_, (Tdynamic | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tarraykind _)) -> invalid ()
-
-  | (_, Tarraykind _),
-    (_, Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), _)) -> default ()
+  | (_, Tarraykind _), (_, Tabstract (AKdependent _, _)) -> default ()
 
   | (_, Tarraykind _),
-    (_, (Tdynamic | Tobject | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tclass _)) -> invalid ()
+    (_, (Tdynamic | Tobject | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tabstract ((AKnewtype _ | AKenum _), _) | Tclass _)) -> invalid ()
 
   | (_, Tabstract (AKdependent _, _)),
     (_, (Tnonnull | Tdynamic | Tobject | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tclass _ | Tarraykind _)) -> default ()
@@ -947,16 +934,16 @@ and simplify_subtype
   | (_, Tabstract (AKdependent _, _)),
     (_, Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), _)) -> default ()
 
-  | (_, Tabstract ((AKnewtype _ | AKenum _), _)), (_, Tdynamic) -> default ()
+  | (_, Tabstract ((AKnewtype _ | AKenum _), _)), (_, Tdynamic) -> invalid ()
 
-  | (_, Tmixed),
-    (_, Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), _)) -> default ()
+  | (_, Tmixed), (_, Tabstract (AKdependent _, _)) -> default ()
 
-  | (_, Tdynamic),
-    (_, Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), _)) -> default ()
+  | (_, Tdynamic), (_, Tdynamic) -> valid ()
 
   | (_, Tdynamic),
-    (_, (Tobject | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tclass _ | Tarraykind _)) -> invalid ()
+    (_, (Tobject | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tabstract ((AKnewtype _ | AKenum _), _) | Tclass _ | Tarraykind _)) -> invalid ()
+
+  | (_, Tdynamic), (_, Tabstract (AKdependent _, _)) -> default ()
 
 and simplify_subtype_variance
   ~(seen_generic_params : SSet.t option)

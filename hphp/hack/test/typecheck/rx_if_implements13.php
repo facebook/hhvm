@@ -17,7 +17,7 @@ class B extends A {
 
 <<__Rx>>
 function f(B $b): void {
-  $a = () ==> {
+  $a = <<__NonRx>>() ==> {
     $b->mayberx();
   };
   // Error, lambda is not reactive

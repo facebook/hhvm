@@ -84,18 +84,21 @@ let condition_type_from_attributes env user_attributes =
   Attributes.find SN.UserAttributes.uaOnlyRxIfImpl user_attributes
   |> Option.map ~f:(conditionally_reactive_attribute_to_hint env)
 
-let fun_reactivity env user_attributes =
+let fun_reactivity_opt env user_attributes =
   let has attr = Attributes.mem attr user_attributes in
   let module UA = SN.UserAttributes in
 
   let rx_condition = condition_type_from_attributes env user_attributes in
 
-  if has UA.uaReactive then Reactive rx_condition
-  else if has UA.uaShallowReactive then Shallow rx_condition
-  else if has UA.uaLocalReactive then Local rx_condition
-  else Nonreactive
+  if has UA.uaReactive then Some (Reactive rx_condition)
+  else if has UA.uaShallowReactive then Some (Shallow rx_condition)
+  else if has UA.uaLocalReactive then Some (Local rx_condition)
+  else if has UA.uaNonRx then Some Nonreactive
+  else None
 
-
+let fun_reactivity env user_attributes =
+  fun_reactivity_opt env user_attributes
+  |> Option.value ~default:Nonreactive
 (*****************************************************************************)
 (* Checking that the kind of a class is compatible with its parent
  * For example, a class cannot extend an interface, an interface cannot

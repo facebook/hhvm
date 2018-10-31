@@ -75,10 +75,6 @@ let error_on_attr env attrs attr f =
   | Some { ua_name = (p, _); _ } -> f p;
   | _ -> ()
 
-let error_if_has_rx_on_scope env attrs =
-  error_on_attr env attrs
-    SN.UserAttributes.uaRxOfScope Errors.misplaced_rx_of_scope
-
 let error_if_has_atmost_rx_as_rxfunc_attribute env attrs =
   error_on_attr env attrs
     SN.UserAttributes.uaOnlyRxIfRxFunc_do_not_use Errors.atmost_rx_as_rxfunc_invalid_location;
@@ -450,10 +446,10 @@ let rec fun_ tenv f named_body =
                 tenv = tenv;
                 is_reactive = fun_is_reactive f.f_user_attributes
                 } in
-    func ~is_efun:false env f named_body
+    func env f named_body
   end
 
-and func ~is_efun env f named_body =
+and func env f named_body =
   let p, fname = f.f_name in
   let fname_lower = String.lowercase (strip_ns fname) in
   if fname_lower = SN.Members.__construct || fname_lower = "using"
@@ -480,14 +476,6 @@ and func ~is_efun env f named_body =
   if Attributes.mem SN.UserAttributes.uaMutableReturn f.f_user_attributes
     && not env.is_reactive then
     Errors.mutable_return_annotated_decls_must_be_reactive "function" p fname;
-
-  if is_efun
-  then begin
-    if env.is_reactive
-    then error_on_attr env
-      f.f_user_attributes SN.UserAttributes.uaRxOfScope Errors.rx_of_scope_and_explicit_rx
-  end
-  else error_if_has_rx_on_scope env f.f_user_attributes;
 
   error_if_has_atmost_rx_as_rxfunc_attribute env f.f_user_attributes;
   check_maybe_rx_attributes_on_params env f.f_user_attributes f.f_params;
@@ -667,7 +655,6 @@ and class_ tenv c =
   let env = { env with tenv = Env.set_mode tenv c.c_mode } in
 
   error_if_has_atmost_rx_as_rxfunc_attribute env c.c_user_attributes;
-  error_if_has_rx_on_scope env c.c_user_attributes;
 
   (* Const handling:
    * prevent for abstract final classes, traits, and interfaces
@@ -1003,8 +990,6 @@ and method_ (env, is_static) m =
   let is_maybe_mutable =
     Attributes.mem SN.UserAttributes.uaMaybeMutable m.m_user_attributes in
 
-  error_if_has_rx_on_scope env m.m_user_attributes;
-
   (* Mutable methods must be reactive *)
   if not env.is_reactive then begin
     if is_mutable
@@ -1122,8 +1107,6 @@ and fun_param env (pos, name) f_type byref param =
      && param.param_is_reference
      && not (TypecheckerOptions.unsafe_rx (Env.get_options env.tenv))
   then Errors.reference_in_rx pos;
-
-  error_if_has_rx_on_scope env param.param_user_attributes;
 
   match param.param_callconv with
   | None -> ()
@@ -1388,7 +1371,7 @@ and expr_ env p = function
       check_coroutines_enabled (f.f_fun_kind = Ast.FCoroutine) env p;
       let env = { env with imm_ctrl_ctx = Toplevel } in
       let body = Nast.assert_named_body f.f_body in
-      func ~is_efun:true env f body; ()
+      func env f body; ()
   | Xml (_, attrl, el) ->
       List.iter attrl (fun attr -> expr env (get_xhp_attr_expr attr));
       List.iter el (expr env);

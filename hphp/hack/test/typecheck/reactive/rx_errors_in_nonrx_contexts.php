@@ -24,12 +24,12 @@ function f() {
 <<__Rx>>
 function g() {
   // non reactive lambda - ok since it is not called
-  $a = () ==> {
+  $a = <<__NonRx>>() ==> {
     $a = new A(1);
     // non-rx context
     $a->f();
   };
-  $b = () ==> {
+  $b = <<__NonRx>>() ==> {
     $a = new A(1);
     // non reactive lambda - ok since it is not called
     A::g($a);

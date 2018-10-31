@@ -1746,19 +1746,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       let suspension_kind =
         mk_suspension_kind node env awaitable_async awaitable_coroutine in
       let blk, yld = mpYielding pFunctionBody awaitable_compound_statement env in
-      let user_attributes =
-        let attrs = pUserAttributes env awaitable_attribute_spec in
-        (* inject uaRxOfScope into the list of arguments if
-           it does not already have it or any other reactivity annotations *)
-        let module UA = Naming_special_names.UserAttributes in
-        let check attr =
-          attr = UA.uaRxOfScope || attr = UA.uaReactive ||
-          attr = UA.uaShallowReactive || attr = UA.uaLocalReactive in
-        (* for now add uaRxOfScope only for typechecker *)
-        if not (is_typechecker env) ||
-           List.exists attrs ~f:(fun { ua_name = (_, n); _ } -> check n)
-        then attrs
-        else { ua_name = (Pos.none, UA.uaRxOfScope); ua_params = [] } :: attrs in
+      let user_attributes = pUserAttributes env awaitable_attribute_spec in
       let f_external = is_semicolon awaitable_compound_statement in
       let body =
         { (fun_template yld node suspension_kind env) with

@@ -607,7 +607,8 @@ let lowering_parsing_error text syntax =
   "Encountered unexpected text '"^text^"', was expecting a "^syntax^"."
 
 let multiple_reactivity_annotations =
-  "Multiple __Rx, __RxShallow, or __RxLocal annotations are not allowed."
+  "Only one of following annotations is allowed: \
+  __Rx, __RxShallow, __RxLocal, __NonRx."
 
 let functions_cannot_implement_reactive =
   "__OnlyRxIfImpl annotations are only valid on class methods."
@@ -630,3 +631,13 @@ let conflicting_owned_mutable_and_maybe_mutable_attributes =
 
 let mutably_owned_attribute_on_non_rx_function =
   "__OwnedMutable annotated parameters are only allowed in reactive functions."
+
+let invalid_non_rx_argument_for_lambda =
+  "Invalid argument list for __NonRx attribute that is placed on \
+  anonymous function. Argument list for __NonRx attribute that is used \
+  in this position should be empty."
+
+let invalid_non_rx_argument_for_declaration  =
+  "Invalid argument list for __NonRx attribute that is placed on \
+  a declaration of function or method. Argument list for __NonRx attribute that is \
+  used in this position should contain only one string literal value."

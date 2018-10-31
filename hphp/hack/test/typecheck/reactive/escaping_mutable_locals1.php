@@ -6,7 +6,7 @@ class A {
 
   <<__Rx>>
   public function f1(): void {
-    $b = () ==> {
+    $b = <<__NonRx>>() ==> {
       // OK - non-reactive lambda can capture anything
       g($this);
     };
@@ -14,7 +14,7 @@ class A {
 
   <<__Rx>>
   public function f2(): void {
-    $b = () ==> {
+    $b = <<__NonRx>>() ==> {
       // OK - non-reactive lambda can capture anything
       $this->x = 42;
     };
@@ -28,7 +28,7 @@ function g(<<__MaybeMutable>> A $a): void {
 <<__Rx>>
 function f1(): void {
   $a = \HH\Rx\mutable(new A(1));
-  $b = () ==> {
+  $b = <<__NonRx>>() ==> {
     // OK - non-reactive lambda can capture anything
     $a->x = 42;
   };
@@ -36,7 +36,7 @@ function f1(): void {
 
 <<__Rx>>
 function f2(<<__Mutable>> A $a): void {
-  $b = () ==> {
+  $b = <<__NonRx>>() ==> {
     // OK - non-reactive lambda can capture anything
     $a->x = 42;
   };
@@ -44,7 +44,7 @@ function f2(<<__Mutable>> A $a): void {
 
 <<__Rx>>
 function f3(<<__MaybeMutable>> A $a): void {
-  $b = () ==> {
+  $b = <<__NonRx>>() ==> {
     // OK - non-reactive lambda can capture anything
     g($a);
   };

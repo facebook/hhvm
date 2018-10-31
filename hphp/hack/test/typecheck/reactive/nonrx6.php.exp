@@ -1,0 +1,2 @@
+File "nonrx6.php", line 5, characters 8-55:
+Invalid argument list for __NonRx attribute that is placed on anonymous function. Argument list for __NonRx attribute that is used in this position should be empty. (Parsing[1002])

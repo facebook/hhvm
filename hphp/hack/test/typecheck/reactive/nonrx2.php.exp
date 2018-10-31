@@ -1,0 +1,2 @@
+File "nonrx2.php", line 4, characters 1-36:
+Invalid argument list for __NonRx attribute that is placed on a declaration of function or method. Argument list for __NonRx attribute that is used in this position should contain only one string literal value. (Parsing[1002])

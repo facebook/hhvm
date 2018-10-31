@@ -6,7 +6,7 @@ function normal(string $s): int {
 
 <<__Rx>>
 function rx(): void {
-  $l = () ==> {
+  $l = <<__NonRx>>() ==> {
     normal("text");
   };
   // Not OK - lambda is not reactive

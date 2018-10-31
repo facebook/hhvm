@@ -1,1 +1,1 @@
-Fatal error: Multiple __Rx, __RxShallow, or __RxLocal annotations are not allowed. in %s/test/slow/rx/multiple_reactivity8.php on line 3
+Fatal error: Only one of following annotations is allowed: __Rx, __RxShallow, __RxLocal, __NonRx. in %s/test/slow/rx/multiple_reactivity8.php on line 3

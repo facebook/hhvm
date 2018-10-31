@@ -1055,20 +1055,28 @@ let methodish_contains_memoize env node parents =
 let is_some_reactivity_attribute_name name =
   name = SN.UserAttributes.uaReactive ||
   name = SN.UserAttributes.uaShallowReactive ||
-  name = SN.UserAttributes.uaLocalReactive
+  name = SN.UserAttributes.uaLocalReactive ||
+  name = SN.UserAttributes.uaNonRx
 
-let is_some_reactivity_attribute n =
+let attribute_matches_criteria f n =
   match syntax n with
     | ListItem {
         list_item = {
-          syntax = ConstructorCall { constructor_call_type; _ }; _
+          syntax = ConstructorCall {
+            constructor_call_type;
+            constructor_call_argument_list = args; _
+          }; _
         }; _
       } ->
       begin match Syntax.extract_text constructor_call_type with
-        | Some n when is_some_reactivity_attribute_name n -> true
-        | _ -> false
+        | Some n when f n -> Some args
+        | _ -> None
       end
-    | _ -> false
+    | _ -> None
+
+let is_some_reactivity_attribute n =
+  attribute_matches_criteria is_some_reactivity_attribute_name n
+  |> Option.is_some
 
 let attribute_has_reactivity_annotation attr_spec =
   match syntax attr_spec with
@@ -1092,6 +1100,60 @@ let methodish_missing_reactivity_for_condition node =
 
 let methodish_contains_owned_mutable_attribute node =
   methodish_contains_attribute (syntax node) SN.UserAttributes.uaOwnedMutable
+
+let check_nonrx_annotation node errors =
+  let err_decl () =
+    let e = make_error_from_node node
+      SyntaxError.invalid_non_rx_argument_for_declaration in
+    e :: errors in
+  let err_lambda () =
+    let e = make_error_from_node node
+      SyntaxError.invalid_non_rx_argument_for_lambda in
+    e :: errors in
+  let attr_spec =
+    match syntax node with
+    | MethodishDeclaration { methodish_attribute = s; _ }
+    | FunctionDeclaration { function_attribute_spec = s; _ } ->
+      Some (syntax s, true)
+    | AnonymousFunction { anonymous_attribute_spec = s; _ }
+    | Php7AnonymousFunction { php7_anonymous_attribute_spec = s; _ }
+    | LambdaExpression { lambda_attribute_spec = s; _ }
+    | AwaitableCreationExpression { awaitable_attribute_spec = s; _ } ->
+      Some (syntax s, false)
+    | _ -> None in
+  match attr_spec with
+  | Some (AttributeSpecification { attribute_specification_attributes = attrs; _ }, is_decl) ->
+    (* try find argument list *)
+    let args =
+      List.find_map (syntax_node_to_list attrs)
+        ~f:(attribute_matches_criteria ((=)SN.UserAttributes.uaNonRx)) in
+    begin match args with
+    (* __NonRx attribute not found *)
+    | None ->  errors
+    (* __NonRx attribute is found and argument list is empty.
+      This is ok for lambdas but error for declarations *)
+    | Some { syntax = Missing; _  } ->
+      if is_decl then err_decl ()
+      else errors
+    (* __NonRx attribute is found with single string argument.
+      This is ok for declarations for not allowed for lambdas *)
+    | Some { syntax = SyntaxList [
+        { syntax = ListItem {
+            list_item = { syntax = LiteralExpression {
+                literal_expression = { syntax = Token token; _ }; _
+                }; _ }; _
+          }; _ }
+        ]; _  } when Token.kind token = TokenKind.DoubleQuotedStringLiteral ||
+                     Token.kind token = TokenKind.SingleQuotedStringLiteral ->
+      if is_decl then errors
+      else err_lambda ()
+    (* __NonRx attribute is found but argument list is not suitable
+      nor for declarations, neither for lambdas *)
+    | Some _ ->
+      if is_decl then err_decl ()
+      else err_lambda ()
+    end
+  | _ -> errors
 
 let function_missing_reactivity_for_condition node =
   match syntax node with
@@ -1221,6 +1283,8 @@ let methodish_errors env node parents errors =
       function_declaration_contains_only_rx_if_impl_attribute node
       SyntaxError.functions_cannot_implement_reactive function_attrs in
     let errors =
+      check_nonrx_annotation node errors in
+    let errors =
       produce_error errors
       function_missing_reactivity_for_condition node
       SyntaxError.missing_reactivity_for_condition function_attrs in
@@ -1305,6 +1369,8 @@ let methodish_errors env node parents errors =
       produce_error errors
       methodish_multiple_reactivity_annotations node
       SyntaxError.multiple_reactivity_annotations method_attrs in
+    let errors =
+      check_nonrx_annotation node errors in
     let errors =
       produce_error errors
       methodish_missing_reactivity_for_condition node
@@ -3391,6 +3457,7 @@ let find_syntax_errors env =
       | CollectionLiteralExpression _ ->
         let errors =
           expression_errors env namespace_name node parents errors in
+        let errors = check_nonrx_annotation node errors in
         let errors = assignment_errors env node errors in
         trait_require_clauses, names, errors
       | RequireClause _ ->

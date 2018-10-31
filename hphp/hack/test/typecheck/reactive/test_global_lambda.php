@@ -7,7 +7,7 @@ class GlobalClassName {
 
 <<__Rx>>
 function fooLambda(): void {
-  $x = () ==> {
+  $x = <<__NonRx>>() ==> {
     return GlobalClassName::$x + 1;
   };
 }

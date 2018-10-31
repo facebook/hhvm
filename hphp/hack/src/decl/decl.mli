@@ -17,6 +17,11 @@ val fun_reactivity :
   Nast.user_attribute list ->
   Typing_defs.reactivity
 
+val fun_reactivity_opt :
+  Decl_env.env ->
+  Nast.user_attribute list ->
+  Typing_defs.reactivity option
+
 val condition_type_from_attributes:
   Decl_env.env ->
   Nast.user_attribute list ->

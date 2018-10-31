@@ -1,6 +1,6 @@
 <?hh
 
 // ERROR
-<<__RxOfScope>>
+<<__NonRx>>
 function f(): void {
 }

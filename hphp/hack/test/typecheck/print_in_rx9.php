@@ -2,7 +2,7 @@
 
 <<__Rx>>
 function f(): void {
-  $a = () ==> {
+  $a = <<__NonRx>>() ==> {
     print 1;
   };
   // ERROR

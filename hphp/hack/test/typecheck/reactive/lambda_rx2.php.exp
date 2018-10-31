@@ -1,0 +1,4 @@
+File "lambda_rx2.php", line 12, characters 5-7:
+Reactive functions can only call other reactive functions. (Typing[4200])
+File "lambda_rx2.php", line 4, characters 10-10:
+This function is shallow reactive.

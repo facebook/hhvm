@@ -8,7 +8,7 @@ function mayberx(<<__OnlyRxIfRxFunc>>(function(): int) $a): int {
 <<__Rx>>
 function rx(): int {
   // ERROR
-  return mayberx(() ==> {
+  return mayberx(<<__NonRx>>() ==> {
     print 1;
     return 1;
   });

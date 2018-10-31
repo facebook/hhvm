@@ -17,7 +17,7 @@ class B extends A implements Rx {
 <<__Rx>>
 function rx(): void {
   // Error: lambda argument is not reactive
-  (new B())->f(() ==> {
+  (new B())->f(<<__NonRx>>() ==> {
     print 1;
     return 1;
   });

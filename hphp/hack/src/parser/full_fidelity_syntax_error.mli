@@ -328,3 +328,5 @@ val conflicting_mutable_and_owned_mutable_attributes: string
 val conflicting_mutable_and_maybe_mutable_attributes: string
 val conflicting_owned_mutable_and_maybe_mutable_attributes: string
 val mutably_owned_attribute_on_non_rx_function: string
+val invalid_non_rx_argument_for_lambda: string
+val invalid_non_rx_argument_for_declaration: string

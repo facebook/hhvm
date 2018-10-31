@@ -28,7 +28,6 @@
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/thread-hooks.h"
 #include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/base/unit-cache.h"
 
@@ -365,7 +364,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/vm-dump-tc:      dump translation cache to /tmp/tc_dump_a and\n"
         "                  /tmp/tc_dump_astub\n"
         "/vm-namedentities:show size of the NamedEntityTable\n"
-        "/thread-mem:      show memory usage per thread\n"
         "/proxy:           set up request proxy\n"
         "    origin        URL to proxy requests to\n"
         "    percentage    percentage of requests to proxy\n"
@@ -677,10 +675,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
     if (cmd == "proxy") {
       handleProxyRequest(cmd, transport);
-      break;
-    }
-    if (!strcmp(cmd.c_str(), "thread-mem")) {
-      transport->sendString(get_thread_mem_usage());
       break;
     }
 

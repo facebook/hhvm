@@ -7,11 +7,7 @@ set(HHVM_WHOLE_ARCHIVE_LIBRARIES
     hphp_runtime_ext
    )
 
-if (LINUX)
-  set(HHVM_WRAP_SYMS -Wl,--wrap=pthread_create -Wl,--wrap=pthread_exit -Wl,--wrap=pthread_join)
-else ()
-  set(HHVM_WRAP_SYMS)
-endif ()
+set(HHVM_WRAP_SYMS)
 
 set(HHVM_LINK_LIBRARIES
   ${HHVM_WRAP_SYMS}

@@ -560,7 +560,7 @@ macro(hphp_link target)
   endif()
 
   if (LINUX)
-    target_link_libraries(${target} -Wl,--wrap=pthread_create -Wl,--wrap=pthread_exit -Wl,--wrap=pthread_join)
+    target_link_libraries(${target})
   endif()
 
   if (MSVC)

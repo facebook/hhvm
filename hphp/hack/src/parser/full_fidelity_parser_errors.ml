@@ -3172,7 +3172,7 @@ let enum_errors node errors =
     errors
   | _ -> errors
 
-let does_op_create_write_on_left = function
+let does_binop_create_write_on_left = function
   | Some (TokenKind.Equal
         | TokenKind.BarEqual
         | TokenKind.PlusEqual
@@ -3186,8 +3186,13 @@ let does_op_create_write_on_left = function
         | TokenKind.AmpersandEqual
         | TokenKind.LessThanLessThanEqual
         | TokenKind.GreaterThanGreaterThanEqual
-        | TokenKind.PlusPlus
+        | TokenKind.QuestionQuestionEqual) -> true
+  | _ -> false
+
+let does_unop_create_write = function
+  | Some (TokenKind.PlusPlus
         | TokenKind.MinusMinus
+        | TokenKind.Ampersand
         | TokenKind.Inout) -> true
   | _ -> false
 
@@ -3285,13 +3290,13 @@ let assignment_errors _env node errors =
   | DecoratedExpression
     { decorated_expression_decorator = op
     ; decorated_expression_expression = loperand
-    }) when does_op_create_write_on_left (token_kind op) ->
+    }) when does_unop_create_write (token_kind op) ->
     check_lvalue ~allow_reassign_this:true loperand errors
   | BinaryExpression
     { binary_left_operand = loperand
     ; binary_operator = op
     ; binary_right_operand = roperand
-    } when does_op_create_write_on_left (token_kind op) ->
+    } when does_binop_create_write_on_left (token_kind op) ->
       let errors = check_lvalue loperand errors in
       check_rvalue roperand errors
   | ForeachStatement

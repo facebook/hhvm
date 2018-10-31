@@ -18,7 +18,7 @@
 
 #include <folly/Likely.h> // defining LIKELY/UNLIKELY is part of this header
 #include <folly/Portability.h>
-#include <folly/CPortability.h> // defining FOLLY_DISABLE_ADDRESS_SANITIZER
+#include <folly/CPortability.h> // FOLLY_DISABLE_ADDRESS_SANITIZER, FOLLY_EXPORT
 
 //////////////////////////////////////////////////////////////////////
 
@@ -81,7 +81,6 @@
 # define ALWAYS_INLINE     inline __attribute__((__always_inline__))
 # define INLINE_FLATTEN    inline __attribute__((__always_inline__,__flatten__))
 #endif
-#define EXTERNALLY_VISIBLE __attribute__((__externally_visible__))
 #define NEVER_INLINE       __attribute__((__noinline__))
 #define UNUSED             __attribute__((__unused__))
 
@@ -89,8 +88,10 @@
 
 #ifdef __clang__
 #define NO_OPT [[clang::optnone]]
+#define EXTERNALLY_VISIBLE ATTRIBUTE_USED FOLLY_EXPORT
 #else
 #define NO_OPT __attribute__((__optimize__("O0")))
+#define EXTERNALLY_VISIBLE __attribute__((__externally_visible__))
 #endif
 
 #if defined(__GNUC__)

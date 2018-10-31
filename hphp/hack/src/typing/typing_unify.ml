@@ -310,7 +310,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
       | Some (reactivity, is_coroutine, ftys, _, anon) ->
         let p1 = Reason.to_pos r1 in
         let p2 = Reason.to_pos r2 in
-        if reactivity <> ft.ft_reactive
+        if reactivity <> ft.ft_reactive && not (TypecheckerOptions.unsafe_rx (Env.get_options env))
         then Errors.fun_reactivity_mismatch
           p1 (TUtils.reactivity_to_string env reactivity)
           p2 (TUtils.reactivity_to_string env ft.ft_reactive);

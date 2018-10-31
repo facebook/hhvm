@@ -614,7 +614,7 @@ and simplify_subtype
       | Some (reactivity, is_coroutine, ftys, _, anon) ->
         let p_super = Reason.to_pos r_super in
         let p_sub = Reason.to_pos r_sub in
-        if not (subtype_reactivity env reactivity ft.ft_reactive)
+        if (not (subtype_reactivity env reactivity ft.ft_reactive)) && (not (TypecheckerOptions.unsafe_rx (Env.get_options env)))
         then Errors.fun_reactivity_mismatch
           p_super (TUtils.reactivity_to_string env reactivity)
           p_sub (TUtils.reactivity_to_string env ft.ft_reactive);

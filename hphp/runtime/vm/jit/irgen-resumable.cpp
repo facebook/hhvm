@@ -349,48 +349,72 @@ void emitAwait(IRGS& env) {
   if (!topC(env)->isA(TObj)) PUNT(Await-NonObject);
 
   auto const child = popC(env);
+  auto const childIsSWH =
+    child->type() <= Type::SubObj(c_StaticWaitHandle::classof());
   gen(env, JmpZero, exitSlow, gen(env, IsWaitHandle, child));
 
-  // cns() would ODR-use these
-  auto const kSucceeded = c_Awaitable::STATE_SUCCEEDED;
-  auto const kFailed    = c_Awaitable::STATE_FAILED;
+  auto const handleSucceeded = [&] {
+    auto const awaitedTy = awaitedType(env, child, resumeOffset);
+    auto const res = gen(env, LdWHResult, awaitedTy, child);
+    gen(env, IncRef, res);
+    decRef(env, child);
+    push(env, res);
+  };
+  auto const handleFailed = [&] {
+    gen(env, Jmp, exitSlow);
+  };
+  auto const handleNotFinished = [&] {
+    if (childIsSWH) {
+      gen(env, Unreachable, ASSERT_REASON);
+    } else if (resumeMode(env) == ResumeMode::Async) {
+      implAwaitR(env, child, resumeOffset);
+    } else {
+      implAwaitE(env, child, resumeOffset);
+    }
+  };
 
   auto const state = gen(env, LdWHState, child);
+  assertx(c_Awaitable::STATE_SUCCEEDED == 0);
+  assertx(c_Awaitable::STATE_FAILED == 1);
 
-  ifThenElse(
-    env,
-    [&] (Block* taken) {
-      auto const succeeded = gen(env, EqInt, state, cns(env, kSucceeded));
-      gen(env, JmpNZero, taken, succeeded);
-    },
-    [&] { // Next: the wait handle is not finished, we need to suspend
-      if (child->type() <= Type::SubObj(c_StaticWaitHandle::classof())) {
-        gen(env, Jmp, exitSlow);
-        return;
+  if (childIsSWH || !likelySuspended(child)) {
+    ifThenElse(env,
+      [&] (Block* taken) { gen(env, JmpNZero, taken, state); },
+      [&] { handleSucceeded(); },
+      [&] {
+        ifThenElse(env,
+          [&] (Block* taken) {
+            if (childIsSWH) return;
+            gen(env, JmpZero, taken, gen(env, EqInt, state, cns(env, 1)));
+          },
+          [&] { handleFailed(); },
+          [&] { handleNotFinished(); }
+        );
       }
-      auto const failed = gen(env, EqInt, state, cns(env, kFailed));
-      gen(env, JmpNZero, exitSlow, failed);
-      if (resumeMode(env) == ResumeMode::Async) {
-        implAwaitR(env, child, resumeOffset);
-      } else {
-        implAwaitE(env, child, resumeOffset);
-      }
-    },
-    [&] { // Taken: retrieve the result from the wait handle
-      auto const awaitedTy = awaitedType(env, child, resumeOffset);
-      auto const res = gen(env, LdWHResult, awaitedTy, child);
-      gen(env, IncRef, res);
-      decRef(env, child);
-      push(env, res);
-
-      if (likelySuspended(child)) {
+    );
+  } else {
+    ifThenElse(env,
+      [&] (Block* taken) {
+        gen(env, JmpNZero, taken, gen(env, LteInt, state, cns(env, 1)));
+      },
+      [&] { handleNotFinished(); },
+      [&] {
         // Coming from a call with request for async eager return that did
         // not return eagerly.
         hint(env, Block::Hint::Unlikely);
-        gen(env, Jmp, makeExit(env, resumeOffset));
+        IRUnit::Hinter h(env.irb->unit(), Block::Hint::Unlikely);
+
+        ifThenElse(env,
+          [&] (Block* taken) { gen(env, JmpNZero, taken, state); },
+          [&] {
+            handleSucceeded();
+            gen(env, Jmp, makeExit(env, resumeOffset));
+          },
+          [&] { handleFailed(); }
+        );
       }
-    }
-  );
+    );
+  }
 }
 
 void emitAwaitAll(IRGS& env, LocalRange locals) {

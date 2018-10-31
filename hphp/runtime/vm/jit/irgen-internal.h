@@ -261,6 +261,9 @@ void ifThenElse(IRGS& env, Branch branch, Next next, Taken taken) {
     last->back().setNext(done_block);
   }
   env.irb->appendBlock(done_block);
+  if (done_block->numPreds() == 0) {
+    gen(env, Unreachable, ASSERT_REASON);
+  }
 }
 
 /*

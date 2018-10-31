@@ -287,6 +287,20 @@ let main args =
       let responses = rpc args @@ Rpc.INFER_TYPE_BATCH (positions, args.dynamic_view) in
       List.iter responses print_endline;
       Exit_status.No_error
+    | MODE_FUN_DEPS_AT_POS_BATCH positions ->
+      let positions = List.map positions begin fun pos ->
+        try
+          match Str.split (Str.regexp ":") pos with
+          | [filename; line; char] ->
+              expand_path filename, int_of_string line, int_of_string char
+          | _ -> raise Exit
+        with _ ->
+          Printf.eprintf "Invalid position\n";
+          raise Exit_status.(Exit_with Input_error)
+      end in
+      let responses = rpc args @@ Rpc.FUN_DEPS_BATCH (positions, args.dynamic_view) in
+      List.iter responses print_endline;
+      Exit_status.No_error
     | MODE_TYPED_FULL_FIDELITY_PARSE filename ->
       let fn =
         try

@@ -51,6 +51,7 @@ let debug_describe_t : type a. a t -> string = function
   | CST_SEARCH               _ -> "CST_SEARCH"
   | NO_PRECHECKED_FILES        -> "NO_PRECHECKED_FILES"
   | GEN_HOT_CLASSES          _ -> "GEN_HOT_CLASSES"
+  | FUN_DEPS_BATCH           _ -> "FUN_DEPS_BATCH"
 
 let debug_describe_cmd : type a. a command -> string = function
   | Rpc rpc -> debug_describe_t rpc

@@ -217,3 +217,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       ServerPrecheckedFiles.expand_all env, ()
     | GEN_HOT_CLASSES threshold ->
       env, ServerHotClasses.go genv.workers env threshold
+    | FUN_DEPS_BATCH (positions, dynamic_view) ->
+        let tcopt = env.ServerEnv.tcopt in
+        let tcopt = { tcopt with GlobalOptions.tco_dynamic_view=dynamic_view } in
+        let env = { env with tcopt } in
+        env, ServerFunDepsBatch.go genv.workers positions env

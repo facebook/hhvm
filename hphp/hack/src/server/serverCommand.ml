@@ -79,6 +79,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | OPEN_FILE _ -> false
   | CLOSE_FILE _ -> false
   | EDIT_FILE _ -> false
+  | FUN_DEPS_BATCH _ -> false
 
 let command_needs_full_check = function
   | Rpc x -> rpc_command_needs_full_check x

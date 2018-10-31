@@ -154,6 +154,7 @@ and expr_ =
   | Xml of sid * xhp_attribute list * expr list
   | Unsafe_expr of expr
   | Callconv of Ast.param_kind * expr
+  | Execution_operator of expr list
 
   (* None of these constructors exist in the AST *)
   | Lplaceholder of pos
@@ -433,6 +434,7 @@ let expr_to_string expr =
   | Xml _  -> "Xml"
   | Unsafe_expr _ -> "Unsafe_expr"
   | Callconv _ -> "Callconv"
+  | Execution_operator _ -> "Execution_operator"
   | Assert _  -> "Assert"
   | Clone _  -> "Clone"
   | Typename _  -> "Typename"

@@ -3,8 +3,8 @@ File "variableprop.php", line 5, characters 3-13:
 File "variableprop.php", line 7, characters 3-13:
   dynamic
 [(Fun
-    { Aast.AnnotatedAST.f_annotation = (); f_mode = <opaque>;
-      f_ret = (Some ([3:50-54], (Hprim Tvoid)));
+    { Aast.AnnotatedAST.f_span = [3:1-8:2]; f_annotation = ();
+      f_mode = <opaque>; f_ret = (Some ([3:50-54], (Hprim Tvoid)));
       f_name = ([3:10-25], "\\testDynamicProp"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic;
       f_params =
@@ -58,9 +58,10 @@ File "variableprop.php", line 7, characters 3-13:
                     []))))
              ];
            fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false })
+      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
+      f_external = false })
   ]
 File "variableprop.php", line 4, characters 12-13:
-Unexpected type in TAST: expected string, got dynamic (TastTypecheck[11001])
+Unexpected type in TAST: expected string, got dynamic (Typing[4291])
 File "variableprop.php", line 6, characters 12-13:
-Unexpected type in TAST: expected string, got dynamic (TastTypecheck[11001])
+Unexpected type in TAST: expected string, got dynamic (Typing[4291])

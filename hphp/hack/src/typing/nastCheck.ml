@@ -385,6 +385,7 @@ module CheckFunctionBody = struct
     | _, Callconv (_, e) ->
         expr f_type env e;
         ()
+    | _, Execution_operator _ -> ()
     | _, Assert (AE_assert e) ->
         expr f_type env e;
         ()
@@ -784,7 +785,8 @@ and check_class_property_initialization prop =
       match (snd e) with
       | Any | Typename _
       | Id _ | Class_const _ | True | False | Int _ | Float _
-      | Null | String _ | PrefixedString _ | Unsafe_expr _ ->
+      | Null | String _ | PrefixedString _ | Unsafe_expr _
+      | Execution_operator _ ->
         ()
       | Array field_list ->
         List.iter field_list begin function
@@ -1385,6 +1387,7 @@ and expr_ env p = function
       in
       if not (aux e) then Errors.inout_argument_bad_expr (fst e);
       ()
+  | Execution_operator _ -> ()
   | Shape fdm ->
       ShapeMap.iter (fun _ v -> expr env v) fdm
 

@@ -76,6 +76,7 @@ and expr_ f = function
     Xml (pstring f sid, attr_list f attrl, List.map el (expr f))
   | Unsafe_expr e -> Unsafe_expr (expr f e)
   | Callconv (kind, e) -> Callconv (kind, expr f e)
+  | Execution_operator (e) -> Execution_operator (List.map e (expr f))
   | ValCollection (s, el) -> ValCollection (s, List.map el (expr f))
   | KeyValCollection (s, fl) ->
     KeyValCollection (s, List.map fl (fun (e1, e2) -> expr f e1, expr f e2))

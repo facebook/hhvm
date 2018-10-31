@@ -2553,6 +2553,7 @@ and expr_
       make_result env (T.Callconv (kind, te)) ty
     (* TODO TAST: change AST so that order of shape expressions is preserved.
      * At present, evaluation order is unspecified in TAST *)
+  | Execution_operator _ -> failwith "Execution operator is forbidden in Hack, so this shouldn't occur"
   | Shape fdm ->
       let env, fdm_with_expected =
         match expand_expected env expected with

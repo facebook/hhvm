@@ -4,13 +4,13 @@
 // sample, factor, observe, condition, sample_model, sampleiid and observeiid
 // They are typed as if they were calls made to Infer->sample, etc.
 // Infer is a special class defined by the PPL team
-// This file should produce no errors
 
 function sample(string $k): void {}
 function observe(string $k): void {}
 function condition(string $k): void {}
 function factor(string $k): void {}
-function sample_model(string $k): void {}
+function sampleiid(string $k): void {}
+function observeiid(string $k): void {}
 
 class Infer {
   public function sample(int $k): int {
@@ -25,7 +25,10 @@ class Infer {
   public function condition(int $s): int {
     return 0;
   }
-  public function sample_model(int $s): int {
+  public function sampleiid(int $s): int {
+    return 0;
+  }
+  public function observeiid(int $s): int {
     return 0;
   }
 }
@@ -33,6 +36,6 @@ class Infer {
 <<__PPL>>
 class MyClass {
   public function test(): void {
-    sample_model(1);
+    sampleiid("hi");
   }
 }

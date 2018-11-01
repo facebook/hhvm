@@ -405,7 +405,8 @@ module PPLFunctions = struct
   let all_reserved =
     [ "sample"; "\\sample"; "factor"; "\\factor";
       "observe"; "\\observe"; "condition"; "\\condition";
-      "sample_model"; "\\sample_model";
+      "sample_model"; "\\sample_model"; "sampleiid"; "\\sampleiid";
+      "observeiid"; "\\observeiid";
     ]
 
   let is_reserved =

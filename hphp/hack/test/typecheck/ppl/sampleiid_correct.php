@@ -10,7 +10,8 @@ function sample(string $k): void {}
 function observe(string $k): void {}
 function condition(string $k): void {}
 function factor(string $k): void {}
-function sample_model(string $k): void {}
+function sampleiid(string $k): void {}
+function observeiid(string $k): void {}
 
 class Infer {
   public function sample(int $k): int {
@@ -25,7 +26,10 @@ class Infer {
   public function condition(int $s): int {
     return 0;
   }
-  public function sample_model(int $s): int {
+  public function sampleiid(int $k): int {
+    return 0;
+  }
+  public function observeiid(int $k): int {
     return 0;
   }
 }
@@ -33,6 +37,6 @@ class Infer {
 <<__PPL>>
 class MyClass {
   public function test(): void {
-    sample_model(1);
+    sampleiid(1);
   }
 }

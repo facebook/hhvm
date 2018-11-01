@@ -22,9 +22,11 @@ let suspend_token_syntax = make_token_syntax TokenKind.Suspend
 (* Special method names reserved by the Infer class *)
 let reserved_method_names =
   [ "sample"
+  ; "sampleiid"
   ; "sample_model"
   ; "factor"
   ; "observe"
+  ; "observeiid"
   ; "condition"
   ]
 

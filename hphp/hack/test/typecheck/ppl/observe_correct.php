@@ -1,7 +1,7 @@
 <?hh // strict
 
 // __PPL attributed classes have special rewriting rules for
-// sample, factor, observe, and condition
+// sample, factor, observe, condition, sample_model, sampleiid and observeiid
 // They are typed as if they were calls made to Infer->sample, etc.
 // Infer is a special class defined by the PPL team
 // This file should produce no errors

@@ -1,0 +1,6 @@
+File "observeiid_incorrect.php", line 39, characters 16-19:
+Invalid argument (Typing[4110])
+File "observeiid_incorrect.php", line 31, characters 30-32:
+This is an int
+File "observeiid_incorrect.php", line 39, characters 16-19:
+It is incompatible with a string

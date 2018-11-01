@@ -187,14 +187,16 @@ let log_subtype ~this_ty function_name env ty_sub ty_super =
       [Typing_log.Log_sub ("Typing_subtype." ^ function_name, types)]
   end
 
+(* Process the constraint proposition *)
 let rec process_simplify_subtype_result ~this_ty ~fail env prop =
-  Typing_log.log_prop 2 env.Env.pos "process_simplify_subtype_result" env prop;
   match prop with
   | TL.Unsat f ->
     f ();
     env
   | TL.Sub (ty1, ty2) -> sub_type_inner_helper env ~this_ty ty1 ty2
-  | TL.Eq (ty1, ty2) -> fst (Unify.unify env ty2 ty1)
+  | TL.Eq (ty1, ty2) ->
+    (* These come only from invariant generics, with new_inference=false *)
+    fst (Unify.unify env ty2 ty1)
   | TL.Conj props ->
     (* Evaluates list from left-to-right so preserves order of conjuncts *)
     List.fold_left
@@ -333,7 +335,10 @@ and simplify_subtype
      end in
 
   match snd ety_sub, snd ety_super with
-  | Tvar _, _ | _, Tvar _ -> assert false
+  | Tvar _, _ | _, Tvar _ ->
+    if TypecheckerOptions.new_inference (Env.get_tcopt env)
+    then default ()
+    else assert false
 
   (* Internally, newtypes are always equipped with an upper bound.
    * In the case when no upper bound is specified in source code,
@@ -1495,16 +1500,19 @@ and sub_type_inner
   (ty_sub: locl ty)
   (ty_super: locl ty) : Env.env =
   log_subtype ~this_ty "sub_type_inner" env ty_sub ty_super;
-  let deep = TypecheckerOptions.unresolved_as_union (Env.get_tcopt env) in
+  let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
   let env, prop = simplify_subtype
-    ~seen_generic_params:empty_seen ~deep ~this_ty ty_sub ty_super env in
+    ~seen_generic_params:empty_seen ~deep:new_inference ~this_ty ty_sub ty_super env in
   let env =
-    if TypecheckerOptions.experimental_feature_enabled
+    if new_inference || TypecheckerOptions.experimental_feature_enabled
          (Env.get_tcopt env)
          TypecheckerOptions.experimental_track_subtype_prop
-    then Env.add_subtype_prop env prop
+    then begin
+      log_prop env prop;
+      Typing_log.log_prop 2 env.Env.pos "sub_type_inner: add_subtype_prop" env prop;
+      Env.add_subtype_prop env prop
+    end
     else env in
-  log_prop env prop;
   process_simplify_subtype_result ~this_ty
     ~fail:(fun () -> TUtils.uerror (fst ty_super) (snd ty_super) (fst ty_sub) (snd ty_sub))
     env
@@ -1560,7 +1568,8 @@ and sub_type_inner_helper env ~this_ty
       sub_type_inner env ~this_ty ty_sub ty_super
    (* This case is for when Tany comes from expanding an empty Tvar - it will
     * result in binding the type variable to the other type. *)
-  | _, (_, Tany) -> fst (Unify.unify env ty_super ty_sub)
+  | _, (_, Tany) ->
+    fst (Unify.unify env ty_super ty_sub)
     (* If the subtype is a type variable bound to an empty unresolved, record
      * this in the todo list to be checked later. But make sure that we wrap
      * any error using the position and reason information that was supplied
@@ -1737,7 +1746,7 @@ and sub_type_inner_helper env ~this_ty
   | _, _ ->
     (* TODO: replace this by fail() once we support all subtyping rules that
      * are implemented in unification *)
-    fst (Unify.unify env ty_super ty_sub)
+     fst (Unify.unify env ty_super ty_sub)
 
 (* BEWARE: hack upon hack here.
  * To implement a predicate that tests whether `ty_sub` is a subtype of

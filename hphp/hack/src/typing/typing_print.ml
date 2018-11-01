@@ -353,6 +353,9 @@ module Full = struct
     | Toption x -> Concat [text "?"; k x]
     | Tprim x -> text @@ prim x
     | Tvar n ->
+      if TypecheckerOptions.new_inference (Env.get_tcopt env)
+      then text ("#" ^ (string_of_int n))
+      else
       let _, n' = Env.get_var env n in
       let prepend =
         if ISet.mem n' st then text "[rec]"

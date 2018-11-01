@@ -4,7 +4,7 @@
 function testit(Super $tf, Sub $s):void {
   // This works
   // bar<Super>(async (C<Super> $step) ==> new Super());
-  // This does not, with unresolved_as_union, because Hack infers `Sub` for Tv
+  // This does not, with --new-inference, because Hack infers `Sub` for Tv
   // Then C<Sub> does not unify with C<Sub>
   bar(async (C<Super> $step) ==> $s);
 }

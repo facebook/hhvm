@@ -70,7 +70,7 @@ let add env x ty =
 let fresh_unresolved_type env =
   let v = Ident.tmp () in
   let env =
-    if TypecheckerOptions.unresolved_as_union env.genv.tcopt
+    if TypecheckerOptions.new_inference env.genv.tcopt
     then env
     else add env v (Reason.Rnone, Tunresolved []) in
   env, (Reason.Rnone, Tvar v)
@@ -842,7 +842,7 @@ end
  *)
 
 let rec unbind seen env ty =
-  if TypecheckerOptions.unresolved_as_union (get_tcopt env)
+  if TypecheckerOptions.new_inference (get_tcopt env)
   then env, ty
   else
   let env, ty = expand_type env ty in

@@ -615,7 +615,7 @@ let in_var env ty =
 
 let unresolved_tparam env (_, (pos, _), _, _) =
   let reason = Reason.Rwitness pos in
-  if TypecheckerOptions.unresolved_as_union (Typing_env.get_tcopt env)
+  if TypecheckerOptions.new_inference (Typing_env.get_tcopt env)
   then env, (reason, Tvar (Env.fresh ()))
   else in_var env (reason, Tunresolved [])
 
@@ -650,7 +650,7 @@ let string_of_visibility = function
   | Vprotected _ -> "protected"
 
 let unresolved env ty =
-  if TypecheckerOptions.unresolved_as_union (Typing_env.get_tcopt env)
+  if TypecheckerOptions.new_inference (Typing_env.get_tcopt env)
   then env, ty
   else
     let env, ety = Env.expand_type env ty in

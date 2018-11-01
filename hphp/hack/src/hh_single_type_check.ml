@@ -185,7 +185,7 @@ let parse_options () =
   let unsafe_rx = ref false in
   let enable_concurrent = ref false in
   let disallow_stringish_magic = ref false in
-  let unresolved_as_union = ref false in
+  let new_inference = ref false in
   let all_errors = ref false in
   let batch_mode = ref false in
   let options = [
@@ -361,9 +361,9 @@ let parse_options () =
     "--disallow-stringish-magic",
         Arg.Set disallow_stringish_magic,
         " Disallow using objects in contexts where strings are required.";
-    "--unresolved-as-union",
-        Arg.Set unresolved_as_union,
-        " Interpret unresolved in type inference only as union.";
+    "--new-inference",
+        Arg.Set new_inference,
+        " Type inference by constraint generation.";
     "--batch-files",
         Arg.Set batch_mode,
         " Typecheck each file passed in independently";
@@ -393,7 +393,7 @@ let parse_options () =
       GlobalOptions.tco_disallow_anon_use_capture_by_ref = not !allow_anon_use_capture_by_ref;
       GlobalOptions.tco_disallow_unset_on_varray = !disallow_unset_on_varray;
       GlobalOptions.tco_disallow_stringish_magic = !disallow_stringish_magic;
-      GlobalOptions.tco_unresolved_as_union = !unresolved_as_union;
+      GlobalOptions.tco_new_inference = !new_inference;
       GlobalOptions.po_auto_namespace_map = !auto_namespace_map;
       GlobalOptions.po_enable_concurrent = !enable_concurrent;
   } in

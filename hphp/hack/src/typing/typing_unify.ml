@@ -20,6 +20,9 @@ module TURecursive = Typing_unify_recursive
  *)
 let rec unify ?(opts=TUtils.default_unify_opt) env ty1 ty2 =
   if phys_equal ty1 ty2 then env, ty1 else
+  if TypecheckerOptions.new_inference (Env.get_tcopt env)
+  then env, ty1
+  else
   let types =
     [Typing_log.Log_type ("ty1", ty1);
      Typing_log.Log_type ("ty2", ty2)]  in

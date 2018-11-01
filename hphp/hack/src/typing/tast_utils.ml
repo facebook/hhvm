@@ -126,4 +126,7 @@ let rec truthiness env ty =
 
   | Ttuple [] -> Always_falsy
   | Tobject | Tfun _ | Ttuple _ | Tanon _ -> Always_truthy
-  | Tvar _ -> failwith "expand_type failed"
+  | Tvar _ ->
+    if TypecheckerOptions.new_inference (Env.get_tcopt env)
+    then Unknown
+    else failwith "expand_type failed"

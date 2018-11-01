@@ -1,0 +1,2 @@
+File "__construct.php", line 11, characters 10-20:
+__construct is a magic method and cannot be called directly (NastCheck[3011])

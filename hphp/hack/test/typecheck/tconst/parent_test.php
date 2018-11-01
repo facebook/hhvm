@@ -18,9 +18,11 @@ class Y extends X {
   }
 
   public static function test(this::T $t): void {
+    /* HH_FIXME[3011] */
     parent::__construct($t);
 
     /* This should be an error, because parent */
+    /* HH_FIXME[3011] */
     parent::__construct('');
   }
 }

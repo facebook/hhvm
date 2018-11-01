@@ -1,0 +1,2 @@
+File "magic_methods_parent_call2.php", line 15, characters 13-24:
+__callStatic is a magic method and cannot be called directly (NastCheck[3011])

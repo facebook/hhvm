@@ -44,6 +44,7 @@ type control_context =
 
 type env = {
   t_is_finally: bool;
+  function_name: string option;
   class_name: string option;
   class_kind: Ast.class_kind option;
   imm_ctrl_ctx: control_context;
@@ -398,14 +399,12 @@ end
 let is_magic =
   let h = Caml.Hashtbl.create 23 in
   let a x = Caml.Hashtbl.add h x true in
-  a SN.Members.__set;
-  a SN.Members.__isset;
-  a SN.Members.__get;
-  a SN.Members.__unset;
-  a SN.Members.__call;
-  a SN.Members.__callStatic;
+  let _ = SSet.iter (fun m -> if m <> SN.Members.__toString then a m) SN.Members.as_set in
   fun (_, s) ->
     Caml.Hashtbl.mem h s
+
+let is_parent e =
+  snd e = CIparent
 
 let check_conditionally_reactive_annotation_params p params ~is_method =
   match params with
@@ -445,6 +444,7 @@ let rec fun_ tenv f named_body =
                 imm_ctrl_ctx = Toplevel;
                 typedef_tparams = [];
                 tenv = tenv;
+                function_name = None;
                 is_reactive = fun_is_reactive f.f_user_attributes
                 } in
     func env f named_body
@@ -646,6 +646,7 @@ and class_ tenv c =
               imm_ctrl_ctx = Toplevel;
               typedef_tparams = [];
               is_reactive = false;
+              function_name = None;
               tenv = tenv } in
   (* Add type parameters to typing environment and localize the bounds *)
   let tenv, constraints = Phase.localize_generic_parameters_with_bounds
@@ -963,7 +964,7 @@ and method_ (env, is_static) m =
     { env with is_reactive = fun_is_reactive m.m_user_attributes } in
   let named_body = assert_named_body m.m_body in
   check__toString m is_static;
-
+  let env = { env with function_name = Some (snd m.m_name) } in
   let p, name = m.m_name in
   let is_coroutine = m.m_fun_kind = Ast.FCoroutine in
   check_coroutines_enabled is_coroutine env p;
@@ -1216,13 +1217,18 @@ and expr_ env p = function
   | Smethod_id _
   | Method_caller _
   | This
-  | Class_const _
   | Typename _
   | Lvar _
   | ImmutableVar _
   | Lplaceholder _
   | Dollardollar _
   | Unsafe_expr _ -> ()
+  | Class_const (cid, ((_, m_name) as mid)) ->
+    let func_name = env.function_name in
+    if is_magic mid &&
+      (not(is_parent cid) || func_name <> Some m_name)
+    then Errors.magic mid;
+    ()
   | Dollar e ->
     let env' = {env with is_array_append_allowed = false} in
     expr env' e
@@ -1260,7 +1266,7 @@ and expr_ env p = function
       ()
   | Clone e -> expr env e; ()
   | Obj_get (e, (_, Id s), _) ->
-      if is_magic s && Env.is_strict env.tenv
+      if is_magic s
       then Errors.magic s;
       let env' = {env with is_array_append_allowed = false} in
       expr env' e;
@@ -1409,6 +1415,7 @@ let typedef tenv t =
               is_array_append_allowed = false;
               class_name = None; class_kind = None;
               imm_ctrl_ctx = Toplevel;
+              function_name = None;
               (* Since typedefs cannot have constraints we shouldn't check
                * if its type params satisfy the constraints of any tapply it
                * references.

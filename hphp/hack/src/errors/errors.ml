@@ -1373,7 +1373,7 @@ let static_memoized_function p =
 
 let magic (p, s) =
   add (NastCheck.err_code NastCheck.Magic) p
-    ("Don't call "^s^" it's one of these magic things we want to avoid")
+    (s^" is a magic method and cannot be called directly")
 
 let non_interface (p : Pos.t) (c2: string) (verb: string): 'a =
   add (NastCheck.err_code NastCheck.NonInterface) p

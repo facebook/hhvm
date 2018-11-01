@@ -1,8 +1,8 @@
-File "parent_test.php", line 24, characters 25-26:
+File "parent_test.php", line 26, characters 25-26:
 Invalid argument (Typing[4110])
 File "parent_test.php", line 8, characters 39-45:
 This is an int
 File "parent_test.php", line 14, characters 18-20:
   resulting from expanding the type constant Y::T
-File "parent_test.php", line 24, characters 25-26:
+File "parent_test.php", line 26, characters 25-26:
 It is incompatible with a string

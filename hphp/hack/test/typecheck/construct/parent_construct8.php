@@ -34,8 +34,10 @@ class B extends A {
 
   private function init(): void {
     if (false) {
+      /* HH_FIXME[3011] */
       parent::__construct();
     } else {
+      /* HH_FIXME[3011] */
       parent::__construct();
     }
   }

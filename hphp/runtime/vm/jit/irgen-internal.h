@@ -384,6 +384,15 @@ inline IRSPRelOffset spOffBCFromIRSP(const IRGS& env) {
   return offsetFromIRSP(env, BCSPRelOffset { 0 });
 }
 
+/*
+ * Offset of empty evaluation stack.
+ */
+inline FPInvOffset spOffEmpty(const IRGS& env) {
+  return FPInvOffset{
+    resumeMode(env) == ResumeMode::None ? curFunc(env)->numSlotsInFrame() : 0
+  };
+}
+
 inline SSATmp* pop(IRGS& env, GuardConstraint gc = DataTypeSpecific) {
   auto const offset = offsetFromIRSP(env, BCSPRelOffset{0});
   auto const knownType = env.irb->stack(offset, gc).type;

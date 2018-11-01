@@ -21,12 +21,19 @@
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/trace.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
+
+/*
+ * Find a catch exception handler for a given raise location. Return the offset
+ * following the Catch opcode if the handler was found or InvalidAbsoluteOffset.
+ */
+Offset findCatchHandler(const Func* func, Offset raiseOffset);
 
 /*
  * Unwind the PHP exception on the top of the fault stack.

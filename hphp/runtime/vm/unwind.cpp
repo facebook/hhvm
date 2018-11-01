@@ -383,6 +383,16 @@ const StaticString s_xdebug_start_code_coverage("xdebug_start_code_coverage");
 
 }
 
+Offset findCatchHandler(const Func* func, Offset raiseOffset) {
+  auto const eh = func->findEH(raiseOffset);
+  if (eh == nullptr) return InvalidAbsoluteOffset;
+  if (eh->m_type != EHEnt::Type::Catch) return InvalidAbsoluteOffset;
+  auto pc = func->unit()->at(eh->m_handler);
+  UNUSED auto const op = decode_op(pc);
+  assertx(op == Op::Catch);
+  return func->unit()->offsetOf(pc);
+}
+
 void chainFaultObjects(ObjectData* top, ObjectData* prev) {
   assertx(throwable_has_expected_props());
 

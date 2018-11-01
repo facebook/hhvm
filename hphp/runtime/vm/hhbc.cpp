@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/unwind.h"
 #include "hphp/util/text-util.h"
 
 namespace HPHP {
@@ -340,9 +341,9 @@ Offset instrJumpTarget(PC instrs, Offset pos) {
   return offset != kInvalidOffset ? offset + pos : InvalidAbsoluteOffset;
 }
 
-OffsetSet instrSuccOffsets(PC opc, const Unit* unit) {
+OffsetSet instrSuccOffsets(PC opc, const Func* func) {
   OffsetSet succBcOffs;
-  auto const bcStart = unit->entry();
+  auto const bcStart = func->unit()->entry();
   auto const op = peek_op(opc);
 
   if (!instrIsControlFlow(op)) {
@@ -360,6 +361,11 @@ OffsetSet instrSuccOffsets(PC opc, const Unit* unit) {
     foreachSwitchTarget(opc, [&](Offset offset) {
       succBcOffs.insert(offset + opc - bcStart);
     });
+  } else if (op == Op::Await || op == Op::Throw) {
+    Offset target = findCatchHandler(func, opc - bcStart);
+    if (target != InvalidAbsoluteOffset) {
+      succBcOffs.insert(target);
+    }
   } else {
     Offset target = instrJumpTarget(bcStart, opc - bcStart);
     if (target != InvalidAbsoluteOffset) {

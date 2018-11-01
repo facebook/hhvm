@@ -451,7 +451,6 @@ void emitAddNewElemV(IRGS& env)               { INTERP }
 void emitExit(IRGS& env)                      { INTERP }
 void emitFatal(IRGS& env, FatalOp)            { INTERP }
 void emitUnwind(IRGS& env)                    { INTERP }
-void emitThrow(IRGS& env)                     { INTERP }
 void emitCGetN(IRGS& env)                     { INTERP }
 void emitCGetQuietN(IRGS& env)                { INTERP }
 void emitVGetN(IRGS& env)                     { INTERP }

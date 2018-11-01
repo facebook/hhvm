@@ -1,0 +1,6 @@
+caught[good]: Exception
+caught[good]: InvalidOperationException
+caught[good]: Error
+caught[good]: AssertionError
+
+Fatal error: Exceptions must implement the Throwable interface. in %s on line 32

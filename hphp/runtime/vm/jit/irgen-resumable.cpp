@@ -23,9 +23,11 @@
 
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/resumable.h"
+#include "hphp/runtime/vm/unwind.h"
 
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/irgen-call.h"
+#include "hphp/runtime/vm/jit/irgen-control.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-ret.h"
@@ -340,6 +342,7 @@ void emitWHResult(IRGS& env) {
 void emitAwait(IRGS& env) {
   auto const resumeOffset = nextBcOff(env);
   assertx(curFunc(env)->isAsync());
+  assertx(spOffBCFromFP(env) == spOffEmpty(env) + 1);
 
   if (curFunc(env)->isAsyncGenerator() &&
       resumeMode(env) == ResumeMode::Async) PUNT(Await-AsyncGenerator);
@@ -361,7 +364,16 @@ void emitAwait(IRGS& env) {
     push(env, res);
   };
   auto const handleFailed = [&] {
-    gen(env, Jmp, exitSlow);
+    auto const offset = findCatchHandler(curFunc(env), bcOff(env));
+    if (offset != InvalidAbsoluteOffset) {
+      auto const exception = gen(env, LdWHResult, TObj, child);
+      gen(env, IncRef, exception);
+      decRef(env, child);
+      push(env, exception);
+      jmpImpl(env, offset);
+    } else {
+      gen(env, Jmp, exitSlow);
+    }
   };
   auto const handleNotFinished = [&] {
     if (childIsSWH) {
@@ -420,6 +432,7 @@ void emitAwait(IRGS& env) {
 void emitAwaitAll(IRGS& env, LocalRange locals) {
   auto const resumeOffset = nextBcOff(env);
   assertx(curFunc(env)->isAsync());
+  assertx(spOffBCFromFP(env) == spOffEmpty(env));
 
   if (curFunc(env)->isAsyncGenerator() &&
       resumeMode(env) == ResumeMode::Async) PUNT(Await-AsyncGenerator);

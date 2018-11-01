@@ -1073,6 +1073,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::StaticLocInit:
   case Op::String:
   case Op::This:
+  case Op::Throw:
   case Op::True:
   case Op::Unbox:
   case Op::UnboxR:
@@ -1130,7 +1131,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Exit:
   case Op::Fatal:
   case Op::Unwind:
-  case Op::Throw:
   case Op::CGetN:
   case Op::CGetQuietN:
   case Op::VGetN:

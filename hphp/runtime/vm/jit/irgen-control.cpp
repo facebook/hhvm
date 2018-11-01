@@ -16,6 +16,7 @@
 #include "hphp/runtime/vm/jit/irgen-control.h"
 
 #include "hphp/runtime/vm/resumable.h"
+#include "hphp/runtime/vm/unwind.h"
 
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/switch-profile.h"
@@ -297,6 +298,40 @@ void emitSelect(IRGS& env) {
       push(env, val);
     },
     [&] { popDecRef(env, DataTypeCountness); } // False case
+  );
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void emitThrow(IRGS& env) {
+  auto const stackEmpty = spOffBCFromFP(env) == spOffEmpty(env) + 1;
+  auto const offset = findCatchHandler(curFunc(env), bcOff(env));
+  auto const srcTy = topC(env)->type();
+  auto const maybeThrowable =
+    srcTy.maybe(Type::SubObj(SystemLib::s_ExceptionClass)) ||
+    srcTy.maybe(Type::SubObj(SystemLib::s_ErrorClass));
+  if (!stackEmpty || offset == InvalidAbsoluteOffset || !maybeThrowable ||
+      !(srcTy <= TObj)) {
+    return interpOne(env, *env.currentNormalizedInstruction);
+  }
+
+  if (srcTy <= Type::SubObj(SystemLib::s_ThrowableClass)) {
+    return jmpImpl(env, offset);
+  }
+
+  ifThenElse(env,
+    [&] (Block* taken) {
+      assertx(srcTy <= TObj);
+      auto const srcClass = gen(env, LdObjClass, topC(env));
+      auto const ecdExc = ExtendsClassData { SystemLib::s_ExceptionClass };
+      auto const isException = gen(env, ExtendsClass, ecdExc, srcClass);
+      gen(env, JmpNZero, taken, isException);
+      auto const ecdErr = ExtendsClassData { SystemLib::s_ErrorClass };
+      auto const isError = gen(env, ExtendsClass, ecdErr, srcClass);
+      gen(env, JmpNZero, taken, isError);
+    },
+    [&] { gen(env, Jmp, makeExitSlow(env)); },
+    [&] { jmpImpl(env, offset); }
   );
 }
 

@@ -164,7 +164,7 @@ inline void SrcKey::setOffset(Offset o) {
 }
 
 inline OffsetSet SrcKey::succOffsets() const {
-  return instrSuccOffsets(pc(), unit());
+  return instrSuccOffsets(pc(), func());
 }
 
 inline void SrcKey::advance(const Unit* u) {

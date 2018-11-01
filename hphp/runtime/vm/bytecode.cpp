@@ -3462,7 +3462,7 @@ OPTBLD_INLINE void iopUnwind() {
   throw VMPrepareUnwind();
 }
 
-OPTBLD_INLINE void iopThrow() {
+OPTBLD_INLINE void iopThrow(PC&) {
   Cell* c1 = vmStack().topC();
   if (c1->m_type != KindOfObject ||
       !c1->m_data.pobj->instanceof(SystemLib::s_ThrowableClass)) {
@@ -6629,7 +6629,7 @@ OPTBLD_INLINE void iopContEnter(PC& pc) {
 
 OPTBLD_INLINE void iopContRaise(PC& pc) {
   contEnterImpl<true>(pc);
-  iopThrow();
+  iopThrow(pc);
 }
 
 OPTBLD_INLINE void moveProgramCounterToCaller(PC& pc,

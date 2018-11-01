@@ -574,7 +574,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(RetV,            NA,               ONE(VV),         NOV,        CF_TF) \
   O(RetM,            ONE(IVA),         CMANY,           NOV,        CF_TF) \
   O(Unwind,          NA,               NOV,             NOV,        TF) \
-  O(Throw,           NA,               ONE(CV),         NOV,        TF) \
+  O(Throw,           NA,               ONE(CV),         NOV,        CF_TF) \
   O(CGetL,           ONE(LA),          NOV,             ONE(CV),    NF) \
   O(CGetQuietL,      ONE(LA),          NOV,             ONE(CV),    NF) \
   O(CUGetL,          ONE(LA),          NOV,             ONE(CUV),   NF) \
@@ -989,7 +989,7 @@ Offset instrJumpTarget(PC instrs, Offset pos);
  * be executed immediately after opc.
  */
 using OffsetSet = hphp_hash_set<Offset>;
-OffsetSet instrSuccOffsets(PC opc, const Unit* unit);
+OffsetSet instrSuccOffsets(PC opc, const Func* func);
 
 struct StackTransInfo {
   enum class Kind {

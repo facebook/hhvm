@@ -25,9 +25,7 @@ function forward_static_call($function, ...);
 function get_called_class(): string; // false if called from outside class
 <<__Deprecated('Use an anonymous function instead.')>>
 function create_function($args, $code);
-<<__Rx>>
 function func_get_arg(int $arg_num);
-<<__Rx>>
 function func_num_args(): int;
 <<__PHPStdLib>>
 function register_postsend_function($function, ...);

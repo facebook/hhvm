@@ -146,7 +146,7 @@ function ignore_user_abort(bool $setting = false): int;
  * byte X Back up one byte @ NUL-fill to absolute position
  * @return mixed - Returns a binary string containing data.
  */
-<<__Native, __IsFoldable>>
+<<__Native, __IsFoldable, __Rx>>
 function pack(string $format, ...$args): mixed;
 
 /* @param int $seconds - Halt time in seconds.
@@ -218,7 +218,7 @@ function uniqid(string $prefix = "",
  * @return mixed - Returns an associative array containing unpacked elements
  * of binary string.
  */
-<<__Native, __IsFoldable>>
+<<__Native, __IsFoldable, __Rx>>
 function unpack(string $format,
                 string $data): mixed;
 
@@ -257,7 +257,7 @@ function token_name(int $token): string;
  * @param mixed $v - The value being casted to a string.
  * @return string - The result of the string cast.
  */
-<<__Native, __IsFoldable>>
+<<__Native, __IsFoldable, __Rx>>
 function hphp_to_string(mixed $v): string;
 
 function __hhas_adata(string $incorrect_hhas_adata) {

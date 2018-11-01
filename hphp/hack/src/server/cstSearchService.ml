@@ -293,6 +293,7 @@ let rec search_node
     else (env, None)
 
   | TypePattern { subtype_of } ->
+    Line_break_map.reset_global_state ();
     let pos = Syntax.position env.path node in
     begin match pos with
     | None -> (env, None)

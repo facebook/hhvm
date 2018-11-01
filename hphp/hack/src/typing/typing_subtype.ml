@@ -110,7 +110,7 @@ let with_error (f : unit -> unit) ((env, p) : (Env.env * TL.subtype_prop))
   env, TL.conj p (TL.Unsat f)
 
 (* If `b` is false then fail with error function `f` *)
-let maybe_with_error b f r = if b then with_error f r else r
+let check_with b f r = if not b then with_error f r else r
 
 let valid env : Env.env * TL.subtype_prop = env, TL.valid
 
@@ -614,19 +614,23 @@ and simplify_subtype
       | Some (reactivity, is_coroutine, ftys, _, anon) ->
         let p_super = Reason.to_pos r_super in
         let p_sub = Reason.to_pos r_sub in
-        if (not (subtype_reactivity env reactivity ft.ft_reactive)) && (not (TypecheckerOptions.unsafe_rx (Env.get_options env)))
-        then Errors.fun_reactivity_mismatch
-          p_super (TUtils.reactivity_to_string env reactivity)
-          p_sub (TUtils.reactivity_to_string env ft.ft_reactive);
-        if is_coroutine <> ft.ft_is_coroutine
-        then Errors.coroutinness_mismatch ft.ft_is_coroutine p_super p_sub;
-        if not (Unify.unify_arities
-                  ~ellipsis_is_variadic:true anon_arity ft.ft_arity)
-        then Errors.fun_arity_mismatch p_super p_sub;
         (* Add function type to set of types seen so far *)
         ftys := TUtils.add_function_type env ety_super !ftys;
-        let env, _, ret = anon env ft.ft_params ft.ft_arity in
-        simplify_subtype ~seen_generic_params ~deep ~this_ty ret ft.ft_ret env
+        (env, TL.valid) |>
+        check_with (subtype_reactivity env reactivity ft.ft_reactive
+          || TypecheckerOptions.unsafe_rx (Env.get_options env))
+          (fun () -> Errors.fun_reactivity_mismatch
+            p_super (TUtils.reactivity_to_string env reactivity)
+            p_sub (TUtils.reactivity_to_string env ft.ft_reactive)) |>
+        check_with (is_coroutine = ft.ft_is_coroutine) (fun () ->
+          Errors.coroutinness_mismatch ft.ft_is_coroutine p_super p_sub) |>
+        check_with (Unify.unify_arities
+                  ~ellipsis_is_variadic:true anon_arity ft.ft_arity)
+          (fun () -> Errors.fun_arity_mismatch p_super p_sub) |>
+        (fun (env, prop) ->
+          let env, _, ret = anon env ft.ft_params ft.ft_arity in
+          (env, prop) &&&
+          simplify_subtype ~seen_generic_params ~deep ~this_ty ret ft.ft_ret)
     end
 
   | Tabstract (AKnewtype (name_sub, tyl_sub), _),
@@ -1329,7 +1333,7 @@ and subtype_fun_params_reactivity
       | _ -> None in
     let ok =
       subtype_param_rx_if_impl env cond_type_sub (Some p_sub.fp_type) cond_type_super in
-    maybe_with_error (not ok) (fun () ->
+      check_with ok (fun () ->
       Errors.rx_parameter_condition_mismatch
         SN.UserAttributes.uaOnlyRxIfImpl p_sub.fp_pos p_super.fp_pos) (env, TL.valid)
 
@@ -1351,17 +1355,17 @@ and check_subtype_funs_attributes
   let p_sub = Reason.to_pos r_sub in
   let p_super = Reason.to_pos r_super in
   (env, TL.valid) |>
-  maybe_with_error
-    (not (subtype_reactivity ?extra_info env ft_sub.ft_reactive ft_super.ft_reactive))
+  check_with
+    (subtype_reactivity ?extra_info env ft_sub.ft_reactive ft_super.ft_reactive)
     (fun () -> Errors.fun_reactivity_mismatch
       p_super (TUtils.reactivity_to_string env ft_super.ft_reactive)
       p_sub (TUtils.reactivity_to_string env ft_sub.ft_reactive))
   |>
-  maybe_with_error
-    (ft_sub.ft_is_coroutine <> ft_super.ft_is_coroutine)
+  check_with
+    (ft_sub.ft_is_coroutine = ft_super.ft_is_coroutine)
     (fun () -> Errors.coroutinness_mismatch ft_super.ft_is_coroutine p_super p_sub) |>
-  maybe_with_error
-    (ft_sub.ft_return_disposable <> ft_super.ft_return_disposable)
+  check_with
+    (ft_sub.ft_return_disposable = ft_super.ft_return_disposable)
     (fun () -> Errors.return_disposable_mismatch ft_super.ft_return_disposable p_super p_sub) |>
   (* it is ok for subclass to return mutably owned value and treat it as immutable -
   the fact that value is mutably owned guarantees it has only single reference so
@@ -1369,15 +1373,15 @@ and check_subtype_funs_attributes
   returns mutable value and subtype yields immutable value - this is not safe.
   NOTE: error is not reported if child is non-reactive since it does not have
   immutability-by-default behavior *)
-  maybe_with_error
-    (ft_sub.ft_returns_mutable <> ft_super.ft_returns_mutable
-    && ft_super.ft_returns_mutable
-    && ft_sub.ft_reactive <> Nonreactive)
+  check_with
+    (ft_sub.ft_returns_mutable = ft_super.ft_returns_mutable
+    || not ft_super.ft_returns_mutable
+    || ft_sub.ft_reactive = Nonreactive)
     (fun () -> Errors.mutable_return_result_mismatch ft_super.ft_returns_mutable p_super p_sub) |>
-  maybe_with_error
-    (ft_super.ft_reactive <> Nonreactive
-    && not ft_super.ft_returns_void_to_rx
-    && ft_sub.ft_returns_void_to_rx)
+  check_with
+    (ft_super.ft_reactive = Nonreactive
+    || ft_super.ft_returns_void_to_rx
+    || not ft_sub.ft_returns_void_to_rx)
     (fun () ->
     (*  __ReturnsVoidToRx can be omitted on subtype, in this case using subtype
        via reference to supertype in rx context will be ok since result will be
@@ -1405,8 +1409,8 @@ and check_subtype_funs_attributes
   then (env, prop) &&&
     check_mutability ~is_receiver:true
       p_super ft_super.ft_mutability p_sub ft_sub.ft_mutability else env, prop) |>
-  maybe_with_error
-    ((arity_min ft_sub.ft_arity) > (arity_min ft_super.ft_arity))
+  check_with
+    ((arity_min ft_sub.ft_arity) <= (arity_min ft_super.ft_arity))
     (fun () -> Errors.fun_too_many_args p_sub p_super)
     |>
   fun res -> (match ft_sub.ft_arity, ft_super.ft_arity with

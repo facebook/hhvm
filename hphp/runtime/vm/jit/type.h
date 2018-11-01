@@ -995,7 +995,7 @@ Type relaxType(Type t, DataTypeCategory cat);
 
 /*
  * Returns the smallest supertype of ty that we can reasonably guard on. Used
- * for checking inner ref cells and locals in pesudomains.
+ * for checking inner ref cells and locals in pseudomains.
  */
 Type relaxToGuardable(Type ty);
 

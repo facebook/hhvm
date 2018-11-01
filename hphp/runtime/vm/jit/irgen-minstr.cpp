@@ -807,7 +807,8 @@ SSATmp* emitProfiledPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key,
   return emitArrayGet(env, base, key, mode, finish);
 }
 
-SSATmp* emitVectorGet(IRGS& env, SSATmp* base, SSATmp* key) {
+template<class Finish>
+SSATmp* emitVectorGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
   auto const size = gen(env, LdVectorSize, base);
   checkCollectionBounds(env, base, key, size);
   base = gen(env, LdVectorBase, base);
@@ -815,11 +816,16 @@ SSATmp* emitVectorGet(IRGS& env, SSATmp* base, SSATmp* key) {
                 "TypedValue size expected to be 16 bytes");
   auto idx = gen(env, Shl, key, cns(env, 4));
   auto result = gen(env, LdElem, base, idx);
-  gen(env, IncRef, result);
-  return result;
+  auto const profres = profiledType(env, result, [&] {
+    gen(env, IncRef, result);
+    finish(result);
+  });
+  gen(env, IncRef, profres);
+  return profres;
 }
 
-SSATmp* emitPairGet(IRGS& env, SSATmp* base, SSATmp* key) {
+template<class Finish>
+SSATmp* emitPairGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
   assertx(key->isA(TInt));
 
   auto const idx = [&] {
@@ -839,8 +845,12 @@ SSATmp* emitPairGet(IRGS& env, SSATmp* base, SSATmp* key) {
 
   auto const pairBase = gen(env, LdPairBase, base);
   auto const result = gen(env, LdElem, pairBase, idx);
-  gen(env, IncRef, result);
-  return result;
+  auto const profres = profiledType(env, result, [&] {
+    gen(env, IncRef, result);
+    finish(result);
+  });
+  gen(env, IncRef, profres);
+  return profres;
 }
 
 SSATmp* emitPackedArrayIsset(IRGS& env, SSATmp* base, SSATmp* key) {
@@ -1008,10 +1018,10 @@ SSATmp* emitCGetElem(IRGS& env, SSATmp* base, SSATmp* key,
       return gen(env, StringGet, base, key);
     case SimpleOp::Vector:
       assertx(mode != MOpMode::InOut);
-      return emitVectorGet(env, base, key);
+      return emitVectorGet(env, base, key, finish);
     case SimpleOp::Pair:
       assertx(mode != MOpMode::InOut);
-      return emitPairGet(env, base, key);
+      return emitPairGet(env, base, key, finish);
     case SimpleOp::Map:
       assertx(mode != MOpMode::InOut);
       return gen(env, MapGet, base, key);
@@ -1624,8 +1634,9 @@ void mFinalImpl(IRGS& env, int32_t nDiscard, SSATmp* result) {
   gen(env, FinishMemberOp);
 }
 
+template<class Finish>
 SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
-                     MOpMode mode, bool nullsafe) {
+                     MOpMode mode, bool nullsafe, Finish finish) {
   auto const propInfo =
     getCurrentPropertyOffset(env, base, key->type(), true, false);
 
@@ -1638,8 +1649,12 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
     auto const cellPtr =
       ty.maybe(TBoxedCell) ? gen(env, UnboxPtr, propAddr) : propAddr;
     auto const result = gen(env, LdMem, ty.unbox(), cellPtr);
-    gen(env, IncRef, result);
-    return result;
+    auto const profres = profiledType(env, result, [&] {
+      gen(env, IncRef, result);
+      finish(result);
+    });
+    gen(env, IncRef, profres);
+    return profres;
   }
 
   // No warning takes precedence over nullsafe.
@@ -2171,7 +2186,8 @@ void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
         );
         return mcodeIsProp(mk.mcode)
           ? cGetPropImpl(env, extractBaseIfObj(env), key,
-                         mode, mk.mcode == MQT)
+                         mode, mk.mcode == MQT,
+                         [&](SSATmp* el) { mFinalImpl(env, nDiscard, el); })
           : emitCGetElem(env, maybeExtractBase(env), key, mode, simpleOp,
                          [&](SSATmp* el) { mFinalImpl(env, nDiscard, el); });
       }
@@ -2180,7 +2196,8 @@ void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
         auto const mode = getQueryMOpMode(query);
         return mcodeIsProp(mk.mcode)
           ? cGetPropImpl(
-              env, extractBaseIfObj(env), key, mode, mk.mcode == MQT
+              env, extractBaseIfObj(env), key, mode, mk.mcode == MQT,
+              [&](SSATmp* el) { mFinalImpl(env, nDiscard, el); }
             )
           : emitCGetElemQuiet(
               env, maybeExtractBase(env), key, mode, simpleOp,
@@ -2317,8 +2334,9 @@ SSATmp* inlineSetOp(IRGS& env, SetOpOp op, SSATmp* lhs, SSATmp* rhs) {
   return result;
 }
 
+template<class Finish>
 SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
-                      SSATmp* key, SSATmp* rhs) {
+                      SSATmp* key, SSATmp* rhs, Finish finish) {
   auto const propInfo =
     getCurrentPropertyOffset(env, base, key->type(), false, false);
 
@@ -2352,9 +2370,16 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
         false
       );
       gen(env, StMem, propPtr, result);
-      gen(env, DecRef, DecRefData{}, lhs);
-      gen(env, IncRef, result);
-      return result;
+      auto const finishMe = [&] (SSATmp* oldVal) {
+        gen(env, DecRef, DecRefData{}, oldVal);
+        gen(env, IncRef, result);
+        return result;
+      };
+      auto const plhs = profiledType(env, lhs, [&] {
+        finishMe(lhs);
+        finish(result);
+      });
+      return finishMe(plhs);
     }
 
     if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
@@ -2372,8 +2397,12 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
       gen(env, SetOpCell, SetOpData{op}, propPtr, rhs);
     }
     auto newVal = gen(env, LdMem, propPtr->type().deref(), propPtr);
-    gen(env, IncRef, newVal);
-    return newVal;
+    auto const pNewVal = profiledType(env, newVal, [&] {
+      gen(env, IncRef, newVal);
+      finish(newVal);
+    });
+    gen(env, IncRef, pNewVal);
+    return pNewVal;
   }
 
   return gen(
@@ -2391,9 +2420,13 @@ void emitSetOpM(IRGS& env, uint32_t nDiscard, SetOpOp op, MemberKey mk) {
   auto key = memberKey(env, mk);
   auto rhs = topC(env);
 
+  auto const finish = [&] (SSATmp* result) {
+    popDecRef(env);
+    mFinalImpl(env, nDiscard, result);
+  };
   auto const result = [&] {
     if (mcodeIsProp(mk.mcode)) {
-      return setOpPropImpl(env, op, extractBaseIfObj(env), key, rhs);
+      return setOpPropImpl(env, op, extractBaseIfObj(env), key, rhs, finish);
     }
     if (mcodeIsElem(mk.mcode)) {
       auto const base = ldMBase(env);
@@ -2410,8 +2443,7 @@ void emitSetOpM(IRGS& env, uint32_t nDiscard, SetOpOp op, MemberKey mk) {
     PUNT(SetOpNewElem);
   }();
 
-  popDecRef(env);
-  mFinalImpl(env, nDiscard, result);
+  finish(result);
 }
 
 void emitBindM(IRGS& env, uint32_t nDiscard, MemberKey mk) {

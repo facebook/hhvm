@@ -523,6 +523,9 @@ struct RuntimeOption {
   // valid values are 0 => enabled (default)
   // 1 => warning, 2 => error
   static uint64_t DisableConstant;
+  // Enable concurrent
+  // true => allows use of concurrent, false => error
+  static bool EnableConcurrent;
   // Disables PHP's define() function
   // valid values are 0 => enabled (default)
   // 1 => warning, 2 => error

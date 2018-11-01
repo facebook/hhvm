@@ -437,6 +437,7 @@ bool RuntimeOption::DisableReservedVariables = false;
 bool RuntimeOption::DisallowExecutionOperator = false;
 bool RuntimeOption::DisableVariableVariables = false;
 uint64_t RuntimeOption::DisableConstant = 0;
+bool RuntimeOption::EnableConcurrent = false;
 
 #ifdef HHVM_DYNAMIC_EXTENSION_DIR
 std::string RuntimeOption::ExtensionDir = HHVM_DYNAMIC_EXTENSION_DIR;
@@ -1579,6 +1580,9 @@ void RuntimeOption::Load(
     Config::Bind(EnableCoroutines, ini, config,
                 "Hack.Lang.EnableCoroutines",
                 true);
+    Config::Bind(EnableConcurrent, ini, config,
+                "Hack.Lang.EnableConcurrent",
+                false);
   }
   {
     // Options for PHP7 features which break BC. (Features which do not break

@@ -48,6 +48,7 @@ type t = {
   option_enable_intrinsics_extension      : bool;
   option_enable_hhjs                      : bool;
   option_dump_hhjs                        : bool;
+  option_enable_concurrent                : bool;
   option_phpism_undefined_const_as_string : bool;
   option_phpism_undefined_const_fallback  : bool;
   option_phpism_disallow_execution_operator: bool;
@@ -94,6 +95,7 @@ let default = {
   option_enable_intrinsics_extension = false;
   option_enable_hhjs = false;
   option_dump_hhjs = false;
+  option_enable_concurrent = false;
   option_phpism_undefined_const_as_string = true;
   option_phpism_undefined_const_fallback = true;
   option_phpism_disallow_execution_operator = false;
@@ -137,6 +139,7 @@ let enable_reified_generics o = o.option_enable_reified_generics
 let enable_intrinsics_extension o = o.option_enable_intrinsics_extension
 let enable_hhjs o = o.option_enable_hhjs
 let dump_hhjs o = o.option_dump_hhjs
+let enable_concurrent o = o.option_enable_concurrent
 let phpism_undefined_const_as_string o = o.option_phpism_undefined_const_as_string
 let phpism_undefined_const_fallback o = o.option_phpism_undefined_const_fallback
 let phpism_disallow_execution_operator o = o.option_phpism_disallow_execution_operator
@@ -187,6 +190,7 @@ let to_string o =
     ; Printf.sprintf "disable_return_by_reference: %B" @@ disable_return_by_reference o
     ; Printf.sprintf "enable_intrinsics_extension: %B" @@ enable_intrinsics_extension o
     ; Printf.sprintf "enable_hhjs: %B" @@ enable_hhjs o
+    ; Printf.sprintf "enable_concurrent: %B" @@ enable_concurrent o
     ; Printf.sprintf "phpism_undefined_const_as_string: %B" @@ phpism_undefined_const_as_string o
     ; Printf.sprintf "phpism_undefined_const_fallback: %B" @@ phpism_undefined_const_fallback o
     ; Printf.sprintf "phpism_disallow_execution_operator %B" @@ phpism_disallow_execution_operator o
@@ -280,6 +284,8 @@ let set_option options name value =
     { options with option_disable_variable_variables = as_bool value }
   | "hack.lang.phpism.disabledefine" ->
     { options with option_phpism_disable_define = int_of_string value > 0 }
+  | "hhvm.hack.lang.enableconcurrent" ->
+    { options with option_enable_concurrent = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -390,6 +396,8 @@ let value_setters = [
     fun opts v -> { opts with option_hacksperimental = (v = 1) });
   (set_value "hhvm.hack.lang.enable_reified_generics" get_value_from_config_int @@
     fun opts v -> { opts with option_enable_reified_generics = (v = 1) });
+  (set_value "hhvm.hack.lang.enable_concurrent" get_value_from_config_int @@
+    fun opts v -> { opts with option_enable_concurrent = (v = 1) });
   (set_value "doc_root" get_value_from_config_string @@
     fun opts v -> { opts with option_doc_root = v });
   (set_value "hhvm.server.include_search_paths" get_value_from_config_string_array @@

@@ -14,6 +14,7 @@ let enable_hh_syntax_for_hhvm = GlobalOptions.po_enable_hh_syntax_for_hhvm
 let disallow_execution_operator = GlobalOptions.po_disallow_execution_operator
 let disable_variable_variables = GlobalOptions.po_disable_variable_variables
 let allow_goto = GlobalOptions.po_allow_goto
+let enable_concurrent = GlobalOptions.po_enable_concurrent
 let default = GlobalOptions.default
 let disable_define = GlobalOptions.po_disable_define
 let with_hh_syntax_for_hhvm po b =
@@ -22,12 +23,14 @@ let with_hh_syntax_for_hhvm po b =
 let make
   ~auto_namespace_map
   ~enable_hh_syntax_for_hhvm
+  ~enable_concurrent
   ~disallow_execution_operator
   ~disable_variable_variables
   ~disable_define = {
   default with
   GlobalOptions.po_auto_namespace_map = auto_namespace_map;
   GlobalOptions.po_enable_hh_syntax_for_hhvm = enable_hh_syntax_for_hhvm;
+  GlobalOptions.po_enable_concurrent = enable_concurrent;
   GlobalOptions.po_disallow_execution_operator = disallow_execution_operator;
   GlobalOptions.po_disable_variable_variables = disable_variable_variables;
   GlobalOptions.po_disable_define = disable_define;

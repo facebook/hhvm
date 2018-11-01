@@ -88,6 +88,9 @@ type t = {
  (* Flag to enable PHP's `goto` operator *)
  po_allow_goto: bool;
 
+ (* Flag to enable concurrent *)
+ po_enable_concurrent : bool;
+
  (** Print types of size bigger than 1000 after performing a type union. *)
  tco_log_inference_constraints : bool;
 
@@ -183,6 +186,7 @@ val make :
   po_disallow_execution_operator: bool ->
   po_disable_define: bool ->
   po_allow_goto: bool ->
+  po_enable_concurrent: bool ->
   tco_log_inference_constraints : bool ->
   tco_user_attrs: SSet.t option ->
   tco_experimental_features: SSet.t ->
@@ -223,6 +227,7 @@ val po_disallow_execution_operator : t -> bool
 val po_disable_variable_variables : t -> bool
 val po_disable_define : t -> bool
 val po_allow_goto : t -> bool
+val po_enable_concurrent : t -> bool
 val po_enable_hh_syntax_for_hhvm : t -> bool
 val tco_log_inference_constraints : t -> bool
 val tco_disallow_ambiguous_lambda : t -> bool

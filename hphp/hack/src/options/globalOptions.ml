@@ -23,6 +23,7 @@ type t = {
   po_disable_variable_variables : bool;
   po_disable_define : bool;
   po_allow_goto: bool;
+  po_enable_concurrent : bool;
   tco_log_inference_constraints : bool;
   tco_disallow_ambiguous_lambda : bool;
   tco_disallow_array_typehint: bool;
@@ -191,6 +192,7 @@ let default = {
  po_disable_variable_variables = false;
  po_disable_define = false;
  po_allow_goto = true;
+ po_enable_concurrent = false;
  tco_log_inference_constraints = false;
  tco_disallow_ambiguous_lambda = false;
  tco_disallow_array_typehint = false;
@@ -231,6 +233,7 @@ let make ~tco_assume_php
          ~po_disallow_execution_operator
          ~po_disable_define
          ~po_allow_goto
+         ~po_enable_concurrent
          ~tco_log_inference_constraints
          ~tco_user_attrs
          ~tco_experimental_features
@@ -271,6 +274,7 @@ let make ~tco_assume_php
                    po_disable_variable_variables;
                    po_disable_define;
                    po_allow_goto;
+                   po_enable_concurrent;
                    tco_log_inference_constraints;
                    tco_disallow_ambiguous_lambda;
                    tco_disallow_array_typehint;
@@ -308,6 +312,7 @@ let po_deregister_php_stdlib t = t.po_deregister_php_stdlib
 let po_disable_variable_variables t = t.po_disable_variable_variables
 let po_disable_define t = t.po_disable_define
 let po_allow_goto t = t.po_allow_goto
+let po_enable_concurrent t = t.po_enable_concurrent
 
 let tco_log_inference_constraints t = t.tco_log_inference_constraints
 let po_enable_hh_syntax_for_hhvm t = t.po_enable_hh_syntax_for_hhvm

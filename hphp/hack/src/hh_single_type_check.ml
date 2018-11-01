@@ -183,6 +183,7 @@ let parse_options () =
   let auto_namespace_map = ref [] in
   let dont_assume_php = ref false in
   let unsafe_rx = ref false in
+  let enable_concurrent = ref false in
   let disallow_stringish_magic = ref false in
   let unresolved_as_union = ref false in
   let all_errors = ref false in
@@ -348,6 +349,9 @@ let parse_options () =
     "--disallow-unset-on-varray",
         Arg.Set disallow_unset_on_varray,
         " Disallow unsetting indices from varrays";
+    "--enable-concurrent",
+      Arg.Set enable_concurrent,
+      " Enable the concurrent feature";
     "--unsafe-rx",
         Arg.Set unsafe_rx,
         " Disables reactivity related errors";
@@ -391,6 +395,7 @@ let parse_options () =
       GlobalOptions.tco_disallow_stringish_magic = !disallow_stringish_magic;
       GlobalOptions.tco_unresolved_as_union = !unresolved_as_union;
       GlobalOptions.po_auto_namespace_map = !auto_namespace_map;
+      GlobalOptions.po_enable_concurrent = !enable_concurrent;
   } in
   let tcopt = {
     tcopt with

@@ -489,7 +489,7 @@ module type S = sig
   val coroutine_outside_experimental : Pos.t -> unit
   val return_disposable_mismatch : bool -> Pos.t -> Pos.t -> unit
   val fun_reactivity_mismatch : Pos.t -> string -> Pos.t -> string -> unit
-  val frozen_in_incorrect_scope : Pos.t -> unit
+  val inconsistent_unset : Pos.t -> unit
   val reassign_mutable_var : Pos.t -> unit
   val mutable_call_on_immutable : Pos.t -> Pos.t -> unit
   val mutable_argument_mismatch : Pos.t -> Pos.t -> unit
@@ -613,4 +613,7 @@ module type S = sig
   val ignored_result_of_move : Pos.t -> unit
   val mutably_owned_argument_mismatch: arg_is_owned_local: bool -> Pos.t -> Pos.t -> unit
   val rx_move_invalid_location: Pos.t -> unit
+  val inconsistent_mutability: Pos.t -> string -> (Pos.t * string) option -> unit
+  val invalid_mutability_flavor: Pos.t -> string -> string -> unit
+  val inconsistent_mutability_for_conditional: Pos.t -> Pos.t -> unit
 end

@@ -899,13 +899,6 @@ let unset_local env local =
   in
   env
 
-
-let is_mutable env local =
-  let module TME = Typing_mutability_env in
-  match LID.Map.get local env.lenv.local_mutability with
-  | Some (_, (TME.Mutable | TME.Borrowed)) -> true
-  | _ -> false
-
 let add_mutable_var env local mutability_type =
 env_with_mut
   env
@@ -928,8 +921,8 @@ let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx =
   match lcl with
   | None ->
     if not_found_is_ok x then () else error_if_pos_provided p;
-    (Reason.Rnone, Tany)
-  | Some (x, _) -> x
+    false, (Reason.Rnone, Tany)
+  | Some (x, _) -> true, x
 
 let get_local_in_next_continuation ?error_if_undef_at_pos:p env x =
   let next_cont = get_locals env in
@@ -949,10 +942,12 @@ let get_local_ ?error_if_undef_at_pos:p env x =
     then get_local_for_todo ?error_if_undef_at_pos:p env x
     else get_local_in_next_continuation ?error_if_undef_at_pos:p env x
 
-let get_local env x = get_local_ env x
+let get_local env x = snd (get_local_ env x)
+
+let is_local_defined env x = fst (get_local_ env x)
 
 let get_local_check_defined env (p, x) =
-  get_local_ ~error_if_undef_at_pos:p env x
+  snd (get_local_ ~error_if_undef_at_pos:p env x)
 
 let set_local_expr_id env x new_eid =
   let local_types = env.lenv.local_types in

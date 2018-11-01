@@ -104,6 +104,7 @@ val set_using_var : env -> Local_id.t -> env
 val unset_local : env -> Local_id.t -> env
 val get_locals : env -> local Local_id.Map.t
 val get_local : env -> Local_id.t -> locl ty
+val is_local_defined : env -> Local_id.t -> bool
 val get_local_check_defined : env -> Nast.lid -> locl ty
 val set_local_expr_id : env -> Local_id.t -> expression_id -> env
 val get_local_expr_id : env -> Local_id.t -> expression_id option
@@ -139,7 +140,6 @@ val set_env_reactive : env -> reactivity -> env
 val set_env_function_pos: env -> Pos.t -> env
 val env_reactivity: env -> reactivity
 val env_local_reactive : env -> bool
-val is_mutable : env -> Local_id.t -> bool
 val add_mutable_var : env -> Local_id.t -> Typing_mutability_env.mutability -> env
 val function_is_mutable : env -> bool
 val set_fun_mutable : env -> bool -> env

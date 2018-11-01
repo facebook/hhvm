@@ -1,0 +1,4 @@
+File "mutability_flavors6_1.php", line 8, characters 23-45:
+Inconsistent mutability of conditional expression, this branch returns owned mutable value (Typing[4293])
+File "mutability_flavors6_1.php", line 8, characters 13-19:
+But this one does not.

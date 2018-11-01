@@ -408,7 +408,9 @@ let rec bind_param env (ty1, param) =
       Env.add_mutable_var env id (param.param_pos, Typing_mutability_env.Mutable)
     | Some Param_maybe_mutable ->
       Env.add_mutable_var env id (param.param_pos, Typing_mutability_env.MaybeMutable)
-    | None -> env in
+    | None ->
+      Env.add_mutable_var env id (param.param_pos, Typing_mutability_env.Immutable)
+    in
   env, tparam
 
 (* In strict mode, we force you to give a type declaration on a parameter *)
@@ -1240,6 +1242,11 @@ and eif env ~expected ~coalesce p c e1 e2 =
    * aren't assigned to local variables in an environment *)
   (* TODO: Omit if expected type is present and checked in calls to expr *)
   let env, ty = Union.union env ty1 ty2 in
+  if coalesce
+  then Typing_mutability.check_conditional_operator tc te2
+  else
+    Option.iter te1
+    ~f:(fun te1 -> Typing_mutability.check_conditional_operator te1 te2);
   let te = if coalesce then T.Binop(Ast.QuestionQuestion, tc, te2) else T.Eif(tc, te1, te2) in
   env, T.make_typed_expr p ty te, ty
 
@@ -1257,8 +1264,13 @@ and check_escaping_var env (pos, x) =
 
 and check_escaping_mutable env (pos, x) =
   let mut_env = Env.get_env_mutability env in
-  if (x = this && Env.function_is_mutable env) || Local_id.Map.mem x mut_env
-  then Errors.escaping_mutable_object pos
+  let is_mutable =
+    (x = this && Env.function_is_mutable env) ||
+    begin match Local_id.Map.get x mut_env with
+    | Some (_, Typing_mutability_env.Immutable) | None -> false
+    | _ -> true
+    end in
+  if is_mutable then Errors.escaping_mutable_object pos
 
 and exprs
   ?(accept_using_var = false)

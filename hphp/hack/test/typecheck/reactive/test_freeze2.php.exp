@@ -1,2 +1,2 @@
-File "test_freeze2.php", line 18, characters 3-4:
-This variable is frozen in one scope but not the other (Typing[4209])
+File "test_freeze2.php", line 20, characters 25-26:
+This variable is unset (via Rx\freeze or Rx\move) in one scope but not the other (Typing[4209])

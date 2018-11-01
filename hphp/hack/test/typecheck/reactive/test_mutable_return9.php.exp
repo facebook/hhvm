@@ -1,6 +1,2 @@
-File "test_mutable_return9.php", line 12, characters 10-11:
-Functions marked <<__MutableReturn>> must return mutably owned values: mutably owned local variables and results of calling Rx\mutable. (Typing[4216])
-File "test_mutable_return9.php", line 6, characters 10-13:
-This function is marked <<__MutableReturn>>
-File "test_mutable_return9.php", line 12, characters 10-11:
-This expression is (borrowed)
+File "test_mutable_return9.php", line 8, characters 5-6:
+Cannot assign mutable value to mutably-borrowed local variable. Mutability flavor of local variable cannot be altered. (Typing[4294])

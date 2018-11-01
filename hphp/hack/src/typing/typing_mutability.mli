@@ -27,3 +27,7 @@ val handle_value_in_return:
   T.expr ->
   Typing_env.env
 val check_unset_target: Typing_env.env -> T.expr -> unit
+val check_conditional_operator:
+  T.expr ->
+  T.expr ->
+  unit

@@ -71,10 +71,10 @@ let handle_value_in_return
   let error_mutable e mut_opt =
     let kind =
       match mut_opt with
-      | None -> "(non-mutable)"
-      | Some MaybeMutable -> "(maybe-mutable)"
-      | Some Borrowed -> "(borrowed)"
-      | Some Mutable -> assert false in
+      | Immutable -> "(non-mutable)"
+      | MaybeMutable -> "(maybe-mutable)"
+      | Borrowed -> "(borrowed)"
+      | MutableUnset | Mutable -> assert false in
     Errors.invalid_mutable_return_result (T.get_position e) fun_pos kind in
   let error_borrowed_as_immutable e =
     (* attempt to return borrowed value as immutable *)
@@ -96,16 +96,13 @@ let handle_value_in_return
     | T.Pipe (_, _, r) ->
       (* ok for pipe if rhs returns mutable *)
       aux r
-    | T.Lvar (_, id) ->
+    | T.Lvar (p, id) ->
       let mut_env = Env.get_env_mutability env in
       begin match LMap.get id mut_env with
       | Some (_, Mutable) ->
         (* it is ok to return mutably owned values *)
-        let env = Env.env_with_mut env (LMap.remove id mut_env) in
-        Env.unset_local env id
-      | Some (_, mut) when function_returns_mutable ->
-        error_mutable e (Some mut);
-        env
+        let env = Env.unset_local env id in
+        Env.env_with_mut env (LMap.add id (p, MutableUnset) mut_env)
       | Some (_, Borrowed) when not function_returns_mutable ->
         (* attempt to return borrowed value as immutable
            unless function is marked with __ReturnsVoidToRx in which case caller
@@ -113,8 +110,10 @@ let handle_value_in_return
         if not function_returns_void_for_rx
         then error_borrowed_as_immutable e;
         env
+      | Some (_, mut) when function_returns_mutable ->
+        error_mutable e mut;
+        env
       | _ ->
-        if function_returns_mutable then error_mutable e None;
         env
       end
     | T.This when not function_returns_mutable && Env.function_is_mutable env ->
@@ -147,6 +146,12 @@ let expr_is_valid_owned_arg (e : T.expr) : bool =
   | T.Call(_, (_, T.Id (_, id)), _, _, _) -> id = SN.Rx.mutable_ || id = SN.Rx.move
   | _ -> false
 
+let local_is_mutable ~include_borrowed env (_, id) =
+  match LMap.get id (Env.get_env_mutability env) with
+  | Some (_, Mutable) -> true
+  | Some (_, Borrowed) -> include_borrowed
+  | _ -> false
+
 (* true if expression is valid argument for __Mutable parameter:
   - Rx\move(owned-local)
   - Rx\mutable(call or new)
@@ -155,8 +160,7 @@ let expr_is_valid_borrowed_arg env (e: T.expr): bool =
   expr_is_valid_owned_arg e || begin
     match snd e with
     | T.Callconv (Ast.Pinout, (_, T.Lvar id))
-    | T.Lvar id ->
-      Env.is_mutable env (snd id)
+    | T.Lvar id -> local_is_mutable ~include_borrowed:true env id
     | T.This when Env.function_is_mutable env -> true
     | _ ->
       false
@@ -176,11 +180,7 @@ let expr_is_maybe_mutable
 
 let is_owned_local env e =
   match snd e with
-  | T.Lvar (_, id) ->
-    begin match LMap.get id (Env.get_env_mutability env) with
-    | Some (_, Mutable) -> true
-    | _ -> false
-    end
+  | T.Lvar id -> local_is_mutable ~include_borrowed:false env id
   | _ -> false
 
 let freeze_or_move_local
@@ -195,8 +195,8 @@ let freeze_or_move_local
     let mut_env = Env.get_env_mutability env in
     begin match LMap.get id mut_env with
     | Some (_, Mutable) ->
-      let env = Env.env_with_mut env (LMap.remove id mut_env) in
-      Env.unset_local env id
+      let env = Env.unset_local env id in
+      Env.env_with_mut env (LMap.add id (id_pos, MutableUnset) mut_env)
     | Some x ->
       invalid_target p id_pos (to_string x);
       env
@@ -231,9 +231,11 @@ let move_local
 let with_mutable_value env e ~default ~f =
   match snd e with
   (* invoke f only for mutable values *)
-  | T.This when Env.function_is_mutable env -> f Arg_this
-  | T.Callconv (Ast.Pinout, (_, T.Lvar (_, id)))
-  | T.Lvar (_, id) when Env.is_mutable env id -> f (Arg_local id)
+  | T.This when Env.function_is_mutable env ->
+    f Arg_this
+  | T.Callconv (Ast.Pinout, (_, T.Lvar id))
+  | T.Lvar id when local_is_mutable ~include_borrowed:true env id ->
+    f (Arg_local (snd id))
   | _ -> default
 
 let check_borrowing
@@ -458,6 +460,25 @@ let check_unset_target
   (env : Typing_env.env) (te : T.expr): unit =
   check_assignment_or_unset_target env te Errors.invalid_unset_target_rx
 
+let is_move_or_mutable_call te =
+  match te with
+  | T.Call(_, (_, T.Id (_, n)), _, _, _) -> n = SN.Rx.mutable_ || n = SN.Rx.move
+  | _ -> false
+
+let check_conditional_operator
+  (when_true : T.expr)
+  (when_false : T.expr) =
+  match is_move_or_mutable_call (snd when_true), is_move_or_mutable_call (snd when_false) with
+  | true, true | false, false -> ()
+  | true, _ ->
+    Errors.inconsistent_mutability_for_conditional
+      (T.get_position when_true)
+      (T.get_position when_false)
+  | false, _ ->
+    Errors.inconsistent_mutability_for_conditional
+      (T.get_position when_false)
+      (T.get_position when_true)
+
 (* Checks for assignment errors as a pass on the TAST *)
 let handle_assignment_mutability
  (env : Typing_env.env) (te1 : T.expr) (te2 : T.expr_ option)
@@ -466,28 +487,53 @@ let handle_assignment_mutability
  (* If e2 is a mutable expression, then e1 is added to the mutability env *)
  let mut_env = Env.get_env_mutability env in
  let mut_env = match snd te1, te2 with
- | _, Some T.Lvar(p, id2) when LMap.mem id2 mut_env ->
-   Env.error_if_reactive_context env @@ begin fun () ->
-     (* Reassigning mutables is not allowed; error *)
-     match LMap.find id2 mut_env with
-     | _, MaybeMutable -> Errors.reassign_maybe_mutable_var p
-     | _ -> Errors.reassign_mutable_var p
-   end;
-   mut_env
  | _, Some T.This when Env.function_is_mutable env ->
+ (* aliasing $this - bad for __Mutable functions *)
    Env.error_if_reactive_context env @@ begin fun () ->
      Errors.reassign_mutable_this (T.get_position te1)
    end;
    mut_env
  (* var = mutable(v)/move(v) - add the var to the env since it points to a owned mutable value *)
- | T.Lvar (_, id), Some T.Call(_, (_, T.Id (_, n)), _, _, _) when
-    n = SN.Rx.mutable_ || n = SN.Rx.move ->
+ | T.Lvar (p, id), Some e when is_move_or_mutable_call e ->
+    begin match LMap.get id mut_env with
+    | Some (_, (Immutable | Borrowed | MaybeMutable) as mut) ->
+      (* error when assigning owned mutable to another mutability flavor *)
+      Errors.invalid_mutability_flavor p
+        (to_string mut)
+        "mutable"
+    | _ -> ()
+    end;
     LMap.add id (T.get_position te1, Mutable) mut_env
+  (* Reassigning mutables is not allowed; error *)
+  | _, Some T.Lvar(p, id2) when
+    (Option.value_map (LMap.get id2 mut_env)
+      ~default:false
+      ~f:(fun (_, m) -> m <> Immutable)
+    ) ->
+    Env.error_if_reactive_context env @@ begin fun () ->
+      match LMap.find id2 mut_env with
+      | _, MaybeMutable -> Errors.reassign_maybe_mutable_var p
+      | _ -> Errors.reassign_mutable_var p
+    end;
+    mut_env
  (* If the Lvar gets reassigned and shadowed to something that
    isn't a mutable, it is now a regular immutable variable.
  *)
- | T.Lvar (_, id), _ ->
-   LMap.remove id mut_env
+ | T.Lvar (p, id), _ ->
+    begin match LMap.get id mut_env with
+    (* ok if local is immutable*)
+    | Some (_, Immutable) ->
+      mut_env
+    (* error assigning immutable value to local known to be mutable *)
+    | Some mut ->
+      Errors.invalid_mutability_flavor p
+        (to_string mut)
+        "immutable";
+      mut_env
+    | None ->
+      (* ok - add new locals *)
+      LMap.add id (T.get_position te1, Immutable) mut_env
+    end;
  | _ ->
-   mut_env in
+    mut_env in
  Env.env_with_mut env mut_env

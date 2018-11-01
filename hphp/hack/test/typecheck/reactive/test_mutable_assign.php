@@ -8,7 +8,7 @@ class C {
 function basic(): void {
   $z = \HH\Rx\mutable(new C(7)); // $z is mutable
   $z->val = 5; // okay
-  $z = 7; // also okay, $z is now immutable
+  $z = 7; // error, cannot change mutability flavor of the local
   $b = $z; // can reassign an immutable object
 
   // $x is mutable(mutably owned)

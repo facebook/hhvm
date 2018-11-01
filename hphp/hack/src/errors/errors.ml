@@ -2441,10 +2441,32 @@ let fun_reactivity_mismatch pos1 kind1 pos2 kind2 =
       pos2, f kind2
     ]
 
-let frozen_in_incorrect_scope pos1 =
-  add (Typing.err_code Typing.FrozenInIncorrectScope) pos1
-  ("This variable is frozen in one scope but not the other")
+let inconsistent_unset pos1 =
+  add (Typing.err_code Typing.InconsistentUnset) pos1
+  ("This variable is unset (via Rx\\freeze or Rx\\move) in one scope but not the other")
 
+let inconsistent_mutability pos1 mut1 p2_opt =
+  match p2_opt with
+  | Some (pos2, mut2) ->
+    add_list (Typing.err_code Typing.InconsistentMutability) [
+      pos1, "Inconsistent mutability of local variable, here local is " ^ mut1;
+      pos2, "But here it is " ^ mut2;
+    ]
+  | None ->
+    add (Typing.err_code Typing.InconsistentMutability) pos1
+      ("Local is " ^ mut1 ^ " in one scope and immutable in another.")
+
+let inconsistent_mutability_for_conditional p_mut p_other =
+  add_list (Typing.err_code Typing.InconsistentMutability) [
+    p_mut, "Inconsistent mutability of conditional expression, this branch returns owned \
+    mutable value";
+    p_other, "But this one does not.";
+  ]
+
+let invalid_mutability_flavor pos mut1 mut2 =
+  add (Typing.err_code Typing.InvalidMutabilityFlavorInAssignment) pos
+    ("Cannot assign " ^ mut2 ^ " value to " ^ mut1 ^ " local variable. \
+     Mutability flavor of local variable cannot be altered.")
 
 let reassign_mutable_var pos1 =
   add (Typing.err_code Typing.ReassignMutableVar) pos1

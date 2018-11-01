@@ -436,7 +436,7 @@ InvalidReturnDisposable = 4205
 InvalidDisposableReturnHint = 4206
 ReturnDisposableMismatch = 4207
 InoutArgumentBadType = 4208
-FrozenInIncorrectScope = 4209
+InconsistentUnset = 4209
 ReassignMutableVar = 4210
 InvalidFreezeTarget = 4211
 InvalidFreezeUse = 4212
@@ -520,4 +520,6 @@ IgnoredResultOfFreeze = 4289
 IgnoredResultOfMove = 4290
 UnexpectedTy = 4291
 UnserializableType = 4292
+InconsistentMutability = 4293
+InvalidMutabilityFlavorInAssignment = 4294
   |}]

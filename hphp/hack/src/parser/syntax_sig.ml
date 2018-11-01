@@ -522,6 +522,10 @@ module type Syntax_S = sig
     ; global_variables                                   : t
     ; global_semicolon                                   : t
     }
+  | ConcurrentStatement                     of
+    { concurrent_keyword                                 : t
+    ; concurrent_statement                               : t
+    }
   | SimpleInitializer                       of
     { simple_initializer_equal                           : t
     ; simple_initializer_value                           : t
@@ -1144,6 +1148,7 @@ module type Syntax_S = sig
   val make_static_declarator : t -> t -> t
   val make_echo_statement : t -> t -> t -> t
   val make_global_statement : t -> t -> t -> t
+  val make_concurrent_statement : t -> t -> t
   val make_simple_initializer : t -> t -> t
   val make_anonymous_class : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_anonymous_function : t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t -> t
@@ -1319,6 +1324,7 @@ module type Syntax_S = sig
   val is_static_declarator : t -> bool
   val is_echo_statement : t -> bool
   val is_global_statement : t -> bool
+  val is_concurrent_statement : t -> bool
   val is_simple_initializer : t -> bool
   val is_anonymous_class : t -> bool
   val is_anonymous_function : t -> bool

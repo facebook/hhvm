@@ -2169,6 +2169,11 @@ and pStmt : stmt parser = fun node env ->
     pos, Continue (pBreak_or_continue_level env level)
   | GlobalStatement { global_variables; _ } ->
     pos, Global_var (couldMap ~f:(pExpr ~location:InGlobalVar) global_variables env)
+  | ConcurrentStatement _ ->
+    if not (ParserOptions.enable_concurrent env.parser_options) then
+      raise_parsing_error env (`Node node) SyntaxError.concurrent_is_disabled;
+
+    failwith "Concurrent not implemented yet"
   | MarkupSection _ -> pMarkup node env
   | _ when env.max_depth > 0 && env.codegen ->
     (* OCaml optimisers; Forgive them, for they know not what they do!

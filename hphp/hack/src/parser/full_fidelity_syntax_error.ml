@@ -641,3 +641,28 @@ let invalid_non_rx_argument_for_declaration  =
   "Invalid argument list for __NonRx attribute that is placed on \
   a declaration of function or method. Argument list for __NonRx attribute that is \
   used in this position should contain only one string literal value."
+
+let nested_concurrent_blocks =
+  "Concurrent blocks cannot be nested."
+
+let less_than_two_statements_in_concurrent_block =
+  "Less than 2 statements in concurrent block."
+
+let invalid_syntax_concurrent_block =
+  "Concurrent block must contain a compound statement of two or " ^
+  "more expression statements, IE concurrent { <expr>; <expr>; }."
+
+let statement_without_await_in_concurrent_block =
+  "Statement without an await in a concurrent block"
+
+let complex_lval_in_concurrent_block =
+  "Concurrent blocks can only contain simple lval ($var = ...)."
+
+let duplicate_lval_in_concurrent_block =
+  "Concurrent blocks can only use a lval once"
+
+let val_and_lval_in_concurrent_block =
+  "Concurrent blocks can either assign to a variable or read from it, not both."
+
+let concurrent_is_disabled =
+  "Concurrent is disabled"

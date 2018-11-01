@@ -246,6 +246,8 @@ class EditableSyntax
       return EchoStatement.from_json(json, position, source);
     case 'global_statement':
       return GlobalStatement.from_json(json, position, source);
+    case 'concurrent_statement':
+      return ConcurrentStatement.from_json(json, position, source);
     case 'simple_initializer':
       return SimpleInitializer.from_json(json, position, source);
     case 'anonymous_class':
@@ -819,6 +821,8 @@ class EditableToken extends EditableSyntax
        return new FunctionToken(leading, trailing);
     case 'global':
        return new GlobalToken(leading, trailing);
+    case 'concurrent':
+       return new ConcurrentToken(leading, trailing);
     case 'goto':
        return new GotoToken(leading, trailing);
     case '__halt_compiler':
@@ -1578,6 +1582,13 @@ class GlobalToken extends EditableToken
   constructor(leading, trailing)
   {
     super('global', leading, trailing, 'global');
+  }
+}
+class ConcurrentToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('concurrent', leading, trailing, 'concurrent');
   }
 }
 class GotoToken extends EditableToken
@@ -12033,6 +12044,70 @@ class GlobalStatement extends EditableSyntax
     return GlobalStatement._children_keys;
   }
 }
+class ConcurrentStatement extends EditableSyntax
+{
+  constructor(
+    keyword,
+    statement)
+  {
+    super('concurrent_statement', {
+      keyword: keyword,
+      statement: statement });
+  }
+  get keyword() { return this.children.keyword; }
+  get statement() { return this.children.statement; }
+  with_keyword(keyword){
+    return new ConcurrentStatement(
+      keyword,
+      this.statement);
+  }
+  with_statement(statement){
+    return new ConcurrentStatement(
+      this.keyword,
+      statement);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    var statement = this.statement.rewrite(rewriter, new_parents);
+    if (
+      keyword === this.keyword &&
+      statement === this.statement)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new ConcurrentStatement(
+        keyword,
+        statement), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let keyword = EditableSyntax.from_json(
+      json.concurrent_keyword, position, source);
+    position += keyword.width;
+    let statement = EditableSyntax.from_json(
+      json.concurrent_statement, position, source);
+    position += statement.width;
+    return new ConcurrentStatement(
+        keyword,
+        statement);
+  }
+  get children_keys()
+  {
+    if (ConcurrentStatement._children_keys == null)
+      ConcurrentStatement._children_keys = [
+        'keyword',
+        'statement'];
+    return ConcurrentStatement._children_keys;
+  }
+}
 class SimpleInitializer extends EditableSyntax
 {
   constructor(
@@ -21372,6 +21447,7 @@ exports.ForeachToken = ForeachToken;
 exports.FromToken = FromToken;
 exports.FunctionToken = FunctionToken;
 exports.GlobalToken = GlobalToken;
+exports.ConcurrentToken = ConcurrentToken;
 exports.GotoToken = GotoToken;
 exports.HaltCompilerToken = HaltCompilerToken;
 exports.IfToken = IfToken;
@@ -21627,6 +21703,7 @@ exports.FunctionStaticStatement = FunctionStaticStatement;
 exports.StaticDeclarator = StaticDeclarator;
 exports.EchoStatement = EchoStatement;
 exports.GlobalStatement = GlobalStatement;
+exports.ConcurrentStatement = ConcurrentStatement;
 exports.SimpleInitializer = SimpleInitializer;
 exports.AnonymousClass = AnonymousClass;
 exports.AnonymousFunction = AnonymousFunction;

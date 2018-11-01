@@ -1052,6 +1052,7 @@ module WithStatementAndDeclAndTypeParser
     | GreaterThanGreaterThan
     | Carat
     | BarGreaterThan
+    | QuestionColon
     | QuestionQuestion
     | QuestionQuestionEqual ->
       parse_remaining_binary_expression parser term assignment_prefix_kind
@@ -1079,8 +1080,6 @@ module WithStatementAndDeclAndTypeParser
       let (parser, token) = assert_token parser Question in
       let (parser, result) = parse_conditional_expression parser term token in
       parse_remaining_expression parser result
-    | QuestionColon ->
-      parse_remaining_binary_expression parser term assignment_prefix_kind
     | _ -> (parser, term)
 
   and parse_member_selection_expression parser term =

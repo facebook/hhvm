@@ -217,21 +217,25 @@ type accumulator = {
   namespace_name: string;
   names: used_names;
   trait_require_clauses: TokenKind.t strmap;
+  is_in_concurrent_block: bool;
 }
 
 let make_acc
-  acc errors namespace_type names namespace_name trait_require_clauses =
+  acc errors namespace_type names namespace_name trait_require_clauses
+  is_in_concurrent_block =
   if phys_equal acc.errors errors &&
      phys_equal acc.namespace_type namespace_type &&
      phys_equal acc.names names &&
      phys_equal acc.namespace_name namespace_name &&
-     phys_equal acc.trait_require_clauses trait_require_clauses
+     phys_equal acc.trait_require_clauses trait_require_clauses &&
+     acc.is_in_concurrent_block = is_in_concurrent_block
   then acc
   else { errors
        ; namespace_type
        ; names
        ; namespace_name
        ; trait_require_clauses
+       ; is_in_concurrent_block
        }
 
 let fold_child_nodes ?(cleanup = (fun x -> x)) f node parents acc =
@@ -1996,7 +2000,7 @@ let rec check_reference node errors =
     check_reference parenthesized_expression_expression errors
   | _ -> make_error_from_node node SyntaxError.invalid_reference :: errors
 
-let expression_errors env namespace_name node parents errors =
+let expression_errors env _is_in_concurrent_block namespace_name node parents errors =
   let is_decimal_or_hexadecimal_literal token =
     match Token.kind token with
     | TokenKind.DecimalLiteral | TokenKind.HexadecimalLiteral -> true
@@ -3409,6 +3413,7 @@ let find_syntax_errors env =
         ; names
         ; namespace_name
         ; trait_require_clauses
+        ; is_in_concurrent_block
         } = acc in
     let names, errors =
       parameter_errors env node parents namespace_name names errors in
@@ -3461,7 +3466,7 @@ let find_syntax_errors env =
       | ConditionalExpression _
       | CollectionLiteralExpression _ ->
         let errors =
-          expression_errors env namespace_name node parents errors in
+          expression_errors env is_in_concurrent_block namespace_name node parents errors in
         let errors = check_nonrx_annotation node errors in
         let errors = assignment_errors env node errors in
         trait_require_clauses, names, errors
@@ -3532,6 +3537,154 @@ let find_syntax_errors env =
       | _ -> trait_require_clauses, names, errors in
 
     match syntax node with
+    | LambdaExpression _
+    | AwaitableCreationExpression _
+    | AnonymousFunction _
+    | Php7AnonymousFunction _ ->
+      (* reset is_in_concurrent_block for functions *)
+      let acc1 =
+        make_acc
+          acc errors namespace_type names
+          namespace_name trait_require_clauses
+          false in
+      (* analyze the body of lambda block *)
+      let acc1 = fold_child_nodes folder node parents acc1 in
+      (* adjust is_in_concurrent_block in final result *)
+      make_acc
+        acc acc1.errors acc1.namespace_type acc1.names
+        acc1.namespace_name acc1.trait_require_clauses
+        is_in_concurrent_block
+
+    | ConcurrentStatement { concurrent_statement = { syntax = statement; _ }; _ } ->
+      (* issue error if concurrent blocks are nested *)
+      let errors =
+        if is_in_concurrent_block
+        then make_error_from_node
+          node SyntaxError.nested_concurrent_blocks :: errors
+        else errors in
+
+      (* issue error if concurrent block isn't well formed
+         - must have at least two statements
+         - must be a compound statement
+         - must only contain expression statements
+         - statement without await
+      *)
+      let errors = (match statement with
+      | CompoundStatement { compound_statements = statements; _ } ->
+        let statement_list = syntax_to_list_no_separators statements in
+        let errors = (match statement_list with
+        | _ :: _ :: _ -> errors
+        | _ -> make_error_from_node node
+          SyntaxError.less_than_two_statements_in_concurrent_block :: errors
+        ) in
+
+        let rec_walk init f node =
+          let rec rec_walk_impl parents init node =
+            let new_init, continue_walk = f init node parents in
+            if continue_walk then
+              List.fold_left
+                ~init:new_init
+                ~f:(rec_walk_impl ((syntax node) :: parents))
+                (Syntax.children node)
+            else new_init in
+          rec_walk_impl [] init node
+          in
+
+        let lvals, vals = rec_walk ([], []) (fun ((lvals, vals) as acc) node parents ->
+          match parents, syntax node with
+          | DecoratedExpression {
+            decorated_expression_decorator = token;
+            decorated_expression_expression = ({ syntax = lval; _ } as lval_syntax)
+          } :: _, n
+            when phys_equal lval n &&
+                 does_unop_create_write (token_kind token) ->
+            (lval_syntax :: lvals, vals), false
+
+          | PrefixUnaryExpression {
+            prefix_unary_operator = token;
+            prefix_unary_operand = ({ syntax = lval; _ } as lval_syntax)
+          } :: _, n
+          | PostfixUnaryExpression {
+            postfix_unary_operator = token;
+            postfix_unary_operand = ({ syntax = lval; _ } as lval_syntax)
+          } :: _, n
+            when phys_equal lval n &&
+                 does_unop_create_write (token_kind token) ->
+            (lval_syntax :: lvals, vals), false
+
+          | BinaryExpression {
+            binary_operator = token;
+            binary_left_operand = ({ syntax = lval; _ } as lval_syntax);
+          _ } :: parents, n
+            when phys_equal lval n &&
+                 does_binop_create_write_on_left (token_kind token) ->
+            let acc = match parents with
+            | ExpressionStatement _ :: ((SyntaxList _ :: []) | []) -> acc
+            | _ -> lval_syntax :: lvals, vals in
+            acc, false
+
+          | _, Token t when Token.kind t = TokenKind.Variable ->
+            (lvals, node :: vals), false
+
+          | _ -> acc, true
+        ) statements in
+
+        let (lval_set, errors) = List.fold_left
+          ~init:(SSet.empty, errors)
+          ~f:(fun (s, e) node -> match syntax node with
+            | VariableExpression { variable_expression = { syntax = Token t; _ }; _ }
+            | Token t when Token.kind t = TokenKind.Variable ->
+              let name = Token.text t in
+              if SSet.mem name s then
+                (s, make_error_from_node node SyntaxError.duplicate_lval_in_concurrent_block :: e)
+              else (SSet.add name s, e)
+            | _ -> (s, make_error_from_node node SyntaxError.complex_lval_in_concurrent_block :: e)
+          ) lvals in
+
+        let errors = List.fold_left
+          ~init:errors
+          ~f:(fun e token -> match syntax token with
+            | Token t when Token.kind t = TokenKind.Variable ->
+              let name = Token.text t in
+              if SSet.mem name lval_set then
+                make_error_from_node token SyntaxError.val_and_lval_in_concurrent_block :: e
+              else e
+            | _ -> failwith "unexpected non-Token node"
+          ) vals in
+
+        List.fold_left ~init:errors ~f:(fun errors n ->
+          match syntax n with
+          | ExpressionStatement { expression_statement_expression = se; _ } ->
+            let node_has_await_child = rec_walk false (fun acc node _ ->
+              let is_await n = match syntax n with
+              | PrefixUnaryExpression { prefix_unary_operator = op; _ }
+                when token_kind op = Some TokenKind.Await -> true
+              | _ -> false in
+              let found_await = acc || is_await node in
+              found_await, not found_await
+            ) in
+            if node_has_await_child se then errors else
+              make_error_from_node n
+                SyntaxError.statement_without_await_in_concurrent_block :: errors
+          | _ -> make_error_from_node n SyntaxError.invalid_syntax_concurrent_block :: errors
+        ) statement_list
+      | _ -> make_error_from_node node SyntaxError.invalid_syntax_concurrent_block :: errors) in
+
+      (* adjust is_in_concurrent_block in accumulator to dive into the
+         concurrent block *)
+      let acc1 =
+        make_acc
+          acc errors namespace_type names
+          namespace_name trait_require_clauses
+          true in
+      (* analyze the body of concurrent block *)
+      let acc1 = fold_child_nodes folder node parents acc1 in
+      (* adjust is_in_concurrent_block in final result *)
+      make_acc
+        acc acc1.errors acc1.namespace_type acc1.names
+        acc1.namespace_name acc1.trait_require_clauses
+        is_in_concurrent_block
+
     | NamespaceBody { namespace_left_brace; namespace_right_brace; _ } ->
       let namespace_type =
         if namespace_type = Unspecified
@@ -3547,6 +3700,7 @@ let find_syntax_errors env =
         make_acc
           acc errors namespace_type new_names
           namespace_name empty_trait_require_clauses
+          is_in_concurrent_block
       in
       let acc1 = fold_child_nodes folder node parents acc1 in
       (* add newly declared global functions to the old set of names *)
@@ -3559,6 +3713,7 @@ let find_syntax_errors env =
         make_acc
           acc acc1.errors namespace_type old_names
           acc.namespace_name acc.trait_require_clauses
+          acc.is_in_concurrent_block
     | NamespaceEmptyBody { namespace_semicolon; _ } ->
       let namespace_type =
         if namespace_type = Unspecified
@@ -3572,6 +3727,7 @@ let find_syntax_errors env =
         make_acc
           acc errors namespace_type empty_names
           namespace_name empty_trait_require_clauses
+          is_in_concurrent_block
       in
       fold_child_nodes folder node parents acc
     | ClassishDeclaration _
@@ -3590,6 +3746,7 @@ let find_syntax_errors env =
         make_acc
           acc errors namespace_type names
           namespace_name empty_trait_require_clauses
+          is_in_concurrent_block
       in
       fold_child_nodes ~cleanup folder node parents acc
     | _ ->
@@ -3597,6 +3754,7 @@ let find_syntax_errors env =
         make_acc
           acc errors namespace_type names
           namespace_name trait_require_clauses
+          is_in_concurrent_block
       in
       fold_child_nodes folder node parents acc in
   let errors =
@@ -3609,6 +3767,7 @@ let find_syntax_errors env =
     ; names = empty_names
     ; namespace_name = global_namespace_name
     ; trait_require_clauses = empty_trait_require_clauses
+    ; is_in_concurrent_block = false
     } in
   acc.errors
 

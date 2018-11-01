@@ -114,6 +114,7 @@ module type SyntaxKind_S = sig
   val is_static_declarator : r -> bool
   val is_echo_statement : r -> bool
   val is_global_statement : r -> bool
+  val is_concurrent_statement : r -> bool
   val is_simple_initializer : r -> bool
   val is_anonymous_class : r -> bool
   val is_anonymous_function : r -> bool
@@ -308,6 +309,7 @@ module SyntaxKind(SC : SC_S)
   let make_static_declarator arg0 arg1 state = compose SK.StaticDeclarator (SC.make_static_declarator (snd arg0) (snd arg1) state)
   let make_echo_statement arg0 arg1 arg2 state = compose SK.EchoStatement (SC.make_echo_statement (snd arg0) (snd arg1) (snd arg2) state)
   let make_global_statement arg0 arg1 arg2 state = compose SK.GlobalStatement (SC.make_global_statement (snd arg0) (snd arg1) (snd arg2) state)
+  let make_concurrent_statement arg0 arg1 state = compose SK.ConcurrentStatement (SC.make_concurrent_statement (snd arg0) (snd arg1) state)
   let make_simple_initializer arg0 arg1 state = compose SK.SimpleInitializer (SC.make_simple_initializer (snd arg0) (snd arg1) state)
   let make_anonymous_class arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 state = compose SK.AnonymousClass (SC.make_anonymous_class (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) (snd arg7) (snd arg8) state)
   let make_anonymous_function arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 arg9 arg10 arg11 arg12 state = compose SK.AnonymousFunction (SC.make_anonymous_function (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) (snd arg7) (snd arg8) (snd arg9) (snd arg10) (snd arg11) (snd arg12) state)
@@ -484,6 +486,7 @@ module SyntaxKind(SC : SC_S)
   let is_static_declarator                            = has_kind SK.StaticDeclarator
   let is_echo_statement                               = has_kind SK.EchoStatement
   let is_global_statement                             = has_kind SK.GlobalStatement
+  let is_concurrent_statement                         = has_kind SK.ConcurrentStatement
   let is_simple_initializer                           = has_kind SK.SimpleInitializer
   let is_anonymous_class                              = has_kind SK.AnonymousClass
   let is_anonymous_function                           = has_kind SK.AnonymousFunction

@@ -1239,6 +1239,15 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       global_variables = var_list;
       global_semicolon = semi; } ->
     transform_keyword_expr_list_statement env kw var_list semi
+  | Syntax.ConcurrentStatement {
+      concurrent_keyword = kw;
+      concurrent_statement = statement; } ->
+      Concat [
+        t env kw;
+        Space;
+        handle_possible_compound_statement env statement;
+        Newline;
+      ]
   | Syntax.SimpleInitializer {
       simple_initializer_equal = eq_kw;
       simple_initializer_value = value; } ->

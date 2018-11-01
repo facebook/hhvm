@@ -102,6 +102,7 @@ type t =
   | StaticDeclarator
   | EchoStatement
   | GlobalStatement
+  | ConcurrentStatement
   | SimpleInitializer
   | AnonymousClass
   | AnonymousFunction
@@ -279,6 +280,7 @@ let to_string kind =
   | StaticDeclarator                        -> "static_declarator"
   | EchoStatement                           -> "echo_statement"
   | GlobalStatement                         -> "global_statement"
+  | ConcurrentStatement                     -> "concurrent_statement"
   | SimpleInitializer                       -> "simple_initializer"
   | AnonymousClass                          -> "anonymous_class"
   | AnonymousFunction                       -> "anonymous_function"

@@ -719,6 +719,14 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
     
+  let make_concurrent_statement p0 p1 stack =
+    match stack with
+    | a1 :: a0 :: rem ->
+      let () = verify ~stack [p0; p1] [a0; a1] "concurrent_statement" in
+      let node = Syntax.make_concurrent_statement p0 p1 in
+      node :: rem, node
+    | _ -> failwith "Unexpected stack state"
+    
   let make_simple_initializer p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->

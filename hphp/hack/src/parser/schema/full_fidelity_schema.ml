@@ -9,7 +9,7 @@
 
 (* If you make changes to the schema that cause it to serialize / deserialize
 differently, please update this version number *)
-let full_fidelity_schema_version_number = "2018-07-19-0001"
+let full_fidelity_schema_version_number = "2018-10-30-0001"
 (* TODO: Consider basing the version number on an auto-generated
 hash of a file rather than relying on people remembering to update it. *)
 (* TODO: It may be worthwhile to investigate how Thrift describes data types
@@ -238,6 +238,7 @@ let given_text_tokens = List.map token_node_from_list [
   [ "From"; "from"; LF.php_and_hack; OF.allowed_as_identifier ];
   [ "Function"; "function"; LF.php_and_hack ];
   [ "Global"; "global"; LF.php_and_hack ];
+  [ "Concurrent"; "concurrent"; LF.hack_only ];
   [ "Goto"; "goto"; LF.php_and_hack ];
   [ "HaltCompiler"; "__halt_compiler"; LF.php_and_hack ];
   [ "If"; "if"; LF.php_and_hack ];

@@ -75,6 +75,7 @@ type t =
   | From
   | Function
   | Global
+  | Concurrent
   | Goto
   | HaltCompiler
   | If
@@ -296,6 +297,7 @@ let from_string keyword ~is_hack ~allow_xhp ~only_reserved =
   | "from"                                        when not only_reserved -> Some From
   | "function"                                                           -> Some Function
   | "global"                                                             -> Some Global
+  | "concurrent"      when is_hack                                       -> Some Concurrent
   | "goto"                                                               -> Some Goto
   | "__halt_compiler"                                                    -> Some HaltCompiler
   | "if"                                                                 -> Some If
@@ -488,6 +490,7 @@ let to_string kind =
   | From                          -> "from"
   | Function                      -> "function"
   | Global                        -> "global"
+  | Concurrent                    -> "concurrent"
   | Goto                          -> "goto"
   | HaltCompiler                  -> "__halt_compiler"
   | If                            -> "if"

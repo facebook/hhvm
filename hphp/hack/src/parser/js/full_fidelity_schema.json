@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2018-07-19-0001",
+  "version" : "2018-08-01-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -133,6 +133,8 @@
       "token_text" : "function" },
     { "token_kind" : "Global",
       "token_text" : "global" },
+    { "token_kind" : "Concurrent",
+      "token_text" : "concurrent" },
     { "token_kind" : "Goto",
       "token_text" : "goto" },
     { "token_kind" : "HaltCompiler",
@@ -1270,6 +1272,14 @@
         { "field_name" : "keyword" },
         { "field_name" : "variables" },
         { "field_name" : "semicolon" }
+      ] },
+    { "kind_name" : "ConcurrentStatement",
+      "type_name" : "concurrent_statement",
+      "description" : "concurrent_statement",
+      "prefix" : "concurrent",
+      "fields" : [
+        { "field_name" : "keyword" },
+        { "field_name" : "statement" }
       ] },
     { "kind_name" : "SimpleInitializer",
       "type_name" : "simple_initializer",

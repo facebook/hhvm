@@ -141,6 +141,7 @@ module WithToken(Token: TokenType) = struct
       | StaticDeclarator                        _ -> SyntaxKind.StaticDeclarator
       | EchoStatement                           _ -> SyntaxKind.EchoStatement
       | GlobalStatement                         _ -> SyntaxKind.GlobalStatement
+      | ConcurrentStatement                     _ -> SyntaxKind.ConcurrentStatement
       | SimpleInitializer                       _ -> SyntaxKind.SimpleInitializer
       | AnonymousClass                          _ -> SyntaxKind.AnonymousClass
       | AnonymousFunction                       _ -> SyntaxKind.AnonymousFunction
@@ -324,6 +325,7 @@ module WithToken(Token: TokenType) = struct
     let is_static_declarator                            = has_kind SyntaxKind.StaticDeclarator
     let is_echo_statement                               = has_kind SyntaxKind.EchoStatement
     let is_global_statement                             = has_kind SyntaxKind.GlobalStatement
+    let is_concurrent_statement                         = has_kind SyntaxKind.ConcurrentStatement
     let is_simple_initializer                           = has_kind SyntaxKind.SimpleInitializer
     let is_anonymous_class                              = has_kind SyntaxKind.AnonymousClass
     let is_anonymous_function                           = has_kind SyntaxKind.AnonymousFunction
@@ -1390,6 +1392,13 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc global_keyword in
          let acc = f acc global_variables in
          let acc = f acc global_semicolon in
+         acc
+      | ConcurrentStatement {
+        concurrent_keyword;
+        concurrent_statement;
+      } ->
+         let acc = f acc concurrent_keyword in
+         let acc = f acc concurrent_statement in
          acc
       | SimpleInitializer {
         simple_initializer_equal;
@@ -3249,6 +3258,13 @@ module WithToken(Token: TokenType) = struct
         global_variables;
         global_semicolon;
       ]
+      | ConcurrentStatement {
+        concurrent_keyword;
+        concurrent_statement;
+      } -> [
+        concurrent_keyword;
+        concurrent_statement;
+      ]
       | SimpleInitializer {
         simple_initializer_equal;
         simple_initializer_value;
@@ -5107,6 +5123,13 @@ module WithToken(Token: TokenType) = struct
         "global_keyword";
         "global_variables";
         "global_semicolon";
+      ]
+      | ConcurrentStatement {
+        concurrent_keyword;
+        concurrent_statement;
+      } -> [
+        "concurrent_keyword";
+        "concurrent_statement";
       ]
       | SimpleInitializer {
         simple_initializer_equal;
@@ -7102,6 +7125,14 @@ module WithToken(Token: TokenType) = struct
           global_keyword;
           global_variables;
           global_semicolon;
+        }
+      | (SyntaxKind.ConcurrentStatement, [
+          concurrent_keyword;
+          concurrent_statement;
+        ]) ->
+        ConcurrentStatement {
+          concurrent_keyword;
+          concurrent_statement;
         }
       | (SyntaxKind.SimpleInitializer, [
           simple_initializer_equal;
@@ -9409,6 +9440,17 @@ module WithToken(Token: TokenType) = struct
           global_keyword;
           global_variables;
           global_semicolon;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_concurrent_statement
+        concurrent_keyword
+        concurrent_statement
+      =
+        let syntax = ConcurrentStatement {
+          concurrent_keyword;
+          concurrent_statement;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

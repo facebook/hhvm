@@ -637,6 +637,10 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; global_variables                                   : t
     ; global_semicolon                                   : t
     }
+  | ConcurrentStatement                     of
+    { concurrent_keyword                                 : t
+    ; concurrent_statement                               : t
+    }
   | SimpleInitializer                       of
     { simple_initializer_equal                           : t
     ; simple_initializer_value                           : t
@@ -1325,6 +1329,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | StmtFunctionStatic               of function_static_statement
   | StmtEcho                         of echo_statement
   | StmtGlobal                       of global_statement
+  | StmtConcurrent                   of concurrent_statement
   | StmtTypeConstant                 of type_constant
   and switch_label =
   | SwitchCase    of case_label
@@ -1938,6 +1943,10 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { global_keyword: Token.t value
     ; global_variables: Token.t listesque value
     ; global_semicolon: Token.t value
+    }
+  and concurrent_statement =
+    { concurrent_keyword: Token.t value
+    ; concurrent_statement: statement value
     }
   and simple_initializer =
     { simple_initializer_equal: Token.t value

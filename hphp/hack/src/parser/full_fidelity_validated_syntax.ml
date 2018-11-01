@@ -406,6 +406,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.FunctionStaticStatement _ -> tag validate_function_static_statement (fun x -> StmtFunctionStatic x) x
     | Syntax.EchoStatement _ -> tag validate_echo_statement (fun x -> StmtEcho x) x
     | Syntax.GlobalStatement _ -> tag validate_global_statement (fun x -> StmtGlobal x) x
+    | Syntax.ConcurrentStatement _ -> tag validate_concurrent_statement (fun x -> StmtConcurrent x) x
     | Syntax.TypeConstant _ -> tag validate_type_constant (fun x -> StmtTypeConstant x) x
     | s -> aggregation_fail Def.Statement s
   and invalidate_statement : statement invalidator = fun (value, thing) ->
@@ -441,6 +442,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | StmtFunctionStatic               thing -> invalidate_function_static_statement      (value, thing)
     | StmtEcho                         thing -> invalidate_echo_statement                 (value, thing)
     | StmtGlobal                       thing -> invalidate_global_statement               (value, thing)
+    | StmtConcurrent                   thing -> invalidate_concurrent_statement           (value, thing)
     | StmtTypeConstant                 thing -> invalidate_type_constant                  (value, thing)
   and validate_switch_label : switch_label validator = fun x ->
     match Syntax.syntax x with
@@ -2176,6 +2178,20 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       { global_keyword = invalidate_token x.global_keyword
       ; global_variables = invalidate_list_with (invalidate_token) x.global_variables
       ; global_semicolon = invalidate_token x.global_semicolon
+      }
+    ; Syntax.value = v
+    }
+  and validate_concurrent_statement : concurrent_statement validator = function
+  | { Syntax.syntax = Syntax.ConcurrentStatement x; value = v } -> v,
+    { concurrent_statement = validate_statement x.concurrent_statement
+    ; concurrent_keyword = validate_token x.concurrent_keyword
+    }
+  | s -> validation_fail (Some SyntaxKind.ConcurrentStatement) s
+  and invalidate_concurrent_statement : concurrent_statement invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.ConcurrentStatement
+      { concurrent_keyword = invalidate_token x.concurrent_keyword
+      ; concurrent_statement = invalidate_statement x.concurrent_statement
       }
     ; Syntax.value = v
     }

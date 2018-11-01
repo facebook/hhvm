@@ -154,6 +154,7 @@ module WithExpressionAndDeclAndTypeParser
       parse_function_static_declaration_or_expression_statement parser
     | Echo -> parse_echo_statement parser
     | Global -> parse_global_statement_or_expression_statement parser
+    | Concurrent -> parse_concurrent_statement parser
     | Unset -> parse_unset_statement parser
     | Case ->
       let (parser, result) = parse_case_label parser in
@@ -1133,6 +1134,11 @@ module WithExpressionAndDeclAndTypeParser
       parse_expression_statement parser
     else
       parse_function_static_declaration parser
+
+  and parse_concurrent_statement parser =
+    let (parser1, keyword) = assert_token parser Concurrent in
+    let (parser_body, statement) = parse_statement parser1 in
+    Make.concurrent_statement parser_body keyword statement
 
   and parse_function_static_declaration parser =
     (* SPEC

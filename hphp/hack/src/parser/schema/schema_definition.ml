@@ -1084,6 +1084,17 @@ let schema : schema_node list =
       ; "semicolon", Token
       ]
     }
+  ; { kind_name   = "ConcurrentStatement"
+    ; type_name   = "concurrent_statement"
+    ; func_name   = "concurrent_statement"
+    ; description = "concurrent_statement"
+    ; prefix      = "concurrent"
+    ; aggregates  = [ Statement ]
+    ; fields =
+      [ "keyword", Token
+      ; "statement", Aggregate Statement
+      ]
+    }
   ; { kind_name   = "SimpleInitializer"
     ; type_name   = "simple_initializer"
     ; func_name   = "simple_initializer"

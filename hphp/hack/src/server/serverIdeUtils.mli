@@ -27,6 +27,12 @@ val check_file_input :
   ServerCommandTypes.file_input ->
   Relative_path.t * Tast.program
 
+val check_fileinfo :
+  TypecheckerOptions.t ->
+  Relative_path.t ->
+  FileInfo.t ->
+  Tast.program
+
 (** Runs the declaration, naming, and typecheck phases on an already-parsed
     AST. *)
 val check_ast :

@@ -88,17 +88,19 @@ let get_upper_bounds = Typing_env.get_upper_bounds
 let is_fresh_generic_parameter = Typing_env.is_fresh_generic_parameter
 
 let subtype env ty_sub ty_super =
-  Errors.try_
-    (fun () -> Typing_subtype.sub_type env ty_sub ty_super, true)
-    (fun _ -> env, false)
+  Errors.ignore_ (fun () ->
+    Errors.try_
+      (fun () -> Typing_subtype.sub_type env ty_sub ty_super, true)
+      (fun _ -> env, false))
 
 let can_subtype env ty_sub ty_super =
   snd (subtype env ty_sub ty_super)
 
 let is_stringish ?allow_mixed env ty =
-  Errors.try_
-    (fun () -> let _ = Typing_subtype.sub_string ?allow_mixed Pos.none env ty in true)
-    (fun _ -> false)
+  Errors.ignore_ (fun () ->
+    Errors.try_
+      (fun () -> let _ = Typing_subtype.sub_string ?allow_mixed Pos.none env ty in true)
+      (fun _ -> false))
 
 let referenced_typeconsts env root ids =
   let root = hint_to_ty env root in

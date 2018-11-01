@@ -13,8 +13,7 @@ open Common
 
 module Syntax = Full_fidelity_positioned_syntax
 module SyntaxKind = Full_fidelity_syntax_kind
-module SyntaxTree = Full_fidelity_syntax_tree
-  .WithSyntax(Full_fidelity_positioned_syntax)
+module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(Syntax)
 
 (**
  * A `SyntaxKind.t`. We can generate a string from a kind, but not the other way
@@ -108,6 +107,16 @@ type pattern =
     }
 
   (**
+   * Matches a given expression node if its type is a subtype of the given type.
+   * TODO: decide if we want to handle exact type equality or supertypes.
+   * TODO: decide what we want to name the pattern for decl types, if we create
+   * one.
+   *)
+  | TypePattern of {
+      subtype_of: Typing_defs.locl Typing_defs.ty;
+    }
+
+  (**
    * Matches if all of the children patterns match.
    *)
   | AndPattern of {
@@ -160,8 +169,15 @@ type result = {
   matched_nodes: matched_node list;
 }
 
+type collected_type_map = Tast_type_collector.collected_type list Pos.AbsolutePosMap.t
+
+(* The environment used in searching a single file. *)
 type env = {
+  tcopt: TypecheckerOptions.t;
+  fileinfo: FileInfo.t;
+  path: Relative_path.t;
   syntax_tree: SyntaxTree.t;
+  collected_types: collected_type_map option;
 }
 
 let empty_result: result option = Some { matched_nodes = [] }
@@ -187,6 +203,16 @@ let find_child_with_type
   match child_index with
   | None -> None
   | Some index -> List.nth (Syntax.children node) index
+
+let collect_types (env: env): env * collected_type_map =
+  match env with
+  | { collected_types = Some collected_types; _ } ->
+    (env, collected_types)
+  | { collected_types = None; tcopt; fileinfo; path; _ } ->
+    let tast = ServerIdeUtils.check_fileinfo tcopt path fileinfo in
+    let collected_types = Tast_type_collector.collect_types tast in
+    let env = { env with collected_types = Some collected_types } in
+    (env, collected_types)
 
 let rec search_node
     ~(env: env)
@@ -266,6 +292,29 @@ let rec search_node
     then (env, empty_result)
     else (env, None)
 
+  | TypePattern { subtype_of } ->
+    let pos = Syntax.position env.path node in
+    begin match pos with
+    | None -> (env, None)
+    | Some pos ->
+      let (env, collected_types) = collect_types env in
+      let pos = Pos.to_absolute pos in
+      let tys = Tast_type_collector.get_from_pos_map pos collected_types in
+      let is_subtype_of (tast_env, ty) =
+        match ty with
+        | Typing_defs.LoclTy ty ->
+          Tast_env.can_subtype tast_env ty subtype_of
+        | Typing_defs.DeclTy _ty ->
+          false
+      in
+      match tys with
+      | Some tys
+        when List.exists tys ~f:is_subtype_of ->
+        (env, empty_result)
+      | Some _ | None ->
+        (env, None)
+    end
+
   | AndPattern { patterns } ->
     let patterns = List.map patterns ~f:(fun pattern -> (node, pattern)) in
     search_and ~env ~patterns
@@ -337,7 +386,10 @@ and search_or
           search_node ~env ~pattern ~node
       )
 
-let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
+let compile_pattern
+    (tcopt: TypecheckerOptions.t)
+    (json: Hh_json.json)
+    : (pattern, string) Core_result.t =
   let open Core_result in
   let open Core_result.Monad_infix in
 
@@ -371,6 +423,8 @@ let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
       compile_list_pattern ~json ~keytrace
     | "raw_text_pattern" ->
       compile_raw_text_pattern ~json ~keytrace
+    | "type_pattern" ->
+      compile_type_pattern ~json ~keytrace
     | "and_pattern" ->
       compile_and_pattern ~json ~keytrace
     | "or_pattern" ->
@@ -514,6 +568,24 @@ let compile_pattern (json: Hh_json.json): (pattern, string) Core_result.t =
       raw_text;
     }
 
+  and compile_type_pattern ~json ~keytrace =
+    get_obj "subtype_of" (json, keytrace)
+      >>= fun (subtype_of_json, subtype_of_keytrace) ->
+    let locl_ty = Typing_print.json_to_locl_ty
+      tcopt
+      ~keytrace:subtype_of_keytrace
+      subtype_of_json
+    in
+    match locl_ty with
+    | Ok locl_ty ->
+      Ok (TypePattern {
+        subtype_of = locl_ty;
+      })
+    | Error (Typing_defs.Wrong_phase message)
+    | Error (Typing_defs.Not_supported message)
+    | Error (Typing_defs.Deserialization_error message) ->
+      Error message
+
   and compile_child_patterns_helper ~json ~keytrace =
     get_array "patterns" (json, keytrace) >>= fun (pattern_list, pattern_list_keytrace) ->
     let compiled_patterns = List.mapi pattern_list (fun i json ->
@@ -577,46 +649,35 @@ let result_to_json ~(sort_results: bool) (result: result option): Hh_json.json =
     ]
 
 let search
-    ~(syntax_tree: SyntaxTree.t)
+    (tcopt: TypecheckerOptions.t)
+    (path: Relative_path.t)
+    (fileinfo: FileInfo.t)
     (pattern: pattern)
     : result option =
-  let env = { syntax_tree } in
+  let source_text = Full_fidelity_source_text.from_file path in
+  let syntax_tree = SyntaxTree.make source_text in
+
+  let env = {
+    tcopt;
+    fileinfo;
+    path;
+    syntax_tree;
+    collected_types = None;
+  } in
   let (_env, result) =
     search_node ~env ~pattern ~node:(SyntaxTree.root env.syntax_tree) in
   result
 
-let job
-    (acc: (Relative_path.t * result) list)
-    (inputs: (Relative_path.t * pattern) list)
-    : (Relative_path.t * result) list =
-  List.fold inputs
-    ~init:acc
-    ~f:(fun acc (path, pattern) ->
-      try
-        let source_text = Full_fidelity_source_text.from_file path in
-        let syntax_tree = SyntaxTree.make source_text in
-        match search ~syntax_tree pattern with
-        | Some result -> (path, result) :: acc
-        | None -> acc
-      with e ->
-        let stack = Printexc.get_backtrace () in
-        let prefix = Printf.sprintf
-          "Error while running CST search on path %s:\n"
-          (Relative_path.to_absolute path)
-        in
-        Hh_logger.exc ~prefix ~stack e;
-        raise e
-    )
-
 let go
     (genv: ServerEnv.genv)
+    (env: ServerEnv.env)
     ~(sort_results: bool)
     ~(files_to_search: string list option)
     (input: Hh_json.json)
     : (Hh_json.json, string) Core_result.t
   =
   let open Core_result.Monad_infix in
-  compile_pattern input >>| fun pattern ->
+  compile_pattern env.ServerEnv.tcopt input >>| fun pattern ->
 
   let num_files_searched = ref 0 in
   let last_printed_num_files_searched = ref 0 in
@@ -637,15 +698,22 @@ let go
     then done_searching := true;
   in
 
-  let next_files: (Relative_path.t * pattern) list Hh_bucket.next =
-    let with_relative_path path =
-      (Relative_path.create_detect_prefix path, pattern)
+  let next_files: (Relative_path.t * FileInfo.t * pattern) list Hh_bucket.next =
+    let with_file_data path =
+      let path = Relative_path.create_detect_prefix path in
+      let fileinfo =
+        match Relative_path.Map.get env.ServerEnv.files_info path with
+        | Some fileinfo -> fileinfo
+        | None -> failwith (Printf.sprintf
+            "Missing fileinfo for path %s" (Relative_path.to_absolute path))
+      in
+      (path, fileinfo, pattern)
     in
     match files_to_search with
     | Some files_to_search ->
       let files_to_search =
         Sys_utils.parse_path_list files_to_search
-        |> List.map ~f:with_relative_path
+        |> List.map ~f:with_file_data
       in
       MultiWorker.next
         genv.ServerEnv.workers
@@ -654,11 +722,36 @@ let go
     | None ->
       let indexer = genv.ServerEnv.indexer FindUtils.is_php in
       begin fun () ->
-        let files = indexer () |> List.map ~f:with_relative_path in
+        let files = indexer () |> List.map ~f:with_file_data in
         progress_fn ~total:0 ~start:0 ~length:(List.length files);
         Hh_bucket.of_list files
       end
   in
+
+  (* Extract the `tcopt` so that we don't close over the entire `env`. *)
+  let tcopt = env.ServerEnv.tcopt in
+  let job
+      (acc: (Relative_path.t * result) list)
+      (inputs: (Relative_path.t * FileInfo.t * pattern) list)
+      : (Relative_path.t * result) list =
+    List.fold inputs
+      ~init:acc
+      ~f:(fun acc (path, fileinfo, pattern) ->
+        try
+          match search tcopt path fileinfo pattern with
+          | Some result -> (path, result) :: acc
+          | None -> acc
+        with e ->
+          let stack = Printexc.get_backtrace () in
+          let prefix = Printf.sprintf
+            "Error while running CST search on path %s:\n"
+            (Relative_path.to_absolute path)
+          in
+          Hh_logger.exc e ~prefix ~stack;
+          raise e
+      )
+  in
+
   let results = MultiWorker.call
     genv.ServerEnv.workers
     ~job

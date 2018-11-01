@@ -23,7 +23,8 @@ let typed_from_positioned
   let rec aux (positioned_node: PS.t): TS.t =
     let value = PS.value positioned_node in
     let position = Pos.to_absolute (Option.value_exn (PS.position file positioned_node)) in
-    let types = Tast_type_collector.get_from_pos_map position map in
+    let types = Tast_type_collector.get_from_pos_map position map
+      |> Option.value ~default:[] in
     match PS.syntax positioned_node with
     | PS.Token token ->
       let syntax = TS.Token token in

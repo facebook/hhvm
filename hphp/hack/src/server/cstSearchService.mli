@@ -10,7 +10,10 @@
 type pattern
 type result
 
-val compile_pattern: Hh_json.json -> (pattern, string) Core_result.t
+val compile_pattern:
+  TypecheckerOptions.t ->
+  Hh_json.json ->
+  (pattern, string) Core_result.t
 (** Compile JSON input into a pattern that can be searched for. *)
 
 val result_to_json: sort_results:bool -> result option -> Hh_json.json
@@ -19,6 +22,7 @@ val result_to_json: sort_results:bool -> result option -> Hh_json.json
 
 val go:
   ServerEnv.genv ->
+  ServerEnv.env ->
   sort_results:bool ->
   files_to_search:string list option  ->
   Hh_json.json ->
@@ -26,8 +30,9 @@ val go:
 (** Search for the given pattern across the given set of files. *)
 
 val search:
-  syntax_tree:Full_fidelity_syntax_tree
-    .WithSyntax(Full_fidelity_positioned_syntax).t ->
+  TypecheckerOptions.t ->
+  Relative_path.t ->
+  FileInfo.t ->
   pattern ->
   result option
 (** Execute a search on a single syntax tree. This is most useful in debugging

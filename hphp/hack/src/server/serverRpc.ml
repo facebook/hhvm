@@ -204,7 +204,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       end
     | CST_SEARCH { sort_results; input; files_to_search }->
       begin try
-        env, CstSearchService.go genv ~sort_results ~files_to_search input
+        env, CstSearchService.go genv env ~sort_results ~files_to_search input
       with
       | MultiThreadedCall.Coalesced_failures failures ->
         let failures = failures

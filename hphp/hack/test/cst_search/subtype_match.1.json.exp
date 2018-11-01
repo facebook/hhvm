@@ -1,0 +1,6 @@
+{
+  "matched_nodes":[
+    {"match_name":"supertype","kind":"token","start_offset":95,"end_offset":104},
+    {"match_name":"supertype","kind":"token","start_offset":115,"end_offset":122}
+  ]
+}

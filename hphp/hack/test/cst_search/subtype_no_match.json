@@ -1,0 +1,20 @@
+{
+  "pattern_type": "descendant_pattern",
+  "pattern": {
+    "pattern_type": "and_pattern",
+    "patterns": [
+      {
+        "pattern_type": "node_pattern",
+        "kind": "variable",
+        "children": {}
+      },
+      {
+        "pattern_type": "type_pattern",
+        "subtype_of": {
+          "kind": "primitive",
+          "name": "resource"
+        }
+      }
+    ]
+  }
+}

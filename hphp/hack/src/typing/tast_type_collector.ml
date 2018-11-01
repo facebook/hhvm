@@ -57,15 +57,5 @@ let collected_types_to_json
 let get_from_pos_map
     (position: Pos.absolute)
     (map: collected_type list Pos.AbsolutePosMap.t) =
-  let rec aux es =
-    match es with
-    | [] -> []
-    | (pos, tys) :: tl ->
-        if ((Pos.start_cnum pos) = (Pos.start_cnum position)
-            && (Pos.end_cnum pos) = (1 + (Pos.end_cnum position))) then
-          tys
-        else
-          aux tl
-  in
-  let elements = Pos.AbsolutePosMap.elements map in
-  aux elements
+  let position = Pos.advance_one position in
+  Pos.AbsolutePosMap.get position map

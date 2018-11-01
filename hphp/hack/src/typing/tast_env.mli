@@ -31,6 +31,7 @@ val ty_to_json : env -> 'a Typing_defs.ty -> Hh_json.json
 
 val json_to_locl_ty :
   TypecheckerOptions.t ->
+  ?keytrace: Hh_json.Access.keytrace ->
   Hh_json.json ->
   (Typing_defs.locl Typing_defs.ty, Typing_defs.deserialization_error) result
 (** Convert a JSON representation of a type back into a locl-phase type. *)

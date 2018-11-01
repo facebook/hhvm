@@ -850,15 +850,20 @@ let handle_mode
         end
       end
   | Cst_search ->
-    iter_over_files (fun filename ->
-    let open Result.Monad_infix in
-    let source_text = Full_fidelity_source_text.from_file filename in
-    let syntax_tree = PositionedTree.make source_text in
+    let filename = expect_single_file () in
+    let fileinfo =
+      match Relative_path.Map.get files_info filename with
+      | Some fileinfo -> fileinfo
+      | None -> failwith (Printf.sprintf
+          "Missing fileinfo for path %s"
+          (Relative_path.to_absolute filename))
+    in
 
+    let open Core_result.Monad_infix in
     let result = Sys_utils.read_stdin_to_string ()
       |> Hh_json.json_of_string
-      |> CstSearchService.compile_pattern
-      >>| CstSearchService.search ~syntax_tree
+      |> CstSearchService.compile_pattern tcopt
+      >>| CstSearchService.search tcopt filename fileinfo
       >>| CstSearchService.result_to_json ~sort_results:true
       >>| Hh_json.json_to_string ~pretty:true
     in
@@ -867,7 +872,7 @@ let handle_mode
     | Error message ->
       Printf.printf "%s\n" message;
       exit 1
-    end)
+    end
   | Dump_symbol_info ->
     iter_over_files (fun filename ->
       begin match Relative_path.Map.get files_info filename with

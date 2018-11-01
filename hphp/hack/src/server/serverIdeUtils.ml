@@ -190,5 +190,9 @@ let check_file_input tcopt files_info fi =
         wrapper (fun () -> List.hd_exn (recheck tcopt [(path, fileinfo)]))
       | None -> path, []
 
+let check_fileinfo tcopt path fileinfo =
+  let (_path, tast) = List.hd_exn (recheck tcopt [(path, fileinfo)]) in
+  tast
+
 let check_ast tcopt ast =
   snd @@ declare_and_check_ast ~make_ast:(fun () -> ast) ~f:(fun _ _ tast -> tast) tcopt

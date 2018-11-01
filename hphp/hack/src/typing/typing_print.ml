@@ -827,6 +827,7 @@ let wrong_phase ~message ~keytrace =
 
 let to_locl_ty
   (tcopt: TypecheckerOptions.t)
+  ?(keytrace = [])
   (json: Hh_json.json)
   : locl deserialized_result =
   let reason = Reason.none in
@@ -1279,7 +1280,7 @@ let to_locl_ty
         ~keytrace
   in
 
-  aux json ~keytrace:[]
+  aux json ~keytrace
 
 end
 

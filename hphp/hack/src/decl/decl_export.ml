@@ -34,17 +34,39 @@ let empty_decls = {
 let keys_to_sset smap =
   SMap.fold smap ~init:SSet.empty ~f:(fun k _ s -> SSet.add s k)
 
-let rec collect_class requested_classes cid decls =
+let rec collect_class
+    ?(fail_if_missing=false)
+    (tcopt : TypecheckerOptions.t)
+    (requested_classes : SSet.t)
+    (cid : string)
+    (decls : saved_decls)
+  : saved_decls =
   if SMap.mem decls.classes cid then decls else
   match Classes.get cid with
   | None ->
-    if not @@ SSet.mem requested_classes cid
-    then failwith @@ "Missing ancestor class "^cid
+    let kind =
+      if SSet.mem requested_classes cid then "requested" else "ancestor" in
+    if fail_if_missing
+    then failwith @@ "Missing "^kind^" class "^cid^" after declaration"
     else begin
-      Hh_logger.log "Missing requested class %s" cid;
-      match Typedefs.get cid with
-      | None -> Hh_logger.log "(It may have been renamed or deleted)"; decls
-      | Some _ -> Hh_logger.log "(It may have been changed to a typedef)"; decls
+      try
+        match Naming_heap.TypeIdHeap.get cid with
+        | None | Some (_, `Typedef) -> raise Exit
+        | Some (pos, `Class) ->
+          let filename = FileInfo.get_pos_filename pos in
+          Hh_logger.log "Declaring %s class %s" kind cid;
+          Decl.declare_class_in_file tcopt filename cid;
+          collect_class tcopt requested_classes cid decls ~fail_if_missing:true
+      with Exit | Decl.Decl_not_found _ ->
+        if not @@ SSet.mem requested_classes cid
+        then failwith @@ "Missing ancestor class "^cid
+        else begin
+          Hh_logger.log "Missing requested class %s" cid;
+          if Typedefs.mem cid
+          then Hh_logger.log "(It may have been changed to a typedef)"
+          else Hh_logger.log "(It may have been renamed or deleted)";
+          decls
+        end
     end
   | Some data ->
     let decls = {decls with classes = SMap.add decls.classes cid data} in
@@ -83,10 +105,10 @@ let rec collect_class requested_classes cid decls =
       end
     in
     let ancestors = keys_to_sset data.dc_ancestors in
-    collect_classes requested_classes decls ancestors
+    collect_classes tcopt requested_classes decls ancestors
 
-and collect_classes requested_classes decls =
-  SSet.fold ~init:decls ~f:(collect_class requested_classes)
+and collect_classes tcopt requested_classes decls =
+  SSet.fold ~init:decls ~f:(collect_class tcopt requested_classes)
 
 let restore_decls decls =
   let {classes; props; sprops; meths; smeths; cstrs} = decls in
@@ -97,8 +119,8 @@ let restore_decls decls =
   CEKMap.iter smeths StaticMethods.add;
   SMap.iter cstrs Constructors.add
 
-let export_class_decls classes =
-  collect_classes classes empty_decls classes
+let export_class_decls tcopt classes =
+  collect_classes tcopt classes empty_decls classes
 
 let import_class_decls decls =
   restore_decls decls;

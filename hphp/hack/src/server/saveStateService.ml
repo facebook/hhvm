@@ -14,6 +14,8 @@ type saved_state_errors = (Errors.phase * Relative_path.Set.t) list
 
 let get_errors_filename (filename: string) : string = filename ^ ".err"
 
+let get_decls_filename (filename: string) : string = filename ^ ".decls"
+
 (* Experimental: save the naming table ("file info") into the same SQLite
     database that we save the dependency table into. The table's name is NAME_INFO *)
 let save_all_file_info_sqlite
@@ -99,8 +101,47 @@ let dump_contents
   Marshal.to_channel chan contents [];
   Sys_utils.close_out_no_fail output_filename chan
 
+let dump_contents_exn
+    (output_filename: string)
+    (contents: 'a) : unit =
+  let oc = Pervasives.open_out_bin output_filename in
+  Marshal.to_channel oc contents [];
+  Pervasives.close_out oc
+
+let get_hot_classes_filename () =
+  let prefix = Relative_path.(path_of_prefix Root) in
+  Filename.concat prefix "hh_hot_classes.json"
+
+let get_hot_classes (filename: string) : SSet.t =
+  Disk.cat filename
+  |> Hh_json.json_of_string
+  |> Hh_json.get_object_exn
+  |> List.find_exn ~f:(fun (k, _) -> k = "classes")
+  |> snd
+  |> Hh_json.get_array_exn
+  |> List.map ~f:Hh_json.get_string_exn
+  |> SSet.of_list
+
+let dump_class_decls tcopt filename =
+  let start_t = Unix.gettimeofday () in
+  Hh_logger.log "Begin saving class declarations";
+  try
+    let hot_classes_filename = get_hot_classes_filename () in
+    Hh_logger.log "Reading hot class names from %s" hot_classes_filename;
+    let classes = get_hot_classes hot_classes_filename in
+    Hh_logger.log "Exporting %d class declarations..." @@ SSet.cardinal classes;
+    let decls = Decl_export.export_class_decls tcopt classes in
+    Hh_logger.log "Marshalling class declarations...";
+    dump_contents_exn filename decls;
+    ignore @@ Hh_logger.log_duration "Saved class declarations" start_t
+  with exn ->
+    let stack = Printexc.get_backtrace () in
+    Hh_logger.exc exn ~stack ~prefix:"Failed to save class declarations: "
+
 (* Dumps the file info and the errors, if any. *)
 let dump_saved_state
+    ~(tcopt: TypecheckerOptions.t)
+    ~(save_decls: bool)
     (output_filename: string)
     (files_info: FileInfo.t Relative_path.Map.t)
     (errors: Errors.t) : unit =
@@ -108,16 +149,21 @@ let dump_saved_state
   dump_contents output_filename files_info_saved;
 
   (* Let's not write empty error files. *)
-  if Errors.is_empty errors then () else
+  if Errors.is_empty errors then () else begin
+    let errors_in_phases =
+      List.map
+        ~f:(fun phase -> (phase, Errors.get_failed_files errors phase))
+        [ Errors.Parsing; Errors.Decl; Errors.Naming; Errors.Typing ] in
+    dump_contents (get_errors_filename output_filename) errors_in_phases
+  end;
 
-  let errors_in_phases =
-    List.map
-      ~f:(fun phase -> (phase, Errors.get_failed_files errors phase))
-      [ Errors.Parsing; Errors.Decl; Errors.Naming; Errors.Typing ] in
-  dump_contents (get_errors_filename output_filename) errors_in_phases
+  if save_decls then
+    dump_class_decls tcopt (get_decls_filename output_filename)
 
 let update_save_state
+    ~(tcopt: TypecheckerOptions.t)
     ~(file_info_on_disk: bool)
+    ~(save_decls: bool)
     (files_info: FileInfo.t Relative_path.Map.t)
     (errors: Errors.t)
     (output_filename: string) : int =
@@ -125,7 +171,7 @@ let update_save_state
   let db_name = output_filename ^ ".sql" in
   if not (Disk.file_exists db_name) then
     failwith "Given existing save state SQL file missing";
-  dump_saved_state output_filename files_info errors;
+  dump_saved_state ~tcopt ~save_decls output_filename files_info errors;
   let () = if file_info_on_disk then begin
     failwith "incrementally updating file info on disk not yet implemented"
   end else begin
@@ -138,7 +184,9 @@ let update_save_state
 (** Saves the saved state to the given path. Returns number of dependency
 * edges dumped into the database. *)
 let save_state
+    ~(tcopt: TypecheckerOptions.t)
     ~(file_info_on_disk: bool)
+    ~(save_decls: bool)
     (files_info: FileInfo.t Relative_path.Map.t)
     (errors: Errors.t)
     (output_filename: string) : int =
@@ -153,7 +201,7 @@ let save_state
   match SharedMem.loaded_dep_table_filename () with
   | None ->
     let t = Unix.gettimeofday () in
-    dump_saved_state output_filename files_info errors;
+    dump_saved_state ~tcopt ~save_decls output_filename files_info errors;
     let () = if file_info_on_disk then begin
       Hh_logger.log "Saving file info (naming table) into a SQLite table.\n";
       (save_all_file_info_sqlite db_name files_info : unit)
@@ -172,7 +220,8 @@ let save_state
     let () = Sys_utils.mkdir_p (Filename.dirname output_filename) in
     let () = Sys_utils.write_file ~file:db_name content in
     let _ : float = Hh_logger.log_duration "Made disk copy of loaded saved state. Took" t in
-    update_save_state ~file_info_on_disk files_info errors output_filename
+    update_save_state ~file_info_on_disk ~tcopt ~save_decls
+      files_info errors output_filename
 
 let get_in_memory_dep_table_entry_count () : (int, string) result =
   Utils.try_with_stack (fun () ->
@@ -182,10 +231,14 @@ let get_in_memory_dep_table_entry_count () : (int, string) result =
 (* If successful, returns the # of edges from the dependency table that were written. *)
 (* TODO: write some other stats, e.g., the number of names, the number of errors, etc. *)
 let go
+    ~(tcopt: TypecheckerOptions.t)
     ~(file_info_on_disk: bool)
+    ~(save_decls: bool)
     (files_info: FileInfo.t Relative_path.Map.t)
     (errors: Errors.t)
     (output_filename: string) : (int, string) result =
-  Utils.try_with_stack (fun () ->
-    save_state ~file_info_on_disk files_info errors output_filename)
+  Utils.try_with_stack begin fun () ->
+    save_state ~file_info_on_disk ~tcopt ~save_decls
+      files_info errors output_filename
+  end
   |> Core_result.map_error ~f:(fun (exn, _stack) -> Exn.to_string exn)

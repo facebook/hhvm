@@ -46,9 +46,13 @@ let save_state (genv: ServerEnv.genv) (env: ServerEnv.env) (fn: string) : unit =
     end in
 
   if do_save_state then
+  let tcopt = env.ServerEnv.tcopt in
   let file_info_on_disk = ServerArgs.file_info_on_disk genv.ServerEnv.options in
-  let _ : int = SaveStateService.save_state
-    ~file_info_on_disk env.ServerEnv.files_info env.errorl fn in
+  let save_decls =
+    genv.local_config.ServerLocalConfig.store_decls_in_saved_state in
+  let _ : int =
+    SaveStateService.save_state ~tcopt ~file_info_on_disk ~save_decls
+      env.ServerEnv.files_info env.errorl fn in
   ()
 
 let get_lazy_level (genv: ServerEnv.genv) : lazy_level =

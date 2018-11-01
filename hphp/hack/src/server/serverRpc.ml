@@ -102,9 +102,14 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       env, (SaveStateService.get_in_memory_dep_table_entry_count ())
     | SAVE_STATE (filename, gen_saved_ignore_type_errors, file_info_on_disk) ->
       if Errors.is_empty env.errorl || gen_saved_ignore_type_errors then
+        let tcopt = env.ServerEnv.tcopt in
+        let save_decls =
+          genv.local_config.ServerLocalConfig.store_decls_in_saved_state in
         env,
         SaveStateService.go
+          ~tcopt
           ~file_info_on_disk
+          ~save_decls
           env.ServerEnv.files_info
           env.errorl
           filename

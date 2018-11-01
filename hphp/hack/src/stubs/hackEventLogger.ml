@@ -121,6 +121,8 @@ let with_rechecked_stats _ _ _ f = f ()
 let with_init_type _ f = f ()
 let with_check_kind _ f = f ()
 let state_loader_dirty_files _ = ()
+let save_decls_failure _ _ = ()
+let load_decls_failure _ _ = ()
 
 (** Informant events *)
 let init_informant_prefetcher_runner ?exit_on_parent_exit _ = ()

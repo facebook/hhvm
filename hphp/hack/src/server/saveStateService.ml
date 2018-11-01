@@ -100,6 +100,7 @@ let load_class_decls (input_filename: string) : SSet.t =
     classes
   with exn ->
     let stack = Printexc.get_backtrace () in
+    HackEventLogger.load_decls_failure exn stack;
     Hh_logger.exc exn ~stack ~prefix:"Failed to load class declarations: ";
     SSet.empty
 
@@ -167,6 +168,7 @@ let dump_class_decls tcopt filename =
     ignore @@ Hh_logger.log_duration "Saved class declarations" start_t
   with exn ->
     let stack = Printexc.get_backtrace () in
+    HackEventLogger.save_decls_failure exn stack;
     Hh_logger.exc exn ~stack ~prefix:"Failed to save class declarations: "
 
 (* Dumps the file info and the errors, if any. *)

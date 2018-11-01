@@ -1058,7 +1058,7 @@ let to_locl_ty
       | "noreturn" -> Ok Nast.Tnoreturn
       | _ ->
         deserialization_error
-          ~message:("Unknown primitive type: " ^ kind)
+          ~message:("Unknown primitive type: " ^ name)
           ~keytrace
       end >>= fun prim_ty ->
       ty (Tprim prim_ty)

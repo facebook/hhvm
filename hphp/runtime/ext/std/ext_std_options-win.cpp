@@ -210,7 +210,7 @@ folly::Optional<String> php_get_windows_name() {
   verInf.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
   GetVersionEx((OSVERSIONINFO*)&verInf);
   if (verInf.dwPlatformId != VER_PLATFORM_WIN32_NT) {
-    return folly::None();
+    return folly::none;
   }
 
   // These are accessed a lot, so use short names to keep things readable.

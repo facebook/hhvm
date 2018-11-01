@@ -67,7 +67,6 @@ ThreadInfo::~ThreadInfo() {
 
 void ThreadInfo::init() {
   m_reqInjectionData.threadInit();
-  rds::threadInit();
   onSessionInit();
   // TODO(20427335): Get rid of the illogical onSessionInit() call above.
   Lock lock(s_thread_info_mutex);

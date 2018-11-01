@@ -2264,6 +2264,7 @@ void hphp_thread_init() {
 #if USE_JEMALLOC_EXTENT_HOOKS
   high_arena_tcache_create();
 #endif
+  rds::threadInit();
   ServerStats::GetLogger();
   zend_get_bigint_data();
   zend_rand_init();

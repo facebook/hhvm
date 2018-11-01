@@ -158,6 +158,8 @@ void pcre_init();
 int compiler_main(int argc, char **argv) {
   try {
     CompilerOptions po;
+    rds::local::init();
+    SCOPE_EXIT { rds::local::fini(); };
 
     int ret = prepareOptions(po, argc, argv);
     if (ret == 1) return 0; // --help
@@ -404,8 +406,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     Logger::LogLevel = Logger::LogInfo;
   }
 
-  rds::local::init();
-  SCOPE_EXIT { rds::local::fini(); };
   tl_heap.getCheck();
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;

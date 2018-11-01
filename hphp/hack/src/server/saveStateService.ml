@@ -80,9 +80,34 @@ let partition_error_files_tf
 
   ((fold_error_files errors_in_phases_t), (fold_error_files errors_in_phases_f))
 
+let load_contents_exn (input_filename: string) : 'a =
+  let ic = Pervasives.open_in_bin input_filename in
+  let contents = Marshal.from_channel ic in
+  Pervasives.close_in ic;
+  contents
+
+let load_class_decls (input_filename: string) : SSet.t =
+  let start_t = Unix.gettimeofday () in
+  Hh_logger.log "Begin loading class declarations";
+  try
+    Hh_logger.log "Unmarshalling class declarations from %s" input_filename;
+    let decls = load_contents_exn input_filename in
+    Hh_logger.log "Importing class declarations...";
+    let classes = Decl_export.import_class_decls decls in
+    let num_classes = SSet.cardinal classes in
+    let msg = Printf.sprintf "Loaded %d class declarations" num_classes in
+    ignore @@ Hh_logger.log_duration msg start_t;
+    classes
+  with exn ->
+    let stack = Printexc.get_backtrace () in
+    Hh_logger.exc exn ~stack ~prefix:"Failed to load class declarations: ";
+    SSet.empty
+
 (* Loads the file info and the errors, if any. *)
 let load_saved_state
-    (saved_state_filename: string) : (FileInfo.saved_state_info * saved_state_errors) =
+    ~(load_decls: bool)
+    (saved_state_filename: string)
+  : FileInfo.saved_state_info * saved_state_errors * SSet.t =
   let chan = In_channel.create ~binary:true saved_state_filename in
   let (old_saved: FileInfo.saved_state_info) =
     Marshal.from_channel chan in
@@ -91,7 +116,13 @@ let load_saved_state
   let errors_filename = get_errors_filename saved_state_filename in
   let (old_errors: saved_state_errors) = if not (Sys.file_exists errors_filename) then [] else
     Marshal.from_channel (In_channel.create ~binary:true errors_filename) in
-  (old_saved, old_errors)
+
+  let loaded_classes =
+    if load_decls
+    then load_class_decls (get_decls_filename saved_state_filename)
+    else SSet.empty in
+
+  (old_saved, old_errors, loaded_classes)
 
 (* Writes some OCaml object to a file with the given filename. *)
 let dump_contents

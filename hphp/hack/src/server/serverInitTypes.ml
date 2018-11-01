@@ -61,6 +61,8 @@ type loaded_info =
   dirty_master_files : Relative_path.Set.t;
   (* Files changed between public merge base and current revision *)
   dirty_local_files : Relative_path.Set.t;
+  (* Names of classes whose declarations were loaded from the saved state *)
+  loaded_classes : SSet.t;
   old_saved : FileInfo.saved_state_info;
   old_errors : SaveStateService.saved_state_errors;
   state_distance: int option;

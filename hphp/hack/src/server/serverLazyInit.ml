@@ -88,8 +88,10 @@ let download_and_load_state_exn
     Error (Lazy_init_loader_failure error)
   | Ok result ->
     lock_and_load_deptable result.State_loader.deptable_fn ~ignore_hh_version;
-    let (old_saved, old_errors) =
-      SaveStateService.load_saved_state result.State_loader.saved_state_fn in
+    let load_decls = genv.local_config.SLC.load_decls_from_saved_state in
+    let (old_saved, old_errors, loaded_classes) =
+      SaveStateService.load_saved_state result.State_loader.saved_state_fn
+        ~load_decls in
 
     let t = Unix.time () in
     match result.State_loader.dirty_files |> Future.get ~timeout:200 with
@@ -107,6 +109,7 @@ let download_and_load_state_exn
         mergebase_rev = result.State_loader.mergebase_rev;
         dirty_master_files;
         dirty_local_files;
+        loaded_classes;
         old_saved;
         old_errors;
         state_distance = Some result.State_loader.state_distance;
@@ -128,7 +131,9 @@ let use_precomputed_state_exn
   lock_and_load_deptable deptable_fn ~ignore_hh_version;
   let changes = Relative_path.set_of_list changes in
   let prechecked_changes = Relative_path.set_of_list prechecked_changes in
-  let (old_saved, old_errors) = SaveStateService.load_saved_state saved_state_fn
+  let load_decls = genv.local_config.SLC.load_decls_from_saved_state in
+  let (old_saved, old_errors, loaded_classes) =
+    SaveStateService.load_saved_state saved_state_fn ~load_decls
   in
   {
     saved_state_fn;
@@ -136,6 +141,7 @@ let use_precomputed_state_exn
     mergebase_rev  = None;
     dirty_master_files = prechecked_changes;
     dirty_local_files = changes;
+    loaded_classes;
     old_saved;
     old_errors;
     state_distance = None;
@@ -219,18 +225,64 @@ let names_to_deps (names: FileInfo.names) : DepSet.t =
   let deps = add_deps_of_sset (fun n -> Dep.GConstName n) n_consts deps in
   deps
 
+(** Compare declarations loaded from the saved state to declarations based on
+    the current versions of dirty files. This lets us check a smaller set of
+    files than the set we'd check if old declarations were not available.
+    To be used only when load_decls_from_saved_state is enabled. *)
+let get_files_to_recheck
+    (genv: ServerEnv.genv)
+    (env: ServerEnv.env)
+    (old_fast: FileInfo.names Relative_path.Map.t)
+    (new_fast: FileInfo.names Relative_path.Map.t)
+    (dirty_fast: FileInfo.names Relative_path.Map.t)
+    (files_to_redeclare: Relative_path.Set.t)
+  : Relative_path.Set.t =
+  let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
+  let fast =
+    Relative_path.Set.fold files_to_redeclare
+      ~init:Relative_path.Map.empty
+      ~f:begin fun path acc ->
+        match Relative_path.Map.get dirty_fast path with
+        | Some info -> Relative_path.Map.add acc path info
+        | None -> acc
+      end
+  in
+  let get_classes path =
+    let old_names = Relative_path.Map.get old_fast path in
+    let new_names = Relative_path.Map.get new_fast path in
+    let classes_from_names x = x.FileInfo.n_classes in
+    let old_classes = Option.map old_names classes_from_names in
+    let new_classes = Option.map new_names classes_from_names in
+    Option.merge old_classes new_classes SSet.union
+    |> Option.value ~default:SSet.empty
+  in
+  let dirty_names =
+    Relative_path.Map.fold dirty_fast
+      ~init:FileInfo.empty_names ~f:(fun _ -> FileInfo.merge_names)
+  in
+  Decl_redecl_service.oldify_type_decl ~bucket_size
+    genv.workers get_classes FileInfo.empty_names dirty_names;
+  let _, _, to_redecl, to_recheck =
+    Decl_redecl_service.redo_type_decl ~conservative_redecl:false
+      ~bucket_size genv.workers env.tcopt dirty_names fast in
+  Decl_redecl_service.remove_old_defs ~bucket_size genv.workers dirty_names;
+  let deps = Typing_deps.add_all_deps to_redecl in
+  let deps = Typing_deps.DepSet.union deps to_recheck in
+  Typing_deps.get_files deps
+
 (* We start of with a list of files that have changed since the state was
  * saved (dirty_files), and two maps of the class / function declarations
  * -- one made when the state was saved (old_fast) and one made for the
- * current files in the repository (fast). We grab the declarations from both
- * , to account for both the declaratons that were deleted and those that
- * are newly created. Then we use the deptable to figure out the files
- * that referred to them. Finally we recheck the lot.
+ * current files in the repository (new_fast). We grab the declarations from
+ * both, to account for both the declaratons that were deleted and those that
+ * are newly created. Then we use the deptable to figure out the files that
+ * referred to them. Finally we recheck the lot.
+ *
  * Args:
  *
  * genv, env : environments
  * old_fast: old file-ast from saved state
- * fast: newly parsed file ast
+ * new_fast: newly parsed file ast
  * dirty_files: we need to typecheck these and,
  *    since their decl have changed, also all of their dependencies
  * similar_files: we only need to typecheck these,
@@ -240,7 +292,7 @@ let type_check_dirty
     (genv: ServerEnv.genv)
     (env: ServerEnv.env)
     (old_fast: FileInfo.names Relative_path.Map.t)
-    (fast: FileInfo.names Relative_path.Map.t)
+    (new_fast: FileInfo.names Relative_path.Map.t)
     (dirty_master_files: Relative_path.Set.t)
     (dirty_local_files: Relative_path.Set.t)
     (similar_files: Relative_path.Set.t)
@@ -249,18 +301,29 @@ let type_check_dirty
   let dirty_files =
     Relative_path.Set.union dirty_master_files dirty_local_files in
   let start_t = Unix.gettimeofday () in
-  let fast = get_dirty_fast old_fast fast dirty_files in
-  let names s = Relative_path.Map.fold fast ~f:begin fun k v acc ->
+  let dirty_fast = get_dirty_fast old_fast new_fast dirty_files in
+  let names s = Relative_path.Map.fold dirty_fast ~f:begin fun k v acc ->
     if Relative_path.Set.mem s k then FileInfo.merge_names v acc
     else acc
   end ~init:FileInfo.empty_names in
   let master_deps = names dirty_master_files |> names_to_deps in
   let local_deps = names dirty_local_files |> names_to_deps in
+  (* Include similar_files in the dirty_fast used to determine which loaded
+     declarations to oldify. This is necessary because the positions of
+     declarations may have changed, which affects error messages and FIXMEs. *)
+  let get_files_to_recheck =
+    get_files_to_recheck genv env old_fast new_fast @@
+      extend_fast dirty_fast env.files_info similar_files in
 
   let env, to_recheck = if use_prechecked_files genv then begin
     (* Start with dirty files and fan-out of local changes only *)
-    let deps = Typing_deps.add_all_deps local_deps in
-    let to_recheck = Typing_deps.get_files deps in
+    let to_recheck =
+      if genv.local_config.SLC.load_decls_from_saved_state
+      then get_files_to_recheck dirty_local_files
+      else
+        let deps = Typing_deps.add_all_deps local_deps in
+        Typing_deps.get_files deps
+    in
     ServerPrecheckedFiles.set env (Initial_typechecking {
       rechecked_files = Relative_path.Set.empty;
       dirty_local_deps = local_deps;
@@ -269,14 +332,19 @@ let type_check_dirty
     }), to_recheck
   end else begin
     (* Start with full fan-out immediately *)
-    let deps = Typing_deps.DepSet.union master_deps local_deps in
-    let deps = Typing_deps.add_all_deps deps in
-    let to_recheck = Typing_deps.get_files deps in
+    let to_recheck =
+      if genv.local_config.SLC.load_decls_from_saved_state
+      then get_files_to_recheck dirty_files
+      else
+        let deps = Typing_deps.DepSet.union master_deps local_deps in
+        let deps = Typing_deps.add_all_deps deps in
+        Typing_deps.get_files deps
+    in
     env, to_recheck
   end in
   (* We still need to typecheck files whose declarations did not change *)
   let to_recheck = Relative_path.Set.union to_recheck similar_files in
-  let fast = extend_fast fast env.files_info to_recheck in
+  let fast = extend_fast dirty_fast env.files_info to_recheck in
   let result = type_check genv env fast t in
   HackEventLogger.type_check_dirty ~start_t
     ~dirty_count:(Relative_path.Set.cardinal dirty_files)
@@ -355,6 +423,7 @@ let post_saved_state_initialization
   let {
     dirty_local_files;
     dirty_master_files;
+    loaded_classes;
     old_saved;
     mergebase_rev;
     old_errors;
@@ -436,6 +505,30 @@ let post_saved_state_initialization
   let t = naming_with_fast old_hack_names t in
   (* Do global naming on all dirty files *)
   let env, t = naming env t in
+
+  (* Parse the files containing any class whose declaration we loaded from the
+     saved state, to populate DECL_HH_FIXMES. *)
+  let loaded_class_filenames =
+    SSet.fold loaded_classes ~init:Relative_path.Set.empty ~f:begin fun cid acc ->
+      match Naming_heap.TypeIdHeap.get cid with
+      | None | Some (_, `Typedef) -> acc
+      | Some (pos, `Class) ->
+        Relative_path.Set.add acc @@ FileInfo.get_pos_filename pos
+    end
+  in
+  let loaded_class_filenames =
+    Relative_path.Set.diff loaded_class_filenames parsing_files in
+  let env, t =
+    if Relative_path.Set.is_empty loaded_class_filenames
+    then env, t
+    else
+      let () = Hh_logger.log "Parsing files containing hot classes..." in
+      let loaded_class_filenames =
+        Relative_path.Set.elements loaded_class_filenames in
+      parsing genv env ~lazy_parse:true ~trace t
+        ~get_next:(MultiWorker.next genv.workers loaded_class_filenames)
+        ~count:(List.length loaded_class_filenames)
+  in
 
   (* Add all files from fast to the files_info object *)
   let fast = FileInfo.simplify_fast env.files_info in

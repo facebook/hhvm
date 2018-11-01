@@ -9,10 +9,12 @@ load("@fbcode_macros//build_defs:create_build_mode.bzl", "create_build_mode")
 # file here prevents this behavior if *only* this rule is being used
 # (and HHVM builds will not be affected).
 
-_opt_mode = create_build_mode(compiler = "gcc")  # T33723700
+_mode = create_build_mode(compiler = "gcc")  # T33723700
 
 def get_modes():
     """ Return modes for this file """
     return {
-        "opt": _opt_mode,
+        "dbg": _mode,
+        "dbgo": _mode,
+        "opt": _mode,
     }

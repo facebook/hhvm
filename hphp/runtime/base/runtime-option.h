@@ -818,7 +818,7 @@ struct RuntimeOption {
   F(uint32_t, JitPGOUnlikelyDecRefDecrementPercent, 5)                  \
   F(uint32_t, JitPGOReleaseVVMinPercent, 8)                             \
   F(bool,     JitPGOArrayGetStress,    false)                           \
-  F(uint32_t, JitPGOMinBlockCountPercent, 0)                            \
+  F(double,   JitPGOMinBlockCountPercent, 0.05)                         \
   F(double,   JitPGOMinArcProbability, 0.0)                             \
   F(uint32_t, JitPGOMaxFuncSizeDupBody, 80)                             \
   F(uint32_t, JitPGORelaxPercent,      100)                             \

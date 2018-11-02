@@ -334,6 +334,18 @@ RegionVec regionizeFunc(const Func* func, std::string& transCFGAnnot) {
     if (!coveredNodes.count(node) ||
         !allArcsCovered(cfg.inArcs(node),  coveredArcs)) {
       auto newHead = node;
+      // If the weight of node is too low, we mark it and its incoming arcs as
+      // covered but skip generating a region starting at it to reduce code
+      // size.  This node will probably trigger a live translation instead.
+      auto const minBlkPerc = RuntimeOption::EvalJitPGOMinBlockCountPercent;
+      if (cfg.weight(node) < cfg.weight(nodes[0]) * minBlkPerc / 100) {
+        FTRACE(3, "regionizeFunc: skipping forming a region to cover node {}\n",
+               newHead);
+        coveredNodes.insert(node);
+        auto const& inArcs = cfg.inArcs(node);
+        coveredArcs.insert(inArcs.begin(), inArcs.end());
+        continue;
+      }
       FTRACE(6, "regionizeFunc: selecting trace to cover node {}\n", newHead);
       RegionDescPtr region;
       HotTransContext ctx;

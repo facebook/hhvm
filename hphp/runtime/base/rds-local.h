@@ -101,6 +101,10 @@ namespace detail {
 struct HotRDSLocals {
   void* rdslocal_base;
 
+  // Every array operation requires checking if the mutable iteration table is
+  // empty.  This bool offers the fastest way to get at that information.
+  bool rl_miter_exists;
+
   TYPE_SCAN_IGNORE_FIELD(rdslocal_base);
 };
 static_assert(sizeof(HotRDSLocals) <= 16,

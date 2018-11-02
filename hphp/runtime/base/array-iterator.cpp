@@ -246,13 +246,19 @@ tv_rval ArrayIter::secondRvalPlus() {
 
 //////////////////////////////////////////////////////////////////////
 
-THREAD_LOCAL_FLAT(MIterTable, tl_miter_table);
+IMPLEMENT_RDS_LOCAL_HOTVALUE(bool, rl_miter_exists);
+RDS_LOCAL_NO_CHECK(MIterTable, rl_miter_table);
 
 void MIterTable::clear() {
-  if (!tl_miter_table) return;
-  auto t = tl_miter_table.get();
+  if (!rl_miter_table) return;
+  auto t = rl_miter_table.get();
   t->ents.fill({nullptr, nullptr});
   t->extras.clear();
+  rl_miter_exists = false;
+}
+
+MIterTable::~MIterTable() {
+  rl_miter_exists = false;
 }
 
 namespace {
@@ -286,7 +292,7 @@ X(6);
 // delegates to slow.
 ALWAYS_INLINE
 MIterTable::Ent* find_empty_strong_iter() {
-  auto& table = *tl_miter_table.getCheck();
+  auto& table = *rl_miter_table.getCheck();
   if (LIKELY(!table.ents[0].array)) {
     return &table.ents[0];
   }
@@ -300,6 +306,7 @@ void newMArrayIter(MArrayIter* marr, ArrayData* ad) {
   slot->iter = marr;
   slot->array = ad;
   marr->setContainer(ad);
+  rl_miter_exists = true;
   assertx(strong_iterators_exist());
 }
 
@@ -326,11 +333,12 @@ void free_strong_iterator_impl(Cond cond) {
     }
   };
 
-  auto& table = *tl_miter_table;
+  auto& table = *rl_miter_table;
   if (cond(table.ents[0])) {
     table.ents[0].iter->setContainer(nullptr);
     table.ents[0].array = nullptr;
     table.ents[0].iter = nullptr;
+    rl_miter_exists = false;
     alreadyValid = false;
   }
   rm(table.ents[1]);
@@ -343,6 +351,7 @@ void free_strong_iterator_impl(Cond cond) {
 
   if (UNLIKELY(pvalid != nullptr)) {
     std::swap(*pvalid, table.ents[0]);
+    rl_miter_exists = true;
     alreadyValid = true;
   }
   if (LIKELY(table.extras.empty())) return;
@@ -362,6 +371,7 @@ void free_strong_iterator_impl(Cond cond) {
     table.extras.visit_to_remove(
       [&] (const MIterTable::Ent& ent) {
         table.ents[0] = ent;
+        rl_miter_exists = true;
       }
     );
   }

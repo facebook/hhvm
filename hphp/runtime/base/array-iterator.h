@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/req-ptr.h"
+#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/util/tls-pod-bag.h"
 #include "hphp/util/type-scan.h"
@@ -541,9 +542,11 @@ struct MIterTable {
   std::array<Ent, ents_size> ents;
   // Slow path: we expect this `extras' list to rarely be allocated.
   TlsPodBag<Ent,req::Allocator<Ent>> extras;
+  ~MIterTable();
 };
 static_assert(sizeof(MIterTable) == 2*64, "want multiple of cache line size");
-extern THREAD_LOCAL_FLAT(MIterTable, tl_miter_table);
+extern DECLARE_RDS_LOCAL_HOTVALUE(bool, rl_miter_exists);
+extern RDS_LOCAL_NO_CHECK(MIterTable, rl_miter_table);
 
 void free_strong_iterators(ArrayData*);
 void move_strong_iterators(ArrayData* dest, ArrayData* src);

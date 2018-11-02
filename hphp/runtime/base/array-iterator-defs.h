@@ -28,7 +28,10 @@ namespace HPHP {
  * guarded on checking this first, and placed in an unlikely path.
  */
 inline bool strong_iterators_exist() {
-  return tl_miter_table->ents[0].array != nullptr;
+  // Assert rl_miter_exists is set iff a strong iterator exists.
+  assertx((rl_miter_exists && rl_miter_table) == (rds::tl_base &&
+          (rl_miter_table && rl_miter_table->ents[0].array != nullptr)));
+  return rl_miter_exists && rl_miter_table;
 }
 
 template<class Fn> NEVER_INLINE
@@ -48,7 +51,7 @@ template<class Fn>
 void for_each_strong_iterator(Fn fn) {
   static_assert(MIterTable::ents_size == 7, "");
   assertx(strong_iterators_exist());
-  auto& table = *tl_miter_table;
+  auto& table = *rl_miter_table;
   fn(table.ents[0]);
   fn(table.ents[1]);
   fn(table.ents[2]);

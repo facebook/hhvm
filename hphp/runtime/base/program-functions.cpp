@@ -2318,7 +2318,6 @@ void hphp_process_init() {
   BootStats::mark("Process::InitProcessStatics");
 
   HHProf::Init();
-  tl_miter_table.getCheck();
 
   // initialize the tzinfo cache.
   timezone_init();
@@ -2607,6 +2606,7 @@ void hphp_session_init(Treadmill::SessionKind session_kind,
   // must be done in ExecutionContext::requestInit.
   StatCache::requestInit();
 
+  rl_miter_table.getCheck();
   // Allow request event handlers to be created now that a new request has
   // started.
   g_context->acceptRequestEventHandlers(true);

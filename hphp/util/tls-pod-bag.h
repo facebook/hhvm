@@ -33,7 +33,7 @@ namespace HPHP {
  * data.
  *
  * The motivating case for this was the strong iterator association in
- * tl_miter_table, so it's got a fairly specialized API.  It has a
+ * rl_miter_table, so it's got a fairly specialized API.  It has a
  * concept of "unpopulated" slots of the vector, and has methods for
  * finding slots that are currently unpopulated.  This was pulled out
  * in a separate class to it testable, not really to make it reusable.

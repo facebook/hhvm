@@ -128,7 +128,7 @@ let run_parsers
   | Benchmark_batch iters ->
     let filename = Relative_path.S.to_string file in
     let _, duration =
-      try (measure (fun () -> run_ffp ~codegen ~iters file))
+      try (measure (fun () -> run_ffp ~codegen ~iters ~allow_malformed:false file))
       with _ -> begin
         Printf.printf "FAIL, %s\n" filename;
         exit_with ParseError

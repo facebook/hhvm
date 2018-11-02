@@ -89,7 +89,7 @@ let download_and_load_state_exn
   | Ok result ->
     lock_and_load_deptable result.State_loader.deptable_fn ~ignore_hh_version;
     let load_decls = genv.local_config.SLC.load_decls_from_saved_state in
-    let (old_saved, old_errors, loaded_classes) =
+    let (old_saved, old_errors) =
       SaveStateService.load_saved_state result.State_loader.saved_state_fn
         ~load_decls in
 
@@ -109,7 +109,6 @@ let download_and_load_state_exn
         mergebase_rev = result.State_loader.mergebase_rev;
         dirty_master_files;
         dirty_local_files;
-        loaded_classes;
         old_saved;
         old_errors;
         state_distance = Some result.State_loader.state_distance;
@@ -132,7 +131,7 @@ let use_precomputed_state_exn
   let changes = Relative_path.set_of_list changes in
   let prechecked_changes = Relative_path.set_of_list prechecked_changes in
   let load_decls = genv.local_config.SLC.load_decls_from_saved_state in
-  let (old_saved, old_errors, loaded_classes) =
+  let (old_saved, old_errors) =
     SaveStateService.load_saved_state saved_state_fn ~load_decls
   in
   {
@@ -141,7 +140,6 @@ let use_precomputed_state_exn
     mergebase_rev  = None;
     dirty_master_files = prechecked_changes;
     dirty_local_files = changes;
-    loaded_classes;
     old_saved;
     old_errors;
     state_distance = None;
@@ -423,7 +421,6 @@ let post_saved_state_initialization
   let {
     dirty_local_files;
     dirty_master_files;
-    loaded_classes;
     old_saved;
     mergebase_rev;
     old_errors;
@@ -505,30 +502,6 @@ let post_saved_state_initialization
   let t = naming_with_fast old_hack_names t in
   (* Do global naming on all dirty files *)
   let env, t = naming env t in
-
-  (* Parse the files containing any class whose declaration we loaded from the
-     saved state, to populate DECL_HH_FIXMES. *)
-  let loaded_class_filenames =
-    SSet.fold loaded_classes ~init:Relative_path.Set.empty ~f:begin fun cid acc ->
-      match Naming_heap.TypeIdHeap.get cid with
-      | None | Some (_, `Typedef) -> acc
-      | Some (pos, `Class) ->
-        Relative_path.Set.add acc @@ FileInfo.get_pos_filename pos
-    end
-  in
-  let loaded_class_filenames =
-    Relative_path.Set.diff loaded_class_filenames parsing_files in
-  let env, t =
-    if Relative_path.Set.is_empty loaded_class_filenames
-    then env, t
-    else
-      let () = Hh_logger.log "Parsing files containing hot classes..." in
-      let loaded_class_filenames =
-        Relative_path.Set.elements loaded_class_filenames in
-      parsing genv env ~lazy_parse:true ~trace t
-        ~get_next:(MultiWorker.next genv.workers loaded_class_filenames)
-        ~count:(List.length loaded_class_filenames)
-  in
 
   (* Add all files from fast to the files_info object *)
   let fast = FileInfo.simplify_fast env.files_info in

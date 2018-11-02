@@ -31,10 +31,10 @@ let init_disk_state =
    state, so we will redeclare it. The error 4101 suppression comment in the hot
    interface IFoo normally suppresses the compatibility error we would emit due
    to MyFoo's version of foo returning a Thing with more type arguments, but
-   if we never parse ifoo.php, this suppression comment won't be accounted for
-   in the DECL_HH_FIXMES heap. Parsing every file containing a hot class on
-   startup ensures that the DECL_HH_FIXMES heap is populated and this situation
-   cannot arise. *)
+   if we never parse ifoo.php and don't store HH_FIXMEs in the saved state, this
+   suppression comment won't be accounted for in the HH_FIXMES or DECL_HH_FIXMES
+   heaps. Storing HH_FIXMES and DECL_HH_FIXMES in the saved state ensures that
+   this situation cannot arise. *)
 
 let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
   let temp_dir = Path.to_string temp_dir in

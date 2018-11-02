@@ -86,7 +86,7 @@ let load_contents_exn (input_filename: string) : 'a =
   Pervasives.close_in ic;
   contents
 
-let load_class_decls (input_filename: string) : SSet.t =
+let load_class_decls (input_filename: string) : unit =
   let start_t = Unix.gettimeofday () in
   Hh_logger.log "Begin loading class declarations";
   try
@@ -96,19 +96,17 @@ let load_class_decls (input_filename: string) : SSet.t =
     let classes = Decl_export.import_class_decls decls in
     let num_classes = SSet.cardinal classes in
     let msg = Printf.sprintf "Loaded %d class declarations" num_classes in
-    ignore @@ Hh_logger.log_duration msg start_t;
-    classes
+    ignore @@ Hh_logger.log_duration msg start_t
   with exn ->
     let stack = Printexc.get_backtrace () in
     HackEventLogger.load_decls_failure exn stack;
-    Hh_logger.exc exn ~stack ~prefix:"Failed to load class declarations: ";
-    SSet.empty
+    Hh_logger.exc exn ~stack ~prefix:"Failed to load class declarations: "
 
 (* Loads the file info and the errors, if any. *)
 let load_saved_state
     ~(load_decls: bool)
     (saved_state_filename: string)
-  : FileInfo.saved_state_info * saved_state_errors * SSet.t =
+  : FileInfo.saved_state_info * saved_state_errors =
   let chan = In_channel.create ~binary:true saved_state_filename in
   let (old_saved: FileInfo.saved_state_info) =
     Marshal.from_channel chan in
@@ -118,12 +116,9 @@ let load_saved_state
   let (old_errors: saved_state_errors) = if not (Sys.file_exists errors_filename) then [] else
     Marshal.from_channel (In_channel.create ~binary:true errors_filename) in
 
-  let loaded_classes =
-    if load_decls
-    then load_class_decls (get_decls_filename saved_state_filename)
-    else SSet.empty in
+  if load_decls then load_class_decls (get_decls_filename saved_state_filename);
 
-  (old_saved, old_errors, loaded_classes)
+  (old_saved, old_errors)
 
 (* Writes some OCaml object to a file with the given filename. *)
 let dump_contents

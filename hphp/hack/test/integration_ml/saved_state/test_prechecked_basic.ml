@@ -80,7 +80,6 @@ let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
   | ServerEnv.Initial_typechecking _ -> ()
   | _ -> assert false);
 
-  ServerMain.force_break_recheck_loop_for_test true;
   let env, _ = Test.full_check env in
 
   (match env.ServerEnv.prechecked_files with

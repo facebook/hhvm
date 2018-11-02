@@ -15,16 +15,23 @@ val setup_server: ?custom_config:ServerConfig.t ->
 
 val setup_disk: ServerEnv.env -> disk_changes_type -> ServerEnv.env
 
-val save_state: disk_changes_type -> string -> unit
+val save_state:
+  ?load_hhi_files:bool ->
+  ?store_decls_in_saved_state:bool ->
+  disk_changes_type ->
+  string ->
+  unit
 
 val save_state_with_errors: disk_changes_type -> string -> string -> unit
 
 val load_state:
   ?master_changes:string list ->
   ?local_changes:string list ->
+  ?load_hhi_files:bool ->
   ?use_precheked_files:bool ->
   ?disable_conservative_redecl:bool ->
   ?predeclare_ide_deps:bool ->
+  ?load_decls_from_saved_state:bool ->
   disk_state:disk_changes_type ->
   string (* saved_state_dir *) ->
   ServerEnv.env

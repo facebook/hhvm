@@ -67,7 +67,6 @@ let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
   Test.assert_needs_no_recheck env "B.php";
   Test.assert_needs_no_recheck env "test.php";
 
-  ServerMain.force_break_recheck_loop_for_test true;
   (* Change to B comes before we have a chance to recheck anything *)
   let env, _loop_output  = Test.(run_loop_once env {default_loop_input with
     disk_changes = [

@@ -65,8 +65,10 @@ let genv = ref { ServerEnvBuild.default_genv with
 
 let did_init = ref false
 
+let real_hhi_files () = Hhi.get_raw_hhi_contents () |> Array.to_list
+
 (* Init part common to fresh and saved state init *)
-let test_init_common () =
+let test_init_common ?(hhi_files = []) () =
   if !did_init then begin
     failwith
       ("Initializing the server twice in same process. There is no guarantee of global state " ^
@@ -83,6 +85,12 @@ let test_init_common () =
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make tmp);
 
   let _ = SharedMem.init GlobalConfig.default_sharedmem_config in
+
+  ServerMain.force_break_recheck_loop_for_test true;
+
+  List.iter hhi_files ~f:(fun (fn, contents) ->
+    TestDisk.set (Filename.concat hhi fn) contents
+  );
   ()
 
 (* Hhi files are loaded during server setup. If given a list of string + contents, we add them
@@ -91,10 +99,7 @@ This isn't exactly the same as how initialization does it, but the purpose is no
 files, but to test incremental mode behavior with Hhi files present.
 *)
 let setup_server ?custom_config ?(hhi_files = []) ()  =
-  test_init_common ();
-  List.iter hhi_files ~f:(fun (fn, contents) ->
-    TestDisk.set (Filename.concat hhi fn) contents
-  );
+  test_init_common () ~hhi_files;
 
   let result = match custom_config with
   | Some config -> ServerEnvBuild.make_env config
@@ -408,11 +413,21 @@ let in_daemon f =
   | _, Unix.WEXITED 0 -> ()
   | _ -> assert false
 
-let save_state disk_changes temp_dir =
+let save_state
+    ?(load_hhi_files = false)
+    ?(store_decls_in_saved_state = ServerLocalConfig.(default.store_decls_in_saved_state))
+    disk_changes
+    temp_dir =
   in_daemon @@ begin fun () ->
-    let env = setup_server () in
+    let hhi_files = if load_hhi_files then real_hhi_files () else [] in
+    let env = setup_server () ~hhi_files in
     let env = setup_disk env disk_changes in
     assert_no_errors env;
+    genv := { !genv with
+      ServerEnv.local_config = { !genv.ServerEnv.local_config with
+        ServerLocalConfig.store_decls_in_saved_state;
+      }
+    };
     ServerInit.save_state !genv env (temp_dir ^ "/" ^ saved_state_filename)
   end
 
@@ -433,9 +448,11 @@ let save_state_with_errors disk_changes temp_dir expected_error =
 let load_state
     ?(master_changes = [])
     ?(local_changes = [])
+    ?(load_hhi_files = false)
     ?(use_precheked_files = ServerLocalConfig.(default.prechecked_files))
     ?(disable_conservative_redecl = ServerLocalConfig.(default.disable_conservative_redecl))
     ?(predeclare_ide_deps = ServerLocalConfig.(default.predeclare_ide_deps))
+    ?(load_decls_from_saved_state = ServerLocalConfig.(default.load_decls_from_saved_state))
     ~disk_state
     saved_state_dir =
   (* In production, saved state is only used in conjunction with lazy init
@@ -449,9 +466,11 @@ let load_state
       predeclare_ide = true;
       disable_conservative_redecl;
       predeclare_ide_deps;
+      load_decls_from_saved_state;
     }
   };
-  test_init_common ();
+  let hhi_files = if load_hhi_files then real_hhi_files () else [] in
+  test_init_common () ~hhi_files;
 
   let disk_changes = List.map disk_state (fun (x, y) -> root ^ x, y) in
   List.iter disk_changes (fun (path, contents) -> TestDisk.set path contents);
@@ -647,11 +666,17 @@ let assert_ide_refactor loop_output expected =
   assertEqual expected results_as_string
 
 let assert_needs_recheck env x =
-  assert Relative_path.(
+  if not Relative_path.(
     Set.mem env.ServerEnv.needs_recheck (create_detect_prefix (root ^ x))
   )
+  then
+    let () = Printf.eprintf "Expected %s to need recheck\n" x in
+    assert false
 
 let assert_needs_no_recheck env x =
-  assert (not Relative_path.(
+  if Relative_path.(
     Set.mem env.ServerEnv.needs_recheck (create_detect_prefix (root ^ x))
-  ))
+  )
+  then
+    let () = Printf.eprintf "Expected %s not to need recheck\n" x in
+    assert false

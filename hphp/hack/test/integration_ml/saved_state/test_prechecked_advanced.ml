@@ -60,7 +60,6 @@ let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
   Test.assert_needs_recheck env "B.php";
   Test.assert_needs_no_recheck env "test.php";
 
-  ServerMain.force_break_recheck_loop_for_test true;
   let env, _ = Test.full_check env in
   Test.assert_no_errors env;
 

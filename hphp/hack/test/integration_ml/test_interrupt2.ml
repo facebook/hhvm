@@ -35,6 +35,8 @@ It is incompatible with a string
 
 let () =
   let env = Test.setup_server () in
+  ServerMain.force_break_recheck_loop_for_test false;
+
   (* There are initially no errors *)
   let env = Test.setup_disk env [
     foo_name , foo_contents "int";

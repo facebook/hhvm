@@ -202,7 +202,7 @@ let update_save_state
     (output_filename: string) : int =
   let t = Unix.gettimeofday () in
   let db_name = output_filename ^ ".sql" in
-  if not (Disk.file_exists db_name) then
+  if not (RealDisk.file_exists db_name) then
     failwith "Given existing save state SQL file missing";
   dump_saved_state ~tcopt ~save_decls output_filename files_info errors;
   let () = if file_info_on_disk then begin
@@ -249,9 +249,9 @@ let save_state
      * are in the SQL table. We need to copy that file and update it with
      * the in-memory edges. *)
     let t = Unix.gettimeofday () in
-    let content = Sys_utils.cat old_table_filename in
-    let () = Sys_utils.mkdir_p (Filename.dirname output_filename) in
-    let () = Sys_utils.write_file ~file:db_name content in
+    let content = RealDisk.cat old_table_filename in
+    let () = RealDisk.mkdir_p (Filename.dirname output_filename) in
+    let () = RealDisk.write_file ~file:db_name ~contents:content in
     let _ : float = Hh_logger.log_duration "Made disk copy of loaded saved state. Took" t in
     update_save_state ~file_info_on_disk ~tcopt ~save_decls
       files_info errors output_filename

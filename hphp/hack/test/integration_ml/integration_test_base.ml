@@ -451,6 +451,18 @@ let save_state
     ServerInit.save_state !genv env (temp_dir ^ "/" ^ saved_state_filename)
   end
 
+let save_state_incremental
+    env
+    ?(store_decls_in_saved_state = ServerLocalConfig.(default.store_decls_in_saved_state))
+    temp_dir =
+  assert_no_errors env;
+  genv := { !genv with
+    ServerEnv.local_config = { !genv.ServerEnv.local_config with
+      ServerLocalConfig.store_decls_in_saved_state;
+    }
+  };
+  ServerInit.save_state !genv env (temp_dir ^ "/" ^ saved_state_filename)
+
 let save_state_with_errors disk_changes temp_dir expected_error =
   in_daemon @@ begin fun () ->
     let env = setup_server () in

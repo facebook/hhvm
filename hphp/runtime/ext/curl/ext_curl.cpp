@@ -540,7 +540,7 @@ Variant HHVM_FUNCTION(curl_multi_exec, const Resource& mh,
     result = curl_multi_perform(curlm->get(), &running);
   } catch (...) {
     curlm->setInExec(false);
-    log_native_stack("unexpcted exception from curl_multi_perform");
+    log_native_stack("unexpected exception from curl_multi_perform");
     throw;
   }
   curlm->setInExec(false);

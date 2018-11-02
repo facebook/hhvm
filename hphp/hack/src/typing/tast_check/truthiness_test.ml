@@ -23,6 +23,10 @@ let rec truthiness_test env ((p, ty), e) =
   | Expr_list el -> truthiness_test env (List.last_exn el)
   | _ ->
     let open Tast_utils in
+    List.iter (find_sketchy_types env ty) begin function
+      | Traversable_interface (env, ty) ->
+        Errors.sketchy_truthiness_test p (Env.print_ty env ty) `Traversable
+    end;
     match truthiness env ty with
     | Always_truthy -> Errors.invalid_truthiness_test p (Env.print_ty env ty)
     | Possibly_falsy | Always_falsy | Unknown -> ()

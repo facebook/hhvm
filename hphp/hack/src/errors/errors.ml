@@ -3452,6 +3452,22 @@ let invalid_truthiness_test pos ty =
     Printf.sprintf
       "Invalid condition: a value of type %s will always be truthy" ty
 
+let sketchy_truthiness_test pos ty truthiness =
+  add (Typing.err_code Typing.SketchyTruthinessTest) pos @@
+    match truthiness with
+    | `Traversable ->
+      (* We have a truthiness test on a value with an interface type which is a
+         subtype of Traversable, but not a subtype of Container.
+         Since the runtime value may be a falsy-when-empty Container or an
+         always-truthy Iterable/Generator, we forbid the test. *)
+      Printf.sprintf
+        "Sketchy condition: a value of type %s may be truthy even when empty.\n\
+        Hack collections and arrays are falsy when empty, but user-defined \
+        Traversables will always be truthy, even when empty.\n\
+        If you would like to only allow containers which are falsy \
+        when empty, use the Container or KeyedContainer interfaces."
+        ty
+
 let forward_compatibility_not_current pos value =
   let current = ForwardCompatibilityLevel.current in
   add (Init.err_code Init.ForwardCompatibilityNotCurrent)

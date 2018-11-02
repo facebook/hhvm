@@ -129,3 +129,37 @@ let rec truthiness env ty =
     if TypecheckerOptions.new_inference (Env.get_tcopt env)
     then Unknown
     else failwith "expand_type failed"
+
+(** When a type represented by one of these variants is used in a truthiness
+    test, it indicates a potential logic error, since the truthiness of some
+    values in the type may be surprising. *)
+type sketchy_type_kind =
+  | Traversable_interface of Env.t * Tast.ty
+  (** Interface types which implement Traversable but not Container may be
+      always truthy, even when empty. *)
+
+let rec find_sketchy_types env acc ty =
+  let env, ty = Env.fold_unresolved env ty in
+  let env, ty = Env.expand_type env ty in
+  match snd ty with
+  | Toption ty -> find_sketchy_types env acc ty
+
+  | Tclass ((_, cid), _) ->
+    if tclass_is_falsy_when_empty env ty || not (is_traversable env ty)
+    then acc
+    else begin
+      match Typing_lazy_heap.get_class (Env.get_tcopt env) cid with
+      | Some {tc_kind = Cinterface; _} -> Traversable_interface (env, ty) :: acc
+      | Some {tc_kind = Cnormal | Cabstract | Ctrait | Cenum; _} | None -> acc
+    end
+
+  | Tunresolved tyl ->
+    List.fold tyl ~init:acc ~f:(find_sketchy_types env)
+  | Tabstract _ ->
+    let env, tyl = Env.get_concrete_supertypes env ty in
+    List.fold tyl ~init:acc ~f:(find_sketchy_types env)
+
+  | Tany | Tnonnull | Tdynamic | Terr | Tobject | Tprim _ | Tfun _ | Ttuple _
+  | Tshape _ | Tvar _ | Tanon _ | Tarraykind _ -> acc
+
+let find_sketchy_types env ty = find_sketchy_types env [] ty

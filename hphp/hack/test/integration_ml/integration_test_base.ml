@@ -203,13 +203,16 @@ let assertEqual expected got =
   if expected <> got then fail
     (Printf.sprintf "Expected:\n%s\nGot:\n%s\n" expected got)
 
-let setup_disk env disk_changes =
+let change_files env disk_changes =
   let env, loop_output = run_loop_once env { default_loop_input with
     disk_changes
   } in
   if not loop_output.did_read_disk_changes then
     fail "Expected the server to process disk updates";
-  env
+  env, loop_output
+
+let setup_disk env disk_changes =
+  fst @@ change_files env disk_changes
 
 let connect_persistent_client env =
   let env, _ = run_loop_once env { default_loop_input with
@@ -348,6 +351,23 @@ let full_check env =
   run_loop_once env { default_loop_input with
     disk_changes = ["__dummy_file_to_trigger_full_check.php", ""]
   }
+
+let start_initial_full_check env =
+  (match env.ServerEnv.prechecked_files with
+  | ServerEnv.Initial_typechecking _ -> ()
+  | _ -> assert false);
+
+  let env, loop_output = full_check env in
+
+  (match env.ServerEnv.prechecked_files with
+  | ServerEnv.Prechecked_files_ready _ -> ()
+  | _ -> assert false);
+
+  let {total_rechecked_count; _} = loop_output in
+  (* full_check adds a dummy file to trigger a recheck, so we subtract one here
+     and return the number of rechecked non-dummy files. *)
+  assert (total_rechecked_count >= 1);
+  env, total_rechecked_count - 1
 
 let assert_no_diagnostics loop_output =
   match loop_output.push_message with

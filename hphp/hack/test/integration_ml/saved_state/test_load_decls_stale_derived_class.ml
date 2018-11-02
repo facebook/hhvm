@@ -101,36 +101,12 @@ let load_state
     ~disable_conservative_redecl:true
     ~load_decls_from_saved_state:true
 
-let change_files env disk_changes =
-  let env, loop_output =
-    Test.(run_loop_once env {default_loop_input with disk_changes}) in
-  if not loop_output.did_read_disk_changes
-  then Test.fail "Expected the server to process disk updates";
-  env, loop_output
-
-let start_full_check_and_break_recheck_loop env =
-  (match env.ServerEnv.prechecked_files with
-  | ServerEnv.Initial_typechecking _ -> ()
-  | _ -> assert false);
-
-  let env, loop_output = Test.full_check env in
-
-  (match env.ServerEnv.prechecked_files with
-  | ServerEnv.Prechecked_files_ready _ -> ()
-  | _ -> assert false);
-
-  let {total_rechecked_count; _} = loop_output in
-  (* Integration_test_base.full_check adds a dummy file to trigger a recheck, so
-     we subtract one here and return the number of rechecked non-dummy files. *)
-  assert (total_rechecked_count >= 1);
-  env, total_rechecked_count - 1
-
 
 let test_change_after_init saved_state_dir () =
   assert (!hot_classes = ["Base"]);
   let env = load_state saved_state_dir in
   Test.assert_no_errors env;
-  let env, loop_output = change_files env make_foo_private in
+  let env, loop_output = Test.change_files env make_foo_private in
   Test.assert_env_errors env @@ base_foo_user_error ^ child_foo_user_error;
   (* Because we don't have a loaded declaration for Child, we must check all its
      dependents instead of only the dependents of Child::foo *)
@@ -142,7 +118,7 @@ let test_change_after_init_with_hot_child saved_state_dir () =
   assert (!hot_classes = ["Base"; "Child"]);
   let env = load_state saved_state_dir in
   Test.assert_no_errors env;
-  let env, loop_output = change_files env make_foo_private in
+  let env, loop_output = Test.change_files env make_foo_private in
   Test.assert_env_errors env @@ base_foo_user_error ^ child_foo_user_error;
   (* Loading both Base and Child means we don't need to recheck base_bar_user or
      child_bar_user *)
@@ -167,7 +143,7 @@ let test_local_change saved_state_dir () =
      loaded the old Base declaration *)
   Test.assert_needs_no_recheck env "base_bar_user.php";
 
-  let env, total_rechecked_count = start_full_check_and_break_recheck_loop env in
+  let env, total_rechecked_count = Test.start_initial_full_check env in
   assert_equals 5 total_rechecked_count
     "All files except base_bar_user should be rechecked";
 
@@ -208,7 +184,7 @@ let test_local_change_with_hot_child saved_state_dir () =
      eliminate the need for two-phase redecl in both cases). *)
   Test.assert_needs_recheck env "child_bar_user.php";
 
-  let env, total_rechecked_count = start_full_check_and_break_recheck_loop env in
+  let env, total_rechecked_count = Test.start_initial_full_check env in
   assert_equals 5 total_rechecked_count
     "All files except base_bar_user should be rechecked";
 
@@ -240,7 +216,7 @@ let test_master_change saved_state_dir () =
   Test.assert_needs_no_recheck env "child_foo_user.php";
   Test.assert_needs_no_recheck env "child_bar_user.php";
 
-  let env, total_rechecked_count = start_full_check_and_break_recheck_loop env in
+  let env, total_rechecked_count = Test.start_initial_full_check env in
   assert_equals 1 total_rechecked_count "Only base.php should be rechecked";
 
   Test.assert_needs_no_recheck env "base.php";
@@ -260,7 +236,7 @@ let test_master_change saved_state_dir () =
      If we failed to invalidate Base's declaration, the symptom of Child
      inheriting its stale declaration would be that we would not see the
      visibility error in child_foo_user. *)
-  let env, loop_output = change_files env child_foo_user_plus_one in
+  let env, loop_output = Test.change_files env child_foo_user_plus_one in
   assert_equals 1 loop_output.total_rechecked_count
     "Only child_foo_user.php should be rechecked";
   Test.assert_env_errors env child_foo_user_error;
@@ -268,7 +244,7 @@ let test_master_change saved_state_dir () =
   (* Make foo public again so that we will redeclare Base. If we have an
      oldified declaration of Base still sitting around, this will cause an
      assertion failure when we try to oldify the current declaration. *)
-  let env, loop_output = change_files env ["base.php", base_contents "public"] in
+  let env, loop_output = Test.change_files env ["base.php", base_contents "public"] in
   assert_equals 6 loop_output.total_rechecked_count @@
     "Prechecked files intersection with master deps causes us to recheck all " ^
     "files rather than just the dependents of Base::foo and Child::foo";
@@ -288,7 +264,7 @@ let test_master_change_with_hot_child saved_state_dir () =
   Test.assert_needs_no_recheck env "child_foo_user.php";
   Test.assert_needs_no_recheck env "child_bar_user.php";
 
-  let env, total_rechecked_count = start_full_check_and_break_recheck_loop env in
+  let env, total_rechecked_count = Test.start_initial_full_check env in
   assert_equals 1 total_rechecked_count "Only base.php should be rechecked";
 
   Test.assert_needs_no_recheck env "base.php";
@@ -310,7 +286,7 @@ let test_master_change_with_hot_child saved_state_dir () =
      declaration would be that we would not see the visibility error in
      child_foo_user. We only recheck one file here because Child is redeclared
      lazily as we recheck child_foo_user. *)
-  let env, loop_output = change_files env child_foo_user_plus_one in
+  let env, loop_output = Test.change_files env child_foo_user_plus_one in
   assert_equals 1 loop_output.total_rechecked_count
     "Only child_foo_user.php should be rechecked";
   Test.assert_env_errors env child_foo_user_error

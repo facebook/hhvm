@@ -15,6 +15,11 @@ val setup_server: ?custom_config:ServerConfig.t ->
 
 val setup_disk: ServerEnv.env -> disk_changes_type -> ServerEnv.env
 
+val change_files:
+  ServerEnv.env ->
+  disk_changes_type ->
+  ServerEnv.env * ('a, unit) loop_outputs
+
 val save_state:
   ?load_hhi_files:bool ->
   ?store_decls_in_saved_state:bool ->
@@ -93,6 +98,8 @@ val status :
     (ServerCommandTypes.Server_status.t, 'a) loop_outputs
 
 val full_check : ServerEnv.env -> ServerEnv.env * ('a, unit) loop_outputs
+
+val start_initial_full_check : ServerEnv.env -> ServerEnv.env * int
 
 val prepend_root: string -> string
 

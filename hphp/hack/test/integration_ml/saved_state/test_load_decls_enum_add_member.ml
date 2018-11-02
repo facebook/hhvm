@@ -56,34 +56,10 @@ let load_state
     ~use_precheked_files:true
     ~load_decls_from_saved_state:load_decls
 
-let change_files env disk_changes =
-  let env, loop_output =
-    Test.(run_loop_once env {default_loop_input with disk_changes}) in
-  if not loop_output.did_read_disk_changes
-  then Test.fail "Expected the server to process disk updates";
-  env, loop_output
-
-let start_full_check_and_break_recheck_loop env =
-  (match env.ServerEnv.prechecked_files with
-  | ServerEnv.Initial_typechecking _ -> ()
-  | _ -> assert false);
-
-  let env, loop_output = Test.full_check env in
-
-  (match env.ServerEnv.prechecked_files with
-  | ServerEnv.Prechecked_files_ready _ -> ()
-  | _ -> assert false);
-
-  let {total_rechecked_count; _} = loop_output in
-  (* Integration_test_base.full_check adds a dummy file to trigger a recheck, so
-     we subtract one here and return the number of rechecked non-dummy files. *)
-  assert (total_rechecked_count >= 1);
-  env, total_rechecked_count - 1
-
 
 let test_change_after_init_no_loaded_decls saved_state_dir () =
   let env = load_state saved_state_dir ~load_decls:false in
-  let _, loop_output = change_files env added_member in
+  let _, loop_output = Test.change_files env added_member in
   assert_equals 321 loop_output.total_rechecked_count @@
     "When we don't store an enum declaration in the saved state, "^
     "adding a member causes us to recheck all of its users"
@@ -91,7 +67,7 @@ let test_change_after_init_no_loaded_decls saved_state_dir () =
 
 let test_change_after_init saved_state_dir () =
   let env = load_state saved_state_dir in
-  let _, loop_output = change_files env added_member in
+  let _, loop_output = Test.change_files env added_member in
   assert_equals 21 loop_output.total_rechecked_count @@
     "Adding a new member to an enum after init should cause us " ^
     "to recheck only its AllMembers dependents"
@@ -106,7 +82,7 @@ let test_master_change saved_state_dir () =
   Test.assert_needs_no_recheck env @@ enum_user_name 1;
   Test.assert_needs_no_recheck env @@ enum_switch_name 1;
 
-  let env, total_rechecked_count = start_full_check_and_break_recheck_loop env in
+  let env, total_rechecked_count = Test.start_initial_full_check env in
   assert_equals 1 total_rechecked_count @@
     "Adding a new member to an enum in a master change should not cause us " ^
     "to recheck any of its dependents";
@@ -132,7 +108,7 @@ let test_local_change saved_state_dir () =
   (* Other dependents of local change *)
   Test.assert_needs_no_recheck env @@ enum_user_name 1;
 
-  let env, total_rechecked_count = start_full_check_and_break_recheck_loop env in
+  let env, total_rechecked_count = Test.start_initial_full_check env in
   assert_equals 21 total_rechecked_count @@
     "Adding a new member to an enum in a local change should cause us " ^
     "to recheck only its AllMembers dependents";
@@ -161,7 +137,7 @@ let test_master_change_with_locally_changed_dependent saved_state_dir () =
   Test.assert_needs_no_recheck env @@ enum_user_name 1;
   Test.assert_needs_no_recheck env @@ enum_switch_name 1;
 
-  let env, total_rechecked_count = start_full_check_and_break_recheck_loop env in
+  let env, total_rechecked_count = Test.start_initial_full_check env in
   assert_equals 2 total_rechecked_count @@
     "Adding a new member to an enum in a master change should not cause us " ^
     "to recheck any of its dependents which are unchanged locally";

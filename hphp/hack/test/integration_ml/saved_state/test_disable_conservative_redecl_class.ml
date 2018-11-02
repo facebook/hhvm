@@ -52,13 +52,6 @@ let init_disk_state = [
   qux_name, qux_contents;
 ]
 
-let change_files env disk_changes =
-  let env, loop_output =
-    Test.(run_loop_once env {default_loop_input with disk_changes}) in
-  if not loop_output.did_read_disk_changes
-  then Test.fail "Expected the server to process disk updates";
-  env, loop_output
-
 let test_cases = [
   false, 3; (* Without disable flag, recheck Foo, Bar, Qux *)
   true, 2; (* With conservative redecl disabled, recheck only Foo and Bar *)
@@ -70,7 +63,7 @@ let run_test saved_state_dir test_case () =
     ~disk_state:init_disk_state
     ~disable_conservative_redecl
   in
-  let env, loop_output = change_files env [foo_name, foo_contents "int"] in
+  let env, loop_output = Test.change_files env [foo_name, foo_contents "int"] in
   Test.assert_no_errors env;
 
   assert_equals 1 loop_output.rechecked_count @@

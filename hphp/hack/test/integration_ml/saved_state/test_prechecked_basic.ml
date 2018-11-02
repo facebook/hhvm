@@ -76,15 +76,7 @@ let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
   (* Dependency of local change *)
   Test.assert_needs_recheck env "d.php";
 
-  (match env.ServerEnv.prechecked_files with
-  | ServerEnv.Initial_typechecking _ -> ()
-  | _ -> assert false);
-
-  let env, _ = Test.full_check env in
-
-  (match env.ServerEnv.prechecked_files with
-  | ServerEnv.Prechecked_files_ready _ -> ()
-  | _ -> assert false);
+  let env, _ = Test.start_initial_full_check env in
 
   Test.assert_needs_no_recheck env "a.php";
   Test.assert_needs_no_recheck env "b.php"; (* important part: no "b" *)

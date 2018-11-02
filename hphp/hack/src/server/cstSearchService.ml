@@ -702,19 +702,18 @@ let go
   let next_files: (Relative_path.t * FileInfo.t * pattern) list Hh_bucket.next =
     let with_file_data path =
       let path = Relative_path.create_detect_prefix path in
-      let fileinfo =
-        match Relative_path.Map.get env.ServerEnv.files_info path with
-        | Some fileinfo -> fileinfo
-        | None -> failwith (Printf.sprintf
-            "Missing fileinfo for path %s" (Relative_path.to_absolute path))
-      in
-      (path, fileinfo, pattern)
+      match Relative_path.Map.get env.ServerEnv.files_info path with
+      | Some fileinfo -> Some (path, fileinfo, pattern)
+      | None ->
+        (* We may not have the file information for a file such as one that we
+        ignore in `.hhconfig`. *)
+        None
     in
     match files_to_search with
     | Some files_to_search ->
       let files_to_search =
         Sys_utils.parse_path_list files_to_search
-        |> List.map ~f:with_file_data
+        |> List.filter_map ~f:with_file_data
       in
       MultiWorker.next
         genv.ServerEnv.workers
@@ -723,7 +722,7 @@ let go
     | None ->
       let indexer = genv.ServerEnv.indexer FindUtils.is_php in
       begin fun () ->
-        let files = indexer () |> List.map ~f:with_file_data in
+        let files = indexer () |> List.filter_map ~f:with_file_data in
         progress_fn ~total:0 ~start:0 ~length:(List.length files);
         Hh_bucket.of_list files
       end

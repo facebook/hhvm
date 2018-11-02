@@ -349,19 +349,13 @@ and simplify_subtype
 
   | Terr, _ | _, Terr -> valid ()
 
-  | (Tany | Tmixed | Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ |
-     Ttuple _ | Tshape _ | Tabstract _ | Tanon _ | Tunresolved _ |
-     Tobject | Tclass _ | Tarraykind _),
-    Tmixed ->
-    valid ()
-
   | (Tprim Nast.(Tint | Tbool | Tfloat | Tstring | Tresource | Tnum |
                  Tarraykey | Tnoreturn) |
      Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tabstract (AKenum _, _) |
      Tanon _ | Tobject | Tclass _ | Tarraykind _),
     Tnonnull ->
     valid ()
-  | (Tmixed | Tdynamic | Toption _ | Tprim Nast.Tvoid |
+  | (Tdynamic | Toption _ | Tprim Nast.Tvoid |
      Tabstract (AKdependent _, None)),
     Tnonnull ->
     invalid ()
@@ -372,7 +366,7 @@ and simplify_subtype
 
   | Tdynamic, Tdynamic ->
     valid ()
-  | (Tmixed | Tnonnull | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tshape _ |
+  | (Tnonnull | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tshape _ |
      Tabstract (AKenum _, _) | Tanon _ | Tobject | Tclass _ | Tarraykind _),
     Tdynamic ->
     invalid ()
@@ -385,11 +379,7 @@ and simplify_subtype
   | _, Toption (_, Tnonnull) -> valid ()
   (* void is the type of null and is a subtype of any option type. *)
   | Tprim Nast.Tvoid, Toption _ -> valid ()
-  (* If the nonnull type is not enabled, mixed <: ?t is equivalent
-   * to mixed <: t.  Otherwise, we should not encounter mixed
-   * because by this time it should have been desugared into ?nonnull.
-   *)
-  | (Tmixed | Tdynamic), Toption ty_super ->
+  | Tdynamic, Toption ty_super ->
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super env
   (* ?ty_sub' <: ?ty_super' iff ty_sub' <: ?ty_super'. Reasoning:
    * If ?ty_sub' <: ?ty_super', then from ty_sub' <: ?ty_super' (widening) and transitivity
@@ -441,7 +431,7 @@ and simplify_subtype
     if TypecheckerOptions.disallow_array_as_tuple (Env.get_options env)
     then invalid ()
     else valid ()
-  | (Tmixed | Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _ |
+  | (Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _ |
      Tshape _ | Tabstract (AKenum _, _) | Tanon _ | Tobject | Tclass _),
     Tarraykind _ ->
     invalid ()
@@ -817,11 +807,6 @@ and simplify_subtype
                 default ()
       end
 
-  (* mixed is not a subtype of any concrete type except mixed *)
-  | Tmixed,
-    (Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tclass _ | Tobject | Tanon _ | Tabstract ((AKnewtype _ | AKenum _), _)) ->
-    invalid ()
-
   | Tany, _ -> default ()
   | _, Tany -> default ()
 
@@ -958,8 +943,6 @@ and simplify_subtype
 
   | Tabstract (AKdependent _, _),
     Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), _) -> default ()
-
-  | Tmixed, Tabstract (AKdependent _, _) -> invalid ()
 
   | Tdynamic,
     (Tobject | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tabstract ((AKnewtype _ | AKenum _), _) | Tclass _) -> invalid ()
@@ -1661,7 +1644,7 @@ and sub_type_inner_helper env ~this_ty
              ~when_: begin fun () ->
                match snd ty_sub with
                | Tclass ((_, y), _) -> y = x
-               | Tany | Terr | Tmixed | Tnonnull | Tarraykind _ | Tprim _
+               | Tany | Terr | Tnonnull | Tarraykind _ | Tprim _
                | Toption _ | Tvar _ | Tabstract (_, _) | Ttuple _
                | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
                | Tshape _ | Tdynamic -> false
@@ -1724,11 +1707,7 @@ and sub_type_inner_helper env ~this_ty
           else fail ()
     end
 
-  (* If the nonnull type is not enabled, mixed <: ?t is equivalent
-   * to mixed <: t.  Otherwise, we should not encounter mixed
-   * because by this time it should have been desugared into ?nonnull.
-   *)
-  | (_, (Tmixed | Tdynamic)), (_, Toption ty_super) ->
+  | (_, Tdynamic), (_, Toption ty_super) ->
     sub_type_inner env ~this_ty ty_sub ty_super
 
   | (_, Tabstract (AKdependent _, Some ty)), (_, Toption arg_ty_super) ->
@@ -1890,9 +1869,9 @@ let rec sub_string
   | _, (Tany | Terr | Tdynamic) ->
     env (* Tany, Terr and Tdynamic are considered Stringish by default *)
   | _, Tobject -> env
-  | _, (Tmixed | Tnonnull) when allow_mixed ->
+  | _, Tnonnull when allow_mixed ->
     env
-  | _, (Tmixed | Tnonnull | Tarraykind _ | Tvar _
+  | _, (Tnonnull | Tarraykind _ | Tvar _
     | Ttuple _ | Tanon (_, _) | Tfun _ | Tshape _) ->
   fail ()
 

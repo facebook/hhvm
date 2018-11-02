@@ -22,7 +22,6 @@ let rec find_sketchy_type env ty =
   let env, ty = Env.fold_unresolved env ty in
   let env, ety = Env.expand_type env ty in
   match snd ety with
-  | Tmixed
   | Tnonnull -> Some false
 
   | Tabstract (AKenum _, _)

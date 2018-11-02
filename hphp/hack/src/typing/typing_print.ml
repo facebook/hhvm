@@ -852,8 +852,6 @@ let to_locl_ty
 
     | "any" ->
       ty Tany
-    | "mixed" ->
-      ty Tmixed
     | "nonnull" ->
       ty Tnonnull
     | "dynamic" ->

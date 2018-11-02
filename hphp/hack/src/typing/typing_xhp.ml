@@ -66,7 +66,7 @@ let rec walk_and_gather_xhp_ ~env ~ureason ~pos cty =
       | Some class_ when class_.tc_is_xhp -> (env, [cty, tyl, class_])
       | _ -> (raise_xhp_required pos ureason cty; env, [])
   end
-  | (Tmixed | Tnonnull | Tarraykind _ | Toption _
+  | (Tnonnull | Tarraykind _ | Toption _
        | Tprim _ | Tvar _ | Tfun _ | Ttuple _ | Tanon (_, _) | Tobject
        | Tshape _) -> (raise_xhp_required pos ureason cty; env, [])
 

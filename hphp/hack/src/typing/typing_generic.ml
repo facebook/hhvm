@@ -35,7 +35,8 @@ end = struct
     | Tgeneric x -> raise (Found (r, x))
     | Tanon _ -> ()
     | Tthis -> ()
-    | Tdynamic | Tany | Terr | Tmixed | Tnonnull | Tprim _ -> ()
+    | Tmixed -> ()
+    | Tdynamic | Tany | Terr | Tnonnull | Tprim _ -> ()
     | Tarraykind akind ->
       begin match akind with
         | AKany -> ()

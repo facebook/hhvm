@@ -69,12 +69,6 @@ let rec unify ?(opts=TUtils.default_unify_opt) env ty1 ty2 =
       let r = unify_reason r1 r2 in
       let env, ty = unify env ty1 ty2 in
       env, (r, Toption ty)
-  (* Mixed is nullable and we want it to unify with both ?T and T at
-   * the same time. If we try to unify mixed with an option,
-   * we peel of the ? and unify mixed with the underlying type. *)
-  | (r2, Tmixed), (_, Toption ty1)
-  | (_, Toption ty1), (r2, Tmixed) ->
-    unify ~opts env ty1 (r2, Tmixed)
   | (r1, ty1), (r2, ty2) ->
       let r = unify_reason r1 r2 in
       let env, ty = unify_ ~opts env r1 ty1 r2 ty2 in
@@ -259,7 +253,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
              ~when_: begin fun () ->
                match ty2 with
                | Tclass ((_, y), _) -> y = x
-               | Tany | Terr | Tmixed | Tnonnull | Tarraykind _ | Tprim _
+               | Tany | Terr | Tnonnull | Tarraykind _ | Tprim _
                | Toption _ | Tvar _ | Tabstract (_, _) | Ttuple _
                | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
                | Tshape _ | Tdynamic -> false
@@ -294,7 +288,6 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
       else
         let env, tyl = List.map2_env env tyl1 tyl2 unify in
         env, Ttuple tyl
-  | Tmixed, Tmixed -> env, Tmixed
   | Tnonnull, Tnonnull -> env, Tnonnull
   | Tanon (_, id1), Tanon (_, id2) when id1 = id2 -> env, ty1
   | Tanon _, Tanon _ ->
@@ -419,7 +412,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
     when generic_param_matches ~opts env x (r1,ty1) ->
     env, ty1
 
-  | (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
+  | (Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
       | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
       | Tfun _ | Tunresolved _ | Tobject | Tshape _), _ ->
         (* Make sure to add a dependency on any classes referenced here, even if

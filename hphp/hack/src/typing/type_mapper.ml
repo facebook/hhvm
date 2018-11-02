@@ -29,7 +29,6 @@ let fresh_env env = env
 class type type_mapper_type = object
   method on_tvar : env -> Reason.t -> int -> result
   method on_infinite_tvar : env -> Reason.t -> int -> result
-  method on_tmixed : env -> Reason.t -> result
   method on_tnonnull : env -> Reason.t -> result
   method on_tdynamic : env -> Reason.t -> result
   method on_tany : env -> Reason.t -> result
@@ -71,7 +70,6 @@ end
 class shallow_type_mapper: type_mapper_type = object(this)
   method on_tvar env r n = env, (r, Tvar n)
   method on_infinite_tvar = this#on_tvar
-  method on_tmixed env r = env, (r, Tmixed)
   method on_tnonnull env r = env, (r, Tnonnull)
   method on_tdynamic env r = env, (r, Tdynamic)
   method on_tany env r = env, (r, Tany)
@@ -102,7 +100,6 @@ class shallow_type_mapper: type_mapper_type = object(this)
 
   method on_type env (r, ty) = match ty with
     | Tvar n -> this#on_tvar env r n
-    | Tmixed -> this#on_tmixed env r
     | Tnonnull -> this#on_tnonnull env r
     | Tany -> this#on_tany env r
     | Terr -> this#on_terr env r

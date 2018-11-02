@@ -332,7 +332,6 @@ module type S = sig
   val missing_constructor : Pos.t -> unit
   val enum_constant_type_bad : Pos.t -> Pos.t -> string -> Pos.t list -> unit
   val enum_type_bad : Pos.t -> string -> Pos.t list -> unit
-  val enum_type_typedef_mixed : Pos.t -> unit
   val enum_type_typedef_nonnull : Pos.t -> unit
   val enum_switch_redundant : string -> Pos.t -> Pos.t -> unit
   val enum_switch_nonexhaustive : Pos.t -> string list -> Pos.t -> unit

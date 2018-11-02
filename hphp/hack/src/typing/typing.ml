@@ -140,7 +140,7 @@ let get_value_collection_inst ty =
     Some vty
     (* If we're expecting a mixed or a nonnull then we can just assume
      * that the element type is mixed *)
-  | (_, (Tmixed | Tnonnull)) ->
+  | (_, Tnonnull) ->
     let mixed = (Reason.Rnone, TUtils.desugar_mixed Reason.Rnone) in
     Some mixed
   | (_, Tany) ->
@@ -162,8 +162,8 @@ let get_key_value_collection_inst ty =
     Some (kty, vty)
     (* If we're expecting a mixed or a nonnull then we can just assume
      * that the value and key types are mixed *)
-  | (_, (Tmixed | Tnonnull)) ->
-    let mixed = (Reason.Rnone, Tmixed) in
+  | (_, Tnonnull) ->
+    let mixed = (Reason.Rnone, TUtils.desugar_mixed Reason.Rnone) in
     Some (mixed, mixed)
   | (_, Tany) ->
     Some (ty, ty)
@@ -1331,7 +1331,7 @@ and expr_
       | Some (_, _, ty) -> env, ty in
     match supertype with
       (* No need to check individual subtypes if expected type is mixed or any! *)
-      | (_, (Tmixed | Tany)) -> env, supertype
+      | (_, Tany) -> env, supertype
       | _ ->
       let subtype_value env ty =
         Type.sub_type p Reason.URarray_value env ty supertype in
@@ -2953,7 +2953,6 @@ and expand_expected env expected =
     match ty with
     | _, Tunresolved [ty] -> env, Some (p, ur, ty)
     | _, Toption ty -> env, Some (p, ur, ty)
-    | _, Tmixed -> env, Some (p, ur, (Reason.Rnone, Tnonnull))
     | _ -> env, Some (p, ur, ty)
 
 (* Do a subtype check of inferred type against expected type *)
@@ -3492,7 +3491,7 @@ and call_parent_construct pos env el uel =
               else Errors.undefined_parent pos;
               default
             | None -> assert false)
-        | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _
+        | _, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _
               | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tvar _ | Tdynamic
               | Tabstract (_, _) | Tanon (_, _) | Tunresolved _ | Tobject
              ) ->
@@ -3509,7 +3508,7 @@ and check_abstract_parent_meth mname pos fty =
 
 and is_abstract_ft fty = match fty with
   | _r, Tfun { ft_abstract = true; _ } -> true
-  | _r, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tprim _
+  | _r, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _ | Tprim _
             | Tvar _ | Tfun _ | Tclass (_, _) | Tabstract (_, _) | Ttuple _
             | Tanon _ | Tunresolved _ | Tobject | Tshape _ | Tdynamic
         )
@@ -4423,7 +4422,7 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
             env, method_, None
         end
       )
-  | _, (Tmixed | Tnonnull | Tarraykind _ | Toption _
+  | _, (Tnonnull | Tarraykind _ | Toption _
         | Tprim _ | Tvar _ | Tfun _ | Ttuple _ | Tanon (_, _) | Tobject
        | Tshape _) ->
       (* should never happen; static_class_id takes care of these *)
@@ -4751,7 +4750,7 @@ and class_id_for_new p env cid =
             | None -> get_info res tyl
             | Some class_info -> get_info ((sid, class_info, ty)::res) tyl
           end
-        | _, (Tany | Terr | Tmixed | Tnonnull | Tarraykind _ | Toption _
+        | _, (Tany | Terr | Tnonnull | Tarraykind _ | Toption _
               | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Ttuple _
               | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _ | Tdynamic ) ->
           get_info res tyl in
@@ -4889,7 +4888,7 @@ and static_class_id ~check_constraints p env =
             (* parent is still technically the same object. *)
             make_result env T.CIparent (r, TUtils.this_of (r, snd parent))
           )
-      | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tprim _
+      | _, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _ | Tprim _
             | Tfun _ | Ttuple _ | Tshape _ | Tvar _ | Tdynamic
             | Tanon (_, _) | Tunresolved _ | Tabstract (_, _) | Tobject
            ) ->
@@ -4932,10 +4931,10 @@ and static_class_id ~check_constraints p env =
         | r, Tunresolved tyl -> r, Tunresolved (List.map tyl resolve_ety)
         | _, Tvar _ as ty -> resolve_ety ty
         | _, Tdynamic as ty -> ty
-        | _, (Tany | Tprim Tstring | Tabstract (_, None) | Tmixed | Tobject)
+        | _, (Tany | Tprim Tstring | Tabstract (_, None) | Tobject)
               when not (Env.is_strict env) ->
           Reason.Rwitness p, Typing_utils.tany env
-        | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _
+        | _, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _
                  | Tprim _ | Tfun _ | Ttuple _
                  | Tabstract ((AKenum _ | AKdependent _ | AKnewtype _), _)
                  | Tanon (_, _) | Tobject | Tshape _ as ty
@@ -5694,7 +5693,7 @@ and condition ?lhs_of_null_coalesce env tparamet
       (match ety with
       | _, Tarraykind (AKany | AKempty)
       | _, Tprim Tbool -> env
-      | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tdynamic
+      | _, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _ | Tdynamic
         | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _)
         | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
         ) ->
@@ -5816,7 +5815,7 @@ and condition ?lhs_of_null_coalesce env tparamet
         | r, Tunresolved tyl ->
           let env, tyl = List.map_env env tyl resolve_obj in
           env, (r, Tunresolved tyl)
-        | _, (Terr | Tany | Tmixed | Tnonnull| Tarraykind _ | Tprim _ | Tvar _
+        | _, (Terr | Tany | Tnonnull| Tarraykind _ | Tprim _ | Tvar _
             | Tfun _ | Tabstract ((AKenum _ | AKnewtype _ | AKdependent _), _)
             | Ttuple _ | Tanon (_, _) | Toption _ | Tobject | Tshape _
             | Tdynamic) ->
@@ -5868,7 +5867,7 @@ and safely_refine_type env p reason ivar_pos ivar_ty hint_ty =
       TUtils.non_null env ivar_ty
     | _, Tabstract (AKdependent (`this, []), Some (_, Tclass _)) ->
       ExprDepTy.make env CIstatic hint_ty
-    | _, (Tany | Tmixed | Tprim _ | Toption _ | Ttuple _
+    | _, (Tany | Tprim _ | Toption _ | Ttuple _
         | Tshape _ | Tvar _ | Tabstract _ | Tarraykind _ | Tanon _
         | Tunresolved _ | Tobject | Terr | Tfun _  | Tdynamic) ->
       (* TODO(kunalm) Implement the type refinement for each type *)
@@ -5975,7 +5974,6 @@ and safely_refine_class_type
             TySet.elements (Env.get_upper_bounds env newname) with
             (* Special case for mixed=?nonnull as a lower bound *)
             | _, [(_, Toption (_, Tnonnull)) as ty], _, _ -> ty
-            | _, [(_, Tmixed) as ty], _, _ -> ty
             | _, _, [ty], _ -> ty
             | Ast.Covariant, _, _, [ty]
             | Ast.Contravariant, [ty], _, _

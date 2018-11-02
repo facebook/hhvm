@@ -81,7 +81,6 @@ and _ ty_ =
   (* Tvarray_or_darray (ty) => "varray_or_darray<ty>" *)
   | Tvarray_or_darray : decl ty -> decl ty_
 
-  (*========== Following Types Exist in Both Phases ==========*)
   (* "Any" is the type of a variable with a missing annotation, and "mixed" is
    * the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
    * Any unifies with anything, i.e., it is both a supertype and subtype of any
@@ -103,9 +102,14 @@ and _ ty_ =
    * of int to take part in addition. (The converse is true though -- int is a
    * subtype of mixed.) A case analysis would need to be done on $x, via
    * is_int or similar.
+   *
+   * mixed exists only in the decl phase because it is desugared into ?nonnull
+   * during the localization phase.
    *)
+  | Tmixed : decl ty_
+
+  (*========== Following Types Exist in Both Phases ==========*)
   | Tany
-  | Tmixed
   | Tnonnull
   (* A dynamic type is a special type which sometimes behaves as if it were a
    * top type; roughly speaking, where a specific value of a particular type is
@@ -666,7 +670,7 @@ let is_suggest_mode = ref false
 let ty_con_ordinal ty =
   match snd ty with
   | Tany | Terr -> 0
-  | Tmixed | Toption (_, Tnonnull) -> 1
+  | Toption (_, Tnonnull) -> 1
   | Tnonnull -> 2
   | Tdynamic -> 3
   | Toption _ -> 4

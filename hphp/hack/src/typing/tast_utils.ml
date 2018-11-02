@@ -78,7 +78,6 @@ let rec truthiness env ty =
   match snd ty with
   | Tany | Terr | Tdynamic -> Unknown
 
-  | Tmixed
   | Tnonnull
   | Tabstract (AKenum _, _)
   | Tarraykind _

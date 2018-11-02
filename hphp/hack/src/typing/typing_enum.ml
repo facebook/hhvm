@@ -56,7 +56,7 @@ let check_valid_array_key_type f_fail ~allow_any:allow_any env p t =
     (* Enums have to be valid array keys *)
     | Tabstract (AKenum _, _) -> ()
     | Terr | Tany when allow_any -> ()
-    | Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
+    | Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
       | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
       | Tfun _ | Tunresolved _ | Tobject | Tshape _ ->
         f_fail p (Reason.to_pos r) (Typing_print.error t') trail);
@@ -94,15 +94,12 @@ let enum_class_check env tc consts const_types =
           (* We disallow first-class enums from being non-exact types, because
            * a switch on such an enum can lead to very unexpected results,
            * since switch uses == equality. *)
-          | Tmixed | Tnonnull | Tprim Tarraykey when tc.tc_enum_type <> None ->
+          | Tnonnull | Tprim Tarraykey when tc.tc_enum_type <> None ->
               Errors.enum_type_bad (Reason.to_pos r)
                 (Typing_print.error ty_exp') trail
-          (* We disallow typedefs that point to mixed *)
-          | Tmixed when snd ty_exp <> Tmixed ->
-              Errors.enum_type_typedef_mixed (Reason.to_pos r)
           | Tnonnull when snd ty_exp <> Tnonnull ->
               Errors.enum_type_typedef_nonnull (Reason.to_pos r)
-          | Tmixed | Tnonnull -> ()
+          | Tnonnull -> ()
           | Tprim Tint | Tprim Tstring | Tprim Tarraykey -> ()
           (* Allow enums in terms of other enums *)
           | Tabstract (AKenum _, _) -> ()

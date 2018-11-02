@@ -1650,10 +1650,6 @@ let enum_type_bad pos ty trail =
     [pos, "Enums must be int or string, not " ^ ty]
     trail
 
-let enum_type_typedef_mixed pos =
-  add (Typing.err_code Typing.EnumTypeTypedefMixed) pos
-    "Can't use typedef that resolves to mixed in enum"
-
 let enum_type_typedef_nonnull pos =
   add (Typing.err_code Typing.EnumTypeTypedefNonnull) pos
     "Can't use typedef that resolves to nonnull in enum"

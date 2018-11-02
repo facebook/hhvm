@@ -79,7 +79,7 @@ let save_type hint_kind env x arg =
             let x_pos = Reason.to_pos (fst x) in
             add_type env x_pos hint_kind arg;
         )
-    | _, (Terr | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
+    | _, (Terr | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
       | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
       | Tfun _ | Tunresolved _ | Tobject | Tshape _) -> ()
   end
@@ -169,7 +169,7 @@ and normalize_ tcopt = function
     (function _, (Tany | Tunresolved []) -> true | _ -> false) ->
       let tyl = List.filter tyl begin function
         |  _, (Tany |  Tunresolved []) -> false
-        | _, (Terr | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Toption _
+        | _, (Terr | Tnonnull | Tarraykind _ | Tprim _ | Toption _
           | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
           | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject | Tshape _
           | Tdynamic
@@ -182,7 +182,7 @@ and normalize_ tcopt = function
        *)
       let rl = List.map rl begin function
         | _, Tclass (x, []) -> x
-        | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Tdynamic
+        | _, (Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Tdynamic
           | Toption _ | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
           | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
           | Tshape _) -> raise Exit
@@ -198,7 +198,6 @@ and normalize_ tcopt = function
   | Tunresolved (x :: (y :: _ as rl)) when compare_types x y tcopt = 0 ->
       normalize_ tcopt (Tunresolved rl)
   | Tunresolved _ | Tany -> raise Exit
-  | Tmixed -> Tmixed                       (* ' with Nothing (mixed type) *)
   | Tnonnull -> Tnonnull
   | Terr -> Terr
   | Tarraykind akind -> begin

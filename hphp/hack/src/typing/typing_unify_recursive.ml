@@ -43,7 +43,7 @@ let rec occurs env n rty =
       | Some ty -> occurs env n ty
       | None -> false)
     end
-  | Terr | Tany | Tmixed | Tnonnull | Tanon _ | Tprim _ | Tobject | Tdynamic -> false
+  | Terr | Tany | Tnonnull | Tanon _ | Tprim _ | Tobject | Tdynamic -> false
   | Toption t -> occurs env n t
   | Ttuple ts | Tunresolved ts | Tclass(_,ts) -> occurs_list env n ts
   | Tabstract(ak,topt) -> occurs_ak env n ak || occurs_opt  env n topt

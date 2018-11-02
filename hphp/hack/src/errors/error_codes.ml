@@ -258,7 +258,7 @@ module Typing                               = struct
   | EnumSwitchRedundantDefault
   | EnumSwitchWrongClass
   | EnumTypeBad
-  | EnumTypeTypedefMixed
+  | EnumTypeTypedefMixedDEPRECATED
   | ExpectedClass
   | ExpectedLiteralFormatString
   | ExpectedStaticIntDEPRECATED

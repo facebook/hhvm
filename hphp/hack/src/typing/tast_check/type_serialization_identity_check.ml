@@ -19,8 +19,9 @@ let rec strip_ty : type a. a ty -> a ty = fun ty ->
   let strip_opt ty_opt = Option.map ty_opt ~f:strip_ty in
   let ty =
     match ty with
+    | Tmixed ->
+      ty
     | Tany
-    | Tmixed
     | Tnonnull
     | Tdynamic
     | Terr ->

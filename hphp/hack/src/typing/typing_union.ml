@@ -166,7 +166,7 @@ and union_ env ty1 ty2 r =
   | (_, Tanon (_, id1)), (_, Tanon (_, id2)) when id1 = id2 -> env, ty1
   (* TODO with Tclass, union type arguments if covariant *)
   | (_, ((Tarraykind _ | Tprim _ | Tdynamic | Tabstract (_, _) | Tclass (_, _)
-    | Ttuple _ | Tanon (_, _) | Tfun _ | Tobject | Tshape _ | Tmixed | Terr
+    | Ttuple _ | Tanon (_, _) | Tfun _ | Tobject | Tshape _ | Terr
     (* If T cannot be null, `union T nonnull = nonnull`. However, it's hard
      * to say whether a given T can be null - e.g. opaque newtypes, dependent
      * types, etc. - so for now we leave it here.

@@ -238,7 +238,7 @@ let rec is_hack_collection env ty =
     let env, tyl = get_concrete_supertypes env ty in
     List.exists tyl (is_hack_collection env)
   | _, Tunresolved tyl -> List.for_all tyl ~f:(is_hack_collection env)
-  | (_, (Tany | Tmixed | Tnonnull | Tdynamic | Terr | Toption _ | Tprim _ |
+  | (_, (Tany | Tnonnull | Tdynamic | Terr | Toption _ | Tprim _ |
          Tfun _ | Ttuple _ | Tshape _ | Tvar _ | Tabstract _ | Tanon _ |
          Tobject | Tclass _ | Tarraykind _)) -> false
 
@@ -589,7 +589,7 @@ let rec push_option_out env ty =
       | _ -> env, ty)
     | env, _ -> env, ty
     end
-  | _, (Terr | Tany | Tmixed | Tnonnull | Tarraykind _ | Tprim _ | Tvar _
+  | _, (Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Tvar _
     | Tclass (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
     | Tobject | Tshape _ | Tdynamic) -> env, ty
 

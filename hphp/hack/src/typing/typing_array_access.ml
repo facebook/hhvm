@@ -281,7 +281,7 @@ let rec array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
       when List.for_all rest ~f:(fun x -> ty_equal (snd x) (snd res)) -> res
     | _ -> error_array env p ety1
     end
-  | Tmixed | Tnonnull | Tprim _ | Tvar _ | Tfun _
+  | Tnonnull | Tprim _ | Tvar _ | Tfun _
   | Tclass (_, _) | Tanon (_, _) ->
       error_array env p ety1
 
@@ -352,7 +352,7 @@ let rec assign_array_append pos ur env ty1 ty2 =
     | [res] -> res
     | _ -> error_assign_array_append env pos ty1
     end
-  | _, (Tmixed | Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tvar _ |
+  | _, (Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tvar _ |
         Tfun _ | Tclass _ | Ttuple _ | Tanon _ | Tshape _) ->
     error_assign_array_append env pos ty1
 
@@ -532,7 +532,7 @@ let rec assign_array_get pos ur env ty1 key tkey ty2 =
       Errors.array_access pos (Reason.to_pos (fst ety1)) (Typing_print.error (snd ety1));
       error
     end
-  | (Toption _ | Tmixed | Tnonnull | Tprim _ |
+  | (Toption _ | Tnonnull | Tprim _ |
      Tvar _ |Tfun _ | Tclass _ | Tanon _) ->
     Errors.array_access pos (Reason.to_pos (fst ety1)) (Typing_print.error (snd ety1));
     error

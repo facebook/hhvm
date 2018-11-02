@@ -13,6 +13,7 @@ val go_def :
   Relative_path.t SymbolDefinition.t ->
   base_class_name: string option ->
   file: ServerCommandTypes.file_input ->
+  basic_only: bool ->
   DocblockService.result
 
 (** Returns the docblock for the symbol or expression at the given location. *)
@@ -20,4 +21,5 @@ val go_location :
   ServerEnv.env ->
   (string * int * int) ->
   base_class_name: string option ->
+  basic_only: bool ->
   DocblockService.result

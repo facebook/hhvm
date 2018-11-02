@@ -39,12 +39,17 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | TYPED_AST (filename) ->
         env, ServerTypedAst.go env filename
     | IDE_HOVER (fn, line, char) ->
-        env, ServerHover.go env (fn, line, char)
+        let basic_only = genv.local_config.ServerLocalConfig.basic_autocomplete_only in
+        env, ServerHover.go env (fn, line, char) ~basic_only
     | DOCBLOCK_AT (filename, line, char, base_class_name) ->
+        let basic_only = genv.local_config.ServerLocalConfig.basic_autocomplete_only in
         env, ServerDocblockAt.go_location env (filename, line, char) ~base_class_name
+          ~basic_only
     | IDE_SIGNATURE_HELP (fn, line, char) ->
-        env, ServerSignatureHelp.go env (fn, line, char)
+        let basic_only = genv.local_config.ServerLocalConfig.basic_autocomplete_only in
+        env, ServerSignatureHelp.go env (fn, line, char) ~basic_only
     | AUTOCOMPLETE content ->
+      let basic_only = genv.local_config.ServerLocalConfig.basic_autocomplete_only in
         let autocomplete_context = { AutocompleteTypes.
           is_manually_invoked = false;
           is_xhp_classname = false;
@@ -55,7 +60,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           is_after_quote = false;
         } in (* feature not implemented here; it only works for LSP *)
         let result = ServerAutoComplete.auto_complete
-          ~tcopt:env.tcopt ~delimit_on_namespaces:false ~autocomplete_context content in
+          ~tcopt:env.tcopt ~delimit_on_namespaces:false ~autocomplete_context ~basic_only content in
         env, result.With_complete_flag.value
     | IDENTIFY_FUNCTION (file_input, line, char) ->
         let content = ServerFileSync.get_file_content file_input in
@@ -152,8 +157,11 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let file_content = ServerFileSync.get_file_content (ServerCommandTypes.FileName path) in
         let offset = File_content.get_offset file_content pos in (* will raise if out of bounds *)
         let char_at_pos = File_content.get_char file_content offset in
+        let basic_only = genv.local_config.ServerLocalConfig.basic_autocomplete_only in
         let results = ServerAutoComplete.auto_complete_at_position
-          ~delimit_on_namespaces ~is_manually_invoked ~file_content ~pos ~tcopt:env.tcopt in
+          ~delimit_on_namespaces ~is_manually_invoked ~file_content ~basic_only ~pos
+          ~tcopt:env.tcopt
+        in
         let completions = results.value in
         let is_complete = results.is_complete in
         env, { AutocompleteTypes.completions; char_at_pos; is_complete; }
@@ -162,8 +170,10 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let content = ServerFileSync.get_file_content (ServerCommandTypes.FileName path) in
         let offset = File_content.get_offset content pos in (* will raise if out of bounds *)
         let char_at_pos = File_content.get_char content offset in
+        let basic_only = genv.local_config.ServerLocalConfig.basic_autocomplete_only in
         let result =
-          FfpAutocompleteService.auto_complete env.tcopt content pos ~filter_by_token:false
+          FfpAutocompleteService.auto_complete env.tcopt content pos
+            ~basic_only ~filter_by_token:false
         in
         env, { AutocompleteTypes.completions = result; char_at_pos; is_complete = true; }
     | DISCONNECT ->

@@ -794,7 +794,9 @@ let handle_mode
       let is_manually_invoked = mode = Autocomplete_manually_invoked in
 
       let result = ServerAutoComplete.auto_complete_at_position
-        ~tcopt ~pos ~is_manually_invoked ~delimit_on_namespaces:false ~file_content:file in
+        ~tcopt ~pos ~is_manually_invoked ~delimit_on_namespaces:false ~file_content:file
+        ~basic_only:false
+      in
       List.iter ~f: begin fun r ->
         let open AutocompleteTypes in
         Printf.printf "%s %s\n" r.res_name r.res_ty
@@ -818,6 +820,7 @@ let handle_mode
           let result =
             FfpAutocompleteService.auto_complete tcopt file_text position
             ~filter_by_token:true
+            ~basic_only:false
           in
           match result with
           | [] -> Printf.printf "No result found\n"

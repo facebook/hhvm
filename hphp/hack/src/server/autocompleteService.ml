@@ -261,6 +261,7 @@ let compute_complete_global
   ~(autocomplete_context: AutocompleteTypes.legacy_autocomplete_context)
   ~(content_funs: Reordered_argument_collections.SSet.t)
   ~(content_classes: Reordered_argument_collections.SSet.t)
+  ~(basic_only: bool)
   : unit =
   let completion_type = !argument_global_type in
   let gname = Utils.strip_ns !auto_complete_for_global in
@@ -316,31 +317,41 @@ let compute_complete_global
     let on_class name ~seen =
       if SSet.mem seen name then None else
       if not (does_fully_qualified_name_match_prefix name) then None else
-      let target = Typing_lazy_heap.get_class tcopt name in
-      let target_kind = Option.map target ~f:(fun c -> c.Typing_defs.tc_kind) in
-      if not (should_complete_class completion_type target_kind) then None else
-      Option.map target ~f:(fun c ->
+      if basic_only then begin
         incr result_count;
-        if completion_type = Some Acnew then
-          get_partial_result
-            (string_to_replace_prefix name)
-            (Phase.decl (get_constructor_ty c))
-            Constructor_kind
-            (* Only do doc block fallback on constructors if they're consistent. *)
-            (if snd c.Typing_defs.tc_construct then Some c else None)
-        else
-          let kind = match c.Typing_defs.tc_kind with
-            | Ast.Cabstract -> Abstract_class_kind
-            | Ast.Cnormal -> Class_kind
-            | Ast.Cinterface -> Interface_kind
-            | Ast.Ctrait -> Trait_kind
-            | Ast.Cenum -> Enum_kind
-          in
-          let ty =
-            Typing_reason.Rwitness c.Typing_defs.tc_pos,
-            Typing_defs.Tapply ((c.Typing_defs.tc_pos, name), []) in
-          get_partial_result (string_to_replace_prefix name) (Phase.decl ty) kind None
-      )
+        let ty =
+          Typing_reason.Rnone,
+          Typing_defs.Tany in
+        Some (get_partial_result
+          (string_to_replace_prefix name)
+          (Phase.decl ty) Class_kind None)
+      end else begin
+        let target = Typing_lazy_heap.get_class tcopt name in
+        let target_kind = Option.map target ~f:(fun c -> c.Typing_defs.tc_kind) in
+        if not (should_complete_class completion_type target_kind) then None else
+        Option.map target ~f:(fun c ->
+          incr result_count;
+          if completion_type = Some Acnew then
+            get_partial_result
+              (string_to_replace_prefix name)
+              (Phase.decl (get_constructor_ty c))
+              Constructor_kind
+              (* Only do doc block fallback on constructors if they're consistent. *)
+              (if snd c.Typing_defs.tc_construct then Some c else None)
+          else
+            let kind = match c.Typing_defs.tc_kind with
+              | Ast.Cabstract -> Abstract_class_kind
+              | Ast.Cnormal -> Class_kind
+              | Ast.Cinterface -> Interface_kind
+              | Ast.Ctrait -> Trait_kind
+              | Ast.Cenum -> Enum_kind
+            in
+            let ty =
+              Typing_reason.Rwitness c.Typing_defs.tc_pos,
+              Typing_defs.Tapply ((c.Typing_defs.tc_pos, name), []) in
+            get_partial_result (string_to_replace_prefix name) (Phase.decl ty) kind None
+        )
+      end
     in
 
     let on_function name ~seen =
@@ -348,11 +359,17 @@ let compute_complete_global
       if SSet.mem seen name then None else
       if not (should_complete_fun completion_type) then None else
       if not (does_fully_qualified_name_match_prefix name) then None else
-      Option.map (Typing_lazy_heap.get_fun tcopt name) ~f:(fun fun_ ->
+      if basic_only then begin
         incr result_count;
-        let ty = Typing_reason.Rwitness fun_.Typing_defs.ft_pos, Typing_defs.Tfun fun_ in
-        get_partial_result (string_to_replace_prefix name) (Phase.decl ty) Function_kind None
-      )
+        let ty = Typing_reason.Rnone, Typing_defs.Tany in
+        Some (get_partial_result (string_to_replace_prefix name) (Phase.decl ty) Function_kind None)
+      end else begin
+        Option.map (Typing_lazy_heap.get_fun tcopt name) ~f:(fun fun_ ->
+          incr result_count;
+          let ty = Typing_reason.Rwitness fun_.Typing_defs.ft_pos, Typing_defs.Tfun fun_ in
+          get_partial_result (string_to_replace_prefix name) (Phase.decl ty) Function_kind None
+        )
+      end
     in
 
     let on_namespace name : autocomplete_result option =
@@ -726,6 +743,7 @@ let go
     ~content_funs
     ~content_classes
     ~autocomplete_context
+    ~basic_only
     tast
   =
   reset ();
@@ -737,7 +755,8 @@ let go
        completion_type = Some Actype ||
        completion_type = Some Actrait_only
     then compute_complete_global
-      ~tcopt ~delimit_on_namespaces ~autocomplete_context ~content_funs ~content_classes;
+      ~tcopt ~delimit_on_namespaces ~autocomplete_context ~content_funs ~content_classes
+      ~basic_only;
     if completion_type = Some Acprop then compute_complete_local tast;
     let env = match !ac_env with
       | Some e -> e

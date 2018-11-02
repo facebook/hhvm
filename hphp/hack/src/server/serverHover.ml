@@ -44,11 +44,11 @@ let filter_class_and_constructor results =
   then List.filter results ~f:result_is_constructor
   else results
 
-let make_hover_doc_block tcopt file occurrence def_opt =
+let make_hover_doc_block ~basic_only tcopt file occurrence def_opt =
   match def_opt with
   | Some def ->
     let base_class_name = SymbolOccurrence.enclosing_class occurrence in
-    ServerDocblockAt.go_def tcopt def ~base_class_name ~file
+    ServerDocblockAt.go_def tcopt def ~base_class_name ~file ~basic_only
     |> Option.to_list
   | None -> []
 
@@ -73,7 +73,7 @@ let make_hover_full_name env_and_ty occurrence def_opt =
     [Printf.sprintf "Full name: `%s`" (Utils.strip_ns name)]
   | _ -> []
 
-let make_hover_info tcopt env_and_ty file (occurrence, def_opt) =
+let make_hover_info tcopt env_and_ty file (occurrence, def_opt) ~basic_only =
   let open SymbolOccurrence in
   let open Typing_defs in
   let snippet = match occurrence, env_and_ty with
@@ -95,14 +95,14 @@ let make_hover_info tcopt env_and_ty file (occurrence, def_opt) =
     | occurrence, Some (env, ty) -> Tast_env.print_ty_with_identity env ty occurrence def_opt
   in
   let addendum = List.concat [
-    make_hover_doc_block tcopt file occurrence def_opt;
+    make_hover_doc_block tcopt file occurrence def_opt ~basic_only;
     make_hover_return_type env_and_ty occurrence;
     make_hover_full_name env_and_ty occurrence def_opt;
   ]
   in
   HoverService.{ snippet; addendum; pos = Some occurrence.SymbolOccurrence.pos }
 
-let go env (file, line, char) =
+let go env (file, line, char) ~basic_only =
   let position = (file, line, char) in
   let ServerEnv.{ tcopt; files_info; _ } = env in
   let identities = symbols_at position tcopt in
@@ -119,5 +119,5 @@ let go env (file, line, char) =
   | identities ->
     identities
     |> filter_class_and_constructor
-    |> List.map ~f:(make_hover_info tcopt env_and_ty file)
+    |> List.map ~f:(make_hover_info tcopt env_and_ty file ~basic_only)
     |> List.remove_consecutive_duplicates ~equal:(=)

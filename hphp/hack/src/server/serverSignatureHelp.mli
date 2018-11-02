@@ -10,5 +10,6 @@
 val go :
   ServerEnv.env ->
   (ServerCommandTypes.file_input * int * int) ->
+  basic_only:bool ->
   Lsp.SignatureHelp.result
 (** Returns signature help for the given location. *)

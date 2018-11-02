@@ -95,7 +95,7 @@ let fallback tcopt class_name member_name =
   |> all_interfaces_or_first_class_docblock []
   |> render_ancestor_docblocks
 
-let go_def tcopt def ~base_class_name ~file =
+let go_def tcopt def ~base_class_name ~file ~basic_only =
   let open Option.Monad_infix in
   (** Read as "or-else." *)
   let (>>~) opt f = if Option.is_some opt then opt else f () in
@@ -105,11 +105,11 @@ let go_def tcopt def ~base_class_name ~file =
   >>= Docblock_finder.get_docblock
   >>~ fun () ->
   match def.SymbolDefinition.kind, base_class_name with
-  | SymbolDefinition.Method, Some base_class_name ->
+  | SymbolDefinition.Method, Some base_class_name when not basic_only ->
     fallback tcopt base_class_name def.SymbolDefinition.name
   | _ -> None
 
-let go_location env (filename, line, char) ~base_class_name =
+let go_location env (filename, line, char) ~base_class_name ~basic_only =
   let open Option.Monad_infix in
   let ServerEnv.{ tcopt; _ } = env in
   let relative_path = Relative_path.create_detect_prefix filename in
@@ -121,4 +121,4 @@ let go_location env (filename, line, char) ~base_class_name =
     in
     List.hd definitions
   end
-  >>= go_def tcopt ~base_class_name ~file:(ServerCommandTypes.FileName filename)
+  >>= go_def tcopt ~base_class_name ~file:(ServerCommandTypes.FileName filename) ~basic_only

@@ -76,6 +76,8 @@ type t = {
   load_decls_from_saved_state : bool;
   (* Size of Gc.major_slice to be performed when server is idle. 0 to disable *)
   idle_gc_slice : int;
+  (* Global name autocomplete will be missing some features to improve performance *)
+  basic_autocomplete_only : bool;
 }
 
 let default = {
@@ -123,6 +125,7 @@ let default = {
   store_decls_in_saved_state = false;
   load_decls_from_saved_state = false;
   idle_gc_slice = 0;
+  basic_autocomplete_only = false;
 }
 
 let path =
@@ -252,6 +255,8 @@ let load_ fn ~silent =
     ~default:default.ide_tast_cache config in
   let idle_gc_slice = int_ "idle_gc_slice"
     ~default:default.idle_gc_slice config in
+  let basic_autocomplete_only = bool_if_version "basic_autocomplete_only"
+    ~default:default.basic_autocomplete_only config in
   {
     use_watchman;
     watchman_init_timeout;
@@ -296,6 +301,7 @@ let load_ fn ~silent =
     store_decls_in_saved_state;
     load_decls_from_saved_state;
     idle_gc_slice;
+    basic_autocomplete_only;
   }
 
 let load ~silent =

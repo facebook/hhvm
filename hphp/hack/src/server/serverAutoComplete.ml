@@ -16,6 +16,7 @@ let get_results
     ~(tcopt:TypecheckerOptions.t)
     ~(delimit_on_namespaces:bool)
     ~(autocomplete_context: AutocompleteTypes.legacy_autocomplete_context)
+    ~(basic_only:bool)
     (_:Relative_path.t)
     (file_info:FileInfo.t)
     (tast:Tast.program)
@@ -29,16 +30,18 @@ let get_results
     ~content_funs
     ~content_classes
     ~autocomplete_context
+    ~basic_only
 
 let auto_complete
     ~(tcopt:TypecheckerOptions.t)
     ~(delimit_on_namespaces:bool)
     ~(autocomplete_context: AutocompleteTypes.legacy_autocomplete_context)
+    ~(basic_only:bool)
     (content:string)
   : AutocompleteTypes.complete_autocomplete_result list Utils.With_complete_flag.t =
   let result =
     ServerIdeUtils.declare_and_check content
-      ~f:(get_results ~tcopt ~delimit_on_namespaces ~autocomplete_context) tcopt in
+      ~f:(get_results ~tcopt ~delimit_on_namespaces ~autocomplete_context ~basic_only) tcopt in
   result
 
 let context_xhp_classname_regex = Str.regexp ".*<[a-zA-Z_0-9:]*$"
@@ -90,6 +93,7 @@ let get_autocomplete_context
 let auto_complete_at_position
   ~(delimit_on_namespaces:bool)
   ~(is_manually_invoked:bool)
+  ~(basic_only:bool)
   ~(file_content:string)
   ~(pos:File_content.position)
   ~(tcopt:TypecheckerOptions.t)
@@ -99,4 +103,4 @@ let auto_complete_at_position
   let autocomplete_context = get_autocomplete_context file_content pos ~is_manually_invoked in
   let edits = [{range = Some {st = pos; ed = pos}; text = "AUTO332"}] in
   let content = File_content.edit_file_unsafe file_content edits in
-  auto_complete ~tcopt ~delimit_on_namespaces ~autocomplete_context content
+  auto_complete ~tcopt ~delimit_on_namespaces ~autocomplete_context ~basic_only content

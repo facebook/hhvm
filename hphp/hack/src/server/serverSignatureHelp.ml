@@ -85,7 +85,7 @@ let get_occurrence_info tcopt ast tast (line, char) occurrence =
   end
   >>| fun ft -> (occurrence, env, ft, def_opt)
 
-let go env (file, line, char) =
+let go env (file, line, char) ~basic_only =
   let ServerEnv.{tcopt; _} = env in
   let tcopt = {
     tcopt with
@@ -126,7 +126,7 @@ let go env (file, line, char) =
     >>= fun def ->
     let file =
       ServerCommandTypes.FileName (def.SymbolDefinition.pos |> Pos.to_absolute |> Pos.filename) in
-    ServerDocblockAt.go_def tcopt def ~base_class_name ~file
+    ServerDocblockAt.go_def tcopt def ~base_class_name ~file ~basic_only
   in
   let signature_information = {
     siginfo_label;

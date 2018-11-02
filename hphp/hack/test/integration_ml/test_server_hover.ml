@@ -947,7 +947,7 @@ let () =
         Printf.sprintf "%s:%d:%d: [%s]" file line col inner
       in
       let fn = ServerCommandTypes.FileName ("/" ^ file) in
-      let hover = ServerHover.go env (fn, line, col) in
+      let hover = ServerHover.go env (fn, line, col) ~basic_only:false in
       let expected = list_to_string expectedHover in
       let actual = list_to_string hover in
       if expected <> actual then Some (expected, actual) else None

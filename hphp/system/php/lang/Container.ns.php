@@ -2,7 +2,7 @@
 
 namespace HH {
 
-<<__Sealed(\HH\KeyedContainer::class, \ConstSet::class)>>
+<<__Sealed(\HH\KeyedContainer::class)>>
 interface Container extends \HH\Rx\Traversable {
 }
 

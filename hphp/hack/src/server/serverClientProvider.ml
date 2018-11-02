@@ -36,12 +36,21 @@ let accept_client_opt parent_in_fd =
     None
   end
 
+let select ~idle_gc_slice fd_list timeout =
+  let deadline = ((Unix.gettimeofday ()) +. timeout) in
+  match ServerIdleGc.select ~slice:idle_gc_slice ~timeout fd_list with
+  | [] ->
+    let timeout = max 0.0 (deadline -. (Unix.gettimeofday ())) in
+    let ready_fds, _, _ = Unix.select fd_list [] [] timeout in
+    ready_fds
+  | ready_fds -> ready_fds
+
 (* sleep_and_check: waits up to 0.1 seconds and then returns either:        *)
 (* - If we should read from persistent_client, then (None, true)            *)
 (* - If we should read from in_fd, then (Some (Non_persist in_fd)), false)  *)
 (* - If there's nothing to read, then (None, false)                         *)
 let sleep_and_check (default_in_fd, priority_in_fd, force_dormant_start_only) persistent_client_opt
-    ~ide_idle kind =
+    ~ide_idle ~idle_gc_slice kind =
   let in_fds = [default_in_fd; priority_in_fd; force_dormant_start_only] in
   let is_persistent x = match persistent_client_opt with
     | Some (Persistent_client fd) when fd = x -> true
@@ -61,7 +70,7 @@ let sleep_and_check (default_in_fd, priority_in_fd, force_dormant_start_only) pe
         assert false
     | `Any, None -> in_fds
   in
-  let ready_fd_l, _, _ = Unix.select l [] [] (0.1) in
+  let ready_fd_l = select ~idle_gc_slice l 0.1 in
   (* Prioritize existing persistent client requests over command line ones *)
   if List.exists ready_fd_l ~f:is_persistent then None, true else
   match List.hd ready_fd_l with

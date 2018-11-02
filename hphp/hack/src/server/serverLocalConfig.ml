@@ -74,6 +74,8 @@ type t = {
   (* When enabled, load class declarations stored in the saved state, if any, on
      server init. *)
   load_decls_from_saved_state : bool;
+  (* Size of Gc.major_slice to be performed when server is idle. 0 to disable *)
+  idle_gc_slice : int;
 }
 
 let default = {
@@ -120,6 +122,7 @@ let default = {
   ide_tast_cache = false;
   store_decls_in_saved_state = false;
   load_decls_from_saved_state = false;
+  idle_gc_slice = 0;
 }
 
 let path =
@@ -247,6 +250,8 @@ let load_ fn ~silent =
     ~default:default.ide_parser_cache config in
   let ide_tast_cache = bool_if_version "ide_tast_cache"
     ~default:default.ide_tast_cache config in
+  let idle_gc_slice = int_ "idle_gc_slice"
+    ~default:default.idle_gc_slice config in
   {
     use_watchman;
     watchman_init_timeout;
@@ -290,6 +295,7 @@ let load_ fn ~silent =
     ide_tast_cache;
     store_decls_in_saved_state;
     load_decls_from_saved_state;
+    idle_gc_slice;
   }
 
 let load ~silent =

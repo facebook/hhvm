@@ -479,6 +479,7 @@ let serve_one_iteration genv env client_provider =
   let has_default_client_pending =
     Option.is_some env.default_client_pending_command_needs_full_check in
   let can_accept_clients = not @@ ServerRevisionTracker.is_in_hg_update_state () in
+  let idle_gc_slice = genv.local_config.ServerLocalConfig.idle_gc_slice in
   let client_kind = match can_accept_clients, has_default_client_pending with
     (* If we are already blocked on some client, do not accept more of them.
      * Other clients (that connect through priority pipe, or persistent clients)
@@ -496,6 +497,7 @@ let serve_one_iteration genv env client_provider =
         client_provider
         env.persistent_client
         ~ide_idle:env.ide_idle
+        ~idle_gc_slice
         client_kind
   in
   (* client here is "None" if we should either handle from our existing  *)
@@ -669,12 +671,14 @@ let priority_client_interrupt_handler genv client_provider env =
     MultiThreadedCall.Cancel
   end else
 
+  let idle_gc_slice = genv.local_config.ServerLocalConfig.idle_gc_slice in
   let client, has_persistent_connection_request =
     if ServerRevisionTracker.is_in_hg_update_state () then None, false else
     ClientProvider.sleep_and_check
       client_provider
       env.persistent_client
       ~ide_idle:env.ide_idle
+      ~idle_gc_slice
       `Priority
   in
   (* we should only be looking at new priority clients, not existing persistent

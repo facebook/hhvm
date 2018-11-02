@@ -124,7 +124,7 @@ exception Client_went_away
 let provider_from_file_descriptors _ = ()
 let provider_for_test _ = ()
 
-let sleep_and_check _ _ ~ide_idle:_ _ =
+let sleep_and_check _ _ ~ide_idle:_ ~idle_gc_slice:_ _ =
   get_mocked_new_client_type (),
   Option.is_some (get_mocked_client_request Persistent)
 

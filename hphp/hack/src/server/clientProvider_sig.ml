@@ -22,6 +22,7 @@ module type S = sig
     (* Whether the most recent message received from persistent client
      * was IDE_IDLE *)
     ide_idle:bool ->
+    idle_gc_slice:int ->
     [`Any | `Priority | `Force_dormant_start_only] ->
     (** Returns an optional new client, and a boolean for whether there is
      * a request on the persistent client. *)

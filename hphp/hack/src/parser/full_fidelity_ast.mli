@@ -11,6 +11,8 @@ include module type of struct
   include Full_fidelity_ast_types
 end
 
+type lifted_awaits [@@deriving show]
+
 (**
  * The `env` of the lowerer is "full request." It provides all the settings the
  * lowerer needs to produce an AST.

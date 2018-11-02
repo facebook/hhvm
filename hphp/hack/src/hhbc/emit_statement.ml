@@ -277,6 +277,7 @@ let rec emit_stmt env (pos, st_) =
   | A.Goto (_, label) ->
     TFR.emit_goto ~in_finally_epilogue:false env label
   | A.Block b -> emit_stmts env b
+  | A.Awaitall _ -> failwith "TODO CONCURRENT"
   | A.If (condition, consequence, alternative) ->
     emit_if env pos condition consequence alternative
   | A.While (e, b) ->

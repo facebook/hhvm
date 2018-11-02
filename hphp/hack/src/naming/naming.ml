@@ -1890,6 +1890,7 @@ module Make (GetLocals : GetLocals) = struct
     | Goto label           -> name_goto env label
     | Static_var el        -> N.Static_var (static_varl env el)
     | Global_var el        -> N.Global_var (global_varl env el)
+    | Awaitall _           -> failwith "TODO CONCURRENT"
     | If (e, b1, b2)       -> if_stmt env st e b1 b2
     | Do (b, e)            -> do_stmt env b e
     | While (e, b)         -> while_stmt env e b

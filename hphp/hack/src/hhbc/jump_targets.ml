@@ -48,6 +48,7 @@ let rec collect_valid_target_labels_aux is_hh_file acc s =
   | A.Goto _
   | A.Static_var _
   | A.Global_var _
+  | A.Awaitall _
   | A.Markup _
   | A.Noop
   | A.Foreach _

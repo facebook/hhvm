@@ -75,6 +75,7 @@ and terminal_ tcopt nsenv ~in_try (_, st_) =
   | Goto _
   | Static_var _
   | Global_var _
+  | Awaitall _
     -> ()
 
 and terminal_catch tcopt nsenv ~in_try (_, _, b) =
@@ -157,6 +158,10 @@ let rec stmt tcopt (acc:(Namespace_env.env * Pos.t SMap.t)) (_, st_) =
   | Declare _
   | Return _ | GotoLabel _ | Goto _ | Static_var _
   | Global_var _ | Def_inline _ | Noop -> acc
+  | Awaitall el ->
+    List.fold_left el ~init:acc ~f:(fun acc (_, e2) ->
+      expr tcopt acc e2
+    )
   | Let (_x, _h, e) ->
     (* We would like to exclude scoped locals here, but gather the locals in
      * expression *)

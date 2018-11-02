@@ -17,6 +17,27 @@ open Ast
 (* Don't allow expressions to nest deeper than this to avoid stack overflow *)
 let recursion_limit = 30000
 
+type lifted_awaits = {
+    mutable awaits: (id option * expr) list;
+    mutable name_counter: int
+}[@@deriving show]
+
+let new_lifted_awaits () = { awaits = []; name_counter = 1 }
+
+let make_tmp_var_name c =
+  "$awaited_value_" ^ (string_of_int c)
+
+let lift_await expr awaits ~with_temp_local =
+    if (with_temp_local)
+    then
+      let name = make_tmp_var_name awaits.name_counter in
+      awaits.name_counter <- awaits.name_counter + 1;
+      awaits.awaits <- ((Some (Pos.none, name)), expr) :: awaits.awaits;
+      Lvar (Pos.none, name)
+    else
+      (awaits.awaits <- (None, expr) :: awaits.awaits;
+      Null)
+
 (* Context of the file being parsed, as (hopefully some day read-only) state. *)
 type env =
   { is_hh_file               : bool
@@ -44,6 +65,7 @@ type env =
   ; mutable saw_yield        : bool   (* Information flowing back up *)
   ; mutable unsafes          : ISet.t (* Offsets of UNSAFE_EXPR in trivia *)
   ; mutable saw_std_constant_redefinition: bool
+  ; mutable lifted_awaits    : lifted_awaits option
   (* Whether we've seen COMPILER_HALT_OFFSET. The value of COMPILER_HALT_OFFSET
     defaults to 0 if HALT_COMPILER isn't called.
     None -> COMPILER_HALT_OFFSET isn't in the source file
@@ -119,6 +141,7 @@ let make_env
     ; cls_reified_generics = ref SSet.empty
     ; in_static_method = ref false
     ; parent_is_reified = ref false
+    ; lifted_awaits = None
     }
 
 type result =
@@ -171,6 +194,21 @@ let namespace_use = Str.regexp "[^\\\\]*$"
 let mode_annotation = function
   | FileInfo.Mphp -> FileInfo.Mdecl
   | m -> m
+
+let with_new_nonconcurrent_scope env f =
+  let saved_lifted_awaits = env.lifted_awaits in
+  env.lifted_awaits <- None;
+  let result = f () in
+  env.lifted_awaits <- saved_lifted_awaits;
+  result
+
+let with_new_concurrent_scope env f =
+  let saved_lifted_awaits = env.lifted_awaits in
+  let lifted_awaits = new_lifted_awaits () in
+  env.lifted_awaits <- Some lifted_awaits;
+  let result = f () in
+  env.lifted_awaits <- saved_lifted_awaits;
+  (lifted_awaits, result)
 
 let syntax_to_list include_separators node  =
   let rec aux acc syntax_list =
@@ -1378,7 +1416,14 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | Some TK.At     when env.codegen -> Unop (Usilence, expr)
         | Some TK.At                      -> snd expr
         | Some TK.Inout                   -> Callconv (Pinout, expr)
-        | Some TK.Await                   -> Await expr
+        | Some TK.Await                   ->
+            begin match env.lifted_awaits with
+            | Some lifted_awaits ->
+                let e = snd expr in
+                let p = pPos node env in
+                lift_await (p, e) lifted_awaits ~with_temp_local:(location <> AsStatement)
+            | None -> Await expr
+            end
         | Some TK.Suspend                 -> Suspend expr
         | Some TK.Clone                   -> Clone expr
         | Some TK.Print                   ->
@@ -1910,14 +1955,14 @@ and pFunctionBody : block parser = fun node env ->
     env.saw_yield <- true;
     [ Pos.none, Noop ]
   | CompoundStatement _ ->
-    let block = pBlock node env in
+    let block = with_new_nonconcurrent_scope env (fun () -> pBlock node env) in
     if not env.top_level_statements
     && (  env.fi_mode = FileInfo.Mdecl && not env.codegen
        || env.quick_mode)
     then [ Pos.none, Noop ]
     else block
   | _ ->
-    let p, r = pExpr node env in
+    let p, r = with_new_nonconcurrent_scope env (fun () -> pExpr node env) in
     [p, Return (Some (p, r))]
 and pStmtUnsafe : stmt list parser = fun node env ->
   let stmt = pStmt node env in
@@ -2169,11 +2214,32 @@ and pStmt : stmt parser = fun node env ->
     pos, Continue (pBreak_or_continue_level env level)
   | GlobalStatement { global_variables; _ } ->
     pos, Global_var (couldMap ~f:(pExpr ~location:InGlobalVar) global_variables env)
-  | ConcurrentStatement _ ->
+  | ConcurrentStatement { concurrent_statement=concurrent_stmt; _ } ->
     if not (ParserOptions.enable_concurrent env.parser_options) then
       raise_parsing_error env (`Node node) SyntaxError.concurrent_is_disabled;
 
-    failwith "Concurrent not implemented yet"
+    let (lifted_awaits, stmt) =
+      with_new_concurrent_scope env (fun () -> pStmt concurrent_stmt env) in
+    (* lifted awaits are accumulated in reverse *)
+    let await_all = pos, Awaitall (List.rev lifted_awaits.awaits) in
+    let stmt = match stmt with
+    | pos, Block stmts ->
+      let body_stmts, assign_stmts, _ =
+        List.fold_left ~init:([], [], 1)
+          ~f:(fun (body_stmts, assign_stmts, i) n ->
+            match n with
+            | (p1, Expr (p2, Binop ((Eq op), e1, e2))) ->
+              let name = make_tmp_var_name i in
+              let tmp_n = Pos.none, Lvar (Pos.none, name) in
+              let new_n = (p1, Expr (Pos.none, Binop ((Eq None), tmp_n, e2))) in
+              let assign_stmt = (p1, Expr (p2, Binop ((Eq op), e1, tmp_n))) in
+              (new_n :: body_stmts, assign_stmt :: assign_stmts, i + 1)
+            | _ -> (n :: body_stmts, assign_stmts, i)
+          ) stmts in
+      pos, Block (List.concat [List.rev body_stmts; List.rev assign_stmts])
+    | _ -> failwith "Unexpected concurrent stmt structure" in
+
+    pos, Block [await_all; stmt]
   | MarkupSection _ -> pMarkup node env
   | _ when env.max_depth > 0 && env.codegen ->
     (* OCaml optimisers; Forgive them, for they know not what they do!

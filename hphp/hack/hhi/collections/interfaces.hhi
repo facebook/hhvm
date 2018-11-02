@@ -1403,7 +1403,7 @@ interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
 interface ConstSet<+Tv> extends ConstCollection<Tv>,
                                 ConstSetAccess<Tv>,
                                 HH\Rx\KeyedIterable<arraykey, Tv>,
-                                Indexish<Tv, Tv> {
+                                Container<Tv> {
   /**
    * Returns a `ConstVector` containing the values of the current `ConstSet`.
    *

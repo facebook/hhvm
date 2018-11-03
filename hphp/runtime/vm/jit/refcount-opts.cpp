@@ -1294,7 +1294,6 @@ void weaken_decrefs(Env& env) {
         if (id != -1 && will_be_used.test(id)) {
           FTRACE(2, "    ** weakening {} to DecRefNZ\n", inst);
           inst.setOpcode(DecRefNZ);
-          inst.clearExtra();
         }
       }
 
@@ -2774,7 +2773,6 @@ void pre_local_transfer(PreEnv& penv, bool incDec, Block* blk) {
           if (lb >= 2) {
             FTRACE(2, "    ** decnz:  {}\n", inst);
             inst.setOpcode(DecRefNZ);
-            inst.clearExtra();
           }
         }
       }

@@ -114,15 +114,6 @@ const StringData* incRefProfileKey(const IRInstruction* inst) {
   );
 }
 
-const StringData* decRefNZProfileKey(const IRInstruction* inst) {
-  return makeStaticString(
-    folly::to<std::string>("DecRefNZProfile-",
-                           opcodeName(inst->op()),
-                           "-",
-                            inst->src(0)->type().toString())
-  );
-}
-
 template<typename T>
 Vreg incrAmount(Vout& v, const TargetProfile<T>& profile) {
   if (!profile.profiling()) return Vreg{};
@@ -269,9 +260,8 @@ namespace {
 
 const StringData* decRefProfileKey(const IRInstruction* inst) {
   return makeStaticString(folly::to<std::string>(
-                            "DecRefProfile-",
-                            opcodeName(inst->op()), '-',
-                            inst->extra<DecRef>()->locId));
+                              "DecRefProfile-",
+                              inst->extra<DecRefData>()->locId));
 }
 
 TargetProfile<DecRefProfile> decRefProfile(const IRLS& env,
@@ -770,12 +760,11 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
   auto const loc = srcLoc(env, inst, 0);
   auto& v = vmain(env);
 
-  auto const profile = TargetProfile<RefcountProfile>(env.unit.context(),
-                                                      inst->marker(),
-                                                      decRefNZProfileKey(inst));
+  auto const profile = decRefProfile(env, inst);
+
   auto const incr = incrAmount(v, profile);
 
-  incrementProfile(v, profile, incr, offsetof(RefcountProfile, total));
+  incrementProfile(v, profile, incr, offsetof(DecRefProfile, total));
 
   bool unlikelyCounted = false;
   bool unlikelyDecrement = false;
@@ -789,8 +778,8 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
         FTRACE(3, "irlower-inc-dec: Emitting cold counted check for {}, {}\n",
                data, *inst);
       }
-      if (data.percent(data.incDeced) <
-          RuntimeOption::EvalJitPGOUnlikelyDecRefSurvivePercent) {
+      if (data.percent(data.decremented) <
+          RuntimeOption::EvalJitPGOUnlikelyDecRefDecrementPercent) {
         unlikelyDecrement = true;
         FTRACE(3, "irlower-inc-dec: Emitting cold DecRef for {}, {}\n",
                data, *inst);
@@ -807,7 +796,7 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
         v, vcold(env), CC_Z, sf,
         [&] (Vout& v) {
           incrementProfile(v, profile, incr,
-                           offsetof(RefcountProfile, incDeced));
+                           offsetof(DecRefProfile, decremented));
           emitDecRef(v, loc.reg(), TRAP_REASON);
         },
         unlikelyDecrement
@@ -835,13 +824,13 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
   ifRefCountedType(
     v, vtaken, ty, loc,
     [&] (Vout& v) {
-      incrementProfile(v, profile, incr, offsetof(RefcountProfile, refcounted));
+      incrementProfile(v, profile, incr, offsetof(DecRefProfile, refcounted));
       auto& vtaken = unlikelyDecrement ? vcold(env) : v;
       ifNonPersistent(
         v, vtaken, ty, loc,
         [&](Vout& v) {
           incrementProfile(v, profile, incr,
-                           offsetof(RefcountProfile, incDeced));
+                           offsetof(DecRefProfile, decremented));
           emitDecRef(v, loc.reg(), TRAP_REASON);
         }
       );

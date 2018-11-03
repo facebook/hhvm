@@ -24,20 +24,26 @@ end)
 type args_mut_map = (Pos.t * param_mutability option) Borrowable_args.t
 
 (* true if function has <<__ReturnMutable>> annotation, otherwise false *)
-let fun_returns_mutable (env : Typing_env.env) (id : Nast.sid) =
-  match Env.get_fun env (snd id) with
-  | None -> false
-  | Some fty -> fty.ft_returns_mutable
-
 let is_fun_call_returning_mutable (env : Typing_env.env) (e : T.expr): bool =
+  let fty_returns_mutable fty =
+    match Env.env_reactivity env, fty.ft_reactive with
+    (* in localrx context assume non-reactive functions to return mutable *)
+    | Local _, Nonreactive -> true
+    | _ -> fty.ft_returns_mutable
+  in
+  let fun_returns_mutable id =
+    match Env.get_fun env (snd id) with
+    | None -> false
+    | Some fty -> fty_returns_mutable fty
+  in
   match snd e with
   (* Function call *)
   | T.Call (_, (_, T.Id id), _, _, _)
   | T.Call (_, (_, T.Fun_id id), _, _, _) ->
-    fun_returns_mutable env id
+    fun_returns_mutable id
   | T.Call (_, ((_, (_, Tfun fty)), T.Obj_get _), _, _, _)
-  | T.Call (_, ((_, (_, Tfun fty)), T.Class_const _), _, _, _)->
-    fty.ft_returns_mutable
+  | T.Call (_, ((_, (_, Tfun fty)), T.Class_const _), _, _, _) ->
+    fty_returns_mutable fty
   | _ -> false
 
 

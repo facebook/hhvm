@@ -3415,6 +3415,7 @@ void optimizeRefcounts(IRUnit& unit) {
     pre_incdecs(env, rca, false);
   }
   sink_incs(env);
+  weaken_decrefs(env);
 
   // We may have pushed IncRefs past CheckTypes, which could allow us to
   // specialize them.

@@ -53,8 +53,8 @@ struct ArrayOffsetProfile;
 struct CallTargetProfile;
 struct ClsCnsProfile;
 struct DecRefProfile;
+struct IncRefProfile;
 struct MethProfile;
-struct RefcountProfile;
 struct SwitchProfile;
 struct TypeProfile;
 struct ReleaseVVProfile;
@@ -247,8 +247,8 @@ using Symbol = boost::variant< StaticLocal
                              , Profile<jit::CallTargetProfile>
                              , Profile<jit::ClsCnsProfile>
                              , Profile<jit::DecRefProfile>
+                             , Profile<jit::IncRefProfile>
                              , Profile<jit::MethProfile>
-                             , Profile<jit::RefcountProfile>
                              , Profile<jit::ReleaseVVProfile>
                              , Profile<jit::SwitchProfile>
                              , Profile<jit::TypeProfile>

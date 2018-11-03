@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_JIT_PROFILE_DECREF_H_
-#define incl_HPHP_JIT_PROFILE_DECREF_H_
+#ifndef incl_HPHP_JIT_DECREF_PROFILE_H_
+#define incl_HPHP_JIT_DECREF_PROFILE_H_
 
 #include <folly/Format.h>
 #include <folly/Optional.h>
@@ -114,77 +114,6 @@ struct DecRefProfile {
    * got a non-persistent, refcounted value with count > 1).
    */
   uint16_t decremented;
-};
-
-/*
- * Profile the frequency of the 3 possible different behaviors for an IncRef,
- * or DecRefNZ instruction.  Each execution must fall into exactly one of these
- * categories:
- *
- *  1) Uncounted:
- *     the type was uncounted
- *  2) Persistent:
- *     the type was refcounted and the value was persistent (so no inc/dec
- *     happened)
- *  3) IncDeced:
- *     the count for the value was incremented or decremented.
- *
- */
-struct RefcountProfile {
-  uint16_t uncounted() const {
-    return total - refcounted;
-  }
-
-  uint16_t persistent() const {
-    return refcounted - incDeced;
-  }
-
-  float percent(uint16_t value) const {
-    return total ? 100.0 * value / total : 0.0;
-  }
-
-  std::string toString() const {
-    return folly::sformat(
-      "total: {:4}\n uncounted: {:4} ({:.1f}%),\n persistent: {:4} ({:.1f}%),\n"
-      " incDeced: {:4} ({:.1f}%)",
-      total,
-      uncounted(),  percent(uncounted()),
-      persistent(), percent(persistent()),
-      incDeced,     percent(incDeced)
-    );
-  }
-
-  // overflow handling isn't statistically correct; but its better
-  // than overflowing, and we're expecting threads to all have similar
-  // distributions.
-  static void reduce(RefcountProfile& a, const RefcountProfile& b) {
-    auto const total = static_cast<uint32_t>(a.total + b.total);
-    if (total > std::numeric_limits<uint16_t>::max()) {
-      auto scale = [&] (uint16_t& x, uint64_t y) {
-        x = (x + y) * std::numeric_limits<uint16_t>::max() / total;
-      };
-      a.total = std::numeric_limits<uint16_t>::max();
-      scale(a.refcounted, b.refcounted);
-      scale(a.incDeced, b.incDeced);
-    } else {
-      a.total       += b.total;
-      a.refcounted  += b.refcounted;
-      a.incDeced    += b.incDeced;
-    }
-  }
-
-  /*
-   * The total number of times this refcount op was executed.
-   */
-  uint16_t total;
-  /*
-   * The number of times this refcount op made it past the refcounted check.
-   */
-  uint16_t refcounted;
-  /*
-   * The number of times this refcount op inc/deced the refcount.
-   */
-  uint16_t incDeced;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

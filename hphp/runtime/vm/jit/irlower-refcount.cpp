@@ -33,10 +33,11 @@
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
+#include "hphp/runtime/vm/jit/decref-profile.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
+#include "hphp/runtime/vm/jit/incref-profile.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
-#include "hphp/runtime/vm/jit/profile-refcount.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
@@ -151,12 +152,12 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
   auto const loc = srcLoc(env, inst, 0);
   auto& v = vmain(env);
 
-  auto const profile = TargetProfile<RefcountProfile>(env.unit.context(),
-                                                      inst->marker(),
-                                                      incRefProfileKey(inst));
+  auto const profile = TargetProfile<IncRefProfile>(env.unit.context(),
+                                                    inst->marker(),
+                                                    incRefProfileKey(inst));
 
   auto const incr = incrAmount(v, profile);
-  incrementProfile(v, profile, incr, offsetof(RefcountProfile, total));
+  incrementProfile(v, profile, incr, offsetof(IncRefProfile, total));
 
   bool unlikelyCounted = false;
   bool unlikelyIncrement = false;
@@ -173,7 +174,7 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
         FTRACE(3, "irlower-inc-dec: Emitting cold counted check for {}, {}\n",
                data, *inst);
       }
-      if (data.percent(data.incDeced) <
+      if (data.percent(data.incremented) <
           RuntimeOption::EvalJitPGOUnlikelyIncRefIncrementPercent) {
         unlikelyIncrement = true;
         FTRACE(3, "irlower-inc-dec: Emitting cold IncRef for {}, {}\n",
@@ -189,7 +190,7 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
     ifThen(v, vcold(env), CC_Z, sf,
            [&] (Vout& v) {
              incrementProfile(v, profile, incr,
-                              offsetof(RefcountProfile, incDeced));
+                              offsetof(IncRefProfile, incremented));
              emitIncRef(v, loc.reg(), TRAP_REASON);
            },
            unlikelyIncrement);
@@ -217,12 +218,12 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
   ifRefCountedType(
     v, vtaken, ty, loc,
     [&] (Vout& v) {
-      incrementProfile(v, profile, incr, offsetof(RefcountProfile, refcounted));
+      incrementProfile(v, profile, incr, offsetof(IncRefProfile, refcounted));
 
       if (one_bit_refcount) {
         if (unconditional_one_bit_incref && !ty.maybe(TPersistent)) {
           incrementProfile(v, profile, incr,
-                           offsetof(RefcountProfile, incDeced));
+                           offsetof(IncRefProfile, incremented));
           emitIncRef(v, loc.reg(), TRAP_REASON);
         } else {
           // if (m_count == OneReference) m_count = MultiReference;
@@ -234,7 +235,7 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
             v, vcold(env), CC_E, sf,
             [&](Vout& v) {
               incrementProfile(v, profile, incr,
-                               offsetof(RefcountProfile, incDeced));
+                               offsetof(IncRefProfile, incremented));
               emitIncRef(v, loc.reg(), TRAP_REASON);
             },
             unlikelyIncrement);
@@ -247,7 +248,7 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
         v, vtaken, ty, loc,
         [&] (Vout& v) {
           incrementProfile(v, profile, incr,
-                           offsetof(RefcountProfile, incDeced));
+                           offsetof(IncRefProfile, incremented));
           emitIncRef(v, loc.reg(), TRAP_REASON);
         }
       );

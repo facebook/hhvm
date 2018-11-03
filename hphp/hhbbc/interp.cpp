@@ -1445,43 +1445,52 @@ void isTypeStructCJmpImpl(ISS& env,
                           const JmpOp& jmp) {
   auto bail = [&] { impl(env, inst, jmp); };
   auto const a = tv(topC(env));
-  if (!a || isValidTSType(*a, false)) return bail();
-  auto ts_type = type_of_type_structure(a->m_data.parr);
-  if (!ts_type) return bail();
+  if (!a || !isValidTSType(*a, false)) return bail();
 
-  auto const locId = topStkEquiv(env, 1);
-  if (locId == NoLocalId) return bail();
-
-  // TODO(T26859386): refine if ($x is nonnull) case
-  popC(env);
-  popC(env);
-  auto const negate = jmp.op == Op::JmpNZ;
-  auto const result = [&] (Type t, bool pass) {
-    if (!pass) {
-      auto tinit = remove_uninit(t);
-      if (tinit.subtypeOf(*ts_type)) return TBottom;
-      if (t.couldBe(BNull)) {
-        auto tnonnull = is_opt(tinit) ? unopt(tinit) : tinit;
-        if (ts_type->couldBe(BNull)) {
-          return tnonnull;
-        }
-        if (tnonnull.subtypeOf(*ts_type)) {
-          return TNull;
-        }
-      }
-
-      return t;
+  auto const is_nullable_ts = is_ts_nullable(a->m_data.parr);
+  auto const ts_kind = get_ts_kind(a->m_data.parr);
+  // type_of_type_structure does not resolve these types.  It is important we
+  // do resolve them here, or we may have issues when we reduce the checks to
+  // InstanceOfD checks.  This logic performs the same exact refinement as
+  // instanceOfD will.
+  if (!is_nullable_ts &&
+      (ts_kind == TypeStructure::Kind::T_class ||
+       ts_kind == TypeStructure::Kind::T_interface ||
+       ts_kind == TypeStructure::Kind::T_xhp ||
+       ts_kind == TypeStructure::Kind::T_unresolved)) {
+    auto const clsName = get_ts_classname(a->m_data.parr);
+    auto const rcls = env.index.resolve_class(env.ctx, clsName);
+    if (!rcls || !rcls->resolved() || rcls->cls()->attrs & AttrEnum) {
+      return bail();
     }
-    if (t.couldBe(BUninit) && ts_type->couldBe(BNull)) {
-      return union_of(intersection_of(std::move(t),
-                                      std::move(ts_type.value())),
-                      TUninit);
+
+    auto const locId = topStkEquiv(env, 1);
+    if (locId == NoLocalId || interface_supports_non_objects(clsName)) {
+      return bail();
     }
-    return intersection_of(std::move(t), std::move(ts_type.value()));
-  };
-  auto const pre  = [&] (Type t) { return result(std::move(t), negate); };
-  auto const post = [&] (Type t) { return result(std::move(t), !negate); };
-  refineLocation(env, locId, pre, jmp.target, post);
+
+    auto const val = topC(env, 1);
+    auto const instTy = subObj(*rcls);
+    if (val.subtypeOf(instTy) || !val.couldBe(instTy)) {
+      return bail();
+    }
+
+    // If we have an optional type, whose unopt is guaranteed to pass
+    // the instanceof check, then failing to pass implies it was null.
+    auto const fail_implies_null = is_opt(val) && unopt(val).subtypeOf(instTy);
+
+    popC(env);
+    popC(env);
+    auto const negate = jmp.op == Op::JmpNZ;
+    auto const result = [&] (Type t, bool pass) {
+      return pass ? instTy : fail_implies_null ? TNull : t;
+    };
+    auto const pre  = [&] (Type t) { return result(t, negate); };
+    auto const post = [&] (Type t) { return result(t, !negate); };
+    refineLocation(env, locId, pre, jmp.target, post);
+  } else {
+    return bail();
+  }
 }
 
 } // namespace

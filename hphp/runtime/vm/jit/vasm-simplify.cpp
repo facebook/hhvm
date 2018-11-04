@@ -821,6 +821,70 @@ bool simplify(Env& env, const cmpbi& vcmp, Vlabel b, size_t i) {
   return false;
 }
 
+// test sets C=O=0; shift sets them in unknown ways
+// Z,S and P are set the same way by both.
+bool fix_shift_test_flags(Env& env, Vreg sf, Vlabel b, size_t i) {
+  return check_sf_usage(
+    env, sf, b, i,
+    [] (ConditionCode cc) {
+      switch (cc) {
+        case CC_None:
+          always_assert(false);
+        case CC_E:
+        case CC_NE:
+        case CC_S:
+        case CC_NS:
+          // only test Z and S, no change
+          return cc;
+        case CC_A:
+          // C=0 && Z=0, but C is always zero
+          return CC_NE;
+        case CC_BE:
+          // C=1 || Z=1, but C is always zero
+          return CC_E;
+        case CC_L:
+          // S != OF, but OF is always zero
+          return CC_S;
+        case CC_GE:
+          // S == OF, but OF is always zero
+          return CC_NS;
+        case CC_O:
+        case CC_NO:
+        case CC_P:
+        case CC_NP:
+        case CC_LE:
+        case CC_G:
+        case CC_AE:
+        case CC_B:
+          // can't be fixed
+          return CC_None;
+      }
+      not_reached();
+    }
+  );
+}
+
+bool simplify(Env& env, const testq& test, Vlabel b, size_t i) {
+  if (test.s0 != test.s1) return false;
+  return if_inst<Vinstr::shrqi>(
+    env, b, i - 1,
+    [&] (const shrqi& vshrqi) {
+      if (env.use_counts[vshrqi.sf] ||
+          vshrqi.d != test.s0 ||
+          !fix_shift_test_flags(env, test.sf, b, i)) {
+        return false;
+      }
+
+      return simplify_impl(
+        env, b, i - 1,
+        [&] (Vout& v) {
+          v << shrqi{ vshrqi.s0, vshrqi.s1, vshrqi.d, test.sf };
+          return 2;
+        }
+      );
+    }
+  );
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 /*

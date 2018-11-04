@@ -4031,7 +4031,7 @@ void in(ISS& env, const bc::LateBoundCls& op) {
 
 void in(ISS& env, const bc::CheckThis&) {
   if (thisAvailable(env)) {
-    reduce(env, bc::Nop {});
+    return reduce(env, bc::Nop {});
   }
   if (env.ctx.cls && is_unused_trait(*env.ctx.cls)) {
     unreachable(env);

@@ -340,124 +340,124 @@ int value_width(Env& env, Vreg reg) {
  *    convert the load to a non-zero extending form
  *  - otherwise apply a movtq<sz> to the register, and return the dst.
  */
-Vreg narrow_reg(Env& env, int size, Vreg r, Vlabel b, size_t i, Vout& /*v*/) {
+Vreg narrow_reg(Env& env, int size, Vreg r, Vlabel b, size_t i, Vout& v) {
   auto const it = env.unit.regToConst.find(r);
   if (it != env.unit.regToConst.end()) {
     assertx(!it->second.isUndef && it->second.kind != Vconst::Double);
     return r;
   }
 
-  while (i--) {
-    auto replace = [&] (const Vinstr& rep) {
-      return simplify_impl(env, b, i, [&] (Vout& v) {
-        v << rep;
-        return 1;
-      });
-    };
-    auto match = [&] (int rsz, size_t rn) {
-      if (rsz != size) return Vreg{};
-      if (env.use_counts[r] == 1) {
-        replace(nop{});
-      }
-      return Vreg{ rn };
-    };
-
-    auto const& inst = env.unit.blocks[b].code[i];
-    switch (inst.op) {
-      case Vinstr::loadzbq: {
-        auto const& load = inst.get<Vinstr::loadzbq>();
-        if (load.d == r) {
-          if (size == sz::byte && env.use_counts[r] == 1) {
-            replace(loadb{load.s, r});
-            return r;
-          }
-          return {};
+  auto reg = [&] () -> Vreg {
+    while (i--) {
+      auto replace = [&] (const Vinstr& rep) {
+        return simplify_impl(env, b, i, [&] (Vout& v) {
+          v << rep;
+          return 1;
+        });
+      };
+      auto match = [&] (int rsz, size_t rn) {
+        if (rsz != size) return Vreg{};
+        if (env.use_counts[r] == 1) {
+          replace(nop{});
         }
-        break;
-      }
-      case Vinstr::loadzbl: {
-        auto const& load = inst.get<Vinstr::loadzbl>();
-        if (load.d == r) {
-          if (size == sz::byte && env.use_counts[r] == 1) {
-            replace(loadb{load.s, r});
-            return r;
+        return Vreg{ rn };
+      };
+
+      auto const& inst = env.unit.blocks[b].code[i];
+      switch (inst.op) {
+        case Vinstr::loadzbq: {
+          auto const& load = inst.get<Vinstr::loadzbq>();
+          if (load.d == r) {
+            if (size == sz::byte && env.use_counts[r] == 1) {
+              replace(loadb{load.s, r});
+              return r;
+            }
+            return {};
           }
-          return {};
+          break;
         }
-        break;
-      }
-      case Vinstr::movzbw:
-        if (inst.movzbw_.d == r) return match(sz::byte, inst.movzbw_.s);
-        break;
-      case Vinstr::movzbl:
-        if (inst.movzbl_.d == r) return match(sz::byte, inst.movzbl_.s);
-        break;
-      case Vinstr::movzbq:
-        if (inst.movzbq_.d == r) return match(sz::byte, inst.movzbq_.s);
-        break;
-
-      case Vinstr::movzwl:
-        if (inst.movzwl_.d == r) return match(sz::word, inst.movzwl_.s);
-        break;
-      case Vinstr::movzwq:
-        if (inst.movzwq_.d == r) return match(sz::word, inst.movzwq_.s);
-        break;
-
-      case Vinstr::movzlq:
-        if (inst.movzlq_.d == r) return match(sz::dword, inst.movzlq_.s);
-        break;
-
-      case Vinstr::loadzlq: {
-        auto const& load = inst.get<Vinstr::loadzlq>();
-        if (load.d == r) {
-          if (size == sz::dword && env.use_counts[r] == 1) {
-            replace(loadl{load.s, r});
-            return r;
+        case Vinstr::loadzbl: {
+          auto const& load = inst.get<Vinstr::loadzbl>();
+          if (load.d == r) {
+            if (size == sz::byte && env.use_counts[r] == 1) {
+              replace(loadb{load.s, r});
+              return r;
+            }
+            return {};
           }
-          return {};
+          break;
         }
-        break;
-      }
-      default:
-        break;
-    }
-  }
-  return {};
-}
+        case Vinstr::movzbw:
+          if (inst.movzbw_.d == r) return match(sz::byte, inst.movzbw_.s);
+          break;
+        case Vinstr::movzbl:
+          if (inst.movzbl_.d == r) return match(sz::byte, inst.movzbl_.s);
+          break;
+        case Vinstr::movzbq:
+          if (inst.movzbq_.d == r) return match(sz::byte, inst.movzbq_.s);
+          break;
 
-int narrow_cmp(Env& env, int size, const cmpq& vcmp, Vlabel b, size_t i,
-               Vout& v) {
-  auto getreg = [&] (Vreg reg, Vout& v) {
-    auto out = narrow_reg(env, size, reg, b, i, v);
-    if (!out.isValid()) {
-      out = v.makeReg();
-      switch (size) {
-        case sz::byte:
-          v << movtqb{reg, out};
+        case Vinstr::movzwl:
+          if (inst.movzwl_.d == r) return match(sz::word, inst.movzwl_.s);
           break;
-        case sz::word:
-          v << movtqw{reg, out};
+        case Vinstr::movzwq:
+          if (inst.movzwq_.d == r) return match(sz::word, inst.movzwq_.s);
           break;
-        case sz::dword:
-          v << movtql{reg, out};
+
+        case Vinstr::movzlq:
+          if (inst.movzlq_.d == r) return match(sz::dword, inst.movzlq_.s);
           break;
+
+        case Vinstr::loadzlq: {
+          auto const& load = inst.get<Vinstr::loadzlq>();
+          if (load.d == r) {
+            if (size == sz::dword && env.use_counts[r] == 1) {
+              replace(loadl{load.s, r});
+              return r;
+            }
+            return {};
+          }
+          break;
+        }
         default:
-          always_assert(false);
+          break;
       }
     }
-    return out;
-  };
-  auto const s0 = getreg(vcmp.s0, v);
-  auto const s1 = getreg(vcmp.s1, v);
+    return {};
+  }();
+
+  if (reg.isValid()) return reg;
+  reg = v.makeReg();
   switch (size) {
     case sz::byte:
-      v << cmpb{s0, s1, vcmp.sf};
+      v << movtqb{r, reg};
       break;
     case sz::word:
-      v << cmpw{s0, s1, vcmp.sf};
+      v << movtqw{r, reg};
       break;
     case sz::dword:
-      v << cmpl{s0, s1, vcmp.sf};
+      v << movtql{r, reg};
+      break;
+    default:
+      always_assert(false);
+  }
+  return reg;
+}
+
+template<typename instb, typename instw, typename instl, typename instq>
+int narrow_inst(Env& env, int size, const instq& vinst, Vlabel b, size_t i,
+                Vout& v) {
+  auto const s0 = narrow_reg(env, size, vinst.s0, b, i, v);
+  auto const s1 = narrow_reg(env, size, vinst.s1, b, i, v);
+  switch (size) {
+    case sz::byte:
+      v << instb{s0, s1, vinst.sf};
+      break;
+    case sz::word:
+      v << instw{s0, s1, vinst.sf};
+      break;
+    case sz::dword:
+      v << instl{s0, s1, vinst.sf};
       break;
     default:
       always_assert(false);
@@ -695,7 +695,7 @@ bool simplify(Env& env, const cmpq& vcmp, Vlabel b, size_t i) {
   if (!fix_signed_uses(env, vcmp.sf, b, i)) return false;
 
   return simplify_impl(env, b, i, [&] (Vout& v) {
-    return narrow_cmp(env, sz, vcmp, b, i, v);
+    return narrow_inst<cmpb, cmpw, cmpl>(env, sz, vcmp, b, i, v);
   });
 }
 
@@ -894,6 +894,71 @@ bool simplify(Env& env, const andbi& andbi, Vlabel b, size_t i) {
 
 bool simplify(Env& env, const andli& andli, Vlabel b, size_t i) {
   return simplify_andi<Vinstr::testl, testli>(env, andli, b, i);
+}
+
+bool simplify(Env& env, const testq& test, Vlabel b, size_t i) {
+  auto const sz0 = value_width(env, test.s0);
+  auto const sz1 = value_width(env, test.s1);
+
+  auto const size = sz1 < sz0 ? sz1 : sz0;
+  if (size >= sz::qword) return false;
+
+  return simplify_impl(env, b, i, [&] (Vout& v) {
+    return narrow_inst<testb, testw, testl>(env, size, test, b, i, v);
+  });
+}
+
+template<typename Out, typename In>
+bool simplify_signed_test(Env& env, const In& test, uint32_t val,
+                          Vlabel b, size_t i) {
+  return
+    val == 0x80000000 &&
+    check_sf_usage(
+      env, test.sf, b, i,
+      [] (ConditionCode cc) {
+        switch (cc) {
+          case CC_None:
+            always_assert(false);
+          case CC_E:   return CC_NS;
+          case CC_NE:  return CC_S;
+          case CC_S:
+          case CC_NS:
+            return cc;
+
+          case CC_A:
+          case CC_BE:
+          case CC_L:
+          case CC_GE:
+          case CC_O:
+          case CC_NO:
+          case CC_P:
+          case CC_NP:
+          case CC_LE:
+          case CC_G:
+          case CC_AE:
+          case CC_B:
+            // can't be fixed
+            return CC_None;
+        }
+        not_reached();
+      }
+    ) &&
+    simplify_impl(env, b, i, Out { test.s1, test.s1, test.sf });
+}
+
+bool simplify(Env& env, const testli& test, Vlabel b, size_t i) {
+  return simplify_signed_test<testl>(env, test, test.s0.l(), b, i);
+}
+
+bool simplify(Env& env, const testl& test, Vlabel b, size_t i) {
+  auto const it = env.unit.regToConst.find(test.s0);
+  if (it != env.unit.regToConst.end()) {
+    if (!it->second.isUndef &&
+        it->second.kind != Vconst::Double) {
+      return simplify_signed_test<testl>(env, test, it->second.val, b, i);
+    }
+  }
+  return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

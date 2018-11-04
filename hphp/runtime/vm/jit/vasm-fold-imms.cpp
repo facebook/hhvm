@@ -100,6 +100,7 @@ struct ImmFolder {
     val = vals[r];
     return true;
   }
+
   // folders
   template <class Inst>
   void fold(Inst&, Vinstr& /*out*/) {}
@@ -150,6 +151,21 @@ struct ImmFolder {
     else if (match_int(in.s1, val)) {out = testqi{val, in.s0, in.sf};}
     else if (match_uint(in.s0, val)) {out = testli{val, Reg32(in.s1), in.sf};}
     else if (match_uint(in.s1, val)) {out = testli{val, Reg32(in.s0), in.sf};}
+  }
+  void fold(testl& in, Vinstr& out) {
+    int val;
+    if (match_xint(in.s0, val)) {out = testli{val, in.s1, in.sf};}
+    else if (match_xint(in.s1, val)) {out = testli{val, in.s0, in.sf};}
+  }
+  void fold(testw& in, Vinstr& out) {
+    int val;
+    if (match_xint(in.s0, val)) {out = testwi{int16_t(val), in.s1, in.sf};}
+    else if (match_xint(in.s1, val)) {out = testwi{int16_t(val), in.s0, in.sf};}
+  }
+  void fold(testb& in, Vinstr& out) {
+    int val;
+    if (match_xint(in.s0, val)) {out = testbi{int8_t(val), in.s1, in.sf};}
+    else if (match_xint(in.s1, val)) {out = testbi{int8_t(val), in.s0, in.sf};}
   }
   void fold(cmpb& in, Vinstr& out) {
     int val;

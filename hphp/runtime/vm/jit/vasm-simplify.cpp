@@ -283,59 +283,6 @@ bool simplify(Env&, const Inst& /*inst*/, Vlabel /*b*/, size_t /*i*/) {
   return false;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-/*
- * Arithmetic instructions.
- */
-
-template<typename Test, typename And>
-bool simplify_and(Env& env, const And& vandq, Vlabel b, size_t i) {
-  return if_inst<Vinstr::testq>(env, b, i + 1, [&] (const testq& vtestq) {
-    // And{s0, s1, tmp, _}; testq{tmp, tmp, sf} -> Test{s0, s1, sf}
-    // where And/Test is either andq/testq, or andqi/testqi.
-    if (!(env.use_counts[vandq.d] == 2 &&
-          env.use_counts[vandq.sf] == 0 &&
-          vtestq.s0 == vandq.d &&
-          vtestq.s1 == vandq.d)) return false;
-
-    return simplify_impl(env, b, i, [&] (Vout& v) {
-      v << Test{vandq.s0, vandq.s1, vtestq.sf};
-      return 2;
-    });
-  });
-}
-
-bool simplify(Env& env, const andq& vandq, Vlabel b, size_t i) {
-  return simplify_and<testq>(env, vandq, b, i);
-}
-
-bool simplify(Env& env, const andqi& vandqi, Vlabel b, size_t i) {
-  return simplify_and<testqi>(env, vandqi, b, i);
-}
-
-/*
- * Simplify masking values with -1 in andXi{}:
- *  andbi{0xff, s, d} -> copy{s, d}
- *  andli{0xffffffff, s, d} -> copy{s, d}
- */
-template<typename andi>
-bool simplify_andi(Env& env, const andi& inst, Vlabel b, size_t i) {
-  if (inst.s0.l() != -1 ||
-      env.use_counts[inst.sf] != 0) return false;
-  return simplify_impl(env, b, i, [&] (Vout& v) {
-    v << copy{inst.s1, inst.d};
-    return 1;
-  });
-}
-
-bool simplify(Env& env, const andbi& andbi, Vlabel b, size_t i) {
-  return simplify_andi(env, andbi, b, i);
-}
-
-bool simplify(Env& env, const andli& andli, Vlabel b, size_t i) {
-  return simplify_andi(env, andli, b, i);
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 /*
  * Narrow compares
@@ -864,26 +811,89 @@ bool fix_shift_test_flags(Env& env, Vreg sf, Vlabel b, size_t i) {
   );
 }
 
-bool simplify(Env& env, const testq& test, Vlabel b, size_t i) {
-  if (test.s0 != test.s1) return false;
-  return if_inst<Vinstr::shrqi>(
-    env, b, i - 1,
-    [&] (const shrqi& vshrqi) {
-      if (env.use_counts[vshrqi.sf] ||
-          vshrqi.d != test.s0 ||
-          !fix_shift_test_flags(env, test.sf, b, i)) {
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Test/And
+ */
+
+/*
+ * If inst (assumed to be an instruction that writes an output
+ * register d, and the status flags sf) is followed by a test
+ * instruction, see if we can drop the test and just use inst's sf
+ * flags.
+ *
+ * Depending on inst we may have to rewrite the uses of sf (see
+ * fix_shift_test_flags), and for some uses, we may have to give
+ * up. The caller provides fun to make these decisions.
+ */
+template<Vinstr::Opcode test, typename Inst, typename FlagsFunc>
+bool simplifyInstTest(Env& env, const Inst& inst, Vlabel b, size_t i,
+                      FlagsFunc fun) {
+  if (env.use_counts[inst.sf]) return false;
+  return if_inst<test>(
+    env, b, i + 1,
+    [&] (const op_type<test>& vtest) {
+      if (inst.d != vtest.s0 ||
+          inst.d != vtest.s1 ||
+          !fun(vtest.sf)) {
         return false;
       }
 
       return simplify_impl(
-        env, b, i - 1,
+        env, b, i,
         [&] (Vout& v) {
-          v << shrqi{ vshrqi.s0, vshrqi.s1, vshrqi.d, test.sf };
+          auto repl = inst;
+          repl.sf = vtest.sf;
+          v << repl;
           return 2;
         }
       );
     }
   );
+}
+
+bool simplify(Env& env, const shrqi& vshr, Vlabel b, size_t i) {
+  return simplifyInstTest<Vinstr::testq>(
+    env, vshr, b, i,
+    [&] (Vreg sf) { return fix_shift_test_flags(env, sf, b, i); }
+  );
+}
+
+template<Vinstr::Opcode test, typename Test, typename And>
+bool simplify_and(Env& env, const And& vand, Vlabel b, size_t i) {
+  if (!env.use_counts[vand.d]) {
+    return simplify_impl(env, b, i, Test{ vand.s0, vand.s1, vand.sf });
+  }
+  return simplifyInstTest<test>(env, vand, b, i, [] (Vreg) { return true; });
+}
+
+bool simplify(Env& env, const andq& vandq, Vlabel b, size_t i) {
+  return simplify_and<Vinstr::testq, testq>(env, vandq, b, i);
+}
+
+bool simplify(Env& env, const andqi& vandqi, Vlabel b, size_t i) {
+  return simplify_and<Vinstr::testq, testqi>(env, vandqi, b, i);
+}
+
+/*
+ * Simplify masking values with -1 in andXi{}:
+ *  andbi{0xff, s, d} -> copy{s, d}
+ *  andli{0xffffffff, s, d} -> copy{s, d}
+ */
+template<Vinstr::Opcode test, typename testi, typename andi>
+bool simplify_andi(Env& env, const andi& inst, Vlabel b, size_t i) {
+  if (inst.s0.l() == -1 && env.use_counts[inst.sf] == 0) {
+    return simplify_impl(env, b, i, copy{ inst.s1, inst.d });
+  }
+  return simplify_and<test, testi>(env, inst, b, i);
+}
+
+bool simplify(Env& env, const andbi& andbi, Vlabel b, size_t i) {
+  return simplify_andi<Vinstr::testb, testbi>(env, andbi, b, i);
+}
+
+bool simplify(Env& env, const andli& andli, Vlabel b, size_t i) {
+  return simplify_andi<Vinstr::testl, testli>(env, andli, b, i);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

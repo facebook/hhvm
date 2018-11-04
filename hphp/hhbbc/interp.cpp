@@ -1520,7 +1520,7 @@ void in(ISS& env, const bc::Switch& op) {
       jmp_setdest(env, blk);
     };
     auto num_elems = op.targets.size();
-    if (op.subop1 == SwitchKind::Bounded) {
+    if (op.subop1 == SwitchKind::Unbounded) {
       if (v->m_type == KindOfInt64 &&
           v->m_data.num >= 0 && v->m_data.num < num_elems) {
         return go(op.targets[v->m_data.num]);

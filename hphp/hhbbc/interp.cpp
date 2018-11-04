@@ -2898,15 +2898,17 @@ void in(ISS& env, const bc::UnsetG& /*op*/) {
 
 void in(ISS& env, const bc::FPushFuncD& op) {
   auto const rfunc = env.index.resolve_func(env.ctx, op.str2);
-  if (auto const func = rfunc.exactFunc()) {
-    if (can_emit_builtin(func, op.arg1, op.has_unpack)) {
-      fpiPush(
-        env,
-        ActRec { FPIKind::Builtin, TBottom, folly::none, rfunc },
-        op.arg1,
-        false
-      );
-      return reduce(env, bc::Nop {});
+  if (!any(env.collect.opts & CollectionOpts::Speculating)) {
+    if (auto const func = rfunc.exactFunc()) {
+      if (can_emit_builtin(func, op.arg1, op.has_unpack)) {
+        fpiPush(
+          env,
+          ActRec { FPIKind::Builtin, TBottom, folly::none, rfunc },
+          op.arg1,
+          false
+        );
+        return reduce(env, bc::Nop {});
+      }
     }
   }
   if (fpiPush(env, ActRec { FPIKind::Func, TBottom, folly::none, rfunc },
@@ -4819,7 +4821,86 @@ StepFlags interpOps(Interp& interp,
   return flags;
 }
 
+namespace {
+
+BlockId speculate(Interp& interp) {
+  auto low_water = interp.state.stack.size();
+
+  interp.collect.opts = interp.collect.opts | CollectionOpts::Speculating;
+  SCOPE_EXIT {
+    interp.collect.opts = interp.collect.opts - CollectionOpts::Speculating;
+  };
+
+  FTRACE(4, "  Speculate B{}\n", interp.blk->id);
+  auto const stop = end(interp.blk->hhbcs);
+  auto iter       = begin(interp.blk->hhbcs);
+  while (iter != stop) {
+    auto const numPop = iter->numPop() + (iter->op == Op::CGetL2 ? 1 : 0);
+    if (interp.state.stack.size() - numPop < low_water) {
+      low_water = interp.state.stack.size() - numPop;
+    }
+
+    auto const flags = interpOps(interp, iter, stop,
+                                 [] (BlockId, const State*) {});
+    if (!flags.effectFree) {
+      FTRACE(3, "  Bailing from speculate because not effect free\n");
+      return NoBlockId;
+    }
+
+    if (flags.usedLocalStatics) {
+      FTRACE(3, "  Bailing from speculate because local statics were used\n");
+      return NoBlockId;
+    }
+
+    assertx(!flags.returned);
+    assertx(!interp.state.unreachable);
+
+    if (flags.jmpDest != NoBlockId && interp.state.stack.size() == low_water) {
+      FTRACE(2, "  Speculate found destination block {}\n", flags.jmpDest);
+      return flags.jmpDest;
+    }
+  }
+
+  return NoBlockId;
+}
+
+}
+
 //////////////////////////////////////////////////////////////////////
+
+BlockId speculateHelper(Interp& interpIn, BlockId target) {
+  if (target == NoBlockId || !options.RemoveDeadBlocks) return target;
+
+  folly::Optional<State> state;
+  while (true) {
+    auto const func = interpIn.ctx.func;
+    auto const targetBlk = func->blocks[target].get();
+    if (!targetBlk->multiPred) return target;
+    switch (targetBlk->hhbcs.back().op) {
+      case Op::JmpZ:
+      case Op::JmpNZ:
+      case Op::SSwitch:
+      case Op::Switch:
+        break;
+      default:
+        return target;
+    }
+
+    if (!state) state.emplace(interpIn.state);
+
+    Interp interp {
+      interpIn.index, interpIn.ctx, interpIn.collect, targetBlk, *state
+    };
+
+    auto const new_target = speculate(interp);
+    if (new_target == NoBlockId) return target;
+
+    target = new_target;
+    interpIn.state = *state;
+  }
+
+  return target;
+}
 
 RunFlags run(Interp& interp, PropagateFn propagate) {
   SCOPE_EXIT {
@@ -4859,7 +4940,7 @@ RunFlags run(Interp& interp, PropagateFn propagate) {
     if (flags.jmpDest != NoBlockId &&
         flags.jmpDest != interp.blk->fallthrough) {
       FTRACE(2, "  <took branch; no fallthrough>\n");
-      propagate(flags.jmpDest, &interp.state);
+      propagate(speculateHelper(interp, flags.jmpDest), &interp.state);
       return ret;
     }
 
@@ -4879,7 +4960,7 @@ RunFlags run(Interp& interp, PropagateFn propagate) {
 
   FTRACE(2, "  <end block>\n");
   if (interp.blk->fallthrough != NoBlockId) {
-    propagate(interp.blk->fallthrough, &interp.state);
+    propagate(speculateHelper(interp, interp.blk->fallthrough), &interp.state);
   }
   return ret;
 }

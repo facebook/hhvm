@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/vasm.h"
 #include "hphp/runtime/vm/jit/vasm-simplify-internal.h"
 
+#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-info.h"
@@ -884,18 +885,6 @@ bool simplify(Env& env, const andli& andli, Vlabel b, size_t i) {
   return simplify_andi<Vinstr::testl, testli>(env, andli, b, i);
 }
 
-bool simplify(Env& env, const testq& test, Vlabel b, size_t i) {
-  auto const sz0 = value_width(env, test.s0);
-  auto const sz1 = value_width(env, test.s1);
-
-  auto const size = sz1 < sz0 ? sz1 : sz0;
-  if (size >= sz::qword) return false;
-
-  return simplify_impl(env, b, i, [&] (Vout& v) {
-    return narrow_inst<testb, testw, testl>(env, size, test, b, i, v);
-  });
-}
-
 template<typename Out, typename Long, typename In>
 bool simplify_signed_test(Env& env, const In& test, uint32_t val,
                           Vlabel b, size_t i) {
@@ -956,20 +945,216 @@ bool simplify_signed_test(Env& env, const In& test, uint32_t val,
   return false;
 }
 
+template<typename testm, typename test>
+bool simplify_testi(Env& env, const test& vtest, Vlabel b, size_t i) {
+  if (arch_any(Arch::ARM, Arch::PPC64)) return false;
+
+  if (auto const vptr = foldable_load(env, vtest.s1, b, i)) {
+    return simplify_impl(env, b, i, testm { vtest.s0, *vptr, vtest.sf });
+  }
+
+  return false;
+}
+
+template<typename testm, typename test>
+bool simplify_test(Env& env, const test& vtest, Vlabel b, size_t i) {
+  if (simplify_testi<testm>(env, vtest, b, i)) return true;
+  if (arch_any(Arch::ARM, Arch::PPC64)) return false;
+  if (auto const vptr = foldable_load(env, vtest.s0, b, i)) {
+    return simplify_impl(env, b, i, testm { vtest.s1, *vptr, vtest.sf });
+  }
+
+  return false;
+}
+
+bool simplify(Env& env, const testqi& test, Vlabel b, size_t i) {
+  return simplify_testi<testqim>(env, test, b, i);
+}
+
 bool simplify(Env& env, const testli& test, Vlabel b, size_t i) {
+  if (simplify_testi<testlim>(env, test, b, i)) return true;
+
   return simplify_signed_test<testl, testq>(env, test, test.s0.l(), b, i);
 }
 
-bool simplify(Env& env, const testl& test, Vlabel b, size_t i) {
-  auto const it = env.unit.regToConst.find(test.s0);
-  if (it != env.unit.regToConst.end()) {
-    if (!it->second.isUndef &&
-        it->second.kind != Vconst::Double) {
-      return simplify_signed_test<testl, testq>(
-        env, test, it->second.val, b, i
-      );
+bool simplify(Env& env, const testwi& test, Vlabel b, size_t i) {
+  return simplify_testi<testwim>(env, test, b, i);
+}
+
+bool simplify(Env& env, const testbi& test, Vlabel b, size_t i) {
+  return simplify_testi<testbim>(env, test, b, i);
+}
+
+template<int size, typename testim>
+bool shrink_test_immediate(Env& env, uint64_t v, Vptr ptr, Vreg sf,
+                           Vlabel b, size_t i) {
+  if (!v) return simplify_impl(env, b, i, testbi{ 0, rarg(0), sf });
+
+  auto getNewVal = [&] (uint64_t val, int bits, bool top_bits, Vreg sf)
+      -> folly::Optional<int> {
+    auto const mask = (1LL << bits) - 1;
+    auto const low = mask >> 1;
+    val &= mask;
+    if (val <= low) return val;
+    // If we're not looking at the top bit of the original result, and
+    // the top bit of the reduced mask is set, we'll have to give up
+    // if anyone cares about the sign bit.
+    if (!top_bits && !check_sf_usage(
+      env, sf, b, i,
+      [] (ConditionCode cc) {
+        switch (cc) {
+          case CC_None:
+            always_assert(false);
+          case CC_E:
+          case CC_NE:
+            return cc;
+          case CC_S:
+          case CC_NS:
+          case CC_A:
+          case CC_BE:
+          case CC_L:
+          case CC_GE:
+          case CC_O:
+          case CC_NO:
+          case CC_P:
+          case CC_NP:
+          case CC_LE:
+          case CC_G:
+          case CC_AE:
+          case CC_B:
+            // can't be fixed
+            return CC_None;
+        }
+        not_reached();
+      })) {
+      return folly::none;
+    }
+
+    return (val & low) - (mask - low);
+  };
+
+  if (size == 1) return false;
+  if (size == 2) {
+    if (!(v & 0xff)) {
+      auto const newVal = getNewVal(v >> 8, 8, true, sf);
+      return newVal && simplify_impl(
+        env, b, i, testbim{ *newVal, ptr + 1, sf });
+    }
+    if (!(v & 0xff00)) {
+      auto const newVal = getNewVal(v, 8, false, sf);
+      return newVal && simplify_impl(
+        env, b, i, testbim{ *newVal, ptr, sf });
     }
   }
+  if (size == 4) {
+    if (!(v & 0xffff)) {
+      auto const newVal = getNewVal(v >> 16, 16, true, sf);
+      return newVal && simplify_impl(
+        env, b, i, testwim{ *newVal, ptr + 2, sf });
+    }
+    if (!(v & 0xffff0000)) {
+      auto const newVal = getNewVal(v, 16, false, sf);
+      return newVal && simplify_impl(
+        env, b, i, testwim{ *newVal, ptr, sf });
+    }
+  }
+
+  if (size == 8) {
+    if (!(v & 0xffffffff)) {
+      auto const newVal = getNewVal(v >> 32, 32, true, sf);
+      return newVal && simplify_impl(
+        env, b, i, testlim{ *newVal, ptr + 4, sf });
+    }
+    if (!(v & 0xffffffff00000000)) {
+      auto const newVal = getNewVal(v, 32, false, sf);
+      return newVal && simplify_impl(
+        env, b, i, testlim{ *newVal, ptr, sf });
+    }
+  }
+
+  return false;
+}
+
+template<int size, typename testim>
+bool shrink_testim(Env& env, const testim& test, Vlabel b, size_t i) {
+  return shrink_test_immediate<size, testim>(
+    env, test.s0.q(), test.s1, test.sf, b, i
+  );
+}
+
+bool simplify(Env& env, const testqim& test, Vlabel b, size_t i) {
+  return shrink_testim<sz::qword>(env, test, b, i);
+}
+
+bool simplify(Env& env, const testlim& test, Vlabel b, size_t i) {
+  return shrink_testim<sz::dword>(env, test, b, i);
+}
+
+bool simplify(Env& env, const testwim& test, Vlabel b, size_t i) {
+  return shrink_testim<sz::word>(env, test, b, i);
+}
+
+bool simplify(Env& env, const testbim& test, Vlabel b, size_t i) {
+  return shrink_testim<sz::byte>(env, test, b, i);
+}
+
+// extract the bottom size bits of value as an int64_t, treating bit
+// (size-1) as the sign bit, and avoiding undefined/unspecified
+// behavior.
+static int64_t extract_signed_value(uint64_t value, int size) {
+  assertx(size && size <= std::numeric_limits<uint64_t>::digits);
+
+  auto const value_mask = (int64_t{1} << (size - 1)) - 1;
+  auto const sign_bit = -(int64_t{1} << (size - 1));
+  int64_t val = value & value_mask;
+  int64_t sgn = (value >> (size - 1)) & 1 ? sign_bit : 0;
+  return val + sgn;
+}
+
+template<typename testi, int size>
+bool simplify_test_imm(Env& env, Vreg r0, Vreg r1, Vreg sf,
+                       Vlabel b, size_t i) {
+  auto const it = env.unit.regToConst.find(r0);
+  if (it == env.unit.regToConst.end() ||
+      it->second.isUndef ||
+      it->second.kind == Vconst::Double) {
+    return false;
+  }
+
+  const int val = extract_signed_value(it->second.val,
+                                       size < sz::qword ? size * 8 : 32);
+  return simplify_impl(env, b, i, testi{ val, r1, sf });
+}
+
+bool simplify(Env& env, const testq& test, Vlabel b, size_t i) {
+  auto const sz0 = value_width(env, test.s0);
+  auto const sz1 = value_width(env, test.s1);
+
+  auto const size = sz1 < sz0 ? sz1 : sz0;
+  if (size >= sz::qword) return false;
+
+  return simplify_impl(env, b, i, [&] (Vout& v) {
+    return narrow_inst<testb, testw, testl>(env, size, test, b, i, v);
+  });
+
+  if (simplify_test_imm<testqi, sz::qword>(
+        env, test.s0, test.s1, test.sf, b, i) ||
+      simplify_test_imm<testqi, sz::qword>(
+        env, test.s1, test.s0, test.sf, b, i)) {
+    return true;
+  }
+
+  if (simplify_test<testqm>(env, test, b, i)) return true;
+}
+
+bool simplify(Env& env, const testl& test, Vlabel b, size_t i) {
+  if (simplify_test_imm<testli, sz::dword>(
+        env, test.s0, test.s1, test.sf, b, i) ||
+      simplify_test_imm<testli, sz::dword>(
+        env, test.s1, test.s0, test.sf, b, i)) {
+    return true;
+  }
+
   return false;
 }
 

@@ -79,14 +79,21 @@ Vreg adjustSPForReturn(IRLS& env, const IRInstruction* inst) {
  */
 void prepare_return_regs(Vout& v, SSATmp* retVal, Vloc retLoc,
                          folly::Optional<AuxUnion> aux) {
+  using u_data_type = std::make_unsigned<data_type_t>::type;
+
   auto const tp = [&] {
-    auto const mask = [&] { return uint64_t{(*aux).u_raw} << 32; };
+    auto const mask = [&] {
+      if (!aux->u_raw) return uint64_t{};
+      if (aux->u_raw == static_cast<uint32_t>(-1)) {
+        return static_cast<uint64_t>(-1) <<
+          std::numeric_limits<u_data_type>::digits;
+      }
+      return uint64_t{aux->u_raw} << 32;
+    };
 
     if (!retLoc.hasReg(1)) {
-      auto const dt = static_cast<std::make_unsigned<data_type_t>::type>(
-        retVal->type().toDataType()
-      );
-      static_assert(std::numeric_limits<decltype(dt)>::digits <= 32, "");
+      auto const dt = static_cast<u_data_type>(retVal->type().toDataType());
+      static_assert(std::numeric_limits<u_data_type>::digits <= 32, "");
       return aux ? v.cns(dt | mask()) : v.cns(dt);
     }
     auto const type = retLoc.reg(1);

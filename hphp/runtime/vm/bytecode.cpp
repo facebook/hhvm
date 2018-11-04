@@ -3359,7 +3359,7 @@ OPTBLD_INLINE TCA ret(PC& pc) {
     assertx(vmStack().topTV() == vmfp()->retSlot());
     // In case async eager return was requested by the caller, pretend that
     // we did not finish eagerly as we already boxed the value.
-    vmStack().topTV()->m_aux.u_asyncNonEagerReturnFlag = 1;
+    vmStack().topTV()->m_aux.u_asyncNonEagerReturnFlag = -1;
   } else if (vmfp()->func()->isAsyncFunction()) {
     // Mark the async function as succeeded and store the return value.
     assertx(!sfp);
@@ -6951,7 +6951,7 @@ OPTBLD_INLINE void asyncSuspendE(PC& pc) {
     vmStack().ndiscard(func->numSlotsInFrame());
     vmStack().ret();
     tvCopy(make_tv<KindOfObject>(waitHandle), *vmStack().topTV());
-    vmStack().topTV()->m_aux.u_asyncNonEagerReturnFlag = 1;
+    vmStack().topTV()->m_aux.u_asyncNonEagerReturnFlag = -1;
     assertx(vmStack().topTV() == fp->retSlot());
 
     // Return control to the caller.

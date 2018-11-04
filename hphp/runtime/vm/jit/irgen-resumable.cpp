@@ -104,7 +104,9 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset resumeOffset) {
 
     // Return control to the caller.
     auto const spAdjust = offsetToReturnSlot(env);
-    auto const retData = RetCtrlData { spAdjust, false, AuxUnion{1} };
+    auto const retData = RetCtrlData {
+      spAdjust, false, AuxUnion{ std::numeric_limits<uint32_t>::max() }
+    };
     gen(env, RetCtrl, retData, sp(env), fp(env), waitHandle);
   } else {
     assertx(!isInlining(env));

@@ -349,7 +349,7 @@ TCA handleServiceRequest(ReqInfo& info) noexcept {
         // the next opcode, not honoring the request for async eager return.
         // If the callee returned eagerly, we need to wrap the result into
         // StaticWaitHandle.
-        assertx(ar->retSlot()->m_aux.u_asyncNonEagerReturnFlag < 2);
+        assertx(ar->retSlot()->m_aux.u_asyncNonEagerReturnFlag + 1 < 2);
         if (!ar->retSlot()->m_aux.u_asyncNonEagerReturnFlag) {
           auto const retval = tvAssertCell(*ar->retSlot());
           auto const waitHandle = c_StaticWaitHandle::CreateSucceeded(retval);

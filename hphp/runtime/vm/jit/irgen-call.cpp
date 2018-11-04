@@ -1728,8 +1728,9 @@ void emitFCall(IRGS& env,
       ifThenElse(
         env,
         [&] (Block* taken) {
-          auto const aux = gen(env, LdTVAux, LdTVAuxData { 1 }, retVal);
-          gen(env, JmpNZero, taken, aux);
+          auto const aux = gen(env, LdTVAux, LdTVAuxData {}, retVal);
+          auto const tst = gen(env, AndInt, aux, cns(env, 1u << 31));
+          gen(env, JmpNZero, taken, tst);
         },
         [&] {
           auto const ty = callee ? awaitedCallReturnType(callee) : TInitCell;

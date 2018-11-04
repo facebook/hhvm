@@ -338,9 +338,12 @@ int value_width(Env& env, Vreg reg) {
  *    correct size, return the source of the move
  *  - if r is the result of a zero-extending load with one use,
  *    convert the load to a non-zero extending form
- *  - otherwise apply a movtq<sz> to the register, and return the dst.
+ *  - otherwise we should logically apply a movtq<sz> to the register,
+ *    and return the dst. we don't check widths after simplify, however,
+ *    and inserting them can prevent other patterns from being recognized,
+ *    so just leave them out.
  */
-Vreg narrow_reg(Env& env, int size, Vreg r, Vlabel b, size_t i, Vout& v) {
+Vreg narrow_reg(Env& env, int size, Vreg r, Vlabel b, size_t i) {
   auto const it = env.unit.regToConst.find(r);
   if (it != env.unit.regToConst.end()) {
     assertx(!it->second.isUndef && it->second.kind != Vconst::Double);
@@ -426,29 +429,14 @@ Vreg narrow_reg(Env& env, int size, Vreg r, Vlabel b, size_t i, Vout& v) {
     return {};
   }();
 
-  if (reg.isValid()) return reg;
-  reg = v.makeReg();
-  switch (size) {
-    case sz::byte:
-      v << movtqb{r, reg};
-      break;
-    case sz::word:
-      v << movtqw{r, reg};
-      break;
-    case sz::dword:
-      v << movtql{r, reg};
-      break;
-    default:
-      always_assert(false);
-  }
-  return reg;
+  return reg.isValid() ? reg : r;
 }
 
 template<typename instb, typename instw, typename instl, typename instq>
 int narrow_inst(Env& env, int size, const instq& vinst, Vlabel b, size_t i,
                 Vout& v) {
-  auto const s0 = narrow_reg(env, size, vinst.s0, b, i, v);
-  auto const s1 = narrow_reg(env, size, vinst.s1, b, i, v);
+  auto const s0 = narrow_reg(env, size, vinst.s0, b, i);
+  auto const s1 = narrow_reg(env, size, vinst.s1, b, i);
   switch (size) {
     case sz::byte:
       v << instb{s0, s1, vinst.sf};
@@ -908,46 +896,68 @@ bool simplify(Env& env, const testq& test, Vlabel b, size_t i) {
   });
 }
 
-template<typename Out, typename In>
+template<typename Out, typename Long, typename In>
 bool simplify_signed_test(Env& env, const In& test, uint32_t val,
                           Vlabel b, size_t i) {
-  return
-    val == 0x80000000 &&
-    check_sf_usage(
-      env, test.sf, b, i,
-      [] (ConditionCode cc) {
-        switch (cc) {
-          case CC_None:
-            always_assert(false);
-          case CC_E:   return CC_NS;
-          case CC_NE:  return CC_S;
-          case CC_S:
-          case CC_NS:
-            return cc;
+  if (val == 0x80000000 &&
+      check_sf_usage(
+        env, test.sf, b, i,
+        [] (ConditionCode cc) {
+          switch (cc) {
+            case CC_None:
+              always_assert(false);
+            case CC_E:   return CC_NS;
+            case CC_NE:  return CC_S;
+            case CC_S:
+            case CC_NS:
+              return cc;
 
-          case CC_A:
-          case CC_BE:
-          case CC_L:
-          case CC_GE:
-          case CC_O:
-          case CC_NO:
-          case CC_P:
-          case CC_NP:
-          case CC_LE:
-          case CC_G:
-          case CC_AE:
-          case CC_B:
-            // can't be fixed
-            return CC_None;
+            case CC_A:
+            case CC_BE:
+            case CC_L:
+            case CC_GE:
+            case CC_O:
+            case CC_NO:
+            case CC_P:
+            case CC_NP:
+            case CC_LE:
+            case CC_G:
+            case CC_AE:
+            case CC_B:
+              // can't be fixed
+              return CC_None;
+          }
+          not_reached();
         }
-        not_reached();
+      ) &&
+      simplify_impl(env, b, i, Out { test.s1, test.s1, test.sf })) {
+
+    // This looks like it belongs in shrqi itself. The problem with
+    // that is that it relies on the test optimizations already having
+    // been done when we reach the shrqi. We could solve that by
+    // iterating the simplify pass, but this should be cheaper, and
+    // almost as good.
+    if_inst<Vinstr::shrqi>(
+      env, b, i - 1,
+      [&] (const shrqi& vshr) {
+        if (vshr.s0.l() != 32) return false;
+        return simplify_impl(
+          env, b, i - 1,
+          [&] (Vout& v) {
+            v << Long{ vshr.s1, vshr.s1, test.sf };
+            return 2;
+          }
+        );
       }
-    ) &&
-    simplify_impl(env, b, i, Out { test.s1, test.s1, test.sf });
+    );
+    return true;
+  }
+
+  return false;
 }
 
 bool simplify(Env& env, const testli& test, Vlabel b, size_t i) {
-  return simplify_signed_test<testl>(env, test, test.s0.l(), b, i);
+  return simplify_signed_test<testl, testq>(env, test, test.s0.l(), b, i);
 }
 
 bool simplify(Env& env, const testl& test, Vlabel b, size_t i) {
@@ -955,7 +965,9 @@ bool simplify(Env& env, const testl& test, Vlabel b, size_t i) {
   if (it != env.unit.regToConst.end()) {
     if (!it->second.isUndef &&
         it->second.kind != Vconst::Double) {
-      return simplify_signed_test<testl>(env, test, it->second.val, b, i);
+      return simplify_signed_test<testl, testq>(
+        env, test, it->second.val, b, i
+      );
     }
   }
   return false;

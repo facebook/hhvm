@@ -879,14 +879,16 @@ void sameJmpImpl(ISS& env, const Same& same, const JmpOp& jmp) {
     (Same::op == Op::Same) == (JmpOp::op == Op::JmpNZ);
 
   auto save = env.state;
-  if (sameIsJmpTarget ? handle_same() : handle_differ()) {
-    env.propagate(jmp.target, &env.state);
-  } else {
-    jmp_nevertaken(env);
-  }
-  env.state = std::move(save);
+  auto const target_reachable = sameIsJmpTarget ?
+    handle_same() : handle_differ();
+  if (!target_reachable) jmp_nevertaken(env);
+  // swap, so we can restore this state if the branch is always taken.
+  std::swap(env.state, save);
   if (!(sameIsJmpTarget ? handle_differ() : handle_same())) {
     jmp_setdest(env, jmp.target);
+    env.state = std::move(save);
+  } else if (target_reachable) {
+    env.propagate(jmp.target, &save);
   }
 }
 
@@ -1122,7 +1124,6 @@ void jmpImpl(ISS& env, const JmpOp& op) {
   if (e == (Negate ? Emptiness::NonEmpty : Emptiness::Empty)) {
     effect_free(env);
     jmp_setdest(env, op.target);
-    env.propagate(op.target, &env.state);
     return;
   }
 
@@ -1325,11 +1326,10 @@ void staticLocCheckJmpImpl(ISS& env,
 
   if (env.collect.localStaticTypes.size() > slc.loc1 &&
       env.collect.localStaticTypes[slc.loc1].subtypeOf(BBottom)) {
+    env.state = std::move(save);
     if (takenOnInit) {
-      env.state = std::move(save);
       jmp_nevertaken(env);
     } else {
-      env.propagate(jmp.target, &save);
       jmp_setdest(env, jmp.target);
     }
     return;
@@ -1516,7 +1516,6 @@ void in(ISS& env, const bc::Switch& op) {
   if (v) {
     auto go = [&] (BlockId blk) {
       effect_free(env);
-      env.propagate(blk, &env.state);
       jmp_setdest(env, blk);
     };
     auto num_elems = op.targets.size();
@@ -1559,7 +1558,6 @@ void in(ISS& env, const bc::SSwitch& op) {
       if (!match) break;
       if (*match) {
         effect_free(env);
-        env.propagate(kv.second, &env.state);
         jmp_setdest(env, kv.second);
         return;
       }
@@ -3652,7 +3650,7 @@ void iterInitImpl(ISS& env, IterId iter, LocalId valueLoc,
 
   switch (ity.count) {
     case IterTypes::Count::Empty:
-      taken();
+      freeIter(env, iter);
       mayReadLocal(env, valueLoc);
       jmp_setdest(env, target);
       break;
@@ -3692,7 +3690,7 @@ void iterInitKImpl(ISS& env, IterId iter, LocalId valueLoc, LocalId keyLoc,
 
   switch (ity.count) {
     case IterTypes::Count::Empty:
-      taken();
+      freeIter(env, iter);
       mayReadLocal(env, valueLoc);
       mayReadLocal(env, keyLoc);
       jmp_setdest(env, target);
@@ -4648,8 +4646,9 @@ void in(ISS& env, const bc::MemoGet& op) {
     nothrow(env);
   }
 
+  if (retTy.first == TBottom) return jmp_setdest(env, op.target);
+
   env.propagate(op.target, &env.state);
-  if (retTy.first == TBottom) jmp_setdest(env, op.target);
   push(env, std::move(retTy.first));
 }
 
@@ -4860,6 +4859,7 @@ RunFlags run(Interp& interp, PropagateFn propagate) {
     if (flags.jmpDest != NoBlockId &&
         flags.jmpDest != interp.blk->fallthrough) {
       FTRACE(2, "  <took branch; no fallthrough>\n");
+      propagate(flags.jmpDest, &interp.state);
       return ret;
     }
 

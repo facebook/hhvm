@@ -577,6 +577,11 @@ void first_pass(const Index& index,
     // The peephole wants the old values of srcStack, so defer the update to the
     // end of the loop.
     SCOPE_EXIT {
+      // If we're on the last bytecode, there's no need to update
+      // srcStack, and some opcodes (eg MemoGet) push differently on
+      // the taken path vs the non-taken path, so just skip if jmpDest
+      // is set.
+      if (flags.jmpDest != NoBlockId) return;
       if (op.op == Op::CGetL2) {
         srcStack.emplace(srcStack.end() - 1,
                          op.op, (state.stack.end() - 2)->type.subtypeOf(BStr));

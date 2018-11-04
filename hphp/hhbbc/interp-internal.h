@@ -169,8 +169,14 @@ void effect_free(ISS& env) {
   env.flags.effectFree = true;
 }
 
-void jmp_setdest(ISS& env, BlockId blk) {
-  env.flags.jmpDest = blk;
+/*
+ * Mark the current block as unconditionally jumping to target. The
+ * caller must arrange for env.state to reflect the state that needs
+ * to be propagated to the target, but it should not propagate that
+ * state.
+ */
+void jmp_setdest(ISS& env, BlockId target) {
+  env.flags.jmpDest = target;
 }
 void jmp_nevertaken(ISS& env) {
   jmp_setdest(env, env.blk.fallthrough);
@@ -795,14 +801,15 @@ template<typename PreFun, typename PostFun>
 void refineLocation(ISS& env, LocalId l,
                     PreFun pre, BlockId target, PostFun post) {
   auto state = env.state;
-  if (refineLocation(env, l, pre)) {
-    env.propagate(target, &env.state);
-  } else {
-    jmp_nevertaken(env);
-  }
-  env.state = std::move(state);
+  auto const target_reachable = refineLocation(env, l, pre);
+  if (!target_reachable) jmp_nevertaken(env);
+  // swap, so we can restore this state if the branch is always taken.
+  std::swap(env.state, state);
   if (!refineLocation(env, l, post)) {
     jmp_setdest(env, target);
+    env.state = std::move(state);
+  } else if (target_reachable) {
+    env.propagate(target, &state);
   }
 }
 

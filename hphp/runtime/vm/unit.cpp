@@ -762,8 +762,10 @@ void Unit::bindFunc(Func *func) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Class lookup utilities
 
-struct FrameRestore {
+namespace {
+struct FrameRestore : private VMRegAnchor {
   explicit FrameRestore(const PreClass* preClass) :
       FrameRestore(preClass->unit(), preClass->getOffset()) {}
   explicit FrameRestore(const Unit* unit, Op op, Id id) :
@@ -832,10 +834,6 @@ struct FrameRestore {
   PC      m_pc;
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// Class lookup.
-
-namespace {
 void setupClass(Class* newClass, NamedEntity* nameList) {
   bool const isPersistent =
     (!SystemLib::s_inited || RuntimeOption::RepoAuthoritative) &&
@@ -858,6 +856,9 @@ void setupClass(Class* newClass, NamedEntity* nameList) {
   }
 }
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// Class lookup.
 
 Class* Unit::defClass(const PreClass* preClass,
                       bool failIsFatal /* = true */) {

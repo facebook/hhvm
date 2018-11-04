@@ -864,7 +864,6 @@ and emit_new env pos expr targs args uargs =
 and emit_new_anon env pos cls_idx args uargs =
   let nargs = List.length args + List.length uargs in
   gather [
-    instr_defcls cls_idx;
     instr_fpushctori nargs cls_idx;
     emit_args_and_call env pos args uargs None;
     instr_popr

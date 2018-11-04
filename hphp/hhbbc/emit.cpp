@@ -654,7 +654,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     auto defcls     = [&] { clsid_impl(inst.DefCls.arg1, false); };
     auto defclsnop  = [&] { clsid_impl(inst.DefClsNop.arg1, false); };
     auto createcl   = [&] { clsid_impl(inst.CreateCl.arg2, true); };
-    auto fpushctori = [&] { clsid_impl(inst.FPushCtorI.arg2, true); };
+    auto fpushctori = [&] { clsid_impl(inst.FPushCtorI.arg2, false); };
     auto deffun     = [&] {
       const_cast<uint32_t&>(inst.DefFunc.arg1) =
         recordFunc(euState, ue, inst.DefFunc.arg1);

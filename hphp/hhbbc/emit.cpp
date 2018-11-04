@@ -637,14 +637,13 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
     auto ret_assert = [&] { assert(currentStackDepth == inst.numPop()); };
 
-    auto defcls_impl = [&] (const uint32_t& id, bool closure) {
+    auto clsid_impl = [&] (const uint32_t& id, bool closure) {
       if (euState.classOffsets[id] != kInvalidOffset) {
-        if (closure) {
-          for (auto const& elm : euState.pceInfo) {
-            if (elm.origId == id) {
-              const_cast<uint32_t&>(id) = elm.pce->id();
-              return;
-            }
+        always_assert(closure);
+        for (auto const& elm : euState.pceInfo) {
+          if (elm.origId == id) {
+            const_cast<uint32_t&>(id) = elm.pce->id();
+            return;
           }
         }
         always_assert(false);
@@ -652,10 +651,11 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       euState.classOffsets[id] = startOffset;
       const_cast<uint32_t&>(id) = recordClass(euState, ue, id);
     };
-    auto defcls    = [&] { defcls_impl(inst.DefCls.arg1, false); };
-    auto defclsnop = [&] { defcls_impl(inst.DefClsNop.arg1, false); };
-    auto createcl  = [&] { defcls_impl(inst.CreateCl.arg2, true); };
-    auto deffun    = [&] {
+    auto defcls     = [&] { clsid_impl(inst.DefCls.arg1, false); };
+    auto defclsnop  = [&] { clsid_impl(inst.DefClsNop.arg1, false); };
+    auto createcl   = [&] { clsid_impl(inst.CreateCl.arg2, true); };
+    auto fpushctori = [&] { clsid_impl(inst.FPushCtorI.arg2, true); };
+    auto deffun     = [&] {
       const_cast<uint32_t&>(inst.DefFunc.arg1) =
         recordFunc(euState, ue, inst.DefFunc.arg1);
     };
@@ -730,6 +730,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       if (Op::opcode == Op::DefCls)       defcls();     \
       if (Op::opcode == Op::DefClsNop)    defclsnop();  \
       if (Op::opcode == Op::CreateCl)     createcl();   \
+      if (Op::opcode == Op::FPushCtorI)   fpushctori(); \
       if (Op::opcode == Op::DefFunc)      deffun();     \
       if (Op::opcode == Op::DefTypeAlias) deftype();    \
       if (isRet(Op::opcode))              ret_assert(); \

@@ -65,6 +65,7 @@ struct Breakpoint {
     const std::string& hitCondition
   );
 
+  Breakpoint(const Breakpoint&) = delete;
   virtual ~Breakpoint();
 
   void updateConditions(
@@ -235,7 +236,7 @@ private:
   ExceptionBreakpointSettings m_exceptionSettings;
 
   // The authoratative list of the current breakpoints set by the client.
-  std::unordered_map<int, Breakpoint> m_breakpoints;
+  std::unordered_map<int, Breakpoint*> m_breakpoints;
 
   // Map of source file name to list of breakpoints in that file.
   std::unordered_map<std::string, std::unordered_set<int>> m_sourceBreakpoints;

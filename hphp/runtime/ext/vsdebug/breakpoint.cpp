@@ -70,8 +70,11 @@ Breakpoint::Breakpoint(
 }
 
 Breakpoint::~Breakpoint() {
-  for (const auto& pair : m_unitCache) {
-    clearCachedConditionUnit(pair.first);
+  for (auto it = m_unitCache.begin(); it != m_unitCache.end();) {
+    if (it->second != nullptr) {
+      delete it->second;
+    }
+    it = m_unitCache.erase(it);
   }
 }
 
@@ -105,6 +108,12 @@ BreakpointManager::BreakpointManager(Debugger* debugger) :
 }
 
 BreakpointManager::~BreakpointManager() {
+  for (auto it = m_breakpoints.begin(); it != m_breakpoints.end();) {
+    delete it->second;
+    it = m_breakpoints.erase(it);
+  }
+
+  assertx(m_breakpoints.empty());
 }
 
 bool BreakpointManager::bpMatchesPath(
@@ -153,7 +162,7 @@ const std::unordered_set<int> BreakpointManager::getBreakpointIdsForPath(
   std::unordered_set<int> ids;
   const auto path = boost::filesystem::path(unitPath);
   for (auto it = m_breakpoints.begin(); it != m_breakpoints.end(); it++) {
-    if (bpMatchesPath(&it->second, path)) {
+    if (bpMatchesPath(it->second, path)) {
       ids.insert(it->first);
     }
   }
@@ -185,17 +194,24 @@ int BreakpointManager::addSourceLineBreakpoint(
   const std::string& hitCondition
 ) {
   const int id = ++g_nextBreakpointId;
-  Breakpoint bp = Breakpoint(id, line, column, path, condition, hitCondition);
+  const auto bp = new Breakpoint(
+    id,
+    line,
+    column,
+    path,
+    condition,
+    hitCondition
+  );
 
   // Add the new breakpoint to the breakpoint map.
   m_breakpoints.emplace(id, bp);
 
   // If this is the first time we've seen a bp for this file, create a new
   // set of breakpoint IDs for this file.
-  auto it = m_sourceBreakpoints.find(bp.m_path);
+  auto it = m_sourceBreakpoints.find(bp->m_path);
   if (it == m_sourceBreakpoints.end()) {
-    m_sourceBreakpoints.emplace(bp.m_path, std::unordered_set<int>());
-    it = m_sourceBreakpoints.find(bp.m_path);
+    m_sourceBreakpoints.emplace(bp->m_path, std::unordered_set<int>());
+    it = m_sourceBreakpoints.find(bp->m_path);
   }
 
   // Add this ID to the set of breakpoints in this file.
@@ -207,8 +223,8 @@ int BreakpointManager::addSourceLineBreakpoint(
     VSDebugLogger::LogLevelInfo,
     "Stored new breakpoint request (id = %d), (file = %s), (line = %d)",
     id,
-    bp.m_path.c_str(),
-    bp.m_line
+    bp->m_path.c_str(),
+    bp->m_line
   );
 
   // Tell the client the bp was installed.
@@ -372,10 +388,10 @@ void BreakpointManager::onFuncIntercepted(
 
   // Warn about any breakpoints in this request that resolved to
   // functions that match the intercepted function name.
-  for (auto pair : m_breakpoints) {
-    auto bpId = pair.first;
-    const auto& bp = pair.second;
-    if (bp.m_functionFullName == name) {
+  for (auto it = m_breakpoints.begin(); it != m_breakpoints.end(); it++) {
+    auto bpId = it->first;
+    const auto bp = it->second;
+    if (bp->m_functionFullName == name) {
       sendBpInterceptedWarning(requestId, bpId, name);
     }
   }
@@ -387,9 +403,8 @@ int BreakpointManager::addFunctionBreakpoint(
   const std::string& hitCondition
 ) {
   const int id = ++g_nextBreakpointId;
-  Breakpoint bp = Breakpoint(id, function, condition, hitCondition);
-
-  // Add the new breakpoint to the function breakpoint map.
+  Breakpoint* bp = new Breakpoint(id, function, condition, hitCondition);
+  // Add the new breakpoint to the breakpoint map.
   m_breakpoints.emplace(id, bp);
   m_fnBreakpoints.emplace(function, id);
 
@@ -409,8 +424,8 @@ int BreakpointManager::addFunctionBreakpoint(
 const std::unordered_set<int>
 BreakpointManager::getFunctionBreakpoints() const {
   std::unordered_set<int> ids;
-  for (const auto& pair : m_fnBreakpoints) {
-    ids.insert(pair.second);
+  for (auto it = m_fnBreakpoints.begin(); it != m_fnBreakpoints.end(); it++) {
+    ids.insert(it->second);
   }
   return ids;
 }
@@ -427,8 +442,10 @@ void BreakpointManager::removeBreakpoint(int id) {
   }
 
   // Remove the breakpoint.
-  const std::string filePath = it->second.m_path;
-  const std::string function = it->second.m_function;
+  const std::string filePath = it->second->m_path;
+  const std::string function = it->second->m_function;
+
+  delete it->second;
   m_breakpoints.erase(it);
 
   // If it was resolved, remove it from the resolved set.
@@ -461,8 +478,8 @@ void BreakpointManager::removeBreakpoint(int id) {
     VSDebugLogger::LogLevelInfo,
     "Client removed breakpoint: (id = %d), (file = %s), (line = %d)",
     id,
-    it->second.m_path.c_str(),
-    it->second.m_line
+    it->second->m_path.c_str(),
+    it->second->m_line
   );
 
   // Tell the client the breakpoint is gone.
@@ -481,7 +498,7 @@ void BreakpointManager::onBreakpointResolved(
   Breakpoint* bp = nullptr;
   const auto it = m_breakpoints.find(id);
   if (it != m_breakpoints.end()) {
-    bp = &it->second;
+    bp = it->second;
   }
 
   if (bp == nullptr) {
@@ -689,7 +706,7 @@ void BreakpointManager::sendBreakpointEvent(
 Breakpoint* BreakpointManager::getBreakpointById(int id) {
   auto it = m_breakpoints.find(id);
   if (it != m_breakpoints.end()) {
-    return &it->second;
+    return it->second;
   }
 
   return nullptr;
@@ -702,7 +719,7 @@ bool BreakpointManager::isBreakpointResolved(int id) const {
 void BreakpointManager::onBreakpointHit(int id) {
   const auto it = m_breakpoints.find(id);
   if (it != m_breakpoints.end()) {
-    Breakpoint* bp = &it->second;
+    Breakpoint* bp = it->second;
     bp->m_hitCount++;
     sendBreakpointEvent(id, ReasonChanged);
   }
@@ -727,8 +744,8 @@ void BreakpointManager::sendBpError(
 
 void BreakpointManager::onRequestShutdown(request_id_t requestId) {
   for (auto it = m_breakpoints.begin(); it != m_breakpoints.end(); it++) {
-    Breakpoint& bp = it->second;
-    bp.clearCachedConditionUnit(requestId);
+    Breakpoint* bp = it->second;
+    bp->clearCachedConditionUnit(requestId);
   }
 
   // When a request ends, it no longer has any intercepted functions.

@@ -55,7 +55,7 @@ let init_disk_state =
   ]
 
 let hot_classes_file hot_classes =
-  "hh_hot_classes.json",
+  "hack/hh_hot_classes.json",
   hot_classes
   |> List.map ~f:(Printf.sprintf {|"\\%s"|})
   |> String.concat ~sep:", "

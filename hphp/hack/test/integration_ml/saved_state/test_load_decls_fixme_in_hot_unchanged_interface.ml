@@ -22,7 +22,7 @@ let init_disk_state =
      cold dependency of MyFoo in the same file as IFoo will cause the issue to
      disappear, since we will need to re-parse the file in order to declare the
      cold dependency. *)
-  [ "hh_hot_classes.json", {|{"classes":["\\IFoo", "\\Thing"]}|}
+  [ "hack/hh_hot_classes.json", {|{"classes":["\\IFoo", "\\Thing"]}|}
   ; "ifoo.php", ifoo_contents
   ; "my_foo.php", my_foo_contents ""
   ]

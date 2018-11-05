@@ -137,7 +137,8 @@ let dump_contents_exn
 
 let get_hot_classes_filename () =
   let prefix = Relative_path.(path_of_prefix Root) in
-  Filename.concat prefix "hh_hot_classes.json"
+  let (/) = Filename.concat in
+  prefix / "hack" / "hh_hot_classes.json"
 
 let get_hot_classes (filename: string) : SSet.t =
   Disk.cat filename

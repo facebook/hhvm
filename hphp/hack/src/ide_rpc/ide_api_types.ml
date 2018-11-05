@@ -7,6 +7,7 @@
  *
  *)
 
+open Core_kernel
 (* 1-based position is used here *)
 type position = {
   line : int;

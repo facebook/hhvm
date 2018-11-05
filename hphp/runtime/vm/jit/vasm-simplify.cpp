@@ -1098,34 +1098,6 @@ bool simplify(Env& env, const testbim& test, Vlabel b, size_t i) {
   return shrink_testim<sz::byte>(env, test, b, i);
 }
 
-// extract the bottom size bits of value as an int64_t, treating bit
-// (size-1) as the sign bit, and avoiding undefined/unspecified
-// behavior.
-static int64_t extract_signed_value(uint64_t value, int size) {
-  assertx(size && size <= std::numeric_limits<uint64_t>::digits);
-
-  auto const value_mask = (int64_t{1} << (size - 1)) - 1;
-  auto const sign_bit = -(int64_t{1} << (size - 1));
-  int64_t val = value & value_mask;
-  int64_t sgn = (value >> (size - 1)) & 1 ? sign_bit : 0;
-  return val + sgn;
-}
-
-template<typename testi, int size>
-bool simplify_test_imm(Env& env, Vreg r0, Vreg r1, Vreg sf,
-                       Vlabel b, size_t i) {
-  auto const it = env.unit.regToConst.find(r0);
-  if (it == env.unit.regToConst.end() ||
-      it->second.isUndef ||
-      it->second.kind == Vconst::Double) {
-    return false;
-  }
-
-  const int val = extract_signed_value(it->second.val,
-                                       size < sz::qword ? size * 8 : 32);
-  return simplify_impl(env, b, i, testi{ val, r1, sf });
-}
-
 bool simplify(Env& env, const testq& test, Vlabel b, size_t i) {
   auto const sz0 = value_width(env, test.s0);
   auto const sz1 = value_width(env, test.s1);
@@ -1137,25 +1109,7 @@ bool simplify(Env& env, const testq& test, Vlabel b, size_t i) {
     return narrow_inst<testb, testw, testl>(env, size, test, b, i, v);
   });
 
-  if (simplify_test_imm<testqi, sz::qword>(
-        env, test.s0, test.s1, test.sf, b, i) ||
-      simplify_test_imm<testqi, sz::qword>(
-        env, test.s1, test.s0, test.sf, b, i)) {
-    return true;
-  }
-
   if (simplify_test<testqm>(env, test, b, i)) return true;
-}
-
-bool simplify(Env& env, const testl& test, Vlabel b, size_t i) {
-  if (simplify_test_imm<testli, sz::dword>(
-        env, test.s0, test.s1, test.sf, b, i) ||
-      simplify_test_imm<testli, sz::dword>(
-        env, test.s1, test.s0, test.sf, b, i)) {
-    return true;
-  }
-
-  return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

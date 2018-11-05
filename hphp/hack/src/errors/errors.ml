@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Utils
 open Reordered_argument_collections
 open String_utils
@@ -162,8 +162,8 @@ module Common = struct
 
     (* Print out a larger stack trace *)
     Printf.eprintf "%s" "Callstack:\n";
-    Printf.eprintf "%s" (Printexc.raw_backtrace_to_string
-      (Printexc.get_callstack 500));
+    Printf.eprintf "%s" (Caml.Printexc.raw_backtrace_to_string
+      (Caml.Printexc.get_callstack 500));
     (* Exit with special error code so we can see the log after *)
     Exit_status.exit Exit_status.Lazy_decl_bug
 
@@ -195,7 +195,7 @@ module Common = struct
     | Typing -> "Typing"
 
   let sort get_pos err =
-    List.sort ~cmp:begin fun x y ->
+    List.sort ~compare:begin fun x y ->
       Pos.compare (get_pos x) (get_pos y)
     end err
     |> List.remove_consecutive_duplicates ~equal:(=)
@@ -342,7 +342,7 @@ module NonTracingErrors: Errors_modes = struct
         | (path, _) when path = Relative_path.default &&
             (not !allow_errors_in_default_path) ->
             Hh_logger.log "WARNING: adding an error in default path\n%s\n"
-              (Printexc.raw_backtrace_to_string (Printexc.get_callstack 100))
+              (Caml.Printexc.raw_backtrace_to_string (Caml.Printexc.get_callstack 100))
         | _ -> ()
       in
       (* Cheap test to avoid duplicating most recent error *)
@@ -364,7 +364,7 @@ end
 
 (** Errors with backtraces embedded. They are revealed with to_string. *)
 module TracingErrors: Errors_modes = struct
-  type 'a error_ = (Printexc.raw_backtrace * error_code * 'a message list)
+  type 'a error_ = (Caml.Printexc.raw_backtrace * error_code * 'a message list)
   type error = Pos.t error_
   type applied_fixme = Pos.t * int
 
@@ -396,7 +396,7 @@ module TracingErrors: Errors_modes = struct
     end
 
   let make_error code (x: (Pos.t * string) list) =
-    let bt = Printexc.get_callstack 25 in
+    let bt = Caml.Printexc.get_callstack 25 in
     ((bt, code, x): error)
 
   let get_code ((_, c, _): 'a error_) = c
@@ -426,7 +426,7 @@ module TracingErrors: Errors_modes = struct
         Buffer.add_string buf begin
           let error_code = Common.error_code_to_string error_code in
           Printf.sprintf "%s\n%s%s (%s)\n"
-            (Pos.string pos1) (Printexc.raw_backtrace_to_string bt)
+            (Pos.string pos1) (Caml.Printexc.raw_backtrace_to_string bt)
             msg1 error_code
         end;
         let indentstr = if indent then "  " else "" in
@@ -797,7 +797,7 @@ let error_name_already_bound name name_prev p p_prev =
   let name_prev = Utils.strip_ns name_prev in
   let errs = [
     p, "Name already bound: "^name;
-    p_prev, (if String.compare name name_prev == 0
+    p_prev, (if String.compare name name_prev = 0
       then "Previous definition is here"
       else "Previous definition "^name_prev^" differs only in capitalization ")
   ] in
@@ -1234,7 +1234,7 @@ let not_initialized (pos, cname) prop_names =
   let props_str = List.fold_right prop_names
     ~f:(fun x acc -> x^" "^acc) ~init:"" in
   let members, verb =
-    if 1 == List.length prop_names
+    if 1 = List.length prop_names
     then "member", "is"
     else "members", "are" in
   let setters_str = List.fold_right prop_names
@@ -1663,7 +1663,7 @@ let enum_switch_redundant const first_pos second_pos =
 let enum_switch_nonexhaustive pos missing enum_pos =
   add_list (Typing.err_code Typing.EnumSwitchNonexhaustive) [
     pos, "Switch statement nonexhaustive; the following cases are missing: " ^
-            String.concat ", " missing;
+            String.concat ~sep:", " missing;
     enum_pos, "Enum declared here"
   ]
 
@@ -2118,28 +2118,28 @@ let undefined_field ~use_pos ~name ~shape_type_pos =
 let array_access pos1 pos2 ty =
   add_list (Typing.err_code Typing.ArrayAccess)
     ((pos1, "This is not an object of type KeyedContainer, this is "^ty) ::
-     if pos2 != Pos.none
+     if not (phys_equal pos2 Pos.none)
      then [pos2, "You might want to check this out"]
      else [])
 
 let keyset_set pos1 pos2 =
   add_list (Typing.err_code Typing.KeysetSet)
     ((pos1, "Keysets entries cannot be set, use append instead.") ::
-     if pos2 != Pos.none
+     if not (phys_equal pos2 Pos.none)
      then [pos2, "You might want to check this out"]
      else [])
 
 let array_append pos1 pos2 ty =
   add_list (Typing.err_code Typing.ArrayAppend)
     ((pos1, ty^" does not allow array append") ::
-     if pos2 != Pos.none
+     if not (phys_equal pos2 Pos.none)
      then [pos2, "You might want to check this out"]
      else [])
 
 let const_mutation pos1 pos2 ty =
   add_list (Typing.err_code Typing.ConstMutation)
     ((pos1, "You cannot mutate this") ::
-     if pos2 != Pos.none
+     if not (phys_equal pos2 Pos.none)
      then [(pos2, "This is " ^ ty)]
      else [])
 
@@ -2764,7 +2764,7 @@ let contravariant_this pos class_name tp =
 let cyclic_typeconst pos sl =
   let sl = List.map sl strip_ns in
   add (Typing.err_code Typing.CyclicTypeconst) pos
-    ("Cyclic type constant:\n  "^String.concat " -> " sl)
+    ("Cyclic type constant:\n  "^String.concat ~sep:" -> " sl)
 
 let this_lvalue pos =
   add (Typing.err_code Typing.ThisLvalue) pos "Cannot assign a value to $this"

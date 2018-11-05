@@ -7,6 +7,8 @@
  *
  *)
 
+open Core_kernel
+
 class virtual ['e] monoid = object
   method private virtual zero: 'e
   method private virtual plus: 'e -> 'e -> 'e
@@ -26,7 +28,7 @@ class ['self] map_defs_base = object
 
   method private on_list
     : 'env 'a 'b . ('env -> 'a -> 'b) -> 'env -> 'a list -> 'b list
-    = fun f env -> List.map (f env)
+    = fun f env -> List.map ~f:(f env)
   method private on_option
     : 'env 'a 'b . ('env -> 'a -> 'b) -> 'env -> 'a option -> 'b option
     = fun f env -> Option.map ~f:(f env)
@@ -39,7 +41,7 @@ class ['self] iter_defs_base = object
 
   method private on_list
     : 'env 'a . ('env -> 'a -> unit) -> 'env -> 'a list -> unit
-    = fun f env -> List.iter (f env)
+    = fun f env -> List.iter ~f:(f env)
   method private on_option
     : 'env 'a . ('env -> 'a -> unit) -> 'env -> 'a option -> unit
     = fun f env -> Option.iter ~f:(f env)
@@ -58,25 +60,25 @@ class ['self] endo_defs_base = object
       | [] -> xs
       | [y1] ->
         let z1 = f env y1 in
-        if y1 == z1 then xs
+        if (phys_equal y1 z1) then xs
         else [z1]
       | [y1; y2] ->
         let z1 = f env y1 in
         let z2 = f env y2 in
-        if y1 == z1 && y2 == z2 then xs
+        if (phys_equal y1 z1) && (phys_equal y2 z2) then xs
         else [z1; z2]
       | [y1; y2; y3] ->
         let z1 = f env y1 in
         let z2 = f env y2 in
         let z3 = f env y3 in
-        if y1 == z1 && y2 == z2 && y3 == z3 then xs
+        if (phys_equal y1 z1) && (phys_equal y2 z2) && (phys_equal y3 z3) then xs
         else [z1; z2; z3]
       | [y1; y2; y3; y4] ->
         let z1 = f env y1 in
         let z2 = f env y2 in
         let z3 = f env y3 in
         let z4 = f env y4 in
-        if y1 == z1 && y2 == z2 && y3 == z3 && y4 == z4 then xs
+        if (phys_equal y1 z1) && (phys_equal y2 z2) && (phys_equal y3 z3) && (phys_equal y4 z4) then xs
         else [z1; z2; z3; z4]
       | [y1; y2; y3; y4; y5] ->
         let z1 = f env y1 in
@@ -84,7 +86,12 @@ class ['self] endo_defs_base = object
         let z3 = f env y3 in
         let z4 = f env y4 in
         let z5 = f env y5 in
-        if y1 == z1 && y2 == z2 && y3 == z3 && y4 == z4 && y5 == z5 then xs
+        if (phys_equal y1 z1) &&
+           (phys_equal y2 z2) &&
+           (phys_equal y3 z3) &&
+           (phys_equal y4 z4) &&
+           (phys_equal y5 z5)
+        then xs
         else [z1; z2; z3; z4; z5]
       | y1::y2::y3::y4::y5::ys ->
         let z1 = f env y1 in
@@ -98,7 +105,12 @@ class ['self] endo_defs_base = object
           else
             aux env ys (counter + 1)
         in
-        if y1 == z1 && y2 == z2 && y3 == z3 && y4 == z4 && y5 == z5 && ys == zs
+        if (phys_equal y1 z1) &&
+           (phys_equal y2 z2) &&
+           (phys_equal y3 z3) &&
+           (phys_equal y4 z4) &&
+           (phys_equal y5 z5) &&
+           (phys_equal ys zs)
         then xs
         else z1::z2::z3::z4::z5::zs
     and aux_slow env xs acc original_list has_new_elements =
@@ -106,7 +118,7 @@ class ['self] endo_defs_base = object
       | [] -> if has_new_elements then List.rev acc else original_list
       | y1::ys ->
         let z1 = f env y1 in
-        aux_slow env ys (z1::acc) original_list (has_new_elements || y1 != z1)
+        aux_slow env ys (z1::acc) original_list (has_new_elements || not (phys_equal y1 z1))
     in
     aux env xs 0
 
@@ -117,7 +129,7 @@ class ['self] endo_defs_base = object
       | None -> x
       | Some y ->
         let z = f env y in
-        if y == z then x else Some z
+        if (phys_equal y z) then x else Some z
 end
 
 class virtual ['self] reduce_defs_base = object (self : 'self)

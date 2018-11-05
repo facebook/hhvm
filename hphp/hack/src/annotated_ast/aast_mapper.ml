@@ -2,7 +2,7 @@
  * transform one annotated AST to another, applying a given function to
  * every annotation
  *)
-open Hh_core
+open Core_kernel
 open Aast
 module MapAnnotatedAST
   (Source : ASTAnnotationTypes)

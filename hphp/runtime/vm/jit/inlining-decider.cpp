@@ -53,23 +53,19 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 std::string nameAndReason(int bcOff, std::string caller, std::string callee,
-    std::string why) {
-  std::ostringstream bcStmStr;
-  bcStmStr << bcOff;
-  std::string bcStr = bcStmStr.str();
-  return "BC: " + bcStr + " " + caller + " -> " + callee + " " + why;
+                          std::string why) {
+  return folly::sformat("BC {}: {} -> {}: {}\n", bcOff, caller, callee, why);
 }
 
 bool traceRefusal(SrcKey callerSk, const Func* callee, const char* why,
-    Annotations& annotations) {
+                  Annotations& annotations) {
   // This is not under Trace::enabled so that we can collect the data in prod.
   const Func* caller = callerSk.func();
   int bcOff = callerSk.offset();
   auto calleeName = callee ? callee->fullName()->data() : "(unknown)";
   if (RuntimeOption::EvalDumpInlRefuse) {
-    annotations.emplace_back("NoInline ",
-      nameAndReason(bcOff, caller->fullName()->data(),
-                    calleeName, why));
+    annotations.emplace_back("NoInline",
+      nameAndReason(bcOff, caller->fullName()->data(), calleeName, why));
   }
   if (Trace::enabled) {
     assertx(caller);
@@ -194,12 +190,22 @@ bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee,
                                   Annotations& annotations) const {
   assertx(callSK.op() == Op::FCall);
 
-  if (m_disabled ||
-      !callee ||
-      !RuntimeOption::EvalHHIREnableGenTimeInlining ||
-      RuntimeOption::EvalJitEnableRenameFunction ||
-      callee->attrs() & AttrInterceptable) {
-    return traceRefusal(callSK, callee, "trivial", annotations);
+  if (m_disabled) {
+    return traceRefusal(callSK, callee, "m_disabled", annotations);
+  }
+  if (!callee) {
+    return traceRefusal(callSK, callee, "unknown callee", annotations);
+  }
+  if (!RuntimeOption::EvalHHIREnableGenTimeInlining) {
+    return traceRefusal(callSK, callee, "disabled via runtime option",
+                        annotations);
+  }
+  if (RuntimeOption::EvalJitEnableRenameFunction) {
+    return traceRefusal(callSK, callee, "rename function is enabled",
+                        annotations);
+  }
+  if (callee->attrs() & AttrInterceptable) {
+    return traceRefusal(callSK, callee, "callee is interceptable", annotations);
   }
 
   // TODO(#4238160): Inlining into pseudomain callsites is still buggy.

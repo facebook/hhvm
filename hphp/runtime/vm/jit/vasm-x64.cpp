@@ -254,12 +254,15 @@ struct Vgen {
   void emit(subsd i) { noncommute(i); a.subsd(i.s0, i.d); }
   void emit(const testb& i) { a.testb(i.s0, i.s1); }
   void emit(const testbi& i) { a.testb(i.s0, i.s1); }
+  void emit(const testbm& i) { a.testb(i.s0, i.s1); }
   void emit(const testbim& i) { a.testb(i.s0, i.s1); }
   void emit(const testw& i) { a.testw(i.s0, i.s1); }
   void emit(const testwi& i);
+  void emit(const testwm& i) { a.testw(i.s0, i.s1); }
   void emit(const testwim& i);
   void emit(const testl& i) { a.testl(i.s0, i.s1); }
   void emit(const testli& i);
+  void emit(const testlm& i) { a.testl(i.s0, i.s1); }
   void emit(const testlim& i);
   void emit(const testq& i) { a.testq(i.s0, i.s1); }
   void emit(const testqi& i);

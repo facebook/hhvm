@@ -956,10 +956,19 @@ bool simplify_testi(Env& env, const test& vtest, Vlabel b, size_t i) {
   return false;
 }
 
-template<typename testm, typename test>
+template<typename testm, typename cmpm, typename test>
 bool simplify_test(Env& env, const test& vtest, Vlabel b, size_t i) {
-  if (simplify_testi<testm>(env, vtest, b, i)) return true;
   if (arch_any(Arch::ARM, Arch::PPC64)) return false;
+  if (vtest.s0 == vtest.s1 && env.use_counts[vtest.s0] == 2) {
+    env.use_counts[vtest.s0]--;
+    auto const vptr = foldable_load(env, vtest.s0, b, i);
+    env.use_counts[vtest.s0]++;
+    if (vptr) {
+      return simplify_impl(env, b, i, cmpm { 0, *vptr, vtest.sf });
+    }
+  }
+
+  if (simplify_testi<testm>(env, vtest, b, i)) return true;
   if (auto const vptr = foldable_load(env, vtest.s0, b, i)) {
     return simplify_impl(env, b, i, testm { vtest.s1, *vptr, vtest.sf });
   }
@@ -1109,7 +1118,19 @@ bool simplify(Env& env, const testq& test, Vlabel b, size_t i) {
     return narrow_inst<testb, testw, testl>(env, size, test, b, i, v);
   });
 
-  if (simplify_test<testqm>(env, test, b, i)) return true;
+  return simplify_test<testqm, cmpqim>(env, test, b, i);
+}
+
+bool simplify(Env& env, const testl& test, Vlabel b, size_t i) {
+  return simplify_test<testlm, cmplim>(env, test, b, i);
+}
+
+bool simplify(Env& env, const testw& test, Vlabel b, size_t i) {
+  return simplify_test<testwm, cmpwim>(env, test, b, i);
+}
+
+bool simplify(Env& env, const testb& test, Vlabel b, size_t i) {
+  return simplify_test<testbm, cmpbim>(env, test, b, i);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -220,12 +220,15 @@ struct Vunit;
   O(testb, I(fl), U(s0) U(s1), D(sf))\
   O(testbi, I(s0) I(fl), U(s1), D(sf))\
   O(testbim, I(s0) I(fl), U(s1), D(sf))\
+  O(testbm, I(fl), U(s0) U(s1), D(sf))  \
   O(testw, I(fl), U(s0) U(s1), D(sf))\
   O(testwi, I(s0) I(fl), U(s1), D(sf))\
   O(testwim, I(s0) I(fl), U(s1), D(sf))\
+  O(testwm, I(fl), U(s0) U(s1), D(sf))  \
   O(testl, I(fl), U(s0) U(s1), D(sf))\
   O(testli, I(s0) I(fl), U(s1), D(sf))\
   O(testlim, I(s0) I(fl), U(s1), D(sf))\
+  O(testlm, I(fl), U(s0) U(s1), D(sf))  \
   O(testq, I(fl), U(s0) U(s1), D(sf))\
   O(testqi, I(s0) I(fl), U(s1), D(sf))\
   O(testqm, I(fl), U(s0) U(s1), D(sf))\
@@ -1046,12 +1049,15 @@ struct ucomisd { VregDbl s0, s1; VregSF sf; Vflags fl; };
 struct testb { Vreg8 s0, s1; VregSF sf; Vflags fl; };
 struct testbi { Immed s0; Vreg8 s1; VregSF sf; Vflags fl; };
 struct testbim { Immed s0; Vptr8 s1; VregSF sf; Vflags fl; };
+struct testbm { Vreg8 s0; Vptr8 s1; VregSF sf; Vflags fl; };
 struct testw { Vreg16 s0, s1; VregSF sf; Vflags fl; };
 struct testwi { Immed s0; Vreg16 s1; VregSF sf; Vflags fl; };
 struct testwim { Immed s0; Vptr16 s1; VregSF sf; Vflags fl; };
+struct testwm { Vreg16 s0; Vptr16 s1; VregSF sf; Vflags fl; };
 struct testl { Vreg32 s0, s1; VregSF sf; Vflags fl; };
 struct testli { Immed s0; Vreg32 s1; VregSF sf; Vflags fl; };
 struct testlim { Immed s0; Vptr32 s1; VregSF sf; Vflags fl; };
+struct testlm { Vreg32 s0; Vptr32 s1; VregSF sf; Vflags fl; };
 struct testq { Vreg64 s0, s1; VregSF sf; Vflags fl; };
 struct testqi { Immed s0; Vreg64 s1; VregSF sf; Vflags fl; };
 struct testqm { Vreg64 s0; Vptr64 s1; VregSF sf; Vflags fl; };

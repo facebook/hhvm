@@ -245,6 +245,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::testb:
     case Vinstr::testbi:
     case Vinstr::testbim:
+    case Vinstr::testbm:
     case Vinstr::cmovb:
     case Vinstr::csincb:
     case Vinstr::setcc:
@@ -268,6 +269,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::testw:
     case Vinstr::testwi:
     case Vinstr::testwim:
+    case Vinstr::testwm:
     case Vinstr::loadw:
     case Vinstr::movw:
     case Vinstr::storew:
@@ -299,6 +301,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::testl:
     case Vinstr::testli:
     case Vinstr::testlim:
+    case Vinstr::testlm:
     case Vinstr::movl:
     case Vinstr::loadl:
     case Vinstr::loadzbl:

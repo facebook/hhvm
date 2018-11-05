@@ -168,16 +168,19 @@ bool effectful(const Vinstr& inst) {
     case Vinstr::testb:
     case Vinstr::testbi:
     case Vinstr::testbim:
+    case Vinstr::testbm:
     case Vinstr::testw:
     case Vinstr::testwi:
+    case Vinstr::testwim:
+    case Vinstr::testwm:
     case Vinstr::testl:
     case Vinstr::testli:
     case Vinstr::testlim:
+    case Vinstr::testlm:
     case Vinstr::testq:
     case Vinstr::testqi:
     case Vinstr::testqim:
     case Vinstr::testqm:
-    case Vinstr::testwim:
     case Vinstr::ucomisd:
     case Vinstr::unpcklpd:
     case Vinstr::ubfmli:

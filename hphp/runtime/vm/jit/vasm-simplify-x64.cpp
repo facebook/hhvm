@@ -190,9 +190,11 @@ static int64_t extract_signed_value(uint64_t value, int size) {
   return val + sgn;
 }
 
-template<typename testi>
-bool simplify_test_imm(Env& env, int size, Vreg r0, Vreg r1, Vreg sf,
+template<typename testi, typename Arg0, typename Arg1>
+bool simplify_test_imm(Env& env, Arg0 r0, Arg1 r1, Vreg sf,
                        Vlabel b, size_t i) {
+  auto const size = static_cast<int>(width(r0));
+  assertx(1 <= size && size <= 8 && !(size & (size - 1)));
   auto const it = env.unit.regToConst.find(r0);
   if (it == env.unit.regToConst.end() ||
       it->second.isUndef ||
@@ -207,13 +209,11 @@ bool simplify_test_imm(Env& env, int size, Vreg r0, Vreg r1, Vreg sf,
 
 template<typename testi, typename test>
 bool simplify_test_imm(Env& env, const test& vtest, Vlabel b, size_t i) {
-  auto const size = static_cast<int>(width(vtest.s1));
-  assertx(1 <= size && size <= 8 && !(size & (size - 1)));
   return
     simplify_test_imm<testi>(
-      env, size, vtest.s0, vtest.s1, vtest.sf, b, i) ||
+      env, vtest.s0, vtest.s1, vtest.sf, b, i) ||
     simplify_test_imm<testi>(
-      env, size, vtest.s1, vtest.s0, vtest.sf, b, i);
+      env, vtest.s1, vtest.s0, vtest.sf, b, i);
 }
 
 bool simplify(Env& env, const testq& test, Vlabel b, size_t i) {
@@ -230,6 +230,22 @@ bool simplify(Env& env, const testw& test, Vlabel b, size_t i) {
 
 bool simplify(Env& env, const testb& test, Vlabel b, size_t i) {
   return simplify_test_imm<testbi>(env, test, b, i);
+}
+
+bool simplify(Env& env, const testqm& test, Vlabel b, size_t i) {
+  return simplify_test_imm<testqim>(env, test.s0, test.s1, test.sf , b, i);
+}
+
+bool simplify(Env& env, const testlm& test, Vlabel b, size_t i) {
+  return simplify_test_imm<testlim>(env, test.s0, test.s1, test.sf, b, i);
+}
+
+bool simplify(Env& env, const testwm& test, Vlabel b, size_t i) {
+  return simplify_test_imm<testwim>(env, test.s0, test.s1, test.sf, b, i);
+}
+
+bool simplify(Env& env, const testbm& test, Vlabel b, size_t i) {
+  return simplify_test_imm<testbim>(env, test.s0, test.s1, test.sf, b, i);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

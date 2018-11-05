@@ -1100,6 +1100,9 @@ void lowerForPPC64(const VLS& e, Vout& v, vasm_src& inst) {             \
   v << vasm_dst{operands tmp, inst.sf};                                 \
 }
 
+X(testbm, testb, loadb,  ONE(s0))
+X(testwm, testw, loadw,  ONE(s0))
+X(testlm, testl, loadl,  ONE(s0))
 X(testqm, testq, load,  ONE(s0))
 X(cmplm,  cmpl,  loadl, ONE(s0))
 X(cmpqm,  cmpq,  load,  ONE(s0))

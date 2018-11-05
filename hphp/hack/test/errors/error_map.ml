@@ -468,7 +468,7 @@ InvalidConditionallyReactiveCall = 4237
 ExtendSealed = 4238
 SealedFinal = 4239
 ComparisonInvalidTypes = 4240
-OptionVoid = 4241
+OptionVoidDEPRECATED = 4241
 MutableInNonreactiveContext = 4242
 InvalidArgumentOfRxMutableFunction = 4243
 LetVarImmutabilityViolation = 4244
@@ -522,4 +522,5 @@ UnexpectedTy = 4291
 UnserializableType = 4292
 InconsistentMutability = 4293
 InvalidMutabilityFlavorInAssignment = 4294
+OptionNull = 4295
   |}]

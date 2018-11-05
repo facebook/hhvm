@@ -90,7 +90,6 @@ type t =
   | Rregex           of Pos.t
   | Rlambda_use      of Pos.t
   | Rimplicit_upper_bound of Pos.t * string
-  | Rnull            of Pos.t
 
 and arg_position =
   | Aonly
@@ -286,8 +285,6 @@ let rec to_string prefix r =
     [(p, prefix ^ " because the lambda function was used here")]
   | Rimplicit_upper_bound (_, cstr) ->
     [(p, prefix ^ " arising from an implicit 'as " ^ cstr ^ "' constraint on this type")]
-  | Rnull p ->
-    [(p, Printf.sprintf "%s (null has type void)" prefix)]
 
 and to_pos = function
   | Rnone     -> Pos.none
@@ -366,7 +363,6 @@ and to_pos = function
   | Rarith_ret_int p -> p
   | Rbitwise_dynamic p -> p
   | Rincdec_dynamic p -> p
-  | Rnull p -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -474,23 +470,6 @@ match r with
   | Rsum_dynamic _ -> "Rsum_dynamic"
   | Rbitwise_dynamic _ -> "Rbitwise_dynamic"
   | Rincdec_dynamic _ -> "Rincdec_dynamic"
-  | Rnull _ -> "Rnull"
-
-let rec is_rnull = function
-  | Rnull _ -> true
-  | Ridx (_, r) -> is_rnull r
-  | Rarith_ret_float (_, r, _) -> is_rnull r
-  | Rarith_ret_num (_, r, _) -> is_rnull r
-  | Rlost_info (_, r, _) -> is_rnull r
-  | Rcoerced (r, _, _) -> is_rnull r
-  | Rformat (_, _, r) -> is_rnull r
-  | Rinstantiate (r, _, _) -> is_rnull r
-  | Rarray_filter (_, r) -> is_rnull r
-  | Rtype_access (_, _, r) -> is_rnull r
-  | Rexpr_dep_type (r, _, _) -> is_rnull r
-  | Rcontravariant_generic (r, _) -> is_rnull r
-  | Rinvariant_generic (r, _) -> is_rnull r
-  | _ -> false
 
 let pp fmt r =
   Format.pp_print_string fmt @@ to_constructor_string r

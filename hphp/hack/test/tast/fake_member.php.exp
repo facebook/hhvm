@@ -10,7 +10,7 @@
          cv_visibility = Private;
          cv_type = (Some ([4:11-15], (Hoption ([4:12-15], (Hprim Tint)))));
          cv_id = ([4:16-20], "foo");
-         cv_expr = (Some (([4:23-27], void), Null)); cv_user_attributes = []
+         cv_expr = (Some (([4:23-27], null), Null)); cv_user_attributes = []
          }
         ];
       c_constructor = None; c_static_methods = [];

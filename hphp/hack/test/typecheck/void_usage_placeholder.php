@@ -12,7 +12,7 @@ async function test(): Awaitable<void> {
   list($x, $_) = await genva(yield_int(), yield_void());
   $_ = v();
 
-  /* HH_FIXME[4119] even though void is subtype of Tmixed */
+  /* HH_FIXME[4110] even though void is subtype of Tmixed */
   takes_mixed($_);
 
   $arr = array();

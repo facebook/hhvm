@@ -258,7 +258,7 @@ let rec array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
         | Some { sft_optional = _; sft_ty } -> env, sft_ty)
     )
   | Toption ty -> nullable_container_get ty
-  | Tprim Tvoid ->
+  | Tprim Tnull ->
       nullable_container_get (Reason.Rnone, Tany)
   | Tobject ->
       if Env.is_strict env

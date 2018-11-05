@@ -265,7 +265,7 @@ module type S = sig
   val ambiguous_member : string -> Pos.t -> string -> Pos.t -> unit
   val null_container : Pos.t -> (Pos.t * string) list -> unit
   val option_mixed : Pos.t -> unit
-  val option_void : Pos.t -> unit
+  val option_null : Pos.t -> unit
   val declared_covariant : Pos.t -> Pos.t -> (Pos.t * string) list -> unit
   val declared_contravariant : Pos.t -> Pos.t -> (Pos.t * string) list -> unit
   val static_property_type_generic_param :

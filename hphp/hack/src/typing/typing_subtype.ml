@@ -355,7 +355,7 @@ and simplify_subtype
      Tanon _ | Tobject | Tclass _ | Tarraykind _),
     Tnonnull ->
     valid ()
-  | (Tdynamic | Toption _ | Tprim Nast.Tvoid |
+  | (Tdynamic | Toption _ | Tprim Nast.(Tnull | Tvoid) |
      Tabstract (AKdependent _, None)),
     Tnonnull ->
     invalid ()
@@ -377,8 +377,17 @@ and simplify_subtype
 
   (* everything subtypes mixed *)
   | _, Toption (_, Tnonnull) -> valid ()
-  (* void is the type of null and is a subtype of any option type. *)
-  | Tprim Nast.Tvoid, Toption _ -> valid ()
+  (* null is the type of null and is a subtype of any option type. *)
+  | Tprim Nast.Tnull, Toption _ -> valid ()
+  (* void behaves with respect to subtyping as an abstract type with
+   * an implicit upper bound ?nonnull
+   *)
+  | Tprim Nast.Tvoid, Toption ty_super' ->
+    let r = Reason.Rimplicit_upper_bound (Reason.to_pos (fst ety_sub), "?nonnull") in
+    let tmixed = (r, Toption (r, Tnonnull)) in
+    env |>
+    simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super' |||
+    simplify_subtype ~seen_generic_params ~deep ~this_ty tmixed ty_super
   | Tdynamic, Toption ty_super ->
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super env
   (* ?ty_sub' <: ?ty_super' iff ty_sub' <: ?ty_super'. Reasoning:
@@ -437,10 +446,10 @@ and simplify_subtype
     Tprim _ ->
     invalid ()
   | Toption _,
-    Tprim Nast.(Tint | Tbool | Tfloat | Tstring | Tresource | Tnum |
+    Tprim Nast.(Tvoid | Tint | Tbool | Tfloat | Tstring | Tresource | Tnum |
                 Tarraykey | Tnoreturn) ->
     invalid ()
-  | Toption ty_sub', Tprim Nast.Tvoid ->
+  | Toption ty_sub', Tprim Nast.Tnull ->
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub' ty_super env
   | Tabstract ((AKnewtype _ | AKenum _), Some ty), Tprim _ ->
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
@@ -625,7 +634,7 @@ and simplify_subtype
     else invalid ()
   | Tprim Nast.(Tarraykey | Tint | Tfloat | Tnum), Tclass ((_, class_name), _) ->
     if class_name = SN.Classes.cXHPChild then valid () else invalid ()
-  | (Tnonnull | Tdynamic | Tprim Nast.(Tvoid | Tbool | Tresource | Tnoreturn) |
+  | (Tnonnull | Tdynamic | Tprim Nast.(Tnull | Tvoid | Tbool | Tresource | Tnoreturn) |
      Toption _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _),
     Tclass _ ->
     invalid ()
@@ -903,6 +912,17 @@ and simplify_subtype
     when Option.is_some seen_generic_params ->
     env |>
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super |||
+    simplify_subtype_generic_super ty_sub name_super
+
+  (* void behaves with respect to subtyping as an abstract type with
+   * an implicit upper bound ?nonnull
+   *)
+  | Tprim Nast.Tvoid, Tabstract (AKgeneric name_super, _)
+    when Option.is_some seen_generic_params ->
+    let r = Reason.Rimplicit_upper_bound (Reason.to_pos (fst ety_sub), "?nonnull") in
+    let tmixed = (r, Toption (r, Tnonnull)) in
+    env |>
+    simplify_subtype ~seen_generic_params ~deep ~this_ty tmixed ty_super |||
     simplify_subtype_generic_super ty_sub name_super
 
   (* Supertype is generic parameter *and* subtype is dependent.

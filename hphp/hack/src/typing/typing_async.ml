@@ -18,7 +18,7 @@ module SN     = Naming_special_names
 let rec can_be_null env ty =
   let _, (_, ety) = Env.expand_type env ty in
   match ety with
-  | Toption _ | Tprim Nast.Tvoid -> true
+  | Toption _ | Tprim Nast.Tnull -> true
   | Tunresolved tyl -> List.exists tyl (can_be_null env)
   | Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Tvar _
     | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
@@ -71,8 +71,8 @@ let rec overload_extract_from_awaitable env p opt_ty_maybe =
     let env, ty = overload_extract_from_awaitable env p ty in
     let env, ty = TUtils.non_null env ty in
     env, (r, Toption ty)
-  | r, Tprim Nast.Tvoid ->
-    env, (r, Tprim Nast.Tvoid)
+  | r, Tprim Nast.Tnull ->
+    env, (r, Tprim Nast.Tnull)
   | _, Tdynamic -> (* Awaiting a dynamic results in a new dynamic *)
     env, (r, Tdynamic)
   | _, (Terr | Tany | Tarraykind _ | Tnonnull | Tprim _

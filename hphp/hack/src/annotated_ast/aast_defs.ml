@@ -76,6 +76,7 @@ and hint_ =
 
 (* AST types such as Happly("int", []) are resolved to Hprim values *)
 and tprim =
+  | Tnull
   | Tvoid
   | Tint
   | Tbool

@@ -3,4 +3,4 @@ Invalid return type (Typing[4110])
 File "null_is_not_of_type_nonnull.php", line 3, characters 15-21:
 This is a nonnull value
 File "null_is_not_of_type_nonnull.php", line 4, characters 10-13:
-It is incompatible with void (null has type void)
+It is incompatible with null

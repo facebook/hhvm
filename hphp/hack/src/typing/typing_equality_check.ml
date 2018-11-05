@@ -67,12 +67,13 @@ let rec assert_nontrivial p bop env ty1 ty2 =
   | (_, Tprim (N.Tint | N.Tfloat)),  (_, Tprim N.Tnum) -> ()
   | (_, Tprim N.Tarraykey),          (_, Tprim (N.Tint | N.Tstring))
   | (_, Tprim (N.Tint | N.Tstring)), (_, Tprim N.Tarraykey) -> ()
+  | (_, Tprim N.Tnull), _
+  | _, (_, Tprim N.Tnull) -> ()
   | (r, Tprim N.Tnoreturn), _
   | _, (r, Tprim N.Tnoreturn) ->
       Errors.noreturn_usage p (Reason.to_string ("This always throws or exits") r)
   | (r, Tprim N.Tvoid), _
   | _, (r, Tprim N.Tvoid) ->
-      if Reason.is_rnull r then () else
       (* Ideally we shouldn't hit this case, but well... *)
       Errors.void_usage p (Reason.to_string ("This is void") r)
   | (_, Tprim a), (_, Tprim b) when a <> b ->

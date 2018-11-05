@@ -25,7 +25,7 @@ let check_param : Env.env -> Nast.fun_param -> unit =
     fun env ty ->
     let env, ty = Env.expand_type env ty in
     match ty with
-    | _, (Tprim (Tarraykey | Tbool | Tint | Tfloat | Tstring | Tnum)
+    | _, (Tprim (Tnull | Tarraykey | Tbool | Tint | Tfloat | Tstring | Tnum)
          | Tnonnull | Tany | Terr | Tabstract (AKenum _, _) | Tdynamic) ->
        ()
     | _, Tprim (Tvoid | Tresource | Tnoreturn) -> error ty

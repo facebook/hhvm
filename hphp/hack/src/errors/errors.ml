@@ -2731,9 +2731,9 @@ let option_mixed pos =
   add (Typing.err_code Typing.OptionMixed) pos
     "?mixed is a redundant typehint - just use mixed"
 
-let option_void pos =
-  add (Typing.err_code Typing.OptionVoid) pos
-    "?void is a redundant typehint - just use void"
+let option_null pos =
+  add (Typing.err_code Typing.OptionNull) pos
+    "?null is a redundant typehint - just use null"
 
 let declared_covariant pos1 pos2 emsg =
   add_list (Typing.err_code Typing.DeclaredCovariant) (

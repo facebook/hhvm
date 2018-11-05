@@ -48,6 +48,7 @@ let rec indexable_type_to_string = function
   | ITmixed               -> "mixed"
   | ITnonnull             -> "nonnull"
   | ITdynamic             -> "dynamic"
+  | ITprim Nast.Tnull     -> "null"
   | ITprim Nast.Tvoid     -> "void"
   | ITprim Nast.Tint      -> "int"
   | ITprim Nast.Tbool     -> "bool"

@@ -29,7 +29,7 @@ let check_valid_rvalue p env ty =
           (Reason.to_string "A noreturn function always throws or exits" r);
         env
 
-      | r, Tprim Tvoid when not @@ Reason.is_rnull r ->
+      | r, Tprim Tvoid ->
         Errors.void_usage p
           (Reason.to_string "A void function doesn't return a value" r);
         env

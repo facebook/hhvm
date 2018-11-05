@@ -95,6 +95,7 @@ let rec parse_type_specifier ?(allow_var=false) parser =
   | Resource
   | Object
   | Mixed
+  | NullLiteral
   | Name -> parse_simple_type_or_type_constant_or_generic parser
   | Namespace ->
     let (parser, name) = scan_name_or_qualified_name parser in

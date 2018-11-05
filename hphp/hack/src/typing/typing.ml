@@ -1640,7 +1640,7 @@ and expr_
      * be null | t
      *)
   | Null ->
-      make_result env T.Null (Reason.Rnull p, Tprim Tvoid)
+      make_result env T.Null (Reason.Rwitness p, Tprim Tnull)
   | String s ->
       make_result env (T.String s) (Reason.Rwitness p, Tprim Tstring)
   | String2 idl ->
@@ -4719,7 +4719,7 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~(pos_params : expr list option) ?(ex
     end
 
   | _, Toption ty -> nullable_obj_get ty
-  | r, Tprim Nast.Tvoid ->
+  | r, Tprim Nast.Tnull ->
     nullable_obj_get (r, Tany)
   | _, _ ->
     k (obj_get_concrete_ty ~is_method ~valkind ~explicit_tparams env ety1 cid id k_lhs)

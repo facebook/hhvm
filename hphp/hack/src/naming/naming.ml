@@ -881,7 +881,8 @@ module Make (GetLocals : GetLocals) = struct
           Errors.wildcard_disallowed p;
           N.Hany
         | x when x.[0] = '\\' &&
-          ( x = ("\\"^SN.Typehints.void)
+          (  x = ("\\"^SN.Typehints.null)
+          || x = ("\\"^SN.Typehints.void)
           || x = ("\\"^SN.Typehints.noreturn)
           || x = ("\\"^SN.Typehints.int)
           || x = ("\\"^SN.Typehints.bool)
@@ -902,15 +903,13 @@ module Make (GetLocals : GetLocals) = struct
           N.Hany
       | x when x = SN.Typehints.void && allow_retonly -> N.Hprim N.Tvoid
       | x when x = SN.Typehints.void ->
-        if TypecheckerOptions.experimental_feature_enabled
-             (fst env).tcopt
-             TypecheckerOptions.experimental_void_is_type_of_null
-        then N.Hprim N.Tvoid
-        else (Errors.return_only_typehint p `void; N.Hany)
+         Errors.return_only_typehint p `void;
+         N.Hany
       | x when x = SN.Typehints.noreturn && allow_retonly -> N.Hprim N.Tnoreturn
       | x when x = SN.Typehints.noreturn ->
         Errors.return_only_typehint p `noreturn;
         N.Hany
+      | x when x = SN.Typehints.null -> N.Hprim N.Tnull
       | x when x = SN.Typehints.num  -> N.Hprim N.Tnum
       | x when x = SN.Typehints.resource -> N.Hprim N.Tresource
       | x when x = SN.Typehints.arraykey -> N.Hprim N.Tarraykey

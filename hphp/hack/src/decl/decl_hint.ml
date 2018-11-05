@@ -44,12 +44,11 @@ and hint_ p env = function
   | Hprim p -> Tprim p
   | Habstr x ->
     Tgeneric x
+  | Hoption (_, Hprim Tnull) ->
+    Errors.option_null p;
+    Terr
   | Hoption (_, Hprim Tvoid) ->
-    if TypecheckerOptions.experimental_feature_enabled
-         env.Decl_env.decl_tcopt
-         TypecheckerOptions.experimental_void_is_type_of_null
-    then Errors.option_void p
-    else Errors.option_return_only_typehint p `void;
+    Errors.option_return_only_typehint p `void;
     Terr
   | Hoption (_, Hprim Tnoreturn) ->
     Errors.option_return_only_typehint p `noreturn;

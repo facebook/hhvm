@@ -1,2 +1,0 @@
-File "option_void2.php", line 3, characters 15-19:
-?void is a redundant typehint - just use void (Typing[4241])

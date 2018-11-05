@@ -178,7 +178,6 @@ let parse_options () =
   let allow_return_by_ref = ref false in
   let allow_array_cell_pass_by_ref = ref false in
   let allow_anon_use_capture_by_ref = ref false in
-  let void_is_type_of_null = ref false in
   let disallow_unset_on_varray = ref false in
   let auto_namespace_map = ref [] in
   let dont_assume_php = ref false in
@@ -343,9 +342,6 @@ let parse_options () =
     "--allow-anon-use-capture-by-ref",
         Arg.Set allow_anon_use_capture_by_ref,
         " Allow binding of local variables by reference in anonymous function use clauses";
-    "--void-is-type-of-null",
-        Arg.Set void_is_type_of_null,
-        " Make void the type of null";
     "--disallow-unset-on-varray",
         Arg.Set disallow_unset_on_varray,
         " Disallow unsetting indices from varrays";
@@ -406,8 +402,6 @@ let parse_options () =
         then !disable_optional_and_unknown_shape_fields
         else if x = GlobalOptions.tco_experimental_reified_generics
         then not (!disallow_reified_generics)
-        else if x = GlobalOptions.tco_experimental_void_is_type_of_null
-        then !void_is_type_of_null
         else true
       end tcopt.GlobalOptions.tco_experimental_features;
   } in

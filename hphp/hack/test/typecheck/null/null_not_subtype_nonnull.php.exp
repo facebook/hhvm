@@ -1,0 +1,6 @@
+File "null_not_subtype_nonnull.php", line 5, characters 10-13:
+Invalid return type (Typing[4110])
+File "null_not_subtype_nonnull.php", line 4, characters 18-24:
+This is a nonnull value
+File "null_not_subtype_nonnull.php", line 5, characters 10-13:
+It is incompatible with null

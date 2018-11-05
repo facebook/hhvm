@@ -265,6 +265,7 @@ end
 
 module Typehints = struct
 
+  let null     = "null"
   let void     = "void"
   let resource = "resource"
   let num      = "num"

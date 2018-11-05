@@ -83,9 +83,8 @@ and union_ env ty1 ty2 r =
   | (r1, Tprim Nast.Tfloat), (r2, Tprim Nast.Tint) ->
     let r = union_reason r1 r2 in
     env, (r, Tprim Nast.Tnum)
-  | (r, Tprim Nast.Tvoid), ty
-  | ty, (r, Tprim Nast.Tvoid) ->
-    let r = match r with Reason.Rnull p -> Reason.Rwitness p | _ -> r in
+  | (r, Tprim Nast.Tnull), ty
+  | ty, (r, Tprim Nast.Tnull) ->
     env, (r, Toption ty)
   | (_, Tany), (_, Tunresolved _ as ty)
   | (_, Tunresolved _ as ty), (_, Tany) ->

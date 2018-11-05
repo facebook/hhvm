@@ -34,6 +34,7 @@ module TySet = Typing_set
 module ErrorString = struct
 
   let tprim = function
+    | Nast.Tnull       -> "null"
     | Nast.Tvoid       -> "void"
     | Nast.Tint        -> "an int"
     | Nast.Tbool       -> "a bool"
@@ -237,6 +238,7 @@ module Suggest = struct
     | x :: rl -> type_ x ^ ", "^ list rl
 
   and prim = function
+    | Nast.Tnull   -> "null"
     | Nast.Tvoid   -> "void"
     | Nast.Tint    -> "int"
     | Nast.Tbool   -> "bool"
@@ -456,6 +458,7 @@ module Full = struct
 
   and prim x =
     match x with
+    | Nast.Tnull   -> "null"
     | Nast.Tvoid   -> "void"
     | Nast.Tint    -> "int"
     | Nast.Tbool   -> "bool"
@@ -635,6 +638,7 @@ struct
 open Hh_json
 
 let prim = function
+  | Nast.Tnull   -> "null"
   | Nast.Tvoid   -> "void"
   | Nast.Tint    -> "int"
   | Nast.Tbool   -> "bool"

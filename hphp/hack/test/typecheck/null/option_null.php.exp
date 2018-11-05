@@ -1,0 +1,2 @@
+File "option_null.php", line 4, characters 18-22:
+?null is a redundant typehint - just use null (Typing[4295])

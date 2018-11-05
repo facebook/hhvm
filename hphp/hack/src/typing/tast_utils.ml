@@ -97,6 +97,7 @@ let rec truthiness env ty =
     end
 
   | Tprim Tresource -> Always_truthy
+  | Tprim Tnull -> Always_falsy
   | Tprim Tvoid -> Always_falsy
   | Tprim Tnoreturn -> Unknown
   | Tprim (Tint | Tbool | Tfloat | Tstring | Tnum | Tarraykey) -> Possibly_falsy

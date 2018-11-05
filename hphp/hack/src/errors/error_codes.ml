@@ -474,7 +474,7 @@ module Typing                               = struct
   | ExtendSealed
   | SealedFinal
   | ComparisonInvalidTypes
-  | OptionVoid
+  | OptionVoidDEPRECATED
   | MutableInNonreactiveContext
   | InvalidArgumentOfRxMutableFunction
   | LetVarImmutabilityViolation
@@ -528,6 +528,7 @@ module Typing                               = struct
   | UnserializableType
   | InconsistentMutability
   | InvalidMutabilityFlavorInAssignment
+  | OptionNull
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@ deriving enum, show { with_path = false } ]
   let err_code = to_enum

@@ -94,7 +94,6 @@ struct InliningDecider {
   bool disabled() const { return m_disabled; }
   int  depth()    const { return m_callDepth; }
   bool inlining() const { return depth() != 0; }
-  int  maxStackDepth() const { return m_maxStackDepth; }
 
   /////////////////////////////////////////////////////////////////////////////
   // Core API.
@@ -168,7 +167,6 @@ private:
   int m_cost{0};
   int m_callDepth{0};
   int m_stackDepth{0};
-  int m_maxStackDepth{0};
 
   // Stack of costs, popped in registerEndInlining().
   std::vector<int> m_costStack;

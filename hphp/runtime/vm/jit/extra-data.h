@@ -1511,20 +1511,6 @@ struct AssertReason : IRExtraData {
 };
 #define ASSERT_REASON AssertReason{Reason{__FILE__, __LINE__}}
 
-struct CheckStackOverflowData : IRExtraData {
-  explicit CheckStackOverflowData(int cells, bool prelive)
-    : cells(cells)
-    , prelive(prelive)
-  {}
-
-  std::string show() const {
-    return folly::to<std::string>(cells, prelive ? " prelive" : "");
-  }
-
-  int cells;
-  bool prelive;
-};
-
 //////////////////////////////////////////////////////////////////////
 
 #define X(op, data)                                                   \
@@ -1742,7 +1728,6 @@ X(NewColFromArray,              NewColData);
 X(InitExtraArgs,                FuncEntryData);
 X(CheckSurpriseFlagsEnter,      FuncEntryData);
 X(CheckSurpriseAndStack,        FuncEntryData);
-X(CheckStackOverflow,           CheckStackOverflowData);
 X(ContPreNext,                  IsAsyncData);
 X(ContStartedCheck,             IsAsyncData);
 X(ContValid,                    IsAsyncData);

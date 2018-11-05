@@ -132,6 +132,9 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee,
   if (callee->isGenerator()) {
     return refuse("callee is generator");
   }
+  if (callee->maxStackCells() >= kStackCheckLeafPadding) {
+    return refuse("function stack depth too deep");
+  }
   if (callee->isMethod() && callee->cls() == Generator::getClass()) {
     return refuse("generator member function");
   }
@@ -522,6 +525,10 @@ bool InliningDecider::shouldInline(SrcKey callerSk,
     return true;
   };
 
+  if (m_stackDepth + callee->maxStackCells() >= kStackCheckLeafPadding) {
+    return refuse("inlining stack depth limit exceeded");
+  }
+
   // Even if the func contains NativeImpl we may have broken the trace before
   // we hit it.
   auto containsNativeImpl = [&] {
@@ -620,8 +627,6 @@ bool InliningDecider::shouldInline(SrcKey callerSk,
 void InliningDecider::registerEndInlining(const Func* callee) {
   auto cost = m_costStack.back();
   m_costStack.pop_back();
-
-  m_maxStackDepth = std::max(m_maxStackDepth, m_stackDepth);
 
   m_cost -= cost;
   m_callDepth -= 1;

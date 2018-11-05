@@ -417,12 +417,7 @@ void emitPrologueEntry(IRGS& env, uint32_t argc) {
   // Emit early stack overflow check if necessary.
   if (stack_check_kind(func, argc) == StackCheck::Early) {
     env.irb->exceptionStackBoundary();
-    gen(
-      env,
-      CheckStackOverflow,
-      CheckStackOverflowData{func->maxStackCells() + kStackCheckPadding, true},
-      fp(env)
-    );
+    gen(env, CheckStackOverflow, fp(env));
   }
 }
 

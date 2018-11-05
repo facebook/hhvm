@@ -88,33 +88,26 @@ void cgCheckSurpriseFlags(IRLS& env, const IRInstruction* inst) {
   emitCheckSurpriseFlags(v, fp_or_sp, label(env, inst->taken()));
 }
 
-static void raiseStackOverflowFast() { raise_error("Stack overflow"); }
-
 void cgCheckStackOverflow(IRLS& env, const IRInstruction* inst) {
-  auto const fp_or_sp = srcLoc(env, inst, 0).reg();
-  auto const maxCells = inst->extra<CheckStackOverflowData>()->cells;
-  auto const prelive = inst->extra<CheckStackOverflowData>()->prelive;
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const func = inst->marker().func();
   auto& v = vmain(env);
 
   auto const stackMask = int32_t{
     cellsToBytes(RuntimeOption::EvalVMStackElms) - 1
   };
-  auto const depth = cellsToBytes(maxCells) + Stack::sSurprisePageSize;
+  auto const depth = cellsToBytes(func->maxStackCells()) +
+                     cellsToBytes(kStackCheckPadding) +
+                     Stack::sSurprisePageSize;
 
   auto const r = v.makeReg();
   auto const sf = v.makeReg();
-  v << andqi{stackMask, fp_or_sp, r, v.makeReg()};
+  v << andqi{stackMask, fp, r, v.makeReg()};
   v << subqi{safe_cast<int32_t>(depth), r, v.makeReg(), sf};
 
   unlikelyIfThen(v, vcold(env), CC_L, sf, [&] (Vout& v) {
-    if (prelive) {
-      assertx(inst->src(0)->isA(TFramePtr));
-      cgCallHelper(v, env, CallSpec::direct(handleStackOverflow), kVoidDest,
-                   SyncOptions::Sync, argGroup(env, inst).reg(fp_or_sp));
-    } else {
-      cgCallHelper(v, env, CallSpec::direct(raiseStackOverflowFast), kVoidDest,
-                   SyncOptions::Sync, argGroup(env, inst));
-    }
+    cgCallHelper(v, env, CallSpec::direct(handleStackOverflow), kVoidDest,
+                 SyncOptions::Sync, argGroup(env, inst).reg(fp));
   });
 }
 

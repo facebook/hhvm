@@ -213,7 +213,7 @@ Array PageletTransport::getAsyncResults(bool allow_empty) {
   return PackedArrayInit(3)
     .append(results)
     .append(next_event
-      ? make_tv<KindOfObject>(next_event->getWaitHandle())
+      ? make_tv<KindOfObject>(next_event->toWaitHandle().get())
       : make_tv<KindOfNull>())
     .append(make_tv<KindOfInt64>(code))
     .toArray();

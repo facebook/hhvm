@@ -113,13 +113,7 @@ Object File::await(uint16_t events, double timeout) {
   }
 
   auto ev = new FileAwait(fd(), events, timeout);
-  try {
-    return Object{ev->getWaitHandle()};
-  } catch (...) {
-    assertx(false);
-    ev->abandon();
-    throw;
-  }
+  return ev->toWaitHandle();
 }
 
 /////////////////////////////////////////////////////////////////////////////

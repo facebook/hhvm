@@ -582,9 +582,7 @@ Object HHVM_FUNCTION(HH_watchman_run,
           return std::string(toJson(result).data());
         });
     });
-  return Object{
-    (new FutureEvent<std::string>(std::move(res_future)))->getWaitHandle()
-  };
+  return (new FutureEvent<std::string>(std::move(res_future)))->toWaitHandle();
 }
 
 // (PHP entry-point)
@@ -628,31 +626,24 @@ Object HHVM_FUNCTION(HH_watchman_subscribe,
       f->fullName()->toCppString(),
       f->filename()->toCppString(),
       name));
-  try {
-    auto res_future = getWatchmanClientForSocket(socket_path)
-      .thenValue([name] (std::shared_ptr<watchman::WatchmanClient> client)
-        -> folly::Future<folly::Unit>
-      {
-        // (ASYNC)
-        auto sub_entry = s_activeSubscriptions.find(name);
-        if (sub_entry != s_activeSubscriptions.end()) {
-          return sub_entry->second.subscribe(client);
-        }
-        return folly::unit;
-      })
-      .onError([name] (std::exception const& e) -> folly::Unit {
-        // (ASNYC) delete active subscription
-        s_activeSubscriptions.erase(name);
-        throw std::runtime_error(e.what());
-      });
-    return Object{
-      (new FutureEvent<folly::Unit>(std::move(res_future)))->getWaitHandle()
-    };
-  } catch(...) {
-    s_activeSubscriptions.erase(name);
-    throw;
-  }
-  not_reached();
+  SCOPE_FAIL { s_activeSubscriptions.erase(name); };
+  auto res_future = getWatchmanClientForSocket(socket_path)
+    .thenValue([name] (std::shared_ptr<watchman::WatchmanClient> client)
+      -> folly::Future<folly::Unit>
+    {
+      // (ASYNC)
+      auto sub_entry = s_activeSubscriptions.find(name);
+      if (sub_entry != s_activeSubscriptions.end()) {
+        return sub_entry->second.subscribe(client);
+      }
+      return folly::unit;
+    })
+    .onError([name] (std::exception const& e) -> folly::Unit {
+      // (ASNYC) delete active subscription
+      s_activeSubscriptions.erase(name);
+      throw std::runtime_error(e.what());
+    });
+  return (new FutureEvent<folly::Unit>(std::move(res_future)))->toWaitHandle();
 }
 
 // (PHP entry-point)
@@ -753,9 +744,7 @@ Object HHVM_FUNCTION(HH_watchman_sync_sub,
           });
         return sync_future;
       });
-    return Object{
-      (new FutureEvent<bool>(std::move(res_future)))->getWaitHandle()
-    };
+    return (new FutureEvent<bool>(std::move(res_future)))->toWaitHandle();
   } catch(const std::exception& e) {
     SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
       "Error '{}' on subscription named '{}'", e.what(), name));
@@ -770,9 +759,8 @@ Object HHVM_FUNCTION(HH_watchman_unsubscribe, const String& _name) {
   try {
     std::lock_guard<std::mutex> g(s_sharedDataMutex);
     auto res_future = watchman_unsubscribe_impl(_name.toCppString());
-    return Object{
-      (new FutureEvent<std::string>(std::move(res_future)))->getWaitHandle()
-    };
+    return (new FutureEvent<std::string>(std::move(res_future)))
+      ->toWaitHandle();
   } catch (const std::exception& e) {
     // Several exceptions related to unsubscribe may be thrown but these will
     // not be PHP-safe as they may be generated in non request contexts.

@@ -271,13 +271,12 @@ static Object newAsyncMysqlConnectEvent(
       event->opFinished();
     });
     op->run();
-
-    return Object{event->getWaitHandle()};
   } catch (...) {
     assertx(false);
     event->abandon();
     return Object{};
   }
+  return event->toWaitHandle();
 }
 
 Object HHVM_STATIC_METHOD(
@@ -426,12 +425,12 @@ Object HHVM_STATIC_METHOD(
 
     });
     connectOp->run();
-    return Object{event->getWaitHandle()};
   } catch (...) {
     Logger::Error("Unexpected exception while creating Connection");
     event->abandon();
     return Object{};
   }
+  return event->toWaitHandle();
 }
 
 Object HHVM_STATIC_METHOD(
@@ -693,8 +692,6 @@ Object AsyncMysqlConnection::query(
     };
     op->setCallback(am::resultAppender(appender_callback));
     op->run();
-
-    return Object{event->getWaitHandle()};
   }
   catch (...) {
     Logger::Error("Unexpected exception while beginning ConnectOperation");
@@ -702,6 +699,7 @@ Object AsyncMysqlConnection::query(
     event->abandon();
     return Object{};
   }
+  return event->toWaitHandle();
 }
 
 static Object HHVM_METHOD(
@@ -833,14 +831,13 @@ static Object HHVM_METHOD(
     };
     op->setCallback(am::resultAppender(appender_callback));
     op->run();
-
-    return Object{event->getWaitHandle()};
   }
   catch (...) {
     assertx(false);
     event->abandon();
     return Object{};
   }
+  return event->toWaitHandle();
 }
 
 static bool HHVM_METHOD(AsyncMysqlConnection, isValid) {

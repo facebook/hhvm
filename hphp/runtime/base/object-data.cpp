@@ -75,7 +75,6 @@ static_assert(sizeof(ObjectData) == (use_lowptr ? 16 : 24),
 namespace {
 
 const StaticString
-  s_offsetGet("offsetGet"),
   s_call("__call"),
   s_clone("__clone");
 
@@ -1130,16 +1129,6 @@ int64_t ObjectData::compare(const ObjectData& other) const {
     }
   );
   return result;
-}
-
-Variant ObjectData::offsetGet(Variant key) {
-  assertx(instanceof(SystemLib::s_ArrayAccessClass));
-
-  auto const method = m_cls->lookupMethod(s_offsetGet.get());
-  assertx(method);
-
-  return
-    g_context->invokeMethodV(this, method, InvokeArgs(key.toCell(), 1), false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

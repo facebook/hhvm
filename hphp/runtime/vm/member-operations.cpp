@@ -102,9 +102,7 @@ static OffsetExistsResult objOffsetExists(ObjectData* base, TypedValue offset) {
     : OffsetExistsResult::DefinitelyExists;
 }
 
-bool objOffsetIsset(ObjectData* base, TypedValue offset,
-                    bool /*validate*/ /* = true */
-                    ) {
+bool objOffsetIsset(ObjectData* base, TypedValue offset) {
   auto exists = objOffsetExists(base, offset);
 
   // Unless we called ArrayObject::offsetExists, there's nothing more to do.
@@ -124,9 +122,7 @@ bool objOffsetIsset(ObjectData* base, TypedValue offset,
   return !result.isNull();
 }
 
-bool objOffsetEmpty(ObjectData* base, TypedValue offset,
-                    bool /*validate*/ /* = true */
-                    ) {
+bool objOffsetEmpty(ObjectData* base, TypedValue offset) {
   if (objOffsetExists(base, offset) == OffsetExistsResult::DoesNotExist) {
     return true;
   }

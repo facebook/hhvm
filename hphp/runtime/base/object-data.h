@@ -385,7 +385,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   ObjectData* clone();
 
-  Variant offsetGet(Variant key);
   String invokeToString();
   bool hasToString();
 

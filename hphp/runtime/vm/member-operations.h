@@ -150,8 +150,8 @@ TypedValue objOffsetGet(
   bool validate = true
 );
 
-bool objOffsetIsset(ObjectData* base, TypedValue offset, bool validate = true);
-bool objOffsetEmpty(ObjectData* base, TypedValue offset, bool validate = true);
+bool objOffsetIsset(ObjectData* base, TypedValue offset);
+bool objOffsetEmpty(ObjectData* base, TypedValue offset);
 
 void objOffsetSet(
   ObjectData* base,

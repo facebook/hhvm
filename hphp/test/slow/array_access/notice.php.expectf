@@ -1,0 +1,25 @@
+==== class C ====
+
+Notice: ArrayAccess via Object of class C in %s/test/slow/array_access/notice.php on line 44
+offsetSet called
+
+Notice: ArrayAccess via Object of class C in %s/test/slow/array_access/notice.php on line 32
+offsetExists called
+
+Notice: ArrayAccess via Object of class C in %s/test/slow/array_access/notice.php on line 33
+offsetExists called
+offsetGet called
+
+Notice: ArrayAccess via Object of class C in %s/test/slow/array_access/notice.php on line 34
+offsetGet called
+int(1)
+
+Notice: ArrayAccess via Object of class C in %s/test/slow/array_access/notice.php on line 36
+offsetUnset called
+==== class HH\Vector ====
+int(1)
+Cannot unset an element of a Vector
+==== class HH\Map ====
+int(1)
+==== class HH\Set ====
+int(0)

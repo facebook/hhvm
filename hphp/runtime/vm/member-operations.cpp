@@ -54,6 +54,10 @@ void objArrayAccess(ObjectData* base) {
   if (!base->instanceof(SystemLib::s_ArrayAccessClass)) {
     raise_error("Object does not implement ArrayAccess");
   }
+  if (RuntimeOption::EvalNoticeOnArrayAccessUse) {
+    raise_notice("ArrayAccess via Object of class %s",
+                 base->getClassName().data());
+  }
 }
 
 TypedValue objOffsetGet(

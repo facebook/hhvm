@@ -959,6 +959,7 @@ struct RuntimeOption {
   F(bool, NoticeOnBuiltinDynamicCalls, false)                           \
   F(bool, RxPretendIsEnabled, false)                                    \
   F(bool, NoArrayAccessInIdx, false)                                    \
+  F(bool, NoticeOnArrayAccessUse, false)                                \
   /* Raise warning when function pointers are used as strings. */       \
   F(bool, RaiseFuncConversionWarning, false)                            \
   /* Raise warning when class pointers are used as strings. */          \

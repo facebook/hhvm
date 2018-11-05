@@ -1,8 +1,10 @@
 File "this_param.php", line 23, characters 16-19:
 Invalid argument (Typing[4110])
-File "this_param.php", line 17, characters 23-26:
-This is the expression dependent type <static>
 File "this_param.php", line 23, characters 5-9:
-  where '<static>' refers to the late bound type of the enclosing class
+This is the expression dependent type this
 File "this_param.php", line 21, characters 24-26:
 It is incompatible with an object of type Foo
+File "this_param.php", line 12, characters 7-9:
+Since Foo is not final
+File "this_param.php", line 21, characters 24-26:
+this might not be a Foo

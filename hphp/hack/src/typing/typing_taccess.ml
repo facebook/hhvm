@@ -78,8 +78,7 @@ and expand_with_env_ ety_env env reason root ids =
        for the receiver - check if condition type has type constant at the same path.
        If yes - attach a condition type ROOTCOND_TY::ID to a result type *)
        begin match root, ids, TR.condition_type_from_reactivity (Env.env_reactivity tenv) with
-       | (_, Tabstract (AKdependent (`static, []),
-                       Some (_, Tabstract (AKdependent (`this, []), _)))),
+       | (_, Tabstract (AKdependent (`this, []), _)),
          [_, id],
          Some cond_ty ->
          begin match CT.try_get_class_for_condition_type tenv cond_ty with

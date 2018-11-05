@@ -1617,11 +1617,8 @@ and expr_
       then check_escaping_var env (p,this);
       let (_, ty) = Env.get_local env this in
       let r = Reason.Rwitness p in
-      let ty = (r, ty) in
-      let ty = r, TUtils.this_of ty in
-      (* '$this' always refers to the late bound static type *)
-      let env, new_ty = ExprDepTy.make env CIstatic ty in
-      make_result env T.This (new_ty)
+      let ty = r, TUtils.this_of (r, ty) in
+      make_result env T.This ty
   | Assert (AE_assert e) ->
       let env, te, _ = expr env e in
       let env = LEnv.save_and_merge_next_in_cont env C.Exit in
@@ -4079,8 +4076,7 @@ and is_abstract_ft fty = match fty with
              * defined on the parent class, but $this is still the child class.
              * We can deal with this by hijacking the continuation that
              * calculates the SN.Typehints.this type *)
-            let env, this_ty = ExprDepTy.make env CIstatic
-              (Reason.Rwitness fpos, TUtils.this_of (Env.get_self env)) in
+            let this_ty = (Reason.Rwitness fpos, TUtils.this_of (Env.get_self env)) in
             let k_lhs _ = this_ty in
             let env, method_, _ =
               obj_get_ ~is_method:true ~nullsafe:None ~pos_params:(Some el) ~valkind:`other env ty1
@@ -4902,8 +4898,8 @@ and static_class_id ~check_constraints p env =
         make_result env T.CIparent (r, TUtils.this_of (r, snd parent))
     )
   | CIstatic ->
-    make_result env T.CIstatic
-      (Reason.Rwitness p, TUtils.this_of (Env.get_self env))
+    let this = (Reason.Rwitness p, TUtils.this_of (Env.get_self env)) in
+    make_result env T.CIstatic this
   | CIself ->
     make_result env T.CIself
       (Reason.Rwitness p, snd (Env.get_self env))
@@ -5767,18 +5763,6 @@ and condition ?lhs_of_null_coalesce env tparamet
           then Errors.instanceof_generic_classname p name;
           env, obj_ty
         | _, Tabstract (AKdependent (`this, []), Some (_, Tclass _)) ->
-          let env, obj_ty =
-            (* Technically instanceof static is not strong enough to prove
-             * that a type is exactly the same as the late bound type.
-             * For now we allow this lie to exist. To solve
-             * this we either need to create a new type that means
-             * subtype of static or provide a way of specifying exactly
-             * the late bound type i.e. $x::class === static::class
-             *)
-            if cid = T.CIstatic then
-              ExprDepTy.make env CIstatic obj_ty
-            else
-              env, obj_ty in
           env, obj_ty
         | _, Tabstract ((AKdependent _ | AKnewtype _), Some ty) ->
           resolve_obj env ty
@@ -5865,8 +5849,6 @@ and safely_refine_type env p reason ivar_pos ivar_ty hint_ty =
       env, (reason, Ttuple tyl)
     | _, Tnonnull ->
       TUtils.non_null env ivar_ty
-    | _, Tabstract (AKdependent (`this, []), Some (_, Tclass _)) ->
-      ExprDepTy.make env CIstatic hint_ty
     | _, (Tany | Tprim _ | Toption _ | Ttuple _
         | Tshape _ | Tvar _ | Tabstract _ | Tarraykind _ | Tanon _
         | Tunresolved _ | Tobject | Terr | Tfun _  | Tdynamic) ->

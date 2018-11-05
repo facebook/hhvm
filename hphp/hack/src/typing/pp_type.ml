@@ -287,7 +287,6 @@ fun fmt (a0,a1) ->
   Format.fprintf fmt "(@[";
   (match a0 with
   | `this -> Format.pp_print_string fmt "`this"
-  | `static -> Format.pp_print_string fmt "`static"
   | `cls x ->
     Format.fprintf fmt "`cls (@[<hov>";
     Format.fprintf fmt "%S" x;

@@ -39,7 +39,7 @@ class A {
 "
 
 let class_A_cases = [
-  ("A.php", 7, 12), "<static>";
+  ("A.php", 7, 12), "this";
   ("A.php", 7, 19), "int";
 ]
 

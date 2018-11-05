@@ -1,10 +1,8 @@
 File "tconst7.php", line 15, characters 14-30:
 Invalid argument (Typing[4110])
   File "tconst7.php", line 6, characters 21-30:
-  This is the expression dependent type <static>::TFoo
-  File "tconst7.php", line 4, characters 31-33:
-    resulting from expanding the type constant C::TFoo
+  This is the expression dependent type this::TFoo
   File "tconst7.php", line 15, characters 5-9:
-    where '<static>' refers to the late bound type of the enclosing class
+    resulting from expanding the type constant C::TFoo
   File "tconst7.php", line 15, characters 14-30:
   It is incompatible with a nullable type

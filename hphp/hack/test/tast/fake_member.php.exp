@@ -24,12 +24,12 @@
             { Aast.AnnotatedAST.fnb_nast =
               [(If (
                   (([7:9-19], ?int),
-                   (Obj_get ((([7:9-14], <static>), This),
+                   (Obj_get ((([7:9-14], this), This),
                       (([7:16-19], ?int), (Id ([7:16-19], "foo"))),
                       OG_nullthrows))),
                   [(Expr
                       (([8:7-17], int),
-                       (Obj_get ((([8:7-12], <static>), This),
+                       (Obj_get ((([8:7-12], this), This),
                           (([8:14-17], int), (Id ([8:14-17], "foo"))),
                           OG_nullthrows))))
                     ],

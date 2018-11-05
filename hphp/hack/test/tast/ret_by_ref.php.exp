@@ -49,7 +49,7 @@ Errors:
              { Aast.AnnotatedAST.fnb_nast =
                [(Return ([11:5-21],
                    (Some (([11:12-20], int),
-                          (Obj_get ((([11:12-17], <static>), This),
+                          (Obj_get ((([11:12-17], this), This),
                              (([11:19-20], int), (Id ([11:19-20], "x"))),
                              OG_nullthrows))))
                    ))

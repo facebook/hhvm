@@ -9,7 +9,6 @@
 
 open Core_kernel
 open Typing_defs
-module ExprDepTy = Typing_dependent_type
 module Env = Typing_env
 module ShapeMap = Nast.ShapeMap
 

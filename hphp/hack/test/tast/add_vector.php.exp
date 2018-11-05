@@ -101,7 +101,7 @@
                         (([16:5-25], Vector<T>),
                          (Binop ((Eq None),
                             (([16:5-13], Vector<T>),
-                             (Obj_get ((([16:5-10], <static>), This),
+                             (Obj_get ((([16:5-10], this), This),
                                 (([16:12-13], Vector<T>),
                                  (Id ([16:12-13], "x"))),
                                 OG_nullthrows))),
@@ -137,7 +137,7 @@
                        (([20:5-15], T),
                         (Array_get (
                            (([20:5-13], Vector<T>),
-                            (Obj_get ((([20:5-10], <static>), This),
+                            (Obj_get ((([20:5-10], this), This),
                                (([20:12-13], Vector<T>),
                                 (Id ([20:12-13], "x"))),
                                OG_nullthrows))),
@@ -167,7 +167,7 @@
                     (Some (([24:12-23], T),
                            (Array_get (
                               (([24:12-20], Vector<T>),
-                               (Obj_get ((([24:12-17], <static>), This),
+                               (Obj_get ((([24:12-17], this), This),
                                   (([24:19-20], Vector<T>),
                                    (Id ([24:19-20], "x"))),
                                   OG_nullthrows))),

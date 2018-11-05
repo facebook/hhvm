@@ -295,7 +295,6 @@ and abstract_kind =
 (* A dependent type consists of a base kind which indicates what the type is
  * dependent on. It is either dependent on:
  *  - The type 'this'
- *  - The class context (what 'static' is resolved to in a class)
  *  - A class
  *  - An expression
  *
@@ -307,14 +306,6 @@ and abstract_kind =
 and dependent_type =
   (* Type that is the subtype of the late bound type within a class. *)
   [ `this
-  (* The late bound type within a class. It is the type of 'new static()' and
-   * '$this'. This is different from the 'this' type. The 'this' type isn't
-   * quite strong enough in some cases. It means you are a subtype of the late
-   * bound class, but there are instances where you need the exact type.
-   * We may not need both since the only way to make something of type 'this'
-   * that is not 'static' is with 'instanceof static'.
-   *)
-  | `static
   (* A class name, new type, or generic, i.e.
    *
    * abstract class C { abstract const type T }
@@ -612,7 +603,6 @@ module AbstractKind = struct
        let dt =
          match dt with
          | `this -> SN.Typehints.this
-         | `static -> "<"^SN.Classes.cStatic^">"
          | `cls c -> c
          | `expr i ->
              let display_id = Reason.get_expr_display_id i in

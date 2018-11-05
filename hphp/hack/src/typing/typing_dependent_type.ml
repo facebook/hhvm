@@ -43,9 +43,9 @@ module ExprDepTy = struct
       | N.CI ((p, cls), _) ->
           p, Reason.ERclass cls, `cls cls
       | N.CIstatic ->
-          pos, Reason.ERstatic, `static
+          pos, Reason.ERstatic, `this
       | N.CIexpr (p, N.This) ->
-          p, Reason.ERstatic, `static
+          p, Reason.ERstatic, `this
       (* If it is a local variable then we look up the expression id associated
        * with it. If one doesn't exist we generate a new one. We are being
        * conservative here because the new expression id we create isn't
@@ -142,7 +142,6 @@ module ExprDepTy = struct
     | Tabstract (
         ( AKnewtype _
         | AKenum _
-        | AKdependent (`this, [])
         ), Some ty) ->
         should_apply env ty
     | Tabstract (AKdependent _, Some _) ->

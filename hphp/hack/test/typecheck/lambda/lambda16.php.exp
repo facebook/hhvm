@@ -1,8 +1,6 @@
 File "lambda16.php", line 14, characters 12-23:
 Invalid return type (Typing[4110])
 File "lambda16.php", line 13, characters 30-33:
-This is the expression dependent type <static>
-File "lambda16.php", line 13, characters 30-33:
-  where '<static>' refers to the late bound type of the enclosing class
+This is the expression dependent type this
 File "lambda16.php", line 14, characters 12-23:
 It is incompatible with a function

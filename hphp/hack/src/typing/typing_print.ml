@@ -114,7 +114,7 @@ module ErrorString = struct
     | AKgeneric _, _ -> "a value of generic type "^x
     | AKdependent (`cls c, []), Some (_, ty) ->
         type_ ty^" (known to be exactly the class '"^strip_ns c^"')"
-    | AKdependent ((`static | `expr _), _), _ ->
+    | AKdependent ((`this | `expr _), _), _ ->
         "the expression dependent type "^x
     | AKdependent (_, _::_), _ -> "the abstract type constant "^x
     | AKdependent _, _ ->
@@ -733,9 +733,6 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
   | Tabstract (AKdependent (`this, ids), opt_ty) ->
     obj @@ kind "path" @ ["type", obj @@ kind "this"]
       @ path ids @ as_type opt_ty
-  | Tabstract (AKdependent (`static, ids), opt_ty) ->
-    obj @@ kind "path" @ ["type", obj @@ kind "static"]
-      @ path ids @ as_type opt_ty
   | Toption (_, Tnonnull) ->
     obj @@ kind "mixed"
   | Toption ty ->
@@ -935,10 +932,6 @@ let to_locl_ty
       | "this" ->
         aux_as json ~keytrace >>= fun as_opt ->
         ty (Tabstract (AKdependent (`this, ids), as_opt))
-
-      | "static" ->
-        aux_as json ~keytrace >>= fun as_opt ->
-        ty (Tabstract (AKdependent (`static, ids), as_opt))
 
       | path_kind ->
         deserialization_error

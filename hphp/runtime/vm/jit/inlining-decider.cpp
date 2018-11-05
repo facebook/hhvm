@@ -601,9 +601,13 @@ bool InliningDecider::shouldInline(SrcKey callerSk,
   // We measure the cost of inlining each callstack and stop when it exceeds a
   // certain threshold.  (Note that we do not measure the total cost of all the
   // inlined calls for a given caller---just the cost of each nested stack.)
-  const int maxCost = maxTotalCost - m_cost;
   const int cost = computeTranslationCost(callerSk, callerFPushOp, region,
                                           annotations);
+  if (cost <= RuntimeOption::EvalHHIRAlwaysInlineVasmCostLimit) {
+    return accept("within always inline limit");
+  }
+
+  const int maxCost = maxTotalCost - m_cost;
   if (cost > maxCost) {
     return refuse("too expensive");
   }

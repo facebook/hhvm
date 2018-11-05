@@ -1,0 +1,6 @@
+File "enum_stringish_bad_1.php", line 10, characters 10-11:
+Invalid return type (Typing[4110])
+File "enum_stringish_bad_1.php", line 9, characters 22-30:
+This is an object of type Stringish
+File "enum_stringish_bad_1.php", line 9, characters 15-15:
+It is incompatible with a value of E

@@ -426,6 +426,356 @@ and simplify_subtype
     simplify_subtype_generic_sub name_sub opt_sub_cstr ty_super
   | Tabstract (AKdependent _, _), Toption _ -> default ()
 
+  | Tprim (Nast.Tint | Nast.Tfloat), Tprim Nast.Tnum -> valid ()
+  | Tprim (Nast.Tint | Nast.Tstring), Tprim Nast.Tarraykey -> valid ()
+  | Tprim p1, Tprim p2 ->
+    if p1 = p2 then valid () else invalid ()
+  | Tabstract ((AKenum _), _), Tprim Nast.Tarraykey ->
+    valid ()
+  | (Tnonnull | Tdynamic | Tfun _ | Ttuple _ | Tshape _ | Tanon _ |
+     Tabstract (AKenum _, None) | Tobject | Tclass _ | Tarraykind _),
+    Tprim _ ->
+    invalid ()
+  | Toption _,
+    Tprim Nast.(Tint | Tbool | Tfloat | Tstring | Tresource | Tnum |
+                Tarraykey | Tnoreturn) ->
+    invalid ()
+  | Toption ty_sub', Tprim Nast.Tvoid ->
+    simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub' ty_super env
+  | Tabstract ((AKnewtype _ | AKenum _), Some ty), Tprim _ ->
+    simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
+  | Tabstract (AKdependent _, _), Tprim _ -> default ()
+
+  | (Tnonnull | Tdynamic | Toption _ | Tprim _ | Ttuple _ | Tshape _ |
+     Tabstract (AKenum _, _) | Tobject | Tclass _ | Tarraykind _), Tfun _ ->
+    invalid ()
+  | Tfun ft_sub, Tfun ft_super ->
+    let r_sub, r_super = fst ety_sub, fst ety_super in
+    simplify_subtype_funs ~seen_generic_params ~deep ~check_return:true
+      r_sub ft_sub r_super ft_super env
+  | Tanon (anon_arity, id), Tfun ft ->
+    let r_sub, r_super = fst ety_sub, fst ety_super in
+    begin match Env.get_anonymous env id with
+      | None ->
+        invalid_with (fun () -> Errors.anonymous_recursive_call (Reason.to_pos r_sub))
+      | Some (reactivity, is_coroutine, ftys, _, anon) ->
+        let p_super = Reason.to_pos r_super in
+        let p_sub = Reason.to_pos r_sub in
+        (* Add function type to set of types seen so far *)
+        ftys := TUtils.add_function_type env ety_super !ftys;
+        (env, TL.valid) |>
+        check_with (subtype_reactivity env reactivity ft.ft_reactive
+          || TypecheckerOptions.unsafe_rx (Env.get_options env))
+          (fun () -> Errors.fun_reactivity_mismatch
+            p_super (TUtils.reactivity_to_string env reactivity)
+            p_sub (TUtils.reactivity_to_string env ft.ft_reactive)) |>
+        check_with (is_coroutine = ft.ft_is_coroutine) (fun () ->
+          Errors.coroutinness_mismatch ft.ft_is_coroutine p_super p_sub) |>
+        check_with (Unify.unify_arities
+                  ~ellipsis_is_variadic:true anon_arity ft.ft_arity)
+          (fun () -> Errors.fun_arity_mismatch p_super p_sub) |>
+        (fun (env, prop) ->
+          let env, _, ret = anon env ft.ft_params ft.ft_arity in
+          (env, prop) &&&
+          simplify_subtype ~seen_generic_params ~deep ~this_ty ret ft.ft_ret)
+    end
+  | Tabstract (AKnewtype _, Some ty), Tfun _ ->
+    simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
+  | Tabstract (AKdependent _, _), Tfun _ -> default ()
+
+  | (Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Tshape _ |
+     Tabstract (AKenum _, _) | Tanon _ | Tobject | Tclass _ | Tarraykind _),
+    Ttuple _ ->
+    invalid ()
+  (* (t1,...,tn) <: (u1,...,un) iff t1<:u1, ... , tn <: un *)
+  | Ttuple tyl_sub, Ttuple tyl_super ->
+    if List.length tyl_super = List.length tyl_sub
+    then
+      wfold_left2 (fun res ty_sub ty_super -> res
+        &&& simplify_subtype ~seen_generic_params ~deep ty_sub ty_super)
+        (env, TL.valid) tyl_sub tyl_super
+    else invalid ()
+  | Tabstract (AKnewtype _, Some ty), Ttuple _ ->
+    simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
+  | Tabstract (AKdependent _, _), Ttuple _ -> default ()
+
+  | (Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _ |
+     Tabstract (AKenum _, _) | Tanon _ | Tobject | Tclass _ | Tarraykind _),
+    Tshape _ ->
+    invalid ()
+  | Tshape (fields_known_sub, fdm_sub), Tshape (fields_known_super, fdm_super) ->
+    let r_sub, r_super = fst ety_sub, fst ety_super in
+      (**
+       * shape_field_type A <: shape_field_type B iff:
+       *   1. A is no more optional than B
+       *   2. A's type <: B.type
+       *)
+      let on_common_field
+          (env, acc) name
+          { sft_optional = optional_super; sft_ty = ty_super }
+          { sft_optional = optional_sub; sft_ty = ty_sub } =
+        match optional_super, optional_sub with
+          | true, _ | false, false ->
+            (env, acc) &&& simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super
+          | false, true ->
+            (env, acc) |> with_error (fun () -> Errors.required_field_is_optional
+              (Reason.to_pos r_sub)
+              (Reason.to_pos r_super)
+              (Env.get_shape_field_name name)) in
+      let on_missing_omittable_optional_field res _ _ = res in
+      let on_missing_non_omittable_optional_field
+          res name { sft_ty = ty_super; _ } =
+        let r = Reason.Rmissing_optional_field (
+          Reason.to_pos r_sub,
+          TUtils.get_printable_shape_field_name name
+        ) in
+        res &&& simplify_subtype ~seen_generic_params ~deep ~this_ty (r, TUtils.desugar_mixed r) ty_super in
+      TUtils.apply_shape
+        ~on_common_field
+        ~on_missing_omittable_optional_field
+        ~on_missing_non_omittable_optional_field
+        ~on_error:(fun _ f -> invalid_with f)
+        (env, TL.valid)
+        (r_super, fields_known_super, fdm_super)
+        (r_sub, fields_known_sub, fdm_sub)
+  | Tabstract (AKnewtype _, Some ty), Tshape _ ->
+    simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
+  | Tabstract (AKdependent _, _), Tshape _ -> default ()
+
+  | (Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tshape _ |
+     Tabstract (AKenum _, None) | Tanon _ | Tobject | Tclass _ | Tarraykind _),
+    Tabstract (AKnewtype _, _) ->
+    invalid ()
+  | Tabstract (AKnewtype (name_sub, tyl_sub), _),
+    Tabstract (AKnewtype (name_super, tyl_super), _)
+    when name_super = name_sub ->
+      let td = Env.get_typedef env name_super in
+      begin match td with
+        | Some {td_tparams; _} ->
+          let variancel = List.map td_tparams (fun (var,_,_,_) -> var) in
+          simplify_subtype_variance ~seen_generic_params ~deep name_sub variancel tyl_sub tyl_super env
+        | None ->
+          default ()
+      end
+  | Tabstract ((AKnewtype _ | AKenum _), Some ty), Tabstract (AKnewtype _, _) ->
+    simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
+  | Tabstract (AKdependent _, _), Tabstract (AKnewtype _, _) -> default ()
+
+  | Tabstract (AKenum e_sub, _), Tabstract (AKenum e_super, _)
+    when e_sub = e_super -> valid ()
+  | Tclass ((_, class_name), _), Tabstract (AKenum enum_name, _)
+    when enum_name = class_name -> valid ()
+  | (Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tshape _ |
+     Tanon _ | Tobject | Tclass _ | Tarraykind _),
+    Tabstract (AKenum _, _) ->
+    invalid ()
+  | Tabstract (AKenum _, None), Tabstract (AKenum _, _) -> invalid ()
+  | Tabstract ((AKnewtype _ | AKenum _), Some ty), Tabstract (AKenum _, _) ->
+    simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
+  | Tabstract (AKdependent _, _), Tabstract (AKenum _, _) -> default ()
+
+  (* Primitives and other concrete types cannot be subtypes of dependent types *)
+  | (Tnonnull | Tdynamic | Tprim _ | Tfun _ | Ttuple _ | Tshape _ |
+     Tabstract (AKenum _, None) | Tanon _ | Tobject | Tarraykind _),
+    Tabstract (AKdependent _, _) ->
+    invalid ()
+  | Tabstract (AKdependent d_sub, Some ty_sub),
+    Tabstract (AKdependent d_super, Some ty_super)
+    when d_sub = d_super ->
+    (* Dependent types are identical but bound might be different *)
+    let this_ty = Option.first_some this_ty (Some ety_sub) in
+    simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super env
+  | Tabstract ((AKnewtype _ | AKenum _), Some ty), Tabstract (AKdependent _, _) ->
+    simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
+  | (Toption _ | Tclass _ | Tabstract (AKdependent _, _)),
+    Tabstract (AKdependent _, _) ->
+    default ()
+
+  | (Tnonnull | Tdynamic | Toption _ | Tprim _ | Ttuple _ | Tshape _ |
+     Tabstract (AKenum _, _) | Tobject | Tclass _ | Tarraykind _),
+    Tanon _ ->
+    invalid ()
+  | Tanon (_, id1), Tanon (_, id2) -> if id1 = id2 then valid () else invalid ()
+  | Tabstract (AKnewtype _, Some ty), Tanon _ ->
+    simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
+  | (Tfun _ | Tabstract (AKdependent _, _)), Tanon _ -> default ()
+
+  | Tobject, Tobject -> valid ()
+  (* Any class type is a subtype of object *)
+  | Tclass _, Tobject -> valid ()
+  | (Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tshape _ |
+     Tabstract (AKenum _, _) | Tanon _ | Tarraykind _),
+    Tobject ->
+    invalid ()
+  | Tabstract (AKnewtype _, Some ty), Tobject ->
+    simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
+  | Tabstract (AKdependent _, _), Tobject -> default ()
+
+  | Tabstract (AKenum enum_name, None), Tclass ((_, class_name), _) ->
+    if enum_name = class_name || class_name = SN.Classes.cXHPChild
+    then valid ()
+    else invalid ()
+  | Tabstract (AKenum enum_name, Some ty), Tclass ((_, class_name), _) ->
+    if enum_name = class_name
+    then valid ()
+    else simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
+  | Tprim Nast.Tstring, Tclass ((_, class_name), _) ->
+    if class_name = SN.Classes.cStringish || class_name = SN.Classes.cXHPChild
+    then valid ()
+    else invalid ()
+  | Tprim Nast.(Tarraykey | Tint | Tfloat | Tnum), Tclass ((_, class_name), _) ->
+    if class_name = SN.Classes.cXHPChild then valid () else invalid ()
+  | (Tnonnull | Tdynamic | Tprim Nast.(Tvoid | Tbool | Tresource | Tnoreturn) |
+     Toption _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _),
+    Tclass _ ->
+    invalid ()
+  (* Match what's done in unify for non-strict code *)
+  | Tobject, Tclass _ ->
+    if Env.is_strict env then default () else valid ()
+  | Tclass (x_sub, tyl_sub), Tclass (x_super, tyl_super) ->
+    let p_sub, p_super = fst ety_sub, fst ety_super in
+    let cid_super, cid_sub = (snd x_super), (snd x_sub) in
+    (* This is side-effecting as it registers a dependency *)
+    let class_def_sub = Env.get_class env cid_sub in
+    if cid_super = cid_sub
+    then
+      (* We handle the case where a generic A<T> is used as A *)
+      let tyl_super =
+        if List.is_empty tyl_super && not (Env.is_strict env)
+        then List.map tyl_sub (fun _ -> (p_super, Tany))
+        else tyl_super in
+      let tyl_sub =
+        if List.is_empty tyl_sub && not (Env.is_strict env)
+        then List.map tyl_super (fun _ -> (p_super, Tany))
+        else tyl_sub in
+      if List.length tyl_sub <> List.length tyl_super
+      then begin
+        let n_sub = String_utils.soi (List.length tyl_sub) in
+        let n_super = String_utils.soi (List.length tyl_super) in
+        invalid_with (fun () ->
+          Errors.type_arity_mismatch (fst x_super) n_super (fst x_sub) n_sub)
+      end
+      else if List.is_empty tyl_sub && List.is_empty tyl_super
+      then valid ()
+      else
+        let variancel =
+          match class_def_sub with
+          | None ->
+            List.map tyl_sub (fun _ -> Ast.Invariant)
+          | Some class_sub ->
+            List.map class_sub.tc_tparams (fun (var, _, _, _) -> var) in
+
+          (* C<t1, .., tn> <: C<u1, .., un> iff
+           *   t1 <:v1> u1 /\ ... /\ tn <:vn> un
+           * where vi is the variance of the i'th generic parameter of C,
+           * and <:v denotes the appropriate direction of subtyping for variance v
+           *)
+          simplify_subtype_variance ~seen_generic_params ~deep cid_sub variancel tyl_sub tyl_super env
+    else
+      begin match class_def_sub with
+      | None ->
+        default ()
+
+      | Some class_sub ->
+        (* We handle the case where a generic A<T> is used as A *)
+        let tyl_sub =
+          if List.is_empty tyl_sub && not (Env.is_strict env)
+          then List.map class_sub.tc_tparams (fun _ -> (p_sub, Tany))
+          else tyl_sub in
+        if List.length class_sub.tc_tparams <> List.length tyl_sub
+        then
+          invalid_with (fun () ->
+          Errors.expected_tparam ~definition_pos:class_sub.tc_pos
+            ~use_pos:(Reason.to_pos p_sub) (List.length class_sub.tc_tparams))
+        else
+          let ety_env =
+          (* NOTE: We rely on the fact that we fold all ancestors of
+           * ty_sub in its class_type so we will never hit this case
+           * again. If this ever changes then we would need to store
+           * ty_sub as the 'this_ty' in the uenv and be careful to
+           * thread it through.
+           *
+           * This is covered by test/typecheck/this_tparam2.php
+          *)
+          {
+            type_expansions = [];
+            substs = Subst.make class_sub.tc_tparams tyl_sub;
+            (* TODO: do we need this? *)
+            this_ty = Option.value this_ty ~default:ty_sub;
+            from_class = None;
+            validate_dty = None;
+          } in
+            let up_obj = SMap.get cid_super class_sub.tc_ancestors in
+            match up_obj with
+              | Some up_obj ->
+                let env, up_obj = Phase.localize ~ety_env env up_obj in
+                simplify_subtype ~seen_generic_params ~deep ~this_ty up_obj ty_super env
+              | None ->
+                default ()
+      end
+  | Tabstract (AKnewtype _, Some ty), Tclass _ ->
+    simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
+  | Tarraykind _, Tclass ((_, class_name), _)
+    when class_name = SN.Classes.cXHPChild -> valid ()
+  | Tarraykind akind, Tclass ((_, coll), [tv_super])
+    when (coll = SN.Collections.cTraversable ||
+          coll = SN.Rx.cTraversable ||
+          coll = SN.Collections.cContainer) ->
+    let r = fst ety_sub in
+      (match akind with
+        (* array <: Traversable<t> and emptyarray <: Traversable<t> for any t *)
+      | AKany -> valid ()
+      | AKempty -> valid ()
+      (* vec<tv> <: Traversable<tv_super>
+       * iff tv <: tv_super
+       * Likewise for vec<tv> <: Container<tv_super>
+       *          and map<_,tv> <: Traversable<tv_super>
+       *          and map<_,tv> <: Container<tv_super>
+       *)
+      | AKvarray tv
+      | AKvec tv
+      | AKdarray (_, tv)
+      | AKvarray_or_darray tv
+      | AKmap (_, tv) -> simplify_subtype ~seen_generic_params ~deep ~this_ty tv tv_super env
+      | AKshape fdm ->
+        Typing_arrays.fold_akshape_as_akmap_with_acc again env TL.valid r fdm
+      | AKtuple fields ->
+        Typing_arrays.fold_aktuple_as_akvec_with_acc again env TL.valid r fields
+    )
+  | Tarraykind akind, Tclass ((_, coll), [tk_super; tv_super])
+    when (coll = SN.Collections.cKeyedTraversable
+         || coll = SN.Rx.cKeyedTraversable
+         || coll = SN.Collections.cKeyedContainer
+         || coll = SN.Collections.cIndexish) ->
+    let r = fst ety_sub in
+      (match akind with
+      | AKany -> valid ()
+      | AKempty -> valid ()
+      | AKvarray tv
+      | AKvec tv ->
+        env |>
+        simplify_subtype ~seen_generic_params ~deep ~this_ty (r, Tprim Nast.Tint) tk_super &&&
+        simplify_subtype ~seen_generic_params ~deep ~this_ty tv tv_super
+      | AKvarray_or_darray tv ->
+        let tk_sub =
+          Reason.Rvarray_or_darray_key (Reason.to_pos r),
+          Tprim Nast.Tarraykey in
+        env |>
+        simplify_subtype ~seen_generic_params ~deep ~this_ty tk_sub tk_super &&&
+        simplify_subtype ~seen_generic_params ~deep ~this_ty tv tv_super
+      | AKdarray (tk, tv)
+      | AKmap (tk, tv) ->
+        env |>
+        simplify_subtype ~seen_generic_params ~deep ~this_ty tk tk_super &&&
+        simplify_subtype ~seen_generic_params ~deep ~this_ty tv tv_super
+      | AKshape fdm ->
+        Typing_arrays.fold_akshape_as_akmap_with_acc again env TL.valid r fdm
+      | AKtuple fields ->
+        Typing_arrays.fold_aktuple_as_akvec_with_acc again env TL.valid r fields
+      )
+  | Tarraykind _, Tclass _ -> invalid ()
+  | Tabstract (AKdependent _, _), Tclass _ -> default ()
+
   (* Arrays *)
   | Ttuple _, Tarraykind AKany ->
     if TypecheckerOptions.disallow_array_as_tuple (Env.get_options env)
@@ -526,127 +876,6 @@ and simplify_subtype
   | _, Tunresolved _ ->
     default ()
 
-  | Tarraykind akind, Tclass ((_, coll), [tv_super])
-    when (coll = SN.Collections.cTraversable ||
-          coll = SN.Rx.cTraversable ||
-          coll = SN.Collections.cContainer) ->
-    let r = fst ety_sub in
-      (match akind with
-        (* array <: Traversable<t> and emptyarray <: Traversable<t> for any t *)
-      | AKany -> valid ()
-      | AKempty -> valid ()
-      (* vec<tv> <: Traversable<tv_super>
-       * iff tv <: tv_super
-       * Likewise for vec<tv> <: Container<tv_super>
-       *          and map<_,tv> <: Traversable<tv_super>
-       *          and map<_,tv> <: Container<tv_super>
-       *)
-      | AKvarray tv
-      | AKvec tv
-      | AKdarray (_, tv)
-      | AKvarray_or_darray tv
-      | AKmap (_, tv) -> simplify_subtype ~seen_generic_params ~deep ~this_ty tv tv_super env
-      | AKshape fdm ->
-        Typing_arrays.fold_akshape_as_akmap_with_acc again env TL.valid r fdm
-      | AKtuple fields ->
-        Typing_arrays.fold_aktuple_as_akvec_with_acc again env TL.valid r fields
-    )
-
-  | Tarraykind akind, Tclass ((_, coll), [tk_super; tv_super])
-    when (coll = SN.Collections.cKeyedTraversable
-         || coll = SN.Rx.cKeyedTraversable
-         || coll = SN.Collections.cKeyedContainer
-         || coll = SN.Collections.cIndexish) ->
-    let r = fst ety_sub in
-      (match akind with
-      | AKany -> valid ()
-      | AKempty -> valid ()
-      | AKvarray tv
-      | AKvec tv ->
-        env |>
-        simplify_subtype ~seen_generic_params ~deep ~this_ty (r, Tprim Nast.Tint) tk_super &&&
-        simplify_subtype ~seen_generic_params ~deep ~this_ty tv tv_super
-      | AKvarray_or_darray tv ->
-        let tk_sub =
-          Reason.Rvarray_or_darray_key (Reason.to_pos r),
-          Tprim Nast.Tarraykey in
-        env |>
-        simplify_subtype ~seen_generic_params ~deep ~this_ty tk_sub tk_super &&&
-        simplify_subtype ~seen_generic_params ~deep ~this_ty tv tv_super
-      | AKdarray (tk, tv)
-      | AKmap (tk, tv) ->
-        env |>
-        simplify_subtype ~seen_generic_params ~deep ~this_ty tk tk_super &&&
-        simplify_subtype ~seen_generic_params ~deep ~this_ty tv tv_super
-      | AKshape fdm ->
-        Typing_arrays.fold_akshape_as_akmap_with_acc again env TL.valid r fdm
-      | AKtuple fields ->
-        Typing_arrays.fold_aktuple_as_akvec_with_acc again env TL.valid r fields
-      )
-
-  (* (t1,...,tn) <: (u1,...,un) iff t1<:u1, ... , tn <: un *)
-  | Ttuple tyl_sub, Ttuple tyl_super
-    when List.length tyl_super = List.length tyl_sub ->
-    wfold_left2 (fun res ty_sub ty_super -> res
-      &&& simplify_subtype ~seen_generic_params ~deep ty_sub ty_super)
-      (env, TL.valid) tyl_sub tyl_super
-
-  | Ttuple _,
-    (Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject |
-     Tclass _ | Tabstract ((AKnewtype _ | AKenum _), _)) ->
-    invalid ()
-
-  | Tfun ft_sub, Tfun ft_super ->
-    let r_sub, r_super = fst ety_sub, fst ety_super in
-    simplify_subtype_funs ~seen_generic_params ~deep ~check_return:true
-      r_sub ft_sub r_super ft_super env
-
-  | Tanon (anon_arity, id), Tfun ft ->
-    let r_sub, r_super = fst ety_sub, fst ety_super in
-    begin match Env.get_anonymous env id with
-      | None ->
-        invalid_with (fun () -> Errors.anonymous_recursive_call (Reason.to_pos r_sub))
-      | Some (reactivity, is_coroutine, ftys, _, anon) ->
-        let p_super = Reason.to_pos r_super in
-        let p_sub = Reason.to_pos r_sub in
-        (* Add function type to set of types seen so far *)
-        ftys := TUtils.add_function_type env ety_super !ftys;
-        (env, TL.valid) |>
-        check_with (subtype_reactivity env reactivity ft.ft_reactive
-          || TypecheckerOptions.unsafe_rx (Env.get_options env))
-          (fun () -> Errors.fun_reactivity_mismatch
-            p_super (TUtils.reactivity_to_string env reactivity)
-            p_sub (TUtils.reactivity_to_string env ft.ft_reactive)) |>
-        check_with (is_coroutine = ft.ft_is_coroutine) (fun () ->
-          Errors.coroutinness_mismatch ft.ft_is_coroutine p_super p_sub) |>
-        check_with (Unify.unify_arities
-                  ~ellipsis_is_variadic:true anon_arity ft.ft_arity)
-          (fun () -> Errors.fun_arity_mismatch p_super p_sub) |>
-        (fun (env, prop) ->
-          let env, _, ret = anon env ft.ft_params ft.ft_arity in
-          (env, prop) &&&
-          simplify_subtype ~seen_generic_params ~deep ~this_ty ret ft.ft_ret)
-    end
-
-  | Tabstract (AKnewtype (name_sub, tyl_sub), _),
-    Tabstract (AKnewtype (name_super, tyl_super), _)
-    when name_super = name_sub ->
-      let td = Env.get_typedef env name_super in
-      begin match td with
-        | Some {td_tparams; _} ->
-          let variancel = List.map td_tparams (fun (var,_,_,_) -> var) in
-          simplify_subtype_variance ~seen_generic_params ~deep name_sub variancel tyl_sub tyl_super env
-        | None ->
-          default ()
-      end
-
-  | Tabstract (AKdependent d_sub, Some ty_sub),
-    Tabstract (AKdependent d_super, Some ty_super)
-    when d_sub = d_super ->
-    (* Dependent types are identical but bound might be different *)
-    let this_ty = Option.first_some this_ty (Some ety_sub) in
-    simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super env
-
   (* This is sort of a hack because our handling of Toption is highly
    * dependent on how the type is structured. When we see a bare
    * dependent type we strip it off at this point since it shouldn't be
@@ -656,156 +885,6 @@ and simplify_subtype
   | Tabstract (AKdependent (`expr _, []), Some ty_sub), _ ->
     let this_ty = Option.first_some this_ty (Some ety_sub) in
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super env
-
-  (* For abstract type with a bound, use transitivity on bound *)
-  | Tabstract (AKnewtype _, Some ty),
-    (Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject |
-     Tclass _ | Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), _)) ->
-    simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
-
-  | Tabstract (AKenum e_sub, _), Tabstract (AKenum e_super, _)
-    when e_sub = e_super -> valid ()
-
-  | Tabstract (AKenum enum_name, _), Tclass ((_, class_name), _)
-  | Tclass ((_, class_name), _), Tabstract (AKenum enum_name, _)
-    when enum_name = class_name -> valid ()
-
-  | Tabstract ((AKenum _), _), Tprim Nast.Tarraykey ->
-    valid ()
-
-  (* Similar to newtype above *)
-  | Tabstract (AKenum _, None),
-    (Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject |
-     Tclass _ | Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), _)) ->
-    invalid ()
-
-  | Tabstract (AKenum _, Some ty),
-    (Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject |
-     Tclass _ | Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), _)) ->
-    simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
-
-  | Tshape (fields_known_sub, fdm_sub), Tshape (fields_known_super, fdm_super) ->
-    let r_sub, r_super = fst ety_sub, fst ety_super in
-      (**
-       * shape_field_type A <: shape_field_type B iff:
-       *   1. A is no more optional than B
-       *   2. A's type <: B.type
-       *)
-      let on_common_field
-          (env, acc) name
-          { sft_optional = optional_super; sft_ty = ty_super }
-          { sft_optional = optional_sub; sft_ty = ty_sub } =
-        match optional_super, optional_sub with
-          | true, _ | false, false ->
-            (env, acc) &&& simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super
-          | false, true ->
-            (env, acc) |> with_error (fun () -> Errors.required_field_is_optional
-              (Reason.to_pos r_sub)
-              (Reason.to_pos r_super)
-              (Env.get_shape_field_name name)) in
-      let on_missing_omittable_optional_field res _ _ = res in
-      let on_missing_non_omittable_optional_field
-          res name { sft_ty = ty_super; _ } =
-        let r = Reason.Rmissing_optional_field (
-          Reason.to_pos r_sub,
-          TUtils.get_printable_shape_field_name name
-        ) in
-        res &&& simplify_subtype ~seen_generic_params ~deep ~this_ty (r, TUtils.desugar_mixed r) ty_super in
-      TUtils.apply_shape
-        ~on_common_field
-        ~on_missing_omittable_optional_field
-        ~on_missing_non_omittable_optional_field
-        ~on_error:(fun _ f -> invalid_with f)
-        (env, TL.valid)
-        (r_super, fields_known_super, fdm_super)
-        (r_sub, fields_known_sub, fdm_sub)
-
-  | Tshape _,
-    (Tprim _ | Tfun _ | Ttuple _ | Tanon _ | Tobject | Tclass _ |
-     Tabstract ((AKnewtype _ | AKenum _), _)) ->
-    invalid ()
-
-  | Tclass (x_sub, tyl_sub), Tclass (x_super, tyl_super) ->
-    let p_sub, p_super = fst ety_sub, fst ety_super in
-    let cid_super, cid_sub = (snd x_super), (snd x_sub) in
-    (* This is side-effecting as it registers a dependency *)
-    let class_def_sub = Env.get_class env cid_sub in
-    if cid_super = cid_sub
-    then
-      (* We handle the case where a generic A<T> is used as A *)
-      let tyl_super =
-        if List.is_empty tyl_super && not (Env.is_strict env)
-        then List.map tyl_sub (fun _ -> (p_super, Tany))
-        else tyl_super in
-      let tyl_sub =
-        if List.is_empty tyl_sub && not (Env.is_strict env)
-        then List.map tyl_super (fun _ -> (p_super, Tany))
-        else tyl_sub in
-      if List.length tyl_sub <> List.length tyl_super
-      then begin
-        let n_sub = String_utils.soi (List.length tyl_sub) in
-        let n_super = String_utils.soi (List.length tyl_super) in
-        invalid_with (fun () ->
-          Errors.type_arity_mismatch (fst x_super) n_super (fst x_sub) n_sub)
-      end
-      else if List.is_empty tyl_sub && List.is_empty tyl_super
-      then valid ()
-      else
-        let variancel =
-          match class_def_sub with
-          | None ->
-            List.map tyl_sub (fun _ -> Ast.Invariant)
-          | Some class_sub ->
-            List.map class_sub.tc_tparams (fun (var, _, _, _) -> var) in
-
-          (* C<t1, .., tn> <: C<u1, .., un> iff
-           *   t1 <:v1> u1 /\ ... /\ tn <:vn> un
-           * where vi is the variance of the i'th generic parameter of C,
-           * and <:v denotes the appropriate direction of subtyping for variance v
-           *)
-          simplify_subtype_variance ~seen_generic_params ~deep cid_sub variancel tyl_sub tyl_super env
-    else
-      begin match class_def_sub with
-      | None ->
-        default ()
-
-      | Some class_sub ->
-        (* We handle the case where a generic A<T> is used as A *)
-        let tyl_sub =
-          if List.is_empty tyl_sub && not (Env.is_strict env)
-          then List.map class_sub.tc_tparams (fun _ -> (p_sub, Tany))
-          else tyl_sub in
-        if List.length class_sub.tc_tparams <> List.length tyl_sub
-        then
-          invalid_with (fun () ->
-          Errors.expected_tparam ~definition_pos:class_sub.tc_pos
-            ~use_pos:(Reason.to_pos p_sub) (List.length class_sub.tc_tparams))
-        else
-          let ety_env =
-          (* NOTE: We rely on the fact that we fold all ancestors of
-           * ty_sub in its class_type so we will never hit this case
-           * again. If this ever changes then we would need to store
-           * ty_sub as the 'this_ty' in the uenv and be careful to
-           * thread it through.
-           *
-           * This is covered by test/typecheck/this_tparam2.php
-          *)
-          {
-            type_expansions = [];
-            substs = Subst.make class_sub.tc_tparams tyl_sub;
-            (* TODO: do we need this? *)
-            this_ty = Option.value this_ty ~default:ty_sub;
-            from_class = None;
-            validate_dty = None;
-          } in
-            let up_obj = SMap.get cid_super class_sub.tc_ancestors in
-            match up_obj with
-              | Some up_obj ->
-                let env, up_obj = Phase.localize ~ety_env env up_obj in
-                simplify_subtype ~seen_generic_params ~deep ~this_ty up_obj ty_super env
-              | None ->
-                default ()
-      end
 
   | Tany, _ -> default ()
   | _, Tany -> default ()
@@ -866,88 +945,6 @@ and simplify_subtype
 
   | _, Tabstract (AKgeneric name_super, _) ->
     simplify_subtype_generic_super ty_sub name_super env
-
-  | Tprim (Nast.Tint | Nast.Tfloat), Tprim Nast.Tnum -> valid ()
-  | Tprim (Nast.Tint | Nast.Tstring), Tprim Nast.Tarraykey -> valid ()
-
-  (* Any class type is a subtype of object *)
-  | Tclass _, Tobject -> valid ()
-
-  (* Match what's done in unify for non-strict code *)
-  | Tobject, Tclass _ ->
-    if Env.is_strict env then default () else valid ()
-
-  | Tprim Nast.Tstring, Tclass ((_, stringish), _)
-      when stringish = SN.Classes.cStringish -> valid ()
-  | Tarraykind _, Tclass ((_, xhp_child), _)
-  | Tprim (Nast.Tarraykey | Nast.Tint | Nast.Tfloat | Nast.Tstring | Nast.Tnum),
-    Tclass ((_, xhp_child), _)
-      when xhp_child = SN.Classes.cXHPChild -> valid ()
-  | Tprim p1, Tprim p2 ->
-    if p1 = p2 then valid () else invalid ()
-  | Tprim _,
-    (Tfun _ | Ttuple _ | Tshape _ | Tanon _  | Tobject | Tclass _ |
-     Tabstract ((AKnewtype _ | AKenum _), _)) ->
-    invalid ()
-
-  | Toption _, Tabstract (AKdependent _, _) -> default ()
-
-  | Toption ty_sub', Tprim Nast.Tvoid ->
-    simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub' ty_super env
-
-  | Toption _,
-    (Tprim Nast.(Tint | Tbool | Tfloat | Tstring | Tresource | Tnum | Tarraykey | Tnoreturn) |
-     Tobject | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tabstract ((AKnewtype _ | AKenum _), _) | Tclass _) -> invalid ()
-
-    (* Primitives and other concrete types cannot be subtypes of dependent types *)
-  | Tprim _, Tabstract (AKdependent _, _) -> invalid ()
-
-  | Tnonnull, Tabstract (AKdependent _, _) -> invalid ()
-
-  | Tnonnull,
-    (Tobject | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tabstract ((AKnewtype _ | AKenum _), _) | Tclass _) -> invalid ()
-
-  | Tfun _, Tabstract (AKdependent _, _) -> invalid ()
-
-  | Tfun _,
-    (Tobject | Tprim _ | Ttuple _ | Tshape _ | Tanon _ | Tabstract ((AKnewtype _ | AKenum _), _) | Tclass _) -> invalid ()
-
-  | Ttuple _, Tabstract (AKdependent _, _) -> invalid ()
-
-  | Tshape _, Tabstract (AKdependent _, _) -> invalid ()
-
-  | Tanon _, Tabstract (AKdependent _, _) -> invalid ()
-
-  | Tanon _,
-    (Tobject | Tprim _ | Ttuple _ | Tshape _ | Tanon _ | Tabstract ((AKnewtype _ | AKenum _), _) | Tclass _) -> invalid ()
-
-  | Tobject, Tobject -> valid ()
-
-  | Tobject, Tabstract (AKdependent _, _) -> invalid ()
-
-  | Tobject,
-    (Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tabstract ((AKnewtype _ | AKenum _), _)) -> invalid ()
-
-  | Tclass _, Tabstract (AKdependent _, _) -> default ()
-
-  | Tclass _,
-    (Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tabstract ((AKnewtype _ | AKenum _), _)) -> invalid ()
-
-  | Tarraykind _, Tabstract (AKdependent _, _) -> invalid ()
-
-  | Tarraykind _,
-    (Tobject | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tabstract ((AKnewtype _ | AKenum _), _) | Tclass _) -> invalid ()
-
-  | Tabstract (AKdependent _, _),
-    (Tobject | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tclass _) -> default ()
-
-  | Tabstract (AKdependent _, _),
-    Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), _) -> default ()
-
-  | Tdynamic,
-    (Tobject | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tabstract ((AKnewtype _ | AKenum _), _) | Tclass _) -> invalid ()
-
-  | Tdynamic, Tabstract (AKdependent _, _) -> invalid ()
 
 and simplify_subtype_variance
   ~(seen_generic_params : SSet.t option)

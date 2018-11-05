@@ -280,29 +280,6 @@ bool CompletionsCommand::executeImpl(
       default:
         assertx(false);
     }
-
-    // Sort results, prefer shorter strings, then alphabatize.
-    std::sort(
-      targets.begin(),
-      targets.end(),
-      [&](folly::dynamic& a, folly::dynamic& b) {
-        const std::string& strA = tryGetString(a, "label", "");
-        const std::string& strB = tryGetString(b, "label", "");
-        size_t sizeA = strA.size();
-        size_t sizeB = strB.size();
-        if (sizeA == sizeB) {
-          // Alphabatize the rest.
-          return strA.compare(strB) <= 0;
-        } else {
-          return sizeA < sizeB;
-        }
-      }
-    );
-
-    // Eliminate any duplicates: for example, an object might actually have
-    // multiple props with the same name if there is inheritance of private
-    // members from a base class.
-    targets.erase(std::unique(targets.begin(), targets.end()), targets.end());
   } catch (...) {
     // Don't actually report any errors for completion requests, we just
     // return an empty list if something goes wrong.

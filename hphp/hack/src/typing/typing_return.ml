@@ -7,14 +7,13 @@
  *
  *)
 
-(* Typing code concerned with return types. *)
 open Core_kernel
 open Typing_defs
 open Typing_env_return_info
 
 module Env = Typing_env
 module TUtils = Typing_utils
-(* For async functions, strip Awaitable<_> from the return type *)
+
 let strip_awaitable fun_kind env ty =
   if fun_kind <> Ast.FAsync then ty
   else
@@ -94,8 +93,6 @@ let force_awaitable env p ty =
   | _ ->
     env, ty
 
-(* If there is no return type annotation on method, assume `void` for the
- * special functions `__destruct` and `__construct`, otherwise Tany *)
 let make_default_return env name =
   if snd name = SN.Members.__destruct
   || snd name = SN.Members.__construct

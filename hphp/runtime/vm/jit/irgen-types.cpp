@@ -1055,7 +1055,7 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, bool onlyCheckNullability) {
     },
     [] (Type) {}, // Collection to array conversion
     [&] (SSATmp* val) { // func to string conversions
-      auto const str = gen(env, LdFuncFullName, val);
+      auto const str = gen(env, LdFuncName, val);
       discard(env, 1);
       push(env, str);
       return true;
@@ -1129,7 +1129,7 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
       }
     },
     [&] (SSATmp* val) { // func to string conversions
-      auto const str = gen(env, LdFuncFullName, val);
+      auto const str = gen(env, LdFuncName, val);
       stLocRaw(env, id, fp(env), str);
       return true;
     },

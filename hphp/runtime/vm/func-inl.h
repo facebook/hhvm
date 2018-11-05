@@ -168,7 +168,7 @@ inline const StringData* funcToStringHelper(const Func* func) {
   if (RuntimeOption::EvalRaiseFuncConversionWarning) {
     raise_warning("Func to string conversion");
   }
-  return func->fullDisplayName();
+  return func->name();
 }
 
 inline NamedEntity* Func::getNamedEntity() {

@@ -852,7 +852,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdCufIterInvName:
   case LdElem:
   case LdFuncNumParams:
-  case LdFuncFullName:
+  case LdFuncName:
   case LdFuncVecLen:
   case LdGblAddr:
   case LdGblAddrDef:

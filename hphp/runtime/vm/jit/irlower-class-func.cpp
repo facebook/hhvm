@@ -183,12 +183,12 @@ void cgLdFuncNumParams(IRLS& env, const IRInstruction* inst) {
   v << shrqi{1, tmp, dst, v.makeReg()};
 }
 
-void cgLdFuncFullName(IRLS& env, const IRInstruction* inst) {
+void cgLdFuncName(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const func = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
-  v << loadzlq{func[Func::fullNameOff()], dst};
+  v << loadzlq{func[Func::nameOff()], dst};
 }
 
 void cgFuncSupportsAsyncEagerReturn(IRLS& env, const IRInstruction* inst) {

@@ -1977,7 +1977,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ProfileArrayKind:
   case ProfileSwitchDest:
   case LdFuncNumParams:
-  case LdFuncFullName:
+  case LdFuncName:
   case LdGblAddr:
   case LdGblAddrDef:
   case LdObjClass:

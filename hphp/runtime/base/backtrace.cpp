@@ -570,9 +570,9 @@ static void walkStack(L func) {
   }
 }
 
-int64_t createBacktraceHash() {
+int64_t createBacktraceHash(bool consider_metadata) {
   // Settings constants before looping
-  int64_t hash = 0x9e3779b9;
+  uint64_t hash = 0x9e3779b9;
   Unit* prev_unit = nullptr;
 
   walkStack([&] (ActRec* fp, Offset) {
@@ -595,6 +595,36 @@ int64_t createBacktraceHash() {
     // implementation (boost::hash_combine)
     auto funchash = curFunc->fullName()->hash();
     hash ^= funchash + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+
+    if (consider_metadata) {
+      TypedValue* meta_tv = nullptr;
+      if (
+        UNLIKELY(fp->func()->attrs() & AttrMayUseVV) &&
+        UNLIKELY(fp->hasVarEnv())
+      ) {
+        auto tv = fp->getVarEnv()->lookup(s_86metadata.get());
+        if (
+          tv != nullptr &&
+          !isNullType(tv->m_type)
+        ) {
+          meta_tv = tv;
+        }
+      } else {
+        auto local = fp->func()->lookupVarId(s_86metadata.get());
+        if (local != kInvalidId) {
+          auto tv = frame_local(fp, local);
+          if (!isNullType(tv->m_type)) {
+            meta_tv = tv;
+          }
+        }
+      }
+
+      if (meta_tv) {
+        hash ^= meta_tv->m_data.num + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+        hash ^= static_cast<int>(meta_tv->m_type)
+          + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+      }
+    }
   });
 
   return hash;

@@ -34,7 +34,7 @@ function hphp_clear_unflushed() { }
 <<__PHPStdLib>>
 function hphp_debug_caller_info() { }
 <<__PHPStdLib>>
-function hphp_debug_backtrace_hash() { }
+function hphp_debug_backtrace_hash(int $options = 0) { }
 <<__PHPStdLib>>
 function trigger_error($error_msg, $error_type = E_USER_NOTICE) { }
 <<__PHPStdLib>>

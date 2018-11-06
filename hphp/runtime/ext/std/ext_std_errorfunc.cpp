@@ -39,6 +39,8 @@ const int64_t k_DEBUG_BACKTRACE_PROVIDE_OBJECT = (1 << 0);
 const int64_t k_DEBUG_BACKTRACE_IGNORE_ARGS = (1 << 1);
 const int64_t k_DEBUG_BACKTRACE_PROVIDE_METADATA = (1 << 16);
 
+const int64_t k_DEBUG_BACKTRACE_HASH_CONSIDER_METADATA = (1 << 0);
+
 
 Array HHVM_FUNCTION(debug_backtrace, int64_t options /* = 1 */,
                                      int64_t limit /* = 0 */) {
@@ -75,8 +77,10 @@ Array HHVM_FUNCTION(hphp_debug_caller_info) {
   return g_context->getCallerInfo();
 }
 
-int64_t HHVM_FUNCTION(hphp_debug_backtrace_hash) {
-  return createBacktraceHash();
+int64_t HHVM_FUNCTION(hphp_debug_backtrace_hash, int64_t options /* = 0 */) {
+  return createBacktraceHash(
+    options & k_DEBUG_BACKTRACE_HASH_CONSIDER_METADATA
+  );
 }
 
 void HHVM_FUNCTION(debug_print_backtrace, int64_t options /* = 0 */,
@@ -363,6 +367,8 @@ void StandardExtension::initErrorFunc() {
   HHVM_RC_INT(DEBUG_BACKTRACE_IGNORE_ARGS, k_DEBUG_BACKTRACE_IGNORE_ARGS);
   HHVM_RC_INT(DEBUG_BACKTRACE_PROVIDE_METADATA,
               k_DEBUG_BACKTRACE_PROVIDE_METADATA);
+  HHVM_RC_INT(DEBUG_BACKTRACE_HASH_CONSIDER_METADATA,
+              k_DEBUG_BACKTRACE_HASH_CONSIDER_METADATA);
   HHVM_RC_INT(E_ERROR, (int)ErrorMode::ERROR);
   HHVM_RC_INT(E_WARNING, (int)ErrorMode::WARNING);
   HHVM_RC_INT(E_PARSE, (int)ErrorMode::PARSE);

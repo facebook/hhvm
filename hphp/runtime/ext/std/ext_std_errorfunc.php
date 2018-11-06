@@ -247,7 +247,7 @@ function hphp_clear_unflushed(): void;
 function hphp_debug_caller_info(): array<string, mixed>;
 
 <<__Native("NoInjection"), __HipHopSpecific>>
-function hphp_debug_backtrace_hash(): int;
+function hphp_debug_backtrace_hash(int $options = 0): int;
 
 namespace HH {
 

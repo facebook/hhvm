@@ -1,2 +1,4 @@
 same hash for same path
 different hash for different paths
+metadata is ignored with default options
+metadata is considered correctly

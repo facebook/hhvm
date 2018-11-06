@@ -193,7 +193,7 @@ class TestLsp(LspTestDriver, unittest.TestCase):
             options=["--identify-function", "2:21", "--json"],
             stdin="<?hh\nfunction f():void {PHP_EOL;}\n",
         )
-        self.assertEquals(retcode, 0)
+        self.assertEqual(retcode, 0)
         constants_path = json.loads(output)[0]["definition_pos"]["filename"]
         return {
             "hhi_path": re.sub("/constants.hhi$", "", constants_path),

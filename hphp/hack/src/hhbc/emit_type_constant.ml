@@ -34,7 +34,7 @@ let get_kind_num ~tparams p =
   | "tuple" -> 10
   | "fun" -> 11
   | "array" -> 12
-  | "typevar" | "hh\\_" -> 13 (* corresponds to user OF_GENERIC *)
+  | "typevar" | "_" -> 13 (* corresponds to user OF_GENERIC *)
   | "shape" -> 14
   | "class" -> 15
   | "interface" -> 16
@@ -131,10 +131,10 @@ and type_constant_access_list sl =
   in if hack_arr_dv_arrs () then (TV.Vec l) else (TV.VArray l)
 
 and resolve_classname ~tparams ~namespace (p, s) =
-  let s = add_ns namespace (p, Types.fix_casing s) in
+  let s = if s = "_" then s else add_ns namespace (p, Types.fix_casing s) in
   if is_prim s || is_resolved_classname s then [], s
   else
-    let is_tparam = List.mem ~equal:(=) tparams s || (String.lowercase s) = "hh\\_" in
+    let is_tparam = s = "_" || List.mem ~equal:(=) tparams s in
     let id = if is_tparam then "name" else "classname" in
     [TV.String id, TV.String s], s
 

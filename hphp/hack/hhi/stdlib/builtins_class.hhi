@@ -27,11 +27,11 @@ function get_class_methods($class_or_object): ?array<string>;
 <<__PHPStdLib>>
 function get_class_vars(string $class_name);
 <<__Rx>>
-function get_class($object = null);
+function get_class(<<__MaybeMutable>> $object = null);
 <<__Rx>>
-function get_parent_class($object = null);
+function get_parent_class(<<__MaybeMutable>> $object = null);
 <<__PHPStdLib, __Rx>>
-function is_a($class_or_object, string $class_name, bool $allow_string = false): bool;
+function is_a(<<__MaybeMutable>> $class_or_object, string $class_name, bool $allow_string = false): bool;
 <<__PHPStdLib>>
 function is_subclass_of($class_or_object, string $class_name, bool $allow_string = true): bool;
 <<__PHPStdLib>>
@@ -39,7 +39,7 @@ function method_exists($class_or_object, string $method_name): bool;
 <<__PHPStdLib>>
 function property_exists($class_or_object, string $property): ?bool;
 <<__Rx>>
-function get_object_vars($object): ?darray;
+function get_object_vars(<<__MaybeMutable>> $object): ?darray;
 <<__PHPStdLib>>
 function call_user_method_array(string $method_name, &$obj, array $paramarr);
 <<__PHPStdLib>>

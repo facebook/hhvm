@@ -113,7 +113,7 @@ function get_class_vars(string $class_name): mixed;
  *   omitted when inside a class, the name of that class is returned.
  */
 <<__Native, __Rx>>
-function get_class(mixed $object = null): mixed;
+function get_class(<<__MaybeMutable>> mixed $object = null): mixed;
 
 /**
  * Returns an array with the name of the defined classes
@@ -156,8 +156,8 @@ function get_declared_traits(): array<string>;
  *   a property has not been assigned a value, it will be returned with a
  *   NULL value.
  */
-<<__Native>>
-function get_object_vars(object $object): darray<string, mixed>;
+<<__Native, __Rx>>
+function get_object_vars(<<__MaybeMutable>> object $object): darray<string, mixed>;
 
 /**
  * Retrieves the parent class name for object or class
@@ -171,7 +171,7 @@ function get_object_vars(object $object): darray<string, mixed>;
  *   returns FALSE.
  */
 <<__Native, __Rx>>
-function get_parent_class(mixed $object = null): mixed;
+function get_parent_class(<<__MaybeMutable>> mixed $object = null): mixed;
 
 /**
  * Checks if the interface has been defined

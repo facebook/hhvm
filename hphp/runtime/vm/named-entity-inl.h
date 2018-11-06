@@ -29,14 +29,16 @@ inline NamedEntity::NamedEntity(NamedEntity&& ne) noexcept
   m_clsList = ne.m_clsList;
 }
 
-inline rds::Handle NamedEntity::getFuncHandle() const {
-  m_cachedFunc.bind(rds::Mode::Normal);
-  return m_cachedFunc.handle();
+inline Func* NamedEntity::getCachedFunc() const {
+  return LIKELY(m_cachedFunc.bound() && m_cachedFunc.isInit())
+    ? *m_cachedFunc
+    : nullptr;
 }
 
-inline rds::Handle NamedEntity::getClassHandle() const {
-  m_cachedClass.bind(rds::Mode::Normal);
-  return m_cachedClass.handle();
+inline Class* NamedEntity::getCachedClass() const {
+  return LIKELY(m_cachedClass.bound() && m_cachedClass.isInit())
+    ? *m_cachedClass
+    : nullptr;
 }
 
 inline Class* NamedEntity::clsList() const {

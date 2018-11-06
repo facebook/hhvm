@@ -35,6 +35,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+rds::Handle NamedEntity::getFuncHandle() const {
+  m_cachedFunc.bind(rds::Mode::Normal);
+  return m_cachedFunc.handle();
+}
+
 void NamedEntity::setCachedFunc(Func* f) {
   *m_cachedFunc = f;
   if (m_cachedFunc.isNormal()) {
@@ -42,10 +47,9 @@ void NamedEntity::setCachedFunc(Func* f) {
   }
 }
 
-Func* NamedEntity::getCachedFunc() const {
-  return LIKELY(m_cachedFunc.bound() && m_cachedFunc.isInit())
-    ? *m_cachedFunc
-    : nullptr;
+rds::Handle NamedEntity::getClassHandle() const {
+  m_cachedClass.bind(rds::Mode::Normal);
+  return m_cachedClass.handle();
 }
 
 void NamedEntity::setCachedClass(Class* f) {
@@ -53,12 +57,6 @@ void NamedEntity::setCachedClass(Class* f) {
   if (m_cachedClass.isNormal()) {
     f ? m_cachedClass.markInit() : m_cachedClass.markUninit();
   }
-}
-
-Class* NamedEntity::getCachedClass() const {
-  return LIKELY(m_cachedClass.bound() && m_cachedClass.isInit())
-    ? *m_cachedClass
-    : nullptr;
 }
 
 bool NamedEntity::isPersistentTypeAlias() const {

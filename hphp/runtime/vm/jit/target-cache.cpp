@@ -627,16 +627,10 @@ StaticMethodCache::lookup(rds::Handle handle, const NamedEntity *ne,
     raise_error(Strings::UNKNOWN_CLASS, clsName->data());
   }
 
-  if (debug) {
-    // After this call, it's a post-condition that the RDS entry for `cls' is
-    // initialized, so make sure it has been as a side-effect of
-    // Unit::loadClass().
-    auto const cls_ch = ne->getClassHandle();
-    assertx(rds::isHandleInit(cls_ch));
-    DEBUG_ONLY auto const p =
-      rds::handleToRef<LowPtr<Class>, rds::Mode::NonLocal>(cls_ch);
-    assertx(cls == p.get());
-  }
+  // After this call, it's a post-condition that the RDS entry for `cls' is
+  // initialized, so make sure it has been as a side-effect of
+  // Unit::loadClass().
+  assertx(cls == ne->getCachedClass());
 
   LookupResult res = lookupClsMethod(f, cls, methName,
                                      nullptr, // there may be an active

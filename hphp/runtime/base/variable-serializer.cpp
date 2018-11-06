@@ -1936,8 +1936,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
         try {
            auto val = const_cast<ObjectData*>(obj)->invokeToDebugDisplay();
            if (val.isInitialized()) {
-             auto const lval = properties.lvalAt(s_PHP_DebugDisplay);
-             tvSet(*val.asTypedValue(), lval);
+             properties.set(s_PHP_DebugDisplay, *val.asTypedValue());
            }
         } catch (const Object &e) {
           assertx(e->instanceof(SystemLib::s_ErrorClass) ||

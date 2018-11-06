@@ -59,7 +59,6 @@ let visitor = object(this)
     non_returning_allowed := is_non_returning_allowed
 
   method! on_expr env ((p, ty), e as te) = match e with
-    | Lplaceholder _ -> ()
     | Binop (Ast.Eq None, e1, e2) ->
       this#allow_non_returning (fun () -> this#on_expr env e1);
       this#disallow_non_returning (fun () -> this#on_expr env e2)
@@ -90,7 +89,11 @@ let visitor = object(this)
       this#allow_non_returning (fun () -> this#on_expr env e1);
       this#disallow_non_returning (fun () -> this#on_expr env e2);
       this#allow_non_returning (fun () -> this#on_expr env e3);
-      this#on_block env b;
+      this#on_block env b
+    | Foreach (e1, e2, b) ->
+      this#disallow_non_returning (fun () -> this#on_expr env e1);
+      this#allow_non_returning (fun () -> this#on_as_expr env e2);
+      this#on_block env b
     | _ ->
       this#disallow_non_returning (fun () -> super#on_stmt env stmt)
 

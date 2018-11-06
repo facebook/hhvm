@@ -6,6 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *)
 
+open Core_kernel
 module CoroutineClosureGenerator = Coroutine_closure_generator
 module CoroutineStateMachineData = Coroutine_state_machine_data
 module CoroutineSyntax = Coroutine_syntax
@@ -57,7 +58,7 @@ let rec has_reachable_endpoint body =
     has_reachable_endpoint compound_statements
   | SyntaxList [] -> true
   | SyntaxList items ->
-    has_reachable_endpoint (List.hd (List.rev items))
+    has_reachable_endpoint (List.hd_exn (List.rev items))
   (* TODO: Fix this -- false if all sections are false and no default *)
   | SwitchStatement _ -> true
   (* TODO: Fix this -- false if consequence and all alternatives are false. *)
@@ -101,8 +102,8 @@ let copy_out_syntax variable =
 
 let add_try_finally used_locals body =
   (*TODO: if there are no used locals - just return the body ? *)
-  let copy_in = Core_list.map ~f:copy_in_syntax used_locals in
-  let copy_out = Core_list.map ~f:copy_out_syntax used_locals in
+  let copy_in = List.map ~f:copy_in_syntax used_locals in
+  let copy_out = List.map ~f:copy_out_syntax used_locals in
   let copy_out = make_compound_statement_syntax copy_out in
   let copy_in = make_compound_statement_syntax copy_in in
   let try_body = make_compound_statement_syntax [ body ] in
@@ -220,14 +221,14 @@ let extract_expressions_from_for_statement
   let make_expression_statements list_syntax =
     list_syntax
       |> syntax_node_to_list
-      |> Core_list.map ~f:make_expression_statement_from_list_item in
+      |> List.map ~f:make_expression_statement_from_list_item in
 
   let initializer_exprs = make_expression_statements for_initializer in
   let control_exprs, condition_expr =
-    match Core_list.rev (syntax_node_to_list for_control) with
+    match List.rev (syntax_node_to_list for_control) with
     | [] -> [], true_expression_syntax
     | condition_expr :: rev_control_exprs ->
-      Core_list.rev_map
+      List.rev_map
         ~f:make_expression_statement_from_list_item rev_control_exprs,
       get_list_item condition_expr in
   let end_of_loop_exprs = make_expression_statements for_end_of_loop in
@@ -609,7 +610,7 @@ let unnest_compound_statements node =
     match get_braced_statements node with
     | Some statements ->
         statements
-          |> Core_list.concat_map
+          |> List.concat_map
             ~f:(fun node ->
               Option.value (get_braced_statements node) ~default:[ node ])
           |> make_compound_statement_syntax
@@ -636,8 +637,8 @@ let lower_body body =
   let body = unnest_compound_statements body in
   let coroutine_result_data_variables =
     temp_count
-      |> Core_list.range 1
-      |> Core_list.map ~f:make_coroutine_result_data_variable in
+      |> List.range 1
+      |> List.map ~f:make_coroutine_result_data_variable in
   (body, coroutine_result_data_variables, generated_to_be_saved_variables)
 
 let lower_synchronous_body body =
@@ -686,7 +687,7 @@ let make_outer_param outer_variable =
   }
 
 let make_outer_params outer_variables =
-  Core_list.map ~f:make_outer_param outer_variables
+  List.map ~f:make_outer_param outer_variables
 
 let compute_state_machine_data
     context
@@ -697,13 +698,13 @@ let compute_state_machine_data
     SSet.elements context.Coroutine_context.inner_variables in
   let inner_variables = generated_to_be_saved_variables @ inner_variables in
   let saved_inner_variables =
-    Core_list.map ~f:make_saved_variable inner_variables in
+    List.map ~f:make_saved_variable inner_variables in
   let properties = saved_inner_variables @ coroutine_result_data_variables in
   let outer_variables =
     SSet.elements context.Coroutine_context.outer_variables in
   let function_parameters = context.Coroutine_context.function_parameters in
   let parameters = outer_variables @ function_parameters
-  |> Core_list.map ~f:make_saved_variable
+  |> List.map ~f:make_saved_variable
   |> make_outer_params in
   CoroutineStateMachineData.{ properties; parameters; }
 

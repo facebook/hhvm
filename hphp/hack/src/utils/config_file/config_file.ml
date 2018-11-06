@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Sys_utils
 
 type t = string SMap.t
@@ -22,13 +22,13 @@ let file_path_relative_to_repo_root = ".hhconfig"
 let parse_contents contents =
   let lines = Str.split (Str.regexp "\n") contents in
   List.fold_left lines ~f:begin fun acc line ->
-    if String.trim line = "" || (String.length line > 0 && line.[0] = '#')
+    if String.strip line = "" || (String.length line > 0 && line.[0] = '#')
     then acc
     else
       let parts = Str.bounded_split (Str.regexp "=") line 2 in
       match parts with
-      | [k; v] -> SMap.add (String.trim k) (String.trim v) acc
-      | [k] -> SMap.add (String.trim k) "" acc
+      | [k; v] -> SMap.add (String.strip k) (String.strip v) acc
+      | [k] -> SMap.add (String.strip k) "" acc
       | _ -> failwith "failed to parse config";
   end ~init:SMap.empty
 

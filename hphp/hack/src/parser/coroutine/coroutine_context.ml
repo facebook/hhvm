@@ -17,6 +17,7 @@ what the return type and parameter types of the coroutine are, and so on,
 is computed elsewhere.
 *)
 
+open Core_kernel
 module Syntax = Full_fidelity_editable_positioned_syntax
 module SourceText = Full_fidelity_source_text
 let make_missing () = Syntax.make_missing SourceText.empty 0
@@ -89,6 +90,6 @@ let make_from_context original_node parents lambda_count =
   in
   let (inner_variables, outer_variables, function_parameters) =
     Lambda_analyzer.partition_used_locals parents original_node in
-  { (Core_list.fold ~f:folder ~init:empty (original_node :: parents))
+  { (List.fold ~f:folder ~init:empty (original_node :: parents))
     with lambda_count; parents; original_node; inner_variables;
     outer_variables; function_parameters }

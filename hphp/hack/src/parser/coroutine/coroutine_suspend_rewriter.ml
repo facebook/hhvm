@@ -6,6 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *)
 
+open Core_kernel
 module Syntax = Full_fidelity_editable_positioned_syntax
 module CoroutineSyntax = Coroutine_syntax
 module Rewriter = Full_fidelity_rewriter.WithSyntax(Syntax)
@@ -42,7 +43,7 @@ let matches_suspend node =
 let has_no_suspends body =
   (* This depth-first traversal to see whether anything matches_suspend. *)
   let rec any_matches_suspend node =
-    matches_suspend node || List.exists any_matches_suspend (Syntax.children node)
+    matches_suspend node || List.exists ~f:any_matches_suspend (Syntax.children node)
   in
   not @@ any_matches_suspend body
 
@@ -65,7 +66,7 @@ let rec is_in_try_block node parents =
   match parents with
   | [] -> false
   | { syntax = TryStatement { try_compound_statement; _ }; _ } :: _
-      when node == try_compound_statement ->
+      when phys_equal node try_compound_statement ->
     true
   | x :: xs -> is_in_try_block x xs
 
@@ -78,13 +79,13 @@ let rec is_in_tail_position node parents =
   | { syntax = ParenthesizedExpression {
         parenthesized_expression_expression = e; _
       }; _
-    } as n :: xs when node == e ->
+    } as n :: xs when phys_equal node e ->
     is_in_tail_position n xs
   | { syntax = ConditionalExpression {
         conditional_consequence = consequence;
         conditional_alternative = alternative; _
       }; _
-    } as n :: xs when node == consequence || node == alternative ->
+    } as n :: xs when (phys_equal node consequence) || (phys_equal node alternative) ->
     is_in_tail_position n xs
   | { syntax = BinaryExpression {
         binary_operator = {
@@ -94,7 +95,7 @@ let rec is_in_tail_position node parents =
         };
         binary_right_operand = right; _
       }; _
-    } as n :: xs when node == right ->
+    } as n :: xs when phys_equal node right ->
     is_in_tail_position n xs
   | _ -> false
 
@@ -107,13 +108,13 @@ let rec is_in_tail_position_truncated node parents =
   | { syntax = ParenthesizedExpression {
         parenthesized_expression_expression = e; _
       }; _
-    } as n :: xs when node == e ->
+    } as n :: xs when phys_equal node e ->
     is_in_tail_position_truncated n xs
   | { syntax = ConditionalExpression {
         conditional_consequence = consequence;
         conditional_alternative = alternative; _
       }; _
-    } as n :: xs when node == consequence || node == alternative ->
+    } as n :: xs when (phys_equal node consequence) || (phys_equal node alternative) ->
     is_in_tail_position_truncated n xs
   | _ -> false
 
@@ -132,7 +133,7 @@ let only_tail_call_suspends body =
         matches_suspend n && not (is_in_tail_position_truncated n ps)
       in
       not (not_in_tail_suspend) &&
-        List.for_all (any_non_tail_suspend (n :: ps)) (Syntax.children n)
+        List.for_all ~f:(any_non_tail_suspend (n :: ps)) (Syntax.children n)
     in
     any_non_tail_suspend [] body
   in
@@ -145,7 +146,7 @@ let only_tail_call_suspends body =
         has_no_suspends try_compound_statement
       | ReturnStatement {return_expression; _ } ->
         return_helper return_expression
-      | _ -> List.for_all aux (Syntax.children node)
+      | _ -> List.for_all ~f:aux (Syntax.children node)
   in
   let body =
     match syntax body with
@@ -188,7 +189,7 @@ let no_tail_call_extra_info prefix =
 let no_info = no_tail_call_extra_info []
 
 let is_no_info { prefix; is_tail_call } =
-  Core_list.is_empty prefix && not is_tail_call
+  List.is_empty prefix && not is_tail_call
 
 (* Describes kind of statement that encloses suspend being rewritten *)
 type rewrite_suspend_context =
@@ -380,7 +381,7 @@ let rec might_be_spilled node parent ~spill_subscript_expressions =
     (
       SubscriptExpression { subscript_receiver = r; _  } |
       MemberSelectionExpression { member_object = r; _ }
-    ) when node == r -> false
+    ) when phys_equal node r -> false
 
   (* spill variables except $this *)
   | VariableExpression {
@@ -580,7 +581,7 @@ let rewrite_short_circuit_operator
 let get_children_count n =
   match syntax n with
   | Token _ | Missing -> 0
-  | _ -> Core_list.length (Syntax.children n)
+  | _ -> List.length (Syntax.children n)
 
 (* rewrites an expression that contains nested suspends
    by introducing a temporary locals to preserve evaluation order.
@@ -685,7 +686,7 @@ let rewrite_suspends_in_statement
       let node_extra_info_list, node_extra_info_rest =
         split_n_reverse_first_exn node_extra_info_list children_count in
 
-      if Core_list.for_all node_extra_info_list ~f:is_no_info
+      if List.for_all node_extra_info_list ~f:is_no_info
       then
         keep_node ()
       else
@@ -757,7 +758,7 @@ let rewrite_suspends_in_statement
           (* return test : consequence ? alternative; *)
           let is_top_level_in_return =
                context <> EnclosedByOtherStatement
-            && Core_list.is_empty parents in
+            && List.is_empty parents in
 
           let assign_to_temp_or_return value value_extra_info =
             if is_missing value
@@ -786,11 +787,11 @@ let rewrite_suspends_in_statement
           let then_block =
               consequence_extra_info.prefix
             @ [ consequence_assignment_or_return ]
-            |> Core_list.filter ~f:not_missing in
+            |> List.filter ~f:not_missing in
           let else_block =
               alternative_extra_info.prefix
             @ [ alternative_assignment_or_return ]
-            |> Core_list.filter ~f:not_missing in
+            |> List.filter ~f:not_missing in
           let if_statement =
             make_if_else_syntax test then_block else_block in
 
@@ -951,7 +952,7 @@ let rewrite_suspends_in_statement
             else
               let next_temp, children =
                 Syntax.children left
-                |> Core_list.fold_left
+                |> List.fold_left
                   ~init:(next_temp, [])
                   ~f:(fun (next_temp, acc) n ->
                     let n, prefix, next_temp =
@@ -964,8 +965,8 @@ let rewrite_suspends_in_statement
 
               let prefixes, children =
                 children
-                |> Core_list.rev
-                |> Core_list.unzip in
+                |> List.rev
+                |> List.unzip in
 
               (* for the sequence of child nodes c1 c2 c3 c4 c5
                  if i.e. c3 has a suspend in it - we'll spill all nodes
@@ -975,7 +976,7 @@ let rewrite_suspends_in_statement
                  prefixes that already were found for the left hand side *)
               let prefix =
                   left_extra_info.prefix
-                @ Core_list.concat prefixes
+                @ List.concat prefixes
                 @ right_extra_info.prefix in
 
               let left =
@@ -994,14 +995,14 @@ let rewrite_suspends_in_statement
       | _ ->
         let spill_subscript_expressions =
              is_argument_to_unset
-          && Core_list.is_empty parents in
+          && List.is_empty parents in
 
         let spill_expr
           (child_node, { prefix; _ })
           (acc, has_prefix_on_the_right, next_temp) =
 
           let result, has_prefix_on_the_right, next_temp =
-            let child_node_has_prefix = not (Core_list.is_empty prefix) in
+            let child_node_has_prefix = not (List.is_empty prefix) in
             if might_be_spilled child_node node ~spill_subscript_expressions
             then
               (* if there is a suspend somewhere on the right of this child node
@@ -1043,18 +1044,18 @@ let rewrite_suspends_in_statement
            evaluation order we need to save to result of f() in a temp
            *)
         let result, has_at_least_one_prefix, next_temp =
-          Core_list.zip_exn children node_extra_info_list
-          |> Core_list.fold_right ~init:([], false, next_temp) ~f:spill_expr in
+          List.zip_exn children node_extra_info_list
+          |> List.fold_right ~init:([], false, next_temp) ~f:spill_expr in
         if has_at_least_one_prefix
         then
           (* create new list of child nodes *)
-          let nodes, prefixes = Core_list.unzip result in
+          let nodes, prefixes = List.unzip result in
 
           let new_node =
             CoroutineSyntax.from_children (Syntax.kind node) nodes in
 
           let extra_info =
-            no_tail_call_extra_info (Core_list.concat prefixes) in
+            no_tail_call_extra_info (List.concat prefixes) in
 
           ( extra_info :: node_extra_info_rest, next_label, next_temp),
           Rewriter.Result.Replace new_node
@@ -1064,7 +1065,7 @@ let rewrite_suspends_in_statement
   Rewriter.parented_aggregating_rewrite_post rewrite node ([], next_label, 1)
 
 let is_in_lambda_or_anonymous_function _node ancestors =
-  Core_list.exists ancestors
+  List.exists ancestors
     ~f:(fun node -> is_lambda_expression node || is_anonymous_function node)
 
 let rewrite_suspends_in_non_return_context
@@ -1080,7 +1081,7 @@ let rewrite_suspends_in_non_return_context
   then
     (next_label, temp_count), Rewriter.Result.Keep
   else
-    let { prefix; _ } = List.hd extra_node_info_list in
+    let { prefix; _ } = List.hd_exn extra_node_info_list in
 
     (* TODO: (t17335630) Generate unset call to release all intermediate data
        stored in $closure->temp_data_member*
@@ -1088,8 +1089,8 @@ let rewrite_suspends_in_non_return_context
        to making unset.
 
        let unset_call =
-         Core_list.range 0 next_temp
-         |> Core_list.map ~f:make_closure_temp_data_member_name_syntax
+         List.range 0 next_temp
+         |> List.map ~f:make_closure_temp_data_member_name_syntax
          |> (make_function_call_statement_syntax unset_syntax)
      *)
     let statements = prefix @ [f node] in
@@ -1134,7 +1135,7 @@ let rewrite_suspends ?(only_tail_call_suspends = false) node =
                 next_label
                 ~is_argument_to_unset:false in
 
-            let extra_node_info = List.hd extra_node_info_list in
+            let extra_node_info = List.hd_exn extra_node_info_list in
 
             extra_node_info.prefix,
             return_expression,

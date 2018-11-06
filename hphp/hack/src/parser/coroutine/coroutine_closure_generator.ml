@@ -6,6 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *)
 
+open Core_kernel
 module CoroutineStateMachineData = Coroutine_state_machine_data
 module CoroutineSyntax = Coroutine_syntax
 module CoroutineTypeLowerer = Coroutine_type_lowerer
@@ -15,13 +16,13 @@ open Syntax
 open CoroutineSyntax
 
 let generate_closure_properties { CoroutineStateMachineData.properties; _; } =
-  Core_list.map ~f:make_member_with_unknown_type_declaration_syntax
+  List.map ~f:make_member_with_unknown_type_declaration_syntax
     properties
 
 let make_parameters_public_and_untyped
     { CoroutineStateMachineData.parameters; _; } =
   parameters
-    |> Core_list.map ~f:
+    |> List.map ~f:
       begin
       fun { CoroutineStateMachineData.parameter_declaration; _ } ->
         make_syntax parameter_declaration
@@ -92,7 +93,7 @@ let generate_clone_body { CoroutineStateMachineData.parameters; properties; } =
         |> strip_dollar_sign
         |> make_name_syntax
         |> make_member_selection_expression_syntax this_syntax in
-    Core_list.map ~f:get_parameter_as_member_variable parameters in
+    List.map ~f:get_parameter_as_member_variable parameters in
   (* [
    *   $this->coroutineContinuation_generated->clone();
    *   $this->stateMachineFunction;
@@ -129,7 +130,7 @@ let generate_clone_body { CoroutineStateMachineData.parameters; properties; } =
       make_assignment_syntax_variable
         closure_member_syntax
         this_member_syntax in
-      Core_list.map
+      List.map
         ~f:make_copy_property_syntax
         (completion_continuation_continuation :: next_label :: properties) in
   (* return $closure; *)

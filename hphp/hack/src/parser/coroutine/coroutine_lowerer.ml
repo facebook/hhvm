@@ -6,13 +6,13 @@
  * LICENSE file in the "hack" directory of this source tree.
  *)
 
+open Core_kernel
 module CoroutineMethodLowerer = Coroutine_method_lowerer
 module CoroutineStateMachineGenerator = Coroutine_state_machine_generator
 module CoroutineSyntax = Coroutine_syntax
 module CoroutineTypeLowerer = Coroutine_type_lowerer
 module CoroutineSuspendRewriter = Coroutine_suspend_rewriter
 module Syntax = Full_fidelity_editable_positioned_syntax
-module List = Core_list
 module Rewriter = Full_fidelity_rewriter.WithSyntax(Syntax)
 
 open Syntax

@@ -6,6 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *)
 
+open Core_kernel
 module CoroutineSyntax = Coroutine_syntax
 module Syntax = Full_fidelity_editable_positioned_syntax
 module CoroutineSuspendRewriter = Coroutine_suspend_rewriter
@@ -32,7 +33,7 @@ let compute_parameter_list function_parameter_list function_type =
 
 let remove_coroutine_modifier_from_modifiers_list modifiers =
   syntax_node_to_list modifiers
-  |> Core_list.filter ~f:(fun c -> not (is_coroutine c))
+  |> List.filter ~f:(fun c -> not (is_coroutine c))
   |> make_list
 
 (**
@@ -68,7 +69,7 @@ let parameter_to_arg param =
 
 let parameter_list_to_arg_list function_parameter_list =
   let function_parameter_list = syntax_node_to_list function_parameter_list in
-  List.map parameter_to_arg function_parameter_list
+  List.map ~f:parameter_to_arg function_parameter_list
 
 (**
  * One of the following, depending on whether the coroutine method is static or
@@ -105,7 +106,7 @@ let create_closure_invocation
   (* $outer1, $outer2 *)
   let outer_variables = context.Coroutine_context.outer_variables in
   let outer_variables = SSet.elements outer_variables in
-  let outer_args = Core_list.map
+  let outer_args = List.map
     ~f:make_variable_expression_syntax outer_variables in
   (* $param1, $param2 *)
   let arg_list = parameter_list_to_arg_list function_parameter_list in

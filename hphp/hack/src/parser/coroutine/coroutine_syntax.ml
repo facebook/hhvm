@@ -10,6 +10,7 @@
  * Contains syntaxes used in coroutine code generation.
  *)
 
+open Core_kernel
 module Syntax = Full_fidelity_editable_positioned_syntax
 module Token = Syntax.Token
 module TokenKind = Full_fidelity_token_kind
@@ -251,7 +252,7 @@ let constructor_member_name =
 
 (* Syntax helper functions *)
 let has_coroutine_modifier n =
-  Core_list.exists (syntax_node_to_list n) ~f:is_coroutine
+  List.exists (syntax_node_to_list n) ~f:is_coroutine
 
 let strip_dollar_sign (var : string) = String_utils.lstrip var "$"
 
@@ -286,22 +287,22 @@ let get_type_parameter_list node =
   | TypeParameters { type_parameters_parameters; _; } ->
       type_parameters_parameters
         |> syntax_node_to_list
-        |> Core_list.map ~f:get_list_item
+        |> List.map ~f:get_list_item
   | Missing -> []
   | _ -> failwith "get_type_parameter_list: Was not a TypeParameters"
 
 let get_type_arguments node =
   node
     |> get_type_parameter_list
-    |> Core_list.map ~f:get_type_parameter_type_name
-    |> Core_list.map ~f:make_simple_type_specifier
+    |> List.map ~f:get_type_parameter_type_name
+    |> List.map ~f:make_simple_type_specifier
 
 let is_static_method { methodish_function_decl_header = header; _; } =
   match syntax header with
   | FunctionDeclarationHeader { function_modifiers; _ } ->
     function_modifiers
       |> syntax_node_to_list
-      |> Core_list.exists ~f:is_static
+      |> List.exists ~f:is_static
   | _ -> false
 
 let string_of_name_token node =
@@ -527,7 +528,7 @@ let make_object_creation_expression_syntax classname arguments =
 let make_functional_type_syntax argument_types return_type_syntax =
   let argument_list_syntax =
     argument_types
-      |> Core_list.map ~f:make_closure_parameter_type_syntax
+      |> List.map ~f:make_closure_parameter_type_syntax
       |> make_comma_list in
   make_closure_type_specifier
     left_paren_syntax

@@ -654,6 +654,14 @@ and emit_instanceof env pos e1 e2 =
       emit_expr ~need_ref:false env e2;
       instr_instanceof ]
 
+and get_type_structure_for_hint env ~targ_map h =
+  let namespace = Emit_env.get_namespace env in
+  let tv = Emit_type_constant.hint_to_type_constant
+    ~tparams:[] ~namespace ~targ_map h in
+  let i = Emit_adata.get_array_identifier tv in
+  if hack_arr_dv_arrs () then
+    instr (ILitConst (Dict i)) else instr (ILitConst (Array i))
+
 and emit_as env pos e h is_nullable =
   (* Creates equivalent to while avoiding double evaluation of e
    * (e is h) ? e : (gather [e; else_block])
@@ -685,14 +693,8 @@ and emit_as env pos e h is_nullable =
       Local.scope @@ fun () -> begin
         let ts_instrs, is_static = emit_reified_arg env h in
         begin if is_static then
-          let namespace = Emit_env.get_namespace env in
-          let tv = Emit_type_constant.hint_to_type_constant
-            ~tparams:[] ~namespace ~targ_map:SMap.empty h in
-          let i = Emit_adata.get_array_identifier tv in
-          let ts = if hack_arr_dv_arrs () then
-            instr (ILitConst (Dict i)) else instr (ILitConst (Array i)) in
           gather [
-            ts;
+            get_type_structure_for_hint env ~targ_map:SMap.empty h;
             instr_astypestructc Resolve;
           ]
         else
@@ -706,14 +708,8 @@ and emit_as env pos e h is_nullable =
 and emit_is env _pos h =
   let ts_instrs, is_static = emit_reified_arg env h in
   if is_static then
-    let namespace = Emit_env.get_namespace env in
-    let tv = Emit_type_constant.hint_to_type_constant
-      ~tparams:[] ~namespace ~targ_map:SMap.empty h in
-    let i = Emit_adata.get_array_identifier tv in
-    let ts = if hack_arr_dv_arrs () then
-      instr (ILitConst (Dict i)) else instr (ILitConst (Array i)) in
     gather [
-      ts;
+      get_type_structure_for_hint env ~targ_map:SMap.empty h;
       instr_istypestructc Resolve;
     ]
   else
@@ -794,9 +790,15 @@ and emit_conditional_expression env pos etest etrue efalse =
       instr_label end_label;
     ]
 
+and emit_reified_targs env pos targs =
+  List.map targs ~f:(function
+    | (_, false) ->
+      get_type_structure_for_hint env ~targ_map:SMap.empty
+        (pos, A.Happly ((pos, "_"), []))
+    | (h, true) -> fst @@ emit_reified_arg env h)
+
 and emit_new env pos expr targs args uargs =
-  let reified_targs = List.filter_map targs
-    ~f:(function (_, false) -> None | (h, true) -> Some h) in
+  let has_reified_args = List.exists ~f:(fun (_, b) -> b) targs in
   let nargs = List.length args + List.length uargs in
   let cexpr = expr_to_class_expr ~resolve_self:true
     (Emit_env.get_scope env) expr in
@@ -804,12 +806,12 @@ and emit_new env pos expr targs args uargs =
     | Class_id (_, name) ->
       let cexpr =
         Option.value ~default:cexpr (get_reified_var_cexpr env name) in
-      if List.length reified_targs = 0 then cexpr, false else
+      if not has_reified_args then cexpr, false else
       begin
+        let reified_targs = emit_reified_targs env pos targs in
         Class_reified (
           gather [
-            gather @@
-              List.map reified_targs (fun h -> fst @@ emit_reified_arg env h);
+            gather reified_targs;
             (match cexpr with
             | Class_id (_, name) -> instr_string name
             | Class_expr e -> emit_expr ~need_ref:false env e
@@ -1731,10 +1733,8 @@ and is_reified_tparam ~is_fun env name =
     if is_fun then Ast_scope.Scope.get_fun_tparams scope
     else Ast_scope.Scope.get_class_tparams scope
   in
-  tparams
-  |> List.filter_map ~f:(function (_, (_, id), _, true) -> Some id | _ -> None)
-  |> List.findi ~f:(fun _i id -> id = name)
-  |> Option.map ~f:fst
+  List.find_mapi tparams
+    ~f:(fun i (_, (_, id), _, b) -> if b && id = name then Some i else None)
 
 and get_reified_var_cexpr env name =
   match emit_reified_type_opt env name with
@@ -3040,13 +3040,8 @@ and emit_reified_arg env hint =
   | A.Happly ((_, name), []) when SMap.mem name current_targs ->
     emit_reified_type env name, false
   | _ ->
-    let namespace = Emit_env.get_namespace env in
-    let ts = Emit_type_constant.hint_to_type_constant
-      ~tparams:[] ~namespace ~targ_map hint in
-    let i = Emit_adata.get_array_identifier ts in
-    let ts_instr = if hack_arr_dv_arrs () then
-      instr (ILitConst (Dict i)) else instr (ILitConst (Array i)) in
-    let ts_list = if count = 0 then ts_instr else
+    let ts = get_type_structure_for_hint env ~targ_map hint in
+    let ts_list = if count = 0 then ts else
       (* Sort map from key 0 to count and convert each identified into cgetl *)
       let values =
         SMap.bindings targ_map
@@ -3055,7 +3050,7 @@ and emit_reified_arg env hint =
       in
       gather [
         gather values;
-        ts_instr;
+        ts;
       ]
     in
     gather [
@@ -3275,10 +3270,9 @@ and has_inout_args es =
 and emit_call_lhs
   env outer_pos (pos, expr_ as expr) targs nargs has_splat inout_arg_positions =
   let has_inout_args = List.length inout_arg_positions <> 0 in
-  let reified_targs =
-    List.filter_map targs ~f:(function (_, false) -> None | (h, true) ->
-      Some (fst @@ emit_reified_arg env h)) in
+  let no_reified_args = not (List.exists ~f:snd targs) in
   let reified_call_body name =
+    let reified_targs = emit_reified_targs env pos targs in
     gather [
       gather reified_targs;
       instr_string name;
@@ -3325,7 +3319,7 @@ and emit_call_lhs
     gather [
       emit_object_expr env ~last_pos:outer_pos obj;
       emit_pos outer_pos;
-      (if List.is_empty reified_targs then
+      (if no_reified_args then
         instr_fpushobjmethodd nargs name null_flavor
       else
         reified_objmethod_call id null_flavor)
@@ -3358,25 +3352,25 @@ and emit_call_lhs
       let fq_cid, _ = Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) cid in
       let fq_cid_string = Hhbc_id.Class.to_raw_string fq_cid in
       Emit_symbol_refs.add_class fq_cid_string;
-      (if List.is_empty reified_targs then
+      (if no_reified_args then
         instr_fpushclsmethodd nargs method_id fq_cid
       else
         reified_clsmethod_call method_id_string fq_cid_string)
     | Class_static ->
-      if List.is_empty reified_targs then
+      if no_reified_args then
         instr_fpushclsmethodsd nargs SpecialClsRef.Static method_id
       else reified_clsmethods_call method_id_string SpecialClsRef.Static
     | Class_self ->
-      if List.is_empty reified_targs then
+      if no_reified_args then
         instr_fpushclsmethodsd nargs SpecialClsRef.Self method_id
       else reified_clsmethods_call method_id_string SpecialClsRef.Self
     | Class_parent ->
-      if List.is_empty reified_targs then
+      if no_reified_args then
         instr_fpushclsmethodsd nargs SpecialClsRef.Parent method_id
       else reified_clsmethods_call method_id_string SpecialClsRef.Parent
     | Class_expr (_, A.Lvar (_, x)) when x = SN.SpecialIdents.this ->
        let name_instrs =
-        if List.is_empty reified_targs then instr_string method_id_string
+        if no_reified_args then instr_string method_id_string
         else reified_call_body method_id_string in
        gather [
          emit_call_lhs_with_this env name_instrs;
@@ -3439,14 +3433,14 @@ and emit_call_lhs
       else fq_id in
     emit_pos_then outer_pos @@
     begin match id_opt with
-    | _ when not @@ List.is_empty reified_targs ->
+    | _ when not no_reified_args ->
       reified_fun_name_call (Hhbc_id.Function.to_raw_string fq_id)
     | Some id -> instr (ICall (FPushFuncU (nargs, fq_id, id)))
     | None -> instr (ICall (FPushFuncD (nargs, fq_id)))
     end
   | A.String s ->
     emit_pos_then outer_pos @@
-    (if List.is_empty reified_targs then
+    (if no_reified_args then
       instr_fpushfuncd nargs (Hhbc_id.Function.from_raw_string s)
      else reified_fun_name_call s)
   | _ ->

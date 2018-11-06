@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/req-optional.h"
 #include "hphp/runtime/base/surprise-flags.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 #include "hphp/runtime/vm/native-data.h"
 
@@ -174,7 +174,7 @@ void HHVM_METHOD(IntervalTimer, __construct,
                  const Variant& callback) {
   auto data = Native::data<IntervalTimer>(this_);
   data->init(interval, initial, callback,
-             &ThreadInfo::s_threadInfo->m_reqInjectionData);
+             &RequestInfo::s_requestInfo->m_reqInjectionData);
 }
 
 void HHVM_METHOD(IntervalTimer, start) {

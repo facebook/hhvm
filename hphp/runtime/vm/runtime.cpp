@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
@@ -263,14 +263,14 @@ void raiseParamRefMismatchForFunc(const Func* func, uint32_t index) {
 //////////////////////////////////////////////////////////////////////
 
 int64_t zero_error_level() {
-  auto& id = ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData;
+  auto& id = RequestInfo::s_requestInfo.getNoCheck()->m_reqInjectionData;
   auto level = id.getErrorReportingLevel();
   id.setErrorReportingLevel(0);
   return level;
 }
 
 void restore_error_level(int64_t oldLevel) {
-  auto& id = ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData;
+  auto& id = RequestInfo::s_requestInfo.getNoCheck()->m_reqInjectionData;
   if (id.getErrorReportingLevel() == 0) {
     id.setErrorReportingLevel(oldLevel);
   }

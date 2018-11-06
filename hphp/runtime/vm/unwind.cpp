@@ -521,7 +521,7 @@ void unwindPhp() {
       // has already been torn down (eg an exception thrown by a user
       // profiler on function exit), we can't execute any handlers in
       // *this* frame.
-      if (ThreadInfo::s_threadInfo->m_pendingException != nullptr ||
+      if (RequestInfo::s_requestInfo->m_pendingException != nullptr ||
           UNLIKELY(fp->localsDecRefd())) {
         continue;
       }

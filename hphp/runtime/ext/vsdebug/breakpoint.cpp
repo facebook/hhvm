@@ -763,7 +763,7 @@ void BreakpointManager::onRequestShutdown(request_id_t requestId) {
 }
 
 bool BreakpointManager::isBreakConditionSatisified(
-  RequestInfo* ri,
+  DebuggerRequestInfo* ri,
   Breakpoint* bp
 ) {
   std::string condition = std::string(bp->getCondition());

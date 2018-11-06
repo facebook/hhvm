@@ -23,7 +23,7 @@ namespace HPHP {
 namespace VSDEBUG {
 
 struct Debugger;
-struct RequestInfo;
+struct DebuggerRequestInfo;
 
 struct VSDebugHook final : DebuggerHook {
   void onRequestInit() override;
@@ -57,7 +57,7 @@ struct VSDebugHook final : DebuggerHook {
 
   static void tryEnterDebugger(
     Debugger* debugger,
-    RequestInfo* requestInfo,
+    DebuggerRequestInfo* requestInfo,
     bool breakNoStepOnly
   );
 

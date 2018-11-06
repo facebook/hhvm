@@ -58,9 +58,9 @@ bool TerminateThreadsCommand::executeImpl(DebuggerSession* /*session*/,
                                           folly::dynamic* /*responseMsg*/
 ) {
   if (m_requestId > 0) {
-    RequestInfo* ri = m_debugger->getRequestInfo();
+    DebuggerRequestInfo* ri = m_debugger->getRequestInfo();
     ri->m_flags.terminateRequest = true;
-    TI().m_reqInjectionData.setDebuggerIntr(true);
+    RI().m_reqInjectionData.setDebuggerIntr(true);
     return true;
   }
 

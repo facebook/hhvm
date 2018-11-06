@@ -344,7 +344,7 @@ void CmdPrint::onClient(DebuggerClient &client) {
 // can occur while we're doing the server-side work for a print.
 bool CmdPrint::onServer(DebuggerProxy &proxy) {
   PCFilter locSave;
-  auto& rid = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  auto& rid = RequestInfo::s_requestInfo->m_reqInjectionData;
   locSave.swap(rid.m_flowFilter);
   g_context->debuggerSettings.bypassCheck = m_bypassAccessCheck;
   {

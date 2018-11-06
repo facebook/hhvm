@@ -43,9 +43,9 @@ using StepOutState = RequestInjectionData::StepOutState;
 //////////////////////////////////////////////////////////////////////////
 // DebuggerHook implementation
 
-void DebuggerHook::detach(ThreadInfo* ti /* = nullptr */) {
+void DebuggerHook::detach(RequestInfo* ti /* = nullptr */) {
   // Legacy hphpd code expects no failure if no hook is attached.
-  ti = (ti != nullptr) ? ti : &TI();
+  ti = (ti != nullptr) ? ti : &RI();
   if (!isDebuggerAttached(ti)) {
     return;
   }
@@ -55,7 +55,7 @@ void DebuggerHook::detach(ThreadInfo* ti /* = nullptr */) {
   // Do not remove/delete m_debuggerHook, it's a singleton, and code in another
   // thread could be using it.
 
-  if (ti == &TI()) {
+  if (ti == &RI()) {
     // Clear the pc filters.  We can only do this for the current thread.
     ti->m_reqInjectionData.m_breakPointFilter.clear();
     ti->m_reqInjectionData.m_flowFilter.clear();
@@ -623,7 +623,7 @@ void phpRemoveBreakPointLine(const Unit* unit, int line) {
   // See note in debugger-hook.h. This can only remove from the line filter
   OffsetRangeVec offsets;
   if (unit->getOffsetRanges(line, offsets)) {
-    ThreadInfo::s_threadInfo->
+    RequestInfo::s_requestInfo->
       m_reqInjectionData.m_lineBreakPointFilter.removeRanges(unit, offsets);
   }
 }

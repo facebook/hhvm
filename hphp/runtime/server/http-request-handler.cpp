@@ -229,7 +229,7 @@ void HttpRequestHandler::teardownRequest(Transport* transport) noexcept {
 }
 
 void HttpRequestHandler::handleRequest(Transport *transport) {
-  ExecutionProfiler ep(ThreadInfo::RuntimeFunctions);
+  ExecutionProfiler ep(RequestInfo::RuntimeFunctions);
 
   Logger::OnNewRequest();
   transport->enableCompression();
@@ -361,7 +361,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
 
   // main body
   hphp_session_init(Treadmill::SessionKind::HttpRequest, transport);
-  ThreadInfo::s_threadInfo->m_reqInjectionData.
+  RequestInfo::s_requestInfo->m_reqInjectionData.
     setTimeout(requestTimeoutSeconds);
 
   bool ret = false;

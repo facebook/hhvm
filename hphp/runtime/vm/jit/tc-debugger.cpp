@@ -18,7 +18,7 @@
 #include "hphp/runtime/vm/jit/tc-internal.h"
 
 #include "hphp/runtime/base/request-injection-data.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/srckey.h"
 
@@ -55,20 +55,22 @@ void addDbgGuardImpl(SrcKey sk, SrcRec* sr, CodeBlock& cb, DataBlock& data,
       v << lea{rvmfp()[-cellsToBytes(off.offset)], rvmsp()};
     }
 
-    auto const tinfo = v.makeReg();
+    // TODO(T36048955): Use a simple vmtl offset to access RDS_LOCALs.
+    auto const rdslocalBase = v.makeReg();
     auto const attached = v.makeReg();
     auto const sf = v.makeReg();
 
     auto const done = v.makeBlock();
 
-    constexpr size_t dbgOff =
-      offsetof(ThreadInfo, m_reqInjectionData) +
-      RequestInjectionData::debuggerReadOnlyOffset();
+    const size_t dbgOff =
+      offsetof(RequestInfo, m_reqInjectionData) +
+      RequestInjectionData::debuggerReadOnlyOffset() +
+      RequestInfo::s_requestInfo.getRawOffset();
 
     v << ldimmq{reinterpret_cast<uintptr_t>(sk.pc()), rarg(0)};
-
-    emitTLSLoad(v, tls_datum(ThreadInfo::s_threadInfo), tinfo);
-    v << loadb{tinfo[dbgOff], attached};
+    auto const datum = tls_datum(rds::local::detail::rl_hotSection.rdslocal_base);
+    v << load{emitTLSAddr(v, datum), rdslocalBase};
+    v << loadb{rdslocalBase[dbgOff], attached};
     v << testbi{static_cast<int8_t>(0xffu), attached, sf};
 
     v << jcci{CC_NZ, sf, done, ustubs().interpHelper};

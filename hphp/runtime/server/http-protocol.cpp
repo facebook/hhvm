@@ -276,10 +276,10 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
     }
   };
 
-  auto variablesOrder = ThreadInfo::s_threadInfo.getNoCheck()
+  auto variablesOrder = RequestInfo::s_requestInfo.getNoCheck()
     ->m_reqInjectionData.getVariablesOrder();
 
-  auto requestOrder = ThreadInfo::s_threadInfo.getNoCheck()
+  auto requestOrder = RequestInfo::s_requestInfo.getNoCheck()
     ->m_reqInjectionData.getRequestOrder();
 
   if (requestOrder.empty()) {

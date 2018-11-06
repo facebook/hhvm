@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/logger.h"
@@ -1594,7 +1594,7 @@ static struct imapExtension final : Extension {
 
     /* set default timeout values */
     void *timeout = reinterpret_cast<void *>(
-      ThreadInfo::s_threadInfo.getNoCheck()->
+      RequestInfo::s_requestInfo.getNoCheck()->
         m_reqInjectionData.getSocketDefaultTimeout());
 
     mail_parameters(NIL, SET_OPENTIMEOUT,  timeout);

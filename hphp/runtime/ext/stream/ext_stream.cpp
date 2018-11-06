@@ -613,7 +613,7 @@ static Variant socket_accept_impl(
   if (isa<SSLSocket>(socket)) {
     auto sock = cast<SSLSocket>(socket);
     auto new_fd = accept(sock->fd(), addr, addrlen);
-    double timeout = ThreadInfo::s_threadInfo.getNoCheck()->
+    double timeout = RequestInfo::s_requestInfo.getNoCheck()->
       m_reqInjectionData.getSocketDefaultTimeout();
     sslsock = SSLSocket::Create(new_fd, sock->getType(),
                                 sock->getCryptoMethod(), sock->getAddress(),
@@ -711,7 +711,7 @@ Variant HHVM_FUNCTION(stream_socket_accept,
   p.revents = 0;
   IOStatusHelper io("socket_accept");
   if (timeout == -1) {
-    timeout = ThreadInfo::s_threadInfo.getNoCheck()->
+    timeout = RequestInfo::s_requestInfo.getNoCheck()->
       m_reqInjectionData.getSocketDefaultTimeout();
   }
   n = poll(&p, 1, (uint64_t)(timeout * 1000.0));

@@ -225,6 +225,10 @@ struct RDSLocal : private detail::RDSLocalNode {
     return s_RDSLocalsBase + m_offset;
   }
 
+  size_t getRawOffset() const {
+    return m_offset;
+  }
+
 private:
   void init() override {
     assertx(detail::rl_hotSection.rdslocal_base);

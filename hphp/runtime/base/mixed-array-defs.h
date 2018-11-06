@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/set-array.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/tv-val.h"
 
 #include "hphp/util/stacktrace-profiler.h"

@@ -331,14 +331,14 @@ String Debugger::ColorStderr(const String& s) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// The flag for this is in the VM's normal ThreadInfo, but we don't
+// The flag for this is in the VM's normal RequestInfo, but we don't
 // have a way to get that given just a tid. Use our own map to find it
 // and answer the question.
 bool Debugger::isThreadDebugging(int64_t tid) {
   TRACE(2, "Debugger::isThreadDebugging tid=%" PRIx64 "\n", tid);
   ThreadInfoMap::const_accessor acc;
   if (m_threadInfos.find(acc, tid)) {
-    ThreadInfo* ti = acc->second;
+    RequestInfo* ti = acc->second;
     auto isDebugging = isDebuggerAttached(ti);
     TRACE(2, "Is thread debugging? %d\n", isDebugging);
     return isDebugging;
@@ -347,7 +347,7 @@ bool Debugger::isThreadDebugging(int64_t tid) {
   return false;
 }
 
-// Remeber this thread's VM ThreadInfo so we can find it later via
+// Remeber this thread's VM RequestInfo so we can find it later via
 // isThreadDebugging(). This is called when a thread interrupts for
 // either session- or request-started, as these each signal the start
 // of debugging for request and other threads.
@@ -356,7 +356,7 @@ void Debugger::registerThread() {
   auto const tid = (int64_t)Process::GetThreadId();
   ThreadInfoMap::accessor acc;
   m_threadInfos.insert(acc, tid);
-  acc->second = &TI();
+  acc->second = &RI();
 }
 
 void Debugger::addOrUpdateSandbox(const DSandboxInfo &sandbox) {
@@ -395,7 +395,7 @@ void Debugger::registerSandbox(const DSandboxInfo &sandbox) {
 
   // add thread to m_sandboxThreadInfoMap
   const StringData* sid = makeStaticString(sandbox.id());
-  auto ti = &TI();
+  auto ti = &RI();
   {
     SandboxThreadInfoMap::accessor acc;
     m_sandboxThreadInfoMap.insert(acc, sid);
@@ -416,7 +416,7 @@ void Debugger::unregisterSandbox(const StringData* sandboxId) {
   TRACE(2, "Debugger::unregisterSandbox\n");
   SandboxThreadInfoMap::accessor acc;
   if (m_sandboxThreadInfoMap.find(acc, sandboxId)) {
-    acc->second.erase(&TI());
+    acc->second.erase(&RI());
   }
 }
 
@@ -425,7 +425,7 @@ void Debugger::unregisterSandbox(const StringData* sandboxId) {
   if (m_sandboxThreadInfoMap.find(acc, sid)) {                         \
     auto const& set = acc->second;                                     \
     for (auto ti : set) {                                              \
-      assertx(ThreadInfo::valid(ti));                                   \
+      assertx(RequestInfo::valid(ti));                                   \
 
 #define FOREACH_SANDBOX_THREAD_END()    } } }                          \
 

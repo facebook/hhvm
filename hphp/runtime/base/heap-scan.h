@@ -32,7 +32,7 @@
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/resource-data.h"
 #include "hphp/runtime/base/string-data.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 
 #include "hphp/runtime/ext/asio/asio-external-thread-event-queue.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"

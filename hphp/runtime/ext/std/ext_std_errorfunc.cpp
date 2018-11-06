@@ -27,7 +27,7 @@
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/util/logger.h"
@@ -195,7 +195,7 @@ bool HHVM_FUNCTION(error_log, const String& message, int message_type /* = 0 */,
 }
 
 int64_t HHVM_FUNCTION(error_reporting, const Variant& level /* = null */) {
-  auto& id = ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData;
+  auto& id = RequestInfo::s_requestInfo.getNoCheck()->m_reqInjectionData;
   int oldErrorReportingLevel = id.getErrorReportingLevel();
   if (!level.isNull()) {
     id.setErrorReportingLevel(level.toInt32());

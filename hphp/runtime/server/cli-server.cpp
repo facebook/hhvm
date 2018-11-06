@@ -139,7 +139,7 @@ way to determine how much progress the server made.
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/string-util.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-variant.h"

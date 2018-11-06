@@ -349,7 +349,7 @@ void CompletionsCommand::addMemberCompletions(
     return;
   }
 
-  RequestInfo* ri = m_debugger->getRequestInfo();
+  DebuggerRequestInfo* ri = m_debugger->getRequestInfo();
 
   // SilentEvaluationContext suppresses all error output during the evaluation,
   // and re-enables it when it is destroyed.

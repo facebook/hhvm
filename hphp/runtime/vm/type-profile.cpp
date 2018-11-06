@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
@@ -229,7 +229,7 @@ void profileRequestStart() {
   // profiling or live translations, but the request is allowed to execute
   // jitted code that is already there.
   bool okToJit = !forceInterp && !retranslateAllScheduled;
-  if (!ThreadInfo::s_threadInfo.isNull()) {
+  if (!RequestInfo::s_requestInfo.isNull()) {
     if (RID().isJittingDisabled()) {
       okToJit = false;
     } else if (!okToJit) {
@@ -268,7 +268,7 @@ void profileRequestStart() {
   // Force interpretation if needed.
   if (standardRequest == forceInterp) {
     standardRequest = !forceInterp;
-    if (!ThreadInfo::s_threadInfo.isNull()) {
+    if (!RequestInfo::s_requestInfo.isNull()) {
       RID().updateJit();
     }
   }

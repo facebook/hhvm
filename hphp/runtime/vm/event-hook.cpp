@@ -479,7 +479,7 @@ void EventHook::onFunctionEnter(const ActRec* ar, int funcType,
       sample.setInt("is_resume", isResume);
       logCommon(sample, ar, flags);
     }
-    auto profiler = ThreadInfo::s_threadInfo->m_profiler;
+    auto profiler = RequestInfo::s_requestInfo->m_profiler;
     if (profiler != nullptr &&
         !(profiler->shouldSkipBuiltins() && ar->func()->isBuiltin())) {
       begin_profiler_frame(profiler,
@@ -511,7 +511,7 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
 
   // Run callbacks only if it's safe to do so, i.e., not when
   // there's a pending exception or we're unwinding from a C++ exception.
-  if (ThreadInfo::s_threadInfo->m_pendingException == nullptr
+  if (RequestInfo::s_requestInfo->m_pendingException == nullptr
       && (!unwind || phpException)) {
 
     // Memory Threhsold
@@ -527,7 +527,7 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
 
   // User profiler
   if (flags & EventHookFlag) {
-    auto profiler = ThreadInfo::s_threadInfo->m_profiler;
+    auto profiler = RequestInfo::s_requestInfo->m_profiler;
     if (profiler != nullptr &&
         !(profiler->shouldSkipBuiltins() && ar->func()->isBuiltin())) {
       // NB: we don't have a function type flag to match what we got in
@@ -539,7 +539,7 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
     }
 
     if (shouldRunUserProfiler(ar->func())) {
-      if (ThreadInfo::s_threadInfo->m_pendingException != nullptr) {
+      if (RequestInfo::s_requestInfo->m_pendingException != nullptr) {
         // Avoid running PHP code when exception from destructor is pending.
         // TODO(#2329497) will not happen once CheckSurprise is used
       } else if (!unwind) {

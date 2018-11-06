@@ -17,7 +17,7 @@
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/heap-scan.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/base/weakref-data.h"
 #include "hphp/runtime/ext/weakref/weakref-data-handle.h"

@@ -97,7 +97,7 @@ bool RunToLocationCommand::executeImpl(DebuggerSession* session,
     );
   }
 
-  RequestInfo* ri = m_debugger->getRequestInfo();
+  DebuggerRequestInfo* ri = m_debugger->getRequestInfo();
   ri->m_runToLocationInfo.path = path;
   ri->m_runToLocationInfo.line = line;
 

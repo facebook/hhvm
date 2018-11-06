@@ -1076,7 +1076,7 @@ bool CurlResource::setNonCurlOption(long option, const Variant& value) {
 }
 
 inline int64_t minTimeoutImpl(int64_t timeout, int64_t multiple) {
-  auto info = ThreadInfo::s_threadInfo.getNoCheck();
+  auto info = RequestInfo::s_requestInfo.getNoCheck();
   auto& data = info->m_reqInjectionData;
   if (!data.getTimeout()) {
     return timeout;

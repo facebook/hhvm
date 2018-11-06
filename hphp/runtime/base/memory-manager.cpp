@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/stack-logger.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/sweepable.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/server/http-server.h"

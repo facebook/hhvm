@@ -194,13 +194,13 @@ void Debugger::setClientConnected(
       if (RuntimeOption::ServerExecutionMode() ||
           m_totalRequestCount.load() > 0) {
 
-        ThreadInfo::ExecutePerThread([this] (ThreadInfo* ti) {
+        RequestInfo::ExecutePerRequest([this] (RequestInfo* ti) {
           this->attachToRequest(ti);
         });
       }
 
       executeForEachAttachedRequest(
-        [&](ThreadInfo* ti, RequestInfo* ri) {
+        [&](RequestInfo* ti, DebuggerRequestInfo* ri) {
           if (ri->m_breakpointInfo == nullptr) {
             ri->m_breakpointInfo = new RequestBreakpointInfo();
           }
@@ -234,10 +234,10 @@ void Debugger::setClientConnected(
       // The client has detached. Walk through any requests we are currently
       // attached to and release them if they are blocked in the debugger.
       executeForEachAttachedRequest(
-        [&](ThreadInfo* ti, RequestInfo* ri) {
+        [&](RequestInfo* ti, DebuggerRequestInfo* ri) {
           // Clear any undelivered client messages in the request's command
           // queue, since they apply to the debugger session that just ended.
-          // NOTE: The request's RequestInfo will be cleaned up and freed when
+          // NOTE: The request's DebuggerRequestInfo will be cleaned up and freed when
           // the request completes in requestShutdown. It is not safe to do that
           // from this thread.
           ri->m_commandQueue.clearPendingMessages();
@@ -292,8 +292,8 @@ void Debugger::setClientInitialized() {
   // the debugger client initializes communication so that they appear in the
   // client side thread list.
   for (auto it = m_requestIdMap.begin(); it != m_requestIdMap.end(); it++) {
-    if (it->second->m_executing == ThreadInfo::Executing::UserFunctions ||
-        it->second->m_executing == ThreadInfo::Executing::RuntimeFunctions) {
+    if (it->second->m_executing == RequestInfo::Executing::UserFunctions ||
+        it->second->m_executing == RequestInfo::Executing::RuntimeFunctions) {
       sendThreadEventMessage(it->first, ThreadEventType::ThreadStarted);
     }
   }
@@ -306,7 +306,7 @@ request_id_t Debugger::getCurrentThreadId() {
     return kDummyTheadId;
   }
 
-  ThreadInfo* const threadInfo = &TI();
+  RequestInfo* const threadInfo = &RI();
   const auto it = m_requestInfoMap.find(threadInfo);
   if (it == m_requestInfoMap.end()) {
     return -1;
@@ -315,7 +315,7 @@ request_id_t Debugger::getCurrentThreadId() {
   return it->second;
 }
 
-void Debugger::cleanupRequestInfo(ThreadInfo* ti, RequestInfo* ri) {
+void Debugger::cleanupRequestInfo(RequestInfo* ti, DebuggerRequestInfo* ri) {
   std::atomic_thread_fence(std::memory_order_acquire);
   if (ti != nullptr && isDebuggerAttached(ti)) {
     DebuggerHook::detach(ti);
@@ -336,7 +336,7 @@ void Debugger::cleanupRequestInfo(ThreadInfo* ti, RequestInfo* ri) {
   delete ri;
 }
 
-void Debugger::cleanupServerObjectsForRequest(RequestInfo* ri) {
+void Debugger::cleanupServerObjectsForRequest(DebuggerRequestInfo* ri) {
   m_lock.assertOwnedBySelf();
 
   std::unordered_map<unsigned int, ServerObject*>& objs = ri->m_serverObjects;
@@ -360,7 +360,7 @@ void Debugger::cleanupServerObjectsForRequest(RequestInfo* ri) {
 }
 
 void Debugger::executeForEachAttachedRequest(
-  std::function<void(ThreadInfo* ti, RequestInfo* ri)> callback,
+  std::function<void(RequestInfo* ti, DebuggerRequestInfo* ri)> callback,
   bool includeDummyRequest
 ) {
   m_lock.assertOwnedBySelf();
@@ -371,7 +371,7 @@ void Debugger::executeForEachAttachedRequest(
   }
 
   if (includeDummyRequest) {
-    RequestInfo* dummyRequestInfo = getDummyRequestInfo();
+    DebuggerRequestInfo* dummyRequestInfo = getDummyRequestInfo();
     if (dummyRequestInfo != nullptr) {
       callback(nullptr, dummyRequestInfo);
     }
@@ -381,7 +381,7 @@ void Debugger::executeForEachAttachedRequest(
 void Debugger::getAllThreadInfo(folly::dynamic& threads) {
   assertx(threads.isArray());
   executeForEachAttachedRequest(
-    [&](ThreadInfo* ti, RequestInfo* ri) {
+    [&](RequestInfo* ti, DebuggerRequestInfo* ri) {
       threads.push_back(folly::dynamic::object);
       folly::dynamic& threadInfo = threads[threads.size() - 1];
 
@@ -515,7 +515,7 @@ void Debugger::sendEventMessage(
   // request is sent, except in the case where we're hitting a nested breakpoint
   // during an evaluation: that we must send immediately because the evaluation
   // response won't happen until the client resumes from the inner breakpoint.
-  RequestInfo* ri = getRequestInfo();
+  DebuggerRequestInfo* ri = getRequestInfo();
   if (ri != nullptr &&
       (ri->m_evaluateCommandDepth > 0 || ri-> m_pauseRecurseCount > 0)) {
 
@@ -574,9 +574,9 @@ void Debugger::requestInit() {
     return;
   }
 
-  ThreadInfo* const threadInfo = &TI();
+  RequestInfo* const threadInfo = &RI();
   bool pauseRequest;
-  RequestInfo* requestInfo;
+  DebuggerRequestInfo* requestInfo;
 
   bool dummy = isDummyRequest();
 
@@ -603,7 +603,7 @@ void Debugger::requestInit() {
   }
 }
 
-void Debugger::enterDebuggerIfPaused(RequestInfo* requestInfo) {
+void Debugger::enterDebuggerIfPaused(DebuggerRequestInfo* requestInfo) {
   Lock lock(m_lock);
 
   if (!clientConnected() && VSDebugExtension::s_launchMode) {
@@ -650,7 +650,7 @@ void Debugger::enterDebuggerIfPaused(RequestInfo* requestInfo) {
 
 void Debugger::processCommandQueue(
   request_id_t threadId,
-  RequestInfo* requestInfo,
+  DebuggerRequestInfo* requestInfo,
   const char* reason,
   const char* displayReason,
   bool focusedThread,
@@ -713,8 +713,8 @@ void Debugger::processCommandQueue(
   m_resumeCondition.notify_all();
 }
 
-RequestInfo* Debugger::createRequestInfo() {
-  RequestInfo* requestInfo = new RequestInfo();
+DebuggerRequestInfo* Debugger::createRequestInfo() {
+  DebuggerRequestInfo* requestInfo = new DebuggerRequestInfo();
   if (requestInfo == nullptr) {
     // Failed to allocate request info.
     VSDebugLogger::Log(
@@ -757,10 +757,10 @@ request_id_t Debugger::nextThreadId() {
   return threadId;
 }
 
-RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
+DebuggerRequestInfo* Debugger::attachToRequest(RequestInfo* ti) {
   m_lock.assertOwnedBySelf();
 
-  RequestInfo* requestInfo = nullptr;
+  DebuggerRequestInfo* requestInfo = nullptr;
 
   request_id_t threadId;
   auto it = m_requests.find(ti);
@@ -806,8 +806,8 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
   requestInfo->m_flags.outputHooked = false;
   ti->m_reqInjectionData.setDebuggerIntr(true);
 
-  if (ti->m_executing == ThreadInfo::Executing::UserFunctions ||
-      ti->m_executing == ThreadInfo::Executing::RuntimeFunctions) {
+  if (ti->m_executing == RequestInfo::Executing::UserFunctions ||
+      ti->m_executing == RequestInfo::Executing::RuntimeFunctions) {
     sendThreadEventMessage(threadId, ThreadEventType::ThreadStarted);
   }
 
@@ -848,8 +848,8 @@ RequestInfo* Debugger::attachToRequest(ThreadInfo* ti) {
 }
 
 void Debugger::requestShutdown() {
-  auto const threadInfo = &TI();
-  RequestInfo* requestInfo = nullptr;
+  auto const threadInfo = &RI();
+  DebuggerRequestInfo* requestInfo = nullptr;
   request_id_t threadId = -1;
 
   SCOPE_EXIT {
@@ -889,7 +889,7 @@ void Debugger::requestShutdown() {
   }
 }
 
-RequestInfo* Debugger::getDummyRequestInfo() {
+DebuggerRequestInfo* Debugger::getDummyRequestInfo() {
   m_lock.assertOwnedBySelf();
   if (!clientConnected()) {
     return nullptr;
@@ -898,7 +898,7 @@ RequestInfo* Debugger::getDummyRequestInfo() {
   return m_session->m_dummyRequestInfo;
 }
 
-RequestInfo* Debugger::getRequestInfo(request_id_t threadId /* = -1 */) {
+DebuggerRequestInfo* Debugger::getRequestInfo(request_id_t threadId /* = -1 */) {
   Lock lock(m_lock);
 
   if (threadId != -1) {
@@ -920,7 +920,7 @@ RequestInfo* Debugger::getRequestInfo(request_id_t threadId /* = -1 */) {
       return getDummyRequestInfo();
     }
 
-    auto it = m_requests.find(&TI());
+    auto it = m_requests.find(&RI());
     if (it != m_requests.end()) {
       return it->second;
     }
@@ -1046,7 +1046,7 @@ void Debugger::resumeTarget() {
   // Resume every paused request. Each request will send a thread continued
   // event when it exits its command loop.
   executeForEachAttachedRequest(
-    [&](ThreadInfo* ti, RequestInfo* ri) {
+    [&](RequestInfo* ti, DebuggerRequestInfo* ri) {
       ri->m_stepReason = nullptr;
 
       if (ri->m_pauseRecurseCount > 0) {
@@ -1061,7 +1061,7 @@ void Debugger::resumeTarget() {
 }
 
 Debugger::PrepareToPauseResult
-Debugger::prepareToPauseTarget(RequestInfo* requestInfo) {
+Debugger::prepareToPauseTarget(DebuggerRequestInfo* requestInfo) {
   m_lock.assertOwnedBySelf();
 
   if (m_state == ProgramState::Paused && isStepInProgress(requestInfo)) {
@@ -1129,7 +1129,7 @@ Debugger::prepareToPauseTarget(RequestInfo* requestInfo) {
   return clientConnected() ? ReadyToPause : ErrorNoClient;
 }
 
-void Debugger::pauseTarget(RequestInfo* ri, const char* stopReason) {
+void Debugger::pauseTarget(DebuggerRequestInfo* ri, const char* stopReason) {
   m_lock.assertOwnedBySelf();
 
   m_state = ProgramState::Paused;
@@ -1147,7 +1147,7 @@ void Debugger::dispatchCommandToRequest(
 ) {
   m_lock.assertOwnedBySelf();
 
-  RequestInfo* ri = nullptr;
+  DebuggerRequestInfo* ri = nullptr;
   if (requestId == kDummyTheadId) {
     ri = getDummyRequestInfo();
   } else {
@@ -1282,7 +1282,7 @@ void Debugger::onClientMessage(folly::dynamic& message) {
       case CommandTarget::Request:
         // Dispatch this command to the correct request.
         {
-          RequestInfo* ri = nullptr;
+          DebuggerRequestInfo* ri = nullptr;
           const auto threadId = command->targetThreadId(m_session);
           if (threadId == kDummyTheadId) {
             ri = getDummyRequestInfo();
@@ -1395,7 +1395,7 @@ void Debugger::onBreakpointAdded(int bpId) {
   // request thread by interrupting it. It will install the bp when it
   // calls into the command hook on the next Hack opcode.
   executeForEachAttachedRequest(
-    [&](ThreadInfo* ti, RequestInfo* ri) {
+    [&](RequestInfo* ti, DebuggerRequestInfo* ri) {
       if (ti != nullptr) {
         ti->m_reqInjectionData.setDebuggerIntr(true);
       }
@@ -1409,7 +1409,7 @@ void Debugger::onBreakpointAdded(int bpId) {
       // opcode hook. Ask it to resolve the breakpoint.
       //
       // Per contract with executeForEachAttachedRequest, ti == nullptr if and
-      // only if RequestInfo points to the dummy's request info.
+      // only if DebuggerRequestInfo points to the dummy's request info.
       if (m_state != ProgramState::Running || ti == nullptr) {
         const auto cmd = ResolveBreakpointsCommand::createInstance(this);
         ri->m_commandQueue.dispatchCommand(cmd);
@@ -1419,7 +1419,7 @@ void Debugger::onBreakpointAdded(int bpId) {
   );
 }
 
-void Debugger::tryInstallBreakpoints(RequestInfo* ri) {
+void Debugger::tryInstallBreakpoints(DebuggerRequestInfo* ri) {
   Lock lock(m_lock);
 
   if (!clientConnected()) {
@@ -1523,7 +1523,7 @@ void Debugger::tryInstallBreakpoints(RequestInfo* ri) {
 }
 
 bool Debugger::tryResolveBreakpoint(
-  RequestInfo* ri,
+  DebuggerRequestInfo* ri,
   const int bpId,
   const Breakpoint* bp
 ) {
@@ -1563,7 +1563,7 @@ bool Debugger::tryResolveBreakpoint(
   return false;
 }
 
-bool Debugger::tryResolveBreakpointInUnit(const RequestInfo* /*ri*/, int bpId,
+bool Debugger::tryResolveBreakpointInUnit(const DebuggerRequestInfo* /*ri*/, int bpId,
                                           const Breakpoint* bp,
                                           const std::string& unitFilePath,
                                           const HPHP::Unit* compilationUnit) {
@@ -1719,7 +1719,7 @@ std::pair<int, int> Debugger::calibrateBreakpointLineInUnit(
 }
 
 void Debugger::onFunctionDefined(
-  RequestInfo* ri,
+  DebuggerRequestInfo* ri,
   const Func* func,
   const std::string& funcName
 ) {
@@ -1752,7 +1752,7 @@ void Debugger::onFunctionDefined(
 }
 
 void Debugger::onCompilationUnitLoaded(
-  RequestInfo* ri,
+  DebuggerRequestInfo* ri,
   const HPHP::Unit* compilationUnit
 ) {
   Lock lock(m_lock);
@@ -1824,7 +1824,7 @@ void Debugger::onFuncIntercepted(std::string funcName) {
 }
 
 void Debugger::onFuncBreakpointHit(
-  RequestInfo* ri,
+  DebuggerRequestInfo* ri,
   const HPHP::Func* func
 ) {
   Lock lock(m_lock);
@@ -1835,7 +1835,7 @@ void Debugger::onFuncBreakpointHit(
 }
 
 void Debugger::onLineBreakpointHit(
-  RequestInfo* ri,
+  DebuggerRequestInfo* ri,
   const HPHP::Unit* compilationUnit,
   int line
 ) {
@@ -1844,7 +1844,7 @@ void Debugger::onLineBreakpointHit(
 }
 
 void Debugger::onBreakpointHit(
-  RequestInfo* ri,
+  DebuggerRequestInfo* ri,
   const HPHP::Unit* compilationUnit,
   const HPHP::Func* func,
   int line
@@ -1953,7 +1953,7 @@ void Debugger::onBreakpointHit(
 }
 
 void Debugger::onExceptionBreakpointHit(
-  RequestInfo* ri,
+  DebuggerRequestInfo* ri,
   const std::string& exceptionName,
   const std::string& exceptionMsg
 ) {
@@ -2011,7 +2011,7 @@ bool Debugger::onHardBreak() {
 
   Lock lock(m_lock);
   VMRegAnchor regAnchor;
-  RequestInfo* ri = getRequestInfo();
+  DebuggerRequestInfo* ri = getRequestInfo();
 
   if (ri == nullptr) {
     return false;
@@ -2075,7 +2075,7 @@ void Debugger::onAsyncBreak() {
   }
 }
 
-void Debugger::onError(RequestInfo* requestInfo,
+void Debugger::onError(DebuggerRequestInfo* requestInfo,
                        const ExtendedException& /*extendedException*/,
                        int errnum, const std::string& message) {
   const char* phpError;
@@ -2148,7 +2148,7 @@ std::string Debugger::getStopReasonForBp(
 
 void Debugger::interruptAllThreads() {
   executeForEachAttachedRequest(
-    [&](ThreadInfo* ti, RequestInfo* ri) {
+    [&](RequestInfo* ti, DebuggerRequestInfo* ri) {
       assertx(ti != nullptr);
       ti->m_reqInjectionData.setDebuggerIntr(true);
     },
@@ -2184,7 +2184,7 @@ operator()(const char*, const char* msg, const char* /*ending*/
 
 SilentEvaluationContext::SilentEvaluationContext(
   Debugger* debugger,
-  RequestInfo* ri,
+  DebuggerRequestInfo* ri,
   bool suppressOutput /* = true */
 ) : m_ri(ri), m_suppressOutput(suppressOutput) {
   // Disable hitting breaks of any kind due to this eval.

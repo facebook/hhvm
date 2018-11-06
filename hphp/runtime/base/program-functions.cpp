@@ -614,7 +614,7 @@ void handle_destructor_exception(const char* situation) {
     throw;
   } catch (ExitException& e) {
     // ExitException is fine, no need to show a warning.
-    TI().setPendingException(e.clone());
+    RI().setPendingException(e.clone());
     return;
   } catch (Object &e) {
     // For user exceptions, invoke the user exception handler
@@ -627,7 +627,7 @@ void handle_destructor_exception(const char* situation) {
       errorMsg += "(unable to call toString())";
     }
   } catch (Exception& e) {
-    TI().setPendingException(e.clone());
+    RI().setPendingException(e.clone());
     errorMsg = situation;
     errorMsg += " raised a fatal error: ";
     errorMsg += e.what();
@@ -783,7 +783,7 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   Eval::Debugger::InterruptPSPEnded(program);
   hphp_context_exit();
   hphp_session_exit();
-  auto& ti = TI();
+  auto& ti = RI();
   if (coverage && ti.m_reqInjectionData.getCoverage() &&
       !RuntimeOption::CodeCoverageOutputFile.empty()) {
     ti.m_coverage->Report(RuntimeOption::CodeCoverageOutputFile);
@@ -2271,15 +2271,15 @@ void hphp_thread_init() {
   get_server_note();
   tl_heap.getCheck()->init();
 
-  assertx(ThreadInfo::s_threadInfo.isNull());
-  ThreadInfo::s_threadInfo.getCheck()->init();
+  assertx(RequestInfo::s_requestInfo.isNull());
+  RequestInfo::s_requestInfo.getCheck()->init();
 
   HardwareCounter::s_counter.getCheck();
   ExtensionRegistry::threadInit();
   InitFiniNode::ThreadInit();
 
   // Ensure that there's no request-allocated memory. This call must happen at
-  // least once after RDS has been initialized by ThreadInfo::init(), to ensure
+  // least once after RDS has been initialized to ensure
   // MemoryManager::resetGC() sets a proper trigger threshold.
   hphp_memory_cleanup();
 }
@@ -2288,6 +2288,7 @@ void hphp_thread_exit() {
   InitFiniNode::ThreadFini();
   ExtensionRegistry::threadShutdown();
   if (!g_context.isNull()) g_context.destroy();
+  rds::threadExit();
 #if USE_JEMALLOC_EXTENT_HOOKS
   high_arena_tcache_destroy();
 #endif
@@ -2591,7 +2592,7 @@ void hphp_session_init(Treadmill::SessionKind session_kind,
   g_context.getCheck();
   AsioSession::Init();
   Socket::clearLastError();
-  TI().onSessionInit();
+  RI().onSessionInit();
   tl_heap->resetExternalStats();
 
   g_thread_safe_locale_handler->reset();
@@ -2859,7 +2860,7 @@ void hphp_session_exit(Transport* transport) {
   // finishes.
   Treadmill::finishRequest();
 
-  TI().onSessionExit();
+  RI().onSessionExit();
 
   // We might have events from after the final surprise flag check of the
   // request, so consume them here.

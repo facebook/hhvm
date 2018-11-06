@@ -59,7 +59,7 @@ request_id_t EvaluateCommand::targetThreadId(DebuggerSession* session) {
 
 ExecutionContext::EvaluationResult evaluate(
   Debugger* debugger,
-  RequestInfo* ri,
+  DebuggerRequestInfo* ri,
   HPHP::Unit* unit,
   int frameDepth,
   bool silent
@@ -98,7 +98,7 @@ bool EvaluateCommand::executeImpl(
   const int previousErrorLevel = rid.getErrorReportingLevel();
   rid.setErrorReportingLevel(0);
 
-  RequestInfo* ri = m_debugger->getRequestInfo();
+  DebuggerRequestInfo* ri = m_debugger->getRequestInfo();
   assertx(ri->m_evaluateCommandDepth >= 0);
   ri->m_evaluateCommandDepth++;
 

@@ -114,7 +114,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   }
   ++m_requestsSinceReset;
 
-  ExecutionProfiler ep(ThreadInfo::RuntimeFunctions);
+  ExecutionProfiler ep(RequestInfo::RuntimeFunctions);
 
   Logger::OnNewRequest();
   GetAccessLog().onNewRequest();
@@ -196,7 +196,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
     return;
   }
 
-  auto& reqData = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  auto& reqData = RequestInfo::s_requestInfo->m_reqInjectionData;
   reqData.setTimeout(vhost->getRequestTimeoutSeconds(getDefaultTimeout()));
   SCOPE_EXIT {
     reqData.setTimeout(0);  // can't throw when you pass zero

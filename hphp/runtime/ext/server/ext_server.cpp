@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/pagelet-server.h"
@@ -92,7 +92,7 @@ Resource HHVM_FUNCTION(pagelet_server_task_start,
   // If a non-zero timeout is requested, use it and cap it at the remaining
   // request time.
   int remaining_time =
-    ThreadInfo::s_threadInfo->m_reqInjectionData.getRemainingTime();
+    RequestInfo::s_requestInfo->m_reqInjectionData.getRemainingTime();
   int timeout = desired_timeout > 0 && desired_timeout <= remaining_time
     ? desired_timeout
     : remaining_time;

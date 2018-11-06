@@ -325,7 +325,7 @@ static String HHVM_FUNCTION(get_include_path) {
 }
 
 static void HHVM_FUNCTION(restore_include_path) {
-  auto path = ThreadInfo::s_threadInfo.getNoCheck()->
+  auto path = RequestInfo::s_requestInfo.getNoCheck()->
     m_reqInjectionData.getDefaultIncludePath();
   IniSetting::SetUser("include_path", path);
 }
@@ -1065,7 +1065,7 @@ static bool HHVM_FUNCTION(putenv, const String& setting) {
 }
 
 static void HHVM_FUNCTION(set_time_limit, int64_t seconds) {
-  ThreadInfo *info = ThreadInfo::s_threadInfo.getNoCheck();
+  RequestInfo *info = RequestInfo::s_requestInfo.getNoCheck();
   RequestInjectionData &data = info->m_reqInjectionData;
   if (RuntimeOption::TimeoutsUseWallTime) {
     data.setTimeout(seconds);

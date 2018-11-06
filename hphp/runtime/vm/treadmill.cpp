@@ -30,7 +30,7 @@
 #include <folly/portability/SysTime.h>
 
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
@@ -58,7 +58,7 @@ namespace {
 
 const int64_t ONE_SEC_IN_MICROSEC = 1000000;
 
-struct RequestInfo {
+struct TreadmillRequestInfo {
   GenCount  startTime;
   pthread_t pthreadId;
   SessionKind sessionKind;
@@ -66,7 +66,7 @@ struct RequestInfo {
 
 pthread_mutex_t s_genLock = PTHREAD_MUTEX_INITIALIZER;
 const GenCount kIdleGenCount = 0; // not processing any requests.
-std::vector<RequestInfo> s_inflightRequests;
+std::vector<TreadmillRequestInfo> s_inflightRequests;
 GenCount s_latestCount = 0;
 std::atomic<GenCount> s_oldestRequestInFlight(0);
 
@@ -192,9 +192,9 @@ void startRequest(SessionKind session_kind) {
     if (s_oldestRequestInFlight.load(std::memory_order_relaxed) == 0) {
       s_oldestRequestInFlight = s_inflightRequests[threadIdx].startTime;
     }
-    if (!ThreadInfo::s_threadInfo.isNull()) {
-      TI().changeGlobalGCStatus(ThreadInfo::Idle,
-                                ThreadInfo::OnRequestWithNoPendingExecution);
+    if (!RequestInfo::s_requestInfo.isNull()) {
+      RI().changeGlobalGCStatus(RequestInfo::Idle,
+                                RequestInfo::OnRequestWithNoPendingExecution);
     }
   }
 }
@@ -239,24 +239,24 @@ void finishRequest() {
       }
     }
     constexpr int limit = 100;
-    if (!ThreadInfo::s_threadInfo.isNull()) {
+    if (!RequestInfo::s_requestInfo.isNull()) {
       // If somehow we excessed the limit, GlobalGCTrigger will stay on
       // "Triggering" stage forever. No more global GC can be triggered.
       // But it should have no effect on APC GC -- The data will be freed
       // by treadmill's calling
       int i;
       for (i = 0; i < limit; ++i) {
-        if (TI().changeGlobalGCStatus(
-              ThreadInfo::OnRequestWithPendingExecution,
-              ThreadInfo::Idle)) {
+        if (RI().changeGlobalGCStatus(
+              RequestInfo::OnRequestWithPendingExecution,
+              RequestInfo::Idle)) {
           // Call globalGCTrigger to Run the pending execution
           // TODO(20074509)
           FTRACE(2, "treadmill executes pending global GC callbacks\n");
           break;
         }
-        if (TI().changeGlobalGCStatus(
-              ThreadInfo::OnRequestWithNoPendingExecution,
-              ThreadInfo::Idle)) {
+        if (RI().changeGlobalGCStatus(
+              RequestInfo::OnRequestWithNoPendingExecution,
+              RequestInfo::Idle)) {
           break;
         }
       }

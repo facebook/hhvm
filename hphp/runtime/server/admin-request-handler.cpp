@@ -1264,11 +1264,11 @@ bool AdminRequestHandler::handleStatsRequest(const std::string &cmd,
 bool AdminRequestHandler::handleProfileRequest(const std::string &cmd,
                                                Transport *transport) {
   if (cmd == "prof-exe") {
-    std::map<ThreadInfo::Executing, int> counts;
-    ThreadInfo::GetExecutionSamples(counts);
+    std::map<RequestInfo::Executing, int> counts;
+    RequestInfo::GetExecutionSamples(counts);
 
     string res = "[ ";
-    for (std::map<ThreadInfo::Executing, int>::const_iterator iter =
+    for (std::map<RequestInfo::Executing, int>::const_iterator iter =
            counts.begin(); iter != counts.end(); ++iter) {
       res += folly::to<string>(iter->first) + ", " +
         folly::to<string>(iter->second) + ", ";

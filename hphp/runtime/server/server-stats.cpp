@@ -880,7 +880,7 @@ void ServerStatsHelper::logTime(const std::string& prefix,
 IOStatusHelper::IOStatusHelper(const char *name,
                                const char *address /* = NULL */,
                                int port /* = 0 */)
-    : m_exeProfiler(ThreadInfo::NetworkIO) {
+    : m_exeProfiler(RequestInfo::NetworkIO) {
   assertx(name && *name);
 
   if (ServerStats::s_profile_network ||

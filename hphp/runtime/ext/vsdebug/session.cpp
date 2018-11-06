@@ -305,7 +305,7 @@ unsigned int DebuggerSession::generateScopeId(
   ScopeType scopeType
 ) {
   unsigned int objectId;
-  RequestInfo* ri = m_debugger->getRequestInfo();
+  DebuggerRequestInfo* ri = m_debugger->getRequestInfo();
   auto& existingScopes = ri->m_scopeIds;
   auto it = existingScopes.find((int)scopeType);
   if (it != existingScopes.end()) {
@@ -361,7 +361,7 @@ unsigned int DebuggerSession::generateOrReuseVariableId(
   // Generate a new object ID if we haven't seen this variant before. Ensure
   // IDs are stable for variants that contain objects or arrays, based on the
   // address of the object to which they point.
-  RequestInfo* ri = m_debugger->getRequestInfo();
+  DebuggerRequestInfo* ri = m_debugger->getRequestInfo();
   const auto options = m_debugger->getDebuggerOptions();
 
   void* key = nullptr;
@@ -413,7 +413,7 @@ void DebuggerSession::registerRequestObject(
   unsigned int objectId,
   ServerObject* obj
 ) {
-  RequestInfo* ri = m_debugger->getRequestInfo();
+  DebuggerRequestInfo* ri = m_debugger->getRequestInfo();
 
   // Add this object to the per-request list of objects.
   auto& objs = ri->m_serverObjects;

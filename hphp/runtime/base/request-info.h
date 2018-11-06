@@ -13,14 +13,14 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#ifndef incl_HPHP_THREAD_INFO_H_
-#define incl_HPHP_THREAD_INFO_H_
+#ifndef incl_HPHP_REQUEST_INFO_H_
+#define incl_HPHP_REQUEST_INFO_H_
 
 #include <cinttypes>
 #include <map>
 #include <functional>
 
-#include "hphp/util/thread-local.h"
+#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/surprise-flags.h"
 
@@ -34,7 +34,7 @@ struct c_WaitableWaitHandle;
 
 //////////////////////////////////////////////////////////////////////
 
-struct ThreadInfo {
+struct RequestInfo {
   enum Executing {
     Idling,
     RuntimeFunctions,
@@ -45,8 +45,8 @@ struct ThreadInfo {
   /*
    * Set to Idle when Treadmill::finishRequest().
    * Set to OnRequestWithNoPendingExecution when Treadmill::startRequest()
-   * If SetPendingGCForAllOnRequestThread() get called,
-   * set to OnRequestWithPendingExecution for each on-request thread
+   * If SetPendingGCForAllOnRequest() get called,
+   * set to OnRequestWithPendingExecution for each on-request context
    */
   enum GlobalGCStatus {
     Idle,
@@ -55,13 +55,13 @@ struct ThreadInfo {
   };
 
   static void GetExecutionSamples(std::map<Executing, int>& counts);
-  static void ExecutePerThread(std::function<void(ThreadInfo*)> f);
+  static void ExecutePerRequest(std::function<void(RequestInfo*)> f);
   /*
-   * Only on-request threads should set up PendingGCFlag
-   * Returns number of on-request threads
+   * Only on-request contexts should set up PendingGCFlag
+   * Returns number of on-request contexts.
    */
-  static int SetPendingGCForAllOnRequestThread();
-  static THREAD_LOCAL_NO_CHECK(ThreadInfo, s_threadInfo);
+  static int SetPendingGCForAllOnRequest();
+  static RDS_LOCAL_NO_CHECK(RequestInfo, s_requestInfo);
 
   /*
    * Actively kill inflight requests when memory is tight.  Some or all ongoing
@@ -78,7 +78,7 @@ struct ThreadInfo {
 
   /*
    * Since this is often used as a static global, we want to do anything that
-   * might try to access ThreadInfo::s_threadInfo here instead of in the
+   * might try to access RequestInfo::s_requestInfo here instead of in the
    * constructor.
    */
   void init();
@@ -98,10 +98,10 @@ struct ThreadInfo {
    */
   void setPendingException(Exception*);
 
-  static bool valid(ThreadInfo*);
+  static bool valid(RequestInfo*);
 
-  ThreadInfo();
-  ~ThreadInfo();
+  RequestInfo();
+  ~RequestInfo();
 
   ////////////////////////////////////////////////////////////////////
 
@@ -127,15 +127,15 @@ private:
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Access to the running thread's ThreadInfo and RequestInjectionData.
+ * Access to the running requests's RequestInfo and RequestInjectionData.
  */
 
-inline ThreadInfo& TI() {
-  return *ThreadInfo::s_threadInfo;
+inline RequestInfo& RI() {
+  return *RequestInfo::s_requestInfo;
 }
 
 inline RequestInjectionData& RID() {
-  return TI().m_reqInjectionData;
+  return RI().m_reqInjectionData;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -150,7 +150,7 @@ inline void* stack_top_ptr() {
 NEVER_INLINE void* stack_top_ptr_conservative();
 
 inline bool stack_in_bounds() {
-  return uintptr_t(stack_top_ptr()) >= s_stackLimit + ThreadInfo::StackSlack;
+  return uintptr_t(stack_top_ptr()) >= s_stackLimit + RequestInfo::StackSlack;
 }
 
 /*

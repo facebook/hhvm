@@ -1107,7 +1107,7 @@ String resolve_include(const String& file, const char* currentDir,
     }
 
   } else {
-    if (!ThreadInfo::s_threadInfo.isNull()) {
+    if (!RequestInfo::s_requestInfo.isNull()) {
       auto const& includePaths = RID().getIncludePaths();
 
       for (auto const& includePath : includePaths) {

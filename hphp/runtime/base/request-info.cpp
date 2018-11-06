@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 
 #include <map>
 #include <set>
@@ -44,57 +44,56 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Set of all ThreadInfos for the running process.
+ * Set of all RequestInfos for the running process.
  */
-std::set<ThreadInfo*> s_thread_infos;
-Mutex s_thread_info_mutex;
+std::set<RequestInfo*> s_request_infos;
+Mutex s_request_info_mutex;
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-THREAD_LOCAL_NO_CHECK(ThreadInfo, ThreadInfo::s_threadInfo);
+RDS_LOCAL_NO_CHECK(RequestInfo, RequestInfo::s_requestInfo);
 
-ThreadInfo::ThreadInfo() {
+RequestInfo::RequestInfo() {
   m_coverage = new CodeCoverage();
 }
 
-ThreadInfo::~ThreadInfo() {
-  Lock lock(s_thread_info_mutex);
-  s_thread_infos.erase(this);
+RequestInfo::~RequestInfo() {
+  Lock lock(s_request_info_mutex);
+  s_request_infos.erase(this);
   delete m_coverage;
-  rds::threadExit();
 }
 
-void ThreadInfo::init() {
+void RequestInfo::init() {
   m_reqInjectionData.threadInit();
   onSessionInit();
   // TODO(20427335): Get rid of the illogical onSessionInit() call above.
-  Lock lock(s_thread_info_mutex);
-  s_thread_infos.insert(this);
+  Lock lock(s_request_info_mutex);
+  s_request_infos.insert(this);
 }
 
-bool ThreadInfo::valid(ThreadInfo* info) {
-  Lock lock(s_thread_info_mutex);
-  return s_thread_infos.find(info) != s_thread_infos.end();
+bool RequestInfo::valid(RequestInfo* info) {
+  Lock lock(s_request_info_mutex);
+  return s_request_infos.find(info) != s_request_infos.end();
 }
 
-void ThreadInfo::GetExecutionSamples(std::map<Executing, int>& counts) {
-  Lock lock(s_thread_info_mutex);
-  for (auto const info : s_thread_infos) {
+void RequestInfo::GetExecutionSamples(std::map<Executing, int>& counts) {
+  Lock lock(s_request_info_mutex);
+  for (auto const info : s_request_infos) {
     ++counts[info->m_executing];
   }
 }
 
-void ThreadInfo::ExecutePerThread(std::function<void(ThreadInfo*)> f) {
-  Lock lock(s_thread_info_mutex);
-  for (auto thread : s_thread_infos) {
-    f(thread);
+void RequestInfo::ExecutePerRequest(std::function<void(RequestInfo*)> f) {
+  Lock lock(s_request_info_mutex);
+  for (auto request_info : s_request_infos) {
+    f(request_info);
   }
 }
 
-int ThreadInfo::SetPendingGCForAllOnRequestThread() {
+int RequestInfo::SetPendingGCForAllOnRequest() {
   int cnt = 0;
-  ExecutePerThread( [&cnt](ThreadInfo* t) {
+  ExecutePerRequest( [&cnt](RequestInfo* t) {
     if ( t->changeGlobalGCStatus(OnRequestWithNoPendingExecution,
                                  OnRequestWithPendingExecution)) {
       t->m_reqInjectionData.setFlag(PendingGCFlag);
@@ -104,9 +103,9 @@ int ThreadInfo::SetPendingGCForAllOnRequestThread() {
   return cnt;
 }
 
-void ThreadInfo::InvokeOOMKiller() {
-  ExecutePerThread(
-    [] (ThreadInfo* t) {
+void RequestInfo::InvokeOOMKiller() {
+  ExecutePerRequest(
+    [] (RequestInfo* t) {
       t->m_reqInjectionData.setHostOOMFlag();
     }
   );
@@ -117,15 +116,15 @@ void ThreadInfo::InvokeOOMKiller() {
   OOMKillerInvokeCounter->addValue(1);
 }
 
-void ThreadInfo::onSessionInit() {
+void RequestInfo::onSessionInit() {
   m_reqInjectionData.onSessionInit();
 }
 
-bool ThreadInfo::changeGlobalGCStatus(GlobalGCStatus from, GlobalGCStatus to) {
+bool RequestInfo::changeGlobalGCStatus(GlobalGCStatus from, GlobalGCStatus to) {
   return m_globalGCStatus.compare_exchange_strong(from, to);
 }
 
-void ThreadInfo::setPendingException(Exception* e) {
+void RequestInfo::setPendingException(Exception* e) {
   m_reqInjectionData.setFlag(PendingExceptionFlag);
 
   auto tmp = m_pendingException;
@@ -133,7 +132,7 @@ void ThreadInfo::setPendingException(Exception* e) {
   delete tmp;
 }
 
-void ThreadInfo::onSessionExit() {
+void RequestInfo::onSessionExit() {
   // Clear any timeout handlers to they don't fire when the request has already
   // been destroyed.
   m_reqInjectionData.setTimeout(0);
@@ -158,7 +157,7 @@ void ThreadInfo::onSessionExit() {
 void raise_infinite_recursion_error() {
   if (!RuntimeOption::NoInfiniteRecursionDetection) {
     // Reset profiler otherwise it might recurse further causing segfault.
-    TI().m_profiler = nullptr;
+    RI().m_profiler = nullptr;
     raise_error("infinite recursion detected");
   }
 }
@@ -236,13 +235,13 @@ static bool callbacksOk() {
 
 size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
   NoHandleSurpriseScope::AssertNone(static_cast<SurpriseFlag>(mask));
-  auto& info = TI();
+  auto& info = RI();
   auto& p = info.m_reqInjectionData;
 
   auto flags = fetchAndClearSurpriseFlags() & mask;
   auto const debugging = p.getDebuggerAttached();
 
-  // Start with any pending exception that might be on the thread.
+  // Start with any pending exception that might be on the request.
   auto pendingException = info.m_pendingException;
   info.m_pendingException = nullptr;
 

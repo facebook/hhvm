@@ -31,7 +31,7 @@ namespace VSDEBUG {
 
 struct Debugger;
 struct ClientPreferences;
-struct RequestInfo;
+struct DebuggerRequestInfo;
 
 enum BreakpointType {
   Source,
@@ -180,7 +180,7 @@ struct BreakpointManager {
   const std::unordered_set<int> getFunctionBreakpoints() const;
 
   bool isBreakConditionSatisified(
-    RequestInfo* ri,
+    DebuggerRequestInfo* ri,
     Breakpoint* bp
   );
 

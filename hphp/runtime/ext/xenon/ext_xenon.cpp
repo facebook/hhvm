@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/surprise-flags.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -247,8 +247,8 @@ void Xenon::onTimer() {
 // passed to ExecutePerThread.
 void Xenon::surpriseAll() {
   TRACE(1, "Xenon::surpriseAll\n");
-  ThreadInfo::ExecutePerThread(
-    [] (ThreadInfo* t) { t->m_reqInjectionData.setFlag(XenonSignalFlag); }
+  RequestInfo::ExecutePerRequest(
+    [] (RequestInfo* t) { t->m_reqInjectionData.setFlag(XenonSignalFlag); }
   );
 }
 

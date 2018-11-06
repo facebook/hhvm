@@ -19,7 +19,7 @@
 
 #include <functional>
 
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -41,8 +41,8 @@ struct Func;
 struct ObjectData;
 
 // Is this thread being debugged?
-inline bool isDebuggerAttached(ThreadInfo* ti = nullptr) {
-  ti = (ti != nullptr) ? ti : &TI();
+inline bool isDebuggerAttached(RequestInfo* ti = nullptr) {
+  ti = (ti != nullptr) ? ti : &RI();
   return ti->m_reqInjectionData.getDebuggerAttached();
 }
 
@@ -79,8 +79,8 @@ struct DebuggerHook {
   // success, false on failure (for instance, if another debugger hook is
   // already attached).
   template<class HookClass>
-  static bool attach(ThreadInfo* ti = nullptr) {
-    ti = (ti != nullptr) ? ti : &TI();
+  static bool attach(RequestInfo* ti = nullptr) {
+    ti = (ti != nullptr) ? ti : &RI();
 
     if (isDebuggerAttached(ti)) {
       // Check if this debugger hook is already attached.
@@ -146,7 +146,7 @@ struct DebuggerHook {
   }
 
   // If a hook is attached to the thread, detaches it.
-  static void detach(ThreadInfo* ti = nullptr);
+  static void detach(RequestInfo* ti = nullptr);
 
   // Debugger events. Subclasses can override these methods to receive
   // events.
@@ -197,7 +197,7 @@ struct DebuggerHook {
 
 // Returns the current hook.
 inline DebuggerHook* getDebuggerHook() {
-  return TI().m_debuggerHook;
+  return RI().m_debuggerHook;
 }
 
 // Is this process being debugged? Since this is across all threads, this cannot

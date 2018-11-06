@@ -35,7 +35,7 @@ bool StepCommand::executeImpl(DebuggerSession* /*session*/,
   const folly::dynamic& message = getMessage();
   const std::string& command = tryGetString(message, "command", "");
 
-  RequestInfo* ri = m_debugger->getRequestInfo();
+  DebuggerRequestInfo* ri = m_debugger->getRequestInfo();
 
   if (command == "next") {
     // Step over.

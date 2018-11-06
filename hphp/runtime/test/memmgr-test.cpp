@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/resource-data.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 
 namespace HPHP {
 

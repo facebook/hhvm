@@ -16,20 +16,20 @@
 #ifndef incl_HPHP_EXECUTION_PROFILER_H_
 #define incl_HPHP_EXECUTION_PROFILER_H_
 
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
 struct ExecutionProfiler {
-  ExecutionProfiler(ThreadInfo *info, bool builtin) : m_info(info) {
+  ExecutionProfiler(RequestInfo *info, bool builtin) : m_info(info) {
     m_executing = m_info->m_executing;
     m_info->m_executing =
-      builtin ? ThreadInfo::ExtensionFunctions : ThreadInfo::UserFunctions;
+      builtin ? RequestInfo::ExtensionFunctions : RequestInfo::UserFunctions;
   }
-  explicit ExecutionProfiler(ThreadInfo::Executing executing) {
-    m_info = ThreadInfo::s_threadInfo.getNoCheck();
+  explicit ExecutionProfiler(RequestInfo::Executing executing) {
+    m_info = RequestInfo::s_requestInfo.getNoCheck();
     m_executing = m_info->m_executing;
     m_info->m_executing = executing;
   }
@@ -37,8 +37,8 @@ struct ExecutionProfiler {
     m_info->m_executing = m_executing;
   }
 private:
-  ThreadInfo *m_info;
-  ThreadInfo::Executing m_executing;
+  RequestInfo *m_info;
+  RequestInfo::Executing m_executing;
 };
 
 //////////////////////////////////////////////////////////////////////

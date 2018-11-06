@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-util.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/url-file.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/ext/url/ext_url.h"
@@ -117,7 +117,7 @@ req::ptr<File> HttpStreamWrapper::open(const String& filename,
   }
 
   if (!headers.exists(s_User_Agent)) {
-    auto default_user_agent = ThreadInfo::s_threadInfo.getNoCheck()
+    auto default_user_agent = RequestInfo::s_requestInfo.getNoCheck()
       ->m_reqInjectionData.getUserAgent();
     if (!default_user_agent.empty()) {
       headers.set(s_User_Agent, default_user_agent);

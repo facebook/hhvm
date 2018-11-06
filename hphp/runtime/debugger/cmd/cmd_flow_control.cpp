@@ -88,7 +88,7 @@ bool CmdFlowControl::onServer(DebuggerProxy& /*proxy*/) {
 void CmdFlowControl::installLocationFilterForLine(InterruptSite *site) {
   // We may be stopped at a place with no source info.
   if (!site || !site->valid()) return;
-  RequestInjectionData &rid = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  RequestInjectionData &rid = RequestInfo::s_requestInfo->m_reqInjectionData;
   rid.m_flowFilter.clear();
   TRACE(3, "Prepare location filter for %s:%d, unit %p:\n",
         site->getFile(), site->getLine0(), site->getUnit());
@@ -124,7 +124,7 @@ void CmdFlowControl::installLocationFilterForLine(InterruptSite *site) {
 }
 
 void CmdFlowControl::removeLocationFilter() {
-  ThreadInfo::s_threadInfo->m_reqInjectionData.m_flowFilter.clear();
+  RequestInfo::s_requestInfo->m_reqInjectionData.m_flowFilter.clear();
 }
 
 bool CmdFlowControl::hasStepOuts() {

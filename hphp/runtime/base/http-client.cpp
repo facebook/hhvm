@@ -43,7 +43,7 @@ HttpClient::HttpClient(int timeout /* = 5 */, int maxRedirect /* = 1 */,
     m_decompress(decompress), m_response(nullptr), m_responseHeaders(nullptr),
     m_proxyPort(0) {
   if (m_timeout <= 0) {
-    m_timeout = ThreadInfo::s_threadInfo.getNoCheck()->
+    m_timeout = RequestInfo::s_requestInfo.getNoCheck()->
       m_reqInjectionData.getSocketDefaultTimeout();
   }
 }

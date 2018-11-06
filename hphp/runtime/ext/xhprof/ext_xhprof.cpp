@@ -1,6 +1,6 @@
 #include "hphp/runtime/ext/xhprof/ext_xhprof.h"
 #include "hphp/runtime/ext/hotprofiler/ext_hotprofiler.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/server/server-stats.h"
 
@@ -11,7 +11,7 @@ void HHVM_FUNCTION(fb_setprofile,
   const Variant& callback,
   int64_t flags = EventHook::ProfileDefault
 ) {
-  if (ThreadInfo::s_threadInfo->m_profiler != nullptr) {
+  if (RequestInfo::s_requestInfo->m_profiler != nullptr) {
     // phpprof is enabled, don't let PHP code override it
     return;
   }
@@ -25,7 +25,7 @@ void HHVM_FUNCTION(fb_setprofile,
 }
 
 void HHVM_FUNCTION(xhprof_frame_begin, const String& name) {
-  Profiler *prof = ThreadInfo::s_threadInfo->m_profiler;
+  Profiler *prof = RequestInfo::s_requestInfo->m_profiler;
   if (prof) {
     s_profiler_factory->cacheString(name);
     prof->beginFrame(name.data());
@@ -33,7 +33,7 @@ void HHVM_FUNCTION(xhprof_frame_begin, const String& name) {
 }
 
 void HHVM_FUNCTION(xhprof_frame_end) {
-  Profiler *prof = ThreadInfo::s_threadInfo->m_profiler;
+  Profiler *prof = RequestInfo::s_requestInfo->m_profiler;
   if (prof) {
     prof->endFrame(nullptr, nullptr);
   }

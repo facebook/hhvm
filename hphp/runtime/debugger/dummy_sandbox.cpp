@@ -20,7 +20,7 @@
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
 #include "hphp/runtime/debugger/cmd/cmd_signal.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/base/externals.h"
 #include "hphp/runtime/base/php-globals.h"
@@ -78,7 +78,7 @@ const StaticString s__SERVER("_SERVER");
 
 void DummySandbox::run() {
   TRACE(2, "DummySandbox::run\n");
-  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+  RequestInfo *ti = RequestInfo::s_requestInfo.getNoCheck();
   while (!m_stopped) {
     try {
       CLISession hphpSession;

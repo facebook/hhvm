@@ -19,7 +19,7 @@
 #include <folly/portability/Sockets.h>
 
 #include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/server-stats.h"
@@ -78,7 +78,7 @@ Socket::Socket(std::shared_ptr<SocketData> data, int sockfd, int type,
 
   struct timeval tv;
   if (timeout <= 0) {
-    tv.tv_sec = ThreadInfo::s_threadInfo.getNoCheck()->
+    tv.tv_sec = RequestInfo::s_requestInfo.getNoCheck()->
       m_reqInjectionData.getSocketDefaultTimeout();
     tv.tv_usec = 0;
   } else {

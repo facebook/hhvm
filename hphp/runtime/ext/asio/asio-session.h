@@ -19,7 +19,7 @@
 #define incl_HPHP_EXT_ASIO_SESSION_H_
 
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event-queue.h"
 
@@ -71,7 +71,7 @@ struct AsioSession final {
   // time is exceeded, onIOWaitExit will throw after checking surprise.
   static TimePoint getLatestWakeTime() {
     auto now = std::chrono::steady_clock::now();
-    auto info = ThreadInfo::s_threadInfo.getNoCheck();
+    auto info = RequestInfo::s_requestInfo.getNoCheck();
     auto& data = info->m_reqInjectionData;
     if (!data.getTimeout()) {
       // Don't wait for over nine thousand hours.

@@ -36,7 +36,7 @@ struct BreakContext {
   }
 
   Debugger* m_debugger;
-  RequestInfo* m_requestInfo;
+  DebuggerRequestInfo* m_requestInfo;
 
   // If true, tryEnterDebugger should try to break only when a step operation
   // is not in progress, otherwise it should always ask the debugger if we
@@ -281,7 +281,7 @@ void VSDebugHook::onDefFunc(const Func* func) {
 
 void VSDebugHook::tryEnterDebugger(
   Debugger* debugger,
-  RequestInfo* requestInfo,
+  DebuggerRequestInfo* requestInfo,
   bool breakNoStepOnly
 ) {
   // Acquire semantics around reading requestInfo->m_flags lock-free.

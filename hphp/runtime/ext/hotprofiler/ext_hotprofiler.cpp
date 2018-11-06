@@ -1317,7 +1317,7 @@ bool ProfilerFactory::start(ProfilerKind kind,
   if (m_profiler && m_profiler->m_successful) {
     // This will be disabled automatically when the thread completes the request
     HPHP::EventHook::Enable();
-    ThreadInfo::s_threadInfo->m_profiler = m_profiler;
+    RequestInfo::s_requestInfo->m_profiler = m_profiler;
     if (beginFrame) {
       m_profiler->beginFrame("main()");
     }
@@ -1336,7 +1336,7 @@ Variant ProfilerFactory::stop() {
     m_profiler->writeStats(ret);
     req::destroy_raw(m_profiler);
     m_profiler = nullptr;
-    ThreadInfo::s_threadInfo->m_profiler = nullptr;
+    RequestInfo::s_requestInfo->m_profiler = nullptr;
 
     return ret;
   }

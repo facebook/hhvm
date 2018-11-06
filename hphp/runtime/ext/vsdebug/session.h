@@ -32,7 +32,7 @@ namespace VSDEBUG {
 
 struct Debugger;
 struct BreakpointManager;
-struct RequestInfo;
+struct DebuggerRequestInfo;
 
 // This object represents a connected session with a single debugger client.
 // It contains any data specific to the connected client's state.
@@ -78,8 +78,8 @@ struct DebuggerSession final {
   // Called by the debugger when a server object is removed from a request.
   void onServerObjectDestroyed(unsigned int objectId);
 
-  // RequestInfo for the dummy request thread.
-  RequestInfo* const m_dummyRequestInfo;
+  // DebuggerRequestInfo for the dummy request thread.
+  DebuggerRequestInfo* const m_dummyRequestInfo;
 
   // Indicates if the client wants output about the startup request state.
   bool m_displayStartupMsg;

@@ -43,7 +43,7 @@
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-util.h"
-#include "hphp/runtime/base/thread-info.h"
+#include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/fb/FBSerialize/FBSerialize.h"
@@ -1070,7 +1070,7 @@ bool HHVM_FUNCTION(fb_rename_function, const String& orig_func_name,
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant HHVM_FUNCTION(fb_get_code_coverage, bool flush) {
-  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+  RequestInfo *ti = RequestInfo::s_requestInfo.getNoCheck();
   if (ti->m_reqInjectionData.getCoverage()) {
     Array ret = ti->m_coverage->Report();
     if (flush) {
@@ -1082,7 +1082,7 @@ Variant HHVM_FUNCTION(fb_get_code_coverage, bool flush) {
 }
 
 void HHVM_FUNCTION(fb_enable_code_coverage) {
-  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+  RequestInfo *ti = RequestInfo::s_requestInfo.getNoCheck();
   ti->m_coverage->Reset();
   ti->m_reqInjectionData.setCoverage(true);;
   if (g_context->isNested()) {
@@ -1093,7 +1093,7 @@ void HHVM_FUNCTION(fb_enable_code_coverage) {
 }
 
 Variant disable_code_coverage_helper(bool report_frequency) {
-  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
+  RequestInfo *ti = RequestInfo::s_requestInfo.getNoCheck();
   ti->m_reqInjectionData.setCoverage(false);
   Array ret = ti->m_coverage->Report(report_frequency);
   ti->m_coverage->Reset();

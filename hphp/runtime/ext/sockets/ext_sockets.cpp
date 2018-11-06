@@ -387,7 +387,7 @@ static req::ptr<Socket> create_new_socket(
 
   req::ptr<Socket> sock;
   int fd = socket(domain, type, 0);
-  double timeout = ThreadInfo::s_threadInfo.getNoCheck()->
+  double timeout = RequestInfo::s_requestInfo.getNoCheck()->
       m_reqInjectionData.getSocketDefaultTimeout();
   req::ptr<StreamContext> streamctx;
   if (context.isResource()) {
@@ -824,7 +824,7 @@ bool HHVM_FUNCTION(socket_set_option,
         tv.tv_usec %= 1000000;
       }
       if (tv.tv_sec < 0) {
-        tv.tv_sec = ThreadInfo::s_threadInfo.getNoCheck()->
+        tv.tv_sec = RequestInfo::s_requestInfo.getNoCheck()->
         m_reqInjectionData.getSocketDefaultTimeout();
       }
       optlen = sizeof(tv);
@@ -1489,7 +1489,7 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
   }
 
   if (timeout < 0) {
-    timeout = ThreadInfo::s_threadInfo.getNoCheck()->
+    timeout = RequestInfo::s_requestInfo.getNoCheck()->
       m_reqInjectionData.getSocketDefaultTimeout();
   }
 

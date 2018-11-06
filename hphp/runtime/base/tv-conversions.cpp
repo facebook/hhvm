@@ -1738,6 +1738,10 @@ bool tvCoerceParamToArrayInPlace(TypedValue* tv, bool /*builtin*/) {
 
     case KindOfObject:
       if (LIKELY(tv->m_data.pobj->isCollection())) {
+        if (RuntimeOption::EvalHackArrCompatCollectionCoercionNotices) {
+          raise_hack_arr_compat_collection_coerce_notice(
+              tv->m_data.pobj->getClassName().c_str());
+        }
         tvAsVariant(tv) = tv->m_data.pobj->toArray();
         return true;
       }

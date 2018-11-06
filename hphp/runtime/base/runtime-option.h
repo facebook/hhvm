@@ -943,6 +943,8 @@ struct RuntimeOption {
   /* Raises notice when a function that returns a PHP array, not */     \
   /* a v/darray, is called */                                           \
   F(bool, HackArrCompatArrayProducingFuncNotices, false)                \
+  /* Raises notice when a Hack Collection is coerced to a PHP array */  \
+  F(bool, HackArrCompatCollectionCoercionNotices, false)                \
   F(bool, HackArrDVArrs, false)                                         \
   /* Warn if is expression are used with type aliases that cannot be    |
    * resolved */                                                        \

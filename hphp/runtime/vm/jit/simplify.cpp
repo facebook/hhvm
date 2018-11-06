@@ -308,6 +308,15 @@ SSATmp* simplifyCheckCtxThis(State& env, const IRInstruction* inst) {
   return mergeBranchDests(env, inst);
 }
 
+SSATmp* simplifyEqFunc(State& env, const IRInstruction* inst) {
+  auto const src0 = inst->src(0);
+  auto const src1 = inst->src(1);
+  if (src0->hasConstVal() && src1->hasConstVal()) {
+    return cns(env, src0->funcVal() == src1->funcVal());
+  }
+  return nullptr;
+}
+
 SSATmp* simplifyCheckFuncStatic(State& env, const IRInstruction* inst) {
   auto const funcTmp = inst->src(0);
   if (funcTmp->hasConstVal()) {
@@ -3841,6 +3850,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(DefLabel)
   X(DivDbl)
   X(DivInt)
+  X(EqFunc)
   X(ExtendsClass)
   X(InstanceOfBitmask)
   X(NInstanceOfBitmask)

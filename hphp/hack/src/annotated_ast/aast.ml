@@ -70,6 +70,7 @@ and stmt =
   | Goto of pstring
   | Static_var of expr list
   | Global_var of expr list
+  | Awaitall of pos * ((expr option * expr) list)
   | If of expr * block * block
   | Do of block * expr
   | While of expr * block

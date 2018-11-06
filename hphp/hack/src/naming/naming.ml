@@ -1889,7 +1889,7 @@ module Make (GetLocals : GetLocals) = struct
     | Goto label           -> name_goto env label
     | Static_var el        -> N.Static_var (static_varl env el)
     | Global_var el        -> N.Global_var (global_varl env el)
-    | Awaitall _           -> failwith "TODO CONCURRENT"
+    | Awaitall el          -> awaitall_stmt env p el
     | If (e, b1, b2)       -> if_stmt env st e b1 b2
     | Do (b, e)            -> do_stmt env b e
     | While (e, b)         -> while_stmt env e b
@@ -2146,6 +2146,22 @@ module Make (GetLocals : GetLocals) = struct
   and global_var env = function
     | p, Lvar _ as lv -> expr env (p, Binop(Eq None, lv, (p, Null)))
     | e -> expr env e
+
+  and awaitall_stmt env pos el =
+    let el = List.map el (fun (e1, e2) ->
+      let e2 = expr env e2 in
+      let e1 = (match e1 with
+      | Some e ->
+        let e = Pos.none, Lvar e in
+        let nsenv = (fst env).namespace in
+        let _, vars =
+          GetLocals.lvalue (fst env).tcopt (nsenv, SMap.empty) e in
+        SMap.iter (fun x p -> ignore (Env.new_lvar env (p, x))) vars;
+        Some (expr env e)
+      | None -> None) in
+      (e1, e2)
+    ) in
+    N.Awaitall (pos, el)
 
   and expr_obj_get_name env = function
     | p, Id x -> p, N.Id x

@@ -1,0 +1,2 @@
+File "concurrent_complex_assign.php", line 8, characters 21-22:
+Concurrent blocks can either assign to a variable or read from it, not both. (Parsing[1002])

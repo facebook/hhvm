@@ -186,6 +186,7 @@ class type ['a] visitor_type = object
   method on_goto : 'a -> pstring -> 'a
   method on_static_var : 'a -> expr list -> 'a
   method on_global_var : 'a -> expr list -> 'a
+  method on_awaitall : 'a -> (expr option * expr) list -> 'a
   method on_stmt : 'a -> stmt -> 'a
   method on_switch : 'a -> expr -> case list -> 'a
   method on_throw : 'a -> is_terminal -> expr -> 'a
@@ -295,6 +296,14 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
 
   method on_global_var acc el = List.fold_left el ~f:this#on_expr ~init:acc
 
+  method on_awaitall acc el = List.fold_left ~f:(fun acc (x, y) ->
+    let acc = match x with
+    | Some x -> this#on_expr acc x
+    | None -> acc in
+    let acc = this#on_expr acc y in
+    acc
+  ) ~init:acc el
+
   method on_if acc e b1 b2 =
     let acc = this#on_expr acc e in
     let acc = this#on_block acc b1 in
@@ -394,6 +403,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     | Fallthrough             -> this#on_fallthrough acc
     | Static_var el           -> this#on_static_var acc el
     | Global_var el           -> this#on_global_var acc el
+    | Awaitall (_, el)        -> this#on_awaitall acc el
     | Let     (x, h, e)       -> this#on_let acc x h e
 
   method on_expr acc (_, e) =

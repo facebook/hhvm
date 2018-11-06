@@ -925,6 +925,18 @@ and stmt env = function
     end ~init:env in
     let env, tel, _ = exprs env el in
     env, T.Global_var tel
+  | Awaitall (p, el) ->
+    let env, el = List.fold_left el ~init:(env, []) ~f:(fun (env, tel) (e1, e2) ->
+      let env, te2, ty2 = expr env e2 in
+      let env, ty2 = Async.overload_extract_from_awaitable env (fst e2) ty2 in
+      (match e1 with
+      | Some e1 ->
+        let env, te1, _ = assign (fst e1) env e1 ty2 in
+        (env, (Some te1, te2) :: tel)
+      | None -> (env, (None, te2) :: tel)
+      )
+    ) in
+    env, T.Awaitall (p, el)
   | Throw (is_terminal, e) ->
     let p = fst e in
     let env, te, ty = expr env e in

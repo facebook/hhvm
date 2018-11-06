@@ -163,7 +163,7 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, bool include,
 
   xmlDocPtr wsdl;
   if (http) {
-    HeaderMap headers;
+    HeaderMap headers = http->streamContextHttpHeader();
     StringBuffer response;
     int code = http->get(struri, response, &headers);
     if (code != 200) {

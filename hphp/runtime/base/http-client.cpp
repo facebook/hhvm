@@ -19,6 +19,8 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/curl-tls-workarounds.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/string-util.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/util/timer.h"
 #include <curl/easy.h>
 #include <vector>
@@ -116,6 +118,41 @@ const StaticString
   s_http("http"),
   s_header("header");
 
+HeaderMap HttpClient::streamContextHttpHeader() {
+  HeaderMap headerFields;
+  if (!m_stream_context_options.exists(s_http)) {
+    return headerFields;
+  }
+
+  String fieldName;
+  String fieldValue;
+  Array headerLines;
+  const Array httpOptions = m_stream_context_options[s_http].toArray();
+
+  // header may be a string or an array
+  if (httpOptions[s_header].isString()) {
+    headerLines = StringUtil::Explode(
+      httpOptions[s_header].toString(), "\r\n"
+    ).toArray();
+  } else if (httpOptions[s_header].isArray()) {
+    headerLines = httpOptions[s_header];
+  }
+
+  for (ArrayIter it(headerLines); it; ++it) {
+    // split header-field into field-name and field-value
+    Array parts = StringUtil::Explode(
+      it.second().toString(), ":", 2
+    ).toArray();
+    fieldName = parts[0].toString();
+    fieldValue = HHVM_FN(ltrim)(parts[1].toString());
+
+    // add to HeaderMap
+    headerFields[std::string(fieldName.data())].push_back(fieldValue.data());
+  }
+
+  return headerFields;
+}
+
 int HttpClient::request(const char* verb,
                      const char *url, const char *data, size_t size,
                      StringBuffer &response, const HeaderMap *requestHeaders,
@@ -194,13 +231,6 @@ int HttpClient::request(const char* verb,
         slist = curl_slist_append(slist, header.data());
       }
     }
-  if (m_stream_context_options[s_http].isArray()) {
-    const Array http = m_stream_context_options[s_http].toArray();
-    if (http.exists(s_header)) {
-      slist = curl_slist_append(slist,
-                                http[s_header].toString().data());
-    }
-  }
   if (slist) {
       curl_easy_setopt(cp, CURLOPT_HTTPHEADER, slist);
     }

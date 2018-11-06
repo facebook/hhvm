@@ -1,0 +1,5 @@
+string(26) "X-TEST-ELEMENT-1: element1"
+string(26) "X-TEST-ELEMENT-2: element2"
+string(23) "X-TEST-STRING-1: value1"
+string(23) "X-TEST-STRING-2: value2"
+string(23) "X-TEST-STRING-3: value3"

@@ -2812,7 +2812,10 @@ Variant HHVM_METHOD(SoapClient, __dorequest,
   USE_SOAP_GLOBAL;
   SoapClientScope ss(this_);
 
-  HeaderMap headers;
+  HttpClient http(data->m_connection_timeout, data->m_max_redirect,
+                  data->m_use11, true);
+  http.setStreamContextOptions(data->m_stream_context_options);
+  HeaderMap headers = http.streamContextHttpHeader();
 
   String buffer(buf);
 
@@ -2855,8 +2858,6 @@ Variant HHVM_METHOD(SoapClient, __dorequest,
   }
 
   // post the request
-  HttpClient http(data->m_connection_timeout, data->m_max_redirect,
-                  data->m_use11, true);
   if (!data->m_proxy_host.empty() && data->m_proxy_port) {
     http.proxy(data->m_proxy_host.data(), data->m_proxy_port,
                data->m_proxy_login.data(), data->m_proxy_password.data());
@@ -2864,7 +2865,6 @@ Variant HHVM_METHOD(SoapClient, __dorequest,
   if (!data->m_login.empty()) {
     http.auth(data->m_login.data(), data->m_password.data(), !data->m_digest);
   }
-  http.setStreamContextOptions(data->m_stream_context_options);
 
   if(data->m_ssl_method > -1) {
     http.setUseSSL(CURLUSESSL_ALL);

@@ -59,7 +59,8 @@ const StaticString
   s_PHP_DebugDisplay("__PHP_DebugDisplay"),
   s_PHP_Incomplete_Class("__PHP_Incomplete_Class"),
   s_PHP_Incomplete_Class_Name("__PHP_Incomplete_Class_Name"),
-  s_debugInfo("__debugInfo");
+  s_debugInfo("__debugInfo"),
+  s_message("message");
 
 [[noreturn]] NEVER_INLINE
 static void throwNestingException() {
@@ -1938,8 +1939,29 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
              auto const lval = properties.lvalAt(s_PHP_DebugDisplay);
              tvSet(*val.asTypedValue(), lval);
            }
+        } catch (const Object &e) {
+          assertx(e->instanceof(SystemLib::s_ErrorClass) ||
+                  e->instanceof(SystemLib::s_ExceptionClass));
+          assertx(
+            SystemLib::s_ErrorClass->lookupDeclProp(s_message.get()) == 0 &&
+            SystemLib::s_ExceptionClass->lookupDeclProp(s_message.get()) == 0
+          );
+          auto const message_rval = e->propRvalAtOffset(Slot{0});
+          if (isStringType(message_rval.type())) {
+            raise_warning("%s::__toDebugDisplay() threw PHP exception "
+                          "of class %s with message '%s'",
+                          obj->getClassName().data(), e->getClassName().data(),
+                          message_rval.val().pstr->data());
+          } else {
+            raise_warning("%s::__toDebugDisplay() threw PHP exception "
+                          "of class %s with non-string message",
+                          obj->getClassName().data(), e->getClassName().data());
+          }
+        } catch (const std::exception &e) {
+          raise_warning("%s::__toDebugDisplay() threw C++ exception: %s",
+                        obj->getClassName().data(), e.what());
         } catch (...) {
-          raise_warning("%s::__toDebugDisplay() throws exception",
+          raise_warning("%s::__toDebugDisplay() threw unknown exception",
                         obj->getClassName().data());
         }
       }

@@ -51,4 +51,7 @@ function id_string(string $value): string {
   return $value;
 }
 
+<<__Native>>
+function serialize_with_format(mixed $thing, int $format): string;
+
 }

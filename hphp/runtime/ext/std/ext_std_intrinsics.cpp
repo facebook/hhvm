@@ -63,6 +63,15 @@ Array HHVM_FUNCTION(dummy_array_builtin, const Array& arr) {
   return Array::Create();
 }
 
+String HHVM_FUNCTION(serialize_with_format, const Variant& thing,
+                     int64_t format) {
+  if (format > static_cast<int64_t>(VariableSerializer::Type::Last)) {
+    throw_invalid_argument("invalid serializer format");
+  }
+  VariableSerializer vs(static_cast<VariableSerializer::Type>(format));
+  return vs.serialize(thing, true);
+}
+
 void StandardExtension::initIntrinsics() {
   if (!RuntimeOption::EnableIntrinsicsExtension) return;
 
@@ -76,6 +85,8 @@ void StandardExtension::initIntrinsics() {
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_arraylike_builtin,
               dummy_arraylike_builtin);
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_array_builtin, dummy_array_builtin);
+
+  HHVM_FALIAS(__hhvm_intrinsics\\serialize_with_format, serialize_with_format);
 
   loadSystemlib("std_intrinsics");
 }

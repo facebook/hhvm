@@ -50,6 +50,7 @@ struct VariableSerializer {
     APCSerialize, //used in APC serialization (controlled by switch)
     DebuggerSerialize, //used by hphp debugger for client<->proxy communication
     PHPOutput, //used by compiler to output scalar values into byte code
+    Last = PHPOutput,
   };
 
   /**

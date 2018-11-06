@@ -284,7 +284,7 @@ let set_option options name value =
     { options with option_disable_variable_variables = as_bool value }
   | "hack.lang.phpism.disabledefine" ->
     { options with option_phpism_disable_define = int_of_string value > 0 }
-  | "hhvm.hack.lang.enableconcurrent" ->
+  | "hack.lang.enableconcurrent" ->
     { options with option_enable_concurrent = as_bool value }
   | _ -> options
 

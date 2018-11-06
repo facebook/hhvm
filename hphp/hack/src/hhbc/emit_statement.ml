@@ -177,11 +177,7 @@ let rec emit_stmt env (pos, st_) =
   | A.Expr (pos, A.Await e) ->
     begin match try_inline_genva_call env e GI_ignore_result with
     | Some r -> r
-    | None ->
-    gather [
-      emit_await env pos e;
-      instr_popc;
-    ]
+    | None -> emit_awaitall_single_no_assign env pos e
     end
   | A.Expr
     (_, A.Binop ((A.Eq None), ((_, A.List l) as e1), (await_pos, A.Await e_await))) ->
@@ -225,21 +221,7 @@ let rec emit_stmt env (pos, st_) =
         ]
     end
   | A.Expr (_, A.Binop (A.Eq None, e_lhs, (await_pos, A.Await e_await))) ->
-    let result = Local.scope @@ fun () -> emit_await env await_pos e_await in
-    Local.scope @@ fun () ->
-      let temp = Local.get_unnamed_local () in
-      let rhs_instrs = instr_pushl temp in
-      let (lhs, rhs, setop) =
-        emit_lval_op_nonlist_steps env pos LValOp.Set e_lhs rhs_instrs 1 in
-      gather [
-        result;
-        instr_setl temp;
-        instr_popc;
-        with_temp_local temp (fun _ _ -> lhs);
-        rhs;
-        setop;
-        instr_popc;
-      ]
+    emit_awaitall_single env await_pos e_lhs e_await
   | A.Expr (_, A.Yield_from e) ->
     gather [
       emit_yield_from_delegates env pos e;
@@ -277,7 +259,6 @@ let rec emit_stmt env (pos, st_) =
   | A.Goto (_, label) ->
     TFR.emit_goto ~in_finally_epilogue:false env label
   | A.Block b -> emit_stmts env b
-  | A.Awaitall _ -> failwith "TODO CONCURRENT"
   | A.If (condition, consequence, alternative) ->
     emit_if env pos condition consequence alternative
   | A.While (e, b) ->
@@ -324,6 +305,8 @@ let rec emit_stmt env (pos, st_) =
     emit_static_var pos es
   | A.Global_var es ->
     emit_global_vars env pos es
+  | A.Awaitall el ->
+    emit_awaitall env pos el
   | A.Markup ((_, s), echo_expr_opt) ->
     emit_markup env s echo_expr_opt ~check_for_hashbang:false
     (* TODO: What do we do with unsafe? *)
@@ -430,6 +413,91 @@ and emit_static_var pos es =
     | _ -> failwith "Static var - impossible"
   in
   gather @@ List.map es ~f:emit_static_var_single
+
+and emit_awaitall env pos el =
+  match el with
+  | [] -> empty
+  | (Some lvar, e) :: [] -> emit_awaitall_single env pos (Pos.none, A.Lvar lvar) e
+  | (None, e) :: [] -> emit_awaitall_single_no_assign env pos e
+  | _ -> emit_awaitall_ env pos el
+
+and emit_awaitall_single env pos lval e =
+  let result = Local.scope @@ fun () -> emit_await env pos e in
+  Local.scope @@ fun () ->
+    let temp = Local.get_unnamed_local () in
+    let rhs_instrs = instr_pushl temp in
+    let lhs, rhs, setop =
+      emit_lval_op_nonlist_steps env pos LValOp.Set lval rhs_instrs 1 in
+    gather [
+      result;
+      instr_setl temp;
+      instr_popc;
+      with_temp_local temp (fun _ _ -> lhs);
+      rhs;
+      setop;
+      instr_popc;
+    ]
+
+and emit_awaitall_single_no_assign env pos e =
+  gather [
+    emit_await env pos e;
+    instr_popc;
+  ]
+
+and emit_awaitall_ env _pos el =
+  let concurrent_items = List.map el
+    ~f:(function (x, y) -> x, y, Local.get_unnamed_local ()) in
+
+  let emit_list_assignment =
+    let reify = gather @@ List.map concurrent_items ~f:begin fun (_, _, l) ->
+      let label_done = Label.next_regular () in
+      gather [
+        instr_istypel l OpNull;
+        instr_jmpnz label_done;
+        instr_pushl l;
+        instr_whresult;
+        instr_popl l;
+        instr_label label_done;
+      ]
+    end in
+    let set = gather @@ List.filter_map concurrent_items (function
+      | (None, _, _) -> None
+      | (Some lhs, _, rhs) ->
+        Some (gather [
+          instr_pushl rhs;
+          instr_setl (Local.Named (snd lhs));
+          instr_popc;
+        ])) in
+    gather [ reify; set ] in
+  Local.scope @@ begin fun () ->
+  let load_args =
+    gather @@ List.map concurrent_items ~f:begin fun (_, arg, _) ->
+      emit_expr ~need_ref:false env arg
+    end in
+  let init_locals =
+    gather @@ List.map (List.rev concurrent_items) ~f:begin fun (_, _, l) ->
+      gather [
+        instr_setl l;
+        instr_popc;
+      ]
+    end in
+  let await_and_process_results =
+    let rhs_local = List.map concurrent_items
+      ~f:(function (_, _, x) -> x) in
+    unset_in_fault rhs_local @@ begin fun () ->
+      gather [
+        instr_awaitall
+          (Some ((List.hd_exn rhs_local), (List.length rhs_local)));
+        instr_popc;
+        emit_list_assignment;
+      ]
+    end in
+  gather [
+    load_args;
+    init_locals;
+    await_and_process_results;
+  ]
+  end
 
 and emit_while env e b =
   let break_label = Label.next_regular () in

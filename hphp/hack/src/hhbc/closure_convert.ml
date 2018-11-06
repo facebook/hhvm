@@ -801,6 +801,10 @@ and convert_prop_expr env st (_, expr_ as expr) =
   | _ ->
     convert_expr env st expr
 
+and convert_snd_expr env st (a, b_exp) =
+  let s, b_exp = convert_expr env st b_exp in
+  s, (a, b_exp)
+
 (* Closure-convert a lambda expression, with use_vars_opt = Some vars
  * if there is an explicit `use` clause.
  *)
@@ -943,6 +947,9 @@ and convert_stmt env st (p, stmt_ as stmt) : _ * stmt =
     let st = List.fold_left el ~init:st ~f:visit_static_var in
     let st, el = convert_exprs env st el in
     st, (p, Static_var el)
+  | Awaitall el ->
+    let st, el = List.map_env st el (convert_snd_expr env) in
+    st, (p, Awaitall el)
   | If (e, b1, b2) ->
     let st, e = convert_expr env st e in
     let st, b1 = convert_block env st b1 in

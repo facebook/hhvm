@@ -100,14 +100,16 @@ namespace detail {
 
 struct HotRDSLocals {
   void* rdslocal_base;
+  void* g_context;
 
   // Every array operation requires checking if the mutable iteration table is
   // empty.  This bool offers the fastest way to get at that information.
   bool rl_miter_exists;
 
   TYPE_SCAN_IGNORE_FIELD(rdslocal_base);
+  TYPE_SCAN_IGNORE_FIELD(g_context);
 };
-static_assert(sizeof(HotRDSLocals) <= 16,
+static_assert(sizeof(HotRDSLocals) <= 24,
               "It is essential HotRDSLocals is small.  Consider using "
               "normal rds locals if possible.  Hot rds locals are copied "
               "every user level context switch.");
@@ -194,6 +196,7 @@ struct RDSLocal : private detail::RDSLocalNode {
 
   NEVER_INLINE void create();
   void destroy();
+  void nullOut();
 
   bool isNull() const { return !(detail::rl_hotSection.rdslocal_base &&
                                  node().has_value()); }
@@ -229,7 +232,7 @@ struct RDSLocal : private detail::RDSLocalNode {
     return m_offset;
   }
 
-private:
+protected:
   void init() override {
     assertx(detail::rl_hotSection.rdslocal_base);
     // Initialize the Node so that it is unset.
@@ -276,6 +279,9 @@ private:
         storage.~T();
       }
     }
+    void nullOut() {
+      hasValue = false;
+    }
     TYPE_SCAN_CUSTOM() {
       if (hasValue) {
         scanner.scan(storage);
@@ -289,7 +295,7 @@ private:
     bool hasValue;
   };
 
-  Node& node() const {
+  virtual Node& node() const {
     return *reinterpret_cast<Node*>(
       ((char*)detail::rl_hotSection.rdslocal_base + m_offset));
   }
@@ -332,6 +338,13 @@ void RDSLocal<T, Init>::destroy() {
 }
 
 template<typename T, Initialize Init>
+void RDSLocal<T, Init>::nullOut() {
+  if (!isNull()) {
+    node().nullOut();
+  }
+}
+
+template<typename T, Initialize Init>
 T* RDSLocal<T, Init>::getCheck() const {
   assertx(detail::rl_hotSection.rdslocal_base);
   if (!node().has_value()) {
@@ -348,6 +361,31 @@ T* RDSLocal<T, Init>::get() const {
   }
   return getCheck();
 }
+
+// This aliased rds local type is the same as an rds local, except it also
+// stores a pointer to the rds storage in the hot rds locals struct.  This
+// saves up to 1 instruction and 1 load per access.  g_context serves as an
+// example for how it is used.  It should be used sparingly as it requires
+// storing a pointer in HotRDSLocals.
+template<typename T, Initialize Init,
+         void* detail::HotRDSLocals::*ptr>
+struct AliasedRDSLocal : RDSLocal<T, Init> {
+  void init() override {
+    detail::rl_hotSection.*ptr = &RDSLocal<T, Init>::node();
+    RDSLocal<T, Init>::init();
+  }
+
+  void fini() override {
+    RDSLocal<T, Init>::fini();
+    detail::rl_hotSection.*ptr = nullptr;
+  }
+
+  typename RDSLocal<T, Init>::Node& node() const override {
+    assertx(detail::rl_hotSection.*ptr);
+    return *(typename RDSLocal<T, Init>::Node*)(detail::rl_hotSection.*ptr);
+  }
+};
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Legacy Request Local Macros (DEPRECATED)

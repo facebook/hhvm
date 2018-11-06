@@ -80,7 +80,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 TRACE_SET_MOD(bcinterp);
 
-THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);
+rds::local::AliasedRDSLocal<ExecutionContext,
+                            rds::local::Initialize::Explicitly,
+                            &rds::local::detail::HotRDSLocals::g_context
+                           > g_context;
 
 ExecutionContext::ExecutionContext()
   : m_transport(nullptr)
@@ -120,16 +123,19 @@ ExecutionContext::ExecutionContext()
   m_shutdownsBackup = Array::CreateDArray();
 }
 
+namespace rds { namespace local {
 // See header for why this is required.
 #ifndef _MSC_VER
 template<>
 #endif
-void ThreadLocalNoCheck<ExecutionContext>::destroy() {
+void rds::local::RDSLocal<ExecutionContext,
+                          rds::local::Initialize::Explicitly>::destroy() {
   if (!isNull()) {
     getNoCheck()->sweep();
     nullOut();
   }
 }
+}}
 
 
 void ExecutionContext::cleanup() {

@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/ext/stream/ext_stream.h"
 #include "hphp/runtime/server/transport.h"
@@ -613,12 +614,20 @@ private:
 
 // MSVC doesn't instantiate this, causing an undefined symbol at link time
 // if the template<> is present, but other compilers require it.
+namespace rds { namespace local {
 #ifndef _MSC_VER
 template<>
 #endif
-void ThreadLocalNoCheck<ExecutionContext>::destroy();
+void RDSLocal<ExecutionContext, Initialize::Explicitly>::destroy();
+}}
 
-extern THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);
+// Use AliasedRDSLocal for the ExecutionContext since it is accessed so
+// frequently, and AliasedRDSlocal may save up to 1 instruction and 1 load
+// per access.
+extern rds::local::AliasedRDSLocal<ExecutionContext,
+                                   rds::local::Initialize::Explicitly,
+                                   &rds::local::detail::HotRDSLocals::g_context
+                                  > g_context;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

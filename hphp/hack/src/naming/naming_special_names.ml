@@ -117,7 +117,7 @@ module UserAttributes = struct
   let uaConst               = "__Const"
   let uaUnsafeConstruct     = "__UNSAFE_Construct"
   let uaDeprecated          = "__Deprecated"
-  let uaEntrypoint          = "__Entrypoint"
+  let uaEntryPoint          = "__EntryPoint"
   let uaMemoize             = "__Memoize"
   let uaMemoizeLSB          = "__MemoizeLSB"
   let uaPHPStdLib           = "__PHPStdLib"
@@ -153,7 +153,7 @@ module UserAttributes = struct
       uaConst;
       uaUnsafeConstruct;
       uaDeprecated;
-      uaEntrypoint;
+      uaEntryPoint;
       uaMemoize;
       uaMemoizeLSB;
       uaPHPStdLib;

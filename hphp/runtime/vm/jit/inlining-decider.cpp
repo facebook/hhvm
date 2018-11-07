@@ -578,6 +578,11 @@ bool InliningDecider::shouldInline(SrcKey callerSk,
                                     opcodeToName(op)).str().c_str());
       }
 
+      // RetM is currently not supported in the callee region.
+      if (op == OpRetM) {
+        return refuse("RetM is not supported");
+      }
+
       // Detect that the region contains a return.
       if (isReturnish(op)) {
         hasRet = true;

@@ -77,9 +77,6 @@ module Main_env = struct
     editor_open_files: Lsp.TextDocumentItem.t SMap.t;
     uris_with_diagnostics: SSet.t;
     uris_with_unsaved_changes: SSet.t; (* see comment in get_uris_with_unsaved_changes *)
-    dialog: ShowMessageRequest.t; (* "hack server is now ready" *)
-    progress: Progress.t; (* "typechecking..." *)
-    actionRequired: ActionRequired.t; (* "save any file to trigger a global recheck" *)
   }
 end
 
@@ -92,9 +89,6 @@ module In_init_env = struct
     file_edits: Hh_json.json ImmQueue.t;
     uris_with_unsaved_changes: SSet.t; (* see comment in get_uris_with_unsaved_changes *)
     tail_env: Tail.env option;
-    has_reported_progress: bool;
-    dialog: ShowMessageRequest.t; (* "hack server is busy" *)
-    progress: Progress.t; (* "hh_server is initializing [naming]" *)
   }
 end
 
@@ -104,17 +98,10 @@ module Lost_env = struct
     editor_open_files: Lsp.TextDocumentItem.t SMap.t;
     uris_with_unsaved_changes: SSet.t; (* see comment in get_uris_with_unsaved_changes *)
     lock_file: string;
-    dialog: ShowMessageRequest.t; (* "hh_server stopped" *)
-    actionRequired: ActionRequired.t; (* "hh_server stopped" *)
-    progress: Progress.t; (* "hh_server monitor is waiting for a rebase to settle" *)
   }
 
-  and how_to_explain_loss_to_user =
-    | Action_required of string (* explain via dialog and actionRequired *)
-    | Wait_required of string (* explain via progress *)
-
   and params = {
-    explanation: how_to_explain_loss_to_user;
+    explanation: string;
     new_hh_server_state: hh_server_state;
     start_on_click: bool; (* if user clicks Restart, do we ClientStart before reconnecting? *)
     trigger_on_lsp: bool; (* reconnect if we receive any LSP request/notification *)
@@ -469,31 +456,19 @@ let dismiss_showMessageRequest (dialog: ShowMessageRequest.t) : ShowMessageReque
 (* dismiss_ui: dismisses all dialogs, progress- and action-required           *)
 (* indicators and diagnostics in a state.                                     *)
 let dismiss_ui (state: state) : state =
-  let p = initialize_params_exc () in
   match state with
   | In_init ienv ->
     let open In_init_env in
     Option.iter ~f:Tail.close_env ienv.tail_env;
     In_init { ienv with
       tail_env = None;
-      dialog = dismiss_showMessageRequest ienv.dialog;
-      progress = Lsp_helpers.notify_progress p to_stdout ienv.progress None;
     }
   | Main_loop menv ->
     let open Main_env in
     Main_loop { menv with
       uris_with_diagnostics = Lsp_helpers.dismiss_diagnostics to_stdout menv.uris_with_diagnostics;
-      dialog = dismiss_showMessageRequest menv.dialog;
-      progress = Lsp_helpers.notify_progress p to_stdout menv.progress None;
-      actionRequired = Lsp_helpers.notify_actionRequired p to_stdout menv.actionRequired None;
     }
-  | Lost_server lenv ->
-    let open Lost_env in
-    Lost_server { lenv with
-      dialog = dismiss_showMessageRequest lenv.dialog;
-      actionRequired = Lsp_helpers.notify_actionRequired p to_stdout lenv.actionRequired None;
-      progress = Lsp_helpers.notify_progress p to_stdout lenv.progress None;
-    }
+  | Lost_server lenv -> Lost_server lenv
   | Pre_init -> Pre_init
   | Post_shutdown -> Post_shutdown
 
@@ -1366,9 +1341,11 @@ let do_documentFormatting
   do_formatting_common editor_open_files action params.options
 
 
-(* do_server_busy: controls the progress / action-required indicator          *)
+  (* TODO(hchau): *)
 let do_server_busy (state: state) (status: ServerCommandTypes.busy_status) : state =
-  let open ServerCommandTypes in
+  match status with
+  | _ -> state
+  (*let open ServerCommandTypes in
   let open Main_env in
   let p = initialize_params_exc () in
   let (progress, action) = match status with
@@ -1384,12 +1361,9 @@ let do_server_busy (state: state) (status: ServerCommandTypes.busy_status) : sta
   (* an existing one, or close an existing one, or just no-op, as appropriate *)
   match state with
   | Main_loop menv ->
-    Main_loop { menv with
-      progress = Lsp_helpers.notify_progress p to_stdout menv.progress progress;
-      actionRequired = Lsp_helpers.notify_actionRequired p to_stdout menv.actionRequired action;
-    }
+    Main_loop menv
   | _ ->
-    state
+    state*)
 
 
 (* do_diagnostics: sends notifications for all reported diagnostics; also     *)
@@ -1432,42 +1406,11 @@ let do_diagnostics
   SSet.union (SSet.diff uris_with_diagnostics uris_without) uris_with
 
 
-let report_connect_start
-    (ienv: In_init_env.t)
-  : state =
-  let open In_init_env in
-  assert (not ienv.has_reported_progress);
-  assert (ienv.dialog = ShowMessageRequest.Absent);
-  assert (ienv.progress = Progress.Absent);
-  let p = initialize_params_exc () in
-  (* Our goal behind progress reporting is to let the user know when things   *)
-  (* won't be instantaneous, and to show that things are working as expected. *)
-  (* Upon connection, if it connects immediately (before we've had 1s idle)   *)
-  (* then nothing will have been displayed. Otherwise, at that first 1s idle, *)
-  (* which is implemented here, we put up a progress indicator and a dialog   *)
-  (* saying "initializing..."... When it's done, if it took too long, then in *)
-  (* report_progress_end we put up a "ready" dialog.                          *)
-
-  (* dialog... *)
-  let handle_result ~result:_ state = match state with
-    | In_init ienv -> In_init {ienv with In_init_env.dialog = ShowMessageRequest.Absent}
-    | _ -> state in
-  let handle_error ~code:_ ~message:_ ~data:_ state = handle_result "" state in
-  let dialog = request_showMessage handle_result handle_error
-    MessageType.InfoMessage "Waiting for hh_server to be ready..." [] in
-
-  (* progress indicator... *)
-  let progress = Lsp_helpers.notify_progress p to_stdout
-    Progress.Absent (Some "hh_server initializing") in
-
-  In_init { ienv with has_reported_progress = true; dialog; progress; }
-
-
+(* TODO(hchau): Show status *)
 let report_connect_progress
     (ienv: In_init_env.t)
   : state =
-  let open In_init_env in
-  assert ienv.has_reported_progress;
+  (*let open In_init_env in
   let p = initialize_params_exc () in
   let tail_env = Option.value_exn ienv.tail_env in
   let time = Unix.time () in
@@ -1483,10 +1426,8 @@ let report_connect_progress
     Printf.sprintf
       "hh_server initializing: %s [%i seconds]"
       tail_msg delay_in_secs
-  in
-  In_init { ienv with
-    progress = Lsp_helpers.notify_progress p to_stdout ienv.progress (Some msg);
-  }
+  in*)
+  In_init ienv
 
 
 let report_connect_end
@@ -1501,25 +1442,9 @@ let report_connect_end
       editor_open_files = ienv.editor_open_files;
       uris_with_diagnostics = SSet.empty;
       uris_with_unsaved_changes = ienv.In_init_env.uris_with_unsaved_changes;
-      dialog = ShowMessageRequest.Absent;
-      progress = Progress.Absent;
-      actionRequired = ActionRequired.Absent;
     }
   in
-  (* alert the user that hack is ready, either by console log or by dialog *)
-  let time = Unix.time () in
-  let seconds = int_of_float (time -. ienv.first_start_time) in
-  let msg = Printf.sprintf "hh_server is now ready, after %i seconds." seconds in
-  if (time -. ienv.first_start_time > 30.0) then
-    let handle_result ~result:_ state = match state with
-      | Main_loop menv -> Main_loop {menv with Main_env.dialog = ShowMessageRequest.Absent}
-      | _ -> state in
-    let handle_error ~code:_ ~message:_ ~data:_ state = handle_result "" state in
-    let dialog = request_showMessage handle_result handle_error
-      MessageType.InfoMessage msg [] in
-    Main_loop {menv with Main_env.dialog;}
-  else
-    Main_loop menv
+  Main_loop menv
 
 
 (* After the server has sent 'hello', it means the persistent connection is   *)
@@ -1709,9 +1634,6 @@ let rec connect (state: state) : state =
         (* Similarly, file_edits will be empty: *)
         file_edits = ImmQueue.empty;
         tail_env = Some (Tail.create_env (ServerFiles.log_link root));
-        has_reported_progress = false;
-        dialog = ShowMessageRequest.Absent;
-        progress = Progress.Absent;
       }
   with e ->
     (* Exit_with Out_of_retries, Exit_with Out_of_time: raised when we        *)
@@ -1740,9 +1662,9 @@ let rec connect (state: state) : state =
     let explanation = match e with
       | Exit_with Out_of_retries
       | Exit_with Out_of_time ->
-        Lost_env.Wait_required "hh_server is waiting for things to settle"
+        "hh_server is waiting for things to settle"
       | _ ->
-        Lost_env.Action_required ("hh_server: " ^ message)
+        "hh_server: " ^ message
     in
     do_lost_server state ~allow_immediate_reconnect:false
       { Lost_env.
@@ -1828,21 +1750,6 @@ and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_e
     shortMessage = None
   };
 
-  let initialize_params = initialize_params_exc () in
-
-  let no_op = match p.explanation, state with
-    | Wait_required _, Lost_server { progress; _ }
-      when progress <> Progress.Absent -> true
-    | Action_required _, Lost_server { actionRequired; _ }
-      when actionRequired <> ActionRequired.Absent -> true
-    | _ -> false in
-  (* If we already display a progress indicator, and call do_lost_server     *)
-  (* to display a progress indicator, then we won't do anything. Likewise,   *)
-  (* if we already display an error dialog with ANY TEXT and Restart button, *)
-  (* and call do_lost_server to display any other text in the error dialog,  *)
-  (* it makes for a nicer UI to simply leave the old text up.                *)
-  if no_op then state else
-
   let state = dismiss_ui state in
   let uris_with_unsaved_changes = get_uris_with_unsaved_changes state in
   let editor_open_files =
@@ -1856,99 +1763,23 @@ and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_e
     p.trigger_on_lock_file && MonitorConnection.server_exists lock_file
   in
 
-  (* These helper functions are for the dialog *)
-  let dialog_ref : ShowMessageRequest.t ref = ref ShowMessageRequest.Absent in
-  let clear_dialog_flag (state: state) : state =
-    match state with
-    | Lost_server lenv ->
-      (* TODO(ljw): The following != test is "implementation-specific".      *)
-      (* Goal is so that if we had one dialog up, then dismiss_ui it which   *)
-      (* sends $/cancelRequest, then put up another dialog, then the editor  *)
-      (* sends back a RequestCancelled error in response to the first dialog,*)
-      (* we don't want to clear the flag that's now there for the second     *)
-      (* dialog. This != test achieves that. But ocaml only guarantees       *)
-      (* behavior of != on mutable things, which ours is not...              *)
-      if not (phys_equal lenv.dialog !dialog_ref) then Lost_server lenv
-      else Lost_server { lenv with dialog = ShowMessageRequest.Absent; }
-    | _ -> state
-  in
-  let handle_error ~code:_ ~message:_ ~data:_ state =
-    state |> clear_dialog_flag
-  in
-  let handle_result ~result state =
-    let state = state |> clear_dialog_flag in
-    let result = Jget.string_d result "title" ~default:"" in
-    match result, state with
-    | "Restart", Lost_server _ ->
-      if p.start_on_click then begin
-        let root = match get_root_opt () with
-          | None -> failwith "we should have root by now"
-          | Some root -> root
-        in
-        start_server root
-      end;
-      reconnect_from_lost_if_necessary state `Force_regain
-    | _ -> state
-  in
-
   if reconnect_immediately then
     let lost_state = Lost_server { Lost_env.
       p;
       editor_open_files;
       uris_with_unsaved_changes;
       lock_file;
-      dialog = ShowMessageRequest.Absent;
-      actionRequired = ActionRequired.Absent;
-      progress = Progress.Absent;
     } in
     Lsp_helpers.telemetry_log to_stdout "Reconnecting immediately to hh_server";
     let new_state = reconnect_from_lost_if_necessary lost_state `Force_regain in
     new_state
   else
-    let progress, actionRequired, dialog = match p.explanation with
-      | Wait_required msg ->
-        let progress = Lsp_helpers.notify_progress initialize_params to_stdout
-          Progress.Absent (Some msg) in
-        progress, ActionRequired.Absent, ShowMessageRequest.Absent
-      | Action_required msg ->
-        let actionRequired = Lsp_helpers.notify_actionRequired initialize_params to_stdout
-          ActionRequired.Absent (Some msg) in
-        let dialog = request_showMessage handle_result handle_error
-          MessageType.ErrorMessage msg ["Restart"] in
-        Progress.Absent, actionRequired, dialog
-    in
-    dialog_ref := dialog;
     Lost_server { Lost_env.
       p;
       editor_open_files;
       uris_with_unsaved_changes;
       lock_file;
-      dialog;
-      actionRequired;
-      progress;
     }
-
-
-
-let dismiss_ready_dialog_if_necessary (state: state) (event: event) : state =
-  (* We'll auto-dismiss the ready dialog if it was up, in response to user    *)
-  (* actions like typing or hover, and in response to a lost server.          *)
-  let open Jsonrpc in
-  let open Main_env in
-  match state with
-  | Main_loop menv -> begin
-      match event with
-      | Client_message {kind = Jsonrpc.Response; _} ->
-        state
-      | Client_message _
-      | Server_message {push=ServerCommandTypes.NEW_CLIENT_CONNECTED; _} ->
-        let dialog = dismiss_showMessageRequest menv.dialog in
-        Main_loop { menv with dialog; }
-      | _ ->
-        state
-    end
-  | _ -> state
-
 
 let handle_idle_if_necessary (state: state) (event: event) : state =
   match state with
@@ -2178,6 +2009,8 @@ let handle_event
   | In_init ienv, Tick ->
     let open ShowStatus in
     let open ShowMessageRequest in
+    (* OCaml has pretty poor Unicode support.
+     # @lint-ignore TXT5 The # sign is needed for the ignore to be respected. *)
     let statusFrames = [|"□";"■"|] in
     let time = Unix.time () in
     request_showStatus {
@@ -2194,9 +2027,7 @@ let handle_event
     let open In_init_env in
     let time = Unix.time () in
     let delay_in_secs = int_of_float (time -. ienv.most_recent_start_time) in
-    if not ienv.has_reported_progress then
-      state := report_connect_start ienv
-    else if delay_in_secs <= 10 then
+    if delay_in_secs <= 10 then
       state := report_connect_progress ienv
     else begin
       state := connect !state (* terminate + retry the connection *)
@@ -2366,9 +2197,8 @@ let handle_event
 
   (* server shut-down request *)
   | Main_loop _menv, Server_message {push=ServerCommandTypes.NEW_CLIENT_CONNECTED; _} ->
-    state := dismiss_ready_dialog_if_necessary !state event;
     state := do_lost_server !state { Lost_env.
-      explanation = Lost_env.Action_required "hh_server is active in another window.";
+      explanation = "hh_server is active in another window.";
       new_hh_server_state = Hh_server_stolen;
       start_on_click = false;
       trigger_on_lock_file = false;
@@ -2431,8 +2261,6 @@ let main (env: env) : 'a =
       state := handle_idle_if_necessary !state event;
       (* if we're in a lost-server state, some triggers cause us to reconnect *)
       state := reconnect_from_lost_if_necessary !state (`Event event);
-      (* if the user does any interaction, then dismiss the "ready" dialog *)
-      state := dismiss_ready_dialog_if_necessary !state event;
       (* we keep track of all open files and their contents *)
       state := track_open_files !state event;
       (* we keep track of all files that have unsaved changes in them *)
@@ -2472,7 +2300,7 @@ let main (env: env) : 'a =
         (* next time around the loop.                                           *)
         deferred_action := Some (fun () ->
           state := do_lost_server !state { Lost_env.
-            explanation = Lost_env.Action_required "hh_server has stopped";
+            explanation = "hh_server has stopped.";
             new_hh_server_state = Hh_server_stopped;
             start_on_click = true;
             trigger_on_lock_file = true;

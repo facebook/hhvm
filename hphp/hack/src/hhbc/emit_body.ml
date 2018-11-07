@@ -433,7 +433,9 @@ let emit_body
       | _ :: Ast_scope.ScopeItem.Class _ :: _ -> move_this decl_vars
       | _ when Ast_scope.Scope.is_toplevel scope -> move_this decl_vars
       | _ -> decl_vars in
-  let decl_vars = if List.exists ~f:(fun (_, _, _, b) -> b) immediate_tparams
+  let decl_vars =
+    if List.exists ~f:(fun (_, _, _, b) -> b) immediate_tparams &&
+       not is_closure_body
     then "$0ReifiedGenerics" :: decl_vars else decl_vars in
 
   let function_state_key =

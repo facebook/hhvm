@@ -83,6 +83,7 @@ type state = {
   (* Free variables computed so far *)
   captured_vars : ULS.t;
   captured_this : bool;
+  captured_generics : ULS.t;
   (* Closure classes and hoisted inline classes *)
   hoisted_classes : class_ list;
   (* Hoisted inline functions *)
@@ -146,6 +147,7 @@ let initial_state popt =
   anon_cls_cnt_per_fun = 0;
   captured_vars = ULS.empty;
   captured_this = false;
+  captured_generics = ULS.empty;
   hoisted_classes = [];
   hoisted_functions = [];
   inout_wrappers = [];
@@ -246,6 +248,26 @@ let add_var env st var =
   || Naming_special_names.Superglobals.is_superglobal var
   then st
   else { st with captured_vars = ULS.add st.captured_vars var }
+
+let add_generic env st var =
+  let is_reified_tparam is_fun =
+    let tparams =
+      if is_fun then Ast_scope.Scope.get_fun_tparams env.scope
+      else Ast_scope.Scope.get_class_tparams env.scope
+    in
+    List.find_mapi tparams
+      ~f:(fun i (_, (_, id), _, b) -> if b && id = var then Some i else None)
+  in
+  match is_reified_tparam true with
+  | Some i ->
+    let var = SU.Reified.reified_generic_captured_name true i in
+    { st with captured_generics = ULS.add st.captured_generics var }
+  | None ->
+    match is_reified_tparam false with
+    | Some i ->
+      let var = SU.Reified.reified_generic_captured_name false i in
+      { st with captured_generics = ULS.add st.captured_generics var }
+    | None -> st
 
 let get_vars scope ~is_closure_body params body =
   let has_this = Scope.has_this scope in
@@ -355,6 +377,7 @@ let enter_lambda st =
   { st with
     captured_vars = ULS.empty;
     captured_this = false;
+    captured_generics = ULS.empty;
     static_vars = ULS.empty;
    }
 
@@ -424,10 +447,10 @@ let make_anonymous_class_name env st =
     (make_scope_name st.namespace env.scope) per_fun_idx
 
 let make_closure ~class_num
-  p env st lambda_vars tparams is_static fd body =
+  p env st lambda_vars fun_tparams class_tparams is_static fd body =
   let md = {
     m_kind = [Public] @ (if is_static then [Static] else []);
-    m_tparams = fd.f_tparams;
+    m_tparams = fun_tparams;
     m_constrs = [];
     m_name = (fst fd.f_name, "__invoke");
     m_params = fd.f_params;
@@ -453,7 +476,7 @@ let make_closure ~class_num
     c_kind = Cnormal;
     c_is_xhp = false;
     c_name = (p, make_closure_name env st);
-    c_tparams = tparams;
+    c_tparams = class_tparams;
     c_extends = [(p, Happly((p, "Closure"), []))];
     c_implements = [];
     c_body = [
@@ -681,12 +704,21 @@ let rec convert_expr env st (p, expr_ as expr) =
     st, (p, InstanceOf (e1, e2))
   | Is (e, h) ->
     let st, e = convert_expr env st e in
+    let st, h = convert_hint env st h in
     st, (p, Is (e, h))
   | As (e, h, b) ->
     let st, e = convert_expr env st e in
+    let st, h = convert_hint env st h in
     st, (p, As (e, h, b))
   | New (e, typeargs, el1, el2) ->
     let st, e = convert_expr env st e in
+    let st, typeargs =
+      List.fold_right ~init:(st, []) typeargs
+        ~f:(fun (h, b) (st, acc) ->
+            let st, h = convert_hint env st h in
+            st, (h, b) :: acc
+         )
+    in
     let st, el1 = convert_exprs env st el1 in
     let st, el2 = convert_exprs env st el2 in
     st, (p, New (e, typeargs, el1, el2))
@@ -760,6 +792,7 @@ let rec convert_expr env st (p, expr_ as expr) =
     st, (p, Import(flavor, e))
   | Id (_, id) as ast_id when String_utils.string_starts_with id "$" ->
     let st = add_var env st id in
+    let st = add_generic env st id in
     st, (p, ast_id)
   | Id (_, var as id) ->
     (match get_let_var st var with
@@ -767,7 +800,9 @@ let rec convert_expr env st (p, expr_ as expr) =
         let lvar_name = transform_let_var_name var idx in
         let st = add_var env st lvar_name in
         st, (p, Lvar (p, lvar_name))
-      | None -> st, convert_id env p id)
+      | None ->
+        let st = add_generic env st var in
+        st, convert_id env p id)
   | Class_get (cid, n) ->
     let st, e = convert_expr env st cid in
     let st, n = convert_expr env st n in
@@ -805,6 +840,37 @@ and convert_snd_expr env st (a, b_exp) =
   let s, b_exp = convert_expr env st b_exp in
   s, (a, b_exp)
 
+and convert_hint env st (p, h as hint) =
+  match h with
+  | Happly ((_, id as ast_id), hl) ->
+    let st = add_generic env st id in
+    let st, hl = convert_hints env st hl in
+    st, (p, Happly (ast_id, hl))
+  | Hreified h ->
+    let st, h = convert_hint env st h in
+    st, (p, Hreified h)
+  | Hoption h ->
+    let st, h = convert_hint env st h in
+    st, (p, Hoption h)
+  | Hsoft h ->
+    let st, h = convert_hint env st h in
+    st, (p, Hsoft h)
+  | Htuple hl ->
+    let st, hl = convert_hints env st hl in
+    st, (p, Htuple hl)
+  | Hshape { si_allows_unknown_fields; si_shape_field_list } ->
+    let st, si_shape_field_list =
+      List.fold_right ~init:(st, []) si_shape_field_list
+        ~f:(fun field (st, acc) ->
+              let st, h = convert_hint env st field.sf_hint in
+              st, { field with sf_hint = h } :: acc
+           )
+    in
+    let info = { si_allows_unknown_fields; si_shape_field_list } in
+    st, (p, Hshape info)
+  | Haccess _
+  | Hfun _ -> st, hint
+
 (* Closure-convert a lambda expression, with use_vars_opt = Some vars
  * if there is an explicit `use` clause.
  *)
@@ -812,6 +878,7 @@ and convert_lambda env st p fd use_vars_opt =
   (* Remember the current capture and defined set across the lambda *)
   let captured_vars = st.captured_vars in
   let captured_this = st.captured_this in
+  let captured_generics = st.captured_generics in
   let static_vars = st.static_vars in
   let old_function_state = st.current_function_state in
   let st = enter_lambda st in
@@ -826,10 +893,12 @@ and convert_lambda env st p fd use_vars_opt =
             else env_with_lambda env fd in
   let st, block, function_state = convert_function_like_body env st fd.f_body in
   let st = { st with closure_cnt_per_fun = st.closure_cnt_per_fun + 1 } in
+  let current_generics = ULS.items st.captured_generics in
   (* HHVM lists lambda vars in descending order - do the same *)
   let lambda_vars =
-    List.sort ~compare:(fun a b -> compare b a) @@ ULS.items st.captured_vars in
-  (* For lambdas without explicit `use` variables, we ignore the computed
+    List.sort ~compare:(fun a b -> compare b a) @@
+    (ULS.items st.captured_vars @ current_generics) in
+  (* For lambdas with explicit `use` variables, we ignore the computed
    * capture set and instead use the explicit set *)
   let lambda_vars, use_vars =
     match use_vars_opt with
@@ -845,8 +914,12 @@ and convert_lambda env st p fd use_vars_opt =
             || List.exists fd.f_params (fun p -> name = snd p.param_id)
             then use_vars else use_var :: use_vars))
       in
-        List.map use_vars (fun ((_, var), _ref) -> var), use_vars in
-  let tparams = Scope.get_tparams env.scope in
+      (* We still need to append the generics *)
+      List.map use_vars (fun ((_, var), _ref) -> var) @ current_generics,
+      use_vars @ List.map current_generics (fun var -> (p, var), false)
+  in
+  let fun_tparams = Scope.get_fun_tparams env.scope in
+  let class_tparams = Scope.get_class_tparams env.scope in
   let class_num = total_class_count env st in
 
   let rec is_scope_static scope =
@@ -875,7 +948,7 @@ and convert_lambda env st p fd use_vars_opt =
   let inline_fundef, cd, md =
       make_closure
       ~class_num
-      p env st lambda_vars tparams is_static fd block in
+      p env st lambda_vars fun_tparams class_tparams is_static fd block in
   let explicit_use_set =
     if Option.is_some use_vars_opt
     then SSet.add (snd inline_fundef.f_name) st.explicit_use_set
@@ -895,9 +968,10 @@ and convert_lambda env st p fd use_vars_opt =
     (* lambda that was just processed was converted into non-static one *)
     (not is_static) in
   (* Restore capture and defined set *)
-  let st = { st with captured_vars = captured_vars;
+  let st = { st with captured_vars;
                      captured_this;
-                     static_vars = static_vars;
+                     captured_generics;
+                     static_vars;
                      explicit_use_set;
                      closure_enclosing_classes;
                      closure_namespaces = SMap.add
@@ -910,8 +984,13 @@ and convert_lambda env st p fd use_vars_opt =
   let env = old_env in
   (* Add lambda captured vars to current captured vars *)
   let st = List.fold_left lambda_vars ~init:st ~f:(add_var env) in
+  let st = List.fold_left current_generics ~init:st ~f:(fun st var ->
+    { st with captured_generics = ULS.add st.captured_generics var}) in
   let st = { st with hoisted_classes = cd :: st.hoisted_classes } in
   st, (p, Efun (inline_fundef, use_vars))
+
+and convert_hints env st hl =
+  List.map_env st hl (convert_hint env)
 
 and convert_exprs env st el =
   List.map_env st el (convert_expr env)

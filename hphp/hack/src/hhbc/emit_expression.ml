@@ -1149,15 +1149,25 @@ and emit_lambda env fundef ids =
   let fundef_name = snd fundef.A.f_name in
   let class_num = int_of_string fundef_name in
   let explicit_use = SSet.mem fundef_name (Emit_env.get_explicit_use_set ()) in
+  let is_in_lambda = Ast_scope.Scope.is_in_lambda (Emit_env.get_scope env) in
   gather [
     gather @@ List.map ids
-      (fun (x, isref) ->
-        instr (IGet (
-          let lid = get_local env x in
-          if explicit_use
-          then
-            if isref then VGetL lid else CGetL lid
-          else CUGetL lid)));
+      (fun (id, isref) ->
+        match SU.Reified.is_captured_generic @@ snd id with
+        | Some (is_fun, i) ->
+          if is_in_lambda then
+            instr_cgetl (Local.Named (
+              SU.Reified.reified_generic_captured_name is_fun i))
+          else instr_reified_generic
+                 (if is_fun then FunGeneric else ClsGeneric) i
+        | None ->
+          instr (IGet (
+            let lid = get_local env id in
+            if explicit_use
+            then
+              if isref then VGetL lid else CGetL lid
+            else CUGetL lid))
+      );
     instr (IMisc (CreateCl (List.length ids, class_num)))
   ]
 
@@ -1747,10 +1757,20 @@ and get_reified_var_cexpr env name =
     ]))
 
 and emit_reified_type_opt env name =
+  let is_in_lambda = Ast_scope.Scope.is_in_lambda (Emit_env.get_scope env) in
+  let cget_instr is_fun i =
+    instr_cgetl (Local.Named (SU.Reified.reified_generic_captured_name is_fun i))
+  in
   match is_reified_tparam ~is_fun:true env name with
-  | Some i -> Some (instr_reified_generic FunGeneric i)
-  | None -> Option.map ~f:(instr_reified_generic ClsGeneric)
-              (is_reified_tparam ~is_fun:false env name)
+  | Some i ->
+    Some (if is_in_lambda then cget_instr true i
+          else instr_reified_generic FunGeneric i)
+  | None ->
+    match is_reified_tparam ~is_fun:false env name with
+    | Some i ->
+      Some (if is_in_lambda then cget_instr false i
+            else instr_reified_generic ClsGeneric i)
+    | None -> None
 
 and emit_reified_type env name =
   match emit_reified_type_opt env name with

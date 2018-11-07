@@ -250,4 +250,20 @@ module Reified = struct
   let reified_init_method_name = "86reifiedinit"
 
   let reified_init_method_param_name = "$__typestructures"
+
+  let reified_generic_captured_name is_fun i =
+    let type_ = if is_fun then "function" else "class" in
+    Printf.sprintf "$__captured$reifiedgeneric$%s$%d" type_ i
+
+  let is_captured_generic id =
+    let prefix = "$__captured$reifiedgeneric$" in
+    let (>>=) = Option.(>>=) in
+    String.chop_prefix ~prefix id
+    >>= String.lsplit2 ~on:'$'
+    >>= (fun v -> try match v with
+          | ("function", i) -> Some (true, int_of_string i)
+          | ("class", i) -> Some (false, int_of_string i)
+          | _ -> None
+          with _ -> None
+        )
 end

@@ -338,13 +338,18 @@ let emit_class : A.class_ * Closure_convert.hoist_kind -> Hhas_class.t =
   fun (ast_class, hoisted) ->
   let namespace = ast_class.Ast.c_namespace in
   validate_class_name namespace ast_class.Ast.c_name;
+  (* TODO: communicate this without looking at the name *)
+  let is_closure_class =
+    String.is_prefix ~prefix:"Closure$" (snd ast_class.A.c_name) in
 
   let class_attributes =
     Emit_attribute.from_asts namespace ast_class.Ast.c_user_attributes in
-  let class_attributes = Emit_attribute.add_reified_attribute
-    class_attributes ast_class.Ast.c_tparams in
-  let class_attributes = Emit_attribute.add_reified_parent_attribute
-    class_attributes ast_class.Ast.c_extends in
+  let class_attributes = if is_closure_class then class_attributes else
+    Emit_attribute.add_reified_attribute
+      class_attributes ast_class.Ast.c_tparams in
+  let class_attributes = if is_closure_class then class_attributes else
+    Emit_attribute.add_reified_parent_attribute
+      class_attributes ast_class.Ast.c_extends in
   let class_is_immutable = Hhas_attribute.has_const class_attributes in
   (* In the future, we intend to set class_no_dynamic_props independently from
    * class_is_immutable, but for now class_is_immutable is the only thing that
@@ -421,9 +426,6 @@ let emit_class : A.class_ * Closure_convert.hoist_kind -> Hhas_class.t =
     ast_class.A.c_final || class_is_trait || (class_enum_type <> None) in
   let class_is_sealed = Hhas_attribute.has_sealed class_attributes in
   let tparams = Emit_body.tparams_to_strings ast_class.A.c_tparams in
-  (* TODO: communicate this without looking at the name *)
-  let is_closure_class =
-    String_utils.string_starts_with (snd ast_class.A.c_name) "Closure$" in
   let class_base =
     if class_is_interface then None
     else let base = from_extends

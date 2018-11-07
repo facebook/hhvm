@@ -62,11 +62,19 @@ let from_ast_wrapper : bool -> _ ->
   if not (has_valid_access_modifiers ast_method.Ast.m_kind) then
     Emit_fatal.raise_fatal_parse Pos.none
       "Multiple access type modifiers are not allowed";
+  let pos, original_name = ast_method.Ast.m_name in
+  let class_name =
+    SU.Xhp.mangle @@ Utils.strip_ns @@ snd ast_class.Ast.c_name in
+  (* TODO: use something that can't be faked in user code *)
+  let method_is_closure_body =
+     original_name = "__invoke"
+     && String.is_prefix ~prefix:"Closure$" class_name in
   let namespace = ast_class.Ast.c_namespace in
   let method_attributes =
     Emit_attribute.from_asts namespace ast_method.Ast.m_user_attributes in
-  let method_attributes = Emit_attribute.add_reified_attribute
-    method_attributes ast_method.Ast.m_tparams in
+  let method_attributes = if method_is_closure_body then method_attributes else
+    Emit_attribute.add_reified_attribute
+      method_attributes ast_method.Ast.m_tparams in
   let is_native = Hhas_attribute.has_native method_attributes in
   let is_native_opcode_impl =
     Hhas_attribute.is_native_opcode_impl method_attributes in
@@ -93,20 +101,13 @@ let from_ast_wrapper : bool -> _ ->
     if is_memoize then None else Hhas_attribute.deprecation_info method_attributes
   in
   let is_no_injection = Hhas_attribute.is_no_injection method_attributes in
-  let (pos, original_name) = ast_method.Ast.m_name in
-  let (_, class_name) = ast_class.Ast.c_name in
-  let class_name = SU.Xhp.mangle @@ Utils.strip_ns class_name in
   let ret = ast_method.Ast.m_ret in
   let original_method_id = make_name ast_method.Ast.m_name in
-  (* TODO: use something that can't be faked in user code *)
-  let method_is_closure_body =
-     original_name = "__invoke"
-     && String_utils.string_starts_with class_name "Closure$" in
-   if not (method_is_static || method_is_closure_body) then
-     List.iter ast_method.Ast.m_params (fun p ->
-       let pos, id = p.Ast.param_id in
-       if id = SN.SpecialIdents.this then
-       Emit_fatal.raise_fatal_parse pos "Cannot re-assign $this");
+  if not (method_is_static || method_is_closure_body) then
+    List.iter ast_method.Ast.m_params (fun p ->
+      let pos, id = p.Ast.param_id in
+      if id = SN.SpecialIdents.this then
+      Emit_fatal.raise_fatal_parse pos "Cannot re-assign $this");
   let inout_param_locations =
     extract_inout_or_ref_param_locations method_is_closure_body ast_method in
   let has_inout_args = List.length inout_param_locations <> 0 in

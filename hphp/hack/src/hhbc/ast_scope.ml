@@ -89,4 +89,8 @@ struct
     match get_class scope with
     | None -> false
     | Some cd -> cd.Ast.c_kind = Ast.Ctrait
+
+  let is_in_lambda = function
+    | ScopeItem.Lambda _ :: _ | ScopeItem.LongLambda _ :: _ -> true
+    | _ -> false
 end

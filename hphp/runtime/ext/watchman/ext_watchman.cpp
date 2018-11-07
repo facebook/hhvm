@@ -230,7 +230,7 @@ struct ActiveSubscription {
           processNextUpdate();
         }
       })
-      .then([this](watchman::SubscriptionPtr wm_sub) { // (ASYNC)
+      .thenValue([this](watchman::SubscriptionPtr wm_sub) { // (ASYNC)
         m_subscriptionPtr = wm_sub;
         return folly::unit;
       });
@@ -550,7 +550,7 @@ folly::Future<std::string> watchman_unsubscribe_impl(const std::string& name) {
   auto res_future = entry->second.unsubscribe()
     // I assume the items queued on the event base are drained in FIFO
     // order. So, after the unsubscribe should be safe to clean up.
-    .then([] (std::string&& result) {
+    .thenValue([] (std::string&& result) {
       // (ASYNC)
       return result;
     })
@@ -736,7 +736,7 @@ Object HHVM_FUNCTION(HH_watchman_sync_sub,
               }
             }
             sub_entry->second.sync(remaining_timeout)
-              .then(
+              .thenTry(
                 [sync_promise= std::move(sync_promise)]
                 (folly::Try<bool> res) mutable { // (ASYNC)
                   sync_promise.setValue(res);

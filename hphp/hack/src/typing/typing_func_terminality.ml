@@ -49,7 +49,7 @@ let static_meth_is_noreturn env ci meth_id =
   match class_name with
   | Some class_name ->
     funopt_is_noreturn
-      (get_static_meth (Env.get_options env) class_name (snd meth_id))
+      (get_static_meth (Env.get_tcopt env) class_name (snd meth_id))
   | None -> false
 
 let expression_exits env (_, e) =
@@ -57,7 +57,7 @@ let expression_exits env (_, e) =
   | Assert(AE_assert (_, False))
   | Yield_break -> true
   | Call (Cnormal, (_, Id (_, fun_name)), _, _, _) ->
-    funopt_is_noreturn @@ get_fun (Env.get_options env) fun_name
+    funopt_is_noreturn @@ get_fun (Env.get_tcopt env) fun_name
   | Call (Cnormal, (_, Class_const ((_, ci), meth_id)), _, _, _) ->
     static_meth_is_noreturn env ci meth_id
   | _ -> false

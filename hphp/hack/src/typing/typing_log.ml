@@ -284,5 +284,5 @@ let log_prop level p message env prop =
     log_position p (fun () -> log_subtype_prop env message prop))
 
 let increment_feature_count env s =
-  if GlobalOptions.tco_language_feature_logging (Env.get_options env)
+  if GlobalOptions.tco_language_feature_logging (Env.get_tcopt env)
   then Measure.sample s 1.0

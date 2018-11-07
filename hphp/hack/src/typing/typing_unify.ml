@@ -89,7 +89,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
   | Tarraykind AKany, (Tarraykind _ as ty)
   | (Tarraykind _ as ty), Tarraykind AKany ->
       let safe_array =
-        TypecheckerOptions.safe_array (Env.get_options env) in
+        TypecheckerOptions.safe_array (Env.get_tcopt env) in
       if safe_array then
         (TUtils.uerror r1 ty1 r2 ty2;
         env, Terr)
@@ -271,7 +271,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
       unify_ env r2 ty2 r1 ty1
 
   | Tarraykind AKany, (Ttuple _ as ty)
-    when not (TypecheckerOptions.disallow_array_as_tuple (Env.get_options env)) ->
+    when not (TypecheckerOptions.disallow_array_as_tuple (Env.get_tcopt env)) ->
       env, ty
 
   | Ttuple tyl1, Ttuple tyl2 ->
@@ -306,7 +306,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
       | Some (reactivity, is_coroutine, ftys, _, anon) ->
         let p1 = Reason.to_pos r1 in
         let p2 = Reason.to_pos r2 in
-        if reactivity <> ft.ft_reactive && not (TypecheckerOptions.unsafe_rx (Env.get_options env))
+        if reactivity <> ft.ft_reactive && not (TypecheckerOptions.unsafe_rx (Env.get_tcopt env))
         then Errors.fun_reactivity_mismatch
           p1 (TUtils.reactivity_to_string env reactivity)
           p2 (TUtils.reactivity_to_string env ft.ft_reactive);

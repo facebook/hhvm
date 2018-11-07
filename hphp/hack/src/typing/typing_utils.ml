@@ -117,7 +117,7 @@ let is_shape_field_optional env { sft_optional; sft_ty } =
   let optional_shape_field_enabled =
     not @@
       TypecheckerOptions.experimental_feature_enabled
-        (Env.get_options env)
+        (Env.get_tcopt env)
         TypecheckerOptions.experimental_disable_optional_and_unknown_shape_fields in
 
   if optional_shape_field_enabled then

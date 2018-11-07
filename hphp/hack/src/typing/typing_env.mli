@@ -82,7 +82,6 @@ val set_mode : env -> FileInfo.mode -> env
 val get_mode : env -> FileInfo.mode
 val is_strict : env -> bool
 val is_decl : env -> bool
-val get_options: env -> TypecheckerOptions.t
 val lost_info : string -> env -> locl ty -> env * locl ty
 val forget_members : env -> Pos.t -> env
 module FakeMembers :

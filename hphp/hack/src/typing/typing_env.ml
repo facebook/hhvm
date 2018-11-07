@@ -718,8 +718,6 @@ let is_strict env = let mode = get_mode env in
                     mode = FileInfo.Mstrict || mode = FileInfo.Mexperimental
 let is_decl env = get_mode env = FileInfo.Mdecl
 
-let get_options env = env.genv.tcopt
-
 let iter_anonymous env f =
   IMap.iter (fun _id (_, _, ftys, pos, _) ->
     let (untyped,typed) = !ftys in f pos (untyped @ typed)) env.genv.anons

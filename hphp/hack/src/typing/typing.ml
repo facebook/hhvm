@@ -1182,7 +1182,7 @@ and raw_expr
     | None -> () in
   if Env.env_local_reactive env
     && not allow_non_awaited_awaitable_in_rx
-    && not (TypecheckerOptions.unsafe_rx (Env.get_options env))
+    && not (TypecheckerOptions.unsafe_rx (Env.get_tcopt env))
   then begin match ty with
   | _, Tclass ((_, cls), _) when cls = SN.Classes.cAwaitable ->
     Errors.non_awaited_awaitable_in_rx (fst e);
@@ -1369,7 +1369,7 @@ and expr_
   let shape_and_tuple_arrays_enabled =
     not @@
       TypecheckerOptions.experimental_feature_enabled
-        (Env.get_options env)
+        (Env.get_tcopt env)
         TypecheckerOptions.experimental_disable_shape_and_tuple_arrays in
 
   let subtype_arraykey ~class_name ~key_pos env key_ty =
@@ -1712,7 +1712,7 @@ and expr_
       | Some (ty, _) ->
         if cst_name = SN.Rx.is_enabled
           && Env.env_reactivity env = Nonreactive
-          && not (TypecheckerOptions.unsafe_rx (Env.get_options env))
+          && not (TypecheckerOptions.unsafe_rx (Env.get_tcopt env))
         then Errors.rx_enabled_in_non_rx_context cst_pos;
         let env, ty =
           Phase.localize_with_self env ty in
@@ -2311,7 +2311,7 @@ and expr_
       let env = save_and_merge_next_in_catch env in
       Async.enforce_not_awaitable env (fst e) ty2;
       if (TypecheckerOptions.experimental_feature_enabled
-        (Env.get_options env)
+        (Env.get_tcopt env)
         TypecheckerOptions.experimental_forbid_nullable_cast)
         && TUtils.is_option_non_mixed env ty2
       then begin
@@ -2494,7 +2494,7 @@ and expr_
              * so treating parameters without type hints as "untyped"
             *)
             if not (Env.is_strict env) && TypecheckerOptions.untyped_nonstrict_lambda_parameters
-              (Env.get_options env)
+              (Env.get_tcopt env)
             then begin
               Typing_log.increment_feature_count env FL.Lambda.non_strict_unknown_params;
               check_body_under_known_params declared_ft
@@ -3625,7 +3625,7 @@ and is_abstract_ft fty = match fty with
      if uel <> [] then
        Errors.unpacking_disallowed_builtin_function p pseudo_func;
      let disallow_varray =
-       TypecheckerOptions.disallow_unset_on_varray (Env.get_options env) in
+       TypecheckerOptions.disallow_unset_on_varray (Env.get_tcopt env) in
      let unset_error = if disallow_varray then
         Errors.unset_nonidx_in_strict_no_varray
       else
@@ -5447,7 +5447,7 @@ and unop ~is_func_arg ~forbid_uref p env uop te ty =
       end
   | Ast.Uref ->
       if Env.env_local_reactive env
-         && not (TypecheckerOptions.unsafe_rx (Env.get_options env))
+         && not (TypecheckerOptions.unsafe_rx (Env.get_tcopt env))
       then Errors.reference_in_rx p;
 
       if forbid_uref
@@ -5455,7 +5455,7 @@ and unop ~is_func_arg ~forbid_uref p env uop te ty =
       else if is_func_arg then
         begin
           if TypecheckerOptions.disallow_array_cell_pass_by_ref
-            (Env.get_options env)
+            (Env.get_tcopt env)
           then match snd te with
           | T.Array_get _ -> Errors.passing_array_cell_by_ref p
           | _ -> ()
@@ -5757,7 +5757,7 @@ and condition ?lhs_of_null_coalesce env tparamet
 
       let safe_instanceof_enabled =
         TypecheckerOptions.experimental_feature_enabled
-          (Env.get_options env) TypecheckerOptions.experimental_instanceof in
+          (Env.get_tcopt env) TypecheckerOptions.experimental_instanceof in
       let rec resolve_obj env obj_ty =
         (* Expand so that we don't modify x *)
         let env, obj_ty = Env.expand_type env obj_ty in
@@ -6024,7 +6024,7 @@ and is_array env ty p pred_name arg_expr =
       | `PHPArray ->
         let safe_isarray_enabled =
           TypecheckerOptions.experimental_feature_enabled
-          (Env.get_options env) TypecheckerOptions.experimental_isarray in
+          (Env.get_tcopt env) TypecheckerOptions.experimental_isarray in
         if safe_isarray_enabled
         then Tarraykind (AKvarray_or_darray tfresh)
         else Tarraykind AKany) in
@@ -6199,7 +6199,7 @@ and class_def_ env c tc =
     Phase.localize_generic_parameters_with_bounds env (fst c.c_tparams)
       ~ety_env:(Phase.env_with_self env) in
   let env = add_constraints (fst c.c_name) env constraints in
-  Typing_variance.class_ (Env.get_options env) (snd c.c_name) tc impl;
+  Typing_variance.class_ (Env.get_tcopt env) (snd c.c_name) tc impl;
   List.iter impl (check_implements_tparaml env);
   check_parents_sealed env c tc;
 

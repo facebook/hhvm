@@ -117,7 +117,7 @@ let shapes_idx_not_null env shape_ty (p, field) =
 
 let experiment_enabled env experiment =
   TypecheckerOptions.experimental_feature_enabled
-    (Env.get_options env)
+    (Env.get_tcopt env)
     experiment
 
 let make_idx_fake_super_shape field_name field_ty =

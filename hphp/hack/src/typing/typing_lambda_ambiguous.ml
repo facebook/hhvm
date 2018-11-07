@@ -19,9 +19,9 @@ let log_anonymous env =
   Env.iter_anonymous env begin fun pos ftys ->
     let n = List.length ftys in
     if n > 0 then found := true;
-    if GlobalOptions.tco_language_feature_logging (Env.get_options env)
+    if GlobalOptions.tco_language_feature_logging (Env.get_tcopt env)
     then Measure.sample (FL.Lambda.unknown_params_with_uses n) 1.0;
-    if TypecheckerOptions.disallow_ambiguous_lambda (Env.get_options env) && n > 0
+    if TypecheckerOptions.disallow_ambiguous_lambda (Env.get_tcopt env) && n > 0
     then Errors.ambiguous_lambda pos
       (List.map ftys (fun fty ->
         (Reason.to_pos (fst fty), Typing_print.full_strip_ns env fty)))

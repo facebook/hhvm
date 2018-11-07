@@ -56,7 +56,7 @@ type env = {
 
 let coroutines_enabled env =
   TypecheckerOptions.experimental_feature_enabled
-    (Env.get_options env.tenv)
+    (Env.get_tcopt env.tenv)
     TypecheckerOptions.experimental_coroutines
 
 let report_coroutines_not_enabled p =
@@ -71,7 +71,7 @@ let check_coroutine_constructor name is_coroutine p =
   then Errors.coroutine_in_constructor p
 
 let error_on_attr env attrs attr f =
-  if not (TypecheckerOptions.unsafe_rx (Env.get_options env.tenv))
+  if not (TypecheckerOptions.unsafe_rx (Env.get_tcopt env.tenv))
   then match Attributes.find attr attrs with
   | Some { ua_name = (p, _); _ } -> f p;
   | _ -> ()
@@ -491,14 +491,14 @@ and func env f named_body =
 
   if f.f_ret_by_ref
      && env.is_reactive
-     && not (TypecheckerOptions.unsafe_rx (Env.get_options env.tenv))
+     && not (TypecheckerOptions.unsafe_rx (Env.get_tcopt env.tenv))
   then Errors.reference_in_rx p;
 
   List.iter f.f_tparams (tparam env);
   let byref = List.find f.f_params ~f:(fun x -> x.param_is_reference) in
   List.iter f.f_params (fun_param env f.f_name f.f_fun_kind byref);
   if f.f_ret_by_ref &&
-    TypecheckerOptions.disallow_return_by_ref (Env.get_options env.tenv)
+    TypecheckerOptions.disallow_return_by_ref (Env.get_tcopt env.tenv)
   then Errors.illegal_return_by_ref p;
   let inout = List.find f.f_params ~f:(
     fun x -> x.param_callconv = Some Ast.Pinout) in
@@ -556,7 +556,7 @@ and hint_ env p = function
       | _ -> ()
       end
   | Happly ((_, x), hl) as h when Env.is_typedef x ->
-    begin match Typing_lazy_heap.get_typedef (Env.get_options env.tenv) x with
+    begin match Typing_lazy_heap.get_typedef (Env.get_tcopt env.tenv) x with
       | Some {td_tparams; _} ->
         check_happly env.typedef_tparams env.tenv (p, h);
         check_tparams env p x td_tparams hl
@@ -585,7 +585,7 @@ and check_tparams env p x tparams hl =
 and check_arity env p tname arity size =
   if size = arity then () else
   if size = 0 && not (Typing_env.is_strict env.tenv)
-  && not (TypecheckerOptions.experimental_feature_enabled (Env.get_options env.tenv)
+  && not (TypecheckerOptions.experimental_feature_enabled (Env.get_tcopt env.tenv)
     TypecheckerOptions.experimental_generics_arity)
   then ()
   else
@@ -707,7 +707,7 @@ and class_ tenv c =
   List.iter c.c_req_extends (check_is_class env);
   List.iter c.c_uses (check_is_trait env);
   let disallow_static_memoized = TypecheckerOptions.experimental_feature_enabled
-    (Env.get_options env.tenv)
+    (Env.get_tcopt env.tenv)
     TypecheckerOptions.experimental_disallow_static_memoized in
   if disallow_static_memoized && not c.c_final then
     begin
@@ -1028,7 +1028,7 @@ and method_ (env, is_static) m =
   let byref = List.find m.m_params ~f:(fun x -> x.param_is_reference) in
   List.iter m.m_params (fun_param env m.m_name m.m_fun_kind byref);
   if m.m_ret_by_ref &&
-    TypecheckerOptions.disallow_return_by_ref (Env.get_options env.tenv)
+    TypecheckerOptions.disallow_return_by_ref (Env.get_tcopt env.tenv)
   then Errors.illegal_return_by_ref p;
   let inout = List.find m.m_params ~f:(
     fun x -> x.param_callconv = Some Ast.Pinout) in
@@ -1116,7 +1116,7 @@ and fun_param env (pos, name) f_type byref param =
 
   if env.is_reactive
      && param.param_is_reference
-     && not (TypecheckerOptions.unsafe_rx (Env.get_options env.tenv))
+     && not (TypecheckerOptions.unsafe_rx (Env.get_tcopt env.tenv))
   then Errors.reference_in_rx pos;
 
   match param.param_callconv with

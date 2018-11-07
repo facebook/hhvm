@@ -474,7 +474,7 @@ and simplify_subtype
         ftys := TUtils.add_function_type env ety_super !ftys;
         (env, TL.valid) |>
         check_with (subtype_reactivity env reactivity ft.ft_reactive
-          || TypecheckerOptions.unsafe_rx (Env.get_options env))
+          || TypecheckerOptions.unsafe_rx (Env.get_tcopt env))
           (fun () -> Errors.fun_reactivity_mismatch
             p_super (TUtils.reactivity_to_string env reactivity)
             p_sub (TUtils.reactivity_to_string env ft.ft_reactive)) |>
@@ -787,7 +787,7 @@ and simplify_subtype
 
   (* Arrays *)
   | Ttuple _, Tarraykind AKany ->
-    if TypecheckerOptions.disallow_array_as_tuple (Env.get_options env)
+    if TypecheckerOptions.disallow_array_as_tuple (Env.get_tcopt env)
     then invalid ()
     else valid ()
   | (Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _ |
@@ -812,7 +812,7 @@ and simplify_subtype
       valid ()
 
     | AKany, _ ->
-      let safe_array = TypecheckerOptions.safe_array (Env.get_options env) in
+      let safe_array = TypecheckerOptions.safe_array (Env.get_tcopt env) in
       if safe_array then invalid () else valid ()
 
     | AKshape fdm, (
@@ -864,7 +864,7 @@ and simplify_subtype
       simplify_subtype ~seen_generic_params ~deep ~this_ty tv_sub tv_super
 
     | (AKvarray elt_ty | AKvec elt_ty), (AKdarray _ | AKmap _)
-        when not (TypecheckerOptions.safe_vector_array (Env.get_options env)) ->
+        when not (TypecheckerOptions.safe_vector_array (Env.get_tcopt env)) ->
           let int_reason = Reason.Ridx (Reason.to_pos r, Reason.Rnone) in
           let int_type = int_reason, Tprim Nast.Tint in
           simplify_subtype ~seen_generic_params ~deep ~this_ty
@@ -1580,7 +1580,7 @@ and sub_type_inner_helper env ~this_ty
     | (_, Tvar _) ->
       if not
         (TypecheckerOptions.experimental_feature_enabled
-        (Env.get_options env)
+        (Env.get_tcopt env)
         TypecheckerOptions.experimental_unresolved_fix)
       then env
       else
@@ -1841,7 +1841,7 @@ let rec sub_string
   (env : Env.env)
   (ty2 : locl ty) : Env.env =
   let stringish_deprecated =
-    TypecheckerOptions.disallow_stringish_magic (Env.get_options env) in
+    TypecheckerOptions.disallow_stringish_magic (Env.get_tcopt env) in
   let sub_string = sub_string ~allow_mixed in
   let env, ety2 = Env.expand_type env ty2 in
   let fail () =

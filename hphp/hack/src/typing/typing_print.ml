@@ -414,7 +414,7 @@ module Full = struct
       let optional_shape_fields_enabled =
         not @@
           TypecheckerOptions.experimental_feature_enabled
-            (Env.get_options env)
+            (Env.get_tcopt env)
             TypecheckerOptions.experimental_disable_optional_and_unknown_shape_fields in
       let fields =
         let f_field (shape_map_key, { sft_optional; sft_ty }) =

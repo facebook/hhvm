@@ -27,9 +27,9 @@ struct CmdAuth : DebuggerCommand {
   CmdAuth() : DebuggerCommand(KindOfAuth) {}
 
   const std::string& getToken() const { return m_token; }
+  const std::string& getSession() const { return m_session; }
   const std::string& getSandboxPath() const { return m_sandboxPath; }
 
-  std::string getFullTokenScriptPath(const std::string& tokenScriptPath);
   void setSandboxPath(const std::string& sandboxPath) {
     m_sandboxPath = sandboxPath;
   };
@@ -43,6 +43,7 @@ protected:
 
 private:
   std::string m_token;
+  std::string m_session;
   std::string m_sandboxPath = "";
 };
 

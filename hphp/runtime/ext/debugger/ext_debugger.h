@@ -24,6 +24,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 String HHVM_FUNCTION(hphpd_auth_token);
+String HHVM_FUNCTION(hphp_debug_session_auth);
 void HHVM_FUNCTION(hphpd_break, bool condition = true);
 bool HHVM_FUNCTION(hphp_debug_break, bool condition = true);
 bool HHVM_FUNCTION(hphp_debugger_attached);

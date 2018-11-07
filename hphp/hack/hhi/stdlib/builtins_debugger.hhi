@@ -13,6 +13,8 @@ function hphpd_install_user_command($cmd, $clsname);
 <<__PHPStdLib>>
 function hphpd_auth_token(): string;
 <<__PHPStdLib>>
+function hphp_debug_session_auth(): string;
+<<__PHPStdLib>>
 function hphpd_get_user_commands();
 <<__PHPStdLib>>
 function hphpd_break(bool $condition = true): void;

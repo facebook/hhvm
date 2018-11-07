@@ -877,6 +877,46 @@ std::string DebuggerProxy::requestAuthToken() {
   return token->getToken();
 }
 
+std::string DebuggerProxy::requestSessionAuth() {
+  Lock lock(m_signalMutex);
+  TRACE_RB(2, "DebuggerProxy::requestSessionAuth: sending auth request\n");
+
+  // Try to use the current sandbox's path, defaulting to the path from
+  // DebuggerDefaultSandboxPath if the current sandbox path is empty.
+  auto sandboxPath = getSandbox().m_path;
+  if (sandboxPath.empty()) {
+    sandboxPath = RuntimeOption::DebuggerDefaultSandboxPath;
+  }
+
+  CmdAuth cmd;
+  cmd.setSandboxPath(sandboxPath);
+  if (!cmd.onServer(*this)) {
+    TRACE_RB(2, "DebuggerProxy::requestSessionAuth: "
+             "Failed to send CmdAuth to client\n");
+    return "";
+  }
+
+  DebuggerCommandPtr res;
+  while (!DebuggerCommand::Receive(m_thrift, res,
+                                   "DebuggerProxy::requestSessionAuth()")) {
+    checkStop();
+  }
+  if (!res) {
+    TRACE_RB(2, "DebuggerProxy::requestSessionAuth: "
+             "Failed to get CmdAuth back from client\n");
+    return "";
+  }
+
+  auto auth = std::dynamic_pointer_cast<CmdAuth>(res);
+  if (!auth) {
+    TRACE_RB(2, "DebuggerProxy::requestSessionAuth: "
+             "bad response from auth request: %d", res->getType());
+    return "";
+  }
+
+  return auth->getSession();
+}
+
 int DebuggerProxy::getRealStackDepth() {
   TRACE(2, "DebuggerProxy::getRealStackDepth\n");
   int depth = 0;

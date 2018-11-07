@@ -735,6 +735,7 @@ std::string RuntimeOption::DebuggerDefaultSandboxPath;
 std::string RuntimeOption::DebuggerStartupDocument;
 int RuntimeOption::DebuggerSignalTimeout = 1;
 std::string RuntimeOption::DebuggerAuthTokenScriptBin;
+std::string RuntimeOption::DebuggerSessionAuthScriptBin;
 
 std::string RuntimeOption::SendmailPath = "sendmail -t -i";
 std::string RuntimeOption::MailForceExtraParameters;
@@ -1495,6 +1496,8 @@ void RuntimeOption::Load(
                    "Eval.Debugger.RPC.DefaultTimeout", 30);
       Config::Bind(DebuggerAuthTokenScriptBin, ini, config,
                    "Eval.Debugger.Auth.TokenScriptBin");
+      Config::Bind(DebuggerSessionAuthScriptBin, ini, config,
+                   "Eval.Debugger.Auth.SessionAuthScriptBin");
     }
   }
   {

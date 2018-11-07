@@ -16,6 +16,7 @@ testing and some alternative PHP implementation.
 - hphp_get_thread_id
 
 - hphpd_auth_token
+- hphp_debug_session_auth
 - hphpd_install_user_command
 - hphpd_get_user_commands
 - hphpd_break

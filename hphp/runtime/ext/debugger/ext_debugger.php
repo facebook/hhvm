@@ -20,6 +20,12 @@ namespace {
   <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
   function hphpd_auth_token(): string;
 
+  /* Request signed session from the client. The serialized session is empty in
+   * case of error;
+   */
+  <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
+  function hphp_debug_session_auth(): string;
+
   /* Sets a hard breakpoint. When a debugger is running, this line of code will
    * break into debugger, if condition is met. If there is no debugger that's
    * attached, it will not do anything.

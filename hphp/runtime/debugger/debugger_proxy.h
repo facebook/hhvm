@@ -118,6 +118,7 @@ struct DebuggerProxy : Synchronizable,
   ExecutePHP(const std::string &php, String &output, int frame, int flags);
 
   std::string requestAuthToken();
+  std::string requestSessionAuth();
 
 private:
   bool blockUntilOwn(CmdInterrupt &cmd, bool check);

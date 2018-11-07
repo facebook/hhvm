@@ -12,6 +12,7 @@ type t =
   | OSS_3_27
   | OSS_3_28
   | OSS_3_29
+  | OSS_3_30
   | HEAD
   | ISODate of int (* yyyymmdd *)
   [@@deriving show]

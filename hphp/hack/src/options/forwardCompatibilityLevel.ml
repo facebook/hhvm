@@ -12,6 +12,7 @@ type t =
   | OSS_3_27
   | OSS_3_28
   | OSS_3_29
+  | OSS_3_30
   | HEAD
   | ISODate of int (* yyyymmdd *)
   [@@deriving show]
@@ -22,6 +23,7 @@ let from_string (s:string): t =
     | "3.27" -> OSS_3_27
     | "3.28" -> OSS_3_28
     | "3.29" -> OSS_3_29
+    | "3.30" -> OSS_3_30
     | "HEAD" -> HEAD
     | _ ->
       if Str.string_match (Str.regexp "^([0-9]+)\\.([0-9]+)$") s 0
@@ -52,6 +54,7 @@ let as_int t =
     | OSS_3_27 -> 2018_06_04
     | OSS_3_28 -> 2018_08_13
     | OSS_3_29 -> 2018_10_08
+    | OSS_3_30 -> 2018_12_03
     | HEAD     -> 9999_99_99
     | ISODate d -> d
 
@@ -61,6 +64,7 @@ let as_string t =
     | OSS_3_27 -> "3.27"
     | OSS_3_28 -> "3.28"
     | OSS_3_29 -> "3.29"
+    | OSS_3_30 -> "3.30"
     | HEAD     -> "HEAD"
     | ISODate d -> string_of_int(d)
 

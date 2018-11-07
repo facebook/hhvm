@@ -688,10 +688,5 @@ void FileUtil::checkPathAndError(const String& path,
   }
 }
 
-bool FileUtil::isSystemName(folly::StringPiece path) {
-  static const char prefix[] = "/:systemlib";
-  return !strncmp(path.begin(), prefix, sizeof prefix - 1);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

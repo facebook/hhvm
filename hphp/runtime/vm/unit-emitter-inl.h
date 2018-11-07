@@ -18,7 +18,6 @@
 #error "unit-emitter-inl.h should only be included by unit-emitter.h"
 #endif
 
-#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
 
 namespace HPHP {
@@ -141,7 +140,10 @@ void UnitEmitter::emitImpl(T n, int64_t pos) {
 // Other methods.
 
 inline bool UnitEmitter::isASystemLib() const {
-  return FileUtil::isSystemName(m_filepath->slice());
+  static const char systemlib_prefix[] = "/:systemlib";
+  return !strncmp(m_filepath->data(),
+                  systemlib_prefix,
+                  sizeof systemlib_prefix - 1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

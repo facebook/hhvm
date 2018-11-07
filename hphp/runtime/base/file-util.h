@@ -137,8 +137,6 @@ template <class Action>
 bool runRelative(std::string suffix, String cmd,
                  const char* currentDir, Action action);
 
-bool isSystemName(folly::StringPiece path);
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 }

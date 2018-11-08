@@ -660,7 +660,18 @@ bool simplify(Env& env, const addq& vadd, Vlabel b, size_t i) {
   return false;
 }
 
+// remove compares with unused results. This overlaps with removeDeadCode,
+// but does it earlier.
+template <typename Cmp>
+bool simplify_dead_cmp(Env& env, const Cmp& cmp, Vlabel b, size_t i) {
+  if (env.use_counts[cmp.sf] == 0) {
+    return simplify_impl(env, b, i, nop{});
+  }
+  return false;
+}
+
 bool simplify(Env& env, const cmpq& vcmp, Vlabel b, size_t i) {
+  if (simplify_dead_cmp(env, vcmp, b, i)) return true;
   if (flip_operands_helper(env, vcmp, b, i)) return true;
 
   if (!arch_any(Arch::ARM, Arch::PPC64)) {
@@ -689,9 +700,10 @@ bool simplify(Env& env, const cmpq& vcmp, Vlabel b, size_t i) {
 }
 
 bool simplify(Env& env, const cmpl& vcmp, Vlabel b, size_t i) {
+  if (simplify_dead_cmp(env, vcmp, b, i)) return true;
   if (flip_operands_helper(env, vcmp, b, i)) return true;
+  if (arch_any(Arch::ARM, Arch::PPC64)) return false;
 
-  if (arch() == Arch::ARM) return false;
   if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
     return simplify_impl(env, b, i,
                          cmplm { vcmp.s0, *vptr, vcmp.sf });
@@ -700,9 +712,10 @@ bool simplify(Env& env, const cmpl& vcmp, Vlabel b, size_t i) {
 }
 
 bool simplify(Env& env, const cmpw& vcmp, Vlabel b, size_t i) {
+  if (simplify_dead_cmp(env, vcmp, b, i))  return true;
   if (flip_operands_helper(env, vcmp, b, i)) return true;
+  if (arch_any(Arch::ARM, Arch::PPC64)) return false;
 
-  if (arch() == Arch::ARM) return false;
   if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
     return simplify_impl(env, b, i,
                          cmpwm { vcmp.s0, *vptr, vcmp.sf });
@@ -712,8 +725,9 @@ bool simplify(Env& env, const cmpw& vcmp, Vlabel b, size_t i) {
 
 bool simplify(Env& env, const cmpb& vcmp, Vlabel b, size_t i) {
   if (flip_operands_helper(env, vcmp, b, i)) return true;
+  if (simplify_dead_cmp(env, vcmp, b, i)) return true;
+  if (arch_any(Arch::ARM, Arch::PPC64)) return false;
 
-  if (arch() == Arch::ARM) return false;
   if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
     return simplify_impl(env, b, i,
                          cmpbm { vcmp.s0, *vptr, vcmp.sf });
@@ -722,6 +736,7 @@ bool simplify(Env& env, const cmpb& vcmp, Vlabel b, size_t i) {
 }
 
 bool simplify(Env& env, const cmpqi& vcmp, Vlabel b, size_t i) {
+  if (simplify_dead_cmp(env, vcmp, b, i)) return true;
   if (arch_any(Arch::ARM, Arch::PPC64)) return false;
   if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
     return simplify_impl(env, b, i,
@@ -731,7 +746,8 @@ bool simplify(Env& env, const cmpqi& vcmp, Vlabel b, size_t i) {
 }
 
 bool simplify(Env& env, const cmpli& vcmp, Vlabel b, size_t i) {
-  if (arch() == Arch::ARM) return false;
+  if (simplify_dead_cmp(env, vcmp, b, i)) return true;
+  if (arch_any(Arch::ARM, Arch::PPC64)) return false;
   if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
     return simplify_impl(env, b, i,
                          cmplim { vcmp.s0, *vptr, vcmp.sf });
@@ -740,7 +756,8 @@ bool simplify(Env& env, const cmpli& vcmp, Vlabel b, size_t i) {
 }
 
 bool simplify(Env& env, const cmpwi& vcmp, Vlabel b, size_t i) {
-  if (arch() == Arch::ARM) return false;
+  if (simplify_dead_cmp(env, vcmp, b, i)) return true;
+  if (arch_any(Arch::ARM, Arch::PPC64)) return false;
   if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
     return simplify_impl(env, b, i,
                          cmpwim { vcmp.s0, *vptr, vcmp.sf });
@@ -749,12 +766,45 @@ bool simplify(Env& env, const cmpwi& vcmp, Vlabel b, size_t i) {
 }
 
 bool simplify(Env& env, const cmpbi& vcmp, Vlabel b, size_t i) {
+  if (simplify_dead_cmp(env, vcmp, b, i)) return true;
   if (arch_any(Arch::ARM, Arch::PPC64)) return false;
   if (auto const vptr = foldable_load(env, vcmp.s1, b, i)) {
     return simplify_impl(env, b, i,
                          cmpbim { vcmp.s0, *vptr, vcmp.sf });
   }
   return false;
+}
+
+bool simplify(Env& env, const cmpbim& vcmp, Vlabel b, size_t i) {
+  return (simplify_dead_cmp(env, vcmp, b, i));
+}
+
+bool simplify(Env& env, const cmpwim& vcmp, Vlabel b, size_t i) {
+  return (simplify_dead_cmp(env, vcmp, b, i));
+}
+
+bool simplify(Env& env, const cmplim& vcmp, Vlabel b, size_t i) {
+  return (simplify_dead_cmp(env, vcmp, b, i));
+}
+
+bool simplify(Env& env, const cmpqim& vcmp, Vlabel b, size_t i) {
+  return (simplify_dead_cmp(env, vcmp, b, i));
+}
+
+bool simplify(Env& env, const cmpbm& vcmp, Vlabel b, size_t i) {
+  return (simplify_dead_cmp(env, vcmp, b, i));
+}
+
+bool simplify(Env& env, const cmpwm& vcmp, Vlabel b, size_t i) {
+  return (simplify_dead_cmp(env, vcmp, b, i));
+}
+
+bool simplify(Env& env, const cmplm& vcmp, Vlabel b, size_t i) {
+  return (simplify_dead_cmp(env, vcmp, b, i));
+}
+
+bool simplify(Env& env, const cmpqm& vcmp, Vlabel b, size_t i) {
+  return (simplify_dead_cmp(env, vcmp, b, i));
 }
 
 // test sets C=O=0; shift sets them in unknown ways

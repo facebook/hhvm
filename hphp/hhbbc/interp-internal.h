@@ -587,7 +587,7 @@ LocalId topStkLocal(const State& state, uint32_t idx = 0) {
   return equiv == StackDupId ? NoLocalId : equiv;
 }
 LocalId topStkLocal(ISS& env, uint32_t idx = 0) {
-  return topStkLocal(env.state);
+  return topStkLocal(env.state, idx);
 }
 
 // Obtain a location which is equivalent to the given stack value

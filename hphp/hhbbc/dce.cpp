@@ -2267,6 +2267,8 @@ void remove_unused_locals(Context const ctx,
 namespace {
 
 struct WritableClsRefSlotVisitor : boost::static_visitor<ClsRefSlotId*> {
+  WritableClsRefSlotVisitor() {}
+
   template <class T>
   typename std::enable_if<!has_car<T>::value && !has_caw<T>::value,
                           ClsRefSlotId*>::type

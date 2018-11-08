@@ -967,6 +967,8 @@ BOOST_MPL_HAS_XXX_TRAIT_NAMED_DEF(has_caw, has_caw_flag, false);
 //////////////////////////////////////////////////////////////////////
 
 struct ReadClsRefSlotVisitor : boost::static_visitor<ClsRefSlotId> {
+  ReadClsRefSlotVisitor() {}
+
   template <class T>
   typename std::enable_if<!has_car<T>::value, ClsRefSlotId>::type
   operator()(T const& /*t*/) const {

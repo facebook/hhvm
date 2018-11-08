@@ -347,7 +347,9 @@ void emitAwait(IRGS& env) {
   assertx(spOffBCFromFP(env) == spOffEmpty(env) + 1);
 
   if (curFunc(env)->isAsyncGenerator() &&
-      resumeMode(env) == ResumeMode::Async) PUNT(Await-AsyncGenerator);
+      resumeMode(env) == ResumeMode::Async) {
+    PUNT(Await-AsyncGenerator);
+  }
 
   auto const exitSlow = makeExitSlow(env);
 
@@ -437,7 +439,9 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
   assertx(spOffBCFromFP(env) == spOffEmpty(env));
 
   if (curFunc(env)->isAsyncGenerator() &&
-      resumeMode(env) == ResumeMode::Async) PUNT(Await-AsyncGenerator);
+      resumeMode(env) == ResumeMode::Async) {
+    PUNT(Await-AsyncGenerator);
+  }
 
   auto const exitSlow = makeExitSlow(env);
 

@@ -81,7 +81,7 @@ module type S = sig
   val error_class_attribute_already_bound : string -> string -> Pos.t -> Pos.t -> unit
   val unbound_name : Pos.t -> string -> [< `cls | `func | `const ] -> unit
   val different_scope : Pos.t -> string -> Pos.t -> unit
-  val undefined : Pos.t -> string -> unit
+  val undefined : in_rx_scope: bool -> Pos.t -> string -> unit
   val this_reserved : Pos.t -> unit
   val start_with_T : Pos.t -> unit
   val already_bound : Pos.t -> string -> unit

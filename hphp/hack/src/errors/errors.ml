@@ -843,11 +843,14 @@ let rx_move_invalid_location pos =
   add (Naming.err_code Naming.RxMoveInvalidLocation) pos
     "Rx\\move is only allowed in argument position or as right hand side of the assignment."
 
-let undefined pos var_name =
+let undefined ~in_rx_scope pos var_name =
+  let rx_scope_clarification =
+    if in_rx_scope then "or unsets "
+    else "" in
   add (Naming.err_code Naming.Undefined) pos ("Variable "^var_name^
     " is undefined, "^
     "or there exists at least one control flow path reaching this point which "^
-    "does not define "^var_name^".")
+    "does not define " ^ rx_scope_clarification ^ var_name ^".")
 
 let this_reserved pos =
   add (Naming.err_code Naming.ThisReserved) pos

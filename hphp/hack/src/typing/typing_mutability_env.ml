@@ -12,13 +12,11 @@ open Core_kernel
   See typing_mutability.ml for a description of the fields.
 *)
 module LMap = Local_id.Map
-type mut_type =
-  Mutable | MutableUnset | Borrowed | MaybeMutable | Immutable
+type mut_type = Mutable | Borrowed | MaybeMutable | Immutable
 type mutability = Pos.t * mut_type
 
 let to_string_ = function
 | Mutable -> "mutably-owned"
-| MutableUnset -> "mutably-owned (unset)"
 | Borrowed -> "mutably-borrowed"
 | MaybeMutable -> "maybe-mutable"
 | Immutable -> "immutable"
@@ -46,35 +44,21 @@ let intersect_mutability
   (m1 : mutability_env)
   (m2 : mutability_env)
   : mutability_env =
-  (* Check for any variables that were unset in one scope but not the other *)
-  LMap.iter
-  begin fun id _ ->
-    match LMap.get id m1, LMap.get id m2 with
-    | Some (_, Mutable), Some (p, MutableUnset)
-    | Some (p, MutableUnset), Some (_, Mutable) ->
-      Errors.inconsistent_unset p;
-    | _ -> ()
-  end parent_mut;
-  let merge ~keep_left _id v1_opt v2_opt =
+  let merge _id v1_opt v2_opt =
     match v1_opt, v2_opt with
     | Some (p1, mut1), Some (p2, mut2) ->
       let assumed_mut =
-        (* do a conservative merge for mutability values *)
-        begin match mut1, mut2 with
-        | Mutable, MutableUnset | MutableUnset, Mutable -> MutableUnset
-        | _ ->
-          if mut1 = mut2 then mut1 else begin
-            Errors.inconsistent_mutability
-              p1 (to_string_ mut1)
-              (Some (p2, (to_string_ mut2)));
-            mut1
-          end
-        end in
+        if mut1 = mut2 then mut1 else begin
+          Errors.inconsistent_mutability
+            p1 (to_string_ mut1)
+            (Some (p2, (to_string_ mut2)));
+          mut1
+      end in
       Some (p1, assumed_mut)
-    | Some v, None | None, Some v when keep_left -> Some v
+    | Some v, None | None, Some v -> Some v
     | _ -> None in
-  (* intersect variables in child maps, keep only entries that exists in both *)
-  let acc = LMap.merge (merge ~keep_left:false) m1 m2 in
-  (* combine result with parent env preserving items from parent *)
-  let acc = LMap.merge (merge ~keep_left:true) parent_mut acc in
+  (* ensure not conflicting mutability flavors in child scopes *)
+  let acc = LMap.merge merge m1 m2 in
+  (* ensure no conflicting flavors in child and parent scopes *)
+  let acc = LMap.merge merge parent_mut acc in
   acc

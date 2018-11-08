@@ -1,0 +1,2 @@
+File "cond_rx3.php", line 11, characters 5-8:
+Variable $foo is undefined, or there exists at least one control flow path reaching this point which does not define or unsets $foo. (Naming[2050])

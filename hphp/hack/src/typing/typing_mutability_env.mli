@@ -21,7 +21,7 @@
   reassigned. They are essentially read only.
 *)
 type mut_type =
-  Mutable | MutableUnset | Borrowed | MaybeMutable | Immutable
+  Mutable | Borrowed | MaybeMutable | Immutable
 type mutability =
   Pos.t * mut_type
 

@@ -920,7 +920,8 @@ let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx =
   let error_if_pos_provided posopt =
     match posopt with
     | Some p when not !Autocomplete.auto_complete ->
-      Errors.undefined p (LID.to_string x);
+      let in_rx_scope = env_local_reactive env in
+      Errors.undefined ~in_rx_scope p (LID.to_string x);
     | _ -> () in
   let lcl = LID.Map.get x ctx in
   match lcl with

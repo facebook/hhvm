@@ -80,7 +80,7 @@ let handle_value_in_return
       | Immutable -> "(non-mutable)"
       | MaybeMutable -> "(maybe-mutable)"
       | Borrowed -> "(borrowed)"
-      | MutableUnset | Mutable -> assert false in
+      | Mutable -> assert false in
     Errors.invalid_mutable_return_result (T.get_position e) fun_pos kind in
   let error_borrowed_as_immutable e =
     (* attempt to return borrowed value as immutable *)
@@ -102,13 +102,13 @@ let handle_value_in_return
     | T.Pipe (_, _, r) ->
       (* ok for pipe if rhs returns mutable *)
       aux r
-    | T.Lvar (p, id) ->
+    | T.Lvar (_, id) ->
       let mut_env = Env.get_env_mutability env in
       begin match LMap.get id mut_env with
-      | Some (_, Mutable) ->
+      | Some (p, Mutable) ->
         (* it is ok to return mutably owned values *)
         let env = Env.unset_local env id in
-        Env.env_with_mut env (LMap.add id (p, MutableUnset) mut_env)
+        Env.env_with_mut env (LMap.add id (p, Mutable) mut_env)
       | Some (_, Borrowed) when not function_returns_mutable ->
         (* attempt to return borrowed value as immutable
            unless function is marked with __ReturnsVoidToRx in which case caller
@@ -197,12 +197,13 @@ let freeze_or_move_local
   (invalid_use : Pos.t -> unit)
   : Typing_env.env =
   match tel with
+  | [_, T.Any] -> env
   | [(_, T.Lvar (id_pos, id));] ->
     let mut_env = Env.get_env_mutability env in
     begin match LMap.get id mut_env with
-    | Some (_, Mutable) ->
+    | Some (p, Mutable) ->
       let env = Env.unset_local env id in
-      Env.env_with_mut env (LMap.add id (id_pos, MutableUnset) mut_env)
+      Env.env_with_mut env (LMap.add id (p, Mutable) mut_env)
     | Some x ->
       invalid_target p id_pos (to_string x);
       env
@@ -375,8 +376,9 @@ let enforce_mutable_constructor_call env ctor_fty el =
 
 let enforce_mutable_call (env : Typing_env.env) (te : T.expr) =
   match snd te with
-  | T.Call (_, (_, T.Id id), _, el, _)
-  | T.Call (_, (_, T.Fun_id id), _, el, _) ->
+  | T.Call (_, (_, T.Id (_, s as id)), _, el, _)
+  | T.Call (_, (_, T.Fun_id (_, s as id)), _, el, _)
+    when s <> SN.Rx.move && s <> SN.Rx.freeze ->
     begin match Env.get_fun env (snd id) with
     | Some fty ->
       check_mutability_fun_params env Borrowable_args.empty fty el

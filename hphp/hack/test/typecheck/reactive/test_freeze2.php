@@ -21,6 +21,7 @@ function basic(bool $b): void {
   } else {
 
   }
+  $y;
   // invalid, $y is frozen in one scope but not another
 
 }

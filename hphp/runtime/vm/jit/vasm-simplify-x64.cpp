@@ -201,7 +201,10 @@ bool simplify_test_imm(Env& env, Arg0 r0, Arg1 r1, Vreg sf,
       it->second.kind == Vconst::Double) {
     return false;
   }
-
+  // andqi/testqi only accepts 32-bit immediates, and will do sign extension.
+  if (size == sz::qword && !deltaFits(it->second.val, sz::dword)) {
+    return false;
+  }
   const int val = extract_signed_value(it->second.val,
                                        size < sz::qword ? size * 8 : 32);
   return simplify_impl(env, b, i, testi{ val, r1, sf });

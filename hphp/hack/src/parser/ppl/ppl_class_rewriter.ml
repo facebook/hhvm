@@ -19,6 +19,7 @@
  * enabled for Hack PPL.
  *)
 
+open Core_kernel
 module Syntax = Full_fidelity_editable_positioned_syntax
 module Rewriter = Full_fidelity_rewriter.WithSyntax(Syntax)
 (* Includes helpful builders *)

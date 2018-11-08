@@ -9,6 +9,7 @@
 
 (** Tools for making sha1 digests. *)
 
+open Core_kernel
 (**
  * The output from sha1sum always includes a filename, even if the input
  * comes from stdin (then it just prints a dash). Annoying.
@@ -21,11 +22,8 @@
 let strip_output_filename digest =
   let expected_digest_length = 40 in
   let open Option in
-  let index = try Some (String.index digest ' ') with
-  | Not_found ->
-    None
-  in
-  index >>| String.sub digest 0 >>= fun digest ->
+  let index = String.index digest ' ' in
+  index >>| (fun len -> String.sub digest ~pos:0 ~len) >>= fun digest ->
     if (String.length digest) = expected_digest_length then
       Some digest
     else

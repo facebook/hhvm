@@ -11,7 +11,7 @@
            ("Who watches the Watchmen?")
 ****************************************************)
 
-open Hh_core
+open Core_kernel
 
 (**
  * Watches a repo and logs state-leave and state-enter
@@ -129,7 +129,7 @@ let send_to_fd env v fd =
   | Responses.Settled ->
     Unix.close fd
   | Responses.Unknown | Responses.Mid_update ->
-    Queue.add fd env.waiting_clients
+    Queue.enqueue env.waiting_clients fd
 
 let watchman_expression_terms = [
   J.strlist ["type"; "f"];
@@ -151,8 +151,8 @@ let process_changes changes env =
   in
   let notify_waiting_clients env =
     let clients = Queue.create () in
-    let () = Queue.transfer env.waiting_clients clients in
-    Queue.fold (fun () client -> notify_client client) () clients
+    let () = Queue.blit_transfer ~src:env.waiting_clients ~dst:clients () in
+    Queue.fold ~f:(fun () client -> notify_client client) ~init:() clients
   in
   let open Watchman in
   match changes with
@@ -161,7 +161,7 @@ let process_changes changes env =
     exit 1
   | Watchman_pushed (Changed_merge_base (mergebase, changes, _)) ->
     Hh_logger.log "changed mergebase: %s" mergebase;
-    let changes = String.concat "\n" (SSet.elements changes) in
+    let changes = String.concat ~sep:"\n" (SSet.elements changes) in
     Hh_logger.log "changes: %s" changes;
     let env = { env with state = Left_at mergebase; } in
     let () = notify_waiting_clients env in

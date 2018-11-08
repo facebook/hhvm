@@ -14,6 +14,7 @@
  * A promise is a strongly-typed wrapper around Process
  *)
 
+open Core_kernel
 include Future_sig.Types
 
 type 'a delayed = {
@@ -50,7 +51,7 @@ let delayed_value ~delays v =
 let error_to_string (info, e) =
   let info = Printf.sprintf "(%s [%s])"
     info.Process_types.name
-    (String.concat ", " info.Process_types.args) in
+    (String.concat ~sep:", " info.Process_types.args) in
   let status_string s = match s with
     | Unix.WEXITED i -> Printf.sprintf "(%s WEXITED %d)" info i
     | Unix.WSIGNALED i -> Printf.sprintf "(%s WSIGNALED %d)" info i
@@ -64,12 +65,12 @@ let error_to_string (info, e) =
   | Process_aborted ->
     Printf.sprintf "Process_aborted(%s)" info
   | Transformer_raised (e, _stack) ->
-    Printf.sprintf "Transformer_raised(%s %s)" info (Printexc.to_string e)
+    Printf.sprintf "Transformer_raised(%s %s)" info (Exn.to_string e)
 
 let error_to_string_verbose (info, e) =
   let {Process_types.name; args; stack=Utils.Callstack stack;} = info in
   let msg = error_to_string (info, e) in
-  Printf.sprintf "%s\nNAME=%s\nARGS=%s\nSTACK=%s" msg name (String.concat "," args) stack
+  Printf.sprintf "%s\nNAME=%s\nARGS=%s\nSTACK=%s" msg name (String.concat ~sep:"," args) stack
 
 let error_to_exn e = raise (Failure e)
 
@@ -116,8 +117,8 @@ let rec get : 'a. ?timeout:int -> 'a t -> ('a, error) result =
       Error (info, Process_aborted)
 
 let get_exn ?timeout x = get ?timeout x
-  |> Core_result.map_error ~f:error_to_exn
-  |> Core_result.ok_exn
+  |> Result.map_error ~f:error_to_exn
+  |> Result.ok_exn
 
 (** Must explicitly make recursive functions polymorphic. *)
 let rec is_ready : 'a. 'a t -> bool = fun (promise, _) ->

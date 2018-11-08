@@ -14,6 +14,7 @@
  * See .mli file for details.
  *)
 
+open Core_kernel
 module Config = WatchmanEventWatcherConfig
 module Responses = WatchmanEventWatcherConfig.Responses
 
@@ -54,9 +55,9 @@ let init root =
   (** Copied wholesale from MonitorConnection *)
   let sockaddr =
     if Sys.win32 then
-      let ic = open_in_bin sock_path in
-      let port = input_binary_int ic in
-      close_in ic;
+      let ic = In_channel.create ~binary:true sock_path in
+      let port = Option.value_exn (In_channel.input_binary_int ic) in
+      In_channel.close ic;
       Unix.(ADDR_INET (inet_addr_loopback, port))
     else
       Unix.ADDR_UNIX sock_path

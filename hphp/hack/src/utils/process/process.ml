@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Ocaml_overrides
 open Stack_utils
 
@@ -167,7 +167,7 @@ let rec read_and_wait_pid
   | Lifecycle_killed_due_to_overflow_stdin ->
     Error Overflow_stdin
   | Lifecycle_running {pid;} ->
-  let fds = Core_list.rev_filter_map ~f:(!) [stdout_fd; stderr_fd;] in
+  let fds = List.rev_filter_map ~f:(!) [stdout_fd; stderr_fd;] in
   if fds = []
   then
     (** EOF reached for all FDs. Blocking wait. *)
@@ -216,7 +216,7 @@ let failure_msg (failure: Process_types.failure) : string =
     Printf.sprintf "Process_aborted_input_too_large"
 
 let send_input_and_form_result
-    ?(input: bytes option)
+    ?(input: string option)
     ~(info: Process_types.invocation_info)
     ~(pid: int)
     ~(stdin_parent: Unix.file_descr)
@@ -246,14 +246,14 @@ let send_input_and_form_result
 
 let exec_no_chdir
     (prog: string)
-    ?(input: bytes option)
+    ?(input: string option)
     ?(env: string list option)
     (args: string list)
   : Process_types.t =
   let info = {
     Process_types.name = prog;
     args = args;
-    stack = Utils.Callstack (Printexc.get_callstack 100 |> Printexc.raw_backtrace_to_string);
+    stack = Utils.Callstack (Caml.Printexc.get_callstack 100 |> Caml.Printexc.raw_backtrace_to_string);
   } in
   let args = Array.of_list (prog :: args) in
   let stdin_child, stdin_parent = Unix.pipe () in
@@ -291,7 +291,7 @@ type chdir_params = {
  * goodness for free (read_and_wait_pid and is_ready). The entry will be
  * spawned into a separate process. *)
 let run_entry
-    ?(input: bytes option)
+    ?(input: string option)
     (entry: 'a Entry.t)
     (params: 'a)
   : Process_types.t =
@@ -301,7 +301,7 @@ let run_entry
   let info = {
     Process_types.name = Daemon.name_of_entry entry;
     args = [];
-    stack = Utils.Callstack (Printexc.get_callstack 100 |> Printexc.raw_backtrace_to_string);
+    stack = Utils.Callstack (Caml.Printexc.get_callstack 100 |> Caml.Printexc.raw_backtrace_to_string);
   } in
   let { Daemon.pid; _ } as daemon = Daemon.spawn
     (stdin_child, stdout_child, stderr_child) entry params in

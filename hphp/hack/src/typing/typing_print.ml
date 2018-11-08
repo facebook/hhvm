@@ -125,10 +125,14 @@ module ErrorString = struct
 
   and unresolved l =
     let l = List.map l snd in
-    let l = List.map l type_ in
+    let null, nonnull = List.partition_tf l (fun ty -> ty = Tprim Nast.Tnull) in
+    let l = List.map nonnull type_ in
     let s = List.fold_right l ~f:SSet.add ~init:SSet.empty in
     let l = SSet.elements s in
-    unresolved_ l
+    if null = [] then
+      unresolved_ l
+    else
+      "a nullable type"
 
   and unresolved_ = function
     | []      -> "an undefined value"
@@ -408,7 +412,27 @@ module Full = struct
     | Tunresolved [] -> text "[unresolved]"
     | Tunresolved [ty] ->
       if !show_tvars then Concat [text "("; k ty; text ")"] else k ty
-    | Tunresolved tyl -> delimited_list (Space ^^ text "|" ^^ Space) "(" k tyl ")"
+    | Tunresolved tyl ->
+      let null, nonnull = List.partition_tf tyl ~f:(fun (_, t) -> t = Tprim Nast.Tnull) in
+      begin match null, nonnull with
+      (* type isn't nullable *)
+      | [], _ ->
+        delimited_list (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
+      (* Type only is null *)
+      | _, [] ->
+        if !show_tvars then text "(null)" else text "null"
+      (* Type is nullable single type *)
+      | _, [ty] ->
+        if !show_tvars
+          then Concat [text "?"; text "("; k ty; text ")"]
+          else Concat [text "?"; k ty]
+      (* Type is nullable unresolved type *)
+      | _, _ ->
+        Concat [
+        text "?";
+        delimited_list (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
+        ]
+      end
     | Tobject -> text "object"
     | Tshape (fields_known, fdm) ->
       let optional_shape_fields_enabled =

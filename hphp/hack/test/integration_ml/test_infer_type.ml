@@ -172,6 +172,27 @@ let nullthrows_cases = [
   ("nullthrows.php", 5, 10), "T";
 ]
 
+let nullvec = "<?hh // strict
+function foo() : vec<?int> {
+  $x = vec[1, null];
+  $x;
+//^4:3
+  $y = vec[1, 'hi', null];
+  $y;
+//^7:3
+  $z = vec[null];
+  $z;
+//^10:3
+}
+"
+
+let nullvec_cases = [
+  ("nullvec.php", 4, 3), "vec<?int>";
+  ("nullvec.php", 7, 3), "vec<?(string | int)>";
+  ("nullvec.php", 10, 3), "vec<null>";
+]
+
+
 let curried = "<?hh // strict
 function curried(): (function(int): (function(bool): string)) {
   return $i ==> $b ==> $i > 0 && $b ? 'true' : 'false';
@@ -291,6 +312,7 @@ let files = [
   "lambda1.php", lambda1;
   "callback.php", callback;
   "nullthrows.php", nullthrows;
+  "nullvec.php", nullvec;
   "curried.php", curried;
   "multiple_type.php", multiple_type;
   "lambda_param.php", lambda_param;
@@ -306,6 +328,7 @@ let cases =
   @ lambda_cases
   @ callback_cases
   @ nullthrows_cases
+  @ nullvec_cases
   @ curried_cases
   @ multiple_type_cases
   @ lambda_param_cases

@@ -107,7 +107,7 @@ struct c_ExternalThreadEventWaitHandle;
  *       "Encountered unexpected exception"
  *     );
  *   }
- *   return event->toWaitHandle();
+ *   return event->getWaitHandle();
  * }
  *
  * Caveats:
@@ -116,15 +116,7 @@ struct c_ExternalThreadEventWaitHandle;
  */
 struct AsioExternalThreadEvent {
     /**
-     * Obtain the associated ExternalThreadEventWaitHandle for return to PHP.
-     *
-     * Checks whether this event has already finished. If so, unserializes the
-     * result and marks the associated WaitHandle as SUCCEEDED or FAILED prior
-     * to return.
-     *
-     * If the event was finished, this object will be destroyed. Once this
-     * function is called, the caller should not do any further operations on
-     * this object.
+     * Get wait handle representing this external thread event.
      *
      * This function may be called only from the web request thread between
      * construction of this object and return of the control back to the VM.
@@ -132,11 +124,18 @@ struct AsioExternalThreadEvent {
      * operation may have finished and this object could have been already
      * destroyed.
      *
-     * It is okay to call this after the asynchronous operation was scheduled.
+     * The caller is responsible for obtaining a reference count immediately
+     * after obtaining the pointer (e.g. by type casting this into Object,
+     * populating a TypedValue using tvWriteObject, or setting an array
+     * element). If any PHP code is executed, a bad things may happen.
+     *
+     * It is okay to call this after asynchronous operation was scheduled.
      * Even if the operation has finished, the object is not destroyed until
-     * ASIO main loop is executed or this function is called.
+     * ASIO main loop is executed.
      */
-    Object toWaitHandle();
+    c_ExternalThreadEventWaitHandle* getWaitHandle() {
+      return m_waitHandle;
+    }
 
     /**
      * Abandon this external thread event.

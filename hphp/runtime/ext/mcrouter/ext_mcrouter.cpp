@@ -351,7 +351,13 @@ void MCRouter::send(std::unique_ptr<const Request> request,
 template <class Request>
 Object MCRouter::issue(std::unique_ptr<const Request> request) {
   auto ev = new MCRouterResult(this, std::move(request));
-  return ev->toWaitHandle();
+  try {
+    return Object{ev->getWaitHandle()};
+  } catch (...) {
+    assertx(false);
+    ev->abandon();
+    throw;
+  }
 }
 
 /////////////////////////////////////////////////////////////////////////////

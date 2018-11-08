@@ -160,17 +160,5 @@ void AsioExternalThreadEventQueue::send(c_ExternalThreadEventWaitHandle* wait_ha
   }
 }
 
-/**
- * Try to withdraw already sent finished event from the top of the queue.
- *
- * Returns true iff the event was successfully withdrawn. This function may be
- * called only from the PHP thread.
- *
- */
-bool AsioExternalThreadEventQueue::withdraw(c_ExternalThreadEventWaitHandle* wait_handle) {
-  auto const next = wait_handle->getNextToProcess();
-  return m_queue.compare_exchange_weak(wait_handle, next);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

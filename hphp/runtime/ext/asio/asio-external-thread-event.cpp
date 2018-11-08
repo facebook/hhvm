@@ -30,15 +30,6 @@ AsioExternalThreadEvent::AsioExternalThreadEvent(ObjectData* priv_data)
     c_ExternalThreadEventWaitHandle::Create(this, priv_data).detach();
 }
 
-Object AsioExternalThreadEvent::toWaitHandle() {
-  auto wh = req::ptr<c_ExternalThreadEventWaitHandle>(m_waitHandle);
-  if (m_state.load() == Finished && m_queue->withdraw(wh.get())) {
-    // Frees this event object.
-    wh.get()->process();
-  }
-  return Object{std::move(wh)};
-}
-
 void AsioExternalThreadEvent::abandon() {
   assertx(m_state.load() == Waiting);
   assertx(m_waitHandle->hasExactlyOneRef());

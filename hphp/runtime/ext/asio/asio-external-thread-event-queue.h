@@ -48,7 +48,6 @@ struct AsioExternalThreadEventQueue final {
       std::chrono::time_point<std::chrono::steady_clock> waketime);
   void receiveSome();
   void send(c_ExternalThreadEventWaitHandle* wait_handle);
-  bool withdraw(c_ExternalThreadEventWaitHandle* wait_handle);
 
 private:
   c_ExternalThreadEventWaitHandle* m_received;

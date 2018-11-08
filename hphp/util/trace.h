@@ -183,6 +183,7 @@ namespace Trace {
       TM(ustubs)        \
       TM(vasm)          \
       TM(vasm_copy)     \
+      TM(vasm_cse)      \
       TM(vasm_phi)      \
       TM(xenon)         \
       TM(xls)           \

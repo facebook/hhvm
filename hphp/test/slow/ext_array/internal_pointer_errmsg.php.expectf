@@ -1,0 +1,69 @@
+array(4) {
+  [1]=>
+  int(1)
+  ["value"]=>
+  int(1)
+  [0]=>
+  int(0)
+  ["key"]=>
+  int(0)
+}
+int(2)
+int(1)
+int(3)
+int(2)
+int(1)
+int(5)
+array(4) {
+  [1]=>
+  int(1)
+  ["value"]=>
+  int(1)
+  [0]=>
+  int(0)
+  ["key"]=>
+  int(0)
+}
+int(2)
+int(1)
+int(3)
+int(2)
+int(1)
+int(4)
+array(4) {
+  [1]=>
+  string(3) "bar"
+  ["value"]=>
+  string(3) "bar"
+  [0]=>
+  string(3) "foo"
+  ["key"]=>
+  string(3) "foo"
+}
+string(3) "qux"
+string(3) "baz"
+string(3) "doz"
+string(3) "qux"
+string(3) "bar"
+string(3) "doz"
+
+Warning: Invalid operand type was used: each() expects array, was integer in %s/test/slow/ext_array/internal_pointer_errmsg.php on line 4
+NULL
+
+Warning: Invalid operand type was used: current() expects array, was integer in %s/test/slow/ext_array/internal_pointer_errmsg.php on line 5
+bool(false)
+
+Warning: Invalid operand type was used: key() expects array, was integer in %s/test/slow/ext_array/internal_pointer_errmsg.php on line 6
+bool(false)
+
+Warning: Invalid operand type was used: next() expects array, was integer in %s/test/slow/ext_array/internal_pointer_errmsg.php on line 7
+bool(false)
+
+Warning: Invalid operand type was used: prev() expects array, was integer in %s/test/slow/ext_array/internal_pointer_errmsg.php on line 8
+bool(false)
+
+Warning: Invalid operand type was used: reset() expects array, was integer in %s/test/slow/ext_array/internal_pointer_errmsg.php on line 9
+bool(false)
+
+Warning: Invalid operand type was used: end() expects array, was integer in %s/test/slow/ext_array/internal_pointer_errmsg.php on line 10
+bool(false)

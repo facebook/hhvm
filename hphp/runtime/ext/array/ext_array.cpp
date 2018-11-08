@@ -1451,6 +1451,7 @@ enum class NoCow {};
 template<class DoCow = void, class NonArrayRet, class OpPtr>
 static Variant iter_op_impl(VRefParam refParam, OpPtr op, const String& objOp,
                             NonArrayRet nonArray,
+                            const std::string& fnName,
                             bool(ArrayData::*pred)() const =
                               &ArrayData::isInvalid) {
   auto& cell = *refParam.wrapped().toCell();
@@ -1461,7 +1462,9 @@ static Variant iter_op_impl(VRefParam refParam, OpPtr op, const String& objOp,
         return obj->o_invoke_few_args(objOp, 0);
       }
     }
-    throw_bad_type_exception("expecting an array");
+    throw_bad_type_exception("%s() expects array, was %s",
+                             fnName.c_str(),
+                             getDataTypeString(refParam->getType()).c_str());
     return Variant(nonArray);
   }
 
@@ -1498,7 +1501,8 @@ Variant HHVM_FUNCTION(each,
     refParam,
     &ArrayData::each,
     s___each,
-    Variant::NullInit()
+    Variant::NullInit(),
+    "each"
   );
 }
 
@@ -1508,7 +1512,8 @@ Variant HHVM_FUNCTION(current,
     refParam,
     &ArrayData::current,
     s___current,
-    false
+    false,
+    "current"
   );
 }
 
@@ -1523,7 +1528,8 @@ Variant HHVM_FUNCTION(key,
     refParam,
     &ArrayData::key,
     s___key,
-    false
+    false,
+    "key"
   );
 }
 
@@ -1533,7 +1539,8 @@ Variant HHVM_FUNCTION(next,
     refParam,
     &ArrayData::next,
     s___next,
-    false
+    false,
+    "next"
   );
 }
 
@@ -1543,7 +1550,8 @@ Variant HHVM_FUNCTION(prev,
     refParam,
     &ArrayData::prev,
     s___prev,
-    false
+    false,
+    "prev"
   );
 }
 
@@ -1554,6 +1562,7 @@ Variant HHVM_FUNCTION(reset,
     &ArrayData::reset,
     s___reset,
     false,
+    "reset",
     &ArrayData::isHead
   );
 }
@@ -1565,6 +1574,7 @@ Variant HHVM_FUNCTION(end,
     &ArrayData::end,
     s___end,
     false,
+    "end",
     &ArrayData::isTail
   );
 }

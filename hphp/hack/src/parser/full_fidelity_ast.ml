@@ -3087,6 +3087,7 @@ let pProgram : program parser = fun node env  ->
     | [] -> List.rev acc
     | (Namespace (n, [])::el) ->
       let body, remainder = span not_namespace el in
+      let body = post_process body [] in
        post_process remainder (Namespace (n, body) :: acc)
     | (Namespace (n, il)::el) ->
       let result = post_process il [] in

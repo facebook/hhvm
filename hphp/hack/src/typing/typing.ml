@@ -1153,9 +1153,10 @@ and expr
   begin match expected with
   | None -> ()
   | Some (_, r, ty) ->
-    Typing_log.log_types 1 (fst e) env
-    [Typing_log.Log_sub ("Typing.expr " ^ Typing_reason.string_of_ureason r,
-       [Typing_log.Log_type ("expected_ty", ty)])] end;
+    Typing_log.(log_with_level env "typing" 1 (fun () ->
+      log_types (fst e) env
+      [Log_head ("Typing.expr " ^ Typing_reason.string_of_ureason r,
+       [Log_type ("expected_ty", ty)])])) end;
   raw_expr ~accept_using_var ~is_using_clause ~is_expr_statement
     ~allow_non_awaited_awaitable_in_rx ~valkind ~check_defined
     ?is_func_arg ?forbid_uref ?expected env e
@@ -1961,20 +1962,21 @@ and expr_
   | Call (Cnormal, (pos_id, Id ((_, s) as id)), hl, el, [])
       when is_pseudo_function s ->
       let env, tel, tys = exprs ~accept_using_var:true env el in
-      if s = SN.PseudoFunctions.hh_show
-      then List.iter tys (Typing_log.hh_show p env)
-      else
-      if s = SN.PseudoFunctions.hh_show_env
-      then Typing_log.hh_show_env p env
-      else
-      if s = SN.PseudoFunctions.hh_log_level
-      then match el with
-        | [(_, Int level_str)] ->
-          Typing_log.hh_log_level (int_of_string level_str)
-        | _ -> ()
-      else
-      if s = SN.PseudoFunctions.hh_loop_forever then loop_forever env
-      else ();
+      let env =
+        if s = SN.PseudoFunctions.hh_show
+        then (List.iter tys (Typing_log.hh_show p env); env)
+        else
+        if s = SN.PseudoFunctions.hh_show_env
+        then (Typing_log.hh_show_env p env; env)
+        else
+        if s = SN.PseudoFunctions.hh_log_level
+        then match el with
+          | [(_, String key_str); (_, Int level_str)] ->
+            Env.set_log_level env key_str (int_of_string level_str)
+          | _ -> env
+        else
+        if s = SN.PseudoFunctions.hh_loop_forever then (loop_forever env; env)
+        else env in
       make_result env
         (T.Call(
           Cnormal,
@@ -2404,11 +2406,6 @@ and expr_
           if is_explicit_ret
           then (Reason.Rwitness p, Tfun { ft with ft_ret = declared_ft.ft_ret })
           else (Reason.Rwitness p, Tfun { ft with ft_ret = ty }) in
-        Typing_log.log_types 1 p env
-          [Typing_log.Log_sub
-            ("Typing.check_body_under_known_params",
-              [Typing_log.Log_type ("ft", (Reason.Rwitness p, Tfun ft));
-               Typing_log.Log_type ("inferred_ty", inferred_ty)])];
         env, tefun, inferred_ty in
       let env, eexpected = expand_expected env expected in
       begin match eexpected with
@@ -2501,10 +2498,6 @@ and expr_
             end
             else begin
               Typing_log.increment_feature_count env FL.Lambda.unknown_params;
-              Typing_log.log_types 1 p env
-                [Typing_log.Log_sub
-                  ("Typing.expr Efun unknown params",
-                    [Typing_log.Log_type ("declared_ft", (Reason.Rwitness p, Tfun declared_ft))])];
               (* check for recursive function calls *)
               let reactivity = fun_reactivity env.Env.decl_env f.f_user_attributes f.f_params in
               let old_reactivity = Env.env_reactivity env in
@@ -2970,11 +2963,11 @@ and check_expected_ty message env inferred_ty expected =
   | None ->
     env
   | Some (p, ur, expected_ty) ->
-    Typing_log.log_types 1 p env
-    [Typing_log.Log_sub
-      (Printf.sprintf "Typing.check_expected_ty %s" message,
-       [Typing_log.Log_type ("inferred_ty", inferred_ty);
-       Typing_log.Log_type ("expected_ty", expected_ty)])];
+    Typing_log.(log_with_level env "typing" 1 (fun () ->
+      log_types p env
+      [Log_head (Printf.sprintf "Typing.check_expected_ty %s" message,
+       [Log_type ("inferred_ty", inferred_ty);
+        Log_type ("expected_ty", expected_ty)])]));
     Type.coerce_type p ur env inferred_ty expected_ty
 
 and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p env cid el uel =

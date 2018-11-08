@@ -318,6 +318,12 @@ let get_tpenv_tparams env =
 let add_subtype_prop env prop =
   {env with subtype_prop = Typing_logic.conj env.subtype_prop prop}
 
+let set_log_level env key log_level =
+  {env with log_levels = SMap.add key log_level env.log_levels }
+
+let get_log_level env key =
+  Option.value (SMap.get key env.log_levels) ~default:0
+
 (* Replace types for locals with empty environment *)
 let env_with_locals env locals =
   { env with lenv =
@@ -398,6 +404,7 @@ let empty tcopt file ~droot = {
   };
   global_tpenv = SMap.empty;
   subtype_prop = Typing_logic.valid;
+  log_levels = SMap.empty;
 }
 
 let set_env_reactive env reactive =

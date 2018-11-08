@@ -71,6 +71,7 @@
    (* A set of constraints that are global to a given method *)
    global_tpenv : tpenv ;
    subtype_prop : Typing_logic.subtype_prop;
+   log_levels : int SMap.t;
  }
 and genv = {
   tcopt   : TypecheckerOptions.t;

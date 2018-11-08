@@ -22,12 +22,13 @@ let rec unify ?(opts=TUtils.default_unify_opt) env ty1 ty2 =
   if phys_equal ty1 ty2 then env, ty1 else
   if TypecheckerOptions.new_inference (Env.get_tcopt env)
   then env, ty1
-  else
-  let types =
-    [Typing_log.Log_type ("ty1", ty1);
-     Typing_log.Log_type ("ty2", ty2)]  in
-  Typing_log.log_types 2 (Reason.to_pos (fst ty2)) env
-    [Typing_log.Log_sub ("Typing_unify.unify", types)];
+  else begin
+    Typing_log.(
+      log_with_level env "unify" 1 (fun () ->
+      log_types (Reason.to_pos (fst ty2)) env
+        [Log_head ("Typing_unify.unify",
+          [Log_type ("ty1", ty1);
+           Log_type ("ty2", ty2)])]));
   match ty1, ty2 with
   | (_, (Tany | Terr)), ty | ty, (_, (Tany | Terr)) -> env, ty
   | (r1, Tvar n1), (r2, Tvar n2) ->
@@ -73,6 +74,7 @@ let rec unify ?(opts=TUtils.default_unify_opt) env ty1 ty2 =
       let r = unify_reason r1 r2 in
       let env, ty = unify_ ~opts env r1 ty1 r2 ty2 in
       env, (r, ty)
+  end
 
 and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
   match ty1, ty2 with

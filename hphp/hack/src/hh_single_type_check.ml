@@ -94,7 +94,7 @@ let magic_builtins = [|
     "function gen_array_rec();\n" ^
     "function hh_show(<<__AcceptDisposable>> $val) {}\n" ^
     "function hh_show_env() {}\n" ^
-    "function hh_log_level($level) {}\n" ^
+    "function hh_log_level($key, $level) {}\n" ^
     "}\n" ^
     "namespace HH\\Lib\\Tuple{\n" ^
     "function gen();\n" ^
@@ -1064,7 +1064,6 @@ let handle_mode
         else write_first_error parse_errors oc)
       else
         begin
-        Typing_log.hh_log_level 0;
         Typing_log.out_channel := oc;
         ServerIdeUtils.make_local_changes ();
         let files_contents = file_to_files filename in

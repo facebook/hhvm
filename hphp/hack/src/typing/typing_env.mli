@@ -56,6 +56,8 @@ val get_return : env -> Typing_env_return_info.t
 val set_return : env -> Typing_env_return_info.t -> env
 val get_params : env -> (locl ty * param_mode) Local_id.Map.t
 val set_param : env -> Local_id.t -> locl ty * param_mode -> env
+val set_log_level : env -> string -> int -> env
+val get_log_level : env -> string -> int
 val clear_params : env -> env
 val with_env : env -> (env -> env * 'a) -> env * 'a
 val is_static : env -> bool

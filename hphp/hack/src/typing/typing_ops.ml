@@ -23,11 +23,11 @@ module Phase   = Typing_phase
 
 (* Tries to add constraint that ty_sub is subtype of ty_super in envs *)
 let sub_type p ur env ty_sub ty_super =
-  Typing_log.log_types 2 p env
-    [Typing_log.Log_sub ("Typing_ops.sub_type",
-       [Typing_log.Log_type ("ty_sub", ty_sub);
-        Typing_log.Log_type ("ty_super", ty_super)])];
-
+  Typing_log.(log_with_level env "sub" 1 (fun () ->
+    log_types p env
+    [Log_head ("Typing_ops.sub_type",
+       [Log_type ("ty_sub", ty_sub);
+        Log_type ("ty_super", ty_super)])]));
   let env = { env with Env.pos = p; Env.outer_pos = p; Env.outer_reason = ur } in
   Errors.try_add_err p (Reason.string_of_ureason ur)
     (fun () -> SubType.sub_type env ty_sub ty_super)

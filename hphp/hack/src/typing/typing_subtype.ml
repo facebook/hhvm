@@ -177,15 +177,15 @@ let check_mutability
 let empty_seen = Some SSet.empty
 
 let log_subtype ~this_ty function_name env ty_sub ty_super =
-  Typing_log.log_with_level 2 begin fun () ->
+  Typing_log.(log_with_level env "sub" 2 begin fun () ->
     let types =
-      [Typing_log.Log_type ("ty_sub", ty_sub);
-       Typing_log.Log_type ("ty_super", ty_super)]  in
+      [Log_type ("ty_sub", ty_sub);
+       Log_type ("ty_super", ty_super)]  in
     let types = Option.value_map this_ty ~default:types
-      ~f:(fun ty -> Typing_log.Log_type ("this_ty", ty) :: types) in
-    Typing_log.log_types 2 (Reason.to_pos (fst ty_sub)) env
-      [Typing_log.Log_sub ("Typing_subtype." ^ function_name, types)]
-  end
+      ~f:(fun ty -> Log_type ("this_ty", ty) :: types) in
+    log_types (Reason.to_pos (fst ty_sub)) env
+      [Log_head ("Typing_subtype." ^ function_name, types)]
+  end)
 
 (* Process the constraint proposition *)
 let rec process_simplify_subtype_result ~this_ty ~fail env prop =
@@ -1586,11 +1586,7 @@ and sub_type_inner_helper env ~this_ty
       else
         let outer_pos = env.Env.outer_pos in
         let outer_reason = env.Env.outer_reason in
-        Typing_log.log_types 2 outer_pos env
-        [Typing_log.Log_sub
-          ("Typing_subtype.add_todo",
-           [Typing_log.Log_type ("ty_sub", ty_sub);
-           Typing_log.Log_type ("ty_super", ty_super)])];
+        log_subtype ~this_ty:None "add_todo" env ty_sub ty_super;
         Env.add_todo env begin fun env' ->
           Errors.try_add_err outer_pos (Reason.string_of_ureason outer_reason)
           (fun () ->

@@ -394,10 +394,11 @@ and check_tparams_constraints ~use_pos ~ety_env env tparams =
       match SMap.get (snd id) ety_env.substs with
       | Some x_ty ->
         begin
-          Typing_log.log_types 1 use_pos env
-          [Typing_log.Log_sub ("check_tparams_constraints: add_check_constraint_todo",
-            [Typing_log.Log_type ("ty", ty);
-            Typing_log.Log_type ("x_ty", x_ty)])];
+          Typing_log.(log_with_level env "generics" 1 (fun () ->
+            log_types use_pos env
+              [Log_head ("check_tparams_constraints: add_check_constraint_todo",
+                [Log_type ("ty", ty);
+                 Log_type ("x_ty", x_ty)])]));
           TGenConstraint.add_check_constraint_todo env ~use_pos id ck ty x_ty
         end
       | None ->

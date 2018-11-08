@@ -15,10 +15,11 @@ module Env = Typing_env
 open Typing_defs
 
 let check_constraint env ck cstr_ty ty =
-  Typing_log.log_types 1 (Reason.to_pos (fst ty)) env
-    [Typing_log.Log_sub ("Typing_generic_constraint.check_constraint",
-     [Typing_log.Log_type ("ty", ty);
-      Typing_log.Log_type ("cstr_ty", cstr_ty)])];
+  Typing_log.(log_with_level env "sub" 1 (fun () ->
+    log_types (Reason.to_pos (fst ty)) env
+    [Log_head ("Typing_generic_constraint.check_constraint",
+     [Log_type ("ty", ty);
+      Log_type ("cstr_ty", cstr_ty)])]));
   let env, ety = Env.expand_type env ty in
   let env, ecstr_ty = Env.expand_type env cstr_ty in
   match ck with

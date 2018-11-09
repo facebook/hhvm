@@ -712,12 +712,10 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     auto funcTmp = inst->src(1);
     if (funcTmp->hasConstVal(TFunc)) {
       auto sp = inst->src(0);
-      auto offset = inst->extra<AssertARFunc>()->offset;
-      auto const invOff = offset.to<FPInvOffset>(cur().irSPOff) -
-                          kNumActRecCells;
+      auto irSPOff = inst->extra<AssertARFunc>()->offset;
       auto func = funcTmp->funcVal();
       for (auto& fpi : cur().fpiStack) {
-        if (fpi.returnSP == sp && fpi.returnSPOff == invOff) {
+        if (fpi.returnSP == sp && fpi.irSPOff == irSPOff) {
           if (fpi.func == nullptr) {
             fpi.func = func;
             // we know the func, so it's eligible for inlining
@@ -726,7 +724,10 @@ void FrameStateMgr::update(const IRInstruction* inst) {
             ITRACE(3, "FrameStateMgr::update(AssertARFunc): setting function "
                    "to {}\n", func->fullName());
           } else {
-            assertx(fpi.func == func);
+            always_assert_flog(
+                fpi.func == func, "fpi.func = {} (@ {}) ; func = {} (@ {})\n",
+                fpi.func->fullName(), fpi.func, func->fullName(), func
+            );
           }
         }
       }
@@ -754,6 +755,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     if (isFPush(extra.opcode)) {
       cur().fpiStack.push_back(FPIInfo { cur().spValue,
                                          cur().bcSPOff - extra.cellsPopped,
+                                         extra.spOffset,
                                          TCtx,
                                          nullptr,
                                          extra.opcode,
@@ -1881,6 +1883,7 @@ void FrameStateMgr::spillFrameStack(IRSPRelOffset offset,
   cur().fpiStack.push_back(FPIInfo {
     cur().spValue,
     retOffset,
+    offset,
     ctx ? ctx->type() : TCtx,
     ctx,
     opc,
@@ -1893,9 +1896,8 @@ void FrameStateMgr::spillFrameStack(IRSPRelOffset offset,
 
 void FrameStateMgr::writeToSpilledFrame(IRSPRelOffset offset,
                                         const SSATmp* sp) {
-  auto const invOff = offset.to<FPInvOffset>(cur().irSPOff) - kNumActRecCells;
   for (auto& fpi : cur().fpiStack) {
-    if (fpi.returnSP == sp && fpi.returnSPOff == invOff) {
+    if (fpi.returnSP == sp && fpi.irSPOff == offset) {
       // The ops which write to a pre-live ActRec after the fact are generally
       // used when we don't have sufficient Func or Ctx information. This makes
       // it hard to predict what they actually write to the ActRec, so be

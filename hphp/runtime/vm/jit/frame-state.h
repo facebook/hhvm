@@ -56,6 +56,11 @@ struct FPIInfo {
   FPInvOffset returnSPOff;
 
   /*
+   * Offset relative to IR SP where this frame is located.
+   */
+  IRSPRelOffset irSPOff;
+
+  /*
    * Union of observed context Class* types, and its value if known.
    */
   Type ctxType;

@@ -60,7 +60,7 @@ ArrayData* getClsReifiedGenericsProp(Class* cls, ActRec* ar) {
   auto const slot = cls->lookupReifiedInitProp();
   assertx(slot != kInvalidSlot);
   auto tv = this_->propVec()[slot];
-  assertx(RuntimeOption::EvalHackArrDVArrs ? tvIsVec(tv) : tvIsArray(tv));
+  assertx(tvIsVecOrVArray(tv));
   return tv.m_data.parr;
 }
 

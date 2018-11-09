@@ -65,6 +65,16 @@ ALWAYS_INLINE bool tvIsReferenced(TypedValue tv) {
          tv.m_data.pref->isReferenced();
 }
 
+template<typename T>
+ALWAYS_INLINE bool tvIsVecOrVArray(T&& tv) {
+  return RuntimeOption::EvalHackArrDVArrs ? tvIsVec(tv) : tvIsArray(tv);
+}
+
+template<typename T>
+ALWAYS_INLINE bool tvIsDictOrDArray(T&& tv) {
+  return RuntimeOption::EvalHackArrDVArrs ? tvIsDict(tv) : tvIsArray(tv);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

@@ -2862,8 +2862,7 @@ OPTBLD_INLINE void iopReifiedGeneric(ReifiedGenericOp op, uint32_t n) {
   if (op == ReifiedGenericOp::FunGeneric) {
     // First local is always $0ReifiedGenerics which comes right after params
     auto const tv = frame_local(vmfp(), vmfp()->m_func->numParams());
-    assertx(tv && (RuntimeOption::EvalHackArrDVArrs ? tvIsVec(tv)
-                                                    : tvIsArray(tv)));
+    assertx(tv && tvIsVecOrVArray(tv));
     reifiedTypes = tv->m_data.parr;
   } else {
     Class* cls = arGetContextClass(vmfp());

@@ -620,6 +620,7 @@ private:
   friend Type packedn_impl(trep, Type);
   friend Type map_impl(trep, MapElems);
   friend Type mapn_impl(trep bits, Type k, Type v);
+  friend Type mapn_impl_from_map(trep bits, Type k, Type v);
   friend DObj dobj_of(const Type&);
   friend DCls dcls_of(Type);
   friend Type union_of(Type, Type);

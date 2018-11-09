@@ -1003,7 +1003,7 @@ struct DualDispatchUnionImpl {
       auto mkva = map_key_values(a);
       auto mkvb = map_key_values(b);
 
-      return mapn_impl(
+      return mapn_impl_from_map(
         bits,
         union_of(std::move(mkva.first), std::move(mkvb.first)),
         union_of(std::move(mkva.second), std::move(mkvb.second)));
@@ -1077,8 +1077,11 @@ struct DualDispatchUnionImpl {
 
   Type operator()(const DArrLikePacked& a, const DArrLikeMap& b) const {
     auto mkv = map_key_values(b);
-    return mapn_impl(bits, union_of(TInt, std::move(mkv.first)),
-                     union_of(packed_values(a), std::move(mkv.second)));
+    return mapn_impl_from_map(
+      bits,
+      union_of(TInt, std::move(mkv.first)),
+      union_of(packed_values(a), std::move(mkv.second))
+    );
   }
 
   Type operator()(const DArrLikePacked& a, const DArrLikeMapN& b) const {
@@ -1088,8 +1091,11 @@ struct DualDispatchUnionImpl {
 
   Type operator()(const DArrLikePackedN& a, const DArrLikeMap& b) const {
     auto mkv = map_key_values(b);
-    return mapn_impl(bits, union_of(TInt, std::move(mkv.first)),
-                     union_of(a.type, std::move(mkv.second)));
+    return mapn_impl_from_map(
+      bits,
+      union_of(TInt, std::move(mkv.first)),
+      union_of(a.type, std::move(mkv.second))
+    );
   }
 
   Type operator()(const DArrLikePackedN& a, const DArrLikeMapN& b) const {
@@ -1098,9 +1104,11 @@ struct DualDispatchUnionImpl {
 
   Type operator()(const DArrLikeMap& a, const DArrLikeMapN& b) const {
     auto mkv = map_key_values(a);
-    return mapn_impl(bits,
-                     union_of(std::move(mkv.first), b.key),
-                     union_of(std::move(mkv.second), b.val));
+    return mapn_impl_from_map(
+      bits,
+      union_of(std::move(mkv.first), b.key),
+      union_of(std::move(mkv.second), b.val)
+    );
   }
 
 private:
@@ -2378,6 +2386,22 @@ Type mapn_impl(trep bits, Type k, Type v) {
   );
   r.m_dataTag = DataTag::ArrLikeMapN;
   return r;
+}
+
+Type mapn_impl_from_map(trep bits, Type k, Type v) {
+  if (bits & BKeyset && k != v) {
+    // When we convert could-be-keyset types from a Map representation to a
+    // MapN representation, we need to coerce the staticness of the key and
+    // value to match one another.  This necessity arises because DArrLikeMap
+    // can decay the value type to be of unknown-staticness, while the key
+    // (which is a TypedValue) maintains a persistent DataType.
+    //
+    // It's sufficient to loosen the key's staticness; it never happens the
+    // other way around.  Also note that we don't do any other coercions here;
+    // it's up to the caller to ensure `k == v` up-to-staticness.
+    k = loosen_staticness(k);
+  }
+  return mapn_impl(bits, std::move(k), std::move(v));
 }
 
 Type arr_mapn(Type k, Type v) {
@@ -4217,9 +4241,11 @@ bool arr_map_set(Type& map,
     return true;
   }
   auto mkv = map_key_values(*map.m_data.map);
-  map = mapn_impl(map.m_bits,
-                  union_of(std::move(mkv.first), key.type),
-                  union_of(std::move(mkv.second), val));
+  map = mapn_impl_from_map(
+    map.m_bits,
+    union_of(std::move(mkv.first), key.type),
+    union_of(std::move(mkv.second), val)
+  );
   return true;
 }
 
@@ -4456,7 +4482,7 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
       m.emplace_back(*k, val);
       return { map_impl(bits, std::move(m)), throwMode };
     }
-    return { mapn_impl(bits, fixedKey.type, val), throwMode };
+    return { mapn_impl_from_map(bits, fixedKey.type, val), throwMode };
   }
 
   auto emptyHelper = [&] (const Type& inKey,
@@ -4464,9 +4490,9 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
     bits = fixedKey.type.subtypeOf(BStr)
       ? promote_varray(bits)
       : maybe_promote_varray(bits);
-    return { mapn_impl(bits,
-                       union_of(inKey, fixedKey.type),
-                       union_of(inVal, val)), throwMode };
+    return { mapn_impl_from_map(bits,
+                                union_of(inKey, fixedKey.type),
+                                union_of(inVal, val)), throwMode };
   };
 
   arr.m_bits = bits;
@@ -4592,9 +4618,9 @@ std::pair<Type,Type> array_like_newelem(Type arr, const Type& val) {
       return { packedn_impl(bits, union_of(inVal, val)), TInt };
     }
 
-    return { mapn_impl(bits,
-                       union_of(inKey, TInt),
-                       union_of(inVal, val)), TInt };
+    return { mapn_impl_from_map(bits,
+                                union_of(inKey, TInt),
+                                union_of(inVal, val)), TInt };
   };
 
   switch (arr.m_dataTag) {
@@ -4663,9 +4689,9 @@ std::pair<Type,Type> array_like_newelem(Type arr, const Type& val) {
     if (maybeEmpty) {
       return emptyHelper(arr.m_data.mapn->key, arr.m_data.mapn->val);
     }
-    return { mapn_impl(bits,
-                       union_of(arr.m_data.mapn->key, TInt),
-                       union_of(arr.m_data.mapn->val, val)),
+    return { mapn_impl_from_map(bits,
+                                union_of(arr.m_data.mapn->key, TInt),
+                                union_of(arr.m_data.mapn->val, val)),
              TInt };
   }
 

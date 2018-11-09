@@ -1460,7 +1460,13 @@ struct notationIterator {
   xmlNotation *notation;
 };
 
-static void itemHashScanner(void* payload, void* data, xmlChar* /*name*/) {
+#if LIBXML_VERSION >= 20908
+#define XMLCHAR_CONST const
+#else
+#define XMLCHAR_CONST
+#endif
+static void itemHashScanner(void* payload, void* data, XMLCHAR_CONST xmlChar* /*name*/) {
+#undef XMLCHAR_CONST
   nodeIterator *priv = (nodeIterator *)data;
   if (priv->cur < priv->index) {
     priv->cur++;

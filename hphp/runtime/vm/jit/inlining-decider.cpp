@@ -57,7 +57,7 @@ std::string nameAndReason(int bcOff, std::string caller, std::string callee,
   return folly::sformat("BC {}: {} -> {}: {}\n", bcOff, caller, callee, why);
 }
 
-bool traceRefusal(SrcKey callerSk, const Func* callee, const char* why,
+bool traceRefusal(SrcKey callerSk, const Func* callee, std::string why,
                   Annotations& annotations) {
   // This is not under Trace::enabled so that we can collect the data in prod.
   const Func* caller = callerSk.func();
@@ -507,7 +507,8 @@ void InliningDecider::initWithCallee(const Func* callee) {
   m_stackDepth += callee->maxStackCells();
 }
 
-bool InliningDecider::shouldInline(SrcKey callerSk,
+bool InliningDecider::shouldInline(const irgen::IRGS& irgs,
+                                   SrcKey callerSk,
                                    Op callerFPushOp,
                                    const Func* callee,
                                    const RegionDesc& region,
@@ -518,7 +519,7 @@ bool InliningDecider::shouldInline(SrcKey callerSk,
   assertx(sk.func() == callee);
 
   // Tracing return lambdas.
-  auto refuse = [&] (const char* why) {
+  auto refuse = [&] (const std::string& why) {
     FTRACE(2, "shouldInline: rejecting callee region: {}", show(region));
     return traceRefusal(callerSk, callee, why, annotations);
   };
@@ -604,7 +605,9 @@ bool InliningDecider::shouldInline(SrcKey callerSk,
   }
 
   if (!hasRet) {
-    return refuse("region has no returns");
+    return refuse(
+      folly::sformat("region has no returns: callee BC instrs = {} : {}",
+                     region.instrSize(), show(region)));
   }
 
   // Ignore cost computation for functions marked __ALWAYS_INLINE
@@ -625,7 +628,13 @@ bool InliningDecider::shouldInline(SrcKey callerSk,
 
   const int maxCost = maxTotalCost - m_cost;
   if (cost > maxCost) {
-    return refuse("too expensive");
+    const auto baseProfCount = s_baseProfCount.load();
+    const auto callerProfCount = irgen::curProfCount(irgs);
+    const auto calleeProfCount = irgen::calleeProfCount(irgs, region);
+    return refuse(folly::sformat(
+      "too expensive: cost={} : maxTotalCost={} : maxCost={} : "
+      "baseProfCount={} : callerProfCount={} : calleeProfCount={}", cost,
+      maxTotalCost, maxCost, baseProfCount, callerProfCount, calleeProfCount));
   }
 
   return accept("small region with return");
@@ -732,16 +741,31 @@ TransID findTransIDForCallee(const ProfData* profData,
   return ret;
 }
 
-RegionDescPtr selectCalleeCFG(const Func* callee, const int numArgs,
+RegionDescPtr selectCalleeCFG(SrcKey callerSk, const Func* callee,
+                              const int numArgs,
                               Type ctxType, std::vector<Type>& argTypes,
-                              int32_t maxBCInstrs) {
+                              int32_t maxBCInstrs,
+                              Annotations& annotations) {
   auto const profData = jit::profData();
-  if (!profData || !profData->profiling(callee->getFuncId())) return nullptr;
+  if (!profData) {
+    traceRefusal(callerSk, callee, "no profData", annotations);
+    return nullptr;
+  }
+
+  if (!profData->profiling(callee->getFuncId())) {
+    traceRefusal(callerSk, callee,
+                 folly::sformat("no profiling data for callee FuncId: {}",
+                                callee->getFuncId()),
+                 annotations);
+    return nullptr;
+  }
 
   auto const dvID = findTransIDForCallee(profData, callee,
                                          numArgs, ctxType, argTypes);
 
   if (dvID == kInvalidTransID) {
+    traceRefusal(callerSk, callee, "didn't find entry TransID for callee",
+                 annotations);
     return nullptr;
   }
 
@@ -755,9 +779,18 @@ RegionDescPtr selectCalleeCFG(const Func* callee, const int numArgs,
   ctx.inlining = true;
   ctx.inputTypes = &argTypes;
 
-  auto r = selectHotCFG(ctx);
+  bool truncated = false;
+  auto r = selectHotCFG(ctx, &truncated);
+  if (truncated) {
+    traceRefusal(callerSk, callee, "callee region truncated due to BC size",
+                 annotations);
+    return nullptr;
+  }
   if (r) {
     r->setInlineContext(ctxType, argTypes);
+  } else {
+    traceRefusal(callerSk, callee, "failed selectHotCFG for callee",
+                 annotations);
   }
   return r;
 }
@@ -776,7 +809,10 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
   auto const& fpiInfo = fpiStack.back();
   auto ctx = fpiInfo.ctxType;
 
-  if (ctx == TBottom) return nullptr;
+  if (ctx == TBottom) {
+    traceRefusal(sk, callee, "ctx is TBottom", annotations);
+    return nullptr;
+  }
   if (callee->isClosureBody()) {
     if (!callee->cls()) {
       ctx = TNullptr;
@@ -798,6 +834,8 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
     // early
     if (type == TBottom) return nullptr;
     if (!(type <= TCell) && !(type <= TBoxedCell)) {
+      traceRefusal(sk, callee, folly::sformat("maybe boxed arg num: {}", i),
+                   annotations);
       return nullptr;
     }
     argTypes.push_back(type);
@@ -807,12 +845,11 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
 
   if (mode == "cfg" || mode == "both") {
     if (profData()) {
-      auto region = selectCalleeCFG(callee, numArgs, ctx, argTypes,
-                                    maxBCInstrs);
-      if (region && inl.shouldInline(sk, fpiInfo.fpushOpc,
-                                     callee, *region,
-                                     adjustedMaxVasmCost(irgs, *region),
-                                     annotations)) {
+      auto region = selectCalleeCFG(sk, callee, numArgs, ctx, argTypes,
+                                    maxBCInstrs, annotations);
+      if (region &&
+          inl.shouldInline(irgs, sk, fpiInfo.fpushOpc, callee, *region,
+                           adjustedMaxVasmCost(irgs, *region), annotations)) {
         return region;
       }
     }
@@ -828,9 +865,9 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
     maxBCInstrs
   );
 
-  if (region && inl.shouldInline(sk, fpiInfo.fpushOpc,
-                             callee, *region,
-                             adjustedMaxVasmCost(irgs, *region), annotations)) {
+  if (region &&
+      inl.shouldInline(irgs, sk, fpiInfo.fpushOpc, callee, *region,
+                       adjustedMaxVasmCost(irgs, *region), annotations)) {
     return region;
   }
 

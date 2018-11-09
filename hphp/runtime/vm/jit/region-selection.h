@@ -475,8 +475,10 @@ RegionDescPtr selectHotTrace(HotTransContext& ctx);
  * Create a region with the given context ctx (starting at ctx.tid) that
  * includes as much of the TransCFG as possible (in "wholecfg" mode), but that
  * can be pruned to eliminate cold/unlikely code as well (in "hotcfg" mode).
+ * Returns in *truncated whether or not the region had to be truncated due to
+ * the maximum bytecode limit.
  */
-RegionDescPtr selectHotCFG(HotTransContext& ctx);
+RegionDescPtr selectHotCFG(HotTransContext& ctx, bool* truncated = nullptr);
 
 /*
  * Checks whether the type predictions at the beginning of block

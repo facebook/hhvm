@@ -49,11 +49,13 @@ const StaticString s_switchProfile("SwitchProfile");
 //////////////////////////////////////////////////////////////////////
 
 struct DFS {
-  DFS(const ProfData* p, const TransCFG& c, int32_t maxBCInstrs, bool inlining)
+  DFS(const ProfData* p, const TransCFG& c, int32_t maxBCInstrs, bool inlining,
+      bool* truncated)
     : m_profData(p)
     , m_cfg(c)
     , m_numBCInstrs(maxBCInstrs)
     , m_inlining(inlining)
+    , m_truncated(truncated)
   {}
 
   RegionDescPtr formRegion(TransID head) {
@@ -166,11 +168,22 @@ private:
   }
 
   void visit(TransID tid) {
+    // Skip tid if its weight is below the JitPGOMinBlockPercent
+    // percentage of the weight of the block where this region
+    // started.
+    auto tidWeight = m_cfg.weight(tid);
+    if (tidWeight < m_minBlockWeight) {
+      ITRACE(5, "- visit: skipping {} due to low weight ({})\n",
+             tid, tidWeight);
+      return;
+    }
+
     auto rec = m_profData->transRec(tid);
     auto tidRegion = rec->region();
     auto tidInstrs = tidRegion->instrSize();
     if (tidInstrs > m_numBCInstrs) {
       ITRACE(5, "- visit: skipping {} due to region size\n", tid);
+      if (m_truncated) *m_truncated = true;
       if (!m_inlining) {
         logLowPriPerfWarning(
           "selectHotCFG",
@@ -182,16 +195,6 @@ private:
           }
         );
       }
-      return;
-    }
-
-    // Skip tid if its weight is below the JitPGOMinBlockPercent
-    // percentage of the weight of the block where this region
-    // started.
-    auto tidWeight = m_cfg.weight(tid);
-    if (tidWeight < m_minBlockWeight) {
-      ITRACE(5, "- visit: skipping {} due to low weight ({})\n",
-             tid, tidWeight);
       return;
     }
 
@@ -265,16 +268,18 @@ private:
   double                       m_minBlockWeight;
   double                       m_minArcProb;
   bool                         m_inlining;
+  bool*                        m_truncated;
 };
 
 //////////////////////////////////////////////////////////////////////
 
 }
 
-RegionDescPtr selectHotCFG(HotTransContext& ctx) {
+RegionDescPtr selectHotCFG(HotTransContext& ctx, bool* truncated) {
+  if (truncated) *truncated = false;
   ITRACE(1, "selectHotCFG: starting with maxBCInstrs = {}\n", ctx.maxBCInstrs);
   auto const region =
-    DFS(ctx.profData, *ctx.cfg, ctx.maxBCInstrs, ctx.inlining)
+    DFS(ctx.profData, *ctx.cfg, ctx.maxBCInstrs, ctx.inlining, truncated)
       .formRegion(ctx.tid);
 
   if (region->empty()) return nullptr;

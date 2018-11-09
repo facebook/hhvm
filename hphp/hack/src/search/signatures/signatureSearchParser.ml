@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 
 type type_specifier =
   | TSsimple of string
@@ -31,7 +31,7 @@ let parse_query_type type_str =
   else if type_str = "_" then Some QTwildcard
   else if type_str.[0] = '?' then
     let type_str = Str.string_after type_str 1 in
-    let type_str = String.trim type_str in
+    let type_str = String.strip type_str in
     Some (QTtype (TSoption (TSsimple type_str)))
   else Some (QTtype (TSsimple type_str))
 
@@ -39,12 +39,12 @@ let parse_query_type type_str =
 let parse_query (query : string) : signature_query option =
   try
     let _ : int = Str.search_forward re_function_query query 0 in
-    let function_output = String.trim (Str.matched_group 2 query) in
+    let function_output = String.strip (Str.matched_group 2 query) in
     let function_params =
       Str.matched_group 1 query
       |> Str.split_delim (Str.regexp ",")
       |> List.filter_map ~f:(fun input ->
-        match String.trim input with
+        match String.strip input with
         | "" -> None
         | trimmed_input -> Some trimmed_input
       )
@@ -57,4 +57,4 @@ let parse_query (query : string) : signature_query option =
       Some {function_params; function_output}
     | _ -> None
   with
-  | Not_found -> None
+  | Caml.Not_found -> None

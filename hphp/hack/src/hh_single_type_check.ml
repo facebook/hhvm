@@ -856,7 +856,7 @@ let handle_mode
           (Relative_path.to_absolute filename))
     in
 
-    let open Core_result.Monad_infix in
+    let open Result.Monad_infix in
     let result = Sys_utils.read_stdin_to_string ()
       |> Hh_json.json_of_string
       |> CstSearchService.compile_pattern tcopt

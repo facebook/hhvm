@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Utils
 open Reordered_argument_collections
 
@@ -43,7 +43,7 @@ module WorkerApi = struct
   let clean_key key =
     if (String.length key) > 0
     then
-      let key = String.lowercase_ascii (Utils.strip_ns key) in
+      let key = String.lowercase (Utils.strip_ns key) in
       if (String.length key) > 0 && key.[0] = ':'
       then String.sub key 1 (String.length key - 1)
       else key
@@ -58,7 +58,7 @@ module WorkerApi = struct
         | Ast.Method m -> let id = m.Ast.m_name in
             let pos, name = FileInfo.pos_full id in
             let full_name = prefix^name in
-            let is_static = List.mem m.Ast.m_kind Ast.Static in
+            let is_static = List.mem ~equal:(=) m.Ast.m_kind Ast.Static in
             let type_ =
               Method (is_static, (Utils.strip_ns (snd c.Ast.c_name)))
             in
@@ -264,9 +264,9 @@ module ClassMethods = struct
 
   let query tcopt class_name method_query =
     let open Option.Monad_infix in
-    let method_query = String.lowercase_ascii method_query in
+    let method_query = String.lowercase method_query in
     let matches_query method_name =
-      let method_name = String.lowercase_ascii method_name in
+      let method_name = String.lowercase method_name in
         String_utils.is_substring method_query method_name
     in
     get_class_definition_file class_name
@@ -276,7 +276,7 @@ module ClassMethods = struct
       match class_elt with
       | Ast.Method Ast.{m_kind; m_name = (pos, name); _}
           when matches_query name ->
-        let is_static = List.mem m_kind Ast.Static in
+        let is_static = List.mem ~equal:(=) m_kind Ast.Static in
         Some SearchUtils. {
           name;
           pos;

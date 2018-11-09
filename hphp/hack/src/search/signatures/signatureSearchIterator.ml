@@ -7,9 +7,11 @@
  *
  *)
 
+open Core_kernel
+
 type t =
   | Empty
-  | File of {ic: in_channel; curr: int option ref}
+  | File of {ic: In_channel.t; curr: int option ref}
   | And of t * t
   | Or of t * t
   (* Returns all non-equal values of the left iterator
@@ -21,17 +23,17 @@ let empty = Empty
 
 let rec close = function
   | Empty | List _ -> ()
-  | File {ic; curr} -> curr := None; close_in ic
+  | File {ic; curr} -> curr := None; In_channel.close ic
   | And (l, r) | Or (l, r) | Diff (l, r) -> close l; close r
 
 let read_int_from_file ic =
-  let curr = try Some (input_line ic) with End_of_file -> None in
+  let curr = In_channel.input_line ic in
   match curr with
   | None -> None
   | Some curr -> int_of_string_opt curr
 
 let from_file path =
-  let ic = try Some (open_in path) with _ -> None in
+  let ic = try Some (In_channel.create path) with _ -> None in
   match ic with
   | None -> Empty
   | Some ic ->
@@ -57,7 +59,7 @@ let rec file_next_gte id ic curr =
   | None -> None
   | Some curr_val ->
     let next = read_int_from_file ic in
-    if next = None then close_in ic;
+    if next = None then In_channel.close ic;
     curr := next;
     if (curr_val >= id) then Some curr_val
     else file_next_gte id ic curr
@@ -70,7 +72,7 @@ let rec file_peek_gte id ic curr =
     then Some curr_val
     else
       let next = read_int_from_file ic in
-      if next = None then close_in ic;
+      if next = None then In_channel.close ic;
       curr := next;
       file_peek_gte id ic curr
 

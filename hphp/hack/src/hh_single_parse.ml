@@ -7,6 +7,8 @@
  *
  *)
 
+module Hh_debug = Debug
+open Core_kernel
 module Lowerer = Full_fidelity_ast
 module Syntax = Full_fidelity_positioned_syntax
 module SyntaxKind = Full_fidelity_syntax_kind
@@ -42,7 +44,7 @@ let exit_with : result -> 'a = fun r -> exit (exit_code r)
 
 let handle_errors : Errors.t -> unit = fun errorl ->
   let open Errors in
-  let print_err err = output_string stderr (to_string (to_absolute err)) in
+  let print_err err = Out_channel.output_string stderr (to_string (to_absolute err)) in
   if is_empty errorl
   then ()
   else begin
@@ -143,7 +145,7 @@ let () =
   Printexc.record_backtrace true;
   let use_parser = ref "ffp"  in
   let hash       = ref false in
-  let dumper     = ref Debug.dump_ast in
+  let dumper     = ref Hh_debug.dump_ast in
   let filename   = ref ""     in
   let num_runs   = ref 100 in
   let benchmark_files      = ref [] in
@@ -153,7 +155,7 @@ let () =
     [ ("--hash", Set hash,
         "Get the decl level parsing hash of a given file "
       )
-    ; ("--sorted", Unit (fun () -> dumper := Debug.dump_sorted_ast),
+    ; ("--sorted", Unit (fun () -> dumper := Hh_debug.dump_sorted_ast),
         "When using the `compare` parser, the (lexicographically) sort the " ^
         "S-Expressions before diffing"
       )
@@ -194,6 +196,6 @@ let () =
       ~allow_malformed:!allow_malformed
   in
   if !benchmark_files <> [] then
-    List.iter parse_file !benchmark_files
+    List.iter ~f:parse_file !benchmark_files
   else
     Unix.handle_unix_error (parse_file) !filename

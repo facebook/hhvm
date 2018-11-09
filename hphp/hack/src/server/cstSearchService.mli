@@ -7,13 +7,14 @@
  *
  *)
 
+open Core_kernel
 type pattern
 type result
 
 val compile_pattern:
   TypecheckerOptions.t ->
   Hh_json.json ->
-  (pattern, string) Core_result.t
+  (pattern, string) Result.t
 (** Compile JSON input into a pattern that can be searched for. *)
 
 val result_to_json: sort_results:bool -> result option -> Hh_json.json
@@ -26,7 +27,7 @@ val go:
   sort_results:bool ->
   files_to_search:string list option  ->
   Hh_json.json ->
-  (Hh_json.json, string) Core_result.t
+  (Hh_json.json, string) Result.t
 (** Search for the given pattern across the given set of files. *)
 
 val search:

@@ -210,6 +210,10 @@ bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee,
   if (callee->attrs() & AttrInterceptable) {
     return traceRefusal(callSK, callee, "callee is interceptable", annotations);
   }
+  if (callee->takesInOutParams()) {
+    return traceRefusal(callSK, callee, "callee takes inout params",
+                        annotations);
+  }
 
   // TODO(#4238160): Inlining into pseudomain callsites is still buggy.
   if (callSK.func()->isPseudoMain()) {

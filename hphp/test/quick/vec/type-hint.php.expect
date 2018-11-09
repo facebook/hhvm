@@ -21,6 +21,8 @@ ERROR: string(92) "Argument 1 passed to takes_vector_container() must be an inst
 ERROR: string(93) "Value returned from function takes_vector_container() must be of type HH\Vector, HH\vec given"
 ERROR: string(86) "Argument 1 passed to takes_map_container() must be an instance of HH\Map, HH\vec given"
 ERROR: string(87) "Value returned from function takes_map_container() must be of type HH\Map, HH\vec given"
+ERROR: string(75) "Argument 1 passed to takes_null() must be an instance of null, HH\vec given"
+ERROR: string(76) "Value returned from function takes_null() must be of type null, HH\vec given"
 vec(0) {
 }
 ====================================================
@@ -49,6 +51,8 @@ ERROR: string(92) "Argument 1 passed to takes_vector_container() must be an inst
 ERROR: string(93) "Value returned from function takes_vector_container() must be of type HH\Vector, HH\vec given"
 ERROR: string(86) "Argument 1 passed to takes_map_container() must be an instance of HH\Map, HH\vec given"
 ERROR: string(87) "Value returned from function takes_map_container() must be of type HH\Map, HH\vec given"
+ERROR: string(75) "Argument 1 passed to takes_null() must be an instance of null, HH\vec given"
+ERROR: string(76) "Value returned from function takes_null() must be of type null, HH\vec given"
 vec(3) {
   int(1)
   int(2)

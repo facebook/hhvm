@@ -2694,6 +2694,7 @@ Parser::AutoAliasMap getAutoAliasedClassesHelper() {
     HH_ONLY_TYPE(vec_or_dict),
     HH_ONLY_TYPE(arraylike),
     HH_ONLY_TYPE(nonnull),
+    HH_ONLY_TYPE(null),
     HH_ALIAS(classname, string),
     HH_ALIAS(typename, string),
     HH_ALIAS(dynamic, mixed),

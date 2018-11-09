@@ -2977,6 +2977,7 @@ folly::Optional<Type> type_of_type_structure(SArray ts) {
     case TypeStructure::Kind::T_keyset:
       return is_nullable ? TOptKeyset : TKeyset;
     case TypeStructure::Kind::T_void:
+    case TypeStructure::Kind::T_null:
       return TNull;
     case TypeStructure::Kind::T_tuple: {
       auto const tsElems = get_ts_elem_types(ts);
@@ -3153,6 +3154,7 @@ Type from_hni_constraint(SString s) {
     ++p;
   }
 
+  if (!strcasecmp(p, "HH\\null"))     return union_of(ret, TInitNull);
   if (!strcasecmp(p, "HH\\resource")) return union_of(ret, TRes);
   if (!strcasecmp(p, "HH\\bool"))     return union_of(ret, TBool);
   if (!strcasecmp(p, "HH\\int"))      return union_of(ret, TInt);

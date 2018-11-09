@@ -260,6 +260,9 @@ TypeStructure::Kind TypeAnnotation::getKind() const {
   if (isPrimType("HH\\noreturn")) {
     return TypeStructure::Kind::T_noreturn;
   }
+  if (isPrimType("HH\\null")) {
+    return TypeStructure::Kind::T_null;
+  }
 
   if (isMixed()) {
     return TypeStructure::Kind::T_mixed;

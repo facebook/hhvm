@@ -84,6 +84,7 @@ const StaticString
 ;
 
 const std::string
+  s_null("null"),
   s_void("void"),
   s_int("int"),
   s_bool("bool"),
@@ -245,6 +246,9 @@ std::string fullName(const Array& arr, bool forDisplay) {
   TypeStructure::Kind kind =
     TypeStructure::Kind(arr[s_kind].toInt64Val());
   switch (kind) {
+    case TypeStructure::Kind::T_null:
+      name += forDisplay ? s_null : s_hh + s_null;
+      break;
     case TypeStructure::Kind::T_void:
       name += forDisplay ? s_void : s_hh + s_void;
       break;

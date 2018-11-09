@@ -423,6 +423,7 @@ bool write_type_alias(ProfDataSerializer& ser, const TypeAliasReq* td) {
           }
           break;
         }
+        case TypeStructure::Kind::T_null:
         case TypeStructure::Kind::T_void:
         case TypeStructure::Kind::T_int:
         case TypeStructure::Kind::T_bool:

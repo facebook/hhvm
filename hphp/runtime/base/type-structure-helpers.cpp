@@ -225,6 +225,7 @@ bool checkTypeStructureMatchesCellImpl(
       result = cellInstanceOf(&c1, ne);
       break;
     }
+    case TypeStructure::Kind::T_null:
     case TypeStructure::Kind::T_void:
       result = isNullType(type);
       break;
@@ -458,6 +459,7 @@ void errorOnIsAsExpressionInvalidTypes(const Array& ts) {
     case TypeStructure::Kind::T_enum:
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
+    case TypeStructure::Kind::T_null:
     case TypeStructure::Kind::T_void:
     case TypeStructure::Kind::T_noreturn:
     case TypeStructure::Kind::T_mixed:
@@ -523,6 +525,7 @@ bool typeStructureCouldBeNonStatic(const Array& ts) {
     case TypeStructure::Kind::T_typeaccess:
     case TypeStructure::Kind::T_reifiedtype:
       return true;
+    case TypeStructure::Kind::T_null:
     case TypeStructure::Kind::T_void:
     case TypeStructure::Kind::T_int:
     case TypeStructure::Kind::T_bool:

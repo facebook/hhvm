@@ -67,6 +67,8 @@ enum class Kind : uint8_t {
   T_varray_or_darray = 26,
   T_arraylike = 27,
 
+  T_null = 28,
+
   /* The following kinds needs class/alias resolution, and
    * are not exposed to the users. */
   T_unresolved = 101,

@@ -891,6 +891,7 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
       }
       return unionOf(TStr, TFunc);
     }
+    case TypeStructure::Kind::T_null:        return primitive(TNull);
     case TypeStructure::Kind::T_void:        return primitive(TNull);
     case TypeStructure::Kind::T_keyset:      return primitive(TKeyset);
     case TypeStructure::Kind::T_nonnull:     return primitive(TNull, true);

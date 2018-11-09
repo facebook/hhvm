@@ -2429,6 +2429,7 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
     case TypeStructure::Kind::T_arraykey:
     case TypeStructure::Kind::T_keyset:
     case TypeStructure::Kind::T_void:
+    case TypeStructure::Kind::T_null:
       return check(ts_type);
     case TypeStructure::Kind::T_tuple:
       return RuntimeOption::EvalHackArrCompatIsArrayNotices

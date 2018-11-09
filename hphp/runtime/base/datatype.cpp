@@ -247,6 +247,7 @@ MaybeDataType get_datatype(
     return folly::none;
   }
   if (!strcasecmp(name.c_str(), "null") ||
+      !strcasecmp(name.c_str(), "HH\\null") ||
       !strcasecmp(name.c_str(), "HH\\void")) {
     return KindOfNull;
   }

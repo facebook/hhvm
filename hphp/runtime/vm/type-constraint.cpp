@@ -111,7 +111,8 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
           break;
         case 4:
           strip = (!strcasecmp(stripped, "bool") ||
-                   !strcasecmp(stripped, "this"));
+                   !strcasecmp(stripped, "this") ||
+                   !strcasecmp(stripped, "null"));
           break;
         case 5: strip = !strcasecmp(stripped, "float"); break;
         case 6: strip = !strcasecmp(stripped, "string"); break;

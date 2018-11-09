@@ -21,6 +21,8 @@ ERROR: string(95) "Argument 1 passed to takes_vector_container() must be an inst
 ERROR: string(96) "Value returned from function takes_vector_container() must be of type HH\Vector, HH\keyset given"
 ERROR: string(89) "Argument 1 passed to takes_map_container() must be an instance of HH\Map, HH\keyset given"
 ERROR: string(90) "Value returned from function takes_map_container() must be of type HH\Map, HH\keyset given"
+ERROR: string(78) "Argument 1 passed to takes_null() must be an instance of null, HH\keyset given"
+ERROR: string(79) "Value returned from function takes_null() must be of type null, HH\keyset given"
 keyset(0) {
 }
 ====================================================
@@ -50,6 +52,8 @@ ERROR: string(95) "Argument 1 passed to takes_vector_container() must be an inst
 ERROR: string(96) "Value returned from function takes_vector_container() must be of type HH\Vector, HH\keyset given"
 ERROR: string(89) "Argument 1 passed to takes_map_container() must be an instance of HH\Map, HH\keyset given"
 ERROR: string(90) "Value returned from function takes_map_container() must be of type HH\Map, HH\keyset given"
+ERROR: string(78) "Argument 1 passed to takes_null() must be an instance of null, HH\keyset given"
+ERROR: string(79) "Value returned from function takes_null() must be of type null, HH\keyset given"
 keyset(4) {
   int(1)
   string(1) "a"

@@ -38,7 +38,9 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString s_Awaitable("HH\\Awaitable");
+const StaticString
+  s_Stringish("Stringish"),
+  s_Awaitable("HH\\Awaitable");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -83,6 +85,9 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
   assertx(src->isA(TObj));
   if (s_Awaitable.get()->isame(className)) {
     return gen(env, IsWaitHandle, src);
+  }
+  if (s_Stringish.get()->isame(className)) {
+    return gen(env, HasToString, src);
   }
 
   auto knownCls = checkCls->hasConstVal(TCls) ? checkCls->clsVal() : nullptr;

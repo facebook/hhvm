@@ -340,6 +340,7 @@ let handle_existing_file args filename =
       ~level
       ~hhvm_compat_mode
       ~codegen:args.codegen
+      ~parser_options:popt
     in
     print_full_fidelity_errors ~source_text ~error_env
   end;

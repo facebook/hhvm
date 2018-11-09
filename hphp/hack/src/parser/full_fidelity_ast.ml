@@ -3460,6 +3460,7 @@ let lower_tree
         ~hhvm_compat_mode
         ~enable_hh_syntax:env.enable_hh_syntax
         ~codegen:env.codegen
+        ~parser_options:env.parser_options
       in
       let errors = ParserErrors.parse_errors error_env in
       (* Prioritize runtime errors *)
@@ -3494,6 +3495,7 @@ let lower_tree
           ~enable_hh_syntax:env.enable_hh_syntax
           ~codegen:env.codegen
           ~hhi_mode:is_hhi
+          ~parser_options:env.parser_options
         in
         let errors = ParserErrors.parse_errors error_env in
         let f e = Errors.parsing_error (pos_and_message_of e) in

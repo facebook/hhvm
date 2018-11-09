@@ -88,6 +88,7 @@ type env =
   ; is_strict            : bool
   ; codegen              : bool
   ; hhi_mode             : bool
+  ; parser_options       : ParserOptions.t
   }
 
 let make_env
@@ -95,6 +96,7 @@ let make_env
   ?(hhvm_compat_mode     = NoCompat        )
   ?(enable_hh_syntax     = false           )
   ?(hhi_mode             = false           )
+  ~(parser_options : ParserOptions.t)
   (syntax_tree : SyntaxTree.t)
   ~(codegen : bool)
   : env
@@ -106,6 +108,7 @@ let make_env
     ; is_strict = SyntaxTree.is_strict syntax_tree
     ; codegen
     ; hhi_mode
+    ; parser_options
     }
 
 and is_hhvm_compat env = env.hhvm_compat_mode <> NoCompat

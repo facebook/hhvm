@@ -24,6 +24,7 @@ module WithSmartConstructors : functor (SmartConstructors : SmartConstructors.Sm
     -> ?enable_hh_syntax:bool
     -> ?hhi_mode:bool
     (* Required parts *)
+    -> parser_options:ParserOptions.t
     -> Full_fidelity_syntax_tree.WithSyntax(Syntax).WithSmartConstructors(SmartConstructors).t
     -> codegen:bool
     -> env

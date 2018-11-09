@@ -77,6 +77,12 @@ module Main_env = struct
     editor_open_files: Lsp.TextDocumentItem.t SMap.t;
     uris_with_diagnostics: SSet.t;
     uris_with_unsaved_changes: SSet.t; (* see comment in get_uris_with_unsaved_changes *)
+    status: status_params;
+  }
+  and status_params = {
+    message: string;
+    shortMessage: string option;
+    type_: MessageType.t;
   }
 end
 
@@ -409,6 +415,13 @@ let respond_to_error (event: event option) (e: exn) (stack: string): unit =
     print_error e stack |> Jsonrpc.respond to_stdout c
   | _ ->
     Lsp_helpers.telemetry_error to_stdout (Printf.sprintf "%s [%i]\n%s" e.message e.code stack)
+
+let status_tick (): string =
+  (* OCaml has pretty poor Unicode support.
+   # @lint-ignore TXT5 The # sign is needed for the ignore to be respected. *)
+  let statusFrames = [|"□";"■"|] in
+  let time = Unix.time () in
+  statusFrames.(int_of_float time mod 2)
 
 (* request_showStatus: pops up a dialog *)
 let request_showStatus
@@ -1341,29 +1354,62 @@ let do_documentFormatting
   do_formatting_common editor_open_files action params.options
 
 
-  (* TODO(hchau): *)
 let do_server_busy (state: state) (status: ServerCommandTypes.busy_status) : state =
-  match status with
-  | _ -> state
-  (*let open ServerCommandTypes in
   let open Main_env in
-  let p = initialize_params_exc () in
-  let (progress, action) = match status with
-    | Needs_local_typecheck -> (Some "Hack: preparing to check edits", None)
-    | Doing_local_typecheck -> (Some "Hack: checking edits", None)
-    | Done_local_typecheck -> (None, Some "Hack: save any file to do a whole-program check")
-    | Doing_global_typecheck true -> (Some "Hack: checking entire project (interruptible)", None)
-    | Doing_global_typecheck false -> (Some "Hack: checking entire project (blocking)", None)
-    | Done_global_typecheck _ -> (None, None)
+  let open ServerCommandTypes in
+  let open ShowStatus in
+  let open ShowMessageRequest in
+  let (type_, shortMessage, message) = match status with
+    | Needs_local_typecheck ->
+      MessageType.WarningMessage,
+      Some "preparing to check edits",
+      "Hack: preparing to check edits"
+    | Doing_local_typecheck ->
+      MessageType.WarningMessage,
+      Some "checking edits",
+      "Hack: checking edits"
+    | Done_local_typecheck ->
+      MessageType.InfoMessage,
+      None,
+      "hh_server is initialized and running correctly."
+    | Doing_global_typecheck false ->
+      MessageType.WarningMessage,
+      Some "checking project",
+      "Hack: checking entire project (blocking)"
+    | Doing_global_typecheck true ->
+      MessageType.InfoMessage,
+      None,
+      "Hack: checking entire project (interruptible)"
+    | Done_global_typecheck _ ->
+      MessageType.InfoMessage,
+      None,
+      "hh_server is initialized and running correctly."
   in
-  (* Following code is subtle. Thanks to the magic of the notify_ functions,  *)
-  (* it will either create a new progress/action notification, or update an   *)
-  (* an existing one, or close an existing one, or just no-op, as appropriate *)
   match state with
   | Main_loop menv ->
-    Main_loop menv
+    request_showStatus {
+      request = {
+        type_ = menv.status.type_;
+        message = menv.status.message;
+        actions = [];
+      };
+      progress = None;
+      total = None;
+      shortMessage = match menv.status.shortMessage with
+        | Some msg -> Some (msg ^ " " ^ status_tick())
+        | None -> None
+      ;
+    };
+    Main_loop {
+      menv with
+      status = {
+        type_;
+        shortMessage;
+        message;
+      }
+    }
   | _ ->
-    state*)
+    state
 
 
 (* do_diagnostics: sends notifications for all reported diagnostics; also     *)
@@ -1406,19 +1452,19 @@ let do_diagnostics
   SSet.union (SSet.diff uris_with_diagnostics uris_without) uris_with
 
 
-(* TODO(hchau): Show status *)
 let report_connect_progress
     (ienv: In_init_env.t)
-  : state =
-  (*let open In_init_env in
-  let p = initialize_params_exc () in
+  : unit =
+  let open In_init_env in
+  let open ShowStatus in
+  let open ShowMessageRequest in
   let tail_env = Option.value_exn ienv.tail_env in
   let time = Unix.time () in
   let delay_in_secs = int_of_float (time -. ienv.first_start_time) in
   (* TODO: better to report time that hh_server has spent initializing *)
   let load_state_not_found, tail_msg =
     ClientConnect.open_and_get_tail_msg ienv.first_start_time tail_env in
-  let msg = if load_state_not_found <> ClientConnect.No_failure then
+  let message = if load_state_not_found <> ClientConnect.No_failure then
     Printf.sprintf
       "hh_server initializing (load-state not found - will take a while): %s [%i seconds]"
       tail_msg delay_in_secs
@@ -1426,14 +1472,24 @@ let report_connect_progress
     Printf.sprintf
       "hh_server initializing: %s [%i seconds]"
       tail_msg delay_in_secs
-  in*)
-  In_init ienv
+  in
+  request_showStatus {
+    request = {
+      type_ = MessageType.WarningMessage;
+      message = message;
+      actions = [];
+    };
+    progress = None;
+    total = None;
+    shortMessage = Some (Printf.sprintf "%s %s" tail_msg (status_tick ()))
+  }
 
 
 let report_connect_end
     (ienv: In_init_env.t)
   : state =
   let open In_init_env in
+  let open Main_env in
   let _state = dismiss_ui (In_init ienv) in
   let menv =
     { Main_env.
@@ -1442,6 +1498,11 @@ let report_connect_end
       editor_open_files = ienv.editor_open_files;
       uris_with_diagnostics = SSet.empty;
       uris_with_unsaved_changes = ienv.In_init_env.uris_with_unsaved_changes;
+      status = {
+        type_ = MessageType.InfoMessage;
+        message = "hh_server is initialized and running correctly.";
+        shortMessage = None;
+      };
     }
   in
   Main_loop menv
@@ -1741,8 +1802,7 @@ and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_e
     request = {
       type_ = MessageType.ErrorMessage;
       message =
-        "hh_server has stopped. "
-        ^ "Language features such as autocomplete are currently unavailable.";
+        p.explanation ^ " Language features such as autocomplete are currently unavailable.";
       actions = [{title = "Restart Hack Server"}];
     };
     progress = None;
@@ -2007,46 +2067,17 @@ let handle_event
 
   (* idle tick while waiting for server to complete initialization *)
   | In_init ienv, Tick ->
-    let open ShowStatus in
-    let open ShowMessageRequest in
-    (* OCaml has pretty poor Unicode support.
-     # @lint-ignore TXT5 The # sign is needed for the ignore to be respected. *)
-    let statusFrames = [|"□";"■"|] in
-    let time = Unix.time () in
-    request_showStatus {
-      request = {
-        type_ = MessageType.WarningMessage;
-        message = "hh_server is initializing. This may take up to 5 minutes.";
-        actions = [];
-      };
-      progress = Some 1;
-      total = Some 2;
-      shortMessage = Some ("initializing " ^ statusFrames.(int_of_float time mod 2))
-    };
-
     let open In_init_env in
     let time = Unix.time () in
     let delay_in_secs = int_of_float (time -. ienv.most_recent_start_time) in
     if delay_in_secs <= 10 then
-      state := report_connect_progress ienv
+      report_connect_progress ienv
     else begin
       state := connect !state (* terminate + retry the connection *)
     end
 
   (* server completes initialization *)
   | In_init ienv, Server_hello ->
-    let open ShowStatus in
-    let open ShowMessageRequest in
-    request_showStatus {
-      request = {
-        type_ = MessageType.InfoMessage;
-        message = "hh_server is initialized and running correctly.";
-        actions = [];
-      };
-      progress = None;
-      total = None;
-      shortMessage = None;
-    };
     connect_after_hello ienv.In_init_env.conn ienv.In_init_env.file_edits;
     state := report_connect_end ienv
 
@@ -2057,13 +2088,31 @@ let handle_event
     let stack = "" in
     raise (Server_fatal_connection_exception { Marshal_tools.message; stack; })
 
-  (* Tick when we're connected to the server and have empty queue *)
-  | Main_loop menv, Tick when menv.needs_idle ->
-    (* If we're connected to a server and have no more messages in the queue, *)
-    (* then we must let the server know we're idle, so it will be free to     *)
-    (* handle command-line requests.                                          *)
-    state := Main_loop { menv with needs_idle = false; };
-    rpc menv.conn ref_unblocked_time ServerCommandTypes.IDE_IDLE
+  (* Tick when we're connected to the server *)
+  | Main_loop menv, Tick ->
+    if menv.needs_idle then begin
+      (* If we're connected to a server and have no more messages in the queue, *)
+      (* then we must let the server know we're idle, so it will be free to     *)
+      (* handle command-line requests.                                          *)
+      state := Main_loop { menv with needs_idle = false; };
+      rpc menv.conn ref_unblocked_time ServerCommandTypes.IDE_IDLE
+    end;
+    let open ShowStatus in
+    let open ShowMessageRequest in
+    request_showStatus {
+      request = {
+        type_ = menv.status.type_;
+        message = menv.status.message;
+        actions = [];
+      };
+      progress = None;
+      total = None;
+      shortMessage = match menv.status.shortMessage with
+        | Some msg -> Some (msg ^ " " ^ status_tick())
+        | None -> None
+      ;
+    }
+
 
   (* textDocument/hover request *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/hover" ->

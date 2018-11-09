@@ -354,7 +354,6 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
-    case KindOfFunc:
     case KindOfClass:
       if (!ad->useWeakKeys()) throwInvalidArrayKeyException(cell, ad);
       if (checkHACArrayKeyCast()) {
@@ -362,6 +361,9 @@ bool HHVM_FUNCTION(array_key_exists,
       }
       raise_warning("Array key should be either a string or an integer");
       return false;
+
+    case KindOfFunc:
+      return ad->exists(StrNR(funcToStringHelper(cell->m_data.pfunc)));
 
     case KindOfPersistentString:
     case KindOfString: {
@@ -2973,6 +2975,9 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
       return tvReturn(str);
     }
 
+    case KindOfFunc:
+      return tvReturn(StrNR(funcToStringHelper(input.toFuncVal())));
+
     case KindOfInt64:
     case KindOfBoolean:
     case KindOfDouble:
@@ -3017,10 +3022,6 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
     case KindOfObject:
       SystemLib::throwInvalidArgumentExceptionObject(
         "Objects cannot be cast to an array-key"
-      );
-    case KindOfFunc:
-      SystemLib::throwInvalidArgumentExceptionObject(
-        "Funcs cannot be cast to an array-key"
       );
     case KindOfClass:
       SystemLib::throwInvalidArgumentExceptionObject(

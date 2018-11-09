@@ -1045,10 +1045,12 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
     }
   }
 
-  if (isString() && !isSoft() && c->m_type == KindOfFunc) {
-    c->m_data.pstr = const_cast<StringData*>(c->m_data.pfunc->fullName());
-    c->m_type = KindOfPersistentString;
-    return;
+  if (!isSoft() && c->m_type == KindOfFunc) {
+    if (isString() || (isObject() && interface_supports_string(m_typeName))) {
+      c->m_data.pstr = const_cast<StringData*>(c->m_data.pfunc->fullName());
+      c->m_type = KindOfPersistentString;
+      return;
+    }
   }
 
   // Handle return type constraint failures

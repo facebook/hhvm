@@ -1,0 +1,3 @@
+-vEval.RaiseFuncConversionWarning=1
+
+-vEval.EmitFuncPointers=1

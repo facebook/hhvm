@@ -328,6 +328,10 @@ void ConvertTvToUncounted(
   // Object or Resource, as these should never appear in an uncounted array.
   // Thus we only need to deal with strings/arrays.
   switch (type) {
+    case KindOfFunc:
+      source->m_data.pstr =
+        const_cast<StringData*>(funcToStringHelper(source->m_data.pfunc));
+      // Fall-through
     case KindOfString:
       source->m_type = KindOfPersistentString;
       // Fall-through.
@@ -430,7 +434,6 @@ void ConvertTvToUncounted(
     case KindOfDouble: {
       break;
     }
-    case KindOfFunc:
     case KindOfClass:
     case KindOfObject:
     case KindOfResource:

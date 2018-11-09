@@ -1021,6 +1021,35 @@ void implResCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   }
 }
 
+const StaticString s_funcToStringWarning("Func to string conversion");
+
+void implFunCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
+  auto const rightTy = right->type();
+
+  if (rightTy <= TFunc) {
+    if (op == Op::Eq || op == Op::Same) {
+      push(env, gen(env, EqFunc, left, right));
+      return;
+    }
+    if (op == Op::Neq || op == Op::NSame) {
+      push(
+        env, gen(env, XorBool, gen(env, EqFunc, left, right), cns(env, true)));
+      return;
+    }
+  }
+
+  if (rightTy <= TStr) {
+    if (RuntimeOption::EvalRaiseFuncConversionWarning) {
+      gen(env, RaiseWarning, cns(env, s_funcToStringWarning.get()));
+    }
+    auto const str = gen(env, LdFuncName, left);
+    implStrCmp(env, op, str, right);
+    return;
+  }
+
+  PUNT(Func-cmp);
+}
+
 /*
  * Responsible for converting the bytecode comparisons (which are type-agnostic)
  * to IR comparisons (which are typed). This generally involves inserting the
@@ -1075,12 +1104,18 @@ void implCmp(IRGS& env, Op op) {
     }
   }
 
+  auto equiv = [&] {
+    return
+      equivDataTypes(leftTy.toDataType(), rightTy.toDataType()) ||
+      (isFuncType(leftTy.toDataType()) && isStringType(rightTy.toDataType())) ||
+      (isStringType(leftTy.toDataType()) && isFuncType(rightTy.toDataType()));
+  };
+
   // If it's a same-ish comparison and the types don't match (taking into
   // account Str and StaticStr), lower to a bool comparison of
   // constants. Otherwise, switch on the type of the left operand to emit the
   // right kind of comparison.
-  if ((op == Op::Same || op == Op::NSame) &&
-      !equivDataTypes(leftTy.toDataType(), rightTy.toDataType())) {
+  if ((op == Op::Same || op == Op::NSame) && !equiv()) {
     push(env, emitConstCmp(env, op, false, true));
   } else if (leftTy <= TNull) implNullCmp(env, op, left, right);
   else if (leftTy <= TBool) implBoolCmp(env, op, left, right);
@@ -1094,6 +1129,7 @@ void implCmp(IRGS& env, Op op) {
   else if (leftTy <= TStr) implStrCmp(env, op, left, right);
   else if (leftTy <= TObj) implObjCmp(env, op, left, right);
   else if (leftTy <= TRes) implResCmp(env, op, left, right);
+  else if (leftTy <= TFunc) implFunCmp(env, op, left, right);
   else always_assert(false);
 
   decRef(env, left);
@@ -1454,7 +1490,7 @@ void emitBitNot(IRGS& env) {
     return;
   }
 
-  auto const resultType = srcType <= TStr ? TStr
+  auto const resultType = srcType <= TStr || srcType <= TFunc ? TStr
                         : srcType.needsReg() ? TCell
                         : TInt;
   interpOne(env, resultType, 1);

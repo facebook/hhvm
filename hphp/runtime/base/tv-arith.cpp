@@ -784,6 +784,10 @@ void cellBitNot(Cell& cell) {
       cell.m_data.num = ~double_to_int64(cell.m_data.dbl);
       break;
 
+    case KindOfFunc:
+      cell.m_type = KindOfString;
+      cell.m_data.pstr =
+        const_cast<StringData*>(funcToStringHelper(cell.m_data.pfunc));
     case KindOfString:
       if (cell.m_data.pstr->cowCheck()) {
     case KindOfPersistentString:
@@ -828,7 +832,6 @@ void cellBitNot(Cell& cell) {
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:
-    case KindOfFunc:
     case KindOfClass:
       raise_error("Unsupported operand type for ~");
   }

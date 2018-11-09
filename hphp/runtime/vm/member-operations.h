@@ -1257,11 +1257,13 @@ tv_lval ElemU(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
-    case KindOfFunc:
     case KindOfClass:
       // Unset on scalar base never modifies the base, but the const_cast is
       // necessary to placate the type system.
       return const_cast<TypedValue*>(&immutable_uninit_base);
+    case KindOfFunc:
+      raise_error(Strings::OP_NOT_SUPPORTED_FUNC);
+      return nullptr;
     case KindOfPersistentString:
     case KindOfString:
       raise_error(Strings::OP_NOT_SUPPORTED_STRING);

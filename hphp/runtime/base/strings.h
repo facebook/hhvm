@@ -70,6 +70,8 @@ auto constexpr CANT_UNSET_STRING =
   "Cannot unset string offsets";
 auto constexpr OP_NOT_SUPPORTED_STRING =
   "Operator not supported for strings";
+auto constexpr OP_NOT_SUPPORTED_FUNC =
+  "Operator not supported for funcs";
 auto constexpr ASYNC_WITHOUT_BODY =
   "Cannot declare %s method %s::%s() async; async is only meaningful"
   " when it modifies a method body";

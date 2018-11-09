@@ -328,6 +328,7 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ArrayData* ad) {
 
     case KindOfPersistentString:
     case KindOfString:
+    case KindOfFunc:
       nonArr();
       return op(false, true);
 
@@ -367,7 +368,6 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ArrayData* ad) {
     }
 
     case KindOfResource:
-    case KindOfFunc:
     case KindOfClass:
       nonArr();
       return op(false, true);
@@ -920,8 +920,18 @@ bool cellSame(Cell c1, Cell c2) {
 
     case KindOfPersistentString:
     case KindOfString:
+      if (isFuncType(c2.m_type)) {
+        return c1.m_data.pstr->same(funcToStringHelper(c2.m_data.pfunc));
+      }
       if (!isStringType(c2.m_type)) return false;
       return c1.m_data.pstr->same(c2.m_data.pstr);
+
+    case KindOfFunc:
+      if (isStringType(c2.m_type)) {
+        return funcToStringHelper(c1.m_data.pfunc)->same(c2.m_data.pstr);
+      }
+      if (c2.m_type != KindOfFunc) return false;
+      return c1.m_data.pfunc == c2.m_data.pfunc;
 
     case KindOfPersistentVec:
     case KindOfVec:
@@ -982,10 +992,6 @@ bool cellSame(Cell c1, Cell c2) {
       return c2.m_type == KindOfResource &&
         c1.m_data.pres == c2.m_data.pres;
 
-    case KindOfFunc:
-      if (c2.m_type != KindOfFunc) return false;
-      return c1.m_data.pfunc == c2.m_data.pfunc;
-
     case KindOfClass:
       if (c2.m_type != KindOfClass) return false;
       return c1.m_data.pclass == c2.m_data.pclass;
@@ -1043,11 +1049,16 @@ bool cellEqual(Cell cell, const ResourceHdr* val) {
 }
 
 bool cellEqual(Cell c1, Cell c2) {
+  if (UNLIKELY(isFuncType(c1.m_type) && isFuncType(c2.m_type))) {
+    return c1.m_data.pfunc == c2.m_data.pfunc;
+  }
   return cellRelOp(Eq(), c1, c2);
 }
 
 bool tvEqual(TypedValue tv1, TypedValue tv2) {
-  return tvRelOp(Eq(), tv1, tv2);
+  auto const c1 = *tvToCell(&tv1);
+  auto const c2 = *tvToCell(&tv2);
+  return cellEqual(c1, c2);
 }
 
 bool cellLess(Cell cell, bool val) {

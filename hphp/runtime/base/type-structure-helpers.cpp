@@ -40,8 +40,15 @@ bool cellInstanceOf(const Cell* tv, const NamedEntity* ne) {
     case KindOfNull:
     case KindOfBoolean:
     case KindOfResource:
-    case KindOfFunc:
     case KindOfClass:
+      return false;
+
+    case KindOfFunc:
+      cls = Unit::lookupClass(ne);
+      if (cls && interface_supports_string(cls->name())) {
+        funcToStringHelper(tv->m_data.pfunc); // maybe raise a warning
+        return true;
+      }
       return false;
 
     case KindOfInt64:

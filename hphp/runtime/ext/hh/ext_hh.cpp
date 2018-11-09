@@ -249,6 +249,11 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
       sb.append(reinterpret_cast<const char*>(&tv.m_data.dbl), 8);
       break;
 
+    case KindOfFunc:
+      serialize_memoize_code(sb, SER_MC_STRING);
+      serialize_memoize_string_data(sb, funcToStringHelper(tv.m_data.pfunc));
+      break;
+
     case KindOfPersistentString:
     case KindOfString:
       serialize_memoize_code(sb, SER_MC_STRING);
@@ -273,7 +278,6 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
       break;
 
     case KindOfResource:
-    case KindOfFunc:
     case KindOfClass:
     case KindOfRef: {
       auto msg = folly::format(

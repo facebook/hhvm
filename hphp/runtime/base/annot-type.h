@@ -301,12 +301,17 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       case KindOfKeyset:
         return interface_supports_keyset(annotClsName)
           ? AnnotAction::Pass : AnnotAction::Fail;
+      case KindOfFunc:
+        if (interface_supports_string(annotClsName)) {
+          return RuntimeOption::EvalStringHintNotices
+            ? AnnotAction::WarnFunc : AnnotAction::ConvertFunc;
+        }
+        return AnnotAction::Fail;
       case KindOfUninit:
       case KindOfNull:
       case KindOfBoolean:
       case KindOfResource:
         return AnnotAction::Fail;
-      case KindOfFunc:
       case KindOfClass:
       case KindOfObject:
       case KindOfRef:

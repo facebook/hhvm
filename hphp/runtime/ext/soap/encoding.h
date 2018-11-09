@@ -264,6 +264,7 @@ inline int dataTypeToSoap(DataType dt) {
     case KindOfBoolean: return XSD_BOOLEAN;
     case KindOfInt64:   return SOAP_ENC_INT_DT;
     case KindOfDouble:  return SOAP_ENC_DOUBLE_DT;
+    case KindOfFunc:
     case KindOfPersistentString:
     case KindOfString:  return XSD_STRING;
     case KindOfPersistentVec:
@@ -279,7 +280,6 @@ inline int dataTypeToSoap(DataType dt) {
     case KindOfObject:  return SOAP_ENC_OBJECT;
     case KindOfResource:
     case KindOfRef:
-    case KindOfFunc:
     case KindOfClass:   return INVALID_TYPE;
   }
   return INVALID_TYPE;

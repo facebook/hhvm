@@ -724,6 +724,7 @@ Variant HHVM_FUNCTION(file_put_contents,
     case KindOfDouble:
     case KindOfPersistentString:
     case KindOfString:
+    case KindOfFunc:
     case KindOfRef: {
       String value = data.toString();
       if (!value.empty()) {
@@ -735,7 +736,6 @@ Variant HHVM_FUNCTION(file_put_contents,
       }
       break;
     }
-    case KindOfFunc:
     case KindOfClass:
       raise_warning("Not a valid stream resource");
       return false;

@@ -287,6 +287,8 @@ static MaybeDataType convert_for_pow(const Variant& val,
       dval = val.toDouble();
       return KindOfDouble;
 
+    case KindOfFunc:
+    case KindOfClass:
     case KindOfPersistentString:
     case KindOfString: {
       auto dt = val.toNumeric(ival, dval, true);
@@ -309,8 +311,6 @@ static MaybeDataType convert_for_pow(const Variant& val,
     case KindOfArray:
       // Not reachable since HHVM_FN(pow) deals with these base cases first.
     case KindOfRef:
-    case KindOfFunc:
-    case KindOfClass:
       break;
   }
 

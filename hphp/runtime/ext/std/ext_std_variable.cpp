@@ -459,9 +459,11 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
       sb.append(';');
       return sb.detach();
     }
+    case KindOfFunc:
     case KindOfPersistentString:
     case KindOfString: {
-      StringData *str = value.getStringData();
+      auto const str = isStringType(value.getType())
+        ? value.getStringData() : funcToStringHelper(value.toFuncVal());
       auto const size = str->size();
       if (size >= RuntimeOption::MaxSerializedStringSize) {
         throw Exception("Size of serialized string (%d) exceeds max", size);
@@ -545,7 +547,6 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
     case KindOfDouble:
     case KindOfObject:
     // TODO (T29639296)
-    case KindOfFunc:
     case KindOfClass:
       break;
 

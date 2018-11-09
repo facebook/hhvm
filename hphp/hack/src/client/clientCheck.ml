@@ -182,14 +182,13 @@ let main args =
       begin try
         let oc = Pervasives.open_out filename in
         Out_channel.output_string oc content;
-        Out_channel.output_char oc '\n';
         Pervasives.close_out oc;
         Exit_status.No_error
       with exn ->
         Printf.eprintf "Failed to save hot classes file: %s\n" @@
           Exn.to_string exn;
         Printexc.print_backtrace stderr;
-        Exit_status.No_error
+        Exit_status.Uncaught_exception
       end
     | MODE_IDE_FIND_REFS arg ->
       let line, char = parse_position_string arg in

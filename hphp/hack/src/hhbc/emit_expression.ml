@@ -3584,7 +3584,9 @@ and emit_special_function env pos id args uargs default =
           (Emit_env.get_namespace env) (pos, func_name) in
         let func_id = Option.value_map id_opt
           ~default:func_id ~f:Hhbc_id.Function.from_raw_string in
-        Some (instr_resolve_func func_id, Flavor.Cell)
+        if Hhbc_options.emit_func_pointers !Hhbc_options.compiler_options
+        then Some (instr_resolve_func func_id, Flavor.Cell)
+        else Some (instr_string (Hhbc_id.Function.to_raw_string func_id), Flavor.Cell)
       | _ ->
         Emit_fatal.raise_fatal_runtime pos "Constant string expected in fun()"
     end
@@ -3595,7 +3597,9 @@ and emit_special_function env pos id args uargs default =
         Some (gather [
           emit_expr ~need_ref:false env obj_expr;
           emit_expr ~need_ref:false env method_name;
-          instr_resolve_obj_method;
+          if Hhbc_options.emit_func_pointers !Hhbc_options.compiler_options
+          then instr_resolve_obj_method
+          else instr (ILitConst (NewVArray 2));
         ], Flavor.Cell)
       | _ ->
         Emit_fatal.raise_fatal_runtime pos
@@ -3609,7 +3613,9 @@ and emit_special_function env pos id args uargs default =
           Some (gather [
             emit_expr ~need_ref:false env class_name;
             emit_expr ~need_ref:false env method_name;
-            instr_resolve_cls_method;
+            if Hhbc_options.emit_func_pointers !Hhbc_options.compiler_options
+            then instr_resolve_cls_method
+            else instr (ILitConst (NewVArray 2));
           ], Flavor.Cell)
         | _ ->
           Emit_fatal.raise_fatal_runtime pos

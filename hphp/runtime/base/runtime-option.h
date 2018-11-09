@@ -753,6 +753,7 @@ struct RuntimeOption {
   F(int32_t,  JitLayoutMainFactor,     1000)                            \
   F(int32_t,  JitLayoutColdFactor,     5)                               \
   F(bool,     JitAHotSizeRoundUp,      true)                            \
+  F(bool,     EmitFuncPointers,        false)                           \
   F(bool, JitProfileRecord,            false)                           \
   F(uint32_t, GdbSyncChunks,           128)                             \
   F(bool, JitKeepDbgFiles,             false)                           \

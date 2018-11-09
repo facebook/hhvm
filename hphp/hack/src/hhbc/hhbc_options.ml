@@ -54,6 +54,7 @@ type t = {
   option_phpism_disallow_execution_operator: bool;
   option_disable_variable_variables       : bool;
   option_phpism_disable_define            : bool;
+  option_emit_func_pointers               : bool;
 }
 
 let default = {
@@ -101,6 +102,7 @@ let default = {
   option_phpism_disallow_execution_operator = false;
   option_disable_variable_variables = false;
   option_phpism_disable_define = true;
+  option_emit_func_pointers = true;
 }
 
 let enable_hiphop_syntax o = o.option_enable_hiphop_syntax
@@ -145,6 +147,7 @@ let phpism_undefined_const_fallback o = o.option_phpism_undefined_const_fallback
 let phpism_disallow_execution_operator o = o.option_phpism_disallow_execution_operator
 let disable_variable_variables o = o.option_disable_variable_variables
 let phpism_disable_define o = o.option_phpism_disable_define
+let emit_func_pointers o = o.option_emit_func_pointers
 let to_string o =
   let dynamic_invokes =
     String.concat ~sep:", " (SSet.elements (dynamic_invoke_functions o)) in
@@ -286,6 +289,8 @@ let set_option options name value =
     { options with option_phpism_disable_define = int_of_string value > 0 }
   | "hack.lang.enableconcurrent" ->
     { options with option_enable_concurrent = as_bool value }
+  | "hhvm.emit_func_pointers" ->
+    { options with option_emit_func_pointers = int_of_string value > 0 }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -424,6 +429,8 @@ let value_setters = [
      fun opts v -> { opts with option_disable_variable_variables = (v = 1) });
   (set_value "hhvm.hack.lang.phpism.disable_define" get_value_from_config_int @@
      fun opts v -> { opts with option_phpism_disable_define = (v > 0) });
+  (set_value "hhvm.emit_func_pointers" get_value_from_config_int @@
+     fun opts v -> { opts with option_emit_func_pointers = (v > 0) });
 ]
 
 let extract_config_options_from_json ~init config_json =

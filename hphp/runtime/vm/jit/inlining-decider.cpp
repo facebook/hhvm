@@ -821,6 +821,15 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
     } else {
       ctx = TCctx;
     }
+  } else {
+    // Bail out if calling a static methods with an object ctx.
+    if (ctx.maybe(TObj) &&
+        (callee->isStaticInPrologue() ||
+         (!sk.hasThis() && isFPushClsMethod(fpiInfo.fpushOpc)))) {
+      traceRefusal(sk, callee, "calling static method with an object",
+                   annotations);
+      return nullptr;
+    }
   }
 
   std::vector<Type> argTypes;

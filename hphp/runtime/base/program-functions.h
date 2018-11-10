@@ -25,6 +25,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Transport;
+struct Unit;
 
 #if defined(__APPLE__) || defined(_MSC_VER)
 extern const void* __hot_start;
@@ -134,6 +135,10 @@ std::string get_systemlib(std::string* hhas = nullptr,
 
 // Helper function for stats tracking with exceptions.
 void bump_counter_and_rethrow(bool isPsp);
+
+
+// Log the first time a unit is loaded
+void log_loaded_unit(const Unit* u);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

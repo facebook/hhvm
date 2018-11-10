@@ -27,6 +27,7 @@
 #include <vector>
 
 #include <boost/container/flat_map.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include <folly/Format.h>
 
@@ -39,10 +40,12 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/smalllocks.h"
+#include "hphp/util/struct-log.h"
 
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-error.h"
@@ -85,6 +88,7 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 
 #include "hphp/system/systemlib.h"
+#include "hphp/runtime/base/program-functions.h"
 
 namespace HPHP {
 
@@ -1396,6 +1400,10 @@ Func* findEntryPoint(const Unit* unit) {
   return nullptr;
 }
 
+bool isEvalName(const StringData* name) {
+  return name->empty() || boost::ends_with(name->slice(), EVAL_FILENAME_SUFFIX);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 
@@ -1409,6 +1417,13 @@ void Unit::initialMerge() {
 
   if (RuntimeOption::EvalEnableReverseDataMap) {
     data_map::register_start(this);
+  }
+
+  if (RuntimeOption::EvalLogLoadedUnitsRate > 0.0) {
+    auto const is_system = FileUtil::isSystemName(m_filepath->slice());
+    if (!is_system && !isEvalName(m_filepath)) {
+      log_loaded_unit(this);
+    }
   }
 
   int state = 0;

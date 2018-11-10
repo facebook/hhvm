@@ -558,8 +558,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   static const bool kVerifyVerbose =
     kVerifyVerboseSystem || getenv("HHVM_VERIFY_VERBOSE");
 
-  const bool isSystemLib =
-    boost::starts_with(m_filepath->data(), "/:systemlib");
+  const bool isSystemLib = FileUtil::isSystemName(m_filepath->slice());
   const bool doVerify =
     kVerify || boost::ends_with(m_filepath->data(), ".hhas");
   if (doVerify) {

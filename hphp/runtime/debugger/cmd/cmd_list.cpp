@@ -20,6 +20,7 @@
 #include <sys/stat.h>
 
 #include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/debugger/cmd/cmd_info.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
@@ -356,8 +357,7 @@ bool CmdList::onServer(DebuggerProxy &proxy) {
     }
   }
   RuntimeOption::WarningFrequency = savedWarningFrequency;
-  if (!m_code.toBoolean() &&
-    m_file.find("/:systemlib.php") == m_file.length() - 15) {
+  if (!m_code.toBoolean() && FileUtil::isSystemName(m_file)) {
     m_code = SystemLib::s_source;
   }
   return proxy.sendToClient((DebuggerCommand*)this);

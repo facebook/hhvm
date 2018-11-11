@@ -106,15 +106,6 @@ void ifRefCountedNonPersistent(Vout& v, Type ty, Vloc loc, Then then) {
   });
 }
 
-const StringData* incRefProfileKey(const IRInstruction* inst) {
-  return makeStaticString(
-    folly::to<std::string>("IncRefProfile-",
-                           opcodeName(inst->op()),
-                           "-",
-                            inst->src(0)->type().toString())
-  );
-}
-
 template<typename T>
 Vreg incrAmount(Vout& v, const TargetProfile<T>& profile) {
   if (!profile.profiling()) return Vreg{};
@@ -141,6 +132,8 @@ void incrementProfile(Vout& v, const TargetProfile<T>& profile,
 
 }
 
+static auto const s_IncRef = makeStaticString("IncRefProfile");
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void cgIncRef(IRLS& env, const IRInstruction* inst) {
@@ -154,7 +147,7 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
 
   auto const profile = TargetProfile<IncRefProfile>(env.unit.context(),
                                                     inst->marker(),
-                                                    incRefProfileKey(inst));
+                                                    s_IncRef);
 
   auto const incr = incrAmount(v, profile);
   incrementProfile(v, profile, incr, offsetof(IncRefProfile, total));

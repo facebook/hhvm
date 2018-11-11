@@ -62,24 +62,51 @@ std::thread s_retranslateAllThread;
 std::atomic<bool> s_retranslateAllScheduled{false};
 std::atomic<bool> s_retranslateAllComplete{false};
 
+CompactVector<Trace::BumpRelease> bumpTraceFunctions(const Func* func) {
+  auto def = [&] {
+    CompactVector<Trace::BumpRelease> result;
+    result.emplace_back(Trace::hhir_refcount, -10);
+    result.emplace_back(Trace::hhir_load, -10);
+    result.emplace_back(Trace::hhir_store, -10);
+    result.emplace_back(Trace::printir, -10);
+    return result;
+  };
+
+  auto opt = [&] {
+    CompactVector<Trace::BumpRelease> result;
+    if (RuntimeOption::EvalJitPrintOptimizedIR) {
+      result.emplace_back(Trace::printir,
+                          -RuntimeOption::EvalJitPrintOptimizedIR);
+    }
+
+    return result;
+  };
+
+  if (func->getFuncId() == RuntimeOption::TraceFuncId) {
+    return def();
+  }
+  if (!RuntimeOption::TraceFunctions.empty()) {
+    auto const funcName = func->fullName()->slice();
+    auto const it =
+      RuntimeOption::TraceFunctions.lower_bound(funcName);
+    if (it == RuntimeOption::TraceFunctions.end()) return opt();
+    folly::StringPiece name = *it;
+    if (name.size() >= funcName.size() &&
+        bstrcaseeq(name.data(), funcName.data(), funcName.size())) {
+      if (name.size() == funcName.size()) return def();
+      if (name[funcName.size()] != ';') return opt();
+      name.advance(funcName.size() + 1);
+      return Trace::bumpSpec(name);
+    }
+  }
+
+  return opt();
+}
+
 void optimize(tc::FuncMetaInfo& info) {
   auto const func = info.func;
 
-  folly::Optional<Trace::BumpRelease> bumpRefcount;
-  folly::Optional<Trace::BumpRelease> bumpLoads;
-  folly::Optional<Trace::BumpRelease> bumpStores;
-  folly::Optional<Trace::BumpRelease> bumpPrint;
-  if (func->getFuncId() == RuntimeOption::TraceFuncId ||
-      (!RuntimeOption::TraceFunctions.empty() &&
-       RuntimeOption::TraceFunctions.count(func->fullName()->toCppString()))) {
-    bumpRefcount.emplace(Trace::hhir_refcount, -10);
-    bumpLoads.emplace(Trace::hhir_load, -10);
-    bumpStores.emplace(Trace::hhir_store, -10);
-    bumpPrint.emplace(Trace::printir, -10);
-  } else if (RuntimeOption::EvalJitPrintOptimizedIR) {
-    bumpPrint.emplace(Trace::printir,
-                      -RuntimeOption::EvalJitPrintOptimizedIR);
-  }
+  auto const bumpers = bumpTraceFunctions(func);
 
   // Regenerate the prologues and DV funclets before the actual function body.
   auto const includedBody = regeneratePrologues(func, info);

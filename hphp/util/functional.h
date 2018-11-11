@@ -20,7 +20,9 @@
 #include <string>
 
 #include <folly/portability/String.h>
+#include <folly/Range.h>
 
+#include "hphp/util/bstring.h"
 #include "hphp/util/hash.h"
 
 namespace HPHP {
@@ -59,8 +61,22 @@ struct stdltstr {
 };
 
 struct stdltistr {
+  using is_transparent = void;
+
   bool operator()(const std::string &s1, const std::string &s2) const {
     return strcasecmp(s1.c_str(), s2.c_str()) < 0;
+  }
+  bool operator()(const std::string &s1, folly::StringPiece s2) const {
+    return bstrcasecmp(s1, s2) < 0;
+  }
+  bool operator()(folly::StringPiece s1, const std::string &s2) const {
+    return bstrcasecmp(s1, s2) < 0;
+  }
+  bool operator()(const std::string &s1, const char* s2) const {
+    return strcasecmp(s1.c_str(), s2) < 0;
+  }
+  bool operator()(const char* s1, const std::string &s2) const {
+    return strcasecmp(s1, s2.c_str()) < 0;
   }
 };
 

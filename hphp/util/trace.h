@@ -26,6 +26,7 @@
 #include <folly/portability/Unistd.h>
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/compact-vector.h"
 #include "hphp/util/portability.h"
 #include "hphp/util/text-color.h"
 
@@ -311,6 +312,8 @@ private:
   int m_adjust;
 };
 
+CompactVector<BumpRelease> bumpSpec(folly::StringPiece traceSpec);
+
 //////////////////////////////////////////////////////////////////////
 
 #if (!defined(NDEBUG) || defined(USE_TRACE)) /* { */
@@ -395,7 +398,7 @@ void dumpRingbuffer();
 void ensureInit(std::string outFile);
 // Set tracing levels for this thread using a module:level,... specification.
 // If traceSpec is empty, all levels for this thread are zeroed.
-void setTraceThread(const std::string& traceSpec);
+void setTraceThread(folly::StringPiece traceSpec);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -97,7 +97,7 @@ public:
     }
   }
 
-  static void InitFromSpec(std::string spec, int* levels) {
+  static void InitFromSpec(folly::StringPiece spec, int* levels) {
     std::vector<folly::StringPiece> pieces;
     folly::split(",", spec, pieces);
     for (auto piece : pieces) {
@@ -152,9 +152,22 @@ void ensureInit(std::string outFile) {
   Init::EnsureInitFile(outFile.c_str());
 }
 
-void setTraceThread(const std::string& traceSpec) {
+void setTraceThread(folly::StringPiece traceSpec) {
   for (auto& level : tl_levels) level = 0;
   Init::InitFromSpec(traceSpec, tl_levels);
+}
+
+CompactVector<BumpRelease> bumpSpec(folly::StringPiece traceSpec) {
+  std::array<int, NumModules> modules{};
+
+  Init::InitFromSpec(traceSpec, modules.data());
+  CompactVector<BumpRelease> result;
+  for (int i = 0; i < NumModules; i++) {
+    if (modules[i]) {
+      result.emplace_back(static_cast<Module>(i), -modules[i]);
+    }
+  }
+  return result;
 }
 
 void vtrace(const char *fmt, va_list ap) {

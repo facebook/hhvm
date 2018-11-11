@@ -265,7 +265,7 @@ public:
 private:
   template <typename AccessorT>
   SortFlavor preSort(const AccessorT& acc, bool checkTypes);
-  void postSort();
+  void postSort(bool);
 
 //////////////////////////////////////////////////////////////////////
 // Set Internals

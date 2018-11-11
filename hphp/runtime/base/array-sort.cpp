@@ -134,7 +134,7 @@ void MixedArray::postSort(bool resetKeys) {   // nothrow guarantee
  * postSort() runs after the sort has been performed. For SetArray, postSort()
  * handles rebuilding the hash.
  */
-void SetArray::postSort() {   // nothrow guarantee
+void SetArray::postSort(bool) {   // nothrow guarantee
   assertx(m_size > 0);
   auto const ht = initHash(m_scale);
   auto const mask = this->mask();
@@ -231,12 +231,7 @@ ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
     if (UNLIKELY(strong_iterators_exist())) {                   \
       free_strong_iterators(a);                                 \
     }                                                           \
-    if (!a->m_size) {                                           \
-      if (resetKeys) {                                          \
-        a->m_nextKI = 0;                                        \
-      }                                                         \
-      return;                                                   \
-    }                                                           \
+    if (!a->m_size) return;                                     \
     SortFlavor flav = a->preSort<acc_type>(acc_type(), true);   \
     a->m_pos = ssize_t(0);                                      \
     try {                                                       \
@@ -260,6 +255,7 @@ void MixedArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
   auto a = asMixed(ad);
   auto data_begin = a->data();
   auto data_end = data_begin + a->m_size;
+  a->m_nextKI = 0;
   SORT_BODY(AssocValAccessor<MixedArray::Elm>, true);
 }
 
@@ -274,16 +270,10 @@ void SetArray::Ksort(ArrayData* ad, int sort_flags, bool ascending) {
   auto a = asSet(ad);
   auto data_begin = a->data();
   auto data_end = data_begin + a->m_size;
-  if (!a->m_size) return;
-  auto acc = AssocKeyAccessor<SetArray::Elm>();
-  SortFlavor flav = a->preSort(acc, true);
-  a->m_pos = 0;
-  SCOPE_EXIT {
-    /* Make sure we leave the array in a consistent state */
-    a->postSort();
-  };
-  CALL_SORT(AssocKeyAccessor<SetArray::Elm>);
+  SORT_BODY(AssocKeyAccessor<SetArray::Elm>, false);
 }
+
+#undef SORT_BODY
 
 void PackedArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
   assertx(checkInvariants(ad));
@@ -311,12 +301,7 @@ void PackedArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
     if (UNLIKELY(strong_iterators_exist())) {                   \
       free_strong_iterators(a);                                 \
     }                                                           \
-    if (!a->m_size) {                                           \
-      if (resetKeys) {                                          \
-        a->m_nextKI = 0;                                        \
-      }                                                         \
-      return true;                                              \
-    }                                                           \
+    if (!a->m_size) return true;                                \
     CallCtx ctx;                                                \
     CallerFrame cf;                                             \
     vm_decode_function(cmp_function, cf(), false, ctx);         \
@@ -342,6 +327,7 @@ bool MixedArray::Uksort(ArrayData* ad, const Variant& cmp_function) {
 
 bool MixedArray::Usort(ArrayData* ad, const Variant& cmp_function) {
   auto a = asMixed(ad);
+  a->m_nextKI = 0;
   USER_SORT_BODY(AssocValAccessor<MixedArray::Elm>, true);
 }
 
@@ -352,25 +338,10 @@ bool MixedArray::Uasort(ArrayData* ad, const Variant& cmp_function) {
 
 bool SetArray::Uksort(ArrayData* ad, const Variant& cmp_function) {
   auto a = asSet(ad);
-  if (!a->m_size) return true;
-  CallCtx ctx;
-  CallerFrame cf;
-  vm_decode_function(cmp_function, cf(), false, ctx);
-  if (!ctx.func) {
-    return false;
-  }
-  auto acc = AssocKeyAccessor<SetArray::Elm>();
-  a->preSort(acc, false);
-  a->m_pos = 0;
-  SCOPE_EXIT {
-    /* Make sure we leave the array in a consistent state */
-    a->postSort();
-  };
-  ElmUCompare<AssocKeyAccessor<SetArray::Elm>> comp;
-  comp.ctx = &ctx;
-  HPHP::Sort::sort(a->data(), a->data() + a->m_size, comp);
-  return true;
+  USER_SORT_BODY(AssocKeyAccessor<SetArray::Elm>, false);
 }
+
+#undef USER_SORT_BODY
 
 SortFlavor PackedArray::preSort(ArrayData* ad) {
   assertx(checkInvariants(ad));
@@ -407,8 +378,6 @@ bool PackedArray::Usort(ArrayData* ad, const Variant& cmp_function) {
   Sort::sort(data, data + ad->m_size, comp);
   return true;
 }
-
-#undef USER_SORT_BODY
 
 ///////////////////////////////////////////////////////////////////////////////
 }

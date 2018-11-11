@@ -183,12 +183,7 @@ ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
     }
     return ad;
   }
-  if (ad->m_size <= 1) {
-    if (ad->isVecArray()) {
-      auto ret = PackedArray::ToDictVec(ad, ad->cowCheck());
-      assertx(ret->empty() || ret->hasExactlyOneRef());
-      return ret;
-    }
+  if (ad->m_size <= 1 && !(ad->isVecArray() || ad->isVArray())) {
     return ad;
   }
   assertx(checkInvariants(ad));

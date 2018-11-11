@@ -1479,20 +1479,21 @@ void PackedArray::OnSetEvalScalar(ArrayData* ad) {
 }
 
 void PackedArray::Ksort(ArrayData* ad, int /*flags*/, bool ascending) {
-  assertx(ad->getSize() <= 1 || ascending);
+  assertx(ascending ||
+          (ad->getSize() <= 1 && !(ad->isVecArray() || ad->isVArray())));
 }
 
 void PackedArray::Asort(ArrayData* ad, int, bool) {
-  assertx(ad->getSize() <= 1);
+  assertx(ad->getSize() <= 1 && !(ad->isVecArray() || ad->isVArray()));
 }
 
 bool PackedArray::Uksort(ArrayData* ad, const Variant&) {
-  assertx(ad->getSize() <= 1);
+  assertx(ad->getSize() <= 1 && !(ad->isVecArray() || ad->isVArray()));
   return true;
 }
 
 bool PackedArray::Uasort(ArrayData* ad, const Variant&) {
-  assertx(ad->getSize() <= 1);
+  assertx(ad->getSize() <= 1 && !(ad->isVecArray() || ad->isVArray()));
   return true;
 }
 

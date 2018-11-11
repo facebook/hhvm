@@ -345,16 +345,26 @@ bool SetArray::Uksort(ArrayData* ad, const Variant& cmp_function) {
 
 SortFlavor PackedArray::preSort(ArrayData* ad) {
   assertx(checkInvariants(ad));
-  auto const data = packedData(ad);
+  assertx(ad->m_size > 0);
   TVAccessor acc;
-  uint32_t sz = ad->m_size;
   bool allInts = true;
   bool allStrs = true;
-  for (uint32_t i = 0; i < sz; ++i) {
-    allInts = (allInts && acc.isInt(data[i]));
-    allStrs = (allStrs && acc.isStr(data[i]));
-  }
-  return allStrs ? StringSort : allInts ? IntegerSort : GenericSort;
+  auto elm = packedData(ad);
+  auto const end = elm + ad->m_size;
+  do {
+    if (acc.isInt(*elm)) {
+      if (!allInts) return GenericSort;
+      allStrs = false;
+    } else if (acc.isStr(*elm)) {
+      if (!allStrs) return GenericSort;
+      allInts = false;
+    } else {
+      return GenericSort;
+    }
+  } while (++elm < end);
+  if (allInts) return IntegerSort;
+  assertx(allStrs);
+  return StringSort;
 }
 
 bool PackedArray::Usort(ArrayData* ad, const Variant& cmp_function) {

@@ -8,7 +8,6 @@
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/packed-array.h"
-#include "hphp/runtime/base/sort-helpers.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/zend-math.h"
@@ -760,100 +759,6 @@ void c_Vector::OffsetSet(ObjectData* obj, const TypedValue* key,
 void c_Vector::OffsetUnset(ObjectData* /*obj*/, const TypedValue* /*key*/) {
   SystemLib::throwRuntimeExceptionObject(
     "Cannot unset an element of a Vector");
-}
-
-using VectorValAccessor = TVAccessor;
-
-/**
- * preSort() does an initial pass over the array to do some preparatory work
- * before the sort algorithm runs. For sorts that use builtin comparators, the
- * types of values are also observed during this first pass. By observing the
- * types during this initial pass, we can often use a specialized comparator
- * and avoid performing type checks during the actual sort.
- */
-template <typename AccessorT>
-SortFlavor c_Vector::preSort(const AccessorT& acc) {
-  assertx(m_size > 0);
-  bool allInts = true;
-  bool allStrs = true;
-  auto elm = data();
-  auto end = elm + m_size;
-  do {
-    if (acc.isInt(*elm)) {
-      if (!allInts) {
-        return GenericSort;
-      }
-      allStrs = false;
-    } else if (acc.isStr(*elm)) {
-      if (!allStrs) {
-        return GenericSort;
-      }
-      allInts = false;
-    } else {
-      return GenericSort;
-    }
-  } while (++elm < end);
-  return allStrs ? StringSort : allInts ? IntegerSort : GenericSort;
-}
-
-#define SORT_CASE(flag, cmp_type, acc_type) \
-  case flag: { \
-    if (ascending) { \
-      cmp_type##Compare<acc_type, flag, true> comp; \
-      HPHP::Sort::sort(data(), data() + m_size, comp); \
-    } else { \
-      cmp_type##Compare<acc_type, flag, false> comp; \
-      HPHP::Sort::sort(data(), data() + m_size, comp); \
-    } \
-    break; \
-  }
-#define SORT_CASE_BLOCK(cmp_type, acc_type) \
-  switch (sort_flags) { \
-    default: /* fall through to SORT_REGULAR case */ \
-    SORT_CASE(SORT_REGULAR, cmp_type, acc_type) \
-    SORT_CASE(SORT_NUMERIC, cmp_type, acc_type) \
-    SORT_CASE(SORT_STRING, cmp_type, acc_type) \
-    SORT_CASE(SORT_LOCALE_STRING, cmp_type, acc_type) \
-    SORT_CASE(SORT_NATURAL, cmp_type, acc_type) \
-    SORT_CASE(SORT_NATURAL_CASE, cmp_type, acc_type) \
-  }
-#define CALL_SORT(acc_type) \
-  if (flav == StringSort) { \
-    SORT_CASE_BLOCK(StrElm, acc_type) \
-  } else if (flav == IntegerSort) { \
-    SORT_CASE_BLOCK(IntElm, acc_type) \
-  } else { \
-    SORT_CASE_BLOCK(Elm, acc_type) \
-  }
-
-void c_Vector::sort(int sort_flags, bool ascending) {
-  if (m_size <= 1) {
-    return;
-  }
-  mutate();
-  SortFlavor flav = preSort<VectorValAccessor>(VectorValAccessor());
-  CALL_SORT(VectorValAccessor);
-}
-
-#undef SORT_CASE
-#undef SORT_CASE_BLOCK
-#undef CALL_SORT
-
-bool c_Vector::usort(const Variant& cmp_function) {
-  if (m_size <= 1) {
-    return true;
-  }
-  mutate();
-  ElmUCompare<VectorValAccessor> comp;
-  CallCtx ctx;
-  CallerFrame cf;
-  vm_decode_function(cmp_function, cf(), false, ctx);
-  if (!ctx.func) {
-    return false;
-  }
-  comp.ctx = &ctx;
-  Sort::sort(data(), data() + m_size, comp);
-  return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////

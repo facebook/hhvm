@@ -69,11 +69,6 @@ struct HashCollection : ObjectData {
     compactOrShrinkIfDensityTooLow();
   }
 
-  void asort(int sort_flags, bool ascending);
-  void ksort(int sort_flags, bool ascending);
-  bool uasort(const Variant& cmp_function);
-  bool uksort(const Variant& cmp_function);
-
   bool isFull() { return posLimit() == cap(); }
   bool isDensityTooLow() const {
     bool b = (m_size < posLimit() / 2);
@@ -599,6 +594,28 @@ struct HashCollection : ObjectData {
     scanner.scan(m_immCopy);
   }
 
+  struct SortTmp {
+    SortTmp(HashCollection* h, SortFunction sf) : m_h(h) {
+      if (hasUserDefinedCmp(sf)) {
+        m_ad = MixedArray::Copy(m_h->m_arr);
+      } else {
+        m_h->mutate();
+        m_ad = m_h->m_arr;
+      }
+    }
+    ~SortTmp() {
+      if (m_h->m_arr != m_ad) {
+        Array tmp = Array::attach(m_h->m_arr);
+        assertx(m_ad->isDict());
+        m_h->m_arr = static_cast<MixedArray*>(m_ad);
+      }
+    }
+    ArrayData* operator->() { return m_ad; }
+   private:
+    HashCollection* m_h;
+    ArrayData* m_ad;
+  };
+
  protected:
 
   // Replace the m_arr field with a new MixedArray. The array must be known to
@@ -625,13 +642,6 @@ struct HashCollection : ObjectData {
   // A pointer to an immutable collection that shares its buffer with
   // this collection.
   Object m_immCopy;
-
- private:
-  template <typename AccessorT>
-  SortFlavor preSort(const AccessorT& acc, bool checkTypes);
-  void postSort();
-
-
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -2531,7 +2531,7 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(Collator, s_collator);
 
 namespace {
 struct ArraySortTmp {
-  explicit ArraySortTmp(TypedValue* arr, SortFunction sf) : m_arr(arr) {
+  ArraySortTmp(TypedValue* arr, SortFunction sf) : m_arr(arr) {
     m_ad = arr->m_data.parr->escalateForSort(sf);
     assertx(m_ad == arr->m_data.parr ||
             m_ad->empty() ||
@@ -2569,8 +2569,9 @@ php_sort(VRefParam container, int sort_flags,
     ObjectData* obj = container.getObjectData();
     if (obj->isCollection() &&
         obj->collectionType() == CollectionType::Vector) {
-      c_Vector* vec = static_cast<c_Vector*>(obj);
-      vec->sort(sort_flags, ascending);
+      SortFunction sf = getSortFunction(SORTFUNC_SORT, ascending);
+      c_Vector::SortTmp vst(static_cast<c_Vector*>(obj), sf);
+      vst->sort(sort_flags, ascending);
       return true;
     }
     // other collections are not supported:
@@ -2600,8 +2601,9 @@ php_asort(VRefParam container, int sort_flags,
     if (obj->isCollection()) {
       auto type = obj->collectionType();
       if (type == CollectionType::Map || type == CollectionType::Set) {
-        HashCollection* hc = static_cast<HashCollection*>(obj);
-        hc->asort(sort_flags, ascending);
+        SortFunction sf = getSortFunction(SORTFUNC_ASORT, ascending);
+        HashCollection::SortTmp hst(static_cast<HashCollection*>(obj), sf);
+        hst->asort(sort_flags, ascending);
         return true;
       }
     }
@@ -2629,8 +2631,9 @@ php_ksort(VRefParam container, int sort_flags, bool ascending,
     if (obj->isCollection()) {
       auto type = obj->collectionType();
       if (type == CollectionType::Map || type == CollectionType::Set) {
-        HashCollection* hc = static_cast<HashCollection*>(obj);
-        hc->ksort(sort_flags, ascending);
+        SortFunction sf = getSortFunction(SORTFUNC_KSORT, ascending);
+        HashCollection::SortTmp hst(static_cast<HashCollection*>(obj), sf);
+        hst->ksort(sort_flags, ascending);
         return true;
       }
     }
@@ -2718,8 +2721,8 @@ bool HHVM_FUNCTION(usort,
     ObjectData* obj = container.getObjectData();
     if (obj->isCollection()) {
       if (obj->collectionType() == CollectionType::Vector) {
-        c_Vector* vec = static_cast<c_Vector*>(obj);
-        return vec->usort(cmp_function);
+        c_Vector::SortTmp vst(static_cast<c_Vector*>(obj), SORTFUNC_USORT);
+        return vst->usort(cmp_function);
       }
     }
     // other collections are not supported:
@@ -2756,8 +2759,9 @@ bool HHVM_FUNCTION(uasort,
     if (obj->isCollection()) {
       auto type = obj->collectionType();
       if (type == CollectionType::Map || type == CollectionType::Set) {
-        HashCollection* hc = static_cast<HashCollection*>(obj);
-        return hc->uasort(cmp_function);
+        HashCollection::SortTmp hst(static_cast<HashCollection*>(obj),
+                                    SORTFUNC_UASORT);
+        return hst->uasort(cmp_function);
       }
     }
     // other collections are not supported:
@@ -2788,8 +2792,9 @@ bool HHVM_FUNCTION(uksort,
     if (obj->isCollection()) {
       auto type = obj->collectionType();
       if (type == CollectionType::Map || type == CollectionType::Set) {
-        HashCollection* hc = static_cast<HashCollection*>(obj);
-        return hc->uksort(cmp_function);
+        HashCollection::SortTmp hst(static_cast<HashCollection*>(obj),
+                                    SORTFUNC_UKSORT);
+        return hst->uksort(cmp_function);
       }
     }
     // other collections are not supported:

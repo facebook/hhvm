@@ -488,13 +488,32 @@ struct c_Vector : BaseVector {
   void splice(int64_t startPos) {
     splice(startPos, m_size - 1);
   }
-  void sort(int sort_flags, bool ascending);
-  bool usort(const Variant& cmp_function);
 
   static void OffsetSet(ObjectData* obj, const TypedValue* key,
                         const TypedValue* val);
   static void OffsetUnset(ObjectData* obj, const TypedValue* key);
   static Object fromArray(const Class*, const Variant&);
+
+  struct SortTmp {
+    SortTmp(c_Vector* v, SortFunction sf) : m_v(v) {
+      if (hasUserDefinedCmp(sf)) {
+        m_ad = PackedArray::Copy(m_v->m_arr);
+      } else {
+        m_v->mutate();
+        m_ad = m_v->m_arr;
+      }
+    }
+    ~SortTmp() {
+      if (m_v->m_arr != m_ad) {
+        Array tmp = Array::attach(m_v->m_arr);
+        m_v->m_arr = m_ad;
+      }
+    }
+    ArrayData* operator->() { return m_ad; }
+   private:
+    c_Vector* m_v;
+    ArrayData* m_ad;
+  };
 
  protected:
   uint32_t checkRequestedSize(const Variant& sz) {
@@ -561,9 +580,6 @@ struct c_Vector : BaseVector {
                   const Variant& replacement = uninit_variant);
 
 private:
-  template <typename AccessorT>
-  SortFlavor preSort(const AccessorT& acc);
-
   // Friends
   friend struct collections::CollectionsExtension;
   friend void collections::append(ObjectData* obj, TypedValue* val);

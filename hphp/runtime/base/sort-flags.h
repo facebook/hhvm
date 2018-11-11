@@ -99,8 +99,9 @@ inline bool supportedByPacked(SortFunction s) {
 
 inline SortFunction getSortFunction(SortFunction s, bool ascending = true) {
   assertx(!hasUserDefinedCmp(s));
+  assertx(!(s & 1));
   // ascending: LSB == 0
-  return static_cast<SortFunction>(s & ~static_cast<int>(ascending));
+  return static_cast<SortFunction>(s | static_cast<int>(!ascending));
 }
 
 }

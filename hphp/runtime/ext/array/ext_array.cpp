@@ -2619,7 +2619,7 @@ php_ksort(VRefParam container, int sort_flags, bool ascending,
     if (use_zend_sort) {
       return zend_ksort(*ref, sort_flags, ascending);
     }
-    SortFunction sf = getSortFunction(SORTFUNC_KRSORT, ascending);
+    SortFunction sf = getSortFunction(SORTFUNC_KSORT, ascending);
     ArraySortTmp ast(ref->asTypedValue(), sf);
     ast->ksort(sort_flags, ascending);
     return true;

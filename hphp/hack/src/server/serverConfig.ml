@@ -22,7 +22,7 @@ type t = {
 
   (* Configures only the workers. Workers can have more relaxed GC configs as
    * they are short-lived processes *)
-  gc_control       : Caml.Gc.control;
+  gc_control       : Gc.control;
   sharedmem_config : SharedMem.config;
   tc_options       : TypecheckerOptions.t;
   parser_options   : ParserOptions.t;
@@ -48,12 +48,12 @@ let is_compatible c1 c2 =
   c1 = c2
 
 let make_gc_control config =
-  let {Caml.Gc.minor_heap_size; space_overhead; _} = GlobalConfig.gc_control in
+  let { Gc.Control.minor_heap_size; space_overhead; _} = GlobalConfig.gc_control in
   let minor_heap_size =
     int_ "gc_minor_heap_size" ~default:minor_heap_size config in
   let space_overhead =
     int_ "gc_space_overhead" ~default:space_overhead config in
-  { GlobalConfig.gc_control with Caml.Gc.minor_heap_size; space_overhead; }
+  { GlobalConfig.gc_control with Gc.Control.minor_heap_size; space_overhead; }
 
 let make_sharedmem_config config options local_config =
   let { SharedMem.

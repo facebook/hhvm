@@ -1,3 +1,5 @@
+open Core_kernel
+
 let entry = WorkerController.register_entry_point ~restore:(fun () -> ())
 
 let make_worker ?call_wrapper heap_handle =

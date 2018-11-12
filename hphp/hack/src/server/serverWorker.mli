@@ -7,4 +7,5 @@
  *
  *)
 
+open Core_kernel
 val make : ?nbr_procs:int -> Gc.control -> SharedMem.handle -> MultiWorker.worker list

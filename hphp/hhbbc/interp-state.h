@@ -378,26 +378,17 @@ enum class CollectionOpts {
   TrackConstantArrays = 1,
   Inlining = 2,
   EffectFreeOnly = 4,
-  Optimizing = 8,
-  Speculating = 16,
+  Optimizing = 8
 };
 
 inline CollectionOpts operator|(CollectionOpts o1, CollectionOpts o2) {
-  return static_cast<CollectionOpts>(
-    static_cast<int>(o1) | static_cast<int>(o2)
-  );
+  return static_cast<CollectionOpts>(static_cast<int>(o1) |
+                                     static_cast<int>(o2));
 }
 
 inline CollectionOpts operator&(CollectionOpts o1, CollectionOpts o2) {
-  return static_cast<CollectionOpts>(
-    static_cast<int>(o1) & static_cast<int>(o2)
-  );
-}
-
-inline CollectionOpts operator-(CollectionOpts o1, CollectionOpts o2) {
-  return static_cast<CollectionOpts>(
-    static_cast<int>(o1) & ~static_cast<int>(o2)
-  );
+  return static_cast<CollectionOpts>(static_cast<int>(o1) &
+                                     static_cast<int>(o2));
 }
 
 inline bool any(CollectionOpts o) { return static_cast<int>(o); }
@@ -424,7 +415,7 @@ struct CollectedInfo {
   bool effectFree{true};
   bool hasInvariantIterBase{false};
   bool readsUntrackedConstants{false};
-  CollectionOpts opts{CollectionOpts::TrackConstantArrays};
+  const CollectionOpts opts{CollectionOpts::TrackConstantArrays};
   bool (*propagate_constants)(const Bytecode& bc, State& state,
                               BytecodeVec& out) = nullptr;
   CompactVector<Type> localStaticTypes;

@@ -202,12 +202,6 @@ using PropagateFn = std::function<void (BlockId, const State*)>;
 RunFlags run(Interp&, PropagateFn);
 
 /*
- * speculatively execute target to figure out if *its* target can be
- * deduced based on the current state.
- */
-BlockId speculateHelper(Interp& interpIn, BlockId target);
-
-/*
  * Dispatch a bytecode to the default interpreter.
  *
  * This entry point is used by custom interpreters that need to add

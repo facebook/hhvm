@@ -60,7 +60,6 @@
 #include <algorithm>
 #include <cstdio>
 #include <memory>
-#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -809,55 +808,59 @@ UnitRepoProxy::~UnitRepoProxy() {
 
 void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   {
-    std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "Unit")
-             << "(unitSn INTEGER PRIMARY KEY, md5 BLOB, preload INTEGER, "
-                "bc BLOB, data BLOB, UNIQUE (md5));";
-    txn.exec(ssCreate.str());
+    auto createQuery = folly::sformat(
+      "CREATE TABLE {} "
+      "(unitSn INTEGER PRIMARY KEY, md5 BLOB UNIQUE, preload INTEGER, bc BLOB, "
+      " data BLOB);",
+      m_repo.table(repoId, "Unit"));
+    txn.exec(createQuery);
   }
   {
-    std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "UnitLitstr")
-             << "(unitSn INTEGER, litstrId INTEGER, litstr TEXT,"
-                " PRIMARY KEY (unitSn, litstrId));";
-    txn.exec(ssCreate.str());
+    auto createQuery = folly::sformat(
+      "CREATE TABLE {} "
+      "(unitSn INTEGER, litstrId INTEGER, litstr TEXT,"
+      " PRIMARY KEY (unitSn, litstrId));",
+      m_repo.table(repoId, "UnitLitstr"));
+    txn.exec(createQuery);
   }
   {
-    std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "UnitArray")
-             << "(unitSn INTEGER, arrayId INTEGER, array BLOB,"
-                " PRIMARY KEY (unitSn, arrayId));";
-    txn.exec(ssCreate.str());
+    auto createQuery = folly::sformat(
+      "CREATE TABLE {} "
+      "(unitSn INTEGER, arrayId INTEGER, array BLOB,"
+      " PRIMARY KEY (unitSn, arrayId));",
+      m_repo.table(repoId, "UnitArray"));
+    txn.exec(createQuery);
   }
   {
-    std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "UnitArrayTypeTable")
-             << "(unitSn INTEGER, arrayTypeTable BLOB,"
-                " PRIMARY KEY (unitSn));";
-    txn.exec(ssCreate.str());
+    auto createQuery = folly::sformat(
+      "CREATE TABLE {} "
+      "(unitSn INTEGER PRIMARY KEY, arrayTypeTable BLOB);",
+      m_repo.table(repoId, "UnitArrayTypeTable"));
+    txn.exec(createQuery);
   }
   {
-    std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "UnitMergeables")
-             << "(unitSn INTEGER, mergeableIx INTEGER,"
-                " mergeableKind INTEGER, mergeableId INTEGER,"
-                " mergeableValue BLOB,"
-                " PRIMARY KEY (unitSn, mergeableIx));";
-    txn.exec(ssCreate.str());
+    auto createQuery = folly::sformat(
+      "CREATE TABLE {} "
+      "(unitSn INTEGER, mergeableIx INTEGER, mergeableKind INTEGER, "
+      " mergeableId INTEGER, mergeableValue BLOB, "
+      " PRIMARY KEY (unitSn, mergeableIx));",
+      m_repo.table(repoId, "UnitMergeables"));
+    txn.exec(createQuery);
   }
   {
-    std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "UnitSourceLoc")
-             << "(unitSn INTEGER, pastOffset INTEGER, line0 INTEGER,"
-                " char0 INTEGER, line1 INTEGER, char1 INTEGER,"
-                " PRIMARY KEY (unitSn, pastOffset));";
-    txn.exec(ssCreate.str());
+    auto createQuery = folly::sformat(
+      "CREATE TABLE {} "
+      "(unitSn INTEGER, pastOffset INTEGER, line0 INTEGER,"
+      " char0 INTEGER, line1 INTEGER, char1 INTEGER,"
+      " PRIMARY KEY (unitSn, pastOffset));",
+      m_repo.table(repoId, "UnitSourceLoc"));
+    txn.exec(createQuery);
   }
   {
-    std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "UnitLineTable")
-             << "(unitSn INTEGER PRIMARY KEY, data BLOB);";
-    txn.exec(ssCreate.str());
+    auto createQuery = folly::sformat(
+      "CREATE TABLE {} (unitSn INTEGER PRIMARY KEY, data BLOB);",
+      m_repo.table(repoId, "UnitLineTable"));
+    txn.exec(createQuery);
   }
 }
 
@@ -957,14 +960,14 @@ void UnitRepoProxy::InsertUnitStmt
   BlobEncoder dataBlob;
 
   if (!prepared()) {
-    std::stringstream ssInsert;
     /*
      * Do not put preload into data; its needed to choose the
      * units in preloadRepo.
      */
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "Unit")
-             << " VALUES(NULL, @md5, @preload, @bc, @data);";
-    txn.prepare(*this, ssInsert.str());
+    auto insertQuery = folly::sformat(
+      "INSERT INTO {} VALUES(NULL, @md5, @preload, @bc, @data);",
+      m_repo.table(m_repoId, "Unit"));
+    txn.prepare(*this, insertQuery);
   }
   RepoTxnQuery query(txn, *this);
   query.bindMd5("@md5", md5);
@@ -980,11 +983,10 @@ RepoStatus UnitRepoProxy::GetUnitStmt::get(UnitEmitter& ue, const MD5& md5) {
   try {
     RepoTxn txn(m_repo);
     if (!prepared()) {
-      std::stringstream ssSelect;
-      ssSelect << "SELECT unitSn,preload,bc,data FROM "
-               << m_repo.table(m_repoId, "Unit")
-               << " WHERE md5 == @md5;";
-      txn.prepare(*this, ssSelect.str());
+      auto selectQuery = folly::sformat(
+        "SELECT unitSn, preload, bc, data FROM {} WHERE md5 == @md5;",
+        m_repo.table(m_repoId, "Unit"));
+      txn.prepare(*this, selectQuery);
     }
     RepoTxnQuery query(txn, *this);
     query.bindMd5("@md5", md5);
@@ -1014,10 +1016,10 @@ void UnitRepoProxy::InsertUnitLitstrStmt
                   ::insert(RepoTxn& txn, int64_t unitSn, Id litstrId,
                            const StringData* litstr) {
   if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "UnitLitstr")
-             << " VALUES(@unitSn, @litstrId, @litstr);";
-    txn.prepare(*this, ssInsert.str());
+    auto insertQuery = folly::sformat(
+      "INSERT INTO {} VALUES(@unitSn, @litstrId, @litstr);",
+      m_repo.table(m_repoId, "UnitLitstr"));
+    txn.prepare(*this, insertQuery);
   }
   RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", unitSn);
@@ -1030,11 +1032,11 @@ void UnitRepoProxy::GetUnitLitstrsStmt
                   ::get(UnitEmitter& ue) {
   RepoTxn txn(m_repo);
   if (!prepared()) {
-    std::stringstream ssSelect;
-    ssSelect << "SELECT litstrId,litstr FROM "
-             << m_repo.table(m_repoId, "UnitLitstr")
-             << " WHERE unitSn == @unitSn ORDER BY litstrId ASC;";
-    txn.prepare(*this, ssSelect.str());
+    auto selectQuery = folly::sformat(
+      "SELECT litstrId, litstr FROM {} "
+      " WHERE unitSn == @unitSn ORDER BY litstrId ASC;",
+      m_repo.table(m_repoId, "UnitLitstr"));
+    txn.prepare(*this, selectQuery);
   }
   RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", ue.m_sn);
@@ -1054,10 +1056,10 @@ void UnitRepoProxy::InsertUnitArrayTypeTableStmt::insert(
   RepoTxn& txn, int64_t unitSn, const ArrayTypeTable& att) {
 
   if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "UnitArrayTypeTable")
-             << " VALUES(@unitSn, @arrayTypeTable);";
-    txn.prepare(*this, ssInsert.str());
+    auto insertQuery = folly::sformat(
+      "INSERT INTO {} VALUES(@unitSn, @arrayTypeTable);",
+      m_repo.table(m_repoId, "UnitArrayTypeTable"));
+    txn.prepare(*this, insertQuery);
   }
   RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", unitSn);
@@ -1071,11 +1073,10 @@ void UnitRepoProxy::GetUnitArrayTypeTableStmt
                   ::get(UnitEmitter& ue) {
   RepoTxn txn(m_repo);
   if (!prepared()) {
-    std::stringstream ssSelect;
-    ssSelect << "SELECT unitSn, arrayTypeTable FROM "
-             << m_repo.table(m_repoId, "UnitArrayTypeTable")
-             << " WHERE unitSn == @unitSn;";
-    txn.prepare(*this, ssSelect.str());
+    auto selectQuery = folly::sformat(
+      "SELECT unitSn, arrayTypeTable FROM {} WHERE unitSn == @unitSn;",
+      m_repo.table(m_repoId, "UnitArrayTypeTable"));
+    txn.prepare(*this, selectQuery);
   }
 
   RepoTxnQuery query(txn, *this);
@@ -1096,10 +1097,10 @@ void UnitRepoProxy::InsertUnitArrayStmt
                   ::insert(RepoTxn& txn, int64_t unitSn, Id arrayId,
                            const std::string& array) {
   if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "UnitArray")
-             << " VALUES(@unitSn, @arrayId, @array);";
-    txn.prepare(*this, ssInsert.str());
+    auto insertQuery = folly::sformat(
+      "INSERT INTO {} VALUES(@unitSn, @arrayId, @array);",
+      m_repo.table(m_repoId, "UnitArray"));
+    txn.prepare(*this, insertQuery);
   }
   RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", unitSn);
@@ -1112,11 +1113,11 @@ void UnitRepoProxy::GetUnitArraysStmt
                   ::get(UnitEmitter& ue) {
   RepoTxn txn(m_repo);
   if (!prepared()) {
-    std::stringstream ssSelect;
-    ssSelect << "SELECT arrayId,array FROM "
-             << m_repo.table(m_repoId, "UnitArray")
-             << " WHERE unitSn == @unitSn ORDER BY arrayId ASC;";
-    txn.prepare(*this, ssSelect.str());
+    auto selectQuery = folly::sformat(
+      "SELECT arrayId, array FROM {} "
+      " WHERE unitSn == @unitSn ORDER BY arrayId ASC;",
+      m_repo.table(m_repoId, "UnitArray"));
+    txn.prepare(*this, selectQuery);
   }
   RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", ue.m_sn);
@@ -1142,11 +1143,11 @@ void UnitRepoProxy::InsertUnitMergeableStmt
                            int ix, Unit::MergeKind kind, Id id,
                            TypedValue* value) {
   if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "UnitMergeables")
-             << " VALUES(@unitSn, @mergeableIx, @mergeableKind,"
-                " @mergeableId, @mergeableValue);";
-    txn.prepare(*this, ssInsert.str());
+    auto insertQuery = folly::sformat(
+      "INSERT INTO {} VALUES("
+      " @unitSn, @mergeableIx, @mergeableKind, @mergeableId, @mergeableValue);",
+      m_repo.table(m_repoId, "UnitMergeables"));
+    txn.prepare(*this, insertQuery);
   }
 
   RepoTxnQuery query(txn, *this);
@@ -1170,12 +1171,12 @@ void UnitRepoProxy::GetUnitMergeablesStmt
                   ::get(UnitEmitter& ue) {
   RepoTxn txn(m_repo);
   if (!prepared()) {
-    std::stringstream ssSelect;
-    ssSelect << "SELECT mergeableIx,mergeableKind,mergeableId,mergeableValue"
-                " FROM "
-             << m_repo.table(m_repoId, "UnitMergeables")
-             << " WHERE unitSn == @unitSn ORDER BY mergeableIx ASC;";
-    txn.prepare(*this, ssSelect.str());
+    auto selectQuery = folly::sformat(
+      "SELECT mergeableIx, mergeableKind, mergeableId, mergeableValue "
+      "FROM {} "
+      "WHERE unitSn == @unitSn ORDER BY mergeableIx ASC;",
+      m_repo.table(m_repoId, "UnitMergeables"));
+    txn.prepare(*this, selectQuery);
   }
   RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", ue.m_sn);
@@ -1269,11 +1270,11 @@ void UnitRepoProxy::InsertUnitSourceLocStmt
                   ::insert(RepoTxn& txn, int64_t unitSn, Offset pastOffset,
                            int line0, int char0, int line1, int char1) {
   if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "UnitSourceLoc")
-             << " VALUES(@unitSn, @pastOffset, @line0, @char0, @line1,"
-                " @char1);";
-    txn.prepare(*this, ssInsert.str());
+    auto insertQuery = folly::sformat(
+      "INSERT INTO {} "
+      "VALUES(@unitSn, @pastOffset, @line0, @char0, @line1, @char1);",
+      m_repo.table(m_repoId, "UnitSourceLoc"));
+    txn.prepare(*this, insertQuery);
   }
   RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", unitSn);
@@ -1291,12 +1292,13 @@ UnitRepoProxy::GetSourceLocTabStmt::get(int64_t unitSn,
   try {
     RepoTxn txn(m_repo);
     if (!prepared()) {
-      std::stringstream ssSelect;
-      ssSelect << "SELECT pastOffset,line0,char0,line1,char1 FROM "
-               << m_repo.table(m_repoId, "UnitSourceLoc")
-               << " WHERE unitSn == @unitSn"
-                  " ORDER BY pastOffset ASC;";
-      txn.prepare(*this, ssSelect.str());
+      auto selectQuery = folly::sformat(
+        "SELECT pastOffset, line0, char0, line1, char1 "
+        "FROM {} "
+        "WHERE unitSn == @unitSn "
+        "ORDER BY pastOffset ASC;",
+        m_repo.table(m_repoId, "UnitSourceLoc"));
+      txn.prepare(*this, selectQuery);
     }
     RepoTxnQuery query(txn, *this);
     query.bindInt64("@unitSn", unitSn);

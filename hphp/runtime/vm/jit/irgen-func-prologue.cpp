@@ -128,6 +128,7 @@ void emitARHasReifiedGenericsCheck(IRGS& env) {
     },
     [&] {
       if (func->hasReifiedGenerics()) return;
+      hint(env, Block::Hint::Unlikely);
       gen(
         env,
         RaiseError,
@@ -137,6 +138,7 @@ void emitARHasReifiedGenericsCheck(IRGS& env) {
     [&] {
       if (!func->hasReifiedGenerics()) return;
       // null out VarEnv before raising error
+      hint(env, Block::Hint::Unlikely);
       gen(env, RaiseError, cns(env, s_reified_generics_not_given.get()));
     }
   );

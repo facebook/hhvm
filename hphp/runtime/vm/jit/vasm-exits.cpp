@@ -123,12 +123,17 @@ void optimizeExits(Vunit& unit) {
       code.emplace_back(jmp{next}, irctx);
     };
 
+    auto const is_colder = [&] (Vlabel succ) {
+      return unit.blocks[b].area_idx < unit.blocks[succ].area_idx;
+    };
+
     // Try to replace jcc to normal exit with bindexit followed by jmp,
     // as long as the sp adjustment is harmless to hoist (disp==0)
     Vptr sp;
-    if (match_bindjmp(unit, t1, &sp) && sp == sp.base[0]) {
+    if (match_bindjmp(unit, t1, &sp) && sp == sp.base[0] && !is_colder(t0)) {
       fold_exit(ijcc.cc, t1, t0);
-    } else if (match_bindjmp(unit, t0, &sp) && sp == sp.base[0]) {
+    } else if (match_bindjmp(unit, t0, &sp) && sp == sp.base[0] &&
+               !is_colder(t1)) {
       fold_exit(ccNegate(ijcc.cc), t0, t1);
     }
   });

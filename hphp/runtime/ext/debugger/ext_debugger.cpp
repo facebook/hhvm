@@ -65,33 +65,40 @@ String HHVM_FUNCTION(hphp_debug_session_auth) {
 
 void HHVM_FUNCTION(hphpd_break, bool condition /* = true */) {
   TRACE(5, "in f_hphpd_break()\n");
-  if (!RuntimeOption::EnableHphpdDebugger || !condition ||
-      g_context->m_dbgNoBreak) {
-    TRACE(5, "bail !%d || !%d || %d\n", RuntimeOption::EnableHphpdDebugger,
-          condition, g_context->m_dbgNoBreak);
-    return;
-  }
-  VMRegAnchor _;
-  Debugger::InterruptVMHook(HardBreakPoint);
-  if (RuntimeOption::EvalJit && DEBUGGER_FORCE_INTR) {
-    TRACE(5, "switch mode\n");
-    throw VMSwitchModeBuiltin();
-  }
+  f_hphp_debug_break(condition);
   TRACE(5, "out f_hphpd_break()\n");
 }
 
 // Hard breakpoint for the VSDebug extension debugger.
 bool HHVM_FUNCTION(hphp_debug_break, bool condition /* = true */) {
-  if (!condition) {
+  TRACE(5, "in f_hphp_debug_break()\n");
+  if (!condition || g_context->m_dbgNoBreak) {
+    TRACE(5, "bail !%d || !%d || %d\n", RuntimeOption::EnableHphpdDebugger,
+          condition, g_context->m_dbgNoBreak);
     return false;
   }
 
+  // Try breaking into the VS Debug Extenstion, if available.
   auto debugger = HPHP::VSDEBUG::VSDebugExtension::getDebugger();
-  if (debugger == nullptr) {
-    return false;
+  if (debugger != nullptr) {
+    if (debugger->onHardBreak()) {
+      return true;
+    }
   }
 
-  return debugger->onHardBreak();
+  // Try breaking into hphpd, if attached.
+  if (RuntimeOption::EnableHphpdDebugger) {
+    VMRegAnchor _;
+    Debugger::InterruptVMHook(HardBreakPoint);
+    if (RuntimeOption::EvalJit && DEBUGGER_FORCE_INTR) {
+      TRACE(5, "switch mode\n");
+      throw VMSwitchModeBuiltin();
+    }
+    return true;
+  }
+
+  TRACE(5, "out f_hphp_debug_break()\n");
+  return false;
 }
 
 // Quickly determine if a debugger is attached to the current thread.

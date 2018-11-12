@@ -881,8 +881,7 @@ module Make (GetLocals : GetLocals) = struct
           Errors.wildcard_disallowed p;
           N.Hany
         | x when x.[0] = '\\' &&
-          (  x = ("\\"^SN.Typehints.null)
-          || x = ("\\"^SN.Typehints.void)
+          (  x = ("\\"^SN.Typehints.void)
           || x = ("\\"^SN.Typehints.noreturn)
           || x = ("\\"^SN.Typehints.int)
           || x = ("\\"^SN.Typehints.bool)
@@ -909,7 +908,6 @@ module Make (GetLocals : GetLocals) = struct
       | x when x = SN.Typehints.noreturn ->
         Errors.return_only_typehint p `noreturn;
         N.Hany
-      | x when x = SN.Typehints.null -> N.Hprim N.Tnull
       | x when x = SN.Typehints.num  -> N.Hprim N.Tnum
       | x when x = SN.Typehints.resource -> N.Hprim N.Tresource
       | x when x = SN.Typehints.arraykey -> N.Hprim N.Tarraykey

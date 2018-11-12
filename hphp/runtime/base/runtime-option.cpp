@@ -1013,6 +1013,14 @@ void RuntimeOption::Load(
   Config::Bind(DeploymentId, ini, config, "DeploymentId");
 
   {
+    static std::string deploymentIdOverride;
+    Config::Bind(deploymentIdOverride, ini, config, "DeploymentIdOverride");
+    if (!deploymentIdOverride.empty()) {
+      RuntimeOption::DeploymentId = deploymentIdOverride;
+    }
+  }
+
+  {
     // Config ID
     Config::Bind(ConfigId, ini, config, "ConfigId", 0);
     auto configIdCounter = ServiceData::createCounter("vm.config.id");

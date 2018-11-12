@@ -22,6 +22,7 @@ module TLazyHeap = Typing_lazy_heap
 module SG = SN.Superglobals
 module LEnvC = Typing_lenv_cont
 module C = Typing_continuations
+module TL = Typing_logic
 
 let show_env _ = "<env>"
 let pp_env _ _ = Printf.printf "%s\n" "<env>"
@@ -274,6 +275,144 @@ let get_tpenv_size env =
       count + TySet.cardinal lower_bounds + TySet.cardinal upper_bounds)
       env.global_tpenv local
 
+
+(*****************************************************************************
+ * Operations to get or add bounds to type variables.
+ * There is a lot of code duplication from the tpenv code here, which we
+ * should consider sharing in future.
+ *****************************************************************************)
+
+let get_tyvar_lower_bounds env var =
+match IMap.get var env.tvenv with
+| None -> empty_bounds
+| Some {lower_bounds; _} -> lower_bounds
+
+let get_tyvar_upper_bounds env var =
+match IMap.get var env.tvenv with
+| None -> empty_bounds
+| Some {upper_bounds; _} -> upper_bounds
+
+
+let rec is_tvar ~elide_nullable ty var =
+  match ty with
+  | (_, Tvar var') -> var = var'
+  | (_, Toption ty) when elide_nullable -> is_tvar ~elide_nullable ty var
+  | _ -> false
+
+(* Add a single new upper bound [ty] to type variable [var] in [tvenv] *)
+let add_tvenv_upper_bound_ tvenv var ty =
+  (* Don't add superfluous v <: v or v <: ?v to environment *)
+  if is_tvar ~elide_nullable:true ty var
+  then tvenv
+  else match IMap.get var tvenv with
+  | None ->
+    IMap.add var
+      {lower_bounds = empty_bounds; upper_bounds = singleton_bound ty} tvenv
+  | Some {lower_bounds; upper_bounds} ->
+    IMap.add var
+      {lower_bounds; upper_bounds = ty++upper_bounds} tvenv
+
+(* Add a single new lower bound [ty] to type variable [var] in [tvenv] *)
+let add_tvenv_lower_bound_ tvenv var ty =
+  (* Don't add superfluous v <: v to environment *)
+  if is_tvar ~elide_nullable:false ty var
+  then tvenv
+  else
+  match IMap.get var tvenv with
+  | None ->
+    IMap.add var
+      {lower_bounds = singleton_bound ty; upper_bounds = empty_bounds} tvenv
+  | Some {lower_bounds; upper_bounds} ->
+    IMap.add var
+      {lower_bounds = ty++lower_bounds; upper_bounds} tvenv
+
+let env_with_tvenv env tvenv =
+  { env with tvenv = tvenv }
+
+ (* Add a single new upper bound [ty] to type variable [var] in [env.tvenv].
+  * If the optional [intersect] operation is supplied, then use this to avoid
+  * adding redundant bounds by merging the type with existing bounds. This makes
+  * sense because a conjunction of upper bounds
+  *   (v <: t1) /\ ... /\ (v <: tn)
+  * is equivalent to a single upper bound
+  *   v <: (t1 & ... & tn)
+  *)
+ let add_tyvar_upper_bound ?intersect env var ty =
+   let tvenv =
+     begin match ty with
+     | (r, Tvar var_super) ->
+       add_tvenv_lower_bound_ env.tvenv var_super
+         (r, Tvar var)
+     | _ -> env.tvenv
+     end in
+   match intersect with
+   | None -> env_with_tvenv env (add_tvenv_upper_bound_ tvenv var ty)
+   | Some intersect ->
+     let tyl = intersect ty (TySet.elements (get_tyvar_upper_bounds env var)) in
+     let add ty tys =
+       if is_tvar ~elide_nullable:true ty var
+       then tys else TySet.add ty tys in
+     let upper_bounds = List.fold_right ~init:TySet.empty ~f:add tyl in
+     let lower_bounds = get_tyvar_lower_bounds env var in
+     env_with_tvenv env (IMap.add var {lower_bounds; upper_bounds} tvenv)
+
+(* Add a single new upper bound [ty] to type variable [var] in [env.tvenv].
+ * If the optional [union] operation is supplied, then use this to avoid
+ * adding redundant bounds by merging the type with existing bounds. This makes
+ * sense because a conjunction of lower bounds
+ *   (t1 <: v) /\ ... /\ (tn <: v)
+ * is equivalent to a single lower bound
+ *   (t1 | ... | tn) <: v
+ *)
+let add_tyvar_lower_bound ?union env var ty =
+  let tvenv =
+    begin match ty with
+    | (r, Tvar var_sub) ->
+      add_tvenv_upper_bound_ env.tvenv var_sub
+        (r, Tvar var)
+    | _ -> env.tvenv
+    end in
+  match union with
+  | None -> env_with_tvenv env (add_tvenv_lower_bound_ tvenv var ty)
+  | Some union ->
+    let tyl = union ty (TySet.elements (get_tyvar_lower_bounds env var)) in
+    let lower_bounds = List.fold_right ~init:TySet.empty ~f:TySet.add tyl in
+    let upper_bounds = get_tyvar_upper_bounds env var in
+    env_with_tvenv env (IMap.add var {lower_bounds; upper_bounds} tvenv)
+
+let rec props_to_env env remain props =
+  match props with
+  | [] ->
+    env, List.rev remain
+  | TL.IsSubtype ((_, Tvar var), ty) :: props ->
+    props_to_env (add_tyvar_upper_bound env var ty) remain props
+  | TL.IsSubtype (ty, (_, Tvar var)) :: props ->
+    props_to_env (add_tyvar_lower_bound env var ty) remain props
+  | TL.Conj props' :: props ->
+    props_to_env env remain (props' @ props)
+  | prop :: props ->
+    props_to_env env (prop::remain) props
+
+(* Move any top-level conjuncts of the form Tvar v <: t or t <: Tvar v to
+ * the type variable environment. To do: use intersection and union to
+ * simplify bounds.
+ *)
+let prop_to_env env prop =
+  match prop with
+  | TL.Conj props ->
+    let env, props' = props_to_env env [] props in
+    env, TL.conj_list props'
+  | TL.IsSubtype _ ->
+    let env, props' = props_to_env env [] [prop] in
+    env, TL.conj_list props'
+  | _ ->
+    env, prop
+
+(* Conjoin a subtype proposition onto the subtype_prop in the environment *)
+let add_subtype_prop env prop =
+  let env, prop = prop_to_env env prop in
+  {env with subtype_prop = TL.conj env.subtype_prop prop}
+
 (* Generate a fresh generic parameter with a specified prefix but distinct
  * from all generic parameters in the environment *)
 let add_fresh_generic_parameter env prefix =
@@ -314,9 +453,6 @@ let get_tpenv_tparams env =
     TySet.fold folder upper_bounds acc
     end
   env.lenv.tpenv SSet.empty
-
-let add_subtype_prop env prop =
-  {env with subtype_prop = Typing_logic.conj env.subtype_prop prop}
 
 let set_log_level env key log_level =
   {env with log_levels = SMap.add key log_level env.log_levels }
@@ -403,8 +539,9 @@ let empty tcopt file ~droot = {
     file    = file;
   };
   global_tpenv = SMap.empty;
-  subtype_prop = Typing_logic.valid;
+  subtype_prop = TL.valid;
   log_levels = SMap.empty;
+  tvenv = IMap.empty;
 }
 
 let set_env_reactive env reactive =

@@ -1571,7 +1571,7 @@ let rec subtype_prop env = function
   | Disj [] -> "FALSE"
   | Disj ps ->
     "(" ^ (String.concat ~sep:" || " (List.map ~f:(subtype_prop env) ps)) ^ ")"
-  | Sub (ty1, ty2) ->
+  | IsSubtype (ty1, ty2) ->
     debug_with_tvars env ty1 ^ " <: " ^ debug_with_tvars env ty2
-  | Eq (ty1, ty2) ->
+  | IsEqual (ty1, ty2) ->
     debug_with_tvars env ty1 ^ " = " ^ debug_with_tvars env ty2

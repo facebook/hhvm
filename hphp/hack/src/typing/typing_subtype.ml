@@ -193,8 +193,8 @@ let rec process_simplify_subtype_result ~this_ty ~fail env prop =
   | TL.Unsat f ->
     f ();
     env
-  | TL.Sub (ty1, ty2) -> sub_type_inner_helper env ~this_ty ty1 ty2
-  | TL.Eq (ty1, ty2) ->
+  | TL.IsSubtype (ty1, ty2) -> sub_type_inner_helper env ~this_ty ty1 ty2
+  | TL.IsEqual (ty1, ty2) ->
     (* These come only from invariant generics, with new_inference=false *)
     fst (Unify.unify env ty2 ty1)
   | TL.Conj props ->
@@ -252,7 +252,7 @@ and simplify_subtype
   (* We *know* that the assertion is valid *)
   let valid () = env, TL.valid in
   (* We don't know whether the assertion is valid or not *)
-  let default () = env, TL.Sub (ty_sub, ty_super) in
+  let default () = env, TL.IsSubtype (ty_sub, ty_super) in
   let simplify_subtype_generic_sub name_sub opt_sub_cstr ty_super env =
   begin match seen_generic_params with
   | None -> default ()
@@ -996,7 +996,7 @@ and simplify_subtype_variance
           simplify_subtype ~seen_generic_params ~deep ~this_ty:None child super' &&&
           simplify_subtype ~seen_generic_params ~deep ~this_ty:None super child
         else
-          env, TL.Eq (child, super')
+          env, TL.IsEqual (child, super')
       end &&&
       simplify_subtype_variance ~seen_generic_params ~deep cid variancel childrenl superl
 
@@ -2086,9 +2086,9 @@ and decompose_subtype_add_prop p env prop =
     env
   | TL.Unsat _ ->
     env
-  | TL.Sub (ty1, ty2) ->
+  | TL.IsSubtype (ty1, ty2) ->
     decompose_subtype_add_bound env ty1 ty2
-  | TL.Eq (ty1, ty2) ->
+  | TL.IsEqual (ty1, ty2) ->
     let env = decompose_subtype_add_bound env ty1 ty2 in
     decompose_subtype_add_bound env ty2 ty1
 

@@ -129,6 +129,18 @@ val env_with_global_tpenv : env -> tpenv -> env
 val add_generic_parameters : env -> Nast.tparam list -> env
 val get_generic_parameters : env -> string list
 val is_generic_parameter: env -> string -> bool
+
+(* Get or add to bounds on type variables *)
+val get_tyvar_lower_bounds : env -> int -> tparam_bounds
+val get_tyvar_upper_bounds : env -> int -> tparam_bounds
+(* Optionally supply intersection or union operations to simplify the bounds *)
+val add_tyvar_upper_bound :
+  ?intersect:(locl ty -> locl ty list -> locl ty list) ->
+  env -> int -> locl ty -> env
+val add_tyvar_lower_bound :
+  ?union:(locl ty -> locl ty list -> locl ty list) ->
+  env -> int -> locl ty -> env
+
 val error_if_reactive_context : env -> (unit -> unit) -> unit
 val error_if_shallow_reactive_context : env -> (unit -> unit) -> unit
 val forward_compat_ge : env -> int -> bool

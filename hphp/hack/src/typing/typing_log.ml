@@ -183,6 +183,19 @@ let log_tpenv env =
       then (lprintf (Normal Green) " <: "; log_type_list env upper))
         end)
 
+let log_tvenv env =
+  indentEnv "tvenv" (fun () ->
+    IMap.iter begin fun var _ ->
+      let lower = Typing_set.elements (Env.get_tyvar_lower_bounds env var) in
+      let upper = Typing_set.elements (Env.get_tyvar_upper_bounds env var) in
+      lnewline ();
+      (if not (List.is_empty lower)
+      then (log_type_list env lower; lprintf (Normal Green) " <: "));
+      lprintf (Bold Green) "#%d" var;
+      (if not (List.is_empty upper)
+      then (lprintf (Normal Green) " <: "; log_type_list env upper))
+      end env.Env.tvenv)
+
 let log_fake_members env =
   let lenv = env.Env.lenv in
   let fakes = lenv.Env.fake_members in
@@ -228,6 +241,7 @@ let hh_show_env p env =
        log_return_type env;
        log_env_diff (!lastenv) env;
        log_tpenv env;
+       log_tvenv env;
        log_subtype_prop env "subtype_prop" env.Env.subtype_prop);
   lastenv := env
 

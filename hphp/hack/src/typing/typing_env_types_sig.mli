@@ -72,6 +72,7 @@
    global_tpenv : tpenv ;
    subtype_prop : Typing_logic.subtype_prop;
    log_levels : int SMap.t;
+   tvenv : tparam_info IMap.t;
  }
 and genv = {
   tcopt   : TypecheckerOptions.t;

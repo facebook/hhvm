@@ -108,7 +108,7 @@ and union_ env ty1 ty2 r =
     | _, Toption _ -> env, ty
     | _ -> env, (r, Toption ty)
     end
-  | (_, Tvar n1), (_, Tvar n2) ->
+  | (_, Tvar n1), (_, Tvar n2) when not (TypecheckerOptions.new_inference (Env.get_tcopt env)) ->
     let env, n1 = Env.get_var env n1 in
     let env, n2 = Env.get_var env n2 in
     if n1 = n2 then env, (r, Tvar n1) else
@@ -119,7 +119,7 @@ and union_ env ty1 ty2 r =
     let env = URec.add env n' ty in
     env, (r, Tvar n')
   | (r, Tvar n), ty2
-  | ty2, (r, Tvar n) ->
+  | ty2, (r, Tvar n) when not (TypecheckerOptions.new_inference (Env.get_tcopt env)) ->
     let env, ty1 = Env.get_type env r n in
     let n' = Env.fresh () in
     let env, ty = union env ty1 ty2 in
@@ -165,7 +165,7 @@ and union_ env ty1 ty2 r =
   | (_, Tanon (_, id1)), (_, Tanon (_, id2)) when id1 = id2 -> env, ty1
   (* TODO with Tclass, union type arguments if covariant *)
   | (_, ((Tarraykind _ | Tprim _ | Tdynamic | Tabstract (_, _) | Tclass (_, _)
-    | Ttuple _ | Tanon (_, _) | Tfun _ | Tobject | Tshape _ | Terr
+    | Ttuple _ | Tanon (_, _) | Tfun _ | Tobject | Tshape _ | Terr | Tvar _
     (* If T cannot be null, `union T nonnull = nonnull`. However, it's hard
      * to say whether a given T can be null - e.g. opaque newtypes, dependent
      * types, etc. - so for now we leave it here.

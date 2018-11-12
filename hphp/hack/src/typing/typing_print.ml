@@ -729,7 +729,10 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
   match snd ty with
   | Tvar _ ->
     let _, ty = Typing_env.expand_type env ty in
-    from_type env ty
+    begin match snd ty with
+    | Tvar _ -> obj @@ kind "var"
+    | _ -> from_type env ty
+    end
   | Tarray(opt_ty1, opt_ty2) ->
     obj @@ kind "array" @ args (Option.to_list opt_ty1 @ Option.to_list opt_ty2)
   | Tthis ->

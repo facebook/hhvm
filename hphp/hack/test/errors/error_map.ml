@@ -523,4 +523,6 @@ UnserializableType = 4292
 InconsistentMutability = 4293
 InvalidMutabilityFlavorInAssignment = 4294
 OptionNull = 4295
+UnknownObjectMember = 4296
+UnknownClass = 4297
   |}]

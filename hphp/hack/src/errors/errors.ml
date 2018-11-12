@@ -2149,6 +2149,11 @@ let const_mutation pos1 pos2 ty =
 let expected_class ?(suffix="") pos =
   add (Typing.err_code Typing.ExpectedClass) pos ("Was expecting a class"^suffix)
 
+let unknown_class pos r =
+  let msg = ("Was expecting a class but class is unknown") in
+  add_list (Typing.err_code Typing.UnknownClass)
+    ([pos, msg] @ r)
+
 let snot_found_hint = function
   | `no_hint ->
       []
@@ -2701,6 +2706,11 @@ let non_object_member s pos1 ty pos2 =
   pos1, msg;
   pos2, "Check this out"
   ]
+
+let unknown_object_member s pos r =
+  let msg = ("You are trying to access the member " ^ s ^ " on a value whose class is unknown") in
+  add_list (Typing.err_code Typing.UnknownObjectMember)
+    ([pos, msg] @ r)
 
 let non_class_member s pos1 ty pos2 =
   add_list (Typing.err_code Typing.NonClassMember) [

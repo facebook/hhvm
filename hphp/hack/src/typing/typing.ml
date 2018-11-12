@@ -1762,7 +1762,7 @@ and expr_
         * types for its type parameters.
         *)
         let env, tvarl =
-          List.map_env env class_.tc_tparams TUtils.unresolved_tparam in
+          List.map_env env class_.tc_tparams (TUtils.unresolved_tparam ~use_pos:p) in
         let params = List.map class_.tc_tparams begin fun (_, (p, n), _, _) ->
           Reason.Rwitness p, Tgeneric n
         end in
@@ -4423,8 +4423,8 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
             env, method_, None
         end
       )
-  | _, (Tnonnull | Tarraykind _ | Toption _
-        | Tprim _ | Tvar _ | Tfun _ | Ttuple _ | Tanon (_, _) | Tobject
+  | _, (Tvar _ | Tnonnull | Tarraykind _ | Toption _
+        | Tprim _ | Tfun _ | Ttuple _ | Tanon (_, _) | Tobject
        | Tshape _) ->
       (* should never happen; static_class_id takes care of these *)
       env, (Reason.Rnone, Typing_utils.tany env), None
@@ -4641,13 +4641,11 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
   | _, Tany
   | _, Terr ->
     default ()
-
   | _ ->
     Errors.non_object_member
       id_str id_pos (Typing_print.error (snd concrete_ty))
       (Reason.to_pos (fst concrete_ty));
     default ()
-
 
 (* k_lhs takes the type of the object receiver *)
 and obj_get_ ~is_method ~nullsafe ~valkind ~(pos_params : expr list option) ?(explicit_tparams=[])
@@ -4726,6 +4724,11 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~(pos_params : expr list option) ?(ex
   | _, Toption ty -> nullable_obj_get ty
   | r, Tprim Nast.Tnull ->
     nullable_obj_get (r, Tany)
+  (* We are trying to access a member through a value of unknown type *)
+  | r, Tvar _ ->
+    Errors.unknown_object_member id_str id_pos (Reason.to_string "It is unknown" r);
+    k (env, (r, Typing_utils.terr env), None)
+
   | _, _ ->
     k (obj_get_concrete_ty ~is_method ~valkind ~explicit_tparams env ety1 cid id k_lhs)
 
@@ -4930,11 +4933,14 @@ and static_class_id ~check_constraints p env =
         | _, Tabstract (AKgeneric _, _)
         | _, Tclass _ -> ty
         | r, Tunresolved tyl -> r, Tunresolved (List.map tyl resolve_ety)
-        | _, Tvar _ as ty -> resolve_ety ty
         | _, Tdynamic as ty -> ty
         | _, (Tany | Tprim Tstring | Tabstract (_, None) | Tobject)
               when not (Env.is_strict env) ->
           Reason.Rwitness p, Typing_utils.tany env
+        | r, Tvar _ ->
+          Errors.unknown_class p (Reason.to_string "It is unknown" r);
+          Reason.Rwitness p, Typing_utils.terr env
+
         | _, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _
                  | Tprim _ | Tfun _ | Ttuple _
                  | Tabstract ((AKenum _ | AKdependent _ | AKnewtype _), _)

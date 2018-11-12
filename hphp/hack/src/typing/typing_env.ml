@@ -80,7 +80,10 @@ let get_type env x_reason x =
   let env, x = get_var env x in
   let ty = IMap.get x env.tenv in
   match ty with
-  | None -> env, (x_reason, Tany)
+  | None ->
+    if TypecheckerOptions.new_inference env.genv.tcopt
+    then env, (x_reason, Tvar x)
+    else env, (x_reason, Tany)
   | Some ty -> env, ty
 
 let get_type_unsafe env x =
@@ -438,7 +441,10 @@ let tparams_visitor env =
       | _ -> acc
     method! on_tvar acc r ix =
       let _env, ty = get_type env r ix in
-      this#on_type acc ty
+      begin match ty with
+      | _, Tvar _ -> acc
+      | _ -> this#on_type acc ty
+      end
   end
 let get_tparams_aux env acc ty = (tparams_visitor env)#on_type acc ty
 let get_tparams env ty = get_tparams_aux env SSet.empty ty

@@ -259,7 +259,7 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
   let env, substs =
     if instantiate_tparams
     then
-      let default () = List.map_env env ft.ft_tparams TUtils.unresolved_tparam in
+      let default () = List.map_env env ft.ft_tparams (TUtils.unresolved_tparam ~use_pos) in
       let env, tvarl =
         if List.length explicit_tparams = 0
         then default ()

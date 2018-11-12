@@ -197,6 +197,7 @@ module type S = sig
   val array_append : Pos.t -> Pos.t -> string -> unit
   val const_mutation : Pos.t -> Pos.t -> string -> unit
   val expected_class : ?suffix:string -> Pos.t -> unit
+  val unknown_class : Pos.t -> (Pos.t * string) list -> unit
   val smember_not_found :
     [< `class_constant | `class_variable | `static_method | `class_typeconst] ->
     Pos.t ->
@@ -261,6 +262,7 @@ module type S = sig
   val static_dynamic : Pos.t -> Pos.t -> string -> elt_type:string -> unit
   val null_member : string -> Pos.t -> (Pos.t * string) list -> unit
   val non_object_member : string -> Pos.t -> string -> Pos.t -> unit
+  val unknown_object_member : string -> Pos.t -> (Pos.t * string) list -> unit
   val non_class_member : string -> Pos.t -> string -> Pos.t -> unit
   val ambiguous_member : string -> Pos.t -> string -> Pos.t -> unit
   val null_container : Pos.t -> (Pos.t * string) list -> unit

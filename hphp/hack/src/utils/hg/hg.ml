@@ -51,17 +51,31 @@ let get_old_version_of_files ~rev ~files ~out ~repo =
  * hg log -r 'ancestor(master,rev)' -T '{svnrev}\n'
  *)
 let get_closest_svn_ancestor rev repo =
-  let process = exec_hg [
+  let svn_rev_query rev = exec_hg [
     "log";
     "-r";
-    Printf.sprintf "ancestor(master,%s)" rev;
+    rev;
     "-T";
     "{svnrev}\n";
     "--cwd";
     repo;
-  ]
+  ] in
+  let svn_rev_process rev =
+    Future.make (svn_rev_query rev)
+    (fun s -> int_of_string (String.trim s))
   in
-  Future.make process (fun s -> int_of_string (String.trim s))
+  (* If we are on public commit, it should have svn field and we are done *)
+  let q1 = svn_rev_process rev in
+  (* Otherwise, we want the closest public commit. It returns empty set when
+   * we are on a public commit, hence the need to still do q1 too *)
+  let q2 = svn_rev_process (Printf.sprintf "parents(roots(draft() & ::%s))" rev) in
+  (* q2 can also fail in case of merge conflicts, in which case let's fall back to
+   * what we always used to do, closest mergebase with master bookmark *)
+  let q3 = svn_rev_process (Printf.sprintf "ancestor(master,%s)" rev) in
+  let take_first r1 r2 = match r1 with
+    | Ok _ -> r1 | _ -> r2
+  in
+  Future.(merge q1 (merge q2 q3 take_first) take_first)
 
   (** Get the hg revision hash of the current working copy in the repo dir.
    *

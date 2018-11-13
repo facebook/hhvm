@@ -436,7 +436,7 @@ static const LineTable& loadLineTable(const Unit* unit) {
   // (this is only an efficiency concern).
   auto& urp = Repo::get().urp();
   auto table = LineTable{};
-  urp.getUnitLineTable(unit->repoID(), unit->sn(), table);
+  urp.getUnitLineTable[unit->repoID()].get(unit->sn(), table);
   auto const p = new LineCacheEntry(unit, std::move(table));
   if (auto const old = entry.exchange(p, std::memory_order_release)) {
     Treadmill::enqueue([old] { delete old; });

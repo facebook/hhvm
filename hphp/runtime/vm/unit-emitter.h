@@ -486,10 +486,16 @@ struct UnitRepoProxy : public RepoProxy {
                                            const MD5& md5,
                                            const Native::FuncTable&);
 
-  void insertUnitLineTable(int repoId, RepoTxn& txn, int64_t unitSn,
-                           LineTable& lineTable); // throws(RepoExc)
-  void getUnitLineTable(int repoId, int64_t unitSn, LineTable& lineTable);
-  // throws(RepoExc)
+  struct InsertUnitLineTableStmt : public RepoProxy::Stmt {
+    InsertUnitLineTableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void insert(RepoTxn& txn,
+                int64_t unitSn,
+                LineTable& lineTable); // throws(RepoExc)
+  };
+  struct GetUnitLineTableStmt : public RepoProxy::Stmt {
+    GetUnitLineTableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
+    void get(int64_t unitSn, LineTable& lineTable);
+  };
 
   struct InsertUnitStmt : public RepoProxy::Stmt {
     InsertUnitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
@@ -556,6 +562,8 @@ struct UnitRepoProxy : public RepoProxy {
 #define URP_OPS \
   URP_IOP(Unit) \
   URP_GOP(Unit) \
+  URP_IOP(UnitLineTable) \
+  URP_GOP(UnitLineTable) \
   URP_IOP(UnitLitstr) \
   URP_GOP(UnitLitstrs) \
   URP_IOP(UnitArrayTypeTable) \
@@ -582,6 +590,8 @@ std::unique_ptr<UnitEmitter> createFatalUnit(
   FatalOp op,
   StringData* err
 );
+
+template<class SerDe> void serdeLineTable(SerDe&, LineTable&);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

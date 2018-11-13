@@ -452,7 +452,7 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
                                     m_bclen);
     }
     int64_t usn = m_sn;
-    urp.insertUnitLineTable(repoId, txn, usn, m_lineTable);
+    urp.insertUnitLineTable[repoId].insert(txn, usn, m_lineTable);
     for (unsigned i = 0; i < m_litstrs.size(); ++i) {
       urp.insertUnitLitstr[repoId].insert(txn, usn, i, m_litstrs[i]);
     }
@@ -791,7 +791,6 @@ void UnitEmitter::serdeMetaData(SerDe& sd) {
   }
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // UnitRepoProxy.
 
@@ -888,7 +887,7 @@ RepoStatus UnitRepoProxy::loadHelper(UnitEmitter& ue,
     getUnitArrayTypeTable[repoId].get(ue);
     m_repo.pcrp().getPreClasses[repoId].get(ue);
     getUnitMergeables[repoId].get(ue);
-    getUnitLineTable(repoId, ue.m_sn, ue.m_lineTable);
+    getUnitLineTable[repoId].get(ue.m_sn, ue.m_lineTable);
     m_repo.frp().getFuncs[repoId].get(ue);
   } catch (RepoExc& re) {
     TRACE(0,
@@ -1226,42 +1225,40 @@ void UnitRepoProxy::GetUnitMergeablesStmt
   txn.commit();
 }
 
-void UnitRepoProxy::insertUnitLineTable(int repoId,
-                                        RepoTxn& txn,
-                                        int64_t unitSn,
-                                        LineTable& lineTable) {
-  RepoStmt stmt(m_repo);
-  stmt.prepare(
-    folly::format(
+void UnitRepoProxy::InsertUnitLineTableStmt
+                  ::insert(RepoTxn& txn,
+                           int64_t unitSn,
+                           LineTable& lineTable) {
+  if (!prepared()) {
+    auto insertQuery = folly::sformat(
       "INSERT INTO {} VALUES(@unitSn, @data);",
-      m_repo.table(repoId, "UnitLineTable")
-    ).str());
+      m_repo.table(m_repoId, "UnitLineTable"));
+    txn.prepare(*this, insertQuery);
+  }
 
-  RepoTxnQuery query(txn, stmt);
   BlobEncoder dataBlob;
-  dataBlob.encode(lineTable);
+  RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", unitSn);
+  serdeLineTable(dataBlob, lineTable);
   query.bindBlob("@data", dataBlob, /* static */ true);
   query.exec();
 }
 
-void UnitRepoProxy::getUnitLineTable(int repoId,
-                                     int64_t unitSn,
-                                     LineTable& lineTable) {
-  RepoStmt stmt(m_repo);
-  stmt.prepare(
-    folly::format(
-      "SELECT data FROM {} WHERE unitSn == @unitSn;",
-      m_repo.table(repoId, "UnitLineTable")
-    ).str());
-
+void UnitRepoProxy::GetUnitLineTableStmt::get(int64_t unitSn,
+                                              LineTable& lineTable) {
   RepoTxn txn(m_repo);
-  RepoTxnQuery query(txn, stmt);
+  if (!prepared()) {
+    auto selectQuery = folly::sformat(
+      "SELECT data FROM {} WHERE unitSn == @unitSn;",
+      m_repo.table(m_repoId, "UnitLineTable"));
+    txn.prepare(*this, selectQuery);
+  }
+  RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", unitSn);
   query.step();
   if (query.row()) {
     BlobDecoder dataBlob = query.getBlob(0);
-    dataBlob.decode(lineTable);
+    serdeLineTable(dataBlob, lineTable);
   }
   txn.commit();
 }
@@ -1339,6 +1336,43 @@ createFatalUnit(StringData* filename, const MD5& md5, FatalOp /*op*/,
   // XXX line numbers are bogus
   fe->finish(ue->bcPos(), false);
   return ue;
+}
+
+template<class SerDe>
+void serdeLineTable(SerDe& sd, LineTable& lineTable) {
+  uint32_t size;
+  Offset pastOffsetDelta;
+  int valDelta;
+
+  if (SerDe::deserializing) {
+    sd(size);
+    lineTable.reserve(size);
+
+    LineEntry lastLineEntry = LineEntry(0, 0);
+    for (uint32_t i = 0; i < size; ++i) {
+      sd(pastOffsetDelta)
+        (valDelta);
+
+      LineEntry lineEntry(
+        pastOffsetDelta + lastLineEntry.pastOffset(),
+        valDelta + lastLineEntry.val());
+      lineTable.push_back(lineEntry);
+      lastLineEntry = lineEntry;
+    }
+  } else {
+    size = uint32_t(lineTable.size());
+    sd(size);
+
+    LineEntry lastEntry = LineEntry(0, 0);
+    for (auto it = lineTable.begin(); it != lineTable.end(); ++it) {
+      auto currentEntry = *it;
+      pastOffsetDelta = currentEntry.pastOffset() - lastEntry.pastOffset();
+      valDelta = currentEntry.val() - lastEntry.val();
+      sd(pastOffsetDelta)
+        (valDelta);
+      lastEntry = currentEntry;
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -104,9 +104,17 @@ struct BlobEncoder {
    *
    * Floating point support could be added later if we need it ...
    */
+   template<class T>
+   typename std::enable_if<
+     std::is_integral<T>::value && std::is_signed<T>::value
+   >::type
+   encode(const T& t) {
+     encode(folly::encodeZigZag(static_cast<int64_t>(t)));
+   }
+
   template<class T>
   typename std::enable_if<
-    std::is_integral<T>::value ||
+    (std::is_integral<T>::value && !std::is_signed<T>::value) ||
     std::is_enum<T>::value
   >::type
   encode(const T& t) {
@@ -262,7 +270,17 @@ struct BlobDecoder {
   // types.
   template<class T>
   typename std::enable_if<
-    std::is_integral<T>::value ||
+    std::is_integral<T>::value && std::is_signed<T>::value
+  >::type
+  decode(T& t) {
+    uint64_t value;
+    decode(value);
+    t = static_cast<T>(folly::decodeZigZag(value));
+  }
+
+  template<class T>
+  typename std::enable_if<
+    (std::is_integral<T>::value && !std::is_signed<T>::value) ||
     std::is_enum<T>::value
   >::type
   decode(T& t) {

@@ -385,7 +385,8 @@ let enforce_mutable_call (env : Typing_env.env) (te : T.expr) =
     | None -> ()
     end
   (* static methods *)
-  | T.Call (_, ((_, (_, Tfun fty)), T.Class_const _), _, el, _) ->
+  | T.Call (_, ((_, (_, Tfun fty)), T.Class_const _), _, el, _)
+  | T.Call (_, ((_, (_, Tfun fty)), T.Lvar _), _, el, _) ->
     check_mutability_fun_params env Borrowable_args.empty fty el
   (* $x->method() where method is mutable *)
   | T.Call (_, ((pos, (r, Tfun fty)), T.Obj_get (expr, _, _)), _, el, _) ->

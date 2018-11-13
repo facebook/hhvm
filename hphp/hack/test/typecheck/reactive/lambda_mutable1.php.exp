@@ -1,0 +1,6 @@
+File "lambda_mutable1.php", line 12, characters 17-20:
+Invalid argument (Typing[4260])
+File "lambda_mutable1.php", line 5, characters 47-49:
+This parameter is not marked as mutable
+File "lambda_mutable1.php", line 12, characters 17-20:
+But this expression is mutable

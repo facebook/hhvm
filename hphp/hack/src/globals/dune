@@ -10,6 +10,7 @@
   (modules
     globalConfig)
   (libraries
+    core_kernel
     find
     heap_shared_mem
     sys_utils))

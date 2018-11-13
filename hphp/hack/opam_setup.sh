@@ -6,7 +6,7 @@ export PATH="$OCAML_PREFIX:$PATH"
 export OPAMROOT="$SRC/_build/.opam"
 mkdir -p "$OPAMROOT"
 export OPAMYES="1"
-MINI_TARBALL="$SRC/facebook/opam-mini-repository.tar.gz"
+MINI_TARBALL="$SRC/facebook/opam-mini-repo/opam-mini-repository.tar.gz"
 MINI_REPO="$SRC/_build/opam-mini-repository"
 
 if [ -f "$MINI_TARBALL" ]

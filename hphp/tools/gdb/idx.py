@@ -234,15 +234,17 @@ def _object_data_prop_vec(obj):
     return prop_vec.cast(T('HPHP::TypedValue').pointer())
 
 
-def object_data_at(obj, prop_name, hasher=None):
-    cls = rawptr(obj['m_cls'])
-
-    prop_vec = _object_data_prop_vec(obj)
-    prop_ind = _ism_index(cls['m_declProperties'], prop_name)
+def object_data_at(obj, prop_name_or_idx, hasher=None):
+    sinfo = strinfo(prop_name_or_idx)
+    if sinfo is None:
+        prop_ind = prop_name_or_idx
+    else:
+        prop_ind = _ism_index(cls['m_declProperties'], prop_name_or_idx)
 
     if prop_ind is None:
         return None
 
+    prop_vec = _object_data_prop_vec(obj)
     return prop_vec[prop_ind]
 
 

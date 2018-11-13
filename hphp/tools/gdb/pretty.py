@@ -289,7 +289,7 @@ class ArrayDataPrinter(object):
             elt = self.cur
 
             try:
-                if elt['data']['m_type'] == -1:
+                if elt['data']['m_type'] == -128:
                     key = '<deleted>'
                 elif elt['data']['m_aux']['u_hash'] < 0:
                     key = '%d' % elt['ikey']
@@ -306,6 +306,28 @@ class ArrayDataPrinter(object):
             self.cur = self.cur + 1
             return (key, data)
 
+    class _set_iterator(_BaseIterator):
+        def __init__(self, begin, end):
+            self.cur = begin
+            self.end = end
+
+        def __next__(self):
+            if self.cur == self.end:
+                raise StopIteration
+
+            elt = self.cur
+
+            try:
+                if elt['tv']['m_type'] == -128:
+                    key = '<deleted>'
+                else:
+                    key = "%s" % elt['tv'].cast(T('HPHP::TypedValue'))
+            except gdb.MemoryError:
+                key = '<invalid>'
+
+            self.cur = self.cur + 1
+            return (key, key)
+
 
     def __init__(self, val):
         kind_ty = T('HPHP::ArrayData::ArrayKind')
@@ -313,6 +335,8 @@ class ArrayDataPrinter(object):
 
         if self.kind == self._kind('Mixed') or self.kind == self._kind('Dict'):
             self.val = val.cast(T('HPHP::MixedArray'))
+        elif self.kind == self._kind('Keyset'):
+            self.val = val.cast(T('HPHP::SetArray'))
         else:
             self.val = val
 
@@ -340,6 +364,9 @@ class ArrayDataPrinter(object):
         if self.kind == self._kind('Mixed') or self.kind == self._kind('Dict'):
             pelm = data.cast(T('HPHP::MixedArray::Elm').pointer())
             return self._mixed_iterator(pelm, pelm + self.val['m_used'])
+        if self.kind == self._kind('Keyset'):
+            pelm = data.cast(T('HPHP::SetArrayElm').pointer())
+            return self._set_iterator(pelm, pelm + self.val['m_used'])
         return self._packed_iterator(0, 0)
 
     def _kind(self, kind):
@@ -367,17 +394,15 @@ class ObjectDataPrinter(object):
 
             try:
                 name = idx.indexed_string_map_at(decl_props, self.cur)['name']
-                try:
-                    val = idx.object_data_at(self.obj, name)
-                except gdb.MemoryError:
-                    val = None
             except gdb.MemoryError:
                 name = '<invalid>'
 
-            self.cur = self.cur + 1
-
-            if val is None:
+            try:
+                val = idx.object_data_at(self.obj, self.cur)
+            except gdb.MemoryError:
                 val = '<unknown>'
+
+            self.cur = self.cur + 1
 
             return (str(deref(name)), val)
 

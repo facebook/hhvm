@@ -1,0 +1,103 @@
+(library
+  (name ai)
+  (wrapped false)
+  (modules
+    ai
+    ai_options)
+  (libraries
+    errors))
+
+(library
+  (name build)
+  (wrapped false)
+  (modules
+    buildMain))
+
+(library
+  (name coroutine_check)
+  (wrapped false)
+  (modules
+    coroutine_check)
+  (libraries
+    tast))
+
+(library
+  (name coroutine_errors)
+  (wrapped false)
+  (modules
+    coroutine_errors))
+
+(library
+  (name debug)
+  (wrapped false)
+  (modules
+    debug)
+  (libraries
+    parser_sigs))
+
+(library
+  (name hackc_parse_delegator)
+  (wrapped false)
+  (modules
+    hackc_parse_delegator))
+
+(library
+  (name ignore)
+  (wrapped false)
+  (modules
+    filesToIgnore))
+
+(library
+  (name linting)
+  (wrapped false)
+  (modules
+    linting_service))
+
+(library
+  (name load_script)
+  (wrapped false)
+  (modules
+    load_script
+    loadScriptConfig
+    loadScriptUtils))
+
+(library
+  (name logging)
+  (wrapped false)
+  (modules
+    bad_files
+    featureLogging
+    hackEventLogger
+    hackcEventLogger
+    hackfmtEventLogger
+    typingLogger)
+  (flags (:standard -w @a-27)))
+
+(library
+  (name logging_event)
+  (wrapped false)
+  (modules
+    eventLogger
+    scuba))
+
+(library
+  (name messages)
+  (wrapped false)
+  (modules
+    clientMessages))
+
+(library
+  (name server_hot_classes_description)
+  (wrapped false)
+  (modules
+    serverHotClassesDescription))
+
+(library
+  (name state_loader)
+  (wrapped false)
+  (modules
+    state_loader
+    xdb)
+  (libraries
+    hg
+    server_monitor))

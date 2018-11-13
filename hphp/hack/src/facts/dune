@@ -1,0 +1,9 @@
+(library
+  (name facts)
+  (wrapped false)
+  (libraries
+    core_kernel
+    hhbc
+    parser
+    parser_syntax)
+  (preprocess (pps ppx_deriving.std)))

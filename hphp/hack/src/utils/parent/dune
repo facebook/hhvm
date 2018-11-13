@@ -1,0 +1,14 @@
+(library
+  (name parentimpl)
+  (wrapped false)
+  (modules)
+  (c_names
+    stubparentimpl))
+
+(library
+  (name parent)
+  (wrapped false)
+  (c_names
+    libparent)
+  (libraries
+    parentimpl))

@@ -1,0 +1,3 @@
+(library
+  (name hackfmt_error)
+  (wrapped false))

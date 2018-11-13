@@ -1,0 +1,12 @@
+(library
+  (name search)
+  (wrapped false)
+  (libraries
+    ast
+    file_info
+    heap_shared_mem
+    naming_heap
+    parser_heap
+    procs_multi_worker
+    pos
+    trie))

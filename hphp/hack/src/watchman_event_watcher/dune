@@ -1,0 +1,6 @@
+(library
+  (name watchman_event_watcher)
+  (wrapped false)
+  (libraries
+    server_utils
+    watchman_utils))

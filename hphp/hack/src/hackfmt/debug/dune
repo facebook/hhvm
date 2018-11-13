@@ -1,0 +1,8 @@
+(library
+  (name hackfmt_debug)
+  (wrapped false)
+  (libraries
+    debug
+    hackfmt
+    parser_syntax
+    parser_syntax_tree))

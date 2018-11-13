@@ -1,0 +1,43 @@
+(library
+  (name fwd_compatibility)
+  (wrapped false)
+  (modules
+    forwardCompatibilityLevel)
+  (libraries
+    utils_core)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name global_options)
+  (wrapped false)
+  (modules
+    globalOptions)
+  (libraries
+    collections
+    errors
+    fwd_compatibility)
+  (preprocess (pps ppx_deriving.std)))
+
+; FIXME copy buildOptions via dune instead of manually
+(library
+  (name build_options)
+  (wrapped false)
+  (modules
+    buildOptions))
+
+(library
+  (name parser_options)
+  (wrapped false)
+  (modules
+    parserOptions)
+  (libraries
+    global_options)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name typechecker_options)
+  (wrapped false)
+  (modules
+    typecheckerOptions)
+  (libraries
+    global_options))

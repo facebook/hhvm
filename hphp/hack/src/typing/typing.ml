@@ -881,7 +881,7 @@ and stmt env = function
     let env, (te1, te2, tb) = LEnv.stash_and_do env [C.Continue; C.Break]
       (fun env ->
         let env = LEnv.save_and_merge_next_in_cont env C.Continue in
-        let env, ty2 = as_expr env (fst e1) e2 in
+        let env, ty2, tk, tv = as_expr env (fst e1) e2 in
         let env =
           check_dynamic env ty1 ~f:begin fun () ->
             Type.sub_type (fst e1) Reason.URforeach env ty1 ty2
@@ -891,7 +891,7 @@ and stmt env = function
         let env, (te2, tb) = Env.in_loop env begin
           iter_n_acc alias_depth begin fun env ->
             let env = LEnv.update_next_from_conts env [C.Continue; C.Next] in
-            let env, te2 = bind_as_expr env ty1 ty2 e2 in
+            let env, te2 = bind_as_expr env ty1 (fst e1) tk tv e2 in
             let env, tb = block env b in
             env, (te2, tb)
           end
@@ -1077,32 +1077,27 @@ and catch catchctx env (sid, exn, b) =
 
 and as_expr env pe = function
   | As_v _ ->
-      let env, ty = Env.fresh_unresolved_type env in
-      let tvector = Tclass ((pe, SN.Collections.cTraversable), [ty]) in
-      env, (Reason.Rforeach pe, tvector)
+      let tk = Reason.Rnone, TUtils.desugar_mixed Reason.Rnone in
+      let env, tv = Env.fresh_unresolved_type env in
+      let tvector = Tclass ((pe, SN.Collections.cTraversable), [tv]) in
+      env, (Reason.Rforeach pe, tvector), tk, tv
   | As_kv _ ->
-      let env, ty1 = Env.fresh_unresolved_type env in
-      let env, ty2 = Env.fresh_unresolved_type env in
-      let tmap = Tclass((pe, SN.Collections.cKeyedTraversable), [ty1; ty2]) in
-      env, (Reason.Rforeach pe, tmap)
+      let env, tk = Env.fresh_unresolved_type env in
+      let env, tv = Env.fresh_unresolved_type env in
+      let tmap = Tclass((pe, SN.Collections.cKeyedTraversable), [tk; tv]) in
+      env, (Reason.Rforeach pe, tmap), tk, tv
   | Await_as_v _ ->
-      let env, ty = Env.fresh_unresolved_type env in
-      let tvector = Tclass ((pe, SN.Classes.cAsyncIterator), [ty]) in
-      env, (Reason.Rasyncforeach pe, tvector)
+      let tk = Reason.Rnone, TUtils.desugar_mixed Reason.Rnone in
+      let env, tv = Env.fresh_unresolved_type env in
+      let tvector = Tclass ((pe, SN.Classes.cAsyncIterator), [tv]) in
+      env, (Reason.Rasyncforeach pe, tvector), tk, tv
   | Await_as_kv _ ->
-      let env, ty1 = Env.fresh_unresolved_type env in
-      let env, ty2 = Env.fresh_unresolved_type env in
-      let tmap = Tclass ((pe, SN.Classes.cAsyncKeyedIterator), [ty1; ty2]) in
-      env, (Reason.Rasyncforeach pe, tmap)
+      let env, tk = Env.fresh_unresolved_type env in
+      let env, tv = Env.fresh_unresolved_type env in
+      let tmap = Tclass ((pe, SN.Classes.cAsyncKeyedIterator), [tk; tv]) in
+      env, (Reason.Rasyncforeach pe, tmap), tk, tv
 
-and bind_as_expr env loop_ty ty aexpr =
-  let env, ety = Env.expand_type env ty in
-  let p, ty1, ty2 =
-    match ety with
-    | _, Tclass ((p, _), [ty2]) ->
-      (p, (Reason.Rnone, TUtils.desugar_mixed Reason.Rnone), ty2)
-    | _, Tclass ((p, _), [ty1; ty2]) -> (p, ty1, ty2)
-    | _ -> assert false in
+and bind_as_expr env loop_ty p ty1 ty2 aexpr =
   (* Set id as dynamic if the foreach loop was dynamic *)
   let env, eloop_ty = Env.expand_type env loop_ty in
   let ty1, ty2 = if TUtils.is_dynamic env eloop_ty then

@@ -302,18 +302,24 @@ let rec is_tvar ~elide_nullable ty var =
   | (_, Toption ty) when elide_nullable -> is_tvar ~elide_nullable ty var
   | _ -> false
 
+let empty_tvar_info =
+  { lower_bounds = empty_bounds;
+    upper_bounds = empty_bounds;
+    appears_covariantly = false;
+    appears_contravariantly = false;
+  }
+
+let get_tvar_info tvenv var =
+  Option.value (IMap.get var tvenv) ~default:empty_tvar_info
+
 (* Add a single new upper bound [ty] to type variable [var] in [tvenv] *)
 let add_tvenv_upper_bound_ tvenv var ty =
   (* Don't add superfluous v <: v or v <: ?v to environment *)
   if is_tvar ~elide_nullable:true ty var
   then tvenv
-  else match IMap.get var tvenv with
-  | None ->
-    IMap.add var
-      {lower_bounds = empty_bounds; upper_bounds = singleton_bound ty} tvenv
-  | Some {lower_bounds; upper_bounds} ->
-    IMap.add var
-      {lower_bounds; upper_bounds = ty++upper_bounds} tvenv
+  else
+  let tvinfo = get_tvar_info tvenv var in
+  IMap.add var { tvinfo with upper_bounds = ty ++ tvinfo.upper_bounds } tvenv
 
 (* Add a single new lower bound [ty] to type variable [var] in [tvenv] *)
 let add_tvenv_lower_bound_ tvenv var ty =
@@ -321,13 +327,8 @@ let add_tvenv_lower_bound_ tvenv var ty =
   if is_tvar ~elide_nullable:false ty var
   then tvenv
   else
-  match IMap.get var tvenv with
-  | None ->
-    IMap.add var
-      {lower_bounds = singleton_bound ty; upper_bounds = empty_bounds} tvenv
-  | Some {lower_bounds; upper_bounds} ->
-    IMap.add var
-      {lower_bounds = ty++lower_bounds; upper_bounds} tvenv
+  let tvinfo = get_tvar_info tvenv var in
+  IMap.add var { tvinfo with lower_bounds = ty ++ tvinfo.lower_bounds } tvenv
 
 let env_with_tvenv env tvenv =
   { env with tvenv = tvenv }
@@ -351,13 +352,13 @@ let env_with_tvenv env tvenv =
    match intersect with
    | None -> env_with_tvenv env (add_tvenv_upper_bound_ tvenv var ty)
    | Some intersect ->
-     let tyl = intersect ty (TySet.elements (get_tyvar_upper_bounds env var)) in
+     let tvinfo = get_tvar_info tvenv var in
+     let tyl = intersect ty (TySet.elements tvinfo.upper_bounds) in
      let add ty tys =
        if is_tvar ~elide_nullable:true ty var
        then tys else TySet.add ty tys in
      let upper_bounds = List.fold_right ~init:TySet.empty ~f:add tyl in
-     let lower_bounds = get_tyvar_lower_bounds env var in
-     env_with_tvenv env (IMap.add var {lower_bounds; upper_bounds} tvenv)
+     env_with_tvenv env (IMap.add var { tvinfo with upper_bounds } tvenv)
 
 (* Add a single new upper bound [ty] to type variable [var] in [env.tvenv].
  * If the optional [union] operation is supplied, then use this to avoid
@@ -378,10 +379,18 @@ let add_tyvar_lower_bound ?union env var ty =
   match union with
   | None -> env_with_tvenv env (add_tvenv_lower_bound_ tvenv var ty)
   | Some union ->
-    let tyl = union ty (TySet.elements (get_tyvar_lower_bounds env var)) in
+    let tvinfo = get_tvar_info tvenv var in
+    let tyl = union ty (TySet.elements tvinfo.lower_bounds) in
     let lower_bounds = List.fold_right ~init:TySet.empty ~f:TySet.add tyl in
-    let upper_bounds = get_tyvar_upper_bounds env var in
-    env_with_tvenv env (IMap.add var {lower_bounds; upper_bounds} tvenv)
+    env_with_tvenv env (IMap.add var { tvinfo with lower_bounds } tvenv)
+
+let set_tyvar_appears_covariantly env var =
+  let tvinfo = get_tvar_info env.tvenv var in
+  env_with_tvenv env (IMap.add var { tvinfo with appears_covariantly = true } env.tvenv)
+
+let set_tyvar_appears_contravariantly env var =
+  let tvinfo = get_tvar_info env.tvenv var in
+  env_with_tvenv env (IMap.add var { tvinfo with appears_contravariantly = true } env.tvenv)
 
 let rec props_to_env env remain props =
   match props with

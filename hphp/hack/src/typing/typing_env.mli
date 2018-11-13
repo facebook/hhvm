@@ -140,7 +140,10 @@ val add_tyvar_upper_bound :
 val add_tyvar_lower_bound :
   ?union:(locl ty -> locl ty list -> locl ty list) ->
   env -> int -> locl ty -> env
-
+val set_tyvar_appears_covariantly :
+  env -> int -> env
+val set_tyvar_appears_contravariantly :
+  env -> int -> env
 val error_if_reactive_context : env -> (unit -> unit) -> unit
 val error_if_shallow_reactive_context : env -> (unit -> unit) -> unit
 val forward_compat_ge : env -> int -> bool

@@ -93,6 +93,19 @@ let pp_anon _ _ = Printf.printf "%s\n" "<anon>"
 let show_tfun _ = "<tfun>"
 let pp_tfun _ _ = Printf.printf "%s\n" "<tfun>"
 
+type tvar_info = {
+  (* Does this type variable appear covariantly in the type of the expression?
+   *)
+  appears_covariantly: bool;
+  (* Does this type variable appear contravariantly in the type of the expression?
+   * If it appears in an invariant position then both will be true; if it doesn't
+   * appear at all then both will be false
+   *)
+  appears_contravariantly: bool;
+  lower_bounds : TySet.t;
+  upper_bounds : TySet.t;
+}
+
 type env = {
   (* position of the function/method being checked *)
   function_pos: Pos.t;
@@ -119,7 +132,7 @@ type env = {
   global_tpenv : tpenv ;
   subtype_prop : Typing_logic.subtype_prop;
   log_levels : int SMap.t ;
-  tvenv : tparam_info IMap.t;
+  tvenv : tvar_info IMap.t;
 }
 and genv = {
   tcopt   : TypecheckerOptions.t;

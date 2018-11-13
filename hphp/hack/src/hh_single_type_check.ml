@@ -178,6 +178,7 @@ let parse_options () =
   let allow_return_by_ref = ref false in
   let allow_array_cell_pass_by_ref = ref false in
   let allow_anon_use_capture_by_ref = ref false in
+  let allow_user_attributes = ref false in
   let disallow_unset_on_varray = ref false in
   let auto_namespace_map = ref [] in
   let dont_assume_php = ref false in
@@ -194,6 +195,9 @@ let parse_options () =
     "--all-errors",
       Arg.Set all_errors,
       " List all errors not just the first one";
+    "--allow-user-attributes",
+      Arg.Set allow_user_attributes,
+      " Allow all user attributes";
     "--deregister-attributes",
       Arg.Set deregister_attributes,
       " Ignore all functions with attribute '__PHPStdLib'";
@@ -373,7 +377,7 @@ let parse_options () =
     GlobalOptions.default with
       GlobalOptions.tco_assume_php = not !dont_assume_php;
       GlobalOptions.tco_unsafe_rx = !unsafe_rx;
-      GlobalOptions.tco_user_attrs = Some SSet.empty;
+      GlobalOptions.tco_user_attrs = if !allow_user_attributes then None else Some SSet.empty;
       GlobalOptions.tco_safe_array = !safe_array;
       GlobalOptions.tco_safe_vector_array = !safe_vector_array;
       GlobalOptions.po_deregister_php_stdlib = !deregister_attributes;
@@ -1190,7 +1194,7 @@ let main_hack ({files; mode; tcopt; _} as opts) =
     begin match files with
     | [filename] ->
       let filecontents = filename |> Relative_path.create Relative_path.Dummy |> file_to_files in
-      Ai.do_ Typing_check_utils.type_file filecontents ai_options
+      Ai.do_ Typing_check_utils.type_file filecontents ai_options tcopt
     | _ -> die "Ai mode does not support multiple files"
     end
   | _ ->

@@ -217,7 +217,6 @@ let make_permissive tcopt =
   { tcopt with
     tco_assume_php = true;
     tco_user_attrs = None;
-    tco_experimental_features = tcopt.tco_experimental_features;
   }
 
 let make ~tco_assume_php

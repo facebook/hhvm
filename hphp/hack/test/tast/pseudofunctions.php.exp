@@ -1,84 +1,122 @@
-[(Fun
-    { Aast.AnnotatedAST.f_span = [8:1-24:2]; f_annotation = ();
-      f_mode = <opaque>; f_ret = (Some ([8:22-26], (Hprim Tvoid)));
-      f_name = ([8:10-14], "\\test"); f_tparams = [];
-      f_where_constraints = []; f_variadic = FVnonVariadic;
-      f_params =
-      [{ Aast.AnnotatedAST.param_annotation = ([8:17-19], C);
-         param_hint = (Some ([8:15-16], (Happly (([8:15-16], "\\C"), []))));
-         param_is_reference = false; param_is_variadic = false;
-         param_pos = [8:17-19]; param_name = "$c"; param_expr = None;
-         param_callconv = None; param_user_attributes = [] }
+[(Class
+    { Aast.AnnotatedAST.c_span = [3:1-6:2]; c_annotation = ();
+      c_mode = <opaque>; c_final = false; c_is_xhp = false; c_kind = Cnormal;
+      c_name = ([3:7-8], "\\C"); c_tparams = <opaque>; c_extends = [];
+      c_uses = []; c_xhp_attr_uses = []; c_xhp_category = [];
+      c_req_extends = []; c_req_implements = []; c_implements = [];
+      c_consts = []; c_typeconsts = []; c_static_vars = []; c_vars = [];
+      c_constructor = None;
+      c_static_methods =
+      [{ Aast.AnnotatedAST.m_span = [4:3-46]; m_annotation = ();
+         m_final = false; m_abstract = false; m_static = true;
+         m_visibility = Public; m_name = ([4:26-35], "staticFoo");
+         m_tparams = []; m_where_constraints = [];
+         m_variadic = FVnonVariadic; m_params = [];
+         m_body =
+         (NamedBody
+            { Aast.AnnotatedAST.fnb_nast = [Noop]; fnb_unsafe = false });
+         m_fun_kind = FSync; m_user_attributes = [];
+         m_ret = (Some ([4:39-43], (Hprim Tvoid))); m_ret_by_ref = false;
+         m_external = false }
         ];
-      f_body =
-      (NamedBody
-         { Aast.AnnotatedAST.fnb_nast =
-           [(Expr
-               (([9:3-15], void),
-                (Call (Cnormal, (([9:3-7], _), (Id ([9:3-7], "echo"))), 
-                   [], [(([9:8-13], string), (String "foo"))], []))));
-             (Expr
-                (([10:3-15], void),
-                 (Call (Cnormal, (([10:3-15], _), (Id ([10:3-15], "echo"))),
-                    [], [(([10:9-14], string), (String "foo"))], []))));
-             (Expr
-                (([12:3-14], (function(C $c): void)),
-                 (Fun_id ([12:7-13], "\\test"))));
-             (Expr
-                (([13:3-36], (function(): void)),
-                 (Smethod_id (([13:14-15], "\\C"), ([13:24-35], "staticFoo")
-                    ))));
-             (Expr
-                (([14:3-31], (function(): void)),
-                 (Method_id ((([14:13-15], C), (Lvar ([14:13-15], $c))),
-                    ([14:17-30], "instanceFoo")))));
-             (Expr
-                (([15:3-39], (function(C): void)),
-                 (Method_caller (([15:15-16], "\\C"),
-                    ([15:25-38], "instanceFoo")))));
-             (Expr
-                (([17:3-12], bool),
-                 (Call (Cnormal,
-                    (([17:3-8], (function($x): bool)),
-                     (Id ([17:3-8], "\\empty"))),
-                    [], [(([17:9-11], C), (Lvar ([17:9-11], $c)))], []))));
-             (Expr
-                (([18:3-12], bool),
-                 (Call (Cnormal,
-                    (([18:3-8], (function($x): bool)),
-                     (Id ([18:3-8], "\\isset"))),
-                    [], [(([18:9-11], C), (Lvar ([18:9-11], $c)))], []))));
-             (Expr
-                (([19:3-13], void),
-                 (Call (Cnormal,
-                    (([19:3-8], (function($x): void)),
-                     (Id ([19:3-8], "\\unset"))),
-                    [], [(([19:9-11], C), (Lvar ([19:9-11], $c)))], []))));
-             (Expr
-                (([21:3-15], void),
-                 (Assert (AE_assert (([21:10-14], bool), True)))));
-             (If (
-                (([22:13-17], bool),
-                 (Unop (Unot, (([22:13-17], bool), True)))),
-                [(Expr
-                    (([22:3-25], noreturn),
-                     (Call (Cnormal,
-                        (([22:3-12], (function(HH\FormatString<PlainSprintf> $fmt, ...): noreturn)),
-                         (Id ([22:3-12], "\\invariant_violation"))),
-                        [], [(([22:19-24], string), (String "foo"))], 
-                        []))))
-                  ],
-                [Noop]));
-             (Expr
-                (([23:3-29], noreturn),
-                 (Call (Cnormal,
-                    (([23:3-22], (function(HH\FormatString<PlainSprintf> $fmt, ...): noreturn)),
-                     (Id ([23:3-22], "\\invariant_violation"))),
-                    [], [(([23:23-28], string), (String "foo"))], []))))
-             ];
-           fnb_unsafe = false });
-      f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
-      f_external = false });
+      c_methods =
+      [{ Aast.AnnotatedAST.m_span = [5:3-41]; m_annotation = ();
+         m_final = false; m_abstract = false; m_static = false;
+         m_visibility = Public; m_name = ([5:19-30], "instanceFoo");
+         m_tparams = []; m_where_constraints = [];
+         m_variadic = FVnonVariadic; m_params = [];
+         m_body =
+         (NamedBody
+            { Aast.AnnotatedAST.fnb_nast = [Noop]; fnb_unsafe = false });
+         m_fun_kind = FSync; m_user_attributes = [];
+         m_ret = (Some ([5:34-38], (Hprim Tvoid))); m_ret_by_ref = false;
+         m_external = false }
+        ];
+      c_namespace = <opaque>; c_user_attributes = []; c_enum = None });
+  (Fun
+     { Aast.AnnotatedAST.f_span = [8:1-24:2]; f_annotation = ();
+       f_mode = <opaque>; f_ret = (Some ([8:22-26], (Hprim Tvoid)));
+       f_name = ([8:10-14], "\\test"); f_tparams = [];
+       f_where_constraints = []; f_variadic = FVnonVariadic;
+       f_params =
+       [{ Aast.AnnotatedAST.param_annotation = ([8:17-19], C);
+          param_hint = (Some ([8:15-16], (Happly (([8:15-16], "\\C"), []))));
+          param_is_reference = false; param_is_variadic = false;
+          param_pos = [8:17-19]; param_name = "$c"; param_expr = None;
+          param_callconv = None; param_user_attributes = [] }
+         ];
+       f_body =
+       (NamedBody
+          { Aast.AnnotatedAST.fnb_nast =
+            [(Expr
+                (([9:3-15], void),
+                 (Call (Cnormal, (([9:3-7], _), (Id ([9:3-7], "echo"))), 
+                    [], [(([9:8-13], string), (String "foo"))], []))));
+              (Expr
+                 (([10:3-15], void),
+                  (Call (Cnormal, (([10:3-15], _), (Id ([10:3-15], "echo"))),
+                     [], [(([10:9-14], string), (String "foo"))], []))));
+              (Expr
+                 (([12:3-14], (function(C $c): void)),
+                  (Fun_id ([12:7-13], "\\test"))));
+              (Expr
+                 (([13:3-36], (function(): void)),
+                  (Smethod_id (([13:14-15], "\\C"), ([13:24-35], "staticFoo")
+                     ))));
+              (Expr
+                 (([14:3-31], (function(): void)),
+                  (Method_id ((([14:13-15], C), (Lvar ([14:13-15], $c))),
+                     ([14:17-30], "instanceFoo")))));
+              (Expr
+                 (([15:3-39], (function(C): void)),
+                  (Method_caller (([15:15-16], "\\C"),
+                     ([15:25-38], "instanceFoo")))));
+              (Expr
+                 (([17:3-12], bool),
+                  (Call (Cnormal,
+                     (([17:3-8], (function($x): bool)),
+                      (Id ([17:3-8], "\\empty"))),
+                     [], [(([17:9-11], C), (Lvar ([17:9-11], $c)))], 
+                     []))));
+              (Expr
+                 (([18:3-12], bool),
+                  (Call (Cnormal,
+                     (([18:3-8], (function($x): bool)),
+                      (Id ([18:3-8], "\\isset"))),
+                     [], [(([18:9-11], C), (Lvar ([18:9-11], $c)))], 
+                     []))));
+              (Expr
+                 (([19:3-13], void),
+                  (Call (Cnormal,
+                     (([19:3-8], (function($x): void)),
+                      (Id ([19:3-8], "\\unset"))),
+                     [], [(([19:9-11], C), (Lvar ([19:9-11], $c)))], 
+                     []))));
+              (Expr
+                 (([21:3-15], void),
+                  (Assert (AE_assert (([21:10-14], bool), True)))));
+              (If (
+                 (([22:13-17], bool),
+                  (Unop (Unot, (([22:13-17], bool), True)))),
+                 [(Expr
+                     (([22:3-25], noreturn),
+                      (Call (Cnormal,
+                         (([22:3-12], (function(HH\FormatString<PlainSprintf> $fmt, ...): noreturn)),
+                          (Id ([22:3-12], "\\invariant_violation"))),
+                         [], [(([22:19-24], string), (String "foo"))], 
+                         []))))
+                   ],
+                 [Noop]));
+              (Expr
+                 (([23:3-29], noreturn),
+                  (Call (Cnormal,
+                     (([23:3-22], (function(HH\FormatString<PlainSprintf> $fmt, ...): noreturn)),
+                      (Id ([23:3-22], "\\invariant_violation"))),
+                     [], [(([23:23-28], string), (String "foo"))], []))))
+              ];
+            fnb_unsafe = false });
+       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
+       f_external = false });
   (Fun
      { Aast.AnnotatedAST.f_span = [26:1-30:2]; f_annotation = ();
        f_mode = <opaque>; f_ret = (Some ([27:21-25], (Hprim Tvoid)));
@@ -117,40 +155,5 @@
        f_fun_kind = FSync;
        f_user_attributes =
        [{ Aast.AnnotatedAST.ua_name = ([26:3-7], "__Rx"); ua_params = [] }];
-       f_ret_by_ref = false; f_external = false });
-  (Class
-     { Aast.AnnotatedAST.c_span = [3:1-6:2]; c_annotation = ();
-       c_mode = <opaque>; c_final = false; c_is_xhp = false;
-       c_kind = Cnormal; c_name = ([3:7-8], "\\C"); c_tparams = <opaque>;
-       c_extends = []; c_uses = []; c_xhp_attr_uses = [];
-       c_xhp_category = []; c_req_extends = []; c_req_implements = [];
-       c_implements = []; c_consts = []; c_typeconsts = [];
-       c_static_vars = []; c_vars = []; c_constructor = None;
-       c_static_methods =
-       [{ Aast.AnnotatedAST.m_span = [4:3-46]; m_annotation = ();
-          m_final = false; m_abstract = false; m_static = true;
-          m_visibility = Public; m_name = ([4:26-35], "staticFoo");
-          m_tparams = []; m_where_constraints = [];
-          m_variadic = FVnonVariadic; m_params = [];
-          m_body =
-          (NamedBody
-             { Aast.AnnotatedAST.fnb_nast = [Noop]; fnb_unsafe = false });
-          m_fun_kind = FSync; m_user_attributes = [];
-          m_ret = (Some ([4:39-43], (Hprim Tvoid))); m_ret_by_ref = false;
-          m_external = false }
-         ];
-       c_methods =
-       [{ Aast.AnnotatedAST.m_span = [5:3-41]; m_annotation = ();
-          m_final = false; m_abstract = false; m_static = false;
-          m_visibility = Public; m_name = ([5:19-30], "instanceFoo");
-          m_tparams = []; m_where_constraints = [];
-          m_variadic = FVnonVariadic; m_params = [];
-          m_body =
-          (NamedBody
-             { Aast.AnnotatedAST.fnb_nast = [Noop]; fnb_unsafe = false });
-          m_fun_kind = FSync; m_user_attributes = [];
-          m_ret = (Some ([5:34-38], (Hprim Tvoid))); m_ret_by_ref = false;
-          m_external = false }
-         ];
-       c_namespace = <opaque>; c_user_attributes = []; c_enum = None })
+       f_ret_by_ref = false; f_external = false })
   ]

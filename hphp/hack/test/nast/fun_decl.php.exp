@@ -11,7 +11,9 @@
          param_callconv = None; param_user_attributes = [] }
         ];
       f_body =
-      (NamedBody { Aast.AnnotatedAST.fnb_nast = []; fnb_unsafe = false });
+      (UnnamedBody
+         { Aast.AnnotatedAST.fub_ast = <opaque>; fub_tparams = <opaque>;
+           fub_namespace = <opaque> });
       f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;
       f_external = true })
   ]

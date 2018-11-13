@@ -536,40 +536,9 @@ let check_file opts errors files_info =
   end ~init:errors
 
 let create_nasts opts files_info =
-  let open Result in
-  let open Nast in
-  let build_nast fn {FileInfo.funs; classes; typedefs; consts; _} =
-    List.map ~f:Result.ok_or_failwith (
-      List.map funs begin fun (_, x) ->
-        Parser_heap.find_fun_in_file ~full:true opts fn x
-        |> Result.of_option ~error:(Printf.sprintf "Couldn't find function %s" x)
-        >>| Naming.fun_ opts
-        >>| (fun f -> {f with f_body = (NamedBody (Typing_naming_body.func_body opts f))})
-        >>| (fun f -> Nast.Fun f)
-      end
-      @
-      List.map classes begin fun (_, x) ->
-        Parser_heap.find_class_in_file ~full:true opts fn x
-        |> Result.of_option ~error:(Printf.sprintf "Couldn't find class %s" x)
-        >>| Naming.class_ opts
-        >>| Typing_naming_body.class_meth_bodies opts
-        >>| (fun c -> Nast.Class c)
-      end
-      @
-      List.map typedefs begin fun (_, x) ->
-        Parser_heap.find_typedef_in_file ~full:true opts fn x
-        |> Result.of_option ~error:(Printf.sprintf "Couldn't find typedef %s" x)
-        >>| Naming.typedef opts
-        >>| (fun t -> Nast.Typedef t)
-      end
-      @
-      List.map consts begin fun (_, x) ->
-        Parser_heap.find_const_in_file ~full:true opts fn x
-        |> Result.of_option ~error:(Printf.sprintf "Couldn't find const %s" x)
-        >>| Naming.global_const opts
-        >>| fun g -> Nast.Constant g
-      end
-    )
+  let build_nast fn _ =
+    let ast = Parser_heap.get_from_parser_heap ~full:true opts fn in
+    Naming.program opts ast
   in Relative_path.Map.mapi ~f:(build_nast) files_info
 
 let with_named_body opts n_fun =

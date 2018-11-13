@@ -32,6 +32,7 @@ struct IRInstruction;
  */
 void optimizeInlineReturns(IRUnit&);
 void optimizeRefcounts(IRUnit&);
+void selectiveDecRefNZ(IRUnit&);
 void optimizePredictions(IRUnit&);
 void gvn(IRUnit&);
 void optimizeLoads(IRUnit&);

@@ -232,6 +232,9 @@ void optimize(IRUnit& unit, TransKind kind) {
   }
   doPass(unit, fixBlockHints, DCE::None);
 
+  if (kind == TransKind::Optimize && !RuntimeOption::AllowObjectDestructors()) {
+    doPass(unit, selectiveDecRefNZ, DCE::None);
+  }
   printUnit(6, unit, " after optimize ");
 }
 

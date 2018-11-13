@@ -528,6 +528,7 @@ them when we shouldn't.
 #include "hphp/runtime/vm/jit/analysis.h"
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/containers.h"
+#include "hphp/runtime/vm/jit/decref-profile.h"
 #include "hphp/runtime/vm/jit/memory-effects.h"
 #include "hphp/runtime/vm/jit/alias-analysis.h"
 #include "hphp/runtime/vm/jit/mutation.h"
@@ -3421,6 +3422,46 @@ void optimizeRefcounts(IRUnit& unit) {
   // specialize them.
   insertNegativeAssertTypes(unit, env.rpoBlocks);
   refineTmps(unit, env.rpoBlocks, env.idoms);
+}
+
+/*
+ * This optimization selectively transforms DecRefs into DecRefNZs, which is
+ * valid when destructors are disallowed.  This tranformation avoids checking if
+ * the count got to zero and immediately releasing the object. This will use
+ * more memory, but it is still OK to do because the tracing GC can later
+ * collect the garbage produced.  This transformation can also trigger more
+ * copy-on-write for arrays and strings for which there are transitive
+ * references inside the object that is not immediately released. To limit these
+ * overheads, this optimization is selectively performed based on profiling and
+ * it's only applied when the number of times that the DecRef reached 0 is below
+ * a certain threshold.  When the type is known to be a string or uncounted, we
+ * can be more aggressive because they don't hold internal references to other
+ * objects, so a separate threshold is used in that case.
+ */
+void selectiveDecRefNZ(IRUnit& unit) {
+  auto blocks = poSortCfg(unit);
+
+  // Union of types that cannot trigger Copy-On-Write for inner elements in case
+  // they're not released.  We can be more aggressive when optimizing them here.
+  auto const cowFree = TStr | TUncounted;
+
+  for (auto& block : blocks) {
+    for (auto& inst : *block) {
+      if (inst.is(DecRef)) {
+        const auto profile = decRefProfile(unit.context(), &inst);
+        if (profile.optimizing()) {
+          const auto data = profile.data();
+          const auto destroyPct = data.percent(data.destroyed());
+          double pctLimit = inst.src(0)->type() <= cowFree
+            ? RuntimeOption::EvalJitPGODecRefNZReleasePercent
+            : RuntimeOption::EvalJitPGODecRefNZReleasePercentCOW;
+          if (destroyPct < pctLimit) {
+            inst.setOpcode(DecRefNZ);
+          }
+        }
+      }
+    }
+  }
 }
 
 }}

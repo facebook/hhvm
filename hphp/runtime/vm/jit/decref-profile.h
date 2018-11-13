@@ -20,6 +20,7 @@
 #include <folly/Format.h>
 #include <folly/Optional.h>
 
+#include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 
 namespace HPHP { namespace jit {
@@ -115,6 +116,18 @@ struct DecRefProfile {
    */
   uint16_t decremented;
 };
+
+inline const StringData* decRefProfileKey(const IRInstruction* inst) {
+  return makeStaticString(folly::to<std::string>(
+                            "DecRefProfile-",
+                            inst->extra<DecRefData>()->locId));
+}
+
+inline TargetProfile<DecRefProfile> decRefProfile(const TransContext&  context,
+                                                  const IRInstruction* inst) {
+  auto const profileKey = decRefProfileKey(inst);
+  return TargetProfile<DecRefProfile>(context, inst->marker(), profileKey);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -252,19 +252,6 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
 
 namespace {
 
-const StringData* decRefProfileKey(const IRInstruction* inst) {
-  return makeStaticString(folly::to<std::string>(
-                              "DecRefProfile-",
-                              inst->extra<DecRefData>()->locId));
-}
-
-TargetProfile<DecRefProfile> decRefProfile(const IRLS& env,
-                                           const IRInstruction* inst) {
-  auto const profileKey = decRefProfileKey(inst);
-  return TargetProfile<DecRefProfile>(env.unit.context(), inst->marker(),
-                                      profileKey);
-}
-
 /*
  * For Optimize translations, this function returns the percentage of the time
  * that the DecRef resulted in destruction during profiling.  For all other
@@ -650,7 +637,7 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
 
   emitDecRefTypeStat(v, env, inst);
 
-  const auto profile = decRefProfile(env, inst);
+  const auto profile = decRefProfile(env.unit.context(), inst);
 
   if (Trace::moduleEnabled(Trace::irlower, 3) && profile.optimizing()) {
     FTRACE(3, "irlower-refcount: DecRefProfile<{}, {}>: {}\n",
@@ -754,7 +741,7 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
   auto const loc = srcLoc(env, inst, 0);
   auto& v = vmain(env);
 
-  auto const profile = decRefProfile(env, inst);
+  auto const profile = decRefProfile(env.unit.context(), inst);
 
   auto const incr = incrAmount(v, profile);
 

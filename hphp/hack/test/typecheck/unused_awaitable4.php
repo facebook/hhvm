@@ -14,6 +14,7 @@ async function a(): Awaitable<int> {
 }
 
 function f(): void {
+  /* HH_IGNORE_ERROR[4273] */
   if (a()) {
   }
 }

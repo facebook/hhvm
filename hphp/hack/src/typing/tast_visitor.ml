@@ -33,6 +33,35 @@ class virtual iter = object (self)
   method! on_Unsafe_block _ _ = ()
 end
 
+class virtual ['state] iter_with_state = object (self)
+  inherit [_] Tast.iter as super
+
+  (* Entry point *)
+  method go (state: 'state) program =
+    self#on_list (fun () -> self#go_def state) () program
+
+  method go_def state x = self#on_def (Env.def_env x, state) x
+
+  method! on_fun_ (env, state) x =
+    super#on_fun_ (Env.restore_fun_env env x, state) x
+  method! on_method_ (env, state) x =
+    super#on_method_ (Env.restore_method_env env x, state) x
+
+  method! on_constructor (env, state) =
+    super#on_constructor (Env.set_inside_constructor env, state)
+  method! on_static_var (env, state) =
+    super#on_static_var (Env.set_static env, state)
+  method! on_static_method (env, state) =
+    super#on_static_method (Env.set_static env, state)
+
+  method! on_Efun (env, state) x =
+    super#on_Efun (Env.set_ppl_lambda env, state) x
+
+  (* Ignore unsafe code. *)
+  method! on_Unsafe_expr _ _ = ()
+  method! on_Unsafe_block _ _ = ()
+end
+
 (** Like {!iter}, but visits unsafe code. Should not be used in the typechecker
     or typed linters. Unsafe code should not be visible to the typechecker. *)
 class virtual iter_unsafe = object (self)

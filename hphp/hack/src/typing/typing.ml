@@ -686,18 +686,10 @@ and stmt env = function
   | Noop ->
       env, T.Noop
   | Expr e ->
-      let env, te, ty = expr ~is_expr_statement:true env e in
+      let env, te, _ = expr ~is_expr_statement:true env e in
       let env = if TFTerm.expression_exits env e
         then LEnv.move_and_merge_next_in_cont env C.Exit
         else env in
-      (* NB: this check does belong here and not in expr, even though it only
-       * applies to expressions -- we actually want to perform the check on
-       * statements that are expressions, e.g., "foo();" we want to check, but
-       * "return foo();" we do not even though the expression "foo()" is a
-       * subexpression of the statement "return foo();". *)
-       (match snd e with
-         | Nast.Binop (Ast.Eq _, _, _) -> ()
-         | _ -> Async.enforce_not_awaitable env (fst e) ty);
       env, T.Expr te
   | If (e, b1, b2)  ->
       let env, te, _ = expr env e in
@@ -854,7 +846,6 @@ and stmt env = function
     env, T.For(te1, te2, te3, tb)
   | Switch ((pos, _) as e, cl) ->
       let env, te, ty = expr env e in
-      Async.enforce_not_awaitable env (fst e) ty;
       (* NB: A 'continue' inside a 'switch' block is equivalent to a 'break'.
        * See the note in
        * http://php.net/manual/en/control-structures.continue.php *)
@@ -2303,7 +2294,6 @@ and expr_
   | Cast (hint, e) ->
       let env, te, ty2 = expr env e in
       let env = save_and_merge_next_in_catch env in
-      Async.enforce_not_awaitable env (fst e) ty2;
       if (TypecheckerOptions.experimental_feature_enabled
         (Env.get_tcopt env)
         TypecheckerOptions.experimental_forbid_nullable_cast)
@@ -5372,9 +5362,6 @@ and unop ~is_func_arg ~forbid_uref p env uop te ty =
     env, T.make_typed_expr p result_ty (T.Unop(uop, te)), result_ty in
   let is_any = TUtils.is_any env in
   match uop with
-  (* TODO: is a check like "Async.enforce_nullable_or_not_awaitable env p ty;"
-   * necessary or desired anywhere here? And if so, don't binops need it as well?
-   *)
   | Ast.Unot ->
     if is_any ty
     then make_result env te ty
@@ -5664,7 +5651,6 @@ and condition_isset env = function
  *)
 and condition ?lhs_of_null_coalesce env tparamet
     ((p, ty as pty), e as te: Tast.expr) =
-  Async.enforce_nullable_or_not_awaitable env p ty;
   let condition = condition ?lhs_of_null_coalesce in
   match e with
   | T.True
@@ -5741,10 +5727,6 @@ and condition ?lhs_of_null_coalesce env tparamet
        * position data for the latter. *)
       let env, _te, obj_ty = static_class_id ~check_constraints:false p env
         (T.to_nast_class_id_ cid) in
-
-      if SubType.is_sub_type env obj_ty (
-        Reason.none, Tclass ((Pos.none, SN.Classes.cAwaitable), [Reason.none, Typing_utils.tany env])
-      ) then () else Async.enforce_nullable_or_not_awaitable env (fst ivar) x_ty;
 
       let safe_instanceof_enabled =
         TypecheckerOptions.experimental_feature_enabled

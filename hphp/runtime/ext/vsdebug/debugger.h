@@ -103,6 +103,10 @@ struct DebuggerRequestInfo {
   std::unordered_map<void*, unsigned int> m_objectIds;
   std::unordered_map<unsigned int, ServerObject*> m_serverObjects;
 
+  // Compilation units produced by debugger evaluations for this
+  // request - to be cleaned up when the request exits.
+  std::vector<std::unique_ptr<HPHP::Unit>> m_evaluationUnits;
+
   struct {
     std::string path {""};
     int line {0};

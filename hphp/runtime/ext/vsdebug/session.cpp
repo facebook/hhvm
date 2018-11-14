@@ -198,6 +198,15 @@ void DebuggerSession::runDummy() {
       DebuggerHook::detach();
     }
 
+    // Free any server objects allocated for the dummy.
+    auto& objs = m_dummyRequestInfo->m_serverObjects;
+    for (auto it = objs.begin(); it != objs.end();) {
+      if (it->second != nullptr) {
+        delete it->second;
+      }
+      it = objs.erase(it);
+    }
+
     std::atomic_thread_fence(std::memory_order_release);
 
     hphp_context_exit();

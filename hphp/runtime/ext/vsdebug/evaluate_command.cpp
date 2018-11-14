@@ -147,6 +147,8 @@ bool EvaluateCommand::executeImpl(
     throw DebuggerCommandException("Error compiling expression.");
   }
 
+  Unit* rawUnit = unit.get();
+  ri->m_evaluationUnits.push_back(std::move(unit));
   FrameObject* frameObj = getFrameObject(session);
   int frameDepth = frameObj == nullptr ? 0 : frameObj->m_frameDepth;
 
@@ -179,7 +181,7 @@ bool EvaluateCommand::executeImpl(
   bool evalSilent = evalContext == "watch" || evalContext == "hover";
   m_debugger->executeWithoutLock(
     [&]() {
-        result = evaluate(m_debugger, ri, unit.get(), frameDepth, evalSilent);
+        result = evaluate(m_debugger, ri, rawUnit, frameDepth, evalSilent);
     });
 
   if (previousPauseCount != ri->m_totalPauseCount &&

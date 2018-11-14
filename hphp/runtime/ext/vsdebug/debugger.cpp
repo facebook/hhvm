@@ -329,9 +329,6 @@ void Debugger::cleanupRequestInfo(RequestInfo* ti, DebuggerRequestInfo* ri) {
     delete ri->m_breakpointInfo;
   }
 
-  ri->m_scopeIds.clear();
-  ri->m_objectIds.clear();
-
   assertx(ri->m_serverObjects.size() == 0);
   delete ri;
 }
@@ -859,7 +856,6 @@ void Debugger::requestShutdown() {
     }
 
     if (requestInfo != nullptr) {
-      cleanupServerObjectsForRequest(requestInfo);
       cleanupRequestInfo(threadInfo, requestInfo);
     }
   };
@@ -886,6 +882,9 @@ void Debugger::requestShutdown() {
 
     g_context->removeStdoutHook(getStdoutHook());
     Logger::SetThreadHook(nullptr);
+
+    // Cleanup any server objects for this request before dropping the lock.
+    cleanupServerObjectsForRequest(requestInfo);
   }
 }
 

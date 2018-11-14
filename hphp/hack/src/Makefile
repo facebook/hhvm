@@ -6,6 +6,8 @@ ROOT=$(shell pwd)
 #                                    Rules                                     #
 ################################################################################
 
+.NOTPARALLEL:
+
 all: build-hack copy-hack-files
 
 clean:

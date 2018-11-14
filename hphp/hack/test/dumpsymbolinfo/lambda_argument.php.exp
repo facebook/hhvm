@@ -30,7 +30,7 @@
     },
     {
       "pos":{"filename":"lambda_argument.php","line":9,"char_start":5,"char_end":6},
-      "type":"vec<_>",
+      "type":"vec<[unresolved]>",
       "ident":0
     },
     {
@@ -40,12 +40,12 @@
     },
     {
       "pos":{"filename":"lambda_argument.php","line":9,"char_start":21,"char_end":22},
-      "type":"_",
+      "type":"[unresolved]",
       "ident":-336303992
     },
     {
       "pos":{"filename":"lambda_argument.php","line":9,"char_start":28,"char_end":29},
-      "type":"_",
+      "type":"[unresolved]",
       "ident":-336303992
     },
     {

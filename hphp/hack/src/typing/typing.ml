@@ -368,21 +368,18 @@ let make_param_local_ty env param =
  * it is a subtype of the parameter type. Set the type of the parameter in
  * the locals environment *)
 let rec bind_param env (ty1, param) =
-  let env, param_te, ty2 =
+  let env, param_te =
     match param.param_expr with
     | None ->
-        (* XXX: We don't want to replace this Tany with Tdynamic, since it
-        represents the lack of a default parameter, which is valid
-        We really want a bottom type here rather than Tany, but this is fine
-        for now *)
-        env, None, (Reason.none, Tany)
+        Typing_suggest.save_param (param.param_name) env ty1 (Reason.none, Tany);
+        env, None
     | Some e ->
-        let env, te, ty = expr ~expected:(param.param_pos, Reason.URparam, ty1) env e in
+        let env, te, ty2 = expr ~expected:(param.param_pos, Reason.URparam, ty1) env e in
         Typing_sequencing.sequence_check_expr e;
-        env, Some te, ty
+        Typing_suggest.save_param (param.param_name) env ty1 ty2;
+        let env = Type.sub_type param.param_pos Reason.URhint env ty2 ty1 in
+        env, Some te
   in
-  Typing_suggest.save_param (param.param_name) env ty1 ty2;
-  let env = Type.sub_type param.param_pos Reason.URhint env ty2 ty1 in
   let tparam = {
     T.param_annotation = T.make_expr_annotation param.param_pos ty1;
     T.param_hint = param.param_hint;

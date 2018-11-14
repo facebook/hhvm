@@ -23,7 +23,11 @@
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/stack-trace.h"
 #include "hphp/util/string-vsnprintf.h"
+#include "hphp/util/struct-log.h"
+
+#include <folly/logging/RateLimiter.h>
 
 #ifdef ERROR
 # undef ERROR
@@ -156,8 +160,33 @@ void raise_disallowed_dynamic_call(const Func* f) {
   );
 }
 
+namespace {
+
+static folly::Optional<folly::logging::IntervalRateLimiter> s_ratelim;
+
+void log_suppressed_intish_cast() {
+  if (RuntimeOption::EvalLogSuppressedIntishCastRate == 0) return;
+  if (!s_ratelim) {
+    s_ratelim.emplace(RuntimeOption::EvalLogSuppressedIntishCastRate,
+                      std::chrono::minutes(1));
+  }
+  if (!s_ratelim->check()) return;
+
+  StackTrace trace(StackTrace::Force{});
+  StructuredLogEntry entry;
+  entry.setStr("type", "intish_cast");
+  entry.setStackTrace("stack", trace);
+  StructuredLog::log("hhvm_native_hac_notices", entry);
+}
+
+}
+
+
 void raise_intish_index_cast() {
-  if (UNLIKELY(RID().getSuppressHACIntishCastNotices())) return;
+  if (UNLIKELY(RID().getSuppressHACIntishCastNotices())) {
+    log_suppressed_intish_cast();
+    return;
+  }
   raise_notice("Hack Array Compat: Intish index cast");
 }
 

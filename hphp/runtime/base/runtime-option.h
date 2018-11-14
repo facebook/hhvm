@@ -949,6 +949,7 @@ struct RuntimeOption {
   /* Raises notice when a Hack Collection is coerced to a PHP array */  \
   F(bool, HackArrCompatCollectionCoercionNotices, false)                \
   F(bool, HackArrDVArrs, false)                                         \
+  F(uint32_t, LogSuppressedIntishCastRate, 0)                           \
   /* Warn if is expression are used with type aliases that cannot be    |
    * resolved */                                                        \
   F(bool, IsExprEnableUnresolvedWarning, false)                         \

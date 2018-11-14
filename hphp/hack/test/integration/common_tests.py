@@ -771,7 +771,9 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
         # sent above doesn't preserve ordering - maybe because they're
         # in separate processes? Give it some time.
         time.sleep(1)
-        client_error = self.check_cmd(['No errors!'], assert_loaded_mini_state=False)
+        client_error = self.check_cmd(
+            expected_output=None,
+            assert_loaded_mini_state=False)
         self.assertIn('Last server killed by signal', client_error)
 
     def test_duplicate_parent(self):

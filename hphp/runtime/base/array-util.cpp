@@ -404,13 +404,14 @@ Variant ArrayUtil::RandomKeys(const Array& input, int num_req /* = 1 */) {
 }
 
 Variant ArrayUtil::StringUnique(const Array& input) {
-  Array seenValues;
+  Array seenValues = Array::CreateKeyset();
   Array ret = Array::Create();
   for (ArrayIter iter(input); iter; ++iter) {
     auto const str = tvCastToString(iter.secondVal());
     if (!seenValues.exists(str)) {
-      seenValues.set(str, 1);
-      ret.set(iter.first(), iter.secondVal());
+      seenValues.append(str);
+      ret.set(ret.convertKey<IntishCast::CastSilently>(iter.first()),
+                                                       iter.secondVal());
     }
   }
   return ret;
@@ -424,7 +425,8 @@ Variant ArrayUtil::NumericUnique(const Array& input) {
     std::pair<std::set<double>::iterator, bool> res =
       seenValues.insert(value);
     if (res.second) { // it was inserted
-      ret.set(iter.first(), iter.secondVal());
+      ret.set(ret.convertKey<IntishCast::CastSilently>(iter.first()),
+                                                       iter.secondVal());
     }
   }
   return ret;

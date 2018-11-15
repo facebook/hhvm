@@ -359,9 +359,6 @@ module Full = struct
     | Toption x -> Concat [text "?"; k x]
     | Tprim x -> text @@ prim x
     | Tvar n ->
-      if TypecheckerOptions.new_inference (Env.get_tcopt env)
-      then text ("#" ^ (string_of_int n))
-      else
       let _, n' = Env.get_var env n in
       let prepend =
         if ISet.mem n' st then text "[rec]"
@@ -371,8 +368,12 @@ module Full = struct
         else Nothing
       in
       let _, ety = Env.expand_type env (Reason.Rnone, x) in
-      let st = ISet.add n' st in
-      Concat [prepend; ty to_doc st env ety]
+      begin match ety with
+      | (_, Tvar _) -> prepend
+      | _ ->
+        let st = ISet.add n' st in
+        Concat [prepend; ty to_doc st env ety]
+      end
     | Tfun ft -> Concat [
         if ft.ft_abstract then text "abs" ^^ Space else Nothing;
         text "(";

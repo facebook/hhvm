@@ -1,0 +1,4 @@
+File "fst_then_invoke_bad2.php", line 22, characters 27-27:
+This is an object of type D (Typing[4110])
+File "fst_then_invoke_bad2.php", line 22, characters 14-14:
+It is incompatible with an object of type C

@@ -101,3 +101,8 @@ val set_tyvar_variance :
   Env.env ->
   locl ty ->
   Env.env
+
+val solve_tyvars :
+  tyvars:ISet.t ->
+  Env.env ->
+  Env.env

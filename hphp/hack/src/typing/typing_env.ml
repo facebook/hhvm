@@ -333,6 +333,9 @@ let add_tvenv_lower_bound_ tvenv var ty =
 let env_with_tvenv env tvenv =
   { env with tvenv = tvenv }
 
+let remove_tyvar env var =
+  env_with_tvenv env (IMap.remove var env.tvenv)
+
  (* Add a single new upper bound [ty] to type variable [var] in [env.tvenv].
   * If the optional [intersect] operation is supplied, then use this to avoid
   * adding redundant bounds by merging the type with existing bounds. This makes
@@ -392,37 +395,16 @@ let set_tyvar_appears_contravariantly env var =
   let tvinfo = get_tvar_info env.tvenv var in
   env_with_tvenv env (IMap.add var { tvinfo with appears_contravariantly = true } env.tvenv)
 
-let rec props_to_env env remain props =
-  match props with
-  | [] ->
-    env, List.rev remain
-  | TL.IsSubtype ((_, Tvar var), ty) :: props ->
-    props_to_env (add_tyvar_upper_bound env var ty) remain props
-  | TL.IsSubtype (ty, (_, Tvar var)) :: props ->
-    props_to_env (add_tyvar_lower_bound env var ty) remain props
-  | TL.Conj props' :: props ->
-    props_to_env env remain (props' @ props)
-  | prop :: props ->
-    props_to_env env (prop::remain) props
+let get_tyvar_appears_covariantly env var =
+  let tvinfo = get_tvar_info env.tvenv var in
+  tvinfo.appears_covariantly
 
-(* Move any top-level conjuncts of the form Tvar v <: t or t <: Tvar v to
- * the type variable environment. To do: use intersection and union to
- * simplify bounds.
- *)
-let prop_to_env env prop =
-  match prop with
-  | TL.Conj props ->
-    let env, props' = props_to_env env [] props in
-    env, TL.conj_list props'
-  | TL.IsSubtype _ ->
-    let env, props' = props_to_env env [] [prop] in
-    env, TL.conj_list props'
-  | _ ->
-    env, prop
+let get_tyvar_appears_contravariantly env var =
+  let tvinfo = get_tvar_info env.tvenv var in
+  tvinfo.appears_contravariantly
 
 (* Conjoin a subtype proposition onto the subtype_prop in the environment *)
 let add_subtype_prop env prop =
-  let env, prop = prop_to_env env prop in
   {env with subtype_prop = TL.conj env.subtype_prop prop}
 
 (* Generate a fresh generic parameter with a specified prefix but distinct

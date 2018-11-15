@@ -5,20 +5,21 @@ class B { }
 class C extends B {
   public function foo():void { }
 }
+class D extends B {
+  public function foo():void { }
+}
 class Inv<Tinv> {
   public function __construct(private Tinv $item) { }
 }
 
-function id<T>(T $x): T {
+function fst<T>(T $x, T $y): T {
   return $x;
 }
 
-function bar(C $c): Inv<B> {
-  // So: T=v, have C <: v and $x:v
-  // Also, v appears only covariantly in the expression
-  $x = id($c);
-  // Here, we find a type variable and solve it, because covariant
-  // So v:=C
+function bar(C $c, D $d): Inv<B> {
+  // Here, let $x:v and C<:v and D<:v
+  $x = fst($c, $d);
+  // Here, we find v:=C|D
   $x->foo();
   // Here, we must instantiate Tinv=B
   return new Inv($x);

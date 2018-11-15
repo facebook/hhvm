@@ -5040,6 +5040,8 @@ and call ~tyvars ~expected ?(is_expr_statement=false) ?method_call_info pos env 
    * When this is the case, a call could violate one of the constraints
    * in a branch. *)
   let env = Env.check_todo env in
+  (* Interestingly, this is where we solve type variables based on their variance *)
+  let env = SubType.solve_tyvars ~tyvars env in
   env, tel, tuel, ty
 
 and call_ ~tyvars ~expected ~method_call_info ~is_expr_statement pos env fty el uel =

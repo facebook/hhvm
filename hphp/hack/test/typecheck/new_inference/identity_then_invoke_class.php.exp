@@ -1,6 +1,1 @@
-File "identity_then_invoke_class.php", line 20, characters 3-4:
-Was expecting a class but class is unknown (Typing[4297])
-File "identity_then_invoke_class.php", line 18, characters 8-9:
-It is unknown because a type could not be determined here
-File "identity_then_invoke_class.php", line 12, characters 23-23:
-  via this generic T
+No errors

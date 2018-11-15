@@ -21,7 +21,7 @@
 # and the two above construct the parameter inline
 # so needed the extension to the fpassl special-case
 # semdiff pattern
-    FCall 2 0 1 - "" ""
+    FCall <> 2 1 - "" ""
     UnboxR
   }
   UnsetL _6
@@ -30,7 +30,7 @@
   .try_fault F5 {
     FPushFuncU 1 "HH\\Lib\\Dict\\gen" "gen"
     CGetL _6
-    FCall 1 0 1 - "" ""
+    FCall <> 1 1 - "" ""
     UnboxR
   }
   UnsetL _6
@@ -88,7 +88,7 @@ F6:
     CGetL $k
     CGetL $v
     FThrowOnRefMismatch "00"
-    FCall 2 0 1 - "" ""
+    FCall <> 2 1 - "" ""
     UnboxR
     RetC
   }

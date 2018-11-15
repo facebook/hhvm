@@ -22,12 +22,12 @@ PART1
 ;
   if ($filter) {
     echo "           FPushCtorD 0 \"HH\\\\Map\"\n";
-    echo "           FCall 0 0 1 - \"\" \"\"\n";
+    echo "           FCall <> 0 1 - \"\" \"\"\n";
     echo "           PopR\n";
   } else if ($immutable) {
     echo "           This\n";
     echo "           FPushObjMethodD 0 \"toMap\" NullThrows\n";
-    echo "           FCall 0 0 1 - \"\" \"\"\n";
+    echo "           FCall <> 0 1 - \"\" \"\"\n";
     echo "           UnboxRNop\n";
   } else {
     echo "           This\n";
@@ -47,11 +47,11 @@ PART2
     echo "    loop:   FPushCufIter 2 0\n";
     echo "            CGetL \$k\n";
     echo "            CGetL \$v\n";
-    echo "            FCall 2 0 1 - \"\" \"\"\n";
+    echo "            FCall <> 2 1 - \"\" \"\"\n";
   } else {
     echo "    loop:   FPushCufIter 1 0\n";
     echo "            CGetL \$v\n";
-    echo "            FCall 1 0 1 - \"\" \"\"\n";
+    echo "            FCall <> 1 1 - \"\" \"\"\n";
   }
 
   if ($filter) {
@@ -91,7 +91,7 @@ PART2
 PART3;
   if ($immutable) {
     echo "           FPushObjMethodD 0 \"toImmMap\" NullThrows\n";
-    echo "           FCall 0 0 1 - \"\" \"\"\n";
+    echo "           FCall <> 0 1 - \"\" \"\"\n";
     echo "           UnboxRNop\n";
   }
 
@@ -100,7 +100,7 @@ PART3;
 
 bad_func: FPushCtorD 1 "InvalidArgumentException"
           String "Parameter must be a valid callback"
-          FCall 1 0 1 - "" ""
+          FCall <> 1 1 - "" ""
           PopR
           Throw
 

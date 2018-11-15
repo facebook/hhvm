@@ -8,6 +8,7 @@
 *)
 
 open Core_kernel
+open Hhbc_ast
 open Instruction_sequence
 
 module H = Hhbc_ast
@@ -35,8 +36,9 @@ let emit_body_instrs_inout params call_instrs =
   let has_variadic = is_last_param_variadic param_count params in
   let param_count = if has_variadic then param_count - 1 else param_count in
   let num_inout = List.length inout_params in
+  let flags = { default_fcall_flags with has_unpack = has_variadic } in
   let fcall_args = make_fcall_args
-    ~has_unpack:has_variadic ~num_rets:(num_inout + 1) param_count in
+    ~flags ~num_rets:(num_inout + 1) param_count in
   gather [
     gather @@ List.init num_inout ~f:(fun _ -> instr_nulluninit);
     call_instrs;
@@ -63,7 +65,8 @@ let emit_body_instrs_ref params call_instrs =
   let param_get_instrs = List.rev param_get_instrs in
   let has_variadic = is_last_param_variadic param_count params in
   let param_count = if has_variadic then param_count - 1 else param_count in
-  let fcall_args = make_fcall_args ~has_unpack:has_variadic param_count in
+  let flags = { default_fcall_flags with has_unpack = has_variadic } in
+  let fcall_args = make_fcall_args ~flags param_count in
   gather [
     call_instrs;
     param_instrs;

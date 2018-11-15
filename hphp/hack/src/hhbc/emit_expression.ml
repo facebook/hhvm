@@ -3094,17 +3094,16 @@ and emit_args_and_call env call_pos args uargs async_eager_label =
   let rec aux i rem_args inout_setters =
     match rem_args with
     | [] ->
-      let use_unpack = uargs <> [] in
-      let num_inout = List.length inout_setters in
+      let num_rets = (List.length inout_setters) + 1 in
       let nargs = List.length args in
       let instr_enforce_hint =
         if throw_on_mismatch && args <> []
         then instr_fthrow_on_ref_mismatch (List.map args expr_starts_with_ref)
         else empty
       in
+      let flags = { default_fcall_flags with has_unpack = uargs <> [] } in
       let fcall_args = make_fcall_args
-        ~has_unpack:use_unpack ~num_rets:(num_inout + 1)
-        ?async_eager_label nargs in
+        ~flags ~num_rets ?async_eager_label nargs in
       gather [
         (* emit call*)
         emit_pos call_pos;

@@ -53,7 +53,7 @@ start:          IsTypeL $arr ArrLike
                 CGetL $v
                 Jmp call_val
     by_ref_val: VGetL $v
-    call_val:   FCall 1 0 1 - "" ""
+    call_val:   FCall <> 1 1 - "" ""
                 UnboxR
                 JmpZ next_val
                 BaseL $res Define
@@ -74,7 +74,7 @@ start:          IsTypeL $arr ArrLike
                 Jmp call_both
     by_ref_k_both:
                 VGetL $k
-    call_both:  FCall 2 0 1 - "" ""
+    call_both:  FCall <> 2 1 - "" ""
                 UnboxR
                 JmpZ next_both
                 BaseL $res Define
@@ -88,7 +88,7 @@ start:          IsTypeL $arr ArrLike
                 CGetL $k
                 Jmp call_key
     by_ref_key: VGetL $k
-    call_key:   FCall 1 0 1 - "" ""
+    call_key:   FCall <> 1 1 - "" ""
                 UnboxR
                 JmpZ next_key
                 BaseL $res Define
@@ -156,7 +156,7 @@ start_kt:         IssetL $func
                   CGetL $v
                   Jmp call_val_kt
     by_ref_val_kt:VGetL $v
-    call_val_kt:  FCall 1 0 1 - "" ""
+    call_val_kt:  FCall <> 1 1 - "" ""
                   UnboxR
                   JmpZ next_val_kt
                   CGetL $v
@@ -180,7 +180,7 @@ start_kt:         IssetL $func
                   Jmp call_both_kt
     by_ref_k_both_kt:
                   VGetL $k
-    call_both_kt: FCall 2 0 1 - "" ""
+    call_both_kt: FCall <> 2 1 - "" ""
                   UnboxR
                   JmpZ next_both_kt
                   CGetL $v
@@ -196,7 +196,7 @@ start_kt:         IssetL $func
                   CGetL $k
                   Jmp call_key_kt
     by_ref_key_kt:VGetL $k
-    call_key_kt:  FCall 1 0 1 - "" ""
+    call_key_kt:  FCall <> 1 1 - "" ""
                   UnboxR
                   JmpZ next_key_kt
                   CGetL $v

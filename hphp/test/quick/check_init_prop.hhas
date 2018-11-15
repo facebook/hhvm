@@ -2,7 +2,7 @@
 .main {
   DefCls 0
   FPushCtorD 0 "C"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
 
   CheckProp "foo"
   InitProp "bar" NonStatic

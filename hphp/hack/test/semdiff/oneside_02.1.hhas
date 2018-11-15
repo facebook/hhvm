@@ -5,7 +5,7 @@
 
 .main {
   FPushFuncD 0 "f"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   PopR
   Int 1
   RetC
@@ -15,7 +15,7 @@
   .declvars $e;
   .try {
     FPushCtorD 0 "Exception"
-    FCall 0 0 1 - "" ""
+    FCall <> 0 1 - "" ""
     PopR
     Throw
     Jmp L0

@@ -49,28 +49,53 @@ struct LocalRange {
   uint32_t count;
 };
 
+
 // Arguments to FCall opcodes.
-// hhas format: <numArgs> <hasUnpack> <numRets> <asyncEagerOffset>
-// hhbc format: <uint8:flags> ?<iva:numArgs> ?<iva:numRets> ?<ba:asyncEagerOffset>
-//   numArgs          = flags >> 3 ? flags >> 3 - 1 : decode_iva()
-//   hasUnpack        = flags & 1
-//   numRets          = flags & 2 ? decode_iva() : 1
-//   asyncEagerOffset = flags & 4 ? decode_ba() : kInvalidOffset
+// hhas format: <flags> <numArgs> <numRets> <asyncEagerOffset>
+// hhbc format: <uint8:flags> ?<iva:numArgs> ?<iva:numRets>
+//              ?<ba:asyncEagerOffset>
+//   flags            = flags except HasInOut / HasAsyncEagerOffset
+//   numArgs          = flags >> kFirstNumArgsBit
+//                        ? flags >> kFirstNumArgsBit - 1 : decode_iva()
+//   numRets          = flags & HasInOut ? decode_iva() : 1
+//   asyncEagerOffset = flags & HasAEO ? decode_ba() : kInvalidOffset
 struct FCallArgsBase {
-  explicit FCallArgsBase(uint32_t numArgs, bool hasUnpack, uint32_t numRets)
-    : numArgs(numArgs), numRets(numRets), hasUnpack(hasUnpack) {}
+  enum Flags : uint8_t {
+    None                     = 0,
+    // Unpack remaining arguments from a varray passed by ...$args.
+    HasUnpack                = (1 << 0),
+    // HHBC-only: is the number of returns provided? false => 1
+    HasInOut                 = (1 << 1),
+    // HHBC-only: is the async eager offset provided? false => kInvalidOffset
+    HasAsyncEagerOffset      = (1 << 2),
+    // HHBC-only: the remaining space is used for number of arguments
+    NumArgsStart             = (1 << 3),
+  };
+
+  // Flags that are valid on FCallArgsBase::flags struct (i.e. non-HHBC-only).
+  static constexpr uint8_t kInternalFlags = HasUnpack;
+  // The first (lowest) bit of numArgs.
+  static constexpr uint8_t kFirstNumArgsBit = 3;
+
+  explicit FCallArgsBase(Flags flags, uint32_t numArgs, uint32_t numRets)
+    : numArgs(numArgs), numRets(numRets), flags(flags) {
+    assertx(!(flags & ~kInternalFlags));
+  }
+  bool hasUnpack() const { return flags & Flags::HasUnpack; }
   uint32_t numArgs;
   uint32_t numRets;
-  bool hasUnpack;
+  Flags flags;
 };
+
 struct FCallArgs : FCallArgsBase {
-  explicit FCallArgs(uint32_t numArgs, bool hasUnpack = false,
-                     uint32_t numRets = 1,
-                     Offset asyncEagerOffset = kInvalidOffset)
-    : FCallArgsBase(numArgs, hasUnpack, numRets)
+  explicit FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
+                     Offset asyncEagerOffset)
+    : FCallArgsBase(flags, numArgs, numRets)
     , asyncEagerOffset(asyncEagerOffset) {}
   Offset asyncEagerOffset;
 };
+
+static_assert(1 << FCallArgs::kFirstNumArgsBit == FCallArgs::NumArgsStart, "");
 
 std::string show(const LocalRange&);
 std::string show(const FCallArgsBase&, std::string asyncEagerLabel);

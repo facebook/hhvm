@@ -852,7 +852,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     auto idx = 0;
     for (int i = 0; i < fca.numRets - 1; ++i) m_tmp_sig[idx++] = UV;
     for (int i = 0; i < fca.numArgs; ++i) m_tmp_sig[idx++] = CVV;
-    if (fca.hasUnpack) m_tmp_sig[idx++] = CV;
+    if (fca.hasUnpack()) m_tmp_sig[idx++] = CV;
     assertx(idx == instrNumPops(pc));
     return m_tmp_sig;
   }
@@ -1033,7 +1033,7 @@ bool FuncChecker::checkFpi(State* cur, PC pc) {
   if (isFCallStar(op)) {
     --cur->fpilen;
     auto const fca = getImm(pc, 0).u_FCA;
-    int call_params = fca.numArgs + (fca.hasUnpack ? 1 : 0);
+    int call_params = fca.numArgs + (fca.hasUnpack() ? 1 : 0);
     int push_params = getImmIva(at(fpi.fpush));
     if (call_params != push_params) {
       error("FCall* param_count (%d) doesn't match FPush* (%d)\n",

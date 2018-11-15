@@ -165,7 +165,7 @@ bool checkNumArgs(SrcKey callSK, const Func* callee, Annotations& annotations) {
     return refuse("callee called with too many arguments");
   }
 
-  if (fca.hasUnpack) {
+  if (fca.hasUnpack()) {
     return refuse("callee called with variadic arguments");
   }
 

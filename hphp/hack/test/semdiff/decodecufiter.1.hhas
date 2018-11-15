@@ -23,7 +23,7 @@ L3:
       FPushCufIter 1 0
       CGetL $v
       FThrowOnRefMismatch "0"
-      FCall 1 0 1 - "" ""
+      FCall <> 1 1 - "" ""
       UnboxR
       AssertRATL $res Obj=HH\Map
       BaseL $res Define
@@ -47,12 +47,12 @@ L1:
 L0:
   FPushCtorD 1 "InvalidArgumentException"
   String "Parameter must be a valid callback"
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   PopR
   Throw
 DV4:
   FPushFuncD 0 "f"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   UnboxR
   SetL $callback
   PopC

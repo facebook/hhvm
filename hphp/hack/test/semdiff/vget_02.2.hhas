@@ -6,7 +6,7 @@
 
 .main {
   FPushFuncD 0 "f"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   PopR
   Int 1
   RetC
@@ -45,7 +45,7 @@
     CGetL $x
     CGetL $y
     CGetL $z
-    FCall 3 0 1 - "" ""
+    FCall <> 3 1 - "" ""
     PopR
     Int 6
     SetL $z
@@ -55,7 +55,7 @@
 L0:
   FPushFuncD 1 "var_dump"
   CGetL $array
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   PopR
   Null
   RetC

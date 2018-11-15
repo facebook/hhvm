@@ -23,7 +23,7 @@
   PopC
   FPushFuncD 1 "var_dump"
   CGetL $foo
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   PopR
   RetC
 }

@@ -42,9 +42,13 @@ let of_pair (i1, i2) = gather [i1; i2]
 
 let class_ref_rewrite_sentinel = -100
 
-let make_fcall_args ?(has_unpack=false) ?(num_rets=1) ?async_eager_label
-  num_args =
-  num_args, has_unpack, num_rets, async_eager_label
+let default_fcall_flags = {
+  has_unpack = false;
+  unused = false;
+}
+let make_fcall_args ?(flags=default_fcall_flags) ?(num_rets=1)
+  ?async_eager_label num_args =
+  flags, num_args, num_rets, async_eager_label
 
 let instr_lit_const l =
   instr (ILitConst l)
@@ -790,7 +794,7 @@ let get_input_output_count i =
     | FPushObjMethod _ -> (2, 0)
     | FPushCtor _ | FPushCtorD _ | FPushCtorI _ | FPushCtorS _
     | FIsParamByRef _ | FIsParamByRefCufIter _ -> (0, 1)
-    | FCall ((n1, u, n2, _), _, _) -> (n1 + (if u then 1 else 0), n2)
+    | FCall ((f, n1, n2, _), _, _) -> (n1 + (if f.has_unpack then 1 else 0), n2)
     | FCallBuiltin (n, _, _) -> (n, 1)
     end
   | IMisc i ->

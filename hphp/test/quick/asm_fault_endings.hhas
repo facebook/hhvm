@@ -1,7 +1,7 @@
 .main {
   .try {
     FPushFuncD 0 "main"
-    FCall 0 0 1 - "" ""
+    FCall <> 0 1 - "" ""
     UnboxR
     RetC
   } .catch {
@@ -21,7 +21,7 @@
     .try {
       FPushCtorD 1 "Exception"
       String "ex"
-      FCall 1 0 1 - "" ""
+      FCall <> 1 1 - "" ""
       PopR
       Throw
     } .catch {

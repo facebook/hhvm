@@ -4,7 +4,7 @@
   FPushFuncD 2 "add"
   Int 3
   Int 2
-  FCall 2 0 1 - "" ""
+  FCall <> 2 1 - "" ""
   UnboxR
   Silence $z Start
   SetL $z
@@ -28,7 +28,7 @@
   Silence _8 End
   FPushFuncD 1 "var_dump"
   Int 1
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   PopR
   Jmp L1
 L0:
@@ -37,7 +37,7 @@ L0:
   Silence _9 End
   FPushFuncD 1 "var_dump"
   Int 2
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   PopR
 L1:
   Silence _1 End

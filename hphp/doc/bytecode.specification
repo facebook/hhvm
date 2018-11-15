@@ -2303,16 +2303,15 @@ FCall* opcodes
   specified by the FCA (FCall arguments) immediate consisting of the following
   data:
 
-  <num args> <unpack> <num returns> <async eager offset>
+  <flags> <num args> <num returns> <async eager offset>
   [C|V..C|V]  ->  [R | C..C]
 
-  FCall* transfers the top %1 values from the stack to the callee as parameters,
-  if %2 is 1, transfers the elements of the last value on the stack (which must
-  be an array) to the callee as parameters and invokes the function according to
-  the specific opcode. When the callee returns, it will transfer %3 return
-  values onto the caller's evaluation stack using the R flavor if %3 was one
-  (callee must use one of the RetC/RetV opcodes) or C flavor otherwise (callee
-  must return the matching number of values using the RetM opcode).
+  FCall* transfers the top %2 values from the stack to the callee as parameters
+  and invokes the function according to the specific opcode. When the callee
+  returns, it will transfer %3 return values onto the caller's evaluation stack
+  using the R flavor if %3 was one (callee must use one of the RetC/RetV
+  opcodes) or C flavor otherwise (callee must return the matching number of
+  values using the RetM opcode).
 
   If the optional offset %4 was specified and the callee would return a finished
   Awaitable, it may instead return the unpacked result of the Awaitable and
@@ -2325,6 +2324,12 @@ FCall* opcodes
   Note that for the purposes of exception handling inside the caller, the PC
   will point after the FCall rather than %4 so it is not advised to have
   different EH entries for these two locations.
+
+  The %1 contains a list of boolean flags:
+
+  Unpack: if enabled, the elements of the last value on the stack, which must be
+  an array, are transferred to the callee as parameters, following the regular
+  %2 parameters.
 
 FCall <fca> <class name> <func name>  [C|V..C|V]  ->  [R | C..C]
 

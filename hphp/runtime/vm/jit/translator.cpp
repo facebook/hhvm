@@ -551,7 +551,7 @@ int64_t getStackPopped(PC pc) {
   switch (op) {
     case Op::FCall: {
       auto const fca = getImm(pc, 0).u_FCA;
-      return fca.numArgs + (fca.hasUnpack ? 1 : 0) + fca.numRets +
+      return fca.numArgs + (fca.hasUnpack() ? 1 : 0) + fca.numRets +
         kNumActRecCells - 1;
     }
 
@@ -741,7 +741,7 @@ InputInfoVec getInputs(NormalizedInstruction& ni, FPInvOffset bcSPOff) {
   if (flags & FStack) {
     assertx(isFCallStar(ni.op()));
     stackOff -= ni.imm[0].u_FCA.numArgs;  // arguments consumed
-    stackOff -= (ni.imm[0].u_FCA.hasUnpack ? 1 : 0);  // unpack
+    stackOff -= (ni.imm[0].u_FCA.hasUnpack() ? 1 : 0);  // unpack
     stackOff -= kNumActRecCells;  // ActRec is torn down as well
   }
   if (flags & IgnoreInnerType) ni.ignoreInnerType = true;

@@ -30,8 +30,11 @@ type method_id = Hhbc_id.Method.t
 type const_id = Hhbc_id.Const.t
 type prop_id = Hhbc_id.Prop.t
 type num_params = int
-type has_unpack = bool
-type fcall_args = num_params * has_unpack * num_params * (Label.t option)
+type fcall_flags = {
+  has_unpack : bool;
+  unused: bool;
+}
+type fcall_args = fcall_flags * num_params * num_params * (Label.t option)
 type classref_id = int
 (* Conventionally this is "A_" followed by an integer *)
 type adata_id = string

@@ -3,7 +3,7 @@
 .main {
     FPushFuncD 1 "foo"
     Int 9
-    FCall 1 0 1 - "" ""
+    FCall <> 1 1 - "" ""
     PopR
     Int 1
     RetC
@@ -15,7 +15,7 @@
     AssertRATL $x Int
     target_label: FPushFuncD 1 "var_dump"
     Int 42
-    FCall 1 0 1 - "" ""
+    FCall <> 1 1 - "" ""
     UnboxR
     RetC
 }

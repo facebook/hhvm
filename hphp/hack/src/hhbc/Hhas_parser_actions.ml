@@ -666,12 +666,6 @@ let paramidofiarg arg =
   | IAInt64 n -> Param_unnamed (Int64.to_int_exn n)
   | _ -> report_error "bad param id to instruction"
 
-let has_unpack_of_iarg arg =
-  match arg with
-  | IAInt64 n when n = Int64.zero -> false
-  | IAInt64 n when n = Int64.one -> true
-  | _ -> report_error "bad has_param"
-
 let barethisopofiarg arg =
   match arg with
   | IAId "Notice" -> Notice
@@ -832,8 +826,24 @@ let doubleofiarg arg =
   | IAInt64 n -> (Int64.to_string n) ^ "." (* ugh *)
   | _ -> report_error "bad double lit cst"
 
-let fcallargsofiargs num_args has_unpack num_rets async_eager_label =
-  intofiarg num_args, has_unpack_of_iarg has_unpack, intofiarg num_rets,
+let fcall_flags_of_iarg arg =
+  let parse_flag flags flag =
+    match flag with
+    | "Unpack" -> { flags with has_unpack = true }
+    | _ -> report_error ("unrecognized fcall flag " ^ flag)
+  in
+  let rec parse_list arglist =
+    match arglist with
+    | [] -> Instruction_sequence.default_fcall_flags
+    | IAId flag :: rest -> parse_flag (parse_list rest) flag
+    | _ -> report_error "bad type of fcall flag"
+  in
+  match arg with
+  | IAArglist l -> parse_list l
+  | _ -> report_error "bad list of fcall flags"
+
+let fcall_args_of_iargs flags num_args num_rets async_eager_label =
+  fcall_flags_of_iarg flags, intofiarg num_args, intofiarg num_rets,
   optlabelofiarg async_eager_label
 
 let makeunaryinst s arg = match s with
@@ -1206,6 +1216,6 @@ match s with
 let makesenaryinst s arg1 arg2 arg3 arg4 arg5 arg6 =
 match s with
   | "FCall" ->
-    ICall(FCall (fcallargsofiargs arg1 arg2 arg3 arg4,
+    ICall(FCall (fcall_args_of_iargs arg1 arg2 arg3 arg4,
       class_id_of_iarg arg5, function_id_of_iarg arg6))
   | _ -> failwith ("NYI senary: " ^ s)

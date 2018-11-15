@@ -1324,13 +1324,29 @@ LocalRange read_local_range(AsmState& as) {
   return LocalRange{uint32_t(firstLoc), count};
 }
 
+FCallArgs::Flags read_fcall_flags(AsmState& as) {
+  uint8_t flags = 0;
+
+  as.in.skipSpaceTab();
+  as.in.expect('<');
+
+  std::string flag;
+  while (as.in.readword(flag)) {
+    if (flag == "Unpack") { flags |= FCallArgs::HasUnpack; continue; }
+    as.error("unrecognized FCall flag `" + flag + "'");
+  }
+  as.in.expectWs('>');
+
+  return static_cast<FCallArgs::Flags>(flags);
+}
+
 std::pair<FCallArgsBase, std::string> read_fcall_args(AsmState& as) {
+  auto const flags = read_fcall_flags(as);
   auto const numArgs = read_opcode_arg<uint32_t>(as);
-  auto const hasUnpack = read_opcode_arg<uint32_t>(as);
   auto const numRets = read_opcode_arg<uint32_t>(as);
   auto const asyncEagerLabel = read_opcode_arg<std::string>(as);
   return std::make_pair(
-    FCallArgsBase(numArgs, hasUnpack != 0, numRets), asyncEagerLabel);
+    FCallArgsBase(flags, numArgs, numRets), asyncEagerLabel);
 }
 
 Id create_litstr_id(AsmState& as) {
@@ -1482,14 +1498,14 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define NUM_POP_C_MFINAL(n) (immIVA[0] + n)
 #define NUM_POP_V_MFINAL NUM_POP_C_MFINAL(1)
 #define NUM_POP_CVUMANY immIVA[0] /* number of arguments */
-#define NUM_POP_FCALL (immFCA.numArgs + (immFCA.hasUnpack ? 1 : 0) +   \
+#define NUM_POP_FCALL (immFCA.numArgs + (immFCA.hasUnpack() ? 1 : 0) + \
                        immFCA.numRets - 1)
 #define NUM_POP_CMANY immIVA[0] /* number of arguments */
 #define NUM_POP_SMANY vecImmStackValues
 
 #define O(name, imm, pop, push, flags)                                 \
   void parse_opcode_##name(AsmState& as) {                             \
-    UNUSED auto immFCA = FCallArgsBase(-1, false, -1);                 \
+    UNUSED auto immFCA = FCallArgsBase(FCallArgsBase::None, -1, -1);   \
     UNUSED uint32_t immIVA[kMaxHhbcImms];                              \
     UNUSED auto const thisOpcode = Op::name;                           \
     UNUSED const Offset curOpcodeOff = as.ue->bcPos();                 \
@@ -1536,7 +1552,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
     }                                                                  \
                                                                        \
     /* FCalls with unpack perform their own bounds checking. */        \
-    if (Op##name == OpFCall && !immFCA.hasUnpack) {                    \
+    if (Op##name == OpFCall && !immFCA.hasUnpack()) {                  \
       as.fe->containsCalls = true;                                     \
     }                                                                  \
                                                                        \

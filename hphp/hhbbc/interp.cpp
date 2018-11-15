@@ -3450,7 +3450,7 @@ folly::Optional<FCallArgs> fcallKnownImpl(ISS& env, const FCallArgs& fca) {
   always_assert(ar.func.hasValue());
 
   if (options.ConstantFoldBuiltins && ar.foldable) {
-    if (!fca.hasUnpack && fca.numRets == 1) {
+    if (!fca.hasUnpack() && fca.numRets == 1) {
       auto ty = [&] () {
         auto const func = ar.func->exactFunc();
         assertx(func);
@@ -3485,19 +3485,19 @@ folly::Optional<FCallArgs> fcallKnownImpl(ISS& env, const FCallArgs& fca) {
     }
     fpiNotFoldable(env);
     fpiPop(env);
-    discard(env, fca.numArgs + (fca.hasUnpack ? 1 : 0));
+    discard(env, fca.numArgs + (fca.hasUnpack() ? 1 : 0));
     for (auto i = uint32_t{0}; i < fca.numRets; ++i) push(env, TBottom);
     return folly::none;
   }
 
   auto returnType = [&] {
     std::vector<Type> args(fca.numArgs);
-    auto const firstArgPos = fca.numArgs + (fca.hasUnpack ? 1 : 0) - 1;
+    auto const firstArgPos = fca.numArgs + (fca.hasUnpack() ? 1 : 0) - 1;
     for (auto i = uint32_t{0}; i < fca.numArgs; ++i) {
       args[i] = topCV(env, firstArgPos - i);
     }
 
-    auto ty = fca.hasUnpack
+    auto ty = fca.hasUnpack()
       ? env.index.lookup_return_type(env.ctx, *ar.func)
       : env.index.lookup_return_type(CallContext { env.ctx, args, ar.context },
                                      *ar.func);
@@ -3507,7 +3507,7 @@ folly::Optional<FCallArgs> fcallKnownImpl(ISS& env, const FCallArgs& fca) {
     if (!ar.fallbackFunc) {
       return ty;
     }
-    auto ty2 = fca.hasUnpack
+    auto ty2 = fca.hasUnpack()
       ? env.index.lookup_return_type(env.ctx, *ar.fallbackFunc)
       : env.index.lookup_return_type(CallContext { env.ctx, args, ar.context },
                                      *ar.fallbackFunc);
@@ -3524,13 +3524,13 @@ folly::Optional<FCallArgs> fcallKnownImpl(ISS& env, const FCallArgs& fca) {
   fpiPop(env);
   specialFunctionEffects(env, ar);
 
-  if (!fca.hasUnpack && ar.func->name()->isame(s_function_exists.get())) {
+  if (!fca.hasUnpack() && ar.func->name()->isame(s_function_exists.get())) {
     handle_function_exists(env, fca.numArgs, false);
   }
 
   if (options.HardConstProp &&
       fca.numArgs == 1 &&
-      !fca.hasUnpack &&
+      !fca.hasUnpack() &&
       ar.func->name()->isame(s_defined.get())) {
     // If someone calls defined('foo') they probably want foo to be
     // defined normally; ie not a persistent constant.
@@ -3542,7 +3542,7 @@ folly::Optional<FCallArgs> fcallKnownImpl(ISS& env, const FCallArgs& fca) {
     }
   }
 
-  if (fca.hasUnpack) popC(env);
+  if (fca.hasUnpack()) popC(env);
   for (auto i = uint32_t{0}; i < fca.numArgs; ++i) popCV(env);
   pushCallReturnType(env, std::move(returnType), fca);
   return folly::none;
@@ -3571,7 +3571,7 @@ void in(ISS& env, const bc::FCall& op) {
     case FPIKind::Builtin:
       assertx(fca.numRets == 1);
       return finish_builtin(
-        env, ar.func->exactFunc(), fca.numArgs, fca.hasUnpack);
+        env, ar.func->exactFunc(), fca.numArgs, fca.hasUnpack());
     case FPIKind::Ctor:
       assertx(fca.numRets == 1);
       /*
@@ -3604,7 +3604,7 @@ void in(ISS& env, const bc::FCall& op) {
     }
   }
 
-  if (fca.hasUnpack) popC(env);
+  if (fca.hasUnpack()) popC(env);
   for (auto i = uint32_t{0}; i < fca.numArgs; ++i) popCV(env);
   fpiPop(env);
   specialFunctionEffects(env, ar);

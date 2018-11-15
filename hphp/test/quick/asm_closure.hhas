@@ -9,7 +9,7 @@
   CreateCl 1 0
 
   FPushFunc 0
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   UnboxR
   Print
   PopC

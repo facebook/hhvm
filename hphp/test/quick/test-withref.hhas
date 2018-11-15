@@ -34,7 +34,7 @@
   # line 5
     FPushFuncD 1 "var_dump"
     CGetL $ar
-    FCall 1 0 1 - "" ""
+    FCall <> 1 1 - "" ""
     PopR
   # line 7
     BaseL $ar Define
@@ -48,12 +48,12 @@
   # line 9
     FPushFuncD 1 "var_dump"
     CGetL $x
-    FCall 1 0 1 - "" ""
+    FCall <> 1 1 - "" ""
     PopR
   # line 10
     FPushFuncD 1 "var_dump"
     CGetL $ar
-    FCall 1 0 1 - "" ""
+    FCall <> 1 1 - "" ""
     PopR
   # line 12
     Array @empty
@@ -63,7 +63,7 @@
     FPushFuncD 2 "sprintf"
     String "%d"
     Int 11
-    FCall 2 0 1 - "" ""
+    FCall <> 2 1 - "" ""
     UnboxR
     SetL $k
     PopC
@@ -71,7 +71,7 @@
     FPushFuncD 2 "sprintf"
     String "%d"
     Int 22
-    FCall 2 0 1 - "" ""
+    FCall <> 2 1 - "" ""
     UnboxR
     SetL $v
     PopC
@@ -96,17 +96,17 @@ loop:
 end_loop:
     FPushFuncD 1 "var_dump"
     CGetL $ar2
-    FCall 1 0 1 - "" ""
+    FCall <> 1 1 - "" ""
     PopR
   # line 20
     FPushFuncD 1 "var_dump"
     CGetL $ar
-    FCall 1 0 1 - "" ""
+    FCall <> 1 1 - "" ""
     PopR
   # line 21
     FPushFuncD 1 "var_dump"
     CGetL $x
-    FCall 1 0 1 - "" ""
+    FCall <> 1 1 - "" ""
     PopR
     Int 1
     RetC

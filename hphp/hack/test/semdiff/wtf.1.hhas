@@ -6,7 +6,7 @@
 .main {
   DefCls 0
   FPushFuncD 0 "mymain"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   PopR
   Int 1
   RetC
@@ -28,7 +28,7 @@
 .function <"" N  > mymain() {
   .declvars $f $a $b;
   FPushCtorD 0 "F"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   PopR
   SetL $f
   PopC
@@ -42,17 +42,17 @@
   FPushObjMethodD 1 "m" NullThrows
   FPushFuncD 1 "h"
   VGetL $b
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   BoxR
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   PopR
   FPushFuncD 1 "var_dump"
   CGetL $a
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   PopR
   FPushFuncD 1 "var_dump"
   CGetL $b
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   PopR
   Null
   RetC
@@ -62,7 +62,7 @@
   .method [public] <"" N  > m(&$y) {
     FPushFuncD 1 "f"
     VGetL $y
-    FCall 1 0 1 - "" ""
+    FCall <> 1 1 - "" ""
     PopR
     Null
     RetC

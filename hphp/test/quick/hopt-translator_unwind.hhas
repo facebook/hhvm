@@ -4,7 +4,7 @@
 .main {
   FPushFuncD 1 "set_error_handler"
     String "thrower"
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   PopR
 
   # If get_undefined_var is inlined then the context passed to handler will
@@ -14,12 +14,12 @@
   # alive past the end of test_unwind_dirty_stack_regs.
   FPushClsMethodD 1 "setTraceOptions" "Exception"
     Cns "DEBUG_BACKTRACE_IGNORE_ARGS"
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   PopR
 
   .try {
     FPushFuncD 0 "test_unwind_dirty_stack_regs"
-    FCall 0 0 1 - "" ""
+    FCall <> 0 1 - "" ""
     UnboxR
     RetC
   } .catch {
@@ -28,7 +28,7 @@
     String "Received exception:  "
     PushL _1
     FPushObjMethodD 0 "getMessage" NullThrows
-    FCall 0 0 1 - "" ""
+    FCall <> 0 1 - "" ""
     UnboxR
     Concat
     String "\n"
@@ -43,7 +43,7 @@
 .function thrower() {
   FPushCtorD 1 "Exception"
     String "hi"
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   PopR
   Throw
 }
@@ -85,7 +85,7 @@
 .function make_obj($id) {
   FPushCtorD 1 "DtorPrinter"
     CGetL $id
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   PopR
   RetC
 }
@@ -108,19 +108,19 @@
 .function test_unwind_dirty_stack_regs() {
   FPushFuncD 1 "make_obj"
     Int 0
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   UnboxR
   SetL $k_0
   PopC
   FPushFuncD 1 "make_obj"
     Int 1
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   UnboxR
   SetL $k_1
   PopC
   FPushFuncD 1 "make_obj"
     Int 2
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   UnboxR
   SetL $k_2
   PopC
@@ -130,7 +130,7 @@
   CGetL $k_2
 
   FPushFuncD 0 "get_undefined_var"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   PopR
 
   # This code isn't reached---but let's Pop this junk just so

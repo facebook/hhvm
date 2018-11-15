@@ -630,7 +630,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
     auto fcall = [&] (Op op) {
       // FCalls with unpack do their own stack overflow checking
-      if (!(op == Op::FCall && inst.FCall.fca.hasUnpack)) {
+      if (!(op == Op::FCall && inst.FCall.fca.hasUnpack())) {
         ret.containsCalls = true;
       }
     };
@@ -715,7 +715,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define POP_CMANY      pop(data.arg##1);
 #define POP_SMANY      pop(data.keys.size());
 #define POP_CVUMANY    pop(data.arg##1);
-#define POP_FCALL      pop(data.fca.numArgs + (data.fca.hasUnpack ? 1 : 0) + \
+#define POP_FCALL      pop(data.fca.numArgs + (data.fca.hasUnpack() ? 1 : 0) + \
                            data.fca.numRets - 1);
 
 #define PUSH_NOV

@@ -8,7 +8,7 @@
   PopC
 
   FPushFuncD 0 "main"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   UnboxR
   RetC
 }
@@ -66,26 +66,26 @@
 .function main() {
   FPushFuncD 1 "foo"
   String "sup: "
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   PopR
 
   FPushFuncD 2 "foo"
   String "sup: "
   String " non-default y value\n"
-  FCall 2 0 1 - "" ""
+  FCall <> 2 1 - "" ""
   PopR
 
   FPushFuncD 0 "multiple"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   PopR
   FPushFuncD 1 "multiple"
   String "nondef\n"
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   PopR
   FPushFuncD 2 "multiple"
   String "nondef1\n"
   String "nondef2\n"
-  FCall 2 0 1 - "" ""
+  FCall <> 2 1 - "" ""
   PopR
 
   String "done\n"

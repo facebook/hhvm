@@ -1,6 +1,6 @@
 .main {
   FPushFuncD 0 "main"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   PopR
 
   String "DONE\n"
@@ -36,7 +36,7 @@
   CGetL $x
   CGetL $x
   CGetL $x
-  FCall 5 0 1 - "Cls1" "foobaz"
+  FCall <> 5 1 - "Cls1" "foobaz"
   UnboxRNop
   Jmp end
 
@@ -49,7 +49,7 @@ cls2:
   CGetL $x
   CGetL $x
   CGetL $x
-  FCall 5 0 1 - "Cls2" "foobaz"
+  FCall <> 5 1 - "Cls2" "foobaz"
   UnboxRNop
   Jmp end
 
@@ -62,7 +62,7 @@ end:
   JmpZ cls2
 
   FPushCtorD 0 "Cls1"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   PopR
   SetL $obj
   PopC
@@ -70,13 +70,13 @@ end:
   CGetL $obj
   CGetL $type
   CGetL $x
-  FCall 3 0 1 - "" ""
+  FCall <> 3 1 - "" ""
   UnboxRNop
   RetC
 
 cls2:
   FPushCtorD 0 "Cls2"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   PopR
   SetL $obj
   PopC
@@ -84,7 +84,7 @@ cls2:
   CGetL $obj
   CGetL $type
   CGetL $x
-  FCall 3 0 1 - "" ""
+  FCall <> 3 1 - "" ""
   UnboxRNop
   RetC
 }
@@ -103,7 +103,7 @@ header:
   FPushFuncD 2 "test_outer"
   CGetL $type
   Int 1
-  FCall 2 0 1 - "" ""
+  FCall <> 2 1 - "" ""
   PopR
 
   IncDecL $count PreInc
@@ -119,13 +119,13 @@ end:
   FPushFuncD 2 "loop"
   False
   Int 40
-  FCall 2 0 1 - "" ""
+  FCall <> 2 1 - "" ""
   PopR
 
   FPushFuncD 2 "loop"
   True
   Int 100
-  FCall 2 0 1 - "" ""
+  FCall <> 2 1 - "" ""
   UnboxRNop
   RetC
 }

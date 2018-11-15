@@ -2,7 +2,7 @@
   DefCls 0
 
   FPushCtorD 0 "Foo"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   PopR
   SetL $object
   PopC
@@ -10,15 +10,15 @@
   CGetL $object
   FPushObjMethodD 1 "main" NullThrows
    FPushCtorD 0 "Foo"
-   FCall 0 0 1 - "" ""
+   FCall <> 0 1 - "" ""
    PopR
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   PopR
 
   CGetL $object
   FPushObjMethodD 1 "main" NullThrows
    Null
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   PopR
 
   Int 1

@@ -1659,9 +1659,9 @@ void emitFCall(IRGS& env,
     : callReadsLocals(*env.currentNormalizedInstruction, curFunc(env));
 
   emitCallerDynamicCallChecks(
-    env, callee, fca.numArgs + (fca.hasUnpack ? 1 : 0));
+    env, callee, fca.numArgs + (fca.hasUnpack() ? 1 : 0));
 
-  if (fca.hasUnpack != 0) {
+  if (fca.hasUnpack()) {
     auto const data = CallUnpackData {
       spOffBCFromIRSP(env),
       fca.numArgs + 1,

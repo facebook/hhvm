@@ -55,7 +55,7 @@ check_func:
               CGetL $v
               Jmp call
     by_ref_v: VGetL $v
-    call:     FCall 2 0 1 - "" ""
+    call:     FCall <> 2 1 - "" ""
               UnboxR
               SetL $res
               PopC

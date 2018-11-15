@@ -10,7 +10,7 @@ call_cpp_impl_with_extra:
           CGetL $arr
           CGetL $res
           CGetL $extra
-          FCall 3 1 1 - "" ""
+          FCall <Unpack> 3 1 - "" ""
           UnboxR
           RetC
 
@@ -18,7 +18,7 @@ call_cpp_impl:
           FPushFuncD   2   "__SystemLib\\array_map"
           CGetL $func
           CGetL $arr
-          FCall 2 0 1 - "" ""
+          FCall <> 2 1 - "" ""
           UnboxR
           RetC
 
@@ -40,7 +40,7 @@ convert_to_array:
 # with a null func, we have to convert the input to an array
           CGetL $arr
           FPushObjMethodD 0 "toArray" NullThrows
-          FCall 0 0 1 - "" ""
+          FCall <> 0 1 - "" ""
           UnboxR
           RetC
 
@@ -71,7 +71,7 @@ not_array:
               CGetL $v
               Jmp call_kt
     by_ref_kt:VGetL $v
-    call_kt:  FCall 1 0 1 - "" ""
+    call_kt:  FCall <> 1 1 - "" ""
               BaseL $res Define
               SetWithRefRML $k
               WIterNextK 1 loop_x_kt $v $k
@@ -114,7 +114,7 @@ one_array:
               CGetL $v
               Jmp call
     by_ref:   VGetL $v
-    call:     FCall 1 0 1 - "" ""
+    call:     FCall <> 1 1 - "" ""
               BaseL $res Define
               SetWithRefRML $k
               WIterNextK 1 loop_x $v $k

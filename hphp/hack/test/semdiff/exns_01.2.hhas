@@ -5,7 +5,7 @@
 
 .main {
   FPushFuncD 0 "foo"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   PopR
   Int 1
   RetC
@@ -22,7 +22,7 @@
         JmpZ L0
         FPushCtorD 1 "Exception"
         String "exception 1"
-        FCall 1 0 1 - "" ""
+        FCall <> 1 1 - "" ""
         PopR
         Throw
       L0:
@@ -44,7 +44,7 @@
             JmpZ L3
             FPushCtorD 1 "Exception"
             String "exception 3"
-            FCall 1 0 1 - "" ""
+            FCall <> 1 1 - "" ""
             PopR
             Throw
           L3:
@@ -83,7 +83,7 @@
       JmpZ L6
       FPushCtorD 1 "Exception"
       String "exception 2"
-      FCall 1 0 1 - "" ""
+      FCall <> 1 1 - "" ""
       PopR
       Throw
     }
@@ -124,7 +124,7 @@ F9:
     JmpZ L7
     FPushCtorD 1 "Exception"
     String "exception 2"
-    FCall 1 0 1 - "" ""
+    FCall <> 1 1 - "" ""
     PopR
     Throw
   }

@@ -84,11 +84,13 @@ LocalRange decodeLocalRange(const unsigned char*& pc) {
 
 void encodeFCallArgsBase(UnitEmitter& ue, const FCallArgsBase& fca,
                          bool hasAsyncEagerOffset) {
-  bool smallNumArgs = ((fca.numArgs + 1) << 3) <= 0xff;
-  uint8_t flags = smallNumArgs ? (fca.numArgs + 1) << 3 : 0;
-  if (fca.hasUnpack) flags |= 1 << 0;
-  if (fca.numRets != 1) flags |= 1 << 1;
-  if (hasAsyncEagerOffset) flags |= 1 << 2;
+  auto constexpr kFirstNumArgsBit = FCallArgsBase::kFirstNumArgsBit;
+  bool smallNumArgs = ((fca.numArgs + 1) << kFirstNumArgsBit) <= 0xff;
+  auto flags = uint8_t{fca.flags};
+  assertx(!(flags & ~FCallArgsBase::kInternalFlags));
+  if (smallNumArgs) flags |= (fca.numArgs + 1) << kFirstNumArgsBit;
+  if (fca.numRets != 1) flags |= FCallArgsBase::HasInOut;
+  if (hasAsyncEagerOffset) flags |= FCallArgsBase::HasAsyncEagerOffset;
 
   ue.emitByte(flags);
   if (!smallNumArgs) ue.emitIVA(fca.numArgs);
@@ -97,11 +99,15 @@ void encodeFCallArgsBase(UnitEmitter& ue, const FCallArgsBase& fca,
 
 FCallArgs decodeFCallArgs(PC& pc) {
   auto const flags = decode_byte(pc);
-  auto const numArgs = (flags >> 3) ? (flags >> 3) - 1 : decode_iva(pc);
-  auto const hasUnpack = flags & 1;
-  auto const numRets = (flags & 2) ? decode_iva(pc) : 1;
-  auto const asyncEagerOffset = (flags & 4) ? decode_ba(pc) : kInvalidOffset;
-  return FCallArgs(numArgs, hasUnpack, numRets, asyncEagerOffset);
+  auto const numArgs = (flags >> FCallArgs::kFirstNumArgsBit)
+    ? (flags >> FCallArgs::kFirstNumArgsBit) - 1 : decode_iva(pc);
+  auto const numRets = (flags & FCallArgs::HasInOut) ? decode_iva(pc) : 1;
+  auto const asyncEagerOffset = (flags & FCallArgs::HasAsyncEagerOffset)
+    ? decode_ba(pc) : kInvalidOffset;
+  return FCallArgs(
+    static_cast<FCallArgs::Flags>(flags & FCallArgs::kInternalFlags),
+    numArgs, numRets, asyncEagerOffset
+  );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

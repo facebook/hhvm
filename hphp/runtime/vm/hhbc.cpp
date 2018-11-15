@@ -446,7 +446,7 @@ int instrNumPops(PC pc) {
   // FCall pops numArgs, unpack and (numRets - 1) uninit values
   if (n == -4) {
     auto const fca = getImm(pc, 0).u_FCA;
-    return fca.numArgs + (fca.hasUnpack ? 1 : 0) + fca.numRets - 1;
+    return fca.numArgs + (fca.hasUnpack() ? 1 : 0) + fca.numRets - 1;
   }
   // Other final member operations pop their first immediate + n
   if (n <= -10) return getImm(pc, 0).u_IVA - n - 10;
@@ -512,8 +512,8 @@ FlavorDesc manyFlavor(PC op, uint32_t i, FlavorDesc flavor) {
 FlavorDesc fcallFlavor(PC op, uint32_t i) {
   always_assert(i < uint32_t(instrNumPops(op)));
   auto const fca = getImm(op, 0).u_FCA;
-  if (i == 0 && fca.hasUnpack) return CV;
-  return i < fca.numArgs + fca.hasUnpack ? CVV : UV;
+  if (i == 0 && fca.hasUnpack()) return CV;
+  return i < fca.numArgs + fca.hasUnpack() ? CVV : UV;
 }
 
 }
@@ -1258,8 +1258,11 @@ std::string show(const LocalRange& range) {
 }
 
 std::string show(const FCallArgsBase& fca, std::string asyncEagerLabel) {
+  std::vector<std::string> flags;
+  if (fca.hasUnpack()) flags.push_back("Unpack");
   return folly::sformat(
-    "{} {} {} {}", fca.numArgs, (int)fca.hasUnpack, fca.numRets, asyncEagerLabel
+    "<{}> {} {} {}",
+    folly::join(' ', flags), fca.numArgs, fca.numRets, asyncEagerLabel
   );
 }
 

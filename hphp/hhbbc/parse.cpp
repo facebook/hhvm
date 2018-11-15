@@ -803,7 +803,7 @@ void populate_block(ParseUnitState& puState,
     auto pc = ue.bc() + fpi->m_fpiEndOff;
     auto const op = decode_op(pc);
     if (op != OpFCall) return false;
-    return decodeFCallArgs(pc).hasUnpack;
+    return decodeFCallArgs(pc).hasUnpack();
   };
 
 #define IMM_BLA(n)     auto targets = decode_switch(opPC);
@@ -857,7 +857,7 @@ void populate_block(ParseUnitState& puState,
                            ? findBlock(opPC + aeOffset - ue.bc())->id     \
                            : NoBlockId;                                   \
                          assertx(aeTarget == NoBlockId || next == past);  \
-                         return FCallArgs(fca.numArgs, fca.hasUnpack,     \
+                         return FCallArgs(fca.flags, fca.numArgs,         \
                                           fca.numRets, aeTarget);         \
                        }();
 

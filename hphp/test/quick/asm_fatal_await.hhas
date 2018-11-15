@@ -1,9 +1,9 @@
 .main {
   FPushFuncD 1 "HH\\Asio\\join"
   FPushFuncD 0 "main"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   UnboxR
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   PopR
   Null
   RetC
@@ -15,7 +15,7 @@
 
 .function main() isAsync {
   FPushCtorD 0 "heh"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   PopR
   SetL $x
   PopC

@@ -4,7 +4,7 @@
 
 .main {
   FPushFuncD 0 "main"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   PopR
   Int 1
   RetC
@@ -26,11 +26,11 @@
 loop:
           FPushFuncD 1 "var_dump"
           CGetL $k
-          FCall 1 0 1 - "" ""
+          FCall <> 1 1 - "" ""
           PopR
           FPushFuncD 1 "var_dump"
           CGetL $v
-          FCall 1 0 1 - "" ""
+          FCall <> 1 1 - "" ""
           PopR
           WIterNextK 0 loop $v $k
 end_loop:

@@ -149,8 +149,8 @@ let rewrite_params_and_body defs used refs params body =
       Some (IGenDelegation (YieldFromDelegate (i, relabel l)))
     | ICall (DecodeCufIter (x, l)) ->
       Some (ICall (DecodeCufIter (x, relabel l)))
-    | ICall (FCall ((na, u, nr, Some l), c, f)) ->
-      Some (ICall (FCall ((na, u, nr, Some (relabel l)), c, f)))
+    | ICall (FCall ((fl, na, nr, Some l), c, f)) ->
+      Some (ICall (FCall ((fl, na, nr, Some (relabel l)), c, f)))
     | IContFlow (Jmp l)   -> Some (IContFlow (Jmp (relabel l)))
     | IContFlow (JmpNS l) -> Some (IContFlow (JmpNS (relabel l)))
     | IContFlow (JmpZ l)  -> Some (IContFlow (JmpZ (relabel l)))
@@ -253,8 +253,8 @@ let clone_with_fresh_regular_labels block =
       IIterator (IterBreak (relabel l, x))
     | ICall (DecodeCufIter (x, l)) ->
       ICall (DecodeCufIter (x, relabel l))
-    | ICall (FCall ((na, u, nr, Some l), c, f)) ->
-      ICall (FCall ((na, u, nr, Some (relabel l)), c, f))
+    | ICall (FCall ((fl, na, nr, Some l), c, f)) ->
+      ICall (FCall ((fl, na, nr, Some (relabel l)), c, f))
     | IContFlow (Jmp l)   -> IContFlow (Jmp (relabel l))
     | IContFlow (JmpNS l) -> IContFlow (JmpNS (relabel l))
     | IContFlow (JmpZ l)  -> IContFlow (JmpZ (relabel l))

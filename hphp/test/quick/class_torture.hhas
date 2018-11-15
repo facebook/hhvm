@@ -6,35 +6,35 @@
   DefCls 0
   FPushCtorD 1 "A"
   String "foo"
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   PopR
   PopC
 
   DefCls 0
   FPushCtorD 1 "B"
   String "foo"
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   PopR
   PopC
 
   DefCls 0
   FPushCtorD 1 "C"
   String "foo"
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   PopR
   PopC
 
   DefCls 0
   FPushCtorD 1 "E"
   String "foo"
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   PopR
   PopC
 
   DefCls 0
   FPushCtorD 1 "G"
   String "foo"
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   PopR
   PopC
 

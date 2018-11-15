@@ -9,7 +9,7 @@
 .class [final] MemoizeWrappers {
   .method [public static] <"HH\\this" "HH\\this" hh_type extended_hint > get() {
     FPushCtorD 0 "MemoizeWrappers"
-    FCall 0 0 1 - "" ""
+    FCall <> 0 1 - "" ""
     PopR
     VerifyRetTypeC
     RetC

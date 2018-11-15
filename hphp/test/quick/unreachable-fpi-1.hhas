@@ -1,11 +1,11 @@
 .main {
   FPushCtorD 1 "Exception"
   String "foo"
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   PopR
   Throw
   FPushFuncD 0 "bar"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   PopR
   Int 1
   RetC

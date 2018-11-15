@@ -352,11 +352,17 @@ let string_of_optional_label opt_label =
   | None -> "-"
   | Some label -> string_of_label label
 
+let string_of_fcall_flags fl =
+  let fl = [
+    if fl.has_unpack then "Unpack" else "";
+  ] in
+  "<" ^ (String.concat ~sep:" " @@ List.filter ~f:(fun f -> f <> "") fl) ^ ">"
+
 let string_of_fcall_args fcall_args =
-  let num_args, has_unpack, num_rets, async_eager_label = fcall_args in
+  let flags, num_args, num_rets, async_eager_label = fcall_args in
   sep [
+    string_of_fcall_flags flags;
     string_of_int num_args;
-    if has_unpack then "1" else "0";
     string_of_int num_rets;
     string_of_optional_label async_eager_label
   ]

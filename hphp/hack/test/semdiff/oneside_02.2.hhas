@@ -5,7 +5,7 @@
 
 .main {
   FPushFuncD 0 "f"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   PopR
   Int 1
   RetC
@@ -17,7 +17,7 @@
     # introduce a try_fault handler that should be a noop
     .try_fault F0 {
       FPushCtorD 0 "Exception"
-      FCall 0 0 1 - "" ""
+      FCall <> 0 1 - "" ""
       PopR
       Throw
     }

@@ -110,17 +110,19 @@ inline bool operator!=(const LocalRange& a, const LocalRange& b) {
 }
 
 struct FCallArgs : FCallArgsBase {
-  explicit FCallArgs(uint32_t numArgs, bool hasUnpack = false,
-                     uint32_t numRets = 1, BlockId asyncEagerTarget = NoBlockId)
-    : FCallArgsBase(numArgs, hasUnpack, numRets)
+  explicit FCallArgs(uint32_t numArgs)
+    : FCallArgs(Flags::None, numArgs, 1, NoBlockId) {}
+  explicit FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
+                     BlockId asyncEagerTarget)
+    : FCallArgsBase(flags, numArgs, numRets)
     , asyncEagerTarget(asyncEagerTarget) {}
   BlockId asyncEagerTarget;
 };
 
 inline bool operator==(const FCallArgs& a, const FCallArgs& b) {
   return
-    a.numArgs == b.numArgs && a.hasUnpack == b.hasUnpack &&
-    a.numRets == b.numRets && a.asyncEagerTarget == b.asyncEagerTarget;
+    a.numArgs == b.numArgs && a.numRets == b.numRets &&
+    a.flags == b.flags && a.asyncEagerTarget == b.asyncEagerTarget;
 }
 
 inline bool operator!=(const FCallArgs& a, const FCallArgs& b) {
@@ -199,8 +201,8 @@ struct hasher_impl {
   }
 
   static size_t hash(FCallArgs fca) {
-    uint64_t hash = (fca.numArgs << 1) + (fca.hasUnpack ? 1 : 0);
-    hash = HPHP::hash_int64_pair(hash, fca.numRets);
+    uint64_t hash = HPHP::hash_int64_pair(fca.numArgs, fca.numRets);
+    hash = HPHP::hash_int64_pair(hash, fca.flags);
     hash = HPHP::hash_int64_pair(hash, fca.asyncEagerTarget);
     return static_cast<size_t>(hash);
   }
@@ -532,13 +534,13 @@ namespace imm {
                     }
 
 #define POP_FCALL   uint32_t numPop() const {                                  \
-                      return fca.numArgs + (fca.hasUnpack ? 1 : 0) +           \
+                      return fca.numArgs + (fca.hasUnpack() ? 1 : 0) +         \
                              fca.numRets - 1;                                  \
                     }                                                          \
                     Flavor popFlavor(uint32_t i) const {                       \
                       assert(i < numPop());                                    \
-                      if (i == 0 && fca.hasUnpack) return Flavor::C;           \
-                      auto const cv = fca.numArgs + (fca.hasUnpack ? 1 : 0);   \
+                      if (i == 0 && fca.hasUnpack()) return Flavor::C;         \
+                      auto const cv = fca.numArgs + (fca.hasUnpack() ? 1 : 0); \
                       return i < cv ? Flavor::CV : Flavor::U;                  \
                     }
 

@@ -5832,7 +5832,7 @@ void iopFCall(PC& pc, ActRec* ar, FCallArgs fca,
       func == func->cls()->getCtor()
     )
   );
-  assertx(fca.numArgs + (fca.hasUnpack ? 1 : 0) == ar->numArgs());
+  assertx(fca.numArgs + (fca.hasUnpack() ? 1 : 0) == ar->numArgs());
   if (ar->isDynamicCall()) callerDynamicCallChecks(func);
   checkStack(vmStack(), func, 0);
   if (fca.numRets != 1) ar->setFCallM();
@@ -5840,7 +5840,7 @@ void iopFCall(PC& pc, ActRec* ar, FCallArgs fca,
     fca.asyncEagerOffset != kInvalidOffset && func->supportsAsyncEagerReturn();
   if (asyncEagerReturn) ar->setAsyncEagerReturn();
   ar->setReturn(vmfp(), pc, jit::tc::ustubs().retHelper);
-  doFCall(ar, pc, fca.numArgs, fca.hasUnpack);
+  doFCall(ar, pc, fca.numArgs, fca.hasUnpack());
 }
 
 OPTBLD_FLT_INLINE
@@ -7317,7 +7317,7 @@ ALWAYS_INLINE ActRec* ar_for_inst(PC origpc, Imm) {
 
 template<>
 ALWAYS_INLINE ActRec* ar_for_inst<Op::FCall, FCallArgs>(PC, FCallArgs fca) {
-  return arFromSp(fca.numArgs + (fca.hasUnpack ? 1 : 0));
+  return arFromSp(fca.numArgs + (fca.hasUnpack() ? 1 : 0));
 }
 
 /*

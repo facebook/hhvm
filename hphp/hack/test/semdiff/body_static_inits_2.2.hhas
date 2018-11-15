@@ -80,7 +80,7 @@ L1:
   Print
   PopC
   FPushFuncD 0 "f"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   PopR
   DefCls 0
   String "a"
@@ -96,13 +96,13 @@ L1:
   Print
   PopC
   FPushCtorD 0 "foo"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   PopR
   SetL $v
   PopC
   CGetL $v
   FPushObjMethodD 0 "bar" NullThrows
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   PopR
   Int 1
   RetC

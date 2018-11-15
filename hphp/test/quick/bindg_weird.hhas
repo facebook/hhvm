@@ -1,6 +1,6 @@
 .main {
   FPushFuncD 0 "main"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   PopR
   Int 1
   RetC
@@ -19,7 +19,7 @@
 
   String "tracelet_breaker"
   FPushFunc 0
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   UnboxR
   SetL $foo
   PopC

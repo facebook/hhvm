@@ -1,18 +1,18 @@
 .main {
   FPushFuncD 0 "main"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   PopR
   FPushFuncD 0 "main"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   PopR
   FPushFuncD 0 "main"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   PopR
   FPushFuncD 0 "main"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   PopR
   FPushFuncD 0 "main"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   PopR
 
   Int 1
@@ -190,7 +190,7 @@
   CGetL $x
 
   FPushFuncD 0 "callee"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   AssertRATStk 0 Int
   UnboxRNop
   PopC

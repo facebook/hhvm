@@ -4,7 +4,7 @@
 
 .main {
   FPushFuncD 0 "main"
-  FCall 0 0 1 - "" ""
+  FCall <> 0 1 - "" ""
   UnboxR
   RetC
 }
@@ -20,7 +20,7 @@
 
   FPushFuncD 1 "var_dump"
   CGetL $arr
-  FCall 1 0 1 - "" ""
+  FCall <> 1 1 - "" ""
   UnboxR
   PopC
 

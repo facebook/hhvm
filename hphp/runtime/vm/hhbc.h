@@ -64,24 +64,30 @@ struct FCallArgsBase {
     None                     = 0,
     // Unpack remaining arguments from a varray passed by ...$args.
     HasUnpack                = (1 << 0),
+    // Callee is known to support async eager return.
+    SupportsAsyncEagerReturn = (1 << 1),
     // HHBC-only: is the number of returns provided? false => 1
-    HasInOut                 = (1 << 1),
+    HasInOut                 = (1 << 2),
     // HHBC-only: is the async eager offset provided? false => kInvalidOffset
-    HasAsyncEagerOffset      = (1 << 2),
+    HasAsyncEagerOffset      = (1 << 3),
     // HHBC-only: the remaining space is used for number of arguments
-    NumArgsStart             = (1 << 3),
+    NumArgsStart             = (1 << 4),
   };
 
   // Flags that are valid on FCallArgsBase::flags struct (i.e. non-HHBC-only).
-  static constexpr uint8_t kInternalFlags = HasUnpack;
+  static constexpr uint8_t kInternalFlags =
+    HasUnpack | SupportsAsyncEagerReturn;
   // The first (lowest) bit of numArgs.
-  static constexpr uint8_t kFirstNumArgsBit = 3;
+  static constexpr uint8_t kFirstNumArgsBit = 4;
 
   explicit FCallArgsBase(Flags flags, uint32_t numArgs, uint32_t numRets)
     : numArgs(numArgs), numRets(numRets), flags(flags) {
     assertx(!(flags & ~kInternalFlags));
   }
   bool hasUnpack() const { return flags & Flags::HasUnpack; }
+  bool supportsAsyncEagerReturn() const {
+    return flags & Flags::SupportsAsyncEagerReturn;
+  }
   uint32_t numArgs;
   uint32_t numRets;
   Flags flags;
@@ -91,7 +97,10 @@ struct FCallArgs : FCallArgsBase {
   explicit FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
                      Offset asyncEagerOffset)
     : FCallArgsBase(flags, numArgs, numRets)
-    , asyncEagerOffset(asyncEagerOffset) {}
+    , asyncEagerOffset(asyncEagerOffset) {
+    assertx(IMPLIES(asyncEagerOffset == kInvalidOffset,
+                    !supportsAsyncEagerReturn()));
+  }
   Offset asyncEagerOffset;
 };
 

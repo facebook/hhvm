@@ -1332,6 +1332,10 @@ FCallArgs::Flags read_fcall_flags(AsmState& as) {
 
   std::string flag;
   while (as.in.readword(flag)) {
+    if (flag == "SupportsAER") {
+      flags |= FCallArgs::SupportsAsyncEagerReturn;
+      continue;
+    }
     if (flag == "Unpack") { flags |= FCallArgs::HasUnpack; continue; }
     as.error("unrecognized FCall flag `" + flag + "'");
   }

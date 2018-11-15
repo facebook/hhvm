@@ -937,10 +937,9 @@ struct Index {
   void rewrite_default_initial_values(php::Program&) const;
 
   /*
-   * Return true if the resolved function is an async
-   * function.
+   * Return true if the resolved function supports async eager return.
    */
-  bool is_async_func(res::Func rfunc) const;
+  folly::Optional<bool> supports_async_eager_return(res::Func rfunc) const;
 
   /*
    * Return true if the resolved function is effect free.

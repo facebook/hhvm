@@ -44,7 +44,7 @@ let class_ref_rewrite_sentinel = -100
 
 let default_fcall_flags = {
   has_unpack = false;
-  unused = false;
+  supports_async_eager_return = false;
 }
 let make_fcall_args ?(flags=default_fcall_flags) ?(num_rets=1)
   ?async_eager_label num_args =

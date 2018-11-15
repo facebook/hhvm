@@ -210,7 +210,7 @@ std::string show(const Func& func, const Bytecode& bc) {
 #define IMM_FCA(n)     do {                                     \
   auto const aeTarget = data.fca.asyncEagerTarget != NoBlockId  \
     ? folly::sformat("<aeblk:{}>", data.fca.asyncEagerTarget)   \
-    : "<aeblk:->";                                              \
+    : "-";                                                      \
   folly::toAppend(" ", show(data.fca, aeTarget), &ret);         \
 } while (false);
 

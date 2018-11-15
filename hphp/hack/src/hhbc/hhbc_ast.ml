@@ -32,7 +32,7 @@ type prop_id = Hhbc_id.Prop.t
 type num_params = int
 type fcall_flags = {
   has_unpack : bool;
-  unused: bool;
+  supports_async_eager_return : bool;
 }
 type fcall_args = fcall_flags * num_params * num_params * (Label.t option)
 type classref_id = int

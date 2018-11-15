@@ -115,7 +115,10 @@ struct FCallArgs : FCallArgsBase {
   explicit FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
                      BlockId asyncEagerTarget)
     : FCallArgsBase(flags, numArgs, numRets)
-    , asyncEagerTarget(asyncEagerTarget) {}
+    , asyncEagerTarget(asyncEagerTarget) {
+    assertx(IMPLIES(asyncEagerTarget == NoBlockId,
+                    !supportsAsyncEagerReturn()));
+  }
   BlockId asyncEagerTarget;
 };
 

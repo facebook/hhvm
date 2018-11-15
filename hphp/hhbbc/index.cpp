@@ -4507,29 +4507,32 @@ bool Index::satisfies_constraint(Context ctx, const Type& t,
   return false;
 }
 
-bool Index::is_async_func(res::Func rfunc) const {
-  return match<bool>(
+folly::Optional<bool>
+Index::supports_async_eager_return(res::Func rfunc) const {
+  auto const supportsAER = [] (const php::Func* func) {
+    // Async functions always support async eager return.
+    if (func->isAsync && !func->isGenerator) return true;
+
+    // No other functions support async eager return yet.
+    return false;
+  };
+
+  return match<folly::Optional<bool>>(
     rfunc.val,
-    [&](res::Func::FuncName)   { return false; },
-    [&](res::Func::MethodName) { return false; },
-    [&](FuncInfo* finfo) {
-      return finfo->func->isAsync && !finfo->func->isGenerator;
-    },
-    [&](const MethTabEntryPair* mte) {
-      return mte->second.func->isAsync && !mte->second.func->isGenerator;
-    },
-    [&](FuncFamily* fam) {
+    [&](res::Func::FuncName)   { return folly::none; },
+    [&](res::Func::MethodName) { return folly::none; },
+    [&](FuncInfo* finfo) { return supportsAER(finfo->func); },
+    [&](const MethTabEntryPair* mte) { return supportsAER(mte->second.func); },
+    [&](FuncFamily* fam) -> folly::Optional<bool> {
+      auto ret = folly::Optional<bool>{};
       for (auto const pf : fam->possibleFuncs) {
-        // Abstract functions will always be overridden by concrete base
-        // classes, and in practice are not marked as async even when all of
-        // concrete implementations are async as this is not considered part of
-        // the interface but merely an implementation detail.
+        // Abstract functions are never called.
         if (pf->second.attrs & AttrAbstract) continue;
-        if (!pf->second.func->isAsync || pf->second.func->isGenerator) {
-          return false;
-        }
+        auto const val = supportsAER(pf->second.func);
+        if (ret && *ret != val) return folly::none;
+        ret = val;
       }
-      return true;
+      return ret;
     });
 }
 

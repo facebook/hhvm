@@ -2313,23 +2313,29 @@ FCall* opcodes
   opcodes) or C flavor otherwise (callee must return the matching number of
   values using the RetM opcode).
 
-  If the optional offset %4 was specified and the callee would return a finished
-  Awaitable, it may instead return the unpacked result of the Awaitable and
-  continue execution of the caller at offset %4. This is usually used to avoid
-  the cost of Awaitable construction if the callee is an async function that
-  finished eagerly and the caller awaits the Awaitable immediately upon return.
-
+  If the optional offset %4 was specified, the callee supports async eager
+  return and it would return a finished Awaitable, it may instead return the
+  unpacked result of the Awaitable and continue execution of the caller at
+  offset %4.
+  
   If %4 was specified and the callee raised an exception, the exception will
   continue to propagate thru the caller instead of being wrapped into Awaitable.
   Note that for the purposes of exception handling inside the caller, the PC
   will point after the FCall rather than %4 so it is not advised to have
   different EH entries for these two locations.
 
+  Async eager offset feature is used to avoid the cost of construction of short
+  lived Awaitables that are produced by eagerly finishing asynchronous code and
+  then immediately awaited by the caller.
+
   The %1 contains a list of boolean flags:
 
   Unpack: if enabled, the elements of the last value on the stack, which must be
   an array, are transferred to the callee as parameters, following the regular
   %2 parameters.
+
+  SupportsAER: hint from static analysis indicating whether the callee is known
+  to support async eager return. Requires specified async eager offset in %4.
 
 FCall <fca> <class name> <func name>  [C|V..C|V]  ->  [R | C..C]
 

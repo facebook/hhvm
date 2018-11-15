@@ -3518,6 +3518,8 @@ folly::Optional<FCallArgs> fcallKnownImpl(ISS& env, const FCallArgs& fca) {
     // Kill the async eager target if the function never returns.
     auto newFCA = fca;
     newFCA.asyncEagerTarget = NoBlockId;
+    newFCA.flags = static_cast<FCallArgs::Flags>(
+      newFCA.flags & ~FCallArgs::SupportsAsyncEagerReturn);
     return newFCA;
   }
 
@@ -3552,6 +3554,24 @@ void in(ISS& env, const bc::FCall& op) {
   auto const fca = op.fca;
   auto const ar = fpiTop(env);
   if (ar.func && !ar.fallbackFunc) {
+    // Infer whether the callee supports async eager return.
+    if (fca.asyncEagerTarget != NoBlockId &&
+        !fca.supportsAsyncEagerReturn()) {
+      auto const status = env.index.supports_async_eager_return(*ar.func);
+      if (status) {
+        auto newFCA = fca;
+        if (*status) {
+          // Callee supports async eager return.
+          newFCA.flags = static_cast<FCallArgs::Flags>(
+            newFCA.flags | FCallArgs::SupportsAsyncEagerReturn);
+        } else {
+          // Callee doesn't support async eager return.
+          newFCA.asyncEagerTarget = NoBlockId;
+        }
+        return reduce(env, bc::FCall { newFCA, op.str2, op.str3 });
+      }
+    }
+
     switch (ar.kind) {
     case FPIKind::Unknown:
     case FPIKind::CallableArr:

@@ -1260,6 +1260,7 @@ std::string show(const LocalRange& range) {
 std::string show(const FCallArgsBase& fca, std::string asyncEagerLabel) {
   std::vector<std::string> flags;
   if (fca.hasUnpack()) flags.push_back("Unpack");
+  if (fca.supportsAsyncEagerReturn()) flags.push_back("SupportsAER");
   return folly::sformat(
     "<{}> {} {} {}",
     folly::join(' ', flags), fca.numArgs, fca.numRets, asyncEagerLabel

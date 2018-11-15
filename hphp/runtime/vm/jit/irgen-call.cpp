@@ -1702,47 +1702,56 @@ void emitFCall(IRGS& env,
     );
   };
 
+  auto const emitCallWithoutAsyncEagerReturn = [&] {
+    push(env, call(false));
+  };
+  auto const emitCallWithAsyncEagerReturn = [&] {
+    auto const retVal = call(true);
+
+    ifThenElse(
+      env,
+      [&] (Block* taken) {
+        auto const aux = gen(env, LdTVAux, LdTVAuxData {}, retVal);
+        auto const tst = gen(env, AndInt, aux, cns(env, 1u << 31));
+        gen(env, JmpNZero, taken, tst);
+      },
+      [&] {
+        auto const ty = callee ? awaitedCallReturnType(callee) : TInitCell;
+        push(env, gen(env, AssertType, ty, retVal));
+        jmpImpl(env, bcOff(env) + fca.asyncEagerOffset);
+      },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        auto const ty = callee ? callReturnType(callee) : TInitGen;
+        push(env, gen(env, AssertType, ty, retVal));
+      }
+    );
+  };
+
   if (fca.asyncEagerOffset == kInvalidOffset ||
       (callee && !callee->supportsAsyncEagerReturn())) {
-    push(env, call(false));
-    return;
+    return emitCallWithoutAsyncEagerReturn();
+  }
+
+  if (fca.supportsAsyncEagerReturn() ||
+      (callee && callee->supportsAsyncEagerReturn())) {
+    assertx(!callee || callee->supportsAsyncEagerReturn());
+    return emitCallWithAsyncEagerReturn();
   }
 
   ifThenElse(
     env,
     [&] (Block* taken) {
-      auto const supportsAsyncEagerReturn = gen(
-        env,
-        FuncSupportsAsyncEagerReturn,
-        ldPreLiveFunc(env)
-      );
+      auto const supportsAsyncEagerReturn =
+        gen(env, FuncSupportsAsyncEagerReturn, ldPreLiveFunc(env));
       gen(env, JmpNZero, taken, supportsAsyncEagerReturn);
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
-      push(env, call(false));
+      emitCallWithoutAsyncEagerReturn();
     },
     [&] {
-      auto const retVal = call(true);
-
-      ifThenElse(
-        env,
-        [&] (Block* taken) {
-          auto const aux = gen(env, LdTVAux, LdTVAuxData {}, retVal);
-          auto const tst = gen(env, AndInt, aux, cns(env, 1u << 31));
-          gen(env, JmpNZero, taken, tst);
-        },
-        [&] {
-          auto const ty = callee ? awaitedCallReturnType(callee) : TInitCell;
-          push(env, gen(env, AssertType, ty, retVal));
-          jmpImpl(env, bcOff(env) + fca.asyncEagerOffset);
-        },
-        [&] {
-          hint(env, Block::Hint::Unlikely);
-          auto const ty = callee ? callReturnType(callee) : TInitGen;
-          push(env, gen(env, AssertType, ty, retVal));
-        }
-      );
+      emitCallWithAsyncEagerReturn();
     }
   );
 }

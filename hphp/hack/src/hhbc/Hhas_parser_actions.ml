@@ -829,6 +829,7 @@ let doubleofiarg arg =
 let fcall_flags_of_iarg arg =
   let parse_flag flags flag =
     match flag with
+    | "SupportsAER" -> { flags with supports_async_eager_return = true }
     | "Unpack" -> { flags with has_unpack = true }
     | _ -> report_error ("unrecognized fcall flag " ^ flag)
   in

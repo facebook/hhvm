@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/tv-variant.h"
+#include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -523,21 +524,30 @@ folly::dynamic VariablesCommand::serializeVariable(
   // If the variable is an array or object, register it as a server object and
   // indicate how many children it has.
   if (variable.isArray() || variable.isObject()) {
+    bool hasChildren = false;
     unsigned int id = session->generateVariableId(
       requestId,
       const_cast<Variant&>(variable)
     );
 
     if (variable.isObject()) {
-      var["namedVariables"] =
-        addObjectChildren(session, requestId, -1, -1, variable, nullptr);
+      auto obj = variable.getObjectDataOrNull();
+      if (obj != nullptr && !UNLIKELY(obj->instanceof(c_Closure::classof()))) {
+        hasChildren = true;
+        var["namedVariables"] =
+          addObjectChildren(session, requestId, -1, -1, variable, nullptr);
+      }
     } else if (variable.isDict() || variable.isKeyset()) {
+      hasChildren = true;
       var["namedVariables"] = variable.toArray().size();
     } else {
+      hasChildren = true;
       var["indexedVariables"] = variable.toArray().size();
     }
 
-    var["variablesReference"] = id;
+    if (hasChildren) {
+      var["variablesReference"] = id;
+    }
   }
 
   if (presentationHint != nullptr) {
@@ -690,17 +700,20 @@ int VariablesCommand::addComplexChildren(
   Variant& var = variable->m_variable;
 
   if (var.isObject()) {
-    int result = addObjectChildren(
-      session,
-      requestId,
-      start,
-      count,
-      variable->m_variable,
-      vars
-    );
+    int result = 0;
+    const auto obj = var.toObject().get();
+    if (obj != nullptr && !UNLIKELY(obj->instanceof(c_Closure::classof()))) {
+      result += addObjectChildren(
+        session,
+        requestId,
+        start,
+        count,
+        variable->m_variable,
+        vars
+      );
+    }
 
     bool isArrayLikeObject = false;
-    const auto obj = var.toObject().get();
     if (obj != nullptr) {
       auto currentClass = obj->getVMClass();
       if (currentClass != nullptr) {

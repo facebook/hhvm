@@ -502,60 +502,12 @@ void fpushObjMethod(IRGS& env,
   }
 }
 
-const StaticString s_funcProfileKey{"FuncProfile"};
-
-void profilePushedFunc(IRGS& env, TargetProfile<CallTargetProfile>& profile) {
-  gen(env, ProfileFunc,
-      ProfileCallTargetData{spOffBCFromIRSP(env), profile.handle()},
-      sp(env));
-}
-
-void optimizePushedFunc(IRGS& env, TargetProfile<CallTargetProfile>& profile) {
-  auto data = profile.data();
-  double probability = 0;
-  auto profiledFunc = data.choose(probability);
-
-  // Don't emit the check if the probability of it succeeding is below the
-  // threshold.
-  if (probability * 100 < RuntimeOption::EvalJitPGOPushedFuncThreshold) return;
-
-  auto liveFuncTmp = gen(env, LdARFuncPtr, TFunc,
-                         IRSPRelOffsetData{spOffBCFromIRSP(env)}, sp(env));
-
-  // Don't emit the check if the function in the ActRec is already known.
-  if (liveFuncTmp->hasConstVal(TFunc)) return;
-
-  // Compare the pushed function with the profiled one.  If they match, emit an
-  // AssertARFunc to pass that information; otherwise, take a side exit to the
-  // next bytecode instruction.
-  auto profiledFuncTmp = cns(env, profiledFunc);
-  auto const equal = gen(env, EqFunc, liveFuncTmp, profiledFuncTmp);
-  auto sideExit = makeExit(env, nextBcOff(env));
-  gen(env, JmpZero, sideExit, equal);
-  gen(env, AssertARFunc, IRSPRelOffsetData{spOffBCFromIRSP(env)}, sp(env),
-      profiledFuncTmp);
-}
-
-void pgoPushedFunc(IRGS& env) {
-  if (!RuntimeOption::RepoAuthoritative) return;
-
-  auto profile = TargetProfile<CallTargetProfile>(env.context,
-                                                  env.irb->curMarker(),
-                                                  s_funcProfileKey.get());
-  if (profile.profiling()) {
-    profilePushedFunc(env, profile);
-  } else if (profile.optimizing()) {
-    optimizePushedFunc(env, profile);
-  }
-}
-
 void fpushFuncObj(IRGS& env, uint32_t numParams) {
   auto const slowExit = makeExitSlow(env);
   auto const obj      = popC(env);
   auto const cls      = gen(env, LdObjClass, obj);
   auto const func     = gen(env, LdObjInvoke, slowExit, cls);
   fpushActRec(env, func, obj, numParams, nullptr, cns(env, false));
-  pgoPushedFunc(env);
 }
 
 void fpushFuncArr(IRGS& env, uint32_t numParams) {
@@ -581,7 +533,6 @@ void fpushFuncArr(IRGS& env, uint32_t numParams) {
       IRSPRelOffsetData { spOffBCFromIRSP(env) },
       arr, sp(env), thisAR);
   decRef(env, arr);
-  pgoPushedFunc(env);
 }
 
 SSATmp* forwardCtx(IRGS& env, SSATmp* ctx, SSATmp* funcTmp) {
@@ -646,7 +597,6 @@ void fpushFuncCommon(IRGS& env,
               numParams,
               nullptr,
               cns(env, false));
-  pgoPushedFunc(env);
 }
 
 void implUnboxR(IRGS& env) {
@@ -1064,7 +1014,6 @@ void emitFPushFunc(IRGS& env, uint32_t numParams, const ImmVector& v) {
       nullptr,
       cns(env, false)
     );
-    pgoPushedFunc(env);
     return;
   }
 
@@ -1090,7 +1039,6 @@ void emitFPushFunc(IRGS& env, uint32_t numParams, const ImmVector& v) {
       funcName, sp(env), fp(env));
 
   decRef(env, funcName);
-  pgoPushedFunc(env);
 }
 
 void emitResolveFunc(IRGS& env, const StringData* name) {
@@ -1830,6 +1778,73 @@ Type awaitedCallReturnType(const Func* callee) {
   }
 
   return typeFromRAT(callee->repoAwaitedReturnType(), callee->cls());
+}
+
+//////////////////////////////////////////////////////////////////////
+
+const Func* profiledCalledFunc(IRGS& env, uint32_t numArgs,
+                               IRInstruction*& checkInst) {
+  checkInst = nullptr;
+
+  if (!RuntimeOption::RepoAuthoritative) return nullptr;
+
+  auto profile = TargetProfile<CallTargetProfile>(env.unit.context(),
+                                                  env.irb->curMarker(),
+                                                  callTargetProfileKey());
+
+  // NB: the profiling used here is shared and done in getCallTarget() in
+  // irlower-call.cpp, so we only handle the optimization phase here.
+  if (!profile.optimizing()) return nullptr;
+
+  auto const data = profile.data();
+  double probability = 0;
+  auto profiledFunc = data.choose(probability);
+
+  if (profiledFunc == nullptr) return nullptr;
+
+  // Don't emit the check if the probability of it succeeding is below the
+  // threshold.
+  if (probability * 100 < RuntimeOption::EvalJitPGOCalledFuncThreshold) {
+    return nullptr;
+  }
+
+  auto const spOff = spOffBCFromIRSP(env);
+  auto const calleeAROff = spOff + numArgs;
+  auto liveFuncTmp = gen(env, LdARFuncPtr, TFunc,
+                         IRSPRelOffsetData{calleeAROff}, sp(env));
+
+  auto profiledFuncTmp = cns(env, profiledFunc);
+  auto const equal = gen(env, EqFunc, liveFuncTmp, profiledFuncTmp);
+
+  auto sideExit = makeExit(env, bcOff(env));
+  gen(env, JmpZero, sideExit, equal);
+
+  auto curBlock = env.irb->curBlock();
+  checkInst = &(curBlock->back());
+  always_assert_flog(checkInst->op() == JmpZero, "checkInst = {}\n",
+                     *checkInst);
+  gen(env, AssertARFunc, IRSPRelOffsetData{calleeAROff}, sp(env),
+      profiledFuncTmp);
+
+  return profiledFunc;
+}
+
+void dropCalledFuncCheck(IRGS& env, IRInstruction* checkInst) {
+  always_assert_flog(checkInst && checkInst->op() == JmpZero,
+                     "checkInst: {}\n", *checkInst);
+
+  // Turn the AssertARFunc following checkInst into a Nop.
+  auto assertInst = checkInst->next()->skipHeader();
+  assertx(assertInst->op() == AssertARFunc);
+  assertInst->convertToNop();
+
+  // Make both directions of the JmpZero jump to it's fall-through block.
+  // Later, optimizations will eliminate this instruction, and also the EqFunc
+  // and LdARFuncPtr above it.
+  checkInst->setTaken(checkInst->next());
+
+  // Clear the information about the top function in FrameState.
+  env.irb->fs().clearTopFunc();;
 }
 
 //////////////////////////////////////////////////////////////////////

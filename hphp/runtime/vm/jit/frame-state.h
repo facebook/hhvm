@@ -411,6 +411,7 @@ struct FrameStateMgr final {
   void setBCSPOff(FPInvOffset o)        { cur().bcSPOff = o; }
   void incBCSPDepth(int32_t n = 1)      { cur().bcSPOff += n; }
   void decBCSPDepth(int32_t n = 1)      { cur().bcSPOff -= n; }
+  void clearTopFunc();
 
   /*
    * Return the LocationState for local `id' or stack element at `off' in the

@@ -695,6 +695,15 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       initNormalizedInstruction(inst, irgs, region, blockId,
                                 topFunc, lastInstr, toInterpInst);
 
+      // If we're at a FCall and the topFunc is still unknown, we may have a
+      // likely target based on profiling data.
+      IRInstruction* profiledFuncCheck = nullptr;
+      if (topFunc == nullptr && sk.op() == Op::FCall) {
+        auto const numArgs = inst.imm[0].u_FCA.numArgs;
+        topFunc = irgen::profiledCalledFunc(irgs, numArgs, profiledFuncCheck);
+        inst.funcd = topFunc;
+      }
+
       // Singleton inlining optimization.
       if (RuntimeOption::EvalHHIRInlineSingletons && !lastInstr &&
           shouldTrySingletonInline(region, inst, i, irgs.transFlags) &&
@@ -819,6 +828,14 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
         } else {
           inl.registerEndInlining(callee);
         }
+      }
+
+      // If we emitted a runtime check to obtain callee information but ended up
+      // not inlining the call, we drop the check to avoid the runtime cost.
+      if (profiledFuncCheck != nullptr && !skipTrans) {
+        assertx(sk.op() == Op::FCall);
+        irgen::dropCalledFuncCheck(irgs, profiledFuncCheck);
+        inst.funcd = topFunc = nullptr;
       }
 
       if (!skipTrans && penultimateInst && isCmp(inst.op())) {

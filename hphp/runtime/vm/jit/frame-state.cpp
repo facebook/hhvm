@@ -720,7 +720,13 @@ void FrameStateMgr::update(const IRInstruction* inst) {
             fpi.func = func;
             // we know the func, so it's eligible for inlining
             fpi.inlineEligible = true;
-            if (func->isStaticInPrologue()) fpi.ctxType = TCctx;
+            if (func->isStaticInPrologue()) {
+              fpi.ctxType = TCctx;
+            } else if (func->cls() != nullptr) {
+              fpi.ctxType -= TNullptr;
+            } else {
+              fpi.ctxType = TNullptr;
+            }
             ITRACE(3, "FrameStateMgr::update(AssertARFunc): setting function "
                    "to {}\n", func->fullName());
           } else {
@@ -1348,6 +1354,15 @@ void FrameStateMgr::clearForUnprocessedPred() {
   cur().fpiStack.clear();
   clearLocals();
   clearClsRefSlots();
+}
+
+void FrameStateMgr::clearTopFunc() {
+  auto& fpiStack = cur().fpiStack;
+  if (fpiStack.empty()) return;
+
+  auto& info = fpiStack.back();
+  info.func = nullptr;
+  info.ctxType = TCtx;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

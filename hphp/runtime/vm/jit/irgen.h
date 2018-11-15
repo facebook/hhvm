@@ -282,6 +282,29 @@ void conjureEndInlining(IRGS& env, bool builtin);
 void inlSingletonSProp(IRGS&, const Func*, PC clsOp, PC propOp);
 void inlSingletonSLoc(IRGS&, const Func*, PC op);
 
+/*
+ * In PGO mode, we use profiling to try to determine the most likely target
+ * function at each call site.  profiledCalledFunc() returns the most likely
+ * called function based on profiling, as long as it was seen at least
+ * Eval.JitPGOCalledFuncThreshold percent of the times during profiling.  When a
+ * callee satisfies this condition, profiledCalledFunc() returns such callee and
+ * it also returns in checkInst a pointer to the runtime check that is inserted
+ * in HHIR.  The following code sequence is emitted in the HHIR unit:
+ *
+ *   t1 = LdARFuncPtr <CalleeFrame>
+ *   t2 = EqFunc t1, <ProfiledFunc>
+ *   JmpZero t2, <SideExit>               <== checkInst points here
+ *   AssertARFunc <CalleeFrame>, <ProfiledFunc>
+ *
+ * If this check is later regarded as not profitable, because it didn't enable
+ * inlining the callee, it can be removed by calling dropCalledFuncCheck()
+ * passing that same checkInst.
+ */
+const Func* profiledCalledFunc(IRGS& env, uint32_t numArgs,
+                               IRInstruction*& checkInst);
+
+void dropCalledFuncCheck(IRGS& env, IRInstruction* checkInst);
+
 ///////////////////////////////////////////////////////////////////////////////
 /*
  * State introspection.

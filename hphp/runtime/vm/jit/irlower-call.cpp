@@ -67,8 +67,6 @@ TRACE_SET_MOD(irlower);
 
 namespace {
 
-const StaticString callTargetProfileKey{"CallTargetProfile"};
-
 TCA getCallTarget(IRLS& env, const IRInstruction* inst, Vreg sp) {
   auto const extra = inst->extra<Call>();
   auto const callee = extra->callee;
@@ -78,7 +76,7 @@ TCA getCallTarget(IRLS& env, const IRInstruction* inst, Vreg sp) {
 
   auto profile = TargetProfile<CallTargetProfile>(env.unit.context(),
                                                   inst->marker(),
-                                                  callTargetProfileKey.get());
+                                                  callTargetProfileKey());
   if (profile.profiling()) {
     auto const spOff = cellsToBytes(extra->spOffset.offset + extra->numParams);
     auto const args = argGroup(env, inst)

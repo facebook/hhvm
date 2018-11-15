@@ -660,6 +660,63 @@ bool simplify(Env& env, const addq& vadd, Vlabel b, size_t i) {
   return false;
 }
 
+// find two lea that add an immediate to a register and fold into a
+// single operation.  given this lea, look for a subsequent lea
+// within the same block whose base reg is this lea's dest reg,
+// and it is the only use of this lea's dest reg.
+//
+// first, try to simplify lea (%r1), %r2 into copy %r1,%r2
+bool simplify(Env& env, const lea& vlea, Vlabel b, size_t i) {
+  if (vlea.s.disp == 0 && !vlea.s.index.isValid()) {
+    env.unit.blocks[b].code[i] = copy{ vlea.s.base, vlea.d };
+    return true;
+  }
+  auto xinst = env.unit.blocks[b].code[i];
+  bool found_second = false;
+  size_t x;
+  int disp2;
+  if (vlea.d.isPhys()) {
+    bool found_interf = false;
+    for (x = i+1; x < env.unit.blocks[b].code.size(); ++x) {
+      xinst = env.unit.blocks[b].code[x];
+      if (xinst.op == Vinstr::lea && xinst.lea_.s.base == vlea.d &&
+          xinst.lea_.d == vlea.d && !(xinst.lea_.s.index.isValid())) {
+        found_second = true;
+        disp2 = xinst.lea_.s.disp;
+        break;
+      } else {
+        visitUses(env.unit, xinst,
+            [&] (Vreg r) { if (r == vlea.d) found_interf = true; });
+        if (found_interf) return false;
+        visitDefs(env.unit, xinst,
+            [&] (Vreg r) { if (r == vlea.d) found_interf = true; });
+        if (found_interf) return false;
+      }
+    }
+  } else {
+    if (env.use_counts[vlea.d] == 1) {
+      for (x = i+1 ; x < env.unit.blocks[b].code.size(); ++x) {
+        xinst = env.unit.blocks[b].code[x];
+        if ((xinst.op == Vinstr::lea) && (xinst.lea_.s.base == vlea.d) &&
+              !xinst.lea_.s.index.isValid()) {
+          found_second = true;
+          disp2 = xinst.lea_.s.disp;
+          break;
+        }
+      }
+    }
+  }
+  if (found_second &&
+      deltaFits((int64_t)(vlea.s.disp) + (int64_t)(disp2), sz::dword)) {
+     (void) simplify_impl(env, b, i,
+         lea { vlea.s+disp2, (xinst).lea_.d });
+     // update uses and delete the inst
+     (void) simplify_impl(env, b, x, [&] (Vout& v) { return 1; });
+     return true;
+  }
+  return false;
+}
+
 // remove compares with unused results. This overlaps with removeDeadCode,
 // but does it earlier.
 template <typename Cmp>

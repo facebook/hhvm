@@ -126,7 +126,9 @@ double cellToDouble(Cell);
 /*
  * Convert `tv' or `cell' to a valid array key for `ad', or throw an exception.
  */
+template <IntishCast intishCast = IntishCast::CastAndWarn>
 Cell cellToKey(Cell cell, const ArrayData* ad);
+template <IntishCast intishCast = IntishCast::CastAndWarn>
 Cell tvToKey(TypedValue tv, const ArrayData* ad);
 
 /*

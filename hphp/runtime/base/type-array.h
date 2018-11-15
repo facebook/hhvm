@@ -254,7 +254,9 @@ public:
   /*
    * Converts `k' to a valid key for this array kind.
    */
+  template <IntishCast intishCast = IntishCast::CastAndWarn>
   Cell convertKey(Cell k) const;
+  template <IntishCast intishCast = IntishCast::CastAndWarn>
   Cell convertKey(const Variant& k) const;
 
   /*

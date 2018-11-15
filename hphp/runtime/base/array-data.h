@@ -64,6 +64,18 @@ struct arr_lval : tv_lval {
   ArrayData* const arr;
 };
 
+/*
+ * We use this enum as a template parameter in a few key places to determine
+ * whether or not a check for intish cast should occur. As it stands today,
+ * either we do the check and possibly warn if a cast occurs, or we do the check
+ * and cast silently. This will change eventually to either casting silently or
+ * not checking/casting at all.
+ */
+enum class IntishCast : int8_t {
+  CastAndWarn,
+  CastSilently,
+};
+
 struct ArrayData : MaybeCountable {
   /*
    * Runtime type tag of possible array types.  This is intentionally not an
@@ -768,6 +780,7 @@ public:
    *
    * If `notice' is set, raise a notice if we return true.
    */
+  template <IntishCast intishCast = IntishCast::CastAndWarn>
   bool convertKey(const StringData* key, int64_t& i,
                   bool notice =
                     RuntimeOption::EvalHackArrCompatNotices &&

@@ -1084,6 +1084,7 @@ struct Variant : private TypedValue {
    * Convert to a valid key or throw an exception. If convertStrKeys is true
    * int-like string keys will be converted to int keys.
    */
+  template <IntishCast intishCast = IntishCast::CastAndWarn>
   VarNR toKey(const ArrayData*) const;
 
   /* Creating a temporary Array, String, or Object with no ref-counting and
@@ -1756,15 +1757,18 @@ inline bool isa_non_null(const Variant& v) {
 
 // Defined here to avoid introducing a dependency cycle between type-variant
 // and type-array
+template <IntishCast intishCast>
 ALWAYS_INLINE Cell Array::convertKey(Cell k) const {
-  return cellToKey(k, m_arr ? m_arr.get() : staticEmptyArray());
+  return cellToKey<intishCast>(k, m_arr ? m_arr.get() : staticEmptyArray());
 }
+template <IntishCast intishCast>
 ALWAYS_INLINE Cell Array::convertKey(const Variant& k) const {
-  return convertKey(*k.toCell());
+  return convertKey<intishCast>(*k.toCell());
 }
 
+template <IntishCast intishCast>
 inline VarNR Variant::toKey(const ArrayData* ad) const {
-  return VarNR(tvToKey(*this, ad));
+  return VarNR(tvToKey<intishCast>(*this, ad));
 }
 
 struct alignas(16) OptionalVariant {

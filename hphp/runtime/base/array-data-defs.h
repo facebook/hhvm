@@ -633,11 +633,16 @@ inline Variant ArrayData::getKey(ssize_t pos) const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+template <IntishCast intishCast>
 ALWAYS_INLINE bool ArrayData::convertKey(const StringData* key,
                                          int64_t& i,
                                          bool notice) const {
   auto const result = key->isStrictlyInteger(i) && useWeakKeys();
-  if (UNLIKELY(result && notice)) raise_intish_index_cast();
+  if (UNLIKELY((intishCast == IntishCast::CastAndWarn &&
+                result &&
+                notice))) {
+    raise_intish_index_cast();
+  }
   return result;
 }
 

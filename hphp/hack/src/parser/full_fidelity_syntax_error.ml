@@ -576,6 +576,8 @@ let cls_reified_generic_in_static_method =
   "You may not use reified generics of the class in a static method"
 let static_method_reified_obj_creation =
   "You may not use object creation for reified self or parent from a static method"
+let non_invariant_reified_generic =
+  "Reified generics cannot be covariant or contravariant"
 
 let dollar_unary = "The dollar sign ('$') cannot be used as a unary operator"
 

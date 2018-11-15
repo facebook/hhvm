@@ -2326,11 +2326,13 @@ and pTParaml ?(is_class=false): tparam list parser = fun node env ->
       let is_reified = not @@ is_missing type_reified in
       if is_class && is_reified then
         env.cls_reified_generics := SSet.add (text type_name) !(env.cls_reified_generics);
-      ( (match token_kind type_variance with
+      let variance = match token_kind type_variance with
         | Some TK.Plus  -> Covariant
         | Some TK.Minus -> Contravariant
-        | _ -> Invariant
-        )
+        | _ -> Invariant in
+      if is_reified && variance <> Invariant then
+        raise_parsing_error env (`Node node) SyntaxError.non_invariant_reified_generic;
+      ( variance
       , pos_name type_name env
       , couldMap ~f:pTConstraint type_constraints env
       , is_reified

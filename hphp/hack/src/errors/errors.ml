@@ -3520,6 +3520,13 @@ let unserializable_type pos message =
     ("Unserializable type (could not be converted to JSON and back again): "
      ^ message)
 
+let invalid_arraykey pos typ =
+  add (Typing.err_code Typing.InvalidArrayKey) pos @@
+    Printf.sprintf
+      "This value is not a valid array key type (string | int), it is %s"
+      typ
+
+
 (*****************************************************************************)
 (* Convert relative paths to absolute. *)
 (*****************************************************************************)

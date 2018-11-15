@@ -577,6 +577,7 @@ module type S = sig
   val forward_compatibility_not_current: Pos.t -> ForwardCompatibilityLevel.t -> unit
   val forward_compatibility_below_minimum: Pos.t -> ForwardCompatibilityLevel.t -> unit
   val unserializable_type: Pos.t -> string -> unit
+  val invalid_arraykey : Pos.t -> string -> unit
   val invalid_argument_type_for_condition_in_rx:
     is_receiver: bool -> Pos.t -> Pos.t -> Pos.t -> string -> string -> unit
   val invalid_function_type_for_condition_in_rx:

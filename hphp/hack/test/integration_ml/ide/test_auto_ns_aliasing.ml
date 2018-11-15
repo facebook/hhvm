@@ -123,6 +123,7 @@ let () =
     ~tco_disallow_scrutinee_case_value_type_mismatch:false
     ~tco_disallow_stringish_magic:false
     ~tco_disallow_anon_use_capture_by_ref:false
+    ~tco_disallow_invalid_arraykey:false
     ~tco_new_inference:false
     ~ignored_fixme_codes: ISet.empty
     ~forward_compatibility_level: ForwardCompatibilityLevel.default

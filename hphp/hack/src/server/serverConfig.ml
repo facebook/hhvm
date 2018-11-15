@@ -296,6 +296,7 @@ let load config_filename options =
     ~tco_disallow_anon_use_capture_by_ref:(bool_
       "disallow_anon_use_capture_by_ref" ~default:false config)
     ~tco_new_inference:(bool_ "new_inference" ~default:false config)
+    ~tco_disallow_invalid_arraykey:(bool_ "disallow_invalid_arraykey" ~default:false config)
     ~ignored_fixme_codes:(prepare_ignored_fixme_codes config)
     ~forward_compatibility_level:forward_compat_level
   in

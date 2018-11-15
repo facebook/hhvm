@@ -39,6 +39,7 @@ type t = {
   tco_disallow_stringish_magic : bool;
   tco_disallow_anon_use_capture_by_ref : bool;
   tco_new_inference : bool;
+  tco_disallow_invalid_arraykey : bool;
   ignored_fixme_codes : ISet.t;
   forward_compatibility_level : ForwardCompatibilityLevel.t;
 } [@@deriving show]
@@ -202,6 +203,7 @@ let default = {
  tco_disallow_stringish_magic = false;
  tco_disallow_anon_use_capture_by_ref = false;
  tco_new_inference = false;
+ tco_disallow_invalid_arraykey = false;
  ignored_fixme_codes = Errors.default_ignored_fixme_codes;
  forward_compatibility_level = ForwardCompatibilityLevel.default;
 }
@@ -249,6 +251,7 @@ let make ~tco_assume_php
          ~tco_disallow_stringish_magic
          ~tco_disallow_anon_use_capture_by_ref
          ~tco_new_inference
+         ~tco_disallow_invalid_arraykey
          ~ignored_fixme_codes
          ~forward_compatibility_level = {
                    tco_assume_php;
@@ -283,6 +286,7 @@ let make ~tco_assume_php
                    tco_disallow_stringish_magic;
                    tco_disallow_anon_use_capture_by_ref;
                    tco_new_inference;
+                   tco_disallow_invalid_arraykey;
                    forward_compatibility_level;
         }
 let tco_assume_php t = t.tco_assume_php
@@ -326,5 +330,6 @@ let tco_disallow_scrutinee_case_value_type_mismatch t =
 let tco_disallow_stringish_magic t = t.tco_disallow_stringish_magic
 let tco_disallow_anon_use_capture_by_ref t = t.tco_disallow_anon_use_capture_by_ref
 let tco_new_inference t = t.tco_new_inference
+let tco_disallow_invalid_arraykey t = t.tco_disallow_invalid_arraykey
 let ignored_fixme_codes t = t.ignored_fixme_codes
 let forward_compatibility_level t = t.forward_compatibility_level

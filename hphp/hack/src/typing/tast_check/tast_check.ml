@@ -30,6 +30,7 @@ let visitor = Tast_visitor.iter_with [
   Callconv_check.handler;
   Xhp_check.handler;
   Discarded_awaitable_check.handler;
+  Invalid_arraykey_check.handler;
 ]
 
 let program = visitor#go

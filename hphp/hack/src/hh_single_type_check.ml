@@ -188,6 +188,7 @@ let parse_options () =
   let new_inference = ref false in
   let all_errors = ref false in
   let batch_mode = ref false in
+  let disallow_invalid_arraykey = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -367,6 +368,9 @@ let parse_options () =
     "--batch-files",
         Arg.Set batch_mode,
         " Typecheck each file passed in independently";
+    "--disallow-invalid-arraykey",
+      Arg.Set disallow_invalid_arraykey,
+        " Disallow using values that get casted to arraykey at runtime as array keys";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -394,6 +398,7 @@ let parse_options () =
       GlobalOptions.tco_disallow_unset_on_varray = !disallow_unset_on_varray;
       GlobalOptions.tco_disallow_stringish_magic = !disallow_stringish_magic;
       GlobalOptions.tco_new_inference = !new_inference;
+      GlobalOptions.tco_disallow_invalid_arraykey = !disallow_invalid_arraykey;
       GlobalOptions.po_auto_namespace_map = !auto_namespace_map;
       GlobalOptions.po_enable_concurrent = !enable_concurrent;
   } in

@@ -149,7 +149,7 @@ ALWAYS_INLINE bool MaybeCountable::checkCount() const {
     return m_count == OneReference || m_count == MultiReference || m_count < 0;
   }
 
-  return m_count >= 1 || m_count <= UncountedValue || m_count == StaticValue;
+  return m_count >= 0 || m_count <= UncountedValue || m_count == StaticValue;
 }
 
 ALWAYS_INLINE bool Countable::checkCount() const {
@@ -157,7 +157,7 @@ ALWAYS_INLINE bool Countable::checkCount() const {
     return m_count == OneReference || m_count == MultiReference;
   }
 
-  return m_count >= 1;
+  return m_count >= 0;
 }
 
 ALWAYS_INLINE bool MaybeCountable::isRefCounted() const {

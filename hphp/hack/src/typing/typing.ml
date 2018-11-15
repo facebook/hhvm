@@ -4072,6 +4072,7 @@ and is_abstract_ft fty = match fty with
                 let fty = check_abstract_parent_meth (snd m) p fty in
                 check_coroutine_call env fty;
                 let env, _tel, _tuel, method_ = call ~tyvars:ISet.empty ~expected
+                  ~is_expr_statement
                   ~method_call_info:(TR.make_call_info ~receiver_is_self:false
                     ~is_static:false this_ty (snd m))
                   p env fty el uel in
@@ -4087,7 +4088,7 @@ and is_abstract_ft fty = match fty with
             let fty = check_abstract_parent_meth (snd m) p fty in
             check_coroutine_call env fty;
             let env, tel, tuel, ty =
-              call ~tyvars:ISet.empty ~expected
+              call ~tyvars:ISet.empty ~expected ~is_expr_statement
                 ~method_call_info:(TR.make_call_info ~receiver_is_self:false
                   ~is_static:true (Reason.Rwitness fpos, TUtils.this_of (Env.get_self env)) (snd m))
                 p env fty el uel in

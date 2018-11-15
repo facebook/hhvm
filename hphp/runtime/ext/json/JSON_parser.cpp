@@ -901,9 +901,19 @@ static void object_set(Variant &var,
       forceToDict(var).set(key, value);
     } else if (container_type == JSONContainerType::DARRAYS ||
                container_type == JSONContainerType::DARRAYS_AND_VARRAYS) {
-      forceToDArray(var).set(key, value);
+      int64_t i;
+      if (key.get()->isStrictlyInteger(i)) {
+        forceToDArray(var).set(i, value);
+      } else {
+        forceToDArray(var).set(key, value);
+      }
     } else {
-      forceToArray(var).set(key, value);
+      int64_t i;
+      if (key.get()->isStrictlyInteger(i)) {
+        forceToArray(var).set(i, value);
+      } else {
+        forceToArray(var).set(key, value);
+      }
     }
   }
 }

@@ -185,13 +185,18 @@ let log_tpenv env =
 
 let log_tvenv env =
   indentEnv "tvenv" (fun () ->
-    IMap.iter begin fun var _ ->
-      let lower = Typing_set.elements (Env.get_tyvar_lower_bounds env var) in
-      let upper = Typing_set.elements (Env.get_tyvar_upper_bounds env var) in
+    IMap.iter begin fun var
+      Env.{ lower_bounds; upper_bounds;
+        appears_covariantly; appears_contravariantly; _ } ->
+      let lower = Typing_set.elements lower_bounds in
+      let upper = Typing_set.elements upper_bounds in
       lnewline ();
       (if not (List.is_empty lower)
       then (log_type_list env lower; lprintf (Normal Green) " <: "));
-      lprintf (Bold Green) "#%d" var;
+      lprintf (Bold Green) "%s%s#%d"
+        (if appears_covariantly then "+" else "")
+        (if appears_contravariantly then "-" else "")
+        var;
       (if not (List.is_empty upper)
       then (lprintf (Normal Green) " <: "; log_type_list env upper))
       end env.Env.tvenv)

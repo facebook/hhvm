@@ -1952,9 +1952,9 @@ let subtype_method
     Errors.abstract_concrete_override ft_sub.ft_pos ft_super.ft_pos `method_;
   let ety_env =
     Phase.env_with_self env in
-  let env, ft_super_no_tvars =
+  let env, ft_super_no_tvars, _ =
     Phase.localize_ft ~use_pos:ft_super.ft_pos ~ety_env ~instantiate_tparams:false env ft_super in
-  let env, ft_sub_no_tvars =
+  let env, ft_sub_no_tvars, _ =
     Phase.localize_ft ~use_pos:ft_sub.ft_pos ~ety_env ~instantiate_tparams:false env ft_sub in
   let old_tpenv = env.Env.lenv.Env.tpenv in
 
@@ -2159,6 +2159,99 @@ let add_constraint
       else iter (n+1) env'
   in
     iter 0 env'
+
+
+let flip_variance v =
+  match v with
+  | Ast.Covariant -> Ast.Contravariant
+  | Ast.Contravariant -> Ast.Covariant
+  | Ast.Invariant -> Ast.Invariant
+
+let combine_variance v1 v2 =
+  match v1, v2 with
+  | Ast.Contravariant, v | v, Ast.Contravariant -> flip_variance v
+  | Ast.Invariant, _ | _, Ast.Invariant -> Ast.Invariant
+  | _ -> Ast.Covariant
+
+(* For type variables in vars, set `appears_covariantly` and
+ * `appears_contravariantly` in the type variable environment according to their
+ * position in `ty`. The current position of `ty` is indicated by `variance`.
+ *)
+let rec set_tyvar_variance ~variance ~tyvars env ty =
+  match snd ty with
+  | Tvar v ->
+    if ISet.mem v tyvars
+    then
+      match variance with
+      | Ast.Covariant -> Env.set_tyvar_appears_covariantly env v
+      | Ast.Contravariant -> Env.set_tyvar_appears_contravariantly env v
+      | Ast.Invariant ->
+        let env = Env.set_tyvar_appears_covariantly env v in
+        Env.set_tyvar_appears_contravariantly env v
+    else env
+  | Tany | Tnonnull | Terr | Tdynamic | Tobject | Tprim _ | Tanon _ | Tabstract(_, None) ->
+    env
+    (* Nullable is covariant *)
+  | Toption ty ->
+    set_tyvar_variance ~variance ~tyvars env ty
+    (* Tuples and unions are covariant *)
+  | Ttuple tyl | Tunresolved tyl ->
+    List.fold_left ~f:(set_tyvar_variance ~variance ~tyvars) ~init:env tyl
+    (* Shape data is covariant *)
+  | Tshape (_, m) ->
+    Nast.ShapeMap.fold begin fun _ { sft_ty; _ } env ->
+      set_tyvar_variance ~variance ~tyvars env sft_ty end m env
+    (* Functions are covariant in return type, contravariant in parameter types *)
+  | Tfun ft ->
+    let flipped = flip_variance variance in
+    let env = List.fold_left ~f:begin fun env { fp_type; _ } ->
+      set_tyvar_variance ~variance:flipped ~tyvars env fp_type end ~init:env ft.ft_params in
+    set_tyvar_variance ~variance ~tyvars env ft.ft_ret
+  | Tabstract (AKnewtype (name, tyl), _) ->
+    begin match Env.get_typedef env name with
+    | Some {td_tparams; _} ->
+      let variancel = List.map td_tparams (fun (v,_,_,_) -> combine_variance variance v) in
+      set_tyvar_variance_list ~variancel ~tyvars env tyl
+    | None ->
+      env
+    end
+  | Tabstract (_, Some ty) ->
+    set_tyvar_variance ~variance ~tyvars env ty
+    (* Classes carry their own variance declarations *)
+  | Tclass ((_, cid), tyl) ->
+    begin match Env.get_class env cid with
+    | None -> env
+    | Some {tc_tparams; _} ->
+      let variancel = List.map tc_tparams (fun (v,_,_,_) -> combine_variance variance v) in
+      set_tyvar_variance_list ~variancel ~tyvars env tyl
+    end
+    (* Arrays are covariant in key and data types *)
+  | Tarraykind ak ->
+    begin match ak with
+    | AKany | AKempty -> env
+    | AKvarray ty | AKvec ty | AKvarray_or_darray ty ->
+      set_tyvar_variance ~variance ~tyvars env ty
+    | AKdarray (ty1, ty2) | AKmap (ty1, ty2) ->
+      let env = set_tyvar_variance ~variance ~tyvars env ty1 in
+      set_tyvar_variance ~variance ~tyvars env ty2
+    | AKshape m ->
+      Nast.ShapeMap.fold begin fun _ (ty1, ty2) env ->
+        let env = set_tyvar_variance ~variance ~tyvars env ty1 in
+        set_tyvar_variance ~variance ~tyvars env ty2 end m env
+    | AKtuple m ->
+      IMap.fold (fun _ ty env -> set_tyvar_variance ~variance ~tyvars env ty) m env
+    end
+
+and set_tyvar_variance_list ~variancel ~tyvars env tyl =
+  match variancel, tyl with
+  | [], [] -> env
+  | variance::variancel, ty::tyl ->
+    let env = set_tyvar_variance ~variance ~tyvars env ty in
+    set_tyvar_variance_list ~variancel ~tyvars env tyl
+  | _ -> env
+
+let set_tyvar_variance ~tyvars env ty =
+  set_tyvar_variance ~variance:Ast.Covariant ~tyvars env ty
 
 (*****************************************************************************)
 (* Exporting *)

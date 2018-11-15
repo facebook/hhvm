@@ -95,3 +95,9 @@ val add_constraint :
   locl ty ->
   locl ty ->
   Env.env
+
+val set_tyvar_variance :
+  tyvars:ISet.t ->
+  Env.env ->
+  locl ty ->
+  Env.env

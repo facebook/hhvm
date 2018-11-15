@@ -1678,7 +1678,7 @@ and expr_
           Errors.re_prefixed_non_string p "Non-strings";
           expr_error env p (Reason.Rregex p))
   | Fun_id x ->
-      let env, fty = fun_type_of_id env x [] in
+      let env, fty, _tyvars = fun_type_of_id env x [] in
       begin match fty with
       | _, Tfun fty -> check_deprecated (fst x) fty;
       | _ -> ()
@@ -1840,7 +1840,7 @@ and expr_
         match ty with
         | (r, Tfun ft) ->
           begin
-            let env, ft = Phase.localize_ft ~use_pos:p ~ety_env env ft in
+            let env, ft, _tyvars = Phase.localize_ft ~use_pos:p ~ety_env env ft in
             let ty = r, Tfun ft in
             check_deprecated p ft;
             match ce_visibility with
@@ -2349,7 +2349,7 @@ and expr_
        *)
       let ety_env =
         { (Phase.env_with_self env) with from_class = Some CIstatic } in
-      let env, declared_ft = Phase.localize_ft ~use_pos:p ~ety_env env declared_ft in
+      let env, declared_ft, _tyvars = Phase.localize_ft ~use_pos:p ~ety_env env declared_ft in
       List.iter idl (check_escaping_var env);
       (* Ensure lambda arity is not Fellipsis in strict mode *)
       begin match declared_ft.ft_arity with
@@ -3511,7 +3511,7 @@ and is_abstract_ft fty = match fty with
     make_call env (T.make_typed_expr fpos (Reason.Rnone, TUtils.tany env) (T.Id id)) [] tel [] ty in
   (* For special functions and pseudofunctions with a definition in hhi. *)
   let make_call_special_from_def env id tel ty_ =
-    let env, fty = fun_type_of_id env id hl in
+    let env, fty, _tyvars = fun_type_of_id env id hl in
     let ty = match fty with
       | _, Tfun ft -> ft.ft_ret
       | _ -> (Reason.Rwitness p, ty_) in
@@ -3652,8 +3652,8 @@ and is_abstract_ft fty = match fty with
       when array_filter = SN.StdlibFunctions.array_filter && el <> [] && uel = [] ->
       check_function_in_suspend SN.StdlibFunctions.array_filter;
       (* dispatch the call to typecheck the arguments *)
-      let env, fty = fun_type_of_id env id hl in
-      let env, tel, tuel, res = call ~expected p env fty el uel in
+      let env, fty, tyvars = fun_type_of_id env id hl in
+      let env, tel, tuel, res = call ~tyvars ~expected p env fty el uel in
       (* but ignore the result and overwrite it with custom return type *)
       let x = List.hd_exn el in
       let env, _tx, ty = expr env x in
@@ -3742,7 +3742,7 @@ and is_abstract_ft fty = match fty with
   | Id ((_, array_map) as x)
       when array_map = SN.StdlibFunctions.array_map && el <> [] && uel = [] ->
       check_function_in_suspend SN.StdlibFunctions.array_map;
-      let env, fty = fun_type_of_id env x [] in
+      let env, fty, tyvars = fun_type_of_id env x [] in
       let env, fty = Env.expand_type env fty in
       let env, fty = match fty, el with
         | ((r_fty, Tfun fty), _::args) when args <> [] ->
@@ -3903,7 +3903,7 @@ and is_abstract_ft fty = match fty with
               build_function env (fun tr ->
                 (r_fty, Tarraykind (AKvec(tr)))))
         | _ -> env, fty in
-      let env, tel, tuel, ty = call ~expected p env fty el [] in
+      let env, tel, tuel, ty = call ~tyvars ~expected p env fty el [] in
       make_call env (T.make_typed_expr fpos fty (T.Id x)) hl tel tuel ty
   (* Special function `idx` *)
   | Id ((_, idx) as id) when idx = SN.FB.idx ->
@@ -3939,9 +3939,9 @@ and is_abstract_ft fty = match fty with
           | _ -> fty.ft_params, fty.ft_ret in
         let fty = { fty with ft_params = params; ft_ret = ret } in
         let ety_env = Phase.env_with_self env in
-        let env, fty = Phase.localize_ft ~use_pos:p ~ety_env env fty in
+        let env, fty, tyvars = Phase.localize_ft ~use_pos:p ~ety_env env fty in
         let tfun = Reason.Rwitness fty.ft_pos, Tfun fty in
-        let env, tel, _tuel, ty = call ~expected p env tfun el [] in
+        let env, tel, _tuel, ty = call ~tyvars ~expected p env tfun el [] in
         let env, ty = match ty with
           | r, Toption ty ->
             let env, ty = TUtils.non_null env ty in
@@ -4047,7 +4047,7 @@ and is_abstract_ft fty = match fty with
         let fty = check_abstract_parent_meth (snd m) p fty in
         check_coroutine_call env fty;
         let env, tel, tuel, ty =
-          call ~expected ~is_expr_statement
+          call ~tyvars:ISet.empty ~expected ~is_expr_statement
           ~method_call_info:(TR.make_call_info ~receiver_is_self:false
               ~is_static:true (Reason.Rwitness fpos, TUtils.this_of (Env.get_self env)) (snd m))
           p env fty el uel in
@@ -4071,7 +4071,7 @@ and is_abstract_ft fty = match fty with
               begin fun (env, fty, _) ->
                 let fty = check_abstract_parent_meth (snd m) p fty in
                 check_coroutine_call env fty;
-                let env, _tel, _tuel, method_ = call ~expected
+                let env, _tel, _tuel, method_ = call ~tyvars:ISet.empty ~expected
                   ~method_call_info:(TR.make_call_info ~receiver_is_self:false
                     ~is_static:false this_ty (snd m))
                   p env fty el uel in
@@ -4087,7 +4087,7 @@ and is_abstract_ft fty = match fty with
             let fty = check_abstract_parent_meth (snd m) p fty in
             check_coroutine_call env fty;
             let env, tel, tuel, ty =
-              call ~expected
+              call ~tyvars:ISet.empty ~expected
                 ~method_call_info:(TR.make_call_info ~receiver_is_self:false
                   ~is_static:true (Reason.Rwitness fpos, TUtils.this_of (Env.get_self env)) (snd m))
                 p env fty el uel in
@@ -4134,7 +4134,7 @@ and is_abstract_ft fty = match fty with
         | _ -> () in
       check_coroutine_call env fty;
       let env, tel, tuel, ty =
-        call ~expected
+        call ~tyvars:ISet.empty ~expected
         ~method_call_info:(TR.make_call_info ~receiver_is_self:(e1 = CIself)
           ~is_static:true ty1 (snd m))
         ~is_expr_statement p env fty el uel in
@@ -4150,7 +4150,7 @@ and is_abstract_ft fty = match fty with
       let tel = ref [] and tuel = ref [] and tftyl = ref [] in
       let fn = (fun (env, fty, _) ->
         let env, tel_, tuel_, method_ =
-          call
+          call ~tyvars:ISet.empty
             ~expected
             ~method_call_info:(TR.make_call_info ~receiver_is_self:false
               ~is_static:false ty1 (snd m))
@@ -4180,7 +4180,7 @@ and is_abstract_ft fty = match fty with
       let k = (fun (env, fty, _) ->
         check_coroutine_call env fty;
         let env, tel_, tuel_, method_ =
-          call ~expected
+          call ~tyvars:ISet.empty ~expected
             ~method_call_info:(TR.make_call_info ~receiver_is_self:false
               ~is_static:false ty1 (snd m))
             ~is_expr_statement p env fty el uel in
@@ -4199,16 +4199,16 @@ and is_abstract_ft fty = match fty with
 
   (* Function invocation *)
   | Fun_id x ->
-      let env, fty = fun_type_of_id env x hl in
+      let env, fty, tyvars = fun_type_of_id env x hl in
       check_coroutine_call env fty;
       let env, tel, tuel, ty =
-        call ~expected ~is_expr_statement p env fty el uel in
+        call ~tyvars ~expected ~is_expr_statement p env fty el uel in
       make_call env (T.make_typed_expr fpos fty (T.Fun_id x)) hl tel tuel ty
   | Id (_, id as x) ->
-      let env, fty = fun_type_of_id env x hl in
+      let env, fty, tyvars = fun_type_of_id env x hl in
       check_coroutine_call env fty;
       let env, tel, tuel, ty =
-        call ~expected ~is_expr_statement p env fty el uel in
+        call ~tyvars ~expected ~is_expr_statement p env fty el uel in
       let is_mutable = id = SN.Rx.mutable_ in
       let is_move = id = SN.Rx.move in
       let is_freeze = id = SN.Rx.freeze in
@@ -4247,19 +4247,17 @@ and is_abstract_ft fty = match fty with
       let env, te, fty = expr env e in
       check_coroutine_call env fty;
       let env, tel, tuel, ty =
-        call ~expected ~is_expr_statement p env fty el uel in
+        call ~tyvars:ISet.empty ~expected ~is_expr_statement p env fty el uel in
       make_call env te hl tel tuel ty
 
 and fun_type_of_id env x hl =
-  let env, fty =
-    match Env.get_fun env (snd x) with
-    | None -> let env, _, ty = unbound_name env x in env, ty
-    | Some fty ->
-        let ety_env = Phase.env_with_self env in
-        let env, fty = Phase.localize_ft ~use_pos:(fst x) ~explicit_tparams:hl ~ety_env env fty in
-        env, (Reason.Rwitness fty.ft_pos, Tfun fty)
-  in
-  env, fty
+  match Env.get_fun env (snd x) with
+  | None -> let env, _, ty = unbound_name env x in env, ty, ISet.empty
+  | Some fty ->
+      let ety_env = Phase.env_with_self env in
+      let env, fty, tyvars =
+        Phase.localize_ft ~use_pos:(fst x) ~explicit_tparams:hl ~ety_env env fty in
+      env, (Reason.Rwitness fty.ft_pos, Tfun fty), tyvars
 
 (**
  * Checks if a class (given by cty) contains a given static method.
@@ -4378,7 +4376,7 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
               | Some {ce_visibility = vis; ce_lsb = lsb; ce_type = lazy (r, Tfun ft); _} ->
                 let p_vis = Reason.to_pos r in
                 TVis.check_class_access p env (p_vis, vis, lsb) cid class_;
-                let env, ft =
+                let env, ft, _tyvars =
                   Phase.localize_ft ~use_pos:p ~ety_env ~explicit_tparams:explicit_tparams env ft in
                 let arity_pos = match ft.ft_params with
                   | [_; { fp_pos; fp_kind = FPnormal; _ }] -> fp_pos
@@ -4397,7 +4395,7 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
               begin match method_ with
                 (* We special case Tfun here to allow passing in explicit tparams to localize_ft. *)
                 | r, Tfun ft ->
-                  let env, ft =
+                  let env, ft, _tyvars =
                     Phase.localize_ft ~use_pos:p ~ety_env ~explicit_tparams:explicit_tparams env ft
                   in env, (r, Tfun ft)
                 | _ -> Phase.localize ~ety_env env method_
@@ -4558,7 +4556,7 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
 
           (* the return type of __call can depend on the class params or be this *)
           let ety_env = mk_ety_env r class_info x paraml in
-          let env, ft = Phase.localize_ft ~use_pos:id_pos ~ety_env env ft in
+          let env, ft, _tyvars = Phase.localize_ft ~use_pos:id_pos ~ety_env env ft in
 
           let arity_pos = match ft.ft_params with
           | [_; { fp_pos; fp_kind = FPnormal; _ }] -> fp_pos
@@ -4600,7 +4598,7 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
             | (r, Tfun ft) ->
               (* We special case function types here to be able to pass explicit type
                * parameters. *)
-              let (env, ft) =
+              let env, ft, _tyvars =
                 Phase.localize_ft ~use_pos:id_pos ~explicit_tparams ~ety_env env ft in
               (env, (r, Tfun ft))
             | _ -> Phase.localize ~ety_env env member_ty
@@ -4908,7 +4906,7 @@ and static_class_id ~check_constraints p env =
       let env, te, ty = expr env e in
       let rec resolve_ety ty =
         let env, ty = TUtils.fold_unresolved env ty in
-        let _, ty = Env.expand_type env ty in
+        let env, ty = Env.expand_type env ty in
         match TUtils.get_base_type env ty with
         | _, Tabstract (AKnewtype (classname, [the_cls]), _) when
             classname = SN.Classes.cClassname -> resolve_ety the_cls
@@ -4958,7 +4956,7 @@ and call_construct p env class_ params el uel cid =
     | Some { ce_visibility = vis; ce_type = lazy m; _ } ->
       TVis.check_obj_access p env (Reason.to_pos (fst m), vis);
       let env, m = Phase.localize ~ety_env env m in
-      let env, tel, tuel, _ty = call ~expected:None p env m el uel in
+      let env, tel, tuel, _ty = call ~tyvars:ISet.empty ~expected:None p env m el uel in
       env, tcid, tel, tuel, m
 
 and check_arity ?(did_unpack=false) pos pos_def (arity:int) exp_arity =
@@ -5033,9 +5031,9 @@ and inout_write_back env { fp_type; _ } (_, e) =
       env
     | _ -> env
 
-and call ~expected ?(is_expr_statement=false) ?method_call_info pos env fty el uel =
+and call ~tyvars ~expected ?(is_expr_statement=false) ?method_call_info pos env fty el uel =
   let env, tel, tuel, ty =
-    call_ ~expected ~is_expr_statement ~method_call_info pos env fty el uel in
+    call_ ~tyvars ~expected ~is_expr_statement ~method_call_info pos env fty el uel in
   (* We need to solve the constraints after every single function call.
    * The type-checker is control-flow sensitive, the same value could
    * have different type depending on the branch that we are in.
@@ -5044,7 +5042,7 @@ and call ~expected ?(is_expr_statement=false) ?method_call_info pos env fty el u
   let env = Env.check_todo env in
   env, tel, tuel, ty
 
-and call_ ~expected ~method_call_info ~is_expr_statement pos env fty el uel =
+and call_ ~tyvars ~expected ~method_call_info ~is_expr_statement pos env fty el uel =
   let make_unpacked_traversable_ty pos ty =
     let unpack_r = Reason.Runpack_param pos in
     unpack_r, Tclass ((pos, SN.Collections.cTraversable), [ty])
@@ -5077,10 +5075,10 @@ and call_ ~expected ~method_call_info ~is_expr_statement pos env fty el uel =
     in
     env, tel, [], ty
   | _, Tunresolved [ty] ->
-    call ~expected pos env ty el uel
+    call ~tyvars ~expected pos env ty el uel
   | r, Tunresolved tyl ->
     let env, retl = List.map_env env tyl begin fun env ty ->
-      let env, _, _, ty = call ~expected pos env ty el uel in env, ty
+      let env, _, _, ty = call ~tyvars ~expected pos env ty el uel in env, ty
     end in
     let env, ty = TUtils.in_var env (r, Tunresolved retl) in
     env, [], [], ty
@@ -5094,6 +5092,8 @@ and call_ ~expected ~method_call_info ~is_expr_statement pos env fty el uel =
     check_deprecated pos ft;
     let env, var_param = variadic_param env ft in
 
+    (* Set variance of type variables appearing in the return type *)
+    let env = SubType.set_tyvar_variance ~tyvars env ft.ft_ret in
     (* Force subtype with expected result *)
     let env = check_expected_ty "Call result" env ft.ft_ret expected in
 
@@ -6638,7 +6638,7 @@ and overload_function make_call fpos p env (cpos, class_id) method_id el uel f =
      but ignore the result and overwrite with custom one *)
   let (env, tel, tuel, res), has_error = Errors.try_with_error
     (* TODO: Should we be passing hints here *)
-    (fun () -> (call ~expected:None p env fty el uel), false)
+    (fun () -> (call ~tyvars:ISet.empty ~expected:None p env fty el uel), false)
     (fun () -> (env, [], [], (Reason.Rwitness p, Typing_utils.tany env)), true) in
   (* if there are errors already stop here - going forward would
    * report them twice *)

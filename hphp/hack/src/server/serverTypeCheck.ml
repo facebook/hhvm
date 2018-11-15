@@ -150,14 +150,6 @@ let add_old_decls old_files_info fast =
       Relative_path.Map.add acc ~key:filename ~data:info_names
   end ~init:fast
 
-let reparse_infos files_info fast =
-  Relative_path.Map.fold fast ~f:begin fun x _y acc ->
-    try
-      let info = Relative_path.Map.find_unsafe files_info x in
-      Relative_path.Map.add acc ~key:x ~data:info
-    with Not_found -> acc
-  end ~init:Relative_path.Map.empty
-
 (*****************************************************************************)
 (* Removes the names that were defined in the files *)
 (*****************************************************************************)
@@ -820,15 +812,6 @@ end = functor(CheckKind:CheckKindType) -> struct
     let memory_cap = genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb in
     let errorl', env , cancelled = Typing_check_service.go_with_interrupt
       genv.workers env.tcopt dynamic_view_files fast ~interrupt ~memory_cap in
-    let errorl' = match ServerArgs.ai_mode genv.options with
-      | None -> errorl'
-      | Some ai_opt ->
-        let fast_infos = reparse_infos files_info fast in
-        let ae = Ai.go_incremental
-          Typing_check_utils.type_file
-          genv.workers fast_infos env.tcopt ai_opt in
-        (Errors.merge errorl' ae)
-    in
     (* Add new things that need to be rechecked *)
     let needs_recheck =
       Relative_path.Set.union env.needs_recheck lazy_check_later in

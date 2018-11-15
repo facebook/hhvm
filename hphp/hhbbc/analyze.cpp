@@ -395,11 +395,6 @@ FuncAnalysis do_analyze_collect(const Index& index,
       auto stateOut = ai.bdata[blk->id].stateIn;
       auto interp   = Interp { index, ctx, collect, blk, stateOut };
       auto flags    = run(interp, propagate);
-      auto& stateIn = ai.bdata[blk->id].stateIn;
-      stateIn.speculated                = stateOut.speculated;
-      stateIn.speculatedPops            = stateOut.speculatedPops;
-      stateIn.speculatedIsUnconditional = stateOut.speculatedIsUnconditional;
-      stateIn.speculatedIsFallThrough   = stateOut.speculatedIsFallThrough;
       if (any(collect.opts & CollectionOpts::EffectFreeOnly) &&
           !collect.effectFree) {
         break;

@@ -36,7 +36,6 @@
 
 #include "hphp/hhbbc/hhbbc.h"
 #include "hphp/hhbbc/analyze.h"
-#include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/cfg-opts.h"
 #include "hphp/hhbbc/dce.h"
 #include "hphp/hhbbc/func-util.h"
@@ -496,8 +495,8 @@ bool propagate_constants(const Bytecode& bc, State& state,
  * Create a block similar to another block (but with no bytecode in it yet).
  */
 php::Block* make_block(FuncAnalysis& ainfo,
-                       const php::Block* srcBlk,
-                       const State& state) {
+                                    const php::Block* srcBlk,
+                                    const State& state) {
   FTRACE(1, " ++ new block {}\n", ainfo.ctx.func->blocks.size());
   assert(ainfo.bdata.size() == ainfo.ctx.func->blocks.size());
 
@@ -520,8 +519,8 @@ php::Block* make_block(FuncAnalysis& ainfo,
 }
 
 php::Block* make_fatal_block(FuncAnalysis& ainfo,
-                             const php::Block* srcBlk,
-                             const State& state) {
+                                          const php::Block* srcBlk,
+                                          const State& state) {
   auto blk = make_block(ainfo, srcBlk, state);
   auto const srcLoc = srcBlk->hhbcs.back().srcLoc;
   blk->hhbcs = {
@@ -552,8 +551,7 @@ void first_pass(const Index& index,
   auto peephole = make_peephole(newBCs, index, ctx);
   std::vector<PeepholeStackElem> srcStack(state.stack.size());
 
-  for (auto it = blk->hhbcs.begin(), end = blk->hhbcs.end(); it != end; ) {
-    auto& op = *it;
+  for (auto& op : blk->hhbcs) {
     FTRACE(2, "  == {}\n", show(ctx.func, op));
 
     if (options.Peephole) {
@@ -576,7 +574,6 @@ void first_pass(const Index& index,
       }
     };
 
-    auto speculated = false;
     // The peephole wants the old values of srcStack, so defer the update to the
     // end of the loop.
     SCOPE_EXIT {
@@ -585,10 +582,6 @@ void first_pass(const Index& index,
       // the taken path vs the non-taken path, so just skip if jmpDest
       // is set.
       if (flags.jmpDest != NoBlockId) return;
-      // similarly, if we speculated some blocks, state.stack may no
-      // longer match srcStack; but again, this only happens at the
-      // end of the block, so no need to update srcStack.
-      if (speculated) return;
       if (op.op == Op::CGetL2) {
         srcStack.emplace(srcStack.end() - 1,
                          op.op, (state.stack.end() - 2)->type.subtypeOf(BStr));
@@ -641,198 +634,111 @@ void first_pass(const Index& index,
       break;
     }
 
-    auto speculate = [&] (BlockId new_target, auto fun) {
-      auto bc = fun();
-      if (bc) {
-        if (bc->op != Op::Nop) gen(*bc);
-        if (interp.state.speculatedPops) {
-          auto const new_block = make_block(ainfo, blk, interp.state);
-          auto fixer = [&] (const BlockId& t) {
-            if (t == new_target) const_cast<BlockId&>(t) = new_block->id;
-          };
-          forEachTakenEdge(*bc, fixer);
-          fixer(blk->fallthrough);
-          new_block->fallthrough = new_target;
-          new_block->hhbcs.insert(new_block->hhbcs.end(), bc::PopC {});
-          return;
-        }
-      }
-      for (auto i = 0; i < interp.state.speculatedPops; i++) {
-        gen(bc::PopC {});
-      }
-    };
-
-    [&] {
-      assertx(!interp.state.speculatedIsUnconditional ||
-              interp.state.speculated != NoBlockId);
-      auto const jmpDest =
-        ++it == end && interp.state.speculatedIsUnconditional ?
-        interp.state.speculated : flags.jmpDest;
-      if (!options.RemoveDeadBlocks || jmpDest == NoBlockId) {
-        genOut(&op);
-        return;
-      }
-      auto const wasFallThrough =
-        interp.state.speculatedIsUnconditional ?
-        interp.state.speculatedIsFallThrough : jmpDest == blk->fallthrough;
-
-      switch (op.op) {
-        /*
-         * For jumps, we need to pop the cell that was on the stack
-         * for the conditional jump.  Note: for jumps this also
-         * conceptually needs to execute any side effects a conversion
-         * to bool can have.  (Currently that is none.)
-         */
+    if (options.RemoveDeadBlocks) {
+      if (flags.jmpDest != NoBlockId) {
+        switch (op.op) {
+          /*
+           * For jumps, we need to pop the cell that was on the stack for the
+           * conditional jump.  Note: for jumps this also conceptually
+           * needs to execute any side effects a conversion to bool can
+           * have.  (Currently that is none.)
+           */
         case Op::JmpNZ:
         case Op::JmpZ:
         case Op::SSwitch:
         case Op::Switch:
           always_assert(!flags.wasPEI);
-          speculate(
-            jmpDest,
-            [&] () -> folly::Optional<Bytecode> {
-              gen(bc::PopC {});
-              blk->fallthrough = jmpDest;
-              return folly::none;
-            }
-          );
-          return;
+          blk->fallthrough = flags.jmpDest;
+          gen(bc::PopC {});
+          continue;
         case Op::IterInit:
         case Op::LIterInit:
         case Op::IterInitK:
         case Op::LIterInitK:
-          speculate(
-            jmpDest,
-            [&] () -> folly::Optional<Bytecode> {
-              auto set_target = [&] (BlockId t) {
-                if (op.op == Op::IterInit) {
-                  op.IterInit.target = t;
-                } else if (op.op == Op::IterInitK) {
-                  op.IterInitK.target = t;
-                } else if (op.op == Op::LIterInit) {
-                  op.LIterInit.target = t;
-                } else if (op.op == Op::LIterInitK) {
-                  op.LIterInitK.target = t;
-                } else {
-                  assertx(false);
-                }
-              };
-              if (!wasFallThrough) {
-                /*
-                 * For iterators, if we'll always take the taken branch
-                 * (which means there's nothing to iterate over), and the
-                 * op cannot raise an exception, we can just pop the input
-                 * and set the fall-through to the taken branch. If not,
-                 * we have to keep the op, but we can make sure we'll
-                 * fatal if we ever actually take the fall-through.
-                 */
-                if (!flags.wasPEI) {
-                  if (op.op != Op::LIterInit && op.op != Op::LIterInitK) {
-                    gen(bc::PopC {});
-                  }
-                  blk->fallthrough = jmpDest;
-                  return folly::none;
-                }
-                set_target(jmpDest);
-                blk->fallthrough = make_fatal_block(ainfo, blk, state)->id;
-                return op;
+          if (flags.jmpDest != blk->fallthrough) {
+            /*
+             * For iterators, if we'll always take the taken branch (which means
+             * there's nothing to iterate over), and the op cannot raise an
+             * exception, we can just pop the input and set the fall-through to
+             * the taken branch. If not, we have to keep the op, but we can make
+             * sure we'll fatal if we ever actually take the fall-through.
+             */
+            if (!flags.wasPEI) {
+              blk->fallthrough = flags.jmpDest;
+              if (op.op != Op::LIterInit && op.op != Op::LIterInitK) {
+                gen(bc::PopC {});
               }
-              /*
-               * We can't ever optimize away iteration initialization if
-               * we know we'll always fall-through (which means we enter
-               * the loop) because we need to initialize the
-               * iterator. We can ensure, however, that the taken branch
-               * is a fatal.
-               */
-              set_target(make_fatal_block(ainfo, blk, state)->id);
-              blk->fallthrough = jmpDest;
-              return op;
+              continue;
             }
-          );
-          return;
+            blk->fallthrough = make_fatal_block(ainfo, blk, state)->id;
+          } else {
+            /*
+             * We can't ever optimize away iteration initialization if we know
+             * we'll always fall-through (which means we enter the loop) because
+             * we need to initialize the iterator. We can ensure, however, that
+             * the taken branch is a fatal.
+             */
+            auto fatal = make_fatal_block(ainfo, blk, state)->id;
+            if (op.op == Op::IterInit) {
+              op.IterInit.target = fatal;
+            } else if (op.op == Op::IterInitK) {
+              op.IterInitK.target = fatal;
+            } else if (op.op == Op::LIterInit) {
+              op.LIterInit.target = fatal;
+            } else if (op.op == Op::LIterInitK) {
+              op.LIterInitK.target = fatal;
+            }
+          }
+          break;
         case Op::IterNext:
         case Op::IterNextK:
         case Op::LIterNext:
         case Op::LIterNextK:
-          assertx(wasFallThrough);
-          speculate(
-            jmpDest,
-            [&] () -> folly::Optional<Bytecode> {
-              /*
-               * If we're nexting an iterator and we know we'll always
-               * fall-through (which means the iteration is over), and we
-               * can't raise an exception when nexting the iterator, we
-               * can just free the iterator and let it fall-through. If
-               * not, we can at least ensure the taken branch is a fatal.
-               */
-              blk->fallthrough = jmpDest;
-              if (!flags.wasPEI) {
-                if (op.op == Op::IterNext) {
-                  gen(bc::IterFree { op.IterNext.iter1 });
-                } else if (op.op == Op::IterNextK) {
-                  gen(bc::IterFree { op.IterNextK.iter1 });
-                } else if (op.op == Op::LIterNext) {
-                  gen(bc::LIterFree { op.LIterNext.iter1, op.LIterNext.loc2 });
-                } else {
-                  gen(
-                    bc::LIterFree { op.LIterNextK.iter1, op.LIterNextK.loc2 }
-                  );
-                }
-                blk->multiSucc = false;
-                return folly::none;
-              }
-              auto const fatal = make_fatal_block(ainfo, blk, state)->id;
-              if (op.op == Op::IterNext) {
-                op.IterNext.target = fatal;
-              } else if (op.op == Op::IterNextK) {
-                op.IterNextK.target = fatal;
-              } else if (op.op == Op::LIterNext) {
-                op.LIterNext.target = fatal;
-              } else {
-                op.LIterNextK.target = fatal;
-              }
-              return op;
+          assertx(flags.jmpDest == blk->fallthrough);
+          /*
+           * If we're nexting an iterator and we know we'll always fall-through
+           * (which means the iteration is over), and we can't raise an
+           * exception when nexting the iterator, we can just free the iterator
+           * and let it fall-through. If not, we can at least ensure the taken
+           * branch is a fatal.
+           */
+          if (!flags.wasPEI) {
+            if (op.op == Op::IterNext) {
+              gen(bc::IterFree { op.IterNext.iter1 });
+            } else if (op.op == Op::IterNextK) {
+              gen(bc::IterFree { op.IterNextK.iter1 });
+            } else if (op.op == Op::LIterNext) {
+              gen(bc::LIterFree { op.LIterNext.iter1, op.LIterNext.loc2 });
+            } else {
+              gen(bc::LIterFree { op.LIterNextK.iter1, op.LIterNextK.loc2 });
             }
-          );
-          return;
+            continue;
+          } else if (op.op == Op::IterNext) {
+            op.IterNext.target = make_fatal_block(ainfo, blk, state)->id;
+          } else if (op.op == Op::IterNextK) {
+            op.IterNextK.target = make_fatal_block(ainfo, blk, state)->id;
+          } else if (op.op == Op::LIterNext) {
+            op.LIterNext.target = make_fatal_block(ainfo, blk, state)->id;
+          } else {
+            op.LIterNextK.target = make_fatal_block(ainfo, blk, state)->id;
+          }
+          break;
         case Op::MemoGet:
-          speculate(
-            jmpDest,
-            [&] () -> folly::Optional<Bytecode> {
-              if (!wasFallThrough) {
-                if (!flags.wasPEI) {
-                  blk->fallthrough = jmpDest;
-                  return folly::none;
-                }
-                op.MemoGet.target = jmpDest;
-                blk->fallthrough = make_fatal_block(ainfo, blk, state)->id;
-                return op;
-              }
-              blk->fallthrough = jmpDest;
-              return op;
+          if (flags.jmpDest != blk->fallthrough) {
+            if (!flags.wasPEI) {
+              blk->fallthrough = flags.jmpDest;
+              continue;
             }
-          );
-          return;
+            blk->fallthrough = make_fatal_block(ainfo, blk, state)->id;
+          }
+          break;
         default:
           always_assert(0 && "unsupported jmpDest");
+        }
       }
-    }();
-
-    if (it == end) {
-      if (options.RemoveDeadBlocks &&
-          interp.state.speculated != NoBlockId &&
-          !interp.state.speculatedIsUnconditional &&
-          interp.state.speculatedIsFallThrough) {
-        assertx(blk->fallthrough != NoBlockId);
-        speculate(interp.state.speculated,
-                  [&] () -> folly::Optional<Bytecode> {
-                    blk->fallthrough = interp.state.speculated;
-                    if (interp.state.speculatedPops) return { bc::Nop{} };
-                    return folly::none;
-                  });
-      }
-      break;
     }
+
+    genOut(&op);
   }
 
   if (options.Peephole) {

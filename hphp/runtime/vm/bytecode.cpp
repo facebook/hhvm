@@ -2742,11 +2742,13 @@ Array resolveAndVerifyTypeStructureHelper(
   Class* calledCls = nullptr;
   if (typeStructureCouldBeNonStatic(ts)) {
     auto const frame = vmfp();
-    if (frame && frame->func() && frame->func()->isMethod()) {
+    if (frame && frame->func()) {
       declaringCls = frame->func()->cls();
-      calledCls = frame->hasClass()
-        ? frame->getClass()
-        : frame->getThis()->getVMClass();
+      if (declaringCls) {
+        calledCls = frame->hasClass()
+          ? frame->getClass()
+          : frame->getThis()->getVMClass();
+      }
     }
   }
   return resolveAndVerifyTypeStructure<isAsOp>(

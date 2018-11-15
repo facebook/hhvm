@@ -682,6 +682,12 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
         snprintf(n, sizeof(n), "%.*s", namelen, name);
       }
 
+      const auto n_str = String(n, CopyString);
+      int64_t n_int;
+      const auto n_key = n_str.get()->isStrictlyInteger(n_int)
+        ? Variant(n_int)
+        : Variant(n_str);
+
       if (size != 0 && size != -1 && INT_MAX - size + 1 < inputpos) {
         throw_invalid_argument("Type %c: integer overflow", type);
         inputpos = 0;
@@ -730,8 +736,7 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
           if (type=='A')
             len++;
 
-          ret.set(String(n, CopyString),
-                  String(input + inputpos, len, CopyString));
+          ret.set(n_key, String(input + inputpos, len, CopyString));
           break;
         }
 
@@ -774,15 +779,14 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
           }
 
           s.setSize(len);
-          ret.set(String(n, CopyString), s);
+          ret.set(n_key, s);
           break;
         }
 
         case 'c':
         case 'C': {
           int issigned = (type == 'c') ? (input[inputpos] & 0x80) : 0;
-          ret.set(String(n, CopyString),
-                  unpack(&input[inputpos], 1, issigned, byte_map));
+          ret.set(n_key, unpack(&input[inputpos], 1, issigned, byte_map));
           break;
         }
 
@@ -802,8 +806,7 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
             map = little_endian_short_map;
           }
 
-          ret.set(String(n, CopyString),
-                  unpack(&input[inputpos], 2, issigned, map));
+          ret.set(n_key, unpack(&input[inputpos], 2, issigned, map));
           break;
         }
 
@@ -823,10 +826,10 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
 
           v |= unpack(&input[inputpos], sizeof(int), issigned, int_map);
           if (type == 'i') {
-            ret.set(String(n, CopyString), v);
+            ret.set(n_key, v);
           } else {
             uint64_t u64 = uint32_t(v);
-            ret.set(String(n, CopyString), u64);
+            ret.set(n_key, u64);
           }
           break;
         }
@@ -856,10 +859,10 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
 
           v |= unpack(&input[inputpos], 4, issigned, map);
           if (type == 'l') {
-            ret.set(String(n, CopyString), v);
+            ret.set(n_key, v);
           } else {
             uint64_t u64 = uint32_t(v);
-            ret.set(String(n, CopyString), u64);
+            ret.set(n_key, u64);
           }
           break;
         }
@@ -884,10 +887,10 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
           v = unpack(&input[inputpos], 8, issigned, map);
 
           if (type == 'q') {
-            ret.set(String(n, CopyString), v);
+            ret.set(n_key, v);
           } else {
             uint64_t u64 = uint64_t(v);
-            ret.set(String(n, CopyString), u64);
+            ret.set(n_key, u64);
           }
 
           break;
@@ -897,7 +900,7 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
           float v;
 
           memcpy(&v, &input[inputpos], sizeof(float));
-          ret.set(String(n, CopyString), (double)v);
+          ret.set(n_key, (double)v);
           break;
         }
 

@@ -613,7 +613,6 @@ String HHVM_FUNCTION(uniqid, const String& prefix /* = null_string */,
 }
 
 Variant HHVM_FUNCTION(unpack, const String& format, const String& data) {
-  SuppressHACIntishCastNotices shacn;
   return ZendPack().unpack(format, data);
 }
 

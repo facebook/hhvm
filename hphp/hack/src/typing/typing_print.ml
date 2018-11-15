@@ -411,12 +411,14 @@ module Full = struct
       | _ -> text "[fun]"
       end
     | Tunresolved [] -> text "[unresolved]"
-    | Tunresolved [ty] ->
-      if !show_tvars then Concat [text "("; k ty; text ")"] else k ty
     | Tunresolved tyl ->
+      let tyl = List.fold_right tyl ~init:Typing_set.empty
+      ~f:Typing_set.add |> Typing_set.elements in
       let null, nonnull = List.partition_tf tyl ~f:(fun (_, t) -> t = Tprim Nast.Tnull) in
       begin match null, nonnull with
       (* type isn't nullable *)
+      | [], [ty] ->
+        if !show_tvars then Concat [text "("; k ty; text ")"] else k ty
       | [], _ ->
         delimited_list (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
       (* Type only is null *)

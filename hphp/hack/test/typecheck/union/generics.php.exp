@@ -11,33 +11,33 @@ File "generics.php--file2.php", line 76, characters 3-13:
 File "generics.php--file2.php", line 79, characters 3-13:
   A<int>
 File "generics.php--file2.php", line 82, characters 3-13:
-  (A<int> | exact A<[unresolved]>)
+  (exact A<[unresolved]> | A<int>)
 File "generics.php--file2.php", line 85, characters 3-13:
-  (A<T> | exact A<[unresolved]>)
+  (exact A<[unresolved]> | A<T>)
 File "generics.php--file2.php", line 88, characters 3-13:
-  (A<T> | exact A<int>)
+  (exact A<int> | A<T>)
 File "generics.php--file2.php", line 91, characters 3-13:
-  (A<T> | A<int>)
+  (A<int> | A<T>)
 File "generics.php--file2.php", line 94, characters 3-13:
   A<T>
 File "generics.php--file2.php", line 97, characters 3-13:
   exact (A<int> | A<string>)
 File "generics.php--file2.php", line 98, characters 3-35:
-  (bool | bool)
+  bool
 File "generics.php--file2.php", line 101, characters 3-13:
   exact (A<num> | A<arraykey>)
 File "generics.php--file2.php", line 102, characters 3-34:
-  (bool | bool)
+  bool
 File "generics.php--file2.php", line 105, characters 3-13:
   (exact A<int> | exact B<int>)
 File "generics.php--file2.php", line 106, characters 3-25:
-  (bool | bool)
+  bool
 File "generics.php--file2.php", line 109, characters 3-13:
   D<(int | string)>
 File "generics.php--file2.php", line 112, characters 3-13:
   exact D<(int | string)>
 File "generics.php--file2.php", line 115, characters 3-13:
-  (D<int> | exact D<string>)
+  (exact D<string> | D<int>)
 File "generics.php--file2.php", line 118, characters 3-13:
   E<int>
 File "generics.php--file2.php", line 121, characters 3-13:
@@ -64,11 +64,11 @@ File "generics.php--file2.php", line 142, characters 3-13:
 File "generics.php--file2.php", line 18, characters 5-15:
   (int | Ta)
 File "generics.php--file2.php", line 21, characters 5-15:
-  (Tabs | Ta)
+  (Ta | Tabs)
 File "generics.php--file2.php", line 24, characters 5-15:
-  (Tcstr | int)
+  (int | Tcstr)
 File "generics.php--file2.php", line 27, characters 5-15:
-  (Tcstr | Ta)
+  (Ta | Tcstr)
 File "generics.php--file2.php", line 98, characters 32-33:
 Invalid argument (Typing[4110])
   File "generics.php--file2.php", line 96, characters 20-22:

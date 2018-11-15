@@ -1,7 +1,7 @@
 File "local_vs_nested.php", line 11, characters 3-13:
-  array<(string | int)>
+  array<(int | string)>
 File "local_vs_nested.php", line 17, characters 3-17:
-  array<(string | int)>
+  array<(int | string)>
 File "local_vs_nested.php", line 12, characters 15-19:
 Invalid argument (Typing[4110])
 File "local_vs_nested.php", line 22, characters 22-27:

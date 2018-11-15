@@ -1,9 +1,9 @@
 File "array_tuple2.php", line 19, characters 5-18:
-  (string | int)
+  (int | string)
 File "array_tuple2.php", line 20, characters 5-19:
-  (string | int)
+  (int | string)
 File "array_tuple2.php", line 19, characters 5-18:[2]
-  (string | int)
+  (int | string)
 File "array_tuple2.php", line 20, characters 5-19:[2]
-  (string | int)
+  (int | string)
 No errors

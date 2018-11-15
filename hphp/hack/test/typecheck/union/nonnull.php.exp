@@ -3,7 +3,7 @@ File "nonnull.php--file2.php", line 19, characters 3-13:
 File "nonnull.php--file2.php", line 22, characters 3-13:
   nonnull
 File "nonnull.php--file2.php", line 25, characters 3-13:
-  (exact A | nonnull)
+  (nonnull | exact A)
 File "nonnull.php--file2.php", line 28, characters 3-13:
   mixed
 File "nonnull.php--file2.php", line 31, characters 3-13:
@@ -19,9 +19,9 @@ File "nonnull.php--file2.php", line 43, characters 3-13:
 File "nonnull.php--file2.php", line 45, characters 3-13:
   B
 File "nonnull.php--file2.php", line 47, characters 3-13:
-  (B | nonnull)
+  (nonnull | B)
 File "nonnull.php--file2.php", line 50, characters 3-13:
-  (C | nonnull)
+  (nonnull | C)
 File "nonnull.php--file2.php", line 54, characters 3-13:
   mixed
 File "nonnull.php--file2.php", line 57, characters 3-13:

@@ -15,5 +15,5 @@ File "switch_fallthrough12.php", line 30, characters 7-17:
 File "switch_fallthrough12.php", line 33, characters 7-17:
   float
 File "switch_fallthrough12.php", line 37, characters 3-13:
-  (num | bool)
+  (bool | num)
 No errors

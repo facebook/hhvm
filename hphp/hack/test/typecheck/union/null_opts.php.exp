@@ -11,7 +11,7 @@ File "null_opts.php", line 25, characters 3-13:
 File "null_opts.php", line 28, characters 3-13:
   ?(int | string)
 File "null_opts.php", line 31, characters 3-13:
-  ?(string | int)
+  ?(int | string)
 File "null_opts.php", line 34, characters 3-13:
-  ?(int | string | bool)
+  ?(int | bool | string)
 No errors

@@ -15,7 +15,7 @@ File "switch_fallthrough.php", line 30, characters 7-17:
 File "switch_fallthrough.php", line 33, characters 7-17:
   float
 File "switch_fallthrough.php", line 37, characters 3-13:
-  (num | bool)
+  (bool | num)
 [(Fun
     { Aast.AnnotatedAST.f_span = [3:1-38:2]; f_annotation = ();
       f_mode = <opaque>; f_ret = (Some ([3:18-22], (Hprim Tvoid)));
@@ -122,7 +122,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                  (Call (Cnormal,
                     (([37:3-10], _), (Id ([37:3-10], "\\hh_show"))), 
                     [],
-                    [(([37:11-13], (num | bool)), (Lvar ([37:11-13], $x)))],
+                    [(([37:11-13], (bool | num)), (Lvar ([37:11-13], $x)))],
                     []))))
              ];
            fnb_unsafe = false });

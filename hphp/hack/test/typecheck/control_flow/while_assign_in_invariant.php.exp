@@ -1,5 +1,5 @@
 File "while_assign_in_invariant.php", line 55, characters 3-13:
-  (exact C | exact B | exact A | exact D)
+  (exact A | exact B | exact C | exact D)
 File "while_assign_in_invariant.php", line 38, characters 48-49:
 Invalid argument (Typing[4110])
   File "while_assign_in_invariant.php", line 31, characters 58-59:

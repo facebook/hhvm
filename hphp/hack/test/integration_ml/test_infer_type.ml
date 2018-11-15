@@ -115,9 +115,9 @@ function loop_assignment(): void {
 
 let loop_assignment_cases = [
   ("loop_assignment.php", 5, 4), "int";
-  ("loop_assignment.php", 8, 11), "(string | int)";
+  ("loop_assignment.php", 8, 11), "(int | string)";
   ("loop_assignment.php", 11, 7), "string";
-  ("loop_assignment.php", 14, 9), "(string | int)";
+  ("loop_assignment.php", 14, 9), "(int | string)";
 ]
 
 let lambda1 = "<?hh // strict
@@ -188,7 +188,7 @@ function foo() : vec<?int> {
 
 let nullvec_cases = [
   ("nullvec.php", 4, 3), "vec<?int>";
-  ("nullvec.php", 7, 3), "vec<?(string | int)>";
+  ("nullvec.php", 7, 3), "vec<?(int | string)>";
   ("nullvec.php", 10, 3), "vec<null>";
 ]
 
@@ -223,7 +223,7 @@ function test_multiple_type(C1 $c1, C2 $c2, bool $cond): arraykey {
 
 let multiple_type_cases = [
   ("multiple_type.php", 6, 10), "(C1 | C2)";
-  ("multiple_type.php", 6, 14), "((function(): string) | (function(): int))";
+  ("multiple_type.php", 6, 14), "((function(): int) | (function(): string))";
 ]
 
 let lambda_param = "<?hh // strict

@@ -622,7 +622,7 @@ let bounded_generic_fun_cases = [
     pos = pos_at (9, 5) (9, 6);
   }];
   ("bounded_generic_fun.php", 12, 3), [{
-    snippet = "(C | T)\nwhere T as Base";
+    snippet = "(T | C)\nwhere T as Base";
     addendum = [];
     pos = pos_at (12, 3) (12, 4);
   }];
@@ -893,7 +893,7 @@ function test_duplicate_result_class(bool $x): void {
 
 let duplicate_results_cases = [
   ("duplicate_results.php", 22, 7), [{
-    snippet = "public ((function(): void) | (function(): void))";
+    snippet = "public (function(): void)";
     addendum = [
       "Doc block.";
       "Full name: `DuplicateResultTrait::foo`";

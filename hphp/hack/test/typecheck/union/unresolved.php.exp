@@ -3,11 +3,11 @@ File "unresolved.php", line 12, characters 3-13:
 File "unresolved.php", line 22, characters 3-13:
   ?(int | bool | string)
 File "unresolved.php", line 30, characters 3-13:
-  ?(bool | int | string)
+  ?(int | bool | string)
 File "unresolved.php", line 37, characters 3-13:
-  (exact A | string | int)
+  (int | string | exact A)
 File "unresolved.php", line 44, characters 3-13:
-  ?(exact A | string | bool | int)
+  ?(int | bool | string | exact A)
 File "unresolved.php", line 51, characters 3-13:
   (nonnull | string)
 File "unresolved.php", line 54, characters 3-13:

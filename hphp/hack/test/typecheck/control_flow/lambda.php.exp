@@ -9,11 +9,11 @@ File "lambda.php", line 71, characters 9-19:
 File "lambda.php", line 51, characters 11-21:[2]
   exact A
 File "lambda.php", line 71, characters 9-19:[2]
-  (exact D | exact G | exact A | exact J)
+  (exact A | exact D | exact G | exact J)
 File "lambda.php", line 23, characters 5-15:[2]
-  (exact B | exact A | exact C)
+  (exact A | exact B | exact C)
 File "lambda.php", line 24, characters 5-15:[2]
-  (exact B | exact A | exact C)
+  (exact A | exact B | exact C)
 File "lambda.php", line 51, characters 11-21:[3]
   _
 File "lambda.php", line 71, characters 9-19:[3]
@@ -21,11 +21,11 @@ File "lambda.php", line 71, characters 9-19:[3]
 File "lambda.php", line 51, characters 11-21:[4]
   exact A
 File "lambda.php", line 71, characters 9-19:[4]
-  (exact D | exact G | exact A | exact J)
+  (exact A | exact D | exact G | exact J)
 File "lambda.php", line 23, characters 5-15:[3]
-  (exact B | exact A | exact C)
+  (exact A | exact B | exact C)
 File "lambda.php", line 24, characters 5-15:[3]
-  (exact B | exact A | exact C)
+  (exact A | exact B | exact C)
 File "lambda.php", line 51, characters 11-21:[5]
   _
 File "lambda.php", line 71, characters 9-19:[5]
@@ -33,10 +33,10 @@ File "lambda.php", line 71, characters 9-19:[5]
 File "lambda.php", line 51, characters 11-21:[6]
   exact A
 File "lambda.php", line 71, characters 9-19:[6]
-  (exact D | exact G | exact A | exact J)
+  (exact A | exact D | exact G | exact J)
 File "lambda.php", line 86, characters 3-13:
-  (exact E | exact C | exact A | exact B)
+  (exact A | exact B | exact C | exact E)
 File "lambda.php", line 87, characters 3-13:
-  (exact E | exact C | exact A | exact B)
+  (exact A | exact B | exact C | exact E)
 File "lambda.php", line 48, characters 11-19:
 continue can only be used inside loops (NastCheck[3023])

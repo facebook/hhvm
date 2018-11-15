@@ -5,7 +5,7 @@ File "mixed.php", line 25, characters 3-13:
 File "mixed.php", line 34, characters 3-13:
   mixed
 File "mixed.php", line 43, characters 3-13:
-  (object | exact A)
+  (exact A | object)
 File "mixed.php", line 54, characters 3-13:
   (function(string $s1, string $s2): (int | string))
 File "mixed.php", line 63, characters 3-13:
@@ -23,7 +23,7 @@ File "mixed.php", line 85, characters 3-13:
 File "mixed.php", line 88, characters 3-13:
   (int | B)
 File "mixed.php", line 91, characters 3-13:
-  (exact A | B)
+  (B | exact A)
 File "mixed.php", line 27, characters 12-13:
 Invalid argument (Typing[4110])
   File "mixed.php", line 102, characters 19-19:

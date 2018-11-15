@@ -31,9 +31,9 @@ File "arrays.php", line 83, characters 3-13:
 File "arrays.php", line 84, characters 3-16:
   int
 File "arrays.php", line 91, characters 3-13:
-  varray<(string | int)>
+  varray<(int | string)>
 File "arrays.php", line 92, characters 3-16:
-  (string | int)
+  (int | string)
 File "arrays.php", line 99, characters 3-13:
   array<int>
 File "arrays.php", line 100, characters 3-16:
@@ -43,17 +43,17 @@ File "arrays.php", line 107, characters 3-13:
 File "arrays.php", line 108, characters 3-16:
   int
 File "arrays.php", line 116, characters 3-13:
-  array<(string | int)>
+  array<(int | string)>
 File "arrays.php", line 117, characters 3-16:
-  (string | int)
+  (int | string)
 File "arrays.php", line 128, characters 3-13:
   darray<int, bool>
 File "arrays.php", line 129, characters 3-16:
   bool
 File "arrays.php", line 136, characters 3-13:
-  darray<int, (string | bool)>
+  darray<int, (bool | string)>
 File "arrays.php", line 137, characters 3-16:
-  (string | bool)
+  (bool | string)
 File "arrays.php", line 144, characters 3-13:
   darray<int, int>
 File "arrays.php", line 145, characters 3-16:

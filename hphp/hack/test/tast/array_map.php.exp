@@ -135,9 +135,9 @@
                       ],
                     []))));
              (Expr
-                (([18:3-29], (array<arraykey, bool> | array<int, bool>)),
+                (([18:3-29], (array<int, bool> | array<arraykey, bool>)),
                  (Call (Cnormal,
-                    (([18:3-12], (function((function(num): bool), Container<num>): (array<arraykey, bool> | array<int, bool>))),
+                    (([18:3-12], (function((function(num): bool), Container<num>): (array<int, bool> | array<arraykey, bool>))),
                      (Id ([18:3-12], "\\array_map"))),
                     [],
                     [(([18:13-15], (function(num): bool)),

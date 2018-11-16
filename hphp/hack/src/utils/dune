@@ -25,7 +25,8 @@
     hh_json
     str
     unix)
-  (preprocess (pps ppx_deriving.std)))
+  (preprocess
+    (pps ppx_deriving.std)))
 
 (library
   (name file_content)
@@ -39,9 +40,15 @@
   (name marshal_tools)
   (wrapped false)
   (modules
-    marshal_tools)
+    marshal_tools
+    marshal_tools_lwt)
   (libraries
-    sys_utils))
+    lwt
+    lwt.unix
+    lwt_log
+    sys_utils)
+  (preprocess
+    (pps lwt_ppx)))
 
 (library
   (name opaque_digest)

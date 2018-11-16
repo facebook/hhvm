@@ -327,46 +327,68 @@ let rpc_with_retry server_conn ref_unblocked_time command =
 let get_message_source
     (server: server_conn)
     (client: Jsonrpc.queue)
-    : [> `From_server | `From_client | `No_source ] =
+    : [> `From_server | `From_client | `No_source ] Lwt.t =
   (* Take action on server messages in preference to client messages, because
      server messages are very easy and quick to service (just send a message to
      the client), while client messages require us to launch a potentially
      long-running RPC command. *)
   let has_server_messages = not (Queue.is_empty server.pending_messages) in
-  if has_server_messages then `From_server else
-  if Jsonrpc.has_message client then `From_client else
+  if has_server_messages then Lwt.return `From_server else
+  if Jsonrpc.has_message client then Lwt.return `From_client else
 
   (* If no immediate messages are available, then wait up to 1 second. *)
-  let server_read_fd = Unix.descr_of_out_channel server.oc in
-  let client_read_fd = Jsonrpc.get_read_fd client in
-  let readable, _, _ = Unix.select [server_read_fd; client_read_fd] [] [] 1.0 in
-  if readable = [] then `No_source
-  else if List.mem ~equal:(=) readable server_read_fd then `From_server
-  else `From_client
+  let server_read_fd = Unix.descr_of_out_channel server.oc
+    |> Lwt_unix.of_unix_file_descr in
+  let client_read_fd = Jsonrpc.get_read_fd client
+    |> Lwt_unix.of_unix_file_descr in
+  let%lwt message_source = Lwt.pick [
+    (let%lwt () = Lwt_unix.sleep 1.0 in
+      Lwt.return `No_source);
+
+    (* Note that `wait_read` waits for the file descriptor to be readable, but
+    does not actually read anything from it (so we won't end up with a race
+    condition where we've read data from both file descriptors but only process
+    the data from either the client or the server). *)
+    (let%lwt () = Lwt_unix.wait_read server_read_fd in
+      Lwt.return `From_server);
+    (let%lwt () = Lwt_unix.wait_read client_read_fd in
+      Lwt.return `From_client);
+  ] in
+  Lwt.return message_source
 
 
 (* A simplified version of get_message_source which only looks at client *)
 let get_client_message_source
     (client: Jsonrpc.queue)
-  : [> `From_client | `No_source ] =
-  if Jsonrpc.has_message client then `From_client else
-  let client_read_fd = Jsonrpc.get_read_fd client in
-  let readable, _, _ = Unix.select [client_read_fd] [] [] 1.0 in
-  if readable = [] then `No_source
-  else `From_client
+  : [> `From_client | `No_source ] Lwt.t =
+  if Jsonrpc.has_message client then Lwt.return `From_client else
+  let client_read_fd = Jsonrpc.get_read_fd client
+    |> Lwt_unix.of_unix_file_descr in
+  let%lwt message_source = Lwt.pick [
+    (let%lwt () = Lwt_unix.sleep 1.0 in
+      Lwt.return `No_source);
+    (let%lwt () = Lwt_unix.wait_read client_read_fd in
+      Lwt.return `From_client);
+  ] in
+  Lwt.return message_source
 
 
 (*  Read a message unmarshaled from the server's out_channel. *)
-let read_message_from_server (server: server_conn) : event =
+let read_message_from_server (server: server_conn) : event Lwt.t =
   let open ServerCommandTypes in
-  try
-    let fd = Unix.descr_of_out_channel server.oc in
-    match Marshal_tools.from_fd_with_preamble fd with
+  try%lwt
+    let fd = Unix.descr_of_out_channel server.oc
+      |> Lwt_unix.of_unix_file_descr in
+    let%lwt message = Marshal_tools_lwt.from_fd_with_preamble fd in
+    match message with
     | Response _ ->
       failwith "unexpected response without request"
-    | Push push -> Server_message {push; has_updated_server_state=false;}
-    | Hello -> Server_hello
-    | Ping -> failwith "unexpected ping on persistent connection"
+    | Push push ->
+      Lwt.return (Server_message {push; has_updated_server_state=false;})
+    | Hello ->
+      Lwt.return Server_hello
+    | Ping ->
+      failwith "unexpected ping on persistent connection"
   with e ->
     let message = Exn.to_string e in
     let stack = Printexc.get_backtrace () in
@@ -377,14 +399,14 @@ let read_message_from_server (server: server_conn) : event =
    from either client or server, we block until that message is completely
    received. Note: if server is None (meaning we haven't yet established
    connection with server) then we'll just block waiting for client. *)
-let get_next_event (state: state) (client: Jsonrpc.queue) : event =
-  let from_server (server: server_conn) =
+let get_next_event (state: state) (client: Jsonrpc.queue) : event Lwt.t =
+  let from_server (server: server_conn) : event Lwt.t =
     if Queue.is_empty server.pending_messages
     then read_message_from_server server
-    else Server_message (Queue.dequeue_exn server.pending_messages)
+    else Lwt.return (Server_message (Queue.dequeue_exn server.pending_messages))
   in
 
-  let from_client (client: Jsonrpc.queue) =
+  let from_client (client: Jsonrpc.queue) : event =
     match Jsonrpc.get_message client with
     | `Message message -> Client_message message
     | `Fatal_exception edata -> raise (Client_fatal_connection_exception edata)
@@ -393,15 +415,19 @@ let get_next_event (state: state) (client: Jsonrpc.queue) : event =
 
   match state with
   | Main_loop { Main_env.conn; _ } | In_init { In_init_env.conn; _ } -> begin
-      match get_message_source conn client with
-      | `From_client -> from_client client
-      | `From_server -> from_server conn
-      | `No_source -> Tick
+      let%lwt message_source = get_message_source conn client in
+      match message_source with
+      | `From_client -> Lwt.return (from_client client)
+      | `From_server ->
+        let%lwt message = from_server conn in
+        Lwt.return message
+      | `No_source -> Lwt.return Tick
     end
   | _ -> begin
-      match get_client_message_source client with
-      | `From_client -> from_client client
-      | `No_source -> Tick
+      let%lwt message_source = get_client_message_source client in
+      match message_source with
+      | `From_client -> Lwt.return (from_client client)
+      | `No_source -> Lwt.return Tick
     end
 
 
@@ -2303,7 +2329,7 @@ let main (type a) (env: env) : a Lwt.t =
     try%lwt
       Option.call () !deferred_action;
       deferred_action := None;
-      let%lwt event = Lwt.return (get_next_event !state client) in
+      let%lwt event = get_next_event !state client in
       ref_event := Some event;
       ref_unblocked_time := Unix.gettimeofday ();
 

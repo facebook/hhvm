@@ -726,13 +726,16 @@ let get_construct env class_ =
   class_.tc_construct
 
 let check_todo env =
-  let env = { env with checking_todos = true } in
-  let env, remaining =
-    List.fold_left env.todo ~f:(fun (env, remaining) f ->
-      let env, remove = f env in
-      if remove then env, remaining else env, f::remaining)
-      ~init:(env, []) in
-  { env with todo = List.rev remaining; checking_todos = false }
+  if TypecheckerOptions.new_inference (get_tcopt env)
+  then env
+  else
+    let env = { env with checking_todos = true } in
+    let env, remaining =
+      List.fold_left env.todo ~f:(fun (env, remaining) f ->
+        let env, remove = f env in
+        if remove then env, remaining else env, f::remaining)
+        ~init:(env, []) in
+    { env with todo = List.rev remaining; checking_todos = false }
 
 let get_return env =
   env.genv.return
@@ -807,12 +810,17 @@ let set_inside_ppl_class env inside_ppl_class =
  *   }
  *)
  let add_todo env f =
-  let tpenv_now = env.lenv.tpenv in
-  let f' env =
-    let old_tpenv = env.lenv.tpenv in
-    let env, remove = f (env_with_tpenv env tpenv_now) in
-    env_with_tpenv env old_tpenv, remove in
-  { env with todo = f' :: env.todo }
+  if TypecheckerOptions.new_inference (get_tcopt env)
+  then
+    let env, _ = f env in
+    env
+  else
+    let tpenv_now = env.lenv.tpenv in
+    let f' env =
+      let old_tpenv = env.lenv.tpenv in
+      let env, remove = f (env_with_tpenv env tpenv_now) in
+      env_with_tpenv env old_tpenv, remove in
+    { env with todo = f' :: env.todo }
 
 let add_anonymous env x =
   let genv = env.genv in

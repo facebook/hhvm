@@ -1354,7 +1354,10 @@ Array VariableUnserializer::unserializeVec() {
   reserveForAdd(size);
 
   for (int64_t i = 0; i < size; i++) {
-    auto const lval = PackedArray::LvalNewVec(arr.get(), false);
+    auto const lval = [&] {
+      SuppressHACFalseyPromoteNotices shacn;
+      return PackedArray::LvalNewVec(arr.get(), false);
+    }();
     assertx(lval.arr == arr.get());
     unserializeVariant(lval, UnserializeMode::VecValue);
     assertx(!tvIsRef(lval));

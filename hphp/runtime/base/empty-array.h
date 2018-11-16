@@ -174,6 +174,11 @@ private:
   static arr_lval MakeMixed(StringData*, TypedValue);
   static arr_lval MakeMixed(int64_t, TypedValue);
 
+  template<bool warn>
+  static arr_lval LvalIntImpl(ArrayData*, int64_t k, bool);
+  template<bool warn>
+  static arr_lval LvalStrImpl(ArrayData*, StringData* k, bool);
+
 private:
   struct Initializer;
   static Initializer s_initializer;

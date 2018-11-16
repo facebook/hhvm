@@ -629,6 +629,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
         if (atcnt) {
           tag.set(s_attributes,atr);
         }
+        SuppressHACFalseyPromoteNotices shacn;
         auto lval = parser->data.toArrRef().lvalAt();
         type(lval) = KindOfArray;
         val(lval).parr = tag.detach();

@@ -1011,7 +1011,7 @@ void MixedArray::compact(bool renumber /* = false */) {
   m_used = m_size;
 }
 
-bool MixedArray::nextInsert(Cell v) {
+void MixedArray::nextInsert(Cell v) {
   assertx(m_nextKI >= 0);
   assertx(!isFull());
 
@@ -1027,7 +1027,6 @@ bool MixedArray::nextInsert(Cell v) {
   e->setIntKey(ki, h);
   m_nextKI = static_cast<uint64_t>(ki) + 1; // Update next free element.
   cellDup(v, e->data);
-  return true;
 }
 
 ArrayData* MixedArray::nextInsertRef(tv_lval data) {
@@ -1125,12 +1124,12 @@ arr_lval MixedArray::LvalNew(ArrayData* ad, bool copy) {
     return arr_lval { a, lvalBlackHole().asTypedValue() };
   }
 
-  a = a->prepareForInsert(copy);
-
-  if (UNLIKELY(!a->nextInsert(make_tv<KindOfNull>()))) {
-    return arr_lval { a, lvalBlackHole().asTypedValue() };
+  if (checkHACFalseyPromote()) {
+    raise_hac_falsey_promote_notice("Lval on missing array element");
   }
 
+  a = a->prepareForInsert(copy);
+  a->nextInsert(make_tv<KindOfNull>());
   return arr_lval { a, &a->data()[a->m_used - 1].data };
 }
 

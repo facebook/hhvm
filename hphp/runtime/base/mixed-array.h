@@ -756,7 +756,7 @@ private:
   static ArrayData* RemoveIntImpl(ArrayData*, int64_t, bool);
   static ArrayData* RemoveStrImpl(ArrayData*, const StringData*, bool);
 
-  bool nextInsert(Cell);
+  void nextInsert(Cell);
   ArrayData* nextInsertRef(tv_lval data);
   ArrayData* nextInsertWithRef(TypedValue data);
   ArrayData* nextInsertWithRef(const Variant& data);

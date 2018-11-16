@@ -352,6 +352,7 @@ void register_variable(Array& variables, char *name, const Variant& value,
       }
 
       if (!index) {
+        SuppressHACFalseyPromoteNotices shacn;
         auto lval = symtable->lvalAt();
         type(lval) = KindOfPersistentArray;
         val(lval).parr = staticEmptyArray();

@@ -2,6 +2,8 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function test($a) {
+  echo "test----------------------------\n";
+
   $a[10]++;
   ++$a[11];
   $a[12]--;
@@ -23,8 +25,32 @@ function test($a) {
   var_dump($a);
 }
 
+function test_append($a) {
+  echo "test_append---------------------\n";
+
+  $a[]++;
+  ++$a[];
+  $a[]--;
+  --$a[];
+
+  $a[10]++;
+  ++$a[11];
+  $a[12]--;
+  --$a[13];
+
+  $a[]++;
+  ++$a[];
+  $a[]--;
+  --$a[];
+
+  var_dump($a);
+}
 
 <<__EntryPoint>>
 function main_setop() {
-test([1 => 'foo', 'baz' => 123]);
+  test([]);
+  test_append([]);
+
+  test([1 => 'foo', 'baz' => 123]);
+  test_append([1 => 'foo', 'baz' => 123]);
 }

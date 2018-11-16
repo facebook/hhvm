@@ -2229,6 +2229,9 @@ inline tv_lval SetOpNewElem(TypedValue& tvRef,
 
     case KindOfPersistentArray:
     case KindOfArray: {
+      if (UNLIKELY(checkHACFalseyPromote())) {
+        raiseHackArrCompatMissingSetOp();
+      }
       auto result = asArrRef(base).lvalAt();
       setopBody(result, op, rhs);
       return result;
@@ -2480,6 +2483,9 @@ inline Cell IncDecNewElem(
 
     case KindOfPersistentArray:
     case KindOfArray: {
+      if (UNLIKELY(checkHACFalseyPromote())) {
+        raiseHackArrCompatMissingIncDec();
+      }
       auto result = asArrRef(base).lvalAt();
       assertx(type(result) == KindOfNull);
       return IncDecBody(op, result);

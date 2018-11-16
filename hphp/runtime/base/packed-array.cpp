@@ -819,6 +819,9 @@ PackedArray::LvalStrRefVec(ArrayData* adIn, StringData* key, bool) {
 
 arr_lval PackedArray::LvalNew(ArrayData* adIn, bool copy) {
   assertx(checkInvariants(adIn));
+  if (checkHACFalseyPromote()) {
+    raise_hac_falsey_promote_notice("Lval on missing array element");
+  }
   auto const ad = PrepareForInsert(adIn, copy);
   auto& tv = packedData(ad)[ad->m_size++];
   tv.m_type = KindOfNull;

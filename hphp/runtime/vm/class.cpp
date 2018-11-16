@@ -2594,9 +2594,9 @@ void Class::setProperties() {
         if (preProp->attrs() & AttrNoImplicitNullable) {
           prop.attrs |= AttrNoImplicitNullable;
         }
-        if (preProp->attrs() & AttrSystemInitialValue) {
-          prop.attrs |= AttrSystemInitialValue;
-        }
+        attrSetter(prop.attrs,
+                   preProp->attrs() & AttrSystemInitialValue,
+                   AttrSystemInitialValue);
         if (preProp->attrs() & AttrInitialSatisfiesTC) {
           prop.attrs |= AttrInitialSatisfiesTC;
         }
@@ -2651,9 +2651,9 @@ void Class::setProperties() {
         if (preProp->attrs() & AttrNoImplicitNullable) {
           prop.attrs |= AttrNoImplicitNullable;
         }
-        if (preProp->attrs() & AttrSystemInitialValue) {
-          prop.attrs |= AttrSystemInitialValue;
-        }
+        attrSetter(prop.attrs,
+                   preProp->attrs() & AttrSystemInitialValue,
+                   AttrSystemInitialValue);
         if (preProp->attrs() & AttrInitialSatisfiesTC) {
           prop.attrs |= AttrInitialSatisfiesTC;
         }

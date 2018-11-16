@@ -178,7 +178,7 @@ namespace __SystemLib {
         $this->stream = bzopen($this->path, 'r');
         $this->pos = 0;
       }
-      fseek($this->stream, $position - $this->pos, SEEK_CUR);
+      fseek($this->stream, $position - $this->pos, \SEEK_CUR);
       $this->pos = $position;
     }
 

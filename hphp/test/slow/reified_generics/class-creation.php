@@ -4,27 +4,27 @@ class C {}
 class D {}
 class E {}
 
-class Test<reified T1> {
-  public function f<reified T2>(bool $fun) {
+class Test<reify T1> {
+  public function f<reify T2>(bool $fun) {
     return $fun ? new T2 : new T1;
   }
 }
 
-function f<reified T>() {
+function f<reify T>() {
   return new T();
 }
 
 echo "function\n";
 
-var_dump(f<reified C>() is C);
-var_dump(f<reified D>() is C);
+var_dump(f<reify C>() is C);
+var_dump(f<reify D>() is C);
 
 echo "\nclass\n";
 
-$t = new Test<reified E>();
-var_dump($t->f<reified C>(true) is C);
-var_dump($t->f<reified D>(true) is C);
-var_dump($t->f<reified D>(false) is C);
-var_dump($t->f<reified D>(false) is C);
-var_dump($t->f<reified D>(true) is E);
-var_dump($t->f<reified D>(false) is E);
+$t = new Test<reify E>();
+var_dump($t->f<reify C>(true) is C);
+var_dump($t->f<reify D>(true) is C);
+var_dump($t->f<reify D>(false) is C);
+var_dump($t->f<reify D>(false) is C);
+var_dump($t->f<reify D>(true) is E);
+var_dump($t->f<reify D>(false) is E);

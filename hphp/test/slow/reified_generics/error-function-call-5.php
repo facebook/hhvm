@@ -1,8 +1,8 @@
 <?hh
 
 class C {
-  function f<reified Ta, reified Tb>() {}
+  function f<reify Ta, reify Tb>() {}
 }
 
 $c = new C();
-$c->f<reified string>();
+$c->f<reify string>();

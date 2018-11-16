@@ -12,13 +12,13 @@ class D {
   const type T1 = string;
   public function f(mixed $x) {
     $e = new E();
-    $e->f<reified C::T2>($x);
+    $e->f<reify C::T2>($x);
   }
 }
 
 class E {
   const type T1 = bool;
-  public function f<reified T>(mixed $x) {
+  public function f<reify T>(mixed $x) {
     var_dump($x is T);
   }
 }

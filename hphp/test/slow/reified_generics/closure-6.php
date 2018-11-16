@@ -6,7 +6,7 @@ class C {
   }
 }
 
-function f<reified T1>() {
+function f<reify T1>() {
   $x = function() {
     $c = new T1();
     $c->f();
@@ -14,4 +14,4 @@ function f<reified T1>() {
   $x();
 }
 
-f<reified C>();
+f<reify C>();

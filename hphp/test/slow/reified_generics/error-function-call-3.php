@@ -1,5 +1,5 @@
 <?hh
 
-function f<reified T>() {}
+function f<reify T>() {}
 
-f<reified int, reified string>();
+f<reify int, reify string>();

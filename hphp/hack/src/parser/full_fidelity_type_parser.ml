@@ -251,7 +251,7 @@ and parse_variance_opt parser =
   TODO: Update the spec with reified
 *)
 and parse_type_parameter parser =
-  let (parser, reified) = optional_token parser Reified in
+  let (parser, reified) = optional_token parser Reify in
   let (parser, variance) = parse_variance_opt parser in
   let (parser, type_name) = require_name_allow_all_keywords parser in
   let (parser, constraints) =
@@ -372,7 +372,7 @@ and parse_closure_param_type_or_ellipsis parser =
 
 and parse_optionally_reified_type parser =
   let (parser1, token) = next_token parser in
-  if (Token.kind token) = Reified then
+  if (Token.kind token) = Reify then
     let (parser, reified_kw) = Make.token parser1 token in
     let (parser, type_argument) = parse_type_specifier parser in
     Make.reified_type_argument parser reified_kw type_argument

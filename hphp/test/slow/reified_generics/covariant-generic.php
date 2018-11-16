@@ -1,3 +1,3 @@
 <?hh
 
-class C<reified +Ta> {}
+class C<reify +Ta> {}

@@ -2,4 +2,4 @@
 
 function f() {}
 
-f<reified int>();
+f<reify int>();

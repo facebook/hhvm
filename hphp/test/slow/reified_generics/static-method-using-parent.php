@@ -1,8 +1,8 @@
 <?hh
 
-class A<reified T> {}
+class A<reify T> {}
 
-class C<reified Ta, reified Tb> extends A<reified int> {
+class C<reify Ta, reify Tb> extends A<reify int> {
   public static function f() {
     new parent();
   }

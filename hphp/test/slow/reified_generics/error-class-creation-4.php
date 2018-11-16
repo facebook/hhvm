@@ -2,4 +2,4 @@
 
 class C{}
 
-new C<reified int, reified string, reified int>();
+new C<reify int, reify string, reify int>();

@@ -1,5 +1,5 @@
 <?hh
 
 class C {
-  public function f<reified T, reified T>() {}
+  public function f<reify T, reify T>() {}
 }

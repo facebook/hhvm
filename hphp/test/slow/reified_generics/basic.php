@@ -1,12 +1,12 @@
 <?hh
 
-function g<reified T1, reified T2>() {
+function g<reify T1, reify T2>() {
   var_dump(__hhvm_intrinsics\get_reified_type(T1));
   var_dump(__hhvm_intrinsics\get_reified_type(T2));
 }
 
-function f<reified T1, reified T2>($x, $y) {
-  g<reified (int, (T1, T2)), reified T1>();
+function f<reify T1, reify T2>($x, $y) {
+  g<reify (int, (T1, T2)), reify T1>();
 }
 
-f<reified (int, int), reified int>(1, 2);
+f<reify (int, int), reify int>(1, 2);

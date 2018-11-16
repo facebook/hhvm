@@ -1,7 +1,7 @@
 <?hh
 
-class C<reified T1> {
-  function f<reified T2>(mixed $x) {
+class C<reify T1> {
+  function f<reify T2>(mixed $x) {
     try {
       $x as (T1, T2);
       var_dump("yep");
@@ -11,6 +11,6 @@ class C<reified T1> {
   }
 }
 
-$c = new C<reified string>();
-$c->f<reified int>(tuple("hello", 1));
-$c->f<reified int>(tuple(1, "hello"));
+$c = new C<reify string>();
+$c->f<reify int>(tuple("hello", 1));
+$c->f<reify int>(tuple(1, "hello"));

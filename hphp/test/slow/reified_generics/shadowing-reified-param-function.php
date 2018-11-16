@@ -1,3 +1,3 @@
 <?hh
 
-function f<reified T, reified T>() {}
+function f<reify T, reify T>() {}

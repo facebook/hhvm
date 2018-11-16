@@ -1,6 +1,6 @@
 <?hh
 
-function f<reified T>() {
+function f<reify T>() {
   var_dump("done");
 }
 

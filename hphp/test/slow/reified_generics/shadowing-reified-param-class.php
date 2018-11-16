@@ -1,4 +1,4 @@
 <?hh
 
-class C<reified T, reified T> {
+class C<reify T, reify T> {
 }

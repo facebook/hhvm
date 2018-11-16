@@ -1,6 +1,6 @@
 <?hh
 
-class C<reified Ta, reified Tb> {}
-class D<reified T> extends C<reified T> {}
+class C<reify Ta, reify Tb> {}
+class D<reify T> extends C<reify T> {}
 
-new D<reified int>();
+new D<reify int>();

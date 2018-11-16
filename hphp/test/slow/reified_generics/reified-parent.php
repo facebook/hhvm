@@ -1,20 +1,20 @@
 <?hh // strict
 
-class E<reified T1, reified T2> {
+class E<reify T1, reify T2> {
   public function f() {
     var_dump(__hhvm_intrinsics\get_reified_type(T1));
     var_dump(__hhvm_intrinsics\get_reified_type(T2));
   }
 }
 
-class D<reified T1, reified T2> extends E<reified (T1, T1), reified T2> {
+class D<reify T1, reify T2> extends E<reify (T1, T1), reify T2> {
   public function f() {
     var_dump(__hhvm_intrinsics\get_reified_type(T1));
     var_dump(__hhvm_intrinsics\get_reified_type(T2));
   }
 }
 
-class C<reified T1, reified T2> extends D<reified (int, (T1, string)), reified T1> {
+class C<reify T1, reify T2> extends D<reify (int, (T1, string)), reify T1> {
   public function f() {
     var_dump(__hhvm_intrinsics\get_reified_type(T1));
     var_dump(__hhvm_intrinsics\get_reified_type(T2));
@@ -22,6 +22,6 @@ class C<reified T1, reified T2> extends D<reified (int, (T1, string)), reified T
   }
 }
 
-$c = new C<reified (int, string), reified string>();
+$c = new C<reify (int, string), reify string>();
 
 $c->f();

@@ -2,8 +2,8 @@
 
 class A{}
 
-class C<reified Ta, reified Tb> {
+class C<reify Ta, reify Tb> {
   public static function f() {
-    new A<reified Ta>();
+    new A<reify Ta>();
   }
 }

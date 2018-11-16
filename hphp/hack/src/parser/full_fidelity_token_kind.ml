@@ -107,7 +107,7 @@ type t =
   | Protected
   | Public
   | Real
-  | Reified
+  | Reify
   | Require
   | Require_once
   | Required
@@ -329,7 +329,7 @@ let from_string keyword ~is_hack ~allow_xhp ~only_reserved =
   | "protected"                                                          -> Some Protected
   | "public"                                                             -> Some Public
   | "real"                                        when not only_reserved -> Some Real
-  | "reified"         when is_hack                &&   not only_reserved -> Some Reified
+  | "reify"           when is_hack                &&   not only_reserved -> Some Reify
   | "require"                                                            -> Some Require
   | "require_once"                                                       -> Some Require_once
   | "required"        when (is_hack || allow_xhp)                        -> Some Required
@@ -522,7 +522,7 @@ let to_string kind =
   | Protected                     -> "protected"
   | Public                        -> "public"
   | Real                          -> "real"
-  | Reified                       -> "reified"
+  | Reify                         -> "reify"
   | Require                       -> "require"
   | Require_once                  -> "require_once"
   | Required                      -> "required"

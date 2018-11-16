@@ -1,5 +1,5 @@
 <?hh
 
-class C<reified Ta, reified Tb> {}
+class C<reify Ta, reify Tb> {}
 
-new C<reified int>();
+new C<reify int>();

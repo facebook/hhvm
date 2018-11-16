@@ -1,6 +1,6 @@
 <?hh
 
-class C<reified T> {
-  public function f<reified T1>() {}
-  public function g<reified T>() {}
+class C<reify T> {
+  public function f<reify T1>() {}
+  public function g<reify T>() {}
 }

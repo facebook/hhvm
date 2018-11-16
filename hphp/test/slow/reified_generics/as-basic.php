@@ -1,6 +1,6 @@
 <?hh
 
-function f<reified T>(mixed $x) {
+function f<reify T>(mixed $x) {
   try {
     $x as T;
     var_dump("yes");
@@ -9,5 +9,5 @@ function f<reified T>(mixed $x) {
   }
 }
 
-f<reified int>("hello");
-f<reified int>(1);
+f<reify int>("hello");
+f<reify int>(1);

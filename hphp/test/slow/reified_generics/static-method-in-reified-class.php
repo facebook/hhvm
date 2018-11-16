@@ -1,6 +1,6 @@
 <?hh
 
-class C<reified T> {
+class C<reify T> {
   private static function f() {}
 }
 

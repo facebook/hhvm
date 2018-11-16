@@ -6,7 +6,7 @@ class B {
   }
 }
 
-class C<reified T> {
+class C<reify T> {
   public function f() {
     var_dump("yep!");
     $b = new T();
@@ -14,11 +14,11 @@ class C<reified T> {
   }
 }
 
-class D<reified T> {
-  function f<reified T1>() {
+class D<reify T> {
+  function f<reify T1>() {
     $x = () ==> {
     $y = () ==> {
-      $c = new T1<reified T>();
+      $c = new T1<reify T>();
       $c->f();
     };
     $y();
@@ -27,5 +27,5 @@ class D<reified T> {
   }
 }
 
-$d = new D<reified B>();
-$d->f<reified C>();
+$d = new D<reify B>();
+$d->f<reify C>();

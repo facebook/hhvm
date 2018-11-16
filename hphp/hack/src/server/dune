@@ -220,7 +220,10 @@
     build
     load_script
     logging
+    lwt
     parent
     server
     state_loader
-    watchman_event_watcher))
+    watchman_event_watcher)
+  (preprocess
+    (pps lwt_ppx)))

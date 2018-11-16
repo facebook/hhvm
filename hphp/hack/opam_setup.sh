@@ -19,4 +19,12 @@ else
 fi
 
 eval "$(opam config env)"
-opam install dune.1.2.1 core_kernel.v0.11.1 ppx_deriving.4.2.1 visitors.20180513 pcre.7.3.4
+opam install \
+	core_kernel.v0.11.1 \
+	dune.1.2.1 \
+	lwt.4.1.0 \
+	lwt_log.1.1.0 \
+	lwt_ppx.1.2.1 \
+	pcre.7.3.4 \
+	ppx_deriving.4.2.1 \
+	visitors.20180513

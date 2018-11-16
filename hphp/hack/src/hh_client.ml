@@ -70,7 +70,8 @@ let () =
         | ClientCommand.CStop env -> ClientStop.main env
         | ClientCommand.CRestart env -> ClientRestart.main env
         | ClientCommand.CBuild env -> ClientBuild.main env
-        | ClientCommand.CLsp env -> ClientLsp.main env (* never terminates *)
+        | ClientCommand.CLsp env ->
+          Lwt_main.run (ClientLsp.main env)
         | ClientCommand.CDebug env -> ClientDebug.main env
     with Exit_status.Exit_with es ->
       HackEventLogger.client_bad_exit ~command:(command_name command) es;

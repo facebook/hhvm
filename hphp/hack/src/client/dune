@@ -8,6 +8,8 @@
   (libraries
     hh_server_monitor
     logging
+    lwt
+    lwt.unix
     messages
     nuclide_rpc_message_printer
     pos
@@ -15,4 +17,6 @@
     server_command_types
     server_monitor
     server_utils
-    sys_utils))
+    sys_utils)
+  (preprocess
+    (pps lwt_ppx)))

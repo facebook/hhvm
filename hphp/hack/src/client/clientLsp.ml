@@ -2285,7 +2285,7 @@ let handle_event
 
 (* main: this is the main loop for processing incoming Lsp client requests,
    and incoming server notifications. Never returns. *)
-let main (env: env) : 'a =
+let main (type a) (env: env) : a Lwt.t =
   let open Marshal_tools in
   Printexc.record_backtrace true;
   ref_from := env.from;
@@ -2293,16 +2293,17 @@ let main (env: env) : 'a =
   let client = Jsonrpc.make_queue () in
   let deferred_action = ref None in
   let state = ref Pre_init in
-  while true do
-    let ref_event = ref None in
-    let ref_unblocked_time = ref (Unix.gettimeofday ()) in
-    (* ref_unblocked_time is the time at which we're no longer blocked on either *)
-    (* clientLsp message-loop or hh_server, and can start actually handling.  *)
-    (* Everything that blocks will update this variable.                      *)
-    try
+  let ref_event = ref None in
+  let ref_unblocked_time = ref (Unix.gettimeofday ()) in
+  (* ref_unblocked_time is the time at which we're no longer blocked on either *)
+  (* clientLsp message-loop or hh_server, and can start actually handling.  *)
+  (* Everything that blocks will update this variable.                      *)
+
+  let process_next_event (): unit Lwt.t =
+    try%lwt
       Option.call () !deferred_action;
       deferred_action := None;
-      let event = get_next_event !state client in
+      let%lwt event = Lwt.return (get_next_event !state client) in
       ref_event := Some event;
       ref_unblocked_time := Unix.gettimeofday ();
 
@@ -2323,6 +2324,7 @@ let main (env: env) : 'a =
       let response = Jsonrpc.last_sent () in
       (* for LSP requests and notifications, we keep a log of what+when we responded *)
       log_response_if_necessary event response !ref_unblocked_time;
+      Lwt.return_unit
     with
     | Server_fatal_connection_exception edata ->
       if !state <> Post_shutdown then begin
@@ -2355,24 +2357,34 @@ let main (env: env) : 'a =
             trigger_on_lock_file = true;
             trigger_on_lsp = false;
           })
-        end
+        end;
+        Lwt.return_unit
     | Client_fatal_connection_exception edata ->
       let stack = edata.stack ^ "---\n" ^ (Printexc.get_backtrace ()) in
       hack_log_error !ref_event edata.message stack "from_client" !ref_unblocked_time;
       Lsp_helpers.telemetry_error to_stdout (edata.message ^ ", from_client\n" ^ stack);
-      exit_fail ()
+      let () = exit_fail () in
+      Lwt.return_unit
     | Client_recoverable_connection_exception edata ->
       let stack = edata.stack ^ "---\n" ^ (Printexc.get_backtrace ()) in
       hack_log_error !ref_event edata.message stack "from_client" !ref_unblocked_time;
       Lsp_helpers.telemetry_error to_stdout (edata.message ^ ", from_client\n" ^ stack);
+      Lwt.return_unit
     | Server_nonfatal_exception edata ->
       let stack = edata.stack ^ "---\n" ^ (Printexc.get_backtrace ()) in
       hack_log_error !ref_event edata.message stack "from_server" !ref_unblocked_time;
-      respond_to_error !ref_event (Error.Unknown edata.message) stack
+      respond_to_error !ref_event (Error.Unknown edata.message) stack;
+      Lwt.return_unit
     | e ->
       let message = Exn.to_string e in
       let stack = Printexc.get_backtrace () in
       respond_to_error !ref_event e stack;
       hack_log_error !ref_event message stack "from_lsp" !ref_unblocked_time;
-  done;
-  failwith "unreachable"
+      Lwt.return_unit
+  in
+
+  let rec main_loop (): a Lwt.t =
+    let%lwt () = process_next_event () in
+    main_loop ()
+  in
+  main_loop ()

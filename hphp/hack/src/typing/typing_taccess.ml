@@ -168,10 +168,12 @@ and expand env (root_reason, root_ty as root) =
           end in
           { env with dep_tys = [] } , (root_reason, Tunresolved tyl)
       | Tvar _ ->
-          let tenv, ty =
-            Env.expand_type env.tenv root in
-          let env = { env with tenv = tenv } in
-          expand env ty
+          if TypecheckerOptions.new_inference env.tenv.Env.genv.Env.tcopt
+          then env, root (* TODO: T36856670 *)
+          else
+            let tenv, ty = Env.expand_type env.tenv root in
+            let env = { env with tenv = tenv } in
+            expand env ty
       | Tanon _ | Tobject | Tnonnull | Tprim _ | Tshape _ | Ttuple _
       | Tarraykind _ | Tfun _ | Tabstract (_, _)  | Tdynamic ->
           let pos, tconst = head in

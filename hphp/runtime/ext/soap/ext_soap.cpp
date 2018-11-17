@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/http-client.h"
 #include "hphp/runtime/base/php-globals.h"
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/ext/soap/soap.h"
 #include "hphp/runtime/ext/soap/packet.h"
@@ -2098,15 +2099,19 @@ Variant HHVM_METHOD(SoapServer, getfunctions) {
   } else if (data->m_type == SOAP_CLASS) {
     class_name = data->m_soap_class.name;
   } else if (data->m_soap_functions.functions_all) {
-    return Unit::getSystemFunctions() + Unit::getUserFunctions();
+    return (Unit::getSystemFunctions() + Unit::getUserFunctions()).toVArray();
   } else if (!data->m_soap_functions.ft.empty()) {
-    return array_keys_helper(data->m_soap_functions.ftOriginal);
+    auto ret = array_keys_helper(data->m_soap_functions.ftOriginal);
+    if (ret.isArray()) {
+      return ret.toVArray();
+    }
+    return ret;
   }
 
   Class* cls = Unit::lookupClass(class_name.get());
   auto ret = Array::attach(PackedArray::MakeReserve(cls->numMethods()));
   Class::getMethodNames(cls, nullptr, ret);
-  return Variant::attach(HHVM_FN(array_values)(ret));
+  return ret.toVArray();
 }
 
 static bool valid_function(SoapServer *server, Object &soap_obj,
@@ -2543,12 +2548,13 @@ void HHVM_METHOD(SoapClient, __construct,
   }
 }
 
-Variant HHVM_METHOD(SoapClient, __soapcall,
+Variant HHVM_METHOD(SoapClient, soapcallImpl,
                     const String& name,
                     const Array& args,
                     const Array& options = null_array,
                     const Variant& input_headers = uninit_variant,
                     VRefParam output_headers_ref = init_null()) {
+  SuppressHACRefBindNotices shacn;
   auto* data = Native::data<SoapClient>(this_);
   SoapClientScope ss(this_);
 
@@ -2706,13 +2712,6 @@ Variant HHVM_METHOD(SoapClient, __soapcall,
   return return_value;
 }
 
-Variant HHVM_METHOD(SoapClient, __call,
-                    const Variant& name,
-                    const Variant& args) {
-  return HHVM_MN(SoapClient, __soapcall)(this_, name.toString(),
-                                         args.toArray());
-}
-
 Variant HHVM_METHOD(SoapClient, __getlastrequest) {
   auto* data = Native::data<SoapClient>(this_);
   return data->m_last_request;
@@ -2738,13 +2737,13 @@ Variant HHVM_METHOD(SoapClient, __getfunctions) {
   SoapClientScope ss(this_);
 
   if (data->m_sdl) {
-    Array ret = Array::Create();
-    for (auto& func: data->m_sdl->functionsOrder) {
+    VArrayInit ret(data->m_sdl->functionsOrder.size());
+    for (const auto& func: data->m_sdl->functionsOrder) {
       StringBuffer sb;
       function_to_string(data->m_sdl->functions[func], sb);
       ret.append(sb.detach());
     }
-    return ret;
+    return ret.toArray();
   }
   return init_null();
 }
@@ -2754,13 +2753,13 @@ Variant HHVM_METHOD(SoapClient, __gettypes) {
   SoapClientScope ss(this_);
 
   if (data->m_sdl) {
-    Array ret = Array::Create();
-    for (unsigned int i = 0; i < data->m_sdl->types.size(); i++) {
+    VArrayInit ret(data->m_sdl->types.size());
+    for (const auto& type: data->m_sdl->types) {
       StringBuffer sb;
-      type_to_string(data->m_sdl->types[i].get(), sb, 0);
+      type_to_string(type.get(), sb, 0);
       ret.append(sb.detach());
     }
-    return ret;
+    return ret.toArray();
   }
   return init_null();
 }
@@ -3108,8 +3107,7 @@ static struct SoapExtension final : Extension {
                                                Native::NDIFlags::NO_SWEEP);
 
     HHVM_ME(SoapClient, __construct);
-    HHVM_ME(SoapClient, __call);
-    HHVM_ME(SoapClient, __soapcall);
+    HHVM_ME(SoapClient, soapcallImpl);
     HHVM_ME(SoapClient, __getlastrequest);
     HHVM_ME(SoapClient, __getlastresponse);
     HHVM_ME(SoapClient, __getlastrequestheaders);

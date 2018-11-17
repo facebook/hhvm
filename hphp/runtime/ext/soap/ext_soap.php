@@ -4,7 +4,10 @@
 class SoapServer {
 
   <<__Native>>
-  function __construct(mixed $wsdl, array $options = []): void;
+  function __construct(
+    mixed $wsdl,
+    darray<string, mixed> $options = darray[],
+  ): void;
 
   /**
    * Exports all methods from specified class.  The object can be made
@@ -115,18 +118,75 @@ class SoapServer {
 <<__NativeData("SoapClient")>>
 class SoapClient {
 
-  <<__Native>>
-  function __construct(mixed $wsdl, array $options = []): void;
+  // Clean out different kinds of arrays, recursively, from an input. For
+  // __soapcall, we want to pass in PHP arrays but receive Hack arrays, so we
+  // invoke cleanArrays twice: once with a PHP array as the base, once with
+  // a Hack array as the base.
+  private static function cleanArrays(
+    mixed $input,
+    mixed $base,
+    mixed $seen = null,
+  ): mixed {
+    if ($seen === null) {
+      $seen = new stdClass();
+      $seen->set = keyset[];
+    }
+    if (HH\is_any_array($input)) {
+      $ret = $base;
+      foreach ($input as $k => $v) {
+        $ret[$k] = self::cleanArrays($v, $base, $seen);
+      }
+      return $ret;
+    } else if (is_object($input)) {
+      $hash = spl_object_hash($input);
+      if (array_key_exists($hash, $seen->set)) {
+        return $input;
+      }
+      $seen->set[] = $hash;
+      foreach ($input as $k => $v) {
+        $input->$k = self::cleanArrays($v, $base, $seen);
+      }
+      return $input;
+    }
+    return $input;
+  }
 
   <<__Native>>
-  function __call(mixed $name, mixed $args): mixed;
+  function __construct(
+    mixed $wsdl,
+    darray<string, mixed> $options = darray[],
+  ): void;
 
   <<__Native>>
-  function __soapcall(string $name,
-                      array $args,
-                      array $options = [],
-                      mixed $input_headers = null,
-                      mixed &$output_headers = null): mixed;
+  private function soapcallImpl(
+    string $name,
+    varray<mixed> $args,
+    darray $options = darray[],
+    mixed $input_headers = null,
+    mixed &$output_headers = null
+  ): mixed;
+
+  function __call(mixed $name, mixed $args): mixed {
+    return $this->__soapcall($name, $args);
+  }
+
+  function __soapcall(
+    string $name,
+    varray<mixed> $args,
+    darray $options = darray[],
+    mixed $input_headers = null,
+    mixed &$output_headers = null,
+  ): mixed {
+    $args = self::cleanArrays($args, array());
+    $ret = $this->soapcallImpl(
+      $name,
+      varray($args),
+      $options,
+      $input_headers,
+      &$output_headers,
+    );
+    return self::cleanArrays($ret, darray[]);
+  }
 
   <<__Native>>
   function __getlastrequest(): mixed;

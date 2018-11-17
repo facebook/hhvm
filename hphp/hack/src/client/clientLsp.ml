@@ -1383,16 +1383,14 @@ let do_documentFormatting
 let do_server_busy (state: state) (status: ServerCommandTypes.busy_status) : state =
   let open Main_env in
   let open ServerCommandTypes in
-  let open ShowStatus in
-  let open ShowMessageRequest in
   let (type_, shortMessage, message) = match status with
     | Needs_local_typecheck ->
-      MessageType.WarningMessage,
-      Some "preparing to check edits",
+      MessageType.InfoMessage,
+      None,
       "Hack: preparing to check edits"
     | Doing_local_typecheck ->
-      MessageType.WarningMessage,
-      Some "checking edits",
+      MessageType.InfoMessage,
+      None,
       "Hack: checking edits"
     | Done_local_typecheck ->
       MessageType.InfoMessage,
@@ -1413,19 +1411,6 @@ let do_server_busy (state: state) (status: ServerCommandTypes.busy_status) : sta
   in
   match state with
   | Main_loop menv ->
-    request_showStatus {
-      request = {
-        type_ = menv.status.type_;
-        message = menv.status.message;
-        actions = [];
-      };
-      progress = None;
-      total = None;
-      shortMessage = match menv.status.shortMessage with
-        | Some msg -> Some (msg ^ " " ^ status_tick())
-        | None -> None
-      ;
-    };
     Main_loop {
       menv with
       status = {
@@ -1805,37 +1790,6 @@ and do_lost_server (state: state) ?(allow_immediate_reconnect = true) (p: Lost_e
   let open Lost_env in
   set_hh_server_state p.new_hh_server_state;
 
-  let open ShowStatus in
-  let open ShowMessageRequest in
-  let restart_command = "Restart Hack Server" in
-  let on_result ~result state =
-    let result = Jget.string_d result "title" ~default:"" in
-    match result, state with
-    | command, Lost_server _ ->
-      if command = restart_command then begin
-        let root = match get_root_opt () with
-          | None -> failwith "we should have root by now"
-          | Some root -> root
-        in
-        start_server root;
-        reconnect_from_lost_if_necessary state `Force_regain
-      end else state
-    | _ -> state
-  in
-  request_showStatus
-  ~on_result
-  {
-    request = {
-      type_ = MessageType.ErrorMessage;
-      message =
-        p.explanation ^ " Language features such as autocomplete are currently unavailable.";
-      actions = [{title = "Restart Hack Server"}];
-    };
-    progress = None;
-    total = None;
-    shortMessage = None
-  };
-
   let state = dismiss_ui state in
   let uris_with_unsaved_changes = get_uris_with_unsaved_changes state in
   let editor_open_files =
@@ -2008,6 +1962,67 @@ let cancel_if_stale (client: Jsonrpc.queue) (message: Jsonrpc.message) (timeout:
   if time_elapsed >= timeout && Jsonrpc.has_message client
   then raise (Error.RequestCancelled "request timed out")
 
+let tick_showStatus (type a) ~(state: state ref): a Lwt.t =
+  let open Main_env in
+  let open Lost_env in
+  let open ShowStatus in
+  let open ShowMessageRequest in
+  let show_status(): unit Lwt.t =
+    let%lwt () = Lwt_unix.sleep 1.0 in
+    begin match !state with
+      | Main_loop menv ->
+        request_showStatus {
+          request = {
+            type_ = menv.status.type_;
+            message = menv.status.message;
+            actions = [];
+          };
+          progress = None;
+          total = None;
+          shortMessage = match menv.status.shortMessage with
+            | Some msg -> Some (msg ^ " " ^ status_tick())
+            | None -> None
+          ;
+        }
+      | Lost_server {p; _} ->
+        let restart_command = "Restart Hack Server" in
+        let on_result ~result state =
+          let result = Jget.string_d result "title" ~default:"" in
+          match result, state with
+          | command, Lost_server _ ->
+            if command = restart_command then begin
+              let root = match get_root_opt () with
+                | None -> failwith "we should have root by now"
+                | Some root -> root
+              in
+              start_server root;
+              reconnect_from_lost_if_necessary state `Force_regain
+            end else state
+          | _ -> state
+        in
+        request_showStatus
+        ~on_result
+        {
+          request = {
+            type_ = MessageType.ErrorMessage;
+            message =
+              p.explanation ^ " Language features such as autocomplete are currently unavailable.";
+            actions = [{title = "Restart Hack Server"}];
+          };
+          progress = None;
+          total = None;
+          shortMessage = None
+        };
+      | _ -> ()
+    end;
+    Lwt.return_unit
+  in
+  let rec loop(): a Lwt.t =
+    let%lwt () = show_status () in
+    loop ()
+  in
+  loop ()
+
 
 (************************************************************************)
 (** Message handling                                                   **)
@@ -2123,22 +2138,6 @@ let handle_event
       state := Main_loop { menv with needs_idle = false; };
       rpc menv.conn ref_unblocked_time ServerCommandTypes.IDE_IDLE
     end;
-    let open ShowStatus in
-    let open ShowMessageRequest in
-    request_showStatus {
-      request = {
-        type_ = menv.status.type_;
-        message = menv.status.message;
-        actions = [];
-      };
-      progress = None;
-      total = None;
-      shortMessage = match menv.status.shortMessage with
-        | Some msg -> Some (msg ^ " " ^ status_tick())
-        | None -> None
-      ;
-    }
-
 
   (* textDocument/hover request *)
   | Main_loop menv, Client_message c when c.method_ = "textDocument/hover" ->
@@ -2413,4 +2412,4 @@ let main (type a) (env: env) : a Lwt.t =
     let%lwt () = process_next_event () in
     main_loop ()
   in
-  main_loop ()
+  Lwt.pick [main_loop (); tick_showStatus state]

@@ -885,15 +885,15 @@ void sameJmpImpl(ISS& env, const Same& same, const JmpOp& jmp) {
   // swap, so we can restore this state if the branch is always taken.
   std::swap(env.state, save);
   if (!(sameIsJmpTarget ? handle_differ() : handle_same())) {
-    jmp_setdest(env, jmp.target);
+    jmp_setdest(env, jmp.target1);
     env.state = std::move(save);
   } else if (target_reachable) {
-    env.propagate(jmp.target, &save);
+    env.propagate(jmp.target1, &save);
   }
 }
 
-bc::JmpNZ invertJmp(const bc::JmpZ& jmp) { return bc::JmpNZ { jmp.target }; }
-bc::JmpZ invertJmp(const bc::JmpNZ& jmp) { return bc::JmpZ { jmp.target }; }
+bc::JmpNZ invertJmp(const bc::JmpZ& jmp) { return bc::JmpNZ { jmp.target1 }; }
+bc::JmpZ invertJmp(const bc::JmpNZ& jmp) { return bc::JmpZ { jmp.target1 }; }
 
 }
 
@@ -1123,7 +1123,7 @@ void jmpImpl(ISS& env, const JmpOp& op) {
   auto const e = emptiness(popC(env));
   if (e == (Negate ? Emptiness::NonEmpty : Emptiness::Empty)) {
     effect_free(env);
-    jmp_setdest(env, op.target);
+    jmp_setdest(env, op.target1);
     return;
   }
 
@@ -1134,7 +1134,7 @@ void jmpImpl(ISS& env, const JmpOp& op) {
   }
 
   if (next_real_block(*env.ctx.func, env.blk.fallthrough) ==
-      next_real_block(*env.ctx.func, op.target)) {
+      next_real_block(*env.ctx.func, op.target1)) {
     effect_free(env);
     jmp_nevertaken(env);
     return;
@@ -1142,14 +1142,14 @@ void jmpImpl(ISS& env, const JmpOp& op) {
 
   nothrow(env);
 
-  if (location == NoLocalId) return env.propagate(op.target, &env.state);
+  if (location == NoLocalId) return env.propagate(op.target1, &env.state);
 
   auto val = peekLocation(env, location);
   assertx(!val.couldBe(BRef)); // we shouldn't have an equivLoc if it was
 
   refineLocation(env, location,
                  Negate ? assert_nonemptiness : assert_emptiness,
-                 op.target,
+                 op.target1,
                  Negate ? assert_emptiness : assert_nonemptiness);
 }
 
@@ -1231,7 +1231,7 @@ void isTypeHelper(ISS& env,
     return negate ? was_false(std::move(t)) : was_true(std::move(t));
   };
 
-  refineLocation(env, location, pre, jmp.target, post);
+  refineLocation(env, location, pre, jmp.target1, post);
 }
 
 folly::Optional<Cell> staticLocHelper(ISS& env, LocalId l, Type init) {
@@ -1330,16 +1330,16 @@ void staticLocCheckJmpImpl(ISS& env,
     if (takenOnInit) {
       jmp_nevertaken(env);
     } else {
-      jmp_setdest(env, jmp.target);
+      jmp_setdest(env, jmp.target1);
     }
     return;
   }
 
   if (takenOnInit) {
-    env.propagate(jmp.target, &env.state);
+    env.propagate(jmp.target1, &env.state);
     env.state = std::move(save);
   } else {
-    env.propagate(jmp.target, &save);
+    env.propagate(jmp.target1, &save);
   }
 }
 
@@ -1417,7 +1417,7 @@ void instanceOfJmpImpl(ISS& env,
   };
   auto const pre  = [&] (Type t) { return result(t, negate); };
   auto const post = [&] (Type t) { return result(t, !negate); };
-  refineLocation(env, locId, pre, jmp.target, post);
+  refineLocation(env, locId, pre, jmp.target1, post);
 }
 
 }
@@ -1487,7 +1487,7 @@ void isTypeStructCJmpImpl(ISS& env,
     };
     auto const pre  = [&] (Type t) { return result(t, negate); };
     auto const post = [&] (Type t) { return result(t, !negate); };
-    refineLocation(env, locId, pre, jmp.target, post);
+    refineLocation(env, locId, pre, jmp.target1, post);
   } else {
     return bail();
   }
@@ -3642,7 +3642,7 @@ void in(ISS& env, const bc::FCall& op) {
 
 void in(ISS& env, const bc::DecodeCufIter& op) {
   popC(env); // func
-  env.propagate(op.target, &env.state); // before iter is modifed
+  env.propagate(op.target2, &env.state); // before iter is modifed
 }
 
 namespace {
@@ -3815,7 +3815,7 @@ void iterNextKImpl(ISS& env, IterId iter, LocalId valueLoc,
 void in(ISS& env, const bc::IterInit& op) {
   auto const baseLoc = topStkLocal(env);
   auto base = popC(env);
-  iterInitImpl(env, op.iter1, op.loc3, op.target, std::move(base), baseLoc);
+  iterInitImpl(env, op.iter1, op.loc3, op.target2, std::move(base), baseLoc);
 }
 
 void in(ISS& env, const bc::LIterInit& op) {
@@ -3823,7 +3823,7 @@ void in(ISS& env, const bc::LIterInit& op) {
     env,
     op.iter1,
     op.loc4,
-    op.target,
+    op.target3,
     locAsCell(env, op.loc2),
     op.loc2
   );
@@ -3837,7 +3837,7 @@ void in(ISS& env, const bc::IterInitK& op) {
     op.iter1,
     op.loc3,
     op.loc4,
-    op.target,
+    op.target2,
     std::move(base),
     baseLoc
   );
@@ -3849,7 +3849,7 @@ void in(ISS& env, const bc::LIterInitK& op) {
     op.iter1,
     op.loc4,
     op.loc5,
-    op.target,
+    op.target3,
     locAsCell(env, op.loc2),
     op.loc2
   );
@@ -3857,14 +3857,14 @@ void in(ISS& env, const bc::LIterInitK& op) {
 
 void in(ISS& env, const bc::MIterInit& op) {
   popV(env);
-  env.propagate(op.target, &env.state);
+  env.propagate(op.target2, &env.state);
   unbindLocalStatic(env, op.loc3);
   setLocRaw(env, op.loc3, TRef);
 }
 
 void in(ISS& env, const bc::MIterInitK& op) {
   popV(env);
-  env.propagate(op.target, &env.state);
+  env.propagate(op.target2, &env.state);
   unbindLocalStatic(env, op.loc3);
   setLocRaw(env, op.loc3, TRef);
   setLoc(env, op.loc4, TInitCell);
@@ -3872,7 +3872,7 @@ void in(ISS& env, const bc::MIterInitK& op) {
 
 void in(ISS& env, const bc::WIterInit& op) {
   popC(env);
-  env.propagate(op.target, &env.state);
+  env.propagate(op.target2, &env.state);
   // WIter* instructions may leave the value locals as either refs
   // or cells, depending whether the rhs of the assignment was a
   // ref.
@@ -3881,49 +3881,49 @@ void in(ISS& env, const bc::WIterInit& op) {
 
 void in(ISS& env, const bc::WIterInitK& op) {
   popC(env);
-  env.propagate(op.target, &env.state);
+  env.propagate(op.target2, &env.state);
   setLocRaw(env, op.loc3, TInitGen);
   setLoc(env, op.loc4, TInitCell);
 }
 
 void in(ISS& env, const bc::IterNext& op) {
-  iterNextImpl(env, op.iter1, op.loc3, op.target);
+  iterNextImpl(env, op.iter1, op.loc3, op.target2);
 }
 
 void in(ISS& env, const bc::LIterNext& op) {
   mayReadLocal(env, op.loc2);
-  iterNextImpl(env, op.iter1, op.loc4, op.target);
+  iterNextImpl(env, op.iter1, op.loc4, op.target3);
 }
 
 void in(ISS& env, const bc::IterNextK& op) {
-  iterNextKImpl(env, op.iter1, op.loc3, op.loc4, op.target);
+  iterNextKImpl(env, op.iter1, op.loc3, op.loc4, op.target2);
 }
 
 void in(ISS& env, const bc::LIterNextK& op) {
   mayReadLocal(env, op.loc2);
-  iterNextKImpl(env, op.iter1, op.loc4, op.loc5, op.target);
+  iterNextKImpl(env, op.iter1, op.loc4, op.loc5, op.target3);
 }
 
 void in(ISS& env, const bc::MIterNext& op) {
-  env.propagate(op.target, &env.state);
+  env.propagate(op.target2, &env.state);
   unbindLocalStatic(env, op.loc3);
   setLocRaw(env, op.loc3, TRef);
 }
 
 void in(ISS& env, const bc::MIterNextK& op) {
-  env.propagate(op.target, &env.state);
+  env.propagate(op.target2, &env.state);
   unbindLocalStatic(env, op.loc3);
   setLocRaw(env, op.loc3, TRef);
   setLoc(env, op.loc4, TInitCell);
 }
 
 void in(ISS& env, const bc::WIterNext& op) {
-  env.propagate(op.target, &env.state);
+  env.propagate(op.target2, &env.state);
   setLocRaw(env, op.loc3, TInitGen);
 }
 
 void in(ISS& env, const bc::WIterNextK& op) {
-  env.propagate(op.target, &env.state);
+  env.propagate(op.target2, &env.state);
   setLocRaw(env, op.loc3, TInitGen);
   setLoc(env, op.loc4, TInitCell);
 }
@@ -3973,7 +3973,7 @@ void in(ISS& env, const bc::IterBreak& op) {
     freeIter(env, it.id);
   }
 
-  env.propagate(op.target, &env.state);
+  env.propagate(op.target1, &env.state);
 }
 
 /*
@@ -4636,7 +4636,6 @@ void in(ISS& env, const bc::Silence& op) {
   }
 }
 
-
 void in(ISS& env, const bc::MemoGet& op) {
   always_assert(env.ctx.func->isMemoizeWrapper);
   always_assert(op.locrange.first + op.locrange.count
@@ -4647,7 +4646,7 @@ void in(ISS& env, const bc::MemoGet& op) {
   if (equiv != op.locrange.first) {
     return reduce(
       env,
-      bc::MemoGet { op.target, LocalRange { equiv, op.locrange.count } }
+      bc::MemoGet { op.target1, LocalRange { equiv, op.locrange.count } }
     );
   }
 
@@ -4667,9 +4666,9 @@ void in(ISS& env, const bc::MemoGet& op) {
     nothrow(env);
   }
 
-  if (retTy.first == TBottom) return jmp_setdest(env, op.target);
+  if (retTy.first == TBottom) return jmp_setdest(env, op.target1);
 
-  env.propagate(op.target, &env.state);
+  env.propagate(op.target1, &env.state);
   push(env, std::move(retTy.first));
 }
 

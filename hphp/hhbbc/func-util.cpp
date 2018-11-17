@@ -98,43 +98,6 @@ std::unique_ptr<ExnNode> cloneExnTree(
   return clone;
 }
 
-void fixupSwitch(SwitchTab& s, BlockId delta) {
-  for (auto& id : s) id += delta;
-}
-
-void fixupSwitch(SSwitchTab& s, BlockId delta) {
-  for (auto& ent : s) ent.second += delta;
-}
-
-// generic do-nothing function, thats an inexact match
-template <typename Opcode>
-void fixupBlockIds(const Opcode& /*op*/, bool) {}
-
-// exact match if there's a targets field with matching fixupSwitch
-template<typename Opcode>
-auto fixupBlockIds(Opcode& op, BlockId delta) ->
-  decltype(fixupSwitch(op.targets, delta)) {
-  return fixupSwitch(op.targets, delta);
-}
-
-// exact match if there's a target field
-template<typename Opcode>
-auto fixupBlockIds(Opcode& op, BlockId delta) -> decltype(op.target, void()) {
-  op.target += delta;
-}
-
-// exact match if there's a fca field
-template<typename Opcode>
-auto fixupBlockIds(Opcode& op, BlockId delta) -> decltype(op.fca, void()) {
-  if (op.fca.asyncEagerTarget != NoBlockId) op.fca.asyncEagerTarget += delta;
-}
-
-void fixupBlockIds(Bytecode& bc, BlockId delta) {
-#define O(opcode, ...) case Op::opcode: return fixupBlockIds(bc.opcode, delta);
-  switch (bc.op) { OPCODES }
-#undef O
-}
-
 void copy_into(php::FuncBase* dst, const php::FuncBase& other) {
   hphp_fast_map<ExnNode*, ExnNode*> processed;
 
@@ -161,7 +124,7 @@ void copy_into(php::FuncBase* dst, const php::FuncBase& other) {
         // (and as a generated function, the src info isn't very
         // meaningful anyway).
         bc.srcLoc = -1;
-        fixupBlockIds(bc, delta);
+        bc.forEachTarget([&] (BlockId& b) { b += delta; });
       }
     }
     dst->blocks.push_back(std::move(ours));

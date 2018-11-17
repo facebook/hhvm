@@ -127,9 +127,9 @@ void BasicPeephole::push_back(const Bytecode& next) {
     if (cur.op == Op::Not &&
         (next.op == Op::JmpZ || next.op == Op::JmpNZ)) {
       if (next.op == Op::JmpZ) {
-        update_cur(bc::JmpNZ { next.JmpZ.target });
+        update_cur(bc::JmpNZ { next.JmpZ.target1 });
       } else {
-        update_cur(bc::JmpZ { next.JmpNZ.target });
+        update_cur(bc::JmpZ { next.JmpNZ.target1 });
       }
       return;
     }

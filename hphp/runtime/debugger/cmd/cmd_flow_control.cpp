@@ -179,9 +179,10 @@ void CmdFlowControl::setupStepOuts() {
       // Set an internal breakpoint at the target of a control flow instruction.
       // A good example of a control flow op that invokes PHP is IterNext.
       if (instrIsControlFlow(retOp)) {
-        Offset target = instrJumpTarget(returnPC, 0);
-        if (target != InvalidAbsoluteOffset) {
-          Offset targetOffset = returnOffset + target;
+        auto const targets = instrJumpTargets(returnPC, 0);
+        if (!targets.empty()) {
+          assertx(targets.size() == 1);
+          Offset targetOffset = returnOffset + targets[0];
           TRACE(2, "CmdFlowControl: step out to '%s' offset %d (jump target)\n",
                 fp->m_func->fullName()->data(), targetOffset);
           m_stepOut2 = StepDestination(returnUnit, targetOffset);

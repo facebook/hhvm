@@ -384,13 +384,38 @@ namespace imm {
 #define IMM_NAME_SA(n)      str##n
 #define IMM_NAME_RATA(n)    rat
 #define IMM_NAME_AA(n)      arr##n
-#define IMM_NAME_BA(n)      target
+#define IMM_NAME_BA(n)      target##n
 #define IMM_NAME_OA_IMPL(n) subop##n
 #define IMM_NAME_OA(type)   IMM_NAME_OA_IMPL
 #define IMM_NAME_VSA(n)     keys
 #define IMM_NAME_KA(n)      mkey
 #define IMM_NAME_LAR(n)     locrange
 #define IMM_NAME_FCA(n)     fca
+
+#define IMM_TARGETS_BLA(n)  for (auto& t : targets) f(t);
+#define IMM_TARGETS_SLA(n)  for (auto& kv : targets) f(kv.second);
+#define IMM_TARGETS_ILA(n)
+#define IMM_TARGETS_I32LA(n)
+#define IMM_TARGETS_BLLA(n)
+#define IMM_TARGETS_IVA(n)
+#define IMM_TARGETS_I64A(n)
+#define IMM_TARGETS_LA(n)
+#define IMM_TARGETS_IA(n)
+#define IMM_TARGETS_CAR(n)
+#define IMM_TARGETS_CAW(n)
+#define IMM_TARGETS_DA(n)
+#define IMM_TARGETS_SA(n)
+#define IMM_TARGETS_RATA(n)
+#define IMM_TARGETS_AA(n)
+#define IMM_TARGETS_BA(n)      f(target##n);
+#define IMM_TARGETS_OA_IMPL(n)
+#define IMM_TARGETS_OA(type)   IMM_TARGETS_OA_IMPL
+#define IMM_TARGETS_VSA(n)
+#define IMM_TARGETS_KA(n)
+#define IMM_TARGETS_LAR(n)
+#define IMM_TARGETS_FCA(n)   if (fca.asyncEagerTarget != NoBlockId) { \
+                               f(fca.asyncEagerTarget);               \
+                             }
 
 #define IMM_EXTRA_BLA
 #define IMM_EXTRA_SLA
@@ -407,7 +432,7 @@ namespace imm {
 #define IMM_EXTRA_SA
 #define IMM_EXTRA_RATA
 #define IMM_EXTRA_AA
-#define IMM_EXTRA_BA        using has_target_flag = std::true_type;
+#define IMM_EXTRA_BA
 #define IMM_EXTRA_OA(x)
 #define IMM_EXTRA_VSA
 #define IMM_EXTRA_KA
@@ -452,6 +477,13 @@ namespace imm {
 #define IMM_HASH_THREE(x, y, z)     IMM_HASH_TWO(x, y), IMM_HASH(z, 3)
 #define IMM_HASH_FOUR(x, y, z, l)   IMM_HASH_THREE(x, y, z), IMM_HASH(l, 4)
 #define IMM_HASH_FIVE(x, y, z, l, m) IMM_HASH_FOUR(x, y, z, l), IMM_HASH(m, 5)
+
+#define IMM_TARGETS_NA
+#define IMM_TARGETS_ONE(x)          IMM_TARGETS_##x(1)
+#define IMM_TARGETS_TWO(x,y)        IMM_TARGETS_ONE(x) IMM_TARGETS_##y(2)
+#define IMM_TARGETS_THREE(x,y,z)    IMM_TARGETS_TWO(x,y) IMM_TARGETS_##z(3)
+#define IMM_TARGETS_FOUR(x,y,z,l)   IMM_TARGETS_THREE(x,y,z) IMM_TARGETS_##l(4)
+#define IMM_TARGETS_FIVE(x,y,z,l,m) IMM_TARGETS_FOUR(x,y,z,l) IMM_TARGETS_##m(5)
 
 #define IMM_EXTRA_NA
 #define IMM_EXTRA_ONE(x)           IMM_EXTRA_##x
@@ -619,6 +651,15 @@ namespace imm {
     size_t hash(H h) const {                    \
       return IMM_HASH_WRAP(h, IMM_HASH_##imms); \
     }                                           \
+                                                \
+    template <typename F>                       \
+    void forEachTarget(F&& f) {                 \
+      IMM_TARGETS_##imms                        \
+    }                                           \
+    template <typename F>                       \
+    void forEachTarget(F&& f) const {           \
+      IMM_TARGETS_##imms                        \
+    }                                           \
   };
 OPCODES
 #undef O
@@ -715,6 +756,34 @@ OPCODES
 // #undef IMM_NAME_OA_IMPL
 // #undef IMM_NAME_LAR
 // #undef IMM_NAME_FCA
+
+#undef IMM_TARGETS_BLA
+#undef IMM_TARGETS_SLA
+#undef IMM_TARGETS_ILA
+#undef IMM_TARGETS_I32LA
+#undef IMM_TARGETS_BLLA
+#undef IMM_TARGETS_IVA
+#undef IMM_TARGETS_I64A
+#undef IMM_TARGETS_LA
+#undef IMM_TARGETS_IA
+#undef IMM_TARGETS_CAR
+#undef IMM_TARGETS_CAW
+#undef IMM_TARGETS_DA
+#undef IMM_TARGETS_SA
+#undef IMM_TARGETS_RATA
+#undef IMM_TARGETS_AA
+#undef IMM_TARGETS_BA
+#undef IMM_TARGETS_OA
+#undef IMM_TARGETS_KA
+#undef IMM_TARGETS_LAR
+#undef IMM_TARGETS_FCA
+
+#undef IMM_TARGETS_NA
+#undef IMM_TARGETS_ONE
+#undef IMM_TARGETS_TWO
+#undef IMM_TARGETS_THREE
+#undef IMM_TARGETS_FOUR
+#undef IMM_TARGETS_FIVE
 
 #undef IMM_EXTRA_BLA
 #undef IMM_EXTRA_SLA
@@ -861,6 +930,24 @@ struct Bytecode {
     not_reached();
   }
 
+  template <typename F>
+  void forEachTarget(F&& f) const {
+#define O(opcode, ...) \
+    case Op::opcode: return opcode.forEachTarget(std::forward<F>(f));
+    switch (op) { OPCODES }
+#undef O
+    not_reached();
+  }
+
+  template <typename F>
+  void forEachTarget(F&& f) {
+#define O(opcode, ...) \
+    case Op::opcode: return opcode.forEachTarget(std::forward<F>(f));
+    switch (op) { OPCODES }
+#undef O
+    not_reached();
+  }
+
   Op op;
   int32_t srcLoc{-1};
 
@@ -965,7 +1052,6 @@ typename Visit::result_type visit(const Bytecode& b, Visit v) {
 
 //////////////////////////////////////////////////////////////////////
 
-BOOST_MPL_HAS_XXX_TRAIT_NAMED_DEF(has_target, has_target_flag, false);
 BOOST_MPL_HAS_XXX_TRAIT_NAMED_DEF(has_car, has_car_flag, false);
 BOOST_MPL_HAS_XXX_TRAIT_NAMED_DEF(has_caw, has_caw_flag, false);
 

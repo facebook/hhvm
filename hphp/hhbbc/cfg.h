@@ -32,34 +32,6 @@ namespace HPHP { namespace HHBBC {
 namespace detail {
 
 template<class Fun>
-struct TargetVisitor : boost::static_visitor<void> {
-  explicit TargetVisitor(Fun f) : f(f) {}
-
-  template <class T>
-  typename std::enable_if<!has_target<T>::value, void>::type
-  operator()(T const& /*t*/) const {}
-
-  template<class T>
-  typename std::enable_if<has_target<T>::value,void>::type
-  operator()(T const& t) const { f(t.target); }
-
-  void operator()(const bc::FCall& fcall) const {
-    if (fcall.fca.asyncEagerTarget != NoBlockId) f(fcall.fca.asyncEagerTarget);
-  }
-
-  void operator()(const bc::Switch& b) const {
-    for (auto& t : b.targets) f(t);
-  }
-
-  void operator()(const bc::SSwitch& b) const {
-    for (auto& kv : b.targets) f(kv.second);
-  }
-
-private:
-  Fun f;
-};
-
-template<class Fun>
 void visitExnLeaves(const php::ExnNode& n, Fun f) {
   for (auto& c : n.children) visitExnLeaves(*c, f);
   f(n);
@@ -96,7 +68,7 @@ BlockId next_real_block(const php::Func& func, BlockId id);
  */
 template<class Fun>
 void forEachTakenEdge(const Bytecode& b, Fun f) {
-  visit(b, detail::TargetVisitor<Fun>(f));
+  b.forEachTarget(f);
 }
 
 /*
@@ -104,8 +76,7 @@ void forEachTakenEdge(const Bytecode& b, Fun f) {
  */
 template<class Fun, class T>
 void forEachTakenEdge(const T& op, Fun f) {
-  detail::TargetVisitor<Fun> v(f);
-  v(op);
+  op.forEachTarget(f);
 }
 
 /*

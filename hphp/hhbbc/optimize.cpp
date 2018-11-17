@@ -680,13 +680,13 @@ void first_pass(const Index& index,
              */
             auto fatal = make_fatal_block(ainfo, blk, state)->id;
             if (op.op == Op::IterInit) {
-              op.IterInit.target = fatal;
+              op.IterInit.target2 = fatal;
             } else if (op.op == Op::IterInitK) {
-              op.IterInitK.target = fatal;
+              op.IterInitK.target2 = fatal;
             } else if (op.op == Op::LIterInit) {
-              op.LIterInit.target = fatal;
+              op.LIterInit.target3 = fatal;
             } else if (op.op == Op::LIterInitK) {
-              op.LIterInitK.target = fatal;
+              op.LIterInitK.target3 = fatal;
             }
           }
           break;
@@ -714,13 +714,13 @@ void first_pass(const Index& index,
             }
             continue;
           } else if (op.op == Op::IterNext) {
-            op.IterNext.target = make_fatal_block(ainfo, blk, state)->id;
+            op.IterNext.target2 = make_fatal_block(ainfo, blk, state)->id;
           } else if (op.op == Op::IterNextK) {
-            op.IterNextK.target = make_fatal_block(ainfo, blk, state)->id;
+            op.IterNextK.target2 = make_fatal_block(ainfo, blk, state)->id;
           } else if (op.op == Op::LIterNext) {
-            op.LIterNext.target = make_fatal_block(ainfo, blk, state)->id;
+            op.LIterNext.target3 = make_fatal_block(ainfo, blk, state)->id;
           } else {
-            op.LIterNextK.target = make_fatal_block(ainfo, blk, state)->id;
+            op.LIterNextK.target3 = make_fatal_block(ainfo, blk, state)->id;
           }
           break;
         case Op::MemoGet:
@@ -1008,7 +1008,7 @@ void optimize_iterators(const Index& index,
             bc::LIterInit {
               op.IterInit.iter1,
                 fixup.base,
-                op.IterInit.target,
+                op.IterInit.target2,
                 op.IterInit.loc3
             }
           )
@@ -1022,7 +1022,7 @@ void optimize_iterators(const Index& index,
             bc::LIterInitK {
               op.IterInitK.iter1,
                 fixup.base,
-                op.IterInitK.target,
+                op.IterInitK.target2,
                 op.IterInitK.loc3,
                 op.IterInitK.loc4
             }
@@ -1036,7 +1036,7 @@ void optimize_iterators(const Index& index,
             bc::LIterNext {
               op.IterNext.iter1,
                 fixup.base,
-                op.IterNext.target,
+                op.IterNext.target2,
                 op.IterNext.loc3
             }
           )
@@ -1049,7 +1049,7 @@ void optimize_iterators(const Index& index,
             bc::LIterNextK {
               op.IterNextK.iter1,
                 fixup.base,
-                op.IterNextK.target,
+                op.IterNextK.target2,
                 op.IterNextK.loc3,
                 op.IterNextK.loc4
             }

@@ -33,7 +33,8 @@ bool branchesToItself(SrcKey sk) {
   auto const op = peek_op(pc);
   if (!instrIsControlFlow(op)) return false;
   if (isSwitch(op)) return false;
-  return instrJumpOffset(pc) == 0;
+  auto const offsets = instrJumpOffsets(pc);
+  return std::find(offsets.begin(), offsets.end(), 0) != offsets.end();
 }
 
 /*

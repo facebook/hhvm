@@ -351,8 +351,7 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
       return false;
     }
     m_instrs.set(offset(pc) - m_func->base);
-    if (isSwitch(op) ||
-        instrJumpTarget(bc, offset(pc)) != InvalidAbsoluteOffset) {
+    if (!instrJumpTargets(bc, offset(pc)).empty()) {
       if (op == OpSwitch && getImm(pc, 0).u_IVA == int(SwitchKind::Bounded)) {
         int64_t switchBase = getImm(pc, 1).u_I64A;
         int32_t len = getImmVector(pc).size();
@@ -393,14 +392,9 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
   }
   // Check each branch target lands on a valid instruction boundary
   // within this region.
-  for (auto branch : branches) {
-    if (isSwitch(peek_op(branch))) {
-      foreachSwitchTarget(branch, [&](Offset o) {
-        ok &= checkOffset("switch target", offset(branch + o),
-                          name, base, past);
-      });
-    } else {
-      Offset target = instrJumpTarget(bc, offset(branch));
+  for (auto const branch : branches) {
+    auto const targets = instrJumpTargets(bc, offset(branch));
+    for (auto const& target : targets) {
       ok &= checkOffset("branch target", target, name, base, past);
       if (peek_op(branch) == Op::JmpNS && target == offset(branch)) {
         error("JmpNS may not have zero offset in %s\n", name);
@@ -600,8 +594,7 @@ bool FuncChecker::checkImmRATA(PC& pc, PC const /*instr*/) {
 
 bool FuncChecker::checkImmBA(PC& pc, PC const instr) {
   // we check branch offsets in checkSection(). ignore here.
-  assertx(instrJumpTarget(unit()->bc(), offset(instr)) !=
-         InvalidAbsoluteOffset);
+  assertx(!instrJumpTargets(unit()->bc(), offset(instr)).empty());
   pc += sizeof(Offset);
   return true;
 }

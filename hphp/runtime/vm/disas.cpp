@@ -181,18 +181,10 @@ FuncInfo find_func_info(const Func* func) {
     auto const bcBase = func->unit()->at(0);
 
     for (; pc != stop; pc += instrLen(pc)) {
-      auto const op = peek_op(pc);
-      if (isSwitch(op)) {
-        foreachSwitchTarget(pc, [&] (Offset off) {
-          add_target("L", pc - bcBase + off);
-        });
-        continue;
-      }
       auto const off = func->unit()->offsetOf(pc);
-      auto const target = instrJumpTarget(bcBase, off);
-      if (target != InvalidAbsoluteOffset) {
+      auto const targets = instrJumpTargets(bcBase, off);
+      for (auto const& target : targets) {
         add_target("L", target);
-        continue;
       }
     }
   };

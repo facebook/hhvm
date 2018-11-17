@@ -201,7 +201,7 @@ std::string show(const Func& func, const Bytecode& bc) {
 #define IMM_SA(n)      folly::toAppend(" ", escaped_string(data.str##n), &ret);
 #define IMM_RATA(n)    folly::toAppend(" ", show(data.rat), &ret);
 #define IMM_AA(n)      ret += " " + array_string(data.arr##n);
-#define IMM_BA(n)      folly::toAppend(" <blk:", data.target, ">", &ret);
+#define IMM_BA(n)      folly::toAppend(" <blk:", data.target##n, ">", &ret);
 #define IMM_OA_IMPL(n) folly::toAppend(" ", subopToName(data.subop##n), &ret);
 #define IMM_OA(type)   IMM_OA_IMPL
 #define IMM_VSA(n)     ret += " "; append_vsa(data.keys);

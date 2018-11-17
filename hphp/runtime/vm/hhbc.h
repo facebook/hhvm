@@ -1010,13 +1010,15 @@ bool subopValid(Subop);
 template<class SubOpType>
 folly::Optional<SubOpType> nameToSubop(const char*);
 
-// Returns a jump offset relative to the instruction, or kInvalidOffset if
-// the instruction cannot jump.
-Offset instrJumpOffset(PC instr);
+using OffsetList = std::vector<Offset>;
 
-// returns absolute address of target, or InvalidAbsoluteOffset if instruction
-//   cannot jump
-Offset instrJumpTarget(PC instrs, Offset pos);
+// Returns a jump offsets relative to the instruction, or nothing if
+// the instruction cannot jump.
+OffsetList instrJumpOffsets(PC instr);
+
+// returns absolute address of targets, or nothing if instruction
+// cannot jump
+OffsetList instrJumpTargets(PC instrs, Offset pos);
 
 /*
  * Returns the set of bytecode offsets for the instructions that may

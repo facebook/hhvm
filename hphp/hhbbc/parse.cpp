@@ -174,7 +174,7 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
     auto const breaksBB =
       instrIsNonCallControlFlow(op) ||
       instrFlags(op) & TF ||
-      (isFCallStar(op) && instrJumpOffset(pc) != kInvalidOffset);
+      (isFCallStar(op) && !instrJumpOffsets(pc).empty());
 
     if (options.TraceBytecodes.count(op)) traceBc = true;
 
@@ -182,14 +182,8 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
       markBlock(nextOff);
     }
 
-    if (isSwitch(op)) {
-      foreachSwitchTarget(pc, [&] (Offset delta) {
-        markBlock(offset + delta);
-      });
-    } else {
-      auto const target = instrJumpTarget(bc, offset);
-      if (target != InvalidAbsoluteOffset) markBlock(target);
-    }
+    auto const targets = instrJumpTargets(bc, offset);
+    for (auto const& target : targets) markBlock(target);
 
     offset = nextOff;
     if (atLast) break;
@@ -838,7 +832,7 @@ void populate_block(ParseUnitState& puState,
 #define IMM_RATA(n)    auto rat = decodeRAT(ue, pc);
 #define IMM_AA(n)      auto arr##n = ue.lookupArray(decode<Id>(pc));
 #define IMM_BA(n)      assert(next == past);     \
-                       auto target = findBlock(  \
+                       auto target##n = findBlock(  \
                          opPC + decode<Offset>(pc) - ue.bc())->id;
 #define IMM_OA_IMPL(n) subop##n; decode(pc, subop##n);
 #define IMM_OA(type)   type IMM_OA_IMPL
@@ -1031,7 +1025,7 @@ void populate_block(ParseUnitState& puState,
    */
 
   auto make_fallthrough = [&] {
-    blk.fallthrough = blk.hhbcs.back().Jmp.target;
+    blk.fallthrough = blk.hhbcs.back().Jmp.target1;
     blk.hhbcs.back() = bc_with_loc(blk.hhbcs.back().srcLoc, bc::Nop{});
   };
 

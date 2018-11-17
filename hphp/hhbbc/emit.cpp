@@ -688,7 +688,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define IMM_AA(n)      ue.emitInt32(ue.mergeArray(data.arr##n));
 #define IMM_OA_IMPL(n) ue.emitByte(static_cast<uint8_t>(data.subop##n));
 #define IMM_OA(type)   IMM_OA_IMPL
-#define IMM_BA(n)      emit_branch(data.target);
+#define IMM_BA(n)      emit_branch(data.target##n);
 #define IMM_VSA(n)     emit_vsa(data.keys);
 #define IMM_KA(n)      encode_member_key(make_member_key(data.mkey), ue);
 #define IMM_LAR(n)     emit_lar(data.locrange);
@@ -848,7 +848,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     if (b->hhbcs.back().op == Op::JmpZ ||
         b->hhbcs.back().op == Op::JmpNZ) {
       auto& bc = b->hhbcs.back();
-      auto const target = bc.op == Op::JmpNZ ? bc.JmpNZ.target : bc.JmpZ.target;
+      auto const target =
+        bc.op == Op::JmpNZ ? bc.JmpNZ.target1 : bc.JmpZ.target1;
       if (std::next(blockIt) != endBlockIt && blockIt[1]->id == target) {
         if (bc.op == Op::JmpNZ) {
           bc = bc_with_loc(bc.srcLoc, bc::JmpZ { b->fallthrough });

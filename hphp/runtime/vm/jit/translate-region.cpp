@@ -841,8 +841,13 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       if (!skipTrans && penultimateInst && isCmp(inst.op())) {
           SrcKey nextSk = inst.nextSk();
           Op nextOp = nextSk.op();
-          if (needsSurpriseCheck(nextOp) &&
-              instrJumpOffset(nextSk.pc()) < 0) {
+          auto const backwards = [&]{
+            auto const offsets = instrJumpOffsets(nextSk.pc());
+            return std::any_of(
+              offsets.begin(), offsets.end(), [] (Offset o) { return o < 0; }
+            );
+          };
+          if (needsSurpriseCheck(nextOp) && backwards()) {
             emitedSurpriseCheck = true;
             inst.forceSurpriseCheck = true;
           }
@@ -852,9 +857,15 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       try {
         if (!skipTrans) {
           const bool firstInstr = isEntry && i == 0;
+          auto const backwards = [&]{
+            auto const offsets = instrJumpOffsets(inst.pc());
+            return std::any_of(
+              offsets.begin(), offsets.end(), [] (Offset o) { return o < 0; }
+            );
+          };
           if (lastInstr && !emitedSurpriseCheck &&
               needsSurpriseCheck(inst.op()) &&
-              instrJumpOffset(inst.pc()) < 0) {
+              backwards()) {
             emitedSurpriseCheck = true;
             inst.forceSurpriseCheck = true;
           }

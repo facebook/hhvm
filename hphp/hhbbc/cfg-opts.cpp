@@ -170,7 +170,7 @@ bool analyzeSwitch(const php::Block& blk,
           }
         }
         auto const jmpTarget = jmp->op == Op::JmpNZ ?
-          jmp->JmpNZ.target : jmp->JmpZ.target;
+          jmp->JmpNZ.target1 : jmp->JmpZ.target1;
         BlockId caseTarget, defaultBlock;
         if ((jmp->op == Op::JmpNZ) == (cmp.op == Op::Eq)) {
           defaultBlock = blk.fallthrough;

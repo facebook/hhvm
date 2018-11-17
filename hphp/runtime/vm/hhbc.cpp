@@ -253,8 +253,8 @@ int instrLen(const PC origPC) {
   return pc - origPC;
 }
 
-Offset instrJumpOffset(const PC origPC) {
-  static const int8_t jumpMask[] = {
+OffsetList instrJumpOffsets(const PC origPC) {
+  static const std::array<uint8_t, kMaxHhbcImms> argTypes[] = {
 #define IMM_NA 0
 #define IMM_IVA 0
 #define IMM_I64A 0
@@ -263,11 +263,11 @@ Offset instrJumpOffset(const PC origPC) {
 #define IMM_AA 0
 #define IMM_RATA 0
 #define IMM_BA 1
-#define IMM_BLA 0  // these are jump offsets, but must be handled specially
+#define IMM_BLA 2
 #define IMM_ILA 0
 #define IMM_I32LA 0
 #define IMM_BLLA 0
-#define IMM_SLA 0
+#define IMM_SLA 3
 #define IMM_LA 0
 #define IMM_IA 0
 #define IMM_CAR 0
@@ -277,12 +277,14 @@ Offset instrJumpOffset(const PC origPC) {
 #define IMM_KA 0
 #define IMM_LAR 0
 #define IMM_FCA 0
-#define ONE(a) IMM_##a
-#define TWO(a, b) (IMM_##a + 2 * IMM_##b)
-#define THREE(a, b, c) (IMM_##a + 2 * IMM_##b + 4 * IMM_##c)
-#define FOUR(a, b, c, d) (IMM_##a + 2 * IMM_##b + 4 * IMM_##c + 8 * IMM_##d)
-#define FIVE(a, b, c, d, e) (IMM_##a + 2 * IMM_##b + 4 * IMM_##c + 8 * IMM_##d + 16 * IMM_##e)
-#define O(name, imm, pop, push, flags) imm,
+#define NA                  { 0,        0,        0,        0,        0      },
+#define ONE(a)              { IMM_##a,  0,        0,        0,        0      },
+#define TWO(a, b)           { IMM_##a,  IMM_##b,  0,        0,        0      },
+#define THREE(a, b, c)      { IMM_##a,  IMM_##b,  IMM_##c,  0,        0      },
+#define FOUR(a, b, c, d)    { IMM_##a,  IMM_##b,  IMM_##c,  IMM_##d,  0      },
+#define FIVE(a, b, c, d, e) { IMM_##a,  IMM_##b,  IMM_##c,  IMM_##d,  IMM_##e},
+#define OA(x) OA
+#define O(name, imm, unusedPop, unusedPush, unusedFlags) imm
     OPCODES
 #undef IMM_NA
 #undef IMM_IVA
@@ -306,73 +308,84 @@ Offset instrJumpOffset(const PC origPC) {
 #undef IMM_KA
 #undef IMM_LAR
 #undef IMM_FCA
+#undef O
+#undef OA
+#undef NA
 #undef ONE
 #undef TWO
 #undef THREE
 #undef FOUR
 #undef FIVE
-#undef O
   };
 
   auto pc = origPC;
   auto const op = decode_op(pc);
-  assertx(!isSwitch(op));     // BLA doesn't work here
 
+  OffsetList targets;
   if (isFCallStar(op)) {
-    return decodeFCallArgs(pc).asyncEagerOffset;
+    auto const offset = decodeFCallArgs(pc).asyncEagerOffset;
+    if (offset != kInvalidOffset) targets.emplace_back(offset);
+    return targets;
   }
 
-  int immNum;
-  switch (jumpMask[size_t(op)]) {
-  case 0: return kInvalidOffset;
-  case 1: immNum = 0; break;
-  case 2: immNum = 1; break;
-  case 4: immNum = 2; break;
-  case 8: immNum = 3; break;
-  case 16: immNum = 4; break;
-  default: assertx(false); return kInvalidOffset;
+  auto const& types = argTypes[size_t(op)];
+  for (size_t i = 0; i < types.size(); ++i) {
+    switch (types[i]) {
+      case 0:
+        break;
+      case 1:
+        pc = origPC;
+        targets.emplace_back(getImmPtr(pc, i)->u_BA);
+        break;
+      case 2: {
+        pc = origPC;
+        PC vp = getImmPtr(pc, i)->bytes;
+        auto const size = decode_iva(vp);
+        ImmVector iv(vp, size, 0);
+        targets.insert(targets.end(), iv.vec32(), iv.vec32() + iv.size());
+        break;
+      }
+      case 3: {
+        pc = origPC;
+        PC vp = getImmPtr(pc, i)->bytes;
+        auto const size = decode_iva(vp);
+        ImmVector iv(vp, size, 0);
+        for (size_t j = 0; j < iv.size(); ++j) {
+          targets.emplace_back(iv.strvec()[j].dest);
+        }
+        break;
+      }
+      default:
+        always_assert(false);
+    }
   }
 
-  return getImmPtr(origPC, immNum)->u_BA;
+  return targets;
 }
 
-Offset instrJumpTarget(PC instrs, Offset pos) {
-  auto offset = instrJumpOffset(instrs + pos);
-  return offset != kInvalidOffset ? offset + pos : InvalidAbsoluteOffset;
+OffsetList instrJumpTargets(PC instrs, Offset pos) {
+  auto offsets = instrJumpOffsets(instrs + pos);
+  for (auto& o : offsets) o += pos;
+  return offsets;
 }
 
 OffsetSet instrSuccOffsets(PC opc, const Func* func) {
-  OffsetSet succBcOffs;
   auto const bcStart = func->unit()->entry();
+  auto const offsets = instrJumpTargets(bcStart, opc - bcStart);
+  OffsetSet offsetsSet{offsets.begin(), offsets.end()};
+
   auto const op = peek_op(opc);
-
-  if (!instrIsControlFlow(op)) {
+  if (!instrIsControlFlow(op) || instrAllowsFallThru(op)) {
     Offset succOff = opc + instrLen(opc) - bcStart;
-    succBcOffs.insert(succOff);
-    return succBcOffs;
+    offsetsSet.emplace(succOff);
   }
 
-  if (instrAllowsFallThru(op)) {
-    Offset succOff = opc + instrLen(opc) - bcStart;
-    succBcOffs.insert(succOff);
+  if (op == Op::Await || op == Op::Throw) {
+    auto const target = findCatchHandler(func, opc - bcStart);
+    if (target != InvalidAbsoluteOffset) offsetsSet.emplace(target);
   }
 
-  if (isSwitch(op)) {
-    foreachSwitchTarget(opc, [&](Offset offset) {
-      succBcOffs.insert(offset + opc - bcStart);
-    });
-  } else if (op == Op::Await || op == Op::Throw) {
-    Offset target = findCatchHandler(func, opc - bcStart);
-    if (target != InvalidAbsoluteOffset) {
-      succBcOffs.insert(target);
-    }
-  } else {
-    Offset target = instrJumpTarget(bcStart, opc - bcStart);
-    if (target != InvalidAbsoluteOffset) {
-      succBcOffs.insert(target);
-    }
-  }
-  return succBcOffs;
+  return offsetsSet;
 }
 
 /**
@@ -381,21 +394,10 @@ OffsetSet instrSuccOffsets(PC opc, const Func* func) {
  */
 int numSuccs(const PC origPC) {
   auto pc = origPC;
-  auto const op = decode_op(pc);
-  if ((instrFlags(op) & TF) != 0) {
-    if (isSwitch(op)) {
-      if (op == Op::Switch) {
-        decode_raw<SwitchKind>(pc); // skip bounded flag
-        decode_raw<int64_t>(pc); // skip base
-      }
-      return decode_iva(pc); // vector length
-    }
-    if (isUnconditionalJmp(op) || op == OpIterBreak) return 1;
-    return 0;
-  }
-  if (!instrIsControlFlow(op)) return 1;
-  if (instrJumpOffset(origPC) != kInvalidOffset) return 2;
-  return 1;
+  auto numTargets = instrJumpOffsets(pc).size();
+  pc = origPC;
+  if ((instrFlags(decode_op(pc)) & TF) == 0) ++numTargets;
+  return numTargets;
 }
 
 /**

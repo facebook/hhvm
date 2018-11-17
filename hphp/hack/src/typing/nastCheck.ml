@@ -612,7 +612,7 @@ and check_happly unchecked_tparams env h =
   | _, Tapply (_, tyl) when tyl <> [] ->
       let env, locl_ty = Phase.localize_with_self env decl_ty in
       begin match TUtils.get_base_type env locl_ty with
-        | _, Tclass (cls, tyl) ->
+        | _, Tclass (cls, _, tyl) ->
           (match Env.get_class env (snd cls) with
             | Some { tc_tparams; _ } ->
                 (* We want to instantiate the class type parameters with the

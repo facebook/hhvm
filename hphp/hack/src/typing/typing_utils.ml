@@ -226,7 +226,7 @@ let is_dynamic env ty =
 let rec is_hack_collection env ty =
   let env, ety = Env.expand_type env ty in
   match ety with
-  | _, Tclass ((_, n), _)
+  | _, Tclass ((_, n), _, _)
     when n = SN.Collections.cVector
       || n = SN.Collections.cImmVector
       || n = SN.Collections.cMap
@@ -291,7 +291,7 @@ let rec get_base_type env ty =
 (*****************************************************************************)
 let get_class_ids env ty =
   let rec aux seen acc = function
-    | _, Tclass ((_, cid), _) -> cid::acc
+    | _, Tclass ((_, cid), _, _) -> cid::acc
     | _, (Toption ty | Tabstract (_, Some ty)) -> aux seen acc ty
     | _, Tunresolved tys -> List.fold tys ~init:acc ~f:(aux seen)
     | _, Tabstract (AKgeneric name, None) when not (List.mem ~equal:(=) seen name) ->
@@ -487,7 +487,7 @@ let shape_field_name_ env field =
     | _, Class_const ((_, CIself), y) ->
       let _, c_ty = Env.get_self env in
       (match c_ty with
-      | Tclass (sid, _) ->
+      | Tclass (sid, _, _) ->
         Ok (Ast.SFclass_const(sid, y))
       | _ ->
         Error `Expected_class)
@@ -588,7 +588,7 @@ let rec push_option_out env ty =
     | env, _ -> env, ty
     end
   | _, (Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Tvar _
-    | Tclass (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
+    | Tclass _ | Ttuple _ | Tanon _ | Tfun _
     | Tobject | Tshape _ | Tdynamic) -> env, ty
 
 (**

@@ -79,10 +79,11 @@ let locl ty = LoclTy ty
 type env = expand_env
 
 let env_with_self env =
+  let this_ty = Reason.none, TUtils.this_of (Env.get_self env) in
   {
     type_expansions = [];
     substs = SMap.empty;
-    this_ty = Reason.none, TUtils.this_of (Env.get_self env);
+    this_ty = this_ty;
     from_class = None;
     validate_dty = None;
   }
@@ -100,6 +101,7 @@ let env_with_self env =
 (*****************************************************************************)
 
 let rec localize_with_env ~ety_env env (dty: decl ty) =
+
   Option.iter ety_env.validate_dty (fun validate_dty -> validate_dty dty);
   match dty with
   | r, Terr ->
@@ -120,7 +122,8 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
             Reason.Rinstantiate (reason, SN.Typehints.this, r), ty in
       let env, ty =
         match ety_env.from_class with
-        | Some cid -> ExprDepTy.make env cid ty
+        | Some cid ->
+          ExprDepTy.make env cid ty
         | _ -> env, ty in
       env, (ety_env, ty)
   | r, Tarray (ty1, ty2) ->
@@ -193,7 +196,7 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
             let tparams = class_info.tc_tparams in
             localize_tparams ~ety_env env (Reason.to_pos r) tyl tparams
       in
-      env, (ety_env, (r, Tclass (cls, tyl)))
+      env, (ety_env, (r, Tclass (cls, Nonexact, tyl)))
   | r, Ttuple tyl ->
       let env, tyl = List.map_env env tyl (localize ~ety_env) in
       env, (ety_env, (r, Ttuple tyl))

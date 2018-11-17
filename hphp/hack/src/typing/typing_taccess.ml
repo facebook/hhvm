@@ -113,10 +113,13 @@ and expand env (root_reason, root_ty as root) =
       | Tany | Terr -> env, root
       | Tabstract (AKdependent (`cls _, []), Some ty)
       | Tabstract (AKnewtype (_, _), Some ty) | Toption ty -> expand env ty
-      | Tclass ((class_pos, class_name), _) ->
+      | Tclass ((class_pos, class_name), _, tyl) ->
+          (* Legacy behaviour is to preserve exactness only on `this`
+           * and not through `this::T` *)
           let env, ty =
             create_root_from_type_constant
-              env class_pos class_name root head in
+              env class_pos class_name
+               (root_reason, Tclass ((class_pos, class_name), Nonexact, tyl)) head in
           expand { env with ids = tail } ty
       | Tabstract (AKgeneric s, _) ->
         let dep_ty = generic_to_dep_ty s in

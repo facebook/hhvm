@@ -44,6 +44,7 @@
     typing_lenv_cont
     typing_log
     typing_logic
+    typing_make_type
     typing_mutability_env
     typing_ops
     typing_phase

@@ -16,6 +16,7 @@ module Env          = Typing_env
 module Reason       = Typing_reason
 module TUtils       = Typing_utils
 module Type         = Typing_ops
+module TMT          = Typing_make_type
 
 let rec refine_shape field_name env shape =
   let env, shape = Env.expand_type env shape in
@@ -252,4 +253,4 @@ let to_array env shape_ty res =
 
 let to_dict env shape_ty res =
   to_collection env shape_ty res (fun r key value ->
-    (r, Tclass ((Reason.to_pos r, SN.Collections.cDict), [key; value])))
+    TMT.dict r key value)

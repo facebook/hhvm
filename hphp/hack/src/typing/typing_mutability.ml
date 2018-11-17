@@ -426,7 +426,7 @@ let enforce_mutable_call (env : Typing_env.env) (te : T.expr) =
 let rec is_byval_collection_type env ty =
   let check t =
     match t with
-    | (_, Tclass ((_, x), _)) ->
+    | (_, Tclass ((_, x), _, _)) ->
       x = SN.Collections.cVec ||
       x = SN.Collections.cDict ||
       x = SN.Collections.cKeyset

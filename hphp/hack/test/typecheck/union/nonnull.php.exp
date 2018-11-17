@@ -3,7 +3,7 @@ File "nonnull.php--file2.php", line 19, characters 3-13:
 File "nonnull.php--file2.php", line 22, characters 3-13:
   nonnull
 File "nonnull.php--file2.php", line 25, characters 3-13:
-  (nonnull | exact A)
+  nonnull
 File "nonnull.php--file2.php", line 28, characters 3-13:
   mixed
 File "nonnull.php--file2.php", line 31, characters 3-13:

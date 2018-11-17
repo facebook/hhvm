@@ -5,73 +5,73 @@ Invalid argument (Typing[4110])
   File "while_assign_in_invariant.php", line 31, characters 58-59:
   This is an object of type BD
   File "while_assign_in_invariant.php", line 36, characters 12-12:
-  It is incompatible with an object of type A
+  It is incompatible with an object of exactly the class A
 File "while_assign_in_invariant.php", line 43, characters 15-16:
 Invalid argument (Typing[4110])
   File "while_assign_in_invariant.php", line 26, characters 20-21:
   This is an object of type BD
   File "while_assign_in_invariant.php", line 36, characters 12-12:
-  It is incompatible with an object of type A
+  It is incompatible with an object of exactly the class A
 File "while_assign_in_invariant.php", line 38, characters 40-41:
 Invalid argument (Typing[4110])
   File "while_assign_in_invariant.php", line 31, characters 44-45:
   This is an object of type AB
   File "while_assign_in_invariant.php", line 52, characters 14-14:
-  It is incompatible with an object of type D
+  It is incompatible with an object of exactly the class D
 File "while_assign_in_invariant.php", line 38, characters 44-45:
 Invalid argument (Typing[4110])
   File "while_assign_in_invariant.php", line 31, characters 51-52:
   This is an object of type AD
   File "while_assign_in_invariant.php", line 44, characters 14-14:
-  It is incompatible with an object of type B
+  It is incompatible with an object of exactly the class B
 File "while_assign_in_invariant.php", line 38, characters 48-49:
 Invalid argument (Typing[4110])
   File "while_assign_in_invariant.php", line 31, characters 58-59:
   This is an object of type BD
   File "while_assign_in_invariant.php", line 36, characters 12-12:
-  It is incompatible with an object of type A
+  It is incompatible with an object of exactly the class A
 File "while_assign_in_invariant.php", line 41, characters 15-16:
 Invalid argument (Typing[4110])
   File "while_assign_in_invariant.php", line 24, characters 20-21:
   This is an object of type AB
   File "while_assign_in_invariant.php", line 52, characters 14-14:
-  It is incompatible with an object of type D
+  It is incompatible with an object of exactly the class D
 File "while_assign_in_invariant.php", line 42, characters 15-16:
 Invalid argument (Typing[4110])
   File "while_assign_in_invariant.php", line 25, characters 20-21:
   This is an object of type AD
   File "while_assign_in_invariant.php", line 44, characters 14-14:
-  It is incompatible with an object of type B
+  It is incompatible with an object of exactly the class B
 File "while_assign_in_invariant.php", line 43, characters 15-16:
 Invalid argument (Typing[4110])
   File "while_assign_in_invariant.php", line 26, characters 20-21:
   This is an object of type BD
   File "while_assign_in_invariant.php", line 36, characters 12-12:
-  It is incompatible with an object of type A
+  It is incompatible with an object of exactly the class A
 File "while_assign_in_invariant.php", line 38, characters 40-41:
 Invalid argument (Typing[4110])
   File "while_assign_in_invariant.php", line 31, characters 44-45:
   This is an object of type AB
   File "while_assign_in_invariant.php", line 52, characters 14-14:
-  It is incompatible with an object of type D
+  It is incompatible with an object of exactly the class D
 File "while_assign_in_invariant.php", line 38, characters 44-45:
 Invalid argument (Typing[4110])
   File "while_assign_in_invariant.php", line 31, characters 51-52:
   This is an object of type AD
   File "while_assign_in_invariant.php", line 44, characters 14-14:
-  It is incompatible with an object of type B
+  It is incompatible with an object of exactly the class B
 File "while_assign_in_invariant.php", line 38, characters 48-49:
 Invalid argument (Typing[4110])
   File "while_assign_in_invariant.php", line 31, characters 58-59:
   This is an object of type BD
   File "while_assign_in_invariant.php", line 36, characters 12-12:
-  It is incompatible with an object of type A
+  It is incompatible with an object of exactly the class A
 File "while_assign_in_invariant.php", line 62, characters 50-51:
 Invalid argument (Typing[4110])
   File "while_assign_in_invariant.php", line 28, characters 59-60:
   This is an object of type BD
   File "while_assign_in_invariant.php", line 59, characters 12-12:
-  It is incompatible with an object of type A
+  It is incompatible with an object of exactly the class A
 File "while_assign_in_invariant.php", line 66, characters 14-15:
 Invalid argument (Typing[4110])
   File "while_assign_in_invariant.php", line 21, characters 19-19:
@@ -83,19 +83,19 @@ Invalid argument (Typing[4110])
   File "while_assign_in_invariant.php", line 28, characters 45-46:
   This is an object of type AB
   File "while_assign_in_invariant.php", line 75, characters 14-14:
-  It is incompatible with an object of type D
+  It is incompatible with an object of exactly the class D
 File "while_assign_in_invariant.php", line 62, characters 46-47:
 Invalid argument (Typing[4110])
   File "while_assign_in_invariant.php", line 28, characters 52-53:
   This is an object of type AD
   File "while_assign_in_invariant.php", line 67, characters 14-14:
-  It is incompatible with an object of type B
+  It is incompatible with an object of exactly the class B
 File "while_assign_in_invariant.php", line 62, characters 50-51:
 Invalid argument (Typing[4110])
   File "while_assign_in_invariant.php", line 28, characters 59-60:
   This is an object of type BD
   File "while_assign_in_invariant.php", line 59, characters 12-12:
-  It is incompatible with an object of type A
+  It is incompatible with an object of exactly the class A
 File "while_assign_in_invariant.php", line 66, characters 14-15:
 Invalid argument (Typing[4110])
   File "while_assign_in_invariant.php", line 21, characters 19-19:
@@ -107,19 +107,19 @@ Invalid argument (Typing[4110])
   File "while_assign_in_invariant.php", line 28, characters 45-46:
   This is an object of type AB
   File "while_assign_in_invariant.php", line 75, characters 14-14:
-  It is incompatible with an object of type D
+  It is incompatible with an object of exactly the class D
 File "while_assign_in_invariant.php", line 62, characters 46-47:
 Invalid argument (Typing[4110])
   File "while_assign_in_invariant.php", line 28, characters 52-53:
   This is an object of type AD
   File "while_assign_in_invariant.php", line 67, characters 14-14:
-  It is incompatible with an object of type B
+  It is incompatible with an object of exactly the class B
 File "while_assign_in_invariant.php", line 62, characters 50-51:
 Invalid argument (Typing[4110])
   File "while_assign_in_invariant.php", line 28, characters 59-60:
   This is an object of type BD
   File "while_assign_in_invariant.php", line 59, characters 12-12:
-  It is incompatible with an object of type A
+  It is incompatible with an object of exactly the class A
 File "while_assign_in_invariant.php", line 79, characters 12-13:
 Invalid argument (Typing[4110])
   File "while_assign_in_invariant.php", line 20, characters 19-19:
@@ -131,4 +131,4 @@ Invalid argument (Typing[4110])
   File "while_assign_in_invariant.php", line 21, characters 19-19:
   This is an object of type E
   File "while_assign_in_invariant.php", line 71, characters 14-14:
-  It is incompatible with an object of type C
+  It is incompatible with an object of exactly the class C

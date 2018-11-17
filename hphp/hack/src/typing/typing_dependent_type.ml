@@ -34,7 +34,7 @@ module ExprDepTy = struct
           )
       | N.CIself ->
           (match Env.get_self env with
-          | _, Tclass ((_, cls), _) ->
+          | _, Tclass ((_, cls), _, _) ->
               pos, Reason.ERself cls, `cls cls
           | _, _ ->
               let ereason, dep = new_() in
@@ -70,9 +70,12 @@ module ExprDepTy = struct
   let apply env dep_tys ty =
     let apply_single env dep_tys ty =
       List.fold_left dep_tys ~f:begin fun (env, ty) (r, dep_ty) ->
-        match dep_ty with
-        | (_, []) ->
-         env, (r, Tabstract (AKdependent dep_ty, Some ty))
+          match dep_ty, ty with
+          (* Always represent exact types without an access path as Tclass(_,Exact,_) *)
+        | (`cls _, []), (_, Tclass (c, _, tyl)) ->
+          env, (r, Tclass (c, Exact, tyl))
+        | (_, []), _ ->
+          env, (r, Tabstract (AKdependent dep_ty, Some ty))
         | _ ->
           begin match ty with
           (* If the generic in question is exactly equal to something, the
@@ -148,7 +151,9 @@ module ExprDepTy = struct
         false
     | Tunresolved tyl ->
         List.exists tyl (should_apply env)
-    | Tclass ((_, x), _) ->
+    | Tclass (_, Exact, _) ->
+        false
+    | Tclass ((_, x), _, _) ->
         let class_ = Env.get_class env x in
         (* If a class is both final and variant, we must treat it as non-final
          * since we can't statically guarantee what the runtime type

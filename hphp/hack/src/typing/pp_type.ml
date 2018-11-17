@@ -178,7 +178,7 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit = fun fmt ty ->
     Format.fprintf fmt "@,]@]";
     Format.fprintf fmt "@])"
   | Tobject -> Format.pp_print_string fmt "Tobject"
-  | Tclass (a0,a1) ->
+  | Tclass (a0,_a2,a1) ->
     Format.fprintf fmt "(@[<2>Tclass (@,";
     Nast.pp_sid fmt a0;
     Format.fprintf fmt ",@ ";

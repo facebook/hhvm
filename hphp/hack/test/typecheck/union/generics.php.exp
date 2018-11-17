@@ -11,9 +11,9 @@ File "generics.php--file2.php", line 76, characters 3-13:
 File "generics.php--file2.php", line 79, characters 3-13:
   A<int>
 File "generics.php--file2.php", line 82, characters 3-13:
-  (exact A<[unresolved]> | A<int>)
+  A<int>
 File "generics.php--file2.php", line 85, characters 3-13:
-  (exact A<[unresolved]> | A<T>)
+  A<T>
 File "generics.php--file2.php", line 88, characters 3-13:
   (exact A<int> | A<T>)
 File "generics.php--file2.php", line 91, characters 3-13:
@@ -21,11 +21,11 @@ File "generics.php--file2.php", line 91, characters 3-13:
 File "generics.php--file2.php", line 94, characters 3-13:
   A<T>
 File "generics.php--file2.php", line 97, characters 3-13:
-  exact (A<int> | A<string>)
+  (exact A<int> | exact A<string>)
 File "generics.php--file2.php", line 98, characters 3-35:
   bool
 File "generics.php--file2.php", line 101, characters 3-13:
-  exact (A<num> | A<arraykey>)
+  (exact A<num> | exact A<arraykey>)
 File "generics.php--file2.php", line 102, characters 3-34:
   bool
 File "generics.php--file2.php", line 105, characters 3-13:
@@ -37,7 +37,7 @@ File "generics.php--file2.php", line 109, characters 3-13:
 File "generics.php--file2.php", line 112, characters 3-13:
   exact D<(int | string)>
 File "generics.php--file2.php", line 115, characters 3-13:
-  (exact D<string> | D<int>)
+  D<(int | string)>
 File "generics.php--file2.php", line 118, characters 3-13:
   E<int>
 File "generics.php--file2.php", line 121, characters 3-13:

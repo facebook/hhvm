@@ -108,7 +108,7 @@ let rec transform_shapemap ?(nullable = false) env ty shape =
             let tyl = [ty1; ty2] in
             let env, tyl = List.map_env env tyl make_ts in
             env, acc_field_with_type (r, Ttuple tyl)
-        | SFlit_str (_, "generic_types"), _, (r, Tclass (_, tyl))
+        | SFlit_str (_, "generic_types"), _, (r, Tclass (_, _, tyl))
               when List.length tyl > 0 ->
             let env, tyl = List.map_env env tyl make_ts in
             env, acc_field_with_type (r, Ttuple tyl)

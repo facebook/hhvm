@@ -13,6 +13,7 @@ open Aast_defs
 open Typing_defs
 
 module Env = Tast_env
+module TMT = Typing_make_type
 
 (** Return true if ty definitely does not contain null.  I.e., the
     return value false can mean two things: ty does contain null, e.g.,
@@ -55,15 +56,14 @@ let fold_truthiness acc truthiness =
 
 let tclass_is_falsy_when_empty, is_traversable =
   let r = Typing_reason.Rnone in
-  let p = Pos.none in
-  let simple_xml_el = r, Tclass ((p, "\\SimpleXMLElement"), []) in
-  let container = r, Tclass ((p, SN.Collections.cContainer), [r, Tany]) in
-  let pair = r, Tclass ((p, SN.Collections.cPair), [r, Tany; r, Tany]) in
+  let simple_xml_el = TMT.class_type r "\\SimpleXMLElement" [] in
+  let container_type = TMT.container r (r, Tany) in
+  let pair_type = TMT.pair r (r, Tany) (r, Tany) in
   let tclass_is_falsy_when_empty env ty =
     Env.can_subtype env ty simple_xml_el ||
-    Env.can_subtype env ty container && not (Env.can_subtype env ty pair)
+    Env.can_subtype env ty container_type && not (Env.can_subtype env ty pair_type)
   in
-  let trv = r, Tclass ((p, SN.Collections.cTraversable), [r, Tany]) in
+  let trv = TMT.traversable r (r, Tany) in
   let is_traversable env ty = Env.can_subtype env ty trv in
   tclass_is_falsy_when_empty, is_traversable
 
@@ -83,7 +83,7 @@ let rec truthiness env ty =
   | Tarraykind _
   | Toption _ -> Possibly_falsy
 
-  | Tclass ((_, cid), _) ->
+  | Tclass ((_, cid), _, _) ->
     if cid = SN.Classes.cStringish then Possibly_falsy else
     if tclass_is_falsy_when_empty env ty then Possibly_falsy else
     if not (is_traversable env ty) then Always_truthy else
@@ -145,7 +145,7 @@ let rec find_sketchy_types env acc ty =
   match snd ty with
   | Toption ty -> find_sketchy_types env acc ty
 
-  | Tclass ((_, cid), _) ->
+  | Tclass ((_, cid), _, _) ->
     if tclass_is_falsy_when_empty env ty || not (is_traversable env ty)
     then acc
     else begin

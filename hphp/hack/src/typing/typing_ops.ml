@@ -55,6 +55,11 @@ module LeastUpperBound = struct
   open Typing_defs
   open Nast
 
+  let exact_least_upper_bound e1 e2 =
+  match e1, e2 with
+  | Exact, Exact -> Exact
+  | _, _ -> Nonexact
+
   let prim_least_up_bound tprim1 tprim2 =
     match tprim1, tprim2 with
     | Tint, Tstring | Tstring, Tint -> Some Tarraykey
@@ -87,10 +92,10 @@ module LeastUpperBound = struct
           r1, Ttuple tyl
           with _ -> default
         end
-      | Tclass ((p, id1), tyl1), Tclass((_, id2), tyl2) ->
+      | Tclass ((p, id1), e1, tyl1), Tclass((_, id2), e2, tyl2) ->
         if id1 = id2 then
           begin try let tyl = List.map2_exn ~f:(type_visitor ~f ~default) tyl1 tyl2 in
-            r1, Tclass ((p, id1), tyl)
+            r1, Tclass ((p, id1), exact_least_upper_bound e1 e2, tyl)
             with _ -> default
           end
         else

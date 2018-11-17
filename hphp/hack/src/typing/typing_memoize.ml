@@ -6,13 +6,14 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
- open Core_kernel
- open Nast
- open Typing_defs
+open Core_kernel
+open Nast
+open Typing_defs
 
- module Env = Typing_env
- module SN = Naming_special_names
- module SubType = Typing_subtype
+module Env = Typing_env
+module SN = Naming_special_names
+module SubType = Typing_subtype
+module TMT = Typing_make_type
 
 let check_param : Env.env -> Nast.fun_param -> unit =
   fun env {param_hint; param_pos; _} ->
@@ -76,11 +77,9 @@ let check_param : Env.env -> Nast.fun_param -> unit =
       IMap.iter begin fun _ tv ->
         check_memoizable env tv
       end fields
-    | _, Tclass (_, _) ->
+    | _, Tclass _ ->
       let type_param = Env.fresh_type() in
-      let container_type =
-        Reason.none,
-        Tclass ((Pos.none, SN.Collections.cContainer), [type_param]) in
+      let container_type = TMT.container Reason.none type_param in
       let env, is_container =
         Errors.try_
           (fun () ->
@@ -90,8 +89,7 @@ let check_param : Env.env -> Nast.fun_param -> unit =
         check_memoizable env type_param
       else
         let r, _ = ty in
-        let memoizable_type =
-          r, Tclass ((Pos.none, SN.Classes.cIMemoizeParam), []) in
+        let memoizable_type = TMT.class_type r SN.Classes.cIMemoizeParam [] in
         if SubType.is_sub_type env ty memoizable_type
         then ()
         else error ty;

@@ -17,6 +17,10 @@ type visibility =
   | Vprivate of string
   | Vprotected of string [@@deriving show]
 
+type exact =
+  | Exact
+  | Nonexact
+
 (* All the possible types, reason is a trace of why a type
    was inferred in a certain way.
 
@@ -246,8 +250,11 @@ and _ ty_ =
    *)
   | Tobject : locl ty_
 
-  (* An instance of a class or interface, ty list are the arguments *)
-  | Tclass : Nast.sid * locl ty list -> locl ty_
+  (* An instance of a class or interface, ty list are the arguments
+   * If exact=Exact, then this represents instances of *exactly* this class
+   * If exact=Nonexact, this also includes subclasses
+   *)
+  | Tclass : Nast.sid * exact * locl ty list -> locl ty_
 
   (* Localized version of Tarray *)
   | Tarraykind : array_kind -> locl ty_
@@ -727,9 +734,19 @@ let rec ty_compare ?(normalize_unresolved = false) ty1 ty2 =
         | n -> n
         end
       (* An instance of a class or interface, ty list are the arguments *)
-      | Tclass (id, tyl), Tclass(id2, tyl2) ->
+      | Tclass (id, exact, tyl), Tclass(id2, exact2, tyl2) ->
         begin match String.compare (snd id) (snd id2) with
-        | 0 -> tyl_compare tyl tyl2
+        | 0 ->
+          begin match tyl_compare tyl tyl2 with
+          | 0 ->
+            begin match exact, exact2 with
+            | Exact, Exact -> 0
+            | Nonexact, Nonexact -> 0
+            | Nonexact, Exact -> -1
+            | Exact, Nonexact -> 1
+            end
+          | n -> n
+          end
         | n -> n
         end
       | Tarraykind ak1, Tarraykind ak2 ->

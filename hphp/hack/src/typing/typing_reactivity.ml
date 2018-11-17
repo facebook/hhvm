@@ -15,6 +15,7 @@ module Env     = Typing_env
 module SubType = Typing_subtype
 module TU      = Typing_utils
 module CT      = SubType.ConditionTypes
+module TMT     = Typing_make_type
 
 type method_call_info = {
   receiver_type: locl ty;
@@ -271,8 +272,7 @@ let disallow_static_or_global_in_reactive_context ~is_static env el =
   end
 
 let rxTraversableType =
-  Reason.none,
-  Tclass ((Pos.none, Naming_special_names.Rx.cTraversable), [(Reason.Rnone, Tany)])
+  TMT.class_type Reason.none Naming_special_names.Rx.cTraversable [(Reason.Rnone, Tany)]
 
 let check_foreach_collection env p t =
   (* do nothing if unsafe_rx is set *)

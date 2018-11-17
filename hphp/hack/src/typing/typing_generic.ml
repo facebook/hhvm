@@ -65,7 +65,7 @@ end = struct
       | Tabstract (AKnewtype (_, tyl), x) ->
           List.iter tyl ty; ty_opt x
       | Ttuple tyl -> List.iter tyl ty
-      | Tclass (_, tyl) -> List.iter tyl ty
+      | Tclass (_, _, tyl) -> List.iter tyl ty
       | Tunresolved tyl -> List.iter tyl ty
       | Tobject -> ()
       | Tapply (_, tyl) -> List.iter tyl ty

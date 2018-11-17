@@ -5,4 +5,4 @@ This is an object of type B
 File "message_vector.php", line 20, characters 11-12:
 It was implicitly typed as an object of type B during this operation
 File "message_vector.php", line 21, characters 14-14:
-It is incompatible with an object of type A
+It is incompatible with an object of exactly the class A

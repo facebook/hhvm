@@ -12,6 +12,7 @@ open Typing_defs
 open Typing_reason
 
 module SN = Naming_special_names
+module TMT = Typing_make_type
 
 let check_implements check_new_object attr_interface
   { Nast.ua_name = (attr_pos, attr_name)
@@ -26,13 +27,12 @@ let check_implements check_new_object attr_interface
     | Some attr_class, Some intf_class ->
       (* Found matching class *)
       let attr_cid = (attr_class.tc_pos, attr_class.tc_name) in
-      let intf_cid = (intf_class.tc_pos, intf_class.tc_name) in
       (* successful exit condition: attribute class is subtype of correct interface
        * and its args satisfy the attribute class constructor *)
      let attr_locl_ty: (Typing_defs.locl Typing_defs.ty) =
-       (Rwitness attr_class.tc_pos, Tclass (attr_cid, [])) in
+       TMT.class_type (Rwitness attr_class.tc_pos) attr_class.tc_name [] in
      let interface_locl_ty: (Typing_defs.locl Typing_defs.ty) =
-       (Rwitness intf_class.tc_pos, Tclass (intf_cid, [])) in
+       TMT.class_type (Rwitness intf_class.tc_pos) intf_class.tc_name [] in
       if not (Typing_subtype.is_sub_type env attr_locl_ty interface_locl_ty)
       then begin
         let expr_kind =

@@ -53,7 +53,7 @@ class type type_mapper_type = object
   method on_tfun : env -> Reason.t -> locl fun_type -> result
   method on_tabstract :
     env -> Reason.t  -> abstract_kind -> locl ty option -> result
-  method on_tclass : env -> Reason.t -> Nast.sid -> locl ty list -> result
+  method on_tclass : env -> Reason.t -> Nast.sid -> exact -> locl ty list -> result
   method on_tobject : env -> Reason.t -> result
   method on_tshape :
     env
@@ -94,7 +94,7 @@ class shallow_type_mapper: type_mapper_type = object(this)
   method on_toption env r ty = env, (r, Toption ty)
   method on_tfun env r fun_type = env, (r, Tfun fun_type)
   method on_tabstract env r ak opt_ty = env, (r, Tabstract (ak, opt_ty))
-  method on_tclass env r x tyl = env, (r, Tclass (x, tyl))
+  method on_tclass env r x e tyl = env, (r, Tclass (x, e, tyl))
   method on_tobject env r = env, (r, Tobject)
   method on_tshape env r fields_known fdm = env, (r, Tshape (fields_known, fdm))
 
@@ -120,7 +120,7 @@ class shallow_type_mapper: type_mapper_type = object(this)
     | Toption ty -> this#on_toption env r ty
     | Tfun fun_type -> this#on_tfun env r fun_type
     | Tabstract (ak, opt_ty) -> this#on_tabstract env r ak opt_ty
-    | Tclass (x, tyl) -> this#on_tclass env r x tyl
+    | Tclass (x, e, tyl) -> this#on_tclass env r x e tyl
     | Tdynamic -> this#on_tdynamic env r
     | Tobject -> this#on_tobject env r
     | Tshape (fields_known, fdm) -> this#on_tshape env r fields_known fdm
@@ -207,9 +207,9 @@ class deep_type_mapper = object(this)
       | _ ->
           let env, cstr = this#on_opt_type env cstr in
           env, (r, Tabstract (ak, cstr))
-  method! on_tclass env r x tyl =
+  method! on_tclass env r x e tyl =
     let env, tyl = List.map_env env tyl this#on_type in
-    env, (r, Tclass (x, tyl))
+    env, (r, Tclass (x, e, tyl))
   method! on_tshape env r fields_known fdm =
     let env, fdm = ShapeFieldMap.map_env this#on_type env fdm in
     env, (r, Tshape (fields_known, fdm))

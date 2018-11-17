@@ -13,6 +13,7 @@ open Core_kernel
 open Typing_defs
 
 module Env = Typing_env
+module TMT = Typing_make_type
 
 let is_disposable_visitor env =
   object(this)
@@ -21,7 +22,7 @@ let is_disposable_visitor env =
    * claim to implement these interfaces. Ideally we should check
    * constrained generics, abstract types, etc.
    *)
-  method! on_tclass acc _ (_, class_name) tyl =
+  method! on_tclass acc _ (_, class_name) _ tyl =
     let default () =
       List.fold_left tyl ~f:this#on_type ~init:acc in
     begin match Env.get_class env class_name with
@@ -61,5 +62,5 @@ let enforce_is_disposable_type env has_await pos ty =
     if has_await
     then SN.Classes.cIAsyncDisposable
     else SN.Classes.cIDisposable in
-  let disposable_ty = (Reason.Rusing pos, Tclass ((pos, class_name), [])) in
+  let disposable_ty = TMT.class_type (Reason.Rusing pos) class_name [] in
   Typing_ops.sub_type pos Reason.URusing env ty disposable_ty

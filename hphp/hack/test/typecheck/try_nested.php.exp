@@ -1,9 +1,9 @@
 File "try_nested.php", line 24, characters 7-17:
-  (D | E | F)
+  (exact D | exact E | exact F)
 File "try_nested.php", line 26, characters 5-15:
-  (D | E | F)
+  (exact D | exact E | exact F)
 File "try_nested.php", line 28, characters 5-15:
-  (B | C | D | E | F)
+  (exact B | exact C | exact D | exact E | exact F)
 File "try_nested.php", line 30, characters 3-13:
-  (B | C | D | E | F)
+  (exact B | exact C | exact D | exact E | exact F)
 No errors

@@ -28,7 +28,7 @@ let rec find_sketchy_type env ty =
   | Tarraykind _
     when Env.forward_compat_ge env 2018_06_14 -> Some false
 
-  | Tclass ((_, cid), _)
+  | Tclass ((_, cid), _, _)
     when Env.forward_compat_ge env 2018_06_14 && (
       (* Hack arrays *)
       cid = SN.Collections.cVec ||

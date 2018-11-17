@@ -49,7 +49,7 @@ let magic_method_name input =
 let lookup_magic_type (env:Env.env) (class_:locl ty) (fname:string) :
     Env.env * (locl fun_params * locl ty option) option =
   match class_ with
-    | (_, Tclass ((_, className), [])) ->
+    | (_, Tclass ((_, className), _, [])) ->
         (match Env.get_class env className with
            | Some c ->
                let env, ce_type =
@@ -141,10 +141,10 @@ let rec const_string_of (env:Env.env) (e:Nast.expr) : Env.env * (Pos.t, string) 
 let retype_magic_func (env:Env.env) (ft:locl fun_type) (el:Nast.expr list) : Env.env * locl fun_type =
   let rec f env param_types args : Env.env * locl fun_params option =
     (match param_types, args with
-      | [ { fp_type = (_,   Toption (_, Tclass ((_, fs), [_       ]))); _ }       ], [(_, Nast.Null)]
+      | [ { fp_type = (_, Toption (_, Tclass ((_, fs), _, [_]))); _ }], [(_, Nast.Null)]
         when SN.Classes.is_format_string fs -> env, None
-      | [({ fp_type = (why, Toption (_, Tclass ((_, fs), [type_arg]))); _ } as fp)], (arg :: _)
-      | [({ fp_type = (why,             Tclass ((_, fs), [type_arg] )); _ } as fp)], (arg :: _)
+      | [({ fp_type = (why, Toption (_, Tclass ((_, fs), _, [type_arg]))); _ } as fp)], (arg :: _)
+      | [({ fp_type = (why,             Tclass ((_, fs), _, [type_arg] )); _ } as fp)], (arg :: _)
         when SN.Classes.is_format_string fs ->
           (match const_string_of env arg with
              |  env, Right str ->

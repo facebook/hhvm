@@ -60,18 +60,18 @@ let visitor = object(this)
   method! on_tunresolved acc r tyl =
     update acc @@ Invalid (r, Tunresolved tyl)
   method! on_tobject acc r = update acc @@ Invalid (r, Tobject)
-  method! on_tclass acc r cls tyl =
+  method! on_tclass acc r cls exact tyl =
     match Env.get_class acc.env (snd cls) with
     | Some { tc_kind = Ctrait; _ } ->
-      update acc @@ Invalid (r, Tclass (cls, tyl))
+      update acc @@ Invalid (r, Tclass (cls, exact, tyl))
     | _ ->
       begin match tyl with
       | [] -> acc
       | tyl when List.for_all tyl this#is_wildcard -> acc
       | _ ->
-        let acc = super#on_tclass acc r cls tyl in
+        let acc = super#on_tclass acc r cls exact tyl in
         begin match acc.validity with
-        | Valid -> update acc @@ Partial (r, Tclass (cls, tyl))
+        | Valid -> update acc @@ Partial (r, Tclass (cls, exact, tyl))
         | _ -> acc
         end
       end
@@ -89,11 +89,11 @@ end
 
 let print_type: type a. Env.env -> a ty_ -> string = fun env ty_ ->
   match ty_ with
-  | Tclass (_, tyl) when tyl <> [] ->
+  | Tclass (_, _, tyl) when tyl <> [] ->
     "a type with generics, because generics are erased at runtime"
   | Tapply (_, tyl) when tyl <> [] ->
     "a type with generics, because generics are erased at runtime"
-  | Tclass (cls, _) ->
+  | Tclass (cls, _, _) ->
     begin match Env.get_class env (snd cls) with
     | Some info -> string_of_class_kind info.tc_kind
     | _ -> Typing_print.error ty_

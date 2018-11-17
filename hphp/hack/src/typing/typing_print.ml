@@ -88,7 +88,10 @@ module ErrorString = struct
     | Tabstract (AKnewtype (x, _), _)
         when x = SN.Classes.cTypename -> "a typename string"
     | Tabstract (ak, cstr) -> abstract ak cstr
-    | Tclass ((_, x), _) -> "an object of type "^(strip_ns x)
+    | Tclass ((_, x), Exact, _) ->
+      "an object of exactly the class " ^ strip_ns x
+    | Tclass ((_, x), _, _) ->
+      "an object of type " ^ strip_ns x
     | Tapply ((_, x), _)
         when x = SN.Classes.cClassname -> "a classname string"
     | Tapply ((_, x), _)
@@ -151,7 +154,7 @@ module ErrorString = struct
     match snd root_ty with
     | Tgeneric x -> f x
     | Tapply ((_, x), _) -> f x
-    | Tclass ((_, x), _) -> f x
+    | Tclass ((_, x), _, _) -> f x
     | Tabstract (ak, _) -> f @@ AbstractKind.to_string ak
     | Taccess _ as x ->
         List.fold_left ~f:(fun acc (_, sid) -> acc^"::"^sid)
@@ -211,12 +214,12 @@ module Suggest = struct
     | Tapply ((_, cid), [])  -> Utils.strip_ns cid
     | Tapply ((_, cid), [x]) -> (Utils.strip_ns cid)^"<"^type_ x^">"
     | Tapply ((_, cid), l)   -> (Utils.strip_ns cid)^"<"^list l^">"
-    | Tclass ((_, cid), []) -> Utils.strip_ns cid
+    | Tclass ((_, cid), _, []) -> Utils.strip_ns cid
     | Tabstract ((AKnewtype (cid, []) | AKenum cid), _) -> Utils.strip_ns cid
-    | Tclass ((_, cid), [x]) -> (Utils.strip_ns cid)^"<"^type_ x^">"
+    | Tclass ((_, cid), _, [x]) -> (Utils.strip_ns cid)^"<"^type_ x^">"
     | Tabstract (AKnewtype (cid, [x]), _) ->
         (Utils.strip_ns cid)^"<"^type_ x^">"
-    | Tclass ((_, cid), l) -> (Utils.strip_ns cid)^"<"^list l^">"
+    | Tclass ((_, cid), _, l) -> (Utils.strip_ns cid)^"<"^list l^">"
     | Tabstract (AKnewtype (cid, l), _)   ->
         (Utils.strip_ns cid)^"<"^list l^">"
     | Tabstract (AKdependent (_, _), _) -> "..."
@@ -347,7 +350,9 @@ module Full = struct
     | Tarraykind (AKtuple fields) ->
       list "tuple-like-array(" k (List.rev (IMap.values fields)) ")"
     | Tarray (None, Some _) -> assert false
-    | Tclass ((_, s), []) -> to_doc s
+    | Tclass ((_, s), Exact, []) when !debug_mode ->
+      Concat [text "exact"; Space; to_doc s]
+    | Tclass ((_, s), _, []) -> to_doc s
     | Tapply ((_, s), []) -> to_doc s
     | Tgeneric s -> to_doc s
     | Taccess (root_ty, ids) -> Concat [
@@ -385,13 +390,14 @@ module Full = struct
           | (Reason.Rdynamic_yield _, _) -> Space ^^ text "[DynamicYield]"
           | _ -> Nothing)
       ]
-    | Tclass ((_, s), tyl) -> to_doc s ^^ list "<" k tyl ">"
+    | Tclass ((_, s), exact, tyl) ->
+      let d = to_doc s ^^ list "<" k tyl ">" in
+      begin match exact with
+      | Exact when !debug_mode -> Concat [text "exact"; Space; d]
+      | _ -> d
+      end
     | Tabstract (AKnewtype (s, []), _) -> to_doc s
     | Tabstract (AKnewtype (s, tyl), _) -> to_doc s ^^ list "<" k tyl ">"
-    (* This is an "exact" type. Show bound, for generics etc *)
-    | Tabstract (AKdependent (`cls _, []), Some ty) ->
-      if !debug_mode then Concat [text "exact"; Space; k ty]
-      else k ty
     | Tabstract (ak, cstr) ->
       let cstr_info = if !debug_mode then
         match cstr with
@@ -775,7 +781,7 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
     obj @@ kind "primitive" @ name (prim tp)
   | Tapply ((_, cid), tys) ->
     obj @@ kind "class" @ name cid @ args tys
-  | Tclass ((_, cid), tys) ->
+  | Tclass ((_, cid), _, tys) ->
     obj @@ kind "class" @ name cid @ args tys
   | Tobject ->
     obj @@ kind "object"
@@ -1109,7 +1115,7 @@ let to_locl_ty
 
       (* NB: "class" could have come from either a `Tapply` or a `Tclass`. Right
       now, we always return a `Tclass`. *)
-      ty (Tclass ((class_pos, name), tyl))
+      ty (Tclass ((class_pos, name), Nonexact, tyl))
 
     | "object" ->
       ty Tobject

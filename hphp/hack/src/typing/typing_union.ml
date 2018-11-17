@@ -97,10 +97,11 @@ and union_ env ty1 ty2 r =
      * So we wrap in an unresolved for now to mimic previous behavior,
      * and allow null checks. *)
     env, (r, Tunresolved [ty])
-  | (_, Tclass ((p, id1), tyl1)), (_, Tclass ((_, id2), tyl2))
+  | (_, Tclass ((p, id1), e1, tyl1)), (_, Tclass ((_, id2), e2, tyl2))
     when id1 = id2 ->
+    let e = Typing_ops.LeastUpperBound.exact_least_upper_bound e1 e2 in
     let env, tyl = union_class env id1 tyl1 tyl2 in
-    env, (r, Tclass ((p, id1), tyl))
+    env, (r, Tclass ((p, id1), e, tyl))
   | (r, Toption ty1), ty2
   | ty2, (r, Toption ty1)->
     let env, ty = union env ty1 ty2 in
@@ -164,8 +165,8 @@ and union_ env ty1 ty2 r =
     env, (r, Tfun ft)
   | (_, Tanon (_, id1)), (_, Tanon (_, id2)) when id1 = id2 -> env, ty1
   (* TODO with Tclass, union type arguments if covariant *)
-  | (_, ((Tarraykind _ | Tprim _ | Tdynamic | Tabstract (_, _) | Tclass (_, _)
-    | Ttuple _ | Tanon (_, _) | Tfun _ | Tobject | Tshape _ | Terr | Tvar _
+  | (_, ((Tarraykind _ | Tprim _ | Tdynamic | Tabstract _ | Tclass _
+    | Ttuple _ | Tanon _ | Tfun _ | Tobject | Tshape _ | Terr | Tvar _
     (* If T cannot be null, `union T nonnull = nonnull`. However, it's hard
      * to say whether a given T can be null - e.g. opaque newtypes, dependent
      * types, etc. - so for now we leave it here.
@@ -211,7 +212,7 @@ and union_ env ty1 ty2 r =
      * the dep) anyways.
      *)
     let add env = function
-      | Tclass ((_, cid), _) -> Env.add_wclass env cid
+      | Tclass ((_, cid), _, _) -> Env.add_wclass env cid
       | _ -> () in
     add env ty1_;
     add env ty2_;

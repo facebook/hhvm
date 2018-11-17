@@ -10,12 +10,12 @@
 open Core_kernel
 open Tast
 open Typing_defs
+module TMT = Typing_make_type
 
 let is_awaitable env ty =
   let mixed =
     Typing_reason.none, Toption (Typing_reason.none, Tnonnull) in
-  let awaitable_of_mixed =
-    Typing_reason.none, Tclass ((Pos.none, SN.Classes.cAwaitable), [mixed]) in
+  let awaitable_of_mixed = TMT.awaitable Typing_reason.none mixed in
   let _, is_ty_awaitable = Tast_env.subtype env ty awaitable_of_mixed in
   is_ty_awaitable
 
@@ -25,20 +25,20 @@ let rec can_be_null env ty =
   | Toption _ | Tprim Nast.Tnull -> true
   | Tunresolved tyl -> List.exists tyl (can_be_null env)
   | Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Tvar _
-    | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
-    | Tanon (_, _) | Tobject | Tshape _ | Tdynamic -> false
+    | Tfun _ | Tabstract _ | Tclass _ | Ttuple _
+    | Tanon _ | Tobject | Tshape _ | Tdynamic -> false
 
 let rec enforce_not_awaitable env p ty =
   let _, ety = Tast_env.expand_type env ty in
   match ety with
   | _, Tunresolved tyl ->
     List.iter tyl (enforce_not_awaitable env p)
-  | r, Tclass ((_, awaitable), _) when
+  | r, Tclass ((_, awaitable), _, _) when
       awaitable = SN.Classes.cAwaitable ->
     Errors.discarded_awaitable p (Typing_reason.to_pos r)
   | _, (Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Toption _
-    | Tvar _ | Tfun _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
-    | Tanon (_, _) | Tobject | Tshape _ | Tdynamic) -> ()
+    | Tvar _ | Tfun _ | Tabstract _ | Tclass _ | Ttuple _
+    | Tanon _ | Tobject | Tshape _ | Tdynamic) -> ()
 
 let enforce_nullable_or_not_awaitable env p ty =
   if can_be_null env ty then ()

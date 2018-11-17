@@ -17,6 +17,7 @@ module Reason       = Typing_reason
 module Subst        = Decl_subst
 module SubType      = Typing_subtype
 module TUtils       = Typing_utils
+module TMT          = Typing_make_type
 
 let raise_xhp_required pos ureason ty =
   let ty_str = Typing_print.error (snd ty) in
@@ -60,7 +61,7 @@ let rec walk_and_gather_xhp_ ~env ~ureason ~pos cty =
         (env, acc' @ acc), ty)
       in
       env, acc
-  | Tclass ((_, c), tyl) -> begin
+  | Tclass ((_, c), _, tyl) -> begin
       (* Here's where we actually check the declaration *)
       match Env.get_class env c with
       | Some class_ when class_.tc_is_xhp -> (env, [cty, tyl, class_])
@@ -108,11 +109,10 @@ and get_spread_attributes env pos onto_xhp cty =
 let is_xhp_child env pos ty =
   let reason = Reason.Rwitness pos in
   (* ?XHPChild *)
-  let ty_child = reason, Tclass ((Pos.none, SN.Classes.cXHPChild), []) in
+  let ty_child = TMT.class_type reason SN.Classes.cXHPChild [] in
   let ty_child = reason, Toption ty_child in
   (* Any ?Traversable *)
-  let ty_traversable =
-    reason, Tclass ((Pos.none, SN.Collections.cTraversable), [Reason.none, TUtils.tany env]) in
+  let ty_traversable = TMT.traversable reason (Reason.none, TUtils.tany env) in
   let ty_traversable = reason, Toption ty_traversable in
   let tys = [ty_child; ty_traversable] in
   List.exists ~f:(fun super -> SubType.is_sub_type env ty super) tys

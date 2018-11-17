@@ -3,4 +3,4 @@ Invalid argument (Typing[4110])
 File "num_type_hint_bad.php", line 15, characters 12-14:
 This is a num (int/float)
 File "num_type_hint_bad.php", line 20, characters 12-12:
-It is incompatible with an object of type C
+It is incompatible with an object of exactly the class C

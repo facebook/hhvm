@@ -572,7 +572,7 @@ and simplify_subtype
 
   | Tabstract (AKenum e_sub, _), Tabstract (AKenum e_super, _)
     when e_sub = e_super -> valid ()
-  | Tclass ((_, class_name), _), Tabstract (AKenum enum_name, _)
+  | Tclass ((_, class_name), _, _), Tabstract (AKenum enum_name, _)
     when enum_name = class_name -> valid ()
   | (Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tshape _ |
      Tanon _ | Tobject | Tclass _ | Tarraykind _),
@@ -620,20 +620,21 @@ and simplify_subtype
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
   | Tabstract (AKdependent _, _), Tobject -> default ()
 
-  | Tabstract (AKenum enum_name, None), Tclass ((_, class_name), _) ->
-    if enum_name = class_name || class_name = SN.Classes.cXHPChild
+  | Tabstract (AKenum enum_name, None), Tclass ((_, class_name), exact, _) ->
+    if (enum_name = class_name || class_name = SN.Classes.cXHPChild) && exact = Nonexact
     then valid ()
     else invalid ()
-  | Tabstract (AKenum enum_name, Some ty), Tclass ((_, class_name), _) ->
-    if enum_name = class_name
+  | Tabstract (AKenum enum_name, Some ty), Tclass ((_, class_name), exact, _) ->
+    if enum_name = class_name && exact = Nonexact
     then valid ()
     else simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
-  | Tprim Nast.Tstring, Tclass ((_, class_name), _) ->
-    if class_name = SN.Classes.cStringish || class_name = SN.Classes.cXHPChild
+  | Tprim Nast.Tstring, Tclass ((_, class_name), exact, _) ->
+    if (class_name = SN.Classes.cStringish || class_name = SN.Classes.cXHPChild)
+      && exact = Nonexact
     then valid ()
     else invalid ()
-  | Tprim Nast.(Tarraykey | Tint | Tfloat | Tnum), Tclass ((_, class_name), _) ->
-    if class_name = SN.Classes.cXHPChild then valid () else invalid ()
+  | Tprim Nast.(Tarraykey | Tint | Tfloat | Tnum), Tclass ((_, class_name), exact, _) ->
+    if class_name = SN.Classes.cXHPChild && exact = Nonexact then valid () else invalid ()
   | (Tnonnull | Tdynamic | Tprim Nast.(Tnull | Tvoid | Tbool | Tresource | Tnoreturn) |
      Toption _ | Tfun _ | Ttuple _ | Tshape _ | Tanon _),
     Tclass _ ->
@@ -641,13 +642,25 @@ and simplify_subtype
   (* Match what's done in unify for non-strict code *)
   | Tobject, Tclass _ ->
     if Env.is_strict env then default () else valid ()
-  | Tclass (x_sub, tyl_sub), Tclass (x_super, tyl_super) ->
+  | Tclass (x_sub, exact_sub, tyl_sub), Tclass (x_super, exact_super, tyl_super) ->
+    let exact_match =
+      match exact_sub, exact_super with
+      | Nonexact, Exact -> false
+      | _, _ -> true in
     let p_sub, p_super = fst ety_sub, fst ety_super in
     let cid_super, cid_sub = (snd x_super), (snd x_sub) in
     (* This is side-effecting as it registers a dependency *)
     let class_def_sub = Env.get_class env cid_sub in
     if cid_super = cid_sub
     then
+      (* If class is final then exactness is superfluous *)
+      let is_final =
+        match class_def_sub with
+        | Some { tc_final; _ } -> tc_final
+        | None -> false in
+      if not (exact_match || is_final)
+      then invalid ()
+      else
       (* We handle the case where a generic A<T> is used as A *)
       let tyl_super =
         if List.is_empty tyl_super && not (Env.is_strict env)
@@ -664,7 +677,8 @@ and simplify_subtype
         invalid_with (fun () ->
           Errors.type_arity_mismatch (fst x_super) n_super (fst x_sub) n_sub)
       end
-      else if List.is_empty tyl_sub && List.is_empty tyl_super
+      else
+      if List.is_empty tyl_sub && List.is_empty tyl_super
       then valid ()
       else
         let variancel =
@@ -681,6 +695,9 @@ and simplify_subtype
            *)
           simplify_subtype_variance ~seen_generic_params ~deep cid_sub variancel tyl_sub tyl_super env
     else
+      if not exact_match
+      then invalid ()
+      else
       begin match class_def_sub with
       | None ->
         default ()
@@ -724,9 +741,9 @@ and simplify_subtype
       end
   | Tabstract (AKnewtype _, Some ty), Tclass _ ->
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
-  | Tarraykind _, Tclass ((_, class_name), _)
+  | Tarraykind _, Tclass ((_, class_name), Nonexact, _)
     when class_name = SN.Classes.cXHPChild -> valid ()
-  | Tarraykind akind, Tclass ((_, coll), [tv_super])
+  | Tarraykind akind, Tclass ((_, coll), Nonexact, [tv_super])
     when (coll = SN.Collections.cTraversable ||
           coll = SN.Rx.cTraversable ||
           coll = SN.Collections.cContainer) ->
@@ -751,7 +768,7 @@ and simplify_subtype
       | AKtuple fields ->
         Typing_arrays.fold_aktuple_as_akvec_with_acc again env TL.valid r fields
     )
-  | Tarraykind akind, Tclass ((_, coll), [tk_super; tv_super])
+  | Tarraykind akind, Tclass ((_, coll), Nonexact, [tk_super; tv_super])
     when (coll = SN.Collections.cKeyedTraversable
          || coll = SN.Rx.cKeyedTraversable
          || coll = SN.Collections.cKeyedContainer
@@ -1672,45 +1689,13 @@ and sub_type_inner_helper env ~this_ty
             sub ty_super)
         ~when_: begin fun () ->
           match sub, TUtils.get_base_type env ty_super with
-          | (_, Tclass ((_, y), _)), (_, Tclass ((_, x), _)) when x = y -> false
+          | (_, Tclass ((_, y), _, _)), (_, Tclass ((_, x), _, _)) when x = y -> false
           | _, _ -> true
         end
         ~do_: (fun _ -> TUtils.simplified_uerror env ty_super ty_sub)
 
-  | (r_sub, _),
-    (_, Tabstract (AKdependent (expr_dep, _),
-      Some (_, Tclass ((_, x) as id, _) as ty_bound))) ->
-    let class_ = Env.get_class env x in
-    (* For final non-contravariant class C, there is no difference between
-     * `this as C<t1,...,tn>` and `C<t1,...,tn>`.
-     *)
-    begin match class_ with
-    | Some class_ty
-      when TUtils.class_is_final_and_not_contravariant class_ty ->
-      sub_type_inner env ~this_ty ty_sub ty_bound
-    | _ ->
-      (Errors.try_when
-         (fun () -> TUtils.simplified_uerror env ty_super ty_sub)
-             ~when_: begin fun () ->
-               match snd ty_sub with
-               | Tclass ((_, y), _) -> y = x
-               | Tany | Terr | Tnonnull | Tarraykind _ | Tprim _
-               | Toption _ | Tvar _ | Tabstract (_, _) | Ttuple _
-               | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
-               | Tshape _ | Tdynamic -> false
-             end
-             ~do_: begin fun error ->
-               if expr_dep = `cls x then
-                 Errors.exact_class_final id (Reason.to_pos r_sub) error
-               else
-                 Errors.this_final id (Reason.to_pos r_sub) error
-             end
-          );
-          env
-    end
-
-  | (p_sub, (Tclass (x_sub, tyl_sub))),
-    (_, (Tclass (x_super, _tyl_super))) ->
+  | (p_sub, (Tclass (x_sub, _, tyl_sub))),
+    (_, (Tclass (x_super, _, _tyl_super))) ->
     let cid_super, cid_sub = (snd x_super), (snd x_sub) in
     if cid_super = cid_sub
     (* Already dealt with this case (variance) in simplify_subtype *)
@@ -1900,7 +1885,7 @@ let rec sub_string
       | env, tyl ->
         List.fold_left tyl ~f:(sub_string p) ~init:env
     end
-  | (r2, Tclass (x, _)) ->
+  | (r2, Tclass (x, _, _)) ->
       let class_ = Env.get_class env (snd x) in
       (match class_ with
       | None -> env
@@ -2254,7 +2239,7 @@ let rec set_tyvar_variance ~variance ~tyvars env ty =
   | Tabstract (_, Some ty) ->
     set_tyvar_variance ~variance ~tyvars env ty
     (* Classes carry their own variance declarations *)
-  | Tclass ((_, cid), tyl) ->
+  | Tclass ((_, cid), _, tyl) ->
     begin match Env.get_class env cid with
     | None -> env
     | Some {tc_tparams; _} ->

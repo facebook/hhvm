@@ -13,16 +13,17 @@ open Typing_env_return_info
 
 module Env = Typing_env
 module TUtils = Typing_utils
+module TMT = Typing_make_type
 
 let strip_awaitable fun_kind env ty =
   if fun_kind <> Ast.FAsync then ty
   else
   match Env.expand_type env ty with
-  | _env, (_, Tclass ((_, class_name), [ty]))
+  | _env, (_, Tclass ((_, class_name), _, [ty]))
     when class_name = Naming_special_names.Classes.cAwaitable ->
     ty
     (* In non-strict code we might find Awaitable without type arguments. Assume Tany *)
-  | _env, (_, Tclass ((_, class_name), []))
+  | _env, (_, Tclass ((_, class_name), _, []))
     when class_name = Naming_special_names.Classes.cAwaitable ->
     (Reason.Rnone, TUtils.tany env)
   | _ ->
@@ -75,12 +76,12 @@ let wrap_awaitable env p rty =
     | Ast.FAsyncGenerator ->
       (Reason.Rnone, TUtils.terr env)
     | Ast.FAsync ->
-      (Reason.Rwitness p), Tclass ((p, SN.Classes.cAwaitable), [rty])
+      TMT.awaitable (Reason.Rwitness p) rty
 
 let force_awaitable env p ty =
   let fun_kind = Env.get_fn_kind env in
   match Env.expand_type env ty with
-  | env, (_, Tclass ((_, class_name), _))
+  | env, (_, Tclass ((_, class_name), _, _))
     when fun_kind = Ast.FAsync && class_name = Naming_special_names.Classes.cAwaitable ->
     env, ty
   | env, (_, Tany) when fun_kind = Ast.FAsync ->

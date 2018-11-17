@@ -15,6 +15,7 @@ open Typing_defs
 module Env = Typing_env
 module TUtils = Typing_utils
 module Reason = Typing_reason
+module TMT = Typing_make_type
 
 let err_witness env p = Reason.Rwitness p, TUtils.terr env
 
@@ -83,7 +84,7 @@ let rec array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
       let ty1 = Reason.Rvarray_or_darray_key p, Tprim Tarraykey in
       let env = type_index env p ty2 ty1 Reason.index_array in
       env, ty
-  | Tclass ((_, cn) as id, argl)
+  | Tclass ((_, cn) as id, _, argl)
     when cn = SN.Collections.cVector
     || cn = SN.Collections.cVec ->
       let ty = match argl with
@@ -92,7 +93,7 @@ let rec array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
       let ty1 = Reason.Ridx_vector (fst e2), Tprim Tint in
       let env = type_index env p ty2 ty1 (Reason.index_class cn) in
       env, ty
-  | Tclass ((_, cn) as id, argl)
+  | Tclass ((_, cn) as id, _, argl)
     when cn = SN.Collections.cMap
     || cn = SN.Collections.cStableMap
     || cn = SN.Collections.cDict
@@ -118,7 +119,7 @@ let rec array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
    *   $x[0] = 100; // ERROR
    *   $x[0]; // OK
    *)
-  | Tclass ((_, cn) as id, argl)
+  | Tclass ((_, cn) as id, _, argl)
       when cn = SN.Collections.cConstMap
         || cn = SN.Collections.cImmMap
         || cn = SN.Collections.cIndexish
@@ -135,7 +136,7 @@ let rec array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
       in
       let env = type_index env p ty2 k (Reason.index_class cn) in
       env, v
-  | Tclass ((_, cn) as id, argl)
+  | Tclass ((_, cn) as id, _, argl)
       when not is_lvalue &&
         (cn = SN.Collections.cConstVector || cn = SN.Collections.cImmVector) ->
       let ty = match argl with
@@ -144,7 +145,7 @@ let rec array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
       let ty1 = Reason.Ridx (fst e2, fst ety1), Tprim Tint in
       let env = type_index env p ty2 ty1 (Reason.index_class cn) in
       env, ty
-  | Tclass ((_, cn), _)
+  | Tclass ((_, cn), _, _)
       when is_lvalue &&
         (cn = SN.Collections.cConstVector || cn = SN.Collections.cImmVector) ->
     error_const_mutation env p ety1
@@ -205,7 +206,7 @@ let rec array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
           Errors.typing_error p (Reason.string_of_ureason Reason.URtuple_access);
           env, err_witness env p
       )
-  | Tclass ((_, cn) as id, argl) when cn = SN.Collections.cPair ->
+  | Tclass ((_, cn) as id, _, argl) when cn = SN.Collections.cPair ->
       let (ty1, ty2) = match argl with
         | [ty1; ty2] -> (ty1, ty2)
         | _ ->
@@ -282,7 +283,7 @@ let rec array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
     | _ -> error_array env p ety1
     end
   | Tnonnull | Tprim _ | Tvar _ | Tfun _
-  | Tclass (_, _) | Tanon (_, _) ->
+  | Tclass _ | Tanon (_, _) ->
       error_array env p ety1
 
 let rec assign_array_append pos ur env ty1 ty2 =
@@ -292,7 +293,7 @@ let rec assign_array_append pos ur env ty1 ty2 =
     env, (ty1, (r, TUtils.tany env))
   | r, Terr ->
     env, (ty1, (r, TUtils.terr env))
-  | _, Tclass ((_, n), [tv])
+  | _, Tclass ((_, n), _, [tv])
     when n = SN.Collections.cVector || n = SN.Collections.cSet ->
     Env.error_if_reactive_context env begin fun () ->
       Errors.nonreactive_append pos
@@ -301,34 +302,32 @@ let rec assign_array_append pos ur env ty1 ty2 =
     env, (ty1, tv)
   (* Handle the case where Vector or Set was used as a typehint
      without type parameters *)
-  | r, Tclass ((_, n), [])
+  | r, Tclass ((_, n), _, [])
     when n = SN.Collections.cVector || n = SN.Collections.cSet ->
     Env.error_if_reactive_context env begin fun () ->
       Errors.nonreactive_append pos
     end;
     env, (ty1, (r, TUtils.tany env))
-  | _, Tclass ((_, n), [tk; tv]) when n = SN.Collections.cMap ->
+  | _, Tclass ((_, n), _, [tk; tv]) when n = SN.Collections.cMap ->
     Env.error_if_reactive_context env begin fun () ->
       Errors.nonreactive_append pos
     end;
-    let tpair =
-      (Reason.Rmap_append pos, Tclass ((pos, SN.Collections.cPair), [tk; tv])) in
+    let tpair = TMT.pair (Reason.Rmap_append pos) tk tv in
     let env = Typing_ops.sub_type pos ur env ty2 tpair in
     env, (ty1, tpair)
   (* Handle the case where Map was used as a typehint without
      type parameters *)
-  | _, Tclass ((_, n), []) when n = SN.Collections.cMap ->
+  | _, Tclass ((_, n), _, []) when n = SN.Collections.cMap ->
     Env.error_if_reactive_context env begin fun () ->
       Errors.nonreactive_append pos
     end;
-    let tpair =
-      (Reason.Rmap_append pos, Tclass ((pos, SN.Collections.cPair), [])) in
+    let tpair = TMT.class_type (Reason.Rmap_append pos) SN.Collections.cPair [] in
     let env = Typing_ops.sub_type pos ur env ty2 tpair in
     env, (ty1, tpair)
-  | r, Tclass ((_, n) as id, [tv])
+  | r, Tclass ((_, n) as id, e, [tv])
     when n = SN.Collections.cVec || n = SN.Collections.cKeyset ->
     let env, tv' = Typing_union.union env tv ty2 in
-    env, ((r, Tclass (id, [tv'])), tv')
+    env, ((r, Tclass (id, e, [tv'])), tv')
   | r, Tarraykind (AKvec tv) ->
     let  env, tv' = Typing_union.union env tv ty2 in
     env, ((r, Tarraykind (AKvec tv')), tv')
@@ -392,7 +391,7 @@ let rec assign_array_get pos ur env ty1 key tkey ty2 =
     let env = type_index env pos tkey tk Reason.index_array in
     let env, tv' = Typing_union.union env tv ty2 in
     env, ((fst ety1, Tarraykind (AKvarray_or_darray tv')), tv')
-  | Tclass ((_, cn) as id, argl) when cn = SN.Collections.cVector ->
+  | Tclass ((_, cn) as id, _, argl) when cn = SN.Collections.cVector ->
     let tv = match argl with
       | [tv] -> tv
       | _ -> arity_error id; err_witness env pos in
@@ -400,15 +399,15 @@ let rec assign_array_get pos ur env ty1 key tkey ty2 =
     let env = type_index env pos tkey tk (Reason.index_class cn) in
     let env = Typing_ops.sub_type pos ur env ty2 tv in
     env, (ety1, tv)
-  | Tclass ((_, cn) as id, argl) when cn = SN.Collections.cVec ->
+  | Tclass ((_, cn) as id, e, argl) when cn = SN.Collections.cVec ->
     let tv = match argl with
       | [tv] -> tv
       | _ -> arity_error id; err_witness env pos in
     let tk = Reason.Ridx_vector (fst key), Tprim Tint in
     let env = type_index env pos tkey tk (Reason.index_class cn) in
     let env, tv' = Typing_union.union env tv ty2 in
-    env, ((fst ety1, Tclass (id, [tv'])), tv')
-  | Tclass ((_, cn) as id, argl)
+    env, ((fst ety1, Tclass (id, e, [tv'])), tv')
+  | Tclass ((_, cn) as id, _, argl)
     when cn = SN.Collections.cMap || cn = SN.Collections.cStableMap ->
     let (tk, tv) = match argl with
       | [tk; tv] -> (tk, tv)
@@ -416,17 +415,17 @@ let rec assign_array_get pos ur env ty1 key tkey ty2 =
     let env = type_index env pos tkey tk (Reason.index_class cn) in
     let env = Typing_ops.sub_type pos ur env ty2 tv in
     env, (ety1, tv)
-  | Tclass ((_, cn) as id, argl) when cn = SN.Collections.cDict ->
+  | Tclass ((_, cn) as id, e, argl) when cn = SN.Collections.cDict ->
     let (tk, tv) = match argl with
       | [tk; tv] -> (tk, tv)
       | _ -> arity_error id; let any = err_witness env pos in any, any in
     let env, tk' = Typing_union.union env tk tkey in
     let env, tv' = Typing_union.union env tv ty2 in
-    env, ((fst ety1, Tclass (id, [tk'; tv'])), tv')
-  | Tclass ((_, cn), _) when cn = SN.Collections.cKeyset ->
+    env, ((fst ety1, Tclass (id, e, [tk'; tv'])), tv')
+  | Tclass ((_, cn), _, _) when cn = SN.Collections.cKeyset ->
     Errors.keyset_set pos (Reason.to_pos (fst ety1));
     error
-  | Tclass ((_, cn), _)
+  | Tclass ((_, cn), _, _)
        when cn = SN.Collections.cConstMap
          || cn = SN.Collections.cImmMap
          || cn = SN.Collections.cIndexish

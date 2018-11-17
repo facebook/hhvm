@@ -621,11 +621,11 @@ bool Type::operator<=(Type rhs) const {
     return true;
   }
 
-  if (lhs.hasConstVal(TArr)) {
+  if (lhs.hasConstVal(TArrLike)) {
     // Arrays can be specialized in different ways.  Here, we check if the
     // constant array fits the kind()/type() of the specialization of `rhs', if
     // any.
-    auto const lhs_arr = lhs.arrVal();
+    auto const lhs_arr = lhs.m_arrVal;
     auto const rhs_as = rhs.arrSpec();
     return arrayFitsSpec(lhs_arr, rhs_as);
   }

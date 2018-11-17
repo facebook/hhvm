@@ -341,9 +341,11 @@ inline Type Type::dropConstVal() const {
   if (!m_hasConstVal) return *this;
   assertx(!isUnion());
 
-  if (*this <= TStaticArr) {
-    return Type::StaticArray(arrVal()->kind());
-  }
+  if (*this <= TStaticArr)    return Type::StaticArray(arrVal()->kind());
+  if (*this <= TStaticVec)    return TStaticVec;
+  if (*this <= TStaticDict)   return TStaticDict;
+  if (*this <= TStaticKeyset) return TStaticKeyset;
+
   return Type(m_bits, ptrKind(), memKind());
 }
 
@@ -521,9 +523,8 @@ inline ArraySpec Type::arrSpec() const {
   // all of them.
   if (supports(SpecKind::Class)) return ArraySpec::Top;
 
-  if (m_hasConstVal) {
-    return ArraySpec(arrVal()->kind());
-  }
+  if (m_hasConstVal) return ArraySpec(m_arrVal->kind());
+
   assertx(m_arrSpec != ArraySpec::Bottom);
   return m_arrSpec;
 }

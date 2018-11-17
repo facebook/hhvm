@@ -479,7 +479,7 @@ public:
     kAnyDict      = kDict | kBoxedDict,
     kAnyKeyset    = kKeyset | kBoxedKeyset,
     kAnyArrLike   = kAnyArr | kAnyVec | kAnyDict | kAnyKeyset,
-    kArrSpecBits  = kAnyArr,
+    kArrSpecBits  = kAnyArrLike,
     kAnyObj       = kObj | kBoxedObj,
     kClsSpecBits  = kAnyObj | kCls,
   };

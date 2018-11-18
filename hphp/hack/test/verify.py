@@ -356,12 +356,11 @@ def get_flags_cache(args_flags: List[str]) -> Callable[[str], List[str]]:
     flags_cache: Dict[str, List[str]] = {}
 
     def get_flags(test_dir: str) -> List[str]:
+        if test_dir not in flags_cache:
+            flags_cache[test_dir] = get_hh_flags(test_dir)
+        flags = flags_cache[test_dir]
         if args_flags is not None:
-            flags = args_flags
-        else:
-            if test_dir not in flags_cache:
-                flags_cache[test_dir] = get_hh_flags(test_dir)
-            flags = flags_cache[test_dir]
+            flags = flags + args_flags
         return flags
 
     return get_flags
@@ -396,11 +395,10 @@ if __name__ == '__main__':
                         help='Pass test input file via stdin')
     parser.add_argument('--batch', action='store_true',
                         help='Run tests in batches to the test program')
-    parser.epilog = "Unless --flags is passed as an argument, "\
-                    "%s looks for a file named HH_FLAGS in the same directory" \
+    parser.epilog = "%s looks for a file named HH_FLAGS in the same directory" \
                     " as the test files it is executing. If found, the " \
                     "contents will be passed as arguments to " \
-                    "<program>." % parser.prog
+                    "<program> in addition to any arguments specified by --flags" % parser.prog
     args = parser.parse_args()
 
     max_workers = args.max_workers

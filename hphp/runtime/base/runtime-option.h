@@ -813,6 +813,7 @@ struct RuntimeOption {
   F(bool,     JitPGOOnly,              false)                           \
   F(bool,     JitPGOHotOnly,           false)                           \
   F(bool,     JitPGOUsePostConditions, true)                            \
+  F(bool,     JitPGOUseAddrCountedCheck, false)                         \
   F(uint32_t, JitPGOUnlikelyIncRefCountedPercent, 2)                    \
   F(uint32_t, JitPGOUnlikelyIncRefIncrementPercent, 5)                  \
   F(uint32_t, JitPGOUnlikelyDecRefReleasePercent, 5)                    \

@@ -128,6 +128,11 @@ void incrementProfile(Vout& v, const TargetProfile<T>& profile,
   }
 }
 
+inline bool useAddrForCountedCheck() {
+  return addr_encodes_persistency && !one_bit_refcount &&
+    RuntimeOption::EvalJitPGOUseAddrCountedCheck;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -190,17 +195,16 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
     return;
   }
 
-  auto& vtaken = unlikelyCounted ? vcold(env) : v;
-
-  if (use_addr_to_check_counted &&
-      !one_bit_refcount && unlikelyIncrement &&
+  if (useAddrForCountedCheck() &&
+      !unlikelyCounted && unlikelyIncrement &&
       ty <= (TCounted | TPersistent) && ty.maybe(TPersistent)) {
+    assertx(profile.optimizing());
     // We know the value is a pointer to a HeapObject
     auto const addr = loc.reg();
     // Look at upper bits of the pointer to decide if it is counted.
     auto const sf = v.makeReg();
     v << shrqi{(int)kUncountedMaxShift, addr, v.makeReg(), sf};
-    unlikelyIfThen(v, vtaken, CC_NZ, sf,
+    unlikelyIfThen(v, vcold(env), CC_NZ, sf,
                    [&] (Vout& v) {
                      emitIncRef(v, loc.reg(), TRAP_REASON);
                    });
@@ -208,6 +212,7 @@ void cgIncRef(IRLS& env, const IRInstruction* inst) {
     return;
   }
 
+  auto& vtaken = unlikelyCounted ? vcold(env) : v;
   ifRefCountedType(
     v, vtaken, ty, loc,
     [&] (Vout& v) {
@@ -703,7 +708,8 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
         implProf(v, ty);
       });
   } else {
-    if (use_addr_to_check_counted && profile.optimizing() &&
+    if (useAddrForCountedCheck() &&
+        profile.optimizing() &&
         ty <= (TCounted | TPersistent) && ty.maybe(TPersistent)) {
       // Need to check countedness, and we do it by looking at the pointer.
       auto const data = profile.data();
@@ -789,19 +795,20 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
   emitIncStat(v, Stats::TC_DecRef_NZ);
   emitDecRefTypeStat(v, env, inst);
 
-  auto& vtaken = unlikelyCounted ? vcold(env) : v;
-
-  if (use_addr_to_check_counted && profile.optimizing() && unlikelyDecrement &&
+  if (useAddrForCountedCheck() &&
+      !unlikelyCounted && unlikelyDecrement &&
       ty <= (TCounted | TPersistent) && ty.maybe(TPersistent)) {
+    assertx(profile.optimizing());
     auto sf = v.makeReg();
     v << shrqi{(int)kUncountedMaxShift, loc.reg(), v.makeReg(), sf};
-    unlikelyIfThen(v, vtaken, CC_NZ, sf,
+    unlikelyIfThen(v, vcold(env), CC_NZ, sf,
                    [&] (Vout& v) {
                      emitDecRef(v, loc.reg(), TRAP_REASON);
                    });
     return;
   }
 
+  auto& vtaken = unlikelyCounted ? vcold(env) : v;
   ifRefCountedType(
     v, vtaken, ty, loc,
     [&] (Vout& v) {

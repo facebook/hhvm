@@ -1433,6 +1433,7 @@ void RuntimeOption::Load(
       EvalJitSerdesFile.clear();
       DumpPreciseProfData = false;
     }
+    EvalJitPGOUseAddrCountedCheck &= addr_encodes_persistency;
     low_malloc_huge_pages(EvalMaxLowMemHugePages);
     HardwareCounter::Init(EvalProfileHWEnable,
                           url_decode(EvalProfileHWEvents.data(),

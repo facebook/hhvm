@@ -223,8 +223,6 @@ TypedValue HHVM_FUNCTION(array_count_values,
 TypedValue HHVM_FUNCTION(array_fill_keys,
                          const Variant& keys,
                          const Variant& value) {
-  SuppressHACIntishCastNotices shacn;
-
   folly::Optional<ArrayInit> ai;
   auto ok = IterateV(
     *keys.toCell(),
@@ -234,12 +232,12 @@ TypedValue HHVM_FUNCTION(array_fill_keys,
     [&](TypedValue v) {
       auto const inner = tvToCell(v);
       if (isIntType(inner.m_type) || isStringType(inner.m_type)) {
-        ai->setUnknownKey(VarNR(inner), value);
+        ai->setUnknownKey<IntishCast::CastSilently>(VarNR(inner), value);
       } else {
         raise_hack_strict(RuntimeOption::StrictArrayFillKeys,
                           "strict_array_fill_keys",
                           "keys must be ints or strings");
-        ai->setUnknownKey(tvCastToString(v), value);
+        ai->setUnknownKey<IntishCast::CastSilently>(tvCastToString(v), value);
       }
     },
     [&](ObjectData* coll) {

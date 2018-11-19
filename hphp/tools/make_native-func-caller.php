@@ -29,8 +29,8 @@
  *
  * I solemnly swear that I am up to no good.
  */
-define('NUM_GP_ARGS', 32); // Must match kMaxBuiltinArgs
-define('NUM_SIMD_ARGS', 8); // Must match CPU's ABI definition for SIMD usage
+const NUM_GP_ARGS = 32; // Must match kMaxBuiltinArgs
+const NUM_SIMD_ARGS = 8; // Must match CPU's ABI definition for SIMD usage
 
 $fp = STDOUT;
 

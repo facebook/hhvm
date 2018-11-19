@@ -1,0 +1,4 @@
+File "tparam_constraints2.php", line 3, characters 35-42:
+This is an array key (int/string) (Typing[4110])
+File "tparam_constraints2.php", line 10, characters 37-40:
+It is incompatible with void

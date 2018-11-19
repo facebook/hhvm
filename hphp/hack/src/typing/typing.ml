@@ -504,6 +504,8 @@ and fun_def tcopt f =
       let local_tpenv = env.Env.lenv.Env.tpenv in
       let env, tb = fun_ env return pos nb f.f_fun_kind in
       let env = Env.check_todo env in
+      let tyvars = ISet.of_list (IMap.keys env.Env.tvenv) in
+      let env = SubType.solve_tyvars ~tyvars env in
       begin match f.f_ret with
         | None when Env.is_strict env ->
           Typing_return.suggest_return env pos return.Typing_env_return_info.return_type
@@ -6479,6 +6481,8 @@ and method_def env m =
     fun_ ~abstract:m.m_abstract env return pos nb m.m_fun_kind in
   let env =
     Env.check_todo env in
+  let tyvars = ISet.of_list (IMap.keys env.Env.tvenv) in
+  let env = SubType.solve_tyvars ~tyvars env in
   let m_ret =
     match m.m_ret with
     | None when

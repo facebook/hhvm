@@ -359,10 +359,12 @@ void register_variable(Array& variables, char *name, const Variant& value,
         gpc_elements.push_back(uninit_null());
         gpc_elements.back().assignRef(lval);
       } else {
-        String key(index, index_len, CopyString);
+        String key_str(index, index_len, CopyString);
+        auto const key =
+          symtable->convertKey<IntishCast::CastSilently>(key_str.toCell());
         auto const v = symtable->rvalAt(key).unboxed();
         if (isNullType(v.type()) || !isArrayLikeType(v.type())) {
-          symtable->set(key, Array::Create());
+          symtable->set(key, make_tv<KindOfPersistentArray>(staticEmptyArray()));
         }
         gpc_elements.push_back(uninit_null());
         gpc_elements.back().assignRef(symtable->lvalAt(key));
@@ -385,9 +387,11 @@ void register_variable(Array& variables, char *name, const Variant& value,
     if (!index) {
       symtable->append(value);
     } else {
-      String key(index, index_len, CopyString);
+      String key_str(index, index_len, CopyString);
+      auto key =
+        symtable->convertKey<IntishCast::CastSilently>(key_str.toCell());
       if (overwrite || !symtable->exists(key)) {
-        symtable->set(key, value);
+        symtable->set(key, *value.toCell(), true);
       }
     }
   }

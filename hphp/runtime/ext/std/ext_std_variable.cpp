@@ -787,7 +787,6 @@ void HHVM_FUNCTION(parse_str,
       default: raise_error(warning);
     }
   }
-  SuppressHACIntishCastNotices shacn;
   Array result = Array::Create();
   HttpProtocol::DecodeParameters(result, str.data(), str.size());
   if (!arr.isReferenced()) {

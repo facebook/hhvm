@@ -24,11 +24,11 @@ function main(): void {
   $mutable = HH\Rx\mutable(Foo::get());
   $mutable->setBar(42);
   HH\Rx\freeze($mutable);
-  var_dump($mutable->getBar());
+  return $mutable->getBar();
 }
 
 
 <<__EntryPoint>>
 function main_freeze_mutable() {
-main();
+  var_dump(main());
 }

@@ -2228,11 +2228,11 @@ Attr parse_attribute_list(AsmState& as, AttrContext ctx,
       *isTop = false;
       continue;
     }
-    auto const rxl = rxLevelFromAttrString(word);
-    if (rxl != RxLevel::None) {
+    auto const rxAttrs = rxAttrsFromAttrString(word);
+    if (rxAttrs != 0) {
       if (seen_rxl) as.error("multiple rx attributes");
       seen_rxl = true;
-      ret |= rxLevelToAttr(rxl);
+      ret |= rxAttrs;
       continue;
     }
 

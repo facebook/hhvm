@@ -22,31 +22,37 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-enum class RxLevel : uint32_t {
+enum class RxLevel : uint8_t {
   None               = 0,
-  ConditionalLocal   = 1,
-  ConditionalShallow = 2,
-  ConditionalRx      = 3,
-  Local              = 4,
-  Shallow            = 5,
-  Rx                 = 6,
+  Local              = 1,
+  Shallow            = 2,
+  Rx                 = 3,
 };
 
-static_assert(AttrRxBit0 == (1u << 14), "");
-static_assert(AttrRxBit1 == (1u << 15), "");
-static_assert(AttrRxBit2 == (1u << 16), "");
+static_assert(AttrRxLevel0 == (1u << 14), "");
+static_assert(AttrRxLevel1 == (1u << 15), "");
+static_assert(AttrRxNonConditional == (1u << 16), "");
 
-constexpr RxLevel rxLevelFromAttr(Attr a) {
-  return static_cast<RxLevel>((static_cast<uint32_t>(a) >> 14) & 7u);
+constexpr RxLevel rxLevelFromAttr(Attr attrs) {
+  return static_cast<RxLevel>((static_cast<uint32_t>(attrs) >> 14) & 3u);
 }
 
-constexpr Attr rxLevelToAttr(RxLevel r) {
-  return static_cast<Attr>(static_cast<uint32_t>(r) << 14);
+constexpr bool rxConditionalFromAttr(Attr attrs) {
+  return !(attrs & AttrRxNonConditional);
 }
 
-RxLevel rxLevelFromAttrString(const std::string& a);
+constexpr Attr rxMakeAttr(RxLevel level, bool conditional) {
+  uint32_t val = static_cast<uint32_t>(level) | (conditional ? 0 : 4);
+  return static_cast<Attr>(val << 14);
+}
 
-const char* rxLevelToAttrString(RxLevel r);
+Attr rxAttrsFromAttrString(const std::string& a);
+const char* rxAttrsToAttrString(Attr a);
+
+const char* rxLevelToString(RxLevel r);
+
+bool rxEnforceCallsInLevel(RxLevel level);
+RxLevel rxRequiredCalleeLevel(RxLevel level);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

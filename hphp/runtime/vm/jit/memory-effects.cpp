@@ -1816,6 +1816,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckFuncStatic:
   case FuncSupportsAsyncEagerReturn:
   case IsFuncDynCallable:
+  case LdFuncRxLevel:
   case IsReifiedName:
   case LdARNumParams:
   case LdRDSAddr:

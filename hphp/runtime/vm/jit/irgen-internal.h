@@ -31,7 +31,9 @@
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/type.h"
+#include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/resumable.h"
+#include "hphp/runtime/vm/rx.h"
 #include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP { namespace jit { namespace irgen {
@@ -80,6 +82,12 @@ inline SrcKey nextSrcKey(const IRGS& env) {
 
 inline Offset nextBcOff(const IRGS& env) {
   return nextSrcKey(env).offset();
+}
+
+inline RxLevel curRxLevel(const IRGS& env) {
+  // Pessimize enforcements for conditional reactivity, as it is not tracked yet
+  if (curFunc(env)->isRxConditional()) return RxLevel::None;
+  return curFunc(env)->rxLevel();
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -251,6 +251,7 @@ bool beginInlining(IRGS& env,
   );
 
   if (!conjure) emitCallerDynamicCallChecks(env, target, numParams);
+  emitCallerRxChecks(env, target);
 
   // The VM stack-pointer is conceptually pointing to the last
   // parameter, so we need to add numParams to get to the ActRec

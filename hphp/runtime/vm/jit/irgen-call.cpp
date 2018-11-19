@@ -1591,6 +1591,32 @@ void emitCallerDynamicCallChecks(IRGS& env,
   );
 }
 
+void emitCallerRxChecks(IRGS& env, const Func* callee) {
+  if (RuntimeOption::EvalRxEnforceCalls <= 0) return;
+  auto const callerLevel = curRxLevel(env);
+  if (!rxEnforceCallsInLevel(callerLevel)) return;
+
+  auto const minReqCalleeLevel = rxRequiredCalleeLevel(callerLevel);
+  if (callee) {
+    // Let interpreter handle the bad call.
+    if (callee->rxLevel() < minReqCalleeLevel) PUNT(FCall-RxViolation);
+    return;
+  }
+
+  ifThen(
+    env,
+    [&] (Block* taken) {
+      auto const calleeLevel = gen(env, LdFuncRxLevel, ldPreLiveFunc(env));
+      auto const lt = gen(env, LtInt, calleeLevel, cns(env, minReqCalleeLevel));
+      gen(env, JmpNZero, taken, lt);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, Jmp, makeExitSlow(env));
+    }
+  );
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void emitFCall(IRGS& env,
@@ -1608,6 +1634,7 @@ void emitFCall(IRGS& env,
 
   emitCallerDynamicCallChecks(
     env, callee, fca.numArgs + (fca.hasUnpack() ? 1 : 0));
+  emitCallerRxChecks(env, callee);
 
   if (fca.hasUnpack()) {
     auto const data = CallUnpackData {

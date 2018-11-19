@@ -101,8 +101,8 @@ std::vector<std::string> attrs_to_vec(AttrContext ctx, Attr attrs) {
   HHAS_ATTRS
 #undef X
 
-  auto const rxl = rxLevelFromAttr(attrs);
-  if (rxl != RxLevel::None) vec.push_back(rxLevelToAttrString(rxl));
+  auto const rxAttrString = rxAttrsToAttrString(attrs);
+  if (rxAttrString) vec.push_back(rxAttrString);
 
   return vec;
 }

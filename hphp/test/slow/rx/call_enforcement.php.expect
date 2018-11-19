@@ -1,0 +1,16 @@
+non_rx -> non_rx: ok
+non_rx -> rx_local: ok
+non_rx -> rx_shallow: ok
+non_rx -> rx: ok
+rx_local -> non_rx: ok
+rx_local -> rx_local: ok
+rx_local -> rx_shallow: ok
+rx_local -> rx: ok
+rx_shallow -> non_rx: Call to non-reactive 'non_rx' from shallow reactive 'rx_shallow' violates reactivity constraints.
+rx_shallow -> rx_local: ok
+rx_shallow -> rx_shallow: ok
+rx_shallow -> rx: ok
+rx -> non_rx: Call to non-reactive 'non_rx' from reactive 'rx' violates reactivity constraints.
+rx -> rx_local: Call to local reactive 'rx_local' from reactive 'rx' violates reactivity constraints.
+rx -> rx_shallow: Call to shallow reactive 'rx_shallow' from reactive 'rx' violates reactivity constraints.
+rx -> rx: ok

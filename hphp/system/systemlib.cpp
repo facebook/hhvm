@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/rx.h"
 
 #include <vector>
 
@@ -322,7 +323,8 @@ Func* setupNullClsMethod(Class* cls, StringData* name) {
   clone->setNewFuncId();
   clone->setAttrs(static_cast<Attr>(
                     AttrPublic | AttrNoInjection | AttrSkipFrame |
-                    AttrRequiresThis | AttrDynamicallyCallable));
+                    AttrRequiresThis | AttrDynamicallyCallable) |
+                    rxMakeAttr(RxLevel::Rx, false));
   return clone;
 }
 
@@ -337,7 +339,6 @@ Func* getNull86reifiedinit(Class* cls) {
   f->setBaseCls(cls);
   f->setGenerated(true);
   return f;
-
 }
 
 /////////////////////////////////////////////////////////////////////////////

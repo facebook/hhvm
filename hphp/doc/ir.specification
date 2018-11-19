@@ -1542,6 +1542,10 @@ To string conversions:
 
   Tests for Func::m_attrs & AttrDynamicallyCallable.
 
+| LdFuncRxLevel, D(Int), S(Func), NF
+
+  Returns the value of func->rxLevel().
+
 | IsReifiedName, D(Bool), S(Str), NF
 
   Tests whether the name in S0 is name of a reified class or function.

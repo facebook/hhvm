@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/rx.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 
@@ -62,6 +63,27 @@ inline void calleeDynamicCallChecks(const ActRec* ar) {
       Strings::FUNCTION_CALLED_DYNAMICALLY,
       func->fullDisplayName()->data()
     );
+  }
+}
+
+inline void callerRxChecks(const ActRec* caller, const Func* callee) {
+  if (RuntimeOption::EvalRxEnforceCalls <= 0) return;
+  // Conditional reactivity is not tracked yet, so assume the callee has maximum
+  // possible level of reactivity.
+  if (callee->rxLevel() >= rxRequiredCalleeLevel(caller->rxMinLevel())) return;
+
+  auto const errMsg = folly::sformat(
+    "Call to {} '{}' from {} '{}' violates reactivity constraints.",
+    rxLevelToString(callee->rxLevel()),
+    callee->fullName()->data(),
+    rxLevelToString(caller->rxMinLevel()),
+    caller->func()->fullName()->data()
+  );
+
+  if (RuntimeOption::EvalRxEnforceCalls >= 2) {
+    SystemLib::throwBadMethodCallExceptionObject(errMsg);
+  } else {
+    raise_warning(errMsg);
   }
 }
 

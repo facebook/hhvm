@@ -1740,6 +1740,7 @@ void emitFCallBuiltin(IRGS& env,
   auto const callee = Unit::lookupBuiltin(funcName);
 
   if (!callee) PUNT(Missing-builtin);
+  emitCallerRxChecks(env, callee);
 
   auto params = prepare_params(
     env, callee,

@@ -5836,6 +5836,9 @@ void iopFCall(PC& pc, ActRec* ar, FCallArgs fca,
   );
   assertx(fca.numArgs + (fca.hasUnpack() ? 1 : 0) == ar->numArgs());
   if (ar->isDynamicCall()) callerDynamicCallChecks(func);
+  if (rxEnforceCallsInLevel(vmfp()->rxMinLevel())) {
+    callerRxChecks(vmfp(), func);
+  }
   checkStack(vmStack(), func, 0);
   if (fca.numRets != 1) ar->setFCallM();
   auto const asyncEagerReturn =
@@ -5852,6 +5855,10 @@ void iopFCallBuiltin(uint32_t numArgs, uint32_t numNonDefault, Id id) {
   if (func == nullptr) {
     raise_error("Call to undefined function %s()",
                 vmfp()->m_func->unit()->lookupLitstrId(id)->data());
+  }
+
+  if (rxEnforceCallsInLevel(vmfp()->rxMinLevel())) {
+    callerRxChecks(vmfp(), func);
   }
 
   TypedValue* args = vmStack().indTV(numArgs-1);

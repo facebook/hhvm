@@ -344,6 +344,13 @@ SSATmp* simplifyIsFuncDynCallable(State& env, const IRInstruction* inst) {
     : nullptr;
 }
 
+SSATmp* simplifyLdFuncRxLevel(State& env, const IRInstruction* inst) {
+  auto const funcTmp = inst->src(0);
+  return funcTmp->hasConstVal(TFunc)
+    ? cns(env, funcTmp->funcVal()->rxLevel())
+    : nullptr;
+}
+
 SSATmp* simplifyRaiseMissingThis(State& env, const IRInstruction* inst) {
   auto const funcTmp = inst->src(0);
   if (funcTmp->hasConstVal()) {
@@ -3884,6 +3891,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CheckFuncStatic)
   X(FuncSupportsAsyncEagerReturn)
   X(IsFuncDynCallable)
+  X(LdFuncRxLevel)
   X(RaiseMissingThis)
   X(LdObjClass)
   X(LdObjInvoke)

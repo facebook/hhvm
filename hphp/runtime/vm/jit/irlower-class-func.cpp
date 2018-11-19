@@ -219,6 +219,20 @@ void cgIsFuncDynCallable(IRLS& env, const IRInstruction* inst) {
   v << setcc{CC_NZ, sf, dst};
 }
 
+void cgLdFuncRxLevel(IRLS& env, const IRInstruction* inst) {
+  auto const func = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  static_assert(AttrRxLevel0 == (1u << 14), "");
+  static_assert(AttrRxLevel1 == (1u << 15), "");
+  auto const attrs = v.makeReg();
+  auto const shifted = v.makeReg();
+  v << loadzlq{func[Func::attrsOff()], attrs};
+  v << shrqi{14, attrs, shifted, v.makeReg()};
+  v << andqi{3, shifted, dst, v.makeReg()};
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

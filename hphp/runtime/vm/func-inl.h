@@ -544,6 +544,17 @@ inline bool Func::isResumable() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Reactivity.
+
+inline RxLevel Func::rxLevel() const {
+  return rxLevelFromAttr(m_attrs);
+}
+
+inline bool Func::isRxConditional() const {
+  return rxConditionalFromAttr(m_attrs);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Methods.
 
 inline Slot Func::methodSlot() const {

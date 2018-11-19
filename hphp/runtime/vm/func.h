@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/rx.h"
 
 #include "hphp/util/fixed-vector.h"
 
@@ -887,6 +888,19 @@ struct Func final {
    * @returns: isGenerator() || isAsync()
    */
   bool isResumable() const;
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Reactivity.                                                        [const]
+
+  /*
+   * What is the level of reactivity of this function?
+   */
+  RxLevel rxLevel() const;
+
+  /*
+   * Is this function conditionally reactive?
+   */
+  bool isRxConditional() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Methods.                                                           [const]

@@ -21,25 +21,48 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline RxLevel rxLevelFromAttrString(const std::string& a) {
-  if (a == "conditional_rx_local")   return RxLevel::ConditionalLocal;
-  if (a == "conditional_rx_shallow") return RxLevel::ConditionalShallow;
-  if (a == "conditional_rx")         return RxLevel::ConditionalRx;
-  if (a == "rx_local")               return RxLevel::Local;
-  if (a == "rx_shallow")             return RxLevel::Shallow;
-  if (a == "rx")                     return RxLevel::Rx;
-  return RxLevel::None;
+inline Attr rxAttrsFromAttrString(const std::string& a) {
+  if (a == "conditional_rx_local")   return rxMakeAttr(RxLevel::Local, true);
+  if (a == "conditional_rx_shallow") return rxMakeAttr(RxLevel::Shallow, true);
+  if (a == "conditional_rx")         return rxMakeAttr(RxLevel::Rx, true);
+  if (a == "rx_local")               return rxMakeAttr(RxLevel::Local, false);
+  if (a == "rx_shallow")             return rxMakeAttr(RxLevel::Shallow, false);
+  if (a == "rx")                     return rxMakeAttr(RxLevel::Rx, false);
+  return static_cast<Attr>(0);
 }
 
-inline const char* rxLevelToAttrString(RxLevel r) {
-  switch (r) {
-    case RxLevel::None:               return nullptr;
-    case RxLevel::ConditionalLocal:   return "conditional_rx_local";
-    case RxLevel::ConditionalShallow: return "conditional_rx_shallow";
-    case RxLevel::ConditionalRx:      return "conditional_rx";
-    case RxLevel::Local:              return "rx_local";
-    case RxLevel::Shallow:            return "rx_shallow";
-    case RxLevel::Rx:                 return "rx";
+inline const char* rxAttrsToAttrString(Attr attrs) {
+  auto const c = rxConditionalFromAttr(attrs);
+  switch (rxLevelFromAttr(attrs)) {
+    case RxLevel::None:    return nullptr;
+    case RxLevel::Local:   return c ? "conditional_rx_local" : "rx_local";
+    case RxLevel::Shallow: return c ? "conditional_rx_shallow" : "rx_shallow";
+    case RxLevel::Rx:      return c ? "conditional_rx" : "rx";
+  }
+  not_reached();
+}
+
+inline const char* rxLevelToString(RxLevel level) {
+  switch (level) {
+    case RxLevel::None:    return "non-reactive";
+    case RxLevel::Local:   return "local reactive";
+    case RxLevel::Shallow: return "shallow reactive";
+    case RxLevel::Rx:      return "reactive";
+  }
+  not_reached();
+}
+
+inline bool rxEnforceCallsInLevel(RxLevel level) {
+  return level >= RxLevel::Shallow;
+}
+
+inline RxLevel rxRequiredCalleeLevel(RxLevel level) {
+  assertx(rxEnforceCallsInLevel(level));
+  switch (level) {
+    case RxLevel::None:
+    case RxLevel::Local:   not_reached();
+    case RxLevel::Shallow: return RxLevel::Local;
+    case RxLevel::Rx:      return RxLevel::Rx;
   }
   not_reached();
 }

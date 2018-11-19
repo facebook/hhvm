@@ -993,6 +993,7 @@ struct RuntimeOption {
    * 2 - Throw exception                                                \
    */                                                                   \
   F(int32_t, ForbidThriftIntegerValuesOutOfRange, 0)                    \
+  F(int32_t, RxEnforceCalls, 0)                                         \
   F(int32_t, ServerOOMAdj, 0)                                           \
   F(std::string, PreludePath, "")                                       \
   F(uint32_t, NonSharedInstanceMemoCaches, 10)                          \

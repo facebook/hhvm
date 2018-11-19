@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/vm/rx.h"
 /*
  * These header dependencies need to stay as minimal as possible.
  */
@@ -388,6 +389,13 @@ struct ActRec {
    * Returns nullptr if there are no extra arguments.
    */
   TypedValue* getExtraArg(unsigned ind) const;
+
+  /*
+   * Get the minimum possible effective level of reactivity.
+   *
+   * Doesn't return precise level as conditional reactivity is not tracked yet.
+   */
+  RxLevel rxMinLevel() const;
 
   /*
    * address to teleport the return value after destroying this actrec.

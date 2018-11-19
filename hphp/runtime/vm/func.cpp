@@ -649,8 +649,8 @@ void Func::print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrReference) { out << " (reference)"; }
   if (attrs & AttrSupportsAsyncEagerReturn) { out << " (can_async_eager_ret)"; }
   if (attrs & AttrDynamicallyCallable) { out << " (dyn_callable)"; }
-  auto rxl = rxLevelFromAttr(attrs);
-  if (rxl != RxLevel::None) out << " (" << rxLevelToAttrString(rxl) << ")";
+  auto rxAttrString = rxAttrsToAttrString(attrs);
+  if (rxAttrString) out << " (" << rxAttrString << ")";
 }
 
 void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {

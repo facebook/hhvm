@@ -908,7 +908,7 @@ Variant ZendPack::unpack(const String& fmt, const String& data) {
           double v;
 
           memcpy(&v, &input[inputpos], sizeof(double));
-          ret.set(String(n, CopyString), v);
+          ret.set(n_key, v);
           break;
         }
 

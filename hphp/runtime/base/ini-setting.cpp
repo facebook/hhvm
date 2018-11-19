@@ -620,7 +620,8 @@ void IniSetting::ParserCallback::makeArray(tv_lval val,
     //   hhvm.a[b][c][d]
     // b will be hash and an array already, but c and d might
     // not exist and will need to be made an array
-    val = forceToArray(val).lvalAt(index);
+    auto& arr = forceToArray(val);
+    val = arr.lvalAt(arr.convertKey<IntishCast::CastSilently>(index));
     if (last) {
       tvMove(make_tv<KindOfString>(StringData::Make(value)), val);
     } else {

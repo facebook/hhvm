@@ -2497,10 +2497,7 @@ void DebuggerClient::loadConfig() {
 
   // We are guaranteed to have an ini file given how m_configFileName is set
   // above
-  {
-    SuppressHACIntishCastNotices shacn;
-    Config::ParseIniFile(m_configFileName);
-  }
+  Config::ParseIniFile(m_configFileName);
 
   // Do this after the ini processing so we don't accidentally save the config
   // when we change one of the options

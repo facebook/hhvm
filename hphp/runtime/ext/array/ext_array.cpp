@@ -285,8 +285,6 @@ TypedValue HHVM_FUNCTION(array_fill,
 
 TypedValue HHVM_FUNCTION(array_flip,
                          const Variant& trans) {
-  SuppressHACIntishCastNotices shacn;
-
   auto const& transCell = *trans.toCell();
   if (UNLIKELY(!isContainer(transCell))) {
     raise_warning("Invalid operand type was used: %s expects "
@@ -298,7 +296,8 @@ TypedValue HHVM_FUNCTION(array_flip,
   for (ArrayIter iter(transCell); iter; ++iter) {
     auto const inner = iter.secondRvalPlus().unboxed();
     if (inner.type() == KindOfInt64 || isStringType(inner.type())) {
-      ret.setUnknownKey(VarNR(inner.tv()), iter.first());
+      ret.setUnknownKey<IntishCast::CastSilently>(VarNR(inner.tv()),
+                                                  iter.first());
     } else {
       raise_warning("Can only flip STRING and INTEGER values!");
     }

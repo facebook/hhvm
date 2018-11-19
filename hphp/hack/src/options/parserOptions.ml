@@ -17,6 +17,7 @@ let allow_goto = GlobalOptions.po_allow_goto
 let enable_concurrent = GlobalOptions.po_enable_concurrent
 let default = GlobalOptions.default
 let disable_define = GlobalOptions.po_disable_define
+let disable_decl = GlobalOptions.po_disable_decl
 let with_hh_syntax_for_hhvm po b =
   { po with GlobalOptions.po_enable_hh_syntax_for_hhvm = b }
 

@@ -538,6 +538,7 @@ void implCheckMixedArrayLikeOffset(IRLS& env, const IRInstruction* inst,
     v << cmpqm{key, arr[elmOff + Elm::keyOff()], sf};
     ifThen(v, CC_NE, sf, branch);
   }
+  auto const is_str_key = key_type == KeyType::Str;
   { // Fail if the Elm key type doesn't match.
     auto const sf = v.makeReg();
     v << cmplim{0, arr[elmOff + Elm::dataOff() + TVOFF(m_aux)], sf};
@@ -547,14 +548,18 @@ void implCheckMixedArrayLikeOffset(IRLS& env, const IRInstruction* inst,
     // Note that if `key' actually is an integer-ish string, we'd fail this
     // check (and most likely would have failed the previous check also), but
     // this false negative is allowed.
-    auto const is_str_key = key_type == KeyType::Str;
     ifThen(v, is_str_key ? CC_L : CC_GE, sf, branch);
   }
   { // Fail if the Elm is a tombstone.  See MixedArray::isTombstone().
-    auto const sf = v.makeReg();
-    v << cmpbim{static_cast<data_type_t>(kInvalidDataType),
-                arr[elmOff + Elm::dataOff() + TVOFF(m_type)], sf};
-    ifThen(v, CC_E, sf, branch);
+    // We set the key type to look like an int when setting it be a tombstone.
+    // This is originally to simplify the type scan, however we can use this
+    // to elide this check when looking for string keys.
+    if (!is_str_key) {
+      auto const sf = v.makeReg();
+      v << cmpbim{static_cast<data_type_t>(kInvalidDataType),
+                  arr[elmOff + Elm::dataOff() + TVOFF(m_type)], sf};
+      ifThen(v, CC_E, sf, branch);
+    }
   }
 }
 

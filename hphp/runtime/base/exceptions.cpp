@@ -233,80 +233,79 @@ namespace {
     return traceOptsTV->m_type == KindOfInt64
       ? traceOptsTV->m_data.num : 0;
   }
-}
 
-void throwable_init_file_and_line_from_builtin(ObjectData* throwable) {
-  assertx(vmfp_is_builtin());
-  assertx(is_throwable(throwable));
-  assertx(throwable_has_expected_props());
+  void throwable_init_file_and_line_from_trace(ObjectData* throwable) {
+    assertx(is_throwable(throwable));
+    assertx(throwable_has_expected_props());
 
-  auto const trace_rval = throwable->propRvalAtOffset(s_traceIdx);
+    auto const trace_rval = throwable->propRvalAtOffset(s_traceIdx);
 
-  if (trace_rval.type() == KindOfResource) {
-    auto bt = dyn_cast<CompactTrace>(Resource(trace_rval.val().pres));
-    assertx(bt);
+    if (trace_rval.type() == KindOfResource) {
+      auto bt = dyn_cast<CompactTrace>(Resource(trace_rval.val().pres));
+      assertx(bt);
 
-    for (auto& f : bt->frames()) {
-      if (!f.func || f.func->isBuiltin()) continue;
+      for (auto& f : bt->frames()) {
+        if (!f.func || f.func->isBuiltin()) continue;
 
-      auto const opAtPrevPc = f.func->unit()->getOp(f.prevPc);
-      Offset pcAdjust = 0;
-      if (opAtPrevPc == Op::PopR ||
-          opAtPrevPc == Op::UnboxR ||
-          opAtPrevPc == Op::UnboxRNop) {
-        pcAdjust = 1;
-      }
+        auto const opAtPrevPc = f.func->unit()->getOp(f.prevPc);
+        Offset pcAdjust = 0;
+        if (opAtPrevPc == Op::PopR ||
+            opAtPrevPc == Op::UnboxR ||
+            opAtPrevPc == Op::UnboxRNop) {
+          pcAdjust = 1;
+        }
 
-      auto const ln = f.func->unit()->getLineNumber(f.prevPc - pcAdjust);
-      tvSetIgnoreRef(
-        make_tv<KindOfInt64>(ln),
-        throwable->propLvalAtOffset(s_lineIdx)
-      );
-
-      if (auto fn = f.func->originalFilename()) {
+        auto const ln = f.func->unit()->getLineNumber(f.prevPc - pcAdjust);
         tvSetIgnoreRef(
-          make_tv<KindOfPersistentString>(fn),
-          throwable->propLvalAtOffset(s_fileIdx)
+          make_tv<KindOfInt64>(ln),
+          throwable->propLvalAtOffset(s_lineIdx)
         );
-      } else {
-        tvSetIgnoreRef(
-          make_tv<KindOfPersistentString>(f.func->unit()->filepath()),
-          throwable->propLvalAtOffset(s_fileIdx)
-        );
+
+        if (auto fn = f.func->originalFilename()) {
+          tvSetIgnoreRef(
+            make_tv<KindOfPersistentString>(fn),
+            throwable->propLvalAtOffset(s_fileIdx)
+          );
+        } else {
+          tvSetIgnoreRef(
+            make_tv<KindOfPersistentString>(f.func->unit()->filepath()),
+            throwable->propLvalAtOffset(s_fileIdx)
+          );
+        }
+        return;
       }
       return;
     }
-    return;
-  }
 
-  assertx(RuntimeOption::EvalHackArrDVArrs ?
-    isVecType(trace_rval.type()) :
-    isArrayType(trace_rval.type())
-  );
-  auto const trace = trace_rval.val().parr;
-  for (ArrayIter iter(trace); iter; ++iter) {
-    assertx(iter.second().asTypedValue()->m_type == (
-      RuntimeOption::EvalHackArrDVArrs ? KindOfDict : KindOfArray
-    ));
-    auto const frame = iter.second().asTypedValue()->m_data.parr;
-    auto const file = frame->rval(s_file.get());
-    auto const line = frame->rval(s_line.get());
-    if (file || line) {
-      if (file) {
-        auto const tv = file.tv();
-        tvSetIgnoreRef(
-          tvAssertCell(tv),
-          throwable->propLvalAtOffset(s_fileIdx)
-        );
+    assertx(RuntimeOption::EvalHackArrDVArrs ?
+      isVecType(trace_rval.type()) :
+      isArrayType(trace_rval.type())
+    );
+    auto const trace = trace_rval.val().parr;
+    for (ArrayIter iter(trace); iter; ++iter) {
+      assertx(iter.second().asTypedValue()->m_type == (
+        RuntimeOption::EvalHackArrDVArrs ? KindOfDict : KindOfArray
+      ));
+      auto const frame = iter.second().asTypedValue()->m_data.parr;
+      auto const file = frame->rval(s_file.get());
+      auto const line = frame->rval(s_line.get());
+      if (file || line) {
+        if (file) {
+          auto const tv = file.tv();
+          tvSetIgnoreRef(
+            tvAssertCell(tv),
+            throwable->propLvalAtOffset(s_fileIdx)
+          );
+        }
+        if (line) {
+          auto const tv = line.tv();
+          tvSetIgnoreRef(
+            tvAssertCell(tv),
+            throwable->propLvalAtOffset(s_lineIdx)
+          );
+        }
+        return;
       }
-      if (line) {
-        auto const tv = line.tv();
-        tvSetIgnoreRef(
-          tvAssertCell(tv),
-          throwable->propLvalAtOffset(s_lineIdx)
-        );
-      }
-      return;
     }
   }
 }
@@ -353,6 +352,34 @@ void throwable_init(ObjectData* throwable) {
       throwable->propLvalAtOffset(s_lineIdx)
     );
   }
+}
+
+void throwable_init_file_and_line_from_builtin(ObjectData* throwable) {
+  assertx(vmfp_is_builtin());
+  throwable_init_file_and_line_from_trace(throwable);
+}
+
+void throwable_recompute_backtrace_from_wh(ObjectData* throwable,
+                                           c_WaitableWaitHandle* wh) {
+  assertx(is_throwable(throwable));
+  assertx(throwable_has_expected_props());
+  assertx(wh);
+
+  auto const trace_lval = throwable->propLvalAtOffset(s_traceIdx);
+  auto opts = exception_get_trace_options();
+  bool provide_object = opts & k_DEBUG_BACKTRACE_PROVIDE_OBJECT;
+  bool provide_metadata = opts & k_DEBUG_BACKTRACE_PROVIDE_METADATA;
+  bool ignore_args = opts & k_DEBUG_BACKTRACE_IGNORE_ARGS;
+
+  auto trace = createBacktrace(BacktraceArgs()
+                               .fromWaitHandle(wh)
+                               .withSelf()
+                               .withThis(provide_object)
+                               .withMetadata(provide_metadata)
+                               .ignoreArgs(ignore_args));
+  auto tv = make_array_like_tv(trace.detach());
+  cellMove(tv, trace_lval);
+  throwable_init_file_and_line_from_trace(throwable);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

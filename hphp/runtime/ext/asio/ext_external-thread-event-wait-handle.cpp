@@ -181,6 +181,7 @@ void c_ExternalThreadEventWaitHandle::process() {
     }
   } catch (const Object& exception) {
     assertx(exception->instanceof(SystemLib::s_ThrowableClass));
+    throwable_recompute_backtrace_from_wh(exception.get(), this);
     auto parentChain = getParentChain();
     setState(STATE_FAILED);
     tvWriteObject(exception.get(), &m_resultOrException);

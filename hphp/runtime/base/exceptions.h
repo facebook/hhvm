@@ -189,6 +189,13 @@ void throwable_init_file_and_line_from_builtin(ObjectData* throwable);
  */
 void throwable_init(ObjectData* throwable);
 
+/*
+ * Reinitialize Throwable's stack trace, file name and line number based on wait
+ * handle.
+ */
+void throwable_recompute_backtrace_from_wh(ObjectData* throwable,
+                                           c_WaitableWaitHandle* wh);
+
 //////////////////////////////////////////////////////////////////////
 
 }

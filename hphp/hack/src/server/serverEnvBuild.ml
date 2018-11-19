@@ -44,7 +44,7 @@ let watchman_expression_terms = [
   ]
 ]
 
-let make_genv options config local_config handle =
+let make_genv options config local_config handle ~logging_init =
   let root = ServerArgs.root options in
   let check_mode   = ServerArgs.check_mode options in
   Typing_deps.trace :=
@@ -64,7 +64,7 @@ let make_genv options config local_config handle =
         ^^"for max workers are given. Choosing minimum of the two.");
   let nbr_procs = min nbr_procs local_config.SLC.max_workers in
   let gc_control = ServerConfig.gc_control config in
-  let workers = Some (ServerWorker.make ~nbr_procs gc_control handle) in
+  let workers = Some (ServerWorker.make ~nbr_procs gc_control handle ~logging_init) in
   let (>>=) = Option.(>>=) in
   let since_clockspec = (ServerArgs.with_mini_state options) >>= function
     | ServerArgs.Mini_state_target_info _ -> None

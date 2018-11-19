@@ -30,7 +30,7 @@ let test_add_remove (
     assert (not @@ IntHeap.mem "a");
     assert (SharedMem.hh_removed_count () = 1)
 
-module TestNoCache = SharedMem.NoCache (StringKey) (IntVal)
+module TestNoCache = SharedMem.NoCache (SharedMem.Immediate) (StringKey) (IntVal)
 
 let tests () =
   let list = [
@@ -46,6 +46,7 @@ let tests () =
         shm_dirs = [];
         shm_min_avail = 0;
         log_level = 0;
+        sample_rate = 0.0;
       }
     ) in
     SharedMem.connect handle ~is_master:true;

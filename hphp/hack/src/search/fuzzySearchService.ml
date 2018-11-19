@@ -42,7 +42,7 @@ type type_to_keyset = SSet.t TMap.t
  *   }
  * }
  *)
-module SearchKeys = SharedMem.NoCache (Relative_path.S) (struct
+module SearchKeys = SharedMem.NoCache (SharedMem.ProfiledImmediate) (Relative_path.S) (struct
   type t = type_to_keyset
   let prefix = Prefix.make()
   let description = "SearchKeys"
@@ -67,7 +67,7 @@ end)
  *   }
  * }
  *)
-module SearchKeyToTermMap = SharedMem.WithCache (Relative_path.S) (struct
+module SearchKeyToTermMap = SharedMem.WithCache (SharedMem.ProfiledImmediate) (Relative_path.S) (struct
   type t = type_to_key_to_term_list
   let prefix = Prefix.make()
   let description = "SearchKeyToTermMap"

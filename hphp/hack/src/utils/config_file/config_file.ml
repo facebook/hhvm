@@ -58,6 +58,9 @@ module Getters = struct
     | Some s -> int_of_string_opt s
     | None -> None
 
+  let float_ key ~default config =
+    Option.value_map (SMap.get key config) ~default ~f:float_of_string
+
   let bool_ key ~default config =
     Option.value_map (SMap.get key config) ~default ~f:bool_of_string
 

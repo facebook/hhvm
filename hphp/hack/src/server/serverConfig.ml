@@ -69,6 +69,7 @@ let make_sharedmem_config config options local_config =
   let dep_table_pow = int_ "sharedmem_dep_table_pow" ~default:17 config in
   let hash_table_pow = int_ "sharedmem_hash_table_pow" ~default:18 config in
   let log_level = int_ "sharedmem_log_level" ~default:0 config in
+  let sample_rate = float_ "sharedmem_sample_rate" ~default:0.0 config in
   let shm_dirs = string_list
     ~delim:(Str.regexp ",")
     "sharedmem_dirs"
@@ -94,6 +95,7 @@ let make_sharedmem_config config options local_config =
       dep_table_pow;
       hash_table_pow;
       log_level;
+      sample_rate;
       shm_dirs;
       shm_min_avail;
   }

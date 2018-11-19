@@ -17,9 +17,10 @@ type t = {
     fixme_codes : ISet.t;
     paths_to_ignore : Str.regexp list;
     no_load : bool;
+    logging_init : unit -> unit;
   }
 
-let save () = {
+let save ~logging_init = {
     saved_root = Path.make (Relative_path.(path_of_prefix Root));
     saved_hhi = Path.make (Relative_path.(path_of_prefix Hhi));
     saved_tmp = Path.make (Relative_path.(path_of_prefix Tmp));
@@ -29,6 +30,7 @@ let save () = {
     fixme_codes = !Errors.ignored_fixme_codes;
     paths_to_ignore = FilesToIgnore.get_paths_to_ignore ();
     no_load = ServerLoadFlag.get_no_load ();
+    logging_init;
   }
 
 let restore state =
@@ -41,7 +43,8 @@ let restore state =
   Errors.ignored_fixme_codes := state.fixme_codes;
   FilesToIgnore.set_paths_to_ignore state.paths_to_ignore;
   ServerLoadFlag.set_no_load state.no_load;
-  Errors.set_allow_errors_in_default_path false
+  Errors.set_allow_errors_in_default_path false;
+  state.logging_init ()
 
 let to_string state =
   let saved_root = Path.to_string state.saved_root in

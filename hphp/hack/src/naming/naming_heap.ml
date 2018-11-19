@@ -13,19 +13,25 @@ module type CanonHeap =
                and type key = string
                and module KeySet = Set.Make (StringKey)
 
-module TypeCanonHeap : CanonHeap = SharedMem.NoCache (StringKey) (struct
-  type t = string
-  let prefix = Prefix.make()
-  let description = "TypeCanon"
-  let use_sqlite_fallback = fun () -> false
-end)
+module TypeCanonHeap : CanonHeap = SharedMem.NoCache
+  (SharedMem.ProfiledImmediate)
+  (StringKey)
+  (struct
+    type t = string
+    let prefix = Prefix.make()
+    let description = "TypeCanon"
+    let use_sqlite_fallback = fun () -> false
+  end)
 
-module FunCanonHeap : CanonHeap = SharedMem.NoCache (StringKey) (struct
-  type t = string
-  let prefix = Prefix.make()
-  let description = "FunCanon"
-  let use_sqlite_fallback = fun () -> false
-end)
+module FunCanonHeap : CanonHeap = SharedMem.NoCache
+  (SharedMem.ProfiledImmediate)
+  (StringKey)
+  (struct
+    type t = string
+    let prefix = Prefix.make()
+    let description = "FunCanon"
+    let use_sqlite_fallback = fun () -> false
+  end)
 
 let check_valid key pos =
   if FileInfo.get_pos_filename pos = Relative_path.default then begin
@@ -40,7 +46,7 @@ let check_valid key pos =
  * same namespace. That is, one cannot both define a class Foo and a typedef
  * Foo (or FOO or fOo, due to case insensitivity). *)
 module TypeIdHeap = struct
-  include SharedMem.WithCache (StringKey) (struct
+  include SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (struct
     type t = FileInfo.pos * [`Class | `Typedef]
     let prefix = Prefix.make ()
     let description = "TypeId"
@@ -56,7 +62,7 @@ module TypeIdHeap = struct
 end
 
 module FunPosHeap = struct
-  include SharedMem.NoCache (StringKey) (struct
+  include SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey) (struct
     type t = FileInfo.pos
     let prefix = Prefix.make()
     let description = "FunPos"
@@ -68,7 +74,7 @@ module FunPosHeap = struct
 end
 
 module ConstPosHeap = struct
-  include SharedMem.NoCache (StringKey) (struct
+  include SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey) (struct
     type t = FileInfo.pos
     let prefix = Prefix.make()
     let description = "ConstPos"

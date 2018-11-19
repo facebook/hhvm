@@ -37,7 +37,7 @@ let start_server_daemon ~informant_managed options log_link daemon_entry =
     end
   in
   let start_t = Unix.time () in
-  let state = ServerGlobalState.save () in
+  let state = ServerGlobalState.save (fun () -> ()) in
   let monitor_pid = Unix.getpid () in
   (* Setting some additional channels between monitor and server *)
   let parent_priority_fd, child_priority_fd =

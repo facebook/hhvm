@@ -19,14 +19,14 @@ open Core_kernel
  *)
 (*****************************************************************************)
 
-module HH_FIXMES = SharedMem.WithCache (Relative_path.S) (struct
+module HH_FIXMES = SharedMem.WithCache (SharedMem.ProfiledImmediate) (Relative_path.S) (struct
   type t = Pos.t IMap.t IMap.t
   let prefix = Prefix.make()
   let description = "HH_FIXMES"
   let use_sqlite_fallback () = false
   end)
 
-module DECL_HH_FIXMES = SharedMem.WithCache (Relative_path.S) (struct
+module DECL_HH_FIXMES = SharedMem.WithCache (SharedMem.ProfiledImmediate) (Relative_path.S) (struct
   type t = Pos.t IMap.t IMap.t
   let prefix = Prefix.make()
   let description = "DECL_HH_FIXMES"

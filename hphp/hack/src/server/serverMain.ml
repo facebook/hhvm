@@ -858,23 +858,26 @@ let setup_server ~informant_managed ~monitor_pid options handle =
   List.iter (ServerConfig.coroutine_whitelist_paths config)
     ~f:Coroutine_check.whitelist_path;
   let prechecked_files = ServerPrecheckedFiles.should_use options local_config in
-  if Sys_utils.is_test_mode ()
-  then EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0
-  else HackEventLogger.init
-    ~exit_on_parent_exit
-    ~root
-    ~init_id
-    ~informant_managed
-    ~time:(Unix.gettimeofday ())
-    ~search_chunk_size
-    ~max_workers
-    ~max_bucket_size
-    ~use_full_fidelity_parser
-    ~interrupt_on_watchman
-    ~interrupt_on_client
-    ~prechecked_files
-    ~predeclare_ide
-    ~max_typechecker_worker_memory_mb;
+  let logging_init init_id =
+    if Sys_utils.is_test_mode ()
+    then EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0
+    else HackEventLogger.init
+      ~exit_on_parent_exit
+      ~root
+      ~init_id
+      ~informant_managed
+      ~time:(Unix.gettimeofday ())
+      ~search_chunk_size
+      ~max_workers
+      ~max_bucket_size
+      ~use_full_fidelity_parser
+      ~interrupt_on_watchman
+      ~interrupt_on_client
+      ~prechecked_files
+      ~predeclare_ide
+      ~max_typechecker_worker_memory_mb
+  in
+  logging_init init_id;
   let root_s = Path.to_string root in
   let check_mode = ServerArgs.check_mode options in
   if not check_mode && Sys_utils.is_nfs root_s && not enable_on_nfs then begin
@@ -892,7 +895,20 @@ let setup_server ~informant_managed ~monitor_pid options handle =
   PidLog.init (ServerFiles.pids_file root);
   Option.iter monitor_pid ~f:(fun monitor_pid -> PidLog.log ~reason:"monitor" monitor_pid);
   PidLog.log ~reason:"main" (Unix.getpid());
-  ServerEnvBuild.make_genv options config local_config handle, init_id
+  (* Make a sub-init_id because we use it to name temporary files for piping to
+     scuba logging processes. *)
+  let worker_logging_init =
+    if (ServerConfig.sharedmem_config config).SharedMem.sample_rate = 0.0
+    then fun () -> ()
+    else fun () -> logging_init (init_id ^ "." ^ Random_id.short_string ()) in
+  let genv = ServerEnvBuild.make_genv
+    options
+    config
+    local_config
+    ~logging_init:worker_logging_init
+    handle
+  in
+  genv, init_id
 
 let run_once options handle =
   let genv, _ = setup_server ~informant_managed:false ~monitor_pid:None options handle in

@@ -11,7 +11,7 @@ module IntVal = struct
   let use_sqlite_fallback () = false
 end
 
-module TestHeap = SharedMem.NoCache (StringKey) (IntVal)
+module TestHeap = SharedMem.NoCache (SharedMem.Immediate) (StringKey) (IntVal)
 
 let sum acc x = acc + x
 

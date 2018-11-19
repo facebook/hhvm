@@ -62,6 +62,7 @@ Variant HHVM_FUNCTION(mailparse_msg_parse_file, const String& filename) {
 bool HHVM_FUNCTION(mailparse_msg_parse,
                    const Resource& mimemail,
                    const String& data) {
+  SuppressHACIntishCastNotices shacn;
   return cast<MimePart>(mimemail)->parse(data.data(), data.size());
 }
 

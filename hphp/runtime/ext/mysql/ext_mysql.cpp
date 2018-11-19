@@ -369,6 +369,7 @@ static bool HHVM_FUNCTION(mysql_more_results,
 
 static Variant HHVM_FUNCTION(mysql_fetch_result,
                       const Variant& link_identifier /* = null */) {
+  SuppressHACIntishCastNotices shacn;
     MYSQL *conn = MySQL::GetConn(link_identifier);
     if (conn == nullptr) {
       return false;
@@ -712,6 +713,7 @@ static bool HHVM_FUNCTION(mysql_data_seek, const Resource& result, int row) {
 
 static Variant HHVM_FUNCTION(mysql_fetch_array, const Resource& result,
                                          int result_type /* = 3 */) {
+  SuppressHACIntishCastNotices shacn;
   return php_mysql_fetch_hash(result, result_type);
 }
 
@@ -720,6 +722,7 @@ static Variant HHVM_FUNCTION(mysql_fetch_object,
                       const String& class_name /* = "stdClass" */,
                       const Variant& params /* = null */) {
 
+  SuppressHACIntishCastNotices shacn;
   Resource result = var_result.isResource() ? var_result.toResource()
                                             : null_resource;
   Variant properties = php_mysql_fetch_hash(result, PHP_MYSQL_ASSOC);
@@ -748,6 +751,7 @@ static Variant HHVM_FUNCTION(mysql_fetch_object,
 }
 
 Variant HHVM_FUNCTION(mysql_fetch_lengths, const Resource& result) {
+  SuppressHACIntishCastNotices shacn;
   auto res = php_mysql_extract_result(result);
   if (res == nullptr) return false;
 
@@ -903,6 +907,7 @@ static bool HHVM_FUNCTION(mysql_free_result, const Resource& result) {
 
 static Variant HHVM_FUNCTION(mysql_fetch_field, const Resource& result,
                                          int field /* = -1 */) {
+  SuppressHACIntishCastNotices shacn;
   auto res = php_mysql_extract_result(result);
   if (res == nullptr) return false;
 

@@ -1516,16 +1516,28 @@ and props_to_env env remain props =
   | [] ->
     env, List.rev remain
   | TL.IsSubtype (((r, Tvar var) as ty'), ty) :: props ->
+    (* Add a new upper bound ty on var. Apply transitivity of sutyping, so if we
+     * already have tyl <: var then check that for each ty_sub in tyl we
+     * have ty_sub <: ty
+     *)
     Typing_log.(log_with_level env "prop" 2 (fun () ->
     log_types (Reason.to_pos r) env
       [Log_head ("Typing_subtype.props_to_env/Env.add_tyvar_upper_bound",
       [Log_type ("var", ty'); Log_type ("ty", ty)])]));
+    let tyl = Typing_set.elements (Env.get_tyvar_lower_bounds env var) in
+    let env = List.fold_left ~f:(fun env ty_sub -> sub_type env ty_sub ty) ~init:env tyl in
     props_to_env (Env.add_tyvar_upper_bound env var ty) remain props
   | TL.IsSubtype (ty, ((r, Tvar var) as ty')) :: props ->
+    (* Add a new lower bound ty on var. Apply transitivity of sutyping, so if we
+     * already have var <: tyl then check that for each ty_super in tyl we
+     * have ty <: ty_super
+     *)
     Typing_log.(log_with_level env "prop" 2 (fun () ->
     log_types (Reason.to_pos r) env
       [Log_head ("Typing_subtype.props_to_env/Env.add_tyvar_lower_bound",
       [Log_type ("var", ty'); Log_type ("ty", ty)])]));
+    let tyl = Typing_set.elements (Env.get_tyvar_upper_bounds env var) in
+    let env = List.fold_left ~f:(fun env ty_super -> sub_type env ty ty_super) ~init:env tyl in
     props_to_env (Env.add_tyvar_lower_bound env var ty) remain props
   | TL.Conj props' :: props ->
     props_to_env env remain (props' @ props)
@@ -2274,15 +2286,6 @@ and set_tyvar_variance_list ~variancel ~tyvars env tyl =
 let set_tyvar_variance ~tyvars env ty =
   set_tyvar_variance ~variance:Ast.Covariant ~tyvars env ty
 
-let remove_tyvar env lower_bounds var upper_bounds =
-  let env =
-    List.fold_left lower_bounds ~init:env
-    ~f:(fun env ty_sub ->
-      List.fold_left upper_bounds ~init:env
-        ~f:(fun env ty_super ->
-          sub_type env ty_sub ty_super)) in
-  Env.remove_tyvar env var
-
 (* Use the variance information about a type variable to force a solution.
  *   (1) If the type variable is bounded by t1, ..., tn <: v and it appears only
  *   covariantly or not at all in the expression type then
@@ -2301,7 +2304,6 @@ let solve_tyvar env r var =
   if appears_contravariantly && not appears_covariantly
   then begin
     let upper_bounds = Typing_set.elements (Env.get_tyvar_upper_bounds env var) in
-    let lower_bounds = Typing_set.elements (Env.get_tyvar_lower_bounds env var) in
     match upper_bounds with
     | [ty] ->
       Typing_log.(log_with_level env "prop" 2 (fun () ->
@@ -2310,10 +2312,8 @@ let solve_tyvar env r var =
         [Log_type ("ty", ty)])]));
       (* Unify the variable with the upper bound *)
       let env = Typing_unify_recursive.add env var ty in
-      (* Remove the variable from the environment. This also has the effect
-       * of closing transitively i.e. checking that lower bounds are sutypes of upper bounds.
-       *)
-      remove_tyvar env lower_bounds var upper_bounds
+      (* Remove the variable from the environment *)
+      Env.remove_tyvar env var
       (* For now, if there are no bounds, or more than one, then don't solve.
        * For no bounds, we could just use `mixed`
        *)
@@ -2325,7 +2325,6 @@ let solve_tyvar env r var =
    *)
   else if not appears_contravariantly
   then begin
-    let upper_bounds = Typing_set.elements (Env.get_tyvar_upper_bounds env var) in
     let lower_bounds = Typing_set.elements (Env.get_tyvar_lower_bounds env var) in
     if List.is_empty lower_bounds
     then env
@@ -2340,7 +2339,7 @@ let solve_tyvar env r var =
         [Log_head (Printf.sprintf "Typing_subtype.solve_tyvar/Typing_unify_recursive.add #%d" var,
         [Log_type ("ty", ty)])]));
     let env = Typing_unify_recursive.add env var ty in
-    remove_tyvar env lower_bounds var upper_bounds
+    Env.remove_tyvar env var
   end
   else env
 

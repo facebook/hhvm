@@ -2009,7 +2009,8 @@ bool strtr_slow(const Array& arr, StringBuffer& result, String& key,
   for (int len = maxlen; len >= minlen; len--) {
     key.setSize(len);
     auto const key_tval = make_tv<KindOfString>(key.get());
-    auto const rval = arr->get(arr.convertKey(key_tval));
+    auto const arrkey = arr.convertKey<IntishCast::CastSilently>(key_tval);
+    auto const rval = arr->get(arrkey);
     if (!rval.is_dummy()) {
       String replace = tvCastToString(rval.tv());
       if (!replace.empty()) {
@@ -2099,8 +2100,6 @@ Variant HHVM_FUNCTION(strtr,
     // Nothing to translate
     return str;
   }
-
-  SuppressHACIntishCastNotices shacn;
 
   for (ArrayIter iter(arr); iter; ++iter) {
     auto const search = iter.first().toString();

@@ -1767,7 +1767,6 @@ static inline void addToSetHelper(const req::ptr<c_Set>& st,
     }
     int64_t n;
     if (convertIntLikeStrs && s->isStrictlyInteger(n)) {
-      if (checkHACIntishCast()) raise_intish_index_cast();
       st->add(n);
     } else {
       st->add(s);
@@ -1792,7 +1791,6 @@ static inline bool checkSetHelper(const req::ptr<c_Set>& st,
   }
   int64_t n;
   if (convertIntLikeStrs && s->isStrictlyInteger(n)) {
-    if (checkHACIntishCast()) raise_intish_index_cast();
     return st->contains(n);
   }
   return st->contains(s);
@@ -1865,7 +1863,6 @@ TypedValue HHVM_FUNCTION(array_diff,
                          const Variant& container1,
                          const Variant& container2,
                          const Array& args /* = null array */) {
-  SuppressHACIntishCastNotices shacn;
   ARRAY_DIFF_PRELUDE()
   // Put all of the values from all the containers (except container1 into a
   // Set. All types aside from integer and string will be cast to string, and
@@ -1888,7 +1885,10 @@ TypedValue HHVM_FUNCTION(array_diff,
   for (ArrayIter iter(container1); iter; ++iter) {
     auto const c = tvToCell(iter.secondValPlus());
     if (checkSetHelper(st, c, strTv, true)) continue;
-    ret.setWithRef(iter.first(), iter.secondValPlus(), isKey);
+    const auto key = isKey
+      ? *iter.first().asTypedValue()
+      : ret.convertKey<IntishCast::CastSilently>(iter.first());
+    ret.setWithRef(key, iter.secondValPlus(), true);
   }
   return tvReturn(std::move(ret));
 }
@@ -1897,8 +1897,6 @@ TypedValue HHVM_FUNCTION(array_diff_key,
                          const Variant& container1,
                          const Variant& container2,
                          const Array& args /* = null array */) {
-  SuppressHACIntishCastNotices shacn;
-
   ARRAY_DIFF_PRELUDE()
   // If we're only dealing with two containers and if they are both arrays,
   // we can avoid creating an intermediate Set
@@ -1913,6 +1911,7 @@ TypedValue HHVM_FUNCTION(array_diff_key,
         if (ad2->exists(c.m_data.num)) continue;
       } else {
         assertx(isStringType(c.m_type));
+        // this call to ArrayData::exists(const StringData*) doesn't intish cast
         if (ad2->exists(c.m_data.pstr)) continue;
       }
       ret.setWithRef(key, iter.secondValPlus(), true);
@@ -1941,7 +1940,10 @@ TypedValue HHVM_FUNCTION(array_diff_key,
     auto key = iter.first();
     const auto& c = *key.toCell();
     if (checkSetHelper(st, c, strTv, !isKey)) continue;
-    ret.setWithRef(key, iter.secondValPlus(), isKey);
+    const auto arrkey = isKey
+      ? c
+      : ret.convertKey<IntishCast::CastSilently>(key);
+    ret.setWithRef(arrkey, iter.secondValPlus(), true);
   }
   return tvReturn(std::move(ret));
 }
@@ -2080,7 +2082,6 @@ static inline void addToIntersectMapHelper(const req::ptr<c_Map>& mp,
     }
     int64_t n;
     if (convertIntLikeStrs && s->isStrictlyInteger(n)) {
-      if (checkHACIntishCast()) raise_intish_index_cast();
       mp->set(n, *intOneTv);
     } else {
       mp->set(s, *intOneTv);
@@ -2110,7 +2111,6 @@ static inline void updateIntersectMapHelper(const req::ptr<c_Map>& mp,
     }
     int64_t n;
     if (convertIntLikeStrs && s->isStrictlyInteger(n)) {
-      if (checkHACIntishCast()) raise_intish_index_cast();
       auto val = mp->get(n);
       if (val && val->m_data.num == pos) {
         assertx(val->m_type == KindOfInt64);
@@ -2246,8 +2246,6 @@ TypedValue HHVM_FUNCTION(array_intersect,
                          const Variant& container1,
                          const Variant& container2,
                          const Array& args /* = null array */) {
-  SuppressHACIntishCastNotices shacn;
-
   ARRAY_INTERSECT_PRELUDE()
   // Build up a Set containing the values that are present in all the
   // containers (except container1)
@@ -2276,7 +2274,10 @@ TypedValue HHVM_FUNCTION(array_intersect,
   for (ArrayIter iter(container1); iter; ++iter) {
     auto const c = tvToCell(iter.secondValPlus());
     if (!checkSetHelper(st, c, strTv, true)) continue;
-    ret.setWithRef(iter.first(), iter.secondValPlus(), isKey);
+    const auto key = isKey
+      ? iter.first()
+      : Variant::wrap(ret.convertKey<IntishCast::CastSilently>(iter.first()));
+    ret.setWithRef(key, iter.secondValPlus(), true);
   }
   return tvReturn(std::move(ret));
 }
@@ -2299,8 +2300,10 @@ TypedValue HHVM_FUNCTION(array_intersect_key,
         if (!ad2->exists(c.m_data.num)) continue;
       } else {
         assertx(isStringType(c.m_type));
+        // this call to ArrayData::exists(const StringData*) doesn't intish cast
         if (!ad2->exists(c.m_data.pstr)) continue;
       }
+      /* This never intish casted */
       ret.setWithRef(key, iter.secondValPlus(), true);
     }
     return tvReturn(std::move(ret));
@@ -2333,7 +2336,10 @@ TypedValue HHVM_FUNCTION(array_intersect_key,
     auto key = iter.first();
     const auto& c = *key.toCell();
     if (!checkSetHelper(st, c, strTv, !isKey)) continue;
-    ret.setWithRef(key, iter.secondValPlus(), isKey);
+    auto arrkey = isKey
+      ? key
+      : Variant::wrap(ret.convertKey<IntishCast::CastSilently>(key));
+    ret.setWithRef(arrkey, iter.secondValPlus(), true);
   }
   return tvReturn(std::move(ret));
 }

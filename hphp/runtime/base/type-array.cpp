@@ -194,7 +194,7 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
       Variant key(iter.first());
       auto const value = iter.secondVal();
       bool found = false;
-      if (array->exists(key)) {
+      if (array->exists(array.convertKey<IntishCast::CastSilently>(key))) {
         if (by_value) {
           found = value_cmp_as_string_function(
             VarNR(value),
@@ -206,6 +206,8 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
         }
       }
       if (found == match) {
+        // this setWithRef never intish casted, even when *this or array is a
+        // hack array
         ret.setWithRef(key, value, true);
       }
     }
@@ -300,6 +302,7 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
     }
 
     if (found == match) {
+      // This never intish casted
       ret.setWithRef(iter.first(), iter.secondVal(), true);
     }
   }

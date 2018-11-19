@@ -210,7 +210,6 @@ TypedValue HHVM_FUNCTION(array_combine,
 
 TypedValue HHVM_FUNCTION(array_count_values,
                          const Variant& input) {
-  SuppressHACIntishCastNotices shacn;
   if (!isContainer(input)) {
     raise_warning("array_count_values() expects parameter 1 to be array, "
                   "%s given",

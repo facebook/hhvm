@@ -250,12 +250,13 @@ Variant ArrayUtil::CountValues(const Array& input) {
   Array ret = Array::Create();
   for (ArrayIter iter(input); iter; ++iter) {
     auto const inner = iter.secondRval().unboxed();
+    auto const inner_key = ret.convertKey<IntishCast::CastSilently>(inner.tv());
     if (isIntType(inner.type()) || isStringType(inner.type())) {
-      if (!ret.exists(inner.tv())) {
-        ret.set(inner.tv(), make_tv<KindOfInt64>(1));
+      if (!ret.exists(inner_key)) {
+        ret.set(inner_key, make_tv<KindOfInt64>(1));
       } else {
-        ret.set(inner.tv(),
-                make_tv<KindOfInt64>(ret[inner.tv()].toInt64() + 1));
+        ret.set(inner_key,
+                make_tv<KindOfInt64>(ret[inner_key].toInt64() + 1));
       }
     } else {
       raise_warning("Can only count STRING and INTEGER values!");

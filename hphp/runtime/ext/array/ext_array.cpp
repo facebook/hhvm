@@ -129,12 +129,10 @@ static inline bool array_column_coerce_key(Variant &key, const char *name) {
 
 TypedValue HHVM_FUNCTION(array_column,
                          const Variant& input,
-                         const Variant& val_key,
-                         const Variant& idx_key /* = uninit_variant */) {
-  SuppressHACIntishCastNotices shacn;
-
+                         const Variant& val_in,
+                         const Variant& idx_in /* = uninit_variant */) {
   getCheckedContainer(input);
-  Variant val = val_key, idx = idx_key;
+  Variant val = val_in, idx = idx_in;
   if (!array_column_coerce_key(val, "column") ||
       !array_column_coerce_key(idx, "index")) {
     return make_tv<KindOfBoolean>(false);
@@ -153,19 +151,27 @@ TypedValue HHVM_FUNCTION(array_column,
     Variant elem;
     if (val.isNull()) {
       elem = sub;
-    } else if (sub.exists(val)) {
-      elem = sub[val];
     } else {
-      // skip subarray without named element
-      continue;
+      auto const val_key = sub.convertKey<IntishCast::CastSilently>(val);
+      if (sub.exists(val_key)) {
+        elem = sub[val_key];
+      } else {
+        // skip subarray without named element
+        continue;
+      }
     }
-
-    if (idx.isNull() || !sub.exists(idx)) {
+    if (idx.isNull()) {
       ret.append(elem);
-    } else if (sub[idx].isObject()) {
-      ret.setUnknownKey(sub[idx].toString(), elem);
     } else {
-      ret.setUnknownKey(sub[idx], elem);
+      auto const idx_key = sub.convertKey<IntishCast::CastSilently>(idx);
+      if (!sub.exists(idx_key)) {
+        ret.append(elem);
+      } else if (sub[idx_key].isObject()) {
+        ret.setUnknownKey<IntishCast::CastSilently>(sub[idx_key].toString(),
+                                                    elem);
+      } else {
+        ret.setUnknownKey<IntishCast::CastSilently>(sub[idx_key], elem);
+      }
     }
   }
   return tvReturn(ret.toVariant());

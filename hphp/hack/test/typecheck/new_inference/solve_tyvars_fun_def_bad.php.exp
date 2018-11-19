@@ -1,4 +1,6 @@
+File "solve_tyvars_fun_def_bad.php", line 6, characters 10-11:
+Invalid return type (Typing[4110])
 File "solve_tyvars_fun_def_bad.php", line 4, characters 39-41:
-This is a num (int/float) (Typing[4110])
+This is a num (int/float)
 File "solve_tyvars_fun_def_bad.php", line 4, characters 23-28:
 It is incompatible with a string

@@ -88,6 +88,20 @@ void cgCheckSurpriseFlags(IRLS& env, const IRInstruction* inst) {
   emitCheckSurpriseFlags(v, fp_or_sp, label(env, inst->taken()));
 }
 
+static void handleSurpriseCheck() {
+  size_t flags = handle_request_surprise();
+  // Memory Threhsold callback should also be fired here
+  if (flags & MemThresholdFlag) {
+    EventHook::DoMemoryThresholdCallback();
+  }
+}
+
+void cgHandleRequestSurprise(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  cgCallHelper(v, env, CallSpec::direct(handleSurpriseCheck), kVoidDest,
+    SyncOptions::Sync, argGroup(env, inst));
+}
+
 void cgCheckStackOverflow(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const func = inst->marker().func();

@@ -431,6 +431,7 @@ bool opcodeMayRaise(Opcode opc) {
   case GteVec:
   case GtObj:
   case GtVec:
+  case HandleRequestSurprise:
   case IncDecElem:
   case IncDecProp:
   case InitClsCns:

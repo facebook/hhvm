@@ -109,11 +109,33 @@ void emitIterInitK(IRGS& env, int32_t iterId, Offset /*relOffset*/,
   implCondJmp(env, targetOffset, true, res);
 }
 
+static void implIterJmp(
+  IRGS& env, Offset relOffset, Offset targetOffset, SSATmp* src) {
+  auto const target = getBlock(env, targetOffset);
+  assertx(target != nullptr);
+  auto const boolSrc = gen(env, ConvCellToBool, src);
+  decRef(env, src);
+
+  if (relOffset <= 0) {
+    ifThen(env,
+      [&] (Block* taken) {
+        gen(env, JmpNZero, taken, boolSrc);
+      },
+      [&] {
+        surpriseCheckWithTarget(env, targetOffset);
+        gen(env, Jmp, target);
+      }
+    );
+  } else {
+    gen(env, JmpNZero, target, boolSrc);
+    return;
+  }
+}
+
 void emitIterNext(IRGS& env,
                   int32_t iterId,
                   Offset relOffset,
                   int32_t valLocalId) {
-  surpriseCheck(env, relOffset);
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const res = gen(
     env,
@@ -122,7 +144,7 @@ void emitIterNext(IRGS& env,
     IterData(iterId, uint32_t(-1), valLocalId),
     fp(env)
   );
-  implCondJmp(env, targetOffset, false, res);
+  implIterJmp(env, relOffset, targetOffset, res);
 }
 
 void emitIterNextK(IRGS& env,
@@ -130,7 +152,6 @@ void emitIterNextK(IRGS& env,
                    Offset relOffset,
                    int32_t valLocalId,
                    int32_t keyLocalId) {
-  surpriseCheck(env, relOffset);
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const res = gen(
     env,
@@ -139,7 +160,7 @@ void emitIterNextK(IRGS& env,
     IterData(iterId, keyLocalId, valLocalId),
     fp(env)
   );
-  implCondJmp(env, targetOffset, false, res);
+  implIterJmp(env, relOffset, targetOffset, res);
 }
 
 void emitLIterInit(IRGS& env,
@@ -198,7 +219,6 @@ void emitLIterNext(IRGS& env,
                    int32_t valLocalId) {
   if (curFunc(env)->isPseudoMain()) PUNT(LIterNext-pseudomain);
 
-  surpriseCheck(env, relOffset);
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
 
   auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
@@ -222,7 +242,7 @@ void emitLIterNext(IRGS& env,
       );
     };
   }();
-  implCondJmp(env, targetOffset, false, res);
+  implIterJmp(env, relOffset, targetOffset, res);
 }
 
 void emitLIterNextK(IRGS& env,
@@ -233,7 +253,6 @@ void emitLIterNextK(IRGS& env,
                     int32_t keyLocalId) {
   if (curFunc(env)->isPseudoMain()) PUNT(LIterNextK-pseudomain);
 
-  surpriseCheck(env, relOffset);
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
 
   auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
@@ -257,7 +276,7 @@ void emitLIterNextK(IRGS& env,
       );
     };
   }();
-  implCondJmp(env, targetOffset, false, res);
+  implIterJmp(env, relOffset, targetOffset, res);
 }
 
 void emitWIterInit(IRGS& env, int32_t iterId, Offset /*relOffset*/,
@@ -296,7 +315,6 @@ void emitWIterNext(IRGS& env,
                    int32_t iterId,
                    Offset relOffset,
                    int32_t valLocalId) {
-  surpriseCheck(env, relOffset);
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const res = gen(
     env,
@@ -305,7 +323,7 @@ void emitWIterNext(IRGS& env,
     IterData(iterId, uint32_t(-1), valLocalId),
     fp(env)
   );
-  implCondJmp(env, targetOffset, false, res);
+  implIterJmp(env, relOffset, targetOffset, res);
 }
 
 void emitWIterNextK(IRGS& env,
@@ -313,7 +331,6 @@ void emitWIterNextK(IRGS& env,
                     Offset relOffset,
                     int32_t valLocalId,
                     int32_t keyLocalId) {
-  surpriseCheck(env, relOffset);
   auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
   auto const res = gen(
     env,
@@ -322,7 +339,7 @@ void emitWIterNextK(IRGS& env,
     IterData(iterId, keyLocalId, valLocalId),
     fp(env)
   );
-  implCondJmp(env, targetOffset, false, res);
+  implIterJmp(env, relOffset, targetOffset, res);
 }
 
 void emitMIterInit(IRGS& env,
@@ -362,7 +379,6 @@ void emitMIterNext(IRGS& env,
                    int32_t iterId,
                    Offset relOffset,
                    int32_t valLocalId) {
-  surpriseCheck(env, relOffset);
   auto const res = gen(
     env,
     MIterNext,
@@ -370,7 +386,7 @@ void emitMIterNext(IRGS& env,
     IterData(iterId, uint32_t(-1), valLocalId),
     fp(env)
   );
-  implCondJmp(env, bcOff(env) + relOffset, false, res);
+  implIterJmp(env, relOffset, bcOff(env) + relOffset, res);
 }
 
 void emitMIterNextK(IRGS& env,
@@ -378,7 +394,6 @@ void emitMIterNextK(IRGS& env,
                     Offset relOffset,
                     int32_t valLocalId,
                     int32_t keyLocalId) {
-  surpriseCheck(env, relOffset);
   auto const res = gen(
     env,
     MIterNextK,
@@ -386,7 +401,7 @@ void emitMIterNextK(IRGS& env,
     IterData(iterId, keyLocalId, valLocalId),
     fp(env)
   );
-  implCondJmp(env, bcOff(env) + relOffset, false, res);
+  implIterJmp(env, relOffset, bcOff(env) + relOffset, res);
 }
 
 void emitIterFree(IRGS& env, int32_t iterId) {

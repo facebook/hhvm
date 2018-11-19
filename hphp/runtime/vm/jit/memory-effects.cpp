@@ -2211,6 +2211,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AsTypeStruct:
   case ResolveTypeStruct:
   case PropTypeRedefineCheck: // Can raise and autoload
+  case HandleRequestSurprise:
     return may_load_store(AHeapAny, AHeapAny);
 
   case AddNewElemVec:

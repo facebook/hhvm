@@ -411,6 +411,7 @@ bool canDCE(IRInstruction* inst) {
   case ProfileSwitchDest:
   case CheckSurpriseFlags:
   case CheckSurpriseAndStack:
+  case HandleRequestSurprise:
   case ReturnHook:
   case SuspendHookAwaitEF:
   case SuspendHookAwaitEG:

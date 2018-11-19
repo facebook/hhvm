@@ -39,6 +39,12 @@ void surpriseCheck(IRGS& env, Offset relOffset) {
   }
 }
 
+void surpriseCheckWithTarget(IRGS& env, Offset targetBcOff) {
+  auto const ptr = resumeMode(env) != ResumeMode::None ? sp(env) : fp(env);
+  auto const exit = makeExitSurprise(env, targetBcOff);
+  gen(env, CheckSurpriseFlags, exit, ptr);
+}
+
 /*
  * Returns an IR block corresponding to the given bytecode offset. The block
  * may be a side exit or a normal IR block, depending on whether or not the

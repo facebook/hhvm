@@ -78,6 +78,7 @@ Block* makeExitOpt(IRGS&);
  * The block is created with the current state.
  */
 Block* makeExitSlow(IRGS&);
+Block* makeExitSurprise(IRGS&, Offset);
 
 //////////////////////////////////////////////////////////////////////
 

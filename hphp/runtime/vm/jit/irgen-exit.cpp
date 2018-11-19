@@ -121,6 +121,14 @@ Block* makeExitSlow(IRGS& env) {
   return exit;
 }
 
+Block* makeExitSurprise(IRGS& env, Offset targetBcOff) {
+  auto const exit = defBlock(env, Block::Hint::Unlikely);
+  BlockPusher bp(*env.irb, makeMarker(env, targetBcOff), exit);
+  gen(env, HandleRequestSurprise);
+  exitRequest(env, TransFlags{}, SrcKey{curSrcKey(env), targetBcOff});
+  return exit;
+}
+
 Block* makePseudoMainExit(IRGS& env) {
   return curFunc(env)->isPseudoMain()
     ? makeExit(env)

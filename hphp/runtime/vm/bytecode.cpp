@@ -5987,8 +5987,9 @@ iopMIterInitK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
 }
 
 OPTBLD_INLINE void iopIterNext(PC& pc, Iter* it, PC targetpc, local_var val) {
-  jmpSurpriseCheck(targetpc - pc);
   if (it->next()) {
+    vmpc() = targetpc;
+    jmpSurpriseCheck(targetpc - pc);
     pc = targetpc;
     tvAsVariant(val.ptr) = it->arr().second();
   }
@@ -5996,8 +5997,9 @@ OPTBLD_INLINE void iopIterNext(PC& pc, Iter* it, PC targetpc, local_var val) {
 
 OPTBLD_INLINE
 void iopIterNextK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
-  jmpSurpriseCheck(targetpc - pc);
   if (it->next()) {
+    vmpc() = targetpc;
+    jmpSurpriseCheck(targetpc - pc);
     pc = targetpc;
     tvAsVariant(val.ptr) = it->arr().second();
     tvAsVariant(key.ptr) = it->arr().first();
@@ -6009,13 +6011,16 @@ OPTBLD_INLINE void iopLIterNext(PC& pc,
                                 local_var base,
                                 PC targetpc,
                                 local_var val) {
-  jmpSurpriseCheck(targetpc - pc);
   if (isArrayLikeType(base.ptr->m_type)) {
     if (it->nextLocal(base.ptr->m_data.parr)) {
+      vmpc() = targetpc;
+      jmpSurpriseCheck(targetpc - pc);
       pc = targetpc;
       tvAsVariant(val.ptr) = it->arr().secondLocal(base.ptr->m_data.parr);
     }
   } else if (it->next()) {
+    vmpc() = targetpc;
+    jmpSurpriseCheck(targetpc - pc);
     pc = targetpc;
     tvAsVariant(val.ptr) = it->arr().second();
   }
@@ -6027,14 +6032,17 @@ OPTBLD_INLINE void iopLIterNextK(PC& pc,
                                  PC targetpc,
                                  local_var val,
                                  local_var key) {
-  jmpSurpriseCheck(targetpc - pc);
   if (isArrayLikeType(base.ptr->m_type)) {
     if (it->nextLocal(base.ptr->m_data.parr)) {
+      vmpc() = targetpc;
+      jmpSurpriseCheck(targetpc - pc);
       pc = targetpc;
       tvAsVariant(val.ptr) = it->arr().secondLocal(base.ptr->m_data.parr);
       tvAsVariant(key.ptr) = it->arr().firstLocal(base.ptr->m_data.parr);
     }
   } else if (it->next()) {
+    vmpc() = targetpc;
+    jmpSurpriseCheck(targetpc - pc);
     pc = targetpc;
     tvAsVariant(val.ptr) = it->arr().second();
     tvAsVariant(key.ptr) = it->arr().first();
@@ -6042,8 +6050,9 @@ OPTBLD_INLINE void iopLIterNextK(PC& pc,
 }
 
 OPTBLD_INLINE void iopWIterNext(PC& pc, Iter* it, PC targetpc, local_var val) {
-  jmpSurpriseCheck(targetpc - pc);
   if (it->next()) {
+    vmpc() = targetpc;
+    jmpSurpriseCheck(targetpc - pc);
     pc = targetpc;
     tvAsVariant(val.ptr).setWithRef(it->arr().secondValPlus());
   }
@@ -6051,8 +6060,9 @@ OPTBLD_INLINE void iopWIterNext(PC& pc, Iter* it, PC targetpc, local_var val) {
 
 OPTBLD_INLINE void
 iopWIterNextK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
-  jmpSurpriseCheck(targetpc - pc);
   if (it->next()) {
+    vmpc() = targetpc;
+    jmpSurpriseCheck(targetpc - pc);
     pc = targetpc;
     tvAsVariant(val.ptr).setWithRef(it->arr().secondValPlus());
     tvAsVariant(key.ptr) = it->arr().first();
@@ -6060,16 +6070,18 @@ iopWIterNextK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
 }
 
 OPTBLD_INLINE void iopMIterNext(PC& pc, Iter* it, PC targetpc, local_var val) {
-  jmpSurpriseCheck(targetpc - pc);
   if (miter_next_key(it, val.ptr, nullptr)) {
+    vmpc() = targetpc;
+    jmpSurpriseCheck(targetpc - pc);
     pc = targetpc;
   }
 }
 
 OPTBLD_INLINE void
 iopMIterNextK(PC& pc, Iter* it, PC targetpc, local_var val, local_var key) {
-  jmpSurpriseCheck(targetpc - pc);
   if (miter_next_key(it, val.ptr, key.ptr)) {
+    vmpc() = targetpc;
+    jmpSurpriseCheck(targetpc - pc);
     pc = targetpc;
   }
 }

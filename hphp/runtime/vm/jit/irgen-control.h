@@ -41,6 +41,7 @@ Block* getBlock(IRGS& env, Offset offset);
  */
 void surpriseCheck(IRGS&);
 void surpriseCheck(IRGS&, Offset);
+void surpriseCheckWithTarget(IRGS&, Offset);
 void jmpImpl(IRGS&, Offset);
 void implCondJmp(IRGS&, Offset taken, bool negate, SSATmp*);
 

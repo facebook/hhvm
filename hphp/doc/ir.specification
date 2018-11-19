@@ -991,6 +991,11 @@ To string conversions:
   stackLimitAndSurprise word. Note that in a resumed, the frame pointer is not
   pointing into the eval stack, so S0 should be a StkPtr in that case.
 
+| HandleRequestSurprise, ND, NA, NF
+
+  Generate exceptions based on surprise flags on a per request basis.
+  Make sure CheckSurpriseFlags is true before calling HandleRequestSurprise.
+
 | ReturnHook, ND, S(FramePtr) S(Gen), NF
 
   Surprise flag hook for function returns.

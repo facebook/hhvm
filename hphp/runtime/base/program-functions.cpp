@@ -257,7 +257,10 @@ static void process_cmd_arguments(int argc, char **argv) {
 static void process_env_variables(Array& variables, char** envp,
                            std::map<std::string, std::string>& envVariables) {
   for (auto& kv : envVariables) {
-    variables.set(String(kv.first), String(kv.second));
+    String idx(kv.first);
+    auto const arrkey = variables.convertKey<IntishCast::CastSilently>(idx);
+    String str(kv.second);
+    variables.set(arrkey, make_tv<KindOfString>(str.get()));
   }
   for (char **env = envp; env && *env; env++) {
     char *p = strchr(*env, '=');

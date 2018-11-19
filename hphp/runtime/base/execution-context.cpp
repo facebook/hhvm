@@ -1066,7 +1066,8 @@ void ExecutionContext::debuggerInfo(
 }
 
 void ExecutionContext::setenv(const String& name, const String& value) {
-  m_envs.set(name, value);
+  m_envs.set(m_envs.convertKey<IntishCast::CastSilently>(name),
+             make_tv<KindOfString>(value.get()));
 }
 
 void ExecutionContext::unsetenv(const String& name) {

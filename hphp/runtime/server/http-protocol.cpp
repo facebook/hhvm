@@ -73,7 +73,9 @@ static bool read_all_post_data(Transport *transport,
 
 static void CopyParams(Array& dest, Array& src) {
   for (ArrayIter iter(src); iter; ++iter) {
-    dest.set(iter.first(), iter.second());
+    const auto arraykey =
+      dest.convertKey<IntishCast::CastSilently>(iter.first());
+    dest.set(arraykey, iter.secondVal(), true);
   }
 }
 
@@ -200,7 +202,8 @@ static void PrepareEnv(Array& env, Transport *transport) {
     String key(header.first);
     String value(header.second.back());
     g_context->setenv(key, value);
-    env.set(key, value);
+    env.set(env.convertKey<IntishCast::CastSilently>(key),
+            make_tv<KindOfString>(value.get()));
   }
 }
 
@@ -228,8 +231,6 @@ static void StartRequest(Array& server) {
 void HttpProtocol::PrepareSystemVariables(Transport *transport,
                                           const RequestURI &r,
                                           const SourceRootInfo &sri) {
-  SuppressHACIntishCastNotices shacn;
-
   auto const vhost = VirtualHost::GetCurrent();
   auto const g = get_global_variables()->asArrayData();
   Variant emptyArr(staticEmptyArray());
@@ -788,10 +789,18 @@ void HttpProtocol::PrepareServerVariable(Array& server,
   }
 
   for (auto& kv : RuntimeOption::ServerVariables) {
-    server.set(String(kv.first), String(kv.second));
+    String idx(kv.first);
+    const auto arrkey =
+      server.convertKey<IntishCast::CastSilently>(idx);
+    String str(kv.second);
+    server.set(arrkey, make_tv<KindOfString>(str.get()), true);
   }
   for (auto& kv : vhost->getServerVars()) {
-    server.set(String(kv.first), String(kv.second));
+    String idx(kv.first);
+    const auto arrkey =
+      server.convertKey<IntishCast::CastSilently>(idx);
+    String str(kv.second);
+    server.set(arrkey, make_tv<KindOfString>(str.get()), true);
   }
   server = sri.setServerVariables(std::move(server));
 

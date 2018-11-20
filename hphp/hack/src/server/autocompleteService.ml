@@ -16,6 +16,7 @@ include AutocompleteTypes
 
 module Phase = Typing_phase
 module TUtils = Typing_utils
+module Cls = Typing_classes_heap
 
 let ac_env = ref None
 let autocomplete_results : autocomplete_result list ref = ref []
@@ -98,7 +99,7 @@ let autocomplete_result_to_json res =
   ]
 
 let get_partial_result name ty kind class_opt =
-  let base_class = Option.map ~f:(fun class_ -> class_.Typing_defs.tc_name) class_opt in
+  let base_class = Option.map ~f:(fun class_ -> Cls.name class_) class_opt in
   Partial { ty; name; kind_=kind; base_class; }
 
 let add_res (res: autocomplete_result) : unit =
@@ -173,12 +174,12 @@ let autocomplete_member ~is_static env class_ cid id =
     argument_global_type := Some Acclass_get;
     let add kind name ty = add_partial_result name (Phase.decl ty) kind (Some class_) in
     if is_static then begin
-      SMap.iter (get_class_elt_types env class_ cid class_.tc_smethods) ~f:(add Method_kind);
-      SMap.iter (get_class_elt_types env class_ cid class_.tc_sprops) ~f:(add Property_kind);
-      SMap.iter (class_.tc_consts) ~f:(fun name cc -> add Class_constant_kind name cc.cc_type);
+      SMap.iter (get_class_elt_types env class_ cid (Cls.smethods class_)) ~f:(add Method_kind);
+      SMap.iter (get_class_elt_types env class_ cid (Cls.sprops class_)) ~f:(add Property_kind);
+      SMap.iter ((Cls.consts class_)) ~f:(fun name cc -> add Class_constant_kind name cc.cc_type);
     end else begin
-      SMap.iter (get_class_elt_types env class_ cid class_.tc_methods) ~f:(add Method_kind);
-      SMap.iter (get_class_elt_types env class_ cid class_.tc_props) ~f:(add Property_kind);
+      SMap.iter (get_class_elt_types env class_ cid (Cls.methods class_)) ~f:(add Method_kind);
+      SMap.iter (get_class_elt_types env class_ cid (Cls.props class_)) ~f:(add Property_kind);
     end
   end
 
@@ -205,10 +206,10 @@ let should_complete_fun completion_type =
   completion_type=Some Acid
 
 let get_constructor_ty c =
-  let pos = c.Typing_defs.tc_pos in
+  let pos = Cls.pos c in
   let reason = Typing_reason.Rwitness pos in
-  let return_ty = reason, Typing_defs.Tapply ((pos, c.Typing_defs.tc_name), []) in
-  match (fst c.Typing_defs.tc_construct) with
+  let return_ty = reason, Typing_defs.Tapply ((pos, Cls.name c), []) in
+  match fst (Cls.construct c) with
     | Some elt ->
         begin match elt.ce_type with
           | lazy (_ as r, Tfun fun_) ->
@@ -327,7 +328,7 @@ let compute_complete_global
           (Phase.decl ty) Class_kind None)
       end else begin
         let target = Typing_lazy_heap.get_class tcopt name in
-        let target_kind = Option.map target ~f:(fun c -> c.Typing_defs.tc_kind) in
+        let target_kind = Option.map target ~f:(fun c -> (Cls.kind c)) in
         if not (should_complete_class completion_type target_kind) then None else
         Option.map target ~f:(fun c ->
           incr result_count;
@@ -337,9 +338,9 @@ let compute_complete_global
               (Phase.decl (get_constructor_ty c))
               Constructor_kind
               (* Only do doc block fallback on constructors if they're consistent. *)
-              (if snd c.Typing_defs.tc_construct then Some c else None)
+              (if snd (Cls.construct c) then Some c else None)
           else
-            let kind = match c.Typing_defs.tc_kind with
+            let kind = match (Cls.kind c) with
               | Ast.Cabstract -> Abstract_class_kind
               | Ast.Cnormal -> Class_kind
               | Ast.Cinterface -> Interface_kind
@@ -347,8 +348,8 @@ let compute_complete_global
               | Ast.Cenum -> Enum_kind
             in
             let ty =
-              Typing_reason.Rwitness c.Typing_defs.tc_pos,
-              Typing_defs.Tapply ((c.Typing_defs.tc_pos, name), []) in
+              Typing_reason.Rwitness (Cls.pos c),
+              Typing_defs.Tapply (((Cls.pos c), name), []) in
             get_partial_result (string_to_replace_prefix name) (Phase.decl ty) kind None
         )
       end

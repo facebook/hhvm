@@ -27,7 +27,7 @@ val full_with_identity:
   string
 val debug: Typing_env.env -> 'a Typing_defs.ty -> string
 val debug_with_tvars: Typing_env.env -> 'a Typing_defs.ty -> string
-val class_: TypecheckerOptions.t -> Typing_defs.class_type -> string
+val class_: TypecheckerOptions.t -> Typing_classes_heap.t -> string
 val gconst: TypecheckerOptions.t -> Decl_heap.GConst.t -> string
 val fun_: TypecheckerOptions.t -> Decl_heap.Fun.t -> string
 val typedef: TypecheckerOptions.t -> Decl_heap.Typedef.t -> string

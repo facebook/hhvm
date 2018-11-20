@@ -19,6 +19,7 @@ module TUtils = Typing_utils
 module SN = Naming_special_names
 module Phase = Typing_phase
 module TL = Typing_logic
+module Cls = Typing_classes_heap
 
 type reactivity_extra_info = {
   method_info: ((* method_name *) string * (* is_static *) bool) option;
@@ -49,7 +50,7 @@ module ConditionTypes = struct
     (method_name: string) =
     match try_get_class_for_condition_type env ty with
     | Some (_, cls) ->
-      let m = if is_static then cls.tc_smethods else cls.tc_methods in
+      let m = if is_static then Cls.smethods cls else Cls.methods cls in
       SMap.get method_name m
     | None -> None
 
@@ -61,13 +62,13 @@ module ConditionTypes = struct
     let ty =
       match try_get_class_for_condition_type env ty with
       | None -> ty
-      | Some (_, cls) when cls.tc_tparams = [] -> ty
+      | Some (_, cls) when Cls.tparams cls = [] -> ty
       | Some (((p, _) as sid), cls) ->
       let params =
-        List.map cls.tc_tparams
+        List.map (Cls.tparams cls)
           ~f:(fun (_, (p, x), _, _) -> Reason.Rwitness p, Tgeneric x) in
       let subst =
-        Decl_instantiate.make_subst cls.tc_tparams [] in
+        Decl_instantiate.make_subst (Cls.tparams cls) [] in
       let ty = Reason.Rwitness p, (Tapply (sid, params)) in
       Decl_instantiate.instantiate subst ty in
     let ety_env = Phase.env_with_self env in
@@ -656,7 +657,7 @@ and simplify_subtype
       (* If class is final then exactness is superfluous *)
       let is_final =
         match class_def_sub with
-        | Some { tc_final; _ } -> tc_final
+        | Some tc -> Cls.final tc
         | None -> false in
       if not (exact_match || is_final)
       then invalid ()
@@ -686,7 +687,7 @@ and simplify_subtype
           | None ->
             List.map tyl_sub (fun _ -> Ast.Invariant)
           | Some class_sub ->
-            List.map class_sub.tc_tparams (fun (var, _, _, _) -> var) in
+            List.map (Cls.tparams class_sub) (fun (var, _, _, _) -> var) in
 
           (* C<t1, .., tn> <: C<u1, .., un> iff
            *   t1 <:v1> u1 /\ ... /\ tn <:vn> un
@@ -706,13 +707,13 @@ and simplify_subtype
         (* We handle the case where a generic A<T> is used as A *)
         let tyl_sub =
           if List.is_empty tyl_sub && not (Env.is_strict env)
-          then List.map class_sub.tc_tparams (fun _ -> (p_sub, Tany))
+          then List.map (Cls.tparams class_sub) (fun _ -> (p_sub, Tany))
           else tyl_sub in
-        if List.length class_sub.tc_tparams <> List.length tyl_sub
+        if List.length (Cls.tparams class_sub) <> List.length tyl_sub
         then
           invalid_with (fun () ->
-          Errors.expected_tparam ~definition_pos:class_sub.tc_pos
-            ~use_pos:(Reason.to_pos p_sub) (List.length class_sub.tc_tparams))
+          Errors.expected_tparam ~definition_pos:(Cls.pos class_sub)
+            ~use_pos:(Reason.to_pos p_sub) (List.length (Cls.tparams class_sub)))
         else
           let ety_env =
           (* NOTE: We rely on the fact that we fold all ancestors of
@@ -725,13 +726,13 @@ and simplify_subtype
           *)
           {
             type_expansions = [];
-            substs = Subst.make class_sub.tc_tparams tyl_sub;
+            substs = Subst.make (Cls.tparams class_sub) tyl_sub;
             (* TODO: do we need this? *)
             this_ty = Option.value this_ty ~default:ty_sub;
             from_class = None;
             validate_dty = None;
           } in
-            let up_obj = SMap.get cid_super class_sub.tc_ancestors in
+            let up_obj = SMap.get cid_super (Cls.ancestors class_sub) in
             match up_obj with
               | Some up_obj ->
                 let env, up_obj = Phase.localize ~ety_env env up_obj in
@@ -1717,7 +1718,7 @@ and sub_type_inner_helper env ~this_ty
       begin match class_ with
         | None -> env
         | Some class_ ->
-          if class_.tc_kind = Ast.Ctrait || class_.tc_kind = Ast.Cinterface then
+          if (Cls.kind class_) = Ast.Ctrait || (Cls.kind class_) = Ast.Cinterface then
           (* NOTE: We rely on the fact that we fold all ancestors of
            * ty_sub in its class_type so we will never hit this case
            * again. If this ever changes then we would need to store
@@ -1729,7 +1730,7 @@ and sub_type_inner_helper env ~this_ty
           let ety_env =
           {
             type_expansions = [];
-            substs = Subst.make class_.tc_tparams tyl_sub;
+            substs = Subst.make (Cls.tparams class_) tyl_sub;
             this_ty = Option.value this_ty ~default:ty_sub;
             from_class = None;
             validate_dty = None;
@@ -1750,7 +1751,7 @@ and sub_type_inner_helper env ~this_ty
                   sub_type env (p_sub, snd req_type) ty_super
                 end (fun _ -> try_reqs reqs)
             in
-              try_reqs class_.tc_req_ancestors
+              try_reqs (Cls.req_ancestors class_)
           else fail ()
     end
 
@@ -1904,8 +1905,8 @@ let rec sub_string
       | Some tc
           (* A Stringish is a string or an object with a __toString method
            * that will be converted to a string *)
-          when tc.tc_name = SN.Classes.cStringish
-          || SMap.mem SN.Classes.cStringish tc.tc_ancestors ->
+          when Cls.name tc = SN.Classes.cStringish
+          || SMap.mem SN.Classes.cStringish (Cls.ancestors tc) ->
         if stringish_deprecated
         then Errors.object_string_deprecated p;
         env
@@ -2254,7 +2255,8 @@ let rec set_tyvar_variance ~variance ~tyvars env ty =
   | Tclass ((_, cid), _, tyl) ->
     begin match Env.get_class env cid with
     | None -> env
-    | Some {tc_tparams; _} ->
+    | Some cls ->
+      let tc_tparams = Cls.tparams cls in
       let variancel = List.map tc_tparams (fun (v,_,_,_) -> combine_variance variance v) in
       set_tyvar_variance_list ~variancel ~tyvars env tyl
     end

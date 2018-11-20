@@ -35,6 +35,7 @@ module SN = Naming_special_names
 module TGenConstraint = Typing_generic_constraint
 module Subst = Decl_subst
 module TUtils = Typing_utils
+module Cls = Typing_classes_heap
 
 
 type control_context =
@@ -251,9 +252,9 @@ module CheckFunctionBody = struct
       when construct = SN.Members.__construct ->
       let () = match Env.get_class env.tenv (Env.get_parent_id env.tenv) with
         | Some parent_class ->
-          begin match fst parent_class.tc_construct with
-          | None when parent_class.tc_kind = Ast.Cabstract ->
-              Errors.parent_abstract_call construct p parent_class.tc_pos;
+          begin match fst (Cls.construct parent_class) with
+          | None when (Cls.kind parent_class) = Ast.Cabstract ->
+              Errors.parent_abstract_call construct p (Cls.pos parent_class);
           | _ -> ()
           end
         | _ -> () in
@@ -567,7 +568,7 @@ and hint_ env p = function
       | None -> ()
       | Some class_ ->
           check_happly env.typedef_tparams env.tenv (p, h);
-          check_tparams env p x class_.tc_tparams hl
+          check_tparams env p x (Cls.tparams class_) hl
       );
       ()
   | Hshape { nsi_allows_unknown_fields=_; nsi_field_map } ->
@@ -614,7 +615,8 @@ and check_happly unchecked_tparams env h =
       begin match TUtils.get_base_type env locl_ty with
         | _, Tclass (cls, _, tyl) ->
           (match Env.get_class env (snd cls) with
-            | Some { tc_tparams; _ } ->
+            | Some cls ->
+                let tc_tparams = Cls.tparams cls in
                 (* We want to instantiate the class type parameters with the
                  * type list of the class we are localizing. We do not want to
                  * add any more constraints when we localize the constraints
@@ -728,9 +730,9 @@ and check_is_interface (env, error_verb) (x : hint) =
           (* in strict mode, we catch the unknown class error before
              even reaching here. *)
           ()
-        | Some { tc_kind = Ast.Cinterface; _ } -> ()
-        | Some { tc_name; _ } ->
-          Errors.non_interface (fst x) tc_name error_verb
+        | Some cls when Cls.kind cls = Ast.Cinterface -> ()
+        | Some cls ->
+          Errors.non_interface (fst x) (Cls.name cls) error_verb
       )
     | Habstr _ ->
       Errors.non_interface (fst x) "generic" error_verb
@@ -748,10 +750,14 @@ and check_is_class env (x : hint) =
           (* in strict mode, we catch the unknown class error before
              even reaching here. *)
           ()
-        | Some { tc_kind = Ast.(Cabstract | Cnormal); tc_final; tc_name; _ } ->
-          if tc_final then Errors.requires_final_class (fst x) tc_name
-        | Some { tc_kind; tc_name; _ } ->
-          Errors.requires_non_class (fst x) tc_name (Ast.string_of_class_kind tc_kind)
+        | Some cls ->
+          let kind = Cls.kind cls in
+          let name = Cls.name cls in
+          match kind with
+          | Ast.(Cabstract | Cnormal) ->
+            if Cls.final cls then Errors.requires_final_class (fst x) name
+          | _ ->
+            Errors.requires_non_class (fst x) name (Ast.string_of_class_kind kind)
       )
     | Habstr name ->
       Errors.requires_non_class (fst x) name "a generic"
@@ -777,11 +783,13 @@ and check_is_trait env (h : hint) =
       (* unit. *)
       | None -> ()
       (* tc_kind is part of the type_info. If we are a trait, all is good *)
-      | Some { tc_kind = Ast.Ctrait; _ } -> ()
+      | Some cls when Cls.kind cls = Ast.Ctrait -> ()
       (* Anything other than a trait we are going to throw an error *)
       (* using the tc_kind and tc_name fields of our type_info *)
-      | Some { tc_kind; tc_name; _ } ->
-        Errors.uses_non_trait (fst h) tc_name (Ast.string_of_class_kind tc_kind)
+      | Some cls ->
+        let name = Cls.name cls in
+        let kind = Cls.kind cls in
+        Errors.uses_non_trait (fst h) name (Ast.string_of_class_kind kind)
     )
   | _ -> failwith "assertion failure: trait isn't an Happly"
   )

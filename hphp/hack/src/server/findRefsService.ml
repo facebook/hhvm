@@ -13,6 +13,8 @@ open Reordered_argument_collections
 open ServerCommandTypes.Find_refs
 open Typing_defs
 
+module Cls = Typing_classes_heap
+
 
 (* The class containing the member can be specified in two ways:
  * - Class_set - as an explicit, pre-computed set of names, which are then
@@ -39,8 +41,9 @@ let process_fun_id target_fun id =
 let check_if_extends_class tcopt target_class_name class_name =
   let class_ = Typing_lazy_heap.get_class tcopt class_name in
   match class_ with
-  | Some { Typing_defs.tc_ancestors = imps; tc_req_ancestors_extends = req_extends; _ }
-      when (SMap.mem imps target_class_name || SSet.mem req_extends target_class_name) -> true
+  | Some cls
+    when SMap.mem (Cls.ancestors cls) target_class_name
+      || SSet.mem (Cls.req_ancestors_extends cls) target_class_name -> true
   | _ -> false
 
 let is_target_class tcopt target_classes class_name =
@@ -112,8 +115,8 @@ let get_origin_class_name tcopt class_name member =
           | Some meth -> Some meth.ce_origin
           | None -> None
         in
-        let origin_from_methods = get_origin_class class_.tc_methods method_name in
-        let origin_from_smethods = get_origin_class class_.tc_smethods method_name in
+        let origin_from_methods = get_origin_class (Cls.methods class_) method_name in
+        let origin_from_smethods = get_origin_class (Cls.smethods class_) method_name in
         let origin = Option.first_some origin_from_methods origin_from_smethods in
         origin
       | None -> None
@@ -223,13 +226,13 @@ let get_definitions tcopt = function
       match Typing_lazy_heap.get_class tcopt class_name with
       | Some class_ ->
         let add_meth meths acc = match SMap.get meths method_name with
-          | Some meth when meth.ce_origin = class_.tc_name ->
+          | Some meth when meth.ce_origin = (Cls.name class_) ->
             let pos = Reason.to_pos (fst @@ Lazy.force meth.ce_type) in
             (method_name, pos) :: acc
           | _ -> acc
         in
-        let acc = add_meth class_.tc_methods acc in
-        let acc = add_meth class_.tc_smethods acc in
+        let acc = add_meth (Cls.methods class_) acc in
+        let acc = add_meth (Cls.smethods class_) acc in
         acc
       | None -> acc
     end
@@ -238,19 +241,19 @@ let get_definitions tcopt = function
       match Typing_lazy_heap.get_class tcopt class_name with
       | Some class_ ->
         let add_class_const class_consts acc = match SMap.get class_consts class_const_name with
-          | Some class_const when class_const.cc_origin = class_.tc_name ->
+          | Some class_const when class_const.cc_origin = (Cls.name class_) ->
             let pos = class_const.cc_pos in
             (class_const_name, pos) :: acc
           | _ -> acc
         in
-        let acc = add_class_const class_.tc_consts acc in
+        let acc = add_class_const (Cls.consts class_) acc in
         acc
       | None -> acc
     end
   | IClass class_name ->
     Option.value ~default:[] begin Naming_heap.TypeIdHeap.get class_name >>=
     function (_, `Class) -> Typing_lazy_heap.get_class tcopt class_name >>=
-      fun class_ -> Some([(class_name, class_.tc_pos)])
+      fun class_ -> Some([(class_name, (Cls.pos class_))])
     | (_, `Typedef) -> Typing_lazy_heap.get_typedef tcopt class_name >>=
       fun type_ -> Some([class_name, type_.td_pos])
     end

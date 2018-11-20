@@ -14,6 +14,7 @@ open Typing_defs
 module Env = Typing_env
 module T = Tast
 module TLazyHeap = Typing_lazy_heap
+module Cls = Typing_classes_heap
 
 (* Not adding a Typing_dep here because it will be added when the
  * Nast is fully processed (by the caller of this code) *)
@@ -22,8 +23,8 @@ let get_fun = TLazyHeap.get_fun
 let get_static_meth tcopt (cls_name:string) (meth_name:string) =
   match TLazyHeap.get_class tcopt cls_name with
   | None -> None
-  | Some { Typing_defs.tc_smethods ; _ } ->
-    begin match SMap.get meth_name tc_smethods with
+  | Some cls ->
+    begin match SMap.get meth_name (Cls.smethods cls) with
       | None -> None
       | Some { Typing_defs.ce_type = lazy (_r, Typing_defs.Tfun fty) ; _} ->
         Some fty

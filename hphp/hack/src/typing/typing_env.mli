@@ -42,15 +42,15 @@ val add_wclass : env -> string -> unit
 val fresh_tenv : env -> (env -> 'a) -> 'a
 val get_class : env -> Classes.key -> Classes.t option
 val get_typedef : env -> Typedefs.key -> Typedefs.t option
-val get_const : env -> class_type -> string -> class_const option
-val get_typeconst : env -> class_type -> string -> typeconst_type option
+val get_const : env -> Typing_classes_heap.t -> string -> class_const option
+val get_typeconst : env -> Typing_classes_heap.t -> string -> typeconst_type option
 val get_gconst : env -> GConsts.key -> GConsts.t option
-val get_static_member : bool -> env -> class_type -> string -> class_elt option
+val get_static_member : bool -> env -> Typing_classes_heap.t -> string -> class_elt option
 val suggest_static_member :
-  bool -> class_type -> string -> (Pos.t * string) option
-val get_member : bool -> env -> class_type -> string -> class_elt option
-val suggest_member : bool -> class_type -> string -> (Pos.t * string) option
-val get_construct : env -> class_type -> class_elt option * bool
+  bool -> Typing_classes_heap.t -> string -> (Pos.t * string) option
+val get_member : bool -> env -> Typing_classes_heap.t -> string -> class_elt option
+val suggest_member : bool -> Typing_classes_heap.t -> string -> (Pos.t * string) option
+val get_construct : env -> Typing_classes_heap.t -> class_elt option * bool
 val check_todo : env -> env
 val get_return : env -> Typing_env_return_info.t
 val set_return : env -> Typing_env_return_info.t -> env

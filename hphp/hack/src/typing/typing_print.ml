@@ -20,6 +20,7 @@ open Utils
 module SN = Naming_special_names
 module Reason = Typing_reason
 module TySet = Typing_set
+module Cls = Typing_classes_heap
 
 (*****************************************************************************)
 (* Computes the string representing a type in an error message.
@@ -1104,7 +1105,7 @@ let to_locl_ty
       let class_pos =
         match Typing_lazy_heap.get_class tcopt name with
         | Some class_ty ->
-          class_ty.tc_pos
+          (Cls.pos class_ty)
         | None ->
           (* Class may not exist (such as in non-strict modes). *)
           Pos.none
@@ -1432,9 +1433,9 @@ module PrintClass = struct
     SMap.fold begin fun field v acc ->
       let sigil, kind = match Typing_lazy_heap.get_class tcopt field with
         | None -> "!", ""
-        | Some {tc_members_fully_known; tc_kind; _} ->
-          (if tc_members_fully_known then " " else "~"),
-          " ("^class_kind tc_kind^")"
+        | Some cls ->
+          (if Cls.members_fully_known cls then " " else "~"),
+          " ("^class_kind (Cls.kind cls)^")"
       in
       let ty_str = Full.to_string_decl tcopt v in
       "\n"^indent^sigil^" "^ty_str^kind^acc
@@ -1453,24 +1454,24 @@ module PrintClass = struct
     end
 
   let class_type tcopt c =
-    let tc_need_init = bool c.tc_need_init in
-    let tc_members_fully_known = bool c.tc_members_fully_known in
-    let tc_abstract = bool c.tc_abstract in
-    let tc_deferred_init_members = sset c.tc_deferred_init_members in
-    let tc_kind = class_kind c.tc_kind in
-    let tc_name = c.tc_name in
-    let tc_tparams = tparam_list tcopt c.tc_tparams in
-    let tc_consts = class_const_smap tcopt c.tc_consts in
-    let tc_typeconsts = typeconst_smap tcopt c.tc_typeconsts in
-    let tc_props = class_elt_smap tcopt c.tc_props in
-    let tc_sprops = class_elt_smap tcopt c.tc_sprops in
-    let tc_methods = class_elt_smap_with_breaks tcopt c.tc_methods in
-    let tc_smethods = class_elt_smap_with_breaks tcopt c.tc_smethods in
-    let tc_construct = constructor tcopt c.tc_construct in
-    let tc_ancestors = ancestors_smap tcopt c.tc_ancestors in
-    let tc_req_ancestors = req_ancestors tcopt c.tc_req_ancestors in
-    let tc_req_ancestors_extends = sset c.tc_req_ancestors_extends in
-    let tc_extends = sset c.tc_extends in
+    let tc_need_init = bool (Cls.need_init c) in
+    let tc_members_fully_known = bool (Cls.members_fully_known c) in
+    let tc_abstract = bool (Cls.abstract c) in
+    let tc_deferred_init_members = sset (Cls.deferred_init_members c) in
+    let tc_kind = class_kind (Cls.kind c) in
+    let tc_name = (Cls.name c) in
+    let tc_tparams = tparam_list tcopt (Cls.tparams c) in
+    let tc_consts = class_const_smap tcopt (Cls.consts c) in
+    let tc_typeconsts = typeconst_smap tcopt (Cls.typeconsts c) in
+    let tc_props = class_elt_smap tcopt (Cls.props c) in
+    let tc_sprops = class_elt_smap tcopt (Cls.sprops c) in
+    let tc_methods = class_elt_smap_with_breaks tcopt (Cls.methods c) in
+    let tc_smethods = class_elt_smap_with_breaks tcopt (Cls.smethods c) in
+    let tc_construct = constructor tcopt (Cls.construct c) in
+    let tc_ancestors = ancestors_smap tcopt (Cls.ancestors c) in
+    let tc_req_ancestors = req_ancestors tcopt (Cls.req_ancestors c) in
+    let tc_req_ancestors_extends = sset (Cls.req_ancestors_extends c) in
+    let tc_extends = sset (Cls.extends c) in
     "tc_need_init: "^tc_need_init^"\n"^
     "tc_members_fully_known: "^tc_members_fully_known^"\n"^
     "tc_abstract: "^tc_abstract^"\n"^

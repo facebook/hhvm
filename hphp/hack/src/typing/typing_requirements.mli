@@ -7,4 +7,4 @@
  *
  *)
 
-val check_class : Typing_env.env -> Typing_defs.class_type -> unit
+val check_class : Typing_env.env -> Typing_classes_heap.t -> unit

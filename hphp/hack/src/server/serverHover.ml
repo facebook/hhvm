@@ -83,7 +83,7 @@ let make_hover_info tcopt env_and_ty file (occurrence, def_opt) ~basic_only =
         let snippet_opt =
           let open Option.Monad_infix in
           Typing_lazy_heap.get_class tcopt classname
-          >>= fun c -> fst c.tc_construct
+          >>= fun c -> fst (Typing_classes_heap.construct c)
           >>| fun elt ->
             let ty = Lazy.force_val elt.ce_type in
             Tast_env.print_ty_with_identity env ty occurrence def_opt

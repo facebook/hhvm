@@ -14,6 +14,7 @@ open Typing_defs
 
 module Env = Tast_env
 module TMT = Typing_make_type
+module Cls = Typing_classes_heap
 
 (** Return true if ty definitely does not contain null.  I.e., the
     return value false can mean two things: ty does contain null, e.g.,
@@ -91,9 +92,12 @@ let rec truthiness env ty =
        truthy when empty. If this Tclass is instead an interface type like
        KeyedTraversable, the value may or may not be truthy when empty. *)
     begin match Typing_lazy_heap.get_class (Env.get_tcopt env) cid with
-    | Some {tc_kind = Cnormal | Cabstract; _} -> Always_truthy
-    | Some {tc_kind = Cinterface | Cenum; _} -> Possibly_falsy
-    | Some {tc_kind = Ctrait; _} | None -> Unknown
+    | None -> Unknown
+    | Some cls ->
+      match Cls.kind cls with
+      | Cnormal | Cabstract -> Always_truthy
+      | Cinterface | Cenum -> Possibly_falsy
+      | Ctrait -> Unknown
     end
 
   | Tprim Tresource -> Always_truthy
@@ -159,8 +163,11 @@ let rec find_sketchy_types env acc ty =
     then acc
     else begin
       match Typing_lazy_heap.get_class (Env.get_tcopt env) cid with
-      | Some {tc_kind = Cinterface; _} -> Traversable_interface (env, ty) :: acc
-      | Some {tc_kind = Cnormal | Cabstract | Ctrait | Cenum; _} | None -> acc
+      | None -> acc
+      | Some cls ->
+        match Cls.kind cls with
+        | Cinterface -> Traversable_interface (env, ty) :: acc
+        | Cnormal | Cabstract | Ctrait | Cenum -> acc
     end
 
   | Tunresolved tyl ->

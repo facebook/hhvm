@@ -15,6 +15,7 @@ module Env = Typing_env
 module SN = Naming_special_names
 module TLazyHeap = Typing_lazy_heap
 module TGen = Typing_generic
+module Cls = Typing_classes_heap
 
 (*****************************************************************************)
 (* Module checking the (co/contra)variance annotations (+/-).
@@ -307,14 +308,14 @@ let check_variance env tparam =
 (* position in a final class.                                                 *)
 (******************************************************************************)
 let check_final_this_pos_variance env_variance rpos class_ty =
-  if class_ty.tc_final then
-    List.iter class_ty.tc_tparams
+  if Cls.final class_ty then
+    List.iter (Cls.tparams class_ty)
       begin fun (typar_variance, id, _, _) ->
         match env_variance, typar_variance with
         | Vcontravariant(_), (Ast.Covariant | Ast.Contravariant)  ->
            (Errors.contravariant_this
              rpos
-             (Utils.strip_ns class_ty.tc_name)
+             (Utils.strip_ns (Cls.name class_ty))
              (snd id))
         | _ -> ()
       end
@@ -344,7 +345,7 @@ let get_class_variance tcopt root (pos, class_name) =
         else
           match TLazyHeap.get_class tcopt class_name with
           | None -> []
-          | Some { tc_tparams; _ } -> tc_tparams
+          | Some cls -> Cls.tparams cls
       in
       List.map tparams make_tparam_variance
 
@@ -354,19 +355,19 @@ let get_class_variance tcopt root (pos, class_name) =
 
 let rec class_ tcopt class_name class_type impl =
   let root = (Typing_deps.Dep.Class class_name, Some(class_type)) in
-  let tparams = class_type.tc_tparams in
+  let tparams = Cls.tparams class_type in
   let env = SMap.empty in
   let env = List.fold_left impl ~f:(type_ tcopt root Vboth) ~init:env in
-  let env = SMap.fold (class_member class_type tcopt root `Instance) class_type.tc_props env in
-  let env = SMap.fold (class_member class_type tcopt root `Static) class_type.tc_sprops env in
+  let env = SMap.fold (class_member class_type tcopt root `Instance) (Cls.props class_type) env in
+  let env = SMap.fold (class_member class_type tcopt root `Static) (Cls.sprops class_type) env in
   let env =
-    SMap.fold (class_method tcopt root `Instance) class_type.tc_methods env in
+    SMap.fold (class_method tcopt root `Instance) (Cls.methods class_type) env in
   (* We need to apply the same restrictions to non-final static members because
      they can be invoked through classname instances *)
   let env =
-    if class_type.tc_final
+    if Cls.final class_type
     then env
-    else SMap.fold (class_method tcopt root `Static) class_type.tc_smethods env in
+    else SMap.fold (class_method tcopt root `Static) (Cls.smethods class_type) env in
   List.iter tparams (check_variance env)
 
 (*****************************************************************************)
@@ -394,12 +395,12 @@ and class_member class_type tcopt root static _member_name member env =
      * Although not strictly speaking a variance check, it fits here because
      * it concerns the presence of generic type parameters in types.
      *)
-    if class_type.tc_kind = Ast.Ctrait
+    if Cls.kind class_type = Ast.Ctrait
     then env
     else
     let lazy (reason, _ as ty) = member.ce_type in
     let var_type_pos = Reason.to_pos reason in
-    let class_pos = class_type.tc_pos in
+    let class_pos = Cls.pos class_type in
     match TGen.IsGeneric.ty tcopt ty with
     | None -> env
     | Some (generic_pos, _generic_name) ->

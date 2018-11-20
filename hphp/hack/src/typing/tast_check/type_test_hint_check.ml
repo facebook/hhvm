@@ -15,6 +15,7 @@ open Typing_defs
 module Env = Tast_env
 module Reason = Typing_reason
 module TySet = Typing_set
+module Cls = Typing_classes_heap
 
 type validity =
   | Valid
@@ -62,7 +63,7 @@ let visitor = object(this)
   method! on_tobject acc r = update acc @@ Invalid (r, Tobject)
   method! on_tclass acc r cls exact tyl =
     match Env.get_class acc.env (snd cls) with
-    | Some { tc_kind = Ctrait; _ } ->
+    | Some tc when Cls.kind tc = Ctrait ->
       update acc @@ Invalid (r, Tclass (cls, exact, tyl))
     | _ ->
       begin match tyl with
@@ -95,7 +96,7 @@ let print_type: type a. Env.env -> a ty_ -> string = fun env ty_ ->
     "a type with generics, because generics are erased at runtime"
   | Tclass (cls, _, _) ->
     begin match Env.get_class env (snd cls) with
-    | Some info -> string_of_class_kind info.tc_kind
+    | Some info -> string_of_class_kind (Cls.kind info)
     | _ -> Typing_print.error ty_
     end
   | ty_ -> Typing_print.error ty_

@@ -119,8 +119,8 @@ let expand_to_supertypes (tcopt:TypecheckerOptions.t) type_ =
     | ITprim Tstring -> [ITprim Tstring; ITprim Tarraykey]
     | ITapply type_ ->
       begin match Typing_lazy_heap.get_class tcopt type_ with
-      | Some class_name ->
-        let super_types = SMap.bindings (class_name.Typing_defs.tc_ancestors) in
+      | Some cls ->
+        let super_types = SMap.bindings (Typing_classes_heap.ancestors cls) in
         let super_types = List.map super_types ~f:(fun (key, _) -> ITapply key) in
         ITapply type_ :: super_types
       | None -> [ITapply type_]

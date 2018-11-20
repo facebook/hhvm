@@ -8,10 +8,10 @@
  *)
 
 open Core_kernel
-open Typing_defs
 
 module Reason = Typing_reason
 module TUtils = Typing_utils
+module Cls = Typing_classes_heap
 
 (* Only applied to classes. Checks that all the requirements of the traits
  * and interfaces it uses are satisfied. *)
@@ -29,7 +29,7 @@ let check_fulfillment env impls (parent_pos, req_ty) =
         impl_ty req_ty
 
 let check_class env tc =
-  match tc.tc_kind with
+  match (Cls.kind tc) with
   | Ast.Cnormal | Ast.Cabstract ->
-    List.iter tc.tc_req_ancestors (check_fulfillment env tc.tc_ancestors)
+    List.iter (Cls.req_ancestors tc) (check_fulfillment env (Cls.ancestors tc))
   | Ast.Ctrait | Ast.Cinterface | Ast.Cenum -> ()

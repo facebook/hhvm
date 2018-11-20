@@ -9,6 +9,8 @@
 
 open Hh_core
 
+module Cls = Typing_classes_heap
+
 let get_all_ancestors tcopt class_name =
   let rec helper classes_to_check cinfos seen_classes =
     match classes_to_check with
@@ -20,7 +22,7 @@ let get_all_ancestors tcopt class_name =
       | None ->
         helper classes cinfos seen_classes
       | Some class_info ->
-        let ancestors = SMap.keys class_info.Typing_defs.tc_ancestors in
+        let ancestors = SMap.keys (Cls.ancestors class_info) in
         helper
           (ancestors @ classes)
           (class_info :: cinfos)
@@ -31,7 +33,7 @@ let get_all_ancestors tcopt class_name =
 
 let get_docblock_for_member class_info member_name =
   let open Option.Monad_infix in
-  SMap.find_opt member_name (class_info.Typing_defs.tc_methods)
+  SMap.find_opt member_name (Cls.methods class_info)
   >>= fun member ->
   match Lazy.force member.Typing_defs.ce_type with
   | _, Typing_defs.Tfun ft ->
@@ -81,13 +83,13 @@ let fallback tcopt class_name member_name =
       | None ->
         all_interfaces_or_first_class_docblock seen_interfaces ancestors
       | Some docblock ->
-        match ancestor.Typing_defs.tc_kind with
+        match Cls.kind ancestor with
         | Ast.Cabstract
         | Ast.Cnormal ->
-          [(ancestor.Typing_defs.tc_name, docblock)]
+          [(Cls.name ancestor, docblock)]
         | _ ->
           all_interfaces_or_first_class_docblock
-            ((ancestor.Typing_defs.tc_name, docblock) :: seen_interfaces)
+            ((Cls.name ancestor, docblock) :: seen_interfaces)
             ancestors
       end
   in

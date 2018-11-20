@@ -126,7 +126,8 @@ end
 let get_implements tcopt (_, x) =
   match Typing_lazy_heap.get_class tcopt x with
   | None -> SSet.empty
-  | Some { tc_ancestors = tyl; _ } ->
+  | Some cls ->
+      let tyl = Typing_classes_heap.ancestors cls in
       SMap.fold begin fun _ ty set ->
         match ty with
         | _, Tapply ((_, x), []) -> SSet.add x set

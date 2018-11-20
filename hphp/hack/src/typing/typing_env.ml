@@ -23,6 +23,7 @@ module SG = SN.Superglobals
 module LEnvC = Typing_lenv_cont
 module C = Typing_continuations
 module TL = Typing_logic
+module Cls = Typing_classes_heap
 
 let show_env _ = "<env>"
 let pp_env _ _ = Printf.printf "%s\n" "<env>"
@@ -607,7 +608,7 @@ let get_enum_constraint env x =
   match get_class env x with
   | None -> None
   | Some tc ->
-    match tc.tc_enum_type with
+    match (Cls.enum_type tc) with
     | None -> None
     | Some e -> e.te_constraint
 
@@ -636,23 +637,23 @@ let fresh_tenv env f =
 
 let get_enum env x =
   match TLazyHeap.get_class env.genv.tcopt x with
-  | Some tc when tc.tc_enum_type <> None -> Some tc
+  | Some tc when (Cls.enum_type tc) <> None -> Some tc
   | _ -> None
 
 let is_enum env x = get_enum env x <> None
 
 let get_typeconst env class_ mid =
-  add_wclass env class_.tc_name;
-  let dep = Dep.Const (class_.tc_name, mid) in
+  add_wclass env (Cls.name class_);
+  let dep = Dep.Const ((Cls.name class_), mid) in
   Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
-  SMap.get mid class_.tc_typeconsts
+  SMap.get mid (Cls.typeconsts class_)
 
 (* Used to access class constants. *)
 let get_const env class_ mid =
-  add_wclass env class_.tc_name;
-  let dep = Dep.Const (class_.tc_name, mid) in
+  add_wclass env (Cls.name class_);
+  let dep = Dep.Const ((Cls.name class_), mid) in
   Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
-  SMap.get mid class_.tc_consts
+  SMap.get mid (Cls.consts class_)
 
 (* Used to access "global constants". That is constants that were
  * introduced with "const X = ...;" at topelevel, or "define('X', ...);"
@@ -663,19 +664,19 @@ let get_gconst env cst_name =
   TLazyHeap.get_gconst env.genv.tcopt cst_name
 
 let get_static_member is_method env class_ mid =
-  add_wclass env class_.tc_name;
+  add_wclass env (Cls.name class_);
   let add_dep x =
     let dep = if is_method then Dep.SMethod (x, mid)
       else Dep.SProp (x, mid) in
     Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
   in
-  add_dep class_.tc_name;
+  add_dep (Cls.name class_);
   (* The type of a member is stored separately in the heap. This means that
    * any user of the member also has a dependency on the class where the member
    * originated.
    *)
-  let ce_opt = if is_method then SMap.get mid class_.tc_smethods
-    else SMap.get mid class_.tc_sprops in
+  let ce_opt = if is_method then SMap.get mid (Cls.smethods class_)
+    else SMap.get mid (Cls.sprops class_) in
   Option.iter ce_opt (fun ce -> add_dep ce.ce_origin);
   ce_opt
 
@@ -689,41 +690,41 @@ let suggest_member members mid =
 
 let suggest_static_member is_method class_ mid =
   let mid = String.lowercase mid in
-  let members = if is_method then class_.tc_smethods else class_.tc_sprops in
+  let members = if is_method then (Cls.smethods class_) else (Cls.sprops class_) in
   suggest_member members mid
 
 let get_member is_method env class_ mid =
-  add_wclass env class_.tc_name;
+  add_wclass env (Cls.name class_);
   let add_dep x =
     let dep = if is_method then Dep.Method (x, mid)
       else Dep.Prop (x, mid) in
     Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep)
   in
-  add_dep class_.tc_name;
+  add_dep (Cls.name class_);
   (* The type of a member is stored separately in the heap. This means that
    * any user of the member also has a dependency on the class where the member
    * originated.
    *)
-  let ce_opt = if is_method then (SMap.get mid class_.tc_methods)
-    else SMap.get mid class_.tc_props in
+  let ce_opt = if is_method then (SMap.get mid (Cls.methods class_))
+    else SMap.get mid (Cls.props class_) in
   Option.iter ce_opt (fun ce -> add_dep ce.ce_origin);
   ce_opt
 
 let suggest_member is_method class_ mid =
   let mid = String.lowercase mid in
-  let members = if is_method then class_.tc_methods else class_.tc_props in
+  let members = if is_method then (Cls.methods class_) else (Cls.props class_) in
   suggest_member members mid
 
 let get_construct env class_ =
-  add_wclass env class_.tc_name;
+  add_wclass env (Cls.name class_);
   let add_dep x =
     let dep = Dep.Cstr (x) in
     Option.iter env.decl_env.Decl_env.droot
       (fun root -> Typing_deps.add_idep root dep);
   in
-  add_dep class_.tc_name;
-  Option.iter (fst class_.tc_construct) (fun ce -> add_dep ce.ce_origin);
-  class_.tc_construct
+  add_dep (Cls.name class_);
+  Option.iter (fst (Cls.construct class_)) (fun ce -> add_dep ce.ce_origin);
+  (Cls.construct class_)
 
 let check_todo env =
   if TypecheckerOptions.new_inference (get_tcopt env)
@@ -870,18 +871,6 @@ let is_decl env = get_mode env = FileInfo.Mdecl
 let iter_anonymous env f =
   IMap.iter (fun _id (_, _, ftys, pos, _) ->
     let (untyped,typed) = !ftys in f pos (untyped @ typed)) env.genv.anons
-
-(*
-let debug_env env =
-  Classes.iter begin fun cid class_ ->
-    Printf.printf "Type of class %s:" cid;
-    Printf.printf "{ ";
-    SMap.iter begin fun m _ ->
-      Printf.printf "%s " m;
-    end class_.tc_methods;
-    Printf.printf "}\n"
-  end env.genv.classes
-*)
 
 let get_last_call env =
   match (env.lenv.fake_members).last_call with

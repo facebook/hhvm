@@ -49,6 +49,7 @@ module Try          = Typing_try
 module TR           = Typing_reactivity
 module FL           = FeatureLogging
 module TMT          = Typing_make_type
+module Cls          = Typing_classes_heap
 
 (* Maps a Nast to a Tast where every type is Tany.
    Used to produce a Tast for unsafe code without inferring types for it. *)
@@ -1741,14 +1742,14 @@ and expr_
         * types for its type parameters.
         *)
         let env, tvarl =
-          List.map_env env class_.tc_tparams (TUtils.unresolved_tparam ~use_pos:p) in
-        let params = List.map class_.tc_tparams begin fun (_, (p, n), _, _) ->
+          List.map_env env (Cls.tparams class_) (TUtils.unresolved_tparam ~use_pos:p) in
+        let params = List.map (Cls.tparams class_) begin fun (_, (p, n), _, _) ->
           Reason.Rwitness p, Tgeneric n
         end in
         let obj_type = Reason.Rwitness p, Tapply (pos_cname, params) in
         let ety_env = {
           (Phase.env_with_self env) with
-          substs = Subst.make class_.tc_tparams tvarl;
+          substs = Subst.make (Cls.tparams class_) tvarl;
         } in
         let env, local_obj_ty = Phase.localize ~ety_env env obj_type in
         let env, fty =
@@ -1762,10 +1763,10 @@ and expr_
                  : return_type_of(Class::meth_name)
              *)
             let ety_env = {
-              ety_env with substs = Subst.make class_.tc_tparams tvarl
+              ety_env with substs = Subst.make (Cls.tparams class_) tvarl
             } in
             let env =
-              Phase.check_tparams_constraints ~use_pos:p ~ety_env env class_.tc_tparams in
+              Phase.check_tparams_constraints ~use_pos:p ~ety_env env (Cls.tparams class_) in
             let env, local_obj_ty = Phase.localize ~ety_env env obj_type in
             let local_obj_fp = TUtils.default_fun_param local_obj_ty in
             let fty = { fty with
@@ -1828,7 +1829,7 @@ and expr_
           | _ -> [] in
         let ety_env = {
           type_expansions = [];
-          substs = Subst.make class_.tc_tparams tyargs;
+          substs = Subst.make (Cls.tparams class_) tyargs;
           this_ty = cid_ty;
           from_class = Some cid;
           validate_dty = None;
@@ -2522,7 +2523,7 @@ and expr_
           let env, declty =
             obj_get ~is_method:false ~nullsafe:None env obj cid
               namepstr (fun x -> x) in
-          let ureason = Reason.URxhp (class_info.tc_name, snd namepstr) in
+          let ureason = Reason.URxhp ((Cls.name class_info), snd namepstr) in
           Type.coerce_type valp ureason env valty declty
         end ~init:env in
         make_result env txml obj
@@ -2968,22 +2969,22 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
       end
 
     | (cname, class_info, c_ty)::classes ->
-      if check_not_abstract && class_info.tc_abstract
+      if check_not_abstract && (Cls.abstract class_info)
         && not (requires_consistent_construct cid) then
-        uninstantiable_error p cid class_info.tc_pos class_info.tc_name p c_ty;
+        uninstantiable_error p cid (Cls.pos class_info) (Cls.name class_info) p c_ty;
       let env, obj_ty_, params =
         match cid, snd c_ty with
         (* Explicit type arguments *)
         | CI (_, _::_), Tclass(_, _, tyl) -> env, (snd c_ty), tyl
         | _, Tclass(_, Exact, _) ->
-          let env, params = List.map_env env class_info.tc_tparams
+          let env, params = List.map_env env (Cls.tparams class_info)
             (fun env _ -> Env.fresh_unresolved_type env) in
           env, (Tclass (cname, Exact, params)), params
         | _, _ ->
-          let env, params = List.map_env env class_info.tc_tparams
+          let env, params = List.map_env env (Cls.tparams class_info)
             (fun env _ -> Env.fresh_unresolved_type env) in
           env, (Tclass (cname, Nonexact, params)), params in
-      if not check_parent && not is_using_clause && class_info.tc_is_disposable
+      if not check_parent && not is_using_clause && (Cls.is_disposable class_info)
       then Errors.invalid_new_disposable p;
       let r_witness = Reason.Rwitness p in
       let obj_ty = (r_witness, obj_ty_) in
@@ -2999,7 +3000,7 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
       let env, _tcid, tel, tuel, ctor_fty =
         let env = check_expected_ty "New" env new_ty expected in
         call_construct p env class_info params el uel cid in
-      if not (snd class_info.tc_construct) then
+      if not (snd (Cls.construct class_info)) then
         (match cid with
           | CIstatic -> Errors.new_inconsistent_construct p cname `static
           | CIexpr _ -> Errors.new_inconsistent_construct p cname `classname
@@ -3007,7 +3008,7 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
       match cid with
         | CIparent ->
           let ctor_fty =
-            match (fst class_info.tc_construct) with
+            match (fst (Cls.construct class_info)) with
             | Some {ce_type = lazy ty; _ } ->
               let ety_env = {
                 type_expansions = [];
@@ -3046,15 +3047,15 @@ and instantiable_cid ?(exact = Nonexact) p env cid =
   let env, te, classes = class_id_for_new ~exact p env cid in
   begin
     List.iter classes begin fun ((pos, name), class_info, c_ty) ->
-      if class_info.tc_kind = Ast.Ctrait || class_info.tc_kind = Ast.Cenum
+      if (Cls.kind class_info) = Ast.Ctrait || (Cls.kind class_info) = Ast.Cenum
       then
          match cid with
           | CIexpr _ | CI _ ->
-            uninstantiable_error p cid class_info.tc_pos name pos c_ty
+            uninstantiable_error p cid (Cls.pos class_info) name pos c_ty
           | CIstatic | CIparent | CIself -> ()
-      else if class_info.tc_kind = Ast.Cabstract && class_info.tc_final
+      else if (Cls.kind class_info) = Ast.Cabstract && (Cls.final class_info)
       then
-        uninstantiable_error p cid class_info.tc_pos name pos c_ty
+        uninstantiable_error p cid (Cls.pos class_info) name pos c_ty
       else () end;
     env, te, classes
   end
@@ -3456,15 +3457,14 @@ and call_parent_construct pos env el uel =
       match Env.get_self env with
         | _, Tclass ((_, self), _, _) ->
           (match Env.get_class env self with
-            | Some ({tc_kind = Ast.Ctrait; _}
-                       as trait) ->
+            | Some trait when Cls.kind trait = Ast.Ctrait ->
               (match trait_most_concrete_req_class trait env with
                 | None -> Errors.parent_in_trait pos; default
                 | Some (_, parent_ty) ->
                   check_parent_construct pos env el uel parent_ty
               )
             | Some self_tc ->
-              if not self_tc.tc_members_fully_known
+              if not (Cls.members_fully_known self_tc)
               then () (* Don't know the hierarchy, assume it's correct *)
               else Errors.undefined_parent pos;
               default
@@ -4076,7 +4076,7 @@ and is_abstract_ft fty = match fty with
                * self:: is in the context of the non-trait "use"-ing
                * the trait's code *)
               begin match Env.get_class env self with
-                | Some { tc_kind = Ast.Ctrait; _ } -> ()
+                | Some cls when Cls.kind cls = Ast.Ctrait -> ()
                 | _ -> Errors.self_abstract_call (snd m) p (Reason.to_pos (fst fty))
               end
             | _ -> ()
@@ -4087,7 +4087,7 @@ and is_abstract_ft fty = match fty with
           begin match Typing_heap.Classes.get classname with
           | Some class_def ->
             let (_, method_name) = m in
-            begin match SMap.get method_name class_def.tc_smethods with
+            begin match SMap.get method_name (Cls.smethods class_def) with
             | None -> ()
             | Some elt ->
               if elt.ce_synthesized then
@@ -4311,7 +4311,7 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
         (* We need to instantiate generic parameters in the method signature *)
         let ety_env =
           { ety_env with
-            substs = Subst.make class_.tc_tparams paraml } in
+            substs = Subst.make (Cls.tparams class_) paraml } in
         if is_const then begin
           let const =
             if incl_tc then Env.get_const env class_ mid else
@@ -4330,7 +4330,7 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
             let env, cc_type = Phase.localize ~ety_env env cc_type in
             env, cc_type,
             (if cc_abstract
-             then Some (cc_pos, class_.tc_name ^ "::" ^ mid)
+             then Some (cc_pos, (Cls.name class_) ^ "::" ^ mid)
              else None)
         end else begin
           let smethod = Env.get_static_member is_method env class_ mid in
@@ -4384,13 +4384,13 @@ and smember_not_found pos ~is_const ~is_method class_ member_name =
     else if is_method then `static_method
     else `class_variable in
   let error hint =
-    let cid = (class_.tc_pos, class_.tc_name) in
+    let cid = ((Cls.pos class_), (Cls.name class_)) in
     Errors.smember_not_found kind pos cid member_name hint
   in
   match Env.suggest_static_member is_method class_ member_name with
   | None ->
       (match Env.suggest_member is_method class_ member_name with
-      | None when not class_.tc_members_fully_known ->
+      | None when not (Cls.members_fully_known class_) ->
           (* no error in this case ... the member might be present
            * in one of the parents of class_ that the typing cannot see *)
           ()
@@ -4404,16 +4404,16 @@ and smember_not_found pos ~is_const ~is_method class_ member_name =
 
 and member_not_found pos ~is_method class_ member_name r =
   let kind = if is_method then `method_ else `member in
-  let cid = class_.tc_pos, class_.tc_name in
+  let cid = (Cls.pos class_), (Cls.name class_) in
   let reason = Reason.to_string
-    ("This is why I think it is an object of type "^strip_ns class_.tc_name) r
+    ("This is why I think it is an object of type "^strip_ns (Cls.name class_)) r
   in
   let error hint =
     Errors.member_not_found kind pos cid member_name hint reason in
   match Env.suggest_member is_method class_ member_name with
     | None ->
       (match Env.suggest_static_member is_method class_ member_name with
-        | None when not class_.tc_members_fully_known ->
+        | None when not (Cls.members_fully_known class_) ->
           (* no error in this case ... the member might be present
            * in one of the parents of class_ that the typing cannot see *)
           ()
@@ -4468,7 +4468,7 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
     {
       type_expansions = [];
       this_ty = this_ty;
-      substs = Subst.make class_info.tc_tparams paraml;
+      substs = Subst.make (Cls.tparams class_info) paraml;
       from_class = Some class_id;
       validate_dty = None;
     }
@@ -4481,18 +4481,18 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
 
     | Some class_info when not is_method
         && not (Env.is_strict env)
-        && class_info.tc_name = SN.Classes.cStdClass ->
+        && (Cls.name class_info) = SN.Classes.cStdClass ->
       default ()
 
     | Some class_info ->
       let paraml =
         if List.length paraml = 0
-        then List.map class_info.tc_tparams
+        then List.map (Cls.tparams class_info)
             (fun _ -> Reason.Rwitness id_pos, Typing_utils.tany env)
         else paraml in
       let old_member_info = Env.get_member is_method env class_info id_str in
       let self = Env.get_self_id env in
-      let member_info, shadowed = if SMap.mem self class_info.tc_ancestors
+      let member_info, shadowed = if SMap.mem self (Cls.ancestors class_info)
       then
         (* We look up the current context to see if there is a field/method with
         * private visibility. If there is one, that one takes precedence *)
@@ -4714,19 +4714,19 @@ and class_id_for_new ~exact p env cid =
  * the 'require extends' must belong to the same inheritance hierarchy
  * and one of them should be the child of all the others *)
 and trait_most_concrete_req_class trait env =
-  List.fold_left trait.tc_req_ancestors ~f:begin fun acc (_p, ty) ->
+  List.fold_left (Cls.req_ancestors trait) ~f:begin fun acc (_p, ty) ->
     let _r, (_p, name), _paraml = TUtils.unwrap_class_type ty in
     let keep = match acc with
-      | Some (c, _ty) -> SMap.mem name c.tc_ancestors
+      | Some (c, _ty) -> SMap.mem name (Cls.ancestors c)
       | None -> false
     in
     if keep then acc
     else
       let class_ = Env.get_class env name in
       (match class_ with
-        | None
-        | Some { tc_kind = Ast.Cinterface; _ } -> acc
-        | Some { tc_kind = Ast.Ctrait; _ } ->
+        | None -> acc
+        | Some c when Cls.kind c = Ast.Cinterface -> acc
+        | Some c when Cls.kind c = Ast.Ctrait ->
           (* this is an error case for which the nastCheck spits out
            * an error, but does *not* currently remove the offending
            * 'require extends' or 'require implements' *)
@@ -4816,9 +4816,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env =
     (match Env.get_self env with
       | _, Tclass ((_, self), _, _) ->
         (match Env.get_class env self with
-          | Some (
-            {tc_kind = Ast.Ctrait; _}
-              as trait) ->
+          | Some trait when Cls.kind trait = Ast.Ctrait ->
             (match trait_most_concrete_req_class trait env with
               | None ->
                 Errors.parent_in_trait p;
@@ -4871,7 +4869,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env =
       | Some class_ ->
         let env, ty =
           resolve_type_arguments_and_check_constraints ~exact ~check_constraints
-            env p c e1 class_.tc_tparams hl in
+            env p c e1 (Cls.tparams class_) hl in
         make_result env (T.CI (c, hl)) ty
     )
   | CIexpr (p, _ as e) ->
@@ -4909,19 +4907,19 @@ and call_construct p env class_ params el uel cid =
   let ety_env = {
     type_expansions = [];
     this_ty = cid_ty;
-    substs = Subst.make class_.tc_tparams params;
+    substs = Subst.make (Cls.tparams class_) params;
     from_class = Some cid;
     validate_dty = None;
   } in
-  let env = Phase.check_tparams_constraints ~use_pos:p ~ety_env env class_.tc_tparams in
-  if class_.tc_is_xhp then env, tcid, [], [], (Reason.Rnone, TUtils.tany env) else
+  let env = Phase.check_tparams_constraints ~use_pos:p ~ety_env env (Cls.tparams class_) in
+  if (Cls.is_xhp class_) then env, tcid, [], [], (Reason.Rnone, TUtils.tany env) else
   let cstr = Env.get_construct env class_ in
   let mode = Env.get_mode env in
   match (fst cstr) with
     | None ->
       if el <> [] &&
         (mode = FileInfo.Mstrict || mode = FileInfo.Mpartial) &&
-        class_.tc_members_fully_known
+        (Cls.members_fully_known class_)
       then Errors.constructor_no_args p;
       let env, tel, _tyl = exprs env el in
       env, tcid, tel, [], (Reason.Rnone, TUtils.terr env)
@@ -5813,7 +5811,7 @@ and safe_instanceof env p class_name class_info ivar_pos ivar_ty obj_ty =
   (* Generate fresh names consisting of formal type parameter name
    * with unique suffix *)
   let env, tparams_with_new_names =
-    List.map_env env class_info.tc_tparams
+    List.map_env env (Cls.tparams class_info)
       (fun env ((_, (_,name), _, _) as tp) ->
         let env, name = Env.add_fresh_generic_parameter env name in
         env, Some (tp, name)) in
@@ -5834,7 +5832,7 @@ and safe_instanceof env p class_name class_info ivar_pos ivar_ty obj_ty =
   env, obj_ty
 
 and isexpr_generate_fresh_tparams env class_info reason hint_tyl =
-  let tparams_len = List.length class_info.tc_tparams in
+  let tparams_len = List.length (Cls.tparams class_info) in
   let hint_tyl = List.take hint_tyl tparams_len in
   let pad_len = tparams_len - (List.length hint_tyl) in
   let hint_tyl =
@@ -5850,7 +5848,7 @@ and isexpr_generate_fresh_tparams env class_info reason hint_tyl =
         let env, new_name = Env.add_fresh_generic_parameter env tparam_name in
         env, (Some (tp, new_name), (reason, Tabstract (AKgeneric new_name, None)))
   in
-  let env, tparams_and_tyl = List.map2_env env hint_tyl class_info.tc_tparams
+  let env, tparams_and_tyl = List.map2_env env hint_tyl (Cls.tparams class_info)
     ~f:replace_wildcard in
   let tparams_with_new_names, tyl_fresh = List.unzip tparams_and_tyl in
   env, tparams_with_new_names, tyl_fresh
@@ -5864,7 +5862,7 @@ and safely_refine_class_type
   (* Add in constraints as assumptions on those type parameters *)
   let ety_env = {
     type_expansions = [];
-    substs = Subst.make class_info.tc_tparams tyl_fresh;
+    substs = Subst.make (Cls.tparams class_info) tyl_fresh;
     this_ty = obj_ty; (* In case `this` appears in constraints *)
     from_class = None;
     validate_dty = None;
@@ -5876,7 +5874,7 @@ and safely_refine_class_type
       let env, ty = Phase.localize ~ety_env env ty in
       SubType.add_constraint p env ck ty_fresh ty end in
   let env =
-    List.fold_left (List.zip_exn class_info.tc_tparams tyl_fresh)
+    List.fold_left (List.zip_exn (Cls.tparams class_info) tyl_fresh)
       ~f:add_bounds ~init:env in
 
   (* Finally, if we have a class-test on something with static class type,
@@ -6049,14 +6047,14 @@ and class_def_parent env class_def class_type =
 
 and check_parent class_def class_type parent_type =
   let position = fst class_def.c_name in
-  if class_type.tc_const && not parent_type.dc_const
+  if (Cls.const class_type) && not parent_type.dc_const
   then Errors.self_const_parent_not position;
-  if parent_type.dc_const && not class_type.tc_const
+  if parent_type.dc_const && not (Cls.const class_type)
   then Errors.parent_const_self_not position;
   (* Are all the parents in Hack? Do we know all their methods?
    * If so, let's check that the abstract methods have been implemented.
    *)
-  if class_type.tc_members_fully_known
+  if (Cls.members_fully_known class_type)
   then check_parent_abstract position parent_type class_type;
   if parent_type.dc_final
   then Errors.extend_final position parent_type.dc_pos parent_type.dc_name
@@ -6068,12 +6066,12 @@ and check_parent_sealed child_type parent_type =
     | Some whitelist ->
       let parent_pos = parent_type.dc_pos in
       let parent_name = parent_type.dc_name in
-      let child_pos = child_type.tc_pos in
-      let child_name = child_type.tc_name in
+      let child_pos = (Cls.pos child_type) in
+      let child_name = (Cls.name child_type) in
       let check kind action =
         if not (SSet.mem child_name whitelist)
         then Errors.extend_sealed child_pos parent_pos parent_name kind action in
-      begin match parent_type.dc_kind, child_type.tc_kind with
+      begin match parent_type.dc_kind, (Cls.kind child_type) with
         | Ast.Cinterface, Ast.Cinterface -> check "interface" "extend"
         | Ast.Cinterface, _ -> check "interface" "implement"
         | Ast.Ctrait, _ -> check "trait" "use"
@@ -6094,21 +6092,21 @@ and check_parents_sealed env child_def child_type =
   end
 
 and check_parent_abstract position parent_type class_type =
-  let is_final = class_type.tc_final in
+  let is_final = (Cls.final class_type) in
   if parent_type.dc_kind = Ast.Cabstract &&
-    (class_type.tc_kind <> Ast.Cabstract || is_final)
+    ((Cls.kind class_type) <> Ast.Cabstract || is_final)
   then begin
-    check_extend_abstract_meth ~is_final position class_type.tc_methods;
-    check_extend_abstract_meth ~is_final position class_type.tc_smethods;
-    check_extend_abstract_const ~is_final position class_type.tc_consts;
+    check_extend_abstract_meth ~is_final position (Cls.methods class_type);
+    check_extend_abstract_meth ~is_final position (Cls.smethods class_type);
+    check_extend_abstract_const ~is_final position (Cls.consts class_type);
     check_extend_abstract_typeconst
-      ~is_final position class_type.tc_typeconsts;
+      ~is_final position (Cls.typeconsts class_type);
   end else ()
 
 and class_def tcopt c =
   let env = EnvFromDef.class_env tcopt c in
   let tc = Env.get_class env (snd c.c_name) in
-  add_decl_errors (Option.(map tc (fun tc -> value_exn tc.tc_decl_errors)));
+  add_decl_errors (Option.(map tc (fun tc -> value_exn (Cls.decl_errors tc))));
   let c = TNBody.class_meth_bodies tcopt c in
   if not !auto_complete then begin
     NastCheck.class_ env c;
@@ -6146,19 +6144,19 @@ and class_def_ env c tc =
   check_parents_sealed env c tc;
 
   let env, parent_id, parent = class_def_parent env c tc in
-  let is_final = tc.tc_final in
-  if (tc.tc_kind = Ast.Cnormal || is_final) && tc.tc_members_fully_known
+  let is_final = (Cls.final tc) in
+  if ((Cls.kind tc) = Ast.Cnormal || is_final) && (Cls.members_fully_known tc)
   then begin
-    check_extend_abstract_meth ~is_final pc tc.tc_methods;
-    check_extend_abstract_meth ~is_final pc tc.tc_smethods;
-    check_extend_abstract_const ~is_final pc tc.tc_consts;
-    check_extend_abstract_typeconst ~is_final pc tc.tc_typeconsts;
+    check_extend_abstract_meth ~is_final pc (Cls.methods tc);
+    check_extend_abstract_meth ~is_final pc (Cls.smethods tc);
+    check_extend_abstract_const ~is_final pc (Cls.consts tc);
+    check_extend_abstract_typeconst ~is_final pc (Cls.typeconsts tc);
   end;
   let env = Env.set_parent env parent in
   let env = match parent_id with
     | None -> env
     | Some parent_id -> Env.set_parent_id env parent_id in
-  if tc.tc_final then begin
+  if (Cls.final tc) then begin
     match c.c_kind with
     | Ast.Cinterface -> Errors.interface_final (fst c.c_name)
     | Ast.Cabstract -> ()
@@ -6167,10 +6165,10 @@ and class_def_ env c tc =
       Errors.internal_error pc "The parser should not parse final on enums"
     | Ast.Cnormal -> ()
   end;
-  SMap.iter (check_static_class_element tc.tc_methods ~elt_type:"method") tc.tc_smethods;
-  SMap.iter (check_static_class_element tc.tc_props ~elt_type:"property") tc.tc_sprops;
+  SMap.iter (check_static_class_element (Cls.methods tc) ~elt_type:"method") (Cls.smethods tc);
+  SMap.iter (check_static_class_element (Cls.props tc) ~elt_type:"property") (Cls.sprops tc);
   List.iter impl (class_implements_type env c);
-  if tc.tc_is_disposable
+  if (Cls.is_disposable tc)
     then List.iter (c.c_extends @ c.c_uses) (Typing_disposable.enforce_is_disposable env);
   let typed_vars = List.map c.c_vars (class_var_def env ~is_static:false c) in
   let typed_methods = List.map c.c_methods (method_def env) in
@@ -6440,7 +6438,7 @@ and method_def env m =
     | None -> env
     | Some c ->
       (* Mark $this as a using variable if it has a disposable type *)
-      if c.tc_is_disposable
+      if (Cls.is_disposable c)
       then Env.set_using_var env this
       else env in
   let env = Env.clear_params env in

@@ -28,6 +28,7 @@
     type_visitor
     typing_arrays
     typing_async
+    typing_classes_heap
     typing_coercion
     typing_continuations
     typing_dependent_type

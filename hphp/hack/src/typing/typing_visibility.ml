@@ -13,6 +13,7 @@ open Utils
 
 module Env = Typing_env
 module TUtils = Typing_utils
+module Cls = Typing_classes_heap
 
 let is_protected_visible env x self_id =
   if x = self_id then None else
@@ -23,11 +24,11 @@ let is_protected_visible env x self_id =
     (* Children can call parent's protected methods and
      * parents can call children's protected methods (like a
      * constructor) *)
-    if SSet.mem x my_class.tc_extends
-       || SMap.mem x my_class.tc_ancestors
-       || SSet.mem self_id their_class.tc_extends
-       || SSet.mem x my_class.tc_req_ancestors_extends
-       || not my_class.tc_members_fully_known
+    if SSet.mem x (Cls.extends my_class)
+       || SMap.mem x (Cls.ancestors my_class)
+       || SSet.mem self_id (Cls.extends their_class)
+       || SSet.mem x (Cls.req_ancestors_extends my_class)
+       || not (Cls.members_fully_known my_class)
     then None
     else Some (
       "Cannot access this protected member, you don't extend "^
@@ -40,7 +41,7 @@ let is_private_visible_for_class env x self_id cid class_ =
   | CIstatic ->
     let my_class = Env.get_class env self_id in
     (match my_class with
-     | Some {tc_final = true; _} -> None
+     | Some cls when Cls.final cls -> None
      | _ ->
        Some "Private members cannot be accessed with static:: since \
              a child class may also have an identically \
@@ -51,13 +52,13 @@ let is_private_visible_for_class env x self_id cid class_ =
   | CI ((_, called_ci), _) ->
     (if x = self_id then None else
      match Env.get_class env called_ci with
-     | Some {tc_kind = Ast.Ctrait; _} ->
+     | Some cls when Cls.kind cls = Ast.Ctrait ->
        Some "You cannot access private members \
              using the trait's name (did you mean to use self::?)"
      | _ ->
        Some "You cannot access this member")
   | CIexpr _ ->
-    if class_.tc_final then None
+    if (Cls.final class_) then None
     else Some "Private members cannot be accessed dynamically. \
                Did you mean to use 'self::'?"
 
@@ -112,7 +113,7 @@ let is_visible_for_class env (vis, lsb) cid cty =
   | Vprotected x ->
     let their_class = Env.get_class env x in
     (match cid, their_class with
-     | CI _, Some {tc_kind = Ast.Ctrait; _} ->
+     | CI _, Some cls when Cls.kind cls = Ast.Ctrait ->
        Some "You cannot access protected members using the trait's name \
              (did you mean to use static:: or self::?)"
      | _ -> is_protected_visible env x self_id)

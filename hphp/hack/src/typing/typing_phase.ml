@@ -193,7 +193,7 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
           | None ->
             List.map_env env tyl (localize ~ety_env)
           | Some class_info ->
-            let tparams = class_info.tc_tparams in
+            let tparams = Typing_classes_heap.tparams class_info in
             localize_tparams ~ety_env env (Reason.to_pos r) tyl tparams
       in
       env, (ety_env, (r, Tclass (cls, Nonexact, tyl)))

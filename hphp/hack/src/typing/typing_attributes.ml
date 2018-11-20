@@ -8,11 +8,11 @@
  *)
 
 open Core_kernel
-open Typing_defs
 open Typing_reason
 
 module SN = Naming_special_names
 module TMT = Typing_make_type
+module Cls = Typing_classes_heap
 
 let check_implements check_new_object attr_interface
   { Nast.ua_name = (attr_pos, attr_name)
@@ -26,13 +26,13 @@ let check_implements check_new_object attr_interface
     match Typing_env.get_class env attr_name, Typing_env.get_class env attr_interface with
     | Some attr_class, Some intf_class ->
       (* Found matching class *)
-      let attr_cid = (attr_class.tc_pos, attr_class.tc_name) in
+      let attr_cid = (Cls.pos attr_class, Cls.name attr_class) in
       (* successful exit condition: attribute class is subtype of correct interface
        * and its args satisfy the attribute class constructor *)
      let attr_locl_ty: (Typing_defs.locl Typing_defs.ty) =
-       TMT.class_type (Rwitness attr_class.tc_pos) attr_class.tc_name [] in
+       TMT.class_type (Rwitness (Cls.pos attr_class)) (Cls.name attr_class) [] in
      let interface_locl_ty: (Typing_defs.locl Typing_defs.ty) =
-       TMT.class_type (Rwitness intf_class.tc_pos) intf_class.tc_name [] in
+       TMT.class_type (Rwitness (Cls.pos intf_class)) (Cls.name intf_class) [] in
       if not (Typing_subtype.is_sub_type env attr_locl_ty interface_locl_ty)
       then begin
         let expr_kind =
@@ -40,7 +40,7 @@ let check_implements check_new_object attr_interface
           | Some ek -> ek
           | None -> "this expression" (* this case should never execute *) in
         Errors.wrong_expression_kind_attribute expr_kind
-          attr_pos attr_name attr_class.tc_pos attr_class.tc_name intf_class.tc_name;
+          attr_pos attr_name (Cls.pos attr_class) (Cls.name attr_class) (Cls.name intf_class);
         env end
       else
         let env, _, _, _, _, _ = check_new_object

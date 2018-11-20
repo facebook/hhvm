@@ -18,6 +18,7 @@ module Subst        = Decl_subst
 module SubType      = Typing_subtype
 module TUtils       = Typing_utils
 module TMT          = Typing_make_type
+module Cls          = Typing_classes_heap
 
 let raise_xhp_required pos ureason ty =
   let ty_str = Typing_print.error (snd ty) in
@@ -28,7 +29,7 @@ let raise_xhp_required pos ureason ty =
  * Given class info, produces the subset of props that are XHP attributes
  *)
 let xhp_attributes_for_class info: Typing_defs.class_elt SMap.t =
-  SMap.filter (fun _ elt_ -> elt_.ce_is_xhp_attr) info.tc_props
+  SMap.filter (fun _ elt_ -> elt_.ce_is_xhp_attr) (Cls.props info)
 
 (**
  * Walks a type and gathers all the XHP, adding an error when we encounter a
@@ -64,7 +65,7 @@ let rec walk_and_gather_xhp_ ~env ~ureason ~pos cty =
   | Tclass ((_, c), _, tyl) -> begin
       (* Here's where we actually check the declaration *)
       match Env.get_class env c with
-      | Some class_ when class_.tc_is_xhp -> (env, [cty, tyl, class_])
+      | Some class_ when (Cls.is_xhp class_) -> (env, [cty, tyl, class_])
       | _ -> (raise_xhp_required pos ureason cty; env, [])
   end
   | (Tnonnull | Tarraykind _ | Toption _
@@ -88,7 +89,7 @@ and get_spread_attributes env pos onto_xhp cty =
     let ety_env = {
       type_expansions = [];
       this_ty = xhp_ty;
-      substs = Subst.make xhp_info.tc_tparams tparams;
+      substs = Subst.make (Cls.tparams xhp_info) tparams;
       from_class = None;
       validate_dty = None;
     } in

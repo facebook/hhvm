@@ -17,6 +17,7 @@ module Reason = Typing_reason
 module Env = Typing_env
 module ShapeMap = Nast.ShapeMap
 module TySet = Typing_set
+module Cls = Typing_classes_heap
 
 (* This can be useful to debug type which blow up in size *)
 let ty_size ty =
@@ -693,9 +694,9 @@ let unwrap_class_type = function
 let try_unwrap_class_type x = Option.try_with (fun () -> unwrap_class_type x)
 
 let class_is_final_and_not_contravariant class_ty =
-  class_ty.tc_final &&
+  Cls.final class_ty &&
     List.for_all
-      class_ty.tc_tparams
+      (Cls.tparams class_ty)
       ~f:(begin function
           (Ast.Invariant | Ast.Covariant), _, _, _ -> true
           | _, _, _, _ -> false

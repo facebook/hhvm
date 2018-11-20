@@ -14,6 +14,7 @@ open Typing_defs
 
 module Env = Typing_env
 module TMT = Typing_make_type
+module Cls = Typing_classes_heap
 
 let is_disposable_visitor env =
   object(this)
@@ -28,7 +29,7 @@ let is_disposable_visitor env =
     begin match Env.get_class env class_name with
     | None -> default ()
     | Some c ->
-      if c.tc_is_disposable
+      if Cls.is_disposable c
       then Some (Utils.strip_ns class_name)
       else default ()
     end

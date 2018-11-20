@@ -7,7 +7,7 @@
  *
  *)
 
-type saved_decls
+type saved_decls [@@deriving show]
 
 val export_class_decls : TypecheckerOptions.t -> SSet.t -> saved_decls
 val import_class_decls : saved_decls -> SSet.t

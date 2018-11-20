@@ -76,7 +76,8 @@
     relative_path)
   (libraries
     collections
-    sys_utils))
+    sys_utils)
+  (preprocess (pps ppx_deriving.std)))
 
 (library
   (name server_load_flag)

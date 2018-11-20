@@ -8,19 +8,22 @@
  *)
 
 open Core_kernel
+
 (* This is the current notion of type in the typed AST.
  * In future we might want to reconsider this and define a new representation
  * that omits type inference artefacts such as type variables and lambda
  * identifiers.
  *)
 type ty = Typing_defs.locl Typing_defs.ty
+let pp_ty fmt ty = Pp_type.pp_ty () fmt ty
+let show_ty ty = Pp_type.show_ty () ty
 
 type saved_env = {
-  tcopt : TypecheckerOptions.t;
+  tcopt : TypecheckerOptions.t [@opaque];
   tenv : ty IMap.t;
   subst : int IMap.t;
   tpenv : Type_parameter_env.t;
-}
+} [@@deriving show]
 
 let empty_saved_env tcopt : saved_env = {
   tcopt;
@@ -28,30 +31,6 @@ let empty_saved_env tcopt : saved_env = {
   subst = IMap.empty;
   tpenv = SMap.empty;
 }
-
-let pp_saved_env fmt env =
-  Format.fprintf fmt "@[<hv 2>{ ";
-
-  Format.fprintf fmt "@[%s =@ " "tcopt";
-  Format.fprintf fmt "<opaque>";
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
-
-  Format.fprintf fmt "@[%s =@ " "tenv";
-  IMap.pp Pp_type.pp_ty fmt env.tenv;
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
-
-  Format.fprintf fmt "@[%s =@ " "subst";
-  IMap.pp Format.pp_print_int fmt env.subst;
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
-
-  Format.fprintf fmt "@[%s =@ " "tpenv";
-  Type_parameter_env.pp fmt env.tpenv;
-  Format.fprintf fmt "@]";
-
-  Format.fprintf fmt " }@]"
 
 (* Typed AST.
  *
@@ -69,18 +48,11 @@ let pp_saved_env fmt env =
  *)
 module Annotations = struct
   module ExprAnnotation = struct
-    type t = Pos.t * ty
-    let pp fmt (pos, ty) =
-      Format.fprintf fmt "(@[";
-      Pos.pp fmt pos;
-      Format.fprintf fmt ",@ ";
-      Pp_type.pp_ty fmt ty;
-      Format.fprintf fmt "@])"
+    type t = Pos.t * ty [@@deriving show]
   end
 
   module EnvAnnotation = struct
-    type t = saved_env
-    let pp = pp_saved_env
+    type t = saved_env [@@deriving show]
   end
 end
 

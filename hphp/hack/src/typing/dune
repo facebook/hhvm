@@ -2,6 +2,7 @@
   (name typing_defs)
   (wrapped false)
   (modules
+    pp_type
     typing_defs
     typing_reason)
   (libraries
@@ -10,14 +11,14 @@
     heap_ident
     nast
     pos
-    utils_core))
+    utils_core)
+  (preprocess (pps ppx_deriving.std)))
 
 (library
   (name tast)
   (wrapped false)
   (modules
     ide_tast_cache
-    pp_type
     tast
     tast_env
     tast_expand

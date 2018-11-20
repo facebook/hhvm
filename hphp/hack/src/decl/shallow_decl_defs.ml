@@ -35,18 +35,15 @@ type shallow_prop = {
 } [@@deriving show]
 
 type shallow_method = {
-  sm_final             : bool;
-  sm_abstract          : bool;
-  sm_visibility        : Aast.visibility;
-  sm_name              : Aast.sid;
-  sm_tparams           : Aast.tparam list;
-  sm_where_constraints : Aast.where_constraint list;
-  sm_variadic          : Nast.fun_variadicity;
-  sm_params            : Nast.fun_param list;
-  sm_fun_kind          : Ast.fun_kind;
-  sm_user_attributes   : Nast.user_attribute list;
-  sm_ret               : Aast.hint option;
-  sm_ret_by_ref        : bool;
+  sm_abstract   : bool;
+  sm_final      : bool;
+  sm_memoizelsb : bool;
+  sm_name       : Aast.sid;
+  sm_override   : bool;
+  sm_reactivity : Decl_defs.method_reactivity option;
+  sm_type       : decl fun_type;
+  sm_unsafecstr : bool;
+  sm_visibility : Aast.visibility;
 } [@@deriving show]
 
 type shallow_class = {

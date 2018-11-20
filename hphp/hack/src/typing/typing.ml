@@ -256,7 +256,7 @@ let param_has_at_most_rx_as_func p =
   Attributes.mem2 UA.uaAtMostRxAsFunc UA.uaOnlyRxIfRxFunc_do_not_use p.param_user_attributes
 
 let fun_reactivity env attrs params =
-  let r = Decl.fun_reactivity env attrs in
+  let r = Decl_fun_utils.fun_reactivity env attrs in
   let module UA = Naming_special_names.UserAttributes in
 
   let r =
@@ -334,7 +334,7 @@ let make_param_local_ty env param =
     | Some x ->
       let ty = Decl_hint.hint env.Env.decl_env x in
       let condition_type =
-        Decl.condition_type_from_attributes env.Env.decl_env param.param_user_attributes in
+        Decl_fun_utils.condition_type_from_attributes env.Env.decl_env param.param_user_attributes in
       begin match condition_type with
       | Some condition_type ->
         let env, ty = Phase.localize ~ety_env env ty in
@@ -2351,7 +2351,7 @@ and expr_
       (* Is the return type declared? *)
       let is_explicit_ret = Option.is_some f.f_ret in
       let reactivity =
-          Decl.fun_reactivity_opt env.Env.decl_env f.f_user_attributes
+          Decl_fun_utils.fun_reactivity_opt env.Env.decl_env f.f_user_attributes
           |> Option.value ~default:(TR.strip_conditional_reactivity (Env.env_reactivity env)) in
       let old_disallow_this = env.Env.disallow_this in
       let disallow_this =

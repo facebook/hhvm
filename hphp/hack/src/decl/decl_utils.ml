@@ -7,15 +7,15 @@
  *
  *)
 
+open Core_kernel
 open Reordered_argument_collections
+open Nast
 open Typing_defs
 
-module N = Nast
-
 let unwrap_class_hint = function
-  | (_, N.Happly ((pos, class_name), type_parameters)) ->
+  | (_, Happly ((pos, class_name), type_parameters)) ->
       pos, class_name, type_parameters
-  | p, N.Habstr _ ->
+  | p, Habstr _ ->
       Errors.expected_class ~suffix:" or interface but got a generic" p;
       Pos.none, "", []
   | p, _ ->

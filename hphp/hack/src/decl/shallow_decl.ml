@@ -8,6 +8,8 @@
  *)
 
 open Core_kernel
+open Decl_defs
+open Decl_fun_utils
 open Shallow_decl_defs
 open Nast
 open Typing_deps
@@ -132,20 +134,86 @@ and static_prop env c cv =
     sp_visibility = cv.cv_visibility;
   }
 
-let method_ m =
+let method_type env m =
+  check_params env m.m_params;
+  let reactivity = fun_reactivity env m.m_user_attributes in
+  let mut = get_param_mutability m.m_user_attributes in
+  let returns_mutable = fun_returns_mutable m.m_user_attributes in
+  let returns_void_to_rx = fun_returns_void_to_rx m.m_user_attributes in
+  let return_disposable = has_return_disposable_attribute m.m_user_attributes in
+  let arity_min = minimum_arity m.m_params in
+  let params = make_params env m.m_params in
+  let ret = match m.m_ret with
+    | None -> ret_from_fun_kind (fst m.m_name) m.m_fun_kind
+    | Some ret -> Decl_hint.hint env ret in
+  let arity = match m.m_variadic with
+    | FVvariadicArg param ->
+      assert param.param_is_variadic;
+      assert (param.param_expr = None);
+      Fvariadic (arity_min, make_param_ty env param)
+    | FVellipsis p  -> Fellipsis (arity_min, p)
+    | FVnonVariadic -> Fstandard (arity_min, List.length m.m_params)
+  in
+  let tparams = List.map m.m_tparams (type_param env) in
+  let where_constraints =
+    List.map m.m_where_constraints (where_constraint env) in
   {
+    ft_pos      = fst m.m_name;
+    ft_deprecated =
+      Attrs.deprecated ~kind:"method" m.m_name m.m_user_attributes;
+    ft_abstract = m.m_abstract;
+    ft_is_coroutine = m.m_fun_kind = Ast.FCoroutine;
+    ft_arity    = arity;
+    ft_tparams  = tparams;
+    ft_where_constraints = where_constraints;
+    ft_params   = params;
+    ft_ret      = ret;
+    ft_ret_by_ref = m.m_ret_by_ref;
+    ft_reactive = reactivity;
+    ft_mutability = mut;
+    ft_returns_mutable = returns_mutable;
+    ft_return_disposable = return_disposable;
+    ft_decl_errors = None;
+    ft_returns_void_to_rx = returns_void_to_rx;
+  }
+
+let method_ env c m =
+  let override = Attrs.mem SN.UserAttributes.uaOverride m.m_user_attributes in
+  if m.m_visibility = Private && override then begin
+    let pos, id = m.m_name in
+    Errors.private_override pos (snd c.c_name) id;
+  end;
+  let has_memoizelsb =
+    Attrs.mem SN.UserAttributes.uaMemoizeLSB m.m_user_attributes in
+  let ft = method_type env m in
+  let reactivity =
+    match ft.ft_reactive with
+    | Reactive (Some (_, Tapply ((_, cls), []))) ->
+      Some (Method_reactive (Some cls))
+    | Reactive None ->
+      Some (Method_reactive None)
+    | Shallow (Some (_, Tapply ((_, cls), []))) ->
+      Some (Method_shallow (Some cls))
+    | Shallow None ->
+      Some (Method_shallow None)
+    | Local (Some (_, Tapply ((_, cls), [])))  ->
+      Some (Method_local (Some cls))
+    | Local None ->
+      Some (Method_local None)
+    | _ -> None
+  in
+  let unsafe_cstr =
+    Attrs.mem SN.UserAttributes.uaUnsafeConstruct m.m_user_attributes in
+  {
+    sm_abstract = ft.ft_abstract;
     sm_final = m.m_final;
-    sm_abstract = m.m_abstract;
-    sm_visibility = m.m_visibility;
+    sm_memoizelsb = has_memoizelsb;
     sm_name = m.m_name;
-    sm_tparams = m.m_tparams;
-    sm_where_constraints = m.m_where_constraints;
-    sm_variadic = m.m_variadic;
-    sm_params = m.m_params;
-    sm_fun_kind = m.m_fun_kind;
-    sm_user_attributes = m.m_user_attributes;
-    sm_ret = m.m_ret;
-    sm_ret_by_ref = m.m_ret_by_ref;
+    sm_override = override;
+    sm_reactivity = reactivity;
+    sm_type = ft;
+    sm_unsafecstr = unsafe_cstr;
+    sm_visibility = m.m_visibility;
   }
 
 let class_ env c =
@@ -167,9 +235,9 @@ let class_ env c =
     sc_typeconsts = List.filter_map c.c_typeconsts (typeconst env c);
     sc_props = List.map c.c_vars (prop env);
     sc_sprops = List.map c.c_static_vars (static_prop env c);
-    sc_constructor = Option.map c.c_constructor ~f:method_;
-    sc_static_methods = List.map c.c_static_methods method_;
-    sc_methods = List.map c.c_methods method_;
+    sc_constructor = Option.map c.c_constructor ~f:(method_ env c);
+    sc_static_methods = List.map c.c_static_methods (method_ env c);
+    sc_methods = List.map c.c_methods (method_ env c);
     sc_user_attributes = c.c_user_attributes;
     sc_enum = c.c_enum;
     sc_decl_errors = Errors.empty;

@@ -15,6 +15,7 @@
 (*****************************************************************************)
 open Core_kernel
 open Decl_defs
+open Decl_fun_utils
 open Nast
 open Shallow_decl_defs
 open Typing_defs
@@ -67,39 +68,6 @@ let stop_tracking () =
   tracked_names := None;
   res
 
-let conditionally_reactive_attribute_to_hint env { ua_params = l; _ } =
-  match l with
-  (* convert class const expression to non-generic type hint *)
-  | [p, Class_const ((_, CI (cls, _)), (_, name))]
-    when name = SN.Members.mClass ->
-      (* set Extends dependency for between class that contains
-         method and condition type *)
-      Decl_env.add_extends_dependency env (snd cls);
-      Decl_hint.hint env (p, Happly (cls, []))
-  | _ ->
-    (* error for invalid argument list was already reported during the
-       naming step, do nothing *)
-    Reason.none, Tany
-
-let condition_type_from_attributes env user_attributes =
-  Attributes.find SN.UserAttributes.uaOnlyRxIfImpl user_attributes
-  |> Option.map ~f:(conditionally_reactive_attribute_to_hint env)
-
-let fun_reactivity_opt env user_attributes =
-  let has attr = Attributes.mem attr user_attributes in
-  let module UA = SN.UserAttributes in
-
-  let rx_condition = condition_type_from_attributes env user_attributes in
-
-  if has UA.uaReactive then Some (Reactive rx_condition)
-  else if has UA.uaShallowReactive then Some (Shallow rx_condition)
-  else if has UA.uaLocalReactive then Some (Local rx_condition)
-  else if has UA.uaNonRx then Some Nonreactive
-  else None
-
-let fun_reactivity env user_attributes =
-  fun_reactivity_opt env user_attributes
-  |> Option.value ~default:Nonreactive
 (*****************************************************************************)
 (* Checking that the kind of a class is compatible with its parent
  * For example, a class cannot extend an interface, an interface cannot
@@ -233,72 +201,10 @@ let get_class_parents_and_traits env shallow_class =
 (* Section declaring the type of a function *)
 (*****************************************************************************)
 
-let has_accept_disposable_attribute user_attributes =
-  Attributes.mem SN.UserAttributes.uaAcceptDisposable user_attributes
-
-let has_return_disposable_attribute user_attributes =
-  Attributes.mem SN.UserAttributes.uaReturnDisposable user_attributes
-
-let fun_returns_mutable user_attributes =
-  Attributes.mem SN.UserAttributes.uaMutableReturn user_attributes
-
-let fun_returns_void_to_rx user_attributes =
-  Attributes.mem SN.UserAttributes.uaReturnsVoidToRx user_attributes
-
-let get_param_mutability user_attributes =
-  if Attributes.mem SN.UserAttributes.uaOwnedMutable user_attributes
-  then Some Param_owned_mutable
-  else if Attributes.mem SN.UserAttributes.uaMutable user_attributes
-  then Some Param_borrowed_mutable
-  else if Attributes.mem SN.UserAttributes.uaMaybeMutable user_attributes
-  then Some Param_maybe_mutable
-  else None
-
 let rec ifun_decl tcopt (f: Ast.fun_) =
   let f = Errors.ignore_ (fun () -> Naming.fun_ tcopt f) in
   fun_decl f tcopt;
   ()
-
-and make_param_ty env param =
-  let ty = match param.param_hint with
-    | None ->
-      let r = Reason.Rwitness param.param_pos in
-      (r, Tany)
-      (* if the code is strict, use the type-hint *)
-    | Some x ->
-      Decl_hint.hint env x
-  in
-  let ty = match ty with
-    | _, t when param.param_is_variadic ->
-      (* When checking a call f($a, $b) to a function f(C ...$args),
-       * both $a and $b must be of type C *)
-      Reason.Rvar_param param.param_pos, t
-    | x -> x
-  in
-  let module UA = SN.UserAttributes in
-  let has_at_most_rx_as_func =
-    Attributes.mem2 UA.uaAtMostRxAsFunc UA.uaOnlyRxIfRxFunc_do_not_use param.param_user_attributes
-  in
-  let ty =
-    if has_at_most_rx_as_func then make_function_type_rxvar ty
-    else ty in
-  let mode = get_param_mode param.param_is_reference param.param_callconv in
-  let rx_annotation =
-    if has_at_most_rx_as_func then Some Param_rx_var
-    else
-      Attributes.find UA.uaOnlyRxIfImpl param.param_user_attributes
-      |> Option.map ~f:(fun v -> Param_rx_if_impl (conditionally_reactive_attribute_to_hint env v))
-    in
-  {
-    fp_pos  = param.param_pos;
-    fp_name = Some param.param_name;
-    fp_type = ty;
-    fp_kind = mode;
-    fp_mutability = get_param_mutability param.param_user_attributes;
-    fp_accept_disposable =
-      has_accept_disposable_attribute param.param_user_attributes;
-    fp_rx_annotation = rx_annotation;
-  }
 
 and fun_decl f decl_tcopt =
   let errors, ft = Errors.do_ begin fun () ->
@@ -314,21 +220,6 @@ and fun_decl f decl_tcopt =
   record_fun (snd f.f_name);
   Decl_heap.Funs.add (snd f.f_name) ft;
   ()
-
-and ret_from_fun_kind pos kind =
-  let ty_any = (Reason.Rwitness pos, Tany) in
-  match kind with
-    | Ast.FGenerator ->
-      let r = Reason.Rret_fun_kind (pos, kind) in
-      r, Tapply ((pos, SN.Classes.cGenerator), [ty_any ; ty_any ; ty_any])
-    | Ast.FAsyncGenerator ->
-      let r = Reason.Rret_fun_kind (pos, kind) in
-      r, Tapply ((pos, SN.Classes.cAsyncGenerator), [ty_any ; ty_any ; ty_any])
-    | Ast.FAsync ->
-      let r = Reason.Rret_fun_kind (pos, kind) in
-      r, Tapply ((pos, SN.Classes.cAwaitable), [ty_any])
-    | Ast.FSync
-    | Ast.FCoroutine -> ty_any
 
 and fun_decl_in_env env f =
   check_params env f.f_params;
@@ -371,53 +262,6 @@ and fun_decl_in_env env f =
     ft_returns_void_to_rx = returns_void_to_rx;
   } in
   ft
-
-and type_param env (variance, x, cstrl, reified) =
-  variance, x, List.map cstrl (fun (ck, h) -> (ck, Decl_hint.hint env h)), reified
-
-and where_constraint env (ty1, ck, ty2) =
-  (Decl_hint.hint env ty1, ck, Decl_hint.hint env ty2)
-
-(* Functions building the types for the parameters of a function *)
-(* It's not completely trivial because of optional arguments  *)
-
-and minimum_arity paraml =
-  (* We're looking for the minimum number of arguments that must be specified
-  in a call to this method. Variadic "..." parameters need not be specified,
-  parameters with default values need not be specified, so this method counts
-  non-default-value, non-variadic parameters. *)
-  let f param = (not param.param_is_variadic) && param.param_expr = None in
-  List.count paraml f
-
-and check_params env paraml =
-  (* We wish to give an error on the first non-default parameter
-  after a default parameter. That is:
-  function foo(int $x, ?int $y = null, int $z)
-  is an error on $z. *)
-  (* TODO: This check doesn't need to be done at type checking time; it is
-  entirely syntactic. When we switch over to the FFP, remove this code. *)
-  let rec loop seen_default paraml =
-    match paraml with
-    | [] -> ()
-    | param :: rl ->
-        if param.param_is_variadic then
-          () (* Assume that a variadic parameter is the last one we need
-            to check. We've already given a parse error if the variadic
-            parameter is not last. *)
-        else if seen_default && param.param_expr = None then
-          Errors.previous_default param.param_pos
-          (* We've seen at least one required parameter, and there's an
-          optional parameter after it.  Given an error, and then stop looking
-          for more errors in this parameter list. *)
-        else
-          loop (param.param_expr <> None) rl
-  in
-  (* PHP allows non-default valued parameters after default valued parameters. *)
-  if (env.Decl_env.mode <> FileInfo.Mphp) then
-    loop false paraml
-
-and make_params env paraml =
-  List.map paraml ~f:(make_param_ty env)
 
 (*****************************************************************************)
 (* Section declaring the type of a class *)
@@ -518,7 +362,7 @@ and class_decl tcopt c =
   let props = List.fold_left ~f:(prop_decl c) ~init:props c.sc_props in
   let m = inherited.Decl_inherit.ih_methods in
   let m, condition_types = List.fold_left
-      ~f:(method_decl_acc ~is_static:false env c )
+      ~f:(method_decl_acc ~is_static:false c )
       ~init:(m, SSet.empty) c.sc_methods in
   let consts = inherited.Decl_inherit.ih_consts in
   let consts = List.fold_left ~f:(class_const_fold c)
@@ -532,10 +376,10 @@ and class_decl tcopt c =
   let sprops = List.fold_left c.sc_sprops ~f:sclass_var ~init:sprops in
   let sm = inherited.Decl_inherit.ih_smethods in
   let sm, condition_types = List.fold_left c.sc_static_methods
-      ~f:(method_decl_acc ~is_static:true env c )
+      ~f:(method_decl_acc ~is_static:true c )
       ~init:(sm, condition_types) in
   let parent_cstr = inherited.Decl_inherit.ih_cstr in
-  let cstr = constructor_decl env parent_cstr c in
+  let cstr = constructor_decl parent_cstr c in
   let has_concrete_cstr = match (fst cstr) with
     | None
     | Some {elt_abstract = true; _} -> false
@@ -694,7 +538,7 @@ and trait_exists env acc trait =
       )
     | _ -> false
 
-and constructor_decl env (pcstr, pconsist) class_ =
+and constructor_decl (pcstr, pconsist) class_ =
   (* constructors in children of class_ must be consistent? *)
   let cconsist = class_.sc_final ||
     Attrs.mem
@@ -705,14 +549,14 @@ and constructor_decl env (pcstr, pconsist) class_ =
   | Some method_, Some {elt_final = true; elt_origin; _ } ->
     let ft = Decl_heap.Constructors.find_unsafe elt_origin in
     Errors.override_final ~parent:(ft.ft_pos) ~child:(fst method_.sm_name);
-    let cstr, mconsist = build_constructor env class_ method_ in
+    let cstr, mconsist = build_constructor class_ method_ in
     cstr, cconsist || mconsist || pconsist
   | Some method_, _ ->
-    let cstr, mconsist = build_constructor env class_ method_ in
+    let cstr, mconsist = build_constructor class_ method_ in
     cstr, cconsist || mconsist || pconsist
 
-and build_constructor env class_ method_ =
-  let ft = method_decl env method_ in
+and build_constructor class_ method_ =
+  let ft = method_.sm_type in
   let _, class_name = class_.sc_name in
   let vis = visibility class_name method_.sm_visibility in
   let mconsist = method_.sm_final || class_.sc_kind = Ast.Cinterface in
@@ -724,8 +568,7 @@ and build_constructor env class_ method_ =
    * UserAttributes.uaConsistentConstruct is marking the corresponding
    * 'new static()' UNSAFE, potentially impacting the safety of a large
    * type hierarchy. *)
-  let consist_override =
-    Attrs.mem SN.UserAttributes.uaUnsafeConstruct method_.sm_user_attributes in
+  let consist_override = method_.sm_unsafecstr in
   let cstr = {
     elt_final = method_.sm_final;
     elt_abstract = ft.ft_abstract;
@@ -859,55 +702,10 @@ and typeconst_fold c ((typeconsts, consts) as acc) stc =
     let typeconsts = SMap.add (snd stc.stc_name) tc typeconsts in
     typeconsts, consts
 
-and method_decl env m =
-  check_params env m.sm_params;
-  let reactivity = fun_reactivity env m.sm_user_attributes in
-  let mut = get_param_mutability m.sm_user_attributes in
-  let returns_mutable = fun_returns_mutable m.sm_user_attributes in
-  let returns_void_to_rx = fun_returns_void_to_rx m.sm_user_attributes in
-  let return_disposable = has_return_disposable_attribute m.sm_user_attributes in
-  let arity_min = minimum_arity m.sm_params in
-  let params = make_params env m.sm_params in
-  let ret = match m.sm_ret with
-    | None -> ret_from_fun_kind (fst m.sm_name) m.sm_fun_kind
-    | Some ret -> Decl_hint.hint env ret in
-  let arity = match m.sm_variadic with
-    | FVvariadicArg param ->
-      assert param.param_is_variadic;
-      assert (param.param_expr = None);
-      Fvariadic (arity_min, make_param_ty env param)
-    | FVellipsis p  -> Fellipsis (arity_min, p)
-    | FVnonVariadic -> Fstandard (arity_min, List.length m.sm_params)
-  in
-  let tparams = List.map m.sm_tparams (type_param env) in
-  let where_constraints =
-    List.map m.sm_where_constraints (where_constraint env) in
-  {
-    ft_pos      = fst m.sm_name;
-    ft_deprecated =
-      Attrs.deprecated ~kind:"method" m.sm_name m.sm_user_attributes;
-    ft_abstract = m.sm_abstract;
-    ft_is_coroutine = m.sm_fun_kind = Ast.FCoroutine;
-    ft_arity    = arity;
-    ft_tparams  = tparams;
-    ft_where_constraints = where_constraints;
-    ft_params   = params;
-    ft_ret      = ret;
-    ft_ret_by_ref = m.sm_ret_by_ref;
-    ft_reactive = reactivity;
-    ft_mutability = mut;
-    ft_returns_mutable = returns_mutable;
-    ft_return_disposable = return_disposable;
-    ft_decl_errors = None;
-    ft_returns_void_to_rx = returns_void_to_rx;
-  }
-
 and method_check_override c m acc  =
   let pos, id = m.sm_name in
   let _, class_id = c.sc_name in
-  let override = Attrs.mem SN.UserAttributes.uaOverride m.sm_user_attributes in
-  if m.sm_visibility = Private && override then
-    Errors.private_override pos class_id id;
+  let override = m.sm_override in
   match SMap.get id acc with
   | Some _ -> false (* overriding final methods is handled in typing *)
   | None when override && c.sc_kind = Ast.Ctrait -> true
@@ -916,27 +714,26 @@ and method_check_override c m acc  =
     false
   | None -> false
 
-and method_decl_acc ~is_static env c (acc, condition_types) m  =
+and method_decl_acc ~is_static c (acc, condition_types) m  =
   let check_override = method_check_override c m acc in
-  let has_memoizelsb =
-    Attrs.mem SN.UserAttributes.uaMemoizeLSB m.sm_user_attributes in
-  let ft = method_decl env m in
+  let has_memoizelsb = m.sm_memoizelsb in
+  let ft = m.sm_type in
   let _, id = m.sm_name in
-  let condition_types, reactivity =
+  let condition_types =
     match ft.ft_reactive with
     | Reactive (Some (_, Tapply ((_, cls), []))) ->
-      SSet.add cls condition_types, Some (Decl_defs.Method_reactive (Some cls))
+      SSet.add cls condition_types
     | Reactive None ->
-      condition_types, Some (Decl_defs.Method_reactive None)
+      condition_types
     | Shallow (Some (_, Tapply ((_, cls), []))) ->
-      SSet.add cls condition_types, Some (Decl_defs.Method_shallow (Some cls))
+      SSet.add cls condition_types
     | Shallow None ->
-      condition_types, Some (Decl_defs.Method_shallow None)
+      condition_types
     | Local (Some (_, Tapply ((_, cls), [])))  ->
-      SSet.add cls condition_types, Some (Decl_defs.Method_local (Some cls))
+      SSet.add cls condition_types
     | Local None ->
-      condition_types, Some (Decl_defs.Method_local None)
-    | _ -> condition_types, None
+      condition_types
+    | _ -> condition_types
   in
   let vis =
     match SMap.get id acc, m.sm_visibility with
@@ -956,7 +753,7 @@ and method_decl_acc ~is_static env c (acc, condition_types) m  =
     elt_synthesized = false;
     elt_visibility = vis;
     elt_origin = snd (c.sc_name);
-    elt_reactivity = reactivity;
+    elt_reactivity = m.sm_reactivity;
   } in
   let add_meth = if is_static
     then Decl_heap.StaticMethods.add

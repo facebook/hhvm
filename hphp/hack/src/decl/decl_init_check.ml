@@ -10,6 +10,7 @@
 open Core_kernel
 open Decl_defs
 open Nast
+open Shallow_decl_defs
 
 module Attrs = Attributes
 module SN = Naming_special_names
@@ -24,19 +25,19 @@ let add_parent_construct decl_env c props parent_hint =
   match parent_hint with
     | (_, Happly ((_, parent), _)) ->
       begin match Decl_env.get_class_dep decl_env parent with
-        | Some class_ when class_.dc_need_init && c.c_constructor <> None ->
+        | Some class_ when class_.dc_need_init && c.sc_constructor <> None ->
           SSet.add parent_init_prop props
         | _ -> props
       end
     | _ -> props
 
 let parent decl_env c acc =
-  if c.c_mode = FileInfo.Mdecl then acc
+  if c.sc_mode = FileInfo.Mdecl then acc
   else
-    if c.c_kind = Ast.Ctrait
-    then List.fold_left c.c_req_extends
+    if c.sc_kind = Ast.Ctrait
+    then List.fold_left c.sc_req_extends
       ~f:(add_parent_construct decl_env c) ~init:acc
-    else match c.c_extends with
+    else match c.sc_extends with
     | [] -> acc
     | parent_hint :: _ -> add_parent_construct decl_env c acc parent_hint
 
@@ -53,14 +54,14 @@ let prop_needs_init cv =
     | Some _ -> cv.cv_expr = None
 
 let own_props c props =
-  List.fold_left c.c_vars ~f:begin fun acc cv ->
+  List.fold_left c.sc_vars ~f:begin fun acc cv ->
     if prop_needs_init cv
     then SSet.add (snd cv.cv_id) acc
     else acc
   end ~init:props
 
 let parent_props decl_env c props =
-  List.fold_left c.c_extends ~f:begin fun acc parent ->
+  List.fold_left c.sc_extends ~f:begin fun acc parent ->
     match parent with
     | _, Happly ((_, parent), _) ->
       let tc = Decl_env.get_class_dep decl_env parent in
@@ -73,7 +74,7 @@ let parent_props decl_env c props =
   end ~init:props
 
 let trait_props decl_env c props =
-  List.fold_left c.c_uses ~f:begin fun acc -> function
+  List.fold_left c.sc_uses ~f:begin fun acc -> function
     | _, Happly ((_, trait), _) -> begin
       let class_ = Decl_env.get_class_dep decl_env trait in
       match class_ with
@@ -91,7 +92,7 @@ let trait_props decl_env c props =
           | None -> SSet.union members acc
           | Some cstr when cstr.elt_origin <> trait || cstr.elt_abstract ->
               SSet.union members acc
-          | _ when c.c_constructor <> None -> SSet.union members acc
+          | _ when c.sc_constructor <> None -> SSet.union members acc
           | _ -> acc
         end
     end
@@ -110,19 +111,19 @@ let get_deferred_init_props decl_env c =
       SSet.add name priv_props, SSet.add name props
     else
       priv_props, SSet.add name props
-  ) ~init:(SSet.empty, SSet.empty) c.c_vars in
+  ) ~init:(SSet.empty, SSet.empty) c.sc_vars in
   let props = parent_props decl_env c props in
   let props = parent decl_env c props in
   priv_props, props
 
 let class_ ~has_own_cstr decl_env c =
-  match c.c_kind with
+  match c.sc_kind with
   | Ast.Cabstract when not has_own_cstr ->
     let priv_props, props = get_deferred_init_props decl_env c in
     if priv_props <> SSet.empty then
       (* XXX: should priv_props be checked for a trait?
        * see chown_privates in typing_inherit *)
-      Errors.constructor_required c.c_name priv_props;
+      Errors.constructor_required c.sc_name priv_props;
     props
   | Ast.Ctrait -> snd (get_deferred_init_props decl_env c)
   | _ -> SSet.empty

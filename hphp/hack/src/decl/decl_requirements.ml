@@ -9,7 +9,7 @@
 
 open Core_kernel
 open Decl_defs
-open Nast
+open Shallow_decl_defs
 open Typing_defs
 
 module Inst = Decl_instantiate
@@ -26,7 +26,7 @@ let make_substitution pos class_name class_type class_parameters =
 
 (* Accumulate requirements so that we can successfully check the bodies
  * of trait methods / check that classes satisfy these requirements *)
-let flatten_parent_class_reqs env class_nast
+let flatten_parent_class_reqs env shallow_class
     (req_ancestors, req_ancestors_extends) parent_hint =
   let parent_pos, parent_name, parent_params =
     Decl_utils.unwrap_class_hint parent_hint in
@@ -47,7 +47,7 @@ let flatten_parent_class_reqs env class_nast
           let ty = Inst.instantiate subst ty in
           parent_pos, ty
         end in
-    match class_nast.c_kind with
+    match shallow_class.sc_kind with
     | Ast.Cnormal | Ast.Cabstract ->
       (* not necessary to accumulate req_ancestors_extends for classes --
        * it's not used *)
@@ -115,22 +115,22 @@ let naive_dedup req_extends =
     | _ -> Some (parent_pos, ty)
   end
 
-let get_class_requirements env class_nast =
+let get_class_requirements env shallow_class =
   let req_ancestors_extends = SSet.empty in
   let acc = ([], req_ancestors_extends) in
   let acc =
     List.fold_left ~f:(declared_class_req env)
-      ~init:acc class_nast.c_req_extends in
+      ~init:acc shallow_class.sc_req_extends in
   let acc =
     List.fold_left ~f:(declared_class_req env)
-      ~init:acc class_nast.c_req_implements in
+      ~init:acc shallow_class.sc_req_implements in
   let acc =
-    List.fold_left ~f:(flatten_parent_class_reqs env class_nast)
-      ~init:acc class_nast.c_uses in
+    List.fold_left ~f:(flatten_parent_class_reqs env shallow_class)
+      ~init:acc shallow_class.sc_uses in
   let acc =
-    List.fold_left ~f:(flatten_parent_class_reqs env class_nast)
-      ~init:acc (if class_nast.c_kind = Ast.Cinterface then
-          class_nast.c_extends else class_nast.c_implements) in
+    List.fold_left ~f:(flatten_parent_class_reqs env shallow_class)
+      ~init:acc (if shallow_class.sc_kind = Ast.Cinterface then
+          shallow_class.sc_extends else shallow_class.sc_implements) in
   let req_extends, req_ancestors_extends = acc in
   let req_extends = naive_dedup req_extends in
   req_extends, req_ancestors_extends

@@ -17,7 +17,7 @@
 
 open Core_kernel
 open Decl_defs
-open Nast
+open Shallow_decl_defs
 open Typing_defs
 
 module Inst = Decl_instantiate
@@ -275,7 +275,7 @@ let inherit_hack_class env c p class_name class_type argl =
     match class_type.dc_kind with
     | Ast.Ctrait ->
         (* Change the private visibility to point to the inheriting class *)
-        chown_privates (snd c.c_name) class_type
+        chown_privates (snd c.sc_name) class_type
     | Ast.Cnormal | Ast.Cabstract | Ast.Cinterface ->
         filter_privates class_type
     | Ast.Cenum -> class_type
@@ -290,7 +290,7 @@ let inherit_hack_class env c p class_name class_type argl =
   let cstr     = Decl_env.get_construct env class_type in
   let subst_ctx = {
     sc_subst = subst;
-    sc_class_context = snd c.c_name;
+    sc_class_context = snd c.sc_name;
     sc_from_req_extends = false;
   } in
   let substs = SMap.add class_name subst_ctx class_type.dc_substs in
@@ -374,10 +374,10 @@ let from_parent env c =
      * will be implemented in the future, so we take them as
      * part of the class (as requested by dependency injection implementers)
      *)
-    match c.c_kind with
-      | Ast.Cabstract -> c.c_implements @ c.c_extends
-      | Ast.Ctrait -> c.c_implements @ c.c_extends @ c.c_req_implements
-      | _ -> c.c_extends
+    match c.sc_kind with
+      | Ast.Cabstract -> c.sc_implements @ c.sc_extends
+      | Ast.Ctrait -> c.sc_implements @ c.sc_extends @ c.sc_req_implements
+      | _ -> c.sc_extends
   in
   let inherited_l = List.map extends (from_class env c) in
   List.fold_right ~f:add_inherited inherited_l ~init:empty
@@ -416,20 +416,20 @@ let make env c =
   (* members inherited from parent class ... *)
   let acc = from_parent env c in
   let acc = List.fold_left ~f:(from_requirements env c)
-    ~init:acc c.c_req_extends in
+    ~init:acc c.sc_req_extends in
   (* ... are overridden with those inherited from used traits *)
   let (acc, methods, smethods) = List.fold_left
     ~f:(from_trait env c)
     ~init:(acc, SMap.empty, SMap.empty)
-    c.c_uses in
+    c.sc_uses in
   let acc = collapse_trait_inherited methods smethods acc in
   let acc = List.fold_left ~f:(from_xhp_attr_use env)
-    ~init:acc c.c_xhp_attr_uses in
+    ~init:acc c.sc_xhp_attr_uses in
   (* todo: what about the same constant defined in different interfaces
    * we implement? We should forbid and say "constant already defined".
    * to julien: where is the logic that check for duplicated things?
    * todo: improve constant handling, see task #2487051
    *)
   let acc = List.fold_left ~f:(from_interface_constants env)
-    ~init:acc c.c_req_implements in
-  List.fold_left ~f:(from_interface_constants env) ~init:acc c.c_implements
+    ~init:acc c.sc_req_implements in
+  List.fold_left ~f:(from_interface_constants env) ~init:acc c.sc_implements

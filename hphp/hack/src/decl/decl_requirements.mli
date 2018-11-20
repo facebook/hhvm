@@ -7,5 +7,5 @@
  *
  *)
 
-val get_class_requirements : Decl_env.env -> Nast.class_ ->
+val get_class_requirements : Decl_env.env -> Shallow_decl_defs.shallow_class ->
   Typing_defs.requirement list * SSet.t

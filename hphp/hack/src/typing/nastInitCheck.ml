@@ -109,13 +109,14 @@ module Env = struct
       | Some parent_id -> Typing_env.set_parent_id tenv parent_id in
     let methods = List.fold_left ~f:method_ ~init:SMap.empty c.c_methods in
     let decl_env = tenv.Typing_env.decl_env in
+    let sc = Shallow_decl.class_ c in
     let props = SSet.empty
-      |> DICheck.own_props c
+      |> DICheck.own_props sc
       (* If we define our own constructor, we need to pretend any traits we use
        * did *not* define a constructor, because they are not reachable through
        * parent::__construct or similar functions. *)
-      |> DICheck.trait_props decl_env c
-      |> DICheck.parent decl_env c in
+      |> DICheck.trait_props decl_env sc
+      |> DICheck.parent decl_env sc in
     { methods; props; tenv; }
 
   and method_ acc m =

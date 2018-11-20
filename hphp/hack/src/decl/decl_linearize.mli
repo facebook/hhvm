@@ -9,4 +9,4 @@
 
 type result = Decl_defs.linearization
 
-val linearize : Decl_env.env -> Nast.class_ -> result
+val linearize : Decl_env.env -> Shallow_decl_defs.shallow_class -> result

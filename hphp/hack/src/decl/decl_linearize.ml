@@ -7,8 +7,8 @@
  *
  *)
 open Core_kernel
-open Nast
 open Decl_defs
+open Shallow_decl_defs
 
 
 (* Module calculating the Member Resolution Order of a class *)
@@ -45,35 +45,35 @@ let from_list (env : Decl_env.env) (l : Nast.hint list)
   List.fold_left l ~init:acc
     ~f:(fun acc hint -> add_linearization acc (from_class env hint source))
 
-let from_parent (env : Decl_env.env) (c : Nast.class_) (acc : result) : result =
+let from_parent (env : Decl_env.env) (c : shallow_class) (acc : result) : result =
   let extends =
     (* In an abstract class or a trait, we assume the interfaces
      * will be implemented in the future, so we take them as
      * part of the class (as requested by dependency injection implementers)
      *)
-    match c.c_kind with
-      | Ast.Cabstract -> c.c_implements @ c.c_extends
-      | Ast.Ctrait -> c.c_implements @ c.c_extends @ c.c_req_implements
-      | _ -> c.c_extends
+    match c.sc_kind with
+      | Ast.Cabstract -> c.sc_implements @ c.sc_extends
+      | Ast.Ctrait -> c.sc_implements @ c.sc_extends @ c.sc_req_implements
+      | _ -> c.sc_extends
   in
   from_list env extends acc Parent
 
-(* Linearize a class declaration given its nast *)
-let linearize (env : Decl_env.env) (c : Nast.class_) : result =
-  let mro_name = snd c.c_name in
+(* Linearize a class declaration given its shallow declaration *)
+let linearize (env : Decl_env.env) (c : shallow_class) : result =
+  let mro_name = snd c.sc_name in
   (* The first class doesn't have its type parameters filled in *)
   let child = { mro_name; mro_params = []; mro_source = Child; } in
   let acc = add_linearization [] [child] in
   (* Add traits in backwards order *)
-  let acc = from_list env (List.rev c.c_uses) acc Trait in
+  let acc = from_list env (List.rev c.sc_uses) acc Trait in
   (* Add interfaces(interfaces can define constants)
   TODO(jjwu): implemented interfaces are *only* important for constants and
   otherwise don't need to take up so much space in the linearization.
   Can we get rid of this somehow? *)
-  let acc = from_list env c.c_implements acc Interface in
-  let acc = from_list env c.c_req_implements acc ReqImpl in (* Same with req_implements *)
+  let acc = from_list env c.sc_implements acc Interface in
+  let acc = from_list env c.sc_req_implements acc ReqImpl in (* Same with req_implements *)
   (* Add requirements *)
-  let acc = from_list env c.c_req_extends acc ReqExtends in
-  let acc = from_list env c.c_xhp_attr_uses acc XHPAttr in
+  let acc = from_list env c.sc_req_extends acc ReqExtends in
+  let acc = from_list env c.sc_xhp_attr_uses acc XHPAttr in
   let result = from_parent env c acc in
   List.rev result

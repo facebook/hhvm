@@ -63,3 +63,26 @@ let split_defs defs split_if_in_defs =
     n_consts  = n_consts2;
   } in
   r1, r2
+
+let rec infer_const (p, expr_) =
+  let open Nast in
+  match expr_ with
+  | String _ -> Reason.Rwitness p, Tprim Tstring
+  | True
+  | False -> Reason.Rwitness p, Tprim Tbool
+  | Int _ -> Reason.Rwitness p, Tprim Tint
+  | Float _ -> Reason.Rwitness p, Tprim Tfloat
+  | Unop ((Ast.Uminus | Ast.Uplus | Ast.Utild | Ast.Unot), e2) ->
+    infer_const e2
+  | _ ->
+    (* We can't infer the type of everything here. Notably, if you
+     * define a const in terms of another const, we need an annotation,
+     * since the other const may not have been declared yet.
+     *
+     * Also note that a number of expressions are considered invalid
+     * as constant initializers, even if we can infer their type; see
+     * Naming.check_constant_expr. *)
+    raise Exit
+
+let infer_const expr =
+  try Some (infer_const expr) with Exit -> None

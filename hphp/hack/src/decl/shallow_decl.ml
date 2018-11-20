@@ -11,6 +11,45 @@ open Core_kernel
 open Shallow_decl_defs
 open Nast
 open Typing_deps
+open Typing_defs
+
+let class_const env c (h, name, e) =
+  let pos = fst name in
+  match c.c_kind with
+  | Ast.Ctrait ->
+      let kind = match c.c_kind with
+        | Ast.Ctrait -> `trait
+        | Ast.Cenum -> `enum
+        | _ -> assert false in
+      Errors.cannot_declare_constant kind pos c.c_name;
+      None
+  | Ast.Cnormal | Ast.Cabstract | Ast.Cinterface | Ast.Cenum ->
+    let ty, abstract =
+      (* Optional hint h, optional expression e *)
+      match h, e with
+      | Some h, Some _ ->
+        Decl_hint.hint env h, false
+      | Some h, None ->
+        Decl_hint.hint env h, true
+      | None, Some e ->
+          begin match Decl_utils.infer_const e with
+            | Some ty -> ty, false
+            | None ->
+              if c.c_mode = FileInfo.Mstrict && c.c_kind <> Ast.Cenum
+              then Errors.missing_typehint pos;
+              (Reason.Rwitness pos, Tany), false
+          end
+        | None, None ->
+          if c.c_mode = FileInfo.Mstrict then Errors.missing_typehint pos;
+          let r = Reason.Rwitness pos in
+          (r, Tany), true
+    in
+    Some {
+      scc_abstract = abstract;
+      scc_expr = e;
+      scc_name = name;
+      scc_type = ty;
+    }
 
 let method_ m =
   {
@@ -43,7 +82,7 @@ let class_ env c =
     sc_req_extends    = List.map ~f:hint c.c_req_extends;
     sc_req_implements = List.map ~f:hint c.c_req_implements;
     sc_implements     = List.map ~f:hint c.c_implements;
-    sc_consts = c.c_consts;
+    sc_consts = List.filter_map c.c_consts (class_const env c);
     sc_typeconsts = c.c_typeconsts;
     sc_static_vars = c.c_static_vars;
     sc_vars = c.c_vars;

@@ -10,6 +10,13 @@
 open Typing_defs
 open Pp_type
 
+type shallow_class_const = {
+  scc_abstract : bool;
+  scc_expr     : Nast.expr option;
+  scc_name     : Aast.sid;
+  scc_type     : decl ty;
+} [@@deriving show]
+
 type shallow_method = {
   sm_final             : bool;
   sm_abstract          : bool;
@@ -40,7 +47,7 @@ type shallow_class = {
   sc_req_extends     : decl ty list;
   sc_req_implements  : decl ty list;
   sc_implements      : decl ty list;
-  sc_consts          : Nast.class_const list;
+  sc_consts          : shallow_class_const list;
   sc_typeconsts      : Nast.class_typeconst list;
   sc_static_vars     : Nast.static_var list;
   sc_vars            : Nast.class_var list;

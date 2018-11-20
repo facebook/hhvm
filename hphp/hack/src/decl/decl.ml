@@ -121,27 +121,6 @@ let check_extend_kind parent_pos parent_kind child_pos child_kind =
       let child  = Ast.string_of_class_kind child_kind in
       Errors.wrong_extend_kind child_pos child parent_pos parent
 
-let rec infer_const (p, expr_) = match expr_ with
-  | String _ -> Reason.Rwitness p, Tprim Tstring
-  | True
-  | False -> Reason.Rwitness p, Tprim Tbool
-  | Int _ -> Reason.Rwitness p, Tprim Tint
-  | Float _ -> Reason.Rwitness p, Tprim Tfloat
-  | Unop ((Ast.Uminus | Ast.Uplus | Ast.Utild | Ast.Unot), e2) ->
-    infer_const e2
-  | _ ->
-    (* We can't infer the type of everything here. Notably, if you
-     * define a const in terms of another const, we need an annotation,
-     * since the other const may not have been declared yet.
-     *
-     * Also note that a number of expressions are considered invalid
-     * as constant initializers, even if we can infer their type; see
-     * Naming.check_constant_expr. *)
-    raise Exit
-
-let infer_const expr =
-  try Some (infer_const expr) with Exit -> None
-
 (*****************************************************************************)
 (* Functions used retrieve everything implemented in parent classes
  * The return values:
@@ -543,7 +522,7 @@ and class_decl tcopt c =
       ~f:(method_decl_acc ~is_static:false env c )
       ~init:(m, SSet.empty) c.sc_methods in
   let consts = inherited.Decl_inherit.ih_consts in
-  let consts = List.fold_left ~f:(class_const_decl env c)
+  let consts = List.fold_left ~f:(class_const_fold c)
     ~init:consts c.sc_consts in
   let consts = SMap.add SN.Members.mClass (class_class_decl c.sc_name) consts in
   let typeconsts = inherited.Decl_inherit.ih_typeconsts in
@@ -765,48 +744,18 @@ and build_constructor env class_ method_ =
   Decl_heap.Constructors.add class_name ft;
   Some cstr, mconsist
 
-and class_const_decl env c acc (h, id, e) =
-  match c.sc_kind with
-  | Ast.Ctrait ->
-      let kind = match c.sc_kind with
-        | Ast.Ctrait -> `trait
-        | Ast.Cenum -> `enum
-        | _ -> assert false in
-      Errors.cannot_declare_constant kind (fst id) c.sc_name;
-      acc
-  | Ast.Cnormal | Ast.Cabstract | Ast.Cinterface | Ast.Cenum ->
-    let c_name = (snd c.sc_name) in
-    let ty, abstract =
-      (* Optional hint h, optional expression e *)
-      match h, e with
-      | Some h, Some _ ->
-        Decl_hint.hint env h, false
-      | Some h, None ->
-        Decl_hint.hint env h, true
-      | None, Some e ->
-          begin match infer_const e with
-            | Some ty -> ty, false
-            | None ->
-              if c.sc_mode = FileInfo.Mstrict && c.sc_kind <> Ast.Cenum
-              then Errors.missing_typehint (fst id);
-              (Reason.Rwitness (fst id), Tany), false
-          end
-        | None, None ->
-          let pos, _name = id in
-          if c.sc_mode = FileInfo.Mstrict then Errors.missing_typehint pos;
-          let r = Reason.Rwitness pos in
-          (r, Tany), true
-    in
-    let cc = {
-      cc_synthesized = false;
-      cc_abstract = abstract;
-      cc_pos = fst id;
-      cc_type = ty;
-      cc_expr = e;
-      cc_origin = c_name;
-    } in
-    let acc = SMap.add (snd id) cc acc in
-    acc
+and class_const_fold c acc scc =
+  let c_name = (snd c.sc_name) in
+  let cc = {
+    cc_synthesized = false;
+    cc_abstract = scc.scc_abstract;
+    cc_pos = fst scc.scc_name;
+    cc_type = scc.scc_type;
+    cc_expr = scc.scc_expr;
+    cc_origin = c_name;
+  } in
+  let acc = SMap.add (snd scc.scc_name) cc acc in
+  acc
 
 (* Every class, interface, and trait implicitly defines a ::class to
  * allow accessing its fully qualified name as a string *)
@@ -1154,7 +1103,7 @@ let const_decl cst decl_tcopt =
   match cst.cst_type with
   | Some h -> Decl_hint.hint env h
   | None ->
-    match cst.cst_value >>= infer_const with
+    match cst.cst_value >>= Decl_utils.infer_const with
     | Some ty -> ty
     | None when cst.cst_mode = FileInfo.Mstrict && (not cst.cst_is_define) ->
       Errors.missing_typehint cst_pos;

@@ -647,7 +647,8 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
   }
 
   for (ArrayIter iter(arr2); iter; ++iter) {
-    Variant key = iter.first();
+    const auto key =
+      Variant::wrap(arr1.convertKey<IntishCast::CastSilently>(iter.first()));
     auto const rval = iter.secondRval().unboxed();
     if (arr1.exists(key, true) && isArrayLikeType(rval.type())) {
       auto const lval = arr1.lvalAt(key, AccessFlags::Key);

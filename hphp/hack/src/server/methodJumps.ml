@@ -8,7 +8,6 @@
  *)
 
 open Core_kernel
-open Reordered_argument_collections
 open ServerCommandTypes.Method_jumps
 open Typing_defs
 
@@ -58,7 +57,7 @@ let check_if_extends_class_and_find_methods tcopt target_class_name get_method
   match class_ with
   | None -> acc
   | Some c
-      when SMap.mem (Cls.ancestors c) target_class_name ->
+      when Cls.has_ancestor c target_class_name ->
         let acc = get_overridden_methods tcopt
                       target_class_name get_method
                       class_name
@@ -129,7 +128,7 @@ let get_ancestor_classes_and_methods tcopt cls ~filter acc =
   match class_ with
   | None -> []
   | Some cls ->
-      SMap.fold (Cls.ancestors cls) ~init:acc ~f:begin fun k _v acc ->
+      Sequence.fold (Cls.all_ancestor_names cls) ~init:acc ~f:begin fun acc k ->
         let class_ = TLazyHeap.get_class tcopt k in
         match class_ with
         | Some c

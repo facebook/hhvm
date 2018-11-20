@@ -24,10 +24,10 @@ let is_protected_visible env x self_id =
     (* Children can call parent's protected methods and
      * parents can call children's protected methods (like a
      * constructor) *)
-    if SSet.mem x (Cls.extends my_class)
-       || SMap.mem x (Cls.ancestors my_class)
-       || SSet.mem self_id (Cls.extends their_class)
-       || SSet.mem x (Cls.req_ancestors_extends my_class)
+    if Cls.extends my_class x
+       || Cls.has_ancestor my_class x
+       || Cls.extends their_class self_id
+       || Cls.requires_ancestor my_class x
        || not (Cls.members_fully_known my_class)
     then None
     else Some (

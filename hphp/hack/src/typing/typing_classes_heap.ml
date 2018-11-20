@@ -59,12 +59,28 @@ let name cls = cls.tc_name
 let pos cls = cls.tc_pos
 let tparams cls = cls.tc_tparams
 let construct cls = cls.tc_construct
-let ancestors cls = cls.tc_ancestors
-let req_ancestors cls = cls.tc_req_ancestors
-let req_ancestors_extends cls = cls.tc_req_ancestors_extends
-let extends cls = cls.tc_extends
 let enum_type cls = cls.tc_enum_type
 let decl_errors cls = cls.tc_decl_errors
+
+let get_ancestor cls ancestor = SMap.get ancestor cls.tc_ancestors
+
+let has_ancestor cls ancestor =
+  SMap.mem ancestor cls.tc_ancestors
+let requires_ancestor cls ancestor =
+  SSet.mem ancestor cls.tc_req_ancestors_extends
+let extends cls ancestor =
+  SSet.mem ancestor cls.tc_extends
+
+let all_ancestors cls =
+  Sequence.of_list (SMap.bindings cls.tc_ancestors)
+let all_ancestor_names cls =
+  Sequence.of_list (SMap.ordered_keys cls.tc_ancestors)
+let all_ancestor_reqs cls =
+  Sequence.of_list cls.tc_req_ancestors
+let all_ancestor_req_names cls =
+  Sequence.of_list (SSet.elements cls.tc_req_ancestors_extends)
+let all_extends_ancestors cls =
+  Sequence.of_list (SSet.elements cls.tc_extends)
 
 let get_const cls id     = SMap.get id cls.tc_consts
 let get_typeconst cls id = SMap.get id cls.tc_typeconsts

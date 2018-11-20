@@ -1338,6 +1338,10 @@ module PrintClass = struct
     let contents = SSet.fold (fun x acc -> x^" "^acc) s "" in
     Printf.sprintf "Set( %s)" contents
 
+  let sseq s =
+    let contents = Sequence.fold s ~init:"" ~f:(fun acc x -> x^" "^acc) in
+    Printf.sprintf "Seq( %s)" contents
+
   let pos p =
     let line, start, end_ = Pos.info_pos p in
     Printf.sprintf "(line %d: chars %d-%d)" line start end_
@@ -1422,7 +1426,7 @@ module PrintClass = struct
       "\n("^(typeconst tcopt v)^")"^acc
     end
 
-  let ancestors_smap tcopt m =
+  let ancestors tcopt m =
     (* Format is as follows:
      *    ParentKnownToHack
      *  ! ParentCompletelyUnknown
@@ -1430,7 +1434,7 @@ module PrintClass = struct
      *
      * ParentPartiallyKnown must inherit one of the ! Unknown parents, so that
      * sigil could be omitted *)
-    SMap.fold begin fun field v acc ->
+    Sequence.fold m ~init:"" ~f:begin fun acc (field, v) ->
       let sigil, kind = match Typing_lazy_heap.get_class tcopt field with
         | None -> "!", ""
         | Some cls ->
@@ -1439,7 +1443,7 @@ module PrintClass = struct
       in
       let ty_str = Full.to_string_decl tcopt v in
       "\n"^indent^sigil^" "^ty_str^kind^acc
-    end m ""
+    end
 
   let constructor tcopt (ce_opt, consist) =
     let consist_str = if consist then " (consistent in hierarchy)" else "" in
@@ -1449,7 +1453,7 @@ module PrintClass = struct
     in ce_str^consist_str
 
   let req_ancestors tcopt xs =
-    List.fold_left xs ~init:"" ~f:begin fun acc (_p, x) ->
+    Sequence.fold xs ~init:"" ~f:begin fun acc (_p, x) ->
       acc ^ Full.to_string_decl tcopt x ^ ", "
     end
 
@@ -1468,10 +1472,10 @@ module PrintClass = struct
     let tc_methods = class_elts_with_breaks tcopt (Cls.methods c) in
     let tc_smethods = class_elts_with_breaks tcopt (Cls.smethods c) in
     let tc_construct = constructor tcopt (Cls.construct c) in
-    let tc_ancestors = ancestors_smap tcopt (Cls.ancestors c) in
-    let tc_req_ancestors = req_ancestors tcopt (Cls.req_ancestors c) in
-    let tc_req_ancestors_extends = sset (Cls.req_ancestors_extends c) in
-    let tc_extends = sset (Cls.extends c) in
+    let tc_ancestors = ancestors tcopt (Cls.all_ancestors c) in
+    let tc_req_ancestors = req_ancestors tcopt (Cls.all_ancestor_reqs c) in
+    let tc_req_ancestors_extends = sseq (Cls.all_ancestor_req_names c) in
+    let tc_extends = sseq (Cls.all_extends_ancestors c) in
     "tc_need_init: "^tc_need_init^"\n"^
     "tc_members_fully_known: "^tc_members_fully_known^"\n"^
     "tc_abstract: "^tc_abstract^"\n"^

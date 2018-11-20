@@ -7,6 +7,7 @@
  *
  *)
 
+open Core_kernel
 open Nast
 open Typing_defs
 
@@ -18,13 +19,13 @@ module SN = Naming_special_names
  * an optional subtyping constraint. For subclasses of Enum<T>, both
  * base and type these are T.
  * For first-class enums, we distinguish between these. *)
-let is_enum name enum ancestors =
+let is_enum name enum get_ancestor =
   match enum with
     | None ->
-      (match SMap.get SN.FB.cEnum ancestors with
+      (match get_ancestor SN.FB.cEnum with
         | Some (_, (Tapply ((_, enum), [ty_exp]))) when enum = SN.FB.cEnum ->
           (* If the class is a subclass of UncheckedEnum, ignore it. *)
-          if SMap.mem SN.FB.cUncheckedEnum ancestors then None
+          if Option.is_some (get_ancestor SN.FB.cUncheckedEnum) then None
           else Some (ty_exp, ty_exp, None)
         | _ -> None)
     | Some enum ->
@@ -35,8 +36,8 @@ let is_enum name enum ancestors =
  * of the Enum. We don't do this for Enum<mixed> and Enum<arraykey>, since
  * that could *lose* type information.
  *)
-let rewrite_class name enum ancestors consts =
-  match is_enum name enum ancestors with
+let rewrite_class name enum get_ancestor consts =
+  match is_enum name enum get_ancestor with
     | None
     | Some (_, (_, (Tmixed | Tprim Tarraykey)), _) -> consts
     | Some (_, ty, _) ->

@@ -37,7 +37,7 @@ let member_type env member_ce =
         | None -> default_result
         | Some tc ->
           (match Decl_enum.is_enum (Cls.pos tc, Cls.name tc)
-              (Cls.enum_type tc) (Cls.ancestors tc) with
+              (Cls.enum_type tc) (Cls.get_ancestor tc) with
                 | None -> default_result
                 | Some (_base, (_, enum_ty), _constraint) ->
                   let ty = (fst default_result), enum_ty in
@@ -84,7 +84,7 @@ let enum_check_const ty_exp env (_, (p, _), _) t =
 let enum_class_check env tc consts const_types =
   let enum_info_opt =
     Decl_enum.is_enum (Cls.pos tc, Cls.name tc) (Cls.enum_type tc)
-    (Cls.ancestors tc) in
+    (Cls.get_ancestor tc) in
   match enum_info_opt with
     | Some (ty_exp, _, ty_constraint) ->
         let ety_env = Phase.env_with_self env in

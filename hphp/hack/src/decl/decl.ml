@@ -612,7 +612,8 @@ and class_decl tcopt c =
       Some
         { te_base       = base_hint;
           te_constraint = constraint_hint } in
-  let consts = Decl_enum.rewrite_class c.c_name enum impl consts in
+  let consts =
+    Decl_enum.rewrite_class c.c_name enum (fun x -> SMap.get x impl) consts in
   let has_own_cstr = has_concrete_cstr && (None <> c.c_constructor) in
   let deferred_members = Decl_init_check.class_ ~has_own_cstr env c in
   let sealed_whitelist = get_sealed_whitelist c in

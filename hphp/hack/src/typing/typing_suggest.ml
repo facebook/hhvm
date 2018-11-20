@@ -127,8 +127,8 @@ let get_implements tcopt (_, x) =
   match Typing_lazy_heap.get_class tcopt x with
   | None -> SSet.empty
   | Some cls ->
-      let tyl = Typing_classes_heap.ancestors cls in
-      SMap.fold begin fun _ ty set ->
+      let tyl = Typing_classes_heap.all_ancestors cls in
+      Sequence.fold tyl ~init:SSet.empty ~f:begin fun set (_, ty) ->
         match ty with
         | _, Tapply ((_, x), []) -> SSet.add x set
         | _,
@@ -153,7 +153,7 @@ let get_implements tcopt (_, x) =
             | Tthis
           ) ->
             raise Exit
-      end tyl SSet.empty
+      end
 
 (** normalizes a "guessed" type. We basically want to bailout whenever
  * the inferred type doesn't resolve to a type hint.

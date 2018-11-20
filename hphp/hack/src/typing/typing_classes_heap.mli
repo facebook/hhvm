@@ -34,12 +34,20 @@ val name                  : t -> string
 val pos                   : t -> Pos.t
 val tparams               : t -> decl tparam list
 val construct             : t -> class_elt option * bool
-val ancestors             : t -> decl ty SMap.t
-val req_ancestors         : t -> requirement list
-val req_ancestors_extends : t -> SSet.t
-val extends               : t -> SSet.t
 val enum_type             : t -> enum_type option
 val decl_errors           : t -> Errors.t option
+
+val get_ancestor : t -> string -> decl ty option
+
+val has_ancestor      : t -> string -> bool
+val requires_ancestor : t -> string -> bool
+val extends           : t -> string -> bool
+
+val all_ancestors          : t -> (string * decl ty) Sequence.t
+val all_ancestor_names     : t -> string Sequence.t
+val all_ancestor_reqs      : t -> requirement Sequence.t
+val all_ancestor_req_names : t -> string Sequence.t
+val all_extends_ancestors  : t -> string Sequence.t
 
 val get_const     : t -> string -> class_const option
 val get_typeconst : t -> string -> typeconst_type option

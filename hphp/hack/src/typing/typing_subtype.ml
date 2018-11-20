@@ -732,7 +732,7 @@ and simplify_subtype
             from_class = None;
             validate_dty = None;
           } in
-            let up_obj = SMap.get cid_super (Cls.ancestors class_sub) in
+            let up_obj = Cls.get_ancestor class_sub cid_super in
             match up_obj with
               | Some up_obj ->
                 let env, up_obj = Phase.localize ~ety_env env up_obj in
@@ -1736,11 +1736,11 @@ and sub_type_inner_helper env ~this_ty
             validate_dty = None;
           } in
           let rec try_reqs reqs =
-              match reqs with
-              | [] ->
+              match Sequence.next reqs with
+              | None ->
                 fail ()
 
-              | (_, req_type) :: reqs ->
+              | Some ((_, req_type), reqs) ->
 
               (* a trait is never the runtime type, but it can be used
                * as a constraint if it has requirements for its using
@@ -1751,7 +1751,7 @@ and sub_type_inner_helper env ~this_ty
                   sub_type env (p_sub, snd req_type) ty_super
                 end (fun _ -> try_reqs reqs)
             in
-              try_reqs (Cls.req_ancestors class_)
+              try_reqs (Cls.all_ancestor_reqs class_)
           else fail ()
     end
 
@@ -1906,7 +1906,7 @@ let rec sub_string
           (* A Stringish is a string or an object with a __toString method
            * that will be converted to a string *)
           when Cls.name tc = SN.Classes.cStringish
-          || SMap.mem SN.Classes.cStringish (Cls.ancestors tc) ->
+          || Cls.has_ancestor tc SN.Classes.cStringish ->
         if stringish_deprecated
         then Errors.object_string_deprecated p;
         env

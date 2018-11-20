@@ -7,6 +7,7 @@
  *
  *)
 
+open Core_kernel
 open Hh_core
 
 module Cls = Typing_classes_heap
@@ -22,9 +23,11 @@ let get_all_ancestors tcopt class_name =
       | None ->
         helper classes cinfos seen_classes
       | Some class_info ->
-        let ancestors = SMap.keys (Cls.ancestors class_info) in
+        let ancestors =
+          Cls.all_ancestor_names class_info
+          |> Sequence.fold ~init:classes ~f:(fun acc cid -> cid :: acc) in
         helper
-          (ancestors @ classes)
+          ancestors
           (class_info :: cinfos)
           (SSet.add class_name seen_classes)
       end
@@ -67,11 +70,11 @@ let render_ancestor_docblocks docblocks =
     docblock_ancestors_pairs
     |> List.map ~f:begin fun (docblock, ancestors) ->
       let ancestors_str =
-        String.concat ", " (List.map ~f:Utils.strip_ns ancestors)
+        String.concat ~sep:", " (List.map ~f:Utils.strip_ns ancestors)
       in
       Printf.sprintf "%s\n(from %s)" docblock ancestors_str
     end
-    |> String.concat "\n\n---\n\n"
+    |> String.concat ~sep:"\n\n---\n\n"
     |> fun results -> Some results
 
 let fallback tcopt class_name member_name =

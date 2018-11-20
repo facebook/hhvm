@@ -42,8 +42,8 @@ let check_if_extends_class tcopt target_class_name class_name =
   let class_ = Typing_lazy_heap.get_class tcopt class_name in
   match class_ with
   | Some cls
-    when SMap.mem (Cls.ancestors cls) target_class_name
-      || SSet.mem (Cls.req_ancestors_extends cls) target_class_name -> true
+    when Cls.has_ancestor cls target_class_name
+      || Cls.requires_ancestor cls target_class_name -> true
   | _ -> false
 
 let is_target_class tcopt target_classes class_name =

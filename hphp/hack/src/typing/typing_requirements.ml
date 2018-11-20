@@ -15,11 +15,11 @@ module Cls = Typing_classes_heap
 
 (* Only applied to classes. Checks that all the requirements of the traits
  * and interfaces it uses are satisfied. *)
-let check_fulfillment env impls (parent_pos, req_ty) =
+let check_fulfillment env get_impl (parent_pos, req_ty) =
   match TUtils.try_unwrap_class_type req_ty with
   | None -> ()
   | Some (_r, (_p, req_name), _paraml) ->
-    match SMap.get req_name impls with
+    match get_impl req_name with
     | None ->
       let req_pos = Reason.to_pos (fst req_ty) in
       Errors.unsatisfied_req parent_pos req_name req_pos;
@@ -31,5 +31,5 @@ let check_fulfillment env impls (parent_pos, req_ty) =
 let check_class env tc =
   match (Cls.kind tc) with
   | Ast.Cnormal | Ast.Cabstract ->
-    List.iter (Cls.req_ancestors tc) (check_fulfillment env (Cls.ancestors tc))
+    Sequence.iter (Cls.all_ancestor_reqs tc) (check_fulfillment env (Cls.get_ancestor tc))
   | Ast.Ctrait | Ast.Cinterface | Ast.Cenum -> ()

@@ -4492,7 +4492,7 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
         else paraml in
       let old_member_info = Env.get_member is_method env class_info id_str in
       let self = Env.get_self_id env in
-      let member_info, shadowed = if SMap.mem self (Cls.ancestors class_info)
+      let member_info, shadowed = if Cls.has_ancestor class_info self
       then
         (* We look up the current context to see if there is a field/method with
         * private visibility. If there is one, that one takes precedence *)
@@ -4714,10 +4714,10 @@ and class_id_for_new ~exact p env cid =
  * the 'require extends' must belong to the same inheritance hierarchy
  * and one of them should be the child of all the others *)
 and trait_most_concrete_req_class trait env =
-  List.fold_left (Cls.req_ancestors trait) ~f:begin fun acc (_p, ty) ->
+  Sequence.fold (Cls.all_ancestor_reqs trait) ~f:begin fun acc (_p, ty) ->
     let _r, (_p, name), _paraml = TUtils.unwrap_class_type ty in
     let keep = match acc with
-      | Some (c, _ty) -> SMap.mem name (Cls.ancestors c)
+      | Some (c, _ty) -> Cls.has_ancestor c name
       | None -> false
     in
     if keep then acc

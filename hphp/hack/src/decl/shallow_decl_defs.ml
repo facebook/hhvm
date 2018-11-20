@@ -17,6 +17,12 @@ type shallow_class_const = {
   scc_type     : decl ty;
 } [@@deriving show]
 
+type shallow_typeconst = {
+  stc_constraint : decl ty option;
+  stc_name       : Aast.sid;
+  stc_type       : decl ty option;
+} [@@deriving show]
+
 type shallow_method = {
   sm_final             : bool;
   sm_abstract          : bool;
@@ -48,7 +54,7 @@ type shallow_class = {
   sc_req_implements  : decl ty list;
   sc_implements      : decl ty list;
   sc_consts          : shallow_class_const list;
-  sc_typeconsts      : Nast.class_typeconst list;
+  sc_typeconsts      : shallow_typeconst list;
   sc_static_vars     : Nast.static_var list;
   sc_vars            : Nast.class_var list;
   sc_constructor     : shallow_method option;

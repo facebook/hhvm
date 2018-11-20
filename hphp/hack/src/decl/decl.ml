@@ -527,7 +527,7 @@ and class_decl tcopt c =
   let consts = SMap.add SN.Members.mClass (class_class_decl c.sc_name) consts in
   let typeconsts = inherited.Decl_inherit.ih_typeconsts in
   let typeconsts, consts = List.fold_left c.sc_typeconsts
-      ~f:(typeconst_decl env c) ~init:(typeconsts, consts) in
+      ~f:(typeconst_fold c) ~init:(typeconsts, consts) in
   let sclass_var = static_class_var_decl env c in
   let sprops = inherited.Decl_inherit.ih_sprops in
   let sprops = List.fold_left c.sc_static_vars ~f:sclass_var ~init:sprops in
@@ -858,46 +858,35 @@ and visibility cid = function
 
 (* each concrete type constant T = <sometype> implicitly defines a
 class constant with the same name which is TypeStructure<sometype> *)
-and typeconst_ty_decl pos dc_name ~is_abstract =
+and typeconst_structure c stc =
+  let pos = fst stc.stc_name in
   let r = Reason.Rwitness pos in
   let tsid = pos, SN.FB.cTypeStructure in
-  let ts_ty = r, Tapply (tsid, [r, Taccess ((r, Tthis), [pos, dc_name])]) in
+  let ts_ty = r, Tapply (tsid, [r, Taccess ((r, Tthis), [stc.stc_name])]) in
   {
-    cc_abstract    = is_abstract;
+    cc_abstract    = Option.is_none stc.stc_type;
     cc_pos         = pos;
     cc_synthesized = true;
     cc_type        = ts_ty;
     cc_expr        = None;
-    cc_origin      = dc_name;
+    cc_origin      = snd c.sc_name;
   }
 
-and typeconst_decl env c (acc, acc2) {
-  c_tconst_name = (pos, name);
-  c_tconst_constraint = constr;
-  c_tconst_type = type_;
-} =
+and typeconst_fold c ((typeconsts, consts) as acc) stc =
   match c.sc_kind with
-  | Ast.Ctrait | Ast.Cenum ->
-      let kind = match c.sc_kind with
-        | Ast.Ctrait -> `trait
-        | Ast.Cenum -> `enum
-        | _ -> assert false in
-      Errors.cannot_declare_constant kind pos c.sc_name;
-      acc, acc2
+  | Ast.Ctrait | Ast.Cenum -> acc
   | Ast.Cinterface | Ast.Cabstract | Ast.Cnormal ->
-      let constr = Option.map constr (Decl_hint.hint env) in
-      let ty = Option.map type_ (Decl_hint.hint env) in
-      let is_abstract = Option.is_none ty in
-      let ts = typeconst_ty_decl pos name ~is_abstract in
-      let acc2 = SMap.add name ts acc2 in
-      let tc = {
-        ttc_name = (pos, name);
-        ttc_constraint = constr;
-        ttc_type = ty;
-        ttc_origin = snd c.sc_name;
-      } in
-      let acc = SMap.add name tc acc in
-      acc, acc2
+    let c_name = (snd c.sc_name) in
+    let ts = typeconst_structure c stc in
+    let consts = SMap.add (snd stc.stc_name) ts consts in
+    let tc = {
+      ttc_name = stc.stc_name;
+      ttc_constraint = stc.stc_constraint;
+      ttc_type = stc.stc_type;
+      ttc_origin = c_name;
+    } in
+    let typeconsts = SMap.add (snd stc.stc_name) tc typeconsts in
+    typeconsts, consts
 
 and method_decl env m =
   check_params env m.sm_params;

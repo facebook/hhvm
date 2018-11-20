@@ -51,6 +51,24 @@ let class_const env c (h, name, e) =
       scc_type = ty;
     }
 
+let typeconst env c tc =
+  match c.c_kind with
+  | Ast.Ctrait | Ast.Cenum ->
+      let kind = match c.c_kind with
+        | Ast.Ctrait -> `trait
+        | Ast.Cenum -> `enum
+        | _ -> assert false in
+      Errors.cannot_declare_constant kind (fst tc.c_tconst_name) c.c_name;
+      None
+  | Ast.Cinterface | Ast.Cabstract | Ast.Cnormal ->
+      let constr = Option.map tc.c_tconst_constraint (Decl_hint.hint env) in
+      let ty = Option.map tc.c_tconst_type (Decl_hint.hint env) in
+      Some {
+        stc_name = tc.c_tconst_name;
+        stc_constraint = constr;
+        stc_type = ty;
+      }
+
 let method_ m =
   {
     sm_final = m.m_final;
@@ -83,7 +101,7 @@ let class_ env c =
     sc_req_implements = List.map ~f:hint c.c_req_implements;
     sc_implements     = List.map ~f:hint c.c_implements;
     sc_consts = List.filter_map c.c_consts (class_const env c);
-    sc_typeconsts = c.c_typeconsts;
+    sc_typeconsts = List.filter_map c.c_typeconsts (typeconst env c);
     sc_static_vars = c.c_static_vars;
     sc_vars = c.c_vars;
     sc_constructor = Option.map c.c_constructor ~f:method_;

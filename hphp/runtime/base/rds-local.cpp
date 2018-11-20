@@ -87,10 +87,10 @@ void fini() {
   if (!detail::rl_hotSection.rdslocal_base) return;
   detail::iterate([](detail::RDSLocalNode* p) { p->fini(); });
   if (!tl_base ||
-      !localSection().contains({
-        (const char*)detail::rl_hotSection.rdslocal_base,
-        detail::s_usedbytes
-      })) {
+      !(localSection().cbegin() <=
+          (const char*)detail::rl_hotSection.rdslocal_base
+        && (const char*)detail::rl_hotSection.rdslocal_base
+           + detail::s_usedbytes <= localSection().cend())) {
     free(detail::rl_hotSection.rdslocal_base);
   }
   detail::rl_hotSection.rdslocal_base = nullptr;

@@ -132,25 +132,25 @@ let go tcopt ast result =
             get_class_by_name tcopt c_name >>= fun c ->
             Some (FileOutline.summarize_class c ~no_children:true)
       end else begin
-        match SMap.get method_name (Cls.methods class_) with
+        match Cls.get_method class_ method_name with
         | Some m -> get_member_def tcopt (Method, m.ce_origin, method_name)
         | None ->
-          SMap.get method_name (Cls.smethods class_) >>= fun m ->
+          Cls.get_smethod class_ method_name >>= fun m ->
           get_member_def tcopt (Static_method, m.ce_origin, method_name)
       end
     | SymbolOccurrence.Property (c_name, property_name) ->
       Typing_lazy_heap.get_class tcopt c_name >>= fun class_ ->
       let property_name = clean_member_name property_name in
-      begin match SMap.get property_name (Cls.props class_) with
+      begin match Cls.get_prop class_ property_name with
       | Some m -> get_member_def tcopt (Property, m.ce_origin, property_name)
       | None ->
-        SMap.get ("$" ^ property_name) (Cls.sprops class_) >>= fun m ->
+        Cls.get_sprop class_ ("$" ^ property_name) >>= fun m ->
         get_member_def tcopt
           (Static_property, m.ce_origin, property_name)
       end
     | SymbolOccurrence.ClassConst (c_name, const_name) ->
       Typing_lazy_heap.get_class tcopt c_name >>= fun class_ ->
-      SMap.get const_name (Cls.consts class_) >>= fun m ->
+      Cls.get_const class_ const_name >>= fun m ->
       get_member_def tcopt (Class_const, m.cc_origin, const_name)
     | SymbolOccurrence.Function ->
       get_function_by_name tcopt result.SymbolOccurrence.name >>= fun f ->
@@ -162,7 +162,7 @@ let go tcopt ast result =
       summarize_class_typedef tcopt result.SymbolOccurrence.name
     | SymbolOccurrence.Typeconst (c_name, typeconst_name) ->
       Typing_lazy_heap.get_class tcopt c_name >>= fun class_ ->
-      SMap.get typeconst_name (Cls.typeconsts class_) >>= fun m ->
+      Cls.get_typeconst class_ typeconst_name >>= fun m ->
       get_member_def tcopt (Typeconst, m.ttc_origin, typeconst_name)
     | SymbolOccurrence.LocalVar ->
       get_local_var_def

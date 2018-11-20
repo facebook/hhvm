@@ -27,15 +27,15 @@ let string_filter_to_method_jump_filter = function
 let add_ns name =
   if name.[0] = '\\' then name else "\\" ^ name
 
-let get_overridden_methods tcopt origin_class or_mthds dest_class acc =
+let get_overridden_methods tcopt origin_class get_or_method dest_class acc =
   match TLazyHeap.get_class tcopt dest_class with
   | None -> acc
   | Some dest_class ->
     (* Check if each destination method exists in the origin *)
-    SMap.fold (Cls.methods dest_class) ~init:acc ~f:begin fun m_name de_mthd acc ->
+    Sequence.fold (Cls.methods dest_class) ~init:acc ~f:begin fun acc (m_name, de_mthd) ->
       (* Filter out inherited methods *)
       if de_mthd.ce_origin <> (Cls.name dest_class) then acc else
-      let or_mthd = SMap.get or_mthds m_name in
+      let or_mthd = get_or_method m_name in
       match or_mthd with
       | Some or_mthd when or_mthd.ce_origin = origin_class ->
         let get_pos (lazy ty) =
@@ -52,7 +52,7 @@ let get_overridden_methods tcopt origin_class or_mthds dest_class acc =
       | None -> acc
     end
 
-let check_if_extends_class_and_find_methods tcopt target_class_name mthds
+let check_if_extends_class_and_find_methods tcopt target_class_name get_method
       target_class_pos class_name acc =
   let class_ = TLazyHeap.get_class tcopt class_name in
   match class_ with
@@ -60,7 +60,7 @@ let check_if_extends_class_and_find_methods tcopt target_class_name mthds
   | Some c
       when SMap.mem (Cls.ancestors c) target_class_name ->
         let acc = get_overridden_methods tcopt
-                      target_class_name mthds
+                      target_class_name get_method
                       class_name
                       acc in {
           orig_name = target_class_name;
@@ -72,22 +72,22 @@ let check_if_extends_class_and_find_methods tcopt target_class_name mthds
         } :: acc
   | _ -> acc
 
-let filter_extended_classes tcopt target_class_name mthds target_class_pos
+let filter_extended_classes tcopt target_class_name get_method target_class_pos
       acc classes =
   List.fold_left classes ~init:acc ~f:begin fun acc cid ->
     check_if_extends_class_and_find_methods
-      tcopt target_class_name mthds target_class_pos (snd cid) acc
+      tcopt target_class_name get_method target_class_pos (snd cid) acc
   end
 
-let find_extended_classes_in_files tcopt target_class_name mthds
+let find_extended_classes_in_files tcopt target_class_name get_method
       target_class_pos acc classes =
   List.fold_left classes ~init:acc ~f:begin fun acc classes ->
-    filter_extended_classes tcopt target_class_name mthds target_class_pos
+    filter_extended_classes tcopt target_class_name get_method target_class_pos
       acc classes
   end
 
 let find_extended_classes_in_files_parallel tcopt workers target_class_name
-      mthds target_class_pos files_info files =
+      get_method target_class_pos files_info files =
   let classes = Relative_path.Set.fold files ~init:[] ~f:begin fun fn acc ->
     let { FileInfo.classes; _ } = Relative_path.Map.find_unsafe files_info fn in
     classes :: acc
@@ -97,13 +97,13 @@ let find_extended_classes_in_files_parallel tcopt workers target_class_name
     MultiWorker.call
       workers
       ~job:(find_extended_classes_in_files
-        tcopt target_class_name mthds target_class_pos)
+        tcopt target_class_name get_method target_class_pos)
       ~merge:(List.rev_append)
       ~neutral:([])
       ~next:(MultiWorker.next workers classes)
   else
     find_extended_classes_in_files tcopt
-        target_class_name mthds target_class_pos [] classes
+        target_class_name get_method target_class_pos [] classes
 
 (* Find child classes *)
 let get_child_classes_and_methods tcopt cls ~filter files_info workers =
@@ -111,7 +111,7 @@ let get_child_classes_and_methods tcopt cls ~filter files_info workers =
   then failwith "Method jump filters not implemented for finding children";
   let files = FindRefsService.get_child_classes_files (Cls.name cls) in
   find_extended_classes_in_files_parallel tcopt
-    workers (Cls.name cls) (Cls.methods cls) (Cls.pos cls) files_info files
+    workers (Cls.name cls) (Cls.get_method cls) (Cls.pos cls) files_info files
 
 let class_passes_filter ~filter cls =
   match filter, cls with
@@ -136,7 +136,7 @@ let get_ancestor_classes_and_methods tcopt cls ~filter acc =
           when class_passes_filter ~filter c ->
             let acc = get_overridden_methods tcopt
                           (Cls.name cls)
-                          (Cls.methods cls)
+                          (Cls.get_method cls)
                           (Cls.name c)
                           acc in {
               orig_name = Utils.strip_ns (Cls.name cls);

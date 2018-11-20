@@ -83,7 +83,7 @@ and expand_with_env_ ety_env env reason root ids =
          [_, id],
          Some cond_ty ->
          begin match CT.try_get_class_for_condition_type tenv cond_ty with
-         | Some (_, cls) when SMap.mem id (Cls.typeconsts cls) ->
+         | Some (_, cls) when Cls.has_typeconst cls id ->
           let cond_ty = (Reason.none, Taccess (cond_ty, ids)) in
           Option.value (TR.try_substitute_type_with_condition tenv cond_ty ty)
             ~default:(tenv, ty)

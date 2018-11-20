@@ -33,7 +33,7 @@ let get_all_ancestors tcopt class_name =
 
 let get_docblock_for_member class_info member_name =
   let open Option.Monad_infix in
-  SMap.find_opt member_name (Cls.methods class_info)
+  Cls.get_method class_info member_name
   >>= fun member ->
   match Lazy.force member.Typing_defs.ce_type with
   | _, Typing_defs.Tfun ft ->

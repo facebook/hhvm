@@ -24,7 +24,7 @@ let get_static_meth tcopt (cls_name:string) (meth_name:string) =
   match TLazyHeap.get_class tcopt cls_name with
   | None -> None
   | Some cls ->
-    begin match SMap.get meth_name (Cls.smethods cls) with
+    begin match Cls.get_smethod cls meth_name with
       | None -> None
       | Some { Typing_defs.ce_type = lazy (_r, Typing_defs.Tfun fty) ; _} ->
         Some fty

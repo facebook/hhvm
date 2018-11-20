@@ -50,8 +50,8 @@ module ConditionTypes = struct
     (method_name: string) =
     match try_get_class_for_condition_type env ty with
     | Some (_, cls) ->
-      let m = if is_static then Cls.smethods cls else Cls.methods cls in
-      SMap.get method_name m
+      let get = if is_static then Cls.get_smethod else Cls.get_method in
+      get cls method_name
     | None -> None
 
 

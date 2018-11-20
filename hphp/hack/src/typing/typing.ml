@@ -4087,7 +4087,7 @@ and is_abstract_ft fty = match fty with
           begin match Typing_heap.Classes.get classname with
           | Some class_def ->
             let (_, method_name) = m in
-            begin match SMap.get method_name (Cls.smethods class_def) with
+            begin match Cls.get_smethod class_def method_name with
             | None -> ()
             | Some elt ->
               if elt.ce_synthesized then
@@ -6165,8 +6165,8 @@ and class_def_ env c tc =
       Errors.internal_error pc "The parser should not parse final on enums"
     | Ast.Cnormal -> ()
   end;
-  SMap.iter (check_static_class_element (Cls.methods tc) ~elt_type:"method") (Cls.smethods tc);
-  SMap.iter (check_static_class_element (Cls.props tc) ~elt_type:"property") (Cls.sprops tc);
+  Sequence.iter (Cls.smethods tc) (check_static_class_element (Cls.get_method tc) ~elt_type:"method");
+  Sequence.iter (Cls.sprops tc) (check_static_class_element (Cls.get_prop tc) ~elt_type:"property");
   List.iter impl (class_implements_type env c);
   if (Cls.is_disposable tc)
     then List.iter (c.c_extends @ c.c_uses) (Typing_disposable.enforce_is_disposable env);
@@ -6209,42 +6209,40 @@ and class_def_ env c tc =
     T.c_enum = c.c_enum;
   }
 
-and check_static_class_element obj element_name static_element ~elt_type =
+and check_static_class_element get_dyn_elt (element_name, static_element) ~elt_type =
   (* The static properties that we get passed in start with '$', but the
      non-static properties we're matching against don't, so we need to detect
      that and remove it if present. *)
   let element_name = String_utils.lstrip element_name "$" in
-  if SMap.mem element_name obj
-  then begin
+  match get_dyn_elt element_name with
+  | None -> ()
+  | Some dyn_element ->
     let lazy (static_element_reason, _) = static_element.ce_type in
-    let dyn_element = SMap.find_unsafe element_name obj in
     let lazy (dyn_element_reason, _) = dyn_element.ce_type in
     Errors.static_dynamic
       (Reason.to_pos static_element_reason)
       (Reason.to_pos dyn_element_reason)
       element_name
       ~elt_type
-  end
-  else ()
 
-and check_extend_abstract_meth ~is_final p smap =
-  SMap.iter begin fun x ce ->
+and check_extend_abstract_meth ~is_final p seq =
+  Sequence.iter seq begin fun (x, ce) ->
     match ce.ce_type with
     | lazy (r, Tfun { ft_abstract = true; _ }) ->
         Errors.implement_abstract ~is_final p (Reason.to_pos r) "method" x
     | _ -> ()
-  end smap
+  end
 
 (* Type constants must be bound to a concrete type for non-abstract classes.
  *)
-and check_extend_abstract_typeconst ~is_final p smap =
-  SMap.iter begin fun x tc ->
+and check_extend_abstract_typeconst ~is_final p seq =
+  Sequence.iter seq begin fun (x, tc) ->
     if tc.ttc_type = None then
       Errors.implement_abstract ~is_final p (fst tc.ttc_name) "type constant" x
-  end smap
+  end
 
-and check_extend_abstract_const ~is_final p smap =
-  SMap.iter begin fun x cc ->
+and check_extend_abstract_const ~is_final p seq =
+  Sequence.iter seq begin fun (x, cc) ->
     match cc.cc_type with
     | r, _ when cc.cc_abstract && not cc.cc_synthesized ->
       Errors.implement_abstract ~is_final p (Reason.to_pos r) "constant" x
@@ -6269,7 +6267,7 @@ and check_extend_abstract_const ~is_final p smap =
         | Tthis
         | Tgeneric _
       ) -> ()
-  end smap
+  end
 
 and typeconst_def env {
   c_tconst_name = (pos, _) as id;

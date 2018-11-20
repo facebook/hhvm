@@ -36,13 +36,16 @@ let check_enum_exhaustiveness pos tc caselist coming_from_unresolved =
      don't punish for having an extra default case *)
   let (seen, has_default) =
     List.fold_left ~f:(get_constant tc) ~init:(SMap.empty, false) caselist in
-  let consts = SMap.remove SN.Members.mClass (Cls.consts tc) in
-  let all_cases_handled = SMap.cardinal seen = SMap.cardinal consts in
+  let unhandled =
+    Cls.consts tc
+    |> Sequence.map ~f:fst
+    |> Sequence.filter ~f:((<>) SN.Members.mClass)
+    |> Sequence.filter ~f:(fun id -> not (SMap.mem id seen))
+    |> Sequence.to_list_rev
+  in
+  let all_cases_handled = List.is_empty unhandled in
   match (all_cases_handled, has_default, coming_from_unresolved) with
     | false, false, _ ->
-      let const_list = SMap.keys consts in
-      let unhandled =
-        List.filter const_list (function k -> not (SMap.mem k seen)) in
       Errors.enum_switch_nonexhaustive pos unhandled (Cls.pos tc)
     | true, true, false -> Errors.enum_switch_redundant_default pos (Cls.pos tc)
     | _ -> ()

@@ -111,14 +111,14 @@ let get_origin_class_name tcopt class_name member =
     | Method method_name ->
       begin match Typing_lazy_heap.get_class tcopt class_name with
       | Some class_ ->
-        let get_origin_class meths meth = match SMap.get meths meth with
+        let get_origin_class meth = match meth with
           | Some meth -> Some meth.ce_origin
           | None -> None
         in
-        let origin_from_methods = get_origin_class (Cls.methods class_) method_name in
-        let origin_from_smethods = get_origin_class (Cls.smethods class_) method_name in
-        let origin = Option.first_some origin_from_methods origin_from_smethods in
-        origin
+        let origin = get_origin_class (Cls.get_method class_ method_name) in
+        if Option.is_some origin
+        then origin
+        else get_origin_class (Cls.get_smethod class_ method_name)
       | None -> None
       end
     | Property _ | Class_const _ | Typeconst _ -> None
@@ -225,14 +225,14 @@ let get_definitions tcopt = function
     SSet.fold classes ~init:[] ~f:begin fun class_name acc ->
       match Typing_lazy_heap.get_class tcopt class_name with
       | Some class_ ->
-        let add_meth meths acc = match SMap.get meths method_name with
+        let add_meth get acc = match get method_name with
           | Some meth when meth.ce_origin = (Cls.name class_) ->
             let pos = Reason.to_pos (fst @@ Lazy.force meth.ce_type) in
             (method_name, pos) :: acc
           | _ -> acc
         in
-        let acc = add_meth (Cls.methods class_) acc in
-        let acc = add_meth (Cls.smethods class_) acc in
+        let acc = add_meth (Cls.get_method class_) acc in
+        let acc = add_meth (Cls.get_smethod class_) acc in
         acc
       | None -> acc
     end
@@ -240,13 +240,13 @@ let get_definitions tcopt = function
     SSet.fold classes ~init:[] ~f:begin fun class_name acc ->
       match Typing_lazy_heap.get_class tcopt class_name with
       | Some class_ ->
-        let add_class_const class_consts acc = match SMap.get class_consts class_const_name with
+        let add_class_const get acc = match get class_const_name with
           | Some class_const when class_const.cc_origin = (Cls.name class_) ->
             let pos = class_const.cc_pos in
             (class_const_name, pos) :: acc
           | _ -> acc
         in
-        let acc = add_class_const (Cls.consts class_) acc in
+        let acc = add_class_const (Cls.get_const class_) acc in
         acc
       | None -> acc
     end

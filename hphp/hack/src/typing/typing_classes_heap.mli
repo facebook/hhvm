@@ -7,6 +7,7 @@
  *
  *)
 
+open Core_kernel
 open Typing_defs
 
 module Classes : sig
@@ -32,12 +33,6 @@ val is_disposable         : t -> bool
 val name                  : t -> string
 val pos                   : t -> Pos.t
 val tparams               : t -> decl tparam list
-val consts                : t -> class_const SMap.t
-val typeconsts            : t -> typeconst_type SMap.t
-val props                 : t -> class_elt SMap.t
-val sprops                : t -> class_elt SMap.t
-val methods               : t -> class_elt SMap.t
-val smethods              : t -> class_elt SMap.t
 val construct             : t -> class_elt option * bool
 val ancestors             : t -> decl ty SMap.t
 val req_ancestors         : t -> requirement list
@@ -45,3 +40,24 @@ val req_ancestors_extends : t -> SSet.t
 val extends               : t -> SSet.t
 val enum_type             : t -> enum_type option
 val decl_errors           : t -> Errors.t option
+
+val get_const     : t -> string -> class_const option
+val get_typeconst : t -> string -> typeconst_type option
+val get_prop      : t -> string -> class_elt option
+val get_sprop     : t -> string -> class_elt option
+val get_method    : t -> string -> class_elt option
+val get_smethod   : t -> string -> class_elt option
+
+val has_const     : t -> string -> bool
+val has_typeconst : t -> string -> bool
+val has_prop      : t -> string -> bool
+val has_sprop     : t -> string -> bool
+val has_method    : t -> string -> bool
+val has_smethod   : t -> string -> bool
+
+val consts     : t -> (string * class_const) Sequence.t
+val typeconsts : t -> (string * typeconst_type) Sequence.t
+val props      : t -> (string * class_elt) Sequence.t
+val sprops     : t -> (string * class_elt) Sequence.t
+val methods    : t -> (string * class_elt) Sequence.t
+val smethods   : t -> (string * class_elt) Sequence.t

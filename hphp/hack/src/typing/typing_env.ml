@@ -646,14 +646,14 @@ let get_typeconst env class_ mid =
   add_wclass env (Cls.name class_);
   let dep = Dep.Const ((Cls.name class_), mid) in
   Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
-  SMap.get mid (Cls.typeconsts class_)
+  Cls.get_typeconst class_ mid
 
 (* Used to access class constants. *)
 let get_const env class_ mid =
   add_wclass env (Cls.name class_);
   let dep = Dep.Const ((Cls.name class_), mid) in
   Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);
-  SMap.get mid (Cls.consts class_)
+  Cls.get_const class_ mid
 
 (* Used to access "global constants". That is constants that were
  * introduced with "const X = ...;" at topelevel, or "define('X', ...);"
@@ -675,16 +675,16 @@ let get_static_member is_method env class_ mid =
    * any user of the member also has a dependency on the class where the member
    * originated.
    *)
-  let ce_opt = if is_method then SMap.get mid (Cls.smethods class_)
-    else SMap.get mid (Cls.sprops class_) in
+  let ce_opt = if is_method then Cls.get_smethod class_ mid
+    else Cls.get_sprop class_ mid in
   Option.iter ce_opt (fun ce -> add_dep ce.ce_origin);
   ce_opt
 
 let suggest_member members mid =
-  let members = SMap.fold begin fun x {ce_type = lazy (r, _); _} acc ->
+  let members = Sequence.fold ~f:begin fun acc (x, {ce_type = lazy (r, _); _}) ->
     let pos = Reason.to_pos r in
     SMap.add (String.lowercase x) (pos, x) acc
-  end members SMap.empty
+  end members ~init:SMap.empty
   in
   SMap.get mid members
 
@@ -705,8 +705,8 @@ let get_member is_method env class_ mid =
    * any user of the member also has a dependency on the class where the member
    * originated.
    *)
-  let ce_opt = if is_method then (SMap.get mid (Cls.methods class_))
-    else SMap.get mid (Cls.props class_) in
+  let ce_opt = if is_method then Cls.get_method class_ mid
+    else Cls.get_prop class_ mid in
   Option.iter ce_opt (fun ce -> add_dep ce.ce_origin);
   ce_opt
 

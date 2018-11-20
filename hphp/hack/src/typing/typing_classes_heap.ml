@@ -7,6 +7,7 @@
  *
  *)
 
+open Core_kernel
 open Typing_defs
 
 type t = class_type
@@ -57,12 +58,6 @@ let is_disposable cls = cls.tc_is_disposable
 let name cls = cls.tc_name
 let pos cls = cls.tc_pos
 let tparams cls = cls.tc_tparams
-let consts cls = cls.tc_consts
-let typeconsts cls = cls.tc_typeconsts
-let props cls = cls.tc_props
-let sprops cls = cls.tc_sprops
-let methods cls = cls.tc_methods
-let smethods cls = cls.tc_smethods
 let construct cls = cls.tc_construct
 let ancestors cls = cls.tc_ancestors
 let req_ancestors cls = cls.tc_req_ancestors
@@ -70,3 +65,24 @@ let req_ancestors_extends cls = cls.tc_req_ancestors_extends
 let extends cls = cls.tc_extends
 let enum_type cls = cls.tc_enum_type
 let decl_errors cls = cls.tc_decl_errors
+
+let get_const cls id     = SMap.get id cls.tc_consts
+let get_typeconst cls id = SMap.get id cls.tc_typeconsts
+let get_prop cls id      = SMap.get id cls.tc_props
+let get_sprop cls id     = SMap.get id cls.tc_sprops
+let get_method cls id    = SMap.get id cls.tc_methods
+let get_smethod cls id   = SMap.get id cls.tc_smethods
+
+let has_const cls id     = Option.is_some (get_const cls id)
+let has_typeconst cls id = Option.is_some (get_typeconst cls id)
+let has_prop cls id      = Option.is_some (get_prop cls id)
+let has_sprop cls id     = Option.is_some (get_sprop cls id)
+let has_method cls id    = Option.is_some (get_method cls id)
+let has_smethod cls id   = Option.is_some (get_smethod cls id)
+
+let consts cls     = Sequence.of_list (SMap.bindings cls.tc_consts)
+let typeconsts cls = Sequence.of_list (SMap.bindings cls.tc_typeconsts)
+let props cls      = Sequence.of_list (SMap.bindings cls.tc_props)
+let sprops cls     = Sequence.of_list (SMap.bindings cls.tc_sprops)
+let methods cls    = Sequence.of_list (SMap.bindings cls.tc_methods)
+let smethods cls   = Sequence.of_list (SMap.bindings cls.tc_smethods)

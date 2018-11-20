@@ -358,16 +358,27 @@ let rec class_ tcopt class_name class_type impl =
   let tparams = Cls.tparams class_type in
   let env = SMap.empty in
   let env = List.fold_left impl ~f:(type_ tcopt root Vboth) ~init:env in
-  let env = SMap.fold (class_member class_type tcopt root `Instance) (Cls.props class_type) env in
-  let env = SMap.fold (class_member class_type tcopt root `Static) (Cls.sprops class_type) env in
   let env =
-    SMap.fold (class_method tcopt root `Instance) (Cls.methods class_type) env in
+    Cls.props class_type
+    |> Sequence.fold ~init:env ~f:(class_member class_type tcopt root `Instance)
+  in
+  let env =
+    Cls.sprops class_type
+    |> Sequence.fold ~init:env ~f:(class_member class_type tcopt root `Static)
+  in
+  let env =
+    Cls.methods class_type
+    |> Sequence.fold ~init:env ~f:(class_method tcopt root `Instance)
+  in
   (* We need to apply the same restrictions to non-final static members because
      they can be invoked through classname instances *)
   let env =
     if Cls.final class_type
     then env
-    else SMap.fold (class_method tcopt root `Static) (Cls.smethods class_type) env in
+    else
+      Cls.smethods class_type
+      |> Sequence.fold ~init:env ~f:(class_method tcopt root `Static)
+  in
   List.iter tparams (check_variance env)
 
 (*****************************************************************************)
@@ -386,7 +397,7 @@ and typedef tcopt type_name =
       List.iter td_tparams (check_variance env)
   | None -> ()
 
-and class_member class_type tcopt root static _member_name member env =
+and class_member class_type tcopt root static env (_member_name, member) =
   if static = `Static
   then begin
     (* Check whether the type of a static property (class variable) contains
@@ -416,7 +427,7 @@ and class_member class_type tcopt root static _member_name member env =
       let variance = make_variance Rmember pos Ast.Invariant in
       type_ tcopt root variance env ty
 
-and class_method tcopt root static _method_name method_ env =
+and class_method tcopt root static env (_method_name, method_) =
   match method_.ce_visibility with
   | Vprivate _ -> env
   | _ ->

@@ -129,10 +129,12 @@ let autocomplete_new cid env =
   | _ -> ()
 
 let get_class_elt_types env class_ cid elts =
-  let elts = SMap.filter elts begin fun _ x ->
-    Tast_env.is_visible env (x.ce_visibility, x.ce_lsb) cid class_
-  end in
-  SMap.map elts (fun { ce_type = lazy ty; _ } -> ty)
+  let is_visible (_, elt) =
+    Tast_env.is_visible env (elt.ce_visibility, elt.ce_lsb) cid class_
+  in
+  elts
+  |> Sequence.filter ~f:is_visible
+  |> Sequence.map ~f:(fun (id, { ce_type = lazy ty; _ }) -> id, ty)
 
 let autocomplete_shape_key env fields id =
   if is_auto_complete (snd id)
@@ -172,14 +174,14 @@ let autocomplete_member ~is_static env class_ cid id =
     ac_env := Some env;
     autocomplete_identifier := Some id;
     argument_global_type := Some Acclass_get;
-    let add kind name ty = add_partial_result name (Phase.decl ty) kind (Some class_) in
+    let add kind (name, ty) = add_partial_result name (Phase.decl ty) kind (Some class_) in
     if is_static then begin
-      SMap.iter (get_class_elt_types env class_ cid (Cls.smethods class_)) ~f:(add Method_kind);
-      SMap.iter (get_class_elt_types env class_ cid (Cls.sprops class_)) ~f:(add Property_kind);
-      SMap.iter ((Cls.consts class_)) ~f:(fun name cc -> add Class_constant_kind name cc.cc_type);
+      Sequence.iter (get_class_elt_types env class_ cid (Cls.smethods class_)) ~f:(add Method_kind);
+      Sequence.iter (get_class_elt_types env class_ cid (Cls.sprops class_)) ~f:(add Property_kind);
+      Sequence.iter (Cls.consts class_) ~f:(fun (name, cc) -> add Class_constant_kind (name, cc.cc_type));
     end else begin
-      SMap.iter (get_class_elt_types env class_ cid (Cls.methods class_)) ~f:(add Method_kind);
-      SMap.iter (get_class_elt_types env class_ cid (Cls.props class_)) ~f:(add Property_kind);
+      Sequence.iter (get_class_elt_types env class_ cid (Cls.methods class_)) ~f:(add Method_kind);
+      Sequence.iter (get_class_elt_types env class_ cid (Cls.props class_)) ~f:(add Property_kind);
     end
   end
 

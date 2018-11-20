@@ -1381,21 +1381,21 @@ module PrintClass = struct
     let type_ = Full.to_string_decl tcopt ty in
     synth^vis^" "^type_
 
-  let class_elt_smap tcopt m =
-    SMap.fold begin fun field v acc ->
+  let class_elts tcopt m =
+    Sequence.fold m ~init:"" ~f:begin fun acc (field, v) ->
       "("^field^": "^class_elt tcopt v^") "^acc
-    end m ""
+    end
 
-  let class_elt_smap_with_breaks tcopt m =
-    SMap.fold begin fun field v acc ->
+  let class_elts_with_breaks tcopt m =
+    Sequence.fold m ~init:"" ~f:begin fun acc (field, v) ->
       "\n"^indent^field^": "^(class_elt tcopt v)^acc
-    end m ""
+    end
 
-  let class_const_smap tcopt m =
-    SMap.fold begin fun field cc acc ->
+  let class_consts tcopt m =
+    Sequence.fold m ~init:"" ~f:begin fun acc (field, cc) ->
       let synth = if cc.cc_synthesized then "synthetic " else "" in
       "("^field^": "^synth^Full.to_string_decl tcopt cc.cc_type^") "^acc
-    end m ""
+    end
 
   let typeconst tcopt {
     ttc_name = tc_name;
@@ -1417,10 +1417,10 @@ module PrintClass = struct
     in
     name^constraint_^type_^" (origin:"^origin^")"
 
-  let typeconst_smap tcopt m =
-    SMap.fold begin fun _ v acc ->
+  let typeconsts tcopt m =
+    Sequence.fold m ~init:"" ~f:begin fun acc (_, v) ->
       "\n("^(typeconst tcopt v)^")"^acc
-    end m ""
+    end
 
   let ancestors_smap tcopt m =
     (* Format is as follows:
@@ -1461,12 +1461,12 @@ module PrintClass = struct
     let tc_kind = class_kind (Cls.kind c) in
     let tc_name = (Cls.name c) in
     let tc_tparams = tparam_list tcopt (Cls.tparams c) in
-    let tc_consts = class_const_smap tcopt (Cls.consts c) in
-    let tc_typeconsts = typeconst_smap tcopt (Cls.typeconsts c) in
-    let tc_props = class_elt_smap tcopt (Cls.props c) in
-    let tc_sprops = class_elt_smap tcopt (Cls.sprops c) in
-    let tc_methods = class_elt_smap_with_breaks tcopt (Cls.methods c) in
-    let tc_smethods = class_elt_smap_with_breaks tcopt (Cls.smethods c) in
+    let tc_consts = class_consts tcopt (Cls.consts c) in
+    let tc_typeconsts = typeconsts tcopt (Cls.typeconsts c) in
+    let tc_props = class_elts tcopt (Cls.props c) in
+    let tc_sprops = class_elts tcopt (Cls.sprops c) in
+    let tc_methods = class_elts_with_breaks tcopt (Cls.methods c) in
+    let tc_smethods = class_elts_with_breaks tcopt (Cls.smethods c) in
     let tc_construct = constructor tcopt (Cls.construct c) in
     let tc_ancestors = ancestors_smap tcopt (Cls.ancestors c) in
     let tc_req_ancestors = req_ancestors tcopt (Cls.req_ancestors c) in

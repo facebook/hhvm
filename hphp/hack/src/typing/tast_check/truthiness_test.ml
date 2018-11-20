@@ -23,7 +23,17 @@ let rec truthiness_test env ((p, ty), e) =
   | Expr_list el -> truthiness_test env (List.last_exn el)
   | _ ->
     let open Tast_utils in
+    let prim_to_string prim = Typing_print.error (Typing_defs.Tprim prim) in
     List.iter (find_sketchy_types env ty) begin function
+      | String ->
+        let tystr = prim_to_string Aast_defs.Tstring in
+        Errors.sketchy_truthiness_test p tystr `String
+      | Arraykey ->
+        let tystr = prim_to_string Aast_defs.Tarraykey in
+        Errors.sketchy_truthiness_test p tystr `Arraykey
+      | Stringish ->
+        let tystr = Utils.strip_ns SN.Classes.cStringish in
+        Errors.sketchy_truthiness_test p tystr `Stringish
       | Traversable_interface (env, ty) ->
         Errors.sketchy_truthiness_test p (Env.print_ty env ty) `Traversable
     end;

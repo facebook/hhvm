@@ -3468,6 +3468,25 @@ let invalid_truthiness_test pos ty =
 let sketchy_truthiness_test pos ty truthiness =
   add (Typing.err_code Typing.SketchyTruthinessTest) pos @@
     match truthiness with
+    | `String ->
+      Printf.sprintf
+        "Sketchy condition: testing the truthiness of %s may not behave as expected.\n\
+        The values '' and '0' are both considered falsy. \
+        To check for emptiness, use Str\\is_empty."
+        ty
+    | `Arraykey ->
+      Printf.sprintf
+        "Sketchy condition: testing the truthiness of %s may not behave as expected.\n\
+        The values 0, '', and '0' are all considered falsy. \
+        Test for them explicitly."
+        ty
+    | `Stringish ->
+      Printf.sprintf
+        "Sketchy condition: testing the truthiness of a %s may not behave as expected.\n\
+        The values '' and '0' are both considered falsy, \
+        but objects will be truthy even if their __toString returns '' or '0'.\n\
+        To check for emptiness, convert to a string and use Str\\is_empty."
+        ty
     | `Traversable ->
       (* We have a truthiness test on a value with an interface type which is a
          subtype of Traversable, but not a subtype of Container.

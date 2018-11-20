@@ -1,1 +1,3 @@
-No errors
+File "initialize_property_with_static_literal.php", line 16, characters 29-42:
+Sketchy condition: testing the truthiness of a string may not behave as expected.
+The values '' and '0' are both considered falsy. To check for emptiness, use Str\is_empty. (Typing[4276])

@@ -573,7 +573,7 @@ module type S = sig
   val shapes_idx_with_non_existent_field: Pos.t -> string -> Pos.t -> [< `Undefined | `Unset] -> unit
   val ambiguous_object_access: Pos.t -> string -> Pos.t -> string -> Pos.t -> string -> string -> unit
   val invalid_truthiness_test: Pos.t -> string -> unit
-  val sketchy_truthiness_test: Pos.t -> string -> [< `Traversable ] -> unit
+  val sketchy_truthiness_test: Pos.t -> string -> [< `String | `Arraykey | `Stringish | `Traversable ] -> unit
   val forward_compatibility_not_current: Pos.t -> ForwardCompatibilityLevel.t -> unit
   val forward_compatibility_below_minimum: Pos.t -> ForwardCompatibilityLevel.t -> unit
   val unserializable_type: Pos.t -> string -> unit

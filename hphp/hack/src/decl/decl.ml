@@ -210,12 +210,12 @@ let add_grand_parents_or_traits no_trait_reuse parent_pos shallow_class acc pare
     check_no_duplicate_traits parent_type shallow_class extends extends';
   extends', parent_type.dc_members_fully_known && is_complete, pass
 
-let get_class_parent_or_trait env shallow_class (parents, is_complete, pass) hint =
+let get_class_parent_or_trait env shallow_class (parents, is_complete, pass) ty =
   (* See comment on check_no_duplicate_traits for reasoning here *)
   let no_trait_reuse = experimental_no_trait_reuse_enabled env
     && pass <> `Xhp_pass && shallow_class.sc_kind <> Ast.Cinterface
   in
-  let parent_pos, parent, _ = Decl_utils.unwrap_class_hint hint in
+  let _, (parent_pos, parent), _ = Decl_utils.unwrap_class_type ty in
   (* If we already had this exact trait, we need to flag trait reuse *)
   let reused_trait = no_trait_reuse && SSet.mem parent parents in
   let parents = SSet.add parent parents in
@@ -471,38 +471,39 @@ let rec class_decl_if_missing class_env c =
 and class_naming_and_decl (class_env:class_env) cid c =
   let class_env = { class_env with stack = SSet.add cid class_env.stack } in
   let c = Errors.ignore_ (fun () -> Naming.class_ class_env.tcopt c) in
-  let shallow_class = Shallow_decl.class_ c in
+  let shallow_class = Shallow_decl.class_ class_env.tcopt c in
   let errors, tc = Errors.do_ begin fun() ->
     class_parents_decl class_env shallow_class;
     class_decl class_env.tcopt shallow_class
   end in
+  let errors = Errors.merge shallow_class.sc_decl_errors errors in
   let name = snd shallow_class.sc_name in
   record_class name;
   Decl_heap.Classes.add name { tc with dc_decl_errors = Some errors };
   ()
 
 and class_parents_decl class_env c =
-  let class_hint = class_hint_decl class_env in
-  List.iter c.sc_extends class_hint;
-  List.iter c.sc_implements class_hint;
-  List.iter c.sc_uses class_hint;
-  List.iter c.sc_xhp_attr_uses class_hint;
-  List.iter c.sc_req_extends class_hint;
-  List.iter c.sc_req_implements class_hint;
+  let class_type = class_type_decl class_env in
+  List.iter c.sc_extends class_type;
+  List.iter c.sc_implements class_type;
+  List.iter c.sc_uses class_type;
+  List.iter c.sc_xhp_attr_uses class_type;
+  List.iter c.sc_req_extends class_type;
+  List.iter c.sc_req_implements class_type;
   ()
 
 and is_disposable_type env hint =
   match hint with
-  | (_, Happly ((_, c), _)) ->
+  | (_, Tapply ((_, c), _)) ->
     begin match Decl_env.get_class_dep env c with
     | None -> false
     | Some c -> c.dc_is_disposable
     end
   | _ -> false
 
-and class_hint_decl class_env hint =
+and class_type_decl class_env hint =
   match hint with
-  | _, Happly ((_, cid), _) ->
+  | _, Tapply ((_, cid), _) ->
     begin match Naming_heap.TypeIdHeap.get cid with
       | Some (pos, `Class) when not (Decl_heap.Classes.mem cid) ->
         let fn = FileInfo.get_pos_filename pos in
@@ -562,17 +563,15 @@ and class_decl tcopt c =
     | Some {elt_abstract = true; _} -> false
     | _ -> true in
   let impl = c.sc_extends @ c.sc_implements @ c.sc_uses in
-  let impl = List.map impl (Decl_hint.hint env) in
   let impl = match SMap.get SN.Members.__toString m with
     | Some { elt_origin = cls; _} when cls_name <> SN.Classes.cStringish ->
       (* HHVM implicitly adds Stringish interface for every class/iface/trait
        * with a __toString method; "string" also implements this interface *)
       let pos = method_pos tcopt ~is_static:false cls SN.Members.__toString  in
-      let hint = pos, Happly ((pos, SN.Classes.cStringish), []) in
       (* Declare Stringish and parents if not already declared *)
       let class_env = { tcopt; stack = SSet.empty } in
-      class_hint_decl class_env hint;
       let ty = (Reason.Rhint pos, Tapply ((pos, SN.Classes.cStringish), [])) in
+      class_type_decl class_env ty;
       ty :: impl
     | _ -> impl
   in
@@ -709,7 +708,7 @@ and get_implements env ht =
 
 and trait_exists env acc trait =
   match trait with
-    | (_, Happly ((_, trait), _)) ->
+    | (_, Tapply ((_, trait), _)) ->
       let class_ = Decl_env.get_class_dep env trait in
       (match class_ with
         | None -> false

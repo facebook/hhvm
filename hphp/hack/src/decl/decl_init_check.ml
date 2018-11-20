@@ -11,6 +11,7 @@ open Core_kernel
 open Decl_defs
 open Nast
 open Shallow_decl_defs
+open Typing_defs
 
 module Attrs = Attributes
 module SN = Naming_special_names
@@ -21,9 +22,9 @@ let parent_init_prop = "parent::" ^ SN.Members.__construct
  * a class variable that needs to be initialized. It's a bit hacky
  * but it works. The idea here is that if the parent needs to be
  * initialized, we add a phony class variable. *)
-let add_parent_construct decl_env c props parent_hint =
-  match parent_hint with
-    | (_, Happly ((_, parent), _)) ->
+let add_parent_construct decl_env c props parent_ty =
+  match parent_ty with
+    | (_, Tapply ((_, parent), _)) ->
       begin match Decl_env.get_class_dep decl_env parent with
         | Some class_ when class_.dc_need_init && c.sc_constructor <> None ->
           SSet.add parent_init_prop props
@@ -39,7 +40,7 @@ let parent decl_env c acc =
       ~f:(add_parent_construct decl_env c) ~init:acc
     else match c.sc_extends with
     | [] -> acc
-    | parent_hint :: _ -> add_parent_construct decl_env c acc parent_hint
+    | parent_ty :: _ -> add_parent_construct decl_env c acc parent_ty
 
 let is_lateinit cv =
   Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes
@@ -63,7 +64,7 @@ let own_props c props =
 let parent_props decl_env c props =
   List.fold_left c.sc_extends ~f:begin fun acc parent ->
     match parent with
-    | _, Happly ((_, parent), _) ->
+    | _, Tapply ((_, parent), _) ->
       let tc = Decl_env.get_class_dep decl_env parent in
       begin match tc with
         | None -> acc
@@ -75,7 +76,7 @@ let parent_props decl_env c props =
 
 let trait_props decl_env c props =
   List.fold_left c.sc_uses ~f:begin fun acc -> function
-    | _, Happly ((_, trait), _) -> begin
+    | _, Tapply ((_, trait), _) -> begin
       let class_ = Decl_env.get_class_dep decl_env trait in
       match class_ with
       | None -> acc

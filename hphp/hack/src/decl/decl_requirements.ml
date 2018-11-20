@@ -27,11 +27,9 @@ let make_substitution pos class_name class_type class_parameters =
 (* Accumulate requirements so that we can successfully check the bodies
  * of trait methods / check that classes satisfy these requirements *)
 let flatten_parent_class_reqs env shallow_class
-    (req_ancestors, req_ancestors_extends) parent_hint =
-  let parent_pos, parent_name, parent_params =
-    Decl_utils.unwrap_class_hint parent_hint in
-  let parent_params =
-    List.map parent_params (Decl_hint.hint env) in
+    (req_ancestors, req_ancestors_extends) parent_ty =
+  let _, (parent_pos, parent_name), parent_params =
+    Decl_utils.unwrap_class_type parent_ty in
   let parent_type = Decl_env.get_class_dep env parent_name in
 
   match parent_type with
@@ -58,10 +56,8 @@ let flatten_parent_class_reqs env shallow_class
       req_ancestors, req_ancestors_extends
     | Ast.Cenum -> assert false
 
-let declared_class_req env (requirements, req_extends) hint =
-  let req_ty = Decl_hint.hint env hint in
-  let req_pos, req_name, req_params = Decl_utils.unwrap_class_hint hint in
-  let _ = List.map req_params (Decl_hint.hint env) in
+let declared_class_req env (requirements, req_extends) req_ty =
+  let _, (req_pos, req_name), _ = Decl_utils.unwrap_class_type req_ty in
   let req_type = Decl_env.get_class_dep env req_name in
   let req_extends = SSet.add req_name req_extends in
   (* since the req is declared on this class, we should

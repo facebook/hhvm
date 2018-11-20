@@ -24,27 +24,14 @@ let unwrap_class_hint = function
 
 let unwrap_class_type = function
   | r, Tapply (name, tparaml) -> r, name, tparaml
-  | _,
-    (
-      Terr
-      | Tany
-      | Tmixed
-      | Tnonnull
-      | Tarray (_, _)
-      | Tdarray (_, _)
-      | Tvarray _
-      | Tvarray_or_darray _
-      | Tgeneric _
-      | Toption _
-      | Tprim _
-      | Tfun _
-      | Ttuple _
-      | Tshape _
-      | Taccess (_, _)
-      | Tdynamic
-      | Tthis
-    ) ->
-    raise @@ Invalid_argument "unwrap_class_type got non-class"
+  | r, Tgeneric _ ->
+      let p = Typing_reason.to_pos r in
+      Errors.expected_class ~suffix:" or interface but got a generic" p;
+      r, (p, ""), []
+  | r, _ ->
+      let p = Typing_reason.to_pos r in
+      Errors.expected_class ~suffix:" or interface" p;
+      r, (p, ""), []
 
 (* Given sets A and B return a tuple (AnB, A\B), i.e split A into the part
  * that is common with B, and which is unique to A *)

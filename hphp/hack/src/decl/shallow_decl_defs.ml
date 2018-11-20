@@ -7,6 +7,9 @@
  *
  *)
 
+open Typing_defs
+open Pp_type
+
 type shallow_method = {
   sm_final             : bool;
   sm_abstract          : bool;
@@ -31,12 +34,12 @@ type shallow_class = {
   sc_tparams :
     Aast.tparam list *
     ((Ast.constraint_kind * Ast.hint) list SMap.t);
-  sc_extends         : Aast.hint list;
-  sc_uses            : Aast.hint list;
-  sc_xhp_attr_uses   : Aast.hint list;
-  sc_req_extends     : Aast.hint list;
-  sc_req_implements  : Aast.hint list;
-  sc_implements      : Aast.hint list;
+  sc_extends         : decl ty list;
+  sc_uses            : decl ty list;
+  sc_xhp_attr_uses   : decl ty list;
+  sc_req_extends     : decl ty list;
+  sc_req_implements  : decl ty list;
+  sc_implements      : decl ty list;
   sc_consts          : Nast.class_const list;
   sc_typeconsts      : Nast.class_typeconst list;
   sc_static_vars     : Nast.static_var list;
@@ -46,4 +49,5 @@ type shallow_class = {
   sc_methods         : shallow_method list;
   sc_user_attributes : Nast.user_attribute list;
   sc_enum            : Nast.enum_ option;
+  sc_decl_errors     : Errors.t [@opaque];
 } [@@deriving show]

@@ -332,9 +332,8 @@ let inherit_hack_xhp_attrs_only class_type =
 
 (*****************************************************************************)
 
-let from_class env c hint =
-  let pos, class_name, class_params = Decl_utils.unwrap_class_hint hint in
-  let class_params = List.map class_params (Decl_hint.hint env) in
+let from_class env c ty =
+  let _, (pos, class_name), class_params = Decl_utils.unwrap_class_type ty in
   let class_type = Decl_env.get_class_dep env class_name in
   match class_type with
   | None ->
@@ -345,9 +344,8 @@ let from_class env c hint =
     inherit_hack_class env c pos class_name class_ class_params
 
 (* mostly copy paste of from_class *)
-let from_class_constants_only env hint =
-  let pos, class_name, class_params = Decl_utils.unwrap_class_hint hint in
-  let class_params = List.map class_params (Decl_hint.hint env) in
+let from_class_constants_only env ty =
+  let _, (pos, class_name), class_params = Decl_utils.unwrap_class_type ty in
   let class_type = Decl_env.get_class_dep env class_name in
   match class_type with
   | None ->
@@ -357,8 +355,8 @@ let from_class_constants_only env hint =
     (* The class lives in Hack *)
     inherit_hack_class_constants_only pos class_name class_ class_params
 
-let from_class_xhp_attrs_only env hint =
-  let _pos, class_name, _class_params = Decl_utils.unwrap_class_hint hint in
+let from_class_xhp_attrs_only env ty =
+  let _, (_pos, class_name), _class_params = Decl_utils.unwrap_class_type ty in
   let class_type = Decl_env.get_class_dep env class_name in
   match class_type with
   | None ->

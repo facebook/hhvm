@@ -9,6 +9,7 @@
 open Core_kernel
 open Decl_defs
 open Shallow_decl_defs
+open Typing_defs
 
 
 (* Module calculating the Member Resolution Order of a class *)
@@ -16,9 +17,8 @@ type result = linearization
 
 let get_linearization (env : Decl_env.env)
                       (class_name : string)
-                      (type_params : Nast.hint list)
+                      (type_params : decl ty list)
                       (new_source : source_type ): result =
-  let type_params = List.map type_params (Decl_hint.hint env) in
   let result = match Decl_env.get_class_dep env class_name with
   | Some l -> l.Decl_defs.dc_linearization
   | None -> [] in
@@ -35,15 +35,15 @@ let add_linearization (acc : result) (lin : result) : result =
     else e::acc
   )
 
-let from_class (env : Decl_env.env) (hint : Nast.hint)  (new_source : source_type): result =
-  let _, class_name, type_params = Decl_utils.unwrap_class_hint hint in
+let from_class (env : Decl_env.env) (ty : decl ty)  (new_source : source_type): result =
+  let _, (_, class_name), type_params = Decl_utils.unwrap_class_type ty in
   get_linearization env class_name type_params new_source
 
 
-let from_list (env : Decl_env.env) (l : Nast.hint list)
+let from_list (env : Decl_env.env) (l : decl ty list)
               (acc : result) (source : source_type): result =
   List.fold_left l ~init:acc
-    ~f:(fun acc hint -> add_linearization acc (from_class env hint source))
+    ~f:(fun acc ty -> add_linearization acc (from_class env ty source))
 
 let from_parent (env : Decl_env.env) (c : shallow_class) (acc : result) : result =
   let extends =

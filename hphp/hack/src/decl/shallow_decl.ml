@@ -10,6 +10,7 @@
 open Core_kernel
 open Shallow_decl_defs
 open Nast
+open Typing_deps
 
 let method_ m =
   {
@@ -27,7 +28,8 @@ let method_ m =
     sm_ret_by_ref = m.m_ret_by_ref;
   }
 
-let class_ c =
+let class_ env c =
+  let hint = Decl_hint.hint env in
   {
     sc_mode = c.c_mode;
     sc_final = c.c_final;
@@ -35,12 +37,12 @@ let class_ c =
     sc_kind = c.c_kind;
     sc_name = c.c_name;
     sc_tparams = c.c_tparams;
-    sc_extends = c.c_extends;
-    sc_uses = c.c_uses;
-    sc_xhp_attr_uses = c.c_xhp_attr_uses;
-    sc_req_extends = c.c_req_extends;
-    sc_req_implements = c.c_req_implements;
-    sc_implements = c.c_implements;
+    sc_extends        = List.map ~f:hint c.c_extends;
+    sc_uses           = List.map ~f:hint c.c_uses;
+    sc_xhp_attr_uses  = List.map ~f:hint c.c_xhp_attr_uses;
+    sc_req_extends    = List.map ~f:hint c.c_req_extends;
+    sc_req_implements = List.map ~f:hint c.c_req_implements;
+    sc_implements     = List.map ~f:hint c.c_implements;
     sc_consts = c.c_consts;
     sc_typeconsts = c.c_typeconsts;
     sc_static_vars = c.c_static_vars;
@@ -50,4 +52,16 @@ let class_ c =
     sc_methods = List.map c.c_methods method_;
     sc_user_attributes = c.c_user_attributes;
     sc_enum = c.c_enum;
+    sc_decl_errors = Errors.empty;
   }
+
+let class_ tcopt c =
+  let _, cls_name = c.c_name in
+  let class_dep = Dep.Class cls_name in
+  let env = {
+    Decl_env.mode = c.c_mode;
+    droot = Some class_dep;
+    decl_tcopt = tcopt;
+  } in
+  let errors, sc = Errors.do_ (fun () -> class_ env c) in
+  { sc with sc_decl_errors = errors }

@@ -45,19 +45,19 @@ let parent decl_env c acc =
 let is_lateinit cv =
   Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes
 
-let prop_needs_init cv =
-  if cv.cv_is_xhp then false
-  else if is_lateinit cv then false
-  else match cv.cv_type with
+let prop_needs_init sp =
+  if sp.sp_is_xhp_attr then false
+  else if sp.sp_lateinit then false
+  else match sp.sp_type with
     | None
-    | Some (_, Hoption _)
-    | Some (_, Hmixed) -> false
-    | Some _ -> cv.cv_expr = None
+    | Some (_, Toption _)
+    | Some (_, Tmixed) -> false
+    | Some _ -> sp.sp_needs_init
 
 let own_props c props =
-  List.fold_left c.sc_vars ~f:begin fun acc cv ->
-    if prop_needs_init cv
-    then SSet.add (snd cv.cv_id) acc
+  List.fold_left c.sc_props ~f:begin fun acc sp ->
+    if prop_needs_init sp
+    then SSet.add (snd sp.sp_name) acc
     else acc
   end ~init:props
 
@@ -103,16 +103,16 @@ let trait_props decl_env c props =
 (* return a tuple of the private init-requiring props of the class
  * and all init-requiring props of the class and its ancestors *)
 let get_deferred_init_props decl_env c =
-  let priv_props, props = List.fold_left ~f:(fun (priv_props, props) cv ->
-    let name = snd cv.cv_id in
-    let visibility = cv.cv_visibility in
-    if not (prop_needs_init cv) then
+  let priv_props, props = List.fold_left ~f:(fun (priv_props, props) sp ->
+    let name = snd sp.sp_name in
+    let visibility = sp.sp_visibility in
+    if not (prop_needs_init sp) then
       priv_props, props
     else if visibility = Private then
       SSet.add name priv_props, SSet.add name props
     else
       priv_props, SSet.add name props
-  ) ~init:(SSet.empty, SSet.empty) c.sc_vars in
+  ) ~init:(SSet.empty, SSet.empty) c.sc_props in
   let props = parent_props decl_env c props in
   let props = parent decl_env c props in
   priv_props, props

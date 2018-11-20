@@ -515,8 +515,7 @@ and class_decl tcopt c =
   } in
   let inherited = Decl_inherit.make env c in
   let props = inherited.Decl_inherit.ih_props in
-  let props =
-    List.fold_left ~f:(class_var_decl env c) ~init:props c.sc_vars in
+  let props = List.fold_left ~f:(prop_decl c) ~init:props c.sc_props in
   let m = inherited.Decl_inherit.ih_methods in
   let m, condition_types = List.fold_left
       ~f:(method_decl_acc ~is_static:false env c )
@@ -528,9 +527,9 @@ and class_decl tcopt c =
   let typeconsts = inherited.Decl_inherit.ih_typeconsts in
   let typeconsts, consts = List.fold_left c.sc_typeconsts
       ~f:(typeconst_fold c) ~init:(typeconsts, consts) in
-  let sclass_var = static_class_var_decl env c in
+  let sclass_var = static_prop_decl c in
   let sprops = inherited.Decl_inherit.ih_sprops in
-  let sprops = List.fold_left c.sc_static_vars ~f:sclass_var ~init:sprops in
+  let sprops = List.fold_left c.sc_sprops ~f:sclass_var ~init:sprops in
   let sm = inherited.Decl_inherit.ih_smethods in
   let sm, condition_types = List.fold_left c.sc_static_methods
       ~f:(method_decl_acc ~is_static:true env c )
@@ -773,33 +772,18 @@ and class_class_decl class_id =
     cc_origin      = name;
   }
 
-and class_var_decl env c acc cv =
-  let cv_pos, cv_name = cv.cv_id in
-  let ty = match cv.cv_type with
-    | None -> Reason.Rwitness cv_pos, Tany
-    | Some ty' when cv.cv_is_xhp ->
-      (* If this is an XHP attribute and we're in strict mode,
-         relax to partial mode to allow the use of the "array"
-         annotation without specifying type parameters. Until
-         recently HHVM did not allow "array" with type parameters
-         in XHP attribute declarations, so this is a temporary
-         hack to support existing code for now. *)
-      (* Task #5815945: Get rid of this Hack *)
-      let env = if Decl_env.mode env = FileInfo.Mstrict
-      then { env with Decl_env.mode = FileInfo.Mpartial }
-        else env
-      in
-      Decl_hint.hint env ty'
-    | Some ty' -> Decl_hint.hint env ty'
+and prop_decl c acc sp =
+  let sp_pos, sp_name = sp.sp_name in
+  let ty = match sp.sp_type with
+    | None -> Reason.Rwitness sp_pos, Tany
+    | Some ty' -> ty'
   in
-  let vis = visibility (snd c.sc_name) cv.cv_visibility in
-  let const = Attrs.mem SN.UserAttributes.uaConst cv.cv_user_attributes in
-  let lateinit = Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes in
+  let vis = visibility (snd c.sc_name) sp.sp_visibility in
   let elt = {
     elt_final = true;
-    elt_is_xhp_attr = cv.cv_is_xhp;
-    elt_const = const;
-    elt_lateinit = lateinit;
+    elt_is_xhp_attr = sp.sp_is_xhp_attr;
+    elt_const = sp.sp_const;
+    elt_lateinit = sp.sp_lateinit;
     elt_lsb = false;
     elt_synthesized = false;
     elt_override = false;
@@ -809,27 +793,23 @@ and class_var_decl env c acc cv =
     elt_origin = (snd c.sc_name);
     elt_reactivity = None;
   } in
-  Decl_heap.Props.add (elt.elt_origin, cv_name) ty;
-  let acc = SMap.add cv_name elt acc in
-  if cv.cv_final then Errors.final_property cv_pos;
-  if lateinit && cv.cv_expr <> None then Errors.lateinit_with_default cv_pos;
+  Decl_heap.Props.add (elt.elt_origin, sp_name) ty;
+  let acc = SMap.add sp_name elt acc in
   acc
 
-and static_class_var_decl env c acc cv =
-  let cv_pos, cv_name = cv.cv_id in
-  let ty = match cv.cv_type with
-    | None -> Reason.Rwitness cv_pos, Tany
-    | Some ty -> Decl_hint.hint env ty in
-  let id = "$" ^ cv_name in
-  let vis = visibility (snd c.sc_name) cv.cv_visibility in
-  let lateinit = Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes in
-  let lsb = Attrs.mem SN.UserAttributes.uaLSB cv.cv_user_attributes in
+and static_prop_decl c acc sp =
+  let sp_pos, sp_name = sp.sp_name in
+  let ty = match sp.sp_type with
+    | None -> Reason.Rwitness sp_pos, Tany
+    | Some ty' -> ty'
+  in
+  let vis = visibility (snd c.sc_name) sp.sp_visibility in
   let elt = {
     elt_final = true;
     elt_const = false; (* unsupported for static properties *)
-    elt_lateinit = lateinit;
-    elt_lsb = lsb;
-    elt_is_xhp_attr = cv.cv_is_xhp;
+    elt_lateinit = sp.sp_lateinit;
+    elt_lsb = sp.sp_lsb;
+    elt_is_xhp_attr = sp.sp_is_xhp_attr;
     elt_override = false;
     elt_memoizelsb = false;
     elt_abstract = false;
@@ -838,17 +818,8 @@ and static_class_var_decl env c acc cv =
     elt_origin = (snd c.sc_name);
     elt_reactivity = None;
   } in
-  Decl_heap.StaticProps.add (elt.elt_origin, id) ty;
-  let acc = SMap.add id elt acc in
-  if cv.cv_expr = None && FileInfo.(c.sc_mode = Mstrict || c.sc_mode = Mpartial)
-  then begin match cv.cv_type with
-    | None
-    | Some (_, Hmixed)
-    | Some (_, Hoption _) -> ()
-    | _ when not lateinit -> Errors.missing_assign cv_pos
-    | _ -> ()
-  end;
-  if lateinit && cv.cv_expr <> None then Errors.lateinit_with_default cv_pos;
+  Decl_heap.StaticProps.add (elt.elt_origin, sp_name) ty;
+  let acc = SMap.add sp_name elt acc in
   acc
 
 and visibility cid = function

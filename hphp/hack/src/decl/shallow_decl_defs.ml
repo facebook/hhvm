@@ -23,6 +23,17 @@ type shallow_typeconst = {
   stc_type       : decl ty option;
 } [@@deriving show]
 
+type shallow_prop = {
+  sp_const       : bool;
+  sp_is_xhp_attr : bool;
+  sp_lateinit    : bool;
+  sp_lsb         : bool;
+  sp_name        : Aast.sid;
+  sp_needs_init  : bool;
+  sp_type        : decl ty option;
+  sp_visibility  : Aast.visibility;
+} [@@deriving show]
+
 type shallow_method = {
   sm_final             : bool;
   sm_abstract          : bool;
@@ -55,8 +66,8 @@ type shallow_class = {
   sc_implements      : decl ty list;
   sc_consts          : shallow_class_const list;
   sc_typeconsts      : shallow_typeconst list;
-  sc_static_vars     : Nast.static_var list;
-  sc_vars            : Nast.class_var list;
+  sc_props           : shallow_prop list;
+  sc_sprops          : shallow_prop list;
   sc_constructor     : shallow_method option;
   sc_static_methods  : shallow_method list;
   sc_methods         : shallow_method list;

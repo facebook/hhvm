@@ -339,3 +339,4 @@ val complex_lval_in_concurrent_block : string
 val duplicate_lval_in_concurrent_block : string
 val val_and_lval_in_concurrent_block : string
 val concurrent_is_disabled : string
+val misplaced_reactivity_annotation : string

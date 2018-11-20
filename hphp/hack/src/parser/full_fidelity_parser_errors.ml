@@ -1085,11 +1085,15 @@ let is_some_reactivity_attribute n =
   attribute_matches_criteria is_some_reactivity_attribute_name n
   |> Option.is_some
 
-let attribute_has_reactivity_annotation attr_spec =
+let attribute_first_reactivity_annotation attr_spec =
   match syntax attr_spec with
   | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
-    List.exists (syntax_node_to_list attrs) ~f:is_some_reactivity_attribute
-  | _ -> false
+    List.find (syntax_node_to_list attrs) ~f:is_some_reactivity_attribute
+  | _ -> None
+
+
+let attribute_has_reactivity_annotation attr_spec =
+  Option.is_some (attribute_first_reactivity_annotation attr_spec)
 
 let attribute_missing_reactivity_for_condition attr_spec =
   let has_attr attr = attribute_specification_contains attr_spec attr in
@@ -2584,6 +2588,13 @@ let classish_errors env node parents namespace_name names errors =
       classish_is_sealed in
     let errors = produce_error errors (classish_invalid_extends_list env) ()
       SyntaxError.error2037 cd.classish_extends_list in
+
+    let errors =
+      match attribute_first_reactivity_annotation cd.classish_attribute with
+      | Some n ->
+        make_error_from_node n SyntaxError.misplaced_reactivity_annotation :: errors
+      | None ->
+        errors in
     let errors =
       produce_error errors
       classish_duplicate_modifiers cd.classish_modifiers

@@ -123,6 +123,7 @@ struct APCLocalArray final : ArrayData,
   static ArrayData* ToPHPArray(ArrayData* ad, bool) {
     return ad;
   }
+  static constexpr auto ToPHPArrayIntishCast = &ToPHPArray;
   static constexpr auto ToVec = &ArrayCommon::ToVec;
   static constexpr auto ToDict = &ArrayCommon::ToDict;
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;

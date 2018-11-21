@@ -206,6 +206,7 @@ public:
   Array toShape() const { COPY_BODY(toShape(true), CreateShape()) }
   Array toKeyset() const { COPY_BODY(toKeyset(true), CreateKeyset()) }
   Array toPHPArray() const { COPY_BODY(toPHPArray(true), Array{}) }
+  Array toPHPArrayIntishCast() const { COPY_BODY(toPHPArrayIntishCast(true), Array{}) }
   Array toVArray() const { COPY_BODY(toVArray(true), CreateVArray()) }
   Array toDArray() const { COPY_BODY(toDArray(true), CreateDArray()) }
 

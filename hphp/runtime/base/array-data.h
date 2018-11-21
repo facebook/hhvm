@@ -197,6 +197,7 @@ public:
    * Convert between array kinds.
    */
   ArrayData* toPHPArray(bool copy);
+  ArrayData* toPHPArrayIntishCast(bool copy);
   ArrayData* toShape(bool copy);
   ArrayData* toDict(bool copy);
   ArrayData* toVec(bool copy);
@@ -1021,6 +1022,7 @@ struct ArrayFunctions {
   void (*onSetEvalScalar[NK])(ArrayData*);
   ArrayData* (*escalate[NK])(const ArrayData*);
   ArrayData* (*toPHPArray[NK])(ArrayData*, bool);
+  ArrayData* (*toPHPArrayIntishCast[NK])(ArrayData*, bool);
   ArrayData* (*toShape[NK])(ArrayData*, bool);
   ArrayData* (*toDict[NK])(ArrayData*, bool);
   ArrayData* (*toVec[NK])(ArrayData*, bool);

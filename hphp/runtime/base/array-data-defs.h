@@ -76,6 +76,10 @@ inline ArrayData* ArrayData::toPHPArray(bool copy) {
   return g_array_funcs.toPHPArray[kind()](this, copy);
 }
 
+inline ArrayData* ArrayData::toPHPArrayIntishCast(bool copy) {
+  return g_array_funcs.toPHPArrayIntishCast[kind()](this, copy);
+}
+
 inline ArrayData* ArrayData::toShape(bool copy) {
   return g_array_funcs.toShape[kind()](this, copy);
 }

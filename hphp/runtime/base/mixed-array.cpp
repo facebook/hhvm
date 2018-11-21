@@ -1673,7 +1673,10 @@ ArrayData* MixedArray::ToPHPArray(ArrayData* in, bool copy) {
 }
 
 ALWAYS_INLINE
-ArrayData* MixedArray::FromDictImpl(ArrayData* adIn, bool copy, bool toDArray) {
+ArrayData* MixedArray::FromDictImpl(ArrayData* adIn,
+                                    bool copy,
+                                    bool toDArray,
+                                    IntishCast intishCast = IntishCast::CastAndWarn) {
   assertx(adIn->isDictOrShape());
   auto a = asMixed(adIn);
 
@@ -1721,7 +1724,8 @@ ArrayData* MixedArray::FromDictImpl(ArrayData* adIn, bool copy, bool toDArray) {
     } else {
       int64_t n;
       if (e.skey->isStrictlyInteger(n)) {
-        if (checkHACIntishCast()) raise_intish_index_cast();
+        if (intishCast == IntishCast::CastAndWarn &&
+            checkHACIntishCast()) raise_intish_index_cast();
         out->update(n, *tvAssertCell(&e.data));
       } else {
         out->update(e.skey, *tvAssertCell(&e.data));
@@ -1736,7 +1740,14 @@ ArrayData* MixedArray::FromDictImpl(ArrayData* adIn, bool copy, bool toDArray) {
 }
 
 ArrayData* MixedArray::ToPHPArrayDict(ArrayData* adIn, bool copy) {
-  auto out = FromDictImpl(adIn, copy, false);
+  auto out = FromDictImpl(adIn, copy, false, IntishCast::CastAndWarn);
+  assertx(out->isNotDVArray());
+  assertx(!out->isLegacyArray());
+  return out;
+}
+
+ArrayData* MixedArray::ToPHPArrayIntishCastDict(ArrayData* adIn, bool copy) {
+  auto out = FromDictImpl(adIn, copy, false, IntishCast::CastSilently);
   assertx(out->isNotDVArray());
   assertx(!out->isLegacyArray());
   return out;
@@ -1768,7 +1779,7 @@ ArrayData* MixedArray::ToDArray(ArrayData* in, bool copy) {
 
 ArrayData* MixedArray::ToDArrayDict(ArrayData* in, bool copy) {
   if (RuntimeOption::EvalHackArrDVArrs) return in;
-  auto out = FromDictImpl(in, copy, true);
+  auto out = FromDictImpl(in, copy, true, IntishCast::CastAndWarn);
   assertx(out->isDArray());
   assertx(!out->isLegacyArray());
   return out;
@@ -1777,7 +1788,7 @@ ArrayData* MixedArray::ToDArrayDict(ArrayData* in, bool copy) {
 ArrayData* MixedArray::ToDArrayShape(ArrayData* in, bool copy) {
   assertx(in->isShape());
   if (RuntimeOption::EvalHackArrDVArrs) {
-    auto out = FromDictImpl(in, copy, true);
+    auto out = FromDictImpl(in, copy, true, IntishCast::CastAndWarn);
     assertx(out->isDArray());
     assertx(!out->isLegacyArray());
     return out;

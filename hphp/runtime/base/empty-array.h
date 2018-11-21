@@ -152,6 +152,7 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   static ArrayData* ToPHPArray(ArrayData* ad, bool) {
     return ad;
   }
+  static constexpr auto ToPHPArrayIntishCast = &ToPHPArray;
   static ArrayData* ToVArray(ArrayData*, bool) {
     return staticEmptyVArray();
   }

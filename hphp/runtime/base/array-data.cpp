@@ -760,6 +760,7 @@ const ArrayFunctions g_array_funcs = {
    *   place.
    */
   DISPATCH(ToPHPArray)
+  DISPATCH(ToPHPArrayIntishCast)
 
    /*
    * ArrayData* ToShape(ArrayData*, bool)

@@ -219,7 +219,7 @@ private:
   static SetArray* CopyReserve(const SetArray* src, size_t expectedSize);
   SetArray* copySet() const { return CopySet(*this, AllocMode::Request); }
 
-  template <typename Init> static ArrayData* ToArrayImpl(ArrayData*, bool);
+  template <typename Init> static ArrayData* ToArrayImpl(ArrayData*, bool, IntishCast);
 
 private:
   SetArray() = delete;
@@ -457,6 +457,7 @@ public:
   static constexpr auto ToDict = &ArrayCommon::ToDict;
   static constexpr auto ToVec = &ArrayCommon::ToVec;
   static ArrayData* ToPHPArray(ArrayData*, bool);
+  static ArrayData* ToPHPArrayIntishCast(ArrayData*, bool);
   static ArrayData* ToKeyset(ArrayData*, bool);
   static constexpr auto ToVArray = &ArrayCommon::ToVArray;
   static ArrayData* ToDArray(ArrayData*, bool);

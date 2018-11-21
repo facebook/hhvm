@@ -380,6 +380,7 @@ public:
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, Cell v);
   static ArrayData* ToPHPArray(ArrayData*, bool);
+  static constexpr auto ToPHPArrayIntishCast = &ToPHPArray;
   static ArrayData* ToDict(ArrayData*, bool);
   static ArrayData* ToShape(ArrayData*, bool);
   static constexpr auto ToVec = &ArrayCommon::ToVec;
@@ -490,6 +491,7 @@ public:
   static constexpr auto OnSetEvalScalarDict = &OnSetEvalScalar;
   static constexpr auto EscalateDict = &Escalate;
   static ArrayData* ToPHPArrayDict(ArrayData*, bool);
+  static ArrayData* ToPHPArrayIntishCastDict(ArrayData*, bool);
   static ArrayData* ToDictDict(ArrayData*, bool);
   static constexpr auto ToVecDict = &ArrayCommon::ToVec;
   static constexpr auto ToKeysetDict = &ArrayCommon::ToKeyset;
@@ -592,6 +594,7 @@ public:
   static constexpr auto OnSetEvalScalarShape = &OnSetEvalScalar;
   static constexpr auto EscalateShape = &Escalate;
   static ArrayData* ToPHPArrayShape(ArrayData*, bool);
+  static constexpr auto ToPHPArrayIntishCastShape = &ToPHPArrayShape;
   static ArrayData* ToShapeShape(ArrayData*, bool);
   static constexpr auto ToVecShape = &ArrayCommon::ToVec;
   static constexpr auto ToKeysetShape = &ArrayCommon::ToKeyset;
@@ -612,7 +615,7 @@ private:
                                     const TypedValue*, HeaderKind,
                                     ArrayData::DVArray);
 
-  static ArrayData* FromDictImpl(ArrayData*, bool, bool);
+  static ArrayData* FromDictImpl(ArrayData*, bool, bool, IntishCast);
 
   static bool DictEqualHelper(const ArrayData*, const ArrayData*, bool);
 

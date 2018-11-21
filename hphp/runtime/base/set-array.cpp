@@ -881,7 +881,8 @@ ArrayData* SetArray::Escalate(const ArrayData* ad) {
 }
 
 template <typename Init> ALWAYS_INLINE
-ArrayData* SetArray::ToArrayImpl(ArrayData* ad, bool toDArray) {
+ArrayData* SetArray::ToArrayImpl(ArrayData* ad, bool toDArray,
+                                 IntishCast intishCast) {
   auto a = asSet(ad);
   auto size = a->size();
 
@@ -900,7 +901,8 @@ ArrayData* SetArray::ToArrayImpl(ArrayData* ad, bool toDArray) {
       auto const key = elm.strKey();
       int64_t n;
       if (key->isStrictlyInteger(n)) {
-        if (checkHACIntishCast()) raise_intish_index_cast();
+        if (intishCast == IntishCast::CastAndWarn &&
+            checkHACIntishCast()) raise_intish_index_cast();
         init.set(n, make_tv<KindOfInt64>(n));
       } else {
         init.set(key, tvAsCVarRef(&elm.tv));
@@ -914,14 +916,20 @@ ArrayData* SetArray::ToArrayImpl(ArrayData* ad, bool toDArray) {
 }
 
 ArrayData* SetArray::ToPHPArray(ArrayData* ad, bool) {
-  auto out = ToArrayImpl<MixedArrayInit>(ad, false);
+  auto out = ToArrayImpl<MixedArrayInit>(ad, false, IntishCast::CastAndWarn);
+  assertx(out->isNotDVArray());
+  return out;
+}
+
+ArrayData* SetArray::ToPHPArrayIntishCast(ArrayData* ad, bool) {
+  auto out = ToArrayImpl<MixedArrayInit>(ad, false, IntishCast::CastSilently);
   assertx(out->isNotDVArray());
   return out;
 }
 
 ArrayData* SetArray::ToDArray(ArrayData* ad, bool copy) {
   if (RuntimeOption::EvalHackArrDVArrs) return ToDict(ad, copy);
-  auto out = ToArrayImpl<DArrayInit>(ad, true);
+  auto out = ToArrayImpl<DArrayInit>(ad, true, IntishCast::CastAndWarn);
   assertx(out->isDArray());
   return out;
 }

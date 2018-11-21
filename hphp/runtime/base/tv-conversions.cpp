@@ -541,6 +541,7 @@ String tvCastToString(TypedValue tv) {
   return String::attach(tvCastToStringData(tv));
 }
 
+template <IntishCast intishCast>
 ArrayData* tvCastToArrayLikeData(TypedValue tv) {
   assertx(tvIsPlausible(tv));
   if (isRefType(tv.m_type)) {
@@ -578,7 +579,7 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
     }
 
     case KindOfObject: {
-      auto ad = tv.m_data.pobj->toArray();
+      auto ad = tv.m_data.pobj->toArray<intishCast>();
       assertx(ad->isPHPArray());
       return ad.detach();
     }
@@ -589,14 +590,19 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
   not_reached();
 }
 
+template
+ArrayData* tvCastToArrayLikeData<IntishCast::CastAndWarn>(TypedValue);
+template
+ArrayData* tvCastToArrayLikeData<IntishCast::CastSilently>(TypedValue);
+
 Array tvCastToArrayLike(TypedValue tv) {
-  return Array::attach(tvCastToArrayLikeData(tv));
+  return Array::attach(tvCastToArrayLikeData<IntishCast::CastAndWarn>(tv));
 }
 
 void tvCastToShapeInPlace(TypedValue* tv) {
   if (isShapeType(tv->m_type)) {
     return;
-  }
+}
   if (RuntimeOption::EvalHackArrDVArrs) {
     tvCastToDictInPlace(tv);
   } else {

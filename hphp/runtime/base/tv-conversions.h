@@ -113,6 +113,7 @@ Object tvCastToObject(TypedValue tv);
 
 StringData* tvCastToStringData(TypedValue tv);
 StringData* cellCastToStringData(Cell c);
+template <IntishCast intishCast /* = IntishCast::CastAndWarn */>
 ArrayData* tvCastToArrayLikeData(TypedValue tv);
 ObjectData* tvCastToObjectData(TypedValue tv);
 

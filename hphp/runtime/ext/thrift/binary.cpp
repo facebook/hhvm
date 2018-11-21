@@ -569,7 +569,7 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
         transport.writeString(sv.data(), sv.size());
     } return;
     case T_MAP: {
-      Array ht = value.toArray();
+      Array ht = value.toArray<IntishCast::CastSilently>();
       uint8_t keytype = (char)tvCastToInt64(
         fieldspec.rvalAt(s_ktype, AccessFlags::ErrorKey).tv()
       );

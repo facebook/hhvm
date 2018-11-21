@@ -991,8 +991,9 @@ struct Variant : private TypedValue {
   // Convert a non-array-like type to a PHP array, leaving PHP arrays and Hack
   // arrays unchanged. Use toPHPArray() if you want the result to always be a
   // PHP array.
+  template <IntishCast intishCast = IntishCast::CastAndWarn>
   Array toArray() const {
-    return HPHP::toArray(asTypedValue());
+    return HPHP::toArray<intishCast>(asTypedValue());
   }
   Array toPHPArray() const {
     if (isArrayType(m_type)) return Array(m_data.parr);

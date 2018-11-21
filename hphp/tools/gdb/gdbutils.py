@@ -263,7 +263,10 @@ def rawptr(val):
     ptr = None
 
     if name == 'std::unique_ptr':
-        ptr = val['_M_t']['_M_head_impl']
+        try:
+            ptr = val['_M_t']['_M_t']['_M_head_impl']
+        except:
+            ptr = val['_M_t']['_M_head_impl']
 
     if name == 'HPHP::default_ptr':
         ptr = val['m_p']

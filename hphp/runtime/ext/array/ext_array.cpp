@@ -983,14 +983,14 @@ TypedValue HHVM_FUNCTION(array_slice,
   // preserve_keys is true, or when preserve_keys is false but the container
   // is packed so we know the keys already map to [0,N].
   if (offset == 0 && len == num_in && (preserve_keys || input_is_packed)) {
-    SuppressHACIntishCastNotices shacn;
     if (isArrayType(cell_input.m_type)) {
       return tvReturn(Variant{cell_input.m_data.parr});
     }
     if (isArrayLikeType(cell_input.m_type)) {
-      return tvReturn(ArrNR{cell_input.m_data.parr}.asArray().toPHPArray());
+      return tvReturn(ArrNR{cell_input.m_data.parr}
+                        .asArray().toPHPArrayIntishCast());
     }
-    return tvReturn(cell_input.m_data.pobj->toArray());
+    return tvReturn(cell_input.m_data.pobj->toArray<IntishCast::CastSilently>());
   }
 
   int pos = 0;

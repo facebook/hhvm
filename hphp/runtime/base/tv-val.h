@@ -109,6 +109,7 @@ public:
   static constexpr int val_idx = wide_tv_val ? 1 : 0;
 
   INLINE_FLATTEN tv_val();
+  /* implicit */ INLINE_FLATTEN tv_val(std::nullptr_t);
   /* implicit */ INLINE_FLATTEN tv_val(tv_t* lval);
   INLINE_FLATTEN tv_val(type_t* type, value_t* val);
 
@@ -187,6 +188,9 @@ private:
    * Default storage type: a single TypedValue*.
    */
   struct storage {
+    INLINE_FLATTEN storage()
+      : m_tv{} {}
+
     INLINE_FLATTEN storage(type_t* type, value_t* val)
       : m_tv{reinterpret_cast<tv_t*>(val)}
     {
@@ -210,6 +214,7 @@ private:
 
     INLINE_FLATTEN type_t* type() const { return &m_tv->m_type; }
     INLINE_FLATTEN value_t* val() const { return &m_tv->m_data; }
+    INLINE_FLATTEN bool is_set() const { return static_cast<bool>(m_tv); }
 
     template<typename Tag = tag_t>
     INLINE_FLATTEN with_tag_t<Tag> tag() const { return m_tv.tag(); }
@@ -223,6 +228,9 @@ private:
    * only meangingful is m_val != nullptr.
    */
   struct wide_storage {
+    INLINE_FLATTEN wide_storage()
+        : m_type{}, m_val{} {}
+
     INLINE_FLATTEN wide_storage(type_t* type, value_t* val)
       : m_type{type}
       , m_val{val}
@@ -250,6 +258,7 @@ private:
       return tv_val_detail::get_ptr(m_type);
     }
     INLINE_FLATTEN value_t* val() const { return m_val; }
+    INLINE_FLATTEN bool is_set() const { return m_val; }
 
     template<typename Tag = tag_t>
     INLINE_FLATTEN with_tag_t<Tag> tag() const { return m_type.tag(); }

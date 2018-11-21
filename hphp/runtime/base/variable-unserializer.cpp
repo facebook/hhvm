@@ -212,6 +212,7 @@ const StaticString
 
 VariableUnserializer::RefInfo::RefInfo(tv_lval v) : RefInfo(v, Type::Value) {}
 VariableUnserializer::RefInfo::RefInfo(tv_lval v, Type t) : m_data{v, t} {}
+VariableUnserializer::RefInfo::RefInfo(std::nullptr_t) : m_data{} {}
 
 VariableUnserializer::RefInfo
 VariableUnserializer::RefInfo::makeColValue(tv_lval v) {

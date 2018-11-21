@@ -167,6 +167,7 @@ private:
    */
   struct RefInfo {
     explicit RefInfo(tv_lval v);
+    explicit RefInfo(std::nullptr_t);
     static RefInfo makeColValue(tv_lval v);
     static RefInfo makeVecValue(tv_lval v);
     static RefInfo makeDictValue(tv_lval v);

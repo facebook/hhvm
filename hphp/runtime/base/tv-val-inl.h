@@ -22,7 +22,7 @@ namespace HPHP {
 
 template<bool is_const, typename tag_t>
 tv_val<is_const, tag_t>::tv_val()
-  : tv_val{nullptr}
+    : m_s{}
 {}
 
 template<bool is_const, typename tag_t>
@@ -33,6 +33,11 @@ tv_val<is_const, tag_t>::tv_val(type_t* type, value_t* val)
 template<bool is_const, typename tag_t>
 tv_val<is_const, tag_t>::tv_val(tv_t* tv)
   : tv_val{&tv->m_type, &tv->m_data}
+{}
+
+template<bool is_const, typename tag_t>
+tv_val<is_const, tag_t>::tv_val(std::nullptr_t)
+    : tv_val{}
 {}
 
 template<bool is_const, typename tag_t>
@@ -54,7 +59,7 @@ bool tv_val<is_const, tag_t>::operator!=(tv_val other) const {
 
 template<bool is_const, typename tag_t>
 bool tv_val<is_const, tag_t>::is_set() const {
-  return m_s.val();
+  return m_s.is_set();
 }
 
 template<bool is_const, typename tag_t>

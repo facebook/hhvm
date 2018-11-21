@@ -913,8 +913,10 @@ and simplify_subtype
     let this_ty = Option.first_some this_ty (Some ety_sub) in
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super env
 
-  | Tany, _ -> default ()
-  | _, Tany -> default ()
+  | Tany, _
+  | _, Tany ->
+    if TypecheckerOptions.new_inference (Env.get_tcopt env) then valid ()
+    else default ()
 
   (* If subtype and supertype are the same generic parameter, we're done *)
   | Tabstract (AKgeneric name_sub, _), Tabstract (AKgeneric name_super, _)
@@ -1601,8 +1603,6 @@ and sub_type_inner_helper env ~this_ty
   log_subtype ~this_ty "sub_type_inner_helper" env ty_sub ty_super;
 
   match ety_sub, ety_super with
-  | (_, Terr), _
-  | _, (_, Terr) -> env
 
   | (_, Tunresolved _), (_, Tunresolved _) ->
     fst (Unify.unify env ty_super ty_sub)

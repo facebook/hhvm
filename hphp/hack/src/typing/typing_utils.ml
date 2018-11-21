@@ -528,9 +528,13 @@ let rec member_inter env ty tyl acc =
       Errors.try_
         begin fun () ->
           let env, ty =
-            if is_sub_type_alt env x ty = Some true then env, ty
-            else if is_sub_type_alt env ty x = Some true then env, x
-            else unify env x ty in
+            match x, ty with
+            | (_, (Tany|Terr)), _ | _, (_, (Tany|Terr)) ->
+              unify env x ty
+            | _, _ ->
+              if is_sub_type_alt env x ty = Some true then env, ty
+              else if is_sub_type_alt env ty x = Some true then env, x
+              else unify env x ty in
           env, List.rev_append acc (ty :: rl)
         end
         begin fun _ ->

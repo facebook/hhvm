@@ -16,15 +16,12 @@ module TUtils = Typing_utils
 module SN     = Naming_special_names
 module TMT    = Typing_make_type
 
-(* We would like to pretend that the wait_for*() functions are overloaded like
- * function wait_for<T>(Awaitable<T> $a): _AsyncWaitHandle<T>
- * function wait_for<T>(?Awaitable<T> $a): _AsyncWaitHandle<?T>
- * function wait_forv<T>(array<Awaitable<T>> $a): _AsyncWaitHandle<array<T>>
- * function wait_forv<T>(array<?Awaitable<T>> $a): _AsyncWaitHandle<array<?T>>
- *
- * Basically we check if the argument to wait_for*() looks option-y and decide
- * the expected types based on that.
- *)
+(* If an expression e is of type `opt_ty_maybe`, then this function
+returns the type of `await e`.
+
+There is the special case that
+  e : ?Awaitable<T> |- await e : ?T
+*)
 let rec overload_extract_from_awaitable env p opt_ty_maybe =
   let type_var = Env.fresh_type() in
   let r = Reason.Rwitness p in

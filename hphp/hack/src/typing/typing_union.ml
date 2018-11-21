@@ -70,11 +70,26 @@ let ty_opt_equiv env tyopt1 tyopt2 ~are_ty_param =
  *)
 let rec union env (r1, _ as ty1) (r2, _ as ty2) =
   if ty_equal ty1 ty2 then env, ty1
-  else if Typing_subtype.is_sub_type_alt env ty1 ty2 = Some true then env, ty2
-  else if Typing_subtype.is_sub_type_alt env ty2 ty1 = Some true then env, ty1
-  else
-    let r = union_reason r1 r2 in
-    union_ env ty1 ty2 r
+  else match ty1, ty2 with
+    | (_, Tany), (_, Tunresolved _ as ty)
+    | (_, Tunresolved _ as ty), (_, Tany) ->
+      env, ty
+    | (_, Tany), (r, _ as ty)
+    | (r, _ as ty), (_, Tany) ->
+      (* The TC will issue an error for null checks on certain types. However,
+       * a nullcheck on a Tany is valid and should still be after unioning this
+       * Tany to something.
+       * So we wrap in an unresolved for now to mimic previous behavior,
+       * and allow null checks. *)
+      env, (r, Tunresolved [ty])
+    | (_, Terr), ty | ty, (_, Terr) ->
+      env, ty
+    | _, _ ->
+      if Typing_subtype.is_sub_type_alt env ty1 ty2 = Some true then env, ty2
+      else if Typing_subtype.is_sub_type_alt env ty2 ty1 = Some true then env, ty1
+      else
+        let r = union_reason r1 r2 in
+        union_ env ty1 ty2 r
 
 and union_ env ty1 ty2 r =
   try
@@ -86,17 +101,6 @@ and union_ env ty1 ty2 r =
   | (r, Tprim Nast.Tnull), ty
   | ty, (r, Tprim Nast.Tnull) ->
     env, (r, Toption ty)
-  | (_, Tany), (_, Tunresolved _ as ty)
-  | (_, Tunresolved _ as ty), (_, Tany) ->
-    env, ty
-  | (r, Tany), ty
-  | ty, (r, Tany) ->
-    (* The TC will issue an error for null checks on certain types. However,
-     * a nullcheck on a Tany is valid and should still be after unioning this
-     * Tany to something.
-     * So we wrap in an unresolved for now to mimic previous behavior,
-     * and allow null checks. *)
-    env, (r, Tunresolved [ty])
   | (_, Tclass ((p, id1), e1, tyl1)), (_, Tclass ((_, id2), e2, tyl2))
     when id1 = id2 ->
     let e = Typing_ops.LeastUpperBound.exact_least_upper_bound e1 e2 in
@@ -171,7 +175,7 @@ and union_ env ty1 ty2 r =
      * to say whether a given T can be null - e.g. opaque newtypes, dependent
      * types, etc. - so for now we leave it here.
      * TODO improve that. *)
-    | Tnonnull) as ty1_)),
+    | Tnonnull | Tany) as ty1_)),
     (_, ty2_) ->
     (* Make sure to add a dependency on any classes referenced here, even if
      * we're in an error state (i.e., where we are right now). The need for

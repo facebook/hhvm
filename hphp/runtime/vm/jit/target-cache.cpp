@@ -313,12 +313,13 @@ readPublicStatic(Entry* mce, ActRec* ar, Class* cls, const Func* /*cand*/) {
 }
 
 template<bool fatal>
-void handleSlowPath(rds::Handle mce_handle,
-                    ActRec* ar,
-                    StringData* name,
-                    Class* cls,
-                    Class* ctx,
-                    uintptr_t mcePrime) {
+EXTERNALLY_VISIBLE void
+handleSlowPath(rds::Handle mce_handle,
+               ActRec* ar,
+               StringData* name,
+               Class* cls,
+               Class* ctx,
+               uintptr_t mcePrime) {
   assertx(ActRec::checkThis(ar->getThisUnsafe()));
   assertx(ar->getThisUnsafe()->getVMClass() == cls);
   assertx(name->isStatic());
@@ -462,12 +463,13 @@ void handleSlowPath(rds::Handle mce_handle,
 }
 
 template<bool fatal>
-void handlePrimeCacheInit(rds::Handle mce_handle,
-                          ActRec* ar,
-                          StringData* name,
-                          Class* cls,
-                          Class* ctx,
-                          uintptr_t rawTarget) {
+EXTERNALLY_VISIBLE void
+handlePrimeCacheInit(rds::Handle mce_handle,
+                     ActRec* ar,
+                     StringData* name,
+                     Class* cls,
+                     Class* ctx,
+                     uintptr_t rawTarget) {
   auto const mce = rds::handleToPtr<Entry, rds::Mode::Normal>(mce_handle);
   if (!rds::isHandleInit(mce_handle, rds::NormalTag{})) {
     mce->m_key = 0;

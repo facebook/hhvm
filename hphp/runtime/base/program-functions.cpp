@@ -810,6 +810,7 @@ const void* __hot_end = nullptr;
 
 static void
 NEVER_INLINE AT_END_OF_TEXT ALIGN_HUGE_PAGE __attribute__((__optimize__("2")))
+EXTERNALLY_VISIBLE
 hugifyText(char* from, char* to) {
 #if !FOLLY_SANITIZE && defined MADV_HUGEPAGE
   if (from > to || (to - from) < sizeof(uint64_t)) {

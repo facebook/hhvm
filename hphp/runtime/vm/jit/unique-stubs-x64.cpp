@@ -196,6 +196,7 @@ TCA emitFreeLocalsHelpers(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+EXTERNALLY_VISIBLE
 void assert_tc_saved_rip(void* sp) {
   auto const saved_rip = *reinterpret_cast<uint8_t**>(sp);
   auto const exittc = tc::ustubs().enterTCExit;

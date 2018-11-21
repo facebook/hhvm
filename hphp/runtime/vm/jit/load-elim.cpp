@@ -499,6 +499,9 @@ Flags handle_general_effects(Local& env,
   case CheckRDSInitialized: {
     auto const handle = inst.extra<CheckRDSInitialized>()->handle;
     if (env.state.initRDS.count(handle) > 0) return FJmpNext{};
+    // set this unconditionally; we record taken state before every
+    // instruction, and next state after each instruction
+    env.state.initRDS.insert(handle);
     break;
   }
 

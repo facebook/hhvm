@@ -322,6 +322,8 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   bool toBoolean() const;
   int64_t toInt64() const;
   double toDouble() const;
+
+  template <IntishCast intishCast = IntishCast::CastAndWarn>
   Array toArray(bool pubOnly = false, bool ignoreLateInit = false) const;
 
   /*

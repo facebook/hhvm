@@ -87,7 +87,14 @@ public:
   Array toPHPArray();
 
 public:
-  static Array ToArray(const ObjectData* obj);
+  template <IntishCast intishCast = IntishCast::CastAndWarn>
+  static Array ToArray(const ObjectData* obj) {
+    check_collection_cast_to_array();
+    return const_cast<BaseMap*>(
+      static_cast<const BaseMap*>(obj)
+    )->toPHPArrayImpl<intishCast>();
+  }
+
   static bool ToBool(const ObjectData* obj);
   template <bool throwOnMiss>
   static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key) {

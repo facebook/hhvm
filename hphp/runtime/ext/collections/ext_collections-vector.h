@@ -2,6 +2,7 @@
 #define incl_HPHP_EXT_COLLECTIONS_VECTOR_H
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -130,6 +131,7 @@ public:
     return &data()[k];
   }
 
+  template <IntishCast intishCast = IntishCast::CastAndWarn>
   static Array ToArray(const ObjectData* obj) {
     check_collection_cast_to_array();
     return const_cast<BaseVector*>(

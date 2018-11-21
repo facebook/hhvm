@@ -82,15 +82,21 @@ COLLECTIONS_ALL_TYPES(X)
 /////////////////////////////////////////////////////////////////////////////
 // Casting and Copying
 
+template <IntishCast intishCast>
 Array toArray(const ObjectData* obj) {
   assertx(obj->isCollection());
   switch (obj->collectionType()) {
-#define X(type) case CollectionType::type: return c_##type::ToArray(obj);
+#define X(type) case CollectionType::type: return c_##type::ToArray<intishCast>(obj);
 COLLECTIONS_ALL_TYPES(X)
 #undef X
   }
   not_reached();
 }
+
+template
+Array toArray<IntishCast::CastAndWarn>(const ObjectData*);
+template
+Array toArray<IntishCast::CastSilently>(const ObjectData*);
 
 bool toBool(const ObjectData* obj) {
   assertx(obj->isCollection());

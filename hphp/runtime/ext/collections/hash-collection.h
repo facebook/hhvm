@@ -47,7 +47,28 @@ struct HashCollection : ObjectData {
   }
 
   Array toArray() = delete;
-  Array toPHPArrayImpl();
+
+  template <IntishCast intishCast = IntishCast::CastAndWarn>
+  Array toPHPArrayImpl() {
+    if (!m_size) {
+      return empty_array();
+    }
+
+    ArrayData* ad;
+    if (intishCast == IntishCast::CastAndWarn) {
+      ad = arrayData()->toPHPArray(true);
+    } else if (intishCast == IntishCast::CastSilently) {
+      ad = arrayData()->toPHPArrayIntishCast(true);
+    } else {
+      always_assert(false);
+    }
+
+    if (UNLIKELY(ad->size() < m_size)) warnOnStrIntDup();
+    assertx(m_size);
+    assertx(ad->m_pos == 0);
+    return Array::attach(ad);
+  }
+
   Array toVArray();
   Array toDArray();
 

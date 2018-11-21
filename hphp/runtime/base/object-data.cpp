@@ -617,6 +617,7 @@ const int64_t ARRAY_OBJ_ITERATOR_STD_PROP_LIST = 1;
 
 const StaticString s_flags("flags");
 
+template <IntishCast intishCast /* = IntishCast::CastAndWarn */>
 Array ObjectData::toArray(bool pubOnly /* = false */,
                           bool ignoreLateInit /* = false */) const {
   assertx(kindIsValid());
@@ -624,7 +625,7 @@ Array ObjectData::toArray(bool pubOnly /* = false */,
   // We can quickly tell if this object is a collection, which lets us avoid
   // checking for each class in turn if it's not one.
   if (isCollection()) {
-    return collections::toArray(this);
+    return collections::toArray<intishCast>(this);
   } else if (UNLIKELY(m_cls->rtAttribute(Class::CallToImpl))) {
     // If we end up with other classes that need special behavior, turn the
     // assert into an if and add cases.
@@ -664,6 +665,12 @@ Array ObjectData::toArray(bool pubOnly /* = false */,
     return ret;
   }
 }
+
+template
+Array ObjectData::toArray<IntishCast::CastAndWarn>(bool, bool) const;
+template
+Array ObjectData::toArray<IntishCast::CastSilently>(bool, bool) const;
+
 
 namespace {
 

@@ -89,12 +89,6 @@ void c_Pair::throwBadKeyType() {
     "Only integer keys may be used with Pairs");
 }
 
-Array c_Pair::ToArray(const ObjectData* obj) {
-  auto pair = static_cast<const c_Pair*>(obj);
-  check_collection_cast_to_array();
-  return pair->toPHPArrayImpl();
-}
-
 bool c_Pair::OffsetIsset(ObjectData* obj, const TypedValue* key) {
   assertx(!isRefType(key->m_type));
   auto pair = static_cast<c_Pair*>(obj);

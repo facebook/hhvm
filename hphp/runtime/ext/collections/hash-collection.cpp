@@ -94,17 +94,6 @@ void HashCollection::warnOnStrIntDup() const {
   // Do nothing if no 'duplicates' were found.
 }
 
-Array HashCollection::toPHPArrayImpl() {
-  if (!m_size) {
-    return empty_array();
-  }
-  auto ad = arrayData()->toPHPArray(true);
-  if (UNLIKELY(ad->size() < m_size)) warnOnStrIntDup();
-  assertx(m_size);
-  assertx(ad->m_pos == 0);
-  return Array::attach(ad);
-}
-
 Array HashCollection::toVArray() {
   if (!m_size) return Array::attach(staticEmptyVArray());
   auto arr = Array{arrayData()}.toVArray();

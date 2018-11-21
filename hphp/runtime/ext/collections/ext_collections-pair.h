@@ -78,7 +78,13 @@ struct c_Pair : ObjectData {
     assertx(obj->getVMClass() == c_Pair::classof());
     return true;
   }
-  static Array ToArray(const ObjectData* obj);
+  template <IntishCast intishCast = IntishCast::CastAndWarn>
+  static Array ToArray(const ObjectData* obj) {
+    auto pair = static_cast<const c_Pair*>(obj);
+    check_collection_cast_to_array();
+    return pair->toPHPArrayImpl();
+  }
+
   template <bool throwOnMiss>
   static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key) {
     assertx(!isRefType(key->m_type));

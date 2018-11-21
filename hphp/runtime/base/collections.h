@@ -93,7 +93,9 @@ bool isType(const Class* cls, CollectionType type, Args... args) {
   return isType(cls, type) || isType(cls, args...);
 }
 
+template <IntishCast intishCast = IntishCast::CastAndWarn>
 Array toArray(const ObjectData* obj);
+
 bool toBool(const ObjectData* obj);
 ObjectData* clone(ObjectData* obj);
 

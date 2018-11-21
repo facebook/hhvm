@@ -255,7 +255,7 @@ Array BaseSet::toPHPArray() {
   if (RuntimeOption::EvalHackArrCompatArrayProducingFuncNotices) {
     raise_hack_arr_compat_array_producing_func_notice("Set::toArray");
   }
-  return toPHPArrayImpl();
+  return toPHPArrayImpl<IntishCast::CastAndWarn>();
 }
 
 Variant BaseSet::firstValue() {
@@ -282,13 +282,6 @@ Variant BaseSet::lastValue() {
 void BaseSet::throwNoMutableIndexAccess() {
   SystemLib::throwInvalidOperationExceptionObject(
     "[] operator cannot be used to modify elements of a Set");
-}
-
-Array BaseSet::ToArray(const ObjectData* obj) {
-  check_collection_cast_to_array();
-  return const_cast<BaseSet*>(
-    static_cast<const BaseSet*>(obj)
-  )->toPHPArrayImpl();
 }
 
 bool BaseSet::ToBool(const ObjectData* obj) {

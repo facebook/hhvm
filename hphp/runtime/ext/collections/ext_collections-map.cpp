@@ -249,7 +249,7 @@ Array BaseMap::toPHPArray() {
   if (RuntimeOption::EvalHackArrCompatArrayProducingFuncNotices) {
     raise_hack_arr_compat_array_producing_func_notice("Map::toArray");
   }
-  return toPHPArrayImpl();
+  return toPHPArrayImpl<IntishCast::CastAndWarn>();
 }
 
 template <bool raw>
@@ -313,13 +313,6 @@ void BaseMap::setRaw(int64_t k, TypedValue val) { setImpl<true>(k, val); }
 void BaseMap::setRaw(StringData* k, TypedValue val) { setImpl<true>(k, val); }
 void BaseMap::set(int64_t k, TypedValue val) { setImpl<false>(k, val); }
 void BaseMap::set(StringData* k, TypedValue val) { setImpl<false>(k, val); }
-
-Array BaseMap::ToArray(const ObjectData* obj) {
-  check_collection_cast_to_array();
-  return const_cast<BaseMap*>(
-    static_cast<const BaseMap*>(obj)
-  )->toPHPArrayImpl();
-}
 
 bool BaseMap::ToBool(const ObjectData* obj) {
   return static_cast<const BaseMap*>(obj)->toBoolImpl();

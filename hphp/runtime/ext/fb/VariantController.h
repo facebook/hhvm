@@ -127,13 +127,20 @@ struct VariantControllerImpl {
   static String mapKeyAsString(const Variant& k) {
     return k.toString();
   }
-  template <typename Key>
-  static void mapSet(MapType& map, Key&& k, VariantType&& v) {
-    map.set(std::move(k), std::move(v));
+
+  static void mapSet(MapType& map, StringType&& k, VariantType&& v) {
+    auto const arrkey = map.convertKey<IntishCast::CastSilently>(k);
+    Variant val(std::move(v));
+    map.set(arrkey, *val.asTypedValue());
   }
+
+  static void mapSet(MapType& map, int64_t k, VariantType&& v) {
+    map.set(k, std::move(v));
+  }
+
   template <typename Key>
   static void mapSet(ArrayInit& map, Key&& k, VariantType&& v) {
-    map.set(std::move(k), std::move(v));
+    map.setUnknownKey<IntishCast::CastSilently>(std::move(k), std::move(v));
   }
   static int64_t mapSize(const MapType& map) { return map.size(); }
   static ArrayIter mapIterator(const MapType& map) {

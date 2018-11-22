@@ -1050,9 +1050,10 @@ struct Func final {
   bool hasReifiedGenerics() const;
 
   /*
-   * Returns how many reified generics this function has
+   * Returns a pair of how many generics this func has and indices of its
+   * reified generics
    */
-  size_t numReifiedGenerics() const;
+  const std::pair<size_t, std::vector<size_t>>& getReifiedGenericsInfo() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Unit table entries.                                                [const]
@@ -1311,6 +1312,7 @@ private:
     LowStringPtr m_originalFilename;
     RepoAuthType m_repoReturnType;
     RepoAuthType m_repoAwaitedReturnType;
+    std::pair<size_t, std::vector<size_t>> m_reifiedGenericsInfo;
 
     /*
      * The `past' offset and `line2' are likely to be small, particularly

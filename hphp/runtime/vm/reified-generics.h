@@ -52,6 +52,24 @@ ArrayData* getReifiedTypeList(const std::string& name);
 // If the cls does not have any reified generics, then returns nullptr
 ArrayData* getClsReifiedGenericsProp(Class* cls, ActRec* ar);
 
+// Returns a pair of number of generics and their indices
+// Format of the input is a list of integers where the first one is the count
+// of reified generics and the following numbers are their indices
+// This is used to distinguish reified and erased generics
+std::pair<size_t, std::vector<size_t>>
+extractSizeAndPosFromReifiedAttribute(const ArrayData* arr);
+
+// Raises a runtime error if the location of reified generics of f/c does not
+// match the location of reified_generics
+void checkFunReifiedGenericMismatch(
+  const Func* f,
+  const ArrayData* reified_generics
+);
+void checkClassReifiedGenericMismatch(
+  const Class* c,
+  const ArrayData* reified_generics
+);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 // Pulls the reified generics associated with the name named 'name'
@@ -71,15 +89,6 @@ inline ArrayData* getReifiedGenericsOpt(Cell cell) {
   return getReifiedGenerics(cell.m_data.pstr);
 }
 
-// Raises a runtime error if n does not match the number of reified generics
-// of f
-inline void raiseReifiedGenericMismatch(const Func* f, size_t n) {
-  if (f->numReifiedGenerics() == n) return;
-  raise_error("Function %s requires %zu reified generics but %zu given",
-              f->fullName()->data(),
-              f->numReifiedGenerics(),
-              n);
-}
 }
 
 #endif

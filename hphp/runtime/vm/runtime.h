@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -235,11 +236,7 @@ inline ObjectData* newInstanceReified(Class* cls, ArrayData* reifiedTypes) {
                 "the reified generics");
   }
   assertx(reifiedTypes != nullptr);
-  if (cls->numReifiedGenerics() != reifiedTypes->size()) {
-    raise_error("This class requires %zu reified generics but %zu given",
-                cls->numReifiedGenerics(),
-                reifiedTypes->size());
-  }
+  checkClassReifiedGenericMismatch(cls, reifiedTypes);
   setReifiedGenerics(inst, cls, reifiedTypes);
   return inst;
 }

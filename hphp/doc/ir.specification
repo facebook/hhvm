@@ -2249,10 +2249,10 @@ To string conversions:
   raise a warning or throw an exception indicating that the func specified in
   S0 was called dynamically (and should not be).
 
-| RaiseReifiedGenericMismatch<func>, ND, S(Int), NF
+| CheckFunReifiedGenericMismatch<func>, ND, SVArr, NF
 
-  Raises a runtime error if the number provided in S1 does not match the number
-  of reified generics S0 expects.
+  Raises a runtime error unless whether each generic in S0 is reified or erased
+  matches exactly to the expectations of the func.
 
 | CheckStaticLoc<func,staticLocalName>, ND, NA, B
 

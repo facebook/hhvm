@@ -28,6 +28,8 @@ const StaticString s_value("value");
 const StaticString s_nullable("nullable");
 const StaticString s_optional_shape_field("optional_shape_field");
 const StaticString s_classname("classname");
+const StaticString s_wildcard("_");
+const StaticString s_name("name");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -84,6 +86,12 @@ ALWAYS_INLINE const StringData* get_ts_classname(const ArrayData* ts) {
   auto const classname_field = ts->rval(s_classname.get());
   assertx(classname_field != nullptr && isStringType(classname_field.type()));
   return classname_field.val().pstr;
+}
+
+ALWAYS_INLINE const StringData* get_ts_name(const ArrayData* ts) {
+  auto const name_field = ts->rval(s_name.get());
+  assertx(name_field != nullptr && isStringType(name_field.type()));
+  return name_field.val().pstr;
 }
 
 ALWAYS_INLINE bool isValidTSType(Cell c, bool error) {

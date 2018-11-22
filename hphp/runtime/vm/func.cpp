@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/reverse-data-map.h"
@@ -611,18 +612,14 @@ void Func::resetPrologue(int numParams) {
 ///////////////////////////////////////////////////////////////////////////////
 // Reified Generics
 
-const StaticString s___Reified("__Reified");
+namespace {
+std::pair<size_t, std::vector<size_t>> defaultReifiedGenericsInfo{0, {}};
+} // namespace
 
-size_t Func::numReifiedGenerics() const {
-  if (!shared()->m_hasReifiedGenerics) return 0;
-  auto const ua = shared()->m_userAttributes;
-  auto const it = ua.find(s___Reified.get());
-  // Since m_hasReifiedGenerics is true, it should exist
-  assertx(it != ua.end());
-  auto tv = it->second;
-  assertx(RuntimeOption::EvalHackArrDVArrs ? tvIsVec(tv) : tvIsArray(tv));
-  // userattribute array counts the indices too, so we need to divide by 2
-  return tv.m_data.parr->size() / 2;
+const std::pair<size_t, std::vector<size_t>>&
+Func::getReifiedGenericsInfo() const {
+  if (!shared()->m_hasReifiedGenerics) return defaultReifiedGenericsInfo;
+  return shared()->m_reifiedGenericsInfo;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

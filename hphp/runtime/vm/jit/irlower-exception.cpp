@@ -132,7 +132,7 @@ IMPL_OPCODE_CALL(RestoreErrorLevel)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPL_OPCODE_CALL(RaiseReifiedGenericMismatch)
+IMPL_OPCODE_CALL(CheckFunReifiedGenericMismatch)
 IMPL_OPCODE_CALL(RaiseArrayIndexNotice)
 IMPL_OPCODE_CALL(RaiseArrayKeyNotice)
 IMPL_OPCODE_CALL(RaiseError)

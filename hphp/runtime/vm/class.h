@@ -1183,9 +1183,10 @@ public:
   bool hasReifiedGenerics() const;
 
   /*
-   * Returns how many reified generics this class has
+   * Returns a pair of how many generics this class has and indices of its
+   * reified generics
    */
-  size_t numReifiedGenerics() const;
+  const std::pair<size_t, std::vector<size_t>>& getReifiedGenericsInfo() const;
 
   /*
    * Returns whether any of this class's parents have reified generics
@@ -1287,6 +1288,11 @@ private:
      */
     BuiltinCtorFunction m_instanceCtor{nullptr};
     BuiltinDtorFunction m_instanceDtor{nullptr};
+
+    /*
+     * Cache for reified generics info
+     */
+    std::pair<size_t, std::vector<size_t>> m_reifiedGenericsInfo;
 
     /*
      * Cache for Closure subclass scopings.

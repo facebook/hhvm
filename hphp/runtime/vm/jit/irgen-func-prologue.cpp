@@ -154,7 +154,7 @@ void emitARHasReifiedGenericsCheck(IRGS& env) {
   );
 }
 
-// Check whether the count of reified generics matches the one we expect
+// Checks whether the reified generics matches the one we expect
 void emitCorrectNumOfReifiedGenericsCheck(IRGS& env) {
   auto const func = curFunc(env);
   if (!func->hasReifiedGenerics()) return;
@@ -167,22 +167,7 @@ void emitCorrectNumOfReifiedGenericsCheck(IRGS& env) {
       LocalId{func->numParams()},
       fp(env)
     );
-  auto const num_generics = RuntimeOption::EvalHackArrDVArrs
-    ? gen(env, CountVec, reified_generics)
-    : gen(env, CountArray, reified_generics);
-  auto const num_expected_generics = func->numReifiedGenerics();
-  ifThen(
-    env,
-    [&] (Block* taken) {
-      auto const test = gen(env, EqInt, num_generics,
-                            cns(env, num_expected_generics));
-      gen(env, JmpZero, taken, test);
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      gen(env, RaiseReifiedGenericMismatch, FuncData{func}, num_generics);
-    }
-  );
+  gen(env, CheckFunReifiedGenericMismatch, FuncData{func}, reified_generics);
 }
 
 /*

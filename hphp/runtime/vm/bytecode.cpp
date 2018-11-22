@@ -1682,7 +1682,7 @@ static void prepareFuncEntry(ActRec *ar, PC& pc, StackArgsState stk) {
 
 namespace {
 // Check whether HasReifiedGenerics is set on the ActRec
-// Check whether the count of reified generics matches the one we expect
+// Check whether the location of reified generics matches the one we expect
 void checkForReifiedGenericsErrors(const ActRec* ar) {
   if (!ar->m_func->hasReifiedGenerics() && !ar->hasReifiedGenerics()) return;
   if (!ar->m_func->hasReifiedGenerics()) {
@@ -1694,8 +1694,7 @@ void checkForReifiedGenericsErrors(const ActRec* ar) {
   auto const tv = frame_local(ar, ar->m_func->numParams());
   assertx(tv && (RuntimeOption::EvalHackArrDVArrs ? tvIsVec(tv)
                                                   : tvIsArray(tv)));
-  auto const reified_generics = tv->m_data.parr;
-  raiseReifiedGenericMismatch(ar->m_func, reified_generics->size());
+  checkFunReifiedGenericMismatch(ar->m_func, tv->m_data.parr);
 }
 } // namespace
 

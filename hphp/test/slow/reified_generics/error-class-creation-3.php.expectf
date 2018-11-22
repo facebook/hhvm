@@ -1,1 +1,1 @@
-Fatal error: This class requires 2 reified generics but 3 given in %s on line 5
+Fatal error: Class C requires 2 generics but 3 given in %s on line 5

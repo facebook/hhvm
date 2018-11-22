@@ -55,14 +55,18 @@ let ast_any_is_memoize_lsb ast_attrs =
 let ast_any_is_deprecated ast_attrs =
   List.exists ast_attrs ast_is_deprecated
 
+(* Adds an __Reified attribute for functions and classes with reified type
+ * parameters. The arguments to __Reified are number of type parameters
+ * followed by the indicies of these reified type parameters
+ *)
 let add_reified_attribute attrs params =
-  let reified_tparams =
-    List.filter_map params
-      ~f:(function (_, _, _, false) -> None | (_, (_, s), _, true) -> Some s) in
-  if List.length reified_tparams = 0 then attrs else
+  let reified_indices =
+    List.filter_mapi params
+      ~f:(fun i (_, _, _, b) -> if b then Some i else None) in
+  if List.is_empty reified_indices then attrs else
+  let data = List.length params :: reified_indices in
   (Hhas_attribute.make "__Reified" @@
-    List.concat_mapi reified_tparams
-      (fun index p -> [TV.Int (Int64.of_int index); TV.String p])) :: attrs
+    List.map data (fun i -> TV.Int (Int64.of_int i))) :: attrs
 
 let add_reified_parent_attribute attrs = function
   | ((_, Ast.Happly (_, hl))) :: _ ->

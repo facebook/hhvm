@@ -2100,7 +2100,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseParamRefMismatchForFunc:
   case RaiseParamRefMismatchForFuncName:
   case RaiseForbiddenDynCall:
-  case RaiseReifiedGenericMismatch:
+  case CheckFunReifiedGenericMismatch:
   case ConvCellToStr:
   case ConvObjToStr:
   case Count:      // re-enters on CountableClass

@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/blob-helper.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/native.h"
+#include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/runtime.h"
 
@@ -228,8 +229,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     makeStaticString(RuntimeOption::SourceRoot +
                      originalFilename->toCppString());
 
-  auto m_hasReifiedGenerics =
-    userAttributes.find(s___Reified.get()) != userAttributes.end();
+  auto const uait = userAttributes.find(s___Reified.get());
+  auto const hasReifiedGenerics = uait != userAttributes.end();
 
   f->shared()->m_localNames.create(m_localNames);
   f->shared()->m_numLocals = m_numLocals;
@@ -252,7 +253,14 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_isMemoizeWrapper = isMemoizeWrapper;
   f->shared()->m_isMemoizeWrapperLSB = isMemoizeWrapperLSB;
   f->shared()->m_numClsRefSlots = m_numClsRefSlots;
-  f->shared()->m_hasReifiedGenerics = m_hasReifiedGenerics;
+  f->shared()->m_hasReifiedGenerics = hasReifiedGenerics;
+
+  if (hasReifiedGenerics) {
+    auto tv = uait->second;
+    assertx(tvIsVecOrVArray(tv));
+    f->shared()->m_reifiedGenericsInfo =
+      extractSizeAndPosFromReifiedAttribute(tv.m_data.parr);
+  }
 
   if (isNative) {
     auto const ex = f->extShared();

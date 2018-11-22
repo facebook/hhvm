@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/memo-cache.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/native-prop-handler.h"
+#include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/trait-method-import-data.h"
@@ -1575,16 +1576,15 @@ bool Class::hasReifiedParent() const {
   return m_hasReifiedParent;
 }
 
-size_t Class::numReifiedGenerics() const {
-  if (!m_hasReifiedGenerics) return 0;
-  auto const ua = m_preClass->userAttributes();
-  auto const it = ua.find(s___Reified.get());
-  // Since m_hasReifiedGenerics is true, it should exist
-  assertx(it != ua.end());
-  auto tv = it->second;
-  assertx(RuntimeOption::EvalHackArrDVArrs ? tvIsVec(tv) : tvIsArray(tv));
-  // userattribute array counts the indices too, so we need to divide by 2
-  return tv.m_data.parr->size() / 2;
+namespace {
+std::pair<size_t, std::vector<size_t>> defaultReifiedGenericsInfo{0, {}};
+} // namespace
+
+const std::pair<size_t, std::vector<size_t>>&
+Class::getReifiedGenericsInfo() const {
+  if (!m_hasReifiedGenerics) return defaultReifiedGenericsInfo;
+  assertx(m_extra);
+  return m_extra.raw()->m_reifiedGenericsInfo;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3048,10 +3048,18 @@ void Class::addTraitPropInitializers(std::vector<const Func*>& thisInitVec,
 
 void Class::setReifiedData() {
   auto const ua = m_preClass->userAttributes();
-  if (ua.find(s___Reified.get()) != ua.end()) m_hasReifiedGenerics = true;
-  if (m_parent.get() != nullptr) {
-    m_hasReifiedParent = m_parent->m_hasReifiedGenerics ||
-                         m_parent->m_hasReifiedParent;
+  auto const it = ua.find(s___Reified.get());
+  if (it != ua.end()) m_hasReifiedGenerics = true;
+  if (m_parent.get()) {
+    m_hasReifiedParent =
+      m_parent->m_hasReifiedGenerics || m_parent->m_hasReifiedParent;
+  }
+  if (m_hasReifiedGenerics) {
+    auto tv = it->second;
+    assertx(tvIsVecOrVArray(tv));
+    allocExtraData();
+    m_extra.raw()->m_reifiedGenericsInfo =
+      extractSizeAndPosFromReifiedAttribute(tv.m_data.parr);
   }
 }
 

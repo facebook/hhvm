@@ -472,13 +472,13 @@ module Typing                               = struct
   | DeclOverrideMissingHint
   | InvalidConditionallyReactiveCall
   | ExtendSealed
-  | SealedFinal
+  | SealedFinalDEPRECATED
   | ComparisonInvalidTypes
   | OptionVoidDEPRECATED
   | MutableInNonreactiveContext
   | InvalidArgumentOfRxMutableFunction
   | LetVarImmutabilityViolation
-  | Unsealable
+  | UnsealableDEPRECATED
   | ReturnVoidToRxMismatch
   | ReturnsVoidToRxAsNonExpressionStatement
   | NonawaitedAwaitableInReactiveContext

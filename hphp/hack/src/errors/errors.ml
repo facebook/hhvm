@@ -2281,13 +2281,6 @@ let extend_ppl
     parent_pos, "Declaration is here";
   ]
 
-let sealed_final pos name =
-  let name = (strip_ns name) in
-  add (Typing.err_code Typing.SealedFinal) pos ("Sealed class "^name^" cannot be marked final")
-
-let unsealable pos kind =
-  add (Typing.err_code Typing.Unsealable) pos (kind^" cannot be sealed")
-
 let read_before_write (pos, v) =
   add (Typing.err_code Typing.ReadBeforeWrite) pos (
   sl[

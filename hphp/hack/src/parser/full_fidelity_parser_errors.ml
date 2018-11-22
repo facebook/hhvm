@@ -2517,6 +2517,9 @@ let class_reified_param_errors node parents errors =
       :: errors else errors
   | _ -> errors
 
+let attr_spec_contains_sealed node =
+  attribute_specification_contains node SN.UserAttributes.uaSealed
+
 let classish_errors env node parents namespace_name names errors =
   match syntax node with
   | ClassishDeclaration cd ->
@@ -2557,15 +2560,7 @@ let classish_errors env node parents namespace_name names errors =
       | _ -> false in
 
     let classish_is_sealed =
-      match cd.classish_attribute.syntax with
-      | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
-        let attrs = syntax_to_list_no_separators attrs in
-        List.exists attrs (fun e ->
-          match syntax e with
-          | ConstructorCall {constructor_call_type; _ } ->
-            text constructor_call_type = SN.UserAttributes.uaSealed
-          | _ -> false)
-      | _ -> false in
+      attr_spec_contains_sealed cd.classish_attribute in
 
     (* Given a ClassishDeclaration node, test whether or not length of
      * extends_list is appropriate for the classish_keyword. *)
@@ -3180,7 +3175,7 @@ let mixed_namespace_errors env node parents namespace_type errors =
     errors
   | _ -> errors
 
-let enum_errors node errors =
+let enumerator_errors node errors =
   match syntax node with
   | Enumerator { enumerator_name = name; enumerator_value = value; _} ->
     let errors = if String.lowercase @@ text name = "class" then
@@ -3188,6 +3183,22 @@ let enum_errors node errors =
       else errors in
     let errors = check_constant_expression errors value in
     errors
+  | _ -> errors
+
+let enum_decl_errors node errors =
+  match syntax node with
+  EnumDeclaration
+   { enum_attribute_spec = attrs
+   (*
+   ; enum_name           = name
+   ; enum_base           = base
+   ; enum_type           = constr
+   ; enum_enumerators    = enums
+   *)
+   ; _ } ->
+    if attr_spec_contains_sealed attrs then
+      make_error_from_node node SyntaxError.sealed_enum :: errors
+      else errors
   | _ -> errors
 
 let does_binop_create_write_on_left = function
@@ -3521,8 +3532,11 @@ let find_syntax_errors env =
         let errors = class_property_visibility_errors env node parents errors in
         let errors = class_reified_param_errors node parents errors in
         trait_require_clauses, names, errors
+      | EnumDeclaration _ ->
+        let errors = enum_decl_errors node errors in
+        trait_require_clauses, names, errors
       | Enumerator _ ->
-        let errors = enum_errors node errors in
+        let errors = enumerator_errors node errors in
         trait_require_clauses, names, errors
       | PostfixUnaryExpression _
       | BinaryExpression _

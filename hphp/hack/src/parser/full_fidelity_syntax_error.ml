@@ -452,6 +452,7 @@ let for_with_as_expression =
 
 let sealed_val_not_classname = "Values in sealed whitelist must be classname constants."
 let sealed_final = "Classes cannot be both final and sealed."
+let sealed_enum = "Enums cannot be sealed."
 
 let interface_implements =
   "Interfaces may not implement other interfaces or classes"

@@ -968,7 +968,6 @@ struct RuntimeOption {
   F(bool, ReffinessInvariance, false)                                   \
   F(bool, NoticeOnBuiltinDynamicCalls, false)                           \
   F(bool, RxPretendIsEnabled, false)                                    \
-  F(bool, NoArrayAccessInIdx, false)                                    \
   F(bool, NoticeOnArrayAccessUse, false)                                \
   /* Raise warning when function pointers are used as strings. */       \
   F(bool, RaiseFuncConversionWarning, false)                            \

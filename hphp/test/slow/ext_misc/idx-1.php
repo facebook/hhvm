@@ -1,25 +1,7 @@
 <?hh
 
-// Test classes
-class MyArray implements ArrayAccess {
-  private $arr = array('a' => 'apple', 'b' => null);
-  public function offsetExists($index) {
-    return array_key_exists($index, $this->arr);
-  }
-  public function offsetGet($index) {
-    return $this->arr[$index];
-  }
-  public function offsetSet($index, $newvalue) {
-    $this->arr[$index] = $newvalue;
-  }
-  public function offsetUnset($index) {
-    unset($this->arr[$index]);
-  }
-}
-
 function main() {
   $o = new stdClass();
-  $a = new MyArray();
   $v = Vector { 'a' , 'b' };
   $m = Map { 'a' => 2, 'b' => 'c' };
   $s = 'hello';
@@ -60,21 +42,13 @@ function main() {
   var_dump(idx($s, null, 'abc'));
   echo "\n";
 
-  // ArrayAccess
-  var_dump(idx($a, 'a', null));
-  var_dump(idx($a, 'b', 'orange'));
-  var_dump(idx($a, 'c', 'orange'));
-  var_dump(idx($a, 'absent'));
-  var_dump(idx($a, null, 'orange'));
-  echo "\n";
-
   // null (because PHP)
   var_dump(idx(null, 'absent'));
   var_dump(idx(null, 'not_reached', 'wtf'));
   echo "\n";
 
   // too few arguments
-  var_dump(idx($a));
+  var_dump(idx($s));
   var_dump(idx());
 }
 

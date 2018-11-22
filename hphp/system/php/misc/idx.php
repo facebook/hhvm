@@ -62,7 +62,7 @@ namespace HH {
  *                         default, this is null.
  * @return mixed Value at array index if it exists, or the default value if not.
  */
-<<__RxLocal>>
+<<__Rx>>
 function idx($arr, $idx, $default=null) {
   if (\HH\is_any_array($arr)) {
     return \hphp_array_idx($arr, $idx, $default);
@@ -77,13 +77,6 @@ function idx($arr, $idx, $default=null) {
       } else if ($arr instanceof \ConstSet) {
         if ($arr->contains($idx)) {
           return $idx;
-        }
-      } else if ($arr instanceof \ArrayAccess) {
-        if (\ini_get('hhvm.no_array_access_in_idx')) {
-          \trigger_error('ArrayAccess passed to idx', \E_WARNING);
-        }
-        if ($arr->offsetExists($idx)) {
-          return $arr->offsetGet($idx);
         }
       }
     } else if (\is_string($arr)) {

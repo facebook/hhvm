@@ -873,11 +873,13 @@ and stmt env = function
     let env, (te1, te2, tb) = LEnv.stash_and_do env [C.Continue; C.Break]
       (fun env ->
         let env = LEnv.save_and_merge_next_in_cont env C.Continue in
-        let env, ty2, tk, tv = as_expr env (fst e1) e2 in
+        let env, ty2, tk, tv, tyvars = as_expr env (fst e1) e2 in
         let env =
           check_dynamic env ty1 ~f:begin fun () ->
             Type.sub_type (fst e1) Reason.URforeach env ty1 ty2
           end in
+        let env = SubType.set_tyvar_variance ~tyvars env ty2 in
+        let env = SubType.solve_tyvars ~tyvars env in
         let alias_depth =
           if env.Env.in_loop then 1 else Typing_alias.get_depth st in
         let env, (te2, tb) = Env.in_loop env begin
@@ -1070,20 +1072,24 @@ and catch catchctx env (sid, exn, b) =
 and as_expr env pe = function
   | As_v _ ->
       let tk = Reason.Rnone, TUtils.desugar_mixed Reason.Rnone in
-      let env, tv = Env.fresh_unresolved_type env in
-      env, TMT.traversable (Reason.Rforeach pe) tv, tk, tv
+      let tyvars = ISet.empty in
+      let env, tv, tyvars = Env.fresh_unresolved_type_add_tyvars env pe tyvars in
+      env, TMT.traversable (Reason.Rforeach pe) tv, tk, tv, tyvars
   | As_kv _ ->
-      let env, tk = Env.fresh_unresolved_type env in
-      let env, tv = Env.fresh_unresolved_type env in
-      env, TMT.keyed_traversable (Reason.Rforeach pe) tk tv, tk, tv
+      let tyvars = ISet.empty in
+      let env, tk, tyvars = Env.fresh_unresolved_type_add_tyvars env pe tyvars in
+      let env, tv, tyvars = Env.fresh_unresolved_type_add_tyvars env pe tyvars in
+      env, TMT.keyed_traversable (Reason.Rforeach pe) tk tv, tk, tv, tyvars
   | Await_as_v _ ->
+      let tyvars = ISet.empty in
       let tk = Reason.Rnone, TUtils.desugar_mixed Reason.Rnone in
-      let env, tv = Env.fresh_unresolved_type env in
-      env, TMT.async_iterator (Reason.Rasyncforeach pe) tv, tk, tv
+      let env, tv, tyvars = Env.fresh_unresolved_type_add_tyvars env pe tyvars in
+      env, TMT.async_iterator (Reason.Rasyncforeach pe) tv, tk, tv, tyvars
   | Await_as_kv _ ->
-      let env, tk = Env.fresh_unresolved_type env in
-      let env, tv = Env.fresh_unresolved_type env in
-      env, TMT.async_keyed_iterator (Reason.Rasyncforeach pe) tk tv, tk, tv
+      let tyvars = ISet.empty in
+      let env, tk, tyvars = Env.fresh_unresolved_type_add_tyvars env pe tyvars in
+      let env, tv, tyvars = Env.fresh_unresolved_type_add_tyvars env pe tyvars in
+      env, TMT.async_keyed_iterator (Reason.Rasyncforeach pe) tk tv, tk, tv, tyvars
 
 and bind_as_expr env loop_ty p ty1 ty2 aexpr =
   (* Set id as dynamic if the foreach loop was dynamic *)

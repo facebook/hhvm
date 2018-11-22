@@ -898,8 +898,14 @@ and simplify_subtype
   | _, Tunresolved [ty_super'] when deep ->
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super' env
 
+  | Tunresolved tyl, _ ->
+    if TypecheckerOptions.new_inference (Env.get_tcopt env)
+    then
+      List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_sub ->
+        res &&& simplify_subtype ~seen_generic_params ~deep ty_sub ty_super)
+    else default ()
+
   (* Don't yet attempt to deal with unresolved types *)
-  | Tunresolved _, _
   | _, Tunresolved _ ->
     default ()
 
@@ -1603,6 +1609,10 @@ and sub_type_inner_helper env ~this_ty
   log_subtype ~this_ty "sub_type_inner_helper" env ty_sub ty_super;
 
   match ety_sub, ety_super with
+
+  | (_, Tunresolved _), _
+    when TypecheckerOptions.new_inference (Env.get_tcopt env) ->
+    assert false
 
   | (_, Tunresolved _), (_, Tunresolved _) ->
     fst (Unify.unify env ty_super ty_sub)

@@ -22,6 +22,8 @@
 #include "hphp/util/locale-portability.h"
 #include "hphp/util/thread-local.h"
 
+#include "hphp/runtime/base/rds-local.h"
+
 namespace HPHP {
 
 struct ThreadSafeLocaleHandler {
@@ -49,7 +51,7 @@ private:
 #endif
 };
 
-extern THREAD_LOCAL(ThreadSafeLocaleHandler, g_thread_safe_locale_handler);
+extern RDS_LOCAL(ThreadSafeLocaleHandler, g_thread_safe_locale_handler);
 
 }
 

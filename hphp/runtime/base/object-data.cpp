@@ -58,7 +58,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 // current maximum object identifier
-__thread uint32_t ObjectData::os_max_id;
+IMPLEMENT_RDS_LOCAL_HOTVALUE(uint32_t, os_max_id);
 
 TRACE_SET_MOD(runtime);
 
@@ -1455,7 +1455,7 @@ namespace {
  * to a recursion error.
  */
 
-THREAD_LOCAL(PropRecurInfo, propRecurInfo);
+RDS_LOCAL(PropRecurInfo, propRecurInfo);
 
 template <class Invoker>
 InvokeResult

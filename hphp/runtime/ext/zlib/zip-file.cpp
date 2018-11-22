@@ -76,11 +76,11 @@ bool ZipFile::close() {
 
 bool ZipFile::closeImpl() {
   bool ret = true;
-  s_pcloseRet = 0;
+  *s_pcloseRet = 0;
   if (!isClosed()) {
     if (m_gzFile) {
-      s_pcloseRet = gzclose(m_gzFile);
-      ret = (s_pcloseRet == 0);
+      *s_pcloseRet = gzclose(m_gzFile);
+      ret = (*s_pcloseRet == 0);
       m_gzFile = nullptr;
     }
     setIsClosed(true);

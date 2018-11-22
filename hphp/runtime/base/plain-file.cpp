@@ -29,29 +29,33 @@ namespace HPHP {
 const StaticString s_plainfile("plainfile");
 const StaticString s_stdio("STDIO");
 
+struct StdFiles {
+  FILE* stdin{nullptr};
+  FILE* stdout{nullptr};
+  FILE* stderr{nullptr};
+};
+
 namespace {
-
-__thread FILE* tl_stdin{nullptr};
-__thread FILE* tl_stdout{nullptr};
-__thread FILE* tl_stderr{nullptr};
-
+RDS_LOCAL(StdFiles, rl_stdfiles);
 }
 
 void setThreadLocalIO(FILE* in, FILE* out, FILE* err) {
   // Before setting new thread local IO structures the previous ones must be
   // cleared to ensure that they are closed appropriately.
-  always_assert(!tl_stdin && !tl_stdout && !tl_stderr);
+  always_assert(!rl_stdfiles->stdin &&
+                !rl_stdfiles->stdout &&
+                !rl_stdfiles->stderr);
 
-  tl_stdin = in;
-  tl_stdout = out;
-  tl_stderr = err;
+  rl_stdfiles->stdin = in;
+  rl_stdfiles->stdout = out;
+  rl_stdfiles->stderr = err;
 }
 
 void clearThreadLocalIO() {
-  if (tl_stdin)  fclose(tl_stdin);
-  if (tl_stdout) fclose(tl_stdout);
-  if (tl_stderr) fclose(tl_stderr);
-  tl_stdin = tl_stdout = tl_stderr = nullptr;
+  if (rl_stdfiles->stdin)  fclose(rl_stdfiles->stdin);
+  if (rl_stdfiles->stdout) fclose(rl_stdfiles->stdout);
+  if (rl_stdfiles->stderr) fclose(rl_stdfiles->stderr);
+  rl_stdfiles->stdin = rl_stdfiles->stdout = rl_stdfiles->stderr = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -142,19 +146,19 @@ bool PlainFile::close() {
 
 bool PlainFile::closeImpl() {
   bool ret = true;
-  s_pcloseRet = 0;
+  *s_pcloseRet = 0;
   if (!isClosed()) {
     if (m_stream) {
-      s_pcloseRet = fclose(m_stream);
+      *s_pcloseRet = fclose(m_stream);
       m_stream = nullptr;
     } else if (getFd() >= 0) {
-      s_pcloseRet = ::close(getFd());
+      *s_pcloseRet = ::close(getFd());
     }
     if (m_buffer) {
       free(m_buffer);
       m_buffer = nullptr;
     }
-    ret = (s_pcloseRet == 0);
+    ret = (*s_pcloseRet == 0);
     setIsClosed(true);
     setFd(-1);
   }
@@ -292,9 +296,9 @@ BuiltinFile::~BuiltinFile() {
 
 bool BuiltinFile::close() {
   invokeFiltersOnClose();
-  if (m_stream == tl_stdin)  tl_stdin = nullptr;
-  if (m_stream == tl_stdout) tl_stdout = nullptr;
-  if (m_stream == tl_stderr) tl_stderr = nullptr;
+  if (m_stream == rl_stdfiles->stdin)  rl_stdfiles->stdin = nullptr;
+  if (m_stream == rl_stdfiles->stdout) rl_stdfiles->stdout = nullptr;
+  if (m_stream == rl_stdfiles->stderr) rl_stdfiles->stderr = nullptr;
   auto status = ::fclose(m_stream);
   setIsClosed(true);
   m_stream = nullptr;
@@ -330,7 +334,8 @@ void BuiltinFiles::requestShutdown() {
 
 const Variant& BuiltinFiles::GetSTDIN() {
   if (g_builtin_files->m_stdin.isNull()) {
-    auto f = req::make<BuiltinFile>(tl_stdin ? tl_stdin : stdin);
+    auto f = req::make<BuiltinFile>(
+        rl_stdfiles->stdin ? rl_stdfiles->stdin : stdin);
     g_builtin_files->m_stdin = f;
     f->setId(1);
     assertx(f->getId() == 1);
@@ -340,7 +345,8 @@ const Variant& BuiltinFiles::GetSTDIN() {
 
 const Variant& BuiltinFiles::GetSTDOUT() {
   if (g_builtin_files->m_stdout.isNull()) {
-    auto f = req::make<BuiltinFile>(tl_stdout ? tl_stdout : stdout);
+    auto f = req::make<BuiltinFile>(
+        rl_stdfiles->stdout ? rl_stdfiles->stdout : stdout);
     g_builtin_files->m_stdout = f;
     f->setId(2);
     assertx(f->getId() == 2);
@@ -350,7 +356,8 @@ const Variant& BuiltinFiles::GetSTDOUT() {
 
 const Variant& BuiltinFiles::GetSTDERR() {
   if (g_builtin_files->m_stderr.isNull()) {
-    auto f = req::make<BuiltinFile>(tl_stderr ? tl_stderr : stderr);
+    auto f = req::make<BuiltinFile>(rl_stdfiles->stderr ?
+        rl_stdfiles->stderr : stderr);
     g_builtin_files->m_stderr = f;
     f->setId(3);
     assertx(f->getId() == 3);

@@ -145,8 +145,8 @@ void VariableSerializer::popObjectInfo() {
   m_objectInfos.pop_back();
 }
 
-__thread int64_t VariableSerializer::serializationSizeLimit =
-  StringData::MaxSize;
+RDS_LOCAL(VariableSerializer::SerializationLimitWrapper,
+    VariableSerializer::serializationSizeLimit);
 
 void VariableSerializer::popResourceInfo() {
   popObjectInfo();
@@ -157,7 +157,7 @@ String VariableSerializer::serialize(const_variant_ref v, bool ret,
   StringBuffer buf;
   m_buf = &buf;
   if (ret) {
-    buf.setOutputLimit(serializationSizeLimit);
+    buf.setOutputLimit(serializationSizeLimit->value);
   } else {
     buf.setOutputLimit(StringData::MaxSize);
   }
@@ -176,7 +176,7 @@ String VariableSerializer::serializeValue(const Variant& v, bool limit) {
   StringBuffer buf;
   m_buf = &buf;
   if (limit) {
-    buf.setOutputLimit(serializationSizeLimit);
+    buf.setOutputLimit(serializationSizeLimit->value);
   }
   m_valueCount = 1;
   write(v);
@@ -192,9 +192,9 @@ String VariableSerializer::serializeWithLimit(const Variant& v, int limit) {
   }
   StringBuffer buf;
   m_buf = &buf;
-  if (serializationSizeLimit > 0 &&
-      (limit <= 0 || limit > serializationSizeLimit)) {
-    limit = serializationSizeLimit;
+  if (serializationSizeLimit->value > 0 &&
+      (limit <= 0 || limit > serializationSizeLimit->value)) {
+    limit = serializationSizeLimit->value;
   }
   buf.setOutputLimit(limit);
   //Does not need m_valueCount, which is only useful with the unsupported types

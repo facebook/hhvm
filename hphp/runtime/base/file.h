@@ -35,7 +35,7 @@ namespace HPHP {
 struct StreamContext;
 struct StreamFilter;
 
-extern int __thread s_pcloseRet;
+extern RDS_LOCAL(int, s_pcloseRet);
 
 // This structure holds the request allocated data members of File.  The
 // purpose of the class is to allow File (and subclasses) to be managed by

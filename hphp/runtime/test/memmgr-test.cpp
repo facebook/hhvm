@@ -28,6 +28,8 @@ namespace HPHP {
 
 static void allocAndJoin(size_t size, bool free) {
   std::thread thread([&]() {
+      HPHP::rds::local::init();
+      SCOPE_EXIT { HPHP::rds::local::fini(); };
       tl_heap.getCheck();
       if (free) {
         String str(size, ReserveString);

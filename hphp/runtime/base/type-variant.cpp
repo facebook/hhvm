@@ -61,7 +61,7 @@ using BlackHoleStorage = std::aligned_storage<
   alignof(req::root<Variant>)
 >::type;
 
-static __thread BlackHoleStorage bhStorage;
+static RDS_LOCAL(BlackHoleStorage, bhStorage);
 
 ///////////////////////////////////////////////////////////////////////////////
 // static strings
@@ -523,7 +523,7 @@ Resource Variant::toResourceHelper() const {
 }
 
 req::root<Variant>* blackHolePtr() {
-  void* p = &bhStorage;
+  void* p = bhStorage.get();
   return reinterpret_cast<req::root<Variant>*>(p);
 }
 

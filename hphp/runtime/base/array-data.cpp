@@ -33,6 +33,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/base/rds-local.h"
 
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/interp-helpers.h"
@@ -49,14 +50,15 @@ const StaticString
   s_VecUnsetMsg{"Vecs do not support unsetting non-end elements"};
 
 ///////////////////////////////////////////////////////////////////////////////
+using ArrayDataHash = rds::local::detail::ArrayDataHash;
+extern DECLARE_RDS_LOCAL_HOTVALUE(ArrayDataHash, s_cachedHash);
+IMPLEMENT_RDS_LOCAL_HOTVALUE(ArrayDataHash, s_cachedHash);
 
 namespace {
 static_assert(
   sizeof(ArrayData) == 16,
   "Performance is sensitive to sizeof(ArrayData)."
   " Make sure you changed it with good reason and then update this assert.");
-
-__thread std::pair<const ArrayData*, size_t> s_cachedHash;
 
 struct ScalarHash {
   size_t operator()(const ArrayData* arr) const {
@@ -66,7 +68,8 @@ struct ScalarHash {
     return equal(ad1, ad2);
   }
   size_t hash(const ArrayData* arr) const {
-    if (arr == s_cachedHash.first) return s_cachedHash.second;
+    if (arr == static_cast<ArrayDataHash&>(s_cachedHash).first)
+      return static_cast<ArrayDataHash&>(s_cachedHash).second;
     return raw_hash(arr);
   }
   size_t raw_hash(const ArrayData* arr) const {
@@ -175,7 +178,7 @@ void ArrayData::GetScalarArray(ArrayData** parr) {
   auto replace = [&] (ArrayData* rep) {
     *parr = rep;
     decRefArr(arr);
-    s_cachedHash.first = nullptr;
+    static_cast<ArrayDataHash&>(s_cachedHash).first = nullptr;
   };
 
   if (arr->empty()) {
@@ -191,8 +194,8 @@ void ArrayData::GetScalarArray(ArrayData** parr) {
   checkNativeStack();
   arr->onSetEvalScalar();
 
-  s_cachedHash.first = arr;
-  s_cachedHash.second = ScalarHash{}.raw_hash(arr);
+  static_cast<ArrayDataHash&>(s_cachedHash).first = arr;
+  static_cast<ArrayDataHash&>(s_cachedHash).second = ScalarHash{}.raw_hash(arr);
 
   auto it = s_arrayDataMap.find(arr);
   if (it != s_arrayDataMap.end()) return replace(*it);
@@ -200,7 +203,9 @@ void ArrayData::GetScalarArray(ArrayData** parr) {
   static std::array<std::mutex, 128> s_mutexes;
 
   std::lock_guard<std::mutex> g {
-    s_mutexes[s_cachedHash.second % s_mutexes.size()]
+    s_mutexes[
+      static_cast<ArrayDataHash&>(s_cachedHash).second % s_mutexes.size()
+    ]
   };
   it = s_arrayDataMap.find(arr);
   if (it != s_arrayDataMap.end()) return replace(*it);
@@ -213,8 +218,9 @@ void ArrayData::GetScalarArray(ArrayData** parr) {
     ad = arr->copyStatic();
   }
   assertx(ad->isStatic());
-  s_cachedHash.first = ad;
-  assertx(ScalarHash{}.raw_hash(ad) == s_cachedHash.second);
+  static_cast<ArrayDataHash&>(s_cachedHash).first = ad;
+  assertx(ScalarHash{}.raw_hash(ad) ==
+      static_cast<ArrayDataHash&>(s_cachedHash).second);
   auto const DEBUG_ONLY inserted = s_arrayDataMap.insert(ad).second;
   assertx(inserted);
   return replace(ad);

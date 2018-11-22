@@ -18,13 +18,14 @@
 #include "hphp/runtime/base/string-hash-map.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/rds-local.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
 
 // Maps object ids to the WeakRefData associated to them.
 using weakref_data_map = req::fast_map<uintptr_t, req::weak_ptr<WeakRefData>>;
-THREAD_LOCAL(weakref_data_map, s_weakref_data);
+RDS_LOCAL(weakref_data_map, s_weakref_data);
 
 void weakref_cleanup() {
   s_weakref_data.destroy();

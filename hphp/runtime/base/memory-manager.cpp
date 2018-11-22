@@ -108,7 +108,7 @@ MemoryManager::MemoryManager() {
 #ifdef USE_JEMALLOC
   threadStats(m_allocated, m_deallocated);
 #endif
-  FTRACE(1, "heap-id {} new MM pid {}\n", tl_heap_id, getpid());
+  rl_gcdata.getCheck();
   resetAllStats();
   setMemoryLimit(std::numeric_limits<int64_t>::max());
   resetGC(); // so each thread has unique req_num at startup

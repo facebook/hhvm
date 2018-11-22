@@ -95,7 +95,7 @@ bool MemFile::close() {
 }
 
 bool MemFile::closeImpl() {
-  s_pcloseRet = 0;
+  *s_pcloseRet = 0;
   setIsClosed(true);
   if (m_malloced && m_data) {
     free(m_data);

@@ -20,7 +20,7 @@
 #include <openssl/rand.h>
 
 #include "hphp/runtime/base/zend-math.h"
-#include "hphp/util/thread-local.h"
+#include "hphp/runtime/base/rds-local.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -118,11 +118,11 @@ struct RandData {
 namespace {
 
 /*
- * Use a ThreadLocalNoCheck to hold RandData instead of directly using __thread.
+ * Use a RdsLocalNoCheck to hold RandData instead of directly using __thread.
  * RandData is large, and we don't want our non-PHP threads to be needlessly
  * holding it in TLS.
  */
-THREAD_LOCAL_NO_CHECK(RandData, s_data);
+RDS_LOCAL_NO_CHECK(RandData, s_data);
 
 void php_mt_initialize(uint32_t seed, uint32_t* state) {
   /* Initialize generator state with seed

@@ -36,7 +36,7 @@ const Slot s_lineIdx{4};
 const Slot s_traceIdx{5};
 const Slot s_traceOptsIdx{0};
 
-__thread int tl_exit_code{0};
+RDS_LOCAL(int, rl_exit_code);
 
 ExtendedException::ExtendedException() : Exception() {
   computeBacktrace();

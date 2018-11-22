@@ -115,7 +115,7 @@ ExecutionContext::ExecutionContext()
   RID().setMemoryLimit(std::to_string(RuntimeOption::RequestMemoryMaxBytes));
   RID().setErrorReportingLevel(RuntimeOption::RuntimeErrorReportingLevel);
 
-  VariableSerializer::serializationSizeLimit =
+  VariableSerializer::serializationSizeLimit->value =
     RuntimeOption::SerializationSizeLimit;
   tvWriteUninit(m_headerCallback);
 
@@ -2416,7 +2416,7 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
   } catch (ExitException& e) {
     errorString << s_exit.data();
     errorString << " : ";
-    errorString << tl_exit_code;
+    errorString << *rl_exit_code;
   } catch (Eval::DebuggerException& e) {
   } catch (Exception& e) {
     errorString << s_cppException.data();

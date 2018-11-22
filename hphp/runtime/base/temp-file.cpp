@@ -68,11 +68,11 @@ bool TempFile::close() {
 
 bool TempFile::closeImpl() {
   bool ret = true;
-  s_pcloseRet = 0;
+  *s_pcloseRet = 0;
   if (!isClosed()) {
     assertx(valid());
-    s_pcloseRet = ::fclose(m_stream);
-    ret = (s_pcloseRet == 0);
+    *s_pcloseRet = ::fclose(m_stream);
+    ret = (*s_pcloseRet == 0);
     setIsClosed(true);
     m_stream = nullptr;
     setFd(-1);

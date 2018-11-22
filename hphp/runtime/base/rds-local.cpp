@@ -33,7 +33,7 @@ RDSLocalNode* head = nullptr;
 // this rds local as the request becomes active, or inactive.
 
 static RDS_LOCAL(HotRDSLocals, rl_hotBackingStore);
-__thread HotRDSLocals rl_hotSection;
+__thread HotRDSLocals rl_hotSection = {};
 uint32_t s_usedbytes = 0;
 
 Handle RDSLocalNode::s_RDSLocalsBase;

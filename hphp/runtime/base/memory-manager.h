@@ -27,6 +27,7 @@
 #include <folly/Memory.h>
 
 #include "hphp/util/alloc.h" // must be included before USE_JEMALLOC is used
+#include "hphp/util/bloom-filter.h"
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/radix-map.h"
 #include "hphp/util/struct-log.h"
@@ -39,6 +40,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/sweepable.h"
 #include "hphp/runtime/base/header-kind.h"
+#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/req-malloc.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/slab-manager.h"
@@ -1068,6 +1070,21 @@ private:
 extern THREAD_LOCAL_FLAT(MemoryManager, tl_heap);
 extern __thread size_t tl_heap_id; // current heap instance id
 
+struct RequestLocalGCData {
+  BloomFilter<256*1024> t_surprise_filter;
+  // Structured logging
+  std::atomic<size_t> g_req_num{};
+  size_t t_req_num; // snapshot thread-local copy of g_req_num;
+  size_t t_gc_num; // nth collection in this request.
+  bool t_enable_samples;
+  int64_t t_trigger;
+  int64_t t_trigger_allocated;
+  int64_t t_req_age;
+  MemoryUsageStats t_pre_stats;
+};
+
+extern RDS_LOCAL_NO_CHECK(RequestLocalGCData, rl_gcdata);
+extern DECLARE_RDS_LOCAL_HOTVALUE(bool, t_eager_gc);
 //////////////////////////////////////////////////////////////////////
 
 }

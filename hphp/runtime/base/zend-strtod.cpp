@@ -91,7 +91,7 @@
 
 #include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/runtime/base/exceptions.h"
-#include "hphp/util/thread-local.h"
+#include "hphp/runtime/base/rds-local.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -393,7 +393,7 @@ struct BigintData {
   Bigint **freelist;
   Bigint *p5s;
 };
-static THREAD_LOCAL_NO_CHECK(BigintData, s_bigint_data);
+static RDS_LOCAL_NO_CHECK(BigintData, s_bigint_data);
 
 void zend_get_bigint_data() {
   s_bigint_data.getCheck();

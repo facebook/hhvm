@@ -41,6 +41,7 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/mem-file.h"
 #include "hphp/runtime/base/zend-functions.h"
+#include "hphp/runtime/base/rds-local.h"
 #include "hphp/util/logger.h"
 
 #define PHP_NORMAL_READ 0x0001
@@ -1447,12 +1448,8 @@ void HHVM_FUNCTION(socket_clear_error,
 // fsock: treating sockets as "file"
 
 namespace {
-
-thread_local std::unordered_map<
-  std::string,
-  std::shared_ptr<SocketData>
-> s_sockets;
-
+using SocketMap = std::unordered_map<std::string, std::shared_ptr<SocketData>>;
+RDS_LOCAL(SocketMap, s_sockets);
 }
 
 Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
@@ -1467,8 +1464,8 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
 
     // Check our persistent storage and determine if it's an SSLSocket
     // or just a regular socket.
-    auto sockItr = s_sockets.find(key);
-    if (sockItr != s_sockets.end()) {
+    auto sockItr = s_sockets->find(key);
+    if (sockItr != s_sockets->end()) {
       req::ptr<Socket> sock;
       if (auto sslSocketData =
           std::dynamic_pointer_cast<SSLSocketData>(sockItr->second)) {
@@ -1484,7 +1481,7 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
       // socket had an error earlier, we need to close it, remove it from
       // persistent storage, and create a new one (in that order)
       sock->close();
-      s_sockets.erase(sockItr);
+      s_sockets->erase(sockItr);
     }
   }
 
@@ -1505,8 +1502,8 @@ Variant sockopen_impl(const HostURL &hosturl, VRefParam errnum,
 
   if (persistent) {
     assertx(!key.empty());
-    s_sockets[key] = cast<Socket>(socket)->getData();
-    assertx(s_sockets[key]);
+    (*s_sockets)[key] = cast<Socket>(socket)->getData();
+    assertx((*s_sockets)[key]);
   }
 
   return socket;

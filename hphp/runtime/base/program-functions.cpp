@@ -243,7 +243,7 @@ const StaticString
   s__SERVER("_SERVER"),
   s__ENV("_ENV");
 
-static __thread bool s_sessionInitialized{false};
+static RDS_LOCAL(bool, s_sessionInitialized);
 
 static void process_cmd_arguments(int argc, char **argv) {
   php_global_set(s_argc, Variant(argc));
@@ -505,7 +505,7 @@ static void handle_exception_helper(bool& ret,
         !context->getExitCallback().isNull() &&
         is_callable(context->getExitCallback())) {
       Array stack = e.getBacktrace();
-      Array argv = make_packed_array(tl_exit_code, stack);
+      Array argv = make_packed_array(*rl_exit_code, stack);
       vm_call_user_func(context->getExitCallback(), argv);
     }
   } catch (const PhpFileDoesNotExistException& e) {
@@ -2125,7 +2125,7 @@ static int execute_program_impl(int argc, char** argv) {
         execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
         ret = 255;
         if (hphp_invoke_simple(file, false /* warmup only */)) {
-          ret = tl_exit_code;
+          ret = *rl_exit_code;
         }
         execute_command_line_end(po.xhprofFlags, true, file.c_str());
       }
@@ -2597,7 +2597,7 @@ static bool hphp_warmup(ExecutionContext *context,
 
 void hphp_session_init(Treadmill::SessionKind session_kind,
                        Transport* transport) {
-  assertx(!s_sessionInitialized);
+  assertx(!*s_sessionInitialized);
   g_context.getCheck();
   AsioSession::Init();
   Socket::clearLastError();
@@ -2623,7 +2623,7 @@ void hphp_session_init(Treadmill::SessionKind session_kind,
 
   g_context->requestInit();             // must happen after treadmill start
   if (transport != nullptr) g_context->setTransport(transport);
-  s_sessionInitialized = true;
+  *s_sessionInitialized = true;
 
   ExtensionRegistry::requestInit();
 
@@ -2855,7 +2855,7 @@ void hphp_memory_cleanup() {
 }
 
 void hphp_session_exit(Transport* transport) {
-  assertx(s_sessionInitialized);
+  assertx(*s_sessionInitialized);
   // Server note and INI have to live long enough for the access log to fire.
   // RequestLocal is too early.
   ServerNote::Reset();
@@ -2887,7 +2887,7 @@ void hphp_session_exit(Transport* transport) {
 
   assertx(tl_heap->empty());
 
-  s_sessionInitialized = false;
+  *s_sessionInitialized = false;
   s_extra_request_nanoseconds = 0;
 
   if (transport) {
@@ -2932,7 +2932,7 @@ void hphp_process_exit() noexcept {
 }
 
 bool is_hphp_session_initialized() {
-  return s_sessionInitialized;
+  return *s_sessionInitialized;
 }
 
 static struct SetThreadInitFini {

@@ -35,7 +35,7 @@ namespace HPHP {
 
 TRACE_SET_MOD(hhprof);
 
-THREAD_LOCAL(HHProf::Request, HHProf::Request::s_request);
+RDS_LOCAL(HHProf::Request, HHProf::Request::s_request);
 
 namespace { folly::Singleton<HHProf> s_hhprof; }
 static std::shared_ptr<HHProf> hhprof() {

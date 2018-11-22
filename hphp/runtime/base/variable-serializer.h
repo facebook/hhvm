@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/vm/class.h"
 
 namespace HPHP {
@@ -62,7 +63,10 @@ struct VariableSerializer {
   VariableSerializer& operator=(const VariableSerializer&) = delete;
 
   // Use UnlimitSerializationScope to suspend this temporarily.
-  static __thread int64_t serializationSizeLimit;
+  struct SerializationLimitWrapper {
+    int64_t value = StringData::MaxSize;
+  };
+  static RDS_LOCAL(SerializationLimitWrapper, serializationSizeLimit);
 
   /**
    * Top level entry function called by f_ functions.
@@ -297,7 +301,8 @@ template<typename T> struct TmpAssign {
 
 struct UnlimitSerializationScope {
   static constexpr int32_t kTmpLimit = StringData::MaxSize;
-  TmpAssign<int64_t> v{VariableSerializer::serializationSizeLimit, kTmpLimit};
+  TmpAssign<int64_t> v{VariableSerializer::serializationSizeLimit->value,
+                       kTmpLimit};
   TmpAssign<int64_t> rs{RuntimeOption::SerializationSizeLimit, kTmpLimit};
   TmpAssign<int32_t> rm{RuntimeOption::MaxSerializedStringSize, kTmpLimit};
 };

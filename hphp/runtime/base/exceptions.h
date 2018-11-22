@@ -27,6 +27,7 @@
 #include "hphp/util/exception.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/req-root.h"
+#include "hphp/runtime/base/rds-local.h"
 
 namespace HPHP {
 
@@ -144,11 +145,11 @@ struct RequestOOMKilledException : ResourceExceededException {
 
 //////////////////////////////////////////////////////////////////////
 
-extern __thread int tl_exit_code;
+extern RDS_LOCAL(int, rl_exit_code);
 
 struct ExitException : ExtendedException {
   explicit ExitException(int exitCode) {
-    tl_exit_code = exitCode;
+    *rl_exit_code = exitCode;
   }
   EXCEPTION_COMMON_IMPL(ExitException);
 };

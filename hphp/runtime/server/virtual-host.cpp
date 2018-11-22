@@ -106,7 +106,7 @@ void VirtualHost::UpdateSerializationSizeLimit() {
   const VirtualHost *vh = GetCurrent();
   assertx(vh);
   if (vh->m_runtimeOption.serializationSizeLimit != StringData::MaxSize) {
-    VariableSerializer::serializationSizeLimit =
+    VariableSerializer::serializationSizeLimit->value =
       vh->m_runtimeOption.serializationSizeLimit;
   }
 }

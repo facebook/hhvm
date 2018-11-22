@@ -64,7 +64,7 @@ bool Pipe::close() {
 
 bool Pipe::closeImpl() {
   bool ret = true;
-  s_pcloseRet = 0;
+  *s_pcloseRet = 0;
   if (valid() && !isClosed()) {
     assertx(m_stream);
 #ifdef _MSC_VER
@@ -73,7 +73,7 @@ bool Pipe::closeImpl() {
     int pcloseRet = LightProcess::pclose(m_stream);
     if (WIFEXITED(pcloseRet)) pcloseRet = WEXITSTATUS(pcloseRet);
 #endif
-    s_pcloseRet = pcloseRet;
+    *s_pcloseRet = pcloseRet;
     ret = (pcloseRet == 0);
     setIsClosed(true);
     m_stream = nullptr;

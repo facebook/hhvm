@@ -237,12 +237,12 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 // Data
 
-THREAD_LOCAL(PCREglobals, tl_pcre_globals);
+RDS_LOCAL(PCREglobals, tl_pcre_globals);
 
 static PCRECache s_pcreCache;
 
 // The last pcre error code is available for the whole thread.
-static __thread int tl_last_error_code;
+static RDS_LOCAL(int, rl_last_error_code);
 
 ///////////////////////////////////////////////////////////////////////////////
 // pcre_cache_entry implementation
@@ -995,7 +995,7 @@ static void pcre_handle_exec_error(int pcre_code) {
     preg_code = PHP_PCRE_INTERNAL_ERROR;
     break;
   }
-  tl_last_error_code = preg_code;
+  *rl_last_error_code = preg_code;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1018,7 +1018,7 @@ Variant preg_grep(const String& pattern, const Array& input, int flags /* = 0 */
 
   /* Initialize return array */
   auto ret = hackArrOutput ? Array::CreateDict() : Array::Create();
-  tl_last_error_code = PHP_PCRE_NO_ERROR;
+  *rl_last_error_code = PHP_PCRE_NO_ERROR;
 
   /* Go through the input array */
   bool invert = (flags & PREG_GREP_INVERT);
@@ -1147,7 +1147,7 @@ static Variant preg_match_impl(const StringData* pattern,
   }
 
   int matched = 0;
-  tl_last_error_code = PHP_PCRE_NO_ERROR;
+  *rl_last_error_code = PHP_PCRE_NO_ERROR;
 
   int g_notempty = 0; // If the match should not be empty
   const char** stringlist; // Holds list of subpatterns
@@ -1500,7 +1500,7 @@ static Variant php_pcre_replace(const String& pattern, const String& subject,
     /* Initialize */
     const char* match = nullptr;
     int start_offset = 0;
-    tl_last_error_code = PHP_PCRE_NO_ERROR;
+    *rl_last_error_code = PHP_PCRE_NO_ERROR;
     pcre_extra extra;
     init_local_extra(&extra, pce->extra);
 
@@ -1834,7 +1834,7 @@ Variant preg_split(const String& pattern, const String& subject,
   int start_offset = 0;
   int next_offset = 0;
   const char* last_match = subject.data();
-  tl_last_error_code = PHP_PCRE_NO_ERROR;
+  *rl_last_error_code = PHP_PCRE_NO_ERROR;
   pcre_extra extra;
   init_local_extra(&extra, pce->extra);
 
@@ -2049,7 +2049,7 @@ String preg_quote(const String& str,
 }
 
 int preg_last_error() {
-  return tl_last_error_code;
+  return *rl_last_error_code;
 }
 
 size_t preg_pcre_cache_size() {

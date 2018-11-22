@@ -20,10 +20,10 @@
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/base/weakref-data.h"
+#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/ext/weakref/weakref-data-handle.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/alloc.h"
-#include "hphp/util/bloom-filter.h"
 #include "hphp/util/cycles.h"
 #include "hphp/util/process.h"
 #include "hphp/util/ptr-map.h"
@@ -41,6 +41,9 @@
 
 namespace HPHP {
 TRACE_SET_MOD(gc);
+
+RDS_LOCAL_NO_CHECK(RequestLocalGCData, rl_gcdata);
+IMPLEMENT_RDS_LOCAL_HOTVALUE(bool, t_eager_gc);
 
 namespace {
 
@@ -544,33 +547,19 @@ NEVER_INLINE void Collector::sweep() {
   }
 }
 
-thread_local bool t_eager_gc{false};
-thread_local BloomFilter<256*1024> t_surprise_filter;
-
-// Structured Logging
-
-thread_local std::atomic<size_t> g_req_num;
-__thread size_t t_req_num; // snapshot thread-local copy of g_req_num;
-__thread size_t t_gc_num; // nth collection in this request.
-__thread bool t_enable_samples;
-__thread int64_t t_trigger;
-__thread int64_t t_trigger_allocated;
-__thread int64_t t_req_age;
-__thread MemoryUsageStats t_pre_stats;
-
 StructuredLogEntry logCommon() {
   StructuredLogEntry sample;
-  sample.setInt("req_num", t_req_num);
+  sample.setInt("req_num", rl_gcdata->t_req_num);
   // MemoryUsageStats
   sample.setInt("memory_limit", tl_heap->getMemoryLimit());
-  sample.setInt("usage", t_pre_stats.usage());
-  sample.setInt("mm_usage", t_pre_stats.mmUsage());
-  sample.setInt("mm_allocated", t_pre_stats.mmAllocated());
-  sample.setInt("aux_usage", t_pre_stats.auxUsage());
-  sample.setInt("mm_capacity", t_pre_stats.capacity());
-  sample.setInt("peak_usage", t_pre_stats.peakUsage);
-  sample.setInt("peak_capacity", t_pre_stats.peakCap);
-  sample.setInt("total_alloc", t_pre_stats.totalAlloc);
+  sample.setInt("usage", rl_gcdata->t_pre_stats.usage());
+  sample.setInt("mm_usage", rl_gcdata->t_pre_stats.mmUsage());
+  sample.setInt("mm_allocated", rl_gcdata->t_pre_stats.mmAllocated());
+  sample.setInt("aux_usage", rl_gcdata->t_pre_stats.auxUsage());
+  sample.setInt("mm_capacity", rl_gcdata->t_pre_stats.capacity());
+  sample.setInt("peak_usage", rl_gcdata->t_pre_stats.peakUsage);
+  sample.setInt("peak_capacity", rl_gcdata->t_pre_stats.peakCap);
+  sample.setInt("total_alloc", rl_gcdata->t_pre_stats.totalAlloc);
   return sample;
 }
 
@@ -587,9 +576,9 @@ void traceCollection(const Collector& collector) {
     "init {}ms mark {}ms sweep {}ms total {}ms "
     "marked {} pinned {} free {:.1f}M "
     "cscan-heap {:.1f}M xscan-heap {:.1f}M\n",
-    t_req_age,
-    t_pre_stats.mmUsage() / MB,
-    t_trigger / MB,
+    rl_gcdata->t_req_age,
+    rl_gcdata->t_pre_stats.mmUsage() / MB,
+    rl_gcdata->t_trigger / MB,
     collector.init_ns_ / 1000000,
     collector.mark_ns_ / 1000000,
     collector.sweep_ns_ / 1000000,
@@ -607,8 +596,8 @@ void logCollection(const char* phase, const Collector& collector) {
   sample.setStr("phase", phase);
   std::string scanner(type_scan::hasNonConservative() ? "typescan" : "ts-cons");
   sample.setStr("scanner", !debug ? scanner : scanner + "-debug");
-  sample.setInt("gc_num", t_gc_num);
-  sample.setInt("req_age_micros", t_req_age);
+  sample.setInt("gc_num", rl_gcdata->t_gc_num);
+  sample.setInt("req_age_micros", rl_gcdata->t_req_age);
   // timers of gc-sub phases
   sample.setInt("init_micros", collector.init_ns_/1000);
   sample.setInt("initfree_micros", collector.initfree_ns_/1000);
@@ -625,8 +614,8 @@ void logCollection(const char* phase, const Collector& collector) {
   sample.setInt("pinned_count", collector.pinned_);
   sample.setInt("unknown_count", collector.unknown_);
   sample.setInt("freed_bytes", collector.freed_bytes_);
-  sample.setInt("trigger_bytes", t_trigger);
-  sample.setInt("trigger_allocated", t_trigger_allocated);
+  sample.setInt("trigger_bytes", rl_gcdata->t_trigger);
+  sample.setInt("trigger_allocated", rl_gcdata->t_trigger_allocated);
   sample.setInt("cscanned_roots", collector.cscanned_roots_.bytes);
   sample.setInt("xscanned_roots", collector.xscanned_roots_.bytes);
   sample.setInt("cscanned_heap",
@@ -646,7 +635,7 @@ void collectImpl(HeapImpl& heap, const char* phase, GCBits& mark_version) {
   if (t_eager_gc && RuntimeOption::EvalFilterGCPoints) {
     t_eager_gc = false;
     auto pc = vmpc();
-    if (t_surprise_filter.test(pc)) {
+    if (rl_gcdata->t_surprise_filter.test(pc)) {
       if (RuntimeOption::EvalGCForAPC) {
         if (!APCGCManager::getInstance().excessedGCTriggerBar()) {
           return;
@@ -655,16 +644,18 @@ void collectImpl(HeapImpl& heap, const char* phase, GCBits& mark_version) {
         return;
       }
     }
-    t_surprise_filter.insert(pc);
+    rl_gcdata->t_surprise_filter.insert(pc);
     TRACE(2, "eager gc %s at %p\n", phase, pc);
     phase = "eager";
   } else {
     TRACE(2, "normal gc %s at %p\n", phase, vmpc());
   }
-  if (t_gc_num == 0) {
-    t_enable_samples = StructuredLog::coinflip(RuntimeOption::EvalGCSampleRate);
+  if (rl_gcdata->t_gc_num == 0) {
+    rl_gcdata->t_enable_samples =
+      StructuredLog::coinflip(RuntimeOption::EvalGCSampleRate);
   }
-  t_pre_stats = tl_heap->getStatsCopy(); // don't check or trigger OOM
+  rl_gcdata->t_pre_stats =
+    tl_heap->getStatsCopy(); // don't check or trigger OOM
   mark_version = (mark_version == MaxMark) ? MinMark :
                  GCBits(uint8_t(mark_version) + 1);
   Collector collector(
@@ -680,23 +671,23 @@ void collectImpl(HeapImpl& heap, const char* phase, GCBits& mark_version) {
   if (Trace::moduleEnabledRelease(Trace::gc, 1)) {
     traceCollection(collector);
   }
-  if (t_enable_samples) {
+  if (rl_gcdata->t_enable_samples) {
     logCollection(phase, collector);
   }
-  ++t_gc_num;
+  ++rl_gcdata->t_gc_num;
 }
 
 }
 
 void MemoryManager::resetGC() {
-  t_req_num = ++g_req_num;
-  t_gc_num = 0;
+  rl_gcdata->t_req_num = ++(rl_gcdata->g_req_num);
+  rl_gcdata->t_gc_num = 0;
   if (rds::header()) updateNextGc();
 }
 
 void MemoryManager::resetEagerGC() {
   if (RuntimeOption::EvalEagerGC && RuntimeOption::EvalFilterGCPoints) {
-    t_surprise_filter.clear();
+    rl_gcdata->t_surprise_filter.clear();
   }
 }
 
@@ -711,8 +702,8 @@ void MemoryManager::checkGC() {
   if (m_stats.mmUsage() > m_nextGC) {
     assertx(rds::header());
     setSurpriseFlag(PendingGCFlag);
-    if (t_trigger_allocated == -1) {
-      t_trigger_allocated = m_stats.mmAllocated();
+    if (rl_gcdata->t_trigger_allocated == -1) {
+      rl_gcdata->t_trigger_allocated = m_stats.mmAllocated();
     }
   }
 }
@@ -727,7 +718,7 @@ void MemoryManager::checkGC() {
  * checkGC()).
  */
 void MemoryManager::updateNextGc() {
-  t_trigger_allocated = -1;
+  rl_gcdata->t_trigger_allocated = -1;
   if (!isGCEnabled()) {
     m_nextGC = kNoNextGC;
     updateMMDebt();
@@ -748,8 +739,8 @@ void MemoryManager::updateNextGc() {
 
 void MemoryManager::collect(const char* phase) {
   if (empty()) return;
-  t_req_age = cpu_ns()/1000 - m_req_start_micros;
-  t_trigger = m_nextGC;
+  rl_gcdata->t_req_age = cpu_ns()/1000 - m_req_start_micros;
+  rl_gcdata->t_trigger = m_nextGC;
   collectImpl(m_heap, phase, m_mark_version);
   updateNextGc();
 }

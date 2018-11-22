@@ -22,6 +22,8 @@
 #include "hphp/util/data-block.h"
 #include "hphp/util/trace.h"
 
+#include "hphp/runtime/base/rds-local.h"
+
 namespace HPHP {
 namespace Stats {
 
@@ -89,7 +91,12 @@ enum StatCounter {
 #undef O
 
 extern const char* g_counterNames[kNumStatCounters];
-extern __thread uint64_t tl_counters[kNumStatCounters];
+
+struct StatCounters {
+  uint64_t counters[kNumStatCounters];
+};
+
+extern RDS_LOCAL(StatCounters, rl_counters);
 
 inline bool enabled() {
   return Trace::moduleEnabled(Trace::stats, 1);
@@ -105,7 +112,7 @@ inline bool enableInstrCount() {
 
 inline void inc(StatCounter stat, int n = 1) {
   if (enabled()) {
-    tl_counters[stat] += n;
+    rl_counters->counters[stat] += n;
   }
 }
 

@@ -1130,7 +1130,7 @@ void CLIWorker::doJob(int client) {
         prelude
       );
       if (invoke_result) {
-        ret = tl_exit_code;
+        ret = *rl_exit_code;
       }
       FTRACE(2, "CLIWorker::doJob({}): waiting for monitor...\n", client);
     }

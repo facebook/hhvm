@@ -350,7 +350,7 @@ Variant HHVM_FUNCTION(pclose,
                       const Variant& handle) {
   CHECK_HANDLE(handle.toResource(), f);
   CHECK_ERROR(f->close());
-  return s_pcloseRet;
+  return *s_pcloseRet;
 }
 
 Variant HHVM_FUNCTION(fseek,

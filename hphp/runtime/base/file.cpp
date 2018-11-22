@@ -69,7 +69,7 @@ FileData::~FileData() {
 
 StaticString File::s_resource_name("stream");
 
-int __thread s_pcloseRet;
+RDS_LOCAL(int, s_pcloseRet);
 
 const int File::USE_INCLUDE_PATH = 1;
 

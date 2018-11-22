@@ -66,7 +66,7 @@ struct TimeZoneData {
 
   const timelib_tzdb *Database;
 };
-static THREAD_LOCAL(TimeZoneData, s_timezone_data);
+static RDS_LOCAL(TimeZoneData, s_timezone_data);
 
 struct ahm_eqstr {
   bool operator()(const char* a, const char* b) {

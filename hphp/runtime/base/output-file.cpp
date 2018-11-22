@@ -53,7 +53,7 @@ bool OutputFile::close() {
 }
 
 bool OutputFile::closeImpl() {
-  s_pcloseRet = 0;
+  *s_pcloseRet = 0;
   if (!isClosed()) {
     setIsClosed(true);
     return true;

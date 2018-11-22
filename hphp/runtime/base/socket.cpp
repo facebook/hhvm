@@ -29,7 +29,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-__thread int Socket::s_lastErrno;
+RDS_LOCAL(int, Socket::s_lastErrno);
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors and destructor
@@ -41,9 +41,9 @@ SocketData::SocketData(int port, int type, bool nonblocking)
 {}
 
 bool SocketData::closeImpl() {
-  s_pcloseRet = 0;
+  *s_pcloseRet = 0;
   if (valid() && !isClosed()) {
-    s_pcloseRet = ::close(getFd());
+    *s_pcloseRet = ::close(getFd());
     setIsClosed(true);
     setFd(-1);
   }
@@ -86,9 +86,9 @@ Socket::Socket(std::shared_ptr<SocketData> data, int sockfd, int type,
     tv.tv_usec = (timeout - tv.tv_sec) * 1e6;
   }
   setsockopt(getFd(), SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
-  s_lastErrno = errno;
+  *s_lastErrno = errno;
   setsockopt(getFd(), SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
-  s_lastErrno = errno;
+  *s_lastErrno = errno;
   internalSetTimeout(tv);
   setIsLocal(type == AF_UNIX);
 
@@ -116,7 +116,7 @@ void Socket::sweep() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Socket::setError(int err) {
-  s_lastErrno = m_data->m_error = err;
+  *s_lastErrno = m_data->m_error = err;
 }
 
 bool Socket::open(const String& /*filename*/, const String& /*mode*/) {

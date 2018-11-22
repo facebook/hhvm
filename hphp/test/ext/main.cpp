@@ -53,6 +53,9 @@ int main(int argc, char **argv) {
     Test::logger.log_url = argv[5];
   }
 
+  rds::local::init();
+  SCOPE_EXIT { rds::local::fini(); };
+
   // Initialize the runtime options with their default values
   {
     IniSetting::Map ini = IniSetting::Map::object;

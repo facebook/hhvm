@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/weakref-data.h"
+#include "hphp/runtime/base/rds-local.h"
 
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -144,6 +145,8 @@ struct InvokeResult {
 #ifdef _MSC_VER
 #pragma pack(push, 1)
 #endif
+
+extern DECLARE_RDS_LOCAL_HOTVALUE(uint32_t, os_max_id);
 struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   enum Attribute : uint8_t {
     NoDestructor       = 0x01, // __destruct()
@@ -165,10 +168,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
     return sizeof(m_aux16);
   }
 
- private:
-  static __thread uint32_t os_max_id;
-
- public:
   static void resetMaxId();
 
   explicit ObjectData(Class*, uint8_t flags = 0,

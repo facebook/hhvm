@@ -26,6 +26,7 @@
 namespace HPHP {
 
 struct RequestEventHandler;
+struct ArrayData;
 
 namespace rds {
 namespace local {
@@ -97,19 +98,22 @@ namespace local {
   RLHotWrapper_ ## f f;
 
 namespace detail {
-
-struct HotRDSLocals {
+using ArrayDataHash = std::pair<const ArrayData*,size_t>;
+struct alignas(64) HotRDSLocals {
   void* rdslocal_base;
   void* g_context;
 
   // Every array operation requires checking if the mutable iteration table is
   // empty.  This bool offers the fastest way to get at that information.
   bool rl_miter_exists;
+  uint32_t os_max_id;
+  bool t_eager_gc;
+  ArrayDataHash s_cachedHash;
 
   TYPE_SCAN_IGNORE_FIELD(rdslocal_base);
   TYPE_SCAN_IGNORE_FIELD(g_context);
 };
-static_assert(sizeof(HotRDSLocals) <= 24,
+static_assert(sizeof(HotRDSLocals) <= 64,
               "It is essential HotRDSLocals is small.  Consider using "
               "normal rds locals if possible.  Hot rds locals are copied "
               "every user level context switch.");

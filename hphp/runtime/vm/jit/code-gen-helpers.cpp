@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
+#include "hphp/runtime/vm/jit/code-gen-tls.h"
 
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/datatype.h"
@@ -514,8 +515,13 @@ void emitRB(Vout& v, Trace::RingBufferType t, const char* msg) {
 
 void emitIncStat(Vout& v, Stats::StatCounter stat) {
   if (!Stats::enabled()) return;
-  intptr_t disp = uintptr_t(&Stats::tl_counters[stat]) - tlsBase();
-  v << incqm{Vptr{baseless(disp), Vptr::FS}, v.makeReg()};
+  auto rdslocalBase = v.makeReg();
+  auto datum = tls_datum(rds::local::detail::rl_hotSection.rdslocal_base);
+  auto offset = Stats::rl_counters.getRawOffset() +
+                offsetof(Stats::StatCounters, counters) +
+                sizeof(decltype(stat))*stat;
+  v << load{emitTLSAddr(v, datum), rdslocalBase};
+  v << incqm{rdslocalBase[offset], v.makeReg()};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

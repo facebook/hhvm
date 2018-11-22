@@ -469,9 +469,11 @@ let check_unset_target
   (env : Typing_env.env) (te : T.expr): unit =
   check_assignment_or_unset_target env te Errors.invalid_unset_target_rx
 
-let is_move_or_mutable_call te =
+let rec is_move_or_mutable_call ?(allow_move=true) te =
   match te with
-  | T.Call(_, (_, T.Id (_, n)), _, _, _) -> n = SN.Rx.mutable_ || n = SN.Rx.move
+  | T.Call(_, (_, T.Id (_, n)), _, _, _) ->
+      n = SN.Rx.mutable_ || (allow_move && n = SN.Rx.move)
+  | T.Pipe (_, _, (_, r)) -> is_move_or_mutable_call ~allow_move:false r
   | _ -> false
 
 let check_conditional_operator

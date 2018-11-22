@@ -1313,7 +1313,9 @@ and expr_
   let exprs = exprs ~check_defined in
   let raw_expr = raw_expr ~check_defined in
 
-  let make_result env te ty =
+  let make_result ?(tyvars = ISet.empty) env te ty =
+    let env = SubType.set_tyvar_variance ~tyvars env ty in
+    let env = SubType.solve_tyvars ~tyvars env in
     env, T.make_typed_expr p ty te, ty in
 
   (**
@@ -1522,6 +1524,7 @@ and expr_
         (Reason.Rwitness p, Tarraykind (AKvarray value_ty))
 
   | ValCollection (kind, el) ->
+      let tyvars = ISet.empty in
       (* Use expected type to determine expected element type *)
       let env, elem_expected =
         match expand_expected env expected with
@@ -1535,10 +1538,10 @@ and expr_
         | _ -> env, None in
       let env, tel, tyl = exprs ?expected:elem_expected env el in
       let env, tyl = List.map_env env tyl Typing_env.unbind in
-      let env, elem_ty =
+      let env, elem_ty, tyvars =
         match elem_expected with
-        | Some (_, _, ty) -> env, ty
-        | None -> Env.fresh_unresolved_type env in
+        | Some (_, _, ty) -> env, ty, tyvars
+        | None -> Env.fresh_unresolved_type_add_tyvars env p tyvars in
       let class_name = vc_kind_to_name kind in
       let subtype_val env ((pos, _), ty) =
         let env = Type.sub_type p Reason.URvector env ty elem_ty in
@@ -1551,9 +1554,10 @@ and expr_
       let env =
         List.fold_left (List.zip_exn el tyl) ~init:env ~f:subtype_val in
       let ty = TMT.class_type (Reason.Rwitness p) class_name [elem_ty] in
-      make_result env (T.ValCollection (kind, tel)) ty
+      make_result ~tyvars env (T.ValCollection (kind, tel)) ty
   | KeyValCollection (kind, l) ->
       (* Use expected type to determine expected key and value types *)
+      let tyvars = ISet.empty in
       let env, kexpected, vexpected =
         match expand_expected env expected with
         | env, Some (pos, ur, ety) ->
@@ -1568,15 +1572,15 @@ and expr_
       let env, tkl, kl = exprs ?expected:kexpected env kl in
       let env, tvl, vl = exprs ?expected:vexpected env vl in
       let env, kl = List.map_env env kl Typing_env.unbind in
-      let env, k =
+      let env, k, tyvars =
         match kexpected with
-        | Some (_, _, k) -> env, k
-        | None -> Env.fresh_unresolved_type env in
+        | Some (_, _, k) -> env, k, tyvars
+        | None -> Env.fresh_unresolved_type_add_tyvars env p tyvars in
       let env, vl = List.map_env env vl Typing_env.unbind in
-      let env, v =
+      let env, v, tyvars =
         match vexpected with
-        | Some (_, _, v) -> env, v
-        | None -> Env.fresh_unresolved_type env in
+        | Some (_, _, v) -> env, v, tyvars
+        | None -> Env.fresh_unresolved_type_add_tyvars env p tyvars in
       let class_name = kvc_kind_to_name kind in
       let subtype_key env (((key_pos, _), _), ty) =
         let env = Type.sub_type p Reason.URkey env ty k in
@@ -1587,7 +1591,7 @@ and expr_
       let env =
         List.fold_left vl ~init:env ~f:subtype_val in
       let ty = TMT.class_type (Reason.Rwitness p) class_name [k; v] in
-      make_result env (T.KeyValCollection (kind, List.zip_exn tkl tvl)) ty
+      make_result ~tyvars env (T.KeyValCollection (kind, List.zip_exn tkl tvl)) ty
   | Clone e ->
     let env, te, ty = expr env e in
     (* Clone only works on objects; anything else fatals at runtime *)
@@ -2271,12 +2275,12 @@ and expr_
   | Special_func func -> special_func env p func
   | New ((pos, c), el, uel) ->
       let env = save_and_merge_next_in_catch env in
-      let env, tc, tel, tuel, ty, ctor_fty =
+      let env, tc, tel, tuel, tyvars, ty, ctor_fty =
         new_object ~expected ~is_using_clause ~check_parent:false ~check_not_abstract:true
           pos env c el uel in
       let env = Env.forget_members env p in
       Typing_mutability.enforce_mutable_constructor_call env ctor_fty tel;
-      make_result env (T.New(tc, tel, tuel)) ty
+      make_result ~tyvars env (T.New(tc, tel, tuel)) ty
   | Cast ((_, Harray (None, None)), _)
     when Env.is_strict env
     || TCO.migration_flag_enabled (Env.get_tcopt env) "array_cast" ->
@@ -2946,12 +2950,12 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
   (* Obtain class info from the cid expression. We get multiple
    * results with a CIexpr that has a union type *)
   let env, tcid, classes = instantiable_cid ~exact:Exact p env cid in
-  let finish env tcid tel tuel ty ctor_fty =
+  let finish env tcid tel tuel tyvars ty ctor_fty =
     let env, new_ty =
       if check_parent then env, ty
       else ExprDepTy.make env cid ty in
-    env, tcid, tel, tuel, new_ty, ctor_fty in
-  let rec gather env tel tuel res classes =
+    env, tcid, tel, tuel, tyvars, new_ty, ctor_fty in
+  let rec gather env tel tuel tyvars res classes =
     match classes with
     | [] ->
       begin
@@ -2960,30 +2964,33 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
           let env, tel, _ = exprs env el in
           let env, tuel, _ = exprs env uel in
           let r = Reason.Runknown_class p in
-          finish env tcid tel tuel (r, Tobject) (r, TUtils.terr env)
-        | [ty,ctor_fty] -> finish env tcid tel tuel ty ctor_fty
+          finish env tcid tel tuel tyvars (r, Tobject) (r, TUtils.terr env)
+        | [ty,ctor_fty] -> finish env tcid tel tuel tyvars ty ctor_fty
         | l ->
           let tyl, ctyl = List.unzip l in
           let r = Reason.Rwitness p in
-          finish env tcid tel tuel (r, Tunresolved tyl) (r, Tunresolved ctyl)
+          finish env tcid tel tuel tyvars (r, Tunresolved tyl) (r, Tunresolved ctyl)
       end
 
     | (cname, class_info, c_ty)::classes ->
       if check_not_abstract && (Cls.abstract class_info)
         && not (requires_consistent_construct cid) then
         uninstantiable_error p cid (Cls.pos class_info) (Cls.name class_info) p c_ty;
-      let env, obj_ty_, params =
+      let env, obj_ty_, params, tyvars =
         match cid, snd c_ty with
         (* Explicit type arguments *)
-        | CI (_, _::_), Tclass(_, _, tyl) -> env, (snd c_ty), tyl
-        | _, Tclass(_, Exact, _) ->
-          let env, params = List.map_env env (Cls.tparams class_info)
-            (fun env _ -> Env.fresh_unresolved_type env) in
-          env, (Tclass (cname, Exact, params)), params
+        | CI (_, _::_), Tclass(_, _, tyl) -> env, (snd c_ty), tyl, tyvars
         | _, _ ->
-          let env, params = List.map_env env (Cls.tparams class_info)
-            (fun env _ -> Env.fresh_unresolved_type env) in
-          env, (Tclass (cname, Nonexact, params)), params in
+          let (env, tyvars), params = List.map_env (env, tyvars) (Cls.tparams class_info)
+            (fun (env, tyvars) _ ->
+              let env, ty, tyvars = Env.fresh_unresolved_type_add_tyvars env p tyvars in
+              (env, tyvars), ty) in
+          begin match snd c_ty with
+          | Tclass(_, Exact, _) ->
+            env, (Tclass (cname, Exact, params)), params, tyvars
+          | _ ->
+            env, (Tclass (cname, Nonexact, params)), params, tyvars
+          end in
       if not check_parent && not is_using_clause && (Cls.is_disposable class_info)
       then Errors.invalid_new_disposable p;
       let r_witness = Reason.Rwitness p in
@@ -3021,8 +3028,8 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
               check_abstract_parent_meth SN.Members.__construct p ctor_fty
             | None -> ctor_fty
           in
-          gather env tel tuel ((obj_ty,ctor_fty)::res) classes
-        | CIstatic | CI _ | CIself -> gather env tel tuel ((c_ty,ctor_fty)::res) classes
+          gather env tel tuel tyvars ((obj_ty,ctor_fty)::res) classes
+        | CIstatic | CI _ | CIself -> gather env tel tuel tyvars ((c_ty,ctor_fty)::res) classes
         | CIexpr _ ->
           (* When constructing from a (classname) variable, the variable
            * dictates what the constructed object is going to be. This allows
@@ -3030,9 +3037,9 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
            * through the 'new $foo()' iff the constructed obj_ty is a
            * supertype of the variable-dictated c_ty *)
           let env = SubType.sub_type env c_ty obj_ty in
-          gather env tel tuel ((c_ty,ctor_fty)::res) classes
+          gather env tel tuel tyvars ((c_ty,ctor_fty)::res) classes
   in
-  gather env [] [] [] classes
+  gather env [] [] ISet.empty [] classes
 
 (* FIXME: we need to separate our instantiability into two parts. Currently,
  * all this function is doing is checking if a given type is inhabited --
@@ -3418,7 +3425,7 @@ and aktuple_field env = function
 and check_parent_construct pos env el uel env_parent =
   let check_not_abstract = false in
   let env, env_parent = Phase.localize_with_self env env_parent in
-  let env, _tcid, tel, tuel, parent, fty =
+  let env, _tcid, tel, tuel, _tyvars, parent, fty =
     new_object ~expected:None ~check_parent:true ~check_not_abstract
       ~is_using_clause:false
       pos env CIparent el uel in

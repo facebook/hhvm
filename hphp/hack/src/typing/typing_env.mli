@@ -18,6 +18,7 @@ val get_tcopt : env -> TypecheckerOptions.t
 val fresh : unit -> int
 val fresh_type : unit -> locl ty
 val fresh_unresolved_type : env -> env * locl ty
+val fresh_unresolved_type_add_tyvars : env -> Pos.t -> ISet.t -> env * locl ty * ISet.t
 val get_var : env -> int -> env * int
 val rename : env -> int -> int -> env
 val add : env -> int -> locl ty -> env

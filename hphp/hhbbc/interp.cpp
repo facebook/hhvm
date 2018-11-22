@@ -2574,6 +2574,11 @@ void in(ISS& env, const bc::ReifiedGeneric& op) {
   push(env, RuntimeOption::EvalHackArrDVArrs ? TDict : TDArr);
 }
 
+void in(ISS& env, const bc::CheckReifiedGenericMismatch& op) {
+  // TODO(T31677864): implement real optimizations
+  popC(env);
+}
+
 namespace {
 
 /*

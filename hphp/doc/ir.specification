@@ -2249,6 +2249,11 @@ To string conversions:
   raise a warning or throw an exception indicating that the func specified in
   S0 was called dynamically (and should not be).
 
+| CheckClsReifiedGenericMismatch<cls>, ND, SVArr, NF
+
+  Raises a runtime error unless whether each generic in S0 is reified or erased
+  matches exactly to the expectations of the cls.
+
 | CheckFunReifiedGenericMismatch<func>, ND, SVArr, NF
 
   Raises a runtime error unless whether each generic in S0 is reified or erased

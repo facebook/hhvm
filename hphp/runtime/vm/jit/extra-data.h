@@ -1638,6 +1638,8 @@ X(RaiseParamRefMismatchForFuncName,
                                 ParamData);
 X(RaiseArrayIndexNotice,        RaiseArrayIndexNoticeData);
 X(RaiseArrayKeyNotice,          RaiseArrayKeyNoticeData);
+X(CheckClsReifiedGenericMismatch,
+                                ClassData);
 X(CheckFunReifiedGenericMismatch,
                                 FuncData);
 X(InterpOne,                    InterpOneData);

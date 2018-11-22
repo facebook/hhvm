@@ -802,6 +802,17 @@ void emitStaticLocDef(IRGS& env, int32_t locId, const StringData* name) {
   decRef(env, oldValue);
 }
 
+void emitCheckReifiedGenericMismatch(IRGS& env) {
+  auto const cls = curClass(env);
+  if (!cls) {
+    // no static context class, so this will raise an error
+    interpOne(env, *env.currentNormalizedInstruction);
+    return;
+  }
+  auto const reified_generics = popC(env);
+  gen(env, CheckClsReifiedGenericMismatch, ClassData{cls}, reified_generics);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}}

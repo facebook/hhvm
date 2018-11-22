@@ -508,6 +508,7 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseNotice:
   case RaiseParamRefMismatchForFunc:
   case RaiseParamRefMismatchForFuncName:
+  case CheckClsReifiedGenericMismatch:
   case CheckFunReifiedGenericMismatch:
   case RaiseUndefProp:
   case RaiseUninitLoc:

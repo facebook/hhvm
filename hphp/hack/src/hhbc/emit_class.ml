@@ -236,43 +236,26 @@ let validate_class_name ns (p, class_name) =
     Emit_fatal.raise_fatal_parse p message
 
 let emit_reified_extends_params env ast_class =
-  let reified_params = match ast_class.Ast.c_extends with
+  let type_params = match ast_class.Ast.c_extends with
     | (_, Ast.Happly (_, l)):: _ ->
-      List.filter_map l ~f:(function (_, Ast.Hreified h) -> Some h | _ -> None)
+      List.map l
+        ~f:(function (_, Ast.Hreified h) -> (h, true) | h -> (h, false))
     | _ -> [] in
-  let n = List.length reified_params in
-  if n = 0 then
+  let has_reified = List.exists type_params ~f:snd in
+  if not has_reified then
     let tv = if hack_arr_dv_arrs () then TV.Vec [] else TV.VArray [] in
     instr (H.ILitConst (H.TypedValue tv))
   else
     gather [
-      gather @@ List.map reified_params ~f:(fun h ->
-        fst @@ Emit_expression.emit_reified_arg env h);
-      instr_record_reified_generic n;
+      gather @@ Emit_expression.emit_reified_targs env Pos.none type_params;
+      instr_record_reified_generic (List.length type_params);
     ]
 
 let emit_reified_init_body env num_reified ast_class =
   let check_length =
-    let label = Label.next_regular () in
-    let plural = if num_reified = 1 then "generic" else "generics" in
     gather [
-      instr_string @@
-        Printf.sprintf "Class %s expects %d reified %s but "
-          (SU.strip_global_ns @@ snd ast_class.A.c_name) num_reified plural;
       instr_cgetl (Local.Named SU.Reified.reified_init_method_param_name);
-      instr_int 0; (* COUNT_NORMAL *)
-      instr_fcallbuiltin 2 1 "count";
-      instr_unboxr_nop;
-      instr_dup;
-      instr_int num_reified;
-      instr_eq;
-      instr_jmpnz label;
-      instr_string " given";
-      instr_concatn 3;
-      instr (H.IOp (H.Fatal H.FatalOp.Runtime));
-      instr_label label;
-      instr_popc; (* pop the dupped number *)
-      instr_popc; (* pop the error message *)
+      instr_check_reified_generic_mismatch;
     ] in
   let set_prop = if num_reified = 0 then empty else
     (* $this->86reified_prop = $__typestructures *)

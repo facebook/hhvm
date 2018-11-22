@@ -2889,6 +2889,15 @@ OPTBLD_INLINE void iopReifiedGeneric(ReifiedGenericOp op, uint32_t n) {
   }
 }
 
+OPTBLD_INLINE void iopCheckReifiedGenericMismatch() {
+  Class* cls = arGetContextClass(vmfp());
+  if (!cls) raise_error("No class scope is active");
+  auto const c = vmStack().topC();
+  assertx(tvIsVecOrVArray(c));
+  checkClassReifiedGenericMismatch(cls, c->m_data.parr);
+  vmStack().popC();
+}
+
 OPTBLD_INLINE void iopPrint() {
   Cell* c1 = vmStack().topC();
   g_context->write(cellAsVariant(*c1).toString());

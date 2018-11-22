@@ -428,6 +428,7 @@ let make_nullary_inst s =
  | "BreakTraceHint" -> IMisc(BreakTraceHint)
  | "CGetCUNop" -> IMisc(CGetCUNop)
  | "UGetCUNop" -> IMisc(UGetCUNop)
+ | "CheckReifiedGenericMismatch" -> IMisc(CheckReifiedGenericMismatch)
 
  (* async_functions *)
  | "Await" -> IAsync Await

@@ -603,6 +603,7 @@ let check_instruct_misc asn i i' =
   | Parent _, _ | LateBoundCls _, _ | ClsRefName _, _ | NativeImpl, _
   | VerifyOutType _, _ | ReifiedName _, _ | ReifiedGeneric _, _
   | RecordReifiedGeneric _, _ | AKExists, _ | Idx, _ | ArrayIdx, _
+  | CheckReifiedGenericMismatch, _
   | AssertRATStk _, _ | BreakTraceHint, _
   | CGetCUNop, _ | UGetCUNop, _ ->
     if i=i' then Some asn else None

@@ -30,6 +30,7 @@ const StaticString s_optional_shape_field("optional_shape_field");
 const StaticString s_classname("classname");
 const StaticString s_wildcard("_");
 const StaticString s_name("name");
+const StaticString s_generic_types("generic_types");
 
 ///////////////////////////////////////////////////////////////////////////////
 

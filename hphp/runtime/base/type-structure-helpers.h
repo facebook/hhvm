@@ -35,6 +35,13 @@ namespace HPHP {
 bool cellInstanceOf(const Cell* tv, const NamedEntity* ne);
 
 /*
+ * Returns true is all the generics on the type type structure are
+ * wildcards. If the type structure does not contain any generics, then
+ * returns true.
+ */
+bool isTSAllWildcards(const ArrayData* ts);
+
+/*
  * Resolves the given Array as a type structure.
  *
  * Raises an error if the type structure contains a trait, typevar or a function

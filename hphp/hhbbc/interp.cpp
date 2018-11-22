@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/runtime/base/type-structure.h"
+#include "hphp/runtime/base/type-structure-helpers.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit-util.h"
@@ -2459,15 +2460,31 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
       return result(TBool);
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
-    case TypeStructure::Kind::T_xhp:
+    case TypeStructure::Kind::T_xhp: {
       if (asExpression) return result(TBool);
-      return reduce(env, bc::PopC {}, bc::InstanceOfD { get_ts_classname(ts) });
+      auto clsname = get_ts_classname(ts);
+      auto const rcls = env.index.resolve_class(env.ctx, clsname);
+      if (!rcls || !rcls->resolved() || (ts->exists(s_generic_types) &&
+                                         (rcls->cls()->hasReifiedGenerics ||
+                                         !isTSAllWildcards(ts)))) {
+        // If it is a reified class or has non wildcard generics,
+        // we need to bail
+        return result(TBool);
+      }
+      return reduce(env, bc::PopC {}, bc::InstanceOfD { clsname });
+    }
     case TypeStructure::Kind::T_unresolved: {
       if (asExpression) return result(TBool);
       auto const rcls = env.index.resolve_class(env.ctx, get_ts_classname(ts));
       // We can only reduce to instance of if we know for sure that this class
       // can be resolved since instanceof undefined class does not throw
       if (!rcls || !rcls->resolved() || rcls->cls()->attrs & AttrEnum) {
+        return result(TBool);
+      }
+      if (ts->exists(s_generic_types) &&
+         (rcls->cls()->hasReifiedGenerics || !isTSAllWildcards(ts))) {
+          // If it is a reified class or has non wildcard generics,
+          // we need to bail
         return result(TBool);
       }
       return reduce(env, bc::PopC {}, bc::InstanceOfD { rcls->name() });

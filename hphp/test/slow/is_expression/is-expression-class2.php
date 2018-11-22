@@ -7,8 +7,7 @@ final class E extends C<string> {}
 final class F implements I<bool> {}
 
   function is_I(mixed $x): void {
-    // Generics are erased at runtime, so this should always work.
-    if ($x is I<string>) {
+    if ($x is I<_>) {
       echo "I\n";
     } else {
       echo "not I\n";
@@ -16,8 +15,7 @@ final class F implements I<bool> {}
   }
 
 function is_C(mixed $x): void {
-  // Generics are erased at runtime, so this should always work.
-  if ($x is C<int>) {
+  if ($x is C<_>) {
     echo "C\n";
   } else {
     echo "not C\n";

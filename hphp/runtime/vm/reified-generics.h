@@ -50,6 +50,7 @@ ArrayData* getReifiedTypeList(const std::string& name);
 
 // Returns the value on the property that holds reified generics
 // If the cls does not have any reified generics, then returns nullptr
+ArrayData* getClsReifiedGenericsProp(Class* cls, ObjectData* obj);
 ArrayData* getClsReifiedGenericsProp(Class* cls, ActRec* ar);
 
 // Returns a pair of number of generics and their indices

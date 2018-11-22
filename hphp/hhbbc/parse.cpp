@@ -1319,18 +1319,20 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
                                         const PreClassEmitter& pce) {
   FTRACE(2, "  class: {}\n", pce.name()->data());
 
-  auto ret               = std::make_unique<php::Class>();
-  ret->name              = pce.name();
-  ret->srcInfo           = php::SrcInfo { pce.getLocation(),
-                                          pce.docComment() };
-  ret->unit              = unit;
-  ret->closureContextCls = nullptr;
-  ret->parentName        = pce.parentName()->empty() ? nullptr
-                                                     : pce.parentName();
-  ret->attrs             = static_cast<Attr>(pce.attrs() & ~AttrNoOverride);
-  ret->hoistability      = pce.hoistability();
-  ret->userAttributes    = pce.userAttributes();
-  ret->id                = pce.id();
+  auto ret                = std::make_unique<php::Class>();
+  ret->name               = pce.name();
+  ret->srcInfo            = php::SrcInfo { pce.getLocation(),
+                                           pce.docComment() };
+  ret->unit               = unit;
+  ret->closureContextCls  = nullptr;
+  ret->parentName         = pce.parentName()->empty() ? nullptr
+                                                      : pce.parentName();
+  ret->attrs              = static_cast<Attr>(pce.attrs() & ~AttrNoOverride);
+  ret->hoistability       = pce.hoistability();
+  ret->userAttributes     = pce.userAttributes();
+  ret->id                 = pce.id();
+  ret->hasReifiedGenerics = ret->userAttributes.find(s_Reified.get()) !=
+                            ret->userAttributes.end();
 
   for (auto& iface : pce.interfaces()) {
     ret->interfaceNames.push_back(iface);

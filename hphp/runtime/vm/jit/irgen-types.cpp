@@ -921,8 +921,18 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_xhp: {
       if (asExpr) return false;
+      auto const clsname = get_ts_classname(ts);
+      auto cls = Unit::lookupUniqueClassInContext(clsname, curClass(env));
+      if (ts->exists(s_generic_types) &&
+          ((classIsPersistentOrCtxParent(env, cls) &&
+            cls->hasReifiedGenerics()) ||
+           !isTSAllWildcards(ts))) {
+        // If it is a reified class or has non wildcard generics,
+        // we need to bail
+        return false;
+      }
       auto const c = popC(env);
-      auto const res = implInstanceOfD(env, c, get_ts_classname(ts));
+      auto const res = implInstanceOfD(env, c, clsname);
       push(env, is_nullable_ts ? check_nullable(env, res, c) : res);
       decRef(env, c);
       return true;

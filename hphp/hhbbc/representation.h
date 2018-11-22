@@ -567,6 +567,11 @@ struct Class : ClassBase {
    * The underlying base type, if this is an enum
    */
   TypeConstraint enumBaseTy;
+
+  /*
+   * This is a reified class.
+   */
+  bool hasReifiedGenerics : 1;
 };
 
 //////////////////////////////////////////////////////////////////////

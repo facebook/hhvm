@@ -56,14 +56,18 @@ ArrayData* getReifiedTypeList(const std::string& name) {
   raise_error("No such entry in the reified classes table");
 }
 
-ArrayData* getClsReifiedGenericsProp(Class* cls, ActRec* ar) {
+ArrayData* getClsReifiedGenericsProp(Class* cls, ObjectData* obj) {
   if (!cls->hasReifiedGenerics()) return nullptr;
-  auto const this_ = ar->getThis();
   auto const slot = cls->lookupReifiedInitProp();
   assertx(slot != kInvalidSlot);
-  auto tv = this_->propVec()[slot];
+  auto tv = obj->propVec()[slot];
   assertx(tvIsVecOrVArray(tv));
   return tv.m_data.parr;
+}
+
+ArrayData* getClsReifiedGenericsProp(Class* cls, ActRec* ar) {
+  auto const this_ = ar->getThis();
+  return getClsReifiedGenericsProp(cls, this_);
 }
 
 std::pair<size_t, std::vector<size_t>>

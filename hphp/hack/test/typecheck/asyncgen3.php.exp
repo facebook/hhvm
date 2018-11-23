@@ -1,10 +1,2 @@
-File "asyncgen3.php", line 14, characters 5-15:
-  int
-File "asyncgen3.php", line 15, characters 5-15:
-  string
-File "asyncgen3.php", line 14, characters 5-15:[2]
-  int
-File "asyncgen3.php", line 15, characters 5-15:[2]
-  string
 File "asyncgen3.php", line 8, characters 8-18:
 await can only be used inside async functions (NastCheck[3003])

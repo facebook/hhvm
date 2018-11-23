@@ -43,6 +43,7 @@ def get_test_flags(path: str) -> List[str]:
 def run_batch_tests(test_cases: List[TestCase],
                     program: str,
                     default_expect_regex,
+                    ignore_error_text,
                     get_flags: Callable[[str], List[str]],
                     out_extension: str) -> List[Result]:
     """
@@ -84,7 +85,8 @@ def run_batch_tests(test_cases: List[TestCase],
         for case in test_cases:
             with open(case.file_path + out_extension, "r") as f:
                 output : str = f.read()
-                result = check_result(case, default_expect_regex, output)
+                result = check_result(case, default_expect_regex,
+                  ignore_error_text, output)
                 results.append(result)
         return results
     # Create a list of batched cases.
@@ -108,6 +110,7 @@ def run_batch_tests(test_cases: List[TestCase],
 def run_test_program(test_cases: List[TestCase],
                      program: str,
                      default_expect_regex,
+                     ignore_error_text,
                      get_flags: Callable[[str], List[str]]) -> List[Result]:
 
     """
@@ -131,7 +134,7 @@ def run_test_program(test_cases: List[TestCase],
             # we don't care about nonzero exit codes... for instance, type
             # errors cause hh_single_type_check to produce them
             output = e.output
-        return check_result(test_case, default_expect_regex, output)
+        return check_result(test_case, default_expect_regex, ignore_error_text, output)
 
     executor = ThreadPoolExecutor(max_workers=max_workers)
     futures = [executor.submit(run, test_case) for test_case in test_cases]
@@ -157,7 +160,15 @@ def filter_ocaml_stacktrace(text: str) -> str:
     return "\n".join(out)
 
 
-def check_result(test_case: TestCase, default_expect_regex, out: str) -> Result:
+def compare_expected(expected, out):
+    if (expected == "No errors\n" or out == "No errors\n"):
+        return expected == out
+    else:
+        return True
+
+
+def check_result(test_case: TestCase, default_expect_regex,
+  ignore_error_messages, out: str) -> Result:
     """
     Check that the output of the test in :out corresponds to the expected
     output, or if a :default_expect_regex is provided,
@@ -165,6 +176,7 @@ def check_result(test_case: TestCase, default_expect_regex, out: str) -> Result:
     """
     is_ok = (
         test_case.expected == out or
+        (ignore_error_messages and compare_expected(test_case.expected, out)) or
         test_case.expected == filter_ocaml_stacktrace(out) or
         (
             default_expect_regex is not None and
@@ -281,6 +293,7 @@ def run_tests(files: List[str],
               program: str,
               default_expect_regex,
               batch_mode: str,
+              ignore_error_text: str,
               get_flags: Callable[[str], List[str]]) -> List[Result]:
 
     # for each file, create a test case
@@ -292,10 +305,10 @@ def run_tests(files: List[str],
         for file in files]
     if batch_mode:
         results = run_batch_tests(test_cases, program, default_expect_regex,
-            get_flags, out_extension)
+            ignore_error_text, get_flags, out_extension)
     else:
         results = run_test_program(test_cases, program, default_expect_regex,
-            get_flags)
+            ignore_error_text, get_flags)
 
     failures = [result for result in results if result.is_failure]
 
@@ -330,7 +343,7 @@ def run_idempotence_tests(results: List[Result],
         for result in results]
 
     idempotence_results = run_test_program(
-        idempotence_test_cases, program, default_expect_regex, get_flags)
+        idempotence_test_cases, program, default_expect_regex, False, get_flags)
 
     num_idempotence_results = len(idempotence_results)
 
@@ -395,6 +408,8 @@ if __name__ == '__main__':
                         help='Pass test input file via stdin')
     parser.add_argument('--batch', action='store_true',
                         help='Run tests in batches to the test program')
+    parser.add_argument("--ignore-error-text", action='store_true',
+                        help='Do not compare error text when verifying output')
     parser.epilog = "%s looks for a file named HH_FLAGS in the same directory" \
                     " as the test files it is executing. If found, the " \
                     "contents will be passed as arguments to " \
@@ -430,6 +445,7 @@ if __name__ == '__main__':
         args.program,
         args.default_expect_regex,
         args.batch,
+        args.ignore_error_text,
         get_flags)
 
     # Doesn't make sense to check failures for idempotence

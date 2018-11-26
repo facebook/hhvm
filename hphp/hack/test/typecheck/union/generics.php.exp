@@ -1,97 +1,81 @@
-File "generics.php--file2.php", line 64, characters 3-13:
+File "generics.php--file2.php", line 68, characters 3-13:
   exact A<int>
-File "generics.php--file2.php", line 67, characters 3-13:
+File "generics.php--file2.php", line 71, characters 3-13:
   exact A<[unresolved]>
-File "generics.php--file2.php", line 70, characters 3-13:
+File "generics.php--file2.php", line 74, characters 3-13:
   exact A<int>
-File "generics.php--file2.php", line 73, characters 3-13:
+File "generics.php--file2.php", line 77, characters 3-13:
   exact B<int>
-File "generics.php--file2.php", line 76, characters 3-13:
+File "generics.php--file2.php", line 80, characters 3-13:
   exact B<int>
-File "generics.php--file2.php", line 79, characters 3-13:
+File "generics.php--file2.php", line 83, characters 3-13:
   A<int>
-File "generics.php--file2.php", line 82, characters 3-13:
+File "generics.php--file2.php", line 86, characters 3-13:
   A<int>
-File "generics.php--file2.php", line 85, characters 3-13:
+File "generics.php--file2.php", line 89, characters 3-13:
   A<T>
-File "generics.php--file2.php", line 88, characters 3-13:
+File "generics.php--file2.php", line 92, characters 3-13:
   (exact A<int> | A<T>)
-File "generics.php--file2.php", line 91, characters 3-13:
+File "generics.php--file2.php", line 95, characters 3-13:
   (A<int> | A<T>)
-File "generics.php--file2.php", line 94, characters 3-13:
+File "generics.php--file2.php", line 98, characters 3-13:
   A<T>
-File "generics.php--file2.php", line 97, characters 3-13:
-  (exact A<int> | exact A<string>)
-File "generics.php--file2.php", line 98, characters 3-35:
-  bool
 File "generics.php--file2.php", line 101, characters 3-13:
-  (exact A<num> | exact A<arraykey>)
-File "generics.php--file2.php", line 102, characters 3-34:
+  (exact A<int> | exact A<string>)
+File "generics.php--file2.php", line 102, characters 3-35:
   bool
 File "generics.php--file2.php", line 105, characters 3-13:
-  (exact A<int> | exact B<int>)
-File "generics.php--file2.php", line 106, characters 3-25:
+  (exact A<num> | exact A<arraykey>)
+File "generics.php--file2.php", line 106, characters 3-34:
   bool
 File "generics.php--file2.php", line 109, characters 3-13:
+  (exact A<int> | exact B<int>)
+File "generics.php--file2.php", line 110, characters 3-25:
+  bool
+File "generics.php--file2.php", line 113, characters 3-13:
   D<(int | string)>
-File "generics.php--file2.php", line 112, characters 3-13:
+File "generics.php--file2.php", line 116, characters 3-13:
   exact D<(int | string)>
-File "generics.php--file2.php", line 115, characters 3-13:
+File "generics.php--file2.php", line 119, characters 3-13:
   D<(int | string)>
-File "generics.php--file2.php", line 118, characters 3-13:
+File "generics.php--file2.php", line 122, characters 3-13:
   E<int>
-File "generics.php--file2.php", line 121, characters 3-13:
+File "generics.php--file2.php", line 125, characters 3-13:
   (E<int> | E<string>)
-File "generics.php--file2.php", line 124, characters 3-13:
+File "generics.php--file2.php", line 128, characters 3-13:
   F<(int | string)>
-File "generics.php--file2.php", line 127, characters 3-13:
+File "generics.php--file2.php", line 131, characters 3-13:
   classname<C>
-File "generics.php--file2.php", line 130, characters 3-13:
+File "generics.php--file2.php", line 134, characters 3-13:
   (Tu | C)
   where Tu super \C
-File "generics.php--file2.php", line 133, characters 3-13:
+File "generics.php--file2.php", line 137, characters 3-13:
   (Tv | C)
   where Tv as \C
-File "generics.php--file2.php", line 136, characters 3-13:
+File "generics.php--file2.php", line 140, characters 3-13:
   (Tu | Tv)
   where Tu super \C, Tv as \C
-File "generics.php--file2.php", line 139, characters 3-13:
+File "generics.php--file2.php", line 143, characters 3-13:
   (Tu | Tw)
   where Tu super \C, Tw super \C
-File "generics.php--file2.php", line 142, characters 3-13:
+File "generics.php--file2.php", line 146, characters 3-13:
   (Tv | Ty)
   where Tv as \C, Ty as \C
-File "generics.php--file2.php", line 18, characters 5-15:
-  (int | Ta)
-File "generics.php--file2.php", line 21, characters 5-15:
-  (Ta | Tabs)
-File "generics.php--file2.php", line 24, characters 5-15:
-  (int | Tcstr)
-File "generics.php--file2.php", line 27, characters 5-15:
-  (Ta | Tcstr)
-File "generics.php--file2.php", line 98, characters 32-33:
+File "generics.php--file2.php", line 22, characters 5-15:
+  ?int
+File "generics.php--file2.php", line 25, characters 5-15:
+  ?(int | AA::Tabs)
+File "generics.php--file2.php", line 28, characters 5-15:
+  (int | AA::Tcstr)
+  where \AA::Tcstr as int
+File "generics.php--file2.php", line 31, characters 5-15:
+  ?(int | AA::Tcstr)
+  where \AA::Tcstr as int
+File "generics.php--file2.php", line 102, characters 32-33:
 Invalid argument (Typing[4110])
-  File "generics.php--file2.php", line 96, characters 20-22:
+  File "generics.php--file2.php", line 100, characters 20-22:
   This is an int
-  File "generics.php--file2.php", line 12, characters 36-36:
+  File "generics.php--file2.php", line 16, characters 36-36:
     via this generic T
-  File "generics.php--file2.php", line 98, characters 32-33:
+  File "generics.php--file2.php", line 102, characters 32-33:
   It is incompatible with a string
-File "generics.php--file2.php", line 16, characters 33-34:
-You probably forgot to bind this type parameter right?
-Add <Ta> somewhere (after the function name definition, or after the class name)
-Examples: function foo<T> or class A<T> (Naming[2002])
-File "generics.php--file2.php", line 16, characters 33-34:
-Unbound name: Ta (an object type) (Naming[2049])
-File "generics.php--file2.php", line 16, characters 40-43:
-Unbound name: Tabs (an object type) (Naming[2049])
-File "generics.php--file2.php", line 16, characters 51-55:
-Unbound name: Tcstr (an object type) (Naming[2049])
-File "generics.php--file2.php", line 3, characters 7-7:
-This class must be declared abstract, or provide an implementation for the abstract type constant 'Tabs' (Typing[4047])
-  File "generics.php--file2.php", line 5, characters 23-26:
-  Declaration is here
-File "generics.php--file2.php", line 3, characters 7-7:
-This class must be declared abstract, or provide an implementation for the abstract type constant 'Tcstr' (Typing[4047])
-  File "generics.php--file2.php", line 6, characters 23-27:
-  Declaration is here

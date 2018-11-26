@@ -7,5 +7,5 @@ Read the following to see why:
   Member foo has the wrong type
   File "constraint_override_bad2.php", line 20, characters 28-28:
   This is an object of type C
-  File "constraint_override_bad2.php", line 15, characters 28-28:
-  It is incompatible with an object of type B
+  File "constraint_override_bad2.php", line 20, characters 23-23:
+  It is incompatible with a value of generic type T

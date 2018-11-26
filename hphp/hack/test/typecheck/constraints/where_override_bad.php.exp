@@ -7,5 +7,7 @@ Read the following to see why:
   Member foo has the wrong type
   File "where_override_bad.php", line 16, characters 45-51:
   This is an object of type Derived
-  File "where_override_bad.php", line 10, characters 45-48:
-  It is incompatible with an object of type Base
+  File "where_override_bad.php", line 15, characters 13-13:
+  It is incompatible with a value of generic type T
+  File "where_override_bad.php", line 16, characters 40-40:
+    via this generic T

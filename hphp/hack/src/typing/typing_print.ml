@@ -1591,37 +1591,6 @@ let constraints_for_type env ty =
   |> Option.map ~f:String.strip
 let class_kind c_kind final = ErrorString.class_kind c_kind final
 let subtype_prop ?(do_normalize = false) env prop =
-  (* let normalize prop =
-    let varmapping = IMap.empty in
-    let cnt = 0 in
-    let rec normalize varmapping cnt prop = match prop with
-      | Unsat _ -> varmapping, cnt, prop
-      | Conj ps ->
-        let (varmapping, cnt, ps) = normalize_list varmapping cnt prop in
-        (varmapping, cnt, Conj ps)
-      | Disj ps ->
-        let (varmapping, cnt, ps) = normalize_list varmapping cnt prop in
-        (varmapping, cnt, Disj ps)
-      | IsSubtype (ty1, ty2) ->
-        let (varmapping, cnt, ty1) = normalize_type varmapping cnt ty1 in
-        let (varmapping, cnt, ty2) = normalize_type varmapping cnt ty2 in
-        (varmapping, cnt, IsSubtype (ty1, ty2))
-      | IsEqual (ty1, ty2) ->
-        let (varmapping, cnt, ty1) = normalize_type varmapping cnt ty1 in
-        let (varmapping, cnt, ty2) = normalize_type varmapping cnt ty2 in
-        (varmapping, cnt, IsEqual (ty1, ty2))
-    and normalize_list varmapping cnt props =
-      List.fold ~init:(varmapping, cnt, []) ps ~f:(fun
-      (varmapping, cnt, ps) prop ->
-        let (varmapping, cnt, prop) = normalize varmapping cnt prop in
-        (varmapping, cnt, prop::ps))
-    and normalize_type varmapping cnt type =
-      let visitor = object
-        inherint [_] Type_visitor.type_visitor as super
-
-
-    in
-  let prop = if do_normalize then normalize prop else prop in *)
   let rec subtype_prop = function
     | Unsat _ -> "UNSAT"
     | Conj [] -> "TRUE"

@@ -1,6 +1,6 @@
 File "new_invariant.php", line 14, characters 14-16:
 You are trying to access the member foo on a value whose class is unknown (Typing[4296])
-File "new_invariant.php", line 13, characters 12-14:
-It is unknown because a type could not be determined here
-File "new_invariant.php", line 6, characters 26-26:
-  via this generic T
+  File "new_invariant.php", line 13, characters 12-14:
+  It is unknown because a type could not be determined here
+  File "new_invariant.php", line 6, characters 26-26:
+    via this generic T

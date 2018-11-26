@@ -1,6 +1,6 @@
 File "tparam_constraints.php", line 5, characters 34-35:
 Invalid argument (Typing[4110])
-File "tparam_constraints.php", line 4, characters 56-58:
-This is an int
-File "tparam_constraints.php", line 4, characters 46-49:
-It is incompatible with a nullable type
+  File "tparam_constraints.php", line 4, characters 56-58:
+  This is an int
+  File "tparam_constraints.php", line 4, characters 46-49:
+  It is incompatible with a nullable type

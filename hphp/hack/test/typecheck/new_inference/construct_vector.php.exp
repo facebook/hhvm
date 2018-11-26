@@ -1,4 +1,4 @@
 File "construct_vector.php", line 9, characters 10-12:
 You are trying to access the member foo on a value whose class is unknown (Typing[4296])
-File "construct_vector.php", line 8, characters 8-20:
-It is unknown because a type could not be determined here
+  File "construct_vector.php", line 8, characters 8-20:
+  It is unknown because a type could not be determined here

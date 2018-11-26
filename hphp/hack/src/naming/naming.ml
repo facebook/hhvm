@@ -97,6 +97,8 @@ module Env : sig
   val make_typedef_env :
     TypecheckerOptions.t ->
     type_constraint SMap.t -> Ast.typedef -> genv * lenv
+  val make_top_level_env :
+    TypecheckerOptions.t -> genv * lenv
   val make_fun_genv :
     TypecheckerOptions.t ->
     type_constraint SMap.t ->
@@ -326,6 +328,26 @@ end = struct
     droot         = Typing_deps.Dep.GConst (snd cst.cst_name);
     namespace     = cst.cst_namespace;
   }
+
+  let make_top_level_genv tcopt = {
+    in_mode       = FileInfo.Mpartial;
+    tcopt;
+    in_try        = false;
+    in_finally    = false;
+    in_ppl        = false;
+    type_params   = SMap.empty;
+    current_cls   = None;
+    class_consts = Caml.Hashtbl.create 0;
+    class_props = Caml.Hashtbl.create 0;
+    droot         = Typing_deps.Dep.Fun "";
+    namespace     = Namespace_env.empty_with_default_popt;
+  }
+
+  let make_top_level_env nenv =
+    let genv = make_top_level_genv nenv in
+    let lenv = empty_local None in
+    let env  = genv, lenv in
+    env
 
   let make_const_env nenv cst =
     let genv = make_const_genv nenv cst in
@@ -2891,16 +2913,25 @@ module Make (GetLocals : GetLocals) = struct
   (**************************************************************************)
 
   let program tcopt ast =
+    let top_level_env = ref (Env.make_top_level_env tcopt) in
     let rec program ast =
     List.concat @@ List.map ast begin function
     | Ast.Fun f -> [N.Fun (fun_ tcopt f)]
     | Ast.Class c -> [N.Class (class_ tcopt c)]
     | Ast.Typedef t -> [N.Typedef (typedef tcopt t)]
     | Ast.Constant cst -> [N.Constant (global_const tcopt cst)]
-    | Ast.Stmt _ -> []
+    | Ast.Stmt (_, Ast.Noop)
+    | Ast.Stmt (_, Ast.Markup _) -> [] (* Noops and markup aren't needed in NAST *)
+    | Ast.Stmt s -> [N.Stmt (stmt !top_level_env s)]
     | Ast.Namespace (_ns, ast) -> program ast
     | Ast.NamespaceUse _ -> []
-    | Ast.SetNamespaceEnv _ -> []
+    | Ast.SetNamespaceEnv nsenv ->
+      begin
+        let (genv, lenv) = !top_level_env in
+        let genv = { genv with namespace = nsenv } in
+        top_level_env := (genv, lenv)
+      end;
+      []
   end in program ast
 end
 

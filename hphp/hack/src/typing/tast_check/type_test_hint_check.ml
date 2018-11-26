@@ -18,7 +18,6 @@ module TySet = Typing_set
 
 type validity =
   | Valid
-  | Partial: locl ty -> validity
   | Invalid: 'a ty -> validity
 
 type validation_state = {
@@ -26,14 +25,10 @@ type validation_state = {
   validity: validity;
 }
 
-let update state new_validity = {
-  (* Invalid > Partial > Valid *)
-  state with validity =
-    match state.validity, new_validity with
-      | Valid, _
-      | Partial _, Invalid _ -> new_validity
-      | v, _ -> v;
-}
+let update state new_validity =
+  if state.validity = Valid
+  then { state with validity = new_validity }
+  else state
 
 let visitor = object(this)
   inherit [validation_state] Type_visitor.type_visitor as super
@@ -70,10 +65,7 @@ let visitor = object(this)
       | tyl when List.for_all tyl this#is_wildcard -> acc
       | _ ->
         let acc = super#on_tclass acc r cls tyl in
-        begin match acc.validity with
-        | Valid -> update acc @@ Partial (r, Tclass (cls, tyl))
-        | _ -> acc
-        end
+        update acc @@ Invalid (r, Tclass (cls,  tyl))
       end
   method! on_tapply acc r ((_, name) as id) tyl =
     if tyl <> [] && Typing_env.is_typedef name
@@ -111,10 +103,6 @@ let validate_hint env hint op =
         then Errors.invalid_is_as_expression_hint
           op (fst hint) (Reason.to_pos r) (print_type env ty_);
         should_suppress := true
-      | Partial (r, ty_) ->
-        if not !should_suppress
-        then Errors.partially_valid_is_as_expression_hint
-          op (fst hint) (Reason.to_pos r) (print_type env ty_)
       | Valid -> ()
   in
   let env, hint_ty = Env.localize_with_dty_validator

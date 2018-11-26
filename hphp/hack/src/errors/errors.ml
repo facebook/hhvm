@@ -2966,24 +2966,10 @@ let trait_reuse p_pos p_name class_name trait =
   let err' = "It is already used through "^(Utils.strip_ns p_name) in
   add_list (Typing.err_code Typing.TraitReuse) [c_pos, err; p_pos, err']
 
-(**
- * This error should be unfixmeable, because the `is` expression does not
- * support it at all.
- *)
 let invalid_is_as_expression_hint op hint_pos ty_pos ty_str =
   add_list (Typing.err_code Typing.InvalidIsAsExpressionHint) [
     hint_pos, ("Invalid \"" ^ op ^ "\" expression hint");
     ty_pos, ("The \"" ^ op ^ "\" operator cannot be used with " ^ ty_str);
-  ]
-
-(**
- * This error is fixmeable, because the typechecker will still refine the type
- * despite the hint not being completely valid.
- *)
-let partially_valid_is_as_expression_hint op hint_pos ty_pos ty_str =
-  add_list (Typing.err_code Typing.PartiallyValidIsAsExpressionHint) [
-    hint_pos, ("Invalid \"" ^ op ^ "\" expression hint");
-    ty_pos, ("The \"" ^ op ^ "\" operator should not be used with " ^ ty_str);
   ]
 
 let override_final ~parent ~child =

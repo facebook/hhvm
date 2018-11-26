@@ -106,3 +106,7 @@ val solve_tyvars :
   tyvars:ISet.t ->
   Env.env ->
   Env.env
+
+val log_prop :
+  Env.env ->
+  unit

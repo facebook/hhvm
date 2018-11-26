@@ -105,6 +105,7 @@ type tvar_info = {
   lower_bounds : TySet.t;
   upper_bounds : TySet.t;
 }
+type tvenv = tvar_info IMap.t
 
 type env = {
   (* position of the function/method being checked *)
@@ -132,7 +133,7 @@ type env = {
   global_tpenv : tpenv ;
   subtype_prop : Typing_logic.subtype_prop;
   log_levels : int SMap.t ;
-  tvenv : tvar_info IMap.t;
+  tvenv : tvenv;
 }
 and genv = {
   tcopt   : TypecheckerOptions.t;

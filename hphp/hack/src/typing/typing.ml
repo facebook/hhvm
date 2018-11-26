@@ -507,6 +507,7 @@ and fun_def tcopt f =
       let env = Env.check_todo env in
       let tyvars = ISet.of_list (IMap.keys env.Env.tvenv) in
       let env = SubType.solve_tyvars ~tyvars env in
+      Typing_subtype.log_prop env;
       begin match f.f_ret with
         | None when Env.is_strict env ->
           Typing_return.suggest_return env pos return.Typing_env_return_info.return_type
@@ -6492,6 +6493,7 @@ and method_def env m =
     Env.check_todo env in
   let tyvars = ISet.of_list (IMap.keys env.Env.tvenv) in
   let env = SubType.solve_tyvars ~tyvars env in
+  Typing_subtype.log_prop env;
   let m_ret =
     match m.m_ret with
     | None when

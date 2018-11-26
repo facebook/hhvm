@@ -20,6 +20,7 @@ module SN = Naming_special_names
 module Phase = Typing_phase
 module TL = Typing_logic
 module Cls = Typing_classes_heap
+module TySet = Typing_set
 
 type reactivity_extra_info = {
   method_info: ((* method_name *) string * (* is_static *) bool) option;
@@ -133,15 +134,6 @@ let if_unsat (f : unit -> Env.env * TL.subtype_prop) (env, p) =
   if TL.is_unsat p
   then f ()
   else env, p
-
-let log_prop env prop =
-  if TypecheckerOptions.log_inference_constraints Env.(env.genv.tcopt) then
-    let p_as_string = Typing_print.subtype_prop env prop in
-    let pos = Pos.string (Pos.to_absolute env.Env.pos) in
-    let size = TL.size prop in
-    let n_disj = TL.n_disj prop in
-    let n_conj = TL.n_conj prop in
-    TypingLogger.InferenceCnstr.log p_as_string ~pos ~size ~n_disj ~n_conj
 
 (** Check that a mutability type is a subtype of another mutability type *)
 let check_mutability
@@ -1591,6 +1583,36 @@ and prop_to_env env prop =
   | _ ->
     env, prop
 
+and env_to_prop env =
+  TL.conj (tvenv_to_prop env.Env.tvenv) env.Env.subtype_prop
+
+and tvenv_to_prop tvenv =
+  let props_per_tvar = IMap.mapi (
+    fun id { Env.lower_bounds; Env.upper_bounds; _ } ->
+      let tyvar = (Reason.Rnone, Tvar id) in
+      let lower_bounds = TySet.elements lower_bounds in
+      let upper_bounds = TySet.elements upper_bounds in
+      let lower_bounds_props = List.map ~f:(fun ty -> TL.IsSubtype (ty, tyvar))
+        lower_bounds in
+      (* If an upper bound of variable n1 is a `Tvar n2`,
+      then we have already added "Tvar n1 <: Tvar n2" when traversing
+      lower bounds of n2, so we can filter out upper bounds that are Tvars. *)
+      let can_be_removed = function
+        | _, Tvar n ->
+          begin match IMap.find_opt n tvenv with
+          | Some _ -> true
+          | None -> false
+          end
+        | _ -> false in
+      let upper_bounds = List.filter ~f:(fun ty -> not (can_be_removed ty))
+        upper_bounds in
+      let upper_bounds_props = List.map ~f:(fun ty -> TL.IsSubtype (tyvar, ty))
+        upper_bounds in
+      TL.conj_list (lower_bounds_props @ upper_bounds_props))
+    tvenv in
+  let _ids, props = List.unzip (IMap.bindings props_per_tvar) in
+  TL.conj_list props
+
 and sub_type_inner
   (env : Env.env)
   ~(this_ty : locl ty option)
@@ -1606,7 +1628,6 @@ and sub_type_inner
          (Env.get_tcopt env)
          TypecheckerOptions.experimental_track_subtype_prop
     then begin
-      log_prop env prop;
       Typing_log.log_prop 2 env.Env.pos "sub_type_inner: add_subtype_prop" env prop;
       Env.add_subtype_prop env prop
     end
@@ -2330,6 +2351,23 @@ let solve_tyvar env r var =
 let solve_tyvars ~tyvars env =
   List.fold_left ~init:env ~f:(fun env tyvar -> solve_tyvar env Reason.Rnone tyvar)
     (ISet.elements tyvars)
+
+let log_prop env =
+  let filename = Pos.filename (Pos.to_absolute env.Env.pos) in
+  if Str.string_match (Str.regexp {|.*\.hhi|}) filename 0 then () else
+  let prop = env_to_prop env in
+  if TypecheckerOptions.log_inference_constraints Env.(env.genv.tcopt) then (
+    let p_as_string = Typing_print.subtype_prop env prop in
+    let pos = Pos.string (Pos.to_absolute env.Env.pos) in
+    let size = TL.size prop in
+    let n_disj = TL.n_disj prop in
+    let n_conj = TL.n_conj prop in
+    TypingLogger.InferenceCnstr.log p_as_string ~pos ~size ~n_disj ~n_conj);
+  if TypecheckerOptions.new_inference Env.(env.genv.tcopt) &&
+    not (Errors.currently_has_errors ()) &&
+    not (TL.is_valid prop)
+  then Typing_log.log_prop ~do_normalize:true 0 env.Env.pos
+    "There are remaining unsolved constraints!" env prop
 
 (*****************************************************************************)
 (* Exporting *)

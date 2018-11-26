@@ -251,6 +251,25 @@ public:
     }
   }
 
+  const std::vector<T>& list() const {
+    return m_list;
+  }
+
+  void fromList(const std::vector<T>&& list) {
+    assertx(
+      !size() && "IndexedStringMap::Builder::fromList called more than once"
+    );
+    m_list = std::move(list);
+    for (Offset i = 0; i < list.size(); ++i) {
+      if (!m_map.emplace(list[i], i).second) {
+        always_assert(
+          false && "IndexedStringMap::Builder::fromList key already exists"
+        );
+
+      }
+    }
+  }
+
 private:
   friend struct IndexedStringMap;
   std::vector<T> m_list;

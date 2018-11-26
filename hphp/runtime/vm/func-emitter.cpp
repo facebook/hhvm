@@ -566,10 +566,12 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
   // NOTE: name, top, and a few other fields currently handled outside of this.
   Offset past_delta;
   Attr a = attrs;
+  std::vector<LowStringPtr> localNames;
 
   if (!SerDe::deserializing) {
     past_delta = past - base;
     a = fix_attrs(attrs);
+    localNames = m_localNames.list();
   }
 
   sd(line1)
@@ -588,7 +590,7 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (m_repoBoolBitset)
 
     (params)
-    (m_localNames)
+    (localNames)
     (staticVars)
     (ehtab)
     (fpitab)
@@ -603,6 +605,7 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     repoAwaitedReturnType.resolveArray(ue());
     past = base + past_delta;
     attrs = fix_attrs(a);
+    m_localNames.fromList(std::move(localNames));
   }
 }
 

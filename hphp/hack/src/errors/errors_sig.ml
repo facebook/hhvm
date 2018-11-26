@@ -276,8 +276,6 @@ module type S = sig
   val cyclic_class_def : SSet.t -> Pos.t -> unit
   val trait_reuse : (Pos.t) -> string -> (Pos.t * string) -> string -> unit
   val invalid_is_as_expression_hint : string -> Pos.t -> Pos.t -> string -> unit
-  val partially_valid_is_as_expression_hint :
-    string -> Pos.t -> Pos.t -> string -> unit
   val override_final : parent:Pos.t -> child:Pos.t -> unit
   val override_memoizelsb : parent:Pos.t -> child:Pos.t -> unit
   val override_lsb : member_name:string -> parent:Pos.t -> child:Pos.t -> unit

@@ -174,6 +174,13 @@ struct CompactRequestData final : RequestEventHandler {
 };
 IMPLEMENT_STATIC_REQUEST_LOCAL(CompactRequestData, s_compact_request_data);
 
+namespace {
+struct FieldInfo {
+  Class* cls = nullptr;
+  int16_t fieldNum = 0;
+};
+}
+
 struct CompactWriter {
     explicit CompactWriter(PHPOutputTransport *transport) :
       transport(transport),
@@ -220,8 +227,8 @@ struct CompactWriter {
         TType fieldType = field.type;
         writeFieldBegin(field.fieldNum, fieldType);
         ArrNR fieldSpec(field.spec);
-        writeField(fieldVal, fieldSpec.asArray(), fieldType, obj->getVMClass(),
-            field.fieldNum);
+        writeField(fieldVal, fieldSpec.asArray(), fieldType,
+            FieldInfo{obj->getVMClass(), field.fieldNum});
         writeFieldEnd();
       }
     }
@@ -249,8 +256,8 @@ struct CompactWriter {
             TType fieldType = fields[i].type;
             ArrNR fieldSpec(fields[i].spec);
             writeFieldBegin(fields[i].fieldNum, fieldType);
-            writeField(fieldVal, fieldSpec.asArray(), fieldType, cls,
-                fields[i].fieldNum);
+            writeField(fieldVal, fieldSpec.asArray(), fieldType,
+                FieldInfo{cls, fields[i].fieldNum});
             writeFieldEnd();
           } else if (UNLIKELY(fieldVal.is(KindOfUninit)) &&
                      (prop[i].attrs & AttrLateInit)) {
@@ -302,8 +309,7 @@ struct CompactWriter {
     void writeField(const Variant& value,
                     const Array& valueSpec,
                     TType type,
-                    Class* cls = nullptr,
-                    int16_t fieldNum = 0) {
+                    const FieldInfo& fieldInfo) {
       switch (type) {
         case T_STOP:
         case T_VOID:
@@ -336,10 +342,10 @@ struct CompactWriter {
           break;
 
         case T_I16:
-          writeIChecked<std::int16_t>(value, cls, fieldNum);
+          writeIChecked<std::int16_t>(value, fieldInfo);
           break;
         case T_I32:
-          writeIChecked<std::int32_t>(value, cls, fieldNum);
+          writeIChecked<std::int32_t>(value, fieldInfo);
           break;
         case T_I64:
         case T_U64:
@@ -387,15 +393,15 @@ struct CompactWriter {
           }
 
         case T_MAP:
-          writeMap(value, valueSpec);
+          writeMap(value, valueSpec, fieldInfo);
           break;
 
         case T_LIST:
-          writeList(value, valueSpec, C_LIST_LIST);
+          writeList(value, valueSpec, C_LIST_LIST, fieldInfo);
           break;
 
         case T_SET:
-          writeList(value, valueSpec, C_LIST_SET);
+          writeList(value, valueSpec, C_LIST_SET, fieldInfo);
           break;
 
         default:
@@ -404,7 +410,8 @@ struct CompactWriter {
       }
     }
 
-    void writeMap(const Variant& map, const Array& spec) {
+    void writeMap(
+        const Variant& map, const Array& spec, const FieldInfo& fieldInfo) {
       TType keyType = (TType)(char)tvCastToInt64(
         spec.rvalAt(s_ktype, AccessFlags::ErrorKey).tv()
       );
@@ -420,8 +427,8 @@ struct CompactWriter {
       );
 
       auto elemWriter = [&](Cell k, TypedValue v) {
-        writeField(VarNR(k), keySpec, keyType);
-        writeField(VarNR(v), valueSpec, valueType);
+        writeField(VarNR(k), keySpec, keyType, fieldInfo);
+        writeField(VarNR(v), valueSpec, valueType, fieldInfo);
         return false;
       };
 
@@ -438,7 +445,11 @@ struct CompactWriter {
       writeCollectionEnd();
     }
 
-    void writeList(const Variant& list, const Array& spec, CListType listType) {
+    void writeList(
+        const Variant& list,
+        const Array& spec,
+        CListType listType,
+        const FieldInfo& fieldInfo) {
       TType valueType = (TType)(char)tvCastToInt64(
         spec.rvalAt(s_etype, AccessFlags::ErrorKey).tv()
       );
@@ -447,10 +458,10 @@ struct CompactWriter {
       );
 
       auto const listWriter = [&](TypedValue v) {
-        writeField(VarNR(v), valueSpec, valueType);
+        writeField(VarNR(v), valueSpec, valueType, fieldInfo);
       };
       auto const setWriter = [&](Cell k, TypedValue /*v*/) {
-        writeField(VarNR(k), valueSpec, valueType);
+        writeField(VarNR(k), valueSpec, valueType, fieldInfo);
       };
 
       always_assert(listType == C_LIST_LIST ||
@@ -521,18 +532,18 @@ struct CompactWriter {
     }
 
     template <typename T>
-    void writeIChecked(const Variant& value, Class *cls, int16_t fieldNum) {
+    void writeIChecked(const Variant& value, const FieldInfo& fieldInfo) {
       static_assert(std::is_integral<T>::value, "not an integral type");
       auto n = value.toInt64();
       using limits = std::numeric_limits<T>;
       auto forbidInvalid =
         RuntimeOption::EvalForbidThriftIntegerValuesOutOfRange;
       if (forbidInvalid != 0 && (n < limits::min() || n > limits::max())) {
-        std::string message = folly::sformat("Value {} is out of range", n);
-        if (cls) {
-          message += folly::sformat(
-              " in field {} of {}", fieldNum, cls->nameStr().c_str());
-        }
+        std::string message = folly::sformat(
+            "Value {} is out of range in field {} of {}",
+            n,
+            fieldInfo.fieldNum,
+            fieldInfo.cls->nameStr().c_str());
         if (forbidInvalid == 1) {
           raise_warning(message);
         } else {

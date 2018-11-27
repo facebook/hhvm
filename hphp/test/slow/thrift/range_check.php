@@ -3,6 +3,7 @@
 class TType {
   const I16    = 6;
   const I32    = 8;
+  const MAP    = 13;
 }
 
 class DummyProtocol {
@@ -32,6 +33,7 @@ class DummyTransport {
 class TestStruct {
   public $anI32 = null;
   public $anI16 = null;
+  public $map = null;
 
   static $_TSPEC = array(
     1 => array(
@@ -41,6 +43,18 @@ class TestStruct {
     2 => array(
       'var' => 'anI16',
       'type' => TType::I16,
+    ),
+    3 => array(
+      'var' => 'map',
+      'type' => TType::MAP,
+      'ktype' => TType::I16,
+      'vtype' => TType::I16,
+      'key' => array(
+        'type' => TType::I16,
+      ),
+      'val' => array(
+        'type' => TType::I16,
+      ),
     ),
   );
 }
@@ -53,5 +67,6 @@ function test() {
   $v1->anI16 = (1 << 15) - 1;
   $v1->anI32 = 1 << 31;
   $v1->anI16 = 1 << 15;
+  $v1->map = array((1 << 15) => 0);
   thrift_protocol_write_compact($p, 'foomethod', 1, $v1, 20, true);
 }

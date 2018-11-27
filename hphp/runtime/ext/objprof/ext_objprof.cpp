@@ -948,6 +948,7 @@ Array HHVM_FUNCTION(objprof_get_strings, int min_dup) {
 
   std::unordered_set<void*> pointers;
   tl_heap->forEachObject([&](const ObjectData* obj) {
+    if (obj->hasZeroRefs()) return;
     ObjprofStack path;
     getObjStrings(obj, &metrics, &path, &pointers);
   });
@@ -991,6 +992,7 @@ Array HHVM_FUNCTION(objprof_get_data,
 
   tl_heap->forEachObject([&](const ObjectData* obj) {
     if (!isObjprofRoot(obj, (ObjprofFlags)flags, exclude_classes)) return;
+    if (obj->hasZeroRefs()) return;
     std::vector<const void*> val_stack;
     auto objsizePair = getObjSize(
       obj,
@@ -1061,6 +1063,7 @@ Array HHVM_FUNCTION(objprof_get_paths,
 
   tl_heap->forEachObject([&](const ObjectData* obj) {
       if (!isObjprofRoot(obj, (ObjprofFlags)flags, exclude_classes)) return;
+      if (obj->hasZeroRefs()) return;
       auto cls = obj->getVMClass();
       auto& metrics = histogram[std::make_pair(cls, "")];
       ObjprofStack stack;

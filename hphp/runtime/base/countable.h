@@ -66,6 +66,7 @@ struct MaybeCountable : HeapObject {
   bool isRefCounted() const;
   bool hasMultipleRefs() const;
   bool hasExactlyOneRef() const;
+  bool hasZeroRefs() const;
   bool isStatic() const;
   bool isUncounted() const;
   void incRefCount() const;
@@ -184,6 +185,12 @@ ALWAYS_INLINE bool Countable::hasMultipleRefs() const {
 ALWAYS_INLINE bool MaybeCountable::hasExactlyOneRef() const {
   assertx(checkCount());
   return m_count == OneReference;
+}
+
+ALWAYS_INLINE bool MaybeCountable::hasZeroRefs() const {
+  assertx(checkCount());
+  if (one_bit_refcount) return false;
+  return m_count == 0;
 }
 
 ALWAYS_INLINE bool Countable::hasExactlyOneRef() const {

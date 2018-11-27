@@ -264,6 +264,7 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
 
       RuntimeOption::EvalJit = false; // For HHBBC to invoke builtins.
       std::unique_ptr<ArrayTypeTable::Builder> arrTable;
+
       wp_thread = std::thread([&] {
           Timer timer(Timer::WallTime, "running HHBBC");
           hphp_thread_init();
@@ -280,6 +281,8 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
         });
 
       commitLoop();
+
+      LitstrTable::get().setReading();
       commitGlobalData(std::move(arrTable));
     }
     wp_thread.join();

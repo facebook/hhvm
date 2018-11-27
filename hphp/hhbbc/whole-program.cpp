@@ -631,7 +631,7 @@ void whole_program(std::vector<std::unique_ptr<UnitEmitter>> ues,
   make_unit_emitters(*index, *program, [&] (std::unique_ptr<UnitEmitter> ue) {
     ueq.push(std::move(ue));
   });
-  LitstrTable::get().setReading();
+
   arrTable = std::move(index->array_table_builder());
   done.post();
   cleanup_thread.join();

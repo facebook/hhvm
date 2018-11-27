@@ -430,6 +430,7 @@ void compile_repo() {
   });
 
   write_units(ueq);
+  LitstrTable::get().setReading();
   write_global_data(arrTable, input.second);
   wp_thread.join();
 }

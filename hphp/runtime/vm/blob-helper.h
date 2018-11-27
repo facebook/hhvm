@@ -27,11 +27,13 @@
 #include <folly/Optional.h>
 #include <folly/Varint.h>
 
+#include "hphp/compiler/option.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/variable-serializer.h"
+#include "hphp/runtime/vm/litstr-table.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 
@@ -144,6 +146,19 @@ struct BlobEncoder {
     // always encode DataType as int8 even if it's a bigger size.
     assertx(DataType(int8_t(t)) == t);
     encode(int8_t(t));
+  }
+
+  void encode(const LowStringPtr& s) {
+    const StringData* sd = s;
+    if (Option::WholeProgram && sd) {
+      Id id = LitstrTable::get().mergeLitstr(sd);
+      id = encodeGlobalLitstrId(id);
+      assertx(id >= 0);
+      encode(static_cast<uint32_t>(id));
+      return;
+    }
+
+    encode(sd);
   }
 
   void encode(const StringData* sd) {
@@ -335,9 +350,17 @@ struct BlobDecoder {
   }
 
   void decode(LowStringPtr& s) {
-    const StringData* sd;
-    decode(sd);
-    s = sd;
+    uint32_t sz;
+    decode(sz);
+    Id id = static_cast<Id>(sz);
+    if (isGlobalLitstrId(id)) {
+      id = decodeGlobalLitstrId(id);
+      s = LitstrTable::get().lookupLitstrId(id);
+      return;
+    }
+
+    String st(decodeStringWithSize(sz));
+    s = st.get() ? makeStaticString(st) : 0;
   }
 
   void decode(std::string& s) {
@@ -470,6 +493,10 @@ private:
   String decodeString() {
     uint32_t sz;
     decode(sz);
+    return decodeStringWithSize(sz);
+  }
+
+  String decodeStringWithSize(uint32_t sz) {
     if (sz == 0) return String();
     sz--;
     if (sz == 0) return empty_string();

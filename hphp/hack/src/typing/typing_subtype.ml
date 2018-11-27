@@ -2356,17 +2356,17 @@ let log_prop env =
   let filename = Pos.filename (Pos.to_absolute env.Env.pos) in
   if Str.string_match (Str.regexp {|.*\.hhi|}) filename 0 then () else
   let prop = env_to_prop env in
-  if TypecheckerOptions.log_inference_constraints Env.(env.genv.tcopt) then (
+  if TypecheckerOptions.log_inference_constraints (Env.get_tcopt env) then (
     let p_as_string = Typing_print.subtype_prop env prop in
     let pos = Pos.string (Pos.to_absolute env.Env.pos) in
     let size = TL.size prop in
     let n_disj = TL.n_disj prop in
     let n_conj = TL.n_conj prop in
     TypingLogger.InferenceCnstr.log p_as_string ~pos ~size ~n_disj ~n_conj);
-  if TypecheckerOptions.new_inference Env.(env.genv.tcopt) &&
+  if TypecheckerOptions.new_inference (Env.get_tcopt env) &&
     not (Errors.currently_has_errors ()) &&
     not (TL.is_valid prop)
-  then Typing_log.log_prop ~do_normalize:true 0 env.Env.pos
+  then Typing_log.log_prop ~do_normalize:true 1 env.Env.pos
     "There are remaining unsolved constraints!" env prop
 
 (*****************************************************************************)

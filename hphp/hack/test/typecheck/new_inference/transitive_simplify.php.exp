@@ -1,5 +1,1 @@
-File "transitive_simplify.php", line 13, characters 10-20:
-  There are remaining unsolved constraints!: (T <: #0 && #0 <: T)
-File "transitive_simplify.php", line 20, characters 10-15:
-  There are remaining unsolved constraints!: (<expr#1> as Inv<C> <: #0 && #0 <: Inv<#1C> && <expr#1> as Inv<C> <: Inv<#1C>)
 No errors

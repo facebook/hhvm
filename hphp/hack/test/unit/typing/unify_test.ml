@@ -41,6 +41,7 @@ let global_options =
     ~tco_new_inference:false
     ~ignored_fixme_codes:ISet.empty
     ~forward_compatibility_level:ForwardCompatibilityLevel.default
+    ~log_levels:SMap.empty
 
 let empty_env = Typing_env.empty global_options Relative_path.default None
 

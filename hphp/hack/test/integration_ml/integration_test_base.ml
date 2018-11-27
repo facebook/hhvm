@@ -56,6 +56,7 @@ let global_opts = GlobalOptions.make
   ~tco_new_inference:false
   ~ignored_fixme_codes: ISet.empty
   ~forward_compatibility_level: ForwardCompatibilityLevel.default
+  ~log_levels:SMap.empty
 
 let server_config = ServerConfig.set_tc_options server_config global_opts
 let server_config = ServerConfig.set_parser_options

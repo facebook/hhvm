@@ -128,6 +128,7 @@ let () =
     ~tco_new_inference:false
     ~ignored_fixme_codes: ISet.empty
     ~forward_compatibility_level: ForwardCompatibilityLevel.default
+    ~log_levels: SMap.empty
   in
 
   let custom_config = ServerConfig.default_config in

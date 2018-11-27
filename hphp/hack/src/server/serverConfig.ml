@@ -302,6 +302,7 @@ let load config_filename options =
     ~tco_disallow_invalid_arraykey:(bool_ "disallow_invalid_arraykey" ~default:false config)
     ~ignored_fixme_codes:(prepare_ignored_fixme_codes config)
     ~forward_compatibility_level:forward_compat_level
+    ~log_levels:SMap.empty
   in
   Errors.ignored_fixme_codes :=
     (GlobalOptions.ignored_fixme_codes global_opts);

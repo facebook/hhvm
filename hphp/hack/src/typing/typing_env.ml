@@ -546,7 +546,7 @@ let empty tcopt file ~droot = {
   };
   global_tpenv = SMap.empty;
   subtype_prop = TL.valid;
-  log_levels = SMap.empty;
+  log_levels = TypecheckerOptions.log_levels tcopt;
   tvenv = IMap.empty;
 }
 

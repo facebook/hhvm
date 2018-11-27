@@ -186,6 +186,9 @@ type t = {
 
  (* What version of Hack the current codebase was designed for *)
  forward_compatibility_level : ForwardCompatibilityLevel.t;
+
+ (* Initial hh_log_level settings *)
+ log_levels : int SMap.t;
 } [@@deriving show]
 val make :
   tco_assume_php: bool ->
@@ -222,6 +225,7 @@ val make :
   tco_disallow_invalid_arraykey: bool ->
   ignored_fixme_codes: ISet.t ->
   forward_compatibility_level: ForwardCompatibilityLevel.t ->
+  log_levels: int SMap.t ->
   t
 val tco_assume_php : t -> bool
 val tco_safe_array : t -> bool
@@ -280,3 +284,4 @@ val tco_experimental_all : SSet.t
 val tco_migration_flags_all : SSet.t
 val ignored_fixme_codes : t -> ISet.t
 val forward_compatibility_level : t -> ForwardCompatibilityLevel.t
+val log_levels : t -> int SMap.t

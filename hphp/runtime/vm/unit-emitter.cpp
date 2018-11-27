@@ -1239,7 +1239,16 @@ void UnitRepoProxy::InsertUnitLineTableStmt
   BlobEncoder dataBlob;
   RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", unitSn);
-  serdeLineTable(dataBlob, lineTable);
+  dataBlob(
+    lineTable,
+    [&](const LineEntry& prev, const LineEntry& cur) -> LineEntry {
+      return LineEntry {
+        cur.pastOffset() - prev.pastOffset(),
+        cur.val() - prev.val()
+      };
+    }
+  );
+
   query.bindBlob("@data", dataBlob, /* static */ true);
   query.exec();
 }
@@ -1258,7 +1267,15 @@ void UnitRepoProxy::GetUnitLineTableStmt::get(int64_t unitSn,
   query.step();
   if (query.row()) {
     BlobDecoder dataBlob = query.getBlob(0);
-    serdeLineTable(dataBlob, lineTable);
+    dataBlob(
+      lineTable,
+      [&](const LineEntry& prev, const LineEntry& delta) -> LineEntry {
+        return LineEntry {
+          delta.pastOffset() + prev.pastOffset(),
+          delta.val() + prev.val()
+        };
+      }
+    );
   }
   txn.commit();
 }
@@ -1336,43 +1353,6 @@ createFatalUnit(StringData* filename, const MD5& md5, FatalOp /*op*/,
   // XXX line numbers are bogus
   fe->finish(ue->bcPos(), false);
   return ue;
-}
-
-template<class SerDe>
-void serdeLineTable(SerDe& sd, LineTable& lineTable) {
-  uint32_t size;
-  Offset pastOffsetDelta;
-  int valDelta;
-
-  if (SerDe::deserializing) {
-    sd(size);
-    lineTable.reserve(size);
-
-    LineEntry lastLineEntry = LineEntry(0, 0);
-    for (uint32_t i = 0; i < size; ++i) {
-      sd(pastOffsetDelta)
-        (valDelta);
-
-      LineEntry lineEntry(
-        pastOffsetDelta + lastLineEntry.pastOffset(),
-        valDelta + lastLineEntry.val());
-      lineTable.push_back(lineEntry);
-      lastLineEntry = lineEntry;
-    }
-  } else {
-    size = uint32_t(lineTable.size());
-    sd(size);
-
-    LineEntry lastEntry = LineEntry(0, 0);
-    for (auto it = lineTable.begin(); it != lineTable.end(); ++it) {
-      auto currentEntry = *it;
-      pastOffsetDelta = currentEntry.pastOffset() - lastEntry.pastOffset();
-      valDelta = currentEntry.val() - lastEntry.val();
-      sd(pastOffsetDelta)
-        (valDelta);
-      lastEntry = currentEntry;
-    }
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

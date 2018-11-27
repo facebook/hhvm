@@ -593,7 +593,18 @@ void FuncEmitter::serdeMetaData(SerDe& sd) {
     (localNames)
     (staticVars)
     (ehtab)
-    (fpitab)
+    (fpitab,
+      [&](const FPIEnt& prev, FPIEnt cur) -> FPIEnt {
+        cur.m_fpiEndOff -= cur.m_fpushOff;
+        cur.m_fpushOff -= prev.m_fpushOff;
+        return cur;
+      },
+      [&](const FPIEnt& prev, FPIEnt delta) -> FPIEnt {
+        delta.m_fpushOff += prev.m_fpushOff;
+        delta.m_fpiEndOff += delta.m_fpushOff;
+        return delta;
+      }
+    )
     (userAttributes)
     (retTypeConstraint)
     (retUserType)

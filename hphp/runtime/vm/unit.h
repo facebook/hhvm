@@ -140,7 +140,10 @@ struct TableEntry {
   /*
    * Constructors.
    */
-  TableEntry() {}
+  TableEntry()
+    : m_pastOffset()
+    , m_val()
+  {}
 
   TableEntry(Offset pastOffset, T val)
     : m_pastOffset(pastOffset)

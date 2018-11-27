@@ -11,6 +11,8 @@
 (*****************************************************************************)
 (* Building the environment *)
 (*****************************************************************************)
+module Hh_bucket = Bucket
+open Core_kernel
 open ServerEnv
 
 module SLC = ServerLocalConfig
@@ -90,16 +92,16 @@ let make_genv options config local_config handle ~logging_init =
   in
   if Option.is_some watchman_env then Hh_logger.log "Using watchman";
   let max_bucket_size = local_config.SLC.max_bucket_size in
-  Bucket.set_max_bucket_size max_bucket_size;
+  Hh_bucket.set_max_bucket_size max_bucket_size;
   let indexer, notifier_async, notifier_async_reader, notifier, wait_until_ready, options =
     match watchman_env with
     | Some watchman_env ->
       let indexer filter =
         let files = Watchman.get_all_files watchman_env in
-        Bucket.make_list
+        Hh_bucket.make_list
           ~num_workers:nbr_procs
           ~max_size:max_bucket_size
-          (List.filter filter files)
+          (List.filter ~f:filter files)
       in
       (** Watchman state can change during requests (See
        * Watchamn.Watchman_dead and Watchman_alive). We need to update
@@ -123,14 +125,14 @@ let make_genv options config local_config handle ~logging_init =
           ServerRevisionTracker.files_changed local_config (SSet.cardinal changes);
           Notifier_async_changes changes
       in
-      let concat_changes_list = List.fold_left begin fun acc changes ->
+      let concat_changes_list = List.fold_left ~f:begin fun acc changes ->
         match on_changes changes with
         | Notifier_unavailable
         | Notifier_state_enter _
         | Notifier_state_leave _ -> acc
         | Notifier_synchronous_changes changes
         | Notifier_async_changes changes -> SSet.union acc changes
-        end SSet.empty
+        end ~init:SSet.empty
       in
       let notifier_async () =
         let watchman', changes = Watchman.get_changes !watchman in

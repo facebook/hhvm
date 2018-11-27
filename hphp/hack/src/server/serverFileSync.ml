@@ -7,6 +7,7 @@
  *
  *)
 
+open Core_kernel
 open File_content
 open Option.Monad_infix
 open ServerEnv

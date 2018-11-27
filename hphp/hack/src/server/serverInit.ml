@@ -7,7 +7,8 @@
  *
  *)
 
-open Core_result.Export
+open Core_kernel
+open Result.Export
 open SearchServiceRunner
 open ServerEnv
 

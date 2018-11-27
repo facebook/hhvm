@@ -9,7 +9,7 @@
 
 open Core_kernel
 open Nast
-open Core_result
+open Result
 open Typing_infer_return
 
 let add_ns name =

@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open ServerEnv
 open ServerCommandTypes
 open Utils
@@ -219,12 +219,12 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       | MultiThreadedCall.Coalesced_failures failures ->
         let failures = failures
           |> List.map ~f:WorkerController.failure_to_string
-          |> String.concat "\n"
+          |> String.concat ~sep:"\n"
         in
         env, Error (Printf.sprintf
           "Worker failures - check the logs for more details:\n%s\n" failures)
       | e ->
-        let msg = Printexc.to_string e in
+        let msg = Exn.to_string e in
         let stack = Printexc.get_backtrace () in
         env, Error (Printf.sprintf "%s\n%s" msg stack)
       end

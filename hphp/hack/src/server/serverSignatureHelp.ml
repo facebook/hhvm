@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Option.Monad_infix
 
 module SourceText = Full_fidelity_source_text

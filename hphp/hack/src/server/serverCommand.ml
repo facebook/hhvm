@@ -7,6 +7,7 @@
  *
  *)
 
+open Core_kernel
 open Utils
 open ServerCommandTypes
 
@@ -153,7 +154,7 @@ exception Remote_nonfatal_exception of Marshal_tools.remote_exception_data
 
 let rec wait_for_rpc_response fd state callback =
   let error state e =
-    let stack = Printexc.get_callstack 100 |> Printexc.raw_backtrace_to_string in
+    let stack = Caml.Printexc.get_callstack 100 |> Caml.Printexc.raw_backtrace_to_string in
     Error (state, Utils.Callstack stack, e)
   in
   try
@@ -177,7 +178,7 @@ let rec wait_for_rpc_response fd state callback =
 
 let rec wait_for_rpc_response_lwt fd state callback =
   let error state e =
-    let stack = Printexc.get_callstack 100 |> Printexc.raw_backtrace_to_string in
+    let stack = Caml.Printexc.get_callstack 100 |> Caml.Printexc.raw_backtrace_to_string in
     Lwt.return (Error (state, Utils.Callstack stack, e))
   in
   try%lwt
@@ -207,12 +208,12 @@ let rec wait_for_rpc_response_lwt fd state callback =
    which it returns. *)
 let rpc_persistent :
   type a s.
-  Timeout.in_channel * out_channel -> s -> (s -> push -> s) -> a t
+  Timeout.in_channel * Out_channel.t -> s -> (s -> push -> s) -> a t
   -> (s * a * float, s * Utils.callstack * exn) result
   = fun (_, oc) state callback cmd ->
   try
     Marshal.to_channel oc (Rpc cmd) [];
-    flush oc;
+    Out_channel.flush oc;
     let fd = Unix.descr_of_out_channel oc in
     wait_for_rpc_response fd state callback
   with e ->
@@ -225,7 +226,7 @@ function multiple times in parallel, since they are writing to the same output
 channel. *)
 let rpc_persistent_lwt :
   type a s.
-  Timeout.in_channel * out_channel -> s -> (s -> push -> s) -> a t
+  Timeout.in_channel * Out_channel.t -> s -> (s -> push -> s) -> a t
   -> (s * a * float, s * Utils.callstack * exn) result Lwt.t
   = fun (_, oc) state callback cmd ->
   try%lwt
@@ -246,15 +247,15 @@ let rpc_persistent_lwt :
 
 let stream_request oc cmd =
   Marshal.to_channel oc (Stream cmd) [];
-  flush oc
+  Out_channel.flush oc
 
 let connect_debug oc =
   Marshal.to_channel oc Debug [];
-  flush oc
+  Out_channel.flush oc
 
 let send_connection_type oc t =
   Marshal.to_channel oc t [];
-  flush oc
+  Out_channel.flush oc
 
 (****************************************************************************)
 (* Called by the server *)
@@ -280,73 +281,73 @@ let stream_response (genv:ServerEnv.genv) env (ic, oc) ~cmd =
           Printf.fprintf oc "%s\t%s\n" mode (Relative_path.to_absolute fn)
         | _ -> ()
       end;
-      flush oc;
+      Out_channel.flush oc;
       ServerUtils.shutdown_client (ic, oc)
   | SHOW name ->
-      output_string oc "starting\n";
+      Out_channel.output_string oc "starting\n";
       SharedMem.invalidate_caches();
       let qual_name = if name.[0] = '\\' then name else ("\\"^name) in
-      output_string oc "class:\n";
+      Out_channel.output_string oc "class:\n";
       let class_name =
         match NamingGlobal.GEnv.type_canon_name qual_name with
         | None ->
-          let () = output_string oc "Missing from naming env\n" in qual_name
+          let () = Out_channel.output_string oc "Missing from naming env\n" in qual_name
         | Some canon ->
           let p = unsafe_opt
             @@ NamingGlobal.GEnv.type_pos env.ServerEnv.tcopt canon in
-          let () = output_string oc ((Pos.string (Pos.to_absolute p))^"\n") in
+          let () = Out_channel.output_string oc ((Pos.string (Pos.to_absolute p))^"\n") in
           canon
       in
       let class_ = TLazyHeap.get_class env.ServerEnv.tcopt class_name in
       (match class_ with
-      | None -> output_string oc "Missing from typing env\n"
+      | None -> Out_channel.output_string oc "Missing from typing env\n"
       | Some c ->
           let class_str = Typing_print.class_ env.ServerEnv.tcopt c in
-          output_string oc (class_str^"\n")
+          Out_channel.output_string oc (class_str^"\n")
       );
-      output_string oc "\nfunction:\n";
+      Out_channel.output_string oc "\nfunction:\n";
       let fun_name =
         match NamingGlobal.GEnv.fun_canon_name qual_name with
         | None ->
-          let () = output_string oc "Missing from naming env\n" in qual_name
+          let () = Out_channel.output_string oc "Missing from naming env\n" in qual_name
         | Some canon ->
           let p = unsafe_opt
             @@ NamingGlobal.GEnv.fun_pos env.ServerEnv.tcopt canon in
-          let () = output_string oc ((Pos.string (Pos.to_absolute p))^"\n") in
+          let () = Out_channel.output_string oc ((Pos.string (Pos.to_absolute p))^"\n") in
           canon
       in
       let fun_ = TLazyHeap.get_fun env.ServerEnv.tcopt fun_name in
       (match fun_ with
       | None ->
-          output_string oc "Missing from typing env\n"
+          Out_channel.output_string oc "Missing from typing env\n"
       | Some f ->
           let fun_str = Typing_print.fun_ env.ServerEnv.tcopt f in
-          output_string oc (fun_str^"\n")
+          Out_channel.output_string oc (fun_str^"\n")
       );
-      output_string oc "\nglobal const:\n";
+      Out_channel.output_string oc "\nglobal const:\n";
       (match NamingGlobal.GEnv.gconst_pos env.ServerEnv.tcopt qual_name with
-      | Some p -> output_string oc (Pos.string (Pos.to_absolute p)^"\n")
-      | None -> output_string oc "Missing from naming env\n");
+      | Some p -> Out_channel.output_string oc (Pos.string (Pos.to_absolute p)^"\n")
+      | None -> Out_channel.output_string oc "Missing from naming env\n");
       let gconst_ty = TLazyHeap.get_gconst env.ServerEnv.tcopt qual_name in
       (match gconst_ty with
-      | None -> output_string oc "Missing from typing env\n"
+      | None -> Out_channel.output_string oc "Missing from typing env\n"
       | Some gc ->
           let gconst_str = Typing_print.gconst env.ServerEnv.tcopt gc in
-          output_string oc ("ty: "^gconst_str^"\n")
+          Out_channel.output_string oc ("ty: "^gconst_str^"\n")
       );
-      output_string oc "typedef:\n";
+      Out_channel.output_string oc "typedef:\n";
       (match NamingGlobal.GEnv.typedef_pos env.ServerEnv.tcopt qual_name with
-      | Some p -> output_string oc (Pos.string (Pos.to_absolute p)^"\n")
-      | None -> output_string oc "Missing from naming env\n");
+      | Some p -> Out_channel.output_string oc (Pos.string (Pos.to_absolute p)^"\n")
+      | None -> Out_channel.output_string oc "Missing from naming env\n");
       let tdef = TLazyHeap.get_typedef env.ServerEnv.tcopt qual_name in
       (match tdef with
       | None ->
-          output_string oc "Missing from typing env\n"
+          Out_channel.output_string oc "Missing from typing env\n"
       | Some td ->
           let td_str = Typing_print.typedef env.ServerEnv.tcopt td in
-          output_string oc (td_str^"\n")
+          Out_channel.output_string oc (td_str^"\n")
       );
-      flush oc;
+      Out_channel.flush oc;
       ServerUtils.shutdown_client (ic, oc)
   | BUILD build_opts ->
       BuildMain.go build_opts genv env oc;

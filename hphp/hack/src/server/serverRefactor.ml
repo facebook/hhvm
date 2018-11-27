@@ -7,12 +7,12 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open ServerEnv
 open ServerRefactorTypes
 
 let maybe_add_dollar s =
-  if s.[0] != '$' then "$" ^ s
+  if s.[0] <> '$' then "$" ^ s
   else s
 
 let get_fixme_patches codes (env: env) =
@@ -67,7 +67,7 @@ let construct_deprecated_wrapper_stub
   (* The immediate body of a function is indented by 2 extra spaces *)
   let func_body_indentation = String.make 2 ' ' in
   let return_indentation = base_indentation ^ func_body_indentation in
-  let parameter_input = String.concat ", " params_text_list in
+  let parameter_input = String.concat ~sep:", " params_text_list in
   let maybe_return =
     if returns_void
     then ""

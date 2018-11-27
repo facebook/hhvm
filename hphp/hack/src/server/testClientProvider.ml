@@ -7,6 +7,7 @@
  *
  *)
 
+open Core_kernel
 open ServerCommandTypes
 
 module type RefsType = sig

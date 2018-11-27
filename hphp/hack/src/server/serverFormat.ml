@@ -6,7 +6,8 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Core_result.Monad_infix
+open Core_kernel
+open Result.Monad_infix
 
 (* TODO t14922604: Further improve error handling *)
 let call_external_formatter
@@ -16,8 +17,8 @@ let call_external_formatter
   : (string list, string) result =
   let args = Array.of_list (cmd :: args) in
   let reader timeout ic oc =
-    output_string oc content;
-    close_out oc;
+    Out_channel.output_string oc content;
+    Out_channel.close oc;
     let lines = ref [] in
     begin
       try
@@ -57,21 +58,21 @@ let go_hackfmt ?filename ~content args =
     | Some filename -> args @ ["--filename-for-logging"; filename]
     | None -> args
   in
-  Hh_logger.log "%s" (String.concat " " args);
+  Hh_logger.log "%s" (String.concat ~sep:" " args);
   let dirname = Filename.dirname Sys.argv.(0) in
-  let paths = List.map (fun x -> Path.make x |> Path.to_string) [
+  let paths = List.map ~f:(fun x -> Path.make x |> Path.to_string) [
     (* if running from build tree *)
     dirname ^ "/hackfmt";
     dirname ^ "/../hackfmt/hackfmt";
     (* look for system installation *)
     BuildOptions.default_hackfmt_path;
   ] in
-  let path = List.find_opt Sys.file_exists paths in
+  let path = List.find ~f:Sys.file_exists paths in
   match path with
   | Some path -> call_external_formatter path content args
   | _ ->
     Hh_logger.log "Formatter not found";
-    Error ("Could not locate formatter - looked in: " ^ (String.concat " " paths))
+    Error ("Could not locate formatter - looked in: " ^ (String.concat ~sep:" " paths))
 
 (* This function takes 1-based offsets, and 'to_' is exclusive. *)
 let go ?filename ~content from to_ options =
@@ -79,7 +80,7 @@ let go ?filename ~content from to_ options =
     let range_args = range_offsets_to_args from to_ in
     let args = format_args @ range_args in
     go_hackfmt ?filename ~content args >>| fun lines ->
-    (String.concat "\n" lines) ^ "\n"
+    (String.concat ~sep:"\n" lines) ^ "\n"
 
 (* Our formatting engine can only handle ranges that span entire rows.  *)
 (* This is signified by a range that starts at column 1 on one row,     *)
@@ -134,7 +135,7 @@ let go_ide
     : ServerFormatTypes.ide_result =
     let range = Ide_api_types.ide_range_from_fc range in
     old_format_result
-      |> Core_result.map ~f:(fun new_text -> {new_text; range;})
+      |> Result.map ~f:(fun new_text -> {new_text; range;})
   in
 
   match action with
@@ -193,5 +194,5 @@ let go_ide
       st = offset_to_position content from0;
       ed = offset_to_position content to0;
     } |> Ide_api_types.ide_range_from_fc in
-    let new_text = String.concat "\n" lines in
+    let new_text = String.concat ~sep:"\n" lines in
     Ok {new_text; range;}

@@ -7,6 +7,7 @@
  *
  *)
 
+open Core_kernel
 [@@@warning "-52"] (* we have no alternative but to depend on Sys_error strings *)
 let log genv msg_thunk =
   Option.iter genv.ServerEnv.debug_channels begin fun (_ic, oc) ->
@@ -16,8 +17,8 @@ let log genv msg_thunk =
      * server when the debug listener isn't attached *)
     let msg = msg_thunk () in
     try
-      output_string oc ((Hh_json.json_to_string msg) ^ "\n");
-      flush oc;
+      Out_channel.output_string oc ((Hh_json.json_to_string msg) ^ "\n");
+      Out_channel.flush oc;
     with Sys_error "Broken pipe" -> begin
       Hh_logger.log "Debug listener has gone away.";
       genv.ServerEnv.debug_channels <- None;

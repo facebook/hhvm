@@ -7,6 +7,7 @@
  *
  *)
 
+open Core_kernel
 include ServerArgs_sig.Types
 
 (*****************************************************************************)
@@ -117,7 +118,7 @@ let parse_mini_state_json (json, _keytrace) =
   json >>= get_string "deptable" >>= fun (deptable, _deptable_keytrace) ->
   json >>= get_array "changes" >>= fun (changes, _) ->
     let array_to_path_list = List.map
-      (fun file -> Hh_json.get_string_exn file |> Relative_path.from_root)
+      ~f:(fun file -> Hh_json.get_string_exn file |> Relative_path.from_root)
     in
     let prechecked_changes = array_to_path_list prechecked_changes in
     let changes = array_to_path_list changes in
@@ -150,8 +151,8 @@ let verify_with_mini_state v = match !v with
           >>= parse_mini_state_json
     in
     match
-      (Core_result.ok_fst data_dump_parse_result),
-      (Core_result.ok_fst from_file_parse_result) with
+      (Result.ok_fst data_dump_parse_result),
+      (Result.ok_fst from_file_parse_result) with
     | (`Fst (parsed_data_dump, _)), (`Fst (_parsed_from_file, _)) ->
       Hh_logger.log "Warning - %s"
         ("Parsed mini state target from both JSON blob data dump" ^
@@ -402,7 +403,7 @@ let to_string
       | None -> "<>"
       | Some b -> string_of_bool b in
     let config_str = Printf.sprintf "[%s]"
-      (String.concat ", " @@ List.map (fun (key, value) -> Printf.sprintf "%s=%s" key value) config)
+      (String.concat ~sep:", " @@ List.map ~f:(fun (key, value) -> Printf.sprintf "%s=%s" key value) config)
     in
     ([
       "ServerArgs.options({";
@@ -428,4 +429,4 @@ let to_string
         "watchman_debug_logging: "; string_of_bool watchman_debug_logging; ", ";
         "with_mini_state: "; mini_state_str; ", ";
       "})"
-    ] |> String.concat "")
+    ] |> String.concat ~sep:"")

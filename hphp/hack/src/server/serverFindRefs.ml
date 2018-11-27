@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open Option.Monad_infix
 open ServerEnv
 open Reordered_argument_collections

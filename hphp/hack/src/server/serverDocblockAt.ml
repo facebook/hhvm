@@ -8,7 +8,6 @@
  *)
 
 open Core_kernel
-open Hh_core
 
 module Cls = Typing_classes_heap
 

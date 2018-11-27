@@ -20,8 +20,8 @@
      Full Parsing -> Naming -> Full Typecheck (with lazy decl)
 *)
 
-open Core_result.Export
-open Hh_core
+open Core_kernel
+open Result.Export
 open Reordered_argument_collections
 open SearchServiceRunner
 open ServerCheckUtils

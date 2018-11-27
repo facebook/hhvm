@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open HoverService
 
 let symbols_at (file, line, char) tcopt =

@@ -2,7 +2,8 @@
   (name discover)
   (libraries
     imported_core
-    dune.configurator))
+    dune.configurator
+    str))
 
 (rule
   (targets c_flags.sexp c_library_flags.sexp)

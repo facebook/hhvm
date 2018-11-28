@@ -1930,7 +1930,7 @@ void optimizeARM(Vunit& unit, const Abi& abi, bool regalloc) {
   annotateSFUses(unit);
   if (unit.needsRegAlloc()) {
     removeDeadCode(unit);
-    if (regalloc) allocateRegisters(unit, abi);
+    if (regalloc) allocateRegistersWithXLS(unit, abi);
   }
   if (unit.blocks.size() > 1) {
     optimizeJmps(unit);

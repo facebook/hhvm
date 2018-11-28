@@ -2863,7 +2863,7 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
     spi.used_spill_slots += extra;
   }
   if (spi.used_spill_slots == 0) return;
-  Timer t(Timer::vasm_xls_spill, unit.log_entry);
+  Timer t(Timer::vasm_reg_alloc_spill, unit.log_entry);
   always_assert(ctx.abi.canSpill);
 
   // Make sure we always allocate spill space in multiples of 16 bytes, to keep
@@ -3175,8 +3175,8 @@ void dumpStats(const Vunit& unit, const ResolutionPlan& resolution) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-void allocateRegisters(Vunit& unit, const Abi& abi) {
-  Timer timer(Timer::vasm_xls, unit.log_entry);
+void allocateRegistersWithXLS(Vunit& unit, const Abi& abi) {
+  Timer timer(Timer::vasm_reg_alloc, unit.log_entry);
   auto const counter = s_counter.fetch_add(1, std::memory_order_relaxed);
 
   splitCriticalEdges(unit);

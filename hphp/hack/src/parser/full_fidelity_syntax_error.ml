@@ -672,3 +672,9 @@ let concurrent_is_disabled =
 
 let misplaced_reactivity_annotation =
   "Reactive annotations are not allowed on classes, interfaces or traits."
+
+let mutability_annotation_on_static_method =
+  "__Mutable and __MaybeMutable annotations are not allowed on static methods."
+
+let mutability_annotation_on_inout_parameter =
+  "__Mutable, __MaybeMutable and __OwnedMutable annotations are not allowed on inout parameters."

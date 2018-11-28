@@ -1521,6 +1521,12 @@ let parameter_rx_errors parents errors node =
           make_error_from_node node
             SyntaxError.conflicting_owned_mutable_and_maybe_mutable_attributes :: errors
         | _ -> errors in
+      let is_inout = is_parameter_with_callconv node in
+      let errors =
+        if is_inout && (has_mutable || has_maybemutable || has_owned_mutable)
+        then make_error_from_node
+          node SyntaxError.mutability_annotation_on_inout_parameter :: errors
+        else errors in
       errors in
     let errors =
       if has_owned_mutable

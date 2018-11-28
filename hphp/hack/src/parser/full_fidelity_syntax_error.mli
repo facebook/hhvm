@@ -341,3 +341,5 @@ val duplicate_lval_in_concurrent_block : string
 val val_and_lval_in_concurrent_block : string
 val concurrent_is_disabled : string
 val misplaced_reactivity_annotation : string
+val mutability_annotation_on_static_method : string
+val mutability_annotation_on_inout_parameter : string

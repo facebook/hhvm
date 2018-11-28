@@ -243,15 +243,12 @@ and simplify_subtype
   let env, ety_sub = Env.expand_type env ty_sub in
   let again env acc ty_sub = (env, acc) &&&
       simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super in
+  let uerror () = TUtils.uerror (fst ety_super) (snd ety_super) (fst ety_sub) (snd ety_sub) in
   (* We *know* that the assertion is unsatisfiable *)
   let invalid_with f = env, TL.Unsat f in
-  let invalid () =
-    invalid_with (fun () ->
-      TUtils.uerror (fst ety_super) (snd ety_super) (fst ety_sub) (snd ety_sub)) in
+  let invalid () = invalid_with uerror in
   let invalid_env_with env f = env, TL.Unsat f in
-  let invalid_env env =
-    invalid_env_with env (fun () ->
-      TUtils.uerror (fst ety_super) (snd ety_super) (fst ety_sub) (snd ety_sub)) in
+  let invalid_env env = invalid_env_with env uerror in
   (* We *know* that the assertion is valid *)
   let valid () = env, TL.valid in
   (* We don't know whether the assertion is valid or not *)
@@ -415,12 +412,34 @@ and simplify_subtype
     Toption (_, Tabstract (AKnewtype (name_super, _), _) as ty_super')
     when name_super = name_sub ->
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super' env
+
+  | Tabstract (AKdependent d_sub, Some ty_sub),
+    Tabstract (AKdependent d_super, Some ty_super)
+    when d_sub = d_super ->
+    (* Dependent types are identical but bound might be different *)
+    let this_ty = Option.first_some this_ty (Some ety_sub) in
+    simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super env
+  | Tabstract (AKdependent d_sub, Some sub),
+    Tabstract (AKdependent d_super, _) when d_sub <> d_super ->
+      let this_ty = Option.first_some this_ty (Some ety_sub) in
+      simplify_subtype ~seen_generic_params ~deep ~this_ty sub ty_super env
+
+  (* This is sort of a hack because our handling of Toption is highly
+   * dependent on how the type is structured. When we see a bare
+   * dependent type we strip it off at this point since it shouldn't be
+   * relevant to subtyping any more.
+   *)
+
+  | Tabstract (AKdependent (`expr _, []), Some ty_sub), (Tclass _ | Toption _) ->
+    let this_ty = Option.first_some this_ty (Some ety_sub) in
+    simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super env
+
   (* If t1 <: ?t2 and t1 is an abstract type constrained as t1',
    * then t1 <: t2 or t1' <: ?t2.  The converse is obviously
    * true as well.  We can fold the case where t1 is unconstrained
    * into the case analysis below.
    *)
-  | Tabstract ((AKnewtype _ (* | AKdependent _ *) ), Some ty), Toption arg_ty_super ->
+  | Tabstract (AKnewtype _, Some ty), Toption arg_ty_super ->
     env |>
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub arg_ty_super |||
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super
@@ -590,22 +609,6 @@ and simplify_subtype
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
   | Tabstract (AKdependent _, None), Tabstract (AKenum _, _) -> invalid ()
 
-  (* Primitives and other concrete types cannot be subtypes of dependent types *)
-  | (Tnonnull | Tdynamic | Tprim _ | Tfun _ | Ttuple _ | Tshape _ |
-     Tabstract (AKenum _, None) | Tanon _ | Tobject | Tarraykind _),
-    Tabstract (AKdependent _, _) ->
-    invalid ()
-  | Tabstract (AKdependent d_sub, Some ty_sub),
-    Tabstract (AKdependent d_super, Some ty_super)
-    when d_sub = d_super ->
-    (* Dependent types are identical but bound might be different *)
-    let this_ty = Option.first_some this_ty (Some ety_sub) in
-    simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super env
-  | Tabstract (AKdependent d_sub, Some sub),
-    Tabstract (AKdependent d_super, _) when d_sub <> d_super ->
-      let this_ty = Option.first_some this_ty (Some ety_sub) in
-      simplify_subtype ~seen_generic_params ~deep ~this_ty sub ty_super env
-
   | _, Tabstract (AKdependent _, Some (_, Tclass ((_, x), _, _) as ty))
     when is_final_and_not_contravariant env x ->
     (* For final class C, there is no difference between `this as X` and `X`,
@@ -615,9 +618,26 @@ and simplify_subtype
      *)
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty env
 
+  (* Primitives and other concrete types cannot be subtypes of dependent types *)
+  | (Tnonnull | Tdynamic | Tprim _ | Tfun _ | Ttuple _ | Tshape _ |
+     Tabstract (AKenum _, None) | Tanon _ | Tclass _ | Tobject | Tarraykind _),
+    Tabstract (AKdependent (expr_dep, _), tyopt) ->
+    (* If the bound is the same class try and show more explanation of the error *)
+    begin match snd ty_sub, tyopt with
+    | Tclass ((_, y), _, _), Some (_, (Tclass ((_, x) as id, _, _))) when y = x ->
+      invalid_with (fun () ->
+      Errors.try_ uerror
+        (fun error ->
+           let p = Reason.to_pos (fst ety_sub) in
+           if expr_dep = `cls x
+           then Errors.exact_class_final id p error
+           else Errors.this_final id p error))
+    | _ -> invalid ()
+    end
+
   | Tabstract ((AKnewtype _ | AKenum _), Some ty), Tabstract (AKdependent _, _) ->
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
-  | (Toption _ | Tclass _ | Tabstract (AKdependent _, _)),
+  | (Tabstract (AKdependent _, _) | Toption _),
     Tabstract (AKdependent _, _) ->
     default ()
 
@@ -628,7 +648,8 @@ and simplify_subtype
   | Tanon (_, id1), Tanon (_, id2) -> if id1 = id2 then valid () else invalid ()
   | Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tanon _ ->
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
-  | (Tfun _ | Tabstract (AKdependent _, None)), Tanon _ -> default ()
+  | (Tfun _ | Tabstract (AKdependent _, None)), Tanon _ ->
+    invalid ()
 
   | Tobject, Tobject -> valid ()
   (* Any class type is a subtype of object *)
@@ -942,16 +963,6 @@ and simplify_subtype
   (* Don't yet attempt to deal with unresolved types *)
   | _, Tunresolved _ ->
     default ()
-
-  (* This is sort of a hack because our handling of Toption is highly
-   * dependent on how the type is structured. When we see a bare
-   * dependent type we strip it off at this point since it shouldn't be
-   * relevant to subtyping any more.
-   *)
-
-  | Tabstract (AKdependent (`expr _, []), Some ty_sub), _ ->
-    let this_ty = Option.first_some this_ty (Some ety_sub) in
-    simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super env
 
   | _, Tany ->
     if TypecheckerOptions.new_inference (Env.get_tcopt env) then valid ()
@@ -1754,16 +1765,6 @@ and sub_type_inner_helper env ~this_ty
 (****************************************************************************)
 (* ### End Tunresolved madness ### *)
 (****************************************************************************)
-
-  (* This is sort of a hack because our handling of Toption is highly
-   * dependent on how the type is structured. When we see a bare
-   * dependent type we strip it off at this point since it shouldn't be
-   * relevant to subtyping any more.
-   *)
-
-  | (_, Tabstract (AKdependent (`expr _, []), Some ty_sub)), _ ->
-      let this_ty = Option.first_some this_ty (Some ety_sub) in
-      sub_type_inner env ~this_ty ty_sub ty_super
 
   | (_, Tabstract (AKdependent _, Some ty)), (_, Toption arg_ty_super) ->
      Errors.try_

@@ -1,6 +1,0 @@
-(library
-  (name diff)
-  (wrapped false)
-  (libraries
-    sys_utils
-    utils_core))

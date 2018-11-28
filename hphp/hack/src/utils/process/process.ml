@@ -71,7 +71,7 @@ let rec maybe_consume
           Unix.close fd;
           fd_ref := None
         end else
-          let chunk = String.sub (Bytes.to_string buffer) 0 bytes_read in
+          let chunk = String.sub buffer 0 bytes_read in
           Stack.push chunk acc;
           let consumed_t = Unix.time () -. start_t in
           let max_time = max_time -. consumed_t in
@@ -227,8 +227,8 @@ let send_input_and_form_result
   let input_succeeded = match input with
     | None -> true
     | Some input ->
-      let written = Unix.write stdin_parent input 0 (Bytes.length input) in
-      written = Bytes.length input in
+      let written = Unix.write stdin_parent input 0 (String.length input) in
+      written = String.length input in
   let lifecycle = if input_succeeded
     then Lifecycle_running {pid;}
     else let () = Unix.kill pid Sys.sigkill in Lifecycle_killed_due_to_overflow_stdin in

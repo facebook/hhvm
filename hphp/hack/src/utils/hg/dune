@@ -1,8 +1,0 @@
-(library
-  (name hg)
-  (wrapped false)
-  (modules
-    hg
-    hg_sig)
-  (libraries
-    utils_process))

@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 open IdentifySymbolService
 open Option.Monad_infix
 open Typing_defs

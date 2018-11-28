@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 
 (* In order to run recheck_typing, workers need access to the FileInfo for each
  * file to be typechecked, so a FileInfo is paired with each query.
@@ -180,7 +180,7 @@ let prepare_pos_infos pos_list files_info =
     pos_list
     (* Sort, so that many queries on the same file will (generally) be
      * dispatched to the same worker. *)
-    |> List.sort ~cmp:compare
+    |> List.sort ~compare
     (* Dedup identical queries *)
     |> List.remove_consecutive_duplicates ~equal:(=)
     (* Get the FileInfo for each query *)
@@ -192,10 +192,10 @@ let prepare_pos_infos pos_list files_info =
       | None -> Error pos
     end
   in
-  let pos_infos = List.filter_map pos_info_results ~f:Core_result.ok in
+  let pos_infos = List.filter_map pos_info_results ~f:Result.ok in
   let failure_msgs =
     pos_info_results
-    |> List.filter_map ~f:Core_result.error
+    |> List.filter_map ~f:Result.error
     |> List.map ~f:(result_to_string (Error "No such file or directory")) in
   pos_infos, failure_msgs
 
@@ -222,13 +222,13 @@ let helper tcopt acc pos_infos =
     let (ast, _) = Parser_heap.ParserHeap.find_unsafe fn in
     let result =
       Relative_path.Map.get tasts fn
-      |> Core_result.of_option ~error:"No such file or directory"
-      |> Core_result.map ~f:begin fun tast ->
+      |> Result.of_option ~error:"No such file or directory"
+      |> Result.map ~f:begin fun tast ->
         (collect line char)#go tast
         |> Option.map ~f:begin fun refs ->
           Results.elements refs
           |> List.map ~f:(ServerSymbolDefinition.go tcopt ast)
-          |> List.sort ~cmp:compare
+          |> List.sort ~compare
           |> remove_duplicates_except_none
         end
       end

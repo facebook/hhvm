@@ -7,7 +7,7 @@
  *
  *)
 
-open Hh_core
+open Core_kernel
 
 (* Identifying a symbol can be a first step to another operation. For example,
  * you can identify symbol and then highlight other "equal" symbols.

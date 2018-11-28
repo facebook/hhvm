@@ -390,12 +390,12 @@ and search_or
 let compile_pattern
     (tcopt: TypecheckerOptions.t)
     (json: Hh_json.json)
-    : (pattern, string) Core_result.t =
-  let open Core_result in
-  let open Core_result.Monad_infix in
+    : (pattern, string) Result.t =
+  let open Result in
+  let open Result.Monad_infix in
 
   let wrap_json_accessor f =
-    fun x -> Core_result.map_error (f x)
+    fun x -> Result.map_error (f x)
       ~f:Hh_json.Access.access_failure_to_string
   in
 
@@ -407,7 +407,7 @@ let compile_pattern
     Error (error_message ^ (keytrace_to_string keytrace))
   in
 
-  let rec compile_pattern ~json ~keytrace : (pattern, string) Core_result.t =
+  let rec compile_pattern ~json ~keytrace : (pattern, string) Result.t =
     get_string "pattern_type" (json, keytrace)
 
     >>= fun (pattern_type, pattern_type_keytrace) ->
@@ -436,7 +436,7 @@ let compile_pattern
       error_at_keytrace ~keytrace:pattern_type_keytrace
         (Printf.sprintf "Unknown pattern type '%s'" pattern_type)
 
-  and compile_node_pattern ~json ~keytrace : (pattern, string) Core_result.t =
+  and compile_node_pattern ~json ~keytrace : (pattern, string) Result.t =
     get_string "kind" (json, keytrace)
 
     >>= fun (kind, kind_keytrace) ->
@@ -460,7 +460,7 @@ let compile_pattern
     let get_child_type
         (child_keytrace: Hh_json.Access.keytrace)
         (child_name: string)
-        : (child_type, string) Core_result.t =
+        : (child_type, string) Result.t =
       (* We're given a field name like `binary_right_operand`, but the field
       names in the schema are things like `right_operand`, and you have to
       affix the prefix yourself. For consistency with other tooling, we want
@@ -556,7 +556,7 @@ let compile_pattern
         (index, pattern)
       )
     in
-    Core_result.all children_patterns >>| fun children ->
+    Result.all children_patterns >>| fun children ->
     ListPattern {
       children;
       max_length;
@@ -593,7 +593,7 @@ let compile_pattern
       let keytrace = (string_of_int i) :: pattern_list_keytrace in
       compile_pattern ~json ~keytrace
     ) in
-    Core_result.all compiled_patterns
+    Result.all compiled_patterns
 
   and compile_and_pattern ~json ~keytrace =
     compile_child_patterns_helper ~json ~keytrace >>| fun patterns ->
@@ -675,9 +675,9 @@ let go
     ~(sort_results: bool)
     ~(files_to_search: string list option)
     (input: Hh_json.json)
-    : (Hh_json.json, string) Core_result.t
+    : (Hh_json.json, string) Result.t
   =
-  let open Core_result.Monad_infix in
+  let open Result.Monad_infix in
   compile_pattern env.ServerEnv.tcopt input >>| fun pattern ->
 
   let num_files_searched = ref 0 in

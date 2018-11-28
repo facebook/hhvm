@@ -7,12 +7,12 @@
  *
  *)
 
+open Core_kernel
 open Ast
-open Hh_core
 
 type result = Pos.absolute list
 
-module PosSet = Set.Make(Pos)
+module PosSet = Caml.Set.Make(Pos)
 
 module LocalPositions = struct
   (**

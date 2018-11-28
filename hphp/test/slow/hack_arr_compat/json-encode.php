@@ -114,4 +114,16 @@ test(
   "everything",
   JSON_FB_WARN_PHP_ARRAYS | JSON_FB_WARN_DICTS | JSON_FB_FORCE_PHP_ARRAYS
 );
+echo "==================== no repeated warnings =========================\n";
+var_dump(json_encode(vec[
+  darray[], darray[],
+  darray[0 => 'a'], darray[0 => 'a'],
+  darray[1 => 'a'], darray[1 => 'a'],
+  dict[0 => 'a'], dict[0 => 'a'],
+], JSON_FB_WARN_EMPTY_DARRAYS |
+  JSON_FB_WARN_VEC_LIKE_DARRAYS |
+  JSON_FB_WARN_DICT_LIKE_DARRAYS |
+  JSON_FB_WARN_PHP_ARRAYS |
+  JSON_FB_WARN_DICTS
+));
 }

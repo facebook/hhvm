@@ -355,3 +355,15 @@ Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/jso
 
 Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 90
 string(73) "{"a":[1,2,3],"b":[1,2,3],"c":{"a":1,"b":2},"d":{"a":"a","b":"b","c":"c"}}"
+==================== no repeated warnings =========================
+
+Notice: Hack Array Compat: Serializing array in %s/test/slow/hack_arr_compat/json-encode.php on line 128
+
+Notice: Hack Array Compat: JSON encoding empty darray in %s/test/slow/hack_arr_compat/json-encode.php on line 128
+
+Notice: Hack Array Compat: JSON encoding vec-like darray in %s/test/slow/hack_arr_compat/json-encode.php on line 128
+
+Notice: Hack Array Compat: JSON encoding dict-like darray in %s/test/slow/hack_arr_compat/json-encode.php on line 128
+
+Notice: Hack Array Compat: Serializing dict in %s/test/slow/hack_arr_compat/json-encode.php on line 128
+string(59) "[[],[],["a"],["a"],{"1":"a"},{"1":"a"},{"0":"a"},{"0":"a"}]"

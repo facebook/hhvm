@@ -202,6 +202,7 @@ class ReflectionParameter implements Reflector {
   public function __toString();
   public function getName();
   public function isPassedByReference();
+  public function isInOut(): bool;
   public function canBePassedByValue();
   public function getDeclaringFunction();
   public function getDeclaringClass();

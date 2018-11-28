@@ -25,7 +25,7 @@ let string_of_file filename =
   let rec iter ic b s =
     let nread = input ic s 0 32759 in
     if nread > 0 then begin
-      Buffer.add_substring b (Bytes.to_string s) 0 nread;
+      Buffer.add_substring b s 0 nread;
       iter ic b s
     end in
   iter ic b s;
@@ -76,7 +76,8 @@ let get_hhis dir =
 
 (* Turn the (name, contents) list into a PPX ast (string * string) array
  * expression *)
-let contents hhi_dir =
+let contents =
+  let hhi_dir = Sys.argv.(1) in
   get_hhis hhi_dir
   |> List.map (fun (name, contents) -> Exp.tuple [
       Exp.constant (Const.string name); Exp.constant (Const.string contents);
@@ -84,36 +85,13 @@ let contents hhi_dir =
   |> Exp.array
 
 (* Whenever we see [%hhi_contents], replace it with all of the hhis *)
-let ppx_gen_hhi_mapper hhi_dir =
+let ppx_gen_hhi_mapper _argv =
  { default_mapper with
    expr = fun mapper expr ->
      match expr with
      | { pexp_desc = Pexp_extension ({ txt = "hhi_contents"; _ }, PStr []); _} ->
-       contents hhi_dir
+       contents
      | other -> default_mapper.expr mapper other; }
 
-let hhi_dir : string option ref = ref None
-
-let set_hhi_dir dir = hhi_dir := Some dir
-let reset_args () = hhi_dir := None
-
-let args = [
-  ("-hhi-dir", Arg.String set_hhi_dir, "<dir> directory of the hhi sources")
-]
-
-let register_driver () =
-  Migrate_parsetree.Driver.register ~name:"ppx_gen_hhi" ~reset_args ~args
-    (module Migrate_parsetree.OCaml_current)
-    (fun _config _cookies ->
-      let hhi_dir = match !hhi_dir with
-        | None -> raise (Arg.Bad "-hhi-dir is mandatory")
-        | Some dir -> dir in
-      ppx_gen_hhi_mapper hhi_dir)
-
-let register () =
-  register "ppx_gen_hhi" (fun _argv ->
-    let hhi_dir = Sys.argv.(1) in
-    ppx_gen_hhi_mapper hhi_dir)
-
 let () =
-  register_driver ()
+  register "ppx_gen_hhi" ppx_gen_hhi_mapper

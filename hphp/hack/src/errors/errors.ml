@@ -3572,7 +3572,7 @@ let try_add_err pos err f1 f2 =
   end
 
 let has_no_errors f =
-  try_ (fun () -> let _ = f () in true) (fun _ -> false)
+  try_ (fun () -> f(); true) (fun _ -> false)
 
 (*****************************************************************************)
 (* Do. *)

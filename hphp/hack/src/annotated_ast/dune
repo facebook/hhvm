@@ -1,6 +1,0 @@
-(library
-  (name annotated_ast)
-  (wrapped false)
-  (libraries
-    ast)
-  (preprocess (pps ppx_deriving.std visitors.ppx)))

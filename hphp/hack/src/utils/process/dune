@@ -1,9 +1,0 @@
-(library
-  (name utils_process)
-  (wrapped false)
-  (libraries
-    core_kernel
-    sys_utils
-    utils_core
-    utils_ocaml_overrides
-    utils_stack))

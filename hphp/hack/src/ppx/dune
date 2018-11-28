@@ -1,9 +1,0 @@
-(library
-  (name ppx_gen_hhi)
-  (wrapped false)
-  (modules
-    ppx_gen_hhi)
-  (kind ppx_rewriter)
-  (libraries
-    ocaml-compiler-libs.common
-    ocaml-migrate-parsetree))

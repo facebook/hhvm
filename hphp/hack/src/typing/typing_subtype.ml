@@ -180,6 +180,12 @@ let log_subtype ~this_ty function_name env ty_sub ty_super =
       [Log_head ("Typing_subtype." ^ function_name, types)]
   end)
 
+let is_final_and_not_contravariant env id =
+  let class_def = Env.get_class env id in
+  match class_def with
+  | Some class_ty -> TUtils.class_is_final_and_not_contravariant class_ty
+  | None -> false
+
 (* Process the constraint proposition *)
 let rec process_simplify_subtype_result ~this_ty ~fail env prop =
   match prop with
@@ -566,9 +572,10 @@ and simplify_subtype
         | None ->
           default ()
       end
-  | Tabstract ((AKnewtype _ | AKenum _), Some ty), Tabstract (AKnewtype _, _) ->
+  | Tabstract ((AKnewtype _ | AKenum _ | AKdependent _), Some ty), Tabstract (AKnewtype _, _) ->
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
-  | Tabstract (AKdependent _, _), Tabstract (AKnewtype _, _) -> default ()
+  | Tabstract (AKdependent _, None), Tabstract (AKnewtype _, _) ->
+    invalid ()
 
   | Tabstract (AKenum e_sub, _), Tabstract (AKenum e_super, _)
     when e_sub = e_super -> valid ()
@@ -594,6 +601,20 @@ and simplify_subtype
     (* Dependent types are identical but bound might be different *)
     let this_ty = Option.first_some this_ty (Some ety_sub) in
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super env
+  | Tabstract (AKdependent d_sub, Some sub),
+    Tabstract (AKdependent d_super, _) when d_sub <> d_super ->
+      let this_ty = Option.first_some this_ty (Some ety_sub) in
+      simplify_subtype ~seen_generic_params ~deep ~this_ty sub ty_super env
+
+  | _, Tabstract (AKdependent _, Some (_, Tclass ((_, x), _, _) as ty))
+    when is_final_and_not_contravariant env x ->
+    (* For final class C, there is no difference between `this as X` and `X`,
+     * and `expr<#n> as X` and `X`.
+     * But we need to take care with contravariant classes, since we can't
+     * statically guarantee their runtime type.
+     *)
+    simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty env
+
   | Tabstract ((AKnewtype _ | AKenum _), Some ty), Tabstract (AKdependent _, _) ->
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
   | (Toption _ | Tclass _ | Tabstract (AKdependent _, _)),
@@ -1691,6 +1712,7 @@ and sub_type_inner_helper env ~this_ty
     * result in binding the type variable to the other type. *)
   | _, (_, Tany) ->
     fst (Unify.unify env ty_super ty_sub)
+
     (* If the subtype is a type variable bound to an empty unresolved, record
      * this in the todo list to be checked later. But make sure that we wrap
      * any error using the position and reason information that was supplied
@@ -1742,24 +1764,6 @@ and sub_type_inner_helper env ~this_ty
   | (_, Tabstract (AKdependent (`expr _, []), Some ty_sub)), _ ->
       let this_ty = Option.first_some this_ty (Some ety_sub) in
       sub_type_inner env ~this_ty ty_sub ty_super
-
-  | (_, Tabstract (AKdependent d_sub, Some sub)),
-    (_, Tabstract (AKdependent d_super, _)) when d_sub <> d_super ->
-      let this_ty = Option.first_some this_ty (Some ety_sub) in
-      (* If an error occurred while subtyping, we produce a unification error
-       * so we get the full information on how the dependent type was
-       * generated
-       *)
-      Errors.try_when
-        (fun () ->
-          sub_type_inner env ~this_ty
-            sub ty_super)
-        ~when_: begin fun () ->
-          match sub, TUtils.get_base_type env ty_super with
-          | (_, Tclass ((_, y), _, _)), (_, Tclass ((_, x), _, _)) when x = y -> false
-          | _, _ -> true
-        end
-        ~do_: (fun _ -> TUtils.simplified_uerror env ty_super ty_sub)
 
   | (_, Tabstract (AKdependent _, Some ty)), (_, Toption arg_ty_super) ->
      Errors.try_

@@ -11,6 +11,7 @@ open Typing_defs
 
 module Reason = Typing_reason
 module Type   = Typing_ops
+module SubType = Typing_subtype
 module Env    = Typing_env
 module TUtils = Typing_utils
 module SN     = Naming_special_names
@@ -23,7 +24,11 @@ There is the special case that
   e : ?Awaitable<T> |- await e : ?T
 *)
 let rec overload_extract_from_awaitable env p opt_ty_maybe =
-  let type_var = Env.fresh_type() in
+  (* Preserve old behaviour if --new-inference not set: no Tunresolved growing *)
+  let env, type_var, tyvars =
+    if TypecheckerOptions.new_inference (Env.get_tcopt env)
+    then Env.fresh_unresolved_type_add_tyvars env p ISet.empty
+    else env, Env.fresh_type (), ISet.empty in
   let r = Reason.Rwitness p in
   let env, e_opt_ty = Env.expand_type env opt_ty_maybe in
   (match e_opt_ty with
@@ -62,6 +67,9 @@ let rec overload_extract_from_awaitable env p opt_ty_maybe =
     in
 
     let env = Type.sub_type p Reason.URawait env opt_ty_maybe expected_type in
+    let env = SubType.set_tyvar_variance ~tyvars env return_type in
+    let env = SubType.solve_tyvars ~tyvars env in
+
     env, return_type
   )
 

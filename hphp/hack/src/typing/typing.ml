@@ -4046,6 +4046,7 @@ and is_abstract_ft fty = match fty with
              * We can deal with this by hijacking the continuation that
              * calculates the SN.Typehints.this type *)
             let k_lhs _ = this_ty in
+            let ftys = ref [] in
             let env, method_, _ =
               obj_get_ ~is_method:true ~nullsafe:None ~pos_params:(Some el) ~valkind:`other env ty1
                        CIparent m
@@ -4057,11 +4058,16 @@ and is_abstract_ft fty = match fty with
                   ~method_call_info:(TR.make_call_info ~receiver_is_self:false
                     ~is_static:false this_ty (snd m))
                   p env fty el uel in
+                ftys := fty :: !ftys;
                 env, method_, None
               end
               k_lhs
             in
-            make_call env (T.make_typed_expr fpos this_ty (T.Class_const (tcid, m)))
+            let fty =
+              match !ftys with
+              | [fty] -> fty
+              | l -> (Reason.none, Tunresolved l) in
+            make_call env (T.make_typed_expr fpos fty (T.Class_const (tcid, m)))
               hl [] [] method_
         else
             let env, fty, _ =

@@ -3945,7 +3945,7 @@ and is_abstract_ft fty = match fty with
             let env, _td, default_ty = expr env default in
             Typing_shapes.idx env p fty shape_ty field
               (Some ((fst default), default_ty))
-        | _ -> env, res
+        | _ -> env, res, ISet.empty
       end
    (* Special function `Shapes::keyExists` *)
    | Class_const ((_, CI((_, shapes), _)) as class_id, ((_, key_exists) as method_id))
@@ -3958,9 +3958,9 @@ and is_abstract_ft fty = match fty with
           (* try accessing the field, to verify existence, but ignore
            * the returned type and keep the one coming from function
            * return type hint *)
-          let env, _ = Typing_shapes.idx env p fty shape_ty field None in
-          env, res
-        | _  -> env, res
+          let env, _, _ = Typing_shapes.idx env p fty shape_ty field None in
+          env, res, ISet.empty
+        | _  -> env, res, ISet.empty
       end
    (* Special function `Shapes::removeKey` *)
    | Class_const ((_, CI((_, shapes), _)) as class_id, ((_, remove_key) as method_id))
@@ -3976,12 +3976,12 @@ and is_abstract_ft fty = match fty with
               let env, shape_ty =
                 Typing_shapes.remove_key p env shape_ty field in
               let env, _ = set_valid_rvalue p env lvar shape_ty in
-              env, res
+              env, res, ISet.empty
             | _ ->
               Errors.invalid_shape_remove_key (fst shape);
-              env, res
+              env, res, ISet.empty
           end
-        | _  -> env, res
+        | _  -> env, res, ISet.empty
       end
   (* Special function `Shapes::toArray` *)
   | Class_const ((_, CI((_, shapes), _)) as class_id, ((_, to_array) as method_id))
@@ -3992,7 +3992,7 @@ and is_abstract_ft fty = match fty with
       | [shape] ->
          let env, _te, shape_ty = expr env shape in
          Typing_shapes.to_array env shape_ty res
-      | _  -> env, res
+      | _  -> env, res, ISet.empty
     end
 
   (* Special function `Shapes::toDict` *)
@@ -4004,7 +4004,7 @@ and is_abstract_ft fty = match fty with
       | [shape] ->
          let env, _te, shape_ty = expr env shape in
          Typing_shapes.to_dict env shape_ty res
-      | _  -> env, res
+      | _  -> env, res, ISet.empty
     end
 
   (* Special function `parent::__construct` *)
@@ -6633,7 +6633,9 @@ and overload_function make_call fpos p env (cpos, class_id) method_id el uel f =
   if has_error
   then env, T.make_typed_expr p res T.Any, res
   else
-    let env, ty = f env fty res el in
+    let env, ty, tyvars = f env fty res el in
+    let env = SubType.set_tyvar_variance ~tyvars env ty in
+    let env = SubType.solve_tyvars ~tyvars env in
     let fty =
       match fty with
       | r, Tfun ft -> r, Tfun {ft with ft_ret = ty}

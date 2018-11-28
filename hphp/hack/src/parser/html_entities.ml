@@ -95,9 +95,6 @@ let utf32_to_utf8 k =
     |> set 5 (0x80 lor (k land 0x3f))
   end
 
-let utf32_to_utf8 k =
-  Bytes.to_string (utf32_to_utf8 k)
-
 let decode_table =
   let ent_iso_8859_1 = [
     "nbsp"; "iexcl"; "cent"; "pound"; "curren"; "yen"; "brvbar";

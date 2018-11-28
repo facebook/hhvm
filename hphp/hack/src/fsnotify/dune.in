@@ -1,4 +1,0 @@
-(library
-  (name fsnotify)
-  (wrapped false)
-  (libraries fsnotify_${CMAKE_SYSTEM_NAME}))

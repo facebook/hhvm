@@ -1,9 +1,0 @@
-(library
-  (name parser_smart_constructor)
-  (wrapped false)
-  (libraries
-    core_kernel
-    parser_env
-    parser_sigs
-    parser_syntax)
-  (preprocess (pps ppx_deriving.std)))

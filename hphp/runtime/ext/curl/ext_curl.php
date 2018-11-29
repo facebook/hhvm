@@ -507,48 +507,48 @@ namespace HH\Asio {
  */
 async function curl_exec(mixed $urlOrHandle,
                          bool $closeHandleIfHandle = false): Awaitable<string> {
-  if (is_string($urlOrHandle)) {
-    $ch = curl_init($urlOrHandle);
-  } else if (is_resource($urlOrHandle) &&
-             (get_resource_type($urlOrHandle) == "curl")) {
+  if (\is_string($urlOrHandle)) {
+    $ch = \curl_init($urlOrHandle);
+  } else if (\is_resource($urlOrHandle) &&
+             (\get_resource_type($urlOrHandle) == "curl")) {
     $ch = $urlOrHandle;
   } else {
-    throw new Exception(__FUNCTION__." expects string of cURL handle");
+    throw new \Exception(__FUNCTION__." expects string of cURL handle");
   }
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  \curl_setopt($ch, \CURLOPT_RETURNTRANSFER, true);
 
-  $mh = curl_multi_init();
-  curl_multi_add_handle($mh, $ch);
+  $mh = \curl_multi_init();
+  \curl_multi_add_handle($mh, $ch);
   $sleep_ms = 10;
   do {
     $active = 1;
     do {
-      $status = curl_multi_exec($mh, &$active);
-    } while ($status == CURLM_CALL_MULTI_PERFORM);
+      $status = \curl_multi_exec($mh, &$active);
+    } while ($status == \CURLM_CALL_MULTI_PERFORM);
     if (!$active) break;
-    $select = await curl_multi_await($mh);
+    $select = await \curl_multi_await($mh);
     /* If cURL is built without ares support, DNS queries don't have a socket
      * to wait on, so curl_multi_await() (and curl_select() in PHP5) will return
      * -1, and polling is required.
      */
     if ($select == -1) {
-      await SleepWaitHandle::create($sleep_ms * 1000);
+      await \SleepWaitHandle::create($sleep_ms * 1000);
       if ($sleep_ms < 1000) {
         $sleep_ms *= 2;
       }
     } else {
       $sleep_ms = 10;
     }
-  } while ($status === CURLM_OK);
-  $content = (string)curl_multi_getcontent($ch);
-  curl_multi_remove_handle($mh, $ch);
+  } while ($status === \CURLM_OK);
+  $content = (string)\curl_multi_getcontent($ch);
+  \curl_multi_remove_handle($mh, $ch);
 
   /* close handle if string was passed or argument */
-  if (is_string($urlOrHandle) || ($closeHandleIfHandle === true)) {
-    curl_close($ch);
+  if (\is_string($urlOrHandle) || ($closeHandleIfHandle === true)) {
+    \curl_close($ch);
   }
 
-  curl_multi_close($mh);
+  \curl_multi_close($mh);
   return $content;
 }
 

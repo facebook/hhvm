@@ -166,7 +166,10 @@ let msg_of_tail tail_env =
 
 let delta_t : float = 3.0
 
-let open_and_get_tail_msg start_time tail_env =
+let open_and_get_tail_msg
+    (start_time : float)
+    (tail_env : Tail.env)
+    : load_state_failure * string =
   let curr_time = Unix.time () in
   if not (Tail.is_open_env tail_env) &&
        curr_time -. start_time > delta_t then begin
@@ -181,7 +184,11 @@ let open_and_get_tail_msg start_time tail_env =
   let tail_msg = msg_of_tail tail_env in
   load_state_failure, tail_msg
 
-let print_wait_msg progress_callback start_time tail_env =
+let print_wait_msg
+    (progress_callback : string option -> 'a)
+    (start_time : float)
+    (tail_env : Tail.env)
+    : 'a =
   let load_state_failure, tail_msg =
     open_and_get_tail_msg start_time tail_env in
   let () = match load_state_failure with
@@ -199,12 +206,13 @@ let print_wait_msg progress_callback start_time tail_env =
 (** Sleeps until the server says hello. While waiting, prints out spinner and
  * useful messages by tailing the server logs. *)
 let rec wait_for_server_message
-  ~expected_message
-  ~ic
-  ~retries
-  ~progress_callback
-  ~start_time
-  ~tail_env =
+  ~(expected_message : 'a ServerCommandTypes.message_type option)
+  ~(ic : Timeout.in_channel)
+  ~(retries : int option)
+  ~(progress_callback : string option -> unit)
+  ~(start_time : float)
+  ~(tail_env : Tail.env option)
+  : 'a ServerCommandTypes.message_type =
   let elapsed_t = int_of_float (Unix.time () -. start_time) in
   match retries with
   | Some n when elapsed_t > n ->
@@ -228,7 +236,8 @@ let rec wait_for_server_message
   ) else
     try
       let fd = Timeout.descr_of_in_channel ic in
-      let msg = Marshal_tools.from_fd_with_preamble fd in
+      let msg : 'a ServerCommandTypes.message_type =
+        Marshal_tools.from_fd_with_preamble fd in
       let is_ping = (msg = ServerCommandTypes.Ping) in
       if (not is_ping) &&
           (Option.is_none expected_message || Some msg = expected_message) then
@@ -247,8 +256,14 @@ let rec wait_for_server_message
       progress_callback None;
       raise Server_hung_up
 
-let wait_for_server_hello ic retries progress_callback start_time tail_env =
-  let _ : 'a ServerCommandTypes.persistent_connection_message_type =
+let wait_for_server_hello
+  (ic : Timeout.in_channel)
+  (retries : int option)
+  (progress_callback : string option -> unit)
+  (start_time : float)
+  (tail_env : Tail.env option)
+  : unit =
+  let _ : 'a ServerCommandTypes.message_type =
     wait_for_server_message
       ~expected_message:(Some ServerCommandTypes.Hello)
       ~ic
@@ -259,14 +274,20 @@ let wait_for_server_hello ic retries progress_callback start_time tail_env =
   in
   ()
 
-let with_server_hung_up f =
+let with_server_hung_up (f : unit -> 'a) : 'a =
   try f () with
   | Server_hung_up ->
     (Printf.eprintf ("Hack server disconnected suddenly. Most likely a new one" ^^
     " is being initialized with a better saved state after a large rebase/update.\n");
     raise Exit_status.(Exit_with No_server_running))
 
-let rec connect ?(first_attempt=false) env retries start_time tail_env =
+let rec connect
+    ?(first_attempt=false)
+    (env : env)
+    (retries : int option)
+    (start_time : float)
+    (tail_env : Tail.env)
+    : conn =
   let elapsed_t = int_of_float (Unix.time () -. start_time) in
   match retries with
   | Some n when elapsed_t > n ->
@@ -416,7 +437,7 @@ let rec connect ?(first_attempt=false) env retries start_time tail_env =
           connect env retries start_time tail_env
         end else raise Exit_status.(Exit_with Exit_status.Build_id_mismatch)
 
-let connect env =
+let connect (env : env) : conn =
   let link_file = ServerFiles.log_link env.root in
   let start_time = Unix.time () in
   let tail_env = Tail.create_env link_file in
@@ -454,7 +475,14 @@ let rpc : type a. conn -> a ServerCommandTypes.t -> a
       ~tail_env
     in
     Option.iter tail_env ~f:Tail.close_env;
-    res
+    match res with
+    | ServerCommandTypes.Response (response, _) -> response
+    | ServerCommandTypes.Push _ -> failwith "unexpected 'push' RPC response"
+    | ServerCommandTypes.Hello -> failwith "unexpected 'hello' RPC response"
+    | ServerCommandTypes.Ping -> failwith "unexpected 'ping' RPC response"
 
-let rpc_with_retry conn cmd =
-  ServerCommandTypes.Done_or_retry.call ~f:(fun () -> rpc (conn ()) cmd)
+let rpc_with_retry
+    (conn_f : unit -> conn)
+    (cmd : 'a ServerCommandTypes.Done_or_retry.t ServerCommandTypes.t)
+    : 'a =
+  ServerCommandTypes.Done_or_retry.call ~f:(fun () -> rpc (conn_f ()) cmd)

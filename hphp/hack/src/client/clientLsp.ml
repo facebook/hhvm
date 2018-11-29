@@ -379,7 +379,8 @@ let read_message_from_server (server: server_conn) : event Lwt.t =
   try%lwt
     let fd = Unix.descr_of_out_channel server.oc
       |> Lwt_unix.of_unix_file_descr in
-    let%lwt message = Marshal_tools_lwt.from_fd_with_preamble fd in
+    let%lwt (message: 'a ServerCommandTypes.message_type) =
+      Marshal_tools_lwt.from_fd_with_preamble fd in
     match message with
     | Response _ ->
       failwith "unexpected response without request"
@@ -1531,10 +1532,14 @@ let connect_after_hello
       let oc = server_conn.oc in
       ServerCommand.send_connection_type oc ServerCommandTypes.Persistent;
       let fd = Unix.descr_of_out_channel oc in
-      let response = Marshal_tools.from_fd_with_preamble fd in
-      if response <> ServerCommandTypes.Connected then
-        failwith "Didn't get server Connected response";
-      set_hh_server_state Hh_server_handling_or_ready;
+      let response: 'a ServerCommandTypes.message_type =
+        Marshal_tools.from_fd_with_preamble fd in
+      begin match response with
+      | ServerCommandTypes.Response (ServerCommandTypes.Connected, _) ->
+        set_hh_server_state Hh_server_handling_or_ready
+      | _ ->
+        failwith "Didn't get server Connected response"
+      end;
 
       let handle_file_edit (json: Hh_json.json) =
         let open Jsonrpc in

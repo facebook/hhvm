@@ -291,14 +291,12 @@ and busy_status =
   | Doing_global_typecheck of bool (* interruptible? *)
   | Done_global_typecheck of {is_truncated: bool; shown: int; total: int;}
 
-type 'a persistent_connection_message_type =
-  | Push of push
+type 'a message_type =
+  | Push of push (* Only sent to persistent connections. *)
   | Response of 'a * float (* records the time at which hh_server started handling *)
   | Hello
   (* Hello is the first message sent after handoff. It's used for both *)
-  (* persistent and non-persistent connections. It's included in this  *)
-  (* type, though, because ocaml typing forces a single type to come   *)
-  (* Marshal.from_fd_with_preamble.                                    *)
+  (* persistent and non-persistent connections. *)
   | Ping
   (* Pings can be sent to non-persistent connection after Hello and before
    * sending RPC response. *)

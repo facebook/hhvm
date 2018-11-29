@@ -78,6 +78,10 @@ class SetTVRecurseCommand(gdb.Command):
 SetTVRecurseCommand()
 
 
+def DT(kind):
+    return V(kind, 'DataType')
+
+
 class TypedValuePrinter(object):
     RECOGNIZE = '^HPHP::(TypedValue|Cell|Ref|Variant|VarNR)$'
 
@@ -92,10 +96,10 @@ class TypedValuePrinter(object):
         val = None
         name = None
 
-        if t == V('HPHP::KindOfUninit') or t == V('HPHP::KindOfNull'):
+        if t == DT('HPHP::KindOfUninit') or t == DT('HPHP::KindOfNull'):
             pass
 
-        elif t == V('HPHP::KindOfBoolean'):
+        elif t == DT('HPHP::KindOfBoolean'):
             if data['num'] == 0:
                 val = False
             elif data['num'] == 1:
@@ -103,14 +107,14 @@ class TypedValuePrinter(object):
             else:
                 val = data['num']
 
-        elif t == V('HPHP::KindOfInt64'):
+        elif t == DT('HPHP::KindOfInt64'):
             val = data['num']
 
-        elif t == V('HPHP::KindOfDouble'):
+        elif t == DT('HPHP::KindOfDouble'):
             val = data['dbl']
 
-        elif (t == V('HPHP::KindOfString') or
-              t == V('HPHP::KindOfPersistentString')):
+        elif (t == DT('HPHP::KindOfString') or
+              t == DT('HPHP::KindOfPersistentString')):
             val = data['pstr'].dereference()
 
         elif (t == V('HPHP::KindOfArray') or
@@ -125,16 +129,16 @@ class TypedValuePrinter(object):
             if _tv_recurse:
                 val = val.dereference()
 
-        elif t == V('HPHP::KindOfObject'):
+        elif t == DT('HPHP::KindOfObject'):
             val = data['pobj']
             if _tv_recurse:
                 val = val.dereference()
             name = nameof(val)
 
-        elif t == V('HPHP::KindOfResource'):
+        elif t == DT('HPHP::KindOfResource'):
             val = data['pres']
 
-        elif t == V('HPHP::KindOfRef'):
+        elif t == DT('HPHP::KindOfRef'):
             val = data['pref'].dereference()
 
         else:
@@ -370,7 +374,7 @@ class ArrayDataPrinter(object):
         return self._packed_iterator(0, 0)
 
     def _kind(self, kind):
-        return K('HPHP::ArrayData::k' + kind + 'Kind')
+        return K('HPHP::ArrayData::k' + kind + 'Kind', 'ArrayKind')
 
 
 #------------------------------------------------------------------------------

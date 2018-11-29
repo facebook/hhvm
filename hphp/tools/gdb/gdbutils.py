@@ -8,6 +8,7 @@ import collections
 import functools
 import gdb
 import re
+import string
 import struct
 import traceback
 import types
@@ -120,10 +121,10 @@ def crc32q(crc, quad):
 def string_data_val(val, keep_case=True):
     """Convert an HPHP::StringData[*] to a Python string."""
 
-    if V('HPHP::use_lowptr'):
-        data = (deref(val).address + 1).cast(T('char').pointer())
-    else:
+    try:
         data = val['m_data']
+    except gdb.error:
+        data = (deref(val).address + 1).cast(T('char').pointer())
 
     s = data.string('utf-8', 'ignore', val['m_len'])
     return s if keep_case else s.lower()
@@ -209,6 +210,16 @@ def vstr(value):
     return ret
 
 
+def alt_form_enum(str, enum_name):
+    """Convert gcc-style enum symbol to clang-style."""
+
+    # for example: alt_form_enum("HPHP::ArrayData::kMixedKind", "KindOfArray")
+    # -> "#HPHP::ArrayData::KindOfArray::kMixedKind"
+    a = str.split("::")
+    b = a[:-1] + [enum_name] + a[-1:]
+    return "::".join(b)
+
+
 #------------------------------------------------------------------------------
 # Caching lookups.
 
@@ -217,12 +228,21 @@ def T(name):
     return gdb.lookup_type(name)
 
 @memoized
-def K(name):
-    return gdb.lookup_global_symbol(name).value()
+def K(name, enumName=''):
+    try:
+        result = gdb.lookup_global_symbol(name).value()
+    except:
+        result = gdb.lookup_global_symbol(alt_form_enum(name, enumName)).value()
+    return result
+
 
 @memoized
-def V(name):
-    return TL(name)
+def V(name, enumName=''):
+    try:
+        result = TL(name)
+    except:
+        result = TL(alt_form_enum(name, enumName))
+    return result
 
 @memoized
 def nullptr():

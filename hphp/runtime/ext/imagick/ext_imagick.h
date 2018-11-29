@@ -74,7 +74,7 @@ struct ImagickExtension final : Extension {
     static Object allocObject(const Variant& arg) { \
       Object ret = allocObject(); \
       tvDecRefGen(\
-        g_context->invokeFunc(cls->getCtor(), make_packed_array(arg), \
+        g_context->invokeFunc(cls->getCtor(), make_vec_array(arg), \
                               ret.get()) \
       );\
       return ret; \

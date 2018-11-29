@@ -694,7 +694,7 @@ static int _ldap_rebind_proc(LDAP* /*ldap*/, const char* url, ber_tag_t /*req*/,
 
   /* callback */
   Variant ret = vm_call_user_func
-    (ld->rebindproc, make_packed_array(Variant(ld), String(url, CopyString)));
+    (ld->rebindproc, make_vec_array(Variant(ld), String(url, CopyString)));
   return ret.toInt64();
 }
 

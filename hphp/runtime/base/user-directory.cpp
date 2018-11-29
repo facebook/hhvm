@@ -44,7 +44,7 @@ bool UserDirectory::open(const String& path) {
   // bool dir_opendir ( string $path , int $options )
   bool invoked = false;
   Variant ret = invoke(m_DirOpen, s_dir_opendir,
-                       make_packed_array(path, 0), invoked);
+                       make_vec_array(path, 0), invoked);
   if (invoked && ret.toBoolean()) {
     return true;
   }

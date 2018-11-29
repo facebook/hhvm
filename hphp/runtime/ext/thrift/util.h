@@ -29,7 +29,7 @@ enum TError {
 };
 
 [[noreturn]] inline void thrift_error(const String& what, TError why) {
-  throw_object(s_TProtocolException, make_packed_array(what, why));
+  throw_object(s_TProtocolException, make_vec_array(what, why));
 }
 
 inline void set_with_intish_key_cast(

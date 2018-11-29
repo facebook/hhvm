@@ -596,7 +596,7 @@ void Reflection::ThrowReflectionExceptionObject(const Variant& message) {
   Object inst{s_ReflectionExceptionClass};
   tvDecRefGen(
     g_context->invokeFunc(s_ReflectionExceptionClass->getCtor(),
-                          make_packed_array(message),
+                          make_vec_array(message),
                           inst.get())
   );
   throw_object(inst);

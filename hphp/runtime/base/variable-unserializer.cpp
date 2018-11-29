@@ -477,7 +477,7 @@ bool VariableUnserializer::whitelistCheck(const String& clsName) const {
 
     if (!ok && m_options[s_throw].toBoolean()) {
       throw_object(m_options[s_throw].toString(),
-                   make_packed_array(clsName));
+                   make_vec_array(clsName));
     }
     return ok;
   }

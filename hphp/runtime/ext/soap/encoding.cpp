@@ -722,7 +722,7 @@ xmlNodePtr to_xml_user(encodeType* type, const Variant& data, int style,
   xmlNodePtr ret = nullptr;
   if (type && type->map && !type->map->to_xml.isNull()) {
     Variant return_value = vm_call_user_func(type->map->to_xml,
-                                                  make_packed_array(data));
+                                             make_vec_array(data));
     if (return_value.isString()) {
       String sdoc = return_value.toString();
       xmlDocPtr doc = soap_xmlParseMemory(sdoc.data(), sdoc.size());
@@ -753,7 +753,7 @@ Variant to_zval_user(encodeType* type, xmlNodePtr node) {
     xmlFreeNode(copy);
 
     return_value = vm_call_user_func(type->map->to_zval,
-                                          make_packed_array(data));
+                                     make_vec_array(data));
   }
   return return_value;
 }

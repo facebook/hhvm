@@ -1142,7 +1142,7 @@ size_t CurlResource::curl_read(char *data,
         };
         Variant ret = vm_call_user_func(
           t->callback,
-          make_packed_array(Resource(ch), Resource(t->fp), data_size));
+          make_vec_array(Resource(ch), Resource(t->fp), data_size));
         if (ret.isString()) {
           String sret = ret.toString();
           length = data_size < sret.size() ? data_size : sret.size();
@@ -1187,7 +1187,7 @@ size_t CurlResource::curl_write(char *data,
         };
         Variant ret = vm_call_user_func(
           t->callback,
-          make_packed_array(Resource(ch), String(data, length, CopyString)));
+          make_vec_array(Resource(ch), String(data, length, CopyString)));
         length = ret.toInt64();
         break;
       }
@@ -1228,7 +1228,7 @@ size_t CurlResource::curl_write_header(char *data,
         };
         Variant ret = vm_call_user_func(
           t->callback,
-          make_packed_array(Resource(ch), String(data, length, CopyString)));
+          make_vec_array(Resource(ch), String(data, length, CopyString)));
         length = ret.toInt64();
         break;
       }

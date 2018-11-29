@@ -339,7 +339,7 @@ void ExecutionContext::obClean(int handler_flag) {
       m_insideOBHandler = true;
       SCOPE_EXIT { m_insideOBHandler = false; };
       vm_call_user_func(last->handler,
-                        make_packed_array(last->oss.detach(), handler_flag));
+                        make_vec_array(last->oss.detach(), handler_flag));
     }
     last->oss.clear();
   }
@@ -375,7 +375,7 @@ bool ExecutionContext::obFlush(bool force /*= false*/) {
           m_insideOBHandler = true;
           SCOPE_EXIT { m_insideOBHandler = false; };
           tout = vm_call_user_func(
-            last.handler, make_packed_array(str, flag)
+            last.handler, make_vec_array(str, flag)
           );
         }
         prev.oss.append(tout.toString());
@@ -395,7 +395,7 @@ bool ExecutionContext::obFlush(bool force /*= false*/) {
         m_insideOBHandler = true;
         SCOPE_EXIT { m_insideOBHandler = false; };
         tout = vm_call_user_func(
-          last.handler, make_packed_array(str, flag)
+          last.handler, make_vec_array(str, flag)
         );
       }
       str = tout.toString();
@@ -934,7 +934,7 @@ bool ExecutionContext::callUserErrorHandler(const Exception& e, int errnum,
       SCOPE_EXIT { m_deferredErrors = Array::CreateVec(); };
       if (!same(vm_call_user_func
                 (m_userErrorHandlers.back().first,
-                 make_packed_array(errnum, String(e.getMessage()),
+                 make_vec_array(errnum, String(e.getMessage()),
                      fileAndLine.first, fileAndLine.second, context,
                      backtrace)),
                 false)) {
@@ -1032,7 +1032,7 @@ bool ExecutionContext::onUnhandledException(Object e) {
     if (!m_userExceptionHandlers.empty()) {
       if (!same(vm_call_user_func
                 (m_userExceptionHandlers.back(),
-                 make_packed_array(e)),
+                 make_vec_array(e)),
                 false)) {
         return true;
       }

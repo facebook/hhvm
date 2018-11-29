@@ -90,7 +90,7 @@ static char** readline_completion_cb(const char* text, int start, int end) {
   char** matches = nullptr;
   auto completion = vm_call_user_func(
       s_readline->completion,
-      make_packed_array(text, start, end));
+      make_vec_array(text, start, end));
   if (completion.isArray()) {
     s_readline->array = completion.toArrRef();
     if (s_readline->array.length() > 0) {

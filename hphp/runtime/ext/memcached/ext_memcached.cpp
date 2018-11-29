@@ -605,7 +605,7 @@ bool HHVM_METHOD(Memcached, getdelayedbykey, const String& server_key,
 
   MemcachedResultWrapper result(&data->m_impl->memcached); Array item;
   while (data->fetchImpl(result.value, item)) {
-    vm_call_user_func(value_cb, make_packed_array(Variant(this_), item));
+    vm_call_user_func(value_cb, make_vec_array(Variant(this_), item));
   }
 
   if (data->m_impl->rescode != MEMCACHED_END) return false;

@@ -505,7 +505,7 @@ static void handle_exception_helper(bool& ret,
         !context->getExitCallback().isNull() &&
         is_callable(context->getExitCallback())) {
       Array stack = e.getBacktrace();
-      Array argv = make_packed_array(*rl_exit_code, stack);
+      Array argv = make_vec_array(*rl_exit_code, stack);
       vm_call_user_func(context->getExitCallback(), argv);
     }
   } catch (const PhpFileDoesNotExistException& e) {

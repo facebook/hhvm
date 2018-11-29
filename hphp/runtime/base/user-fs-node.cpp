@@ -89,7 +89,7 @@ Variant UserFSNode::invoke(const Func* func, const String& name,
     case LookupResult::MagicCallFound:
     {
       auto ret = Variant::attach(
-        g_context->invokeFunc(func, make_packed_array(name, args), m_obj.get())
+        g_context->invokeFunc(func, make_vec_array(name, args), m_obj.get())
       );
       invoked = true;
       return ret;

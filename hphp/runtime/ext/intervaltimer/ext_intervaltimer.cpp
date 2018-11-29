@@ -97,9 +97,7 @@ void IntervalTimer::RunCallbacks(
       }
     }
     try {
-      Array args = make_packed_array(sample_type_string(type),
-                                     count,
-                                     Object{wh});
+      auto args = make_vec_array(sample_type_string(type), count, Object{wh});
       vm_call_user_func(timer->m_callback, args);
     } catch (Object& ex) {
       raise_error("Uncaught exception escaping IntervalTimer: %s",

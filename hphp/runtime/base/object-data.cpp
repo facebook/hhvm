@@ -385,7 +385,7 @@ Object ObjectData::iterableObject(bool& isIterable,
     isIterable = true;
     return create_object(
       s_SimpleXMLElementIterator,
-      make_packed_array(obj)
+      make_vec_array(obj)
     );
   }
   isIterable = false;

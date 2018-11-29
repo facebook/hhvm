@@ -221,7 +221,7 @@ int64_t UserFile::readImpl(char *buffer, int64_t length) {
   // String stread_read($count)
   bool invoked = false;
   auto const str = invoke(m_StreamRead, s_stream_read,
-                          make_packed_array(length), invoked).toString();
+                          make_vec_array(length), invoked).toString();
   if (!invoked) {
     raise_warning("%s::stream_read is not implemented",
                   m_cls->name()->data());
@@ -248,7 +248,7 @@ int64_t UserFile::writeImpl(const char *buffer, int64_t length) {
     int64_t didWrite = invoke(
       m_StreamWrite,
       s_stream_write,
-      make_packed_array(String(buffer, length, CopyString)),
+      make_vec_array(String(buffer, length, CopyString)),
       invoked
     ).toInt64();
     if (!invoked) {
@@ -302,7 +302,7 @@ bool UserFile::seek(int64_t offset, int whence /* = SEEK_SET */) {
   // bool stream_seek($offset, $whence)
   bool invoked = false;
   bool sought  = invoke(
-    m_StreamSeek, s_stream_seek, make_packed_array(offset, whence), invoked
+    m_StreamSeek, s_stream_seek, make_vec_array(offset, whence), invoked
   ).toBoolean();
   if (!invoked) {
     always_assert("No seek method? But I found one earlier?");
@@ -359,7 +359,7 @@ bool UserFile::truncate(int64_t size) {
   // bool stream_truncate()
   bool invoked = false;
   Variant ret = invoke(m_StreamTruncate, s_stream_truncate,
-                       make_packed_array(size), invoked);
+                       make_vec_array(size), invoked);
   if (!invoked) {
     return false;
   }
@@ -380,7 +380,7 @@ bool UserFile::lock(int operation, bool& /*wouldBlock*/) {
   // bool stream_lock(int $operation)
   bool invoked = false;
   Variant ret = invoke(m_StreamLock, s_stream_lock,
-                       make_packed_array(op), invoked);
+                       make_vec_array(op), invoked);
   if (!invoked) {
     if (operation) {
       raise_warning("%s::stream_lock is not implemented!",
@@ -445,7 +445,7 @@ int UserFile::urlStat(const String& path, struct stat* stat_sb,
   // array url_stat ( string $path , int $flags )
   bool invoked = false;
   return statFill(invoke(m_UrlStat, s_url_stat,
-                         make_packed_array(path, flags), invoked),
+                         make_vec_array(path, flags), invoked),
                   stat_sb);
 }
 

@@ -127,7 +127,7 @@ bool register_intercept(const String& name, const Variant& callback,
 
   EventHook::EnableIntercept();
 
-  Array handler = make_packed_array(callback, data);
+  Array handler = make_vec_array(callback, data);
 
   if (name.empty()) {
     s_intercept_data->global_handler() = handler;

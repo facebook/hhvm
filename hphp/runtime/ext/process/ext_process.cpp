@@ -415,7 +415,7 @@ bool HHVM_FUNCTION(pcntl_signal_dispatch) {
       signaled[i] = 0;
       if (s_signal_handlers->handlers.exists(i)) {
         vm_call_user_func(s_signal_handlers->handlers[i],
-                               make_packed_array(i));
+                          make_vec_array(i));
       }
     }
   }

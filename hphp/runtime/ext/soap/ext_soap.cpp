@@ -2263,7 +2263,7 @@ void HHVM_METHOD(SoapServer, handle,
       try {
         if (data->m_type == SOAP_CLASS || data->m_type == SOAP_OBJECT) {
           h->retval = vm_call_user_func
-            (make_packed_array(soap_obj, fn_name), h->parameters);
+            (make_vec_array(soap_obj, fn_name), h->parameters);
         } else {
           h->retval = vm_call_user_func(fn_name, h->parameters);
         }
@@ -2288,7 +2288,7 @@ void HHVM_METHOD(SoapServer, handle,
     try {
       if (data->m_type == SOAP_CLASS || data->m_type == SOAP_OBJECT) {
         retval = vm_call_user_func
-          (make_packed_array(soap_obj, fn_name), params);
+          (make_vec_array(soap_obj, fn_name), params);
       } else {
         retval = vm_call_user_func(fn_name, params);
       }

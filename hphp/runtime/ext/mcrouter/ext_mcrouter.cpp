@@ -53,7 +53,7 @@ static void mcr_throwException(const std::string& message,
   Object obj{c_MCRouterException};
   tvDecRefGen(
     g_context->invokeFunc(c_MCRouterException->getCtor(),
-      make_packed_array(message, (int64_t)op, (int64_t)result, key),
+      make_vec_array(message, (int64_t)op, (int64_t)result, key),
       obj.get())
   );
   throw_object(obj);
@@ -83,7 +83,7 @@ static void mcr_throwOptionException(
   tvDecRefGen(
     g_context->invokeFunc(
       c_MCRouterOptionException->getCtor(),
-      make_packed_array(errorArray),
+      make_vec_array(errorArray),
       obj.get()
     )
   );

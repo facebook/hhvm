@@ -36,7 +36,7 @@ static Array HHVM_STATIC_METHOD(BuiltinEnum, getNames) {
   const EnumValues* values = EnumCache::getValuesBuiltin(self_);
   if (values->names.size() != values->values.size()) {
     invoke("\\HH\\invariant_violation",
-           make_packed_array(s_overlappingErrorMessage));
+           make_vec_array(s_overlappingErrorMessage));
   }
 
   assertx(values->names.isDictOrDArray());

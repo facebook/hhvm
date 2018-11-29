@@ -606,9 +606,9 @@ static void HHVM_METHOD(Imagick, __construct, const Variant& files) {
     setWandResource(s_Imagick, Object{this_}, magick);
   }
   auto wand = getMagickWandResource(Object{this_});
-  Array array = files.isString() ? make_packed_array(files)
+  Array array = files.isString() ? make_vec_array(files)
               : files.isArray() ? files.toArray()
-              : Array();
+              : empty_vec_array();
   for (ArrayIter it(array); it; ++it) {
     imagickReadOp(
       wand->getWand(),

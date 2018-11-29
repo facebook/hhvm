@@ -49,7 +49,7 @@ static struct PharStreamWrapper final : Stream::Wrapper {
     static Func* f = SystemLib::s_PharClass->lookupMethod(s_openPhar.get());
 
     auto ret = Variant::attach(
-      g_context->invokeFunc(f, make_packed_array(filename), nullptr,
+      g_context->invokeFunc(f, make_vec_array(filename), nullptr,
                             SystemLib::s_PharClass)
     );
 
@@ -90,7 +90,7 @@ static struct PharStreamWrapper final : Stream::Wrapper {
   req::ptr<Directory> opendir(const String& path) override {
     static Func* f = SystemLib::s_PharClass->lookupMethod(s_opendir.get());
     auto ret = Variant::attach(
-      g_context->invokeFunc(f, make_packed_array(path), nullptr,
+      g_context->invokeFunc(f, make_vec_array(path), nullptr,
                             SystemLib::s_PharClass)
     );
     Array files = ret.toArray();
@@ -105,7 +105,7 @@ static struct PharStreamWrapper final : Stream::Wrapper {
   Variant callStat(const String& path) {
     static Func* f = SystemLib::s_PharClass->lookupMethod(s_stat.get());
     return Variant::attach(
-      g_context->invokeFunc(f, make_packed_array(path), nullptr,
+      g_context->invokeFunc(f, make_vec_array(path), nullptr,
                             SystemLib::s_PharClass)
     );
   }

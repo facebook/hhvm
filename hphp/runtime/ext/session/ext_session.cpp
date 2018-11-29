@@ -870,8 +870,8 @@ struct UserSessionModule : SessionModule {
   UserSessionModule() : SessionModule("user") {}
 
   bool open(const char *save_path, const char *session_name) override {
-    auto func = make_packed_array(s_session->ps_session_handler, s_open);
-    auto args = make_packed_array(String(save_path), String(session_name));
+    auto func = make_vec_array(s_session->ps_session_handler, s_open);
+    auto args = make_vec_array(String(save_path), String(session_name));
 
     auto res = vm_call_user_func(func, args);
     s_session->mod_user_implemented = true;
@@ -879,18 +879,17 @@ struct UserSessionModule : SessionModule {
   }
 
   bool close() override {
-    auto func = make_packed_array(s_session->ps_session_handler, s_close);
-    auto args = Array::Create();
+    auto func = make_vec_array(s_session->ps_session_handler, s_close);
 
-    auto res = vm_call_user_func(func, args);
+    auto res = vm_call_user_func(func, empty_vec_array());
     s_session->mod_user_implemented = false;
     return handleReturnValue(res);
   }
 
   bool read(const char *key, String &value) override {
     Variant ret = vm_call_user_func(
-       make_packed_array(s_session->ps_session_handler, s_read),
-       make_packed_array(String(key))
+       make_vec_array(s_session->ps_session_handler, s_read),
+       make_vec_array(String(key))
     );
     if (ret.isString()) {
       value = ret.toString();
@@ -901,22 +900,22 @@ struct UserSessionModule : SessionModule {
 
   bool write(const char *key, const String& value) override {
     return handleReturnValue(vm_call_user_func(
-       make_packed_array(s_session->ps_session_handler, s_write),
-       make_packed_array(String(key, CopyString), value)
+       make_vec_array(s_session->ps_session_handler, s_write),
+       make_vec_array(String(key, CopyString), value)
     ));
   }
 
   bool destroy(const char *key) override {
     return handleReturnValue(vm_call_user_func(
-       make_packed_array(s_session->ps_session_handler, s_destroy),
-       make_packed_array(String(key))
+       make_vec_array(s_session->ps_session_handler, s_destroy),
+       make_vec_array(String(key))
     ));
   }
 
   bool gc(int maxlifetime, int* /*nrdels*/) override {
     return handleReturnValue(vm_call_user_func(
-       make_packed_array(s_session->ps_session_handler, s_gc),
-       make_packed_array((int64_t)maxlifetime)
+       make_vec_array(s_session->ps_session_handler, s_gc),
+       make_vec_array((int64_t)maxlifetime)
     ));
   }
 

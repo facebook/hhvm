@@ -322,13 +322,13 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
 
 void heapgraphCallback(Array fields, const Variant& callback) {
   VMRegAnchor _;
-  auto params = make_packed_array(fields);
+  auto params = make_vec_array(fields);
   vm_call_user_func(callback, params);
 }
 
 void heapgraphCallback(Array fields, Array fields2, const Variant& callback) {
   VMRegAnchor _;
-  auto params = make_packed_array(fields, fields2);
+  auto params = make_vec_array(fields, fields2);
   vm_call_user_func(callback, params);
 }
 

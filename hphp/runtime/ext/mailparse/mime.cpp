@@ -993,7 +993,7 @@ int MimePart::extractImpl(int decode, req::ptr<File> src) {
 }
 
 void MimePart::callUserFunc(const String& s) {
-  vm_call_user_func(m_extract_context, make_packed_array(s));
+  vm_call_user_func(m_extract_context, make_vec_array(s));
 }
 
 void MimePart::outputToStdout(const String& s) {

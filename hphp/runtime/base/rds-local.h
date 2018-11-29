@@ -23,6 +23,8 @@
 
 #include "hphp/runtime/base/rds.h"
 
+#include <folly/Optional.h>
+
 namespace HPHP {
 
 struct RequestEventHandler;
@@ -165,6 +167,28 @@ void iterate(Fn fn) {
 
 void initializeRequestEventHandler(RequestEventHandler* h);
 
+template<typename T, typename Enable = void>
+struct RDSLocalBase;
+
+template<typename T>
+struct RDSLocalBase<T, std::enable_if_t<std::is_copy_constructible<T>::value>>
+    : RDSLocalNode {
+  folly::Optional<T> m_defaultValue;
+  void setDefault(const T& v) {
+    m_defaultValue = v;
+  }
+  folly::Optional<T> getDefault() const {
+    return m_defaultValue;
+  }
+};
+
+template<typename T>
+struct RDSLocalBase<T, std::enable_if_t<!std::is_copy_constructible<T>::value>>
+  : RDSLocalNode {
+  void setDefault(const T& v) {}
+  folly::Optional<T> getDefault() const { return folly::none; }
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 
@@ -187,7 +211,7 @@ enum class Initialize : uint8_t {
 };
 
 template<typename T, Initialize Init>
-struct RDSLocal : private detail::RDSLocalNode {
+struct RDSLocal : private detail::RDSLocalBase<T> {
   static auto constexpr REH = std::is_base_of<RequestEventHandler, T>::value;
   template<typename T1>
   using REH_t = std::enable_if_t<REH, T1>;
@@ -198,6 +222,14 @@ struct RDSLocal : private detail::RDSLocalNode {
 
   RDSLocal();
 
+  template<typename T1 = T>
+  explicit RDSLocal(
+    const T& v,
+    std::enable_if_t<std::is_copy_constructible<T1>::value>* = 0)
+  : RDSLocal() {
+    this->setDefault(v);
+  }
+
   NEVER_INLINE void create();
   void destroy();
   void nullOut();
@@ -205,6 +237,11 @@ struct RDSLocal : private detail::RDSLocalNode {
   bool isNull() const { return !(detail::rl_hotSection.rdslocal_base &&
                                  node().has_value()); }
   explicit operator bool() const { return !isNull(); }
+
+  template<typename T1 = T, typename = decltype(std::declval<T1&>()[0])>
+  decltype(std::declval<T1&>()[0]) operator[](size_t i) {
+    return (*get())[i];
+  }
 
   T* operator->() const { return get(); }
   T& operator*() const { return *get(); }
@@ -229,7 +266,7 @@ struct RDSLocal : private detail::RDSLocalNode {
   }
 
   size_t getRDSOffset() const {
-    return s_RDSLocalsBase + m_offset;
+    return this->s_RDSLocalsBase + m_offset;
   }
 
   size_t getRawOffset() const {
@@ -237,10 +274,20 @@ struct RDSLocal : private detail::RDSLocalNode {
   }
 
 protected:
+  template<typename T1 = T>
+  std::enable_if_t<!std::is_copy_constructible<T1>::value> defaultInit() {}
+  template<typename T1 = T>
+  std::enable_if_t<std::is_copy_constructible<T1>::value> defaultInit() {
+    if (auto const& defaultValue = this->getDefault()) {
+      node().emplace(*defaultValue);
+    }
+  }
+
   void init() override {
     assertx(detail::rl_hotSection.rdslocal_base);
     // Initialize the Node so that it is unset.
     new (&node()) Node();
+    defaultInit();
   }
   void fini() override {
     destroy();
@@ -271,17 +318,23 @@ protected:
       assertx(hasValue);
       return storage;
     }
-    void emplace() {
+    template<typename... Args>
+    void emplace(Args&&... args) {
       clear();
       const void* ptr = &storage;
-      new (const_cast<void*>(ptr)) T();
+      new (const_cast<void*>(ptr)) T(std::forward<Args>(args)...);
       hasValue = true;
     }
-    void clear() {
+    template<typename T1 = T>
+    std::enable_if_t<!std::is_trivially_destructible<T1>::value, void> clear() {
       if (hasValue) {
         hasValue = false;
         storage.~T();
       }
+    }
+    template<typename T1 = T>
+    std::enable_if_t<std::is_trivially_destructible<T1>::value, void> clear() {
+      hasValue = false;
     }
     void nullOut() {
       hasValue = false;
@@ -323,7 +376,7 @@ protected:
 
 template<typename T, Initialize Init>
 RDSLocal<T, Init>::RDSLocal() {
-  m_next = detail::head;
+  this->m_next = detail::head;
   detail::head = this;
   m_offset = detail::s_usedbytes;
   detail::s_usedbytes += sizeof(Node);

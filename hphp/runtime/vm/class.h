@@ -156,7 +156,7 @@ struct Class : AtomicCountable {
      */
     RepoAuthType repoAuthType;
     LowStringPtr docComment;
-    int idx;
+    Slot serializationIdx;
   };
 
   /*
@@ -171,7 +171,7 @@ struct Class : AtomicCountable {
 
     /* Most derived class that declared this property. */
     LowPtr<Class> cls;
-    int idx;
+    int serializationIdx;
 
     /* Used if (cls == this). */
     TypedValue val;
@@ -1392,18 +1392,23 @@ private:
   template<typename XProp>
   void checkPrePropVal(XProp& prop, const PreClass::Prop* preProp);
   void importTraitProps(int traitIdx,
-                        int idxOffset,
                         PropMap::Builder& curPropMap,
-                        SPropMap::Builder& curSPropMap);
-  void importTraitInstanceProp(Prop&       traitProp,
+                        SPropMap::Builder& curSPropMap,
+                        Slot& serializationIdx,
+                        std::vector<bool>& serializationVisited,
+                        Slot& staticSerializationIdx,
+                        std::vector<bool>& staticSerializationVisited);
+  void importTraitInstanceProp(Prop& traitProp,
                                const TypedValue& traitPropVal,
-                               const int idxOffset,
                                PropMap::Builder& curPropMap,
-                               SPropMap::Builder& curSPropMap);
+                               SPropMap::Builder& curSPropMap,
+                               Slot& serializationIdx,
+                               std::vector<bool>& serializationVisited);
   void importTraitStaticProp(SProp&   traitProp,
-                             const int idxOffset,
                              PropMap::Builder& curPropMap,
-                             SPropMap::Builder& curSPropMap);
+                             SPropMap::Builder& curSPropMap,
+                             Slot& staticSerializationIdx,
+                             std::vector<bool>& staticSerializationVisited);
   void addTraitPropInitializers(std::vector<const Func*>&, Attr which);
 
   void checkInterfaceMethods();
@@ -1517,6 +1522,18 @@ private:
   LowPtr<Func> m_dtor;
   PropInitVec m_declPropInit;
   FixedVector<const Func*> m_pinitVec;
+
+  /*
+   * There are two ways to index m_staticProperties.
+   * 1. Key can be either name or Slot, value is Prop. When used this way,
+   *    serializationIdx field of prop is meaningless and should not be
+   *    accessed.
+   * 2. Key is sequence id for serialization, value is Prop. When used this way,
+   *    the only meaningful field of prop is serializationIdx,
+   *    which represents a slot number. All other field is meaningless and
+   *    should not be accessed.
+   *    The serializationIdx is used only for reflection.
+   */
   SPropMap m_staticProperties;
   PreClassPtr m_preClass;
   InterfaceMap m_interfaces;
@@ -1561,6 +1578,16 @@ private:
    *
    * m_declPropInit is indexed by the Slot values from m_declProperties, and
    * contains initialization information.
+   *
+   * There are two ways to index m_declProperties.
+   * 1. Key can be either name or Slot, value is Prop. When used this way,
+   *    serializationIdx field of prop is meaningless and should not be
+   *    accessed.
+   * 2. Key is sequence id for serialization, value is Prop. When used this way,
+   *    the only meaningful field of prop is serializationIdx,
+   *    which represents a slot number. All other field is meaningless and
+   *    should not be accessed.
+   *    The serializationIdx is used for both serialization and reflection.
    */
   PropMap m_declProperties;
 

@@ -96,47 +96,19 @@ void IteratePropToArrayOrder(const ObjectData* obj, DeclFn declFn,
   if (incRef) obj->incRefCount();
   SCOPE_EXIT { if (incRef) decRefObj(const_cast<ObjectData*>(obj)); };
 
-  auto cls = obj->getVMClass();
-  auto const declProps = cls->declProperties();
-
   // The iteration order is going most-to-least-derived in the inheritance
   // hierarchy, visiting properties in declaration order (with the wrinkle
   // that overridden properties should appear only once, at the site of the
-  // most-derived declaration). Because of overriding, we need to keep track
-  // of which properties have already been visited, which we do in this vector.
-  std::vector<bool> visited(cls->numDeclProperties(), false);
-
-  auto visitPreClassProps = [&](const PreClass* pc) {
-    for (auto const& preProp : pc->allProperties()) {
-      if (preProp.attrs() & AttrStatic) continue;
-      auto const slot = cls->lookupDeclProp(preProp.name());
-      assertx(slot != kInvalidSlot);
-      if (visited[slot]) continue;
-      visited[slot] = true;
-      if (ArrayData::call_helper(declFn, slot, declProps[slot],
-                                 obj->propRvalAtOffset(slot))) {
-        return true;
-      }
+  // most-derived declaration).
+  auto cls = obj->getVMClass();
+  auto const declProps = cls->declProperties();
+  for (auto const& prop : declProps) {
+    auto slot = prop.serializationIdx;
+    if (ArrayData::call_helper(
+      declFn, slot, declProps[slot], obj->propRvalAtOffset(slot))) {
+      return;
     }
-    return false;
-  };
-
-  std::function<bool(const Class*)> visitTrait = [&](const Class* trait) {
-    assertx(isTrait(trait));
-    if (visitPreClassProps(trait->preClass())) return true;
-    for (auto const& subTrait : trait->usedTraitClasses()) {
-      if (visitTrait(subTrait.get())) return true;
-    }
-    return false;
-  };
-
-  do {
-    if (visitPreClassProps(cls->preClass())) return;
-    for (auto const& trait : cls->usedTraitClasses()) {
-      if (visitTrait(trait.get())) return;
-    }
-    cls = cls->parent();
-  } while (cls);
+  }
 
   if (UNLIKELY(obj->getAttribute(ObjectData::HasDynPropArr))) {
     // If we increffed the object, we still have to incref the dyn prop

@@ -2447,11 +2447,7 @@ void Class::setProperties() {
       prop.typeConstraint      = parentProp.typeConstraint;
       prop.name                = parentProp.name;
       prop.repoAuthType        = parentProp.repoAuthType;
-      // Temporarily assign parent properties' indexes to their additive
-      // inverses minus one.  After assigning current properties' indexes, we
-      // will use these negative indexes to assign new indexes to parent
-      // properties that haven't been overlayed.
-      prop.idx = -parentProp.idx - 1;
+
       if (!(parentProp.attrs & AttrPrivate)) {
         curPropMap.add(prop.name, prop);
       } else {
@@ -2474,7 +2470,6 @@ void Class::setProperties() {
       sProp.docComment     = parentProp.docComment;
       sProp.cls            = parentProp.cls;
       sProp.repoAuthType   = parentProp.repoAuthType;
-      sProp.idx            = -parentProp.idx - 1;
       tvWriteUninit(sProp.val);
       curSPropMap.add(sProp.name, sProp);
     }
@@ -2487,6 +2482,11 @@ void Class::setProperties() {
       traitIdx--;
     }
   }
+
+  Slot serializationIdx = 0;
+  std::vector<bool> serializationVisited(curPropMap.size(), false);
+  Slot staticSerializationIdx = 0;
+  std::vector<bool> staticSerializationVisited(curSPropMap.size(), false);
 
   static_assert(AttrPublic < AttrProtected && AttrProtected < AttrPrivate, "");
   for (Slot slot = 0; slot < traitIdx; ++slot) {
@@ -2528,9 +2528,11 @@ void Class::setProperties() {
       auto addNewProp = [&] {
         Prop prop;
         initProp(prop, preProp);
-        prop.idx = slot;
 
         curPropMap.add(preProp->name(), prop);
+        curPropMap[serializationIdx++].serializationIdx = curPropMap.size() - 1;
+        serializationVisited.push_back(true);
+
         m_declPropInit.push_back(preProp->val());
       };
 
@@ -2567,6 +2569,14 @@ void Class::setProperties() {
           addNewProp();
           break;
         }
+        // For duplicate property name, add the slot # defined in curPropMap,
+        // and mark the property visited.
+        assertx(serializationVisited.size() > it2->second);
+        if (!serializationVisited[it2->second]) {
+          curPropMap[serializationIdx++].serializationIdx = it2->second;
+          serializationVisited[it2->second] = true;
+        }
+
         auto& prop = curPropMap[it2->second];
         assertx((prop.attrs & (AttrPublic|AttrProtected|AttrPrivate)) ==
                 AttrProtected);
@@ -2602,7 +2612,6 @@ void Class::setProperties() {
         }
 
         checkPrePropVal(prop, preProp);
-        prop.idx = slot;
         TypedValueAux& tvaux = m_declPropInit[it2->second];
         auto const& tv = preProp->val();
         tvaux.m_data = tv.m_data;
@@ -2618,6 +2627,12 @@ void Class::setProperties() {
           addNewProp();
           break;
         }
+        assertx(serializationVisited.size() > it2->second);
+        if (!serializationVisited[it2->second]) {
+          curPropMap[serializationIdx++].serializationIdx = it2->second;
+          serializationVisited[it2->second] = true;
+        }
+
         auto& prop = curPropMap[it2->second];
         assertx(!(prop.attrs & AttrNoImplicitNullable) ||
                 (preProp->attrs() & AttrNoImplicitNullable));
@@ -2634,7 +2649,6 @@ void Class::setProperties() {
           prop.attrs = Attr(prop.attrs ^ (AttrProtected|AttrPublic));
           prop.userType = preProp->userType();
         }
-        prop.idx = slot;
 
         auto const& tc = preProp->typeConstraint();
         if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
@@ -2704,45 +2718,63 @@ void Class::setProperties() {
         }
         sPropInd = it3->second;
       }
+
       if (sPropInd == kInvalidSlot) {
         SProp sProp;
         initProp(sProp, preProp);
-        sProp.idx = slot;
         curSPropMap.add(sProp.name, sProp);
-        continue;
-      }
-      // Overlay ancestor's property.
-      auto& sProp = curSPropMap[sPropInd];
-      initProp(sProp, preProp);
-      sProp.idx = slot;
-    }
-  }
 
-  // After assigning indexes for current properties, we reassign indexes to
-  // parent properties that haven't been overlayed to make sure that they
-  // are greater than those of current properties.
-  int idxOffset = traitIdx - 1;
-  int curIdx = idxOffset;
-  for (Slot slot = 0; slot < curPropMap.size(); ++slot) {
-    auto& prop = curPropMap[slot];
-    if (prop.idx < 0) {
-      prop.idx = idxOffset - prop.idx;
-      if (curIdx < prop.idx) {
-        curIdx = prop.idx;
-      }
-    }
-  }
-  for (Slot slot = 0; slot < curSPropMap.size(); ++slot) {
-    auto& sProp = curSPropMap[slot];
-    if (sProp.idx < 0) {
-      sProp.idx = idxOffset - sProp.idx;
-      if (curIdx < sProp.idx) {
-        curIdx = sProp.idx;
+        curSPropMap[staticSerializationIdx++].serializationIdx =
+          curSPropMap.size() - 1;
+        staticSerializationVisited.push_back(true);
+      } else {
+        // Overlay ancestor's property.
+        auto& sProp = curSPropMap[sPropInd];
+        initProp(sProp, preProp);
+
+        assertx(staticSerializationVisited.size() > sPropInd);
+        if (!staticSerializationVisited[sPropInd]) {
+          staticSerializationVisited[sPropInd] = true;
+          curSPropMap[staticSerializationIdx++].serializationIdx = sPropInd;
+        }
       }
     }
   }
 
-  importTraitProps(traitIdx, curIdx + 1, curPropMap, curSPropMap);
+  importTraitProps(traitIdx, curPropMap, curSPropMap,
+                   serializationIdx, serializationVisited,
+                   staticSerializationIdx, staticSerializationVisited);
+
+  // set serialization index for parent properties at the end
+  if (m_parent.get() != nullptr) {
+    for (Slot i = 0; i < m_parent->declProperties().size(); ++i) {
+      // For non-static properties, slot is always equal to parentSlot
+      Slot slot = m_parent->declProperties()[i].serializationIdx;
+      assertx(serializationVisited.size() > slot);
+      if (!serializationVisited[slot]) {
+        curPropMap[serializationIdx++].serializationIdx = slot;
+      }
+    }
+
+    for (Slot i = 0; i < m_parent->staticProperties().size(); ++i) {
+      Slot parentSlot = m_parent->staticProperties()[i].serializationIdx;
+      auto const& prop = m_parent->staticProperties()[parentSlot];
+
+      if ((prop.attrs & AttrPrivate) && !(prop.attrs & AttrLSB)) continue;
+
+      auto it = curSPropMap.find(prop.name);
+      assertx(it != curPropMap.end());
+
+      Slot slot = it->second;
+      assertx(staticSerializationVisited.size() > slot);
+      if (!staticSerializationVisited[slot]) {
+        curSPropMap[staticSerializationIdx++].serializationIdx = slot;
+      }
+    }
+
+    assertx(serializationIdx == curPropMap.size());
+    assertx(staticSerializationIdx == curSPropMap.size());
+  }
 
   // LSB static properties that were inherited must be initialized separately.
   for (Slot slot = 0; slot < curSPropMap.size(); ++slot) {
@@ -2820,9 +2852,10 @@ const constexpr Attr kRedeclarePropAttrMask =
 
 void Class::importTraitInstanceProp(Prop& traitProp,
                                     const TypedValue& traitPropVal,
-                                    const int idxOffset,
                                     PropMap::Builder& curPropMap,
-                                    SPropMap::Builder& curSPropMap) {
+                                    SPropMap::Builder& curSPropMap,
+                                    Slot& serializationIdx,
+                                    std::vector<bool>& serializationVisited) {
   // Check if prop already declared as static
   if (curSPropMap.find(traitProp.name) != curSPropMap.end()) {
     raise_error("trait declaration of property '%s' is incompatible with "
@@ -2847,15 +2880,19 @@ void Class::importTraitInstanceProp(Prop& traitProp,
       // this was a non-flattened trait property.
       prop.cls = this;
 
-      // Clear NoImplicitNullable on the property. HHBBC analyzed the property in
-      // the context of the trait, not this class, so we cannot predict what
+      // Clear NoImplicitNullable on the property. HHBBC analyzed the property
+      // in the context of the trait, not this class, so we cannot predict what
       // derived class' will do with it. Be conservative.
-      prop.attrs = Attr(prop.attrs & ~AttrNoImplicitNullable) | AttrNoBadRedeclare;
+      prop.attrs = Attr(
+        prop.attrs & ~AttrNoImplicitNullable) | AttrNoBadRedeclare;
     } else {
       assertx(prop.attrs & AttrNoBadRedeclare);
     }
-    prop.idx += idxOffset;
+
     curPropMap.add(prop.name, prop);
+    curPropMap[serializationIdx++].serializationIdx = curPropMap.size() - 1;
+    serializationVisited.push_back(true);
+
     m_declPropInit.push_back(traitPropVal);
   } else {
     // Redeclared prop, make sure it matches previous declarations
@@ -2868,13 +2905,21 @@ void Class::importTraitInstanceProp(Prop& traitProp,
       raise_error("trait declaration of property '%s' is incompatible with "
                     "previous declaration", traitProp.name->data());
     }
+
+    assertx(serializationVisited.size() > prevIt->second);
+    if (!serializationVisited[prevIt->second]) {
+      curPropMap[serializationIdx++].serializationIdx = prevIt->second;
+      serializationVisited[prevIt->second] = true;
+    }
   }
 }
 
-void Class::importTraitStaticProp(SProp& traitProp,
-                                  const int idxOffset,
-                                  PropMap::Builder& curPropMap,
-                                  SPropMap::Builder& curSPropMap) {
+void Class::importTraitStaticProp(
+  SProp& traitProp,
+  PropMap::Builder& curPropMap,
+  SPropMap::Builder& curSPropMap,
+  Slot& staticSerializationIdx,
+  std::vector<bool>& staticSerializationVisited) {
   // Check if prop already declared as non-static
   if (curPropMap.find(traitProp.name) != curPropMap.end()) {
     raise_error("trait declaration of property '%s' is incompatible with "
@@ -2886,9 +2931,12 @@ void Class::importTraitStaticProp(SProp& traitProp,
     // New prop, go ahead and add it
     auto prop = traitProp;
     prop.cls = this; // set current class as the first declaring prop
-    prop.idx += idxOffset;
     prop.attrs |= AttrNoBadRedeclare;
+
     curSPropMap.add(prop.name, prop);
+    curSPropMap[staticSerializationIdx++].serializationIdx =
+      curSPropMap.size() - 1;
+    staticSerializationVisited.push_back(true);
   } else {
     // Redeclared prop, make sure it matches previous declaration
     auto& prevProp = curSPropMap[prevIt->second];
@@ -2921,6 +2969,12 @@ void Class::importTraitStaticProp(SProp& traitProp,
     }
     prevProp.cls = this;
     prevProp.val = prevPropVal;
+
+    assertx(staticSerializationVisited.size() > prevIt->second);
+    if (!staticSerializationVisited[prevIt->second]) {
+      curSPropMap[staticSerializationIdx++].serializationIdx = prevIt->second;
+      staticSerializationVisited[prevIt->second] = true;
+    }
   }
 }
 
@@ -2970,9 +3024,12 @@ void Class::initProp(SProp& prop, const PreClass::Prop* preProp) {
 }
 
 void Class::importTraitProps(int traitIdx,
-                             int idxOffset,
                              PropMap::Builder& curPropMap,
-                             SPropMap::Builder& curSPropMap) {
+                             SPropMap::Builder& curSPropMap,
+                             Slot& serializationIdx,
+                             std::vector<bool>& serializationVisited,
+                             Slot& staticSerializationIdx,
+                             std::vector<bool>& staticSerializationVisited) {
   if (attrs() & AttrNoExpandTrait) {
     for (Slot p = traitIdx; p < m_preClass->numProperties(); p++) {
       auto const* preProp = &m_preClass->properties()[p];
@@ -2980,16 +3037,15 @@ void Class::importTraitProps(int traitIdx,
       if (!(preProp->attrs() & AttrStatic)) {
         Prop prop;
         initProp(prop, preProp);
-        prop.idx = 0;
-        importTraitInstanceProp(prop, preProp->val(), idxOffset,
-                                curPropMap, curSPropMap);
+        importTraitInstanceProp(prop, preProp->val(), curPropMap, curSPropMap,
+                                serializationIdx, serializationVisited);
       } else {
         SProp prop;
         initProp(prop, preProp);
-        prop.idx = 0;
-        importTraitStaticProp(prop, idxOffset, curPropMap, curSPropMap);
+        importTraitStaticProp(
+          prop, curPropMap, curSPropMap,
+          staticSerializationIdx, staticSerializationVisited);
       }
-      ++idxOffset;
     }
     return;
   }
@@ -3003,18 +3059,17 @@ void Class::importTraitProps(int traitIdx,
     for (Slot p = 0; p < trait->m_declProperties.size(); p++) {
       auto& traitProp    = trait->m_declProperties[p];
       auto& traitPropVal = trait->m_declPropInit[p];
-      importTraitInstanceProp(traitProp, traitPropVal, idxOffset,
-                              curPropMap, curSPropMap);
+      importTraitInstanceProp(traitProp, traitPropVal, curPropMap, curSPropMap,
+                              serializationIdx, serializationVisited);
     }
 
     // static properties
     for (Slot p = 0; p < trait->m_staticProperties.size(); ++p) {
       auto& traitProp = trait->m_staticProperties[p];
-      importTraitStaticProp(traitProp, idxOffset, curPropMap, curSPropMap);
+      importTraitStaticProp(
+        traitProp, curPropMap, curSPropMap,
+        staticSerializationIdx, staticSerializationVisited);
     }
-
-    idxOffset += trait->m_declProperties.size() +
-                 trait->m_staticProperties.size();
   }
 }
 

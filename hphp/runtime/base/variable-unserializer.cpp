@@ -1041,10 +1041,14 @@ void VariableUnserializer::unserializeVariant(
           auto remainingProps = size;
           // Try fast case.
           if (size >= objCls->numDeclProperties()) {
-            bool mismatch = false;
-            auto objProps = obj->propVecForConstruct();
+            auto mismatch = false;
+            auto const objProps = obj->propVecForConstruct();
 
-            for (auto prop : objCls->declProperties()) {
+            auto const declProps = objCls->declProperties();
+            for (auto const& p : declProps) {
+              auto slot = p.serializationIdx;
+              auto const& prop = declProps[slot];
+
               if (!matchString(prop.mangledName->slice())) {
                 mismatch = true;
                 break;
@@ -1053,8 +1057,8 @@ void VariableUnserializer::unserializeVariant(
               // don't need to worry about overwritten list, because
               // this is definitely the first time we're setting this
               // property.
-              TypedValue* tv = objProps++;
-              auto t = tv_lval{tv};
+              TypedValue* tv = objProps + slot;
+              auto const t = tv_lval{tv};
               unserializePropertyValue(t, remainingProps--);
 
               if (UNLIKELY(checkRepoAuthType &&

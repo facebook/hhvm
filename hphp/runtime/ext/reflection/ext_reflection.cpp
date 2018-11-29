@@ -1517,59 +1517,40 @@ static Array HHVM_METHOD(ReflectionClass, getClassPropertyInfo) {
    * when ReflectionProperty is ported.
    */
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
-
-  auto arrProp    = Array::Create();
-  auto arrPriv    = Array::Create();
-  auto arrIdx     = Array::Create();
-  auto arrPrivIdx = Array::Create();
-
   auto const properties = cls->declProperties();
   cls->initialize();
-
   auto const& propInitVec = cls->getPropData()
     ? *cls->getPropData()
     : cls->declPropInit();
 
-  auto const nProps = cls->numDeclProperties();
-
-  for (Slot i = 0; i < nProps; ++i) {
-    auto const& prop = properties[i];
-    auto const& default_val = tvAsCVarRef(&propInitVec[i]);
-    auto info = Array::Create();
-    if ((prop.attrs & AttrPrivate) == AttrPrivate) {
-      if (prop.cls == cls) {
-        set_instance_prop_info(info, &prop, default_val);
-        arrPriv.set(StrNR(prop.name), VarNR(info).tv());
-        arrPrivIdx.set(StrNR(prop.name), prop.idx);
-      }
+  auto ret = Array::Create();
+  for (auto const& declProp : properties) {
+    auto slot = declProp.serializationIdx;
+    auto const& prop = properties[slot];
+    auto const& default_val = tvAsCVarRef(&propInitVec[slot]);
+    if (((prop.attrs & AttrPrivate) == AttrPrivate) && (prop.cls != cls)) {
       continue;
     }
+
+    auto info = Array::Create();
     set_instance_prop_info(info, &prop, default_val);
-    arrProp.set(StrNR(prop.name), VarNR(info).tv());
-    arrIdx.set(StrNR(prop.name), prop.idx);
+    ret.set(StrNR(prop.name), VarNR(info).tv());
   }
 
-  for (auto const& prop : cls->staticProperties()) {
-    auto info = Array::Create();
-    if ((prop.attrs & AttrPrivate) == AttrPrivate) {
-      if (prop.cls == cls) {
-        set_static_prop_info(info, &prop);
-        arrPriv.set(StrNR(prop.name), VarNR(info).tv());
-        arrPrivIdx.set(StrNR(prop.name), prop.idx);
-      }
+  // static properties
+  auto const sProperties = cls->staticProperties();
+  for (auto const& sProp : sProperties) {
+    auto slot = sProp.serializationIdx;
+    auto const& prop = sProperties[slot];
+    if (((prop.attrs & AttrPrivate) == AttrPrivate) && (prop.cls != cls)) {
       continue;
     }
-    set_static_prop_info(info, &prop);
-    arrProp.set(StrNR(prop.name), VarNR(info).tv());
-    arrIdx.set(StrNR(prop.name), prop.idx);
-  }
 
-  ArrayInit ret(4, ArrayInit::Mixed{});
-  ret.set(s_properties, VarNR(arrProp).tv());
-  ret.set(s_private_properties, VarNR(arrPriv).tv());
-  ret.set(s_properties_index, VarNR(arrIdx).tv());
-  ret.set(s_private_properties_index, VarNR(arrPrivIdx).tv());
-  return ret.toArray();
+    auto info = Array::Create();
+    set_static_prop_info(info, &prop);
+    ret.set(StrNR(prop.name), VarNR(info).tv());
+  }
+  return ret;
 }
 
 static Array HHVM_METHOD(ReflectionClass, getDynamicPropertyInfos,
@@ -2428,13 +2409,13 @@ Array get_class_info(const String& name) {
         if (prop.cls == cls) {
           set_instance_prop_info(info, &prop, default_val);
           arrPriv.set(StrNR(prop.name), VarNR(info).tv());
-          arrPrivIdx.set(StrNR(prop.name), prop.idx);
+          arrPrivIdx.set(StrNR(prop.name), prop.serializationIdx);
         }
         continue;
       }
       set_instance_prop_info(info, &prop, default_val);
       arr.set(StrNR(prop.name), VarNR(info).tv());
-      arrIdx.set(StrNR(prop.name), prop.idx);
+      arrIdx.set(StrNR(prop.name), prop.serializationIdx);
     }
 
     for (auto const& prop : cls->staticProperties()) {
@@ -2443,13 +2424,13 @@ Array get_class_info(const String& name) {
         if (prop.cls == cls) {
           set_static_prop_info(info, &prop);
           arrPriv.set(StrNR(prop.name), VarNR(info).tv());
-          arrPrivIdx.set(StrNR(prop.name), prop.idx);
+          arrPrivIdx.set(StrNR(prop.name), prop.serializationIdx);
         }
         continue;
       }
       set_static_prop_info(info, &prop);
       arr.set(StrNR(prop.name), VarNR(info).tv());
-      arrIdx.set(StrNR(prop.name), prop.idx);
+      arrIdx.set(StrNR(prop.name), prop.serializationIdx);
     }
     ret.set(s_properties, VarNR(arr).tv());
     ret.set(s_private_properties, VarNR(arrPriv).tv());

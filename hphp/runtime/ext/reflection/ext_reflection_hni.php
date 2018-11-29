@@ -1857,26 +1857,8 @@ class ReflectionClass implements Reflector {
   private function getOrderedPropertyInfos(): ConstMap<string, mixed> {
     $props_map = hphp_array_idx(self::$propInfoCache, $this->getName(), null);
     if (null === $props_map) {
-      $prop_info = $this->getClassPropertyInfo();
-      $properties = $prop_info['properties'];
-      foreach ($prop_info['private_properties'] as $k => $v) {
-        if (!array_key_exists($k, $properties)) {
-          $properties[$k] = $v;
-        }
-      }
-      $props_index = $prop_info['properties_index'];
-      foreach ($prop_info['private_properties_index'] as $k => $v) {
-        if (!array_key_exists($k, $props_index)) {
-          $props_index[$k] = $v;
-        }
-      }
-      $ordering = array_values($props_index);
-      array_multisort(&$ordering, &$properties);
       self::$propInfoCache[$this->getName()]
-        = $props_map = new ImmMap($properties);
-      // the $props_index does not need to be cached because $props are now
-      // correctly ordered, we know that any dynamic properties with a name
-      // collision will be appended
+        = $props_map = new ImmMap($this->getClassPropertyInfo());
     }
 
     if (!$this->obj) { return $props_map; }

@@ -91,10 +91,10 @@ let do_kill env =
     try mean_kill env with FailedToKill ->
       raise Exit_status.(Exit_with Kill_error)
 
-let main env =
+let main (env : env) : Exit_status.t Lwt.t =
   HackEventLogger.set_from env.from;
   HackEventLogger.client_stop ();
   do_kill env;
-  Exit_status.No_error
+  Lwt.return Exit_status.No_error
 
 let kill_server root from = do_kill {root; from;}

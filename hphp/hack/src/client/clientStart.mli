@@ -24,5 +24,5 @@ type env = {
   config : (string * string) list;
 }
 
-val main : env -> Exit_status.t
+val main : env -> Exit_status.t Lwt.t
 val start_server : env -> unit

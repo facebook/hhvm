@@ -54,12 +54,12 @@ let handle_response env ic =
     Printf.fprintf stderr "Unexpected error: %s\n%s%!" (Exn.to_string e) stack;
     raise e
 
-let main_exn env =
+let main_exn (env : env) : Exit_status.t Lwt.t =
   let build_type = ServerBuild.build_type_of env.build_opts in
   let request_id = env.build_opts.ServerBuild.id in
   HackEventLogger.set_from env.from;
   HackEventLogger.client_build build_type request_id;
-  let ClientConnect.{channels = ic, oc; _} =
+  let%lwt ClientConnect.{channels = ic, oc; _} =
       ClientConnect.connect { ClientConnect.
     root = env.root;
     from = env.from;
@@ -101,10 +101,14 @@ let main_exn env =
   end in
   HackEventLogger.client_build_finish
     ~rev_changed:(svnrev <> old_svnrev) ~build_type ~request_id ~exit_status;
-  exit_status
+  Lwt.return exit_status
 
-let main env =
-  try main_exn env with
+let main (env : env) : Exit_status.t Lwt.t =
+  try%lwt
+    let%lwt result = main_exn env in
+    Lwt.return result
+  with
   | Exit_status.Exit_with Exit_status.No_server_running ->
     Printf.eprintf "Retrying build...\n";
-    main_exn env
+    let%lwt result = main_exn env in
+    Lwt.return result

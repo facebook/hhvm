@@ -139,8 +139,15 @@ let patches_to_json_string patches =
 let print_patches_json patches =
   print_endline (patches_to_json_string patches)
 
-let go_ide conn args filename line char new_name =
-  let patches = ClientConnect.rpc_with_retry conn @@
+let go_ide
+    (conn : unit -> ClientConnect.conn Lwt.t)
+    (args : client_check_env)
+    (filename : string)
+    (line : int)
+    (char : int)
+    (new_name : string)
+    : unit Lwt.t =
+  let%lwt patches = ClientConnect.rpc_with_retry conn @@
     ServerCommandTypes.IDE_REFACTOR {
       ServerCommandTypes.Ide_refactor_type.
       filename;
@@ -152,11 +159,18 @@ let go_ide conn args filename line char new_name =
   | Ok patches -> patches
   | Error message -> failwith message
   in
-  if args.output_json
+  (if args.output_json
   then print_patches_json patches
-  else apply_patches patches
+  else apply_patches patches);
+  Lwt.return_unit
 
-let go conn args mode before after =
+let go
+    (conn : unit -> ClientConnect.conn Lwt.t)
+    (args : client_check_env)
+    (mode : string)
+    (before : string)
+    (after : string)
+    : unit Lwt.t =
     let command = match mode with
     | "Class" -> ServerRefactorTypes.ClassRename (before, after)
     | "Function" ->
@@ -203,8 +217,9 @@ let go conn args mode before after =
     | _ ->
         failwith "Unexpected Mode" in
 
-    let patches =
+    let%lwt patches =
       ClientConnect.rpc_with_retry conn @@ ServerCommandTypes.REFACTOR command in
-    if args.output_json
+    (if args.output_json
     then print_patches_json patches
-    else apply_patches patches
+    else apply_patches patches);
+    Lwt.return_unit

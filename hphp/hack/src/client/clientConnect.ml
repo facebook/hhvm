@@ -212,7 +212,7 @@ let rec wait_for_server_message
   ~(progress_callback : string option -> unit)
   ~(start_time : float)
   ~(tail_env : Tail.env option)
-  : 'a ServerCommandTypes.message_type =
+  : 'a ServerCommandTypes.message_type Lwt.t =
   let elapsed_t = int_of_float (Unix.time () -. start_time) in
   match retries with
   | Some n when elapsed_t > n ->
@@ -221,7 +221,7 @@ let rec wait_for_server_message
       raise Exit_status.(Exit_with Out_of_retries)
   | Some _
   | None -> ();
-  let readable, _, _  = Unix.select
+  let%lwt readable, _, _ = Lwt_utils.select
     [Timeout.descr_of_in_channel ic] [] [Timeout.descr_of_in_channel ic] 1.0 in
   if readable = [] then (
     Option.iter tail_env
@@ -234,7 +234,7 @@ let rec wait_for_server_message
       ~start_time
       ~tail_env
   ) else
-    try
+    try%lwt
       let fd = Timeout.descr_of_in_channel ic in
       let msg : 'a ServerCommandTypes.message_type =
         Marshal_tools.from_fd_with_preamble fd in
@@ -243,7 +243,7 @@ let rec wait_for_server_message
           (Option.is_none expected_message || Some msg = expected_message) then
       begin
         progress_callback None;
-        msg
+        Lwt.return msg
       end else begin
         if not is_ping then Option.iter tail_env
           (fun t -> print_wait_msg progress_callback start_time t);
@@ -262,8 +262,8 @@ let wait_for_server_hello
   (progress_callback : string option -> unit)
   (start_time : float)
   (tail_env : Tail.env option)
-  : unit =
-  let _ : 'a ServerCommandTypes.message_type =
+  : unit Lwt.t =
+  let%lwt _ : 'a ServerCommandTypes.message_type =
     wait_for_server_message
       ~expected_message:(Some ServerCommandTypes.Hello)
       ~ic
@@ -272,10 +272,10 @@ let wait_for_server_hello
       ~start_time
       ~tail_env
   in
-  ()
+  Lwt.return_unit
 
-let with_server_hung_up (f : unit -> 'a) : 'a =
-  try f () with
+let with_server_hung_up (f : unit -> 'a Lwt.t) : 'a Lwt.t =
+  try%lwt f () with
   | Server_hung_up ->
     (Printf.eprintf ("Hack server disconnected suddenly. Most likely a new one" ^^
     " is being initialized with a better saved state after a large rebase/update.\n");
@@ -287,7 +287,7 @@ let rec connect
     (retries : int option)
     (start_time : float)
     (tail_env : Tail.env)
-    : conn =
+    : conn Lwt.t =
   let elapsed_t = int_of_float (Unix.time () -. start_time) in
   match retries with
   | Some n when elapsed_t > n ->
@@ -326,12 +326,15 @@ let rec connect
   HackEventLogger.client_connect_once connect_once_start_t;
   match conn with
   | Ok (ic, oc) ->
-      if env.do_post_handoff_handshake then begin
-        with_server_hung_up @@ fun () ->
-          wait_for_server_hello ic retries env.progress_callback start_time
-            (Some tail_env)
-      end;
-      {
+      let%lwt () =
+        if env.do_post_handoff_handshake then
+          with_server_hung_up @@ fun () ->
+            wait_for_server_hello ic retries env.progress_callback start_time
+              (Some tail_env)
+        else
+          Lwt.return_unit
+      in
+      Lwt.return {
         channels = (ic, oc);
         conn_retries = retries;
         conn_progress_callback = env.progress_callback;
@@ -437,25 +440,25 @@ let rec connect
           connect env retries start_time tail_env
         end else raise Exit_status.(Exit_with Exit_status.Build_id_mismatch)
 
-let connect (env : env) : conn =
+let connect (env : env) : conn Lwt.t =
   let link_file = ServerFiles.log_link env.root in
   let start_time = Unix.time () in
   let tail_env = Tail.create_env link_file in
-  try
-    let {channels = (_, oc); _} as conn =
+  try%lwt
+    let%lwt {channels = (_, oc); _} as conn =
       connect ~first_attempt:true env env.retries start_time tail_env in
     Tail.close_env tail_env;
     HackEventLogger.client_established_connection start_time;
     if env.do_post_handoff_handshake then begin
       ServerCommand.send_connection_type oc ServerCommandTypes.Non_persistent;
     end;
-    conn
+    Lwt.return conn
   with
   | e ->
     HackEventLogger.client_establish_connection_exception e;
     raise e
 
-let rpc : type a. conn -> a ServerCommandTypes.t -> a
+let rpc : type a. conn -> a ServerCommandTypes.t -> a Lwt.t
 = fun {
     channels = (ic, oc);
     conn_retries = retries;
@@ -466,7 +469,7 @@ let rpc : type a. conn -> a ServerCommandTypes.t -> a
   Marshal.to_channel oc (ServerCommandTypes.Rpc cmd) [];
   Out_channel.flush oc;
   with_server_hung_up @@ fun () ->
-    let res = wait_for_server_message
+    let%lwt res = wait_for_server_message
       ~expected_message:None
       ~ic
       ~retries
@@ -476,13 +479,17 @@ let rpc : type a. conn -> a ServerCommandTypes.t -> a
     in
     Option.iter tail_env ~f:Tail.close_env;
     match res with
-    | ServerCommandTypes.Response (response, _) -> response
+    | ServerCommandTypes.Response (response, _) -> Lwt.return response
     | ServerCommandTypes.Push _ -> failwith "unexpected 'push' RPC response"
     | ServerCommandTypes.Hello -> failwith "unexpected 'hello' RPC response"
     | ServerCommandTypes.Ping -> failwith "unexpected 'ping' RPC response"
 
 let rpc_with_retry
-    (conn_f : unit -> conn)
+    (conn_f : unit -> conn Lwt.t)
     (cmd : 'a ServerCommandTypes.Done_or_retry.t ServerCommandTypes.t)
-    : 'a =
-  ServerCommandTypes.Done_or_retry.call ~f:(fun () -> rpc (conn_f ()) cmd)
+    : 'a Lwt.t =
+  ServerCommandTypes.Done_or_retry.call ~f:(fun () ->
+    let%lwt conn = conn_f () in
+    let%lwt result = rpc conn cmd in
+    Lwt.return result
+  )

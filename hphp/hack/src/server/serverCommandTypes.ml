@@ -68,15 +68,19 @@ module Done_or_retry = struct
   (* Note: this is designed to work with calls that always will succeed on second try
    * (the reason for retrying is a one time event that is resolved during first call).
    * If this ends up throwing, it's a bug in hh_server. *)
-  let rec call ~(f:unit -> 'a t) ~(depth:int) : 'a =
-    if depth = 2 then raise Two_retries_in_a_row;
-    match f () with
-    | Done x -> x
+  let rec call ~(f:unit -> 'a t Lwt.t) ~(depth:int) : 'a Lwt.t =
+    let%lwt () =
+      if depth = 2
+      then Lwt.fail Two_retries_in_a_row
+      else Lwt.return_unit
+    in
+    match%lwt f () with
+    | Done x -> Lwt.return x
     | Retry -> call ~f ~depth:(depth+1)
 
   (* Call the function returning Done_or_retry.t with at most one retry, expecting
    * that this is enough to yield a non-Retry value, which is returned *)
-  let call ~(f:unit -> 'a t) : 'a = call ~f ~depth:0
+  let call ~(f:unit -> 'a t Lwt.t) : 'a Lwt.t = call ~f ~depth:0
 
   (* Helper function useful when mapping over results from functions that (in addition
    * to Done_or_retry.t result) thread through some kind of environment. *)

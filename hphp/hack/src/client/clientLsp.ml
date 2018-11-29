@@ -312,7 +312,7 @@ let rpc
     update_hh_server_state_if_necessary (Server_message {push; has_updated_server_state=false;});
     Queue.enqueue server_conn.pending_messages {push; has_updated_server_state=true;}
   in
-  let%lwt result = ServerCommand.rpc_persistent_lwt
+  let%lwt result = ServerCommandLwt.rpc_persistent_lwt
     (server_conn.ic, server_conn.oc) () callback command in
   match result with
   | Ok ((), res, start_server_handle_time) ->

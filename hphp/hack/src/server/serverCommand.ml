@@ -202,24 +202,6 @@ let rec wait_for_rpc_response_lwt fd state callback =
     let stack = Printexc.get_backtrace () in
     Lwt.return (Error (state, Utils.Callstack stack, e))
 
-(** rpc_persistent blocks until it can send a message. Then it sends the message
-   and listens for incoming messages - either an exception which it raises,
-   or a push which it dispatches via the supplied callback, or a response
-   which it returns. *)
-let rpc_persistent :
-  type a s.
-  Timeout.in_channel * Out_channel.t -> s -> (s -> push -> s) -> a t
-  -> (s * a * float, s * Utils.callstack * exn) result
-  = fun (_, oc) state callback cmd ->
-  try
-    Marshal.to_channel oc (Rpc cmd) [];
-    Out_channel.flush oc;
-    let fd = Unix.descr_of_out_channel oc in
-    wait_for_rpc_response fd state callback
-  with e ->
-    let stack = Printexc.get_backtrace () in
-    Error (state, Utils.Callstack stack, e)
-
 (** Same as [rpc_persistent], but returns an Lwt promise instead of blocking.
 Note: although this function returns a promise, it is not safe to call this
 function multiple times in parallel, since they are writing to the same output

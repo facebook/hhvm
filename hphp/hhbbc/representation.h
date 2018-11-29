@@ -114,6 +114,8 @@ struct Block {
    */
   BlockId fallthrough{NoBlockId};
   bool fallthroughNS{false};
+  bool multiPred{false};
+  bool multiSucc{false};
 
   CompactVector<BlockId> throwExits;
   CompactVector<BlockId> unwindExits;

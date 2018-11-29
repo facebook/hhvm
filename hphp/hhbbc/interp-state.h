@@ -258,9 +258,26 @@ enum class LocalStaticBinding {
  *
  */
 struct State {
-  bool initialized = false;
-  bool unreachable = false;
-  bool thisAvailable = false;
+  State() {
+    initialized = unreachable = thisAvailable = false;
+    speculatedIsUnconditional = false;
+    speculatedIsFallThrough = false;
+  };
+  State(const State&) = default;
+  State(State&&) = default;
+  State& operator=(const State&) = default;
+  State& operator=(State&&) = default;
+
+  uint8_t initialized : 1;
+  uint8_t unreachable : 1;
+  uint8_t thisAvailable : 1;
+  // if set, speculated is where we end up when we fall through
+  uint8_t speculatedIsFallThrough : 1;
+  // if set, speculated is taken unconditionally
+  uint8_t speculatedIsUnconditional : 1;
+  // when speculated is set, the number of extra pops to be inserted
+  uint8_t speculatedPops{};
+  uint32_t speculated = NoBlockId;
   LocalId thisLocToKill = NoLocalId;
   CompactVector<Type> locals;
   CompactVector<Iter> iters;
@@ -378,17 +395,26 @@ enum class CollectionOpts {
   TrackConstantArrays = 1,
   Inlining = 2,
   EffectFreeOnly = 4,
-  Optimizing = 8
+  Optimizing = 8,
+  Speculating = 16,
 };
 
 inline CollectionOpts operator|(CollectionOpts o1, CollectionOpts o2) {
-  return static_cast<CollectionOpts>(static_cast<int>(o1) |
-                                     static_cast<int>(o2));
+  return static_cast<CollectionOpts>(
+    static_cast<int>(o1) | static_cast<int>(o2)
+  );
 }
 
 inline CollectionOpts operator&(CollectionOpts o1, CollectionOpts o2) {
-  return static_cast<CollectionOpts>(static_cast<int>(o1) &
-                                     static_cast<int>(o2));
+  return static_cast<CollectionOpts>(
+    static_cast<int>(o1) & static_cast<int>(o2)
+  );
+}
+
+inline CollectionOpts operator-(CollectionOpts o1, CollectionOpts o2) {
+  return static_cast<CollectionOpts>(
+    static_cast<int>(o1) & ~static_cast<int>(o2)
+  );
 }
 
 inline bool any(CollectionOpts o) { return static_cast<int>(o); }
@@ -415,7 +441,7 @@ struct CollectedInfo {
   bool effectFree{true};
   bool hasInvariantIterBase{false};
   bool readsUntrackedConstants{false};
-  const CollectionOpts opts{CollectionOpts::TrackConstantArrays};
+  CollectionOpts opts{CollectionOpts::TrackConstantArrays};
   bool (*propagate_constants)(const Bytecode& bc, State& state,
                               BytecodeVec& out) = nullptr;
   CompactVector<Type> localStaticTypes;

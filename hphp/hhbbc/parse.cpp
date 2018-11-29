@@ -1081,6 +1081,8 @@ void build_cfg(ParseUnitState& puState,
 
   auto exnTreeInfo = build_exn_tree(fe, func, findBlock);
 
+  hphp_fast_map<BlockId, std::pair<int, int>> predSuccCounts;
+
   for (auto it = begin(blockStarts);
        std::next(it) != end(blockStarts);
        ++it) {
@@ -1095,6 +1097,10 @@ void build_cfg(ParseUnitState& puState,
     }
 
     populate_block(puState, fe, func, *block, bcStart, bcStop, findBlock);
+    forEachNonThrowSuccessor(*block, [&] (BlockId blkId) {
+        predSuccCounts[blkId].first++;
+        predSuccCounts[block->id].second++;
+    });
   }
 
   link_entry_points(func, fe, findBlock);
@@ -1103,6 +1109,8 @@ void build_cfg(ParseUnitState& puState,
   func.blocks.resize(blockMap.size());
   for (auto& kv : blockMap) {
     auto const id = kv.second->id;
+    kv.second->multiSucc = predSuccCounts[id].second > 1;
+    kv.second->multiPred = predSuccCounts[id].first > 1;
     func.blocks[id] = std::move(kv.second);
   }
 

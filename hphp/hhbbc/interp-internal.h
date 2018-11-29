@@ -392,6 +392,7 @@ void push(ISS& env, Type t, LocalId l) {
 bool fpiPush(ISS& env, ActRec ar, int32_t nArgs, bool maybeDynamic) {
   auto foldable = [&] {
     if (!options.ConstantFoldBuiltins) return false;
+    if (any(env.collect.opts & CollectionOpts::Speculating)) return false;
     if (!env.collect.propagate_constants &&
         any(env.collect.opts & CollectionOpts::Optimizing)) {
       // we're in the optimization phase, but we're not folding constants

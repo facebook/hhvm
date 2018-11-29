@@ -40,16 +40,35 @@ const char* destTypeName(DestType dt) {
   not_reached();
 }
 
-ArgDesc::ArgDesc(SSATmp* tmp, Vloc loc, bool val) {
+ArgDesc::ArgDesc(SSATmp* tmp,
+                 Vloc loc,
+                 bool val,
+                 folly::Optional<AuxUnion> aux) {
+  assertx(IMPLIES(aux, !val));
+
+  auto const setTypeImm = [&] {
+    static_assert(offsetof(TypedValue, m_type) % 8 == 0, "");
+
+    if (aux) {
+      auto const dt = static_cast<std::make_unsigned<data_type_t>::type>(
+        tmp->type().toDataType()
+      );
+      static_assert(std::numeric_limits<decltype(dt)>::digits <= 32, "");
+      m_imm64 = dt | auxToMask(*aux);
+      m_kind = Kind::Imm;
+    } else {
+      m_typeImm = tmp->type().toDataType();
+      m_kind = Kind::TypeImm;
+    }
+  };
+
   if (tmp->hasConstVal()) {
     // tmp is a constant
     if (val) {
       m_imm64 = tmp->rawVal();
       m_kind = Kind::Imm;
     } else {
-      static_assert(offsetof(TypedValue, m_type) % 8 == 0, "");
-      m_typeImm = tmp->type().toDataType();
-      m_kind = Kind::TypeImm;
+      setTypeImm();
     }
     return;
   }
@@ -69,13 +88,11 @@ ArgDesc::ArgDesc(SSATmp* tmp, Vloc loc, bool val) {
     // val is false so we're passing tmp's type.
     m_srcReg = loc.reg(1);
     m_kind = Kind::Reg;
+    m_aux = aux;
     return;
   }
 
-  // arg is the (constant) type of a known-typed value.
-  static_assert(offsetof(TypedValue, m_type) % 8 == 0, "");
-  m_typeImm = tmp->type().toDataType();
-  m_kind = Kind::TypeImm;
+  setTypeImm();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -106,7 +123,7 @@ ArgGroup& ArgGroup::ssa(int i, bool allowFP) {
   return *this;
 }
 
-ArgGroup& ArgGroup::typedValue(int i) {
+ArgGroup& ArgGroup::typedValue(int i, folly::Optional<AuxUnion> aux) {
   // If there's exactly one register argument slot left, the whole TypedValue
   // goes on the stack instead of being split between a register and the stack.
   if (m_gpArgs.size() == num_arg_regs() - 1) m_override = &m_stkArgs;
@@ -114,7 +131,7 @@ ArgGroup& ArgGroup::typedValue(int i) {
 
   static_assert(offsetof(TypedValue, m_data) == 0, "");
   static_assert(offsetof(TypedValue, m_type) == 8, "");
-  ssa(i, false).type(i);
+  ssa(i, false).type(i, aux);
   return *this;
 }
 

@@ -45,6 +45,8 @@ namespace {
  * append its Vreg to `vargs'.
  */
 void prepareArg(const ArgDesc& arg, Vout& v, VregList& vargs) {
+  assertx(IMPLIES(arg.aux(), arg.kind() == ArgDesc::Kind::Reg));
+
   switch (arg.kind()) {
     case ArgDesc::Kind::IndRet: {
       auto const tmp = v.makeReg();
@@ -56,10 +58,26 @@ void prepareArg(const ArgDesc& arg, Vout& v, VregList& vargs) {
     case ArgDesc::Kind::Reg: {
       auto reg = arg.srcReg();
       if (arg.isZeroExtend()) {
+        assertx(!arg.aux());
         reg = v.makeReg();
         v << movzbq{arg.srcReg(), reg};
+        vargs.push_back(reg);
+      } else if (auto const aux = arg.aux()) {
+        // DataType is signed. We're using movzbq here to clear out the upper 7
+        // bytes of the register, not to actually extend the type value.
+        auto const extended = v.makeReg();
+        auto const result = v.makeReg();
+        v << movzbq{arg.srcReg(), extended};
+        v << orq{
+          extended,
+          v.cns(auxToMask(*aux)),
+          result,
+          v.makeReg()
+        };
+        vargs.push_back(result);
+      } else {
+        vargs.push_back(reg);
       }
-      vargs.push_back(reg);
       break;
     }
 

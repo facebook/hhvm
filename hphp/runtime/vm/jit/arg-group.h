@@ -98,6 +98,7 @@ struct ArgDesc {
     return m_disp32;
   }
   bool isZeroExtend() const { return m_zeroExtend; }
+  folly::Optional<AuxUnion> aux() const { return m_aux; }
   bool done() const { return m_done; }
   void markDone() { m_done = true; }
 
@@ -119,7 +120,10 @@ private: // These should be created using ArgGroup.
     : m_kind(kind)
   {}
 
-  explicit ArgDesc(SSATmp* tmp, Vloc, bool val = true);
+  explicit ArgDesc(SSATmp* tmp,
+                   Vloc,
+                   bool val = true,
+                   folly::Optional<AuxUnion> aux = folly::none);
 
 private:
   Kind m_kind;
@@ -130,6 +134,7 @@ private:
     Immed m_disp32;  // 32-bit displacement
     DataType m_typeImm;
   };
+  folly::Optional<AuxUnion> m_aux;
   bool m_zeroExtend{false};
   bool m_done{false};
 };
@@ -227,7 +232,7 @@ struct ArgGroup {
   /*
    * Pass tmp as a TypedValue passed by value.
    */
-  ArgGroup& typedValue(int i);
+  ArgGroup& typedValue(int i, folly::Optional<AuxUnion> aux = folly::none);
 
   ArgGroup& memberKeyIS(int i) {
     return memberKeyImpl(i, true);
@@ -248,9 +253,9 @@ private:
   /*
    * For passing the m_type field of a TypedValue.
    */
-  ArgGroup& type(int i) {
+  ArgGroup& type(int i, folly::Optional<AuxUnion> aux) {
     auto s = m_inst->src(i);
-    push_arg(ArgDesc(s, m_locs[s], false));
+    push_arg(ArgDesc(s, m_locs[s], false, aux));
     return *this;
   }
 

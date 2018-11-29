@@ -96,6 +96,9 @@ void emitCmpTVType(Vout& v, Vreg sf, DataType s0, Vreg s1);
 void storeTV(Vout& v, Vptr dst, Vloc srcLoc, const SSATmp* src);
 void storeTV(Vout& v, Type type, Vloc srcLoc, Vptr typePtr, Vptr dataPtr);
 
+void storeTVWithAux(Vout& v, Vptr dst, Vloc srcLoc,
+                    const SSATmp* src, AuxUnion aux);
+
 /*
  * Load `src' into `loc', the registers representing `dst'.
  *
@@ -289,6 +292,14 @@ Vreg checkRDSHandleInitialized(Vout& v, Vreg ch);
  */
 void markRDSHandleInitialized(Vout& v, rds::Handle ch);
 void markRDSHandleInitialized(Vout& v, Vreg ch);
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Return a mask for an aux value suitable for ORing into the lower 64-bits of a
+ * TypedValue.
+ */
+uint64_t auxToMask(AuxUnion);
 
 }}
 

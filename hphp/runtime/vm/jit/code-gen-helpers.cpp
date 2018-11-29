@@ -134,6 +134,25 @@ Vreg zeroExtendIfBool(Vout& v, Type ty, Vreg reg) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+void storeTVVal(Vout& v, Type type, Vloc srcLoc, Vptr valPtr) {
+  // We ignore the values of statically nullish types.
+  if (type <= TNull || type <= TNullptr) return;
+
+  // Store the value.
+  if (type.hasConstVal()) {
+    // Skip potential zero-extend if we know the value.
+    v << store{v.cns(type.rawVal()), valPtr};
+  } else {
+    assertx(srcLoc.hasReg(0));
+    auto const extended = zeroExtendIfBool(v, type, srcLoc.reg(0));
+    v << store{extended, valPtr};
+  }
+}
+
+}
+
 void storeTV(Vout& v, Vptr dst, Vloc srcLoc, const SSATmp* src) {
   storeTV(v, src->type(), srcLoc, dst + TVOFF(m_type), dst + TVOFF(m_data));
 }
@@ -154,18 +173,41 @@ void storeTV(Vout& v, Type type, Vloc srcLoc, Vptr typePtr, Vptr valPtr) {
     v << storeb{v.cns(type.toDataType()), typePtr};
   }
 
-  // We ignore the values of statically nullish types.
-  if (type <= TNull || type <= TNullptr) return;
+  storeTVVal(v, type, srcLoc, valPtr);
+}
 
-  // Store the value.
-  if (type.hasConstVal()) {
-    // Skip potential zero-extend if we know the value.
-    v << store{v.cns(type.rawVal()), valPtr};
+void storeTVWithAux(Vout& v,
+                    Vptr dst,
+                    Vloc srcLoc,
+                    const SSATmp* src,
+                    AuxUnion aux) {
+  static_assert(TVOFF(m_type) == 8, "");
+  static_assert(TVOFF(m_aux) == 12, "");
+  assertx(!srcLoc.isFullSIMD());
+
+  auto const type = src->type();
+  auto const auxMask = auxToMask(aux);
+
+  if (type.needsReg()) {
+    assertx(srcLoc.hasReg(1));
+
+    // DataType is signed. We're using movzbq here to clear out the upper 7
+    // bytes of the register, not to actually extend the type value.
+    auto const typeReg = srcLoc.reg(1);
+    auto const extended = v.makeReg();
+    auto const result = v.makeReg();
+    v << movzbq{typeReg, extended};
+    v << orq{extended, v.cns(auxMask), result, v.makeReg()};
+    v << store{result, dst + TVOFF(m_type)};
   } else {
-    assertx(srcLoc.hasReg(0));
-    auto const extended = zeroExtendIfBool(v, type, srcLoc.reg(0));
-    v << store{extended, valPtr};
+    auto const dt = static_cast<std::make_unsigned<data_type_t>::type>(
+      type.toDataType()
+    );
+    static_assert(std::numeric_limits<decltype(dt)>::digits <= 32, "");
+    v << store{v.cns(dt | auxMask), dst + TVOFF(m_type)};
   }
+
+  storeTVVal(v, type, srcLoc, dst + TVOFF(m_data));
 }
 
 void loadTV(Vout& v, const SSATmp* dst, Vloc dstLoc, Vptr src,
@@ -183,7 +225,7 @@ void loadTV(Vout& v, Type type, Vloc dstLoc, Vptr typePtr, Vptr valPtr,
     return;
   }
 
-  if (type.needsReg()) {
+  if (type.needsReg() || aux) {
     assertx(dstLoc.hasReg(1));
     if (aux) {
       v << load{typePtr, dstLoc.reg(1)};
@@ -565,6 +607,19 @@ void markRDSHandleInitialized(Vout& v, rds::Handle ch) {
 
 void markRDSHandleInitialized(Vout& v, Vreg ch) {
   doMarkRDSHandleInitialized(v, ch);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+uint64_t auxToMask(AuxUnion aux) {
+  if (!aux.u_raw) return 0;
+  if (aux.u_raw == static_cast<uint32_t>(-1)) {
+    return static_cast<uint64_t>(-1) <<
+      std::numeric_limits<
+        std::make_unsigned<data_type_t>::type
+      >::digits;
+  }
+  return uint64_t{aux.u_raw} << 32;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

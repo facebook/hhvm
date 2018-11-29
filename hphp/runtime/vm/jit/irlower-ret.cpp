@@ -187,7 +187,7 @@ void cgAsyncSwitchFast(IRLS& env, const IRInstruction* inst) {
 void cgLdRetVal(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);
-  loadTV(v, inst->dst(), dstLoc(env, inst, 0), fp[kArRetOff], true);
+  loadTV(v, inst->dst(), dstLoc(env, inst, 0), fp[kArRetOff]);
 }
 
 void cgDbgTrashRetVal(IRLS& env, const IRInstruction* inst) {

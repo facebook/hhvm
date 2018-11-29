@@ -423,7 +423,7 @@ let enforce_mutable_call (env : Typing_env.env) (te : T.expr) =
   (* TAny, T.Calls that don't have types, etc *)
   | _ -> ()
 
-let rec is_byval_collection_type env ty =
+let rec is_byval_collection_or_string_type env ty =
   let check t =
     match t with
     | (_, Tclass ((_, x), _, _)) ->
@@ -432,7 +432,8 @@ let rec is_byval_collection_type env ty =
       x = SN.Collections.cKeyset
     | _, (Tarraykind _ | Ttuple _ | Tshape _)
       -> true
-    | _, Tunresolved tl -> List.for_all tl ~f:(is_byval_collection_type env)
+    | _, Tprim Nast.Tstring -> true
+    | _, Tunresolved tl -> List.for_all tl ~f:(is_byval_collection_or_string_type env)
     | _ -> false in
   let _, tl = Typing_utils.get_all_supertypes env ty in
   List.for_all tl ~f:check
@@ -440,12 +441,12 @@ let rec is_byval_collection_type env ty =
 let rec is_valid_mutable_subscript_expression_target env v =
   match v with
   | (_, ty), T.Lvar _ ->
-    is_byval_collection_type env ty
+    is_byval_collection_or_string_type env ty
   | (_, ty), T.Array_get (e, _) ->
-    is_byval_collection_type env ty &&
+    is_byval_collection_or_string_type env ty &&
     is_valid_mutable_subscript_expression_target env e
   | (_, ty), T.Obj_get (e, _, _) ->
-    is_byval_collection_type env ty &&
+    is_byval_collection_or_string_type env ty &&
     (is_valid_mutable_subscript_expression_target env e || expr_is_valid_borrowed_arg env e)
   | _ -> false
 

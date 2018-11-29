@@ -88,6 +88,9 @@ struct Immed {
 
   Immed operator-() { return -this->m_int; }
 
+  bool operator==(Immed o) const { return m_int == o.m_int; }
+  bool operator!=(Immed o) const { return m_int != o.m_int; }
+
 private:
   int32_t m_int;
 };
@@ -113,6 +116,9 @@ struct Immed64 {
   int8_t  b() const { return safe_cast<int8_t>(m_long); }
 
   bool fits(int sz) const { return deltaFits(m_long, sz); }
+
+  bool operator==(Immed64 o) const { return m_long == o.m_long; }
+  bool operator!=(Immed64 o) const { return m_long != o.m_long; }
 
 private:
   int64_t m_long;

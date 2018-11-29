@@ -178,6 +178,7 @@ struct FPInvOffset {
    * A "lower" FPInvOffset means "closer to fp" (i.e., higher address).
    */
   bool operator==(FPInvOffset o) const { return offset == o.offset; }
+  bool operator!=(FPInvOffset o) const { return offset != o.offset; }
   bool operator< (FPInvOffset o) const { return offset <  o.offset; }
   bool operator<=(FPInvOffset o) const { return offset <= o.offset; }
   bool operator> (FPInvOffset o) const { return offset >  o.offset; }

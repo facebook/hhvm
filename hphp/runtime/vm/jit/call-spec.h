@@ -357,6 +357,21 @@ struct CallSpec {
 
   /////////////////////////////////////////////////////////////////////////////
 
+  bool operator==(const CallSpec& o) const {
+    auto const k1 = kind();
+    auto const k2 = o.kind();
+    if (k1 != k2) return false;
+    switch (k1) {
+      case CallSpec::Kind::Direct:
+      case CallSpec::Kind::Smashable:  return address() == o.address();
+      case CallSpec::Kind::ArrayVirt:  return arrayTable() == o.arrayTable();
+      case CallSpec::Kind::Destructor: return reg() == o.reg();
+      case CallSpec::Kind::Stub:       return stubAddr() == o.stubAddr();
+    }
+    always_assert(false);
+  }
+  bool operator!=(const CallSpec& o) const { return !(*this == o); }
+
 private:
   union U {
     /* implicit */ U(void* fp) : fp(fp) {}

@@ -45,6 +45,13 @@ struct VdataPtr {
   VdataPtr(const VdataPtr& other) = default;
   VdataPtr& operator=(const VdataPtr& other) = default;
 
+  bool operator==(const VdataPtr& o) const {
+    return m_ptr == o.m_ptr && m_bound == o.m_bound;
+  }
+  bool operator!=(const VdataPtr& o) const {
+    return m_ptr != o.m_ptr || m_bound != o.m_bound;
+  }
+
   bool bound() const {
     return m_bound;
   }

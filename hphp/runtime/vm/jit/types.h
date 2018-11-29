@@ -148,6 +148,9 @@ inline bool isPrologue(TransKind k) {
 struct TransFlags {
   /* implicit */ TransFlags(uint64_t flags = 0) : packed(flags) {}
 
+  bool operator==(TransFlags o) const { return packed == o.packed; }
+  bool operator!=(TransFlags o) const { return packed != o.packed; }
+
   union {
     struct {
       bool noinlineSingleton : 1;
@@ -259,6 +262,13 @@ using Vflags = uint8_t;
 struct Reason {
   const char* file;
   unsigned line;
+
+  bool operator==(const Reason& o) const {
+    return line == o.line && std::string{file} == std::string{o.file};
+  }
+  bool operator!=(const Reason& o) const {
+    return line != o.line || std::string{file} != std::string{o.file};
+  }
 };
 
 inline std::string show(const Reason &r) {

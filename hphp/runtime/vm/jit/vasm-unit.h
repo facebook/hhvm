@@ -62,6 +62,13 @@ struct VcallArgs {
   VregList simdArgs;
   VregList stkArgs;
   VregList indRetArgs;
+
+  bool operator==(const VcallArgs& o) const {
+    return
+      std::tie(args, simdArgs, stkArgs, indRetArgs) ==
+      std::tie(o.args, o.simdArgs, o.stkArgs, o.indRetArgs);
+  }
+  bool operator!=(const VcallArgs& o) const { return !(*this == o); }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

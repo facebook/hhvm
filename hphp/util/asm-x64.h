@@ -256,6 +256,9 @@ struct DispRIP {
     return DispRIP(disp - x);
   }
 
+  bool operator==(DispRIP o) const { return disp == o.disp; }
+  bool operator!=(DispRIP o) const { return disp != o.disp; }
+
   intptr_t disp;
 };
 
@@ -270,6 +273,9 @@ struct MemoryRef {
 struct RIPRelativeRef {
   explicit RIPRelativeRef(DispRIP r) : r(r) {}
   DispRIP r;
+
+  bool operator==(const RIPRelativeRef& o) const { return r == o.r; }
+  bool operator!=(const RIPRelativeRef& o) const { return r != o.r; }
 };
 
 inline MemoryRef IndexedDispReg::operator*() const {

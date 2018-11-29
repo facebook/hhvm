@@ -123,6 +123,13 @@ struct Fixup {
 
   bool isValid() const { return pcOffset >= 0 && spOffset >= 0; }
 
+  bool operator==(const Fixup& o) const {
+    return pcOffset == o.pcOffset && spOffset == o.spOffset;
+  }
+  bool operator!=(const Fixup& o) const {
+    return pcOffset != o.pcOffset || spOffset != o.spOffset;
+  }
+
   int32_t pcOffset{-1};
   int32_t spOffset{-1};
 };

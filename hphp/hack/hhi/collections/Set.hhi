@@ -632,7 +632,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @return - A `Set` with the values from the passed `array`(s).
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __MutableReturn>>
   public static function fromArrays(...): Set<Tv>;
 
   /**
@@ -647,7 +647,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - A `Set` with the values from the `Traversable`; or an empty `Set`
    *           if the `Traversable` is `null`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
   public static function fromItems<Tv2>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv2> $items): Set<Tv2>;
 
   /**
@@ -659,7 +659,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @return - A `Set` built from the keys of the specified container.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __MutableReturn>>
   public static function fromKeysOf<Tk, Tv2>(
     ?KeyedContainer<Tk,Tv2> $container,
   ): Set<Tk>;

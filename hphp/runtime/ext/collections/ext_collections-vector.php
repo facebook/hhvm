@@ -504,14 +504,14 @@ final class Vector implements \MutableVector {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn>>
   public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a Vector built from the keys of the specified container.
    * @param mixed $container
    * @return object
    */
-  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __MutableReturn>>
   public static function fromKeysOf(mixed $container): object;
 
   /* Returns a Vector built from the values from the specified array.
@@ -539,14 +539,14 @@ final class ImmVector implements \ConstVector {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs>>
   public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a ImmVector built from the keys of the specified container.
    * @param mixed $container
    * @return object
    */
-  <<__Native, __Rx, __MaybeMutable>>
+  <<__Native, __Rx>>
   public static function fromKeysOf(mixed $container): object;
 
   /* Returns true if the ImmVector is empty, false otherwise.

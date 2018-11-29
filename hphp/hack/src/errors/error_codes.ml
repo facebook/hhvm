@@ -225,7 +225,7 @@ module NastCheck                            = struct
   | RequiresFinalClass
   | InterfaceUsesTrait
   | NonstaticMethodInAbstractFinalClass
-  | MutableOnStatic
+  | MutableOnStaticDEPRECATED
   | ClassnameConstInstanceOf
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@ deriving enum, show { with_path = false } ]

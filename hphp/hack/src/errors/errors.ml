@@ -1216,11 +1216,6 @@ let no_construct_parent pos =
    ]
  )
 
-let mutable_on_static pos =
-  add (NastCheck.err_code NastCheck.MutableOnStatic) pos (
-    "<<__Mutable>> attribute is not allowed on static methods."
-  )
-
  let nonstatic_method_in_abstract_final_class pos =
   add (NastCheck.err_code NastCheck.NonstaticMethodInAbstractFinalClass) pos (
     "Abstract final classes cannot have nonstatic methods or constructors."

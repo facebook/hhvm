@@ -709,7 +709,7 @@ EOT
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn>>
   public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a Map built from the keys and values from the specified array.
@@ -1320,7 +1320,7 @@ EOT
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs>>
   public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 }
 

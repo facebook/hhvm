@@ -410,14 +410,14 @@ final class Set implements \MutableSet {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn>>
   public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a Set built from the keys of the specified container.
    * @param mixed $container
    * @return object
    */
-  <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
+  <<__Native, __Rx, __MutableReturn>>
   public static function fromKeysOf(mixed $container): object;
 
   /* Returns a Set built from the values from the specified array.
@@ -430,7 +430,7 @@ final class Set implements \MutableSet {
   /* Returns a Set built from the values from the specified arrays.
    * @return object
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __MutableReturn>>
   public static function fromArrays(...$argv) {
     if (!$argv) return \HH\Set {};
     $ret = \HH\Set {};
@@ -744,20 +744,20 @@ final class ImmSet implements \ConstSet {
    * @param mixed $iterable
    * @return object
    */
-  <<__Native, __Rx, __AtMostRxAsArgs, __MaybeMutable>>
+  <<__Native, __Rx, __AtMostRxAsArgs>>
   public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> mixed $iterable): object;
 
   /* Returns a ImmSet built from the keys of the specified container.
    * @param mixed $container
    * @return object
    */
-  <<__Native, __Rx, __MaybeMutable>>
+  <<__Native, __Rx>>
   public static function fromKeysOf(mixed $container): object;
 
   /* Returns a ImmSet built from the values from the specified arrays.
    * @return object
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Rx>>
   public static function fromArrays(...$argv) {
     if (!$argv) return \HH\ImmSet {};
     $ret = \HH\Set {};

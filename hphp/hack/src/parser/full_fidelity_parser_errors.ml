@@ -1380,6 +1380,14 @@ let methodish_errors env node parents errors =
     let errors =
       produce_error errors methodish_duplicate_modifier node
       SyntaxError.error2013 modifiers in
+    let errors =
+      if methodish_contains_static node && (
+        attribute_specification_contains method_attrs SN.UserAttributes.uaMutable ||
+        attribute_specification_contains method_attrs SN.UserAttributes.uaMaybeMutable
+      )
+      then make_error_from_node node
+        SyntaxError.mutability_annotation_on_static_method :: errors
+      else errors in
     let fun_semicolon = md.methodish_semicolon in
     let errors =
       produce_error errors

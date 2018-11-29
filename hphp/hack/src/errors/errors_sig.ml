@@ -601,7 +601,6 @@ module type S = sig
   val bad_lateinit_override: bool -> Pos.t -> Pos.t -> unit
   val interface_use_trait: Pos.t -> unit
   val nonstatic_method_in_abstract_final_class: Pos.t -> unit
-  val mutable_on_static: Pos.t -> unit
   val trait_interface_constructor_promo: Pos.t -> unit
   val escaping_mutable_object: Pos.t -> unit
   val multiple_concrete_defs : Pos.t -> Pos.t -> string -> string -> string -> string -> unit

@@ -343,3 +343,5 @@ val concurrent_is_disabled : string
 val misplaced_reactivity_annotation : string
 val mutability_annotation_on_static_method : string
 val mutability_annotation_on_inout_parameter : string
+val mutable_parameter_in_memoize_function: is_this: bool -> string
+val mutable_return_in_memoize_function: string

@@ -1,0 +1,2 @@
+File "memoize_mutable2.php", line 5, characters 20-33:
+Memoized functions cannot return mutable objects. (Parsing[1002])

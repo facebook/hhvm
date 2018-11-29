@@ -1,0 +1,2 @@
+File "memoize_mutable1.php", line 10, characters 12-28:
+Memoized functions cannot have mutable parameters. (Parsing[1002])

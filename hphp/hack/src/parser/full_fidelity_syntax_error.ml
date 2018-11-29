@@ -678,3 +678,9 @@ let mutability_annotation_on_static_method =
 
 let mutability_annotation_on_inout_parameter =
   "__Mutable, __MaybeMutable and __OwnedMutable annotations are not allowed on inout parameters."
+
+let mutable_parameter_in_memoize_function ~is_this =
+  "Memoized functions cannot have mutable " ^ (if is_this then "$this." else "parameters.")
+
+let mutable_return_in_memoize_function =
+  "Memoized functions cannot return mutable objects."

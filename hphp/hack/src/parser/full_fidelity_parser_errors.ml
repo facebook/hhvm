@@ -1019,21 +1019,26 @@ let is_param_by_ref node =
     is_byref_parameter_variable parameter_name
   | _ -> false
 
+let attribute_constructor_name node =
+  match syntax node with
+  | ListItem {
+      list_item = { syntax = ConstructorCall { constructor_call_type; _ }; _ }; _
+    } -> Syntax.extract_text constructor_call_type
+  | _ -> None
+
 let attribute_specification_contains node name =
   match syntax node with
   | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
     List.exists (syntax_node_to_list attrs) ~f:begin fun n ->
-      match syntax n with
-      | ListItem {
-          list_item = { syntax = ConstructorCall { constructor_call_type; _ }; _ }; _
-        } ->
-        begin match Syntax.extract_text constructor_call_type with
-        | Some n when n = name -> true
-        | _ -> false
-        end
-      | _ -> false
+      attribute_constructor_name n = Some name
     end
   | _ -> false
+
+let fold_attribute_spec node ~f ~init =
+  match syntax node with
+  | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
+    List.fold (syntax_node_to_list attrs) ~init ~f
+  | _ -> init
 
 let methodish_contains_attribute node attribute =
   match node with
@@ -1102,6 +1107,36 @@ let attribute_missing_reactivity_for_condition attr_spec =
     has_attr SN.UserAttributes.uaOnlyRxIfArgs_do_not_use ||
     has_attr SN.UserAttributes.uaAtMostRxAsArgs
   )
+
+let error_if_memoize_function_returns_mutable attrs errors =
+  let (has_memoize, mutable_node, mut_return_node) =
+    fold_attribute_spec attrs ~init:(false, None, None) ~f:(
+      fun ((has_memoize, mutable_node, mut_return_node) as acc) node ->
+        match attribute_constructor_name node with
+        | Some n when n = SN.UserAttributes.uaMutableReturn ->
+          (has_memoize, mutable_node, (Some node))
+        | Some n when n = SN.UserAttributes.uaMemoize ||
+                      n = SN.UserAttributes.uaMemoizeLSB ->
+          (true, mutable_node, mut_return_node)
+        | Some n when n = SN.UserAttributes.uaMutable ->
+          (has_memoize, Some node, mut_return_node)
+        | _ -> acc
+    ) in
+  if has_memoize
+  then
+    let errors =
+      match mutable_node with
+      | Some n ->
+        make_error_from_node
+          n (SyntaxError.mutable_parameter_in_memoize_function ~is_this:true) :: errors
+      | None -> errors in
+    let errors =
+      match mut_return_node with
+      | Some n ->
+        make_error_from_node n SyntaxError.mutable_return_in_memoize_function :: errors
+      | None -> errors in
+    errors
+  else errors
 
 let methodish_missing_reactivity_for_condition node =
   match syntax node with
@@ -1290,6 +1325,8 @@ let methodish_errors env node parents errors =
       function_multiple_reactivity_annotations node
       SyntaxError.multiple_reactivity_annotations function_attrs in
     let errors =
+      error_if_memoize_function_returns_mutable function_attrs errors in
+    let errors =
       produce_error errors
       function_declaration_contains_only_rx_if_impl_attribute node
       SyntaxError.functions_cannot_implement_reactive function_attrs in
@@ -1312,6 +1349,8 @@ let methodish_errors env node parents errors =
     let method_name = Option.value (extract_function_name
       md.methodish_function_decl_header) ~default:"" in
     let method_attrs = md.methodish_attribute in
+    let errors =
+      error_if_memoize_function_returns_mutable method_attrs errors in
     let errors =
       produce_error_for_header errors
       (methodish_contains_memoize env)
@@ -1500,6 +1539,17 @@ let decoration_errors node errors =
   errors
 
 let parameter_rx_errors parents errors node =
+  let rec get_containing_function_attrs l =
+    match l with
+    | [] -> None
+    | ({ syntax = AnonymousFunction { anonymous_attribute_spec = s; _ }; _ } |
+       { syntax = Php7AnonymousFunction { php7_anonymous_attribute_spec = s; _ }; _ } |
+       { syntax = LambdaExpression { lambda_attribute_spec = s; _ }; _ } |
+       { syntax = FunctionDeclaration { function_attribute_spec = s; _ }; _ } |
+       { syntax = MethodishDeclaration { methodish_attribute = s; _ }; _ })
+      :: _ -> Some s
+    | _ :: tl -> get_containing_function_attrs tl
+  in
   match syntax node with
   | ParameterDeclaration { parameter_attribute = spec; _ } ->
     let has_owned_mutable =
@@ -1527,30 +1577,35 @@ let parameter_rx_errors parents errors node =
         then make_error_from_node
           node SyntaxError.mutability_annotation_on_inout_parameter :: errors
         else errors in
-      errors in
-    let errors =
-      if has_owned_mutable
-      then
-        let parent_func_is_rx =
-          let rec get_containing_function_attrs l =
-            match l with
-            | [] -> None
-            | ({ syntax = AnonymousFunction { anonymous_attribute_spec = s; _ }; _ } |
-               { syntax = Php7AnonymousFunction { php7_anonymous_attribute_spec = s; _ }; _ } |
-               { syntax = LambdaExpression { lambda_attribute_spec = s; _ }; _ } |
-               { syntax = FunctionDeclaration { function_attribute_spec = s; _ }; _ } |
-               { syntax = MethodishDeclaration { methodish_attribute = s; _ }; _ })
-              :: _ -> Some s
-            | _ :: tl -> get_containing_function_attrs tl
+
+      let errors =
+        if has_owned_mutable || has_mutable
+        then begin
+          let attrs = get_containing_function_attrs parents in
+          let parent_func_is_rx =
+            Option.value_map attrs ~default:false ~f:attribute_has_reactivity_annotation
           in
-          get_containing_function_attrs parents
-          |> Option.value_map ~default:false ~f:attribute_has_reactivity_annotation
-        in
-        if not parent_func_is_rx
-        then make_error_from_node node
-          SyntaxError.mutably_owned_attribute_on_non_rx_function :: errors
-        else errors
-      else errors
+          let parent_func_is_memoize =
+            Option.value_map attrs ~default:false ~f:(fun spec ->
+              attribute_specification_contains spec SN.UserAttributes.uaMemoize ||
+              attribute_specification_contains spec SN.UserAttributes.uaMemoize
+            ) in
+          let errors =
+            if has_owned_mutable && not parent_func_is_rx
+            then make_error_from_node node
+              SyntaxError.mutably_owned_attribute_on_non_rx_function :: errors
+            else errors
+          in
+          let errors =
+            if has_mutable && parent_func_is_memoize
+            then make_error_from_node node
+              (SyntaxError.mutable_parameter_in_memoize_function ~is_this:false) :: errors
+            else errors
+          in
+          errors
+        end
+        else errors in
+      errors
     in
     errors
   | _ -> errors

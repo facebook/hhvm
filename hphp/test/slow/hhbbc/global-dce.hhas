@@ -1,0 +1,39 @@
+.main {
+  FPushFuncD 2 "var_dump"
+  FPushFuncD 3 "test"
+  String "a"
+  String "b"
+  String "c"
+  FCall <> 3 1 - "" ""
+  UnboxR
+  FPushFuncD 3 "test"
+  Null
+  String "b"
+  String "c"
+  FCall <> 3 1 - "" ""
+  UnboxR
+  FCall <> 2 1 - "" ""
+  PopR
+  Int 1
+  RetC
+}
+
+.function <"" N  > test(<"\?HH\\string" "HH\\string" nullable hh_type extended_hint > $a, <"\?HH\\string" "HH\\string" nullable hh_type extended_hint > $b, <"HH\\string" "HH\\string" hh_type > $c) {
+  VerifyParamType $a
+  VerifyParamType $b
+  VerifyParamType $c
+  IsTypeL $a Null
+  JmpZ L1
+  Null
+  Jmp L5
+L1:
+  CGetL $b
+L3:
+  Dup
+  JmpNZ L4
+L5:
+  PopC
+  CGetL $c
+L4:
+  RetC
+}

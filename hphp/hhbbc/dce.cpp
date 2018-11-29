@@ -2445,10 +2445,27 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
     }
   };
 
-  auto mergeUIs = [&] (std::vector<UseInfo>& outBase, const UseInfo& in,
+  auto mergeUIs = [&] (std::vector<UseInfo>& outBase,
+                       const std::vector<UseInfo>& inBase,
                        uint32_t i, BlockId blk, bool isSlot) {
     auto& out = outBase[i];
+    auto& in = inBase[i];
     if (out.usage == Use::Used) {
+      if (in.usage != Use::Used && nonThrowPreds[blk].size() > 1) {
+        // This is to deal with the case where blk has multiple preds,
+        // and one of those has multiple succs, one of which does use
+        // this stack value.
+        while (true) {
+          auto& ui = inBase[i];
+          auto linked = isLinked(ui);
+          if (ui.usage != Use::Used) {
+            forcedLiveTemp.insert({blk, i, isSlot});
+          }
+          if (!linked) break;
+          assert(i);
+          i--;
+        }
+      }
       return false;
     }
 
@@ -2489,7 +2506,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
     auto ret = false;
     assert(stkOut->size() == stkIn.size());
     for (uint32_t i = 0; i < stkIn.size(); i++) {
-      if (mergeUIs(*stkOut, stkIn[i], i, blk, isSlot)) ret = true;
+      if (mergeUIs(*stkOut, stkIn, i, blk, isSlot)) ret = true;
     }
     return ret;
   };

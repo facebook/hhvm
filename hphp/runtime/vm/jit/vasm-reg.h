@@ -409,6 +409,14 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
+namespace std {
+  template<> struct hash<HPHP::jit::Vreg> {
+    size_t operator()(HPHP::jit::Vreg r) const { return (size_t)r; }
+  };
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 #include "hphp/runtime/vm/jit/vasm-reg-inl.h"
 
 #endif

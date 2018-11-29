@@ -158,4 +158,12 @@ boost::dynamic_bitset<> backedgeTargets(const Vunit& unit,
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
+namespace std {
+template<> struct hash<HPHP::jit::Vlabel> {
+  size_t operator()(HPHP::jit::Vlabel l) const { return (size_t)l; }
+};
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 #endif

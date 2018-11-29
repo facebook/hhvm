@@ -125,6 +125,8 @@ public:
   constexpr bool operator==(Reg32 r) const { return Reg32(n) == r; }
   constexpr bool operator!=(Reg32 r) const { return Reg32(n) != r; }
 
+  size_t hash() const { return n; }
+
   MemoryRef operator[](intptr_t p) const {
     assertx(type() == GP);
     return *(*this + p);
@@ -489,5 +491,15 @@ static_assert(std::is_trivially_destructible<RegSet>::value,
 ///////////////////////////////////////////////////////////////////////////////
 
 }}
+
+///////////////////////////////////////////////////////////////////////////////
+
+namespace std {
+  template<> struct hash<HPHP::jit::PhysReg> {
+    size_t operator()(HPHP::jit::PhysReg r) const { return r.hash(); }
+  };
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 #endif

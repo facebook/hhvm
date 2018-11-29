@@ -178,6 +178,7 @@ let parse_options () =
   let dynamic_view = ref false in
   let allow_array_as_tuple = ref false in
   let allow_return_by_ref = ref false in
+  let disallow_assign_by_ref = ref false in
   let allow_array_cell_pass_by_ref = ref false in
   let allow_anon_use_capture_by_ref = ref false in
   let allow_user_attributes = ref false in
@@ -343,6 +344,9 @@ let parse_options () =
     "--allow-return-by-ref",
         Arg.Set allow_return_by_ref,
         " Allow returning references from functions";
+    "--disallow-assign-by-ref",
+        Arg.Set disallow_assign_by_ref,
+        " Disallow assignment by reference";
     "--allow-array-cell-pass-by-ref",
         Arg.Set allow_array_cell_pass_by_ref,
         " Allow binding of array cells by reference as arguments to function calls";
@@ -401,6 +405,7 @@ let parse_options () =
       GlobalOptions.tco_dynamic_view = !dynamic_view;
       GlobalOptions.tco_disallow_array_as_tuple = not !allow_array_as_tuple;
       GlobalOptions.tco_disallow_return_by_ref = not !allow_return_by_ref;
+      GlobalOptions.tco_disallow_assign_by_ref = !disallow_assign_by_ref;
       GlobalOptions.tco_disallow_array_cell_pass_by_ref = not !allow_array_cell_pass_by_ref;
       GlobalOptions.tco_disallow_anon_use_capture_by_ref = not !allow_anon_use_capture_by_ref;
       GlobalOptions.tco_disallow_unset_on_varray = !disallow_unset_on_varray;

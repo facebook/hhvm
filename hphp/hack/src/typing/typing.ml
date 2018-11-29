@@ -5441,7 +5441,9 @@ and unop ~is_func_arg ~forbid_uref p env uop te ty =
           | _ -> ()
         end
       else if Env.is_strict env
-      then Errors.reference_expr p;
+      then Errors.reference_expr p
+      else if TypecheckerOptions.disallow_assign_by_ref (Env.get_tcopt env)
+      then Errors.reference_expr_partial p;
       (* any check omitted because would return the same anyway *)
       make_result env te ty
   | Ast.Usilence ->

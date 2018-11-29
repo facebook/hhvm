@@ -3187,6 +3187,10 @@ let reference_expr pos =
   let msg = "Cannot take a value by reference in strict mode." in
   add (Typing.err_code Typing.ReferenceExpr) pos msg
 
+let reference_expr_partial pos =
+  let msg = "Taking a value by reference is no longer supported in Hack." in
+  add (Typing.err_code Typing.ReferenceExprPartial) pos msg
+
 let pass_by_ref_annotation_missing pos1 pos2 =
   let msg1 = pos1, "This argument should be annotated with &" in
   let msg2 = pos2, "Because this parameter is passed by reference" in

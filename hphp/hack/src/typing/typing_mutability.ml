@@ -407,7 +407,11 @@ let enforce_mutable_call (env : Typing_env.env) (te : T.expr) =
         Errors.invalid_call_on_maybe_mutable ~fun_is_mutable:false pos fpos
       (* mutable call on immutable value - error *)
       | Some Param_borrowed_mutable when not (expr_is_valid_borrowed_arg env expr) ->
-        Errors.mutable_call_on_immutable fpos pos
+        let rx_mutable_hint_pos =
+          if is_valid_rx_mutable_arg env expr
+          then Some (T.get_position expr)
+          else None in
+        Errors.mutable_call_on_immutable fpos pos rx_mutable_hint_pos
       (* immutable call on mutable value - error *)
       | None when expr_is_valid_borrowed_arg env expr ->
         Errors.immutable_call_on_mutable fpos pos

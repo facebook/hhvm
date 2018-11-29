@@ -488,7 +488,7 @@ module type S = sig
   val fun_reactivity_mismatch : Pos.t -> string -> Pos.t -> string -> unit
   val inconsistent_unset : Pos.t -> unit
   val reassign_mutable_var : Pos.t -> unit
-  val mutable_call_on_immutable : Pos.t -> Pos.t -> unit
+  val mutable_call_on_immutable : Pos.t -> Pos.t -> Pos.t option -> unit
   val mutable_argument_mismatch : Pos.t -> Pos.t -> unit
   val invalid_mutable_return_result: Pos.t -> Pos.t -> string -> unit
   val mutable_return_result_mismatch: bool -> Pos.t -> Pos.t -> unit

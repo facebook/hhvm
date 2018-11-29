@@ -2485,12 +2485,19 @@ let reassign_maybe_mutable_var pos1 =
   ("This variable is maybe mutable. You cannot create a new reference to it.")
 
 
-let mutable_call_on_immutable fpos pos1 =
-  add_list (Typing.err_code Typing.MutableCallOnImmutable)
-  [
-    pos1, "Cannot call mutable function on immutable expression";
-    fpos, "This function is marked <<__Mutable>>, so it has a mutable $this.";
-  ]
+let mutable_call_on_immutable  fpos pos1 rx_mutable_hint_pos =
+  let l =
+    match rx_mutable_hint_pos with
+    | Some p ->
+      [p, "Consider wrapping this expression with Rx\\mutable to forward mutability."]
+    | None -> []
+  in
+  let l =
+      (pos1, "Cannot call mutable function on immutable expression") ::
+      (fpos, "This function is marked <<__Mutable>>, so it has a mutable $this.") ::
+      l
+  in
+  add_list (Typing.err_code Typing.MutableCallOnImmutable) l
 
 let immutable_call_on_mutable fpos pos1 =
   add_list (Typing.err_code Typing.ImmutableCallOnMutable)

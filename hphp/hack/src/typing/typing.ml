@@ -5794,23 +5794,27 @@ and condition ?lhs_of_null_coalesce env tparamet
       in
       let env, x_ty = resolve_obj env obj_ty in
       set_local env ivar x_ty
-  | T.Is (ivar, h) when tparamet && is_instance_var (T.to_nast_expr ivar) ->
-    let ivar = T.to_nast_expr ivar in
-    (* Check the expession and determine its static type *)
-    let env, _te, ivar_ty = raw_expr env ivar in
-    (* What is the local variable bound to the expression? *)
-    let env, ((ivar_pos, _) as ivar) = get_instance_var env ivar in
-    (* Resolve the typehint to a type *)
+  | T.Is (ivar, h) when is_instance_var (T.to_nast_expr ivar) ->
+    (* Stash env so we don't return an updated one if we don't refine *)
+    let env' = env in
     let ety_env = { (Phase.env_with_self env) with from_class = Some CIstatic; } in
     let env, hint_ty = Phase.localize_hint ~ety_env env h in
-    let reason = Reason.Ris ivar_pos in
-    (* Expand so that we don't modify ivar *)
     let env, hint_ty = Env.expand_type env hint_ty in
-    let env, hint_ty =
-      if snd hint_ty <> Tdynamic && SubType.is_sub_type env ivar_ty hint_ty
-      then env, ivar_ty
-      else safely_refine_type env p reason ivar_pos ivar_ty hint_ty in
-    set_local env ivar hint_ty
+    let reason = Reason.Ris p in
+    let refine_type hint_ty =
+      let ivar_pos, ivar_ty = fst ivar in
+      let env, ivar = get_instance_var env (T.to_nast_expr ivar) in
+      let env, hint_ty =
+        if snd hint_ty <> Tdynamic && SubType.is_sub_type env ivar_ty hint_ty
+        then env, ivar_ty
+        else safely_refine_type env p reason ivar_pos ivar_ty hint_ty in
+      set_local env ivar hint_ty
+    in
+    begin match snd hint_ty with
+    | _ when tparamet -> refine_type hint_ty
+    | Tprim Nast.Tnull -> refine_type (reason, Tnonnull)
+    | _ -> env'
+    end
   | _ -> env
 
 and safely_refine_type env p reason ivar_pos ivar_ty hint_ty =

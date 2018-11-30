@@ -884,6 +884,10 @@ module Make (GetLocals : GetLocals) = struct
   and hint_id ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth
     env (p, x as id) hl =
     let params = (fst env).type_params in
+    let allow_null = TypecheckerOptions.experimental_feature_enabled
+      (fst env).tcopt
+      TypecheckerOptions.experimental_null_type
+    in
     if   is_alok_type_name id && not (SMap.mem x params)
     then Errors.typeparam_alok id;
     (* some common Xhp screw ups *)
@@ -904,6 +908,7 @@ module Make (GetLocals : GetLocals) = struct
           N.Hany
         | x when x.[0] = '\\' &&
           (  x = ("\\"^SN.Typehints.void)
+          || x = ("\\"^SN.Typehints.null)
           || x = ("\\"^SN.Typehints.noreturn)
           || x = ("\\"^SN.Typehints.int)
           || x = ("\\"^SN.Typehints.bool)
@@ -930,6 +935,7 @@ module Make (GetLocals : GetLocals) = struct
       | x when x = SN.Typehints.noreturn ->
         Errors.return_only_typehint p `noreturn;
         N.Hany
+      | x when x = SN.Typehints.null && allow_null -> N.Hprim N.Tnull
       | x when x = SN.Typehints.num  -> N.Hprim N.Tnum
       | x when x = SN.Typehints.resource -> N.Hprim N.Tresource
       | x when x = SN.Typehints.arraykey -> N.Hprim N.Tarraykey

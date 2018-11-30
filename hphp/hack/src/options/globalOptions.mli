@@ -287,6 +287,7 @@ val tco_experimental_null_coalesce_assignment : string
 val tco_experimental_reified_generics : string
 val tco_experimental_decl_linearization : string
 val tco_experimental_track_subtype_prop : string
+val tco_experimental_null_type : string
 val tco_experimental_all : SSet.t
 val tco_migration_flags_all : SSet.t
 val ignored_fixme_codes : t -> ISet.t

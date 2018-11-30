@@ -36,6 +36,8 @@ type t = {
   class_use_aliases  :
     (string option * string * string option * Ast.kind list) list;
   class_use_precedences : (string * string * string list) list;
+  class_method_trait_resolutions:
+    (string * string * string * Ast.kind list * Ast.fun_kind) list;
   class_enum_type    : Hhas_type_info.t option;
   class_methods      : Hhas_method.t list;
   class_properties   : Hhas_property.t list;
@@ -65,6 +67,7 @@ let make
   class_uses
   class_use_aliases
   class_use_precedences
+  class_method_trait_resolutions
   class_enum_type
   class_methods
   class_properties
@@ -92,6 +95,7 @@ let make
     class_uses;
     class_use_aliases;
     class_use_precedences;
+    class_method_trait_resolutions;
     class_enum_type;
     class_methods;
     class_properties;
@@ -123,6 +127,7 @@ let needs_no_reifiedinit hhas_class = hhas_class.class_needs_no_reifiedinit
 let class_uses hhas_class = hhas_class.class_uses
 let class_use_aliases hhas_class = hhas_class.class_use_aliases
 let class_use_precedences hhas_class = hhas_class.class_use_precedences
+let class_method_trait_resolutions hhas_class = hhas_class.class_method_trait_resolutions
 let enum_type hhas_class = hhas_class.class_enum_type
 let methods hhas_class = hhas_class.class_methods
 let with_methods hhas_class class_methods = { hhas_class with class_methods }

@@ -1,2 +1,15 @@
-File "methodish_trait_resolution.php", line 18, characters 3-46:
-Encountered unexpected text 'public function animal(): void = T1::animal;', was expecting a class element. (Parsing[1002])
+File "methodish_trait_resolution.php", line 15, characters 7-7:
+Class C does not correctly implement all required members  (Typing[4285])
+File "methodish_trait_resolution.php", line 16, characters 7-8:
+Some members are incompatible with those declared in type T1
+Read the following to see why:
+File "methodish_trait_resolution.php", line 10, characters 19-24:
+Member animal has the wrong type
+File "methodish_trait_resolution.php", line 10, characters 19-24:
+T2 and T1 both declare ambiguous implementations of animal.
+File "methodish_trait_resolution.php", line 10, characters 19-24:
+T2's definition is here.
+File "methodish_trait_resolution.php", line 4, characters 19-24:
+T1's definition is here.
+File "methodish_trait_resolution.php", line 10, characters 19-24:
+Redeclare animal in C with a compatible signature.

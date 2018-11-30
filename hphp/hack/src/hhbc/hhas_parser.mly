@@ -253,9 +253,10 @@ classdecl:
           (List.mem attrs ~equal:(=) "has_immutable") (*has_immutable*)
           (List.mem attrs ~equal:(=) "no_dynamic_props") (*no_dynamic_props*)
           (List.mem attrs ~equal:(=) "noreifiedinit") (*needs_no_reifiedinit*)
-          ((fun (x, _, _) -> x) $8)(*uses*)
-          ((fun (_, x, _) -> x) $8)(*use_aliases*)
-          ((fun (_, _, x) -> x) $8)(*use_precedences*)
+          ((fun (x, _, _, _) -> x) $8)(*uses*)
+          ((fun (_, x, _, _) -> x) $8)(*use_aliases*)
+          ((fun (_, _, x, _) -> x) $8)(*use_precedences*)
+          ((fun (_, _, _, x) -> x) $8)(* trait method redeclartions *)
           $9(*enumtype*)
           $13(*methods*)
           $12(*properties*)
@@ -425,17 +426,20 @@ classenumty:
   | ENUMTYDIRECTIVE enumtypeinfo SEMI nl {Some $2}
 ;
 classuses:
-  | /* empty */ {[], [], []}
-  | USESDIRECTIVE idlist SEMI nl {$2, [], []}
+  | /* empty */ {[], [], [], []}
+  | USESDIRECTIVE idlist SEMI nl {$2, [], [], []}
   | USESDIRECTIVE idlist LBRACE nl classconflictlist nl RBRACE nl
-   {let (aliases,precedences) = split_classconflicts $5
-    in ($2, aliases, precedences)}
+   {let (aliases,precedences,redeclarations) = split_classconflicts $5
+    in ($2, aliases, precedences,redeclarations)}
 ;
 classconflictlist:
   | /* empty */ {[]}
   | idlist nl SEMI nl classconflictlist {parse_precedence_or_alias $1 :: $5}
   | ID ID LBRACK idlist RBRACK idoption nl SEMI nl classconflictlist
     {parse_alias $1 $2 $4 $6 :: $10}
+  | ID ID ID idoption LBRACK idlist RBRACK ID nl SEMI nl classconflictlist
+    {parse_redeclatation $1 $2 $3 $4 $6 $8 :: $12}
+
 ;
 idoption:
  | /* empty */ {None}

@@ -126,6 +126,7 @@ class type ['a] ast_visitor_type = object
                            id option -> pstring ->
                            id option -> kind list -> 'a
   method on_classUsePrecedence: 'a -> id -> pstring -> id list -> 'a
+  method on_methodTraitResolution: 'a -> method_trait_resolution -> 'a
   method on_classVars:
     'a -> class_vars_ -> 'a
   method on_const: 'a -> hint option -> (id * expr) list -> 'a
@@ -730,6 +731,8 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
       this#on_classUseAlias acc ido1 ps ido2 ko
     | ClassUsePrecedence (id, ps, ids) ->
       this#on_classUsePrecedence acc id ps ids
+    | MethodTraitResolution i ->
+      this#on_methodTraitResolution acc i
     | XhpAttrUse h -> this#on_xhpAttrUse acc h
     | XhpCategory (_, cs) -> this#on_xhpCategory acc cs
     | XhpChild (_, c) -> this#on_xhp_child acc c
@@ -781,6 +784,16 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     let acc = this#on_pstring acc ps in
     let acc = List.fold_left this#on_id acc ids in
     acc
+  method on_methodTraitResolution acc mtr =
+    let acc = this#on_id acc mtr.mt_name in
+    let acc = List.fold_left this#on_tparam acc mtr.mt_tparams in
+    let acc = List.fold_left this#on_fun_param acc mtr.mt_params in
+    let acc = List.fold_left this#on_user_attribute acc mtr.mt_user_attributes in
+    let acc = match mtr.mt_ret with
+      | Some h -> this#on_hint acc h
+      | None -> acc in
+    acc
+
   method on_xhpAttrUse acc h =
     let acc = this#on_hint acc h in
     acc

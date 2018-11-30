@@ -1334,6 +1334,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassUsePrecedence (_, (p, _), _) ->
       Errors.unsupported_feature p "The insteadof keyword";
       acc
+    | MethodTraitResolution _ -> acc
     | XhpAttrUse _ -> acc
     | ClassTraitRequire _ -> acc
     | ClassVars _ -> acc
@@ -1351,6 +1352,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassUse _ -> acc
     | ClassUseAlias _ -> acc
     | ClassUsePrecedence _ -> acc
+    | MethodTraitResolution _ -> acc
     | XhpAttrUse h ->
       hint ~allow_typedef:false env h :: acc
     | ClassTraitRequire _ -> acc
@@ -1369,6 +1371,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassUse _ -> acc
     | ClassUseAlias _ -> acc
     | ClassUsePrecedence _ -> acc
+    | MethodTraitResolution _ -> acc
     | XhpAttrUse _ -> acc
     | ClassTraitRequire _ -> acc
     | ClassVars _ -> acc
@@ -1389,6 +1392,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassUse _ -> acc
     | ClassUseAlias _ -> acc
     | ClassUsePrecedence _ -> acc
+    | MethodTraitResolution _ -> acc
     | XhpAttrUse _ -> acc
     | ClassTraitRequire (MustExtend, h)
         when c_kind <> Ast.Ctrait && c_kind <> Ast.Cinterface ->
@@ -1417,6 +1421,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassUse _ -> acc
     | ClassUseAlias _ -> acc
     | ClassUsePrecedence _ -> acc
+    | MethodTraitResolution _ -> acc
     | XhpAttrUse _ -> acc
     | ClassTraitRequire _ -> acc
     | ClassVars _ -> acc
@@ -1452,6 +1457,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassUse _ -> acc
     | ClassUseAlias _ -> acc
     | ClassUsePrecedence _ -> acc
+    | MethodTraitResolution _ -> acc
     | XhpAttrUse _ -> acc
     | ClassTraitRequire _ -> acc
     | ClassVars _ -> acc
@@ -1467,6 +1473,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassUse _ -> acc
     | ClassUseAlias _ -> acc
     | ClassUsePrecedence _ -> acc
+    | MethodTraitResolution _ -> acc
     | XhpAttrUse _ -> acc
     | ClassTraitRequire _ -> acc
     | Const _ -> acc
@@ -1502,6 +1509,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassUse _ -> acc
     | ClassUseAlias _ -> acc
     | ClassUsePrecedence _ -> acc
+    | MethodTraitResolution _ -> acc
     | XhpAttrUse _ -> acc
     | ClassTraitRequire _ -> acc
     | Const _ -> acc
@@ -1540,6 +1548,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassUse _ -> acc
     | ClassUseAlias _ -> acc
     | ClassUsePrecedence _ -> acc
+    | MethodTraitResolution _ -> acc
     | XhpAttrUse _ -> acc
     | ClassTraitRequire _ -> acc
     | Const _ -> acc
@@ -1559,6 +1568,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassUse _ -> acc
     | ClassUseAlias _ -> acc
     | ClassUsePrecedence _ -> acc
+    | MethodTraitResolution _ -> acc
     | XhpAttrUse _ -> acc
     | ClassTraitRequire _ -> acc
     | Const _ -> acc
@@ -1585,6 +1595,7 @@ module Make (GetLocals : GetLocals) = struct
     | ClassUse _ -> acc
     | ClassUseAlias _ -> acc
     | ClassUsePrecedence _ -> acc
+    | MethodTraitResolution _ -> acc
     | XhpAttrUse _ -> acc
     | ClassTraitRequire _ -> acc
     | ClassVars _ -> acc

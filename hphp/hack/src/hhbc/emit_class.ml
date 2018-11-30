@@ -375,6 +375,20 @@ let emit_class : A.class_ * Closure_convert.hoist_kind -> Hhas_class.t =
           Some (id1, snd id2, ids)
         | _ -> None)
   in
+  let class_method_trait_resolutions =
+    List.filter_map
+      ast_class.A.c_body
+      (function
+        | A.MethodTraitResolution {
+            A.mt_kind = kinds;
+            A.mt_name = new_id;
+            A.mt_trait = (_, (A.Happly ((_, trait), _)));
+            A.mt_method = id;
+            A.mt_fun_kind = fun_kind; _
+          } ->
+          Some (trait, snd id, snd new_id, kinds, fun_kind)
+        | _ -> None)
+  in
   let class_enum_type =
     if ast_class.A.c_kind = Ast.Cenum
     then from_enum_type ast_class.A.c_namespace ast_class.A.c_enum
@@ -587,6 +601,7 @@ let emit_class : A.class_ * Closure_convert.hoist_kind -> Hhas_class.t =
     class_uses
     class_use_aliases
     class_use_precedences
+    class_method_trait_resolutions
     class_enum_type
     (class_methods @ List.rev additional_methods)
     (class_properties @ additional_properties)

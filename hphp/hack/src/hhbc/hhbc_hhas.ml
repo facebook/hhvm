@@ -1765,23 +1765,44 @@ let add_use_alias buf (ido1, id, ido2, kindl) =
   let rest = Option.value ~default:"" rest in
   Acc.add buf @@ Printf.sprintf "\n    %s as %s;" aliasing_id rest
 
+let add_replace buf (trait, id, new_id, kindl, fun_kind) =
+  Acc.add buf @@ Printf.sprintf
+    "\n    %s::%s as strict "
+    trait id;
+  if fun_kind = Ast_defs.FAsync || fun_kind = Ast_defs.FAsyncGenerator
+  then Acc.add buf "async ";
+  Acc.add buf "[";
+  let rec concat kindl =
+    match kindl with
+    | [] -> ()
+    | kind :: [] ->
+      Acc.add buf (Printf.sprintf "%s" (Ast.string_of_kind kind))
+    | kind :: kindl ->
+      Acc.add buf (Printf.sprintf "%s " (Ast.string_of_kind kind));
+      concat kindl in
+  concat kindl;
+  Acc.add buf "] ";
+  Acc.add buf (Printf.sprintf "%s;" new_id)
+
 let add_uses buf c =
   let use_l = Hhas_class.class_uses c in
   let use_alias_list = Hhas_class.class_use_aliases c in
   let use_precedence_list = Hhas_class.class_use_precedences c in
-  if use_l = [] then () else
+  let class_method_trait_resolutions = Hhas_class.class_method_trait_resolutions c in
+  if use_l = [] && class_method_trait_resolutions = [] then () else
     begin
       let unique_ids =
         List.fold_left ~f:(fun l e -> ULS.add l (Utils.strip_ns e)) ~init:ULS.empty use_l
       in
       let use_l = String.concat ~sep:" " @@ ULS.items unique_ids in
       Acc.add buf @@ Printf.sprintf "\n  .use %s" use_l;
-      if use_alias_list = [] && use_precedence_list = []
+      if use_alias_list = [] && use_precedence_list = [] && class_method_trait_resolutions = []
       then Acc.add buf ";" else
       begin
         Acc.add buf " {";
         List.iter ~f:(add_use_precedence buf) use_precedence_list;
         List.iter ~f:(add_use_alias buf) use_alias_list;
+        List.iter ~f:(add_replace buf) class_method_trait_resolutions;
         Acc.add buf "\n  }";
       end
     end

@@ -2881,6 +2881,9 @@ void parse_use(AsmState& as) {
     }
 
     if (as.in.tryConsume("as")) {
+      bool strict = as.in.tryConsume("strict");
+      bool async = as.in.tryConsume("async");
+
       Attr attrs = parse_attribute_list(as, AttrContext::TraitImport);
       std::string alias;
       if (!as.in.readword(alias)) {
@@ -2896,7 +2899,9 @@ void parse_use(AsmState& as) {
         makeStaticString(traitName),
         makeStaticString(identifier),
         makeStaticString(alias),
-        attrs));
+        attrs,
+        strict,
+        async));
     } else if (as.in.tryConsume("insteadof")) {
       if (traitName.empty()) {
         as.error("Must specify TraitName::name when using a trait insteadof");

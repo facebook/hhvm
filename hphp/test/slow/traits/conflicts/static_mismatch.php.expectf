@@ -1,0 +1,1 @@
+Fatal error: Redeclaration of trait method 'T::b' is inconsistent about 'static' in %s/hphp/test/slow/traits/conflicts/static_mismatch.php on line 8

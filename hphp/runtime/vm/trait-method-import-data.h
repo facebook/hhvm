@@ -60,6 +60,10 @@ namespace HPHP {
  *    bool isTrait(TraitMethod::class_type traitCls);
  *    bool isAbstract(Attr modifiers);
  *
+ *    bool isAsync(TraitMethod::method_type meth);
+ *    bool isStatic(TraitMethod::method_type meth);
+ *    bool isFinal(TraitMethod::method_type meth);
+ *
  *    // Whether to exclude methods with name `methName' when adding.
  *    bool exclude(const String& methName);
  *
@@ -156,10 +160,12 @@ struct TraitMethodImportData {
                      typename TraitMethod::class_type ctx);
 
   /*
-   * Apply an alias ("as") rule to the import data set.
+   * Apply all alias ("as") rules to the import data set.
    */
-  void applyAliasRule(const PreClass::TraitAliasRule& rule,
-                      typename TraitMethod::class_type ctx);
+  template<typename Iter>
+  void applyAliasRules(Iter it_begin,
+                       Iter it_end,
+                       typename TraitMethod::class_type ctx);
 
   /*
    * Declare that all imports have been added---and that all rules have been

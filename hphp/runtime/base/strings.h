@@ -83,6 +83,10 @@ auto constexpr TRAITS_UNKNOWN_TRAIT_METHOD =
   "Unknown trait method '%s'";
 auto constexpr METHOD_IN_MULTIPLE_TRAITS =
   "Method '%s' declared in multiple traits";
+auto constexpr TRAIT_REDECLARED_METHOD_INCONSISTENT_ATTRIBUTES =
+  "Redeclaration of trait method '%s::%s' is inconsistent about '%s'";
+auto constexpr TRAIT_REDECLARED_FINAL_METHOD=
+  "Redeclaration of final trait method '%s::%s' must also be final";
 auto constexpr TRAIT_REQ_EXTENDS =
   "Class '%s' required to extend class '%s'"
   " by trait '%s'";

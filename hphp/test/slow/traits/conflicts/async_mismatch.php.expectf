@@ -1,0 +1,1 @@
+Fatal error: Redeclaration of trait method 'T::b' is inconsistent about 'async' in %s/hphp/test/slow/traits/conflicts/async_mismatch.php on line 8

@@ -1,0 +1,4 @@
+Dog
+Cat
+
+Fatal error: Call to private C::f() from invalid context in %s/hphp/test/slow/traits/conflicts/promote_both_ways.php on line 19

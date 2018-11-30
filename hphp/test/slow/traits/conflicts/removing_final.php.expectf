@@ -1,0 +1,1 @@
+Fatal error: Redeclaration of final trait method 'T::b' must also be final in %s/hphp/test/slow/traits/conflicts/removing_final.php on line 9

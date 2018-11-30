@@ -21,6 +21,7 @@ open Core_kernel
 let current_mergebase : Hg.svn_rev option ref = ref None
 
 let is_in_hg_update_state = ref false
+let is_in_hg_transaction_state = ref false
 
 (* Do we think that this server have processed a mergebase change? If we are
  * in this state and get notified about changes to a huge number of files (or
@@ -56,14 +57,19 @@ let add_query ~hg_rev root =
     Queue.enqueue pending_queries hg_rev
   end
 
-let on_state_enter state_name  =
-  if state_name <> "hg.update" then () else begin
+let on_state_enter state_name =
+  match state_name with
+  | "hg.update" ->
     Hh_logger.log "ServerRevisionTracker: entering hg.update";
     is_in_hg_update_state := true;
-  end
+  | "hg.transaction" ->
+    Hh_logger.log "ServerRevisionTracker: entering hg.transaction";
+    is_in_hg_transaction_state := true;
+  | _ -> ()
 
 let on_state_leave root state_name state_metadata =
-  if state_name <> "hg.update" then () else begin
+  match state_name with
+  | "hg.update" ->
     is_in_hg_update_state := false;
     Hh_logger.log "ServerRevisionTracker: leaving hg.update";
     let open Option.Monad_infix in
@@ -73,9 +79,12 @@ let on_state_leave root state_name state_metadata =
         | Some true -> Hh_logger.log "ServerRevisionTracker: Ignoring merge rev %s" hg_rev;
         | _ -> add_query ~hg_rev root
       end
-  end
+  | "hg.transaction" ->
+    Hh_logger.log "ServerRevisionTracker: leaving hg.transaction";
+    is_in_hg_transaction_state := false
+  | _ -> ()
 
-let is_in_hg_update_state () = !is_in_hg_update_state
+let is_hg_updating () = !is_in_hg_update_state || !is_in_hg_transaction_state
 
 let check_query future ~timeout ~current_t =
   match Future.get ~timeout future with

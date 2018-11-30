@@ -363,6 +363,7 @@ module Revision_tracker = struct
     current_base_revision : int ref;
 
     is_in_hg_update_state : bool ref;
+    is_in_hg_transaction_state : bool ref;
 
     rev_map : Revision_map.t;
 
@@ -398,6 +399,9 @@ module Revision_tracker = struct
    * make it responsible for maintaining its own instance. *)
   type t = instance ref
 
+  let is_hg_updating env =
+    !(env.is_in_hg_update_state) || !(env.is_in_hg_transaction_state)
+
   let init
   ~min_distance_restart
   ~use_xdb ~ignore_hh_version
@@ -431,6 +435,7 @@ module Revision_tracker = struct
         init_settings.ignore_hh_version;
       state_changes = Queue.create() ;
       is_in_hg_update_state = ref false;
+      is_in_hg_transaction_state = ref false;
     }
 
   let reinitialized_env env base_svn_rev = { env with
@@ -604,6 +609,16 @@ module Revision_tracker = struct
           Hh_logger.log "State_leave: %s" hg_rev;
           Some (State_leave hg_rev)
         end
+    | Watchman.Watchman_pushed (Watchman.State_enter (state, _))
+        when state = "hg.transaction" ->
+        env.is_in_hg_transaction_state := true;
+        Hh_logger.log "State_enter: hg.transaction";
+        None
+    | Watchman.Watchman_pushed (Watchman.State_leave (state, _))
+        when state = "hg.transaction" ->
+        env.is_in_hg_transaction_state := false;
+        Hh_logger.log "State_leave: hg.transaction";
+        None
     | Watchman.Watchman_pushed (Watchman.Files_changed _)
     | Watchman.Watchman_pushed (Watchman.State_enter _)
     | Watchman.Watchman_pushed (Watchman.State_leave _) ->
@@ -698,7 +713,7 @@ module Revision_tracker = struct
         Move_along
     in
     let default_decision = match server_state with
-      | Server_not_yet_started when not !(env.is_in_hg_update_state) ->
+      | Server_not_yet_started when (not (is_hg_updating env)) ->
         Restart_server None
       | _ -> Move_along
     in

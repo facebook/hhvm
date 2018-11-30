@@ -78,15 +78,16 @@ module Responses = Config.Responses
 type state =
   | Unknown
   (** State_enter heading towards. *)
-  | Entering_to of string
+  | Entering
   (** State_leave left at. *)
-  | Left_at of string
+  | Left
 
 type env = {
   watchman : Watchman.watchman_instance;
   (** Directory we are watching. *)
   root : Path.t;
-  state : state;
+  update_state : state;
+  transaction_state : state;
   socket : Unix.file_descr;
   waiting_clients : Unix.file_descr Queue.t;
 }
@@ -163,7 +164,7 @@ let process_changes changes env =
     Hh_logger.log "changed mergebase: %s" mergebase;
     let changes = String.concat ~sep:"\n" (SSet.elements changes) in
     Hh_logger.log "changes: %s" changes;
-    let env = { env with state = Left_at mergebase; } in
+    let env = { env with update_state = Left; } in
     let () = notify_waiting_clients env in
     env
   | Watchman_pushed (State_enter (name, json)) when name = "hg.update" ->
@@ -173,7 +174,10 @@ let process_changes changes env =
     ignore (json >>= Watchman_utils.rev_in_state_change >>| fun hg_rev -> begin
       Hh_logger.log "Revision: %s" hg_rev
     end);
-    { env with state = Entering_to name; }
+    { env with update_state = Entering; }
+  | Watchman_pushed (State_enter (name, _json)) when name = "hg.transaction" ->
+    Hh_logger.log "State_enter hg.transaction";
+    { env with transaction_state = Entering; }
   | Watchman_pushed (State_enter (name, _json))  ->
     Hh_logger.log "Ignoring State_enter %s" name;
     env
@@ -184,9 +188,12 @@ let process_changes changes env =
     ignore (json >>= Watchman_utils.rev_in_state_change >>| fun hg_rev -> begin
       Hh_logger.log "Revision: %s" hg_rev
     end);
-    let env = { env with state = Left_at name; } in
+    let env = { env with update_state = Left } in
     let () = notify_waiting_clients env in
     env
+  | Watchman_pushed (State_leave (name, _json)) when name = "hg.transaction" ->
+    Hh_logger.log "State_leave hg.transaction";
+    { env with transaction_state = Left; }
   | Watchman_pushed (State_leave (name, _json))  ->
     Hh_logger.log "Ignoring State_leave %s" name;
     env
@@ -237,12 +244,14 @@ let get_new_clients socket =
 let process_client_ env client =
   (** We allow this to throw Unix_error - this lets us ignore broken
    * clients instead of adding them to the waiting_clients queue. *)
-  (match env.state with
-  | Unknown ->
+  (match env.update_state, env.transaction_state with
+  | Unknown, _ | _, Unknown ->
     send_to_fd env Responses.Unknown client
-  | Entering_to _ ->
+  | Entering, Entering
+  | Entering, Left
+  | Left, Entering ->
     send_to_fd env Responses.Mid_update client
-  | Left_at _ ->
+  | Left, Left ->
     send_to_fd env Responses.Settled client);
   env
 
@@ -294,7 +303,8 @@ let init root =
       (Config.socket_file root);
     Ok {
       watchman = Watchman.Watchman_alive wenv;
-      state = Unknown;
+      update_state = Unknown;
+      transaction_state = Unknown;
       socket;
       root;
       waiting_clients = Queue.create ();

@@ -485,7 +485,7 @@ int main(int argc, char** argv) try {
   RuntimeOption::RepoLocalMode = "--";
   RuntimeOption::RepoEvalMode = "readonly";
   open_repo(input_repo);
-  Repo::get().loadGlobalData(false, false);
+  Repo::get().loadGlobalData(false);
   LitstrTable::fini();
   auto const& gd = Repo::get().global();
   if (gd.InitialNamedEntityTableSize) {

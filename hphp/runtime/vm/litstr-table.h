@@ -140,7 +140,7 @@ private:
   NamedEntityPairTable m_namedInfo;
   LitstrMap m_litstr2id;
 
-  std::atomic<Id> m_nextId{0};
+  std::atomic<Id> m_nextId{1};
   std::atomic<bool> m_safeToRead{true};
 };
 

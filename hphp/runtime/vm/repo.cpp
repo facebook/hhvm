@@ -135,8 +135,37 @@ size_t Repo::stringLengthLimit() const {
   return limit;
 }
 
-void Repo::loadGlobalData(bool allowFailure /* = false */,
-                          bool readArrayTable /* = true */) {
+bool Repo::hasGlobalData() {
+  for (int repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
+    if (repoName(repoId).empty()) {
+      // The repo wasn't loadable
+      continue;
+    }
+
+    RepoStmt stmt(*this);
+    const auto& tbl = table(repoId, "GlobalData");
+    stmt.prepare(
+      folly::sformat(
+        "SELECT count(*) FROM {};", tbl
+      )
+    );
+    RepoTxn txn(*this);
+    RepoTxnQuery query(txn, stmt);
+    query.step();
+
+    if (!query.row()) {
+      return false;
+    }
+
+    int val;
+    query.getInt(0, val);
+    return val != 0;
+  }
+
+  return false;
+}
+
+void Repo::loadGlobalData(bool readArrayTable /* = true */) {
   if (readArrayTable) m_lsrp.load();
 
   if (!RuntimeOption::RepoAuthoritative) return;
@@ -157,9 +186,9 @@ void Repo::loadGlobalData(bool allowFailure /* = false */,
       RepoStmt stmt(*this);
       const auto& tbl = table(repoId, "GlobalData");
       stmt.prepare(
-        folly::format(
-          "SELECT count(*), data from {};", tbl
-        ).str()
+        folly::sformat(
+          "SELECT count(*), data FROM {};", tbl
+        )
       );
       RepoTxn txn(*this);
       RepoTxnQuery query(txn, stmt);
@@ -231,8 +260,6 @@ void Repo::loadGlobalData(bool allowFailure /* = false */,
 
     return;
   }
-
-  if (allowFailure) return;
 
   if (failures.empty()) {
     std::fprintf(stderr, "No repo was loadable. Check all the possible repo "

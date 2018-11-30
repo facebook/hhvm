@@ -118,10 +118,16 @@ struct Repo : RepoProxy {
     int repoId, bool preloadOnly, bool warn);
 
   /*
+   * Check if the repo has global data. If it does the repo was built using
+   * WholeProgram mode.
+   */
+  bool hasGlobalData();
+
+  /*
    * Load the repo-global metadata table, including the global litstr
    * table.  Normally called during process initialization.
    */
-  void loadGlobalData(bool allowFailure = false, bool readArrayTable = true);
+  void loadGlobalData(bool readArrayTable = true);
 
   /*
    * Access to global data.

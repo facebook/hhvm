@@ -1,6 +1,7 @@
 <?hh
 
 $test_run_id = posix_getpid();
+$next_instance_id = 0;
 $error_log_file = fopen("${LOG_ROOT}_test$test_run_id.log", 'w');
 
 function tlog($str) {
@@ -75,7 +76,9 @@ function get_random_port($exclude1, $exclude2) {
 # Return the command line to start the server with the specified options
 function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
                       $customArgs = '', $serverId = null, $repoArgs = '') {
-  global $test_run_id, $LOG_ROOT;
+  global $test_run_id, $LOG_ROOT, $next_instance_id;
+  $instance_id = $next_instance_id++;
+
   $portConfig = ' -vServer.Port='.$serverPort;
   $serverConfig = ' --config='.$home.'/config/server.ini';
   $logFileConfig = ' -vLog.File='."${LOG_ROOT}_test_server$test_run_id.log";
@@ -85,7 +88,7 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
   $includePathConfig = ' -vServer.IncludeSearchPaths.0='.$root;
   $adminPortConfig = $adminPort ? ' -vAdminServer.Port='.$adminPort : '';
   $debugPortConfig = $debugPort ? ' -vEval.Debugger.Port='.$debugPort : '';
-  $repoConfig = " -vRepo.Central.Path=${LOG_ROOT}_server$test_run_id.hhbc";
+  $repoConfig = " -vRepo.Central.Path=${LOG_ROOT}_server{$test_run_id}_{$instance_id}.hhbc";
   $useJit = array_key_exists('HHVM_JIT', $_ENV) && $_ENV['HHVM_JIT'] == 1;
   $jitConfig = ' -vEval.Jit='.($useJit ? "true" : "false");
   // To emulate sandbox setup, let Sandbox.Home be '$home'
@@ -97,12 +100,12 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
   $hhvm = PHP_BINARY;
 
   if (ini_get('hhvm.repo.authoritative')) {
-    $cmd = "$hhvm --hphp -k1 -l2 -t hhbc -o ${LOG_ROOT}_bytecode$test_run_id ".
+    $cmd = "$hhvm --hphp -k1 -l2 -t hhbc -o ${LOG_ROOT}_bytecode{$test_run_id}_{$instance_id} ".
       "--input-dir $root $repoArgs";
     tlog('Building repo with command: '.$cmd);
     tlog(exec($cmd));
     $repoConfig .=
-      " -vRepo.Local.Path=${LOG_ROOT}_bytecode$test_run_id/hhvm.hhbc".
+      " -vRepo.Local.Path=${LOG_ROOT}_bytecode{$test_run_id}_{$instance_id}/hhvm.hhbc".
       " -vRepo.Authoritative=true";
   }
 
@@ -186,7 +189,7 @@ function waitForServerToGetGoing($serverPort, $serverProc, $serverId = null) {
 }
 
 function stopServer($adminPort, $serverProc) {
-  global $test_run_id, $LOG_ROOT;
+  global $test_run_id, $LOG_ROOT, $next_instance_id;
 
   $r = "";
   for ($i = 1; $i <= 10; $i++) {
@@ -206,11 +209,14 @@ function stopServer($adminPort, $serverProc) {
   @unlink("${LOG_ROOT}_test_server_stderr$test_run_id.log");
   @unlink("${LOG_ROOT}_test_server_stdout$test_run_id.log");
   @unlink("${LOG_ROOT}_test_client$test_run_id.log");
-  @unlink("${LOG_ROOT}_server$test_run_id.hhbc");
   @unlink("${LOG_ROOT}_client$test_run_id.hhbc");
   @unlink("${LOG_ROOT}_curl$test_run_id.log");
-  @unlink("${LOG_ROOT}_bytecode$test_run_id/hhvm.hhbc");
-  @rmdir("${LOG_ROOT}_bytecode$test_run_id");
+
+  for ($instance_id = 0; $instance_id < $next_instance_id; $instance_id++) {
+    @unlink("${LOG_ROOT}_server{$test_run_id}_{$instance_id}.hhbc");
+    @unlink("${LOG_ROOT}_bytecode{$test_run_id}_{$instance_id}/hhvm.hhbc");
+    @rmdir("${LOG_ROOT}_bytecode{$test_run_id}_{$instance_id}");
+  }
 }
 
 // Start a new server to takeover the old one, we want to assign a new

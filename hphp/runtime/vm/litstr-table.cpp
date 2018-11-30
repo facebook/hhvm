@@ -26,6 +26,10 @@ LitstrTable* LitstrTable::s_litstrTable = nullptr;
 ///////////////////////////////////////////////////////////////////////////////
 
 Id LitstrTable::mergeLitstr(const StringData* litstr) {
+  if (!litstr) {
+    return 0;
+  }
+
   {
     LitstrMap::const_accessor acc;
     if (m_litstr2id.find(acc, litstr)) {
@@ -45,13 +49,14 @@ Id LitstrTable::mergeLitstr(const StringData* litstr) {
 void LitstrTable::setReading() {
   always_assert(!m_safeToRead);
   always_assert(!m_namedInfo.size());
-  if (m_litstr2id.size()) {
-    m_namedInfo.resize(m_litstr2id.size());
-    m_namedInfo.shrink_to_fit();
-    for (auto const& strId : m_litstr2id) {
-      m_namedInfo[strId.second] = strId.first;
-    }
+
+  m_namedInfo.resize(m_litstr2id.size() + 1);
+  m_namedInfo.shrink_to_fit();
+  m_namedInfo[0] = nullptr;
+  for (auto const& strId : m_litstr2id) {
+    m_namedInfo[strId.second] = strId.first;
   }
+
   m_safeToRead = true;
 }
 
@@ -60,7 +65,10 @@ void LitstrTable::forEachLitstr(
   assertx(m_safeToRead);
   auto i = 0;
   for (auto s : m_namedInfo) {
-    onItem(i++, s);
+    if (i != 0) {
+      onItem(i, s);
+    }
+    i++;
   }
 }
 

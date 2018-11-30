@@ -34,11 +34,10 @@ LitstrRepoProxy::LitstrRepoProxy(Repo& repo)
 }
 
 void LitstrRepoProxy::createSchema(int repoId, RepoTxn& txn) {
-  std::stringstream ssCreate;
-  ssCreate << "CREATE TABLE " << m_repo.table(repoId, "Litstr")
-           << "(litstrId INTEGER, litstr TEXT,"
-              " PRIMARY KEY (litstrId));";
-  txn.exec(ssCreate.str());
+  auto insertQuery = folly::sformat(
+    "CREATE TABLE {} (litstrId INTEGER PRIMARY KEY, litstr TEXT);",
+    m_repo.table(repoId, "Litstr"));
+  txn.exec(insertQuery);
 }
 
 void LitstrRepoProxy::load() {
@@ -57,10 +56,10 @@ void LitstrRepoProxy::InsertLitstrStmt::insert(RepoTxn& txn,
                                                Id litstrId,
                                                const StringData* litstr) {
   if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "Litstr")
-             << " VALUES(@litstrId, @litstr);";
-    txn.prepare(*this, ssInsert.str());
+    auto insertQuery = folly::sformat(
+      "INSERT INTO {} VALUES(@litstrId, @litstr);",
+      m_repo.table(m_repoId, "Litstr"));
+    txn.prepare(*this, insertQuery);
   }
   RepoTxnQuery query(txn, *this);
   query.bindInt64("@litstrId", litstrId);
@@ -72,16 +71,23 @@ RepoStatus LitstrRepoProxy::GetLitstrsStmt::get() {
   try {
     RepoTxn txn(m_repo);
     if (!prepared()) {
-      std::stringstream ssSelect;
-      ssSelect << "SELECT litstrId,litstr FROM "
-               << m_repo.table(m_repoId, "Litstr");
-      txn.prepare(*this, ssSelect.str());
+      auto selectQuery = folly::sformat(
+        "SELECT litstrId,litstr FROM {} ORDER BY litstrId;",
+        m_repo.table(m_repoId, "Litstr"));
+      txn.prepare(*this, selectQuery);
     }
     RepoTxnQuery query(txn, *this);
     NamedEntityPairTable namedInfo;
+    namedInfo.emplace_back(nullptr);
+    int index = 1;
     do {
       query.step();
       if (query.row()) {
+        int litstrId;
+        query.getInt(0, litstrId);
+        always_assert(
+          litstrId == index++ && "LitstrId needs to be from 1 to N"
+        );
         StringData* litstr; /**/ query.getStaticString(1, litstr);
         namedInfo.emplace_back(litstr);
       }

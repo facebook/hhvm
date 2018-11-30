@@ -63,8 +63,8 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
   Option::WholeProgram = false;
 
   LitstrTable::init();
-  RuntimeOption::RepoAuthoritative = true;
-  repo->loadGlobalData(true /* allowFailure */);
+  RuntimeOption::RepoAuthoritative = repo->hasGlobalData();
+  repo->loadGlobalData();
 
   std::string hhasLib;
   auto const phpLib = get_systemlib(&hhasLib);

@@ -150,11 +150,9 @@ struct BlobEncoder {
 
   void encode(const LowStringPtr& s) {
     const StringData* sd = s;
-    if (Option::WholeProgram && sd) {
+    if (Option::WholeProgram) {
       Id id = LitstrTable::get().mergeLitstr(sd);
-      id = encodeGlobalLitstrId(id);
-      assertx(id >= 0);
-      encode(static_cast<uint32_t>(id));
+      encode(id);
       return;
     }
 
@@ -350,16 +348,14 @@ struct BlobDecoder {
   }
 
   void decode(LowStringPtr& s) {
-    uint32_t sz;
-    decode(sz);
-    Id id = static_cast<Id>(sz);
-    if (isGlobalLitstrId(id)) {
-      id = decodeGlobalLitstrId(id);
+    if (RuntimeOption::RepoAuthoritative) {
+      Id id;
+      decode(id);
       s = LitstrTable::get().lookupLitstrId(id);
       return;
     }
 
-    String st(decodeStringWithSize(sz));
+    String st(decodeString());
     s = st.get() ? makeStaticString(st) : 0;
   }
 
@@ -493,10 +489,6 @@ private:
   String decodeString() {
     uint32_t sz;
     decode(sz);
-    return decodeStringWithSize(sz);
-  }
-
-  String decodeStringWithSize(uint32_t sz) {
     if (sz == 0) return String();
     sz--;
     if (sz == 0) return empty_string();

@@ -50,6 +50,7 @@ module type S = sig
   val no_load: options -> bool
   val prechecked: options -> bool option
   val profile_log: options -> bool
+  val replace_state_after_saving: options -> bool
   val root: options -> Path.t
   val save_filename: options -> string option
   val should_detach: options -> bool

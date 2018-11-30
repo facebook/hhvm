@@ -71,6 +71,7 @@ type client_check_env = {
   output_json: bool;
   prechecked : bool option;
   profile_log: bool;
+  replace_state_after_saving: bool;
   retries: int;
   root: Path.t;
   sort_results: bool;

@@ -14,13 +14,15 @@ import tempfile
 import time
 
 from hh_paths import hh_server, hh_client
+from typing import Union
+
 
 class CommonTestDriver(object):
 
     # This needs to be overridden in child classes. The files in this
     # directory will be used to set up the initial environment for each
     # test.
-    template_repo: str = None
+    template_repo: Union[str, None] = None
 
     @classmethod
     def setUpClass(cls):
@@ -38,7 +40,7 @@ class CommonTestDriver(object):
             'HH_TEST_MODE': '1',
             'HH_TMPDIR': cls.hh_tmp_dir,
             'PATH': '%s:%s:/bin:/usr/bin:/usr/local/bin' %
-                (hh_server_dir, cls.bin_dir),
+            (hh_server_dir, cls.bin_dir),
             'HH_HOME': os.path.dirname(hh_client),
             'OCAMLRUNPARAM': 'b',
             'HH_LOCALCONF_PATH': cls.repo_dir,
@@ -120,12 +122,12 @@ class CommonTestDriver(object):
     @classmethod
     def proc_create(cls, args, env):
         return subprocess.Popen(
-                args,
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                env=dict(cls.test_env, **env),
-                universal_newlines=True)
+            args,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=dict(cls.test_env, **env),
+            universal_newlines=True)
 
     @classmethod
     def proc_call(cls, args, env=None, stdin=None):

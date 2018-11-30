@@ -30,6 +30,7 @@ type options = {
   no_load: bool;
   prechecked: bool option;
   profile_log: bool;
+  replace_state_after_saving: bool;
   root: Path.t;
   save_filename: string option;
   should_detach: bool;
@@ -82,6 +83,9 @@ module Messages = struct
   let no_load = " don't load from a saved state"
   let prechecked = " override value of \"prechecked_files\" flag from hh.conf"
   let profile_log = " enable profile logging"
+  let replace_state_after_saving = " if combined with --save-mini, causes the saved state" ^
+                        " to replace the program state; otherwise, the state files are not" ^
+                        " used after being written to disk (default: false)"
   let save_mini = " save mini server state to file"
   let waiting_client= " send message to fd/handle when server has begun" ^
                       " starting and again when it's done starting"
@@ -192,6 +196,7 @@ let parse_options () =
   let prechecked = ref None in
   let profile_log = ref false in
   let root = ref "" in
+  let replace_state_after_saving = ref false in
   let save = ref None in
   let should_detach = ref false in
   let version = ref false in
@@ -231,6 +236,9 @@ let parse_options () =
       "--no-prechecked", Arg.Unit (fun () -> prechecked := Some false), Messages.prechecked;
       "--prechecked", Arg.Unit (fun () -> prechecked := Some true), Messages.prechecked;
       "--profile-log", Arg.Set profile_log, Messages.profile_log;
+      "--replace-state-after-saving",
+        Arg.Set replace_state_after_saving,
+        Messages.replace_state_after_saving;
       "--save-mini", Arg.String set_save_mini, Messages.save_mini;
       "--version", Arg.Set version, "";
       "--waiting-client", Arg.Int set_wait, Messages.waiting_client;
@@ -287,6 +295,7 @@ let parse_options () =
     no_load = !no_load;
     prechecked = !prechecked;
     profile_log = !profile_log;
+    replace_state_after_saving = !replace_state_after_saving;
     root = root_path;
     save_filename = !save;
     should_detach = !should_detach;
@@ -312,6 +321,7 @@ let default_options ~root = {
   no_load = true;
   prechecked = None;
   profile_log = false;
+  replace_state_after_saving = false;
   root = Path.make root;
   save_filename = None;
   should_detach = false;
@@ -339,6 +349,7 @@ let max_procs options = options.max_procs
 let no_load options = options.no_load
 let prechecked options = options.prechecked
 let profile_log options = options.profile_log
+let replace_state_after_saving options = options.replace_state_after_saving
 let root options = options.root
 let save_filename options = options.save_filename
 let should_detach options = options.should_detach
@@ -380,6 +391,7 @@ let to_string
     no_load;
     prechecked;
     profile_log;
+    replace_state_after_saving;
     root;
     save_filename;
     should_detach;
@@ -422,6 +434,7 @@ let to_string
         "no_load: "; string_of_bool no_load; ", ";
         "prechecked: "; prechecked_str;
         "profile_log: "; string_of_bool profile_log; ", ";
+        "replace_state_after_saving: "; string_of_bool replace_state_after_saving; ", ";
         "root: "; Path.to_string root; ", ";
         "save_filename: "; save_filename_str; ", ";
         "should_detach: "; string_of_bool should_detach; ", ";

@@ -219,7 +219,7 @@ type _ t =
   | DUMP_SYMBOL_INFO : string list -> Symbol_info_service.result t
   | REMOVE_DEAD_FIXMES : int list -> [`Ok of ServerRefactorTypes.patch list | `Error of string] t
   | IN_MEMORY_DEP_TABLE_SIZE : ((int, string) Pervasives.result) t
-  | SAVE_STATE : (string * bool * bool) -> ((int, string) Pervasives.result) t
+  | SAVE_STATE : (string * bool * bool * bool) -> ((int, string) Pervasives.result) t
   | SEARCH : string * string -> HackSearchService.result t
   | COVERAGE_COUNTS : string -> ServerCoverageMetricTypes.result t
   | LINT : string list -> ServerLintTypes.result t

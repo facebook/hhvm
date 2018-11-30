@@ -105,7 +105,11 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, SymbolInfoService.go genv.workers file_list env
     | IN_MEMORY_DEP_TABLE_SIZE ->
       env, (SaveStateService.get_in_memory_dep_table_entry_count ())
-    | SAVE_STATE (filename, gen_saved_ignore_type_errors, file_info_on_disk) ->
+    | SAVE_STATE (
+        filename,
+        gen_saved_ignore_type_errors,
+        file_info_on_disk,
+        replace_state_after_saving) ->
       if Errors.is_empty env.errorl || gen_saved_ignore_type_errors then
         let tcopt = env.ServerEnv.tcopt in
         let save_decls =
@@ -118,6 +122,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           env.ServerEnv.files_info
           env.errorl
           filename
+          ~replace_state_after_saving
       else
         env, Error "There are typecheck errors; cannot generate saved state."
     | SEARCH (query, type_) ->

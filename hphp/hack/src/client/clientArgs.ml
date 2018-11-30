@@ -100,6 +100,7 @@ let parse_check_args cmd =
   let profile_log = ref false in
   let refactor_before = ref "" in
   let refactor_mode = ref "" in
+  let replace_state_after_saving = ref false in
   let retries = ref 800 in
   let sort_results = ref false in
   let timeout = ref None in
@@ -400,6 +401,11 @@ let parse_check_args cmd =
         Arg.Unit (set_mode (MODE_REMOVE_DEAD_FIXMES [])),
       " (mode) remove dead HH_FIXME for any error code < 5000 " ^
       "(first do hh_client restart --no-load)";
+    "--replace-state-after-saving",
+      Arg.Set replace_state_after_saving,
+      " if combined with --save-mini, causes the saved state" ^
+      " to replace the program state; otherwise, the state files are not" ^
+      " used after being written to disk (default: false)";
     (* Retrieve changed files since input checkpoint.
      * Output is separated by newline.
      * Exit code will be non-zero if no checkpoint is found *)
@@ -527,11 +533,11 @@ let parse_check_args cmd =
     no_load = !no_load || (
       match !mode with
       | Some (MODE_REMOVE_DEAD_FIXMES _) -> true
-      | _ -> false
-    );
+      | _ -> false);
     output_json = !output_json;
     prechecked = !prechecked;
     profile_log = !profile_log;
+    replace_state_after_saving = !replace_state_after_saving;
     retries = !retries;
     root = root;
     sort_results = !sort_results;

@@ -305,7 +305,7 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   Config::Bind(ParserThreadCount, ini, config, "ParserThreadCount", 0);
   if (ParserThreadCount <= 0) {
-    ParserThreadCount = Process::GetCPUCount();
+    ParserThreadCount = Process::GetCPUCount() / 2;
   }
 
   // Just to silence warnings until we remove them from various config files

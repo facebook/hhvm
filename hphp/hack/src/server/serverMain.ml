@@ -830,7 +830,7 @@ let program_init genv =
   env
 
 let setup_server ~informant_managed ~monitor_pid options handle =
-  let init_id = Random_id.short_string () in
+  let init_id = Random_id.short_alphanumeric_string () in
   Hh_logger.log "Version: %s" Build_id.build_id_ohai;
   Hh_logger.log "Hostname: %s" (Unix.gethostname ());
   let root = ServerArgs.root options in
@@ -900,7 +900,7 @@ let setup_server ~informant_managed ~monitor_pid options handle =
   let worker_logging_init =
     if (ServerConfig.sharedmem_config config).SharedMem.sample_rate = 0.0
     then fun () -> ()
-    else fun () -> logging_init (init_id ^ "." ^ Random_id.short_string ()) in
+    else fun () -> logging_init (init_id ^ "." ^ Random_id.short_alphanumeric_string ()) in
   let genv = ServerEnvBuild.make_genv
     options
     config

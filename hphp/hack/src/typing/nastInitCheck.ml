@@ -437,7 +437,7 @@ and expr_ env acc p e =
       expr acc e
   | Special_func (Genva el) ->
       exprl acc el
-  | New (_, el, uel) ->
+  | New (_, el, uel, _) ->
       exprl acc (el @ uel)
   | Pair (e1, e2) ->
     let acc = expr acc e1 in

@@ -2576,19 +2576,21 @@ module Make (GetLocals : GetLocals) = struct
       let e1 = expr env e in
       let h1 = hint ~allow_wildcard:true env h in
       N.As (e1, h1, b)
-    | New ((_, Id x), hl, el, uel)
-    | New ((_, Lvar x), hl, el, uel) ->
+    | New ((cp, Id x), hl, el, uel)
+    | New ((cp, Lvar x), hl, el, uel) ->
       let hl = extract_hintl_from_type_args env p hl in
       N.New (make_class_id env x hl,
         exprl env el,
-        exprl env uel)
+        exprl env uel,
+        cp)
     | New ((p, _e), hl, el, uel) ->
       let hl = extract_hintl_from_type_args env p hl in
       if (fst env).in_mode = FileInfo.Mstrict
       then Errors.dynamic_new_in_strict_mode p;
       N.New (make_class_id env (p, SN.Classes.cUnknown) hl,
         exprl env el,
-        exprl env uel)
+        exprl env uel,
+        p)
     | NewAnonClass _ ->
       Errors.experimental_feature p "Anonymous classes";
       N.Null

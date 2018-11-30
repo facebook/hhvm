@@ -225,3 +225,8 @@ val is_xhp_child : env -> Pos.t -> Tast.ty -> bool
 (** Verify that an XHP body expression is legal. *)
 
 val get_enum : env -> string -> Typing_classes_heap.t option
+val env_reactivity: env -> Typing_defs.reactivity
+val function_is_mutable: env -> bool
+val local_is_mutable: include_borrowed: bool -> env -> Local_id.t -> bool
+val get_env_mutability: env -> Typing_mutability_env.mutability_env
+val get_fun: env -> Typing_heap.Funs.key -> Typing_heap.Funs.t option

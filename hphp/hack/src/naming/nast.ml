@@ -460,7 +460,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
    | Is          (e, h)           -> this#on_is acc e h
    | As          (e, h, b)           -> this#on_as acc e h b
    | Typename n -> this#on_typename acc n
-   | New         (cid, el, uel)   -> this#on_new acc cid el uel
+   | New         (cid, el, uel, _)   -> this#on_new acc cid el uel
    | Efun        (f, idl)         -> this#on_efun acc f idl
    | Xml         (sid, attrl, el) -> this#on_xml acc sid attrl el
    | Unsafe_expr (e)              -> this#on_unsafe_expr acc e

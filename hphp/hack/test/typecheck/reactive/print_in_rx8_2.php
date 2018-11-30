@@ -2,6 +2,5 @@
 
 <<__RxLocal>>
 function rxlocal(): void {
-  // ERROR
-  print 1;
+  echo 2;
 }

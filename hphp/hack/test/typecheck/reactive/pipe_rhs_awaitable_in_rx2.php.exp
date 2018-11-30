@@ -1,0 +1,4 @@
+File "pipe_rhs_awaitable_in_rx2.php", line 11, characters 3-18:
+This expression is of type Awaitable, but it's either being discarded or used in a dangerous way before being awaited (Typing[4015])
+File "pipe_rhs_awaitable_in_rx2.php", line 4, characters 33-46:
+This is why I think it is Awaitable

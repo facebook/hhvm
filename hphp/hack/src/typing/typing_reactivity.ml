@@ -255,22 +255,6 @@ let check_call env method_info pos reason ft arg_types =
       |> ignore
   end
 
-let rec get_name = function
-(* name *)
-| _, Nast.Lvar (_, id) -> Local_id.to_string id
-(* name = initializer *)
-| _, Nast.Binop (_, lhs, _) -> get_name lhs
-| _ -> "_"
-
-let disallow_static_or_global_in_reactive_context ~is_static env el =
-  Env.error_if_reactive_context env @@ begin fun () ->
-    (List.hd el) |> Option.iter ~f:(fun n ->
-      let p = fst n in
-      let name = get_name n in
-      if is_static then Errors.static_in_reactive_context p name
-      else Errors.global_in_reactive_context p name)
-  end
-
 let rxTraversableType =
   TMT.class_type Reason.none Naming_special_names.Rx.cTraversable [(Reason.Rnone, Tany)]
 
@@ -322,12 +306,6 @@ let generate_fresh_name_for_target_of_condition_type env target_type condition_t
   | _, Taccess _ ->
     Some ((Typing_print.full env target_type) ^ "#" ^ (Typing_print.full env condition_type))
   | _ -> None
-
-let verify_void_return_to_rx ~is_expr_statement p env ft =
-  if ft.ft_returns_void_to_rx && not is_expr_statement
-  then Env.error_if_reactive_context env @@ begin fun () ->
-    Errors.returns_void_to_rx_function_as_non_expression_statement p ft.ft_pos
-  end
 
 let try_substitute_type_with_condition env cond_ty ty =
   generate_fresh_name_for_target_of_condition_type env ty cond_ty

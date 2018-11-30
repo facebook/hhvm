@@ -295,32 +295,20 @@ let rec assign_array_append pos ur env ty1 ty2 =
     env, (ty1, (r, TUtils.terr env))
   | _, Tclass ((_, n), _, [tv])
     when n = SN.Collections.cVector || n = SN.Collections.cSet ->
-    Env.error_if_reactive_context env begin fun () ->
-      Errors.nonreactive_append pos
-    end;
     let env = Typing_ops.sub_type pos ur env ty2 tv in
     env, (ty1, tv)
   (* Handle the case where Vector or Set was used as a typehint
      without type parameters *)
   | r, Tclass ((_, n), _, [])
     when n = SN.Collections.cVector || n = SN.Collections.cSet ->
-    Env.error_if_reactive_context env begin fun () ->
-      Errors.nonreactive_append pos
-    end;
     env, (ty1, (r, TUtils.tany env))
   | _, Tclass ((_, n), _, [tk; tv]) when n = SN.Collections.cMap ->
-    Env.error_if_reactive_context env begin fun () ->
-      Errors.nonreactive_append pos
-    end;
     let tpair = TMT.pair (Reason.Rmap_append pos) tk tv in
     let env = Typing_ops.sub_type pos ur env ty2 tpair in
     env, (ty1, tpair)
   (* Handle the case where Map was used as a typehint without
      type parameters *)
   | _, Tclass ((_, n), _, []) when n = SN.Collections.cMap ->
-    Env.error_if_reactive_context env begin fun () ->
-      Errors.nonreactive_append pos
-    end;
     let tpair = TMT.class_type (Reason.Rmap_append pos) SN.Collections.cPair [] in
     let env = Typing_ops.sub_type pos ur env ty2 tpair in
     env, (ty1, tpair)

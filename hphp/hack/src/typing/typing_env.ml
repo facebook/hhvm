@@ -516,7 +516,6 @@ let empty tcopt file ~droot = {
   in_case  = false;
   inside_constructor = false;
   inside_ppl_class = false;
-  disallow_this = false;
   decl_env = {
     mode = FileInfo.Mstrict;
     droot;
@@ -1048,6 +1047,13 @@ env_with_mut
   env
   (LID.Map.add local mutability_type env.lenv.local_mutability)
 
+let local_is_mutable ~include_borrowed env id =
+  let module TME = Typing_mutability_env in
+  match LID.Map.get id (get_env_mutability env) with
+  | Some (_, TME.Mutable) -> true
+  | Some (_, TME.Borrowed) -> include_borrowed
+  | _ -> false
+
 let get_locals env =
   LEnvC.get_cont C.Next env.lenv.local_types
 
@@ -1159,4 +1165,7 @@ let save local_tpenv env =
     Tast.tenv = env.tenv;
     Tast.subst = env.subst;
     Tast.tpenv = SMap.union local_tpenv env.global_tpenv;
+    Tast.reactivity = env_reactivity env;
+    Tast.local_mutability = get_env_mutability env;
+    Tast.fun_mutable = function_is_mutable env;
   }

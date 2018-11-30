@@ -15,9 +15,12 @@ function f(): void {
 function l(): int {
   // OK - lambda is local
   return g(() ==> {
-    print(1);
+    nonrx();
     return 1;
   });
+}
+
+function nonrx(): void {
 }
 
 <<__RxShallow>>

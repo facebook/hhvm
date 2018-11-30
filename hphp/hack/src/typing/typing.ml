@@ -508,6 +508,8 @@ and fun_def tcopt f =
       let tyvars = ISet.of_list (IMap.keys env.Env.tvenv) in
       let env = SubType.solve_tyvars ~tyvars env in
       Typing_subtype.log_prop env;
+      (* restore original reactivity *)
+      let env = Env.set_env_reactive env reactive in
       begin match f.f_ret with
         | None when Env.is_strict env ->
           Typing_return.suggest_return env pos return.Typing_env_return_info.return_type
@@ -691,7 +693,7 @@ and stmt env = function
   | Noop ->
       env, T.Noop
   | Expr e ->
-      let env, te, _ = expr ~is_expr_statement:true env e in
+      let env, te, _ = expr env e in
       let env = if TFTerm.expression_exits env e
         then LEnv.move_and_merge_next_in_cont env C.Exit
         else env in
@@ -899,8 +901,6 @@ and stmt env = function
     let env, ttb, tcl, tfb = try_catch env tb cl fb in
     env, T.Try (ttb, tcl, tfb)
   | Static_var el ->
-    Typing_reactivity.disallow_static_or_global_in_reactive_context env el
-      ~is_static:true;
     let env = List.fold_left el ~f:begin fun env e ->
       match e with
         | _, Binop (Ast.Eq _, (_, Lvar (p, x)), _) ->
@@ -910,8 +910,6 @@ and stmt env = function
     let env, tel, _ = exprs env el in
     env, T.Static_var tel
   | Global_var el ->
-    Typing_reactivity.disallow_static_or_global_in_reactive_context env el
-      ~is_static:false;
     let env = List.fold_left el ~f:begin fun env e ->
       match e with
         | _, Binop (Ast.Eq _, (_, Lvar (p, x)), _) ->
@@ -1133,8 +1131,6 @@ and expr
     ?expected
     ?(accept_using_var = false)
     ?(is_using_clause = false)
-    ?(is_expr_statement = false)
-    ?(allow_non_awaited_awaitable_in_rx=false)
     ?is_func_arg
     ?forbid_uref
     ?(valkind = `other)
@@ -1147,15 +1143,13 @@ and expr
       log_types (fst e) env
       [Log_head ("Typing.expr " ^ Typing_reason.string_of_ureason r,
        [Log_type ("expected_ty", ty)])])) end;
-  raw_expr ~accept_using_var ~is_using_clause ~is_expr_statement
-    ~allow_non_awaited_awaitable_in_rx ~valkind ~check_defined
+  raw_expr ~accept_using_var ~is_using_clause
+    ~valkind ~check_defined
     ?is_func_arg ?forbid_uref ?expected env e
 
 and raw_expr
   ?(accept_using_var = false)
   ?(is_using_clause = false)
-  ?(is_expr_statement = false)
-  ?(allow_non_awaited_awaitable_in_rx=false)
   ?expected
   ?lhs_of_null_coalesce
   ?is_func_arg
@@ -1165,20 +1159,12 @@ and raw_expr
   env e =
   debug_last_pos := fst e;
   let env, te, ty =
-    expr_ ~accept_using_var ~is_using_clause ~is_expr_statement ?expected
+    expr_ ~accept_using_var ~is_using_clause ?expected
       ?lhs_of_null_coalesce ?is_func_arg ?forbid_uref
       ~valkind ~check_defined env e in
   let () = match !expr_hook with
     | Some f -> f e (Typing_expand.fully_expand env ty)
     | None -> () in
-  if Env.env_local_reactive env
-    && not allow_non_awaited_awaitable_in_rx
-    && not (TypecheckerOptions.unsafe_rx (Env.get_tcopt env))
-  then begin match ty with
-  | _, Tclass ((_, cls), _, _) when cls = SN.Classes.cAwaitable ->
-    Errors.non_awaited_awaitable_in_rx (fst e);
-  | _ -> ()
-  end;
   env, te, ty
 
 and lvalue env e =
@@ -1225,15 +1211,13 @@ and eif env ~expected ~coalesce p c e1 e2 =
         let env, ty = TUtils.non_null env tyc in
         env, None, ty
     | Some e1 ->
-        let env, te1, ty1 = expr ?expected
-          ~allow_non_awaited_awaitable_in_rx:true env e1 in
+        let env, te1, ty1 = expr ?expected env e1 in
         env, Some te1, ty1
     in
   let lenv1 = env.Env.lenv in
   let env = { env with Env.lenv = parent_lenv } in
   let env = condition env false tc in
-  let env, te2, ty2 = expr ?expected
-    ~allow_non_awaited_awaitable_in_rx:true env e2 in
+  let env, te2, ty2 = expr ?expected env e2 in
   let lenv2 = env.Env.lenv in
   let fake_members = LEnv.intersect_fake lenv1 lenv2 in
   (* we restore the locals to their parent state so as not to leak the
@@ -1245,11 +1229,6 @@ and eif env ~expected ~coalesce p c e1 e2 =
    * aren't assigned to local variables in an environment *)
   (* TODO: Omit if expected type is present and checked in calls to expr *)
   let env, ty = Union.union env ty1 ty2 in
-  if coalesce
-  then Typing_mutability.check_conditional_operator tc te2
-  else
-    Option.iter te1
-    ~f:(fun te1 -> Typing_mutability.check_conditional_operator te1 te2);
   let te = if coalesce then T.Binop(Ast.QuestionQuestion, tc, te2) else T.Eif(tc, te1, te2) in
   make_result env p te ty
 
@@ -1265,19 +1244,8 @@ and check_escaping_var env (pos, x) =
     else Errors.escaping_disposable pos
   else ()
 
-and check_escaping_mutable env (pos, x) =
-  let mut_env = Env.get_env_mutability env in
-  let is_mutable =
-    (x = this && Env.function_is_mutable env) ||
-    begin match Local_id.Map.get x mut_env with
-    | Some (_, Typing_mutability_env.Immutable) | None -> false
-    | _ -> true
-    end in
-  if is_mutable then Errors.escaping_mutable_object pos
-
 and exprs
   ?(accept_using_var = false)
-  ?(allow_non_awaited_awaitable_in_rx = false)
   ?is_func_arg
   ?expected
   ?(valkind = `other)
@@ -1288,9 +1256,9 @@ and exprs
     env, [], []
 
   | e::el ->
-    let env, te, ty = expr ~accept_using_var ~allow_non_awaited_awaitable_in_rx
+    let env, te, ty = expr ~accept_using_var
       ?is_func_arg ?expected ~valkind ~check_defined env e in
-    let env, tel, tyl = exprs ~accept_using_var ~allow_non_awaited_awaitable_in_rx
+    let env, tel, tyl = exprs ~accept_using_var
       ?is_func_arg ?expected ~valkind ~check_defined env el in
     env, te::tel, ty::tyl
 
@@ -1317,7 +1285,6 @@ and expr_
   ?expected
   ?(accept_using_var = false)
   ?(is_using_clause = false)
-  ?(is_expr_statement = false)
   ?lhs_of_null_coalesce
   ?(is_func_arg = false)
   ?(forbid_uref = false)
@@ -1387,10 +1354,10 @@ and expr_
     | _ -> Env.forget_members env p in
 
   let check_call
-    ~is_using_clause ~expected ~is_expr_statement env p call_type e hl el uel ~in_suspend =
+    ~is_using_clause ~expected env p call_type e hl el uel ~in_suspend =
     let env, te, result =
       dispatch_call
-      ~is_using_clause ~expected ~is_expr_statement p env call_type e hl el uel ~in_suspend in
+      ~is_using_clause ~expected p env call_type e hl el uel ~in_suspend in
     let env = forget_fake_members env p e in
     env, te, result in
 
@@ -1618,8 +1585,6 @@ and expr_
       let r, _ = Env.get_self env in
       if r = Reason.Rnone
       then Errors.this_var_outside_class p;
-      if env.Env.disallow_this
-      then Errors.escaping_mutable_object p;
       if not accept_using_var
       then check_escaping_var env (p,this);
       let (_, ty) = Env.get_local env this in
@@ -1705,10 +1670,6 @@ and expr_
       | None ->
           make_result env p (T.Id id) (Reason.Rwitness cst_pos, Typing_utils.tany env)
       | Some (ty, _) ->
-        if cst_name = SN.Rx.is_enabled
-          && Env.env_reactivity env = Nonreactive
-          && not (TypecheckerOptions.unsafe_rx (Env.get_tcopt env))
-        then Errors.rx_enabled_in_non_rx_context cst_pos;
         let env, ty =
           Phase.localize_with_self env ty in
         make_result env p (T.Id id) ty
@@ -1881,11 +1842,6 @@ and expr_
       let env = save_and_merge_next_in_catch env in
       make_result env p (T.Dollardollar id) ty
   | Lvar ((_, x) as id) ->
-      let local_id = Local_id.to_string x in
-      if SN.Superglobals.is_superglobal local_id
-      then Env.error_if_reactive_context env @@ begin fun () ->
-        Errors.superglobal_in_reactive_context p local_id;
-      end;
       if not accept_using_var
       then check_escaping_var env id;
       let ty = if check_defined
@@ -1979,9 +1935,8 @@ and expr_
           [])) (Env.fresh_type())
   | Call (call_type, e, hl, el, uel) ->
       let env = save_and_merge_next_in_catch env in
-      let env, te, ty = check_call ~is_using_clause ~expected ~is_expr_statement
+      let env, te, ty = check_call ~is_using_clause ~expected
         env p call_type e hl el uel ~in_suspend:false in
-      Typing_mutability.enforce_mutable_call env te;
       env, te, ty
   | Binop (Ast.QuestionQuestion, e1, e2) ->
       eif env ~expected ~coalesce:true p e1 None e2
@@ -2067,9 +2022,7 @@ and expr_
       (** id is the ID of the $$ that is implicitly declared by the pipe.
        * Set the local type for the $$ in the RHS. *)
       let env = set_local env e0 ty in
-      (* do not error on awaitable being returned from RHS *)
-      let env, te2, ty2 =
-        expr env ~allow_non_awaited_awaitable_in_rx:true e2 in
+      let env, te2, ty2 = expr env e2 in
       (**
        * Return ty2 since the type of the pipe expression is the type of the
        * RHS.
@@ -2115,18 +2068,12 @@ and expr_
   | Class_const (cid, mid) -> class_const env p (cid, mid)
   | Class_get ((px, x), (py, y))
       when Env.FakeMembers.get_static env x y <> None ->
-        Env.error_if_reactive_context env @@ begin fun () ->
-          Errors.static_property_in_reactive_context p
-        end;
         let env, local = Env.FakeMembers.make_static p env x y in
         let local = p, Lvar (p, local) in
         let env, _, ty = expr env local in
         let env, te, _ = static_class_id ~check_constraints:false px env x in
         make_result env p (T.Class_get (te, (py, y))) ty
   | Class_get ((cpos, cid), mid) ->
-      Env.error_if_reactive_context env @@ begin fun () ->
-        Errors.static_property_in_reactive_context p
-      end;
       let env, te, cty = static_class_id ~check_constraints:false cpos env cid in
       let env = save_and_merge_next_in_catch env in
       (* We don't expect type variables to be generated because class properties
@@ -2238,7 +2185,7 @@ and expr_
     let key = Env.fresh_type () in
     let value = Env.fresh_type () in
     let env, te, yield_from_ty =
-      expr ~is_using_clause ~is_expr_statement env e in
+      expr ~is_using_clause env e in
       (* Expected type of `e` in `yield from e` is KeyedTraversable<Tk,Tv> (but might be dynamic)*)
     let expected_yield_from_ty = TMT.keyed_traversable (Reason.Ryield_gen p) key value in
     let from_dynamic = SubType.is_sub_type env yield_from_ty (fst yield_from_ty, Tdynamic) in
@@ -2265,15 +2212,14 @@ and expr_
   | Await e ->
       (* Await is permitted in a using clause e.g. using (await make_handle()) *)
       let env, te, rty =
-        expr ~is_using_clause ~is_expr_statement
-          ~allow_non_awaited_awaitable_in_rx:true env e in
+        expr ~is_using_clause env e in
       let env, ty = Async.overload_extract_from_awaitable env p rty in
       make_result env p (T.Await te) ty
   | Suspend (e) ->
       let env, te, ty =
         match e with
         | _, Call (call_type, e, hl, el, uel) ->
-          check_call ~is_using_clause ~expected ~is_expr_statement
+          check_call ~is_using_clause ~expected
             env p call_type e hl el uel ~in_suspend:true
         | (epos, _)  ->
           let env, te, (r, ty) = expr env e in
@@ -2285,14 +2231,13 @@ and expr_
       make_result env p (T.Suspend te) ty
 
   | Special_func func -> special_func env p func
-  | New ((pos, c), el, uel) ->
+  | New ((pos, c), el, uel, p1) ->
       let env = save_and_merge_next_in_catch env in
       let env, tc, tel, tuel, tyvars, ty, ctor_fty =
         new_object ~expected ~is_using_clause ~check_parent:false ~check_not_abstract:true
           pos env c el uel in
       let env = Env.forget_members env p in
-      Typing_mutability.enforce_mutable_constructor_call env ctor_fty tel;
-      make_result ~tyvars env p (T.New(tc, tel, tuel)) ty
+      make_result ~tyvars env p (T.New(tc, tel, tuel, (p1, ctor_fty))) ty
   | Cast ((_, Harray (None, None)), _)
     when Env.is_strict env
     || TCO.migration_flag_enabled (Env.get_tcopt env) "array_cast" ->
@@ -2369,18 +2314,8 @@ and expr_
       let reactivity =
           Decl_fun_utils.fun_reactivity_opt env.Env.decl_env f.f_user_attributes
           |> Option.value ~default:(TR.strip_conditional_reactivity (Env.env_reactivity env)) in
-      let old_disallow_this = env.Env.disallow_this in
-      let disallow_this =
-        if reactivity <> Nonreactive
-        then begin
-          List.iter idl (check_escaping_mutable env);
-          (* disallow referencing $this in lambdas if containing method mutable *)
-          old_disallow_this || Env.function_is_mutable env
-          end
-        else false in
       let check_body_under_known_params ?ret_ty ft =
         let old_reactivity = Env.env_reactivity env in
-        let env = { env with Env.disallow_this = disallow_this } in
         let env = Env.set_env_reactive env reactivity in
         let old_inside_ppl_class = env.Typing_env.inside_ppl_class in
         let env = { env with Typing_env.inside_ppl_class = false } in
@@ -2389,8 +2324,7 @@ and expr_
         let (env, tefun, ty) = anon ?ret_ty env ft.ft_params ft.ft_arity in
         let env = Env.set_env_reactive env old_reactivity in
         let env = { env with
-          Typing_env.inside_ppl_class = old_inside_ppl_class;
-          Env.disallow_this = old_disallow_this } in
+          Typing_env.inside_ppl_class = old_inside_ppl_class; } in
         let inferred_ty =
           if is_explicit_ret
           then (Reason.Rwitness p, Tfun { ft with ft_ret = declared_ft.ft_ret })
@@ -2491,7 +2425,6 @@ and expr_
               let reactivity = fun_reactivity env.Env.decl_env f.f_user_attributes f.f_params in
               let old_reactivity = Env.env_reactivity env in
               let env = Env.set_env_reactive env reactivity in
-              let env = { env with Env.disallow_this = disallow_this } in
               let is_coroutine, counter, pos, anon = anon_make env p f declared_ft idl in
               let env, tefun, _, anon_id = Errors.try_with_error
                 (fun () ->
@@ -2509,7 +2442,6 @@ and expr_
                   let env, anon_id = Env.add_anonymous env anon_fun in
                   env, tefun, ty, anon_id) in
               let env = Env.set_env_reactive env old_reactivity in
-              let env = { env with Env.disallow_this = old_disallow_this } in
               let anon_ty = (Reason.Rwitness p, Tanon (declared_ft.ft_arity, anon_id)) in
               let ((ep,_efun_ty),efun) = tefun in
               let tefun = ((ep, anon_ty), efun) in
@@ -2526,7 +2458,7 @@ and expr_
           * cid = CI sid cannot produce a union of classes anyhow *)
         | (_, class_info, _)::_ -> Some class_info
       in
-      let env, _te, obj = expr env (fst sid, New ((fst sid, cid), [], [])) in
+      let env, _te, obj = expr env (fst sid, New ((fst sid, cid), [], [], (fst sid))) in
       let env, typed_attrs, attr_types = xhp_attribute_exprs env class_info attrl in
       let env, tel = List.map_env env el ~f:(fun env e -> let env, te, _ = expr env e in env, te) in
       let txml = T.Xml (sid, typed_attrs, List.rev tel) in
@@ -2910,7 +2842,7 @@ and special_func env p func =
       let env, ty = Async.gena env p ety in
       env, T.Gena te, ty
   | Genva el ->
-      let env, tel, etyl = exprs ~allow_non_awaited_awaitable_in_rx:true  env el in
+      let env, tel, etyl = exprs env el in
       let env, ty = Async.genva env p etyl in
       env, T.Genva tel, ty
   | Gen_array_rec e ->
@@ -3515,7 +3447,7 @@ and is_abstract_ft fty = match fty with
  * The typing of call is different.
  *)
 
- and dispatch_call ~expected ~is_using_clause ~is_expr_statement p env call_type
+ and dispatch_call ~expected ~is_using_clause p env call_type
     (fpos, fun_expr as e) hl el uel ~in_suspend =
   let make_call ~tyvars env te thl tel tuel ty =
     make_result ~tyvars env p (T.Call (call_type, te, thl, tel, tuel)) ty in
@@ -3582,9 +3514,6 @@ and is_abstract_ft fty = match fty with
   (* Special function `echo` *)
   | Id ((p, pseudo_func) as id) when pseudo_func = SN.SpecialFunctions.echo ->
       check_function_in_suspend SN.SpecialFunctions.echo;
-      Env.error_if_shallow_reactive_context env @@ begin fun () ->
-        Errors.echo_in_reactive_context p;
-      end;
       let env, tel, _ = exprs ~accept_using_var:true env el in
       make_call_special env id tel (Reason.Rwitness p, Tprim Tvoid)
   (* Special function `empty` *)
@@ -3610,7 +3539,6 @@ and is_abstract_ft fty = match fty with
   | Id ((_, pseudo_func) as id) when pseudo_func = SN.PseudoFunctions.unset ->
     check_function_in_suspend SN.PseudoFunctions.unset;
      let env, tel, _ = exprs env el in
-     List.iter tel ~f:(Typing_mutability.check_unset_target env);
      if uel <> [] then
        Errors.unpacking_disallowed_builtin_function p pseudo_func;
      let disallow_varray =
@@ -4044,7 +3972,7 @@ and is_abstract_ft fty = match fty with
         let fty = check_abstract_parent_meth (snd m) p fty in
         check_coroutine_call env fty;
         let env, tel, tuel, ty =
-          call ~expected ~is_expr_statement
+          call ~expected
           ~method_call_info:(TR.make_call_info ~receiver_is_self:false
             ~is_static:true this_ty (snd m))
           p env fty el uel in
@@ -4069,7 +3997,6 @@ and is_abstract_ft fty = match fty with
                 let fty = check_abstract_parent_meth (snd m) p fty in
                 check_coroutine_call env fty;
                 let env, _tel, _tuel, method_ = call ~expected
-                  ~is_expr_statement
                   ~method_call_info:(TR.make_call_info ~receiver_is_self:false
                     ~is_static:false this_ty (snd m))
                   p env fty el uel in
@@ -4090,8 +4017,7 @@ and is_abstract_ft fty = match fty with
             let fty = check_abstract_parent_meth (snd m) p fty in
             check_coroutine_call env fty;
             let env, tel, tuel, ty =
-              call ~expected ~is_expr_statement
-                ~method_call_info:(TR.make_call_info ~receiver_is_self:false
+              call ~expected ~method_call_info:(TR.make_call_info ~receiver_is_self:false
                   ~is_static:true this_ty (snd m))
                 p env fty el uel in
             make_call ~tyvars env (T.make_typed_expr fpos fty
@@ -4140,7 +4066,7 @@ and is_abstract_ft fty = match fty with
         call ~expected
         ~method_call_info:(TR.make_call_info ~receiver_is_self:(e1 = CIself)
           ~is_static:true ty1 (snd m))
-        ~is_expr_statement p env fty el uel in
+        p env fty el uel in
       make_call ~tyvars env (T.make_typed_expr fpos fty
         (T.Class_const(te1, m))) hl tel tuel ty
   (* <<__PPL>>: sample, factor, observe, condition *)
@@ -4186,7 +4112,7 @@ and is_abstract_ft fty = match fty with
           call ~expected
             ~method_call_info:(TR.make_call_info ~receiver_is_self:false
               ~is_static:false ty1 (snd m))
-            ~is_expr_statement p env fty el uel in
+            p env fty el uel in
         tel := tel_; tuel := tuel_;
         tftyl := fty :: !tftyl;
         env, method_, None) in
@@ -4205,13 +4131,13 @@ and is_abstract_ft fty = match fty with
       let env, fty, tyvars = fun_type_of_id env x hl in
       check_coroutine_call env fty;
       let env, tel, tuel, ty =
-        call ~expected ~is_expr_statement p env fty el uel in
+        call ~expected p env fty el uel in
       make_call ~tyvars env (T.make_typed_expr fpos fty (T.Fun_id x)) hl tel tuel ty
   | Id (_, id as x) ->
       let env, fty, tyvars = fun_type_of_id env x hl in
       check_coroutine_call env fty;
       let env, tel, tuel, ty =
-        call ~expected ~is_expr_statement p env fty el uel in
+        call ~expected p env fty el uel in
       let is_mutable = id = SN.Rx.mutable_ in
       let is_move = id = SN.Rx.move in
       let is_freeze = id = SN.Rx.freeze in
@@ -4225,18 +4151,6 @@ and is_abstract_ft fty = match fty with
       if (is_mutable || is_move || is_freeze) && uel <> [] then begin
         Errors.unpacking_disallowed_builtin_function p id
       end;
-      (* check arguments of Rx\mutable *)
-      if is_mutable then begin
-        Typing_mutability.check_rx_mutable_arguments p env tel;
-      end;
-      (* error if result of Rx\freeze or Rx\move is ignored *)
-      if is_expr_statement
-      then begin
-         if is_freeze
-         then Errors.ignored_result_of_freeze p
-         else if is_move
-         then Errors.ignored_result_of_move p
-      end;
       (* adjust env for Rx\freeze or Rx\move calls *)
       let env =
         if is_freeze
@@ -4249,7 +4163,7 @@ and is_abstract_ft fty = match fty with
   | _ ->
       let env, te, fty = expr env e in
       check_coroutine_call env fty;
-      let env, tel, tuel, ty = call ~expected ~is_expr_statement p env fty el uel in
+      let env, tel, tuel, ty = call ~expected p env fty el uel in
       make_call ~tyvars:ISet.empty env te hl tel tuel ty
 
 and fun_type_of_id env x hl =
@@ -5038,9 +4952,9 @@ and inout_write_back env { fp_type; _ } (_, e) =
       env
     | _ -> env
 
-and call ~expected ?(is_expr_statement=false) ?method_call_info pos env fty el uel =
+and call ~expected ?method_call_info pos env fty el uel =
   let env, tel, tuel, ty =
-    call_ ~expected ~is_expr_statement ~method_call_info pos env fty el uel in
+    call_ ~expected ~method_call_info pos env fty el uel in
   (* We need to solve the constraints after every single function call.
    * The type-checker is control-flow sensitive, the same value could
    * have different type depending on the branch that we are in.
@@ -5049,7 +4963,7 @@ and call ~expected ?(is_expr_statement=false) ?method_call_info pos env fty el u
   let env = Env.check_todo env in
   env, tel, tuel, ty
 
-and call_ ~expected ~method_call_info ~is_expr_statement pos env fty el uel =
+and call_ ~expected ~method_call_info pos env fty el uel =
   let make_unpacked_traversable_ty pos ty = TMT.traversable (Reason.Runpack_param pos) ty in
   let env, efty = Env.expand_type env fty in
   (match efty with
@@ -5090,7 +5004,6 @@ and call_ ~expected ~method_call_info ~is_expr_statement pos env fty el uel =
     (* Typing of format string functions. It is dependent on the arguments (el)
      * so it cannot be done earlier.
      *)
-    Typing_reactivity.verify_void_return_to_rx ~is_expr_statement pos env ft;
     let pos_def = Reason.to_pos r2 in
     let env, ft = Typing_exts.retype_magic_func env ft el in
     check_deprecated pos ft;
@@ -6519,6 +6432,8 @@ and method_def env m =
   let tyvars = ISet.of_list (IMap.keys env.Env.tvenv) in
   let env = SubType.solve_tyvars ~tyvars env in
   Typing_subtype.log_prop env;
+  (* restore original method reactivity  *)
+  let env = Env.set_env_reactive env reactive in
   let m_ret =
     match m.m_ret with
     | None when

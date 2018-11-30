@@ -15,14 +15,27 @@ open Core_kernel
  * identifiers.
  *)
 type ty = Typing_defs.locl Typing_defs.ty
+type reactivity = Typing_defs.reactivity
+type mutability_env = Typing_mutability_env.mutability_env
+
 let pp_ty fmt ty = Pp_type.pp_ty () fmt ty
 let show_ty ty = Pp_type.show_ty () ty
+
+let pp_reactivity fmt r = Pp_type.pp_reactivity fmt r
+let show_reactivity r = Pp_type.show_reactivity r
+
+let show_mutability_env _ = "<mutability-env>"
+let pp_mutability_env fmt _ = Format.fprintf fmt "<mutability-env>"
+
 
 type saved_env = {
   tcopt : TypecheckerOptions.t [@opaque];
   tenv : ty IMap.t;
   subst : int IMap.t;
   tpenv : Type_parameter_env.t;
+  reactivity : reactivity;
+  local_mutability: mutability_env;
+  fun_mutable: bool
 } [@@deriving show]
 
 let empty_saved_env tcopt : saved_env = {
@@ -30,6 +43,9 @@ let empty_saved_env tcopt : saved_env = {
   tenv = IMap.empty;
   subst = IMap.empty;
   tpenv = SMap.empty;
+  reactivity = Typing_defs.Nonreactive;
+  local_mutability = Local_id.Map.empty;
+  fun_mutable = false;
 }
 
 (* Typed AST.

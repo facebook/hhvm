@@ -126,9 +126,6 @@ type env = {
   in_case : bool       ;
   inside_constructor: bool;
   inside_ppl_class: bool;
-  (* disallow usages of $this - set for reactive lambdas in methods
-     having mutable $this *)
-  disallow_this: bool;
   (* A set of constraints that are global to a given method *)
   global_tpenv : tpenv ;
   subtype_prop : Typing_logic.subtype_prop;

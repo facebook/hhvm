@@ -342,7 +342,7 @@ module CheckFunctionBody = struct
     | _, Eif (e1, Some e2, e3) ->
         List.iter [e1; e2; e3] (expr f_type env);
         ()
-    | _, New (_, el, uel) ->
+    | _, New (_, el, uel, _) ->
       List.iter el (expr f_type env);
       List.iter uel (expr f_type env);
       ()
@@ -1389,7 +1389,7 @@ and expr_ env p = function
       expr env e;
       hint env h;
       ()
-  | New (_, el, uel) ->
+  | New (_, el, uel, _) ->
       List.iter el (expr env);
       List.iter uel (expr env);
       ()

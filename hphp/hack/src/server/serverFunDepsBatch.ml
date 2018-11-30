@@ -86,10 +86,10 @@ let collect_in_decl = object(self)
       | _ ->  self#zero in
     acc + (super#on_Call env ct e h el uel)
 
-  method! on_New env (((p, ty), _) as c) el uel =
+  method! on_New env (((p, ty), _) as c) el uel ctor_annot =
     let (+) = self#plus in
     let acc = process_method env ty (p, SN.Members.__construct) in
-    acc + super#on_New env c el uel
+    acc + super#on_New env c el uel ctor_annot
 
   method! on_expr env expr =
     let (+) = self#plus in

@@ -2356,7 +2356,7 @@ let untyped_lambda_strict_mode pos =
 
 let echo_in_reactive_context pos =
   add (Typing.err_code Typing.EchoInReactiveContext) pos (
-    "'echo' or 'print' are not allowed in reactive or shallow-reactive functions."
+    "'echo' or 'print' are not allowed in reactive functions."
   )
 
 let expected_tparam ~use_pos ~definition_pos n =

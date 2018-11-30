@@ -3088,8 +3088,11 @@ and emit_args_and_call env call_pos args uargs async_eager_label =
     else SMap.empty in
   let use_hint = Emit_env.is_hh_syntax_enabled () in
   let throw_on_mismatch = use_hint &&
-    Hhbc_options.throw_on_call_by_ref_annotation_mismatch
-    !Hhbc_options.compiler_options in
+    (
+      Hhbc_options.throw_on_call_by_ref_annotation_mismatch
+        !Hhbc_options.compiler_options ||
+      Emit_env.is_in_rx_body env
+    ) in
 
   let rec aux i rem_args inout_setters =
     match rem_args with

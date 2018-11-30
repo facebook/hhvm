@@ -19,6 +19,7 @@ let emit_main is_evaled popt defs =
       ~is_memoize:false
       ~is_native:false
       ~is_async:false
+      ~is_rx_body:false
       ~deprecation_info:None
       ~skipawaitable:false
       ~is_return_by_ref:false

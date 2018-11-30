@@ -308,6 +308,7 @@ let emit_body
   ~is_memoize
   ~is_native
   ~is_async
+  ~is_rx_body
   ~deprecation_info
   ~skipawaitable
   ~is_return_by_ref
@@ -481,7 +482,8 @@ let emit_body
     empty |>
     with_namespace namespace |>
     with_needs_local_this needs_local_this |>
-    with_scope scope) in
+    with_scope scope |>
+    with_rx_body is_rx_body) in
   let stmt_instrs = if is_native then instr_nativeimpl else
     Emit_env.do_function env body emit_defs in
   let begin_label, default_value_setters =

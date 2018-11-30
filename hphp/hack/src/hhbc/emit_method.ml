@@ -194,6 +194,7 @@ let from_ast_wrapper : bool -> _ ->
   let is_return_by_ref = ast_method.Ast.m_ret_by_ref in
   let has_ref_params =
     List.exists ast_method.Ast.m_params ~f:(fun p -> p.Ast.param_is_reference) in
+  let method_rx_level = Rx.rx_level_from_ast ast_method.Ast.m_user_attributes in
   let method_body, method_is_generator, method_is_pair_generator =
     if is_native_opcode_impl then
       Emit_native_opcode.emit_body
@@ -213,6 +214,7 @@ let from_ast_wrapper : bool -> _ ->
         ~is_memoize
         ~is_native
         ~is_async:method_is_async
+        ~is_rx_body:(method_rx_level <> Rx.NonRx)
         ~deprecation_info
         ~skipawaitable:(ast_method.Ast.m_fun_kind = Ast_defs.FAsync)
         ~is_return_by_ref
@@ -231,7 +233,6 @@ let from_ast_wrapper : bool -> _ ->
   let method_is_interceptable =
     Interceptable.is_method_interceptable
       namespace ast_class original_method_id method_attributes in
-  let method_rx_level = Rx.rx_level_from_ast ast_method.Ast.m_user_attributes in
   let method_span =
     if is_native_opcode_impl then (0, 0)
     else Hhas_pos.pos_to_span ast_method.Ast.m_span in

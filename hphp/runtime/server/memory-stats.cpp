@@ -63,9 +63,11 @@ void MemoryStats::ReportMemory(std::string& output, Writer::Format format) {
 
   w->writeEntry("VmSize", procStatus.VmSizeKb);
   w->writeEntry("VmRSS", procStatus.VmRSSKb);
+  w->writeEntry("mem.rss", procStatus.VmRSSKb);
   w->writeEntry("PeakUsage", procStatus.VmHWMKb);
   w->writeEntry("HugetlbPages", procStatus.HugetlbPagesKb);
   w->writeEntry("adjustedRSS", procStatus.adjustedRSSKb);
+  w->writeEntry("mem.rss_adjusted", procStatus.adjustedRSSKb);
 
   // static string stats
   w->writeEntry("static_string_count", makeStaticStringCount());

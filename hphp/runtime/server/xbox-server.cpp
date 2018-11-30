@@ -189,13 +189,14 @@ void XboxServer::Restart() {
 }
 
 void XboxServer::Stop() {
-  if (s_dispatcher) {
-    s_dispatcher->stop();
+  if (!s_dispatcher) return;
 
-    Lock l(s_dispatchMutex);
-    delete s_dispatcher;
-    s_dispatcher = nullptr;
-  }
+  Lock l(s_dispatchMutex);
+  if (!s_dispatcher) return;
+
+  s_dispatcher->stop();
+  delete s_dispatcher;
+  s_dispatcher = nullptr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

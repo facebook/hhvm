@@ -362,6 +362,8 @@ module Revision_tracker = struct
      * when a State_leave is handled. *)
     current_base_revision : int ref;
 
+    is_in_hg_update_state : bool ref;
+
     rev_map : Revision_map.t;
 
     (**
@@ -428,6 +430,7 @@ module Revision_tracker = struct
         init_settings.use_xdb
         init_settings.ignore_hh_version;
       state_changes = Queue.create() ;
+      is_in_hg_update_state = ref false;
     }
 
   let reinitialized_env env base_svn_rev = { env with
@@ -590,6 +593,7 @@ module Revision_tracker = struct
       Some (Changed_merge_base (rev, files, clock))
     | Watchman.Watchman_pushed (Watchman.State_enter (state, json))
         when state = "hg.update" ->
+        env.is_in_hg_update_state := true;
         let open Option in
         json >>= Watchman_utils.rev_in_state_change >>= fun hg_rev -> begin
           Hh_logger.log "State_enter: %s" hg_rev;
@@ -597,6 +601,7 @@ module Revision_tracker = struct
         end
     | Watchman.Watchman_pushed (Watchman.State_leave (state, json))
         when state = "hg.update" ->
+        env.is_in_hg_update_state := false;
         let open Option in
         json >>= Watchman_utils.rev_in_state_change >>= fun hg_rev -> begin
           Hh_logger.log "State_leave: %s" hg_rev;
@@ -695,7 +700,12 @@ module Revision_tracker = struct
       | _, _ ->
         Move_along
     in
-    List.fold_left ~f:max_report ~init:Move_along reports
+    let decision = List.fold_left ~f:max_report ~init:Move_along reports in
+    match decision with
+    | Restart_server _ when !(env.is_in_hg_update_state) ->
+      Hh_logger.log "Ignoring Restart_server because we are already in next hg.update state";
+      Move_along
+    | decision -> decision
 
   let reinit t =
     (* The results of old initialization query might be stale by now, so we need

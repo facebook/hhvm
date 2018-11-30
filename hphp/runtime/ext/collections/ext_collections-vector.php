@@ -83,12 +83,12 @@ final class Vector implements \MutableVector {
   <<__Native, __Rx, __MutableReturn, __MaybeMutable>>
   public function keys(): object;
 
-  /* Returns a clone of this Vector.
+  /* Returns a copy of this Vector.
    * @return object
    */
   <<__Rx, __MutableReturn, __MaybeMutable>>
   public function values(): this {
-    return clone $this;
+    return new self($this);
   }
 
   /* Returns a lazy iterable view of this Vector.
@@ -249,7 +249,7 @@ final class Vector implements \MutableVector {
    */
   <<__Rx, __MutableReturn, __MaybeMutable>>
   public function toVector(): this {
-    return clone $this;
+    return new self($this);
   }
 
   /* Returns a ImmVector built from the values of this Vector.
@@ -823,12 +823,12 @@ final class ImmVector implements \ConstVector {
     return $this;
   }
 
-  /* Returns a clone of this ImmVector.
+  /* Returns a copy of this ImmVector.
    * @return object
    */
   <<__Rx, __MutableReturn, __MaybeMutable>>
   public function values(): this {
-    return clone $this;
+    return new self($this);
   }
 
   /* Returns a lazy iterable view of this ImmVector.

@@ -188,7 +188,7 @@ final class Set implements \MutableSet {
    */
   <<__Rx, __MutableReturn, __MaybeMutable>>
   public function toSet(): this {
-    return clone $this;
+    return new self($this);
   }
 
   /* Returns a ImmSet built from the values of this Set.

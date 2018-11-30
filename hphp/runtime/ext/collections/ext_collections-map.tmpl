@@ -30,8 +30,10 @@ PART1
     echo "           FCall <> 0 1 - \"\" \"\"\n";
     echo "           UnboxRNop\n";
   } else {
+    echo "           FPushCtorD 1 \"HH\\\\Map\"\n";
     echo "           This\n";
-    echo "           Clone\n";
+    echo "           FCall <> 1 1 - \"\" \"\"\n";
+    echo "           PopR\n";
   }
   echo <<<'PART2'
            SetL $res
@@ -326,7 +328,7 @@ final class Map implements \MutableMap {
    */
   <<__Rx, __MutableReturn, __MaybeMutable>>
   public function toMap(): this {
-    return clone $this;
+    return new self($this);
   }
 
   /* Returns a ImmMap built from the keys and values of this Map.

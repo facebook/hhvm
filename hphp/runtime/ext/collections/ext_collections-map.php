@@ -221,7 +221,7 @@ final class Map implements \MutableMap {
    */
   <<__Rx, __MutableReturn, __MaybeMutable>>
   public function toMap(): this {
-    return clone $this;
+    return new self($this);
   }
 
   /* Returns a ImmMap built from the keys and values of this Map.
@@ -293,8 +293,10 @@ final class Map implements \MutableMap {
           CGetL $callback
           DecodeCufIter 0 bad_func
 .try {
+           FPushCtorD 1 "HH\\Map"
            This
-           Clone
+           FCall <> 1 1 - "" ""
+           PopR
            SetL $res
            PopC
 
@@ -349,8 +351,10 @@ EOT
           CGetL $callback
           DecodeCufIter 0 bad_func
 .try {
+           FPushCtorD 1 "HH\\Map"
            This
-           Clone
+           FCall <> 1 1 - "" ""
+           PopR
            SetL $res
            PopC
 

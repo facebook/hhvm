@@ -167,6 +167,12 @@ def compare_expected(expected, out):
         return True
 
 
+# Strip leading and trailing whitespace from every line
+def strip_lines(text: str) -> str:
+    lines = [line.strip() for line in text.splitlines()]
+    return "\n".join(lines)
+
+
 def check_result(test_case: TestCase, default_expect_regex,
   ignore_error_messages, out: str) -> Result:
     """
@@ -175,7 +181,7 @@ def check_result(test_case: TestCase, default_expect_regex,
     check that the output in :out contains the provided regex.
     """
     is_ok = (
-        test_case.expected == out or
+        strip_lines(test_case.expected) == strip_lines(out) or
         (ignore_error_messages and compare_expected(test_case.expected, out)) or
         test_case.expected == filter_ocaml_stacktrace(out) or
         (

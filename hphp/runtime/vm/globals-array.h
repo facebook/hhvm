@@ -105,9 +105,12 @@ public:
   static ArrayData* RemoveStrInPlace(ArrayData*, const StringData* k);
   static constexpr auto RemoveStr = &RemoveStrInPlace;
 
-  static ArrayData* Append(ArrayData*, Cell v, bool copy);
-  static ArrayData* AppendRef(ArrayData*, tv_lval v, bool copy);
-  static ArrayData* AppendWithRef(ArrayData*, TypedValue v, bool copy);
+  static ArrayData* AppendInPlace(ArrayData*, Cell v);
+  static constexpr auto Append = &AppendInPlace;
+  static ArrayData* AppendRefInPlace(ArrayData*, tv_lval v);
+  static constexpr auto AppendRef = &AppendRefInPlace;
+  static ArrayData* AppendWithRefInPlace(ArrayData*, TypedValue v);
+  static constexpr auto AppendWithRef = &AppendWithRefInPlace;
 
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);

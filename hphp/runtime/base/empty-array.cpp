@@ -316,19 +316,19 @@ ArrayData* EmptyArray::SetRefStr(ArrayData*, StringData* k, tv_lval v) {
   return EmptyArray::MakeMixed(k, v.tv()).arr;
 }
 
-ArrayData* EmptyArray::Append(ArrayData*, Cell v, bool /*copy*/) {
+ArrayData* EmptyArray::Append(ArrayData*, Cell v) {
   tvIncRefGen(v);
   return EmptyArray::MakePackedInl(v).arr;
 }
 
-ArrayData* EmptyArray::AppendRef(ArrayData*, tv_lval v, bool) {
+ArrayData* EmptyArray::AppendRef(ArrayData*, tv_lval v) {
   if (checkHACRefBind()) raiseHackArrCompatRefNew();
   tvBoxIfNeeded(v);
   tvIncRefCountable(v.tv());
   return EmptyArray::MakePacked(v.tv()).arr;
 }
 
-ArrayData* EmptyArray::AppendWithRef(ArrayData*, TypedValue v, bool /*copy*/) {
+ArrayData* EmptyArray::AppendWithRef(ArrayData*, TypedValue v) {
   if (checkHACRefBind() && tvIsReferenced(v)) {
     raiseHackArrCompatRefNew();
   }

@@ -1329,7 +1329,7 @@ ArrayData* MixedArray::Copy(const ArrayData* ad) {
   return asMixed(ad)->copyMixed();
 }
 
-ArrayData* MixedArray::Append(ArrayData* ad, Cell v, bool copy) {
+ArrayData* MixedArray::AppendImpl(ArrayData* ad, Cell v, bool copy) {
   assertx(copy || ad->notCyclic(v));
   auto a = asMixed(ad);
   if (UNLIKELY(a->m_nextKI < 0)) {
@@ -1342,7 +1342,15 @@ ArrayData* MixedArray::Append(ArrayData* ad, Cell v, bool copy) {
   return a;
 }
 
-ArrayData* MixedArray::AppendRef(ArrayData* ad, tv_lval v, bool copy) {
+ArrayData* MixedArray::Append(ArrayData* ad, Cell v) {
+  return AppendImpl(ad, v, ad->cowCheck());
+}
+
+ArrayData* MixedArray::AppendInPlace(ArrayData* ad, Cell v) {
+  return AppendImpl(ad, v, false);
+}
+
+ArrayData* MixedArray::AppendRefImpl(ArrayData* ad, tv_lval v, bool copy) {
   auto a = asMixed(ad);
   assertx(a->isMixed());
 
@@ -1358,7 +1366,16 @@ ArrayData* MixedArray::AppendRef(ArrayData* ad, tv_lval v, bool copy) {
   return a->prepareForInsert(copy)->nextInsertRef(v);
 }
 
-ArrayData* MixedArray::AppendWithRef(ArrayData* ad, TypedValue v, bool copy) {
+ArrayData* MixedArray::AppendRef(ArrayData* ad, tv_lval v) {
+  return AppendRefImpl(ad, v, ad->cowCheck());
+}
+
+ArrayData* MixedArray::AppendRefInPlace(ArrayData* ad, tv_lval v) {
+  return AppendRefImpl(ad, v, false);
+}
+
+ArrayData*
+MixedArray::AppendWithRefImpl(ArrayData* ad, TypedValue v, bool copy) {
   auto a = asMixed(ad);
   assertx(a->isMixed());
 
@@ -1367,6 +1384,14 @@ ArrayData* MixedArray::AppendWithRef(ArrayData* ad, TypedValue v, bool copy) {
   }
 
   return a->prepareForInsert(copy)->nextInsertWithRef(v);
+}
+
+ArrayData* MixedArray::AppendWithRef(ArrayData* ad, TypedValue v) {
+  return AppendWithRefImpl(ad, v, ad->cowCheck());
+}
+
+ArrayData* MixedArray::AppendWithRefInPlace(ArrayData* ad, TypedValue v) {
+  return AppendWithRefImpl(ad, v, false);
 }
 
 /*
@@ -1979,18 +2004,26 @@ MixedArray::SetRefStrDict(ArrayData* adIn, StringData*, tv_lval) {
   throwRefInvalidArrayValueException(adIn);
 }
 
-ArrayData* MixedArray::AppendRefDict(ArrayData* adIn, tv_lval, bool) {
+ArrayData* MixedArray::AppendRefDict(ArrayData* adIn, tv_lval) {
   assertx(asMixed(adIn)->checkInvariants());
   assertx(adIn->isDictOrShape());
   throwRefInvalidArrayValueException(adIn);
 }
 
 ArrayData*
-MixedArray::AppendWithRefDict(ArrayData* adIn, TypedValue v, bool copy) {
+MixedArray::AppendWithRefDict(ArrayData* adIn, TypedValue v) {
   assertx(asMixed(adIn)->checkInvariants());
   assertx(adIn->isDictOrShape());
   if (tvIsReferenced(v)) throwRefInvalidArrayValueException(adIn);
-  return Append(adIn, tvToInitCell(v), copy);
+  return Append(adIn, tvToInitCell(v));
+}
+
+ArrayData*
+MixedArray::AppendWithRefInPlaceDict(ArrayData* adIn, TypedValue v) {
+  assertx(asMixed(adIn)->checkInvariants());
+  assertx(adIn->isDictOrShape());
+  if (tvIsReferenced(v)) throwRefInvalidArrayValueException(adIn);
+  return AppendInPlace(adIn, tvToInitCell(v));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2084,17 +2117,30 @@ MixedArray::SetRefStrInPlaceShape(ArrayData* adIn, StringData* k, tv_lval v) {
     : SetRefStrInPlace(adIn, k, v);
 }
 
-ArrayData* MixedArray::AppendRefShape(ArrayData* adIn, tv_lval v, bool copy) {
+ArrayData* MixedArray::AppendRefShape(ArrayData* adIn, tv_lval v) {
   return RuntimeOption::EvalHackArrDVArrs
-    ? AppendRefDict(adIn, v, copy)
-    : AppendRef(adIn, v, copy);
+    ? AppendRefDict(adIn, v)
+    : AppendRef(adIn, v);
+}
+
+ArrayData* MixedArray::AppendRefInPlaceShape(ArrayData* adIn, tv_lval v) {
+  return RuntimeOption::EvalHackArrDVArrs
+    ? AppendRefInPlaceDict(adIn, v)
+    : AppendRefInPlace(adIn, v);
 }
 
 ArrayData*
-MixedArray::AppendWithRefShape(ArrayData* adIn, TypedValue v, bool copy) {
+MixedArray::AppendWithRefShape(ArrayData* adIn, TypedValue v) {
   return RuntimeOption::EvalHackArrDVArrs
-    ? AppendWithRefDict(adIn, v, copy)
-    : AppendWithRef(adIn, v, copy);
+    ? AppendWithRefDict(adIn, v)
+    : AppendWithRef(adIn, v);
+}
+
+ArrayData*
+MixedArray::AppendWithRefInPlaceShape(ArrayData* adIn, TypedValue v) {
+  return RuntimeOption::EvalHackArrDVArrs
+    ? AppendWithRefInPlaceDict(adIn, v)
+    : AppendWithRefInPlace(adIn, v);
 }
 
 //////////////////////////////////////////////////////////////////////

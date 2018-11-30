@@ -564,25 +564,29 @@ public:
   ArrayData* removeInPlace(const StringData* k);
 
   /**
-   * Append `v' to the array, making a copy first if `copy' is set.
+   * Append `v' to the array. append() makes a copy first if `copy' is set,
+   * appendInPlace() may only escalate or grow.
    *
    * Return `this' if copy/escalation are not needed, or a copied/escalated
    * array data.
    */
-  ArrayData* append(Cell v, bool copy);
+  ArrayData* append(Cell v);
+  ArrayData* appendInPlace(Cell v);
 
   /*
    * Like append(), except the reffiness of `v' is preserved unless it is
    * singly-referenced.
    */
-  ArrayData* appendWithRef(TypedValue v, bool copy);
-  ArrayData* appendWithRef(const Variant& v, bool copy);
+  ArrayData* appendWithRef(TypedValue v);
+  ArrayData* appendWithRefInPlace(TypedValue v);
+  ArrayData* appendWithRef(const Variant& v);
 
   /*
    * Like append(), except `v' is first boxed if it's not already a ref.
    */
-  ArrayData* appendRef(tv_lval v, bool copy);
-  ArrayData* appendRef(Variant& v, bool copy);
+  ArrayData* appendRef(tv_lval v);
+  ArrayData* appendRefInPlace(tv_lval v);
+  ArrayData* appendRef(Variant& v);
 
   /////////////////////////////////////////////////////////////////////////////
   // Iteration.
@@ -1010,9 +1014,12 @@ struct ArrayFunctions {
   bool (*uasort[NK])(ArrayData* ad, const Variant& cmp_function);
   ArrayData* (*copy[NK])(const ArrayData*);
   ArrayData* (*copyStatic[NK])(const ArrayData*);
-  ArrayData* (*append[NK])(ArrayData*, Cell v, bool copy);
-  ArrayData* (*appendRef[NK])(ArrayData*, tv_lval v, bool copy);
-  ArrayData* (*appendWithRef[NK])(ArrayData*, TypedValue v, bool copy);
+  ArrayData* (*append[NK])(ArrayData*, Cell v);
+  ArrayData* (*appendInPlace[NK])(ArrayData*, Cell v);
+  ArrayData* (*appendRef[NK])(ArrayData*, tv_lval v);
+  ArrayData* (*appendRefInPlace[NK])(ArrayData*, tv_lval v);
+  ArrayData* (*appendWithRef[NK])(ArrayData*, TypedValue v);
+  ArrayData* (*appendWithRefInPlace[NK])(ArrayData*, TypedValue v);
   ArrayData* (*plusEq[NK])(ArrayData*, const ArrayData* elems);
   ArrayData* (*merge[NK])(ArrayData*, const ArrayData* elems);
   ArrayData* (*pop[NK])(ArrayData*, Variant& value);

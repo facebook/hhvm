@@ -138,9 +138,12 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static bool Uksort(ArrayData*, const Variant&);
   static bool Usort(ArrayData*, const Variant&);
   static bool Uasort(ArrayData*, const Variant&);
-  static ArrayData* Append(ArrayData*, Cell v, bool copy);
-  static ArrayData* AppendRef(ArrayData*, tv_lval v, bool copy);
-  static ArrayData* AppendWithRef(ArrayData*, TypedValue v, bool copy);
+  static ArrayData* Append(ArrayData*, Cell v);
+  static ArrayData* AppendInPlace(ArrayData*, Cell v);
+  static ArrayData* AppendRef(ArrayData*, tv_lval v);
+  static ArrayData* AppendRefInPlace(ArrayData*, tv_lval v);
+  static ArrayData* AppendWithRef(ArrayData*, TypedValue v);
+  static ArrayData* AppendWithRefInPlace(ArrayData*, TypedValue v);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
@@ -182,8 +185,10 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static constexpr auto SetRefIntInPlaceVec = &SetRefIntVec;
   static ArrayData* SetRefStrVec(ArrayData*, StringData*, tv_lval);
   static constexpr auto SetRefStrInPlaceVec = &SetRefStrVec;
-  static ArrayData* AppendRefVec(ArrayData*, tv_lval, bool);
-  static ArrayData* AppendWithRefVec(ArrayData*, TypedValue, bool);
+  static ArrayData* AppendRefVec(ArrayData*, tv_lval);
+  static constexpr auto AppendRefInPlaceVec = &AppendRefVec;
+  static ArrayData* AppendWithRefVec(ArrayData*, TypedValue);
+  static ArrayData* AppendWithRefInPlaceVec(ArrayData*, TypedValue);
   static ArrayData* PlusEqVec(ArrayData*, const ArrayData*);
   static ArrayData* ToPHPArrayVec(ArrayData*, bool);
   static constexpr auto ToPHPArrayIntishCastVec = &ToPHPArrayVec;
@@ -222,6 +227,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static constexpr auto CopyVec = &Copy;
   static constexpr auto CopyStaticVec = &CopyStatic;
   static constexpr auto AppendVec = &Append;
+  static constexpr auto AppendInPlaceVec = &AppendInPlace;
   static constexpr auto PopVec = &Pop;
   static constexpr auto DequeueVec = &Dequeue;
   static constexpr auto PrependVec = &Prepend;
@@ -361,6 +367,11 @@ private:
                                          TypedValue v, bool copy);
   static ArrayData* SetRefIntImpl(ArrayData*, int64_t k, tv_lval v, bool copy);
   static ArrayData* SetRefStrImpl(ArrayData*, StringData*, tv_lval, bool copy);
+
+  static ArrayData* AppendImpl(ArrayData*, Cell v, bool copy);
+  static ArrayData* AppendRefImpl(ArrayData*, tv_lval v, bool copy);
+  static ArrayData* AppendWithRefImpl(ArrayData*, TypedValue v, bool copy);
+  static ArrayData* AppendWithRefVecImpl(ArrayData*, TypedValue, bool copy);
 
   struct VecInitializer;
   static VecInitializer s_vec_initializer;

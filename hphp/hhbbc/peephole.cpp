@@ -277,8 +277,7 @@ void AppendPeephole::append(
             cur.asTypedValue()->m_data.parr = arr->set(*key, *val);
           }
         } else {
-          cur.asTypedValue()->m_data.parr =
-            arr->append(*val, arr->cowCheck());
+          cur.asTypedValue()->m_data.parr = arr->append(*val);
         }
         cur.asTypedValue()->m_data.parr->incRefCount();
         return *cur.asTypedValue();

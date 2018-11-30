@@ -77,7 +77,7 @@ namespace jit {
 ArrayData* addNewElemHelper(ArrayData* a, TypedValue value) {
   assertx(a->isPHPArray());
 
-  auto r = a->append(*tvAssertCell(&value), a->hasMultipleRefs());
+  auto r = a->append(*tvAssertCell(&value));
   if (UNLIKELY(r != a)) {
     decRefArr(a);
   }

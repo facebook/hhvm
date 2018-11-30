@@ -655,37 +655,43 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(CopyStatic)
 
   /*
-   * ArrayData* Append(ArrayData*, Cell v, bool copy)
+   * ArrayData* Append(ArrayData*, Cell v);
    *
    *   Append a new value to the array, with the next available
    *   integer key.  If there is no next available integer key, no
-   *   value is appended.  This function has copy/grow semantics.  The
-   *   value must not be KindOfUninit.
+   *   value is appended.  Append has copy/grow semantics;
+   *   AppendInPlace may only escalate or grow. The value must not be
+   *   KindOfUninit.
    */
   DISPATCH(Append)
+  DISPATCH(AppendInPlace)
 
   /*
-   * ArrayData* AppendRef(ArrayData*, tv_lval v, bool copy)
+   * ArrayData* AppendRef(ArrayData*, tv_lval v)
    *
    *   Binding append.  This function appends a new KindOfRef to the
    *   array with the next available integer key, boxes v if it is not
    *   already boxed, and points the new value to the same RefData.
    *   If there is no next available integer key, this function does
-   *   not append a value.  This function has copy/grow semantics.
+   *   not append a value. AppendRef() has copy/grow semantics;
+   *   AppendRefInPlace() may only escalate or grow.
    */
   DISPATCH(AppendRef)
+  DISPATCH(AppendRefInPlace)
 
   /*
-   * ArrayData* AppendWithRef(ArrayData*, TypedValue v, bool copy)
+   * ArrayData* AppendWithRef(ArrayData*, TypedValue v)
    *
    *   "With ref" append.  This function appends a new value to the
    *   array with the next available integer key, if there is a next
    *   available integer key.  It either sets the value to `v', or
    *   binds the value to `v', depending on whether `v' is "observably
    *   referenced"---i.e. if `v' is already KindOfRef and
-   *   RefData::isReferenced is true.
+   *   RefData::isReferenced is true. AppendWithRef() has copy/grow
+   *   semantics; AppendWithRefInPlace may only grow or escalate.
    */
   DISPATCH(AppendWithRef)
+  DISPATCH(AppendWithRefInPlace)
 
   /*
    * ArrayData* PlusEq(ArrayData*, const ArrayData* elems)

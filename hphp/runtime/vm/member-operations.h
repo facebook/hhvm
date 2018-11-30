@@ -1910,7 +1910,7 @@ inline void SetNewElemArray(tv_lval base, Cell* value) {
   assertx(tvIsArray(base));
   assertx(tvIsPlausible(*base));
   auto a = val(base).parr;
-  auto a2 = a->append(*value, a->cowCheck());
+  auto a2 = a->append(*value);
   if (a2 != a) {
     type(base) = KindOfArray;
     val(base).parr = a2;
@@ -1926,7 +1926,7 @@ inline void SetNewElemVec(tv_lval base, Cell* value) {
   assertx(tvIsVec(base));
   assertx(tvIsPlausible(*base));
   auto a = val(base).parr;
-  auto a2 = PackedArray::AppendVec(a, *value, a->cowCheck());
+  auto a2 = PackedArray::AppendVec(a, *value);
   if (a2 != a) {
     type(base) = KindOfVec;
     val(base).parr = a2;
@@ -1943,7 +1943,7 @@ inline void SetNewElemDict(tv_lval base, Cell* value) {
   assertx(tvIsDict(base));
   assertx(tvIsPlausible(*base));
   auto a = val(base).parr;
-  auto a2 = MixedArray::AppendDict(a, *value, a->cowCheck());
+  auto a2 = MixedArray::AppendDict(a, *value);
   if (a2 != a) {
     type(base) = KindOfDict;
     val(base).parr = a2;
@@ -1960,7 +1960,7 @@ inline void SetNewElemKeyset(tv_lval base, Cell* value) {
   assertx(tvIsKeyset(base));
   assertx(tvIsPlausible(*base));
   auto a = val(base).parr;
-  auto a2 = SetArray::Append(a, *value, a->cowCheck());
+  auto a2 = SetArray::Append(a, *value);
   if (a2 != a) {
     type(base) = KindOfKeyset;
     val(base).parr = a2;

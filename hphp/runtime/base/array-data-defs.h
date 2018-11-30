@@ -268,22 +268,36 @@ inline ArrayData* ArrayData::removeInPlace(const StringData* k) {
   return g_array_funcs.removeStrInPlace[kind()](this, k);
 }
 
-inline ArrayData* ArrayData::append(Cell v, bool copy) {
+inline ArrayData* ArrayData::append(Cell v) {
   assertx(v.m_type != KindOfUninit);
-  assertx(copy || notCyclic(v));
-  return g_array_funcs.append[kind()](this, v, copy);
+  assertx(cowCheck() || notCyclic(v));
+  return g_array_funcs.append[kind()](this, v);
 }
 
-inline ArrayData* ArrayData::appendWithRef(TypedValue v, bool copy) {
-  return g_array_funcs.appendWithRef[kind()](this, v, copy);
+inline ArrayData* ArrayData::appendInPlace(Cell v) {
+  assertx(v.m_type != KindOfUninit);
+  assertx(notCyclic(v));
+  return g_array_funcs.appendInPlace[kind()](this, v);
 }
 
-inline ArrayData* ArrayData::appendWithRef(const Variant& v, bool copy) {
-  return g_array_funcs.appendWithRef[kind()](this, *v.asTypedValue(), copy);
+inline ArrayData* ArrayData::appendWithRef(TypedValue v) {
+  return g_array_funcs.appendWithRef[kind()](this, v);
 }
 
-inline ArrayData* ArrayData::appendRef(tv_lval v, bool copy) {
-  return g_array_funcs.appendRef[kind()](this, v, copy);
+inline ArrayData* ArrayData::appendWithRefInPlace(TypedValue v) {
+  return g_array_funcs.appendWithRefInPlace[kind()](this, v);
+}
+
+inline ArrayData* ArrayData::appendWithRef(const Variant& v) {
+  return g_array_funcs.appendWithRef[kind()](this, *v.asTypedValue());
+}
+
+inline ArrayData* ArrayData::appendRef(tv_lval v) {
+  return g_array_funcs.appendRef[kind()](this, v);
+}
+
+inline ArrayData* ArrayData::appendRefInPlace(tv_lval v) {
+  return g_array_funcs.appendRefInPlace[kind()](this, v);
 }
 
 inline ssize_t ArrayData::iter_begin() const {
@@ -622,8 +636,8 @@ inline ArrayData* ArrayData::remove(const Variant& k) {
   return remove(*k.toCell());
 }
 
-inline ArrayData* ArrayData::appendRef(Variant& v, bool copy) {
-  return appendRef(tv_lval{v.asTypedValue()}, copy);
+inline ArrayData* ArrayData::appendRef(Variant& v) {
+  return appendRef(tv_lval{v.asTypedValue()});
 }
 
 inline Variant ArrayData::getValue(ssize_t pos) const {

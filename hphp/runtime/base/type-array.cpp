@@ -855,7 +855,7 @@ arr_lval Array::lvalAtRef() {
 void Array::append(TypedValue v) {
   if (!m_arr) operator=(Create());
   assertx(m_arr);
-  auto const escalated = m_arr->append(tvToInitCell(v), m_arr->cowCheck());
+  auto const escalated = m_arr->append(tvToInitCell(v));
   if (escalated != m_arr) m_arr = Ptr::attach(escalated);
 }
 
@@ -863,14 +863,14 @@ void Array::appendRef(Variant& v) {
   if (!m_arr) {
     m_arr = Ptr::attach(ArrayData::CreateRef(v));
   } else {
-    auto const escalated = m_arr->appendRef(v, m_arr->cowCheck());
+    auto const escalated = m_arr->appendRef(v);
     if (escalated != m_arr) m_arr = Ptr::attach(escalated);
   }
 }
 
 void Array::appendWithRef(TypedValue v) {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
-  auto const escalated = m_arr->appendWithRef(v, m_arr->cowCheck());
+  auto const escalated = m_arr->appendWithRef(v);
   if (escalated != m_arr) m_arr = Ptr::attach(escalated);
 }
 

@@ -268,14 +268,26 @@ ArrayData* SetArray::MakeSetFromAPC(const APCArray* apc) {
   return init.create();
 }
 
-ArrayData* SetArray::AddToSet(ArrayData* ad, int64_t i, bool copy) {
-  auto a = asSet(ad)->prepareForInsert(copy);
+ArrayData* SetArray::AddToSet(ArrayData* ad, int64_t i) {
+  auto a = asSet(ad)->prepareForInsert(ad->cowCheck());
   a->insert(i);
   return a;
 }
 
-ArrayData* SetArray::AddToSet(ArrayData* ad, StringData* s, bool copy) {
-  auto a = asSet(ad)->prepareForInsert(copy);
+ArrayData* SetArray::AddToSetInPlace(ArrayData* ad, int64_t i) {
+  auto a = asSet(ad)->prepareForInsert(false);
+  a->insert(i);
+  return a;
+}
+
+ArrayData* SetArray::AddToSet(ArrayData* ad, StringData* s) {
+  auto a = asSet(ad)->prepareForInsert(ad->cowCheck());
+  a->insert(s);
+  return a;
+}
+
+ArrayData* SetArray::AddToSetInPlace(ArrayData* ad, StringData* s) {
+  auto a = asSet(ad)->prepareForInsert(false);
   a->insert(s);
   return a;
 }
@@ -750,7 +762,7 @@ ArrayData* SetArray::CopyStatic(const ArrayData* ad) {
   return CopySet(*a, AllocMode::Static);
 }
 
-ArrayData* SetArray::Append(ArrayData* ad, Cell v, bool copy) {
+ArrayData* SetArray::AppendImpl(ArrayData* ad, Cell v, bool copy) {
   auto a = asSet(ad)->prepareForInsert(copy);
   if (isIntType(v.m_type)) {
     a->insert(v.m_data.num);
@@ -763,12 +775,25 @@ ArrayData* SetArray::Append(ArrayData* ad, Cell v, bool copy) {
   }
 }
 
-ArrayData* SetArray::AppendWithRef(ArrayData* ad, TypedValue v, bool copy) {
-  if (tvIsReferenced(v)) throwRefInvalidArrayValueException(ad);
-  return Append(ad, tvToInitCell(v), copy);
+ArrayData* SetArray::Append(ArrayData* ad, Cell v) {
+  return AppendImpl(ad, v, ad->cowCheck());
 }
 
-ArrayData* SetArray::AppendRef(ArrayData* ad, tv_lval, bool) {
+ArrayData* SetArray::AppendInPlace(ArrayData* ad, Cell v) {
+  return AppendImpl(ad, v, false);
+}
+
+ArrayData* SetArray::AppendWithRef(ArrayData* ad, TypedValue v) {
+  if (tvIsReferenced(v)) throwRefInvalidArrayValueException(ad);
+  return Append(ad, tvToInitCell(v));
+}
+
+ArrayData* SetArray::AppendWithRefInPlace(ArrayData* ad, TypedValue v) {
+  if (tvIsReferenced(v)) throwRefInvalidArrayValueException(ad);
+  return AppendInPlace(ad, tvToInitCell(v));
+}
+
+ArrayData* SetArray::AppendRef(ArrayData* ad, tv_lval) {
   throwRefInvalidArrayValueException(ad);
 }
 

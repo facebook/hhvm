@@ -339,10 +339,10 @@ protected:
     auto oldAd = arrayData();
     if (raw) {
       assertx(canMutateBuffer());
-      m_arr = PackedArray::AppendVec(oldAd, tv, false);
+      m_arr = PackedArray::AppendInPlaceVec(oldAd, tv);
     } else {
       dropImmCopy();
-      m_arr = PackedArray::AppendVec(oldAd, tv, oldAd->cowCheck());
+      m_arr = PackedArray::AppendVec(oldAd, tv);
     }
     if (m_arr != oldAd) {
       decRefArr(oldAd);

@@ -371,9 +371,12 @@ public:
   static ArrayData* RemoveStrInPlace(ArrayData*, const StringData* k);
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
-  static ArrayData* Append(ArrayData*, Cell v, bool copy);
-  static ArrayData* AppendRef(ArrayData*, tv_lval v, bool copy);
-  static ArrayData* AppendWithRef(ArrayData*, TypedValue v, bool copy);
+  static ArrayData* Append(ArrayData*, Cell v);
+  static ArrayData* AppendInPlace(ArrayData*, Cell v);
+  static ArrayData* AppendRef(ArrayData*, tv_lval v);
+  static ArrayData* AppendRefInPlace(ArrayData*, tv_lval v);
+  static ArrayData* AppendWithRef(ArrayData*, TypedValue v);
+  static ArrayData* AppendWithRefInPlace(ArrayData*, TypedValue v);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
   static ArrayData* Merge(ArrayData*, const ArrayData* elems);
   static ArrayData* Pop(ArrayData*, Variant& value);
@@ -468,6 +471,7 @@ public:
   static constexpr auto CopyDict = &Copy;
   static constexpr auto CopyStaticDict = &CopyStatic;
   static constexpr auto AppendDict = &Append;
+  static constexpr auto AppendInPlaceDict = &AppendInPlace;
   static arr_lval LvalIntRefDict(ArrayData*, int64_t, bool);
   static arr_lval LvalStrRefDict(ArrayData*, StringData*, bool);
   static arr_lval LvalNewRefDict(ArrayData*, bool);
@@ -480,8 +484,10 @@ public:
   static constexpr auto SetRefIntInPlaceDict = &SetRefIntDict;
   static ArrayData* SetRefStrDict(ArrayData*, StringData*, tv_lval);
   static constexpr auto SetRefStrInPlaceDict = &SetRefStrDict;
-  static ArrayData* AppendRefDict(ArrayData*, tv_lval, bool);
-  static ArrayData* AppendWithRefDict(ArrayData*, TypedValue, bool);
+  static ArrayData* AppendRefDict(ArrayData*, tv_lval);
+  static constexpr auto AppendRefInPlaceDict = &AppendRefDict;
+  static ArrayData* AppendWithRefDict(ArrayData*, TypedValue);
+  static ArrayData* AppendWithRefInPlaceDict(ArrayData*, TypedValue);
   static constexpr auto PlusEqDict = &PlusEq;
   static constexpr auto MergeDict = &Merge;
   static constexpr auto PopDict = &Pop;
@@ -570,6 +576,7 @@ public:
   static constexpr auto CopyShape = &Copy;
   static constexpr auto CopyStaticShape = &CopyStatic;
   static constexpr auto AppendShape = &Append;
+  static constexpr auto AppendInPlaceShape = &AppendInPlace;
   static arr_lval LvalIntRefShape(ArrayData*, int64_t, bool);
   static arr_lval LvalStrRefShape(ArrayData*, StringData*, bool);
   static arr_lval LvalNewRefShape(ArrayData*, bool);
@@ -583,8 +590,10 @@ public:
   static ArrayData* SetRefIntInPlaceShape(ArrayData*, int64_t, tv_lval);
   static ArrayData* SetRefStrShape(ArrayData*, StringData*, tv_lval);
   static ArrayData* SetRefStrInPlaceShape(ArrayData*, StringData*, tv_lval);
-  static ArrayData* AppendRefShape(ArrayData*, tv_lval, bool);
-  static ArrayData* AppendWithRefShape(ArrayData*, TypedValue, bool);
+  static ArrayData* AppendRefShape(ArrayData*, tv_lval);
+  static ArrayData* AppendRefInPlaceShape(ArrayData*, tv_lval);
+  static ArrayData* AppendWithRefShape(ArrayData*, TypedValue);
+  static ArrayData* AppendWithRefInPlaceShape(ArrayData*, TypedValue);
   static constexpr auto PlusEqShape = &PlusEq;
   static constexpr auto MergeShape = &Merge;
   static constexpr auto PopShape = &Pop;
@@ -758,6 +767,9 @@ private:
 
   static ArrayData* RemoveIntImpl(ArrayData*, int64_t, bool);
   static ArrayData* RemoveStrImpl(ArrayData*, const StringData*, bool);
+  static ArrayData* AppendImpl(ArrayData*, Cell v, bool copy);
+  static ArrayData* AppendRefImpl(ArrayData*, tv_lval v, bool copy);
+  static ArrayData* AppendWithRefImpl(ArrayData*, TypedValue v, bool copy);
 
   void nextInsert(Cell);
   ArrayData* nextInsertRef(tv_lval data);

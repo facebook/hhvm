@@ -843,7 +843,7 @@ ArrayData* PackedArray::SetInt(ArrayData* adIn, int64_t k, Cell v) {
   bool copy = adIn->cowCheck();
   return MutableOpInt(adIn, k, copy,
     [&] (ArrayData* ad) { setElem(packedData(ad)[k], v); return ad; },
-    [&] { return Append(adIn, v, copy); },
+    [&] { return AppendImpl(adIn, v, copy); },
     [&] (MixedArray* mixed) { return mixed->addVal(k, v); }
   );
 }
@@ -851,7 +851,7 @@ ArrayData* PackedArray::SetInt(ArrayData* adIn, int64_t k, Cell v) {
 ArrayData* PackedArray::SetIntInPlace(ArrayData* adIn, int64_t k, Cell v) {
   return MutableOpInt(adIn, k, false,
     [&] (ArrayData* ad) { setElem(packedData(ad)[k], v); return ad; },
-    [&] { return Append(adIn, v, false); },
+    [&] { return AppendInPlace(adIn, v); },
     [&] (MixedArray* mixed) { return mixed->addVal(k, v); }
   );
 }
@@ -891,7 +891,7 @@ ArrayData* PackedArray::SetStrVec(ArrayData* adIn, StringData* k, Cell v) {
 }
 
 ArrayData* PackedArray::SetWithRefIntImpl(ArrayData* adIn, int64_t k,
-                                      TypedValue v, bool copy) {
+                                          TypedValue v, bool copy) {
   auto const checkHackArrRef = [&] {
     if (checkHACRefBind() && tvIsReferenced(v)) {
       raiseHackArrCompatRefBind(k);
@@ -904,7 +904,7 @@ ArrayData* PackedArray::SetWithRefIntImpl(ArrayData* adIn, int64_t k,
       setElemWithRef(packedData(ad)[k], v);
       return ad;
     },
-    [&] { return AppendWithRef(adIn, v, copy); },
+    [&] { return AppendWithRefImpl(adIn, v, copy); },
     [&] (MixedArray* mixed) {
       checkHackArrRef();
       auto const lval = mixed->addLvalImpl<false>(k);
@@ -984,7 +984,7 @@ ArrayData* PackedArray::SetRefIntImpl(ArrayData* adIn, int64_t k,
       tvBind(v.tv(), packedData(ad)[k]);
       return ad;
     },
-    [&] { return AppendRef(adIn, v, copy); },
+    [&] { return AppendRefImpl(adIn, v, copy); },
     // TODO(#2606310): Make use of our knowledge that the key is missing.
     [&] (MixedArray* mixed) { return mixed->updateRef(k, v); }
   );
@@ -1158,7 +1158,7 @@ bool PackedArray::AdvanceMArrayIter(ArrayData* ad, MArrayIter& fp) {
   return true;
 }
 
-ArrayData* PackedArray::Append(ArrayData* adIn, Cell v, bool copy) {
+ArrayData* PackedArray::AppendImpl(ArrayData* adIn, Cell v, bool copy) {
   assertx(checkInvariants(adIn));
   assertx(v.m_type != KindOfUninit);
   assertx(copy || adIn->notCyclic(v));
@@ -1167,7 +1167,15 @@ ArrayData* PackedArray::Append(ArrayData* adIn, Cell v, bool copy) {
   return ad;
 }
 
-ArrayData* PackedArray::AppendRef(ArrayData* adIn, tv_lval v, bool copy) {
+ArrayData* PackedArray::Append(ArrayData* adIn, Cell v) {
+  return AppendImpl(adIn, v, adIn->cowCheck());
+}
+
+ArrayData* PackedArray::AppendInPlace(ArrayData* adIn, Cell v) {
+  return AppendImpl(adIn, v, false);
+}
+
+ArrayData* PackedArray::AppendRefImpl(ArrayData* adIn, tv_lval v, bool copy) {
   assertx(checkInvariants(adIn));
   assertx(adIn->isPacked());
   if (checkHACRefBind()) raiseHackArrCompatRefNew();
@@ -1180,14 +1188,22 @@ ArrayData* PackedArray::AppendRef(ArrayData* adIn, tv_lval v, bool copy) {
   return ad;
 }
 
-ArrayData* PackedArray::AppendRefVec(ArrayData* adIn, tv_lval, bool) {
+ArrayData* PackedArray::AppendRef(ArrayData* adIn, tv_lval v) {
+  return AppendRefImpl(adIn, v, adIn->cowCheck());
+}
+
+ArrayData* PackedArray::AppendRefInPlace(ArrayData* adIn, tv_lval v) {
+  return AppendRefImpl(adIn, v, false);
+}
+
+ArrayData* PackedArray::AppendRefVec(ArrayData* adIn, tv_lval) {
   assertx(checkInvariants(adIn));
   assertx(adIn->isVecArray());
   throwRefInvalidArrayValueException(adIn);
 }
 
 ArrayData*
-PackedArray::AppendWithRef(ArrayData* adIn, TypedValue v, bool copy) {
+PackedArray::AppendWithRefImpl(ArrayData* adIn, TypedValue v, bool copy) {
   assertx(checkInvariants(adIn));
   assertx(adIn->isPacked());
 
@@ -1203,11 +1219,31 @@ PackedArray::AppendWithRef(ArrayData* adIn, TypedValue v, bool copy) {
 }
 
 ArrayData*
-PackedArray::AppendWithRefVec(ArrayData* adIn, TypedValue v, bool copy) {
+PackedArray::AppendWithRef(ArrayData* adIn, TypedValue v) {
+  return AppendWithRefImpl(adIn, v, adIn->cowCheck());
+}
+
+ArrayData*
+PackedArray::AppendWithRefInPlace(ArrayData* adIn, TypedValue v) {
+  return AppendWithRefImpl(adIn, v, false);
+}
+
+ArrayData*
+PackedArray::AppendWithRefVecImpl(ArrayData* adIn, TypedValue v, bool copy) {
   assertx(checkInvariants(adIn));
   assertx(adIn->isVecArray());
   if (tvIsReferenced(v)) throwRefInvalidArrayValueException(adIn);
-  return Append(adIn, tvToInitCell(v), copy);
+  return AppendImpl(adIn, tvToInitCell(v), copy);
+}
+
+ArrayData*
+PackedArray::AppendWithRefVec(ArrayData* a, TypedValue v) {
+  return AppendWithRefVecImpl(a, v, a->cowCheck());
+}
+
+ArrayData*
+PackedArray::AppendWithRefInPlaceVec(ArrayData* a, TypedValue v) {
+  return AppendWithRefVecImpl(a, v, false);
 }
 
 ArrayData* PackedArray::PlusEq(ArrayData* adIn, const ArrayData* elems) {

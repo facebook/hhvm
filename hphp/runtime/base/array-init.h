@@ -230,7 +230,7 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
    */
   MixedPHPArrayInitBase& append(TypedValue tv) {
     this->performOp([&]{
-      return MixedArray::Append(this->m_arr, tvToInitCell(tv), false);
+      return MixedArray::AppendInPlace(this->m_arr, tvToInitCell(tv));
     });
     return *this;
   }
@@ -413,7 +413,7 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
    */
   MixedPHPArrayInitBase& appendRef(Variant& v) {
     this->performOp([&]{
-      return MixedArray::AppendRef(this->m_arr, LV(v), false);
+      return MixedArray::AppendRefInPlace(this->m_arr, LV(v));
     });
     return *this;
   }
@@ -500,7 +500,7 @@ struct DictInit : ArrayInitBase<detail::DictArray, KindOfDict> {
 
   DictInit& append(TypedValue tv) {
     performOp([&]{
-      return MixedArray::AppendDict(m_arr, tvToInitCell(tv), false);
+      return MixedArray::AppendInPlaceDict(m_arr, tvToInitCell(tv));
     });
     return *this;
   }
@@ -594,7 +594,7 @@ struct PackedPHPArrayInitBase : PackedArrayInitBase<TArray, KindOfArray> {
 
   PackedPHPArrayInitBase& append(TypedValue tv) {
     this->performOp([&]{
-      return PackedArray::Append(this->m_arr, tvToInitCell(tv), false);
+      return PackedArray::AppendInPlace(this->m_arr, tvToInitCell(tv));
     });
     return *this;
   }
@@ -604,14 +604,14 @@ struct PackedPHPArrayInitBase : PackedArrayInitBase<TArray, KindOfArray> {
 
   PackedPHPArrayInitBase& appendRef(Variant& v) {
     this->performOp([&]{
-      return PackedArray::AppendRef(this->m_arr, LV(v), false);
+      return PackedArray::AppendRefInPlace(this->m_arr, LV(v));
     });
     return *this;
   }
 
   PackedPHPArrayInitBase& appendWithRef(TypedValue v) {
     this->performOp([&]{
-      return PackedArray::AppendWithRef(this->m_arr, v, false);
+      return PackedArray::AppendWithRefInPlace(this->m_arr, v);
     });
     return *this;
   }
@@ -630,7 +630,7 @@ struct VecArrayInit : PackedArrayInitBase<detail::VecArray, KindOfVec> {
 
   VecArrayInit& append(TypedValue tv) {
     performOp([&]{
-      return PackedArray::AppendVec(m_arr, tvToInitCell(tv), false);
+      return PackedArray::AppendInPlaceVec(m_arr, tvToInitCell(tv));
     });
     return *this;
   }
@@ -680,7 +680,7 @@ struct VArrayInit {
   }
 
   VArrayInit& append(TypedValue tv) {
-    performOp([&]{ return m_arr->append(tvToInitCell(tv), false); });
+    performOp([&]{ return m_arr->appendInPlace(tvToInitCell(tv)); });
     return *this;
   }
   VArrayInit& append(const Variant& v) {
@@ -688,7 +688,7 @@ struct VArrayInit {
   }
 
   VArrayInit& appendWithRef(TypedValue v) {
-    performOp([&]{ return m_arr->appendWithRef(v, false); });
+    performOp([&]{ return m_arr->appendWithRefInPlace(v); });
     return *this;
   }
   VArrayInit& appendWithRef(const Variant& v) {
@@ -787,7 +787,7 @@ struct DArrayInit {
   }
 
   DArrayInit& append(TypedValue tv) {
-    performOp([&]{ return m_arr->append(tvToInitCell(tv), false); });
+    performOp([&]{ return m_arr->appendInPlace(tvToInitCell(tv)); });
     return *this;
   }
   DArrayInit& append(const Variant& v) {
@@ -973,16 +973,16 @@ struct KeysetInit : ArrayInitBase<SetArray, KindOfKeyset> {
   KeysetInit(size_t n, CheckAllocation);
 
   KeysetInit& add(int64_t v) {
-    performOp([&]{ return SetArray::AddToSet(m_arr, v, false); });
+    performOp([&]{ return SetArray::AddToSetInPlace(m_arr, v); });
     return *this;
   }
   KeysetInit& add(StringData* v) {
-    performOp([&]{ return SetArray::AddToSet(m_arr, v, false); });
+    performOp([&]{ return SetArray::AddToSetInPlace(m_arr, v); });
     return *this;
   }
   KeysetInit& add(TypedValue tv) {
     performOp([&]{
-      return SetArray::Append(m_arr, tvToInitCell(tv), false);
+      return SetArray::AppendInPlace(m_arr, tvToInitCell(tv));
     });
     return *this;
   }

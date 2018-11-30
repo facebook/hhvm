@@ -753,14 +753,14 @@ IMPL_OPCODE_CALL(AddNewElem);
 
 static ArrayData* addNewElemKeysetImpl(ArrayData* keyset, Cell v) {
   assertx(keyset->isKeyset());
-  auto out = SetArray::Append(keyset, v, keyset->cowCheck());
+  auto out = SetArray::Append(keyset, v);
   if (keyset != out) decRefArr(keyset);
   return out;
 }
 
 static ArrayData* addNewElemVecImpl(ArrayData* vec, Cell v) {
   assertx(vec->isVecArray());
-  auto out = PackedArray::AppendVec(vec, v, vec->cowCheck());
+  auto out = PackedArray::AppendVec(vec, v);
   if (vec != out) decRefArr(vec);
   return out;
 }

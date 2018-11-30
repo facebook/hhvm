@@ -2303,13 +2303,13 @@ OPTBLD_INLINE void iopAddNewElemC() {
     cellAsVariant(*c2).asArrRef().append(tvAsCVarRef(c1));
   } else if (isVecType(c2->m_type)) {
     auto in = c2->m_data.parr;
-    auto out = PackedArray::AppendVec(in, *c1, in->cowCheck());
+    auto out = PackedArray::AppendVec(in, *c1);
     if (in != out) decRefArr(in);
     c2->m_type = KindOfVec;
     c2->m_data.parr = out;
   } else if (isKeysetType(c2->m_type)) {
     auto in = c2->m_data.parr;
-    auto out = SetArray::Append(in, *c1, in->cowCheck());
+    auto out = SetArray::Append(in, *c1);
     if (in != out) decRefArr(in);
     c2->m_type = KindOfKeyset;
     c2->m_data.parr = out;
@@ -2826,7 +2826,7 @@ recordReifiedGenericsAndGetName(uint32_t first, uint32_t n) {
   for (int i = 0; i < n - first; ++i) {
     auto a = vmStack().indC(n - i - 1);
     isValidTSType(*a, true);
-    tsList = tsList->append(*a, false);
+    tsList = tsList->appendInPlace(*a);
   }
   ArrayData::GetScalarArray(&tsList);
   auto const mangledName = mangleReifiedGenericsName(tsList);

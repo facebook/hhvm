@@ -247,20 +247,20 @@ ArrayData* APCLocalArray::Copy(const ArrayData* ad) {
   return Escalate(ad);
 }
 
-ArrayData* APCLocalArray::Append(ArrayData* ad, Cell v, bool /*copy*/) {
+ArrayData* APCLocalArray::Append(ArrayData* ad, Cell v) {
   EscalateHelper helper{ad};
-  return helper.release(helper.escalated->append(v, false));
+  return helper.release(helper.escalated->appendInPlace(v));
 }
 
-ArrayData* APCLocalArray::AppendRef(ArrayData* ad, tv_lval v, bool) {
+ArrayData* APCLocalArray::AppendRef(ArrayData* ad, tv_lval v) {
   EscalateHelper helper{ad};
-  return helper.release(helper.escalated->appendRef(v, false));
+  return helper.release(helper.escalated->appendRefInPlace(v));
 }
 
 ArrayData*
-APCLocalArray::AppendWithRef(ArrayData* ad, TypedValue v, bool /*copy*/) {
+APCLocalArray::AppendWithRef(ArrayData* ad, TypedValue v) {
   EscalateHelper helper{ad};
-  return helper.release(helper.escalated->appendWithRef(v, false));
+  return helper.release(helper.escalated->appendWithRefInPlace(v));
 }
 
 ArrayData* APCLocalArray::PlusEq(ArrayData* ad, const ArrayData *elems) {

@@ -192,15 +192,15 @@ GlobalsArray::RemoveStrInPlace(ArrayData* ad, const StringData* k) {
  * is currently $GLOBALS.
  */
 
-ArrayData* GlobalsArray::Append(ArrayData*, Cell /*v*/, bool /*copy*/) {
+ArrayData* GlobalsArray::AppendInPlace(ArrayData*, Cell /*v*/) {
   throw_not_implemented("append on $GLOBALS");
 }
 
-ArrayData* GlobalsArray::AppendRef(ArrayData*, tv_lval, bool) {
+ArrayData* GlobalsArray::AppendRefInPlace(ArrayData*, tv_lval) {
   throw_not_implemented("appendRef on $GLOBALS");
 }
 
-ArrayData* GlobalsArray::AppendWithRef(ArrayData*, TypedValue, bool) {
+ArrayData* GlobalsArray::AppendWithRefInPlace(ArrayData*, TypedValue) {
   throw_not_implemented("appendWithRef on $GLOBALS");
 }
 

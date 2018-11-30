@@ -207,8 +207,10 @@ public:
   /*
    * For array initialization using KeysetInit.
    */
-  static ArrayData* AddToSet(ArrayData*, int64_t, bool);
-  static ArrayData* AddToSet(ArrayData*, StringData*, bool);
+  static ArrayData* AddToSet(ArrayData*, int64_t);
+  static ArrayData* AddToSetInPlace(ArrayData*, int64_t);
+  static ArrayData* AddToSet(ArrayData*, StringData*);
+  static ArrayData* AddToSetInPlace(ArrayData*, StringData*);
 
 private:
   static bool ClearElms(Elm* elms, uint32_t count);
@@ -443,9 +445,12 @@ public:
   static bool AdvanceMArrayIter(ArrayData*, MArrayIter&);
   static ArrayData* Copy(const ArrayData*);
   static ArrayData* CopyStatic(const ArrayData*);
-  static ArrayData* Append(ArrayData*, Cell, bool);
-  static ArrayData* AppendRef(ArrayData*, tv_lval, bool);
-  static ArrayData* AppendWithRef(ArrayData*, TypedValue, bool);
+  static ArrayData* Append(ArrayData*, Cell);
+  static ArrayData* AppendInPlace(ArrayData*, Cell);
+  static ArrayData* AppendRef(ArrayData*, tv_lval);
+  static constexpr auto AppendRefInPlace = &AppendRef;
+  static ArrayData* AppendWithRef(ArrayData*, TypedValue);
+  static ArrayData* AppendWithRefInPlace(ArrayData*, TypedValue);
   static ArrayData* PlusEq(ArrayData*, const ArrayData*);
   static ArrayData* Merge(ArrayData*, const ArrayData*);
   static ArrayData* Pop(ArrayData*, Variant&);
@@ -472,6 +477,7 @@ public:
 private:
   template<class K>
   static ArrayData* RemoveImpl(ArrayData*, K key, bool, SetArrayElm::hash_t);
+  static ArrayData* AppendImpl(ArrayData*, Cell, bool);
 
 private:
   struct Initializer;

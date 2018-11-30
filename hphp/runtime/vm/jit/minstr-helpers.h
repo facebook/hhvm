@@ -1024,11 +1024,11 @@ DICTSET_REF_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 inline ArrayData* keysetSetNewElemImplPre(ArrayData* a, int64_t i) {
-  return SetArray::AddToSet(a, i, a->cowCheck());
+  return SetArray::AddToSet(a, i);
 }
 
 inline ArrayData* keysetSetNewElemImplPre(ArrayData* a, StringData* s) {
-  return SetArray::AddToSet(a, s, a->cowCheck());
+  return SetArray::AddToSet(a, s);
 }
 
 template<KeyType keyType>

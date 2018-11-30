@@ -461,12 +461,9 @@ module Revision_tracker = struct
     let open Informant_sig in
     match significant, transition, server_state, xdb_results with
     | _, State_leave _, Server_not_yet_started, _ ->
-     (** This case should be unreachable since Server_not_yet_started
-      * should be handled by "should_start_first_server" and not by the
-      * revision tracker. Restart anyway which, at worst, could result in a
-      * slow init. *)
-      Hh_logger.log "Hit unreachable Server_not_yet_started match in %s"
-        "Revision_tracker.form_decision";
+      (* This is reachable when server stopped in the middle of rebase. Instead
+      * of restarting immediately, we go back to Server_not_yet_started, and want
+      * to restart only when hg.update state is vacated *)
       Restart_server None
     | _, State_leave _, Server_dead, _ ->
       (** Regardless of whether we had a significant change or not, when the
@@ -700,7 +697,12 @@ module Revision_tracker = struct
       | _, _ ->
         Move_along
     in
-    let decision = List.fold_left ~f:max_report ~init:Move_along reports in
+    let default_decision = match server_state with
+      | Server_not_yet_started when not !(env.is_in_hg_update_state) ->
+        Restart_server None
+      | _ -> Move_along
+    in
+    let decision = List.fold_left ~f:max_report ~init:default_decision reports in
     match decision with
     | Restart_server _ when !(env.is_in_hg_update_state) ->
       Hh_logger.log "Ignoring Restart_server because we are already in next hg.update state";
@@ -886,10 +888,19 @@ let report informant server_state = match informant, server_state with
     Informant_sig.Restart_server None
   | Resigned, _ ->
     Informant_sig.Move_along
-  | Active _, Informant_sig.Server_not_yet_started ->
+  | Active env, Informant_sig.Server_not_yet_started ->
     if should_start_first_server informant then begin
-      HackEventLogger.informant_watcher_starting_server_from_settling ();
-      Informant_sig.Restart_server None
+      (* should_start_first_server (as name implies) prevents us from starting first (since
+       * monitor start) server in the middle of update, when Revision_tracker is not reliable.
+       * When server crashes/exits, it will go back to Server_not_yet_started, and
+       * once again we need to avoid starting it during update. This time we can
+       * defer to Revision_tracker safely. *)
+      let report = Revision_tracker.make_report server_state env.revision_tracker in
+      (match report with
+      | Informant_sig.Restart_server _ ->
+        HackEventLogger.informant_watcher_starting_server_from_settling ()
+      | Informant_sig.Move_along -> ());
+      report
     end
     else
       Informant_sig.Move_along

@@ -1345,7 +1345,7 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
     if (buildTime <= currTime - 3600 * RuntimeOption::ProfDataTTLHours) {
       throw std::runtime_error(
           "Stale profile data (check Eval.ProfDataTTLHours)");
-    } else if (buildTime >= currTime) {
+    } else if (buildTime > currTime) {
       throw std::runtime_error("profile data dumped in the future?");
     }
     ProfDataDeserializer::s_buildTime = buildTime;

@@ -921,7 +921,8 @@ and stmt env = function
   | Awaitall (p, el) ->
     let env, el = List.fold_left el ~init:(env, []) ~f:(fun (env, tel) (e1, e2) ->
       let env, te2, ty2 = expr env e2 in
-      let env, ty2 = Async.overload_extract_from_awaitable env (fst e2) ty2 in
+      let (env, _tyvars), ty2 =
+        Async.overload_extract_from_awaitable (env, ISet.empty) (fst e2) ty2 in
       (match e1 with
       | Some e1 ->
         let env, te1, _ = assign (fst e1) env e1 ty2 in
@@ -1300,13 +1301,13 @@ and expr_
    * unknown (e.g., comes from PHP), the supertype will be Typing_utils.tany env.
    *)
   let compute_supertype ~expected env tys =
-    let env, supertype =
+    let env, supertype, tyvars =
       match expected with
-      | None -> Env.fresh_unresolved_type env
-      | Some (_, _, ty) -> env, ty in
+      | None -> Env.fresh_unresolved_type_add_tyvars env Pos.none ISet.empty
+      | Some (_, _, ty) -> env, ty, ISet.empty in
     match supertype with
       (* No need to check individual subtypes if expected type is mixed or any! *)
-      | (_, Tany) -> env, supertype
+      | (_, Tany) -> env, supertype, tyvars
       | _ ->
       let subtype_value env ty =
         Type.sub_type p Reason.URarray_value env ty supertype in
@@ -1314,9 +1315,9 @@ and expr_
       if List.exists tys (fun (_, ty) -> ty = Typing_utils.tany env) then
         (* If one of the values comes from PHP land, we have to be conservative
          * and consider that we don't know what the type of the values are. *)
-        env, (Reason.Rwitness p, Typing_utils.tany env)
+        env, (Reason.Rwitness p, Typing_utils.tany env), tyvars
       else
-        env, supertype in
+        env, supertype, tyvars in
 
   (**
    * Given a 'a list and a method to extract an expr and its ty from a 'a, this
@@ -1326,8 +1327,8 @@ and expr_
   let compute_exprs_and_supertype ~expected env l extract_expr_and_ty =
     let env, exprs_and_tys = List.map_env env l (extract_expr_and_ty ~expected) in
     let exprs, tys = List.unzip exprs_and_tys in
-    let env, supertype = compute_supertype ~expected env tys in
-    env, exprs, supertype in
+    let env, supertype, tyvars = compute_supertype ~expected env tys in
+    env, exprs, supertype, tyvars in
 
   let shape_and_tuple_arrays_enabled =
     not @@
@@ -1397,19 +1398,19 @@ and expr_
             end
           | _ ->
             env, None in
-        let env, tel, arraykind =
+        let env, tel, arraykind, tyvars =
           if shape_and_tuple_arrays_enabled then
             let env, tel, fields =
               List.foldi l ~f:begin fun index (env, tel, acc) e ->
                 let env, te, ty = aktuple_field env e in
                 env, te::tel, IMap.add index ty acc
               end ~init:(env, [], IMap.empty) in
-            env, tel, AKtuple fields
+            env, tel, AKtuple fields, ISet.empty
           else
-            let env, tel, value_ty =
+            let env, tel, value_ty, tyvars =
               compute_exprs_and_supertype ~expected:elem_expected env l array_field_value in
-            env, tel, AKvec value_ty in
-        make_result env p
+            env, tel, AKvec value_ty, tyvars in
+        make_result ~tyvars env p
           (T.Array (List.map tel (fun e -> T.AFvalue e)))
           (Reason.Rwitness p, Tarraykind arraykind)
       else
@@ -1427,9 +1428,9 @@ and expr_
             end
           | _ ->
             env, None in
-        let env, _value_exprs, value_ty =
+        let env, _value_exprs, value_ty, tyvars =
           compute_exprs_and_supertype ~expected:vexpected env l array_field_value in
-        make_result env p T.Any
+        make_result ~tyvars env p T.Any
           (Reason.Rwitness p, Tarraykind (AKvec value_ty))
       else
         (* Use expected type to determine expected element type *)
@@ -1442,11 +1443,11 @@ and expr_
             end
           | _ ->
             env, None, None in
-        let env, key_exprs, key_ty =
+        let env, key_exprs, key_ty, key_tyvars =
           compute_exprs_and_supertype ~expected:kexpected env l array_field_key in
-        let env, value_exprs, value_ty =
+        let env, value_exprs, value_ty, value_tyvars =
           compute_exprs_and_supertype ~expected:vexpected env l array_field_value in
-        make_result env p
+        make_result ~tyvars:(ISet.union key_tyvars value_tyvars) env p
           (T.Array (List.map (List.zip_exn key_exprs value_exprs)
             (fun (tek, tev) -> T.AFkvalue (tek, tev))))
           (Reason.Rwitness p, Tarraykind (AKmap (key_ty, value_ty)))
@@ -1466,9 +1467,9 @@ and expr_
           env, None, None in
       let keys, values = List.unzip l in
 
-      let env, value_exprs, value_ty =
+      let env, value_exprs, value_ty, value_tyvars =
         compute_exprs_and_supertype ~expected:vexpected env values array_value in
-      let env, key_exprs, key_ty =
+      let env, key_exprs, key_ty, key_tyvars =
         compute_exprs_and_supertype ~expected:kexpected env keys array_value in
       let env =
         List.fold_left key_exprs ~init:env ~f:begin
@@ -1476,7 +1477,7 @@ and expr_
             subtype_arraykey ~class_name:"darray" ~key_pos env key_ty
         end in
       let field_exprs = List.zip_exn key_exprs value_exprs in
-      make_result env p
+      make_result ~tyvars:(ISet.union value_tyvars key_tyvars) env p
         (T.Darray field_exprs)
         (Reason.Rwitness p, Tarraykind (AKdarray (key_ty, value_ty)))
 
@@ -1494,9 +1495,9 @@ and expr_
         | _ ->
           env, None
         in
-      let env, value_exprs, value_ty =
+      let env, value_exprs, value_ty, tyvars =
         compute_exprs_and_supertype ~expected:elem_expected env values array_value in
-      make_result env p
+      make_result ~tyvars env p
         (T.Varray value_exprs)
         (Reason.Rwitness p, Tarraykind (AKvarray value_ty))
 
@@ -2143,26 +2144,27 @@ and expr_
   | Yield_break ->
       make_result env p T.Yield_break (Reason.Rwitness p, Typing_utils.tany env)
   | Yield af ->
+      let tyvars = ISet.empty in
       let env, (taf, opt_key, value) = array_field env af in
-      let send = Env.fresh_type () in
-      let env, key = match af, opt_key with
+      let send, tyvars = Env.fresh_type_add_tyvars p tyvars in
+      let env, key, tyvars = match af, opt_key with
         | Nast.AFvalue (p, _), None ->
-          let result_ty =
+          let result_ty, tyvars =
             match Env.get_fn_kind env with
               | Ast.FCoroutine
               | Ast.FSync
               | Ast.FAsync ->
                   Errors.internal_error p "yield found in non-generator";
-                  Reason.Rwitness p, Typing_utils.tany env
+                  (Reason.Rwitness p, Typing_utils.tany env), tyvars
               | Ast.FGenerator ->
-                  (Reason.Rwitness p, Tprim Tint)
+                  (Reason.Rwitness p, Tprim Tint), tyvars
               | Ast.FAsyncGenerator ->
-                  (Reason.Ryield_asyncnull p,
-                    Toption (Env.fresh_type ()))
+                let ty, tyvars = Env.fresh_type_add_tyvars p tyvars in
+                  (Reason.Ryield_asyncnull p, Toption ty), tyvars
             in
-            env, result_ty
+            env, result_ty, tyvars
         | _, Some x ->
-            env, x
+            env, x, tyvars
         | _, _ -> assert false in
       let rty = match Env.get_fn_kind env with
         | Ast.FCoroutine ->
@@ -2180,10 +2182,11 @@ and expr_
         Type.coerce_type p (Reason.URyield) env rty expected_return in
       let env = Env.forget_members env p in
       let env = LEnv.save_and_merge_next_in_cont env C.Exit in
-      make_result env p (T.Yield taf) (Reason.Ryield_send p, Toption send)
+      make_result ~tyvars env p (T.Yield taf) (Reason.Ryield_send p, Toption send)
   | Yield_from e ->
-    let key = Env.fresh_type () in
-    let value = Env.fresh_type () in
+    let tyvars = ISet.empty in
+    let key, tyvars = Env.fresh_type_add_tyvars p tyvars in
+    let value, tyvars = Env.fresh_type_add_tyvars p tyvars in
     let env, te, yield_from_ty =
       expr ~is_using_clause env e in
       (* Expected type of `e` in `yield from e` is KeyedTraversable<Tk,Tv> (but might be dynamic)*)
@@ -2208,13 +2211,13 @@ and expr_
     let env =
       Type.coerce_type p (Reason.URyield_from) env rty expected_return in
     let env = Env.forget_members env p in
-    make_result env p (T.Yield_from te) (Reason.Rwitness p, Tprim Tvoid)
+    make_result ~tyvars env p (T.Yield_from te) (Reason.Rwitness p, Tprim Tvoid)
   | Await e ->
       (* Await is permitted in a using clause e.g. using (await make_handle()) *)
       let env, te, rty =
         expr ~is_using_clause env e in
-      let env, ty = Async.overload_extract_from_awaitable env p rty in
-      make_result env p (T.Await te) ty
+      let (env, tyvars), ty = Async.overload_extract_from_awaitable (env, ISet.empty) p rty in
+      make_result ~tyvars env p (T.Await te) ty
   | Suspend (e) ->
       let env, te, ty =
         match e with
@@ -2836,22 +2839,22 @@ and anon_make tenv p f ft idl =
 (*****************************************************************************)
 
 and special_func env p func =
-  let env, tfunc, ty = (match func with
+  let env, tfunc, ty, tyvars = (match func with
   | Gena e ->
       let env, te, ety = expr env e in
-      let env, ty = Async.gena env p ety in
-      env, T.Gena te, ty
+      let (env, tyvars), ty = Async.gena (env, ISet.empty) p ety in
+      env, T.Gena te, ty, tyvars
   | Genva el ->
       let env, tel, etyl = exprs env el in
-      let env, ty = Async.genva env p etyl in
-      env, T.Genva tel, ty
+      let (env, tyvars), ty = Async.genva (env, ISet.empty) p etyl in
+      env, T.Genva tel, ty, tyvars
   | Gen_array_rec e ->
       let env, te, ety = expr env e in
-      let env, ty = Async.gen_array_rec env p ety in
-      env, T.Gen_array_rec te, ty
+      let (env, tyvars), ty = Async.gen_array_rec (env, ISet.empty) p ety in
+      env, T.Gen_array_rec te, ty, tyvars
   ) in
   let result_ty = TMT.awaitable (Reason.Rwitness p) ty in
-  make_result env p (T.Special_func tfunc) result_ty
+  make_result ~tyvars env p (T.Special_func tfunc) result_ty
 
 and requires_consistent_construct = function
   | CIstatic -> true

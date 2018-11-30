@@ -1,0 +1,6 @@
+File "yield_from_generic.php", line 8, characters 3-19:
+Invalid yield from (Typing[4110])
+  File "yield_from_generic.php", line 6, characters 33-35:
+  This is an int
+  File "yield_from_generic.php", line 8, characters 16-18:
+  It is incompatible with a string

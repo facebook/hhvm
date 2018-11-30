@@ -85,6 +85,10 @@ let fresh_unresolved_type_add_tyvars env p tyvars =
     else add env v (Reason.Rnone, Tunresolved []) in
   env, (Reason.Rtype_variable p, Tvar v), ISet.add v tyvars
 
+let fresh_type_add_tyvars p tyvars =
+  let v = Ident.tmp () in
+  (Reason.Rtype_variable p, Tvar v), ISet.add v tyvars
+
 let get_type env x_reason x =
   let env, x = get_var env x in
   let ty = IMap.get x env.tenv in

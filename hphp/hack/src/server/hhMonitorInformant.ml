@@ -640,6 +640,11 @@ module Revision_tracker = struct
     churn_changes server_state env
   end
 
+  let has_more_watchman_messages env =
+    match Watchman.get_reader !(env.inits.watchman) with
+    | None -> false
+    | Some reader -> Buffered_line_reader.is_readable reader
+
   (**
    * This must be a non-blocking call, so it creates Futures and consumes ready
    * Futures.
@@ -686,7 +691,10 @@ module Revision_tracker = struct
       | Some (Move_along, _) | None ->
         handle_change_then_churn server_state change env
     in
-    report, (change <> None)
+    (* All the cases that `(change <> None)` cover should be also covered by
+     * has_more_watchman_messages, but this alternate method of pumping messages
+     * is heavily used in tests *)
+    report, has_more_watchman_messages env || (change <> None)
 
   let rec process (server_state, env, reports_acc) =
     (** Sometimes Watchman pushes many file changes as many sequential

@@ -6119,6 +6119,7 @@ and class_def_ env c tc =
   if (Cls.is_disposable tc)
     then List.iter (c.c_extends @ c.c_uses) (Typing_disposable.enforce_is_disposable env);
   let typed_vars = List.map c.c_vars (class_var_def env ~is_static:false c) in
+  let typed_method_redeclarations = [] in
   let typed_methods = List.map c.c_methods (method_def env) in
   let typed_typeconsts = List.map c.c_typeconsts (typeconst_def env) in
   let typed_consts, const_types =
@@ -6140,6 +6141,7 @@ and class_def_ env c tc =
     T.c_tparams = c.c_tparams;
     T.c_extends = c.c_extends;
     T.c_uses = c.c_uses;
+    T.c_method_redeclarations = typed_method_redeclarations;
     T.c_xhp_attr_uses = c.c_xhp_attr_uses;
     T.c_xhp_category = c.c_xhp_category;
     T.c_req_extends = c.c_req_extends;

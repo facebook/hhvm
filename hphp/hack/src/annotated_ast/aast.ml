@@ -285,6 +285,8 @@ and class_ = {
     ((Ast.constraint_kind * Ast.hint) list SMap.t) [@opaque];
   c_extends        : hint list        ;
   c_uses           : hint list        ;
+  c_method_redeclarations :
+    method_redeclaration list;
   c_xhp_attr_uses  : hint list        ;
   c_xhp_category   : pstring list     ;
   c_req_extends    : hint list        ;
@@ -347,6 +349,24 @@ and method_ = {
   m_ret_by_ref      : bool                ;
   m_external        : bool                ;  (* see f_external above for context *)
 }
+
+and method_redeclaration = {
+  mt_final           : bool                ;
+  mt_abstract        : bool                ;
+  mt_static          : bool                ;
+  mt_visibility      : visibility          ;
+  mt_name            : sid                 ;
+  mt_tparams         : tparam list         ;
+  mt_where_constraints : where_constraint list;
+  mt_variadic        : fun_variadicity     ;
+  mt_params          : fun_param list      ;
+  mt_fun_kind        : Ast.fun_kind        ;
+  mt_ret             : hint option         ;
+  mt_ret_by_ref      : bool                ;
+  mt_trait           : hint                ;
+  mt_method          : pstring             ;
+}
+
 
 and nsenv = Namespace_env.env [@opaque]
 

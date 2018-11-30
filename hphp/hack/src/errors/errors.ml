@@ -744,12 +744,6 @@ let trait_interface_constructor_promo pos =
   add (Naming.err_code Naming.TraitInterfaceConstructorPromo) pos
   "Constructor parameter promotion not allowed on traits or interfaces"
 
-let typeparam_alok (pos, x) =
-  add (Naming.err_code Naming.TypeparamAlok) pos (
-  "You probably forgot to bind this type parameter right?\nAdd <"^x^
-  "> somewhere (after the function name definition, \
-    or after the class name)\nExamples: "^"function foo<T> or class A<T>")
-
 let unexpected_arrow pos cname =
   add (Naming.err_code Naming.UnexpectedArrow) pos (
   "Keys may not be specified for "^cname^" initialization"

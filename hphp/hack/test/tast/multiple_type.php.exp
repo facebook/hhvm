@@ -2,10 +2,11 @@
     { Aast.AnnotatedAST.c_span = [4:1-8:2]; c_annotation = ();
       c_mode = <opaque>; c_final = false; c_is_xhp = false; c_kind = Cnormal;
       c_name = ([4:7-9], "\\C1"); c_tparams = <opaque>; c_extends = [];
-      c_uses = []; c_xhp_attr_uses = []; c_xhp_category = [];
-      c_req_extends = []; c_req_implements = []; c_implements = [];
-      c_consts = []; c_typeconsts = []; c_static_vars = []; c_vars = [];
-      c_constructor = None; c_static_methods = [];
+      c_uses = []; c_method_redeclarations = []; c_xhp_attr_uses = [];
+      c_xhp_category = []; c_req_extends = []; c_req_implements = [];
+      c_implements = []; c_consts = []; c_typeconsts = [];
+      c_static_vars = []; c_vars = []; c_constructor = None;
+      c_static_methods = [];
       c_methods =
       [{ Aast.AnnotatedAST.m_span = [5:3-7:4]; m_annotation = ();
          m_final = false; m_abstract = false; m_static = false;
@@ -25,11 +26,11 @@
      { Aast.AnnotatedAST.c_span = [10:1-14:2]; c_annotation = ();
        c_mode = <opaque>; c_final = false; c_is_xhp = false;
        c_kind = Cnormal; c_name = ([10:7-9], "\\C2"); c_tparams = <opaque>;
-       c_extends = []; c_uses = []; c_xhp_attr_uses = [];
-       c_xhp_category = []; c_req_extends = []; c_req_implements = [];
-       c_implements = []; c_consts = []; c_typeconsts = [];
-       c_static_vars = []; c_vars = []; c_constructor = None;
-       c_static_methods = [];
+       c_extends = []; c_uses = []; c_method_redeclarations = [];
+       c_xhp_attr_uses = []; c_xhp_category = []; c_req_extends = [];
+       c_req_implements = []; c_implements = []; c_consts = [];
+       c_typeconsts = []; c_static_vars = []; c_vars = [];
+       c_constructor = None; c_static_methods = [];
        c_methods =
        [{ Aast.AnnotatedAST.m_span = [11:3-13:4]; m_annotation = ();
           m_final = false; m_abstract = false; m_static = false;

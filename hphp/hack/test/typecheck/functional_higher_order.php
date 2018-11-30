@@ -9,7 +9,7 @@
  *
  */
 
-function f((function(T): T) $g, T $x): T {
+function f<T>((function(T): T) $g, T $x): T {
   return call_user_func($g, $x);
 }
 

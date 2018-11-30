@@ -51,6 +51,9 @@ let experimental_null_coalesce_assignment =
   GlobalOptions.tco_experimental_null_coalesce_assignment
 let experimental_reified_generics =
   GlobalOptions.tco_experimental_reified_generics
+let experimental_trait_method_redeclarations =
+  GlobalOptions.tco_experimental_trait_method_redeclarations
+
 let experimental_decl_linearization =
   GlobalOptions.tco_experimental_decl_linearization
 let experimental_track_subtype_prop =

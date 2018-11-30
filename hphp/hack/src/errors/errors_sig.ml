@@ -53,7 +53,6 @@ module type S = sig
   val experimental_feature : Pos.t -> string -> unit
 
   val fixme_format : Pos.t -> unit
-  val typeparam_alok : Pos.t * string -> unit
   val unexpected_eof : Pos.t -> unit
   val missing_field : Pos.t -> Pos.t -> string -> unit
   val explain_constraint :

@@ -2,9 +2,10 @@
     { Aast.AnnotatedAST.c_span = [12:1-22:2]; c_annotation = ();
       c_mode = <opaque>; c_final = false; c_is_xhp = false; c_kind = Cnormal;
       c_name = ([12:7-16], "\\TestClass"); c_tparams = <opaque>;
-      c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = [];
-      c_req_extends = []; c_req_implements = []; c_implements = [];
-      c_consts = []; c_typeconsts = [];
+      c_extends = []; c_uses = []; c_method_redeclarations = [];
+      c_xhp_attr_uses = []; c_xhp_category = []; c_req_extends = [];
+      c_req_implements = []; c_implements = []; c_consts = [];
+      c_typeconsts = [];
       c_static_vars =
       [{ Aast.AnnotatedAST.cv_final = false; cv_is_xhp = false;
          cv_visibility = Private;

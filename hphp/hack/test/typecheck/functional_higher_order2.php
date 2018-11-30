@@ -9,7 +9,7 @@
  *
  */
 
-function build(T $x): (function(T): T) {
+function build<T>(T $x): (function(T): T) {
   return function(T $y): T use ($x) {
     return $y;
   };

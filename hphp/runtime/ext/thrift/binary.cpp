@@ -590,7 +590,7 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
       }
     } return;
     case T_LIST: {
-      Array ht = value.toArray();
+      Array ht = value.toArray<IntishCast::CastSilently>();
       Variant val;
 
       uint8_t valtype = tvCastToInt64(
@@ -606,7 +606,7 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
       }
     } return;
     case T_SET: {
-      Array ht = value.toArray();
+      Array ht = value.toArray<IntishCast::CastSilently>();
 
       uint8_t keytype = (char)tvCastToInt64(
         fieldspec.rvalAt(s_etype, AccessFlags::ErrorKey).tv()
@@ -691,8 +691,6 @@ void HHVM_FUNCTION(thrift_protocol_write_binary,
   }
 
   const Object& obj_request_struct = request_struct;
-
-  SuppressHACIntishCastNotices shacn;
 
   Variant spec(get_tspec(obj_request_struct->getVMClass()));
   binary_serialize_spec(obj_request_struct, transport, spec.toArray());

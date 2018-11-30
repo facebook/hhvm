@@ -20,8 +20,7 @@ module SN = Naming_special_names
 let rec find_sketchy_type env ty =
   (* Find sketchy nulls hidden under Tunresolved *)
   let env, ty = Env.fold_unresolved env ty in
-  let env, ety = Env.expand_type env ty in
-  match snd ety with
+  match snd ty with
   | Tnonnull -> Some false
 
   | Tabstract (AKenum _, _)
@@ -55,7 +54,7 @@ let rec find_sketchy_type env ty =
   | Tunresolved tyl -> List.find_map tyl (find_sketchy_type env)
   | Tabstract _
     when Env.forward_compat_ge env 2018_06_14 ->
-    let env, tyl = Env.get_concrete_supertypes env ety in
+    let env, tyl = Env.get_concrete_supertypes env ty in
     List.find_map tyl (find_sketchy_type env)
   | _ -> None
 

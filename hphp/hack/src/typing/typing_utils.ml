@@ -639,9 +639,9 @@ let rec fold_unresolved env ty =
           end ~init:(env, x) in
         env, acc
       with Exit ->
-        env, ty
+        env, ety
       )
-  | _ -> env, ty
+  | _ -> env, ety
 
 (*****************************************************************************)
 (* *)

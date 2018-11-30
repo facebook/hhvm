@@ -75,9 +75,8 @@ let tclass_is_falsy_when_empty, is_traversable =
     indicates a logic error. *)
 let rec truthiness env ty =
   let env, ty = Env.fold_unresolved env ty in
-  let env, ty = Env.expand_type env ty in
   match snd ty with
-  | Tany | Terr | Tdynamic -> Unknown
+  | Tany | Terr | Tdynamic | Tvar _ -> Unknown
 
   | Tnonnull
   | Tabstract (AKenum _, _)
@@ -130,10 +129,6 @@ let rec truthiness env ty =
 
   | Ttuple [] -> Always_falsy
   | Tobject | Tfun _ | Ttuple _ | Tanon _ -> Always_truthy
-  | Tvar _ ->
-    if TypecheckerOptions.new_inference (Env.get_tcopt env)
-    then Unknown
-    else failwith "expand_type failed"
 
 (** When a type represented by one of these variants is used in a truthiness
     test, it indicates a potential logic error, since the truthiness of some
@@ -150,7 +145,6 @@ type sketchy_type_kind =
 
 let rec find_sketchy_types env acc ty =
   let env, ty = Env.fold_unresolved env ty in
-  let env, ty = Env.expand_type env ty in
   match snd ty with
   | Toption ty -> find_sketchy_types env acc ty
 

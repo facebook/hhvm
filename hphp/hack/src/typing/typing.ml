@@ -4821,7 +4821,6 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env =
       let env, te, ty = expr env e in
       let rec resolve_ety ty =
         let env, ty = TUtils.fold_unresolved env ty in
-        let env, ty = Env.expand_type env ty in
         match TUtils.get_base_type env ty with
         | _, Tabstract (AKnewtype (classname, [the_cls]), _) when
             classname = SN.Classes.cClassname -> resolve_ety the_cls

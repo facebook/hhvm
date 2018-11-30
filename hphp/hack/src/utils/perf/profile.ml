@@ -48,7 +48,7 @@ let query_real_time = Unix.gettimeofday
  * as well as the number of runs.  It return 0 for the latter if the first run fails
  * so that failures can be unambiguously identified and filtered out if needed.
  *)
-let profile_longer_than run min_time =
+let profile_longer_than run ?(min_runs=1) min_time =
   let rec work dt_user_tot nbr_runs =
     let t_user0 = query_user_time () in
     let run_incr =
@@ -58,7 +58,7 @@ let profile_longer_than run min_time =
     let dt_user = (query_user_time ()) -. t_user0 in
     let dt_user_tot = dt_user_tot +. dt_user in
     let nbr_runs = nbr_runs + run_incr in
-    if dt_user_tot < min_time && run_incr > 0 then
+    if (dt_user_tot < min_time || nbr_runs < min_runs) && run_incr > 0 then
       (work[@tailcall]) dt_user_tot nbr_runs
     else
       dt_user_tot, nbr_runs

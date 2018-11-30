@@ -25,9 +25,16 @@ let test_profile_longer_than () =
   if nbr_runs < 1 then failwith "not ran at least once";
   user_time >= 1e-8  (* to avoid flakiness, use 5 orders of magnitude smaller *)
 
+let test_profile_longer_than_min_runs_gt1 () =
+  let min_runs = 7 in
+  let cnt = ref 0 in
+  let _, nbr_runs = profile_longer_than ~min_runs (fun () -> cnt := !cnt + 1) 0.0 in
+  nbr_runs = min_runs && min_runs = !cnt
+
 let () =
   Unit_test.run_all [
     "test_with_gc_alloc", test_with_gc_alloc;
     "test_merge_alloc", test_merge_alloc;
     "test_profile_longer_than", test_profile_longer_than;
+    "test_profile_longer_than_min_runs_gt1", test_profile_longer_than_min_runs_gt1;
   ]

@@ -30,9 +30,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-// TODO(felixh): @nocommit: evaluate for memory leaks. (what is the convention
-// for who is responsible for freeing returned strings???)
-
 namespace {
 bool isOff(const String& s) {
   return s.size() == 3 && bstrcaseeq(s.data(), "off", 3);
@@ -208,7 +205,13 @@ GzipCompressor* GzipResponseCompressor::getCompressor() {
 StringHolder GzipResponseCompressor::compressResponse(
     const char *data, int len, bool last) {
   auto compressor = getCompressor();
-  const char *compressedData = compressor ? compressor->compress(data, len, last) : nullptr;
+  if (!compressor) {
+    // We just decided not to use this compressor. This doesn't necessarily
+    // imply an error: gzip could have simply been disabled by the request
+    // userland. Return null but don't log an error.
+    return StringHolder(nullptr, 0);
+  }
+  const char *compressedData = compressor->compress(data, len, last);
   if (!compressedData) {
     m_compressor.reset();
     Logger::Error("Unable to compress response: len=%d", len);
@@ -278,10 +281,14 @@ brotli::BrotliCompressor* BrotliResponseCompressor::getCompressor(
 StringHolder BrotliResponseCompressor::compressResponse(
     const char *data, int len, bool last) {
   auto compressor = getCompressor(len, last);
+  if (!compressor) {
+    // We just decided not to use this compressor. This doesn't necessarily
+    // imply an error: brotli could have simply been disabled by the request
+    // userland. Return null but don't log an error.
+    return StringHolder(nullptr, 0);
+  }
   size_t size = len;
-  const char *compressedData = compressor ?
-      HPHP::compressBrotli(compressor, data, size, last) :
-      nullptr;
+  const char *compressedData = HPHP::compressBrotli(compressor, data, size, last);
   if (!compressedData) {
     m_compressor.reset();
     Logger::Error("Unable to compress response to brotli: len=%d", len);
@@ -325,8 +332,14 @@ ZstdCompressor* ZstdResponseCompressor::getCompressor() {
 StringHolder ZstdResponseCompressor::compressResponse(
     const char *data, int len, bool last) {
   auto compressor = getCompressor();
+  if (!compressor) {
+    // We just decided not to use this compressor. This doesn't necessarily
+    // imply an error: zstd could have simply been disabled by the request
+    // userland. Return null but don't log an error.
+    return StringHolder(nullptr, 0);
+  }
   size_t size = len;
-  const char *compressedData = compressor ? compressor->compress(data, size, last) : nullptr;
+  const char *compressedData = compressor->compress(data, size, last);
   if (!compressedData) {
     m_compressor.reset();
     Logger::Error("Unable to compress response to zstd: len=%d", len);

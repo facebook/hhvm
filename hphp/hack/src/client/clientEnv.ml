@@ -54,6 +54,7 @@ type client_mode =
 | MODE_TYPE_AT_POS_BATCH of string list
 | MODE_TYPED_FULL_FIDELITY_PARSE of string (* filename *)
 | MODE_FUN_DEPS_AT_POS_BATCH of string list
+| MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH of string list
 
 type client_check_env = {
   ai_mode: string option;
@@ -125,3 +126,4 @@ let mode_to_string = function
   | MODE_TYPE_AT_POS_BATCH _ -> "MODE_TYPE_AT_POS_BATCH"
   | MODE_TYPED_FULL_FIDELITY_PARSE _ -> "MODE_TYPED_FULL_FIDELITY_PARSE"
   | MODE_FUN_DEPS_AT_POS_BATCH _ -> "MODE_FUN_DEPS_AT_POS_BATCH"
+  | MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH _ -> "MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH"

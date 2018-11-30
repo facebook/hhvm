@@ -434,7 +434,7 @@ module Typing                               = struct
   | ParentConstSelfNot
   | PartiallyValidIsAsExpressionHint
   | NonreactiveFunctionCall
-  | NonreactiveAppend
+  | NonreactiveIndexing
   | ObjSetReactive
   | FunReactivityMismatch
   | OverridingPropConstMismatch

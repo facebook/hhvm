@@ -127,6 +127,17 @@ let rpc
     Lwt.return result
   )
 
+let parse_positions positions =
+  List.map positions begin fun pos ->
+  try
+    match Str.split (Str.regexp ":") pos with
+    | [filename; line; char] ->
+        expand_path filename, int_of_string line, int_of_string char
+    | _ -> raise Exit
+  with _ ->
+    Printf.eprintf "Invalid position\n";
+    raise Exit_status.(Exit_with Input_error)
+  end
 let main (args : client_check_env) : Exit_status.t Lwt.t =
   let mode_s = ClientEnv.mode_to_string args.mode in
   HackEventLogger.set_from args.from;
@@ -297,18 +308,15 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       List.iter responses print_endline;
       Lwt.return Exit_status.No_error
     | MODE_FUN_DEPS_AT_POS_BATCH positions ->
-      let positions = List.map positions begin fun pos ->
-        try
-          match Str.split (Str.regexp ":") pos with
-          | [filename; line; char] ->
-              expand_path filename, int_of_string line, int_of_string char
-          | _ -> raise Exit
-        with _ ->
-          Printf.eprintf "Invalid position\n";
-          raise Exit_status.(Exit_with Input_error)
-      end in
+      let positions = parse_positions positions in
       let%lwt responses =
         rpc args @@ Rpc.FUN_DEPS_BATCH (positions, args.dynamic_view) in
+      List.iter responses print_endline;
+      Lwt.return Exit_status.No_error
+    | MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH positions ->
+      let positions = parse_positions positions in
+      let%lwt responses =
+        rpc args @@ Rpc.FUN_IS_LOCALLABLE_BATCH positions in
       List.iter responses print_endline;
       Lwt.return Exit_status.No_error
     | MODE_TYPED_FULL_FIDELITY_PARSE filename ->

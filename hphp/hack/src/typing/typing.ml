@@ -3118,12 +3118,6 @@ and assign_ p ur env e1 ty2 =
             || x = SN.Collections.cImmVector
             || x = SN.Collections.cVec
             || x = SN.Collections.cConstVector ->
-            (* Vector assignment is illegal in a reactive context
-                but vec assignment is okay *)
-            if x <> SN.Collections.cVec
-            then Env.error_if_reactive_context env @@ begin fun () ->
-              Errors.nonreactive_append p
-            end;
             let env, tel = List.map_env env el begin fun env e ->
               let env, te, _ = assign (fst e) env e elt_type in
               env, te

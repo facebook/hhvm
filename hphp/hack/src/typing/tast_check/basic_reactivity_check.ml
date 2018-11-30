@@ -31,10 +31,8 @@ let expr_is_valid_borrowed_arg env (e: expr): bool =
 (* basic reactivity checks:
   X no superglobals in reactive context
   X no static property accesses
-  X no append calls
-  - no unawaited awaitables
-  - escaping mutables ?*)
-let rec is_byval_collection__or_string_type env ty =
+  X no append calls *)
+let rec is_byval_collection_or_string_or_any_type env ty =
   let check t =
     match t with
     | _, Tclass ((_, x), _, _) ->
@@ -43,8 +41,9 @@ let rec is_byval_collection__or_string_type env ty =
       x = SN.Collections.cKeyset
     | _, (Tarraykind _ | Ttuple _ | Tshape _)
       -> true
-    | _, Tprim Nast.Tstring -> true
-    | _, Tunresolved tl -> List.for_all tl ~f:(is_byval_collection__or_string_type env)
+    | _, Tprim Nast.Tstring
+    | _, Tany -> true
+    | _, Tunresolved tl -> List.for_all tl ~f:(is_byval_collection_or_string_or_any_type env)
     | _ -> false in
   let _, tl = Tast_env.get_concrete_supertypes env ty in
   List.for_all tl ~f:check
@@ -52,12 +51,12 @@ let rec is_byval_collection__or_string_type env ty =
 let rec is_valid_mutable_subscript_expression_target env v =
   match v with
   | (_, ty), Lvar _ ->
-    is_byval_collection__or_string_type env ty
+    is_byval_collection_or_string_or_any_type env ty
   | (_, ty), Array_get (e, _) ->
-    is_byval_collection__or_string_type env ty &&
+    is_byval_collection_or_string_or_any_type env ty &&
     is_valid_mutable_subscript_expression_target env e
   | (_, ty), Obj_get (e, _, _) ->
-    is_byval_collection__or_string_type env ty &&
+    is_byval_collection_or_string_or_any_type env ty &&
     (is_valid_mutable_subscript_expression_target env e || expr_is_valid_borrowed_arg env e)
   | _ -> false
 
@@ -83,15 +82,16 @@ let check_assignment_or_unset_target
   match snd te1 with
    (* Setting mutable locals is okay *)
   | Obj_get (e1, _, _) when expr_is_valid_borrowed_arg env e1 -> ()
-  | Array_get (e1, None) when
+  | Array_get (e1, i) when
     is_assignment &&
     not (is_valid_append_target (get_type e1)) ->
-    Errors.nonreactive_append
-      (Option.value append_pos_opt ~default:p);
+    Errors.nonreactive_indexing (i = None) (Option.value append_pos_opt ~default:p);
   | Array_get (e1, _)
     when expr_is_valid_borrowed_arg env e1 ||
          is_valid_mutable_subscript_expression_target env e1 -> ()
-  | Class_get _
+  | Class_get _ ->
+    (* we already report errors about statics in rx context, no need to do it twice *)
+    ()
   | Obj_get _
   | Array_get _ ->
     if is_assignment
@@ -386,12 +386,17 @@ type ctx = {
   allow_awaitable: bool;
   disallow_this: bool;
   is_expr_statement: bool;
+  is_locallable_pass: bool;
 }
 
 let new_ctx reactivity = {
   reactivity; allow_awaitable = false; disallow_this = false;
-  is_expr_statement=false;
+  is_expr_statement=false; is_locallable_pass = false;
 }
+
+let new_ctx_for_is_locallable_pass reactivity =
+  { (new_ctx reactivity) with is_locallable_pass = true }
+
 let allow_awaitable ctx =
   if ctx.allow_awaitable then ctx
   else { ctx with allow_awaitable = true }
@@ -404,6 +409,19 @@ let disallow_this ctx =
   if ctx.disallow_this then ctx
   else { ctx with disallow_this = true }
 
+let get_reactivity_from_user_attributes user_attributes =
+  let module UA = SN.UserAttributes in
+  let rec go attrs =
+    match attrs with
+    | [] -> None
+    | { ua_name = (_, n); _ } :: tl ->
+      if n = UA.uaReactive then Some (Reactive None)
+      else if n = UA.uaShallowReactive then Some (Shallow None)
+      else if n = UA.uaLocalReactive then Some (Local None)
+      else if n = UA.uaNonRx then Some Nonreactive
+      else go tl in
+  go user_attributes
+
 let set_expr_statement ctx =
   if ctx.is_expr_statement then ctx
   else { ctx with is_expr_statement = true }
@@ -412,7 +430,7 @@ let set_nested_expr ctx =
   if not ctx.is_expr_statement then ctx
   else { ctx with is_expr_statement = false }
 
-let with_reactivity ctx reactivity =
+let set_reactivity ctx reactivity =
   { ctx with reactivity }
 let check = object(self)
   inherit [ctx] Tast_visitor.iter_with_state as super
@@ -504,8 +522,17 @@ let check = object(self)
           if ctx.disallow_this || Env.function_is_mutable env
           then disallow_this ctx
           else ctx in
+
         let env = Tast_env.restore_fun_env env f in
-        let ctx = with_reactivity ctx (Env.env_reactivity env) in
+        let env, ctx =
+          if ctx.is_locallable_pass
+          then begin
+            match get_reactivity_from_user_attributes f.f_user_attributes with
+            | Some rx -> (Env.set_env_reactive env rx), (set_reactivity ctx rx)
+            | None -> env, ctx
+          end
+          else env, set_reactivity ctx (Env.env_reactivity env)
+        in
         self#handle_body env ctx f.f_body;
 
       | _, Binop (Ast.Eq _, te1, _) ->

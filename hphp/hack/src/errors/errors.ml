@@ -3270,9 +3270,14 @@ let rx_parameter_condition_mismatch cond pos def_pos =
     matching parameter in function super type.";
     def_pos, "This is parameter declaration from the function super type."
   ]
-let nonreactive_append pos =
-  let msg = "Cannot append to a Hack Collection object in a reactive context" in
-  add (Typing.err_code Typing.NonreactiveAppend) pos msg
+let nonreactive_indexing is_append pos =
+  let msg =
+    if is_append
+    then "Cannot append to a Hack Collection object in a reactive context. \
+    Instead, use the 'add' method."
+    else "Cannot assign to element of Hack Collection object via [] in a reactive context. \
+    Instead, use the 'set' method." in
+  add (Typing.err_code Typing.NonreactiveIndexing) pos msg
 
 let obj_set_reactive pos =
   let msg = ("This object's property is being mutated(used as an lvalue)" ^

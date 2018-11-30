@@ -2,6 +2,6 @@
 
 <<__Rx>>
 function f(<<__Mutable>>Map<int, string> $m): void {
-  // OK
+  // ERROR
   $m[1] = "42";
 }

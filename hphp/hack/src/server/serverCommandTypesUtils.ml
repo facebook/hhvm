@@ -52,6 +52,7 @@ let debug_describe_t : type a. a t -> string = function
   | NO_PRECHECKED_FILES        -> "NO_PRECHECKED_FILES"
   | GEN_HOT_CLASSES          _ -> "GEN_HOT_CLASSES"
   | FUN_DEPS_BATCH           _ -> "FUN_DEPS_BATCH"
+  | FUN_IS_LOCALLABLE_BATCH  _ -> "FUN_IS_LOCALLABLE_BATCH"
 
 let debug_describe_cmd : type a. a command -> string = function
   | Rpc rpc -> debug_describe_t rpc

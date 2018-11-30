@@ -55,7 +55,7 @@ bool cellIsPlausible(const Cell cell) {
       case KindOfString:
         assertPtr(cell.m_data.pstr);
         assertx(cell.m_data.pstr->kindIsValid());
-        assertx(cell.m_data.pstr->checkCount());
+        assertx(cell.m_data.pstr->checkCountZ());
         return;
       case KindOfPersistentVec:
         assertPtr(cell.m_data.parr);
@@ -65,7 +65,7 @@ bool cellIsPlausible(const Cell cell) {
         return;
       case KindOfVec:
         assertPtr(cell.m_data.parr);
-        assertx(cell.m_data.parr->checkCount());
+        assertx(cell.m_data.parr->checkCountZ());
         assertx(cell.m_data.parr->isVecArray());
         assertx(cell.m_data.parr->isNotDVArray());
         return;
@@ -77,7 +77,7 @@ bool cellIsPlausible(const Cell cell) {
         return;
       case KindOfDict:
         assertPtr(cell.m_data.parr);
-        assertx(cell.m_data.parr->checkCount());
+        assertx(cell.m_data.parr->checkCountZ());
         assertx(cell.m_data.parr->isDict());
         assertx(cell.m_data.parr->isNotDVArray());
         return;
@@ -89,7 +89,7 @@ bool cellIsPlausible(const Cell cell) {
         return;
       case KindOfKeyset:
         assertPtr(cell.m_data.parr);
-        assertx(cell.m_data.parr->checkCount());
+        assertx(cell.m_data.parr->checkCountZ());
         assertx(cell.m_data.parr->isKeyset());
         assertx(cell.m_data.parr->isNotDVArray());
         return;
@@ -108,17 +108,14 @@ bool cellIsPlausible(const Cell cell) {
         assertx(cell.m_data.parr->dvArraySanityCheck());
         return;
       case KindOfShape:
+        assertPtr(cell.m_data.parr);
+        assertx(cell.m_data.parr->checkCountZ());
+        assertx(cell.m_data.parr->isShape());
         if (RuntimeOption::EvalHackArrDVArrs) {
-          assertPtr(cell.m_data.parr);
-          assertx(cell.m_data.parr->checkCount());
-          assertx(cell.m_data.parr->isShape());
           assertx(cell.m_data.parr->isNotDVArray());
           return;
         }
-        assertPtr(cell.m_data.parr);
         assertx(cell.m_data.parr->kindIsValid());
-        assertx(cell.m_data.parr->checkCount());
-        assertx(cell.m_data.parr->isShape());
         assertx(cell.m_data.parr->dvArraySanityCheck());
         return;
       case KindOfPersistentArray:
@@ -131,19 +128,19 @@ bool cellIsPlausible(const Cell cell) {
       case KindOfArray:
         assertPtr(cell.m_data.parr);
         assertx(cell.m_data.parr->kindIsValid());
-        assertx(cell.m_data.parr->checkCount());
+        assertx(cell.m_data.parr->checkCountZ());
         assertx(cell.m_data.parr->isPHPArray());
         assertx(cell.m_data.parr->dvArraySanityCheck());
         return;
       case KindOfObject:
         assertPtr(cell.m_data.pobj);
         assertx(cell.m_data.pobj->kindIsValid());
-        assertx(cell.m_data.pobj->checkCount());
+        assertx(cell.m_data.pobj->checkCountZ());
         return;
       case KindOfResource:
         assertPtr(cell.m_data.pres);
         assertx(cell.m_data.pres->kindIsValid());
-        assertx(cell.m_data.pres->checkCount());
+        assertx(cell.m_data.pres->checkCountZ());
         return;
       case KindOfFunc:
         assertPtr(cell.m_data.pfunc);
@@ -168,7 +165,7 @@ bool tvIsPlausible(TypedValue tv) {
     assertx(tv.m_data.pref);
     assertx(uintptr_t(tv.m_data.pref) % sizeof(void*) == 0);
     assertx(tv.m_data.pref->kindIsValid());
-    assertx(tv.m_data.pref->checkCount());
+    assertx(tv.m_data.pref->checkCountZ());
     tv = *tv.m_data.pref->cell();
   }
   return cellIsPlausible(tv);

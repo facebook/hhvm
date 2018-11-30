@@ -89,7 +89,7 @@ inline ArrayData* alloc_packed_static(size_t cap) {
 
 bool PackedArray::checkInvariants(const ArrayData* arr) {
   assertx(arr->hasPackedLayout());
-  assertx(arr->checkCount());
+  assertx(arr->checkCountZ());
   assertx(arr->m_size <= MixedArray::MaxSize);
   assertx(arr->m_size <= capacity(arr));
   assertx(arr->m_pos >= 0 && arr->m_pos <= arr->m_size);

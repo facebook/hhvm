@@ -41,12 +41,6 @@ struct Vunit;
  * before we deal with cycles.
  */
 
-struct VMoveInfo {
-  enum class Kind { Move, Xchg };
-  Kind m_kind;
-  Vreg m_src, m_dst;
-};
-
 struct MoveInfo {
   enum class Kind { Move, Xchg };
   Kind m_kind;
@@ -54,7 +48,6 @@ struct MoveInfo {
 };
 
 using MovePlan = PhysReg::Map<PhysReg>;
-jit::vector<VMoveInfo> doVregMoves(Vunit&, MovePlan& moves);
 jit::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp);
 
 ///////////////////////////////////////////////////////////////////////////////

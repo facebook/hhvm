@@ -183,6 +183,7 @@ bool effectful(const Vinstr& inst) {
     case Vinstr::testqm:
     case Vinstr::ucomisd:
     case Vinstr::unpcklpd:
+    case Vinstr::sbfmqi:
     case Vinstr::ubfmli:
     case Vinstr::xorb:
     case Vinstr::xorbi:

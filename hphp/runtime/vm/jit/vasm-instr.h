@@ -330,6 +330,7 @@ struct Vunit;
   O(fcvtzs, Inone, U(s), D(d))\
   O(mrs, I(s), Un, D(r))\
   O(msr, I(s), U(r), Dn)\
+  O(sbfmqi, I(mr) I(ms), U(s), D(d))\
   O(ubfmli, I(mr) I(ms), U(s), D(d))\
   /* ppc64 instructions */\
   O(fcmpo, Inone, U(s0) U(s1), D(sf))\
@@ -1208,6 +1209,7 @@ struct csincq { ConditionCode cc; VregSF sf; Vreg64 f, t, d; };
 struct fcvtzs { VregDbl s; Vreg64 d;};
 struct mrs { Immed s; Vreg64 r; };
 struct msr { Vreg64 r; Immed s; };
+struct sbfmqi { Immed mr, ms; Vreg64 s, d; };
 struct ubfmli { Immed mr, ms; Vreg32 s, d; };
 
 /*

@@ -397,8 +397,10 @@ bool AutoloadHandler::autoloadClassPHP5Impl(const String& className,
   // rely on it unless we are forcing a restart (due to spl_autoload_call)
   // in which case autoload is allowed to be reentrant.
   if (!forceSplStack) {
-    if (m_loading.exists(className)) { return false; }
-    m_loading.set(className, className);
+    const auto arrkey =
+      m_loading.convertKey<IntishCast::CastSilently>(className);
+    if (m_loading.exists(arrkey)) { return false; }
+    m_loading.set(arrkey, make_tv<KindOfString>(className.get()));
   } else {
     // We can still overflow the stack if there is a loop when using
     // spl_autoload_call directly, but this behavior matches PHP5.

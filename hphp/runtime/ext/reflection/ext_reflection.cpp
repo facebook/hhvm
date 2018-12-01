@@ -1760,7 +1760,9 @@ static void HHVM_METHOD(ReflectionProperty, __construct,
     auto obj = cls_or_obj.toCObjRef().get();
     assertx(cls == obj->getVMClass());
     if (obj->getAttribute(ObjectData::HasDynPropArr) &&
-        obj->dynPropArray().exists(prop_name)) {
+        obj->dynPropArray().exists(
+          obj->dynPropArray().convertKey<IntishCast::CastSilently>(prop_name))
+        ){
       if (RuntimeOption::EvalNoticeOnReadDynamicProp) {
         obj->raiseReadDynamicProp(prop_name.get());
       }

@@ -578,6 +578,16 @@ let check = object(self)
     else super#on_expr (env, ctx) expr
 end
 
+let check_redundant_rx_condition env pos r =
+  match r with
+  | Reactive (Some cond_ty) | Local (Some cond_ty) | Shallow (Some cond_ty) ->
+    let env, cond_ty = Tast_env.localize_with_self env cond_ty in
+    let _, is_subtype =
+      Tast_env.subtype env (Tast_env.get_self_exn env) cond_ty in
+    if is_subtype
+    then Errors.redundant_rx_condition pos
+  | _ -> ()
+
 let handler = object
   inherit Tast_visitor.handler_base
   method! at_fun_def env f =
@@ -587,6 +597,7 @@ let handler = object
 
   method! at_method_ env m =
     let env = Tast_env.restore_method_env env m in
+    check_redundant_rx_condition env (fst m.m_name) (Env.env_reactivity env);
     let ctx = new_ctx (Env.env_reactivity env) in
     check#handle_body env ctx m.m_body
 end

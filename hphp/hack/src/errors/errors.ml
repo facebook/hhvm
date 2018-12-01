@@ -3529,6 +3529,9 @@ let invalid_arraykey pos typ =
       "This value is not a valid array key type (string | int), it is %s"
       typ
 
+let redundant_rx_condition pos =
+  add (Typing.err_code Typing.RedundantRxCondition) pos
+    "Reactivity condition for this method is always true, consider removing it."
 
 (*****************************************************************************)
 (* Convert relative paths to absolute. *)

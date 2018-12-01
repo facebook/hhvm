@@ -527,4 +527,5 @@ UnknownObjectMember = 4296
 UnknownClass = 4297
 InvalidArrayKey = 4298
 ReferenceExprPartial = 4299
+RedundantRxCondition = 4300
   |}]

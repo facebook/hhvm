@@ -109,6 +109,8 @@ let make_test test =
       start_server_count := !start_server_count + 1;
       fake_process_data
 
+    let server_restart_options x = x
+
     let get_start_server_count () = !start_server_count
 
     let get_last_start_server_call () = !last_start_server_call

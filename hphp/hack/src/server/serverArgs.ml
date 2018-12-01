@@ -365,7 +365,8 @@ let set_gen_saved_ignore_type_errors options ignore_type_errors = { options with
   gen_saved_ignore_type_errors = ignore_type_errors}
 let set_no_load options is_no_load = {options with no_load = is_no_load}
 let set_mini_state_target options target = match target with
-  | None -> options
+  | None ->
+    { options with with_mini_state = None }
   | Some target ->
     { options with
       with_mini_state = Some (Informant_induced_mini_state_target target)

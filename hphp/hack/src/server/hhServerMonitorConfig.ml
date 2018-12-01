@@ -116,6 +116,12 @@ module HhServerConfig = struct
       let options = ServerArgs.set_mini_state_target options target_mini_state in
       start_hh_server ~informant_managed options
 
+  (* with_mini_state includes information about repo state (list of changed files)
+   * that could have changed between start and restart, so we can't re-use it, and
+   * need to fall back to querying for data again *)
+  let server_restart_options (options : server_start_options) =
+    ServerArgs.set_mini_state_target options None
+
   let kill_server process =
     try
       Unix.kill process.ServerProcess.pid Sys.sigusr2

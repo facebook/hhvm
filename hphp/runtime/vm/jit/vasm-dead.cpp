@@ -363,6 +363,16 @@ void removeDeadCode(Vunit& unit) {
             }
             break;
           }
+          case Vinstr::copy2:
+            if (isLive(inst.copy2_.d0) && !isLive(inst.copy2_.s0)) {
+              live[inst.copy2_.s0] = true;
+              changed = true;
+            }
+            if (isLive(inst.copy2_.d1) && !isLive(inst.copy2_.s1)) {
+              live[inst.copy2_.s1] = true;
+              changed = true;
+            }
+            break;
           case Vinstr::phijmp: {
             // A phijmp's source is live if the corresponding dest in the phidef
             // is.
@@ -381,7 +391,7 @@ void removeDeadCode(Vunit& unit) {
           case Vinstr::phidef: // Processed as part of phijmp above
             break;
           default:
-            // Otherwise the sources are only live if all of the dests are.
+            // Otherwise the sources are only live if any of the dests are.
             if (!isLiveInst(inst)) break;
             visitUses(
               unit, inst,
@@ -436,6 +446,25 @@ void removeDeadCode(Vunit& unit) {
             changed = true;
             break;
           }
+          case Vinstr::copy2:
+            if (!isLive(inst.copy2_.d0)) {
+              if (!isLive(inst.copy2_.d1)) {
+                inst = nop{};
+              } else {
+                auto const s = inst.copy2_.s1;
+                auto const d = inst.copy2_.d1;
+                inst.op = Vinstr::copy;
+                inst.copy_ = copy{s, d};
+              }
+              changed = true;
+            } else if (!isLive(inst.copy2_.d1)) {
+              auto const s = inst.copy2_.s0;
+              auto const d = inst.copy2_.d0;
+              inst.op = Vinstr::copy;
+              inst.copy_ = copy{s, d};
+              changed = true;
+            }
+            break;
           case Vinstr::phidef: {
             // Remove dead source/dest pairs from phidef/phijmp.
             auto d = &unit.tuples[inst.phidef_.defs];

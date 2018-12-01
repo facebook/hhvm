@@ -299,10 +299,12 @@ void optimizeJmps(Vunit& unit) {
           changed = true;
         } else {
           auto jcc_i = code.back().jcc_;
-          if (isOnly(unit, jcc_i.targets[0], Vinstr::fallback)) {
+          if (isOnly(unit, jcc_i.targets[0], Vinstr::fallback) ||
+              isOnly(unit, jcc_i.targets[0], Vinstr::jmpi)) {
             jcc_i = jcc{ccNegate(jcc_i.cc), jcc_i.sf,
                         {jcc_i.targets[1], jcc_i.targets[0]}};
           }
+
           if (isOnly(unit, jcc_i.targets[1], Vinstr::fallback)) {
             // replace jcc with fallbackcc and jmp
             const auto& fb_i = unit.blocks[jcc_i.targets[1]].code[0].fallback_;
@@ -316,6 +318,22 @@ void optimizeJmps(Vunit& unit) {
             );
             code.emplace_back(jmp{t0}, jcc_irctx);
             changed = true;
+          }
+
+          if (isOnly(unit, jcc_i.targets[1], Vinstr::jmpi)) {
+            // Replace jcc with jcci if the taken branch is just a jmpi
+            auto const& jmpi = unit.blocks[jcc_i.targets[1]].code[0].jmpi_;
+            if (jmpi.args.empty()) {
+              // We don't have a way to provide the jmpi's args in a jcci, so
+              // only perform the optimization if there's none.
+              auto const jcc_irctx = code.back().irctx();
+              code.pop_back();
+              code.emplace_back(
+                jcci{jcc_i.cc, jcc_i.sf, jcc_i.targets[0], jmpi.target},
+                jcc_irctx
+              );
+              changed = true;
+            }
           }
 
           changed |= diamondIntoCmov(unit, jcc_i, code, npreds);

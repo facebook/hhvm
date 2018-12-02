@@ -65,10 +65,13 @@ int64_t readSLEB(folly::StringPiece& sp) {
   return r;
 }
 
-uintptr_t readAddr(folly::StringPiece&sp, uint64_t size) {
+uintptr_t readAddr(folly::StringPiece&sp, uint64_t size, bool sgn) {
   if (size == 4) {
-    // sign extend for DW_AT_ranges
-    return read<int32_t>(sp);
+    if (sgn) {
+      return read<int32_t>(sp);
+    } else {
+      return read<uint32_t>(sp);
+    }
   }
   assertx(size == 8);
   return read<int64_t>(sp);
@@ -517,7 +520,7 @@ int64_t DwarfState::getAttributeValueSData(Dwarf_Attribute attr) const {
 uintptr_t DwarfState::getAttributeValueAddr(Dwarf_Attribute attr) const {
   if (attr->form == DW_FORM_addr) {
     auto sp = attr->attrValue;
-    return readAddr(sp, attr->die->context->addrSize);
+    return readAddr(sp, attr->die->context->addrSize, false);
   }
   throw DwarfStateException{
     folly::sformat(
@@ -546,7 +549,7 @@ GlobalOff DwarfState::getAttributeValueRef(Dwarf_Attribute attr) const {
     case DW_FORM_ref_addr: {
       auto const addrSize = die->context->version <= 2 ? die->context->addrSize :
         die->is64Bit ? 8 : 4;
-      return { readAddr(sp, addrSize), isInfo };
+      return { readAddr(sp, addrSize, false), isInfo };
     }
 
     case DW_FORM_ref_sig8: {
@@ -588,8 +591,8 @@ DwarfState::getRanges(Dwarf_Attribute attr) const -> std::vector<Dwarf_Ranges> {
   std::vector<Dwarf_Ranges> v;
   while (true) {
     Dwarf_Ranges tmp;
-    tmp.dwr_addr1 = readAddr(range, attr->die->context->addrSize);
-    tmp.dwr_addr2 = readAddr(range, attr->die->context->addrSize);
+    tmp.dwr_addr1 = readAddr(range, attr->die->context->addrSize, true);
+    tmp.dwr_addr2 = readAddr(range, attr->die->context->addrSize, true);
     if (!tmp.dwr_addr1 && !tmp.dwr_addr2) break;
     v.push_back(tmp);
   }

@@ -36,6 +36,9 @@ using hphp_hash_map = folly::F14NodeMap<T,U,V,W>;
 template <class T, class U, class V=std::hash<T>, class W=std::equal_to<T>>
 using hphp_fast_map = folly::F14FastMap<T,U,V,W>;
 
+template <class T, class U, class V=std::hash<T>, class W=std::equal_to<T>>
+using hphp_vector_map = folly::F14VectorMap<T,U,V,W>;
+
 //////////////////////////////////////////////////////////////////////
 
 // std::string keyed tables, stable entries do not move on rehash.

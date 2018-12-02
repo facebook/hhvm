@@ -176,6 +176,8 @@ public:
   const_iterator begin() const { return m_map.begin(); }
   const_iterator end()   const { return m_map.end(); }
 
+  auto& ordered_range() const { return m_list; }
+
   bool contains(const StringData* key) const { return m_map.count(key); }
 
   T& operator[](Index idx) {

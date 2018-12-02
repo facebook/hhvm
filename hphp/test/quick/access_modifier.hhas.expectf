@@ -1,6 +1,6 @@
-Verification Error (unit %s): Property blah in class A has no access modifier
-
 Verification Error (unit %s): Property attre in class A has more than one access modifier
+
+Verification Error (unit %s): Property blah in class A has no access modifier
 
 Verification Error (unit %s): Method get in class A has more than one access modifier
 

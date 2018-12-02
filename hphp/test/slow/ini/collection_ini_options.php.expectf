@@ -5,10 +5,10 @@ array(2) {
   string(8) "/foo/bar"
 }
 array(2) {
-  [1]=>
-  string(4) ".doc"
   [0]=>
   string(4) ".txt"
+  [1]=>
+  string(4) ".doc"
 }
 array(1) {
   [0]=>

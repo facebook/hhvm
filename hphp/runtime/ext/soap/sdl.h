@@ -83,9 +83,9 @@ using sdlTypePtr = std::shared_ptr<sdlType>;
 using sdlTypePtrVec = std::vector<std::shared_ptr<sdlType>>;
 using sdlTypeMap = hphp_string_map<std::shared_ptr<sdlType>>;
 using sdlAttributePtr = std::shared_ptr<sdlAttribute>;
-using sdlAttributeMap = hphp_string_map<std::shared_ptr<sdlAttribute>>;
-using sdlExtraAttributeMap = hphp_string_map<
-  std::shared_ptr<sdlExtraAttribute>
+using sdlAttributeMap = hphp_vector_map<std::string, std::shared_ptr<sdlAttribute>>;
+using sdlExtraAttributeMap = hphp_vector_map<
+  std::string, std::shared_ptr<sdlExtraAttribute>
 >;
 
 struct sdlBinding;

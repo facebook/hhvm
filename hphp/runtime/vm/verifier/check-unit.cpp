@@ -251,8 +251,7 @@ bool UnitChecker::checkPreClasses() {
       }
     }
 
-    for(auto it : preclass->propMap()) {
-      auto prop = preclass->propMap()[it.second];
+    for(auto& prop : preclass->propMap().ordered_range()) {
       Attr attributes = prop.attrs();
       int access_modifiers = (attributes & AttrPublic ? 1 : 0) +
                              (attributes & AttrProtected ? 1 : 0) +

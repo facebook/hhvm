@@ -19,6 +19,7 @@
 #include <sstream>
 
 #include <folly/Random.h>
+#include <folly/json.h>
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/stack-trace.h"
@@ -111,9 +112,7 @@ std::string show(const StructuredLogEntry& cols) {
   out["ints"] = cols.ints;
   out["sets"] = cols.sets;
   out["vecs"] = cols.vecs;
-  std::ostringstream oss;
-  oss << out;
-  return oss.str();
+  return folly::toJson(out);
 }
 
 }

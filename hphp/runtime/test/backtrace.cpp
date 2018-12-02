@@ -16,6 +16,7 @@
 #include "hphp/runtime/base/backtrace.h"
 
 #include <folly/portability/GTest.h>
+#include <folly/test/JsonTestUtil.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/type-array.h"
@@ -59,7 +60,7 @@ TEST(Backtrace, FullFunctionNames) {
   auto const expectedDescription = "{\"vecs\":{\"php_lines\":[\"42\"],"
     "\"php_functions\":[\"Class::function_name\"],\"php_files\":[\"filename\"]}"
     ",\"sets\":{},\"ints\":{}}";
-  EXPECT_EQ(show(sample), expectedDescription);
+  FOLLY_EXPECT_JSON_EQ(show(sample), expectedDescription);
 }
 
 TEST(Backtrace, FunctionNameWithObject) {
@@ -81,7 +82,7 @@ TEST(Backtrace, FunctionNameWithObject) {
   auto const expectedDescription = "{\"vecs\":{\"php_lines\":[\"42\"],"
     "\"php_functions\":[\"Class->function_name\"],\"php_files\":[\"filename\"]}"
     ",\"sets\":{},\"ints\":{}}";
-  EXPECT_EQ(show(sample), expectedDescription);
+  FOLLY_EXPECT_JSON_EQ(show(sample), expectedDescription);
 }
 
 TEST(Backtrace, LongFunctionNames) {
@@ -108,7 +109,7 @@ TEST(Backtrace, LongFunctionNames) {
     "enameeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
     "eeeeeee\"]}"
     ",\"sets\":{},\"ints\":{}}";
-  EXPECT_EQ(show(sample), expectedDescription);
+  FOLLY_EXPECT_JSON_EQ(show(sample), expectedDescription);
 }
 
 

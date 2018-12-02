@@ -60,7 +60,7 @@ struct CodeCoverage {
   void Reset();
 
 private:
-  using CodeCoverageMap = hphp_const_char_map<std::vector<int>>;
+  using CodeCoverageMap = hphp_vector_map<const char*, std::vector<int>>;
   CodeCoverageMap m_hits;
 };
 

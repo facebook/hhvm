@@ -83,7 +83,7 @@ inline void FuncEmitter::setNumClsRefSlots(Id num) {
 
 inline bool FuncEmitter::hasVar(const StringData* name) const {
   assertx(name != nullptr);
-  return m_localNames.find(name) != m_localNames.end();
+  return m_localNames.contains(name);
 }
 
 inline Id FuncEmitter::lookupVarId(const StringData* name) const {

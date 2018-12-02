@@ -814,7 +814,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
             // rest of this block is dead- we could continue but there's no
             // benefit to inlining this call if it ends in a ReqRetranslate or
             // ReqBind* so instead we mark it as uninlinable and retry.
-            if (!irgen::endInlining(irgs)) {
+            if (!irgen::endInlining(irgs, *calleeRegion)) {
               retry.inlineBlacklist.insert(psk);
               return TranslateResult::Retry;
             }
@@ -1057,7 +1057,7 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
     }
 
     if (result == TranslateResult::Success) {
-      irgen::conjureEndInlining(irgs, func->isCPPBuiltin());
+      irgen::conjureEndInlining(irgs, region, func->isCPPBuiltin());
       irgen::sealUnit(irgs);
       optimize(*unit, TransKind::Optimize);
     }

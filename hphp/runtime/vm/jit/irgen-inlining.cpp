@@ -511,7 +511,7 @@ InlineState implInlineReturn(IRGS& env, bool suspend) {
   return popInlineState(env);
 }
 
-void implReturnBlock(IRGS& env) {
+void implReturnBlock(IRGS& env, const RegionDesc& calleeRegion) {
   auto const rt = env.inlineReturnTarget.back();
 
   // The IR instructions should be associated with one of the return bytecodes,
@@ -520,6 +520,21 @@ void implReturnBlock(IRGS& env) {
   always_assert(curBlock && !curBlock->preds().empty());
   auto const bcContext = curBlock->preds().front().inst()->bcctx();
   env.bcStateStack.back().setOffset(bcContext.marker.sk().offset());
+
+  // At this point, env.profTransID and env.region are already set with the
+  // caller's information.  We temporarily reset both of these with the callee's
+  // information, so that the HHIR instructions emitted for the RetC have their
+  // markers associated with the callee.  This is necessary to successfully look
+  // up any profile data associated with them.
+  auto const callerProfTransID = env.profTransID;
+  auto const callerRegion      = env.region;
+  SCOPE_EXIT{
+    env.profTransID = callerProfTransID;
+    env.region      = callerRegion;
+  };
+  auto const calleeTransID = bcContext.marker.profTransID();
+  env.profTransID = calleeTransID;
+  env.region = &calleeRegion;
   updateMarker(env);
   env.irb->resetCurIROff(bcContext.iroff + 1);
 
@@ -585,7 +600,7 @@ void implInlineReturn(IRGS& env) {
   implInlineReturn(env, false);
 }
 
-bool endInlining(IRGS& env) {
+bool endInlining(IRGS& env, const RegionDesc& calleeRegion) {
   auto const rt = env.inlineReturnTarget.back();
 
   if (env.irb->canStartBlock(rt.callerTarget)) {
@@ -597,15 +612,16 @@ bool endInlining(IRGS& env) {
   auto const did_start = env.irb->startBlock(rt.callerTarget, false);
   always_assert(did_start);
 
-  implReturnBlock(env);
+  implReturnBlock(env, calleeRegion);
 
   FTRACE(1, "]]] end inlining: {}\n", curFunc(env)->fullName()->data());
   return true;
 }
 
-void conjureEndInlining(IRGS& env, bool builtin) {
+void conjureEndInlining(IRGS& env, const RegionDesc& calleeRegion,
+                        bool builtin) {
   if (!builtin) {
-    endInlining(env);
+    endInlining(env, calleeRegion);
   }
   gen(env, ConjureUse, pop(env));
   gen(env, EndBlock, ASSERT_REASON);

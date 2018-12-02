@@ -245,7 +245,7 @@ bool beginInlining(IRGS& env,
  * eval stack, in addition to the actual control transfer and bookkeeping done
  * by implInlineReturn().
  */
-bool endInlining(IRGS& env);
+bool endInlining(IRGS& env, const RegionDesc& calleeRegion);
 
 /*
  * Begin inlining func into a dummy region used to measure the cost of
@@ -269,7 +269,9 @@ bool conjureBeginInlining(IRGS& env,
  * conjureBeginInlining, this function should not be used in a region that will
  * be executed.
  */
-void conjureEndInlining(IRGS& env, bool builtin);
+void conjureEndInlining(IRGS& env,
+                        const RegionDesc& calleeRegion,
+                        bool builtin);
 
 /*
  * We do two special-case optimizations to partially inline 'singleton'

@@ -64,14 +64,15 @@ void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Vreg fp,
                                  Fixup fixup, Vlabel catchBlock) {
   auto const handleSurprise = vcold.makeBlock();
   auto const done = v.makeBlock();
-  emitCheckSurpriseFlags(v, fp, handleSurprise);;
+  emitCheckSurpriseFlags(v, fp, handleSurprise);
   v << jmp{done};
-  v = done;
 
   vcold = handleSurprise;
   auto const call = CallSpec::stub(tc::ustubs().functionEnterHelper);
   auto const args = v.makeVcallArgs({});
   vcold << vinvoke{call, args, v.makeTuple({}), {done, catchBlock}, fixup};
+
+  v = done;
 }
 
 void cgCheckSurpriseFlags(IRLS& env, const IRInstruction* inst) {

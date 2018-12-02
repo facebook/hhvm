@@ -39,6 +39,22 @@ bool is_trivial_nop(const Vinstr&);
  */
 bool splitCriticalEdges(Vunit& unit);
 
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Compute a mapping of each (reachable) block in a Vunit to its immediate
+ * dominator, using the provided reverse post-order sort of the blocks.
+ */
+using VIdomVector = jit::vector<Vlabel>;
+VIdomVector findDominators(const Vunit&, const jit::vector<Vlabel>& rpo);
+
+/*
+ * Test if b1 dominates b2
+ */
+bool dominates(Vlabel b1, Vlabel b2, const VIdomVector&);
+
+///////////////////////////////////////////////////////////////////////////////
+
 /*
  * Return a Vloc holding the constant value represented by the given Type.
  */

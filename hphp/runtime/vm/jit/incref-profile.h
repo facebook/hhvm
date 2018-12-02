@@ -67,11 +67,12 @@ struct IncRefProfile {
   // distributions.
   static void reduce(IncRefProfile& a, const IncRefProfile& b) {
     auto const total = static_cast<uint32_t>(a.total + b.total);
-    if (total > std::numeric_limits<uint16_t>::max()) {
+    auto constexpr limit = std::numeric_limits<decltype(a.total)>::max();
+    if (total > limit) {
       auto scale = [&] (uint16_t& x, uint64_t y) {
-        x = (x + y) * std::numeric_limits<uint16_t>::max() / total;
+        x = ((x + y) * limit + total - 1) / total;
       };
-      a.total = std::numeric_limits<uint16_t>::max();
+      a.total = limit;
       scale(a.refcounted, b.refcounted);
       scale(a.incremented, b.incremented);
     } else {

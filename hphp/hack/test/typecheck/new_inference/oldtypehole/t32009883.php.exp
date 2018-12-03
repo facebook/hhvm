@@ -1,0 +1,6 @@
+File "t32009883.php", line 17, characters 12-39:
+Invalid return type (Typing[4110])
+  File "t32009883.php", line 15, characters 7-10:
+  This is a value of generic type Tout
+  File "t32009883.php", line 14, characters 5-5:
+  It is incompatible with an object of type I

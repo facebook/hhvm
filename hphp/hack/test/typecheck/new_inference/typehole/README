@@ -1,0 +1,2 @@
+Examples of unsoundness
+This directory contains files that should be rejected by the type-checker but prior to constraint-based inference were not.

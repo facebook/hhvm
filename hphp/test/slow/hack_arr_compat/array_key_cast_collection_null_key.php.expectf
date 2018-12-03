@@ -1,0 +1,5 @@
+
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Only integer keys and string keys may be used with Maps' in %s:%d
+Stack trace:
+#0 (): main()
+#1 {main}

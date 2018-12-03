@@ -48,7 +48,7 @@ struct FileAwait : AsioExternalThreadEvent {
   void unserialize(Cell& c) override;
   void setFinished(int64_t status);
  private:
-  std::shared_ptr<FileEventHandler> m_file;
+  std::unique_ptr<FileEventHandler> m_file;
   std::unique_ptr<FileTimeoutHandler> m_timeout;
   int m_result{-1};
   bool m_finished{false};

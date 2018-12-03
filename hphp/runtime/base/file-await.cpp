@@ -28,7 +28,7 @@ FileAwait::FileAwait(int fd, uint16_t events, double timeout) {
   assertx(events & FileEventHandler::READ_WRITE);
 
   auto asio_event_base = getSingleton<AsioEventBase>();
-  m_file = std::make_shared<FileEventHandler>(asio_event_base.get(), fd, this);
+  m_file = std::make_unique<FileEventHandler>(asio_event_base.get(), fd, this);
   m_file->registerHandler(events);
 
   int64_t timeout_ms = timeout * 1000.0;

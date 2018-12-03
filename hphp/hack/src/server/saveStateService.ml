@@ -76,7 +76,9 @@ let partition_error_files_tf
   (phases: Errors.phase list): (Relative_path.Set.t * Relative_path.Set.t) =
 
   let (errors_in_phases_t, errors_in_phases_f) =
-    List.partition_tf errors_in_phases ~f:(fun (phase, _error_files) -> List.mem ~equal:(=) phases phase) in
+    List.partition_tf
+      errors_in_phases
+      ~f:(fun (phase, _error_files) -> List.mem ~equal:(=) phases phase) in
 
   ((fold_error_files errors_in_phases_t), (fold_error_files errors_in_phases_f))
 
@@ -141,14 +143,21 @@ let get_hot_classes_filename () =
   prefix / "hack" / "hh_hot_classes.json"
 
 let get_hot_classes (filename: string) : SSet.t =
-  Disk.cat filename
-  |> Hh_json.json_of_string
-  |> Hh_json.get_object_exn
-  |> List.find_exn ~f:(fun (k, _) -> k = "classes")
-  |> snd
-  |> Hh_json.get_array_exn
-  |> List.map ~f:Hh_json.get_string_exn
-  |> SSet.of_list
+  if not (Disk.file_exists filename)
+  then begin
+    Hh_logger.log "Hot classes file '%s' was not found" filename;
+    SSet.empty
+  end
+  else begin
+    Disk.cat filename
+    |> Hh_json.json_of_string
+    |> Hh_json.get_object_exn
+    |> List.find_exn ~f:(fun (k, _) -> k = "classes")
+    |> snd
+    |> Hh_json.get_array_exn
+    |> List.map ~f:Hh_json.get_string_exn
+    |> SSet.of_list
+  end
 
 let dump_class_decls tcopt filename =
   let start_t = Unix.gettimeofday () in

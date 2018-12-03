@@ -3056,7 +3056,7 @@ and check_shape_keys_validity env pos keys =
 
     let check_field witness_pos witness_info env key =
       let env, key_pos, key_info = get_field_info env key in
-      (match witness_info, key_info with
+      match witness_info, key_info with
         | Some _, None ->
           Errors.invalid_shape_field_literal key_pos witness_pos; env
         | None, Some _ ->
@@ -3066,15 +3066,12 @@ and check_shape_keys_validity env pos keys =
           if cls1 <> cls2 then
             Errors.shape_field_class_mismatch
               key_pos witness_pos (strip_ns cls2) (strip_ns cls1);
-          (* We want to use our own error message here instead of the normal
-           * unification one. *)
-          Errors.try_
-            (fun () -> Unify.iunify env ty1 ty2)
-            (fun _ ->
-              Errors.shape_field_type_mismatch
-                key_pos witness_pos
-                (Typing_print.error (snd ty2)) (Typing_print.error (snd ty1));
-              env))
+          if not (SubType.is_sub_type env ty1 ty2 && SubType.is_sub_type env ty2 ty1)
+          then
+            Errors.shape_field_type_mismatch
+              key_pos witness_pos
+              (Typing_print.error (snd ty2)) (Typing_print.error (snd ty1));
+          env
     in
 
     (* Sort the keys by their positions since the error messages will make

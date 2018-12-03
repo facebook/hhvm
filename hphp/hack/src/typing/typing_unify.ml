@@ -515,10 +515,6 @@ and unify_reason r1 r2 =
       if c <= 0 then r1
       else r2
 
-and iunify env ty1 ty2 =
-  let env, _ = unify env ty1 ty2 in
-  env
-
 (* This function is used to unify two functions *)
 (* r1 is the reason for ft1 to have its type (witness) *)
 and unify_funs env r1 ft1 r2 ft2 =

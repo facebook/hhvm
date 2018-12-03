@@ -630,7 +630,13 @@ let rec fold_unresolved env ty =
   match ety with
   | r, Tunresolved [] -> env, (r, Tany)
   | _, Tunresolved [x] -> fold_unresolved env x
-  | _, Tunresolved (x :: rl) ->
+  (* We don't want to use unification if new_inference is set.
+   * Just return the type unchanged: better would be to remove redundant
+   * elements, but let's postpone that until we have an improved
+   * representation of unions.
+   *)
+  | _, Tunresolved (x :: rl)
+    when not (TypecheckerOptions.new_inference (Env.get_tcopt env)) ->
       (try
         let env, acc =
           List.fold_left rl ~f:begin fun (env, acc) ty ->

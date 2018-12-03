@@ -1,2 +1,4 @@
 -vRuntime.Eval.HackArrCompatTypeHintNotices=1
 -vEnableHipHopSyntax=1
+-vRuntime.Eval.HackArrCompatNotices=1
+-vRuntime.Eval.HackArrCompatCheckArrayKeyCast=1

@@ -250,8 +250,9 @@ Variant ArrayUtil::CountValues(const Array& input) {
   Array ret = Array::Create();
   for (ArrayIter iter(input); iter; ++iter) {
     auto const inner = iter.secondRval().unboxed();
-    auto const inner_key = ret.convertKey<IntishCast::CastSilently>(inner.tv());
     if (isIntType(inner.type()) || isStringType(inner.type())) {
+      auto const inner_key =
+        ret.convertKey<IntishCast::CastSilently>(inner.tv());
       if (!ret.exists(inner_key)) {
         ret.set(inner_key, make_tv<KindOfInt64>(1));
       } else {

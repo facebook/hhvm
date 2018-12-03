@@ -47,9 +47,14 @@ function array_count_values_test_cases(
         1 => 2,
       ],
     ),
+    tuple(
+      [null, 0, false, 0.2],
+      [0 => 1],
+    )
   ];
 }
 
+<<__EntryPoint>>
 function main(): void {
   foreach (array_count_values_test_cases() as $case) {
     list($input, $expected) = $case;
@@ -63,5 +68,3 @@ function main(): void {
   array_count_values('foo');
   echo "DONE";
 }
-
-main();

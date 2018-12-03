@@ -278,6 +278,9 @@ module Full = struct
 
   let debug_mode = ref false
   let show_tvars = ref false
+  let must_show_tvars env =
+    !show_tvars ||
+    (TypecheckerOptions.new_inference (Env.get_tcopt env))
   let varmapping = ref IMap.empty
   let normalize_tvars = ref false
 
@@ -380,7 +383,7 @@ module Full = struct
               varmapping := IMap.add n n' !varmapping;
               n'
           else n in
-        if !show_tvars then (text ("#" ^ (string_of_int normalized_n)))
+        if must_show_tvars env then (text ("#" ^ (string_of_int normalized_n)))
         else Nothing
       in
       let _, ety = Env.expand_type env (Reason.Rnone, x) in
@@ -435,15 +438,15 @@ module Full = struct
       begin match null, nonnull with
       (* type isn't nullable *)
       | [], [ty] ->
-        if !show_tvars then Concat [text "("; k ty; text ")"] else k ty
+        if must_show_tvars env then Concat [text "("; k ty; text ")"] else k ty
       | [], _ ->
         delimited_list (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
       (* Type only is null *)
       | _, [] ->
-        if !show_tvars then text "(null)" else text "null"
+        if must_show_tvars env then text "(null)" else text "null"
       (* Type is nullable single type *)
       | _, [ty] ->
-        if !show_tvars
+        if must_show_tvars env
           then Concat [text "?"; text "("; k ty; text ")"]
           else Concat [text "?"; k ty]
       (* Type is nullable unresolved type *)

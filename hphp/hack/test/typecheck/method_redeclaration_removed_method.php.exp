@@ -1,0 +1,6 @@
+File "method_redeclaration_removed_method.php", line 15, characters 7-7:
+Could not find method f in an object of type C (Typing[4053])
+File "method_redeclaration_removed_method.php", line 14, characters 12-12:
+This is why I think it is an object of type C
+File "method_redeclaration_removed_method.php", line 7, characters 7-7:
+Declaration of C is here

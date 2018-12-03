@@ -177,6 +177,43 @@ let method_type env m =
     ft_returns_void_to_rx = returns_void_to_rx;
   }
 
+let method_redeclaration_type env m =
+  check_params env m.mt_params;
+  let arity_min = minimum_arity m.mt_params in
+  let params = make_params env m.mt_params in
+  let ret = match m.mt_ret with
+    | None -> ret_from_fun_kind (fst m.mt_name) m.mt_fun_kind
+    | Some ret -> Decl_hint.hint env ret in
+  let arity = match m.mt_variadic with
+    | FVvariadicArg param ->
+      assert param.param_is_variadic;
+      assert (param.param_expr = None);
+      Fvariadic (arity_min, make_param_ty env param)
+    | FVellipsis p  -> Fellipsis (arity_min, p)
+    | FVnonVariadic -> Fstandard (arity_min, List.length m.mt_params)
+  in
+  let tparams = List.map m.mt_tparams (type_param env) in
+  let where_constraints =
+    List.map m.mt_where_constraints (where_constraint env) in
+  {
+    ft_pos      = fst m.mt_name;
+    ft_deprecated = None;
+    ft_abstract = m.mt_abstract;
+    ft_is_coroutine = m.mt_fun_kind = Ast.FCoroutine;
+    ft_arity    = arity;
+    ft_tparams  = tparams;
+    ft_where_constraints = where_constraints;
+    ft_params   = params;
+    ft_ret      = ret;
+    ft_ret_by_ref = m.mt_ret_by_ref;
+    ft_reactive = Nonreactive;
+    ft_mutability = None;
+    ft_returns_mutable = false;
+    ft_return_disposable = false;
+    ft_decl_errors = None;
+    ft_returns_void_to_rx = false;
+  }
+
 let method_ env c m =
   let override = Attrs.mem SN.UserAttributes.uaOverride m.m_user_attributes in
   if m.m_visibility = Private && override then begin
@@ -216,6 +253,19 @@ let method_ env c m =
     sm_visibility = m.m_visibility;
   }
 
+let method_redeclaration env m =
+  let ft = method_redeclaration_type env m in
+  {
+    smr_abstract = ft.ft_abstract;
+    smr_final = m.mt_final;
+    smr_static = m.mt_static;
+    smr_name = m.mt_name;
+    smr_type = ft;
+    smr_visibility = m.mt_visibility;
+    smr_trait = m.mt_trait;
+    smr_method = m.mt_method;
+  }
+
 let class_ env c =
   let hint = Decl_hint.hint env in
   {
@@ -227,6 +277,8 @@ let class_ env c =
     sc_tparams = c.c_tparams;
     sc_extends        = List.map ~f:hint c.c_extends;
     sc_uses           = List.map ~f:hint c.c_uses;
+    sc_method_redeclarations =
+      List.map c.c_method_redeclarations (method_redeclaration env);
     sc_xhp_attr_uses  = List.map ~f:hint c.c_xhp_attr_uses;
     sc_req_extends    = List.map ~f:hint c.c_req_extends;
     sc_req_implements = List.map ~f:hint c.c_req_implements;

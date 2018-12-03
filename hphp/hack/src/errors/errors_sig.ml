@@ -146,6 +146,7 @@ module type S = sig
   val option_return_only_typehint : Pos.t -> [< `void | `noreturn ] -> unit
   val tuple_syntax : Pos.t -> unit
   val class_arity : Pos.t -> Pos.t -> string -> int -> unit
+  val redeclaring_missing_method : Pos.t -> string -> unit
   val expecting_type_hint : Pos.t -> unit
   val expecting_type_hint_suggest : Pos.t -> string -> unit
   val expecting_return_type_hint : Pos.t -> unit

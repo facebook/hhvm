@@ -1,0 +1,4 @@
+File "method_redeclaration_removed_static_method.php", line 14, characters 6-6:
+Could not find static method f in type C (Typing[4090])
+File "method_redeclaration_removed_static_method.php", line 7, characters 7-7:
+Declaration of C is here

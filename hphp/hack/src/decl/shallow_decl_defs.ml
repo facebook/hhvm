@@ -46,6 +46,17 @@ type shallow_method = {
   sm_visibility : Aast.visibility;
 } [@@deriving show]
 
+type shallow_method_redeclaration = {
+  smr_abstract   : bool;
+  smr_final      : bool;
+  smr_static     : bool;
+  smr_name       : Aast.sid;
+  smr_type       : decl fun_type;
+  smr_visibility : Aast.visibility;
+  smr_trait      : Aast.hint;
+  smr_method     : Aast.pstring;
+} [@@deriving show]
+
 type shallow_class = {
   sc_mode            : FileInfo.mode;
   sc_final           : bool;
@@ -57,6 +68,7 @@ type shallow_class = {
     ((Ast.constraint_kind * Ast.hint) list SMap.t);
   sc_extends         : decl ty list;
   sc_uses            : decl ty list;
+  sc_method_redeclarations : shallow_method_redeclaration list;
   sc_xhp_attr_uses   : decl ty list;
   sc_req_extends     : decl ty list;
   sc_req_implements  : decl ty list;

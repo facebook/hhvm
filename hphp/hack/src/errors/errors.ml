@@ -1841,6 +1841,10 @@ let class_arity usage_pos class_pos class_name arity =
                     soi arity^" arguments");
      class_pos, "Definition is here"]
 
+let redeclaring_missing_method p trait_method =
+  add (Typing.err_code Typing.RedeclaringMissingMethod) p
+    ("Attempting to redeclare a trait method " ^ trait_method ^ " which was never inherited")
+
 let expecting_type_hint p =
   add (Typing.err_code Typing.ExpectingTypeHint) p "Was expecting a type hint"
 

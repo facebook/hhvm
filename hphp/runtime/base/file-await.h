@@ -4,6 +4,7 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 #include "hphp/runtime/ext/asio/socket-event.h"
+#include <memory>
 
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
@@ -48,7 +49,7 @@ struct FileAwait : AsioExternalThreadEvent {
   void setFinished(int64_t status);
  private:
   std::shared_ptr<FileEventHandler> m_file;
-  std::shared_ptr<FileTimeoutHandler> m_timeout;
+  std::unique_ptr<FileTimeoutHandler> m_timeout;
   int m_result{-1};
   bool m_finished{false};
 };

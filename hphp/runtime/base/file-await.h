@@ -4,6 +4,7 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
 #include "hphp/runtime/ext/asio/socket-event.h"
+#include <atomic>
 #include <memory>
 
 namespace HPHP {
@@ -14,25 +15,25 @@ struct FileAwait;
 struct FileTimeoutHandler : AsioTimeoutHandler {
  friend struct FileAwait;
 
-  FileTimeoutHandler(AsioEventBase* base, FileAwait* fa):
+  FileTimeoutHandler(AsioEventBase* base, FileAwait& fa):
     AsioTimeoutHandler(base), m_fileAwait(fa) {}
 
   void timeoutExpired() noexcept override;
 
  private:
-  FileAwait* m_fileAwait;
+  FileAwait& m_fileAwait;
 };
 
 struct FileEventHandler : AsioEventHandler {
  friend struct FileAwait;
 
-  FileEventHandler(AsioEventBase* base, int fd, FileAwait* fa):
+  FileEventHandler(AsioEventBase* base, int fd, FileAwait& fa):
     AsioEventHandler(base, fd), m_fileAwait(fa) {}
 
   void handlerReady(uint16_t events) noexcept override;
 
  private:
-  FileAwait* m_fileAwait;
+  FileAwait& m_fileAwait;
 };
 
 struct FileAwait : AsioExternalThreadEvent {
@@ -51,7 +52,7 @@ struct FileAwait : AsioExternalThreadEvent {
   std::unique_ptr<FileEventHandler> m_file;
   std::unique_ptr<FileTimeoutHandler> m_timeout;
   int m_result{-1};
-  bool m_finished{false};
+  std::atomic<bool> m_finished{false};
 };
 
 /////////////////////////////////////////////////////////////////////////////

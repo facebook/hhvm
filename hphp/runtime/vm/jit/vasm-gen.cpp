@@ -115,6 +115,7 @@ Vauto::~Vauto() {
         return std::move(m_text);
       }();
 
+      SCOPE_ASSERT_DETAIL("vasm unit") { return show(unit()); };
       auto const abi = jit::abi(m_kind);
       switch (arch()) {
         case Arch::X64:

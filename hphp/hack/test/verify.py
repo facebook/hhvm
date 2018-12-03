@@ -10,7 +10,7 @@ import difflib
 import shlex
 from collections import namedtuple
 from concurrent.futures import ThreadPoolExecutor
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Optional
 
 max_workers = 48
 verbose = False
@@ -111,7 +111,9 @@ def run_test_program(test_cases: List[TestCase],
                      program: str,
                      default_expect_regex,
                      ignore_error_text,
-                     get_flags: Callable[[str], List[str]]) -> List[Result]:
+                     get_flags: Callable[[str], List[str]],
+                     timeout=None,
+                     ) -> List[Result]:
 
     """
     Run the program and return a list of results.
@@ -129,7 +131,9 @@ def run_test_program(test_cases: List[TestCase],
         try:
             output = subprocess.check_output(
                 cmd, stderr=subprocess.STDOUT, cwd=test_dir,
-                universal_newlines=True, input=test_case.input)
+                universal_newlines=True, input=test_case.input, timeout=timeout)
+        except subprocess.TimeoutExpired as e:
+            output = "Timed out. " + e.output
         except subprocess.CalledProcessError as e:
             # we don't care about nonzero exit codes... for instance, type
             # errors cause hh_single_type_check to produce them
@@ -300,7 +304,9 @@ def run_tests(files: List[str],
               default_expect_regex,
               batch_mode: str,
               ignore_error_text: str,
-              get_flags: Callable[[str], List[str]]) -> List[Result]:
+              get_flags: Callable[[str], List[str]],
+              timeout=None,
+              ) -> List[Result]:
 
     # for each file, create a test case
     test_cases = [
@@ -314,7 +320,7 @@ def run_tests(files: List[str],
             ignore_error_text, get_flags, out_extension)
     else:
         results = run_test_program(test_cases, program, default_expect_regex,
-            ignore_error_text, get_flags)
+            ignore_error_text, get_flags, timeout=timeout)
 
     failures = [result for result in results if result.is_failure]
 
@@ -416,6 +422,8 @@ if __name__ == '__main__':
                         help='Run tests in batches to the test program')
     parser.add_argument("--ignore-error-text", action='store_true',
                         help='Do not compare error text when verifying output')
+    parser.add_argument("--timeout", type=int,
+                    help='Timeout in seconds for each test, in non-batch mode.')
     parser.epilog = "%s looks for a file named HH_FLAGS in the same directory" \
                     " as the test files it is executing. If found, the " \
                     "contents will be passed as arguments to " \
@@ -452,7 +460,8 @@ if __name__ == '__main__':
         args.default_expect_regex,
         args.batch,
         args.ignore_error_text,
-        get_flags)
+        get_flags,
+        timeout=args.timeout)
 
     # Doesn't make sense to check failures for idempotence
     successes = [result for result in results if not result.is_failure]

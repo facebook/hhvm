@@ -616,8 +616,7 @@ let in_var env ty =
   let env = Env.add env x ty in
   env, (fst ty, Tvar x)
 
-let unresolved_tparam ~use_pos env (_, (_, _), _, _) =
-  let reason = Reason.Rtype_variable use_pos in
+let unresolved_tparam ~reason env =
   if TypecheckerOptions.new_inference (Typing_env.get_tcopt env)
   then env, (reason, Tvar (Env.fresh ()))
   else in_var env (reason, Tunresolved [])

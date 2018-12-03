@@ -263,14 +263,18 @@ struct BlockInfo {
 };
 
 /*
- * These instructions all read from the ActRec. In particular all three can call
+ * The Verify* instructions all read from the ActRec. In particular all can call
  * through to VerifyParamFail, which can read locals from the frame, check the
  * weak types flag on the ActRec; The other two can also check is_callable which
  * may read the context from the frame.
  *
+ * InitThrowableFileAndLine reads the current ActRec, and asserts
+ * that it's a builtin frame.
+ *
  * TODO(#9876771): these should be cleaned up.
  */
 bool isDangerousActRecInst(IRInstruction& inst) {
+  if (debug && inst.is(InitThrowableFileAndLine)) return true;
   return inst.is(VerifyParamCls, VerifyParamCallable,
                  VerifyParamFail, VerifyRetFail);
 }

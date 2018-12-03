@@ -33,7 +33,7 @@ RDSLocalNode* head = nullptr;
 // this rds local as the request becomes active, or inactive.
 
 static RDS_LOCAL(HotRDSLocals, rl_hotBackingStore);
-__thread HotRDSLocals rl_hotSection = {};
+alignas(64) __thread HotRDSLocals rl_hotSection = {};
 uint32_t s_usedbytes = 0;
 
 Handle RDSLocalNode::s_RDSLocalsBase;
@@ -58,9 +58,8 @@ void initializeRequestEventHandler(RequestEventHandler* h) {
 void RDSInit() {
   assertx(!isHandleBound(detail::RDSLocalNode::s_RDSLocalsBase));
   detail::RDSLocalNode::s_RDSLocalsBase =
-    rds::detail::allocUnlocked(Mode::Local, detail::s_usedbytes,
-                               std::min(detail::s_usedbytes, 16U),
-                               type_scan::kIndexUnknown);
+    rds::detail::allocUnlocked(Mode::Local, std::max(detail::s_usedbytes, 16U),
+                               16U, type_scan::kIndexUnknown);
 }
 
 void init() {
@@ -76,6 +75,7 @@ void init() {
     detail::rl_hotSection.rdslocal_base = malloc(detail::s_usedbytes);
   }
   always_assert(detail::rl_hotSection.rdslocal_base);
+  always_assert((uintptr_t)detail::rl_hotSection.rdslocal_base % 16 == 0);
   detail::iterate([](detail::RDSLocalNode* p) { p->init(); });
 }
 

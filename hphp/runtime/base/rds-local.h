@@ -101,7 +101,7 @@ namespace local {
 
 namespace detail {
 using ArrayDataHash = std::pair<const ArrayData*,size_t>;
-struct alignas(64) HotRDSLocals {
+struct HotRDSLocals {
   void* rdslocal_base;
   void* g_context;
 
@@ -378,6 +378,9 @@ template<typename T, Initialize Init>
 RDSLocal<T, Init>::RDSLocal() {
   this->m_next = detail::head;
   detail::head = this;
+  auto const align = folly::nextPowTwo(alignof(T)) - 1;
+  always_assert(align < 16);
+  detail::s_usedbytes = (detail::s_usedbytes + align) & ~align;
   m_offset = detail::s_usedbytes;
   detail::s_usedbytes += sizeof(Node);
 }

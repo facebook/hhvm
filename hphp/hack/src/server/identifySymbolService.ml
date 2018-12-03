@@ -184,7 +184,7 @@ let visitor = object (self)
       self#on_expr env expr
     | _ -> typed_class_id env ty p
 
-  method! on_Call env ct e hl el uel =
+  method! on_Call env ct e tal el uel =
     (* For Id, Obj_get (with an Id member), and Class_const, we don't want to
      * use the result of `self#on_expr env e`, since it would record a
      * property, class const, or global const access instead of a method call.
@@ -202,10 +202,10 @@ let visitor = object (self)
         self#on_class_id env cid + typed_method env ty mid
       | _ -> self#on_expr env e
     in
-    let hla  = self#on_list self#on_hint env hl in
+    let tala  = self#on_list self#on_targ env tal in
     let ela  = self#on_list self#on_expr env el in
     let uela = self#on_list self#on_expr env uel in
-    cta + ea + hla + ela + uela
+    cta + ea + tala + ela + uela
 
   method! on_Haccess env root ids =
     let acc =

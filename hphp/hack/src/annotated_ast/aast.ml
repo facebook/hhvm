@@ -126,7 +126,7 @@ and expr_ =
   | Class_const of class_id * pstring
   | Call of call_type
     * expr (* function *)
-    * hint list (* explicit type annotations *)
+    * targ list (* explicit type annotations *)
     * expr list (* positional args *)
     * expr list (* unpacked args *)
   | Int of string

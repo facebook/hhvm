@@ -3443,7 +3443,7 @@ and is_abstract_ft fty = match fty with
  *)
 
  and dispatch_call ~expected ~is_using_clause p env call_type
-    (fpos, fun_expr as e) hl el uel ~in_suspend =
+    (fpos, fun_expr as e) tal el uel ~in_suspend =
   let make_call ~tyvars env te thl tel tuel ty =
     make_result ~tyvars env p (T.Call (call_type, te, thl, tel, tuel)) ty in
   (* TODO: Avoid Tany annotations in TAST by eliminating `make_call_special` *)
@@ -3452,7 +3452,7 @@ and is_abstract_ft fty = match fty with
       (T.make_typed_expr fpos (Reason.Rnone, TUtils.tany env) (T.Id id)) [] tel [] ty in
   (* For special functions and pseudofunctions with a definition in hhi. *)
   let make_call_special_from_def env id tel ty_ =
-    let env, fty, tyvars = fun_type_of_id env id hl in
+    let env, fty, tyvars = fun_type_of_id env id tal in
     let ty = match fty with
       | _, Tfun ft -> ft.ft_ret
       | _ -> (Reason.Rwitness p, ty_) in
@@ -3587,7 +3587,7 @@ and is_abstract_ft fty = match fty with
       when array_filter = SN.StdlibFunctions.array_filter && el <> [] && uel = [] ->
       check_function_in_suspend SN.StdlibFunctions.array_filter;
       (* dispatch the call to typecheck the arguments *)
-      let env, fty, tyvars = fun_type_of_id env id hl in
+      let env, fty, tyvars = fun_type_of_id env id tal in
       let env, tel, tuel, res = call ~expected p env fty el uel in
       (* but ignore the result and overwrite it with custom return type *)
       let x = List.hd_exn el in
@@ -3644,7 +3644,7 @@ and is_abstract_ft fty = match fty with
         match fty with
         | r, Tfun ft -> r, Tfun {ft with ft_ret = rty}
         | _ -> fty in
-      make_call ~tyvars env (T.make_typed_expr fpos fty (T.Id id)) hl tel tuel rty
+      make_call ~tyvars env (T.make_typed_expr fpos fty (T.Id id)) tal tel tuel rty
   (* Special function `type_structure` *)
   | Id (p, type_structure)
       when type_structure = SN.StdlibFunctions.type_structure
@@ -3689,7 +3689,7 @@ and is_abstract_ft fty = match fty with
             let (env, tyvars), vars, tr =
               (* If T1, ... Tn, Tr are provided explicitly, instantiate the function parameters with
                * those directly. *)
-              if List.length hl = 0
+              if List.is_empty tal
               then
                 let env, tr, tyvars = Env.fresh_unresolved_type_add_tyvars env p tyvars in
                 let (env, tyvars), vars = List.map_env (env, tyvars) args
@@ -3697,7 +3697,7 @@ and is_abstract_ft fty = match fty with
                     let env, ty, tyvars = Env.fresh_unresolved_type_add_tyvars env p tyvars in
                     (env,tyvars), ty) in
                 (env, tyvars), vars, tr
-              else if List.length hl <> List.length args + 1 then begin
+              else if List.length tal <> List.length args + 1 then begin
                 let env, tr, tyvars = Env.fresh_unresolved_type_add_tyvars env p tyvars in
                 Errors.expected_tparam ~use_pos:fpos ~definition_pos:fty.ft_pos
                   (1 + (List.length args));
@@ -3707,6 +3707,7 @@ and is_abstract_ft fty = match fty with
                     (env,tyvars), ty) in
                 (env, tyvars), vars, tr end
               else
+              let hl, _is_reified_list = List.unzip tal in
               let env, vars_and_tr = List.map_env env hl Phase.localize_hint_with_self in
               let vars, trl = List.split_n vars_and_tr (List.length vars_and_tr - 1) in
               (* Since we split the arguments and return type at the last index and the length is
@@ -3823,7 +3824,7 @@ and is_abstract_ft fty = match fty with
                 (r_fty, Tarraykind (AKvec(tr)))))
         | _ -> (env, tyvars), fty in
       let env, tel, tuel, ty = call ~expected p env fty el [] in
-      make_call ~tyvars env (T.make_typed_expr fpos fty (T.Id x)) hl tel tuel ty
+      make_call ~tyvars env (T.make_typed_expr fpos fty (T.Id x)) tal tel tuel ty
   (* Special function `idx` *)
   | Id ((_, idx) as id) when idx = SN.FB.idx ->
       check_function_in_suspend SN.FB.idx;
@@ -3952,7 +3953,7 @@ and is_abstract_ft fty = match fty with
       let env, tel, tuel, ty, pty, ctor_fty =
         call_parent_construct p env el uel in
       make_call ~tyvars:ISet.empty env (T.make_typed_expr fpos ctor_fty
-        (T.Class_const (((pos, pty), T.CIparent), id))) hl tel tuel ty
+        (T.Class_const (((pos, pty), T.CIparent), id))) tal tel tuel ty
 
   (* Calling parent method *)
   | Class_const ((pos, CIparent), m) ->
@@ -3962,6 +3963,7 @@ and is_abstract_ft fty = match fty with
       then begin
         (* in static context, you can only call parent::foo() on static
          * methods *)
+        let hl, _is_reified_list = List.unzip tal in
         let env, fty, tyvars, _ =
           class_get ~is_method:true ~is_const:false ~explicit_tparams:hl env ty1 m CIparent in
         let fty = check_abstract_parent_meth (snd m) p fty in
@@ -3972,7 +3974,7 @@ and is_abstract_ft fty = match fty with
             ~is_static:true this_ty (snd m))
           p env fty el uel in
         make_call ~tyvars env (T.make_typed_expr fpos fty
-          (T.Class_const (tcid, m))) hl tel tuel ty
+          (T.Class_const (tcid, m))) tal tel tuel ty
       end
       else begin
         (* in instance context, you can call parent:foo() on static
@@ -4005,8 +4007,9 @@ and is_abstract_ft fty = match fty with
               | [fty] -> fty
               | l -> (Reason.none, Tunresolved l) in
             make_call ~tyvars:ISet.empty env (T.make_typed_expr fpos fty (T.Class_const (tcid, m)))
-              hl [] [] method_
+              tal [] [] method_
         else
+            let hl, _is_reified_list = List.unzip tal in
             let env, fty, tyvars, _ =
               class_get ~is_method:true ~is_const:false ~explicit_tparams:hl env ty1 m CIparent in
             let fty = check_abstract_parent_meth (snd m) p fty in
@@ -4016,11 +4019,12 @@ and is_abstract_ft fty = match fty with
                   ~is_static:true this_ty (snd m))
                 p env fty el uel in
             make_call ~tyvars env (T.make_typed_expr fpos fty
-              (T.Class_const (tcid, m))) hl tel tuel ty
+              (T.Class_const (tcid, m))) tal tel tuel ty
       end
   (* Call class method *)
   | Class_const ((pid, e1), m) ->
       let env, te1, ty1 = static_class_id ~check_constraints:true pid env e1 in
+      let hl, _is_reified_list = List.unzip tal in
       let env, fty, tyvars, _ =
         class_get ~is_method:true ~is_const:false ~explicit_tparams:hl
         ~pos_params:el env ty1 m e1 in
@@ -4063,7 +4067,7 @@ and is_abstract_ft fty = match fty with
           ~is_static:true ty1 (snd m))
         p env fty el uel in
       make_call ~tyvars env (T.make_typed_expr fpos fty
-        (T.Class_const(te1, m))) hl tel tuel ty
+        (T.Class_const(te1, m))) tal tel tuel ty
   (* <<__PPL>>: sample, factor, observe, condition *)
   | Id (pos, id) when env.Env.inside_ppl_class && SN.PPLFunctions.is_reserved id ->
       let m = (pos, String_utils.lstrip id "\\") in
@@ -4082,6 +4086,7 @@ and is_abstract_ft fty = match fty with
         tel := tel_; tuel := tuel_;
         tftyl := fty :: !tftyl;
         env, method_, None) in
+      let hl, _is_reified_list = List.unzip tal in
       let env, ty = obj_get ~is_method:true ~nullsafe ~pos_params:el
                       ~explicit_tparams:hl env ty1 infer_e m fn in
       let tfty =
@@ -4089,7 +4094,7 @@ and is_abstract_ft fty = match fty with
         | [fty] -> fty
         | tftyl -> (Reason.none, Tunresolved tftyl)
       in
-      make_call ~tyvars:ISet.empty env (T.make_typed_expr fpos tfty (T.Fun_id m)) hl !tel !tuel ty
+      make_call ~tyvars:ISet.empty env (T.make_typed_expr fpos tfty (T.Fun_id m)) tal !tel !tuel ty
 
   (* Call instance method *)
   | Obj_get(e1, (pos_id, Id m), nullflavor) ->
@@ -4111,6 +4116,7 @@ and is_abstract_ft fty = match fty with
         tel := tel_; tuel := tuel_;
         tftyl := fty :: !tftyl;
         env, method_, None) in
+      let hl, _is_reified_list = List.unzip tal in
       let env, ty = obj_get ~is_method ~nullsafe ~pos_params:el
                       ~explicit_tparams:hl env ty1 (CIexpr e1) m k in
       let tfty =
@@ -4119,17 +4125,17 @@ and is_abstract_ft fty = match fty with
         | tftyl -> (Reason.none, Tunresolved tftyl)
       in
       make_call ~tyvars:ISet.empty env (T.make_typed_expr fpos tfty (T.Obj_get(te1,
-        T.make_typed_expr pos_id tfty (T.Id m), nullflavor))) hl !tel !tuel ty
+        T.make_typed_expr pos_id tfty (T.Id m), nullflavor))) tal !tel !tuel ty
 
   (* Function invocation *)
   | Fun_id x ->
-      let env, fty, tyvars = fun_type_of_id env x hl in
+      let env, fty, tyvars = fun_type_of_id env x tal in
       check_coroutine_call env fty;
       let env, tel, tuel, ty =
         call ~expected p env fty el uel in
-      make_call ~tyvars env (T.make_typed_expr fpos fty (T.Fun_id x)) hl tel tuel ty
+      make_call ~tyvars env (T.make_typed_expr fpos fty (T.Fun_id x)) tal tel tuel ty
   | Id (_, id as x) ->
-      let env, fty, tyvars = fun_type_of_id env x hl in
+      let env, fty, tyvars = fun_type_of_id env x tal in
       check_coroutine_call env fty;
       let env, tel, tuel, ty =
         call ~expected p env fty el uel in
@@ -4154,18 +4160,19 @@ and is_abstract_ft fty = match fty with
         then Typing_mutability.move_local p env tel
         else env
       in
-      make_call ~tyvars env (T.make_typed_expr fpos fty (T.Id x)) hl tel tuel ty
+      make_call ~tyvars env (T.make_typed_expr fpos fty (T.Id x)) tal tel tuel ty
   | _ ->
       let env, te, fty = expr env e in
       check_coroutine_call env fty;
       let env, tel, tuel, ty = call ~expected p env fty el uel in
-      make_call ~tyvars:ISet.empty env te hl tel tuel ty
+      make_call ~tyvars:ISet.empty env te tal tel tuel ty
 
-and fun_type_of_id env x hl =
+and fun_type_of_id env x tal =
   match Env.get_fun env (snd x) with
   | None -> let env, _, ty = unbound_name env x in env, ty, ISet.empty
   | Some fty ->
       let ety_env = Phase.env_with_self env in
+      let hl, _is_reified_list = List.unzip tal in
       let env, fty, tyvars =
         Phase.localize_ft ~use_pos:(fst x) ~explicit_tparams:hl ~ety_env env fty in
       env, (Reason.Rwitness fty.ft_pos, Tfun fty), tyvars

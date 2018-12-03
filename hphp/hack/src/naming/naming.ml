@@ -1037,24 +1037,26 @@ module Make (GetLocals : GetLocals) = struct
             ~allow_typedef ~allow_wildcard ~tp_depth env l =
     List.map l
       (hint ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth env)
-  and hintl_funcall env p l =
-    hintl
-      ~allow_wildcard:true
-      ~forbid_this:false
-      ~allow_typedef:true
-      ~allow_retonly:true
-      ~tp_depth:1
-      env (extract_hintl_from_type_args env p l)
+  and targl_funcall env p tal =
+    check_type_args_for_reified env p tal;
+    List.map ~f:(fun (h, is_reified) ->
+      let h =
+        hint
+        ~allow_wildcard:true
+        ~forbid_this:false
+        ~allow_typedef:true
+        ~allow_retonly:true
+        ~tp_depth:1
+        env h in
+      h, is_reified) tal
 
-  and extract_hintl_from_type_args env p hl =
-    let hl, reifiedl = List.unzip hl in
+  and check_type_args_for_reified env p tal =
     if not (TypecheckerOptions.experimental_feature_enabled
         (fst env).tcopt
       TypecheckerOptions.experimental_reified_generics)
-      && List.exists reifiedl (fun i -> i)
+      && List.exists tal ~f:snd
     then
-      Errors.experimental_feature p "reified generics";
-    hl
+      Errors.experimental_feature p "reified generics"
 
   (**************************************************************************)
   (* All the methods and static methods of an interface are "implicitly"
@@ -2336,16 +2338,16 @@ module Make (GetLocals : GetLocals) = struct
     | Class_const _ ->
       (* TODO: report error in strict mode *)
       N.Any
-    | Call ((_, Id (p, pseudo_func)), hl, el, uel)
+    | Call ((_, Id (p, pseudo_func)), tal, el, uel)
         when pseudo_func = SN.SpecialFunctions.echo ->
         arg_unpack_unexpected uel ;
-        N.Call (N.Cnormal, (p, N.Id (p, pseudo_func)), hintl_funcall env p hl, exprl env el, [])
-    | Call ((p, Id (_, cn)), hl, el, uel)
+        N.Call (N.Cnormal, (p, N.Id (p, pseudo_func)), targl_funcall env p tal, exprl env el, [])
+    | Call ((p, Id (_, cn)), tal, el, uel)
       when cn = SN.SpecialFunctions.call_user_func ->
         arg_unpack_unexpected uel ;
         (match el with
         | [] -> Errors.naming_too_few_arguments p; N.Any
-        | f :: el -> N.Call (N.Cuser_func, expr env f, hintl_funcall env p hl, exprl env el, [])
+        | f :: el -> N.Call (N.Cuser_func, expr env f, targl_funcall env p tal, exprl env el, [])
         )
     | Call ((p, Id (_, cn)), _, el, uel) when cn = SN.SpecialFunctions.fun_ ->
         arg_unpack_unexpected uel ;
@@ -2444,17 +2446,17 @@ module Make (GetLocals : GetLocals) = struct
         | el -> N.List (exprl env el)
         )
     (* sample, factor, observe, condition *)
-    | Call ((p1, Id (p2, cn)), hl, el, uel)
+    | Call ((p1, Id (p2, cn)), tal, el, uel)
       when Env.in_ppl env && SN.PPLFunctions.is_reserved cn ->
         let n_expr = N.Id (p2, cn) in
         N.Call (N.Cnormal, (p1, n_expr),
-                hintl_funcall env p hl, exprl env el, exprl env uel)
-    | Call ((p, Id f), hl, el, uel) ->
+               targl_funcall env p tal, exprl env el, exprl env uel)
+    | Call ((p, Id f), tal, el, uel) ->
       begin match Env.let_local env f with
       | Some x ->
         (* Translate into local id *)
         let f = (p, N.ImmutableVar x) in
-        N.Call (N.Cnormal, f, hintl_funcall env p hl, exprl env el, exprl env uel)
+        N.Call (N.Cnormal, f, targl_funcall env p tal, exprl env el, exprl env uel)
       | None ->
         (* The name is not a local `let` binding *)
         let qualified = Env.fun_id env f in
@@ -2488,25 +2490,25 @@ module Make (GetLocals : GetLocals) = struct
           | _ -> Errors.gen_array_rec_arity p; N.Any
           )
         end else
-          N.Call (N.Cnormal, (p, N.Id qualified), hintl_funcall env p hl,
+          N.Call (N.Cnormal, (p, N.Id qualified), targl_funcall env p tal,
                   exprl env el, exprl env uel)
       end (* match *)
     (* Handle nullsafe instance method calls here. Because Obj_get is used
        for both instance property access and instance method calls, we need
        to match the entire "Call(Obj_get(..), ..)" pattern here so that we
        only match instance method calls *)
-    | Call ((p, Obj_get (e1, e2, OG_nullsafe)), hl, el, uel) ->
+    | Call ((p, Obj_get (e1, e2, OG_nullsafe)), tal, el, uel) ->
         N.Call
           (N.Cnormal,
            (p, N.Obj_get (expr env e1,
               expr_obj_get_name env e2, N.OG_nullsafe)),
-           hintl_funcall env p hl,
+           targl_funcall env p tal,
            exprl env el, exprl env uel)
     (* Handle all kinds of calls that weren't handled by any of
        the cases above *)
-    | Call (e, hl, el, uel) ->
+    | Call (e, tal, el, uel) ->
         N.Call (N.Cnormal, expr env e,
-                hintl_funcall env p hl, exprl env el, exprl env uel)
+               targl_funcall env p tal, exprl env el, exprl env uel)
     | Yield_break -> N.Yield_break
     | Yield e -> N.Yield (afield env e)
     | Await e -> N.Await (expr env e)
@@ -2619,15 +2621,17 @@ module Make (GetLocals : GetLocals) = struct
       let e1 = expr env e in
       let h1 = hint ~allow_wildcard:true env h in
       N.As (e1, h1, b)
-    | New ((cp, Id x), hl, el, uel)
-    | New ((cp, Lvar x), hl, el, uel) ->
-      let hl = extract_hintl_from_type_args env p hl in
+    | New ((cp, Id x), tal, el, uel)
+    | New ((cp, Lvar x), tal, el, uel) ->
+      check_type_args_for_reified env p tal;
+      let hl, _is_reified_list = List.unzip tal in
       N.New (make_class_id env x hl,
         exprl env el,
         exprl env uel,
         cp)
-    | New ((p, _e), hl, el, uel) ->
-      let hl = extract_hintl_from_type_args env p hl in
+    | New ((p, _e), tal, el, uel) ->
+      check_type_args_for_reified env p tal;
+      let hl, _is_reified_list = List.unzip tal in
       if (fst env).in_mode = FileInfo.Mstrict
       then Errors.dynamic_new_in_strict_mode p;
       N.New (make_class_id env (p, SN.Classes.cUnknown) hl,

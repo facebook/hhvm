@@ -334,8 +334,9 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
 
   (* If we're instantiating the generic parameters then remove them
    * from the result. Otherwise localize them *)
+  let has_reified = List.exists ~f:(fun (_, _, _, reified) -> reified) ft.ft_tparams in
   let env, tparams =
-    if instantiate_tparams then env, []
+    if instantiate_tparams && not has_reified then env, []
     else List.map_env env ft.ft_tparams localize_tparam in
 
   (* Localize the 'where' constraints *)

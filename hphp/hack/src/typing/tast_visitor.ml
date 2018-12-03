@@ -187,7 +187,7 @@ class type handler = object
     Env.t ->
     Aast.call_type ->
     Tast.expr ->
-    Aast.hint list ->
+    Aast.targ list ->
     Tast.expr list ->
     Tast.expr list ->
     unit
@@ -253,7 +253,7 @@ let iter_with (handlers : handler list) : iter = object
     List.iter handlers (if_enabled env (fun v -> v#at_fun_ env x));
     super#on_fun_ env x;
 
-  method! on_Call env ct e hl el uel =
-    List.iter handlers (if_enabled env (fun v -> v#at_Call env ct e hl el uel));
-    super#on_Call env ct e hl el uel;
+  method! on_Call env ct e tal el uel =
+    List.iter handlers (if_enabled env (fun v -> v#at_Call env ct e tal el uel));
+    super#on_Call env ct e tal el uel;
 end

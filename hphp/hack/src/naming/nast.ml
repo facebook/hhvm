@@ -264,6 +264,7 @@ class type ['a] visitor_type = object
   method on_typedef: 'a -> typedef -> 'a
 
   method on_hint: 'a -> hint -> 'a
+  method on_targ: 'a -> targ -> 'a
 
   method on_def: 'a -> def -> 'a
   method on_program: 'a -> program -> 'a
@@ -644,6 +645,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
         acc
 
   method on_hint acc _ = acc
+  method on_targ acc _ = acc
 
   method on_fun_ acc f =
     let acc = this#on_id acc f.f_name in

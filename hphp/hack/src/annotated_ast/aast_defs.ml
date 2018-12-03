@@ -28,6 +28,7 @@ and call_type =
 and is_coroutine = bool
 and func_reactive = FReactive | FLocal | FShallow | FNonreactive
 
+and targ = hint * Ast.reified
 and hint = pos * hint_
 and variadic_hint =
   | Hvariadic of hint option

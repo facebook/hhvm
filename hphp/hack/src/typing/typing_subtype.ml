@@ -239,6 +239,7 @@ and simplify_subtype
   (ty_super : locl ty)
   env : Env.env * TL.subtype_prop =
   log_subtype ~this_ty "simplify_subtype" env ty_sub ty_super;
+  let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
   let env, ety_super = Env.expand_type env ty_super in
   let env, ety_sub = Env.expand_type env ty_sub in
   let again env acc ty_sub = (env, acc) &&&
@@ -252,7 +253,10 @@ and simplify_subtype
   (* We *know* that the assertion is valid *)
   let valid () = env, TL.valid in
   (* We don't know whether the assertion is valid or not *)
-  let default () = env, TL.IsSubtype (ty_sub, ty_super) in
+  let default () =
+    if new_inference
+    then env, TL.IsSubtype (ety_sub, ety_super)
+    else env, TL.IsSubtype (ty_sub, ty_super) in
   let simplify_subtype_generic_sub name_sub opt_sub_cstr ty_super env =
   begin match seen_generic_params with
   | None -> default ()
@@ -336,9 +340,7 @@ and simplify_subtype
 
   match snd ety_sub, snd ety_super with
   | Tvar _, _ | _, Tvar _ ->
-    if TypecheckerOptions.new_inference (Env.get_tcopt env)
-    then default ()
-    else assert false
+    if new_inference then default () else assert false
 
   (* Internally, newtypes and dependent types are always equipped with an upper bound.
    * In the case when no upper bound is specified in source code,
@@ -936,7 +938,7 @@ and simplify_subtype
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super' env
 
   | Tunresolved tyl, _ ->
-    if TypecheckerOptions.new_inference (Env.get_tcopt env)
+    if new_inference
     then
       List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_sub ->
         res &&& simplify_subtype ~seen_generic_params ~deep ty_sub ty_super)
@@ -965,8 +967,7 @@ and simplify_subtype
     else default ()
 
   | _, Tany ->
-    if TypecheckerOptions.new_inference (Env.get_tcopt env) then valid ()
-    else default ()
+    if new_inference then valid () else default ()
 
   | Tany, _ ->
     default ()

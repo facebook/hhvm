@@ -45,7 +45,7 @@ let check_constraint env ck cstr_ty ty =
       TUtils.sub_type env ecstr_ty ty
 
 let add_check_constraint_todo (env_now:Env.env) ~use_pos (pos,name) ck cstr_ty ty =
-  Env.add_todo env_now begin fun (env:Env.env) ->
+  Env.check_now_or_add_todo env_now begin fun (env:Env.env) ->
     Errors.try_
       (fun () ->
         check_constraint env ck cstr_ty ty)
@@ -56,7 +56,7 @@ let add_check_constraint_todo (env_now:Env.env) ~use_pos (pos,name) ck cstr_ty t
   end
 
 let add_check_where_constraint_todo (env_now:Env.env) ~use_pos ~definition_pos ck cstr_ty ty =
-  Env.add_todo env_now begin fun (env:Env.env) ->
+  Env.check_now_or_add_todo env_now begin fun (env:Env.env) ->
     Errors.try_
       (fun () ->
         check_constraint env ck cstr_ty ty)
@@ -107,7 +107,7 @@ let handle_eq_tconst_constraint env ck ty cstr_ty =
 
 let add_check_tconst_where_constraint_todo
   (env_now:Env.env) ~use_pos ~definition_pos ck ty_from_env cstr_ty ty =
-  Env.add_todo env_now begin fun (env: Env.env) ->
+  Env.check_now_or_add_todo env_now begin fun (env: Env.env) ->
     Errors.try_
       (fun () ->
         let env, ty = ty_from_env env ty in

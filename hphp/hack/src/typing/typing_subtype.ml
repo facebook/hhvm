@@ -1754,7 +1754,8 @@ and sub_type_inner_helper env ~this_ty
      * any error using the position and reason information that was supplied
      * at the entry point to subtyping.
      *)
-  | (_, Tunresolved []), _ ->
+  | (_, Tunresolved []), _
+    when not (TypecheckerOptions.new_inference (Env.get_tcopt env)) ->
     begin match ty_sub with
     | (_, Tvar _) ->
       if not

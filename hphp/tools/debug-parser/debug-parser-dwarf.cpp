@@ -194,11 +194,19 @@ private:
     folly::F14FastSet<GlobalOff> children;
   };
 
+  struct StaticSpec {
+    static auto constexpr kNoAddress = std::numeric_limits<uint64_t>::max();
+    std::string linkage_name;
+    uint64_t address{kNoAddress};
+    bool is_member{false};
+  };
+
   struct Env {
     const DwarfState* dwarf;
     std::unique_ptr<StateBlock> state;
     folly::F14FastMap<GlobalOff, GlobalOff> local_mappings;
     folly::F14FastMap<GlobalOff, LinkageDependents> linkage_dependents;
+    std::vector<std::pair<GlobalOff, StaticSpec>> raw_static_definitions;
   };
 
   // Functions used while concurrently building state. Since these functions are
@@ -208,13 +216,6 @@ private:
                        Dwarf_Die die,
                        Scope& scope,
                        std::vector<GlobalOff>* template_params = nullptr);
-
-  struct StaticSpec {
-    static auto constexpr kNoAddress = std::numeric_limits<uint64_t>::max();
-    std::string linkage_name;
-    uint64_t address{kNoAddress};
-    bool is_member{false};
-  };
 
   static folly::Optional<uintptr_t> interpretLocAddress(const DwarfState& dwarf,
                                                         Dwarf_Attribute attr);
@@ -269,7 +270,7 @@ private:
   struct StateBlock {
     std::vector<ObjectType> all_objs;
     folly::F14FastMap<GlobalOff, size_t> obj_offsets;
-    std::unordered_multimap<GlobalOff, StaticSpec> static_definitions;
+    std::multimap<GlobalOff, StaticSpec> static_definitions;
   };
   std::vector<std::unique_ptr<StateBlock>> m_states;
   std::vector<std::pair<GlobalOff, StateBlock*>> m_state_map;
@@ -381,6 +382,22 @@ TypeParserImpl::TypeParserImpl(const std::string& filename, int num_threads)
           }
           return o;
         };
+
+        // Generate static_definitions by updating their keys collected during
+        // genNames. Some keys refer back to a DW_AT_member that belongs to a
+        // struct whose definition was in another type-unit. We want to add an
+        // entry for the member in the definition.
+        std::transform(
+            env.raw_static_definitions.begin(),
+            env.raw_static_definitions.end(),
+            std::inserter(
+                env.state->static_definitions,
+                env.state->static_definitions.end()),
+            [&](const auto& elem) {
+              return std::make_pair(remap(elem.first), std::move(elem.second));
+            });
+        env.raw_static_definitions.clear();
+
         for (auto& linkage : env.linkage_dependents) {
           if (!linkage.second.template_uses.size()) continue;
 
@@ -1059,14 +1076,7 @@ void TypeParserImpl::genNames(Env& env,
 
       StaticSpec spec;
       if (auto off = parseSpecification(dwarf, die, true, spec)) {
-        auto const it = env.local_mappings.find(*off);
-        if (it != env.local_mappings.end()) {
-          // this refers back to a DW_AT_member, which belongs to a
-          // struct whose definition was in another type-unit. We want
-          // to add an entry for the member in the definition.
-          off = it->second;
-        }
-        state.static_definitions.emplace(*off, spec);
+        env.raw_static_definitions.emplace_back(*off, spec);
       }
       // Note that we don't recurse into any child DIEs here. There shouldn't be
       // anything interesting in them.
@@ -1081,7 +1091,7 @@ void TypeParserImpl::genNames(Env& env,
 
       StaticSpec spec;
       if (auto off = parseSpecification(dwarf, die, true, spec)) {
-        state.static_definitions.emplace(*off, spec);
+        env.raw_static_definitions.emplace_back(*off, spec);
       }
 
       // Don't recurse. There might be valid types within a subprogram

@@ -701,12 +701,11 @@ int fb_compact_unserialize_from_buffer(
       break;
     }
 
-    case FB_CS_LIST_MAP:
     case FB_CS_VECTOR:
     {
       Array arr = Array::Create();
       int64_t i = 0;
-      bool should_log_skip = (code == FB_CS_VECTOR) &&
+      bool should_log_skip =
         RuntimeOption::EvalHackArrCompatCompactSerializeNotices;
       while (p < n && buf[p] != (char)(kCodePrefix | FB_CS_STOP)) {
         if (buf[p] == (char)(kCodePrefix | FB_CS_SKIP)) {
@@ -715,6 +714,32 @@ int fb_compact_unserialize_from_buffer(
             raise_hackarr_compat_notice(
               "fb_compact_unserialize(): vector cannot contain skip");
           }
+          ++i;
+          ++p;
+          continue;
+        }
+        Variant value;
+        int err = fb_compact_unserialize_from_buffer(value, buf, n, p);
+        if (err) {
+          return err;
+        }
+        arr.set(i++, value);
+      }
+
+      // Consume STOP
+      CHECK_ENOUGH(1, p, n);
+      p += 1;
+
+      out = arr;
+      break;
+    }
+
+    case FB_CS_LIST_MAP:
+    {
+      Array arr = Array::CreateDArray();
+      int64_t i = 0;
+      while (p < n && buf[p] != (char)(kCodePrefix | FB_CS_STOP)) {
+        if (buf[p] == (char)(kCodePrefix | FB_CS_SKIP)) {
           ++i;
           ++p;
         } else {

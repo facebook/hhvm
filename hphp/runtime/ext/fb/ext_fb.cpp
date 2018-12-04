@@ -737,7 +737,7 @@ int fb_compact_unserialize_from_buffer(
 
     case FB_CS_MAP:
     {
-      Array arr = Array::Create();
+      Array arr = Array::CreateDArray();
       while (p < n && buf[p] != (char)(kCodePrefix | FB_CS_STOP)) {
         Variant key;
         int err = fb_compact_unserialize_from_buffer(key, buf, n, p);

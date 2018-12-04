@@ -1,4 +1,3 @@
-
 ====
 x = NULL
 bool(true)
@@ -194,18 +193,18 @@ FB FC "
 bool(true)
 int(1)
 fb_compact_unserialize(fb_compact_serialize(dict [
-])) === array (
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+])) === dict [
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -294,19 +293,19 @@ bool(true)
 int(1)
 fb_compact_unserialize(fb_compact_serialize(dict [
   1 => 12345,
-])) === array (
+])) === dict [
   1 => 12345,
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -323,19 +322,19 @@ bool(true)
 int(1)
 fb_compact_unserialize(fb_compact_serialize(dict [
   1 => 12345,
-])) === array (
+])) === dict [
   1 => 12345,
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -357,21 +356,21 @@ fb_compact_unserialize(fb_compact_serialize(dict [
   1 => 12345,
   'a' => 123124,
   'sdf' => 0.1234,
-])) === array (
+])) === dict [
   1 => 12345,
   'a' => 123124,
   'sdf' => 0.1234,
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -393,21 +392,21 @@ fb_compact_unserialize(fb_compact_serialize(dict [
   1 => 12345,
   'a' => 123124,
   'sdf' => 0.1234,
-])) === array (
+])) === dict [
   1 => 12345,
   'a' => 123124,
   'sdf' => 0.1234,
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -1314,20 +1313,20 @@ fb_compact_unserialize(fb_compact_serialize(dict [
   47 => 
   stdClass::__set_state(array(
   )),
-])) === array (
+])) === dict [
   42 => NULL,
   47 => NULL,
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+]: false
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
 fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -1346,20 +1345,20 @@ int(1)
 fb_compact_unserialize(fb_compact_serialize(dict [
   0 => 'a',
   1 => 'b',
-])) === array (
+])) === dict [
   0 => 'a',
   1 => 'b',
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -1378,20 +1377,20 @@ int(1)
 fb_compact_unserialize(fb_compact_serialize(dict [
   0 => 'a',
   1 => 'b',
-])) === array (
+])) === dict [
   0 => 'a',
   1 => 'b',
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -1410,20 +1409,20 @@ int(1)
 fb_compact_unserialize(fb_compact_serialize(dict [
   '0' => 'a',
   '1' => 'b',
-])) === array (
-  0 => 'a',
-  1 => 'b',
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+])) === dict [
+  '0' => 'a',
+  '1' => 'b',
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -1442,20 +1441,20 @@ int(1)
 fb_compact_unserialize(fb_compact_serialize(dict [
   '0' => 'a',
   '1' => 'b',
-])) === array (
-  0 => 'a',
-  1 => 'b',
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+])) === dict [
+  '0' => 'a',
+  '1' => 'b',
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -1474,20 +1473,20 @@ int(1)
 fb_compact_unserialize(fb_compact_serialize(dict [
   0 => 'a',
   '1' => 'b',
-])) === array (
+])) === dict [
   0 => 'a',
-  1 => 'b',
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+  '1' => 'b',
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -1506,20 +1505,20 @@ int(1)
 fb_compact_unserialize(fb_compact_serialize(dict [
   0 => 'a',
   '1' => 'b',
-])) === array (
+])) === dict [
   0 => 'a',
-  1 => 'b',
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+  '1' => 'b',
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -1538,20 +1537,20 @@ int(1)
 fb_compact_unserialize(fb_compact_serialize(dict [
   '0' => 'a',
   1 => 'b',
-])) === array (
-  0 => 'a',
+])) === dict [
+  '0' => 'a',
   1 => 'b',
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -1570,20 +1569,20 @@ int(1)
 fb_compact_unserialize(fb_compact_serialize(dict [
   '0' => 'a',
   1 => 'b',
-])) === array (
-  0 => 'a',
+])) === dict [
+  '0' => 'a',
   1 => 'b',
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -1602,20 +1601,20 @@ int(1)
 fb_compact_unserialize(fb_compact_serialize(keyset [
   0,
   1,
-])) === array (
+])) === dict [
   0 => 0,
   1 => 1,
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(keyset))) === array
+]: false
+gettype(fb_compact_unserialize(fb_compact_serialize(keyset))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(keyset))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(keyset))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(keyset))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(keyset))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(keyset))) === false
 fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(keyset))) === array
+gettype(fb_unserialize(fb_serialize(keyset))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(keyset))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(keyset))) === false
+is_array(fb_unserialize(fb_compact_serialize(keyset))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(keyset))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(keyset))) === false
 
 ====
@@ -1634,20 +1633,20 @@ int(1)
 fb_compact_unserialize(fb_compact_serialize(keyset [
   '0',
   1,
-])) === array (
-  0 => '0',
+])) === dict [
+  '0' => '0',
   1 => 1,
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(keyset))) === array
+]: false
+gettype(fb_compact_unserialize(fb_compact_serialize(keyset))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(keyset))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(keyset))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(keyset))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(keyset))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(keyset))) === false
 fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(keyset))) === array
+gettype(fb_unserialize(fb_serialize(keyset))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(keyset))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(keyset))) === false
+is_array(fb_unserialize(fb_compact_serialize(keyset))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(keyset))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(keyset))) === false
 
 ====
@@ -1666,20 +1665,20 @@ int(1)
 fb_compact_unserialize(fb_compact_serialize(keyset [
   0,
   '1',
-])) === array (
+])) === dict [
   0 => 0,
-  1 => '1',
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(keyset))) === array
+  '1' => '1',
+]: false
+gettype(fb_compact_unserialize(fb_compact_serialize(keyset))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(keyset))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(keyset))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(keyset))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(keyset))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(keyset))) === false
 fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(keyset))) === array
+gettype(fb_unserialize(fb_serialize(keyset))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(keyset))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(keyset))) === false
+is_array(fb_unserialize(fb_compact_serialize(keyset))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(keyset))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(keyset))) === false
 
 ====
@@ -1698,20 +1697,20 @@ int(1)
 fb_compact_unserialize(fb_compact_serialize(keyset [
   '0',
   '1',
-])) === array (
-  0 => '0',
-  1 => '1',
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(keyset))) === array
+])) === dict [
+  '0' => '0',
+  '1' => '1',
+]: false
+gettype(fb_compact_unserialize(fb_compact_serialize(keyset))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(keyset))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(keyset))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(keyset))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(keyset))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(keyset))) === false
 fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(keyset))) === array
+gettype(fb_unserialize(fb_serialize(keyset))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(keyset))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(keyset))) === false
+is_array(fb_unserialize(fb_compact_serialize(keyset))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(keyset))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(keyset))) === false
 
 ====
@@ -1730,20 +1729,20 @@ int(1)
 fb_compact_unserialize(fb_compact_serialize(keyset [
   -1,
   0,
-])) === array (
+])) === dict [
   -1 => -1,
   0 => 0,
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(keyset))) === array
+]: false
+gettype(fb_compact_unserialize(fb_compact_serialize(keyset))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(keyset))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(keyset))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(keyset))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(keyset))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(keyset))) === false
 fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(keyset))) === array
+gettype(fb_unserialize(fb_serialize(keyset))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(keyset))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(keyset))) === false
+is_array(fb_unserialize(fb_compact_serialize(keyset))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(keyset))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(keyset))) === false
 
 ====
@@ -1762,20 +1761,20 @@ int(1)
 fb_compact_unserialize(fb_compact_serialize(keyset [
   '-1',
   0,
-])) === array (
-  -1 => '-1',
+])) === dict [
+  '-1' => '-1',
   0 => 0,
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(keyset))) === array
+]: false
+gettype(fb_compact_unserialize(fb_compact_serialize(keyset))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(keyset))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(keyset))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(keyset))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(keyset))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(keyset))) === false
 fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(keyset))) === array
+gettype(fb_unserialize(fb_serialize(keyset))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(keyset))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(keyset))) === false
+is_array(fb_unserialize(fb_compact_serialize(keyset))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(keyset))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(keyset))) === false
 
 ====
@@ -1796,21 +1795,21 @@ fb_compact_unserialize(fb_compact_serialize(dict [
   0 => 'a',
   1 => 'b',
   3 => 'c',
-])) === array (
+])) === dict [
   0 => 'a',
   1 => 'b',
   3 => 'c',
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -1831,21 +1830,21 @@ fb_compact_unserialize(fb_compact_serialize(dict [
   0 => 'a',
   1 => 'b',
   3 => 'c',
-])) === array (
+])) === dict [
   0 => 'a',
   1 => 'b',
   3 => 'c',
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -1866,21 +1865,21 @@ fb_compact_unserialize(fb_compact_serialize(dict [
   '0' => 'a',
   '1' => 'b',
   '3' => 'c',
-])) === array (
-  0 => 'a',
-  1 => 'b',
-  3 => 'c',
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+])) === dict [
+  '0' => 'a',
+  '1' => 'b',
+  '3' => 'c',
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -1901,21 +1900,21 @@ fb_compact_unserialize(fb_compact_serialize(dict [
   '0' => 'a',
   1 => 'b',
   '3' => 'c',
-])) === array (
-  0 => 'a',
+])) === dict [
+  '0' => 'a',
   1 => 'b',
-  3 => 'c',
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+  '3' => 'c',
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -1936,21 +1935,21 @@ fb_compact_unserialize(fb_compact_serialize(dict [
   1 => 'a',
   2 => 'b',
   3 => 'c',
-])) === array (
+])) === dict [
   1 => 'a',
   2 => 'b',
   3 => 'c',
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -1971,21 +1970,21 @@ fb_compact_unserialize(fb_compact_serialize(dict [
   1 => 'a',
   2 => 'b',
   3 => 'c',
-])) === array (
+])) === dict [
   1 => 'a',
   2 => 'b',
   3 => 'c',
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -2006,21 +2005,21 @@ fb_compact_unserialize(fb_compact_serialize(dict [
   0 => 'a',
   2 => 'b',
   3 => 'c',
-])) === array (
+])) === dict [
   0 => 'a',
   2 => 'b',
   3 => 'c',
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -2041,21 +2040,21 @@ fb_compact_unserialize(fb_compact_serialize(dict [
   0 => 'a',
   2 => 'b',
   3 => 'c',
-])) === array (
+])) === dict [
   0 => 'a',
   2 => 'b',
   3 => 'c',
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -2076,21 +2075,21 @@ fb_compact_unserialize(fb_compact_serialize(dict [
   '0' => 'a',
   '2' => 'b',
   '3' => 'c',
-])) === array (
-  0 => 'a',
-  2 => 'b',
-  3 => 'c',
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+])) === dict [
+  '0' => 'a',
+  '2' => 'b',
+  '3' => 'c',
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -2107,19 +2106,19 @@ bool(true)
 int(1)
 fb_compact_unserialize(fb_compact_serialize(dict [
   3 => 'a',
-])) === array (
+])) === dict [
   3 => 'a',
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -2136,19 +2135,19 @@ bool(true)
 int(1)
 fb_compact_unserialize(fb_compact_serialize(dict [
   3 => 'a',
-])) === array (
+])) === dict [
   3 => 'a',
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -2169,21 +2168,21 @@ fb_compact_unserialize(fb_compact_serialize(dict [
   2 => 2,
   1 => 1,
   3 => 3,
-])) === array (
+])) === dict [
   2 => 2,
   1 => 1,
   3 => 3,
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
@@ -2204,21 +2203,21 @@ fb_compact_unserialize(fb_compact_serialize(dict [
   2 => 2,
   1 => 1,
   3 => 3,
-])) === array (
+])) === dict [
   2 => 2,
   1 => 1,
   3 => 3,
-): false
-gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === array
+]: true
+gettype(fb_compact_unserialize(fb_compact_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_compact_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_compact_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(dict))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: false
-gettype(fb_unserialize(fb_serialize(dict))) === array
+fb_unserialize(fb_compact_serialize(x)) === x: true
+gettype(fb_unserialize(fb_serialize(dict))) === dict
 fb_compact_unserialize success: true
-is_array(fb_unserialize(fb_compact_serialize(dict))) === true
-HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === false
+is_array(fb_unserialize(fb_compact_serialize(dict))) === false
+HH\is_darray(fb_unserialize(fb_compact_serialize(dict))) === true
 HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====

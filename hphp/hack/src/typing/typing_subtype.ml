@@ -1572,45 +1572,53 @@ and sub_type
   (ty_super : locl ty) : Env.env =
     sub_type_inner env ~this_ty:None ty_sub ty_super
 
+(* Add a new upper bound ty on var.  Apply transitivity of sutyping,
+ * so if we already have tyl <: var, then check that for each ty_sub
+ * in tyl we have ty_sub <: ty.
+ *)
+and add_tyvar_upper_bound env r var ty =
+  Typing_log.(log_with_level env "prop" 2 (fun () ->
+  log_types (Reason.to_pos r) env
+    [Log_head ("Typing_subtype.props_to_env/add_tyvar_upper_bound",
+    [Log_type ("var", (r, Tvar var)); Log_type ("ty", ty)])]));
+  if Typing_set.mem ty (Env.get_tyvar_upper_bounds env var)
+  then env
+  else
+    let tyl = Typing_set.elements (Env.get_tyvar_lower_bounds env var) in
+    let env = Env.add_tyvar_upper_bound ~intersect:(try_intersect env) env var ty in
+    let env = List.fold_left ~f:(fun env ty_sub -> sub_type env ty_sub ty) ~init:env tyl in
+    Env.remove_equivalent_tyvars env var
+
+(* Add a new lower bound ty on var.  Apply transitivity of sutyping,
+ * so if we already have var <: tyl, then check that for each ty_super
+ * in tyl we have ty <: ty_super.
+ *)
+and add_tyvar_lower_bound env r var ty =
+  Typing_log.(log_with_level env "prop" 2 (fun () ->
+  log_types (Reason.to_pos r) env
+    [Log_head ("Typing_subtype.props_to_env/add_tyvar_lower_bound",
+    [Log_type ("var", (r, Tvar var)); Log_type ("ty", ty)])]));
+  if Typing_set.mem ty (Env.get_tyvar_lower_bounds env var)
+  then env
+  else
+    let tyl = Typing_set.elements (Env.get_tyvar_upper_bounds env var) in
+    let env = Env.add_tyvar_lower_bound ~union:(try_union env) env var ty in
+    let env = List.fold_left ~f:(fun env ty_super -> sub_type env ty ty_super) ~init:env tyl in
+    Env.remove_equivalent_tyvars env var
+
 and props_to_env env remain props =
   match props with
   | [] ->
     env, List.rev remain
-  | TL.IsSubtype (((r, Tvar var) as ty'), ty) :: props ->
-    (* Add a new upper bound ty on var. Apply transitivity of sutyping, so if we
-     * already have tyl <: var then check that for each ty_sub in tyl we
-     * have ty_sub <: ty
-     *)
-    Typing_log.(log_with_level env "prop" 2 (fun () ->
-    log_types (Reason.to_pos r) env
-      [Log_head ("Typing_subtype.props_to_env/Env.add_tyvar_upper_bound",
-      [Log_type ("var", ty'); Log_type ("ty", ty)])]));
-    let env =
-      if Typing_set.mem ty (Env.get_tyvar_upper_bounds env var)
-      then env
-      else
-        let tyl = Typing_set.elements (Env.get_tyvar_lower_bounds env var) in
-        let env = Env.add_tyvar_upper_bound ~intersect:(try_intersect env) env var ty in
-        let env = List.fold_left ~f:(fun env ty_sub -> sub_type env ty_sub ty) ~init:env tyl in
-        Env.remove_equivalent_tyvars env var in
+  | TL.IsSubtype (((r_sub, Tvar var_sub) as ty_sub), ((r_super, Tvar var_super) as ty_super)) :: props ->
+    let env = add_tyvar_upper_bound env r_sub var_sub ty_super in
+    let env = add_tyvar_lower_bound env r_super var_super ty_sub in
     props_to_env env remain props
-  | TL.IsSubtype (ty, ((r, Tvar var) as ty')) :: props ->
-    (* Add a new lower bound ty on var. Apply transitivity of sutyping, so if we
-     * already have var <: tyl then check that for each ty_super in tyl we
-     * have ty <: ty_super
-     *)
-    Typing_log.(log_with_level env "prop" 2 (fun () ->
-    log_types (Reason.to_pos r) env
-      [Log_head ("Typing_subtype.props_to_env/Env.add_tyvar_lower_bound",
-      [Log_type ("var", ty'); Log_type ("ty", ty)])]));
-    let env =
-      if Typing_set.mem ty (Env.get_tyvar_lower_bounds env var)
-      then env
-      else
-        let tyl = Typing_set.elements (Env.get_tyvar_upper_bounds env var) in
-        let env = Env.add_tyvar_lower_bound ~union:(try_union env) env var ty in
-        let env = List.fold_left ~f:(fun env ty_super -> sub_type env ty ty_super) ~init:env tyl in
-        Env.remove_equivalent_tyvars env var in
+  | TL.IsSubtype ((r, Tvar var), ty) :: props ->
+    let env = add_tyvar_upper_bound env r var ty in
+    props_to_env env remain props
+  | TL.IsSubtype (ty, (r, Tvar var)) :: props ->
+    let env = add_tyvar_lower_bound env r var ty in
     props_to_env env remain props
   | TL.Conj props' :: props ->
     props_to_env env remain (props' @ props)

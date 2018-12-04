@@ -412,23 +412,16 @@ let remove_equivalent_tyvars env var =
   *   v <: (t1 & ... & tn)
   *)
  let add_tyvar_upper_bound ?intersect env var ty =
-   let tvenv =
-     begin match ty with
-     | (r, Tvar var_super) ->
-       add_tvenv_lower_bound_ env.tvenv var_super
-         (r, Tvar var)
-     | _ -> env.tvenv
-     end in
    match intersect with
-   | None -> env_with_tvenv env (add_tvenv_upper_bound_ tvenv var ty)
+   | None -> env_with_tvenv env (add_tvenv_upper_bound_ env.tvenv var ty)
    | Some intersect ->
-     let tvinfo = get_tvar_info tvenv var in
+     let tvinfo = get_tvar_info env.tvenv var in
      let tyl = intersect ty (TySet.elements tvinfo.upper_bounds) in
      let add ty tys =
        if is_tvar ~elide_nullable:true ty var
        then tys else TySet.add ty tys in
      let upper_bounds = List.fold_right ~init:TySet.empty ~f:add tyl in
-     env_with_tvenv env (IMap.add var { tvinfo with upper_bounds } tvenv)
+     env_with_tvenv env (IMap.add var { tvinfo with upper_bounds } env.tvenv)
 
 (* Add a single new upper bound [ty] to type variable [var] in [env.tvenv].
  * If the optional [union] operation is supplied, then use this to avoid
@@ -439,20 +432,13 @@ let remove_equivalent_tyvars env var =
  *   (t1 | ... | tn) <: v
  *)
 let add_tyvar_lower_bound ?union env var ty =
-  let tvenv =
-    begin match ty with
-    | (r, Tvar var_sub) ->
-      add_tvenv_upper_bound_ env.tvenv var_sub
-        (r, Tvar var)
-    | _ -> env.tvenv
-    end in
   match union with
-  | None -> env_with_tvenv env (add_tvenv_lower_bound_ tvenv var ty)
+  | None -> env_with_tvenv env (add_tvenv_lower_bound_ env.tvenv var ty)
   | Some union ->
-    let tvinfo = get_tvar_info tvenv var in
+    let tvinfo = get_tvar_info env.tvenv var in
     let tyl = union ty (TySet.elements tvinfo.lower_bounds) in
     let lower_bounds = List.fold_right ~init:TySet.empty ~f:TySet.add tyl in
-    env_with_tvenv env (IMap.add var { tvinfo with lower_bounds } tvenv)
+    env_with_tvenv env (IMap.add var { tvinfo with lower_bounds } env.tvenv)
 
 let set_tyvar_appears_covariantly env var =
   let tvinfo = get_tvar_info env.tvenv var in

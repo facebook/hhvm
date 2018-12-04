@@ -446,8 +446,6 @@ public:
    * Request to adjust the maximum number of threads on the server.
    */
   virtual void trySetMaxThreadCount(int max) {}
-
-protected:
   /**
    * Parameter parsing in this class is done by making just one copy of the
    * entire query (either URL or post data), then insert termintaing NULLs
@@ -457,6 +455,10 @@ protected:
    */
   using ParamMap = hphp_hash_map<const char*, std::vector<const char*>,
                                  cstr_hash, eqstr>;
+
+  ParamMap getQueryParams();
+  ParamMap getPostParams();
+protected:
 
   // timers and other perf data
   timespec m_queueTime;

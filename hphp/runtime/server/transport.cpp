@@ -202,6 +202,20 @@ void Transport::parsePostParams() {
   }
 }
 
+Transport::ParamMap Transport::getQueryParams() {
+  if (m_url == nullptr) {
+    parseGetParams();
+  }
+  return m_getParams;
+}
+
+Transport::ParamMap Transport::getPostParams() {
+  if (!m_postDataParsed) {
+    parsePostParams();
+  }
+  return m_postParams;
+}
+
 bool Transport::paramExists(const char *name,
                             Method method /* = Method::GET */) {
   assertx(name && *name);

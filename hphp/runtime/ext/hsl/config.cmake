@@ -28,3 +28,10 @@ HHVM_DEFINE_EXTENSION("hsl_regex"
   SYSTEMLIB
     ext_hsl_regex.php
 )
+
+HHVM_DEFINE_EXTENSION("hsl_httprequest"
+  SOURCES
+    ext_hsl_httprequest.cpp
+  SYSTEMLIB
+    ext_hsl_httprequest.php
+)

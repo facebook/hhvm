@@ -2231,9 +2231,17 @@ and pStmt : stmt parser = fun node env ->
             | (p1, Expr (p2, Binop ((Eq op), e1, e2))) ->
               let name = make_tmp_var_name i in
               let tmp_n = Pos.none, Lvar (Pos.none, name) in
-              let new_n = (p1, Expr (Pos.none, Binop ((Eq None), tmp_n, e2))) in
+              let body_stmts =
+                match tmp_n, e2 with
+                | (_, Lvar (_, name1)), (_, Lvar (_, name2))
+                  when name1 = name2 ->
+                  body_stmts
+                | _ ->
+                  let new_n = (p1, Expr (Pos.none, Binop ((Eq None), tmp_n, e2))) in
+                  new_n :: body_stmts in
+
               let assign_stmt = (p1, Expr (p2, Binop ((Eq op), e1, tmp_n))) in
-              (new_n :: body_stmts, assign_stmt :: assign_stmts, i + 1)
+              (body_stmts, assign_stmt :: assign_stmts, i + 1)
             | _ -> (n :: body_stmts, assign_stmts, i)
           ) stmts in
       pos, Block (List.concat [List.rev body_stmts; List.rev assign_stmts])

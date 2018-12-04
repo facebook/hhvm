@@ -360,7 +360,10 @@ and class_decl tcopt c =
   let inherited = Decl_inherit.make env c in
   let props = inherited.Decl_inherit.ih_props in
   let props = List.fold_left ~f:(prop_decl c) ~init:props c.sc_props in
+  let redecl_smethods, redecl_methods =
+    List.partition_tf ~f:(fun x -> x.smr_static) c.sc_method_redeclarations in
   let m = inherited.Decl_inherit.ih_methods in
+  let m = List.fold_left ~f:(method_redecl_acc c) ~init:m redecl_methods in
   let m, condition_types = List.fold_left
       ~f:(method_decl_acc ~is_static:false c )
       ~init:(m, SSet.empty) c.sc_methods in
@@ -375,6 +378,7 @@ and class_decl tcopt c =
   let sprops = inherited.Decl_inherit.ih_sprops in
   let sprops = List.fold_left c.sc_sprops ~f:sclass_var ~init:sprops in
   let sm = inherited.Decl_inherit.ih_smethods in
+  let sm = List.fold_left ~f:(method_redecl_acc c) ~init:sm redecl_smethods in
   let sm, condition_types = List.fold_left c.sc_static_methods
       ~f:(method_decl_acc ~is_static:true c )
       ~init:(sm, condition_types) in
@@ -703,6 +707,36 @@ and method_check_override c m acc  =
     Errors.should_be_override pos class_id id;
     false
   | None -> false
+
+and method_redecl_acc c acc m =
+  let ft = m.smr_type in
+  let _, id = m.smr_name in
+  let vis =
+    match SMap.get id acc, m.smr_visibility with
+    | Some { elt_visibility = Vprotected _ as parent_vis; _ }, Protected ->
+      parent_vis
+    | _ -> visibility (snd c.sc_name) m.smr_visibility
+  in
+  let elt = {
+    elt_final = m.smr_final;
+    elt_is_xhp_attr = false;
+    elt_const = false;
+    elt_lateinit = false;
+    elt_lsb = false;
+    elt_abstract = ft.ft_abstract;
+    elt_override = false;
+    elt_memoizelsb = false;
+    elt_synthesized = false;
+    elt_visibility = vis;
+    elt_origin = snd (c.sc_name);
+    elt_reactivity = None;
+  } in
+  let add_meth = if m.smr_static
+    then Decl_heap.StaticMethods.add
+    else Decl_heap.Methods.add
+  in
+  add_meth (elt.elt_origin, id) ft;
+  SMap.add id elt acc
 
 and method_decl_acc ~is_static c (acc, condition_types) m  =
   let check_override = method_check_override c m acc in

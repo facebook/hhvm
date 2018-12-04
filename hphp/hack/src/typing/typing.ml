@@ -6430,8 +6430,7 @@ and method_def env m =
   let local_tpenv = env.Env.lenv.Env.tpenv in
   let env, tb =
     fun_ ~abstract:m.m_abstract env return pos nb m.m_fun_kind in
-  let env =
-    Env.check_todo env in
+  let env = Env.check_todo env in
   let tyvars = ISet.of_list (IMap.keys env.Env.tvenv) in
   let env = SubType.solve_tyvars ~tyvars env in
   Typing_subtype.log_prop env;

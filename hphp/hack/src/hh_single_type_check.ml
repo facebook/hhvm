@@ -188,6 +188,7 @@ let parse_options () =
   let unsafe_rx = ref false in
   let enable_concurrent = ref false in
   let disallow_stringish_magic = ref false in
+  let log_inference_constraints = ref false in
   let new_inference = ref false in
   let all_errors = ref false in
   let batch_mode = ref false in
@@ -368,6 +369,9 @@ let parse_options () =
     "--disallow-stringish-magic",
         Arg.Set disallow_stringish_magic,
         " Disallow using objects in contexts where strings are required.";
+    "--log-inference-constraints",
+        Arg.Set log_inference_constraints,
+        " Log inference constraints to Scuba.";
     "--new-inference",
         Arg.Set new_inference,
         " Type inference by constraint generation.";
@@ -410,6 +414,7 @@ let parse_options () =
       GlobalOptions.tco_disallow_anon_use_capture_by_ref = not !allow_anon_use_capture_by_ref;
       GlobalOptions.tco_disallow_unset_on_varray = !disallow_unset_on_varray;
       GlobalOptions.tco_disallow_stringish_magic = !disallow_stringish_magic;
+      GlobalOptions.tco_log_inference_constraints = !log_inference_constraints;
       GlobalOptions.tco_new_inference = !new_inference;
       GlobalOptions.tco_disallow_invalid_arraykey = !disallow_invalid_arraykey;
       GlobalOptions.po_auto_namespace_map = !auto_namespace_map;
@@ -1186,7 +1191,8 @@ let main_hack ({files; mode; tcopt; _} as opts) =
     | _ -> die "Ai mode does not support multiple files"
     end
   | _ ->
-    decl_and_run_mode opts tcopt
+    decl_and_run_mode opts tcopt;
+  TypingLogger.flush_buffers ()
 
 (* command line driver *)
 let _ =

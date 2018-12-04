@@ -57,7 +57,7 @@ TRACE_SET_MOD(typeProfile);
  */
 
 RequestKind __thread requestKind = RequestKind::Warmup;
-bool __thread standardRequest = true;
+bool __thread requestForceInterpreter = false;
 
 namespace {
 
@@ -217,13 +217,13 @@ void profileRequestStart() {
   requestKind = getRequestKind();
 
   // Force the request to use interpreter (not even running jitted code) when it
-  // is not a standard kind, and during retranslateAll when we need to dump out
-  // precise profile data.
+  // is of `RequestKind::Profile`, or when retranslateAll is pending and we need
+  // to dump out precise profile data.
   auto const retranslateAllScheduled =
     jit::mcgen::pendingRetranslateAllScheduled();
   auto const forceInterp =
     (retranslateAllScheduled && RuntimeOption::DumpPreciseProfData) ||
-    (requestKind != RequestKind::Standard);
+    (requestKind == RequestKind::Profile);
 
   // When retranslateAll is scheduled to run, we don't want to generate more
   // profiling or live translations, but the request is allowed to execute
@@ -266,14 +266,14 @@ void profileRequestStart() {
   }
 
   // Force interpretation if needed.
-  if (standardRequest == forceInterp) {
-    standardRequest = !forceInterp;
+  if (requestForceInterpreter != forceInterp) {
+    requestForceInterpreter = forceInterp;
     if (!RequestInfo::s_requestInfo.isNull()) {
       RID().updateJit();
     }
   }
 
-  if (standardRequest && relocateRequests > 0 && !--relocateRequests) {
+  if (okToJit && relocateRequests > 0 && !--relocateRequests) {
     jit::tc::liveRelocate(true);
   }
 }

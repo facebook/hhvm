@@ -226,4 +226,73 @@ VIdomVector findDominators(const Vunit& unit,
   return idom;
 }
 
+//////////////////////////////////////////////////////////////////////
+
+BackEdgeVector findBackEdges(const Vunit& unit,
+                             const jit::vector<Vlabel>& rpo,
+                             const VIdomVector& idoms) {
+  BackEdgeVector backEdges;
+
+  boost::dynamic_bitset<> seen(unit.blocks.size());
+  for (auto const b : rpo) {
+    seen[b] = true;
+    for (auto const succ : succs(unit.blocks[b])) {
+      if (!seen[succ]) continue; // If we haven't seen it, it can't dominate b,
+                                 // so skip the dominator check.
+      if (!dominates(succ, b, idoms)) continue;
+      backEdges.emplace_back(b, succ);
+    }
+  }
+
+  return backEdges;
+}
+
+LoopBlocks findLoopBlocks(const Vunit& unit,
+                          const PredVector& preds,
+                          const BackEdgeVector& backEdges) {
+
+  jit::fast_map<Vlabel, jit::vector<Vlabel>> headers;
+  for (auto const& edge : backEdges) {
+    headers[edge.second].emplace_back(edge.first);
+  }
+
+  /*
+   * Use a flood-fill algorithm, starting at the first node of the back-edge
+   * (which is a predecessor of the loop header inside the loop). Any node which
+   * is reachable via predecessors from that node (not passing through the
+   * header block) is considered part of the loop. This may not be true for
+   * irreducible loops.
+   */
+  auto const fillBlocks = [&] (Vlabel header,
+                               const jit::vector<Vlabel>& edgePreds) {
+    boost::dynamic_bitset<> visited(unit.blocks.size());
+    visited[header] = true;
+
+    jit::vector<Vlabel> blocks;
+    blocks.emplace_back(header);
+
+    jit::stack<Vlabel> worklist;
+    for (auto const pred : edgePreds) worklist.push(pred);
+
+    while (!worklist.empty()) {
+      auto const block = worklist.top();
+      worklist.pop();
+
+      if (visited[block]) continue;
+      visited[block] = true;
+
+      for (auto const pred : preds[block]) worklist.push(pred);
+      blocks.emplace_back(block);
+    }
+
+    return blocks;
+  };
+
+  jit::fast_map<Vlabel, jit::vector<Vlabel>> loopBlocks;
+  for (auto const& p : headers) {
+    loopBlocks[p.first] = fillBlocks(p.first, p.second);
+  }
+
+  return loopBlocks;
+}
 }}

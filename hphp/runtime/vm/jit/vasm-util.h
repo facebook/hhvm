@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/jit/vasm-visit.h"
 
 #include <algorithm>
 
@@ -52,6 +53,34 @@ VIdomVector findDominators(const Vunit&, const jit::vector<Vlabel>& rpo);
  * Test if b1 dominates b2
  */
 bool dominates(Vlabel b1, Vlabel b2, const VIdomVector&);
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Compute all back edges among the (reachable) blocks in a Vunit, using the
+ * provided reverse post-order sort of the blocks.
+ *
+ * A back-edge is a pair of blocks b1 and b2 where b2 is an immediate successor
+ * of b1, and b2 also dominates b1.
+ */
+using BackEdgeVector = jit::vector<std::pair<Vlabel, Vlabel>>;
+BackEdgeVector findBackEdges(const Vunit&,
+                             const jit::vector<Vlabel>& rpo,
+                             const VIdomVector&);
+
+/*
+ * Compute a mapping of loops (represented by the loop's header block) to the
+ * blocks contained within that loop. The membership is inclusive, a block may
+ * be in multiple loops.
+ *
+ * NB: This only finds reducible loops. It may not recognize irreducible loops
+ * correctly, so should not be used in places where it would be unsound to miss
+ * those.
+ */
+using LoopBlocks = jit::fast_map<Vlabel, jit::vector<Vlabel>>;
+LoopBlocks findLoopBlocks(const Vunit&,
+                          const PredVector&,
+                          const BackEdgeVector&);
 
 ///////////////////////////////////////////////////////////////////////////////
 

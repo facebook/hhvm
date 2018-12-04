@@ -22,6 +22,7 @@ let label_id_local = ref None
 let retval_local = ref None
 
 let next_local = ref 0
+let temp_local_map = ref SMap.empty
 
 let rec get_unnamed_local () =
   let current = !next_local in
@@ -33,6 +34,15 @@ let rec get_unnamed_local () =
   match !retval_local with
   | Some (Unnamed v) when current = v -> get_unnamed_local ()
   | _ -> Unnamed current
+
+let get_unnamed_local_for_tempname s =
+  let temp_local_map_ = !temp_local_map in
+  match SMap.get s temp_local_map_ with
+  | Some x -> x
+  | None ->
+    let new_local = get_unnamed_local () in
+    temp_local_map := SMap.add s new_local temp_local_map_;
+    new_local
 
 let get_or_allocate_unnamed r =
   match !r with
@@ -53,12 +63,15 @@ let reserve_retval_and_label_id_locals () =
   ()
 
 let scope f =
-  let current = !next_local in
+  let current_next_local = !next_local in
+  let current_temp_local_map = !temp_local_map in
   let result = f () in
-  next_local := current;
+  next_local := current_next_local;
+  temp_local_map := current_temp_local_map;
   result
 
 let reset_local base =
   next_local := base;
   label_id_local := None;
   retval_local := None;
+  temp_local_map := SMap.empty;

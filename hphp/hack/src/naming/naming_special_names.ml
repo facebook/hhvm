@@ -235,6 +235,13 @@ module SpecialIdents = struct
   let placeholder = "$_"
   let dollardollar = "$$"
 
+  (* Intentionally using an invalid variable name to ensure it's translated *)
+  let tmp_var_prefix = "__tmp$"
+
+  let is_tmp_var name =
+    String.length name > 6 &&
+    String.sub name 0 6 = tmp_var_prefix
+
 end
 
 module PseudoFunctions = struct

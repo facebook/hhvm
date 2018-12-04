@@ -465,7 +465,7 @@ and emit_awaitall_ env _pos el =
       | (Some lhs, _, rhs) ->
         Some (gather [
           instr_pushl rhs;
-          instr_setl (Local.Named (snd lhs));
+          instr_setl (get_local env lhs);
           instr_popc;
         ])) in
     gather [ reify; set ] in

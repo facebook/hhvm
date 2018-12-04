@@ -71,7 +71,7 @@ let dvs_empty = {
  * the pipe variable $$. If it's $this, add it, and if this variable appears
  * "bare" (because bareparam=true), remember for needs_local_this *)
 let add_local ~barethis s (_, name) =
-  if name = SN.Superglobals.globals || name = SN.SpecialIdents.dollardollar
+  if name = SN.Superglobals.globals || name = SN.SpecialIdents.dollardollar || SN.SpecialIdents.is_tmp_var name
   then s
   else if name = SN.SpecialIdents.this
   then with_this barethis s

@@ -174,8 +174,11 @@ module InoutLocals = struct
      should be saved to local because it might be overwritten later *)
   let should_save_local_value name i aliases =
     Option.value_map ~default:false ~f:(in_range i) (SMap.get name aliases)
-  let should_move_local_value name aliases =
-    Option.value_map ~default:true ~f:has_single_ref (SMap.get name aliases)
+  let should_move_local_value local aliases =
+    match local with
+    | Local.Named name ->
+      Option.value_map ~default:true ~f:has_single_ref (SMap.get name aliases)
+    | Local.Unnamed _ -> false
 end
 
 (* Describes what kind of value is intended to be stored in local *)
@@ -463,7 +466,9 @@ and get_local env (pos, str) =
     | None -> Emit_fatal.raise_fatal_runtime pos
       "Pipe variables must occur only in the RHS of pipe expressions"
     | Some v -> v
-  else Local.Named str
+  else (if SN.SpecialIdents.is_tmp_var str
+    then Local.get_unnamed_local_for_tempname str
+    else Local.Named str)
 
 and check_non_pipe_local e =
   match e with
@@ -3126,17 +3131,18 @@ and emit_args_and_call env call_pos args uargs async_eager_label =
     | (_, A.Callconv (A.Pinout, expr)) :: rest -> begin
       let pos, expr_ = strip_ref expr in
       match expr_ with
-      | A.Lvar (name_pos, s) ->
+      | A.Lvar ((name_pos, _) as lvar) ->
+        let local = get_local env lvar in
         let inout_setters =
-          (instr_setl @@ Local.Named s) :: inout_setters in
+          (instr_setl local) :: inout_setters in
         let not_in_try = not (Emit_env.is_in_try env) in
         let move_instrs =
-          if not_in_try && (InoutLocals.should_move_local_value s aliases)
-          then gather [ instr_null; instr_popl @@ Local.Named s ]
+          if not_in_try && (InoutLocals.should_move_local_value local aliases)
+          then gather [ instr_null; instr_popl local ]
           else empty in
         gather [
           emit_pos name_pos;
-          instr_cgetl @@ Local.Named s;
+          instr_cgetl local;
           move_instrs;
           aux (i + 1) rest inout_setters
         ]

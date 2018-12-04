@@ -25,7 +25,7 @@ type lifted_awaits = {
 let new_lifted_awaits () = { awaits = []; name_counter = 1 }
 
 let make_tmp_var_name c =
-  "$awaited_value_" ^ (string_of_int c)
+  SN.SpecialIdents.tmp_var_prefix ^ (string_of_int c)
 
 let lift_await expr awaits ~with_temp_local =
     if (with_temp_local)

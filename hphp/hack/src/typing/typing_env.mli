@@ -152,6 +152,8 @@ val get_tyvar_appears_contravariantly :
   env -> int -> bool
 val remove_tyvar :
   env -> int -> env
+val remove_equivalent_tyvars :
+  env -> int -> env
 val error_if_reactive_context : env -> (unit -> unit) -> unit
 val error_if_shallow_reactive_context : env -> (unit -> unit) -> unit
 val forward_compat_ge : env -> int -> bool

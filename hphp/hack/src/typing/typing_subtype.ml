@@ -339,8 +339,12 @@ and simplify_subtype
      end in
 
   match snd ety_sub, snd ety_super with
+  | Tvar _ ,_ | _, Tvar _ when not new_inference -> assert false
+
+  | Tvar var_sub, Tvar var_super when var_sub = var_super -> valid ()
+
   | Tvar _, _ | _, Tvar _ ->
-    if new_inference then default () else assert false
+    default ()
 
   (* Internally, newtypes and dependent types are always equipped with an upper bound.
    * In the case when no upper bound is specified in source code,
@@ -1587,7 +1591,8 @@ and props_to_env env remain props =
       else
         let tyl = Typing_set.elements (Env.get_tyvar_lower_bounds env var) in
         let env = Env.add_tyvar_upper_bound ~intersect:(try_intersect env) env var ty in
-        List.fold_left ~f:(fun env ty_sub -> sub_type env ty_sub ty) ~init:env tyl in
+        let env = List.fold_left ~f:(fun env ty_sub -> sub_type env ty_sub ty) ~init:env tyl in
+        Env.remove_equivalent_tyvars env var in
     props_to_env env remain props
   | TL.IsSubtype (ty, ((r, Tvar var) as ty')) :: props ->
     (* Add a new lower bound ty on var. Apply transitivity of sutyping, so if we
@@ -1604,7 +1609,8 @@ and props_to_env env remain props =
       else
         let tyl = Typing_set.elements (Env.get_tyvar_upper_bounds env var) in
         let env = Env.add_tyvar_lower_bound ~union:(try_union env) env var ty in
-        List.fold_left ~f:(fun env ty_super -> sub_type env ty ty_super) ~init:env tyl in
+        let env = List.fold_left ~f:(fun env ty_super -> sub_type env ty ty_super) ~init:env tyl in
+        Env.remove_equivalent_tyvars env var in
     props_to_env env remain props
   | TL.Conj props' :: props ->
     props_to_env env remain (props' @ props)

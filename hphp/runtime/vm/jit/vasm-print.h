@@ -30,12 +30,15 @@ namespace HPHP { namespace jit {
 struct Vinstr;
 struct Vunit;
 struct Vconst;
+struct VregSet;
 
 ///////////////////////////////////////////////////////////////////////////////
 
 std::string show(Vreg r);
 std::string show(Vptr p);
 std::string show(Vconst c);
+std::string show(const VregSet&);
+std::string show(const VregList&);
 std::string show(const Vunit& unit);
 std::string show(const Vunit& unit, const Vinstr& inst);
 

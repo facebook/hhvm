@@ -233,6 +233,31 @@ std::string show(Vreg r) {
   return str.str();
 }
 
+std::string show(const VregSet& s) {
+  std::ostringstream str;
+  auto comma = false;
+  str << '{';
+  s.forEach(
+    [&] (Vreg r) {
+      if (comma) str << ", ";
+      comma = true;
+      str << show(r);
+    }
+  );
+  str << '}';
+  return str.str();
+}
+
+std::string show(const VregList& l) {
+  using namespace folly::gen;
+  return folly::sformat(
+    "[{}]",
+    from(l)
+    | map([] (Vreg r) { return show(r); })
+    | unsplit<std::string>(", ")
+  );
+}
+
 std::string show(Vptr p) {
   std::string str;
   switch(arch()) {

@@ -1581,9 +1581,14 @@ and props_to_env env remain props =
     log_types (Reason.to_pos r) env
       [Log_head ("Typing_subtype.props_to_env/Env.add_tyvar_upper_bound",
       [Log_type ("var", ty'); Log_type ("ty", ty)])]));
-    let tyl = Typing_set.elements (Env.get_tyvar_lower_bounds env var) in
-    let env = List.fold_left ~f:(fun env ty_sub -> sub_type env ty_sub ty) ~init:env tyl in
-    props_to_env (Env.add_tyvar_upper_bound ~intersect:(try_intersect env) env var ty) remain props
+    let env =
+      if Typing_set.mem ty (Env.get_tyvar_upper_bounds env var)
+      then env
+      else
+        let tyl = Typing_set.elements (Env.get_tyvar_lower_bounds env var) in
+        let env = Env.add_tyvar_upper_bound ~intersect:(try_intersect env) env var ty in
+        List.fold_left ~f:(fun env ty_sub -> sub_type env ty_sub ty) ~init:env tyl in
+    props_to_env env remain props
   | TL.IsSubtype (ty, ((r, Tvar var) as ty')) :: props ->
     (* Add a new lower bound ty on var. Apply transitivity of sutyping, so if we
      * already have var <: tyl then check that for each ty_super in tyl we
@@ -1593,9 +1598,14 @@ and props_to_env env remain props =
     log_types (Reason.to_pos r) env
       [Log_head ("Typing_subtype.props_to_env/Env.add_tyvar_lower_bound",
       [Log_type ("var", ty'); Log_type ("ty", ty)])]));
-    let tyl = Typing_set.elements (Env.get_tyvar_upper_bounds env var) in
-    let env = List.fold_left ~f:(fun env ty_super -> sub_type env ty ty_super) ~init:env tyl in
-    props_to_env (Env.add_tyvar_lower_bound ~union:(try_union env) env var ty) remain props
+    let env =
+      if Typing_set.mem ty (Env.get_tyvar_lower_bounds env var)
+      then env
+      else
+        let tyl = Typing_set.elements (Env.get_tyvar_upper_bounds env var) in
+        let env = Env.add_tyvar_lower_bound ~union:(try_union env) env var ty in
+        List.fold_left ~f:(fun env ty_super -> sub_type env ty ty_super) ~init:env tyl in
+    props_to_env env remain props
   | TL.Conj props' :: props ->
     props_to_env env remain (props' @ props)
   | prop :: props ->

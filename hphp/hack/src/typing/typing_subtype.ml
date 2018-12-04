@@ -942,9 +942,27 @@ and simplify_subtype
         res &&& simplify_subtype ~seen_generic_params ~deep ty_sub ty_super)
     else default ()
 
-  (* Don't yet attempt to deal with unresolved types *)
-  | _, Tunresolved _ ->
-    default ()
+  | _, Tunresolved tyl ->
+    (* It's sound to reduce t <: t1 | t2 to (t <: t1) || (t <: t2). But
+     * not complete e.g. consider (t1 | t3) <: (t1 | t2) | (t2 | t3).
+     * But we deal with unions on the left first (see case above), so this
+     * particular situation won't arise.
+     * TODO: identify under what circumstances this reduction is complete.
+     *)
+    if TypecheckerOptions.new_inference (Env.get_tcopt env)
+    then
+    let rec try_each tys env =
+      match tys with
+      | [] ->
+        invalid ()
+
+      | ty::tys ->
+        env |>
+        simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty
+        ||| try_each tys
+    in
+      try_each tyl env
+    else default ()
 
   | _, Tany ->
     if TypecheckerOptions.new_inference (Env.get_tcopt env) then valid ()

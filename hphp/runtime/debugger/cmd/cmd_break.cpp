@@ -172,7 +172,7 @@ void CmdBreak::help(DebuggerClient& client) {
 
   client.helpTitle("Special Breakpoints");
   client.helpSection(
-    "There are special breakpoints what can only be set by names:\n"
+    "There are special breakpoints that can only be set by names:\n"
     "\n"
     "\tstart\n"
     "\tend\n"

@@ -51,7 +51,7 @@ For examples,
 
     ------------------------ Special Breakpoints ------------------------
 
-There are special breakpoints what can only be set by names:
+There are special breakpoints that can only be set by names:
 
       start
       end
@@ -548,4 +548,3 @@ The space between & and command is not needed. '&s' works as well.
 Executes the shell command on connected machine.
 
 The space between ! and command is not needed. '!ls' works as well.
-

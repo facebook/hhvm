@@ -130,8 +130,8 @@ void initializeNamedDataMap() {
   config.growthFactor = 1;
   config.entryCountThreadCacheSize = 10;
 
-  s_namedDataMap = new NamedEntity::Map(
-      RuntimeOption::EvalInitialNamedEntityTableSize, config);
+  s_namedDataMap = new (vm_malloc(sizeof(NamedEntity::Map)))
+    NamedEntity::Map(RuntimeOption::EvalInitialNamedEntityTableSize, config);
 }
 
 /*

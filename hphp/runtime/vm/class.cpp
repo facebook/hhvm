@@ -162,7 +162,7 @@ namespace {
  * 'usedTraits'.  Return an estimate of the method count of all used traits.
  */
 unsigned loadUsedTraits(PreClass* preClass,
-                        CompactVector<ClassPtr>& usedTraits) {
+                        VMCompactVector<ClassPtr>& usedTraits) {
   unsigned methodCount = 0;
 
   auto const traitsFlattened = !!(preClass->attrs() & AttrNoExpandTrait);
@@ -273,7 +273,7 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
       funcVecLen++;
     }
 
-  CompactVector<ClassPtr> usedTraits;
+  VMCompactVector<ClassPtr> usedTraits;
   auto numTraitMethodsEstimate = loadUsedTraits(preClass, usedTraits);
   funcVecLen += numTraitMethodsEstimate;
 
@@ -576,8 +576,7 @@ void Class::releaseRefs() {
     m_parent.reset();
   }
 
-  m_numDeclInterfaces = 0;
-  m_declInterfaces.reset();
+  m_declInterfaces.clear();
   m_requirements.clear();
 
   if (m_extra) {
@@ -652,8 +651,8 @@ Class::Avail Class::avail(Class*& parent,
     }
   }
 
-  for (size_t i = 0; i < m_numDeclInterfaces; i++) {
-    auto di = m_declInterfaces.get()[i].get();
+  for (size_t i = 0; i < m_declInterfaces.size(); i++) {
+    auto di = m_declInterfaces[i].get();
     const StringData* pdi = m_preClass.get()->interfaces()[i];
     assertx(pdi->isame(di->name()));
 
@@ -1961,7 +1960,7 @@ void checkDeclarationCompat(const PreClass* preClass,
 } // namespace
 
 Class::Class(PreClass* preClass, Class* parent,
-             CompactVector<ClassPtr>&& usedTraits,
+             VMCompactVector<ClassPtr>&& usedTraits,
              unsigned classVecLen, unsigned funcVecLen)
 #ifndef NDEBUG
   : m_magic{kMagic}
@@ -2294,7 +2293,7 @@ void Class::setConstants() {
       if (existingConst.cls != iConst.cls) {
         // It's only an error if the constant comes from the declared
         // interfaces.
-        for (auto const& interface : declInterfaces()) {
+        for (auto const& interface : m_declInterfaces) {
           if (interface.get() == iface) {
             raise_error("%s cannot inherit the %sconstant %s from %s, because "
                         "it was previously inherited from %s",
@@ -2318,7 +2317,7 @@ void Class::setConstants() {
       // Constants from interfaces implemented by superclasses can be
       // overridden.
       if (definingClass->attrs() & AttrInterface) {
-        for (auto interface : declInterfaces()) {
+        for (auto interface : m_declInterfaces) {
           if (interface->hasConstant(preConst->name()) ||
               interface->hasTypeConstant(preConst->name())) {
             raise_error("Cannot override previously defined %sconstant "
@@ -3315,11 +3314,12 @@ void Class::setInterfaces() {
     }
   }
 
-  m_numDeclInterfaces = declInterfaces.size();
-  m_declInterfaces.reset(new ClassPtr[declInterfaces.size()]);
-  std::copy(std::begin(declInterfaces),
-            std::end(declInterfaces),
-            m_declInterfaces.get());
+  if (auto sz = declInterfaces.size()) {
+    m_declInterfaces.reserve(sz);
+    for (auto interface : declInterfaces) {
+      m_declInterfaces.push_back(interface);
+    }
+  }
 
   addInterfacesFromUsedTraits(interfacesBuilder);
 
@@ -3544,6 +3544,7 @@ void Class::initLSBMemoHandles() {
   /* Allocate handles array */
   auto& mx = m_extra->m_lsbMemoExtra;
   auto const numSlots = mx.m_numSlots;
+  assertx(numSlots > 0);
   rds::Handle* handles = static_cast<rds::Handle*>(
     vm_malloc(numSlots * sizeof(rds::Handle)));
 
@@ -3903,7 +3904,7 @@ void Class::getMethodNames(const Class* cls,
   }
 
   // Add interface methods that the class may not have implemented yet.
-  for (auto& iface : cls->declInterfaces()) {
+  for (auto& iface : cls->m_declInterfaces) {
     getMethodNames(iface.get(), ctx, out);
   }
 }

@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/vm/class.h"
+#include "hphp/runtime/vm/containers.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/named-entity-pair-table.h"
@@ -177,7 +178,7 @@ using LineInfo       = std::pair<OffsetRange, int>;
 
 using LineTable      = std::vector<LineEntry>;
 using SourceLocTable = std::vector<SourceLocEntry>;
-using FuncTable      = CompactVector<const Func*>;
+using FuncTable      = VMCompactVector<const Func*>;
 
 /*
  * Get the line number or SourceLoc for Offset `pc' in `table'.
@@ -321,6 +322,9 @@ public:
   using PseudoMainCacheMap = hphp_hash_map<
     const Class*, Func*, pointer_hash<Class>
   >;
+
+  using PreClassPtrVec = VMCompactVector<PreClassPtr>;
+  using TypeAliasVec = VMFixedVector<TypeAlias>;
 
   /////////////////////////////////////////////////////////////////////////////
   // Construction and destruction.
@@ -913,8 +917,8 @@ private:
   LowStringPtr m_dirpath{nullptr};
 
   TypedValue m_mainReturn;
-  CompactVector<PreClassPtr> m_preClasses;
-  FixedVector<TypeAlias> m_typeAliases;
+  PreClassPtrVec m_preClasses;
+  TypeAliasVec m_typeAliases;
   /*
    * Cached the EntryPoint for an unit, since compactMergeInfo() inside of
    * mergeImpl will drop the original EP.
@@ -927,9 +931,9 @@ private:
 
   int64_t m_sn{-1};             // Note: could be 32-bit
   MD5 m_md5;
-  FixedVector<const ArrayData*> m_arrays;
+  VMFixedVector<const ArrayData*> m_arrays;
   mutable PseudoMainCacheMap* m_pseudoMainCache{nullptr};
-  mutable LockFreePtrWrapper<CompactVector<LineInfo>> m_lineMap;
+  mutable LockFreePtrWrapper<VMCompactVector<LineInfo>> m_lineMap;
   UserAttributeMap m_metaData;
 };
 

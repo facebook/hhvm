@@ -18,17 +18,20 @@
 #error "litstr-table-inl.h should only be included by litstr-table.h"
 #endif
 
+#include "hphp/util/alloc.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline void LitstrTable::init() {
   assertx(!LitstrTable::s_litstrTable);
-  LitstrTable::s_litstrTable = new LitstrTable();
+  LitstrTable::s_litstrTable =
+    new (vm_malloc(sizeof(LitstrTable))) LitstrTable();
 }
 
 inline void LitstrTable::fini() {
   assertx(LitstrTable::s_litstrTable);
-  delete LitstrTable::s_litstrTable;
+  vm_free(LitstrTable::s_litstrTable);
   LitstrTable::s_litstrTable = nullptr;
 }
 

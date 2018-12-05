@@ -1568,7 +1568,7 @@ void* Unit::replaceUnit() const {
 }
 
 static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
-                               const FixedVector<TypeAlias>& aliasInfo) {
+                               const Unit::TypeAliasVec& aliasInfo) {
   using MergeKind = Unit::MergeKind;
 
   Func** it = in->funcHoistableBegin();

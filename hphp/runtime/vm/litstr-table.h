@@ -20,6 +20,9 @@
 #include "hphp/runtime/base/string-hash-map.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/named-entity-pair-table.h"
+#include "hphp/util/alloc.h"
+#include "hphp/util/functional.h"
+#include "hphp/util/hash-map.h"
 #include "hphp/util/mutex.h"
 
 #include <tbb/concurrent_hash_map.h>
@@ -134,7 +137,8 @@ private:
   using LitstrMap = tbb::concurrent_hash_map<
     const StringData*,
     Id,
-    StringDataHashCompare
+    StringDataHashCompare,
+    VMAllocator<char>
   >;
 
   NamedEntityPairTable m_namedInfo;

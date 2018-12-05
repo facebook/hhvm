@@ -184,10 +184,10 @@ struct Func final {
     LowStringPtr name;
   };
 
-  using ParamInfoVec = FixedVector<ParamInfo>;
-  using SVInfoVec = FixedVector<SVInfo>;
-  using EHEntVec = FixedVector<EHEnt>;
-  using FPIEntVec = FixedVector<FPIEnt, VMAllocator<FPIEnt>>;
+  using ParamInfoVec = VMFixedVector<ParamInfo>;
+  using SVInfoVec = VMFixedVector<SVInfo>;
+  using EHEntVec = VMFixedVector<EHEnt>;
+  using FPIEntVec = VMFixedVector<FPIEnt>;
 
   /////////////////////////////////////////////////////////////////////////////
   // Creation and destruction.

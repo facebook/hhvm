@@ -335,7 +335,7 @@ inline const Class::PropInitVec& Class::declPropInit() const {
   return m_declPropInit;
 }
 
-inline const FixedVector<const Func*>& Class::pinitVec() const {
+inline const VMFixedVector<const Func*>& Class::pinitVec() const {
   return m_pinitVec;
 }
 
@@ -412,10 +412,8 @@ inline bool Class::hasTypeConstant(const StringData* typeConstName,
 // Interfaces and traits.
 
 inline folly::Range<const ClassPtr*> Class::declInterfaces() const {
-  return folly::range(
-    m_declInterfaces.get(),
-    m_declInterfaces.get() + m_numDeclInterfaces
-  );
+  return folly::range(m_declInterfaces.begin(),
+                      m_declInterfaces.end());
 }
 
 inline const Class::InterfaceMap& Class::allInterfaces() const {
@@ -430,7 +428,7 @@ inline Slot Class::traitsEndIdx() const   {
   return m_extra->m_traitsEndIdx;
 }
 
-inline const CompactVector<ClassPtr>& Class::usedTraitClasses() const {
+inline const VMCompactVector<ClassPtr>& Class::usedTraitClasses() const {
   return m_extra->m_usedTraits;
 }
 

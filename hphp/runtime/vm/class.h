@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/atomic-countable.h"
+#include "hphp/runtime/vm/containers.h"
 #include "hphp/runtime/vm/fixed-string-map.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/vm/instance-bits.h"
@@ -257,8 +258,7 @@ struct Class : AtomicCountable {
   using InterfaceMap      = IndexedStringMap<LowPtr<Class>, true, int>;
   using RequirementMap    = IndexedStringMap<
                               const PreClass::ClassRequirement*, true, int>;
-
-  using TraitAliasVec = std::vector<PreClass::TraitAliasRule::NamePair>;
+  using TraitAliasVec     = vm_vector<PreClass::TraitAliasRule::NamePair>;
 
   /*
    * Attributes that determine how we cloned/want to clone a closure class.
@@ -798,7 +798,7 @@ public:
    *
    * These are invoked during initProps() to populate the copied PropInitVec.
    */
-  const FixedVector<const Func*>& pinitVec() const;
+  const VMFixedVector<const Func*>& pinitVec() const;
 
   /*
    * RDS handle which marks whether a property type-hint redefinition check has
@@ -999,7 +999,7 @@ public:
    * In RepoAuthoritative mode, we flatten all traits into their users in the
    * compile phase, which leaves m_usedTraits empty as a result.
    */
-  const CompactVector<ClassPtr>& usedTraitClasses() const;
+  const VMCompactVector<ClassPtr>& usedTraitClasses() const;
 
   /*
    * Trait alias rules.
@@ -1241,7 +1241,6 @@ private:
      * Mapping of methods (declared by this class only) to their assigned slots
      * for LSB memoization. This is populated in the Class ctor when LSB
      * memoized methods are present.
-     *
      */
     boost::container::flat_map<FuncId, Slot> m_slots;
 
@@ -1274,7 +1273,7 @@ private:
      * phase to import the contents of traits.  As a result, m_usedTraits is
      * always empty.
      */
-    CompactVector<ClassPtr> m_usedTraits;
+    VMCompactVector<ClassPtr> m_usedTraits;
 
     /*
      * Only used by reflection for method ordering.  Whenever we have no traits
@@ -1310,7 +1309,7 @@ private:
      * List of references to Closure subclasses whose scoped Class context is
      * `this'.
      */
-    CompactVector<ScopedCloneBackref> m_clonesWithThisScope;
+    VMCompactVector<ScopedCloneBackref> m_clonesWithThisScope;
 
     /*
      * Objects with the <<__NativeData("T")>> UA are allocated with extra space
@@ -1327,12 +1326,12 @@ private:
      * Mapping of functions (in this class only) to their assigned slots and
      * whether the slot is shared. This is not inherited from the parent.
      */
-    boost::container::flat_map<FuncId, std::pair<Slot, bool>> m_memoMappings;
+    vm_flat_map<FuncId, std::pair<Slot, bool>> m_memoMappings;
     /*
      * Maps a parameter count to an assigned slot for that count. This is
      * inherited from the parent.
      */
-    boost::container::flat_map<size_t, Slot> m_sharedMemoSlots;
+    vm_flat_map<size_t, Slot> m_sharedMemoSlots;
     /*
      * The next memo slot to assign. This is inherited from the parent.
      */
@@ -1375,7 +1374,7 @@ private:
 private:
   Class(PreClass* preClass,
         Class* parent,
-        CompactVector<ClassPtr>&& usedTraits,
+        VMCompactVector<ClassPtr>&& usedTraits,
         unsigned classVecLen,
         unsigned funcVecLen);
   ~Class();
@@ -1473,8 +1472,7 @@ private:
   friend struct StandardExtension;
 
   RequirementMap m_requirements;
-  std::unique_ptr<ClassPtr[]> m_declInterfaces;
-  uint32_t m_numDeclInterfaces{0};
+  VMCompactVector<ClassPtr> m_declInterfaces;
   mutable rds::Link<Array, rds::Mode::Normal> m_nonScalarConstantCache;
 
   LowPtr<Func> m_toString;
@@ -1516,12 +1514,12 @@ private:
    *    - An instance of this class is created.
    *    - A static property of this class is accessed.
    */
-  FixedVector<const Func*> m_sinitVec;
-  FixedVector<const Func*> m_linitVec;
+  VMFixedVector<const Func*> m_sinitVec;
+  VMFixedVector<const Func*> m_linitVec;
   LowPtr<Func> m_ctor;
   LowPtr<Func> m_dtor;
   PropInitVec m_declPropInit;
-  FixedVector<const Func*> m_pinitVec;
+  VMFixedVector<const Func*> m_pinitVec;
 
   /*
    * There are two ways to index m_staticProperties.

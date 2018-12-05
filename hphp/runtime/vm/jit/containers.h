@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_VM_CONTAINERS_H_
-#define incl_HPHP_VM_CONTAINERS_H_
+#ifndef incl_HPHP_JIT_CONTAINERS_H_
+#define incl_HPHP_JIT_CONTAINERS_H_
 
 #include <array>
 #include <deque>

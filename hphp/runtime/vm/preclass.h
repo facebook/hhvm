@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/user-attributes.h"
 #include "hphp/runtime/base/atomic-countable.h"
+#include "hphp/runtime/vm/containers.h"
 #include "hphp/runtime/vm/indexed-string-map.h"
 #include "hphp/runtime/vm/type-constraint.h"
 
@@ -282,11 +283,11 @@ private:
   typedef IndexedStringMap<Const,true,Slot> ConstMap;
 
 public:
-  typedef FixedVector<LowStringPtr> InterfaceVec;
-  typedef FixedVector<LowStringPtr> UsedTraitVec;
-  typedef FixedVector<ClassRequirement> ClassRequirementsVec;
-  typedef FixedVector<TraitPrecRule> TraitPrecRuleVec;
-  typedef FixedVector<TraitAliasRule> TraitAliasRuleVec;
+  typedef VMFixedVector<LowStringPtr> InterfaceVec;
+  typedef VMFixedVector<LowStringPtr> UsedTraitVec;
+  typedef VMFixedVector<ClassRequirement> ClassRequirementsVec;
+  typedef VMFixedVector<TraitPrecRule> TraitPrecRuleVec;
+  typedef VMFixedVector<TraitAliasRule> TraitAliasRuleVec;
 
 
   /////////////////////////////////////////////////////////////////////////////

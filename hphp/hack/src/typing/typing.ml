@@ -2328,7 +2328,7 @@ and expr_
         let env = { env with Typing_env.inside_ppl_class = false } in
         let (is_coroutine, _counter, _, anon) = anon_make env p f ft idl in
         let ft = { ft with ft_is_coroutine = is_coroutine; ft_reactive = reactivity } in
-        let (env, tefun, ty) = anon ?ret_ty env ft.ft_params ft.ft_arity in
+        let env, tefun, ty = anon ?ret_ty env ft.ft_params ft.ft_arity in
         let env = Env.set_env_reactive env old_reactivity in
         let env = { env with
           Typing_env.inside_ppl_class = old_inside_ppl_class; } in
@@ -2777,17 +2777,18 @@ and anon_make tenv p f ft idl =
             iter ft.ft_params x;
             wfold_left2 inout_write_back env ft.ft_params x in
         let env = Env.set_fn_kind env f.f_fun_kind in
-        let env, hret =
+        let env, hret, tyvars =
           match f.f_ret with
           | None ->
             (* Do we have a contextual return type? *)
             begin match ret_ty with
             | None ->
-              let env, ret_ty = Env.fresh_unresolved_type env in
-              env, Typing_return.wrap_awaitable env p ret_ty
+              let env, ret_ty, tyvars = Env.fresh_unresolved_type_add_tyvars env p ISet.empty in
+              env, Typing_return.wrap_awaitable env p ret_ty, tyvars
             | Some ret_ty ->
               (* We might need to force it to be Awaitable if it is a type variable *)
-              Typing_return.force_awaitable env p ret_ty
+              let env, ty = Typing_return.force_awaitable env p ret_ty in
+              env, ty, ISet.empty
             end
           | Some x ->
             let ret = TI.instantiable_hint env x in
@@ -2797,7 +2798,8 @@ and anon_make tenv p f ft idl =
             let ety_env =
               { (Phase.env_with_self env) with
                 from_class = Some CIstatic } in
-            Phase.localize ~ety_env env ret in
+            let env, ty = Phase.localize ~ety_env env ret in
+            env, ty, ISet.empty in
         let env = Env.set_return env
           (Typing_return.make_info f.f_fun_kind [] env
             ~is_explicit:(Option.is_some ret_ty)
@@ -2834,6 +2836,8 @@ and anon_make tenv p f ft idl =
         } in
         let ty = (Reason.Rwitness p, Tfun ft) in
         let te = T.make_typed_expr p ty (T.Efun (tfun_, idl)) in
+        let env = SubType.set_tyvar_variance ~tyvars env ty in
+        let env = SubType.solve_tyvars ~tyvars env in
         env, te, hret
       end
     end

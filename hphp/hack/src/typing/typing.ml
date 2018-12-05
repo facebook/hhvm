@@ -3474,25 +3474,33 @@ and is_abstract_ft fty = match fty with
        - Some false if type is definitely not a coroutine
        - None if type is Tunresolved that contains
          both coroutine and non-coroutine constituents *)
+    (* TODO: replace the case analysis here with a subtyping check;
+     * see T37483866 and the linked diff for discussion.
+     *)
     let rec is_coroutine ty =
-      match snd ty with
+      let _, ety = Env.expand_type env ty in
+      match snd ety with
       | Tfun { ft_is_coroutine = true; _ } ->
         Some true
       | Tanon (_, id) ->
-        Some (Option.value_map (Env.get_anonymous env id) ~default:false ~f:(fun (_,b,_,_,_) -> b) )
-      | Tunresolved ts ->
-        begin match List.map ts ~f:is_coroutine with
-        | None :: _ -> None
-        | Some x :: xs ->
-          (*if rest of the list has the same value as the first element
-            return value of the first element or None otherwise*)
-          if List.for_all xs ~f:(Option.value_map ~default:false ~f:((=)x))
-          then Some x
-          else None
-        | _ -> Some false
-        end
+        Some (Option.value_map (Env.get_anonymous env id) ~default:false ~f:(fun (_,b,_,_,_) -> b))
+      | Tunresolved ts -> are_coroutines ts
+      | Tvar var ->
+        let lower_bounds =
+          Typing_set.elements (Env.get_tyvar_lower_bounds env var) in
+        are_coroutines lower_bounds
       | _ ->
-        Some false in
+        Some false
+    and are_coroutines ts =
+      match List.map ts ~f:is_coroutine with
+      | None :: _ -> None
+      | Some x :: xs ->
+        (*if rest of the list has the same value as the first element
+          return value of the first element or None otherwise*)
+        if List.for_all xs ~f:(Option.value_map ~default:false ~f:((=)x))
+        then Some x
+        else None
+      | _ -> Some false in
     match in_suspend, is_coroutine fty with
     | true, Some true
     | false, Some false -> ()

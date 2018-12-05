@@ -2772,9 +2772,6 @@ let cyclic_typeconst pos sl =
   add (Typing.err_code Typing.CyclicTypeconst) pos
     ("Cyclic type constant:\n  "^String.concat ~sep:" -> " sl)
 
-let this_lvalue pos =
-  add (Typing.err_code Typing.ThisLvalue) pos "Cannot assign a value to $this"
-
 let abstract_concrete_override pos parent_pos kind =
   let kind_str = match kind with
     | `method_ -> "method"

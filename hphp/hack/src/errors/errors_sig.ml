@@ -375,7 +375,6 @@ module type S = sig
   val cyclic_typeconst : Pos.t -> string list -> unit
   val explain_contravariance : Pos.t -> string -> error -> unit
   val explain_invariance : Pos.t -> string -> string -> error -> unit
-  val this_lvalue : Pos.t -> unit
   val abstract_concrete_override:
     Pos.t -> Pos.t -> [< `method_ | `typeconst |`constant]-> unit
   val local_variable_modified_and_used : Pos.t -> Pos.t list -> unit

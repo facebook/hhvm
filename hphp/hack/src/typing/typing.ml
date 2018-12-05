@@ -1582,9 +1582,6 @@ and expr_
   | This when Env.is_static env ->
       Errors.this_in_static p;
       expr_error env p (Reason.Rwitness p)
-  | This when valkind = `lvalue ->
-     Errors.this_lvalue p;
-     expr_error env p (Reason.Rwitness p)
   | This ->
       let r, _ = Env.get_self env in
       if r = Reason.Rnone
@@ -3294,9 +3291,6 @@ and assign_ p ur env e1 ty2 =
       then env, te1
       else let env, te1, _ = assign_ p ur env e1 ty1' in env, te1 in
     env, ((pos, ty2'), T.Array_get (te1, Some te)), ty2
-  | _, This ->
-     Errors.this_lvalue p;
-     make_result env T.Any (Reason.Rwitness p, Typing_utils.terr env)
   | pref, Unop (Ast.Uref, e1') ->
     (* references can be "lvalues" in foreach bindings *)
     Errors.binding_ref_in_array pref;

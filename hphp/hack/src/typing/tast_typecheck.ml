@@ -177,6 +177,7 @@ let rec check_stmt env (stmt:ETast.stmt) (gamma:gamma) : delta =
   | Switch _
   | Try _
   | Using _
+  | Def_inline _
   | Let _
   | Static_var _
   | Global_var _

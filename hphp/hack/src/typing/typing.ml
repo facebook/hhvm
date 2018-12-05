@@ -900,6 +900,9 @@ and stmt env = function
   | Try (tb, cl, fb) ->
     let env, ttb, tcl, tfb = try_catch env tb cl fb in
     env, T.Try (ttb, tcl, tfb)
+  | Def_inline _ ->
+     (* Do nothing, this doesn't occur in Hack code. *)
+     failwith "Should never typecheck nested definitions"
   | Static_var el ->
     let env = List.fold_left el ~f:begin fun env e ->
       match e with

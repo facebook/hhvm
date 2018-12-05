@@ -198,6 +198,7 @@ struct
       T.Foreach(map_expr menv e, map_as_expr ae, map_block menv b)
     | S.Try (b1, cl, b2) ->
       T.Try(map_block menv b1, List.map cl map_catch, map_block menv b2)
+    | S.Def_inline d -> T.Def_inline (map_def menv d)
     | S.Noop -> T.Noop
     | S.Unsafe_block b -> T.Unsafe_block(map_block menv b)
     | S.Fallthrough -> T.Fallthrough
@@ -338,14 +339,7 @@ struct
     T.cst_is_define = c.S.cst_is_define;
   }
 
-  let map_def
-    ~map_expr_annotation
-    ~map_env_annotation
-    d =
-    let menv = {
-      map_expr_annotation;
-      map_env_annotation;
-    } in
+  and map_def menv d =
     match d with
     | S.Fun fd -> T.Fun (map_fun menv fd)
     | S.Class c -> T.Class (map_class menv c)
@@ -357,5 +351,9 @@ struct
     ~map_expr_annotation
     ~map_env_annotation
     dl =
-    List.map dl (map_def ~map_expr_annotation ~map_env_annotation)
+    let menv = {
+      map_expr_annotation;
+      map_env_annotation;
+    } in
+    List.map dl (map_def menv)
 end

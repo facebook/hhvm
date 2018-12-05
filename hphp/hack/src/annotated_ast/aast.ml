@@ -80,6 +80,7 @@ and stmt =
   (* Dropped the Pos.t option *)
   | Foreach of expr * as_expr * block
   | Try of block * catch list * block
+  | Def_inline of def
   | Let of lid * hint option * expr
   | Noop
 

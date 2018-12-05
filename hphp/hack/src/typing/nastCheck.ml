@@ -153,6 +153,7 @@ module CheckFunctionBody = struct
         List.iter cl (catch f_type env);
         block f_type { env with t_is_finally = true } fb;
         ()
+    | _, Def_inline _ -> ()
     | _, Let ((p, x), _, e) ->
         (* We treat let statement as an assignment expression *)
         let fake_expr = (p, Binop (Ast.Eq None, (p, Lvar (p, x)), e)) in
@@ -1203,6 +1204,7 @@ and stmt env = function
       List.iter cl (catch env);
       block { env with t_is_finally = true } fb;
       ()
+  | Def_inline _ -> ()
   | Let ((p, x), _, e) ->
       (* We treat let statement as assignment expresssions *)
       let fake_expr = (p, Binop (Ast.Eq None, (p, Lvar (p, x)), e)) in

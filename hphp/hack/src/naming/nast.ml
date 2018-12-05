@@ -191,6 +191,7 @@ class type ['a] visitor_type = object
   method on_switch : 'a -> expr -> case list -> 'a
   method on_throw : 'a -> is_terminal -> expr -> 'a
   method on_try : 'a -> block -> catch list -> block -> 'a
+  method on_def_inline : 'a -> def -> 'a
   method on_let : 'a -> id -> hint option -> expr -> 'a
   method on_while : 'a -> expr -> block -> 'a
   method on_using : 'a -> bool -> expr -> block -> 'a
@@ -350,6 +351,9 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     let acc = this#on_block acc fb in
     acc
 
+  method on_def_inline acc d =
+    this#on_def acc d
+
   method on_let acc x h e =
     let acc = this#on_lvar acc x in
     let acc = match h with
@@ -405,6 +409,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     | Static_var el           -> this#on_static_var acc el
     | Global_var el           -> this#on_global_var acc el
     | Awaitall (_, el)        -> this#on_awaitall acc el
+    | Def_inline d            -> this#on_def_inline acc d
     | Let     (x, h, e)       -> this#on_let acc x h e
 
   method on_expr acc (_, e) =

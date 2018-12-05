@@ -408,7 +408,7 @@ and simplify_subtype
   | (Tprim Nast.(Tint | Tbool | Tfloat | Tstring | Tresource | Tnum |
                  Tarraykey | Tnoreturn) |
      Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject |
-     Tclass _ | Tarraykind _ | Tabstract (AKenum _, _)),
+     Tclass _ | Tarraykind _ | Tabstract (AKenum _, _) | Tany),
     Toption ty_super' ->
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super' env
   | Tabstract (AKnewtype (name_sub, _), _),
@@ -1594,9 +1594,9 @@ and add_tyvar_upper_bound env r var ty =
   if Typing_set.mem ty (Env.get_tyvar_upper_bounds env var)
   then env
   else
-    let tyl = Typing_set.elements (Env.get_tyvar_lower_bounds env var) in
+    let tys = Env.get_tyvar_lower_bounds env var in
     let env = Env.add_tyvar_upper_bound ~intersect:(try_intersect env) env var ty in
-    let env = List.fold_left ~f:(fun env ty_sub -> sub_type env ty_sub ty) ~init:env tyl in
+    let env = Typing_set.fold (fun ty_sub env -> sub_type env ty_sub ty) tys env in
     Env.remove_equivalent_tyvars env var
 
 (* Add a new lower bound ty on var.  Apply transitivity of sutyping,
@@ -1611,9 +1611,9 @@ and add_tyvar_lower_bound env r var ty =
   if Typing_set.mem ty (Env.get_tyvar_lower_bounds env var)
   then env
   else
-    let tyl = Typing_set.elements (Env.get_tyvar_upper_bounds env var) in
+    let tys = Env.get_tyvar_upper_bounds env var in
     let env = Env.add_tyvar_lower_bound ~union:(try_union env) env var ty in
-    let env = List.fold_left ~f:(fun env ty_super -> sub_type env ty ty_super) ~init:env tyl in
+    let env = Typing_set.fold (fun ty_super env -> sub_type env ty ty_super) tys env in
     Env.remove_equivalent_tyvars env var
 
 and props_to_env env remain props =
@@ -2378,10 +2378,8 @@ let solve_tyvar env r var =
   else if not appears_contravariantly
   then begin
     let lower_bounds = Typing_set.elements (Env.get_tyvar_lower_bounds env var) in
-    if List.is_empty lower_bounds
-    then env
-    else
-    (* Construct the union of the lower bounds *)
+    (* Construct the union of the lower bounds. Note that if there are no lower
+     * bounds then we will construct the empty type, i.e. Tunresolved []. *)
     let ty =
       match lower_bounds with
       | [ty] -> ty
@@ -2396,8 +2394,9 @@ let solve_tyvar env r var =
   else env
 
 let solve_tyvars ~tyvars env =
-  List.fold_left ~init:env ~f:(fun env tyvar -> solve_tyvar env Reason.Rnone tyvar)
-    (ISet.elements tyvars)
+  if TypecheckerOptions.new_inference (Env.get_tcopt env)
+  then ISet.fold (fun tyvar env -> solve_tyvar env Reason.Rnone tyvar) tyvars env
+  else env
 
 let log_prop env =
   let filename = Pos.filename (Pos.to_absolute env.Env.pos) in

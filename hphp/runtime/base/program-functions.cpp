@@ -2460,8 +2460,9 @@ void hphp_process_init() {
                  std::max(RuntimeOption::EvalJitWorkerThreads, numWorkers));
       setup_extra_arenas(numArenas);
 #endif
-      auto const errMsg =
-        jit::deserializeProfData(RuntimeOption::EvalJitSerdesFile, numWorkers);
+      auto const errMsg = jit::deserializeProfData(
+        RuntimeOption::EvalJitSerdesFile,
+        RuntimeOption::EvalJitParallelDeserialize ? numWorkers : 1);
 
       if (mode == JitSerdesMode::DeserializeAndDelete) {
         // Delete the serialized profile data when we finish reading

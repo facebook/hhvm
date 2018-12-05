@@ -1,0 +1,2 @@
+File "no_isset_in_strict_mode.php", line 9, characters 8-12:
+isset cannot be used in a completely type safe way and so is banned in strict mode; try using array_key_exists instead (Typing[4016])

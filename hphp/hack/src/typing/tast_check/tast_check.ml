@@ -32,6 +32,7 @@ let visitor = Tast_visitor.iter_with [
   Discarded_awaitable_check.handler;
   Invalid_arraykey_check.handler;
   Basic_reactivity_check.handler;
+  Pseudofunctions_check.handler;
 ]
 
 let program = visitor#go

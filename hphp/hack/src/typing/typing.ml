@@ -3532,8 +3532,6 @@ and is_abstract_ft fty = match fty with
     let env, tel, _ = exprs ~accept_using_var:true env el in
     if uel <> [] then
       Errors.unpacking_disallowed_builtin_function p pseudo_func;
-    if Env.is_strict env then
-      Errors.empty_in_strict p;
     make_call_special_from_def env id tel (Tprim Tbool)
   (* Special function `isset` *)
   | Id ((_, pseudo_func) as id) when pseudo_func = SN.PseudoFunctions.isset ->
@@ -3542,8 +3540,6 @@ and is_abstract_ft fty = match fty with
       exprs ~accept_using_var:true ~check_defined:false env el in
     if uel <> [] then
       Errors.unpacking_disallowed_builtin_function p pseudo_func;
-    if Env.is_strict env then
-      Errors.isset_in_strict p;
     make_call_special_from_def env id tel (Tprim Tbool)
   (* Special function `unset` *)
   | Id ((_, pseudo_func) as id) when pseudo_func = SN.PseudoFunctions.unset ->

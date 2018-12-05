@@ -620,6 +620,11 @@ function find_test_files($file) {
     'zend'       => 'hphp/test/zend/good',
     'facebook'   => 'hphp/facebook/test',
 
+    // hhjs tests
+    'hhjs_unit' => 'hphp/facebook/extensions/hhjs/test/ext_hhjs',
+    'hhjs_functional' =>
+      'hphp/facebook/extensions/hhjs/test/ext_hhjs_functional',
+
     // Subsets of zend tests.
     'zend_ext'    => 'hphp/test/zend/good/ext',
     'zend_ext_am' => 'hphp/test/zend/good/ext/[a-m]*',

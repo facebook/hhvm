@@ -13,19 +13,19 @@ Typing error (Typing[4110])
 File "arities02.php", line 34, characters 17-19:
 You are trying to access the member bar but this is not an object, it is an int (Typing[4062])
   File "arities02.php", line 3, characters 51-53:
-  Check this out
+  Definition is here
 File "arities02.php", line 34, characters 17-19:
 You are trying to access the member bar but this is not an object, it is a string (Typing[4062])
   File "arities02.php", line 3, characters 35-40:
-  Check this out
+  Definition is here
 File "arities02.php", line 34, characters 17-19:
 You are trying to access the member bar but this is not an object, it is a string (Typing[4062])
   File "arities02.php", line 3, characters 43-48:
-  Check this out
+  Definition is here
 File "arities02.php", line 40, characters 17-19:
 You are trying to access the member bar but this is not an object, it is a string (Typing[4062])
   File "arities02.php", line 39, characters 29-30:
-  Check this out
+  Definition is here
 File "arities02.php", line 45, characters 13-48:
 Invalid argument (Typing[4042])
   File "arities02.php", line 45, characters 13-48:

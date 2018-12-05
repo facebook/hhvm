@@ -1,7 +1,7 @@
 File "lambda_application_incorrect_types.php", line 17, characters 33-35:
 You are trying to access the member foo but this is not an object, it is a string (Typing[4062])
   File "lambda_application_incorrect_types.php", line 20, characters 12-18:
-  Check this out
+  Definition is here
 File "lambda_application_incorrect_types.php", line 29, characters 12-18:
 Invalid argument (Typing[4110])
   File "lambda_application_incorrect_types.php", line 27, characters 20-21:
@@ -11,4 +11,4 @@ Invalid argument (Typing[4110])
 File "lambda_application_incorrect_types.php", line 38, characters 33-35:
 You are trying to access the member foo but this is not an object, it is an int (Typing[4062])
   File "lambda_application_incorrect_types.php", line 39, characters 39-39:
-  Check this out
+  Definition is here

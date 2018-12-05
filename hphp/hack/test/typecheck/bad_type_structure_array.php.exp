@@ -45,4 +45,4 @@ File "bad_type_structure_array.php", line 36, characters 3-22:
 File "bad_type_structure_array.php", line 10, characters 15-25:
 The field classname is undefined (Typing[4108])
 File "hhi_lib__srcs/typestructure.hhi", line 49, characters 29-708:
-You might want to check this out
+Definition is here

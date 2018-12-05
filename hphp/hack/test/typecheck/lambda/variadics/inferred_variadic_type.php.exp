@@ -19,13 +19,13 @@ Invalid return type (Typing[4110])
 File "inferred_variadic_type.php", line 41, characters 38-40:
 You are trying to access the member foo but this is not an object, it is an int (Typing[4062])
   File "inferred_variadic_type.php", line 15, characters 42-44:
-  Check this out
+  Definition is here
 File "inferred_variadic_type.php", line 44, characters 19-25:
 Invalid argument (Typing[4062])
   File "inferred_variadic_type.php", line 43, characters 32-34:
   You are trying to access the member foo but this is not an object, it is an int
   File "inferred_variadic_type.php", line 15, characters 42-44:
-  Check this out
+  Definition is here
 File "inferred_variadic_type.php", line 47, characters 19-26:
 Invalid argument (Typing[4110])
   File "inferred_variadic_type.php", line 46, characters 20-21:

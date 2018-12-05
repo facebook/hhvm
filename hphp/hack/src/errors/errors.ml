@@ -2108,28 +2108,28 @@ let typing_error_l err =
 let undefined_field ~use_pos ~name ~shape_type_pos =
   add_list (Typing.err_code Typing.UndefinedField) [
     use_pos, "The field "^name^" is undefined";
-    shape_type_pos, "You might want to check this out"
+    shape_type_pos, "Definition is here"
   ]
 
 let array_access pos1 pos2 ty =
   add_list (Typing.err_code Typing.ArrayAccess)
     ((pos1, "This is not an object of type KeyedContainer, this is "^ty) ::
      if not (phys_equal pos2 Pos.none)
-     then [pos2, "You might want to check this out"]
+     then [pos2, "Definition is here"]
      else [])
 
 let keyset_set pos1 pos2 =
   add_list (Typing.err_code Typing.KeysetSet)
-    ((pos1, "Keysets entries cannot be set, use append instead.") ::
+    ((pos1, "Elements in a keyset cannot be assigned, use append instead.") ::
      if not (phys_equal pos2 Pos.none)
-     then [pos2, "You might want to check this out"]
+     then [pos2, "Definition is here"]
      else [])
 
 let array_append pos1 pos2 ty =
   add_list (Typing.err_code Typing.ArrayAppend)
     ((pos1, ty^" does not allow array append") ::
      if not (phys_equal pos2 Pos.none)
-     then [pos2, "You might want to check this out"]
+     then [pos2, "Definition is here"]
      else [])
 
 let const_mutation pos1 pos2 ty =
@@ -2697,7 +2697,7 @@ let non_object_member s pos1 ty pos2 =
       msg_start in
   add_list (Typing.err_code Typing.NonObjectMember) [
   pos1, msg;
-  pos2, "Check this out"
+  pos2, "Definition is here"
   ]
 
 let unknown_object_member s pos r =
@@ -2712,7 +2712,7 @@ let non_class_member s pos1 ty pos2 =
    " but this is not a class, it is "^
    ty);
   pos2,
-  "Check this out"
+  "Definition is here"
   ]
 
 let ambiguous_member s pos1 ty pos2 =
@@ -2722,7 +2722,7 @@ let ambiguous_member s pos1 ty pos2 =
    " but there is more than one implementation on "^
    ty);
   pos2,
-  "Check this out"
+  "Definition is here"
   ]
 
 let null_container p null_witness =

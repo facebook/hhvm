@@ -60,18 +60,13 @@ int singleJitRequestCount();
 void profileIncrementFuncCounter(const Func*);
 
 extern __thread RequestKind requestKind;
-extern __thread bool requestForceInterpreter;
-
 inline bool isProfileRequest() {
   return requestKind == RequestKind::Profile;
 }
 
+extern __thread bool standardRequest;
 inline bool isStandardRequest() {
-  return requestKind == RequestKind::Standard;
-}
-
-inline bool isForcedToInterpret() {
-  return requestForceInterpreter;
+  return standardRequest;
 }
 
 void setRelocateRequests(int32_t n);

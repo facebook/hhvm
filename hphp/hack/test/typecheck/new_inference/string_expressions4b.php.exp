@@ -1,0 +1,8 @@
+File "string_expressions4b.php", line 32, characters 12-19:
+This is an array key (int/string) (Typing[4110])
+  File "string_expressions4b.php", line 31, characters 30-34:
+  It is incompatible with an object of exactly the class Other
+File "string_expressions4b.php", line 32, characters 20-24:
+This is an array key (int/string) (Typing[4110])
+  File "string_expressions4b.php", line 32, characters 20-24:
+  It is incompatible with an object of type Meh

@@ -948,6 +948,16 @@ and simplify_subtype
         res &&& simplify_subtype ~seen_generic_params ~deep ty_sub ty_super)
     else default ()
 
+  (* Num is not atomic: it is equivalent to int|float. The rule below relies
+   * on ty_sub not being a union e.g. consider num <: arraykey | float, so
+   * we break out num first.
+   *)
+  | Tprim Nast.Tnum, Tunresolved _ when new_inference ->
+    let r = fst ty_sub in
+    env |>
+    simplify_subtype ~seen_generic_params ~deep ~this_ty (r, Tprim Nast.Tfloat) ty_super &&&
+    simplify_subtype ~seen_generic_params ~deep ~this_ty (r, Tprim Nast.Tint) ty_super
+
   | _, Tunresolved tyl ->
     (* It's sound to reduce t <: t1 | t2 to (t <: t1) || (t <: t2). But
      * not complete e.g. consider (t1 | t3) <: (t1 | t2) | (t2 | t3).
@@ -955,7 +965,7 @@ and simplify_subtype
      * particular situation won't arise.
      * TODO: identify under what circumstances this reduction is complete.
      *)
-    if TypecheckerOptions.new_inference (Env.get_tcopt env)
+    if new_inference
     then
     let rec try_each tys env =
       match tys with
@@ -1895,6 +1905,24 @@ let rec sub_string
   (ty2 : locl ty) : Env.env =
   let stringish_deprecated =
     TypecheckerOptions.disallow_stringish_magic (Env.get_tcopt env) in
+  (* Under constraint-based inference, we implement sub_string as a subtype test.
+   * All the cases in the legacy implementation just fall out from subtyping rules.
+   * We test against ?(arraykey | bool | float | resource | object | dynamic)
+   *)
+  if not allow_mixed && TypecheckerOptions.new_inference (Env.get_tcopt env)
+  then
+    let tyl = [(Reason.Rwitness p, Tprim Nast.Tarraykey);
+               (Reason.Rwitness p, Tprim Nast.Tbool);
+               (Reason.Rwitness p, Tprim Nast.Tfloat);
+               (Reason.Rwitness p, Tprim Nast.Tresource);
+               (Reason.Rwitness p, Tdynamic)] in
+    let tyl =
+      if stringish_deprecated
+      then tyl
+      else (Reason.Rwitness p, Tclass((p, SN.Classes.cStringish), Nonexact, []))::tyl in
+    let stringish = (Reason.Rwitness p, Toption (Reason.Rwitness p, Tunresolved tyl)) in
+    sub_type env ty2 stringish
+  else
   let sub_string = sub_string ~allow_mixed in
   let env, ety2 = Env.expand_type env ty2 in
   let fail () =

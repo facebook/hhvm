@@ -303,29 +303,38 @@ let update_hh_server_state_if_necessary (event: event) : unit =
   | Server_message {push; has_updated_server_state=false} -> helper push
   | _ -> ()
 
+let rpc_lock = ref false
 
 let rpc
     (server_conn: server_conn)
     (ref_unblocked_time: float ref)
     (command: 'a ServerCommandTypes.t)
   : 'a Lwt.t =
-  let callback () push =
-    update_hh_server_state_if_necessary (Server_message {push; has_updated_server_state=false;});
-    Queue.enqueue server_conn.pending_messages {push; has_updated_server_state=true;}
+  let do_rpc () =
+    let callback () push =
+      update_hh_server_state_if_necessary (Server_message {push; has_updated_server_state=false;});
+      Queue.enqueue server_conn.pending_messages {push; has_updated_server_state=true;}
+    in
+    let%lwt result = ServerCommandLwt.rpc_persistent_lwt
+      (server_conn.ic, server_conn.oc) () callback command in
+    match result with
+    | Ok ((), res, start_server_handle_time) ->
+      ref_unblocked_time := start_server_handle_time;
+      Lwt.return res
+    | Error ((), Utils.Callstack _, ServerCommand.Remote_fatal_exception remote_e_data) ->
+      raise (Server_fatal_connection_exception remote_e_data)
+    | Error ((), Utils.Callstack _, ServerCommand.Remote_nonfatal_exception remote_e_data) ->
+      raise (Server_nonfatal_exception remote_e_data)
+    | Error ((), Utils.Callstack stack, e) ->
+      let message = Exn.to_string e in
+      raise (Server_fatal_connection_exception { Marshal_tools.message; stack; })
   in
-  let%lwt result = ServerCommandLwt.rpc_persistent_lwt
-    (server_conn.ic, server_conn.oc) () callback command in
-  match result with
-  | Ok ((), res, start_server_handle_time) ->
-    ref_unblocked_time := start_server_handle_time;
-    Lwt.return res
-  | Error ((), Utils.Callstack _, ServerCommand.Remote_fatal_exception remote_e_data) ->
-    raise (Server_fatal_connection_exception remote_e_data)
-  | Error ((), Utils.Callstack _, ServerCommand.Remote_nonfatal_exception remote_e_data) ->
-    raise (Server_nonfatal_exception remote_e_data)
-  | Error ((), Utils.Callstack stack, e) ->
-    let message = Exn.to_string e in
-    raise (Server_fatal_connection_exception { Marshal_tools.message; stack; })
+  let%lwt result = Lwt_utils.wrap_non_reentrant_section
+    ~name:"ClientLsp.rpc"
+    ~lock:rpc_lock
+    ~f:do_rpc
+  in
+  Lwt.return result
 
 let rpc_with_retry server_conn ref_unblocked_time command =
   ServerCommandTypes.Done_or_retry.call
@@ -1575,23 +1584,42 @@ let connect_after_hello
       let handle_file_edit (json: Hh_json.json) =
         let open Jsonrpc in
         let c = Jsonrpc.parse_message ~json ~timestamp:0.0 in
-        match c.method_ with
-        | "textDocument/didOpen" -> parse_didOpen c.params |> do_didOpen server_conn ignore
-        | "textDocument/didChange" -> parse_didChange c.params |> do_didChange server_conn ignore
-        | "textDocument/didClose" -> parse_didClose c.params |> do_didClose server_conn ignore
-        | _ -> failwith "should only buffer up didOpen/didChange/didClose"
+        let%lwt () =
+          match c.method_ with
+          | "textDocument/didOpen" ->
+            let%lwt () = parse_didOpen c.params
+              |> do_didOpen server_conn ignore
+            in
+            Lwt.return_unit
+          | "textDocument/didChange" ->
+            let%lwt () = parse_didChange c.params
+              |> do_didChange server_conn ignore
+            in
+            Lwt.return_unit
+          | "textDocument/didClose" ->
+            let%lwt () = parse_didClose c.params
+              |> do_didClose server_conn ignore
+            in
+            Lwt.return_unit
+          | _ -> failwith "should only buffer up didOpen/didChange/didClose"
+        in
+        Lwt.return_unit
       in
-      file_edits
-        |> ImmQueue.to_list
-        |> List.map ~f:handle_file_edit
-        |> Lwt.join
+      let%lwt () =
+        file_edits
+          |> ImmQueue.to_list
+          |> Lwt_list.iter_s handle_file_edit
+      in
+      Lwt.return_unit
     with e ->
       let message = Exn.to_string e in
       let stack = Printexc.get_backtrace () in
       raise (Server_fatal_connection_exception { Marshal_tools.message; stack; })
   in
 
-  rpc server_conn ignore (ServerCommandTypes.SUBSCRIBE_DIAGNOSTIC 0)
+  let%lwt result =
+    rpc server_conn ignore (ServerCommandTypes.SUBSCRIBE_DIAGNOSTIC 0) in
+  Lwt.return result
 
 
 let rec connect_client

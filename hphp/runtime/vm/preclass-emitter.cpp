@@ -383,12 +383,12 @@ PreClassRepoProxy::~PreClassRepoProxy() {
 
 void PreClassRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   {
-    std::stringstream ssCreate;
-    ssCreate << "CREATE TABLE " << m_repo.table(repoId, "PreClass")
-             << "(unitSn INTEGER, preClassId INTEGER, name TEXT,"
-                " hoistable INTEGER, extraData BLOB,"
-                " PRIMARY KEY (unitSn, preClassId));";
-    txn.exec(ssCreate.str());
+    auto createQuery = folly::sformat(
+      "CREATE TABLE {} "
+      "(unitSn INTEGER, preClassId INTEGER, name TEXT, hoistable INTEGER, "
+      " extraData BLOB, PRIMARY KEY (unitSn, preClassId));",
+      m_repo.table(repoId, "PreClass"));
+    txn.exec(createQuery);
   }
 }
 
@@ -398,11 +398,11 @@ void PreClassRepoProxy::InsertPreClassStmt
                                const StringData* name,
                                PreClass::Hoistable hoistable) {
   if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "PreClass")
-             << " VALUES(@unitSn, @preClassId, @name, @hoistable, "
-                "@extraData);";
-    txn.prepare(*this, ssInsert.str());
+    auto insertQuery = folly::sformat(
+      "INSERT INTO {} "
+      "VALUES(@unitSn, @preClassId, @name, @hoistable, @extraData);",
+      m_repo.table(m_repoId, "PreClass"));
+    txn.prepare(*this, insertQuery);
   }
 
   auto n = name->slice();
@@ -425,11 +425,12 @@ void PreClassRepoProxy::GetPreClassesStmt
                       ::get(UnitEmitter& ue) {
   RepoTxn txn(m_repo);
   if (!prepared()) {
-    std::stringstream ssSelect;
-    ssSelect << "SELECT preClassId,name,hoistable,extraData FROM "
-             << m_repo.table(m_repoId, "PreClass")
-             << " WHERE unitSn == @unitSn ORDER BY preClassId ASC;";
-    txn.prepare(*this, ssSelect.str());
+    auto selectQuery = folly::sformat(
+      "SELECT preClassId, name, hoistable, extraData "
+      "FROM {} "
+      "WHERE unitSn == @unitSn ORDER BY preClassId ASC;",
+      m_repo.table(m_repoId, "PreClass"));
+    txn.prepare(*this, selectQuery);
   }
   RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", ue.m_sn);

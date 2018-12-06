@@ -362,10 +362,10 @@ Repo::enumerateUnits(int repoId, bool preloadOnly, bool warn) {
 void Repo::InsertFileHashStmt::insert(RepoTxn& txn, const StringData* path,
                                       const MD5& md5) {
   if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "FileMd5")
-             << " VALUES(@path, @md5);";
-    txn.prepare(*this, ssInsert.str());
+    auto insertQuery = folly::sformat(
+      "INSERT INTO {} VALUES(@path, @md5);",
+      m_repo.table(m_repoId, "FileMd5"));
+    txn.prepare(*this, insertQuery);
   }
   RepoTxnQuery query(txn, *this);
   query.bindStaticString("@path", path);
@@ -377,13 +377,14 @@ RepoStatus Repo::GetFileHashStmt::get(const char *path, MD5& md5) {
   try {
     RepoTxn txn(m_repo);
     if (!prepared()) {
-      std::stringstream ssSelect;
-      ssSelect << "SELECT f.md5 FROM "
-               << m_repo.table(m_repoId, "FileMd5")
-               << " AS f, " << m_repo.table(m_repoId, "Unit")
-               << " AS u WHERE path == @path AND f.md5 == u.md5"
-               << " ORDER BY unitSn DESC LIMIT 1;";
-      txn.prepare(*this, ssSelect.str());
+      auto selectQuery = folly::sformat(
+        "SELECT f.md5 "
+        "FROM {} AS f, {} AS u "
+        "WHERE path == @path AND f.md5 == u.md5 "
+        "ORDER BY unitSn DESC LIMIT 1;",
+        m_repo.table(m_repoId, "FileMd5"),
+        m_repo.table(m_repoId, "Unit"));
+      txn.prepare(*this, selectQuery);
     }
     RepoTxnQuery query(txn, *this);
     query.bindText("@path", path, strlen(path));
@@ -459,9 +460,8 @@ void Repo::commitMd5(UnitOrigin unitOrigin, UnitEmitter* ue) {
 }
 
 std::string Repo::table(int repoId, const char* tablePrefix) {
-  std::stringstream ss;
-  ss << dbName(repoId) << "." << tablePrefix << "_" << repoSchemaId();
-  return ss.str();
+  return folly::sformat(
+    "{}.{}_{}", dbName(repoId), tablePrefix, repoSchemaId());
 }
 
 void Repo::exec(const std::string& sQuery) {
@@ -932,10 +932,9 @@ void Repo::attachLocal(const char* path, bool isWritable) {
     }
   }
   try {
-    std::stringstream ssAttach;
-    ssAttach << "ATTACH DATABASE '" << repoPath << "' as "
-             << dbName(RepoIdLocal) << ";";
-    exec(ssAttach.str());
+    auto attachQuery = folly::sformat(
+      "ATTACH DATABASE '{}' as {};", repoPath, dbName(RepoIdLocal));
+    exec(attachQuery);
     pragmas(RepoIdLocal);
   } catch (RepoExc& re) {
     // Failed to run pragmas on local DB - ignored
@@ -964,10 +963,9 @@ void Repo::pragmas(int repoId) {
 }
 
 void Repo::getIntPragma(int repoId, const char* name, int& val) {
-  std::stringstream ssPragma;
-  ssPragma << "PRAGMA " << dbName(repoId) << "." << name << ";";
+  auto pragmaQuery = folly::sformat("PRAGMA {}.{};", dbName(repoId), name);
   RepoStmt stmt(*this);
-  stmt.prepare(ssPragma.str());
+  stmt.prepare(pragmaQuery);
   RepoQuery query(stmt);
   query.step();
   query.getInt(0, val);
@@ -981,9 +979,9 @@ void Repo::setIntPragma(int repoId, const char* name, int val) {
 
   // Pragma writes must be executed outside transactions, since they may change
   // transaction behavior.
-  std::stringstream ssPragma;
-  ssPragma << "PRAGMA " << dbName(repoId) << "." << name << " = " << val << ";";
-  exec(ssPragma.str());
+  auto pragmaQuery = folly::sformat(
+    "PRAGMA {}.{} = {};", dbName(repoId), name, val);
+  exec(pragmaQuery);
   if (debug) {
     // Verify that the pragma had the desired effect.
     int newval = -1;
@@ -996,10 +994,9 @@ void Repo::setIntPragma(int repoId, const char* name, int val) {
 }
 
 void Repo::getTextPragma(int repoId, const char* name, std::string& val) {
-  std::stringstream ssPragma;
-  ssPragma << "PRAGMA " << dbName(repoId) << "." << name << ";";
+  auto pragmaQuery = folly::sformat("PRAGMA {}.{};", dbName(repoId), name);
   RepoStmt stmt(*this);
-  stmt.prepare(ssPragma.str());
+  stmt.prepare(pragmaQuery);
   RepoQuery query(stmt);
   const char* s;
   query.step();
@@ -1015,10 +1012,9 @@ void Repo::setTextPragma(int repoId, const char* name, const char* val) {
 
   // Pragma writes must be executed outside transactions, since they may change
   // transaction behavior.
-  std::stringstream ssPragma;
-  ssPragma <<
-    "PRAGMA " << dbName(repoId) << "." << name << " = '" << val << "';";
-  exec(ssPragma.str());
+  auto pragmaQuery = folly::sformat(
+    "PRAGMA {}.{} = {};", dbName(repoId), name, val);
+  exec(pragmaQuery);
   if (debug) {
     // Verify that the pragma had the desired effect.
     std::string newval = "?";
@@ -1054,12 +1050,12 @@ RepoStatus Repo::initSchema(int repoId, bool& isWritable,
 bool Repo::schemaExists(int repoId) {
   try {
     RepoTxn txn(*this);
-    std::stringstream ssSelect;
-    ssSelect << "SELECT product FROM " << table(repoId, "magic") << ";";
+    auto selectQuery = folly::sformat(
+      "SELECT product FROM {};", table(repoId, "magic"));
     RepoStmt stmt(*this);
     // If the DB is 'new' and hasn't been initialized yet then we expect this
     // prepare() to fail.
-    stmt.prepare(ssSelect.str());
+    stmt.prepare(selectQuery);
     // This SHOULDN'T fail - we create the table under a transaction - so if it
     // exists then it should have our magic value.
     RepoTxnQuery query(txn, stmt);
@@ -1079,24 +1075,22 @@ RepoStatus Repo::createSchema(int repoId, std::string& errorMsg) {
   try {
     RepoTxn txn(*this);
     {
-      std::stringstream ssCreate;
-      ssCreate << "CREATE TABLE " << table(repoId, "magic")
-               << "(product TEXT);";
-      txn.exec(ssCreate.str());
+      auto createQuery = folly::sformat(
+        "CREATE TABLE {} (product TEXT);", table(repoId, "magic"));
+      txn.exec(createQuery);
 
-      std::stringstream ssInsert;
-      ssInsert << "INSERT INTO " << table(repoId, "magic")
-               << " VALUES('" << kMagicProduct << "');";
-      txn.exec(ssInsert.str());
+      auto insertQuery = folly::sformat(
+        "INSERT INTO {} VALUES('{}');", table(repoId, "magic"), kMagicProduct);
+      txn.exec(insertQuery);
     }
     {
-      std::stringstream ssCreate;
-      ssCreate << "CREATE TABLE " << table(repoId, "FileMd5")
-               << "(path TEXT, md5 BLOB, UNIQUE(path, md5));";
-      txn.exec(ssCreate.str());
+      auto createQuery = folly::sformat(
+        "CREATE TABLE {} (path TEXT, md5 BLOB, UNIQUE(path, md5));",
+        table(repoId, "FileMd5"));
+      txn.exec(createQuery);
     }
-    txn.exec(folly::format("CREATE TABLE {} (data BLOB);",
-                           table(repoId, "GlobalData")).str());
+    txn.exec(folly::sformat("CREATE TABLE {} (data BLOB);",
+                           table(repoId, "GlobalData")));
     m_urp.createSchema(repoId, txn);
     m_pcrp.createSchema(repoId, txn);
     m_frp.createSchema(repoId, txn);

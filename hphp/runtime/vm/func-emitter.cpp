@@ -633,13 +633,12 @@ FuncRepoProxy::~FuncRepoProxy() {
 }
 
 void FuncRepoProxy::createSchema(int repoId, RepoTxn& txn) {
-  std::stringstream ssCreate;
-  ssCreate << "CREATE TABLE " << m_repo.table(repoId, "Func")
-           << "(unitSn INTEGER, funcSn INTEGER, preClassId INTEGER,"
-              " name TEXT, top INTEGER,"
-              " extraData BLOB,"
-              " PRIMARY KEY (unitSn, funcSn));";
-  txn.exec(ssCreate.str());
+  auto createQuery = folly::sformat(
+    "CREATE TABLE {} "
+    "(unitSn INTEGER, funcSn INTEGER, preClassId INTEGER, name TEXT, "
+    " top INTEGER, extraData BLOB, PRIMARY KEY (unitSn, funcSn));",
+    m_repo.table(repoId, "Func"));
+  txn.exec(createQuery);
 }
 
 void FuncRepoProxy::InsertFuncStmt
@@ -648,11 +647,11 @@ void FuncRepoProxy::InsertFuncStmt
                            Id preClassId, const StringData* name,
                            bool top) {
   if (!prepared()) {
-    std::stringstream ssInsert;
-    ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "Func")
-             << " VALUES(@unitSn, @funcSn, @preClassId, @name, "
-                "        @top, @extraData);";
-    txn.prepare(*this, ssInsert.str());
+    auto insertQuery = folly::sformat(
+      "INSERT INTO {} "
+      "VALUES(@unitSn, @funcSn, @preClassId, @name, @top, @extraData);",
+      m_repo.table(m_repoId, "Func"));
+    txn.prepare(*this, insertQuery);
   }
 
   BlobEncoder extraBlob;
@@ -671,12 +670,12 @@ void FuncRepoProxy::GetFuncsStmt
                   ::get(UnitEmitter& ue) {
   RepoTxn txn(m_repo);
   if (!prepared()) {
-    std::stringstream ssSelect;
-    ssSelect << "SELECT funcSn,preClassId,name,top,extraData "
-                "FROM "
-             << m_repo.table(m_repoId, "Func")
-             << " WHERE unitSn == @unitSn ORDER BY funcSn ASC;";
-    txn.prepare(*this, ssSelect.str());
+    auto selectQuery = folly::sformat(
+      "SELECT funcSn, preClassId, name, top, extraData "
+      "FROM {} "
+      "WHERE unitSn == @unitSn ORDER BY funcSn ASC;",
+      m_repo.table(m_repoId, "Func"));
+    txn.prepare(*this, selectQuery);
   }
   RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", ue.m_sn);

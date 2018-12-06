@@ -456,6 +456,17 @@ let get_tyvar_appears_contravariantly env var =
   let tvinfo = get_tvar_info env.tvenv var in
   tvinfo.appears_contravariantly
 
+let map_tyvar_bounds env old_var new_var f =
+  let old_tvinfo = get_tvar_info env.tvenv old_var in
+  let env, new_lower_bounds =
+    List.map_env env (TySet.elements old_tvinfo.lower_bounds) f in
+  let env, new_upper_bounds =
+    List.map_env env (TySet.elements old_tvinfo.upper_bounds) f in
+  let new_tvinfo =
+    { old_tvinfo with lower_bounds = TySet.of_list new_lower_bounds;
+                      upper_bounds = TySet.of_list new_upper_bounds } in
+  env_with_tvenv env (IMap.add new_var new_tvinfo env.tvenv)
+
 (* Conjoin a subtype proposition onto the subtype_prop in the environment *)
 let add_subtype_prop env prop =
   {env with subtype_prop = TL.conj env.subtype_prop prop}

@@ -59,7 +59,7 @@ let rec refine_shape field_name env shape =
  *)
 (*****************************************************************************)
 
-let rec shrink_shape pos field_name env shape =
+let rec shrink_shape ~seen_tyvars pos field_name env shape =
   let _, shape = Env.expand_type env shape in
   match shape with
   | _, Tshape (fields_known, fields) ->
@@ -73,9 +73,21 @@ let rec shrink_shape pos field_name env shape =
       let result = Reason.Rwitness pos, Tshape (fields_known, fields) in
       env, result
   | _, Tunresolved tyl ->
-      let env, tyl = List.map_env env tyl(shrink_shape pos field_name) in
+      let env, tyl =
+        List.map_env env tyl (shrink_shape ~seen_tyvars pos field_name) in
       let result = Reason.Rwitness pos, Tunresolved tyl in
       env, result
+  | r, Tvar var ->
+      begin match IMap.get var seen_tyvars with
+      | Some var' ->
+        env, (r, Tvar var')
+      | None ->
+        let var' = Env.fresh () in
+        let seen_tyvars = IMap.add var var' seen_tyvars in
+        let env = Env.map_tyvar_bounds env var var'
+          (shrink_shape ~seen_tyvars pos field_name) in
+        env, (r, Tvar var')
+      end
   | x ->
       env, x
 
@@ -206,8 +218,10 @@ let idx env p fty shape_ty field default =
 
 let remove_key p env shape_ty field  =
   match TUtils.shape_field_name env field with
-   | None -> env, (Reason.Rwitness (fst field), TUtils.tany env)
-   | Some field_name -> shrink_shape p field_name env shape_ty
+   | None ->
+     env, (Reason.Rwitness (fst field), TUtils.tany env)
+   | Some field_name ->
+     shrink_shape ~seen_tyvars:IMap.empty p field_name env shape_ty
 
 let to_collection env shape_ty res return_type =
   let mapper = object

@@ -22,7 +22,7 @@ let check_types env ((p, _), te) =
         match ety1 with
         | _, Tany -> true
         | _, (Tarraykind _ | Ttuple _ | Tshape _) -> true
-        | _, Tclass ((_, cn), _, _)
+        | _, Tclass ((_, cn), _)
           when cn = SN.Collections.cDict
             || cn = SN.Collections.cKeyset
             || cn = SN.Collections.cVec -> true

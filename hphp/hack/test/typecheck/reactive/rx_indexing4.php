@@ -2,6 +2,6 @@
 
 <<__Rx>>
 function f(<<__Mutable>>Vector<string> $m): void {
-  // ERROR
+  // OK
   $m[0] = "42";
 }

@@ -231,10 +231,9 @@ let log_position p f =
     indentEnv (Pos.string (Pos.to_absolute p)
       ^ (if n = 1 then "" else "[" ^ string_of_int n ^ "]")) f
 
-let log_subtype_prop ?(do_normalize = false) env message prop =
+let log_subtype_prop env message prop =
   lprintf (Tty.Bold Tty.Green) "%s: " message;
-  lprintf (Tty.Normal Tty.Green) "%s"
-    (Typing_print.subtype_prop ~do_normalize env prop);
+  lprintf (Tty.Normal Tty.Green) "%s" (Typing_print.subtype_prop env prop);
   lnewline ()
 
 (* Log the environment: local_types, subst, tenv and tpenv *)
@@ -288,9 +287,9 @@ let log_types p env items =
             lnewline ()) in
       go items)
 
-let log_prop ?(do_normalize = false) level p message env prop =
+let log_prop level p message env prop =
   log_with_level env "prop" level (fun () ->
-    log_position p (fun () -> log_subtype_prop ~do_normalize env message prop))
+    log_position p (fun () -> log_subtype_prop env message prop))
 
 let increment_feature_count env s =
   if GlobalOptions.tco_language_feature_logging (Env.get_tcopt env)

@@ -37,13 +37,11 @@ let global_opts = GlobalOptions.make
   ~po_disable_define:false
   ~po_allow_goto:false
   ~po_enable_concurrent:false
-  ~po_disable_decl:false
   ~tco_log_inference_constraints:false
   ~tco_disallow_ambiguous_lambda:false
   ~tco_disallow_array_typehint:false
   ~tco_disallow_array_literal:false
   ~tco_disallow_return_by_ref:false
-  ~tco_disallow_assign_by_ref:false
   ~tco_disallow_array_cell_pass_by_ref:false
   ~tco_untyped_nonstrict_lambda_parameters:false
   ~tco_language_feature_logging:false
@@ -57,7 +55,6 @@ let global_opts = GlobalOptions.make
   ~tco_new_inference:false
   ~ignored_fixme_codes: ISet.empty
   ~forward_compatibility_level: ForwardCompatibilityLevel.default
-  ~log_levels:SMap.empty
 
 let server_config = ServerConfig.set_tc_options server_config global_opts
 let server_config = ServerConfig.set_parser_options

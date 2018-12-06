@@ -43,7 +43,6 @@ let emit_function : A.fun_ * Closure_convert.hoist_kind -> Hhas_function.t list 
     else original_id in
   let scope = [Ast_scope.ScopeItem.Function ast_fun] in
   let is_return_by_ref = ast_fun.Ast.f_ret_by_ref in
-  let function_rx_level = Rx.rx_level_from_ast ast_fun.Ast.f_user_attributes in
   let function_body, function_is_generator, function_is_pair_generator =
     Emit_body.emit_body
       ~pos: ast_fun.A.f_span
@@ -52,7 +51,6 @@ let emit_function : A.fun_ * Closure_convert.hoist_kind -> Hhas_function.t list 
       ~is_memoize
       ~is_native
       ~is_async:function_is_async
-      ~is_rx_body:(function_rx_level <> Rx.NonRx)
       ~deprecation_info:(if is_memoize then None else deprecation_info)
       ~skipawaitable:(ast_fun.Ast.f_fun_kind = Ast_defs.FAsync)
       ~is_return_by_ref
@@ -69,6 +67,7 @@ let emit_function : A.fun_ * Closure_convert.hoist_kind -> Hhas_function.t list 
     then original_id else renamed_id in
   let is_interceptable =
     Interceptable.is_function_interceptable namespace ast_fun function_attributes in
+  let function_rx_level = Rx.rx_level_from_ast ast_fun.Ast.f_user_attributes in
   let normal_function =
     Hhas_function.make
       function_attributes

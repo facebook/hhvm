@@ -23,7 +23,6 @@ value hh_connect(value connector, value is_master);
 /*****************************************************************************/
 CAMLprim value hh_heap_size(void);
 CAMLprim value hh_log_level(void);
-CAMLprim value hh_sample_rate(void);
 CAMLprim value hh_hash_used_slots(void);
 CAMLprim value hh_hash_slots(void);
 
@@ -105,13 +104,7 @@ void hh_cleanup_sqlite(void);
 /* Dependency table. */
 CAMLprim value hh_save_dep_table_sqlite(
         value out_filename,
-        value build_revision,
-        value replace_state_after_saving
-);
-CAMLprim value hh_update_dep_table_sqlite(
-    value out_filename,
-    value build_revision,
-    value replace_state_after_saving
+        value build_revision
 );
 CAMLprim value hh_load_dep_table_sqlite(
         value in_filename,

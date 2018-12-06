@@ -259,7 +259,6 @@ val missing_double_quote: string
 val for_with_as_expression: string
 val sealed_val_not_classname: string
 val sealed_final: string
-val sealed_enum: string
 val interface_implements: string
 val memoize_on_lambda: string
 val memoize_lsb_on_non_static: string
@@ -340,8 +339,3 @@ val complex_lval_in_concurrent_block : string
 val duplicate_lval_in_concurrent_block : string
 val val_and_lval_in_concurrent_block : string
 val concurrent_is_disabled : string
-val misplaced_reactivity_annotation : string
-val mutability_annotation_on_static_method : string
-val mutability_annotation_on_inout_parameter : string
-val mutable_parameter_in_memoize_function: is_this: bool -> string
-val mutable_return_in_memoize_function: string

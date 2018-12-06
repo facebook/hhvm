@@ -1,6 +1,0 @@
-File "instance_method_then_invoke.php", line 12, characters 7-9:
-You are trying to access the member foo on a value whose class is unknown (Typing[4296])
-  File "instance_method_then_invoke.php", line 11, characters 12-13:
-  It is unknown because a type could not be determined here
-  File "instance_method_then_invoke.php", line 6, characters 31-31:
-    via this generic T

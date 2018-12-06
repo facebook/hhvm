@@ -1,0 +1,192 @@
+(library
+  (name typing_defs)
+  (wrapped false)
+  (modules
+    typing_defs
+    typing_reason)
+  (libraries
+    ast
+    core_kernel
+    heap_ident
+    nast
+    pos
+    utils_core))
+
+(library
+  (name tast)
+  (wrapped false)
+  (modules
+    ide_tast_cache
+    pp_type
+    tast
+    tast_env
+    tast_expand
+    tast_utils
+    tast_visitor
+    type_mapper
+    type_parameter_env
+    type_visitor
+    typing_arrays
+    typing_async
+    typing_coercion
+    typing_continuations
+    typing_dependent_type
+    typing_env
+    typing_env_from_def
+    typing_env_return_info
+    typing_env_types
+    typing_env_types_sig
+    typing_equality_check
+    typing_expand
+    typing_generic_constraint
+    typing_heap
+    typing_lazy_heap
+    typing_lenv_cont
+    typing_log
+    typing_logic
+    typing_mutability_env
+    typing_ops
+    typing_phase
+    typing_print
+    typing_reactivity
+    typing_set
+    typing_subtype
+    typing_taccess
+    typing_tdef
+    typing_unify
+    typing_unify_recursive
+    typing_utils
+    typing_visibility
+    typing_xhp)
+  (modules_without_implementation
+    typing_env_types_sig)
+  (libraries
+    common
+    decl
+    hackfmt_doc
+    hackfmt_env
+    hackfmt
+    logging
+    naming_attributes
+    naming_heap
+    symbol
+    typechecker_options
+    typing_defs)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name typed_positioned_syntax)
+  (wrapped false)
+  (modules
+    full_fidelity_typed_positioned_syntax
+    tast_type_collector)
+  (libraries
+    core_kernel
+    parser_syntax
+    tast)
+  (preprocess (pps ppx_deriving.std)))
+
+(library
+  (name typing_naming_body)
+  (wrapped false)
+  (modules
+    typing_func_terminality
+    typing_get_locals
+    typing_naming_body)
+  (libraries
+    ast
+    core_kernel
+    nast
+    parser_namespaces
+    tast
+    typing_defs))
+
+(library
+  (name typing)
+  (wrapped false)
+  (modules
+    nastCheck
+    nastInitCheck
+    typing
+    typing_alias
+    typing_array_access
+    typing_attributes
+    typing_disposable
+    typing_enum
+    typing_extends
+    typing_exts
+    typing_gather_defined
+    typing_generic
+    typing_infer_return
+    typing_instantiability
+    typing_lambda_ambiguous
+    typing_lenv
+    typing_memoize
+    typing_mutability
+    typing_regex
+    typing_requirements
+    typing_return
+    typing_sequencing
+    typing_suggest
+    typing_shapes
+    typing_structure
+    typing_try
+    typing_union
+    typing_variance)
+  (libraries
+    logging
+    pcre
+    procs_multi_worker
+    tast
+    tast_check
+    typing_naming_body))
+
+(library
+  (name coverage_level)
+  (wrapped false)
+  (modules
+    coverage_level)
+  (libraries
+    core_kernel
+    ide_rpc_api_types
+    tast
+    typing_defs))
+
+(library
+  (name typing_check)
+  (wrapped false)
+  (modules
+    typing_check_service
+    typing_check_utils)
+  (libraries
+    core_kernel
+    decl
+    errors
+    file_info
+    global_options
+    heap_global_storage
+    procs_bucket
+    typing))
+
+(library
+  (name typed_syntax_transforms)
+  (wrapped false)
+  (modules
+    typedSyntaxTransforms)
+  (libraries
+    core_kernel
+    parser_syntax
+    parser_syntax_tree
+    typed_positioned_syntax))
+
+(library
+  (name tast_typecheck)
+  (wrapped false)
+  (modules
+    delta
+    tast_typecheck)
+  (libraries
+    core_kernel
+    tast
+    typing
+    utils_core))

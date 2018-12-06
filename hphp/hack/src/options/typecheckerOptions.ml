@@ -51,22 +51,17 @@ let experimental_null_coalesce_assignment =
   GlobalOptions.tco_experimental_null_coalesce_assignment
 let experimental_reified_generics =
   GlobalOptions.tco_experimental_reified_generics
-let experimental_trait_method_redeclarations =
-  GlobalOptions.tco_experimental_trait_method_redeclarations
 
 let experimental_decl_linearization =
   GlobalOptions.tco_experimental_decl_linearization
 let experimental_track_subtype_prop =
   GlobalOptions.tco_experimental_track_subtype_prop
-let experimental_null_type =
-  GlobalOptions.tco_experimental_null_type
 
 let experimental_all = GlobalOptions.tco_experimental_all
 let migration_flags_all = GlobalOptions.tco_migration_flags_all
 let dynamic_view = GlobalOptions.tco_dynamic_view
 let disallow_array_as_tuple = GlobalOptions.tco_disallow_array_as_tuple
 let disallow_return_by_ref = GlobalOptions.tco_disallow_return_by_ref
-let disallow_assign_by_ref = GlobalOptions.tco_disallow_assign_by_ref
 let disallow_array_cell_pass_by_ref = GlobalOptions.tco_disallow_array_cell_pass_by_ref
 let disallow_implicit_returns_in_non_void_functions =
   GlobalOptions.tco_disallow_implicit_returns_in_non_void_functions
@@ -78,4 +73,3 @@ let disallow_anon_use_capture_by_ref = GlobalOptions.tco_disallow_anon_use_captu
 let new_inference = GlobalOptions.tco_new_inference
 let disallow_invalid_arraykey = GlobalOptions.tco_disallow_invalid_arraykey
 let forward_compatibility_level = GlobalOptions.forward_compatibility_level
-let log_levels = GlobalOptions.log_levels

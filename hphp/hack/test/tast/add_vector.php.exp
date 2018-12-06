@@ -2,10 +2,9 @@
     { Aast.AnnotatedAST.c_span = [12:1-26:2]; c_annotation = ();
       c_mode = <opaque>; c_final = false; c_is_xhp = false; c_kind = Cnormal;
       c_name = ([12:7-20], "\\MyPhonyVector"); c_tparams = <opaque>;
-      c_extends = []; c_uses = []; c_method_redeclarations = [];
-      c_xhp_attr_uses = []; c_xhp_category = []; c_req_extends = [];
-      c_req_implements = []; c_implements = []; c_consts = [];
-      c_typeconsts = []; c_static_vars = [];
+      c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = [];
+      c_req_extends = []; c_req_implements = []; c_implements = [];
+      c_consts = []; c_typeconsts = []; c_static_vars = [];
       c_vars =
       [{ Aast.AnnotatedAST.cv_final = false; cv_is_xhp = false;
          cv_visibility = Private;
@@ -110,34 +109,32 @@
      { Aast.AnnotatedAST.c_span = [28:1-11]; c_annotation = ();
        c_mode = <opaque>; c_final = false; c_is_xhp = false;
        c_kind = Cnormal; c_name = ([28:7-8], "\\X"); c_tparams = <opaque>;
-       c_extends = []; c_uses = []; c_method_redeclarations = [];
-       c_xhp_attr_uses = []; c_xhp_category = []; c_req_extends = [];
-       c_req_implements = []; c_implements = []; c_consts = [];
-       c_typeconsts = []; c_static_vars = []; c_vars = [];
-       c_constructor = None; c_static_methods = []; c_methods = [];
-       c_namespace = <opaque>; c_user_attributes = []; c_enum = None });
+       c_extends = []; c_uses = []; c_xhp_attr_uses = [];
+       c_xhp_category = []; c_req_extends = []; c_req_implements = [];
+       c_implements = []; c_consts = []; c_typeconsts = [];
+       c_static_vars = []; c_vars = []; c_constructor = None;
+       c_static_methods = []; c_methods = []; c_namespace = <opaque>;
+       c_user_attributes = []; c_enum = None });
   (Class
      { Aast.AnnotatedAST.c_span = [29:1-21]; c_annotation = ();
        c_mode = <opaque>; c_final = false; c_is_xhp = false;
        c_kind = Cnormal; c_name = ([29:7-8], "\\A"); c_tparams = <opaque>;
        c_extends = [([29:17-18], (Happly (([29:17-18], "\\X"), [])))];
-       c_uses = []; c_method_redeclarations = []; c_xhp_attr_uses = [];
-       c_xhp_category = []; c_req_extends = []; c_req_implements = [];
-       c_implements = []; c_consts = []; c_typeconsts = [];
-       c_static_vars = []; c_vars = []; c_constructor = None;
-       c_static_methods = []; c_methods = []; c_namespace = <opaque>;
-       c_user_attributes = []; c_enum = None });
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = [];
+       c_req_extends = []; c_req_implements = []; c_implements = [];
+       c_consts = []; c_typeconsts = []; c_static_vars = []; c_vars = [];
+       c_constructor = None; c_static_methods = []; c_methods = [];
+       c_namespace = <opaque>; c_user_attributes = []; c_enum = None });
   (Class
      { Aast.AnnotatedAST.c_span = [30:1-21]; c_annotation = ();
        c_mode = <opaque>; c_final = false; c_is_xhp = false;
        c_kind = Cnormal; c_name = ([30:7-8], "\\B"); c_tparams = <opaque>;
        c_extends = [([30:17-18], (Happly (([30:17-18], "\\X"), [])))];
-       c_uses = []; c_method_redeclarations = []; c_xhp_attr_uses = [];
-       c_xhp_category = []; c_req_extends = []; c_req_implements = [];
-       c_implements = []; c_consts = []; c_typeconsts = [];
-       c_static_vars = []; c_vars = []; c_constructor = None;
-       c_static_methods = []; c_methods = []; c_namespace = <opaque>;
-       c_user_attributes = []; c_enum = None });
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = [];
+       c_req_extends = []; c_req_implements = []; c_implements = [];
+       c_consts = []; c_typeconsts = []; c_static_vars = []; c_vars = [];
+       c_constructor = None; c_static_methods = []; c_methods = [];
+       c_namespace = <opaque>; c_user_attributes = []; c_enum = None });
   (Fun
      { Aast.AnnotatedAST.f_span = [32:1-37:2]; f_annotation = ();
        f_mode = <opaque>; f_ret = (Some ([32:37-41], (Hprim Tvoid)));
@@ -164,7 +161,7 @@
                      (New (
                         (([33:12-25], MyPhonyVector<[unresolved]>),
                          (CI (([33:12-25], "\\MyPhonyVector"), []))),
-                        [], [], ([33:12-25], (function(): _)))))
+                        [], [])))
                     ))));
               (Expr
                  (([34:3-19], void),
@@ -179,7 +176,7 @@
                      [(([34:11-18], B),
                        (New (
                           (([34:15-16], B), (CI (([34:15-16], "\\B"), []))),
-                          [], [], ([34:15-16], _))))
+                          [], [])))
                        ],
                      []))));
               (Expr
@@ -195,7 +192,7 @@
                      [(([35:11-18], A),
                        (New (
                           (([35:15-16], A), (CI (([35:15-16], "\\A"), []))),
-                          [], [], ([35:15-16], _))))
+                          [], [])))
                        ],
                      []))));
               (Expr

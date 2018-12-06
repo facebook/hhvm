@@ -37,7 +37,7 @@ let start_server_daemon ~informant_managed options log_link daemon_entry =
     end
   in
   let start_t = Unix.time () in
-  let state = ServerGlobalState.save (fun () -> ()) in
+  let state = ServerGlobalState.save () in
   let monitor_pid = Unix.getpid () in
   (* Setting some additional channels between monitor and server *)
   let parent_priority_fd, child_priority_fd =
@@ -115,12 +115,6 @@ module HhServerConfig = struct
     | _ ->
       let options = ServerArgs.set_mini_state_target options target_mini_state in
       start_hh_server ~informant_managed options
-
-  (* with_mini_state includes information about repo state (list of changed files)
-   * that could have changed between start and restart, so we can't re-use it, and
-   * need to fall back to querying for data again *)
-  let server_restart_options (options : server_start_options) =
-    ServerArgs.set_mini_state_target options None
 
   let kill_server process =
     try

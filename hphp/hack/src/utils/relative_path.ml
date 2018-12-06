@@ -17,7 +17,6 @@ type prefix =
   | Hhi
   | Dummy
   | Tmp
-  [@@deriving show]
 
 
 let root = ref None
@@ -51,8 +50,8 @@ let set_path_prefix prefix v =
   | Dummy -> raise (Failure "Dummy is always represented by an empty string")
   | _ -> path_ref_of_prefix prefix := Some v
 
-type t = prefix * string [@@deriving show]
-type relative_path = t
+type relative_path = prefix * string
+type t = relative_path
 
 let prefix (p : t) = fst p
 
@@ -100,26 +99,10 @@ let to_tmp (_, rest) = (Tmp, rest)
 
 let to_root (_, rest) = (Root, rest)
 
-module Set = struct
-  include Reordered_argument_set(Set.Make(S))
+let pp fmt rp = Format.pp_print_string fmt (S.to_string rp)
 
-  let pp fmt x =
-    Format.fprintf fmt "@[<2>{";
-    ignore @@ List.fold_left (elements x) ~init:false ~f:begin fun sep s ->
-      if sep then Format.fprintf fmt ";@ ";
-      pp fmt s;
-      true
-    end;
-    Format.fprintf fmt "@,}@]"
-
-  let show x = Format.asprintf "%a" pp x
-end
-
-module Map = struct
-  include Reordered_argument_map(MyMap.Make(S))
-  let pp pp_data = make_pp pp pp_data
-  let show pp_data x = Format.asprintf "%a" (pp pp_data) x
-end
+module Set = Reordered_argument_set(Set.Make(S))
+module Map = Reordered_argument_map(MyMap.Make(S))
 
 let create prefix s =
   let prefix_s = path_of_prefix prefix in

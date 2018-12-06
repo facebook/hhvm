@@ -16,7 +16,6 @@ module Env          = Typing_env
 module Reason       = Typing_reason
 module TUtils       = Typing_utils
 module Type         = Typing_ops
-module TMT          = Typing_make_type
 
 let rec refine_shape field_name env shape =
   let env, shape = Env.expand_type env shape in
@@ -170,11 +169,11 @@ let is_shape_field_required env field_name shape_ty =
  *     Shapes::idx(e1, sfn, e2) : t
  *
  *)
-let idx env p fty shape_ty field default =
+let idx env _p fty shape_ty field default =
   let env, shape_ty = Env.expand_type env shape_ty in
-  let env, res, tyvars = Env.fresh_unresolved_type_add_tyvars env p ISet.empty in
+  let env, res = Env.fresh_unresolved_type env in
   match TUtils.shape_field_name env field with
-  | None -> env, (Reason.Rwitness (fst field), TUtils.tany env), tyvars
+  | None -> env, (Reason.Rwitness (fst field), TUtils.tany env)
   | Some field_name ->
     let fake_super_shape_ty =
       make_idx_fake_super_shape
@@ -187,12 +186,11 @@ let idx env p fty shape_ty field default =
           shape_ty
           fake_super_shape_ty in
       env,
-      (if experiment_enabled env
+      if experiment_enabled env
            TypecheckerOptions.experimental_stronger_shape_idx_ret &&
          is_shape_field_required env field_name shape_ty
       then res
-      else TUtils.ensure_option env (fst fty) res),
-      tyvars
+      else TUtils.ensure_option env (fst fty) res
     | Some (default_pos, default_ty) ->
       let env =
         Type.sub_type (fst field) Reason.URparam env
@@ -202,7 +200,7 @@ let idx env p fty shape_ty field default =
         Type.sub_type default_pos Reason.URparam env
           default_ty
           res in
-      env, res, tyvars
+      env, res
 
 let remove_key p env shape_ty field  =
   match TUtils.shape_field_name env field with
@@ -246,9 +244,7 @@ let to_collection env shape_ty res return_type =
       | _ -> env, res
 
   end in
-  let env, ty =
-    mapper#on_type (Type_mapper.fresh_env env) shape_ty in
-  env, ty, ISet.empty
+  mapper#on_type (Type_mapper.fresh_env env) shape_ty
 
 let to_array env shape_ty res =
   to_collection env shape_ty res (fun r key value ->
@@ -256,4 +252,4 @@ let to_array env shape_ty res =
 
 let to_dict env shape_ty res =
   to_collection env shape_ty res (fun r key value ->
-    TMT.dict r key value)
+    (r, Tclass ((Reason.to_pos r, SN.Collections.cDict), [key; value])))

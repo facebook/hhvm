@@ -11,7 +11,7 @@
 (*****************************************************************************)
 (* Error module                                                              *)
 (*****************************************************************************)
-open Core_kernel
+open Hh_core
 open Utils
 
 let get_errorl_json el =
@@ -30,25 +30,25 @@ let get_errorl_json el =
 let print_errorl_json oc el =
   let res = get_errorl_json el in
   Hh_json.json_to_output oc res;
-  Out_channel.flush oc
+  flush oc
 
 let print_errorl is_stale_msg use_json el oc =
   if use_json then
     print_errorl_json oc el
   else begin
     if el = []
-    then Out_channel.output_string oc "No errors!\n"
+    then output_string oc "No errors!\n"
     else
       let sl = List.map ~f:Errors.to_string el in
-      let sl = List.dedup_and_sort ~compare:String.compare sl in
+      let sl = List.dedup ~compare:String.compare sl in
       List.iter ~f:begin fun s ->
         if !debug then begin
-          Out_channel.output_string stdout s;
-          Out_channel.flush stdout;
+          output_string stdout s;
+          flush stdout;
         end;
-        Out_channel.output_string oc s;
-        Out_channel.output_string oc "\n";
+        output_string oc s;
+        output_string oc "\n";
       end sl
   end;
-  Option.iter is_stale_msg ~f:(fun msg -> Out_channel.output_string oc msg);
-  Out_channel.flush oc
+  Option.iter is_stale_msg ~f:(fun msg -> output_string oc msg);
+  flush oc

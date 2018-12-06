@@ -68,19 +68,15 @@ module Done_or_retry = struct
   (* Note: this is designed to work with calls that always will succeed on second try
    * (the reason for retrying is a one time event that is resolved during first call).
    * If this ends up throwing, it's a bug in hh_server. *)
-  let rec call ~(f:unit -> 'a t Lwt.t) ~(depth:int) : 'a Lwt.t =
-    let%lwt () =
-      if depth = 2
-      then Lwt.fail Two_retries_in_a_row
-      else Lwt.return_unit
-    in
-    match%lwt f () with
-    | Done x -> Lwt.return x
+  let rec call ~(f:unit -> 'a t) ~(depth:int) : 'a =
+    if depth = 2 then raise Two_retries_in_a_row;
+    match f () with
+    | Done x -> x
     | Retry -> call ~f ~depth:(depth+1)
 
   (* Call the function returning Done_or_retry.t with at most one retry, expecting
    * that this is enough to yield a non-Retry value, which is returned *)
-  let call ~(f:unit -> 'a t Lwt.t) : 'a Lwt.t = call ~f ~depth:0
+  let call ~(f:unit -> 'a t) : 'a = call ~f ~depth:0
 
   (* Helper function useful when mapping over results from functions that (in addition
    * to Done_or_retry.t result) thread through some kind of environment. *)
@@ -219,7 +215,7 @@ type _ t =
   | DUMP_SYMBOL_INFO : string list -> Symbol_info_service.result t
   | REMOVE_DEAD_FIXMES : int list -> [`Ok of ServerRefactorTypes.patch list | `Error of string] t
   | IN_MEMORY_DEP_TABLE_SIZE : ((int, string) Pervasives.result) t
-  | SAVE_STATE : (string * bool * bool * bool) -> ((int, string) Pervasives.result) t
+  | SAVE_STATE : (string * bool * bool) -> ((int, string) Pervasives.result) t
   | SEARCH : string * string -> HackSearchService.result t
   | COVERAGE_COUNTS : string -> ServerCoverageMetricTypes.result t
   | LINT : string list -> ServerLintTypes.result t
@@ -250,7 +246,6 @@ type _ t =
   | NO_PRECHECKED_FILES: unit t
   | GEN_HOT_CLASSES: int -> string t
   | FUN_DEPS_BATCH : (string * int * int) list * bool -> string list t
-  | FUN_IS_LOCALLABLE_BATCH : (string * int * int) list -> string list t
 
 
 let is_disconnect_rpc : type a. a t -> bool = function
@@ -296,12 +291,14 @@ and busy_status =
   | Doing_global_typecheck of bool (* interruptible? *)
   | Done_global_typecheck of {is_truncated: bool; shown: int; total: int;}
 
-type 'a message_type =
-  | Push of push (* Only sent to persistent connections. *)
+type 'a persistent_connection_message_type =
+  | Push of push
   | Response of 'a * float (* records the time at which hh_server started handling *)
   | Hello
   (* Hello is the first message sent after handoff. It's used for both *)
-  (* persistent and non-persistent connections. *)
+  (* persistent and non-persistent connections. It's included in this  *)
+  (* type, though, because ocaml typing forces a single type to come   *)
+  (* Marshal.from_fd_with_preamble.                                    *)
   | Ping
   (* Pings can be sent to non-persistent connection after Hello and before
    * sending RPC response. *)

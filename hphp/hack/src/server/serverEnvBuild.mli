@@ -12,7 +12,6 @@ val make_genv:
   ServerConfig.t ->
   ServerLocalConfig.t ->
   SharedMem.handle ->
-  logging_init:(unit -> unit) ->
     ServerEnv.genv
 
 val default_genv: ServerEnv.genv

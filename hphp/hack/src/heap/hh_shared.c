@@ -453,8 +453,6 @@ static uintptr_t* counter = NULL;
  */
 static size_t* log_level = NULL;
 
-static double* sample_rate = NULL;
-
 static size_t* workers_should_exit = NULL;
 
 static size_t* allow_removes = NULL;
@@ -505,12 +503,8 @@ CAMLprim value hh_heap_size(void) {
 }
 
 CAMLprim value hh_log_level(void) {
-  return Val_long(*log_level);
-}
-
-CAMLprim value hh_sample_rate(void) {
   CAMLparam0();
-  CAMLreturn(caml_copy_double(*sample_rate));
+  CAMLreturn(Val_long(*log_level));
 }
 
 CAMLprim value hh_hash_used_slots(void) {
@@ -849,24 +843,21 @@ static void define_globals(char * shared_mem_init) {
   assert (CACHE_LINE_SIZE >= sizeof(size_t));
   log_level = (size_t*)(mem + 5*CACHE_LINE_SIZE);
 
-  assert (CACHE_LINE_SIZE >= sizeof(double));
-  sample_rate = (double*)(mem + 6*CACHE_LINE_SIZE);
+  assert (CACHE_LINE_SIZE >= sizeof(size_t));
+  workers_should_exit = (size_t*)(mem + 6*CACHE_LINE_SIZE);
 
   assert (CACHE_LINE_SIZE >= sizeof(size_t));
-  workers_should_exit = (size_t*)(mem + 7*CACHE_LINE_SIZE);
+  wasted_heap_size = (size_t*)(mem + 7*CACHE_LINE_SIZE);
 
   assert (CACHE_LINE_SIZE >= sizeof(size_t));
-  wasted_heap_size = (size_t*)(mem + 8*CACHE_LINE_SIZE);
+  allow_removes = (size_t*)(mem + 8*CACHE_LINE_SIZE);
 
   assert (CACHE_LINE_SIZE >= sizeof(size_t));
-  allow_removes = (size_t*)(mem + 9*CACHE_LINE_SIZE);
-
-  assert (CACHE_LINE_SIZE >= sizeof(size_t));
-  allow_dependency_table_reads = (size_t*)(mem + 10*CACHE_LINE_SIZE);
+  allow_dependency_table_reads = (size_t*)(mem + 9*CACHE_LINE_SIZE);
 
   mem += page_size;
   // Just checking that the page is large enough.
-  assert(page_size > 11*CACHE_LINE_SIZE + (int)sizeof(int));
+  assert(page_size > 10*CACHE_LINE_SIZE + (int)sizeof(int));
 
   /* File name we get in hh_load_dep_table_sqlite needs to be smaller than
    * page_size - it should be since page_size is quite big for a string
@@ -914,10 +905,7 @@ static size_t get_shared_mem_size(void) {
           heap_size + 2 * page_size);
 }
 
-static void init_shared_globals(
-  size_t config_log_level,
-  double config_sample_rate
-) {
+static void init_shared_globals(size_t config_log_level) {
   // Initial size is zero for global storage is zero
   global_storage[0] = 0;
   // Initialize the number of element in the table
@@ -925,7 +913,6 @@ static void init_shared_globals(
   *dcounter = 0;
   *counter = early_counter + 1;
   *log_level = config_log_level;
-  *sample_rate = config_sample_rate;
   *workers_should_exit = 0;
   *wasted_heap_size = 0;
   *allow_removes = 1;
@@ -1010,9 +997,7 @@ CAMLprim value hh_shared_init(
   my_pid = *master_pid;
 #endif
 
-  init_shared_globals(
-    Long_val(Field(config_val, 6)),
-    Double_val(Field(config_val, 7)));
+  init_shared_globals(Long_val(Field(config_val, 6)));
   // Checking that we did the maths correctly.
   assert(*heap + heap_size == shared_mem + shared_mem_size);
 
@@ -1413,12 +1398,6 @@ void hh_add_dep(value ocaml_dep) {
   uint64_t dep = Long_val(ocaml_dep);
   add_dep((uint32_t)(dep >> 31), (uint32_t)(dep & 0x7FFFFFFF));
   CAMLreturn0;
-}
-
-void kill_dep_used_slots(void) {
-  CAMLparam0();
-  memset(deptbl, 0, dep_size_b);
-  memset(deptbl_bindings, 0, bindings_size_b);
 }
 
 CAMLprim value hh_dep_used_slots(void) {
@@ -2051,8 +2030,6 @@ void hh_remove(value key) {
 // not at the end of saving the state.
 void hh_cleanup_sqlite(void) {
   CAMLparam0();
-
-  // Reset the SQLite database file name
   size_t page_size = getpagesize();
   memset(db_filename, 0, page_size);
   CAMLreturn0;
@@ -2227,24 +2204,6 @@ query_result_t get_dep_sqlite_blob_with_duration(
   return result;
 }
 
-static void hh_swap_in_db(sqlite3 *db_out) {
-  if (g_get_dep_select_stmt != NULL) {
-    assert_sql(sqlite3_clear_bindings(g_get_dep_select_stmt), SQLITE_OK);
-    assert_sql(sqlite3_reset(g_get_dep_select_stmt), SQLITE_OK);
-    assert_sql(sqlite3_finalize(g_get_dep_select_stmt), SQLITE_OK);
-    g_get_dep_select_stmt = NULL;
-  }
-
-  if (g_db != NULL) {
-    sqlite3_close_v2(g_db);
-    g_db = NULL;
-  }
-
-  g_db = db_out;
-
-  kill_dep_used_slots();
-}
-
 // Add all the entries in the in-memory deptable
 // into the connected database. This adds edges only, so the
 // resulting deptable may contain more edges than truly represented
@@ -2252,8 +2211,8 @@ static void hh_swap_in_db(sqlite3 *db_out) {
 // any (modulo bugs).
 static size_t hh_update_dep_table_helper(
     sqlite3* const db_out,
-    const char* const build_info,
-    const size_t replace_state_after_saving) {
+    const char* const build_info
+) {
   struct timeval start_t = { 0 };
   gettimeofday(&start_t, NULL);
   // Create header for verification
@@ -2270,7 +2229,7 @@ static size_t hh_update_dep_table_helper(
   assert_sql(sqlite3_exec(db_out, "BEGIN TRANSACTION", NULL, 0, NULL),
     SQLITE_OK);
 
-  // Create entries in the table
+  // Create entries on the table
   size_t slot = 0;
   size_t count = 0;
   size_t prev_count = 0;
@@ -2360,34 +2319,16 @@ static size_t hh_update_dep_table_helper(
       existing_rows_lookup_duration);
   fprintf(stderr, "Wrote %lu new rows\n", new_rows_count);
   fprintf(stderr, "Updated %lu existing rows\n", existing_rows_updated_count);
-
-  if (replace_state_after_saving) {
-    hh_swap_in_db(db_out);
-  } else {
-    destroy_prepared_stmt(&select_dep_stmt);
-    assert_sql(sqlite3_close(db_out), SQLITE_OK);
-    log_duration("Finished closing SQL connection", start_t);
-  }
-
+  destroy_prepared_stmt(&select_dep_stmt);
+  assert_sql(sqlite3_close(db_out), SQLITE_OK);
+  log_duration("Finished closing SQL connection", start_t);
   return edges_added;
-}
-
-static void set_db_filename(const char* const out_filename) {
-  size_t filename_len = strlen(out_filename);
-
-  /* Since we save the filename on the heap, and have allocated only
-   * getpagesize() space
-   */
-  assert(filename_len < getpagesize());
-
-  memcpy(db_filename, out_filename, filename_len);
-  db_filename[filename_len] = '\0';
 }
 
 static size_t hh_save_dep_table_helper_sqlite(
     const char* const out_filename,
-    const char* const build_info,
-    const size_t replace_state_after_saving) {
+    const char* const build_info
+) {
   // This can only happen in the master
   assert_master();
 
@@ -2396,18 +2337,9 @@ static size_t hh_save_dep_table_helper_sqlite(
   gettimeofday(&tv, NULL);
 
   sqlite3 *db_out = connect_and_create_dep_table_helper(out_filename);
-  size_t edges_added = hh_update_dep_table_helper(
-    db_out,
-    build_info,
-    replace_state_after_saving);
-
-  if (replace_state_after_saving) {
-    set_db_filename(out_filename);
-  }
-
+  size_t edges_added = hh_update_dep_table_helper(db_out, build_info);
   tv2 = log_duration("Writing dependency file with sqlite", tv);
   UNUSED(tv2);
-
   return edges_added;
 }
 
@@ -2418,28 +2350,23 @@ static size_t hh_save_dep_table_helper_sqlite(
  */
 CAMLprim value hh_save_dep_table_sqlite(
     value out_filename,
-    value build_revision,
-    value replace_state_after_saving) {
-  CAMLparam3(out_filename, build_revision, replace_state_after_saving);
+    value build_revision
+) {
+  CAMLparam2(out_filename, build_revision);
   char *out_filename_raw = String_val(out_filename);
   char *build_revision_raw = String_val(build_revision);
-  size_t replace_state_after_saving_raw = Bool_val(replace_state_after_saving);
-  size_t edges_added = hh_save_dep_table_helper_sqlite(
-    out_filename_raw,
-    build_revision_raw,
-    replace_state_after_saving_raw);
-
+  size_t edges_added =
+    hh_save_dep_table_helper_sqlite(out_filename_raw, build_revision_raw);
   CAMLreturn(Val_long(edges_added));
 }
 
 CAMLprim value hh_update_dep_table_sqlite(
     value out_filename,
-    value build_revision,
-    value replace_state_after_saving) {
-  CAMLparam3(out_filename, build_revision, replace_state_after_saving);
+    value build_revision
+) {
+  CAMLparam2(out_filename, build_revision);
   char *out_filename_raw = String_val(out_filename);
   char *build_revision_raw = String_val(build_revision);
-  size_t replace_state_after_saving_raw = Bool_val(replace_state_after_saving);
   sqlite3 *db_out = NULL;
 
   // This can only happen in the master
@@ -2450,16 +2377,7 @@ CAMLprim value hh_update_dep_table_sqlite(
   gettimeofday(&tv, NULL);
 
   assert_sql(sqlite3_open(out_filename_raw, &db_out), SQLITE_OK);
-
-  size_t edges_added = hh_update_dep_table_helper(
-    db_out,
-    build_revision_raw,
-    replace_state_after_saving_raw);
-
-  if (replace_state_after_saving_raw) {
-    set_db_filename(out_filename_raw);
-  }
-
+  size_t edges_added = hh_update_dep_table_helper(db_out, build_revision_raw);
   UNUSED(log_duration("Updated dependency file with sqlite", tv));
   CAMLreturn(Val_long(edges_added));
 }
@@ -2525,7 +2443,15 @@ CAMLprim value hh_load_dep_table_sqlite(
   assert_master();
 
   const char *filename = String_val(in_filename);
-  set_db_filename(filename);
+  size_t filename_len = strlen(filename);
+
+  /* Since we save the filename on the heap, and have allocated only
+   * getpagesize() space
+   */
+  assert(filename_len < getpagesize());
+
+  memcpy(db_filename, filename, filename_len);
+  db_filename[filename_len] = '\0';
 
   // SQLITE_OPEN_READONLY makes sure that we throw if the db doesn't exist
   assert_sql(sqlite3_open_v2(db_filename, &g_db, SQLITE_OPEN_READONLY, NULL),
@@ -2645,9 +2571,6 @@ CAMLprim value hh_get_dep_sqlite(value ocaml_key) {
   uint32_t *values = NULL;
   // The caller is required to pass a 32-bit node ID.
   const uint64_t key64 = Long_val(ocaml_key);
-
-  sqlite3_stmt *insert_stmt = NULL;
-
   query_result_t query_result =
     get_dep_sqlite_blob(g_db, key64, &g_get_dep_select_stmt);
   // Make sure we don't have malformed output
@@ -2679,8 +2602,7 @@ CAMLprim value hh_get_loaded_dep_table_filename() {
 
 CAMLprim value hh_save_dep_table_sqlite(
     value out_filename,
-    value build_revision,
-    value replace_state_after_saving
+    value build_revision
 ) {
   CAMLparam0();
   CAMLreturn(Val_long(0));
@@ -2688,8 +2610,7 @@ CAMLprim value hh_save_dep_table_sqlite(
 
 CAMLprim value hh_update_dep_table_sqlite(
     value out_filename,
-    value build_revision,
-    value replace_state_after_saving
+    value build_revision
 ) {
   CAMLparam0();
   CAMLreturn(Val_long(0));

@@ -55,7 +55,7 @@ let rec can_coerce ?seen:(seen=[]) env ty_have ty_expect =
   | _, (_, Tdynamic) -> Some env
 
   (* the Awaitable case *)
-  | (_, Tclass ((_, cls1), _, [ty1])), (_, Tclass ((_, cls2), _, [ty2]))
+  | (_, Tclass ((_, cls1), [ty1])), (_, Tclass ((_, cls2), [ty2]))
     when cls1 = SN.Classes.cAwaitable && cls1 = cls2 ->
     can_coerce env ty1 ty2
 

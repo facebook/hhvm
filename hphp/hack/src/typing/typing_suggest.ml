@@ -80,7 +80,7 @@ let save_type hint_kind env x arg =
             add_type env x_pos hint_kind arg;
         )
     | _, (Terr | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
-      | Tvar _ | Tabstract _ | Tclass _ | Ttuple _ | Tanon _
+      | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
       | Tfun _ | Tunresolved _ | Tobject | Tshape _) -> ()
   end
 
@@ -126,9 +126,8 @@ end
 let get_implements tcopt (_, x) =
   match Typing_lazy_heap.get_class tcopt x with
   | None -> SSet.empty
-  | Some cls ->
-      let tyl = Typing_classes_heap.all_ancestors cls in
-      Sequence.fold tyl ~init:SSet.empty ~f:begin fun set (_, ty) ->
+  | Some { tc_ancestors = tyl; _ } ->
+      SMap.fold begin fun _ ty set ->
         match ty with
         | _, Tapply ((_, x), []) -> SSet.add x set
         | _,
@@ -153,7 +152,7 @@ let get_implements tcopt (_, x) =
             | Tthis
           ) ->
             raise Exit
-      end
+      end tyl SSet.empty
 
 (** normalizes a "guessed" type. We basically want to bailout whenever
  * the inferred type doesn't resolve to a type hint.
@@ -171,20 +170,20 @@ and normalize_ tcopt = function
       let tyl = List.filter tyl begin function
         |  _, (Tany |  Tunresolved []) -> false
         | _, (Terr | Tnonnull | Tarraykind _ | Tprim _ | Toption _
-          | Tvar _ | Tabstract _ | Tclass _ | Ttuple _
+          | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
           | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject | Tshape _
           | Tdynamic
              ) -> true
       end in
       normalize_ tcopt (Tunresolved tyl)
-  | Tunresolved ((_, Tclass (x, e, [])) :: rl) ->
+  | Tunresolved ((_, Tclass (x, [])) :: rl) ->
       (* If we have A & B & C where all the elements are classes
        * we try to find a unique common ancestor.
        *)
       let rl = List.map rl begin function
-        | _, Tclass (x, _, []) -> x
+        | _, Tclass (x, []) -> x
         | _, (Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Tdynamic
-          | Toption _ | Tvar _ | Tabstract _ | Tclass _ | Ttuple _
+          | Toption _ | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _
           | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
           | Tshape _) -> raise Exit
       end in
@@ -194,7 +193,7 @@ and normalize_ tcopt = function
       end ~init:x_imp in
       (* is it unique? *)
       if SSet.cardinal set = 1
-      then Tclass ((Pos.none, SSet.choose set), e, [])
+      then Tclass ((Pos.none, SSet.choose set), [])
       else raise Exit
   | Tunresolved (x :: (y :: _ as rl)) when compare_types x y tcopt = 0 ->
       normalize_ tcopt (Tunresolved rl)
@@ -224,25 +223,25 @@ and normalize_ tcopt = function
   | Tprim _ as ty -> ty
   | Tvar _ -> raise Exit
   | Tfun _ -> raise Exit
-  | Tclass ((pos, name), e, tyl) when name.[0] = '\\' && String.rindex_exn name '\\' = 0 ->
+  | Tclass ((pos, name), tyl) when name.[0] = '\\' && String.rindex_exn name '\\' = 0 ->
       (* TODO this transform isn't completely legit; can cause a reference into
        * the global namespace to suddenly refer to a different class in the
        * local one. Figure something else out that doesn't involve spamming '\'
        * across FB code, maybe? See if anyone complains on GitHub? I have no
        * idea how bad this is in practice, I'm kinda hoping it's okay. *)
-      normalize_ tcopt (Tclass ((pos, strip_ns name), e, tyl))
-  | Tclass ((pos1, "Awaitable"), e, [(_, Toption (pos2, Tprim Nast.Tvoid))]) ->
+      normalize_ tcopt (Tclass ((pos, strip_ns name), tyl))
+  | Tclass ((pos1, "Awaitable"), [(_, Toption (pos2, Tprim Nast.Tvoid))]) ->
       (* Special case: Awaitable<?void> is nonsensical, but often
        * Awaitable<void> works. *)
-      Tclass ((pos1, "Awaitable"), e, [(pos2, Tprim Nast.Tvoid)])
-  | Tclass ((pos, name), e, tyl) ->
+      Tclass ((pos1, "Awaitable"), [(pos2, Tprim Nast.Tvoid)])
+  | Tclass ((pos, name), tyl) ->
       (* Handling xhp names *)
       let name =
         if String.contains name ':' && name.[0] <> ':'
         then ":"^name
         else name
       in
-      Tclass ((pos, name), e, List.map tyl (normalize tcopt))
+      Tclass ((pos, name), List.map tyl (normalize tcopt))
   | Ttuple tyl -> Ttuple (List.map tyl (normalize tcopt))
   | Tdynamic -> Tdynamic
   | Tanon _ -> raise Exit

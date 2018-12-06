@@ -7,12 +7,12 @@
  *
  *)
 
-open Core_kernel
 module SN = Naming_special_names
 
+open Hh_core
 open ServerCommandTypes.Symbol_info_service
 
-module Result_set = Caml.Set.Make(struct
+module Result_set = Set.Make(struct
   type t = ServerCommandTypes.Symbol_info_service.symbol_fun_call
   let compare a b =
     (* Descending order, since SymbolInfoService.format_result uses rev_append
@@ -30,7 +30,7 @@ let combine_name cur_class cur_caller =
   | Some c, Some f -> c ^ "::" ^ f
 
 let is_pseudofunction name =
-  List.mem ~equal:String.equal SN.PseudoFunctions.[empty; isset; unset;] name
+  List.mem SN.PseudoFunctions.[empty; isset; unset;] name
 
 class visitor = object (self)
   inherit [_] Tast_visitor.reduce as super

@@ -215,8 +215,8 @@ let error2057 = "First bracketed namespace occurrence here"
 let error2058 = "Property may not be abstract."
 let invalid_shape_field_name = "Shape field name must be a nonempty single-quoted string or a class constant"
 let error2060 = "Shape field name must not start with an integer"
-let error2061 = "Non-static instance variables are not allowed in abstract final
-  classes."
+let error2061 = "Non-static instance variables are not allowed in abstract " ^
+  "final classes."
 let error2062 = "Non-static methods are not allowed in abstract final classes."
 let error2063 = "Expected integer or string literal."
 let error2064 = "Reference methods are not allowed in strict mode."
@@ -452,7 +452,6 @@ let for_with_as_expression =
 
 let sealed_val_not_classname = "Values in sealed whitelist must be classname constants."
 let sealed_final = "Classes cannot be both final and sealed."
-let sealed_enum = "Enums cannot be sealed."
 
 let interface_implements =
   "Interfaces may not implement other interfaces or classes"
@@ -669,18 +668,3 @@ let val_and_lval_in_concurrent_block =
 
 let concurrent_is_disabled =
   "Concurrent is disabled"
-
-let misplaced_reactivity_annotation =
-  "Reactive annotations are not allowed on classes, interfaces or traits."
-
-let mutability_annotation_on_static_method =
-  "__Mutable and __MaybeMutable annotations are not allowed on static methods."
-
-let mutability_annotation_on_inout_parameter =
-  "__Mutable, __MaybeMutable and __OwnedMutable annotations are not allowed on inout parameters."
-
-let mutable_parameter_in_memoize_function ~is_this =
-  "Memoized functions cannot have mutable " ^ (if is_this then "$this." else "parameters.")
-
-let mutable_return_in_memoize_function =
-  "Memoized functions cannot return mutable objects."

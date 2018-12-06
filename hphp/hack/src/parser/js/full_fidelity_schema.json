@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2018-11-15-0001",
+  "version" : "2018-08-01-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -197,8 +197,8 @@
       "token_text" : "public" },
     { "token_kind" : "Real",
       "token_text" : "real" },
-    { "token_kind" : "Reify",
-      "token_text" : "reify" },
+    { "token_kind" : "Reified",
+      "token_text" : "reified" },
     { "token_kind" : "Require",
       "token_text" : "require" },
     { "token_kind" : "Require_once",

@@ -19,7 +19,6 @@ module Phase = Typing_phase
 module TySet = Typing_set
 module TR = Typing_reactivity
 module CT = Typing_subtype.ConditionTypes
-module Cls = Typing_classes_heap
 
 type env = {
   tenv : Env.env;
@@ -83,7 +82,7 @@ and expand_with_env_ ety_env env reason root ids =
          [_, id],
          Some cond_ty ->
          begin match CT.try_get_class_for_condition_type tenv cond_ty with
-         | Some (_, cls) when Cls.has_typeconst cls id ->
+         | Some (_, cls) when SMap.mem id cls.tc_typeconsts ->
           let cond_ty = (Reason.none, Taccess (cond_ty, ids)) in
           Option.value (TR.try_substitute_type_with_condition tenv cond_ty ty)
             ~default:(tenv, ty)
@@ -114,13 +113,10 @@ and expand env (root_reason, root_ty as root) =
       | Tany | Terr -> env, root
       | Tabstract (AKdependent (`cls _, []), Some ty)
       | Tabstract (AKnewtype (_, _), Some ty) | Toption ty -> expand env ty
-      | Tclass ((class_pos, class_name), _, tyl) ->
-          (* Legacy behaviour is to preserve exactness only on `this`
-           * and not through `this::T` *)
+      | Tclass ((class_pos, class_name), _) ->
           let env, ty =
             create_root_from_type_constant
-              env class_pos class_name
-               (root_reason, Tclass ((class_pos, class_name), Nonexact, tyl)) head in
+              env class_pos class_name root head in
           expand { env with ids = tail } ty
       | Tabstract (AKgeneric s, _) ->
         let dep_ty = generic_to_dep_ty s in
@@ -172,12 +168,10 @@ and expand env (root_reason, root_ty as root) =
           end in
           { env with dep_tys = [] } , (root_reason, Tunresolved tyl)
       | Tvar _ ->
-          if TypecheckerOptions.new_inference env.tenv.Env.genv.Env.tcopt
-          then env, root (* TODO: T36856670 *)
-          else
-            let tenv, ty = Env.expand_type env.tenv root in
-            let env = { env with tenv = tenv } in
-            expand env ty
+          let tenv, ty =
+            Env.expand_type env.tenv root in
+          let env = { env with tenv = tenv } in
+          expand env ty
       | Tanon _ | Tobject | Tnonnull | Tprim _ | Tshape _ | Ttuple _
       | Tarraykind _ | Tfun _ | Tabstract (_, _)  | Tdynamic ->
           let pos, tconst = head in
@@ -254,10 +248,10 @@ and get_typeconst env class_pos class_name pos tconst =
     let typeconst = match Env.get_typeconst env.tenv class_ tconst with
       | None ->
           Errors.smember_not_found
-            `class_typeconst pos ((Cls.pos class_), class_name) tconst `no_hint;
+            `class_typeconst pos (class_.tc_pos, class_name) tconst `no_hint;
           raise Exit
       | Some tc -> tc in
-    let tc_tuple = ((Cls.name class_), snd typeconst.ttc_name, pos) in
+    let tc_tuple = (class_.tc_name, snd typeconst.ttc_name, pos) in
     let env = {env with typeconsts_seen = tc_tuple :: env.typeconsts_seen} in
     (* Check for cycles. We do this by combining the name of the current class
      * with the remaining ids that we need to expand. If we encounter the same
@@ -278,7 +272,7 @@ and get_typeconst env class_pos class_name pos tconst =
     let env =
       { env with
         ety_env = { env.ety_env with type_expansions };
-        dep_tys = if (Cls.final class_) then []  else env.dep_tys;
+        dep_tys = if class_.tc_final then []  else env.dep_tys;
       } in
     Some (env, typeconst)
   with

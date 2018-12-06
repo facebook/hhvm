@@ -116,8 +116,6 @@ let instr_combine_and_resolve_type_struct i =
 let instr_reified_name i = instr (IMisc (ReifiedName i))
 let instr_reified_generic op i = instr (IMisc (ReifiedGeneric (op, i)))
 let instr_record_reified_generic i = instr (IMisc (RecordReifiedGeneric i))
-let instr_check_reified_generic_mismatch =
-  instr (IMisc CheckReifiedGenericMismatch)
 let instr_int i = instr (ILitConst (Int (Int64.of_int i)))
 let instr_int64 i = instr (ILitConst (Int i))
 let instr_int_of_string litstr =
@@ -806,7 +804,7 @@ let get_input_output_count i =
     | CheckThis | InitThisLoc _ | VerifyParamType _ | Self _ | Parent _
     | LateBoundCls _ | NativeImpl | AssertRATL _ | AssertRATStk _
     | BreakTraceHint| Silence _ -> (0, 0)
-    | StaticLocDef _ | StaticLocInit _ | CheckReifiedGenericMismatch -> (1, 0)
+    | StaticLocDef _ | StaticLocInit _ -> (1, 0)
     | OODeclExists _ | AKExists -> (2, 1)
     | VerifyOutType _ | VerifyRetTypeC | VerifyRetTypeV | CGetCUNop
     | UGetCUNop -> (1, 1)

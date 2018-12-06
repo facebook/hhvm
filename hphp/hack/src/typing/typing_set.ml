@@ -26,7 +26,7 @@ let pp fmt t =
     (List.fold_left
       ~f:(fun sep ty ->
         if sep then Format.fprintf fmt ";@ ";
-        Pp_type.pp_ty () fmt ty;
+        Pp_type.pp_ty fmt ty;
         true)
       ~init:false
       (elements t));

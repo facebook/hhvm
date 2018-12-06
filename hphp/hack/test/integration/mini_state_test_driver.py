@@ -12,21 +12,16 @@ import tempfile
 import common_tests
 
 from hh_paths import hh_server, hh_client
-from typing import List, NamedTuple, Union
+from typing import List, NamedTuple
 
 
 def write_echo_json(f, obj):
     f.write("echo %s\n" % shlex.quote(json.dumps(obj)))
 
 
-class SaveStateCommandResult(NamedTuple):
-    retcode: int
-    edges_added: Union[int, None]
-
-
 class SaveStateResult(NamedTuple):
     path: str
-    returned_values: SaveStateCommandResult
+    retcode: int
 
 
 class MiniStateTestDriver(common_tests.CommonTestDriver):
@@ -54,40 +49,12 @@ class MiniStateTestDriver(common_tests.CommonTestDriver):
         return os.path.join(cls.saved_state_dir, 'foo')
 
     @classmethod
-    def exec_save_command(
-            cls,
-            hh_command: List[str],
-            assert_edges_added: bool = False,
-            ignore_errors: bool = False) -> SaveStateCommandResult:
-        stdout, stderr, retcode = cls.proc_call(hh_command)
-        if retcode != 0 and not ignore_errors:
-            raise Exception('Failed to save! stdout: "%s" stderr: "%s"' %
-                            (stdout, stderr))
-
-        edges_added = None
-        if assert_edges_added is not None:
-            obj = json.loads(stdout)
-
-            if obj.get('saved_state_result', None) is not None:
-                saved_state_result = obj['saved_state_result']
-                edges_added = saved_state_result.get('edges_added', None)
-            else:
-                edges_added = obj.get('result', None)
-
-            if (edges_added is None):
-                raise Exception('Failed. Missing result field: "%s" stderr: "%s"' %
-                                (stdout, stderr))
-
-        return SaveStateCommandResult(retcode, edges_added)
-
-    @classmethod
     def save_command(
             cls,
             init_dir: str,
             saved_state_path: str = None,
             assert_edges_added: bool = False,
-            ignore_errors: bool = False,
-            replace_state_after_saving: bool = False) -> SaveStateCommandResult:
+            ignore_errors: bool = False) -> int:
 
         actual_saved_state_path: str = (
             saved_state_path if saved_state_path is not None else
@@ -103,31 +70,35 @@ class MiniStateTestDriver(common_tests.CommonTestDriver):
         if (ignore_errors):
             hh_command.append("--gen-saved-ignore-type-errors")
 
-        if (replace_state_after_saving):
-            hh_command.append("--replace-state-after-saving")
-
-        return cls.exec_save_command(
-            hh_command,
-            assert_edges_added,
-            ignore_errors)
+        stdout, stderr, retcode = cls.proc_call(hh_command)
+        if retcode != 0 and not ignore_errors:
+            raise Exception('Failed to save! stdout: "%s" stderr: "%s"' %
+                            (stdout, stderr))
+        if assert_edges_added:
+            obj = json.loads(stdout)
+            if obj['result'] is None:
+                raise Exception('Failed. Missing result field: "%s" stderr: "%s"' %
+                                (stdout, stderr))
+            if obj['result'] <= 0:
+                raise Exception('Failed. Expected some edges added: "%s" stderr: "%s"' %
+                                (stdout, stderr))
+        return retcode
 
     @classmethod
     def dump_saved_state(
             cls,
             assert_edges_added: bool = False,
-            ignore_errors: bool = False,
-            replace_state_after_saving: bool = False) -> SaveStateResult:
+            ignore_errors: bool = False) -> SaveStateResult:
         # Dump a saved state to a temporary directory.
         # Return the path to the saved state.
         saved_state_path = os.path.join(tempfile.mkdtemp(), 'new_saved_state')
-        result: SaveStateCommandResult = cls.save_command(
+        retcode: int = cls.save_command(
             cls.repo_dir,
             saved_state_path,
             assert_edges_added,
-            ignore_errors,
-            replace_state_after_saving)
+            ignore_errors)
 
-        return SaveStateResult(saved_state_path, result)
+        return SaveStateResult(saved_state_path, retcode)
 
     def write_local_conf(self):
         with open(os.path.join(self.repo_dir, 'hh.conf'), 'w') as f:
@@ -175,8 +146,12 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
             'corresponding_base_revision': '1',
             'is_cached': True,
             'deptable': saved_state_path + '.sql',
-            'changes': changed_files,
         }
+
+        if changed_files:
+            state['changes'] = changed_files
+        else:
+            state['changes'] = []
 
         with_state_arg = {
             'data_dump': state
@@ -195,7 +170,7 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
 
     def check_cmd(
         self,
-        expected_output: List[str],
+        expected_output,
         stdin=None,
         options=None,
         assert_loaded_mini_state=True

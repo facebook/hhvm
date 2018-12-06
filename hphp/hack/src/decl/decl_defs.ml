@@ -7,7 +7,6 @@
  *
  *)
 open Typing_defs
-open Pp_type
 
 (* A substitution context contains all the information necessary for
  * changing the type of an inherited class element to the class that is
@@ -40,10 +39,9 @@ type subst_context = {
   sc_subst            : decl ty SMap.t;
   sc_class_context    : string;
   sc_from_req_extends : bool;
-} [@@deriving show]
+}
 
 type source_type = Child | Parent | Trait | XHPAttr | Interface | ReqImpl | ReqExtends
-  [@@deriving show]
 
 let source_type_to_string = function
   | Child -> "child"
@@ -65,9 +63,9 @@ type mro_element = {
     TParent, mro_source for TParent would be Parent for the linearization of T, but
     Trait for the linearization of C.) *)
   mro_source : source_type;
-} [@@deriving show]
+}
 
-type linearization = mro_element list [@@deriving show]
+type linearization = mro_element list
 
 type decl_class_type = {
   dc_need_init           : bool;
@@ -99,12 +97,12 @@ type decl_class_type = {
   dc_sealed_whitelist    : SSet.t option;
   dc_xhp_attr_deps       : SSet.t;
   dc_enum_type           : enum_type option;
-  dc_decl_errors         : Errors.t option [@opaque];
+  dc_decl_errors         : Errors.t option;
   (* this field is used to prevent condition types being filtered
        in Decl_redecl_service.is_dependent_class_of_any *)
   dc_condition_types     : SSet.t;
   dc_linearization       : linearization;
-} [@@deriving show]
+}
 
 (* name of condition type for conditional reactivity of methods.
    If None - method is unconditionally reactive *)

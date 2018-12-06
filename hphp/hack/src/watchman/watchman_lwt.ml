@@ -20,14 +20,10 @@ struct
   let (>|=) = Lwt.(>|=)
   let return = Lwt.return
 
-  external reraise : exn -> 'a = "%reraise"
-
   let catch ~f ~catch = Lwt.catch f (fun e ->
-    match e with
-    | Lwt.Canceled -> reraise e
-    | e ->
-      catch ~stack:(Printexc.get_backtrace ()) e
-  )
+    (* TODO(ljw): what if the backtract has been corrupted by the time we get here? *)
+    let dodgy_stack = Printexc.get_backtrace () in
+    catch ~stack:dodgy_stack e)
 
   let list_fold_values l ~init ~f =
     Lwt_list.fold_left_s f init l
@@ -95,9 +91,8 @@ struct
       try%lwt
         f conn
       with e ->
-        let e = Exception.wrap e in
         let%lwt () = close_connection conn in
-        Exception.reraise e
+        raise e
     in
     let%lwt () = close_connection conn in
     Lwt.return result

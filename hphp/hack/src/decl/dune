@@ -1,0 +1,12 @@
+(library
+  (name decl)
+  (wrapped false)
+  (libraries
+    heap_global_storage
+    naming
+    naming_heap
+    naming_attributes
+    nast_pos_mapper
+    parser_heap
+    procs_multi_worker
+    typing_defs))

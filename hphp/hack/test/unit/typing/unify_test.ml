@@ -15,7 +15,6 @@ let global_options =
     ~po_disable_define:false
     ~po_allow_goto:false
     ~po_enable_concurrent:false
-    ~po_disable_decl:false
     ~tco_log_inference_constraints:false
     ~tco_user_attrs:None
     ~tco_experimental_features:TypecheckerOptions.experimental_all
@@ -28,7 +27,6 @@ let global_options =
     ~tco_disallow_array_typehint:false
     ~tco_disallow_array_literal:false
     ~tco_disallow_return_by_ref:false
-    ~tco_disallow_assign_by_ref:false
     ~tco_disallow_array_cell_pass_by_ref:false
     ~tco_untyped_nonstrict_lambda_parameters:false
     ~tco_language_feature_logging:false
@@ -42,7 +40,6 @@ let global_options =
     ~tco_new_inference:false
     ~ignored_fixme_codes:ISet.empty
     ~forward_compatibility_level:ForwardCompatibilityLevel.default
-    ~log_levels:SMap.empty
 
 let empty_env = Typing_env.empty global_options Relative_path.default None
 

@@ -17,8 +17,6 @@ module Reason       = Typing_reason
 module Subst        = Decl_subst
 module SubType      = Typing_subtype
 module TUtils       = Typing_utils
-module TMT          = Typing_make_type
-module Cls          = Typing_classes_heap
 
 let raise_xhp_required pos ureason ty =
   let ty_str = Typing_print.error (snd ty) in
@@ -28,9 +26,8 @@ let raise_xhp_required pos ureason ty =
 (**
  * Given class info, produces the subset of props that are XHP attributes
  *)
-let xhp_attributes_for_class info: (string * class_elt) Sequence.t =
-  Cls.props info
-  |> Sequence.filter ~f:(fun (_, elt_) -> elt_.ce_is_xhp_attr)
+let xhp_attributes_for_class info: Typing_defs.class_elt SMap.t =
+  SMap.filter (fun _ elt_ -> elt_.ce_is_xhp_attr) info.tc_props
 
 (**
  * Walks a type and gathers all the XHP, adding an error when we encounter a
@@ -63,10 +60,10 @@ let rec walk_and_gather_xhp_ ~env ~ureason ~pos cty =
         (env, acc' @ acc), ty)
       in
       env, acc
-  | Tclass ((_, c), _, tyl) -> begin
+  | Tclass ((_, c), tyl) -> begin
       (* Here's where we actually check the declaration *)
       match Env.get_class env c with
-      | Some class_ when (Cls.is_xhp class_) -> (env, [cty, tyl, class_])
+      | Some class_ when class_.tc_is_xhp -> (env, [cty, tyl, class_])
       | _ -> (raise_xhp_required pos ureason cty; env, [])
   end
   | (Tnonnull | Tarraykind _ | Toption _
@@ -78,21 +75,19 @@ let rec walk_and_gather_xhp_ ~env ~ureason ~pos cty =
  * list of possible attributes for typechecking the spread operator.
  *)
 and get_spread_attributes env pos onto_xhp cty =
-  let onto_attrs =
-    xhp_attributes_for_class onto_xhp
-    |> Sequence.fold ~init:SSet.empty ~f:(fun acc (k, _) -> SSet.add k acc) in
+  let onto_attrs = xhp_attributes_for_class onto_xhp in
   let env, possible_xhp =
     walk_and_gather_xhp_ ~env ~ureason:Reason.URxhp_spread ~pos cty in
   let xhp_to_attrs env (xhp_ty, tparams, xhp_info) =
     let attrs = xhp_attributes_for_class xhp_info in
     (* Compute the intersection and then localize the types *)
-    let attrs = Sequence.filter attrs (fun (k, _) -> SSet.mem k onto_attrs) in
+    let attrs = SMap.filter (fun k _ -> SMap.mem k onto_attrs) attrs in
     (* XHP does not allow generics in the class declaration, so
      * we don't need to perform any substitutions *)
     let ety_env = {
       type_expansions = [];
       this_ty = xhp_ty;
-      substs = Subst.make (Cls.tparams xhp_info) tparams;
+      substs = Subst.make xhp_info.tc_tparams tparams;
       from_class = None;
       validate_dty = None;
     } in
@@ -100,7 +95,7 @@ and get_spread_attributes env pos onto_xhp cty =
       let lazy ty = ce.ce_type in
       let env, ty = Phase.localize ~ety_env env ty in
       env, ((pos, k), (pos, ty))
-    end env (Sequence.to_list attrs)
+    end env (SMap.bindings attrs)
   in
   let env, attrs = List.map_env ~f:xhp_to_attrs env possible_xhp in
   env, List.concat attrs
@@ -113,10 +108,11 @@ and get_spread_attributes env pos onto_xhp cty =
 let is_xhp_child env pos ty =
   let reason = Reason.Rwitness pos in
   (* ?XHPChild *)
-  let ty_child = TMT.class_type reason SN.Classes.cXHPChild [] in
+  let ty_child = reason, Tclass ((Pos.none, SN.Classes.cXHPChild), []) in
   let ty_child = reason, Toption ty_child in
   (* Any ?Traversable *)
-  let ty_traversable = TMT.traversable reason (Reason.none, TUtils.tany env) in
+  let ty_traversable =
+    reason, Tclass ((Pos.none, SN.Collections.cTraversable), [Reason.none, TUtils.tany env]) in
   let ty_traversable = reason, Toption ty_traversable in
   let tys = [ty_child; ty_traversable] in
   List.exists ~f:(fun super -> SubType.is_sub_type env ty super) tys

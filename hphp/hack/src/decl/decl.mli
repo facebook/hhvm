@@ -12,6 +12,21 @@
 *)
 exception Decl_not_found of string
 
+val fun_reactivity :
+  Decl_env.env ->
+  Nast.user_attribute list ->
+  Typing_defs.reactivity
+
+val fun_reactivity_opt :
+  Decl_env.env ->
+  Nast.user_attribute list ->
+  Typing_defs.reactivity option
+
+val condition_type_from_attributes:
+  Decl_env.env ->
+  Nast.user_attribute list ->
+  Typing_defs.decl Typing_defs.ty option
+
 (*
  * This function works by side effects. It is adding in the
  * Naming_heap the nast produced from the ast passed as a parameter

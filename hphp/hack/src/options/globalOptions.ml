@@ -24,14 +24,12 @@ type t = {
   po_disable_define : bool;
   po_allow_goto: bool;
   po_enable_concurrent : bool;
-  po_disable_decl : bool;
   tco_log_inference_constraints : bool;
   tco_disallow_ambiguous_lambda : bool;
   tco_disallow_array_typehint: bool;
   tco_disallow_array_literal: bool;
   tco_untyped_nonstrict_lambda_parameters: bool;
   tco_disallow_return_by_ref: bool;
-  tco_disallow_assign_by_ref: bool;
   tco_disallow_array_cell_pass_by_ref: bool;
   tco_language_feature_logging : bool;
   tco_unsafe_rx : bool;
@@ -44,7 +42,6 @@ type t = {
   tco_disallow_invalid_arraykey : bool;
   ignored_fixme_codes : ISet.t;
   forward_compatibility_level : ForwardCompatibilityLevel.t;
-  log_levels : int SMap.t;
 } [@@deriving show]
 
 let tco_experimental_instanceof = "instanceof"
@@ -135,11 +132,6 @@ let tco_experimental_null_coalesce_assignment = "null_coalesce_assignment"
 let tco_experimental_reified_generics = "reified_generics"
 
 (**
- * Enable trait method redeclarations, i.e. public function f(): void = T1::f;
- *)
-let tco_experimental_trait_method_redeclarations = "trait_method_redeclarations"
-
-(**
  * Enable declaration linearization
  *)
 let tco_experimental_decl_linearization = "decl_linearization"
@@ -148,11 +140,6 @@ let tco_experimental_decl_linearization = "decl_linearization"
  * Enable keeping track of the current subtype proposition in the environment.
  *)
 let tco_experimental_track_subtype_prop = "track_subtype_prop"
-
-(**
- * Enable the `null` typehint.
- *)
-let tco_experimental_null_type = "null_type"
 
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
@@ -172,10 +159,8 @@ let tco_experimental_all =
      tco_experimental_no_trait_reuse;
      tco_experimental_null_coalesce_assignment;
      tco_experimental_reified_generics;
-     tco_experimental_trait_method_redeclarations;
      tco_experimental_decl_linearization;
      tco_experimental_track_subtype_prop;
-     tco_experimental_null_type;
    ]
 
 let tco_migration_flags_all =
@@ -203,14 +188,12 @@ let default = {
  po_disable_define = false;
  po_allow_goto = true;
  po_enable_concurrent = false;
- po_disable_decl = false;
  tco_log_inference_constraints = false;
  tco_disallow_ambiguous_lambda = false;
  tco_disallow_array_typehint = false;
  tco_disallow_array_literal = false;
  tco_untyped_nonstrict_lambda_parameters = false;
  tco_disallow_return_by_ref = false;
- tco_disallow_assign_by_ref = false;
  tco_disallow_array_cell_pass_by_ref = false;
  tco_language_feature_logging = false;
  tco_unsafe_rx = true;
@@ -223,7 +206,6 @@ let default = {
  tco_disallow_invalid_arraykey = false;
  ignored_fixme_codes = Errors.default_ignored_fixme_codes;
  forward_compatibility_level = ForwardCompatibilityLevel.default;
- log_levels = SMap.empty;
 }
 
 (* Use this instead of default when you don't have access to a project
@@ -247,7 +229,6 @@ let make ~tco_assume_php
          ~po_disable_define
          ~po_allow_goto
          ~po_enable_concurrent
-         ~po_disable_decl
          ~tco_log_inference_constraints
          ~tco_user_attrs
          ~tco_experimental_features
@@ -261,7 +242,6 @@ let make ~tco_assume_php
          ~tco_disallow_array_literal
          ~tco_untyped_nonstrict_lambda_parameters
          ~tco_disallow_return_by_ref
-         ~tco_disallow_assign_by_ref
          ~tco_disallow_array_cell_pass_by_ref
          ~tco_language_feature_logging
          ~tco_unsafe_rx
@@ -273,8 +253,7 @@ let make ~tco_assume_php
          ~tco_new_inference
          ~tco_disallow_invalid_arraykey
          ~ignored_fixme_codes
-         ~forward_compatibility_level
-         ~log_levels = {
+         ~forward_compatibility_level = {
                    tco_assume_php;
                    tco_safe_array;
                    tco_safe_vector_array;
@@ -292,14 +271,12 @@ let make ~tco_assume_php
                    po_disable_define;
                    po_allow_goto;
                    po_enable_concurrent;
-                   po_disable_decl;
                    tco_log_inference_constraints;
                    tco_disallow_ambiguous_lambda;
                    tco_disallow_array_typehint;
                    tco_disallow_array_literal;
                    tco_untyped_nonstrict_lambda_parameters;
                    tco_disallow_return_by_ref;
-                   tco_disallow_assign_by_ref;
                    tco_disallow_array_cell_pass_by_ref;
                    tco_language_feature_logging;
                    tco_unsafe_rx;
@@ -311,7 +288,6 @@ let make ~tco_assume_php
                    tco_new_inference;
                    tco_disallow_invalid_arraykey;
                    forward_compatibility_level;
-                   log_levels;
         }
 let tco_assume_php t = t.tco_assume_php
 let tco_safe_array t = t.tco_safe_array
@@ -334,7 +310,6 @@ let po_disable_variable_variables t = t.po_disable_variable_variables
 let po_disable_define t = t.po_disable_define
 let po_allow_goto t = t.po_allow_goto
 let po_enable_concurrent t = t.po_enable_concurrent
-let po_disable_decl t = t.po_disable_decl
 
 let tco_log_inference_constraints t = t.tco_log_inference_constraints
 let po_enable_hh_syntax_for_hhvm t = t.po_enable_hh_syntax_for_hhvm
@@ -344,7 +319,6 @@ let tco_disallow_array_typehint t = t.tco_disallow_array_typehint
 let tco_disallow_array_literal t = t.tco_disallow_array_literal
 let tco_untyped_nonstrict_lambda_parameters t = t.tco_untyped_nonstrict_lambda_parameters
 let tco_disallow_return_by_ref t = t.tco_disallow_return_by_ref
-let tco_disallow_assign_by_ref t = t.tco_disallow_assign_by_ref
 let tco_disallow_array_cell_pass_by_ref t = t.tco_disallow_array_cell_pass_by_ref
 let tco_language_feature_logging t = t.tco_language_feature_logging
 let tco_unsafe_rx t = t.tco_unsafe_rx
@@ -359,4 +333,3 @@ let tco_new_inference t = t.tco_new_inference
 let tco_disallow_invalid_arraykey t = t.tco_disallow_invalid_arraykey
 let ignored_fixme_codes t = t.ignored_fixme_codes
 let forward_compatibility_level t = t.forward_compatibility_level
-let log_levels t = t.log_levels

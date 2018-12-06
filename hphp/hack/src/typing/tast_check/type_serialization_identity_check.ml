@@ -84,8 +84,8 @@ let rec strip_ty : type a. a ty -> a ty = fun ty ->
       Tabstract (abstract_kind, strip_opt ty_opt)
     | Tunresolved tyl ->
       Tunresolved (strip_tyl tyl)
-    | Tclass (sid, exact, tyl) ->
-      Tclass (sid, exact, strip_tyl tyl)
+    | Tclass (sid, tyl) ->
+      Tclass (sid, strip_tyl tyl)
 
     | Tfun {
         ft_is_coroutine;

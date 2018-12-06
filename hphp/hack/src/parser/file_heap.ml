@@ -20,7 +20,7 @@ type disk_type = Disk of string | Ide of string
 
 exception File_heap_stale
 
-module FileHeap = SharedMem.WithCache (SharedMem.ProfiledImmediate) (Relative_path.S) (struct
+module FileHeap = SharedMem.WithCache (Relative_path.S) (struct
     type t = disk_type
     let prefix = Prefix.make()
     let description = "Disk"

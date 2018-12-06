@@ -1,2 +1,2 @@
-File "mutable_on_static.php", line 4, characters 3-74:
-__Mutable and __MaybeMutable annotations are not allowed on static methods. (Parsing[1002])
+File "mutable_on_static.php", line 4, characters 11-19:
+<<__Mutable>> attribute is not allowed on static methods. (NastCheck[3075])

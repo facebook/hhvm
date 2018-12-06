@@ -22,7 +22,6 @@ module TUtils = Typing_utils
 module Inst = Decl_instantiate
 module Phase = Typing_phase
 module SN = Naming_special_names
-module Cls = Typing_classes_heap
 
 (*****************************************************************************)
 (* Helpers *)
@@ -70,8 +69,8 @@ let check_visibility parent_class_elt class_elt =
 
 (* Check that all the required members are implemented *)
 let check_members_implemented check_private parent_reason reason
-    (_, parent_members, get_member, _) =
-  Sequence.iter parent_members begin fun (member_name, class_elt) ->
+    (_, parent_members, members, _) =
+  SMap.iter begin fun member_name class_elt ->
     match class_elt.ce_visibility with
       | Vprivate _ when not check_private -> ()
       | Vprivate _ ->
@@ -82,12 +81,12 @@ let check_members_implemented check_private parent_reason reason
          * won't have access to private members of the grandparent
          * trait *)
         ()
-      | _ when Option.is_none (get_member member_name) ->
+      | _ when not (SMap.mem member_name members) ->
         let lazy (pos, _) = class_elt.ce_type in
         let defn_reason = Reason.to_pos pos in
         Errors.member_not_implemented member_name parent_reason reason defn_reason
       | _ -> ()
-  end
+  end parent_members
 
 (* When constant is overridden we need to check if the type is
  * compatible with the previous type defined in the parent.
@@ -133,15 +132,15 @@ let check_types_for_const env
 let check_ambiguous_inheritance f parent child pos class_ origin =
     Errors.try_when
       (f parent child)
-      ~when_: (fun () -> (Cls.name class_) <> origin &&
+      ~when_: (fun () -> class_.tc_name <> origin &&
         Errors.has_no_errors (f child parent))
       ~do_: (fun error ->
-        Errors.ambiguous_inheritance pos (Cls.name class_) origin error)
+        Errors.ambiguous_inheritance pos class_.tc_name origin error)
 
 let should_check_params parent_class class_ =
   let class_known =
-    if use_parent_for_known then (Cls.members_fully_known parent_class)
-    else (Cls.members_fully_known class_) in
+    if use_parent_for_known then parent_class.tc_members_fully_known
+    else class_.tc_members_fully_known in
   let check_params = class_known || check_partially_known_method_params in
   class_known, check_params
 
@@ -220,7 +219,7 @@ let check_override env ~check_member_unique member_name mem_source ?(ignore_fun_
     Errors.try_ (fun () ->
     match parent_class_elt.ce_type, fty_child with
     | lazy (r_parent, Tfun ft_parent), (r_child, Tfun ft_child) ->
-      let is_static = Cls.has_smethod parent_class member_name in
+      let is_static = SMap.mem member_name parent_class.tc_smethods in
       (* Add deps here when we override *)
       let subtype_funs = SubType.subtype_method
           ~extra_info:SubType.({
@@ -243,7 +242,7 @@ let check_override env ~check_member_unique member_name mem_source ?(ignore_fun_
             (class_elt.ce_origin)
             (parent_class_elt.ce_origin)
             member_name
-            ((Cls.name class_))
+            (class_.tc_name)
         | _ -> () end;
         ignore(subtype_funs env r2 ft2 r1 ft1) in
       check_ambiguous_inheritance check (r_parent, ft_parent) (r_child, ft_child)
@@ -272,14 +271,14 @@ let check_const_override env
       (Currently overriding interface constants is not supported in HHVM, but
       we should allow it in Hack files)
     *)
-    match (Cls.kind parent_class) with
+    match parent_class.tc_kind with
     | Ast.Cinterface ->
       (* Synthetic  *)
       not class_const.cc_synthesized
       (* The parent we are checking is synthetic, no point in checking *)
       && not parent_class_const.cc_synthesized
       (* defined on original class *)
-      && class_const.cc_origin <> (Cls.name class_)
+      && class_const.cc_origin <> class_.tc_name
       (* defined from parent class, nothing to check *)
       && class_const.cc_origin <> parent_class_const.cc_origin
       (* Only check if there are multiple concrete definitions *)
@@ -291,7 +290,7 @@ let check_const_override env
     if member_not_unique then
       Errors.multiple_concrete_defs class_const.cc_pos parent_class_const.cc_pos
       class_const.cc_origin parent_class_const.cc_origin
-      const_name (Cls.name class_)
+      const_name class_.tc_name
     else
       check_types_for_const env
         parent_class_const.cc_abstract parent_class_const.cc_type
@@ -299,13 +298,15 @@ let check_const_override env
 
 (* Privates are only visible in the parent, we don't need to check them *)
 let filter_privates members =
-  Sequence.filter members begin fun (_name, class_elt) ->
-    not (is_private class_elt) || is_lsb class_elt
-  end
+  SMap.fold begin fun name class_elt acc ->
+    if is_private class_elt && not (is_lsb class_elt)
+    then acc
+    else SMap.add name class_elt acc
+  end members SMap.empty
 
 let check_members check_private env (parent_class, psubst, parent_ty)
   (class_, subst, class_ty)
-    (mem_source, parent_members, get_member, dep) =
+    (mem_source, parent_members, members, dep) =
   let parent_members = if check_private then parent_members
     else filter_privates parent_members in
   let should_check_member_unique class_elt parent_class_elt =
@@ -319,32 +320,32 @@ let check_members check_private env (parent_class, psubst, parent_ty)
     3. It is concretely defined in exactly one place
     4. It is abstract, and all other declarations are identical
     *)
-    match (Cls.kind parent_class) with
+    match parent_class.tc_kind with
     | Ast.Cinterface | Ast.Ctrait ->
       (* Synthetic  *)
       not class_elt.ce_synthesized
       (* The parent we are checking is synthetic, no point in checking *)
       && not parent_class_elt.ce_synthesized
       (* defined on original class *)
-      && class_elt.ce_origin <> (Cls.name class_)
+      && class_elt.ce_origin <> class_.tc_name
       (* defined from parent class, nothing to check *)
       && class_elt.ce_origin <> parent_class_elt.ce_origin
     | _ -> false in
-  Sequence.iter parent_members begin fun (member_name, parent_class_elt) ->
-    match get_member member_name with
+  SMap.iter begin fun member_name parent_class_elt ->
+    match SMap.get member_name members with
     | Some class_elt ->
       let parent_class_elt = Inst.instantiate_ce psubst parent_class_elt in
       let class_elt = Inst.instantiate_ce subst class_elt in
       let check_member_unique = should_check_member_unique class_elt parent_class_elt in
       if parent_class_elt.ce_origin <> class_elt.ce_origin then
         Typing_deps.add_idep
-          (Dep.Class (Cls.name class_))
+          (Dep.Class class_.tc_name)
           (dep parent_class_elt.ce_origin member_name);
       check_override ~check_member_unique env member_name mem_source
         (parent_class, parent_ty) (class_, class_ty)
         parent_class_elt class_elt
     | None -> ()
-  end
+  end parent_members
 
 (*****************************************************************************)
 (* Before checking that a class implements an interface, we have to
@@ -354,16 +355,16 @@ let check_members check_private env (parent_class, psubst, parent_ty)
 
 (* Instantiation basically applies the substitution *)
 let instantiate_consts subst consts =
-  Sequence.map consts (fun (id, cc) -> id, Inst.instantiate_cc subst cc)
+  SMap.map (Inst.instantiate_cc subst) consts
 
 let make_all_members ~child_class ~parent_class = [
-  `FromProp, Cls.props parent_class, Cls.get_prop child_class,
+  `FromProp, parent_class.tc_props, child_class.tc_props,
   (fun x y -> Dep.Prop (x, y));
-  `FromSProp, Cls.sprops parent_class, Cls.get_sprop child_class,
+  `FromSProp, parent_class.tc_sprops, child_class.tc_sprops,
   (fun x y -> Dep.SProp (x, y));
-  `FromMethod, Cls.methods parent_class, Cls.get_method child_class,
+  `FromMethod, parent_class.tc_methods, child_class.tc_methods,
   (fun x y -> Dep.Method (x, y));
-  `FromSMethod, Cls.smethods parent_class, Cls.get_smethod child_class,
+  `FromSMethod, parent_class.tc_smethods, child_class.tc_smethods,
   (fun x y -> Dep.SMethod (x, y));
 ]
 
@@ -373,7 +374,7 @@ let make_all_members ~child_class ~parent_class = [
  * It isn't added to the tc_construct only because that's used to
  * determine whether a child class needs to call parent::__construct *)
 let default_constructor_ce class_ =
-  let pos, name = (Cls.pos class_), (Cls.name class_) in
+  let pos, name = class_.tc_pos, class_.tc_name in
   let r = Reason.Rwitness pos in (* reason doesn't get used in, e.g. arity checks *)
   let ft = { ft_pos      = pos;
              ft_deprecated = None;
@@ -407,10 +408,10 @@ let default_constructor_ce class_ =
 
 (* When an interface defines a constructor, we check that they are compatible *)
 let check_constructors env (parent_class, parent_ty) (class_, class_ty) psubst subst =
-  let explicit_consistency = snd (Cls.construct parent_class) in
-  if (Cls.kind parent_class) = Ast.Cinterface || explicit_consistency
+  let explicit_consistency = snd parent_class.tc_construct in
+  if parent_class.tc_kind = Ast.Cinterface || explicit_consistency
   then (
-    match (fst (Cls.construct parent_class)), (fst (Cls.construct class_)) with
+    match (fst parent_class.tc_construct), (fst class_.tc_construct) with
       | Some parent_cstr, _  when parent_cstr.ce_synthesized -> ()
       | Some parent_cstr, None ->
         let lazy (pos, _) = parent_cstr.ce_type in
@@ -422,7 +423,7 @@ let check_constructors env (parent_class, parent_ty) (class_, class_ty) psubst s
         let cstr = Inst.instantiate_ce subst cstr in
         if parent_cstr.ce_origin <> cstr.ce_origin then
           Typing_deps.add_idep
-            (Dep.Class (Cls.name class_))
+            (Dep.Class class_.tc_name)
             (Dep.Cstr parent_cstr.ce_origin);
         check_override env ~check_member_unique:false "__construct" `FromMethod
           ~ignore_fun_return:true
@@ -433,13 +434,13 @@ let check_constructors env (parent_class, parent_ty) (class_, class_ty) psubst s
         let cstr = Inst.instantiate_ce subst cstr in
         if parent_cstr.ce_origin <> cstr.ce_origin then
           Typing_deps.add_idep
-            (Dep.Class (Cls.name class_))
+            (Dep.Class class_.tc_name)
             (Dep.Cstr parent_cstr.ce_origin);
         check_override env ~check_member_unique:false "__construct" `FromMethod
           ~ignore_fun_return:true (parent_class, parent_ty) (class_, class_ty) parent_cstr cstr
       | None, _ -> ()
   ) else (
-    match fst (Cls.construct parent_class), fst (Cls.construct class_) with
+    match fst parent_class.tc_construct, fst class_.tc_construct with
     | Some parent_cstr, _ when parent_cstr.ce_synthesized -> ()
     | Some parent_cstr, Some child_cstr ->
       check_visibility parent_cstr child_cstr
@@ -502,51 +503,51 @@ let tconst_subsumption env parent_typeconst child_typeconst =
 let check_typeconsts env parent_class class_ =
   let parent_pos, parent_class, _ = parent_class in
   let pos, class_, _ = class_ in
-  let ptypeconsts = Cls.typeconsts parent_class in
+  let ptypeconsts = parent_class.tc_typeconsts in
+  let typeconsts = class_.tc_typeconsts in
   let tconst_check parent_tconst tconst () =
     tconst_subsumption env parent_tconst tconst in
-  Sequence.iter ptypeconsts begin fun (tconst_name, parent_tconst) ->
-    match Cls.get_typeconst class_ tconst_name with
+  SMap.iter begin fun tconst_name parent_tconst ->
+    match SMap.get tconst_name typeconsts with
       | Some tconst ->
           check_ambiguous_inheritance tconst_check parent_tconst tconst
             (fst tconst.ttc_name) class_ tconst.ttc_origin
       | None ->
         Errors.member_not_implemented
           tconst_name parent_pos pos (fst parent_tconst.ttc_name)
-  end
+  end ptypeconsts
 
 let check_consts env parent_class class_ psubst subst =
-  let pconsts, consts = Cls.consts parent_class, Cls.consts class_ in
+  let pconsts, consts = parent_class.tc_consts, class_.tc_consts in
   let pconsts = instantiate_consts psubst pconsts in
   let consts = instantiate_consts subst consts in
-  let consts = Sequence.fold consts ~init:SMap.empty ~f:(fun m (k,v) -> SMap.add k v m) in
-  Sequence.iter pconsts begin fun (const_name, parent_const) ->
+  SMap.iter begin fun const_name parent_const ->
     if const_name <> SN.Members.mClass then
       match SMap.get const_name consts with
       | Some const ->
         (* skip checks for typeconst derived class constants *)
-        (match Cls.get_typeconst class_ const_name with
+        (match SMap.get const_name class_.tc_typeconsts with
          | None ->
            check_const_override env const_name parent_class class_ parent_const const
          | Some _ -> ())
       | None ->
         let parent_pos = Reason.to_pos (fst parent_const.cc_type) in
         Errors.member_not_implemented const_name parent_pos
-          (Cls.pos class_) (Cls.pos parent_class);
-  end;
+          class_.tc_pos parent_class.tc_pos;
+  end pconsts;
   ()
 
 let check_class_implements env (parent_class, parent_ty) (class_, class_ty) =
   check_typeconsts env parent_class class_;
   let parent_pos, parent_class, parent_tparaml = parent_class in
   let pos, class_, tparaml = class_ in
-  let fully_known = (Cls.members_fully_known class_) in
-  let psubst = Inst.make_subst (Cls.tparams parent_class) parent_tparaml in
-  let subst = Inst.make_subst (Cls.tparams class_) tparaml in
+  let fully_known = class_.tc_members_fully_known in
+  let psubst = Inst.make_subst parent_class.tc_tparams parent_tparaml in
+  let subst = Inst.make_subst class_.tc_tparams tparaml in
   check_consts env parent_class class_ psubst subst;
   let memberl = make_all_members ~parent_class ~child_class:class_ in
   check_constructors env (parent_class, parent_ty) (class_, class_ty) psubst subst;
-  let check_privates:bool = Cls.kind parent_class = Ast.Ctrait in
+  let check_privates:bool = (parent_class.tc_kind = Ast.Ctrait) in
   if not fully_known then () else
     List.iter memberl
       (check_members_implemented check_privates parent_pos pos);

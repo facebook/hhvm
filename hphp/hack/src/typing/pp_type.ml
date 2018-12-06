@@ -178,7 +178,7 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit = fun fmt ty ->
     Format.fprintf fmt "@,]@]";
     Format.fprintf fmt "@])"
   | Tobject -> Format.pp_print_string fmt "Tobject"
-  | Tclass (a0,_a2,a1) ->
+  | Tclass (a0,a1) ->
     Format.fprintf fmt "(@[<2>Tclass (@,";
     Nast.pp_sid fmt a0;
     Format.fprintf fmt ",@ ";
@@ -1008,25 +1008,3 @@ and pp_where_constraint
 
 and show_where_constraint : type a. a where_constraint -> string = fun x ->
   Format.asprintf "%a" pp_where_constraint x
-
-let pp_decl _ _ = ()
-let pp_locl _ _ = ()
-
-let pp_ty _ fmt ty = pp_ty fmt ty
-let show_ty _ x = show_ty x
-let pp_shape_field_type _ fmt x = pp_shape_field_type fmt x
-let show_shape_field_type _ x = show_shape_field_type x
-let pp_ty_ _ fmt x = pp_ty_ fmt x
-let show_ty_ _ x = show_ty_ x
-let pp_fun_type _ fmt x = pp_fun_type fmt x
-let show_fun_type _ x = show_fun_type x
-let pp_fun_arity _ fmt x = pp_fun_arity fmt x
-let show_fun_arity _ x = show_fun_arity x
-let pp_fun_param _ fmt x = pp_fun_param fmt x
-let show_fun_param _ x = show_fun_param x
-let pp_fun_params _ fmt x = pp_fun_params fmt x
-let show_fun_params _ x = show_fun_params x
-let pp_tparam _ fmt x = pp_tparam fmt x
-let show_tparam _ x = show_tparam x
-let pp_where_constraint _ fmt x = pp_where_constraint fmt x
-let show_where_constraint _ x = show_where_constraint x

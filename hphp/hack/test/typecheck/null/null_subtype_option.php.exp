@@ -1,1 +1,2 @@
-No errors
+File "null_subtype_option.php", line 4, characters 16-19:
+Unbound name: null (an object type) (Naming[2049])

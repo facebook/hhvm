@@ -105,7 +105,6 @@ type tvar_info = {
   lower_bounds : TySet.t;
   upper_bounds : TySet.t;
 }
-type tvenv = tvar_info IMap.t
 
 type env = {
   (* position of the function/method being checked *)
@@ -126,11 +125,14 @@ type env = {
   in_case : bool       ;
   inside_constructor: bool;
   inside_ppl_class: bool;
+  (* disallow usages of $this - set for reactive lambdas in methods
+     having mutable $this *)
+  disallow_this: bool;
   (* A set of constraints that are global to a given method *)
   global_tpenv : tpenv ;
   subtype_prop : Typing_logic.subtype_prop;
   log_levels : int SMap.t ;
-  tvenv : tvenv;
+  tvenv : tvar_info IMap.t;
 }
 and genv = {
   tcopt   : TypecheckerOptions.t;

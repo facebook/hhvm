@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *)
 
-open Core_kernel
+
 (** Note: the tracking in this module is best effort only;
  * it's not guaranteed to always reflect accurate merge base transitions:
  * - in some init types, initial merge base is not known so we will only notice
@@ -21,7 +21,6 @@ open Core_kernel
 let current_mergebase : Hg.svn_rev option ref = ref None
 
 let is_in_hg_update_state = ref false
-let is_in_hg_transaction_state = ref false
 
 (* Do we think that this server have processed a mergebase change? If we are
  * in this state and get notified about changes to a huge number of files (or
@@ -39,7 +38,7 @@ let is_in_hg_transaction_state = ref false
  *)
 let did_change_mergebase = ref false
 
-let mergebase_queries : (Hg.hg_rev, (Hg.svn_rev Future.t)) Caml.Hashtbl.t = Caml.Hashtbl.create 200
+let mergebase_queries : (Hg.hg_rev, (Hg.svn_rev Future.t)) Hashtbl.t = Hashtbl.create 200
 (* Keys from mergebase_queries that contain futures that were not resolved yet *)
 let pending_queries : Hg.hg_rev Queue.t = Queue.create ()
 
@@ -48,28 +47,23 @@ let initialize mergebase =
   current_mergebase := Some mergebase
 
 let add_query ~hg_rev root =
-  if Caml.Hashtbl.mem mergebase_queries hg_rev then
+  if Hashtbl.mem mergebase_queries hg_rev then
     ()
   else begin
     Hh_logger.log "ServerRevisionTracker: Seen new HG revision: %s" hg_rev;
     let future = Hg.get_closest_svn_ancestor hg_rev (Path.to_string root) in
-    Caml.Hashtbl.add mergebase_queries hg_rev future;
-    Queue.enqueue pending_queries hg_rev
+    Hashtbl.add mergebase_queries hg_rev future;
+    Queue.add hg_rev pending_queries
   end
 
-let on_state_enter state_name =
-  match state_name with
-  | "hg.update" ->
+let on_state_enter state_name  =
+  if state_name <> "hg.update" then () else begin
     Hh_logger.log "ServerRevisionTracker: entering hg.update";
     is_in_hg_update_state := true;
-  | "hg.transaction" ->
-    Hh_logger.log "ServerRevisionTracker: entering hg.transaction";
-    is_in_hg_transaction_state := true;
-  | _ -> ()
+  end
 
 let on_state_leave root state_name state_metadata =
-  match state_name with
-  | "hg.update" ->
+  if state_name <> "hg.update" then () else begin
     is_in_hg_update_state := false;
     Hh_logger.log "ServerRevisionTracker: leaving hg.update";
     let open Option.Monad_infix in
@@ -79,12 +73,9 @@ let on_state_leave root state_name state_metadata =
         | Some true -> Hh_logger.log "ServerRevisionTracker: Ignoring merge rev %s" hg_rev;
         | _ -> add_query ~hg_rev root
       end
-  | "hg.transaction" ->
-    Hh_logger.log "ServerRevisionTracker: leaving hg.transaction";
-    is_in_hg_transaction_state := false
-  | _ -> ()
+  end
 
-let is_hg_updating () = !is_in_hg_update_state || !is_in_hg_transaction_state
+let is_in_hg_update_state () = !is_in_hg_update_state
 
 let check_query future ~timeout ~current_t =
   match Future.get ~timeout future with
@@ -111,11 +102,11 @@ let check_blocking () =
   else begin
     let start_t = Unix.gettimeofday () in
     Hh_logger.log "Querying Mercurial for mergebase changes";
-    Queue.iter ~f:begin fun hg_rev ->
+    Queue.iter begin fun hg_rev ->
       let current_t = Unix.gettimeofday () in
       let elapsed_t = current_t -. start_t in
       let timeout = max 0 (int_of_float (30.0 -. elapsed_t)) in
-      let future = Caml.Hashtbl.find mergebase_queries hg_rev in
+      let future = Hashtbl.find mergebase_queries hg_rev in
       check_query future ~timeout ~current_t
     end pending_queries;
     Queue.clear pending_queries;
@@ -133,10 +124,10 @@ let rec check_non_blocking env =
       HackEventLogger.set_changed_mergebase false;
     end
   end else
-    let hg_rev = Queue.peek_exn pending_queries in
-    let future = Caml.Hashtbl.find mergebase_queries hg_rev in
+    let hg_rev = Queue.peek pending_queries in
+    let future = Hashtbl.find mergebase_queries hg_rev in
     if Future.is_ready future then begin
-      let _ : Hg.hg_rev = Queue.dequeue_exn pending_queries in
+      let _ : Hg.hg_rev = Queue.pop pending_queries in
       check_query future ~timeout:30 ~current_t:(Unix.gettimeofday ());
       check_non_blocking env
     end

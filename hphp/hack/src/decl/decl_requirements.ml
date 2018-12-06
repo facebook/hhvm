@@ -9,7 +9,7 @@
 
 open Core_kernel
 open Decl_defs
-open Shallow_decl_defs
+open Nast
 open Typing_defs
 
 module Inst = Decl_instantiate
@@ -26,10 +26,12 @@ let make_substitution pos class_name class_type class_parameters =
 
 (* Accumulate requirements so that we can successfully check the bodies
  * of trait methods / check that classes satisfy these requirements *)
-let flatten_parent_class_reqs env shallow_class
-    (req_ancestors, req_ancestors_extends) parent_ty =
-  let _, (parent_pos, parent_name), parent_params =
-    Decl_utils.unwrap_class_type parent_ty in
+let flatten_parent_class_reqs env class_nast
+    (req_ancestors, req_ancestors_extends) parent_hint =
+  let parent_pos, parent_name, parent_params =
+    Decl_utils.unwrap_class_hint parent_hint in
+  let parent_params =
+    List.map parent_params (Decl_hint.hint env) in
   let parent_type = Decl_env.get_class_dep env parent_name in
 
   match parent_type with
@@ -45,7 +47,7 @@ let flatten_parent_class_reqs env shallow_class
           let ty = Inst.instantiate subst ty in
           parent_pos, ty
         end in
-    match shallow_class.sc_kind with
+    match class_nast.c_kind with
     | Ast.Cnormal | Ast.Cabstract ->
       (* not necessary to accumulate req_ancestors_extends for classes --
        * it's not used *)
@@ -56,8 +58,10 @@ let flatten_parent_class_reqs env shallow_class
       req_ancestors, req_ancestors_extends
     | Ast.Cenum -> assert false
 
-let declared_class_req env (requirements, req_extends) req_ty =
-  let _, (req_pos, req_name), _ = Decl_utils.unwrap_class_type req_ty in
+let declared_class_req env (requirements, req_extends) hint =
+  let req_ty = Decl_hint.hint env hint in
+  let req_pos, req_name, req_params = Decl_utils.unwrap_class_hint hint in
+  let _ = List.map req_params (Decl_hint.hint env) in
   let req_type = Decl_env.get_class_dep env req_name in
   let req_extends = SSet.add req_name req_extends in
   (* since the req is declared on this class, we should
@@ -111,22 +115,22 @@ let naive_dedup req_extends =
     | _ -> Some (parent_pos, ty)
   end
 
-let get_class_requirements env shallow_class =
+let get_class_requirements env class_nast =
   let req_ancestors_extends = SSet.empty in
   let acc = ([], req_ancestors_extends) in
   let acc =
     List.fold_left ~f:(declared_class_req env)
-      ~init:acc shallow_class.sc_req_extends in
+      ~init:acc class_nast.c_req_extends in
   let acc =
     List.fold_left ~f:(declared_class_req env)
-      ~init:acc shallow_class.sc_req_implements in
+      ~init:acc class_nast.c_req_implements in
   let acc =
-    List.fold_left ~f:(flatten_parent_class_reqs env shallow_class)
-      ~init:acc shallow_class.sc_uses in
+    List.fold_left ~f:(flatten_parent_class_reqs env class_nast)
+      ~init:acc class_nast.c_uses in
   let acc =
-    List.fold_left ~f:(flatten_parent_class_reqs env shallow_class)
-      ~init:acc (if shallow_class.sc_kind = Ast.Cinterface then
-          shallow_class.sc_extends else shallow_class.sc_implements) in
+    List.fold_left ~f:(flatten_parent_class_reqs env class_nast)
+      ~init:acc (if class_nast.c_kind = Ast.Cinterface then
+          class_nast.c_extends else class_nast.c_implements) in
   let req_extends, req_ancestors_extends = acc in
   let req_extends = naive_dedup req_extends in
   req_extends, req_ancestors_extends

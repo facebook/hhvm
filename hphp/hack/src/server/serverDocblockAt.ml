@@ -7,9 +7,7 @@
  *
  *)
 
-open Core_kernel
-
-module Cls = Typing_classes_heap
+open Hh_core
 
 let get_all_ancestors tcopt class_name =
   let rec helper classes_to_check cinfos seen_classes =
@@ -22,11 +20,9 @@ let get_all_ancestors tcopt class_name =
       | None ->
         helper classes cinfos seen_classes
       | Some class_info ->
-        let ancestors =
-          Cls.all_ancestor_names class_info
-          |> Sequence.fold ~init:classes ~f:(fun acc cid -> cid :: acc) in
+        let ancestors = SMap.keys class_info.Typing_defs.tc_ancestors in
         helper
-          ancestors
+          (ancestors @ classes)
           (class_info :: cinfos)
           (SSet.add class_name seen_classes)
       end
@@ -35,7 +31,7 @@ let get_all_ancestors tcopt class_name =
 
 let get_docblock_for_member class_info member_name =
   let open Option.Monad_infix in
-  Cls.get_method class_info member_name
+  SMap.find_opt member_name (class_info.Typing_defs.tc_methods)
   >>= fun member ->
   match Lazy.force member.Typing_defs.ce_type with
   | _, Typing_defs.Tfun ft ->
@@ -69,11 +65,11 @@ let render_ancestor_docblocks docblocks =
     docblock_ancestors_pairs
     |> List.map ~f:begin fun (docblock, ancestors) ->
       let ancestors_str =
-        String.concat ~sep:", " (List.map ~f:Utils.strip_ns ancestors)
+        String.concat ", " (List.map ~f:Utils.strip_ns ancestors)
       in
       Printf.sprintf "%s\n(from %s)" docblock ancestors_str
     end
-    |> String.concat ~sep:"\n\n---\n\n"
+    |> String.concat "\n\n---\n\n"
     |> fun results -> Some results
 
 let fallback tcopt class_name member_name =
@@ -85,13 +81,13 @@ let fallback tcopt class_name member_name =
       | None ->
         all_interfaces_or_first_class_docblock seen_interfaces ancestors
       | Some docblock ->
-        match Cls.kind ancestor with
+        match ancestor.Typing_defs.tc_kind with
         | Ast.Cabstract
         | Ast.Cnormal ->
-          [(Cls.name ancestor, docblock)]
+          [(ancestor.Typing_defs.tc_name, docblock)]
         | _ ->
           all_interfaces_or_first_class_docblock
-            ((Cls.name ancestor, docblock) :: seen_interfaces)
+            ((ancestor.Typing_defs.tc_name, docblock) :: seen_interfaces)
             ancestors
       end
   in

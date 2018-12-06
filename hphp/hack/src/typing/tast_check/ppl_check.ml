@@ -61,7 +61,7 @@ let check_ppl_class c =
 let check_ppl_obj_get env ((p, ty), e) =
   let check_type ty =
     match snd (base_type ty) with
-    | Tclass ((_, name), _, _) ->
+    | Tclass ((_, name), _) ->
       begin
         match Decl_heap.Classes.get name with
         | Some ({ dc_ppl = true; _ }) ->
@@ -119,7 +119,7 @@ let check_ppl_meth_pointers p classname special_name =
 let check_ppl_inst_meth env ((p, ty), _) =
   let check_type ty =
     match snd (base_type ty) with
-    | Tclass ((_, name), _, _) ->
+    | Tclass ((_, name), _) ->
       begin
         match Decl_heap.Classes.get name with
         | Some ({ dc_ppl = true; _ }) -> Errors.ppl_meth_pointer p "inst_meth"

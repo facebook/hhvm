@@ -17,7 +17,6 @@ module Reason = Typing_reason
 module Env = Typing_env
 module ShapeMap = Nast.ShapeMap
 module TySet = Typing_set
-module Cls = Typing_classes_heap
 
 (* This can be useful to debug type which blow up in size *)
 let ty_size ty =
@@ -227,7 +226,7 @@ let is_dynamic env ty =
 let rec is_hack_collection env ty =
   let env, ety = Env.expand_type env ty in
   match ety with
-  | _, Tclass ((_, n), _, _)
+  | _, Tclass ((_, n), _)
     when n = SN.Collections.cVector
       || n = SN.Collections.cImmVector
       || n = SN.Collections.cMap
@@ -292,7 +291,7 @@ let rec get_base_type env ty =
 (*****************************************************************************)
 let get_class_ids env ty =
   let rec aux seen acc = function
-    | _, Tclass ((_, cid), _, _) -> cid::acc
+    | _, Tclass ((_, cid), _) -> cid::acc
     | _, (Toption ty | Tabstract (_, Some ty)) -> aux seen acc ty
     | _, Tunresolved tys -> List.fold tys ~init:acc ~f:(aux seen)
     | _, Tabstract (AKgeneric name, None) when not (List.mem ~equal:(=) seen name) ->
@@ -488,7 +487,7 @@ let shape_field_name_ env field =
     | _, Class_const ((_, CIself), y) ->
       let _, c_ty = Env.get_self env in
       (match c_ty with
-      | Tclass (sid, _, _) ->
+      | Tclass (sid, _) ->
         Ok (Ast.SFclass_const(sid, y))
       | _ ->
         Error `Expected_class)
@@ -528,13 +527,9 @@ let rec member_inter env ty tyl acc =
       Errors.try_
         begin fun () ->
           let env, ty =
-            match x, ty with
-            | (_, (Tany|Terr)), _ | _, (_, (Tany|Terr)) ->
-              unify env x ty
-            | _, _ ->
-              if is_sub_type_alt env x ty = Some true then env, ty
-              else if is_sub_type_alt env ty x = Some true then env, x
-              else unify env x ty in
+            if is_sub_type_alt env x ty = Some true then env, ty
+            else if is_sub_type_alt env ty x = Some true then env, x
+            else unify env x ty in
           env, List.rev_append acc (ty :: rl)
         end
         begin fun _ ->
@@ -593,7 +588,7 @@ let rec push_option_out env ty =
     | env, _ -> env, ty
     end
   | _, (Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Tvar _
-    | Tclass _ | Ttuple _ | Tanon _ | Tfun _
+    | Tclass (_, _) | Ttuple _ | Tanon (_, _) | Tfun _
     | Tobject | Tshape _ | Tdynamic) -> env, ty
 
 (**
@@ -616,7 +611,8 @@ let in_var env ty =
   let env = Env.add env x ty in
   env, (fst ty, Tvar x)
 
-let unresolved_tparam ~reason env =
+let unresolved_tparam ~use_pos env (_, (_, _), _, _) =
+  let reason = Reason.Rtype_variable use_pos in
   if TypecheckerOptions.new_inference (Typing_env.get_tcopt env)
   then env, (reason, Tvar (Env.fresh ()))
   else in_var env (reason, Tunresolved [])
@@ -630,13 +626,7 @@ let rec fold_unresolved env ty =
   match ety with
   | r, Tunresolved [] -> env, (r, Tany)
   | _, Tunresolved [x] -> fold_unresolved env x
-  (* We don't want to use unification if new_inference is set.
-   * Just return the type unchanged: better would be to remove redundant
-   * elements, but let's postpone that until we have an improved
-   * representation of unions.
-   *)
-  | _, Tunresolved (x :: rl)
-    when not (TypecheckerOptions.new_inference (Env.get_tcopt env)) ->
+  | _, Tunresolved (x :: rl) ->
       (try
         let env, acc =
           List.fold_left rl ~f:begin fun (env, acc) ty ->
@@ -644,9 +634,9 @@ let rec fold_unresolved env ty =
           end ~init:(env, x) in
         env, acc
       with Exit ->
-        env, ety
+        env, ty
       )
-  | _ -> env, ety
+  | _ -> env, ty
 
 (*****************************************************************************)
 (* *)
@@ -703,9 +693,9 @@ let unwrap_class_type = function
 let try_unwrap_class_type x = Option.try_with (fun () -> unwrap_class_type x)
 
 let class_is_final_and_not_contravariant class_ty =
-  Cls.final class_ty &&
+  class_ty.tc_final &&
     List.for_all
-      (Cls.tparams class_ty)
+      class_ty.tc_tparams
       ~f:(begin function
           (Ast.Invariant | Ast.Covariant), _, _, _ -> true
           | _, _, _, _ -> false

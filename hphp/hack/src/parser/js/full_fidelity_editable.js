@@ -885,8 +885,8 @@ class EditableToken extends EditableSyntax
        return new PublicToken(leading, trailing);
     case 'real':
        return new RealToken(leading, trailing);
-    case 'reify':
-       return new ReifyToken(leading, trailing);
+    case 'reified':
+       return new ReifiedToken(leading, trailing);
     case 'require':
        return new RequireToken(leading, trailing);
     case 'require_once':
@@ -1808,11 +1808,11 @@ class RealToken extends EditableToken
     super('real', leading, trailing, 'real');
   }
 }
-class ReifyToken extends EditableToken
+class ReifiedToken extends EditableToken
 {
   constructor(leading, trailing)
   {
-    super('reify', leading, trailing, 'reify');
+    super('reified', leading, trailing, 'reified');
   }
 }
 class RequireToken extends EditableToken
@@ -21479,7 +21479,7 @@ exports.PrivateToken = PrivateToken;
 exports.ProtectedToken = ProtectedToken;
 exports.PublicToken = PublicToken;
 exports.RealToken = RealToken;
-exports.ReifyToken = ReifyToken;
+exports.ReifiedToken = ReifiedToken;
 exports.RequireToken = RequireToken;
 exports.Require_onceToken = Require_onceToken;
 exports.RequiredToken = RequiredToken;

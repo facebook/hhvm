@@ -7,7 +7,7 @@
  *
  *)
 
-let main (env: ClientStart.env) : Exit_status.t Lwt.t =
+let main (env: ClientStart.env) : Exit_status.t =
   HackEventLogger.set_from env.ClientStart.from;
   HackEventLogger.client_restart ();
   if MonitorConnection.server_exists
@@ -16,4 +16,4 @@ let main (env: ClientStart.env) : Exit_status.t Lwt.t =
   else Printf.eprintf "Warning: no server to restart for %s\n%!"
     (Path.to_string env.ClientStart.root);
   ClientStart.start_server env;
-  Lwt.return Exit_status.No_error
+  Exit_status.No_error

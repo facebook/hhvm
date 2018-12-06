@@ -13,4 +13,4 @@ type env = {
 }
 
 val kill_server : Path.t -> string -> unit
-val main : env -> Exit_status.t Lwt.t
+val main : env -> Exit_status.t

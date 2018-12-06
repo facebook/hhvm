@@ -28,7 +28,6 @@ val emit_body:
   is_memoize: bool ->
   is_native: bool ->
   is_async: bool ->
-  is_rx_body: bool ->
   deprecation_info: (Typed_value.t list) option ->
   skipawaitable:bool ->
   (* True if the return type is a ref *)

@@ -1,2 +1,0 @@
-Examples of incompleteness
-This directory contains tests that are safe according to Hack's typing rules but which the type checker used to reject

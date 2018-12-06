@@ -1,12 +1,12 @@
-File "declarations.php", line 5, characters 18-19:
+File "declarations.php", line 5, characters 20-21:
 Cannot use experimental feature: reified generics (Other[0000])
-File "declarations.php", line 5, characters 32-33:
+File "declarations.php", line 5, characters 36-37:
 Cannot use experimental feature: reified generics (Other[0000])
 File "declarations.php", line 8, characters 3-3:
 Cannot use experimental feature: reified generics (Other[0000])
-File "declarations.php", line 9, characters 3-40:
+File "declarations.php", line 9, characters 3-44:
 Cannot use experimental feature: reified generics (Other[0000])
-File "declarations.php", line 3, characters 15-16:
+File "declarations.php", line 3, characters 17-18:
 Cannot use experimental feature: reified generics (Other[0000])
-File "declarations.php", line 3, characters 29-30:
+File "declarations.php", line 3, characters 33-34:
 Cannot use experimental feature: reified generics (Other[0000])

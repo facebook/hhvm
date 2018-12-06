@@ -1,0 +1,10 @@
+(library
+  (name errors)
+  (wrapped false)
+  (preprocess (pps ppx_deriving.std))
+  (libraries
+    core_kernel
+    coroutine_errors
+    fwd_compatibility
+    pos
+    server_load_flag))

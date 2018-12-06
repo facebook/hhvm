@@ -2,12 +2,11 @@
     { Aast.AnnotatedAST.c_span = [3:1-11]; c_annotation = ();
       c_mode = <opaque>; c_final = false; c_is_xhp = false; c_kind = Cnormal;
       c_name = ([3:7-8], "\\A"); c_tparams = <opaque>; c_extends = [];
-      c_uses = []; c_method_redeclarations = []; c_xhp_attr_uses = [];
-      c_xhp_category = []; c_req_extends = []; c_req_implements = [];
-      c_implements = []; c_consts = []; c_typeconsts = [];
-      c_static_vars = []; c_vars = []; c_constructor = None;
-      c_static_methods = []; c_methods = []; c_namespace = <opaque>;
-      c_user_attributes = []; c_enum = None });
+      c_uses = []; c_xhp_attr_uses = []; c_xhp_category = [];
+      c_req_extends = []; c_req_implements = []; c_implements = [];
+      c_consts = []; c_typeconsts = []; c_static_vars = []; c_vars = [];
+      c_constructor = None; c_static_methods = []; c_methods = [];
+      c_namespace = <opaque>; c_user_attributes = []; c_enum = None });
   (Fun
      { Aast.AnnotatedAST.f_span = [5:1-7:2]; f_annotation = ();
        f_mode = <opaque>;
@@ -22,7 +21,7 @@
             [(Return ([6:3-18],
                 (Some (([6:10-17], A),
                        (New ((([6:14-15], A), (CI (([6:14-15], "\\A"), []))),
-                          [], [], ([6:14-15], _)))))
+                          [], []))))
                 ))
               ];
             fnb_unsafe = false });
@@ -41,7 +40,7 @@
                  (Binop ((Eq None), (([10:3-5], A), (Lvar ([10:3-5], $x))),
                     (([10:8-15], A),
                      (New ((([10:12-13], A), (CI (([10:12-13], "\\A"), []))),
-                        [], [], ([10:12-13], _))))
+                        [], [])))
                     ))));
               (While ((([11:10-12], ?A), (Lvar ([11:10-12], $x))),
                  [(Expr
@@ -77,7 +76,7 @@
                          (([17:13-20], A),
                           (New (
                              (([17:17-18], A), (CI (([17:17-18], "\\A"), []))),
-                             [], [], ([17:17-18], _))))
+                             [], [])))
                          )))
                       ])),
                 (([17:22-24], (?A)),

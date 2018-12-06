@@ -20,7 +20,6 @@ open Utils
 module SN = Naming_special_names
 module Reason = Typing_reason
 module TySet = Typing_set
-module Cls = Typing_classes_heap
 
 (*****************************************************************************)
 (* Computes the string representing a type in an error message.
@@ -89,10 +88,7 @@ module ErrorString = struct
     | Tabstract (AKnewtype (x, _), _)
         when x = SN.Classes.cTypename -> "a typename string"
     | Tabstract (ak, cstr) -> abstract ak cstr
-    | Tclass ((_, x), Exact, _) ->
-      "an object of exactly the class " ^ strip_ns x
-    | Tclass ((_, x), _, _) ->
-      "an object of type " ^ strip_ns x
+    | Tclass ((_, x), _) -> "an object of type "^(strip_ns x)
     | Tapply ((_, x), _)
         when x = SN.Classes.cClassname -> "a classname string"
     | Tapply ((_, x), _)
@@ -155,7 +151,7 @@ module ErrorString = struct
     match snd root_ty with
     | Tgeneric x -> f x
     | Tapply ((_, x), _) -> f x
-    | Tclass ((_, x), _, _) -> f x
+    | Tclass ((_, x), _) -> f x
     | Tabstract (ak, _) -> f @@ AbstractKind.to_string ak
     | Taccess _ as x ->
         List.fold_left ~f:(fun acc (_, sid) -> acc^"::"^sid)
@@ -215,12 +211,12 @@ module Suggest = struct
     | Tapply ((_, cid), [])  -> Utils.strip_ns cid
     | Tapply ((_, cid), [x]) -> (Utils.strip_ns cid)^"<"^type_ x^">"
     | Tapply ((_, cid), l)   -> (Utils.strip_ns cid)^"<"^list l^">"
-    | Tclass ((_, cid), _, []) -> Utils.strip_ns cid
+    | Tclass ((_, cid), []) -> Utils.strip_ns cid
     | Tabstract ((AKnewtype (cid, []) | AKenum cid), _) -> Utils.strip_ns cid
-    | Tclass ((_, cid), _, [x]) -> (Utils.strip_ns cid)^"<"^type_ x^">"
+    | Tclass ((_, cid), [x]) -> (Utils.strip_ns cid)^"<"^type_ x^">"
     | Tabstract (AKnewtype (cid, [x]), _) ->
         (Utils.strip_ns cid)^"<"^type_ x^">"
-    | Tclass ((_, cid), _, l) -> (Utils.strip_ns cid)^"<"^list l^">"
+    | Tclass ((_, cid), l) -> (Utils.strip_ns cid)^"<"^list l^">"
     | Tabstract (AKnewtype (cid, l), _)   ->
         (Utils.strip_ns cid)^"<"^list l^">"
     | Tabstract (AKdependent (_, _), _) -> "..."
@@ -278,11 +274,6 @@ module Full = struct
 
   let debug_mode = ref false
   let show_tvars = ref false
-  let must_show_tvars env =
-    !show_tvars ||
-    (TypecheckerOptions.new_inference (Env.get_tcopt env))
-  let varmapping = ref IMap.empty
-  let normalize_tvars = ref false
 
   let comma_sep = Concat [text ","; Space]
 
@@ -356,9 +347,7 @@ module Full = struct
     | Tarraykind (AKtuple fields) ->
       list "tuple-like-array(" k (List.rev (IMap.values fields)) ")"
     | Tarray (None, Some _) -> assert false
-    | Tclass ((_, s), Exact, []) when !debug_mode ->
-      Concat [text "exact"; Space; to_doc s]
-    | Tclass ((_, s), _, []) -> to_doc s
+    | Tclass ((_, s), []) -> to_doc s
     | Tapply ((_, s), []) -> to_doc s
     | Tgeneric s -> to_doc s
     | Taccess (root_ty, ids) -> Concat [
@@ -375,15 +364,7 @@ module Full = struct
         if ISet.mem n' st then text "[rec]"
         else
         (* For hh_show_env we further show the type variable number *)
-        let normalized_n = if !normalize_tvars
-          then match IMap.find_opt n !varmapping with
-            | Some n' -> n'
-            | None ->
-              let n' = IMap.cardinal !varmapping in
-              varmapping := IMap.add n n' !varmapping;
-              n'
-          else n in
-        if must_show_tvars env then (text ("#" ^ (string_of_int normalized_n)))
+        if !show_tvars then (text ("#" ^ (string_of_int n)))
         else Nothing
       in
       let _, ety = Env.expand_type env (Reason.Rnone, x) in
@@ -404,14 +385,13 @@ module Full = struct
           | (Reason.Rdynamic_yield _, _) -> Space ^^ text "[DynamicYield]"
           | _ -> Nothing)
       ]
-    | Tclass ((_, s), exact, tyl) ->
-      let d = to_doc s ^^ list "<" k tyl ">" in
-      begin match exact with
-      | Exact when !debug_mode -> Concat [text "exact"; Space; d]
-      | _ -> d
-      end
+    | Tclass ((_, s), tyl) -> to_doc s ^^ list "<" k tyl ">"
     | Tabstract (AKnewtype (s, []), _) -> to_doc s
     | Tabstract (AKnewtype (s, tyl), _) -> to_doc s ^^ list "<" k tyl ">"
+    (* This is an "exact" type. Show bound, for generics etc *)
+    | Tabstract (AKdependent (`cls _, []), Some ty) ->
+      if !debug_mode then Concat [text "exact"; Space; k ty]
+      else k ty
     | Tabstract (ak, cstr) ->
       let cstr_info = if !debug_mode then
         match cstr with
@@ -438,15 +418,15 @@ module Full = struct
       begin match null, nonnull with
       (* type isn't nullable *)
       | [], [ty] ->
-        if must_show_tvars env then Concat [text "("; k ty; text ")"] else k ty
+        if !show_tvars then Concat [text "("; k ty; text ")"] else k ty
       | [], _ ->
         delimited_list (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
       (* Type only is null *)
       | _, [] ->
-        if must_show_tvars env then text "(null)" else text "null"
+        if !show_tvars then text "(null)" else text "null"
       (* Type is nullable single type *)
       | _, [ty] ->
-        if must_show_tvars env
+        if !show_tvars
           then Concat [text "?"; text "("; k ty; text ")"]
           else Concat [text "?"; k ty]
       (* Type is nullable unresolved type *)
@@ -795,7 +775,7 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
     obj @@ kind "primitive" @ name (prim tp)
   | Tapply ((_, cid), tys) ->
     obj @@ kind "class" @ name cid @ args tys
-  | Tclass ((_, cid), _, tys) ->
+  | Tclass ((_, cid), tys) ->
     obj @@ kind "class" @ name cid @ args tys
   | Tobject ->
     obj @@ kind "object"
@@ -1118,7 +1098,7 @@ let to_locl_ty
       let class_pos =
         match Typing_lazy_heap.get_class tcopt name with
         | Some class_ty ->
-          (Cls.pos class_ty)
+          class_ty.tc_pos
         | None ->
           (* Class may not exist (such as in non-strict modes). *)
           Pos.none
@@ -1129,7 +1109,7 @@ let to_locl_ty
 
       (* NB: "class" could have come from either a `Tapply` or a `Tclass`. Right
       now, we always return a `Tclass`. *)
-      ty (Tclass ((class_pos, name), Nonexact, tyl))
+      ty (Tclass ((class_pos, name), tyl))
 
     | "object" ->
       ty Tobject
@@ -1351,10 +1331,6 @@ module PrintClass = struct
     let contents = SSet.fold (fun x acc -> x^" "^acc) s "" in
     Printf.sprintf "Set( %s)" contents
 
-  let sseq s =
-    let contents = Sequence.fold s ~init:"" ~f:(fun acc x -> x^" "^acc) in
-    Printf.sprintf "Seq( %s)" contents
-
   let pos p =
     let line, start, end_ = Pos.info_pos p in
     Printf.sprintf "(line %d: chars %d-%d)" line start end_
@@ -1398,21 +1374,21 @@ module PrintClass = struct
     let type_ = Full.to_string_decl tcopt ty in
     synth^vis^" "^type_
 
-  let class_elts tcopt m =
-    Sequence.fold m ~init:"" ~f:begin fun acc (field, v) ->
+  let class_elt_smap tcopt m =
+    SMap.fold begin fun field v acc ->
       "("^field^": "^class_elt tcopt v^") "^acc
-    end
+    end m ""
 
-  let class_elts_with_breaks tcopt m =
-    Sequence.fold m ~init:"" ~f:begin fun acc (field, v) ->
+  let class_elt_smap_with_breaks tcopt m =
+    SMap.fold begin fun field v acc ->
       "\n"^indent^field^": "^(class_elt tcopt v)^acc
-    end
+    end m ""
 
-  let class_consts tcopt m =
-    Sequence.fold m ~init:"" ~f:begin fun acc (field, cc) ->
+  let class_const_smap tcopt m =
+    SMap.fold begin fun field cc acc ->
       let synth = if cc.cc_synthesized then "synthetic " else "" in
       "("^field^": "^synth^Full.to_string_decl tcopt cc.cc_type^") "^acc
-    end
+    end m ""
 
   let typeconst tcopt {
     ttc_name = tc_name;
@@ -1434,12 +1410,12 @@ module PrintClass = struct
     in
     name^constraint_^type_^" (origin:"^origin^")"
 
-  let typeconsts tcopt m =
-    Sequence.fold m ~init:"" ~f:begin fun acc (_, v) ->
+  let typeconst_smap tcopt m =
+    SMap.fold begin fun _ v acc ->
       "\n("^(typeconst tcopt v)^")"^acc
-    end
+    end m ""
 
-  let ancestors tcopt m =
+  let ancestors_smap tcopt m =
     (* Format is as follows:
      *    ParentKnownToHack
      *  ! ParentCompletelyUnknown
@@ -1447,16 +1423,16 @@ module PrintClass = struct
      *
      * ParentPartiallyKnown must inherit one of the ! Unknown parents, so that
      * sigil could be omitted *)
-    Sequence.fold m ~init:"" ~f:begin fun acc (field, v) ->
+    SMap.fold begin fun field v acc ->
       let sigil, kind = match Typing_lazy_heap.get_class tcopt field with
         | None -> "!", ""
-        | Some cls ->
-          (if Cls.members_fully_known cls then " " else "~"),
-          " ("^class_kind (Cls.kind cls)^")"
+        | Some {tc_members_fully_known; tc_kind; _} ->
+          (if tc_members_fully_known then " " else "~"),
+          " ("^class_kind tc_kind^")"
       in
       let ty_str = Full.to_string_decl tcopt v in
       "\n"^indent^sigil^" "^ty_str^kind^acc
-    end
+    end m ""
 
   let constructor tcopt (ce_opt, consist) =
     let consist_str = if consist then " (consistent in hierarchy)" else "" in
@@ -1466,29 +1442,29 @@ module PrintClass = struct
     in ce_str^consist_str
 
   let req_ancestors tcopt xs =
-    Sequence.fold xs ~init:"" ~f:begin fun acc (_p, x) ->
+    List.fold_left xs ~init:"" ~f:begin fun acc (_p, x) ->
       acc ^ Full.to_string_decl tcopt x ^ ", "
     end
 
   let class_type tcopt c =
-    let tc_need_init = bool (Cls.need_init c) in
-    let tc_members_fully_known = bool (Cls.members_fully_known c) in
-    let tc_abstract = bool (Cls.abstract c) in
-    let tc_deferred_init_members = sset (Cls.deferred_init_members c) in
-    let tc_kind = class_kind (Cls.kind c) in
-    let tc_name = (Cls.name c) in
-    let tc_tparams = tparam_list tcopt (Cls.tparams c) in
-    let tc_consts = class_consts tcopt (Cls.consts c) in
-    let tc_typeconsts = typeconsts tcopt (Cls.typeconsts c) in
-    let tc_props = class_elts tcopt (Cls.props c) in
-    let tc_sprops = class_elts tcopt (Cls.sprops c) in
-    let tc_methods = class_elts_with_breaks tcopt (Cls.methods c) in
-    let tc_smethods = class_elts_with_breaks tcopt (Cls.smethods c) in
-    let tc_construct = constructor tcopt (Cls.construct c) in
-    let tc_ancestors = ancestors tcopt (Cls.all_ancestors c) in
-    let tc_req_ancestors = req_ancestors tcopt (Cls.all_ancestor_reqs c) in
-    let tc_req_ancestors_extends = sseq (Cls.all_ancestor_req_names c) in
-    let tc_extends = sseq (Cls.all_extends_ancestors c) in
+    let tc_need_init = bool c.tc_need_init in
+    let tc_members_fully_known = bool c.tc_members_fully_known in
+    let tc_abstract = bool c.tc_abstract in
+    let tc_deferred_init_members = sset c.tc_deferred_init_members in
+    let tc_kind = class_kind c.tc_kind in
+    let tc_name = c.tc_name in
+    let tc_tparams = tparam_list tcopt c.tc_tparams in
+    let tc_consts = class_const_smap tcopt c.tc_consts in
+    let tc_typeconsts = typeconst_smap tcopt c.tc_typeconsts in
+    let tc_props = class_elt_smap tcopt c.tc_props in
+    let tc_sprops = class_elt_smap tcopt c.tc_sprops in
+    let tc_methods = class_elt_smap_with_breaks tcopt c.tc_methods in
+    let tc_smethods = class_elt_smap_with_breaks tcopt c.tc_smethods in
+    let tc_construct = constructor tcopt c.tc_construct in
+    let tc_ancestors = ancestors_smap tcopt c.tc_ancestors in
+    let tc_req_ancestors = req_ancestors tcopt c.tc_req_ancestors in
+    let tc_req_ancestors_extends = sset c.tc_req_ancestors_extends in
+    let tc_extends = sset c.tc_extends in
     "tc_need_init: "^tc_need_init^"\n"^
     "tc_members_fully_known: "^tc_members_fully_known^"\n"^
     "tc_abstract: "^tc_abstract^"\n"^
@@ -1593,22 +1569,15 @@ let constraints_for_type env ty =
   |> Option.map ~f:(Libhackfmt.format_doc_unbroken Full.format_env)
   |> Option.map ~f:String.strip
 let class_kind c_kind final = ErrorString.class_kind c_kind final
-let subtype_prop ?(do_normalize = false) env prop =
-  let rec subtype_prop = function
-    | Unsat _ -> "UNSAT"
-    | Conj [] -> "TRUE"
-    | Conj ps ->
-      "(" ^ (String.concat ~sep:" && " (List.map ~f:subtype_prop ps)) ^ ")"
-    | Disj [] -> "FALSE"
-    | Disj ps ->
-      "(" ^ (String.concat ~sep:" || " (List.map ~f:subtype_prop ps)) ^ ")"
-    | IsSubtype (ty1, ty2) ->
-      debug_with_tvars env ty1 ^ " <: " ^ debug_with_tvars env ty2
-    | IsEqual (ty1, ty2) ->
-      debug_with_tvars env ty1 ^ " = " ^ debug_with_tvars env ty2 in
-  if do_normalize then
-    Full.varmapping := IMap.empty;
-    Full.normalize_tvars := true;
-  let p_str = subtype_prop prop in
-  Full.normalize_tvars := false;
-  p_str
+let rec subtype_prop env = function
+  | Unsat _ -> "UNSAT"
+  | Conj [] -> "TRUE"
+  | Conj ps ->
+    "(" ^ (String.concat ~sep:" && " (List.map ~f:(subtype_prop env) ps)) ^ ")"
+  | Disj [] -> "FALSE"
+  | Disj ps ->
+    "(" ^ (String.concat ~sep:" || " (List.map ~f:(subtype_prop env) ps)) ^ ")"
+  | IsSubtype (ty1, ty2) ->
+    debug_with_tvars env ty1 ^ " <: " ^ debug_with_tvars env ty2
+  | IsEqual (ty1, ty2) ->
+    debug_with_tvars env ty1 ^ " = " ^ debug_with_tvars env ty2

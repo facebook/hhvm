@@ -84,14 +84,10 @@ let compute_funs_deps ~conservative_redecl old_funs (changed, to_redecl, to_rech
  *)
 (*****************************************************************************)
 
-let compute_types_deps ~conservative_redecl old_types (changed, to_redecl, to_recheck) types =
+let compute_types_deps old_types (changed, to_redecl, to_recheck) types =
   let rc, rdc = Decl_compare.get_types_deps old_types types in
   let changed = DepSet.union rc changed in
-  let to_redecl =
-    if conservative_redecl
-    then DepSet.union rdc to_redecl
-    else to_redecl
-  in
+  let to_redecl = DepSet.union rdc to_redecl in
   let to_recheck = DepSet.union rdc to_recheck in
   changed, to_redecl, to_recheck
 
@@ -137,7 +133,7 @@ let compute_deps ~conservative_redecl fast filel =
   let acc = compute_funs_deps ~conservative_redecl old_funs acc n_funs in
 
   let old_types = Decl_heap.Typedefs.get_old_batch n_types in
-  let acc = compute_types_deps ~conservative_redecl old_types acc n_types in
+  let acc = compute_types_deps old_types acc n_types in
 
   let old_consts = Decl_heap.GConsts.get_old_batch n_consts in
   let acc = compute_gconsts_deps ~conservative_redecl old_consts acc n_consts in

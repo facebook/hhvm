@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_core
 open IdentifySymbolService
 open Option.Monad_infix
 open Typing_defs
@@ -16,7 +16,6 @@ module SourceText = Full_fidelity_source_text
 module Syntax = Full_fidelity_positioned_syntax
 module SyntaxKind = Full_fidelity_syntax_kind
 module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(Full_fidelity_positioned_syntax)
-module Cls = Typing_classes_heap
 
 (* Element type, class name, element name. Class name refers to "origin" class,
  * we expect to find said element in AST/NAST of this class *)
@@ -125,32 +124,32 @@ let go tcopt ast result =
        * is not defined directly in class c_name *)
       Typing_lazy_heap.get_class tcopt c_name >>= fun class_ ->
       if method_name = Naming_special_names.Members.__construct then begin
-        match fst (Cls.construct class_) with
+        match fst class_.tc_construct with
           | Some m ->
             get_member_def tcopt (Constructor, m.ce_origin, method_name)
           | None ->
             get_class_by_name tcopt c_name >>= fun c ->
             Some (FileOutline.summarize_class c ~no_children:true)
       end else begin
-        match Cls.get_method class_ method_name with
+        match SMap.get method_name class_.tc_methods with
         | Some m -> get_member_def tcopt (Method, m.ce_origin, method_name)
         | None ->
-          Cls.get_smethod class_ method_name >>= fun m ->
+          SMap.get method_name class_.tc_smethods >>= fun m ->
           get_member_def tcopt (Static_method, m.ce_origin, method_name)
       end
     | SymbolOccurrence.Property (c_name, property_name) ->
       Typing_lazy_heap.get_class tcopt c_name >>= fun class_ ->
       let property_name = clean_member_name property_name in
-      begin match Cls.get_prop class_ property_name with
+      begin match SMap.get property_name class_.tc_props with
       | Some m -> get_member_def tcopt (Property, m.ce_origin, property_name)
       | None ->
-        Cls.get_sprop class_ ("$" ^ property_name) >>= fun m ->
+        SMap.get ("$" ^ property_name) class_.tc_sprops >>= fun m ->
         get_member_def tcopt
           (Static_property, m.ce_origin, property_name)
       end
     | SymbolOccurrence.ClassConst (c_name, const_name) ->
       Typing_lazy_heap.get_class tcopt c_name >>= fun class_ ->
-      Cls.get_const class_ const_name >>= fun m ->
+      SMap.get const_name class_.tc_consts >>= fun m ->
       get_member_def tcopt (Class_const, m.cc_origin, const_name)
     | SymbolOccurrence.Function ->
       get_function_by_name tcopt result.SymbolOccurrence.name >>= fun f ->
@@ -162,7 +161,7 @@ let go tcopt ast result =
       summarize_class_typedef tcopt result.SymbolOccurrence.name
     | SymbolOccurrence.Typeconst (c_name, typeconst_name) ->
       Typing_lazy_heap.get_class tcopt c_name >>= fun class_ ->
-      Cls.get_typeconst class_ typeconst_name >>= fun m ->
+      SMap.get typeconst_name class_.tc_typeconsts >>= fun m ->
       get_member_def tcopt (Typeconst, m.ttc_origin, typeconst_name)
     | SymbolOccurrence.LocalVar ->
       get_local_var_def

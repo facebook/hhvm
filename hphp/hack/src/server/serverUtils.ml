@@ -7,7 +7,6 @@
  *
  *)
 
-open Core_kernel
 module MC = MonitorConnection
 
 type 'env handle_command_result =
@@ -35,7 +34,7 @@ let shutdown_client (_ic, oc) =
   let cli = Unix.descr_of_out_channel oc in
   try
     Unix.shutdown cli Unix.SHUTDOWN_ALL;
-    Out_channel.close oc
+    close_out oc
   with _ -> ()
 
 let hh_monitor_config root = ServerMonitorUtils.({
@@ -53,8 +52,8 @@ let connect_to_monitor ~timeout root =
 
 let print_hash_stats () =
   Utils.try_with_stack SharedMem.dep_stats
-  |> Result.map_error ~f:(fun (exn, Utils.Callstack stack) -> Hh_logger.exc ~stack exn)
-  |> Result.iter ~f:begin fun { SharedMem.
+  |> Core_result.map_error ~f:(fun (exn, Utils.Callstack stack) -> Hh_logger.exc ~stack exn)
+  |> Core_result.iter ~f:begin fun { SharedMem.
     used_slots;
     slots;
     nonempty_slots = _ } ->
@@ -63,8 +62,8 @@ let print_hash_stats () =
       used_slots slots load_factor
   end;
   Utils.try_with_stack SharedMem.hash_stats
-  |> Result.map_error ~f:(fun (exn, Utils.Callstack stack) -> Hh_logger.exc ~stack exn)
-  |> Result.iter ~f:begin fun { SharedMem.
+  |> Core_result.map_error ~f:(fun (exn, Utils.Callstack stack) -> Hh_logger.exc ~stack exn)
+  |> Core_result.iter ~f:begin fun { SharedMem.
     used_slots;
     slots;
     nonempty_slots } ->
@@ -97,7 +96,7 @@ let exit_on_exception (exn: exn) ~(stack: Utils.callstack) =
     let is_oom_failure f = match f with
       | WorkerController.Worker_oomed -> true
       | _ -> false in
-    let has_oom_failure = List.exists ~f:is_oom_failure failures in
+    let has_oom_failure = List.exists is_oom_failure failures in
     if has_oom_failure then
       let () = Hh_logger.log "Worker oomed. Exiting" in
       Exit_status.(exit Worker_oomed)
@@ -110,9 +109,9 @@ let exit_on_exception (exn: exn) ~(stack: Utils.callstack) =
         | _ ->
           None
       in
-      let exit_code = List.fold_left ~f:(fun acc f ->
+      let exit_code = List.fold_left (fun acc f ->
         if Option.is_some acc then acc else worker_exit f
-        ) ~init:None failures
+        ) None failures
       in
       match exit_code with
       | Some i ->

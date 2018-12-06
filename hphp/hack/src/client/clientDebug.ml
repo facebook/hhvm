@@ -12,8 +12,8 @@ type env = {
   from : string;
 }
 
-let main (env : env) : Exit_status.t Lwt.t =
-  let%lwt {ClientConnect.channels = ic, oc; _} =
+let main env =
+  let {ClientConnect.channels = ic, oc; _} =
       ClientConnect.connect { ClientConnect.
     root = env.root;
     from = env.from;
@@ -38,4 +38,4 @@ let main (env : env) : Exit_status.t Lwt.t =
   while true do
     print_endline (Timeout.input_line ic);
   done;
-  Lwt.return Exit_status.No_error
+  Exit_status.No_error

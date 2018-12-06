@@ -30,4 +30,4 @@ type inherited = {
 }
 
 (* Builds the inherited type *)
-val make: Decl_env.env -> Shallow_decl_defs.shallow_class -> inherited
+val make: Decl_env.env -> Nast.class_ -> inherited

@@ -157,8 +157,6 @@ let parse_options () =
   let mode = ref Errors in
   let no_builtins = ref false in
   let line = ref 0 in
-  let log_key = ref "" in
-  let log_levels = ref SMap.empty in
   let set_mode x () =
     if !mode <> Errors
     then raise (Arg.Bad "only a single mode should be specified")
@@ -178,7 +176,6 @@ let parse_options () =
   let dynamic_view = ref false in
   let allow_array_as_tuple = ref false in
   let allow_return_by_ref = ref false in
-  let disallow_assign_by_ref = ref false in
   let allow_array_cell_pass_by_ref = ref false in
   let allow_anon_use_capture_by_ref = ref false in
   let allow_user_attributes = ref false in
@@ -344,9 +341,6 @@ let parse_options () =
     "--allow-return-by-ref",
         Arg.Set allow_return_by_ref,
         " Allow returning references from functions";
-    "--disallow-assign-by-ref",
-        Arg.Set disallow_assign_by_ref,
-        " Disallow assignment by reference";
     "--allow-array-cell-pass-by-ref",
         Arg.Set allow_array_cell_pass_by_ref,
         " Allow binding of array cells by reference as arguments to function calls";
@@ -371,12 +365,6 @@ let parse_options () =
     "--new-inference",
         Arg.Set new_inference,
         " Type inference by constraint generation.";
-    "--hh-log-level",
-        Arg.Tuple ([
-          Arg.String (fun x -> log_key := x);
-          Arg.Int (fun level -> log_levels := SMap.add !log_key level !log_levels);
-        ]),
-        " Set the log level for a key";
     "--batch-files",
         Arg.Set batch_mode,
         " Typecheck each file passed in independently";
@@ -405,7 +393,6 @@ let parse_options () =
       GlobalOptions.tco_dynamic_view = !dynamic_view;
       GlobalOptions.tco_disallow_array_as_tuple = not !allow_array_as_tuple;
       GlobalOptions.tco_disallow_return_by_ref = not !allow_return_by_ref;
-      GlobalOptions.tco_disallow_assign_by_ref = !disallow_assign_by_ref;
       GlobalOptions.tco_disallow_array_cell_pass_by_ref = not !allow_array_cell_pass_by_ref;
       GlobalOptions.tco_disallow_anon_use_capture_by_ref = not !allow_anon_use_capture_by_ref;
       GlobalOptions.tco_disallow_unset_on_varray = !disallow_unset_on_varray;
@@ -414,7 +401,6 @@ let parse_options () =
       GlobalOptions.tco_disallow_invalid_arraykey = !disallow_invalid_arraykey;
       GlobalOptions.po_auto_namespace_map = !auto_namespace_map;
       GlobalOptions.po_enable_concurrent = !enable_concurrent;
-      GlobalOptions.log_levels = !log_levels;
   } in
   let tcopt = {
     tcopt with
@@ -446,7 +432,7 @@ let compute_least_type tcopt popt fn =
         Nast.(List.fold fnb_nast ~init:[]
           ~f:begin fun acc stmt ->
             match stmt with
-            | Expr (_, New ((_, CI ((_, "\\least_upper_bound"), hints)), _, _, _)) ->
+            | Expr (_, New ((_, CI ((_, "\\least_upper_bound"), hints)), _, _)) ->
               (List.map hints
                 (fun h -> snd (Typing_infer_return.type_from_hint tcopt fn h)))
               :: acc

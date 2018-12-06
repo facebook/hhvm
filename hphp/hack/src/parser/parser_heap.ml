@@ -19,7 +19,7 @@ module Lowerer = Full_fidelity_ast
 
 type parse_type = Decl | Full
 
-module ParserHeap = SharedMem.WithCache (SharedMem.ProfiledImmediate) (Relative_path.S) (struct
+module ParserHeap = SharedMem.WithCache (Relative_path.S) (struct
     type t = Ast.program * parse_type
     let prefix = Prefix.make()
     let description = "Parser"

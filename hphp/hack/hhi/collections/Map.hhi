@@ -681,7 +681,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * @return - A `Map` with the key/value pairs from the `Traversable`; or an
    *           empty `Map` if the `Traversable` is `null`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
   public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Pair<Tk, Tv>> $items)
     : Map<Tk, Tv>;
 

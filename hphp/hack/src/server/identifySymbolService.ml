@@ -145,7 +145,7 @@ let visitor = object (self)
     let (+) = self#plus in
     let acc =
       match snd expr with
-      | Tast.New (((p, ty), _), _, _, _) ->
+      | Tast.New (((p, ty), _), _, _) ->
         typed_constructor env ty p
       | Tast.Obj_get (((_, ty), _), (_, Tast.Id mid), _) ->
         typed_property env ty mid

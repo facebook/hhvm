@@ -91,9 +91,6 @@ type t = {
  (* Flag to enable concurrent *)
  po_enable_concurrent : bool;
 
- (* Flag to disable decl mode outside of HHI files *)
- po_disable_decl : bool;
-
  (** Print types of size bigger than 1000 after performing a type union. *)
  tco_log_inference_constraints : bool;
 
@@ -121,11 +118,6 @@ type t = {
   * Flag to disallow returning references from functions
   *)
  tco_disallow_return_by_ref: bool;
-
- (*
-  * Flag to disallow assignment by reference
-  *)
- tco_disallow_assign_by_ref: bool;
 
  (*
   * Flag to disallow binding array cells by reference as function arguments
@@ -191,9 +183,6 @@ type t = {
 
  (* What version of Hack the current codebase was designed for *)
  forward_compatibility_level : ForwardCompatibilityLevel.t;
-
- (* Initial hh_log_level settings *)
- log_levels : int SMap.t;
 } [@@deriving show]
 val make :
   tco_assume_php: bool ->
@@ -204,7 +193,6 @@ val make :
   po_disable_define: bool ->
   po_allow_goto: bool ->
   po_enable_concurrent: bool ->
-  po_disable_decl: bool ->
   tco_log_inference_constraints : bool ->
   tco_user_attrs: SSet.t option ->
   tco_experimental_features: SSet.t ->
@@ -218,7 +206,6 @@ val make :
   tco_disallow_array_literal: bool ->
   tco_untyped_nonstrict_lambda_parameters: bool ->
   tco_disallow_return_by_ref: bool ->
-  tco_disallow_assign_by_ref: bool ->
   tco_disallow_array_cell_pass_by_ref: bool ->
   tco_language_feature_logging: bool ->
   tco_unsafe_rx: bool ->
@@ -231,7 +218,6 @@ val make :
   tco_disallow_invalid_arraykey: bool ->
   ignored_fixme_codes: ISet.t ->
   forward_compatibility_level: ForwardCompatibilityLevel.t ->
-  log_levels: int SMap.t ->
   t
 val tco_assume_php : t -> bool
 val tco_safe_array : t -> bool
@@ -249,7 +235,6 @@ val po_disable_variable_variables : t -> bool
 val po_disable_define : t -> bool
 val po_allow_goto : t -> bool
 val po_enable_concurrent : t -> bool
-val po_disable_decl : t -> bool
 val po_enable_hh_syntax_for_hhvm : t -> bool
 val tco_log_inference_constraints : t -> bool
 val tco_disallow_ambiguous_lambda : t -> bool
@@ -257,7 +242,6 @@ val tco_disallow_array_typehint : t -> bool
 val tco_disallow_array_literal : t -> bool
 val tco_untyped_nonstrict_lambda_parameters : t -> bool
 val tco_disallow_return_by_ref : t -> bool
-val tco_disallow_assign_by_ref : t -> bool
 val tco_disallow_array_cell_pass_by_ref : t -> bool
 val tco_language_feature_logging : t -> bool
 val tco_unsafe_rx : t -> bool
@@ -285,12 +269,9 @@ val tco_experimental_disable_optional_and_unknown_shape_fields : string
 val tco_experimental_no_trait_reuse : string
 val tco_experimental_null_coalesce_assignment : string
 val tco_experimental_reified_generics : string
-val tco_experimental_trait_method_redeclarations : string
 val tco_experimental_decl_linearization : string
 val tco_experimental_track_subtype_prop : string
-val tco_experimental_null_type : string
 val tco_experimental_all : SSet.t
 val tco_migration_flags_all : SSet.t
 val ignored_fixme_codes : t -> ISet.t
 val forward_compatibility_level : t -> ForwardCompatibilityLevel.t
-val log_levels : t -> int SMap.t

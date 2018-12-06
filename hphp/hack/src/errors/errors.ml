@@ -744,6 +744,12 @@ let trait_interface_constructor_promo pos =
   add (Naming.err_code Naming.TraitInterfaceConstructorPromo) pos
   "Constructor parameter promotion not allowed on traits or interfaces"
 
+let typeparam_alok (pos, x) =
+  add (Naming.err_code Naming.TypeparamAlok) pos (
+  "You probably forgot to bind this type parameter right?\nAdd <"^x^
+  "> somewhere (after the function name definition, \
+    or after the class name)\nExamples: "^"function foo<T> or class A<T>")
+
 let unexpected_arrow pos cname =
   add (Naming.err_code Naming.UnexpectedArrow) pos (
   "Keys may not be specified for "^cname^" initialization"
@@ -1209,6 +1215,11 @@ let no_construct_parent pos =
      "Make sure you call parent::__construct.\n"
    ]
  )
+
+let mutable_on_static pos =
+  add (NastCheck.err_code NastCheck.MutableOnStatic) pos (
+    "<<__Mutable>> attribute is not allowed on static methods."
+  )
 
  let nonstatic_method_in_abstract_final_class pos =
   add (NastCheck.err_code NastCheck.NonstaticMethodInAbstractFinalClass) pos (
@@ -2270,6 +2281,13 @@ let extend_ppl
     parent_pos, "Declaration is here";
   ]
 
+let sealed_final pos name =
+  let name = (strip_ns name) in
+  add (Typing.err_code Typing.SealedFinal) pos ("Sealed class "^name^" cannot be marked final")
+
+let unsealable pos kind =
+  add (Typing.err_code Typing.Unsealable) pos (kind^" cannot be sealed")
+
 let read_before_write (pos, v) =
   add (Typing.err_code Typing.ReadBeforeWrite) pos (
   sl[
@@ -2350,7 +2368,7 @@ let untyped_lambda_strict_mode pos =
 
 let echo_in_reactive_context pos =
   add (Typing.err_code Typing.EchoInReactiveContext) pos (
-    "'echo' or 'print' are not allowed in reactive functions."
+    "'echo' or 'print' are not allowed in reactive or shallow-reactive functions."
   )
 
 let expected_tparam ~use_pos ~definition_pos n =
@@ -2474,19 +2492,12 @@ let reassign_maybe_mutable_var pos1 =
   ("This variable is maybe mutable. You cannot create a new reference to it.")
 
 
-let mutable_call_on_immutable  fpos pos1 rx_mutable_hint_pos =
-  let l =
-    match rx_mutable_hint_pos with
-    | Some p ->
-      [p, "Consider wrapping this expression with Rx\\mutable to forward mutability."]
-    | None -> []
-  in
-  let l =
-      (pos1, "Cannot call mutable function on immutable expression") ::
-      (fpos, "This function is marked <<__Mutable>>, so it has a mutable $this.") ::
-      l
-  in
-  add_list (Typing.err_code Typing.MutableCallOnImmutable) l
+let mutable_call_on_immutable fpos pos1 =
+  add_list (Typing.err_code Typing.MutableCallOnImmutable)
+  [
+    pos1, "Cannot call mutable function on immutable expression";
+    fpos, "This function is marked <<__Mutable>>, so it has a mutable $this.";
+  ]
 
 let immutable_call_on_mutable fpos pos1 =
   add_list (Typing.err_code Typing.ImmutableCallOnMutable)
@@ -2955,10 +2966,24 @@ let trait_reuse p_pos p_name class_name trait =
   let err' = "It is already used through "^(Utils.strip_ns p_name) in
   add_list (Typing.err_code Typing.TraitReuse) [c_pos, err; p_pos, err']
 
+(**
+ * This error should be unfixmeable, because the `is` expression does not
+ * support it at all.
+ *)
 let invalid_is_as_expression_hint op hint_pos ty_pos ty_str =
   add_list (Typing.err_code Typing.InvalidIsAsExpressionHint) [
     hint_pos, ("Invalid \"" ^ op ^ "\" expression hint");
     ty_pos, ("The \"" ^ op ^ "\" operator cannot be used with " ^ ty_str);
+  ]
+
+(**
+ * This error is fixmeable, because the typechecker will still refine the type
+ * despite the hint not being completely valid.
+ *)
+let partially_valid_is_as_expression_hint op hint_pos ty_pos ty_str =
+  add_list (Typing.err_code Typing.PartiallyValidIsAsExpressionHint) [
+    hint_pos, ("Invalid \"" ^ op ^ "\" expression hint");
+    ty_pos, ("The \"" ^ op ^ "\" operator should not be used with " ^ ty_str);
   ]
 
 let override_final ~parent ~child =
@@ -3181,10 +3206,6 @@ let reference_expr pos =
   let msg = "Cannot take a value by reference in strict mode." in
   add (Typing.err_code Typing.ReferenceExpr) pos msg
 
-let reference_expr_partial pos =
-  let msg = "Taking a value by reference is no longer supported in Hack." in
-  add (Typing.err_code Typing.ReferenceExprPartial) pos msg
-
 let pass_by_ref_annotation_missing pos1 pos2 =
   let msg1 = pos1, "This argument should be annotated with &" in
   let msg2 = pos2, "Because this parameter is passed by reference" in
@@ -3264,14 +3285,9 @@ let rx_parameter_condition_mismatch cond pos def_pos =
     matching parameter in function super type.";
     def_pos, "This is parameter declaration from the function super type."
   ]
-let nonreactive_indexing is_append pos =
-  let msg =
-    if is_append
-    then "Cannot append to a Hack Collection object in a reactive context. \
-    Instead, use the 'add' method."
-    else "Cannot assign to element of Hack Collection object via [] in a reactive context. \
-    Instead, use the 'set' method." in
-  add (Typing.err_code Typing.NonreactiveIndexing) pos msg
+let nonreactive_append pos =
+  let msg = "Cannot append to a Hack Collection object in a reactive context" in
+  add (Typing.err_code Typing.NonreactiveAppend) pos msg
 
 let obj_set_reactive pos =
   let msg = ("This object's property is being mutated(used as an lvalue)" ^
@@ -3452,25 +3468,6 @@ let invalid_truthiness_test pos ty =
 let sketchy_truthiness_test pos ty truthiness =
   add (Typing.err_code Typing.SketchyTruthinessTest) pos @@
     match truthiness with
-    | `String ->
-      Printf.sprintf
-        "Sketchy condition: testing the truthiness of %s may not behave as expected.\n\
-        The values '' and '0' are both considered falsy. \
-        To check for emptiness, use Str\\is_empty."
-        ty
-    | `Arraykey ->
-      Printf.sprintf
-        "Sketchy condition: testing the truthiness of %s may not behave as expected.\n\
-        The values 0, '', and '0' are all considered falsy. \
-        Test for them explicitly."
-        ty
-    | `Stringish ->
-      Printf.sprintf
-        "Sketchy condition: testing the truthiness of a %s may not behave as expected.\n\
-        The values '' and '0' are both considered falsy, \
-        but objects will be truthy even if their __toString returns '' or '0'.\n\
-        To check for emptiness, convert to a string and use Str\\is_empty."
-        ty
     | `Traversable ->
       (* We have a truthiness test on a value with an interface type which is a
          subtype of Traversable, but not a subtype of Container.
@@ -3529,9 +3526,6 @@ let invalid_arraykey pos typ =
       "This value is not a valid array key type (string | int), it is %s"
       typ
 
-let redundant_rx_condition pos =
-  add (Typing.err_code Typing.RedundantRxCondition) pos
-    "Reactivity condition for this method is always true, consider removing it."
 
 (*****************************************************************************)
 (* Convert relative paths to absolute. *)
@@ -3578,7 +3572,7 @@ let try_add_err pos err f1 f2 =
   end
 
 let has_no_errors f =
-  try_ (fun () -> f(); true) (fun _ -> false)
+  try_ (fun () -> let _ = f () in true) (fun _ -> false)
 
 (*****************************************************************************)
 (* Do. *)

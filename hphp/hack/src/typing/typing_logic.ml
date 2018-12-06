@@ -63,26 +63,28 @@ let rec has_disj p =
 let valid = Conj []
 
 (* Smart constructor for binary conjunction *)
-let conj p1 p2 =
+let rec conj p1 p2 =
   match p1, p2 with
-  | Conj [], p
-  | p, Conj [] -> p
-  | Conj ps1, Conj ps2 -> Conj (ps1 @ ps2)
+  | Conj ps1, Conj ps2 -> conj_list (ps1 @ ps2)
+  | Conj [], _ -> p2
+  | _, Conj [] -> p1
   (* Preserve the order to maintain legacy behaviour. If two errors share the
    * same position then the first one to be emitted wins.
    * TODO: consider relaxing this behaviour *)
-  | Conj ps, _ -> Conj (ps @ [p2])
-  | _, Conj ps -> Conj (p1::ps)
+  | Conj ps, _ -> conj_list (ps @ [p2])
+  | _, Conj ps -> conj_list (p1::ps)
   | _, _ -> Conj [p1; p2]
 
-let conj_list ps =
-  List.fold ~init:(Conj []) ps ~f:conj
+and conj_list ps =
+  match ps with
+  | [p] -> p
+  | _ -> Conj ps
 
 (* Smart constructor for binary disjunction *)
 let disj p1 p2 =
   match p1, p2 with
-  | p, (Unsat _ | Disj [])
-  | (Unsat _ | Disj []), p -> p
+  | _, (Unsat _ | Disj []) -> p1
+  | (Unsat _ | Disj []), _ -> p2
   | Conj [], _
   | _, Conj [] -> Conj []
   | Disj ps1, Disj ps2 -> Disj (ps1 @ ps2)
@@ -91,7 +93,9 @@ let disj p1 p2 =
   | _, _ -> Disj [p1; p2]
 
 let disj_list ps =
-  List.fold ~init:(Disj []) ps ~f:disj
+  match ps with
+  | [p] -> p
+  | _ -> Disj ps
 
 (* Is this proposition always true? (e.g. Conj [] but also Disj [Conj []; Unsat _]
  * if not simplified

@@ -8,16 +8,6 @@
  *)
 module T = Tast
 
-module type Env_S = sig
-  type env
-  val env_reactivity: env -> Typing_defs.reactivity
-  val get_fun: env -> Typing_heap.Funs.key -> Typing_heap.Funs.t option
-end
-
-module Shared(Env: Env_S): sig
-  val is_fun_call_returning_mutable: Env.env -> T.expr -> bool
-end
-
 val handle_assignment_mutability :
   Typing_env.env ->
   T.expr ->
@@ -25,6 +15,10 @@ val handle_assignment_mutability :
   Typing_env.env
 val freeze_local : Pos.t -> Typing_env.env -> T.expr list -> Typing_env.env
 val move_local : Pos.t -> Typing_env.env -> T.expr list -> Typing_env.env
+val check_rx_mutable_arguments : Pos.t -> Typing_env.env -> T.expr list -> unit
+val enforce_mutable_call : Typing_env.env -> T.expr -> unit
+val enforce_mutable_constructor_call:
+  Typing_env.env -> 'a Typing_defs.ty -> T.expr list -> unit
 val handle_value_in_return:
   function_returns_mutable: bool ->
   function_returns_void_for_rx: bool ->
@@ -32,4 +26,8 @@ val handle_value_in_return:
   Pos.t ->
   T.expr ->
   Typing_env.env
-val is_move_or_mutable_call: ?allow_move: bool -> T.expr_ -> bool
+val check_unset_target: Typing_env.env -> T.expr -> unit
+val check_conditional_operator:
+  T.expr ->
+  T.expr ->
+  unit

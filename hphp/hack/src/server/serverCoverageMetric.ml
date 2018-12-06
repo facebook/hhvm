@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_core
 open Coverage_level
 open Option.Monad_infix
 open Reordered_argument_collections

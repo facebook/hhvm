@@ -53,6 +53,7 @@ module type S = sig
   val experimental_feature : Pos.t -> string -> unit
 
   val fixme_format : Pos.t -> unit
+  val typeparam_alok : Pos.t * string -> unit
   val unexpected_eof : Pos.t -> unit
   val missing_field : Pos.t -> Pos.t -> string -> unit
   val explain_constraint :
@@ -232,6 +233,8 @@ module type S = sig
   val extend_final : Pos.t -> Pos.t -> string -> unit
   val extend_sealed : Pos.t -> Pos.t -> string -> string -> string -> unit
   val extend_ppl : Pos.t -> string -> bool -> Pos.t -> string -> string -> string -> unit
+  val sealed_final : Pos.t -> string -> unit
+  val unsealable : Pos.t -> string -> unit
   val read_before_write : Pos.t * string -> unit
   val interface_final : Pos.t -> unit
   val trait_final : Pos.t -> unit
@@ -275,6 +278,8 @@ module type S = sig
   val cyclic_class_def : SSet.t -> Pos.t -> unit
   val trait_reuse : (Pos.t) -> string -> (Pos.t * string) -> string -> unit
   val invalid_is_as_expression_hint : string -> Pos.t -> Pos.t -> string -> unit
+  val partially_valid_is_as_expression_hint :
+    string -> Pos.t -> Pos.t -> string -> unit
   val override_final : parent:Pos.t -> child:Pos.t -> unit
   val override_memoizelsb : parent:Pos.t -> child:Pos.t -> unit
   val override_lsb : member_name:string -> parent:Pos.t -> child:Pos.t -> unit
@@ -386,7 +391,6 @@ module type S = sig
   val illegal_typeconst_direct_access : Pos.t -> unit
   val class_property_only_static_literal : Pos.t -> unit
   val reference_expr : Pos.t -> unit
-  val reference_expr_partial : Pos.t -> unit
   val unification_cycle : Pos.t -> string -> unit
   val eq_incompatible_types : Pos.t -> (Pos.t * string) list
     -> (Pos.t * string) list -> unit
@@ -488,7 +492,7 @@ module type S = sig
   val fun_reactivity_mismatch : Pos.t -> string -> Pos.t -> string -> unit
   val inconsistent_unset : Pos.t -> unit
   val reassign_mutable_var : Pos.t -> unit
-  val mutable_call_on_immutable : Pos.t -> Pos.t -> Pos.t option -> unit
+  val mutable_call_on_immutable : Pos.t -> Pos.t -> unit
   val mutable_argument_mismatch : Pos.t -> Pos.t -> unit
   val invalid_mutable_return_result: Pos.t -> Pos.t -> string -> unit
   val mutable_return_result_mismatch: bool -> Pos.t -> Pos.t -> unit
@@ -523,7 +527,7 @@ module type S = sig
   val xhp_required : Pos.t -> string -> (Pos.t * string) list -> unit
   val illegal_xhp_child : Pos.t -> (Pos.t * string) list -> unit
   val nonreactive_function_call : Pos.t -> Pos.t -> string -> Pos.t option -> unit
-  val nonreactive_indexing : bool -> Pos.t -> unit
+  val nonreactive_append : Pos.t -> unit
   val inout_argument_bad_expr : Pos.t -> unit
   val inout_argument_bad_type : Pos.t -> (Pos.t * string) list -> unit
   val nonreactive_call_from_shallow : Pos.t -> Pos.t -> string -> Pos.t option -> unit
@@ -569,7 +573,7 @@ module type S = sig
   val shapes_idx_with_non_existent_field: Pos.t -> string -> Pos.t -> [< `Undefined | `Unset] -> unit
   val ambiguous_object_access: Pos.t -> string -> Pos.t -> string -> Pos.t -> string -> string -> unit
   val invalid_truthiness_test: Pos.t -> string -> unit
-  val sketchy_truthiness_test: Pos.t -> string -> [< `String | `Arraykey | `Stringish | `Traversable ] -> unit
+  val sketchy_truthiness_test: Pos.t -> string -> [< `Traversable ] -> unit
   val forward_compatibility_not_current: Pos.t -> ForwardCompatibilityLevel.t -> unit
   val forward_compatibility_below_minimum: Pos.t -> ForwardCompatibilityLevel.t -> unit
   val unserializable_type: Pos.t -> string -> unit
@@ -601,6 +605,7 @@ module type S = sig
   val bad_lateinit_override: bool -> Pos.t -> Pos.t -> unit
   val interface_use_trait: Pos.t -> unit
   val nonstatic_method_in_abstract_final_class: Pos.t -> unit
+  val mutable_on_static: Pos.t -> unit
   val trait_interface_constructor_promo: Pos.t -> unit
   val escaping_mutable_object: Pos.t -> unit
   val multiple_concrete_defs : Pos.t -> Pos.t -> string -> string -> string -> string -> unit
@@ -614,5 +619,4 @@ module type S = sig
   val inconsistent_mutability: Pos.t -> string -> (Pos.t * string) option -> unit
   val invalid_mutability_flavor: Pos.t -> string -> string -> unit
   val inconsistent_mutability_for_conditional: Pos.t -> Pos.t -> unit
-  val redundant_rx_condition: Pos.t -> unit
 end

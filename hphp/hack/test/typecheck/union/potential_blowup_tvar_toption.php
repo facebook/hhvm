@@ -10,7 +10,7 @@ function test(bool $b, int $e): void {
   $b = true;
   $c = 1;
   $d = false;
-  $e = vec[];
+  $e = "";
 
   while ($b) {
     // a dependency chain to typecheck this loop block multiple times

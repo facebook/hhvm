@@ -3,4 +3,4 @@ Invalid argument (Typing[4110])
 File "arraykey_type_hint_bad.php", line 14, characters 12-19:
 This is an array key (int/string)
 File "arraykey_type_hint_bad.php", line 19, characters 12-12:
-It is incompatible with an object of exactly the class C
+It is incompatible with an object of type C

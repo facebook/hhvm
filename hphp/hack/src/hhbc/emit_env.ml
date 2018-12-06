@@ -17,7 +17,6 @@ type t = {
   env_jump_targets         : Jump_targets.t;
   env_in_try               : bool;
   env_allows_array_append  : bool;
-  env_in_rx_body           : bool;
 }
 
 type global_state =
@@ -79,17 +78,6 @@ let empty = {
   env_jump_targets = Jump_targets.empty;
   env_in_try = false;
   env_allows_array_append = false;
-  env_in_rx_body = false;
-}
-let make_class_env ast_class = {
-  env_pipe_var = None;
-  env_scope = [Ast_scope.ScopeItem.Class ast_class];
-  env_namespace = ast_class.Ast.c_namespace;
-  env_needs_local_this = false;
-  env_jump_targets = Jump_targets.empty;
-  env_in_try = false;
-  env_allows_array_append = false;
-  env_in_rx_body = false;
 }
 
 let get_pipe_var env = env.env_pipe_var
@@ -99,7 +87,6 @@ let get_needs_local_this env = env.env_needs_local_this
 let get_jump_targets env = env.env_jump_targets
 let is_in_try env = env.env_in_try
 let does_env_allow_array_append env = env.env_allows_array_append
-let is_in_rx_body env = env.env_in_rx_body
 
 (* Environment is second parameter so we can chain these e.g.
  *   empty |> with_scope scope |> with_namespace ns
@@ -112,10 +99,13 @@ let with_needs_local_this needs_local_this env =
   { env with env_needs_local_this = needs_local_this }
 let with_pipe_var v env =
   { env with env_pipe_var = Some v }
-let with_try env =
-  { env with env_in_try = true }
-let with_rx_body rx_body env =
-  { env with env_in_rx_body = rx_body }
+let make_class_env ast_class =
+  { env_pipe_var = None; env_scope = [Ast_scope.ScopeItem.Class ast_class];
+    env_namespace = ast_class.Ast.c_namespace; env_needs_local_this = false;
+    env_jump_targets = Jump_targets.empty; env_in_try = false;
+    env_allows_array_append = false;
+  }
+let with_try env = { env with env_in_try = true }
 
 let do_in_loop_body break_label continue_label ?iter env s f =
   Jump_targets.with_loop (!is_hh_file_) break_label continue_label

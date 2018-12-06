@@ -195,8 +195,8 @@ let test_cache_behavior (
      occurred when the index hit 2000, deleted half of the keys at
      random; we don't know which ones specifically. *)
 
-module TestNoCache = SharedMem.NoCache (SharedMem.Immediate) (StringKey) (IntVal)
-module TestWithCache = SharedMem.WithCache (SharedMem.Immediate) (StringKey) (IntVal)
+module TestNoCache = SharedMem.NoCache (StringKey) (IntVal)
+module TestWithCache = SharedMem.WithCache (StringKey) (IntVal)
 
 let tests () =
   let list = [
@@ -214,7 +214,6 @@ let tests () =
         shm_dirs = [];
         shm_min_avail = 0;
         log_level = 0;
-        sample_rate = 0.0;
       }
     ) in
     SharedMem.connect handle ~is_master:true;

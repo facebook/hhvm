@@ -37,23 +37,24 @@ let make_ts env ty =
 
 let rec transform_shapemap ?(nullable = false) env ty shape =
   let env, ty = TUtils.fold_unresolved env ty in
+  let env, ety = Env.expand_type env ty in
   (* If there are Tanys, be conservative and don't try to represent the
    * type more precisely
    *)
   if TUtils.HasTany.check ty then env, shape else
-  match ty with
+  match ety with
   | _, Toption ty ->
       transform_shapemap ~nullable:true env ty shape
   | _ ->
       (* If the abstract type is unbounded we do not specialize at all *)
-      let is_unbound = match ty |> TUtils.get_base_type env |> snd with
+      let is_unbound = match ety |> TUtils.get_base_type env |> snd with
         (* An enum is considered a valid bound *)
         | Tabstract (AKenum _, _) -> false
         | Tabstract (_, None) -> true
         | _ -> false in
       if is_unbound then (env, shape) else
       let is_generic =
-        match snd ty with Tabstract (AKgeneric _, _) -> true | _ -> false in
+        match snd ety with Tabstract (AKgeneric _, _) -> true | _ -> false in
       let transform_shape_field field { sft_ty; _ } (env, shape) =
         let open Ast in
 
@@ -63,7 +64,7 @@ let rec transform_shapemap ?(nullable = false) env ty shape =
         let acc_field_with_type sft_ty =
           ShapeMap.add field { sft_optional = false; sft_ty } shape in
 
-        match field, sft_ty, TUtils.get_base_type env ty with
+        match field, sft_ty, TUtils.get_base_type env ety with
         | SFlit_str (_, "nullable"), (_, Toption (fty)), _ when nullable ->
             env, acc_field_with_type fty
         | SFlit_str (_, "nullable"), (_, Toption (fty)), (_, Toption _) ->
@@ -107,7 +108,7 @@ let rec transform_shapemap ?(nullable = false) env ty shape =
             let tyl = [ty1; ty2] in
             let env, tyl = List.map_env env tyl make_ts in
             env, acc_field_with_type (r, Ttuple tyl)
-        | SFlit_str (_, "generic_types"), _, (r, Tclass (_, _, tyl))
+        | SFlit_str (_, "generic_types"), _, (r, Tclass (_, tyl))
               when List.length tyl > 0 ->
             let env, tyl = List.map_env env tyl make_ts in
             env, acc_field_with_type (r, Ttuple tyl)

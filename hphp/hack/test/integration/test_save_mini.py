@@ -168,8 +168,6 @@ public static function foo () : %s {
         self.check_cmd(['No errors!'], assert_loaded_mini_state=False)
         new_saved_state: SaveStateResult = (
             self.dump_saved_state(assert_edges_added=True))
-        assert(new_saved_state.returned_values.edges_added > 0)
-
         self.change_return_type_on_base_class(
             os.path.join(self.repo_dir, 'class_1.php'))
         self.check_cmd([
@@ -216,8 +214,6 @@ public static function foo () : %s {
         self.add_file_that_depends_on_class_a(new_file)
         self.check_cmd(['No errors!'], assert_loaded_mini_state=True)
         new_saved_state = self.dump_saved_state(assert_edges_added=True)
-        assert(new_saved_state.returned_values.edges_added > 0)
-
         self.change_return_type_on_base_class(
             os.path.join(self.repo_dir, 'class_1.php'))
         self.check_cmd([
@@ -312,44 +308,3 @@ public static function foo () : %s {
             saved_state_path=saved_state_with_2_errors.path)
 
         self.check_cmd(['No errors!'], assert_loaded_mini_state=True)
-
-    def test_replace_state_after_saving(self):
-        # Save state
-        result = self.dump_saved_state(assert_edges_added=True)
-        assert(result.returned_values.edges_added > 0)
-
-        # Save state again - confirm the same number of edges is dumped
-        result2 = self.dump_saved_state(assert_edges_added=True)
-        self.assertEqual(
-            result.returned_values.edges_added,
-            result2.returned_values.edges_added)
-
-        # Save state with the 'replace' arg
-        replace_result1 = self.dump_saved_state(
-            assert_edges_added=True,
-            replace_state_after_saving=True)
-
-        self.assertEqual(
-            result.returned_values.edges_added,
-            replace_result1.returned_values.edges_added)
-
-        # Save state with the new arg - confirm there are 0 new edges
-        replace_result2 = self.dump_saved_state(
-            assert_edges_added=True,
-            replace_state_after_saving=True)
-        self.assertEqual(replace_result2.returned_values.edges_added, 0)
-
-        # Make a change
-        # Save state - confirm there are only the # of new edges
-        #   corresponding to the one change
-        new_file = os.path.join(self.repo_dir, 'class_3b.php')
-        self.add_file_that_depends_on_class_a(new_file)
-        self.check_cmd(['No errors!'], assert_loaded_mini_state=False)
-        replace_incremental = self.dump_saved_state(
-            assert_edges_added=True,
-            replace_state_after_saving=True)
-
-        assert(
-            replace_incremental.returned_values.edges_added <
-            result.returned_values.edges_added)
-        assert(replace_incremental.returned_values.edges_added > 0)

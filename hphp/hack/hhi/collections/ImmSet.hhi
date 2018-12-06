@@ -139,7 +139,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - An `ImmSet` with the values from the `Traversable`; or an empty
    *           `ImmSet` if the `Traversable` is `null`.
    */
-  <<__Rx, __OnlyRxIfArgs>>
+  <<__Rx, __OnlyRxIfArgs, __MaybeMutable>>
   public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv> $items): ImmSet<Tv>;
 
   /**
@@ -150,7 +150,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *
    * @return - An `ImmSet` with the values from the passed `array`(s).
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public static function fromArrays(...): ImmSet<Tv>;
 
   /**
@@ -163,7 +163,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *
    * @return - An `ImmSet` built from the keys of the specified container.
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public static function fromKeysOf<Tk, Tv2>(
     ?KeyedContainer<Tk,Tv2> $container
   ): ImmSet<Tk>;

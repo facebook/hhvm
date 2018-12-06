@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_core
 
 module TLazyHeap = Typing_lazy_heap
 
@@ -43,7 +43,7 @@ fun workers classes filter env ->
   (* Sort and dedup identical queries *)
   let deduped =
     List.remove_consecutive_duplicates ~equal:(=)
-      (List.sort ~compare classes)
+      (List.sort ~cmp:compare classes)
   in
   let results =
     if (List.length deduped) < 10

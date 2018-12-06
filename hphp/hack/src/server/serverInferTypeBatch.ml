@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_core
 
 (* In order to run recheck_typing, workers need access to the FileInfo for each
  * file to be typechecked, so a FileInfo is paired with each query.
@@ -60,8 +60,8 @@ let helper tcopt acc pos_infos =
     let fn, line, char, range_end = pos in
     let result =
       Relative_path.Map.get tasts fn
-      |> Result.of_option ~error:"No such file or directory"
-      |> Result.map ~f:begin fun tast ->
+      |> Core_result.of_option ~error:"No such file or directory"
+      |> Core_result.map ~f:begin fun tast ->
         let env_and_ty =
           match range_end with
           | None ->
@@ -95,7 +95,7 @@ fun workers pos_list env ->
     pos_list
     (* Sort, so that many queries on the same file will (generally) be
      * dispatched to the same worker. *)
-    |> List.sort ~compare
+    |> List.sort ~cmp:compare
     (* Dedup identical queries *)
     |> List.remove_consecutive_duplicates ~equal:(=)
     (* Get the FileInfo for each query *)
@@ -107,10 +107,10 @@ fun workers pos_list env ->
       | None -> Error pos
     end
   in
-  let pos_infos = List.filter_map pos_info_results ~f:Result.ok in
+  let pos_infos = List.filter_map pos_info_results ~f:Core_result.ok in
   let failure_msgs =
     pos_info_results
-    |> List.filter_map ~f:Result.error
+    |> List.filter_map ~f:Core_result.error
     |> List.map ~f:(result_to_string (Error "No such file or directory"))
   in
   let results =

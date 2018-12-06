@@ -13,13 +13,12 @@ open Typing_defs
 open Utils
 
 module Env = Tast_env
-module Cls = Typing_classes_heap
 
 let get_constant tc (seen, has_default) = function
   | Default _ -> (seen, true)
   | Case (((pos, _), Class_const ((_, CI ((_, cls), _)), (_, const))), _) ->
-    if cls <> Cls.name tc then
-      (Errors.enum_switch_wrong_class pos (strip_ns (Cls.name tc)) (strip_ns cls);
+    if cls <> tc.tc_name then
+      (Errors.enum_switch_wrong_class pos (strip_ns tc.tc_name) (strip_ns cls);
        (seen, has_default))
     else
       (match SMap.get const seen with
@@ -36,18 +35,15 @@ let check_enum_exhaustiveness pos tc caselist coming_from_unresolved =
      don't punish for having an extra default case *)
   let (seen, has_default) =
     List.fold_left ~f:(get_constant tc) ~init:(SMap.empty, false) caselist in
-  let unhandled =
-    Cls.consts tc
-    |> Sequence.map ~f:fst
-    |> Sequence.filter ~f:((<>) SN.Members.mClass)
-    |> Sequence.filter ~f:(fun id -> not (SMap.mem id seen))
-    |> Sequence.to_list_rev
-  in
-  let all_cases_handled = List.is_empty unhandled in
+  let consts = SMap.remove SN.Members.mClass tc.tc_consts in
+  let all_cases_handled = SMap.cardinal seen = SMap.cardinal consts in
   match (all_cases_handled, has_default, coming_from_unresolved) with
     | false, false, _ ->
-      Errors.enum_switch_nonexhaustive pos unhandled (Cls.pos tc)
-    | true, true, false -> Errors.enum_switch_redundant_default pos (Cls.pos tc)
+      let const_list = SMap.keys consts in
+      let unhandled =
+        List.filter const_list (function k -> not (SMap.mem k seen)) in
+      Errors.enum_switch_nonexhaustive pos unhandled tc.tc_pos
+    | true, true, false -> Errors.enum_switch_redundant_default pos tc.tc_pos
     | _ -> ()
 
 let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =

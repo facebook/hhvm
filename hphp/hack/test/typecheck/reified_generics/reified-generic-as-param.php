@@ -1,3 +1,3 @@
 <?hh
 
-function f<reify T>(C<reify T> $x) {}
+function f<reified T>(C<reified T> $x) {}

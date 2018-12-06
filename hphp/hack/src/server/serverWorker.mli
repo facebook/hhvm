@@ -8,9 +8,4 @@
  *)
 
 open Core_kernel
-val make :
-  ?nbr_procs:int ->
-  Gc.control ->
-  SharedMem.handle ->
-  logging_init:(unit -> unit) ->
-  MultiWorker.worker list
+val make : ?nbr_procs:int -> Gc.control -> SharedMem.handle -> MultiWorker.worker list

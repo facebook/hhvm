@@ -5,6 +5,4 @@ File "hhi_lib__srcs/reflection.hhi", line 55, characters 43-43:
 File "hhi_lib__srcs/reflection.hhi", line 55, characters 48-68:
 This is an object of type HH\ClassLikeAttribute
 File "reflectionEnumClass.php", line 18, characters 26-30:
-It is incompatible with an object of exactly the class FAttr
-File "reflectionEnumClass.php", line 18, characters 26-30:
-  where the class 'FAttr' was referenced here
+It is incompatible with an object of type FAttr

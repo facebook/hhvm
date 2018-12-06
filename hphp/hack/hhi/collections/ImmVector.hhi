@@ -180,7 +180,7 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    * @return - An `ImmVector` with the values from the `Traversable`; or an
    *           empty `ImmVector` if the `Traversable` is `null`.
    */
-  <<__Rx, __OnlyRxIfArgs>>
+  <<__Rx, __OnlyRxIfArgs, __MaybeMutable>>
   public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv> $items): ImmVector<Tv>;
 
   /**
@@ -194,7 +194,7 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    *
    * @return - An `ImmVector` built from the keys of the specified container.
    */
-  <<__Rx>>
+  <<__Rx, __MaybeMutable>>
   public static function fromKeysOf<Tk>(
     ?KeyedContainer<Tk, mixed> $container,
   ): ImmVector<Tk>;

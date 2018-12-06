@@ -79,11 +79,10 @@ let locl ty = LoclTy ty
 type env = expand_env
 
 let env_with_self env =
-  let this_ty = Reason.none, TUtils.this_of (Env.get_self env) in
   {
     type_expansions = [];
     substs = SMap.empty;
-    this_ty = this_ty;
+    this_ty = Reason.none, TUtils.this_of (Env.get_self env);
     from_class = None;
     validate_dty = None;
   }
@@ -101,7 +100,6 @@ let env_with_self env =
 (*****************************************************************************)
 
 let rec localize_with_env ~ety_env env (dty: decl ty) =
-
   Option.iter ety_env.validate_dty (fun validate_dty -> validate_dty dty);
   match dty with
   | r, Terr ->
@@ -122,8 +120,7 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
             Reason.Rinstantiate (reason, SN.Typehints.this, r), ty in
       let env, ty =
         match ety_env.from_class with
-        | Some cid ->
-          ExprDepTy.make env cid ty
+        | Some cid -> ExprDepTy.make env cid ty
         | _ -> env, ty in
       env, (ety_env, ty)
   | r, Tarray (ty1, ty2) ->
@@ -193,10 +190,10 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
           | None ->
             List.map_env env tyl (localize ~ety_env)
           | Some class_info ->
-            let tparams = Typing_classes_heap.tparams class_info in
+            let tparams = class_info.tc_tparams in
             localize_tparams ~ety_env env (Reason.to_pos r) tyl tparams
       in
-      env, (ety_env, (r, Tclass (cls, Nonexact, tyl)))
+      env, (ety_env, (r, Tclass (cls, tyl)))
   | r, Ttuple tyl ->
       let env, tyl = List.map_env env tyl (localize ~ety_env) in
       env, (ety_env, (r, Ttuple tyl))
@@ -262,9 +259,7 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
   let env, substs, tvarl =
     if instantiate_tparams
     then
-      let default () =
-        List.map_env env ft.ft_tparams (fun env _ ->
-          TUtils.unresolved_tparam ~reason:(Reason.Rtype_variable use_pos) env) in
+      let default () = List.map_env env ft.ft_tparams (TUtils.unresolved_tparam ~use_pos) in
       let env, tvarl =
         if List.length explicit_tparams = 0
         then default ()
@@ -277,7 +272,8 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
           let type_argument env hint =
             match hint with
             | (pos, Nast.Happly ((_, id), [])) when id = SN.Typehints.wildcard ->
-              TUtils.unresolved_tparam ~reason:(Reason.Rwitness pos) env
+              let reason = Reason.Rwitness pos in
+              TUtils.in_var env (reason, Tunresolved [])
             | _ -> localize_hint_with_self env hint in
           List.map_env env explicit_tparams type_argument
       in

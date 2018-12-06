@@ -1,25 +1,25 @@
 File "try_nested_terminal.php", line 26, characters 7-17:
-  (exact D | exact E | exact F)
+  (D | E | F)
 File "try_nested_terminal.php", line 31, characters 7-17:
-  (exact D | exact E | exact F | exact G | exact H)
+  (D | E | F | G | H)
 File "try_nested_terminal.php", line 31, characters 7-17:[2]
-  (exact D | exact E | exact F | exact G)
+  (D | E | F | G)
 File "try_nested_terminal.php", line 31, characters 7-17:[3]
-  exact H
+  H
 File "try_nested_terminal.php", line 31, characters 7-17:[4]
-  exact F
+  F
 File "try_nested_terminal.php", line 33, characters 5-15:
-  exact F
+  F
 File "try_nested_terminal.php", line 36, characters 5-15:
-  (exact B | exact C | exact D | exact E | exact F | exact G)
+  (B | C | D | E | F | G)
 File "try_nested_terminal.php", line 38, characters 5-15:
-  (exact B | exact C | exact D | exact E | exact F | exact G | exact H)
+  (B | C | D | E | F | G | H)
 File "try_nested_terminal.php", line 38, characters 5-15:[2]
-  (exact B | exact C | exact D | exact E | exact F | exact G)
+  (B | C | D | E | F | G)
 File "try_nested_terminal.php", line 38, characters 5-15:[3]
-  (exact F | exact H)
+  (F | H)
 File "try_nested_terminal.php", line 38, characters 5-15:[4]
-  (exact B | exact C | exact D | exact E | exact F | exact G)
+  (B | C | D | E | F | G)
 File "try_nested_terminal.php", line 40, characters 3-13:
-  (exact B | exact C | exact D | exact E | exact F | exact G)
+  (B | C | D | E | F | G)
 No errors

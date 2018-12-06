@@ -7,7 +7,6 @@
  *
  *)
 
-open Core_kernel
 include HhMonitorInformant_sig.Types
 
 let exit_on_parent_exit () = Parent.exit_on_parent_exit 10 60
@@ -43,8 +42,8 @@ module State_loader_prefetcher_real = struct
         ~config_hash:hhconfig_hash
         handle in
       result
-      |> Result.map_error ~f:State_loader.error_string_verbose
-      |> Result.ok_or_failwith
+      |> Core_result.map_error ~f:State_loader.error_string_verbose
+      |> Core_result.ok_or_failwith
       |> ignore
 
   let prefetch_package_entry = Process.register_entry_point "State_loader_prefetcher_entry" main
@@ -80,10 +79,10 @@ module Revision_map = struct
      *)
     type t =
       {
-        svn_queries : (Hg.hg_rev, (Hg.svn_rev Future.t)) Caml.Hashtbl.t;
+        svn_queries : (Hg.hg_rev, (Hg.svn_rev Future.t)) Hashtbl.t;
         xdb_queries : (int,
           (Xdb.sql_result list Future.t *
-          (** Prefetcher *) (unit Future.t) option ref)) Caml.Hashtbl.t;
+          (** Prefetcher *) (unit Future.t) option ref)) Hashtbl.t;
         use_xdb : bool;
         ignore_hh_version : bool;
         saved_state_cache_limit : int;
@@ -91,8 +90,8 @@ module Revision_map = struct
 
     let create ~saved_state_cache_limit use_xdb ignore_hh_version =
       {
-        svn_queries = Caml.Hashtbl.create 200;
-        xdb_queries = Caml.Hashtbl.create 200;
+        svn_queries = Hashtbl.create 200;
+        xdb_queries = Hashtbl.create 200;
         use_xdb;
         ignore_hh_version;
         saved_state_cache_limit;
@@ -100,42 +99,42 @@ module Revision_map = struct
 
     let add_query ~hg_rev root t =
       (** Don't add if we already have an entry for this. *)
-      try ignore @@ Caml.Hashtbl.find t.svn_queries hg_rev
+      try ignore @@ Hashtbl.find t.svn_queries hg_rev
       with
-      | Caml.Not_found ->
+      | Not_found ->
         let future = Hg.get_closest_svn_ancestor hg_rev (Path.to_string root) in
-        Caml.Hashtbl.add t.svn_queries hg_rev future
+        Hashtbl.add t.svn_queries hg_rev future
 
     let find_svn_rev hg_rev t =
-      let future = Caml.Hashtbl.find t.svn_queries hg_rev in
+      let future = Hashtbl.find t.svn_queries hg_rev in
       match Future.check_status future with
       | Future.In_progress {age} when age > 60.0 ->
         (** Fail if lookup up SVN rev number takes more than 60 s.
          * Delete the query so we can retry again if we encounter this hg_rev
          * again. Return fake "0" SVN rev number. *)
-        let () = Caml.Hashtbl.remove t.svn_queries hg_rev in
+        let () = Hashtbl.remove t.svn_queries hg_rev in
         Some 0
       | Future.In_progress _ ->
         None
       | Future.Complete_with_result result ->
         let result = result
-          |> Result.map_error ~f:Future.error_to_string
-          |> Result.map_error ~f:(HackEventLogger.find_svn_rev_failed (Future.start_t future))
+          |> Core_result.map_error ~f:Future.error_to_string
+          |> Core_result.map_error ~f:(HackEventLogger.find_svn_rev_failed (Future.start_t future))
         in
         (* TODO (achow): make it log less often
-        let () = Result.iter result ~f:(fun _ ->
+        let () = Core_result.iter result ~f:(fun _ ->
           HackEventLogger.find_svn_rev_success (Future.start_t future)
         )
         in*)
         Some (result
-          |> Result.ok
+          |> Core_result.ok
           |> Option.value ~default:0)
 
     (** XDB table changes over time. Prior queries should be cleared out after
      * we'v finished using the result completely (i.e. also allowed the
      * Prefetcher to finish) so that we don't reuse old results. *)
     let clear_xdb_query ~svn_rev t =
-      Caml.Hashtbl.remove t.xdb_queries svn_rev
+      Hashtbl.remove t.xdb_queries svn_rev
 
     (**
      * Does an async query to XDB to find nearest saved state match.
@@ -145,8 +144,8 @@ module Revision_map = struct
      * Non-blocking.
      *)
     let find_xdb_match svn_rev t =
-      let query = try Some (Caml.Hashtbl.find t.xdb_queries svn_rev) with
-        | Caml.Not_found ->
+      let query = try Some (Hashtbl.find t.xdb_queries svn_rev) with
+        | Not_found ->
           let hhconfig_hash, _config = Config_file.parse
             (Relative_path.to_absolute ServerConfig.filename) in
           (** Query doesn't exist yet, so we create one and consume it when
@@ -168,14 +167,14 @@ module Revision_map = struct
                 ~hhconfig_hash
               |> fst
           end in
-          let () = Caml.Hashtbl.add t.xdb_queries svn_rev (future, ref None) in
+          let () = Hashtbl.add t.xdb_queries svn_rev (future, ref None) in
           None
       in
       let query_to_result_list future =
         Future.get future
-        |> Result.map_error ~f:Future.error_to_string
-        |> Result.map_error ~f:(HackEventLogger.find_xdb_match_failed (Future.start_t future))
-        |> Result.ok
+        |> Core_result.map_error ~f:Future.error_to_string
+        |> Core_result.map_error ~f:(HackEventLogger.find_xdb_match_failed (Future.start_t future))
+        |> Core_result.ok
         |> Option.value ~default:[] in
       let prefetch_package xdb_result =
         let handle = {
@@ -222,7 +221,7 @@ module Revision_map = struct
              * XDB lookup finishes and produces a non-empty result list,
              * so we know the XDB list is non-empty here. *)
             let () = HackEventLogger.informant_prefetcher_success (Future.start_t prefetcher) in
-            good_xdb_result (List.hd_exn (query_to_result_list query))
+            good_xdb_result (List.hd (query_to_result_list query))
           | Future.Complete_with_result (Error e) ->
             let () = HackEventLogger.informant_prefetcher_failed
               (Future.start_t prefetcher) (Future.error_to_string e) in
@@ -248,7 +247,7 @@ module Revision_map = struct
               let () = HackEventLogger.find_xdb_match_success (Future.start_t query) in
               (** XDB looup is done, so we need to fire up the prefetcher.
                * The prefetcher's status will be checked on the next loop. *)
-              let () = prefetcher := Some (prefetch_package  (List.hd_exn result)) in
+              let () = prefetcher := Some (prefetch_package  (List.hd result)) in
               not_yet_ready
           end
 
@@ -362,9 +361,6 @@ module Revision_tracker = struct
      * when a State_leave is handled. *)
     current_base_revision : int ref;
 
-    is_in_hg_update_state : bool ref;
-    is_in_hg_transaction_state : bool ref;
-
     rev_map : Revision_map.t;
 
     (**
@@ -399,9 +395,6 @@ module Revision_tracker = struct
    * make it responsible for maintaining its own instance. *)
   type t = instance ref
 
-  let is_hg_updating env =
-    !(env.is_in_hg_update_state) || !(env.is_in_hg_transaction_state)
-
   let init
   ~min_distance_restart
   ~use_xdb ~ignore_hh_version
@@ -434,8 +427,6 @@ module Revision_tracker = struct
         init_settings.use_xdb
         init_settings.ignore_hh_version;
       state_changes = Queue.create() ;
-      is_in_hg_update_state = ref false;
-      is_in_hg_transaction_state = ref false;
     }
 
   let reinitialized_env env base_svn_rev = { env with
@@ -466,9 +457,12 @@ module Revision_tracker = struct
     let open Informant_sig in
     match significant, transition, server_state, xdb_results with
     | _, State_leave _, Server_not_yet_started, _ ->
-      (* This is reachable when server stopped in the middle of rebase. Instead
-      * of restarting immediately, we go back to Server_not_yet_started, and want
-      * to restart only when hg.update state is vacated *)
+     (** This case should be unreachable since Server_not_yet_started
+      * should be handled by "should_start_first_server" and not by the
+      * revision tracker. Restart anyway which, at worst, could result in a
+      * slow init. *)
+      Hh_logger.log "Hit unreachable Server_not_yet_started match in %s"
+        "Revision_tracker.form_decision";
       Restart_server None
     | _, State_leave _, Server_dead, _ ->
       (** Regardless of whether we had a significant change or not, when the
@@ -554,13 +548,13 @@ module Revision_tracker = struct
     if Queue.is_empty env.state_changes then
       acc
     else
-      let transition, timestamp = Queue.peek_exn env.state_changes in
+      let transition, timestamp = Queue.peek env.state_changes in
       match make_decision timestamp transition server_state env with
       | None ->
         acc
       | Some (decision, svn_rev) ->
         (** We already peeked the value above. Can ignore here. *)
-        let _ = Queue.dequeue_exn env.state_changes in
+        let _ = Queue.pop env.state_changes in
         (** Maybe setting the base revision must be done after
          * computing distance. *)
         maybe_set_base_rev transition svn_rev env;
@@ -581,7 +575,7 @@ module Revision_tracker = struct
         | _, Restart_server target -> Restart_server target
         | _, _ -> Move_along
       in
-      List.fold_left ~f:select_relevant ~init:Move_along decisions
+      List.fold_left select_relevant Move_along decisions
 
   let get_change env =
     let watchman, change = Watchman.get_changes !(env.inits.watchman) in
@@ -595,7 +589,6 @@ module Revision_tracker = struct
       Some (Changed_merge_base (rev, files, clock))
     | Watchman.Watchman_pushed (Watchman.State_enter (state, json))
         when state = "hg.update" ->
-        env.is_in_hg_update_state := true;
         let open Option in
         json >>= Watchman_utils.rev_in_state_change >>= fun hg_rev -> begin
           Hh_logger.log "State_enter: %s" hg_rev;
@@ -603,22 +596,11 @@ module Revision_tracker = struct
         end
     | Watchman.Watchman_pushed (Watchman.State_leave (state, json))
         when state = "hg.update" ->
-        env.is_in_hg_update_state := false;
         let open Option in
         json >>= Watchman_utils.rev_in_state_change >>= fun hg_rev -> begin
           Hh_logger.log "State_leave: %s" hg_rev;
           Some (State_leave hg_rev)
         end
-    | Watchman.Watchman_pushed (Watchman.State_enter (state, _))
-        when state = "hg.transaction" ->
-        env.is_in_hg_transaction_state := true;
-        Hh_logger.log "State_enter: hg.transaction";
-        None
-    | Watchman.Watchman_pushed (Watchman.State_leave (state, _))
-        when state = "hg.transaction" ->
-        env.is_in_hg_transaction_state := false;
-        Hh_logger.log "State_leave: hg.transaction";
-        None
     | Watchman.Watchman_pushed (Watchman.Files_changed _)
     | Watchman.Watchman_pushed (Watchman.State_enter _)
     | Watchman.Watchman_pushed (Watchman.State_leave _) ->
@@ -631,19 +613,14 @@ module Revision_tracker = struct
     let () = match change with
     | None -> ()
     | Some (State_enter hg_rev) ->
-      Queue.enqueue env.state_changes (State_enter hg_rev, Unix.time ())
+      Queue.add (State_enter hg_rev, Unix.time ()) env.state_changes
     | Some (State_leave hg_rev) ->
-      Queue.enqueue env.state_changes (State_leave hg_rev, Unix.time ())
+      Queue.add (State_leave hg_rev, Unix.time ()) env.state_changes
     | Some (Changed_merge_base _ as change) ->
-      Queue.enqueue env.state_changes (change, Unix.time ())
+      Queue.add (change, Unix.time ()) env.state_changes
     in
     churn_changes server_state env
   end
-
-  let has_more_watchman_messages env =
-    match Watchman.get_reader !(env.inits.watchman) with
-    | None -> false
-    | Some reader -> Buffered_line_reader.is_readable reader
 
   (**
    * This must be a non-blocking call, so it creates Futures and consumes ready
@@ -691,10 +668,7 @@ module Revision_tracker = struct
       | Some (Move_along, _) | None ->
         handle_change_then_churn server_state change env
     in
-    (* All the cases that `(change <> None)` cover should be also covered by
-     * has_more_watchman_messages, but this alternate method of pumping messages
-     * is heavily used in tests *)
-    report, has_more_watchman_messages env || (change <> None)
+    report, (change <> None)
 
   let rec process (server_state, env, reports_acc) =
     (** Sometimes Watchman pushes many file changes as many sequential
@@ -720,17 +694,7 @@ module Revision_tracker = struct
       | _, _ ->
         Move_along
     in
-    let default_decision = match server_state with
-      | Server_not_yet_started when (not (is_hg_updating env)) ->
-        Restart_server None
-      | _ -> Move_along
-    in
-    let decision = List.fold_left ~f:max_report ~init:default_decision reports in
-    match decision with
-    | Restart_server _ when !(env.is_in_hg_update_state) ->
-      Hh_logger.log "Ignoring Restart_server because we are already in next hg.update state";
-      Move_along
-    | decision -> decision
+    List.fold_left max_report Move_along reports
 
   let reinit t =
     (* The results of old initialization query might be stale by now, so we need
@@ -753,9 +717,9 @@ module Revision_tracker = struct
   let check_init_future future =
     if not @@ Future.is_ready future then None else
     let svn_rev = Future.get future
-      |> Result.map_error ~f:Future.error_to_string
-      |> Result.map_error ~f:HackEventLogger.revision_tracker_init_svn_rev_failed
-      |> Result.ok
+      |> Core_result.map_error ~f:Future.error_to_string
+      |> Core_result.map_error ~f:HackEventLogger.revision_tracker_init_svn_rev_failed
+      |> Core_result.ok
       |> Option.value ~default:0
     in
     let () = Hh_logger.log "Initialized Revision_tracker to SVN rev: %d" svn_rev in
@@ -911,19 +875,10 @@ let report informant server_state = match informant, server_state with
     Informant_sig.Restart_server None
   | Resigned, _ ->
     Informant_sig.Move_along
-  | Active env, Informant_sig.Server_not_yet_started ->
+  | Active _, Informant_sig.Server_not_yet_started ->
     if should_start_first_server informant then begin
-      (* should_start_first_server (as name implies) prevents us from starting first (since
-       * monitor start) server in the middle of update, when Revision_tracker is not reliable.
-       * When server crashes/exits, it will go back to Server_not_yet_started, and
-       * once again we need to avoid starting it during update. This time we can
-       * defer to Revision_tracker safely. *)
-      let report = Revision_tracker.make_report server_state env.revision_tracker in
-      (match report with
-      | Informant_sig.Restart_server _ ->
-        HackEventLogger.informant_watcher_starting_server_from_settling ()
-      | Informant_sig.Move_along -> ());
-      report
+      HackEventLogger.informant_watcher_starting_server_from_settling ();
+      Informant_sig.Restart_server None
     end
     else
       Informant_sig.Move_along

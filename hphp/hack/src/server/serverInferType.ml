@@ -7,7 +7,6 @@
  *
  *)
 
-open Core_kernel
 open Option.Monad_infix
 
 (** Return the type of the smallest expression node whose associated span

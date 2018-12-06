@@ -8,45 +8,50 @@
  *)
 
 open Core_kernel
-
 (* This is the current notion of type in the typed AST.
  * In future we might want to reconsider this and define a new representation
  * that omits type inference artefacts such as type variables and lambda
  * identifiers.
  *)
 type ty = Typing_defs.locl Typing_defs.ty
-type reactivity = Typing_defs.reactivity
-type mutability_env = Typing_mutability_env.mutability_env
-
-let pp_ty fmt ty = Pp_type.pp_ty () fmt ty
-let show_ty ty = Pp_type.show_ty () ty
-
-let pp_reactivity fmt r = Pp_type.pp_reactivity fmt r
-let show_reactivity r = Pp_type.show_reactivity r
-
-let show_mutability_env _ = "<mutability-env>"
-let pp_mutability_env fmt _ = Format.fprintf fmt "<mutability-env>"
-
 
 type saved_env = {
-  tcopt : TypecheckerOptions.t [@opaque];
+  tcopt : TypecheckerOptions.t;
   tenv : ty IMap.t;
   subst : int IMap.t;
   tpenv : Type_parameter_env.t;
-  reactivity : reactivity;
-  local_mutability: mutability_env;
-  fun_mutable: bool
-} [@@deriving show]
+}
 
 let empty_saved_env tcopt : saved_env = {
   tcopt;
   tenv = IMap.empty;
   subst = IMap.empty;
   tpenv = SMap.empty;
-  reactivity = Typing_defs.Nonreactive;
-  local_mutability = Local_id.Map.empty;
-  fun_mutable = false;
 }
+
+let pp_saved_env fmt env =
+  Format.fprintf fmt "@[<hv 2>{ ";
+
+  Format.fprintf fmt "@[%s =@ " "tcopt";
+  Format.fprintf fmt "<opaque>";
+  Format.fprintf fmt "@]";
+  Format.fprintf fmt ";@ ";
+
+  Format.fprintf fmt "@[%s =@ " "tenv";
+  IMap.pp Pp_type.pp_ty fmt env.tenv;
+  Format.fprintf fmt "@]";
+  Format.fprintf fmt ";@ ";
+
+  Format.fprintf fmt "@[%s =@ " "subst";
+  IMap.pp Format.pp_print_int fmt env.subst;
+  Format.fprintf fmt "@]";
+  Format.fprintf fmt ";@ ";
+
+  Format.fprintf fmt "@[%s =@ " "tpenv";
+  Type_parameter_env.pp fmt env.tpenv;
+  Format.fprintf fmt "@]";
+
+  Format.fprintf fmt " }@]"
 
 (* Typed AST.
  *
@@ -64,11 +69,18 @@ let empty_saved_env tcopt : saved_env = {
  *)
 module Annotations = struct
   module ExprAnnotation = struct
-    type t = Pos.t * ty [@@deriving show]
+    type t = Pos.t * ty
+    let pp fmt (pos, ty) =
+      Format.fprintf fmt "(@[";
+      Pos.pp fmt pos;
+      Format.fprintf fmt ",@ ";
+      Pp_type.pp_ty fmt ty;
+      Format.fprintf fmt "@])"
   end
 
   module EnvAnnotation = struct
-    type t = saved_env [@@deriving show]
+    type t = saved_env
+    let pp = pp_saved_env
   end
 end
 

@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_core
 
 (* In order to run recheck_typing, workers need access to the FileInfo for each
  * file to be typechecked, so a FileInfo is paired with each query.
@@ -16,13 +16,22 @@ open Core_kernel
  * marshalling and unmarshalling the same FileInfo many times over. There are
  * probably ways we could avoid this, but it doesn't seem to be a major problem.
  *)
-
+type pos = Relative_path.t * int * int
+type pos_info = pos * FileInfo.t
 
 module T = Tast
-module S = ServerRxApiShared
 module SN = Naming_special_names
 
 open SymbolOccurrence
+
+let recheck_typing tcopt (pos_infos : pos_info list) =
+  let files_to_check =
+    pos_infos
+    |> List.map ~f:(fun ((filename,_, _), file_info) -> filename, file_info)
+    |> List.remove_consecutive_duplicates ~equal:(fun (a,_) (b,_) -> a = b)
+  in
+  let tcopt = TypecheckerOptions.make_permissive tcopt in
+  ServerIdeUtils.recheck tcopt files_to_check
 
 module Results = Caml.Set.Make(struct
   type t = Relative_path.t SymbolOccurrence.t
@@ -77,10 +86,10 @@ let collect_in_decl = object(self)
       | _ ->  self#zero in
     acc + (super#on_Call env ct e h el uel)
 
-  method! on_New env (((p, ty), _) as c) el uel ctor_annot =
+  method! on_New env (((p, ty), _) as c) el uel =
     let (+) = self#plus in
     let acc = process_method env ty (p, SN.Members.__construct) in
-    acc + super#on_New env c el uel ctor_annot
+    acc + super#on_New env c el uel
 
   method! on_expr env expr =
     let (+) = self#plus in
@@ -102,11 +111,38 @@ let collect_in_decl = object(self)
     acc + (super#on_expr env expr)
 end
 
+let pos_contains_line_char pos line char =
+  let l, start, end_ = Pos.info_pos pos in
+  l = line && start <= char && char - 1 <= end_
+
+let collect line char = object(self)
+  inherit [_] Tast_visitor.reduce
+  inherit [_] Ast.option_monoid
+
+  method merge = collect_in_decl#plus
+
+  method! on_method_ env m =
+    if pos_contains_line_char (fst m.Tast.m_name) line char
+    then Some (collect_in_decl#on_method_ env m)
+    else self#zero
+
+  method! on_fun_ env f =
+    if pos_contains_line_char (fst f.Tast.f_name) line char
+    then Some (collect_in_decl#on_fun_ env f)
+    else self#zero
+end
 
 let result_to_string result (fn, line, char) =
   let open Hh_json in
+  let pos_to_json fn line char =
+    JSON_Object [
+        "file", JSON_String (Relative_path.to_absolute fn);
+        "line", int_ line;
+        "character", int_ char
+    ]
+  in
   let obj = JSON_Object [
-    "position", S.pos_to_json fn line char;
+    "position", pos_to_json fn line char;
     match result with
     | Ok (Some refs) -> "deps",
       begin
@@ -139,6 +175,30 @@ let result_to_string result (fn, line, char) =
   ] in
   json_to_string obj
 
+let prepare_pos_infos pos_list files_info =
+  let pos_info_results =
+    pos_list
+    (* Sort, so that many queries on the same file will (generally) be
+     * dispatched to the same worker. *)
+    |> List.sort ~cmp:compare
+    (* Dedup identical queries *)
+    |> List.remove_consecutive_duplicates ~equal:(=)
+    (* Get the FileInfo for each query *)
+    |> List.map ~f:begin fun (fn, line, char) ->
+      let fn = Relative_path.create_detect_prefix fn in
+      let pos = (fn, line, char) in
+      match Relative_path.Map.get files_info fn with
+      | Some fileinfo -> Ok (pos, fileinfo)
+      | None -> Error pos
+    end
+  in
+  let pos_infos = List.filter_map pos_info_results ~f:Core_result.ok in
+  let failure_msgs =
+    pos_info_results
+    |> List.filter_map ~f:Core_result.error
+    |> List.map ~f:(result_to_string (Error "No such file or directory")) in
+  pos_infos, failure_msgs
+
 let remove_duplicates_except_none l=
   let rec loop l accum =
     match l with
@@ -151,24 +211,38 @@ let remove_duplicates_except_none l=
   in
   List.rev (loop l [])
 
-let handlers = {
-  S.result_to_string = result_to_string;
-  S.walker = {
-    S.plus = collect_in_decl#plus;
-    S.on_method = collect_in_decl#on_method_;
-    S.on_fun = collect_in_decl#on_fun_
-  };
-  S.get_state = begin fun fn ->
+let helper tcopt acc pos_infos =
+  let tasts =
+    List.fold (recheck_typing tcopt pos_infos)
+      ~init:Relative_path.Map.empty
+      ~f:(fun map (key, data) -> Relative_path.Map.add map ~key ~data)
+  in
+  List.fold pos_infos ~init:acc ~f:begin fun acc (pos, _) ->
+    let fn, line, char = pos in
     let (ast, _) = Parser_heap.ParserHeap.find_unsafe fn in
-    ast
-  end;
-  S.map_result = begin fun tcopt ast refs ->
-    Results.elements refs
-    |> List.map ~f:(ServerSymbolDefinition.go tcopt ast)
-    |> List.sort ~compare
-    |> remove_duplicates_except_none
+    let result =
+      Relative_path.Map.get tasts fn
+      |> Core_result.of_option ~error:"No such file or directory"
+      |> Core_result.map ~f:begin fun tast ->
+        (collect line char)#go tast
+        |> Option.map ~f:begin fun refs ->
+          Results.elements refs
+          |> List.map ~f:(ServerSymbolDefinition.go tcopt ast)
+          |> List.sort ~cmp:compare
+          |> remove_duplicates_except_none
+        end
+      end
+    in
+    result_to_string result pos :: acc
   end
-}
+
+let parallel_helper workers tcopt pos_infos =
+  MultiWorker.call
+    workers
+    ~job:(helper tcopt)
+    ~neutral:[]
+    ~merge:List.rev_append
+    ~next:(MultiWorker.next workers pos_infos)
 
 (* Entry Point *)
 let go:
@@ -177,4 +251,11 @@ let go:
   ServerEnv.env ->
   _ =
 fun workers pos_list env ->
-  ServerRxApiShared.go workers pos_list env handlers
+  let {ServerEnv.tcopt; files_info; _} = env in
+  let pos_infos, failure_msgs = prepare_pos_infos pos_list files_info in
+  let results =
+    if (List.length pos_infos) < 10
+    then helper tcopt [] pos_infos
+    else parallel_helper workers tcopt pos_infos
+  in
+  failure_msgs @ results

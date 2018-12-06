@@ -246,10 +246,9 @@ let makelabel s =
     | _ -> Label.Named s
 let makelabelinst s = ILabel (makelabel s)
 
-type precedence_or_alias_or_redeclaration =
+type precedence_or_alias =
  | Precedence of (string * string * string list)
  | Alias of (string option * string * string option * Ast.kind list)
- | Redeclaration of (string * string * string * Ast.kind list * Ast.fun_kind)
 
 let vis_of s = match s with
  | "public" ->  Ast.Public
@@ -286,33 +285,14 @@ let parse_alias x y vislist opt_lastid =
     Alias (first, second, opt_lastid, vis)
    else report_error "missing as in alias"
 
-let parse_redeclatation id as_kw strict async_opt modifiers new_id =
-  let (first, second) =
-    match colon_split id with
-     | Some (first_id, second_id) -> (first_id, second_id)
-     | None -> report_error "trait method not qualified with :: in redeclaration" in
-  if as_kw <> "as" then
-    report_error "missing as in redeclaration";
-  if strict <> "strict" then
-    report_error "missing strict in redeclaration";
-  let async = match async_opt with
-    | Some _ -> Ast.FAsync
-    | None -> Ast.FSync in
-  let mods = List.map ~f:(function
-    | "final" -> Ast.Final
-    | "static" -> Ast.Static
-    | x -> vis_of x) modifiers in
-  Redeclaration (first, second, new_id, mods, async)
-
 (* TODO: replace with list library function *)
 let rec split_classconflicts xss = match xss with
- | [] -> ([],[],[])
+ | [] -> ([],[])
  | xs :: rest ->
-   let (aliases, precedences, redeclarations) = split_classconflicts rest
+   let (aliases, precedences) = split_classconflicts rest
    in match xs with
-       | Alias tup -> (tup :: aliases, precedences, redeclarations)
-       | Precedence tup -> (aliases, tup :: precedences, redeclarations)
-       | Redeclaration tup -> (aliases, precedences, tup :: redeclarations)
+       | Alias tup -> (tup :: aliases, precedences)
+       | Precedence tup -> (aliases, tup :: precedences)
 
 (* TODO: replace stupidly big match with a hash table. Bootcampable? *)
 let make_nullary_inst s =
@@ -448,7 +428,6 @@ let make_nullary_inst s =
  | "BreakTraceHint" -> IMisc(BreakTraceHint)
  | "CGetCUNop" -> IMisc(CGetCUNop)
  | "UGetCUNop" -> IMisc(UGetCUNop)
- | "CheckReifiedGenericMismatch" -> IMisc(CheckReifiedGenericMismatch)
 
  (* async_functions *)
  | "Await" -> IAsync Await

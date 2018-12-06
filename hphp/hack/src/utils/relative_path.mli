@@ -14,7 +14,6 @@ type prefix =
   | Hhi
   | Dummy
   | Tmp
-  [@@deriving show]
 
 val set_path_prefix : prefix -> Path.t -> unit
 val path_of_prefix : prefix -> string
@@ -25,7 +24,9 @@ module S : sig
   val to_string : t -> string
 end
 
-type t = S.t [@@deriving show]
+type t = S.t
+
+val pp : Format.formatter -> t -> unit
 
 val default : t
 (* Checks that string indeed has the given prefix before constructing path *)
@@ -41,17 +42,8 @@ val to_tmp : t -> t
 val to_root : t -> t
 val strip_root_if_possible : string -> string
 
-module Set : sig
-  include module type of Reordered_argument_set(Set.Make(S))
-  val pp : Format.formatter -> t -> unit
-  val show : t -> string
-end
-
-module Map : sig
-  include module type of Reordered_argument_map(MyMap.Make(S))
-  val pp : (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit
-  val show : (Format.formatter -> 'a -> unit) -> 'a t -> string
-end
+module Set : module type of Reordered_argument_set(Set.Make(S))
+module Map : module type of Reordered_argument_map(MyMap.Make(S))
 
 val relativize_set : prefix -> SSet.t -> Set.t
 val set_of_list : t list -> Set.t

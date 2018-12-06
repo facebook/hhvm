@@ -69,7 +69,6 @@ let make_sharedmem_config config options local_config =
   let dep_table_pow = int_ "sharedmem_dep_table_pow" ~default:17 config in
   let hash_table_pow = int_ "sharedmem_hash_table_pow" ~default:18 config in
   let log_level = int_ "sharedmem_log_level" ~default:0 config in
-  let sample_rate = float_ "sharedmem_sample_rate" ~default:0.0 config in
   let shm_dirs = string_list
     ~delim:(Str.regexp ",")
     "sharedmem_dirs"
@@ -95,7 +94,6 @@ let make_sharedmem_config config options local_config =
       dep_table_pow;
       hash_table_pow;
       log_level;
-      sample_rate;
       shm_dirs;
       shm_min_avail;
   }
@@ -270,7 +268,6 @@ let load config_filename options =
     ~po_disallow_execution_operator:false
     ~po_disable_define:false
     ~po_enable_concurrent:(bool_ "enable_concurrent" ~default:false config)
-    ~po_disable_decl:(bool_ "disable_decl" ~default:false config)
     ~po_allow_goto:(not (bool_ "disallow_goto" ~default:false config))
     ~tco_user_attrs:(config_user_attributes config)
     ~tco_experimental_features:(config_experimental_tc_features config)
@@ -285,7 +282,6 @@ let load config_filename options =
     ~tco_untyped_nonstrict_lambda_parameters:(bool_
       "untyped_nonstrict_lambda_parameters" ~default:false config)
     ~tco_disallow_return_by_ref:(bool_ "disallow_return_by_ref" ~default:false config)
-    ~tco_disallow_assign_by_ref:(bool_ "disallow_assign_by_ref" ~default:false config)
     ~tco_disallow_array_cell_pass_by_ref:(bool_
       "disallow_array_cell_pass_by_ref" ~default:false config)
     ~tco_language_feature_logging:(bool_ "language_feature_logging" ~default:false config)
@@ -303,7 +299,6 @@ let load config_filename options =
     ~tco_disallow_invalid_arraykey:(bool_ "disallow_invalid_arraykey" ~default:false config)
     ~ignored_fixme_codes:(prepare_ignored_fixme_codes config)
     ~forward_compatibility_level:forward_compat_level
-    ~log_levels:SMap.empty
   in
   Errors.ignored_fixme_codes :=
     (GlobalOptions.ignored_fixme_codes global_opts);

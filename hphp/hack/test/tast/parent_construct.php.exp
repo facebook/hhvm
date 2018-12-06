@@ -2,10 +2,9 @@
     { Aast.AnnotatedAST.c_span = [3:1-5:2]; c_annotation = ();
       c_mode = <opaque>; c_final = false; c_is_xhp = false; c_kind = Cnormal;
       c_name = ([3:7-8], "\\B"); c_tparams = <opaque>; c_extends = [];
-      c_uses = []; c_method_redeclarations = []; c_xhp_attr_uses = [];
-      c_xhp_category = []; c_req_extends = []; c_req_implements = [];
-      c_implements = []; c_consts = []; c_typeconsts = [];
-      c_static_vars = []; c_vars = [];
+      c_uses = []; c_xhp_attr_uses = []; c_xhp_category = [];
+      c_req_extends = []; c_req_implements = []; c_implements = [];
+      c_consts = []; c_typeconsts = []; c_static_vars = []; c_vars = [];
       c_constructor =
       (Some { Aast.AnnotatedAST.m_span = [4:3-41]; m_annotation = ();
               m_final = false; m_abstract = false; m_static = false;
@@ -32,10 +31,9 @@
        c_mode = <opaque>; c_final = false; c_is_xhp = false;
        c_kind = Cnormal; c_name = ([6:7-8], "\\A"); c_tparams = <opaque>;
        c_extends = [([6:17-18], (Happly (([6:17-18], "\\B"), [])))];
-       c_uses = []; c_method_redeclarations = []; c_xhp_attr_uses = [];
-       c_xhp_category = []; c_req_extends = []; c_req_implements = [];
-       c_implements = []; c_consts = []; c_typeconsts = [];
-       c_static_vars = []; c_vars = [];
+       c_uses = []; c_xhp_attr_uses = []; c_xhp_category = [];
+       c_req_extends = []; c_req_implements = []; c_implements = [];
+       c_consts = []; c_typeconsts = []; c_static_vars = []; c_vars = [];
        c_constructor =
        (Some { Aast.AnnotatedAST.m_span = [7:3-9:4]; m_annotation = ();
                m_final = false; m_abstract = false; m_static = false;

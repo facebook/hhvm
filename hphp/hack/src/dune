@@ -1,0 +1,103 @@
+(env
+  (_ (flags (:standard -w @a-4-6-20-29-35-41-42-44-45-48-50 \ -strict-sequence))))
+
+(executable
+  (name hh_single_type_check)
+  (modules
+    hh_single_type_check)
+  (libraries
+    ai
+    client
+    file_content
+    gen_deps
+    hhi
+    nast
+    parent
+    parser_syntax
+    server
+    server_env
+    sys_utils
+    tast
+    tast_typecheck
+    typed_positioned_syntax
+    typing
+    utils_core))
+
+(executable
+  (name hh_server)
+  (modules
+    hh_server)
+  (libraries
+    ai
+    client
+    file_content
+    gen_deps
+    hhi
+    hh_server_monitor
+    nast
+    parent
+    server
+    server_env
+    sys_utils
+    tast
+    typed_positioned_syntax
+    typing
+    utils_core))
+
+(executable
+  (name hh_client)
+  (modules
+    hh_client)
+  (libraries
+    ai
+    client
+    file_content
+    gen_deps
+    hhi
+    hh_server_monitor
+    nast
+    parent
+    server
+    server_env
+    sys_utils
+    tast
+    typed_positioned_syntax
+    typing
+    utils_core))
+
+(executable
+  (name hh_single_compile)
+  (modules
+    hh_single_compile)
+  (libraries
+    compiler_id
+    facts
+    global_config
+    hackc_parse_delegator
+    hhbc
+    heap_ident
+    logging
+    parser_syntax_tree)
+  (flags (:standard -unsafe-string)))
+
+(executable
+  (name full_fidelity_parse)
+  (modules
+    full_fidelity_parse)
+  (libraries
+    debug
+    global_config
+    hackfmt
+    parser_heap
+    parser_syntax
+    parser_syntax_transforms
+    parser_syntax_tree))
+
+(executable
+  (name hackfmt)
+  (modules
+    hackfmt)
+  (libraries
+    hackfmt
+    hackfmt_debug
+    utils_ocaml_overrides))

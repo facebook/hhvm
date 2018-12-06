@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_core
 open ServerCheckUtils
 open SearchServiceRunner
 open ServerEnv
@@ -65,7 +65,7 @@ let print_fast_pos fast_pos =
     print_defs "Class" classes;
   end;
   Printf.printf "\n";
-  Out_channel.flush stdout;
+  flush stdout;
   ()
 
 let print_fast fast =
@@ -75,7 +75,7 @@ let print_fast fast =
     SSet.iter classes (Printf.printf "  Class %s\n");
   end;
   Printf.printf "\n";
-  Out_channel.flush stdout;
+  flush stdout;
   ()
 
 let debug_print_path_set genv name set =
@@ -646,7 +646,7 @@ end = functor(CheckKind:CheckKindType) -> struct
 
     let reparse_count = Relative_path.Set.cardinal files_to_parse in
     Hh_logger.log "Files to recompute: %d" reparse_count;
-    if reparse_count = 1 then
+    if reparse_count == 1 then
       files_to_parse |>
       Relative_path.Set.choose |>
       Relative_path.to_absolute |>
@@ -926,6 +926,6 @@ let check genv env =
   if !debug then begin
     Printf.printf "****************************************\n";
     Printf.printf "Start Check\n";
-    Out_channel.flush stdout;
+    flush stdout;
   end;
   type_check genv env

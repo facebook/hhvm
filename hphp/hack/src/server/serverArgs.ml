@@ -7,7 +7,6 @@
  *
  *)
 
-open Core_kernel
 include ServerArgs_sig.Types
 
 (*****************************************************************************)
@@ -30,7 +29,6 @@ type options = {
   no_load: bool;
   prechecked: bool option;
   profile_log: bool;
-  replace_state_after_saving: bool;
   root: Path.t;
   save_filename: string option;
   should_detach: bool;
@@ -83,9 +81,6 @@ module Messages = struct
   let no_load = " don't load from a saved state"
   let prechecked = " override value of \"prechecked_files\" flag from hh.conf"
   let profile_log = " enable profile logging"
-  let replace_state_after_saving = " if combined with --save-mini, causes the saved state" ^
-                        " to replace the program state; otherwise, the state files are not" ^
-                        " used after being written to disk (default: false)"
   let save_mini = " save mini server state to file"
   let waiting_client= " send message to fd/handle when server has begun" ^
                       " starting and again when it's done starting"
@@ -122,7 +117,7 @@ let parse_mini_state_json (json, _keytrace) =
   json >>= get_string "deptable" >>= fun (deptable, _deptable_keytrace) ->
   json >>= get_array "changes" >>= fun (changes, _) ->
     let array_to_path_list = List.map
-      ~f:(fun file -> Hh_json.get_string_exn file |> Relative_path.from_root)
+      (fun file -> Hh_json.get_string_exn file |> Relative_path.from_root)
     in
     let prechecked_changes = array_to_path_list prechecked_changes in
     let changes = array_to_path_list changes in
@@ -155,8 +150,8 @@ let verify_with_mini_state v = match !v with
           >>= parse_mini_state_json
     in
     match
-      (Result.ok_fst data_dump_parse_result),
-      (Result.ok_fst from_file_parse_result) with
+      (Core_result.ok_fst data_dump_parse_result),
+      (Core_result.ok_fst from_file_parse_result) with
     | (`Fst (parsed_data_dump, _)), (`Fst (_parsed_from_file, _)) ->
       Hh_logger.log "Warning - %s"
         ("Parsed mini state target from both JSON blob data dump" ^
@@ -196,7 +191,6 @@ let parse_options () =
   let prechecked = ref None in
   let profile_log = ref false in
   let root = ref "" in
-  let replace_state_after_saving = ref false in
   let save = ref None in
   let should_detach = ref false in
   let version = ref false in
@@ -236,9 +230,6 @@ let parse_options () =
       "--no-prechecked", Arg.Unit (fun () -> prechecked := Some false), Messages.prechecked;
       "--prechecked", Arg.Unit (fun () -> prechecked := Some true), Messages.prechecked;
       "--profile-log", Arg.Set profile_log, Messages.profile_log;
-      "--replace-state-after-saving",
-        Arg.Set replace_state_after_saving,
-        Messages.replace_state_after_saving;
       "--save-mini", Arg.String set_save_mini, Messages.save_mini;
       "--version", Arg.Set version, "";
       "--waiting-client", Arg.Int set_wait, Messages.waiting_client;
@@ -295,7 +286,6 @@ let parse_options () =
     no_load = !no_load;
     prechecked = !prechecked;
     profile_log = !profile_log;
-    replace_state_after_saving = !replace_state_after_saving;
     root = root_path;
     save_filename = !save;
     should_detach = !should_detach;
@@ -321,7 +311,6 @@ let default_options ~root = {
   no_load = true;
   prechecked = None;
   profile_log = false;
-  replace_state_after_saving = false;
   root = Path.make root;
   save_filename = None;
   should_detach = false;
@@ -349,7 +338,6 @@ let max_procs options = options.max_procs
 let no_load options = options.no_load
 let prechecked options = options.prechecked
 let profile_log options = options.profile_log
-let replace_state_after_saving options = options.replace_state_after_saving
 let root options = options.root
 let save_filename options = options.save_filename
 let should_detach options = options.should_detach
@@ -365,8 +353,7 @@ let set_gen_saved_ignore_type_errors options ignore_type_errors = { options with
   gen_saved_ignore_type_errors = ignore_type_errors}
 let set_no_load options is_no_load = {options with no_load = is_no_load}
 let set_mini_state_target options target = match target with
-  | None ->
-    { options with with_mini_state = None }
+  | None -> options
   | Some target ->
     { options with
       with_mini_state = Some (Informant_induced_mini_state_target target)
@@ -392,7 +379,6 @@ let to_string
     no_load;
     prechecked;
     profile_log;
-    replace_state_after_saving;
     root;
     save_filename;
     should_detach;
@@ -416,7 +402,7 @@ let to_string
       | None -> "<>"
       | Some b -> string_of_bool b in
     let config_str = Printf.sprintf "[%s]"
-      (String.concat ~sep:", " @@ List.map ~f:(fun (key, value) -> Printf.sprintf "%s=%s" key value) config)
+      (String.concat ", " @@ List.map (fun (key, value) -> Printf.sprintf "%s=%s" key value) config)
     in
     ([
       "ServerArgs.options({";
@@ -435,7 +421,6 @@ let to_string
         "no_load: "; string_of_bool no_load; ", ";
         "prechecked: "; prechecked_str;
         "profile_log: "; string_of_bool profile_log; ", ";
-        "replace_state_after_saving: "; string_of_bool replace_state_after_saving; ", ";
         "root: "; Path.to_string root; ", ";
         "save_filename: "; save_filename_str; ", ";
         "should_detach: "; string_of_bool should_detach; ", ";
@@ -443,4 +428,4 @@ let to_string
         "watchman_debug_logging: "; string_of_bool watchman_debug_logging; ", ";
         "with_mini_state: "; mini_state_str; ", ";
       "})"
-    ] |> String.concat ~sep:"")
+    ] |> String.concat "")

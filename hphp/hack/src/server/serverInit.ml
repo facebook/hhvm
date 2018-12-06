@@ -7,8 +7,7 @@
  *
  *)
 
-open Core_kernel
-open Result.Export
+open Core_result.Export
 open SearchServiceRunner
 open ServerEnv
 
@@ -25,7 +24,7 @@ let run_search (genv: ServerEnv.genv) (t: float) : unit =
   end
   else ()
 
-let save_state (genv: ServerEnv.genv) (env: ServerEnv.env) (output_filename: string) : unit =
+let save_state (genv: ServerEnv.genv) (env: ServerEnv.env) (fn: string) : unit =
   let ignore_errors =
     ServerArgs.gen_saved_ignore_type_errors genv.ServerEnv.options in
   let has_errors = not (Errors.is_empty env.errorl) in
@@ -49,16 +48,11 @@ let save_state (genv: ServerEnv.genv) (env: ServerEnv.env) (output_filename: str
   if do_save_state then
   let tcopt = env.ServerEnv.tcopt in
   let file_info_on_disk = ServerArgs.file_info_on_disk genv.ServerEnv.options in
-  let save_decls = genv.local_config.ServerLocalConfig.store_decls_in_saved_state in
-  let replace_state_after_saving = ServerArgs.replace_state_after_saving genv.ServerEnv.options in
-  let _ : int = SaveStateService.save_state
-    ~tcopt
-    ~file_info_on_disk
-    ~save_decls
-    env.ServerEnv.files_info
-    env.errorl
-    output_filename
-    ~replace_state_after_saving in
+  let save_decls =
+    genv.local_config.ServerLocalConfig.store_decls_in_saved_state in
+  let _ : int =
+    SaveStateService.save_state ~tcopt ~file_info_on_disk ~save_decls
+      env.ServerEnv.files_info env.errorl fn in
   ()
 
 let get_lazy_level (genv: ServerEnv.genv) : lazy_level =

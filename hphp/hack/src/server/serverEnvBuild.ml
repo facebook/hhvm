@@ -11,8 +11,6 @@
 (*****************************************************************************)
 (* Building the environment *)
 (*****************************************************************************)
-module Hh_bucket = Bucket
-open Core_kernel
 open ServerEnv
 
 module SLC = ServerLocalConfig
@@ -46,7 +44,7 @@ let watchman_expression_terms = [
   ]
 ]
 
-let make_genv options config local_config handle ~logging_init =
+let make_genv options config local_config handle =
   let root = ServerArgs.root options in
   let check_mode   = ServerArgs.check_mode options in
   Typing_deps.trace :=
@@ -66,7 +64,7 @@ let make_genv options config local_config handle ~logging_init =
         ^^"for max workers are given. Choosing minimum of the two.");
   let nbr_procs = min nbr_procs local_config.SLC.max_workers in
   let gc_control = ServerConfig.gc_control config in
-  let workers = Some (ServerWorker.make ~nbr_procs gc_control handle ~logging_init) in
+  let workers = Some (ServerWorker.make ~nbr_procs gc_control handle) in
   let (>>=) = Option.(>>=) in
   let since_clockspec = (ServerArgs.with_mini_state options) >>= function
     | ServerArgs.Mini_state_target_info _ -> None
@@ -92,16 +90,16 @@ let make_genv options config local_config handle ~logging_init =
   in
   if Option.is_some watchman_env then Hh_logger.log "Using watchman";
   let max_bucket_size = local_config.SLC.max_bucket_size in
-  Hh_bucket.set_max_bucket_size max_bucket_size;
+  Bucket.set_max_bucket_size max_bucket_size;
   let indexer, notifier_async, notifier_async_reader, notifier, wait_until_ready, options =
     match watchman_env with
     | Some watchman_env ->
       let indexer filter =
         let files = Watchman.get_all_files watchman_env in
-        Hh_bucket.make_list
+        Bucket.make_list
           ~num_workers:nbr_procs
           ~max_size:max_bucket_size
-          (List.filter ~f:filter files)
+          (List.filter filter files)
       in
       (** Watchman state can change during requests (See
        * Watchamn.Watchman_dead and Watchman_alive). We need to update
@@ -125,14 +123,14 @@ let make_genv options config local_config handle ~logging_init =
           ServerRevisionTracker.files_changed local_config (SSet.cardinal changes);
           Notifier_async_changes changes
       in
-      let concat_changes_list = List.fold_left ~f:begin fun acc changes ->
+      let concat_changes_list = List.fold_left begin fun acc changes ->
         match on_changes changes with
         | Notifier_unavailable
         | Notifier_state_enter _
         | Notifier_state_leave _ -> acc
         | Notifier_synchronous_changes changes
         | Notifier_async_changes changes -> SSet.union acc changes
-        end ~init:SSet.empty
+        end SSet.empty
       in
       let notifier_async () =
         let watchman', changes = Watchman.get_changes !watchman in

@@ -7,15 +7,15 @@
  *
  *)
 
-open Core_kernel
 open Reordered_argument_collections
-open Nast
 open Typing_defs
 
+module N = Nast
+
 let unwrap_class_hint = function
-  | (_, Happly ((pos, class_name), type_parameters)) ->
+  | (_, N.Happly ((pos, class_name), type_parameters)) ->
       pos, class_name, type_parameters
-  | p, Habstr _ ->
+  | p, N.Habstr _ ->
       Errors.expected_class ~suffix:" or interface but got a generic" p;
       Pos.none, "", []
   | p, _ ->
@@ -24,14 +24,27 @@ let unwrap_class_hint = function
 
 let unwrap_class_type = function
   | r, Tapply (name, tparaml) -> r, name, tparaml
-  | r, Tgeneric _ ->
-      let p = Typing_reason.to_pos r in
-      Errors.expected_class ~suffix:" or interface but got a generic" p;
-      r, (p, ""), []
-  | r, _ ->
-      let p = Typing_reason.to_pos r in
-      Errors.expected_class ~suffix:" or interface" p;
-      r, (p, ""), []
+  | _,
+    (
+      Terr
+      | Tany
+      | Tmixed
+      | Tnonnull
+      | Tarray (_, _)
+      | Tdarray (_, _)
+      | Tvarray _
+      | Tvarray_or_darray _
+      | Tgeneric _
+      | Toption _
+      | Tprim _
+      | Tfun _
+      | Ttuple _
+      | Tshape _
+      | Taccess (_, _)
+      | Tdynamic
+      | Tthis
+    ) ->
+    raise @@ Invalid_argument "unwrap_class_type got non-class"
 
 (* Given sets A and B return a tuple (AnB, A\B), i.e split A into the part
  * that is common with B, and which is unique to A *)
@@ -63,26 +76,3 @@ let split_defs defs split_if_in_defs =
     n_consts  = n_consts2;
   } in
   r1, r2
-
-let rec infer_const (p, expr_) =
-  let open Nast in
-  match expr_ with
-  | String _ -> Reason.Rwitness p, Tprim Tstring
-  | True
-  | False -> Reason.Rwitness p, Tprim Tbool
-  | Int _ -> Reason.Rwitness p, Tprim Tint
-  | Float _ -> Reason.Rwitness p, Tprim Tfloat
-  | Unop ((Ast.Uminus | Ast.Uplus | Ast.Utild | Ast.Unot), e2) ->
-    infer_const e2
-  | _ ->
-    (* We can't infer the type of everything here. Notably, if you
-     * define a const in terms of another const, we need an annotation,
-     * since the other const may not have been declared yet.
-     *
-     * Also note that a number of expressions are considered invalid
-     * as constant initializers, even if we can infer their type; see
-     * Naming.check_constant_expr. *)
-    raise Exit
-
-let infer_const expr =
-  try Some (infer_const expr) with Exit -> None

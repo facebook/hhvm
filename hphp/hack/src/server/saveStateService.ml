@@ -195,8 +195,7 @@ let update_save_state
     ~(save_decls: bool)
     (files_info: FileInfo.t Relative_path.Map.t)
     (errors: Errors.t)
-    (output_filename: string)
-    (replace_state_after_saving: bool) : int =
+    (output_filename: string) : int =
   let t = Unix.gettimeofday () in
   let db_name = output_filename ^ ".sql" in
   if not (RealDisk.file_exists db_name) then
@@ -207,10 +206,7 @@ let update_save_state
   end else begin
     Hh_logger.log "skip writing file info to sqlite table"
   end in
-  let edges_added = SharedMem.update_dep_table_sqlite
-    db_name
-    Build_id.build_revision
-    replace_state_after_saving in
+  let edges_added = SharedMem.update_dep_table_sqlite db_name Build_id.build_revision in
   ignore @@ Hh_logger.log_duration "Updating saved state took" t;
   edges_added
 
@@ -222,8 +218,7 @@ let save_state
     ~(save_decls: bool)
     (files_info: FileInfo.t Relative_path.Map.t)
     (errors: Errors.t)
-    (output_filename: string)
-    ~(replace_state_after_saving: bool): int =
+    (output_filename: string) : int =
   let () = Sys_utils.mkdir_p (Filename.dirname output_filename) in
   let db_name = output_filename ^ ".sql" in
   let () = if Sys.file_exists output_filename then
@@ -241,10 +236,7 @@ let save_state
       (save_all_file_info_sqlite db_name files_info : unit)
     end in
     let dep_table_edges_added =
-      SharedMem.save_dep_table_sqlite
-        db_name
-        Build_id.build_revision
-        replace_state_after_saving in
+      SharedMem.save_dep_table_sqlite db_name Build_id.build_revision in
     let _ : float = Hh_logger.log_duration "Saving saved state took" t in
     dep_table_edges_added
   | Some old_table_filename ->
@@ -257,19 +249,13 @@ let save_state
     let () = RealDisk.mkdir_p (Filename.dirname output_filename) in
     let () = RealDisk.write_file ~file:db_name ~contents:content in
     let _ : float = Hh_logger.log_duration "Made disk copy of loaded saved state. Took" t in
-    update_save_state
-      ~file_info_on_disk
-      ~tcopt
-      ~save_decls
-      files_info
-      errors
-      output_filename
-      replace_state_after_saving
+    update_save_state ~file_info_on_disk ~tcopt ~save_decls
+      files_info errors output_filename
 
 let get_in_memory_dep_table_entry_count () : (int, string) result =
   Utils.try_with_stack (fun () ->
     SharedMem.get_in_memory_dep_table_entry_count ())
-  |> Result.map_error ~f:(fun (exn, _stack) -> Exn.to_string exn)
+  |> Core_result.map_error ~f:(fun (exn, _stack) -> Exn.to_string exn)
 
 (* If successful, returns the # of edges from the dependency table that were written. *)
 (* TODO: write some other stats, e.g., the number of names, the number of errors, etc. *)
@@ -279,16 +265,9 @@ let go
     ~(save_decls: bool)
     (files_info: FileInfo.t Relative_path.Map.t)
     (errors: Errors.t)
-    (output_filename: string)
-    ~(replace_state_after_saving: bool): (int, string) result =
-  Utils.try_with_stack
-  begin
-    fun () -> save_state
-      ~file_info_on_disk
-      ~tcopt
-      ~save_decls
-      files_info errors
-      output_filename
-      ~replace_state_after_saving
+    (output_filename: string) : (int, string) result =
+  Utils.try_with_stack begin fun () ->
+    save_state ~file_info_on_disk ~tcopt ~save_decls
+      files_info errors output_filename
   end
-  |> Result.map_error ~f:(fun (exn, _stack) -> Exn.to_string exn)
+  |> Core_result.map_error ~f:(fun (exn, _stack) -> Exn.to_string exn)

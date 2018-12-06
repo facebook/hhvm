@@ -1,3 +1,1 @@
-File "assign_in_conditional.php", line 9, characters 7-37:
-Sketchy condition: testing the truthiness of a string may not behave as expected.
-The values '' and '0' are both considered falsy. To check for emptiness, use Str\is_empty. (Typing[4276])
+No errors

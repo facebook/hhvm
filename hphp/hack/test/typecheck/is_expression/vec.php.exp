@@ -4,11 +4,11 @@ File "vec.php", line 6, characters 17-18:
 Invalid argument (Typing[4110])
   File "vec.php", line 25, characters 26-31:
   This is a string
-  File "vec.php", line 4, characters 7-15:
+  File "vec.php", line 4, characters 7-8:
   It is incompatible with a value of generic type T#1 from this is expression test
 File "vec.php", line 13, characters 17-18:
 Invalid argument (Typing[4110])
   File "vec.php", line 25, characters 26-31:
   This is a string
-  File "vec.php", line 11, characters 7-18:
+  File "vec.php", line 11, characters 7-8:
   It is incompatible with a value of generic type T#1 from this is expression test

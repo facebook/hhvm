@@ -548,7 +548,7 @@ final class ImmMap<Tk, +Tv> implements ConstMap<Tk, Tv>, Indexish<Tk, Tv> {
    * @return - An `ImmMap` with the key/value pairs from the `Traversable`; or
    *           an empty `ImmMap` if the `Traversable` is `null`.
    */
-  <<__Rx, __OnlyRxIfArgs>>
+  <<__Rx, __OnlyRxIfArgs, __MaybeMutable>>
   public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Pair<Tk, Tv>> $items):
     ImmMap<Tk, Tv>;
 

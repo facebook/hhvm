@@ -15,7 +15,6 @@ open Nast
 open Typing_defs
 
 module Env = Typing_env
-module Cls = Typing_classes_heap
 
 (*****************************************************************************)
 (* The signature of the visitor. *)
@@ -167,16 +166,12 @@ module CheckInstantiability = struct
 
     method! on_apply () (usage_pos, n) hl =
       let () = (match Env.get_class env n with
-        | Some cls
-          when
-            let kind = Cls.kind cls in
-            let tc_name = Cls.name cls in
-            (kind = Ast.Ctrait || kind = Ast.Cabstract && Cls.final cls)
-            && tc_name <> SN.Collections.cDict
+        | Some {tc_kind = Ast.Ctrait; tc_name; tc_pos; _}
+        | Some {tc_kind = Ast.Cabstract; tc_final = true;
+                tc_name; tc_pos; _}
+            when tc_name <> SN.Collections.cDict
             && tc_name <> SN.Collections.cKeyset
             && tc_name <> SN.Collections.cVec ->
-          let tc_pos = Cls.pos cls in
-          let tc_name = Cls.name cls in
           Errors.uninstantiable_class usage_pos tc_pos tc_name []
         | _ -> ()) in
       if n = SN.Classes.cClassname

@@ -100,9 +100,8 @@ struct
     | S.InstanceOf (e, ci) -> T.InstanceOf (map_expr menv e, map_class_id menv ci)
     | S.Is (e, h) -> T.Is (map_expr menv e, h)
     | S.As (e, h, b) -> T.As (map_expr menv e, h, b)
-    | S.New (ci, el1, el2, ctor_annot) ->
-      T.New (map_class_id menv ci, map_exprl menv el1,
-        map_exprl menv el2, menv.map_expr_annotation ctor_annot)
+    | S.New (ci, el1, el2) ->
+      T.New (map_class_id menv ci, map_exprl menv el1, map_exprl menv el2)
     | S.Efun (ef, ids) -> T.Efun(map_fun menv ef, ids)
     | S.Xml (id, pl, el) ->
       T.Xml (id, List.map pl (fun attr -> match attr with
@@ -237,8 +236,6 @@ struct
     T.c_tparams = c.S.c_tparams;
     T.c_extends = c.S.c_extends;
     T.c_uses = c.S.c_uses;
-    T.c_method_redeclarations =
-      List.map c.S.c_method_redeclarations ~f:(map_method_redeclaration menv);
     T.c_xhp_attr_uses = c.S.c_xhp_attr_uses;
     T.c_xhp_category = c.S.c_xhp_category;
     T.c_req_extends = c.S.c_req_extends;
@@ -297,24 +294,6 @@ struct
       T.m_ret_by_ref = m.S.m_ret_by_ref;
       T.m_external = m.S.m_external;
     }
-
-  and map_method_redeclaration menv mt =
-  {
-    T.mt_final = mt.S.mt_final;
-    T.mt_static = mt.S.mt_static;
-    T.mt_abstract = mt.S.mt_abstract;
-    T.mt_visibility = mt.S.mt_visibility;
-    T.mt_name = mt.S.mt_name;
-    T.mt_tparams = mt.S.mt_tparams;
-    T.mt_where_constraints = mt.S.mt_where_constraints;
-    T.mt_variadic = map_fun_variadicity menv mt.S.mt_variadic;
-    T.mt_params = List.map mt.S.mt_params (map_fun_param menv);
-    T.mt_fun_kind = mt.S.mt_fun_kind;
-    T.mt_ret = mt.S.mt_ret;
-    T.mt_ret_by_ref = mt.S.mt_ret_by_ref;
-    T.mt_trait = mt.S.mt_trait;
-    T.mt_method = mt.S.mt_method;
-  }
 
   and map_typedef menv td = {
     T.t_annotation = menv.map_env_annotation td.S.t_annotation;

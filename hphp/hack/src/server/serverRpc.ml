@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_core
 open ServerEnv
 open ServerCommandTypes
 open Utils
@@ -105,11 +105,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, SymbolInfoService.go genv.workers file_list env
     | IN_MEMORY_DEP_TABLE_SIZE ->
       env, (SaveStateService.get_in_memory_dep_table_entry_count ())
-    | SAVE_STATE (
-        filename,
-        gen_saved_ignore_type_errors,
-        file_info_on_disk,
-        replace_state_after_saving) ->
+    | SAVE_STATE (filename, gen_saved_ignore_type_errors, file_info_on_disk) ->
       if Errors.is_empty env.errorl || gen_saved_ignore_type_errors then
         let tcopt = env.ServerEnv.tcopt in
         let save_decls =
@@ -122,7 +118,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           env.ServerEnv.files_info
           env.errorl
           filename
-          ~replace_state_after_saving
       else
         env, Error "There are typecheck errors; cannot generate saved state."
     | SEARCH (query, type_) ->
@@ -224,12 +219,12 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       | MultiThreadedCall.Coalesced_failures failures ->
         let failures = failures
           |> List.map ~f:WorkerController.failure_to_string
-          |> String.concat ~sep:"\n"
+          |> String.concat "\n"
         in
         env, Error (Printf.sprintf
           "Worker failures - check the logs for more details:\n%s\n" failures)
       | e ->
-        let msg = Exn.to_string e in
+        let msg = Printexc.to_string e in
         let stack = Printexc.get_backtrace () in
         env, Error (Printf.sprintf "%s\n%s" msg stack)
       end
@@ -242,6 +237,3 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let tcopt = { tcopt with GlobalOptions.tco_dynamic_view=dynamic_view } in
         let env = { env with tcopt } in
         env, ServerFunDepsBatch.go genv.workers positions env
-    | FUN_IS_LOCALLABLE_BATCH positions ->
-        let env = { env with tcopt = env.ServerEnv.tcopt } in
-        env, ServerFunIsLocallableBatch.go genv.workers positions env

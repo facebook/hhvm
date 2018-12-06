@@ -349,16 +349,6 @@ struct
       ~extra_expressions:([Hh_json.JSON_String "exists"])
       Query env
 
-  let get_changes_since_mergebase_query env =
-    let extra_kv = [
-      "since", Hh_json.JSON_Object [
-        ("scm", Hh_json.JSON_Object [("mergebase-with", Hh_json.JSON_String "master")])
-      ]
-    ] in
-    request_json
-      ~extra_kv
-      Query env
-
   let since_query env =
     request_json
       ~extra_kv: ["since", Hh_json.JSON_String env.clockspec;
@@ -579,21 +569,10 @@ struct
       else
         Watchman_process.return instance
 
-  let close env = Watchman_process.close_connection env.conn
-
   let close_channel_on_instance env =
-    close env >|= fun () ->
+    Watchman_process.close_connection env.conn >|= fun () ->
     EventLogger.watchman_died_caught ();
     Watchman_dead (dead_env_from_alive env), Watchman_unavailable
-
-
-  let with_instance instance ~try_to_restart ~on_alive ~on_dead =
-    (if try_to_restart
-    then maybe_restart_instance instance
-    else Watchman_process.return instance)
-    >>= function
-    | Watchman_dead dead_env -> on_dead dead_env
-    | Watchman_alive env -> on_alive env
 
   (** Calls f on the instance, maybe restarting it if its dead and maybe
    * reverting it to a dead state if things go south. For example, if watchman
@@ -602,12 +581,12 @@ struct
    * Alternatively, we also proactively revert to a dead instance if it appears
    * to be unresponsive (Timeout), and if reading the payload from it is
    * taking too long. *)
-  let call_on_instance =
-    let on_dead dead_env =
-      Watchman_process.return (Watchman_dead dead_env, Watchman_unavailable)
-    in
-
-    let on_alive source f env =
+  let call_on_instance instance source f =
+    maybe_restart_instance instance >>= fun instance ->
+    match instance with
+    | Watchman_dead _ ->
+      Watchman_process.return (instance, Watchman_unavailable)
+    | Watchman_alive env -> begin
       Watchman_process.catch
         ~f:(fun () ->
           with_crash_record_exn source (fun () -> f env) >|= fun (env, result) ->
@@ -651,10 +630,7 @@ struct
             EventLogger.watchman_uncaught_failure msg;
             raise Exit_status.(Exit_with Watchman_failed)
         )
-    in
-
-    fun instance source f ->
-      with_instance instance ~try_to_restart:true ~on_dead ~on_alive:(on_alive source f)
+    end
 
   (** This is a large >50MB payload, which could longer than 2 minutes for
    * Watchman to generate and push down the channel. *)
@@ -679,30 +655,19 @@ struct
     | `Leave ->
       State_leave (name, metadata)
 
-  let extract_mergebase data =
+  let make_mergebase_changed_response env data =
     let open Hh_json.Access in
     let accessor = return data in
-    let ret =
-      accessor >>=
+    accessor >>=
       get_obj "clock" >>=
-      get_string "clock" >>=
-      fun (clock, _) ->
-        accessor >>= get_obj "clock" >>=
-        get_obj "scm" >>=
-        get_string "mergebase" >>=
-        fun (mergebase, _) ->
-          return (clock, mergebase)
-    in
-    to_option ret
-
-  let make_mergebase_changed_response env data =
-    match extract_mergebase data with
-    | None -> Error "Failed to extract mergebase"
-    | Some (clock, mergebase) ->
-      let files = set_of_list @@ extract_file_names env data in
-      env.clockspec <- clock;
-      let response = Changed_merge_base (mergebase, files, clock) in
-      Ok (env, response)
+      get_string "clock" >>= fun (clock, _) ->
+    accessor >>= get_obj "clock" >>=
+      get_obj "scm" >>=
+      get_string "mergebase" >>= fun (mergebase, keytrace) ->
+    let files = set_of_list @@ extract_file_names env data in
+    env.clockspec <- clock;
+    let response = Changed_merge_base (mergebase, files, clock) in
+    Ok ((env, response), keytrace)
 
   let transform_asynchronous_get_changes_response env data = match data with
     | None ->
@@ -710,7 +675,7 @@ struct
     | Some data -> begin
 
       match make_mergebase_changed_response env data with
-      | Ok (env, response) -> env, response
+      | Ok ((env, response), _) -> env, response
       | Error _ ->
         env.clockspec <- J.get_string_val "clock" data;
         assert_no_fresh_instance data;
@@ -741,23 +706,6 @@ struct
         >|= fun response ->
         let env, changes = transform_asynchronous_get_changes_response env (Some response) in
         env, Watchman_synchronous [changes]
-
-  let get_changes_since_mergebase env =
-    Watchman_process.request
-      ~timeout:(float_of_int env.settings.init_timeout)
-      ~debug_logging:env.settings.debug_logging
-      (get_changes_since_mergebase_query env)
-    >|= extract_file_names env
-
-  let get_mergebase env =
-    Watchman_process.request
-      ~timeout:(float_of_int env.settings.init_timeout)
-      ~debug_logging:env.settings.debug_logging
-      (get_changes_since_mergebase_query env)
-    >|= fun response ->
-      match extract_mergebase response with
-      | Some (_clock, mergebase) -> mergebase
-      | None -> raise (Watchman_error "Failed to extract mergebase from response")
 
   let flush_request ~(timeout:int) watch_root =
     let open Hh_json in
@@ -933,16 +881,6 @@ module Watchman_mock = struct
     Mocking.all_files := [];
     result
 
-  let get_changes_since_mergebase _  = []
-
-  let get_mergebase _ = "mergebase"
-
-  let close _ = ()
-
-  let with_instance instance ~try_to_restart:_ ~on_alive ~on_dead =
-    match instance with
-    | Watchman_dead dead_env -> on_dead dead_env
-    | Watchman_alive env -> on_alive env
 end
 
 module type S = sig

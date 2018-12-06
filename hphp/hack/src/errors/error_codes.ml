@@ -225,7 +225,7 @@ module NastCheck                            = struct
   | RequiresFinalClass
   | InterfaceUsesTrait
   | NonstaticMethodInAbstractFinalClass
-  | MutableOnStaticDEPRECATED
+  | MutableOnStatic
   | ClassnameConstInstanceOf
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@ deriving enum, show { with_path = false } ]
@@ -434,7 +434,7 @@ module Typing                               = struct
   | ParentConstSelfNot
   | PartiallyValidIsAsExpressionHint
   | NonreactiveFunctionCall
-  | NonreactiveIndexing
+  | NonreactiveAppend
   | ObjSetReactive
   | FunReactivityMismatch
   | OverridingPropConstMismatch
@@ -472,13 +472,13 @@ module Typing                               = struct
   | DeclOverrideMissingHint
   | InvalidConditionallyReactiveCall
   | ExtendSealed
-  | SealedFinalDEPRECATED
+  | SealedFinal
   | ComparisonInvalidTypes
   | OptionVoidDEPRECATED
   | MutableInNonreactiveContext
   | InvalidArgumentOfRxMutableFunction
   | LetVarImmutabilityViolation
-  | UnsealableDEPRECATED
+  | Unsealable
   | ReturnVoidToRxMismatch
   | ReturnsVoidToRxAsNonExpressionStatement
   | NonawaitedAwaitableInReactiveContext
@@ -532,8 +532,6 @@ module Typing                               = struct
   | UnknownObjectMember
   | UnknownClass
   | InvalidArrayKey
-  | ReferenceExprPartial
-  | RedundantRxCondition
   (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@ deriving enum, show { with_path = false } ]
   let err_code = to_enum

@@ -17,9 +17,7 @@ val pp_env : Format.formatter -> env -> unit
 val get_tcopt : env -> TypecheckerOptions.t
 val fresh : unit -> int
 val fresh_type : unit -> locl ty
-val fresh_type_add_tyvars : Pos.t -> ISet.t -> locl ty * ISet.t
 val fresh_unresolved_type : env -> env * locl ty
-val fresh_unresolved_type_add_tyvars : env -> Pos.t -> ISet.t -> env * locl ty * ISet.t
 val get_var : env -> int -> env * int
 val rename : env -> int -> int -> env
 val add : env -> int -> locl ty -> env
@@ -44,15 +42,15 @@ val add_wclass : env -> string -> unit
 val fresh_tenv : env -> (env -> 'a) -> 'a
 val get_class : env -> Classes.key -> Classes.t option
 val get_typedef : env -> Typedefs.key -> Typedefs.t option
-val get_const : env -> Typing_classes_heap.t -> string -> class_const option
-val get_typeconst : env -> Typing_classes_heap.t -> string -> typeconst_type option
+val get_const : env -> class_type -> string -> class_const option
+val get_typeconst : env -> class_type -> string -> typeconst_type option
 val get_gconst : env -> GConsts.key -> GConsts.t option
-val get_static_member : bool -> env -> Typing_classes_heap.t -> string -> class_elt option
+val get_static_member : bool -> env -> class_type -> string -> class_elt option
 val suggest_static_member :
-  bool -> Typing_classes_heap.t -> string -> (Pos.t * string) option
-val get_member : bool -> env -> Typing_classes_heap.t -> string -> class_elt option
-val suggest_member : bool -> Typing_classes_heap.t -> string -> (Pos.t * string) option
-val get_construct : env -> Typing_classes_heap.t -> class_elt option * bool
+  bool -> class_type -> string -> (Pos.t * string) option
+val get_member : bool -> env -> class_type -> string -> class_elt option
+val suggest_member : bool -> class_type -> string -> (Pos.t * string) option
+val get_construct : env -> class_type -> class_elt option * bool
 val check_todo : env -> env
 val get_return : env -> Typing_env_return_info.t
 val set_return : env -> Typing_env_return_info.t -> env
@@ -165,7 +163,6 @@ val set_env_function_pos: env -> Pos.t -> env
 val env_reactivity: env -> reactivity
 val env_local_reactive : env -> bool
 val add_mutable_var : env -> Local_id.t -> Typing_mutability_env.mutability -> env
-val local_is_mutable : include_borrowed: bool -> env -> Local_id.t -> bool
 val function_is_mutable : env -> bool
 val set_fun_mutable : env -> bool -> env
 val env_with_locals : env -> local_types -> env

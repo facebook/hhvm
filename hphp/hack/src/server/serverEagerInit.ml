@@ -27,8 +27,7 @@
    Type-decl is performed lazily as needed.
 *)
 
-open Core_kernel
-open Result.Export
+open Core_result.Export
 open SearchServiceRunner
 open ServerEnv
 open ServerInitCommon

@@ -7,7 +7,6 @@
  *
  *)
 
-open Core_kernel
 open ServerEnv
 
 let should_use options local_config =

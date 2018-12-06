@@ -70,26 +70,11 @@ let ty_opt_equiv env tyopt1 tyopt2 ~are_ty_param =
  *)
 let rec union env (r1, _ as ty1) (r2, _ as ty2) =
   if ty_equal ty1 ty2 then env, ty1
-  else match ty1, ty2 with
-    | (_, Tany), (_, Tunresolved _ as ty)
-    | (_, Tunresolved _ as ty), (_, Tany) ->
-      env, ty
-    | (_, Tany), (r, _ as ty)
-    | (r, _ as ty), (_, Tany) ->
-      (* The TC will issue an error for null checks on certain types. However,
-       * a nullcheck on a Tany is valid and should still be after unioning this
-       * Tany to something.
-       * So we wrap in an unresolved for now to mimic previous behavior,
-       * and allow null checks. *)
-      env, (r, Tunresolved [ty])
-    | (_, Terr), ty | ty, (_, Terr) ->
-      env, ty
-    | _, _ ->
-      if Typing_subtype.is_sub_type_alt env ty1 ty2 = Some true then env, ty2
-      else if Typing_subtype.is_sub_type_alt env ty2 ty1 = Some true then env, ty1
-      else
-        let r = union_reason r1 r2 in
-        union_ env ty1 ty2 r
+  else if Typing_subtype.is_sub_type_alt env ty1 ty2 = Some true then env, ty2
+  else if Typing_subtype.is_sub_type_alt env ty2 ty1 = Some true then env, ty1
+  else
+    let r = union_reason r1 r2 in
+    union_ env ty1 ty2 r
 
 and union_ env ty1 ty2 r =
   try
@@ -101,11 +86,21 @@ and union_ env ty1 ty2 r =
   | (r, Tprim Nast.Tnull), ty
   | ty, (r, Tprim Nast.Tnull) ->
     env, (r, Toption ty)
-  | (_, Tclass ((p, id1), e1, tyl1)), (_, Tclass ((_, id2), e2, tyl2))
+  | (_, Tany), (_, Tunresolved _ as ty)
+  | (_, Tunresolved _ as ty), (_, Tany) ->
+    env, ty
+  | (r, Tany), ty
+  | ty, (r, Tany) ->
+    (* The TC will issue an error for null checks on certain types. However,
+     * a nullcheck on a Tany is valid and should still be after unioning this
+     * Tany to something.
+     * So we wrap in an unresolved for now to mimic previous behavior,
+     * and allow null checks. *)
+    env, (r, Tunresolved [ty])
+  | (_, Tclass ((p, id1), tyl1)), (_, Tclass ((_, id2), tyl2))
     when id1 = id2 ->
-    let e = Typing_ops.LeastUpperBound.exact_least_upper_bound e1 e2 in
     let env, tyl = union_class env id1 tyl1 tyl2 in
-    env, (r, Tclass ((p, id1), e, tyl))
+    env, (r, Tclass ((p, id1), tyl))
   | (r, Toption ty1), ty2
   | ty2, (r, Toption ty1)->
     let env, ty = union env ty1 ty2 in
@@ -169,13 +164,13 @@ and union_ env ty1 ty2 r =
     env, (r, Tfun ft)
   | (_, Tanon (_, id1)), (_, Tanon (_, id2)) when id1 = id2 -> env, ty1
   (* TODO with Tclass, union type arguments if covariant *)
-  | (_, ((Tarraykind _ | Tprim _ | Tdynamic | Tabstract _ | Tclass _
-    | Ttuple _ | Tanon _ | Tfun _ | Tobject | Tshape _ | Terr | Tvar _
+  | (_, ((Tarraykind _ | Tprim _ | Tdynamic | Tabstract (_, _) | Tclass (_, _)
+    | Ttuple _ | Tanon (_, _) | Tfun _ | Tobject | Tshape _ | Terr | Tvar _
     (* If T cannot be null, `union T nonnull = nonnull`. However, it's hard
      * to say whether a given T can be null - e.g. opaque newtypes, dependent
      * types, etc. - so for now we leave it here.
      * TODO improve that. *)
-    | Tnonnull | Tany) as ty1_)),
+    | Tnonnull) as ty1_)),
     (_, ty2_) ->
     (* Make sure to add a dependency on any classes referenced here, even if
      * we're in an error state (i.e., where we are right now). The need for
@@ -216,7 +211,7 @@ and union_ env ty1 ty2 r =
      * the dep) anyways.
      *)
     let add env = function
-      | Tclass ((_, cid), _, _) -> Env.add_wclass env cid
+      | Tclass ((_, cid), _) -> Env.add_wclass env cid
       | _ -> () in
     add env ty1_;
     add env ty2_;
@@ -348,7 +343,7 @@ and union_funs env fty1 fty2 =
 and union_class env name tyl1 tyl2 =
   let tparams = match Env.get_class env name with
     | None -> []
-    | Some c -> Typing_classes_heap.tparams c in
+    | Some c -> c.tc_tparams in
   union_tylists_w_variances env tparams tyl1 tyl2
 
 and union_ak env ak1 ak2 =

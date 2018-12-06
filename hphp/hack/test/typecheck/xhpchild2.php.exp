@@ -3,4 +3,4 @@ Invalid argument (Typing[4110])
 File "xhpchild2.php", line 14, characters 13-20:
 This is an object of type XHPChild
 File "xhpchild2.php", line 17, characters 10-12:
-It is incompatible with an object of exactly the class Foo
+It is incompatible with an object of type Foo

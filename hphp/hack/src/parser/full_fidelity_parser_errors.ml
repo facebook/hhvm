@@ -1019,26 +1019,21 @@ let is_param_by_ref node =
     is_byref_parameter_variable parameter_name
   | _ -> false
 
-let attribute_constructor_name node =
-  match syntax node with
-  | ListItem {
-      list_item = { syntax = ConstructorCall { constructor_call_type; _ }; _ }; _
-    } -> Syntax.extract_text constructor_call_type
-  | _ -> None
-
 let attribute_specification_contains node name =
   match syntax node with
   | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
     List.exists (syntax_node_to_list attrs) ~f:begin fun n ->
-      attribute_constructor_name n = Some name
+      match syntax n with
+      | ListItem {
+          list_item = { syntax = ConstructorCall { constructor_call_type; _ }; _ }; _
+        } ->
+        begin match Syntax.extract_text constructor_call_type with
+        | Some n when n = name -> true
+        | _ -> false
+        end
+      | _ -> false
     end
   | _ -> false
-
-let fold_attribute_spec node ~f ~init =
-  match syntax node with
-  | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
-    List.fold (syntax_node_to_list attrs) ~init ~f
-  | _ -> init
 
 let methodish_contains_attribute node attribute =
   match node with
@@ -1090,15 +1085,11 @@ let is_some_reactivity_attribute n =
   attribute_matches_criteria is_some_reactivity_attribute_name n
   |> Option.is_some
 
-let attribute_first_reactivity_annotation attr_spec =
+let attribute_has_reactivity_annotation attr_spec =
   match syntax attr_spec with
   | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
-    List.find (syntax_node_to_list attrs) ~f:is_some_reactivity_attribute
-  | _ -> None
-
-
-let attribute_has_reactivity_annotation attr_spec =
-  Option.is_some (attribute_first_reactivity_annotation attr_spec)
+    List.exists (syntax_node_to_list attrs) ~f:is_some_reactivity_attribute
+  | _ -> false
 
 let attribute_missing_reactivity_for_condition attr_spec =
   let has_attr attr = attribute_specification_contains attr_spec attr in
@@ -1107,36 +1098,6 @@ let attribute_missing_reactivity_for_condition attr_spec =
     has_attr SN.UserAttributes.uaOnlyRxIfArgs_do_not_use ||
     has_attr SN.UserAttributes.uaAtMostRxAsArgs
   )
-
-let error_if_memoize_function_returns_mutable attrs errors =
-  let (has_memoize, mutable_node, mut_return_node) =
-    fold_attribute_spec attrs ~init:(false, None, None) ~f:(
-      fun ((has_memoize, mutable_node, mut_return_node) as acc) node ->
-        match attribute_constructor_name node with
-        | Some n when n = SN.UserAttributes.uaMutableReturn ->
-          (has_memoize, mutable_node, (Some node))
-        | Some n when n = SN.UserAttributes.uaMemoize ||
-                      n = SN.UserAttributes.uaMemoizeLSB ->
-          (true, mutable_node, mut_return_node)
-        | Some n when n = SN.UserAttributes.uaMutable ->
-          (has_memoize, Some node, mut_return_node)
-        | _ -> acc
-    ) in
-  if has_memoize
-  then
-    let errors =
-      match mutable_node with
-      | Some n ->
-        make_error_from_node
-          n (SyntaxError.mutable_parameter_in_memoize_function ~is_this:true) :: errors
-      | None -> errors in
-    let errors =
-      match mut_return_node with
-      | Some n ->
-        make_error_from_node n SyntaxError.mutable_return_in_memoize_function :: errors
-      | None -> errors in
-    errors
-  else errors
 
 let methodish_missing_reactivity_for_condition node =
   match syntax node with
@@ -1325,8 +1286,6 @@ let methodish_errors env node parents errors =
       function_multiple_reactivity_annotations node
       SyntaxError.multiple_reactivity_annotations function_attrs in
     let errors =
-      error_if_memoize_function_returns_mutable function_attrs errors in
-    let errors =
       produce_error errors
       function_declaration_contains_only_rx_if_impl_attribute node
       SyntaxError.functions_cannot_implement_reactive function_attrs in
@@ -1349,8 +1308,6 @@ let methodish_errors env node parents errors =
     let method_name = Option.value (extract_function_name
       md.methodish_function_decl_header) ~default:"" in
     let method_attrs = md.methodish_attribute in
-    let errors =
-      error_if_memoize_function_returns_mutable method_attrs errors in
     let errors =
       produce_error_for_header errors
       (methodish_contains_memoize env)
@@ -1380,14 +1337,6 @@ let methodish_errors env node parents errors =
     let errors =
       produce_error errors methodish_duplicate_modifier node
       SyntaxError.error2013 modifiers in
-    let errors =
-      if methodish_contains_static node && (
-        attribute_specification_contains method_attrs SN.UserAttributes.uaMutable ||
-        attribute_specification_contains method_attrs SN.UserAttributes.uaMaybeMutable
-      )
-      then make_error_from_node node
-        SyntaxError.mutability_annotation_on_static_method :: errors
-      else errors in
     let fun_semicolon = md.methodish_semicolon in
     let errors =
       produce_error errors
@@ -1547,17 +1496,6 @@ let decoration_errors node errors =
   errors
 
 let parameter_rx_errors parents errors node =
-  let rec get_containing_function_attrs l =
-    match l with
-    | [] -> None
-    | ({ syntax = AnonymousFunction { anonymous_attribute_spec = s; _ }; _ } |
-       { syntax = Php7AnonymousFunction { php7_anonymous_attribute_spec = s; _ }; _ } |
-       { syntax = LambdaExpression { lambda_attribute_spec = s; _ }; _ } |
-       { syntax = FunctionDeclaration { function_attribute_spec = s; _ }; _ } |
-       { syntax = MethodishDeclaration { methodish_attribute = s; _ }; _ })
-      :: _ -> Some s
-    | _ :: tl -> get_containing_function_attrs tl
-  in
   match syntax node with
   | ParameterDeclaration { parameter_attribute = spec; _ } ->
     let has_owned_mutable =
@@ -1579,41 +1517,30 @@ let parameter_rx_errors parents errors node =
           make_error_from_node node
             SyntaxError.conflicting_owned_mutable_and_maybe_mutable_attributes :: errors
         | _ -> errors in
-      let is_inout = is_parameter_with_callconv node in
-      let errors =
-        if is_inout && (has_mutable || has_maybemutable || has_owned_mutable)
-        then make_error_from_node
-          node SyntaxError.mutability_annotation_on_inout_parameter :: errors
-        else errors in
-
-      let errors =
-        if has_owned_mutable || has_mutable
-        then begin
-          let attrs = get_containing_function_attrs parents in
-          let parent_func_is_rx =
-            Option.value_map attrs ~default:false ~f:attribute_has_reactivity_annotation
+      errors in
+    let errors =
+      if has_owned_mutable
+      then
+        let parent_func_is_rx =
+          let rec get_containing_function_attrs l =
+            match l with
+            | [] -> None
+            | ({ syntax = AnonymousFunction { anonymous_attribute_spec = s; _ }; _ } |
+               { syntax = Php7AnonymousFunction { php7_anonymous_attribute_spec = s; _ }; _ } |
+               { syntax = LambdaExpression { lambda_attribute_spec = s; _ }; _ } |
+               { syntax = FunctionDeclaration { function_attribute_spec = s; _ }; _ } |
+               { syntax = MethodishDeclaration { methodish_attribute = s; _ }; _ })
+              :: _ -> Some s
+            | _ :: tl -> get_containing_function_attrs tl
           in
-          let parent_func_is_memoize =
-            Option.value_map attrs ~default:false ~f:(fun spec ->
-              attribute_specification_contains spec SN.UserAttributes.uaMemoize ||
-              attribute_specification_contains spec SN.UserAttributes.uaMemoize
-            ) in
-          let errors =
-            if has_owned_mutable && not parent_func_is_rx
-            then make_error_from_node node
-              SyntaxError.mutably_owned_attribute_on_non_rx_function :: errors
-            else errors
-          in
-          let errors =
-            if has_mutable && parent_func_is_memoize
-            then make_error_from_node node
-              (SyntaxError.mutable_parameter_in_memoize_function ~is_this:false) :: errors
-            else errors
-          in
-          errors
-        end
-        else errors in
-      errors
+          get_containing_function_attrs parents
+          |> Option.value_map ~default:false ~f:attribute_has_reactivity_annotation
+        in
+        if not parent_func_is_rx
+        then make_error_from_node node
+          SyntaxError.mutably_owned_attribute_on_non_rx_function :: errors
+        else errors
+      else errors
     in
     errors
   | _ -> errors
@@ -1696,8 +1623,7 @@ let redeclaration_errors env node parents namespace_name names errors =
       | { syntax = FunctionDeclaration _; _}
         :: _ :: {syntax = NamespaceBody _; _} :: _
       | [{ syntax = FunctionDeclaration _; _ }; _; _]
-      | { syntax = MethodishDeclaration _; _ } :: _
-      | { syntax = MethodishTraitResolution _; _ } :: _ ->
+      | { syntax = MethodishDeclaration _; _ } :: _ ->
         let function_name = text f.function_name in
         let location = make_location_of_node f.function_name in
         let is_method = match parents with
@@ -2587,9 +2513,6 @@ let class_reified_param_errors node parents errors =
       :: errors else errors
   | _ -> errors
 
-let attr_spec_contains_sealed node =
-  attribute_specification_contains node SN.UserAttributes.uaSealed
-
 let classish_errors env node parents namespace_name names errors =
   match syntax node with
   | ClassishDeclaration cd ->
@@ -2630,7 +2553,15 @@ let classish_errors env node parents namespace_name names errors =
       | _ -> false in
 
     let classish_is_sealed =
-      attr_spec_contains_sealed cd.classish_attribute in
+      match cd.classish_attribute.syntax with
+      | AttributeSpecification { attribute_specification_attributes = attrs; _ } ->
+        let attrs = syntax_to_list_no_separators attrs in
+        List.exists attrs (fun e ->
+          match syntax e with
+          | ConstructorCall {constructor_call_type; _ } ->
+            text constructor_call_type = SN.UserAttributes.uaSealed
+          | _ -> false)
+      | _ -> false in
 
     (* Given a ClassishDeclaration node, test whether or not length of
      * extends_list is appropriate for the classish_keyword. *)
@@ -2653,13 +2584,6 @@ let classish_errors env node parents namespace_name names errors =
       classish_is_sealed in
     let errors = produce_error errors (classish_invalid_extends_list env) ()
       SyntaxError.error2037 cd.classish_extends_list in
-
-    let errors =
-      match attribute_first_reactivity_annotation cd.classish_attribute with
-      | Some n ->
-        make_error_from_node n SyntaxError.misplaced_reactivity_annotation :: errors
-      | None ->
-        errors in
     let errors =
       produce_error errors
       classish_duplicate_modifiers cd.classish_modifiers
@@ -3245,7 +3169,7 @@ let mixed_namespace_errors env node parents namespace_type errors =
     errors
   | _ -> errors
 
-let enumerator_errors node errors =
+let enum_errors node errors =
   match syntax node with
   | Enumerator { enumerator_name = name; enumerator_value = value; _} ->
     let errors = if String.lowercase @@ text name = "class" then
@@ -3253,22 +3177,6 @@ let enumerator_errors node errors =
       else errors in
     let errors = check_constant_expression errors value in
     errors
-  | _ -> errors
-
-let enum_decl_errors node errors =
-  match syntax node with
-  EnumDeclaration
-   { enum_attribute_spec = attrs
-   (*
-   ; enum_name           = name
-   ; enum_base           = base
-   ; enum_type           = constr
-   ; enum_enumerators    = enums
-   *)
-   ; _ } ->
-    if attr_spec_contains_sealed attrs then
-      make_error_from_node node SyntaxError.sealed_enum :: errors
-      else errors
   | _ -> errors
 
 let does_binop_create_write_on_left = function
@@ -3602,11 +3510,8 @@ let find_syntax_errors env =
         let errors = class_property_visibility_errors env node parents errors in
         let errors = class_reified_param_errors node parents errors in
         trait_require_clauses, names, errors
-      | EnumDeclaration _ ->
-        let errors = enum_decl_errors node errors in
-        trait_require_clauses, names, errors
       | Enumerator _ ->
-        let errors = enumerator_errors node errors in
+        let errors = enum_errors node errors in
         trait_require_clauses, names, errors
       | PostfixUnaryExpression _
       | BinaryExpression _

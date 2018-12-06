@@ -5,4 +5,4 @@ File "gen6.php", line 12, characters 9-9:
 File "gen6.php", line 12, characters 14-17:
 This is an object of type A
 File "gen6.php", line 26, characters 15-15:
-It is incompatible with an object of exactly the class Z
+It is incompatible with an object of type Z

@@ -541,7 +541,6 @@ type instruct_misc =
   | ReifiedName of int
   | ReifiedGeneric of reified_generic_op * int
   | RecordReifiedGeneric of int
-  | CheckReifiedGenericMismatch
   | NativeImpl
   | AKExists
   | CreateCl of num_params * class_num

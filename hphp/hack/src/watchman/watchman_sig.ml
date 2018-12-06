@@ -121,26 +121,12 @@ module type S = sig
 
   val get_all_files: env -> string list result
 
-  val get_changes_since_mergebase: env -> string list result
-
-  val get_mergebase: env -> string result
-
   val get_changes: ?deadline:float ->
     watchman_instance -> (watchman_instance * changes) result
   val get_changes_synchronously: timeout:int ->
     watchman_instance -> (watchman_instance * (pushed_changes list)) result
 
   val conn_of_instance: watchman_instance -> conn option
-
-  val close: env -> unit result
-
-  val with_instance:
-    watchman_instance ->
-    try_to_restart:bool ->
-    on_alive:(env -> 'a result) ->
-    on_dead:(dead_env -> 'a result) ->
-    'a result
-
 
   (** Expose some things for testing. *)
   module Testing : sig

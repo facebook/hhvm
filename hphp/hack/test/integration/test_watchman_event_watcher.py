@@ -286,8 +286,8 @@ class CustodietTests(common_tests.CommonTestDriver, unittest.TestCase):
                 'initialized message')
             self.check_call(['hg', 'update', '.~1'])
             ignore = [
-                "State_enter hg.transaction",
-                "State_leave hg.transaction"
+                "Ignoring State_enter hg.transaction",
+                "Ignoring State_leave hg.transaction"
             ]
             state_enter = self.poll_line(f, retry_eof=True, ignore=ignore)
             state_enter_revision = self.poll_line(f, retry_eof=True, ignore=ignore)

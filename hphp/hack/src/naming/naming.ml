@@ -97,8 +97,6 @@ module Env : sig
   val make_typedef_env :
     TypecheckerOptions.t ->
     type_constraint SMap.t -> Ast.typedef -> genv * lenv
-  val make_top_level_env :
-    TypecheckerOptions.t -> genv * lenv
   val make_fun_genv :
     TypecheckerOptions.t ->
     type_constraint SMap.t ->
@@ -328,26 +326,6 @@ end = struct
     droot         = Typing_deps.Dep.GConst (snd cst.cst_name);
     namespace     = cst.cst_namespace;
   }
-
-  let make_top_level_genv tcopt = {
-    in_mode       = FileInfo.Mpartial;
-    tcopt;
-    in_try        = false;
-    in_finally    = false;
-    in_ppl        = false;
-    type_params   = SMap.empty;
-    current_cls   = None;
-    class_consts = Caml.Hashtbl.create 0;
-    class_props = Caml.Hashtbl.create 0;
-    droot         = Typing_deps.Dep.Fun "";
-    namespace     = Namespace_env.empty_with_default_popt;
-  }
-
-  let make_top_level_env nenv =
-    let genv = make_top_level_genv nenv in
-    let lenv = empty_local None in
-    let env  = genv, lenv in
-    env
 
   let make_const_env nenv cst =
     let genv = make_const_genv nenv cst in
@@ -685,6 +663,18 @@ end
 (* Helpers *)
 (*****************************************************************************)
 
+(* Alok is constantly complaining that in partial mode,
+ * he forgets to bind a type parameter, for example T,
+ * and because partial assumes T is just a class that lives
+ * in PHP land there is no error message.
+ * So to help him, I am adding a rule that if
+ * the class name starts with a T and is only 2 characters
+ * it is considered a type variable. You will not be able to
+ * define a class T in php land in this scheme ... But it is a bad
+ * name for a class anyway.
+*)
+let is_alok_type_name (_, x) = String.length x <= 2 && x.[0] = 'T'
+
 let check_constraint (_, (pos, name), _, _) =
   (* TODO refactor this in a separate module for errors *)
   if String.lowercase name = "this"
@@ -872,10 +862,8 @@ module Make (GetLocals : GetLocals) = struct
   and hint_id ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth
     env (p, x as id) hl =
     let params = (fst env).type_params in
-    let allow_null = TypecheckerOptions.experimental_feature_enabled
-      (fst env).tcopt
-      TypecheckerOptions.experimental_null_type
-    in
+    if   is_alok_type_name id && not (SMap.mem x params)
+    then Errors.typeparam_alok id;
     (* some common Xhp screw ups *)
     if   (x = "Xhp") || (x = ":Xhp") || (x = "XHP")
     then Errors.disallowed_xhp_type p x;
@@ -894,7 +882,6 @@ module Make (GetLocals : GetLocals) = struct
           N.Hany
         | x when x.[0] = '\\' &&
           (  x = ("\\"^SN.Typehints.void)
-          || x = ("\\"^SN.Typehints.null)
           || x = ("\\"^SN.Typehints.noreturn)
           || x = ("\\"^SN.Typehints.int)
           || x = ("\\"^SN.Typehints.bool)
@@ -921,7 +908,6 @@ module Make (GetLocals : GetLocals) = struct
       | x when x = SN.Typehints.noreturn ->
         Errors.return_only_typehint p `noreturn;
         N.Hany
-      | x when x = SN.Typehints.null && allow_null -> N.Hprim N.Tnull
       | x when x = SN.Typehints.num  -> N.Hprim N.Tnum
       | x when x = SN.Typehints.resource -> N.Hprim N.Tresource
       | x when x = SN.Typehints.arraykey -> N.Hprim N.Tarraykey
@@ -1142,8 +1128,7 @@ module Make (GetLocals : GetLocals) = struct
           parent::parents
       | _ -> parents in
     let methods  = List.fold_right c.c_body ~init:[] ~f:(class_method env) in
-    let uses, redeclarations =
-      List.fold_right c.c_body ~init:([], []) ~f:(class_use env) in
+    let uses     = List.fold_right c.c_body ~init:[] ~f:(class_use env) in
     let xhp_attr_uses =
       List.fold_right c.c_body ~init:[] ~f:(xhp_attr_use env) in
     let xhp_category =
@@ -1171,32 +1156,31 @@ module Make (GetLocals : GetLocals) = struct
     check_name_collision smethods;
     check_tparams_shadow class_tparam_names smethods;
     let named_class =
-      { N.c_annotation            = ();
-        N.c_span                  = c.c_span;
-        N.c_mode                  = c.c_mode;
-        N.c_final                 = c.c_final;
-        N.c_is_xhp                = c.c_is_xhp;
-        N.c_kind                  = c.c_kind;
-        N.c_name                  = name;
-        N.c_tparams               = (tparam_l, constraints);
-        N.c_extends               = parents;
-        N.c_uses                  = uses;
-        N.c_method_redeclarations = redeclarations;
-        N.c_xhp_attr_uses         = xhp_attr_uses;
-        N.c_xhp_category          = xhp_category;
-        N.c_req_extends           = req_extends;
-        N.c_req_implements        = req_implements;
-        N.c_implements            = implements;
-        N.c_consts                = consts;
-        N.c_typeconsts            = typeconsts;
-        N.c_static_vars           = sprops;
-        N.c_vars                  = props;
-        N.c_constructor           = constructor;
-        N.c_static_methods        = smethods;
-        N.c_methods               = methods;
-        N.c_user_attributes       = attrs;
-        N.c_namespace             = c.c_namespace;
-        N.c_enum                  = enum
+      { N.c_annotation     = ();
+        N.c_span           = c.c_span;
+        N.c_mode           = c.c_mode;
+        N.c_final          = c.c_final;
+        N.c_is_xhp         = c.c_is_xhp;
+        N.c_kind           = c.c_kind;
+        N.c_name           = name;
+        N.c_tparams        = (tparam_l, constraints);
+        N.c_extends        = parents;
+        N.c_uses           = uses;
+        N.c_xhp_attr_uses  = xhp_attr_uses;
+        N.c_xhp_category   = xhp_category;
+        N.c_req_extends    = req_extends;
+        N.c_req_implements = req_implements;
+        N.c_implements     = implements;
+        N.c_consts         = consts;
+        N.c_typeconsts     = typeconsts;
+        N.c_static_vars    = sprops;
+        N.c_vars           = props;
+        N.c_constructor    = constructor;
+        N.c_static_methods = smethods;
+        N.c_methods        = methods;
+        N.c_user_attributes = attrs;
+        N.c_namespace      = c.c_namespace;
+        N.c_enum           = enum
       }
     in
     named_class
@@ -1310,26 +1294,18 @@ module Make (GetLocals : GetLocals) = struct
           (ty1, ck, ty2))
 
   and class_use env x acc =
-    let (uses, redeclarations) = acc in
     match x with
     | Attributes _ -> acc
     | Const _ -> acc
     | AbsConst _ -> acc
     | ClassUse h ->
-      (hint ~allow_typedef:false env h :: uses, redeclarations)
+      hint ~allow_typedef:false env h :: acc
     | ClassUseAlias (_, (p, _), _, _) ->
       Errors.unsupported_feature p "Trait use aliasing";
       acc
     | ClassUsePrecedence (_, (p, _), _) ->
       Errors.unsupported_feature p "The insteadof keyword";
       acc
-    | MethodTraitResolution mt ->
-      if not (TypecheckerOptions.experimental_feature_enabled
-          (fst env).tcopt
-        TypecheckerOptions.experimental_trait_method_redeclarations)
-      then
-        Errors.experimental_feature (fst mt.mt_name) "trait method redeclarations";
-      (uses, method_redeclaration (fst env) mt :: redeclarations)
     | XhpAttrUse _ -> acc
     | ClassTraitRequire _ -> acc
     | ClassVars _ -> acc
@@ -1347,7 +1323,6 @@ module Make (GetLocals : GetLocals) = struct
     | ClassUse _ -> acc
     | ClassUseAlias _ -> acc
     | ClassUsePrecedence _ -> acc
-    | MethodTraitResolution _ -> acc
     | XhpAttrUse h ->
       hint ~allow_typedef:false env h :: acc
     | ClassTraitRequire _ -> acc
@@ -1366,7 +1341,6 @@ module Make (GetLocals : GetLocals) = struct
     | ClassUse _ -> acc
     | ClassUseAlias _ -> acc
     | ClassUsePrecedence _ -> acc
-    | MethodTraitResolution _ -> acc
     | XhpAttrUse _ -> acc
     | ClassTraitRequire _ -> acc
     | ClassVars _ -> acc
@@ -1387,7 +1361,6 @@ module Make (GetLocals : GetLocals) = struct
     | ClassUse _ -> acc
     | ClassUseAlias _ -> acc
     | ClassUsePrecedence _ -> acc
-    | MethodTraitResolution _ -> acc
     | XhpAttrUse _ -> acc
     | ClassTraitRequire (MustExtend, h)
         when c_kind <> Ast.Ctrait && c_kind <> Ast.Cinterface ->
@@ -1416,7 +1389,6 @@ module Make (GetLocals : GetLocals) = struct
     | ClassUse _ -> acc
     | ClassUseAlias _ -> acc
     | ClassUsePrecedence _ -> acc
-    | MethodTraitResolution _ -> acc
     | XhpAttrUse _ -> acc
     | ClassTraitRequire _ -> acc
     | ClassVars _ -> acc
@@ -1452,7 +1424,6 @@ module Make (GetLocals : GetLocals) = struct
     | ClassUse _ -> acc
     | ClassUseAlias _ -> acc
     | ClassUsePrecedence _ -> acc
-    | MethodTraitResolution _ -> acc
     | XhpAttrUse _ -> acc
     | ClassTraitRequire _ -> acc
     | ClassVars _ -> acc
@@ -1468,7 +1439,6 @@ module Make (GetLocals : GetLocals) = struct
     | ClassUse _ -> acc
     | ClassUseAlias _ -> acc
     | ClassUsePrecedence _ -> acc
-    | MethodTraitResolution _ -> acc
     | XhpAttrUse _ -> acc
     | ClassTraitRequire _ -> acc
     | Const _ -> acc
@@ -1504,7 +1474,6 @@ module Make (GetLocals : GetLocals) = struct
     | ClassUse _ -> acc
     | ClassUseAlias _ -> acc
     | ClassUsePrecedence _ -> acc
-    | MethodTraitResolution _ -> acc
     | XhpAttrUse _ -> acc
     | ClassTraitRequire _ -> acc
     | Const _ -> acc
@@ -1543,7 +1512,6 @@ module Make (GetLocals : GetLocals) = struct
     | ClassUse _ -> acc
     | ClassUseAlias _ -> acc
     | ClassUsePrecedence _ -> acc
-    | MethodTraitResolution _ -> acc
     | XhpAttrUse _ -> acc
     | ClassTraitRequire _ -> acc
     | Const _ -> acc
@@ -1563,7 +1531,6 @@ module Make (GetLocals : GetLocals) = struct
     | ClassUse _ -> acc
     | ClassUseAlias _ -> acc
     | ClassUsePrecedence _ -> acc
-    | MethodTraitResolution _ -> acc
     | XhpAttrUse _ -> acc
     | ClassTraitRequire _ -> acc
     | Const _ -> acc
@@ -1590,7 +1557,6 @@ module Make (GetLocals : GetLocals) = struct
     | ClassUse _ -> acc
     | ClassUseAlias _ -> acc
     | ClassUsePrecedence _ -> acc
-    | MethodTraitResolution _ -> acc
     | XhpAttrUse _ -> acc
     | ClassTraitRequire _ -> acc
     | ClassVars _ -> acc
@@ -1782,43 +1748,6 @@ module Make (GetLocals : GetLocals) = struct
       N.m_user_attributes = attrs;
       N.m_ret_by_ref      = m.m_ret_by_ref;
       N.m_external        = m.m_external;
-    }
-
-  and method_redeclaration genv mt =
-    let genv = extend_params genv mt.mt_tparams in
-    let env = genv, Env.empty_local None in
-    (* Cannot use 'this' if it is a public instance method *)
-    let variadicity, paraml = fun_paraml env mt.mt_params in
-    let contains_visibility = List.exists mt.mt_kind ~f:(
-        function
-        | Private
-        | Public
-        | Protected -> true
-        | _ -> false
-      ) in
-    if not contains_visibility then
-      Errors.method_needs_visibility (fst mt.mt_name);
-    let acc = false, false, false, N.Public in
-    let final, abs, static, vis = List.fold_left ~f:kind ~init:acc mt.mt_kind in
-    List.iter mt.mt_tparams check_constraint;
-    let tparam_l = type_paraml env mt.mt_tparams in
-    let where_constraints = type_where_constraints env mt.mt_constrs in
-    let ret = Option.map mt.mt_ret (hint ~allow_retonly:true env) in
-    let f_kind = mt.mt_fun_kind in
-    { N.mt_final           = final       ;
-      N.mt_visibility      = vis         ;
-      N.mt_abstract        = abs         ;
-      N.mt_static          = static      ;
-      N.mt_name            = mt.Ast.mt_name;
-      N.mt_tparams         = tparam_l    ;
-      N.mt_where_constraints = where_constraints ;
-      N.mt_params          = paraml      ;
-      N.mt_fun_kind        = f_kind      ;
-      N.mt_ret             = ret         ;
-      N.mt_variadic        = variadicity ;
-      N.mt_ret_by_ref      = mt.mt_ret_by_ref;
-      N.mt_trait           = hint ~allow_typedef:false env mt.mt_trait;
-      N.mt_method          = mt.Ast.mt_method;
     }
 
   and kind (final, abs, static, vis) = function
@@ -2619,21 +2548,19 @@ module Make (GetLocals : GetLocals) = struct
       let e1 = expr env e in
       let h1 = hint ~allow_wildcard:true env h in
       N.As (e1, h1, b)
-    | New ((cp, Id x), hl, el, uel)
-    | New ((cp, Lvar x), hl, el, uel) ->
+    | New ((_, Id x), hl, el, uel)
+    | New ((_, Lvar x), hl, el, uel) ->
       let hl = extract_hintl_from_type_args env p hl in
       N.New (make_class_id env x hl,
         exprl env el,
-        exprl env uel,
-        cp)
+        exprl env uel)
     | New ((p, _e), hl, el, uel) ->
       let hl = extract_hintl_from_type_args env p hl in
       if (fst env).in_mode = FileInfo.Mstrict
       then Errors.dynamic_new_in_strict_mode p;
       N.New (make_class_id env (p, SN.Classes.cUnknown) hl,
         exprl env el,
-        exprl env uel,
-        p)
+        exprl env uel)
     | NewAnonClass _ ->
       Errors.experimental_feature p "Anonymous classes";
       N.Null
@@ -2964,25 +2891,16 @@ module Make (GetLocals : GetLocals) = struct
   (**************************************************************************)
 
   let program tcopt ast =
-    let top_level_env = ref (Env.make_top_level_env tcopt) in
     let rec program ast =
     List.concat @@ List.map ast begin function
     | Ast.Fun f -> [N.Fun (fun_ tcopt f)]
     | Ast.Class c -> [N.Class (class_ tcopt c)]
     | Ast.Typedef t -> [N.Typedef (typedef tcopt t)]
     | Ast.Constant cst -> [N.Constant (global_const tcopt cst)]
-    | Ast.Stmt (_, Ast.Noop)
-    | Ast.Stmt (_, Ast.Markup _) -> [] (* Noops and markup aren't needed in NAST *)
-    | Ast.Stmt s -> [N.Stmt (stmt !top_level_env s)]
+    | Ast.Stmt _ -> []
     | Ast.Namespace (_ns, ast) -> program ast
     | Ast.NamespaceUse _ -> []
-    | Ast.SetNamespaceEnv nsenv ->
-      begin
-        let (genv, lenv) = !top_level_env in
-        let genv = { genv with namespace = nsenv } in
-        top_level_env := (genv, lenv)
-      end;
-      []
+    | Ast.SetNamespaceEnv _ -> []
   end in program ast
 end
 

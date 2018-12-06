@@ -45,7 +45,7 @@ let rec occurs env n rty =
     end
   | Terr | Tany | Tnonnull | Tanon _ | Tprim _ | Tobject | Tdynamic -> false
   | Toption t -> occurs env n t
-  | Ttuple ts | Tunresolved ts | Tclass(_,_,ts) -> occurs_list env n ts
+  | Ttuple ts | Tunresolved ts | Tclass(_,ts) -> occurs_list env n ts
   | Tabstract(ak,topt) -> occurs_ak env n ak || occurs_opt  env n topt
   | Tarraykind ak -> occurs_array env n ak
   | Tfun ft -> occurs_ft env n ft

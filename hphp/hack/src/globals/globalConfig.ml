@@ -45,5 +45,4 @@ let default_sharedmem_config =
     shm_dirs       = [shm_dir; tmp_dir;];
     shm_min_avail  = gig / 2; (* Half a gig by default *)
     log_level      = 0;
-    sample_rate    = 0.0;
   }

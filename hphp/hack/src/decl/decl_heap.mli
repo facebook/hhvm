@@ -69,21 +69,18 @@ end
 module ClassEltKey : SharedMem.UserKeyType
   with type t = string * string
 
-module Funs : module type of SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Fun)
-module Classes :
-  module type of SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Class)
-module Typedefs :
-  module type of SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Typedef)
-module GConsts :
-  module type of SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (GConst)
+module Funs : module type of SharedMem.WithCache (StringKey) (Fun)
+module Classes : module type of SharedMem.WithCache (StringKey) (Class)
+module Typedefs : module type of SharedMem.WithCache (StringKey) (Typedef)
+module GConsts : module type of SharedMem.WithCache (StringKey) (GConst)
 
 module Props :
-  module type of SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (Property)
+  module type of SharedMem.WithCache (ClassEltKey) (Property)
 module StaticProps :
-  module type of SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (StaticProperty)
+  module type of SharedMem.WithCache (ClassEltKey) (StaticProperty)
 module Methods :
-  module type of SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (Method)
+  module type of SharedMem.WithCache (ClassEltKey) (Method)
 module StaticMethods :
-  module type of SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (StaticMethod)
+  module type of SharedMem.WithCache (ClassEltKey) (StaticMethod)
 module Constructors :
-  module type of SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Constructor)
+  module type of SharedMem.WithCache (StringKey) (Constructor)

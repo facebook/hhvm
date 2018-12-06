@@ -92,7 +92,6 @@ let init_shared_mem () =
         shm_dirs = [];
         shm_min_avail = 0;
         log_level = 0;
-        sample_rate = 0.0;
       }
     ) in
   SharedMem.connect handle ~is_master:true

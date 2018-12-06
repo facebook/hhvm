@@ -35,7 +35,6 @@ module SN = Naming_special_names
 module TGenConstraint = Typing_generic_constraint
 module Subst = Decl_subst
 module TUtils = Typing_utils
-module Cls = Typing_classes_heap
 
 
 type control_context =
@@ -252,9 +251,9 @@ module CheckFunctionBody = struct
       when construct = SN.Members.__construct ->
       let () = match Env.get_class env.tenv (Env.get_parent_id env.tenv) with
         | Some parent_class ->
-          begin match fst (Cls.construct parent_class) with
-          | None when (Cls.kind parent_class) = Ast.Cabstract ->
-              Errors.parent_abstract_call construct p (Cls.pos parent_class);
+          begin match fst parent_class.tc_construct with
+          | None when parent_class.tc_kind = Ast.Cabstract ->
+              Errors.parent_abstract_call construct p parent_class.tc_pos;
           | _ -> ()
           end
         | _ -> () in
@@ -342,7 +341,7 @@ module CheckFunctionBody = struct
     | _, Eif (e1, Some e2, e3) ->
         List.iter [e1; e2; e3] (expr f_type env);
         ()
-    | _, New (_, el, uel, _) ->
+    | _, New (_, el, uel) ->
       List.iter el (expr f_type env);
       List.iter uel (expr f_type env);
       ()
@@ -568,7 +567,7 @@ and hint_ env p = function
       | None -> ()
       | Some class_ ->
           check_happly env.typedef_tparams env.tenv (p, h);
-          check_tparams env p x (Cls.tparams class_) hl
+          check_tparams env p x class_.tc_tparams hl
       );
       ()
   | Hshape { nsi_allows_unknown_fields=_; nsi_field_map } ->
@@ -613,10 +612,9 @@ and check_happly unchecked_tparams env h =
   | _, Tapply (_, tyl) when tyl <> [] ->
       let env, locl_ty = Phase.localize_with_self env decl_ty in
       begin match TUtils.get_base_type env locl_ty with
-        | _, Tclass (cls, _, tyl) ->
+        | _, Tclass (cls, tyl) ->
           (match Env.get_class env (snd cls) with
-            | Some cls ->
-                let tc_tparams = Cls.tparams cls in
+            | Some { tc_tparams; _ } ->
                 (* We want to instantiate the class type parameters with the
                  * type list of the class we are localizing. We do not want to
                  * add any more constraints when we localize the constraints
@@ -730,9 +728,9 @@ and check_is_interface (env, error_verb) (x : hint) =
           (* in strict mode, we catch the unknown class error before
              even reaching here. *)
           ()
-        | Some cls when Cls.kind cls = Ast.Cinterface -> ()
-        | Some cls ->
-          Errors.non_interface (fst x) (Cls.name cls) error_verb
+        | Some { tc_kind = Ast.Cinterface; _ } -> ()
+        | Some { tc_name; _ } ->
+          Errors.non_interface (fst x) tc_name error_verb
       )
     | Habstr _ ->
       Errors.non_interface (fst x) "generic" error_verb
@@ -750,14 +748,10 @@ and check_is_class env (x : hint) =
           (* in strict mode, we catch the unknown class error before
              even reaching here. *)
           ()
-        | Some cls ->
-          let kind = Cls.kind cls in
-          let name = Cls.name cls in
-          match kind with
-          | Ast.(Cabstract | Cnormal) ->
-            if Cls.final cls then Errors.requires_final_class (fst x) name
-          | _ ->
-            Errors.requires_non_class (fst x) name (Ast.string_of_class_kind kind)
+        | Some { tc_kind = Ast.(Cabstract | Cnormal); tc_final; tc_name; _ } ->
+          if tc_final then Errors.requires_final_class (fst x) tc_name
+        | Some { tc_kind; tc_name; _ } ->
+          Errors.requires_non_class (fst x) tc_name (Ast.string_of_class_kind tc_kind)
       )
     | Habstr name ->
       Errors.requires_non_class (fst x) name "a generic"
@@ -783,13 +777,11 @@ and check_is_trait env (h : hint) =
       (* unit. *)
       | None -> ()
       (* tc_kind is part of the type_info. If we are a trait, all is good *)
-      | Some cls when Cls.kind cls = Ast.Ctrait -> ()
+      | Some { tc_kind = Ast.Ctrait; _ } -> ()
       (* Anything other than a trait we are going to throw an error *)
       (* using the tc_kind and tc_name fields of our type_info *)
-      | Some cls ->
-        let name = Cls.name cls in
-        let kind = Cls.kind cls in
-        Errors.uses_non_trait (fst h) name (Ast.string_of_class_kind kind)
+      | Some { tc_kind; tc_name; _ } ->
+        Errors.uses_non_trait (fst h) tc_name (Ast.string_of_class_kind tc_kind)
     )
   | _ -> failwith "assertion failure: trait isn't an Happly"
   )
@@ -999,8 +991,12 @@ and method_ (env, is_static) m =
     && not (Attributes.mem SN.UserAttributes.uaOptionalDestruct m.m_user_attributes)
   then Errors.illegal_destructor p;
 
-  let is_mutable =
-    Attributes.mem SN.UserAttributes.uaMutable m.m_user_attributes in
+  let is_mutable, is_mutable_pos =
+    Attributes.find SN.UserAttributes.uaMutable m.m_user_attributes
+    |> Option.value_map
+        ~default:(false, Pos.none)
+        ~f:(fun { ua_name = (p, _); _ } -> true, p) in
+
 
   let is_maybe_mutable =
     Attributes.mem SN.UserAttributes.uaMaybeMutable m.m_user_attributes in
@@ -1016,6 +1012,8 @@ and method_ (env, is_static) m =
   then begin
     if is_maybe_mutable
     then Errors.conflicting_mutable_and_maybe_mutable_attributes p;
+    if is_static && name <> SN.Members.__construct
+    then Errors.mutable_on_static is_mutable_pos;
   end;
 
   (*Methods annotated with MutableReturn attribute must be reactive *)
@@ -1389,7 +1387,7 @@ and expr_ env p = function
       expr env e;
       hint env h;
       ()
-  | New (_, el, uel, _) ->
+  | New (_, el, uel) ->
       List.iter el (expr env);
       List.iter uel (expr env);
       ()

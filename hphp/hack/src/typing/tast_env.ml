@@ -113,17 +113,10 @@ let empty tcopt = Typing_env.empty tcopt Relative_path.default ~droot:None
 let restore_saved_env env saved_env =
   let module Env = Typing_env in
   {env with
-    Env.genv = {
-      env.Env.genv with
-        Env.tcopt = saved_env.Tast.tcopt;
-        Env.fun_mutable = saved_env.Tast.fun_mutable};
+    Env.genv = {env.Env.genv with Env.tcopt = saved_env.Tast.tcopt};
     Env.tenv = IMap.union env.Env.tenv saved_env.Tast.tenv;
     Env.subst = IMap.union env.Env.subst saved_env.Tast.subst;
     Env.global_tpenv = saved_env.Tast.tpenv;
-    Env.lenv = {
-      env.Env.lenv with
-        Env.local_reactive = saved_env.Tast.reactivity;
-        Env.local_mutability = saved_env.Tast.local_mutability};
   }
 
 module EnvFromDef = Typing_env_from_def.EnvFromDef(Tast.Annotations)
@@ -157,11 +150,10 @@ let def_env d =
   | Class x -> class_env x
   | Typedef x -> typedef_env x
   | Constant x -> gconst_env x
-  (* Top level statements are included in the TAST, but are not typechecked.
-   * However, we need to return an env here so for now create an empty env using
-   * the default typechecker options.
+  (* We don't typecheck top level statements, so we rely on callers
+     dropping them before starting the typecheck.
    *)
-  | Stmt _ -> empty GlobalOptions.default
+  | Stmt _ -> assert false
 
 let set_ppl_lambda env =
   { env with Typing_env.inside_ppl_class = false }
@@ -181,14 +173,3 @@ let can_coerce = Typing_ops.can_coerce
 let is_xhp_child = Typing_xhp.is_xhp_child
 
 let get_enum = Typing_env.get_enum
-
-let env_reactivity = Typing_env.env_reactivity
-
-let function_is_mutable = Typing_env.function_is_mutable
-
-let local_is_mutable = Typing_env.local_is_mutable
-
-let get_env_mutability = Typing_env.get_env_mutability
-
-let get_fun = Typing_env.get_fun
-let set_env_reactive = Typing_env.set_env_reactive

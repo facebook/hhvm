@@ -27,7 +27,7 @@ let is_vector_container env e =
      SN.Collections.cConstVector]
     ~f:begin fun cls ->
       Env.can_subtype env e
-        (Reason.Rnone, Tclass ((Pos.none, cls), Nonexact, [Reason.Rnone, Tany]))
+        (Reason.Rnone, Tclass ((Pos.none, cls), [Reason.Rnone, Tany]))
     end
 
 let handler = object

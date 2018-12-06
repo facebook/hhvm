@@ -10,14 +10,10 @@ newtype F<+T> = mixed;
 //// file2.php
 <?hh // strict
 
-abstract class AA<T> {
+class A<T> {
+  const type Ta = ?int;
   abstract const type Tabs;
   abstract const type Tcstr as int;
-}
-class A<T> extends AA<T> {
-  const type Ta = ?int;
-  const type Tabs = string;
-  const type Tcstr = int;
 
   public function isAClass(): bool {
     return true;
@@ -27,7 +23,7 @@ class A<T> extends AA<T> {
     return true;
   }
 
-  public function f(bool $cond, A::Ta $a, AA::Tabs $abs, AA::Tcstr $cstr): void {
+  public function f(bool $cond, Ta $a, Tabs $abs, Tcstr $cstr): void {
     $x = ($cond ? 0 : $a);
     hh_show($x);
 

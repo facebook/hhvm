@@ -106,9 +106,9 @@ val is_visible :
   env ->
   Typing_defs.visibility * bool ->
   Nast.class_id_ option ->
-  Typing_classes_heap.t ->
+  Typing_defs.class_type ->
   bool
-(** Return {true} if the given {Typing_classes_heap.t} (referred to by the given
+(** Return {true} if the given {class_type} (referred to by the given
     {class_id_}, if provided) allows the current class (the one returned by
     {!get_self}) to access its members with the given {visibility}. *)
 
@@ -224,10 +224,4 @@ val can_coerce : env -> Tast.ty -> Tast.ty -> env option
 val is_xhp_child : env -> Pos.t -> Tast.ty -> bool
 (** Verify that an XHP body expression is legal. *)
 
-val get_enum : env -> string -> Typing_classes_heap.t option
-val env_reactivity: env -> Typing_defs.reactivity
-val function_is_mutable: env -> bool
-val local_is_mutable: include_borrowed: bool -> env -> Local_id.t -> bool
-val get_env_mutability: env -> Typing_mutability_env.mutability_env
-val get_fun: env -> Typing_heap.Funs.key -> Typing_heap.Funs.t option
-val set_env_reactive: env -> Typing_defs.reactivity -> env
+val get_enum : env -> string -> Typing_defs.class_type option

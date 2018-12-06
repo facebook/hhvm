@@ -18,7 +18,7 @@ val on_state_leave :
   Hh_json.json option -> (* state metadata *)
   unit
 
-val is_hg_updating : unit -> bool
+val is_in_hg_update_state : unit -> bool
 
 val check_blocking : unit -> unit
 val check_non_blocking : ServerEnv.env -> unit

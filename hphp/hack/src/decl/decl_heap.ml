@@ -47,10 +47,10 @@ module GConst = struct
   let use_sqlite_fallback () = false
 end
 
-module Funs = SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Fun)
-module Classes = SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Class)
-module Typedefs = SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Typedef)
-module GConsts = SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (GConst)
+module Funs = SharedMem.WithCache (StringKey) (Fun)
+module Classes = SharedMem.WithCache (StringKey) (Class)
+module Typedefs = SharedMem.WithCache (StringKey) (Typedef)
+module GConsts = SharedMem.WithCache (StringKey) (GConst)
 
 module Property = struct
   type t = decl ty
@@ -97,8 +97,8 @@ module ClassEltKey = struct
   let to_string (cls, elt) = cls ^ "::" ^ elt
 end
 
-module Props = SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (Property)
-module StaticProps = SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (StaticProperty)
-module Methods = SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (Method)
-module StaticMethods = SharedMem.WithCache (SharedMem.ProfiledImmediate) (ClassEltKey) (StaticMethod)
-module Constructors = SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (Constructor)
+module Props = SharedMem.WithCache (ClassEltKey) (Property)
+module StaticProps = SharedMem.WithCache (ClassEltKey) (StaticProperty)
+module Methods = SharedMem.WithCache (ClassEltKey) (Method)
+module StaticMethods = SharedMem.WithCache (ClassEltKey) (StaticMethod)
+module Constructors = SharedMem.WithCache (StringKey) (Constructor)

@@ -151,7 +151,6 @@ and class_elt =
   | XhpAttr of hint option * class_var * bool *
                ((pos * bool * expr list) option)
   | Method of method_
-  | MethodTraitResolution of method_trait_resolution
   | XhpCategory of pos * (pstring list)
   | XhpChild of pos * xhp_child
 
@@ -246,20 +245,6 @@ and method_ = {
   m_span: pos;
   m_doc_comment: string option;
   m_external: bool;
-}
-
-and method_trait_resolution = {
-  mt_kind: kind list ;
-  mt_tparams: tparam list;
-  mt_constrs: (hint * constraint_kind * hint) list;
-  mt_name: id;
-  mt_params: fun_param list;
-  mt_user_attributes : user_attribute list;
-  mt_ret: hint option;
-  mt_ret_by_ref: bool;
-  mt_fun_kind: fun_kind;
-  mt_trait: hint;
-  mt_method: pstring;
 }
 
 and typeconst = {

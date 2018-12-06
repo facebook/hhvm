@@ -137,7 +137,7 @@ let should_start env =
     ClientStop.kill_server env.root env.from;
     true
 
-let main (env : env) : Exit_status.t Lwt.t =
+let main env =
   HackEventLogger.set_from env.from;
   HackEventLogger.client_start ();
   (* TODO(ljw): There are some race conditions here. First scenario: two      *)
@@ -186,11 +186,11 @@ let main (env : env) : Exit_status.t Lwt.t =
   if should_start env
   then begin
     start_server env;
-    Lwt.return Exit_status.No_error
+    Exit_status.No_error
   end else begin
     if not env.silent then Printf.eprintf
       "Error: Server already exists for %s\n\
       Use hh_client restart if you want to kill it and start a new one\n%!"
       (Path.to_string env.root);
-    Lwt.return Exit_status.Server_already_exists
+    Exit_status.Server_already_exists
   end

@@ -13,8 +13,6 @@ open Aast_defs
 open Typing_defs
 
 module Env = Tast_env
-module TMT = Typing_make_type
-module Cls = Typing_classes_heap
 
 (** Return true if ty definitely does not contain null.  I.e., the
     return value false can mean two things: ty does contain null, e.g.,
@@ -57,14 +55,15 @@ let fold_truthiness acc truthiness =
 
 let tclass_is_falsy_when_empty, is_traversable =
   let r = Typing_reason.Rnone in
-  let simple_xml_el = TMT.class_type r "\\SimpleXMLElement" [] in
-  let container_type = TMT.container r (r, Tany) in
-  let pair_type = TMT.pair r (r, Tany) (r, Tany) in
+  let p = Pos.none in
+  let simple_xml_el = r, Tclass ((p, "\\SimpleXMLElement"), []) in
+  let container = r, Tclass ((p, SN.Collections.cContainer), [r, Tany]) in
+  let pair = r, Tclass ((p, SN.Collections.cPair), [r, Tany; r, Tany]) in
   let tclass_is_falsy_when_empty env ty =
     Env.can_subtype env ty simple_xml_el ||
-    Env.can_subtype env ty container_type && not (Env.can_subtype env ty pair_type)
+    Env.can_subtype env ty container && not (Env.can_subtype env ty pair)
   in
-  let trv = TMT.traversable r (r, Tany) in
+  let trv = r, Tclass ((p, SN.Collections.cTraversable), [r, Tany]) in
   let is_traversable env ty = Env.can_subtype env ty trv in
   tclass_is_falsy_when_empty, is_traversable
 
@@ -75,15 +74,16 @@ let tclass_is_falsy_when_empty, is_traversable =
     indicates a logic error. *)
 let rec truthiness env ty =
   let env, ty = Env.fold_unresolved env ty in
+  let env, ty = Env.expand_type env ty in
   match snd ty with
-  | Tany | Terr | Tdynamic | Tvar _ -> Unknown
+  | Tany | Terr | Tdynamic -> Unknown
 
   | Tnonnull
   | Tabstract (AKenum _, _)
   | Tarraykind _
   | Toption _ -> Possibly_falsy
 
-  | Tclass ((_, cid), _, _) ->
+  | Tclass ((_, cid), _) ->
     if cid = SN.Classes.cStringish then Possibly_falsy else
     if tclass_is_falsy_when_empty env ty then Possibly_falsy else
     if not (is_traversable env ty) then Always_truthy else
@@ -91,12 +91,9 @@ let rec truthiness env ty =
        truthy when empty. If this Tclass is instead an interface type like
        KeyedTraversable, the value may or may not be truthy when empty. *)
     begin match Typing_lazy_heap.get_class (Env.get_tcopt env) cid with
-    | None -> Unknown
-    | Some cls ->
-      match Cls.kind cls with
-      | Cnormal | Cabstract -> Always_truthy
-      | Cinterface | Cenum -> Possibly_falsy
-      | Ctrait -> Unknown
+    | Some {tc_kind = Cnormal | Cabstract; _} -> Always_truthy
+    | Some {tc_kind = Cinterface | Cenum; _} -> Possibly_falsy
+    | Some {tc_kind = Ctrait; _} | None -> Unknown
     end
 
   | Tprim Tresource -> Always_truthy
@@ -129,39 +126,32 @@ let rec truthiness env ty =
 
   | Ttuple [] -> Always_falsy
   | Tobject | Tfun _ | Ttuple _ | Tanon _ -> Always_truthy
+  | Tvar _ ->
+    if TypecheckerOptions.new_inference (Env.get_tcopt env)
+    then Unknown
+    else failwith "expand_type failed"
 
 (** When a type represented by one of these variants is used in a truthiness
     test, it indicates a potential logic error, since the truthiness of some
     values in the type may be surprising. *)
 type sketchy_type_kind =
-  | String | Arraykey | Stringish
-  (** Truthiness tests on strings may not behave as expected. The user may not
-      know that the string "0" is falsy, and may have intended only to check for
-      emptiness. *)
-
   | Traversable_interface of Env.t * Tast.ty
   (** Interface types which implement Traversable but not Container may be
       always truthy, even when empty. *)
 
 let rec find_sketchy_types env acc ty =
   let env, ty = Env.fold_unresolved env ty in
+  let env, ty = Env.expand_type env ty in
   match snd ty with
   | Toption ty -> find_sketchy_types env acc ty
 
-  | Tprim Tstring -> String :: acc
-  | Tprim Tarraykey -> Arraykey :: acc
-
-  | Tclass ((_, cid), _, _) ->
-    if cid = SN.Classes.cStringish then Stringish :: acc else
+  | Tclass ((_, cid), _) ->
     if tclass_is_falsy_when_empty env ty || not (is_traversable env ty)
     then acc
     else begin
       match Typing_lazy_heap.get_class (Env.get_tcopt env) cid with
-      | None -> acc
-      | Some cls ->
-        match Cls.kind cls with
-        | Cinterface -> Traversable_interface (env, ty) :: acc
-        | Cnormal | Cabstract | Ctrait | Cenum -> acc
+      | Some {tc_kind = Cinterface; _} -> Traversable_interface (env, ty) :: acc
+      | Some {tc_kind = Cnormal | Cabstract | Ctrait | Cenum; _} | None -> acc
     end
 
   | Tunresolved tyl ->

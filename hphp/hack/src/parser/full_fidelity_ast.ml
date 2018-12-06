@@ -2664,36 +2664,6 @@ and pClassElt : class_elt list parser = fun node env ->
       ; m_doc_comment     = doc_comment_opt
       ; m_external        = is_external  (* see f_external above for context *)
       }]
-  | MethodishTraitResolution
-    { methodish_trait_attribute
-    ; methodish_trait_function_decl_header = {
-        syntax = FunctionDeclarationHeader h; _
-      } as header
-    ; methodish_trait_name; _
-    } ->
-    let hdr = pFunHdr (fun _ -> ()) header env in
-    let kind = pKinds (fun _ -> ()) h.function_modifiers env in
-    let qualifier, name =
-      match syntax methodish_trait_name with
-      | ScopeResolutionExpression
-        { scope_resolution_qualifier; scope_resolution_name; _ } ->
-        pHint scope_resolution_qualifier env,
-        pos_name scope_resolution_name env
-      | _ -> missing_syntax "trait method redeclaration item" node env
-    in
-    [MethodTraitResolution
-    { mt_kind            = kind
-    ; mt_tparams         = hdr.fh_type_parameters
-    ; mt_constrs         = hdr.fh_constrs
-    ; mt_name            = hdr.fh_name
-    ; mt_params          = hdr.fh_parameters
-    ; mt_user_attributes = pUserAttributes env methodish_trait_attribute
-    ; mt_ret             = hdr.fh_return_type
-    ; mt_ret_by_ref      = hdr.fh_ret_by_ref
-    ; mt_fun_kind        = mk_fun_kind hdr.fh_suspension_kind false
-    ; mt_trait           = qualifier
-    ; mt_method          = name
-    }]
   | TraitUseConflictResolution
     { trait_use_conflict_resolution_names
     ; trait_use_conflict_resolution_clauses
@@ -3416,8 +3386,7 @@ let parse_text
   (env : env)
   (source_text : SourceText.t)
 : (FileInfo.file_type * FileInfo.mode * PositionedSyntaxTree.t) =
-  let disable_decl = ParserOptions.disable_decl env.parser_options in
-  let lang, mode = Full_fidelity_parser.get_language_and_mode ~disable_decl source_text in
+  let lang, mode = Full_fidelity_parser.get_language_and_mode source_text in
   let mode = Option.value ~default:FileInfo.Mphp mode in
   let env =  { env with fi_mode = mode } in
   let env = { env with quick_mode = not env.codegen
@@ -3627,8 +3596,7 @@ let defensive_program
     let mode =
     try
       let source = Full_fidelity_source_text.make fn content in
-      let disable_decl = ParserOptions.disable_decl parser_options in
-      snd @@ Full_fidelity_parser.get_language_and_mode ~disable_decl source
+      snd @@ Full_fidelity_parser.get_language_and_mode source
     with _ -> None in
     let err = Exn.to_string e in
     let fn = Relative_path.suffix fn in

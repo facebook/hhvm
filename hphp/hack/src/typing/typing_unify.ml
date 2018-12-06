@@ -175,11 +175,8 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
   | Tfun ft1, Tfun ft2 ->
       let env, ft = unify_funs env r1 ft1 r2 ft2 in
       env, Tfun ft
-  | Tclass (((p1, x1) as id), e1, argl1),
-      Tclass ((p2, x2), e2, argl2) when String.compare x1 x2 = 0 ->
-      let e = match e1, e2 with
-      | Exact, Exact -> Exact
-      | _, _ -> Nonexact in
+  | Tclass (((p1, x1) as id), argl1),
+      Tclass ((p2, x2), argl2) when String.compare x1 x2 = 0 ->
         (* We handle the case where a generic A<T> is used as A *)
         let argl1 =
           if argl1 = [] && not (Env.is_strict env)
@@ -200,7 +197,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
         end
         else
           let env, argl = List.map2_env env argl1 argl2 unify in
-          env, Tclass (id, e, argl)
+          env, Tclass (id, argl)
   | Tabstract (AKnewtype (x1, argl1), tcstr1),
     Tabstract (AKnewtype (x2, argl2), tcstr2) when String.compare x1 x2 = 0 ->
         if List.length argl1 <> List.length argl2
@@ -240,7 +237,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
       env, Tabstract (ak1, tcstr)
 
   | Tabstract (AKdependent (expr_dep, _),
-      Some (_, Tclass ((_, x) as id, _, _) as ty)), _ ->
+      Some (_, Tclass ((_, x) as id, _) as ty)), _ ->
     let class_ = Env.get_class env x in
       (* For final class C, there is no difference between abstract<X> and X.
        * Two exceptions are for new types, because they are considered a
@@ -257,7 +254,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
              (fun () -> TUtils.simplified_uerror env (r1, ty1) (r2, ty2))
              ~when_: begin fun () ->
                match ty2 with
-               | Tclass ((_, y), _, _) -> y = x
+               | Tclass ((_, y), _) -> y = x
                | Tany | Terr | Tnonnull | Tarraykind _ | Tprim _
                | Toption _ | Tvar _ | Tabstract (_, _) | Ttuple _
                | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
@@ -394,12 +391,12 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
         (* After doing apply_shape in both directions we can be sure that
          * fields_known1 = fields_known2 *)
       env, Tshape (fields_known1, res)
-  | Tabstract (AKenum enum_name, _), Tclass ((post, class_name), e, tylist)
+  | Tabstract (AKenum enum_name, _), Tclass ((post, class_name), tylist)
     when String.compare enum_name class_name = 0 ->
-      env, Tclass ((post, class_name), e, tylist)
-  | (Tclass ((post, class_name), e, tylist), Tabstract (AKenum enum_name, _))
+      env, Tclass ((post, class_name), tylist)
+  | (Tclass ((post, class_name), tylist), Tabstract (AKenum enum_name, _))
     when String.compare enum_name class_name = 0 ->
-    env, Tclass ((post, class_name), e, tylist)
+    env, Tclass ((post, class_name), tylist)
 
   (* If we are trying to unify a type parameter T with another type t it's
      possible that we can get there through subtyping in both directions.
@@ -418,7 +415,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
     env, ty1
 
   | (Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
-      | Tvar _ | Tabstract _ | Tclass _ | Ttuple _ | Tanon _
+      | Tvar _ | Tabstract (_, _) | Tclass (_, _) | Ttuple _ | Tanon (_, _)
       | Tfun _ | Tunresolved _ | Tobject | Tshape _), _ ->
         (* Make sure to add a dependency on any classes referenced here, even if
          * we're in an error state (i.e., where we are right now). The need for
@@ -459,7 +456,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
          * the dep) anyways.
          *)
         let add env = function
-          | Tclass ((_, cid), _, _) -> Env.add_wclass env cid
+          | Tclass ((_, cid), _) -> Env.add_wclass env cid
           | _ -> () in
         add env ty1;
         add env ty2;
@@ -514,6 +511,10 @@ and unify_reason r1 r2 =
       let c = Reason.compare r1 r2 in
       if c <= 0 then r1
       else r2
+
+and iunify env ty1 ty2 =
+  let env, _ = unify env ty1 ty2 in
+  env
 
 (* This function is used to unify two functions *)
 (* r1 is the reason for ft1 to have its type (witness) *)

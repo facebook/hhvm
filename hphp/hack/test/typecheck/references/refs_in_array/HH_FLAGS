@@ -1,1 +1,1 @@
---allow-return-by-ref --disallow-assign-by-ref
+--allow-return-by-ref

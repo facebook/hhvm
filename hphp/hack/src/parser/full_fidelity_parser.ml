@@ -147,11 +147,9 @@ module Parser = WithSyntax(Syntax)
 open Syntax
 
 (* Parsing only the header of the file for language and mode information *)
-let get_language_and_mode ?(disable_decl=false) text =
+let get_language_and_mode text =
   let php = FileInfo.PhpFile in
   let hh = FileInfo.HhFile in
-  let suffix = Relative_path.suffix (SourceText.file_path text) in
-  let is_hhi = String_utils.string_ends_with suffix ".hhi" in
   let header = Parser.parse_header_only (Env.make ()) text in
   match syntax header with
   | MarkupSection
@@ -194,10 +192,9 @@ let get_language_and_mode ?(disable_decl=false) text =
               let mode = List.hd (Str.split (Str.regexp " +") mode) in
               FileInfo.parse_mode mode
             with _ -> if language = hh then Some FileInfo.Mpartial else None in
-          match mode with
-          | Some FileInfo.Mstrict when !Ide.is_ide_mode -> Some FileInfo.Mpartial
-          | Some FileInfo.Mdecl when disable_decl && not is_hhi -> Some FileInfo.Mpartial
-          | _ -> mode
+          if !(Ide.is_ide_mode) && mode = Some FileInfo.Mstrict then
+            Some FileInfo.Mpartial
+          else mode
         in
         language, mode
       )

@@ -1,11 +1,11 @@
 File "mixed.php", line 17, characters 3-13:
   exact A
 File "mixed.php", line 25, characters 3-13:
-  nonnull
+  (nonnull | exact A)
 File "mixed.php", line 34, characters 3-13:
   mixed
 File "mixed.php", line 43, characters 3-13:
-  exact A
+  (exact A | object)
 File "mixed.php", line 54, characters 3-13:
   (function(string $s1, string $s2): (int | string))
 File "mixed.php", line 63, characters 3-13:
@@ -41,7 +41,7 @@ Invalid argument (Typing[4110])
   File "mixed.php", line 101, characters 24-29:
   This is an object of type Object
   File "mixed.php", line 41, characters 14-14:
-  It is incompatible with an object of exactly the class A
+  It is incompatible with an object of type A
 File "mixed.php", line 56, characters 18-19:
 Invalid argument (Typing[4110])
   File "mixed.php", line 96, characters 52-54:

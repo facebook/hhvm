@@ -762,7 +762,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    * @return - A `Vector` with the values from the `Traversable`; or an empty
    *           `Vector` if the `Traversable` is `null`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
   public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv> $items): Vector<Tv>;
 
   /**
@@ -776,7 +776,7 @@ final class Vector<Tv> implements MutableVector<Tv> {
    *
    * @return - A `Vector` built from the keys of the specified container.
    */
-  <<__Rx, __MutableReturn>>
+  <<__Rx, __MutableReturn, __MaybeMutable>>
   public static function fromKeysOf<Tk,Tv2>(
     ?KeyedContainer<Tk,Tv2> $container
   ): Vector<Tk>;

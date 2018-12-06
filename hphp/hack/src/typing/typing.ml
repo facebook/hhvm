@@ -3103,14 +3103,13 @@ and assign p env e1 ty2 : _ * T.expr * T.ty =
   assign_ p Reason.URassign env e1 ty2
 
 and assign_ p ur env e1 ty2 =
-  let make_result env te1 ty1 = (env, T.make_typed_expr (fst e1) ty1 te1, ty1) in
   match e1 with
   | (_, Lvar ((_, x) as id)) ->
     let env, ty1 = set_valid_rvalue p env x ty2 in
-    make_result env (T.Lvar id) ty1
+    make_result env (fst e1) (T.Lvar id) ty1
   | (_, Lplaceholder id) ->
     let placeholder_ty = Reason.Rplaceholder p, (Tprim Tvoid) in
-    make_result env (T.Lplaceholder id) placeholder_ty
+    make_result env (fst e1) (T.Lplaceholder id) placeholder_ty
   | (_, List el) ->
     let env, folded_ty2 = TUtils.fold_unresolved env ty2 in
     let resl =
@@ -3127,7 +3126,7 @@ and assign_ p ur env e1 ty2 =
               let env, te, _ = assign (fst e) env e elt_type in
               env, te
             end in
-            make_result env (T.List tel) ty2
+            make_result env (fst e1) (T.List tel) ty2
           (* array<t> or varray<t> *)
           | (_, Tarraykind (AKvec elt_type))
           | (_, Tarraykind (AKvarray elt_type)) ->
@@ -3135,20 +3134,20 @@ and assign_ p ur env e1 ty2 =
               let env, te, _ = assign (fst e) env e elt_type in
               env, te
             end in
-            make_result env (T.List tel) ty2
+            make_result env (fst e1) (T.List tel) ty2
           (* array or empty array or Tany *)
           | (r, (Tarraykind (AKany | AKempty) | Tany)) ->
             let env, tel = List.map_env env el begin fun env e ->
               let env, te, _ = assign (fst e) env e (r, Typing_utils.tany env) in
               env, te
             end in
-            make_result env (T.List tel) ty2
+            make_result env (fst e1) (T.List tel) ty2
           | (r, (Tdynamic)) ->
             let env, tel = List.map_env env el begin fun env e ->
               let env, te, _ = assign (fst e) env e (r, Tdynamic) in
               env, te
             end in
-            make_result env (T.List tel) ty2
+            make_result env (fst e1) (T.List tel) ty2
           (* Pair<t1,t2> *)
           | ((r, Tclass ((_, coll), _, [ty1; ty2])) as folded_ety2)
             when coll = SN.Collections.cPair ->
@@ -3156,10 +3155,10 @@ and assign_ p ur env e1 ty2 =
             | [x1; x2] ->
                 let env, te1, _ = assign p env x1 ty1 in
                 let env, te2, _ = assign p env x2 ty2 in
-                make_result env (T.List [te1; te2]) folded_ety2
+                make_result env (fst e1) (T.List [te1; te2]) folded_ety2
             | _ ->
                 Errors.pair_arity p;
-                make_result env T.Any (r, Typing_utils.terr env))
+                make_result env (fst e1) T.Any (r, Typing_utils.terr env))
           (* tuple-like array *)
           | (r, Tarraykind (AKtuple fields)) ->
             let p1 = fst e1 in
@@ -3170,7 +3169,7 @@ and assign_ p ur env e1 ty2 =
             if size1 <> size2
             then begin
               Errors.tuple_arity p2 size2 p1 size1;
-              make_result env T.Any (r, Typing_utils.terr env)
+              make_result env (fst e1) T.Any (r, Typing_utils.terr env)
             end
             else
               let env, reversed_tel =
@@ -3178,20 +3177,23 @@ and assign_ p ur env e1 ty2 =
                 let env, te, _ = assign p env lvalue ty2 in
                 env, te::tel
               end ~init:(env,[]) in
-              make_result env (T.List (List.rev reversed_tel)) ty2
+              make_result env (fst e1) (T.List (List.rev reversed_tel)) ty2
         (* Other, including tuples. Create a tuple type for the left hand
          * side and attempt subtype against it. In particular this deals with
          * types such as (string,int) | (int,bool) *)
-        | _ ->
-          let env, tyl =
-            List.map_env env el (fun env _ -> Env.fresh_unresolved_type env) in
+        | (r, _) ->
+          let (env, tyvars), tyl = List.map_env (env, ISet.empty) el
+             ~f:(fun (env, tyvars) _ ->
+               let env, ty, tyvars =
+                 Env.fresh_unresolved_type_add_tyvars env (Reason.to_pos r) tyvars in
+               (env, tyvars), ty) in
           let env = Type.sub_type p ur env folded_ty2
               (Reason.Rwitness (fst e1), Ttuple tyl) in
           let env, reversed_tel =
             List.fold2_exn el tyl ~init:(env,[]) ~f:(fun (env,tel) lvalue ty2 ->
             let env, te, _ = assign p env lvalue ty2 in
             env, te::tel) in
-          make_result env (T.List (List.rev reversed_tel)) ty2
+          make_result ~tyvars env (fst e1) (T.List (List.rev reversed_tel)) ty2
         end in
     begin match resl with
       | [res] -> res
@@ -3295,7 +3297,7 @@ and assign_ p ur env e1 ty2 =
     (* references can be "lvalues" in foreach bindings *)
     Errors.binding_ref_in_array pref;
     let env, texpr, ty = assign p env e1' ty2 in
-    make_result env (T.Unop (Ast.Uref, texpr)) ty
+    make_result env (fst e1) (T.Unop (Ast.Uref, texpr)) ty
   | _ ->
       assign_simple p ur env e1 ty2
 

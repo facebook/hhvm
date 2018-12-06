@@ -104,6 +104,16 @@ sk {{ ocaml Shape_key }} :: 'SF' ::= {{ com shape keys }}
 
 {{ com \subhead{Syntax of types} }}
 
+{{ com
+
+Implicit below is a well-formedness conditions for shapes stating that
+all shape field names must be disjoint.  In particular, the unset
+shape field names, which are listed on the right of $[[\]]$ in the
+open shape syntax, must not occur as shape field names of the shape
+field types on the left of $[[\]]$.
+
+}}
+
 t, u {{ ocaml ty }} :: 'ty_' ::=                           {{ com syntax of types }}
   | noreturn :: :: noreturn                 {{ com bottom type }}
   | mixed  ::   :: mixed                    {{ com top type }}
@@ -125,8 +135,8 @@ t, u {{ ocaml ty }} :: 'ty_' ::=                           {{ com syntax of type
   | t1 & t2 :: :: intersection              {{ com intersection type }}
   | ( t )  :: S :: paren {{ coq [[t]] }}    {{ com parentheses }} {{ ocaml [[t]] }}
   | ( t1 , .... , tn ) :: :: tuple          {{ com tuple }}
-  | shape ( sft1 , ... , sftn ) :: :: shape  {{ com closed shape }}
-  | shape ( sft1 , ... , sftn , vardots )   :: :: openshape  {{ com open shape }}
+  | shape ( sft1 , .. , sftn ) :: :: shape  {{ com closed shape (all field names are assumed to be disjoint) }}
+  | shape ( sft1 , .. , sftn , vardots \ sfn1 , .. , sfnm )   :: :: openshape  {{ com open shape (all field names are ssumed to be disjoint) }}
   | function ( t1 , .. , tn ) : t           :: :: function {{ com function type }}
   | function ( t1 , .. , tn , t0 vardots ) : t :: :: variadicfunction {{ com variadic function type }}
   | array < > :: :: emptyarray              {{ com empty array }}
@@ -408,8 +418,9 @@ terminals :: terminals_ ::=
   | ~>                         ::   :: leadsto        {{ tex \leadsto }}
   | ~                          ::   :: tilde          {{ tex \sim }}
   | truthy                     ::   :: truthy         {{ tex \Downarrow }}
-  | vardots                      ::   :: variadicrest   {{ tex \underline{\mathtt{...} } }}
+  | vardots                    ::   :: variadicrest   {{ tex \underline{\mathtt{...} } }}
   | __construct                ::   :: construct      {{ tex \mathtt{\_\_construct}  }}
+  | \                          ::   :: setminus       {{ tex \setminus }}
 
 formula :: 'formula_' ::=
   | judgement                       ::   :: judgement
@@ -876,28 +887,33 @@ G |- shape ( sft1 , .. , sftm , sfn => noreturn , sft1' , .. , sftn') <: noretur
 {{ com Closed shapes can be opened }}
 
 -------------------------------------------------- :: shape_open
-G |- shape ( sft1 , .. , sftn ) <: shape ( sft1 , .. , sftn , vardots )
+G |- shape ( sft1 , .. , sftn ) <: shape ( sft1 , .. , sftn , vardots \ )
 
 {{ com Depth subtyping on open shapes: types of fields behave covariantly }}
 
 G |- sft1 <: sft1' .. G |- sftn <: sftn'
 -------------------------------------------------- :: open_shape_co
-G |- shape ( sft1 , .. , sftn , vardots ) <: shape ( sft1' , .. , sftn' , vardots )
+G |- shape ( sft1 , .. , sftn , vardots \ sfn1 , .. , sfnm ) <: shape ( sft1' , .. , sftn' , vardots \ sfn1 , .. , sfnm )
 
 {{ com Width subtyping on open shapes: fields can be forgotten }}
 
 -------------------------------------------------- :: open_shape_narrow
-G |- shape ( sft1 , .. , sftm , sft1' , .. , sftn', vardots ) <: shape ( sft1 , .. , sftm , vardots )
+G |- shape ( sft1 , .. , sfti , sft1' , .. , sftj', vardots \ sfn1 , .. , sfnm ) <: shape ( sft1 , .. , sfti , vardots \ sfn1 , .. , sfnm )
 
 {{ com Width subtyping on open shapes: optional fields of type $[[mixed]]$ can be introduced }}
 
 -------------------------------------------------- :: open_shape_widen
-G |- shape ( sft1 , .. , sftm , vardots ) <: shape (sft1 , .. , sftm , ?sfn1' => mixed , .. , ?sfnn' => mixed , vardots )
+G |- shape ( sft1 , .. , sfti , vardots \ sfn1 , .. , sfnm ) <: shape (sft1 , .. , sfti , ?sfn1' => mixed , .. , ?sfnj' => mixed , vardots \ sfn1 , .. , sfnm )
+
+{{ com Width subtyping on open shapes: unset fields can be set again }}
+
+-------------------------------------------------- :: open_shape_set_unset
+G |- shape ( sft1 , .. , sftn , vardots \ sfn1 , .. , sfni , sfn , sfn1' , .. , sfnj' ) <: shape ( sft1 , .. , sftn , vardots \ sfn1 , .. , sfni , sfn1' , .. , sfnj' )
 
 {{ com An open shape collapses if any of its required field types is $[[noreturn]]$ }}
 
 -------------------------------------------------- :: open_shape_empty
-G |- shape ( sft1 , .. , sftm , sfn => noreturn , sft1' , .. , sftn' , vardots ) <: noreturn
+G |- shape ( sft1 , .. , sftm , sfn => noreturn , sft1' , .. , sftn' , vardots \ ) <: noreturn
 
 {{ com \subsection{Class and interface inheritance} }}
 
@@ -1468,15 +1484,15 @@ G ; K |- < e1 : ? `KeyedContainer` < t , u > , e2 : ? t , e3 : u >
 -------------------------------------------------- :: idx_default
 G ; K |- `idx` ( e1 , e2 , e3 ) : u
 
-G ; K |- e : shape ( sfn => t , vardots )
+G ; K |- e : shape ( sfn => t , vardots \ sfn1 , .. , sfnm )
 -------------------------------------------------- :: shapes_idx_required
 G ; K |- `Shapes` :: `idx` ( e , sfn ) : t
 
-G ; K |- e : shape ( ?sfn => t , vardots )
+G ; K |- e : shape ( ?sfn => t , vardots \ sfn1 , .. , sfnm )
 -------------------------------------------------- :: shapes_idx_optional
 G ; K |- `Shapes` :: `idx` ( e , sfn ) : ? t
 
-G ; K |- < e1 : shape ( ?sfn => t , vardots) , e2 : t >
+G ; K |- < e1 : shape ( ?sfn => t , vardots \ sfn1 , .., sfnm ) , e2 : t >
 -------------------------------------------------- :: shapes_idx_default
 G ; K |- `Shapes` :: `idx` ( e1 , sfn , e2 ) : t
 
@@ -1562,7 +1578,7 @@ G ; K |- e : t1 | dynamic
 G ; K |- `Indexish` < t1 , t2 > [ e ] : t2
 
 ------------------------------------------------- :: shape
-G ; K |- shape ( sfn => t , vardots ) [ sfn ] : t
+G ; K |- shape ( sfn => t , vardots \ sfn1 , .. , sfnm ) [ sfn ] : t
 
 ------------------------------------------------------- :: tuple
 G ; K |- (t1 , .. , ti , t , t1' , .. , tj' ) [ i ] : t
@@ -1787,7 +1803,10 @@ G ; K |- `Map` < t1 , t2 > [ e1 ] := t2 => `Map` < t1 , t2 >
 G ; K |- shape ( sft1 , .. , sftn , ?sfn => t , sft1' , .. , sftm' ) [sfn] := t' => shape ( sft1 , .. , sftn , sfn => t' , sft1' , .. , sftm' )
 
 -------------------------------------------------- :: open_set
-G ; K |- shape ( sft1 , .. , sftn , ?sfn => t , sft1' , .. , sftm' , vardots ) [sfn] := t' => shape ( sft1 , .. , sftn , sfn => t' , sft1' , .. , sftm' , vardots )
+G ; K |- shape ( sft1 , .. , sfti , ?sfn => t , sft1' , .. , sftj' , vardots \ sfn1 , .. , sfnm ) [ sfn ] := t' => shape ( sft1 , .. , sfti , sfn => t' , sft1' , .. , sftj' , vardots \ sfn1 , .. , sfnm )
+
+-------------------------------------------------- :: open_set_unset
+G ; K |- shape ( sft1 , .. , sftn , vardots \ sfn1 , .. , sfni , sfn , sfn1' , .. , sfnj' ) [ sfn ] := t' => shape ( sft1 , .. , sftn , sfn => t' , vardots \ sfn1 , .. , sfni , sfn1' , .. , sfnj' )
 
 {{ com
 
@@ -1873,7 +1892,7 @@ is_hack_collection ( array < t1 , t2 > ) = False
 is_hack_collection ( shape ( sft1 , .. , sftn ) ) = False
 
 -------------------------------------------------- :: open_shape
-is_hack_collection ( shape ( sft1 , .. , sftn , vardots ) ) = False
+is_hack_collection ( shape ( sft1 , .. , sftn , vardots \ sfn1 , .. , sfnm ) ) = False
 
 -------------------------------------------------- :: tuple
 is_hack_collection ( t1 , .. , tn ) = False

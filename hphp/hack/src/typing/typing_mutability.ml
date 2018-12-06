@@ -41,7 +41,8 @@ let is_fun_call_returning_mutable (env : Env.env) (e : T.expr): bool =
   | T.Call (_, (_, T.Fun_id id), _, _, _) ->
     fun_returns_mutable id
   | T.Call (_, ((_, (_, Tfun fty)), T.Obj_get _), _, _, _)
-  | T.Call (_, ((_, (_, Tfun fty)), T.Class_const _), _, _, _) ->
+  | T.Call (_, ((_, (_, Tfun fty)), T.Class_const _), _, _, _)
+  | T.Call (_, ((_, (_, Tfun fty)), T.Lvar _), _, _, _) ->
     fty_returns_mutable fty
   | _ -> false
 end

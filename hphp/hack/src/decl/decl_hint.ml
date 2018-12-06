@@ -15,7 +15,6 @@ open Nast
 open Typing_defs
 
 (* Unpacking a hint for typing *)
-
 let rec hint env (p, h) =
   let h = hint_ p env h in
   Typing_reason.Rhint p, h
@@ -59,23 +58,29 @@ and hint_ p env = function
   | Hoption h ->
     let h = hint env h in
     Toption h
-  | Hfun (reactivity, is_coroutine, hl, kl, vh, h) ->
-    let make_param ((p, _ as x), k) =
+  | Hfun (reactivity, is_coroutine, hl, kl, muts, vh, h, mut_ret) ->
+    let make_param (p, _ as x) k mut =
+      let fp_mutability =
+        match mut with
+        | Some Nast.PMutable -> Some Param_borrowed_mutable
+        | Some Nast.POwnedMutable -> Some Param_owned_mutable
+        | Some Nast.PMaybeMutable -> Some Param_maybe_mutable
+        | _ -> None in
       { fp_pos = p;
         fp_name = None;
         fp_type = hint env x;
         fp_kind = get_param_mode ~is_ref:false k;
         fp_accept_disposable = false;
-        fp_mutability = None;
+        fp_mutability;
         fp_rx_annotation = None;
       }
     in
-    let paraml = List.map (List.zip_exn hl kl) make_param in
+    let paraml = List.map3_exn hl kl muts ~f:make_param in
     let ret = hint env h in
     let arity_min = List.length paraml in
     let arity = match vh with
-      | Hvariadic Some(t) -> Fvariadic (arity_min, make_param (t, None))
-      | Hvariadic None -> Fvariadic (arity_min, make_param ((p, Hany), None))
+      | Hvariadic Some(t) -> Fvariadic (arity_min, make_param t None None)
+      | Hvariadic None -> Fvariadic (arity_min, make_param (p, Hany) None None)
       | Hnon_variadic -> Fstandard (arity_min, arity_min)
     in
     let reactivity = match reactivity with
@@ -97,7 +102,7 @@ and hint_ p env = function
       ft_reactive = reactivity;
       ft_return_disposable = false;
       ft_mutability = None;
-      ft_returns_mutable = false;
+      ft_returns_mutable = mut_ret;
       ft_decl_errors = None;
       ft_returns_void_to_rx = false;
     }

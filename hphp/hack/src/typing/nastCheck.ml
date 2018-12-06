@@ -476,7 +476,7 @@ and func env f named_body =
   let env = { env with
     tenv = Env.set_mode tenv f.f_mode;
     t_is_finally = false;
-    is_reactive = fun_is_reactive f.f_user_attributes;
+    is_reactive = env.is_reactive || fun_is_reactive f.f_user_attributes;
   } in
   maybe hint env f.f_ret;
   (* Functions can't be mutable, only methods can *)
@@ -547,7 +547,7 @@ and hint_ env p = function
   | Htuple hl -> List.iter hl (hint env)
   | Hoption h ->
       hint env h; ()
-  | Hfun (_, is_coroutine, hl, _, variadic_hint, h) ->
+  | Hfun (_, is_coroutine, hl, _, _, variadic_hint, h, _) ->
       check_coroutines_enabled is_coroutine env p;
       List.iter hl (hint env);
       hint env h;
@@ -929,7 +929,7 @@ and check_no_class_tparams class_tparams (pos, ty)  =
         check_tparams ty
     | Htuple tyl -> List.iter tyl check_tparams
     | Hoption ty_ -> check_tparams ty_
-    | Hfun (_, _, tyl, _, _, ty_) ->
+    | Hfun (_, _, tyl, _, _, _, ty_, _) ->
         List.iter tyl check_tparams;
         check_tparams ty_
     | Happly (_, tyl) -> List.iter tyl check_tparams

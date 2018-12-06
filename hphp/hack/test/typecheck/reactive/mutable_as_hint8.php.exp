@@ -1,0 +1,8 @@
+File "mutable_as_hint8.php", line 16, characters 5-47:
+Invalid argument (Typing[4263])
+File "mutable_as_hint8.php", line 10, characters 38-38:
+Incompatible mutabilities:
+File "mutable_as_hint8.php", line 10, characters 38-38:
+This parameter is maybe-mutable
+File "mutable_as_hint8.php", line 16, characters 22-23:
+This parameter is mutable

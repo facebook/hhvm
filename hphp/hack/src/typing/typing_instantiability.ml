@@ -41,8 +41,10 @@ class type ['a] hint_visitor_type = object
                      bool ->
                      Nast.hint list ->
                      Ast.param_kind option list ->
+                     Nast.param_mutability option list ->
                      Nast.variadic_hint ->
                      Nast.hint ->
+                     bool ->
                      'a
   method on_apply  : 'a -> Nast.sid -> Nast.hint list -> 'a
   method on_shape  : 'a -> nast_shape_info -> 'a
@@ -71,7 +73,7 @@ class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
     | Hvarray h             -> this#on_array  acc (Some h) None
     | Hprim p               -> this#on_prim   acc p
     | Hoption h             -> this#on_option acc h
-    | Hfun (is_r, is_c, hl, kl, b, h)       -> this#on_fun acc is_r is_c hl kl b h
+    | Hfun (is_r, is_c, hl, kl, mut, b, h, mut_ret)  -> this#on_fun acc is_r is_c hl kl mut b h mut_ret
     | Happly (i, hl)        -> this#on_apply  acc i hl
     | Hshape hm             -> this#on_shape  acc hm
     | Haccess (h, il)       -> this#on_access acc h il
@@ -103,7 +105,7 @@ class virtual ['a] hint_visitor: ['a] hint_visitor_type = object(this)
 
   method on_param_kind acc _ = acc
 
-  method on_fun acc _ _ hl kl _ h =
+  method on_fun acc _ _ hl kl _ _ h _ =
     let acc = List.fold_left ~f:this#on_hint ~init:acc hl in
     let acc = List.fold_left ~f:(fun acc k ->
       match k with

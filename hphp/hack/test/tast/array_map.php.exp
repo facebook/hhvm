@@ -9,7 +9,8 @@
          param_hint =
          (Some ([4:3-24],
                 (Hfun (FNonreactive, false, [([4:13-16], (Hprim Tint))],
-                   [None], Hnon_variadic, ([4:19-23], (Hprim Tbool))))));
+                   [None], [None], Hnon_variadic, ([4:19-23], (Hprim Tbool)),
+                   false))));
          param_is_reference = false; param_is_variadic = false;
          param_pos = [4:25-27]; param_name = "$f"; param_expr = None;
          param_callconv = None; param_user_attributes = [] };
@@ -19,7 +20,8 @@
           (Some ([5:3-32],
                  (Hfun (FNonreactive, false,
                     [([5:13-16], (Hprim Tint)); ([5:18-24], (Hprim Tstring))],
-                    [None; None], Hnon_variadic, ([5:27-31], (Hprim Tbool))))));
+                    [None; None], [None; None], Hnon_variadic,
+                    ([5:27-31], (Hprim Tbool)), false))));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [5:33-35]; param_name = "$g"; param_expr = None;
           param_callconv = None; param_user_attributes = [] };
@@ -30,11 +32,11 @@
                  (Hfun (FNonreactive, false,
                     [([6:13-16], (Hprim Tint)); ([6:18-24], (Hprim Tstring));
                       ([6:26-29], (Hprim Tnum))],
-                    [None; None; None], Hnon_variadic,
+                    [None; None; None], [None; None; None], Hnon_variadic,
                     ([6:32-46],
                      (Happly (([6:32-41], "\\Container"),
-                        [([6:42-45], (Hprim Tint))])))
-                    ))));
+                        [([6:42-45], (Hprim Tint))]))),
+                    false))));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [6:48-50]; param_name = "$h"; param_expr = None;
           param_callconv = None; param_user_attributes = [] };
@@ -43,7 +45,8 @@
           param_hint =
           (Some ([7:3-24],
                  (Hfun (FNonreactive, false, [([7:13-16], (Hprim Tnum))],
-                    [None], Hnon_variadic, ([7:19-23], (Hprim Tbool))))));
+                    [None], [None], Hnon_variadic,
+                    ([7:19-23], (Hprim Tbool)), false))));
           param_is_reference = false; param_is_variadic = false;
           param_pos = [7:25-27]; param_name = "$i"; param_expr = None;
           param_callconv = None; param_user_attributes = [] };

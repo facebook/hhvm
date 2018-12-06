@@ -615,4 +615,7 @@ module type S = sig
   val invalid_mutability_flavor: Pos.t -> string -> string -> unit
   val inconsistent_mutability_for_conditional: Pos.t -> Pos.t -> unit
   val redundant_rx_condition: Pos.t -> unit
+  val misplaced_mutability_hint: Pos.t -> unit
+  val mutability_hint_in_non_rx_function: Pos.t -> unit
+  val invalid_mutability_in_return_type_hint: Pos.t -> unit
 end

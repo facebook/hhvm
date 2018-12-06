@@ -29,13 +29,16 @@ and is_coroutine = bool
 and func_reactive = FReactive | FLocal | FShallow | FNonreactive
 
 and targ = hint * Ast.reified
+and param_mutability = PMutable | POwnedMutable | PMaybeMutable
 and hint = pos * hint_
+and mutable_return = bool
 and variadic_hint =
   | Hvariadic of hint option
   | Hnon_variadic
 and hint_ =
   | Hoption of hint
-  | Hfun of func_reactive * is_coroutine * hint list * Ast.param_kind option list * variadic_hint * hint
+  | Hfun of func_reactive * is_coroutine * hint list * Ast.param_kind option list *
+    param_mutability option list * variadic_hint * hint * mutable_return
   | Htuple of hint list
   | Happly of sid * hint list
   | Hshape of nast_shape_info

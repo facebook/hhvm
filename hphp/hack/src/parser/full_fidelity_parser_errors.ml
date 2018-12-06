@@ -1549,14 +1549,35 @@ let decoration_errors node errors =
 let parameter_rx_errors parents errors node =
   let rec get_containing_function_attrs l =
     match l with
-    | [] -> None
+    | [] -> None, []
     | ({ syntax = AnonymousFunction { anonymous_attribute_spec = s; _ }; _ } |
        { syntax = Php7AnonymousFunction { php7_anonymous_attribute_spec = s; _ }; _ } |
-       { syntax = LambdaExpression { lambda_attribute_spec = s; _ }; _ } |
-       { syntax = FunctionDeclaration { function_attribute_spec = s; _ }; _ } |
+       { syntax = LambdaExpression { lambda_attribute_spec = s; _ }; _ })
+      :: tl -> Some s, tl
+    | ({ syntax = FunctionDeclaration { function_attribute_spec = s; _ }; _ } |
        { syntax = MethodishDeclaration { methodish_attribute = s; _ }; _ })
-      :: _ -> Some s
+      :: _ -> Some s, []
     | _ :: tl -> get_containing_function_attrs tl
+  in
+  let rec parent_func_is_reactive attrs parents =
+    (* function/method without attributes *)
+    let is_rx = Option.bind attrs (fun attrs ->
+      attribute_first_reactivity_annotation attrs
+      |> Option.map ~f:(fun a ->
+        match attribute_matches_criteria ((<>) SN.UserAttributes.uaNonRx) a with
+        | Some _ -> true
+        | None -> false
+      )
+    ) in
+    match is_rx, parents with
+    (* method/function/lambda has annotation - use it*)
+    | Some x, _ -> x
+    (* method/function does not have annotation - assume non-rx *)
+    | None, [] -> false
+    (* lambda does not have annotation - try use one from enclosing function *)
+    | None, tl ->
+      let parent_attrs, parent_tl = get_containing_function_attrs tl in
+      parent_func_is_reactive parent_attrs parent_tl
   in
   match syntax node with
   | ParameterDeclaration { parameter_attribute = spec; _ } ->
@@ -1589,10 +1610,8 @@ let parameter_rx_errors parents errors node =
       let errors =
         if has_owned_mutable || has_mutable
         then begin
-          let attrs = get_containing_function_attrs parents in
-          let parent_func_is_rx =
-            Option.value_map attrs ~default:false ~f:attribute_has_reactivity_annotation
-          in
+          let attrs, rest = get_containing_function_attrs parents in
+          let parent_func_is_rx = parent_func_is_reactive attrs rest in
           let parent_func_is_memoize =
             Option.value_map attrs ~default:false ~f:(fun spec ->
               attribute_specification_contains spec SN.UserAttributes.uaMemoize ||

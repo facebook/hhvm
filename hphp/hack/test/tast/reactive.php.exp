@@ -4,7 +4,7 @@
       f_ret =
       (Some ([3:18-45],
              (Hfun (FReactive, false, [([3:32-35], (Hprim Tint))], [None],
-                Hnon_variadic, ([3:39-43], (Hprim Tvoid))))));
+                [None], Hnon_variadic, ([3:39-43], (Hprim Tvoid)), false))));
       f_name = ([3:10-13], "\\foo"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =

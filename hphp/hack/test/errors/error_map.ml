@@ -148,6 +148,9 @@ TraitInterfaceConstructorPromo = 2093
 NonstaticPropertyWithLSB = 2094
 ReferenceInAnonUseClause = 2095
 RxMoveInvalidLocation = 2096
+MisplacedMutabilityHint = 2097
+MutabilityHintInNonRx = 2098
+InvalidReturnMutableHint = 2099
 
 NastCheck Errors:
 AbstractBody = 3001

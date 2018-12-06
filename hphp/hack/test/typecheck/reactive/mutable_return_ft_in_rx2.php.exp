@@ -1,0 +1,2 @@
+File "mutable_return_ft_in_rx2.php", line 10, characters 28-37:
+OwnedMutable is the only mutability related hint allowed in return type annotation for reactive function types. (Naming[2099])

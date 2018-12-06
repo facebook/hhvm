@@ -1,0 +1,2 @@
+File "mutable_as_hint1.php", line 7, characters 20-20:
+Setting mutability via type hints is only allowed for parameters of reactive function types. For other cases consider using attributes. (Naming[2097])

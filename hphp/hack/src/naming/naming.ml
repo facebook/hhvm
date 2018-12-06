@@ -758,7 +758,10 @@ module Make (GetLocals : GetLocals) = struct
       ?(allow_wildcard=false)
       ?(in_where_clause=false)
       ?(tp_depth=0)
-      env (p, h) =
+      env hh =
+    let mut, (p, h) = unwrap_mutability hh in
+    if Option.is_some mut
+    then Errors.misplaced_mutability_hint p;
     p, hint_
       ~forbid_this
       ~allow_retonly
@@ -790,13 +793,35 @@ module Make (GetLocals : GetLocals) = struct
       nsi_field_map
     }
 
+  and unwrap_mutability p =
+    match p with
+    | _, Happly ((_, "Mutable"), [t]) -> Some N.PMutable, t
+    | _, Happly ((_, "MaybeMutable"), [t]) -> Some N.PMaybeMutable, t
+    | _, Happly ((_, "OwnedMutable"), [t]) -> Some N.POwnedMutable, t
+    | t -> None, t
+
   and hfun env reactivity is_coroutine hl kl variadic_hint h =
     let variadic_hint = match variadic_hint with
       | Hvariadic Some (h) -> N.Hvariadic (Some (hint env h))
       | Hvariadic None -> N.Hvariadic (None)
       | Hnon_variadic -> N.Hnon_variadic in
-    N.Hfun (reactivity, is_coroutine, List.map hl (hint env), kl, variadic_hint,
-            hint ~allow_retonly:true env h)
+    let muts, hl =
+      List.map hl ~f:(fun h ->
+        let mut, h1 = unwrap_mutability h in
+        if Option.is_some mut && reactivity = N.FNonreactive
+        then Errors.mutability_hint_in_non_rx_function (fst h);
+        mut, hint env h1)
+      |> List.unzip in
+    let ret_mut, rh = unwrap_mutability h in
+    let ret_mut =
+      match ret_mut with
+      | None -> false
+      | Some N.POwnedMutable -> true
+      | Some _ ->
+        Errors.invalid_mutability_in_return_type_hint (fst h);
+        true in
+    N.Hfun (reactivity, is_coroutine, hl, kl,
+      muts, variadic_hint, hint ~allow_retonly:true env rh, ret_mut)
 
   and hint_ ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard
             ~in_where_clause ?(tp_depth=0)

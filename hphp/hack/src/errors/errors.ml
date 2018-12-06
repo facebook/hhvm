@@ -1193,6 +1193,20 @@ let reference_in_strict_mode pos =
   add (Naming.err_code Naming.ReferenceInStrictMode) pos
     "Don't use references!"
 
+let misplaced_mutability_hint pos =
+  add (Naming.err_code Naming.MisplacedMutabilityHint) pos
+    "Setting mutability via type hints is only allowed for parameters of reactive function types. \
+    For other cases consider using attributes."
+
+let mutability_hint_in_non_rx_function pos =
+  add (Naming.err_code Naming.MutabilityHintInNonRx) pos
+    "Parameter with mutability hint cannot appear in non-reactive function type."
+
+let invalid_mutability_in_return_type_hint pos =
+  add (Naming.err_code Naming.InvalidReturnMutableHint) pos
+    "OwnedMutable is the only mutability related hint allowed in return type annotation \
+    for reactive function types."
+
 let anon_use_capture_by_ref pos =
   add (Naming.err_code Naming.ReferenceInAnonUseClause) pos (
     "Capturing variables by PHP reference is no longer supported on anonymous "^

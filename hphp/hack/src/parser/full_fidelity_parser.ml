@@ -180,6 +180,7 @@ let get_language_and_mode text =
           | "php" -> php
           | _ -> php (* Default choice; should become hh at some point *)
         in
+        if is_hhi then language, Some FileInfo.Mdecl else
         let skip_length = skip_length + width name in
         let mode =
           let s = SourceText.sub text skip_length (trailing_width name) in

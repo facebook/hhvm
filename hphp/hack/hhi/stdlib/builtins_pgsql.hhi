@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 
 const int PGSQL_ASSOC = 0;
 const int PGSQL_NUM = 0;

@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 
 /**
  * The base interface implemented for a collection type so that base information

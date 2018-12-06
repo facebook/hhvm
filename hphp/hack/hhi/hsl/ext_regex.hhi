@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 /**
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.

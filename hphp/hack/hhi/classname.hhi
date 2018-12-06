@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 
 /**
  * The constant ::class works for types besides classes, including type defs.

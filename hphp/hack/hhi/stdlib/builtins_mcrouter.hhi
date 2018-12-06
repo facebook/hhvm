@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 
 <<__PHPStdLib>>
 class MCRouterException extends Exception {

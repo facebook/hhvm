@@ -1,4 +1,4 @@
-<?hh // decl   /* -*- php -*- */
+<?hh   /* -*- php -*- */
 /**
  * Copyright (c) 2018, Facebook, Inc.
  * All rights reserved.

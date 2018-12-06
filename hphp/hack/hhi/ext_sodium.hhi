@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 
 final class SodiumException extends Exception { }
 

@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 
 // Based on runtime/ext/icu/ext_icu_transliterator.php
 

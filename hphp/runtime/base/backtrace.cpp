@@ -596,7 +596,7 @@ int64_t createBacktraceHash(bool consider_metadata) {
     auto funchash = curFunc->fullName()->hash();
     hash ^= funchash + 0x9e3779b9 + (hash << 6) + (hash >> 2);
 
-    if (consider_metadata) {
+    if (consider_metadata && !fp->localsDecRefd()) {
       TypedValue* meta_tv = nullptr;
       if (
         UNLIKELY(fp->func()->attrs() & AttrMayUseVV) &&

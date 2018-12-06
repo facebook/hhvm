@@ -274,6 +274,8 @@ AutoloadHandler::loadFromMapImpl(const String& clsName,
       throw;
     } catch (ResourceExceededException&) {
       throw;
+    } catch (PhpNotSupportedException&) {
+      throw;
     } catch (ExtendedException& ee) {
       auto fileAndLine = ee.getFileAndLine();
       err = (fileAndLine.first.empty())

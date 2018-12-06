@@ -1,0 +1,2 @@
+
+Fatal error: PHP support is not enabled: %s/test/slow/no_php/autoload_foo.inc in %s/test/slow/no_php/autoload.php on line 12

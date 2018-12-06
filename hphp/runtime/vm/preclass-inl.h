@@ -54,13 +54,6 @@ inline Func* PreClass::lookupMethod(const StringData* methName) const {
   return f;
 }
 
-inline const PreClass::Prop*
-PreClass::lookupProp(const StringData* propName) const {
-  Slot s = m_properties.findIndex(propName);
-  assertx(s != kInvalidSlot);
-  return &m_properties[s];
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // PreClass::TraitPrecRule.
 

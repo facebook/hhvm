@@ -140,23 +140,22 @@ struct Class : AtomicCountable {
    * Instance property information.
    */
   struct Prop {
-    LowStringPtr name;
-    LowStringPtr mangledName;
-
-    /* Most derived class that declares this property. */
-    LowPtr<Class> cls;
-
-    Attr attrs;
-    LowStringPtr userType;
-    TypeConstraint typeConstraint;
-
+    const PreClass::Prop* preProp;
     /*
      * When built in RepoAuthoritative mode, this is a control-flow insensitive,
      * always-true type assertion for this property.  (It may be Gen if there
      * was nothing interesting known.)
      */
     RepoAuthType repoAuthType;
-    LowStringPtr docComment;
+    TypeConstraint typeConstraint;
+
+    LowStringPtr name;
+    LowStringPtr mangledName;
+
+    /* Most derived class that declared this property. */
+    LowPtr<Class> cls;
+
+    Attr attrs;
     Slot serializationIdx;
   };
 
@@ -164,20 +163,20 @@ struct Class : AtomicCountable {
    * Static property information.
    */
   struct SProp {
-    LowStringPtr name;
-    Attr attrs;
-    LowStringPtr userType;
-    LowStringPtr docComment;
+    const PreClass::Prop* preProp;
+    RepoAuthType repoAuthType;
     TypeConstraint typeConstraint;
+
+    LowStringPtr name;
 
     /* Most derived class that declared this property. */
     LowPtr<Class> cls;
-    int serializationIdx;
+
+    Attr attrs;
+    Slot serializationIdx;
 
     /* Used if (cls == this). */
     TypedValue val;
-
-    RepoAuthType repoAuthType;
   };
 
   /*

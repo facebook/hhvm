@@ -421,7 +421,6 @@ public:
    */
   const Const* lookupConstant(const StringData* cnsName) const;
   Func* lookupMethod(const StringData* methName) const;
-  const Prop* lookupProp(const StringData* propName) const;
 
   /*
    * Static offset accessors, used by the JIT.

@@ -271,10 +271,11 @@ static void set_instance_prop_info(Array& ret,
   ret.set(s_defaultValue, default_val);
   set_attrs(ret, get_modifiers(prop->attrs, false, true) & ~0x66);
   ret.set(s_class, make_tv<KindOfPersistentString>(prop->cls->name()));
-  set_doc_comment(ret, prop->docComment, prop->cls->isBuiltin());
+  set_doc_comment(ret, prop->preProp->docComment(), prop->cls->isBuiltin());
 
-  if (prop->userType && prop->userType->size()) {
-    ret.set(s_type, make_tv<KindOfPersistentString>(prop->userType));
+  auto const user_type = prop->preProp->userType();
+  if (user_type && user_type->size()) {
+    ret.set(s_type, make_tv<KindOfPersistentString>(user_type));
   } else {
     ret.set(s_type, false_varNR.tv());
   }
@@ -297,9 +298,10 @@ static void set_static_prop_info(Array &ret, const Class::SProp* prop) {
   ret.set(s_defaultValue, prop->val);
   set_attrs(ret, get_modifiers(prop->attrs, false, true) & ~0x66);
   ret.set(s_class, make_tv<KindOfPersistentString>(prop->cls->name()));
-  set_doc_comment(ret, prop->docComment, prop->cls->isBuiltin());
-  if (prop->userType && prop->userType->size()) {
-    ret.set(s_type, make_tv<KindOfPersistentString>(prop->userType));
+  set_doc_comment(ret, prop->preProp->docComment(), prop->cls->isBuiltin());
+  auto const user_type = prop->preProp->userType();
+  if (user_type && user_type->size()) {
+    ret.set(s_type, make_tv<KindOfPersistentString>(user_type));
   } else {
     ret.set(s_type, false_varNR.tv());
   }
@@ -1876,10 +1878,10 @@ static TypedValue HHVM_METHOD(ReflectionProperty, getDocComment) {
   const StringData *comment = nullptr;
   switch (data->getType()) {
     case ReflectionPropHandle::Type::Instance:
-      comment = data->getProp()->docComment;
+      comment = data->getProp()->preProp->docComment();
       break;
     case ReflectionPropHandle::Type::Static:
-      comment = data->getSProp()->docComment;
+      comment = data->getSProp()->preProp->docComment();
       break;
     case ReflectionPropHandle::Type::Dynamic:
       break;
@@ -1899,10 +1901,10 @@ static String HHVM_METHOD(ReflectionProperty, getTypeText) {
   const StringData *type = nullptr;
   switch (data->getType()) {
     case ReflectionPropHandle::Type::Instance:
-      type = data->getProp()->userType;
+      type = data->getProp()->preProp->userType();
       break;
     case ReflectionPropHandle::Type::Static:
-      type = data->getSProp()->userType;
+      type = data->getSProp()->preProp->userType();
       break;
     case ReflectionPropHandle::Type::Dynamic:
       break;
@@ -1952,17 +1954,15 @@ static Array HHVM_METHOD(ReflectionProperty, getAttributesNamespaced) {
   auto attrs = Array::CreateDict();
   switch (data->getType()) {
     case ReflectionPropHandle::Type::Instance: {
-      auto const prop = data->getProp();
-      auto const preProp = prop->cls->preClass()->lookupProp(prop->name);
-      for (auto attr : preProp->userAttributes()) {
+      auto const prop = data->getProp()->preProp;
+      for (auto attr : prop->userAttributes()) {
         attrs.set(StrNR(attr.first), attr.second);
       }
       return attrs;
     }
     case ReflectionPropHandle::Type::Static: {
-      auto const prop = data->getSProp();
-      auto const preProp = prop->cls->preClass()->lookupProp(prop->name);
-      for (auto attr : preProp->userAttributes()) {
+      auto const prop = data->getSProp()->preProp;
+      for (auto attr : prop->userAttributes()) {
         attrs.set(StrNR(attr.first), attr.second);
       }
       return attrs;

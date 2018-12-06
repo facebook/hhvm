@@ -217,7 +217,6 @@ struct PreClassEmitter {
                    const TypedValue* val,
                    RepoAuthType,
                    UserAttributeMap);
-  const Prop& lookupProp(const StringData* propName) const;
   bool addConstant(const StringData* n, const StringData* typeConstraint,
                    const TypedValue* val, const StringData* phpCode,
                    const bool typeConst = false,

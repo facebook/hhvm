@@ -157,14 +157,6 @@ bool PreClassEmitter::addProperty(const StringData* n, Attr attrs,
   return true;
 }
 
-const PreClassEmitter::Prop&
-PreClassEmitter::lookupProp(const StringData* propName) const {
-  PropMap::Builder::const_iterator it = m_propMap.find(propName);
-  assertx(it != m_propMap.end());
-  Slot idx = it->second;
-  return m_propMap[idx];
-}
-
 bool PreClassEmitter::addAbstractConstant(const StringData* n,
                                           const StringData* typeConstraint,
                                           const bool typeconst) {

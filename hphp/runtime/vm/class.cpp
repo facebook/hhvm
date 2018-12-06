@@ -2438,11 +2438,10 @@ void Class::setProperties() {
       // weakened to public below, but otherwise, the parent's properties
       // will stay the same for this class.
       Prop prop;
+      prop.preProp             = parentProp.preProp;
       prop.cls                 = parentProp.cls;
       prop.mangledName         = parentProp.mangledName;
       prop.attrs               = parentProp.attrs | AttrNoBadRedeclare;
-      prop.docComment          = parentProp.docComment;
-      prop.userType            = parentProp.userType;
       prop.typeConstraint      = parentProp.typeConstraint;
       prop.name                = parentProp.name;
       prop.repoAuthType        = parentProp.repoAuthType;
@@ -2462,11 +2461,10 @@ void Class::setProperties() {
 
       // Alias parent's static property.
       SProp sProp;
+      sProp.preProp        = parentProp.preProp;
       sProp.name           = parentProp.name;
       sProp.attrs          = parentProp.attrs | AttrNoBadRedeclare;
-      sProp.userType       = parentProp.userType;
       sProp.typeConstraint = parentProp.typeConstraint;
-      sProp.docComment     = parentProp.docComment;
       sProp.cls            = parentProp.cls;
       sProp.repoAuthType   = parentProp.repoAuthType;
       tvWriteUninit(sProp.val);
@@ -2585,8 +2583,8 @@ void Class::setProperties() {
 
         lateInitCheck(prop);
 
+        prop.preProp = preProp;
         prop.cls = this;
-        prop.docComment = preProp->docComment();
 
         auto const& tc = preProp->typeConstraint();
         if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
@@ -2639,14 +2637,13 @@ void Class::setProperties() {
 
         lateInitCheck(prop);
 
+        prop.preProp = preProp;
         prop.cls = this;
-        prop.docComment = preProp->docComment();
         if ((prop.attrs & (AttrPublic|AttrProtected|AttrPrivate))
             == AttrProtected) {
           // Weaken protected property to public.
           prop.mangledName = preProp->mangledName();
           prop.attrs = Attr(prop.attrs ^ (AttrProtected|AttrPublic));
-          prop.userType = preProp->userType();
         }
 
         auto const& tc = preProp->typeConstraint();
@@ -2997,14 +2994,13 @@ void Class::checkPrePropVal(XProp& prop, const PreClass::Prop* preProp) {
 
 template<typename XProp>
 void Class::initProp(XProp& prop, const PreClass::Prop* preProp) {
+  prop.preProp             = preProp;
   prop.name                = preProp->name();
   prop.attrs               = Attr(preProp->attrs() & ~AttrTrait) |
                              AttrNoBadRedeclare;
   // This is the first class to declare this property
   prop.cls                 = this;
-  prop.userType            = preProp->userType();
   prop.typeConstraint      = preProp->typeConstraint();
-  prop.docComment          = preProp->docComment();
   prop.repoAuthType        = preProp->repoAuthType();
 
   // Check if this property's initial value needs to be type checked at

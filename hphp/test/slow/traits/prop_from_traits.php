@@ -25,6 +25,11 @@ class A {
 
 <<__EntryPoint>>
 function main_prop_from_traits() {
-$a = new A();
-$a->t();
+  $a = new A();
+  $a->t();
+
+  $cls = new ReflectionClass($a);
+  foreach ($cls->getProperties() as $prop) {
+    $prop->getAttributes();
+  }
 }

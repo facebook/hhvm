@@ -1,1 +1,2 @@
-No errors
+File "heredoc_token_inside_xhp.php", line 14, characters 12-17:
+XHP: mismatched tag: '' not the same as 'div' (Parsing[1002])

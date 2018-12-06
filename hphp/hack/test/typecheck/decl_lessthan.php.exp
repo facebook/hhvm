@@ -1,1 +1,2 @@
-No errors
+File "decl_lessthan.php", line 3, characters 12-18:
+Yield can only appear as a statement or on the right of an assignment (Parsing[1002])

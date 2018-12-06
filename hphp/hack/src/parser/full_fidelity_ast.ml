@@ -3424,8 +3424,7 @@ let parse_text
   (env : env)
   (source_text : SourceText.t)
 : (FileInfo.file_type * FileInfo.mode * PositionedSyntaxTree.t) =
-  let disable_decl = ParserOptions.disable_decl env.parser_options in
-  let lang, mode = Full_fidelity_parser.get_language_and_mode ~disable_decl source_text in
+  let lang, mode = Full_fidelity_parser.get_language_and_mode source_text in
   let mode = Option.value ~default:FileInfo.Mphp mode in
   let env =  { env with fi_mode = mode } in
   let env = { env with quick_mode = not env.codegen
@@ -3635,8 +3634,7 @@ let defensive_program
     let mode =
     try
       let source = Full_fidelity_source_text.make fn content in
-      let disable_decl = ParserOptions.disable_decl parser_options in
-      snd @@ Full_fidelity_parser.get_language_and_mode ~disable_decl source
+      snd @@ Full_fidelity_parser.get_language_and_mode source
     with _ -> None in
     let err = Exn.to_string e in
     let fn = Relative_path.suffix fn in

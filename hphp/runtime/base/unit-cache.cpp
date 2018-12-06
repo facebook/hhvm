@@ -730,6 +730,7 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::EnableHipHopSyntax ? '1' : '0')
     + (RuntimeOption::EnableReifiedGenerics ? '1' : '0')
     + (RuntimeOption::EvalGenerateDocComments ? '1' : '0')
+    + (RuntimeOption::EnablePHP ? '1' : '0')
     + (RuntimeOption::EnableXHP ? '1' : '0')
     + (RuntimeOption::EvalAllowHhas ? '1' : '0')
     + (RuntimeOption::EvalEmitSwitch ? '1' : '0')
@@ -805,6 +806,13 @@ String resolveVmInclude(StringData* path,
   return ctx.path;
 }
 
+Unit* checkPhpUnits(Unit* unit) {
+  if (UNLIKELY(!RuntimeOption::EnablePHP) && !unit->isHHFile()) {
+    throw PhpNotSupportedException(unit->filepath()->data());
+  }
+  return unit;
+}
+
 Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
                  const Native::FuncTable& nativeFuncs) {
   bool init;
@@ -839,7 +847,7 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
         (it->second.ts_sec > s.st_mtime) ||
         ((it->second.ts_sec == s.st_mtime) &&
          (it->second.ts_nsec >= s.st_mtim.tv_nsec))) {
-      return it->second.unit;
+      return checkPhpUnits(it->second.unit);
     }
   }
 
@@ -869,7 +877,7 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
 
   lookupTimer.stop();
   if (ent) logLoad(*ent, path, currentDir, spath, cunit);
-  return cunit.unit;
+  return checkPhpUnits(cunit.unit);
 }
 
 Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable& nativeFuncs) {

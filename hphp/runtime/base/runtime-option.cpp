@@ -98,6 +98,7 @@ bool RuntimeOption::EnableHipHopSyntax = false;
 bool RuntimeOption::EnableHipHopExperimentalSyntax = false;
 bool RuntimeOption::EnableShortTags = true;
 bool RuntimeOption::EnableAspTags = false;
+bool RuntimeOption::EnablePHP = true;
 bool RuntimeOption::EnableXHP = false;
 bool RuntimeOption::EnableObjDestructCall = true;
 bool RuntimeOption::EnableIntrinsicsExtension = false;
@@ -1337,6 +1338,7 @@ void RuntimeOption::Load(
                  config, "Eval.EnableHipHopExperimentalSyntax");
     Config::Bind(EnableShortTags, ini, config, "Eval.EnableShortTags", true);
     Config::Bind(EnableAspTags, ini, config, "Eval.EnableAspTags");
+    Config::Bind(EnablePHP, ini, config, "Eval.EnablePHP", EnablePHP);
     Config::Bind(EnableXHP, ini, config, "Eval.EnableXHP", EnableXHP);
     Config::Bind(EnableZendSorting, ini, config, "Eval.EnableZendSorting",
                  false);

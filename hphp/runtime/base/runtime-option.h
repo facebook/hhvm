@@ -429,6 +429,7 @@ struct RuntimeOption {
   static bool EnableShortTags;
   static bool EnableAspTags;
   static bool EnableXHP;
+  static bool EnablePHP;
   static bool CheckParamTypeInvariance;
   static bool EnableObjDestructCall;
   static bool EnableIntrinsicsExtension;

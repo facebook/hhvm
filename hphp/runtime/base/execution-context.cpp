@@ -1463,6 +1463,10 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit,
                                         bool callByHPHPInvoke) {
   checkHHConfig(unit);
 
+  if (UNLIKELY(!RuntimeOption::EnablePHP) && !unit->isHHFile()) {
+    throw PhpNotSupportedException(unit->filepath()->data());
+  }
+
   auto const func = unit->getMain(nullptr);
   auto ret = invokeFunc(func, init_null_variant, nullptr, nullptr,
                     m_globalVarEnv, nullptr, InvokePseudoMain);

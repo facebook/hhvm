@@ -150,6 +150,7 @@ let can_autostart_after_mismatch: bool ref = ref true
 let callbacks_outstanding: (on_result * on_error) IdMap.t ref = ref IdMap.empty
 let hh_server_state: (float * hh_server_state) list ref = ref [] (* head is newest *)
 let ref_from: string ref = ref ""
+let showStatus_outstanding: string ref = ref ""
 
 let initialize_params_exc () : Lsp.Initialize.params =
   match !initialize_params_ref with
@@ -464,11 +465,26 @@ let request_showStatus
     ?(on_error: on_error = fun ~code:_ ~message:_ ~data:_ state -> Lwt.return state)
     (params: ShowStatus.params)
   : unit =
-  let id = NumberId (Jsonrpc.get_next_request_id ()) in
-  let json = Lsp_fmt.print_lsp (RequestMessage (id, ShowStatusRequest params)) in
-  to_stdout json;
-  (* save the callback-handlers *)
-  callbacks_outstanding := IdMap.add id (on_result, on_error) !callbacks_outstanding
+  (* We try not to send duplicate statuses. *)
+  (* That means: if you call request_showStatus but your message is the same as *)
+  (* what's already up, then you won't be shown, and your callbacks won't be shown. *)
+  let msg = params.ShowStatus.request.ShowMessageRequest.message in
+  if msg = !showStatus_outstanding then
+    ()
+  else begin
+    showStatus_outstanding := msg;
+    let id = NumberId (Jsonrpc.get_next_request_id ()) in
+    let json = Lsp_fmt.print_lsp (RequestMessage (id, ShowStatusRequest params)) in
+    to_stdout json;
+    (* save the callback-handlers *)
+    let on_result2 = fun ~result state ->
+      if msg = !showStatus_outstanding then showStatus_outstanding := "";
+      on_result result state in
+    let on_error2 = fun ~code ~message ~data state ->
+      if msg = !showStatus_outstanding then showStatus_outstanding := "";
+      on_error code message data state in
+    callbacks_outstanding := IdMap.add id (on_result2, on_error2) !callbacks_outstanding
+  end
 
 (* request_showMessage: pops up a dialog *)
 let request_showMessage

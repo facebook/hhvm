@@ -71,7 +71,7 @@ let rec collect_class
           Hh_logger.log "Declaring %s class %s" kind cid;
           Decl.declare_class_in_file tcopt filename cid;
           collect_class tcopt requested_classes cid decls ~fail_if_missing:true
-      with Exit | Decl.Decl_not_found _ ->
+      with Exit | Decl_not_found _ ->
         if not @@ SSet.mem requested_classes cid
         then failwith @@ "Missing ancestor class "^cid
         else begin

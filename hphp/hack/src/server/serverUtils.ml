@@ -140,7 +140,7 @@ let exit_on_exception (exn: exn) ~(stack: Utils.callstack) =
     Exit_status.(exit File_heap_stale)
   | Decl_class.Decl_heap_elems_bug ->
     Exit_status.(exit Decl_heap_elems_bug)
-  | Decl.Decl_not_found _->
+  | Decl_defs.Decl_not_found _->
     Exit_status.(exit Decl_not_found)
   | SharedMem.C_assertion_failure _ as e ->
     Hh_logger.exc ~stack e;

@@ -27,8 +27,6 @@ module Attrs = Attributes
 
 module SN = Naming_special_names
 
-exception Decl_not_found of string
-
 let tracked_names = ref None
 
 let start_tracking () =

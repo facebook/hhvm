@@ -9,6 +9,9 @@
 open Typing_defs
 open Pp_type
 
+(* Exception representing not finding a class during decl *)
+exception Decl_not_found of string
+
 (* A substitution context contains all the information necessary for
  * changing the type of an inherited class element to the class that is
  * inheriting the class element. It's best illustrated via an example.

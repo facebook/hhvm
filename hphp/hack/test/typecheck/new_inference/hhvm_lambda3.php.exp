@@ -1,1 +1,3 @@
+File "hhvm_lambda3.php", line 3, characters 10-13:
+  There are remaining unsolved constraints!: ((_ <: arraykey || _ <: bool || _ <: float || _ <: resource || _ <: dynamic) && _ <: void)
 No errors

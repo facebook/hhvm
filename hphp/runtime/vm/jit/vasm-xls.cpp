@@ -933,6 +933,7 @@ struct UseVisitor {
    * register, but is still correct.
    */
   template<class R> void across(R r) { use(r, constraint(r), m_range.end + 1); }
+  void across(Vtuple uses) { for (auto r : m_unit.tuples[uses]) across(r); }
   void across(RegSet regs) { regs.forEach([&](Vreg r) { across(r); }); }
   void across(Vptr m) {
     if (m.base.isValid()) across(m.base);

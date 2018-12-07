@@ -232,7 +232,6 @@ let rec ty (p, x) =
       dc_enum_type             = Option.map dc.dc_enum_type enum_type ;
       dc_decl_errors           = None                                 ;
       dc_condition_types       = dc.dc_condition_types                ;
-      dc_linearization         = dc.dc_linearization                  ;
     }
 
   and requirement (p, t) = (pos p, ty t)

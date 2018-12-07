@@ -88,7 +88,6 @@ let to_class_type {
   dc_enum_type;
   dc_decl_errors;
   dc_condition_types = _;
-  dc_linearization = _;
 } =
   let map_elements find elts = SMap.mapi begin fun name elt ->
     let ty = lazy begin

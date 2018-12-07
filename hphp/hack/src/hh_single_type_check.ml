@@ -1123,15 +1123,10 @@ let handle_mode
     in
     Relative_path.Map.iter files_info ~f:(fun file info ->
       let { FileInfo.classes; _} = info in
-      (* For each class, grab the declaration from the decl_heap*)
-      let linearizations = List.map classes
-        begin fun (_, c) ->
-            let class_decl = Decl_heap.Classes.find_unsafe c in
-            c, class_decl.Decl_defs.dc_linearization
-        end in
-      List.iter linearizations ~f:(fun (classname, linearization) ->
+      List.iter classes ~f:(fun (_, classname) ->
         Printf.printf "Linearization for class %s:\n" classname;
-        let linearization = List.map linearization (fun mro ->
+        let linearization = Decl_linearize.get_linearization tcopt classname in
+        let linearization = Sequence.map linearization (fun mro ->
           let name = mro.Decl_defs.mro_name in
           let params = List.map mro.Decl_defs.mro_params (fun ty ->
               let tenv = Typing_env.empty tcopt ~droot:None file in
@@ -1142,7 +1137,9 @@ let handle_mode
              name
              params
              (Decl_defs.source_type_to_string mro.Decl_defs.mro_source)
-          ) in
+          )
+          |> Sequence.to_list
+        in
         Printf.printf "[%s]\n" (String.concat ~sep:", " linearization)
       )
     )

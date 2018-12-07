@@ -6,6 +6,8 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
+
+open Core_kernel
 open Typing_defs
 open Pp_type
 
@@ -70,7 +72,7 @@ type mro_element = {
   mro_source : source_type;
 } [@@deriving show]
 
-type linearization = mro_element list [@@deriving show]
+type linearization = mro_element Sequence.t
 
 type decl_class_type = {
   dc_need_init           : bool;
@@ -106,7 +108,6 @@ type decl_class_type = {
   (* this field is used to prevent condition types being filtered
        in Decl_redecl_service.is_dependent_class_of_any *)
   dc_condition_types     : SSet.t;
-  dc_linearization       : linearization;
 } [@@deriving show]
 
 (* name of condition type for conditional reactivity of methods.

@@ -102,11 +102,6 @@ let experimental_no_trait_reuse_enabled env =
   env.Decl_env.decl_tcopt
   TypecheckerOptions.experimental_no_trait_reuse)
 
-let experimental_linearization_enabled env =
-  (TypecheckerOptions.experimental_feature_enabled
-  env.Decl_env.decl_tcopt
-  TypecheckerOptions.experimental_decl_linearization)
-
 let report_reused_trait parent_type shallow_class =
   Errors.trait_reuse parent_type.dc_pos parent_type.dc_name shallow_class.sc_name
 
@@ -442,8 +437,6 @@ and class_decl tcopt c =
   let has_own_cstr = has_concrete_cstr && (None <> c.sc_constructor) in
   let deferred_members = Decl_init_check.class_ ~has_own_cstr env c in
   let sealed_whitelist = get_sealed_whitelist c in
-  let linearization = if experimental_linearization_enabled env then
-    Decl_linearize.linearize env c else [] in
   let tc = {
     dc_final = c.sc_final;
     dc_const = const;
@@ -475,7 +468,6 @@ and class_decl tcopt c =
     dc_enum_type = enum;
     dc_decl_errors = None;
     dc_condition_types = condition_types;
-    dc_linearization = linearization;
   } in
   if Ast.Cnormal = c.sc_kind then
     begin

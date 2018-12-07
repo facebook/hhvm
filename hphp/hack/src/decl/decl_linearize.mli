@@ -7,6 +7,6 @@
  *
  *)
 
-type result = Decl_defs.linearization
+open Decl_defs
 
-val linearize : Decl_env.env -> Shallow_decl_defs.shallow_class -> result
+val get_linearization : TypecheckerOptions.t -> string -> linearization

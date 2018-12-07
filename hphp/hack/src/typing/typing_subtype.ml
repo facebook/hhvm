@@ -2335,6 +2335,16 @@ and set_tyvar_variance_list ~variancel ~tyvars env tyl =
 let set_tyvar_variance ~tyvars env ty =
   set_tyvar_variance ~variance:Ast.Covariant ~tyvars env ty
 
+let bind env r var ty =
+  Typing_log.(log_with_level env "prop" 2 (fun () ->
+  log_types (Reason.to_pos r) env
+    [Log_head (Printf.sprintf "Typing_subtype.solve_tyvar/Typing_unify_recursive.add #%d" var,
+    [Log_type ("ty", ty)])]));
+  (* Unify the variable *)
+  let env = Typing_unify_recursive.add env var ty in
+  (* Remove the variable from the environment *)
+  Env.remove_tyvar env var
+
 let bind_to_lower_bound env r var =
   let lower_bounds = Typing_set.elements (Env.get_tyvar_lower_bounds env var) in
   (* Construct the union of the lower bounds. Note that if there are no lower
@@ -2343,30 +2353,15 @@ let bind_to_lower_bound env r var =
     match lower_bounds with
     | [ty] -> ty
     | tys -> (r, Tunresolved tys) in
-  Typing_log.(log_with_level env "prop" 2 (fun () ->
-    log_types (Reason.to_pos r) env
-      [Log_head (Printf.sprintf "Typing_subtype.solve_tyvar/Typing_unify_recursive.add #%d" var,
-      [Log_type ("ty", ty)])]));
-  let env = Typing_unify_recursive.add env var ty in
-  Env.remove_tyvar env var
+  bind env r var ty
 
 let bind_to_upper_bound env r var =
   let upper_bounds = Typing_set.elements (Env.get_tyvar_upper_bounds env var) in
   match upper_bounds with
-  | [ty] ->
-    Typing_log.(log_with_level env "prop" 2 (fun () ->
-    log_types (Reason.to_pos r) env
-      [Log_head (Printf.sprintf "Typing_subtype.solve_tyvar/Typing_unify_recursive.add #%d" var,
-      [Log_type ("ty", ty)])]));
-    (* Unify the variable with the upper bound *)
-    let env = Typing_unify_recursive.add env var ty in
-    (* Remove the variable from the environment *)
-    Env.remove_tyvar env var
-    (* For now, if there are no bounds, or more than one, then don't solve.
-     * For no bounds, we could just use `mixed`
-     *)
-  | _ ->
-    env
+  | [] -> bind env r var (r, TUtils.desugar_mixed r)
+  | [ty] -> bind env r var ty
+  (* For now, if there are multiple bounds, then don't solve. *)
+  | _ -> env
 
 (* Use the variance information about a type variable to force a solution.
  *   (1) If the type variable is bounded by t1, ..., tn <: v and it appears only

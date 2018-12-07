@@ -759,7 +759,7 @@ TypedValue keysetIdxS(ArrayData* a, StringData* key, TypedValue def) {
 
 template <bool isFirst>
 TypedValue vecFirstLast(ArrayData* a) {
-  assertx(a->isVecArray());
+  assertx(a->isVecArray() || a->isPacked());
   int64_t idx = isFirst ? 0 : a->size() - 1;
   auto rval = a->rval(idx);
   return UNLIKELY(!rval) ? make_tv<KindOfNull>() : rval.tv();

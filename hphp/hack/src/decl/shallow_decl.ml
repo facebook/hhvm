@@ -266,6 +266,12 @@ let method_redeclaration env m =
     smr_method = m.mt_method;
   }
 
+let enum_type hint e =
+  {
+    te_base = hint e.e_base;
+    te_constraint = Option.map e.e_constraint hint;
+  }
+
 let class_ env c =
   let hint = Decl_hint.hint env in
   {
@@ -291,7 +297,7 @@ let class_ env c =
     sc_static_methods = List.map c.c_static_methods (method_ env c);
     sc_methods = List.map c.c_methods (method_ env c);
     sc_user_attributes = c.c_user_attributes;
-    sc_enum = c.c_enum;
+    sc_enum_type = Option.map c.c_enum (enum_type hint);
     sc_decl_errors = Errors.empty;
   }
 

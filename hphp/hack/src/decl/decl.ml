@@ -422,15 +422,7 @@ and class_decl tcopt c =
     let p, name = c.sc_name in
     Errors.strict_members_not_known p name
   else ();
-  let enum = match c.sc_enum with
-    | None -> None
-    | Some e ->
-      let base_hint = Decl_hint.hint env e.e_base in
-      let constraint_hint =
-        Option.map e.e_constraint (Decl_hint.hint env) in
-      Some
-        { te_base       = base_hint;
-          te_constraint = constraint_hint } in
+  let enum = c.sc_enum_type in
   let consts =
     Decl_enum.rewrite_class c.sc_name enum (fun x -> SMap.get x impl) consts in
   let has_own_cstr = has_concrete_cstr && (None <> c.sc_constructor) in

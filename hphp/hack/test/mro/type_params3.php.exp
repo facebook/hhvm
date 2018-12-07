@@ -3,4 +3,4 @@ Linearization for class \C:
 Linearization for class \D:
 [\D(child), \C<int,T3>(parent)]
 Linearization for class \E:
-[\E(child), \D<string>(parent), \C<int,T3>(parent)]
+[\E(child), \D<string>(parent), \C<int,string>(parent)]

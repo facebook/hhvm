@@ -58,11 +58,6 @@ let from_parent (c : shallow_class) : decl ty list =
 let get_class (env : env) (class_name : string) : shallow_class option =
   Shallow_classes_heap.get env.decl_env.Decl_env.decl_tcopt class_name
 
-let map_hd lin ~f =
-  match Sequence.next lin with
-  | None -> Sequence.empty
-  | Some (c, rest) -> Sequence.append (Sequence.singleton (f c)) rest
-
 let rec ancestor_linearization
     (env : env)
     (class_name : string)
@@ -70,10 +65,25 @@ let rec ancestor_linearization
     (new_source : source_type)
   : linearization =
   Decl_env.add_extends_dependency env.decl_env class_name;
-  get_linearization env class_name
-  (* Fill in the type parameterization of the starting class *)
-  |> map_hd ~f:(fun c -> { c with mro_params = type_params })
-  |> Sequence.map ~f:(fun c -> { c with mro_source = new_source })
+  let lin = get_linearization env class_name in
+  let lin = Sequence.map lin ~f:(fun c -> { c with mro_source = new_source }) in
+  match Sequence.next lin with
+  | None -> Sequence.empty
+  | Some (c, rest) ->
+    (* Fill in the type parameterization of the starting class *)
+    let c = { c with mro_params = type_params } in
+    (* Instantiate its linearization with those type parameters *)
+    let tparams =
+      get_class env class_name
+      |> Option.value_map ~default:[] ~f:(fun c -> c.sc_tparams)
+    in
+    let subst = Decl_subst.make tparams type_params in
+    let rest = Sequence.map rest ~f:begin fun c ->
+      { c with mro_params =
+        List.map c.mro_params ~f:(Decl_instantiate.instantiate subst)
+      }
+    end in
+    Sequence.append (Sequence.singleton c) rest
 
 (* Linearize a class declaration given its shallow declaration *)
 and linearize (env : env) (c : shallow_class) : linearization =
@@ -119,7 +129,7 @@ and get_linearization (env : env) (class_name : string) : linearization =
   let class_stack = SSet.add class_stack class_name in
   let env = { env with class_stack } in
   match Cache.get class_name with
-  | Some s -> s
+  | Some lin -> lin
   | None ->
     match get_class env class_name with
     | None -> Sequence.empty

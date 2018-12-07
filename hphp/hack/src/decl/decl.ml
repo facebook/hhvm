@@ -422,7 +422,6 @@ and class_decl tcopt c =
     let p, name = c.sc_name in
     Errors.strict_members_not_known p name
   else ();
-  let tparams = List.map (fst c.sc_tparams) (type_param env) in
   let enum = match c.sc_enum with
     | None -> None
     | Some e ->
@@ -450,7 +449,7 @@ and class_decl tcopt c =
     dc_is_disposable = is_disposable;
     dc_name = snd c.sc_name;
     dc_pos = fst c.sc_name;
-    dc_tparams = tparams;
+    dc_tparams = c.sc_tparams;
     dc_substs = inherited.Decl_inherit.ih_substs;
     dc_consts = consts;
     dc_typeconsts = typeconsts;

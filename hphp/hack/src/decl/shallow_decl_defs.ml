@@ -63,9 +63,7 @@ type shallow_class = {
   sc_is_xhp          : bool;
   sc_kind            : Ast.class_kind;
   sc_name            : Aast.sid;
-  sc_tparams :
-    Aast.tparam list *
-    ((Ast.constraint_kind * Ast.hint) list SMap.t);
+  sc_tparams         : decl tparam list;
   sc_extends         : decl ty list;
   sc_uses            : decl ty list;
   sc_method_redeclarations : shallow_method_redeclaration list;

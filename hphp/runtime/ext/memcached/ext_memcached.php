@@ -591,7 +591,7 @@ class Memcached {
                                string $value): bool;
 
   /**
-   * Memcached::quit() closes any open connections to the memcache servers. 
+   * Memcached::quit() closes any open connections to the memcache servers.
    * @return bool TRUE on success or FALSE on failure
   */
   <<__Native>>
@@ -788,7 +788,7 @@ class MemcachedSessionModule implements SessionHandlerInterface {
   }
 
   public function open($savePath, $name) {
-    $serverList = self::parseSavePath($savePath);
+    $serverList = $this->parseSavePath($savePath);
     if (!$serverList) {
       return false;
     }
@@ -835,7 +835,7 @@ class MemcachedSessionModule implements SessionHandlerInterface {
                                  (int)ini_get('session.gc_maxlifetime'));
   }
 
-  private static function parseSavePath($savePath) {
+  private function parseSavePath($savePath) {
     $savePath = trim($savePath);
     if (empty($savePath)) {
       trigger_error("Failed to initialize memcached session storage",

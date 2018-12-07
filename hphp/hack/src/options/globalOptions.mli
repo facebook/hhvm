@@ -173,9 +173,11 @@ type t = {
  tco_disallow_anon_use_capture_by_ref : bool;
 
  (*
-  * Flag to enable interpretation of unresolved only as union
+  * Constraint-based type inference
+  * Apply to a sample of files based on name hashing:
+  * 1.0 = always, 0.0 = never
   *)
- tco_new_inference : bool;
+ tco_new_inference : float;
 
  (*
   * Flag to disallow using values that get casted to array keys at runtime;
@@ -223,7 +225,7 @@ val make :
   tco_disallow_scrutinee_case_value_type_mismatch: bool ->
   tco_disallow_stringish_magic: bool ->
   tco_disallow_anon_use_capture_by_ref: bool ->
-  tco_new_inference: bool ->
+  tco_new_inference: float ->
   tco_disallow_invalid_arraykey: bool ->
   ignored_fixme_codes: ISet.t ->
   forward_compatibility_level: ForwardCompatibilityLevel.t ->

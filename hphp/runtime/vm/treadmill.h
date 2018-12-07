@@ -54,7 +54,7 @@ enum class SessionKind {
  * Return the current thread's index.
  */
 constexpr int64_t kInvalidThreadIdx = -1;
-int64_t threadIdx();
+int64_t requestIdx();
 
 /*
  * The Treadmill allows us to defer work until all currently

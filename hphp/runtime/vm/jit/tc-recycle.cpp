@@ -30,6 +30,8 @@
 #include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 
+#include "hphp/runtime/base/rds-local.h"
+
 #include "hphp/util/arch.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/match.h"
@@ -485,6 +487,8 @@ void recycleInit() {
 
   s_running.store(true, std::memory_order_release);
   s_reaper = std::thread([] {
+    rds::local::init();
+    SCOPE_EXIT { rds::local::fini(); };
     while (auto j = dequeueJob()) {
       ProfData::Session pds;
       match<void>(

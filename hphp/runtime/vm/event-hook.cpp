@@ -58,7 +58,7 @@ const StaticString
   s_name("name"),
   s_return("return");
 
-__thread uint64_t tl_func_sequence_id;
+RDS_LOCAL_NO_CHECK(uint64_t, rl_func_sequence_id){0};
 
 // implemented in runtime/ext/ext_hotprofiler.cpp
 extern void begin_profiler_frame(Profiler *p,
@@ -461,7 +461,7 @@ void logCommon(StructuredLogEntry sample, const ActRec* ar, ssize_t flags) {
   addBacktraceToStructLog(
     createBacktrace(BacktraceArgs()), sample
   );
-  sample.setInt("sequence_id", tl_func_sequence_id++);
+  sample.setInt("sequence_id", (*rl_func_sequence_id)++);
   StructuredLog::log("hhvm_function_calls2", sample);
 }
 

@@ -2338,6 +2338,39 @@ and set_tyvar_variance_list ~variancel ~tyvars env tyl =
 let set_tyvar_variance ~tyvars env ty =
   set_tyvar_variance ~variance:Ast.Covariant ~tyvars env ty
 
+let bind_to_lower_bound env r var =
+  let lower_bounds = Typing_set.elements (Env.get_tyvar_lower_bounds env var) in
+  (* Construct the union of the lower bounds. Note that if there are no lower
+   * bounds then we will construct the empty type, i.e. Tunresolved []. *)
+  let ty =
+    match lower_bounds with
+    | [ty] -> ty
+    | tys -> (r, Tunresolved tys) in
+  Typing_log.(log_with_level env "prop" 2 (fun () ->
+    log_types (Reason.to_pos r) env
+      [Log_head (Printf.sprintf "Typing_subtype.solve_tyvar/Typing_unify_recursive.add #%d" var,
+      [Log_type ("ty", ty)])]));
+  let env = Typing_unify_recursive.add env var ty in
+  Env.remove_tyvar env var
+
+let bind_to_upper_bound env r var =
+  let upper_bounds = Typing_set.elements (Env.get_tyvar_upper_bounds env var) in
+  match upper_bounds with
+  | [ty] ->
+    Typing_log.(log_with_level env "prop" 2 (fun () ->
+    log_types (Reason.to_pos r) env
+      [Log_head (Printf.sprintf "Typing_subtype.solve_tyvar/Typing_unify_recursive.add #%d" var,
+      [Log_type ("ty", ty)])]));
+    (* Unify the variable with the upper bound *)
+    let env = Typing_unify_recursive.add env var ty in
+    (* Remove the variable from the environment *)
+    Env.remove_tyvar env var
+    (* For now, if there are no bounds, or more than one, then don't solve.
+     * For no bounds, we could just use `mixed`
+     *)
+  | _ ->
+    env
+
 (* Use the variance information about a type variable to force a solution.
  *   (1) If the type variable is bounded by t1, ..., tn <: v and it appears only
  *   covariantly or not at all in the expression type then
@@ -2347,55 +2380,29 @@ let set_tyvar_variance ~tyvars env ty =
  *   would use an intersection v := t1 & ... & tn so for now we only solve
  *   if there is a single upper bound.
  *)
-let solve_tyvar env r var =
+let solve_tyvar ~solve_invariant env r var =
   let appears_contravariantly = Env.get_tyvar_appears_contravariantly env var in
   let appears_covariantly = Env.get_tyvar_appears_covariantly env var in
-  (* As in Local Type Inference by Pierce & Turner, if type variable
-   * appears only contravariantly, force to upper bound
-   *)
-  if appears_contravariantly && not appears_covariantly
-  then begin
-    let upper_bounds = Typing_set.elements (Env.get_tyvar_upper_bounds env var) in
-    match upper_bounds with
-    | [ty] ->
-      Typing_log.(log_with_level env "prop" 2 (fun () ->
-      log_types (Reason.to_pos r) env
-        [Log_head (Printf.sprintf "Typing_subtype.solve_tyvar/Typing_unify_recursive.add #%d" var,
-        [Log_type ("ty", ty)])]));
-      (* Unify the variable with the upper bound *)
-      let env = Typing_unify_recursive.add env var ty in
-      (* Remove the variable from the environment *)
-      Env.remove_tyvar env var
-      (* For now, if there are no bounds, or more than one, then don't solve.
-       * For no bounds, we could just use `mixed`
-       *)
-    | _ ->
-      env
-  end
-  (* As in Local Type Inference by Pierce & Turner, if type variable does
-   * not appear at all, or only appears covariantly, force to lower bound
-   *)
-  else if not appears_contravariantly
-  then begin
-    let lower_bounds = Typing_set.elements (Env.get_tyvar_lower_bounds env var) in
-    (* Construct the union of the lower bounds. Note that if there are no lower
-     * bounds then we will construct the empty type, i.e. Tunresolved []. *)
-    let ty =
-      match lower_bounds with
-      | [ty] -> ty
-      | tys -> (r, Tunresolved tys) in
-    Typing_log.(log_with_level env "prop" 2 (fun () ->
-      log_types (Reason.to_pos r) env
-        [Log_head (Printf.sprintf "Typing_subtype.solve_tyvar/Typing_unify_recursive.add #%d" var,
-        [Log_type ("ty", ty)])]));
-    let env = Typing_unify_recursive.add env var ty in
-    Env.remove_tyvar env var
-  end
-  else env
+  match appears_covariantly, appears_contravariantly with
+  | true, false
+  | false, false ->
+    (* As in Local Type Inference by Pierce & Turner, if type variable does
+     * not appear at all, or only appears covariantly, force to lower bound
+     *)
+    bind_to_lower_bound env r var
+  | false, true ->
+    (* As in Local Type Inference by Pierce & Turner, if type variable
+     * appears only contravariantly, force to upper bound
+     *)
+    bind_to_upper_bound env r var
+  | true, true ->
+    if solve_invariant then bind_to_lower_bound env r var else env
 
-let solve_tyvars ~tyvars env =
+let solve_tyvars ?(solve_invariant = false) ~tyvars env =
   if TypecheckerOptions.new_inference (Env.get_tcopt env)
-  then ISet.fold (fun tyvar env -> solve_tyvar env Reason.Rnone tyvar) tyvars env
+  then ISet.fold
+    (fun tyvar env -> solve_tyvar ~solve_invariant env Reason.Rnone tyvar)
+    tyvars env
   else env
 
 let log_prop env =

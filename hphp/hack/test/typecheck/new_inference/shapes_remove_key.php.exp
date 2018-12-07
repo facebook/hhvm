@@ -1,5 +1,1 @@
-File "shapes_remove_key.php", line 11, characters 10-27:
-  There are remaining unsolved constraints!: (T <: #0 && #0 <: T && T <: #1 && #1 <: T)
-File "shapes_remove_key.php", line 19, characters 10-29:
-  There are remaining unsolved constraints!: (shape('x' => int) <: #0 && #0 <: shape('x' => int) && #0 <: #1(shape('x' => int) | #0) && shape() <: #2 && #2 <: shape() && #2 <: #3(shape() | #2) && shape() <: #4 && #3(shape() | #2) <: #4 && #2 <: #4 && #4 <: shape() && shape('x' => int) <: #5 && #0 <: #5 && #5 <: shape('x' => int))
 No errors

@@ -506,7 +506,7 @@ and fun_def tcopt f =
       let env, tb = fun_ env return pos nb f.f_fun_kind in
       let env = Env.check_todo env in
       let tyvars = ISet.of_list (IMap.keys env.Env.tvenv) in
-      let env = SubType.solve_tyvars ~tyvars env in
+      let env = SubType.solve_tyvars ~solve_invariant:true ~tyvars env in
       Typing_subtype.log_prop env;
       (* restore original reactivity *)
       let env = Env.set_env_reactive env reactive in
@@ -6439,7 +6439,7 @@ and method_def env m =
     fun_ ~abstract:m.m_abstract env return pos nb m.m_fun_kind in
   let env = Env.check_todo env in
   let tyvars = ISet.of_list (IMap.keys env.Env.tvenv) in
-  let env = SubType.solve_tyvars ~tyvars env in
+  let env = SubType.solve_tyvars ~solve_invariant:true ~tyvars env in
   Typing_subtype.log_prop env;
   (* restore original method reactivity  *)
   let env = Env.set_env_reactive env reactive in

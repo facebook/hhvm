@@ -103,6 +103,7 @@ val set_tyvar_variance :
   Env.env
 
 val solve_tyvars :
+  ?solve_invariant:bool ->
   tyvars:ISet.t ->
   Env.env ->
   Env.env

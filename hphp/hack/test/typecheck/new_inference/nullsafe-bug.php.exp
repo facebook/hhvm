@@ -1,3 +1,1 @@
-File "nullsafe-bug.php", line 9, characters 10-39:
-  There are remaining unsolved constraints!: _ <: Awaitable<#0[unresolved]>
 No errors

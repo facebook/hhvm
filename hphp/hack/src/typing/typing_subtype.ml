@@ -980,11 +980,8 @@ and simplify_subtype
       try_each tyl env
     else default ()
 
-  | _, Tany ->
+  | _, Tany | Tany, _ ->
     if new_inference then valid () else default ()
-
-  | Tany, _ ->
-    default ()
 
   (* If subtype and supertype are the same generic parameter, we're done *)
   | Tabstract (AKgeneric name_sub, _), Tabstract (AKgeneric name_super, _)

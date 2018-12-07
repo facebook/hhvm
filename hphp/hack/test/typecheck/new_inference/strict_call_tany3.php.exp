@@ -1,5 +1,1 @@
-File "strict_call_tany3.php--partial.php", line 3, characters 10-12:
-  There are remaining unsolved constraints!: _ <: void
-File "strict_call_tany3.php--strict.php", line 11, characters 16-16:
-  There are remaining unsolved constraints!: _ <: Awaitable<#0[unresolved]>
 No errors

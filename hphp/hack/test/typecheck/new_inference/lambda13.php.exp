@@ -1,3 +1,1 @@
-File "lambda13.php", line 12, characters 10-13:
-  There are remaining unsolved constraints!: ((_ <: arraykey || _ <: bool || _ <: float || _ <: resource || _ <: dynamic) && (_ <: arraykey || _ <: bool || _ <: float || _ <: resource || _ <: dynamic))
 No errors

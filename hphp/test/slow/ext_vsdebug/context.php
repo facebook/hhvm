@@ -6,10 +6,10 @@ $breakpoints = [
    array(
      "path" => $path,
      "breakpoints" => [
-       array("line" => 24, "calibratedLine" => 24, "condition" => ""),
-       array("line" => 25, "calibratedLine" => 25, "condition" => ""),
-       array("line" => 27, "calibratedLine" => 28, "condition" => ""),
-       array("line" => 32, "calibratedLine" => 32, "condition" => ""),
+       array("line" => 20, "calibratedLine" => 20, "condition" => ""),
+       array("line" => 21, "calibratedLine" => 21, "condition" => ""),
+       array("line" => 23, "calibratedLine" => 24, "condition" => ""),
+       array("line" => 28, "calibratedLine" => 28, "condition" => ""),
      ])
    ];
 
@@ -38,13 +38,13 @@ checkObjEqualRecursively($msg, array(
         array(
           "source" => array("path" => $path, "name" => $path),
           "id" => 1,
-          "line" => 24,
+          "line" => 20,
           "name" => "innerFunc"
         ),
         array(
           "source" => array("path" => $path, "name" => $path),
           "id" => 2,
-          "line" => 35,
+          "line" => 31,
           "name" => "{main}"
         )
       ]
@@ -172,7 +172,7 @@ checkObjEqualRecursively($msg, array(
         array(
           "type" => "B",
           "name" => "\$bObj",
-          "value" => "class B",
+          "value" => "B",
         ),
         array(
           "type" => "array",
@@ -570,13 +570,13 @@ $seq = sendVsCommand(array(
           array(
             "type" => "B",
             "name" => "0",
-            "value" => "class B",
+            "value" => "B",
             "variablesReference" => 14
           ),
           array(
             "type" => "B",
             "name" => "1",
-            "value" => "class B",
+            "value" => "B",
             "variablesReference" => 14
           )
         ]

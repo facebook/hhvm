@@ -467,14 +467,23 @@ private:
     folly::dynamic* vars
   );
 
-  static const std::string getVariableValue(
+  struct VariableValue {
+    explicit VariableValue(const std::string &value, bool hasSummaryOverride = false)
+      : m_value{value},
+        m_hasSummaryOverride(hasSummaryOverride)
+    {}
+    const std::string m_value;
+    bool m_hasSummaryOverride;
+  };
+
+  static const VariableValue getVariableValue(
     DebuggerSession* session,
     Debugger* debugger,
     request_id_t requestId,
     const Variant& variable
   );
 
-  static const std::string getObjectSummary(
+  static const VariableValue getObjectSummary(
     DebuggerSession* session,
     Debugger* debugger,
     request_id_t requestId,

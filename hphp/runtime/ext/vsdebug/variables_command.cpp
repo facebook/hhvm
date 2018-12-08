@@ -566,13 +566,16 @@ folly::dynamic VariablesCommand::serializeVariable(
   folly::dynamic var = folly::dynamic::object;
   const std::string variableName = doNotModifyName ? name : getPHPVarName(name);
 
+  auto value = getVariableValue(session, debugger, requestId, variable);
+
   var["name"] = variableName;
-  var["value"] = getVariableValue(session, debugger, requestId, variable);
+  var["value"] = value.m_value;
   var["type"] = getTypeName(variable);
 
-  // If the variable is an array or object, register it as a server object and
-  // indicate how many children it has.
-  if (variable.isArray() || variable.isObject()) {
+  // If there is a summary value returned from the object, then we don't want
+  // to show children. Otherwise, if the variable is an array or object,
+  // register it as a server object and indicate how many children it has.
+  if (!value.m_hasSummaryOverride && (variable.isArray() || variable.isObject())) {
     bool hasChildren = false;
     unsigned int id = session->generateVariableId(
       requestId,
@@ -667,7 +670,7 @@ const char* VariablesCommand::getTypeName(const Variant& variable) {
   }
 }
 
-const std::string VariablesCommand::getVariableValue(
+const VariablesCommand::VariableValue VariablesCommand::getVariableValue(
   DebuggerSession* session,
   Debugger* debugger,
   request_id_t requestId,
@@ -679,13 +682,13 @@ const std::string VariablesCommand::getVariableValue(
     // the variable's value.
     case KindOfUninit:
     case KindOfNull:
-      return "null";
+      return VariableValue{"null"};
 
     case KindOfBoolean:
-      return variable.toBooleanVal() ? "true" : "false";
+      return VariableValue{variable.toBooleanVal() ? "true" : "false"};
 
     case KindOfInt64:
-      return std::to_string(variable.toInt64Val());
+      return VariableValue{std::to_string(variable.toInt64Val())};
 
     case KindOfDouble: {
       // Convert double to string, but remove any trailing 0s after the
@@ -695,12 +698,12 @@ const std::string VariablesCommand::getVariableValue(
       if (dblString[dblString.size() - 1] == '.') {
         dblString += "0";
       }
-      return dblString;
+      return VariableValue{dblString};
     }
 
     case KindOfPersistentString:
     case KindOfString:
-      return variable.toCStrRef().toCppString();
+      return VariableValue{variable.toCStrRef().toCppString()};
 
     case KindOfResource: {
       auto res = variable.toResource();
@@ -709,40 +712,40 @@ const std::string VariablesCommand::getVariableValue(
       resourceDesc += "' type='";
       resourceDesc += res->o_getResourceName().data();
       resourceDesc += "'";
-      return resourceDesc;
+      return VariableValue{resourceDesc};
     }
 
     case KindOfPersistentVec:
     case KindOfVec:
-      return format("vec[{}]", variable.toArray().size()).str();
+      return VariableValue{format("vec[{}]", variable.toArray().size()).str()};
     case KindOfPersistentArray:
     case KindOfArray: {
-      return format("array[{}]", variable.toArray().size()).str();
+      return VariableValue{format("array[{}]", variable.toArray().size()).str()};
     }
 
     case KindOfPersistentDict:
     case KindOfDict: {
-      return format("dict[{}]", variable.toArray().size()).str();
+      return VariableValue{format("dict[{}]", variable.toArray().size()).str()};
     }
 
     case KindOfPersistentKeyset:
     case KindOfKeyset: {
-      return format("keyset[{}]", variable.toArray().size()).str();
+      return VariableValue{format("keyset[{}]", variable.toArray().size()).str()};
     }
 
     case KindOfRef:
       // Note: PHP references are not supported in Hack.
-      return "reference";
+      return VariableValue{"reference"};
 
     case KindOfObject:
       return getObjectSummary(session, debugger, requestId, variable.toCObjRef());
 
     default:
-      return "Unexpected variable type";
+      return VariableValue{"Unexpected variable type"};
   }
 }
 
-const std::string VariablesCommand::getObjectSummary(
+const VariablesCommand::VariableValue VariablesCommand::getObjectSummary(
   DebuggerSession* session,
   Debugger* debugger,
   request_id_t threadId,
@@ -758,10 +761,13 @@ const std::string VariablesCommand::getObjectSummary(
   executor.execute();
 
   if (executor.m_debugDisplay.isString()) {
-    return executor.m_debugDisplay.toCStrRef().toCppString();
+    return VariableValue{
+      executor.m_debugDisplay.toCStrRef().toCppString(),
+      true
+    };
   }
 
-  return obj->getClassName().c_str();
+  return VariableValue{obj->getClassName().c_str()};
 }
 
 int VariablesCommand::addComplexChildren(

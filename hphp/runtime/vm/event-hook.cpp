@@ -114,7 +114,7 @@ void EventHook::DoMemoryThresholdCallback() {
   if (!g_context->m_memThresholdCallback.isNull()) {
     VMRegAnchor _;
     try {
-      vm_call_user_func(g_context->m_memThresholdCallback, empty_array());
+      vm_call_user_func(g_context->m_memThresholdCallback, empty_vec_array());
     } catch (Object& ex) {
       raise_error("Uncaught exception escaping mem Threshold callback: %s",
                   ex.toString().data());
@@ -176,14 +176,14 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
   VMRegAnchor _;
   ExecutingSetprofileCallbackGuard guard;
 
-  Array params;
-  params.append((isResume && isResumeAware()) ? s_resume : s_enter);
-  params.append(make_tv<KindOfPersistentString>(ar->func()->fullName()));
-
-  Array frameinfo;
-  frameinfo.set(s_args, hhvm_get_frame_args(ar, 0));
+  auto frameinfo = make_darray(s_args, hhvm_get_frame_args(ar, 0));
   addFramePointers(ar, frameinfo, true);
-  params.append(frameinfo);
+
+  const auto params = make_vec_array(
+    (isResume && isResumeAware()) ? s_resume : s_enter,
+    StrNR{ar->func()->fullName()},
+    frameinfo
+  );
 
   vm_call_user_func(g_context->m_setprofileCallback, params);
 }
@@ -197,18 +197,19 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
   VMRegAnchor _;
   ExecutingSetprofileCallbackGuard guard;
 
-  Array params;
-  params.append((isSuspend && isResumeAware()) ? s_suspend : s_exit);
-  params.append(make_tv<KindOfPersistentString>(ar->func()->fullName()));
-
   Array frameinfo;
   if (retval) {
-    frameinfo.set(s_return, tvAsCVarRef(retval));
+    frameinfo = make_darray(s_return, tvAsCVarRef(retval));
   } else if (exception) {
-    frameinfo.set(s_exception, Variant{exception});
+    frameinfo = make_darray(s_exception, Variant{exception});
   }
   addFramePointers(ar, frameinfo, false);
-  params.append(frameinfo);
+
+  const auto params = make_vec_array(
+    (isSuspend && isResumeAware()) ? s_suspend : s_exit,
+    StrNR{ar->func()->fullName()},
+    frameinfo
+  );
 
   vm_call_user_func(g_context->m_setprofileCallback, params);
 }

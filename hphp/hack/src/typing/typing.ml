@@ -2129,15 +2129,8 @@ and expr_
     let env, te2, _ = expr env e2 in
     let ty = if TUtils.is_dynamic env ty1 then
       (Reason.Rwitness p, Tdynamic) else
-      begin
-      if Env.is_strict env then
-        begin
-        Errors.dynamic_method_call (fst e2);
-        (Reason.Rwitness p, Typing_utils.terr env)
-        end
-      else
       (Reason.Rwitness p, Typing_utils.tany env)
-      end in
+    in
     let (pos, _), te2 = te2 in
     let env = save_and_merge_next_in_catch env in
     let te2 = T.make_typed_expr pos ty te2 in

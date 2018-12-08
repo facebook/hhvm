@@ -1003,7 +1003,7 @@ let illegal_TRAIT pos =
 
 let dynamic_method_call pos =
   add (Naming.err_code Naming.DynamicMethodCall) pos
-    "Dynamic method call"
+    "Method name must be an identifier, not an expression"
 
 let nullsafe_property_write_context pos =
   add (Typing.err_code Typing.NullsafePropertyWriteContext) pos

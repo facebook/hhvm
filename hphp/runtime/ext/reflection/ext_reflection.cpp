@@ -1195,13 +1195,13 @@ static Array HHVM_METHOD(ReflectionClass, getRequirementNames) {
   if (!(cls->attrs() & (AttrTrait | AttrInterface))) {
     // requirements are applied to abstract/concrete classes when they use
     // a trait / implement an interface
-    return Array::attach(staticEmptyVArray());
+    return empty_varray();
   }
 
   auto const& requirements = cls->allRequirements();
   auto numReqs = requirements.size();
   if (numReqs == 0) {
-    return Array::attach(staticEmptyVArray());
+    return empty_varray();
   }
 
   VArrayInit pai(numReqs);

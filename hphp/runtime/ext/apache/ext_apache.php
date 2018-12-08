@@ -23,7 +23,7 @@ function apache_note(string $note_name,
  *   current request, or FALSE on failure.
  */
 <<__Native>>
-function apache_request_headers(): array<string, string>;
+function apache_request_headers(): darray<string, string>;
 
 /**
  * Fetch all HTTP response headers
@@ -31,7 +31,7 @@ function apache_request_headers(): array<string, string>;
  * @return array - An array of all Apache response headers on success.
  */
 <<__Native>>
-function apache_response_headers(): array<string, string>;
+function apache_response_headers(): darray<string, string>;
 
 /**
  * Set an Apache subprocess_env variable

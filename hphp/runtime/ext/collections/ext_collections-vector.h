@@ -230,12 +230,12 @@ public:
   }
 
   Array toVArray() {
-    if (!m_size) return Array::attach(staticEmptyVArray());
+    if (!m_size) return empty_varray();
     return Array::attach(arrayData()->toVArray(true));
   }
 
   Array toDArray() {
-    if (!m_size) return Array::attach(staticEmptyDArray());
+    if (!m_size) return empty_darray();
     return Array::attach(arrayData()->toDArray(true));
   }
 

@@ -11,9 +11,9 @@
 <<__PHPStdLib>>
 function apache_note($note_name, $note_value = "") { }
 <<__PHPStdLib>>
-function apache_request_headers(): array<string, string> { }
+function apache_request_headers(): darray<string, string> { }
 <<__PHPStdLib>>
-function apache_response_headers(): array<string, string> { }
+function apache_response_headers(): darray<string, string> { }
 <<__PHPStdLib>>
 function apache_setenv($variable, $value, $walk_to_top = false) { }
 <<__PHPStdLib>>

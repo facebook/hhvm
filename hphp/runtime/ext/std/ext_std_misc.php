@@ -229,7 +229,7 @@ function unpack(string $format,
  * minutes).
  */
 <<__Native>>
-function sys_getloadavg(): array;
+function sys_getloadavg(): varray;
 
 /* token_get_all() parses the given source string into PHP language tokens
  * using the Zend engine's lexical scanner.  For a list of parser tokens, see

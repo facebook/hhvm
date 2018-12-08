@@ -54,9 +54,9 @@ Array HHVM_FUNCTION(apache_request_headers) {
   Transport *transport = g_context->getTransport();
   if (transport) {
     auto const& headers = transport->getHeaders();
-    return get_headers<PackedArrayInit, MixedArrayInit>(headers);
+    return get_headers(headers);
   }
-  return empty_array();
+  return empty_darray();
 }
 
 Array HHVM_FUNCTION(apache_response_headers) {
@@ -64,9 +64,9 @@ Array HHVM_FUNCTION(apache_response_headers) {
   if (transport) {
     HeaderMap headers;
     transport->getResponseHeaders(headers);
-    return get_headers<PackedArrayInit, MixedArrayInit>(headers);
+    return get_headers(headers);
   }
-  return empty_array();
+  return empty_darray();
 }
 
 bool HHVM_FUNCTION(apache_setenv, const String& /*variable*/,
@@ -109,7 +109,7 @@ Array HHVM_FUNCTION(get_headers_secure) {
   Transport *transport = g_context->getTransport();
   if (transport) {
     auto const& headers = transport->getHeaders();
-    return get_headers<VArrayInit, DArrayInit>(headers, true);
+    return get_headers(headers, true);
   }
   return Array::CreateVArray();
 }

@@ -95,14 +95,14 @@ void HashCollection::warnOnStrIntDup() const {
 }
 
 Array HashCollection::toVArray() {
-  if (!m_size) return Array::attach(staticEmptyVArray());
+  if (!m_size) return empty_varray();
   auto arr = Array{arrayData()}.toVArray();
   assertx(arr->m_pos == 0);
   return arr;
 }
 
 Array HashCollection::toDArray() {
-  if (!m_size) return Array::attach(staticEmptyDArray());
+  if (!m_size) return empty_darray();
   auto arr = Array{arrayData()}.toDArray();
   if (UNLIKELY(arr->size() < m_size)) warnOnStrIntDup();
   assertx(arr->m_pos == 0);

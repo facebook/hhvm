@@ -619,7 +619,7 @@ Variant HHVM_FUNCTION(unpack, const String& format, const String& data) {
 Array HHVM_FUNCTION(sys_getloadavg) {
   double load[3];
   getloadavg(load, 3);
-  return make_packed_array(load[0], load[1], load[2]);
+  return make_varray(load[0], load[1], load[2]);
 }
 
 // We want token IDs to remain stable regardless of how we change the

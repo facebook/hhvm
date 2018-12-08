@@ -647,6 +647,14 @@ ALWAYS_INLINE Array empty_array() {
   return Array::attach(staticEmptyArray());
 }
 
+ALWAYS_INLINE Array empty_varray() {
+  return Array::attach(staticEmptyVArray());
+}
+
+ALWAYS_INLINE Array empty_darray() {
+  return Array::attach(staticEmptyDArray());
+}
+
 ALWAYS_INLINE Array empty_vec_array() {
   return Array::attach(staticEmptyVecArray());
 }

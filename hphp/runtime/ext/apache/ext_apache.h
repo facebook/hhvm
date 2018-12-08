@@ -48,17 +48,15 @@ struct ApacheExtension final : Extension {
   static HealthLevel m_healthLevel;
 };
 
-template<class TPackedArrayInit,
-         class TMixedArrayInit>
 static Array get_headers(const HeaderMap& headers, bool allHeaders = false) {
-  TMixedArrayInit ret(headers.size());
+  DArrayInit ret(headers.size());
   for (auto& iter : headers) {
     const auto& values = iter.second;
     if (auto size = values.size()) {
       if (!allHeaders) {
         ret.set(String(iter.first), String(values.back()));
       } else {
-        TPackedArrayInit dups(size);
+        VArrayInit dups(size);
         for (auto& dup : values) {
           dups.append(String(dup));
         }

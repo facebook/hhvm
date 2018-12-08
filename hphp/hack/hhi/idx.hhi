@@ -25,6 +25,6 @@
  * provided. If the key is `null`, the default value will be returned even if
  * `null` is a valid key in the container.
  */
-<<__RxLocal>>
+<<__Rx>>
 function idx<Tk, Tv>(?KeyedContainer<Tk, Tv> $collection, $index,
   $default = null) {}

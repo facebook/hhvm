@@ -3294,9 +3294,9 @@ void in(ISS& env, const bc::FPushCtorS& op) {
   auto const cls = specialClsRefToCls(env, op.subop2);
   if (is_specialized_cls(cls)) {
     auto const dcls = dcls_of(cls);
-    if (dcls.type == DCls::Exact
-        && (!dcls.cls.couldBeOverriden()
-            || equivalently_refined(cls, unctx(cls)))) {
+    if (dcls.type == DCls::Exact && !dcls.cls.couldHaveReifiedGenerics() &&
+        (!dcls.cls.couldBeOverriden() || equivalently_refined(cls, unctx(cls)))
+    ) {
       return reduce(
         env,
         bc::FPushCtorD { op.arg1, dcls.cls.name(), op.has_unpack }

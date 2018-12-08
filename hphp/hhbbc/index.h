@@ -211,6 +211,11 @@ struct Class {
   bool couldBeMocked() const;
 
   /*
+   * Whether this class could have reified generics
+   */
+  bool couldHaveReifiedGenerics() const;
+
+  /*
    * Whether initializing this class (which sets up the class' properties and is
    * a side-effect of several different bytecodes) can potentially raise.
    */

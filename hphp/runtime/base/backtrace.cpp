@@ -404,7 +404,8 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       if (ctx != nullptr && !fp->func()->isClosureBody()) {
         String clsname{const_cast<StringData*>(ctx->name())};
         if (RuntimeOption::EnableArgsInBacktraces &&
-          ctx->hasReifiedGenerics()) {
+            ctx->hasReifiedGenerics() &&
+            fp->hasThis()) {
           auto const reified_generics = getClsReifiedGenericsProp(ctx, fp);
           clsname += mangleReifiedGenericsName(reified_generics);
         }

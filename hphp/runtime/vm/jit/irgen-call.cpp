@@ -977,12 +977,49 @@ void storeReifiedGenerics(IRGS& env, SSATmp* funName) {
   );
 }
 
+
+folly::Optional<int> specialClsReifiedPropSlot(IRGS& env, SpecialClsRef ref) {
+  auto const cls = curClass(env);
+  if (!cls) return folly::none;
+  auto result = [&] (const Class* cls) -> folly::Optional<int> {
+    if (!cls->hasReifiedGenerics()) return folly::none;
+    auto const slot = cls->lookupReifiedInitProp();
+    assertx(slot != kInvalidSlot);
+    return slot;
+  };
+  switch (ref) {
+    case SpecialClsRef::Static:
+      // Currently we disallow new static on reified classes
+      return folly::none;
+    case SpecialClsRef::Self:
+      return result(cls);
+    case SpecialClsRef::Parent:
+      if (!cls->parent()) return folly::none;
+      return result(cls->parent());
+  }
+  always_assert(false);
 }
+
+} // namespace
 
 void emitFPushCtorS(IRGS& env, uint32_t numParams, SpecialClsRef ref) {
   auto const cls  = specialClsRefToCls(env, ref);
   auto const func = gen(env, LdClsCtor, cls, fp(env));
-  auto const obj  = gen(env, AllocObj, cls);
+  auto const obj = [&] {
+    auto const slot = specialClsReifiedPropSlot(env, ref);
+    if (slot == folly::none) return gen(env, AllocObj, cls);
+    auto const this_ = checkAndLoadThis(env);
+    auto const ty = RuntimeOption::EvalHackArrDVArrs ? TVec : TArr;
+    auto const addr = gen(
+      env,
+      LdPropAddr,
+      ByteOffsetData { (ptrdiff_t)curClass(env)->declPropOffset(*slot) },
+      ty.lval(Ptr::Prop),
+      this_
+    );
+    auto const reified_generic = gen(env, LdMem, ty, addr);
+    return gen(env, AllocObjReified, cls, reified_generic);
+  }();
   pushIncRef(env, obj);
   fpushActRec(env, func, obj, numParams, nullptr, cns(env, false));
 }

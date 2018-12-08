@@ -805,8 +805,24 @@ and emit_reified_targs env pos targs =
 and emit_new env pos expr targs args uargs =
   let has_reified_args = List.exists ~f:(fun (_, b) -> b) targs in
   let nargs = List.length args + List.length uargs in
-  let cexpr = expr_to_class_expr ~resolve_self:true
-    (Emit_env.get_scope env) expr in
+  let scope = Emit_env.get_scope env in
+  (* If `new self` or `new parent `when self or parent respectively has
+   * reified generics, do not resolve *)
+  let resolve_self = match expr with
+    | _, A.Id (_, n) when SU.is_self n ->
+      Ast_scope.Scope.get_class_tparams scope
+      |> List.exists ~f:(fun (_, _, _, b) -> b)
+      |> not
+    | _, A.Id (_, n) when SU.is_parent n ->
+      let cls = Ast_scope.Scope.get_class scope in
+      Option.value_map cls ~default:true ~f:(fun cls ->
+      match cls.A.c_extends with
+      | (_, A.Happly (_, l)) :: _ ->
+        not @@ List.exists l ~f:(function (_, A.Hreified _) -> true
+                                         | _ -> false)
+      | _ -> true)
+    | _ -> true in
+  let cexpr = expr_to_class_expr ~resolve_self scope expr in
   let cexpr, has_generics = match cexpr with
     | Class_id (_, name) ->
       let cexpr =

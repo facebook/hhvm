@@ -5660,8 +5660,13 @@ OPTBLD_INLINE void iopFPushCtorI(uint32_t numArgs, uint32_t clsIx) {
 }
 
 OPTBLD_INLINE void iopFPushCtorS(uint32_t numArgs, SpecialClsRef ref) {
-  // TODO(T31677864): implement reification for `new static` etc...
-  fpushCtorImpl(numArgs, specialClsRefToCls(ref), nullptr, false);
+  auto const cls = specialClsRefToCls(ref);
+  if (ref == SpecialClsRef::Static && cls->hasReifiedGenerics()) {
+    raise_error(Strings::NEW_STATIC_ON_REIFIED_CLASS, cls->name()->data());
+  }
+  auto const reified_generics = cls->hasReifiedGenerics()
+    ? getClsReifiedGenericsProp(cls, vmfp()) : nullptr;
+  fpushCtorImpl(numArgs, cls, reified_generics, false);
 }
 
 OPTBLD_INLINE

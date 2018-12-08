@@ -57,7 +57,9 @@ ArrayData* getReifiedTypeList(const std::string& name) {
 }
 
 ArrayData* getClsReifiedGenericsProp(Class* cls, ObjectData* obj) {
-  if (!cls->hasReifiedGenerics()) return nullptr;
+  if (!cls->hasReifiedGenerics()) {
+    raise_error("Cannot get reified generics property of a non reified class");
+  }
   auto const slot = cls->lookupReifiedInitProp();
   assertx(slot != kInvalidSlot);
   auto tv = obj->propVec()[slot];

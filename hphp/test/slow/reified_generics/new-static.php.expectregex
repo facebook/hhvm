@@ -1,0 +1,1 @@
+Fatal error\: ((Cannot call new static since class D has reified generics)|(Cannot create a new instance of a reified class without the reified generics)) in [^\r\n]+ on line 8

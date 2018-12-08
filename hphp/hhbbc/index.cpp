@@ -686,6 +686,15 @@ bool Class::couldBeMocked() const {
   );
 }
 
+bool Class::couldHaveReifiedGenerics() const {
+  return val.match(
+    [] (SString) { return true; },
+    [] (ClassInfo* cinfo) {
+      return cinfo->cls->hasReifiedGenerics;
+    }
+  );
+}
+
 folly::Optional<Class> Class::commonAncestor(const Class& o) const {
   if (val.left() || o.val.left()) return folly::none;
   auto const c1 = val.right();

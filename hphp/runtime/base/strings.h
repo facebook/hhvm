@@ -123,6 +123,8 @@ auto constexpr REIFIED_GENERICS_NOT_GIVEN =
   "Cannot call a reified function without the reified generics";
 auto constexpr REIFIED_GENERICS_SHOULD_NOT_BE_GIVEN =
   "Cannot call a non-reified function with reified generics";
+auto constexpr NEW_STATIC_ON_REIFIED_CLASS =
+  "Cannot call new static since class %s has reified generics";
 
 } // namespace Strings
 } // namespace HPHP

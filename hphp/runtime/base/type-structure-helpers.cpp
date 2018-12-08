@@ -766,6 +766,17 @@ Array resolveAndVerifyTypeStructure(
 ) {
   assertx(!ts.empty());
   assertx(ts.isDictOrDArray());
+  auto const handleResolutionException = [&](auto const& errMsg) {
+    if (!suppress || !IsOrAsOp) raise_error(errMsg);
+    if (RuntimeOption::EvalIsExprEnableUnresolvedWarning) raise_warning(errMsg);
+    auto unresolved = Array::CreateDArray();
+    unresolved.set(
+      s_kind,
+      Variant(static_cast<uint8_t>(TypeStructure::Kind::T_unresolved))
+    );
+    unresolved.set(s_classname, Variant(s_unresolved));
+    return unresolved;
+  };
   Array resolved;
   try {
     bool persistent = true;
@@ -773,15 +784,10 @@ Array resolveAndVerifyTypeStructure(
       TypeStructure::resolve(ts, calledCls, declaringCls, tsList, persistent);
   } catch (Exception& e) {
     // Catch and throw again so we get a line number
-    auto const errMsg = e.getMessage();
-    if (!suppress || !IsOrAsOp) raise_error(errMsg);
-    if (RuntimeOption::EvalIsExprEnableUnresolvedWarning) raise_warning(errMsg);
-    // Lets just return an unresolved array instead
-    resolved = Array::CreateDArray();
-    resolved.set(s_kind,
-                 Variant(static_cast<uint8_t>(
-                         TypeStructure::Kind::T_unresolved)));
-    resolved.set(s_classname, Variant(s_unresolved));
+    resolved = handleResolutionException(e.getMessage());
+  } catch (Object& e) {
+    std::string errMsg = "unable to resolve anonymous type structure";
+    resolved = handleResolutionException(errMsg);
   }
   assertx(!resolved.empty());
   assertx(resolved.isDictOrDArray());

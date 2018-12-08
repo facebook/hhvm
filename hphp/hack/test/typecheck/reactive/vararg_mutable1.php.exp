@@ -1,0 +1,2 @@
+File "vararg_mutable1.php", line 6, characters 28-31:
+__Mutable, __OwnedMutable and __MaybeMutable annotations cannot be used with variadic parameters. (Parsing[1002])

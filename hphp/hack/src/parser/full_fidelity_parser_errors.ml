@@ -1580,7 +1580,7 @@ let parameter_rx_errors parents errors node =
       parent_func_is_reactive parent_attrs parent_tl
   in
   match syntax node with
-  | ParameterDeclaration { parameter_attribute = spec; _ } ->
+  | ParameterDeclaration { parameter_attribute = spec; parameter_name = name; _ } ->
     let has_owned_mutable =
       attribute_specification_contains spec SN.UserAttributes.uaOwnedMutable in
     let errors =
@@ -1600,6 +1600,11 @@ let parameter_rx_errors parents errors node =
           make_error_from_node node
             SyntaxError.conflicting_owned_mutable_and_maybe_mutable_attributes :: errors
         | _ -> errors in
+      let errors =
+        if (has_mutable || has_owned_mutable || has_maybemutable) &&
+           is_variadic_expression name
+        then make_error_from_node name SyntaxError.vararg_and_mutable :: errors
+        else errors in
       let is_inout = is_parameter_with_callconv node in
       let errors =
         if is_inout && (has_mutable || has_maybemutable || has_owned_mutable)

@@ -684,3 +684,7 @@ let mutable_parameter_in_memoize_function ~is_this =
 
 let mutable_return_in_memoize_function =
   "Memoized functions cannot return mutable objects."
+
+let vararg_and_mutable =
+  "__Mutable, __OwnedMutable and __MaybeMutable annotations cannot be used with \
+  variadic parameters."

@@ -2130,7 +2130,7 @@ std::string Debugger::getStopReasonForBp(
 ) {
   std::string description("Breakpoint " + std::to_string(bp->m_id));
   if (!path.empty()) {
-    const char* name = boost::filesystem::path(path.c_str()).filename().c_str();
+    auto const name = boost::filesystem::path(path).filename().string();
     description += " (";
     description += name;
     description += ":";

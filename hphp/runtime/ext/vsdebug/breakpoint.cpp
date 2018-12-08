@@ -444,6 +444,7 @@ void BreakpointManager::removeBreakpoint(int id) {
   // Remove the breakpoint.
   const std::string filePath = it->second->m_path;
   const std::string function = it->second->m_function;
+  auto const line = it->second->m_line;
 
   delete it->second;
   m_breakpoints.erase(it);
@@ -478,8 +479,8 @@ void BreakpointManager::removeBreakpoint(int id) {
     VSDebugLogger::LogLevelInfo,
     "Client removed breakpoint: (id = %d), (file = %s), (line = %d)",
     id,
-    it->second->m_path.c_str(),
-    it->second->m_line
+    filePath.c_str(),
+    line
   );
 
   // Tell the client the breakpoint is gone.

@@ -105,7 +105,7 @@ folly::dynamic ScopesCommand::getScopeDescription(
 
   const ScopeObject* scopeObj = session->getScopeObject(scopeId);
   scope["namedVariables"] =
-    VariablesCommand::countScopeVariables(session, scopeObj, req);
+    VariablesCommand::countScopeVariables(session, m_debugger, scopeObj, req);
 
   return scope;
 }

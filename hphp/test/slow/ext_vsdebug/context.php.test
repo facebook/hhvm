@@ -13,6 +13,10 @@ class B extends A {
   protected int $b = 2;
   public int $c = 3;
   const HELLOB = "hello1";
+
+  public function __toDebugDisplay(): string {
+    return "class B";
+  }
 }
 
 function innerFunc() {

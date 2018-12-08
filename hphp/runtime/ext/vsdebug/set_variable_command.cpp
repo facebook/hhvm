@@ -400,6 +400,7 @@ void SetVariableCommand::setVariableValue(
   Variant variable = tvAsVariant(typedVariable);
   *result = VariablesCommand::serializeVariable(
               session,
+              m_debugger,
               requestId,
               name,
               variable

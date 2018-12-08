@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
+#include "hphp/runtime/ext/vsdebug/php_executor.h"
 
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/php-globals.h"
@@ -32,6 +33,46 @@ using folly::format;
 
 namespace HPHP {
 namespace VSDEBUG {
+
+namespace {
+struct DebugSummaryPHPExecutor: public PHPExecutor
+{
+public:
+  DebugSummaryPHPExecutor(
+    Debugger *debugger,
+    DebuggerSession *session,
+    request_id_t m_threadId,
+    const Object &obj
+  );
+
+Variant m_debugDisplay;
+
+protected:
+  const Object &m_obj;
+
+  virtual void callPHPCode() override;
+};
+
+DebugSummaryPHPExecutor::DebugSummaryPHPExecutor(
+  Debugger *debugger,
+  DebuggerSession *session,
+  request_id_t threadId,
+  const Object &obj
+) : PHPExecutor(debugger, session, "Debug summary returned", threadId)
+  , m_obj{obj}
+{
+}
+
+void DebugSummaryPHPExecutor::callPHPCode()
+{
+  try {
+    m_debugDisplay = m_obj->invokeToDebugDisplay();
+  } catch (...) {
+    // NB if we get here it's because __toDebugDisplay threw, so we'll
+    // fall back to the default action.
+  }
+}
+}
 
 const StaticString s_user("user");
 const StaticString s_core("Core");
@@ -142,7 +183,7 @@ bool VariablesCommand::executeImpl(
 
     if (obj->objectType() == ServerObjectType::Scope) {
       ScopeObject* scope = static_cast<ScopeObject*>(obj);
-      addScopeVariables(session, targetThreadId(session), scope, &variables);
+      addScopeVariables(session, m_debugger, targetThreadId(session), scope, &variables);
       sortVariablesInPlace(variables);
 
       // Client can ask for a subsequence of the variables.
@@ -189,14 +230,16 @@ bool VariablesCommand::executeImpl(
 
 int VariablesCommand::countScopeVariables(
   DebuggerSession* session,
+  Debugger* debugger,
   const ScopeObject* scope,
   request_id_t requestId
 ) {
-  return addScopeVariables(session, requestId, scope, nullptr);
+  return addScopeVariables(session, debugger, requestId, scope, nullptr);
 }
 
 int VariablesCommand::addScopeVariables(
   DebuggerSession* session,
+  Debugger* debugger,
   request_id_t requestId,
   const ScopeObject* scope,
   folly::dynamic* vars
@@ -205,11 +248,11 @@ int VariablesCommand::addScopeVariables(
 
   switch (scope->m_scopeType) {
     case ScopeType::Locals:
-      return addLocals(session, requestId, scope, vars);
+      return addLocals(session, debugger, requestId, scope, vars);
 
     case ScopeType::ServerConstants: {
       Variant v;
-      int count = addConstants(session, requestId, s_user, nullptr);
+      int count = addConstants(session, debugger, requestId, s_user, nullptr);
       addScopeSubSection(
         session,
         "User Defined Constants",
@@ -223,7 +266,7 @@ int VariablesCommand::addScopeVariables(
         vars
       );
 
-      count = addConstants(session, requestId, s_core, nullptr);
+      count = addConstants(session, debugger, requestId, s_core, nullptr);
       addScopeSubSection(
         session,
         "System Defined Constants",
@@ -240,7 +283,7 @@ int VariablesCommand::addScopeVariables(
       return 2;
     }
     case ScopeType::Superglobals:
-      return addSuperglobalVariables(session, requestId, scope, vars);
+      return addSuperglobalVariables(session, debugger, requestId, scope, vars);
 
     default:
       assertx(false);
@@ -258,11 +301,11 @@ void VariablesCommand::addSubScopes(
   folly::dynamic* variables
 ) {
   if (subScope->m_subScopeType == ClassPropsType::UserDefinedConstants) {
-    addConstants(session, requestId, s_user, variables);
+    addConstants(session, m_debugger, requestId, s_user, variables);
     sortVariablesInPlace(*variables);
   } else if (subScope->m_subScopeType ==
               ClassPropsType::SystemDefinedConstants) {
-    addConstants(session, requestId, s_core, variables);
+    addConstants(session, m_debugger, requestId, s_core, variables);
     sortVariablesInPlace(*variables);
   } else {
     const auto obj = subScope->m_variable.toObject().get();
@@ -280,6 +323,7 @@ void VariablesCommand::addSubScopes(
         // Add all the constants for the specified class to the result array
         addClassConstants(
           session,
+          m_debugger,
           requestId,
           start,
           count,
@@ -295,6 +339,7 @@ void VariablesCommand::addSubScopes(
         // result array.
         addClassStaticProps(
           session,
+          m_debugger,
           requestId,
           start,
           count,
@@ -326,6 +371,7 @@ void VariablesCommand::addSubScopes(
 
 int VariablesCommand::addLocals(
   DebuggerSession* session,
+  Debugger* debugger,
   request_id_t requestId,
   const ScopeObject* scope,
   folly::dynamic* vars
@@ -347,7 +393,7 @@ int VariablesCommand::addLocals(
     count++;
     if (vars != nullptr) {
       Variant this_(fp->getThis());
-      vars->push_back(serializeVariable(session, requestId, "this", this_));
+      vars->push_back(serializeVariable(session, debugger, requestId, "this", this_));
     }
   }
 
@@ -361,7 +407,7 @@ int VariablesCommand::addLocals(
 
     if (vars != nullptr) {
       vars->push_back(
-        serializeVariable(session, requestId, name, iter.second())
+        serializeVariable(session, debugger, requestId, name, iter.second())
       );
     }
 
@@ -393,6 +439,7 @@ int VariablesCommand::getCachedValue(
 
 int VariablesCommand::addConstants(
   DebuggerSession* session,
+  Debugger* debugger,
   request_id_t requestId,
   const StaticString& category,
   folly::dynamic* vars
@@ -418,7 +465,7 @@ int VariablesCommand::addConstants(
     const std::string name = iter.first().toString().toCppString();
     if (vars != nullptr) {
       vars->push_back(
-        serializeVariable(session, requestId, name, iter.second(), true)
+        serializeVariable(session, debugger, requestId, name, iter.second(), true)
       );
     }
 
@@ -453,6 +500,7 @@ bool VariablesCommand::isSuperGlobal(const std::string& name) {
 
 int VariablesCommand::addSuperglobalVariables(
   DebuggerSession* session,
+  Debugger* debugger,
   request_id_t requestId,
   const ScopeObject* scope,
   folly::dynamic* vars
@@ -479,7 +527,7 @@ int VariablesCommand::addSuperglobalVariables(
 
     if (vars != nullptr) {
       vars->push_back(
-        serializeVariable(session, requestId, name, iter.second())
+        serializeVariable(session, debugger, requestId, name, iter.second())
       );
     }
 
@@ -508,6 +556,7 @@ const std::string VariablesCommand::getPHPVarName(const std::string& name) {
 
 folly::dynamic VariablesCommand::serializeVariable(
   DebuggerSession* session,
+  Debugger* debugger,
   request_id_t requestId,
   const std::string& name,
   const Variant& variable,
@@ -518,7 +567,7 @@ folly::dynamic VariablesCommand::serializeVariable(
   const std::string variableName = doNotModifyName ? name : getPHPVarName(name);
 
   var["name"] = variableName;
-  var["value"] = getVariableValue(variable);
+  var["value"] = getVariableValue(session, debugger, requestId, variable);
   var["type"] = getTypeName(variable);
 
   // If the variable is an array or object, register it as a server object and
@@ -535,7 +584,7 @@ folly::dynamic VariablesCommand::serializeVariable(
       if (obj != nullptr && !UNLIKELY(obj->instanceof(c_Closure::classof()))) {
         hasChildren = true;
         var["namedVariables"] =
-          addObjectChildren(session, requestId, -1, -1, variable, nullptr);
+          addObjectChildren(session, debugger, requestId, -1, -1, variable, nullptr);
       }
     } else if (variable.isDict() || variable.isKeyset()) {
       hasChildren = true;
@@ -618,7 +667,11 @@ const char* VariablesCommand::getTypeName(const Variant& variable) {
   }
 }
 
-const std::string VariablesCommand::getVariableValue(const Variant& variable) {
+const std::string VariablesCommand::getVariableValue(
+  DebuggerSession* session,
+  Debugger* debugger,
+  request_id_t requestId,
+  const Variant& variable) {
   const DataType type = variable.getType();
 
   switch (type) {
@@ -682,11 +735,33 @@ const std::string VariablesCommand::getVariableValue(const Variant& variable) {
       return "reference";
 
     case KindOfObject:
-      return variable.toCObjRef()->getClassName().c_str();
+      return getObjectSummary(session, debugger, requestId, variable.toCObjRef());
 
     default:
       return "Unexpected variable type";
   }
+}
+
+const std::string VariablesCommand::getObjectSummary(
+  DebuggerSession* session,
+  Debugger* debugger,
+  request_id_t threadId,
+  const Object &obj
+) {
+  auto executor = DebugSummaryPHPExecutor{
+    debugger,
+    session,
+    threadId,
+    obj
+  };
+
+  executor.execute();
+
+  if (executor.m_debugDisplay.isString()) {
+    return executor.m_debugDisplay.toCStrRef().toCppString();
+  }
+
+  return obj->getClassName().c_str();
 }
 
 int VariablesCommand::addComplexChildren(
@@ -705,6 +780,7 @@ int VariablesCommand::addComplexChildren(
     if (obj != nullptr && !UNLIKELY(obj->instanceof(c_Closure::classof()))) {
       result += addObjectChildren(
         session,
+        m_debugger,
         requestId,
         start,
         count,
@@ -733,6 +809,7 @@ int VariablesCommand::addComplexChildren(
     // from classes up the parent chain.
     result += addClassSubScopes(
       session,
+      m_debugger,
       ClassPropsType::Constants,
       requestId,
       var,
@@ -743,6 +820,7 @@ int VariablesCommand::addComplexChildren(
     // inherited from classes up the parent chain.
     result += addClassSubScopes(
       session,
+      m_debugger,
       ClassPropsType::StaticProps,
       requestId,
       var,
@@ -751,7 +829,7 @@ int VariablesCommand::addComplexChildren(
 
     return result;
   } else if (var.isArray()) {
-    return addArrayChildren(session, requestId, start, count, variable, vars);
+    return addArrayChildren(session, m_debugger, requestId, start, count, variable, vars);
   }
 
   return 0;
@@ -759,6 +837,7 @@ int VariablesCommand::addComplexChildren(
 
 int VariablesCommand::addArrayChildren(
   DebuggerSession* session,
+  Debugger* debugger,
   request_id_t requestId,
   int start,
   int count,
@@ -786,7 +865,7 @@ int VariablesCommand::addArrayChildren(
 
     if (vars != nullptr) {
       vars->push_back(
-        serializeVariable(session, requestId, name, iter.second(), true)
+        serializeVariable(session, debugger, requestId, name, iter.second(), true)
       );
       added++;
     }
@@ -799,11 +878,14 @@ int VariablesCommand::addArrayChildren(
   return added;
 }
 
-int VariablesCommand::addClassConstants(DebuggerSession* session,
-                                        request_id_t requestId, int start,
-                                        int count, Class* cls,
-                                        const Variant& /*var*/,
-                                        folly::dynamic* vars) {
+int VariablesCommand::addClassConstants(
+  DebuggerSession* session,
+  Debugger* debugger,
+  request_id_t requestId, int start,
+  int count, Class* cls,
+  const Variant& /*var*/,
+  folly::dynamic* vars
+) {
   Class* currentClass = cls;
 
   std::unordered_set<std::string> constantNames;
@@ -827,6 +909,7 @@ int VariablesCommand::addClassConstants(DebuggerSession* session,
           vars->push_back(
             serializeVariable(
               session,
+              debugger,
               requestId,
               name,
               tvAsVariant(const_cast<TypedValueAux*>(&constant.val)),
@@ -859,11 +942,14 @@ int VariablesCommand::addClassConstants(DebuggerSession* session,
   return constantNames.size();
 }
 
-int VariablesCommand::addClassStaticProps(DebuggerSession* session,
-                                          request_id_t requestId, int start,
-                                          int count, Class* cls,
-                                          const Variant& /*var*/,
-                                          folly::dynamic* vars) {
+int VariablesCommand::addClassStaticProps(
+  DebuggerSession* session,
+  Debugger* debugger,
+  request_id_t requestId, int start,
+  int count, Class* cls,
+  const Variant& /*var*/,
+  folly::dynamic* vars
+) {
   const std::string className = cls->name()->toCppString();
   const auto staticProperties = cls->staticProperties();
   int propCount = 0;
@@ -905,6 +991,7 @@ int VariablesCommand::addClassStaticProps(DebuggerSession* session,
         vars->push_back(
           serializeVariable(
             session,
+            debugger,
             requestId,
             propName,
             variant,
@@ -976,6 +1063,7 @@ int VariablesCommand::addScopeSubSection(
 
 int VariablesCommand::addClassSubScopes(
   DebuggerSession* session,
+  Debugger* debugger,
   ClassPropsType propType,
   request_id_t requestId,
   const Variant& var,
@@ -1000,6 +1088,7 @@ int VariablesCommand::addClassSubScopes(
     case ClassPropsType::Constants: {
         count = addClassConstants(
           session,
+          debugger,
           requestId,
           0,
           0,
@@ -1029,6 +1118,7 @@ int VariablesCommand::addClassSubScopes(
         className = currentClass->name()->toCppString();
         count = addClassStaticProps(
           session,
+          debugger,
           requestId,
           0,
           0,
@@ -1180,6 +1270,7 @@ void VariablesCommand::addClassPrivateProps(
       vars->push_back(
         serializeVariable(
           session,
+          m_debugger,
           requestId,
           displayName,
           propertyVariant,
@@ -1198,6 +1289,7 @@ void VariablesCommand::addClassPrivateProps(
 
 int VariablesCommand::addObjectChildren(
   DebuggerSession* session,
+  Debugger* debugger,
   request_id_t requestId,
   int start,
   int count,
@@ -1272,6 +1364,7 @@ int VariablesCommand::addObjectChildren(
       vars->push_back(
         serializeVariable(
           session,
+          debugger,
           requestId,
           displayName,
           propertyVariant,

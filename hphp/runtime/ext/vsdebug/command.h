@@ -267,6 +267,7 @@ public:
   // specified scope.
   static int countScopeVariables(
     DebuggerSession* session,
+    Debugger* debugger,
     const ScopeObject* scope,
     request_id_t requestId
   );
@@ -283,6 +284,7 @@ public:
   // Serializes a variable to be sent over the VS Code debugger protocol.
   static folly::dynamic serializeVariable(
     DebuggerSession* session,
+    Debugger* debugger,
     request_id_t requestId,
     const std::string& name,
     const Variant& variable,
@@ -307,6 +309,7 @@ private:
   // returns a count of variables if vars == nullptr.
   static int addScopeVariables(
     DebuggerSession* session,
+    Debugger* debugger,
     request_id_t requestId,
     const ScopeObject* scope,
     folly::dynamic* vars
@@ -325,6 +328,7 @@ private:
   // Adds local variables.
   static int addLocals(
     DebuggerSession* session,
+    Debugger* debugger,
     request_id_t requestId,
     const ScopeObject* scope,
     folly::dynamic* vars
@@ -333,6 +337,7 @@ private:
   // Adds the specified type of constants.
   static int addConstants(
     DebuggerSession* session,
+    Debugger* debugger,
     request_id_t requestId,
     const StaticString& category,
     folly::dynamic* vars
@@ -341,13 +346,14 @@ private:
   // Adds super global variables.
   static int addSuperglobalVariables(
     DebuggerSession* session,
+    Debugger* debugger,
     request_id_t requestId,
     const ScopeObject* scope,
     folly::dynamic* vars
   );
 
   // Adds children of a complex object.
-  static int addComplexChildren(
+  int addComplexChildren(
     DebuggerSession* session,
     request_id_t requestId,
     int start,
@@ -359,6 +365,7 @@ private:
   // Adds array indicies.
   static int addArrayChildren(
     DebuggerSession* session,
+    Debugger* debugger,
     request_id_t requestId,
     int start,
     int count,
@@ -382,6 +389,7 @@ private:
   // Adds object properties.
   static int addObjectChildren(
     DebuggerSession* session,
+    Debugger* debugger,
     request_id_t requestId,
     int start,
     int count,
@@ -392,6 +400,7 @@ private:
   // Adds constants defined on a class.
   static int addClassConstants(
     DebuggerSession* session,
+    Debugger* debugger,
     request_id_t requestId,
     int start,
     int count,
@@ -403,6 +412,7 @@ private:
   // Adds static properties defined on an object's class.
   static int addClassStaticProps(
     DebuggerSession* session,
+    Debugger* debugger,
     request_id_t requestId,
     int start,
     int count,
@@ -412,7 +422,7 @@ private:
   );
 
   // Adds private properties defined on one of an object's base classes.
-  static void addClassPrivateProps(
+  void addClassPrivateProps(
     DebuggerSession* session,
     request_id_t requestId,
     int start,
@@ -426,6 +436,7 @@ private:
   // chain (including itself) that has class constants or static props defined.
   static int addClassSubScopes(
     DebuggerSession* session,
+    Debugger* debugger,
     ClassPropsType propType,
     request_id_t requestId,
     const Variant& var,
@@ -456,7 +467,19 @@ private:
     folly::dynamic* vars
   );
 
-  static const std::string getVariableValue(const Variant& variable);
+  static const std::string getVariableValue(
+    DebuggerSession* session,
+    Debugger* debugger,
+    request_id_t requestId,
+    const Variant& variable
+  );
+
+  static const std::string getObjectSummary(
+    DebuggerSession* session,
+    Debugger* debugger,
+    request_id_t requestId,
+    const Object &obj
+  );
 
   static constexpr char* VisibilityPrivate = "private";
   static constexpr char* VisibilityProtected = "protected";
@@ -483,7 +506,7 @@ struct SetVariableCommand : public VSCommand {
 
 private:
 
-  static bool setLocalVariable(
+  bool setLocalVariable(
     DebuggerSession* session,
     const std::string& name,
     const std::string& value,
@@ -491,7 +514,7 @@ private:
     folly::dynamic* result
   );
 
-  static bool setConstant(
+  bool setConstant(
     DebuggerSession* session,
     const std::string& name,
     const std::string& value,
@@ -499,7 +522,7 @@ private:
     folly::dynamic* result
   );
 
-  static bool setArrayVariable(
+  bool setArrayVariable(
     DebuggerSession* session,
     const std::string& name,
     const std::string& value,
@@ -507,7 +530,7 @@ private:
     folly::dynamic* result
   );
 
-  static bool setObjectVariable(
+  bool setObjectVariable(
     DebuggerSession* session,
     const std::string& name,
     const std::string& value,
@@ -517,7 +540,7 @@ private:
 
   static bool getBooleanValue(const std::string& str);
 
-  static void setVariableValue(
+  void setVariableValue(
     DebuggerSession* session,
     const std::string& name,
     const std::string& value,

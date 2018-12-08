@@ -727,7 +727,7 @@ module Revision_tracker = struct
     in
     let decision = List.fold_left ~f:max_report ~init:default_decision reports in
     match decision with
-    | Restart_server _ when !(env.is_in_hg_update_state) ->
+    | Restart_server _ when is_hg_updating env ->
       Hh_logger.log "Ignoring Restart_server because we are already in next hg.update state";
       Move_along
     | decision -> decision

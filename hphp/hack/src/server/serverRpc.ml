@@ -132,6 +132,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | LINT_STDIN { filename; contents } ->
         env, ServerLint.go_stdin env ~filename ~contents
     | LINT_ALL code -> env, ServerLint.lint_all genv env code
+    | LINT_XCONTROLLER fnl -> env, ServerLint.go_xcontroller genv env fnl
     | CREATE_CHECKPOINT x -> env, ServerCheckpoint.create_checkpoint x
     | RETRIEVE_CHECKPOINT x -> env, ServerCheckpoint.retrieve_checkpoint x
     | DELETE_CHECKPOINT x -> env, ServerCheckpoint.delete_checkpoint x

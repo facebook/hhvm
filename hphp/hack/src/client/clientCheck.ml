@@ -458,6 +458,30 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       let%lwt results = rpc args @@ Rpc.LINT_ALL code in
       ClientLint.go results args.output_json;
       Lwt.return Exit_status.No_error
+    | MODE_LINT_XCONTROLLER filename ->
+      begin try
+        match Sys_utils.realpath filename with
+        | None ->
+          prerr_endlinef "Could not find file '%s'" filename;
+          raise Exit
+        | Some filename ->
+          let files =
+            Sys_utils.cat_no_fail filename |>
+            Sys_utils.split_lines |>
+            List.filter_map ~f:begin fun filename ->
+              let res = Sys_utils.realpath filename in
+              if Option.is_none res then begin
+                prerr_endlinef "Could not find file '%s'" filename;
+                raise Exit
+              end;
+              res
+            end
+          in
+          let%lwt results = rpc args @@ Rpc.LINT_XCONTROLLER files in
+          ClientLint.go results args.output_json;
+          Lwt.return Exit_status.No_error
+        with Exit -> Lwt.return Exit_status.Input_error
+      end
     | MODE_CREATE_CHECKPOINT x ->
       let%lwt () = rpc args @@ Rpc.CREATE_CHECKPOINT x in
       Lwt.return Exit_status.No_error

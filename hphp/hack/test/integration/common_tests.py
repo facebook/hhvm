@@ -1064,3 +1064,24 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
             options=['--single', '-'],
             stdin='<?hh //strict\n function aaaa(): int { return h(); }'
         )
+
+    def test_lint_xcontroller(self):
+        self.start_hh_server()
+
+        with open(os.path.join(self.repo_dir, 'in_list.txt'), 'w') as f:
+            f.write(os.path.join(self.repo_dir, 'xcontroller.php'))
+
+        with open(os.path.join(self.repo_dir, 'xcontroller.php'), 'w') as f:
+            f.write("<?hh\n class MyXController extends XControllerBase { "
+                "public function getPath() { return f(); }  }")
+
+        self.check_cmd([
+            'File "{root}xcontroller.php", line 2, characters 8-20:',
+            'When linting MyXController: The body of isDelegateOnly should '
+            'only contain `return true;` or `return false;` (Lint[5615])',
+            'File "{root}xcontroller.php", line 2, characters 8-20:',
+            'When linting MyXController: getPath method of MyXController must '
+            'be present and return a static literal for build purposes (Lint[5615])'
+        ],
+            options=['--lint-xcontroller', '{root}in_list.txt'],
+        )

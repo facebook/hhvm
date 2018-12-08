@@ -8,3 +8,5 @@
  *)
 
 let lint _ _ _ = ()
+
+let lint_xcontroller _ _ = ()

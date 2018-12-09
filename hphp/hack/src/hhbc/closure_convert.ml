@@ -640,18 +640,19 @@ let rec convert_expr env st (p, expr_ as expr) =
       env p pe
   | Call ((_, (Class_const ((_, Id (_, cid)), _)
              | Class_get ((_, Id (_, cid)), _))) as e,
-    el1, el2, el3)
+    targs, el2, el3)
     when SU.is_parent cid ->
     let st = add_var env st "$this" in
     let st, e = convert_expr env st e in
+    let st, targs = convert_targs env st targs in
     let st, el2 = convert_exprs env st el2 in
     let st, el3 = convert_exprs env st el3 in
-    st, (p, Call(e, el1, el2, el3))
+    st, (p, Call(e, targs, el2, el3))
   | Call ((_, Id (_, id)), _, es, _)
     when String.lowercase id = "tuple" &&
       Emit_env.is_hh_syntax_enabled () ->
     convert_expr env st (p, Varray es)
-  | Call (e, el1, el2, el3) ->
+  | Call (e, targs, el2, el3) ->
     let st =
       begin match snd e, el2 with
       | Id (_, s), [_, String arg] when
@@ -660,9 +661,10 @@ let rec convert_expr env st (p, expr_ as expr) =
       | _ -> st
       end in
     let st, e = convert_expr env st e in
+    let st, targs = convert_targs env st targs in
     let st, el2 = convert_exprs env st el2 in
     let st, el3 = convert_exprs env st el3 in
-    st, (p, Call(e, el1, el2, el3))
+    st, (p, Call(e, targs, el2, el3))
   | String2 el ->
     let st, el = convert_exprs env st el in
     st, (p, String2 el)
@@ -710,18 +712,12 @@ let rec convert_expr env st (p, expr_ as expr) =
     let st, e = convert_expr env st e in
     let st, h = convert_hint env st h in
     st, (p, As (e, h, b))
-  | New (e, typeargs, el1, el2) ->
+  | New (e, targs, el1, el2) ->
     let st, e = convert_expr env st e in
-    let st, typeargs =
-      List.fold_right ~init:(st, []) typeargs
-        ~f:(fun (h, b) (st, acc) ->
-            let st, h = convert_hint env st h in
-            st, (h, b) :: acc
-         )
-    in
+    let st, targs = convert_targs env st targs in
     let st, el1 = convert_exprs env st el1 in
     let st, el2 = convert_exprs env st el2 in
-    st, (p, New (e, typeargs, el1, el2))
+    st, (p, New (e, targs, el1, el2))
   | NewAnonClass (args, varargs, cls) ->
     let cls = { cls with
       c_name = (fst cls.c_name, make_anonymous_class_name env st) } in
@@ -870,6 +866,13 @@ and convert_hint env st (p, h as hint) =
     st, (p, Hshape info)
   | Haccess _
   | Hfun _ -> st, hint
+
+and convert_targs env st targs =
+  List.fold_right ~init:(st, []) targs
+    ~f:(fun (h, is_reified) (st, acc) ->
+        let st, h = convert_hint env st h in
+        st, (h, is_reified) :: acc
+     )
 
 (* Closure-convert a lambda expression, with use_vars_opt = Some vars
  * if there is an explicit `use` clause.

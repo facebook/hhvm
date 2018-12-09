@@ -75,7 +75,7 @@ interface OutputCollection<-Te> {
    *
    * @return - Returns itself.
    */
-  <<__Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
+  <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
   public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Te> $traversable): this;
 }
 
@@ -236,7 +236,7 @@ interface IndexAccess<Tk, Tv> extends ConstIndexAccess<Tk, Tv> {
    *
    * @return - Returns itself.
    */
-  <<__Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
+  <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
   public function setAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> ?KeyedTraversable<Tk, Tv> $traversable): this;
   /**
    * Removes the specified key (and associated value) from the current
@@ -334,8 +334,8 @@ interface ConstVector<+Tv> extends ConstCollection<Tv>,
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__OnlyRxIfRxFunc>>(function(Tv): Tu) $fn): ConstVector<Tu>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn): ConstVector<Tu>;
   /**
    * Returns a `ConstVector` containing the values after an operation has been
    * applied to each key and value in the current `ConstVector`.
@@ -350,8 +350,8 @@ interface ConstVector<+Tv> extends ConstCollection<Tv>,
    * @return - a `ConstVector` containing the values after a user-specified
    *           operation on the current Vector's keys and values is applied.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__OnlyRxIfRxFunc>>(function(int, Tv): Tu) $fn):
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(int, Tv): Tu) $fn):
     ConstVector<Tu>;
   /**
    * Returns a `ConstVector` containing the values of the current `ConstVector`
@@ -368,8 +368,8 @@ interface ConstVector<+Tv> extends ConstCollection<Tv>,
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): ConstVector<Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): ConstVector<Tv>;
   /**
    * Returns a `ConstVector` containing the values of the current `ConstVector`
    * that meet a supplied condition applied to its keys and values.
@@ -385,8 +385,8 @@ interface ConstVector<+Tv> extends ConstCollection<Tv>,
    *           condition is applied to the keys and values of the current
    *           `ConstVector`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__OnlyRxIfRxFunc>>(function(int, Tv): bool) $fn):
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(int, Tv): bool) $fn):
     ConstVector<Tv>;
   /**
    * Returns a `ConstVector` where each element is a `Pair` that combines the
@@ -403,7 +403,7 @@ interface ConstVector<+Tv> extends ConstCollection<Tv>,
    * @return - The `ConstVector` that combines the values of the current
    *           `ConstVector` with the provided `Traversable`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
     ConstVector<Pair<Tv, Tu>>;
   /**
@@ -437,8 +437,8 @@ interface ConstVector<+Tv> extends ConstCollection<Tv>,
    * @return - A `ConstVector` that is a proper subset of the current
    *           `ConstVector` up until the callback returns `false`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): ConstVector<Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): ConstVector<Tv>;
   /**
    * Returns a `ConstVector` containing the values after the `n`-th element of
    * the current `ConstVector`.
@@ -471,8 +471,8 @@ interface ConstVector<+Tv> extends ConstCollection<Tv>,
    * @return - A `ConstVector` that is a proper subset of the current
    *           `ConstVector` starting after the callback returns `true`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): ConstVector<Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): ConstVector<Tv>;
   /**
    * Returns a subset of the current `ConstVector` starting from a given key up
    * to, but not including, the element at the provided length from the starting
@@ -508,7 +508,7 @@ interface ConstVector<+Tv> extends ConstCollection<Tv>,
    *
    * @guide /hack/generics/constraints
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function concat<Tu super Tv>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
     ConstVector<Tu>;
   /**
@@ -611,8 +611,8 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__OnlyRxIfRxFunc>>(function(Tv): Tu) $fn): MutableVector<Tu>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn): MutableVector<Tu>;
   /**
    * Returns a `MutableVector` containing the values after an operation has been
    * applied to each key and value in the current `MutableVector`.
@@ -627,8 +627,8 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
    * @return - a `MutableVector` containing the values after a user-specified
    *           operation on the current Vector's keys and values is applied.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__OnlyRxIfRxFunc>>(function(int, Tv): Tu) $fn):
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(int, Tv): Tu) $fn):
     MutableVector<Tu>;
   /**
    * Returns a `MutableVector` containing the values of the current
@@ -645,8 +645,8 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): MutableVector<Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): MutableVector<Tv>;
   /**
    * Returns a `MutableVector` containing the values of the current
    * `MutableVector` that meet a supplied condition applied to its keys and
@@ -664,8 +664,8 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
    *           `MutableVector`.
    *
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__OnlyRxIfRxFunc>>(function(int, Tv): bool) $fn):
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(int, Tv): bool) $fn):
     MutableVector<Tv>;
   /**
    * Returns a `MutableVector` where each element is a `Pair` that combines the
@@ -682,7 +682,7 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
    * @return - The `MutableVector` that combines the values of the current
    *           `MutableVector` with the provided `Traversable`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
     MutableVector<Pair<Tv, Tu>>;
   /**
@@ -716,8 +716,8 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
    * @return - A `MutableVector` that is a proper subset of the current
    *           `MutableVector` up until the callback returns `false`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): MutableVector<Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): MutableVector<Tv>;
   /**
    * Returns a `MutableVector` containing the values after the `n`-th element of
    * the current `MutableVector`.
@@ -750,8 +750,8 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
    * @return - A `MutableVector` that is a proper subset of the current
    *           `MutableVector` starting after the callback returns `true`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): MutableVector<Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): MutableVector<Tv>;
   /**
    * Returns a subset of the current `MutableVector` starting from a given key
    * up to, but not including, the element at the provided length from the
@@ -787,7 +787,7 @@ interface MutableVector<Tv> extends ConstVector<Tv>,
    *
    * @guide /hack/generics/constraints
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function concat<Tu super Tv>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
     MutableVector<Tu>;
   /**
@@ -889,8 +889,8 @@ interface ConstMap<Tk, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__OnlyRxIfRxFunc>>(function(Tv): Tu) $fn): ConstMap<Tk, Tu>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn): ConstMap<Tk, Tu>;
   /**
    * Returns a `ConstMap` after an operation has been applied to each key and
    * value in the current `ConstMap`.
@@ -908,8 +908,8 @@ interface ConstMap<Tk, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
    * @return - a `ConstMap` containing the values after a user-specified
    *           operation on the current `ConstMap`'s keys and values is applied.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__OnlyRxIfRxFunc>>(function(Tk, Tv): Tu) $fn):
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(Tk, Tv): Tu) $fn):
     ConstMap<Tk, Tu>;
   /**
    * Returns a `ConstMap` containing the values of the current `ConstMap` that
@@ -929,8 +929,8 @@ interface ConstMap<Tk, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): ConstMap<Tk, Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): ConstMap<Tk, Tv>;
   /**
    * Returns a `ConstMap` containing the values of the current `ConstMap` that
    * meet a supplied condition applied to its keys and values.
@@ -949,8 +949,8 @@ interface ConstMap<Tk, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
    *           condition is applied to the keys and values of the current
    *           `ConstMap`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__OnlyRxIfRxFunc>>(function(Tk, Tv): bool) $fn):
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(Tk, Tv): bool) $fn):
     ConstMap<Tk, Tv>;
   /**
    * Returns a `ConstMap` where each value is a `Pair` that combines the value
@@ -970,7 +970,7 @@ interface ConstMap<Tk, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
    * @return - The `ConstMap` that combines the values of the current
    *           `ConstMap` with the provided `Traversable`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
     ConstMap<Tk, Pair<Tv, Tu>>;
   /**
@@ -1002,8 +1002,8 @@ interface ConstMap<Tk, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
    * @return - A `ConstMap` that is a proper subset of the current `ConstMap`
    *           up until the callback returns `false`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): ConstMap<Tk, Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): ConstMap<Tk, Tv>;
   /**
    * Returns a `ConstMap` containing the values after the `n`-th element of the
    * current `ConstMap`.
@@ -1036,8 +1036,8 @@ interface ConstMap<Tk, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
    * @return - A `ConstMap` that is a proper subset of the current `ConstMap`
    *           starting after the callback returns `true`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): ConstMap<Tk, Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): ConstMap<Tk, Tv>;
   /**
    * Returns a subset of the current `ConstMap` starting from a given key
    * location up to, but not including, the element at the provided length from
@@ -1073,7 +1073,7 @@ interface ConstMap<Tk, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
    *
    * @guide /hack/generics/constraints
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function concat<Tu super Tv>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
     ConstVector<Tu>;
   /**
@@ -1164,8 +1164,8 @@ interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__OnlyRxIfRxFunc>>(function(Tv): Tu) $fn): MutableMap<Tk, Tu>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn): MutableMap<Tk, Tu>;
   /**
    * Returns a `MutableMap` after an operation has been applied to each key and
    * value in the current `MutableMap`.
@@ -1184,8 +1184,8 @@ interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
    *           operation on the current `MutableMap`'s keys and values is
    *           applied.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__OnlyRxIfRxFunc>>(function(Tk, Tv): Tu) $fn):
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(Tk, Tv): Tu) $fn):
     MutableMap<Tk, Tu>;
   /**
    * Returns a `MutableMap` containing the values of the current `MutableMap`
@@ -1205,8 +1205,8 @@ interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): MutableMap<Tk, Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): MutableMap<Tk, Tv>;
   /**
    * Returns a `MutableMap` containing the values of the current `MutableMap`
    * that meet a supplied condition applied to its keys and values.
@@ -1225,8 +1225,8 @@ interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
    *           condition is applied to the keys and values of the current
    *           `MutableMap`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__OnlyRxIfRxFunc>>(function(Tk, Tv): bool) $fn):
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(Tk, Tv): bool) $fn):
     MutableMap<Tk, Tv>;
   /**
    * Returns a `MutableMap` where each value is a `Pair` that combines the
@@ -1246,7 +1246,7 @@ interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
    * @return - The `MutableMap` that combines the values of the current
    *           `MutableMap` with the provided `Traversable`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
     MutableMap<Tk, Pair<Tv, Tu>>;
   /**
@@ -1278,8 +1278,8 @@ interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
    * @return - A `MutableMap` that is a proper subset of the current
    *           `MutableMap` up until the callback returns `false`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): MutableMap<Tk, Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): MutableMap<Tk, Tv>;
   /**
    * Returns a `MutableMap` containing the values after the `n`-th element of
    * the current `MutableMap`.
@@ -1313,8 +1313,8 @@ interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
    * @return - A `MutableMap` that is a proper subset of the current
    *           `MutableMap` starting after the callback returns `true`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): MutableMap<Tk, Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): MutableMap<Tk, Tv>;
   /**
    * Returns a subset of the current `MutableMap` starting from a given key
    * location up to, but not including, the element at the provided length from
@@ -1350,7 +1350,7 @@ interface MutableMap<Tk, Tv> extends ConstMap<Tk, Tv>,
    *
    * @guide /hack/generics/constraints
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function concat<Tu super Tv>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
     MutableVector<Tu>;
   /**
@@ -1442,8 +1442,8 @@ interface ConstSet<+Tv> extends ConstCollection<Tv>,
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__OnlyRxIfRxFunc>>(function(Tv): Tu) $fn): ConstSet<Tu>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn): ConstSet<Tu>;
   /**
    * Returns a `ConstSet` containing the values after an operation has been
    * applied to each "key" and value in the current Set.
@@ -1461,8 +1461,8 @@ interface ConstSet<+Tv> extends ConstCollection<Tv>,
    * @return - a `ConstSet` containing the values after a user-specified
    *           operation on the current `ConstSet`'s values is applied.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__OnlyRxIfRxFunc>>(function(arraykey, Tv): Tu) $fn): ConstSet<Tu>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $fn): ConstSet<Tu>;
   /**
    * Returns a `ConstSet` containing the values of the current `ConstSet` that
    * meet a supplied condition applied to each value.
@@ -1478,8 +1478,8 @@ interface ConstSet<+Tv> extends ConstCollection<Tv>,
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): ConstSet<Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): ConstSet<Tv>;
   /**
    * Returns a `ConstSet` containing the values of the current `ConstSet` that
    * meet a supplied condition applied to its "keys" and values.
@@ -1497,8 +1497,8 @@ interface ConstSet<+Tv> extends ConstCollection<Tv>,
    * @return - a `ConstSet` containing the values after a user-specified
    *           condition is applied to the values of the current `ConstSet`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__OnlyRxIfRxFunc>>(function(arraykey, Tv): bool) $fn): ConstSet<Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv): bool) $fn): ConstSet<Tv>;
   /**
    * Returns a `ConstSet` where each value is a `Pair` that combines the value
    * of the current `ConstSet` and the provided `Traversable`.
@@ -1518,7 +1518,7 @@ interface ConstSet<+Tv> extends ConstCollection<Tv>,
    * @return - The `ConstSet` that combines the values of the current
    *           `ConstSet` with the provided `Traversable`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): ConstSet<Pair<Tv, Tu>>;
   /**
    * Returns a `ConstSet` containing the first `n` values of the current
@@ -1549,8 +1549,8 @@ interface ConstSet<+Tv> extends ConstCollection<Tv>,
    * @return - A `ConstSet` that is a proper subset of the current `ConstSet`
    *           up until the callback returns `false`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): ConstSet<Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): ConstSet<Tv>;
   /**
    * Returns a `ConstSet` containing the values after the `n`-th element of the
    * current `ConstSet`.
@@ -1582,8 +1582,8 @@ interface ConstSet<+Tv> extends ConstCollection<Tv>,
    * @return - A `ConstSet` that is a proper subset of the current `ConstSet`
    *           starting after the callback returns `true`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): ConstSet<Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): ConstSet<Tv>;
   /**
    * Returns a subset of the current `ConstSet` starting from a given key up
    * to, but not including, the element at the provided length from the
@@ -1619,7 +1619,7 @@ interface ConstSet<+Tv> extends ConstCollection<Tv>,
    *
    * @guide /hack/generics/constraints
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function concat<Tu super Tv>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
     ConstVector<Tu>;
   /**
@@ -1720,8 +1720,8 @@ interface MutableSet<Tv> extends ConstSet<Tv>,
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__OnlyRxIfRxFunc>>(function(Tv): Tu) $fn): MutableSet<Tu>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $fn): MutableSet<Tu>;
   /**
    * Returns a `MutableSet` containing the values after an operation has been
    * applied to each "key" and value in the current Set.
@@ -1739,8 +1739,8 @@ interface MutableSet<Tv> extends ConstSet<Tv>,
    * @return - a `MutableSet` containing the values after a user-specified
    *           operation on the current `MutableSet`'s values is applied.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__OnlyRxIfRxFunc>>(function(arraykey, Tv): Tu) $fn): MutableSet<Tu>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $fn): MutableSet<Tu>;
   /**
    * Returns a `MutableSet` containing the values of the current `MutableSet`
    * that meet a supplied condition applied to each value.
@@ -1756,8 +1756,8 @@ interface MutableSet<Tv> extends ConstSet<Tv>,
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): MutableSet<Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): MutableSet<Tv>;
   /**
    * Returns a `MutableSet` containing the values of the current `MutableSet`
    * that meet a supplied condition applied to its "keys" and values.
@@ -1775,8 +1775,8 @@ interface MutableSet<Tv> extends ConstSet<Tv>,
    * @return - a `MutableSet` containing the values after a user-specified
    *           condition is applied to the values of the current `MutableSet`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__OnlyRxIfRxFunc>>(function(arraykey, Tv): bool) $fn):
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv): bool) $fn):
     MutableSet<Tv>;
   /**
    * Returns a `MutableSet` where each value is a `Pair` that combines the
@@ -1797,7 +1797,7 @@ interface MutableSet<Tv> extends ConstSet<Tv>,
    * @return - The `MutableSet` that combines the values of the current
    *           `MutableSet` with the provided `Traversable`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
     MutableSet<Pair<Tv, Tu>>;
   /**
@@ -1829,8 +1829,8 @@ interface MutableSet<Tv> extends ConstSet<Tv>,
    * @return - A `MutableSet` that is a proper subset of the current
    *           `MutableSet` up until the callback returns `false`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): MutableSet<Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): MutableSet<Tv>;
   /**
    * Returns a `MutableSet` containing the values after the `n`-th element of
    * the current `MutableSet`.
@@ -1863,8 +1863,8 @@ interface MutableSet<Tv> extends ConstSet<Tv>,
    * @return - A `MutableSet` that is a proper subset of the current
    *           `MutableSet` starting after the callback returns `true`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): MutableSet<Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): MutableSet<Tv>;
   /**
    * Returns a subset of the current `MutableSet` starting from a given key up
    * to, but not including, the element at the provided length from the
@@ -1900,7 +1900,7 @@ interface MutableSet<Tv> extends ConstSet<Tv>,
    *
    * @guide /hack/generics/constraints
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function concat<Tu super Tv>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
     MutableVector<Tu>;
   /**

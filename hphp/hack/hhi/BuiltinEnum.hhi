@@ -66,7 +66,7 @@ abstract class BuiltinEnum<T> {
    * Coerce all the values in a traversable. If the value is not an
    * array of valid items, an UnexpectedValueException is thrown
    */
-  <<__Rx, __OnlyRxIfArgs>>
+  <<__Rx, __AtMostRxAsArgs>>
   final public static function assertAll(
     <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>> Traversable<mixed> $values,
   ): Container<T>;

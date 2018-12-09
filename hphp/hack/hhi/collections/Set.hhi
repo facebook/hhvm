@@ -54,7 +54,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @param $it - any `Traversable` object from which to create the `Set`
    *              (e.g., `array`). If `null`, then an empty `Set` is created.
    */
-  <<__Rx, __OnlyRxIfArgs>>
+  <<__Rx, __AtMostRxAsArgs>>
   public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv> $it);
 
   /**
@@ -217,8 +217,8 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__OnlyRxIfRxFunc>>(function(Tv): Tu) $callback): Set<Tu>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $callback): Set<Tu>;
 
   /**
    * Returns a `Set` containing the values after an operation has been applied
@@ -237,8 +237,8 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - a `Set` containing the values after a user-specified operation
    *           on the current `Set`'s values is applied.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__OnlyRxIfRxFunc>>(function(arraykey, Tv): Tu) $callback): Set<Tu>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $callback): Set<Tu>;
 
   /**
    * Returns a `Set` containing the values of the current `Set` that meet
@@ -255,8 +255,8 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $callback): Set<Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $callback): Set<Tv>;
 
   /**
    * Returns a `Set` containing the values of the current `Set` that meet
@@ -276,8 +276,8 @@ final class Set<Tv> implements MutableSet<Tv> {
    *           is applied to the values of the current `Set`.
    *
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__OnlyRxIfRxFunc>>(function(arraykey, Tv): bool) $callback): Set<Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv): bool) $callback): Set<Tv>;
 
   /**
    * Alters the current `Set` so that it only contains the values that meet a
@@ -294,8 +294,8 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @return - Returns itself.
    */
-  <<__Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
-  public function retain(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $callback): Set<Tv>;
+  <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
+  public function retain(<<__AtMostRxAsFunc>>(function(Tv): bool) $callback): Set<Tv>;
 
   /**
    * Alters the current `Set` so that it only contains the values that meet a
@@ -315,8 +315,8 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @return - Returns itself.
    */
-  <<__Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
-  public function retainWithKey(<<__OnlyRxIfRxFunc>>(function(arraykey, Tv): bool) $callback): Set<Tv>;
+  <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
+  public function retainWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv): bool) $callback): Set<Tv>;
 
   /**
    * Throws an exception unless the current `Set` or the `Traversable` is
@@ -334,7 +334,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *           the provided `Traversable`; one of these must be empty or an
    *           exception is thrown.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): Set<Pair<Tv, Tu>>;
 
   /**
@@ -364,8 +364,8 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - A `Set` that is a proper subset of the current `Set` up until
    *           the callback returns `false`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): Set<Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): Set<Tv>;
 
   /**
    * Returns a `Set` containing the values after the `n`-th element of the
@@ -397,8 +397,8 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - A `Set` that is a proper subset of the current `Set` starting
    *           after the callback returns `true`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): Set<Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): Set<Tv>;
 
   /**
    * Returns a subset of the current `Set` starting from a given key up to, but
@@ -433,7 +433,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function concat<Tu super Tv>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): Vector<Tu>;
 
   /**
@@ -545,7 +545,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @return - Returns itself.
    */
-  <<__Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
+  <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
   public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv> $it): Set<Tv>;
 
   /**
@@ -602,7 +602,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    *
    * @return - Returns itself.
    */
-  <<__Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
+  <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
   public function removeAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tv> $other): Set<Tv>;
 
   /**
@@ -647,7 +647,7 @@ final class Set<Tv> implements MutableSet<Tv> {
    * @return - A `Set` with the values from the `Traversable`; or an empty `Set`
    *           if the `Traversable` is `null`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn>>
   public static function fromItems<Tv2>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv2> $items): Set<Tv2>;
 
   /**

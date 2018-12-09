@@ -2,7 +2,7 @@
 interface RxA {
 }
 
-<<__Rx, __OnlyRxIfArgs>>
+<<__Rx, __AtMostRxAsArgs>>
 function g(<<__OnlyRxIfImpl(RxA::class)>>C $a): void {
 }
 

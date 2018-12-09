@@ -2,5 +2,5 @@
 
 // ERROR
 <<__Rx>>
-function f(<<__OnlyRxIfRxFunc>>string $a): void {
+function f(<<__AtMostRxAsFunc>>string $a): void {
 }

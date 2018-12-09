@@ -1,4 +1,4 @@
 <?hh // strict
 
-<<__OnlyRxIfArgs>>
+<<__AtMostRxAsArgs>>
 function f(): void {}

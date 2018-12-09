@@ -7,6 +7,6 @@ interface RxA {
 }
 
 //ERROR
-<<__Rx, __OnlyRxIfArgs>>
+<<__Rx, __AtMostRxAsArgs>>
 function f(<<__OnlyRxIfImpl("RxA")>>A $a): void {
 }

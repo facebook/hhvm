@@ -11,7 +11,7 @@ class C1 {
 
 class C2 extends C1 {
   // OK (though condition is kind of useless)
-  <<__Rx, __OnlyRxIfArgs>>
+  <<__Rx, __AtMostRxAsArgs>>
   public function f(<<__OnlyRxIfImpl(RxA::class)>>A $a): void {
   }
 }

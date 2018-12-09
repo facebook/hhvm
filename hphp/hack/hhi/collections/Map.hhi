@@ -62,7 +62,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * @param $it - any `Traversable` object from which to create a `Map`
    *              (e.g., `array`). If `null`, then an empty `Map` is created.
    */
-  <<__Rx, __OnlyRxIfArgs>>
+  <<__Rx, __AtMostRxAsArgs>>
   public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> ?KeyedTraversable<Tk, Tv> $it);
 
   /**
@@ -204,9 +204,9 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   /* HH_FIXME[3007]: This is intentional; not a constructor */
-  public function map<Tu>(<<__OnlyRxIfRxFunc>>(function(Tv): Tu) $callback): Map<Tk, Tu>;
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $callback): Map<Tk, Tu>;
 
   /**
    * Returns a `Map` after an operation has been applied to each key and
@@ -225,8 +225,8 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * @return - a `Map` containing the values after a user-specified operation
    *           on the current `Map`'s keys and values is applied.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__OnlyRxIfRxFunc>>(function(Tk, Tv): Tu) $callback): Map<Tk, Tu>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(Tk, Tv): Tu) $callback): Map<Tk, Tu>;
 
   /**
    * Returns a `Map` containing the values of the current `Map` that meet
@@ -246,8 +246,8 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $callback): Map<Tk, Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $callback): Map<Tk, Tv>;
 
   /**
    * Returns a `Map` containing the values of the current `Map` that meet
@@ -267,8 +267,8 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    *           is applied to the keys and values of the current `Map`.
    *
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__OnlyRxIfRxFunc>>(function(Tk, Tv): bool) $callback):
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(Tk, Tv): bool) $callback):
     Map<Tk, Tv>;
 
   /**
@@ -289,7 +289,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * @return - The `Map` that combines the values of the current `Map` with
    *           the provided `Traversable`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): Map<Tk, Pair<Tv, Tu>>;
 
   /**
@@ -318,8 +318,8 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * @return - A `Map` that is a proper subset of the current `Map` up until
    *           the callback returns `false`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): Map<Tk, Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): Map<Tk, Tv>;
 
   /**
    * Returns a `Map` containing the values after the `n`-th element of the
@@ -351,8 +351,8 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * @return - A `Map` that is a proper subset of the current `Map` starting
    *           after the callback returns `true`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): Map<Tk, Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): Map<Tk, Tv>;
 
   /**
    * Returns a subset of the current `Map` starting from a given key location
@@ -388,7 +388,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function concat<Tu super Tv>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): Vector<Tu>;
 
   /**
@@ -513,7 +513,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    *
    * @return - Returns itself.
    */
-  <<__Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
+  <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
   public function setAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> ?KeyedTraversable<Tk, Tv> $it): Map<Tk, Tv>;
 
   /**
@@ -592,7 +592,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    *
    * @return - Returns itself.
    */
-  <<__Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
+  <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
   public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Pair<Tk, Tv>> $it): Map<Tk, Tv>;
 
   /**
@@ -645,7 +645,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * @return - A `Map` containing the keys (and associated values) of the
    *           current `Map` that are not in the `KeyedTraversable`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function differenceByKey(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> KeyedTraversable<Tk, Tv> $traversable):
     Map<Tk, Tv>;
 
@@ -681,7 +681,7 @@ final class Map<Tk, Tv> implements MutableMap<Tk, Tv> {
    * @return - A `Map` with the key/value pairs from the `Traversable`; or an
    *           empty `Map` if the `Traversable` is `null`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn>>
   public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Pair<Tk, Tv>> $items)
     : Map<Tk, Tv>;
 

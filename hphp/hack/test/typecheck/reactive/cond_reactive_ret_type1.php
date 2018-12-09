@@ -20,7 +20,7 @@ interface IRxValue extends IValue {
   public function get(): IRxObj;
 }
 
-<<__Rx, __OnlyRxIfArgs>>
+<<__Rx, __AtMostRxAsArgs>>
 function f(<<__OnlyRxIfImpl(IRxValue::class)>>IValue $v): int {
   $obj = $v->get();
   return $obj->foo();

@@ -227,7 +227,7 @@ final class Set implements \MutableSet {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map(<<__OnlyRxIfRxFunc>> mixed $callback): object;
+  public function map(<<__AtMostRxAsFunc>> mixed $callback): object;
 
   /* Returns a Set of the values produced by applying the specified callback on
    * each key and value from this Set.
@@ -235,7 +235,7 @@ final class Set implements \MutableSet {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object;
+  public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): object;
 
   /* Returns a Set of all the values from this Set for which the specified
    * callback returns true.
@@ -243,7 +243,7 @@ final class Set implements \MutableSet {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__OnlyRxIfRxFunc>> mixed $callback): object;
+  public function filter(<<__AtMostRxAsFunc>> mixed $callback): object;
 
   /* Returns a Set of all the values from this Set for which the specified
    * callback returns true.
@@ -251,7 +251,7 @@ final class Set implements \MutableSet {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object;
+  public function filterWithKey(<<__AtMostRxAsFunc>> mixed $callback): object;
 
   /* Ensures that this Set contains only values for which the specified callback
    * returns true.
@@ -259,7 +259,7 @@ final class Set implements \MutableSet {
    * @return object
    */
   <<__Native, __Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function retain(<<__OnlyRxIfRxFunc>> mixed $callback): object;
+  public function retain(<<__AtMostRxAsFunc>> mixed $callback): object;
 
   /* Ensures that this Set contains only keys/values for which the specified
    * callback returns true when passed the key and the value.
@@ -267,7 +267,7 @@ final class Set implements \MutableSet {
    * @return object
    */
   <<__Native, __Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
-  public function retainWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object;
+  public function retainWithKey(<<__AtMostRxAsFunc>> mixed $callback): object;
 
   /* Returns a Iterable produced by combined the specified Iterables pair-wise.
    * @param mixed $iterable
@@ -289,7 +289,7 @@ final class Set implements \MutableSet {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__OnlyRxIfRxFunc>> mixed $callback): object;
+  public function takeWhile(<<__AtMostRxAsFunc>> mixed $callback): object;
 
   /* Returns a Set containing all values except the first n of this Set.
    * @param mixed $n
@@ -304,7 +304,7 @@ final class Set implements \MutableSet {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__OnlyRxIfRxFunc>> mixed $fn): object;
+  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): object;
 
   /* Returns a Set containing the specified range of values from this Set. The
    * range is specified by two non-negative integers: a starting position and a
@@ -589,7 +589,7 @@ final class ImmSet implements \ConstSet {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map(<<__OnlyRxIfRxFunc>> mixed $callback): object;
+  public function map(<<__AtMostRxAsFunc>> mixed $callback): object;
 
   /* Returns a ImmSet of the values produced by applying the specified callback
    * on each key and value from this ImmSet.
@@ -597,7 +597,7 @@ final class ImmSet implements \ConstSet {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object;
+  public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): object;
 
   /* Returns a ImmSet of all the values from this ImmSet for which the specified
    * callback returns true.
@@ -605,7 +605,7 @@ final class ImmSet implements \ConstSet {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__OnlyRxIfRxFunc>> mixed $callback): object;
+  public function filter(<<__AtMostRxAsFunc>> mixed $callback): object;
 
   /* Returns a ImmSet of all the values from this ImmSet for which the specified
    * callback returns true.
@@ -613,7 +613,7 @@ final class ImmSet implements \ConstSet {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object;
+  public function filterWithKey(<<__AtMostRxAsFunc>> mixed $callback): object;
 
   /* Returns an Iterable produced by combining the specified Iterables
    * pair-wise.
@@ -637,7 +637,7 @@ final class ImmSet implements \ConstSet {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__OnlyRxIfRxFunc>> mixed $callback): object;
+  public function takeWhile(<<__AtMostRxAsFunc>> mixed $callback): object;
 
   /* Returns a ImmSet containing all values except the first n of this ImmSet.
    * @param mixed $n
@@ -652,7 +652,7 @@ final class ImmSet implements \ConstSet {
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__OnlyRxIfRxFunc>> mixed $fn): object;
+  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): object;
 
   /* Returns a ImmSet containing the specified range of values from this ImmSet.
    * The range is specified by two non-negative integers: a starting position

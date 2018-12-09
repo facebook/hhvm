@@ -1,7 +1,7 @@
 <?hh // strict
 
-<<__Rx, __OnlyRxIfArgs>>
-function test<T>(<<__OnlyRxIfRxFunc>>Predicate<int> $predicate): void {
+<<__Rx, __AtMostRxAsArgs>>
+function test<T>(<<__AtMostRxAsFunc>>Predicate<int> $predicate): void {
   // OK
   $predicate(0);
 }

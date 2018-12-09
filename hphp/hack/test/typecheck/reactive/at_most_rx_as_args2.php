@@ -1,6 +1,6 @@
 <?hh // strict
 
 // ERROR
-<<__OnlyRxIfArgs>>
+<<__Rx, __AtMostRxAsArgs>>
 function f((function(): int) $s): void {
 }

@@ -1,6 +1,6 @@
 <?hh // strict
 
 class C {
-  <<__OnlyRxIfArgs>>
+  <<__AtMostRxAsArgs>>
   public function f(): void {}
 }

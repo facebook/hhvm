@@ -6,7 +6,7 @@ interface A {
 interface RxA {
 }
 
-<<__Rx, __OnlyRxIfArgs>>
+<<__Rx, __AtMostRxAsArgs>>
 function f(<<__OnlyRxIfImpl(RxA::class)>>A $a): void {
 }
 

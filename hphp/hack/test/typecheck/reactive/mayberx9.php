@@ -1,7 +1,7 @@
 <?hh // strict
 
-<<__RxLocal, __OnlyRxIfArgs>>
-function mayberx(<<__OnlyRxIfRxFunc>>(function(): int) $a): int {
+<<__RxLocal, __AtMostRxAsArgs>>
+function mayberx(<<__AtMostRxAsFunc>>(function(): int) $a): int {
   return $a() + 1;
 }
 

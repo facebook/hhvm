@@ -285,7 +285,7 @@ final class Pair implements \ConstVector {
    * @guide /hack/collections/examples
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__OnlyRxIfRxFunc>> (function(mixed): Tu) $callback): ImmVector<Tu> {
+  public function map<Tu>(<<__AtMostRxAsFunc>> (function(mixed): Tu) $callback): ImmVector<Tu> {
     return ImmVector { $callback($this[0]), $callback($this[1]) };
   }
 
@@ -304,7 +304,7 @@ final class Pair implements \ConstVector {
    *           operation on the current `Pair`'s keys and values is applied.
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__OnlyRxIfRxFunc>> (function(int, mixed): Tu) $callback):
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>> (function(int, mixed): Tu) $callback):
     ImmVector<Tu> {
     return ImmVector { $callback(0, $this[0]), $callback(1, $this[1]) };
   }
@@ -325,7 +325,7 @@ final class Pair implements \ConstVector {
    * @guide /hack/collections/examples
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__OnlyRxIfRxFunc>> (function(mixed): bool) $callback): ImmVector<mixed> {
+  public function filter(<<__AtMostRxAsFunc>> (function(mixed): bool) $callback): ImmVector<mixed> {
     $values = $this->toArray();
     if (!$callback($values[0])) { unset($values[0]); }
     if (!$callback($values[1])) { unset($values[1]); }
@@ -348,7 +348,7 @@ final class Pair implements \ConstVector {
    *           `Pair`.
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__OnlyRxIfRxFunc>> (function(int, mixed): bool) $callback):
+  public function filterWithKey(<<__AtMostRxAsFunc>> (function(int, mixed): bool) $callback):
     ImmVector<mixed> {
     $values = $this->toArray();
     if (!$callback(0, $values[0])) { unset($values[0]); }
@@ -420,7 +420,7 @@ final class Pair implements \ConstVector {
    *           until the callback returns `false`.
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__OnlyRxIfRxFunc>> (function(mixed): bool) $callback):
+  public function takeWhile(<<__AtMostRxAsFunc>> (function(mixed): bool) $callback):
     ImmVector<mixed> {
     $pair = $this->toArray();
     if (!$callback($pair[0])) return \HH\ImmVector {};
@@ -467,7 +467,7 @@ final class Pair implements \ConstVector {
    *           starting after the callback returns `true`.
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__OnlyRxIfRxFunc>> (function(mixed): bool) $callback):
+  public function skipWhile(<<__AtMostRxAsFunc>> (function(mixed): bool) $callback):
     ImmVector<mixed> {
     $pair = $this->toArray();
     if (!$callback($pair[0])) return $this->toImmVector();

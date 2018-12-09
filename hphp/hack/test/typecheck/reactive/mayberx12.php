@@ -1,12 +1,12 @@
 <?hh // strict
 
 interface A {
-  <<__RxLocal, __OnlyRxIfArgs>>
-  public function f(<<__OnlyRxIfRxFunc>>(function(): void) $a): int;
+  <<__RxLocal, __AtMostRxAsArgs>>
+  public function f(<<__AtMostRxAsFunc>>(function(): void) $a): int;
 }
 
 interface B extends A {
   // OK
-  <<__Rx, __OnlyRxIfArgs>>
-  public function f(<<__OnlyRxIfRxFunc>>(function(): void) $a): int;
+  <<__Rx, __AtMostRxAsArgs>>
+  public function f(<<__AtMostRxAsFunc>>(function(): void) $a): int;
 }

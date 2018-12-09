@@ -19,7 +19,7 @@ interface IRxValue {
   public function get(): IFakeRxObj;
 }
 
-<<__Rx, __OnlyRxIfArgs>>
+<<__Rx, __AtMostRxAsArgs>>
 function f(<<__OnlyRxIfImpl(IRxValue::class)>>IValue $v): int {
   $obj = $v->get();
   // ERROR: foo in IFakeRxObj is non-reactive

@@ -14,7 +14,7 @@ abstract class MyTestClass {
     self::bar($x);
   }
 
-  <<__Rx, __OnlyRxIfArgs>>
+  <<__Rx, __AtMostRxAsArgs>>
   public static function bar(
     <<__OnlyRxIfImpl(MyRxConditionalClass::class)>>MyConditionalClassBase $x,
   ): void {}

@@ -197,8 +197,8 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__OnlyRxIfRxFunc>>(function(mixed): Tu) $callback): ImmVector<Tu>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(mixed): Tu) $callback): ImmVector<Tu>;
 
   /**
    * Returns an `ImmVector` containing the values after an operation has been
@@ -214,8 +214,8 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    * @return - an `ImmVector` containing the values after a user-specified
    *           operation on the current `Pair`'s keys and values is applied.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__OnlyRxIfRxFunc>>(function(int, mixed): Tu) $callback):
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(int, mixed): Tu) $callback):
     ImmVector<Tu>;
 
   /**
@@ -233,8 +233,8 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__OnlyRxIfRxFunc>>(function(mixed): bool) $callback): ImmVector<mixed>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filter(<<__AtMostRxAsFunc>>(function(mixed): bool) $callback): ImmVector<mixed>;
 
   /**
    * Returns an `ImmVector` containing the values of the current `Pair` that
@@ -251,8 +251,8 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    *           condition is applied to the keys and values of the current
    *           `Pair`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__OnlyRxIfRxFunc>>(function(int, mixed): bool) $callback):
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(int, mixed): bool) $callback):
     ImmVector<mixed>;
 
   /**
@@ -270,7 +270,7 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    * @return - The `ImmVector` that combines the values of the current `Pair`
    *           with the provided `Traversable`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
     ImmVector<Pair<mixed, Tu>>;
 
@@ -300,8 +300,8 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    * @return - An `ImmVector` that contains the values of the current `Pair` up
    *           until the callback returns `false`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__OnlyRxIfRxFunc>>(function(mixed): bool) $fn): ImmVector<mixed>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function takeWhile(<<__AtMostRxAsFunc>>(function(mixed): bool) $fn): ImmVector<mixed>;
 
   /**
    * Returns an `ImmVector` containing the values after the `n`-th element of
@@ -332,8 +332,8 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    * @return - An `ImmVector` that contains the values of the current `Pair`
    *           starting after the callback returns `true`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__OnlyRxIfRxFunc>>(function(mixed): bool) $fn): ImmVector<mixed>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function skipWhile(<<__AtMostRxAsFunc>>(function(mixed): bool) $fn): ImmVector<mixed>;
 
   /**
    * Returns a subset of the current `Pair` starting from a given key up to,
@@ -367,7 +367,7 @@ final class Pair<+Tv1, +Tv2> implements ConstVector<mixed> {
    *
    * @guide /hack/generics/constraints
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function concat<Tu super mixed>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
     ImmVector<Tu>;
 

@@ -35,7 +35,7 @@ function f5(darray<int, int> $a): void {
   }
 }
 
-<<__Rx, __OnlyRxIfArgs>>
+<<__Rx, __AtMostRxAsArgs>>
 function f6(
   <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>>Traversable<int> $a,
 ): void {
@@ -56,7 +56,7 @@ function toArray(Iterable<int> $a): array<int> {
   throw new Exception();
 }
 
-<<__Rx, __OnlyRxIfArgs>>
+<<__Rx, __AtMostRxAsArgs>>
 function f8(
   <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>>Traversable<int> $a,
 ): void {

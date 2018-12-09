@@ -286,7 +286,7 @@ final class Map implements \MutableMap {
    * @return object
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map(<<__OnlyRxIfRxFunc>> mixed $callback): object {
+  public function map(<<__AtMostRxAsFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
 
@@ -344,7 +344,7 @@ EOT
    * @return object
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object {
+  public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
 
@@ -403,7 +403,7 @@ EOT
    * @return object
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__OnlyRxIfRxFunc>> mixed $callback): object {
+  public function filter(<<__AtMostRxAsFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
 
@@ -462,7 +462,7 @@ EOT
    * @return object
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object {
+  public function filterWithKey(<<__AtMostRxAsFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
 
@@ -554,7 +554,7 @@ EOT
    * @return object
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__OnlyRxIfRxFunc>> mixed $callback): object {
+  public function takeWhile(<<__AtMostRxAsFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
 
@@ -623,7 +623,7 @@ EOT
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__OnlyRxIfRxFunc>> mixed $fn): object;
+  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): object;
 
   /* Returns a Map containing the specified range of key/value pairs from this
    * Map. The range is specified by two non-negative integers: a starting
@@ -898,7 +898,7 @@ final class ImmMap implements \ConstMap {
    * @return object
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function map(<<__OnlyRxIfRxFunc>> mixed $callback): object {
+  public function map(<<__AtMostRxAsFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
 
@@ -959,7 +959,7 @@ EOT
    * @return object
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object {
+  public function mapWithKey(<<__AtMostRxAsFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
 
@@ -1021,7 +1021,7 @@ EOT
    * @return object
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__OnlyRxIfRxFunc>> mixed $callback): object {
+  public function filter(<<__AtMostRxAsFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
 
@@ -1083,7 +1083,7 @@ EOT
    * @return object
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__OnlyRxIfRxFunc>> mixed $callback): object {
+  public function filterWithKey(<<__AtMostRxAsFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
 
@@ -1162,7 +1162,7 @@ EOT
    * @return object
    */
   <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__OnlyRxIfRxFunc>> mixed $callback): object {
+  public function takeWhile(<<__AtMostRxAsFunc>> mixed $callback): object {
       \hh\asm(<<<'EOT'
           .numiters 2;
 
@@ -1234,7 +1234,7 @@ EOT
    * @return object
    */
   <<__Native, __Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__OnlyRxIfRxFunc>> mixed $fn): object;
+  public function skipWhile(<<__AtMostRxAsFunc>> mixed $fn): object;
 
   /* Returns a ImmMap containing the specified range of key/value pairs from
    * this ImmMap. The range is specified by two non-negative integers: a

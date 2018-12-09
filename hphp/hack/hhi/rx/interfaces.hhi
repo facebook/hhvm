@@ -240,9 +240,9 @@ interface Iterable<+Tv>
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function map<Tu>(
-    <<__OnlyRxIfRxFunc>>(function(Tv): Tu) $fn,
+    <<__AtMostRxAsFunc>>(function(Tv): Tu) $fn,
   ): namespace\Iterable<Tu>;
   /**
    * Returns an `Iterable` containing the values of the current `Iterable` that
@@ -259,9 +259,9 @@ interface Iterable<+Tv>
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function filter(
-    <<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn,
+    <<__AtMostRxAsFunc>>(function(Tv): bool) $fn,
   ): namespace\Iterable<Tv>;
   /**s
    *  Returns an `Iterable` where each element is a `Pair` that combines the
@@ -278,7 +278,7 @@ interface Iterable<+Tv>
    *  @return - The `Iterable` that combines the values of the current
    *            `Itearable` with the provided `Traversable`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip<Tu>(
     <<__OnlyRxIfImpl(namespace\Traversable::class)>> \Traversable<Tu> $traversable,
   ): namespace\Iterable<Pair<Tv, Tu>>;
@@ -313,9 +313,9 @@ interface Iterable<+Tv>
    * @return - An `Iterable` that is a proper subset of the current `Iterable`
    *           up until the callback returns `false`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function takeWhile(
-    <<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn,
+    <<__AtMostRxAsFunc>>(function(Tv): bool) $fn,
   ): namespace\Iterable<Tv>;
   /**
    * Returns an `Iterable` containing the values after the `n`-th element of the
@@ -348,9 +348,9 @@ interface Iterable<+Tv>
    * @return - An `Iterable` that is a proper subset of the current `Iterable`
    *           starting after the callback returns `true`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function skipWhile(
-    <<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn,
+    <<__AtMostRxAsFunc>>(function(Tv): bool) $fn,
   ): namespace\Iterable<Tv>;
   /**
    * Returns a subset of the current `Iterable` starting from a given key up
@@ -387,7 +387,7 @@ interface Iterable<+Tv>
    *
    * @guide /hack/generics/constraints
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function concat<Tu super Tv>(
     <<__OnlyRxIfImpl(namespace\Traversable::class)>> \Traversable<Tu> $traversable,
   ): namespace\Iterable<Tu>;
@@ -501,9 +501,9 @@ interface KeyedIterable<Tk, +Tv>
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function map<Tu>(
-    <<__OnlyRxIfRxFunc>>(function(Tv): Tu) $fn,
+    <<__AtMostRxAsFunc>>(function(Tv): Tu) $fn,
   ): namespace\KeyedIterable<Tk, Tu>;
   /**
    * Returns a `KeyedIterable` containing the values after an operation has
@@ -520,9 +520,9 @@ interface KeyedIterable<Tk, +Tv>
    *           operation on the current `KeyedIterable`'s keys and values is
    *           applied.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function mapWithKey<Tu>(
-    <<__OnlyRxIfRxFunc>>(function(Tk, Tv): Tu) $fn,
+    <<__AtMostRxAsFunc>>(function(Tk, Tv): Tu) $fn,
   ): namespace\KeyedIterable<Tk, Tu>;
   /**
    * Returns a `KeyedIterable` containing the values of the current
@@ -539,9 +539,9 @@ interface KeyedIterable<Tk, +Tv>
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function filter(
-    <<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn,
+    <<__AtMostRxAsFunc>>(function(Tv): bool) $fn,
   ): namespace\KeyedIterable<Tk, Tv>;
   /**
    * Returns a `KeyedIterable` containing the values of the current
@@ -560,9 +560,9 @@ interface KeyedIterable<Tk, +Tv>
    *           `KeyedIterable`.
    *
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function filterWithKey(
-    <<__OnlyRxIfRxFunc>>(function(Tk, Tv): bool) $fn,
+    <<__AtMostRxAsFunc>>(function(Tk, Tv): bool) $fn,
   ): namespace\KeyedIterable<Tk, Tv>;
   /**
    *  Returns a `KeyedIterable` where each element is a `Pair` that combines the
@@ -579,7 +579,7 @@ interface KeyedIterable<Tk, +Tv>
    *  @return - The `KeyedIterable` that combines the values of the current
    *            `KeyedItearable` with the provided `Traversable`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip<Tu>(
     <<__OnlyRxIfImpl(namespace\Traversable::class)>> \Traversable<Tu> $traversable,
   ): namespace\KeyedIterable<Tk, Pair<Tv, Tu>>;
@@ -614,9 +614,9 @@ interface KeyedIterable<Tk, +Tv>
    * @return - A `KeyedIterable` that is a proper subset of the current
    *           `KeyedIterable` up until the callback returns `false`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function takeWhile(
-    <<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn,
+    <<__AtMostRxAsFunc>>(function(Tv): bool) $fn,
   ): namespace\KeyedIterable<Tk, Tv>;
   /**
    * Returns a `KeyedIterable` containing the values after the `n`-th element
@@ -650,9 +650,9 @@ interface KeyedIterable<Tk, +Tv>
    * @return - A `KeyedIterable` that is a proper subset of the current
    *           `KeyedIterable` starting after the callback returns `true`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function skipWhile(
-    <<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn,
+    <<__AtMostRxAsFunc>>(function(Tv): bool) $fn,
   ): namespace\KeyedIterable<Tk, Tv>;
   /**
    * Returns a subset of the current `KeyedIterable` starting from a given key
@@ -689,7 +689,7 @@ interface KeyedIterable<Tk, +Tv>
    *
    * @guide /hack/generics/constraints
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function concat<Tu super Tv>(
     <<__OnlyRxIfImpl(namespace\Traversable::class)>> \Traversable<Tu> $traversable,
   ): namespace\Iterable<Tu>;

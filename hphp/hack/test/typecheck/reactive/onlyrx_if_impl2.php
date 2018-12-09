@@ -9,12 +9,12 @@ interface RxA {
   public function f(): int;
 }
 
-<<__Rx, __OnlyRxIfArgs>>
+<<__Rx, __AtMostRxAsArgs>>
 function a(<<__OnlyRxIfImpl(RxA::class)>>A $a): int {
   return b($a);
 }
 
-<<__Rx, __OnlyRxIfArgs>>
+<<__Rx, __AtMostRxAsArgs>>
 function b(<<__OnlyRxIfImpl(RxA::class)>>A $a): int {
   // ERROR: reactive lambda cannot call conditionally reactive function
   $x = <<__Rx>> () ==> $a->f();

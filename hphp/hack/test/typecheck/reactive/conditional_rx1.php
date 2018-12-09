@@ -1,8 +1,8 @@
 <?hh
 
-<<__RxLocal, __OnlyRxIfArgs>>
+<<__RxLocal, __AtMostRxAsArgs>>
 async function f(
-  <<__OnlyRxIfRxFunc>>(function(): Awaitable<int>) $async_func,
+  <<__AtMostRxAsFunc>>(function(): Awaitable<int>) $async_func,
 ): Awaitable<int> {
   // OK
   $r = await $async_func();

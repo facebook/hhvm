@@ -49,7 +49,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @param $it - any `Traversable` object from which to create the `ImmSet`
    *              (e.g., `array`). If `null`, then an empty `ImmSet` is created.
    */
-  <<__Rx, __OnlyRxIfArgs>>
+  <<__Rx, __AtMostRxAsArgs>>
   public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv> $it);
 
   /**
@@ -139,7 +139,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - An `ImmSet` with the values from the `Traversable`; or an empty
    *           `ImmSet` if the `Traversable` is `null`.
    */
-  <<__Rx, __OnlyRxIfArgs>>
+  <<__Rx, __AtMostRxAsArgs>>
   public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv> $items): ImmSet<Tv>;
 
   /**
@@ -320,8 +320,8 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__OnlyRxIfRxFunc>>(function(Tv): Tu) $callback): ImmSet<Tu>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $callback): ImmSet<Tu>;
 
   /**
    * Returns an `ImmSet` containing the values after an operation has been
@@ -340,8 +340,8 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - an `ImmSet` containing the values after a user-specified
    *           operation on the current `ImmSet`'s values is applied.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__OnlyRxIfRxFunc>>(function(arraykey, Tv): Tu) $callback):
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $callback):
     ImmSet<Tu>;
 
   /**
@@ -359,8 +359,8 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $callback): ImmSet<Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $callback): ImmSet<Tv>;
 
   /**
    * Returns an `ImmSet` containing the values of the current `ImmSet` that
@@ -380,8 +380,8 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *           condition is applied to the values of the current `ImmSet`.
    *
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__OnlyRxIfRxFunc>>(function(arraykey, Tv): bool) $callback):
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv): bool) $callback):
     ImmSet<Tv>;
 
   /**
@@ -400,7 +400,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *           with the provided `Traversable`; one of these must be empty or
    *           an exception is thrown.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): ImmSet<Pair<Tv, Tu>>;
 
   /**
@@ -433,8 +433,8 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - An `ImmSet` that is a proper subset of the current `ImmSet` up
    *           until the callback returns `false`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): ImmSet<Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): ImmSet<Tv>;
 
   /**
    * Returns an `ImmSet` containing the values after the `n`-th element of the
@@ -468,8 +468,8 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    * @return - An `ImmSet` that is a proper subset of the current `ImmSet`
    *           starting after the callback returns `true`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): ImmSet<Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): ImmSet<Tv>;
 
   /**
    * Returns a subset of the current `ImmSet` starting from a given key up to,
@@ -507,7 +507,7 @@ final class ImmSet<+Tv> implements ConstSet<Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function concat<Tu super Tv>(
     <<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable
   ): ImmVector<Tu>;

@@ -14,7 +14,7 @@ abstract class A<T> {
 
 final class C {
 
-  <<__RxShallow, __OnlyRxIfArgs>>
+  <<__RxShallow, __AtMostRxAsArgs>>
   public function g<T>(<<__OnlyRxIfImpl(IRx::class)>>A<T> $p): bool {
     // OK - method exists both in A and IRx and reactive in IRx
     $r = $p->get();

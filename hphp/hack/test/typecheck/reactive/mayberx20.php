@@ -11,7 +11,7 @@ class C1 {
 
 class C2 {
   // OK (though condition is kind of useless)
-  <<__Rx, __OnlyRxIfArgs>>
-  public function f(<<__OnlyRxIfRxFunc>>(function(): int) $a): void {
+  <<__Rx, __AtMostRxAsArgs>>
+  public function f(<<__AtMostRxAsFunc>>(function(): int) $a): void {
   }
 }

@@ -16,7 +16,7 @@ interface ConstCollection extends HH\Rx\Countable {
 interface OutputCollection {
   <<__Rx, __Mutable, __ReturnsVoidToRx>>
   public function add($e);
-  <<__Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
+  <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
   public function addAll(
     <<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> $iterable
   );
@@ -63,7 +63,7 @@ interface ConstIndexAccess {
 interface IndexAccess extends ConstIndexAccess {
   <<__Rx, __Mutable, __ReturnsVoidToRx>>
   public function set($k,$v);
-  <<__Rx, __Mutable, __OnlyRxIfArgs, __ReturnsVoidToRx>>
+  <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
   public function setAll(
     <<__OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> $iterable
   );

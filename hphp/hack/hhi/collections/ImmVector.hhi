@@ -54,7 +54,7 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    *              (e.g., `array`). If `null`, then an empty `ImmVector` is
    *              created.
    */
-  <<__Rx, __OnlyRxIfArgs>>
+  <<__Rx, __AtMostRxAsArgs>>
   public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv> $it);
 
   /**
@@ -180,7 +180,7 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    * @return - An `ImmVector` with the values from the `Traversable`; or an
    *           empty `ImmVector` if the `Traversable` is `null`.
    */
-  <<__Rx, __OnlyRxIfArgs>>
+  <<__Rx, __AtMostRxAsArgs>>
   public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> ?Traversable<Tv> $items): ImmVector<Tv>;
 
   /**
@@ -377,8 +377,8 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function map<Tu>(<<__OnlyRxIfRxFunc>>(function(Tv): Tu) $callback): ImmVector<Tu>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $callback): ImmVector<Tu>;
 
   /**
    * Returns an `ImmVector` containing the results of applying an operation to
@@ -396,8 +396,8 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    *           user-specified operation to each key/value pair of the current
    *           `ImmVector` in turn.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function mapWithKey<Tu>(<<__OnlyRxIfRxFunc>>(function(int, Tv): Tu) $callback):
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(int, Tv): Tu) $callback):
     ImmVector<Tu>;
 
   /**
@@ -416,8 +416,8 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function filter(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $callback): ImmVector<Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $callback): ImmVector<Tv>;
 
   /**
    * Returns an `ImmVector` containing the values of the current `ImmVector`
@@ -438,8 +438,8 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    *           applied to the corresponding key/value pairs.
    *
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function filterWithKey(<<__OnlyRxIfRxFunc>>(function(int, Tv): bool) $callback):
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function filterWithKey(<<__AtMostRxAsFunc>>(function(int, Tv): bool) $callback):
     ImmVector<Tv>;
 
   /**
@@ -457,7 +457,7 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    * @return - An `ImmVector` that combines the values of the current
    *           `ImmVector` with the provided `Traversable`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable):
     ImmVector<Pair<Tv, Tu>>;
 
@@ -495,8 +495,8 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    * @return - An `ImmVector` that is a subset of the current `ImmVector` up
    *           until when the callback returns `false`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function takeWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): ImmVector<Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): ImmVector<Tv>;
 
   /**
    * Returns an `ImmVector` containing the values after the `$n`-th element of
@@ -536,8 +536,8 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    *           starting with the value for which the callback first returns
    *           `false`.
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
-  public function skipWhile(<<__OnlyRxIfRxFunc>>(function(Tv): bool) $fn): ImmVector<Tv>;
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): ImmVector<Tv>;
 
   /**
    * Returns a subset of the current `ImmVector` starting from a given key up
@@ -585,7 +585,7 @@ final class ImmVector<+Tv> implements ConstVector<Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  <<__Rx, __OnlyRxIfArgs, __MutableReturn, __MaybeMutable>>
+  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function concat<Tu super Tv>(
     <<__MaybeMutable, __OnlyRxIfImpl(HH\Rx\Traversable::class)>> Traversable<Tu> $traversable
   ): ImmVector<Tv>;

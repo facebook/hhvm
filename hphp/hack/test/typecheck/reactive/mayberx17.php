@@ -4,7 +4,7 @@ interface A {}
 interface RxA {}
 
 class C1 {
-  <<__Rx, __OnlyRxIfArgs>>
+  <<__Rx, __AtMostRxAsArgs>>
   public function f(<<__OnlyRxIfImpl(RxA::class)>>A $a): void {
   }
 }

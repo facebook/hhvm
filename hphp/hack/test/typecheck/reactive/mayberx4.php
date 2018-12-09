@@ -1,6 +1,6 @@
 <?hh // strict
 
-// ERROR, missing <<__OnlyRxIfArgs>>
+// ERROR, missing <<__AtMostRxAsArgs>>
 <<__Rx>>
-function f(<<__OnlyRxIfRxFunc>>(function(): void) $a): void {
+function f(<<__AtMostRxAsFunc>>(function(): void) $a): void {
 }

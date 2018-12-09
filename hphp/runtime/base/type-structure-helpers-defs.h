@@ -31,6 +31,7 @@ const StaticString s_classname("classname");
 const StaticString s_wildcard("_");
 const StaticString s_name("name");
 const StaticString s_generic_types("generic_types");
+const StaticString s_is_cls_cns("is_cls_cns");
 
 ///////////////////////////////////////////////////////////////////////////////
 

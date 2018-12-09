@@ -2512,7 +2512,86 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
   not_reached();
 }
 
+bool canReduceToDontResolve(SArray ts) {
+  switch (get_ts_kind(ts)) {
+    case TypeStructure::Kind::T_int:
+    case TypeStructure::Kind::T_bool:
+    case TypeStructure::Kind::T_float:
+    case TypeStructure::Kind::T_string:
+    case TypeStructure::Kind::T_num:
+    case TypeStructure::Kind::T_arraykey:
+    case TypeStructure::Kind::T_void:
+    case TypeStructure::Kind::T_null:
+    case TypeStructure::Kind::T_noreturn:
+    case TypeStructure::Kind::T_mixed:
+    case TypeStructure::Kind::T_nonnull:
+    case TypeStructure::Kind::T_resource:
+    // Following ones don't reify, so no need to check the generics
+    case TypeStructure::Kind::T_dict:
+    case TypeStructure::Kind::T_vec:
+    case TypeStructure::Kind::T_keyset:
+    case TypeStructure::Kind::T_vec_or_dict:
+    case TypeStructure::Kind::T_arraylike:
+      return true;
+    case TypeStructure::Kind::T_class:
+    case TypeStructure::Kind::T_interface:
+    case TypeStructure::Kind::T_xhp:
+    case TypeStructure::Kind::T_enum:
+      // If it does not have generics, then we can reduce
+      // If it has generics but all of them are wildcards, then we can reduce
+      // Otherwise, we can't.
+      return isTSAllWildcards(ts);
+    case TypeStructure::Kind::T_tuple: {
+      auto result = true;
+      IterateV(
+        get_ts_elem_types(ts),
+        [&](TypedValue v) {
+          assertx(isArrayLikeType(v.m_type));
+          result &= canReduceToDontResolve(v.m_data.parr);
+           // when result is false, we can short circuit
+          return !result;
+        }
+      );
+      return result;
+    }
+    case TypeStructure::Kind::T_shape: {
+      auto result = true;
+      IterateV(
+        get_ts_fields(ts),
+        [&](TypedValue v) {
+          assertx(isArrayLikeType(v.m_type));
+          auto const arr = v.m_data.parr;
+          if (arr->exists(s_is_cls_cns)) {
+            result = false;
+            return true; // short circuit
+          }
+          result &= canReduceToDontResolve(get_ts_value_field(arr));
+           // when result is false, we can short circuit
+          return !result;
+        }
+      );
+      return result;
+    }
+    // Following needs to be resolved
+    case TypeStructure::Kind::T_unresolved:
+    case TypeStructure::Kind::T_typeaccess:
+    // Following cannot be used in is/as expressions, we need to error on them
+    // Currently erroring happens as a part of the resolving phase,
+    // so keep resolving them
+    case TypeStructure::Kind::T_array:
+    case TypeStructure::Kind::T_darray:
+    case TypeStructure::Kind::T_varray:
+    case TypeStructure::Kind::T_varray_or_darray:
+    case TypeStructure::Kind::T_reifiedtype:
+    case TypeStructure::Kind::T_fun:
+    case TypeStructure::Kind::T_typevar:
+    case TypeStructure::Kind::T_trait:
+      return false;
+  }
+  not_reached();
 }
+
+} // namespace
 
 void in(ISS& env, const bc::IsTypeStructC& op) {
   auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? TDict : TDArr;
@@ -2526,6 +2605,10 @@ void in(ISS& env, const bc::IsTypeStructC& op) {
     popC(env);
     popC(env);
     return push(env, TBool);
+  }
+  if (op.subop1 == TypeStructResolveOp::Resolve &&
+      canReduceToDontResolve(a->m_data.parr)) {
+    return reduce(env, bc::IsTypeStructC { TypeStructResolveOp::DontResolve });
   }
   isAsTypeStructImpl<false>(env, a->m_data.parr);
 }
@@ -2542,6 +2625,10 @@ void in(ISS& env, const bc::AsTypeStructC& op) {
     popC(env);
     push(env, popC(env));
     return;
+  }
+  if (op.subop1 == TypeStructResolveOp::Resolve &&
+      canReduceToDontResolve(a->m_data.parr)) {
+    return reduce(env, bc::AsTypeStructC { TypeStructResolveOp::DontResolve });
   }
   isAsTypeStructImpl<true>(env, a->m_data.parr);
 }

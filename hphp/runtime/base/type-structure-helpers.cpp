@@ -562,12 +562,7 @@ bool checkTypeStructureMatchesCellImpl(
             errOnKey(k);
             return true;
           }
-          auto const value_field = ts->rval(s_value.get());
-          assertx(value_field == nullptr || isArrayType(value_field.type()));
-          auto const tsField = value_field == nullptr
-            ? tsFieldData
-            : value_field.val().parr;
-
+          auto const tsField = getShapeFieldElement(v);
           auto const field = fields->at(k);
           if (!checkTypeStructureMatchesCellImpl<genErrorMessage>(
               ArrNR(tsField), tvToCell(field), givenType,
@@ -646,7 +641,13 @@ void errorOnIsAsExpressionInvalidTypesList(const ArrayData* tsFields) {
     tsFields,
     [&](TypedValue v) {
       assertx(isArrayLikeType(v.m_type));
-      errorOnIsAsExpressionInvalidTypes(ArrNR(v.m_data.parr));
+      auto arr = v.m_data.parr;
+      auto const value_field = arr->rval(s_value.get());
+      if (value_field.is_set()) {
+        assertx(isArrayType(value_field.type()));
+        arr = value_field.val().parr;
+      }
+      errorOnIsAsExpressionInvalidTypes(ArrNR(arr));
     }
   );
 }

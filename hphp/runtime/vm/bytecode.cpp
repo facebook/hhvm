@@ -3328,12 +3328,20 @@ OPTBLD_INLINE TCA jitReturnPost(JitReturn retInfo) {
 
 }
 
+template <bool suspended>
 OPTBLD_INLINE TCA ret(PC& pc) {
+  assertx(!suspended || vmfp()->func()->isAsyncFunction());
+  assertx(!suspended || !vmfp()->resumed());
+
   auto const jitReturn = jitReturnPre(vmfp());
 
   // Get the return value.
   TypedValue retval = *vmStack().topTV();
   vmStack().discard();
+
+  assertx(
+    !suspended || (tvIsObject(retval) && retval.m_data.pobj->isWaitHandle())
+  );
 
   // Free $this and local variables. Calls FunctionReturn hook. The return
   // value must be removed from the stack, or the unwinder would try to free it
@@ -3353,7 +3361,7 @@ OPTBLD_INLINE TCA ret(PC& pc) {
     // If in an eagerly executed async function, wrap the return value into
     // succeeded StaticWaitHandle. Async eager return requests are currently
     // not respected, as we don't have a way to obtain the async eager offset.
-    if (UNLIKELY(vmfp()->func()->isAsyncFunction())) {
+    if (UNLIKELY(vmfp()->func()->isAsyncFunction()) && !suspended) {
       auto const& retvalCell = *tvAssertCell(&retval);
       // Heads up that we're assuming CreateSucceeded can't throw, or we won't
       // decref the return value.  (It can't right now.)
@@ -3406,13 +3414,19 @@ OPTBLD_INLINE TCA ret(PC& pc) {
 }
 
 OPTBLD_INLINE TCA iopRetC(PC& pc) {
-  return ret(pc);
+  return ret<false>(pc);
+}
+
+OPTBLD_INLINE TCA iopRetCSuspended(PC& pc) {
+  assertx(vmfp()->func()->isAsyncFunction());
+  assertx(!vmfp()->resumed());
+  return ret<true>(pc);
 }
 
 OPTBLD_INLINE TCA iopRetV(PC& pc) {
   assertx(!vmfp()->resumed());
   assertx(!vmfp()->func()->isResumable());
-  return ret(pc);
+  return ret<false>(pc);
 }
 
 OPTBLD_INLINE TCA iopRetM(PC& pc, uint32_t numRet) {
@@ -4190,9 +4204,7 @@ inline void checkThis(ActRec* fp) {
   }
 }
 
-}
-
-OPTBLD_INLINE void iopMemoGet(PC& pc, PC taken, LocalRange keys) {
+OPTBLD_INLINE const Cell* memoGetImpl(LocalRange keys) {
   assertx(vmfp()->m_func->isMemoizeWrapper());
   assertx(keys.first + keys.count <= vmfp()->m_func->numLocals());
 
@@ -4280,18 +4292,45 @@ OPTBLD_INLINE void iopMemoGet(PC& pc, PC taken, LocalRange keys) {
     );
   }();
 
-  if (c) {
-    assertx(cellIsPlausible(*c));
-    assertx(c->m_type != KindOfUninit);
+  assertx(!c || cellIsPlausible(*c));
+  assertx(!c || c->m_type != KindOfUninit);
+  return c;
+}
+
+}
+
+OPTBLD_INLINE void iopMemoGet(PC& pc, PC notfound, LocalRange keys) {
+  if (auto const c = memoGetImpl(keys)) {
     cellDup(*c, *vmStack().allocC());
   } else {
-    pc = taken;
+    pc = notfound;
   }
 }
 
-OPTBLD_INLINE void iopMemoSet(LocalRange keys) {
+OPTBLD_INLINE void iopMemoGetEager(PC& pc,
+                                   PC notfound,
+                                   PC suspended,
+                                   LocalRange keys) {
+  assertx(vmfp()->m_func->isAsyncFunction());
+  assertx(!vmfp()->resumed());
+
+  if (auto const c = memoGetImpl(keys)) {
+    cellDup(*c, *vmStack().allocC());
+    if (c->m_aux.u_asyncNonEagerReturnFlag) {
+      assertx(tvIsObject(c) && c->m_data.pobj->isWaitHandle());
+      pc = suspended;
+    }
+  } else {
+    pc = notfound;
+  }
+}
+
+namespace {
+
+OPTBLD_INLINE void memoSetImpl(LocalRange keys, Cell val) {
   assertx(vmfp()->m_func->isMemoizeWrapper());
   assertx(keys.first + keys.count <= vmfp()->m_func->numLocals());
+  assertx(cellIsPlausible(val));
 
   for (auto i = 0; i < keys.count; ++i) {
     auto const key = frame_local(vmfp(), keys.first + i);
@@ -4299,9 +4338,6 @@ OPTBLD_INLINE void iopMemoSet(LocalRange keys) {
       raise_error("Memoization keys can only be ints or strings");
     }
   }
-
-  auto val = *vmStack().topC();
-  assertx(val.m_type != KindOfUninit);
 
   auto const func = vmfp()->m_func;
   if (!func->isMethod() || func->isStatic()) {
@@ -4331,7 +4367,8 @@ OPTBLD_INLINE void iopMemoSet(LocalRange keys) {
       tvWriteUninit(*cache);
       cache.markInit();
     }
-    cellSet(val, *cache);
+
+    cellSetWithAux(val, *cache);
     return;
   }
 
@@ -4350,7 +4387,7 @@ OPTBLD_INLINE void iopMemoSet(LocalRange keys) {
     : this_->memoSlot(memoInfo.first);
 
   if (keys.count == 0 && !memoInfo.second) {
-    cellSet(val, *slot->getValue());
+    cellSetWithAux(val, *slot->getValue());
     return;
   }
 
@@ -4387,6 +4424,27 @@ OPTBLD_INLINE void iopMemoSet(LocalRange keys) {
     keysBegin,
     val
   );
+}
+
+}
+
+OPTBLD_INLINE void iopMemoSet(LocalRange keys) {
+  auto val = *vmStack().topC();
+  assertx(val.m_type != KindOfUninit);
+  if (vmfp()->m_func->isAsyncFunction()) {
+    assertx(tvIsObject(val) && val.m_data.pobj->isWaitHandle());
+    val.m_aux.u_asyncNonEagerReturnFlag = -1;
+  }
+  memoSetImpl(keys, val);
+}
+
+OPTBLD_INLINE void iopMemoSetEager(LocalRange keys) {
+  assertx(vmfp()->m_func->isAsyncFunction());
+  assertx(!vmfp()->resumed());
+  auto val = *vmStack().topC();
+  assertx(val.m_type != KindOfUninit);
+  val.m_aux.u_asyncNonEagerReturnFlag = 0;
+  memoSetImpl(keys, val);
 }
 
 static inline void vgetl_body(TypedValue* fr, TypedValue* to) {

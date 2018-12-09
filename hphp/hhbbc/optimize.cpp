@@ -825,6 +825,7 @@ void first_pass(const Index& index,
         );
         break;
       case Op::MemoGet:
+      case Op::MemoGetEager:
         speculate(
           jmpDest,
           [&] () -> folly::Optional<Bytecode> {
@@ -833,7 +834,12 @@ void first_pass(const Index& index,
                 blk->fallthrough = jmpDest;
                 return folly::none;
               }
-              op.MemoGet.target1 = jmpDest;
+              if (op.op == Op::MemoGet) {
+                op.MemoGet.target1 = jmpDest;
+              } else {
+                assertx(jmpDest != op.MemoGetEager.target2);
+                op.MemoGetEager.target1 = jmpDest;
+              }
               blk->fallthrough = make_fatal_block(ainfo, blk, state)->id;
               return op;
             }

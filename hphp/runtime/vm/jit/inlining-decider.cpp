@@ -280,6 +280,7 @@ bool isInliningVVSafe(Op op) {
     case Op::VerifyParamType:
     case Op::VerifyRetTypeC:
     case Op::RetC:
+    case Op::RetCSuspended:
       return true;
     default:
       break;

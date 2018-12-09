@@ -583,7 +583,11 @@ let check_instruct_misc asn i i' =
   | MemoSet _, _
   | _, MemoSet _
   | MemoGet _, _
-  | _, MemoGet _ ->
+  | _, MemoGet _
+  | MemoGetEager _, _
+  | _, MemoGetEager _
+  | MemoSetEager _, _
+  | _, MemoSetEager _ ->
     (* COMPLETENESS: wimp out again *)
     None
   | CreateCl(npars,cln), CreateCl(npars',cln') ->

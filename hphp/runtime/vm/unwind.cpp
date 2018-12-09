@@ -250,7 +250,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
     decRefLocals();
     if (UNLIKELY(func->isAsyncFunction()) &&
         phpException &&
-        !fp->isAsyncEagerReturn()) {
+        (!fp->isAsyncEagerReturn() || func->isMemoizeImpl())) {
       // If in an eagerly executed async function without request for async
       // eager return, wrap the user exception into a failed StaticWaitHandle
       // and return it to the caller.
@@ -260,6 +260,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
       stack.ret();
       assertx(stack.topTV() == fp->retSlot());
       cellCopy(make_tv<KindOfObject>(waitHandle), *fp->retSlot());
+      fp->retSlot()->m_aux.u_asyncNonEagerReturnFlag = -1;
     } else {
       // Free ActRec.
       stack.ndiscard(func->numSlotsInFrame());

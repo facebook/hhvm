@@ -1538,17 +1538,30 @@ std::map<std::string,ParserFunc> opcode_parsers;
     IMM_##imm;                                                         \
                                                                        \
     as.adjustStack(-NUM_POP_##pop);                                    \
-    /* MemoGet pushes after branching */                               \
-    if (thisOpcode != OpMemoGet) {                                     \
-      as.adjustStack(NUM_PUSH_##push);                                 \
-    }                                                                  \
-                                                                       \
-    for (auto& kv : labelJumps) {                                      \
-      as.addLabelJump(kv.first, kv.second, curOpcodeOff);              \
-    }                                                                  \
                                                                        \
     if (thisOpcode == OpMemoGet) {                                     \
+      /* MemoGet pushes after branching */                             \
+      assertx(labelJumps.size() == 1);                                 \
+      as.addLabelJump(                                                 \
+        labelJumps[0].first, labelJumps[0].second, curOpcodeOff        \
+      );                                                               \
       as.adjustStack(NUM_PUSH_##push);                                 \
+    } else if (thisOpcode == OpMemoGetEager) {                         \
+      /* MemoGetEager pushes on its second branch only */              \
+      assertx(labelJumps.size() == 2);                                 \
+      as.addLabelJump(                                                 \
+        labelJumps[0].first, labelJumps[0].second, curOpcodeOff        \
+      );                                                               \
+      as.adjustStack(NUM_PUSH_##push);                                 \
+      as.addLabelJump(                                                 \
+        labelJumps[1].first, labelJumps[1].second, curOpcodeOff        \
+      );                                                               \
+    } else {                                                           \
+      /* Everything else pushes before branching */                    \
+      as.adjustStack(NUM_PUSH_##push);                                 \
+      for (auto& kv : labelJumps) {                                    \
+        as.addLabelJump(kv.first, kv.second, curOpcodeOff);            \
+      }                                                                \
     }                                                                  \
                                                                        \
     if (isFPush(Op##name)) {                                           \
@@ -1562,7 +1575,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
                                                                        \
     /* Stack depth should be 0 after RetC or RetV. */                  \
     if (thisOpcode == OpRetC || thisOpcode == OpRetV ||                \
-        thisOpcode == OpRetM) {                                        \
+        thisOpcode == OpRetM || thisOpcode == OpRetCSuspended) {       \
       as.enforceStackDepth(0);                                         \
     }                                                                  \
                                                                        \

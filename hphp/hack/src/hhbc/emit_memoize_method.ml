@@ -73,34 +73,57 @@ let get_cls_method info param_count method_id with_lsb =
     instr_fpushclsmethodd param_count method_id info.memoize_class_id
 
 let make_memoize_instance_method_no_params_code
-      scope deprecation_info method_id =
+      scope deprecation_info method_id is_async =
   let renamed_name =
     Hhbc_id.Method.add_suffix method_id memoize_suffix in
-  let label = Label.Regular 0 in
+  let notfound = Label.next_regular() in
+  let suspended_get = Label.next_regular() in
+  let eager_set = Label.next_regular() in
   let deprecation_body =
-    Emit_body.emit_deprecation_warning scope deprecation_info
+    Emit_body.emit_deprecation_warning scope deprecation_info in
+  let fcall_args =
+    if is_async then make_fcall_args ~async_eager_label:eager_set 0
+    else make_fcall_args 0
   in
   gather [
-      deprecation_body;
-      instr_checkthis;
-      instr_memoget label None;
-      instr_retc;
-      instr_label label;
-      instr_this;
-      instr_fpushobjmethodd_nullthrows 0 renamed_name;
-      instr_fcall (make_fcall_args 0);
-      instr_unboxr;
-      instr_memoset None;
-      instr_retc;
-    ]
+    deprecation_body;
+    instr_checkthis;
+    if is_async then
+      gather [
+        instr_memoget_eager notfound suspended_get None;
+        instr_retc;
+        instr_label suspended_get;
+        instr_retc_suspended
+      ] else
+      gather [
+        instr_memoget notfound None;
+        instr_retc
+      ];
+    instr_label notfound;
+    instr_this;
+    instr_fpushobjmethodd_nullthrows 0 renamed_name;
+    instr_fcall fcall_args;
+    instr_unboxr;
+    instr_memoset None;
+    if is_async then
+      gather [
+        instr_retc_suspended;
+        instr_label eager_set;
+        instr_memoset_eager None;
+        instr_retc
+      ] else
+      gather [ instr_retc ]
+  ]
 
 (* md is the already-renamed memoize method that must be wrapped *)
 let make_memoize_instance_method_with_params_code ~pos
-  env scope deprecation_info method_id params =
+  env scope deprecation_info method_id params is_async =
   let renamed_name =
     Hhbc_id.Method.add_suffix method_id memoize_suffix in
   let param_count = List.length params in
-  let label = Label.Regular 0 in
+  let notfound = Label.next_regular() in
+  let suspended_get = Label.next_regular() in
+  let eager_set = Label.next_regular() in
   let first_local = Local.Unnamed param_count in
   let begin_label, default_value_setters =
     (* Default value setters belong in the
@@ -109,6 +132,10 @@ let make_memoize_instance_method_with_params_code ~pos
   in
   let deprecation_body =
     Emit_body.emit_deprecation_warning scope deprecation_info
+  in
+  let fcall_args =
+    if is_async then make_fcall_args ~async_eager_label:eager_set param_count
+    else make_fcall_args param_count
   in
   gather [
     begin_label;
@@ -116,39 +143,81 @@ let make_memoize_instance_method_with_params_code ~pos
     deprecation_body;
     instr_checkthis;
     param_code_sets params param_count;
-    instr_memoget label (Some (first_local, param_count));
-    instr_retc;
-    instr_label label;
+    if is_async then
+      gather [
+        instr_memoget_eager notfound suspended_get (Some (first_local, param_count));
+        instr_retc;
+        instr_label suspended_get;
+        instr_retc_suspended
+      ] else
+      gather [
+        instr_memoget notfound (Some (first_local, param_count));
+        instr_retc
+      ];
+    instr_label notfound;
     instr_this;
     instr_fpushobjmethodd_nullthrows param_count renamed_name;
     param_code_gets params;
-    instr_fcall (make_fcall_args param_count);
+    instr_fcall fcall_args;
     instr_unboxr;
     instr_memoset (Some (first_local, param_count));
-    instr_retc;
-    default_value_setters ]
+    if is_async then
+      gather [
+        instr_retc_suspended;
+        instr_label eager_set;
+        instr_memoset_eager (Some (first_local, param_count));
+        instr_retc
+      ] else
+      gather [ instr_retc ];
+    default_value_setters
+  ]
 
 let make_memoize_static_method_no_params_code
-  info scope deprecation_info method_id with_lsb =
-  let label = Label.Regular 0 in
+  info scope deprecation_info method_id with_lsb is_async =
+  let notfound = Label.next_regular() in
+  let suspended_get = Label.next_regular() in
+  let eager_set = Label.next_regular() in
   let deprecation_body =
     Emit_body.emit_deprecation_warning scope deprecation_info
   in
+  let fcall_args =
+    if is_async then make_fcall_args ~async_eager_label:eager_set 0
+    else make_fcall_args 0
+  in
   gather [
     deprecation_body;
-    instr_memoget label None;
-    instr_retc;
-    instr_label label;
+    if is_async then
+      gather [
+        instr_memoget_eager notfound suspended_get None;
+        instr_retc;
+        instr_label suspended_get;
+        instr_retc_suspended
+      ] else
+      gather [
+        instr_memoget notfound None;
+        instr_retc
+      ];
+    instr_label notfound;
     get_cls_method info 0 method_id with_lsb;
-    instr_fcall (make_fcall_args 0);
+    instr_fcall fcall_args;
     instr_unboxr;
     instr_memoset None;
-    instr_retc ]
+    if is_async then
+      gather [
+        instr_retc_suspended;
+        instr_label eager_set;
+        instr_memoset_eager None;
+        instr_retc
+      ] else
+      gather [ instr_retc ]
+  ]
 
 let make_memoize_static_method_with_params_code ~pos
-  env info scope deprecation_info method_id with_lsb params =
+  env info scope deprecation_info method_id with_lsb params is_async =
   let param_count = List.length params in
-  let label = Label.Regular 0 in
+  let notfound = Label.next_regular() in
+  let suspended_get = Label.next_regular() in
+  let eager_set = Label.next_regular() in
   let first_local = Local.Unnamed param_count in
   let deprecation_body =
     Emit_body.emit_deprecation_warning scope deprecation_info
@@ -158,36 +227,60 @@ let make_memoize_static_method_with_params_code ~pos
      * wrapper method not in the original method *)
     Emit_param.emit_param_default_value_setter env pos params
   in
+  let fcall_args =
+    if is_async then make_fcall_args ~async_eager_label:eager_set param_count
+    else make_fcall_args param_count
+  in
   gather [
     begin_label;
     Emit_body.emit_method_prolog ~pos ~params:params ~should_emit_init_this:false;
     deprecation_body;
     param_code_sets params param_count;
-    instr_memoget label (Some (first_local, param_count));
-    instr_retc;
-    instr_label label;
+    if is_async then
+      gather [
+        instr_memoget_eager notfound suspended_get (Some (first_local, param_count));
+        instr_retc;
+        instr_label suspended_get;
+        instr_retc_suspended
+      ] else
+      gather [
+        instr_memoget notfound (Some (first_local, param_count));
+        instr_retc
+      ];
+    instr_label notfound;
     get_cls_method info param_count method_id with_lsb;
     param_code_gets params;
-    instr_fcall (make_fcall_args param_count);
+    instr_fcall fcall_args;
     instr_unboxr;
     instr_memoset (Some (first_local, param_count));
-    instr_retc;
-    default_value_setters ]
+    if is_async then
+      gather [
+        instr_retc_suspended;
+        instr_label eager_set;
+        instr_memoset_eager (Some (first_local, param_count));
+        instr_retc
+      ] else
+      gather [ instr_retc ];
+    default_value_setters
+  ]
 
-let make_memoize_static_method_code ~pos env info scope deprecation_info method_id with_lsb params =
+let make_memoize_static_method_code
+      ~pos env info scope deprecation_info method_id with_lsb params is_async =
   if List.is_empty params then
-    make_memoize_static_method_no_params_code info scope deprecation_info method_id with_lsb
+    make_memoize_static_method_no_params_code
+      info scope deprecation_info method_id with_lsb is_async
   else
-    make_memoize_static_method_with_params_code ~pos env info scope
-                                                deprecation_info method_id with_lsb params
+    make_memoize_static_method_with_params_code
+      ~pos env info scope
+      deprecation_info method_id with_lsb params is_async
 
 let make_memoize_instance_method_code
-      ~pos env scope deprecation_info method_id params =
+      ~pos env scope deprecation_info method_id params is_async =
   if List.is_empty params
   then make_memoize_instance_method_no_params_code
-         scope deprecation_info method_id
+         scope deprecation_info method_id is_async
   else make_memoize_instance_method_with_params_code
-         ~pos env scope deprecation_info method_id params
+         ~pos env scope deprecation_info method_id params is_async
 
 (* Construct the wrapper function *)
 let make_wrapper env return_type params instrs with_lsb =
@@ -203,24 +296,24 @@ let make_wrapper env return_type params instrs with_lsb =
     (Some env)
 
 let emit ~pos env info return_type_info scope
-         deprecation_info params is_static method_id with_lsb =
+         deprecation_info params is_static method_id with_lsb is_async =
   let instrs =
     Emit_pos.emit_pos_then pos @@
     if is_static
     then make_memoize_static_method_code
-      ~pos env info scope deprecation_info method_id with_lsb params
+      ~pos env info scope deprecation_info method_id with_lsb params is_async
     else make_memoize_instance_method_code
-      ~pos env scope deprecation_info method_id params
+      ~pos env scope deprecation_info method_id params is_async
   in
   make_wrapper env return_type_info params instrs with_lsb
 
 let emit_memoize_wrapper_body env memoize_info ast_method
-                              ~namespace scope deprecation_info params ret =
+                              ~namespace scope deprecation_info params ret is_async =
     let is_static = List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Static in
     let tparams =
       List.map (Ast_scope.Scope.get_tparams scope) ~f:(fun (_, (_, s), _, _) -> s) in
     let return_type_info =
-      Emit_body.emit_return_type_info ~scope ~skipawaitable:false ~namespace ret in
+      Emit_body.emit_return_type_info ~scope ~skipawaitable:is_async ~namespace ret in
     let params =
       Emit_param.from_asts ~namespace ~tparams:tparams ~generate_defaults:true ~scope params in
     let pos = ast_method.Ast.m_span in
@@ -230,7 +323,7 @@ let emit_memoize_wrapper_body env memoize_info ast_method
     let with_lsb =
       Emit_attribute.ast_any_is_memoize_lsb ast_method.Ast.m_user_attributes in
     emit ~pos env memoize_info return_type_info scope deprecation_info
-         params is_static method_id with_lsb
+         params is_static method_id with_lsb is_async
 
 let make_memoize_wrapper_method env info ast_class ast_method =
   (* This is cut-and-paste from emit_method above, with special casing for
@@ -264,12 +357,13 @@ let make_memoize_wrapper_method env info ast_class ast_method =
     Interceptable.is_method_interceptable namespace ast_class method_id method_attributes in
   let method_attributes =
     Emit_attribute.from_asts namespace ast_method.Ast.m_user_attributes in
+  let method_is_async = ast_method.Ast.m_fun_kind = Ast_defs.FAsync in
   let deprecation_info = Hhas_attribute.deprecation_info method_attributes in
   let method_rx_level = Rx.rx_level_from_ast ast_method.Ast.m_user_attributes in
   let env = Emit_env.with_rx_body (method_rx_level <> Rx.NonRx) env in
   let method_body =
     emit_memoize_wrapper_body env info ast_method
-    ~namespace scope deprecation_info ast_method.Ast.m_params ret in
+    ~namespace scope deprecation_info ast_method.Ast.m_params ret method_is_async in
   Hhas_method.make
     method_attributes
     method_is_protected
@@ -283,7 +377,7 @@ let make_memoize_wrapper_method env info ast_class ast_method =
     method_id
     method_body
     (Hhas_pos.pos_to_span ast_method.Ast.m_span)
-    false (*method_is_async*)
+    method_is_async
     false (*method_is_generator*)
     false (*method_is_pair_generator*)
     false (*method_is_closure_body*)

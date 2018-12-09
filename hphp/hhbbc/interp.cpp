@@ -1588,6 +1588,17 @@ void in(ISS& env, const bc::RetM& op) {
   doRet(env, vec(std::move(ret)), false);
 }
 
+void in(ISS& env, const bc::RetCSuspended&) {
+  always_assert(env.ctx.func->isAsync && !env.ctx.func->isGenerator);
+
+  auto const t = popC(env);
+  doRet(
+    env,
+    is_specialized_wait_handle(t) ? wait_handle_inner(t) : TInitCell,
+    false
+  );
+}
+
 void in(ISS& env, const bc::Unwind&) {
   nothrow(env); // Don't propagate to throw edges
   for (auto exit : env.blk.unwindExits) {
@@ -4747,7 +4758,10 @@ void in(ISS& env, const bc::Silence& op) {
   }
 }
 
-void in(ISS& env, const bc::MemoGet& op) {
+namespace {
+
+template <typename Op, typename Rebind>
+bool memoGetImpl(ISS& env, const Op& op, Rebind&& rebind) {
   always_assert(env.ctx.func->isMemoizeWrapper);
   always_assert(op.locrange.first + op.locrange.count
                 <= env.ctx.func->locals.size());
@@ -4755,10 +4769,8 @@ void in(ISS& env, const bc::MemoGet& op) {
   // If we can use an equivalent, earlier range, then use that instead.
   auto const equiv = equivLocalRange(env, op.locrange);
   if (equiv != op.locrange.first) {
-    return reduce(
-      env,
-      bc::MemoGet { op.target1, LocalRange { equiv, op.locrange.count } }
-    );
+    reduce(env, rebind(LocalRange { equiv, op.locrange.count }));
+    return true;
   }
 
   auto retTy = memoizeImplRetType(env);
@@ -4777,13 +4789,48 @@ void in(ISS& env, const bc::MemoGet& op) {
     nothrow(env);
   }
 
-  if (retTy.first == TBottom) return jmp_setdest(env, op.target1);
+  if (retTy.first == TBottom) {
+    jmp_setdest(env, op.target1);
+    return true;
+  }
 
   env.propagate(op.target1, &env.state);
   push(env, std::move(retTy.first));
+  return false;
 }
 
-void in(ISS& env, const bc::MemoSet& op) {
+}
+
+void in(ISS& env, const bc::MemoGet& op) {
+  memoGetImpl(
+    env, op,
+    [&] (const LocalRange& l) { return bc::MemoGet { op.target1, l }; }
+  );
+}
+
+void in(ISS& env, const bc::MemoGetEager& op) {
+  always_assert(env.ctx.func->isAsync && !env.ctx.func->isGenerator);
+
+  auto const reduced = memoGetImpl(
+    env, op,
+    [&] (const LocalRange& l) {
+      return bc::MemoGetEager { op.target1, op.target2, l };
+    }
+  );
+  if (reduced) return;
+
+  env.propagate(op.target2, &env.state);
+  auto const t = popC(env);
+  push(
+    env,
+    is_specialized_wait_handle(t) ? wait_handle_inner(t) : TInitCell
+  );
+}
+
+namespace {
+
+template <typename Op>
+void memoSetImpl(ISS& env, const Op& op) {
   always_assert(env.ctx.func->isMemoizeWrapper);
   always_assert(op.locrange.first + op.locrange.count
                 <= env.ctx.func->locals.size());
@@ -4793,7 +4840,7 @@ void in(ISS& env, const bc::MemoSet& op) {
   if (equiv != op.locrange.first) {
     return reduce(
       env,
-      bc::MemoSet { LocalRange { equiv, op.locrange.count } }
+      Op { LocalRange { equiv, op.locrange.count } }
     );
   }
 
@@ -4810,6 +4857,17 @@ void in(ISS& env, const bc::MemoSet& op) {
     nothrow(env);
   }
   push(env, popC(env));
+}
+
+}
+
+void in(ISS& env, const bc::MemoSet& op) {
+  memoSetImpl(env, op);
+}
+
+void in(ISS& env, const bc::MemoSetEager& op) {
+  always_assert(env.ctx.func->isAsync && !env.ctx.func->isGenerator);
+  memoSetImpl(env, op);
 }
 
 }

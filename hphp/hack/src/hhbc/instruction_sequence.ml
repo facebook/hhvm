@@ -99,6 +99,7 @@ let instr_print = instr (IOp Print)
 let instr_cast_darray = instr (IOp CastDArray)
 let instr_cast_dict = instr (IOp CastDict)
 let instr_retc = instr (IContFlow RetC)
+let instr_retc_suspended = instr (IContFlow (RetCSuspended))
 let instr_retm p = instr (IContFlow (RetM p))
 let instr_retv = instr (IContFlow RetV)
 let instr_null = instr (ILitConst Null)
@@ -231,8 +232,12 @@ let instr_cgetcunop = instr (IMisc CGetCUNop)
 let instr_ugetcunop = instr (IMisc UGetCUNop)
 let instr_memoget label range =
   instr (IMisc (MemoGet(label, range)))
+let instr_memoget_eager label1 label2 range =
+  instr (IMisc (MemoGetEager(label1, label2, range)))
 let instr_memoset range =
   instr (IMisc (MemoSet range))
+let instr_memoset_eager range =
+  instr (IMisc (MemoSetEager range))
 let instr_getmemokeyl local = instr (IMisc (GetMemoKeyL local))
 let instr_checkthis = instr (IMisc CheckThis)
 let instr_verifyRetTypeC = instr (IMisc VerifyRetTypeC)
@@ -811,7 +816,8 @@ let get_input_output_count i =
     | VerifyOutType _ | VerifyRetTypeC | VerifyRetTypeV | CGetCUNop
     | UGetCUNop -> (1, 1)
     | CreateCl (n, _) -> (n, 1)
-    | MemoGet _ -> (0, 1) | MemoSet _ -> (0, 0)
+    | MemoGet _ -> (0, 1) | MemoGetEager _ -> (0, 1)
+    | MemoSet _ -> (0, 0) | MemoSetEager _ -> (0, 0)
     | Idx | ArrayIdx -> (3, 1)
     | ReifiedName n | RecordReifiedGeneric n -> (n, 1)
     end
@@ -973,6 +979,7 @@ let get_estimated_stack_depth instrs =
         { acc with depth = 0 }
       | RetM _
       | RetC
+      | RetCSuspended
       | RetV
       | Unwind
       | Throw ->
@@ -1026,7 +1033,8 @@ let collect_locals f instrs =
     | IMisc (InitThisLoc l | StaticLocCheck (l, _) | StaticLocDef (l, _) |
              StaticLocInit (l, _) | AssertRATL (l, _) | Silence (l, _) |
              GetMemoKeyL l |
-             MemoGet (_, Some (l, _)) | MemoSet (Some (l, _)))
+             MemoGet (_, Some (l, _)) | MemoGetEager (_, _, Some (l, _)) |
+             MemoSet (Some (l, _)) | MemoSetEager (Some (l, _)))
     | IAsync (AwaitAll (Some (l, _)))
       -> add acc l
     | IFinal (SetWithRefLML (l1, l2))

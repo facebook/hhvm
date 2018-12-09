@@ -97,25 +97,32 @@ void freeLocalsAndThis(IRGS& env) {
   decRefThis(env);
 }
 
-void normalReturn(IRGS& env, SSATmp* retval) {
+void normalReturn(IRGS& env, SSATmp* retval, bool suspended) {
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     gen(env, DbgTrashRetVal, fp(env));
   }
+
   // If we're on the eager side of an async function, we have to zero-out the
   // TV aux of the return value, because it might be used as a flag if async
   // eager return was requested.
-  auto const aux =
-    (curFunc(env)->isAsyncFunction() && resumeMode(env) == ResumeMode::None)
-      ? folly::make_optional(AuxUnion{0})
-      : folly::none;
+  auto const aux = [&] () -> folly::Optional<AuxUnion> {
+    if (suspended) return AuxUnion{std::numeric_limits<uint32_t>::max()};
+    if (curFunc(env)->isAsyncFunction() &&
+        resumeMode(env) == ResumeMode::None) {
+      return AuxUnion{0};
+    }
+    return folly::none;
+  }();
 
   auto const data = RetCtrlData { offsetToReturnSlot(env), false, aux };
   gen(env, RetCtrl, data, sp(env), fp(env), retval);
 }
 
-void asyncFunctionReturn(IRGS& env, SSATmp* retVal) {
+void asyncFunctionReturn(IRGS& env, SSATmp* retVal, bool suspended) {
   if (resumeMode(env) == ResumeMode::None) {
     retSurpriseCheck(env, retVal, []{});
+
+    if (suspended) return normalReturn(env, retVal, true);
 
     // Return from an eagerly-executed async function: wrap the return value in
     // a StaticWaitHandle object and return that normally, unless async eager
@@ -135,9 +142,10 @@ void asyncFunctionReturn(IRGS& env, SSATmp* retVal) {
       [&] {
         return retVal;
       });
-    normalReturn(env, wrapped);
+    normalReturn(env, wrapped, false);
     return;
   }
+  assertx(!suspended);
 
   auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});
 
@@ -185,8 +193,10 @@ void generatorReturn(IRGS& env, SSATmp* retval) {
   gen(env, RetCtrl, retData, sp(env), fp(env), retval);
 }
 
-void implRet(IRGS& env) {
+void implRet(IRGS& env, bool suspended) {
   auto func = curFunc(env);
+  assertx(!suspended || func->isAsyncFunction());
+  assertx(!suspended || resumeMode(env) == ResumeMode::None);
 
   // Pop the return value. Since it will be teleported to its place in memory,
   // we don't care about the type.
@@ -206,7 +216,7 @@ void implRet(IRGS& env) {
 
   // Async function has its own surprise check.
   if (func->isAsyncFunction()) {
-    return asyncFunctionReturn(env, retval);
+    return asyncFunctionReturn(env, retval, suspended);
   }
 
   if (func->isGenerator()) {
@@ -215,7 +225,7 @@ void implRet(IRGS& env) {
 
   assertx(resumeMode(env) == ResumeMode::None);
   retSurpriseCheck(env, retval, []{});
-  return normalReturn(env, retval);
+  return normalReturn(env, retval, false);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -237,7 +247,7 @@ void emitRetC(IRGS& env) {
     assertx(resumeMode(env) == ResumeMode::None);
     retFromInlined(env);
   } else {
-    implRet(env);
+    implRet(env, false);
   }
 }
 
@@ -247,7 +257,7 @@ void emitRetV(IRGS& env) {
   if (isInlining(env)) {
     retFromInlined(env);
   } else {
-    implRet(env);
+    implRet(env, false);
   }
 }
 
@@ -263,7 +273,18 @@ void emitRetM(IRGS& env, uint32_t nvals) {
     gen(env, StOutValue, IndexData(i), fp(env), pop(env, DataTypeGeneric));
   }
 
-  implRet(env);
+  implRet(env, false);
+}
+
+void emitRetCSuspended(IRGS& env) {
+  assertx(curFunc(env)->isAsyncFunction());
+  assertx(resumeMode(env) == ResumeMode::None);
+
+  if (isInlining(env)) {
+    suspendFromInlined(env, pop(env, DataTypeGeneric));
+  } else {
+    implRet(env, true);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

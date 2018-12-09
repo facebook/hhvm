@@ -402,6 +402,18 @@ enable_if_lval_t<C&&, void> cellSet(const Cell fr, C&& to) {
 }
 
 /*
+ * Like cellSet(), but preserves m_aux
+ */
+template<typename C> ALWAYS_INLINE
+enable_if_lval_t<C&&, void> cellSetWithAux(const Cell fr, C&& to) {
+  assertx(cellIsPlausible(fr));
+  auto const old = as_tv(to);
+  to = fr;
+  tvIncRefGen(to);
+  tvDecRefGen(old);
+}
+
+/*
  * Set `fr' to `to' with reference demotion semantics.
  *
  * This is just like tvDupWithRef(), except it decrefs the old value of `to'.

@@ -397,6 +397,7 @@ let make_nullary_inst s =
 
  (* instruct_control_flow *)
  | "RetC" -> IContFlow (RetC)
+ | "RetCSuspended" -> IContFlow (RetCSuspended)
  | "RetV" -> IContFlow (RetV)
  | "Unwind" -> IContFlow (Unwind)
  | "Throw" -> IContFlow (Throw)
@@ -1044,6 +1045,7 @@ let makeunaryinst s arg = match s with
    | "ClsRefName" -> IMisc(ClsRefName (intofiarg arg))
    | "GetMemoKeyL" -> IMisc(GetMemoKeyL (localidofiarg arg))
    | "MemoSet" -> IMisc (MemoSet (memoargofiarg arg))
+   | "MemoSetEager" -> IMisc (MemoSetEager (memoargofiarg arg))
 
    | "ContAssignDelegate" -> IGenDelegation (ContAssignDelegate (iterofiarg arg))
    (* Note: The TryCatch/TryFault instructions don't show up here because the
@@ -1202,6 +1204,10 @@ let maketernaryinst s arg1 arg2 arg3 =
                                          labelofiarg arg2, localidofiarg arg3))
  | "MIterNext" -> IIterator(MIterNext (iterofiarg arg1,
                                          labelofiarg arg2, localidofiarg arg3))
+
+ (* instruct_misc *)
+| "MemoGetEager" -> IMisc (MemoGetEager(labelofiarg arg1, labelofiarg arg2,
+                                        memoargofiarg arg3))
 
  | _ -> failwith ("NYI ternary: " ^ s)
 

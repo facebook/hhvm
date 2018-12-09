@@ -2343,9 +2343,15 @@ void emitGetMemoKeyL(IRGS& env, int32_t locId) {
   push(env, gen(env, GetMemoKey, value));
 }
 
-void emitMemoGet(IRGS& env, Offset relOffset, LocalRange keys) {
+namespace {
+
+void memoGetImpl(IRGS& env,
+                 Offset notfoundOff,
+                 Offset suspendedOff,
+                 LocalRange keys) {
   assertx(curFunc(env)->isMemoizeWrapper());
   assertx(keys.first + keys.count <= curFunc(env)->numLocals());
+  assertx(suspendedOff == kInvalidOffset || curFunc(env)->isAsyncFunction());
 
   CompactVector<bool> types;
   for (auto i = keys.count; i > 0; --i) {
@@ -2360,17 +2366,22 @@ void emitMemoGet(IRGS& env, Offset relOffset, LocalRange keys) {
     }
   }
 
-  auto const takenOff = bcOff(env) + relOffset;
-  auto const taken = getBlock(env, takenOff);
-  assertx(taken != nullptr);
+  auto const notFound = getBlock(env, bcOff(env) + notfoundOff);
+  assertx(notFound != nullptr);
 
   auto const func = curFunc(env);
-  // Any value we get from memoization must be the same type we return from this
-  // function.
-  auto const retTy =
-    typeFromRAT(func->repoReturnType(), curClass(env)) & TInitCell;
+
+  auto const loadAux = suspendedOff != kInvalidOffset;
 
   auto const val = [&]{
+    // Any value we get from memoization must be the same type we return from
+    // this function. If we need to load the aux field, force the type to be
+    // InitCell so that we actually load the type. We'll assert the proper type
+    // once we've checked aux.
+    auto const retTy = loadAux
+      ? TInitCell
+      : typeFromRAT(func->repoReturnType(), curClass(env)) & TInitCell;
+
     if (func->isMethod() && !func->isStatic()) {
       auto const cls = func->cls();
       assertx(cls != nullptr);
@@ -2385,8 +2396,8 @@ void emitMemoGet(IRGS& env, Offset relOffset, LocalRange keys) {
         return gen(
           env,
           MemoGetInstanceValue,
-          MemoValueInstanceData { memoInfo.first, func },
-          taken,
+          MemoValueInstanceData { memoInfo.first, func, folly::none, loadAux },
+          notFound,
           retTy,
           this_
         );
@@ -2400,9 +2411,11 @@ void emitMemoGet(IRGS& env, Offset relOffset, LocalRange keys) {
           keys,
           types.data(),
           func,
-          memoInfo.second
+          memoInfo.second,
+          folly::none,
+          loadAux
         },
-        taken,
+        notFound,
         retTy,
         fp(env),
         this_
@@ -2416,8 +2429,14 @@ void emitMemoGet(IRGS& env, Offset relOffset, LocalRange keys) {
         return gen(
           env,
           MemoGetLSBCache,
-          MemoCacheStaticData { func, keys, types.data() },
-          taken,
+          MemoCacheStaticData {
+            func,
+            keys,
+            types.data(),
+            folly::none,
+            loadAux
+          },
+          notFound,
           retTy,
           fp(env),
           lsbCls
@@ -2426,8 +2445,8 @@ void emitMemoGet(IRGS& env, Offset relOffset, LocalRange keys) {
       return gen(
         env,
         MemoGetLSBValue,
-        MemoValueStaticData { func },
-        taken,
+        MemoValueStaticData { func, folly::none, loadAux },
+        notFound,
         retTy,
         lsbCls
       );
@@ -2438,8 +2457,8 @@ void emitMemoGet(IRGS& env, Offset relOffset, LocalRange keys) {
       return gen(
         env,
         MemoGetStaticCache,
-        MemoCacheStaticData { func, keys, types.data() },
-        taken,
+        MemoCacheStaticData { func, keys, types.data(), folly::none, loadAux },
+        notFound,
         retTy,
         fp(env)
       );
@@ -2447,17 +2466,72 @@ void emitMemoGet(IRGS& env, Offset relOffset, LocalRange keys) {
     return gen(
       env,
       MemoGetStaticValue,
-      MemoValueStaticData { func },
-      taken,
+      MemoValueStaticData { func, folly::none, loadAux },
+      notFound,
       retTy
     );
   }();
-  pushIncRef(env, val);
+
+  if (!loadAux) {
+    pushIncRef(env, val);
+    return;
+  }
+
+  ifThenElse(
+    env,
+    [&] (Block* taken) {
+      auto const aux = gen(env, LdTVAux, LdTVAuxData {}, val);
+      auto const tst = gen(env, AndInt, aux, cns(env, 1u << 31));
+      gen(env, JmpNZero, taken, tst);
+    },
+    [&] {
+      pushIncRef(
+        env,
+        gen(
+          env,
+          AssertType,
+          typeFromRAT(func->repoAwaitedReturnType(), curClass(env)) & TInitCell,
+          val
+        )
+      );
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      pushIncRef(
+        env,
+        gen(
+          env,
+          AssertType,
+          typeFromRAT(func->repoReturnType(), curClass(env)) & TInitCell,
+          val
+        )
+      );
+      jmpImpl(env, bcOff(env) + suspendedOff);
+    }
+  );
 }
 
-void emitMemoSet(IRGS& env, LocalRange keys) {
+}
+
+void emitMemoGet(IRGS& env, Offset notfoundOff, LocalRange keys) {
+  memoGetImpl(env, notfoundOff, kInvalidOffset, keys);
+}
+
+void emitMemoGetEager(IRGS& env,
+                      Offset notfoundOff,
+                      Offset suspendedOff,
+                      LocalRange keys) {
+  assertx(curFunc(env)->isAsyncFunction());
+  assertx(resumeMode(env) == ResumeMode::None);
+  memoGetImpl(env, notfoundOff, suspendedOff, keys);
+}
+
+namespace {
+
+void memoSetImpl(IRGS& env, LocalRange keys, bool eager) {
   assertx(curFunc(env)->isMemoizeWrapper());
   assertx(keys.first + keys.count <= curFunc(env)->numLocals());
+  assertx(!eager || curFunc(env)->isAsyncFunction());
 
   CompactVector<bool> types;
   for (auto i = keys.count; i > 0; --i) {
@@ -2482,6 +2556,12 @@ void emitMemoSet(IRGS& env, LocalRange keys) {
   };
 
   auto const func = curFunc(env);
+
+  auto const asyncEager = [&] () -> folly::Optional<bool> {
+    if (!func->isAsyncFunction()) return folly::none;
+    return eager;
+  }();
+
   if (func->isMethod() && !func->isStatic()) {
     auto const cls = func->cls();
     assertx(cls != nullptr);
@@ -2496,7 +2576,7 @@ void emitMemoSet(IRGS& env, LocalRange keys) {
       gen(
         env,
         MemoSetInstanceValue,
-        MemoValueInstanceData { memoInfo.first, func },
+        MemoValueInstanceData { memoInfo.first, func, asyncEager, false },
         this_,
         ldVal(DataTypeCountness)
       );
@@ -2511,7 +2591,9 @@ void emitMemoSet(IRGS& env, LocalRange keys) {
         keys,
         types.data(),
         func,
-        memoInfo.second
+        memoInfo.second,
+        asyncEager,
+        false
       },
       fp(env),
       this_,
@@ -2527,7 +2609,7 @@ void emitMemoSet(IRGS& env, LocalRange keys) {
       gen(
         env,
         MemoSetLSBCache,
-        MemoCacheStaticData { func, keys, types.data() },
+        MemoCacheStaticData { func, keys, types.data(), asyncEager, false },
         fp(env),
         lsbCls,
         ldVal(DataTypeGeneric)
@@ -2538,7 +2620,7 @@ void emitMemoSet(IRGS& env, LocalRange keys) {
     gen(
       env,
       MemoSetLSBValue,
-      MemoValueStaticData { func },
+      MemoValueStaticData { func, asyncEager, false },
       ldVal(DataTypeCountness),
       lsbCls
     );
@@ -2548,7 +2630,7 @@ void emitMemoSet(IRGS& env, LocalRange keys) {
     gen(
       env,
       MemoSetStaticCache,
-      MemoCacheStaticData { func, keys, types.data() },
+      MemoCacheStaticData { func, keys, types.data(), asyncEager, false },
       fp(env),
       ldVal(DataTypeGeneric)
     );
@@ -2558,9 +2640,21 @@ void emitMemoSet(IRGS& env, LocalRange keys) {
   gen(
     env,
     MemoSetStaticValue,
-    MemoValueStaticData { func },
+    MemoValueStaticData { func, asyncEager, false },
     ldVal(DataTypeCountness)
   );
+}
+
+}
+
+void emitMemoSet(IRGS& env, LocalRange keys) {
+  memoSetImpl(env, keys, false);
+}
+
+void emitMemoSetEager(IRGS& env, LocalRange keys) {
+  assertx(curFunc(env)->isAsyncFunction());
+  assertx(resumeMode(env) == ResumeMode::None);
+  memoSetImpl(env, keys, true);
 }
 
 //////////////////////////////////////////////////////////////////////

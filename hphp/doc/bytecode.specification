@@ -1635,6 +1635,13 @@ RetC    [C]  ->  []
   the control is given back to the next instruction after ContEnter or
   ContRaise instruction in a previous frame. The $1 must be Null.
 
+RetCSuspended   [C]  ->  []
+
+  Return a cell. Returns $1, which is an already suspended wait-handle, to the
+  caller. This instruction can only be used within async functions. This is
+  meant to be used within memoized async functions where the memoized value to
+  be returned is already wrapped in a wait-handle.
+
 RetV    [V]  ->  []
 
   Return a ref. Returns $1 to the caller. This instruction may not be used
@@ -4192,6 +4199,16 @@ MemoGet  <rel offset> <local range>   []   ->  [C]
   offset (without pushing anything). This op can only be used within a function
   marked as being a memoize wrapper.
 
+MemoGetEager  <rel offset> <rel offset> <local range>  []  -> [C]
+
+  Retrieve a memoization value associated with the current function and push it
+  onto the stack. This instruction behaves similarily to MemoGet, but is meant
+  to be used within an async memoize wrapper. If no value is present, branch to
+  the first specified offset (without pushing anything). If a value is present,
+  but it is a suspended wait-handle, push it onto the stack and branch to the
+  second specified offset. If a value is present, and it represents an eagerly
+  returned value (not a suspended wait-handle), push it without branching.
+
 MemoSet  <local range>   [C]  ->  [C]
 
   Store $1 as a memoization value associated with the current function and
@@ -4200,7 +4217,17 @@ MemoSet  <local range>   [C]  ->  [C]
   strings, fatal. The number of locals must match the number of formal
   parameters to the function. If there is already a value stored with that
   particular set of keys, it is overwritten. This op can only be used within a
-  function marked as being a memoize wrapper.
+  function marked as being a memoize wrapper. If the function is an async
+  memoize wrapper, this marks the value as representing a suspended return
+  value from the wrapped async function (and therefore must be a wait-handle).
+
+MemoSetEager  <local range>  [C]  -> [C]
+
+  Store $1 as a memoization value associated with the current function and
+  leave it on the stack. This instruction behaves similarily as MemoSet, but is
+  meant to be used within async memoize wrappers. It indicates that the value
+  being stored represents an eager return from the wrapped async function (and
+  is not a suspended wait-handle).
 
 14. Generator creation and execution
 ---------------------------------------

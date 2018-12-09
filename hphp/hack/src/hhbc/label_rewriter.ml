@@ -52,6 +52,7 @@ let get_regular_labels instr =
   | IContFlow (Jmp l | JmpNS l | JmpZ l | JmpNZ l) -> [l]
   | IContFlow (Switch (_, _, ls)) -> ls
   | IContFlow (SSwitch pairs) -> List.map pairs snd
+  | IMisc (MemoGetEager (l1, l2, _)) -> [l1; l2]
   | _ -> []
 
 (* Get any labels referred to in catch or fault handlers *)
@@ -165,6 +166,8 @@ let rewrite_params_and_body defs used refs params body =
     | ITry (TryFaultBegin l) -> Some (ITry (TryFaultBegin (relabel l)))
     | IMisc (MemoGet (l, r)) ->
       Some (IMisc (MemoGet (relabel l, r)))
+    | IMisc (MemoGetEager (l1, l2, r)) ->
+      Some (IMisc (MemoGetEager (relabel l1, relabel l2, r)))
     | ILabel l ->
       begin match Label.option_map relabel_define_label_id l with
       | None -> None
@@ -266,6 +269,8 @@ let clone_with_fresh_regular_labels block =
        (List.map pairs (fun (id,l) -> (id, relabel l))))
     | IMisc (MemoGet (l, r)) ->
       IMisc (MemoGet (relabel l, r))
+    | IMisc (MemoGetEager (l1, l2, r)) ->
+      IMisc (MemoGetEager (relabel l1, relabel l2, r))
     | ILabel l -> ILabel (relabel l)
     | _ -> instr
   in

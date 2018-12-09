@@ -1161,30 +1161,64 @@ struct NewKeysetArrayData : IRExtraData {
 };
 
 struct MemoValueStaticData : IRExtraData {
-  explicit MemoValueStaticData(const Func* func) : func{func} {}
-  std::string show() const { return func->fullName()->toCppString(); }
+  explicit MemoValueStaticData(const Func* func,
+                               folly::Optional<bool> asyncEager,
+                               bool loadAux)
+    : func{func}
+    , asyncEager{asyncEager}
+    , loadAux{loadAux} {}
+  std::string show() const {
+    return folly::sformat(
+      "{},{},{}",
+      func->fullName()->toCppString(),
+      asyncEager ? folly::to<std::string>(*asyncEager) : "-",
+      loadAux
+    );
+  }
   const Func* func;
+  folly::Optional<bool> asyncEager;
+  bool loadAux;
 };
 
 struct MemoValueInstanceData : IRExtraData {
-  explicit MemoValueInstanceData(Slot slot, const Func* func)
+  explicit MemoValueInstanceData(Slot slot,
+                                 const Func* func,
+                                 folly::Optional<bool> asyncEager,
+                                 bool loadAux)
     : slot{slot}
-    , func{func} {}
+    , func{func}
+    , asyncEager{asyncEager}
+    , loadAux{loadAux} {}
   std::string show() const {
-    return folly::sformat("{},{}", slot, func->fullName());
+    return folly::sformat(
+      "{},{},{},{}",
+      slot,
+      func->fullName(),
+      asyncEager ? folly::to<std::string>(*asyncEager) : "-",
+      loadAux
+    );
   }
   Slot slot;
   const Func* func;
+  folly::Optional<bool> asyncEager;
+  bool loadAux;
 };
 
 struct MemoCacheStaticData : IRExtraData {
-  MemoCacheStaticData(const Func* func, LocalRange keys, const bool* types)
+  MemoCacheStaticData(const Func* func,
+                      LocalRange keys,
+                      const bool* types,
+                      folly::Optional<bool> asyncEager,
+                      bool loadAux)
     : func{func}
     , keys{keys}
-    , types{types} {}
+    , types{types}
+    , asyncEager{asyncEager}
+    , loadAux{loadAux} {}
 
   MemoCacheStaticData* clone(Arena& arena) const {
-    auto p = new (arena) MemoCacheStaticData(func, keys, types);
+    auto p =
+      new (arena) MemoCacheStaticData(func, keys, types, asyncEager, loadAux);
     auto tmp = new (arena) bool[keys.count];
     std::copy(types, types + keys.count, tmp);
     p->types = tmp;
@@ -1207,6 +1241,8 @@ struct MemoCacheStaticData : IRExtraData {
   const Func* func;
   LocalRange keys;
   const bool* types;
+  folly::Optional<bool> asyncEager;
+  bool loadAux;
 };
 
 struct MemoCacheInstanceData : IRExtraData {
@@ -1214,16 +1250,21 @@ struct MemoCacheInstanceData : IRExtraData {
                         LocalRange keys,
                         const bool* types,
                         const Func* func,
-                        bool shared)
+                        bool shared,
+                        folly::Optional<bool> asyncEager,
+                        bool loadAux)
     : slot{slot}
     , keys{keys}
     , types{types}
     , func{func}
-    , shared{shared} {}
+    , shared{shared}
+    , asyncEager{asyncEager}
+    , loadAux{loadAux} {}
 
   MemoCacheInstanceData* clone(Arena& arena) const {
-    auto p =
-      new (arena) MemoCacheInstanceData(slot, keys, types, func, shared);
+    auto p = new (arena) MemoCacheInstanceData(
+      slot, keys, types, func, shared, asyncEager, loadAux
+    );
     auto tmp = new (arena) bool[keys.count];
     std::copy(types, types + keys.count, tmp);
     p->types = tmp;
@@ -1251,6 +1292,8 @@ struct MemoCacheInstanceData : IRExtraData {
   const bool* types;
   const Func* func;
   bool shared;
+  folly::Optional<bool> asyncEager;
+  bool loadAux;
 };
 
 struct MOpModeData : IRExtraData {

@@ -1315,6 +1315,7 @@ void dce(Env& env, const bc::BareThis& op) {
 }
 
 void dce(Env& env, const bc::RetC&)  { pop(env); readDtorLocs(env); }
+void dce(Env& env, const bc::RetCSuspended&) { pop(env); readDtorLocs(env); }
 void dce(Env& env, const bc::Throw&) { pop(env); readDtorLocs(env); }
 void dce(Env& env, const bc::Fatal&) { pop(env); readDtorLocs(env); }
 void dce(Env& env, const bc::Exit&)  { stack_ops(env); readDtorLocs(env); }
@@ -2579,6 +2580,9 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
       auto const& lastOpc = blk->hhbcs.back();
       if (!instrIsNonCallControlFlow(lastOpc.op)) return false;
       if (!lastOpc.numPush()) return false;
+      if (lastOpc.op == Op::MemoGetEager) {
+        return lastOpc.MemoGetEager.target1 == succId;
+      }
       auto isTaken = false;
       forEachTakenEdge(
         lastOpc,

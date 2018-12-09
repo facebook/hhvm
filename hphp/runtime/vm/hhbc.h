@@ -607,6 +607,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(RetC,            NA,               ONE(CV),         NOV,        CF_TF) \
   O(RetV,            NA,               ONE(VV),         NOV,        CF_TF) \
   O(RetM,            ONE(IVA),         CMANY,           NOV,        CF_TF) \
+  O(RetCSuspended,   NA,               ONE(CV),         NOV,        CF_TF) \
   O(Unwind,          NA,               NOV,             NOV,        TF) \
   O(Throw,           NA,               ONE(CV),         NOV,        CF_TF) \
   O(CGetL,           ONE(LA),          NOV,             ONE(CV),    NF) \
@@ -824,7 +825,10 @@ constexpr uint32_t kMaxConcatN = 4;
   O(SetWithRefLML,   TWO(LA,LA),       NOV,             NOV,        NF) \
   O(SetWithRefRML,   ONE(LA),          ONE(RV),         NOV,        NF) \
   O(MemoGet,         TWO(BA, LAR),     NOV,             ONE(CV),    CF) \
-  O(MemoSet,         ONE(LAR),         ONE(CV),         ONE(CV),    NF)
+  O(MemoGetEager,    THREE(BA, BA, LAR),                                \
+                                       NOV,             ONE(CV),    CF) \
+  O(MemoSet,         ONE(LAR),         ONE(CV),         ONE(CV),    NF) \
+  O(MemoSetEager,    ONE(LAR),         ONE(CV),         ONE(CV),    NF)
 
 enum class Op : uint16_t {
 #define O(name, ...) name,
@@ -1135,7 +1139,7 @@ inline bool isFCallStar(Op opcode) {
 }
 
 constexpr bool isRet(Op op) {
-  return op == OpRetC || op == OpRetV || op == OpRetM;
+  return op == OpRetC || op == OpRetV || op == OpRetM || op == OpRetCSuspended;
 }
 
 constexpr bool isReturnish(Op op) {
@@ -1223,7 +1227,7 @@ constexpr bool instrCanHalt(Op op) {
   return op == OpRetC || op == OpRetV || op == OpNativeImpl ||
          op == OpAwait || op == OpAwaitAll || op == OpCreateCont ||
          op == OpYield || op == OpYieldK || op == OpRetM ||
-         op == OpYieldFromDelegate;
+         op == OpRetCSuspended || op == OpYieldFromDelegate;
 }
 
 int instrNumPops(PC opcode);

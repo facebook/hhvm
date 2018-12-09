@@ -395,6 +395,7 @@ let string_of_control_flow instruction =
   | JmpZ l -> "JmpZ " ^ string_of_label l
   | JmpNZ l -> "JmpNZ " ^ string_of_label l
   | RetC -> "RetC"
+  | RetCSuspended -> "RetCSuspended"
   | RetM p -> "RetM " ^ string_of_int p
   | RetV -> "RetV"
   | Throw -> "Throw"
@@ -606,11 +607,22 @@ let string_of_misc instruction =
     | MemoGet (label, None) ->
       Printf.sprintf "MemoGet %s L:0+0" (string_of_label label)
     | MemoGet _ -> failwith "MemoGet needs an unnamed local"
+    | MemoGetEager (label1, label2, Some (Local.Unnamed first, local_count)) ->
+      Printf.sprintf "MemoGetEager %s %s L:%d+%d"
+                     (string_of_label label1) (string_of_label label2) first local_count
+    | MemoGetEager (label1, label2, None) ->
+      Printf.sprintf "MemoGetEager %s %s L:0+0" (string_of_label label1) (string_of_label label2)
+    | MemoGetEager _ -> failwith "MemoGetEager needs an unnamed local"
     | MemoSet (Some (Local.Unnamed first, local_count)) ->
        Printf.sprintf "MemoSet L:%d+%d" first local_count
     | MemoSet None ->
        Printf.sprintf "MemoSet L:0+0"
     | MemoSet _ -> failwith "MemoSet needs an unnamed local"
+    | MemoSetEager (Some (Local.Unnamed first, local_count)) ->
+       Printf.sprintf "MemoSetEager L:%d+%d" first local_count
+    | MemoSetEager None ->
+       Printf.sprintf "MemoSetEager L:0+0"
+    | MemoSetEager _ -> failwith "MemoSetEager needs an unnamed local"
     | GetMemoKeyL local ->
       sep ["GetMemoKeyL"; string_of_local_id local]
     | CreateCl (n, cid) ->

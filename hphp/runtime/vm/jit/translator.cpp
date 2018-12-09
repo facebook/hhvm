@@ -230,6 +230,8 @@ static const struct {
   { OpRetC,        {AllLocals,        None,         OutNone         }},
   { OpRetV,        {AllLocals,        None,         OutNone         }},
   { OpRetM,        {AllLocals,        None,         OutNone         }},
+  { OpRetCSuspended,
+                   {AllLocals,        None,         OutNone         }},
   { OpThrow,       {Stack1,           None,         OutNone         }},
   { OpUnwind,      {None,             None,         OutNone         }},
 
@@ -491,7 +493,10 @@ static const struct {
   { OpSetWithRefRML,
                    {Stack1|MBase,     None,         OutNone         }},
   { OpMemoGet,     {LocalRange,       None,         OutUnknown      }},
+  { OpMemoGetEager,{LocalRange,       None,         OutUnknown      }},
   { OpMemoSet,     {Stack1|LocalRange,
+                                      Stack1,       OutSameAsInput1 }},
+  { OpMemoSetEager, {Stack1|LocalRange,
                                       Stack1,       OutSameAsInput1 }},
 };
 
@@ -1065,6 +1070,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::PushL:
   case Op::RetC:
   case Op::RetV:
+  case Op::RetCSuspended:
   case Op::Self:
   case Op::SetG:
   case Op::SetS:
@@ -1113,7 +1119,9 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::SetWithRefRML:
   case Op::SetRangeM:
   case Op::MemoGet:
+  case Op::MemoGetEager:
   case Op::MemoSet:
+  case Op::MemoSetEager:
   case Op::RetM:
   case Op::Select:
     return false;

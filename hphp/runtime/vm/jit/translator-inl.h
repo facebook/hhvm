@@ -65,6 +65,7 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op, bool inlining) {
     case Op::RetC:
     case Op::RetV:
     case Op::RetM:
+    case Op::RetCSuspended:
     case Op::Exit:
     case Op::Fatal:
     case Op::IterNext:
@@ -91,6 +92,7 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op, bool inlining) {
     case Op::NativeImpl:
     case Op::BreakTraceHint:
     case Op::MemoGet:
+    case Op::MemoGetEager:
       return ControlFlowInfo::BreaksBB;
     case Op::Await:
     case Op::AwaitAll:

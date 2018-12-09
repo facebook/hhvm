@@ -491,7 +491,9 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     fpiStack.pop_back();
   };
 
-  auto set_expected_depth = [&] (EmitBcInfo::BlockInfo& info) {
+  auto set_expected_depth = [&] (BlockId block) {
+    auto& info = blockInfo[block];
+
     if (info.expectedStackDepth) {
       assert(*info.expectedStackDepth == currentStackDepth);
     } else {
@@ -543,9 +545,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
     auto emit_branch = [&] (BlockId id) {
       auto& info = blockInfo[id];
-
-      set_expected_depth(info);
-
       if (info.offset != kInvalidOffset) {
         ue.emitInt32(info.offset - startOffset);
       } else {
@@ -556,16 +555,21 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
     auto emit_switch = [&] (const SwitchTab& targets) {
       ue.emitIVA(targets.size());
-      for (auto t : targets) emit_branch(t);
+      for (auto t : targets) {
+        set_expected_depth(t);
+        emit_branch(t);
+      }
     };
 
     auto emit_sswitch = [&] (const SSwitchTab& targets) {
       ue.emitIVA(targets.size());
       for (size_t i = 0; i < targets.size() - 1; ++i) {
+        set_expected_depth(targets[i].second);
         ue.emitInt32(ue.mergeLitstr(targets[i].first));
         emit_branch(targets[i].second);
       }
       ue.emitInt32(-1);
+      set_expected_depth(targets[targets.size() - 1].second);
       emit_branch(targets[targets.size() - 1].second);
     };
 
@@ -688,14 +692,18 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define IMM_AA(n)      ue.emitInt32(ue.mergeArray(data.arr##n));
 #define IMM_OA_IMPL(n) ue.emitByte(static_cast<uint8_t>(data.subop##n));
 #define IMM_OA(type)   IMM_OA_IMPL
-#define IMM_BA(n)      emit_branch(data.target##n);
+#define IMM_BA(n)      targets[numTargets++] = data.target##n; \
+                       emit_branch(data.target##n);
 #define IMM_VSA(n)     emit_vsa(data.keys);
 #define IMM_KA(n)      encode_member_key(make_member_key(data.mkey), ue);
 #define IMM_LAR(n)     emit_lar(data.locrange);
 #define IMM_FCA(n)     encodeFCallArgs(                                    \
                          ue, data.fca,                                     \
                          data.fca.asyncEagerTarget != NoBlockId,           \
-                         [&] { emit_branch(data.fca.asyncEagerTarget); });
+                         [&] {                                             \
+                           set_expected_depth(data.fca.asyncEagerTarget);  \
+                           emit_branch(data.fca.asyncEagerTarget);         \
+                         });
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x(1)
@@ -736,15 +744,30 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       if (isRet(Op::opcode))              ret_assert(); \
       ue.emitOp(Op::opcode);                            \
       POP_##inputs                                      \
-      /* MemoGet pushes after branching */              \
-      if (Op::opcode != Op::MemoGet) {                  \
-        PUSH_##outputs                                  \
-      }                                                 \
       if (isFCallStar(Op::opcode)) end_fpi(startOffset);\
-      IMM_##imms                                        \
+                                                        \
+      size_t numTargets = 0;                            \
+      std::array<BlockId, kMaxHhbcImms> targets;        \
+                                                        \
       if (Op::opcode == Op::MemoGet) {                  \
+        IMM_##imms                                      \
+        assertx(numTargets == 1);                       \
+        set_expected_depth(targets[0]);                 \
         PUSH_##outputs                                  \
+      } else if (Op::opcode == Op::MemoGetEager) {      \
+        IMM_##imms                                      \
+        assertx(numTargets == 2);                       \
+        set_expected_depth(targets[0]);                 \
+        PUSH_##outputs                                  \
+        set_expected_depth(targets[1]);                 \
+      } else {                                          \
+        PUSH_##outputs                                  \
+        IMM_##imms                                      \
+        for (size_t i = 0; i < numTargets; ++i) {       \
+          set_expected_depth(targets[i]);               \
+        }                                               \
       }                                                 \
+                                                        \
       if (isFPush(Op::opcode))     fpush();             \
       if (isFCallStar(Op::opcode)) fcall(Op::opcode);   \
       if (flags & TF) currentStackDepth = 0;            \
@@ -865,7 +888,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     info.past = ue.bcPos();
 
     if (b->fallthrough != NoBlockId) {
-      set_expected_depth(blockInfo[b->fallthrough]);
+      set_expected_depth(b->fallthrough);
       if (std::next(blockIt) == endBlockIt ||
           blockIt[1]->id != b->fallthrough) {
         if (b->fallthroughNS) {

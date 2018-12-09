@@ -302,6 +302,7 @@ type instruct_control_flow =
   (* litstr id / offset vector *)
   | SSwitch of (string * Label.t) list
   | RetC
+  | RetCSuspended
   | RetM of num_params
   | RetV
   | Unwind
@@ -555,7 +556,9 @@ type instruct_misc =
   | CGetCUNop
   | UGetCUNop
   | MemoGet of Label.t * (local_id * int) option
+  | MemoGetEager of Label.t * Label.t * (local_id * int) option
   | MemoSet of (local_id * int) option
+  | MemoSetEager of (local_id * int) option
 
 type gen_creation_execution =
   | CreateCont

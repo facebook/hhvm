@@ -1293,7 +1293,8 @@ ActRec* ExecutionContext::getFrameAtDepth(int frame) {
   if (UNLIKELY(fp->localsDecRefd())) return nullptr;
   auto const curOp = fp->func()->unit()->getOp(pc);
   if (UNLIKELY(curOp == Op::RetC || curOp == Op::RetV || curOp == Op::RetM ||
-               curOp == Op::CreateCont || curOp == Op::Await)) {
+               curOp == Op::RetCSuspended || curOp == Op::CreateCont ||
+               curOp == Op::Await)) {
     return nullptr;
   }
   assertx(!fp->magicDispatch());
@@ -1363,6 +1364,7 @@ bool sideEffect(Op op) {
     case Op::Vec:
     case Op::Keyset:
     case Op::RetC:
+    case Op::RetCSuspended:
     case Op::Array:
     case Op::Dict:
     case Op::Cns:

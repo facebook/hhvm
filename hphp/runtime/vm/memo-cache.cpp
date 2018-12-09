@@ -640,8 +640,7 @@ struct CellWrapper {
   CellWrapper(const CellWrapper&) = delete;
   CellWrapper& operator=(const CellWrapper&) = delete;
   CellWrapper& operator=(CellWrapper&& o) noexcept {
-    std::swap(value.m_data.num, o.value.m_data.num);
-    std::swap(value.m_type, o.value.m_type);
+    std::swap(value, o.value);
     return *this;
   }
   ~CellWrapper() { tvDecRefGen(value); }

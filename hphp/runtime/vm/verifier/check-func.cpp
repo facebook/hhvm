@@ -1343,11 +1343,20 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
     #undef O
     case Op::GetMemoKeyL:
     case Op::MemoGet:
+    case Op::MemoGetEager:
     case Op::MemoSet:
+    case Op::MemoSetEager:
       if (!m_func->isMemoizeWrapper) {
         ferror("{} can only appear within memoize wrappers\n",
                opcodeToName(op));
         return false;
+      }
+      if (op == Op::MemoGetEager || op == Op::MemoSetEager) {
+        if (!m_func->isAsync || m_func->isGenerator) {
+          ferror("{} can only appear within async functions\n",
+                 opcodeToName(op));
+          return false;
+        }
       }
       break;
     case Op::NewCol:
@@ -1488,7 +1497,15 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
         ferror("{} has an illegal element count\n", opcodeToName(op));
         return false;
       }
+      break;
     }
+
+    case Op::RetCSuspended:
+      if (!m_func->isAsync || m_func->isGenerator) {
+        ferror("{} can only appear within async functions\n",
+               opcodeToName(op));
+        return false;
+      }
 
     default:
       break;
@@ -1603,7 +1620,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   }
 
   if (cur->fpilen > 0 && (op == Op::RetC || op == Op::RetV || op == Op::RetM ||
-                          op == Op::Unwind)) {
+                          op == Op::RetCSuspended || op == Op::Unwind)) {
     error("%s instruction encountered inside of FPI region\n",
           opcodeToName(op));
     ok = false;
@@ -1817,6 +1834,12 @@ bool FuncChecker::checkSuccEdges(Block* b, State* cur) {
     ok &= checkEdge(b, *cur, b->succs[0]);
     --cur->stklen;
     ok &= checkEdge(b, *cur, b->succs[1]);
+  } else if (peek_op(b->last) == OpMemoGetEager && numSuccBlocks(b) == 3) {
+    ok &= checkEdge(b, *cur, b->succs[0]);
+    --cur->stklen;
+    ok &= checkEdge(b, *cur, b->succs[1]);
+    ++cur->stklen;
+    ok &= checkEdge(b, *cur, b->succs[2]);
   } else {
     // Other branch instructions send the same state to all successors.
     if (m_errmode == kVerbose) {

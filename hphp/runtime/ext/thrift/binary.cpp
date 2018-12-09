@@ -649,7 +649,7 @@ void binary_serialize_spec(const Object& obj, PHPOutputTransport& transport,
   const size_t numFields = fields.size();
   // Write each member
   for (int i = 0; i < numFields; ++i) {
-    if (i <= numProps && fields[i].name == prop[i].name) {
+    if (i < numProps && fields[i].name == prop[i].name) {
       auto const& fieldVal = tvAsCVarRef(&objProp[i]);
       if (!fieldVal.isNull()) {
         TType fieldType = fields[i].type;

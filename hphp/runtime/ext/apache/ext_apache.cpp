@@ -96,7 +96,7 @@ Array HHVM_FUNCTION(apache_get_config) {
     health_level = (int)(ApacheExtension::GetHealthLevel());
   }
 
-  return make_map_array(
+  return make_darray(
     s_restart_time, HttpServer::StartTime,
     s_max_clients, RuntimeOption::ServerThreadCount,
     s_active_clients, workers,
@@ -111,7 +111,7 @@ Array HHVM_FUNCTION(get_headers_secure) {
     auto const& headers = transport->getHeaders();
     return get_headers(headers, true);
   }
-  return Array::CreateVArray();
+  return empty_darray();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

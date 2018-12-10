@@ -20,7 +20,7 @@ function apache_note(string $note_name,
  * Fetch all HTTP request headers
  *
  * @return array - An associative array of all the HTTP headers in the
- *   current request, or FALSE on failure.
+ *   current request.
  */
 <<__Native>>
 function apache_request_headers(): darray<string, string>;
@@ -52,13 +52,13 @@ function apache_setenv(string $variable,
  * Fetch all HTTP request headers
  *
  * @return array - An associative array of all the HTTP headers in the
- *   current request, or FALSE on failure.
+ *   current request.
  */
 <<__Native>>
-function getallheaders(): array<string, string>;
+function getallheaders(): darray<string, string>;
 
 <<__Native, __HipHopSpecific>>
-function apache_get_config(): array<string, mixed>;
+function apache_get_config(): darray<string, mixed>;
 
 }
 
@@ -67,9 +67,8 @@ namespace HH {
  * Fetch all HTTP request headers, including duplicates
  *
  * @return array - An associative array of all the HTTP headers in the
- *   current request, or FALSE on failure. The values in the array will
- *   be strings for uniquely specified headers, but arrays where a header
- *   was specified more than once.
+ *   current request. The values in the array will be strings for uniquely
+ *   specified headers, but arrays where a header was specified more than once.
  */
 <<__Native, __HipHopSpecific>>
 function get_headers_secure(): darray<string, varray<string>>;

@@ -118,6 +118,7 @@ t, u {{ ocaml ty }} :: 'ty_' ::=                           {{ com syntax of type
   | noreturn :: :: noreturn                 {{ com bottom type }}
   | mixed  ::   :: mixed                    {{ com top type }}
   | nonnull ::  :: nonnull                  {{ com nonnull type }}
+  | null   ::   :: null                     {{ com null type }}
   | int    ::   :: int                      {{ com integer }}
   | float  ::   :: float                    {{ com floating point }}
   | num    ::   :: num                      {{ com number }}
@@ -509,33 +510,6 @@ G |- t1 <: t3
 -------------------------- :: assume
 G , t <: t' |- t <: t'
 
-{{ com \subsection{Nullable types} }}
-
-{{ com
-Any type can be \emph{widened} to include null.
-}}
-
-------------- :: nullable_widen
-G |- t <:  ?t
-
-{{ com
-The nullable type behaves covariantly. }}
-
-G |- t1 <: t2
------------------ :: nullable_sub
-G |- ? t1 <: ? t2
-
-{{ com
-In Caml and Haskell the \texttt{option} and \texttt{Maybe} type constructors
-can be nested. But in Hack, there is a single \texttt{null} value, and so applying
-the nullable type constructor $[[? t]]$ more than once makes no difference: it is
-idempotent. Note that the converse rule to the one below is a consequence of
-the two rules above.
-}}
-
------------------ :: nullable_cancel
-G |- ? ? t <: ? t
-
 {{ com \subsection{Union} }}
 
 {{ com
@@ -567,21 +541,41 @@ Other properties are consequences of these rules. For example, commutativity
 follows by applying all three.
 }}
 
-{{ com
-Nullable types are unions:
-}}
-
--------------------- :: nullable_union
-G |- ?t1 <: t1 | ?t2
+{{ com \subsection{Nullable types} }}
 
 {{ com
 
-Note that this rule, together with \ottdrulename{sub\_refl} and
-\ottdrulename{sub\_union\_least}, implies
-\ottdrulename{sub\_nullable\_cancel} if we take $[[t1]]$ to be
-$[[?t2]]$.
+Hack has nullable (or option) types.  For any type $[[t]]$, $[[? t]]$
+is syntactic sugar for $[[t | null]]$.  The following properties of
+nullable types are corollaries of this definition and the typing rules
+for unions.
 
 }}
+
+{{ com
+Any type can be \emph{widened} to include null.
+}}
+
+------------- :: nullable_widen
+G |- t <: ? t
+
+{{ com
+The nullable type behaves covariantly. }}
+
+G |- t1 <: t2
+----------------- :: nullable_sub
+G |- ? t1 <: ? t2
+
+{{ com
+In Caml and Haskell the \texttt{option} and \texttt{Maybe} type constructors
+can be nested. But in Hack, there is a single \texttt{null} value, and so applying
+the nullable type constructor $[[? t]]$ more than once makes no difference: it is
+idempotent. Note that the converse rule to the one below is a consequence of
+the two rules above.
+}}
+
+----------------- :: nullable_cancel
+G |- ? ? t <: ? t
 
 {{ com \subsection{Primitives} }}
 
@@ -738,17 +732,17 @@ G |- function(t1, .., tn) : t <: nonnull
 
 {{ com
 
-Finally, $[[mixed]]$ is a subtype of $[[?nonnull]]$:
+Finally, $[[mixed]]$ is a subtype of $[[nonnull | null]]$:
 
 }}
 
----------------------- :: mixed_as_nullable_nonnull
-G |- mixed <: ?nonnull
+---------------------------- :: mixed_as_nullable_nonnull
+G |- mixed <: nonnull | null
 
 {{ com
 
 Together with \ottdrulename{sub\_as\_mixed} this implies $[[G |- mixed
-== ?nonnull]]$.
+== nonnull | null]]$.
 
 }}
 
@@ -1148,8 +1142,8 @@ G ; K |- e : t'
 
 {{ com \subsection{Literals} }}
 
-------------------- :: null
-G ; K |- null : ?t
+-------------------- :: null
+G ; K |- null : null
 
 --------------------- :: true
 G ; K |- true : bool

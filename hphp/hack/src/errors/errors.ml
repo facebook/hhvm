@@ -3538,15 +3538,16 @@ let unserializable_type pos message =
     ("Unserializable type (could not be converted to JSON and back again): "
      ^ message)
 
-let invalid_arraykey pos typ =
-  add (Typing.err_code Typing.InvalidArrayKey) pos @@
-    Printf.sprintf
-      "This value is not a valid array key type (string | int), it is %s"
-      typ
-
 let redundant_rx_condition pos =
   add (Typing.err_code Typing.RedundantRxCondition) pos
     "Reactivity condition for this method is always true, consider removing it."
+
+let invalid_arraykey pos (cpos, ctype) (kpos, ktype) =
+  add_list (Typing.err_code Typing.InvalidArrayKey) @@ [
+    pos, "This value is not a valid key type for this container";
+    cpos, "This container is " ^ ctype;
+    kpos, (String.capitalize ktype) ^ " cannot be used as a key for " ^ ctype;
+  ]
 
 (*****************************************************************************)
 (* Convert relative paths to absolute. *)

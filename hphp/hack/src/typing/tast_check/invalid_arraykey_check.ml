@@ -19,16 +19,24 @@ module Subtype = Typing_subtype
 let should_enforce env =
   TCO.disallow_invalid_arraykey (Env.get_tcopt env)
 
-let is_vector_container env e =
-  List.exists
-    [SN.Collections.cVector;
-     SN.Collections.cImmVector;
-     SN.Collections.cVec;
-     SN.Collections.cConstVector]
-    ~f:begin fun cls ->
-      Env.can_subtype env e
-        (Reason.Rnone, Tclass ((Pos.none, cls), Nonexact, [Reason.Rnone, Tany]))
-    end
+let info_of_type (reason, typ): Pos.t * string =
+  (Reason.to_pos reason, Typing_print.error typ)
+
+let is_valid_arraykey env tcontainer tkey =
+  let is_vector_container env e =
+    List.exists
+      [SN.Collections.cVector;
+       SN.Collections.cImmVector;
+       SN.Collections.cVec;
+       SN.Collections.cConstVector]
+      ~f:begin fun cls ->
+        Env.can_subtype env e
+          (Reason.Rnone,
+           Tclass ((Pos.none, cls), Nonexact, [Reason.Rnone, Tany]))
+      end
+      in
+  is_vector_container env tcontainer ||
+  Env.can_subtype env tkey (Reason.Rnone, Tprim Tarraykey)
 
 let handler = object
   inherit Tast_visitor.handler_base
@@ -39,9 +47,7 @@ let handler = object
     match expr with
     | Array_get (((_, tcontainer), _), Some ((_, tkey), _))
       when should_enforce env &&
-        not (Env.can_subtype env tkey (Reason.Rnone, Tprim Tarraykey)) &&
-        (* vec<_> and the *Vector collection types already guard against this *)
-        not (is_vector_container env tcontainer) ->
-      Errors.invalid_arraykey p (Typing_print.error (snd tkey))
+        not (is_valid_arraykey env tcontainer tkey) ->
+      Errors.invalid_arraykey p (info_of_type tcontainer) (info_of_type tkey)
     | _ -> ()
 end

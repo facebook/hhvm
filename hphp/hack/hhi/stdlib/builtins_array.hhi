@@ -83,16 +83,16 @@ function array_fill_keys($keys, $value);
  * Calls to array_filter are rewritten depending on the type
  * of argument to have one of the following signatures:
  *
- * function(array, ?(function(Tv):bool)): array
- * function(KeyedContainer<Tk, Tv>, ?(function(Tv):bool)): array<Tk, Tv>
- * function(Container<Tv>, ?(function(Tv):bool)): array<arraykey, Tv>
+ * function(array, mixed): array
+ * function(KeyedContainer<Tk, Tv>, mixed): array<Tk, Tv>
+ * function(Container<Tv>, mixed): array<arraykey, Tv>
  *
  * Single argument calls additionally remove nullability of Tv, i.e.:
  *
  * function(Container<?Tv>): array<arraykey, Tv>
  *
  */
-function array_filter<Tv>(Container<Tv> $input, ?(function(Tv):bool) $callback = null, int $flag = 0);
+function array_filter<Tv>(Container<Tv> $input, mixed $callback = null, int $flag = 0);
 <<__PHPStdLib, __Rx>>
 function array_flip($trans);
 <<__PHPStdLib, __Rx>>

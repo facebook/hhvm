@@ -343,9 +343,6 @@ and simplify_subtype
 
   | Tvar var_sub, Tvar var_super when var_sub = var_super -> valid ()
 
-  | Tvar _, _ | _, Tvar _ ->
-    default ()
-
   (* Internally, newtypes and dependent types are always equipped with an upper bound.
    * In the case when no upper bound is specified in source code,
    * an implicit upper bound mixed = ?nonnull is added.
@@ -941,12 +938,30 @@ and simplify_subtype
   | _, Tunresolved [ty_super'] when deep ->
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super' env
 
-  | Tunresolved tyl, _ ->
+  (* t1 | ... | tn <: t
+   *   if and only if
+   * t1 <: t /\ ... /\ tn <: t
+   * We want this even if t is a type variable e.g. consider
+   *   int | v <: v
+   *)
+  | Tunresolved tyl, _->
     if new_inference
     then
       List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_sub ->
         res &&& simplify_subtype ~seen_generic_params ~deep ty_sub ty_super)
     else default ()
+
+  (* We want to treat nullable as a union with the same rule as above.
+   * This is only needed for Tvar on right; other cases are dealt with specially as
+   * derived rules.
+   *)
+  | Toption t, Tvar _ when new_inference ->
+    env |>
+    simplify_subtype ~seen_generic_params ~deep ~this_ty t ty_super &&&
+    simplify_subtype ~seen_generic_params ~deep ~this_ty (fst ety_sub, Tprim Nast.Tnull) ty_super
+
+  | Tvar _, _ | _, Tvar _ ->
+    default ()
 
   (* Num is not atomic: it is equivalent to int|float. The rule below relies
    * on ty_sub not being a union e.g. consider num <: arraykey | float, so

@@ -39,8 +39,8 @@ const int EXTR_IF_EXISTS = 0;
 const int EXTR_REFS = 0;
 
 // flags for array_filter()
-const int ARRAY_FILTER_USE_BOTH = 1;
-const int ARRAY_FILTER_USE_KEY = 2;
+const int ARRAY_FILTER_USE_BOTH = 0;
+const int ARRAY_FILTER_USE_KEY = 0;
 
 const int UCOL_DEFAULT = 0;
 const int UCOL_PRIMARY = 0;

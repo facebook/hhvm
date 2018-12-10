@@ -154,7 +154,7 @@ let get_reactivity_attributes attrs =
         then Local :: acc
         else if n = SNUA.uaOnlyRxIfImpl
         then OnlyRxIfImpl :: acc
-        else if n = SNUA.uaAtMostRxAsArgs || n = SNUA.uaOnlyRxIfArgs_do_not_use
+        else if n = SNUA.uaAtMostRxAsArgs
         then AtMostRxAsArgs :: acc
         else acc in
       go tl acc in

@@ -84,7 +84,7 @@ let make_param_ty env param =
   in
   let module UA = SN.UserAttributes in
   let has_at_most_rx_as_func =
-    Attributes.mem2 UA.uaAtMostRxAsFunc UA.uaOnlyRxIfRxFunc_do_not_use param.param_user_attributes
+    Attributes.mem UA.uaAtMostRxAsFunc param.param_user_attributes
   in
   let ty =
     if has_at_most_rx_as_func then make_function_type_rxvar ty

@@ -253,7 +253,7 @@ let enforce_param_not_disposable env param ty =
 
 let param_has_at_most_rx_as_func p =
   let module UA = SN.UserAttributes in
-  Attributes.mem2 UA.uaAtMostRxAsFunc UA.uaOnlyRxIfRxFunc_do_not_use p.param_user_attributes
+  Attributes.mem UA.uaAtMostRxAsFunc p.param_user_attributes
 
 let fun_reactivity env attrs params =
   let r = Decl_fun_utils.fun_reactivity env attrs in
@@ -342,8 +342,7 @@ let make_param_local_ty env param =
         | Some r -> r
         | None -> env, ty
         end
-      | _ when Attributes.mem2 SN.UserAttributes.uaOnlyRxIfRxFunc_do_not_use
-                SN.UserAttributes.uaAtMostRxAsFunc param.param_user_attributes ->
+      | _ when Attributes.mem SN.UserAttributes.uaAtMostRxAsFunc param.param_user_attributes ->
         let env, ty = Phase.localize ~ety_env env ty in
         (* expand type to track aliased function types *)
         let env, expanded_ty = Env.expand_type env ty in

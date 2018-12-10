@@ -1246,7 +1246,7 @@ and subtype_reactivity
   | MaybeReactive sub, MaybeReactive super, _ ->
     subtype_reactivity ?extra_info ~is_call_site env sub super
   (* for explicit checks at callsites implicitly unwrap maybereactive value:
-     function f(<<__OnlyRxIfRxFunc>> F $f)
+     function f(<<__AtMostRxAsFunc>> F $f)
      f(<<__RxLocal>> () ==> {... })
      here parameter will be maybereactive and argument - rxlocal
      *)
@@ -1384,14 +1384,14 @@ and subtype_fun_params_reactivity
       <<__Rx>>
       function super((function(): int) $f);
       <<__Rx>>
-      function sub(<<__OnlyRxIfRxFunc>> (function(): int) $f);
+      function sub(<<__AtMostRxAsFunc>> (function(): int) $f);
       We check if sub <: super. parameters are checked contravariantly
       so we need to verify that
-      (function(): int) $f <: <<__OnlyRxIfRxFunc>> (function(): int) $f
+      (function(): int) $f <: <<__AtMostRxAsFunc>> (function(): int) $f
 
       Suppose this is legal, then this will be allowed (in pseudo-code)
 
-      function sub(<<__OnlyRxIfRxFunc>> (function(): int) $f) {
+      function sub(<<__AtMostRxAsFunc>> (function(): int) $f) {
         $f(); // can call function here since it is conditionally reactive
       }
       <<__Rx>>

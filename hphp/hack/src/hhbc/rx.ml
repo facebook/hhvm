@@ -45,8 +45,7 @@ let any_attr_is_rx_if_impl ast_attrs =
 
 let attr_is_rx_as_args ast_attr =
   let name = snd ast_attr.Ast.ua_name in
-  name = Naming_special_names.UserAttributes.uaOnlyRxIfArgs_do_not_use
-    || name = Naming_special_names.UserAttributes.uaAtMostRxAsArgs
+    name = Naming_special_names.UserAttributes.uaAtMostRxAsArgs
 
 let any_attr_is_rx_as_args ast_attrs =
   List.exists ast_attrs ~f:attr_is_rx_as_args

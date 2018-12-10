@@ -79,8 +79,6 @@ let error_on_attr env attrs attr f =
 
 let error_if_has_atmost_rx_as_rxfunc_attribute env attrs =
   error_on_attr env attrs
-    SN.UserAttributes.uaOnlyRxIfRxFunc_do_not_use Errors.atmost_rx_as_rxfunc_invalid_location;
-  error_on_attr env attrs
     SN.UserAttributes.uaAtMostRxAsFunc Errors.atmost_rx_as_rxfunc_invalid_location;
 
 module CheckFunctionBody = struct
@@ -1073,12 +1071,10 @@ and method_ (env, is_static) m =
 
 and check_maybe_rx_attributes_on_params env parent_attrs params =
   let parent_only_rx_if_args =
-    Attributes.find2 SN.UserAttributes.uaOnlyRxIfArgs_do_not_use
-      SN.UserAttributes.uaAtMostRxAsArgs parent_attrs in
+    Attributes.find SN.UserAttributes.uaAtMostRxAsArgs parent_attrs in
   let check_param seen_atmost_rx_as_rxfunc p =
     let only_rx_if_rxfunc_attr =
-      Attributes.find2 SN.UserAttributes.uaOnlyRxIfRxFunc_do_not_use
-        SN.UserAttributes.uaAtMostRxAsFunc p.param_user_attributes in
+      Attributes.find SN.UserAttributes.uaAtMostRxAsFunc p.param_user_attributes in
     let only_rx_if_impl_attr =
       Attributes.find SN.UserAttributes.uaOnlyRxIfImpl p.param_user_attributes in
     match only_rx_if_rxfunc_attr, only_rx_if_impl_attr with

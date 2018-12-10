@@ -133,11 +133,7 @@ module UserAttributes = struct
   let uaOnlyRxIfImpl        = "__OnlyRxIfImpl"
   let uaProbabilisticModel  = "__PPL"
   let uaLSB                 = "__LSB"
-  (* DEPRECATED: remove after codemodding www *)
-  let uaOnlyRxIfRxFunc_do_not_use = "__OnlyRxIfRxFunc"
   let uaAtMostRxAsFunc      = "__AtMostRxAsFunc"
-  (* DEPRECATED: remove after codemodding www *)
-  let uaOnlyRxIfArgs_do_not_use = "__OnlyRxIfArgs"
   let uaAtMostRxAsArgs      = "__AtMostRxAsArgs"
   let uaSealed              = "__Sealed"
   let uaReturnsVoidToRx     = "__ReturnsVoidToRx"
@@ -169,8 +165,6 @@ module UserAttributes = struct
       uaOnlyRxIfImpl;
       uaProbabilisticModel;
       uaLSB;
-      uaOnlyRxIfRxFunc_do_not_use;
-      uaOnlyRxIfArgs_do_not_use;
       uaSealed;
       uaReturnsVoidToRx;
       uaMaybeMutable;

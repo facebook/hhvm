@@ -1104,7 +1104,6 @@ let attribute_missing_reactivity_for_condition attr_spec =
   let has_attr attr = attribute_specification_contains attr_spec attr in
   not (attribute_has_reactivity_annotation attr_spec) && (
     has_attr SN.UserAttributes.uaOnlyRxIfImpl ||
-    has_attr SN.UserAttributes.uaOnlyRxIfArgs_do_not_use ||
     has_attr SN.UserAttributes.uaAtMostRxAsArgs
   )
 

@@ -617,7 +617,7 @@ let functions_cannot_implement_reactive =
   "__OnlyRxIfImpl annotations are only valid on class methods."
 
 let missing_reactivity_for_condition =
-  "__OnlyRxIfImpl, __OnlyRxIfArgs, and __AtMostRxAsArgs annotations cannot " ^
+  "__OnlyRxIfImpl and __AtMostRxAsArgs annotations cannot " ^
   "be used without __Rx, __RxShallow, or __RxLocal."
 
 let misplaced_owned_mutable =

@@ -12,7 +12,7 @@ interface Rx {
 class A {
 }
 
-<<__Rx, __OnlyRxIfArgs>>
+<<__Rx, __AtMostRxAsArgs>>
 function f(<<__OnlyRxIfImpl(Rx::class)>> A $a): void {
 }
 |}
@@ -24,7 +24,7 @@ interface Rx {
 class A implements Rx {
 }
 
-<<__Rx, __OnlyRxIfArgs>>
+<<__Rx, __AtMostRxAsArgs>>
 function f(<<__OnlyRxIfImpl(Rx::class)>> A $a): void {
 }
 |}

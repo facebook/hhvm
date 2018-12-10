@@ -8,6 +8,7 @@
  *
  */
 
+namespace {
 <<__PHPStdLib, __Rx>>
 function is_bool($var): bool;
 <<__PHPStdLib, __Rx>>
@@ -58,3 +59,30 @@ function get_defined_vars();
 function import_request_variables($types, $prefix = "");
 <<__PHPStdLib>>
 function extract(&$var_array, $extract_type = EXTR_OVERWRITE, $prefix = "");
+}
+
+namespace HH\Lib\_Private\Native {
+  <<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
+  function first(
+    <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>>
+    mixed $iterable
+  ): mixed;
+
+  <<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
+  function first_key(
+    <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>>
+    mixed $iterable
+  ): mixed;
+
+  <<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
+  function last(
+    <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>>
+    mixed $iterable
+  ): mixed;
+
+  <<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
+  function last_key(
+    <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>>
+    mixed $iterable
+  ): mixed;
+}

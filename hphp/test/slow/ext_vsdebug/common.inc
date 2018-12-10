@@ -264,12 +264,13 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = []) 
       $scriptPath,
     ];
   } else {
-    $uri = "unix:///tmp/hhvm_unit_test";
+    $sockfile = "/tmp/hhvm_unit_test." . getmypid();
+    $uri = "unix://" . $sockfile;
     $cmd = vec[
       getHhvmPath(),
       '-d', 'hhvm.hack.lang.look_for_typechecker=0',
       '--mode', 'vsdebug',
-      '--vsDebugDomainSocketPath', '/tmp/hhvm_unit_test',
+      '--vsDebugDomainSocketPath', $sockfile,
       $scriptPath,
     ];
   }

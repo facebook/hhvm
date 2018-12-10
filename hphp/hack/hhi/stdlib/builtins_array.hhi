@@ -38,6 +38,10 @@ const int EXTR_PREFIX_IF_EXISTS = 0;
 const int EXTR_IF_EXISTS = 0;
 const int EXTR_REFS = 0;
 
+// flags for array_filter()
+const int ARRAY_FILTER_USE_BOTH = 1;
+const int ARRAY_FILTER_USE_KEY = 2;
+
 const int UCOL_DEFAULT = 0;
 const int UCOL_PRIMARY = 0;
 const int UCOL_SECONDARY = 0;
@@ -88,7 +92,7 @@ function array_fill_keys($keys, $value);
  * function(Container<?Tv>): array<arraykey, Tv>
  *
  */
-function array_filter<Tv>(Container<Tv> $input, ?(function(Tv):bool) $callback = null);
+function array_filter<Tv>(Container<Tv> $input, ?(function(Tv):bool) $callback = null, int $flag = 0);
 <<__PHPStdLib, __Rx>>
 function array_flip($trans);
 <<__PHPStdLib, __Rx>>

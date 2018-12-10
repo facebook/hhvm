@@ -2776,8 +2776,7 @@ and anon_make tenv p f ft idl =
               env, Typing_return.wrap_awaitable env p ret_ty, tyvars
             | Some ret_ty ->
               (* We might need to force it to be Awaitable if it is a type variable *)
-              let env, ty = Typing_return.force_awaitable env p ret_ty in
-              env, ty, ISet.empty
+              Typing_return.force_awaitable env p ret_ty
             end
           | Some x ->
             let ret = TI.instantiable_hint env x in

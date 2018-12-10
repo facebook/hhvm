@@ -3,7 +3,7 @@
 /**
  * Generic type remains generic if it was not modified.
  */
-function f<Tv as KeyedContainer<mixed, mixed>>(Tv $a): Tv {
+function f<Tv as KeyedContainer<string, mixed>>(Tv $a): Tv {
   $a['a'];
   return $a;
 }

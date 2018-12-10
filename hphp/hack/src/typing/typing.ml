@@ -1906,9 +1906,10 @@ and expr_
       let env, te2, ty2 = expr env e2 in
       let env = save_and_merge_next_in_catch env in
       let is_lvalue = phys_equal valkind `lvalue in
-      let env, ty =
-        Typing_array_access.array_get ?lhs_of_null_coalesce is_lvalue p env ty1 e2 ty2 in
-      make_result env p (T.Array_get(te1, Some te2)) ty
+      let (env, tyvars), ty =
+        Typing_array_access.array_get ?lhs_of_null_coalesce
+          is_lvalue p (env, ISet.empty) ty1 e2 ty2 in
+      make_result ~tyvars env p (T.Array_get(te1, Some te2)) ty
   | Call (Cnormal, (pos_id, Id ((_, s) as id)), hl, el, [])
       when is_pseudo_function s ->
       let env, tel, tys = exprs ~accept_using_var:true env el in

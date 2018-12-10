@@ -16,22 +16,29 @@ module Env = Typing_env
 module TUtils = Typing_utils
 module Reason = Typing_reason
 module TMT = Typing_make_type
+module SubType = Typing_subtype
 
 let err_witness env p = Reason.Rwitness p, TUtils.terr env
 
-let error_array env p (r, ty) =
+let error_array (env, tyvars) p (r, ty) =
   Errors.array_access p (Reason.to_pos r) (Typing_print.error ty);
-  env, err_witness env p
+  (env, tyvars), err_witness env p
 
-let error_const_mutation env p (r, ty) =
+let error_const_mutation (env, tyvars) p (r, ty) =
   Errors.const_mutation p (Reason.to_pos r) (Typing_print.error ty);
-  env, err_witness env p
+  (env, tyvars), err_witness env p
 
 let error_assign_array_append env p (r, ty) =
   Errors.array_append p (Reason.to_pos r) (Typing_print.error ty);
   env, ((r, ty), err_witness env p)
 
-let rec array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
+let rec array_get ?(lhs_of_null_coalesce=false)
+  is_lvalue p ((env, tyvars) as acc) ty1 e2 ty2 =
+  Typing_log.(log_with_level env "typing" 1 (fun () ->
+    log_types p env
+      [Log_head ("array_get",
+      [Log_type ("ty1", ty1); Log_type("ty2", ty2)])]));
+  let env, ety1 = Env.expand_type env ty1 in
   (* This is a little weird -- we enforce the right arity when you use certain
    * collections, even in partial mode (where normally completely omitting the
    * type parameter list is admitted). Basically the "omit type parameter"
@@ -40,7 +47,6 @@ let rec array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
    * errored (with an inscrutable error message) when you try to actually use
    * a collection with omitted type parameters, we can continue to error and
    * give a more useful error message. *)
-  let env, ety1 = Env.expand_type env ty1 in
   let arity_error (_, name) =
     Errors.array_get_arity p name (Reason.to_pos (fst ety1)) in
   let nullable_container_get ty =
@@ -50,40 +56,46 @@ let rec array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
        indexing into a nullable container as long as it is on the lhs of a
        null coalesce *)
     then
-      array_get ~lhs_of_null_coalesce is_lvalue p env ty e2 ty2
+      array_get ~lhs_of_null_coalesce is_lvalue p (env, tyvars) ty e2 ty2
     else begin
       Errors.null_container p
         (Reason.to_string
           "This is what makes me believe it can be null"
           (fst ety1)
         );
-      env, err_witness env p
+      (env, tyvars), err_witness env p
     end in
-  let type_index env p ty_have ty_expect reason =
+  let type_index (env, tyvars) p ty_have ty_expect reason =
+  Typing_log.(log_with_level env "typing" 1 (fun () ->
+    log_types p env
+    [Log_head ("array_get/type_index",
+     [Log_type ("ty_have", ty_have); Log_type("ty_expect", ty_expect)])]));
     (* coerce if possible *)
     match Typing_coercion.try_coerce p reason env ty_have ty_expect with
-    | Some e -> e
+    | Some env -> (env, tyvars)
     | None ->
         (* if subtype of dynamic, allow it to be used *)
         if Typing_subtype.is_sub_type env ty_have (fst ty_have, Tdynamic)
-        then env
+        then env, tyvars
         (* fail with useful error *)
-        else Typing_ops.sub_type p reason env ty_have ty_expect
+        else
+          let env = Typing_ops.sub_type p reason env ty_have ty_expect in
+          env, tyvars
   in
   match snd ety1 with
   | Tunresolved tyl ->
-      let env, tyl = List.map_env env tyl begin fun env ty1 ->
-        array_get ~lhs_of_null_coalesce is_lvalue p env ty1 e2 ty2
+      let acc, tyl = List.map_env acc tyl begin fun acc ty1 ->
+        array_get ~lhs_of_null_coalesce is_lvalue p acc ty1 e2 ty2
       end in
-      env, (fst ety1, Tunresolved tyl)
+      acc, (fst ety1, Tunresolved tyl)
   | Tarraykind (AKvarray ty | AKvec ty) ->
       let ty1 = Reason.Ridx (fst e2, fst ety1), Tprim Tint in
-      let env = type_index env p ty2 ty1 Reason.index_array in
-      env, ty
+      let acc = type_index acc p ty2 ty1 Reason.index_array in
+      acc, ty
   | Tarraykind (AKvarray_or_darray ty) ->
       let ty1 = Reason.Rvarray_or_darray_key p, Tprim Tarraykey in
-      let env = type_index env p ty2 ty1 Reason.index_array in
-      env, ty
+      let acc = type_index acc p ty2 ty1 Reason.index_array in
+      acc, ty
   | Tclass ((_, cn) as id, _, argl)
     when cn = SN.Collections.cVector
     || cn = SN.Collections.cVec ->
@@ -91,8 +103,8 @@ let rec array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
         | [ty] -> ty
         | _ -> arity_error id; err_witness env p in
       let ty1 = Reason.Ridx_vector (fst e2), Tprim Tint in
-      let env = type_index env p ty2 ty1 (Reason.index_class cn) in
-      env, ty
+      let acc = type_index acc p ty2 ty1 (Reason.index_class cn) in
+      acc, ty
   | Tclass ((_, cn) as id, _, argl)
     when cn = SN.Collections.cMap
     || cn = SN.Collections.cStableMap
@@ -100,7 +112,7 @@ let rec array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
     || cn = SN.Collections.cKeyset ->
       if cn = SN.Collections.cKeyset && is_lvalue then begin
         Errors.keyset_set p (Reason.to_pos (fst ety1));
-        env, err_witness env p
+        acc, err_witness env p
       end else
         let (k, v) = match argl with
           | [t] when cn = SN.Collections.cKeyset -> (t, t)
@@ -111,8 +123,8 @@ let rec array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
               any, any
         in
         let env, ty2 = Env.unbind env ty2 in
-        let env = type_index env p ty2 k (Reason.index_class cn) in
-        env, v
+        let acc = type_index (env, tyvars) p ty2 k (Reason.index_class cn) in
+        acc, v
   (* Certain container/collection types are intended to be immutable/const,
    * thus they should never appear as a lvalue when indexing i.e.
    *
@@ -125,7 +137,7 @@ let rec array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
         || cn = SN.Collections.cIndexish
         || cn = SN.Collections.cKeyedContainer ->
     if is_lvalue then
-      error_const_mutation env p ety1
+      error_const_mutation acc p ety1
     else
       let (k, v) = match argl with
         | [k; v] -> (k, v)
@@ -134,8 +146,8 @@ let rec array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
             let any = err_witness env p in
             any, any
       in
-      let env = type_index env p ty2 k (Reason.index_class cn) in
-      env, v
+      let acc = type_index acc p ty2 k (Reason.index_class cn) in
+      acc, v
   | Tclass ((_, cn) as id, _, argl)
       when not is_lvalue &&
         (cn = SN.Collections.cConstVector || cn = SN.Collections.cImmVector) ->
@@ -143,53 +155,53 @@ let rec array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
         | [ty] -> ty
         | _ -> arity_error id; err_witness env p in
       let ty1 = Reason.Ridx (fst e2, fst ety1), Tprim Tint in
-      let env = type_index env p ty2 ty1 (Reason.index_class cn) in
-      env, ty
+      let acc = type_index acc p ty2 ty1 (Reason.index_class cn) in
+      acc, ty
   | Tclass ((_, cn), _, _)
       when is_lvalue &&
         (cn = SN.Collections.cConstVector || cn = SN.Collections.cImmVector) ->
-    error_const_mutation env p ety1
+    error_const_mutation acc p ety1
   | Tarraykind (AKdarray (k, v) | AKmap (k, v)) ->
       let env, ty2 = Env.unbind env ty2 in
-      let env = type_index env p ty2 k Reason.index_array in
-      env, v
+      let acc = type_index (env, tyvars) p ty2 k Reason.index_array in
+      acc, v
   | Tarraykind ((AKshape  _ |  AKtuple _) as akind) ->
       let key = Typing_arrays.static_array_access env (Some e2) in
-      let env, result = match key, akind with
+      let (env, tyvars), result = match key, akind with
         | Typing_arrays.AKtuple_index index, AKtuple fields ->
             begin match IMap.get index fields with
               | Some ty ->
                   let ty1 = Reason.Ridx (fst e2, fst ety1), Tprim Tint in
-                  let env = type_index env p ty2 ty1 Reason.index_array in
-                  env, Some ty
-              | None -> env, None
+                  let acc = type_index acc p ty2 ty1 Reason.index_array in
+                  acc, Some ty
+              | None -> acc, None
             end
         | Typing_arrays.AKshape_key field_name, AKshape fdm ->
             begin match ShapeMap.get field_name fdm with
               | Some (k, v) ->
                   let env, ty2 = Env.unbind env ty2 in
-                  let env = type_index env p ty2 k Reason.index_array in
-                  env, Some v
-              | None -> env, None
+                  let acc = type_index (env, tyvars) p ty2 k Reason.index_array in
+                  acc, Some v
+              | None -> acc, None
             end
-        | _ -> env, None in
+        | _ -> acc, None in
       begin match result with
-        | Some ty -> env, ty
+        | Some ty -> (env, tyvars), ty
         | None ->
           (* Key is dynamic, or static and not in the array - treat it as
             regular map or vec like array *)
           let env, ty1 = Typing_arrays.downcast_aktypes env ety1 in
-          array_get is_lvalue p env ty1 e2 ty2
+          array_get is_lvalue p (env, tyvars) ty1 e2 ty2
       end
-  | Terr -> env, err_witness env p
-  | Tdynamic -> env, ety1
+  | Terr -> acc, err_witness env p
+  | Tdynamic -> acc, ety1
   | Tany | Tarraykind (AKany | AKempty) ->
-      env, (Reason.Rnone, TUtils.tany env)
+      acc, (Reason.Rnone, TUtils.tany env)
   | Tprim Tstring ->
       let ty = Reason.Rwitness p, Tprim Tstring in
       let ty1 = Reason.Ridx (fst e2, fst ety1), Tprim Tint in
-      let env = type_index env p ty2 ty1 Reason.index_array in
-      env, ty
+      let acc = type_index acc p ty2 ty1 Reason.index_array in
+      acc, ty
   | Ttuple tyl ->
       (* requires integer literal *)
       (match e2 with
@@ -197,14 +209,14 @@ let rec array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
           (try
             let idx = int_of_string n in
             let nth = List.nth_exn tyl idx in
-            env, nth
+            acc, nth
           with _ ->
             Errors.typing_error p (Reason.string_of_ureason Reason.index_tuple);
-            env, err_witness env p
+            acc, err_witness env p
           )
       | p, _ ->
           Errors.typing_error p (Reason.string_of_ureason Reason.URtuple_access);
-          env, err_witness env p
+          acc, err_witness env p
       )
   | Tclass ((_, cn) as id, _, argl) when cn = SN.Collections.cPair ->
       let (ty1, ty2) = match argl with
@@ -219,15 +231,15 @@ let rec array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
           (try
             let idx = int_of_string n in
             let nth = List.nth_exn [ty1; ty2] idx in
-            env, nth
+            acc, nth
           with _ ->
             Errors.typing_error p @@
             Reason.string_of_ureason (Reason.index_class cn);
-            env, err_witness env p
+            acc, err_witness env p
           )
       | p, _ ->
           Errors.typing_error p (Reason.string_of_ureason Reason.URpair_access);
-          env, err_witness env p
+          acc, err_witness env p
       )
   | Tshape (_, fdm) ->
     let p = fst e2 in
@@ -235,14 +247,14 @@ let rec array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
       | None ->
           (* there was already an error in shape_field name,
              don't report another one for a missing field *)
-          env, err_witness env p
+          acc, err_witness env p
       | Some field -> (match ShapeMap.get field fdm with
         | None ->
           Errors.undefined_field
             ~use_pos:p
             ~name:(TUtils.get_printable_shape_field_name field)
             ~shape_type_pos:(Reason.to_pos (fst ety1));
-          env, err_witness env p
+          acc, err_witness env p
         | Some { sft_optional = true; _ }
           when not is_lvalue && not lhs_of_null_coalesce ->
           let declared_field =
@@ -255,36 +267,49 @@ let rec array_get ?(lhs_of_null_coalesce=false) is_lvalue p env ty1 e2 ty2 =
             p
             declaration_pos
             (TUtils.get_printable_shape_field_name field);
-          env, err_witness env p
-        | Some { sft_optional = _; sft_ty } -> env, sft_ty)
+          acc, err_witness env p
+        | Some { sft_optional = _; sft_ty } -> acc, sft_ty)
     )
   | Toption ty -> nullable_container_get ty
   | Tprim Tnull ->
       nullable_container_get (Reason.Rnone, Tany)
   | Tobject ->
       if Env.is_strict env
-      then error_array env p ety1
-      else env, (Reason.Rwitness p, TUtils.tany env)
+      then error_array acc p ety1
+      else acc, (Reason.Rwitness p, TUtils.tany env)
   | Tabstract (AKnewtype (ts, [ty]), Some (r, Tshape (fk, fields)))
         when ts = SN.FB.cTypeStructure ->
       let env, fields = Typing_structure.transform_shapemap env ty fields in
       let ty = r, Tshape (fk, fields) in
-      array_get ~lhs_of_null_coalesce is_lvalue p env ty e2 ty2
+      array_get ~lhs_of_null_coalesce is_lvalue p (env, tyvars) ty e2 ty2
   | Tabstract _ ->
     let resl =
     TUtils.try_over_concrete_supertypes env ety1
       begin fun env ty ->
-        array_get ~lhs_of_null_coalesce is_lvalue p env ty e2 ty2
+        let (env, _tyvars), res =
+          array_get ~lhs_of_null_coalesce is_lvalue p (env, tyvars) ty e2 ty2 in
+        env, res
       end in
     begin match resl with
-    | [res] -> res
+    | [res] -> let env, res = res in (env, tyvars), res
     | res::rest
-      when List.for_all rest ~f:(fun x -> ty_equal (snd x) (snd res)) -> res
-    | _ -> error_array env p ety1
+      when List.for_all rest ~f:(fun x -> ty_equal (snd x) (snd res)) ->
+      let env, res = res in (env, tyvars), res
+    | _ -> error_array acc p ety1
     end
-  | Tnonnull | Tprim _ | Tvar _ | Tfun _
+  | Tnonnull | Tprim _ | Tfun _
   | Tclass _ | Tanon (_, _) ->
-      error_array env p ety1
+      error_array acc p ety1
+  (* Type-check array access as though it is the method
+   * array_get<Tk,Tv>(KeyedContainer<Tk,Tv> $array, Tk $key): Tv
+   * (We can already force Tk to be the type of the key argument because
+   * Tk does not appear in the result of the call)
+   *)
+  | Tvar _ ->
+    let env, value, tyvars = Env.fresh_unresolved_type_add_tyvars env p tyvars in
+    let keyed_container = TMT.keyed_container (fst ety1) ty2 value in
+    let env = SubType.sub_type env ty1 keyed_container in
+    (env, tyvars), value
 
 let rec assign_array_append pos ur env ty1 ty2 =
   let env, ety1 = Env.expand_type env ty1 in
@@ -343,7 +368,18 @@ let rec assign_array_append pos ur env ty1 ty2 =
         Tfun _ | Tclass _ | Ttuple _ | Tanon _ | Tshape _) ->
     error_assign_array_append env pos ty1
 
+(* Used for typing an assignment e1[key] = e2
+ * where e1 has type ty1, key has type tkey and e2 has type ty2.
+ * Return (ty1', ty2') where ty1' is the new array type, and ty2' is the element type
+ *)
 let rec assign_array_get pos ur env ty1 key tkey ty2 =
+Typing_log.(log_with_level env "typing" 1 (fun () ->
+  log_types pos env
+  [Log_head ("assign_array_get",
+   [Log_type ("ty1", ty1);
+    Log_type ("tkey", tkey);
+    Log_type ("ty2", ty2)])]));
+
   let env, ety1 = Env.expand_type env ty1 in
   let arity_error (_, name) =
     Errors.array_get_arity pos name (Reason.to_pos (fst ety1)) in
@@ -520,6 +556,6 @@ let rec assign_array_get pos ur env ty1 key tkey ty2 =
       error
     end
   | (Toption _ | Tnonnull | Tprim _ |
-     Tvar _ |Tfun _ | Tclass _ | Tanon _) ->
+     Tvar _ | Tfun _ | Tclass _ | Tanon _) ->
     Errors.array_access pos (Reason.to_pos (fst ety1)) (Typing_print.error (snd ety1));
     error

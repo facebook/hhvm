@@ -222,7 +222,7 @@ void ProxygenTransport::onHeadersComplete(
     //   TRACE, COPY, MOVE, MKACTIVITY, CHECKOUT, MERGE, MSEARCH, NOTIFY,
     //   SUBSCRIBE, UNSUBSCRIBE, PATCH
     m_method = Transport::Method::Unknown;
-    sendErrorResponse(405 /* Method Not Allowed */);
+    sendErrorResponse(501 /* Not Implemented */);
     return;
   }
 

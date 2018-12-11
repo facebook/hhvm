@@ -157,11 +157,12 @@ let def_env d =
   | Class x -> class_env x
   | Typedef x -> typedef_env x
   | Constant x -> gconst_env x
-  (* Top level statements are included in the TAST, but are not typechecked.
+  (* The following nodes are included in the TAST, but are not typechecked.
    * However, we need to return an env here so for now create an empty env using
    * the default typechecker options.
    *)
-  | Stmt _ -> empty GlobalOptions.default
+  | Stmt _
+  | SetNamespaceEnv _ -> empty GlobalOptions.default
 
 let set_ppl_lambda env =
   { env with Typing_env.inside_ppl_class = false }

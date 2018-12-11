@@ -350,6 +350,7 @@ struct
     | S.Typedef td -> T.Typedef (map_typedef menv td)
     | S.Constant gc -> T.Constant (map_gconst menv gc)
     | S.Stmt s -> T.Stmt (map_stmt menv s)
+    | S.SetNamespaceEnv env -> T.SetNamespaceEnv env
 
   let map_program
     ~map_expr_annotation

@@ -299,7 +299,7 @@ and on_def : def -> Aast.def = function
   | Constant c -> Aast.Constant (on_constant c)
   | Namespace _ -> Aast.Stmt Aast.Noop (* TODO: T37786581 *)
   | NamespaceUse _ -> Aast.Stmt Aast.Noop (* TODO: T37786581 *)
-  | SetNamespaceEnv _ -> Aast.Stmt Aast.Noop (* TODO: T37786581 *)
+  | SetNamespaceEnv env -> Aast.SetNamespaceEnv env
 
 and program ast = on_list on_def ast
 

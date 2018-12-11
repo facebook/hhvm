@@ -6631,6 +6631,7 @@ let nast_to_tast opts nast =
     | Nast.Stmt s ->
     let env = Env.empty opts Relative_path.default None in
       T.Stmt (snd (stmt env s))
+    | Nast.SetNamespaceEnv env -> T.SetNamespaceEnv env
   in
   let tast = List.map nast convert_def in
   Tast_check.program tast;

@@ -39,6 +39,7 @@ let global_options =
     ~tco_disallow_anon_use_capture_by_ref:false
     ~tco_disallow_invalid_arraykey:false
     ~tco_new_inference:0.0
+    ~tco_new_inference_eager_solve:false
     ~ignored_fixme_codes:ISet.empty
     ~forward_compatibility_level:ForwardCompatibilityLevel.default
     ~log_levels:SMap.empty

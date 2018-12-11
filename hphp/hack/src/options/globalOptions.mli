@@ -180,6 +180,12 @@ type t = {
  tco_new_inference : float;
 
  (*
+  * Additional mode for new_inference, where an invariant type variable
+  * is solved eagerly for constructs such as method invocation
+  *)
+ tco_new_inference_eager_solve : bool;
+
+ (*
   * Flag to disallow using values that get casted to array keys at runtime;
   * like bools, floats, or null; as array keys.
   *)
@@ -226,6 +232,7 @@ val make :
   tco_disallow_stringish_magic: bool ->
   tco_disallow_anon_use_capture_by_ref: bool ->
   tco_new_inference: float ->
+  tco_new_inference_eager_solve: bool ->
   tco_disallow_invalid_arraykey: bool ->
   ignored_fixme_codes: ISet.t ->
   forward_compatibility_level: ForwardCompatibilityLevel.t ->
@@ -264,6 +271,7 @@ val tco_disallow_scrutinee_case_value_type_mismatch : t -> bool
 val tco_disallow_stringish_magic : t -> bool
 val tco_disallow_anon_use_capture_by_ref : t -> bool
 val tco_new_inference : t -> bool
+val tco_new_inference_eager_solve : t -> bool
 val tco_disallow_invalid_arraykey : t -> bool
 val default : t
 val make_permissive : t -> t

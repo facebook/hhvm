@@ -6092,6 +6092,7 @@ and class_def_ env c tc =
     name, trait) in
   let removals = String.Map.of_alist_fold alist ~init:[] ~f:(Fn.flip List.cons) in
   List.iter impl (class_implements_type env c removals);
+  let env = List.fold c.c_method_redeclarations ~init:env ~f:(supertype_redeclared_method tc) in
   if (Cls.is_disposable tc)
     then List.iter (c.c_extends @ c.c_uses) (Typing_disposable.enforce_is_disposable env);
   let typed_vars = List.map c.c_vars (class_var_def env ~is_static:false c) in
@@ -6322,6 +6323,45 @@ and add_constraints p env constraints =
   let add_constraint env (ty1, ck, ty2) =
     SubType.add_constraint p env ck ty1 ty2 in
   List.fold_left constraints ~f:add_constraint ~init: env
+
+and supertype_redeclared_method tc env m =
+  let pos, name = m.mt_name in
+  let get_method = if m.mt_static then Env.get_static_member else Env.get_member in
+
+  let class_member_opt = get_method true env tc name in
+  let _, trait, _ = Decl_utils.unwrap_class_hint m.mt_trait in
+  let _, trait_method = m.mt_method in
+  let open Option in
+  let trait_member_opt = Env.get_class env trait >>= (fun trait_tc ->
+    get_method true env trait_tc trait_method) in
+
+  ignore (map2 trait_member_opt class_member_opt ~f:begin fun trait_member class_member ->
+    match trait_member.ce_type, class_member.ce_type with
+    | lazy (r_child, Tfun ft_child), lazy (r_parent, Tfun ft_parent) ->
+      Errors.try_
+      (fun () ->
+        ignore (Typing_subtype.(subtype_method
+          ~check_return:true
+          ~extra_info:{ method_info = None; class_ty = None; parent_class_ty = None }
+          env
+          r_child
+          ft_child
+          r_parent
+          ft_parent
+        ))
+      ) (fun errorl ->
+        Errors.try_
+        (fun () -> Errors.bad_method_override pos name errorl)
+        (fun ierrorl ->
+          Errors.bad_decl_override
+          (Reason.to_pos r_parent)
+          trait
+          (Cls.pos tc)
+          (Cls.name tc)
+          ierrorl)
+      )
+    | _ -> ()
+  end); env
 
 and user_attribute env ua =
   let typed_ua_params =

@@ -1857,7 +1857,8 @@ let class_arity usage_pos class_pos class_name arity =
 
 let redeclaring_missing_method p trait_method =
   add (Typing.err_code Typing.RedeclaringMissingMethod) p
-    ("Attempting to redeclare a trait method " ^ trait_method ^ " which was never inherited")
+    ("Attempting to redeclare a trait method " ^ trait_method ^ " which was never inherited. " ^
+     "You might be trying to redeclare a non-static method as static or vice-versa.")
 
 let expecting_type_hint p =
   add (Typing.err_code Typing.ExpectingTypeHint) p "Was expecting a type hint"

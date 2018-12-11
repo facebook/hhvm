@@ -488,26 +488,26 @@ let check = object(self)
     end;
     match expr with
     | _, Await e ->
-      super#on_expr (env, allow_awaitable ctx) e
+      self#on_expr (env, allow_awaitable ctx) e
     | _, Pipe (_, l, r) ->
-      super#on_expr (env, ctx) l;
-      super#on_expr (env, allow_awaitable ctx) r;
+      self#on_expr (env, ctx) l;
+      self#on_expr (env, allow_awaitable ctx) r;
     | _, Special_func (Genva args) ->
       let ctx = allow_awaitable ctx in
-      List.iter args ~f:(super#on_expr (env, ctx));
+      List.iter args ~f:(self#on_expr (env, ctx));
     | _, Eif (cond, e1, e2) ->
-      super#on_expr (env, disallow_awaitable ctx) cond;
+      self#on_expr (env, disallow_awaitable ctx) cond;
       let ctx = allow_awaitable ctx in
       Option.iter e1 ~f:(fun e1 ->
         check_conditional_operator e1 e2;
-        super#on_expr (env, ctx) e1
+        self#on_expr (env, ctx) e1
       );
-      super#on_expr (env, ctx) e2
+      self#on_expr (env, ctx) e2
     | _, Binop (Ast.QuestionQuestion, e1, e2) ->
       let ctx = allow_awaitable ctx in
       check_conditional_operator e1 e2;
-      super#on_expr (env, ctx) e1;
-      super#on_expr (env, ctx) e2
+      self#on_expr (env, ctx) e1;
+      self#on_expr (env, ctx) e2
     | e ->
       let ctx = disallow_awaitable ctx in
       begin match e with

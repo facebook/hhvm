@@ -1,0 +1,6 @@
+File "mutable_in_expr3.php", line 17, characters 3-11:
+Cannot call mutable function on immutable expression (Typing[4214])
+File "mutable_in_expr3.php", line 5, characters 21-21:
+This function is marked <<__Mutable>>, so it has a mutable $this.
+File "mutable_in_expr3.php", line 17, characters 3-8:
+Consider wrapping this expression with Rx\mutable to forward mutability.

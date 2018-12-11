@@ -244,7 +244,7 @@ function hphp_clear_unflushed(): void;
  *    context) of the callsite that invoked the current function or method.
  */
 <<__Native, __HipHopSpecific>>
-function hphp_debug_caller_info(): array<string, mixed>;
+function hphp_debug_caller_info(): darray<string, mixed>;
 
 <<__Native("NoInjection"), __HipHopSpecific>>
 function hphp_debug_backtrace_hash(int $options = 0): int;

@@ -1239,7 +1239,7 @@ Array ExecutionContext::getCallerInfo() {
          || ar->func()->name()->isame(s_call_user_func_array.get())) {
     ar = getPrevVMState(ar);
     if (ar == nullptr) {
-      return empty_array();
+      return empty_darray();
     }
   }
 
@@ -1255,14 +1255,14 @@ Array ExecutionContext::getCallerInfo() {
       if ((lineNumber = unit->getLineNumber(pc)) != -1) {
         auto const cls = ar->func()->cls();
         if (cls != nullptr && !ar->func()->isClosureBody()) {
-          return make_map_array(
+          return make_darray(
             s_class, const_cast<StringData*>(cls->name()),
             s_file, const_cast<StringData*>(path),
             s_function, const_cast<StringData*>(ar->func()->name()),
             s_line, lineNumber
           );
         } else {
-          return make_map_array(
+          return make_darray(
             s_file, const_cast<StringData*>(path),
             s_function, const_cast<StringData*>(ar->func()->name()),
             s_line, lineNumber
@@ -1272,7 +1272,7 @@ Array ExecutionContext::getCallerInfo() {
     }
     ar = getPrevVMState(ar, &pc);
   }
-  return empty_array();
+  return empty_darray();
 }
 
 ActRec* ExecutionContext::getFrameAtDepth(int frame) {

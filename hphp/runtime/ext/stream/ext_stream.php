@@ -176,7 +176,7 @@ function stream_get_meta_data(resource $stream): mixed;
  *
  */
 <<__Native>>
-function stream_get_transports(): array;
+function stream_get_transports(): vec<string>;
 
 /**
  * Retrieve list of registered streams available on the running system.

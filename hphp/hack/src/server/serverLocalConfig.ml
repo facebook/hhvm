@@ -15,8 +15,8 @@ type t = {
   watchman_init_timeout: int; (* in seconds *)
   watchman_subscribe: bool;
   watchman_synchronous_timeout : int; (* in seconds *)
-  use_mini_state: bool;
-  load_mini_script_timeout: int; (* in seconds *)
+  use_saved_state: bool;
+  load_state_script_timeout: int; (* in seconds *)
   (** Prefer using Ocaml implementation over load script. *)
   load_state_natively: bool;
   type_decl_bucket_size: int;
@@ -86,8 +86,8 @@ let default = {
   watchman_init_timeout = 10;
   watchman_subscribe = false;
   watchman_synchronous_timeout = 120;
-  use_mini_state = false;
-  load_mini_script_timeout = 20;
+  use_saved_state = false;
+  load_state_script_timeout = 20;
   load_state_natively = false;
   type_decl_bucket_size = 1000;
   enable_on_nfs = false;
@@ -164,8 +164,8 @@ let load_ fn ~silent =
   let config = Config_file.parse_contents contents in
   let use_watchman = bool_if_version "use_watchman"
     ~default:default.use_watchman config in
-  let use_mini_state = bool_if_version "use_mini_state"
-    ~default:default.use_mini_state config in
+  let use_saved_state = bool_if_version "use_mini_state"
+    ~default:default.use_saved_state config in
   let enable_on_nfs = bool_if_version "enable_on_nfs"
     ~default:default.enable_on_nfs config in
   let enable_fuzzy_search = bool_if_version "enable_fuzzy_search"
@@ -178,8 +178,8 @@ let load_ fn ~silent =
     ~default:default.max_purgatory_clients config in
   let search_chunk_size = int_ "search_chunk_size"
     ~default:default.search_chunk_size config in
-  let load_mini_script_timeout = int_ "load_mini_script_timeout"
-    ~default:default.load_mini_script_timeout config in
+  let load_state_script_timeout = int_ "load_mini_script_timeout"
+    ~default:default.load_state_script_timeout config in
   let load_state_natively = bool_if_version "load_state_natively_v4"
     ~default:default.load_state_natively config in
   let state_loader_timeouts = state_loader_timeouts_
@@ -262,8 +262,8 @@ let load_ fn ~silent =
     watchman_init_timeout;
     watchman_subscribe;
     watchman_synchronous_timeout;
-    use_mini_state;
-    load_mini_script_timeout;
+    use_saved_state;
+    load_state_script_timeout;
     load_state_natively;
     max_purgatory_clients;
     type_decl_bucket_size;

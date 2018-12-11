@@ -68,9 +68,9 @@ let make_genv options config local_config handle ~logging_init =
   let gc_control = ServerConfig.gc_control config in
   let workers = Some (ServerWorker.make ~nbr_procs gc_control handle ~logging_init) in
   let (>>=) = Option.(>>=) in
-  let since_clockspec = (ServerArgs.with_mini_state options) >>= function
-    | ServerArgs.Mini_state_target_info _ -> None
-    | ServerArgs.Informant_induced_mini_state_target target ->
+  let since_clockspec = (ServerArgs.with_saved_state options) >>= function
+    | ServerArgs.Saved_state_target_info _ -> None
+    | ServerArgs.Informant_induced_saved_state_target target ->
       target.ServerMonitorUtils.watchman_mergebase >>= fun mb ->
         Some mb.ServerMonitorUtils.watchman_clock
   in
@@ -163,11 +163,11 @@ let make_genv options config local_config handle ~logging_init =
       (** Failed to start Watchman subscription. Clear out the watchman_mergebase
        * inside the Informant-directed target mini state since it is no longer
        * usable during init. *)
-      let options = match ServerArgs.with_mini_state options with
+      let options = match ServerArgs.with_saved_state options with
         | None -> options
-        | Some (ServerArgs.Mini_state_target_info _) -> options
-        | Some (ServerArgs.Informant_induced_mini_state_target target) ->
-          ServerArgs.set_mini_state_target options
+        | Some (ServerArgs.Saved_state_target_info _) -> options
+        | Some (ServerArgs.Informant_induced_saved_state_target target) ->
+          ServerArgs.set_saved_state_target options
             (Some { target with ServerMonitorUtils.watchman_mergebase = None; })
       in
       let indexer filter = Find.make_next_files ~name:"root" ~filter root in

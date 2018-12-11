@@ -53,11 +53,11 @@ let tty_progress_reporter () =
 let null_progress_reporter (_status: string option) : unit =
   ()
 
-let loading_mini_re = Str.regexp_string "loading mini-state"
+let loading_saved_state_re = Str.regexp_string "loading saved state"
 
-let success_loaded_mini_re = Str.regexp_string "loaded mini-state"
+let success_loaded_saved_state_re = Str.regexp_string "loaded saved state"
 
-let could_not_load_mini_state_re = Str.regexp_string "Could not load mini state"
+let could_not_load_saved_state_re = Str.regexp_string "Could not load saved state"
 
 let tls_bug_re = Str.regexp_string "fburl.com/tls_debug"
 
@@ -87,9 +87,9 @@ let matches_re re s =
 
 let re_list =
   [
-   loading_mini_re;
-   success_loaded_mini_re;
-   could_not_load_mini_state_re;
+   loading_saved_state_re;
+   success_loaded_saved_state_re;
+   could_not_load_saved_state_re;
    begin_re;
    indexing_re;
    parsing_re;
@@ -120,11 +120,11 @@ let rec did_loading_saved_state_fail l =
        saved_state_failed := Tls_bug;
        Tls_bug
      end
-     else if matches_re success_loaded_mini_re s then begin
+     else if matches_re success_loaded_saved_state_re s then begin
        saved_state_failed := No_failure;
        No_failure
        end
-     else if matches_re could_not_load_mini_state_re s then
+     else if matches_re could_not_load_saved_state_re s then
        Saved_state_failed
      else if matches_re server_ready_re s then begin
        saved_state_failed := No_failure; No_failure end
@@ -141,11 +141,11 @@ let msg_of_tail tail_env =
     then " - this can take a long time because loading saved state failed]"
     else "]" in
   let line = Tail.last_line tail_env in
-  if matches_re loading_mini_re line then
+  if matches_re loading_saved_state_re line then
     "[loading saved state]"
-  else if matches_re success_loaded_mini_re line then
+  else if matches_re success_loaded_saved_state_re line then
     "[loading saved state succeeded]"
-  else if matches_re could_not_load_mini_state_re line then
+  else if matches_re could_not_load_saved_state_re line then
     "[loading saved state failed]"
   else if matches_re indexing_re line then
     "[indexing" ^ final_suffix

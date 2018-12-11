@@ -1,14 +1,14 @@
 open Core_kernel
 
-module Target_mini_state_comparator = struct
-  type t = ServerMonitorUtils.target_mini_state
+module Target_saved_state_comparator = struct
+  type t = ServerMonitorUtils.target_saved_state
   let to_string {
-    ServerMonitorUtils.mini_state_everstore_handle;
+    ServerMonitorUtils.saved_state_everstore_handle;
     target_svn_rev;
     watchman_mergebase; } =
-      Printf.sprintf ("(Target mini state. everstore handle: %s. svn_rev: %d." ^^
+      Printf.sprintf ("(Target saved state. everstore handle: %s. svn_rev: %d." ^^
         " watchman_mergebase: %s)")
-        mini_state_everstore_handle target_svn_rev
+        saved_state_everstore_handle target_svn_rev
         (Option.value_map watchman_mergebase ~default:"None"
           ~f:ServerMonitorUtils.watchman_mergebase_to_string)
 
@@ -19,22 +19,22 @@ end;;
 module Int_asserter = Asserter.Int_asserter
 
 
-module Target_mini_state_opt_comparator =
-  Asserter.Make_option_comparator (Target_mini_state_comparator);;
+module Target_saved_state_opt_comparator =
+  Asserter.Make_option_comparator (Target_saved_state_comparator);;
 
 
 module Start_server_args_comparator = struct
 
   (** We only care about this arg and drop the rest. *)
-  type t = ServerMonitorUtils.target_mini_state option
+  type t = ServerMonitorUtils.target_saved_state option
 
   let to_string state =
-    let state_string = Target_mini_state_opt_comparator.to_string state in
+    let state_string = Target_saved_state_opt_comparator.to_string state in
     Printf.sprintf "(Start server call args: %s)"
       state_string
 
   let is_equal x y =
-    Target_mini_state_opt_comparator.is_equal x y
+    Target_saved_state_opt_comparator.is_equal x y
 
 end;;
 
@@ -104,8 +104,12 @@ let make_test test =
 
     let last_start_server_call = ref None
 
-    let start_server ?(target_mini_state:_) ~informant_managed:_ ~prior_exit_status:_ start_options =
-      last_start_server_call := (Some target_mini_state);
+    let start_server
+        ?(target_saved_state:_)
+        ~informant_managed:_
+        ~prior_exit_status:_
+        _start_options =
+      last_start_server_call := (Some target_saved_state);
       start_server_count := !start_server_count + 1;
       fake_process_data
 
@@ -191,7 +195,7 @@ let test_restart_server_with_target_saved_state mock_server_config temp_dir =
     watchman_clock = "dummy_clock";
   } in
   let state_target = {
-    ServerMonitorUtils.mini_state_everstore_handle = "dummy_handle_for_svn_200";
+    ServerMonitorUtils.saved_state_everstore_handle = "dummy_handle_for_svn_200";
     target_svn_rev = 200;
     watchman_mergebase = Some expected_mergebase;
   } in

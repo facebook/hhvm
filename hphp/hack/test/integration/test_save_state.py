@@ -15,9 +15,9 @@ import hierarchy_tests
 
 from hh_paths import hh_client
 
-from mini_state_test_driver import (
-    MiniStateTestDriver,
-    MiniStateClassicTestDriver,
+from saved_state_test_driver import (
+    SavedStateTestDriver,
+    SavedStateClassicTestDriver,
     SaveStateResult)
 
 
@@ -25,7 +25,7 @@ def write_echo_json(f, obj):
     f.write("echo %s\n" % shlex.quote(json.dumps(obj)))
 
 
-class LazyInitTestDriver(MiniStateTestDriver):
+class LazyInitTestDriver(SavedStateTestDriver):
     def write_local_conf(self):
         with open(os.path.join(self.repo_dir, 'hh.conf'), 'w') as f:
             f.write(
@@ -55,29 +55,25 @@ class LazyInitHeirarchyTests(
     pass
 
 
-class MiniStateCommonTests(
-    common_tests.CommonTests, MiniStateTestDriver, unittest.TestCase
+class SavedStateCommonTests(
+    common_tests.CommonTests, SavedStateTestDriver, unittest.TestCase
 ):
     pass
 
 
-class MiniStateBarebonesTestsClassic(
-    common_tests.BarebonesTests, MiniStateClassicTestDriver, unittest.TestCase
+class SavedStateBarebonesTestsClassic(
+    common_tests.BarebonesTests, SavedStateClassicTestDriver, unittest.TestCase
 ):
     pass
 
 
-class MiniStateHierarchyTests(
-    hierarchy_tests.HierarchyTests, MiniStateTestDriver, unittest.TestCase
+class SavedStateHierarchyTests(
+    hierarchy_tests.HierarchyTests, SavedStateTestDriver, unittest.TestCase
 ):
     pass
 
 
-class MiniStateTests(MiniStateTestDriver, unittest.TestCase):
-    """
-    Tests in this class are specific to saved state; would not make sense
-    for them to run on a fresh init
-    """
+class SavedStateTests(SavedStateTestDriver, unittest.TestCase):
     template_repo = 'hphp/hack/test/integration/data/simple_repo'
 
     def test_hhconfig_change(self):
@@ -105,7 +101,7 @@ assume_php = true
         # start a new server instance until the *next* client connects. Just in
         # case the race doesn't go the way we want, add another "check_cmd"
         # call here to force the Monitor into the state we want.
-        self.check_cmd(None, assert_loaded_mini_state=False)
+        self.check_cmd(None, assert_loaded_saved_state=False)
 
         # this should start a new server
         self.check_cmd(['No errors!'])
@@ -132,40 +128,11 @@ watchman_init_timeout = 1
         self.proc_call([hh_client, 'stop', self.repo_dir])
         self.assertIn('Watchman_sig.Types.Timeout', self.get_server_logs())
 
-    def add_file_that_depends_on_class_a(self, filename):
-        with open(filename, 'w') as f:
-            f.write("""<?hh // strict
-
-class UsesAToo {
-public function test() : int {
-return A::foo();
-}
-
-}
-            """)
-
-    def change_return_type_on_base_class(
-            self,
-            filename: str,
-            type: str = "string",
-            value: str = "\"Hello\""):
-        # Change the return type
-        with open(filename, 'w') as f:
-            f.write("""<?hh // strict
-
-class B {
-
-public static function foo () : %s {
-  return %s;
-}
-}
-            """ % (type, value))
-
     def test_incrementally_generated_saved_state(self):
         old_saved_state: SaveStateResult = self.dump_saved_state()
         new_file = os.path.join(self.repo_dir, 'class_3b.php')
         self.add_file_that_depends_on_class_a(new_file)
-        self.check_cmd(['No errors!'], assert_loaded_mini_state=False)
+        self.check_cmd(['No errors!'], assert_loaded_saved_state=False)
         new_saved_state: SaveStateResult = (
             self.dump_saved_state(assert_edges_added=True))
         assert(new_saved_state.returned_values.edges_added > 0)
@@ -179,7 +146,7 @@ public static function foo () : %s {
             '{root}class_3b.php:5:8,15: Invalid return type (Typing[4110])',
             '  {root}class_3b.php:4:26,28: This is an int',
             '  {root}class_1.php:5:33,38: It is incompatible with a string',
-        ], assert_loaded_mini_state=False)
+        ], assert_loaded_saved_state=False)
         self.proc_call([hh_client, 'stop', self.repo_dir])
         # Start server with the original saved state. Will be missing the
         # second error because of the missing edge.
@@ -210,11 +177,11 @@ public static function foo () : %s {
         # a Hack Server that loads a saved state.
         self.start_hh_server()
         # Hack server is now started with a saved state
-        self.check_cmd(['No errors!'], assert_loaded_mini_state=True)
+        self.check_cmd(['No errors!'], assert_loaded_saved_state=True)
         old_saved_state = self.dump_saved_state()
         new_file = os.path.join(self.repo_dir, 'class_3b.php')
         self.add_file_that_depends_on_class_a(new_file)
-        self.check_cmd(['No errors!'], assert_loaded_mini_state=True)
+        self.check_cmd(['No errors!'], assert_loaded_saved_state=True)
         new_saved_state = self.dump_saved_state(assert_edges_added=True)
         assert(new_saved_state.returned_values.edges_added > 0)
 
@@ -227,7 +194,7 @@ public static function foo () : %s {
             '{root}class_3b.php:5:8,15: Invalid return type (Typing[4110])',
             '  {root}class_3b.php:4:26,28: This is an int',
             '  {root}class_1.php:5:33,38: It is incompatible with a string',
-        ], assert_loaded_mini_state=True)
+        ], assert_loaded_saved_state=True)
         self.proc_call([hh_client, 'stop', self.repo_dir])
         # Start server with the original saved state. Will be missing the
         # second error because of the missing edge.
@@ -294,7 +261,7 @@ public static function foo () : %s {
             '{root}class_3b.php:5:8,15: Invalid return type (Typing[4110])',
             '  {root}class_3b.php:4:26,28: This is an int',
             '  {root}class_1.php:5:33,38: It is incompatible with a string',
-        ], assert_loaded_mini_state=False)
+        ], assert_loaded_saved_state=False)
 
         saved_state_with_2_errors = self.dump_saved_state(ignore_errors=True)
 
@@ -311,7 +278,7 @@ public static function foo () : %s {
             changed_files=['class_1.php'],
             saved_state_path=saved_state_with_2_errors.path)
 
-        self.check_cmd(['No errors!'], assert_loaded_mini_state=True)
+        self.check_cmd(['No errors!'], assert_loaded_saved_state=True)
 
     def test_replace_state_after_saving(self):
         # Save state
@@ -344,7 +311,7 @@ public static function foo () : %s {
         #   corresponding to the one change
         new_file = os.path.join(self.repo_dir, 'class_3b.php')
         self.add_file_that_depends_on_class_a(new_file)
-        self.check_cmd(['No errors!'], assert_loaded_mini_state=False)
+        self.check_cmd(['No errors!'], assert_loaded_saved_state=False)
         replace_incremental = self.dump_saved_state(
             assert_edges_added=True,
             replace_state_after_saving=True)
@@ -353,3 +320,33 @@ public static function foo () : %s {
             replace_incremental.returned_values.edges_added <
             result.returned_values.edges_added)
         assert(replace_incremental.returned_values.edges_added > 0)
+        self.check_cmd(['No errors!'], assert_loaded_saved_state=False)
+
+    def add_file_that_depends_on_class_a(self, filename):
+        with open(filename, 'w') as f:
+            f.write("""<?hh // strict
+
+class UsesAToo {
+public function test() : int {
+return A::foo();
+}
+
+}
+            """)
+
+    def change_return_type_on_base_class(
+            self,
+            filename: str,
+            type: str = "string",
+            value: str = "\"Hello\""):
+        # Change the return type
+        with open(filename, 'w') as f:
+            f.write("""<?hh // strict
+
+class B {
+
+public static function foo () : %s {
+  return %s;
+}
+}
+            """ % (type, value))

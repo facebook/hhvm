@@ -59,17 +59,17 @@ let lock_and_load_deptable (fn: string) ~(ignore_hh_version: bool) : unit =
  *)
 let download_and_load_state_exn
     ~(use_canary: bool)
-    ~(target: ServerMonitorUtils.target_mini_state option)
+    ~(target: ServerMonitorUtils.target_saved_state option)
     ~(genv: ServerEnv.genv)
     ~(root: Path.t)
   : (loaded_info, error) result =
   let open ServerMonitorUtils in
-  let mini_state_handle = match target with
+  let saved_state_handle = match target with
     | None -> None
-    | Some { mini_state_everstore_handle; target_svn_rev; watchman_mergebase } ->
+    | Some { saved_state_everstore_handle; target_svn_rev; watchman_mergebase } ->
       Some {
-        State_loader.mini_state_everstore_handle = mini_state_everstore_handle;
-        mini_state_for_rev = (Hg.Svn_rev target_svn_rev);
+        State_loader.saved_state_everstore_handle = saved_state_everstore_handle;
+        saved_state_for_rev = (Hg.Svn_rev target_svn_rev);
         watchman_mergebase;
       } in
   let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
@@ -78,7 +78,7 @@ let download_and_load_state_exn
   let state_future : (State_loader.native_load_result, State_loader.error) result =
     State_loader.mk_state_future
       ~config:genv.local_config.SLC.state_loader_timeouts
-      ~use_canary ?mini_state_handle
+      ~use_canary ?saved_state_handle
       ~config_hash:(ServerConfig.config_hash genv.config) root
       ~ignore_hh_version
       ~use_prechecked_files in
@@ -117,7 +117,7 @@ let download_and_load_state_exn
 
 let use_precomputed_state_exn
     (genv: ServerEnv.genv)
-    (info: ServerArgs.mini_state_target_info)
+    (info: ServerArgs.saved_state_target_info)
   : loaded_info =
   let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
   let { ServerArgs.
@@ -388,10 +388,10 @@ let fallback_init
   SharedMem.cleanup_sqlite ();
   if err <> Lazy_init_no_load_approach then begin
     let err_str = error_to_verbose_string err in
-    HackEventLogger.load_mini_exn err_str;
+    HackEventLogger.load_state_exn err_str;
     (* CARE! the following string literal is matched by clientConnect.ml *)
-    (* in its log-scraping function. Do not change. *)
-    Hh_logger.log "Could not load mini state: %s" err_str;
+    (* in its log-scraping function. Change with care. *)
+    Hh_logger.log "Could not load saved state: %s" err_str;
   end;
   let get_next, t = indexing genv in
   (* The full_fidelity_parser currently works better in both memory and time
@@ -559,22 +559,22 @@ let post_saved_state_initialization
     dirty_master_files dirty_local_files similar_files t
 
 let init
-  ~(load_mini_approach: load_mini_approach option)
+  ~(load_state_approach: load_state_approach option)
   (genv: ServerEnv.genv)
   (lazy_level: lazy_level)
   (env: ServerEnv.env)
   (root: Path.t)
 : (ServerEnv.env * float) * (loaded_info * Relative_path.Set.t, error) result =
   assert(lazy_level = Init);
-  Hh_logger.log "Begin loading mini-state";
+  Hh_logger.log "Begin loading saved state";
 
   (* A historical quirk: we allowed the timeout once while downloading+loading *)
   (* saved-state, and then once again while waiting to get dirty files from hg *)
-  let timeout = 2 * genv.local_config.SLC.load_mini_script_timeout in
+  let timeout = 2 * genv.local_config.SLC.load_state_script_timeout in
 
   (* following function will be run under the timeout *)
   let do_ (_id: Timeout.t) : (loaded_info, error) result =
-    match load_mini_approach with
+    match load_state_approach with
     | None ->
       Error Lazy_init_no_load_approach
     | Some (Precomputed info) ->
@@ -600,5 +600,5 @@ let init
     (* Fall back to type-checking everything *)
     fallback_init genv env error, state_result
   | Ok (loaded_info, changed_while_parsing) ->
-    Hh_logger.log "Successfully loaded mini-state";
+    Hh_logger.log "Successfully loaded saved state";
     post_saved_state_initialization ~loaded_info ~changed_while_parsing ~env ~genv, state_result

@@ -59,14 +59,14 @@ let type_decl
   env, t
 
 let init
-    ~(load_mini_approach: load_mini_approach option)
+    ~(load_state_approach: load_state_approach option)
     (genv: ServerEnv.genv)
     (lazy_level: lazy_level)
     (env: ServerEnv.env)
     (root: Path.t)
   : (ServerEnv.env * float) * (loaded_info * Relative_path.Set.t, error) result =
   (* We don't support a saved state for eager init. *)
-  ignore (load_mini_approach, root);
+  ignore (load_state_approach, root);
   let get_next, t = indexing genv in
   let lazy_parse = lazy_level = Parse in
   (* Parsing entire repo, too many files to trace. TODO: why do we parse

@@ -518,7 +518,7 @@ let load_state
   let saved_state_fn = saved_state_dir ^ "/" ^ saved_state_filename in
   let deptable_fn = saved_state_dir ^ "/" ^ saved_state_filename ^ ".sql" in
 
-  let load_mini_approach = ServerInit.Precomputed {
+  let load_state_approach = ServerInit.Precomputed {
     ServerArgs.saved_state_fn;
     (* in Precomputed scenario, base revision should only be used in logging,
      * which is irrelevant in tests *)
@@ -527,8 +527,8 @@ let load_state
     prechecked_changes;
     changes;
   } in
-  match ServerInit.init ~load_mini_approach !genv with
-  | env, ServerInit.Mini_load _ -> env
+  match ServerInit.init ~load_state_approach !genv with
+  | env, ServerInit.State_load _ -> env
   | _ -> assert false
 
 let diagnostics_to_string x =

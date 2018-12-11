@@ -73,7 +73,7 @@ let get_lazy_level (genv: ServerEnv.genv) : lazy_level =
 
 (* entry point *)
 let init
-    ?(load_mini_approach: load_mini_approach option)
+    ?(load_state_approach: load_state_approach option)
     (genv: ServerEnv.genv)
   : ServerEnv.env * init_result =
   let lazy_lev = get_lazy_level genv in
@@ -94,9 +94,9 @@ let init
   let (env, t), state =
     match lazy_lev with
     | Init ->
-      ServerLazyInit.init ~load_mini_approach genv lazy_lev env root
+      ServerLazyInit.init ~load_state_approach genv lazy_lev env root
     | _ ->
-      ServerEagerInit.init ~load_mini_approach genv lazy_lev env root
+      ServerEagerInit.init ~load_state_approach genv lazy_lev env root
   in
   let env, t = ServerAiInit.ai_check genv env.files_info env t in
   run_search genv t;
@@ -104,9 +104,9 @@ let init
   ServerUtils.print_hash_stats ();
   let result = match state with
     | Ok ({state_distance; _}, _) ->
-      Mini_load state_distance
+      State_load state_distance
     | Error err ->
       let err_str = error_to_verbose_string err in
-      Mini_load_failed err_str
+      State_load_failed err_str
   in
   env, result

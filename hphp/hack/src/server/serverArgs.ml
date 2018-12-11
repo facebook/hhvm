@@ -36,7 +36,7 @@ type options = {
   should_detach: bool;
   waiting_client: Unix.file_descr option;
   watchman_debug_logging: bool;
-  with_mini_state: mini_state_target option;
+  with_saved_state: saved_state_target option;
 }
 
 (*****************************************************************************)
@@ -68,17 +68,17 @@ module Messages = struct
   let log_inference_constraints = " (for hh debugging purpose only) log type" ^
     " inference constraints into external logger (e.g. Scuba)"
   let max_procs = " max numbers of workers"
-  let mini_state_json_descr =
+  let saved_state_json_descr =
     "Either\n" ^
-    "   { \"data_dump\" : <mini_state_target json> }\n" ^
+    "   { \"data_dump\" : <saved_state_target json> }\n" ^
     "or\n" ^
-    "   { \"from_file\" : <path to file containing mini_state_target json }\n" ^
-    "where mini_state_target json looks liks:\n" ^
+    "   { \"from_file\" : <path to file containing saved_state_target json }\n" ^
+    "where saved_state_target JSON looks like:\n" ^
     "   {\n" ^
-    "      \"state\" : <saved state filename>\n" ^
-    "      \"corresponding_base_revision\" : <SVN rev #>\n" ^
-    "      \"deptable\" : <dependency table filename>\n" ^
-    "      \"changes\" : [array of files changed since that saved state]\n" ^
+    "      \"state\": <saved state filename>,\n" ^
+    "      \"corresponding_base_revision\" : <SVN rev #>,\n" ^
+    "      \"deptable\": <dependency table filename>,\n" ^
+    "      \"changes\": [array of files changed since that saved state]\n" ^
     "   }"
   let no_load = " don't load from a saved state"
   let prechecked = " override value of \"prechecked_files\" flag from hh.conf"
@@ -86,16 +86,15 @@ module Messages = struct
   let replace_state_after_saving = " if combined with --save-mini, causes the saved state" ^
                         " to replace the program state; otherwise, the state files are not" ^
                         " used after being written to disk (default: false)"
-  let save_mini = " save mini server state to file"
+  let save_state = " save server state to file"
   let waiting_client= " send message to fd/handle when server has begun" ^
                       " starting and again when it's done starting"
   let watchman_debug_logging =
     " Enable debug logging on Watchman client. This is very noisy"
 
-  let with_mini_state = " init with the given saved state instead of getting" ^
-                        " it by running load mini state script." ^
-                        " Expects a JSON blob specified as" ^
-                        mini_state_json_descr
+  let with_saved_state = " init with the given saved state instead of fetching it." ^
+                        " Expects a JSON string specified as" ^
+                        saved_state_json_descr
 end
 
 let print_json_version () =
@@ -111,7 +110,9 @@ let print_json_version () =
 (* The main entry point *)
 (*****************************************************************************)
 
-let parse_mini_state_json (json, _keytrace) =
+let parse_saved_state_json (json, _keytrace) =
+  let array_to_path_list = List.map
+    ~f:(fun file -> Hh_json.get_string_exn file |> Relative_path.from_root) in
   let prechecked_changes = Option.value ~default:[]
     (Hh_json.(get_field_opt (Access.get_array "prechecked_changes")) json) in
   let json = Hh_json.Access.return json in
@@ -121,12 +122,9 @@ let parse_mini_state_json (json, _keytrace) =
     >>= fun (for_base_rev, _for_base_rev_keytrace) ->
   json >>= get_string "deptable" >>= fun (deptable, _deptable_keytrace) ->
   json >>= get_array "changes" >>= fun (changes, _) ->
-    let array_to_path_list = List.map
-      ~f:(fun file -> Hh_json.get_string_exn file |> Relative_path.from_root)
-    in
     let prechecked_changes = array_to_path_list prechecked_changes in
     let changes = array_to_path_list changes in
-    return (Mini_state_target_info {
+    return (Saved_state_target_info {
       saved_state_fn = state;
       corresponding_base_revision = for_base_rev;
       deptable_fn = deptable;
@@ -134,7 +132,7 @@ let parse_mini_state_json (json, _keytrace) =
       changes;
     })
 
-let verify_with_mini_state v = match !v with
+let verify_with_saved_state (v: string option ref) : saved_state_target option = match !v with
   | None -> None
   | Some blob ->
     let json = Hh_json.json_of_string blob in
@@ -143,7 +141,7 @@ let verify_with_mini_state v = match !v with
     let data_dump_parse_result =
       json
         >>= get_obj "data_dump"
-        >>= parse_mini_state_json
+        >>= parse_saved_state_json
     in
     let from_file_parse_result =
       json
@@ -152,14 +150,14 @@ let verify_with_mini_state v = match !v with
         let contents = Sys_utils.cat filename in
         let json = Hh_json.json_of_string contents in
         (Hh_json.Access.return json)
-          >>= parse_mini_state_json
+          >>= parse_saved_state_json
     in
     match
       (Result.ok_fst data_dump_parse_result),
       (Result.ok_fst from_file_parse_result) with
     | (`Fst (parsed_data_dump, _)), (`Fst (_parsed_from_file, _)) ->
       Hh_logger.log "Warning - %s"
-        ("Parsed mini state target from both JSON blob data dump" ^
+        ("Parsed saved state target from both JSON blob data dump" ^
         " and from contents of file.");
       Hh_logger.log "Preferring data dump result";
       Some parsed_data_dump
@@ -168,7 +166,7 @@ let verify_with_mini_state v = match !v with
     | (`Snd _), (`Fst (parsed_from_file, _)) ->
       Some parsed_from_file
     | (`Snd data_dump_failure), (`Snd from_file_failure) ->
-      Hh_logger.log "parsing optional arg with_mini_state failed:\n%s\n%s"
+      Hh_logger.log "parsing optional arg with_saved_state failed:\n%s\n%s"
         (Printf.sprintf "  data_dump failure:%s"
               (access_failure_to_string data_dump_failure))
         (Printf.sprintf "  from_file failure:%s"
@@ -202,13 +200,13 @@ let parse_options () =
   let version = ref false in
   let waiting_client= ref None in
   let watchman_debug_logging = ref false in
-  let with_mini_state = ref None in
+  let with_saved_state = ref None in
 
   let set_ai = fun s -> ai_mode := Some (Ai_options.prepare ~server:true s) in
   let set_max_procs = fun s -> max_procs := min !max_procs s in
-  let set_save_mini = fun s -> save := Some s in
+  let set_save_state = fun s -> save := Some s in
   let set_wait = fun fd -> waiting_client := Some (Handle.wrap_handle fd) in
-  let set_with_mini_state = fun s -> with_mini_state := Some s in
+  let set_with_saved_state = fun s -> with_saved_state := Some s in
   let set_from = fun s -> from := s in
 
   let options = [
@@ -230,7 +228,9 @@ let parse_options () =
       "--ignore-hh-version", Arg.Set ignore_hh, Messages.ignore_hh_version;
       "--json", Arg.Set json_mode, Messages.json;
       "--load-state-canary", Arg.Set load_state_canary, Messages.load_state_canary;
-      "--log-inference-constraints", Arg.Set log_inference_constraints, Messages.log_inference_constraints;
+      "--log-inference-constraints",
+        Arg.Set log_inference_constraints,
+        Messages.log_inference_constraints;
       "--max-procs", Arg.Int set_max_procs, Messages.max_procs;
       "--no-load", Arg.Set no_load, Messages.no_load;
       "--no-prechecked", Arg.Unit (fun () -> prechecked := Some false), Messages.prechecked;
@@ -239,13 +239,14 @@ let parse_options () =
       "--replace-state-after-saving",
         Arg.Set replace_state_after_saving,
         Messages.replace_state_after_saving;
-      "--save-mini", Arg.String set_save_mini, Messages.save_mini;
+      "--save-mini", Arg.String set_save_state, Messages.save_state;
+      "--save-state", Arg.String set_save_state, Messages.save_state;
       "--version", Arg.Set version, "";
       "--waiting-client", Arg.Int set_wait, Messages.waiting_client;
       "--watchman-debug-logging", Arg.Set watchman_debug_logging, Messages.watchman_debug_logging;
-      "--with-mini-state", Arg.String set_with_mini_state, Messages.with_mini_state;
+      "--with-mini-state", Arg.String set_with_saved_state, Messages.with_saved_state;
       "-d", Arg.Set should_detach, Messages.daemon;
-      "-s", Arg.String set_save_mini, Messages.save_mini;
+      "-s", Arg.String set_save_state, Messages.save_state;
     ] in
   let options = Arg.align options in
   Arg.parse options (fun s -> root := s) usage;
@@ -260,7 +261,7 @@ let parse_options () =
     Printf.eprintf "--check is incompatible with wait modes!\n";
     Exit_status.(exit Input_error)
   end;
-  let with_mini_state = verify_with_mini_state with_mini_state in
+  let with_saved_state = verify_with_saved_state with_saved_state in
   (match !root with
   | "" ->
       Printf.eprintf "You must specify a root directory!\n";
@@ -281,7 +282,7 @@ let parse_options () =
   end;
   {
     ai_mode = !ai_mode;
-    check_mode = check_mode;
+    check_mode;
     config = !config;
     dynamic_view = !dynamic_view;
     file_info_on_disk = !file_info_on_disk;
@@ -301,7 +302,7 @@ let parse_options () =
     should_detach = !should_detach;
     waiting_client = !waiting_client;
     watchman_debug_logging = !watchman_debug_logging;
-    with_mini_state = with_mini_state;
+    with_saved_state;
   }
 
 (* useful in testing code *)
@@ -327,7 +328,7 @@ let default_options ~root = {
   should_detach = false;
   waiting_client = None;
   watchman_debug_logging = false;
-  with_mini_state = None;
+  with_saved_state = None;
 }
 
 (*****************************************************************************)
@@ -355,7 +356,7 @@ let save_filename options = options.save_filename
 let should_detach options = options.should_detach
 let waiting_client options = options.waiting_client
 let watchman_debug_logging options = options.watchman_debug_logging
-let with_mini_state options = options.with_mini_state
+let with_saved_state options = options.with_saved_state
 
 (*****************************************************************************)
 (* Setters *)
@@ -364,11 +365,13 @@ let with_mini_state options = options.with_mini_state
 let set_gen_saved_ignore_type_errors options ignore_type_errors = { options with
   gen_saved_ignore_type_errors = ignore_type_errors}
 let set_no_load options is_no_load = {options with no_load = is_no_load}
-let set_mini_state_target options target = match target with
+
+let set_saved_state_target options target =
+  match target with
   | None -> options
   | Some target ->
     { options with
-      with_mini_state = Some (Informant_induced_mini_state_target target)
+      with_saved_state = Some (Informant_induced_saved_state_target target)
     }
 
 (****************************************************************************)
@@ -397,14 +400,14 @@ let to_string
     should_detach;
     waiting_client;
     watchman_debug_logging;
-    with_mini_state;
+    with_saved_state;
   } =
     let ai_mode_str = match ai_mode with
       | None -> "<>"
       | Some _ -> "Some(...)" in
-    let mini_state_str = match with_mini_state with
+    let saved_state_str = match with_saved_state with
       | None -> "<>"
-      | Some _ -> "MiniStateTarget(...)" in
+      | Some _ -> "SavedStateTarget(...)" in
     let waiting_client_str = match waiting_client with
       | None -> "<>"
       | Some _ -> "WaitingClient(...)" in
@@ -440,6 +443,6 @@ let to_string
         "should_detach: "; string_of_bool should_detach; ", ";
         "waiting_client: "; waiting_client_str; ", ";
         "watchman_debug_logging: "; string_of_bool watchman_debug_logging; ", ";
-        "with_mini_state: "; mini_state_str; ", ";
+        "with_saved_state: "; saved_state_str; ", ";
       "})"
     ] |> String.concat ~sep:"")

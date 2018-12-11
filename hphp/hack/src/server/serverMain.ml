@@ -774,8 +774,8 @@ let serve genv env in_fds =
   done
 
 let resolve_init_approach genv =
-  if not genv.local_config.ServerLocalConfig.use_mini_state then
-    None, "Local_config_mini_state_disabled"
+  if not genv.local_config.ServerLocalConfig.use_saved_state then
+    None, "Local_config_saved_state_disabled"
   else if ServerArgs.no_load genv.options then
     None, "Server_args_no_load"
   else if ServerArgs.save_filename genv.options <> None then
@@ -783,7 +783,7 @@ let resolve_init_approach genv =
   else
     match
       (genv.local_config.ServerLocalConfig.load_state_natively),
-      (ServerArgs.with_mini_state genv.options) with
+      (ServerArgs.with_saved_state genv.options) with
       | false, None ->
         None, "No_native_loading_or_precomputed"
       | true, None ->
@@ -791,24 +791,24 @@ let resolve_init_approach genv =
          * and the local config prefers native. *)
         let use_canary = ServerArgs.load_state_canary genv.options in
         Some (ServerInit.Load_state_natively use_canary), "Load_state_natively"
-      | _, Some (ServerArgs.Informant_induced_mini_state_target target) ->
+      | _, Some (ServerArgs.Informant_induced_saved_state_target target) ->
         Some (ServerInit.Load_state_natively_with_target target), "Load_state_natively_with_target"
-      | _, Some (ServerArgs.Mini_state_target_info target) ->
+      | _, Some (ServerArgs.Saved_state_target_info target) ->
         Some (ServerInit.Precomputed target), "Precomputed"
 
 let program_init genv =
-  let load_mini_approach, approach_name = resolve_init_approach genv in
+  let load_state_approach, approach_name = resolve_init_approach genv in
   Hh_logger.log "Initing with approach: %s" approach_name;
   let env, init_type, init_error, state_distance =
-    match load_mini_approach with
+    match load_state_approach with
     | None ->
       let env, _ = ServerInit.init genv in
       env, "fresh", None, None
-    | Some load_mini_approach ->
-      let env, init_result = ServerInit.init ~load_mini_approach genv in
+    | Some load_state_approach ->
+      let env, init_result = ServerInit.init ~load_state_approach genv in
       begin match init_result with
-        | ServerInit.Mini_load distance -> env, "mini_load", None, distance
-        | ServerInit.Mini_load_failed err -> env, "mini_load_failed", Some err, None
+        | ServerInit.State_load distance -> env, "state_load", None, distance
+        | ServerInit.State_load_failed err -> env, "state_load_failed", Some err, None
       end
   in
   let env = { env with
@@ -823,7 +823,7 @@ let program_init genv =
   genv.wait_until_ready ();
   ServerStamp.touch_stamp ();
   let informant_use_xdb = genv.local_config.ServerLocalConfig.informant_use_xdb in
-  let load_script_timeout = genv.local_config.ServerLocalConfig.load_mini_script_timeout in
+  let load_script_timeout = genv.local_config.ServerLocalConfig.load_state_script_timeout in
   EventLogger.set_init_type init_type;
   HackEventLogger.init_lazy_end ~informant_use_xdb ~load_script_timeout ~state_distance
     ~approach_name ~init_error ~init_type;

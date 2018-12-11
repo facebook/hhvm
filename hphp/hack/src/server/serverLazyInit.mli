@@ -10,7 +10,7 @@
 open ServerInitTypes
 
 val init :
-  load_mini_approach: load_mini_approach option ->
+  load_state_approach: load_state_approach option ->
   ServerEnv.genv ->
   lazy_level ->
   ServerEnv.env ->

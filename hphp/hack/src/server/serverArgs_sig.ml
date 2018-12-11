@@ -1,7 +1,7 @@
 module Types = struct
 
   (** Commandline arg "--with-mini-state" constructs this record. *)
-  type mini_state_target_info = {
+  type saved_state_target_info = {
     changes: Relative_path.t list;
     corresponding_base_revision: string;
     deptable_fn: string;
@@ -9,9 +9,9 @@ module Types = struct
     saved_state_fn: string;
   }
 
-  type mini_state_target =
-    | Informant_induced_mini_state_target of ServerMonitorUtils.target_mini_state
-    | Mini_state_target_info of mini_state_target_info
+  type saved_state_target =
+    | Informant_induced_saved_state_target of ServerMonitorUtils.target_saved_state
+    | Saved_state_target_info of saved_state_target_info
 
 end
 
@@ -56,14 +56,14 @@ module type S = sig
   val should_detach: options -> bool
   val waiting_client: options -> Unix.file_descr option
   val watchman_debug_logging: options -> bool
-  val with_mini_state: options -> mini_state_target option
+  val with_saved_state: options -> saved_state_target option
 
   (****************************************************************************)
   (* Setters *)
   (****************************************************************************)
 
   val set_gen_saved_ignore_type_errors: options -> bool -> options
-  val set_mini_state_target: options -> ServerMonitorUtils.target_mini_state option -> options
+  val set_saved_state_target: options -> ServerMonitorUtils.target_saved_state option -> options
   val set_no_load: options -> bool -> options
 
   (****************************************************************************)

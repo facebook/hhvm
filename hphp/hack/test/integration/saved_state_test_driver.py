@@ -29,7 +29,7 @@ class SaveStateResult(NamedTuple):
     returned_values: SaveStateCommandResult
 
 
-class MiniStateTestDriver(common_tests.CommonTestDriver):
+class SavedStateTestDriver(common_tests.CommonTestDriver):
 
     @classmethod
     def setUpClass(cls):
@@ -156,7 +156,7 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
         os.mkdir(os.path.join(self.repo_dir, '.hg'))
 
     def setUp(self):
-        super(MiniStateTestDriver, self).setUp()
+        super(SavedStateTestDriver, self).setUp()
         self.write_local_conf()
         self.write_hhconfig()
         self.write_watchman_config()
@@ -198,17 +198,17 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
         expected_output: List[str],
         stdin=None,
         options=None,
-        assert_loaded_mini_state=True
+        assert_loaded_saved_state=True
     ):
-        result = super(MiniStateTestDriver, self).check_cmd(
+        result = super(SavedStateTestDriver, self).check_cmd(
             expected_output,
             stdin,
             options
         )
         logs = self.get_server_logs()
         self.assertIn('Using watchman', logs)
-        if assert_loaded_mini_state:
-            self.assertIn('Successfully loaded mini-state', logs)
+        if assert_loaded_saved_state:
+            self.assertIn('Successfully loaded saved state', logs)
         return result
 
     def assertEqualString(self, first, second, msg=None):
@@ -217,16 +217,16 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
         self.assertEqual(first, second, msg)
 
 
-# Like MiniStateTestDriver except saves the mini state by invoking hh_server
+# Like SavedStateTestDriver except saves the state by invoking hh_server
 # directly instead of over RPC via hh_client
-class MiniStateClassicTestDriver(MiniStateTestDriver):
+class SavedStateClassicTestDriver(SavedStateTestDriver):
 
     @classmethod
     def save_command(cls, init_dir):
         stdout, stderr, retcode = cls.proc_call([
             hh_server,
             '--check', init_dir,
-            '--save-mini', cls.saved_state_path()
+            '--save-state', cls.saved_state_path()
         ])
         if retcode != 0:
             raise Exception('Failed to save! stdout: "%s" stderr: "%s"' %

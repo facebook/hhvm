@@ -19,7 +19,7 @@ module type State_loader_prefetcher_sig = sig
   val fetch :
     hhconfig_hash:string ->
     cache_limit:int ->
-    State_loader.mini_state_handle ->
+    State_loader.saved_state_handle ->
       unit Future.t
 end
 
@@ -29,15 +29,15 @@ module State_loader_prefetcher_real = struct
   let main (hhconfig_hash, handle, cache_limit) =
     EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0;
     let cached = State_loader.cached_state
-      ~mini_state_handle:handle
+      ~saved_state_handle:handle
       ~config_hash:hhconfig_hash
-      ~rev:handle.State_loader.mini_state_for_rev
+      ~rev:handle.State_loader.saved_state_for_rev
     in
     if cached <> None then
       (** No need to fetch if catched. *)
       ()
     else
-      let result = State_loader.fetch_mini_state
+      let result = State_loader.fetch_saved_state
         ~cache_limit
         ~config:(State_loader_config.default_timeouts)
         ~config_hash:hhconfig_hash
@@ -179,8 +179,8 @@ module Revision_map = struct
         |> Option.value ~default:[] in
       let prefetch_package xdb_result =
         let handle = {
-          State_loader.mini_state_for_rev = Hg.Svn_rev (xdb_result.Xdb.svn_rev);
-          mini_state_everstore_handle = xdb_result.Xdb.everstore_handle;
+          State_loader.saved_state_for_rev = Hg.Svn_rev (xdb_result.Xdb.svn_rev);
+          saved_state_everstore_handle = xdb_result.Xdb.everstore_handle;
           watchman_mergebase = None;
         } in
         State_loader_prefetcher.fetch
@@ -499,7 +499,7 @@ module Revision_tracker = struct
           watchman_clock;
         } in
         let target_state = {
-          ServerMonitorUtils.mini_state_everstore_handle = nearest_xdb_result.Xdb.everstore_handle;
+          ServerMonitorUtils.saved_state_everstore_handle = nearest_xdb_result.Xdb.everstore_handle;
           target_svn_rev = nearest_xdb_result.Xdb.svn_rev;
           watchman_mergebase = Some watchman_mergebase;
         } in

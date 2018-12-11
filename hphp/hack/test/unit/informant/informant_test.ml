@@ -10,11 +10,11 @@ module Report_comparator : Asserter.Comparator
       | Restart_server state ->
         let str = begin match state with
           | None -> "None"
-          | Some { ServerMonitorUtils.mini_state_everstore_handle;
+          | Some { ServerMonitorUtils.saved_state_everstore_handle;
               target_svn_rev;
               watchman_mergebase; _ } ->
             Printf.sprintf "(Some %s %d %s)"
-              mini_state_everstore_handle
+              saved_state_everstore_handle
               target_svn_rev
               (Option.value_map watchman_mergebase ~default:"None"
                 ~f:ServerMonitorUtils.watchman_mergebase_to_string)
@@ -111,7 +111,7 @@ let test_informant_restarts_significant_move temp_dir =
     watchman_clock = "dummy_clock";
   } in
   let expected_state_target = {
-    ServerMonitorUtils.mini_state_everstore_handle = "dummy_handle_for_svn_200";
+    ServerMonitorUtils.saved_state_everstore_handle = "dummy_handle_for_svn_200";
     target_svn_rev = 200;
     watchman_mergebase = Some expected_mergebase;
   } in
@@ -164,7 +164,7 @@ let test_informant_restarts_significant_move temp_dir =
     watchman_clock = "dummy_clock";
   } in
   let expected_state_target = {
-    ServerMonitorUtils.mini_state_everstore_handle = "dummy_handle_for_svn_5";
+    ServerMonitorUtils.saved_state_everstore_handle = "dummy_handle_for_svn_5";
     target_svn_rev = 5;
     watchman_mergebase = Some expected_mergebase;
   } in
@@ -195,7 +195,7 @@ let test_informant_restarts_significant_move_with_local_changes temp_dir =
     watchman_clock = "dummy_clock";
   } in
   let expected_state_target = {
-    ServerMonitorUtils.mini_state_everstore_handle = "dummy_handle_for_svn_200";
+    ServerMonitorUtils.saved_state_everstore_handle = "dummy_handle_for_svn_200";
     target_svn_rev = 200;
     watchman_mergebase = Some expected_mergebase;
   } in

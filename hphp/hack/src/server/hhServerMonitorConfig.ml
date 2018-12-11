@@ -104,7 +104,7 @@ module HhServerConfig = struct
 
   let on_server_exit = check_log_for_lazy_incremental
 
-  let start_server ?target_mini_state ~informant_managed ~prior_exit_status options =
+  let start_server ?target_saved_state ~informant_managed ~prior_exit_status options =
     match prior_exit_status with
     | Some c
       when c = Exit_status.(exit_code Sql_assertion_failure) ||
@@ -113,7 +113,7 @@ module HhServerConfig = struct
            c = Exit_status.(exit_code Sql_misuse) ->
       start_hh_server ~informant_managed (ServerArgs.set_no_load options true)
     | _ ->
-      let options = ServerArgs.set_mini_state_target options target_mini_state in
+      let options = ServerArgs.set_saved_state_target options target_saved_state in
       start_hh_server ~informant_managed options
 
   let kill_server process =

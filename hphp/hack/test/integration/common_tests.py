@@ -182,7 +182,7 @@ class CommonTestDriver(object):
             expected_output,
             stdin=None,
             options=None,
-            assert_loaded_mini_state=False
+            assert_loaded_saved_state=False
     ):
         (output, err, retcode) = self.run_check(stdin, options)
         root = self.repo_dir + os.path.sep
@@ -775,7 +775,7 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
         time.sleep(1)
         client_error = self.check_cmd(
             expected_output=None,
-            assert_loaded_mini_state=False)
+            assert_loaded_saved_state=False)
         self.assertIn('Last server killed by signal', client_error)
 
     def test_duplicate_parent(self):

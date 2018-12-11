@@ -115,12 +115,18 @@ let run_parsers
   ~hash
   ~codegen
   ~allow_malformed
+  ~dump_nast
 =
   match conf with
   | FFP ->
     let ast = (run_ffp ~codegen ~allow_malformed file).Lowerer.ast in
     let output =
-      if not hash then dumper ast else
+      if dump_nast then (
+        let nast = Ast_to_nast.convert ast in
+        Nast.show_program nast
+      ) else
+      if not hash then dumper ast
+      else
         let decl_hash = Ast_utils.generate_ast_decl_hash ast in
         OpaqueDigest.to_hex decl_hash
     in
@@ -151,6 +157,7 @@ let () =
   let benchmark_files      = ref [] in
   let no_codegen    = ref false in
   let allow_malformed = ref false in
+  let dump_nast = ref false in
   Arg.(parse
     [ ("--hash", Set hash,
         "Get the decl level parsing hash of a given file "
@@ -170,6 +177,9 @@ let () =
     )
     ; ("--no-codegen", Set no_codegen,
         "Turn off codegen mode when parsing with FFP [default: false]"
+    )
+    ; ("--nast", Set dump_nast,
+        "Convert to NAST and print [default: false]"
     )
     ; ("--allow-malformed", Set allow_malformed,
         "Allow malformed files (such as for testing IDE services) [default: false]"
@@ -194,6 +204,7 @@ let () =
       parse_function
       ~codegen:(not !no_codegen)
       ~allow_malformed:!allow_malformed
+      ~dump_nast:!dump_nast
   in
   if !benchmark_files <> [] then
     List.iter ~f:parse_file !benchmark_files

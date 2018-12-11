@@ -63,7 +63,6 @@ and hint_ =
   * Haccess (Happly "Class", ["TC1", "TC2", "TC3"])
   *)
   | Haccess of hint * sid list
-
   (* The following constructors don't exist in the AST hint type *)
   | Hany
   | Hmixed

@@ -1596,7 +1596,16 @@ void optimizePPC64(Vunit& unit, const Abi& abi, bool regalloc) {
 
   if (unit.needsRegAlloc()) {
     removeDeadCode(unit);
-    if (regalloc) allocateRegistersWithXLS(unit, abi);
+    if (regalloc) {
+      if (RuntimeOption::EvalUseGraphColor &&
+          unit.context &&
+          (unit.context->kind == TransKind::Optimize ||
+           unit.context->kind == TransKind::OptPrologue)) {
+        allocateRegistersWithGraphColor(unit, abi);
+      } else {
+        allocateRegistersWithXLS(unit, abi);
+      }
+    }
   }
   if (unit.blocks.size() > 1) {
     optimizeJmps(unit);

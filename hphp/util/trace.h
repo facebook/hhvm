@@ -184,6 +184,7 @@ namespace Trace {
       TM(ustubs)        \
       TM(vasm)          \
       TM(vasm_copy)     \
+      TM(vasm_graph_color) \
       TM(vasm_phi)      \
       TM(xenon)         \
       TM(xls)           \

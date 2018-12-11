@@ -76,13 +76,12 @@ using std::string;
 // extension functions
 
 Array HHVM_FUNCTION(pdo_drivers) {
-  Array ret = Array::Create();
-  const PDODriverMap &drivers = PDODriver::GetDrivers();
-  for (PDODriverMap::const_iterator iter = drivers.begin();
-       iter != drivers.end(); ++iter) {
-    ret.append(iter->second->getName());
+  const auto& drivers = PDODriver::GetDrivers();
+  VecArrayInit ret{drivers.size()};
+  for (const auto& driver : drivers) {
+    ret.append(driver.second->getName());
   }
-  return ret;
+  return ret.toArray();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -458,8 +457,7 @@ void pdo_handle_error(sp_PDOResource rsrc, PDOStatement* stmt) {
   String supp;
   Array info;
   if (dbh->support(PDOConnection::MethodFetchErr)) {
-    info = Array::CreateVArray();
-    info.append(String(*pdo_err, CopyString));
+    info = make_varray(String(*pdo_err, CopyString));
     if (dbh->fetchErr(stmt, info)) {
       if (info.exists(1)) {
         native_code = info[1].toInt64();
@@ -3148,7 +3146,7 @@ static Variant HHVM_METHOD(PDOStatement, getcolumnmeta, int64_t column) {
   }
 
   setPDOErrorNone(data->m_stmt->error_code);
-  Array ret;
+  auto ret = Array::CreateDArray();
   if (!data->m_stmt->getColumnMeta(column, ret)) {
     PDO_HANDLE_STMT_ERR(data->m_stmt);
     return false;
@@ -3245,34 +3243,41 @@ static Variant HHVM_METHOD(PDOStatement, debugdumpparams) {
     return false;
   }
 
-  Array params;
-  params.append(data->m_stmt->query_string.size());
-  params.append(data->m_stmt->query_string.size());
-  params.append(data->m_stmt->query_string.data());
-  f->printf("SQL: [%d] %.*s\n", params);
+  f->printf(
+    "SQL: [%d] %.*s\n",
+    make_vec_array(
+      data->m_stmt->query_string.size(),
+      data->m_stmt->query_string.size(),
+      data->m_stmt->query_string.data()
+    )
+  );
 
   f->printf("Params:  %d\n",
-            make_packed_array(data->m_stmt->bound_params.size()));
+            make_vec_array(data->m_stmt->bound_params.size()));
   for (ArrayIter iter(data->m_stmt->bound_params); iter; ++iter) {
     if (iter.first().isString()) {
       String key = iter.first().toString();
-      params = make_packed_array(key.size(), key.size(), key.data());
-      f->printf("Key: Name: [%d] %.*s\n", params);
+      f->printf(
+        "Key: Name: [%d] %.*s\n",
+        make_vec_array(key.size(), key.size(), key.data())
+      );
     } else {
       f->printf("Key: Position #%ld:\n",
-                make_packed_array(iter.first().toInt64()));
+                make_vec_array(iter.first().toInt64()));
     }
 
     auto param = cast<PDOBoundParam>(iter.second());
-    params.clear();
-    params.append(param->paramno);
-    params.append(param->name.size());
-    params.append(param->name.size());
-    params.append(param->name.data());
-    params.append(param->is_param);
-    params.append(param->param_type);
-    f->printf("paramno=%d\nname=[%d] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
-              params);
+    f->printf(
+      "paramno=%d\nname=[%d] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
+      make_vec_array(
+        param->paramno,
+        param->name.size(),
+        param->name.size(),
+        param->name.data(),
+        param->is_param,
+        param->param_type
+      )
+    );
   }
   return true;
 }

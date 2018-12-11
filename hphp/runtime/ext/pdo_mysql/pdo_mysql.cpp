@@ -1229,7 +1229,7 @@ bool PDOMySqlStatement::getColumnMeta(int64_t colno, Array &ret) {
     return false;
   }
 
-  Array flags = Array::CreateDArray();
+  Array flags = Array::CreateVArray();
 
   const MYSQL_FIELD *F = m_fields + colno;
   if (F->def) {

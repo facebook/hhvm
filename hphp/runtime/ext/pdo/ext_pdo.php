@@ -316,7 +316,7 @@ class PDO {
    * names. If no drivers are available, it returns an empty array.
    */
   <<__Native>>
-  static function getAvailableDrivers(): array;
+  static function getAvailableDrivers(): vec<string>;
 }
 
 /* Represents a prepared statement and, after the statement is executed, an
@@ -678,7 +678,7 @@ class PDOStatement implements Iterator {
   function __sleep(): mixed;
 }
 
-/* @return array
+/* @return vec<string>
  */
 <<__Native>>
-function pdo_drivers(): array;
+function pdo_drivers(): vec<string>;

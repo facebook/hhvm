@@ -12,7 +12,9 @@
 (* Checks that a class implements an interface *)
 (*****************************************************************************)
 
+open Core_kernel
 val check_implements:
     Typing_env.env ->
+    string list String.Map.t ->
     Typing_defs.decl Typing_defs.ty ->
     Typing_defs.decl Typing_defs.ty -> unit

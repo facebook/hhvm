@@ -1,0 +1,7 @@
+File "method_redeclaration_renamed_no_conflict.php", line 31, characters 3-19:
+  num
+File "method_redeclaration_renamed_no_conflict.php", line 32, characters 3-19:
+  int
+File "method_redeclaration_renamed_no_conflict.php", line 33, characters 3-19:
+  float
+No errors

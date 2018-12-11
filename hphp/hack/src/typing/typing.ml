@@ -6119,7 +6119,13 @@ and class_def_ env c tc =
   end;
   Sequence.iter (Cls.smethods tc) (check_static_class_element (Cls.get_method tc) ~elt_type:"method");
   Sequence.iter (Cls.sprops tc) (check_static_class_element (Cls.get_prop tc) ~elt_type:"property");
-  List.iter impl (class_implements_type env c);
+  (* get a map of method names to list of traits from which they were removed *)
+  let alist = List.map c.c_method_redeclarations ~f:(fun m ->
+    let _, name = m.mt_method in
+    let _, trait, _ = Decl_utils.unwrap_class_hint m.mt_trait in
+    name, trait) in
+  let removals = String.Map.of_alist_fold alist ~init:[] ~f:(Fn.flip List.cons) in
+  List.iter impl (class_implements_type env c removals);
   if (Cls.is_disposable tc)
     then List.iter (c.c_extends @ c.c_uses) (Typing_disposable.enforce_is_disposable env);
   let typed_vars = List.map c.c_vars (class_var_def env ~is_static:false c) in
@@ -6259,14 +6265,14 @@ and class_constr_def env c =
   let env = { env with Env.inside_constructor = true } in
   Option.map c.c_constructor (method_def env)
 
-and class_implements_type env c1 ctype2 =
+and class_implements_type env c1 removals ctype2 =
   let params =
     List.map (fst c1.c_tparams) begin fun (_, (p, s), _, _) ->
       (Reason.Rwitness p, Tgeneric s)
     end in
   let r = Reason.Rwitness (fst c1.c_name) in
   let ctype1 = r, Tapply (c1.c_name, params) in
-  Typing_extends.check_implements env ctype2 ctype1;
+  Typing_extends.check_implements env removals ctype2 ctype1;
   ()
 
 (* Type-check a property declaration, with optional initializer *)

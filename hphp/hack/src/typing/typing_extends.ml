@@ -303,7 +303,7 @@ let filter_privates members =
     not (is_private class_elt) || is_lsb class_elt
   end
 
-let check_members check_private env (parent_class, psubst, parent_ty)
+let check_members check_private env removals (parent_class, psubst, parent_ty)
   (class_, subst, class_ty)
     (mem_source, parent_members, get_member, dep) =
   let parent_members = if check_private then parent_members
@@ -331,6 +331,13 @@ let check_members check_private env (parent_class, psubst, parent_ty)
       && class_elt.ce_origin <> parent_class_elt.ce_origin
     | _ -> false in
   Sequence.iter parent_members begin fun (member_name, parent_class_elt) ->
+    (* for this particular member, check to see if the parent considered
+    is a trait that was removed, otherwise subtype with the declaration in
+    that parent *)
+    let removed = match String.Map.find removals member_name with
+    | Some traits -> List.mem traits parent_class_elt.ce_origin ~equal:String.equal
+    | None -> false in
+    if not removed then
     match get_member member_name with
     | Some class_elt ->
       let parent_class_elt = Inst.instantiate_ce psubst parent_class_elt in
@@ -536,7 +543,7 @@ let check_consts env parent_class class_ psubst subst =
   end;
   ()
 
-let check_class_implements env (parent_class, parent_ty) (class_, class_ty) =
+let check_class_implements env removals (parent_class, parent_ty) (class_, class_ty) =
   check_typeconsts env parent_class class_;
   let parent_pos, parent_class, parent_tparaml = parent_class in
   let pos, class_, tparaml = class_ in
@@ -551,7 +558,7 @@ let check_class_implements env (parent_class, parent_ty) (class_, class_ty) =
     List.iter memberl
       (check_members_implemented check_privates parent_pos pos);
   List.iter memberl
-    (check_members check_privates env
+    (check_members check_privates env removals
       (parent_class, psubst, parent_ty) (class_, subst, class_ty));
   ()
 
@@ -559,7 +566,7 @@ let check_class_implements env (parent_class, parent_ty) (class_, class_ty) =
 (* The externally visible function *)
 (*****************************************************************************)
 
-let check_implements env parent_type type_ =
+let check_implements env removals parent_type type_ =
   let parent_r, parent_name, parent_tparaml =
     TUtils.unwrap_class_type parent_type in
   let r, name, tparaml = TUtils.unwrap_class_type type_ in
@@ -573,7 +580,7 @@ let check_implements env parent_type type_ =
       let class_ = (Reason.to_pos r), class_, tparaml in
       Errors.try_
         (fun () ->
-          check_class_implements env (parent_class, parent_type) (class_, type_))
+          check_class_implements env removals (parent_class, parent_type) (class_, type_))
         (fun errorl ->
           let p_name_pos, p_name_str = parent_name in
           let name_pos, name_str = name in

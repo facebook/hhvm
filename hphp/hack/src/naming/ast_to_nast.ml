@@ -286,7 +286,7 @@ and on_constant (c : gconst) : Aast.gconst =
     cst_type = optional on_hint c.cst_type;
     cst_value = Some (on_expr c.cst_value);
     cst_is_define = (c.cst_kind = Cst_define);
-    (* TODO: T37786581 c.cst_namespace *)
+    cst_namespace = c.cst_namespace;
   }
 
 and on_def : def -> Aast.def = function

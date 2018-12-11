@@ -2986,6 +2986,7 @@ module Make (GetLocals : GetLocals) = struct
       cst_type = hint;
       cst_value = e;
       cst_is_define = (cst.cst_kind = Ast.Cst_define);
+      cst_namespace = cst.cst_namespace;
     }
 
   (**************************************************************************)

@@ -390,6 +390,7 @@ and gconst = {
   cst_type: hint option;
   cst_value: expr option;
   cst_is_define: bool;
+  cst_namespace: nsenv;
 }
 
 and fun_def = fun_

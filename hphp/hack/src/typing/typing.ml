@@ -6560,6 +6560,7 @@ and gconst_def tcopt cst =
     T.cst_type = cst.cst_type;
     T.cst_value = typed_cst_value;
     T.cst_is_define = cst.cst_is_define;
+    T.cst_namespace = cst.cst_namespace;
   }
 
 (* Calls the method of a class, but allows the f callback to override the

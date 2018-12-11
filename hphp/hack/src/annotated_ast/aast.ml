@@ -60,7 +60,6 @@ and stmt =
   | Unsafe_block of block
   | Fallthrough
   | Expr of expr
-  (* AST has Block of block *)
   | Break of pos
   | Continue of pos
   (* is_terminal is new *)
@@ -83,6 +82,9 @@ and stmt =
   | Def_inline of def
   | Let of lid * hint option * expr
   | Noop
+  | Block of block
+  | Markup of pstring * expr option
+  | Declare of (* is_block *) bool * expr * block
 
 and as_expr =
   | As_v of expr

@@ -321,6 +321,14 @@ and stmt env acc st =
     | Let (_, _, e) ->
       (* Scoped local variable cannot escape the block *)
       expr acc e
+    | Block b -> block acc b
+    | Markup (_, eopt) -> (match eopt with
+      | Some e -> expr acc e
+      | None -> acc
+      )
+    | Declare (_, e, b) ->
+      let acc = expr acc e in
+      block acc b
 
 and toplevel env acc l =
   try List.fold_left ~f:(stmt env) ~init:acc l

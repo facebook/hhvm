@@ -185,8 +185,12 @@ let rec check_stmt env (stmt:ETast.stmt) (gamma:gamma) : delta =
     raise Not_implemented
   | Goto _
   | GotoLabel _
-  | Unsafe_block _ ->
+  | Unsafe_block _
+  | Block _
+  | Markup _
+  | Declare _ ->
     raise Cant_check
+
 
 and check_block env (block:ETast.block) gamma =
   let rec go block gamma delta =

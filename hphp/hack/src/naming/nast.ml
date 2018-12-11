@@ -269,6 +269,9 @@ class type ['a] visitor_type = object
 
   method on_def: 'a -> def -> 'a
   method on_program: 'a -> program -> 'a
+
+  method on_markup: 'a -> pstring -> expr option -> 'a
+  method on_declare: 'a -> bool -> expr -> block -> 'a
 end
 
 (*****************************************************************************)
@@ -284,6 +287,14 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
   method on_fallthrough acc = acc
   method on_goto_label acc _ = acc
   method on_goto acc _ = acc
+
+  method on_markup acc _ eopt = match eopt with
+  | Some e -> this#on_expr acc e
+  | None -> acc
+
+  method on_declare acc _ e b =
+    let acc = this#on_expr acc e in
+    this#on_block acc b
 
   method on_throw acc _ e =
     let acc = this#on_expr acc e in
@@ -411,6 +422,9 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     | Awaitall (_, el)        -> this#on_awaitall acc el
     | Def_inline d            -> this#on_def_inline acc d
     | Let     (x, h, e)       -> this#on_let acc x h e
+    | Block b                 -> this#on_block acc b
+    | Markup (s, e)           -> this#on_markup acc s e
+    | Declare (is_blk, e, b)  -> this#on_declare acc is_blk e b
 
   method on_expr acc (_, e) =
     this#on_expr_ acc e

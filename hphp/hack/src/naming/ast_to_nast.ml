@@ -20,11 +20,10 @@ let rec on_variadic_hint h =
   | Hvariadic h -> Aast.Hvariadic (optional on_hint h)
   | Hnon_variadic -> Aast.Hnon_variadic
 
-(* TODO: T37786581 Fill this out properly *)
 and on_shape_info info =
   Aast.{
     nsi_allows_unknown_fields = info.si_allows_unknown_fields;
-    nsi_field_map = ShapeMap.empty;
+    nsi_field_map = ShapeMap.empty; (* TODO T37786581: Fill this out properly *)
   }
 and on_hint (p, h) : Aast.hint =
   match h with
@@ -135,11 +134,11 @@ and on_catch (id1, id2, b) : Aast.catch =
 and on_stmt (p, st) :  Aast.stmt =
   match st with
   | Let _                     -> Aast.Noop (* TODO: T37786581 *)
-  | Block _                   -> Aast.Noop (* TODO: T37786581 *)
-  | Unsafe                    -> Aast.Noop (* TODO: T37786581 *)
+  | Block sl                  -> Aast.Block (on_block sl)
+  | Unsafe                    -> failwith "Unsafe statements should be removed in on_block"
   | Fallthrough               -> Aast.Fallthrough
   | Noop                      -> Aast.Noop
-  | Markup _                  -> Aast.Noop (* TODO: T37786581 *)
+  | Markup (s, e)             -> Aast.Markup (s, optional on_expr e)
   | Break _                   -> Aast.Noop (* TODO: T37786581 *)
   | Continue _                -> Aast.Noop (* TODO: T37786581 *)
   | Throw e                   -> Aast.Throw (false, on_expr e)
@@ -152,17 +151,20 @@ and on_stmt (p, st) :  Aast.stmt =
   | If (e, b1, b2)            -> Aast.If (on_expr e, on_block b1, on_block b2)
   | Do (b, e)                 -> Aast.Do (on_block b, on_expr e)
   | While (e, b)              -> Aast.While (on_expr e, on_block b)
-  | Declare _                 -> Aast.Noop (* TODO: T37786581 *)
+  | Declare (is_blk, e, b)    -> Aast.Declare (is_blk, on_expr e, on_block b)
   | Using _                   -> Aast.Noop (* TODO: T37786581 *)
   | For (st1, e, st2, b)      -> Aast.For (on_expr st1, on_expr e, on_expr st2, on_block b)
   | Switch (e, cl)            -> Aast.Switch (on_expr e, on_list on_case cl)
   | Foreach (e, _, ae, b)     -> Aast.Foreach (on_expr e, on_as_expr ae, on_block b)
   | Try (b, cl, fb)           -> Aast.Try (on_block b, on_list on_catch cl, on_block fb)
-  | Def_inline _              -> Aast.Noop (* TODO: T37786581 *)
+  | Def_inline d              -> Aast.Def_inline (on_def d)
   | Expr e                    -> Aast.Expr (on_expr e)
 
 and on_block stmt_list : Aast.stmt list =
-  List.map on_stmt stmt_list
+  match stmt_list with
+  | [] -> []
+  | (_, Unsafe) :: rest -> [Aast.Unsafe_block (on_block rest)]
+  | x :: rest -> (on_stmt x) :: (on_block rest)
 
 and on_tparam_constraint (kind, hint) : (constraint_kind * Aast.hint) =
   (kind, on_hint hint)

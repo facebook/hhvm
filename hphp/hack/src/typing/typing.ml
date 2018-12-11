@@ -972,6 +972,10 @@ and stmt env = function
     | _ -> env
     in
     env, T.Let (id, h, t_rhs)
+  | Block _
+  | Markup _
+  | Declare _ ->
+    failwith "Unexpected nodes in AST. These nodes should have been removed in naming."
 
 and finally_cont fb env ctx =
   let env = LEnv.replace_cont env C.Next (Some ctx) in

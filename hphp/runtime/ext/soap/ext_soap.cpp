@@ -2101,11 +2101,11 @@ Variant HHVM_METHOD(SoapServer, getfunctions) {
   } else if (data->m_soap_functions.functions_all) {
     return (Unit::getSystemFunctions() + Unit::getUserFunctions()).toVArray();
   } else if (!data->m_soap_functions.ft.empty()) {
-    auto ret = array_keys_helper(data->m_soap_functions.ftOriginal);
-    if (ret.isArray()) {
-      return ret.toVArray();
-    }
-    return ret;
+    return Variant::attach(
+      array_keys_helper(
+        make_tv<KindOfArray>(data->m_soap_functions.ftOriginal.get())
+      )
+    );
   }
 
   Class* cls = Unit::lookupClass(class_name.get());

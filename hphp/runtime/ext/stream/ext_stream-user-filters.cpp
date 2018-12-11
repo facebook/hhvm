@@ -335,7 +335,11 @@ Array HHVM_FUNCTION(stream_get_filters) {
   if (UNLIKELY(filters.isNull())) {
     return empty_array();
   }
-  return array_keys_helper(filters.filtersAsArray()).toArray();
+  return Array::attach(
+    array_keys_helper(
+      make_tv<KindOfArray>(filters.filtersAsArray().get())
+    ).m_data.parr
+  );
 }
 
 Variant HHVM_FUNCTION(stream_filter_append,

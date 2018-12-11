@@ -389,44 +389,53 @@ bool HHVM_FUNCTION(key_exists,
   return HHVM_FN(array_key_exists)(key, search);
 }
 
-Variant array_keys_helper(const Variant& input,
-                          const Variant& search_value /* = uninit_null */,
-                          bool strict /* = false */) {
-  const auto& cell_input = *input.toCell();
-  if (UNLIKELY(!isContainer(cell_input))) {
+TypedValue array_keys_helper(TypedValue input,
+                             TypedValue search_value /* = uninit_null */,
+                             bool strict /* = false */) {
+  if (UNLIKELY(!isContainer(input))) {
     raise_warning("array_keys() expects parameter 1 to be an array "
                   "or collection");
-    return init_null();
+    return make_tv<KindOfNull>();
   }
 
-  if (LIKELY(!search_value.isInitialized())) {
-    PackedArrayInit ai(getContainerSize(cell_input));
-    for (ArrayIter iter(cell_input); iter; ++iter) {
-      ai.append(iter.first());
-    }
-    return ai.toVariant();
+  if (LIKELY(search_value.m_type == KindOfUninit)) {
+    VArrayInit ai(getContainerSize(input));
+    IterateKV(
+      input,
+      [](ArrayData*) { return false; },
+      [&](Cell k, TypedValue) {
+        ai.append(k);
+      },
+      [](ObjectData*) {}
+    );
+    return make_array_like_tv(ai.create());
   } else {
-    Array ai = Array::attach(PackedArray::MakeReserve(0));
-    for (ArrayIter iter(cell_input); iter; ++iter) {
-      if ((strict &&
-           tvSame(iter.secondValPlus(), *search_value.asTypedValue())) ||
-          (!strict &&
-           tvEqual(iter.secondValPlus(), *search_value.asTypedValue()))) {
-        ai.append(iter.first());
-      }
-    }
-    return ai;
+    auto ai = Array::attach(staticEmptyVArray());
+    IterateKV(
+      input,
+      [](ArrayData*) { return false; },
+      [&](Cell k, TypedValue v) {
+        if (strict ?
+            tvSame(v, search_value) :
+            tvEqual(v, search_value)) {
+          ai.append(k);
+        }
+      },
+      [](ObjectData*) {}
+    );
+    return make_array_like_tv(ai.detach());
   }
 }
 
 static
-Variant HHVM_FUNCTION(array_keys, int64_t argc,
-                                  const Variant& input,
-                                  const Variant& search_value /*=null*/,
-                                  bool strict /*=false*/) {
+TypedValue HHVM_FUNCTION(array_keys,
+                         int64_t argc,
+                         TypedValue input,
+                         TypedValue search_value /*=null*/,
+                         bool strict /*=false*/) {
   return array_keys_helper(
     input,
-    argc < 2 ? uninit_variant : search_value,
+    argc < 2 ? make_tv<KindOfUninit>() : search_value,
     strict
   );
 }

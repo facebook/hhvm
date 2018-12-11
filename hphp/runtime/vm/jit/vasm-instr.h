@@ -91,6 +91,7 @@ struct Vunit;
   O(pushframe, Inone, Un, Dn)\
   O(popframe, Inone, Un, Dn)\
   O(recordstack, Inone, Un, Dn)\
+  O(ssaalias, Inone, U(s), D(d))\
   /* native function abi */\
   O(vcall, I(call) I(destType) I(fixup), U(args), D(d))\
   O(vinvoke, I(call) I(destType) I(fixup), U(args), D(d))\
@@ -536,6 +537,13 @@ struct phijmp { Vlabel target; Vtuple uses; };
  */
 struct conjure { Vreg c; };
 struct conjureuse { Vreg c; };
+
+/*
+ * Pseudo-instruction used to indicate to restoreSSA() that d is an
+ * alias of s, and d should be rewritten to whatever s is rewritten to
+ * (regardless of what definition d is dominated by).
+ */
+struct ssaalias { Vreg s; Vreg d; };
 
 /*
  * Emit a function prologue guard.

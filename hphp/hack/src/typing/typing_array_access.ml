@@ -38,7 +38,7 @@ let rec array_get ?(lhs_of_null_coalesce=false)
     log_types p env
       [Log_head ("array_get",
       [Log_type ("ty1", ty1); Log_type("ty2", ty2)])]));
-  let env, ety1 = Env.expand_type env ty1 in
+  let env, ety1 = SubType.expand_type_and_solve env ty1 in
   (* This is a little weird -- we enforce the right arity when you use certain
    * collections, even in partial mode (where normally completely omitting the
    * type parameter list is admitted). Basically the "omit type parameter"
@@ -304,7 +304,7 @@ let rec array_get ?(lhs_of_null_coalesce=false)
     (env, tyvars), value
 
 let rec assign_array_append pos ur env ty1 ty2 =
-  let env, ety1 = Env.expand_type env ty1 in
+  let env, ety1 = SubType.expand_type_and_solve env ty1 in
   match ety1 with
   | r, (Tany | Tarraykind (AKany | AKempty)) ->
     env, (ty1, (r, TUtils.tany env))
@@ -372,7 +372,7 @@ Typing_log.(log_with_level env "typing" 1 (fun () ->
     Log_type ("tkey", tkey);
     Log_type ("ty2", ty2)])]));
 
-  let env, ety1 = Env.expand_type env ty1 in
+  let env, ety1 = SubType.expand_type_and_solve env ty1 in
   let arity_error (_, name) =
     Errors.array_get_arity pos name (Reason.to_pos (fst ety1)) in
   let type_index env p ty_have ty_expect reason =

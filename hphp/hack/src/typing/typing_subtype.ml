@@ -2369,6 +2369,10 @@ let bind_to_upper_bound env r var =
  *   if there is a single upper bound.
  *)
 let solve_tyvar ~solve_invariant env r var =
+  (* Don't try and solve twice *)
+  if Env.tyvar_is_solved env var
+  then env
+  else
   let appears_contravariantly = Env.get_tyvar_appears_contravariantly env var in
   let appears_covariantly = Env.get_tyvar_appears_covariantly env var in
   match appears_covariantly, appears_contravariantly with
@@ -2392,6 +2396,15 @@ let solve_tyvars ?(solve_invariant = false) ~tyvars env =
     (fun tyvar env -> solve_tyvar ~solve_invariant env Reason.Rnone tyvar)
     tyvars env
   else env
+
+let expand_type_and_solve env ty =
+  let env, ety = Env.expand_type env ty in
+  match ety with
+  | (_, Tvar v) when TypecheckerOptions.new_inference_eager_solve (Env.get_tcopt env) ->
+    let env = solve_tyvar ~solve_invariant:true env Reason.Rnone v in
+    Env.expand_type env ty
+  | _ ->
+    env, ety
 
 let log_prop env =
   let filename = Pos.filename (Pos.to_absolute env.Env.pos) in

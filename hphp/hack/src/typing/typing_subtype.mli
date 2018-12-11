@@ -108,6 +108,11 @@ val solve_tyvars :
   Env.env ->
   Env.env
 
+val expand_type_and_solve :
+  Env.env ->
+  locl ty ->
+  Env.env * locl ty
+
 val log_prop :
   Env.env ->
   unit

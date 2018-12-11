@@ -4516,7 +4516,7 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
 (* k_lhs takes the type of the object receiver *)
 and obj_get_ ~is_method ~nullsafe ~valkind ~(pos_params : expr list option) ?(explicit_tparams=[])
     env ty1 cid (id_pos, id_str as id) k k_lhs =
-  let env, ety1 = Env.expand_type env ty1 in
+  let env, ety1 = SubType.expand_type_and_solve env ty1 in
   let nullable_obj_get ty = match nullsafe with
     | Some p1 ->
         let env, method_, tyvars, x = obj_get_ ~is_method ~nullsafe ~valkind
@@ -4793,6 +4793,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env =
   | CIexpr (p, _ as e) ->
       let env, te, ty = expr env e in
       let rec resolve_ety ty =
+        let env, ty = SubType.expand_type_and_solve env ty in
         let env, ty = TUtils.fold_unresolved env ty in
         match TUtils.get_base_type env ty with
         | _, Tabstract (AKnewtype (classname, [the_cls]), _) when

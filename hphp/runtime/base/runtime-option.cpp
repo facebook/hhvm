@@ -104,7 +104,7 @@ bool RuntimeOption::EnableObjDestructCall = true;
 bool RuntimeOption::EnableIntrinsicsExtension = false;
 bool RuntimeOption::CheckSymLink = true;
 bool RuntimeOption::EnableArgsInBacktraces = true;
-bool RuntimeOption::EnableContextInErrorHandler = true;
+bool RuntimeOption::EnableContextInErrorHandler = false;
 bool RuntimeOption::EnableZendSorting = false;
 bool RuntimeOption::EnableZendIniCompat = true;
 bool RuntimeOption::TimeoutsUseWallTime = true;
@@ -1469,7 +1469,7 @@ void RuntimeOption::Load(
     Config::Bind(EnableArgsInBacktraces, ini, config,
                  "Eval.EnableArgsInBacktraces", !RepoAuthoritative);
     Config::Bind(EnableContextInErrorHandler, ini, config,
-                 "Eval.EnableContextInErrorHandler", !RepoAuthoritative);
+                 "Eval.EnableContextInErrorHandler", false);
     Config::Bind(EvalAuthoritativeMode, ini, config, "Eval.AuthoritativeMode",
                  false);
     if (RepoAuthoritative) {

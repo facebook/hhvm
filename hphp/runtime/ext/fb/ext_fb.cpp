@@ -1110,7 +1110,7 @@ Variant HHVM_FUNCTION(fb_get_code_coverage, bool flush) {
 void HHVM_FUNCTION(fb_enable_code_coverage) {
   RequestInfo *ti = RequestInfo::s_requestInfo.getNoCheck();
   ti->m_coverage->Reset();
-  ti->m_reqInjectionData.setCoverage(true);;
+  ti->m_reqInjectionData.setCoverage(true);
   if (g_context->isNested()) {
     raise_notice("Calling fb_enable_code_coverage from a nested "
                  "VM instance may cause unpredicable results");
@@ -1118,19 +1118,19 @@ void HHVM_FUNCTION(fb_enable_code_coverage) {
   throw VMSwitchModeBuiltin();
 }
 
-Variant disable_code_coverage_helper(bool report_frequency) {
+Array disable_code_coverage_helper(bool report_frequency) {
   RequestInfo *ti = RequestInfo::s_requestInfo.getNoCheck();
   ti->m_reqInjectionData.setCoverage(false);
-  Array ret = ti->m_coverage->Report(report_frequency);
+  auto ret = ti->m_coverage->Report(report_frequency);
   ti->m_coverage->Reset();
   return ret;
 }
 
-Variant HHVM_FUNCTION(fb_disable_code_coverage) {
+Array HHVM_FUNCTION(fb_disable_code_coverage) {
   return disable_code_coverage_helper(/* report frequency */ false);
 }
 
-Variant HHVM_FUNCTION(HH_disable_code_coverage_with_frequency) {
+Array HHVM_FUNCTION(HH_disable_code_coverage_with_frequency) {
   return disable_code_coverage_helper(/* report frequency */ true);
 }
 

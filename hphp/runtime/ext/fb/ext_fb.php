@@ -144,7 +144,7 @@ function fb_utf8_substr(string $str,
  * you to specify an output file to store results at end of a script run from
  * command line. Use this function in server mode to collect results instead.
  * @param bool $flush - Whether to clear data after this function call.
- * @return mixed
+ * @return darray<string,mixed>|false
  */
 <<__HipHopSpecific, __Native>>
 function fb_get_code_coverage(bool $flush): mixed;
@@ -157,7 +157,7 @@ function fb_enable_code_coverage(): void;
 /* Disables and returns code coverage. The coverage information is cleared.
  */
 <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
-function fb_disable_code_coverage(): mixed;
+function fb_disable_code_coverage(): darray<string, mixed>;
 
 /* Toggles the compression status of HipHop output, if headers have already
  * been sent this may be ignored.
@@ -205,5 +205,5 @@ namespace HH {
  * The coverage information is cleared.
  */
 <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
-function disable_code_coverage_with_frequency(): mixed;
+function disable_code_coverage_with_frequency(): darray<string, mixed>;
 } // HH namespace

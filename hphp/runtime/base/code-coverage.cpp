@@ -18,6 +18,8 @@
 #include <fstream>
 #include <vector>
 
+#include <folly/String.h>
+
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
@@ -91,15 +93,15 @@ void CodeCoverage::Record(const char *filename, int line0, int line1) {
   }
   Logger::Verbose("%s, (%d, %d)\n", filename, line0, line1);
 
-  CodeCoverageMap::iterator iter = m_hits.find(filename);
+  auto iter = m_hits.find(filename);
   if (iter == m_hits.end()) {
-    std::vector<int> &lines = m_hits[filename];
+    auto& lines = m_hits[filename];
     lines.resize(line1 + 1);
     for (int i = line0; i <= line0 /* should be line1 one day */; i++) {
       lines[i] = 1;
     }
   } else {
-    std::vector<int> &lines = iter->second;
+    auto& lines = iter->second;
     if ((int)lines.size() < line1 + 1) {
       lines.resize(line1 + 1);
     }
@@ -111,26 +113,25 @@ void CodeCoverage::Record(const char *filename, int line0, int line1) {
 
 Array CodeCoverage::Report(bool report_frequency /* = false*/,
                            bool sys /* = true */) {
-  Array ret = Array::Create();
-  for (CodeCoverageMap::const_iterator iter = m_hits.begin();
-       iter != m_hits.end(); ++iter) {
-    if (!sys && Extension::IsSystemlibPath(iter->first)) {
+  Array ret = Array::CreateDArray();
+  for (const auto& iter : m_hits) {
+    if (!sys && Extension::IsSystemlibPath(iter.first)) {
       continue;
     }
-    const std::vector<int> &lines = iter->second;
+    const auto& lines = iter.second;
 
     if (report_frequency) {
       auto const count = std::count_if(lines.begin(), lines.end(),
-                                       [&](int i) { return i != 0; });
-      ret.set(String(iter->first), Variant((int64_t)count));
+                                       [](int i) { return i != 0; });
+      ret.set(String(iter.first), Variant((int64_t)count));
     } else {
-      Array tmp = Array::Create();
+      auto tmp = Array::CreateDArray();
       for (int i = 1; i < (int)lines.size(); i++) {
         if (lines[i]) {
           tmp.set(i, Variant((int64_t)lines[i]));
         }
       }
-      ret.set(String(iter->first), Variant(tmp));
+      ret.set(String(iter.first), Variant(tmp));
     }
   }
 
@@ -147,15 +148,8 @@ void CodeCoverage::Report(const std::string &filename) {
   f << "{\n";
   for (CodeCoverageMap::const_iterator iter = m_hits.begin();
        iter != m_hits.end();) {
-    const std::vector<int> &lines = iter->second;
     f << "\"" << iter->first << "\": [";
-    int count = lines.size();
-    for (int i = 0 /* not 1 */; i < count; i++) {
-      f << lines[i];
-      if (i < count - 1) {
-        f << ",";
-      }
-    }
+    f << folly::join(",", iter->second);
     f << "]";
     if (++iter != m_hits.end()) {
       f << ",";

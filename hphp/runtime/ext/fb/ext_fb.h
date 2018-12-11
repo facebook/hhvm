@@ -45,8 +45,8 @@ String HHVM_FUNCTION(fb_utf8_substr, const String& str,
                      int64_t start, int64_t length = INT_MAX);
 Variant HHVM_FUNCTION(fb_get_code_coverage, bool flush);
 void HHVM_FUNCTION(fb_enable_code_coverage);
-Variant HHVM_FUNCTION(fb_disable_code_coverage);
-Variant HHVM_FUNCTION(HH_disable_code_coverage_with_frequency);
+Array HHVM_FUNCTION(fb_disable_code_coverage);
+Array HHVM_FUNCTION(HH_disable_code_coverage_with_frequency);
 bool HHVM_FUNCTION(fb_output_compression, bool new_value);
 void HHVM_FUNCTION(fb_set_exit_callback, const Variant& function);
 int64_t HHVM_FUNCTION(fb_get_last_flush_size);

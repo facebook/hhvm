@@ -6,6 +6,10 @@ dict(1) {
   ["TWO"]=>
   string(3) "TWO"
 }
+dict(1) {
+  ["TFoo"]=>
+  string(4) "TFoo"
+}
 vec(1) {
   object(ReflectionTypeConstant)#2 (0) {
   }
@@ -36,7 +40,7 @@ dict(1) {
   }
 }
 
-Deprecated: ReflectionClass::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line 42
+Deprecated: ReflectionClass::getAttributesRecursive: This function is being removed as it has been broken for some time in %s on line %d
 dict(1) {
   ["__Attr1"]=>
   vec(2) {

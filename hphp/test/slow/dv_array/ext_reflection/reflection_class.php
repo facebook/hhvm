@@ -34,6 +34,7 @@ function main() {
   $a_cls = new ReflectionClass('A');
   var_dump($a_cls->getConstants());
   var_dump($a_cls->getAbstractConstantNames());
+  var_dump($a_cls->getOrderedTypeConstants());
   var_dump($a_cls->getTypeConstants());
   var_dump($a_cls->getDefaultProperties());
   var_dump($a_cls->getInterfaceNames());

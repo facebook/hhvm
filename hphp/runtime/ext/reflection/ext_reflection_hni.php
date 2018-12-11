@@ -1564,7 +1564,7 @@ class ReflectionClass implements Reflector {
 
   private static $typeConstCache = array();
 
-  private function getTypeConstantNamesWithCaching(): array<string, string> {
+  private function getTypeConstantNamesWithCaching(): darray<string, string> {
     $clsname = $this->getName();
     $cached = hphp_array_idx(self::$typeConstCache, $clsname, null);
     if (null !== $cached) {
@@ -1597,7 +1597,7 @@ class ReflectionClass implements Reflector {
   private function getOrderedAbstractConstants(): darray<string, string>;
 
   <<__Native>>
-  public function getOrderedTypeConstants(): array<string, string>;
+  public function getOrderedTypeConstants(): darray<string, string>;
 
   /**
    * ( excerpt from

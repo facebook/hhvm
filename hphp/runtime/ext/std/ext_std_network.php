@@ -347,7 +347,7 @@ function header(string $string,
  * @return array - Returns a numerically indexed array of headers.
  */
 <<__Native>>
-function headers_list(): array<string>;
+function headers_list(): varray<string>;
 
 /**
  * Checks if or where headers have been sent

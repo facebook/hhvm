@@ -21,6 +21,7 @@
 #include <folly/ScopeGuard.h>
 #include <folly/portability/Sockets.h>
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -307,19 +308,19 @@ Variant HHVM_FUNCTION(http_response_code, int response_code /* = 0 */) {
 
 Array HHVM_FUNCTION(headers_list) {
   Transport *transport = g_context->getTransport();
-  Array ret = Array::Create();
-  if (transport) {
-    HeaderMap headers;
-    transport->getResponseHeaders(headers);
-    for (HeaderMap::const_iterator iter = headers.begin();
-         iter != headers.end(); ++iter) {
-      const std::vector<std::string> &values = iter->second;
-      for (unsigned int i = 0; i < values.size(); i++) {
-        ret.append(String(iter->first + ": " + values[i]));
-      }
+  if (!transport) {
+    return Array::CreateVArray();
+  }
+  HeaderMap headers;
+  transport->getResponseHeaders(headers);
+  // Underestimate if duplicate headers exist.
+  VArrayInit ret{headers.size()};
+  for (const auto& iter : headers) {
+    for (const auto& values : iter.second) {
+      ret.append(String(iter.first + ": " + values));
     }
   }
-  return ret;
+  return ret.toArray();
 }
 
 bool HHVM_FUNCTION(headers_sent, VRefParam file /* = null */,

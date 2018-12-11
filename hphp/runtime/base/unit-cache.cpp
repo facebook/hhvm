@@ -768,6 +768,8 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + (RuntimeOption::DisallowExecutionOperator ? '1' : '0')
     + (RuntimeOption::DisableVariableVariables ? '1' : '0')
     + (RuntimeOption::EvalEmitFuncPointers ? '1' : '0')
+    + (RuntimeOption::EvalEmitClsMethPointers ? '1' : '0')
+    + (RuntimeOption::EvalEmitInstMethPointers ? '1' : '0')
     + mangleUnitPHP7Options()
     + mangleAliasedNamespaces()
     + hackc_version();

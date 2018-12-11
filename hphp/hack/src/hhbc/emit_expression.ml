@@ -3621,7 +3621,7 @@ and emit_special_function env pos id args uargs default =
         Some (gather [
           emit_expr ~need_ref:false env obj_expr;
           emit_expr ~need_ref:false env method_name;
-          if Hhbc_options.emit_func_pointers !Hhbc_options.compiler_options
+          if Hhbc_options.emit_inst_meth_pointers !Hhbc_options.compiler_options
           then instr_resolve_obj_method
           else instr (ILitConst (NewVArray 2));
         ], Flavor.Cell)
@@ -3637,7 +3637,7 @@ and emit_special_function env pos id args uargs default =
           Some (gather [
             emit_expr ~need_ref:false env class_name;
             emit_expr ~need_ref:false env method_name;
-            if Hhbc_options.emit_func_pointers !Hhbc_options.compiler_options
+            if Hhbc_options.emit_cls_meth_pointers !Hhbc_options.compiler_options
             then instr_resolve_cls_method
             else instr (ILitConst (NewVArray 2));
           ], Flavor.Cell)

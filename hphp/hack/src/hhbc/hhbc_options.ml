@@ -55,6 +55,8 @@ type t = {
   option_disable_variable_variables       : bool;
   option_phpism_disable_define            : bool;
   option_emit_func_pointers               : bool;
+  option_emit_cls_meth_pointers           : bool;
+  option_emit_inst_meth_pointers          : bool;
 }
 
 let default = {
@@ -103,6 +105,8 @@ let default = {
   option_disable_variable_variables = false;
   option_phpism_disable_define = true;
   option_emit_func_pointers = true;
+  option_emit_cls_meth_pointers = true;
+  option_emit_inst_meth_pointers = true;
 }
 
 let enable_hiphop_syntax o = o.option_enable_hiphop_syntax
@@ -148,6 +152,8 @@ let phpism_disallow_execution_operator o = o.option_phpism_disallow_execution_op
 let disable_variable_variables o = o.option_disable_variable_variables
 let phpism_disable_define o = o.option_phpism_disable_define
 let emit_func_pointers o = o.option_emit_func_pointers
+let emit_cls_meth_pointers o = o.option_emit_cls_meth_pointers
+let emit_inst_meth_pointers o = o.option_emit_inst_meth_pointers
 let to_string o =
   let dynamic_invokes =
     String.concat ~sep:", " (SSet.elements (dynamic_invoke_functions o)) in
@@ -291,6 +297,10 @@ let set_option options name value =
     { options with option_enable_concurrent = as_bool value }
   | "hhvm.emit_func_pointers" ->
     { options with option_emit_func_pointers = int_of_string value > 0 }
+  | "hhvm.emit_cls_meth_pointers" ->
+    { options with option_emit_cls_meth_pointers = int_of_string value > 0 }
+  | "hhvm.emit_inst_meth_pointers" ->
+    { options with option_emit_inst_meth_pointers = int_of_string value > 0 }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -431,6 +441,10 @@ let value_setters = [
      fun opts v -> { opts with option_phpism_disable_define = (v > 0) });
   (set_value "hhvm.emit_func_pointers" get_value_from_config_int @@
      fun opts v -> { opts with option_emit_func_pointers = (v > 0) });
+  (set_value "hhvm.emit_cls_meth_pointers" get_value_from_config_int @@
+     fun opts v -> { opts with option_emit_cls_meth_pointers = (v > 0) });
+  (set_value "hhvm.emit_inst_meth_pointers" get_value_from_config_int @@
+     fun opts v -> { opts with option_emit_inst_meth_pointers = (v > 0) });
 ]
 
 let extract_config_options_from_json ~init config_json =

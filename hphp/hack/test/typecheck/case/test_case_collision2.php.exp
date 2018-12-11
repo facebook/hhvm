@@ -1,2 +1,0 @@
-File "test_case_collision2.php", line 7, characters 1-33:
-Cannot redeclare FOO() (previously declared in test_case_collision2.php:3) (Parsing[1002])

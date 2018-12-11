@@ -72,8 +72,6 @@ module ErrorString = struct
                          -> array (Some x, Some y)
     | Tarraykind (AKshape _)
                          -> "an array (used like a shape)"
-    | Tarraykind (AKtuple _)
-                         -> "an array (used like a tuple)"
     | Ttuple l           -> "a tuple of size " ^ string_of_int (List.length l)
     | Tmixed             -> "a mixed value"
     | Tnonnull           -> "a nonnull value"
@@ -353,8 +351,6 @@ module Full = struct
           k tv
         ] in
       list "shape-like-array(" id (shape_map fdm f_field) ")"
-    | Tarraykind (AKtuple fields) ->
-      list "tuple-like-array(" k (List.rev (IMap.values fields)) ")"
     | Tarray (None, Some _) -> assert false
     | Tclass ((_, s), Exact, []) when !debug_mode ->
       Concat [text "exact"; Space; to_doc s]
@@ -847,8 +843,6 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
     obj @@ kind "array" @ empty false @ args [ty]
   | Tarraykind (AKmap (ty1, ty2)) ->
     obj @@ kind "array" @ empty false @ args [ty1; ty2]
-  | Tarraykind (AKtuple fields) ->
-    obj @@ kind "tuple" @ is_array true @ args (List.rev (IMap.values fields))
   | Tarraykind (AKshape fl) ->
     obj @@ kind "shape" @ is_array true
       @ shape_like_array_fields (Nast.ShapeMap.elements fl)
@@ -1065,20 +1059,8 @@ let to_locl_ty
       end
 
     | "tuple" ->
-      get_bool "is_array" (json, keytrace)
-        >>= fun (is_array, _is_array_keytrace) ->
       get_array "args" (json, keytrace) >>= fun (args, args_keytrace) ->
-      aux_args args ~keytrace:args_keytrace >>= fun args ->
-      if is_array then
-        let args =
-          List.foldi
-            (List.rev args)
-            ~init:IMap.empty
-            ~f:(fun k acc v -> IMap.add k v acc)
-        in
-        ty (Tarraykind (AKtuple args))
-      else
-        ty (Ttuple args)
+      aux_args args ~keytrace:args_keytrace >>= fun args -> ty (Ttuple args)
 
     | "nullable" ->
       get_array "args" (json, keytrace) >>= fun (args, keytrace) ->

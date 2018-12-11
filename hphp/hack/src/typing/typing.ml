@@ -1405,17 +1405,9 @@ and expr_
           | _ ->
             env, None in
         let env, tel, arraykind, tyvars =
-          if shape_and_tuple_arrays_enabled then
-            let env, tel, fields =
-              List.foldi l ~f:begin fun index (env, tel, acc) e ->
-                let env, te, ty = aktuple_field env e in
-                env, te::tel, IMap.add index ty acc
-              end ~init:(env, [], IMap.empty) in
-            env, tel, AKtuple fields, ISet.empty
-          else
-            let env, tel, value_ty, tyvars =
-              compute_exprs_and_supertype ~expected:elem_expected env l array_field_value in
-            env, tel, AKvec value_ty, tyvars in
+          let env, tel, value_ty, tyvars =
+            compute_exprs_and_supertype ~expected:elem_expected env l array_field_value in
+          env, tel, AKvec value_ty, tyvars in
         make_result ~tyvars env p
           (T.Array (List.map tel (fun e -> T.AFvalue e)))
           (Reason.Rwitness p, Tarraykind arraykind)
@@ -3155,25 +3147,6 @@ and assign_ p ur env e1 ty2 =
             | _ ->
                 Errors.pair_arity p;
                 make_result env (fst e1) T.Any (r, Typing_utils.terr env))
-          (* tuple-like array *)
-          | (r, Tarraykind (AKtuple fields)) ->
-            let p1 = fst e1 in
-            let p2 = Reason.to_pos r in
-            let tyl = List.rev (IMap.values fields) in
-            let size1 = List.length el in
-            let size2 = List.length tyl in
-            if size1 <> size2
-            then begin
-              Errors.tuple_arity p2 size2 p1 size1;
-              make_result env (fst e1) T.Any (r, Typing_utils.terr env)
-            end
-            else
-              let env, reversed_tel =
-                List.fold2_exn el tyl ~f:begin fun (env,tel) lvalue ty2 ->
-                let env, te, _ = assign p env lvalue ty2 in
-                env, te::tel
-              end ~init:(env,[]) in
-              make_result env (fst e1) (T.List (List.rev reversed_tel)) ty2
         (* Other, including tuples. Create a tuple type for the left hand
          * side and attempt subtype against it. In particular this deals with
          * types such as (string,int) | (int,bool) *)
@@ -3348,17 +3321,6 @@ and akshape_field env = function
       env, T.AFkvalue (tek, tev), (field_name, (tk, tv))
   | Nast.AFvalue _ -> assert false (* Typing_arrays.is_shape_like_array
                                     * should have prevented this *)
-
-and aktuple_afvalue env v =
-  let env, tev, tv = expr env v in
-  let env, tv = Typing_env.unbind env tv in
-  let env, ty = TUtils.unresolved env tv in
-  env, tev, ty
-
-and aktuple_field env = function
-  | Nast.AFvalue v -> aktuple_afvalue env v
-  | Nast.AFkvalue _ -> assert false (* check_consistent_fields
-                                     * should have prevented this *)
 
 and check_parent_construct pos env el uel env_parent =
   let check_not_abstract = false in
@@ -3608,9 +3570,6 @@ and is_abstract_ft fty = match fty with
         (match ety with
         | (_, Tarraykind (AKany | AKempty)) as array_type ->
             (env, tyvars), array_type
-        | (_, Tarraykind (AKtuple _)) ->
-            let env, ty = Typing_arrays.downcast_aktypes env ty in
-            get_array_filter_return_type (env,tyvars) ty
         | (r, Tarraykind (AKvec tv | AKvarray tv)) ->
             let env, tv = get_value_type env tv in
             (env, tyvars), (r, Tarraykind (AKvec tv))
@@ -3767,9 +3726,6 @@ and is_abstract_ft fty = match fty with
               match x with
               | (_, Tarraykind (AKany | AKempty)) as array_type ->
                 (env, tyvars), (fun _ -> array_type)
-              | (_, Tarraykind (AKtuple _ )) ->
-                let env, x = Typing_arrays.downcast_aktypes env x in
-                build_output_container (env, tyvars) x
               | (r, Tarraykind (AKvec _ | AKvarray _)) ->
                 (env, tyvars), (fun tr -> (r, Tarraykind (AKvec(tr))) )
               | (r, Tany) ->

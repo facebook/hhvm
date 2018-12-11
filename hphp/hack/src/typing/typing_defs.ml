@@ -282,9 +282,6 @@ and array_kind =
   (* Array "used like a shape" - initialized and indexed with keys that are
    * only string/class constants *)
   | AKshape of (locl ty * locl ty) Nast.ShapeMap.t
-  (* Array "used like a tuple" - initialized without keys and indexed with
-   * integers that are within initialized range *)
-  | AKtuple of (locl ty) IMap.t
 
 (* An abstract type derived from either a newtype, a type parameter, or some
  * dependent type
@@ -693,7 +690,6 @@ let array_kind_con_ordinal ak =
   | AKmap _ -> 5
   | AKempty -> 6
   | AKshape _ -> 7
-  | AKtuple _ -> 8
 
 let abstract_kind_con_ordinal ak =
   match ak with
@@ -819,12 +815,6 @@ let rec ty_compare ?(normalize_unresolved = false) ty1 ty2 =
           | 0 -> tyl_compare [v1'; v1''] [v2'; v2'']
           | n -> n)
           (Nast.ShapeMap.elements fields1) (Nast.ShapeMap.elements fields2)
-      | AKtuple tyl1, AKtuple tyl2 ->
-        List.compare (fun (k1, v1) (k2, v2) ->
-          match compare k1 k2 with
-          | 0 -> ty_compare v1 v2
-          | n -> n)
-          (IMap.elements tyl1) (IMap.elements tyl2)
       | _ ->
         array_kind_con_ordinal ak1 - array_kind_con_ordinal ak2
 

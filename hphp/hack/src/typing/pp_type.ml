@@ -241,10 +241,6 @@ and pp_array_kind : Format.formatter -> array_kind -> unit = fun fmt ak ->
       fmt
       a0;
     Format.fprintf fmt "@])"
-  | AKtuple a0 ->
-    Format.fprintf fmt "(@[<2>AKtuple@ ";
-    IMap.pp pp_ty fmt a0;
-    Format.fprintf fmt "@])"
 
 and show_array_kind : array_kind -> string = fun x ->
   Format.asprintf "%a" pp_array_kind x

@@ -212,7 +212,7 @@ and normalize_ tcopt = function
         | AKmap (tk, tv) -> AKmap (normalize tcopt tk, normalize tcopt tv)
         | AKvarray_or_darray tv -> AKvarray_or_darray (normalize tcopt tv)
         (* fully_expand_tvars_downcast_aktypes should have removed those *)
-        | AKshape _ | AKtuple _ -> raise Exit
+        | AKshape _ -> raise Exit
       )
     with Exit -> Tarraykind AKany
   end

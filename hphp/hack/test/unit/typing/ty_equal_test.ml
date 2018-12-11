@@ -17,12 +17,6 @@ let tv3 = Reason.none, Tprim Tstring
 
 let shape fields =
   Reason.none, Tarraykind (AKshape (ShapeMap.of_list fields))
-let tuple values =
-  let imap_of_list values =
-    List.foldi values
-      ~init:IMap.empty
-      ~f:(fun index acc value -> IMap.add index value acc) in
-  Reason.none, Tarraykind (AKtuple (imap_of_list values))
 
 let test_shape_like_arrays_same_fields_same_order () =
   ty_equal
@@ -44,21 +38,6 @@ let test_shape_like_arrays_different_keys () =
     (shape [k1, (tk1, tv1); k3, (tk3, tv3)])
     (shape [k1, (tk1, tv1); k2, (tk2, tv2)])
 
-let test_tuple_like_arrays_same_length_same_values () =
-  ty_equal
-    (tuple [tv1; tv2; tv3])
-    (tuple [tv1; tv2; tv3])
-
-let test_tuple_like_arrays_same_length_different_values () =
-  not @@ ty_equal
-    (tuple [tv1; tv2; tv3])
-    (tuple [tv2; tv3; tv1])
-
-let test_tuple_like_arrays_different_length () =
-  not @@ ty_equal
-    (tuple [tv1; tv2; tv3])
-    (tuple [tv1; tv2])
-
 let tests =
   [
     "compare shape-like arrays: same fields, same order",
@@ -69,12 +48,6 @@ let tests =
     test_shape_like_arrays_same_keys_different_values;
     "compare shape-like arrays: different keys",
     test_shape_like_arrays_different_keys;
-    "compare tuple-like arrays: same length, same values",
-    test_tuple_like_arrays_same_length_same_values;
-    "compare tuple-like arrays: same length, different values",
-    test_tuple_like_arrays_same_length_different_values;
-    "compare tuple-like arrays: different length",
-    test_tuple_like_arrays_different_length;
   ]
 
 let () = Unit_test.run_all tests

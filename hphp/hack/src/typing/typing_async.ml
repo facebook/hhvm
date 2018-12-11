@@ -78,10 +78,6 @@ let overload_extract_from_awaitable_shape acc p fdm =
       acc, (tk, rtv)
   end acc fdm
 
-let overload_extract_from_awaitable_aktuple acc p fields =
-  IMap.map_env begin fun acc _key ty ->
-    overload_extract_from_awaitable acc p ty end acc fields
-
 let gena (env, tyvars) p ty =
   let env, ty = TUtils.fold_unresolved env ty in
   let acc = (env, tyvars) in
@@ -106,9 +102,6 @@ let gena (env, tyvars) p ty =
   | r, Tarraykind AKshape fdm ->
     let acc, fdm = overload_extract_from_awaitable_shape acc p fdm in
     acc, (r, Tarraykind (AKshape fdm))
-  | r, Tarraykind AKtuple fields ->
-    let acc, fields = overload_extract_from_awaitable_aktuple acc p fields in
-    acc, (r, Tarraykind (AKtuple fields))
   | r, Ttuple tyl ->
     let acc, tyl =
       overload_extract_from_awaitable_list acc p tyl in
@@ -183,12 +176,6 @@ let rec gen_array_rec ((env,_tyvars) as acc) p ty =
       acc, (tk, tv)
     end acc fdm in
     acc, (r, Tarraykind (AKshape fdm))
-  | r, Tarraykind (AKtuple fields) ->
-    let acc, fields = IMap.map_env begin fun acc _key ty ->
-      let acc, ty = is_array acc ty in
-      acc, ty
-    end acc fields in
-    acc, (r, Tarraykind (AKtuple fields))
   | _, Ttuple tyl -> gen_array_va_rec acc p tyl
   | _, (Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Toption _
     | Tvar _ | Tfun _ | Tabstract _ | Tclass _ | Tdynamic

@@ -48,8 +48,6 @@ end = struct
           | AKmap (tk, tv) -> ty tk; ty tv
           | AKshape fdm ->
               ShapeMap.iter (fun _ (tk, tv) -> ty tk; ty tv) fdm
-          | AKtuple fields ->
-              IMap.iter (fun _ tv -> ty tv) fields
         end
       | Tvar _ ->
         if TypecheckerOptions.new_inference tcopt

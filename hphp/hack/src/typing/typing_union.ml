@@ -315,22 +315,11 @@ and union_arraykind env ak1 ak2 =
         env, Some (tk, tv) in
     let env, fdm = Nast.ShapeMap.merge_env env fdm1 fdm2 ~combine:union in
     env, AKshape fdm
-  | AKtuple fields1, AKtuple fields2 ->
-    let ty_opt_equiv env _k = ty_opt_equiv env ~are_ty_param:false in
-    let env, fields =
-      try IMap.merge_env env fields1 fields2 ~combine:ty_opt_equiv
-      with Not_equiv -> raise Dont_unify in
-    env, AKtuple fields
   | AKshape fdm, ak
   | ak, AKshape fdm ->
     Nast.ShapeMap.fold_env env (fun env _k (tk, tv) akacc ->
       let ak = AKdarray (tk, tv) in
       union_arraykind env akacc ak) fdm ak
-  | AKtuple fields, ak
-  | ak, AKtuple fields ->
-    IMap.fold_env env (fun env _k ty akacc ->
-      let ak = AKvarray ty in
-      union_arraykind env akacc ak) fields ak
   | _ -> raise Dont_unify
 
 and union_funs env fty1 fty2 =

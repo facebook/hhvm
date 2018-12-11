@@ -749,8 +749,6 @@ end = struct
               (this#on_type acc tk)
               (this#on_type acc tv)
           ) fdm acc
-        | AKtuple fields ->
-          IMap.fold (fun _ ty acc -> this#on_type acc ty) fields acc
     end
   let check_why ty = visitor#on_type None ty
 

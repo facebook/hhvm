@@ -805,8 +805,6 @@ and simplify_subtype
       | AKmap (_, tv) -> simplify_subtype ~seen_generic_params ~deep ~this_ty tv tv_super env
       | AKshape fdm ->
         Typing_arrays.fold_akshape_as_akmap_with_acc again env TL.valid r fdm
-      | AKtuple fields ->
-        Typing_arrays.fold_aktuple_as_akvec_with_acc again env TL.valid r fields
     )
   | Tarraykind akind, Tclass ((_, coll), Nonexact, [tk_super; tv_super])
     when (coll = SN.Collections.cKeyedTraversable
@@ -836,8 +834,6 @@ and simplify_subtype
         simplify_subtype ~seen_generic_params ~deep ~this_ty tv tv_super
       | AKshape fdm ->
         Typing_arrays.fold_akshape_as_akmap_with_acc again env TL.valid r fdm
-      | AKtuple fields ->
-        Typing_arrays.fold_aktuple_as_akvec_with_acc again env TL.valid r fields
       )
   | Tarraykind _, Tclass _ -> invalid ()
   | Tabstract (AKdependent _, Some ty), Tclass _ ->
@@ -884,19 +880,6 @@ and simplify_subtype
        begin fun env acc ty ->
          (env, acc) &&& simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super
        end env TL.valid r fdm
-
-    | AKtuple fields,
-      (
-        AKvarray _
-      | AKvec _
-      | AKdarray _
-      | AKvarray_or_darray _
-      | AKmap _
-      ) ->
-      Typing_arrays.fold_aktuple_as_akvec_with_acc
-       begin fun env acc ty ->
-         (env, acc) &&& simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super
-       end env TL.valid r fields
 
     (* varray_or_darray<ty1> <: varray_or_darray<ty2> iff t1 <: ty2
        But, varray_or_darray<ty1> is never a subtype of a vect-like array *)
@@ -2335,8 +2318,6 @@ let rec set_tyvar_variance ~variance ~tyvars env ty =
       Nast.ShapeMap.fold begin fun _ (ty1, ty2) env ->
         let env = set_tyvar_variance ~variance ~tyvars env ty1 in
         set_tyvar_variance ~variance ~tyvars env ty2 end m env
-    | AKtuple m ->
-      IMap.fold (fun _ ty env -> set_tyvar_variance ~variance ~tyvars env ty) m env
     end
 
 and set_tyvar_variance_list ~variancel ~tyvars env tyl =

@@ -73,10 +73,6 @@ let check_param : Env.env -> Nast.fun_param -> unit =
       ShapeMap.iter begin fun _ (_, tv) ->
         check_memoizable env tv
       end fdm
-    | _, Tarraykind (AKtuple fields) ->
-      IMap.iter begin fun _ tv ->
-        check_memoizable env tv
-      end fields
     | r, Tclass _ ->
       let env, type_param, tyvars =
         Env.fresh_unresolved_type_add_tyvars env (Reason.to_pos r) ISet.empty in

@@ -65,11 +65,6 @@ let rec strip_ty : type a. a ty -> a ty = fun ty ->
 
     | Ttuple tyl ->
       Ttuple (strip_tyl tyl)
-    | Tarraykind (AKtuple ty_map) ->
-      let ty_map = IMap.map (fun v ->
-        strip_ty v
-      ) ty_map in
-      Tarraykind (AKtuple ty_map)
 
     | Toption ty ->
       Toption (strip_ty ty)

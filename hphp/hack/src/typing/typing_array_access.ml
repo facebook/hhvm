@@ -165,17 +165,9 @@ let rec array_get ?(lhs_of_null_coalesce=false)
       let env, ty2 = Env.unbind env ty2 in
       let acc = type_index (env, tyvars) p ty2 k Reason.index_array in
       acc, v
-  | Tarraykind ((AKshape  _ |  AKtuple _) as akind) ->
+  | Tarraykind (AKshape  _ as akind) ->
       let key = Typing_arrays.static_array_access env (Some e2) in
       let (env, tyvars), result = match key, akind with
-        | Typing_arrays.AKtuple_index index, AKtuple fields ->
-            begin match IMap.get index fields with
-              | Some ty ->
-                  let ty1 = Reason.Ridx (fst e2, fst ety1), Tprim Tint in
-                  let acc = type_index acc p ty2 ty1 Reason.index_array in
-                  acc, Some ty
-              | None -> acc, None
-            end
         | Typing_arrays.AKshape_key field_name, AKshape fdm ->
             begin match ShapeMap.get field_name fdm with
               | Some (k, v) ->
@@ -467,21 +459,12 @@ Typing_log.(log_with_level env "typing" 1 (fun () ->
     let env, tk' = Typing_union.union env tk tkey in
     let env, tv' = Typing_union.union env tv ty2 in
     env, ((fst ety1, Tarraykind (AKmap (tk', tv'))), tv')
-  | Tarraykind ((AKshape _ | AKtuple _) as akind) ->
+  | Tarraykind (AKshape _ as akind) ->
     let access_type = Typing_arrays.static_array_access env (Some key) in
     let fallback () =
       let env, ty1 = Typing_arrays.downcast_aktypes env ety1 in
       assign_array_get pos ur env ty1 key tkey ty2 in
     begin match access_type, akind with
-    | Typing_arrays.AKtuple_index index, AKtuple fields ->
-      begin match IMap.get index fields with
-      | Some _ ->
-        let tk = Reason.Ridx (fst key, fst ety1), Tprim Tint in
-        let env = type_index env pos tkey tk Reason.index_array in
-        let fields' = IMap.add index ty2 fields in
-        env, ((fst ety1, Tarraykind (AKtuple fields')), ty2)
-      | None -> fallback ()
-      end
     | Typing_arrays.AKshape_key field_name, AKshape fdm ->
       begin match ShapeMap.get field_name fdm with
       | Some (tk, _) ->

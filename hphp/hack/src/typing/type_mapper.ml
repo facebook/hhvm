@@ -44,8 +44,6 @@ class type type_mapper_type = object
     env -> Reason.t -> locl ty -> locl ty -> result
   method on_tarraykind_akshape :
     env -> Reason.t -> (locl ty * locl ty) ShapeMap.t -> result
-  method on_tarraykind_aktuple :
-    env -> Reason.t -> locl ty IMap.t -> result
   method on_tvarray_or_darray : env -> Reason.t -> locl ty -> result
   method on_ttuple : env -> Reason.t -> locl ty list -> result
   method on_tunresolved : env -> Reason.t -> locl ty list -> result
@@ -85,8 +83,6 @@ class shallow_type_mapper: type_mapper_type = object(this)
   method on_tarraykind_akdarray env r tk tv =
     env, (r, Tarraykind (AKdarray (tk, tv)))
   method on_tarraykind_akshape env r fdm = env, (r, Tarraykind (AKshape fdm))
-  method on_tarraykind_aktuple env r fields =
-    env, (r, Tarraykind (AKtuple fields))
   method on_tvarray_or_darray env r tv =
     env, (r, Tarraykind (AKvarray_or_darray tv))
   method on_ttuple env r tyl = env, (r, Ttuple tyl)
@@ -114,7 +110,6 @@ class shallow_type_mapper: type_mapper_type = object(this)
     | Tarraykind (AKvarray_or_darray tv) ->
       this#on_tvarray_or_darray env r tv
     | Tarraykind (AKshape fdm) -> this#on_tarraykind_akshape env r fdm
-    | Tarraykind (AKtuple fields) -> this#on_tarraykind_aktuple env r fields
     | Ttuple tyl -> this#on_ttuple env r tyl
     | Tunresolved tyl -> this#on_tunresolved env r tyl
     | Toption ty -> this#on_toption env r ty
@@ -165,10 +160,6 @@ class deep_type_mapper = object(this)
       env, (tk, tv)
     end env fdm in
     env, (r, Tarraykind (AKshape fdm))
-  method! on_tarraykind_aktuple env r fields =
-    let on_type env _key = this#on_type env in
-    let env, fields = IMap.map_env on_type env fields in
-    env, (r, Tarraykind (AKtuple fields))
   method! on_tvarray_or_darray env r tv =
     let env, tv = this#on_type env tv in
     env, (r, Tarraykind (AKvarray_or_darray tv))

@@ -365,4 +365,13 @@ class ChunkedInflator {
   <<__Native>>
   function inflateChunk(string $chunk): string;
 }
+
+<<__NativeData("__SystemLib\\ChunkedGunzipper")>>
+class ChunkedGunzipper {
+  <<__Native>>
+  function eof(): bool;
+
+  <<__Native>>
+  function inflateChunk(string $chunk): string;
+}
 }

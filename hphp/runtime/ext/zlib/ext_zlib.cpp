@@ -437,18 +437,21 @@ Variant HHVM_FUNCTION(nzuncompress, const String& compressed) {
 // Chunk-based API
 
 const StaticString s_SystemLib_ChunkedInflator("__SystemLib\\ChunkedInflator");
+const StaticString s_SystemLib_ChunkedGunzipper(
+  "__SystemLib\\ChunkedGunzipper");
 
-struct ChunkedInflator {
-  ChunkedInflator(): m_eof(false) {
+template<int W>
+struct ChunkedDecompressor {
+  ChunkedDecompressor(): m_eof(false) {
     m_zstream.zalloc = (alloc_func) Z_NULL;
     m_zstream.zfree = (free_func) Z_NULL;
-    int status = inflateInit2(&m_zstream, -MAX_WBITS);
+    int status = inflateInit2(&m_zstream, W);
     if (status != Z_OK) {
       raise_error("Failed to init zlib: %d", status);
     }
   }
 
-  ~ChunkedInflator() {
+  ~ChunkedDecompressor() {
     if (!eof()) {
       inflateEnd(&m_zstream);
     }
@@ -499,6 +502,14 @@ struct ChunkedInflator {
   TYPE_SCAN_IGNORE_FIELD(m_zstream);
 };
 
+// As per zlib manual (https://www.zlib.net/manual.html)
+//  "... windowBits can also be -8..-15 for raw deflate ..."
+//  "... windowBits can also be greater than 15 for optional gzip encoding.
+//  Add 16 to windowBits to write a simple gzip header and trailer around
+//  the compressed data instead of a zlib wrapper ..."
+typedef ChunkedDecompressor<-MAX_WBITS> ChunkedInflator;
+typedef ChunkedDecompressor<16 + MAX_WBITS> ChunkedGunzipper;
+
 #define FETCH_CHUNKED_INFLATOR(dest, src) \
   auto dest = Native::data<ChunkedInflator>(src);
 
@@ -512,6 +523,23 @@ String HHVM_METHOD(ChunkedInflator,
                    inflateChunk,
                    const String& chunk) {
   FETCH_CHUNKED_INFLATOR(data, this_);
+  assertx(data);
+  return data->inflateChunk(chunk);
+}
+
+#define FETCH_CHUNKED_GUNZIPPER(dest, src) \
+  auto dest = Native::data<ChunkedGunzipper>(src);
+
+bool HHVM_METHOD(ChunkedGunzipper, eof) {
+  FETCH_CHUNKED_GUNZIPPER(data, this_);
+  assertx(data);
+  return data->eof();
+}
+
+String HHVM_METHOD(ChunkedGunzipper,
+                   inflateChunk,
+                   const String& chunk) {
+  FETCH_CHUNKED_GUNZIPPER(data, this_);
   assertx(data);
   return data->inflateChunk(chunk);
 }
@@ -567,9 +595,16 @@ struct ZlibExtension final : Extension {
                   HHVM_MN(ChunkedInflator, eof));
     HHVM_NAMED_ME(__SystemLib\\ChunkedInflator, inflateChunk,
                   HHVM_MN(ChunkedInflator, inflateChunk));
+    HHVM_NAMED_ME(__SystemLib\\ChunkedGunzipper, eof,
+                  HHVM_MN(ChunkedGunzipper, eof));
+    HHVM_NAMED_ME(__SystemLib\\ChunkedGunzipper, inflateChunk,
+                  HHVM_MN(ChunkedGunzipper, inflateChunk));
 
     Native::registerNativeDataInfo<ChunkedInflator>(
       s_SystemLib_ChunkedInflator.get());
+
+    Native::registerNativeDataInfo<ChunkedGunzipper>(
+      s_SystemLib_ChunkedGunzipper.get());
 
     loadSystemlib();
 #ifdef HAVE_QUICKLZ

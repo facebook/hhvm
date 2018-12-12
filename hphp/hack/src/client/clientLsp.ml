@@ -303,14 +303,14 @@ let update_hh_server_state_if_necessary (event: event) : unit =
   | Server_message {push; has_updated_server_state=false} -> helper push
   | _ -> ()
 
-let rpc_lock = ref false
+let rpc_lock = Lwt_mutex.create ()
 
 let rpc
     (server_conn: server_conn)
     (ref_unblocked_time: float ref)
     (command: 'a ServerCommandTypes.t)
   : 'a Lwt.t =
-  let do_rpc () =
+  let%lwt result = Lwt_mutex.with_lock rpc_lock (fun () ->
     let callback () push =
       update_hh_server_state_if_necessary (Server_message {push; has_updated_server_state=false;});
       Queue.enqueue server_conn.pending_messages {push; has_updated_server_state=true;}
@@ -328,12 +328,8 @@ let rpc
     | Error ((), Utils.Callstack stack, e) ->
       let message = Exn.to_string e in
       raise (Server_fatal_connection_exception { Marshal_tools.message; stack; })
-  in
-  let%lwt result = Lwt_utils.wrap_non_reentrant_section
-    ~name:"ClientLsp.rpc"
-    ~lock:rpc_lock
-    ~f:do_rpc
-  in
+
+  ) in
   Lwt.return result
 
 let rpc_with_retry server_conn ref_unblocked_time command =
@@ -1608,6 +1604,7 @@ let connect_after_hello
       let%lwt () =
         file_edits
           |> ImmQueue.to_list
+          (* Note: do serially since these involve RPC calls. *)
           |> Lwt_list.iter_s handle_file_edit
       in
       Lwt.return_unit

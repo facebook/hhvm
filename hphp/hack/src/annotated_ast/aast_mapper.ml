@@ -343,16 +343,30 @@ struct
     T.cst_namespace = c.S.cst_namespace;
   }
 
+  and map_ns_use (k, id1, id2) =
+    let kind = match k with
+    | S.NSNamespace -> T.NSNamespace
+    | S.NSClass -> T.NSClass
+    | S.NSClassAndNamespace -> T.NSClassAndNamespace
+    | S.NSFun -> T.NSFun
+    | S.NSConst -> T.NSConst
+    in
+    (kind, id1, id2)
+
   and map_def menv d =
+    let { map_expr_annotation; map_env_annotation } = menv in
     match d with
     | S.Fun fd -> T.Fun (map_fun menv fd)
     | S.Class c -> T.Class (map_class menv c)
     | S.Typedef td -> T.Typedef (map_typedef menv td)
     | S.Constant gc -> T.Constant (map_gconst menv gc)
     | S.Stmt s -> T.Stmt (map_stmt menv s)
+    | S.Namespace (id, p) ->
+      T.Namespace (id, map_program ~map_expr_annotation ~map_env_annotation p)
+    | S.NamespaceUse usel -> T.NamespaceUse (List.map usel map_ns_use)
     | S.SetNamespaceEnv env -> T.SetNamespaceEnv env
 
-  let map_program
+  and map_program
     ~map_expr_annotation
     ~map_env_annotation
     dl =

@@ -162,6 +162,8 @@ let def_env d =
    * the default typechecker options.
    *)
   | Stmt _
+  | Namespace _
+  | NamespaceUse _
   | SetNamespaceEnv _ -> empty GlobalOptions.default
 
 let set_ppl_lambda env =

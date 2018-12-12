@@ -291,16 +291,26 @@ and on_constant (c : gconst) : Aast.gconst =
     cst_namespace = c.cst_namespace;
   }
 
+and on_ns_use (k, id1, id2): (Aast.ns_kind * Aast.sid * Aast.sid) =
+  let kind = match k with
+  | NSNamespace -> Aast.NSNamespace
+  | NSClass -> Aast.NSClass
+  | NSClassAndNamespace -> Aast.NSClassAndNamespace
+  | NSFun -> Aast.NSFun
+  | NSConst -> Aast.NSConst
+  in
+  (kind, id1, id2)
+
 and on_def : def -> Aast.def = function
   | Fun f -> Aast.Fun (on_fun f)
   | Class c -> Aast.Class (on_class c)
   | Stmt s -> Aast.Stmt (on_stmt s)
   | Typedef t -> Aast.Typedef (on_typedef t)
   | Constant c -> Aast.Constant (on_constant c)
-  | Namespace _ -> Aast.Stmt Aast.Noop (* TODO: T37786581 *)
-  | NamespaceUse _ -> Aast.Stmt Aast.Noop (* TODO: T37786581 *)
+  | Namespace (id, p) -> Aast.Namespace (id, on_program p)
+  | NamespaceUse usel -> Aast.NamespaceUse (on_list on_ns_use usel)
   | SetNamespaceEnv env -> Aast.SetNamespaceEnv env
 
-and program ast = on_list on_def ast
+and on_program ast = on_list on_def ast
 
-let convert ast : Aast.program = program ast
+let convert ast : Aast.program = on_program ast

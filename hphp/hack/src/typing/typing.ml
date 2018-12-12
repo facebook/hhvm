@@ -6628,7 +6628,10 @@ let nast_to_tast opts nast =
     | Nast.Stmt s ->
     let env = Env.empty opts Relative_path.default None in
       T.Stmt (snd (stmt env s))
-    | Nast.SetNamespaceEnv env -> T.SetNamespaceEnv env
+    | Nast.Namespace _
+    | Nast.NamespaceUse _
+    | Nast.SetNamespaceEnv _ ->
+      failwith "Invalid nodes in NAST. These nodes should be removed during naming."
   in
   let tast = List.map nast convert_def in
   Tast_check.program tast;

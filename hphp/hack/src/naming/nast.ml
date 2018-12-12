@@ -725,6 +725,8 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     | Stmt s -> this#on_stmt acc s
     | Typedef t -> this#on_typedef acc t
     | Constant g -> this#on_gconst acc g
+    | Namespace (_, p) -> this#on_program acc p
+    | NamespaceUse _
     | SetNamespaceEnv _ -> acc
 
   method on_program acc p =

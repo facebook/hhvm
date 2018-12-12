@@ -403,7 +403,16 @@ and def =
   | Stmt of stmt
   | Typedef of typedef
   | Constant of gconst
+  | Namespace of sid * program
+  | NamespaceUse of (ns_kind * sid * sid) list
   | SetNamespaceEnv of nsenv
+
+and ns_kind =
+  | NSNamespace
+  | NSClass
+  | NSClassAndNamespace
+  | NSFun
+  | NSConst
 
 let expr_to_string expr =
   match expr with

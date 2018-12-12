@@ -69,7 +69,7 @@ end
 type ('a, 'r, 's) handlers = {
   result_to_string: ('r option, string) result -> (Relative_path.t * int * int) -> string;
   walker: 'a walker;
-  get_state: Relative_path.t -> 's;
+  get_state: Relative_path.t -> ParserOptions.t -> 's;
   map_result: TypecheckerOptions.t -> 's -> 'a -> 'r
 }
 
@@ -97,7 +97,7 @@ let prepare_pos_infos h pos_list files_info =
     |> List.map ~f:(h.result_to_string (Error "No such file or directory")) in
   pos_infos, failure_msgs
 
-let helper h tcopt acc pos_infos =
+let helper h tcopt popt acc pos_infos =
   let tasts =
     List.fold (recheck_typing tcopt pos_infos)
       ~init:Relative_path.Map.empty
@@ -105,7 +105,7 @@ let helper h tcopt acc pos_infos =
   in
   List.fold pos_infos ~init:acc ~f:begin fun acc (pos, _) ->
     let fn, line, char = pos in
-    let s = h.get_state fn in
+    let s = h.get_state fn popt in
     let result =
       Relative_path.Map.get tasts fn
       |> Result.of_option ~error:"No such file or directory"
@@ -117,10 +117,10 @@ let helper h tcopt acc pos_infos =
     h.result_to_string result pos :: acc
   end
 
-let parallel_helper h workers tcopt pos_infos =
+let parallel_helper h workers tcopt popt pos_infos =
   MultiWorker.call
     workers
-    ~job:(helper h tcopt)
+    ~job:(helper h tcopt popt)
     ~neutral:[]
     ~merge:List.rev_append
     ~next:(MultiWorker.next workers pos_infos)
@@ -133,11 +133,11 @@ let go:
   (_ handlers) ->
   _ =
 fun workers pos_list env h ->
-  let {ServerEnv.tcopt; files_info; _} = env in
+  let {ServerEnv.tcopt; files_info; popt; _} = env in
   let pos_infos, failure_msgs = prepare_pos_infos h pos_list files_info in
   let results =
     if (List.length pos_infos) < 10
-    then helper h tcopt [] pos_infos
-    else parallel_helper h workers tcopt pos_infos
+    then helper h tcopt popt [] pos_infos
+    else parallel_helper h workers tcopt popt pos_infos
   in
   failure_msgs @ results

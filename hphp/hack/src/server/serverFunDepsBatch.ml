@@ -158,9 +158,8 @@ let handlers = {
     S.on_method = collect_in_decl#on_method_;
     S.on_fun = collect_in_decl#on_fun_
   };
-  S.get_state = begin fun fn ->
-    let (ast, _) = Parser_heap.ParserHeap.find_unsafe fn in
-    ast
+  S.get_state = begin fun fn popt ->
+    Parser_heap.get_from_parser_heap ~full:true popt fn
   end;
   S.map_result = begin fun tcopt ast refs ->
     Results.elements refs

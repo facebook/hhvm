@@ -176,6 +176,7 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.HackArrCompatSerializeNotices =
     RuntimeOption::EvalHackArrCompatSerializeNotices;
   gd.HackArrDVArrs = RuntimeOption::EvalHackArrDVArrs;
+  gd.EnableIntishCast = RuntimeOption::EvalEnableIntishCast;
 
   for (auto a : Option::APCProfile) {
     gd.APCProfile.emplace_back(StringData::MakeStatic(folly::StringPiece(a)));

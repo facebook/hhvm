@@ -175,6 +175,11 @@ struct Repo::GlobalData {
   bool HackArrDVArrs = false;
 
   /*
+   * Is intish cast enabled?
+   */
+  bool EnableIntishCast = true;
+
+  /*
    * Should the extension containing HHVM intrinsics be enabled?
    */
   bool EnableIntrinsicsExtension = false;
@@ -249,6 +254,7 @@ struct Repo::GlobalData {
       (HackArrCompatDVCmpNotices)
       (HackArrCompatSerializeNotices)
       (HackArrDVArrs)
+      (EnableIntishCast)
       (EnableIntrinsicsExtension)
       (ReffinessInvariance)
       (ForbidDynamicCalls)

@@ -752,6 +752,7 @@ std::string mangleUnitMd5(const std::string& fileMd5) {
     + std::to_string(RuntimeOption::EvalForbidDynamicCalls)
     + (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls ? '1' : '0')
     + (RuntimeOption::EvalHackArrDVArrs ? '1' : '0')
+    + (RuntimeOption::EvalEnableIntishCast ? '1' : '0')
     + (RuntimeOption::EvalDisableHphpcOpts ? '1' : '0')
     + (RuntimeOption::EvalAllowObjectDestructors ? '1' : '0')
     + (RuntimeOption::EvalAssemblerFoldDefaultValues ? '1' : '0')

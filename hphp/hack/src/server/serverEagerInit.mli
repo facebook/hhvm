@@ -10,9 +10,7 @@
 open ServerInitTypes
 
 val init :
-  load_state_approach: load_state_approach option ->
   ServerEnv.genv ->
   lazy_level ->
   ServerEnv.env ->
-  Path.t ->
   (ServerEnv.env * float) * (loaded_info * files_changed_while_parsing, error) result

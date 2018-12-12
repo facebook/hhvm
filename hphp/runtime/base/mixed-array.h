@@ -624,7 +624,9 @@ private:
                                     const TypedValue*, HeaderKind,
                                     ArrayData::DVArray);
 
-  static ArrayData* FromDictImpl(ArrayData*, bool, bool, IntishCast);
+
+  template <IntishCast intishCast>
+  static ArrayData* FromDictImpl(ArrayData*, bool, bool);
 
   static bool DictEqualHelper(const ArrayData*, const ArrayData*, bool);
 

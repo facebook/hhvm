@@ -312,12 +312,13 @@ void implElem(IRLS& env, const IRInstruction* inst) {
   auto const target = [&] {
     if (inst->is(ElemDX)) {
       assertx(mode == MOpMode::Define);
-      BUILD_OPTAB(ELEMD_HELPER_TABLE, getKeyType(key), checkHACIntishCast());
+      BUILD_OPTAB(ELEMD_HELPER_TABLE, getKeyType(key),
+      intishCastMode());
       args.ssa(3);
       return target;
     } else {
       BUILD_OPTAB(ELEM_HELPER_TABLE, getKeyType(key),
-                  mode, checkHACIntishCast());
+                  mode, intishCastMode());
       return target;
     }
   }();
@@ -330,7 +331,7 @@ void implIssetEmptyElem(IRLS& env, const IRInstruction* inst) {
   auto const isEmpty = inst->op() == EmptyElem;
   auto const key     = inst->src(1);
   BUILD_OPTAB(ISSET_EMPTY_ELEM_HELPER_TABLE, getKeyType(key),
-              isEmpty, checkHACIntishCast());
+              isEmpty, intishCastMode());
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst),
@@ -349,7 +350,7 @@ void cgCGetElem(IRLS& env, const IRInstruction* inst) {
   auto const mode  = inst->extra<MOpModeData>()->mode;
   auto const key   = inst->src(1);
   BUILD_OPTAB(CGETELEM_HELPER_TABLE, getKeyType(key), mode,
-              checkHACIntishCast());
+              intishCastMode());
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDestTV(env, inst),
@@ -359,7 +360,7 @@ void cgCGetElem(IRLS& env, const IRInstruction* inst) {
 void cgVGetElem(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);
   BUILD_OPTAB(VGETELEM_HELPER_TABLE, getKeyType(key),
-              checkHACIntishCast());
+              intishCastMode());
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst),
@@ -369,7 +370,7 @@ void cgVGetElem(IRLS& env, const IRInstruction* inst) {
 void cgSetElem(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);
   BUILD_OPTAB(SETELEM_HELPER_TABLE, getKeyType(key),
-              checkHACIntishCast());
+              intishCastMode());
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst),
@@ -394,12 +395,23 @@ void cgSetRangeRev(IRLS& env, const IRInstruction* inst) {
 IMPL_OPCODE_CALL(SetNewElem);
 IMPL_OPCODE_CALL(BindNewElem);
 
+#define ICMODE_DISPATCH(fn) \
+  ([] {                                                                \
+    switch (intishCastMode()) {                                        \
+      case ICMode::Warn:                                               \
+        return CallSpec::direct(fn<ICMode::Warn>);                     \
+      case ICMode::Cast:                                               \
+        return CallSpec::direct(fn<ICMode::Cast>);                     \
+      case ICMode::Ignore:                                             \
+        return CallSpec::direct(fn<ICMode::Ignore>);                   \
+    }                                                                  \
+    not_reached();                                                     \
+  }())
+
 void cgSetWithRefElem(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
-  auto const target = checkHACIntishCast()
-    ? CallSpec::direct(MInstrHelpers::setWithRefElem<true>)
-    : CallSpec::direct(MInstrHelpers::setWithRefElem<false>);
+  auto const target = ICMODE_DISPATCH(MInstrHelpers::setWithRefElem);
 
   auto const args = argGroup(env, inst)
     .ssa(0)
@@ -413,9 +425,7 @@ void cgSetWithRefElem(IRLS& env, const IRInstruction* inst) {
 void cgBindElem(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
-  auto const target = checkHACIntishCast()
-    ? CallSpec::direct(MInstrHelpers::bindElemC<true>)
-    : CallSpec::direct(MInstrHelpers::bindElemC<false>);
+  auto const target = ICMODE_DISPATCH(MInstrHelpers::bindElemC);
 
   auto const args = argGroup(env, inst)
     .ssa(0)
@@ -429,9 +439,7 @@ void cgBindElem(IRLS& env, const IRInstruction* inst) {
 void cgSetOpElem(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
-  auto const target = checkHACIntishCast()
-    ? CallSpec::direct(MInstrHelpers::setOpElem<true>)
-    : CallSpec::direct(MInstrHelpers::setOpElem<false>);
+  auto const target = ICMODE_DISPATCH(MInstrHelpers::setOpElem);
 
   auto const args = argGroup(env, inst)
     .ssa(0)
@@ -447,9 +455,7 @@ void cgSetOpElem(IRLS& env, const IRInstruction* inst) {
 void cgIncDecElem(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
-  auto const target = checkHACIntishCast()
-    ? CallSpec::direct(MInstrHelpers::incDecElem<true>)
-    : CallSpec::direct(MInstrHelpers::incDecElem<false>);
+  auto const target = ICMODE_DISPATCH(MInstrHelpers::incDecElem);
 
   auto const args = argGroup(env, inst)
     .ssa(0)
@@ -464,7 +470,7 @@ void cgIncDecElem(IRLS& env, const IRInstruction* inst) {
 void cgUnsetElem(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);
   BUILD_OPTAB(UNSET_ELEM_HELPER_TABLE, getKeyType(key),
-              checkHACIntishCast());
+              intishCastMode());
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, kVoidDest,
@@ -660,7 +666,7 @@ void implArraySet(IRLS& env, const IRInstruction* inst) {
   BUILD_OPTAB2(setRef,
                ARRAYSET_REF_HELPER_TABLE,
                ARRAYSET_HELPER_TABLE,
-               keyInfo.type, keyInfo.checkForInt, checkHACIntishCast());
+               keyInfo.type, keyInfo.checkForInt, intishCastMode());
 
   auto args = arrArgs(env, inst, keyInfo);
   args.typedValue(2);
@@ -679,7 +685,7 @@ void cgElemArrayX(IRLS& env, const IRInstruction* inst) {
   auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
   BUILD_OPTAB(ELEM_ARRAY_HELPER_TABLE,
               keyInfo.type, keyInfo.checkForInt, mode,
-              checkHACIntishCast());
+              intishCastMode());
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst),
@@ -689,7 +695,7 @@ void cgElemArrayX(IRLS& env, const IRInstruction* inst) {
 void cgElemArrayD(IRLS& env, const IRInstruction* inst) {
   auto const key     = inst->src(1);
   auto const keyInfo = checkStrictlyInteger(inst->typeParam(), key->type());
-  BUILD_OPTAB(ELEM_ARRAY_D_HELPER_TABLE, keyInfo.type, checkHACIntishCast());
+  BUILD_OPTAB(ELEM_ARRAY_D_HELPER_TABLE, keyInfo.type, intishCastMode());
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst),
@@ -699,7 +705,8 @@ void cgElemArrayD(IRLS& env, const IRInstruction* inst) {
 void cgElemArrayU(IRLS& env, const IRInstruction* inst) {
   auto const key     = inst->src(1);
   auto const keyInfo = checkStrictlyInteger(inst->typeParam(), key->type());
-  BUILD_OPTAB(ELEM_ARRAY_U_HELPER_TABLE, keyInfo.type, checkHACIntishCast());
+  BUILD_OPTAB(ELEM_ARRAY_U_HELPER_TABLE, keyInfo.type,
+              intishCastMode());
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst),
@@ -727,7 +734,7 @@ void cgArrayGet(IRLS& env, const IRInstruction* inst) {
   auto const mode = inst->extra<ArrayGet>()->mode;
   auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
   BUILD_OPTAB(ARRAYGET_HELPER_TABLE, keyInfo.type, keyInfo.checkForInt, mode,
-              checkHACIntishCast());
+              intishCastMode());
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDestTV(env, inst),
@@ -790,9 +797,7 @@ void cgAddNewElemVec(IRLS& env, const IRInstruction* inst) {
 void cgAddElemStrKey(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
-  auto const target = checkHACIntishCast()
-    ? CallSpec::direct(addElemStringKeyHelper<true>)
-    : CallSpec::direct(addElemStringKeyHelper<false>);
+  auto const target = ICMODE_DISPATCH(addElemStringKeyHelper);
 
   cgCallHelper(v, env, target,
                callDest(env, inst), SyncOptions::Sync,
@@ -804,7 +809,7 @@ void cgArrayIsset(IRLS& env, const IRInstruction* inst) {
   auto const key     = inst->src(1);
   auto const keyInfo = checkStrictlyInteger(arr->type(), key->type());
   BUILD_OPTAB(ARRAY_ISSET_HELPER_TABLE, keyInfo.type, keyInfo.checkForInt,
-              checkHACIntishCast());
+              intishCastMode());
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst),
@@ -818,9 +823,7 @@ void cgArrayIdx(IRLS& env, const IRInstruction* inst) {
 
   auto const target = [&] () -> CallSpec {
     if (keyInfo.checkForInt) {
-      return checkHACIntishCast()
-        ? CallSpec::direct(arrayIdxSi<true>)
-        : CallSpec::direct(arrayIdxSi<false>);
+      return ICMODE_DISPATCH(arrayIdxSi);
     }
     if (keyInfo.type == KeyType::Int) {
       return CallSpec::direct(arrayIdxI);

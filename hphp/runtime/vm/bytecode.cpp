@@ -3858,42 +3858,86 @@ void elemDispatch(MOpMode mode, TypedValue key, bool reffy) {
   auto const result = [&]() -> tv_rval {
     switch (mode) {
       case MOpMode::None:
-        return
-          UNLIKELY(checkHACIntishCast())
-            ? Elem<MOpMode::None, true>(mstate.tvRef, b, key)
-            : Elem<MOpMode::None, false>(mstate.tvRef, b, key);
+        switch (intishCastMode()) {
+          case ICMode::Warn:
+            return Elem<MOpMode::None, ICMode::Warn>(
+              mstate.tvRef, b, key
+            );
+          case ICMode::Cast:
+            return Elem<MOpMode::None, ICMode::Cast>(
+              mstate.tvRef, b, key
+            );
+          case ICMode::Ignore:
+            return Elem<MOpMode::None, ICMode::Ignore>(
+              mstate.tvRef, b, key
+            );
+        }
       case MOpMode::Warn:
-        return
-          UNLIKELY(checkHACIntishCast())
-            ? Elem<MOpMode::Warn, true>(mstate.tvRef, b, key)
-            : Elem<MOpMode::Warn, false>(mstate.tvRef, b, key);
+        switch (intishCastMode()) {
+          case ICMode::Warn:
+            return Elem<MOpMode::Warn, ICMode::Warn>(
+              mstate.tvRef, b, key
+            );
+          case ICMode::Cast:
+            return Elem<MOpMode::Warn, ICMode::Cast>(
+              mstate.tvRef, b, key
+            );
+          case ICMode::Ignore:
+            return Elem<MOpMode::Warn, ICMode::Ignore>(
+              mstate.tvRef, b, key
+            );
+        }
       case MOpMode::InOut:
-        return
-          UNLIKELY(checkHACIntishCast())
-            ? Elem<MOpMode::InOut, true>(mstate.tvRef, b, key)
-            : Elem<MOpMode::InOut, false>(mstate.tvRef, b, key);
+        switch (intishCastMode()) {
+          case ICMode::Warn:
+            return Elem<MOpMode::InOut, ICMode::Warn>(
+              mstate.tvRef, b, key
+            );
+          case ICMode::Cast:
+            return Elem<MOpMode::InOut, ICMode::Cast>(
+              mstate.tvRef, b, key
+            );
+          case ICMode::Ignore:
+            return Elem<MOpMode::InOut, ICMode::Ignore>(
+              mstate.tvRef, b, key
+            );
+        }
       case MOpMode::Define:
-        if (UNLIKELY(checkHACIntishCast())) {
-          return reffy
-            ? ElemD<MOpMode::Define, true, true>(
-                mstate.tvRef, b, key, &mstate.propState
-              )
-            : ElemD<MOpMode::Define, false, true>(
-                mstate.tvRef, b, key, &mstate.propState
-              );
-        } else {
-          return reffy
-            ? ElemD<MOpMode::Define, true, false>(
-                mstate.tvRef, b, key, &mstate.propState
-              )
-            : ElemD<MOpMode::Define, false, false>(
-                mstate.tvRef, b, key, &mstate.propState
-              );
+        switch (intishCastMode()) {
+          case ICMode::Warn:
+            return reffy
+              ? ElemD<MOpMode::Define, true, ICMode::Warn>(
+                  mstate.tvRef, b, key, &mstate.propState
+                )
+              : ElemD<MOpMode::Define, false, ICMode::Warn>(
+                  mstate.tvRef, b, key, &mstate.propState
+                );
+          case ICMode::Cast:
+            return reffy
+              ? ElemD<MOpMode::Define, true, ICMode::Cast>(
+                  mstate.tvRef, b, key, &mstate.propState
+                )
+              : ElemD<MOpMode::Define, false, ICMode::Cast>(
+                  mstate.tvRef, b, key, &mstate.propState
+                );
+          case ICMode::Ignore:
+            return reffy
+              ? ElemD<MOpMode::Define, true, ICMode::Ignore>(
+                  mstate.tvRef, b, key, &mstate.propState
+                )
+              : ElemD<MOpMode::Define, false, ICMode::Ignore>(
+                  mstate.tvRef, b, key, &mstate.propState
+                );
         }
       case MOpMode::Unset:
-        return UNLIKELY(checkHACIntishCast())
-          ? ElemU<true>(mstate.tvRef, b, key)
-          : ElemU<false>(mstate.tvRef, b, key);
+        switch (intishCastMode()) {
+          case ICMode::Warn:
+            return ElemU<ICMode::Warn>(mstate.tvRef, b, key);
+          case ICMode::Cast:
+            return ElemU<ICMode::Cast>(mstate.tvRef, b, key);
+          case ICMode::Ignore:
+            return ElemU<ICMode::Ignore>(mstate.tvRef, b, key);
+        }
     }
     always_assert(false);
   }().as_lval();
@@ -3995,14 +4039,23 @@ void queryMImpl(MemberKey mk, int32_t nDiscard, QueryMOp op) {
           : IssetEmptyProp<false>(ctx, mstate.base, key);
       } else {
         assertx(mcodeIsElem(mk.mcode));
-        if (UNLIKELY(checkHACIntishCast())) {
-          result.m_data.num = op == QueryMOp::Empty
-            ? IssetEmptyElem<true, true>(mstate.base, key)
-            : IssetEmptyElem<false, true>(mstate.base, key);
-        } else {
-          result.m_data.num = op == QueryMOp::Empty
-            ? IssetEmptyElem<true, false>(mstate.base, key)
-            : IssetEmptyElem<false, false>(mstate.base, key);
+
+        switch (intishCastMode()) {
+          case ICMode::Warn:
+            result.m_data.num = op == QueryMOp::Empty
+              ? IssetEmptyElem<true, ICMode::Warn>(mstate.base, key)
+              : IssetEmptyElem<false, ICMode::Warn>(mstate.base, key);
+            break;
+          case ICMode::Cast:
+            result.m_data.num = op == QueryMOp::Empty
+              ? IssetEmptyElem<true, ICMode::Cast>(mstate.base, key)
+              : IssetEmptyElem<false, ICMode::Cast>(mstate.base, key);
+            break;
+          case ICMode::Ignore:
+            result.m_data.num = op == QueryMOp::Empty
+              ? IssetEmptyElem<true, ICMode::Ignore>(mstate.base, key)
+              : IssetEmptyElem<false, ICMode::Ignore>(mstate.base, key);
+            break;
         }
       }
       break;
@@ -4036,9 +4089,23 @@ OPTBLD_FLT_INLINE void iopSetM(uint32_t nDiscard, MemberKey mk) {
   } else {
     auto const key = key_tv(mk);
     if (mcodeIsElem(mk.mcode)) {
-      auto const result = UNLIKELY(checkHACIntishCast())
-        ? SetElem<true, true>(mstate.base, key, topC, &mstate.propState)
-        : SetElem<true, false>(mstate.base, key, topC, &mstate.propState);
+      auto const result = ([&] {
+        switch (intishCastMode()) {
+          case ICMode::Warn:
+            return SetElem<true, ICMode::Warn>(
+              mstate.base, key, topC, &mstate.propState
+            );
+          case ICMode::Cast:
+            return SetElem<true, ICMode::Cast>(
+              mstate.base, key, topC, &mstate.propState
+            );
+          case ICMode::Ignore:
+            return SetElem<true, ICMode::Ignore>(
+              mstate.base, key, topC, &mstate.propState
+            );
+        }
+        not_reached();
+      })();
       if (result) {
         tvDecRefGen(topC);
         topC->m_type = KindOfString;
@@ -4082,9 +4149,23 @@ OPTBLD_INLINE void iopIncDecM(uint32_t nDiscard, IncDecOp subop, MemberKey mk) {
       arGetContextClass(vmfp()), subop, mstate.base, key, &mstate.propState
     );
   } else if (mcodeIsElem(mk.mcode)) {
-    result = UNLIKELY(checkHACIntishCast())
-      ? IncDecElem<true>(subop, mstate.base, key, &mstate.propState)
-      : IncDecElem<false>(subop, mstate.base, key, &mstate.propState);
+    switch (intishCastMode()) {
+      case ICMode::Warn:
+        result = IncDecElem<ICMode::Warn>(
+          subop, mstate.base, key, &mstate.propState
+        );
+        break;
+      case ICMode::Cast:
+        result = IncDecElem<ICMode::Cast>(
+          subop, mstate.base, key, &mstate.propState
+        );
+        break;
+      case ICMode::Ignore:
+        result = IncDecElem<ICMode::Ignore>(
+          subop, mstate.base, key, &mstate.propState
+        );
+        break;
+    }
   } else {
     result = IncDecNewElem(mstate.tvRef, subop, mstate.base, &mstate.propState);
   }
@@ -4102,13 +4183,23 @@ OPTBLD_INLINE void iopSetOpM(uint32_t nDiscard, SetOpOp subop, MemberKey mk) {
     result = SetOpProp(mstate.tvRef, arGetContextClass(vmfp()), subop,
                        mstate.base, key, rhs, &mstate.propState);
   } else if (mcodeIsElem(mk.mcode)) {
-    result = UNLIKELY(checkHACIntishCast())
-      ? SetOpElem<true>(
-          mstate.tvRef, subop, mstate.base, key, rhs, &mstate.propState
-        )
-      : SetOpElem<false>(
+    switch (intishCastMode()) {
+      case ICMode::Warn:
+        result = SetOpElem<ICMode::Warn>(
           mstate.tvRef, subop, mstate.base, key, rhs, &mstate.propState
         );
+        break;
+      case ICMode::Cast:
+        result = SetOpElem<ICMode::Cast>(
+          mstate.tvRef, subop, mstate.base, key, rhs, &mstate.propState
+        );
+        break;
+      case ICMode::Ignore:
+        result = SetOpElem<ICMode::Ignore>(
+          mstate.tvRef, subop, mstate.base, key, rhs, &mstate.propState
+        );
+        break;
+    }
   } else {
     result =
       SetOpNewElem(mstate.tvRef, subop, mstate.base, rhs, &mstate.propState);
@@ -4139,10 +4230,16 @@ OPTBLD_INLINE void iopUnsetM(uint32_t nDiscard, MemberKey mk) {
     UnsetProp(arGetContextClass(vmfp()), mstate.base, key);
   } else {
     assertx(mcodeIsElem(mk.mcode));
-    if (UNLIKELY(checkHACIntishCast())) {
-      UnsetElem<true>(mstate.base, key);
-    } else {
-      UnsetElem<false>(mstate.base, key);
+    switch (intishCastMode()) {
+      case ICMode::Warn:
+        UnsetElem<ICMode::Warn>(mstate.base, key);
+        break;
+      case ICMode::Cast:
+        UnsetElem<ICMode::Cast>(mstate.base, key);
+        break;
+      case ICMode::Ignore:
+        UnsetElem<ICMode::Ignore>(mstate.base, key);
+        break;
     }
   }
 
@@ -4155,9 +4252,21 @@ static OPTBLD_INLINE void setWithRefImpl(TypedValue key, TypedValue* value) {
     mstate.base = [&] {
       if (LIKELY(!isRefType(value->m_type))) {
         SuppressHACFalseyPromoteNotices shacn;
-        return ElemD<MOpMode::Define, false, false>(
-          mstate.tvRef, mstate.base, key, &mstate.propState
-        );
+        switch (intishCastMode()) {
+          case ICMode::Warn:
+            return ElemD<MOpMode::Define, false, ICMode::Warn>(
+              mstate.tvRef, mstate.base, key, &mstate.propState
+            );
+          case ICMode::Cast:
+            return ElemD<MOpMode::Define, false, ICMode::Cast>(
+              mstate.tvRef, mstate.base, key, &mstate.propState
+            );
+          case ICMode::Ignore:
+            return ElemD<MOpMode::Define, false, ICMode::Ignore>(
+              mstate.tvRef, mstate.base, key, &mstate.propState
+            );
+        }
+        not_reached();
       }
 
       // See the comment in SetWithRefMLElem() for an explanation of this check
@@ -4168,18 +4277,52 @@ static OPTBLD_INLINE void setWithRefImpl(TypedValue key, TypedValue* value) {
       }
 
       SuppressHACFalseyPromoteNotices shacn;
-      return ElemD<MOpMode::Define, true, false>(
-        mstate.tvRef, mstate.base, key, &mstate.propState
-      );
+      switch (intishCastMode()) {
+        case ICMode::Warn:
+          return ElemD<MOpMode::Define, true, ICMode::Warn>(
+            mstate.tvRef, mstate.base, key, &mstate.propState
+          );
+        case ICMode::Cast:
+          return ElemD<MOpMode::Define, true, ICMode::Cast>(
+            mstate.tvRef, mstate.base, key, &mstate.propState
+          );
+        case ICMode::Ignore:
+          return ElemD<MOpMode::Define, true, ICMode::Ignore>(
+            mstate.tvRef, mstate.base, key, &mstate.propState
+          );
+      }
+      not_reached();
     }();
   } else {
-    mstate.base = UNLIKELY(isRefType(value->m_type))
-      ? ElemD<MOpMode::Define, true, false>(
-          mstate.tvRef, mstate.base, key, &mstate.propState
-        )
-      : ElemD<MOpMode::Define, false, false>(
-          mstate.tvRef, mstate.base, key, &mstate.propState
-        );
+    switch (intishCastMode()) {
+      case ICMode::Warn:
+        mstate.base = UNLIKELY(isRefType(value->m_type))
+          ? ElemD<MOpMode::Define, true, ICMode::Warn>(
+              mstate.tvRef, mstate.base, key, &mstate.propState
+            )
+          : ElemD<MOpMode::Define, false, ICMode::Warn>(
+              mstate.tvRef, mstate.base, key, &mstate.propState
+            );
+        break;
+      case ICMode::Cast:
+        mstate.base = UNLIKELY(isRefType(value->m_type))
+          ? ElemD<MOpMode::Define, true, ICMode::Cast>(
+              mstate.tvRef, mstate.base, key, &mstate.propState
+            )
+          : ElemD<MOpMode::Define, false, ICMode::Cast>(
+              mstate.tvRef, mstate.base, key, &mstate.propState
+            );
+        break;
+      case ICMode::Ignore:
+        mstate.base = UNLIKELY(isRefType(value->m_type))
+          ? ElemD<MOpMode::Define, true, ICMode::Ignore>(
+              mstate.tvRef, mstate.base, key, &mstate.propState
+            )
+          : ElemD<MOpMode::Define, false, ICMode::Ignore>(
+              mstate.tvRef, mstate.base, key, &mstate.propState
+            );
+        break;
+    }
   }
   tvSetWithRef(*value, mstate.base);
 

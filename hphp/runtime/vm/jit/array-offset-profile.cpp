@@ -111,7 +111,10 @@ void ArrayOffsetProfile::update(const ArrayData* ad,
       auto const a = MixedArray::asMixed(ad);
 
       int64_t i;
-      if (checkForInt && ad->convertKey(sd, i, false)) {
+      if (RuntimeOption::EvalEnableIntishCast &&
+          checkForInt &&
+          ad->useWeakKeys() &&
+          sd->isStrictlyInteger(i)) {
         return !checkHACIntishCast() ?
           a->find(i, hash_int64(i)) : -1;
       }

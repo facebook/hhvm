@@ -154,7 +154,8 @@ const EnumValues* EnumCache::loadEnumValues(const Class* klass,
     // Manually perform int-like key coercion even if names is a dict for
     // backwards compatibility.
     int64_t n;
-    if (tvIsString(&value) && value.m_data.pstr->isStrictlyInteger(n)) {
+    if (tvIsString(&value) &&
+        value.m_data.pstr->isStrictlyInteger(n)) {
       names.set(n, make_tv<KindOfPersistentString>(consts[i].name));
     } else {
       names.set(value, make_tv<KindOfPersistentString>(consts[i].name), true);

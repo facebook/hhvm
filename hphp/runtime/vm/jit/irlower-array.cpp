@@ -165,21 +165,20 @@ void cgCountKeyset(IRLS& env, const IRInstruction* inst) {
 
 namespace {
 
-template <bool intishWarn>
+template <ICMode intishCast>
 ALWAYS_INLINE
 bool ak_exist_string_impl(const ArrayData* arr, const StringData* key) {
-  int64_t n;
-  if (arr->convertKey(key, n, intishWarn)) {
-    return arr->exists(n);
+  if (auto const intish = tryIntishCast<intishCast>(key, arr)) {
+    return arr->exists(*intish);
   }
   return arr->exists(key);
 }
 
 }
 
-template <bool intishWarn>
+template <ICMode intishCast>
 bool ak_exist_string(const ArrayData* arr, const StringData* key) {
-  return ak_exist_string_impl<intishWarn>(arr, key);
+  return ak_exist_string_impl<intishCast>(arr, key);
 }
 
 bool ak_exist_int_obj(ObjectData* obj, int64_t key) {
@@ -199,7 +198,16 @@ bool ak_exist_string_obj(ObjectData* obj, StringData* key) {
     return false;
   }
   auto const arr = obj->toArray(false, true);
-  return ak_exist_string_impl<false>(arr.get(), key);
+  switch (intishCastMode()) {
+    case ICMode::Warn:
+      return ak_exist_string_impl<ICMode::Warn>(arr.get(), key);
+    case ICMode::Cast:
+      return ak_exist_string_impl<ICMode::Cast>(arr.get(), key);
+    case ICMode::Ignore:
+      return ak_exist_string_impl<ICMode::Ignore>(arr.get(), key);
+    default:
+      not_reached();
+  }
 }
 
 void cgAKExistsArr(IRLS& env, const IRInstruction* inst) {
@@ -208,14 +216,24 @@ void cgAKExistsArr(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
 
   auto const keyInfo = checkStrictlyInteger(arrTy, keyTy);
-  auto const target =
-    keyInfo.checkForInt
-      ? (checkHACIntishCast()
-         ? CallSpec::direct(ak_exist_string<true>)
-         : CallSpec::direct(ak_exist_string<false>))
-      : (keyInfo.type == KeyType::Int
-         ? CallSpec::array(&g_array_funcs.existsInt)
-         : CallSpec::array(&g_array_funcs.existsStr));
+  auto const target = ([&]{
+    if (keyInfo.checkForInt) {
+      switch (intishCastMode()) {
+        case ICMode::Warn:
+          return CallSpec::direct(ak_exist_string<ICMode::Warn>);
+        case ICMode::Cast:
+          return CallSpec::direct(ak_exist_string<ICMode::Cast>);
+        case ICMode::Ignore:
+          return CallSpec::direct(ak_exist_string<ICMode::Ignore>);
+        default:
+          not_reached();
+      }
+    } else {
+      return keyInfo.type == KeyType::Int
+        ? CallSpec::array(&g_array_funcs.existsInt)
+        : CallSpec::array(&g_array_funcs.existsStr);
+    }
+  })();
 
   auto args = argGroup(env, inst).ssa(0);
   if (keyInfo.converted) {

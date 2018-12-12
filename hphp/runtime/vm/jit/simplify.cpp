@@ -1927,6 +1927,7 @@ namespace {
 
 bool intlikeCheck(const ArrayData* a) {
   bool intlike = false;
+  if (!RuntimeOption::EvalEnableIntishCast) return false;
   IterateKV(
     a,
     [&](Cell k, TypedValue v) {
@@ -2964,7 +2965,9 @@ SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst, bool& skip) {
   skip = false;
   auto const rval = [&] {
     int64_t val;
-    if (arr->arrVal()->convertKey(idx->strVal(), val, false)) {
+    if (RuntimeOption::EvalEnableIntishCast &&
+        arr->arrVal()->useWeakKeys() &&
+        idx->strVal()->isStrictlyInteger(val)) {
       if (checkHACIntishCast()) {
         skip = true;
         return tv_rval{};

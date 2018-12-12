@@ -844,10 +844,11 @@ namespace {
 
 DEBUG_ONLY void assertForCreate(TypedValue name) {
   auto const k = tvToCell(name);
-  int64_t unused;
-  always_assert(isStringType(k.m_type)
-    ? !k.m_data.pstr->isStrictlyInteger(unused)
-    : isIntType(k.m_type)
+  always_assert(
+    isIntType(k.m_type) ||
+    (isStringType(k.m_type) && !tryIntishCast(k.m_data.pstr))
+    /* This would raise a HAC notice if we cast but since we will crash anyways
+     * it seems like a somewhat moot point */
   );
 }
 

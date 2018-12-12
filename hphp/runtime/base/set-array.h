@@ -221,7 +221,8 @@ private:
   static SetArray* CopyReserve(const SetArray* src, size_t expectedSize);
   SetArray* copySet() const { return CopySet(*this, AllocMode::Request); }
 
-  template <typename Init> static ArrayData* ToArrayImpl(ArrayData*, bool, IntishCast);
+  template <typename Init, IntishCast intishCast>
+  static ArrayData* ToArrayImpl(ArrayData*, bool);
 
 private:
   SetArray() = delete;

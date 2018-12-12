@@ -32,7 +32,8 @@ bool enumHasValue(const Class* cls, const Cell* cell) {
   // Manually perform int-like key conversion even if names is a dict, for
   // backwards compatibility.
   int64_t num;
-  if (isStringType(type) && cell->m_data.pstr->isStrictlyInteger(num)) {
+  if (isStringType(type) &&
+      cell->m_data.pstr->isStrictlyInteger(num)) {
    return values->names.exists(num);
   }
   return values->names.exists(*cell);

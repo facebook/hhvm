@@ -58,7 +58,8 @@ static Variant HHVM_STATIC_METHOD(BuiltinEnum, coerce, const Variant &value) {
   // succeeds below (since the values array does int-like string key conversion
   // when created, even if its a dict).
   int64_t num;
-  if (value.isString() && value.getStringData()->isStrictlyInteger(num)) {
+  if (value.isString() &&
+      value.getStringData()->isStrictlyInteger(num)) {
     res = Variant(num);
   }
 

@@ -953,6 +953,10 @@ struct RuntimeOption {
   F(bool, HackArrCompatArrayProducingFuncNotices, false)                \
   /* Raises notice when a Hack Collection is coerced to a PHP array */  \
   F(bool, HackArrCompatCollectionCoercionNotices, false)                \
+  /* Disables intish cast wherever we would have warned for             \
+   * HackArrCompatCheckIntishCast--this includes intish key cast in any \
+   * PHP code and much of the runtime and extensions */                 \
+  F(bool, EnableIntishCast, true)                                       \
   F(bool, HackArrDVArrs, false)                                         \
   F(uint32_t, LogSuppressedIntishCastRate, 0)                           \
   /* Warn if is expression are used with type aliases that cannot be    |

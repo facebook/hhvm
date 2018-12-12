@@ -36,7 +36,7 @@ ArrayKeyInfo checkStrictlyInteger(Type arr, Type key) {
   assertx(key <= TStr);
   ret.type = KeyType::Str;
 
-  if (key.hasConstVal()) {
+  if (RuntimeOption::EvalEnableIntishCast && key.hasConstVal()) {
     int64_t i;
     if (key.strVal()->isStrictlyInteger(i)) {
       if (!checkHACIntishCast()) {

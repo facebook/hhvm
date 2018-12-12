@@ -36,6 +36,7 @@ struct MInstrState;
 struct TypeConstraint;
 struct c_Pair;
 struct c_Vector;
+enum class ICMode : int8_t;
 
 namespace jit {
 //////////////////////////////////////////////////////////////////////
@@ -84,7 +85,7 @@ inline TypedValue* arPreliveOverwriteCells(ActRec *preLiveAR) {
 
 ArrayData* addNewElemHelper(ArrayData* a, TypedValue value);
 ArrayData* addElemIntKeyHelper(ArrayData* ad, int64_t key, TypedValue val);
-template <bool intishWarn>
+template <ICMode intishCast>
 ArrayData* addElemStringKeyHelper(ArrayData* ad, StringData* key,
                                   TypedValue val);
 ArrayData* dictAddElemIntKeyHelper(ArrayData* ad, int64_t key, TypedValue val);
@@ -159,7 +160,7 @@ void raise_error_sd(const StringData* sd);
 TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);
 TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
 
-template <bool intishWarn>
+template <ICMode intishCast>
 TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
 
 TypedValue dictIdxI(ArrayData*, int64_t, TypedValue);
@@ -237,18 +238,18 @@ namespace MInstrHelpers {
 void setNewElem(tv_lval base, Cell val, const MInstrPropState*);
 void setNewElemArray(tv_lval base, Cell val);
 void setNewElemVec(tv_lval base, Cell val);
-template<bool intishWarn>
+template<ICMode intishCast>
 TypedValue setOpElem(tv_lval base, TypedValue key, Cell val, SetOpOp op,
                      const MInstrPropState*);
 StringData* stringGetI(StringData*, uint64_t);
 uint64_t pairIsset(c_Pair*, int64_t);
 uint64_t vectorIsset(c_Vector*, int64_t);
-template <bool intishWarn>
+template <ICMode intishCast>
 void bindElemC(tv_lval, TypedValue, RefData*, const MInstrPropState*);
-template <bool intishWarn>
+template <ICMode intishCast>
 void setWithRefElem(tv_lval, TypedValue, TypedValue,
                     const MInstrPropState*);
-template<bool intishWarn>
+template<ICMode intishCast>
 TypedValue incDecElem(tv_lval base, TypedValue key, IncDecOp op,
                       const MInstrPropState*);
 void bindNewElem(tv_lval base, RefData* val, const MInstrPropState*);

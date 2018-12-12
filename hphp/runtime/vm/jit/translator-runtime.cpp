@@ -100,7 +100,7 @@ ArrayData* addElemIntKeyHelper(ArrayData* ad,
   return arrayRefShuffle<false, KindOfArray>(ad, retval, nullptr);
 }
 
-template <bool intishWarn>
+template <ICMode intishCast>
 ArrayData* addElemStringKeyHelper(ArrayData* ad,
                                   StringData* key,
                                   TypedValue value) {
@@ -108,11 +108,9 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
   assertx(cellIsPlausible(value));
   // set will decRef any old value that may have been overwritten
   // if appropriate
-  int64_t intkey;
   ArrayData* retval;
-  if (UNLIKELY(key->isStrictlyInteger(intkey))) {
-    if (intishWarn) raise_intish_index_cast();
-    retval = ad->set(intkey, *tvToCell(&value));
+  if (auto const intish = tryIntishCast<intishCast>(key)) {
+    retval = ad->set(*intish, *tvToCell(&value));
   } else {
     retval = ad->set(key, *tvToCell(&value));
   }
@@ -125,9 +123,11 @@ ArrayData* addElemStringKeyHelper(ArrayData* ad,
 }
 
 template ArrayData*
-addElemStringKeyHelper<true>(ArrayData*, StringData*, TypedValue);
+addElemStringKeyHelper<ICMode::Warn>(ArrayData*, StringData*, TypedValue);
 template ArrayData*
-addElemStringKeyHelper<false>(ArrayData*, StringData*, TypedValue);
+addElemStringKeyHelper<ICMode::Cast>(ArrayData*, StringData*, TypedValue);
+template ArrayData*
+addElemStringKeyHelper<ICMode::Ignore>(ArrayData*, StringData*, TypedValue);
 
 ArrayData* dictAddElemIntKeyHelper(ArrayData* ad,
                                    int64_t key,
@@ -689,14 +689,12 @@ TypedValue getDefaultIfNullCell(tv_rval rval, const TypedValue& def) {
   return UNLIKELY(!rval) ? def : rval.tv();
 }
 
-template <bool intishWarn>
+template <ICMode intishCast>
 NEVER_INLINE
 TypedValue arrayIdxSiSlow(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isPHPArray());
-  int64_t i;
-  if (UNLIKELY(key->isStrictlyInteger(i))) {
-    if (intishWarn) raise_intish_index_cast();
-    return getDefaultIfNullCell(a->rval(i), def);
+  if (auto const intish = tryIntishCast<intishCast>(key)) {
+    return getDefaultIfNullCell(a->rval(*intish), def);
   } else {
     return getDefaultIfNullCell(a->rval(key), def);
   }
@@ -716,21 +714,24 @@ TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
   return getDefaultIfNullCell(MixedArray::RvalStr(a, key), def);
 }
 
-template <bool intishWarn>
+template <ICMode intishCast>
 TypedValue arrayIdxSi(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isPHPArray());
-  if (UNLIKELY(!a->isMixed())) return arrayIdxSiSlow<intishWarn>(a, key, def);
-  int64_t i;
-  if (UNLIKELY(key->isStrictlyInteger(i))) {
-    if (intishWarn) raise_intish_index_cast();
-    return getDefaultIfNullCell(MixedArray::RvalInt(a, i), def);
+  if (UNLIKELY(!a->isMixed())) return arrayIdxSiSlow<intishCast>(a, key, def);
+  if (auto const intish = tryIntishCast<intishCast>(key)) {
+    return getDefaultIfNullCell(MixedArray::RvalInt(a, *intish), def);
   } else {
     return getDefaultIfNullCell(MixedArray::RvalStr(a, key), def);
   }
 }
 
-template TypedValue arrayIdxSi<false>(ArrayData*, StringData*, TypedValue);
-template TypedValue arrayIdxSi<true>(ArrayData*, StringData*, TypedValue);
+template
+TypedValue arrayIdxSi<ICMode::Warn>(ArrayData*, StringData*, TypedValue);
+template
+TypedValue arrayIdxSi<ICMode::Cast>(ArrayData*, StringData*, TypedValue);
+template
+TypedValue arrayIdxSi<ICMode::Ignore>(ArrayData*, StringData*,
+                                          TypedValue);
 
 TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
   assertx(a->isPHPArray());
@@ -1046,20 +1047,25 @@ void setNewElemVec(tv_lval base, Cell val) {
   HPHP::SetNewElemVec(base, &val);
 }
 
-template <bool intishWarn>
+template <ICMode intishCast>
 TypedValue setOpElem(tv_lval base, TypedValue key,
                      Cell val, SetOpOp op, const MInstrPropState* pState) {
   TypedValue localTvRef;
   auto result =
-    HPHP::SetOpElem<intishWarn>(localTvRef, op, base, key, &val, pState);
+    HPHP::SetOpElem<intishCast>(localTvRef, op, base, key, &val, pState);
 
   return cGetRefShuffle(localTvRef, result);
 }
 
-template TypedValue setOpElem<true>(tv_lval, TypedValue, Cell, SetOpOp,
-                                    const MInstrPropState*);
-template TypedValue setOpElem<false>(tv_lval, TypedValue, Cell, SetOpOp,
-                                     const MInstrPropState*);
+template
+TypedValue setOpElem<ICMode::Warn>(tv_lval, TypedValue, Cell,
+                                   SetOpOp, const MInstrPropState*);
+template
+TypedValue setOpElem<ICMode::Cast>(tv_lval, TypedValue, Cell,
+                                   SetOpOp, const MInstrPropState*);
+template
+TypedValue setOpElem<ICMode::Ignore>(tv_lval, TypedValue, Cell,
+                                     SetOpOp, const MInstrPropState*);
 
 StringData* stringGetI(StringData* base, uint64_t x) {
   if (LIKELY(x < base->size())) {
@@ -1080,11 +1086,11 @@ uint64_t vectorIsset(c_Vector* vec, int64_t index) {
   return result ? !cellIsNull(result) : false;
 }
 
-template <bool intishWarn>
+template <ICMode intishCast>
 void bindElemC(tv_lval base, TypedValue key, RefData* val,
                const MInstrPropState* pState) {
   TypedValue localTvRef;
-  auto elem = HPHP::ElemD<MOpMode::Define, true, intishWarn>(
+  auto elem = HPHP::ElemD<MOpMode::Define, true, intishCast>(
     localTvRef, base, key, pState
   );
 
@@ -1098,43 +1104,55 @@ void bindElemC(tv_lval base, TypedValue key, RefData* val,
   tvBindRef(val, elem);
 }
 
-template void bindElemC<true>(tv_lval, TypedValue, RefData*,
-                              const MInstrPropState*);
-template void bindElemC<false>(tv_lval, TypedValue, RefData*,
-                               const MInstrPropState*);
+template void bindElemC<ICMode::Warn>(tv_lval, TypedValue,
+                                      RefData*, const MInstrPropState*);
+template void bindElemC<ICMode::Cast>(tv_lval, TypedValue,
+                                      RefData*, const MInstrPropState*);
+template void bindElemC<ICMode::Ignore>(tv_lval, TypedValue,
+                                        RefData*, const MInstrPropState*);
 
-template <bool intishWarn>
+template <ICMode intishCast>
 void setWithRefElem(tv_lval base, TypedValue keyTV, TypedValue val,
                     const MInstrPropState* pState) {
   TypedValue localTvRef;
   auto const keyC = tvToCell(keyTV);
 
   if (UNLIKELY(isRefType(val.m_type))) {
-    HPHP::SetWithRefMLElem<MOpMode::Define, true, intishWarn>(
+    HPHP::SetWithRefMLElem<MOpMode::Define, true, intishCast>(
       localTvRef, base, keyC, val, pState);
   } else {
-    HPHP::SetWithRefMLElem<MOpMode::Define, false, intishWarn>(
+    HPHP::SetWithRefMLElem<MOpMode::Define, false, intishCast>(
       localTvRef, base, keyC, val, pState);
   }
 }
 
-template void setWithRefElem<true>(tv_lval, TypedValue, TypedValue,
-                                   const MInstrPropState*);
-template void setWithRefElem<false>(tv_lval, TypedValue, TypedValue,
+template
+void setWithRefElem<ICMode::Warn>(tv_lval, TypedValue, TypedValue,
+                                  const MInstrPropState*);
+template
+void setWithRefElem<ICMode::Cast>(tv_lval, TypedValue, TypedValue,
+                                  const MInstrPropState*);
+template
+void setWithRefElem<ICMode::Ignore>(tv_lval, TypedValue, TypedValue,
                                     const MInstrPropState*);
 
-template <bool intishWarn>
+template <ICMode intishCast>
 TypedValue incDecElem(tv_lval base, TypedValue key,
                       IncDecOp op, const MInstrPropState* pState) {
-  auto const result = HPHP::IncDecElem<intishWarn>(op, base, key, pState);
+  auto const result = HPHP::IncDecElem<intishCast>(op, base, key, pState);
   assertx(!isRefType(result.m_type));
   return result;
 }
 
-template TypedValue incDecElem<true>(tv_lval, TypedValue, IncDecOp,
-                                     const MInstrPropState* pState);
-template TypedValue incDecElem<false>(tv_lval, TypedValue, IncDecOp,
-                                      const MInstrPropState* pState);
+template
+TypedValue incDecElem<ICMode::Warn>(tv_lval, TypedValue, IncDecOp,
+                                    const MInstrPropState*);
+template
+TypedValue incDecElem<ICMode::Cast>(tv_lval, TypedValue, IncDecOp,
+                                    const MInstrPropState*);
+template
+TypedValue incDecElem<ICMode::Ignore>(tv_lval, TypedValue, IncDecOp,
+                                      const MInstrPropState*);
 
 void bindNewElem(tv_lval base,
                  RefData* val,

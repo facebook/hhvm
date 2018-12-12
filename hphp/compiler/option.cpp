@@ -262,6 +262,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 #undef BIND_HAC_OPTION_SELF
 #undef BIND_HAC_OPTION
 
+  Config::Bind(RuntimeOption::EvalEnableIntishCast,
+               ini, config, "EnableIntishCast",
+               RuntimeOption::EvalEnableIntishCast);
   Config::Bind(RuntimeOption::EvalHackArrDVArrs,
                ini, config, "HackArrDVArrs",
                RuntimeOption::EvalHackArrDVArrs);

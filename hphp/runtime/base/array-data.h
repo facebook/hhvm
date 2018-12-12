@@ -78,7 +78,7 @@ struct arr_lval : tv_lval {
  * at all, except where the cast was made explicit (CastSilently)
  */
 enum class IntishCast : int8_t {
-  AllowCastAndWarn, /* Cast if DisableIntishCast allows it,
+  AllowCastAndWarn, /* Cast if EnableIntishCast allows it,
                        Log if CheckIntishCast is on and we casted */
   CastSilently,     /* Unconditionally do cast, never log */
 };
@@ -789,14 +789,9 @@ public:
    * Return whether `key' should undergo intish-cast when used in this array
    * (which may depend on the array kind, e.g.).  If true, `i' is set to the
    * intish value of `key'.
-   *
-   * If `notice' is set, raise a notice if we return true.
    */
   template <IntishCast intishCast = IntishCast::AllowCastAndWarn>
-  bool convertKey(const StringData* key, int64_t& i,
-                  bool notice =
-                    RuntimeOption::EvalHackArrCompatNotices &&
-                    RuntimeOption::EvalHackArrCompatCheckIntishCast) const;
+  bool convertKey(const StringData* key, int64_t& i) const;
 
   /*
    * Re-index all numeric keys to start from 0.
@@ -1091,6 +1086,9 @@ bool checkHACFalseyPromote();
 bool checkHACCompare();
 bool checkHACArrayPlus();
 bool checkHACArrayKeyCast();
+
+template <IntishCast intishCast = IntishCast::AllowCastAndWarn>
+folly::Optional<int64_t> tryIntishCast(const StringData* key);
 
 ///////////////////////////////////////////////////////////////////////////////
 

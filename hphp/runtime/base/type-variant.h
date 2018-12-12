@@ -1514,10 +1514,8 @@ private:
 struct VarNR : private TypedValueAux {
   static VarNR MakeKey(const String& s) {
     if (s.empty()) return VarNR(staticEmptyString());
-    int64_t n;
-    if (UNLIKELY(s.get()->isStrictlyInteger(n))) {
-      if (checkHACIntishCast()) raise_intish_index_cast();
-      return VarNR(n);
+    if (auto const intish = tryIntishCast(s.get())) {
+      return VarNR(*intish);
     }
     return VarNR(s);
   }

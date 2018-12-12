@@ -905,9 +905,9 @@ ArrayData* SetArray::Escalate(const ArrayData* ad) {
   return const_cast<ArrayData*>(ad);
 }
 
-template <typename Init> ALWAYS_INLINE
-ArrayData* SetArray::ToArrayImpl(ArrayData* ad, bool toDArray,
-                                 IntishCast intishCast) {
+template <typename Init, IntishCast intishCast>
+ALWAYS_INLINE
+ArrayData* SetArray::ToArrayImpl(ArrayData* ad, bool toDArray) {
   auto a = asSet(ad);
   auto size = a->size();
 
@@ -924,11 +924,8 @@ ArrayData* SetArray::ToArrayImpl(ArrayData* ad, bool toDArray,
       init.set(elm.intKey(), tvAsCVarRef(&elm.tv));
     } else {
       auto const key = elm.strKey();
-      int64_t n;
-      if (key->isStrictlyInteger(n)) {
-        if (intishCast == IntishCast::AllowCastAndWarn &&
-            checkHACIntishCast()) raise_intish_index_cast();
-        init.set(n, make_tv<KindOfInt64>(n));
+      if (auto const intish = tryIntishCast<intishCast>(key)) {
+        init.set(*intish, make_tv<KindOfInt64>(*intish));
       } else {
         init.set(key, tvAsCVarRef(&elm.tv));
       }
@@ -941,22 +938,21 @@ ArrayData* SetArray::ToArrayImpl(ArrayData* ad, bool toDArray,
 }
 
 ArrayData* SetArray::ToPHPArray(ArrayData* ad, bool) {
-  auto out = ToArrayImpl<MixedArrayInit>(
-    ad, false, IntishCast::AllowCastAndWarn
-  );
+  auto out =
+    ToArrayImpl<MixedArrayInit, IntishCast::AllowCastAndWarn>(ad, false);
   assertx(out->isNotDVArray());
   return out;
 }
 
 ArrayData* SetArray::ToPHPArrayIntishCast(ArrayData* ad, bool) {
-  auto out = ToArrayImpl<MixedArrayInit>(ad, false, IntishCast::CastSilently);
+  auto out = ToArrayImpl<MixedArrayInit, IntishCast::CastSilently>(ad, false);
   assertx(out->isNotDVArray());
   return out;
 }
 
 ArrayData* SetArray::ToDArray(ArrayData* ad, bool copy) {
   if (RuntimeOption::EvalHackArrDVArrs) return ToDict(ad, copy);
-  auto out = ToArrayImpl<DArrayInit>(ad, true, IntishCast::AllowCastAndWarn);
+  auto out = ToArrayImpl<DArrayInit, IntishCast::AllowCastAndWarn>(ad, true);
   assertx(out->isDArray());
   return out;
 }

@@ -653,15 +653,36 @@ inline Variant ArrayData::getKey(ssize_t pos) const {
 
 template <IntishCast intishCast>
 ALWAYS_INLINE bool ArrayData::convertKey(const StringData* key,
-                                         int64_t& i,
-                                         bool notice) const {
-  auto const result = key->isStrictlyInteger(i) && useWeakKeys();
-  if (UNLIKELY((intishCast == IntishCast::AllowCastAndWarn &&
-                result &&
-                notice))) {
+                                         int64_t& i) const {
+  auto const result = (intishCast == IntishCast::CastSilently ||
+                       RuntimeOption::EvalEnableIntishCast) &&
+                      key->isStrictlyInteger(i) &&
+                      useWeakKeys();
+  if (UNLIKELY(result && intishCast == IntishCast::AllowCastAndWarn &&
+               checkHACIntishCast())) {
     raise_intish_index_cast();
   }
   return result;
+}
+
+/*
+ * Like isStrictlyInteger but changes behavior with the value of intishCast
+ * and will raise warnings appropriately
+ */
+template <IntishCast intishCast>
+ALWAYS_INLINE
+folly::Optional<int64_t> tryIntishCast(const StringData* key) {
+  int64_t i;
+  if (UNLIKELY((intishCast == IntishCast::CastSilently ||
+                RuntimeOption::EvalEnableIntishCast) &&
+               key->isStrictlyInteger(i))) {
+    if (UNLIKELY(intishCast == IntishCast::AllowCastAndWarn &&
+                 checkHACIntishCast())) {
+      raise_intish_index_cast();
+    }
+    return i;
+  }
+  return {};
 }
 
 ///////////////////////////////////////////////////////////////////////////////

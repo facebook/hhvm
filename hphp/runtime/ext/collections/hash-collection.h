@@ -48,14 +48,14 @@ struct HashCollection : ObjectData {
 
   Array toArray() = delete;
 
-  template <IntishCast intishCast = IntishCast::CastAndWarn>
+  template <IntishCast intishCast = IntishCast::AllowCastAndWarn>
   Array toPHPArrayImpl() {
     if (!m_size) {
       return empty_array();
     }
 
     ArrayData* ad;
-    if (intishCast == IntishCast::CastAndWarn) {
+    if (intishCast == IntishCast::AllowCastAndWarn) {
       ad = arrayData()->toPHPArray(true);
     } else if (intishCast == IntishCast::CastSilently) {
       ad = arrayData()->toPHPArrayIntishCast(true);

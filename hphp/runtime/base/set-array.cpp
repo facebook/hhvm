@@ -926,7 +926,7 @@ ArrayData* SetArray::ToArrayImpl(ArrayData* ad, bool toDArray,
       auto const key = elm.strKey();
       int64_t n;
       if (key->isStrictlyInteger(n)) {
-        if (intishCast == IntishCast::CastAndWarn &&
+        if (intishCast == IntishCast::AllowCastAndWarn &&
             checkHACIntishCast()) raise_intish_index_cast();
         init.set(n, make_tv<KindOfInt64>(n));
       } else {
@@ -941,7 +941,9 @@ ArrayData* SetArray::ToArrayImpl(ArrayData* ad, bool toDArray,
 }
 
 ArrayData* SetArray::ToPHPArray(ArrayData* ad, bool) {
-  auto out = ToArrayImpl<MixedArrayInit>(ad, false, IntishCast::CastAndWarn);
+  auto out = ToArrayImpl<MixedArrayInit>(
+    ad, false, IntishCast::AllowCastAndWarn
+  );
   assertx(out->isNotDVArray());
   return out;
 }
@@ -954,7 +956,7 @@ ArrayData* SetArray::ToPHPArrayIntishCast(ArrayData* ad, bool) {
 
 ArrayData* SetArray::ToDArray(ArrayData* ad, bool copy) {
   if (RuntimeOption::EvalHackArrDVArrs) return ToDict(ad, copy);
-  auto out = ToArrayImpl<DArrayInit>(ad, true, IntishCast::CastAndWarn);
+  auto out = ToArrayImpl<DArrayInit>(ad, true, IntishCast::AllowCastAndWarn);
   assertx(out->isDArray());
   return out;
 }

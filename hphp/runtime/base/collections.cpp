@@ -94,7 +94,7 @@ COLLECTIONS_ALL_TYPES(X)
 }
 
 template
-Array toArray<IntishCast::CastAndWarn>(const ObjectData*);
+Array toArray<IntishCast::AllowCastAndWarn>(const ObjectData*);
 template
 Array toArray<IntishCast::CastSilently>(const ObjectData*);
 

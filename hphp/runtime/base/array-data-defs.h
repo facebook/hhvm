@@ -656,7 +656,7 @@ ALWAYS_INLINE bool ArrayData::convertKey(const StringData* key,
                                          int64_t& i,
                                          bool notice) const {
   auto const result = key->isStrictlyInteger(i) && useWeakKeys();
-  if (UNLIKELY((intishCast == IntishCast::CastAndWarn &&
+  if (UNLIKELY((intishCast == IntishCast::AllowCastAndWarn &&
                 result &&
                 notice))) {
     raise_intish_index_cast();

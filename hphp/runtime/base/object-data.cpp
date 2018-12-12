@@ -617,7 +617,7 @@ const int64_t ARRAY_OBJ_ITERATOR_STD_PROP_LIST = 1;
 
 const StaticString s_flags("flags");
 
-template <IntishCast intishCast /* = IntishCast::CastAndWarn */>
+template <IntishCast intishCast /* = IntishCast::AllowCastAndWarn */>
 Array ObjectData::toArray(bool pubOnly /* = false */,
                           bool ignoreLateInit /* = false */) const {
   assertx(kindIsValid());
@@ -667,7 +667,7 @@ Array ObjectData::toArray(bool pubOnly /* = false */,
 }
 
 template
-Array ObjectData::toArray<IntishCast::CastAndWarn>(bool, bool) const;
+Array ObjectData::toArray<IntishCast::AllowCastAndWarn>(bool, bool) const;
 template
 Array ObjectData::toArray<IntishCast::CastSilently>(bool, bool) const;
 

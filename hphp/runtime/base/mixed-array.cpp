@@ -1701,7 +1701,8 @@ ALWAYS_INLINE
 ArrayData* MixedArray::FromDictImpl(ArrayData* adIn,
                                     bool copy,
                                     bool toDArray,
-                                    IntishCast intishCast = IntishCast::CastAndWarn) {
+                                    IntishCast intishCast =
+                                      IntishCast::AllowCastAndWarn) {
   assertx(adIn->isDictOrShape());
   auto a = asMixed(adIn);
 
@@ -1749,7 +1750,7 @@ ArrayData* MixedArray::FromDictImpl(ArrayData* adIn,
     } else {
       int64_t n;
       if (e.skey->isStrictlyInteger(n)) {
-        if (intishCast == IntishCast::CastAndWarn &&
+        if (intishCast == IntishCast::AllowCastAndWarn &&
             checkHACIntishCast()) raise_intish_index_cast();
         out->update(n, *tvAssertCell(&e.data));
       } else {
@@ -1765,7 +1766,7 @@ ArrayData* MixedArray::FromDictImpl(ArrayData* adIn,
 }
 
 ArrayData* MixedArray::ToPHPArrayDict(ArrayData* adIn, bool copy) {
-  auto out = FromDictImpl(adIn, copy, false, IntishCast::CastAndWarn);
+  auto out = FromDictImpl(adIn, copy, false, IntishCast::AllowCastAndWarn);
   assertx(out->isNotDVArray());
   assertx(!out->isLegacyArray());
   return out;
@@ -1804,7 +1805,7 @@ ArrayData* MixedArray::ToDArray(ArrayData* in, bool copy) {
 
 ArrayData* MixedArray::ToDArrayDict(ArrayData* in, bool copy) {
   if (RuntimeOption::EvalHackArrDVArrs) return in;
-  auto out = FromDictImpl(in, copy, true, IntishCast::CastAndWarn);
+  auto out = FromDictImpl(in, copy, true, IntishCast::AllowCastAndWarn);
   assertx(out->isDArray());
   assertx(!out->isLegacyArray());
   return out;
@@ -1813,7 +1814,7 @@ ArrayData* MixedArray::ToDArrayDict(ArrayData* in, bool copy) {
 ArrayData* MixedArray::ToDArrayShape(ArrayData* in, bool copy) {
   assertx(in->isShape());
   if (RuntimeOption::EvalHackArrDVArrs) {
-    auto out = FromDictImpl(in, copy, true, IntishCast::CastAndWarn);
+    auto out = FromDictImpl(in, copy, true, IntishCast::AllowCastAndWarn);
     assertx(out->isDArray());
     assertx(!out->isLegacyArray());
     return out;

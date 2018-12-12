@@ -94,7 +94,7 @@ public:
     std::is_base_of<BaseSet, TSet>::value, TSet*>::type
   static Clone(ObjectData* obj);
 
-  template <IntishCast intishCast = IntishCast::CastAndWarn>
+  template <IntishCast intishCast = IntishCast::AllowCastAndWarn>
   static Array ToArray(const ObjectData* obj) {
     check_collection_cast_to_array();
     return const_cast<BaseSet*>(

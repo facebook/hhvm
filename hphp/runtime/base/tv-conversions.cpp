@@ -591,12 +591,12 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
 }
 
 template
-ArrayData* tvCastToArrayLikeData<IntishCast::CastAndWarn>(TypedValue);
+ArrayData* tvCastToArrayLikeData<IntishCast::AllowCastAndWarn>(TypedValue);
 template
 ArrayData* tvCastToArrayLikeData<IntishCast::CastSilently>(TypedValue);
 
 Array tvCastToArrayLike(TypedValue tv) {
-  return Array::attach(tvCastToArrayLikeData<IntishCast::CastAndWarn>(tv));
+  return Array::attach(tvCastToArrayLikeData<IntishCast::AllowCastAndWarn>(tv));
 }
 
 void tvCastToShapeInPlace(TypedValue* tv) {

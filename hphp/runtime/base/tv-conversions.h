@@ -113,7 +113,7 @@ Object tvCastToObject(TypedValue tv);
 
 StringData* tvCastToStringData(TypedValue tv);
 StringData* cellCastToStringData(Cell c);
-template <IntishCast intishCast /* = IntishCast::CastAndWarn */>
+template <IntishCast intishCast /* = IntishCast::AllowCastAndWarn */>
 ArrayData* tvCastToArrayLikeData(TypedValue tv);
 ObjectData* tvCastToObjectData(TypedValue tv);
 
@@ -127,9 +127,9 @@ double cellToDouble(Cell);
 /*
  * Convert `tv' or `cell' to a valid array key for `ad', or throw an exception.
  */
-template <IntishCast intishCast = IntishCast::CastAndWarn>
+template <IntishCast intishCast = IntishCast::AllowCastAndWarn>
 Cell cellToKey(Cell cell, const ArrayData* ad);
-template <IntishCast intishCast = IntishCast::CastAndWarn>
+template <IntishCast intishCast = IntishCast::AllowCastAndWarn>
 Cell tvToKey(TypedValue tv, const ArrayData* ad);
 
 /*

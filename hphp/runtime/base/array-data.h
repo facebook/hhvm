@@ -66,14 +66,21 @@ struct arr_lval : tv_lval {
 
 /*
  * We use this enum as a template parameter in a few key places to determine
- * whether or not a check for intish cast should occur. As it stands today,
- * either we do the check and possibly warn if a cast occurs, or we do the check
- * and cast silently. This will change eventually to either casting silently or
- * not checking/casting at all.
+ * whether or not a check for intish cast should occur and if a warning should
+ * be logged.
+ *
+ * Currently, there a few spots in extensions where we cast explicitly and do
+ * not log (CastSilently) In the JIT and the rest of the runtime, whether we
+ * [cast and possibly warn] or [don't cast at all] is controlled by a runtime
+ * flag. Whether the warning is emitted or not is controlled by another flag.
+
+ * Eventually, the flag will go away and we will default to not checking/casting
+ * at all, except where the cast was made explicit (CastSilently)
  */
 enum class IntishCast : int8_t {
-  CastAndWarn,
-  CastSilently,
+  AllowCastAndWarn, /* Cast if DisableIntishCast allows it,
+                       Log if CheckIntishCast is on and we casted */
+  CastSilently,     /* Unconditionally do cast, never log */
 };
 
 struct ArrayData : MaybeCountable {
@@ -785,7 +792,7 @@ public:
    *
    * If `notice' is set, raise a notice if we return true.
    */
-  template <IntishCast intishCast = IntishCast::CastAndWarn>
+  template <IntishCast intishCast = IntishCast::AllowCastAndWarn>
   bool convertKey(const StringData* key, int64_t& i,
                   bool notice =
                     RuntimeOption::EvalHackArrCompatNotices &&

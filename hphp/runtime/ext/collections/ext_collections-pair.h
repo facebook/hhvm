@@ -78,7 +78,7 @@ struct c_Pair : ObjectData {
     assertx(obj->getVMClass() == c_Pair::classof());
     return true;
   }
-  template <IntishCast intishCast = IntishCast::CastAndWarn>
+  template <IntishCast intishCast = IntishCast::AllowCastAndWarn>
   static Array ToArray(const ObjectData* obj) {
     auto pair = static_cast<const c_Pair*>(obj);
     check_collection_cast_to_array();

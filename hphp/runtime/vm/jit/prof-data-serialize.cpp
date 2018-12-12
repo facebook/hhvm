@@ -798,6 +798,8 @@ void merge_loaded_units(int numWorkers) {
   UNUSED std::atomic_int curr_node{0};
   for (auto worker = 0; worker < numWorkers; ++worker) {
     workers.push_back(std::thread([&] {
+      hphp_thread_init();
+      SCOPE_EXIT { hphp_thread_exit(); };
       ProfileNonVMThread nonVM;
 #if USE_JEMALLOC_EXTENT_HOOKS
       auto const numaNode = next_numa_node(curr_node);
@@ -812,7 +814,6 @@ void merge_loaded_units(int numWorkers) {
       }
 #endif
 
-      hphp_thread_init();
       hphp_session_init(Treadmill::SessionKind::PreloadRepo);
 
       while (true) {
@@ -834,7 +835,6 @@ void merge_loaded_units(int numWorkers) {
 
       hphp_context_exit();
       hphp_session_exit();
-      hphp_thread_exit();
     }));
   }
   for (auto& worker : workers) {
@@ -1271,6 +1271,8 @@ Func* read_func(ProfDataDeserializer& ser) {
 
 std::string serializeProfData(const std::string& filename) {
   try {
+    hphp_thread_init();
+    SCOPE_EXIT { hphp_thread_exit(); };
     ProfDataSerializer ser{filename};
 
     write_raw(ser, Repo::get().global().Signature);
@@ -1284,7 +1286,6 @@ std::string serializeProfData(const std::string& filename) {
     write_raw(ser, TimeStamp::Current());
 
     Func::s_treadmill = true;
-    hphp_thread_init();
     hphp_session_init(Treadmill::SessionKind::ProfData);
     requestInitProfData();
 
@@ -1292,7 +1293,6 @@ std::string serializeProfData(const std::string& filename) {
       requestExitProfData();
       hphp_context_exit();
       hphp_session_exit();
-      hphp_thread_exit();
       Func::s_treadmill = false;
     };
 

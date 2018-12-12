@@ -3158,11 +3158,13 @@ and assign_ p ur env e1 ty2 =
                (env, tyvars), ty) in
           let env = Type.sub_type p ur env folded_ty2
               (Reason.Rwitness (fst e1), Ttuple tyl) in
+          let env = ISet.fold (fun var env -> Env.set_tyvar_appears_covariantly env var) tyvars env in
+          let env = SubType.solve_tyvars ~tyvars env in
           let env, reversed_tel =
             List.fold2_exn el tyl ~init:(env,[]) ~f:(fun (env,tel) lvalue ty2 ->
             let env, te, _ = assign p env lvalue ty2 in
             env, te::tel) in
-          make_result ~tyvars env (fst e1) (T.List (List.rev reversed_tel)) ty2
+          make_result env (fst e1) (T.List (List.rev reversed_tel)) ty2
         end in
     begin match resl with
       | [res] -> res

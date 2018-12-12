@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/vm/native-data.h"
 #include "hphp/util/alloc.h"
 #include <folly/String.h>
 
@@ -241,6 +242,87 @@ Variant HHVM_FUNCTION(bzdecompress, const String& source, int small /* = 0 */) {
   }
 }
 
+const StaticString s_SystemLib_ChunkedBunzipper(
+  "__SystemLib\\ChunkedBunzipper");
+
+struct ChunkedBunzipper {
+  ChunkedBunzipper(): m_eof(false) {
+    m_bzstream.bzalloc = nullptr;
+    m_bzstream.bzfree = nullptr;
+    int status = BZ2_bzDecompressInit(&m_bzstream, 0, 0);
+    if (status != BZ_OK) {
+      raise_error("Failed BZ2_bzDecompressInit: %d", status);
+    }
+  }
+
+  ~ChunkedBunzipper() {
+    if (!eof()) {
+      BZ2_bzDecompressEnd(&m_bzstream);
+    }
+  }
+
+  bool eof() const {
+    return m_eof;
+  }
+
+  String inflateChunk(const String& chunk) {
+    if (m_eof) {
+      raise_warning("Tried to inflate after final chunk");
+      return empty_string();
+    }
+    m_bzstream.next_in = (char *) chunk.data();
+    m_bzstream.avail_in = chunk.length();
+    int factor = 0;
+    unsigned int maxfactor = 16;
+    do {
+      int buffer_length = 1024 * 1024 * (1 << factor);
+      String buffer(buffer_length, ReserveString);
+      char* raw = buffer.mutableData();
+      m_bzstream.next_out = raw;
+      m_bzstream.avail_out = buffer_length;
+
+      int status = BZ2_bzDecompress(&m_bzstream);
+      if (status == BZ_STREAM_END || status == BZ_OK) {
+        if (status == BZ_STREAM_END) {
+          m_eof = true;
+        }
+        int64_t produced = buffer_length - m_bzstream.avail_out;
+        if (produced) {
+          buffer.shrink(produced);
+          return buffer;
+        }
+        return empty_string();
+      }
+    } while (++factor < maxfactor);
+    raise_warning("Failed to extract chunk");
+    return empty_string();
+  }
+
+ private:
+  ::bz_stream m_bzstream;
+  bool m_eof;
+
+  // z_stream contains void* that we don't care about.
+  TYPE_SCAN_IGNORE_FIELD(m_bzstream);
+};
+
+#define FETCH_CHUNKED_BUNZIPPER(dest, src) \
+  auto dest = Native::data<ChunkedBunzipper>(src);
+
+bool HHVM_METHOD(ChunkedBunzipper, eof) {
+  FETCH_CHUNKED_BUNZIPPER(data, this_);
+  assertx(data);
+  return data->eof();
+}
+
+String HHVM_METHOD(ChunkedBunzipper,
+                   inflateChunk,
+                   const String& chunk) {
+  FETCH_CHUNKED_BUNZIPPER(data, this_);
+  assertx(data);
+  return data->inflateChunk(chunk);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct bz2Extension final : Extension {
@@ -261,6 +343,13 @@ struct bz2Extension final : Extension {
     HHVM_FE(bzerrno);
     HHVM_FE(bzcompress);
     HHVM_FE(bzdecompress);
+
+    HHVM_NAMED_ME(__SystemLib\\ChunkedBunzipper, eof,
+                  HHVM_MN(ChunkedBunzipper, eof));
+    HHVM_NAMED_ME(__SystemLib\\ChunkedBunzipper, inflateChunk,
+                  HHVM_MN(ChunkedBunzipper, inflateChunk));
+    Native::registerNativeDataInfo<ChunkedBunzipper>(
+      s_SystemLib_ChunkedBunzipper.get());
 
     loadSystemlib("bz2");
   }

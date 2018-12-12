@@ -2,9 +2,10 @@
 
 function test($input, $compressed, $decompressor) {
   $output = '';
-  $i = 0;
+  $i = $j = 0;
   $chunks = str_split($compressed, 512 /* bytes */);
-  foreach ($chunks as $chunk) {
+  while (!$decompressor->eof()) {
+    $chunk = $j < count($chunks) ? $chunks[$j++] : "";
     $this_chunk = $decompressor->inflateChunk($chunk);
     printf(
       "Chunk %d: produced %d; eof: %s\n",
@@ -24,6 +25,26 @@ function test($input, $compressed, $decompressor) {
   );
 }
 
+function bzencode($input) {
+  $filename = tempnam(sys_get_temp_dir(), '');
+  try {
+    $bz = bzopen($filename, "w");
+    bzwrite($bz, $input);
+    bzclose($bz);
+
+    $f = fopen($filename, "r");
+    $result = "";
+    while (!feof($f)) {
+      $result .= fread($f, 1024);
+    }
+    fclose($f);
+  } catch (Exception $_) {
+  } finally {
+    unlink($filename);
+  }
+  return $result;
+}
+
 function main() {
   $input = 'herp derp';
   // need a bigger string, with big output
@@ -35,6 +56,9 @@ function main() {
 
   printf("-----\nTesting gunzipper\n");
   test($input, gzencode($input), new __SystemLib\ChunkedGunzipper());
+
+  printf("-----\nTesting bunzipper\n");
+  test($input, bzencode($input), new __SystemLib\ChunkedBunzipper());
 }
 
 

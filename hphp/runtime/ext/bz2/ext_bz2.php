@@ -134,3 +134,17 @@ function bzread(resource $bz, int $length = 1024): mixed;
  */
 <<__Native>>
 function bzwrite(resource $bz, string $data, int $length = 0): mixed;
+
+/*
+ * Not a public API
+ */
+namespace __SystemLib {
+<<__NativeData("__SystemLib\\ChunkedBunzipper")>>
+class ChunkedBunzipper {
+  <<__Native>>
+  function eof(): bool;
+
+  <<__Native>>
+  function inflateChunk(string $chunk): string;
+}
+}

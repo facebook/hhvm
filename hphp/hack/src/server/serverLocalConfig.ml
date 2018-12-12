@@ -15,7 +15,7 @@ type t = {
   watchman_init_timeout: int; (* in seconds *)
   watchman_subscribe: bool;
   watchman_synchronous_timeout : int; (* in seconds *)
-  use_saved_state: bool;
+  use_saved_state: bool; (* should we attempt to load saved-state? (subject to further options) *)
   load_state_script_timeout: int; (* in seconds *)
   (** Prefer using Ocaml implementation over load script. *)
   load_state_natively: bool;

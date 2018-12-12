@@ -773,6 +773,17 @@ let serve genv env in_fds =
     env := new_env
   done
 
+(** Rules for whether+how to load saved-state...
+ * 1. If hh.conf lacks "use_mini_state = true", then don't load it.
+ * 2. If hh_server --no-load, then don't load it.
+ * 3. If hh_server --save-mini or -s, then save but don't load it.
+ * 4. If monitor previously got a saved-state failure and restarts, it might decide
+ *    to use Informant_induced_mini_state_target, targeting the saved-state it had previously!
+ * 5. If "hh_server --with-mini-state", then load the one specified there!
+ * 6. If hh.conf lacks "load_state_natively_v4", then don't load it
+ * 7. If "hh_server --load_state_canary", then load it! but by commit hash rather than public svn
+ * 8. Otherwise, load it normally!
+ *)
 let resolve_init_approach genv =
   if not genv.local_config.ServerLocalConfig.use_saved_state then
     None, "Local_config_saved_state_disabled"
@@ -784,6 +795,10 @@ let resolve_init_approach genv =
     match
       (genv.local_config.ServerLocalConfig.load_state_natively),
       (ServerArgs.with_saved_state genv.options) with
+      | _, Some (ServerArgs.Informant_induced_saved_state_target target) ->
+        Some (ServerInit.Load_state_natively_with_target target), "Load_state_natively_with_target"
+      | _, Some (ServerArgs.Saved_state_target_info target) ->
+        Some (ServerInit.Precomputed target), "Precomputed"
       | false, None ->
         None, "No_native_loading_or_precomputed"
       | true, None ->
@@ -791,10 +806,6 @@ let resolve_init_approach genv =
          * and the local config prefers native. *)
         let use_canary = ServerArgs.load_state_canary genv.options in
         Some (ServerInit.Load_state_natively use_canary), "Load_state_natively"
-      | _, Some (ServerArgs.Informant_induced_saved_state_target target) ->
-        Some (ServerInit.Load_state_natively_with_target target), "Load_state_natively_with_target"
-      | _, Some (ServerArgs.Saved_state_target_info target) ->
-        Some (ServerInit.Precomputed target), "Precomputed"
 
 let program_init genv =
   let load_state_approach, approach_name = resolve_init_approach genv in

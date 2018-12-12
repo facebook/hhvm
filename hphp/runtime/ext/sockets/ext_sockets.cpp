@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <vector>
 
 #if HAVE_IF_NAMETOINDEX
 #include <net/if.h>
@@ -280,9 +281,8 @@ static bool set_sockaddr(sockaddr_storage &sa_storage, req::ptr<Socket> sock,
   return true;
 }
 
-static void sock_array_to_fd_set(const Array& sockets, pollfd *fds, int &nfds,
+static void sock_array_to_fd_set(const Array& sockets, std::vector<pollfd>& fds,
                                  short flag) {
-  assertx(fds);
   for (ArrayIter iter(sockets); iter; ++iter) {
     auto sock = cast<File>(iter.second());
     int intfd = sock->fd();
@@ -292,20 +292,22 @@ static void sock_array_to_fd_set(const Array& sockets, pollfd *fds, int &nfds,
       );
       continue;
     }
-    pollfd &fd = fds[nfds++];
+    fds.emplace_back();
+    auto& fd = fds.back();
     fd.fd = intfd;
     fd.events = flag;
     fd.revents = 0;
   }
 }
 
-static void sock_array_from_fd_set(Variant &sockets, pollfd *fds, int &nfds,
-                                   int &count, short flag) {
+static void sock_array_from_fd_set(Variant &sockets,
+                                   const std::vector<pollfd>& fds,
+                                   int &nfds, int &count, short flag) {
   assertx(sockets.isArray());
   Array sock_array = sockets.toArray();
   Array ret = Array::Create();
   for (ArrayIter iter(sock_array); iter; ++iter) {
-    const pollfd &fd = fds[nfds++];
+    const pollfd &fd = fds.at(nfds++);
     assertx(fd.fd == cast<File>(iter.second())->fd());
     if (fd.revents & flag) {
       ret.set(iter.first(), iter.second());
@@ -958,20 +960,19 @@ Variant HHVM_FUNCTION(socket_select,
     return false;
   }
 
-  struct pollfd *fds = (struct pollfd *)calloc(count, sizeof(struct pollfd));
-  count = 0;
+  std::vector<pollfd> fds;
+  fds.reserve(count);
   if (!read.isNull()) {
-    sock_array_to_fd_set(read->toCArrRef(), fds, count, POLLIN);
+    sock_array_to_fd_set(read->toCArrRef(), fds, POLLIN);
   }
   if (!write.isNull()) {
-    sock_array_to_fd_set(write->toCArrRef(), fds, count, POLLOUT);
+    sock_array_to_fd_set(write->toCArrRef(), fds, POLLOUT);
   }
   if (!except.isNull()) {
-    sock_array_to_fd_set(except->toCArrRef(), fds, count, POLLPRI);
+    sock_array_to_fd_set(except->toCArrRef(), fds, POLLPRI);
   }
-  if (!count) {
+  if (fds.empty()) {
     raise_warning("no resource arrays were passed to select");
-    free(fds);
     return false;
   }
 
@@ -1000,16 +1001,14 @@ Variant HHVM_FUNCTION(socket_select,
         except.assignIfRef(empty_array());
       }
       read.assignIfRef(hasData);
-      free(fds);
       return hasData.size();
     }
   }
 
-  int retval = poll(fds, count, timeout_ms);
+  int retval = poll(fds.data(), fds.size(), timeout_ms);
   if (retval == -1) {
     raise_warning("unable to select [%d]: %s", errno,
                   folly::errnoStr(errno).c_str());
-    free(fds);
     return false;
   }
 
@@ -1031,7 +1030,6 @@ Variant HHVM_FUNCTION(socket_select,
     }
   }
 
-  free(fds);
   return count;
 }
 

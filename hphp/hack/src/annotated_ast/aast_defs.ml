@@ -20,6 +20,7 @@ and lid = pos * local_id
 and sid = Ast.id
 
 and is_terminal = bool
+and is_reified = bool
 
 and call_type =
   | Cnormal    [@visitors.name "call_type_Cnormal"] (* when the call looks like f() *)
@@ -28,8 +29,10 @@ and call_type =
 and is_coroutine = bool
 and func_reactive = FReactive | FLocal | FShallow | FNonreactive
 
-and targ = hint * Ast.reified
+and targ = hint * is_reified
+
 and param_mutability = PMutable | POwnedMutable | PMaybeMutable
+
 and hint = pos * hint_
 and mutable_return = bool
 and variadic_hint =
@@ -76,7 +79,6 @@ and hint_ =
   | Hthis
   | Hdynamic
 
-
 (* AST types such as Happly("int", []) are resolved to Hprim values *)
 and tprim =
   | Tnull
@@ -106,7 +108,6 @@ and kvc_kind = [
   | `Dict ]
   [@visitors.opaque]
 
-
 and vc_kind = [
   | `Vector
   | `ImmVector
@@ -133,7 +134,6 @@ and enum_ = {
   e_base       : hint;
   e_constraint : hint option;
 }
-
 
 and instantiated_sid = sid * hint list
 

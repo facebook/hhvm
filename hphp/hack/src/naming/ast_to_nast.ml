@@ -66,6 +66,8 @@ and on_xhp_attribute a : Aast.xhp_attribute =
   | Xhp_simple (id, e) -> Aast.Xhp_simple (id, on_expr e)
   | Xhp_spread e -> Aast.Xhp_spread (on_expr e)
 
+and on_targ (h, r) : Aast.targ = (on_hint h, r)
+
 and on_expr (p, e) : Aast.expr =
   let node = match e with
   | Array al -> Aast.Array (on_list on_afield al)
@@ -87,7 +89,8 @@ and on_expr (p, e) : Aast.expr =
   | Array_get (e, opt_e) -> Aast.Array_get (on_expr e, optional on_expr opt_e)
   | Class_get _ -> Aast.Any (* TODO: T37786581 *)
   | Class_const _ -> Aast.Any (* TODO: T37786581 *)
-  | Call _ -> Aast.Any (* TODO: T37786581 *)
+  | Call (e, tl, el, uel) ->
+    Aast.Call (Aast.Cnormal, on_expr e, on_list on_targ tl, on_list on_expr el, on_list on_expr uel)
   | Int s -> Aast.Int s
   | Float s -> Aast.Float s
   | String s -> Aast.String s

@@ -23,6 +23,9 @@ let hack_arr_compat_notices () =
 let hack_arr_dv_arrs () =
   Hhbc_options.hack_arr_dv_arrs !Hhbc_options.compiler_options
 
+let enable_intish_cast () =
+  Hhbc_options.enable_intish_cast !Hhbc_options.compiler_options
+
 let radix (s : string) : [`Oct | `Hex | `Dec | `Bin ] =
   if String.length s > 1 && s.[0] = '0' then
     match s.[1] with
@@ -212,7 +215,8 @@ and array_to_typed_value ns fields =
            * parses successfully as integer *)
         | A.AFkvalue (((_, (A.Int s | A.String s)) as key), value) ->
           begin match Int64.of_string s with
-          | newindex when SU.Integer.is_decimal_int s ->
+          | newindex when SU.Integer.is_decimal_int s &&
+                          (enable_intish_cast ())->
             begin match key with
             (* do not fold int-like strings when hack_arr_compat_notices is set.
                Arrays with such indices should not be placed in scalar table map
@@ -248,7 +252,9 @@ and darray_to_typed_value ns fields =
         match snd v1 with
         | A.String s ->
            begin match Int64.of_string s with
-           | index when (SU.Integer.is_decimal_int s) && not (hack_arr_dv_arrs ()) ->
+           | index when (SU.Integer.is_decimal_int s) &&
+                        not (hack_arr_dv_arrs ()) &&
+                        (enable_intish_cast ()) ->
               if (hack_arr_compat_notices ()) then raise NotLiteral
               else (TV.Int index, expr_to_typed_value ns v2)
            | _ ->

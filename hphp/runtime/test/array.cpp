@@ -50,7 +50,7 @@ TEST(ARRAY, Constructors) {
   EXPECT_TRUE(arr.size() == 1);
   EXPECT_TRUE(arr.length() == 1);
 
-  arr = make_packed_array(0);
+  arr = make_varray(0);
   EXPECT_TRUE(!arr.empty());
   EXPECT_TRUE(arr.size() == 1);
   EXPECT_TRUE(arr.length() == 1);
@@ -59,7 +59,7 @@ TEST(ARRAY, Constructors) {
   EXPECT_TRUE(arr.isPHPArray());
   EXPECT_FALSE(arr.isHackArray());
 
-  arr = make_packed_array("test");
+  arr = make_varray("test");
   EXPECT_TRUE(!arr.empty());
   EXPECT_TRUE(arr.size() == 1);
   EXPECT_TRUE(arr.length() == 1);
@@ -69,7 +69,7 @@ TEST(ARRAY, Constructors) {
   EXPECT_FALSE(arr.isHackArray());
 
   Array arrCopy = arr;
-  arr = make_packed_array(arrCopy);
+  arr = make_varray(arrCopy);
   EXPECT_TRUE(!arr.empty());
   EXPECT_TRUE(arr.size() == 1);
   EXPECT_TRUE(arr.length() == 1);
@@ -182,7 +182,7 @@ TEST(ARRAY, Conversions) {
   EXPECT_TRUE(arr0.toDouble() == 0.0);
   EXPECT_TRUE(arr0.toString().empty());
 
-  Array arr1 = make_packed_array("test");
+  Array arr1 = make_varray("test");
   EXPECT_TRUE(arr1.toBoolean() == true);
   EXPECT_TRUE(arr1.toByte() == 1);
   EXPECT_TRUE(arr1.toInt16() == 1);
@@ -258,7 +258,7 @@ TEST(Array, Offsets) {
     Array arr;
     arr.set(0, "v1");
     arr.set(1, "v2");
-    EXPECT_TRUE(equal(arr, make_packed_array("v1", "v2")));
+    EXPECT_TRUE(equal(arr, make_varray("v1", "v2")));
   }
   {
     Array arr;
@@ -272,7 +272,7 @@ TEST(Array, Offsets) {
     Variant v2 = String("v2");
     tvSet(*v1.asTypedValue(), arr.lvalAt(0));
     tvSet(*v2.asTypedValue(), arr.lvalAt(1));
-    EXPECT_TRUE(equal(arr, make_packed_array("v1", "v2")));
+    EXPECT_TRUE(equal(arr, make_varray("v1", "v2")));
   }
   {
     Array arr;
@@ -452,7 +452,7 @@ TEST(ARRAY, Membership) {
     auto const lval = arr.lvalAt();
     type(lval) = KindOfString;
     val(lval).pstr = StringData::Make("test", CopyString);
-    EXPECT_TRUE(equal(arr, make_packed_array("test")));
+    EXPECT_TRUE(equal(arr, make_varray("test")));
   }
   {
     Array arr;
@@ -538,18 +538,18 @@ TEST(ARRAY, Membership) {
 
 TEST(ARRAY, Merge) {
   {
-    Array arr = make_packed_array(0) + make_packed_array(1);
-    EXPECT_TRUE(equal(arr, make_packed_array(0)));
-    arr += make_packed_array(0, 1);
-    EXPECT_TRUE(equal(arr, make_packed_array(0, 1)));
+    Array arr = make_varray(0) + make_varray(1);
+    EXPECT_TRUE(equal(arr, make_varray(0)));
+    arr += make_varray(0, 1);
+    EXPECT_TRUE(equal(arr, make_varray(0, 1)));
 
-    arr = make_packed_array(0).merge(make_packed_array(1));
-    EXPECT_TRUE(equal(arr, make_packed_array(0, 1)));
-    arr = arr.merge(make_packed_array(0, 1));
-    EXPECT_TRUE(equal(arr, make_packed_array(0, 1, 0, 1)));
+    arr = make_varray(0).merge(make_varray(1));
+    EXPECT_TRUE(equal(arr, make_varray(0, 1)));
+    arr = arr.merge(make_varray(0, 1));
+    EXPECT_TRUE(equal(arr, make_varray(0, 1, 0, 1)));
 
-    arr = make_packed_array("s0").merge(make_packed_array("s1"));
-    EXPECT_TRUE(equal(arr, make_packed_array("s0", "s1")));
+    arr = make_varray("s0").merge(make_varray("s1"));
+    EXPECT_TRUE(equal(arr, make_varray("s0", "s1")));
 
     arr = make_map_array("n0", "s0") + make_map_array("n1", "s1");
     EXPECT_TRUE(equal(arr, make_map_array("n0", "s0", "n1", "s1")));

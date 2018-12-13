@@ -38,8 +38,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 Array mockBacktrace() {
-  auto bt = Array::Create();
-  bt.append(
+  return make_varray(
     make_map_array(
       s_file, "filename",
       s_line, "42",
@@ -48,7 +47,6 @@ Array mockBacktrace() {
       s_class, "Class"
     )
   );
-  return bt;
 }
 
 TEST(Backtrace, FullFunctionNames) {
@@ -66,8 +64,7 @@ TEST(Backtrace, FullFunctionNames) {
 TEST(Backtrace, FunctionNameWithObject) {
   StructuredLogEntry sample;
   {
-    auto bt = Array::Create();
-    bt.append(
+    auto bt = make_varray(
       make_map_array(
         s_file, "filename",
         s_line, "42",
@@ -88,8 +85,7 @@ TEST(Backtrace, FunctionNameWithObject) {
 TEST(Backtrace, LongFunctionNames) {
   StructuredLogEntry sample;
   {
-    auto bt = Array::Create();
-    bt.append(
+    auto bt = make_varray(
       make_map_array(
         s_file, "filenameeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
         s_line, "42---------------------------------------------------------------------------------",

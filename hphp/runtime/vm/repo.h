@@ -172,12 +172,13 @@ struct Repo : RepoProxy {
   std::string table(int repoId, const char* tablePrefix);
   void exec(const std::string& sQuery); // throws(RepoExc)
 
-  void begin(); // throws(RepoExc)
  private:
+  friend struct RepoTxn;
+  void begin(); // throws(RepoExc)
   void txPop(); // throws(RepoExc)
- public:
   void rollback(); // nothrow
   void commit(); // throws(RepoExc)
+ public:
   RepoStatus insertUnit(UnitEmitter* ue, UnitOrigin unitOrigin,
                         RepoTxn& txn); // nothrow
   void commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin); // nothrow

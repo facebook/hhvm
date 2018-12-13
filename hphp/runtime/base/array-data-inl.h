@@ -327,6 +327,10 @@ ALWAYS_INLINE bool checkHACFalseyPromote() {
   return RuntimeOption::EvalHackArrCompatNotices &&
          RuntimeOption::EvalHackArrCompatCheckFalseyPromote;
 }
+ALWAYS_INLINE bool checkHACEmptyStringPromote() {
+  return RuntimeOption::EvalHackArrCompatNotices &&
+         RuntimeOption::EvalHackArrCompatCheckEmptyStringPromote;
+}
 ALWAYS_INLINE bool checkHACCompare() {
   return RuntimeOption::EvalHackArrCompatNotices &&
          RuntimeOption::EvalHackArrCompatCheckCompare;

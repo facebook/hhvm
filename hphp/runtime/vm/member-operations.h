@@ -263,12 +263,15 @@ ALWAYS_INLINE void checkPromotion(tv_rval base, const MInstrPropState* pState) {
     }
   }
 
-  if (LIKELY(!checkHACFalseyPromote())) return;
+  auto const falseyPromote = checkHACFalseyPromote();
+  auto const stringPromote = checkHACEmptyStringPromote();
 
-  if (tvIsNull(base)) {
+  if (UNLIKELY(falseyPromote) && tvIsNull(base)) {
     raise_hac_falsey_promote_notice("Promoting null to array");
-  } else if (tvIsBool(base)) {
+  } else if (UNLIKELY(falseyPromote) && tvIsBool(base)) {
     raise_hac_falsey_promote_notice("Promoting false to array");
+  } else if (UNLIKELY(stringPromote) && tvIsString(base)) {
+    raise_hac_empty_string_promote_notice("Promoting empty string to array");
   }
 }
 

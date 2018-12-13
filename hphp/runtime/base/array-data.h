@@ -1083,6 +1083,7 @@ void raiseHackArrCompatImplicitArrayKey(const TypedValue* key);
 bool checkHACIntishCast();
 bool checkHACRefBind();
 bool checkHACFalseyPromote();
+bool checkHACEmptyStringPromote();
 bool checkHACCompare();
 bool checkHACArrayPlus();
 bool checkHACArrayKeyCast();

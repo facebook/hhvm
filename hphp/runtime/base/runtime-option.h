@@ -556,12 +556,13 @@ struct RuntimeOption {
 
   static std::vector<std::string> TzdataSearchPaths;
 
-#define HAC_CHECK_OPTS              \
-  HC(IntishCast, intish_cast)       \
-  HC(RefBind, ref_bind)             \
-  HC(FalseyPromote, falsey_promote) \
-  HC(Compare, compare)              \
-  HC(ArrayKeyCast, array_key_cast)  \
+#define HAC_CHECK_OPTS                         \
+  HC(IntishCast, intish_cast)                  \
+  HC(RefBind, ref_bind)                        \
+  HC(FalseyPromote, falsey_promote)            \
+  HC(EmptyStringPromote, empty_string_promote) \
+  HC(Compare, compare)                         \
+  HC(ArrayKeyCast, array_key_cast)             \
   HC(ArrayPlus, array_plus)
 
 #define EVALFLAGS()                                                     \
@@ -935,6 +936,7 @@ struct RuntimeOption {
   F(bool, HackArrCompatCheckIntishCast, false)                          \
   F(bool, HackArrCompatCheckRefBind, false)                             \
   F(bool, HackArrCompatCheckFalseyPromote, false)                       \
+  F(bool, HackArrCompatCheckEmptyStringPromote, false)                  \
   F(bool, HackArrCompatCheckCompare, false)                             \
   F(bool, HackArrCompatCheckArrayPlus, false)                           \
   F(bool, HackArrCompatCheckArrayKeyCast, false)                        \

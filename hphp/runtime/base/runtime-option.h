@@ -1004,6 +1004,12 @@ struct RuntimeOption {
    */                                                                   \
   F(int32_t, ForbidThriftIntegerValuesOutOfRange, 0)                    \
   F(int32_t, RxEnforceCalls, 0)                                         \
+  /*                                                                    \
+   * 0 - Nothing                                                        \
+   * 1 - Warn                                                           \
+   * 2 - Fail unit verification (i.e. fail to load it)                  \
+   */                                                                   \
+  F(int32_t, RxVerifyBody, 0)                                           \
   F(int32_t, ServerOOMAdj, 0)                                           \
   F(std::string, PreludePath, "")                                       \
   F(uint32_t, NonSharedInstanceMemoCaches, 10)                          \

@@ -1,0 +1,21 @@
+Verification Error (unit %s/test/slow/rx/body/globals.php func test): globals are forbidden in Rx functions: CGetG
+
+Verification Error (unit %s/test/slow/rx/body/globals.php func test): globals are forbidden in Rx functions: CGetQuietG
+
+Verification Error (unit %s/test/slow/rx/body/globals.php func test): globals are forbidden in Rx functions: IssetG
+
+Verification Error (unit %s/test/slow/rx/body/globals.php func test): globals are forbidden in Rx functions: EmptyG
+
+Verification Error (unit %s/test/slow/rx/body/globals.php func test): globals are forbidden in Rx functions: SetG
+
+Verification Error (unit %s/test/slow/rx/body/globals.php func test): globals are forbidden in Rx functions: SetOpG
+
+Verification Error (unit %s/test/slow/rx/body/globals.php func test): globals are forbidden in Rx functions: IncDecG
+
+Verification Error (unit %s/test/slow/rx/body/globals.php func test): globals are forbidden in Rx functions: UnsetG
+
+Verification Error (unit %s/test/slow/rx/body/globals.php func test): globals are forbidden in Rx functions: BaseGC
+
+Verification Error (unit %s/test/slow/rx/body/globals.php func test): globals are forbidden in Rx functions: BaseGL
+
+Done

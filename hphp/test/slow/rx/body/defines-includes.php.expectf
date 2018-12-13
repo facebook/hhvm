@@ -1,0 +1,20 @@
+Verification Error (unit %s/test/slow/rx/body/defines-includes.php func test): defines/includes are forbidden in Rx functions: DefFunc
+
+Verification Error (unit %s/test/slow/rx/body/defines-includes.php func test): defines/includes are forbidden in Rx functions: DefCls
+
+Verification Error (unit %s/test/slow/rx/body/defines-includes.php func test): defines/includes are forbidden in Rx functions: AliasCls
+
+Verification Error (unit %s/test/slow/rx/body/defines-includes.php func test): defines/includes are forbidden in Rx functions: DefCns
+
+Verification Error (unit %s/test/slow/rx/body/defines-includes.php func test): defines/includes are forbidden in Rx functions: InclOnce
+
+Verification Error (unit %s/test/slow/rx/body/defines-includes.php func test): defines/includes are forbidden in Rx functions: Incl
+
+Verification Error (unit %s/test/slow/rx/body/defines-includes.php func test): defines/includes are forbidden in Rx functions: ReqOnce
+
+Verification Error (unit %s/test/slow/rx/body/defines-includes.php func test): defines/includes are forbidden in Rx functions: Req
+
+Included
+Included
+Included
+Done

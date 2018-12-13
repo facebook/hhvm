@@ -1,0 +1,5 @@
+(Verification Error \(unit [^\r\n]*\/test\/slow\/rx\/body\/fail\.php func main\): Print cannot appear in Rx function
+
+Verification failed for unit [^\r\n]*\/test\/slow\/rx\/body\/fail\.php\. Re-run with HHVM_VERIFY_VERBOSE=1 to see more details\.
+){1,2}
+Fatal error: A bytecode verification error was detected in [^\r\n]*\/test\/slow\/rx\/body\/fail\.php on line -1

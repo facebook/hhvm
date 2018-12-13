@@ -16,13 +16,16 @@
 
 #include "hphp/runtime/vm/verifier/check.h"
 
-#include "hphp/runtime/base/repo-auth-type-codec.h"
-#include "hphp/runtime/base/mixed-array.h"
-#include "hphp/runtime/vm/native.h"
-
 #include "hphp/runtime/vm/verifier/cfg.h"
 #include "hphp/runtime/vm/verifier/util.h"
 #include "hphp/runtime/vm/verifier/pretty.h"
+
+#include "hphp/runtime/base/mixed-array.h"
+#include "hphp/runtime/base/repo-auth-type-codec.h"
+#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/vm/native.h"
+#include "hphp/runtime/vm/rx.h"
+
 #include <folly/Range.h>
 
 #include <boost/dynamic_bitset.hpp>
@@ -67,6 +70,8 @@ struct State {
   folly::Optional<MOpMode> mbr_mode; // mode of member base register
   boost::dynamic_bitset<> silences; // set of silenced local variables
   bool guaranteedThis; // whether $this is guaranteed to be non-null
+  bool mbrMustContainThis; // immediately following BaseH in a minstr sequence
+  bool afterDim; // has there been a Dim in the current minstr seqence
 };
 
 /**
@@ -117,6 +122,7 @@ struct FuncChecker {
   bool checkMemberKey(State* cur, PC, Op);
   bool checkInputs(State* cur, PC, Block* b);
   bool checkOutputs(State* cur, PC, Block* b);
+  bool checkRxOp(State* cur, PC, Op);
   bool checkSig(PC pc, int len, const FlavorDesc* args, const FlavorDesc* sig);
   bool checkEHStack(const EHEnt&, Block* b);
   bool checkTerminal(State* cur, PC pc);
@@ -1629,6 +1635,480 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   return ok;
 }
 
+bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
+  switch (op) {
+    // nops
+    case Op::Nop:
+    case Op::EntryNop:
+    case Op::BreakTraceHint:
+      return true;
+
+    // flavor safety
+    case Op::UnboxR:
+    case Op::UnboxRNop:
+    case Op::RGetCNop:
+    case Op::CGetCUNop:
+    case Op::UGetCUNop:
+      return true;
+
+    // literals
+    case Op::Null:
+    case Op::NullUninit:
+    case Op::True:
+    case Op::False:
+    case Op::Int:
+    case Op::Double:
+    case Op::String:
+    case Op::Array:
+    case Op::Dict:
+    case Op::Keyset:
+    case Op::Vec:
+    case Op::NewArray:
+    case Op::NewMixedArray:
+    case Op::NewDictArray:
+    case Op::NewLikeArrayL:
+    case Op::NewPackedArray:
+    case Op::NewStructArray:
+    case Op::NewStructDArray:
+    case Op::NewStructDict:
+    case Op::NewVecArray:
+    case Op::NewKeysetArray:
+    case Op::NewVArray:
+    case Op::NewDArray:
+    case Op::AddElemC:
+    case Op::AddNewElemC:
+    case Op::NewCol:
+    case Op::NewPair:
+    case Op::ColFromArray:
+      return true;
+
+    // constants
+    case Op::Cns:
+    case Op::CnsE:
+    case Op::CnsU:
+    case Op::CnsUE:
+    case Op::ClsCns:
+    case Op::ClsCnsD:
+    case Op::File:
+    case Op::Dir:
+    case Op::Method:
+      return true;
+
+    // basic operations
+    case Op::Concat:
+    case Op::ConcatN:
+    case Op::Add:
+    case Op::Sub:
+    case Op::Mul:
+    case Op::AddO:
+    case Op::SubO:
+    case Op::MulO:
+    case Op::Div:
+    case Op::Mod:
+    case Op::Pow:
+    case Op::Xor:
+    case Op::Not:
+    case Op::Same:
+    case Op::NSame:
+    case Op::Eq:
+    case Op::Neq:
+    case Op::Lt:
+    case Op::Lte:
+    case Op::Gt:
+    case Op::Gte:
+    case Op::Cmp:
+    case Op::BitAnd:
+    case Op::BitOr:
+    case Op::BitXor:
+    case Op::BitNot:
+    case Op::Shl:
+    case Op::Shr:
+      return true;
+
+    // type transformations
+    case Op::CastBool:
+    case Op::CastInt:
+    case Op::CastDouble:
+    case Op::CastString:
+    case Op::CastArray:
+    case Op::CastObject:
+    case Op::CastDict:
+    case Op::CastKeyset:
+    case Op::CastVec:
+    case Op::CastVArray:
+    case Op::CastDArray:
+    case Op::DblAsBits:
+
+    // type tests and assertions
+    case Op::IsTypeC:
+    case Op::IsTypeL:
+    case Op::InstanceOf:
+    case Op::InstanceOfD:
+    case Op::IsTypeStructC:
+    case Op::AsTypeStructC:
+    case Op::CombineAndResolveTypeStruct:
+    case Op::RecordReifiedGeneric:
+    case Op::ReifiedName:
+    case Op::ReifiedGeneric:
+    case Op::CheckReifiedGenericMismatch:
+    case Op::VerifyOutType:
+    case Op::VerifyParamType:
+    case Op::VerifyRetTypeC:
+    case Op::VerifyRetNonNullC:
+    case Op::AssertRATL:
+    case Op::AssertRATStk:
+      return true;
+
+    // movs and mov-like things
+    case Op::Dup:
+    case Op::Select:
+    case Op::PopC:
+    case Op::PopR:
+    case Op::PopU:
+    case Op::PopL:
+    case Op::CGetL:
+    case Op::CGetQuietL:
+    case Op::CUGetL:
+    case Op::CGetL2:
+    case Op::PushL:
+    case Op::IssetL:
+    case Op::EmptyL:
+    case Op::SetL:
+    case Op::SetOpL:
+    case Op::IncDecL:
+    case Op::UnsetL:
+    case Op::AKExists:
+    case Op::Idx:
+    case Op::ArrayIdx:
+      return true;
+
+    // this
+    case Op::This:
+    case Op::BareThis:
+    case Op::CheckThis:
+    case Op::InitThisLoc:
+      return true;
+
+    // classref and related
+    case Op::Self:
+    case Op::Parent:
+    case Op::LateBoundCls:
+    case Op::ClsRefGetC:
+    case Op::ClsRefGetL:
+    case Op::DiscardClsRef:
+    case Op::ClsRefName:
+    case Op::OODeclExists:
+      return true;
+
+    // control flow
+    case Op::Jmp:
+    case Op::JmpNS:
+    case Op::JmpZ:
+    case Op::JmpNZ:
+    case Op::Switch:
+    case Op::SSwitch:
+    case Op::RetC:
+    case Op::RetCSuspended:
+    case Op::RetM:
+    case Op::Fatal:
+    case Op::Throw:
+    case Op::Catch:
+    case Op::Unwind:
+    case Op::ChainFaults:
+      return true;
+
+    // iteration (safe variants)
+    case Op::IterInit:
+    case Op::LIterInit:
+    case Op::IterInitK:
+    case Op::LIterInitK:
+    case Op::IterNext:
+    case Op::LIterNext:
+    case Op::IterNextK:
+    case Op::LIterNextK:
+    case Op::IterFree:
+    case Op::LIterFree:
+    case Op::IterBreak:
+      return true;
+
+    // function calling
+    case Op::FPushFunc:
+    case Op::FPushFuncD:
+    case Op::FPushFuncU:
+    case Op::FPushObjMethod:
+    case Op::FPushObjMethodD:
+    case Op::FPushClsMethod:
+    case Op::FPushClsMethodD:
+    case Op::FPushClsMethodS:
+    case Op::FPushClsMethodSD:
+    case Op::FPushCtor:
+    case Op::FPushCtorD:
+    case Op::FPushCtorI:
+    case Op::FPushCtorS:
+    case Op::DecodeCufIter:
+    case Op::FPushCufIter:
+    case Op::CIterFree:
+    case Op::FIsParamByRef:
+    case Op::FIsParamByRefCufIter:
+    case Op::FThrowOnRefMismatch:
+    case Op::FHandleRefMismatch:
+    case Op::FCall:
+    case Op::FCallBuiltin:
+    case Op::NativeImpl:
+    case Op::ResolveFunc:
+    case Op::ResolveObjMethod:
+    case Op::ResolveClsMethod:
+      return true;
+
+    // closures and generators
+    case Op::CreateCl:
+    case Op::CreateCont:
+    case Op::ContEnter:
+    case Op::ContRaise:
+    case Op::Yield:
+    case Op::YieldK:
+    case Op::ContCheck:
+    case Op::ContValid:
+    case Op::ContStarted:
+    case Op::ContKey:
+    case Op::ContCurrent:
+    case Op::ContGetReturn:
+      return true;
+
+    // memoization wrappers
+    case Op::GetMemoKeyL:
+    case Op::MemoGet:
+    case Op::MemoGetEager:
+    case Op::MemoSet:
+    case Op::MemoSetEager:
+      return true;
+
+    // awaitable special ops
+    case Op::WHResult:
+    case Op::Await:
+    case Op::AwaitAll:
+      return true;
+
+    // special ops for array_map/filter/walk functions
+    case Op::WIterInit:
+    case Op::WIterInitK:
+    case Op::WIterNext:
+    case Op::WIterNextK:
+    case Op::SetWithRefLML:
+    case Op::SetWithRefRML:
+      return true;
+
+    // safe member base operations
+    case Op::BaseL:
+    case Op::BaseC:
+    case Op::BaseR:
+    case Op::BaseH:
+      cur->mbrMustContainThis = op == Op::BaseH;
+      cur->afterDim = false;
+      return true;
+
+    // Dim is safe as long as we're not doing a write through an object
+    case Op::Dim: {
+      auto const mbr_contains_this = cur->mbrMustContainThis;
+      cur->mbrMustContainThis = false;
+      cur->afterDim = true;
+      decode_op(pc);
+      auto const mode = decode_oa<MOpMode>(pc);
+      if (mode != MOpMode::Define && mode != MOpMode::Unset) return true;
+      switch (decode_raw<MemberCode>(pc)) {
+        case MEC:
+        case MEL:
+        case MET:
+        case MEI:
+        case MW:
+          return true;
+        case MPC:
+        case MPL:
+        case MPT:
+        case MQT:
+          if (mbr_contains_this) return true;
+          break;
+      }
+      ferror("Dim through object for write is forbidden in Rx functions\n");
+      return RuntimeOption::EvalRxVerifyBody < 2;
+    }
+
+    // member final read: QueryM is always safe
+    case Op::QueryM:
+      return true;
+
+    // member final write: SetRangeM only operates on strings, always safe
+    case Op::SetRangeM:
+      return true;
+
+    // member final write: prop write must not follow Dim
+    case Op::SetM:
+    case Op::UnsetM:
+    case Op::IncDecM:
+    case Op::SetOpM:
+    {
+      decode_op(pc);
+      decode_iva(pc);
+      switch(op) {
+        case Op::SetM:
+        case Op::UnsetM:
+          break;
+        case Op::IncDecM:
+          decode_oa<IncDecOp>(pc);
+          break;
+        case Op::SetOpM:
+          decode_oa<SetOpOp>(pc);
+          break;
+        default:
+          not_reached();
+      }
+      switch (decode_raw<MemberCode>(pc)) {
+        case MEC:
+        case MEL:
+        case MET:
+        case MEI:
+        case MW:
+          return true;
+        case MPC:
+        case MPL:
+        case MPT:
+        case MQT:
+          break;
+      }
+      if (cur->afterDim) {
+        ferror("writes to embedded objects are forbidden in Rx functions: {}\n",
+               opcodeToName(op));
+        return RuntimeOption::EvalRxVerifyBody < 2;
+      }
+      return true;
+    }
+
+    // unsafe: operations definitely involving boxes
+    case Op::PopV:
+    case Op::Box:
+    case Op::Unbox:
+    case Op::BoxR:
+    case Op::BoxRNop:
+    case Op::AddElemV:
+    case Op::AddNewElemV:
+    case Op::RetV:
+    case Op::VGetL:
+    case Op::VGetN:
+    case Op::VGetG:
+    case Op::VGetS:
+    case Op::BindL:
+    case Op::BindN:
+    case Op::BindG:
+    case Op::BindS:
+    case Op::MIterInit:
+    case Op::MIterInitK:
+    case Op::MIterNext:
+    case Op::MIterNextK:
+    case Op::MIterFree:
+    case Op::VerifyRetTypeV:
+    case Op::VGetM:
+    case Op::BindM:
+      ferror("references are forbidden in Rx functions: {}\n",
+             opcodeToName(op));
+      return RuntimeOption::EvalRxVerifyBody < 2;
+
+    // unsafe: globals
+    case Op::BaseGC:
+    case Op::BaseGL:
+      cur->mbrMustContainThis = false;
+      cur->afterDim = false;
+      // fallthrough
+    case Op::CGetG:
+    case Op::CGetQuietG:
+    case Op::IssetG:
+    case Op::EmptyG:
+    case Op::SetG:
+    case Op::SetOpG:
+    case Op::IncDecG:
+    case Op::UnsetG:
+      ferror("globals are forbidden in Rx functions: {}\n", opcodeToName(op));
+      return RuntimeOption::EvalRxVerifyBody < 2;
+
+    // unsafe: class statics
+    case Op::BaseSC:
+    case Op::BaseSL:
+      cur->mbrMustContainThis = false;
+      cur->afterDim = false;
+      // fallthrough
+    case Op::CGetS:
+    case Op::IssetS:
+    case Op::EmptyS:
+    case Op::SetS:
+    case Op::SetOpS:
+    case Op::IncDecS:
+      ferror("statics are forbidden in Rx functions: {}\n", opcodeToName(op));
+      return RuntimeOption::EvalRxVerifyBody < 2;
+
+    // unsafe: variable variables
+    case Op::BaseNC:
+    case Op::BaseNL:
+      cur->mbrMustContainThis = false;
+      cur->afterDim = false;
+      // fallthrough
+    case Op::CGetN:
+    case Op::CGetQuietN:
+    case Op::IssetN:
+    case Op::EmptyN:
+    case Op::SetN:
+    case Op::SetOpN:
+    case Op::IncDecN:
+    case Op::UnsetN:
+      ferror("variable variables are forbidden in Rx functions: {}\n",
+             opcodeToName(op));
+      return RuntimeOption::EvalRxVerifyBody < 2;
+
+    // unsafe: static locals
+    case Op::StaticLocCheck:
+    case Op::StaticLocDef:
+    case Op::StaticLocInit:
+      ferror("static locals are forbidden in Rx functions: {}\n",
+             opcodeToName(op));
+      return RuntimeOption::EvalRxVerifyBody < 2;
+
+    // unsafe: defines and includes
+    case Op::DefFunc:
+    case Op::DefCls:
+    case Op::DefClsNop:
+    case Op::AliasCls:
+    case Op::DefCns:
+    case Op::DefTypeAlias:
+    case Op::Incl:
+    case Op::InclOnce:
+    case Op::Req:
+    case Op::ReqOnce:
+    case Op::ReqDoc:
+      ferror("defines/includes are forbidden in Rx functions: {}\n",
+             opcodeToName(op));
+      return RuntimeOption::EvalRxVerifyBody < 2;
+
+    // unsafe: generator delegation (yield from)
+    case Op::ContAssignDelegate:
+    case Op::ContEnterDelegate:
+    case Op::YieldFromDelegate:
+    case Op::ContUnsetDelegate:
+      ferror("`yield from` is forbidden in Rx functions: {}\n",
+             opcodeToName(op));
+      return RuntimeOption::EvalRxVerifyBody < 2;
+
+    // unsafe: misc
+    case Op::CheckProp:
+    case Op::InitProp:
+    case Op::Clone: // only unsafe because of __clone, we may revisit this
+    case Op::Exit:
+    case Op::Eval:
+    case Op::Print:
+    case Op::Silence:
+      ferror("{} cannot appear in Rx function\n", opcodeToName(op));
+      return RuntimeOption::EvalRxVerifyBody < 2;
+  }
+  not_reached();
+}
+
 std::string FuncChecker::stkToString(int len, const FlavorDesc* args) const {
   std::stringstream out;
   out << '[';
@@ -1696,6 +2176,8 @@ void FuncChecker::initState(State* s) {
   s->silences.clear();
   s->guaranteedThis =
     !m_func->isClosureBody && (m_func->attrs & AttrRequiresThis);
+  s->mbrMustContainThis = false;
+  s->afterDim = false;
 }
 
 void FuncChecker::copyState(State* to, const State* from) {
@@ -1711,6 +2193,8 @@ void FuncChecker::copyState(State* to, const State* from) {
   to->mbr_mode = from->mbr_mode;
   to->silences = from->silences;
   to->guaranteedThis = from->guaranteedThis;
+  to->mbrMustContainThis = from->mbrMustContainThis;
+  to->afterDim = from->afterDim;
 }
 
 bool FuncChecker::checkExnEdge(State cur, Block* b) {
@@ -1735,6 +2219,8 @@ bool FuncChecker::checkExnEdge(State cur, Block* b) {
 
 bool FuncChecker::checkBlock(State& cur, Block* b) {
   bool ok = true;
+  auto const verify_rx = (RuntimeOption::EvalRxVerifyBody > 0) &&
+    funcAttrIsAnyRx(m_func->attrs);
   if (m_errmode == kVerbose) {
     std::cout << blockToString(b, m_graph, unit()) << std::endl;
   }
@@ -1758,6 +2244,7 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
     if (Op(*pc) == Op::IterBreak) ok &= checkIterBreak(&cur, pc);
     ok &= checkClsRefSlots(&cur, pc);
     ok &= checkOutputs(&cur, pc, b);
+    if (verify_rx) ok &= checkRxOp(&cur, pc, op);
   }
   ok &= checkSuccEdges(b, &cur);
   return ok;

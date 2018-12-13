@@ -1,0 +1,16 @@
+Verification Error (unit %s/test/slow/rx/body/misc.php func test): Clone cannot appear in Rx function
+
+Verification Error (unit %s/test/slow/rx/body/misc.php func test): Silence cannot appear in Rx function
+
+Verification Error (unit %s/test/slow/rx/body/misc.php func test): Silence cannot appear in Rx function
+
+Verification Error (unit %s/test/slow/rx/body/misc.php func test): Eval cannot appear in Rx function
+
+Verification Error (unit %s/test/slow/rx/body/misc.php func test): Print cannot appear in Rx function
+
+Verification Error (unit %s/test/slow/rx/body/misc.php func test): Exit cannot appear in Rx function
+
+Verification Error (unit %s/test/slow/rx/body/misc.php func test): Silence cannot appear in Rx function
+
+Evil
+Goodbye

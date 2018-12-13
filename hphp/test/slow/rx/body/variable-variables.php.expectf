@@ -1,0 +1,21 @@
+Verification Error (unit %s/test/slow/rx/body/variable-variables.php func test): variable variables are forbidden in Rx functions: CGetN
+
+Verification Error (unit %s/test/slow/rx/body/variable-variables.php func test): variable variables are forbidden in Rx functions: CGetQuietN
+
+Verification Error (unit %s/test/slow/rx/body/variable-variables.php func test): variable variables are forbidden in Rx functions: IssetN
+
+Verification Error (unit %s/test/slow/rx/body/variable-variables.php func test): variable variables are forbidden in Rx functions: EmptyN
+
+Verification Error (unit %s/test/slow/rx/body/variable-variables.php func test): variable variables are forbidden in Rx functions: SetN
+
+Verification Error (unit %s/test/slow/rx/body/variable-variables.php func test): variable variables are forbidden in Rx functions: SetOpN
+
+Verification Error (unit %s/test/slow/rx/body/variable-variables.php func test): variable variables are forbidden in Rx functions: IncDecN
+
+Verification Error (unit %s/test/slow/rx/body/variable-variables.php func test): variable variables are forbidden in Rx functions: UnsetN
+
+Verification Error (unit %s/test/slow/rx/body/variable-variables.php func test): variable variables are forbidden in Rx functions: BaseNC
+
+Verification Error (unit %s/test/slow/rx/body/variable-variables.php func test): variable variables are forbidden in Rx functions: BaseNL
+
+Done

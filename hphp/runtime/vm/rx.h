@@ -51,6 +51,10 @@ const char* rxAttrsToAttrString(Attr a);
 
 const char* rxLevelToString(RxLevel r);
 
+constexpr bool funcAttrIsAnyRx(Attr a) {
+  return static_cast<uint32_t>(a) & (7u << 14);
+}
+
 bool rxEnforceCallsInLevel(RxLevel level);
 RxLevel rxRequiredCalleeLevel(RxLevel level);
 

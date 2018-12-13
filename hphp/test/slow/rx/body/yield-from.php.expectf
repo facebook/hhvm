@@ -1,0 +1,14 @@
+Verification Error (unit %s/test/slow/rx/body/yield-from.php func gen_bad): `yield from` is forbidden in Rx functions: ContAssignDelegate
+
+Verification Error (unit %s/test/slow/rx/body/yield-from.php func gen_bad): `yield from` is forbidden in Rx functions: ContEnterDelegate
+
+Verification Error (unit %s/test/slow/rx/body/yield-from.php func gen_bad): `yield from` is forbidden in Rx functions: YieldFromDelegate
+
+Verification Error (unit %s/test/slow/rx/body/yield-from.php func gen_bad): `yield from` is forbidden in Rx functions: ContUnsetDelegate
+
+Verification Error (unit %s/test/slow/rx/body/yield-from.php func gen_bad): `yield from` is forbidden in Rx functions: ContUnsetDelegate
+
+1
+2
+3
+Done

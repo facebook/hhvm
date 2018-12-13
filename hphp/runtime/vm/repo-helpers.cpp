@@ -127,13 +127,11 @@ void RepoStmt::reset() {
 //==============================================================================
 // RepoTxn.
 
+/**
+ * This constructor should only be called from Repo::begin
+ */
 RepoTxn::RepoTxn(Repo& repo)
-  : m_repo(repo), m_pending(false), m_error(false) {
-  // Set m_pending AFTER calling repo.begin() so if repo.begin() fails we are
-  // prepared as 'not pending'.
-  // Don't need a rollback guard here because what would we be rolling back?
-  m_repo.begin();
-  m_pending = true;
+  : m_repo(repo), m_pending(true), m_error(false) {
 }
 
 RepoTxn::~RepoTxn() {

@@ -153,17 +153,21 @@ struct RepoQuery {
 };
 
 /*
- * Transaction guard object.
+ * Transaction guard object. Create with Repo::begin().
  *
  * Semantics: the guard object will rollback the transaction unless
  * you tell it not to.  Call .commit() when you want things to stay.
  */
 struct RepoTxn {
-  explicit RepoTxn(Repo& repo); // throws(RepoExc)
   ~RepoTxn();
 
   RepoTxn(const RepoTxn&) = delete;
   RepoTxn& operator=(const RepoTxn&) = delete;
+
+  constexpr RepoTxn(RepoTxn&& o) noexcept
+    : m_repo(o.m_repo), m_pending(o.m_pending), m_error(o.m_error) {
+    o.m_pending = false;
+  }
 
   /*
    * All these routines may throw if there is an error accessing the
@@ -179,7 +183,12 @@ struct RepoTxn {
   bool error() const { return m_error; }
 
  private:
+  friend struct Repo;
   friend struct RepoTxnQuery;
+
+  // Called from Repo::begin()
+  explicit RepoTxn(Repo& repo);
+
   void step(RepoQuery& query); // throws(RepoExc)
   void exec(RepoQuery& query); // throws(RepoExc)
   void rollback(); // nothrow

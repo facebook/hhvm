@@ -668,7 +668,7 @@ void FuncRepoProxy::InsertFuncStmt
 
 void FuncRepoProxy::GetFuncsStmt
                   ::get(UnitEmitter& ue) {
-  RepoTxn txn(m_repo);
+  auto txn = RepoTxn{m_repo.begin()};
   if (!prepared()) {
     auto selectQuery = folly::sformat(
       "SELECT funcSn, preClassId, name, top, extraData "

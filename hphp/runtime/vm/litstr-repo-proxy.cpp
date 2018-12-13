@@ -69,7 +69,7 @@ void LitstrRepoProxy::InsertLitstrStmt::insert(RepoTxn& txn,
 
 RepoStatus LitstrRepoProxy::GetLitstrsStmt::get() {
   try {
-    RepoTxn txn(m_repo);
+    auto txn = RepoTxn{m_repo.begin()};
     if (!prepared()) {
       auto selectQuery = folly::sformat(
         "SELECT litstrId,litstr FROM {} ORDER BY litstrId;",

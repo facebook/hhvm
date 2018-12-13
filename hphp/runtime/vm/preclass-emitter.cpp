@@ -415,7 +415,7 @@ void PreClassRepoProxy::InsertPreClassStmt
 
 void PreClassRepoProxy::GetPreClassesStmt
                       ::get(UnitEmitter& ue) {
-  RepoTxn txn(m_repo);
+  auto txn = RepoTxn{m_repo.begin()};
   if (!prepared()) {
     auto selectQuery = folly::sformat(
       "SELECT preClassId, name, hoistable, extraData "

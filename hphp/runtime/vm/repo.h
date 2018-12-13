@@ -172,9 +172,9 @@ struct Repo : RepoProxy {
   std::string table(int repoId, const char* tablePrefix);
   void exec(const std::string& sQuery); // throws(RepoExc)
 
+  RepoTxn begin(); // throws(RepoExc)
  private:
   friend struct RepoTxn;
-  void begin(); // throws(RepoExc)
   void txPop(); // throws(RepoExc)
   void rollback(); // nothrow
   void commit(); // throws(RepoExc)

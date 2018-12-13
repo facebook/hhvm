@@ -419,7 +419,7 @@ void UnitEmitter::insertMergeableTypeAlias(int ix, Unit::MergeKind kind,
 void UnitEmitter::commit(UnitOrigin unitOrigin) {
   Repo& repo = Repo::get();
   try {
-    RepoTxn txn(repo);
+    auto txn = RepoTxn{repo.begin()};
     RepoStatus err = insert(unitOrigin, txn);
     if (err == RepoStatus::success) {
       txn.commit();
@@ -980,7 +980,7 @@ void UnitRepoProxy::InsertUnitStmt
 
 RepoStatus UnitRepoProxy::GetUnitStmt::get(UnitEmitter& ue, const MD5& md5) {
   try {
-    RepoTxn txn(m_repo);
+    auto txn = RepoTxn{m_repo.begin()};
     if (!prepared()) {
       auto selectQuery = folly::sformat(
         "SELECT unitSn, preload, bc, data FROM {} WHERE md5 == @md5;",
@@ -1029,7 +1029,7 @@ void UnitRepoProxy::InsertUnitLitstrStmt
 
 void UnitRepoProxy::GetUnitLitstrsStmt
                   ::get(UnitEmitter& ue) {
-  RepoTxn txn(m_repo);
+  auto txn = RepoTxn{m_repo.begin()};
   if (!prepared()) {
     auto selectQuery = folly::sformat(
       "SELECT litstrId, litstr FROM {} "
@@ -1070,7 +1070,7 @@ void UnitRepoProxy::InsertUnitArrayTypeTableStmt::insert(
 
 void UnitRepoProxy::GetUnitArrayTypeTableStmt
                   ::get(UnitEmitter& ue) {
-  RepoTxn txn(m_repo);
+  auto txn = RepoTxn{m_repo.begin()};
   if (!prepared()) {
     auto selectQuery = folly::sformat(
       "SELECT unitSn, arrayTypeTable FROM {} WHERE unitSn == @unitSn;",
@@ -1110,7 +1110,7 @@ void UnitRepoProxy::InsertUnitArrayStmt
 
 void UnitRepoProxy::GetUnitArraysStmt
                   ::get(UnitEmitter& ue) {
-  RepoTxn txn(m_repo);
+  auto txn = RepoTxn{m_repo.begin()};
   if (!prepared()) {
     auto selectQuery = folly::sformat(
       "SELECT arrayId, array FROM {} "
@@ -1168,7 +1168,7 @@ void UnitRepoProxy::InsertUnitMergeableStmt
 
 void UnitRepoProxy::GetUnitMergeablesStmt
                   ::get(UnitEmitter& ue) {
-  RepoTxn txn(m_repo);
+  auto txn = RepoTxn{m_repo.begin()};
   if (!prepared()) {
     auto selectQuery = folly::sformat(
       "SELECT mergeableIx, mergeableKind, mergeableId, mergeableValue "
@@ -1255,7 +1255,7 @@ void UnitRepoProxy::InsertUnitLineTableStmt
 
 void UnitRepoProxy::GetUnitLineTableStmt::get(int64_t unitSn,
                                               LineTable& lineTable) {
-  RepoTxn txn(m_repo);
+  auto txn = RepoTxn{m_repo.begin()};
   if (!prepared()) {
     auto selectQuery = folly::sformat(
       "SELECT data FROM {} WHERE unitSn == @unitSn;",
@@ -1304,7 +1304,7 @@ RepoStatus
 UnitRepoProxy::GetSourceLocTabStmt::get(int64_t unitSn,
                                         SourceLocTable& sourceLocTab) {
   try {
-    RepoTxn txn(m_repo);
+    auto txn = RepoTxn{m_repo.begin()};
     if (!prepared()) {
       auto selectQuery = folly::sformat(
         "SELECT pastOffset, line0, char0, line1, char1 "

@@ -149,7 +149,7 @@ bool Repo::hasGlobalData() {
         "SELECT count(*) FROM {};", tbl
       )
     );
-    RepoTxn txn(*this);
+    auto txn = RepoTxn{begin()};
     RepoTxnQuery query(txn, stmt);
     query.step();
 
@@ -190,7 +190,7 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
           "SELECT count(*), data FROM {};", tbl
         )
       );
-      RepoTxn txn(*this);
+      auto txn = RepoTxn{begin()};
       RepoTxnQuery query(txn, stmt);
       query.step();
       if (!query.row()) {
@@ -291,7 +291,7 @@ void Repo::saveGlobalData(GlobalData newData) {
       "INSERT INTO {} VALUES(@data);", table(repoId, "GlobalData")
     ).str()
   );
-  RepoTxn txn(*this);
+  auto txn = RepoTxn{begin()};
   RepoTxnQuery query(txn, stmt);
   BlobEncoder encoder;
   encoder(s_globalData);
@@ -336,7 +336,7 @@ Repo::enumerateUnits(int repoId, bool preloadOnly, bool warn) {
                    "SELECT path, md5 FROM {};",
                    table(repoId, "FileMd5"))
                 );
-    RepoTxn txn(*this);
+    auto txn = RepoTxn{begin()};
     RepoTxnQuery query(txn, stmt);
 
     for (query.step(); query.row(); query.step()) {
@@ -377,7 +377,7 @@ void Repo::InsertFileHashStmt::insert(RepoTxn& txn, const StringData* path,
 
 RepoStatus Repo::GetFileHashStmt::get(const char *path, MD5& md5) {
   try {
-    RepoTxn txn(m_repo);
+    auto txn = RepoTxn{m_repo.begin()};
     if (!prepared()) {
       auto selectQuery = folly::sformat(
         "SELECT f.md5 "
@@ -446,7 +446,7 @@ RepoStatus Repo::insertMd5(UnitOrigin unitOrigin, UnitEmitter* ue,
 
 void Repo::commitMd5(UnitOrigin unitOrigin, UnitEmitter* ue) {
   try {
-    RepoTxn txn(*this);
+    auto txn = RepoTxn{begin()};
     RepoStatus err = insertMd5(unitOrigin, ue, txn);
     if (err == RepoStatus::success) {
       txn.commit();
@@ -473,10 +473,10 @@ void Repo::exec(const std::string& sQuery) {
   query.exec();
 }
 
-void Repo::begin() {
+RepoTxn Repo::begin() {
   if (m_txDepth > 0) {
     m_txDepth++;
-    return;
+    return RepoTxn{*this};
   }
   if (debug) {
     // Verify start state.
@@ -506,6 +506,8 @@ void Repo::begin() {
   RepoQuery query(m_beginStmt);
   query.exec();
   m_txDepth++;
+
+  return RepoTxn(*this);
 }
 
 void Repo::txPop() {
@@ -1051,7 +1053,7 @@ RepoStatus Repo::initSchema(int repoId, bool& isWritable,
 
 bool Repo::schemaExists(int repoId) {
   try {
-    RepoTxn txn(*this);
+    auto txn = RepoTxn{begin()};
     auto selectQuery = folly::sformat(
       "SELECT product FROM {};", table(repoId, "magic"));
     RepoStmt stmt(*this);
@@ -1075,7 +1077,7 @@ bool Repo::schemaExists(int repoId) {
 
 RepoStatus Repo::createSchema(int repoId, std::string& errorMsg) {
   try {
-    RepoTxn txn(*this);
+    auto txn = RepoTxn{begin()};
     {
       auto createQuery = folly::sformat(
         "CREATE TABLE {} (product TEXT);", table(repoId, "magic"));
@@ -1125,7 +1127,7 @@ void batchCommit(const std::vector<std::unique_ptr<UnitEmitter>>& ues) {
   // files having identical contents.
   bool err = false;
   {
-    RepoTxn txn(repo);
+    auto txn = RepoTxn{repo.begin()};
 
     for (auto& ue : ues) {
       if (repo.insertUnit(ue.get(), UnitOrigin::File, txn) ==

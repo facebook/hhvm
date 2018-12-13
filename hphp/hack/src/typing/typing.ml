@@ -569,13 +569,14 @@ and fun_implicit_return env pos ret = function
     (* A function without a terminal block has an implicit return; the
      * "void" type *)
     let env = check_inout_return env in
-    let rty = Reason.Rno_return pos, Tprim Nast.Tvoid in
+    let r = Reason.Rno_return pos in
+    let rty = TMT.void r in
     Typing_return.implicit_return env pos ~expected:ret ~actual:rty
   | Ast.FAsync ->
     (* An async function without a terminal block has an implicit return;
      * the Awaitable<void> type *)
     let r = Reason.Rno_return_async pos in
-    let rty = TMT.awaitable r (r, Tprim Nast.Tvoid) in
+    let rty = TMT.awaitable r (TMT.void r) in
     Typing_return.implicit_return env pos ~expected:ret ~actual:rty
 
 and block env (stl : block) = List.map_env env stl ~f:stmt
@@ -720,7 +721,7 @@ and stmt env = function
       env, T.If(te, tb1, tb2)
   | Return (p, None) ->
       let env = check_inout_return env in
-      let rty = Typing_return.wrap_awaitable env p (Reason.Rwitness p, Tprim Tvoid) in
+      let rty = Typing_return.wrap_awaitable env p (TMT.void (Reason.Rwitness p)) in
       let { Typing_env_return_info.return_type = expected_return; _ } = Env.get_return env in
       let env = Typing_return.implicit_return env p ~expected:expected_return ~actual:rty in
       let env = LEnv.move_and_merge_next_in_cont env C.Exit in
@@ -1101,7 +1102,7 @@ and bind_as_expr env loop_ty p ty1 ty2 aexpr =
   (* Set id as dynamic if the foreach loop was dynamic *)
   let env, eloop_ty = Env.expand_type env loop_ty in
   let ty1, ty2 = if TUtils.is_dynamic env eloop_ty then
-    (fst ty1, Tdynamic), (fst ty2, Tdynamic) else ty1, ty2 in
+    TMT.dynamic (fst ty1), TMT.dynamic (fst ty2) else ty1, ty2 in
   let check_reassigned_mutable env te =
     if Env.env_local_reactive env
     then Typing_mutability.handle_assignment_mutability env te None
@@ -1343,7 +1344,7 @@ and expr_
         TypecheckerOptions.experimental_disable_shape_and_tuple_arrays in
 
   let subtype_arraykey ~class_name ~key_pos env key_ty =
-    let ty_arraykey = Reason.Ridx_dict key_pos, Tprim Tarraykey in
+    let ty_arraykey = TMT.arraykey (Reason.Ridx_dict key_pos) in
     Type.sub_type p (Reason.index_class class_name) env key_ty ty_arraykey in
 
   let forget_fake_members env p callexpr =
@@ -1592,28 +1593,28 @@ and expr_
       let env = LEnv.save_and_merge_next_in_cont env C.Exit in
       let env = condition env true te in
       make_result env p (T.Assert (T.AE_assert te))
-        (Reason.Rwitness p, Tprim Tvoid)
+        (TMT.void (Reason.Rwitness p))
   | True ->
-      make_result env p T.True (Reason.Rwitness p, Tprim Tbool)
+      make_result env p T.True (TMT.bool (Reason.Rwitness p))
   | False ->
-      make_result env p T.False (Reason.Rwitness p, Tprim Tbool)
+      make_result env p T.False (TMT.bool (Reason.Rwitness p))
     (* TODO TAST: consider checking that the integer is in range. Right now
      * it's possible for HHVM to fail on well-typed Hack code
      *)
   | Int s ->
-      make_result env p (T.Int s) (Reason.Rwitness p, Tprim Tint)
+      make_result env p (T.Int s) (TMT.int (Reason.Rwitness p))
   | Float s ->
-      make_result env p (T.Float s) (Reason.Rwitness p, Tprim Tfloat)
+      make_result env p (T.Float s) (TMT.float (Reason.Rwitness p))
     (* TODO TAST: consider introducing a "null" type, and defining ?t to
      * be null | t
      *)
   | Null ->
-      make_result env p T.Null (Reason.Rwitness p, Tprim Tnull)
+      make_result env p T.Null (TMT.null (Reason.Rwitness p))
   | String s ->
-      make_result env p (T.String s) (Reason.Rwitness p, Tprim Tstring)
+      make_result env p (T.String s) (TMT.string (Reason.Rwitness p))
   | String2 idl ->
       let env, tel = string2 env idl in
-      make_result env p (T.String2 tel) (Reason.Rwitness p, Tprim Tstring)
+      make_result env p (T.String2 tel) (TMT.string (Reason.Rwitness p))
   | PrefixedString (n, e) ->
       if n <> "re"
       then begin
@@ -1829,7 +1830,7 @@ and expr_
     )
   | Lplaceholder p ->
       let r = Reason.Rplaceholder p in
-      let ty = r, Tprim Tvoid in
+      let ty = TMT.void r in
       make_result env p (T.Lplaceholder p) ty
   | Dollardollar _ when valkind = `lvalue ->
       Errors.dollardollar_lvalue p;
@@ -1997,8 +1998,7 @@ and expr_
       let env = condition env c te1 in
       let env, te2, _ = expr env e2 in
       let env = { env with Env.lenv = lenv } in
-      make_result env p (T.Binop(bop, te1, te2))
-        (Reason.Rlogic_ret p, Tprim Tbool)
+      make_result env p (T.Binop(bop, te1, te2)) (TMT.bool (Reason.Rlogic_ret p))
   | Binop (bop, e1, e2) when Env.is_strict env
                         && (snd e1 = Nast.Null || snd e2 = Nast.Null)
                         && (bop = Ast.Eqeqeq || bop = Ast.Diff2) ->
@@ -2006,8 +2006,7 @@ and expr_
       let env, te, ty = raw_expr env e in
       let tne = T.make_typed_expr (fst ne) ty T.Null in
       let te1, te2 = if snd e2 = Nast.Null then te, tne else tne, te in
-      make_result env p (T.Binop(bop, te1, te2))
-        (Reason.Rcomp p, Tprim Tbool)
+      make_result env p (T.Binop(bop, te1, te2)) (TMT.bool (Reason.Rcomp p))
   | Binop (bop, e1, e2) ->
       let env, te1, ty1 = raw_expr env e1 in
       let env, te2, ty2 = raw_expr env e2 in
@@ -2124,7 +2123,7 @@ and expr_
     let env, te1, ty1 = expr ~accept_using_var:true env e1 in
     let env, te2, _ = expr env e2 in
     let ty = if TUtils.is_dynamic env ty1 then
-      (Reason.Rwitness p, Tdynamic) else
+      TMT.dynamic (Reason.Rwitness p) else
       (Reason.Rwitness p, Typing_utils.tany env)
     in
     let (pos, _), te2 = te2 in
@@ -2147,7 +2146,7 @@ and expr_
                   Errors.internal_error p "yield found in non-generator";
                   (Reason.Rwitness p, Typing_utils.tany env), tyvars
               | Ast.FGenerator ->
-                  (Reason.Rwitness p, Tprim Tint), tyvars
+                  TMT.int (Reason.Rwitness p), tyvars
               | Ast.FAsyncGenerator ->
                 let ty, tyvars = Env.fresh_type_add_tyvars p tyvars in
                   (Reason.Ryield_asyncnull p, Toption ty), tyvars
@@ -2181,7 +2180,7 @@ and expr_
       expr ~is_using_clause env e in
       (* Expected type of `e` in `yield from e` is KeyedTraversable<Tk,Tv> (but might be dynamic)*)
     let expected_yield_from_ty = TMT.keyed_traversable (Reason.Ryield_gen p) key value in
-    let from_dynamic = SubType.is_sub_type env yield_from_ty (fst yield_from_ty, Tdynamic) in
+    let from_dynamic = SubType.is_sub_type env yield_from_ty (TMT.dynamic (fst yield_from_ty)) in
     let env =
       if from_dynamic
       then env (* all set if dynamic, otherwise need to check against KeyedTraversable *)
@@ -2193,15 +2192,15 @@ and expr_
         ty
       | Ast.FGenerator ->
         if from_dynamic
-        then Reason.Ryield_gen p, Tdynamic (*TODO: give better reason*)
-        else TMT.generator (Reason.Ryield_gen p) key value (Reason.Rwitness p, Tprim Tvoid)
+        then TMT.dynamic (Reason.Ryield_gen p) (*TODO: give better reason*)
+        else TMT.generator (Reason.Ryield_gen p) key value (TMT.void (Reason.Rwitness p))
       | Ast.FSync | Ast.FAsync | Ast.FAsyncGenerator ->
         failwith "Parsing should never allow this" in
     let Typing_env_return_info.{ return_type = expected_return; _ } = Env.get_return env in
     let env =
       Type.coerce_type p (Reason.URyield_from) env rty expected_return in
     let env = Env.forget_members env p in
-    make_result ~tyvars env p (T.Yield_from te) (Reason.Rwitness p, Tprim Tvoid)
+    make_result ~tyvars env p (T.Yield_from te) (TMT.void (Reason.Rwitness p))
   | Await e ->
       (* Await is permitted in a using clause e.g. using (await make_handle()) *)
       let env, te, rty =
@@ -2252,10 +2251,10 @@ and expr_
   | InstanceOf (e, (pos, cid)) ->
       let env, te, _ = expr env e in
       let env, te2, _class = instantiable_cid pos env cid in
-      make_result env p (T.InstanceOf (te, te2)) (Reason.Rwitness p, Tprim Tbool)
+      make_result env p (T.InstanceOf (te, te2)) (TMT.bool (Reason.Rwitness p))
   | Is (e, hint) ->
     let env, te, _ = expr env e in
-    make_result env p (T.Is (te, hint)) (Reason.Rwitness p, Tprim Tbool)
+    make_result env p (T.Is (te, hint)) (TMT.bool (Reason.Rwitness p))
   | As (e, hint, is_nullable) ->
     let refine_type env lpos lty rty =
       let reason = Reason.Ras lpos in
@@ -3096,7 +3095,7 @@ and assign_ p ur env e1 ty2 =
     let env, ty1 = set_valid_rvalue p env x ty2 in
     make_result env (fst e1) (T.Lvar id) ty1
   | (_, Lplaceholder id) ->
-    let placeholder_ty = Reason.Rplaceholder p, (Tprim Tvoid) in
+    let placeholder_ty = TMT.void (Reason.Rplaceholder p) in
     make_result env (fst e1) (T.Lplaceholder id) placeholder_ty
   | (_, List el) ->
     let env, folded_ty2 = TUtils.fold_unresolved env ty2 in
@@ -3132,7 +3131,7 @@ and assign_ p ur env e1 ty2 =
             make_result env (fst e1) (T.List tel) ty2
           | (r, (Tdynamic)) ->
             let env, tel = List.map_env env el begin fun env e ->
-              let env, te, _ = assign (fst e) env e (r, Tdynamic) in
+              let env, te, _ = assign (fst e) env e (TMT.dynamic r) in
               env, te
             end in
             make_result env (fst e1) (T.List tel) ty2
@@ -3302,7 +3301,7 @@ and array_field_value ~expected env = function
 and array_field_key ~expected env = function
   (* This shouldn't happen *)
   | Nast.AFvalue (p, _) ->
-      let ty = (Reason.Rwitness p, Tprim Tint) in
+      let ty = TMT.int (Reason.Rwitness p) in
       env, (T.make_typed_expr p ty T.Any, ty)
   | Nast.AFkvalue (x, _) ->
       array_value ~expected env x
@@ -3334,7 +3333,7 @@ and check_parent_construct pos env el uel env_parent =
   (* Not sure why we need to equate these types *)
   let env = Type.sub_type pos (Reason.URnone) env env_parent parent in
   let env = Type.sub_type pos (Reason.URnone) env parent env_parent in
-  env, tel, tuel, (Reason.Rwitness pos, Tprim Tvoid), parent, fty
+  env, tel, tuel, TMT.void (Reason.Rwitness pos), parent, fty
 
 and call_parent_construct pos env el uel =
   let parent = Env.get_parent env in
@@ -3481,7 +3480,7 @@ and is_abstract_ft fty = match fty with
   | Id ((p, pseudo_func) as id) when pseudo_func = SN.SpecialFunctions.echo ->
       check_function_in_suspend SN.SpecialFunctions.echo;
       let env, tel, _ = exprs ~accept_using_var:true env el in
-      make_call_special env id tel (Reason.Rwitness p, Tprim Tvoid)
+      make_call_special env id tel (TMT.void (Reason.Rwitness p))
   (* Special function `empty` *)
   | Id ((_, pseudo_func) as id) when pseudo_func = SN.PseudoFunctions.empty ->
     check_function_in_suspend SN.PseudoFunctions.empty;
@@ -3600,7 +3599,7 @@ and is_abstract_ft fty = match fty with
                   let env = SubType.sub_type env ety container_type in
                   let env, tv = get_value_type env tv in
                   (env, tyvars), (r, Tarraykind (AKmap (
-                    (explain_array_filter (r, Tprim Tarraykey)),
+                    (explain_array_filter (TMT.arraykey r)),
                     tv))))
                 (fun _ -> (env, tyvars), res)))
       in let (env, tyvars), rty = get_array_filter_return_type (env, tyvars) ty in
@@ -3757,7 +3756,7 @@ and is_abstract_ft fty = match fty with
                   let container_type = TMT.container r_fty tv in
                   let env = SubType.sub_type env x container_type in
                   env, (fun tr -> (r, Tarraykind (AKmap (
-                    (r, Tprim Tarraykey),
+                    (TMT.arraykey r),
                     tr)))) in
                 let env, tr =
                   Errors.try_
@@ -4503,7 +4502,7 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
 
     end (* match Env.get_class env (snd x) *)
   | _, Tdynamic ->
-    let ty = Reason.Rdynamic_prop id_pos, Tdynamic in
+    let ty = TMT.dynamic (Reason.Rdynamic_prop id_pos) in
     env, ty, ISet.empty, None
   | _, Tobject
   | _, Tany
@@ -4956,8 +4955,8 @@ and call_ ~expected ~method_call_info pos env fty el uel =
     end in
     let env = call_untyped_unpack env uel in
     let ty =
-      if snd efty = Tdynamic then
-        (Reason.Rdynamic_call pos, Tdynamic)
+      if snd efty = Tdynamic
+      then TMT.dynamic (Reason.Rdynamic_call pos)
       else (Reason.Rnone, Typing_utils.tany env)
     in
     env, tel, [], ty
@@ -5216,30 +5215,32 @@ and enforce_sub_ty env p ty1 ty2 =
 
 (* throws typing error if neither t <: ty nor t <: dynamic, and adds appropriate
  * constraint to env otherwise *)
-and check_type ty p r env t =
-  let is_ty = SubType.is_sub_type env t (r, ty) in
-  let is_dynamic = SubType.is_sub_type env t (r, Tdynamic) in
+and check_type ty p env t =
+  let is_ty = SubType.is_sub_type env t ty in
+  let is_dynamic = SubType.is_sub_type env t (TMT.dynamic (fst ty)) in
   match is_ty, is_dynamic with
-  | false, true -> enforce_sub_ty env p t (r, Tdynamic)
-  | _ -> enforce_sub_ty env p t (r, ty)
+  | false, true -> enforce_sub_ty env p t (TMT.dynamic (fst ty))
+  | _ -> enforce_sub_ty env p t ty
 
 (* does check_type with num and then gives back normalized type and env *)
 and check_num env p t r =
-  let env2, t2 = check_type (Tprim Tnum) p r env t in
-  env2, if SubType.is_sub_type env2 t (fst t2, Tprim Tint)
-    then (fst t2, Tprim Tint)
-    else if SubType.is_sub_type env2 t (fst t2, Tprim Tfloat)
-    then (fst t2, Tprim Tfloat)
-    else if SubType.is_sub_type env2 t (fst t2, Tprim Tnum)
-    then (fst t2, Tprim Tnum)
-    else (fst t2, Tdynamic)
+  let env2, t2 = check_type (TMT.num r) p env t in
+  let r2 = fst t2 in
+  env2, if SubType.is_sub_type env2 t (TMT.int r2)
+    then TMT.int r2
+    else if SubType.is_sub_type env2 t (TMT.float r2)
+    then TMT.float r2
+    else if SubType.is_sub_type env2 t (TMT.num r2)
+    then TMT.num r2
+    else TMT.dynamic r2
 
 (* does check_type with int and then gives back normalized type and env *)
 and check_int env p t r =
-  let env2, t2 = check_type (Tprim Tint) p r env t in
-  env2, if SubType.is_sub_type env2 t (fst t2, Tprim Tint)
-    then (fst t2, Tprim Tint)
-    else (fst t2, Tdynamic)
+  let env2, t2 = check_type (TMT.int r) p env t in
+  let r2 = fst t2 in
+  env2, if SubType.is_sub_type env2 t (TMT.int r2)
+    then TMT.int r2
+    else TMT.dynamic r2
 
 and unop ~is_func_arg ~forbid_uref p env uop te ty =
   let make_result env te result_ty =
@@ -5251,7 +5252,7 @@ and unop ~is_func_arg ~forbid_uref p env uop te ty =
     then make_result env te ty
     else (* args isn't any or a variant thereof so can actually do stuff *)
       (* !$x (logical not) works with any type, so we just return Tbool *)
-      make_result env te (Reason.Rlogic_ret p, Tprim Tbool)
+      make_result env te (TMT.bool (Reason.Rlogic_ret p))
   | Ast.Utild ->
       if is_any ty
       then make_result env te ty
@@ -5259,8 +5260,8 @@ and unop ~is_func_arg ~forbid_uref p env uop te ty =
       let env, t = check_int env p ty (Reason.Rbitwise p) in
       begin
         match snd t with
-        | Tdynamic -> make_result env te (Reason.Rbitwise_dynamic p, Tdynamic)
-        | _ -> make_result env te (Reason.Rbitwise_ret p, Tprim Tint)
+        | Tdynamic -> make_result env te (TMT.dynamic (Reason.Rbitwise_dynamic p))
+        | _ -> make_result env te (TMT.int (Reason.Rbitwise_ret p))
       end
   | Ast.Uincr
   | Ast.Upincr
@@ -5285,12 +5286,12 @@ and unop ~is_func_arg ~forbid_uref p env uop te ty =
         in
         match snd t with
         | Tprim Tfloat ->
-          make_result env te (Reason.Rarith_ret_float (p, fst t, Reason.Aonly), Tprim Tfloat)
+          make_result env te (TMT.float (Reason.Rarith_ret_float (p, fst t, Reason.Aonly)))
         | Tprim Tnum ->
-          make_result env te (Reason.Rarith_ret_num (p, fst t, Reason.Aonly), Tprim Tnum)
-        | Tprim Tint -> make_result env te (Reason.Rarith_ret_int p, Tprim Tint)
-        | Tdynamic -> make_result env te (Reason.Rincdec_dynamic p, Tdynamic)
-        | _ ->  make_result env te (Reason.Rarith_ret p, Tprim Tnum)
+          make_result env te (TMT.num (Reason.Rarith_ret_num (p, fst t, Reason.Aonly)))
+        | Tprim Tint -> make_result env te (TMT.int (Reason.Rarith_ret_int p))
+        | Tdynamic -> make_result env te (TMT.dynamic (Reason.Rincdec_dynamic p))
+        | _ ->  make_result env te (TMT.num (Reason.Rarith_ret p))
       end
   | Ast.Uplus
   | Ast.Uminus ->
@@ -5301,11 +5302,11 @@ and unop ~is_func_arg ~forbid_uref p env uop te ty =
       begin
         match snd t with
         | Tprim Tfloat ->
-          make_result env te (Reason.Rarith_ret_float (p, fst t, Reason.Aonly), Tprim Tfloat)
+          make_result env te (TMT.float (Reason.Rarith_ret_float (p, fst t, Reason.Aonly)))
         | Tprim Tnum ->
-          make_result env te (Reason.Rarith_ret_num (p, fst t, Reason.Aonly), Tprim Tnum)
-        | Tprim Tint -> make_result env te (Reason.Rarith_ret_int p, Tprim Tint)
-        | _ -> make_result env te (Reason.Rarith_ret p, Tprim Tnum)
+          make_result env te (TMT.num (Reason.Rarith_ret_num (p, fst t, Reason.Aonly)))
+        | Tprim Tint -> make_result env te (TMT.int (Reason.Rarith_ret_int p))
+        | _ -> make_result env te (TMT.num (Reason.Rarith_ret p))
       end
   | Ast.Uref ->
       if Env.env_local_reactive env
@@ -5346,17 +5347,17 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
       annotated as such, or we are e.g. HH_FIXMEing *)
     begin
       match snd t1, snd t2 with
-      | Tprim Tint, Tprim Tint -> make_result env te1 te2 (Reason.Rarith_ret_int p, Tprim Tint)
+      | Tprim Tint, Tprim Tint -> make_result env te1 te2 (TMT.int (Reason.Rarith_ret_int p))
       | Tprim Tfloat, _ ->
-        make_result env te1 te2 ((Reason.Rarith_ret_float (p, fst t1, Reason.Afirst)), Tprim Tfloat)
+        make_result env te1 te2 (TMT.float (Reason.Rarith_ret_float (p, fst t1, Reason.Afirst)))
       | _, Tprim Tfloat ->
-        make_result env te1 te2 ((Reason.Rarith_ret_float (p, fst t2, Reason.Asecond)),Tprim Tfloat)
+        make_result env te1 te2 (TMT.float (Reason.Rarith_ret_float (p, fst t2, Reason.Asecond)))
       | Tprim Tnum, _ ->
-        make_result env te1 te2 ((Reason.Rarith_ret_num (p, fst t1, Reason.Afirst)), Tprim Tnum)
+        make_result env te1 te2 (TMT.num (Reason.Rarith_ret_num (p, fst t1, Reason.Afirst)))
       | _, Tprim Tnum ->
-        make_result env te1 te2 ((Reason.Rarith_ret_num (p, fst t2, Reason.Asecond)), Tprim Tnum)
-      | Tdynamic, Tdynamic -> make_result env te1 te2 (Reason.Rsum_dynamic p, Tdynamic)
-      | _ -> make_result env te1 te2 (Reason.Rarith_ret p, Tprim Tnum)
+        make_result env te1 te2 (TMT.num (Reason.Rarith_ret_num (p, fst t2, Reason.Asecond)))
+      | Tdynamic, Tdynamic -> make_result env te1 te2 (TMT.dynamic (Reason.Rsum_dynamic p))
+      | _ -> make_result env te1 te2 (TMT.num (Reason.Rarith_ret p))
     end
   | Ast.Minus | Ast.Star when not contains_any ->
     let env, t1 = check_num env p ty1 (Reason.Rarith p1) in
@@ -5365,16 +5366,16 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
       annotated as such, or we are e.g. HH_FIXMEing *)
     begin
       match snd t1, snd t2 with
-      | Tprim Tint, Tprim Tint -> make_result env te1 te2 (Reason.Rarith_ret_int p, Tprim Tint)
+      | Tprim Tint, Tprim Tint -> make_result env te1 te2 (TMT.int (Reason.Rarith_ret_int p))
       | Tprim Tfloat, _ ->
-        make_result env te1 te2 ((Reason.Rarith_ret_float (p, fst t1, Reason.Afirst)), Tprim Tfloat)
+        make_result env te1 te2 (TMT.float (Reason.Rarith_ret_float (p, fst t1, Reason.Afirst)))
       | _, Tprim Tfloat ->
-        make_result env te1 te2 ((Reason.Rarith_ret_float (p, fst t2, Reason.Asecond)),Tprim Tfloat)
+        make_result env te1 te2 (TMT.float (Reason.Rarith_ret_float (p, fst t2, Reason.Asecond)))
       | Tprim Tnum, _ ->
-        make_result env te1 te2 ((Reason.Rarith_ret_num (p, fst t1, Reason.Afirst)), Tprim Tnum)
+        make_result env te1 te2 (TMT.num (Reason.Rarith_ret_num (p, fst t1, Reason.Afirst)))
       | _, Tprim Tnum ->
-        make_result env te1 te2 ((Reason.Rarith_ret_num (p, fst t2, Reason.Asecond)), Tprim Tnum)
-      | _ -> make_result env te1 te2 (Reason.Rarith_ret p, Tprim Tnum)
+        make_result env te1 te2 (TMT.num (Reason.Rarith_ret_num (p, fst t2, Reason.Asecond)))
+      | _ -> make_result env te1 te2 (TMT.num (Reason.Rarith_ret p))
     end
   | Ast.Slash | Ast.Starstar when not contains_any ->
     let env, t1 = check_num env p ty1 (Reason.Rarith p1) in
@@ -5387,10 +5388,10 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
     begin
       match snd t1, snd t2 with
       | Tprim Tfloat, _ ->
-        make_result env te1 te2 ((Reason.Rarith_ret_float (p, fst t1, Reason.Afirst)), Tprim Tfloat)
+        make_result env te1 te2 (TMT.float (Reason.Rarith_ret_float (p, fst t1, Reason.Afirst)))
       | _, Tprim Tfloat ->
-        make_result env te1 te2 ((Reason.Rarith_ret_float (p, fst t2, Reason.Asecond)), Tprim Tfloat)
-      | _ -> make_result env te1 te2 (r, Tprim Tnum)
+        make_result env te1 te2 (TMT.float (Reason.Rarith_ret_float (p, fst t2, Reason.Asecond)))
+      | _ -> make_result env te1 te2 (TMT.num r)
     end
   | Ast.Percent | Ast.Ltlt | Ast.Gtgt when not contains_any ->
     let env, _ = check_int env p ty1 (Reason.Rarith p1) in
@@ -5400,7 +5401,7 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
     let r = match bop with
       | Ast.Percent -> Reason.Rarith_ret_int p
       | _ -> Reason.Rbitwise_ret p in
-    make_result env te1 te2 (r, Tprim Tint)
+    make_result env te1 te2 (TMT.int r)
   | Ast.Xor | Ast.Amp | Ast.Bar when not contains_any ->
     let env, t1 = check_int env p ty1 (Reason.Rbitwise p1) in
     let env, t2 = check_int env p ty2 (Reason.Rbitwise p2) in
@@ -5408,20 +5409,20 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
       annotated as such, or we are e.g. HH_FIXMEing *)
     begin
       match snd t1, snd t2 with
-      | Tdynamic, Tdynamic -> make_result env te1 te2 (Reason.Rbitwise_dynamic p, Tdynamic)
-      | _ -> make_result env te1 te2 (Reason.Rbitwise_ret p, Tprim Tint)
+      | Tdynamic, Tdynamic -> make_result env te1 te2 (TMT.dynamic (Reason.Rbitwise_dynamic p))
+      | _ -> make_result env te1 te2 (TMT.int (Reason.Rbitwise_ret p))
     end
-  | Ast.Eqeq  | Ast.Diff  ->
-      make_result env te1 te2 (Reason.Rcomp p, Tprim Tbool)
-  | Ast.Eqeqeq | Ast.Diff2 ->
-      make_result env te1 te2 (Reason.Rcomp p, Tprim Tbool)
+  | Ast.Eqeq  | Ast.Diff | Ast.Eqeqeq | Ast.Diff2 ->
+      make_result env te1 te2 (TMT.bool (Reason.Rcomp p))
   | Ast.Lt | Ast.Lte | Ast.Gt | Ast.Gte | Ast.Cmp ->
-      let ty_result = match bop with Ast.Cmp -> Tprim Tint | _ -> Tprim Tbool in
-      let ty_num = (Reason.Rcomp p, Tprim Tnum) in
-      let ty_string = (Reason.Rcomp p, Tprim Tstring) in
+      let ty_num = TMT.num (Reason.Rcomp p) in
+      let ty_int = TMT.int (Reason.Rcomp p) in
+      let ty_bool = TMT.bool (Reason.Rcomp p) in
+      let ty_result = match bop with Ast.Cmp -> ty_int | _ -> ty_bool in
+      let ty_string = TMT.string (Reason.Rcomp p) in
       let ty_datetime = TMT.datetime (Reason.Rcomp p) in
       let ty_datetimeimmutable = TMT.datetime_immutable (Reason.Rcomp p) in
-      let ty_dynamic = (Reason.Rcomp p, Tdynamic) in
+      let ty_dynamic = TMT.dynamic (Reason.Rcomp p) in
       let both_sub tyl =
         (List.exists tyl ~f:(SubType.is_sub_type env ty1))
         && (List.exists tyl ~f:(SubType.is_sub_type env ty2)) in
@@ -5450,16 +5451,16 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
           (Reason.to_string ("This is " ^ tys1) (fst ty1))
           (Reason.to_string ("This is " ^ tys2) (fst ty2))
       end;
-      make_result env te1 te2 (Reason.Rcomp p, ty_result)
+      make_result env te1 te2 ty_result
   | Ast.Dot ->
     (* A bit weird, this one:
      *   function(Stringish | string, Stringish | string) : string)
      *)
       let env = SubType.sub_string p1 env ty1 in
       let env = SubType.sub_string p2 env ty2 in
-      make_result env te1 te2 (Reason.Rconcat_ret p, Tprim Tstring)
+      make_result env te1 te2 (TMT.string (Reason.Rconcat_ret p))
   | Ast.Barbar | Ast.Ampamp | Ast.LogXor ->
-      make_result env te1 te2 (Reason.Rlogic_ret p, Tprim Tbool)
+      make_result env te1 te2 (TMT.bool (Reason.Rlogic_ret p))
   | Ast.QuestionQuestion
   | Ast.Eq _ when not contains_any ->
       assert false
@@ -5869,8 +5870,7 @@ and is_array env ty p pred_name arg_expr =
     let r = Reason.Rpredicated (p, pred_name) in
     let env, tarrkey_name = Env.add_fresh_generic_parameter env "Tk" in
     let tarrkey = (r, Tabstract (AKgeneric tarrkey_name, None)) in
-    let env = SubType.add_constraint p env Ast.Constraint_as
-      tarrkey (r, Tprim Tarraykey) in
+    let env = SubType.add_constraint p env Ast.Constraint_as tarrkey (TMT.arraykey r) in
     let env, tfresh_name = Env.add_fresh_generic_parameter env "T" in
     let tfresh = (r, Tabstract (AKgeneric tfresh_name, None)) in
     (* This is the refined type of e inside the branch *)

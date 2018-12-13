@@ -23,6 +23,7 @@ module Inst = Decl_instantiate
 module Phase = Typing_phase
 module SN = Naming_special_names
 module Cls = Typing_classes_heap
+module TMT = Typing_make_type
 
 (*****************************************************************************)
 (* Helpers *)
@@ -390,7 +391,7 @@ let default_constructor_ce class_ =
              ft_tparams  = [];
              ft_where_constraints = [];
              ft_params   = [];
-             ft_ret      = r, Tprim Nast.Tvoid;
+             ft_ret      = TMT.void r;
              ft_ret_by_ref = false;
              ft_reactive = Nonreactive;
              ft_mutability = None;

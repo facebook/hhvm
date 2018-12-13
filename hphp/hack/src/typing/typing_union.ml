@@ -16,6 +16,7 @@ module Reason = Typing_reason
 module Unify = Typing_unify
 module URec = Typing_unify_recursive
 module Utils = Typing_utils
+module TMT = Typing_make_type
 
 exception Not_equiv
 exception Arraykinds_dont_unify
@@ -97,7 +98,7 @@ and union_ env ty1 ty2 r =
   | (r1, Tprim Nast.Tint), (r2, Tprim Nast.Tfloat)
   | (r1, Tprim Nast.Tfloat), (r2, Tprim Nast.Tint) ->
     let r = union_reason r1 r2 in
-    env, (r, Tprim Nast.Tnum)
+    env, TMT.num r
   | (r, Tprim Nast.Tnull), ty
   | ty, (r, Tprim Nast.Tnull) ->
     env, (r, Toption ty)

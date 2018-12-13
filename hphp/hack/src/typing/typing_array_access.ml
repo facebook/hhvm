@@ -89,11 +89,11 @@ let rec array_get ?(lhs_of_null_coalesce=false)
       end in
       acc, (fst ety1, Tunresolved tyl)
   | Tarraykind (AKvarray ty | AKvec ty) ->
-      let ty1 = Reason.Ridx (fst e2, fst ety1), Tprim Tint in
+      let ty1 = TMT.int (Reason.Ridx (fst e2, fst ety1)) in
       let acc = type_index acc p ty2 ty1 Reason.index_array in
       acc, ty
   | Tarraykind (AKvarray_or_darray ty) ->
-      let ty1 = Reason.Rvarray_or_darray_key p, Tprim Tarraykey in
+      let ty1 = TMT.arraykey (Reason.Rvarray_or_darray_key p) in
       let acc = type_index acc p ty2 ty1 Reason.index_array in
       acc, ty
   | Tclass ((_, cn) as id, _, argl)
@@ -102,7 +102,7 @@ let rec array_get ?(lhs_of_null_coalesce=false)
       let ty = match argl with
         | [ty] -> ty
         | _ -> arity_error id; err_witness env p in
-      let ty1 = Reason.Ridx_vector (fst e2), Tprim Tint in
+      let ty1 = TMT.int (Reason.Ridx_vector (fst e2)) in
       let acc = type_index acc p ty2 ty1 (Reason.index_class cn) in
       acc, ty
   | Tclass ((_, cn) as id, _, argl)
@@ -154,7 +154,7 @@ let rec array_get ?(lhs_of_null_coalesce=false)
       let ty = match argl with
         | [ty] -> ty
         | _ -> arity_error id; err_witness env p in
-      let ty1 = Reason.Ridx (fst e2, fst ety1), Tprim Tint in
+      let ty1 = TMT.int (Reason.Ridx (fst e2, fst ety1)) in
       let acc = type_index acc p ty2 ty1 (Reason.index_class cn) in
       acc, ty
   | Tclass ((_, cn), _, _)
@@ -190,8 +190,8 @@ let rec array_get ?(lhs_of_null_coalesce=false)
   | Tany | Tarraykind (AKany | AKempty) ->
       acc, (Reason.Rnone, TUtils.tany env)
   | Tprim Tstring ->
-      let ty = Reason.Rwitness p, Tprim Tstring in
-      let ty1 = Reason.Ridx (fst e2, fst ety1), Tprim Tint in
+      let ty = TMT.string (Reason.Rwitness p) in
+      let ty1 = TMT.int (Reason.Ridx (fst e2, fst ety1)) in
       let acc = type_index acc p ty2 ty1 Reason.index_array in
       acc, ty
   | Ttuple tyl ->
@@ -393,17 +393,17 @@ Typing_log.(log_with_level env "typing" 1 (fun () ->
     let (ty1l', tyl') = List.unzip resl in
     env, ((fst ety1, Tunresolved ty1l'), (fst ety1, Tunresolved tyl'))
   | Tarraykind (AKvarray tv) ->
-    let tk = Reason.Ridx (fst key, fst ety1), Tprim Tint in
+    let tk = TMT.int (Reason.Ridx (fst key, fst ety1)) in
     let env = type_index env pos tkey tk Reason.index_array in
     let env, tv' = Typing_union.union env tv ty2 in
     env, ((fst ety1, Tarraykind (AKvarray tv')), tv')
   | Tarraykind (AKvec tv) ->
-    let tk = Reason.Ridx (fst key, fst ety1), Tprim Tint in
+    let tk = TMT.int (Reason.Ridx (fst key, fst ety1)) in
     let env = type_index env pos tkey tk Reason.index_array in
     let env, tv' = Typing_union.union env tv ty2 in
     env, ((fst ety1, Tarraykind (AKvec tv')), tv')
   | Tarraykind (AKvarray_or_darray tv) ->
-    let tk = Reason.Rvarray_or_darray_key (Reason.to_pos (fst ety1)), Tprim Tarraykey in
+    let tk = TMT.arraykey (Reason.Rvarray_or_darray_key (Reason.to_pos (fst ety1))) in
     let env = type_index env pos tkey tk Reason.index_array in
     let env, tv' = Typing_union.union env tv ty2 in
     env, ((fst ety1, Tarraykind (AKvarray_or_darray tv')), tv')
@@ -411,7 +411,7 @@ Typing_log.(log_with_level env "typing" 1 (fun () ->
     let tv = match argl with
       | [tv] -> tv
       | _ -> arity_error id; err_witness env pos in
-    let tk = Reason.Ridx_vector (fst key), Tprim Tint in
+    let tk = TMT.int (Reason.Ridx_vector (fst key)) in
     let env = type_index env pos tkey tk (Reason.index_class cn) in
     let env = Typing_ops.sub_type pos ur env ty2 tv in
     env, (ety1, tv)
@@ -419,7 +419,7 @@ Typing_log.(log_with_level env "typing" 1 (fun () ->
     let tv = match argl with
       | [tv] -> tv
       | _ -> arity_error id; err_witness env pos in
-    let tk = Reason.Ridx_vector (fst key), Tprim Tint in
+    let tk = TMT.int (Reason.Ridx_vector (fst key)) in
     let env = type_index env pos tkey tk (Reason.index_class cn) in
     let env, tv' = Typing_union.union env tv ty2 in
     env, ((fst ety1, Tclass (id, e, [tv'])), tv')
@@ -483,12 +483,12 @@ Typing_log.(log_with_level env "typing" 1 (fun () ->
     let tany = Reason.Rwitness pos, TUtils.tany env in
     env, (ety1, tany)
   | Tarraykind AKempty ->
-    let tk = Reason.Rvarray_or_darray_key (Reason.to_pos (fst ety1)), Tprim Tarraykey in
+    let tk = TMT.arraykey (Reason.Rvarray_or_darray_key (Reason.to_pos (fst ety1))) in
     let env = type_index env pos tkey tk Reason.index_array in
     env, ((fst ety1, Tarraykind (AKvarray_or_darray ty2)), ty2)
   | Tprim Tstring ->
-    let tk = Reason.Ridx (fst key, fst ety1), Tprim Tint in
-    let tv = Reason.Rwitness pos, Tprim Tstring in
+    let tk = TMT.int (Reason.Ridx (fst key, fst ety1)) in
+    let tv = TMT.string (Reason.Rwitness pos) in
     let env = type_index env pos tkey tk Reason.index_array in
     let env = Typing_ops.sub_type pos ur env ty2 tv in
     env, (ety1, tv)

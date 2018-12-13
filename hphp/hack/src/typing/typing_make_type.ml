@@ -13,6 +13,7 @@ module SN = Naming_special_names
 module Reason = Typing_reason
 
 let class_type r name tyl = (r, Tclass ((Reason.to_pos r, name), Nonexact, tyl))
+let prim_type r t = (r, Tprim t)
 
 let traversable r ty =
   class_type r SN.Collections.cTraversable [ty]
@@ -48,3 +49,23 @@ let datetime_immutable r =
   class_type r SN.Classes.cDateTimeImmutable []
 let const_vector r ty =
   class_type r SN.Collections.cConstVector [ty]
+let int r =
+  prim_type r Nast.Tint
+let bool r =
+  prim_type r Nast.Tbool
+let string r =
+  prim_type r Nast.Tstring
+let float r =
+  prim_type r Nast.Tfloat
+let num r =
+  prim_type r Nast.Tnum
+let arraykey r =
+  prim_type r Nast.Tarraykey
+let void r =
+  prim_type r Nast.Tvoid
+let null r =
+  prim_type r Nast.Tnull
+let dynamic r =
+  (r, Tdynamic)
+let resource r =
+  prim_type r Nast.Tresource

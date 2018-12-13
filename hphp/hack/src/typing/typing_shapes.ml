@@ -235,8 +235,8 @@ let to_collection env shape_ty res return_type =
         let keys = ShapeMap.keys fdm in
         let env, keys = List.map_env env keys begin fun env key ->
           match key with
-          | Ast.SFlit_int (p, _) -> env, (Reason.Rwitness p, Tprim Tint)
-          | Ast.SFlit_str (p, _) -> env, (Reason.Rwitness p, Tprim Tstring)
+          | Ast.SFlit_int (p, _) -> env, TMT.int (Reason.Rwitness p)
+          | Ast.SFlit_str (p, _) -> env, TMT.string (Reason.Rwitness p)
           | Ast.SFclass_const ((p, cid), (_, mid)) ->
             begin match Env.get_class env cid with
               | Some class_ -> begin match Env.get_const env class_ mid with

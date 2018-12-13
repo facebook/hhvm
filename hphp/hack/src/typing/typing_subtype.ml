@@ -21,6 +21,7 @@ module Phase = Typing_phase
 module TL = Typing_logic
 module Cls = Typing_classes_heap
 module TySet = Typing_set
+module TMT = Typing_make_type
 
 type reactivity_extra_info = {
   method_info: ((* method_name *) string * (* is_static *) bool) option;
@@ -818,12 +819,10 @@ and simplify_subtype
       | AKvarray tv
       | AKvec tv ->
         env |>
-        simplify_subtype ~seen_generic_params ~deep ~this_ty (r, Tprim Nast.Tint) tk_super &&&
+        simplify_subtype ~seen_generic_params ~deep ~this_ty (TMT.int r) tk_super &&&
         simplify_subtype ~seen_generic_params ~deep ~this_ty tv tv_super
       | AKvarray_or_darray tv ->
-        let tk_sub =
-          Reason.Rvarray_or_darray_key (Reason.to_pos r),
-          Tprim Nast.Tarraykey in
+        let tk_sub = TMT.arraykey (Reason.Rvarray_or_darray_key (Reason.to_pos r)) in
         env |>
         simplify_subtype ~seen_generic_params ~deep ~this_ty tk_sub tk_super &&&
         simplify_subtype ~seen_generic_params ~deep ~this_ty tv tv_super
@@ -898,9 +897,7 @@ and simplify_subtype
 
     | (AKdarray (tk_sub, tv_sub) | AKmap (tk_sub, tv_sub)),
       (AKvarray_or_darray tv_super) ->
-      let tk_super =
-        Reason.Rvarray_or_darray_key (Reason.to_pos (fst ety_super)),
-        Tprim Nast.Tarraykey in
+      let tk_super = TMT.arraykey (Reason.Rvarray_or_darray_key (Reason.to_pos (fst ety_super))) in
       env |>
       simplify_subtype ~seen_generic_params ~deep ~this_ty tk_sub tk_super &&&
       simplify_subtype ~seen_generic_params ~deep ~this_ty tv_sub tv_super
@@ -908,7 +905,7 @@ and simplify_subtype
     | (AKvarray elt_ty | AKvec elt_ty), (AKdarray _ | AKmap _)
         when not (TypecheckerOptions.safe_vector_array (Env.get_tcopt env)) ->
           let int_reason = Reason.Ridx (Reason.to_pos r, Reason.Rnone) in
-          let int_type = int_reason, Tprim Nast.Tint in
+          let int_type = TMT.int int_reason in
           simplify_subtype ~seen_generic_params ~deep ~this_ty
             (r, Tarraykind (AKmap (int_type, elt_ty))) ty_super env
 
@@ -941,7 +938,7 @@ and simplify_subtype
   | Toption t, Tvar _ when new_inference ->
     env |>
     simplify_subtype ~seen_generic_params ~deep ~this_ty t ty_super &&&
-    simplify_subtype ~seen_generic_params ~deep ~this_ty (fst ety_sub, Tprim Nast.Tnull) ty_super
+    simplify_subtype ~seen_generic_params ~deep ~this_ty (TMT.null (fst ety_sub)) ty_super
 
   | Tvar _, _ | _, Tvar _ ->
     default ()
@@ -953,8 +950,8 @@ and simplify_subtype
   | Tprim Nast.Tnum, Tunresolved _ when new_inference ->
     let r = fst ty_sub in
     env |>
-    simplify_subtype ~seen_generic_params ~deep ~this_ty (r, Tprim Nast.Tfloat) ty_super &&&
-    simplify_subtype ~seen_generic_params ~deep ~this_ty (r, Tprim Nast.Tint) ty_super
+    simplify_subtype ~seen_generic_params ~deep ~this_ty (TMT.float r) ty_super &&&
+    simplify_subtype ~seen_generic_params ~deep ~this_ty (TMT.int r) ty_super
 
   | _, Tunresolved tyl ->
     (* It's sound to reduce t <: t1 | t2 to (t <: t1) || (t <: t2). But
@@ -1889,7 +1886,7 @@ and try_union env ty tyl =
     else match snd ty, snd ty' with
     | Tprim Nast.Tfloat, Tprim Nast.Tint
     | Tprim Nast.Tint, Tprim Nast.Tfloat ->
-      let t = (fst ty, Tprim Nast.Tnum) in
+      let t = TMT.num (fst ty) in
       try_union env t tyl'
     | _, _ -> ty' :: try_union env ty tyl'
 
@@ -1906,11 +1903,12 @@ let rec sub_string
    *)
   if not allow_mixed && TypecheckerOptions.new_inference (Env.get_tcopt env)
   then
-    let tyl = [(Reason.Rwitness p, Tprim Nast.Tarraykey);
-               (Reason.Rwitness p, Tprim Nast.Tbool);
-               (Reason.Rwitness p, Tprim Nast.Tfloat);
-               (Reason.Rwitness p, Tprim Nast.Tresource);
-               (Reason.Rwitness p, Tdynamic)] in
+    let r = Reason.Rwitness p in
+    let tyl = [TMT.arraykey r;
+               TMT.bool r;
+               TMT.float r;
+               TMT.resource r;
+               TMT.dynamic r] in
     let tyl =
       if stringish_deprecated
       then tyl

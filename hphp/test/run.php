@@ -539,7 +539,7 @@ function get_options($argv) {
   $GLOBALS['recorded_options'] = $recorded;
 
   if (isset($options['jit-serialize'])) {
-    if (!isset($options['repo'])) {
+    if (!isset($options['repo']) && !isset($options['repo-single'])) {
       echo "jit-serialize only works in repo mode\n";
       exit(1);
     }

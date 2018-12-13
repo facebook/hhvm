@@ -314,8 +314,10 @@ let save_state_incremental existing_state_dir incremental_state_dir () =
   assert_equals 0 loop_output.total_rechecked_count
     "No files should be rechecked";
 
-  Test.save_state_incremental env incremental_state_dir
-    ~store_decls_in_saved_state:true;
+  let _edges_added = Test.save_state_incremental
+    env
+    incremental_state_dir
+    ~store_decls_in_saved_state:true in ();
   (* Saving the state declared Child as a side effect. *)
   assert (Decl_heap.Classes.mem "\\Child")
 
@@ -371,8 +373,10 @@ let save_state_incremental_hot_child existing_state_dir incremental_state_dir ()
   assert_equals 0 loop_output.total_rechecked_count
     "All changes should have been checked already";
 
-  Test.save_state_incremental env incremental_state_dir
-    ~store_decls_in_saved_state:true
+  let _edges_added = Test.save_state_incremental
+    env
+    incremental_state_dir
+    ~store_decls_in_saved_state:true in ()
 
 
 let hot_base_tests () = Tempfile.with_real_tempdir @@ fun temp_dir ->

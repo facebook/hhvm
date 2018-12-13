@@ -85,7 +85,7 @@ let go status output_json from =
     (* this should really go to stdout but we need to adapt the various
      * IDE plugins first *)
     let oc = if output_json then stderr else stdout in
-    ServerError.print_errorl stale_msg output_json error_list oc
+    ServerError.print_error_list oc ~stale_msg ~output_json ~error_list ~edges_added:None
   end else begin
     List.iter error_list print_error_color;
     Option.iter stale_msg ~f:(fun msg -> Printf.printf "%s" msg);

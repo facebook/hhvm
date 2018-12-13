@@ -65,25 +65,28 @@ module Program =
              Exit_status.exit Exit_status.Server_shutting_down
            )))
 
-    let run_once_and_exit genv env =
-      ServerError.print_errorl
-        None
-        (ServerArgs.json_mode genv.options)
-        (List.map (Errors.get_error_list env.errorl) Errors.to_absolute) stdout;
-         WorkerController.killall ();
-         (* as Warnings shouldn't break CI, don't change the exit status except
-          * for Errors *)
-         let has_errors = if Errors.is_empty env.errorl
-           then false
-           else
-             List.exists ~f:(fun e -> Errors.get_severity e = Errors.Error)
-               (Errors.get_error_list env.errorl)
-         in
-         let is_saving_state_and_ignoring_errors =
-          ServerArgs.gen_saved_ignore_type_errors genv.options &&
-          Option.is_some (ServerArgs.save_filename genv.options)
-         in
-         exit (if has_errors && (not is_saving_state_and_ignoring_errors) then 1 else 0)
+    let run_once_and_exit genv env (edges_added: int option) =
+      ServerError.print_error_list
+        stdout
+        ~stale_msg:None
+        ~output_json:(ServerArgs.json_mode genv.options)
+        ~error_list:(List.map (Errors.get_error_list env.errorl) Errors.to_absolute)
+        ~edges_added;
+
+      WorkerController.killall ();
+
+      (* as Warnings shouldn't break CI, don't change the exit status except
+      * for Errors *)
+      let has_errors =
+        List.exists
+          ~f:(fun e -> Errors.get_severity e = Errors.Error)
+          (Errors.get_error_list env.errorl)
+      in
+      let is_saving_state_and_ignoring_errors =
+        ServerArgs.gen_saved_ignore_type_errors genv.options &&
+        Option.is_some (ServerArgs.save_filename genv.options)
+      in
+      exit (if has_errors && (not is_saving_state_and_ignoring_errors) then 1 else 0)
 
     (* filter and relativize updated file paths *)
     let process_updates genv updates =
@@ -927,10 +930,13 @@ let run_once options handle =
     (Hh_logger.log "ServerMain run_once only supported in check mode.";
     Exit_status.(exit Input_error));
   let env = program_init genv in
-  Option.iter (ServerArgs.save_filename genv.options)
-    (ServerInit.save_state genv env);
+  let edges_added =
+    match (ServerArgs.save_filename genv.options) with
+    | None -> None
+    | Some filename -> ServerInit.save_state genv env filename
+  in
   Hh_logger.log "Running in check mode";
-  Program.run_once_and_exit genv env
+  Program.run_once_and_exit genv env edges_added
 
 (*
  * The server monitor will pass client connections to this process

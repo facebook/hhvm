@@ -452,7 +452,7 @@ let save_state
         ServerLocalConfig.store_decls_in_saved_state;
       }
     };
-    ServerInit.save_state !genv env (temp_dir ^ "/" ^ saved_state_filename)
+    let _edges_added = ServerInit.save_state !genv env (temp_dir ^ "/" ^ saved_state_filename) in ()
   end
 
 let save_state_incremental
@@ -467,7 +467,7 @@ let save_state_incremental
   };
   ServerInit.save_state !genv env (temp_dir ^ "/" ^ saved_state_filename)
 
-let save_state_with_errors disk_changes temp_dir expected_error =
+let save_state_with_errors disk_changes temp_dir expected_error: unit =
   in_daemon @@ begin fun () ->
     let env = setup_server () in
     let env = setup_disk env disk_changes in
@@ -478,7 +478,7 @@ let save_state_with_errors disk_changes temp_dir expected_error =
         (ServerArgs.set_gen_saved_ignore_type_errors !genv.ServerEnv.options true);
     } in
 
-    ServerInit.save_state genv env (temp_dir ^ "/" ^ saved_state_filename)
+    let _edges_added = ServerInit.save_state genv env (temp_dir ^ "/" ^ saved_state_filename) in ()
   end
 
 let load_state

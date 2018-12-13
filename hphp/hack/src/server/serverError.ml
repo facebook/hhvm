@@ -14,32 +14,53 @@
 open Core_kernel
 open Utils
 
-let get_errorl_json el =
-  if el = [] then
-    Hh_json.JSON_Object [ "passed", Hh_json.JSON_Bool true;
-                  "errors", Hh_json.JSON_Array [];
-                  "version", Hh_json.JSON_String Build_id.build_id_ohai;
-                ]
-  else
-    let errors_json = List.map ~f:Errors.to_json el in
-    Hh_json.JSON_Object [ "passed", Hh_json.JSON_Bool false;
-                  "errors", Hh_json.JSON_Array errors_json;
-                  "version", Hh_json.JSON_String Build_id.build_id_ohai;
-                ]
+let get_error_list_json
+    (error_list: (Pos.absolute Errors.error_ list))
+    ~(edges_added: int option) =
+  let error_list, did_pass = match error_list with
+  | [] -> [], true
+  | error_list -> (List.map ~f:Errors.to_json error_list), false
+  in
+  let (properties: (string * Hh_json.json) list) =
+    [ "passed", Hh_json.JSON_Bool did_pass;
+      "errors", Hh_json.JSON_Array error_list;
+      "version", Hh_json.JSON_String Build_id.build_id_ohai;
+    ]
+  in
+  let properties = match edges_added with
+  | None -> properties
+  | Some edges_added ->
+    let saved_state_result =
+      "saved_state_result", Hh_json.JSON_Object
+        [
+          "edges_added", Hh_json.int_ edges_added
+        ]
+    in
+    saved_state_result :: properties in
 
-let print_errorl_json oc el =
-  let res = get_errorl_json el in
+  Hh_json.JSON_Object properties
+
+let print_error_list_json
+    (oc: Out_channel.t)
+    (error_list: (Pos.absolute Errors.error_ list))
+    (edges_added: int option) =
+  let res = get_error_list_json error_list ~edges_added in
   Hh_json.json_to_output oc res;
   Out_channel.flush oc
 
-let print_errorl is_stale_msg use_json el oc =
-  if use_json then
-    print_errorl_json oc el
+let print_error_list
+    (oc: Out_channel.t)
+    ~(stale_msg: string option)
+    ~(output_json: bool)
+    ~(error_list: (Pos.absolute Errors.error_ list))
+    ~(edges_added: int option) =
+  if output_json then
+    print_error_list_json oc error_list edges_added
   else begin
-    if el = []
+    if error_list = []
     then Out_channel.output_string oc "No errors!\n"
     else
-      let sl = List.map ~f:Errors.to_string el in
+      let sl = List.map ~f:Errors.to_string error_list in
       let sl = List.dedup_and_sort ~compare:String.compare sl in
       List.iter ~f:begin fun s ->
         if !debug then begin
@@ -50,5 +71,5 @@ let print_errorl is_stale_msg use_json el oc =
         Out_channel.output_string oc "\n";
       end sl
   end;
-  Option.iter is_stale_msg ~f:(fun msg -> Out_channel.output_string oc msg);
+  Option.iter stale_msg ~f:(fun msg -> Out_channel.output_string oc msg);
   Out_channel.flush oc

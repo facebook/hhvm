@@ -25,7 +25,10 @@ let run_search (genv: ServerEnv.genv) (t: float) : unit =
   end
   else ()
 
-let save_state (genv: ServerEnv.genv) (env: ServerEnv.env) (output_filename: string) : unit =
+let save_state
+    (genv: ServerEnv.genv)
+    (env: ServerEnv.env)
+    (output_filename: string) : int option =
   let ignore_errors =
     ServerArgs.gen_saved_ignore_type_errors genv.ServerEnv.options in
   let has_errors = not (Errors.is_empty env.errorl) in
@@ -46,20 +49,22 @@ let save_state (genv: ServerEnv.genv) (env: ServerEnv.env) (output_filename: str
         true
     end in
 
-  if do_save_state then
-  let tcopt = env.ServerEnv.tcopt in
-  let file_info_on_disk = ServerArgs.file_info_on_disk genv.ServerEnv.options in
-  let save_decls = genv.local_config.ServerLocalConfig.store_decls_in_saved_state in
-  let replace_state_after_saving = ServerArgs.replace_state_after_saving genv.ServerEnv.options in
-  let _ : int = SaveStateService.save_state
-    ~tcopt
-    ~file_info_on_disk
-    ~save_decls
-    env.ServerEnv.files_info
-    env.errorl
-    output_filename
-    ~replace_state_after_saving in
-  ()
+  if not do_save_state then None
+  else begin
+    let tcopt = env.ServerEnv.tcopt in
+    let file_info_on_disk = ServerArgs.file_info_on_disk genv.ServerEnv.options in
+    let save_decls = genv.local_config.ServerLocalConfig.store_decls_in_saved_state in
+    let replace_state_after_saving = ServerArgs.replace_state_after_saving genv.ServerEnv.options in
+    let edges_added: int = SaveStateService.save_state
+      ~tcopt
+      ~file_info_on_disk
+      ~save_decls
+      env.ServerEnv.files_info
+      env.errorl
+      output_filename
+      ~replace_state_after_saving in
+    Some edges_added
+  end
 
 let get_lazy_level (genv: ServerEnv.genv) : lazy_level =
   let lazy_decl = Option.is_none (ServerArgs.ai_mode genv.options) in

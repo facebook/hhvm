@@ -16,8 +16,9 @@ type load_state_approach =
   (* Use the supplied saved state target to skip lookup in XDB. *)
   | Load_state_natively_with_target of ServerMonitorUtils.target_saved_state
 
-(* Saves the state that is used by init below. *)
-val save_state: ServerEnv.genv -> ServerEnv.env -> string -> unit
+(* Saves the state that is used by init below and returns the number of
+  edges added to the saved state dependency table. *)
+val save_state: ServerEnv.genv -> ServerEnv.env -> string -> int option
 
 type init_result =
   (** Loaded a saved saved state of this distance. Note: for older load scripts

@@ -6137,6 +6137,10 @@ and class_def_ env c tc =
     T.c_user_attributes = List.map c.c_user_attributes (user_attribute env);
     T.c_namespace = c.c_namespace;
     T.c_enum = c.c_enum;
+    T.c_doc_comment = c.c_doc_comment;
+    T.c_attributes = [];
+    T.c_xhp_children = c.c_xhp_children;
+    T.c_xhp_attrs = [];
   }
 
 and check_static_class_element get_dyn_elt (element_name, static_element) ~elt_type =

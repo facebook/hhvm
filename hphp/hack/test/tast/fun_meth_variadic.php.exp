@@ -75,5 +75,7 @@
           m_ret = (Some ([12:35-39], (Hprim Tvoid))); m_ret_by_ref = false;
           m_external = false }
          ];
-       c_namespace = <opaque>; c_user_attributes = []; c_enum = None })
+       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace = <opaque>; c_user_attributes = []; c_enum = None;
+       c_doc_comment = None })
   ]

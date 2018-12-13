@@ -6,8 +6,12 @@
       c_xhp_category = []; c_req_extends = []; c_req_implements = [];
       c_implements = []; c_consts = []; c_typeconsts = [];
       c_static_vars = []; c_vars = []; c_constructor = None;
-      c_static_methods = []; c_methods = []; c_namespace = <opaque>;
-      c_user_attributes = []; c_enum = None });
+      c_static_methods = []; c_methods = []; c_attributes = [];
+      c_xhp_children = []; c_xhp_attrs = []; c_namespace = <opaque>;
+      c_user_attributes = []; c_enum = None;
+      c_doc_comment =
+      (Some "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */")
+      });
   (Fun
      { Aast.AnnotatedAST.f_span = [14:1-16:2]; f_annotation = ();
        f_mode = <opaque>; f_ret = (Some ([14:22-26], (Hprim Tvoid)));

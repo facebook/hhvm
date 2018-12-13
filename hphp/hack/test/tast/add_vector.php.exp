@@ -105,7 +105,11 @@
           m_ret = (Some ([23:32-33], (Habstr "T"))); m_ret_by_ref = false;
           m_external = false }
         ];
-      c_namespace = <opaque>; c_user_attributes = []; c_enum = None });
+      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace = <opaque>; c_user_attributes = []; c_enum = None;
+      c_doc_comment =
+      (Some "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */")
+      });
   (Class
      { Aast.AnnotatedAST.c_span = [28:1-11]; c_annotation = ();
        c_mode = <opaque>; c_final = false; c_is_xhp = false;
@@ -115,7 +119,9 @@
        c_req_implements = []; c_implements = []; c_consts = [];
        c_typeconsts = []; c_static_vars = []; c_vars = [];
        c_constructor = None; c_static_methods = []; c_methods = [];
-       c_namespace = <opaque>; c_user_attributes = []; c_enum = None });
+       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace = <opaque>; c_user_attributes = []; c_enum = None;
+       c_doc_comment = None });
   (Class
      { Aast.AnnotatedAST.c_span = [29:1-21]; c_annotation = ();
        c_mode = <opaque>; c_final = false; c_is_xhp = false;
@@ -125,8 +131,9 @@
        c_xhp_category = []; c_req_extends = []; c_req_implements = [];
        c_implements = []; c_consts = []; c_typeconsts = [];
        c_static_vars = []; c_vars = []; c_constructor = None;
-       c_static_methods = []; c_methods = []; c_namespace = <opaque>;
-       c_user_attributes = []; c_enum = None });
+       c_static_methods = []; c_methods = []; c_attributes = [];
+       c_xhp_children = []; c_xhp_attrs = []; c_namespace = <opaque>;
+       c_user_attributes = []; c_enum = None; c_doc_comment = None });
   (Class
      { Aast.AnnotatedAST.c_span = [30:1-21]; c_annotation = ();
        c_mode = <opaque>; c_final = false; c_is_xhp = false;
@@ -136,8 +143,9 @@
        c_xhp_category = []; c_req_extends = []; c_req_implements = [];
        c_implements = []; c_consts = []; c_typeconsts = [];
        c_static_vars = []; c_vars = []; c_constructor = None;
-       c_static_methods = []; c_methods = []; c_namespace = <opaque>;
-       c_user_attributes = []; c_enum = None });
+       c_static_methods = []; c_methods = []; c_attributes = [];
+       c_xhp_children = []; c_xhp_attrs = []; c_namespace = <opaque>;
+       c_user_attributes = []; c_enum = None; c_doc_comment = None });
   (Fun
      { Aast.AnnotatedAST.f_span = [32:1-37:2]; f_annotation = ();
        f_mode = <opaque>; f_ret = (Some ([32:37-41], (Hprim Tvoid)));

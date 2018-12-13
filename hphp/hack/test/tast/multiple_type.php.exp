@@ -21,7 +21,9 @@
          m_ret = (Some ([5:26-29], (Hprim Tint))); m_ret_by_ref = false;
          m_external = false }
         ];
-      c_namespace = <opaque>; c_user_attributes = []; c_enum = None });
+      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace = <opaque>; c_user_attributes = []; c_enum = None;
+      c_doc_comment = None });
   (Class
      { Aast.AnnotatedAST.c_span = [10:1-14:2]; c_annotation = ();
        c_mode = <opaque>; c_final = false; c_is_xhp = false;
@@ -48,7 +50,9 @@
           m_ret = (Some ([11:26-32], (Hprim Tstring))); m_ret_by_ref = false;
           m_external = false }
          ];
-       c_namespace = <opaque>; c_user_attributes = []; c_enum = None });
+       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace = <opaque>; c_user_attributes = []; c_enum = None;
+       c_doc_comment = None });
   (Fun
      { Aast.AnnotatedAST.f_span = [16:1-19:2]; f_annotation = ();
        f_mode = <opaque>; f_ret = (Some ([16:44-52], (Hprim Tarraykey)));

@@ -258,7 +258,31 @@ struct
     T.c_namespace = c.S.c_namespace;
     T.c_user_attributes = List.map c.S.c_user_attributes (map_user_attribute menv);
     T.c_enum = c.S.c_enum;
+    T.c_doc_comment = c.S.c_doc_comment;
+    T.c_attributes = List.map c.S.c_attributes (map_attribute menv);
+    T.c_xhp_children = c.S.c_xhp_children;
+    T.c_xhp_attrs = List.map c.S.c_xhp_attrs (map_xhp_attr menv);
   }
+
+  and map_xhp_attr menv (h, var, b, maybe_enum) =
+    (h, map_class_var menv var, b, Option.map maybe_enum (map_xhp_attr_enum menv))
+
+  and map_attribute menv attr =
+    match attr with
+    | S. CA_name id -> T.CA_name id
+    | S.CA_field f -> T.CA_field T.{
+      ca_type = map_ca_type f.S.ca_type;
+      ca_id = f.S.ca_id;
+      ca_value = Option.map f.S.ca_value (map_expr menv);
+      ca_required = f.S.ca_required;
+    }
+
+  and map_ca_type ty =
+    match ty with
+    | S.CA_hint h -> T.CA_hint h
+    | S.CA_enum sl -> T.CA_enum sl
+
+  and map_xhp_attr_enum menv (p, b, el) = (p, b, List.map el (map_expr menv))
 
   and map_class_const menv (h, id, e) =
     (h, id, Option.map e (map_expr menv))
@@ -318,6 +342,7 @@ struct
     T.mt_ret_by_ref = mt.S.mt_ret_by_ref;
     T.mt_trait = mt.S.mt_trait;
     T.mt_method = mt.S.mt_method;
+    T.mt_user_attributes = List.map mt.S.mt_user_attributes (map_user_attribute menv);
   }
 
   and map_typedef menv td = {

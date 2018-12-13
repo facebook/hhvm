@@ -1223,7 +1223,12 @@ module Make (GetLocals : GetLocals) = struct
         N.c_methods               = methods;
         N.c_user_attributes       = attrs;
         N.c_namespace             = c.c_namespace;
-        N.c_enum                  = enum
+        N.c_enum                  = enum;
+        N.c_doc_comment           = c.c_doc_comment;
+        (* Naming and typechecking shouldn't use these fields *)
+        N.c_attributes            = [];
+        N.c_xhp_children          = [];
+        N.c_xhp_attrs             = [];
       }
     in
     named_class
@@ -1846,6 +1851,7 @@ module Make (GetLocals : GetLocals) = struct
       N.mt_ret_by_ref      = mt.mt_ret_by_ref;
       N.mt_trait           = hint ~allow_typedef:false env mt.mt_trait;
       N.mt_method          = mt.Ast.mt_method;
+      N.mt_user_attributes = [];
     }
 
   and kind (final, abs, static, vis) = function

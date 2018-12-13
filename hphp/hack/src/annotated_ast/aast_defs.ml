@@ -35,6 +35,15 @@ and param_mutability = PMutable | POwnedMutable | PMaybeMutable
 
 and hint = pos * hint_
 and mutable_return = bool
+
+and xhp_child =
+  | ChildName of sid
+  | ChildList of xhp_child list
+  | ChildUnary of xhp_child * xhp_child_op
+  | ChildBinary of xhp_child * xhp_child
+
+and xhp_child_op = ChildStar | ChildPlus | ChildQuestion
+
 and variadic_hint =
   | Hvariadic of hint option
   | Hnon_variadic

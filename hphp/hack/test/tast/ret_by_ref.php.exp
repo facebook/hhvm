@@ -59,5 +59,7 @@ Errors:
           m_ret = (Some ([10:25-28], (Hprim Tint))); m_ret_by_ref = true;
           m_external = false }
          ];
-       c_namespace = <opaque>; c_user_attributes = []; c_enum = None })
+       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace = <opaque>; c_user_attributes = []; c_enum = None;
+       c_doc_comment = None })
   ]

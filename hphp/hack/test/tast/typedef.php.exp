@@ -28,8 +28,9 @@
               m_fun_kind = FSync; m_user_attributes = [];
               m_ret = (Some ([3:62-73], (Happly (([3:62-73], "void"), []))));
               m_ret_by_ref = false; m_external = false });
-      c_static_methods = []; c_methods = []; c_namespace = <opaque>;
-      c_user_attributes = []; c_enum = None });
+      c_static_methods = []; c_methods = []; c_attributes = [];
+      c_xhp_children = []; c_xhp_attrs = []; c_namespace = <opaque>;
+      c_user_attributes = []; c_enum = None; c_doc_comment = None });
   (Class
      { Aast.AnnotatedAST.c_span = [4:1-46]; c_annotation = ();
        c_mode = <opaque>; c_final = false; c_is_xhp = false;
@@ -41,7 +42,9 @@
        [([4:22-43], (Happly (([4:22-43], "\\HH\\TypeAliasAttribute"), [])))];
        c_consts = []; c_typeconsts = []; c_static_vars = []; c_vars = [];
        c_constructor = None; c_static_methods = []; c_methods = [];
-       c_namespace = <opaque>; c_user_attributes = []; c_enum = None });
+       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace = <opaque>; c_user_attributes = []; c_enum = None;
+       c_doc_comment = None });
   (Class
      { Aast.AnnotatedAST.c_span = [5:1-58]; c_annotation = ();
        c_mode = <opaque>; c_final = false; c_is_xhp = false;
@@ -53,7 +56,9 @@
        [([5:34-55], (Happly (([5:34-55], "\\HH\\TypeAliasAttribute"), [])))];
        c_consts = []; c_typeconsts = []; c_static_vars = []; c_vars = [];
        c_constructor = None; c_static_methods = []; c_methods = [];
-       c_namespace = <opaque>; c_user_attributes = []; c_enum = None });
+       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+       c_namespace = <opaque>; c_user_attributes = []; c_enum = None;
+       c_doc_comment = None });
   (Typedef
      { Aast.AnnotatedAST.t_annotation = (); t_name = ([8:6-8], "\\T1");
        t_tparams = []; t_constraint = None;

@@ -14,7 +14,9 @@
          }
         ];
       c_constructor = None; c_static_methods = []; c_methods = [];
-      c_namespace = <opaque>; c_user_attributes = []; c_enum = None });
+      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace = <opaque>; c_user_attributes = []; c_enum = None;
+      c_doc_comment = None });
   (Fun
      { Aast.AnnotatedAST.f_span = [7:1-19:2]; f_annotation = ();
        f_mode = <opaque>; f_ret = (Some ([7:18-22], (Hprim Tvoid)));

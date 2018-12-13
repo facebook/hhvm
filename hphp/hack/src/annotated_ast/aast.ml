@@ -288,25 +288,44 @@ and class_ = {
     ((Ast.constraint_kind * Ast.hint) list SMap.t) [@opaque];
   c_extends        : hint list        ;
   c_uses           : hint list        ;
-  c_method_redeclarations :
-    method_redeclaration list;
+  c_method_redeclarations : method_redeclaration list;
   c_xhp_attr_uses  : hint list        ;
   c_xhp_category   : pstring list     ;
   c_req_extends    : hint list        ;
   c_req_implements : hint list        ;
   c_implements     : hint list        ;
   c_consts         : class_const list ;
-  c_typeconsts     : class_typeconst list   ;
+  c_typeconsts     : class_typeconst list;
   c_static_vars    : static_var list  ;
   c_vars           : class_var list   ;
   c_constructor    : constructor option;
   c_static_methods : static_method list;
   c_methods        : method_ list     ;
-  c_namespace      : nsenv;
+  c_attributes     : class_attr list  ;
+  c_xhp_children   : (pos * xhp_child) list;
+  c_xhp_attrs      : xhp_attr list    ;
+  c_namespace      : nsenv            ;
   c_user_attributes: user_attribute list;
   c_enum           : enum_ option     ;
+  c_doc_comment    : string option    ;
 }
 
+and xhp_attr = hint option * class_var * bool * ((pos * bool * expr list) option)
+
+and class_attr =
+  | CA_name of sid
+  | CA_field of ca_field
+
+and ca_field = {
+  ca_type: ca_type;
+  ca_id: sid;
+  ca_value: expr option;
+  ca_required: bool;
+}
+
+and ca_type =
+  | CA_hint of hint
+  | CA_enum of string list
 
 (* expr = None indicates an abstract const *)
 and class_const = hint option * sid * expr option
@@ -368,8 +387,8 @@ and method_redeclaration = {
   mt_ret_by_ref      : bool                ;
   mt_trait           : hint                ;
   mt_method          : pstring             ;
+  mt_user_attributes : user_attribute list;
 }
-
 
 and nsenv = Namespace_env.env [@opaque]
 

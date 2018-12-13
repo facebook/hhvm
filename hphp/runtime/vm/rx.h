@@ -29,12 +29,24 @@ enum class RxLevel : uint8_t {
   Rx                 = 3,
 };
 
-static_assert(AttrRxLevel0 == (1u << 14), "");
-static_assert(AttrRxLevel1 == (1u << 15), "");
-static_assert(AttrRxNonConditional == (1u << 16), "");
+constexpr int kRxAttrShift = 14;
+#define ASSERT_LEVEL(attr, rl) \
+  static_assert(static_cast<RxLevel>(attr >> kRxAttrShift) == RxLevel::rl, "")
+ASSERT_LEVEL(AttrRxLevel0, Local);
+ASSERT_LEVEL(AttrRxLevel1, Shallow);
+ASSERT_LEVEL((AttrRxLevel0 | AttrRxLevel1), Rx);
+#undef ASSERT_LEVEL
+
+constexpr uint32_t kRxAttrMask = AttrRxLevel0 | AttrRxLevel1;
+constexpr uint32_t kRxLevelMask = 3u;
+static_assert(kRxAttrMask >> kRxAttrShift == kRxLevelMask, "");
+static_assert(AttrRxNonConditional == (4u << kRxAttrShift), "");
+
 
 constexpr RxLevel rxLevelFromAttr(Attr attrs) {
-  return static_cast<RxLevel>((static_cast<uint32_t>(attrs) >> 14) & 3u);
+  return static_cast<RxLevel>(
+    (static_cast<uint32_t>(attrs) >> kRxAttrShift) & kRxLevelMask
+  );
 }
 
 constexpr bool rxConditionalFromAttr(Attr attrs) {
@@ -42,8 +54,8 @@ constexpr bool rxConditionalFromAttr(Attr attrs) {
 }
 
 constexpr Attr rxMakeAttr(RxLevel level, bool conditional) {
-  uint32_t val = static_cast<uint32_t>(level) | (conditional ? 0 : 4);
-  return static_cast<Attr>(val << 14);
+  return static_cast<Attr>(static_cast<uint32_t>(level) << kRxAttrShift)
+    | (conditional ? AttrNone : AttrRxNonConditional);
 }
 
 Attr rxAttrsFromAttrString(const std::string& a);
@@ -52,7 +64,7 @@ const char* rxAttrsToAttrString(Attr a);
 const char* rxLevelToString(RxLevel r);
 
 constexpr bool funcAttrIsAnyRx(Attr a) {
-  return static_cast<uint32_t>(a) & (7u << 14);
+  return static_cast<uint32_t>(a) & kRxAttrMask;
 }
 
 bool rxEnforceCallsInLevel(RxLevel level);

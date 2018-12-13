@@ -30,15 +30,13 @@ let make tparams tyl =
   (* We tolerate missing types in silent_mode. When that happens, we bind
    * all the parameters we can, and bind the remaining ones to "Tany".
    *)
-  let make_subst_tparam subst tyl (_, (_, tparam_name), _, _) =
-    let ty =
-      match !tyl with
-      | [] -> Reason.Rnone, Tany
-      | ty :: rl -> tyl := rl; ty
+  let make_subst_tparam (subst, tyl) (_, (_, tparam_name), _, _) =
+    let ty, tyl =
+      match tyl with
+      | [] -> (Reason.Rnone, Tany), []
+      | ty :: rl -> ty, rl
     in
-    subst := SMap.add tparam_name ty !subst
+    SMap.add tparam_name ty subst, tyl
   in
-  let subst = ref SMap.empty in
-  let tyl = ref tyl in
-  List.iter tparams (make_subst_tparam subst tyl);
-  !subst
+  let subst, _ = List.fold tparams ~init:(SMap.empty, tyl) ~f:make_subst_tparam in
+  subst

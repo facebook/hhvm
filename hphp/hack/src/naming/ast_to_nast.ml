@@ -65,6 +65,11 @@ and on_shape_info info =
     nsi_allows_unknown_fields = info.si_allows_unknown_fields;
     nsi_field_map = ShapeMap.empty; (* TODO T37786581: Fill this out properly *)
   }
+
+and on_haccess (pos, root_id) id ids =
+  let root_ty = Aast.Happly ((pos, root_id), []) in
+  Aast.Haccess ((pos, root_ty), id :: ids)
+
 and on_hint (p, h) : Aast.hint =
   match h with
   | Hoption h -> (p, Aast.Hoption (on_hint h))
@@ -83,7 +88,7 @@ and on_hint (p, h) : Aast.hint =
   | Htuple (hl) -> (p, Aast.Htuple (on_list on_hint hl))
   | Happly (x, hl) -> (p, Aast.Happly (x, on_list on_hint hl))
   | Hshape s -> (p, Aast.Hshape (on_shape_info s))
-  | Haccess _ -> (p, Aast.Hany) (* TODO: T37786581 *)
+  | Haccess (root, id, ids) -> (p, on_haccess root id ids)
   | Hsoft _ -> (p, Aast.Hany)  (* TODO: T37786581 *)
   | Hreified _ -> (p, Aast.Hany) (* TODO: T37786581 *)
 

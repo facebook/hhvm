@@ -962,12 +962,6 @@ let extract_callconv_node node =
     Some variadic_parameter_call_convention
   | _ -> None
 
-(* Test if a list_expression is the value clause of a foreach_statement *)
-let is_value_of_foreach le_node p1 =
-  match syntax p1 with
-  | ForeachStatement { foreach_value; _ } -> phys_equal le_node foreach_value
-  | _ -> false
-
 (* Given a node, checks if it is a abstract ConstDeclaration *)
 let is_abstract_const declaration =
   match syntax declaration with
@@ -1641,10 +1635,6 @@ let parameter_rx_errors parents errors node =
     errors
   | _ -> errors
 
-let parameters_rx_errors params parents errors =
-  syntax_to_list_no_separators params
-  |> List.fold_left ~init:errors ~f:(parameter_rx_errors parents)
-
 let parameter_errors env node parents namespace_name names errors =
   match syntax node with
   | ParameterDeclaration p ->
@@ -1706,7 +1696,9 @@ let parameter_errors env node parents namespace_name names errors =
     { lambda_signature = {syntax = LambdaSignature { lambda_parameters = params; _ }; _}
     ; _
     } ->
-    let errors = parameters_rx_errors params parents errors in
+    let errors =
+      syntax_to_list_no_separators params
+      |> List.fold_left ~init:errors ~f:(parameter_rx_errors parents) in
     params_errors env params namespace_name names errors
   | DecoratedExpression _ -> names, decoration_errors node errors
   | _ -> names, errors
@@ -2191,16 +2183,13 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
       function_call_on_xhp_name_errors env function_call_receiver errors in
     errors
   | ListExpression { list_members; _ }
-    when is_hhvm_compat env ->
+      when is_missing list_members && is_hhvm_compat env ->
     begin match parents with
-    | p1 :: _ when is_value_of_foreach node p1 ->
-      begin match list_members.syntax with
-      | Missing ->
+      | { syntax = ForeachStatement { foreach_value; _ }; _ } :: _
+          when phys_equal node foreach_value ->
         make_error_from_node ~error_type:SyntaxError.RuntimeError node
           SyntaxError.error2077 :: errors
       | _ -> errors
-      end
-    | _ -> errors
     end
   | ShapeExpression { shape_expression_fields; _} ->
     List.fold_right ~f:(invalid_shape_field_check env)
@@ -3232,9 +3221,11 @@ let mixed_namespace_errors env node parents namespace_type errors =
           | { syntax = MarkupSection {markup_text; _}; _} :: rest
             when width markup_text = 0 || is_hashbang markup_text ->
             is_first rest
-          | { syntax = DeclareDirectiveStatement _; _} :: rest
-          | { syntax = DeclareBlockStatement _; _} :: rest
-          | { syntax = NamespaceUseDeclaration _; _} :: rest -> is_first rest
+          | { syntax = ( DeclareDirectiveStatement _
+                       | DeclareBlockStatement _
+                       | NamespaceUseDeclaration _
+                       ); _} :: rest ->
+            is_first rest
           | { syntax = NamespaceDeclaration _; _} :: _ -> true
           | _ -> false
         in

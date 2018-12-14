@@ -146,7 +146,7 @@ function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): Option
     // Long-style arguments.
     $m = null;
     if (preg_match('/^--([^=]*)(=(.*))?/', $arg, &$m)) {
-      assert($m);
+      invariant($m, 'assert');
       $long = $m[1];
       $has_val = !empty($m[3]);
       $val = $has_val ? $m[3] : false;
@@ -179,7 +179,7 @@ function parse_options_impl(OptionInfoMap $optmap, array<string> &$argv): Option
     // Short-style arguments
     $m = null;
     if (preg_match('/^-([^-=]*)(=(.*))?/', $arg, &$m)) {
-      assert($m);
+      invariant($m, 'assert');
       $shorts = $m[1];
       $has_val = !empty($m[3]);
       $val = $has_val ? $m[3] : false;

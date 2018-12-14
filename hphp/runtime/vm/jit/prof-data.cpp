@@ -227,7 +227,7 @@ struct ProfDataTreadmillDeleter {
 };
 }
 
-RDS_LOCAL_NO_CHECK(ProfData*, rl_profData)(nullptr);
+__thread ProfData* tl_profData{nullptr};
 
 void processInitProfData() {
   if (!RuntimeOption::EvalJitPGO) return;
@@ -236,11 +236,11 @@ void processInitProfData() {
 }
 
 void requestInitProfData() {
-  *rl_profData = s_profData.load(std::memory_order_relaxed);
+  tl_profData = s_profData.load(std::memory_order_relaxed);
 }
 
 void requestExitProfData() {
-  *rl_profData = nullptr;
+  tl_profData = nullptr;
 }
 
 const ProfData* globalProfData() {

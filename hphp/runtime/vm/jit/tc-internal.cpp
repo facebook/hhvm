@@ -18,7 +18,6 @@
 #include "hphp/runtime/vm/jit/tc.h"
 
 #include "hphp/runtime/base/perf-warning.h"
-#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/vm/debug/debug.h"
@@ -62,7 +61,7 @@ namespace {
 std::atomic<uint64_t> s_numTrans;
 SimpleMutex s_codeLock{false, RankCodeCache};
 SimpleMutex s_metadataLock{false, RankCodeMetadata};
-RDS_LOCAL_NO_CHECK(size_t, s_initialTCSize);
+__thread size_t s_initialTCSize;
 
 bool shouldPGOFunc(const Func* func) {
   if (profData() == nullptr) return false;
@@ -219,10 +218,10 @@ void assertOwnsMetadataLock() { s_metadataLock.assertOwnedBySelf(); }
 void requestInit() {
   tl_regState = VMRegState::CLEAN;
   Timer::RequestInit();
-  memset(rl_perf_counters.getCheck(), 0, sizeof(PerfCounters));
+  memset(&tl_perf_counters, 0, sizeof(tl_perf_counters));
   Stats::init();
   requestInitProfData();
-  *s_initialTCSize.getCheck() = g_code->totalUsed();
+  s_initialTCSize = g_code->totalUsed();
   assertx(!g_unwind_rds.isInit());
   memset(g_unwind_rds.get(), 0, sizeof(UnwindRDS));
   g_unwind_rds.markInit();
@@ -245,7 +244,7 @@ void requestExit() {
                         g_context->getRequestUrl(50).c_str());
     for (int i = 0; i < tpc_num_counters; i++) {
       Trace::traceRelease("%-20s %10" PRId64 "\n",
-                          kPerfCounterNames[i], rl_perf_counters[i]);
+                          kPerfCounterNames[i], tl_perf_counters[i]);
     }
     Trace::traceRelease("\n");
   }
@@ -254,7 +253,7 @@ void requestExit() {
 }
 
 void codeEmittedThisRequest(size_t& requestEntry, size_t& now) {
-  requestEntry = *s_initialTCSize;
+  requestEntry = s_initialTCSize;
   now = g_code->totalUsed();
 }
 

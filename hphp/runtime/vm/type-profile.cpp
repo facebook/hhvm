@@ -56,17 +56,20 @@ TRACE_SET_MOD(typeProfile);
  * record samples for EvalJitProfileInterpRequests standard requests.
  */
 
-RDS_LOCAL_NO_CHECK(TypeProfileLocals, rl_typeProfileLocals)
-  {TypeProfileLocals{}};
+RequestKind __thread requestKind = RequestKind::Warmup;
+bool __thread standardRequest = true;
 
 namespace {
 
 bool warmingUp;
 std::atomic<int64_t> numRequests;
 std::atomic<bool> singleJitLock;
+__thread bool acquiredSingleJit = false;
 std::atomic<int> singleJitConcurrentCount;
+__thread bool acquiredSingleJitConcurrent = false;
 std::atomic<int> singleJitRequests;
 std::atomic<int> relocateRequests;
+__thread bool nonVMThread = false;
 
 /*
  * RFH, or "requests served in first hour" is used as a performance metric that
@@ -86,12 +89,12 @@ std::atomic<size_t> nextRFH{0};
 }
 
 ProfileNonVMThread::ProfileNonVMThread() {
-  always_assert(!rl_typeProfileLocals->nonVMThread);
-  rl_typeProfileLocals->nonVMThread = true;
+  always_assert(!nonVMThread);
+  nonVMThread = true;
 }
 
 ProfileNonVMThread::~ProfileNonVMThread() {
-  rl_typeProfileLocals->nonVMThread = false;
+  nonVMThread = false;
 }
 
 void setRelocateRequests(int32_t n) {
@@ -202,7 +205,7 @@ static inline bool doneProfiling() {
 }
 
 static inline RequestKind getRequestKind() {
-  if (rl_typeProfileLocals->nonVMThread) return RequestKind::NonVM;
+  if (nonVMThread) return RequestKind::NonVM;
   if (warmingUp) return RequestKind::Warmup;
   if (doneProfiling()) return RequestKind::Standard;
   if (RuntimeOption::ServerExecutionMode() ||
@@ -211,7 +214,7 @@ static inline RequestKind getRequestKind() {
 }
 
 void profileRequestStart() {
-  rl_typeProfileLocals->requestKind = getRequestKind();
+  requestKind = getRequestKind();
 
   // Force the request to use interpreter (not even running jitted code) when it
   // is not a standard kind, and during retranslateAll when we need to dump out
@@ -220,7 +223,7 @@ void profileRequestStart() {
     jit::mcgen::pendingRetranslateAllScheduled();
   auto const forceInterp =
     (retranslateAllScheduled && RuntimeOption::DumpPreciseProfData) ||
-    (rl_typeProfileLocals->requestKind != RequestKind::Standard);
+    (requestKind != RequestKind::Standard);
 
   // When retranslateAll is scheduled to run, we don't want to generate more
   // profiling or live translations, but the request is allowed to execute
@@ -235,12 +238,12 @@ void profileRequestStart() {
   }
   jit::setMayAcquireLease(okToJit);
   jit::setMayAcquireConcurrentLease(okToJit);
-  assertx(!rl_typeProfileLocals->acquiredSingleJit);
-  assertx(!rl_typeProfileLocals->acquiredSingleJitConcurrent);
+  assertx(!acquiredSingleJit);
+  assertx(!acquiredSingleJitConcurrent);
   if (okToJit) {
     if (singleJitRequests < RuntimeOption::EvalNumSingleJitRequests) {
       if (!singleJitLock.exchange(true, std::memory_order_relaxed)) {
-        rl_typeProfileLocals->acquiredSingleJit = true;
+        acquiredSingleJit = true;
       } else {
         jit::setMayAcquireLease(false);
       }
@@ -254,7 +257,7 @@ void profileRequestStart() {
         if (threads < RuntimeOption::EvalJitThreads &&
             singleJitConcurrentCount.compare_exchange_strong(
               threads, threads + 1, std::memory_order_relaxed)) {
-          rl_typeProfileLocals->acquiredSingleJitConcurrent = true;
+          acquiredSingleJitConcurrent = true;
         } else {
           jit::setMayAcquireConcurrentLease(false);
         }
@@ -263,15 +266,14 @@ void profileRequestStart() {
   }
 
   // Force interpretation if needed.
-  if (rl_typeProfileLocals->standardRequest == forceInterp) {
-    rl_typeProfileLocals->standardRequest = !forceInterp;
+  if (standardRequest == forceInterp) {
+    standardRequest = !forceInterp;
     if (!RequestInfo::s_requestInfo.isNull()) {
       RID().updateJit();
     }
   }
 
-  if (rl_typeProfileLocals->standardRequest &&
-      relocateRequests > 0 && !--relocateRequests) {
+  if (standardRequest && relocateRequests > 0 && !--relocateRequests) {
     jit::tc::liveRelocate(true);
   }
 }
@@ -307,10 +309,7 @@ static void checkRFH(int64_t finished) {
 }
 
 void profileRequestEnd() {
-  if (warmingUp ||
-      rl_typeProfileLocals->requestKind == RequestKind::NonVM) {
-    return;
-  }
+  if (warmingUp || requestKind == RequestKind::NonVM) return;
   auto const finished = numRequests.fetch_add(1, std::memory_order_relaxed) + 1;
   static auto const requestSeries = ServiceData::createTimeSeries(
     "vm.requests",
@@ -320,17 +319,16 @@ void profileRequestEnd() {
   requestSeries->addValue(1);
   checkRFH(finished);
 
-  if (rl_typeProfileLocals->acquiredSingleJit ||
-      rl_typeProfileLocals->acquiredSingleJitConcurrent) {
+  if (acquiredSingleJit || acquiredSingleJitConcurrent) {
     ++singleJitRequests;
 
-    if (rl_typeProfileLocals->acquiredSingleJit) {
+    if (acquiredSingleJit) {
       singleJitLock = false;
-      rl_typeProfileLocals->acquiredSingleJit = false;
+      acquiredSingleJit = false;
     }
-    if (rl_typeProfileLocals->acquiredSingleJitConcurrent) {
+    if (acquiredSingleJitConcurrent) {
       --singleJitConcurrentCount;
-      rl_typeProfileLocals->acquiredSingleJitConcurrent = false;
+      acquiredSingleJitConcurrent = false;
     }
 
     if (RuntimeOption::ServerExecutionMode()) {

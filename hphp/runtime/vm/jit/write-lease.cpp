@@ -202,7 +202,7 @@ bool couldAcquireOptimizeLease(const Func* func) {
       auto const funcId = func->getFuncId();
       s_funcOwners.ensureSize(funcId + 1);
       auto const owner = s_funcOwners[funcId].load(std::memory_order_relaxed);
-      auto const self = Treadmill::requestIdx();
+      auto const self = Treadmill::threadIdx();
       return owner == self || owner == Treadmill::kInvalidThreadIdx;
     }
     case LockLevel::Kind:
@@ -236,7 +236,7 @@ LeaseHolder::LeaseHolder(const Func* func, TransKind kind, bool isWorker)
     s_funcOwners.ensureSize(funcId + 1);
     auto& owner = s_funcOwners[funcId];
     auto oldOwner = owner.load(std::memory_order_relaxed);
-    auto const self = Treadmill::requestIdx();
+    auto const self = Treadmill::threadIdx();
 
     if (oldOwner == self) {
       // We already have the lock on this Func.

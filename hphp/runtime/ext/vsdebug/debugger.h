@@ -188,6 +188,9 @@ struct DebuggerOptions {
 
   // Don't try to unique variable references by address.
   bool disableUniqueVarRef;
+
+  // Don't try to run PSPs after each eval command on the dummy.
+  bool disableDummyPsPs;
 };
 
 struct ClientInfo {

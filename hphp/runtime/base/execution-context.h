@@ -394,6 +394,7 @@ public:
   void enterDebuggerDummyEnv();
   void exitDebuggerDummyEnv();
   void destructObjects();
+  void debuggerExecutePsps();
 
   bool isNested() { return m_nesting != 0; }
   void pushVMState(Cell* savedSP);

@@ -191,6 +191,7 @@ void DebuggerSession::runDummy() {
                             RuntimeOption::ServerVariables,
                             RuntimeOption::EnvVariables);
   SCOPE_EXIT {
+    g_context->onShutdownPostSend();
     g_context->removeStdoutHook(m_debugger->getStdoutHook());
     Logger::SetThreadHook(nullptr);
 

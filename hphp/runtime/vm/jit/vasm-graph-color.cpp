@@ -104,10 +104,7 @@ namespace HPHP { namespace jit {
 namespace {
 
 //////////////////////////////////////////////////////////////////////
-
-/*
- * State
- */
+// State
 
 // State about each Vreg. Instead of separate data-structures, all Vreg
 // information is concentrated in this one data-structure.
@@ -139,15 +136,17 @@ struct State {
   // SIMD scratch register for resolving shuffles.
   const PhysReg scratch;
 
+  // All the instructions which have been converted to
+  // pseudo-instructions. Those pseudo-instructions have the index into this
+  // vector stored in their "pos" field to map back.
+  jit::vector<Vinstr> pseudos;
+
   // Vreg state
   jit::vector<folly::Optional<RegInfo>> regInfo;
 };
 
 //////////////////////////////////////////////////////////////////////
-
-/*
- * Pretty-Printers
- */
+// Pretty-printers
 
 std::string show(const BlockVector& v) {
   using namespace folly::gen;
@@ -197,10 +196,7 @@ std::string show(const State& state) {
 }
 
 //////////////////////////////////////////////////////////////////////
-
-/*
- * RegInfo accessors
- */
+// RegInfo accessors
 
 // Access the RegInfo for the given Vreg (the info should exist).
 RegInfo& reg_info(State& state, Vreg r) {
@@ -244,10 +240,7 @@ RegInfo& reg_info_insert(State& state, Vreg r, RegInfo info) {
 }
 
 //////////////////////////////////////////////////////////////////////
-
-/*
- * Initial state creation
- */
+// Initial state creation
 
 void compute_rpo(State& state) {
   auto rpo = sortBlocks(state.unit);
@@ -288,18 +281,321 @@ State make_state(Vunit& unit, const Abi& abi) {
 }
 
 //////////////////////////////////////////////////////////////////////
+// Pre-allocation preparation
 
 /*
- * Pre-allocation preparation
+ * Vasm instructions may have RegSets or implicit register effects (which aren't
+ * reflected in the instruction's operands). Its not possible to store arbitrary
+ * Vregs in these, but we need to put the program into SSA form (which will
+ * involve rewriting physical registers into virtual ones). So, convert all such
+ * instructions into "pseudo" instructions, which serve solely to make their
+ * uses/defs explicit with Vregs. These instructions can then be manipulated
+ * just like any other instruction. We use the "pos" field as an index to their
+ * original instruction, which lets us convert these pseudo instructions back
+ * when we're done. We have a variety of pseudo instructions to represent the
+ * distinct categories of instructions that we care about.
  */
+
+// Gather the operands into lists to make for easy conversion
+struct PseudoConvertVisitor {
+  template <typename T> void imm(const T&) const {}
+
+  void use(const Vptr& p) {
+    if (p.base.isValid())  use(p.base);
+    if (p.index.isValid()) use(p.index);
+  }
+  void use(const RegSet& s) { s.forEach([this](Vreg r) { use(r); }); }
+  void use(Vreg r) { uses.emplace_back(r); }
+  void use(Vtuple) { always_assert(false); }
+  void use(VcallArgsId) { always_assert(false); }
+
+  void use(Vreg64 r) { uses64.push_back(r); }
+  void use(VregSF r) { assertx(!flagUse); flagUse = r; }
+  template <typename W> void use(Vr<W> r) { always_assert(false); }
+
+  void useHint(Vreg64 r1, Vreg64 r2) { uses64WithHints.emplace_back(r1, r2); }
+  template <typename U> void useHint(Vtuple, const U&) {
+    always_assert(false);
+  }
+  template <typename U> void useHint(Vreg, const U&) {
+    always_assert(false);
+  }
+  template <typename W, typename U> void useHint(Vr<W>, const U&) {
+    always_assert(false);
+  }
+
+  void defHint(Vreg64 r1, Vreg64 r2) { defs64WithHints.emplace_back(r1, r2); }
+  template <typename U> void defHint(Vtuple, const U&) {
+    always_assert(false);
+  }
+  template <typename U> void defHint(Vreg, const U&) {
+    always_assert(false);
+  }
+  template <typename W, typename U> void defHint(Vr<W>, const U&) {
+    always_assert(false);
+  }
+
+  template <typename T> void across(const T&) { always_assert(false); }
+
+  void def(Vtuple) { always_assert(false); }
+  void def(Vreg r) { defs.emplace_back(r); }
+
+  void def(VregSF r) { assertx(!flagDef); flagDef = r; }
+  template <typename W> void def(Vr<W>) { always_assert(false); }
+
+  VregList uses;
+  VregList uses64;
+  VregList defs;
+  VregList acrosses;
+  jit::vector<std::pair<Vreg64, Vreg64>> uses64WithHints;
+  jit::vector<std::pair<Vreg64, Vreg64>> defs64WithHints;
+  folly::Optional<VregSF> flagUse;
+  folly::Optional<VregSF> flagDef;
+};
+
+// Check if any operand is a RegSet
+struct HasRegSetVisitor {
+  template <typename T> void imm(const T&) const {}
+  template <typename T> void use(const T& t) { check(t); }
+  template <typename T> void def(const T& t) { check(t); }
+  template <typename T> void across(const T& t) { check(t); }
+  template <typename T, typename U> void useHint(const T& t, const U& u) {
+    check(t); check(u);
+  }
+  template <typename T, typename U> void defHint(const T& t, const U& u) {
+    check(t); check(u);
+  }
+
+  template <typename T> void check(const T&) const {}
+  void check(const RegSet&) { hasRegSet = true; }
+
+  bool hasRegSet = false;
+};
+
+void pseudo_convert(State& state) {
+  auto& unit = state.unit;
+  auto const& abi = state.abi;
+
+  for (auto const label : state.rpo) {
+    for (auto& inst : unit.blocks[label].code) {
+
+      auto const visit = [&] {
+        PseudoConvertVisitor v;
+        visitOperands(inst, v);
+
+        RegSet implicitUses, implicitAcross, implicitDefs;
+        getEffects(abi, inst, implicitUses, implicitAcross, implicitDefs);
+        implicitDefs.forEach([&](Vreg r) { v.defs.emplace_back(r); });
+        implicitUses.forEach([&](Vreg r) { v.uses.emplace_back(r); });
+        implicitAcross.forEach([&](Vreg r) { v.acrosses.emplace_back(r); });
+        return v;
+      };
+
+      switch (inst.op) {
+        case Vinstr::bindjmp:
+        case Vinstr::callfaststub:
+        case Vinstr::calltc:
+        case Vinstr::cqo:
+        case Vinstr::fallback:
+        case Vinstr::fallthru:
+        case Vinstr::jmpi:
+        case Vinstr::jmpm:
+        case Vinstr::jmpr:
+        case Vinstr::leavetc:
+        case Vinstr::phpret:
+        case Vinstr::resumetc:
+        case Vinstr::ret:
+        case Vinstr::retransopt:
+        case Vinstr::stubret:
+        case Vinstr::tailcallphp:
+        case Vinstr::tailcallstub: {
+          assertx(succs(inst).size() == 0);
+
+          auto v = visit();
+          assertx(v.uses64WithHints.empty());
+          assertx(v.defs64WithHints.empty());
+          assertx(!v.flagUse);
+          assertx(!v.flagDef);
+
+          state.pseudos.emplace_back(inst);
+          inst.pos = state.pseudos.size() - 1;
+
+          inst.op = Vinstr::pseudojmp;
+          inst.pseudojmp_ = pseudojmp{
+            unit.makeTuple(std::move(v.defs)),
+            unit.makeTuple(std::move(v.uses)),
+            unit.makeTuple(std::move(v.uses64)),
+            unit.makeTuple(std::move(v.acrosses))
+          };
+          continue;
+        }
+        case Vinstr::call:
+        case Vinstr::callm:
+        case Vinstr::callr:
+        case Vinstr::calls:
+        case Vinstr::callstub:
+        case Vinstr::callunpack: {
+          assertx(succs(inst).size() == 0);
+
+          auto v = visit();
+          assertx(v.uses64WithHints.empty());
+          assertx(v.defs64WithHints.empty());
+          assertx(!v.flagUse);
+
+          state.pseudos.emplace_back(inst);
+          inst.pos = state.pseudos.size() - 1;
+
+          inst.op = Vinstr::pseudocall;
+          inst.pseudocall_ = pseudocall{
+            unit.makeTuple(std::move(v.defs)),
+            unit.makeTuple(std::move(v.uses)),
+            unit.makeTuple(std::move(v.uses64)),
+            unit.makeTuple(std::move(v.acrosses))
+          };
+          continue;
+        }
+        case Vinstr::bindjcc:
+        case Vinstr::fallbackcc: {
+          assertx(succs(inst).size() == 0);
+
+          auto v = visit();
+          assertx(v.uses64.empty());
+          assertx(v.uses64WithHints.empty());
+          assertx(v.defs64WithHints.empty());
+          assertx(v.flagUse);
+          assertx(!v.flagDef);
+
+          state.pseudos.emplace_back(inst);
+          inst.pos = state.pseudos.size() - 1;
+
+          inst.op = Vinstr::pseudojcc;
+          inst.pseudojcc_ = pseudojcc{
+            unit.makeTuple(std::move(v.defs)),
+            unit.makeTuple(std::move(v.uses)),
+            unit.makeTuple(std::move(v.acrosses)),
+            *v.flagUse
+          };
+          continue;
+        }
+        case Vinstr::idiv: {
+          assertx(succs(inst).size() == 0);
+
+          auto v = visit();
+          assertx(v.uses64WithHints.empty());
+          assertx(v.defs64WithHints.empty());
+          assertx(!v.flagUse);
+          assertx(v.flagDef);
+
+          state.pseudos.emplace_back(inst);
+          inst.pos = state.pseudos.size() - 1;
+
+          inst.op = Vinstr::pseudodiv;
+          inst.pseudodiv_ = pseudodiv{
+            unit.makeTuple(std::move(v.defs)),
+            unit.makeTuple(std::move(v.uses)),
+            unit.makeTuple(std::move(v.uses64)),
+            unit.makeTuple(std::move(v.acrosses)),
+            *v.flagDef
+          };
+          continue;
+        }
+        case Vinstr::callphp:
+        case Vinstr::contenter: {
+          auto v = visit();
+          assertx(v.uses64WithHints.empty());
+          assertx(v.defs64WithHints.empty());
+          assertx(!v.flagUse);
+          assertx(!v.flagDef);
+
+          auto const succList = succs(inst);
+          assertx(succList.size() == 2);
+          Vlabel targets[2] = { succList[0], succList[1] };
+
+          state.pseudos.emplace_back(inst);
+          inst.pos = state.pseudos.size() - 1;
+
+          inst.op = Vinstr::pseudocallphp;
+          inst.pseudocallphp_ = pseudocallphp{
+            unit.makeTuple(std::move(v.defs)),
+            unit.makeTuple(std::move(v.uses)),
+            unit.makeTuple(std::move(v.uses64)),
+            unit.makeTuple(std::move(v.acrosses)),
+            { targets[0], targets[1] }
+          };
+          continue;
+        }
+        case Vinstr::sarq:
+        case Vinstr::shlq: {
+          assertx(succs(inst).size() == 0);
+
+          auto v = visit();
+          assertx(v.uses64WithHints.size() == 1);
+          assertx(v.defs64WithHints.size() == 1);
+          assertx(v.uses64WithHints[0].second == v.defs64WithHints[0].first);
+          assertx(v.defs64WithHints[0].second == v.uses64WithHints[0].first);
+          assertx(!v.flagUse);
+          assertx(v.flagDef);
+
+          state.pseudos.emplace_back(inst);
+          inst.pos = state.pseudos.size() - 1;
+
+          inst.op = Vinstr::pseudoshift;
+          inst.pseudoshift_ = pseudoshift{
+            v.defs64WithHints[0].first,
+            v.uses64WithHints[0].first,
+            unit.makeTuple(std::move(v.defs)),
+            unit.makeTuple(std::move(v.uses)),
+            unit.makeTuple(std::move(v.acrosses)),
+            *v.flagDef
+          };
+          continue;
+        }
+        default:
+          break;
+      }
+
+      // We should have covered any instruction which requires conversion
+      // already. Do a sanity check to make sure the remaining instructions
+      // don't have implicit register effects or RegSets.
+      if (debug) {
+        RegSet uses, across, defs;
+        getEffects(abi, inst, uses, across, defs);
+        always_assert_flog(
+          (defs | uses | across).empty(),
+          "Instruction '{}' in {} with non-trivial effects "
+          "not converted to pseudo",
+          show(unit, inst),
+          label
+        );
+
+        HasRegSetVisitor v;
+        visitOperands(inst, v);
+        always_assert_flog(
+          !v.hasRegSet,
+          "Instruction '{}' in {} with RegSet operand "
+          "not converted to pseudo",
+          show(unit, inst),
+          label
+        );
+      }
+    }
+  }
+
+  assertx(check(unit));
+}
+
+//////////////////////////////////////////////////////////////////////
 
 void prepare_unit(State& state) {
   /*
    * The algorithm requires all registers to be in strict SSA form. Existing
    * Vregs should already be in SSA form, so only physical registers need to be
-   * dealt with. Use the SSA restoration pass to turn them into Vregs in SSA
-   * form.
+   * dealt with. First convert any instructions which have RegSets or implicit
+   * effects into pseudo forms, turning them into Vregs. Then use the SSA
+   * restoration pass to turn them into SSA form.
    */
+  pseudo_convert(state);
+
   VregSet unreserved{state.gpUnreserved | state.simdUnreserved};
   // Ensure that the physical registers have a definition (required for the SSA
   // restoration algorithm).

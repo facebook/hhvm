@@ -3423,17 +3423,16 @@ module FromEditablePositionedSyntax =
 let parse_text
   (env : env)
   (source_text : SourceText.t)
-: (FileInfo.file_type * FileInfo.mode * PositionedSyntaxTree.t) =
+: (FileInfo.file_type * FileInfo.mode option * PositionedSyntaxTree.t) =
   let lang, mode = Full_fidelity_parser.get_language_and_mode source_text in
-  let mode = Option.value ~default:FileInfo.Mphp mode in
-  let env =  { env with fi_mode = mode } in
-  let env = { env with quick_mode = not env.codegen
-      && (match mode with
-         | FileInfo.Mdecl
-         | FileInfo.Mphp -> true
-         | _ -> env.quick_mode
-         ) } in
-  if mode = FileInfo.Mexperimental && env.codegen && (not env.hacksperimental) then begin
+  let quick_mode = not env.codegen && (
+    match mode with
+    | None
+    | Some FileInfo.Mdecl
+    | Some FileInfo.Mphp -> true
+    | _ -> env.quick_mode
+  ) in
+  if mode = Some FileInfo.Mexperimental && env.codegen && (not env.hacksperimental) then begin
     let e = SyntaxError.make 0 0 SyntaxError.experimental_in_codegen_without_hacksperimental in
     let p =
       SourceText.relative_pos env.file source_text
@@ -3450,14 +3449,14 @@ let parse_text
         ~enable_xhp:env.enable_xhp
         ~php5_compat_mode:env.php5_compat_mode
         ~lang:lang
-        ~mode
+        ?mode
         ()
     in
-    if env.quick_mode then
+    if quick_mode then
       let parser = DeclModeParser.make env' source_text in
       let (parser, root) = DeclModeParser.parse_script parser in
       let errors = DeclModeParser.errors parser in
-      PositionedSyntaxTree.create source_text root errors lang (Some mode) false
+      PositionedSyntaxTree.create source_text root errors lang mode false
     else
       PositionedSyntaxTree.make ~env:env' source_text
   in
@@ -3480,7 +3479,7 @@ let lower_tree
   (env : env)
   (source_text : SourceText.t)
   (lang : FileInfo.file_type)
-  (mode : FileInfo.mode)
+  (mode : FileInfo.mode option)
   (tree : PositionedSyntaxTree.t)
 : result =
   let env =
@@ -3543,8 +3542,13 @@ let lower_tree
       | e::_ ->
         Errors.parsing_error (pos_and_message_of e);
   in
-  let mode = if lang = FileInfo.PhpFile then FileInfo.Mphp else mode in
-  let mode = if mode = FileInfo.Mdecl && env.codegen then FileInfo.Mphp else mode in
+  let mode =
+    match mode with
+    | None -> FileInfo.Mphp
+    | Some FileInfo.Mdecl when env.codegen -> FileInfo.Mphp
+    | Some _ when lang = FileInfo.PhpFile -> FileInfo.Mphp
+    | Some m -> m
+  in
   let env = { env with fi_mode = mode } in
   let env = { env with is_hh_file = lang = FileInfo.HhFile } in
   let popt = env.parser_options in

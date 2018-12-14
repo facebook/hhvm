@@ -47,6 +47,11 @@ let parse_mode = function
   | "experimental" -> Some Mexperimental
   | _ -> None
 
+let parse_file_type = function
+  | "php" -> PhpFile
+  | "hh" -> HhFile
+  | _ -> PhpFile (* Default choice; should become hh at some point *)
+
 let string_of_mode = function
   | Mphp          -> "php"
   | Mdecl         -> "decl"

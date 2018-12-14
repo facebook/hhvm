@@ -28,6 +28,7 @@ type file_type =
   | PhpFile
   | HhFile [@@deriving show]
 
+val parse_file_type : string -> file_type
 val string_of_file_type : file_type -> string
 
 type mode =

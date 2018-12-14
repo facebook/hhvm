@@ -121,8 +121,7 @@ let is_typechecker env =
   is_hack env && (not env.codegen)
 
 let is_strict env =
-  let mode_opt = FileInfo.parse_mode @@ SyntaxTree.mode env.syntax_tree in
-  mode_opt = Some FileInfo.Mstrict
+  SyntaxTree.mode env.syntax_tree = Some FileInfo.Mstrict
 
 let global_namespace_name = "\\"
 
@@ -3507,8 +3506,7 @@ let get_namespace_name parents current_namespace_name =
   | _ -> current_namespace_name
 
 let is_invalid_hack_mode env errors =
-  let mode = FileInfo.parse_mode @@ SyntaxTree.mode env.syntax_tree in
-  if Option.is_none mode then
+  if SyntaxTree.mode env.syntax_tree = None then
     let root = SyntaxTree.root env.syntax_tree in
     let e = make_error_from_node root SyntaxError.invalid_hack_mode in
     e::errors

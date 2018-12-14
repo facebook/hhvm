@@ -38,8 +38,8 @@ type t = {
   text : SourceText.t;
   root : Syntax.t;
   errors : SyntaxError.t list;
-  language : string;
-  mode : string;
+  language : FileInfo.file_type;
+  mode : FileInfo.mode option;
   state : SCI.t;
 } [@@deriving show]
 
@@ -67,8 +67,8 @@ let analyze_header text script =
     markup_suffix_less_than_question;
     markup_suffix_name; _ } ->
     begin match syntax markup_suffix_name with
-    | Missing -> "php", ""
-    | Token t when Token.kind t = TK.Equal -> "php", ""
+    | Missing -> FileInfo.PhpFile, None
+    | Token t when Token.kind t = TK.Equal -> FileInfo.PhpFile, None
     | _ ->
       let prefix_width = full_width markup_prefix in
       let text_width = full_width markup_text in
@@ -79,14 +79,14 @@ let analyze_header text script =
       let language = SourceText.sub text (prefix_width + text_width +
         ltq_width + name_leading) name_width
       in
-      let language = String.lowercase language in
+      let language = FileInfo.parse_file_type (String.lowercase language) in
       let mode = SourceText.sub text (prefix_width + text_width +
         ltq_width + name_leading + name_width) name_trailing
       in
-      let mode = parse_mode_comment mode in
+      let mode = FileInfo.parse_mode (parse_mode_comment mode) in
       language, mode
     end
-  | _ -> "php", ""
+  | _ -> FileInfo.PhpFile, None
   (* The parser never produces a leading markup section; it fills one in with zero
      width tokens if it needs to. *)
 
@@ -118,8 +118,8 @@ let build
     (text: SourceText.t)
     (root: Syntax.t)
     (errors: SyntaxError.t list)
-    (language: string)
-    (mode: string)
+    (language: FileInfo.file_type)
+    (mode: FileInfo.mode option)
     (state: SCI.t): t =
   { text; root; errors; language; mode; state }
 
@@ -132,16 +132,13 @@ let process_errors errors =
   let errors = List.stable_sort SyntaxError.compare errors in
   remove_duplicates errors SyntaxError.exactly_equal
 
-let from_root text root errors state =
+let create text root errors language mode state =
   let errors = process_errors errors in
-  let (language, mode) = get_language_and_mode text root in
   build text root errors language mode state
 
-let create text root errors lang mode state =
-  let errors = process_errors errors in
-  let language = FileInfo.string_of_file_type lang in
-  let mode = FileInfo.string_of_mode @@ Option.value ~default:FileInfo.Mphp mode in
-  { text; root; errors; language; mode; state }
+let from_root text root errors state =
+  let (language, mode) = get_language_and_mode text root in
+  create text root errors language mode state
 
 let make_impl ?(env = Env.default) text =
   let parser = Parser.make env text in
@@ -179,16 +176,16 @@ let sc_state tree =
   tree.state
 
 let is_hack tree =
-  tree.language = "hh"
+  tree.language = FileInfo.HhFile
 
 let is_php tree =
-  tree.language = "php"
+  tree.language = FileInfo.PhpFile
 
 let is_strict tree =
-  (is_hack tree) && tree.mode = "strict"
+  (is_hack tree) && tree.mode = Some FileInfo.Mstrict
 
 let is_decl tree =
-  (is_hack tree) && tree.mode = "decl"
+  (is_hack tree) && tree.mode = Some FileInfo.Mdecl
 
 let errors_no_bodies tree =
   let not_in_body error =

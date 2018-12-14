@@ -34,8 +34,8 @@ module WithSmartConstructors : functor (SmartConstructors : SmartConstructors.Sm
     Full_fidelity_source_text.t ->
     Syntax.t ->
     Full_fidelity_syntax_error.t list ->
-    string ->
-    string ->
+    FileInfo.file_type ->
+    FileInfo.mode option ->
     SmartConstructors.t ->
     t
 
@@ -44,8 +44,8 @@ module WithSmartConstructors : functor (SmartConstructors : SmartConstructors.Sm
   val sc_state : t -> SmartConstructors.t
   val all_errors : t -> Full_fidelity_syntax_error.t list
   val errors : t -> Full_fidelity_syntax_error.t list
-  val language : t -> string
-  val mode : t -> string
+  val language : t -> FileInfo.file_type
+  val mode : t -> FileInfo.mode option
   val is_hack : t -> bool
   val is_php : t -> bool
   val is_strict : t -> bool
@@ -73,8 +73,8 @@ val build :
   Full_fidelity_source_text.t ->
   Syntax.t ->
   Full_fidelity_syntax_error.t list ->
-  string ->
-  string ->
+  FileInfo.file_type ->
+  FileInfo.mode option ->
   t
 
 end (* WithSyntax *)

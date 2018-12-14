@@ -173,12 +173,9 @@ let get_language_and_mode text =
         let skip_length =
           full_width pfx + full_width txt + full_width ltq + leading_width name
         in
-        let language =
-          let s = SourceText.sub text skip_length (width name) in
-          match String.lowercase_ascii s with
-          | "hh" -> hh
-          | "php" -> php
-          | _ -> php (* Default choice; should become hh at some point *)
+        let language = width name
+          |> SourceText.sub text skip_length
+          |> FileInfo.parse_file_type
         in
         if is_hhi then language, Some FileInfo.Mdecl else
         let skip_length = skip_length + width name in

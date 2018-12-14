@@ -305,7 +305,7 @@ void HHVM_FUNCTION(spl_autoload_call, const String& class_name) {
 
 struct ExtensionList final : RequestEventHandler {
   void requestInit() override {
-    extensions = make_packed_array(String(".inc"), String(".php"));
+    extensions = make_vec_array(String(".inc"), String(".php"));
   }
   void requestShutdown() override {
     extensions.reset();
@@ -320,7 +320,7 @@ String HHVM_FUNCTION(spl_autoload_extensions,
                      const String& file_extensions /* = null_string */) {
   if (!file_extensions.empty()) {
     s_extension_list->extensions = StringUtil::Explode(file_extensions, ",")
-                                   .toArray();
+                                   .toVecArray();
     return file_extensions;
   }
   return StringUtil::Implode(s_extension_list->extensions, ",");

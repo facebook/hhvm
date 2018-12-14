@@ -42,7 +42,6 @@ type mode =
 
 let parse_mode = function
   | "strict" -> Some Mstrict
-  | "decl" | "only-headers" -> Some Mdecl
   | "" | "partial" -> Some Mpartial
   | "experimental" -> Some Mexperimental
   | _ -> None

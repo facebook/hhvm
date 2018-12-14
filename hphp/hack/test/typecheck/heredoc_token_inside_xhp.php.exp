@@ -1,2 +1,2 @@
-File "heredoc_token_inside_xhp.php", line 14, characters 12-17:
-XHP: mismatched tag: '' not the same as 'div' (Parsing[1002])
+File "heredoc_token_inside_xhp.php", line 14, characters 19-19:
+An opening square bracket ('[') is expected here. (Parsing[1002])

@@ -194,7 +194,6 @@ let get_language_and_mode text =
             with _ -> if language = hh then Some FileInfo.Mpartial else None in
           match mode with
           | Some FileInfo.Mstrict when !Ide.is_ide_mode -> Some FileInfo.Mpartial
-          | Some FileInfo.Mdecl when not is_hhi -> Some FileInfo.Mpartial
           | _ -> mode
         in
         language, mode

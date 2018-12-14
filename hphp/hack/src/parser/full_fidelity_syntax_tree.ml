@@ -80,6 +80,11 @@ let analyze_header text script =
         ltq_width + name_leading) name_width
       in
       let language = FileInfo.parse_file_type (String.lowercase language) in
+      let is_hhi = text
+        |> SourceText.file_path
+        |> Relative_path.suffix
+        |> String.is_suffix ~suffix:".hhi" in
+      if is_hhi then language, Some FileInfo.Mdecl else
       let mode = SourceText.sub text (prefix_width + text_width +
         ltq_width + name_leading + name_width) name_trailing
       in

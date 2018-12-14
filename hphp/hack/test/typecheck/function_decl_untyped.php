@@ -1,5 +1,5 @@
 //// decl.php
-<?hh // decl
+<?hh
 
 async function f_asyncgen() {
   yield 10;

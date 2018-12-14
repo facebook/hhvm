@@ -1,5 +1,5 @@
 //// file1.php
-<?hh // decl
+<?hh
 
 async function foo() {
   yield 10;

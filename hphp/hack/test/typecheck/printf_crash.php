@@ -4,7 +4,7 @@
 newtype FormatString<T> = string;
 
 //// printf.php
-<?hh // decl
+<?hh
 interface MyPlainSprintf {
 }
 

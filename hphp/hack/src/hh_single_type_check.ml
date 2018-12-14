@@ -87,7 +87,7 @@ let hhi_builtins = Hhi.get_raw_hhi_contents ()
 let magic_builtins = [|
   (
     "hh_single_type_check_magic.hhi",
-    "<?hh // decl\n" ^
+    "<?hh\n" ^
     "namespace {\n" ^
     "function gena();\n" ^
     "function genva();\n" ^

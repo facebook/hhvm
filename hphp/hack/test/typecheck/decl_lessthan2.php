@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 
 function inTheFuture($x) {
   if ($x < new DateTime()) {

@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh
 
 function &test(): mixed {
   static $x;

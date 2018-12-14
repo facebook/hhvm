@@ -555,7 +555,7 @@ let collection_intrinsic_generic =
   "Cannot initialize collection builtins with type parameters"
 
 let invalid_hack_mode =
-  "Incorrect comment; possible values include strict, decl, partial, only-headers, or empty"
+  "Incorrect comment; possible values include strict, partial, or empty"
 
 let pair_initializer_needed =
   "Initializer needed for Pair object"

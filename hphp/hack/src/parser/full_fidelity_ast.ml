@@ -866,13 +866,19 @@ let rec pHint : hint parser = fun node env ->
       ; dictionary_type_members = members
       ; _ } -> Happly (pos_name kw env, couldMap ~f:pHint members env)
     | GenericTypeSpecifier { generic_class_type; generic_argument_list } ->
-      Happly
-      ( pos_name generic_class_type env
-      , match syntax generic_argument_list with
+      let name = pos_name generic_class_type env in
+      let type_args =
+        match syntax generic_argument_list with
         | TypeArguments { type_arguments_types; _ }
           -> couldMap ~f:pHint type_arguments_types env
         | _ -> missing_syntax "generic type arguments" generic_argument_list env
-      )
+      in
+      if env.codegen
+      then match String.lowercase (snd name), type_args with
+      | ("rx" | "rxlocal" | "rxshallow"), [_, (Hfun _ as t)]
+      | ("mutable" | "maybemutable" | "ownedmutable"), [_, (Happly _ as t)] -> t
+      | _ -> Happly(name, type_args)
+      else Happly(name, type_args)
     | NullableTypeSpecifier { nullable_type; _ } ->
       Hoption (pHint nullable_type env)
     | SoftTypeSpecifier { soft_type; _ } ->

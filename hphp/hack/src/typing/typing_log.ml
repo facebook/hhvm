@@ -125,9 +125,9 @@ let rec log_type_list env tyl =
   match tyl with
     | [] -> ()
     | [ty] ->
-      lprintf (Normal Green) "%s" (Typing_print.debug_with_tvars env ty)
+      lprintf (Normal Green) "%s" (Typing_print.debug env ty)
     | ty::tyl ->
-      lprintf (Normal Green) "%s, " (Typing_print.debug_with_tvars env ty);
+      lprintf (Normal Green) "%s, " (Typing_print.debug env ty);
       log_type_list env tyl
 
 let log_continuation env name cont =
@@ -136,7 +136,7 @@ let log_continuation env name cont =
       lnewline();
       lprintf (Bold Green) "%s[#%d]: "
         (Local_id.get_name id) (Local_id.to_int id);
-      lprintf (Normal Green) "%s" (Typing_print.debug_with_tvars env type_);
+      lprintf (Normal Green) "%s" (Typing_print.debug env type_);
       lprintf (Normal Green) " [eid: %s]" (Ident.debug expr_id) end
     cont)
 
@@ -160,7 +160,7 @@ let log_return_type env =
       {return_type; return_disposable; return_mutable; return_explicit; return_by_ref;
        return_void_to_rx; } = Env.get_return env in
     lprintf (Normal Green) "%s%s%s%s%s%s"
-      (Typing_print.debug_with_tvars env return_type)
+      (Typing_print.debug env return_type)
       (if return_disposable then " (disposable)" else "")
       (if return_mutable then " (mutable_return)" else "")
       (if return_explicit then " (explicit)" else "")
@@ -282,7 +282,7 @@ let log_types p env items =
           | Log_head (message, items) ->
             indentEnv ~color:(Normal Yellow) message (fun () -> go items)
           | Log_type (message, ty) ->
-            let s = Typing_print.debug_with_tvars env ty in
+            let s = Typing_print.debug env ty in
             lprintf (Bold Green) "%s: " message;
             lprintf (Normal Green) "%s" s;
             lnewline ()) in

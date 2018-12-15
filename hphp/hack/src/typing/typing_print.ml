@@ -275,10 +275,7 @@ module Full = struct
   let (^^) a b = Concat [a; b]
 
   let debug_mode = ref false
-  let show_tvars = ref false
-  let must_show_tvars env =
-    !show_tvars ||
-    (TypecheckerOptions.new_inference (Env.get_tcopt env))
+  let show_verbose env = Env.get_log_level env "show" > 1
   let varmapping = ref IMap.empty
   let normalize_tvars = ref false
 
@@ -367,25 +364,28 @@ module Full = struct
     | Tprim x -> text @@ prim x
     | Tvar n ->
       let _, n' = Env.get_var env n in
-      let prepend =
-        if ISet.mem n' st then text "[rec]"
-        else
-        (* For hh_show_env we further show the type variable number *)
-        let normalized_n = if !normalize_tvars
-          then match IMap.find_opt n !varmapping with
-            | Some n' -> n'
-            | None ->
-              let n' = IMap.cardinal !varmapping in
-              varmapping := IMap.add n n' !varmapping;
-              n'
-          else n in
-        if must_show_tvars env then (text ("#" ^ (string_of_int normalized_n)))
-        else Nothing
-      in
       let _, ety = Env.expand_type env (Reason.Rnone, x) in
+      let normalized_n = if !normalize_tvars
+        then match IMap.find_opt n !varmapping with
+          | Some n' -> n'
+          | None ->
+            let n' = IMap.cardinal !varmapping in
+            varmapping := IMap.add n n' !varmapping;
+            n'
+        else n in
       begin match ety with
-      | (_, Tvar _) -> prepend
+        (* For unsolved type variables, always show the type variable *)
+      | (_, Tvar _) ->
+        if ISet.mem n' st
+        then text "[rec]"
+        else text ("#" ^ string_of_int normalized_n)
       | _ ->
+        let prepend =
+          if ISet.mem n' st then text "[rec]"
+          else
+          (* For hh_show_env we further show the type variable number *)
+          if show_verbose env then (text ("#" ^ (string_of_int normalized_n)))
+          else Nothing in
         let st = ISet.add n' st in
         Concat [prepend; ty to_doc st env ety]
       end
@@ -426,7 +426,10 @@ module Full = struct
       | Some (Reactive _, false, _, _, _) -> text "[rx fun]"
       | _ -> text "[fun]"
       end
-    | Tunresolved [] -> text "[unresolved]"
+    | Tunresolved [] ->
+      if TypecheckerOptions.new_inference (Env.get_tcopt env)
+      then text "nothing"
+      else text "[unresolved]"
     | Tunresolved tyl ->
       let tyl = List.fold_right tyl ~init:Typing_set.empty
       ~f:Typing_set.add |> Typing_set.elements in
@@ -434,15 +437,15 @@ module Full = struct
       begin match null, nonnull with
       (* type isn't nullable *)
       | [], [ty] ->
-        if must_show_tvars env then Concat [text "("; k ty; text ")"] else k ty
+        if show_verbose env then Concat [text "("; k ty; text ")"] else k ty
       | [], _ ->
         delimited_list (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
       (* Type only is null *)
       | _, [] ->
-        if must_show_tvars env then text "(null)" else text "null"
+        if show_verbose env then text "(null)" else text "null"
       (* Type is nullable single type *)
       | _, [ty] ->
-        if must_show_tvars env
+        if show_verbose env
           then Concat [text "?"; text "("; k ty; text ")"]
           else Concat [text "?"; k ty]
       (* Type is nullable unresolved type *)
@@ -1560,12 +1563,6 @@ let debug env ty =
   Full.debug_mode := false;
   f_str
 
-let debug_with_tvars env ty =
-  Full.show_tvars := true;
-  let f_str = debug env ty in
-  Full.show_tvars := false;
-  f_str
-
 let class_ tcopt c = PrintClass.class_type tcopt c
 let gconst tcopt gc = Full.to_string_decl tcopt (fst gc)
 let fun_ tcopt f = PrintFun.fun_type tcopt f
@@ -1585,9 +1582,9 @@ let subtype_prop ?(do_normalize = false) env prop =
     | Disj ps ->
       "(" ^ (String.concat ~sep:" || " (List.map ~f:subtype_prop ps)) ^ ")"
     | IsSubtype (ty1, ty2) ->
-      debug_with_tvars env ty1 ^ " <: " ^ debug_with_tvars env ty2
+      debug env ty1 ^ " <: " ^ debug env ty2
     | IsEqual (ty1, ty2) ->
-      debug_with_tvars env ty1 ^ " = " ^ debug_with_tvars env ty2 in
+      debug env ty1 ^ " = " ^ debug env ty2 in
   if do_normalize then
     Full.varmapping := IMap.empty;
     Full.normalize_tvars := true;

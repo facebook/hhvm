@@ -269,7 +269,7 @@ bool conjureBeginInlining(IRGS& env,
  * conjureBeginInlining, this function should not be used in a region that will
  * be executed.
  */
-void conjureEndInlining(IRGS& env,
+bool conjureEndInlining(IRGS& env,
                         const RegionDesc& calleeRegion,
                         bool builtin);
 

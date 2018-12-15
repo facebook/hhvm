@@ -618,13 +618,14 @@ bool endInlining(IRGS& env, const RegionDesc& calleeRegion) {
   return true;
 }
 
-void conjureEndInlining(IRGS& env, const RegionDesc& calleeRegion,
+bool conjureEndInlining(IRGS& env, const RegionDesc& calleeRegion,
                         bool builtin) {
   if (!builtin) {
-    endInlining(env, calleeRegion);
+    if (!endInlining(env, calleeRegion)) return false;
   }
   gen(env, ConjureUse, pop(env));
   gen(env, EndBlock, ASSERT_REASON);
+  return true;
 }
 
 void retFromInlined(IRGS& env) {

@@ -1057,7 +1057,9 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
     }
 
     if (result == TranslateResult::Success) {
-      irgen::conjureEndInlining(irgs, region, func->isCPPBuiltin());
+      if (!irgen::conjureEndInlining(irgs, region, func->isCPPBuiltin())) {
+        return nullptr;
+      }
       irgen::sealUnit(irgs);
       optimize(*unit, TransKind::Optimize);
     }

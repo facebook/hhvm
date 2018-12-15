@@ -63,6 +63,7 @@ module FullFidelityParseArgs = struct
     fail_open : bool;
     (* Defining the input *)
     files : string list;
+    dump_nast : bool;
   }
 
   let make
@@ -88,7 +89,8 @@ module FullFidelityParseArgs = struct
     enable_hh_syntax
     fail_open
     show_file_name
-    files = {
+    files
+    dump_nast = {
     full_fidelity_json;
     full_fidelity_dot;
     full_fidelity_dot_edges;
@@ -111,7 +113,8 @@ module FullFidelityParseArgs = struct
     enable_hh_syntax;
     fail_open;
     show_file_name;
-    files }
+    files;
+    dump_nast }
 
   let parse_args () =
     let usage = Printf.sprintf "Usage: %s [OPTIONS] filename\n" Sys.argv.(0) in
@@ -149,6 +152,7 @@ module FullFidelityParseArgs = struct
     let enable_hh_syntax = ref false in
     let fail_open = ref true in
     let show_file_name = ref false in
+    let dump_nast = ref false in
     let set_show_file_name () = show_file_name := true in
     let files = ref [] in
     let push_file file = files := file :: !files in
@@ -249,6 +253,9 @@ No errors are filtered out.";
       "--show-file-name",
         Arg.Unit set_show_file_name,
         "Displays the file name.";
+      "--dump-nast",
+        Arg.Set dump_nast,
+        "Converts the legacy AST to a NAST and prints it.";
       ] in
     Arg.parse options push_file usage;
     make
@@ -275,6 +282,7 @@ No errors are filtered out.";
       !fail_open
       !show_file_name
       (List.rev !files)
+      !dump_nast
 end
 
 open FullFidelityParseArgs
@@ -350,7 +358,7 @@ let handle_existing_file args filename =
     let str = DebugPos.dump_syntax root in
     Printf.printf "%s\n" str
   end;
-  if args.full_fidelity_ast_s_expr then begin
+  if args.full_fidelity_ast_s_expr || args.dump_nast then begin
     let module Lowerer = Full_fidelity_ast in
     let env =
       Lowerer.make_env
@@ -369,7 +377,12 @@ let handle_existing_file args filename =
         file
     in
     let res = Lowerer.from_file env in
-    let str = Debug.dump_ast @@ Ast.AProgram res.Lowerer.ast in
+    let ast = res.Lowerer.ast in
+    let str =
+      if args.dump_nast then
+        Nast.show_program (Ast_to_nast.convert ast)
+      else
+        Debug.dump_ast (Ast.AProgram ast) in
     Printf.printf "%s\n" str
   end;
   if args.full_fidelity_json then begin

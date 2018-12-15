@@ -870,6 +870,8 @@ FuncSet s_ignores_frame = {
   "fb_get_last_flush_size",
   "fb_lazy_lstat",
   "fb_lazy_realpath",
+  "HH\\non_crypto_md5_upper",
+  "HH\\non_crypto_md5_lower",
   "hash",
   "hash_algos",
   "hash_file",

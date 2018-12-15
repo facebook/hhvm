@@ -52,6 +52,8 @@ void HHVM_FUNCTION(fb_set_exit_callback, const Variant& function);
 int64_t HHVM_FUNCTION(fb_get_last_flush_size);
 Variant HHVM_FUNCTION(fb_lazy_lstat, const String& filename);
 Variant HHVM_FUNCTION(fb_lazy_realpath, const String& filename);
+int64_t HHVM_FUNCTION(HH_non_crypto_md5_upper, StringArg str);
+int64_t HHVM_FUNCTION(HH_non_crypto_md5_lower, StringArg str);
 
 ///////////////////////////////////////////////////////////////////////////////
 

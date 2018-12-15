@@ -198,6 +198,7 @@ function fb_lazy_lstat(string $filename): mixed;
  */
 <<__Native>>
 function fb_lazy_realpath(string $filename): mixed;
+
 } // namespace
 
 namespace HH {
@@ -206,4 +207,36 @@ namespace HH {
  */
 <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
 function disable_code_coverage_with_frequency(): darray<string, mixed>;
+
+/* Returns an int for the upper (first) 64 bits of an md5 hash of a string.
+ * The MD5 hash, usually presented as a hex value, is taken as big endian, and
+ * this int result is the signed counterpart to the unsigned upper 64 bits.
+ *
+ * This function and the _lower version are generally only intended for
+ * legacy use cases in which an MD5 hash is used to compute a number
+ * of 64 bits or less. These functions are faster and prettier than calling
+ * unpack+substr+md5/raw or hexdec+substr+md5. Note that hexdec converts
+ * to floating point (information loss) for some 64-bit unsigned values.
+ *
+ * The faster and quite effective xxhash64 is generally recommended for
+ * non-crypto hashing needs when no backward compatibility is needed.
+ */
+<<__Native,__IsFoldable>>
+function non_crypto_md5_upper(string $str): int;
+
+/* Returns an int for the lower (last) 64 bits of an md5 hash of a string.
+ * The MD5 hash, usually presented as a hex value, is taken as big endian, and
+ * this int result is the signed counterpart to the unsigned lower 64 bits.
+ *
+ * This function and the _upper version are generally only intended for
+ * legacy use cases in which an MD5 hash is used to compute a number
+ * of 64 bits or less. These functions are faster and prettier than calling
+ * unpack+substr+md5/raw or hexdec+substr+md5. Note that hexdec converts
+ * to floating point (information loss) for some 64-bit unsigned values.
+ *
+ * The faster and quite effective xxhash64 is generally recommended for
+ * non-crypto hashing needs when no backward compatibility is needed.
+ */
+<<__Native,__IsFoldable>>
+function non_crypto_md5_lower(string $str): int;
 } // HH namespace

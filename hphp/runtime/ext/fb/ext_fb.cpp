@@ -49,6 +49,7 @@
 #include "hphp/runtime/ext/fb/FBSerialize/FBSerialize.h"
 #include "hphp/runtime/ext/fb/VariantController.h"
 #include "hphp/runtime/vm/unwind.h"
+#include "hphp/zend/zend-string.h"
 
 namespace HPHP {
 
@@ -1194,6 +1195,26 @@ Variant HHVM_FUNCTION(fb_lazy_realpath, const String& filename) {
   return StatCache::realpath(filename.c_str());
 }
 
+int64_t HHVM_FUNCTION(HH_non_crypto_md5_upper, StringArg str) {
+  Md5Digest md5(str.get()->data(), str.get()->size());
+  int64_t pre_decode;
+  // Work around "strict aliasing" with memcpy
+  memcpy(&pre_decode, md5.digest, sizeof(pre_decode));
+  // When PHP/Hack users decode MD5 hex, they treat it as big endian.
+  // Replicate that here.
+  return folly::Endian::big(pre_decode);
+}
+
+int64_t HHVM_FUNCTION(HH_non_crypto_md5_lower, StringArg str) {
+  Md5Digest md5(str.get()->data(), str.get()->size());
+  int64_t pre_decode;
+  // Work around "strict aliasing" with memcpy
+  memcpy(&pre_decode, md5.digest + 8, sizeof(pre_decode));
+  // When PHP/Hack users decode MD5 hex, they treat it as big endian.
+  // Replicate that here.
+  return folly::Endian::big(pre_decode);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 EXTERNALLY_VISIBLE
@@ -1237,6 +1258,8 @@ struct FBExtension : Extension {
 
     HHVM_FALIAS(HH\\disable_code_coverage_with_frequency,
                 HH_disable_code_coverage_with_frequency);
+    HHVM_FALIAS(HH\\non_crypto_md5_upper, HH_non_crypto_md5_upper);
+    HHVM_FALIAS(HH\\non_crypto_md5_lower, HH_non_crypto_md5_lower);
 
     loadSystemlib();
   }

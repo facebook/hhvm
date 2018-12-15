@@ -701,6 +701,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       parameter_default_value = default } ->
     Concat [
       t env attr;
+      when_present attr space;
       t env visibility;
       when_present visibility space;
       t env callconv;

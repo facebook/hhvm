@@ -488,6 +488,7 @@ and expr_ env acc p e =
       ShapeMap.fold begin fun _ v acc ->
         expr acc v
       end fdm acc
+  | Omitted -> acc
 
 and case env acc = function
   | Default b

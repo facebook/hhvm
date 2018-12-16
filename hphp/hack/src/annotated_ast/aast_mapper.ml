@@ -114,6 +114,7 @@ struct
     | S.Execution_operator e -> T.Execution_operator (map_exprl menv e)
     | S.Assert (S.AE_assert e) -> T.Assert (T.AE_assert (map_expr menv e))
     | S.Clone e -> T.Clone (map_expr menv e)
+    | S.Omitted -> T.Omitted
   in
   let p' = menv.map_expr_annotation p in
     (p', e')

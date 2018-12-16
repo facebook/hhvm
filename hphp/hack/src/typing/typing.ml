@@ -1381,6 +1381,7 @@ and expr_
 
   try
   match e with
+  | Omitted -> failwith "AST should not contain these nodes"
   | Any -> expr_error env p (Reason.Rwitness p)
   | Array [] ->
     (* TODO: use expected type to determine expected element type *)

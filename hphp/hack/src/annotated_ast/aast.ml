@@ -124,6 +124,7 @@ and expr_ =
   | This
   | True
   | False
+  | Omitted
   | Id of sid
   | Lvar of lid
   | ImmutableVar of lid
@@ -499,5 +500,6 @@ let expr_to_string expr =
   | Assert _  -> "Assert"
   | Clone _  -> "Clone"
   | Typename _  -> "Typename"
+  | Omitted -> "Omitted"
 
 end (* of AnnotatedAST functor *)

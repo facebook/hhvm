@@ -80,6 +80,7 @@ and expr_ f = function
   | ValCollection (s, el) -> ValCollection (s, List.map el (expr f))
   | KeyValCollection (s, fl) ->
     KeyValCollection (s, List.map fl (fun (e1, e2) -> expr f e1, expr f e2))
+  | Omitted -> Omitted
 
 and afield f = function
   | AFvalue e -> AFvalue (expr f e)

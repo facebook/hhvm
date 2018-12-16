@@ -193,7 +193,7 @@ and on_expr (p, e) : Aast.expr =
   | Null -> Aast.Null
   | True -> Aast.True
   | False -> Aast.False
-  | Omitted -> Aast.Any (* TODO: T37786581 *)
+  | Omitted -> Aast.Omitted
   | Id id -> Aast.Id id
   | Lvar id ->
     let lid = Local_id.make_unscoped (snd id) in

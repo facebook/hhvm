@@ -251,7 +251,9 @@ and on_catch (id1, id2, b) : Aast.catch =
 
 and on_stmt (p, st) :  Aast.stmt =
   match st with
-  | Let _                     -> Aast.Noop (* TODO: T37786581 *)
+  | Let (id, h, e) ->
+    let lid = Local_id.make_unscoped (snd id) in
+    Aast.Let ((p, lid), optional on_hint h, on_expr e)
   | Block sl                  -> Aast.Block (on_block sl)
   | Unsafe                    -> failwith "Unsafe statements should be removed in on_block"
   | Fallthrough               -> Aast.Fallthrough

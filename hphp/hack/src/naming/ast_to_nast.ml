@@ -259,8 +259,10 @@ and on_stmt (p, st) :  Aast.stmt =
   | Fallthrough               -> Aast.Fallthrough
   | Noop                      -> Aast.Noop
   | Markup (s, e)             -> Aast.Markup (s, optional on_expr e)
-  | Break _                   -> Aast.Noop (* TODO: T37786581 *)
-  | Continue _                -> Aast.Noop (* TODO: T37786581 *)
+  | Break (Some _)            -> failwith "Breaks with labels are not allowed in Hack"
+  | Break None                -> Aast.Break p
+  | Continue (Some _)         -> failwith "Continues with labels are not allowed in Hack"
+  | Continue None             -> Aast.Continue p
   | Throw e                   -> Aast.Throw (false, on_expr e)
   | Return e                  -> Aast.Return (p, optional on_expr e)
   | GotoLabel label           -> Aast.GotoLabel label

@@ -159,6 +159,14 @@ struct
         T.fnb_nast = map_block menv fnb.S.fnb_nast;
       }
 
+  and map_using_stmt menv us =
+  T.{
+    us_is_block_scoped = us.S.us_is_block_scoped;
+    us_has_await = us.S.us_has_await;
+    us_expr = map_expr menv us.S.us_expr;
+    us_block = map_block menv us.S.us_block;
+  }
+
   and map_stmt menv s =
     let map_as_expr ae =
       match ae with
@@ -190,7 +198,7 @@ struct
     | S.If(e, b1, b2) -> T.If (map_expr menv e, map_block menv b1, map_block menv b2)
     | S.Do(b, e) -> T.Do(map_block menv b, map_expr menv e)
     | S.While(e, b) -> T.While(map_expr menv e, map_block menv b)
-    | S.Using(has_await, e, b) -> T.Using(has_await, map_expr menv e, map_block menv b)
+    | S.Using us -> T.Using (map_using_stmt menv us)
     | S.For(e1, e2, e3, b) ->
       T.For(map_expr menv e1, map_expr menv e2, map_expr menv e3, map_block menv b)
     | S.Switch(e, cl) -> T.Switch(map_expr menv e, List.map cl map_case)

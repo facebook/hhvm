@@ -2078,7 +2078,12 @@ module Make (GetLocals : GetLocals) = struct
     let e = expr env e in
     let b = block ~new_scope:false env b in
     Env.remove_locals env vars;
-    N.Using (has_await, e, b)
+    N.Using N.{
+      us_is_block_scoped = false; (* This isn't used for naming so provide a default *)
+      us_has_await = has_await;
+      us_expr = e;
+      us_block = b;
+    }
 
   and for_stmt env e1 e2 e3 b =
     (* The initialization and condition expression should be in the outer scope,

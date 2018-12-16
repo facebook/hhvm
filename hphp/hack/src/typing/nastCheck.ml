@@ -124,7 +124,7 @@ module CheckFunctionBody = struct
         expr f_type env e;
         block f_type env b;
         ()
-    | _, Using (has_await, e, b) ->
+    | _, Using { us_has_await = has_await; us_expr = e; us_block = b; _ } ->
         if has_await then found_await f_type (fst e);
         expr_allow_await_list f_type env e;
         block f_type env b;
@@ -1181,7 +1181,7 @@ and stmt env = function
       expr env e;
       block { env with imm_ctrl_ctx = LoopContext } b;
       ()
-  | Using (_has_await, e, b) ->
+  | Using { us_expr = e; us_block = b; _ } ->
       expr env e;
       block env b;
       ()

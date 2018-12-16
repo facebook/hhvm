@@ -272,7 +272,13 @@ and on_stmt (p, st) :  Aast.stmt =
   | Do (b, e)                 -> Aast.Do (on_block b, on_expr e)
   | While (e, b)              -> Aast.While (on_expr e, on_block b)
   | Declare (is_blk, e, b)    -> Aast.Declare (is_blk, on_expr e, on_block b)
-  | Using _                   -> Aast.Noop (* TODO: T37786581 *)
+  | Using s ->
+    Aast.Using Aast.{
+      us_expr = on_expr s.us_expr;
+      us_block = on_block s.us_block;
+      us_has_await = s.us_has_await;
+      us_is_block_scoped = s.us_is_block_scoped;
+   }
   | For (st1, e, st2, b)      -> Aast.For (on_expr st1, on_expr e, on_expr st2, on_block b)
   | Switch (e, cl)            -> Aast.Switch (on_expr e, on_list on_case cl)
   | Foreach (e, _, ae, b)     -> Aast.Foreach (on_expr e, on_as_expr ae, on_block b)

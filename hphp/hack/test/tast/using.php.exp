@@ -32,44 +32,51 @@
        f_body =
        (NamedBody
           { Aast.AnnotatedAST.fnb_nast =
-            [(Using (false,
-                (([8:10-46], (Handle, Handle)),
-                 (Expr_list
-                    [(([8:10-27], Handle),
-                      (Binop ((Eq None),
-                         (([8:10-12], Handle), (Lvar ([8:10-12], $x))),
-                         (([8:15-27], Handle),
-                          (New (
-                             (([8:19-25], Handle),
-                              (CI (([8:19-25], "\\Handle"), []))),
-                             [], [], ([8:19-25], _))))
-                         )));
-                      (([8:29-46], Handle),
-                       (Binop ((Eq None),
-                          (([8:29-31], Handle), (Lvar ([8:29-31], $y))),
-                          (([8:34-46], Handle),
-                           (New (
-                              (([8:38-44], Handle),
-                               (CI (([8:38-44], "\\Handle"), []))),
-                              [], [], ([8:38-44], _))))
-                          )))
-                      ])),
-                [(Using (false,
-                    (([9:12-29], (Handle)),
-                     (Expr_list
-                        [(([9:12-29], Handle),
-                          (Binop ((Eq None),
-                             (([9:12-14], Handle), (Lvar ([9:12-14], $z))),
-                             (([9:17-29], Handle),
-                              (New (
-                                 (([9:21-27], Handle),
-                                  (CI (([9:21-27], "\\Handle"), []))),
-                                 [], [], ([9:21-27], _))))
-                             )))
-                          ])),
-                    [Noop]))
-                  ]
-                ))
+            [(Using
+                { Aast.AnnotatedAST.us_is_block_scoped = false;
+                  us_has_await = false;
+                  us_expr =
+                  (([8:10-46], (Handle, Handle)),
+                   (Expr_list
+                      [(([8:10-27], Handle),
+                        (Binop ((Eq None),
+                           (([8:10-12], Handle), (Lvar ([8:10-12], $x))),
+                           (([8:15-27], Handle),
+                            (New (
+                               (([8:19-25], Handle),
+                                (CI (([8:19-25], "\\Handle"), []))),
+                               [], [], ([8:19-25], _))))
+                           )));
+                        (([8:29-46], Handle),
+                         (Binop ((Eq None),
+                            (([8:29-31], Handle), (Lvar ([8:29-31], $y))),
+                            (([8:34-46], Handle),
+                             (New (
+                                (([8:38-44], Handle),
+                                 (CI (([8:38-44], "\\Handle"), []))),
+                                [], [], ([8:38-44], _))))
+                            )))
+                        ]));
+                  us_block =
+                  [(Using
+                      { Aast.AnnotatedAST.us_is_block_scoped = false;
+                        us_has_await = false;
+                        us_expr =
+                        (([9:12-29], (Handle)),
+                         (Expr_list
+                            [(([9:12-29], Handle),
+                              (Binop ((Eq None),
+                                 (([9:12-14], Handle), (Lvar ([9:12-14], $z))),
+                                 (([9:17-29], Handle),
+                                  (New (
+                                     (([9:21-27], Handle),
+                                      (CI (([9:21-27], "\\Handle"), []))),
+                                     [], [], ([9:21-27], _))))
+                                 )))
+                              ]));
+                        us_block = [Noop] })
+                    ]
+                  })
               ];
             fnb_unsafe = false });
        f_fun_kind = FSync; f_user_attributes = []; f_ret_by_ref = false;

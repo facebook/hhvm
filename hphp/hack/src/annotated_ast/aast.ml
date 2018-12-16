@@ -73,7 +73,7 @@ and stmt =
   | If of expr * block * block
   | Do of block * expr
   | While of expr * block
-  | Using of bool (* await? *) * expr * block
+  | Using of using_stmt
   | For of expr * expr * expr * block
   | Switch of expr * case list
   (* Dropped the Pos.t option *)
@@ -85,6 +85,13 @@ and stmt =
   | Block of block
   | Markup of pstring * expr option
   | Declare of (* is_block *) bool * expr * block
+
+and using_stmt = {
+  us_is_block_scoped: bool;
+  us_has_await: bool;
+  us_expr: expr;
+  us_block: block;
+}
 
 and as_expr =
   | As_v of expr

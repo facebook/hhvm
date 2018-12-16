@@ -816,13 +816,23 @@ and stmt env = function
       let env = LEnv.update_next_from_conts env [C.Break; C.Next] in
       env, (te, tb)) in
     env, T.While (te, tb)
-  | Using (has_await, using_clause, using_block) ->
+  | Using {
+    us_has_await = has_await;
+    us_expr = using_clause;
+    us_block = using_block;
+    us_is_block_scoped
+    } ->
       let env, typed_using_clause, using_vars = check_using_clause env has_await using_clause in
       let env, typed_using_block = block env using_block in
       (* Remove any using variables from the environment, as they should not
        * be in scope outside the block *)
       let env = List.fold_left using_vars ~init:env ~f:Env.unset_local in
-      env, T.Using (has_await, typed_using_clause, typed_using_block)
+      env, T.Using T.{
+        us_has_await = has_await;
+        us_expr = typed_using_clause;
+        us_block = typed_using_block;
+        us_is_block_scoped;
+      }
   | For (e1, e2, e3, b) as st ->
     let env, (te1, te2, te3, tb) = LEnv.stash_and_do env [C.Continue; C.Break]
       (fun env ->

@@ -221,7 +221,9 @@ and on_expr (p, e) : Aast.expr =
   | Cast (h, e) -> Aast.Cast (on_hint h, on_expr e)
   | Unop (op, e) -> Aast.Unop (op, on_expr e)
   | Binop (op, e1, e2) -> Aast.Binop (op, on_expr e1, on_expr e2)
-  | Pipe _ -> Aast.Any (* TODO: T37786581 *)
+  | Pipe (e1, e2) ->
+    let id = Local_id.make_scoped SN.SpecialIdents.dollardollar in
+    Aast.Pipe ((p, id), on_expr e1, on_expr e2)
   | Eif (e1, opt_e, e2) -> Aast.Eif (on_expr e1, optional on_expr opt_e, on_expr e2)
   | InstanceOf _ -> Aast.Any
   | Is (e, h) -> Aast.Is (on_expr e, on_hint h)

@@ -546,6 +546,10 @@ bool CurlResource::isLongOption(long option) {
 #if LIBCURL_VERSION_NUM >= 0x073d00 /* Available since 7.61.0 */
     case CURLOPT_DISALLOW_USERNAME_IN_URL:
 #endif
+#if LIBCURL_VERSION_NUM >= 0x073e00 /* Available since 7.62.0 */
+    case CURLOPT_UPKEEP_INTERVAL_MS:
+    case CURLOPT_UPLOAD_BUFFERSIZE:
+#endif
 #if CURLOPT_MUTE != 0
     case CURLOPT_MUTE:
 #endif
@@ -681,6 +685,9 @@ bool CurlResource::isStringOption(long option) {
 #if LIBCURL_VERSION_NUM >= 0x073d00 /* Available since 7.61.0 */
     case CURLOPT_PROXY_TLS13_CIPHERS:
     case CURLOPT_TLS13_CIPHERS:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x073e00 /* Available since 7.62.0 */
+    case CURLOPT_DOH_URL:
 #endif
       return true;
     default:

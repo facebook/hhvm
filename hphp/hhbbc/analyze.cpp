@@ -677,6 +677,17 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
 
     if (!(prop.attrs & AttrPrivate)) continue;
 
+    // LateInitSoft properties can be anything because of the default value, so
+    // don't try to infer its type.
+    if (prop.attrs & AttrLateInitSoft) {
+      if (prop.attrs & AttrStatic) {
+        clsAnalysis.privateStatics[prop.name] = TGen;
+      } else {
+        clsAnalysis.privateProperties[prop.name] = TGen;
+      }
+      continue;
+    }
+
     if (isHNIBuiltin) {
       auto const hniTy = from_hni_constraint(prop.userType);
       if (!cellTy.subtypeOf(hniTy)) {

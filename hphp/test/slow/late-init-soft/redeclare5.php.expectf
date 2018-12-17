@@ -1,0 +1,1 @@
+Fatal error: Property B::$x must not be <<__SoftLateInit>> (as in class A) in %s/redeclare5.php on line 8

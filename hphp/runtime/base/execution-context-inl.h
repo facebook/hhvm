@@ -187,6 +187,14 @@ inline bool ExecutionContext::hasRequestEventHandlers() const {
   return !m_requestEventHandlers.empty();
 }
 
+inline const Variant& ExecutionContext::getSoftLateInitDefault() const {
+  return m_softLateInitDefault;
+}
+
+inline void ExecutionContext::setSoftLateInitDefault(Variant d) {
+  m_softLateInitDefault = std::move(d);
+}
+
 inline const Func* ExecutionContext::getPrevFunc(const ActRec* fp) {
   auto state = getPrevVMState(fp, nullptr, nullptr, nullptr);
   return state ? state->func() : nullptr;

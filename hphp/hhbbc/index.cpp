@@ -5056,9 +5056,16 @@ void Index::init_public_static_prop_types() {
        * include the Uninit (which isn't really a user-visible type for the
        * property) or by the time we union things in we'll have inferred nothing
        * much.
+       *
+       * If the property is AttrLateInitSoft, it can be anything because of the
+       * default value, so just assume TGen.
        */
       auto const tyRaw = from_cell(prop.val);
-      auto const ty = tyRaw.subtypeOf(BUninit) ? TBottom : tyRaw;
+      auto const ty = (prop.attrs & AttrLateInitSoft)
+        ? TGen
+        : tyRaw.subtypeOf(BUninit)
+          ? TBottom
+          : tyRaw;
       cinfo->publicStaticProps[prop.name] = PublicSPropEntry { ty, ty, false };
     }
   }

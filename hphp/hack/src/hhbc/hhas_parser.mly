@@ -359,6 +359,7 @@ classproperty:
       (List.mem ~equal:(=) attrs "no_implicit_null")
       (List.mem ~equal:(=) attrs "initial_satisfies_tc")
       (List.mem ~equal:(=) attrs "late_init")
+      (List.mem ~equal:(=) attrs "late_init_soft")
       (Hhbc_id.Prop.from_raw_string $5) (*name *)
       $8 (*initial value *)
       None (* initializer instructions. already been emitted elsewhere *)

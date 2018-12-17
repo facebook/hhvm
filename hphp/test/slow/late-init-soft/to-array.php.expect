@@ -1,0 +1,77 @@
+============= test_cast ===============
+Accessing <<__SoftLateInit>> property 'A::y' before initialization. Providing default.
+array(3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  int(123)
+  ["z"]=>
+  string(3) "abc"
+}
+array(3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  int(123)
+  ["z"]=>
+  string(3) "abc"
+}
+array(3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  int(700)
+  ["z"]=>
+  string(3) "abc"
+}
+Accessing <<__SoftLateInit>> property 'A::y' before initialization. Providing default.
+array(3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  int(456)
+  ["z"]=>
+  string(3) "abc"
+}
+============= test_iter ===============
+Accessing <<__SoftLateInit>> property 'A::y' before initialization. Providing default.
+123 123 abc 
+123 123 abc 
+123 700 abc 
+Accessing <<__SoftLateInit>> property 'A::y' before initialization. Providing default.
+123 456 abc 
+============= test_obj_prop_array ===============
+Accessing <<__SoftLateInit>> property 'A::y' before initialization. Providing default.
+array(3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  int(123)
+  ["z"]=>
+  string(3) "abc"
+}
+array(3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  int(123)
+  ["z"]=>
+  string(3) "abc"
+}
+array(3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  int(700)
+  ["z"]=>
+  string(3) "abc"
+}
+Accessing <<__SoftLateInit>> property 'A::y' before initialization. Providing default.
+array(3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  int(456)
+  ["z"]=>
+  string(3) "abc"
+}

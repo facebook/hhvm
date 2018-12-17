@@ -213,6 +213,10 @@ void throw_instance_method_fatal(const char *name);
                                        const StringData* propName,
                                        bool isSProp);
 
+void raise_soft_late_init_prop(const Class* cls,
+                               const StringData* propName,
+                               bool isSProp);
+
 void check_collection_cast_to_array();
 
 Object create_object_only(const String& s);

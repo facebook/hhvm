@@ -1,0 +1,32 @@
+Accessing <<__SoftLateInit>> property 'A::a' before initialization. Providing default.
+NULL
+Accessing <<__SoftLateInit>> property 'A::b' before initialization. Providing default.
+NULL
+NULL
+NULL
+Accessing <<__SoftLateInit>> property 'A::a' before initialization. Providing default.
+int(123)
+Accessing <<__SoftLateInit>> property 'A::b' before initialization. Providing default.
+int(123)
+int(123)
+int(123)
+Accessing <<__SoftLateInit>> property 'A::a' before initialization. Providing default.
+string(3) "abc"
+Accessing <<__SoftLateInit>> property 'A::b' before initialization. Providing default.
+string(3) "abc"
+string(3) "abc"
+string(3) "abc"
+Accessing <<__SoftLateInit>> property 'A::a' before initialization. Providing default.
+string(3) "abc"
+Accessing <<__SoftLateInit>> property 'A::b' before initialization. Providing default.
+string(3) "abc"
+string(3) "abc"
+string(3) "abc"
+string(3) "abc"
+string(3) "abc"
+string(3) "abc"
+string(3) "abc"
+int(789)
+int(789)
+int(789)
+int(789)

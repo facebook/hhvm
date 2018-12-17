@@ -1888,8 +1888,18 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
         auto const slot = lookup.slot;
 
         if (slot != kInvalidSlot && lookup.accessible) {
-          auto const propVal = obj->propRvalAtOffset(slot);
+          auto propVal = const_cast<ObjectData*>(obj)->propLvalAtOffset(slot);
           auto const& prop = obj_cls->declProperties()[slot];
+
+          if (propVal.type() == KindOfUninit &&
+              (prop.attrs & AttrLateInitSoft)) {
+            raise_soft_late_init_prop(prop.cls, memberName.get(), false);
+            tvDup(
+              *g_context->getSoftLateInitDefault().asTypedValue(),
+              propVal
+            );
+          }
+
           if (propVal.type() != KindOfUninit) {
             if (prop.attrs & AttrPrivate) {
               memberName = concat4(s_zero, ctx->nameStr(),

@@ -761,6 +761,18 @@ void throw_late_init_prop(const Class* cls,
   );
 }
 
+void raise_soft_late_init_prop(const Class* cls,
+                               const StringData* propName,
+                               bool isSProp) {
+  raise_notice(
+    "Accessing <<__SoftLateInit>> %s '%s::%s' before initialization. "
+    "Providing default.",
+    isSProp ? "static property" : "property",
+    cls->name()->data(),
+    propName->data()
+  );
+}
+
 void check_collection_cast_to_array() {
   if (RuntimeOption::WarnOnCollectionToArray) {
     raise_warning("Casting a collection to an array is an expensive operation "

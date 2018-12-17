@@ -86,6 +86,7 @@ let from_ast
     Hhas_attribute.has_const attributes in
   let is_lsb = Hhas_attribute.has_lsb attributes in
   let is_late_init = Hhas_attribute.has_late_init attributes in
+  let is_soft_late_init = Hhas_attribute.has_soft_late_init attributes in
   let is_private = List.mem ~equal:(=) cv_kind_list Ast.Private in
   let is_protected = List.mem ~equal:(=) cv_kind_list Ast.Protected in
   let is_public =
@@ -120,12 +121,13 @@ let from_ast
   let initial_value, is_deep_init, has_system_initial, initializer_instrs =
     match initial_value with
     | None ->
-       let v = if is_late_init then (Some Typed_value.Uninit) else None
+       let v = if is_late_init || is_soft_late_init then (Some Typed_value.Uninit) else None
        in v, false, true, None
     | Some expr ->
-       if is_late_init
+       if is_late_init || is_soft_late_init
        then Emit_fatal.raise_fatal_parse pos
-         (Printf.sprintf "<<__LateInit>> property '%s::$%s' cannot have an initial value"
+         (Printf.sprintf "<<__%sLateInit>> property '%s::$%s' cannot have an initial value"
+                         (if is_soft_late_init then "Soft" else "")
                          (Utils.strip_ns (snd ast_class.Ast.c_name))
                          (Hhbc_id.Prop.to_raw_string pid));
       let is_collection_map =
@@ -177,6 +179,7 @@ let from_ast
     false (*no_implicit_null*)
     false (*initial_satisfies_tc*)
     is_late_init
+    is_soft_late_init
     pid
     initial_value
     initializer_instrs

@@ -1670,6 +1670,7 @@ let property_attributes p =
   let user_attrs = P.attributes p in
   let attrs = Emit_adata.attributes_to_strings user_attrs in
   let attrs = if P.is_late_init p then "late_init" :: attrs else attrs in
+  let attrs = if P.is_soft_late_init p then "late_init_soft" :: attrs else attrs in
   let attrs = if P.is_no_bad_redeclare p then "no_bad_redeclare" :: attrs else attrs in
   let attrs = if P.initial_satisfies_tc p then "initial_satisfies_tc" :: attrs else attrs in
   let attrs = if P.no_implicit_null p then "no_implicit_null" :: attrs else attrs in

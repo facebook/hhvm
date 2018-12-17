@@ -78,6 +78,7 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrNoImplicitNullable,   P,       "no_implicit_null"); \
   X(AttrInitialSatisfiesTC,   P,       "initial_satisfies_tc"); \
   X(AttrLateInit,             P,       "late_init");        \
+  X(AttrLateInitSoft,         P,       "late_init_soft");   \
   X(AttrNoReifiedInit,        C,       "noreifiedinit");
   /* */
 

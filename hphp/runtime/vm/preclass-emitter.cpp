@@ -142,6 +142,8 @@ bool PreClassEmitter::addProperty(const StringData* n, Attr attrs,
   if (it != m_propMap.end()) {
     return false;
   }
+  // LateInitSoft implies LateInit
+  if (attrs & AttrLateInitSoft) attrs |= AttrLateInit;
   PreClassEmitter::Prop prop{
     this,
     n,

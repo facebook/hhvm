@@ -132,6 +132,10 @@ bool assertTypeHint(const Class* cls, tv_rval prop, Slot propIdx) {
   assertx(propIdx < cls->numDeclProperties());
   auto const& propDecl = cls->declProperties()[propIdx];
 
+  // AttrLateInitSoft properties can be potentially anything due to default
+  // values, so don't assume anything.
+  if (propDecl.attrs & AttrLateInitSoft) return true;
+
   if (debug && RuntimeOption::RepoAuthoritative) {
     // The fact that uninitialized LateInit props are uninint isn't
     // reflected in the repo-auth-type.
@@ -481,6 +485,14 @@ Variant ObjectData::o_get(const String& propName, bool error /* = true */,
     if (lookup.val.type() != KindOfUninit) {
       return Variant::wrap(tvToCell(lookup.val.tv()));
     } else if (lookup.prop && (lookup.prop->attrs & AttrLateInit)) {
+      if (lookup.prop->attrs & AttrLateInitSoft) {
+        raise_soft_late_init_prop(lookup.prop->cls, propName.get(), false);
+        tvDup(
+          *g_context->getSoftLateInitDefault().asTypedValue(),
+          lookup.val
+        );
+        return Variant::wrap(tvToCell(lookup.val.tv()));
+      }
       if (error) throw_late_init_prop(lookup.prop->cls, propName.get(), false);
       return uninit_null();
     }
@@ -594,8 +606,20 @@ void ObjectData::o_getArray(Array& props,
     [&](Slot slot, const Class::Prop& prop, tv_rval val) {
       assertx(assertTypeHint(cls, val, slot));
       if (UNLIKELY(val.type() == KindOfUninit)) {
-        if ((prop.attrs & AttrLateInit) && !ignoreLateInit) {
-          throw_late_init_prop(cls, prop.name, false);
+        if (!ignoreLateInit) {
+          if (prop.attrs & AttrLateInitSoft) {
+            raise_soft_late_init_prop(cls, prop.name, false);
+            tvDup(
+              *g_context->getSoftLateInitDefault().asTypedValue(),
+              const_cast<ObjectData*>(this)->propLvalAtOffset(slot)
+            );
+            props.setWithRef(
+              StrNR(prop.mangledName).asString(),
+              val.tv()
+            );
+          } else if (prop.attrs & AttrLateInit) {
+            throw_late_init_prop(cls, prop.name, false);
+          }
         }
       } else if (!pubOnly || (prop.attrs & AttrPublic)) {
         props.setWithRef(StrNR(prop.mangledName).asString(), val.tv());
@@ -1023,7 +1047,25 @@ bool ObjectData::equal(const ObjectData& other) const {
       if ((UNLIKELY(thisVal.type() == KindOfUninit) ||
            UNLIKELY(otherVal.type() == KindOfUninit)) &&
           (prop.attrs & AttrLateInit)) {
-        throw_late_init_prop(cls, prop.name, false);
+        if (prop.attrs & AttrLateInitSoft) {
+          raise_soft_late_init_prop(cls, prop.name, false);
+          auto const& d = g_context->getSoftLateInitDefault();
+
+          if (thisVal.type() == KindOfUninit) {
+            tvDup(
+              *d.asTypedValue(),
+              const_cast<ObjectData*>(this)->propLvalAtOffset(slot)
+            );
+          }
+          if (otherVal.type() == KindOfUninit) {
+            tvDup(
+              *d.asTypedValue(),
+              const_cast<ObjectData*>(&other)->propLvalAtOffset(slot)
+            );
+          }
+        } else {
+          throw_late_init_prop(cls, prop.name, false);
+        }
       }
       if (!tvEqual(thisVal.tv(), otherVal.tv())) {
         result = false;
@@ -1113,7 +1155,25 @@ int64_t ObjectData::compare(const ObjectData& other) const {
       if ((UNLIKELY(thisVal.type() == KindOfUninit) ||
            UNLIKELY(otherVal.type() == KindOfUninit)) &&
           (prop.attrs & AttrLateInit)) {
-        throw_late_init_prop(cls, prop.name, false);
+        if (prop.attrs & AttrLateInitSoft) {
+          raise_soft_late_init_prop(cls, prop.name, false);
+          auto const& d = g_context->getSoftLateInitDefault();
+
+          if (thisVal.type() == KindOfUninit) {
+            tvDup(
+              *d.asTypedValue(),
+              const_cast<ObjectData*>(this)->propLvalAtOffset(slot)
+            );
+          }
+          if (otherVal.type() == KindOfUninit) {
+            tvDup(
+              *d.asTypedValue(),
+              const_cast<ObjectData*>(&other)->propLvalAtOffset(slot)
+            );
+          }
+        } else {
+          throw_late_init_prop(cls, prop.name, false);
+        }
       }
       auto cmp = tvCompare(thisVal.tv(), otherVal.tv());
       if (cmp != 0) {
@@ -1309,19 +1369,27 @@ ObjectData::PropLookup ObjectData::getPropImpl(
   if (LIKELY(propIdx != kInvalidSlot)) {
     // We found a visible property, but it might not be accessible.  No need to
     // check if there is a dynamic property with this name.
-    auto const prop = &propVec()[propIdx];
+    auto const prop = const_cast<TypedValue*>(&propVec()[propIdx]);
     assertx(assertTypeHint(m_cls, prop, propIdx));
 
     auto const& declProp = m_cls->declProperties()[propIdx];
     if (!ignoreLateInit && lookup.accessible) {
       if (UNLIKELY(prop->m_type == KindOfUninit) &&
           (declProp.attrs & AttrLateInit)) {
-        throw_late_init_prop(declProp.cls, key, false);
+        if (declProp.attrs & AttrLateInitSoft) {
+          raise_soft_late_init_prop(declProp.cls, key, false);
+          tvDup(
+            *g_context->getSoftLateInitDefault().asTypedValue(),
+            prop
+          );
+        } else {
+          throw_late_init_prop(declProp.cls, key, false);
+        }
       }
     }
 
     return {
-     const_cast<TypedValue*>(prop),
+     prop,
      &declProp,
      propIdx,
      lookup.accessible,
@@ -1392,6 +1460,16 @@ tv_lval ObjectData::vGetPropIgnoreAccessibility(const StringData* key) {
       tvBoxIfNeeded(prop);
       return prop;
     } else if (lookup.prop && (lookup.prop->attrs & AttrLateInit)) {
+      if (lookup.prop->attrs & AttrLateInitSoft) {
+        raise_soft_late_init_prop(lookup.prop->cls, key, false);
+        tvDup(
+          *g_context->getSoftLateInitDefault().asTypedValue(),
+          prop
+        );
+        boxingTypeHint(lookup.prop);
+        tvBoxIfNeeded(prop);
+        return prop;
+      }
       throw_late_init_prop(lookup.prop->cls, key, false);
     }
   }

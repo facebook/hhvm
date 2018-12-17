@@ -659,7 +659,18 @@ void binary_serialize_spec(const Object& obj, PHPOutputTransport& transport,
         binary_serialize(fieldType, transport, fieldVal, fieldSpec);
       } else if (UNLIKELY(fieldVal.is(KindOfUninit)) &&
                  (prop[i].attrs & AttrLateInit)) {
-        throw_late_init_prop(prop[i].cls, prop[i].name, false);
+        if (prop[i].attrs & AttrLateInitSoft) {
+          raise_soft_late_init_prop(prop[i].cls, prop[i].name, false);
+          tvDup(
+            *g_context->getSoftLateInitDefault().asTypedValue(),
+            *const_cast<TypedValue*>(&objProp[i])
+          );
+          // Loop over this property again
+          --i;
+          continue;
+        } else {
+          throw_late_init_prop(prop[i].cls, prop[i].name, false);
+        }
       }
     } else {
       binary_serialize_slow(fields[i], obj, transport);

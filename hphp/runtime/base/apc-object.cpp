@@ -108,13 +108,26 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
     }
 
     if (UNLIKELY(type(objProp) == KindOfUninit) && (attrs & AttrLateInit)) {
-      auto const origI = i;
-      while (i > 0) {
-        --i;
-        apcPropVec[i]->unreferenceRoot();
+      if (attrs & AttrLateInitSoft) {
+        assertx(!(attrs & AttrBuiltin));
+        raise_soft_late_init_prop(
+          propInfo[i].cls,
+          propInfo[i].name,
+          false
+        );
+        tvDup(
+          *g_context->getSoftLateInitDefault().asTypedValue(),
+          *const_cast<TypedValue*>(objPropVec + i)
+        );
+      } else {
+        auto const origI = i;
+        while (i > 0) {
+          --i;
+          apcPropVec[i]->unreferenceRoot();
+        }
+        apc_sized_free(apcObj, size);
+        throw_late_init_prop(propInfo[origI].cls, propInfo[origI].name, false);
       }
-      apc_sized_free(apcObj, size);
-      throw_late_init_prop(propInfo[origI].cls, propInfo[origI].name, false);
     }
 
     auto val = APCHandle::Create(const_variant_ref{objProp}, false,

@@ -58,21 +58,29 @@ ClsPropLookup ldClsPropAddrKnown(IRGS& env,
   auto const& prop = cls->staticProperties()[slot];
 
   auto knownType = TGen;
-  if (RuntimeOption::EvalCheckPropTypeHints >= 3) {
-    knownType = typeFromPropTC(prop.typeConstraint, cls, ctx, true);
-    if (!(prop.attrs & AttrNoImplicitNullable)) knownType |= TInitNull;
-  }
-  knownType &= typeFromRAT(prop.repoAuthType, ctx);
-  // Repo-auth-type doesn't include uninit for AttrLateInit props, so we need to
-  // add it after intersecting with it.
-  if (prop.attrs & AttrLateInit) {
-    // If we're ignoring AttrLateInit, the prop might be uninit, but if we're
-    // validating it, we'll never see uninit, so remove it.
-    if (ignoreLateInit) {
-      knownType |= TUninit;
-    } else {
-      knownType -= TUninit;
+  // AttrLateInitSoft properties can have default values which can be anything,
+  // so don't try to infer the type of them.
+  if (!(prop.attrs & AttrLateInitSoft)) {
+    if (RuntimeOption::EvalCheckPropTypeHints >= 3) {
+      knownType = typeFromPropTC(prop.typeConstraint, cls, ctx, true);
+      if (!(prop.attrs & AttrNoImplicitNullable)) knownType |= TInitNull;
     }
+    knownType &= typeFromRAT(prop.repoAuthType, ctx);
+    // Repo-auth-type doesn't include uninit for AttrLateInit props, so we need
+    // to add it after intersecting with it.
+    if (prop.attrs & AttrLateInit) {
+      // If we're ignoring AttrLateInit, the prop might be uninit, but if we're
+      // validating it, we'll never see uninit, so remove it.
+      if (ignoreLateInit) {
+        knownType |= TUninit;
+      } else {
+        knownType -= TUninit;
+      }
+    }
+  } else if (!ignoreLateInit) {
+    // If we want the AttrLateInitSoft default value behavior here, fallback to
+    // the runtime helpers instead.
+    return { nullptr, nullptr, 0 };
   }
 
   auto const ptrTy = knownType.ptr(Ptr::SProp);
@@ -135,12 +143,13 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls,
   }();
 
   if (sPropKnown) {
-    return ldClsPropAddrKnown(
+    auto const lookup = ldClsPropAddrKnown(
       env,
       ssaCls->clsVal(),
       ssaName->strVal(),
       ignoreLateInit
     );
+    if (lookup.propPtr) return lookup;
   }
 
   auto const propAddr = gen(

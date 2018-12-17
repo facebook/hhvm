@@ -1,0 +1,150 @@
+Accessing <<__SoftLateInit>> property 'A::y' before initialization. Providing default.
+bool(true)
+bool(true)
+object(A)#1 (3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  int(123)
+  ["z"]=>
+  string(3) "abc"
+}
+object(A)#2 (3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  int(123)
+  ["z"]=>
+  string(3) "abc"
+}
+Accessing <<__SoftLateInit>> property 'A::y' before initialization. Providing default.
+bool(false)
+bool(false)
+object(A)#3 (3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  string(3) "abc"
+  ["z"]=>
+  string(3) "abc"
+}
+object(A)#4 (3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  int(123)
+  ["z"]=>
+  string(3) "abc"
+}
+Accessing <<__SoftLateInit>> property 'A::y' before initialization. Providing default.
+bool(false)
+bool(false)
+object(A)#5 (3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  int(123)
+  ["z"]=>
+  string(3) "abc"
+}
+object(A)#6 (3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  string(3) "abc"
+  ["z"]=>
+  string(3) "abc"
+}
+bool(true)
+bool(true)
+object(A)#7 (3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  string(3) "abc"
+  ["z"]=>
+  string(3) "abc"
+}
+object(A)#8 (3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  string(3) "abc"
+  ["z"]=>
+  string(3) "abc"
+}
+Accessing <<__SoftLateInit>> property 'A::y' before initialization. Providing default.
+int(0)
+int(0)
+object(A)#9 (3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  int(123)
+  ["z"]=>
+  string(3) "abc"
+}
+object(A)#10 (3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  int(123)
+  ["z"]=>
+  string(3) "abc"
+}
+Accessing <<__SoftLateInit>> property 'A::y' before initialization. Providing default.
+int(-1)
+int(-1)
+object(A)#11 (3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  string(3) "abc"
+  ["z"]=>
+  string(3) "abc"
+}
+object(A)#12 (3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  int(123)
+  ["z"]=>
+  string(3) "abc"
+}
+Accessing <<__SoftLateInit>> property 'A::y' before initialization. Providing default.
+int(1)
+int(1)
+object(A)#13 (3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  int(123)
+  ["z"]=>
+  string(3) "abc"
+}
+object(A)#14 (3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  string(3) "abc"
+  ["z"]=>
+  string(3) "abc"
+}
+int(0)
+int(0)
+object(A)#15 (3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  string(3) "abc"
+  ["z"]=>
+  string(3) "abc"
+}
+object(A)#16 (3) {
+  ["x"]=>
+  int(123)
+  ["y"]=>
+  string(3) "abc"
+  ["z"]=>
+  string(3) "abc"
+}

@@ -82,6 +82,7 @@ void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
   );
   assertx(!lookup.tc->isCheckable());
   auto const sprop = lookup.propPtr;
+  assertx(sprop);
 
   auto const trace = cond(
     env,

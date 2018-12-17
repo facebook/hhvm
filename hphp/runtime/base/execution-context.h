@@ -311,6 +311,9 @@ public:
 
   bool hasRequestEventHandlers() const;
 
+  const Variant& getSoftLateInitDefault() const;
+  void setSoftLateInitDefault(Variant);
+
 private:
   struct OutputBuffer {
     explicit OutputBuffer(Variant&& h, int chunk_sz, OBFlags flgs)
@@ -556,6 +559,7 @@ private:
   String m_timezone;
   bool m_throwAllErrors;
   req::ptr<StreamContext> m_streamContext;
+  Variant m_softLateInitDefault;
 
   // session backup/restore for RPCRequestHandler
   Array m_shutdownsBackup;

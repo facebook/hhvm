@@ -70,15 +70,6 @@ function serialize_memoize_param(mixed $param): arraykey;
 function clear_static_memoization(?string $cls, ?string $func = null) : bool;
 
 <<__Native>>
-function ffp_parse_file_native(string $file): string;
-
-function ffp_parse_file(string $file): array {
-  $json = ffp_parse_file_native($file);
-  // 2048 is MAX_JSON_DEPTH to avoid making a global constant
-  return json_decode($json, true, 2048);
-}
-
-<<__Native>>
 function ffp_parse_string_native(string $program): string;
 
 function ffp_parse_string(string $program): array {

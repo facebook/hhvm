@@ -12,7 +12,8 @@ class D extends C {
 }
 
 $rd = new ReflectionClass("D");
-$json = HH\ffp_parse_file($rd->getFileName());
+$program = file_get_contents($rd->getFileName());
+$json = HH\ffp_parse_string($program);
 $description = null;
 while ($rd !== false) {
   $d = HH\ExperimentalParserUtils\find_class_body($json, $rd->getName());

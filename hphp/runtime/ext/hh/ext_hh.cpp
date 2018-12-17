@@ -415,51 +415,6 @@ bool HHVM_FUNCTION(clear_static_memoization,
   return false;
 }
 
-String HHVM_FUNCTION(ffp_parse_file_native, const String& str) {
-  std::string filename = str.get()->data();
-
-  // Implementation taken from ext_factparse.cpp
-  struct stat st;
-  FfpResult result;
-  auto w = Stream::getWrapperFromURI(StrNR(filename));
-  if (w && !dynamic_cast<FileStreamWrapper*>(w)) {
-    if (w->stat(filename.c_str(), &st)) {
-      result = "";
-    } else if (S_ISDIR(st.st_mode)) {
-      result = "";
-    } else {
-      const auto f = w->open(StrNR(filename), "r", 0, nullptr);
-      if (!f) {
-        result = "";
-      } else {
-        auto str = f->read();
-        result = ffp_parse_file(filename, str.data(), str.size());
-      }
-    }
-  } else {
-    if (stat(filename.c_str(), &st)) {
-      result = "";
-    } else if (S_ISDIR(st.st_mode)) {
-      result = "";
-    } else {
-      result = ffp_parse_file(filename, "", 0);
-    }
-  }
-
-  FfpJSONString res;
-  match<void>(
-    result,
-    [&](FfpJSONString& r) {
-      res = std::move(r);
-    },
-    [&](std::string& err) {
-      SystemLib::throwInvalidArgumentExceptionObject(
-        "FFP failed to parse file");
-    }
-  );
-  return res.value;
-}
-
 String HHVM_FUNCTION(ffp_parse_string_native, const String& str) {
   std::string program = str.get()->data();
 
@@ -561,8 +516,6 @@ static struct HHExtension final : Extension {
                   HHVM_FN(serialize_memoize_param));
     HHVM_NAMED_FE(HH\\clear_static_memoization,
                   HHVM_FN(clear_static_memoization));
-    HHVM_NAMED_FE(HH\\ffp_parse_file_native,
-                  HHVM_FN(ffp_parse_file_native));
     HHVM_NAMED_FE(HH\\ffp_parse_string_native,
                   HHVM_FN(ffp_parse_string_native));
     HHVM_NAMED_FE(HH\\clear_lsb_memoization,

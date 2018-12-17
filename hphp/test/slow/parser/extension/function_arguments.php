@@ -18,7 +18,8 @@ class C {
 }
 
 $rm = new ReflectionMethod("C", "f");
-$json = HH\ffp_parse_file($rm->getFileName());
+$program = file_get_contents($rm->getFileName());
+$json = HH\ffp_parse_string($program);
 $ma = HH\ExperimentalParserUtils\find_method_parameters($json,
   $rm->getName(), $rm->getStartLine());
 var_dump(HH\ExperimentalParserUtils\extract_parameter_comments($ma));

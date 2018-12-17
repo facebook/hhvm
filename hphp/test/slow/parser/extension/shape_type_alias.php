@@ -32,7 +32,8 @@ type X = shape(
   ...
 );
 
-$json = HH\ffp_parse_file(__FILE__);
+$program = file_get_contents(__FILE__);
+$json = HH\ffp_parse_string($program);
 $result = HH\ExperimentalParserUtils\find_single_shape_type_alias($json, "x"); // case insensitive
 invariant($result !== null, "Failed to find shape type alias");
 list($real_name, $shape) = $result;

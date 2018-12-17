@@ -22,7 +22,8 @@ class F {
   )> {}
 }
 
-$json = HH\ffp_parse_file(__FILE__);
+$program = file_get_contents(__FILE__);
+$json = HH\ffp_parse_string($program);
 $a = HH\ExperimentalParserUtils\find_class_body($json, "A");
 invariant($a !== null, "Failed to find class in file");
 $shape = HH\ExperimentalParserUtils\find_class_method_shape_return_type($a, "f");

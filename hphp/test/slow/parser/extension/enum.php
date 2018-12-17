@@ -8,7 +8,8 @@ enum Animal: string as string {
   CAT = 'cat';
 }
 
-$json = HH\ffp_parse_file(__FILE__);
+$program = file_get_contents(__FILE__);
+$json = HH\ffp_parse_string($program);
 $e = HH\ExperimentalParserUtils\find_enum_body($json, "Animal");
 $description = HH\ExperimentalParserUtils\extract_enum_comments($e);
 var_dump($description);

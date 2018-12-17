@@ -307,20 +307,18 @@ Variant HHVM_FUNCTION(http_response_code, int response_code /* = 0 */) {
 }
 
 Array HHVM_FUNCTION(headers_list) {
-  Transport *transport = g_context->getTransport();
-  if (!transport) {
-    return Array::CreateVArray();
-  }
-  HeaderMap headers;
-  transport->getResponseHeaders(headers);
-  // Underestimate if duplicate headers exist.
-  VArrayInit ret{headers.size()};
-  for (const auto& iter : headers) {
-    for (const auto& values : iter.second) {
-      ret.append(String(iter.first + ": " + values));
+  auto const transport = g_context->getTransport();
+  auto ret = Array::CreateVArray();
+  if (transport) {
+    HeaderMap headers;
+    transport->getResponseHeaders(headers);
+    for (const auto& iter : headers) {
+      for (const auto& values : iter.second) {
+        ret.append(String(iter.first + ": " + values));
+      }
     }
   }
-  return ret.toArray();
+  return ret;
 }
 
 bool HHVM_FUNCTION(headers_sent, VRefParam file /* = null */,

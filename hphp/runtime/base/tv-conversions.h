@@ -53,11 +53,15 @@ X(Vec)
 X(Dict)
 X(Keyset)
 X(Shape)
-X(Array)
 X(Object)
 X(NullableObject)
 X(Resource)
 #undef X
+
+template <IntishCast intishCast = IntishCast::AllowCastAndWarn>
+void tvCastToArrayInPlace(TypedValue* tv);
+template <IntishCast intishCast = IntishCast::AllowCastAndWarn>
+bool tvCoerceParamToArrayInPlace(TypedValue* tv, bool builtin);
 
 void tvCastToVArrayInPlace(TypedValue* tv);
 void tvCastToDArrayInPlace(TypedValue* tv);
@@ -108,6 +112,7 @@ bool tvCastToBoolean(TypedValue tv);
 int64_t tvCastToInt64(TypedValue tv);
 double tvCastToDouble(TypedValue tv);
 String tvCastToString(TypedValue tv);
+template <IntishCast intishCast = IntishCast::AllowCastAndWarn>
 Array tvCastToArrayLike(TypedValue tv);
 Object tvCastToObject(TypedValue tv);
 

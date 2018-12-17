@@ -595,9 +595,13 @@ ArrayData* tvCastToArrayLikeData<IntishCast::AllowCastAndWarn>(TypedValue);
 template
 ArrayData* tvCastToArrayLikeData<IntishCast::CastSilently>(TypedValue);
 
+template <IntishCast intishCast /* = IntishCast::AllowCastAndWarn */>
 Array tvCastToArrayLike(TypedValue tv) {
-  return Array::attach(tvCastToArrayLikeData<IntishCast::AllowCastAndWarn>(tv));
+  return Array::attach(tvCastToArrayLikeData<intishCast>(tv));
 }
+
+template Array tvCastToArrayLike<IntishCast::CastSilently>(TypedValue);
+template Array tvCastToArrayLike<IntishCast::AllowCastAndWarn>(TypedValue);
 
 void tvCastToShapeInPlace(TypedValue* tv) {
   if (isShapeType(tv->m_type)) {
@@ -612,6 +616,7 @@ void tvCastToShapeInPlace(TypedValue* tv) {
   tvAsVariant(tv) = ad->toShape(ad->cowCheck());
 }
 
+template <IntishCast intishCast /* = IntishCast::AllowCastAndWarn */>
 void tvCastToArrayInPlace(TypedValue* tv) {
   assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
@@ -655,7 +660,14 @@ void tvCastToArrayInPlace(TypedValue* tv) {
       case KindOfPersistentDict: {
         auto* adIn = tv->m_data.parr;
         assertx(adIn->isDict());
-        a = MixedArray::ToPHPArrayDict(adIn, true);
+
+        if (intishCast == IntishCast::CastSilently) {
+          a = MixedArray::ToPHPArrayIntishCastDict(adIn, true);
+        } else {
+          assertx(intishCast == IntishCast::AllowCastAndWarn);
+          a = MixedArray::ToPHPArrayDict(adIn, true);
+        }
+
         assertx(a != adIn);
         continue;
       }
@@ -663,7 +675,14 @@ void tvCastToArrayInPlace(TypedValue* tv) {
       case KindOfDict: {
         auto* adIn = tv->m_data.parr;
         assertx(adIn->isDict());
-        a = MixedArray::ToPHPArrayDict(adIn, adIn->cowCheck());
+
+        if (intishCast == IntishCast::CastSilently) {
+          a = MixedArray::ToPHPArrayIntishCastDict(adIn, adIn->cowCheck());
+        } else {
+          assertx(intishCast == IntishCast::AllowCastAndWarn);
+          a = MixedArray::ToPHPArrayDict(adIn, adIn->cowCheck());
+        }
+
         if (a != adIn) tvDecRefArr(tv);
         continue;
       }
@@ -671,7 +690,14 @@ void tvCastToArrayInPlace(TypedValue* tv) {
       case KindOfPersistentKeyset: {
         auto* adIn = tv->m_data.parr;
         assertx(adIn->isKeyset());
-        a = SetArray::ToPHPArray(adIn, true);
+
+        if (intishCast == IntishCast::CastSilently) {
+          a = SetArray::ToPHPArrayIntishCast(adIn, true);
+        } else {
+          assertx(intishCast == IntishCast::AllowCastAndWarn);
+          a = SetArray::ToPHPArray(adIn, true);
+        }
+
         assertx(a != adIn);
         continue;
       }
@@ -679,7 +705,14 @@ void tvCastToArrayInPlace(TypedValue* tv) {
       case KindOfKeyset: {
         auto* adIn = tv->m_data.parr;
         assertx(adIn->isKeyset());
-        a = SetArray::ToPHPArray(adIn, adIn->cowCheck());
+
+        if  (intishCast == IntishCast::CastSilently) {
+          a = SetArray::ToPHPArrayIntishCast(adIn, adIn->cowCheck());
+        } else {
+          assertx(intishCast == IntishCast::AllowCastAndWarn);
+          a = SetArray::ToPHPArray(adIn, adIn->cowCheck());
+        }
+
         if (a != adIn) tvDecRefArr(tv);
         continue;
       }
@@ -720,7 +753,7 @@ void tvCastToArrayInPlace(TypedValue* tv) {
 
       case KindOfObject:
         // For objects, we fall back on the Variant machinery
-        tvAsVariant(tv) = tv->m_data.pobj->toArray();
+        tvAsVariant(tv) = tv->m_data.pobj->toArray<intishCast>();
         return;
 
       case KindOfResource:
@@ -746,6 +779,9 @@ void tvCastToArrayInPlace(TypedValue* tv) {
   tv->m_type = KindOfArray;
   assertx(cellIsPlausible(*tv));
 }
+
+template void tvCastToArrayInPlace<IntishCast::CastSilently>(TypedValue*);
+template void tvCastToArrayInPlace<IntishCast::AllowCastAndWarn>(TypedValue*);
 
 void tvCastToVecInPlace(TypedValue* tv) {
   assertx(tvIsPlausible(*tv));
@@ -1703,6 +1739,7 @@ bool tvCoerceParamToShapeInPlace(TypedValue* tv, bool builtin) {
   not_reached();
 }
 
+template <IntishCast intishCast /* = IntishCast::AllowCastAndWarn */>
 bool tvCoerceParamToArrayInPlace(TypedValue* tv, bool /*builtin*/) {
   assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(*tv);
@@ -1748,7 +1785,7 @@ bool tvCoerceParamToArrayInPlace(TypedValue* tv, bool /*builtin*/) {
           raise_hack_arr_compat_collection_coerce_notice(
               tv->m_data.pobj->getClassName().c_str());
         }
-        tvAsVariant(tv) = tv->m_data.pobj->toArray();
+        tvAsVariant(tv) = tv->m_data.pobj->toArray<intishCast>();
         return true;
       }
       return false;
@@ -1760,6 +1797,12 @@ bool tvCoerceParamToArrayInPlace(TypedValue* tv, bool /*builtin*/) {
   }
   not_reached();
 }
+
+template
+bool tvCoerceParamToArrayInPlace<IntishCast::CastSilently>(TypedValue*, bool);
+template
+bool tvCoerceParamToArrayInPlace<IntishCast::AllowCastAndWarn>(TypedValue*,
+                                                               bool);
 
 bool tvCoerceParamToVecInPlace(TypedValue* tv, bool /*builtin*/) {
   assertx(tvIsPlausible(*tv));

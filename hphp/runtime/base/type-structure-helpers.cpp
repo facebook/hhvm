@@ -199,13 +199,11 @@ bool typeStructureIsType(const ArrayData* input, const ArrayData* type) {
       if (!get_ts_classname(input)->equal(get_ts_classname(type))) return false;
       auto const inputGenerics = getGenericTypesOpt(input);
       auto const typeGenerics = getGenericTypesOpt(type);
-      // If one has but not the other, return false
-      if (!!inputGenerics ^ !!typeGenerics) return false;
-      if (!inputGenerics && !typeGenerics) {
-        return type->equal(input, true);
+      if (!inputGenerics) {
+        return !typeGenerics && type->equal(input, true);
       }
-      assertx(inputGenerics && typeGenerics);
-      return typeStructureIsTypeList(*inputGenerics, *typeGenerics);
+      return
+        typeGenerics && typeStructureIsTypeList(*inputGenerics, *typeGenerics);
     }
     case TypeStructure::Kind::T_tuple:
       return typeStructureIsTypeList(

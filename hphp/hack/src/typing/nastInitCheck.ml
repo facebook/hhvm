@@ -489,6 +489,7 @@ and expr_ env acc p e =
         expr acc v
       end fdm acc
   | Omitted -> acc
+  | NewAnonClass _ -> acc
 
 and case env acc = function
   | Default b

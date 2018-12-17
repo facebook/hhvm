@@ -115,6 +115,8 @@ struct
     | S.Assert (S.AE_assert e) -> T.Assert (T.AE_assert (map_expr menv e))
     | S.Clone e -> T.Clone (map_expr menv e)
     | S.Omitted -> T.Omitted
+    | S.NewAnonClass (el1, el2, c) ->
+      T.NewAnonClass (List.map el1 (map_expr menv), List.map el2 (map_expr menv), map_class menv c)
   in
   let p' = menv.map_expr_annotation p in
     (p', e')

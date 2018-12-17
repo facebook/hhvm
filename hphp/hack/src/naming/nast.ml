@@ -491,6 +491,10 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
    | KeyValCollection (s, fl)     ->
        this#on_keyValCollection acc s fl
    | Omitted -> acc
+   | NewAnonClass (el1, el2, c) ->
+      let acc = this#on_list acc el1 in
+      let acc = this#on_list acc el2 in
+      this#on_class_ acc c
 
   method on_array acc afl =
     List.fold_left afl ~f:this#on_afield ~init:acc

@@ -81,6 +81,7 @@ and expr_ f = function
   | KeyValCollection (s, fl) ->
     KeyValCollection (s, List.map fl (fun (e1, e2) -> expr f e1, expr f e2))
   | Omitted -> Omitted
+  | NewAnonClass (el1, el2, c) -> NewAnonClass (el1, el2, c)
 
 and afield f = function
   | AFvalue e -> AFvalue (expr f e)

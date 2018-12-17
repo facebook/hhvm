@@ -231,7 +231,8 @@ and on_expr (p, e) : Aast.expr =
   | BracedExpr _ -> Aast.Any (* TODO: T37786581 *)
   | ParenthesizedExpr _ -> Aast.Any (* TODO: T37786581 *)
   | New _ -> Aast.Any (* TODO: T37786581 *)
-  | NewAnonClass _ -> Aast.Any (* TODO: T37786581 *)
+  | NewAnonClass (el1, el2, c) ->
+    Aast.NewAnonClass (on_list on_expr el1, on_list on_expr el2, on_class c)
   | Efun _ -> Aast.Any (* TODO: T37786581 *)
   | Lfun _ -> Aast.Any (* TODO: T37786581 *)
   | Xml (id, xhpl, el) -> Aast.Xml (id, on_list on_xhp_attribute xhpl, on_list on_expr el)

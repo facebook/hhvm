@@ -167,6 +167,7 @@ and expr_ =
   | Unsafe_expr of expr
   | Callconv of Ast.param_kind * expr
   | Execution_operator of expr list
+  | NewAnonClass of expr list * expr list * class_
 
   (* None of these constructors exist in the AST *)
   | Lplaceholder of pos
@@ -501,5 +502,6 @@ let expr_to_string expr =
   | Clone _  -> "Clone"
   | Typename _  -> "Typename"
   | Omitted -> "Omitted"
+  | NewAnonClass _ -> "NewAnonClass"
 
 end (* of AnnotatedAST functor *)

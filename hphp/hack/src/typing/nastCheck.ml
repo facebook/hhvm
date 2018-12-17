@@ -251,6 +251,7 @@ module CheckFunctionBody = struct
     ()
 
   and expr_ p f_type env exp = match f_type, exp with
+    | _, NewAnonClass _
     | _, Omitted -> failwith "AST should not contain these nodes after naming"
     | _, Any -> ()
     | _, Class_const ((_pos, CIparent), ((_, construct)))
@@ -805,6 +806,7 @@ and check_class_property_initialization prop =
   Option.iter prop.cv_expr ~f:begin fun e ->
     let rec rec_assert_static_literal e =
       match (snd e) with
+      | NewAnonClass _
       | Omitted -> failwith "AST should not contain these nodes after naming"
       | Any | Typename _
       | Id _ | Class_const _ | True | False | Int _ | Float _
@@ -1239,6 +1241,7 @@ and expr env (p, e) =
   expr_ env p e
 
 and expr_ env p = function
+  | NewAnonClass _
   | Omitted -> failwith "AST should not contain these nodes after naming"
   | Any
   | Fun_id _

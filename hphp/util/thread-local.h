@@ -274,47 +274,6 @@ void ThreadLocalImpl<Check,T>::create() {
 template<typename T> using ThreadLocal = ThreadLocalImpl<true,T>;
 template<typename T> using ThreadLocalNoCheck = ThreadLocalImpl<false,T>;
 
-///////////////////////////////////////////////////////////////////////////////
-// some classes don't need new/delete at all
-
-template<typename T>
-struct ThreadLocalProxy {
-  T *get() const {
-    return m_p;
-  }
-
-  void set(T* obj) {
-    if (!m_node.m_on_thread_exit_fn) {
-      m_node.m_on_thread_exit_fn = onThreadExit;
-      ThreadLocalManager::PushTop(m_node);
-      assert(!m_node.m_p);
-      m_node.m_p = this;
-    } else {
-      assert(m_node.m_p == this);
-    }
-    m_p = obj;
-  }
-
-  bool isNull() const { return m_p == nullptr; }
-
-  T *operator->() const {
-    return get();
-  }
-
-  T &operator*() const {
-    return *get();
-  }
-
-  static void onThreadExit(void* p) {
-    auto node = (ThreadLocalNode<ThreadLocalProxy<T>>*)p;
-    node->m_p = nullptr;
-  }
-
-  T* m_p;
-  ThreadLocalNode<ThreadLocalProxy<T>> m_node;
-  TYPE_SCAN_IGNORE_FIELD(m_node);
-};
-
 // Wraps a __thread storage instance of T with a similar api to
 // ThreadLocalProxy. Importantly, inlining a method of T via operator-> or
 // operator* allows the C++ compiler to emit direct access to fields of
@@ -379,7 +338,6 @@ struct ThreadLocalFlat {
 
 #define THREAD_LOCAL(T, f) __thread HPHP::ThreadLocal<T> f
 #define THREAD_LOCAL_NO_CHECK(T, f) __thread HPHP::ThreadLocalNoCheck<T> f
-#define THREAD_LOCAL_PROXY(T, f) __thread HPHP::ThreadLocalProxy<T> f
 #define THREAD_LOCAL_FLAT(T, f) __thread HPHP::ThreadLocalFlat<T> f
 
 } // namespace HPHP

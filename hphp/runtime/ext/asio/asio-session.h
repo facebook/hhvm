@@ -19,6 +19,7 @@
 #define incl_HPHP_EXT_ASIO_SESSION_H_
 
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/asio-external-thread-event-queue.h"
@@ -34,7 +35,7 @@ struct c_ResumableWaitHandle;
 
 struct AsioSession final {
   static void Init();
-  static AsioSession* Get() { return s_current.get(); }
+  static AsioSession* Get() { return *s_current; }
 
   // context
   void enterContext(ActRec* savedFP);
@@ -159,7 +160,7 @@ private:
   friend AsioSession* req::make_raw<AsioSession>();
 
 private:
-  static THREAD_LOCAL_PROXY(AsioSession, s_current);
+  static RDS_LOCAL_NO_CHECK(AsioSession*, s_current);
   req::vector<AsioContext*> m_contexts;
   req::vector<c_SleepWaitHandle*> m_sleepEvents;
   AsioExternalThreadEventQueue m_externalThreadEventQueue;

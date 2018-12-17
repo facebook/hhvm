@@ -38,7 +38,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-THREAD_LOCAL_PROXY(AsioSession, AsioSession::s_current);
+RDS_LOCAL_NO_CHECK(AsioSession*, AsioSession::s_current)(nullptr);
 
 namespace {
   const context_idx_t MAX_CONTEXT_DEPTH =
@@ -73,7 +73,7 @@ namespace {
 }
 
 void AsioSession::Init() {
-  s_current.set(req::make_raw<AsioSession>());
+  *s_current = req::make_raw<AsioSession>();
 }
 
 AsioSession::AsioSession()

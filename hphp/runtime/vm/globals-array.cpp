@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/runtime-error.h"
@@ -25,11 +26,11 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-static THREAD_LOCAL_PROXY(GlobalsArray, g_variables);
+static RDS_LOCAL_NO_CHECK(GlobalsArray*, g_variables)(nullptr);
 
 GlobalsArray* get_global_variables() {
-  assertx(!g_variables.isNull());
-  return g_variables.get();
+  assertx(*g_variables != nullptr);
+  return *g_variables;
 }
 
 GlobalsArray::GlobalsArray(NameValueTable* tab)
@@ -52,7 +53,7 @@ GlobalsArray::GlobalsArray(NameValueTable* tab)
   X(HTTP_RAW_POST_DATA,   init_null_variant);
 #undef X
 
-  g_variables.set(this);
+  *g_variables = this;
   assertx(hasExactlyOneRef());
 }
 

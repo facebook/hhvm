@@ -1795,6 +1795,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::LateBoundCls:
     case Op::ClsRefGetC:
     case Op::ClsRefGetL:
+    case Op::ClsRefGetTS:
     case Op::DiscardClsRef:
     case Op::ClsRefName:
     case Op::OODeclExists:

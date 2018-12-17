@@ -185,6 +185,7 @@ type reified_generic_op =
 
 type has_generics_op =
   | NoGenerics
+  | MaybeGenerics
   | HasGenerics
 
 type instruct_lit_const =
@@ -330,6 +331,7 @@ type instruct_get =
   | VGetS of classref_id
   | ClsRefGetL of local_id * classref_id
   | ClsRefGetC of classref_id
+  | ClsRefGetTS of classref_id
 
 type istype_op =
   | OpNull

@@ -756,6 +756,7 @@ let hasgenericsopofiarg arg =
   match arg with
   | IAId "NoGenerics" -> NoGenerics
   | IAId "HasGenerics" -> HasGenerics
+  | IAId "MaybeGenerics" -> MaybeGenerics
   | _ -> report_error "bad has generics op"
 
 let labelofiarg arg =
@@ -980,6 +981,7 @@ let makeunaryinst s arg = match s with
    | "VGetL" -> IGet (VGetL (localidofiarg arg))
    | "VGetS" -> IGet (VGetS (intofiarg arg))
    | "ClsRefGetC" -> IGet (ClsRefGetC (intofiarg arg))
+   | "ClsRefGetTS" -> IGet (ClsRefGetTS (intofiarg arg))
 
    (*instruct_isset *)
    | "IssetL" -> IIsset (IssetL (localidofiarg arg))

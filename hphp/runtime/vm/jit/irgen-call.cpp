@@ -823,6 +823,12 @@ void emitFPushCufIter(IRGS& env, uint32_t numParams, int32_t itId) {
 void emitFPushCtor(
   IRGS& env, uint32_t numParams, uint32_t slot, HasGenericsOp op
 ) {
+  /*
+   * NoGenerics:    Do not read the generic part of clsref and emit AllocObj
+   * HasGenerics:   Read the full clsref and emit AllocObjReified
+   * MaybeGenerics: Read the full clsref, if generic part is not nullptr,
+   *                emit AllocObjReified, otherwise use AllocObj
+   */
   auto const ret = [&] {
     if (HasGenericsOp::NoGenerics == op) {
       auto const cls  = takeClsRefCls(env, slot);
@@ -830,11 +836,28 @@ void emitFPushCtor(
       auto const obj  = gen(env, AllocObj, cls);
       return std::make_pair(func, obj);
     }
-    auto const clsref = takeClsRef(env, slot);
+    auto const clsref = takeClsRef(env, slot, HasGenericsOp::HasGenerics == op);
     auto const reified_generic = clsref.first;
     auto const cls  = clsref.second;
     auto const func = gen(env, LdClsCtor, cls, fp(env));
-    auto const obj  = gen(env, AllocObjReified, cls, reified_generic);
+    auto const obj  = [&] {
+      if (HasGenericsOp::HasGenerics == op) {
+        return gen(env, AllocObjReified, cls, reified_generic);
+      }
+      assertx(HasGenericsOp::MaybeGenerics == op);
+      return cond(
+        env,
+        [&] (Block* taken) {
+          return gen(env, CheckNonNull, taken, reified_generic);
+        },
+        [&] (SSATmp* generics) {
+          return gen(env, AllocObjReified, cls, generics);
+        },
+        [&] {
+          return gen(env, AllocObj, cls);
+        }
+      );
+    }();
     return std::make_pair(func, obj);
   }();
   auto const func = ret.first;

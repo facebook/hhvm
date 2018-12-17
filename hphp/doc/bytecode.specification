@@ -1779,8 +1779,9 @@ VGetS <class-ref slot>    [C]  ->  [V]
   instruction throws a fatal error. Otherwise, this instruction boxes the
   static property and pushes it onto the stack as a ref.
 
-ClsRefGetC <class-ref slot>                        [C]  ->  []
-ClsRefGetL <local variable id> <class-ref slot>    []   ->  []
+ClsRefGetC  <class-ref slot>                        [C]  ->  []
+ClsRefGetTS <class-ref slot>                        [C]  ->  []
+ClsRefGetL  <local variable id> <class-ref slot>    []   ->  []
 
   Fetch class. This instruction first loads a value into x as shown by the
   following table:
@@ -1788,7 +1789,14 @@ ClsRefGetL <local variable id> <class-ref slot>    []   ->  []
       instruction    x
     ---------------+----
       ClsRefGetC   | $1
+      ClsRefGetTS  | $1['classname']
       ClsRefGetL   | %1
+
+  If the flavor is TS, then this instruction checks whether $1 is a type
+  structure. If not, it throws a fatal error. Loads the classname field onto
+  x and checks to see whether the type structure contains generics. If it does,
+  then mangles the name of those generics and performs the duties of the
+  RecordReifiedGeneric instruction.
 
   Next this instruction checks if x is a string or an object. If x is not a
   string or object, this instruction throws a fatal error. Otherwise, this
@@ -2259,6 +2267,9 @@ FPushCtorS <num params> <mode>                             []  ->  [C]
 
   If HasGenerics is passed to FPushCtor, this indicates that the data at cls-ref
   slot's reified generics portion is valid.
+  If MaybeGenerics is passed to FPushCtor, this indicates that data at cls-ref
+  slot's reified generics portion will be nulled out when there are no reified
+  generics.
 
 DecodeCufIter <iterator id> <rel offset>   [C]  ->  []
 
@@ -2324,7 +2335,7 @@ FCall* opcodes
   return and it would return a finished Awaitable, it may instead return the
   unpacked result of the Awaitable and continue execution of the caller at
   offset %4.
-  
+
   If %4 was specified and the callee raised an exception, the exception will
   continue to propagate thru the caller instead of being wrapped into Awaitable.
   Note that for the purposes of exception handling inside the caller, the PC

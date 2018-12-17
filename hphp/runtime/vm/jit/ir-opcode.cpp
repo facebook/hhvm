@@ -68,6 +68,7 @@ TRACE_SET_MOD(hhir);
 #define DArrPacked     HasDest
 #define DArrMixed      HasDest
 #define DVArr          HasDest
+#define DVArrOrNull    HasDest
 #define DDArr          HasDest
 #define DStaticDArr    HasDest
 #define DCol           HasDest
@@ -145,6 +146,7 @@ OpInfo g_opInfo[] = {
 #undef DArrPacked
 #undef DArrMixed
 #undef DVArr
+#undef DVArrOrNull
 #undef DDArr
 #undef DStaticDArr
 #undef DCol

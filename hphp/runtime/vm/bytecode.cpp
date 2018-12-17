@@ -3510,6 +3510,35 @@ OPTBLD_INLINE void iopClsRefGetL(local_var fr, clsref_slot slot) {
   slot.put(nullptr, lookupClsRef(tvToCell(fr.ptr)));
 }
 
+OPTBLD_INLINE void iopClsRefGetTS(clsref_slot slot) {
+  auto const cell = vmStack().topC();
+  if (!tvIsDictOrDArray(cell)) {
+    raise_error("Reified type must be a type structure");
+  }
+  auto const ts = cell->m_data.parr;
+  auto const classname_field = ts->rval(s_classname.get());
+  if (!classname_field.is_set()) {
+    raise_error("You cannot create a new instance of this type as "
+                "it is not a class");
+  }
+  assertx(isStringType(classname_field.type()));
+  auto const name = classname_field.val().pstr;
+  auto const generics_field = ts->rval(s_generic_types.get());
+  auto mangledName = name;
+  ArrayData* reified_types = nullptr;
+  if (generics_field.is_set()) {
+    reified_types = generics_field.val().parr;
+    ArrayData::GetScalarArray(&reified_types);
+    auto const mangledTypeName = mangleReifiedGenericsName(reified_types);
+    addToReifiedGenericsTable(mangledTypeName, reified_types);
+    mangledName = makeStaticString(mangleReifiedName(name, mangledTypeName));
+  }
+  auto tv = make_tv<KindOfString>(mangledName);
+  auto const cls = lookupClsRef(&tv);
+  slot.put(reified_types, cls);
+  vmStack().popC();
+}
+
 static void raise_undefined_local(ActRec* fp, Id pind) {
   assertx(pind < fp->m_func->numNamedLocals());
   raise_notice(Strings::UNDEFINED_VARIABLE,
@@ -5839,7 +5868,7 @@ OPTBLD_INLINE void iopFPushCtor(
 ) {
   auto cls_ref = slot.take();
   auto const reified_types =
-    HasGenericsOp::HasGenerics == op ? cls_ref.first : nullptr;
+    HasGenericsOp::NoGenerics != op ? cls_ref.first : nullptr;
   fpushCtorImpl(numArgs, cls_ref.second, reified_types, true);
 }
 

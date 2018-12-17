@@ -196,6 +196,7 @@ bool typeStructureIsType(const ArrayData* input, const ArrayData* type) {
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_xhp: {
+      if (!get_ts_classname(input)->equal(get_ts_classname(type))) return false;
       auto const inputGenerics = getGenericTypesOpt(input);
       auto const typeGenerics = getGenericTypesOpt(type);
       // If one has but not the other, return false

@@ -160,6 +160,8 @@ let instr_bindn = instr (IMutator BindN)
 let instr_bindl local = instr (IMutator (BindL local))
 let instr_clsrefgetc =
   instr (IGet (ClsRefGetC class_ref_rewrite_sentinel))
+let instr_clsrefgetts =
+  instr (IGet (ClsRefGetTS class_ref_rewrite_sentinel))
 let instr_clsrefname =
   instr (IMisc (ClsRefName class_ref_rewrite_sentinel))
 let instr_self =
@@ -482,6 +484,7 @@ let get_num_cls_ref_slots instrseq =
         | IMisc (Self id)
         | IMisc (ClsRefName id)
         | IGet (ClsRefGetL (_, id))
+        | IGet (ClsRefGetTS id)
         | IGet (ClsRefGetC id) -> if id + 1 > num then id + 1 else num
         | _ -> num)
 
@@ -546,6 +549,7 @@ let rewrite_user_labels instrseq =
 let rewrite_class_refs_instr num = function
 | IGet (ClsRefGetL (lid, _)) -> (num + 1, IGet (ClsRefGetL (lid, num + 1)))
 | IGet (ClsRefGetC _) -> (num + 1, IGet (ClsRefGetC (num + 1)))
+| IGet (ClsRefGetTS _) -> (num + 1, IGet (ClsRefGetTS (num + 1)))
 | IMisc (Parent _) -> (num + 1, IMisc (Parent (num + 1)))
 | IMisc (LateBoundCls _) -> (num + 1, IMisc (LateBoundCls (num + 1)))
 | IMisc (Self _) -> (num + 1, IMisc (Self (num + 1)))
@@ -827,7 +831,7 @@ let get_input_output_count i =
     | CGetN | CGetQuietN | CGetG | CGetQuietG | CGetS _ | VGetN
     | VGetG | VGetS _ -> (1, 1)
     | ClsRefGetL _ -> (0, 0)
-    | ClsRefGetC _ -> (1, 0)
+    | ClsRefGetC _ | ClsRefGetTS _ -> (1, 0)
     end
   | IMutator i ->
     begin match i with

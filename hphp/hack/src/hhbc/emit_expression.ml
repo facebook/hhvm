@@ -827,21 +827,30 @@ and emit_new env pos expr targs args uargs =
     | Class_id (_, name) ->
       let cexpr =
         Option.value ~default:cexpr (get_reified_var_cexpr env name) in
-      if not has_reified_args then cexpr, false else
-      begin
-        let reified_targs = emit_reified_targs env pos targs in
-        Class_reified (
+      begin match emit_reified_type_opt env name with
+      | Some instrs ->
+        if has_reified_args then Emit_fatal.raise_fatal_parse pos
+          "Cannot have higher kinded reified generics";
+        Class_reified instrs, H.MaybeGenerics
+      | None when not has_reified_args ->
+        cexpr, H.NoGenerics
+      | None ->
+        let cexpr_instrs name =
+          let reified_targs = emit_reified_targs env pos targs in
           gather [
             gather reified_targs;
-            (match cexpr with
-            | Class_id (_, name) -> instr_string name
-            | Class_expr e -> emit_expr ~need_ref:false env e
-            | Class_reified instrs -> instrs
-            | _ -> failwith "Internal error: This node can only be id or expr");
-            instr_reified_name (List.length reified_targs + 1)
-          ]), true
+            name;
+            instr_reified_name (List.length reified_targs + 1);
+          ]
+        in
+        let instrs = match cexpr with
+          | Class_id (_, name) -> cexpr_instrs @@ instr_string name
+          | Class_expr e -> cexpr_instrs @@ emit_expr ~need_ref:false env e
+          | Class_reified instrs -> instrs
+          | _ -> failwith "Internal error: This node can only be id or expr" in
+        Class_reified instrs, H.HasGenerics
       end
-    | _ -> cexpr, false in
+    | _ -> cexpr, H.NoGenerics in
   match cexpr with
     (* Special case for statically-known class *)
   | Class_id id ->
@@ -876,10 +885,13 @@ and emit_new env pos expr targs args uargs =
       instr_popr
       ]
   | _ ->
-    let op = if has_generics then H.HasGenerics else H.NoGenerics in
+    let instrs = match cexpr with
+      | Class_reified instrs when has_generics = H.MaybeGenerics ->
+        gather [ instrs; instr_clsrefgetts ]
+      | _ -> emit_load_class_ref env pos cexpr in
     gather [
-      emit_load_class_ref env pos cexpr;
-      instr_fpushctor nargs 0 op;
+      instrs;
+      instr_fpushctor nargs 0 has_generics;
       emit_args_and_call env pos args uargs None;
       instr_popr
     ]

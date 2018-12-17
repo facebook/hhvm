@@ -342,7 +342,7 @@ let check_instruct_get asn i i' =
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
   | CGetN, _ | CGetQuietN, _ | CGetG, _ | CGetQuietG, _ | CGetS _, _ | VGetN, _
-  | VGetG, _ | VGetS _, _ | ClsRefGetC _, _ ->
+  | VGetG, _ | VGetS _, _ | ClsRefGetC _, _ | ClsRefGetTS _, _ ->
     if i = i' then Some asn else None
 
 let check_instruct_isset asn i i' =

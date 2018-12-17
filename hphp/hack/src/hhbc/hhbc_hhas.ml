@@ -153,6 +153,7 @@ let string_of_reifiedgeneric_op = function
 let string_of_has_generics_op = function
   | NoGenerics -> "NoGenerics"
   | HasGenerics -> "HasGenerics"
+  | MaybeGenerics -> "MaybeGenerics"
 
 let string_of_operator instruction =
   match instruction with
@@ -233,8 +234,8 @@ let string_of_get x =
   | VGetL id -> sep ["VGetL"; string_of_local_id id]
   | ClsRefGetL (id, cr) ->
     sep ["ClsRefGetL"; string_of_local_id id; string_of_int cr]
-  | ClsRefGetC cr ->
-    sep ["ClsRefGetC"; string_of_int cr]
+  | ClsRefGetC cr -> sep ["ClsRefGetC"; string_of_int cr]
+  | ClsRefGetTS cr -> sep ["ClsRefGetTS"; string_of_int cr]
 
 let string_of_member_key mk =
   let open MemberKey in

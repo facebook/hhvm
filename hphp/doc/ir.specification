@@ -333,7 +333,7 @@ exceptions depending on how coercion is implemented.
   If the value in S0 is Nullptr, branch to block B. If S0 cannot be Nullptr, or
   always is Nullptr, this check may be optimized away.
 
-| AssertNonNull, DSubtract(0, Nullptr), S(Nullptr,CountedStr,Func), P
+| AssertNonNull, DSubtract(0, Nullptr), S(Nullptr,CountedStr,Func,Arr), P
 
   Returns S0, with Nullptr removed from its type. This instruction currently
   supports a very limited range of types but can be expanded if needed.
@@ -1102,7 +1102,7 @@ To string conversions:
   Loads class-ref's cls from slot `slot` in frame S0 and puts the value in D
   as type T. T must be a sub-type of TCls.
 
-| LdClsRefTS<slot>, DVArr, S(FramePtr), NF
+| LdClsRefTS<slot>, DVArrOrNull, S(FramePtr), NF
 
   Loads class-ref's reified generics from slot `slot` in frame S0 and puts the
   value in D.

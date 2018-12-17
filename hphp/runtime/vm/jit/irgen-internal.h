@@ -966,8 +966,13 @@ inline SSATmp* takeClsRefCls(IRGS& env, uint32_t slot) {
   return cls;
 }
 
-inline std::pair<SSATmp*, SSATmp*> takeClsRef(IRGS& env, uint32_t slot) {
-  auto const ts = peekClsRefTS(env, slot);
+inline std::pair<SSATmp*, SSATmp*> takeClsRef(
+  IRGS& env,
+  uint32_t slot,
+  bool assertNonNullTS = true
+) {
+  auto ts = peekClsRefTS(env, slot);
+  if (assertNonNullTS) ts = gen(env, AssertNonNull, ts);
   auto const cls = peekClsRefCls(env, slot);
   killClsRef(env, slot);
   return std::make_pair(ts, cls);

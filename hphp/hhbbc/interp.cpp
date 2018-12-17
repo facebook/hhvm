@@ -1838,6 +1838,17 @@ void in(ISS& env, const bc::ClsRefGetC& op) {
   clsRefGetImpl(env, popC(env), op.slot);
 }
 
+void in(ISS& env, const bc::ClsRefGetTS& op) {
+  // TODO(T31677864): implement real optimizations
+  auto const ts = popC(env);
+  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? BDict : BDArr;
+  if (!ts.couldBe(requiredTSType)) {
+    push(env, TBottom);
+    return;
+  }
+  clsRefGetImpl(env, TStr, op.slot);
+}
+
 void in(ISS& env, const bc::AKExists& /*op*/) {
   auto const base = popC(env);
   auto const key  = popC(env);

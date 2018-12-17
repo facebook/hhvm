@@ -568,6 +568,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
 #define DArrPacked
 #define DArrMixed
 #define DVArr
+#define DVArrOrNull
 #define DDArr
 #define DStaticDArr
 #define DCol
@@ -629,6 +630,7 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
 #undef DArrPacked
 #undef DArrMixed
 #undef DVArr
+#undef DVArrOrNull
 #undef DDArr
 #undef DStaticDArr
 #undef DCol

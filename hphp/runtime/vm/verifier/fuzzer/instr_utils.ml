@@ -92,6 +92,7 @@ let stk_data : instruct -> stack_sig = function
   | IMisc StaticLocDef _
   | IContFlow Throw
   | IGet ClsRefGetC _
+  | IGet ClsRefGetTS _
   | IMutator UnsetG
   | IMutator UnsetN
   | IMutator InitProp _

@@ -137,12 +137,6 @@ struct Repo::GlobalData {
   bool PHP7_Substr = false;
 
   /*
-   * Indicates that generators should be autoprimed and not require an initial
-   * call to next() before calling other generator functions.
-   */
-  bool AutoprimeGenerators = true;
-
-  /*
    * Should emptyish in lval context be promoted to a stdclass object?
    */
   bool PromoteEmptyObject = true;
@@ -243,7 +237,6 @@ struct Repo::GlobalData {
       (PHP7_ScalarTypes)
       (PHP7_Substr)
       (PHP7_Builtins)
-      (AutoprimeGenerators)
       (PromoteEmptyObject)
       (EnableRenameFunction)
       (HackArrCompatNotices)

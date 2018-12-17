@@ -5,6 +5,7 @@ function gen() {
 }
 
 $gen = gen();
+$gen->next();
 $gen->send(NULL);
 
 echo "DONE";

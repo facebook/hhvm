@@ -8,6 +8,7 @@ function gen() {
 }
 
 $g = gen();
+$g->next();
 var_dump($g->valid());
 var_dump($g->current());
 $g->next();

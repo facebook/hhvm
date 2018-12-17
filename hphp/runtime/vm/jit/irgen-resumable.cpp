@@ -604,12 +604,6 @@ void emitContValid(IRGS& env) {
     IsAsyncData(curClass(env)->classof(AsyncGenerator::getClass())), cont));
 }
 
-void emitContStarted(IRGS& env) {
-  assertx(curClass(env));
-  auto const cont = ldThis(env);
-  push(env, gen(env, ContStarted, cont));
-}
-
 // Delegate generators aren't currently supported in the IR, so just use the
 // interpreter if we get into a situation where we need to use the delegate
 void interpIfHasDelegate(IRGS& env, SSATmp *cont) {
@@ -623,9 +617,7 @@ void interpIfHasDelegate(IRGS& env, SSATmp *cont) {
 void emitContKey(IRGS& env) {
   assertx(curClass(env));
   auto const cont = ldThis(env);
-  if (!RuntimeOption::AutoprimeGenerators) {
-    gen(env, ContStartedCheck, IsAsyncData(false), makeExitSlow(env), cont);
-  }
+  gen(env, ContStartedCheck, IsAsyncData(false), makeExitSlow(env), cont);
 
   interpIfHasDelegate(env, cont);
 
@@ -638,9 +630,7 @@ void emitContKey(IRGS& env) {
 void emitContCurrent(IRGS& env) {
   assertx(curClass(env));
   auto const cont = ldThis(env);
-  if (!RuntimeOption::AutoprimeGenerators) {
-    gen(env, ContStartedCheck, IsAsyncData(false), makeExitSlow(env), cont);
-  }
+  gen(env, ContStartedCheck, IsAsyncData(false), makeExitSlow(env), cont);
 
   interpIfHasDelegate(env, cont);
 

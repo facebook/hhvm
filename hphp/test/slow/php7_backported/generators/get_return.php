@@ -38,25 +38,29 @@ function gen6() {
 
 <<__EntryPoint>>
 function main_get_return() {
-$gen = gen1();
-// Calling getReturn() directly here is okay due to auto-priming
-var_dump($gen->getReturn());
+  $gen = gen1();
+  $gen->next();
+  var_dump($gen->getReturn());
 
-$gen = gen2();
-var_dump($gen->current());
-$gen->next();
-var_dump($gen->getReturn());
+  $gen = gen2();
+  $gen->next();
+  var_dump($gen->current());
+  $gen->next();
+  var_dump($gen->getReturn());
 
-$gen = gen4();
-var_dump($gen->current());
-$gen->next();
-var_dump($gen->getReturn());
+  $gen = gen4();
+  $gen->next();
+  var_dump($gen->current());
+  $gen->next();
+  var_dump($gen->getReturn());
 
-$gen = gen5();
-var_dump($gen->current());
-$gen->next();
-var_dump($gen->getReturn());
+  $gen = gen5();
+  $gen->next();
+  var_dump($gen->current());
+  $gen->next();
+  var_dump($gen->getReturn());
 
-$gen = gen6();
-var_dump($gen->getReturn());
+  $gen = gen6();
+  $gen->next();
+  var_dump($gen->getReturn());
 }

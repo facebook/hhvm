@@ -1,4 +1,4 @@
-<?php
+<?hh
 function gen($a = 0) {
   yield 1 + $a;
   if ($a < 1) {
@@ -27,19 +27,22 @@ function bar($gen) {
 /* Twice a Generator from bar() using yield from on $gen */
 <<__EntryPoint>>
 function main_yield_from_advance_inner_generator() {
-$gen = gen();
-$gens[] = bar($gen);
-$gens[] = bar($gen);
+  $gen = gen();
+  $bar1 = bar($gen);
+  $bar2 = bar($gen);
+  $bar1->next();
+  $bar2->next();
+  $gens = vec[$bar1, $bar2];
 
-do {
-  foreach ($gens as $g) {
+  do {
+    foreach ($gens as $g) {
+      var_dump($g->current());
+      $gen->next();
+    }
+  } while($gen->valid());
+
+  foreach($gens as $g) {
+    var_dump($g->valid());
     var_dump($g->current());
-    $gen->next();
   }
-} while($gen->valid());
-
-foreach($gens as $g) {
-  var_dump($g->valid());
-  var_dump($g->current());
-}
 }

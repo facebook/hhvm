@@ -448,7 +448,6 @@ struct RuntimeOption {
   static HackStrictOption MinMaxAllowDegenerate;
   static bool LookForTypechecker;
   static bool AutoTypecheck;
-  static bool AutoprimeGenerators;
   static bool EnableIsExprPrimitiveMigration;
   static bool EnableReifiedGenerics;
   static bool EnableCoroutines;

@@ -775,7 +775,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(ContUnsetDelegate, TWO(OA(CudOp),IA), NOV,          NOV,        NF) \
   O(ContCheck,       ONE(OA(ContCheckOp)), NOV,         NOV,        NF) \
   O(ContValid,       NA,               NOV,             ONE(CV),    NF) \
-  O(ContStarted,     NA,               NOV,             ONE(CV),    NF) \
   O(ContKey,         NA,               NOV,             ONE(CV),    NF) \
   O(ContCurrent,     NA,               NOV,             ONE(CV),    NF) \
   O(ContGetReturn,   NA,               NOV,             ONE(CV),    NF) \

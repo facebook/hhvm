@@ -13,6 +13,7 @@ function g() {
   } while ($x < 5);
 }
 
+<<__EntryPoint>>
 function test() {
   $g1 = g();
   foreach ($g1 as $x) {
@@ -27,10 +28,4 @@ function test() {
   foreach($g2 as $x) {
     var_dump($x);
   }
-}
-
-
-<<__EntryPoint>>
-function main_gc() {
-test();
 }

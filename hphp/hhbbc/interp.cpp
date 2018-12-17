@@ -4530,7 +4530,6 @@ void in(ISS& /*env*/, const bc::ContUnsetDelegate&) {}
 
 void in(ISS& /*env*/, const bc::ContCheck&) {}
 void in(ISS& env, const bc::ContValid&)   { push(env, TBool); }
-void in(ISS& env, const bc::ContStarted&) { push(env, TBool); }
 void in(ISS& env, const bc::ContKey&)     { push(env, TInitCell); }
 void in(ISS& env, const bc::ContCurrent&) { push(env, TInitCell); }
 void in(ISS& env, const bc::ContGetReturn&) { push(env, TInitCell); }

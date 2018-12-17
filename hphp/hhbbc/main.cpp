@@ -371,7 +371,6 @@ void write_global_data(
   gd.PHP7_ScalarTypes            = RuntimeOption::PHP7_ScalarTypes;
   gd.PHP7_Substr                 = RuntimeOption::PHP7_Substr;
   gd.PHP7_Builtins               = RuntimeOption::PHP7_Builtins;
-  gd.AutoprimeGenerators         = RuntimeOption::AutoprimeGenerators;
   gd.PromoteEmptyObject          = RuntimeOption::EvalPromoteEmptyObject;
   gd.EnableRenameFunction        = RuntimeOption::EvalJitEnableRenameFunction;
   gd.HackArrCompatNotices        = RuntimeOption::EvalHackArrCompatNotices;

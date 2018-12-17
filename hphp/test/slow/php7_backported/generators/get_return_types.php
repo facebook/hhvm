@@ -28,18 +28,23 @@ function gen5($val) {
 
 <<__EntryPoint>>
 function main_get_return_types() {
-$gen = gen1();
-var_dump($gen->getReturn());
+  $gen = gen1();
+  $gen->next();
+  var_dump($gen->getReturn());
 
-$gen = gen2();
-var_dump($gen->getReturn());
+  $gen = gen2();
+  $gen->next();
+  var_dump($gen->getReturn());
 
-$gen = gen3([1, 2, 3]);
-var_dump($gen->getReturn());
+  $gen = gen3([1, 2, 3]);
+  $gen->next();
+  var_dump($gen->getReturn());
 
-$gen = gen4((object) ['prop' => 321]);
-var_dump($gen->getReturn());
+  $gen = gen4((object) ['prop' => 321]);
+  $gen->next();
+  var_dump($gen->getReturn());
 
-$gen = gen5("42");
-var_dump($gen->getReturn());
+  $gen = gen5("42");
+  $gen->next();
+  var_dump($gen->getReturn());
 }

@@ -11,10 +11,11 @@ function squares_cubes() {
 
 <<__EntryPoint>>
 function main_2229() {
-$c = squares_cubes();
-var_dump($c->key());
-var_dump($c->current());
-$c->next();
-var_dump($c->key());
-var_dump($c->current());
+  $c = squares_cubes();
+  $c->next();
+  var_dump($c->key());
+  var_dump($c->current());
+  $c->next();
+  var_dump($c->key());
+  var_dump($c->current());
 }

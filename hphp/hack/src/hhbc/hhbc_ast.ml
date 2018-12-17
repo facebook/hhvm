@@ -568,7 +568,6 @@ type gen_creation_execution =
   | YieldK
   | ContCheck of check_started
   | ContValid
-  | ContStarted
   | ContKey
   | ContGetReturn
   | ContCurrent

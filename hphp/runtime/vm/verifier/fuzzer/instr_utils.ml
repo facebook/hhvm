@@ -162,7 +162,6 @@ let stk_data : instruct -> stack_sig = function
   | IMisc GetMemoKeyL _
   | IGenerator CreateCont
   | IGenerator ContValid
-  | IGenerator ContStarted
   | IGenerator ContKey
   | IGenerator ContGetReturn
   | ICall FPushCtor _

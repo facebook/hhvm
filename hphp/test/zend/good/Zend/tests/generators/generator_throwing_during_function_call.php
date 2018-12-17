@@ -11,7 +11,7 @@ function gen() {
 }
 
 $gen = gen();
-
+$gen->next();
 var_dump($gen->current());
 
 try {

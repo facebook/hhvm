@@ -1869,7 +1869,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::YieldK:
     case Op::ContCheck:
     case Op::ContValid:
-    case Op::ContStarted:
     case Op::ContKey:
     case Op::ContCurrent:
     case Op::ContGetReturn:

@@ -10,6 +10,7 @@ function fn() {
 }
 
 $gen = gen();
+$gen->next();
 $gen->current();
 
 ?>

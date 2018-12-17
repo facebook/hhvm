@@ -767,7 +767,6 @@ let string_of_generator = function
   | ContCheck IgnoreStarted -> "ContCheck IgnoreStarted"
   | ContCheck CheckStarted -> "ContCheck CheckStarted"
   | ContValid -> "ContValid"
-  | ContStarted -> "ContStarted"
   | ContKey -> "ContKey"
   | ContGetReturn -> "ContGetReturn"
   | ContCurrent -> "ContCurrent"

@@ -465,7 +465,6 @@ let make_nullary_inst s =
  | "ContKey" -> IGenerator ContKey
  | "ContCurrent" -> IGenerator ContCurrent
  | "ContGetReturn" -> IGenerator ContGetReturn
- | "ContStarted" -> IGenerator ContStarted
 
  | "ContEnterDelegate" -> IGenDelegation ContEnterDelegate
  | _ -> failwith ("NYI nullary: " ^ s)

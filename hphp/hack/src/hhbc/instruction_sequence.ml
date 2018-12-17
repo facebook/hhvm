@@ -328,7 +328,6 @@ let instr_contcheck_ignore = instr (IGenerator (ContCheck IgnoreStarted))
 let instr_contenter = instr (IGenerator ContEnter)
 let instr_contraise = instr (IGenerator ContRaise)
 let instr_contvalid = instr (IGenerator ContValid)
-let instr_contstarted = instr (IGenerator ContStarted)
 let instr_contcurrent = instr (IGenerator ContCurrent)
 let instr_contkey = instr (IGenerator ContKey)
 let instr_contgetreturn = instr (IGenerator ContGetReturn)
@@ -766,7 +765,7 @@ let get_input_output_count i =
     end
   | IGenerator i ->
     begin match i with
-    | CreateCont | ContValid | ContStarted | ContKey | ContCurrent
+    | CreateCont | ContValid | ContKey | ContCurrent
     | ContGetReturn  -> (0, 1)
     | ContEnter | ContRaise | Yield -> (1, 1)
     | YieldK -> (2, 1)

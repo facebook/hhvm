@@ -9,6 +9,8 @@ class Test {
 }
 
 $genFactory = (new Test)->getGenFactory();
-var_dump($genFactory()->current());
+$gen = $genFactory();
+$gen->next();
+var_dump($gen->current());
 
 ?>

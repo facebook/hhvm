@@ -7107,11 +7107,6 @@ OPTBLD_INLINE void iopContValid() {
     this_generator(vmfp())->getState() != BaseGenerator::State::Done);
 }
 
-OPTBLD_INLINE void iopContStarted() {
-  vmStack().pushBool(
-    this_generator(vmfp())->getState() != BaseGenerator::State::Created);
-}
-
 OPTBLD_INLINE Generator *currentlyDelegatedGenerator(Generator *gen) {
   while(tvIsGenerator(gen->m_delegate)) {
     gen = Generator::fromObject(gen->m_delegate.m_data.pobj);
@@ -7121,7 +7116,7 @@ OPTBLD_INLINE Generator *currentlyDelegatedGenerator(Generator *gen) {
 
 OPTBLD_INLINE void iopContKey() {
   Generator* cont = this_generator(vmfp());
-  if (!RuntimeOption::AutoprimeGenerators) cont->startedCheck();
+  cont->startedCheck();
 
   // If we are currently delegating to a generator, return its key instead
   cont = currentlyDelegatedGenerator(cont);
@@ -7131,7 +7126,7 @@ OPTBLD_INLINE void iopContKey() {
 
 OPTBLD_INLINE void iopContCurrent() {
   Generator* cont = this_generator(vmfp());
-  if (!RuntimeOption::AutoprimeGenerators) cont->startedCheck();
+  cont->startedCheck();
 
   // If we are currently delegating to a generator, return its value instead
   cont = currentlyDelegatedGenerator(cont);
@@ -7145,7 +7140,7 @@ OPTBLD_INLINE void iopContCurrent() {
 
 OPTBLD_INLINE void iopContGetReturn() {
   Generator* cont = this_generator(vmfp());
-  if (!RuntimeOption::AutoprimeGenerators) cont->startedCheck();
+  cont->startedCheck();
 
   if(!cont->successfullyFinishedExecuting()) {
     SystemLib::throwExceptionObject("Cannot get return value of a generator "

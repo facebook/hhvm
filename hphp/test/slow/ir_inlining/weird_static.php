@@ -6,13 +6,9 @@ final class Constants {
   }
 }
 
+<<__EntryPoint>>
 function main() {
   $g = Constants::gen();
+  $g->next();
   var_dump($g->current());
-}
-
-
-<<__EntryPoint>>
-function main_weird_static() {
-main();
 }

@@ -36,7 +36,6 @@ type t = {
   option_jit_enable_rename_function       : bool;
   option_can_inline_gen_functions         : bool;
   option_php7_int_semantics               : bool;
-  option_autoprime_generators             : bool;
   option_enable_is_expr_primitive_migration : bool;
   option_enable_coroutines                : bool;
   option_hacksperimental                  : bool;
@@ -87,7 +86,6 @@ let default = {
   option_jit_enable_rename_function = false;
   option_can_inline_gen_functions = true;
   option_php7_int_semantics = false;
-  option_autoprime_generators = true;
   option_enable_is_expr_primitive_migration = true;
   option_enable_coroutines = true;
   option_hacksperimental = false;
@@ -135,7 +133,6 @@ let repo_authoritative o = o.option_repo_authoritative
 let jit_enable_rename_function o = o.option_jit_enable_rename_function
 let can_inline_gen_functions o = o.option_can_inline_gen_functions
 let php7_int_semantics o = o.option_php7_int_semantics
-let autoprime_generators o = o.option_autoprime_generators
 let enable_is_expr_primitive_migration o = o.option_enable_is_expr_primitive_migration
 let enable_coroutines o = o.option_enable_coroutines
 let hacksperimental o = o.option_hacksperimental
@@ -191,7 +188,6 @@ let to_string o =
       @@ jit_enable_rename_function o
     ; Printf.sprintf "can_inline_gen_functions: %B" @@ can_inline_gen_functions o
     ; Printf.sprintf "php7_int_semantics: %B" @@ php7_int_semantics o
-    ; Printf.sprintf "autoprime_generators: %B" @@ autoprime_generators o
     ; Printf.sprintf "enable_is_expr_primitive_migration: %B"
       @@ enable_is_expr_primitive_migration o
     ; Printf.sprintf "enable_coroutines: %B" @@ enable_coroutines o
@@ -269,8 +265,6 @@ let set_option options name value =
                    option_can_inline_gen_functions = v}
   | "hhvm.php7.int_semantics" ->
     { options with option_php7_int_semantics = as_bool value }
-  | "hack.lang.autoprimegenerators" ->
-    { options with option_autoprime_generators = as_bool value }
   | "hack.lang.enableisexprprimitivemigration" ->
     { options with option_enable_is_expr_primitive_migration = as_bool value }
   | "hack.lang.enablecoroutines" ->
@@ -409,8 +403,6 @@ let value_setters = [
     fun opts v -> { opts with option_jit_enable_rename_function = (v = 1) });
   (set_value "hhvm.php7.int_semantics" get_value_from_config_int @@
     fun opts v -> { opts with option_php7_int_semantics = (v = 1) });
-  (set_value "hhvm.hack.lang.autoprime_generators" get_value_from_config_int @@
-    fun opts v -> { opts with option_autoprime_generators = (v = 1) });
   (set_value "hhvm.hack.lang.enable_is_expr_primitive_migration" get_value_from_config_int @@
     fun opts v -> { opts with option_enable_is_expr_primitive_migration = (v = 1) });
   (set_value "hhvm.hack.lang.enable_coroutines" get_value_from_config_int @@

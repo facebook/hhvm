@@ -225,7 +225,6 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
     RuntimeOption::EnableIntrinsicsExtension =
       s_globalData.EnableIntrinsicsExtension;
     HHBBC::options.ElideAutoloadInvokes     = s_globalData.ElideAutoloadInvokes;
-    RuntimeOption::AutoprimeGenerators      = s_globalData.AutoprimeGenerators;
     RuntimeOption::EnableHipHopSyntax       = s_globalData.EnableHipHopSyntax;
     RuntimeOption::EvalHardTypeHints        = s_globalData.HardTypeHints;
     RuntimeOption::EvalUseHHBBC             = s_globalData.UsedHHBBC;

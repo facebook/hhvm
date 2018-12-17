@@ -111,7 +111,6 @@ bool RuntimeOption::TimeoutsUseWallTime = true;
 bool RuntimeOption::CheckFlushOnUserClose = true;
 bool RuntimeOption::EvalAuthoritativeMode = false;
 bool RuntimeOption::IntsOverflowToInts = false;
-bool RuntimeOption::AutoprimeGenerators = true;
 bool RuntimeOption::EnableIsExprPrimitiveMigration = true;
 bool RuntimeOption::EnableReifiedGenerics = false;
 bool RuntimeOption::Hacksperimental = false;
@@ -1576,12 +1575,6 @@ void RuntimeOption::Load(
     Config::Bind(AutoTypecheck, ini, config, "Hack.Lang.AutoTypecheck",
                  LookForTypechecker);
 
-    // The default behavior in PHP is to auto-prime generators. For now we leave
-    // this disabled in HipHop syntax mode to deal with incompatibilities in
-    // existing code-bases.
-    Config::Bind(AutoprimeGenerators, ini, config,
-                 "Hack.Lang.AutoprimeGenerators",
-                 true);
     Config::Bind(EnableIsExprPrimitiveMigration, ini, config,
                  "Hack.Lang.EnableIsExprPrimitiveMigration",
                  true);

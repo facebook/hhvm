@@ -705,7 +705,7 @@ let check_instruct_gen_creation_execution i i' =
   (* Whitelist the instructions where equality implies equivalence
     (e.g. they do not access locals). *)
   | CreateCont, _ | ContEnter, _ | ContRaise, _ | Yield, _ | YieldK, _
-  | ContCheck _, _ | ContValid, _ | ContStarted, _ | ContKey, _ | ContCurrent, _
+  | ContCheck _, _ | ContValid, _ | ContKey, _ | ContCurrent, _
   | ContGetReturn, _ ->
     if i=i' then Some () else None
 

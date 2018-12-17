@@ -12,6 +12,6 @@ function yf() {
 
 $g = yf();
 // Prime the generator
-$g->valid();
+$g->next();
 // THROW
 $g->throw(new Exception("This should throw from gen!"));
